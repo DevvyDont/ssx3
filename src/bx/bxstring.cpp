@@ -161,7 +161,19 @@ extern char* cBXString_EmptyString;
 extern "C" void cBXString_Realloc(cBXString* self, int size);
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
 
-// Copies len chars of src starting at pos into dst, reserving extra more.
+/**
+ * Copies @p len characters of @p src, from offset @p pos, into a fresh buffer of @p dst with room for @p extra more.
+ *
+ * When len + extra is 0, @p dst becomes the shared empty string (cBXString_EmptyString). Otherwise cBXString_Realloc
+ * gives @p dst a new buffer of len + extra characters and func_0041605C copies the text; the old buffer of @p dst is
+ * not released, so it is meant to be empty.
+ *
+ * @param src  the string to copy from
+ * @param dst  the string that receives the copy
+ * @param len  number of characters to copy
+ * @param pos  offset of the first character to copy
+ * @param extra  extra characters to allocate
+ */
 extern "C" void func_003181E8(cBXString* src, cBXString* dst, int len, int pos, int extra)
 {
     int total = len + extra;
@@ -252,7 +264,17 @@ extern "C" unsigned int strlen(const char* s);
 extern "C" void cBXString_Realloc(cBXString* self, int size);
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
 
-// cBXString(const char* str, int n): at most n chars of str.
+/**
+ * Constructs a string from at most @p n characters of a C string.
+ *
+ * Starts as the shared empty string (cBXString_EmptyString); @p n is clamped to strlen(@p str), and a non-zero count
+ * gets a buffer from cBXString_Realloc and a copy of the text. @p str must not be null. The camera trigger factory uses
+ * it to cut a word out of a line.
+ *
+ * @param str  the source text
+ * @param n  the most characters to take
+ * @return @p self
+ */
 extern "C" cBXString* func_00318350(cBXString* self, const char* str, int n)
 {
     self->Str = cBXString_EmptyString;
@@ -395,6 +417,17 @@ extern "C" void cBXString_concatCopy(cBXString* self, int len1, const char* s1, 
 extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
 extern "C" void cBXString__cBXString(cBXString* self, int flags);
 
+/**
+ * Builds @p self as the concatenation of two strings.
+ *
+ * cBXString_concatCopy joins the texts into a temporary, @p self is copy-constructed from it (cBXString_cBXString1) and
+ * the temporary is destroyed (cBXString__cBXString). The result is returned by value: @p self is the caller's result
+ * slot.
+ *
+ * @param left  the first string
+ * @param right  the second string
+ * @return @p self
+ */
 // cBXString(a + b). PORT: pointer held in int for the negative header offsets.
 extern "C" cBXString* func_003185C8(cBXString* self, cBXString* left, cBXString* right)
 {
@@ -418,6 +451,17 @@ extern "C" void cBXString_concatCopy(cBXString* self, int len1, const char* s1, 
 extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
 extern "C" void cBXString__cBXString(cBXString* self, int flags);
 
+/**
+ * Builds @p self as a string followed by a C string (null counts as empty).
+ *
+ * cBXString_concatCopy joins the texts into a temporary, @p self is copy-constructed from it (cBXString_cBXString1) and
+ * the temporary is destroyed (cBXString__cBXString). The result is returned by value: @p self is the caller's result
+ * slot. The world, world cache and game loader use it to build file paths.
+ *
+ * @param bxString  the string
+ * @param str  the C string to append, or null
+ * @return @p self
+ */
 // cBXString(a + str). PORT: pointer held in int for the negative header offsets.
 extern "C" cBXString* func_00318630(cBXString* self, cBXString* bxString, const char* str)
 {
@@ -444,6 +488,17 @@ extern "C" void cBXString_concatCopy(cBXString* self, int len1, const char* s1, 
 extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
 extern "C" void cBXString__cBXString(cBXString* self, int flags);
 
+/**
+ * Builds @p self as a C string (null counts as empty) followed by a string.
+ *
+ * cBXString_concatCopy joins the texts into a temporary, @p self is copy-constructed from it (cBXString_cBXString1) and
+ * the temporary is destroyed (cBXString__cBXString). The result is returned by value: @p self is the caller's result
+ * slot. The world, world cache and game loader use it to put a directory in front of a name.
+ *
+ * @param str  the C string, or null
+ * @param bxString  the string to append
+ * @return @p self
+ */
 // cBXString(str + b). PORT: pointer held in int for the negative header offset.
 extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString* bxString)
 {
@@ -471,6 +526,17 @@ struct sBXTmp_318760 {
     sBXTmp_318760(const sBXTmp_318760& o) : p(o.p) {}
 };
 
+/**
+ * Builds @p self as a string followed by one character.
+ *
+ * cBXString_concatCopy joins the texts into a temporary, @p self is copy-constructed from it (cBXString_cBXString1) and
+ * the temporary is destroyed (cBXString__cBXString). The result is returned by value: @p self is the caller's result
+ * slot. Nothing in the C calls it.
+ *
+ * @param bxString  the string
+ * @param ch  the character to append
+ * @return @p self
+ */
 // cBXString(a + ch). PORT: pointer held in int for the negative header offset.
 extern "C" cBXString* func_00318760(cBXString* self, cBXString* bxString, char ch)
 {
@@ -493,6 +559,17 @@ struct sBXTmp_3187C8 {
     sBXTmp_3187C8(const sBXTmp_3187C8& o) : p(o.p) {}
 };
 
+/**
+ * Builds @p self as one character followed by a string.
+ *
+ * cBXString_concatCopy joins the texts into a temporary, @p self is copy-constructed from it (cBXString_cBXString1) and
+ * the temporary is destroyed (cBXString__cBXString). The result is returned by value: @p self is the caller's result
+ * slot. Nothing in the C calls it.
+ *
+ * @param ch  the leading character
+ * @param bxString  the string
+ * @return @p self
+ */
 // cBXString(ch + b). PORT: pointer held in int for the negative header offset.
 extern "C" cBXString* func_003187C8(cBXString* self, char ch, cBXString* bxString)
 {
@@ -582,6 +659,14 @@ extern "C" cBXString* cBXString_Concat(cBXString* self, const char* str)
 //100%
 INCLUDE_ASM("bx/bxstring", func_00318968);
 #ifdef SKIP_ASM
+/**
+ * Appends one character to the string (cBXString_ConcatImpl with a length of 1).
+ *
+ * Nothing in the C calls it.
+ *
+ * @param ch  the character to append
+ * @return @p self
+ */
 extern "C" cBXString* func_00318968(cBXString* self, char ch)
 {
     char buf = ch;
@@ -595,7 +680,14 @@ INCLUDE_ASM("bx/bxstring", func_003189A0);
 #ifdef SKIP_ASM
 extern "C" void cBXString_ConcatImpl(cBXString* self, int len, const char* str);
 
-// cBXString += cBXString; the length lives in the header 8 bytes before the chars.
+/**
+ * Appends another string to this one (cBXString_ConcatImpl with the other's DataLength, read 8 bytes before its text).
+ *
+ * The async file front end uses it to build a message text.
+ *
+ * @param other  the string to append
+ * @return @p self
+ */
 extern "C" cBXString* func_003189A0(cBXString* self, char** other)
 {
     cBXString_ConcatImpl(self, *(int*)(*other - 8), *other);
@@ -730,6 +822,14 @@ extern "C" char* cBXString_lockBuffer(cBXString* self)
 //100%
 INCLUDE_ASM("bx/bxstring", func_00318BF8);
 #ifdef SKIP_ASM
+/**
+ * Unlocks a string's buffer: sets the reference count (Str - 0xC) back to 1.
+ *
+ * Undoes cBXString_lockBuffer, which sets it to -1. The shared empty string's text (D_0048DCD4) is left alone. Nothing
+ * in the C calls it.
+ *
+ * @param arg0  the string
+ */
 extern "C" void func_00318BF8(void **arg0) {
     void *temp_4;
 
@@ -770,6 +870,15 @@ INCLUDE_ASM("bx/bxstring", func_00318C60);
 #ifdef SKIP_ASM
 extern "C" int func_0041AC40(int);
 
+/**
+ * Returns the offset of the string's first character that belongs to a character set, or -1 when none does.
+ *
+ * func_0041AC40 behaves like strpbrk. The set pointer is the second argument, which the C does not declare; it reaches
+ * func_0041AC40 untouched in its register. Nothing in the C calls it.
+ *
+ * @param string  the string
+ * @return the offset from the start of the text, or -1
+ */
 extern "C" int func_00318C60(int *string) {
     int temp_2;
 
@@ -808,6 +917,16 @@ INCLUDE_ASM("bx/bxstring", func_00318CE8);
 #ifdef SKIP_ASM
 extern "C" char* func_0041AD80(char* str);
 
+/**
+ * Returns the offset of the first occurrence of a substring at or after @p start, or -1 when there is none.
+ *
+ * func_0041AD80 behaves like strstr. The substring is the second argument, declared as int @p unused; it reaches
+ * func_0041AD80 untouched in its register. Nothing in the C calls it.
+ *
+ * @param unused  the substring to find (declared int; it is a const char*)
+ * @param start  offset to start searching at
+ * @return the offset from the start of the text, or -1
+ */
 extern "C" int func_00318CE8(cBXString* self, int unused, int start)
 {
     char* result = func_0041AD80(self->Str + start);
@@ -916,7 +1035,16 @@ INCLUDE_ASM("bx/bxstring", func_00318EB8);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void*, int, unsigned int);
 
-// cBXString(ch, n): n copies of ch.
+/**
+ * Constructs a string of @p n copies of a character.
+ *
+ * Starts as the shared empty string (cBXString_EmptyString); for @p n above 0, cBXString_Realloc allocates @p n
+ * characters and func_00416210 fills them. Nothing in the C calls it.
+ *
+ * @param ch  the character
+ * @param n  the number of copies
+ * @return @p self
+ */
 extern "C" cBXString* func_00318EB8(cBXString* self, char ch, int n)
 {
     self->Str = cBXString_EmptyString;
@@ -930,6 +1058,14 @@ extern "C" cBXString* func_00318EB8(cBXString* self, char ch, int n)
 //100%
 INCLUDE_ASM("bx/bxstring", func_00318F20);
 #ifdef SKIP_ASM
+/**
+ * Assigns a single character to the string (cBXString_InitFromCString with a length of 1).
+ *
+ * It does not reset the text pointer first, so it works on an existing string. Nothing in the C calls it.
+ *
+ * @param ch  the character
+ * @return @p self
+ */
 extern "C" cBXString* func_00318F20(cBXString* self, char ch)
 {
     char buf = ch;
@@ -942,6 +1078,15 @@ INCLUDE_ASM("bx/bxstring", func_00318F58);
 #ifdef SKIP_ASM
 extern "C" cBXString* func_00318F90(cBXString* self, cBXString* other, int start, int count);
 
+/**
+ * Builds @p self from @p other's characters from @p start to the end (func_00318F90 with count = length - start).
+ *
+ * The result is returned by value: @p self is the caller's result slot. Nothing in the C calls it.
+ *
+ * @param other  the source string
+ * @param start  offset of the first character
+ * @return @p self
+ */
 extern "C" cBXString* func_00318F58(cBXString* self, cBXString* other, int start)
 {
     func_00318F90(self, other, start, *(int*)((int)other->Str - 8) - start);
@@ -951,6 +1096,19 @@ extern "C" cBXString* func_00318F58(cBXString* self, cBXString* other, int start
 //100%
 INCLUDE_ASM("bx/bxstring", func_00318F90);
 #ifdef SKIP_ASM
+/**
+ * Builds @p self from @p count characters of @p other starting at @p start.
+ *
+ * Negative @p start or @p count become 0, @p count is cut to the end of the text, and a @p start past the end gives an
+ * empty result. The characters are copied with func_003181E8 into a temporary, @p self is copy-constructed from it
+ * (cBXString_cBXString1) and the temporary is destroyed. The result is returned by value: @p self is the caller's
+ * result slot.
+ *
+ * @param other  the source string
+ * @param start  offset of the first character
+ * @param count  the number of characters
+ * @return @p self
+ */
 // Mid(start, count). PORT: pointer held in int for the header offset.
 extern "C" cBXString* func_00318F90(cBXString* self, cBXString* other, int start, int count)
 {

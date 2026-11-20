@@ -48,6 +48,13 @@ extern "C" void cCubicSplineInterpolant_initCommon(void* self);
 //99.62%
 INCLUDE_ASM("bx/cubicspline", func_0031D700__FPv);
 #ifdef SKIP_ASM
+/**
+ * Prepares a spline interpolant as a natural spline: cCubicSplineInterpolant_initCommon, then clears the type bit (bit
+ * 0).
+ *
+ * The point count is the second argument, which the C does not declare; it reaches cCubicSplineInterpolant_initCommon
+ * untouched in its register. The spline camera algorithm builds its interpolants with it.
+ */
 void func_0031D700(void* self)
 {
     cCubicSplineInterpolant_initCommon(self);
@@ -58,6 +65,16 @@ void func_0031D700(void* self)
 //99.76%
 INCLUDE_ASM("bx/cubicspline", func_0031D738__FPvff);
 #ifdef SKIP_ASM
+/**
+ * Prepares a spline interpolant as a clamped spline with given end slopes.
+ *
+ * Runs cCubicSplineInterpolant_initCommon (the point count is the undeclared second argument, passed through in its
+ * register), sets the type bit (bit 0), and parks @p start in the first segment's fifth float (+0x10 of the data, +0x8)
+ * and @p end in +0x4 until func_0031D8B0 reads them.
+ *
+ * @param start  the slope at the first point
+ * @param end  the slope at the last point
+ */
 void func_0031D738(void* self, float start, float end)
 {
     cCubicSplineInterpolant_initCommon(self);
@@ -75,6 +92,12 @@ void* cMemMan_free(void* ptr);
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031D790__FPv);
 #ifdef SKIP_ASM
+/**
+ * Frees a spline interpolant's segment data (+0x8, cMemMan_free) and clears its allocated and loaded flags (bits 1 and
+ * 2).
+ *
+ * cCubicSplineInterpolant_initCommon calls it before allocating new data.
+ */
 void func_0031D790(void* self)
 {
     if (*(void**)((char*)self + 0x8) != 0) {
@@ -101,6 +124,17 @@ struct sCubicSplineKeyK2 {
 
 extern "C" void func_0031D8B0(sCubicSpline* self);
 
+/**
+ * Adds the next point (@p x, @p y) to a spline interpolant; the last point completes it.
+ *
+ * While the added-point counter (bits 3-10) is below the segment count (bits 11-18), the point goes into that segment's
+ * start (+0x0, +0x4 of its 0x14 bytes) and the counter goes up. The point after that becomes the last segment's end
+ * (+0x8, +0xC); the coefficients are then computed (func_0031D8B0) and the loaded flag (bit 2) is set. The camera code
+ * feeds its key times and values through it.
+ *
+ * @param x  the point's input value (time)
+ * @param y  the point's output value
+ */
 extern "C" void func_0031D7E0(sCubicSpline* self, float x, float y)
 {
     if (self->flags.f3 == self->flags.count) {
@@ -119,6 +153,16 @@ extern "C" void func_0031D7E0(sCubicSpline* self, float x, float y)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031D8B0);
 #ifdef SKIP_ASM
+/**
+ * Computes a spline interpolant's cubic coefficients from its points, natural or clamped by the type bit.
+ *
+ * Copies the points into local arrays and solves the tridiagonal system for the second-derivative terms: with natural
+ * end conditions (type bit 0 clear) or with the end slopes that func_0031D738 parked at +0x10 of the data and at +0x4.
+ * Each 0x14-byte segment then holds d, c, b, a and its start x, for y = a + b*u + c*u^2 + d*u^3 with u = t - x.
+ *
+ * +0x4 becomes the last point's x and the cached segment index (bits 19-26) is cleared. The local arrays hold 256
+ * entries. func_0031D7E0 calls it after the last point.
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 // self->data holds 5 floats per key: x, y, end x, end y, start slope on input;
 // d, c, b, a, x of each segment (y = a + b*u + c*u^2 + d*u^3, u = t - x) on output.
@@ -231,6 +275,20 @@ struct sSpline_31DEE0 {
 extern "C" float func_0031D5A8(sSplSeg_31DEE0* seg, float t);
 
 extern "C" float func_0031DEE0_impl(sSpline_31DEE0* s, float t) __asm__("func_0031DEE0");
+/**
+ * Evaluates a spline interpolant at @p time.
+ *
+ * Uses the cached segment (bits 19-26) when @p time lies in it, else its neighbour, else a bisection over the segments,
+ * caches the one found and evaluates its cubic with func_0031D5A8. Times before the first segment use segment 0; when
+ * the cached segment is the second-to-last, times past the end use the last.
+ *
+ * Likely bug: a time past the end (+0x4) while the cached segment is any other one reads past the segment array
+ * (seg[cur + 2]) or never leaves the bisection, which keeps landing on the last segment.
+ *
+ * @param spline  the interpolant
+ * @param time  the input value
+ * @return the interpolated value
+ */
 extern "C" float func_0031DEE0_impl(sSpline_31DEE0* spline, float time)
 {
     int last = spline->flags.count - 1;
@@ -290,6 +348,12 @@ INCLUDE_ASM("bx/cubicspline", func_0031E0E0);
 #ifdef SKIP_ASM
 extern "C" void func_0031DEE0(void* self, float t);
 
+/**
+ * Steps through a spline interpolant's range in 99 steps, evaluating it at each one and discarding the values.
+ *
+ * The range runs from the first segment's start x (+0x10 of the data) to the end (+0x4). A first loop over the same
+ * steps is empty; this is what remains of a debug dump. Nothing calls it.
+ */
 extern "C" void func_0031E0E0(void* self)
 {
     float end = *(float*)((char*)self + 4);
@@ -308,6 +372,11 @@ INCLUDE_ASM("bx/cubicspline", func_0031E190);
 // Number of spline segments (flags.count, bits 11..18); the empty loop is a stripped debug walk.
 static inline int cCubicSpline_getCount(sCubicSpline* s) { return s->flags.count; }
 
+/**
+ * Loops over a spline interpolant's segments (count in bits 11-18) doing nothing.
+ *
+ * An empty loop, what remains of a debug dump. Nothing calls it.
+ */
 extern "C" void func_0031E190(sCubicSpline* self)
 {
     for (int i = 0; i < cCubicSpline_getCount(self); i++) {
@@ -318,6 +387,14 @@ extern "C" void func_0031E190(sCubicSpline* self)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031E1D8);
 #ifdef SKIP_ASM
+/**
+ * Returns the large-bin index (32 to 95) for a chunk size, from its highest set bit and the next two bits.
+ *
+ * Sizes of 0x1000000 or more give 95. func_0031E818 uses it to find the bin to search and to file chunks.
+ *
+ * @param sz  the chunk size in bytes
+ * @return the bin index
+ */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // dlmalloc 2.7 largebin_index() (portable highest-bit version).
 extern "C" int func_0031E1D8(unsigned int sz)
@@ -344,6 +421,14 @@ extern "C" int func_0031E1D8(unsigned int sz)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031E260__FPv);
 #ifdef SKIP_ASM
+/**
+ * Initialises a malloc state: empty circular bins, default limits, and the top chunk at the first bin.
+ *
+ * Points both links of the 95 bins (from +0x38) at themselves, sets the fastbin limit (+0x0) to 0x50 keeping its low
+ * two flag bits, trim threshold 0x8000 (+0x344), mmap threshold 0x40000 (+0x34C), top pad and mmap count 0 (+0x348,
+ * +0x354), page size 0x1000 (+0x35C), the contiguous flag (bit 0 of +0x360) and the top (+0x30) to the first bin.
+ * func_0031EEE8 calls it on a state whose fastbin limit is still 0.
+ */
 void func_0031E260(void* self)
 {
     char* bin = (char*)self + 0x38;
@@ -400,6 +485,22 @@ struct sMState_31E2D8
     unsigned int max_total_mem;         // 0x374
 };
 
+/**
+ * Gets more memory for the heap from its core (func_0031FFD8) and allocates a chunk of @p nb bytes from the grown top.
+ *
+ * When fast chunks exist (bit 1 of +0x0) it consolidates them (func_0031EEE8) and retries func_0031E818 instead.
+ * Otherwise it asks func_0031FFD8 for nb + top pad + 16 bytes rounded to the page (less the old top when the core is
+ * contiguous), fixes up a foreign or misaligned break with a second request, frees the old top when the new memory is
+ * not adjacent, and updates sbrked_mem and its maxima.
+ *
+ * Returns the chunk carved from the new top, or sets *func_00415FB8() to 12 (ENOMEM) and returns null. func_0031E818
+ * ends with it.
+ *
+ * @param ms  the heap manager; its first word points to the malloc state
+ * @param nb  the padded chunk size needed
+ * @param av  the malloc state
+ * @return the new memory, or null
+ */
 extern "C" void* func_0031E2D8(void* ms, unsigned int nb, sMState_31E2D8* av)
 {
     sMChunk_31E2D8* old_top;
@@ -552,6 +653,18 @@ struct sMState_31E6D8
     unsigned int sbrked_mem;    // 0x368
 };
 
+/**
+ * Gives unused memory at the top of the heap back to its core (func_0031FFD8 with a negative size), keeping @p topPad
+ * bytes.
+ *
+ * Releases whole pages only, and only when the core's current end is still the top chunk's end; updates the top size
+ * and sbrked_mem.
+ *
+ * @param ms  the heap manager; its first word points to the malloc state
+ * @param topPad  bytes to keep above what is in use
+ * @param av  the malloc state
+ * @return 1 when memory was released, else 0
+ */
 extern "C" int func_0031E6D8(void* ms, unsigned int topPad, sMState_31E6D8* av)
 {
     long top_size;
@@ -613,6 +726,18 @@ extern "C" void* func_0031E2D8_E818(void* ms, unsigned int nb, sMState_31E818* a
 
 #define BIN_AT_31E818(av, i) ((sMChunk_31E818*)((char*)&(av)->bins[(i) << 1] - 8))
 
+/**
+ * Allocates @p bytes from the heap (dlmalloc 2.7's malloc on 16-byte aligned chunks).
+ *
+ * Sizes of 0xFFFFFFE0 or more set *func_00415FB8() to 12 (ENOMEM) and return null. Otherwise it tries the fast bins,
+ * the small bins, the unsorted chunks (filing them into their bins, func_0031E1D8 for large ones), the best-fitting
+ * larger bin through the bin map, then the top chunk, and finally grows the heap with func_0031E2D8. Every other
+ * allocator here (func_00320038, calloc, realloc, memalign, func_0031F858) goes through it.
+ *
+ * @param ms  the heap manager; its first word points to the malloc state
+ * @param bytes  the size requested
+ * @return the memory, or null
+ */
 extern "C" void* func_0031E818(void* ms, unsigned int bytes)
 {
     sMState_31E818* av = *(sMState_31E818**)ms;
@@ -962,6 +1087,15 @@ struct sMState_31EEE8
     sMChunk_31EEE8* bins[4];            // 0x38
 };
 
+/**
+ * Merges every chunk in the fast bins with its free neighbours and moves the results to the unsorted bin or the top.
+ *
+ * Clears the fast-chunks flag (bit 1 of +0x0) first. A state whose fastbin limit (+0x0) is 0 has never been set up and
+ * gets func_0031E260 instead.
+ *
+ * @param ms  the heap manager; its first word points to the malloc state
+ * @param av  the malloc state
+ */
 extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av)
 {
     sMChunk_31EEE8** fb;
@@ -1046,6 +1180,18 @@ struct sMChunk_31F018
 
 extern "C" void MEM_copy(void* d, void* s, int n);
 
+/**
+ * Resizes an allocation (dlmalloc 2.7's realloc), in place when it can.
+ *
+ * A null @p oldmem allocates with func_0031E818. Otherwise it grows into the top or a free next chunk, or allocates a
+ * new block, copies the contents (MEM_copy) and frees the old one with cDynamicMemMan_dlfree; any surplus is split off
+ * and freed. Sizes of 0xFFFFFFE0 or more set *func_00415FB8() to 12 (ENOMEM) and return null.
+ *
+ * @param ms  the heap manager; its first word points to the malloc state
+ * @param oldmem  the allocation to resize, or null
+ * @param bytes  the new size
+ * @return the resized allocation, or null
+ */
 extern "C" void* func_0031F018(void* ms, void* oldmem, unsigned int bytes)
 {
     char* av = *(char**)ms;
@@ -1172,6 +1318,18 @@ struct sMChunk_31F2C8
 // PORT: the unit declares func_0031F2C8(void*); the body really takes (ms, alignment, bytes).
 extern "C" void* func_0031F2C8_memalign(void* ms, unsigned int alignment, unsigned int bytes) __asm__("func_0031F2C8");
 
+/**
+ * Allocates @p bytes aligned to a power of two of at least @p alignment (dlmalloc 2.7's memalign).
+ *
+ * An alignment of 16 or less is a plain func_0031E818. Otherwise it over-allocates by the alignment, frees the leading
+ * part and any surplus tail (cDynamicMemMan_dlfree) and returns the aligned chunk. func_0031FAA8 and func_0031FB00 call
+ * it with the page size.
+ *
+ * @param ms  the heap manager; its first word points to the malloc state
+ * @param alignment  the alignment wanted
+ * @param bytes  the size requested
+ * @return the aligned memory, or null
+ */
 extern "C" void* func_0031F2C8_memalign(void* ms, unsigned int alignment, unsigned int bytes)
 {
     unsigned int nb;
@@ -1255,6 +1413,18 @@ struct sMChunk_31F4E8
 // PORT: the unit declares func_0031F4E8(void*); the body really takes (ms, alignment, bytes, offset).
 extern "C" void* func_0031F4E8_memalign(void* ms, unsigned int alignment, unsigned int bytes, unsigned int offset) __asm__("func_0031F4E8");
 
+/**
+ * Allocates memory so that the address @p offset bytes into it is aligned to @p alignment (memalign with a header).
+ *
+ * Works like func_0031F2C8 on bytes + offset. Likely bug: for an alignment of 16 or less it returns
+ * func_0031E818(bytes) without adding the offset, so the block lacks the header's room.
+ *
+ * @param ms  the heap manager; its first word points to the malloc state
+ * @param alignment  the alignment wanted
+ * @param bytes  the size requested
+ * @param offset  the header size: the address this far into the block is aligned
+ * @return the memory, or null
+ */
 extern "C" void* func_0031F4E8_memalign(void* ms, unsigned int alignment, unsigned int bytes, unsigned int offset)
 {
     unsigned int nb;
@@ -1326,6 +1496,16 @@ INCLUDE_ASM("bx/cubicspline", func_0031F718);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int c, int n);
 
+/**
+ * Allocates @p n * @p elem_size bytes with func_0031E818 and zeroes them (dlmalloc 2.7's calloc).
+ *
+ * Small chunks are cleared word by word, larger ones with MEM_fill. The product is not checked for overflow.
+ *
+ * @param ms  the heap manager; its first word points to the malloc state
+ * @param n  the number of elements
+ * @param elem_size  the size of one element
+ * @return the zeroed memory, or null
+ */
 // dlmalloc 2.7 cALLOc()
 extern "C" void* func_0031F718(void* ms, unsigned int n, unsigned int elem_size)
 {
@@ -1369,6 +1549,12 @@ INCLUDE_ASM("bx/cubicspline", func_0031F7F0);
 // PORT: the unit declares cDynamicMemMan_dlfree(void*); the body really takes (ms, mem).
 extern "C" void cDynamicMemMan_dlfree_F7F0(void* ms, void* mem) __asm__("cDynamicMemMan_dlfree");
 
+/**
+ * Frees an allocation through cDynamicMemMan_dlfree.
+ *
+ * @param ms  the heap manager; its first word points to the malloc state
+ * @param mem  the allocation
+ */
 extern "C" void func_0031F7F0(void* ms, void* mem)
 {
     cDynamicMemMan_dlfree_F7F0(ms, mem);
@@ -1379,6 +1565,15 @@ INCLUDE_ASM("bx/cubicspline", func_0031F810);
 #ifdef SKIP_ASM
 extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, int opts, void** chunks);
 
+/**
+ * Allocates @p n zeroed elements of @p elem_size bytes as separate chunks in one block (func_0031F858 with options 3).
+ *
+ * @param ms  the heap manager; its first word points to the malloc state
+ * @param n  the number of elements
+ * @param elem_size  the size of each element
+ * @param chunks  receives the element pointers, or null to allocate the array too
+ * @return the pointer array, or null
+ */
 // dlmalloc 2.7 independent_calloc()
 extern "C" void* func_0031F810(void* ms, unsigned int n, unsigned int elem_size, void** chunks)
 {
@@ -1391,6 +1586,15 @@ INCLUDE_ASM("bx/cubicspline", func_0031F838);
 #ifdef SKIP_ASM
 extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, int opts, void** chunks);
 
+/**
+ * Allocates @p n chunks of the sizes in @p sizes in one block (func_0031F858 with options 0).
+ *
+ * @param ms  the heap manager; its first word points to the malloc state
+ * @param n  the number of chunks
+ * @param sizes  the size of each chunk
+ * @param chunks  receives the chunk pointers, or null to allocate the array too
+ * @return the pointer array, or null
+ */
 // dlmalloc 2.7 independent_comalloc()
 extern "C" void* func_0031F838(void* ms, unsigned int n, unsigned int* sizes, void** chunks)
 {
@@ -1409,6 +1613,21 @@ struct sMChunk_31F858
 
 extern "C" void MEM_fill(void* dst, int c, int n);
 
+/**
+ * Allocates @p n chunks from one block and returns an array of pointers to them (the worker behind dlmalloc 2.7's
+ * independent_calloc and independent_comalloc).
+ *
+ * Bit 0 of @p opts means all elements have the size *@p sizes, bit 1 zeroes the contents. Without @p chunks the pointer
+ * array is carved from the same block. The mmap count limit (+0x354) is set to 0 around the func_0031E818 call. @p n of
+ * 0 returns @p chunks, or func_0031E818(0) when that is null.
+ *
+ * @param ms  the heap manager; its first word points to the malloc state
+ * @param n  the number of chunks
+ * @param sizes  the chunk sizes (one size when bit 0 of @p opts is set)
+ * @param opts  bit 0: same size for all; bit 1: zero the memory
+ * @param chunks  receives the chunk pointers, or null
+ * @return the pointer array, or null
+ */
 extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, int opts, void** chunks)
 {
     sMState_31EEE8* av = *(sMState_31EEE8**)ms;
@@ -1500,6 +1719,15 @@ struct sMState_31FAA8
     unsigned int pagesize;              // 0x35C
 };
 
+/**
+ * Allocates @p bytes aligned to the page size (+0x35C of the malloc state) with func_0031F2C8.
+ *
+ * Sets the state up first (func_0031EEE8) when its fastbin limit is still 0.
+ *
+ * @param ms  the heap manager; its first word points to the malloc state
+ * @param bytes  the size requested
+ * @return the memory, or null
+ */
 extern "C" void* func_0031FAA8(void** ms, unsigned int bytes)
 {
     sMState_31FAA8* av = *(sMState_31FAA8**)ms;
@@ -1520,6 +1748,16 @@ struct sMState_31FB00
     unsigned int pagesize;              // 0x35C
 };
 
+/**
+ * Allocates @p bytes rounded up to whole pages, page-aligned, with func_0031F2C8.
+ *
+ * Sets the state up first (func_0031EEE8) when its fastbin limit is still 0. The page size is +0x35C of the malloc
+ * state.
+ *
+ * @param ms  the heap manager; its first word points to the malloc state
+ * @param bytes  the size requested
+ * @return the memory, or null
+ */
 extern "C" void* func_0031FB00(void** ms, unsigned int bytes)
 {
     sMState_31FB00* av = *(sMState_31FB00**)ms;
@@ -1538,6 +1776,14 @@ struct sMState_31E6D8;
 extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av);
 extern "C" int func_0031E6D8(void* ms, unsigned int pad, sMState_31E6D8* av);
 
+/**
+ * Consolidates the fast bins (func_0031EEE8) and returns unused top memory beyond @p topPad to the core
+ * (func_0031E6D8).
+ *
+ * @param ms  the heap manager; its first word points to the malloc state
+ * @param topPad  bytes to keep above what is in use
+ * @return 1 when memory was released, else 0
+ */
 // dlmalloc 2.7 malloc_trim(): consolidate fastbins, then sYSTRIm.
 extern "C" int func_0031FB68(void** ms, unsigned int topPad)
 {
@@ -1550,6 +1796,14 @@ extern "C" int func_0031FB68(void** ms, unsigned int topPad)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031FBB8__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Returns how many bytes of an allocation can be used: its chunk size minus the header overhead.
+ *
+ * 0 for null or for a chunk whose next chunk does not mark it in use.
+ *
+ * @param mem  the allocation
+ * @return the usable size, or 0
+ */
 unsigned int func_0031FBB8(void* self, void* mem)
 {
     if (mem != 0) {
@@ -1614,6 +1868,15 @@ struct sMallinfo_31FC20
 struct sMState_31EEE8;
 extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av);
 
+/**
+ * Returns heap statistics: free and used totals, block counts and the top size (dlmalloc 2.7's mallinfo).
+ *
+ * Counts the fast bins and walks every regular bin; unlike dlmalloc it stops a bin walk early when the links loop back
+ * on themselves. A state with no top yet is set up first (func_0031EEE8). The structure is returned by value.
+ *
+ * @param ms  the heap manager; its first word points to the malloc state
+ * @return the statistics
+ */
 extern "C" sMallinfo_31FC20 func_0031FC20(void* ms)
 {
     sMState_31FC20* av = *(sMState_31FC20**)ms;
@@ -1673,6 +1936,11 @@ extern "C" sMallinfo_31FC20 func_0031FC20(void* ms)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031FE28);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (empty body).
+ *
+ * Sits between func_0031FC20 and func_0031FE30, where dlmalloc 2.7 defines its statistics printer. Nothing calls it.
+ */
 extern "C" void func_0031FE28(void) {
 
 }
@@ -1680,6 +1948,17 @@ extern "C" void func_0031FE28(void) {
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031FE30);
 #ifdef SKIP_ASM
+/**
+ * Sets a heap parameter and returns whether the value was accepted (dlmalloc 2.7's mallopt).
+ *
+ * Consolidates the fast bins first (func_0031EEE8). @p kind 1 sets the fastbin limit (+0x0) for values up to 80; -1 the
+ * trim threshold (+0x344), -2 the top pad (+0x348), -3 the mmap threshold (+0x34C), and -4 the mmap count (+0x354),
+ * which only accepts 0.
+ *
+ * @param kind  the parameter: 1, -1, -2, -3 or -4
+ * @param val  the new value
+ * @return 1 when accepted, else 0
+ */
 extern "C" int func_0031FE30(void** self, int kind, unsigned int val) {
     char* ms = (char*)*self;
     func_0031EEE8(self, (sMState_31EEE8*)ms);
@@ -1726,6 +2005,11 @@ extern "C" int func_0031FE30(void** self, int kind, unsigned int val) {
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031FF20__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs an empty dynamic heap manager: zeroes its four words (malloc state, heap, core top, heap size).
+ *
+ * @return @p self
+ */
 void* func_0031FF20(void* self)
 {
     *(int*)((char*)self + 0x4) = 0;
@@ -1741,6 +2025,11 @@ void operator_delete(int* ptr);
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031FF38__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Destroys a dynamic heap manager: frees the object when bit 0 of @p flags is set; nothing else to release.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 void func_0031FF38(void* self, int flags)
 {
     if (flags & 1) {
@@ -1779,6 +2068,16 @@ extern "C" void cDynamicMemMan_init(void* self, unsigned int base, unsigned int 
 //100%
 INCLUDE_ASM("bx/cubicspline", func_0031FFD8);
 #ifdef SKIP_ASM
+/**
+ * Moves the heap's core top (+0x8) by @p incr bytes, like sbrk, within the heap (+0x4, size +0xC).
+ *
+ * A non-negative @p incr that still fits returns the old top; one that does not fit returns -1. A negative @p incr
+ * moves the top down without a lower-bound check and returns the new top. func_0031E2D8 and func_0031E6D8 use it as
+ * their core.
+ *
+ * @param incr  the number of bytes to add (negative to give back)
+ * @return the old top (new top when shrinking), or -1 (0xFFFFFFFF)
+ */
 extern "C" unsigned int func_0031FFD8(void* self, long incr) // PORT: 64-bit long param
 {
     if (incr >= 0) {
@@ -1802,6 +2101,13 @@ INCLUDE_ASM("bx/cubicspline", func_00320038);
 #ifdef SKIP_ASM
 extern "C" void* func_0031E818(void* ms, unsigned int bytes);
 
+/**
+ * Allocates @p bytes from the dynamic heap (func_0031E818).
+ *
+ * @param ms  the heap manager; its first word points to the malloc state
+ * @param bytes  the size requested
+ * @return the memory, or null
+ */
 extern "C" void* func_00320038(void* ms, unsigned int bytes)
 {
     return func_0031E818(ms, bytes);
@@ -1811,6 +2117,14 @@ extern "C" void* func_00320038(void* ms, unsigned int bytes)
 //99.29%
 INCLUDE_ASM("bx/cubicspline", func_00320058__FPv);
 #ifdef SKIP_ASM
+/**
+ * Allocates aligned memory from the dynamic heap: forwards to func_0031F2C8 with the alignment and size passed through.
+ *
+ * The C declares only the heap manager; the alignment and size reach func_0031F2C8 untouched in the second and third
+ * argument registers.
+ *
+ * @return the memory (declared int)
+ */
 int func_00320058(void* self)
 {
     return func_0031F2C8(self);
@@ -1822,6 +2136,15 @@ extern "C" int func_0031F4E8(void* self);
 //99.29%
 INCLUDE_ASM("bx/cubicspline", func_00320078__FPv);
 #ifdef SKIP_ASM
+/**
+ * Allocates header-offset aligned memory from the dynamic heap: forwards to func_0031F4E8 with its arguments passed
+ * through.
+ *
+ * The C declares only the heap manager; the alignment, size and header size reach func_0031F4E8 untouched in their
+ * registers.
+ *
+ * @return the memory (declared int)
+ */
 int func_00320078(void* self)
 {
     return func_0031F4E8(self);
@@ -1833,6 +2156,12 @@ extern "C" int cDynamicMemMan_dlfree(void* self);
 //100%
 INCLUDE_ASM("bx/cubicspline", func_00320098);
 #ifdef SKIP_ASM
+/**
+ * Returns whether an address lies strictly inside the dynamic heap (between +0x4 and +0x4 plus the size at +0xC).
+ *
+ * @param addr  the address to test
+ * @return 1 when inside, else 0
+ */
 extern "C" int func_00320098(char* self, unsigned int addr)
 {
     unsigned int base = *(unsigned int*)(self + 4);
@@ -1861,6 +2190,11 @@ int cDynamicMemMan_free(void* self)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_003200E0);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (empty body).
+ *
+ * Sits right after cDynamicMemMan_free. Nothing calls it.
+ */
 extern "C" void func_003200E0(void) {
 
 }
@@ -1869,6 +2203,14 @@ extern "C" void func_003200E0(void) {
 //100%
 INCLUDE_ASM("bx/cubicspline", func_003200E8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Builds the 8-byte block pool's free list: 256 blocks of 8 bytes, each linked to the next.
+ *
+ * The list head at +0x800 points to the first block and the last block's link (+0x7F8) is 0. cMemBlockMan_initialize
+ * runs it on the "m_container8" allocation (cMemBlockMan_m_container8).
+ *
+ * @return @p self
+ */
 void* func_003200E8(void* self)
 {
     *(void**)((char*)self + 0x800) = self;
@@ -1887,6 +2229,14 @@ void* func_003200E8(void* self)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_00320120__FPv);
 #ifdef SKIP_ASM
+/**
+ * Builds the 16-byte block pool's free list: 512 blocks of 16 bytes, each linked to the next.
+ *
+ * The list head at +0x2000 points to the first block and the last block's link (+0x1FF0) is 0. cMemBlockMan_initialize
+ * runs it on the "m_container16" allocation (cMemBlockMan_m_container16).
+ *
+ * @return @p self
+ */
 void* func_00320120(void* self)
 {
     *(void**)((char*)self + 0x2000) = self;
@@ -1905,6 +2255,14 @@ void* func_00320120(void* self)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_00320158__FPv);
 #ifdef SKIP_ASM
+/**
+ * Builds the 32-byte block pool's free list: 768 blocks of 32 bytes, each linked to the next.
+ *
+ * The list head at +0x6000 points to the first block and the last block's link (+0x5FE0) is 0. cMemBlockMan_initialize
+ * runs it on the "m_container32" allocation (cMemBlockMan_m_container32).
+ *
+ * @return @p self
+ */
 void* func_00320158(void* self)
 {
     *(void**)((char*)self + 0x6000) = self;
@@ -1923,6 +2281,14 @@ void* func_00320158(void* self)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_00320190__FPv);
 #ifdef SKIP_ASM
+/**
+ * Builds the 64-byte block pool's free list: 3200 blocks of 64 bytes, each linked to the next.
+ *
+ * The list head at +0x32000 points to the first block and the last block's link (+0x31FC0) is 0.
+ * cMemBlockMan_initialize runs it on the "m_container64" allocation (cMemBlockMan_m_container64).
+ *
+ * @return @p self
+ */
 void* func_00320190(void* self)
 {
     unsigned int i = 0;
@@ -1942,6 +2308,14 @@ void* func_00320190(void* self)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_003201D8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Builds the 128-byte block pool's free list: 1200 blocks of 128 bytes, each linked to the next.
+ *
+ * The list head at +0x25800 points to the first block and the last block's link (+0x25780) is 0.
+ * cMemBlockMan_initialize runs it on the "m_container128" allocation (cMemBlockMan_m_container128).
+ *
+ * @return @p self
+ */
 void* func_003201D8(void* self)
 {
     unsigned int i = 0;
@@ -1961,6 +2335,14 @@ void* func_003201D8(void* self)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_00320220__FPv);
 #ifdef SKIP_ASM
+/**
+ * Builds the 256-byte block pool's free list: 512 blocks of 256 bytes, each linked to the next.
+ *
+ * The list head at +0x20000 points to the first block and the last block's link (+0x1FF00) is 0.
+ * cMemBlockMan_initialize runs it on the "m_container256" allocation (cMemBlockMan_m_container256).
+ *
+ * @return @p self
+ */
 void* func_00320220(void* self)
 {
     unsigned int i = 0;
@@ -1980,6 +2362,14 @@ void* func_00320220(void* self)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_00320270__FPv);
 #ifdef SKIP_ASM
+/**
+ * Builds the 512-byte block pool's free list: 256 blocks of 512 bytes, each linked to the next.
+ *
+ * The list head at +0x20000 points to the first block and the last block's link (+0x1FE00) is 0.
+ * cMemBlockMan_initialize runs it on the "m_container512" allocation (cMemBlockMan_m_container512).
+ *
+ * @return @p self
+ */
 void* func_00320270(void* self)
 {
     unsigned int i = 0;
@@ -2001,6 +2391,14 @@ extern "C" void* cMemBlockMan_alloc(int size);
 //100%
 INCLUDE_ASM("bx/cubicspline", func_003202C0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes a block from the 8-byte pool.
+ *
+ * Pops the head of the free list at +0x800; when the pool is empty it falls back to cMemBlockMan_alloc(12). Nothing in
+ * the C calls it.
+ *
+ * @return the block
+ */
 void* func_003202C0(void* self)
 {
     void* node = *(void**)((char*)self + 0x800);
@@ -2016,6 +2414,14 @@ void* func_003202C0(void* self)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_003202F8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes a block from the 16-byte pool.
+ *
+ * Pops the head of the free list at +0x2000; when the pool is empty it falls back to cMemBlockMan_alloc(20). Nothing in
+ * the C calls it.
+ *
+ * @return the block
+ */
 void* func_003202F8(void* self)
 {
     void* node = *(void**)((char*)self + 0x2000);
@@ -2031,6 +2437,14 @@ void* func_003202F8(void* self)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_00320330__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes a block from the 32-byte pool.
+ *
+ * Pops the head of the free list at +0x6000; when the pool is empty it falls back to cMemBlockMan_alloc(36). Nothing in
+ * the C calls it.
+ *
+ * @return the block
+ */
 void* func_00320330(void* self)
 {
     void* node = *(void**)((char*)self + 0x6000);
@@ -2053,6 +2467,14 @@ static inline void* popFreeNode(void** head)
     return node;
 }
 
+/**
+ * Takes a block from the 64-byte pool.
+ *
+ * Pops the head of the free list at +0x32000; when the pool is empty it falls back to cMemBlockMan_alloc(68). Nothing
+ * in the C calls it.
+ *
+ * @return the block
+ */
 void* func_00320368(void* self)
 {
     if (*(void**)((char*)self + 0x32000) != 0) {
@@ -2065,6 +2487,14 @@ void* func_00320368(void* self)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_003203B8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes a block from the 128-byte pool.
+ *
+ * Pops the head of the free list at +0x25800; when the pool is empty it falls back to cMemBlockMan_alloc(132). Nothing
+ * in the C calls it.
+ *
+ * @return the block
+ */
 void* func_003203B8(void* self)
 {
     if (*(void**)((char*)self + 0x25800) != 0) {
@@ -2099,6 +2529,15 @@ static inline void* reserveBlock_0408(TMemBlock_0408** blockptr)
 }
 
 void* func_00320408(TMemContainer_0408* self, unsigned int align) __asm__("func_00320408__FPv");
+/**
+ * Takes a block from the 256-byte pool.
+ *
+ * Pops the head of the free list at +0x20000; when the pool is empty it falls back to cMemBlockMan_alloc(260), passing
+ * @p align on. Nothing in the C calls it.
+ *
+ * @param align  the alignment, passed to the fallback
+ * @return the block
+ */
 void* func_00320408(TMemContainer_0408* self, unsigned int align)
 {
     if (self->m_freeList != 0) {
@@ -2133,6 +2572,15 @@ static inline void* reserveBlock_0448(TMemBlock_0448** blockptr)
 }
 
 void* func_00320448(TMemContainer_0448* self, unsigned int align) __asm__("func_00320448__FPv");
+/**
+ * Takes a block from the 512-byte pool.
+ *
+ * Pops the head of the free list at +0x20000; when the pool is empty it falls back to cMemBlockMan_alloc(516), passing
+ * @p align on. Nothing in the C calls it.
+ *
+ * @param align  the alignment, passed to the fallback
+ * @return the block
+ */
 void* func_00320448(TMemContainer_0448* self, unsigned int align)
 {
     if (self->m_freeList != 0) {
@@ -2145,6 +2593,13 @@ void* func_00320448(TMemContainer_0448* self, unsigned int align)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_00320488__FPvPPv);
 #ifdef SKIP_ASM
+/**
+ * Returns a block to the 8-byte pool by pushing it onto the free list at +0x800.
+ *
+ * The block's first word becomes the link. cMemBlockMan_free calls it for addresses inside cMemBlockMan_m_container8.
+ *
+ * @param node  the block to free
+ */
 void func_00320488(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x800);
@@ -2155,6 +2610,13 @@ void func_00320488(void* self, void** node)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_00320498__FPvPPv);
 #ifdef SKIP_ASM
+/**
+ * Returns a block to the 16-byte pool by pushing it onto the free list at +0x2000.
+ *
+ * The block's first word becomes the link. cMemBlockMan_free calls it for addresses inside cMemBlockMan_m_container16.
+ *
+ * @param node  the block to free
+ */
 void func_00320498(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x2000);
@@ -2165,6 +2627,13 @@ void func_00320498(void* self, void** node)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_003204A8__FPvPPv);
 #ifdef SKIP_ASM
+/**
+ * Returns a block to the 32-byte pool by pushing it onto the free list at +0x6000.
+ *
+ * The block's first word becomes the link. cMemBlockMan_free calls it for addresses inside cMemBlockMan_m_container32.
+ *
+ * @param node  the block to free
+ */
 void func_003204A8(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x6000);
@@ -2175,6 +2644,13 @@ void func_003204A8(void* self, void** node)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_003204B8__FPvPPv);
 #ifdef SKIP_ASM
+/**
+ * Returns a block to the 64-byte pool by pushing it onto the free list at +0x32000.
+ *
+ * The block's first word becomes the link. cMemBlockMan_free calls it for addresses inside cMemBlockMan_m_container64.
+ *
+ * @param node  the block to free
+ */
 void func_003204B8(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x32000);
@@ -2185,6 +2661,13 @@ void func_003204B8(void* self, void** node)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_003204D0__FPvPPv);
 #ifdef SKIP_ASM
+/**
+ * Returns a block to the 128-byte pool by pushing it onto the free list at +0x25800.
+ *
+ * The block's first word becomes the link. cMemBlockMan_free calls it for addresses inside cMemBlockMan_m_container128.
+ *
+ * @param node  the block to free
+ */
 void func_003204D0(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x25800);
@@ -2195,6 +2678,13 @@ void func_003204D0(void* self, void** node)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_003204E8__FPvPPv);
 #ifdef SKIP_ASM
+/**
+ * Returns a block to the 256-byte pool by pushing it onto the free list at +0x20000.
+ *
+ * The block's first word becomes the link. cMemBlockMan_free calls it for addresses inside cMemBlockMan_m_container256.
+ *
+ * @param node  the block to free
+ */
 void func_003204E8(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x20000);
@@ -2205,6 +2695,13 @@ void func_003204E8(void* self, void** node)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_00320500__FPvPPv);
 #ifdef SKIP_ASM
+/**
+ * Returns a block to the 512-byte pool by pushing it onto the free list at +0x20000.
+ *
+ * The block's first word becomes the link. cMemBlockMan_free calls it for addresses inside cMemBlockMan_m_container512.
+ *
+ * @param node  the block to free
+ */
 void func_00320500(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x20000);
@@ -2215,6 +2712,11 @@ void func_00320500(void* self, void** node)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_00320518__Fv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (empty body): the 8-byte pool's check.
+ *
+ * cMemBlockMan_validate calls it on cMemBlockMan_m_container8.
+ */
 void func_00320518(void)
 {
 }
@@ -2223,6 +2725,11 @@ void func_00320518(void)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_00320520__Fv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (empty body): the 16-byte pool's check.
+ *
+ * cMemBlockMan_validate calls it on cMemBlockMan_m_container16.
+ */
 void func_00320520(void)
 {
 }
@@ -2231,6 +2738,11 @@ void func_00320520(void)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_00320528__Fv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (empty body): the 32-byte pool's check.
+ *
+ * cMemBlockMan_validate calls it on cMemBlockMan_m_container32.
+ */
 void func_00320528(void)
 {
 }
@@ -2239,6 +2751,11 @@ void func_00320528(void)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_00320530__Fv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (empty body): the 64-byte pool's check.
+ *
+ * cMemBlockMan_validate calls it on cMemBlockMan_m_container64.
+ */
 void func_00320530(void)
 {
 }
@@ -2247,6 +2764,11 @@ void func_00320530(void)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_00320538__Fv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (empty body): the 128-byte pool's check.
+ *
+ * cMemBlockMan_validate calls it on cMemBlockMan_m_container128.
+ */
 void func_00320538(void)
 {
 }
@@ -2255,6 +2777,11 @@ void func_00320538(void)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_00320540__Fv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (empty body): the 256-byte pool's check.
+ *
+ * cMemBlockMan_validate calls it on cMemBlockMan_m_container256.
+ */
 void func_00320540(void)
 {
 }
@@ -2263,6 +2790,11 @@ void func_00320540(void)
 //100%
 INCLUDE_ASM("bx/cubicspline", func_00320548__Fv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (empty body): the 512-byte pool's check.
+ *
+ * cMemBlockMan_validate calls it on cMemBlockMan_m_container512.
+ */
 void func_00320548(void)
 {
 }

@@ -49,6 +49,15 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
 extern char D_0046D8C0[];
 
+/**
+ * Destroys a private message: restores the vtable D_0046D8C0 at +0xC, destroys its three cBXStrings and frees it when
+ * asked.
+ *
+ * Same body as cPrivateMessage__cPrivateMessage, which is the destructor slot of D_0046D8C0; this copy is referenced by
+ * nothing.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void func_002688E0(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0046D8C0;
@@ -69,6 +78,15 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
 extern char D_004810E0[];
 
+/**
+ * Destroys a pending challenge: restores its vtable D_004810E0 at +0x3C, destroys its two cBXStrings and frees it when
+ * asked.
+ *
+ * The strings at +0x0 and +0x4 hold the challenger's name and message text. It is slot 1 of D_004810E0, the vtable the
+ * challenge handler stores in each 0x40-byte object tagged "cChallenger" (BuddyMan's mChallengers).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void func_00268950(void* self, int flags)
 {
     *(void**)((char*)self + 0x3C) = D_004810E0;
@@ -115,7 +133,16 @@ struct sOwner89B8 {
     char str[4];      // 0xEC
 };
 
-// Destructor: string member, then the two pointer vectors (same vector-free shape as feasyncfile cFEStateNetMessenger__cFEStateNetMessenger).
+/**
+ * Destroys the buddy manager: its resource string, then the storage of its two pointer vectors, and frees it when
+ * asked.
+ *
+ * Destroys the cBXString mResource (+0xEC), then releases the buffers of mChallengers (+0xB8) and mMessages (+0xA8): a
+ * one-element buffer goes to operator_delete, a larger one to cMemMan_free. The pointed-to objects are not destroyed
+ * here. The teardown in tagsunk calls it on BuddyMan_mBuddyMan with flags 3.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void func_002689B8(sOwner89B8* self, int flags)
 {
     cBXString__cBXString(self->str, 2);
@@ -138,6 +165,14 @@ extern "C" void LobbyMan_onroomlistupdate(int);
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_00268A80);
 #ifdef SKIP_ASM
+/**
+ * Returns the first word at @p arg0.
+ *
+ * Nothing references it.
+ *
+ * @param arg0  the pointer to read
+ * @return the word at @p arg0
+ */
 extern "C" int func_00268A80(int *arg0) {
     return *arg0;
 }
@@ -145,6 +180,14 @@ extern "C" int func_00268A80(int *arg0) {
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_00268A88);
 #ifdef SKIP_ASM
+/**
+ * Returns the first word at @p arg0.
+ *
+ * Nothing references it. Same body as func_00268A80.
+ *
+ * @param arg0  the pointer to read
+ * @return the word at @p arg0
+ */
 extern "C" int func_00268A88(int *arg0) {
     return *arg0;
 }
@@ -153,6 +196,16 @@ extern "C" int func_00268A88(int *arg0) {
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_00268A90);
 #ifdef SKIP_ASM
+/**
+ * Calls LobbyMan_onroomlistupdate on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A2FB0 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. func_0025A778 registers it as the callback of list 0 (rooms).
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268A90(void* self, void* a1, int a2)
 {
     LobbyMan_onroomlistupdate(a2 + D_004A2FB0.v);
@@ -165,6 +218,16 @@ extern "C" void LobbyMan_onuserlistupdate(int);
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_00268AB8);
 #ifdef SKIP_ASM
+/**
+ * Calls LobbyMan_onuserlistupdate on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A2FB8 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. func_0025A778 registers it as the callback of list 1 (users).
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268AB8(void* self, void* a1, int a2)
 {
     LobbyMan_onuserlistupdate(a2 + D_004A2FB8.v);
@@ -177,6 +240,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268AE0);
 extern sShortPad16 D_004A2FC0;
 extern "C" void LobbyMan_onranklistupdate(int);
 
+/**
+ * Calls LobbyMan_onranklistupdate on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A2FC0 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. func_0025A778 (list 2, ranks) and func_0025E348 register it.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268AE0(void* self, void* a1, int a2)
 {
     LobbyMan_onranklistupdate(a2 + D_004A2FC0.v);
@@ -189,6 +262,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268B08);
 extern sShortPad16 D_004A2FF0;
 void* LobbyMan_onincomingmsg(void* self);
 
+/**
+ * Calls LobbyMan_onincomingmsg on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A2FF0 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. func_0025A948 registers it as LobbyApi message callback 0.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268B08(void* self, void* a1, char* a2)
 {
     LobbyMan_onincomingmsg(a2 + D_004A2FF0.v);
@@ -201,6 +284,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268B30);
 extern sShortPad16 D_004A2FF8;
 extern "C" void LobbyMan_onchatmsg(int);
 
+/**
+ * Calls LobbyMan_onchatmsg on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A2FF8 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. func_0025A948 registers it as LobbyApi message callback 1.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268B30(void* self, void* a1, int a2)
 {
     LobbyMan_onchatmsg(a2 + D_004A2FF8.v);
@@ -213,6 +306,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268B58);
 extern sShortPad16 D_004A3000;
 extern "C" void LobbyMan_onconnectionmsg(int);
 
+/**
+ * Calls LobbyMan_onconnectionmsg on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3000 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. func_0025A948 registers it as LobbyApi message callback 3.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268B58(void* self, void* a1, int a2)
 {
     LobbyMan_onconnectionmsg(a2 + D_004A3000.v);
@@ -225,6 +328,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268B80);
 extern sShortPad16 D_004A3008;
 extern "C" void LobbyMan_onplaymsg(int);
 
+/**
+ * Calls LobbyMan_onplaymsg on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3008 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. func_0025A948 registers it as LobbyApi message callback 4.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268B80(void* self, void* a1, int a2)
 {
     LobbyMan_onplaymsg(a2 + D_004A3008.v);
@@ -237,6 +350,17 @@ INCLUDE_ASM("bx/bxstringctor", func_00268BA8);
 extern sShortPad16 D_004A3020;
 extern "C" void LobbyMan_onlobbyconnect(int);
 
+/**
+ * Calls LobbyMan_onlobbyconnect on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3020 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. The lobby connect code passes it as the reply callback of func_003E8260 (port
+ * 11000).
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268BA8(void* self, void* a1, int a2)
 {
     LobbyMan_onlobbyconnect(a2 + D_004A3020.v);
@@ -249,6 +373,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268BD0);
 extern sShortPad16 D_004A3088;
 extern "C" void LobbyMan_onaccountcreated(int);
 
+/**
+ * Calls LobbyMan_onaccountcreated on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3088 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. The account-create request passes it to func_0025B608 as its reply callback.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268BD0(void* self, void* a1, int a2)
 {
     LobbyMan_onaccountcreated(a2 + D_004A3088.v);
@@ -261,6 +395,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268BF8);
 extern sShortPad16 D_004A30A8;
 extern "C" void LobbyMan_onaccountedited(int);
 
+/**
+ * Calls LobbyMan_onaccountedited on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A30A8 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. The account-edit request passes it to func_0025B608 as its reply callback.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268BF8(void* self, void* a1, int a2)
 {
     LobbyMan_onaccountedited(a2 + D_004A30A8.v);
@@ -273,6 +417,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268C20);
 extern sShortPad16 D_004A30B0;
 extern "C" void LobbyMan_onlostaccountrequestsent(int);
 
+/**
+ * Calls LobbyMan_onlostaccountrequestsent on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A30B0 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. The lost-account request passes it to func_0025B608 as its reply callback.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268C20(void* self, void* a1, int a2)
 {
     LobbyMan_onlostaccountrequestsent(a2 + D_004A30B0.v);
@@ -285,6 +439,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268C48);
 extern sShortPad16 D_004A30B8;
 extern "C" void LobbyMan_onlostpasswordrequestsent(int);
 
+/**
+ * Calls LobbyMan_onlostpasswordrequestsent on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A30B8 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268C48(void* self, void* a1, int a2)
 {
     LobbyMan_onlostpasswordrequestsent(a2 + D_004A30B8.v);
@@ -297,6 +461,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268C70);
 extern sShortPad16 D_004A30E8;
 extern "C" void LobbyMan_onauthentication(int);
 
+/**
+ * Calls LobbyMan_onauthentication on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A30E8 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. The login request passes it to func_0025B608 as its reply callback.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268C70(void* self, void* a1, int a2)
 {
     LobbyMan_onauthentication(a2 + D_004A30E8.v);
@@ -309,6 +483,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268C98);
 extern sShortPad16 D_004A3118;
 extern "C" void LobbyMan_onpersonaselected(int);
 
+/**
+ * Calls LobbyMan_onpersonaselected on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3118 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268C98(void* self, void* a1, int a2)
 {
     LobbyMan_onpersonaselected(a2 + D_004A3118.v);
@@ -321,6 +505,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268CC0);
 extern sShortPad16 D_004A3120;
 extern "C" void func_0025D048(int);
 
+/**
+ * Calls func_0025D048 on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3120 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. func_0025D048 handles the reply to the persona's 'onln' stats request.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268CC0(void* self, void* a1, int a2)
 {
     func_0025D048(a2 + D_004A3120.v);
@@ -333,6 +527,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268CE8);
 extern sShortPad16 D_004A3138;
 extern "C" void LobbyMan_onpersonacreated(int);
 
+/**
+ * Calls LobbyMan_onpersonacreated on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3138 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268CE8(void* self, void* a1, int a2)
 {
     LobbyMan_onpersonacreated(a2 + D_004A3138.v);
@@ -345,6 +549,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268D10);
 extern sShortPad16 D_004A3140;
 extern "C" void LobbyMan_onpersonadeleted(int);
 
+/**
+ * Calls LobbyMan_onpersonadeleted on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3140 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268D10(void* self, void* a1, int a2)
 {
     LobbyMan_onpersonadeleted(a2 + D_004A3140.v);
@@ -357,6 +571,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268D38);
 extern sShortPad16 D_004A3148;
 extern "C" void LobbyMan_onroomselected(int);
 
+/**
+ * Calls LobbyMan_onroomselected on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3148 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268D38(void* self, void* a1, int a2)
 {
     LobbyMan_onroomselected(a2 + D_004A3148.v);
@@ -369,6 +593,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268D60);
 extern sShortPad16 D_004A3158;
 extern "C" void LobbyMan_onRoomCreated(int);
 
+/**
+ * Calls LobbyMan_onRoomCreated on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3158 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268D60(void* self, void* a1, int a2)
 {
     LobbyMan_onRoomCreated(a2 + D_004A3158.v);
@@ -381,6 +615,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268D88);
 extern sShortPad16 D_004A3160;
 extern "C" void LobbyMan_onPingReceived(int);
 
+/**
+ * Calls LobbyMan_onPingReceived on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3160 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268D88(void* self, void* a1, int a2)
 {
     LobbyMan_onPingReceived(a2 + D_004A3160.v);
@@ -393,6 +637,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268DB0);
 extern sShortPad16 D_004A3170;
 extern "C" void LobbyMan_onAbuseReportReceived(int);
 
+/**
+ * Calls LobbyMan_onAbuseReportReceived on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3170 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268DB0(void* self, void* a1, int a2)
 {
     LobbyMan_onAbuseReportReceived(a2 + D_004A3170.v);
@@ -405,6 +659,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268DD8);
 extern sShortPad16 D_004A3178;
 extern "C" void LobbyMan_onNewsRetrieved(int);
 
+/**
+ * Calls LobbyMan_onNewsRetrieved on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3178 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. The news request passes it to func_0025B608 as its reply callback.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268DD8(void* self, void* a1, int a2)
 {
     LobbyMan_onNewsRetrieved(a2 + D_004A3178.v);
@@ -417,6 +681,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268E00);
 extern sShortPad16 D_004A31B0;
 extern "C" void LobbyMan_onRanklistRetrieved(int);
 
+/**
+ * Calls LobbyMan_onRanklistRetrieved on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A31B0 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268E00(void* self, void* a1, int a2)
 {
     LobbyMan_onRanklistRetrieved(a2 + D_004A31B0.v);
@@ -429,6 +703,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268E28);
 extern sShortPad16 D_004A31B8;
 extern "C" void LobbyMan_onPlayerFound(int);
 
+/**
+ * Calls LobbyMan_onPlayerFound on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A31B8 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268E28(void* self, void* a1, int a2)
 {
     LobbyMan_onPlayerFound(a2 + D_004A31B8.v);
@@ -441,6 +725,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268E50);
 extern sShortPad16 D_004A31D0;
 extern "C" void func_0025EB00(int);
 
+/**
+ * Calls func_0025EB00 on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A31D0 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. func_0025EB00 handles the reply to another player's 'onln' info request.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268E50(void* self, void* a1, int a2)
 {
     func_0025EB00(a2 + D_004A31D0.v);
@@ -453,6 +747,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268E78);
 extern sShortPad16 D_004A3210;
 extern "C" void LobbyMan_onQuickMatchResponse(int);
 
+/**
+ * Calls LobbyMan_onQuickMatchResponse on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3210 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268E78(void* self, void* a1, int a2)
 {
     LobbyMan_onQuickMatchResponse(a2 + D_004A3210.v);
@@ -465,6 +769,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268EA0);
 extern sShortPad16 D_004A3248;
 extern "C" void LobbyMan_onchallengeresponse(int);
 
+/**
+ * Calls LobbyMan_onchallengeresponse on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3248 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268EA0(void* self, void* a1, int a2)
 {
     LobbyMan_onchallengeresponse(a2 + D_004A3248.v);
@@ -477,6 +791,17 @@ INCLUDE_ASM("bx/bxstringctor", func_00268EC8);
 extern sShortPad16 D_004A3268;
 void func_0025FC20(void* self);
 
+/**
+ * Calls func_0025FC20 on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3268 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. The private 'mesg' request passes it to func_003E8B10 as its reply callback;
+ * func_0025FC20 is empty.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268EC8(void* self, void* a1, char* a2)
 {
     func_0025FC20(a2 + D_004A3268.v);
@@ -489,6 +814,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268EF0);
 extern sShortPad16 D_004A3318;
 extern "C" void LobbyMan_onresultsreportresponse(int);
 
+/**
+ * Calls LobbyMan_onresultsreportresponse on the lobby manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3318 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the lobby manager the callback was registered with
+ */
 extern "C" void func_00268EF0(void* self, void* a1, int a2)
 {
     LobbyMan_onresultsreportresponse(a2 + D_004A3318.v);
@@ -501,6 +836,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268F18);
 extern sShortPad16 D_004A3340;
 extern "C" void BuddyMan_onconnect(int);
 
+/**
+ * Calls BuddyMan_onconnect on the buddy manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3340 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. func_00261248 (the buddy connect) registers it.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the buddy manager the callback was registered with
+ */
 extern "C" void func_00268F18(void* self, void* a1, int a2)
 {
     BuddyMan_onconnect(a2 + D_004A3340.v);
@@ -513,6 +858,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268F40);
 extern sShortPad16 D_004A3348;
 extern "C" void BuddyMan_onReceiveMessage(int);
 
+/**
+ * Calls BuddyMan_onReceiveMessage on the buddy manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3348 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. Registered when the BuddyApi handle is created (mpBuddyApi).
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the buddy manager the callback was registered with
+ */
 extern "C" void func_00268F40(void* self, void* a1, int a2)
 {
     BuddyMan_onReceiveMessage(a2 + D_004A3348.v);
@@ -525,6 +880,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268F68);
 extern sShortPad16 D_004A3350;
 extern "C" void BuddyMan_onrosterupdate(int);
 
+/**
+ * Calls BuddyMan_onrosterupdate on the buddy manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3350 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. BuddyMan_onconnect registers it on the roster it creates.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the buddy manager the callback was registered with
+ */
 extern "C" void func_00268F68(void* self, void* a1, int a2)
 {
     BuddyMan_onrosterupdate(a2 + D_004A3350.v);
@@ -537,6 +902,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268F90);
 extern sShortPad16 D_004A3380;
 extern "C" void BuddyMan_onBuddyDelete(int);
 
+/**
+ * Calls BuddyMan_onBuddyDelete on the buddy manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3380 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. func_00261EF8 and two other BuddyMan functions register it with the delete call.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the buddy manager the callback was registered with
+ */
 extern "C" void func_00268F90(void* self, void* a1, int a2)
 {
     BuddyMan_onBuddyDelete(a2 + D_004A3380.v);
@@ -549,6 +924,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268FB8);
 extern sShortPad16 D_004A3388;
 extern "C" void BuddyMan_onBuddyAdd(int);
 
+/**
+ * Calls BuddyMan_onBuddyAdd on the buddy manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A3388 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used. func_002620D8 registers it with the add call func_003F0E38.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the buddy manager the callback was registered with
+ */
 extern "C" void func_00268FB8(void* self, void* a1, int a2)
 {
     BuddyMan_onBuddyAdd(a2 + D_004A3388.v);
@@ -561,6 +946,16 @@ INCLUDE_ASM("bx/bxstringctor", func_00268FE0);
 extern sShortPad16 D_004A33A0;
 void BuddyMan_onBuddySend(void* self);
 
+/**
+ * Calls BuddyMan_onBuddySend on the buddy manager passed as the third argument (callback thunk).
+ *
+ * A functor thunk: the third argument is the object registered with the callback; D_004A33A0 holds the short
+ * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
+ * argument, and the first is not used.
+ *
+ * @param a1  the callback's message, passed through to the handler
+ * @param a2  the buddy manager the callback was registered with
+ */
 extern "C" void func_00268FE0(void* self, void* a1, char* a2)
 {
     BuddyMan_onBuddySend(a2 + D_004A33A0.v);
@@ -604,6 +999,17 @@ static inline sMsgListIter_00269008 sMsgList_00269008_insert(sMsgListIter_002690
     return tmp;
 }
 
+/**
+ * Handles the host echoing the client's character pick: takes the host's state, applies the character and posts an
+ * event.
+ *
+ * Stores @p a2 as the setup state (+0x0), applies @p a1 as this player's character (func_00264CF0) and pushes an 8-byte
+ * online event of kind 243 (vtable online_Event_vtbl, tag "NetEvent") onto LobbyMan's mEventList. func_002642B8 calls
+ * it on the client's setup manager (D_004A33CC) for a type-1 message while the state is below 7.
+ *
+ * @param a1  the character id from the message
+ * @param a2  the host's setup state from the message
+ */
 extern "C" void func_00269008(void* self, int a1, int a2)
 {
     int kind = 243;
@@ -655,6 +1061,17 @@ static inline sMsgListIter_002690C8 sMsgList_002690C8_insert(sMsgListIter_002690
     return tmp;
 }
 
+/**
+ * Handles the host echoing the client's character confirmation: takes the host's state, applies the character and posts
+ * an event.
+ *
+ * Stores @p a2 as the setup state (+0x0), applies @p a1 as this player's character (func_00264CF0) and pushes an 8-byte
+ * online event of kind 244 (vtable online_Event_vtbl, tag "NetEvent") onto LobbyMan's mEventList. func_002642B8 calls
+ * it on the client's setup manager (D_004A33CC) for a type-3 message while the state is below 7.
+ *
+ * @param a1  the character id from the message
+ * @param a2  the host's setup state from the message
+ */
 extern "C" void func_002690C8(void* self, int a1, int a2)
 {
     int kind = 244;
@@ -710,6 +1127,15 @@ struct sMsgSelf_00269188 {
     int f0;
 };
 
+/**
+ * Handles the host echoing the client's withdrawn confirmation: takes the host's state and posts an event.
+ *
+ * Stores @p a1 as the setup state (+0x0) and pushes an 8-byte online event of kind 247 (vtable online_Event_vtbl, tag
+ * "NetEvent") onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (D_004A33CC) for a
+ * type-5 message while the state is below 7.
+ *
+ * @param a1  the host's setup state (the message's second word)
+ */
 extern "C" void func_00269188(void* self, int a1)
 {
     int kind = 247;
@@ -760,6 +1186,19 @@ static inline sMsgListIter_00269240 sMsgList_00269240_insert(sMsgListIter_002692
     return tmp;
 }
 
+/**
+ * Handles the host's character pick on the client: takes the host's state, records the opponent's character and posts
+ * an event.
+ *
+ * Stores @p a2 as the setup state (+0x0), applies @p a1 and the attribute bytes @p a3 as the opponent's character
+ * (func_00264D80) and pushes an 8-byte online event of kind 243 (vtable online_Event_vtbl, tag "NetEvent") onto
+ * LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (D_004A33CC) for a type-0 message while
+ * the state is below 7.
+ *
+ * @param a1  the host's character id
+ * @param a2  the host's setup state
+ * @param a3  the host rider's 7 attribute bytes from the message
+ */
 extern "C" void func_00269240(void* self, int a1, int a2, void* a3)
 {
     int kind = 243;
@@ -811,6 +1250,18 @@ static inline sMsgListIter_00269300 sMsgList_00269300_insert(sMsgListIter_002693
     return tmp;
 }
 
+/**
+ * Handles the host's character confirmation on the client: takes the host's state, records the opponent's character and
+ * posts an event.
+ *
+ * Stores @p a2 as the setup state (+0x0), applies @p a1 as the opponent's character without attribute bytes
+ * (func_00264D80) and pushes an 8-byte online event of kind 245 (vtable online_Event_vtbl, tag "NetEvent") onto
+ * LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (D_004A33CC) for a type-2 message while
+ * the state is below 7.
+ *
+ * @param a1  the host's character id
+ * @param a2  the host's setup state
+ */
 extern "C" void func_00269300(void* self, int a1, int a2)
 {
     int kind = 245;
@@ -866,6 +1317,15 @@ struct sMsgSelf_002693C0 {
     int f0;
 };
 
+/**
+ * Handles the host withdrawing its confirmation on the client: takes the host's state and posts an event.
+ *
+ * Stores @p a1 as the setup state (+0x0) and pushes an 8-byte online event of kind 247 (vtable online_Event_vtbl, tag
+ * "NetEvent") onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (D_004A33CC) for a
+ * type-4 message while the state is below 7.
+ *
+ * @param a1  the host's setup state (the message's second word)
+ */
 extern "C" void func_002693C0(void* self, int a1)
 {
     int kind = 247;
@@ -922,6 +1382,16 @@ struct sMsg_00269478 {
     int fC;
 };
 
+/**
+ * Handles the client's highlighted bragging-rights row on the host: posts it as a lobby event.
+ *
+ * Pushes a 0x10-byte event of kind 251 (vtable D_00481150, tag "cSetupMan::Update"), the row at +0xC, with flag +0x8 =
+ * 1 onto LobbyMan's mEventList. The local senders (func_00265458, func_00265568) post the same event with flag 0.
+ * func_002642B8 calls it on the host's setup manager (D_004A33CC) for a type-7 message in the bragging-rights phase
+ * (state 7 or more).
+ *
+ * @param a1  the highlighted row from the message
+ */
 extern "C" void func_00269478(void* self, int a1)
 {
     sMsg_00269478* m = (sMsg_00269478*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
@@ -978,6 +1448,17 @@ struct sMsg_00269538 {
     int f10;
 };
 
+/**
+ * Handles a bragging-rights rule change from the client on the host: posts it as a lobby event.
+ *
+ * Pushes a 0x14-byte event of kind 252 (vtable D_00481130, tag "cSetupMan::Update"), the rule slot at +0xC and the
+ * value at +0x10, with flag +0x8 = 1 onto LobbyMan's mEventList. The local senders (func_00265458, func_00265568) post
+ * the same event with flag 0. func_002642B8 calls it on the host's setup manager (D_004A33CC) for a type-9 message in
+ * the bragging-rights phase (state 7 or more).
+ *
+ * @param a1  the rule slot
+ * @param a2  the new value
+ */
 extern "C" void func_00269538(void* self, int a1, int a2)
 {
     sMsg_00269538* m = (sMsg_00269538*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
@@ -1034,6 +1515,14 @@ struct sMsg_00269608 {
     int f8;
 };
 
+/**
+ * Handles the client locking its bragging-rights panel on the host: advances the state, answers and posts an event.
+ *
+ * Moves the state word from 6 or 7 to 8, or from 9 to 10, sends a type-11 message carrying the new state
+ * (func_00264E50) and pushes a 0xC-byte event of kind 253 (vtable D_004813E0, tag "cSetupMan::Update") with flag +0x8 =
+ * 1 onto LobbyMan's mEventList. func_002642B8 calls it on the host's setup manager (D_004A33CC) for a type-11 message
+ * in the bragging-rights phase (state 7 or more).
+ */
 extern "C" void func_00269608(void* self)
 {
     switch (*(int*)self)
@@ -1099,6 +1588,14 @@ struct sMsg_002696F8 {
     int f8;
 };
 
+/**
+ * Handles the client unlocking its bragging-rights panel on the host: steps the state back, answers and posts an event.
+ *
+ * Moves the state word from 8 back to 7, sends a type-12 message carrying the state (func_00264E50) and pushes a
+ * 0xC-byte event of kind 254 (vtable D_004813C0, tag "cSetupMan::Update") with flag +0x8 = 1 onto LobbyMan's
+ * mEventList. func_002642B8 calls it on the host's setup manager (D_004A33CC) for a type-13 message in the
+ * bragging-rights phase (state 7 or more).
+ */
 extern "C" void func_002696F8(void* self)
 {
     if (*(int*)self == 8)
@@ -1156,6 +1653,16 @@ struct sMsg_002697D0 {
     int fC;
 };
 
+/**
+ * Handles the host's highlighted bragging-rights row on the client: posts it as a lobby event.
+ *
+ * Pushes a 0x10-byte event of kind 251 (vtable D_00481150, tag "cSetupMan::Update"), the row at +0xC, with flag +0x8 =
+ * 1 onto LobbyMan's mEventList. The local senders (func_00265458, func_00265568) post the same event with flag 0.
+ * func_002642B8 calls it on the client's setup manager (D_004A33CC) for a type-6 message in the bragging-rights phase
+ * (state 7 or more).
+ *
+ * @param a1  the highlighted row from the message
+ */
 extern "C" void func_002697D0(void* self, int a1)
 {
     sMsg_002697D0* m = (sMsg_002697D0*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
@@ -1211,6 +1718,15 @@ struct sMsg_00269890 {
     int fC;
 };
 
+/**
+ * Handles a type-7 highlighted-row message on the client: posts it as a lobby event with flag 0.
+ *
+ * Pushes a 0x10-byte event of kind 251 (vtable D_00481150, tag "cSetupMan::Update"), the row at +0xC, with flag +0x8 =
+ * 0 onto LobbyMan's mEventList, like the local sender func_00265458. func_002642B8 calls it on the client's setup
+ * manager (D_004A33CC) for a type-7 message in the bragging-rights phase (state 7 or more).
+ *
+ * @param a1  the highlighted row from the message
+ */
 extern "C" void func_00269890(void* self, int a1)
 {
     sMsg_00269890* m = (sMsg_00269890*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
@@ -1267,6 +1783,17 @@ struct sMsg_00269948 {
     int f10;
 };
 
+/**
+ * Handles a bragging-rights rule change from the host on the client: posts it as a lobby event.
+ *
+ * Pushes a 0x14-byte event of kind 252 (vtable D_00481130, tag "cSetupMan::Update"), the rule slot at +0xC and the
+ * value at +0x10, with flag +0x8 = 1 onto LobbyMan's mEventList. The local senders (func_00265458, func_00265568) post
+ * the same event with flag 0. func_002642B8 calls it on the client's setup manager (D_004A33CC) for a type-8 message in
+ * the bragging-rights phase (state 7 or more).
+ *
+ * @param a1  the rule slot
+ * @param a2  the new value
+ */
 extern "C" void func_00269948(void* self, int a1, int a2)
 {
     sMsg_00269948* m = (sMsg_00269948*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
@@ -1324,6 +1851,17 @@ struct sMsg_00269A18 {
     int f10;
 };
 
+/**
+ * Handles a type-9 rule-change message on the client: posts it as a lobby event with flag 0.
+ *
+ * Pushes a 0x14-byte event of kind 252 (vtable D_00481130, tag "cSetupMan::Update"), the rule slot at +0xC and the
+ * value at +0x10, with flag +0x8 = 0 onto LobbyMan's mEventList, like the local sender func_00265568. func_002642B8
+ * calls it on the client's setup manager (D_004A33CC) for a type-9 message in the bragging-rights phase (state 7 or
+ * more).
+ *
+ * @param a1  the rule slot
+ * @param a2  the new value
+ */
 extern "C" void func_00269A18(void* self, int a1, int a2)
 {
     sMsg_00269A18* m = (sMsg_00269A18*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
@@ -1379,6 +1917,15 @@ struct sMsg_00269AE0 {
     int f8;
 };
 
+/**
+ * Handles the host locking its bragging-rights panel on the client: takes the host's state and posts an event.
+ *
+ * Stores @p a1 as the setup state (+0x0) and pushes a 0xC-byte event of kind 253 (vtable D_004813E0, tag
+ * "cSetupMan::Update") with flag +0x8 = 1 onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup
+ * manager (D_004A33CC) for a type-10 message in the bragging-rights phase (state 7 or more).
+ *
+ * @param a1  the host's setup state from the message
+ */
 extern "C" void func_00269AE0(void* self, int a1)
 {
     *(int*)self = a1;
@@ -1433,6 +1980,16 @@ struct sMsg_00269B90 {
     int f8;
 };
 
+/**
+ * Handles the host's answer to the client's lock (type 11, sent by func_00269608): takes the host's state and posts an
+ * event.
+ *
+ * Stores @p a1 as the setup state (+0x0) and pushes a 0xC-byte event of kind 253 (vtable D_004813E0, tag
+ * "cSetupMan::Update") with flag +0x8 = 0 onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup
+ * manager (D_004A33CC) for a type-11 message in the bragging-rights phase (state 7 or more).
+ *
+ * @param a1  the host's setup state from the message
+ */
 extern "C" void func_00269B90(void* self, int a1)
 {
     *(int*)self = a1;
@@ -1487,6 +2044,16 @@ struct sMsg_00269C40 {
     int f8;
 };
 
+/**
+ * Handles a type-12 unlock message from the host on the client: takes the host's state and posts an event.
+ *
+ * Type 12 comes from the host unlocking its own panel (func_00265700) or answering the client's unlock (func_002696F8).
+ * Stores @p a1 as the setup state (+0x0) and pushes a 0xC-byte event of kind 254 (vtable D_004813C0, tag
+ * "cSetupMan::Update") with flag +0x8 = 1 onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup
+ * manager (D_004A33CC) for a type-12 message in the bragging-rights phase (state 7 or more).
+ *
+ * @param a1  the host's setup state from the message
+ */
 extern "C" void func_00269C40(void* self, int a1)
 {
     *(int*)self = a1;
@@ -1541,6 +2108,15 @@ struct sMsg_00269CF0 {
     int f8;
 };
 
+/**
+ * Handles a type-13 unlock message on the client: takes the state from it and posts an event with flag 0.
+ *
+ * Stores @p a1 as the setup state (+0x0) and pushes a 0xC-byte event of kind 254 (vtable D_004813C0, tag
+ * "cSetupMan::Update") with flag +0x8 = 0 onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup
+ * manager (D_004A33CC) for a type-13 message in the bragging-rights phase (state 7 or more).
+ *
+ * @param a1  the setup state from the message
+ */
 extern "C" void func_00269CF0(void* self, int a1)
 {
     *(int*)self = a1;
@@ -1558,6 +2134,13 @@ extern "C" void* online_Event__Event(void* self);
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_00269DA0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys a bragging-rights lock event (kind 253) through the base online event destructor online_Event__Event.
+ *
+ * Slot 1 of D_004813E0. The destructor flags pass through untouched in the second argument register.
+ *
+ * @return no meaningful value (online_Event__Event returns nothing)
+ */
 void* func_00269DA0(void* self)
 {
     return online_Event__Event(self);
@@ -1577,6 +2160,13 @@ struct sNode00269DC0 {
     int value;
 };
 
+/**
+ * Returns a heap copy of a bragging-rights lock event (kind 253, vtable D_004813E0).
+ *
+ * Allocates 0xC bytes with the "NetEvent" tag and copies the flag word at +0x8. Slot 2 of D_004813E0.
+ *
+ * @return the new event
+ */
 extern "C" sNode00269DC0* func_00269DC0(void* self)
 {
     sNode00269DC0* n = (sNode00269DC0*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
@@ -1591,6 +2181,13 @@ extern "C" sNode00269DC0* func_00269DC0(void* self)
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_00269E20__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys a bragging-rights unlock event (kind 254) through the base online event destructor online_Event__Event.
+ *
+ * Slot 1 of D_004813C0. The destructor flags pass through untouched in the second argument register.
+ *
+ * @return no meaningful value (online_Event__Event returns nothing)
+ */
 void* func_00269E20(void* self)
 {
     return online_Event__Event(self);
@@ -1610,6 +2207,13 @@ struct sNode00269E40 {
     int value;
 };
 
+/**
+ * Returns a heap copy of a bragging-rights unlock event (kind 254, vtable D_004813C0).
+ *
+ * Allocates 0xC bytes with the "NetEvent" tag and copies the flag word at +0x8. Slot 2 of D_004813C0.
+ *
+ * @return the new event
+ */
 extern "C" sNode00269E40* func_00269E40(void* self)
 {
     sNode00269E40* n = (sNode00269E40*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
@@ -1626,6 +2230,13 @@ extern "C" void* func_00267468(int, int);
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_00269EA0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the unit's static constructor func_00267468 (initialize 1, priority 0xFFFF).
+ *
+ * The argument is not read.
+ *
+ * @return no meaningful value (func_00267468 returns nothing)
+ */
 void* func_00269EA0(void* self)
 {
     return func_00267468(1, 0xffff);
@@ -1753,6 +2364,16 @@ struct sTable_0026A000 {
     sEntry_0026A000* entries;
 };
 
+/**
+ * Returns whether a reset is allowed at position @p x along an AI path: 0 inside any event of type 13, else 1.
+ *
+ * Walks the path's events (count +0x0, 16-byte events at +0x4) for one of type 13 whose range [+0x8, +0xC] contains @p
+ * x. Nothing in the C calls it.
+ *
+ * @param table  the AI path
+ * @param x  the position along the path
+ * @return 1 when a reset is allowed, else 0
+ */
 extern "C" int func_0026A000(sTable_0026A000* table, float x) {
     int i;
     for (i = 0; i < table->count; i++) {
@@ -1884,6 +2505,15 @@ struct sTable_0026A138 {
     sEntry_0026A138* entries;
 };
 
+/**
+ * Returns the start position (+0x8) of a track path's first type-1 event, or -1 when it has none.
+ *
+ * Walks the path's events (count +0x0, 16-byte events at +0x4). The AI uses it to find the first track path that has
+ * one.
+ *
+ * @param table  the track path
+ * @return the position along the path, or -1.0
+ */
 extern "C" float func_0026A138(sTable_0026A138* table)
 {
     int i;
@@ -1920,6 +2550,19 @@ struct sBXStr_26A180
     void* vt;           // 0x34
 };
 
+/**
+ * Initialises a path from its serialized data and returns how many bytes it read.
+ *
+ * Calls the path's virtual slot 3 (defaults), then for each of the data's chunks passes (data, id, size) to virtual
+ * slot 4 and skips the chunk. Then reads the node count (+0x8) and event count (+0x0), the start point (+0xC) and the
+ * bounds (+0x1C, +0x28) with func_0026BA48, and converts the 16-byte nodes (+0x18, func_0026A338) and events (+0x4,
+ * func_0026A378) in place in the data.
+ *
+ * The path-system loaders (cPathSys_loadTrackPaths, cPathSys_loadAIPaths) call it for each path.
+ *
+ * @param src  the serialized path data
+ * @return the number of bytes read
+ */
 extern "C" int func_0026A180(sBXStr_26A180* self, char* src)
 {
     char* start = src;
@@ -1976,6 +2619,14 @@ extern "C" void func_0026BA48(void* p, void* q);
 // PORT: func_0026BA88 takes (dst, src); the unit declares it with one arg
 void func_0026BA88_2(void* dst, void* src) __asm__("func_0026BA88");
 
+/**
+ * Reads one 16-byte path node: its direction (func_0026BA48) and its length at +0xC (func_0026BA88).
+ *
+ * func_0026A180 calls it with the same address for @p src and @p dst, converting the node in place.
+ *
+ * @param src  the node in the serialized data
+ * @param dst  the node to fill
+ */
 extern "C" void func_0026A338(void* self, void* src, void* dst)
 {
     func_0026BA48(dst, src);
@@ -1990,6 +2641,16 @@ INCLUDE_ASM("bx/bxstringctor", func_0026A378);
 void pathREAD_tInt32_K2(void* dst, void* src) __asm__("pathREAD_tInt32");
 extern int D_004453D0[];
 
+/**
+ * Reads one 16-byte path event: its type code, argument and start and end positions.
+ *
+ * The type code is looked up in the 21 codes of D_004453D0 and stored as its index (0 when not found); then the
+ * argument (+0x4) and the two floats (+0x8, +0xC, func_0026BA88) follow. func_0026A180 converts the events in place
+ * with it.
+ *
+ * @param src  the event in the serialized data
+ * @param dst  the event to fill
+ */
 extern "C" void func_0026A378(void* self, char* src, int* dst)
 {
     int key;
@@ -2124,6 +2785,21 @@ static inline float bxClamp_A428(float v, float lo, float hi)
     return lo <= v ? v <? hi : lo;
 }
 
+/**
+ * Finds the point of a path nearest to @p p and returns its position along the path.
+ *
+ * Walks the path's segments from its start (+0xC): for each node (+0x18, count +0x8) it projects @p p onto the segment,
+ * clamped to its length, and keeps the closest point. With @p flat only X and Y count. The best point goes to @p outPos
+ * and the horizontal (XY) distance to it, square-rooted, to @p outDist, even when the comparison was in 3D.
+ *
+ * The AI (ai/computer) uses it on track and AI paths, for example when the rider is in a pipe jump.
+ *
+ * @param p  the point to project
+ * @param outPos  receives the nearest point on the path
+ * @param outDist  receives the XY distance to it
+ * @param flat  non-zero to measure in X and Y only
+ * @return the position along the path of the nearest point
+ */
 extern "C" float func_0026A428(sBXPath_A428* self, const sBXVec4_A428& p, sBXVec4_A428* outPos,
                                float* outDist, int flat)
 {
@@ -2290,6 +2966,24 @@ struct sBXPathCache_A638 {
     int idx;           // 0x14
 };
 
+/**
+ * Finds the point of a path nearest to @p p, starting from a cached segment, and returns its position along the path.
+ *
+ * Walks the path's segments from its start (+0xC): for each node (+0x18, count +0x8) it projects @p p onto the segment,
+ * clamped to its length, and keeps the closest point. With @p flat only X and Y count. The best point goes to @p outPos
+ * and the horizontal (XY) distance to it, square-rooted, to @p outDist, even when the comparison was in 3D.
+ *
+ * When @p cache holds a segment (+0x14 >= 0) the walk starts there from its saved start point (+0x0) and distance
+ * (+0x10), gives up 3000 units further on, and stops at the first improvement whose projection did not need clamping.
+ * Each improvement is written back to @p cache. The AI calls it every update with the rider's path hint.
+ *
+ * @param p  the point to project
+ * @param outPos  receives the nearest point on the path
+ * @param outDist  receives the XY distance to it
+ * @param cache  the search hint: start point, distance and segment index of the last result
+ * @param flat  non-zero to measure in X and Y only
+ * @return the position along the path of the nearest point
+ */
 extern "C" float func_0026A638(sBXPath_A638* self, const sBXVec4_A638& p, sBXVec4_A638* outPos,
                                float* outDist, sBXPathCache_A638* cache, int flat)
 {
@@ -2410,6 +3104,16 @@ struct sTable_0026A920 {
     sEntry_0026A920* entries;
 };
 
+/**
+ * Returns the path's first event whose type (+0x0) is @p firstKey and argument (+0x4) is @p secondKey.
+ *
+ * Walks the 16-byte events at +0x4 (count +0x0). Nothing in the C calls it.
+ *
+ * @param table  the path
+ * @param firstKey  the event type
+ * @param secondKey  the event argument
+ * @return the event, or null
+ */
 extern "C" sEntry_0026A920* func_0026A920(sTable_0026A920* table, int firstKey, int secondKey)
 {
     int i = 0;
@@ -2435,6 +3139,15 @@ struct sTable_0026A970 {
     sEntry_0026A970* entries;
 };
 
+/**
+ * Returns the path's first event whose type (+0x0) is @p key.
+ *
+ * Walks the 16-byte events at +0x4 (count +0x0). Nothing in the C calls it.
+ *
+ * @param table  the path
+ * @param key  the event type
+ * @return the event, or null
+ */
 extern "C" sEntry_0026A970* func_0026A970(sTable_0026A970* table, int key)
 {
     int i = 0;
@@ -2458,7 +3171,14 @@ struct sBXBox {
     float max[3]; // 0x28
 };
 
-// Largest per-axis distance from point p to the box.
+/**
+ * Returns how far a point is outside a path's bounding box: the largest per-axis distance, 0 inside.
+ *
+ * The box is +0x1C (minimum) to +0x28 (maximum). cPathSys_getNearAIPaths and func_0026B178 rank paths with it.
+ *
+ * @param point  the point (x, y, z)
+ * @return the largest of the X, Y and Z distances to the box
+ */
 extern "C" float func_0026A9B0(sBXBox* self, float* point)
 {
     float dx = 0.0f;
@@ -2702,7 +3422,15 @@ struct sBXBox2 {
     float max[3]; // 0x28
 };
 
-// Whether the XY rectangle [lo, hi] overlaps the box's XY extent.
+/**
+ * Returns whether the XY rectangle [@p lo, @p hi] overlaps the XY extent of a path's bounding box (+0x1C to +0x28).
+ *
+ * Z is ignored. Nothing in the C calls it.
+ *
+ * @param lo  the rectangle minimum (x, y)
+ * @param hi  the rectangle maximum (x, y)
+ * @return 1 when they overlap, else 0
+ */
 extern "C" int func_0026AD00(sBXBox2* self, float* lo, float* hi)
 {
     if (hi[0] < self->min[0])
@@ -2722,6 +3450,15 @@ INCLUDE_ASM("bx/bxstringctor", func_0026AD70);
 #ifdef SKIP_ASM
 extern "C" void func_0026ADF0(void* self);
 
+/**
+ * Installs path data that is already in memory: stores it (+0x48), marks the path file loaded (+0x4C) and parses it
+ * (func_0026ADF0).
+ *
+ * cAI_swaploadInjectedPathFile calls it on gPaths after cPathSys_purgePaths.
+ *
+ * @param data  the path data
+ * @return 1
+ */
 extern "C" int func_0026AD70(void* self, int data)
 {
     *(int*)((char*)self + 0x48) = data;
@@ -2734,6 +3471,11 @@ extern "C" int func_0026AD70(void* self, int data)
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026ADA0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (empty body).
+ *
+ * cAI_removeInjectedFile calls it on gPaths when a chunk with injected AI paths is unloaded.
+ */
 void func_0026ADA0(void* self)
 {
 }
@@ -2744,6 +3486,14 @@ INCLUDE_ASM("bx/bxstringctor", func_0026ADA8);
 #ifdef SKIP_ASM
 extern "C" int FILE_loadpack(int, int);
 
+/**
+ * Loads a path file: stores the pack (FILE_loadpack) at +0x48, marks it loaded (+0x4C) and parses it (func_0026ADF0).
+ *
+ * cAI_swaploadPathFile calls it on gPaths after cPathSys_purgePaths; func_0026AE70 calls it when no file is loaded yet.
+ *
+ * @param pathSys  the path system
+ * @param name  the path file name (passed as an int)
+ */
 extern "C" void func_0026ADA8(void *pathSys, int name) {
     (*(int *)((char*)(pathSys) + (0x48))) = FILE_loadpack(name, 0);
     (*(int *)((char*)(pathSys) + (0x4C))) = 1;
@@ -2753,6 +3503,14 @@ extern "C" void func_0026ADA8(void *pathSys, int name) {
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026ADE8);
 #ifdef SKIP_ASM
+/**
+ * Returns the path system's loaded flag (+0x4C).
+ *
+ * func_0026AD70 and func_0026ADA8 set it.
+ *
+ * @param pathSys  the path system
+ * @return non-zero when a path file is loaded
+ */
 extern "C" int func_0026ADE8(void *pathSys) {
     return (*(int *)((char*)(pathSys) + (0x4C)));
 }
@@ -2768,6 +3526,13 @@ extern "C" int cPathSys_loadTrackPaths(void* self, char* p);
 extern "C" int func_0026B7D8(void* self, char* p);
 extern "C" void func_0026B880(void* self, char* p);
 
+/**
+ * Parses the loaded path data (+0x48) into the path system's startpoints, AI paths, track paths and checkpoints.
+ *
+ * Clears the startpoint, AI path and track path counts (+0x0, +0x8, +0x10), skips a header word, then runs
+ * cPathSys_loadAIPaths, cPathSys_loadTrackPaths, func_0026B7D8 and func_0026B880 in turn, each starting where the
+ * previous one stopped. func_0026AD70 and func_0026ADA8 call it.
+ */
 extern "C" void func_0026ADF0(void* self)
 {
     int header;
@@ -2795,6 +3560,15 @@ void pathREAD_tInt32_3(void* dst, void* src) __asm__("pathREAD_tInt32");
 extern "C" int cPathSys_loadAIPaths(void* self, char* p);
 extern "C" int cPathSys_loadTrackPaths(void* self, char* p);
 
+/**
+ * Loads a further path file and parses only its AI and track paths into the path system.
+ *
+ * Frees the current data (+0x48) when there is one; when there is none it first loads the same file with func_0026ADA8,
+ * whose buffer is then dropped without being freed. Then it loads the file again with FILE_loadpack, stores it at
+ * +0x48, skips a header word and runs cPathSys_loadAIPaths and cPathSys_loadTrackPaths. Nothing in the C calls it.
+ *
+ * @param name  the path file name (passed as an int)
+ */
 extern "C" void func_0026AE70(void* self, int name)
 {
     int header;
@@ -2843,6 +3617,14 @@ extern "C" void cPathSys_purgePaths(void* self)
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026AF70);
 #ifdef SKIP_ASM
+/**
+ * Returns track path @p pathIndex: +0x14 plus pathIndex * 0x3C.
+ *
+ * The AI stores the result as the rider's track path (+0xAB4).
+ *
+ * @param pathIndex  the track path index
+ * @return the track path
+ */
 extern "C" int func_0026AF70(void* self, int pathIndex)
 {
     return *(int*)((char*)self + 0x14) + pathIndex * 0x3c;
@@ -2852,6 +3634,14 @@ extern "C" int func_0026AF70(void* self, int pathIndex)
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_0026AF88);
 #ifdef SKIP_ASM
+/**
+ * Returns AI path @p index: +0xC plus index * 0x40.
+ *
+ * The AI stores the result as the rider's AI path (+0xAB8).
+ *
+ * @param index  the AI path index
+ * @return the AI path
+ */
 extern "C" int func_0026AF88(void* self, int index)
 {
     return *(int*)((char*)self + 0xc) + (index << 6);
@@ -2984,7 +3774,18 @@ static inline int minB178(int a, int b)
     return a < b ? a : b;
 }
 
-// Collects up to max items nearest to pos (items containing it first), nearest first; returns how many.
+/**
+ * Collects up to @p max track paths nearest to @p pos into @p out, nearest first, and returns how many.
+ *
+ * Paths whose box contains the point (func_0026A9B0 gives 0) come first, in index order; the rest follow by increasing
+ * func_0026A9B0 distance. The paths are the 0x3C-byte entries at +0x14 (count +0x10); the distances live in a fixed
+ * 52-entry stack array, so more than 52 paths would overflow it.
+ *
+ * @param pos  the point
+ * @param out  receives the path pointers
+ * @param max  the most paths to return
+ * @return the number of paths written
+ */
 extern "C" int func_0026B178(sPathList_B178* self, float* pos, sPathItem_B178** out, int max)
 {
     float dist[52];

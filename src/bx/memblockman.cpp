@@ -115,6 +115,15 @@ extern "C" int func_0031A130(void* self);
 void func_0031FBB8(void* list, void* item);
 extern char TheDynamicMemMan[];
 
+/**
+ * Returns the usable size of a block: its pool's block size, or for a heap block its usable size in the dynamic heap.
+ *
+ * func_0031A130 gives 8 to 512 for an address inside one of the cMemBlockMan pools; otherwise func_0031FBB8 measures
+ * the chunk in TheDynamicMemMan. The C declares it void, but the size is left in the return register: func_002525F8
+ * returns it under the cMemMan mutex and cMemMan_internalResizeBlock uses it for the old block.
+ *
+ * @return the block size (declared void)
+ */
 extern "C" void func_00319B98(void* self)
 {
     if (func_0031A130(self) == 0) {
@@ -195,6 +204,11 @@ extern "C" void cMemMan_validate(void)
 //100%
 INCLUDE_ASM("bx/memblockman", func_00319D08);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (empty body).
+ *
+ * Follows cMemMan_validate in the unit. Nothing calls it.
+ */
 extern "C" void func_00319D08(void) {
 
 }
@@ -203,6 +217,11 @@ extern "C" void func_00319D08(void) {
 //100%
 INCLUDE_ASM("bx/memblockman", func_00319D10__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (empty body).
+ *
+ * cAppMan_mainLoop calls it with no arguments right after func_00319D18(1, 1) when it swaps in a new module.
+ */
 void func_00319D10(void* self)
 {
 }
@@ -211,6 +230,13 @@ void func_00319D10(void* self)
 //100%
 INCLUDE_ASM("bx/memblockman", func_00319D18__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0 (stub).
+ *
+ * cAppMan_mainLoop calls it with (1, 1) when it swaps in a new module, then calls func_00319D10.
+ *
+ * @return 0
+ */
 int func_00319D18(void* self)
 {
     return 0;

@@ -2179,6 +2179,16 @@ int cBELibrary_getCharacterID(int);
 
 extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
 
+/**
+ * Sets a rider's stability stat (the seventh entry of its character's stat record) in the current-stat table.
+ *
+ * Looks up the rider's profile with cBELibrary_getProfileIndex() and character with cBELibrary_getCharacterID(), then
+ * stores @p value as a byte in D_00535538[profile][character][6] (On Tour tBEStatDB.cStability).
+ * cBEStatInterface_setStatLevel() calls it with level * 5.
+ *
+ * @param rider  race rider slot (On Tour iRider)
+ * @param value  new stat value (On Tour var)
+ */
 extern "C" void func_00148880(void* self, int rider, int value)
 {
     int a = cBELibrary_getProfileIndex(rider);
@@ -2196,6 +2206,15 @@ int cBELibrary_getCharacterID(int);
 
 extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
 
+/**
+ * Returns a rider's stability stat (the seventh entry of its character's stat record) from the current-stat table.
+ *
+ * Reads D_00535538[profile][character][6] (On Tour tBEStatDB.cStability), with the profile from
+ * cBELibrary_getProfileIndex() and the character from cBELibrary_getCharacterID().
+ *
+ * @param rider  race rider slot (On Tour iRider)
+ * @return the stability stat (5 per level)
+ */
 extern "C" signed char func_001488F0(void* self, int rider)
 {
     int a = cBELibrary_getProfileIndex(rider);
@@ -2215,6 +2234,17 @@ extern "C" signed char func_00148750(void* self, int rider);
 extern "C" signed char func_00148820(void* self, int rider);
 extern "C" signed char func_001488F0(void* self, int rider);
 
+/**
+ * Returns a rider's overall stat level: the average of its seven stat levels, at least 1.
+ *
+ * Reads the speed, acceleration, trick, edging, spin, toughness and stability stats (func_00148410, func_001484E0,
+ * func_001485B0, func_00148680, func_00148750, func_00148820, func_001488F0), divides each by 5 (5 stat points per
+ * level), sums the seven levels and divides by 7, rounding down. The inverse of cBEStatInterface_setStatLevel(), which
+ * stores level * 5 in each stat. The front end shows it as the rider's level (ovstatelodge, festateloadhint).
+ *
+ * @param rider  race rider slot (On Tour iRider)
+ * @return the average level, or 1 when it would be 0 or less
+ */
 extern "C" int func_00148950(void* self, int rider)
 {
     int statValue;
@@ -2278,6 +2308,16 @@ struct sPlayerStatRowView_00148B50 {
 };
 extern sPlayerStatRowView_00148B50 D_00535538_view00148B50[] __asm__("D_00535538");
 
+/**
+ * Stores a profile's speed stat for one character (byte 0 of the character's stat record) in the current-stat table.
+ *
+ * Writes @p value to D_00535538[@p a1][@p a2][0] (On Tour tBEStatDB.cSpeed). Unlike the rider-slot setters, it takes
+ * the profile and the character directly.
+ *
+ * @param a1  profile index (On Tour iHuman)
+ * @param value  new stat value (On Tour var)
+ * @param a2  character ID (On Tour charType)
+ */
 extern "C" void func_00148B50(void* self, int a1, int value, int a2)
 {
     D_00535538_view00148B50[a1].e[a2].v[0] = value;
@@ -2295,6 +2335,15 @@ struct sPlayerStatRow {
 };
 extern sPlayerStatRow D_00535538[];
 
+/**
+ * Returns a profile's speed stat for one character (byte 0 of the character's stat record) from the current-stat table.
+ *
+ * Reads D_00535538[@p a1][@p a2][0] (On Tour tBEStatDB.cSpeed).
+ *
+ * @param a1  profile index (On Tour iHuman)
+ * @param a2  character ID (On Tour charType)
+ * @return the speed stat (5 per level)
+ */
 extern "C" signed char func_00148B78(void* self, int a1, int a2)
 {
     return D_00535538[a1].e[a2].v[0];
@@ -2304,6 +2353,17 @@ extern "C" signed char func_00148B78(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148BA0);
 #ifdef SKIP_ASM
+/**
+ * Stores a profile's acceleration stat for one character (byte 1 of the character's stat record) in the current-stat
+ * table.
+ *
+ * Writes @p value to D_00535538[@p a1][@p a2][1] (On Tour tBEStatDB.cAccel). Unlike the rider-slot setters, it takes
+ * the profile and the character directly.
+ *
+ * @param a1  profile index (On Tour iHuman)
+ * @param value  new stat value (On Tour var)
+ * @param a2  character ID (On Tour charType)
+ */
 extern "C" void func_00148BA0(void* self, int a1, int value, int a2)
 {
     D_00535538[a1].e[a2].v[1] = value;
@@ -2313,6 +2373,16 @@ extern "C" void func_00148BA0(void* self, int a1, int value, int a2)
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148BC8);
 #ifdef SKIP_ASM
+/**
+ * Returns a profile's acceleration stat for one character (byte 1 of the character's stat record) from the current-stat
+ * table.
+ *
+ * Reads D_00535538[@p a1][@p a2][1] (On Tour tBEStatDB.cAccel).
+ *
+ * @param a1  profile index (On Tour iHuman)
+ * @param a2  character ID (On Tour charType)
+ * @return the acceleration stat (5 per level)
+ */
 extern "C" signed char func_00148BC8(void* self, int a1, int a2)
 {
     return D_00535538[a1].e[a2].v[1];
@@ -2322,6 +2392,16 @@ extern "C" signed char func_00148BC8(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148BF0);
 #ifdef SKIP_ASM
+/**
+ * Stores a profile's trick stat for one character (byte 2 of the character's stat record) in the current-stat table.
+ *
+ * Writes @p value to D_00535538[@p a1][@p a2][2] (On Tour tBEStatDB.cTrick). Unlike the rider-slot setters, it takes
+ * the profile and the character directly.
+ *
+ * @param a1  profile index (On Tour iHuman)
+ * @param value  new stat value (On Tour var)
+ * @param a2  character ID (On Tour charType)
+ */
 extern "C" void func_00148BF0(void* self, int a1, int value, int a2)
 {
     D_00535538[a1].e[a2].v[2] = value;
@@ -2331,6 +2411,15 @@ extern "C" void func_00148BF0(void* self, int a1, int value, int a2)
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148C18);
 #ifdef SKIP_ASM
+/**
+ * Returns a profile's trick stat for one character (byte 2 of the character's stat record) from the current-stat table.
+ *
+ * Reads D_00535538[@p a1][@p a2][2] (On Tour tBEStatDB.cTrick).
+ *
+ * @param a1  profile index (On Tour iHuman)
+ * @param a2  character ID (On Tour charType)
+ * @return the trick stat (5 per level)
+ */
 extern "C" signed char func_00148C18(void* self, int a1, int a2)
 {
     return D_00535538[a1].e[a2].v[2];
@@ -2340,6 +2429,16 @@ extern "C" signed char func_00148C18(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148C40);
 #ifdef SKIP_ASM
+/**
+ * Stores a profile's edging stat for one character (byte 3 of the character's stat record) in the current-stat table.
+ *
+ * Writes @p value to D_00535538[@p a1][@p a2][3] (On Tour tBEStatDB.cEdging). Unlike the rider-slot setters, it takes
+ * the profile and the character directly.
+ *
+ * @param a1  profile index (On Tour iHuman)
+ * @param value  new stat value (On Tour var)
+ * @param a2  character ID (On Tour charType)
+ */
 extern "C" void func_00148C40(void* self, int a1, int value, int a2)
 {
     D_00535538[a1].e[a2].v[3] = value;
@@ -2349,6 +2448,16 @@ extern "C" void func_00148C40(void* self, int a1, int value, int a2)
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148C68);
 #ifdef SKIP_ASM
+/**
+ * Returns a profile's edging stat for one character (byte 3 of the character's stat record) from the current-stat
+ * table.
+ *
+ * Reads D_00535538[@p a1][@p a2][3] (On Tour tBEStatDB.cEdging).
+ *
+ * @param a1  profile index (On Tour iHuman)
+ * @param a2  character ID (On Tour charType)
+ * @return the edging stat (5 per level)
+ */
 extern "C" signed char func_00148C68(void* self, int a1, int a2)
 {
     return D_00535538[a1].e[a2].v[3];
@@ -2358,6 +2467,16 @@ extern "C" signed char func_00148C68(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148C90);
 #ifdef SKIP_ASM
+/**
+ * Stores a profile's spin stat for one character (byte 4 of the character's stat record) in the current-stat table.
+ *
+ * Writes @p value to D_00535538[@p a1][@p a2][4] (On Tour tBEStatDB.cSpin). Unlike the rider-slot setters, it takes the
+ * profile and the character directly.
+ *
+ * @param a1  profile index (On Tour iHuman)
+ * @param value  new stat value (On Tour var)
+ * @param a2  character ID (On Tour charType)
+ */
 extern "C" void func_00148C90(void* self, int a1, int value, int a2)
 {
     D_00535538[a1].e[a2].v[4] = value;
@@ -2367,6 +2486,15 @@ extern "C" void func_00148C90(void* self, int a1, int value, int a2)
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148CB8);
 #ifdef SKIP_ASM
+/**
+ * Returns a profile's spin stat for one character (byte 4 of the character's stat record) from the current-stat table.
+ *
+ * Reads D_00535538[@p a1][@p a2][4] (On Tour tBEStatDB.cSpin).
+ *
+ * @param a1  profile index (On Tour iHuman)
+ * @param a2  character ID (On Tour charType)
+ * @return the spin stat (5 per level)
+ */
 extern "C" signed char func_00148CB8(void* self, int a1, int a2)
 {
     return D_00535538[a1].e[a2].v[4];
@@ -2376,6 +2504,17 @@ extern "C" signed char func_00148CB8(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148CE0);
 #ifdef SKIP_ASM
+/**
+ * Stores a profile's toughness stat for one character (byte 5 of the character's stat record) in the current-stat
+ * table.
+ *
+ * Writes @p value to D_00535538[@p a1][@p a2][5] (On Tour tBEStatDB.cToughness). Unlike the rider-slot setters, it
+ * takes the profile and the character directly.
+ *
+ * @param a1  profile index (On Tour iHuman)
+ * @param value  new stat value (On Tour var)
+ * @param a2  character ID (On Tour charType)
+ */
 extern "C" void func_00148CE0(void* self, int a1, int value, int a2)
 {
     D_00535538[a1].e[a2].v[5] = value;
@@ -2385,6 +2524,16 @@ extern "C" void func_00148CE0(void* self, int a1, int value, int a2)
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148D08);
 #ifdef SKIP_ASM
+/**
+ * Returns a profile's toughness stat for one character (byte 5 of the character's stat record) from the current-stat
+ * table.
+ *
+ * Reads D_00535538[@p a1][@p a2][5] (On Tour tBEStatDB.cToughness).
+ *
+ * @param a1  profile index (On Tour iHuman)
+ * @param a2  character ID (On Tour charType)
+ * @return the toughness stat (5 per level)
+ */
 extern "C" signed char func_00148D08(void* self, int a1, int a2)
 {
     return D_00535538[a1].e[a2].v[5];
@@ -2394,6 +2543,17 @@ extern "C" signed char func_00148D08(void* self, int a1, int a2)
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148D30);
 #ifdef SKIP_ASM
+/**
+ * Stores a profile's stability stat for one character (byte 6 of the character's stat record) in the current-stat
+ * table.
+ *
+ * Writes @p value to D_00535538[@p a1][@p a2][6] (On Tour tBEStatDB.cStability). Unlike the rider-slot setters, it
+ * takes the profile and the character directly.
+ *
+ * @param a1  profile index (On Tour iHuman)
+ * @param value  new stat value (On Tour var)
+ * @param a2  character ID (On Tour charType)
+ */
 extern "C" void func_00148D30(void* self, int a1, int value, int a2)
 {
     D_00535538[a1].e[a2].v[6] = value;
@@ -2403,6 +2563,16 @@ extern "C" void func_00148D30(void* self, int a1, int value, int a2)
 //100%
 INCLUDE_ASM("be/beintplayer", func_00148D58);
 #ifdef SKIP_ASM
+/**
+ * Returns a profile's stability stat for one character (byte 6 of the character's stat record) from the current-stat
+ * table.
+ *
+ * Reads D_00535538[@p a1][@p a2][6] (On Tour tBEStatDB.cStability).
+ *
+ * @param a1  profile index (On Tour iHuman)
+ * @param a2  character ID (On Tour charType)
+ * @return the stability stat (5 per level)
+ */
 extern "C" signed char func_00148D58(void* self, int a1, int a2)
 {
     return D_00535538[a1].e[a2].v[6];
@@ -2420,6 +2590,18 @@ struct sCharStat_005308D8
 };
 extern sCharStat_005308D8 D_005308D8[];
 
+/**
+ * Returns a rider's braking attribute as a fraction of the character's maximum edging level.
+ *
+ * Mission riders (cBENewPlayerInterface_isMissionMan()) get 0.5. The level is @p value when positive, else the
+ * profile's edging stat for the character (D_00535538[profile][character][3], On Tour cEdging) divided by 5; the result
+ * is that level over the character's cMaxEdging (byte 0xB of its D_005308D8 default-stat record). func_00148D80 and
+ * func_00148E68 have identical bodies.
+ *
+ * @param rider  race rider slot (On Tour iRider)
+ * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
+ * @return the attribute level divided by the character's edging maximum
+ */
 extern "C" float func_00148D80(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -2447,6 +2629,18 @@ struct sCharStat_00148E68
 };
 extern sCharStat_00148E68 D_005308D8_00148E68[] __asm__("D_005308D8");
 
+/**
+ * Returns a rider's edging attribute as a fraction of the character's maximum edging level.
+ *
+ * Mission riders (cBENewPlayerInterface_isMissionMan()) get 0.5. The level is @p value when positive, else the
+ * profile's edging stat for the character (D_00535538[profile][character][3], On Tour cEdging) divided by 5; the result
+ * is that level over the character's cMaxEdging (byte 0xB of its D_005308D8 default-stat record). func_00148D80 and
+ * func_00148E68 have identical bodies.
+ *
+ * @param rider  race rider slot (On Tour iRider)
+ * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
+ * @return the attribute level divided by the character's edging maximum
+ */
 extern "C" float func_00148E68(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);

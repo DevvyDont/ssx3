@@ -139,6 +139,17 @@ extern sCharTbl_2758 cBELibrary_playerDB[];
 struct sSaveBits_2758 { unsigned a : 1; unsigned b : 8; unsigned rest : 23; };
 struct sSaveBits6_2758 { sSaveBits_2758 e[6]; };
 
+/**
+ * Builds the game save (settings and high scores) in a fresh buffer and returns it.
+ *
+ * Releases any previous buffer (cBESaveInterface_releaseBuffer) and allocates cBESaveInterface_getSaveGameSize() bytes
+ * tagged "save file buffer" into cBESaveInterface_buffer. Writes the 0x288-byte block D_00535898, the 26 high-score
+ * tables D_00535C18 (2600 bytes, the ones func_0014AB20 returns), then two bits per player of cBELibrary_playerDB (bit
+ * 1 of the word at +0x10 and the byte at +0x13, six players), and ends with a CRC of everything before it
+ * (func_003E62D0, seed 64490). func_00152BB0 reads this layout back.
+ *
+ * @return the save buffer (cBESaveInterface_buffer)
+ */
 extern "C" void* func_00152758(void* self)
 {
     int size = cBESaveInterface_getSaveGameSize(self);
@@ -284,7 +295,18 @@ cBEIface_2BB0* cBENewPlayerInterface_getThis();
 extern "C" void cSSXApp_initLocale(void* app);
 extern "C" void cSSXApp_activateBEOptions(void* app);
 
-// Restores the save block written by func_00152758 after checking its CRC; returns 0 when the CRC is wrong.
+/**
+ * Loads a game save written by func_00152758, after checking its CRC.
+ *
+ * Compares the CRC of the first cBESaveInterface_getSaveGameSize() - 4 bytes (func_003E62D0, seed 64490) with the
+ * stored one and returns 0 on a mismatch. Otherwise restores D_00535898 and calls the option interface's onLoad,
+ * restores the high-score tables D_00535C18 (2600 bytes) and calls the score interface's onLoad, restores the two
+ * player bits of cBELibrary_playerDB and calls the player interface's onLoad, then re-applies the locale and options
+ * (cSSXApp_initLocale, cSSXApp_activateBEOptions).
+ *
+ * @param buf  the save data read from the memory card
+ * @return 1 when loaded, 0 when the CRC is wrong
+ */
 extern "C" int func_00152BB0(void* self, char* buf)
 {
     int size = cBESaveInterface_getSaveGameSize(self) - 4;
@@ -332,7 +354,19 @@ extern sProfile_2DE0 D_004A6CA8_2DE0[] __asm__("cBELibrary_profileLib");
 struct sCharFlag_2DE0 { unsigned char f; char pad[0x1B]; };
 extern sCharFlag_2DE0 D_00535B31[];
 
-// Loads rider profile 'idx' from a save block after checking its CRC; the per-sub-profile 'keep' values survive the load.
+/**
+ * Loads one rider profile from a profile save, after checking its CRC.
+ *
+ * Compares the CRC of the first cBESaveInterface_getSaveProfileSize() - 4 bytes (func_003E62D0, seed 64490) with the
+ * stored one and returns 0 on a mismatch. Otherwise copies the 12-byte name into cBELibrary_playerDB[@p idx], the ten
+ * character records into cBELibrary_profileLib[@p idx] and one byte into playerDB +0x11, then calls the onLoad of the
+ * player, stat and BAGT interfaces. The word at +0x288 of each character record (the item index table pointer that
+ * func_00156C70 reads) is kept across the load, and func_001515B8 is called on each record afterwards.
+ *
+ * @param buf  the save data read from the memory card
+ * @param idx  the profile slot to load into (On Tour iProfile)
+ * @return 1 when loaded, 0 when the CRC is wrong
+ */
 extern "C" int func_00152DE0(void* self, char* buf, int idx)
 {
     int size = cBESaveInterface_getSaveProfileSize() - 4;

@@ -76,6 +76,15 @@ float AIrandf(float low, float high)
 
 INCLUDE_ASM("bx/bxrandom", func_00317890__Fff);
 #ifdef SKIP_ASM
+/**
+ * Returns @p param_1 plus @p param_2 times a random value in [-1, 1) from the AI generator (AIrandf).
+ *
+ * The world sphere tree uses it to vary a speed around its base value.
+ *
+ * @param param_1  the base value
+ * @param param_2  the largest deviation
+ * @return the varied value
+ */
 float func_00317890(float param_1, float param_2)
 {
 	float fVar1;
@@ -125,6 +134,13 @@ extern "C" void* MEM_copy(void*, void*, int);
 //100%
 INCLUDE_ASM("bx/bxrandom", func_00317930__FPv);
 #ifdef SKIP_ASM
+/**
+ * Resets a random generator's six-word state to the fixed default state D_0048DCB0 (MEM_copy of 0x18 bytes).
+ *
+ * Static initialisation runs it on BXrandom, AIrandom and GMrandom.
+ *
+ * @return MEM_copy's result (@p self)
+ */
 void* func_00317930(void* self)
 {
     return MEM_copy(self, (void*)D_0048DCB0, 0x18);

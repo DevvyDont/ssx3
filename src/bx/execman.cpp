@@ -51,6 +51,14 @@ void cExecutionMan_postpause()
 //100%
 INCLUDE_ASM("bx/execman", func_00320960);
 #ifdef SKIP_ASM
+/**
+ * Returns whether a module is loading: the loading module (+0x4) is not null.
+ *
+ * Nothing in the C calls it.
+ *
+ * @param appMan  the application manager
+ * @return 1 while a module is loading, else 0
+ */
 extern "C" int func_00320960(void *appMan) {
     return (*(int *)((char*)(appMan) + (4))) != 0;
 }
@@ -58,6 +66,14 @@ extern "C" int func_00320960(void *appMan) {
 //100%
 INCLUDE_ASM("bx/execman", func_00320970);
 #ifdef SKIP_ASM
+/**
+ * Sets the game rate (+0x24), the ticks per timer interrupt that func_00317348 accumulates.
+ *
+ * Nothing in the C calls it.
+ *
+ * @param appMan  the application manager
+ * @param fparg0  the new game rate
+ */
 extern "C" void func_00320970(void *appMan, float fparg0) {
     (*(float *)((char*)(appMan) + (0x24))) = fparg0;
 }
@@ -65,6 +81,14 @@ extern "C" void func_00320970(void *appMan, float fparg0) {
 //100%
 INCLUDE_ASM("bx/execman", func_00320978);
 #ifdef SKIP_ASM
+/**
+ * Returns the timer frequency (+0x10).
+ *
+ * Nothing in the C calls it.
+ *
+ * @param appMan  the application manager
+ * @return the timer rate in Hz
+ */
 extern "C" int func_00320978(void *appMan) {
     return (*(int *)((char*)(appMan) + (0x10)));
 }
@@ -72,6 +96,14 @@ extern "C" int func_00320978(void *appMan) {
 //100%
 INCLUDE_ASM("bx/execman", func_00320980);
 #ifdef SKIP_ASM
+/**
+ * Returns the timer period (+0x14).
+ *
+ * Nothing in the C calls it.
+ *
+ * @param appMan  the application manager
+ * @return the timer period
+ */
 extern "C" float func_00320980(void *appMan) {
     return (*(float *)((char*)(appMan) + (0x14)));
 }
@@ -79,6 +111,14 @@ extern "C" float func_00320980(void *appMan) {
 //100%
 INCLUDE_ASM("bx/execman", func_00320988);
 #ifdef SKIP_ASM
+/**
+ * Returns the game rate (+0x24).
+ *
+ * Nothing in the C calls it.
+ *
+ * @param appMan  the application manager
+ * @return the game rate
+ */
 extern "C" float func_00320988(void *appMan) {
     return (*(float *)((char*)(appMan) + (0x24)));
 }
@@ -86,6 +126,14 @@ extern "C" float func_00320988(void *appMan) {
 //100%
 INCLUDE_ASM("bx/execman", func_00320990);
 #ifdef SKIP_ASM
+/**
+ * Returns the damped frame rate (+0x2C) that cAppMan_mainLoop keeps.
+ *
+ * Nothing in the C calls it.
+ *
+ * @param appMan  the application manager
+ * @return the frame rate
+ */
 extern "C" float func_00320990(void *appMan) {
     return (*(float *)((char*)(appMan) + (0x2C)));
 }
@@ -93,6 +141,14 @@ extern "C" float func_00320990(void *appMan) {
 //100%
 INCLUDE_ASM("bx/execman", func_00320998);
 #ifdef SKIP_ASM
+/**
+ * Returns the update tick count (+0x1C).
+ *
+ * Nothing in the C calls it.
+ *
+ * @param appMan  the application manager
+ * @return the tick count
+ */
 extern "C" int func_00320998(void *appMan) {
     return (*(int *)((char*)(appMan) + (0x1C)));
 }
@@ -100,6 +156,14 @@ extern "C" int func_00320998(void *appMan) {
 //100%
 INCLUDE_ASM("bx/execman", func_003209A0);
 #ifdef SKIP_ASM
+/**
+ * Returns the timer interrupt count (+0x18).
+ *
+ * Nothing in the C calls it.
+ *
+ * @param appMan  the application manager
+ * @return the timer tick count
+ */
 extern "C" int func_003209A0(void *appMan) {
     return (*(int *)((char*)(appMan) + (0x18)));
 }
@@ -107,6 +171,14 @@ extern "C" int func_003209A0(void *appMan) {
 //100%
 INCLUDE_ASM("bx/execman", func_003209A8);
 #ifdef SKIP_ASM
+/**
+ * Returns the AI updates per render (+0xC).
+ *
+ * Nothing in the C calls it.
+ *
+ * @param appMan  the application manager
+ * @return the AI updates per render
+ */
 extern "C" int func_003209A8(void *appMan) {
     return (*(int *)((char*)(appMan) + (0xC)));
 }
@@ -114,6 +186,14 @@ extern "C" int func_003209A8(void *appMan) {
 //100%
 INCLUDE_ASM("bx/execman", func_003209B0);
 #ifdef SKIP_ASM
+/**
+ * Sets the AI updates per render (+0xC).
+ *
+ * Nothing in the C calls it.
+ *
+ * @param appMan  the application manager
+ * @param value  the new count
+ */
 extern "C" void func_003209B0(void *appMan, int value) {
     (*(int *)((char*)(appMan) + (0xC))) = value;
 }
@@ -121,6 +201,14 @@ extern "C" void func_003209B0(void *appMan, int value) {
 //100%
 INCLUDE_ASM("bx/execman", func_003209B8);
 #ifdef SKIP_ASM
+/**
+ * Returns the active module (+0x0).
+ *
+ * Nothing in the C calls it.
+ *
+ * @param appMan  the application manager
+ * @return the active module
+ */
 extern "C" int func_003209B8(int *appMan) {
     return *appMan;
 }
@@ -146,6 +234,11 @@ public:
     virtual void v11();
 };
 
+/**
+ * Wakes the execution manager: calls virtual entry 5 of the app manager's execution manager (+0x8).
+ *
+ * Nothing in the C calls it.
+ */
 extern "C" void func_003209C0(cExecutionMan *self) {
     ((cExecObj *)self->field_0x8)->v4();
 }
@@ -153,6 +246,11 @@ extern "C" void func_003209C0(cExecutionMan *self) {
 //100%
 INCLUDE_ASM("bx/execman", func_003209F0);
 #ifdef SKIP_ASM
+/**
+ * Waits on the execution manager: calls virtual entry 4 of the app manager's execution manager (+0x8).
+ *
+ * cAppMan_mainLoop calls the same entry when a frame has nothing to render. Nothing in the C calls this copy.
+ */
 extern "C" void func_003209F0(cExecutionMan *self) {
     ((cExecObj *)self->field_0x8)->v3();
 }
@@ -160,6 +258,14 @@ extern "C" void func_003209F0(cExecutionMan *self) {
 //100%
 INCLUDE_ASM("bx/execman", func_00320A20);
 #ifdef SKIP_ASM
+/**
+ * Returns the current thread id from the execution manager (+0x8, virtual entry 6), or -1 without one.
+ *
+ * Entry 6 of the PS2 execution manager's vtable D_0048DB68 is func_00320B08, which returns GetThreadId(). Nothing in
+ * the C calls it.
+ *
+ * @return the thread id, or 0xFFFFFFFF
+ */
 extern "C" unsigned int func_00320A20(cExecutionMan *self) {
     cExecObj *obj = (cExecObj *)self->field_0x8;
     if (obj != 0) {
@@ -171,6 +277,11 @@ extern "C" unsigned int func_00320A20(cExecutionMan *self) {
 //100%
 INCLUDE_ASM("bx/execman", func_00320A60);
 #ifdef SKIP_ASM
+/**
+ * Calls the execution manager's (+0x8) virtual entry 11, which is cExecutionMan_prepause in cExecutionMan_vtbl.
+ *
+ * Nothing in the C calls it.
+ */
 extern "C" void func_00320A60(cExecutionMan *self) {
     ((cExecObj *)self->field_0x8)->v10();
 }
@@ -178,6 +289,11 @@ extern "C" void func_00320A60(cExecutionMan *self) {
 //100%
 INCLUDE_ASM("bx/execman", func_00320A90);
 #ifdef SKIP_ASM
+/**
+ * Calls the execution manager's (+0x8) virtual entry 12, which is cExecutionMan_postpause in cExecutionMan_vtbl.
+ *
+ * Nothing in the C calls it.
+ */
 extern "C" void func_00320A90(cExecutionMan *self) {
     ((cExecObj *)self->field_0x8)->v11();
 }
@@ -185,6 +301,14 @@ extern "C" void func_00320A90(cExecutionMan *self) {
 //100%
 INCLUDE_ASM("bx/execman", func_00320AC0);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the app manager's load-progress timer (+0x38).
+ *
+ * The timer functions are func_00317530, func_00317550, func_003175A0 and func_00317600. Nothing in the C calls it.
+ *
+ * @param appMan  the application manager
+ * @return @p appMan + 0x38
+ */
 extern "C" int func_00320AC0(int appMan) {
     return appMan + 0x38;
 }
@@ -194,6 +318,13 @@ INCLUDE_ASM("bx/execman", func_00320AC8);
 #ifdef SKIP_ASM
 extern int cAppMan_TheAppMan;
 
+/**
+ * Returns the application manager, cAppMan_TheAppMan.
+ *
+ * Nothing in the C calls it.
+ *
+ * @return the application manager
+ */
 extern "C" int func_00320AC8(void) {
     return cAppMan_TheAppMan;
 }
@@ -201,6 +332,14 @@ extern "C" int func_00320AC8(void) {
 //100%
 INCLUDE_ASM("bx/execman", func_00320AD0);
 #ifdef SKIP_ASM
+/**
+ * Sets the 30 fps lock flag (+0x34) that cAppMan_mainLoop reads when deciding to render.
+ *
+ * Nothing in the C calls it.
+ *
+ * @param appMan  the application manager
+ * @param value  non-zero to lock to 30 fps
+ */
 extern "C" void func_00320AD0(void *appMan, int value) {
     (*(int *)((char*)(appMan) + (0x34))) = value;
 }
@@ -209,7 +348,14 @@ extern "C" void func_00320AD0(void *appMan, int value) {
 //100%
 INCLUDE_ASM("bx/execman", func_00320AD8);
 #ifdef SKIP_ASM
-// deleting destructor: reset the vtable, free when bit 0 of flags is set
+/**
+ * Destroys the PS2 execution manager: restores cExecutionMan_vtbl at +0x8 and frees the object when bit 0 of @p flags
+ * is set.
+ *
+ * Entry 1 (the destructor) of the PS2 execution manager's vtable D_0048DB68; same body as cExecutionMan__cExecutionMan.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void func_00320AD8(cExecutionMan* self, int flags)
 {
     self->field_0x8 = cExecutionMan_vtbl;
@@ -224,6 +370,13 @@ extern "C" void* GetThreadId(void* self);
 //100%
 INCLUDE_ASM("bx/execman", func_00320B08__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the current thread's id (GetThreadId).
+ *
+ * Entry 6 of the PS2 execution manager's vtable D_0048DB68, the entry func_00320A20 calls.
+ *
+ * @return GetThreadId's result
+ */
 void* func_00320B08(void* self)
 {
     return GetThreadId(self);
@@ -235,6 +388,13 @@ extern "C" void* __sti__all_in_one_bx_cpp(int, int);
 //100%
 INCLUDE_ASM("bx/execman", func_00320B28__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the bx unit's static constructors: __sti__all_in_one_bx_cpp(1, 0xFFFF).
+ *
+ * Entry +0x80 of the global constructor table D_0043CE38. The argument is not read.
+ *
+ * @return no meaningful value (declared void*)
+ */
 void* func_00320B28(void* self)
 {
     return __sti__all_in_one_bx_cpp(1, 0xffff);
@@ -246,6 +406,13 @@ extern "C" void* __sti__all_in_one_bx_cpp(int, int);
 //100%
 INCLUDE_ASM("bx/execman", func_00320B48__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the bx unit's static destructors: __sti__all_in_one_bx_cpp(0, 0xFFFF).
+ *
+ * Entry +0x20 of the global destructor table D_0043CEE4. The argument is not read.
+ *
+ * @return no meaningful value (declared void*)
+ */
 void* func_00320B48(void* self)
 {
     return __sti__all_in_one_bx_cpp(0, 0xffff);
@@ -313,6 +480,18 @@ INCLUDE_ASM("bx/execman", func_00320C18);
 #ifdef SKIP_ASM
 extern "C" void cInputMap_getValue1(int, int, int, int);
 
+/**
+ * Reads an input state's analogue value with a button modifier and eight float arguments, through the input's map and
+ * pad.
+ *
+ * Calls cInputMap_getValue1(map (+0x4), pad (+0x0), @p state, modifier); the eight floats reach it untouched in the float
+ * argument registers, which the C does not declare. The value comes back in the float return register although the C
+ * returns void. Nothing in the C calls it.
+ *
+ * @param input  the input (pad +0x0, map +0x4)
+ * @param state  the input state id
+ * @param arg2  the button modifier
+ */
 extern "C" void func_00320C18(void *input, int state, int arg2) {
     cInputMap_getValue1((*(int *)((char*)(input) + (4))), (*(int *)((char*)(input) + (0))), state, arg2);
 }
@@ -341,6 +520,18 @@ INCLUDE_ASM("bx/execman", func_00320C70);
 #ifdef SKIP_ASM
 extern "C" void cInputMap_getState1(int, int, int, int);
 
+/**
+ * Tells whether an input state is active with a button modifier and eight float arguments, through the input's map and
+ * pad.
+ *
+ * Calls cInputMap_getState1(map (+0x4), pad (+0x0), @p state, modifier); the eight floats reach it untouched in the float
+ * argument registers, which the C does not declare. The result is left in the return register although the C returns
+ * void. Nothing in the C calls it.
+ *
+ * @param input  the input (pad +0x0, map +0x4)
+ * @param state  the input state id
+ * @param arg2  the button modifier
+ */
 extern "C" void func_00320C70(void *input, int state, int arg2) {
     cInputMap_getState1((*(int *)((char*)(input) + (4))), (*(int *)((char*)(input) + (0))), state, arg2);
 }

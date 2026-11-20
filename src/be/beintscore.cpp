@@ -135,6 +135,16 @@ int cBELibrary_getProfileIndex(int);
 extern "C" void func_00155420(int rider, int a, int b, int c);
 extern signed char D_005305F9[];
 
+/**
+ * Records a rider's race statistics in its character's best records, for the two human profiles only.
+ *
+ * Unless raceDB byte +0x49 (D_005305F9) is set, calls func_00155420(@p rider, @p a, -1, -1) when the rider's profile
+ * (cBELibrary_getProfileIndex) is 0 or 1. The AI code passes each rider's metrix stats block (metrix + 0xFC);
+ * func_00154AB8 passes the event stats.
+ *
+ * @param rider  race rider slot
+ * @param a  the rider stats block, passed as an int
+ */
 extern "C" void func_00154A58(int rider, int a)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -201,6 +211,26 @@ struct sEvent_154AB8 {
 };
 extern sEvent_154AB8 D_0043D950_154AB8[] __asm__("cBELibrary_locationDB");
 
+/**
+ * Records a human rider's finished-event stats and score: keeps the stats, enters the score in the event's top-5 table,
+ * and updates the character's best records.
+ *
+ * Only profiles 0 and 1. Copies @p stats into the profile's last-event slot (+0x20 + profile * 0xB0) with result -1,
+ * passes them to func_00154A58, and resets the profile's high-score rank (+0x18) to -1 and best flag (+0x10) to 0. The
+ * location comes from cBELibrary_locationDB[raceDB +0x40].id (22 becomes 0) and the event from
+ * cBENewRaceInterface_newRace.cGameEvent. Race kinds 0 and 5 (raceDB +0x48) are timed: @p score is converted from ticks
+ * to seconds.
+ *
+ * When func_001557E0 allows it, the score goes into the 5-entry table from func_0014AB20 (lower is better when timed):
+ * later entries shift down, the new one gets the character, score and player name
+ * (cBENewPlayerInterface_getPlayerName), and with two humans the other profile's rank moves down (dropping off at 5).
+ * Then func_00155420 gets the score as the time (timed) or the points, and unless raceDB +0x49 is set, the best flag is
+ * func_00152460's result for the character record.
+ *
+ * @param rider  race rider slot (On Tour iRider)
+ * @param stats  the rider's event stats, 0xAC bytes (On Tour pRiderStats)
+ * @param score  the event score or time in ticks (On Tour uiPoints)
+ */
 extern "C" void func_00154AB8(sScore_154AB8* self, int rider, sRaceStats_154AB8* stats, unsigned int score)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -293,7 +323,23 @@ struct sEvent_154EE8 {
 };
 extern sEvent_154EE8 cBELibrary_locationDB[];
 
-// Race result: records it, refreshes the event popups and passes the medal (cleared when the record is not beaten) to the reward interface.
+/**
+ * Handles a human rider's finishing rank: stores it, converts it to a medal, and passes the medal to the reward
+ * interface.
+ *
+ * Only profiles 0 and 1. Stores @p result at +0xCC + profile * 0xB0 (the last-event slot's rank). The medal is
+ * cBEScoreInterface_convertRankToMedal(@p result); events 4 and 5 (D_00535C12) give 1 for first place, else none.
+ * Unless raceDB +0x49 is set it updates the event popups (func_001E25D8, then func_001E1EB8 and, outside events 4 and
+ * 5, func_001E1550).
+ *
+ * With a medal, unless raceDB +0x49 is set or raceDB +0x48 is 4: when @p score meets or beats the event's target from
+ * func_001456A0 (time target * 60 for events 0 and 4, lower is better; a score target otherwise) the medal becomes 0
+ * (the best). Then calls func_001591E8 on the reward interface.
+ *
+ * @param rider  race rider slot (On Tour iRider)
+ * @param result  the finishing rank, 0 first (On Tour iRanking)
+ * @param score  the event score or time in ticks (On Tour uiPoints)
+ */
 extern "C" void func_00154EE8(char* self, int rider, int result, int score)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -346,6 +392,16 @@ struct sScoreEntry_001550E8 {
 };
 extern "C" sScoreEntry_001550E8* func_0014AB20(int a, int b);
 
+/**
+ * Returns the score of one entry in an event's high-score table.
+ *
+ * The table is func_0014AB20(@p event, @p mode); entries are 0x14 bytes with the score first.
+ *
+ * @param i  entry index, 0 (best) to 4
+ * @param event  the location
+ * @param mode  the game event
+ * @return the score, or 0 when the event has no table
+ */
 extern "C" int func_001550E8(void* self, int i, int event, int mode)
 {
     sScoreEntry_001550E8* highScores = func_0014AB20(event, mode);
@@ -365,6 +421,15 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern int D_005305F0[];
 extern signed char D_00535C12[];
 
+/**
+ * Returns the score of one entry in the current race's high-score table.
+ *
+ * The table is func_0014AB20(raceDB +0x40, D_00535C12), the race's location index and game event. The pause and lodge
+ * screens show entry 0 as the record.
+ *
+ * @param i  entry index, 0 (best) to 4
+ * @return the score, or 0 when the event has no table
+ */
 extern "C" int func_00155130(void* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -393,6 +458,16 @@ struct sScoreSlot_00155190
 extern sScoreSlot_00155190 D_00530990[];
 extern void* D_004A1244;
 
+/**
+ * Returns the character record (D_00530990, 0x88 bytes each) of the rider who set one entry of the current race's
+ * high-score table.
+ *
+ * The table is func_0014AB20(raceDB +0x40, D_00535C12); the entry's second word is the character ID. The lodge shows
+ * the result as text next to the entry.
+ *
+ * @param i  entry index, 0 (best) to 4
+ * @return the character record, or D_004A1244 when the event has no table
+ */
 extern "C" void* func_00155190(void* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -414,6 +489,14 @@ struct sScoreEntryB_00155208
 };
 extern void* D_004A1244;
 
+/**
+ * Returns the player name stored in one entry of the current race's high-score table.
+ *
+ * The table is func_0014AB20(raceDB +0x40, D_00535C12); the 12-byte name is at +0x8 of the entry.
+ *
+ * @param i  entry index, 0 (best) to 4
+ * @return the name, or D_004A1244 when the event has no table
+ */
 extern "C" void* func_00155208(void* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -427,6 +510,12 @@ extern "C" void* func_00155208(void* self, int i)
 //100%
 INCLUDE_ASM("be/beintscore", func_00155270);
 #ifdef SKIP_ASM
+/**
+ * Returns a profile's last-event block: the rider stats and rank stored at +0x20 + profile * 0xB0.
+ *
+ * @param profileIndex  profile index, 0 or 1 (On Tour iProfileIndex)
+ * @return the stats block (0xAC bytes of stats, then the rank)
+ */
 extern "C" void* func_00155270(void* self, int profileIndex)
 {
     return (char*)self + (profileIndex * 0xb0 + 0x20);
@@ -438,6 +527,16 @@ INCLUDE_ASM("be/beintscore", func_00155288);
 #ifdef SKIP_ASM
 extern char cBELibrary_profileLib[];
 
+/**
+ * Returns a character's best-stats block: +0xDE4 of the character record (cBELibrary_profileLib + profile * 0x9B50 +
+ * character * 0xF88).
+ *
+ * Ten (value, location) pairs and the longest combo, as func_00155420 writes them.
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iChar)
+ * @return the best-stats block
+ */
 extern "C" void* func_00155288(void* self, int profileIndex, int characterId)
 {
     char* charRecord = cBELibrary_profileLib + (profileIndex * 39760 + characterId * 3976);
@@ -529,6 +628,16 @@ INCLUDE_ASM("be/beintscore", func_00155390);
 #ifdef SKIP_ASM
 extern short D_00440ED0[][3];
 
+/**
+ * Raises a character's level in one career highlight to the level a value reaches.
+ *
+ * The level is 1, 2 or 3 for the highest of the highlight's three thresholds D_00440ED0[@p idx][0..2] that @p score
+ * reaches (0 for none). The stored level, the signed byte at +0xBB8 + @p idx of the character record (what
+ * cBEScoreInterface_getCurrentHighlightLevel reads), only goes up. func_00155420 calls it for highlights 0 to 7.
+ *
+ * @param idx  which highlight, 0 to 7
+ * @param score  the value to rate
+ */
 extern "C" void func_00155390(char* self, int idx, int score)
 {
     signed char cur = *(signed char*)(self + idx + 0xBB8);
@@ -589,6 +698,25 @@ struct sRecord_155420 {
     int event;
 };
 
+/**
+ * Updates a character's best stats from one event's results and raises the matching career highlights.
+ *
+ * Does nothing when raceDB +0x49 is set or the rider's profile is above 2. The best stats are the ten (value, location)
+ * pairs at +0xDE4 of the character record; the location is cBELibrary_locationDB[raceDB +0x40].id (22 becomes 0). Pairs
+ * 0-7 take the larger of the stored value and the stats words at +0x2C, +0x18, +0x1C, +0x20, +0x88 and the rounded
+ * floats at +0x5C, +0x58, +0x50 (On Tour tRiderStats has NumFrags, NumUberTricks, NumSuperUberTricks,
+ * NumUberGrindTricks, LongestCombo, BiggestHandplantTime, BiggestRailDist, BiggestAirTime there), each also raising a
+ * highlight with func_00155390 (pair 1 excepted).
+ *
+ * Pair 8 keeps the shortest positive @p a3 in race event 0 (raceDB +0x4A); pair 9 keeps the largest positive @p a2 in
+ * events 1-3 or race kind 6 (raceDB +0x48) and raises highlight 6 with @p a2 / 100. Without @p statsArg, or in event
+ * 12, only pairs 8 and 9 are looked at. Finally the word after the ten pairs keeps the largest stats +0x88.
+ *
+ * @param rider  race rider slot
+ * @param statsArg  the rider stats block, passed as an int; 0 for none
+ * @param a2  the event points, or -1
+ * @param a3  the event time in seconds, or -1
+ */
 // PORT: the unit declares this as (int, int, int, int) (func_00154A58 passes the stats pointer as int).
 extern "C" void func_00155420(int rider, int statsArg, int a2, int a3)
 {
@@ -714,6 +842,16 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" bool func_0014F810(int i);
 extern int D_00535BFC[];
 
+/**
+ * Returns whether a profile may enter the high-score tables.
+ *
+ * False for profile 2 and up, and while func_0014F810(0) reports any of player 0's option flags in D_005308B8 set.
+ * Likely bug: with two or more humans (cBENewRaceInterface_newRace +0x34) it tests func_0014F810(0) again instead of
+ * player 1, so that branch always returns true.
+ *
+ * @param rider  the profile index (On Tour iProfile)
+ * @return true when the profile is eligible
+ */
 extern "C" bool func_001557E0(void* self, int rider)
 {
     if (rider >= 2 || func_0014F810(0))
@@ -732,6 +870,18 @@ int cBELibrary_getProfileIndex(int);
 void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
 extern signed char D_005305F9[];
 
+/**
+ * Returns how many times a race rider's character has won an event at a location: the short at +0x2 of its score
+ * record.
+ *
+ * Returns 0 when raceDB +0x49 (D_005305F9) is set, the rider's profile is 3 or more, or there is no record. The record
+ * is cBECharProfileDB_getScoreStats(character record, @p a, @p b). Nothing calls it.
+ *
+ * @param rider  race rider slot (On Tour iRider)
+ * @param a  the location (On Tour iLocation)
+ * @param b  the game event (On Tour iEvent)
+ * @return the win count
+ */
 extern "C" int func_00155848(void* self, int rider, int a, int b)
 {
     if (D_005305F9[0] != 0)
@@ -756,6 +906,17 @@ void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
 extern signed char D_005305F9[];
 extern char cBELibrary_profileLib[];
 
+/**
+ * Returns the best medal a race rider's character has for an event at a location: byte 1 of its score record.
+ *
+ * Returns -1 when raceDB +0x49 (D_005305F9) is set, the rider's profile is 3 or more, or there is no record. The record
+ * is cBECharProfileDB_getScoreStats(character record, @p a, @p b).
+ *
+ * @param rider  race rider slot (On Tour iRider)
+ * @param a  the location (On Tour iLocation)
+ * @param b  the game event (On Tour iEvent)
+ * @return the medal, 0 best to 3, or -1
+ */
 extern "C" int func_001558F8(void* self, int rider, int a, int b)
 {
     if (D_005305F9[0] != 0)
@@ -779,6 +940,16 @@ int cBELibrary_getProfileIndex(int);
 extern "C" void func_00152528(void* iface, int a, int b, int c);
 extern signed char D_005305F9[];
 
+/**
+ * Stores a medal in a race rider's character's score record for an event at a location (func_00152528).
+ *
+ * Does nothing when raceDB +0x49 (D_005305F9) is set or the rider's profile is 3 or more. Nothing calls it.
+ *
+ * @param rider  race rider slot (On Tour iRider)
+ * @param a  the location (On Tour iLocation)
+ * @param b  the game event (On Tour iEvent)
+ * @param c  the medal (On Tour iMedal)
+ */
 extern "C" void func_001559A8(void* self, int rider, int a, int b, int c)
 {
     if (D_005305F9[0] != 0)

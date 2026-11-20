@@ -126,6 +126,13 @@ int cBigFile_open_impl(cBigFile* self, const char* name, int memclass)
 //100%
 INCLUDE_ASM("bx/bigfile", func_00316A00__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs an empty block manager: no memory, size or groups, and an alignment (+0x10) of 16.
+ *
+ * Called on D_004FF000 during static initialisation.
+ *
+ * @return @p self
+ */
 void* func_00316A00(void* self)
 {
     int zero = 0;
@@ -141,6 +148,14 @@ void* func_00316A00(void* self)
 //100%
 INCLUDE_ASM("bx/bigfile", func_00316A20);
 #ifdef SKIP_ASM
+/**
+ * Rounds a size up to a multiple of the block manager's alignment (+0x10).
+ *
+ * cBlockMan_init uses it for the block sizes and the total memory size.
+ *
+ * @param size  the size in bytes
+ * @return @p size rounded up
+ */
 extern "C" int func_00316A20(void* self, int size)
 {
     int align = *(int*)((char*)self + 0x10);

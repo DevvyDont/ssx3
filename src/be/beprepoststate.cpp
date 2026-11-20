@@ -387,6 +387,12 @@ INCLUDE_ASM("be/beprepoststate", func_00156810);
 #ifdef SKIP_ASM
 extern "C" void func_001519E0(void* p, int i);
 
+/**
+ * Runs func_001519E0 on each of a profile's ten character records (0xF88 bytes apart), passing the character index.
+ *
+ * func_001519E0 is the part of cBECharProfileDB_init that sets a character kind's defaults. The network interface calls
+ * this when it resets a player's profile.
+ */
 extern "C" void func_00156810(void* self)
 {
     int i;
@@ -414,6 +420,16 @@ struct sProfile_156858
     short* index;       // 0x288
 };
 
+/**
+ * Copies a profile's ten character records over another profile's, keeping the destination's bolt lookup tables.
+ *
+ * For each character, copies the 0xF88-byte record but puts back the destination's lookup pointer (+0x288), then
+ * rebuilds that lookup: all D_004A11E8 ids are set to -1, and each of the 525 bolt entries (+0x290) with an id of 0 or
+ * more maps its id to its index.
+ *
+ * @param dst  the destination profile (10 character records)
+ * @param src  the source profile (On Tour pSrcProfileLib)
+ */
 extern "C" void func_00156858(char* dst, char* src)
 {
     int i;
@@ -443,6 +459,13 @@ extern "C" void MEM_copy(void* dst, void* src, int n);
 extern signed char D_004A125C;
 extern char D_004C4090[];
 
+/**
+ * Saves one character record of a profile into the backup buffer D_004C4090 and remembers its character index in
+ * D_004A125C.
+ *
+ * @param base  the profile (10 character records)
+ * @param idx  the character whose record is saved
+ */
 extern "C" void func_00156950(char* base, int idx)
 {
     D_004A125C = idx;
@@ -457,6 +480,12 @@ extern "C" void MEM_copy(void* dst, void* src, int n);
 extern signed char D_004A125C;
 extern char D_004C4090[];
 
+/**
+ * Copies the backup buffer D_004C4090 back into the profile's character record that func_00156950 saved (index
+ * D_004A125C).
+ *
+ * @param base  the profile (10 character records)
+ */
 extern "C" void func_00156988(char* base)
 {
     MEM_copy(base + D_004A125C * 3976, D_004C4090, 3976);

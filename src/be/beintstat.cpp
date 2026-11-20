@@ -156,6 +156,18 @@ struct sCharStat_func_00149208
 extern sPlayerStatRow_func_00149208 D_00535538_func_00149208[] __asm__("D_00535538");
 extern sCharStat_func_00149208 D_005308D8_func_00149208[] __asm__("D_005308D8");
 
+/**
+ * Returns a rider's balance attribute as a fraction of the character's maximum stability level.
+ *
+ * Mission riders (cBENewPlayerInterface_isMissionMan()) get 0.5. The level is @p value when positive, else the
+ * profile's stability stat for the character (D_00535538[profile][character][6]) divided by 5; the result is that level
+ * over the character's cMaxStability (byte 0xE of its D_005308D8 default-stat record). func_00149208 and func_001492F0
+ * have identical bodies.
+ *
+ * @param rider  race rider slot (On Tour iRider)
+ * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
+ * @return the attribute level divided by the character's stability maximum
+ */
 extern "C" float func_00149208(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -174,6 +186,18 @@ extern "C" float func_00149208(void* self, int rider, int value)
 //100%
 INCLUDE_ASM("be/beintstat", func_001492F0);
 #ifdef SKIP_ASM
+/**
+ * Returns a rider's recovery attribute as a fraction of the character's maximum stability level.
+ *
+ * Mission riders (cBENewPlayerInterface_isMissionMan()) get 0.5. The level is @p value when positive, else the
+ * profile's stability stat for the character (D_00535538[profile][character][6]) divided by 5; the result is that level
+ * over the character's cMaxStability (byte 0xE of its D_005308D8 default-stat record). func_00149208 and func_001492F0
+ * have identical bodies.
+ *
+ * @param rider  race rider slot (On Tour iRider)
+ * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
+ * @return the attribute level divided by the character's stability maximum
+ */
 extern "C" float func_001492F0(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -208,6 +232,17 @@ struct sCharStat_func_001493D8
 extern sPlayerStatRow_func_001493D8 D_00535538_func_001493D8[] __asm__("D_00535538");
 extern sCharStat_func_001493D8 D_005308D8_func_001493D8[] __asm__("D_005308D8");
 
+/**
+ * Returns a rider's acceleration attribute as a fraction of the character's maximum acceleration level.
+ *
+ * Mission riders (cBENewPlayerInterface_isMissionMan()) get 0.5. The level is @p value when positive, else the
+ * profile's acceleration stat for the character (D_00535538[profile][character][1]) divided by 5; the result is that
+ * level over the character's cMaxAccel (byte 0x9 of its D_005308D8 default-stat record).
+ *
+ * @param rider  race rider slot (On Tour iRider)
+ * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
+ * @return the attribute level divided by the character's acceleration maximum
+ */
 extern "C" float func_001493D8(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -242,6 +277,17 @@ struct sCharStat_func_001494C0
 extern sPlayerStatRow_func_001494C0 D_00535538_func_001494C0[] __asm__("D_00535538");
 extern sCharStat_func_001494C0 D_005308D8_func_001494C0[] __asm__("D_005308D8");
 
+/**
+ * Returns a rider's speed attribute as a fraction of the character's maximum speed level.
+ *
+ * Mission riders (cBENewPlayerInterface_isMissionMan()) get 0.5. The level is @p value when positive, else the
+ * profile's speed stat for the character (D_00535538[profile][character][0]) divided by 5; the result is that level
+ * over the character's cMaxSpeed (byte 0x8 of its D_005308D8 default-stat record).
+ *
+ * @param rider  race rider slot (On Tour iRider)
+ * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
+ * @return the attribute level divided by the character's speed maximum
+ */
 extern "C" float func_001494C0(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -543,6 +589,18 @@ static inline void vreset_149A88(char* o)
     vt[2].fn(o + vt[2].delta);
 }
 
+/**
+ * Resets a player profile to a new one: clears its player entry, names it "Player n", re-initialises its character
+ * records and resets the player, stat and BAGT interfaces.
+ *
+ * Zeroes the 0x1C-byte entry @p idx of cBELibrary_playerDB, sets bit 1 of the word at +0x10 and the byte at +0x11 to 4,
+ * and formats the localised kT_MEMPlayerName string (looked up through the FE locale's vtable) with @p idx + 1 as its
+ * name. Then calls cBEProfileLib_init on profile @p idx of cBELibrary_profileLib and the discard virtual (vtable slot
+ * 2) of the player (cBENewPlayerInterface_getThis), stat and BAGT interfaces. cBE's wrapper func_0014DE28 calls it on
+ * cBE_library.
+ *
+ * @param idx  the profile slot (On Tour index)
+ */
 extern "C" void func_00149A88(void* self, signed char idx)
 {
     char buf[64];
@@ -836,6 +894,9 @@ extern "C" void cBELibrary_loadData(void)
 //100%
 INCLUDE_ASM("be/beintstat", func_0014A078);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (an empty function; func_0014DEE8 calls it with cBE_library).
+ */
 extern "C" void func_0014A078(void) {
 
 }

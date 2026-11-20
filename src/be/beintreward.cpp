@@ -35,6 +35,11 @@ INCLUDE_ASM("be/beintreward", func_00156A10);
 extern "C" void cBERewardDB_init(void* db, int flag);
 extern void* cBELibrary_rewardDB[];
 
+/**
+ * Starts loading the reward database asynchronously: cBERewardDB_init(cBELibrary_rewardDB, 1).
+ *
+ * The rewards screen calls it when func_00156A38() reports the database not ready.
+ */
 extern "C" void func_00156A10()
 {
     cBERewardDB_init(cBELibrary_rewardDB, 1);
@@ -47,6 +52,14 @@ INCLUDE_ASM("be/beintreward", func_00156A38);
 // PORT: compares a pointer cast to int against -1; not 64-bit safe.
 extern void* cBELibrary_rewardDB[];
 
+/**
+ * Returns whether the reward database has finished loading.
+ *
+ * True when the first word of cBELibrary_rewardDB (On Tour cBERewardDB.mRewardFileIndex, the load request id) is -1,
+ * which cBERewardDB_init stores after a synchronous load, and the second (mpRewardsFile) is non-null.
+ *
+ * @return 1 when loaded, else 0
+ */
 extern "C" int func_00156A38(void)
 {
     int result = 0;
@@ -208,6 +221,25 @@ static inline int Match_6C70(sBEEntry_6C70* e, int type)
     return (type == 0 && (e->flags & 0x100)) || (type == 1 && (e->flags & 0x200)) || (type == 2 && (e->flags & 0x400));
 }
 
+/**
+ * Picks a random item of one type that the character does not have yet from the character's item-database entries, or
+ * returns -1.
+ *
+ * Walks the character's entries in the item database (func_0014BDB8; count func_0014D988, array func_0014D998, 0x38
+ * bytes each). Type 0 takes entries whose flags word (+0x34) has 0x100 set, type 1 0x200, type 2 0x400. An entry counts
+ * when its per-character state, found through the index table at +0x288 of the character record (cBELibrary_profileLib
+ * + profile * 0x9B50 + character * 0xF88) into the 4-byte states at +0x290, has bit 0x2 clear. Picks one of the n
+ * candidates with BXrand() % n and returns its id (+0x4).
+ *
+ * cBERewardInterface_awardUser uses it for award categories 17, 18 and 19 (types 0, 1, 2). The first pass tests byte
+ * +0x35 bit 0, the same bit as flags 0x100. The second pass dereferences the state pointer without the null check the
+ * first pass has.
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param type  item type, 0 to 2 (flags 0x100, 0x200, 0x400)
+ * @return the chosen item id, or -1 when there is none
+ */
 extern "C" int func_00156C70(void* self, int profileIndex, int characterId, int type)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -323,6 +355,19 @@ static inline sBEFlagEntry_6EE0* Flag_6EE0(char* p, sBEEntry_6EE0* e)
     return 0;
 }
 
+/**
+ * Picks a random item with flag 0x800 that the character does not have yet from the character's item-database entries,
+ * or returns -1.
+ *
+ * Same walk as func_00156C70 with the single test flags (+0x34) & 0x800: candidates are entries whose per-character
+ * state (index table at +0x288 of the character record (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88),
+ * states at +0x290) has bit 0x2 clear; one is chosen with BXrand() % n. cBERewardInterface_awardUser uses it for award
+ * categories 20 to 31.
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @return the chosen item id, or -1 when there is none
+ */
 extern "C" int func_00156EE0(void* self, int profileIndex, int characterId)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -376,7 +421,20 @@ unsigned int BXrand();
 extern "C" int func_00157210(void* self, int kind);
 extern "C" int func_00157518(void* self, int a1, int a2, int kind);
 
-// Picks a random not-yet-unlocked reward bit of the given kind for the profile/character, or -1 if all are unlocked.
+/**
+ * Picks a random reward of one kind that the character does not own yet.
+ *
+ * Returns -1 when the owned count (func_00157518) has reached the total (func_00157210). Otherwise takes n = BXrand() %
+ * (total - owned) and returns the index of the n-th clear bit in the kind's ownership bits in the character record
+ * (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88): +0xF30 posters (kind 3), +0xF36 trading cards (4),
+ * +0xF45 concept arts (5), +0xF52 videos (6), +0xF53 toys (7). Other kinds leave the bit pointer null.
+ * cBERewardInterface_awardUser gives the result with the matching buy function.
+ *
+ * @param profile  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param kind  reward kind, 3 to 7
+ * @return the reward index, or -1 when every reward of the kind is owned
+ */
 extern "C" int func_00157080(void* self, int profile, int characterId, int kind)
 {
     int total = func_00157210(self, kind);
@@ -420,6 +478,15 @@ int func_001572F0(void* self);
 int func_00157330(void* self);
 int func_00157310(void* self);
 
+/**
+ * Returns how many rewards of one kind exist.
+ *
+ * Kind 3 posters (func_001572B0), 4 trading cards (func_001572D0), 5 concept arts (func_001572F0), 6 videos
+ * (func_00157330), 7 toys (func_00157310), 8 returns 20 (the cheat characters), 9 returns 0; anything else 0.
+ *
+ * @param kind  reward kind, 3 to 9
+ * @return the number of rewards of that kind
+ */
 extern "C" int func_00157210(void* self, int kind)
 {
     switch (kind) {
@@ -447,6 +514,12 @@ extern "C" void* cBERewardInterface_getDB(void* self);
 //100%
 INCLUDE_ASM("be/beintreward", func_001572B0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of posters in the reward database (word +0x3C of cBERewardInterface_getDB(), On Tour
+ * cBERewardDB.mNumPosters).
+ *
+ * @return the posters count
+ */
 int func_001572B0(void* self)
 {
     return *(int*)((char*)cBERewardInterface_getDB(self) + 0x3c);
@@ -456,6 +529,12 @@ int func_001572B0(void* self)
 //100%
 INCLUDE_ASM("be/beintreward", func_001572D0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of trading cards in the reward database (word +0x40 of cBERewardInterface_getDB(), On Tour
+ * cBERewardDB.mNumTradingCards).
+ *
+ * @return the trading cards count
+ */
 int func_001572D0(void* self)
 {
     return *(int*)((char*)cBERewardInterface_getDB(self) + 0x40);
@@ -465,6 +544,12 @@ int func_001572D0(void* self)
 //100%
 INCLUDE_ASM("be/beintreward", func_001572F0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of concept arts in the reward database (word +0x44 of cBERewardInterface_getDB(), On Tour
+ * cBERewardDB.mNumConceptArts).
+ *
+ * @return the concept arts count
+ */
 int func_001572F0(void* self)
 {
     return *(int*)((char*)cBERewardInterface_getDB(self) + 0x44);
@@ -474,6 +559,12 @@ int func_001572F0(void* self)
 //100%
 INCLUDE_ASM("be/beintreward", func_00157310__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of toys in the reward database (word +0x48 of cBERewardInterface_getDB(), On Tour
+ * cBERewardDB.mNumToys).
+ *
+ * @return the toys count
+ */
 int func_00157310(void* self)
 {
     return *(int*)((char*)cBERewardInterface_getDB(self) + 0x48);
@@ -483,6 +574,12 @@ int func_00157310(void* self)
 //100%
 INCLUDE_ASM("be/beintreward", func_00157330__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of videos in the reward database (word +0x4C of cBERewardInterface_getDB(), On Tour
+ * cBERewardDB.mNumVideos).
+ *
+ * @return the videos count
+ */
 int func_00157330(void* self)
 {
     return *(int*)((char*)cBERewardInterface_getDB(self) + 0x4c);
@@ -494,6 +591,11 @@ extern "C" void* cAudioInterface_bxAudio(void* self);
 //100%
 INCLUDE_ASM("be/beintreward", func_00157350__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of songs: the word at +0x504 of the audio object (cAudioInterface_bxAudio()).
+ *
+ * @return the song count
+ */
 int func_00157350(void* self)
 {
     return *(int*)((char*)cAudioInterface_bxAudio(self) + 0x504);
@@ -503,6 +605,12 @@ int func_00157350(void* self)
 //100%
 INCLUDE_ASM("be/beintreward", func_00157370__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of cheat characters in the reward database (word +0x50 of cBERewardInterface_getDB(), On Tour
+ * cBERewardDB.mNumCheatChars).
+ *
+ * @return the cheat character count
+ */
 int func_00157370(void* self)
 {
     return *(int*)((char*)cBERewardInterface_getDB(self) + 0x50);
@@ -512,7 +620,15 @@ int func_00157370(void* self)
 //100%
 INCLUDE_ASM("be/beintreward", func_00157390);
 #ifdef SKIP_ASM
-// Counts the set bits among the first `count` bits of `bits` (LSB first).
+/**
+ * Counts the set bits among the first @p count bits of a bit array (least significant bit of each byte first).
+ *
+ * Used by the getNumOwned functions on the ownership bits of the character record.
+ *
+ * @param count  number of bits to look at (On Tour nRewards)
+ * @param bits  the bit array (On Tour flags)
+ * @return the number of set bits
+ */
 extern "C" int func_00157390(void* self, int count, signed char* bits)
 {
     int i = 0;
@@ -533,6 +649,14 @@ extern "C" int func_00157390(void* self, int count, signed char* bits)
 //100%
 INCLUDE_ASM("be/beintreward", func_001573F0);
 #ifdef SKIP_ASM
+/**
+ * Sets bit @p bit of a bit array (byte bit / 8, bit bit % 8).
+ *
+ * The buy functions (func_00157FD0 and its siblings) use it to mark a reward owned in the character record.
+ *
+ * @param bit  index of the bit to set (On Tour rewardIndex)
+ * @param bits  the bit array (On Tour flags)
+ */
 extern "C" void func_001573F0(void* self, int bit, char* bits)
 {
     int shift = bit % 8;
@@ -543,6 +667,15 @@ extern "C" void func_001573F0(void* self, int bit, char* bits)
 //100%
 INCLUDE_ASM("be/beintreward", func_00157430);
 #ifdef SKIP_ASM
+/**
+ * Returns bit @p bit of a bit array (byte bit / 8, bit bit % 8).
+ *
+ * The is...Owned functions (func_00157D60 and its siblings) use it on the ownership bits of the character record.
+ *
+ * @param bit  index of the bit to test (On Tour rewardIndex)
+ * @param bits  the bit array (On Tour flags)
+ * @return 1 when the bit is set, else 0
+ */
 extern "C" int func_00157430(void* self, int bit, char* bits)
 {
     int shift = bit % 8;
@@ -561,6 +694,19 @@ extern "C" int func_00157E60(void* self, int a1, int a2, int bit);
 extern "C" int func_00157E20(void* self, int a1, int a2, int bit);
 extern "C" int func_00157EE0(void* self, int a1, int a2, int bit);
 
+/**
+ * Returns whether the character owns reward @p bit of one kind.
+ *
+ * Dispatches by kind: 3 posters (func_00157D60), 4 trading cards (func_00157DA0), 5 concept arts (func_00157DE0), 6
+ * videos (func_00157E60), 7 toys (func_00157E20), 8 cheat characters (func_00157EE0, with @p bit + 10 since that
+ * function subtracts 10). Other kinds return 0.
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param kind  reward kind, 3 to 8
+ * @param bit  reward index
+ * @return non-zero when owned
+ */
 extern "C" int func_00157468(void* self, int profileIndex, int characterId, int kind, int bit)
 {
     switch (kind) {
@@ -586,6 +732,17 @@ extern "C" int func_00157740(void* self, int a1, int a2);
 extern "C" int func_001576E0(void* self, int a1, int a2);
 extern "C" int func_001577A0(void* self, int a1, int a2);
 
+/**
+ * Returns how many rewards of one kind the character owns.
+ *
+ * Kind 3 posters (func_001575C0), 4 trading cards (func_00157620), 5 concept arts (func_00157680), 6 videos
+ * (func_00157740), 7 toys (func_001576E0), 8 cheat characters (func_001577A0); other kinds 0.
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param kind  reward kind, 3 to 8
+ * @return the owned count
+ */
 extern "C" int func_00157518(void* self, int profileIndex, int characterId, int kind)
 {
     switch (kind) {
@@ -608,6 +765,16 @@ extern int cBELibrary_profileLib[];
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
+/**
+ * Returns how many posters the character owns.
+ *
+ * Counts (func_00157390) the first N bits at +0xF30 of the character record (cBELibrary_profileLib + profile * 0x9B50 +
+ * character * 0xF88), where N is the reward database's posters count (+0x3C of cBERewardInterface_getDB()).
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @return the number of posters owned
+ */
 extern "C" int func_001575C0(void* self, int profileIndex, int characterId)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -623,6 +790,16 @@ extern int cBELibrary_profileLib[];
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
+/**
+ * Returns how many trading cards the character owns.
+ *
+ * Counts (func_00157390) the first N bits at +0xF36 of the character record (cBELibrary_profileLib + profile * 0x9B50 +
+ * character * 0xF88), where N is the reward database's trading cards count (+0x40 of cBERewardInterface_getDB()).
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @return the number of trading cards owned
+ */
 extern "C" int func_00157620(void* self, int profileIndex, int characterId)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -638,6 +815,16 @@ extern int cBELibrary_profileLib[];
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
+/**
+ * Returns how many concept arts the character owns.
+ *
+ * Counts (func_00157390) the first N bits at +0xF45 of the character record (cBELibrary_profileLib + profile * 0x9B50 +
+ * character * 0xF88), where N is the reward database's concept arts count (+0x44 of cBERewardInterface_getDB()).
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @return the number of concept arts owned
+ */
 extern "C" int func_00157680(void* self, int profileIndex, int characterId)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -653,6 +840,16 @@ extern int cBELibrary_profileLib[];
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
+/**
+ * Returns how many toys the character owns.
+ *
+ * Counts (func_00157390) the first N bits at +0xF53 of the character record (cBELibrary_profileLib + profile * 0x9B50 +
+ * character * 0xF88), where N is the reward database's toys count (+0x48 of cBERewardInterface_getDB()).
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @return the number of toys owned
+ */
 extern "C" int func_001576E0(void* self, int profileIndex, int characterId)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -668,6 +865,16 @@ extern int cBELibrary_profileLib[];
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
+/**
+ * Returns how many videos the character owns.
+ *
+ * Counts (func_00157390) the first N bits at +0xF52 of the character record (cBELibrary_profileLib + profile * 0x9B50 +
+ * character * 0xF88), where N is the reward database's videos count (+0x4C of cBERewardInterface_getDB()).
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @return the number of videos owned
+ */
 extern "C" int func_00157740(void* self, int profileIndex, int characterId)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -681,6 +888,16 @@ INCLUDE_ASM("be/beintreward", func_001577A0);
 extern int cBELibrary_profileLib[];
 extern "C" int func_00157390(void* self, int count, signed char* bits);
 
+/**
+ * Returns how many cheat characters the character owns: the set bits among the 20 at +0xF57 of the character record
+ * (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88).
+ *
+ * The front end (festatelodge, festateriderbio) uses it to see whether any cheat character is unlocked.
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @return the number of cheat characters owned
+ */
 extern "C" int func_001577A0(void* self, int profileIndex, int characterId)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -842,6 +1059,16 @@ int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00157B70(void* self, int a, int b, int peak);
 
+/**
+ * Returns whether a peak is still locked for a race rider.
+ *
+ * Converts the rider to its profile (cBELibrary_getProfileIndex) and character (cBELibrary_getCharacterID) and calls
+ * func_00157B70.
+ *
+ * @param rider  race rider slot (On Tour iRider)
+ * @param peak  the peak (On Tour peakID)
+ * @return 1 when locked, else 0
+ */
 extern "C" int func_00157B08(void* self, int rider, int peak)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -854,6 +1081,17 @@ INCLUDE_ASM("be/beintreward", func_00157B70);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
 
+/**
+ * Returns whether peak 1 or 2 is still locked for a character.
+ *
+ * Reads the 64-bit flags word at +0x278 of the character record (cBELibrary_profileLib + profile * 0x9B50 + character *
+ * 0xF88): bit 12 for peak 1, bit 13 for peak 2. Every other peak is never locked (0). func_00158F60 clears these bits.
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param peak  the peak (On Tour peakID)
+ * @return 1 when locked, else 0
+ */
 // PORT: 64-bit ulong flag word (bit 12 = peak 1 locked, bit 13 = peak 2).
 extern "C" int func_00157B70(void* self, int profileIndex, int characterId, int peak)
 {
@@ -943,6 +1181,17 @@ INCLUDE_ASM("be/beintreward", func_00157D60);
 extern int cBELibrary_profileLib[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
+/**
+ * Returns whether the character owns poster @p bit: bit @p bit of the bits at +0xF30 of the character record
+ * (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88).
+ *
+ * Tests with func_00157430.
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param bit  poster index (On Tour rewardIndex)
+ * @return 1 when owned, else 0
+ */
 extern "C" int func_00157D60(void* self, int profileIndex, int characterId, int bit)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -956,6 +1205,17 @@ INCLUDE_ASM("be/beintreward", func_00157DA0);
 extern int cBELibrary_profileLib[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
+/**
+ * Returns whether the character owns trading card @p bit: bit @p bit of the bits at +0xF36 of the character record
+ * (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88).
+ *
+ * Tests with func_00157430.
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param bit  trading card index (On Tour rewardIndex)
+ * @return 1 when owned, else 0
+ */
 extern "C" int func_00157DA0(void* self, int profileIndex, int characterId, int bit)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -969,6 +1229,17 @@ INCLUDE_ASM("be/beintreward", func_00157DE0);
 extern int cBELibrary_profileLib[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
+/**
+ * Returns whether the character owns concept art @p bit: bit @p bit of the bits at +0xF45 of the character record
+ * (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88).
+ *
+ * Tests with func_00157430.
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param bit  concept art index (On Tour rewardIndex)
+ * @return 1 when owned, else 0
+ */
 extern "C" int func_00157DE0(void* self, int profileIndex, int characterId, int bit)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -982,6 +1253,17 @@ INCLUDE_ASM("be/beintreward", func_00157E20);
 extern int cBELibrary_profileLib[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
+/**
+ * Returns whether the character owns toy @p bit: bit @p bit of the bits at +0xF53 of the character record
+ * (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88).
+ *
+ * Tests with func_00157430.
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param bit  toy index (On Tour rewardIndex)
+ * @return 1 when owned, else 0
+ */
 extern "C" int func_00157E20(void* self, int profileIndex, int characterId, int bit)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -995,6 +1277,17 @@ INCLUDE_ASM("be/beintreward", func_00157E60);
 extern int cBELibrary_profileLib[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
+/**
+ * Returns whether the character owns video @p bit: bit @p bit of the bits at +0xF52 of the character record
+ * (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88).
+ *
+ * Tests with func_00157430.
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param bit  video index (On Tour rewardIndex)
+ * @return 1 when owned, else 0
+ */
 extern "C" int func_00157E60(void* self, int profileIndex, int characterId, int bit)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -1005,6 +1298,19 @@ extern "C" int func_00157E60(void* self, int profileIndex, int characterId, int 
 //100%
 INCLUDE_ASM("be/beintreward", func_00157EA0);
 #ifdef SKIP_ASM
+/**
+ * Returns bit @p bit of the 64-bit playlist word at +0xF78 of the character record (cBELibrary_profileLib + profile *
+ * 0x9B50 + character * 0xF88).
+ *
+ * Nothing calls it. It sits where On Tour has isSongOwned (between the video and cheat-character tests), but +0xF78 is
+ * the playlist (cBERewardInterface_getNumSongsInPlayList, func_00158750, func_00158848); the owned-song word is +0xF70
+ * (func_00158728, func_00158558). Either it is a playlist test or a song-ownership test reading the wrong word.
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param bit  song index
+ * @return 1 when the bit is set, else 0
+ */
 // PORT: 64-bit ulong bit test (ld/dsrlv).
 extern "C" int func_00157EA0(void* self, int profileIndex, int characterId, int bit)
 {
@@ -1019,6 +1325,18 @@ INCLUDE_ASM("be/beintreward", func_00157EE0);
 extern int cBELibrary_profileLib[];
 extern "C" int func_00157430(void* self, int bit, char* bits);
 
+/**
+ * Returns whether the character owns cheat character @p bit: bit (@p bit - 10) of the bits at +0xF57 of the character
+ * record (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88).
+ *
+ * Cheat character ids start at 10, after the ten regular characters. The character-select screen uses it to list the
+ * owned cheat characters.
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param bit  cheat character id, 10 and up (On Tour cheatCharID)
+ * @return 1 when owned, else 0
+ */
 extern "C" int func_00157EE0(void* self, int profileIndex, int characterId, int bit)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -1039,6 +1357,20 @@ int func_00158470_r(void* self, int a1, int a2, int bit, int give) __asm__("func
 int func_00158348_r(void* self, int a1, int a2, int bit, int give) __asm__("func_00158348");
 int func_00158618_r(void* self, int a1, int a2, int bit, int give) __asm__("func_00158618");
 
+/**
+ * Gives the character reward @p bit of one kind, optionally charging its price.
+ *
+ * Dispatches by kind: 3 func_00157FD0 (poster), 4 func_001580F8 (trading card), 5 func_00158220 (concept art), 6
+ * func_00158470 (video), 7 func_00158348 (toy), 8 func_00158618 (cheat character, with @p bit + 10). The gallery's buy
+ * popup calls it.
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param kind  reward kind, 3 to 8
+ * @param bit  reward index
+ * @param give  non-zero to charge the price (On Tour payForIt)
+ * @return the called function's result, or 0 for other kinds
+ */
 extern "C" int func_00157F20(void* self, int profileIndex, int characterId, int kind, int bit, int give)
 {
     switch (kind) {
@@ -1076,6 +1408,20 @@ struct sRewardDef_157FD0
     short padE;
 };
 
+/**
+ * Gives the character poster @p bit, charging its price when @p give is set.
+ *
+ * Marks the bit at +0xF30 of the character record (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88)
+ * (func_001573F0). With @p give, takes the price, the short at +0xC of the poster's 16-byte record (table at +0x14 of
+ * cBERewardInterface_getDB()), times 10 when positive, off the character's money (func_00150B48 on the economy
+ * interface, cBE_getInterface kind 11). When the character then owns every poster (owned count equal to the database
+ * count) it also gets cheat character 20 (func_00158618, unpaid). Ends with cBEEconInterface_getMoney().
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param bit  poster index (On Tour rewardIndex)
+ * @param give  non-zero to charge the price (On Tour payForIt)
+ */
 extern "C" void func_00157FD0(void* self, int profileIndex, int characterId, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
@@ -1119,6 +1465,20 @@ struct sRewardDef_1580F8
     short padE;
 };
 
+/**
+ * Gives the character trading card @p bit, charging its price when @p give is set.
+ *
+ * Marks the bit at +0xF36 of the character record (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88)
+ * (func_001573F0). With @p give, takes the price, the short at +0xC of the trading card's 16-byte record (table at
+ * +0x18 of cBERewardInterface_getDB()), times 10 when positive, off the character's money (func_00150B48 on the economy
+ * interface, cBE_getInterface kind 11). When the character then owns every trading card (owned count equal to the
+ * database count) it also gets cheat character 17 (func_00158618, unpaid). Ends with cBEEconInterface_getMoney().
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param bit  trading card index (On Tour rewardIndex)
+ * @param give  non-zero to charge the price (On Tour payForIt)
+ */
 extern "C" void func_001580F8(void* self, int profileIndex, int characterId, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
@@ -1162,6 +1522,20 @@ struct sRewardDef_158220
     short padE;
 };
 
+/**
+ * Gives the character concept art @p bit, charging its price when @p give is set.
+ *
+ * Marks the bit at +0xF45 of the character record (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88)
+ * (func_001573F0). With @p give, takes the price, the short at +0xC of the concept art's 16-byte record (table at +0x1C
+ * of cBERewardInterface_getDB()), times 10 when positive, off the character's money (func_00150B48 on the economy
+ * interface, cBE_getInterface kind 11). When the character then owns every concept art (owned count equal to the
+ * database count) it also gets cheat character 22 (func_00158618, unpaid). Ends with cBEEconInterface_getMoney().
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param bit  concept art index (On Tour rewardIndex)
+ * @param give  non-zero to charge the price (On Tour payForIt)
+ */
 extern "C" void func_00158220(void* self, int profileIndex, int characterId, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
@@ -1205,6 +1579,20 @@ struct sRewardDef_158348
     short padE;
 };
 
+/**
+ * Gives the character toy @p bit, charging its price when @p give is set.
+ *
+ * Marks the bit at +0xF53 of the character record (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88)
+ * (func_001573F0). With @p give, takes the price, the short at +0xC of the toy's 16-byte record (table at +0x20 of
+ * cBERewardInterface_getDB()), times 10 when positive, off the character's money (func_00150B48 on the economy
+ * interface, cBE_getInterface kind 11). When the character then owns every toy (owned count equal to the database
+ * count) it also gets cheat character 19 (func_00158618, unpaid). Ends with cBEEconInterface_getMoney().
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param bit  toy index (On Tour rewardIndex)
+ * @param give  non-zero to charge the price (On Tour payForIt)
+ */
 extern "C" void func_00158348(void* self, int profileIndex, int characterId, int bit, int give)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
@@ -1238,6 +1626,20 @@ extern "C" void func_001573F0(void* self, int bit, char* bits);
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern "C" int func_00150B48(void* self, int a, int b, int amount);
 
+/**
+ * Gives the character video @p idx, charging its price when @p award is set.
+ *
+ * Marks the bit at +0xF52 of the character record (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88)
+ * (func_001573F0). With @p award, takes the price, the short at +0xC of the video's 16-byte record (table at +0x24 of
+ * cBERewardInterface_getDB()), times 10 when positive, off the character's money (func_00150B48 on the economy
+ * interface). Ends with cBEEconInterface_getMoney(). Unlike the poster, card, art and toy versions it unlocks nothing
+ * for a complete set.
+ *
+ * @param profile  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param idx  video index (On Tour rewardIndex)
+ * @param award  non-zero to charge the price (On Tour payForIt)
+ */
 extern "C" void func_00158470(void* self, int profile, int characterId, int idx, int award)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
@@ -1264,6 +1666,18 @@ extern int cBELibrary_profileLib[];
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern "C" int func_00150B48(void* self, int a, int b, int amount);
 
+/**
+ * Gives the character song @p bit, charging 5000 when @p award is set.
+ *
+ * Sets bit @p bit of the 64-bit owned-song word at +0xF70 of the character record (cBELibrary_profileLib + profile *
+ * 0x9B50 + character * 0xF88); with @p award, takes 5000 off the character's money (func_00150B48 on the economy
+ * interface). Ends with cBEEconInterface_getMoney(). The message center's request line and the cheat codes call it.
+ *
+ * @param profile  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param bit  song index (On Tour songIndex)
+ * @param award  non-zero to charge the price (On Tour payForIt)
+ */
 // PORT: 64-bit ulong bit set (sd/ld).
 extern "C" void func_00158558(void* self, int profile, int characterId, int bit, int award)
 {
@@ -1291,6 +1705,20 @@ extern "C" void func_001573F0(void* self, int bit, char* bits);
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
 extern "C" int func_00150B48(void* self, int a, int b, int amount);
 
+/**
+ * Gives the character cheat character @p idx, charging its price when @p award is set.
+ *
+ * Marks bit (@p idx - 10) of the bits at +0xF57 of the character record (cBELibrary_profileLib + profile * 0x9B50 +
+ * character * 0xF88) (func_001573F0). With @p award, takes the price, the short at +0xC of the 16-byte record (idx -
+ * 10) in the table at +0x28 of cBERewardInterface_getDB(), times 10 when positive, off the character's money
+ * (func_00150B48). Ends with cBEEconInterface_getMoney(). The buy functions call it with ids 17, 19, 20 and 22 for
+ * completed sets; the cheat codes and cBERewardInterface_awardUser call it too.
+ *
+ * @param profile  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param idx  cheat character id, 10 and up (On Tour cheatCharID)
+ * @param award  non-zero to charge the price (On Tour payForIt)
+ */
 extern "C" void func_00158618(void* self, int profile, int characterId, int idx, int award)
 {
     idx -= 10;
@@ -1313,6 +1741,14 @@ INCLUDE_ASM("be/beintreward", func_00158700);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
 
+/**
+ * Returns the character's radio mode: the word at +0xF80 of the character record (cBELibrary_profileLib + profile *
+ * 0x9B50 + character * 0xF88).
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @return the radio mode
+ */
 extern "C" int func_00158700(void* self, int profileIndex, int characterId)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -1326,6 +1762,14 @@ INCLUDE_ASM("be/beintreward", func_00158728);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
 extern int cBELibrary_profileLib[];
 
+/**
+ * Returns the character's owned-song list: the 64-bit word at +0xF70 of the character record (cBELibrary_profileLib +
+ * profile * 0x9B50 + character * 0xF88).
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @return the owned-song bits
+ */
 extern "C" long func_00158728(void* self, int profileIndex, int characterId)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -1339,6 +1783,14 @@ INCLUDE_ASM("be/beintreward", func_00158750);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
 extern int cBELibrary_profileLib[];
 
+/**
+ * Returns the character's playlist: the 64-bit word at +0xF78 of the character record (cBELibrary_profileLib + profile
+ * * 0x9B50 + character * 0xF88).
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @return the playlist bits
+ */
 extern "C" long func_00158750(void* self, int profileIndex, int characterId)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -1349,6 +1801,14 @@ extern "C" long func_00158750(void* self, int profileIndex, int characterId)
 //100%
 INCLUDE_ASM("be/beintreward", func_00158778);
 #ifdef SKIP_ASM
+/**
+ * Returns how many songs the character owns: the set bits among the 64 at +0xF70 of the character record
+ * (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88).
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @return the number of owned songs
+ */
 extern "C" int func_00158778(void* self, int profileIndex, int characterId)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -1381,6 +1841,14 @@ INCLUDE_ASM("be/beintreward", func_001587F8);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
 
+/**
+ * Sets the character's radio mode: the word at +0xF80 of the character record (cBELibrary_profileLib + profile * 0x9B50
+ * + character * 0xF88).
+ *
+ * @param a1  profile index (On Tour iProfileIndex)
+ * @param a2  character ID (On Tour iCharacterID)
+ * @param value  the radio mode (On Tour radioMode)
+ */
 extern "C" void func_001587F8(void* self, int a1, int a2, int value)
 {
     char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 3976;
@@ -1394,6 +1862,14 @@ INCLUDE_ASM("be/beintreward", func_00158820);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
 extern int cBELibrary_profileLib[];
 
+/**
+ * Sets the character's owned-song list: the 64-bit word at +0xF70 of the character record (cBELibrary_profileLib +
+ * profile * 0x9B50 + character * 0xF88).
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param value  the owned-song bits (On Tour iOwnedSongList)
+ */
 extern "C" void func_00158820(void* self, int profileIndex, int characterId, long value)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -1407,6 +1883,14 @@ INCLUDE_ASM("be/beintreward", func_00158848);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
 extern int cBELibrary_profileLib[];
 
+/**
+ * Sets the character's playlist: the 64-bit word at +0xF78 of the character record (cBELibrary_profileLib + profile *
+ * 0x9B50 + character * 0xF88).
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param value  the playlist bits (On Tour iPlayList)
+ */
 extern "C" void func_00158848(void* self, int profileIndex, int characterId, long value)
 {
     char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
@@ -1473,6 +1957,16 @@ extern int cBELibrary_profileLib[];
 //100%
 INCLUDE_ASM("be/beintreward", func_001588C8);
 #ifdef SKIP_ASM
+/**
+ * Returns the best collectibles medal a count reaches on a peak.
+ *
+ * Compares @p v with the peak's four targets in D_0045AFE8 (the table cBERewardInterface_getCollectibleMedalTarget
+ * reads), best medal first.
+ *
+ * @param idx  the peak (On Tour peakID)
+ * @param v  number of collectibles found (On Tour numCollected)
+ * @return the first medal (0 best to 3) whose target @p v reaches, or -1
+ */
 extern "C" int func_001588C8(void* self, int idx, int v)
 {
     int* row = D_0045AFE8 + idx * 4;
@@ -1515,6 +2009,19 @@ signed char cBERewardInterface_getTrackMedal(void* self, int iProfileIndex, int 
 //100%
 INCLUDE_ASM("be/beintreward", func_00158960);
 #ifdef SKIP_ASM
+/**
+ * Returns a character's best result for one event: the word at +0x4 of its score record.
+ *
+ * The record comes from cBECharProfileDB_getScoreStats() with @p locationId and @p event, as in
+ * cBERewardInterface_getTrackMedal (which reads the medal byte of the same record). The trophy room shows it as the
+ * best time (seconds) or best score.
+ *
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param event  the game event (On Tour eventID)
+ * @param locationId  the location (On Tour location)
+ * @return the best time or score, or 0 when there is no record
+ */
 extern "C" int func_00158960(void* self, int profileIndex, int characterId, int event, int locationId)
 {
     void* result = cBECharProfileDB_getScoreStats(&((sProfileSlot_00158910 (*)[10])cBELibrary_profileLib)[profileIndex][characterId], locationId, event);
@@ -1615,6 +2122,16 @@ extern "C" int cBERewardInterface_getEarningsMedal(cBERewardInterface* self, int
 //100%
 INCLUDE_ASM("be/beintreward", func_00158B70);
 #ifdef SKIP_ASM
+/**
+ * Returns the best big-challenges medal a completed-challenge count reaches on a peak.
+ *
+ * Compares @p v with the peak's four targets in D_0045B018 (the table cBERewardInterface_getChallengesMedalTarget
+ * reads), best medal first.
+ *
+ * @param idx  the peak (On Tour peakID)
+ * @param v  number of completed big challenges (On Tour numCompletedChallenges)
+ * @return the first medal (0 best to 3) whose target @p v reaches, or -1
+ */
 extern "C" int func_00158B70(void* self, int idx, int v)
 {
     int* row = D_0045B018 + idx * 4;
@@ -1627,6 +2144,15 @@ extern "C" int func_00158B70(void* self, int idx, int v)
 //100%
 INCLUDE_ASM("be/beintreward", func_00158BB8);
 #ifdef SKIP_ASM
+/**
+ * Returns the earnings medal for a cash total on a peak: 1 when it reaches the peak's target, else -1.
+ *
+ * The target is D_0045B048[@p idx] (what cBERewardInterface_getEarningsTarget returns), compared unsigned.
+ *
+ * @param idx  the peak (On Tour peakID)
+ * @param v  total cash earned (On Tour totalCashEarned)
+ * @return 1 when @p v reaches the target, else -1
+ */
 extern "C" int func_00158BB8(void* self, int idx, unsigned int v)
 {
     return (v < (unsigned int)D_0045B048[idx]) ? -1 : 1;
@@ -1797,6 +2323,12 @@ void* cBERewardInterface_getTotalNumUserAwards(void* self)
 //100%
 INCLUDE_ASM("be/beintreward", func_00158F50);
 #ifdef SKIP_ASM
+/**
+ * Returns the cash recorded in the user-awards log: the first word of cBELibrary_userAwards (On Tour
+ * tUserAwardsData.iCash).
+ *
+ * @return the awarded cash
+ */
 extern "C" void *func_00158F50(void) {
     return *cBELibrary_userAwards;
 }
@@ -1817,6 +2349,21 @@ struct sCharRec_158F60 {
     char pad280[0xF88 - 0x280];
 };
 
+/**
+ * Unlocks peak 1 (mode 1) or peaks 2 and 1 (mode 2) for the character and logs each newly unlocked peak as a peak-pass
+ * award.
+ *
+ * Mode 2 clears bit 13 of the 64-bit flags at +0x278 of the character record (cBELibrary_profileLib + profile * 0x9B50
+ * + character * 0xF88) when set and logs it with func_0015A628(cBELibrary_userAwards, @p row, 2, character * 3 + 2); it
+ * then falls through to mode 1, which does the same for bit 12 with character * 3 + 1. Mode 0 does nothing. Bits 12 and
+ * 13 are the locks func_00157B70 tests. cBERewardInterface_awardUser calls it for peak 0's trophy categories (mode 1)
+ * and peak 1's (mode 2).
+ *
+ * @param profile  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
+ * @param row  the award category the log entry goes under (On Tour awardCategory)
+ * @param mode  which peaks to unlock: 1 or 2
+ */
 extern "C" void func_00158F60(void* self, int profile, int characterId, int row, int mode)
 {
     sReward_0015A628* awards = (sReward_0015A628*)cBELibrary_userAwards;
@@ -1976,6 +2523,33 @@ extern sRaceSettings_1591E8 D_005305B0_1591E8 __asm__("cBELibrary_raceDB");
 extern signed char D_005305F9[];
 
 
+/**
+ * Hands out the rewards for an event result: medal cash, the award category, trophies, and the unlocks of the peak's
+ * next events.
+ *
+ * The peak comes from func_0015A398 (the location's peak; events 6/9, 7/10 and 8/11 force peaks 0, 1 and 2) and the
+ * trophy from func_0015A3B8. The cash is func_00151040(economy interface, @p medal, @p event, @p mode). The award
+ * category is the peak plus 17 (events 0-3), 20 (4), 23 (5), 26 (6-8) or 29 (9-11). A medal of 0 or 1 calls
+ * cBERewardInterface_awardUser for it on the first result (score-record count 0); events 6-11 with medal 3 or 2 call
+ * func_001E1DD0 instead, unless raceDB byte +0x49 (D_005305F9) is set.
+ *
+ * When the medal beats the stored one (cBERewardInterface_isBetterMedal), pays the full cash (func_00159818), records
+ * the medal (func_00152528) and gives the trophy with cBERewardInterface_awardUserTrophy if it became owned; otherwise
+ * records the medal and pays half. A conquered mountain gets award 0 once. Stores the medal and cash in mLastEventMedal
+ * and mLastEventCashReward of cBERewardInterface_instance.
+ *
+ * With any medal it then walks the trophy's five requirements in D_0045AAD8[peak][trophy] (event byte, location byte;
+ * event -1 ends) and checks each for a medal with cBERewardInterface_getTrackMedal. If they hold, it clears a lock bit
+ * in the character's flags (+0x278: 0x40/0x80/0x100 for trophy 0, 0x200/0x400/0x800 otherwise, by peak) and calls
+ * func_001E2370; the requirements on events 4 and 5 gate a second set of bits (0x4000-0x80000). Events 12 and 13 leave
+ * the category at -1, which would still reach cBERewardInterface_awardUser (possible bug).
+ *
+ * @param profile  profile index (On Tour iProfileIndex)
+ * @param c  character ID (On Tour iCharacterID)
+ * @param mode  the game event, 0 to 13 (On Tour eventID)
+ * @param event  the location (On Tour locationID)
+ * @param medal  the medal earned, 0 best to 3, -1 none (On Tour medalID)
+ */
 extern "C" void func_001591E8(void* self, int profile, int c, int mode, int event, int medal)
 {
     sProfileChar_1591E8* pc = &D_004A6CA8_1591E8[profile][c];
@@ -2121,6 +2695,12 @@ int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern "C" void func_00159818(void* self, int a, int b, int c);
 
+/**
+ * Gives a race rider cash: converts the rider to profile and character and calls func_00159818.
+ *
+ * @param rider  race rider slot (On Tour iRider)
+ * @param money  the amount (On Tour cash)
+ */
 extern "C" void func_001597B0(void* self, int rider, int money)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -2142,6 +2722,20 @@ extern "C" void cBERewardInterface_awardUserTrophy(cBERewardInterface* self, int
 extern void* gNextEarningsLimit;
 extern void* cBELibrary_userAwards[];
 
+/**
+ * Gives a character cash, logging it and awarding any earnings trophies the new total earns.
+ *
+ * Adds @p amount to the awards log's cash (the first word of cBELibrary_userAwards), then to the character's money and
+ * total earned (func_00150A90 on the economy interface). When gNextEarningsLimit is non-zero and the total earned
+ * (cBEEconInterface_getTotalMoneyEarned) plus @p amount reaches it, it notes trophy 3 of the three peaks
+ * (cBERewardInterface_isTrophyOwned) before paying, moves the limit on with
+ * cBERewardInterface_calculateNextEarningsLevel, and awards each trophy 3 that became owned
+ * (cBERewardInterface_awardUserTrophy).
+ *
+ * @param a  profile index (On Tour iProfileIndex)
+ * @param b  character ID (On Tour iCharacterID)
+ * @param amount  the cash (On Tour cash)
+ */
 extern "C" void func_00159818(void* self, int a, int b, int amount)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
@@ -2276,6 +2870,13 @@ INCLUDE_ASM("be/beintreward", func_00159C68);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
+/**
+ * Gives a race rider an award category: converts the rider to profile and character and calls
+ * cBERewardInterface_awardUser.
+ *
+ * @param rider  race rider slot (On Tour iRider)
+ * @param bit  the award category (On Tour awardCategory)
+ */
 extern "C" void func_00159C68(void* self, int rider, int bit)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -2490,6 +3091,15 @@ extern "C" int cBERewardInterface_isAwardReceived(void* self, int iProfileIndex,
 //100%
 INCLUDE_ASM("be/beintreward", func_0015A320);
 #ifdef SKIP_ASM
+/**
+ * Returns bit @p bit of a bit array (byte bit / 8, bit bit % 8).
+ *
+ * cBERewardInterface_isAwardReceived uses it on the award-category bits at +0xF28 of the character record.
+ *
+ * @param bit  bit index (On Tour bitIndex)
+ * @param bits  the bit array (On Tour pBitsArray)
+ * @return 1 when set, else 0
+ */
 extern "C" int func_0015A320(void* self, int bit, unsigned char* bits)
 {
     int shift = bit % 8;
@@ -2500,6 +3110,14 @@ extern "C" int func_0015A320(void* self, int bit, unsigned char* bits)
 //100%
 INCLUDE_ASM("be/beintreward", func_0015A358);
 #ifdef SKIP_ASM
+/**
+ * Sets bit @p bit of a bit array (byte bit / 8, bit bit % 8).
+ *
+ * cBERewardInterface_awardUser uses it to mark an award category received (+0xF28 of the character record).
+ *
+ * @param bit  bit index (On Tour bitIndex)
+ * @param bits  the bit array (On Tour pBitsArray)
+ */
 extern "C" void func_0015A358(void* self, int bit, unsigned char* bits)
 {
     int shift = bit % 8;
@@ -2519,6 +3137,12 @@ extern sBERewardEntry cBELibrary_locationDB[];
 //100%
 INCLUDE_ASM("be/beintreward", func_0015A398);
 #ifdef SKIP_ASM
+/**
+ * Returns the peak a location belongs to: the word at +0x54 of its 0x64-byte cBELibrary_locationDB entry.
+ *
+ * @param a1  the location (On Tour locationID)
+ * @return the peak ID
+ */
 extern "C" int func_0015A398(void* self, int a1)
 {
     return cBELibrary_locationDB[a1].field_0x54;
@@ -2536,6 +3160,16 @@ struct sRewardPair_0015A3B8
 
 extern sRewardPair_0015A3B8 D_0045AAD8[3][4][5];
 
+/**
+ * Returns which trophy of its peak an event at a location counts toward.
+ *
+ * Searches the requirement table D_0045AAD8[3 peaks][4 trophies][5] (event byte, location byte) for an entry with event
+ * @p a and location @p b; for events 6 to 11 the event alone matches. Returns the trophy index of the first hit.
+ *
+ * @param a  the game event (On Tour eventID)
+ * @param b  the location (On Tour locationID)
+ * @return the trophy index, 0 to 3, or -1 when no entry matches
+ */
 extern "C" int func_0015A3B8(void* self, int a, int b)
 {
     for (int i = 0; i < 3; i++)
@@ -2624,6 +3258,15 @@ extern "C" void cBEUserAwards_clear(void* self)
 //100%
 INCLUDE_ASM("be/beintreward", func_0015A548);
 #ifdef SKIP_ASM
+/**
+ * Counts the set bits among the first @p n bits of a bit array (least significant bit of each byte first).
+ *
+ * Nothing calls it.
+ *
+ * @param n  number of bits to look at (On Tour nMaxBits)
+ * @param bits  the bit array (On Tour pBitsArray)
+ * @return the number of set bits
+ */
 extern "C" int func_0015A548(void* self, int n, unsigned char* bits)
 {
     int i = 0;
@@ -2645,6 +3288,14 @@ extern "C" int func_0015A548(void* self, int n, unsigned char* bits)
 //100%
 INCLUDE_ASM("be/beintreward", func_0015A5B0);
 #ifdef SKIP_ASM
+/**
+ * Sets bit @p bit of a bit array (byte bit / 8, bit bit % 8).
+ *
+ * func_0015A628 uses it on the awards log's per-type bits.
+ *
+ * @param bit  bit index (On Tour bitIndex)
+ * @param bits  the bit array (On Tour pBitsArray)
+ */
 extern "C" void func_0015A5B0(void* self, int bit, unsigned char* bits)
 {
     int shift = bit % 8;
@@ -2655,6 +3306,15 @@ extern "C" void func_0015A5B0(void* self, int bit, unsigned char* bits)
 //100%
 INCLUDE_ASM("be/beintreward", func_0015A5F0);
 #ifdef SKIP_ASM
+/**
+ * Returns bit @p bit of a bit array (byte bit / 8, bit bit % 8).
+ *
+ * Nothing calls it.
+ *
+ * @param bit  bit index (On Tour bitIndex)
+ * @param bits  the bit array (On Tour pBitsArray)
+ * @return 1 when set, else 0
+ */
 extern "C" int func_0015A5F0(void* self, int bit, unsigned char* bits)
 {
     int shift = bit % 8;
@@ -2681,6 +3341,18 @@ struct sReward_0015A628
     unsigned char* mBits[10];        // 0x174
 };
 
+/**
+ * Records one reward in the user-awards log under an award category.
+ *
+ * Columns 0-7 (reward types) set bit @p value in the type's bits (mBits[col] at +0x174, func_0015A5B0) and count it in
+ * row @p row's counts (+0x6 + row * 10). Column 8 stores @p value as the row's byte 8 (a cheat character's id); column
+ * 9 sets the row's byte 9 to 1 and the short at +0x4 (On Tour iCharBoltID) to @p value (an item id).
+ * cBERewardInterface_awardUser and func_00158F60 call it on cBELibrary_userAwards.
+ *
+ * @param row  the award category (On Tour awardCategory)
+ * @param col  the reward type (On Tour rewardType)
+ * @param value  the reward index or id (On Tour index)
+ */
 extern "C" void func_0015A628(sReward_0015A628* self, int row, int col, int value)
 {
     switch (col)
@@ -2746,6 +3418,14 @@ int cBEUserAwards_getTotalNumAwards_impl(sRewardGrid_0015A6F0* self)
 //100%
 INCLUDE_ASM("be/beintreward", func_0015A750);
 #ifdef SKIP_ASM
+/**
+ * Returns one count of the user-awards log: the signed byte for award category @p row and reward type @p column (+0x6 +
+ * row * 10 + column).
+ *
+ * @param row  the award category (On Tour awardCategory)
+ * @param column  the reward type (On Tour rewardType)
+ * @return the count
+ */
 extern "C" signed char func_0015A750(void* self, int row, int column)
 {
     return *(signed char*)((char*)self + (row * 0xa + column) + 0x6);
@@ -2755,6 +3435,12 @@ extern "C" signed char func_0015A750(void* self, int row, int column)
 //100%
 INCLUDE_ASM("be/beintreward", func_0015A768__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Returns the user-awards log's bit array for one reward type: mBits[@p i] at +0x174 (On Tour mpAwardBits).
+ *
+ * @param i  the reward type (On Tour rewardType)
+ * @return the bit array, or null for types without one
+ */
 int func_0015A768(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2) + 0x174);
@@ -2764,6 +3450,15 @@ int func_0015A768(void* self, int i)
 //100%
 INCLUDE_ASM("be/beintreward", func_0015A778);
 #ifdef SKIP_ASM
+/**
+ * Constructs the reward database: sets the load handle (+0x0) to -1 and zeroes the table pointers and counts.
+ *
+ * Zeroes +0x4 to +0x24 and +0x2C to +0x4C. It skips +0x28 and +0x50, the cheat-character table and count that
+ * func_0015A818 fills and func_00157370 reads (an oversight; the one instance, cBELibrary_rewardDB, is a zeroed global
+ * anyway).
+ *
+ * @return @p self
+ */
 extern "C" void* func_0015A778(void* self)
 {
     *(int*)((char*)self + 0x4) = 0;
@@ -2795,6 +3490,11 @@ INCLUDE_ASM("be/beintreward", func_0015A7D0);
 void operator_delete(int* ptr);
 extern "C" void func_0015AE00(void* self);
 
+/**
+ * Destroys the reward database: frees its data with func_0015AE00 and deletes the object when bit 0 of @p flags is set.
+ *
+ * @param flags  destructor flags; bit 0 frees the object
+ */
 extern "C" void func_0015A7D0(int* self, int flags)
 {
     func_0015AE00(self);
@@ -2844,6 +3544,20 @@ struct sRewardData {
 
 #define FIXUP(e) if (e) e = self->strings + ((int)e - 1)
 
+/**
+ * Parses a loaded reward file into the reward database's tables and turns its string offsets into pointers.
+ *
+ * Stores @p data at +0x4 (On Tour mpRewardsFile). The file starts with nine (type, count) word pairs, each followed by
+ * its records: type 0 trophies and 1 medals (3 string words each), 2 peak passes (2), 3 posters, 4 trading cards, 5
+ * concept arts, 6 videos, 7 toys and 8 cheat characters (16-byte records, 3 strings). The tables and counts land at On
+ * Tour cBERewardDB's mpTrophies..mpCheatChars (+0x8 to +0x28) and mNumTrophies..mNumCheatChars (+0x30 to +0x50).
+ *
+ * After the pairs comes one word, then the string pool (+0x2C, mpStrings). Every non-zero string word is an offset + 1
+ * into the pool and becomes strings + (offset - 1). cBERewardDB_init calls it after a synchronous load and
+ * func_0015AEC0 calls it once an asynchronous load has finished.
+ *
+ * @param data  the loaded reward file (On Tour pFileData)
+ */
 extern "C" void func_0015A818(sRewardData* self, int* data)
 {
     int n;
