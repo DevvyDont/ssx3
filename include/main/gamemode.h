@@ -39,7 +39,7 @@ struct cGameModeMan {
     int iCurrModeHandler;       // 0x04 [R] indexes aHandler (initGameMode, restartHeat, riderCheckpointHit ...);
                                 //      purge = -1; [O]
     int iCurrentGameEvent;      // 0x08 [R] initGameMode(iBEGameEvent) stores its argument; getGM/purge = -1; [O]
-    int iCurrentGamePath;       // 0x0C [R] initGameMode stores newRace.cGamePath (D_00535C11; 2 = online); [O]
+    int iCurrentGamePath;       // 0x0C [R] initGameMode stores newRace.cGamePath (D_00535C11; 2 = multiplayer, online included); [O]
     int iNumberAI;              // 0x10 [O]; [U] preview assert `iRider < (pManager->iNumberAI+1)`; big air = 5
     int iSimAI;                 // 0x14 [O]; [U] big air = 4 or 5, race = 0; gamestate sets newRace's AI count to
                                 //      iNumberAI - iSimAI (the AI riders that really ride; On Tour getNumberAIToSim)

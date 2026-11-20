@@ -471,6 +471,30 @@ struct sSnd54F8Mgr {
     sSnd54F8Sub sub;         // 0x1D8
 };
 
+/**
+ * Plays a speech file from a stream at a position (or 2D) and registers the voice with the bank monitor.
+ *
+ * Starts stream @p a1 on the file @p a2 at @p a3 (func_002AAD78 with the hold time @p a5); a negative handle is
+ * returned as is. Then pushes a play-option level with the defaults, sets the 3D radius (func_002A9988): @p f when
+ * above 0, else 29.997713 for a human speaker and 100 otherwise, stores @p a6 as the voice's user pointer and, with a
+ * position @p a4, follows it on the closest view (func_00288940). In the multiplayer game path a human speaker's voice
+ * is panned to its side @p a8 (two-player pan). The handle goes to cBankMonitor_BANKMONITOR_Create(.., 0x7F, type 3)
+ * and func_002ABCF8 records the stream's slot, file and offset on the instance; the level is popped. It fills slot 1 of
+ * cSSXAudio's cSpeechSys vtable (D_004836D8; pure virtual in cSpeechSys), which func_002B04D8 calls to start a speech
+ * line.
+ *
+ * @param vself  the audio system
+ * @param a1  the stream index
+ * @param a2  the file name (the speech .big path)
+ * @param a3  the offset of the line in the file
+ * @param a4  the speaker's position (t4Vector*), or 0 for none
+ * @param a5  the stream hold time
+ * @param a6  the user pointer stored on the voice (the request's identity)
+ * @param a7  nonzero when the speaker is a human rider
+ * @param f  the 3D radius, or 0 for the default
+ * @param a8  the speaker's view (two-player side)
+ * @return the stream voice handle, or a negative value on failure
+ */
 extern "C" int func_002854F8(cSSXAudio* vself, int a1, const char* a2, int a3, int a4, int a5, int a6, int a7, float f, int a8)
 {
     cSSXAudio* self = vself;
@@ -605,6 +629,20 @@ static inline float Atan2_5930(float y, float x)
     return r;
 }
 
+/**
+ * Computes a positional voice's place relative to its view's camera: pan and elevation angles and squared distance.
+ *
+ * Returns 1.0 outside the game (no cGame). The voice's position (+0x68) is transformed by the camera matrix of its
+ * viewport (+0x84) with VU0, offset by (0, 25, -100) and scaled to metres (0.01). With mAudioMode 0 the angles at +8 /
+ * +10 of @p outAngles are 0; otherwise the azimuth at +8 is atan2(x, z) in 1/65536 turns (0x4000 or 0xC000 for a
+ * two-player-panned voice, by its side at +0xA4) and the elevation at +10 is atan2(y, horizontal distance). It fills
+ * slot 6 of cSSXAudio's cBankMonitor vtable (D_00483640), pure virtual in cBankMonitor's cBankMonitor_vtbl.
+ *
+ * @param audio  the audio system
+ * @param source  the voice's monitor instance (cBankMonitorInstance)
+ * @param outAngles  the sound driver's play options (SNDPLAYOPTS) to fill
+ * @return the squared distance in square metres
+ */
 extern "C" float func_00285930(char* audio, char* source, char* outAngles)
 {
     if (*(int*)((char*)cAudioInterface_getApp() + 0x84) == 0)
@@ -687,6 +725,20 @@ extern "C" void* cAudioInterface_getGame();
 extern "C" void cSSXAudio_ResetLift(void* self);
 extern "C" void func_00289BB8(void* self);
 
+/**
+ * Updates the audio each frame: the sound system, ducking and mixing, then the in-game sound events.
+ *
+ * Plays thunder when the screen tint asks (func_00390EF8, cSSXAudio_PlayThunder), runs func_002AB958, and while a
+ * stream is ducked (mDuckStream not 3) un-ducks it (func_00287F00(self, 3, 0.5, 1.0)) once that stream has started and
+ * stopped again. Then cSSXAudio_UpdateDuck and func_002887F8. In game: func_0028C8C8 and, while mAudioUpdateState is 6,
+ * func_0028F000 (not paused), func_00295208, the lift update (cSSXAudio_UpdateLift in game state 4, else
+ * cSSXAudio_ResetLift), cSSXAudio_UpdateAttachedSounds, func_0028E100, cSSXAudio_UpdateTrackBanks, func_0029AB40,
+ * func_0029B738, cSSXAudio_UpdateTimedEvent, cSSXAudio_UpdateTone, and func_00289BB8 when mAudioPaused is set and
+ * cPauseState_Flags bit 1 is clear. Finally cSSXAudio_ApplyRMSData. cGame_render, cRealFE_render and func_0022C830 call
+ * it.
+ *
+ * @param dt  the frame time
+ */
 extern "C" void func_00285BF8(char* self, float dt)
 {
     if (func_00390EF8() != 0)
@@ -794,6 +846,12 @@ INCLUDE_ASM("sound/ssxAudio", func_00285F48);
 extern "C" void func_002A7718(void*);
 extern "C" void func_002AD3C0(void*);
 
+/**
+ * Destroys every bank monitor instance: first the crowd voices (func_002A7718), then the base cBankMonitor's
+ * (func_002AD3C0).
+ *
+ * It fills slot 2 of cSSXAudio's cBankMonitor vtable (D_00483640), where cBankMonitor has func_002AD3C0.
+ */
 extern "C" void func_00285F48(cSSXAudio* self)
 {
     func_002A7718(self);
@@ -813,6 +871,13 @@ struct func_00285F80_sPair {
 
 extern "C" void func_002AD410(void* obj, ...);
 
+/**
+ * Destroys the bank monitor instances that use a callback: forwards to the base cBankMonitor's func_002AD410.
+ *
+ * It fills slot 3 of cSSXAudio's cBankMonitor vtable (D_00483640), where cBankMonitor has func_002AD410.
+ *
+ * @param key  the callback (pointer to member)
+ */
 extern "C" void func_00285F80(cSSXAudio* self, func_00285F80_sPair key)
 {
     void* inner = *(void**)self->MusicSys.mpVStreamSys;
@@ -858,6 +923,15 @@ struct sIniParser5FB0 {
 
 struct sSaVt5FB0 { short delta; short index; void (*fn)(void*, char*, int, void*, int); };
 
+/**
+ * Loads the front-end audio: the front-end sound levels, its main bank from banks.inf and the character-select music.
+ *
+ * Sets sound level 0 (cSSXAudio_InitSoundLevels) and update state 1, reads data/config/banks.inf: BASEPATH of the
+ * GLOBAL section, then section FE, whose MAIN bank is loaded synchronously into slot 0 (func_0028BC58). Un-ducks
+ * (func_00287F00(self, 3, 0.5, 1.0)), starts the "charsel" stream through the music system's vtable slot 2 with the
+ * Music volume control, sets the song state 301, unk_6290 to 10 and unk_6090 to unk_608C, and resumes the audio
+ * (func_00289BB8). cRealFE_load and the sound-mode setters of the options and memory-card screens call it.
+ */
 extern "C" void func_00285FB0(char* self)
 {
     sIniParser5FB0 parser;
@@ -906,6 +980,9 @@ INCLUDE_ASM("sound/ssxAudio", func_002861D0);
 #ifdef SKIP_ASM
 struct sSaVt61D0 { short delta; short index; int (*fn)(void*, int); };
 
+/**
+ * Calls the music system's vtable slot 4 (set track) with 1; the retail image has no call or data reference to it.
+ */
 extern "C" void func_002861D0(char* self)
 {
     char* mon = self + 0x118;
@@ -983,7 +1060,6 @@ extern char cBENewRaceInterface_newRace[];
  * sounds load from data/config/crowd.inf, with 2 or 1 by the race type (newRace +0x49). The // comment above
  * calls this front-end setup; it is the in-game load.
  */
-// Front-end audio setup: reads the audio ini, registers each stream group with the async system.
 extern "C" void cSSXAudio_InGameLoad(char* self)
 {
     char ext[0x40];
@@ -1285,6 +1361,16 @@ struct sSsxAudioBanks {
 };
 extern "C" void func_0028BE60(void* self, int i, int a, int b);
 
+/**
+ * Loads one of the two track sound banks from data in memory and records its section.
+ *
+ * The handle carries the slot (0 or 1) in bits 8 and up and the section in the low byte. With data, bank-manager slot 8
+ * + slot gets it (func_0028BE60, 0x20000 bytes), mTrackBankLoaded[slot] is set and mTrackBankLoadedSection[slot]
+ * records the section. cSSXAudio_UnAttachAudioBank undoes it.
+ *
+ * @param id  the handle: slot << 8 | section
+ * @param on  the bank data in main memory, or 0 to do nothing
+ */
 extern "C" void func_00286CA8(sSsxAudioBanks* self, unsigned int id, int on)
 {
     unsigned int bank = id >> 8;
@@ -1360,6 +1446,13 @@ extern "C" void func_002A39E0(void* self);
 extern signed char D_00535C11[];
 extern void* gWorldTriggerManager;
 
+/**
+ * Starts the in-game audio of an event: update state 6, world triggers reset, all rider sounds, and the grunt timer.
+ *
+ * Sets the update state 6 (cSSXAudio_SetAudioUpdateState), resets the world triggers, begins every rider's sounds
+ * (cSSXAudio_BeginAllRiderSound) and stores the cAI's AITick in mGruntCycle. In game paths 1 and 2 (D_00535C11) it also
+ * requests the PA's location line func_002A39E0. cSSXAudio_InGameInit calls it.
+ */
 extern "C" void func_00286E20(void* self)
 {
     cSSXAudio_SetAudioUpdateState((cSSXAudio*)self, 6);
@@ -1406,6 +1499,19 @@ static inline int sa_state6EA0()
 
 struct sSaVt6EA0 { short delta; short index; int (*fn)(void*, int); };
 
+/**
+ * Plays the finish of a rider's event for its view: crowd cheer, music, the PA's place line and the result record.
+ *
+ * Only for the focus rider of its view. Raises a level-2 TRICK cheer (func_002A73A8; view 0 when replaying), stops the
+ * rider's wipeout slide and tumble (func_00296E20, func_00297438) and uber spin. In game modes 2 and 3 before the last
+ * heat the music gets track 36 (and unk_627C is cleared), otherwise track 10, each when func_0028D960 allows. A rider
+ * that finished (mDidNotFinish 0) gets the PA's place line: func_002A3708 at the locations of func_002A4078; in the
+ * multiplayer game path func_002A3708 when the race is over (cAI_isRaceFinished), else func_002A34D0; otherwise
+ * func_002A34D0 before heat 3 and func_002A3708 from heat 3. In game path 0 the result is recorded (func_002A45C0).
+ * cRider_doFinishEvent calls it.
+ *
+ * @param rider  the rider (cRider)
+ */
 // PORT: rider pointers passed through int parameters of some callees.
 extern "C" void func_00286EA0(char* self, char* rider)
 {
@@ -1489,6 +1595,13 @@ extern "C" void cSSXAudio_PlayHistoryAdd(void* self, int a, int b, int c, int d,
 extern "C" int func_002A4168(void* self);
 extern "C" int func_002A41D8(void* self);
 
+/**
+ * Resets the audio for a partial restart (func_002871B0), and in game modes of func_002A4168 / func_002A41D8 marks
+ * play-history event 0.
+ *
+ * That event is added (cSSXAudio_PlayHistoryAdd(self, 0, 0, -1, 0, 0)) when the game mode is not 4, unk_5824 has
+ * reached cGameModeMan iNextHeat and the event is not live yet. cGame_partialRestart calls it.
+ */
 extern "C" void func_00287108(void* self)
 {
     func_002871B0(self);
@@ -1513,6 +1626,15 @@ extern "C" void func_00296E20(void* self, int id);
 extern "C" void func_00297438(void* self, int id);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
+/**
+ * Resets the in-game audio state: lift, uber spin, ducking, world triggers, every rider's wipeout loops and the turbo.
+ *
+ * Calls cSSXAudio_ResetLift, cSSXAudio_EndUberSpin, func_00287F00(self, 3, 0.5, 1.0) and
+ * cWorldTriggerManager_ResetStates, stops the wipeout slide and tumble of every allocated rider (func_00296E20,
+ * func_00297438), clears mCurTrickPower[0..1], and while mTurboRef is above 0 stops mTurboHandle (mode 1, the fade read
+ * back from the just-cleared mCurTrickPower[0]) and clears mTurboRef. cSSXAudio_RestartEvent, func_00287108 and
+ * cGFPreEventState_ResetGameState call it.
+ */
 extern "C" void func_002871B0(void* self)
 {
     int i = 0;
@@ -1548,6 +1670,15 @@ extern char cBENewRaceInterface_newRace[];
 
 struct sSaVt72A8 { short delta; short index; int (*fn)(void*, int); };
 
+/**
+ * Starts the music and DJ intro of an event without a start gate (game modes 5 and 6).
+ *
+ * Stores the cAI's AITick in mGruntCycle, then only in game modes 5 and 6: with unk_530 set the music system's vtable
+ * slot 4 gets track 0, else func_0028D488 and func_0028CF98(self, 0, 0, -1, 0). Unless play-history event 0 is live: in
+ * game events 4 and 5 it queues the DJ line func_002A1138 (unk_5788), or in the multiplayer path plays func_002A26F0(0,
+ * 0) at once, then queues the song announcement (unk_5774, unk_5778 = func_002B4908). The pre-event overlays in
+ * fe/ovstatepause.cpp call it when they close.
+ */
 extern "C" void func_002872A8(void* self)
 {
     *(int*)((char*)self + 0x582C) = *(int*)(*(char**)((char*)cAudioInterface_getGame() + 0xC) + 0x8);
@@ -1593,6 +1724,12 @@ static inline float clamp_73D8(float f, float lo, float hi)
 }
 
 extern "C" float func_002873D8_impl(void* self, int n) __asm__("func_002873D8");
+/**
+ * Converts a volume setting 0..11 to a level 0.0..1.0 (n / 11, clamped).
+ *
+ * @param n  the setting
+ * @return the level
+ */
 extern "C" float func_002873D8_impl(void* self, int n)
 {
     return clamp_73D8(n * 0.09090909361839294f, 0.0f, 1.0f);
@@ -1606,6 +1743,13 @@ extern "C" float func_002873D8(void*);
 // PORT: cSSXAudio_SetCurrVolume's real parameter order is (self, int, float); the unit declares (self, float, int).
 void cSSXAudio_SetCurrVolume_if(void*, int, float) __asm__("cSSXAudio_SetCurrVolume");
 
+/**
+ * Applies the music volume setting (0..11, passed on in $a1 to func_002873D8) to the Music, Ambient and DJ controls.
+ *
+ * Sets controls 1 and 8 to the level, and control 2 too when DJ speech is on (unk_62B8) and unk_608C is not 2. The
+ * options screens, the pause options, the memory-card load and cSSXApp_initload call it. The setting is not a declared
+ * parameter: it stays in $a1 for func_002873D8.
+ */
 extern "C" void func_00287410(void* self)
 {
     float level = func_002873D8(self);
@@ -1624,6 +1768,12 @@ extern "C" float func_002873D8(void*);
 // PORT: cSSXAudio_SetCurrVolume's real parameter order is (self, int, float); the unit declares (self, float, int).
 void cSSXAudio_SetCurrVolume_if(void*, int, float) __asm__("cSSXAudio_SetCurrVolume");
 
+/**
+ * Applies the sound-effect volume setting (0..11, passed on in $a1) to the SFX, PA, Board and Collision controls.
+ *
+ * Sets controls 5, 3, 6 and 7 to func_002873D8's level, and with mArcadeSFX set also 9 and 10 (ArcadeSFX,
+ * ArcadeSpeech). The setting is not a declared parameter: it stays in $a1 for func_002873D8.
+ */
 extern "C" void func_00287488(void* self)
 {
     float level = func_002873D8(self);
@@ -1644,6 +1794,11 @@ INCLUDE_ASM("sound/ssxAudio", func_00287520);
 extern "C" float func_002873D8(void*);
 extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio*, float, int);
 
+/**
+ * Applies the character speech volume setting (0..11, passed on in $a1) to control 4 (Character).
+ *
+ * The setting is not a declared parameter: it stays in $a1 for func_002873D8.
+ */
 extern "C" void func_00287520(cSSXAudio* self)
 {
     cSSXAudio_SetCurrVolume(self, func_002873D8(self), 4);
@@ -1683,6 +1838,13 @@ INCLUDE_ASM("sound/ssxAudio", func_002875D0);
 extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio*, float, int);
 extern "C" float func_00287920(void* self, int a1);
 
+/**
+ * Turns the arcade sound effects and speech on or off: controls 9 and 10 get the SFX level (control 5) or 0.
+ *
+ * Records @p on in mArcadeSFX. func_00288F60 calls it for every preset (on for presets 0..3, off for 4 and 5).
+ *
+ * @param on  nonzero to enable the arcade sounds
+ */
 extern "C" void func_002875D0(void* self, int on)
 {
     if (on != 0) {
@@ -1701,6 +1863,11 @@ INCLUDE_ASM("sound/ssxAudio", func_00287670);
 #ifdef SKIP_ASM
 extern "C" float func_00287920(void* self, int a1);
 
+/**
+ * Returns the music volume setting 0..11: the set level of control 1 (Music) times 11, truncated.
+ *
+ * @return the setting
+ */
 extern "C" int func_00287670(void* self)
 {
     return (int)(func_00287920(self, 1) * 11.0f);
@@ -1712,6 +1879,11 @@ INCLUDE_ASM("sound/ssxAudio", func_002876A0);
 #ifdef SKIP_ASM
 extern "C" float func_00287920(void* self, int a1);
 
+/**
+ * Returns the sound-effect volume setting 0..11: the set level of control 5 (SFX) times 11, truncated.
+ *
+ * @return the setting
+ */
 extern "C" int func_002876A0(void* self)
 {
     return (int)(func_00287920(self, 5) * 11.0f);
@@ -1723,6 +1895,11 @@ INCLUDE_ASM("sound/ssxAudio", func_002876D0);
 #ifdef SKIP_ASM
 extern "C" float func_00287920(void* self, int a1);
 
+/**
+ * Returns the character speech volume setting 0..11: the set level of control 4 (Character) times 11, truncated.
+ *
+ * @return the setting
+ */
 extern "C" int func_002876D0(void* self)
 {
     return (int)(func_00287920(self, 4) * 11.0f);
@@ -1868,6 +2045,12 @@ extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio* self_, float volume, int ch)
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00287920);
 #ifdef SKIP_ASM
+/**
+ * Returns the set level of a volume control (mSoundVolume[i].setVolume).
+ *
+ * @param volumeIndex  the volume control (eVolumeControl)
+ * @return the level, 0.0..1.0
+ */
 extern "C" float func_00287920(void* self, int volumeIndex)
 {
     self = (char*)self + (volumeIndex << 4);
@@ -1878,6 +2061,15 @@ extern "C" float func_00287920(void* self, int volumeIndex)
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00287930);
 #ifdef SKIP_ASM
+/**
+ * Returns the applied level of a volume control, or a character's own level for control 4.
+ *
+ * Control 4 (Character) with a character below 10 reads unk_636C[charIndex]; others read mSoundVolume[i].appliedVolume.
+ *
+ * @param volumeIndex  the volume control (eVolumeControl)
+ * @param charIndex  the character for control 4
+ * @return the level
+ */
 extern "C" float func_00287930(void* self, int volumeIndex, int charIndex)
 {
     if (volumeIndex != 4 || charIndex >= 10) {
@@ -1890,6 +2082,15 @@ extern "C" float func_00287930(void* self, int volumeIndex, int charIndex)
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00287968);
 #ifdef SKIP_ASM
+/**
+ * Returns a pointer to the applied level of a volume control, or to a character's own level for control 4.
+ *
+ * Same choice as func_00287930. The sound calls pass it as the voice's volume control (mVolControl).
+ *
+ * @param volumeIndex  the volume control (eVolumeControl)
+ * @param charIndex  the character for control 4
+ * @return a pointer to the level (float)
+ */
 extern "C" void* func_00287968(void* self, int volumeIndex, int charIndex)
 {
     if (volumeIndex != 4 || charIndex >= 10) {
@@ -1903,6 +2104,12 @@ extern "C" void* func_00287968(void* self, int volumeIndex, int charIndex)
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_002879A0);
 #ifdef SKIP_ASM
+/**
+ * Returns a pointer to the set level of a volume control (&mSoundVolume[idx].setVolume).
+ *
+ * @param idx  the volume control (eVolumeControl)
+ * @return a pointer to the level
+ */
 extern "C" char* func_002879A0(char* self, int idx)
 {
     return &self[25276 + (idx << 4)];
@@ -2161,6 +2368,18 @@ INCLUDE_ASM("sound/ssxAudio", func_00287F00);
 extern "C" void cSSXAudio_DuckVolume(cSSXAudio* self, int a1, float a2, float a3);
 extern "C" int func_00284BA0(int);
 
+/**
+ * Ducks the other sounds while a stream plays, or with stream 3 (none) restores them.
+ *
+ * Stream 3 while ducked (mStreamIsDucked): un-ducks the controls of mDuckStream (cSSXAudio_DuckVolume with the mask
+ * func_00284BA0, level 1.0 over @p fadeTime), then mDuckScale = @p duckLevel, mDuckStream = 3, mStreamIsDucked = 0.
+ * Another stream while not ducked: ducks that stream's controls to @p duckLevel over @p fadeTime and records it
+ * (mDuckStream, mStreamIsDucked 1, mDuckScale, mDuckedStreamHasStarted 0).
+ *
+ * @param duckStream  the stream that ducks the others, or 3 to restore
+ * @param fadeTime  the fade time
+ * @param duckLevel  the ducked level
+ */
 extern "C" void func_00287F00(void* self, int duckStream, float fadeTime, float duckLevel)
 {
     if (duckStream == 3) {
@@ -2299,6 +2518,14 @@ extern "C" void cSSXAudio_LoadMixes(sAudio7FC8* self)
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00288370);
 #ifdef SKIP_ASM
+/**
+ * Converts a mix value to a level: a percentage (0.01 * value), or for a negative value the current level of the mix
+ * control (its final mix value while a mix is fading, else mMixLevel).
+ *
+ * @param i  the mix control
+ * @param pct  the mix value (percent), or negative to keep the control's level
+ * @return the level
+ */
 extern "C" float func_00288370(void* self, int i, int pct)
 {
     if (pct >= 0) {
@@ -2446,6 +2673,16 @@ struct sAudioFade_87A8 {
     float target[11];  // 0x6440
 };
 
+/**
+ * Sets a mix control's final value and, when asked, its per-frame step to reach it in a given time (at 60 fps).
+ *
+ * A target equal to the current level clears the step.
+ *
+ * @param i  the mix control
+ * @param smooth  nonzero to compute the step
+ * @param target  the final level
+ * @param time  the fade time in seconds
+ */
 extern "C" void func_002887A8(sAudioFade_87A8* self, int i, int smooth, float target, float time)
 {
     self->target[i] = target;
@@ -2491,6 +2728,14 @@ struct sSaMixOut87F8 {
     float out[10];              // 0x636C
 };
 
+/**
+ * Steps the mix levels toward their final values and re-applies the volumes, while a mix is fading.
+ *
+ * Only while mMixing is set (cleared first, set again while a control still moves). Each of the 11 controls with a step
+ * moves mMixLevel by mMixStep, stopping at mMixFinalValue, and gets appliedVolume = duckedVolume * mMixLevel. Then the
+ * ten character levels unk_636C are the Character control's applied volume times the constants D_004A352C ..
+ * D_004A3550.
+ */
 extern "C" void func_002887F8(sSaMix87F8* self)
 {
     if (self->dirty == 0) return;
@@ -2576,6 +2821,12 @@ static inline float audVu0Dot_8940(const sAudV4_8940& a, const sAudV4_8940& b)
     return r;
 }
 
+/**
+ * Returns the view (0 or 1) whose camera is nearer a position; 0 with fewer than two views.
+ *
+ * @param id  the position (t4Vector*)
+ * @return the view index
+ */
 // PORT: second parameter is really an sAudV4_8940*; kept int to agree with func_00288A20's declaration.
 // FAKEMATCH: register pin `register int r FM_REG("$2")` (local-alloc gives v0 to the dot asm's block-local "=&r"
 // temps before the global r; retail keeps r in v0); plain form 94.02% (unpositioned).
@@ -2605,6 +2856,14 @@ int cSSXAudio_GetNumViews_self(void* self) __asm__("cSSXAudio_GetNumViews");
 
 struct sAudVtEnt { short delta; short index; int (*fn)(void*); };
 
+/**
+ * Returns the view a rider's sounds play on: its own view for a local human, else the view nearer its position.
+ *
+ * Outside the game 0; with one view 0; otherwise func_00288940 of the rider's position (cRider vtable slot 5).
+ *
+ * @param obj  the rider (cRider)
+ * @return the view index
+ */
 extern "C" int func_00288A20(void* self, void* obj)
 {
     if (cAudioInterface_isInGame() == 0) {
@@ -2744,6 +3003,15 @@ INCLUDE_ASM("sound/ssxAudio", func_00288C08);
 #ifdef SKIP_ASM
 void* cSSXAudio_GetCameraPos(void* self, int a1);
 
+/**
+ * Tells whether a position lies within a radius (in metres) of any view's camera and in front of it (z above 0).
+ *
+ * func_00298488 (RiderCollision) uses it.
+ *
+ * @param pos  the position
+ * @param radius  the radius in metres (scaled by 100)
+ * @return 1 or 0
+ */
 // PORT: PS2-only VU0 inline asm (vector subtract).
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 extern "C" int func_00288C08(void* self, sAudV4* pos, float radius)
@@ -2882,6 +3150,15 @@ INCLUDE_ASM("sound/ssxAudio", func_00288F60);
 // PORT: cSSXAudio_SetCurrVolume's real parameter order is (self, int, float); the unit declares (self, float, int).
 void cSSXAudio_SetCurrVolume_if(void*, int, float) __asm__("cSSXAudio_SetCurrVolume");
 
+/**
+ * Applies a sound preset: stores it in mPreset and sets the ten volume controls and the arcade sounds for it.
+ *
+ * Preset 0 sets controls 1..10 to 10/11 with arcade on; 1 silences speech (2, 3, 4, 9, 10); 2 silences the music (1); 3
+ * keeps only the effects (5..8); 4 keeps only the music; 5 silences all; 4 and 5 turn the arcade sounds off
+ * (func_002875D0).
+ *
+ * @param mode  the preset, 0..5
+ */
 extern "C" void func_00288F60(void* self, int mode)
 {
     *(int*)((char*)self + 0x6470) = mode;
@@ -2973,6 +3250,9 @@ INCLUDE_ASM("sound/ssxAudio", func_00289398);
 #ifdef SKIP_ASM
 extern "C" void func_00288F60(void* self, int mode);
 
+/**
+ * Steps to the previous sound preset (wrapping 0 to 5) and applies it (func_00288F60).
+ */
 extern "C" void func_00289398(char* self)
 {
     int cur = *(int*)(self + 0x6470);
@@ -2989,6 +3269,9 @@ INCLUDE_ASM("sound/ssxAudio", func_002893C8);
 #ifdef SKIP_ASM
 extern "C" void func_00288F60(void* self, int mode);
 
+/**
+ * Steps to the next sound preset (wrapping 5 to 0) and applies it (func_00288F60).
+ */
 extern "C" void func_002893C8(char* self)
 {
     int n = *(int*)(self + 0x6470) + 1;
@@ -3024,6 +3307,13 @@ INCLUDE_ASM("sound/ssxAudio", func_00289448);
 #ifdef SKIP_ASM
 extern "C" void func_002B6950(int, int, int);
 
+/**
+ * Monitor callback: re-enables the world triggers (func_002B6950(gWorldTriggerManager, 1, 0)); returns 1.
+ *
+ * cSSXAudio_DelayMonitorTriggers installs it (D_004A3600) as a 250 ms monitor.
+ *
+ * @return 1
+ */
 extern "C" int func_00289448(void) {
     func_002B6950((*(int*)&gWorldTriggerManager), 1, 0);
     return 1;
@@ -3041,6 +3331,12 @@ extern "C" char* strcpy(char* dst, const char* src);
 extern char* str_x_H;
 struct sAudio_9470 { char pad[0x60A4]; char names[20][0x14]; };
 
+/**
+ * Reads the play-list names: up to 20 section names of data/config/playlist.inf into the table, counted in
+ * mNumPlayLists (0 when the file is missing).
+ *
+ * The cSSXAudio constructor calls it.
+ */
 extern "C" void func_00289470(void* self)
 {
     if (BXFILE_exists(str_x_H) != 0) {
@@ -3080,6 +3376,16 @@ void func_002B4060(void* self);
 extern char* str_x_H;
 extern char str_SONG[];
 
+/**
+ * Selects a play list by name: loads its SONG entries into the music system and records its index.
+ *
+ * Clears the music system's song list (func_002B3EB0), reads the section of data/config/playlist.inf that matches
+ * @p name and adds each SONG (func_002B3EE8), sets mPlayListIndex to the index of @p name in the play-list table (20
+ * when absent), finishes the list (func_002B4060) and copies MusicSys.mActiveMap into +0x518. The constructor and the
+ * debug menu call it.
+ *
+ * @param name  the play list (section) name
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t off-PS2.
 extern "C" void func_00289520(cSSXAudio* self, const char* name)
 {
@@ -3116,6 +3422,11 @@ INCLUDE_ASM("sound/ssxAudio", func_00289650);
 // PORT: func_00289680 is defined (void*) but this caller passes (system, msg).
 void func_00289680_2(void* self, void* msg) __asm__("func_00289680__FPv");
 
+/**
+ * Sound-driver user-data callback: passes a stream chunk of type 3 to the audio system (func_00289680 on gSSXAudio).
+ *
+ * @param msg  the user chunk (SNDUSERDATACBINFO; its first word is the type)
+ */
 extern "C" void func_00289650(void* msg)
 {
     if (*(int*)msg == 3) {
@@ -3127,6 +3438,9 @@ extern "C" void func_00289650(void* msg)
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00289680__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: handles a stream user-data chunk passed on by func_00289650.
+ */
 void func_00289680(void* self)
 {
 }
@@ -3237,6 +3551,12 @@ INCLUDE_ASM("sound/ssxAudio", func_00289830);
 #ifdef SKIP_ASM
 extern "C" void cSSXAudio_DuckVolume(cSSXAudio* self, int a1, float a2, float a3);
 
+/**
+ * Ducks the music by the stream's RMS level: when the level differs from mLastRMSDuckLevel, cSSXAudio_DuckVolume(1,
+ * level, 0) and record it.
+ *
+ * @param duckLevel  the duck level
+ */
 extern "C" void func_00289830(void* self, float duckLevel)
 {
     if (*(float*)((char*)self + 0x6C5C) != duckLevel) {
@@ -3249,6 +3569,14 @@ extern "C" void func_00289830(void* self, float duckLevel)
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00289880);
 #ifdef SKIP_ASM
+/**
+ * Cancels the RMS ducking data: mValidRMSData = 0, the final value back to 1.0, the step frame 0 and the step 1.0 -
+ * mRMSCurValue.
+ *
+ * The retail image has no call or data reference to it.
+ *
+ * @param audio  the audio system
+ */
 extern "C" void func_00289880(void *audio) {
     (*(int *)((char*)(audio) + (0x6C58))) = 0;
     (*(float *)((char*)(audio) + (0x6C6C))) = 1.0f;
@@ -3342,6 +3670,17 @@ void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFoc
 struct sSaVt99F8a { short delta; short index; int* (*fn)(void*); };
 struct sSaVt99F8b { short delta; short index; int (*fn)(void*, int); };
 
+/**
+ * Reacts to a world-painter music event for the focus rider: switches the song or the music track.
+ *
+ * Only for the focus rider (cSSXAudio_GetFocusRider(self, -1)) and with data. The id from the data's vtable slot 4: -1
+ * nothing; 0x1F the music state 101 (func_0028CF98(.., 1, ..)) unless already there; 0x20 state 102 likewise; 33
+ * nothing; any other id goes to the music system's vtable slot 4 (set track). cSSXAudio_UpdateAudioWorldPainter calls
+ * it.
+ *
+ * @param rider  the rider
+ * @param obj  the world-painter data (tWPInGameData)
+ */
 extern "C" void func_002899F8(void* self, void* rider, void* obj)
 {
     if (rider != cSSXAudio_GetFocusRider_p(self, -1)) return;
@@ -3383,6 +3722,13 @@ extern "C" void* cSSXAudio_StopRiderSound(void* self);
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00289AF8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Stops a rider's sounds when the rider is destroyed: cSSXAudio_StopRiderSound with the rider passed on in $a1.
+ *
+ * cRider__cRider calls it.
+ *
+ * @return the result of cSSXAudio_StopRiderSound (unused)
+ */
 void* func_00289AF8(void* self)
 {
     return cSSXAudio_StopRiderSound(self);
@@ -3396,6 +3742,13 @@ extern "C" void cSSXAudio_BindingsOff(void* a0, void* a1);
 extern "C" void cSSXAudio_BindingsOn(void* a0, void* a1);
 extern "C" void cSSXAudio_UndoBindings(void* a0, void* a1);
 
+/**
+ * Plays an animation's sound tag: 80 cSSXAudio_BindingsOff, 81 cSSXAudio_BindingsOn, 82 cSSXAudio_UndoBindings.
+ *
+ * @param ssxAudio  the audio system
+ * @param rider  the rider
+ * @param type  the tag (patch)
+ */
 extern "C" void func_00289B18(cSSXAudio* ssxAudio, void* rider, int type)
 {
     if (type == 80) {
@@ -3435,6 +3788,12 @@ extern "C" void cSSXAudio_ResumeSFX(void*);
 extern "C" void func_002B11B0(void*, int);
 extern "C" void func_002A4550(void*);
 
+/**
+ * Resumes paused audio: the music (func_002B3A98) and the effects (cSSXAudio_ResumeSFX), clearing mAudioPaused.
+ *
+ * When unk_5828 is set it also stops speech instance 0 (func_002B11B0), clears the pending speech flags (func_002A4550)
+ * and unk_5828. func_00285BF8, func_00285FB0, cSSXAudio_InGameDeInit and a game state call it.
+ */
 extern "C" void func_00289BB8(void* self)
 {
     if (*(int*)((char*)self + 0x5FB4) != 0) {
@@ -3464,6 +3823,15 @@ struct sSsxAudioVEntryI {
     int (*fn)(void*);
 };
 
+/**
+ * Returns a rider's character level from its stat level: below 4 gives 0, below 8 gives 1, else 2.
+ *
+ * The stat level comes from cBEStatInterface_getStatLevel (BE interface 3) for the rider's AI index. func_0028F000 and
+ * func_0028F108 use it.
+ *
+ * @param src  the rider (cRider)
+ * @return 0, 1 or 2
+ */
 extern "C" int func_00289C18(void* self, void* src)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
@@ -3513,6 +3881,14 @@ extern "C" void cSSXAudio_ReactToWPMixEvent(cSSXAudio* self, int id, void* obj)
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00289D08);
 #ifdef SKIP_ASM
+/**
+ * Converts the options' sound mode to the sound driver's mode: 0 gives 1, 1 gives 2, 2 gives 0, 3 gives 3.
+ *
+ * cSSXApp_initload uses it.
+ *
+ * @param a1  the options' sound mode
+ * @return the driver mode (eSOUNDDEF_MODE)
+ */
 extern "C" int func_00289D08(void* self, unsigned char a1)
 {
     int result = 1;
@@ -3536,6 +3912,12 @@ extern "C" int func_00289D08(void* self, unsigned char a1)
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00289D60);
 #ifdef SKIP_ASM
+/**
+ * Converts the sound driver's mode to the options' sound mode: 1 gives 0, 2 gives 1, 0 gives 2, 3 gives 3.
+ *
+ * @param a1  the driver mode (eSOUNDDEF_MODE)
+ * @return the options' sound mode
+ */
 extern "C" void* func_00289D60(void* self, int a1)
 {
     int result = 0;
@@ -3561,6 +3943,13 @@ extern "C" void* func_00289D60(void*, int);
 //99.29%
 INCLUDE_ASM("sound/ssxAudio", func_00289DC0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the current sound mode for the options: func_00289D60 of mAudioMode.
+ *
+ * cFEStateOptionsSound_updateWidget uses it.
+ *
+ * @return the options' sound mode
+ */
 void* func_00289DC0(void* self)
 {
     return func_00289D60(self, *(int*)((char*)self + 0x62b0));
@@ -3570,6 +3959,13 @@ void* func_00289DC0(void* self)
 //100%
 INCLUDE_ASM("sound/ssxAudio", func_00289DE0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns mPlayIntroMovieWithDJ and clears it (a one-shot flag; the constructor sets it).
+ *
+ * cRealFE_update reads it.
+ *
+ * @return the previous flag
+ */
 int func_00289DE0(void* self)
 {
     int old = *(int*)((char*)self + 0x6c88);
@@ -3617,6 +4013,17 @@ struct sAsync289DF0 {
     virtual void v05(int id, int a, int mode, char* name, int b, int c);
 };
 
+/**
+ * Cancels the current asynchronous bank load, optionally the whole queue, then starts the next one.
+ *
+ * Pops the front entries of the four request queues (user handle, slot, kind, flags). While a load is busy, kinds 0..2
+ * cancel and release the async file and report the end through the object's vtable slot 5 (state 1 when the cancel
+ * succeeded, else 2, with the slot's file name), clearing the busy flag. With @p flush set the queues are emptied.
+ * Finally cAsyncSys_ASYNCSYS_StartLoad. cAsyncSys_ASYNCSYS_Cancel, cAsyncSys_ASYNCSYS_CancelCurrent,
+ * cAsyncSys_ASYNCSYS_CancelAll, cAsyncSys_ASYNCSYS_DeInit, cAsyncSys_ASYNCSYS_Update and cSSXAudio_InGamePurge call it.
+ *
+ * @param flush  nonzero to cancel every queued request too
+ */
 extern "C" void func_00289DF0(void* self, int flush)
 {
     sAsync289DF0* s = (sAsync289DF0*)self;

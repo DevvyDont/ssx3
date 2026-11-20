@@ -45,6 +45,15 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B4B70);
 #ifdef SKIP_ASM
 extern unsigned char D_004A35A8[];
 
+/**
+ * Constructs a world trigger instance (0x70 bytes): clears every field, audio handle -1, last frame -1.0.
+ *
+ * Sets the handle (+0x30) to -1, the position's w (+0x2C) to 1.0, the swap string (+0x40) empty and the last animation
+ * frame (+0x68) to -1.0; everything else is 0. The cWorldTriggerManager constructor runs it on each of its 40
+ * instances.
+ *
+ * @return self
+ */
 extern "C" void* func_002B4B70(void* self)
 {
     *(int*)((char*)self + 0x30) = -1;
@@ -74,6 +83,13 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B4BE0);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a world trigger instance: nothing to release; deletes the object when bit 0 of flags is set.
+ *
+ * cWorldTriggerManager__cWorldTriggerManager calls it with 0 for each instance.
+ *
+ * @param flags  g++ 2.95 destructor flags (bit 0: operator delete the object)
+ */
 extern "C" void func_002B4BE0(int* self, int flags)
 {
     if (flags & 1) {
@@ -85,6 +101,16 @@ extern "C" void func_002B4BE0(int* self, int flags)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B4C08);
 #ifdef SKIP_ASM
+/**
+ * Returns whether a world trigger instance is for the given object, audio volume and viewport.
+ *
+ * Compares objectRef with +0x4, volNum with +0x8 and viewPort with +0x3C.
+ *
+ * @param objectRef  the object reference
+ * @param volNum  the audio volume number within the object
+ * @param viewPort  the viewport
+ * @return 1 on a match, else 0
+ */
 extern "C" int func_002B4C08(void* self, int objectRef, int volNum, int viewPort)
 {
     if (objectRef == *(int*)((char*)self + 0x4)
@@ -240,6 +266,27 @@ static inline void voiceTail_4C38(struct sWt4C38* t)
     (*p4)->sub.p64[(*p4)->sub.cur] = t->f3C;
 }
 
+/**
+ * Per-frame update of a touched world trigger instance: starts its sound once, then keeps its volume current.
+ *
+ * Without a sound (+0x30 == -1): records whether it is a crowd trigger (func_002B5838, +0x38); a non-crowd trigger
+ * whose object volume is already playing elsewhere (func_002B66E8) is reset (func_002B5898). It resolves the bank and
+ * patch (func_002B5818, kept in +0x60 / +0x64); a no-audio trigger gets the handle -9999. A swap trigger (bank 3) needs
+ * the focus rider's viewport, no other swap trigger playing (func_002B6630) and its swap string (func_002B5878); its
+ * string goes to func_0029B818 and it plays only when that returns 1.
+ *
+ * The sound plays only when the trigger is not an after-collision trigger (func_002B67D8) or its object was hit
+ * (func_002B6808); a sync-to-animation trigger (func_002B6988) also waits for its object's first frame (func_002B69B8).
+ * Crowd triggers go to the crowd system (func_002A7468, func_002A7678); others play through cBankSys_SFX_Begin-style
+ * options with volume +0x10 x 127, volume control 5, the position (+0x20) when positional and the viewport, ending in
+ * cBankSys_SFX_End.
+ *
+ * With a sound: a sync-to-animation trigger restarts on each new first frame (stopping the old handle with a 0.1 s
+ * fade); otherwise the volume is re-applied (func_002A7340 for crowd triggers, else the bank monitor instance's volume
+ * through cBankMonitor_BANKMONITOR_GetHandle). Called by func_002B5D78 for touched instances.
+ *
+ * @param tt  the world trigger instance
+ */
 extern "C" void func_002B4C38(sWorldTrigger70* tt)
 {
     struct sWt4C38* t = (struct sWt4C38*)tt;
@@ -380,6 +427,19 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5818);
 #ifdef SKIP_ASM
 extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int idx, int* type, int* a, int* b, int c, int d);
 
+/**
+ * Looks up a world trigger's bank and patch through the manager (cWorldTriggerManager_TriggerToPatch).
+ *
+ * The instance itself is not used; gWorldTriggerManager answers.
+ *
+ * @param trigger  the trigger number
+ * @param bank  out: the sound bank
+ * @param patch  out: the patch
+ * @param noAudio  out: 1 when the trigger plays no bank sound
+ * @param viewPort  the viewport
+ * @param check  the lookup kind (0 general, 1 crowd, 2 swap)
+ * @return cWorldTriggerManager_TriggerToPatch's result
+ */
 extern "C" int func_002B5818(void* self, int trigger, int* bank, int* patch, int* noAudio, int viewPort, int check)
 {
     return cWorldTriggerManager_TriggerToPatch(gWorldTriggerManager, trigger, bank, patch, noAudio, viewPort, check);
@@ -391,6 +451,15 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5838);
 #ifdef SKIP_ASM
 extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int idx, int* type, int* a, int* b, int c, int d);
 
+/**
+ * Returns whether a world trigger plays from the crowd bank (bank 5 from a check-1 TriggerToPatch lookup).
+ *
+ * Likely bug: for a trigger type TriggerToPatch does not resolve with a nonzero check, bank is left uninitialised and
+ * compared anyway.
+ *
+ * @param trigger  the trigger number
+ * @return 1 for a crowd trigger, else 0
+ */
 extern "C" int func_002B5838(void* self, int trigger)
 {
     int bank;
@@ -406,6 +475,13 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5878);
 #ifdef SKIP_ASM
 extern "C" int func_002B65B0(void* self, int idx, char* dst);
 
+/**
+ * Copies a swap trigger's string into dst through the manager (func_002B65B0 on gWorldTriggerManager).
+ *
+ * @param idx  the trigger number
+ * @param dst  receives the string
+ * @return func_002B65B0's result (1 when copied)
+ */
 extern "C" int func_002B5878(void* self, int idx, char* dst)
 {
     return func_002B65B0(gWorldTriggerManager, idx, dst);
@@ -417,6 +493,11 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5898);
 #ifdef SKIP_ASM
 extern unsigned char D_004A35A8[];
 
+/**
+ * Resets a world trigger instance to unused: no sound (-1), untouched, empty swap string, last frame -1.0.
+ *
+ * Clears +0x0, +0x34, the bank and patch references (+0x60, +0x64) and +0x6C.
+ */
 extern "C" void func_002B5898(void* self)
 {
     *(int*)((char*)self + 0x0) = 0;
@@ -565,6 +646,13 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5B40);
 extern "C" void cMemMan_free__FPv(int);
 extern "C" void MEM_free(int);
 
+/**
+ * Frees the loaded trigger info: MEM_free on the file (+0x338), cMemMan_free on the table (+0x33C), count 0.
+ *
+ * Does nothing when no file is loaded.
+ *
+ * @param manager  the cWorldTriggerManager
+ */
 extern "C" void func_002B5B40(void *manager) {
     int temp_4;
     int temp_4_2;
@@ -592,6 +680,11 @@ struct sWorldTrigger70 {
     char pad2[0x38];
 };
 
+/**
+ * Returns the first unused world trigger instance of the 40, or 0 when all are in use.
+ *
+ * @return the free instance, or 0
+ */
 extern "C" sWorldTrigger70* func_002B5B90(sWorldTrigger70** self)
 {
     for (int i = 0; i < 40; i++) {
@@ -608,6 +701,14 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5BC0);
 #ifdef SKIP_ASM
 extern "C" int func_002B4C08(void* self, int a1, int a2, int a3);
 
+/**
+ * Returns the in-use world trigger instance for an object, volume and viewport (func_002B4C08), or 0.
+ *
+ * @param objectRef  the object reference
+ * @param volNum  the audio volume number
+ * @param viewPort  the viewport
+ * @return the instance, or 0
+ */
 extern "C" sWorldTrigger70* func_002B5BC0(sWorldTrigger70** self, int objectRef, int volNum, int viewPort)
 {
     for (int i = 0; i < 40; i++) {
@@ -629,6 +730,22 @@ struct sWtVec4 {
     sWtVec4(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
+/**
+ * Records a world audio trigger hit for this frame: finds or claims its instance, fills it and touches it.
+ *
+ * Only while triggers are monitored (+0x334, set by func_002B6950). An existing instance (func_002B5BC0) gets the new
+ * volume; otherwise a free one (func_002B5B90) is marked in use with the object, volume number, viewport, trigger,
+ * volume, positional flag and position (w 1.0). Note: the free instance is not checked for 0. Either way +0x34
+ * (touched) is set so func_002B5D78 keeps it playing. Called by func_002B7908.
+ *
+ * @param objectRef  the object reference
+ * @param volNum  the audio volume number in the object
+ * @param viewPort  the viewport
+ * @param audioTrigger  the trigger number
+ * @param positional  nonzero to play at pos
+ * @param volume  the volume (0..1)
+ * @param pos  the sound position
+ */
 extern "C" void func_002B5C68(sWorldTrigger70** self, int objectRef, int volNum, int viewPort, int audioTrigger, int positional, float volume, const sWtVec3& pos)
 {
     sWtVec3 localPos = pos;
@@ -665,6 +782,13 @@ extern "C" void func_002B4C38(sWorldTrigger70* t);
 extern "C" void cWorldTriggerInstance_Stop(sWorldTrigger70* t);
 extern unsigned char D_004A35A8[];
 
+/**
+ * Per-frame update of the world triggers: stops untouched instances, updates touched ones, clears the touches.
+ *
+ * Skipped while the sound effects are paused (mSFXPaused). For each in-use instance: when untouched it releases a swap
+ * string (func_0029B960), marks it unused and stops it (cWorldTriggerInstance_Stop); when touched it runs
+ * func_002B4C38. Called every frame from the game (func_0022C830).
+ */
 extern "C" void func_002B5D78(sWorldTrigger70** self)
 {
     if (*(int*)((char*)cAudioInterface_bxAudio() + 0x5FB0) != 0) return;
@@ -713,6 +837,11 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B5ED8);
 #ifdef SKIP_ASM
 extern "C" void cWorldTriggerInstance_Stop(sWorldTrigger70* t);
 
+/**
+ * Stops every in-use world trigger instance playing trigger id (marks it unused, cWorldTriggerInstance_Stop).
+ *
+ * @param id  the trigger number
+ */
 extern "C" void func_002B5ED8(sWorldTrigger70** self, int id)
 {
     for (int i = 0; i < 40; i++) {
@@ -793,6 +922,21 @@ struct sWtSnd5F60 {
 #define MIN_5F60(a, b) ((a) < (b) ? (a) : (b))
 #define MAX_5F60(a, b) ((a) < (b) ? (b) : (a))
 
+/**
+ * Plays the sound of a world trigger hit by a rider (collision): returns its handle, or -1.
+ *
+ * A trigger whose info type is 3 (swap) returns -1. When evt differs from the last hit object (+0x328) and has an
+ * after-collision trigger (func_002B6740) it is added to the hit objects (func_002B6868); evt becomes the last hit
+ * object. Resolves the bank and patch (cWorldTriggerManager_TriggerToPatch, viewport 1); with audio it plays them like
+ * cBankSys_SFX_Begin / SFX_End with volume vol, volume control 7 and, for a rider, the rider's position (+0x110) and
+ * func_00288A20. Called by cSSXAudio_CollisionSound.
+ *
+ * @param evt  the hit object (instance record), or 0
+ * @param id  the trigger number
+ * @param rider  the rider, or 0
+ * @param vol  the volume (0..127)
+ * @return the sound handle, or -1
+ */
 extern "C" int func_002B5F60(char* self, void* evt, int id, char* rider, int vol)
 {
     if (*(int*)(*(char**)(self + 0x33C) + id * 8) == 3)
@@ -987,6 +1131,15 @@ struct sWorldTriggerInfo8 {
     char* data;
 };
 
+/**
+ * Copies a swap trigger's string: a type-3 trigger's text (+0x10 of its data); type 4 goes to func_002B6628.
+ *
+ * Returns 0 for a trigger number at or past the count (+0x340) and for other types.
+ *
+ * @param idx  the trigger number
+ * @param out  receives the string
+ * @return 1 when copied, else 0 (or func_002B6628's 0)
+ */
 extern "C" int func_002B65B0(void* self, int idx, char* out)
 {
     if (idx < *(int*)((char*)self + 0x340)) {
@@ -1006,6 +1159,13 @@ extern "C" int func_002B65B0(void* self, int idx, char* out)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6628__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0: the advanced-trigger string lookup is a stub.
+ *
+ * func_002B65B0 reaches it for type-4 triggers with the trigger and buffer still in the argument registers.
+ *
+ * @return 0
+ */
 int func_002B6628(void* self)
 {
     return 0;
@@ -1018,6 +1178,14 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6630);
 extern "C" int func_004165A8(const void* a, const void* b);
 extern unsigned char D_004A35A8[];
 
+/**
+ * Counts the in-use instances that hold a swap string and play a trigger other than id.
+ *
+ * func_002B4C38 does not start a swap trigger while this is above 0.
+ *
+ * @param id  the trigger to leave out
+ * @return the count
+ */
 extern "C" int func_002B6630(sWorldTrigger70** self, int id)
 {
     int n = 0;
@@ -1033,6 +1201,14 @@ extern "C" int func_002B6630(sWorldTrigger70** self, int id)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B66E8);
 #ifdef SKIP_ASM
+/**
+ * Returns whether another in-use instance (not except) plays the same object and audio volume.
+ *
+ * @param objectRef  the object reference
+ * @param volNum  the audio volume number
+ * @param except  the instance to ignore
+ * @return 1 when one exists, else 0
+ */
 extern "C" int func_002B66E8(sWorldTrigger70** self, int objectRef, int volNum, sWorldTrigger70* except)
 {
     for (int i = 0; i < 40; i++) {
@@ -1054,6 +1230,14 @@ extern "C" void* cAudioInterface_getGame(void);
 extern "C" void func_002B8190(void* self, void* obj, int* o0, int* o1, int* o2, int* o3);
 extern "C" int func_002B67D8(void* self, unsigned int i);
 
+/**
+ * Returns whether any of an object's four audio volumes uses an after-collision trigger (func_002B67D8).
+ *
+ * The trigger numbers come from the game's cWorldSound (func_002B8190). Called by func_002B5F60.
+ *
+ * @param obj  the instance record
+ * @return 1 or 0
+ */
 extern "C" int func_002B6740(void* self, void* obj)
 {
     int ids[4];
@@ -1079,6 +1263,12 @@ struct sTriggerRef {
     void* obj;
 };
 
+/**
+ * Returns whether trigger i is an after-collision trigger: its type data's +0x4 is 1 (never for i < 2).
+ *
+ * @param i  the trigger number
+ * @return 1 or 0
+ */
 extern "C" int func_002B67D8(void* self, unsigned int i)
 {
     if (i < 2) {
@@ -1101,6 +1291,14 @@ struct sTriggerIdCache {
     int lastResult;     // 0x330
 };
 
+/**
+ * Returns whether an object is in the hit-object list (+0x4, count +0x324), caching the last answer.
+ *
+ * The last asked object and result are kept in +0x32C / +0x330.
+ *
+ * @param id  the object
+ * @return 1 when it was hit, else 0
+ */
 extern "C" int func_002B6808(sTriggerIdCache* self, int id)
 {
     if (id == self->lastId) {
@@ -1122,6 +1320,11 @@ extern "C" int func_002B6808(sTriggerIdCache* self, int id)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6868);
 #ifdef SKIP_ASM
+/**
+ * Adds an object to the hit-object list (at most 200) when not already there and invalidates the cache.
+ *
+ * @param id  the object
+ */
 extern "C" void func_002B6868(sTriggerIdCache* self, int id)
 {
     if (func_002B6808(self, id) == 0) {
@@ -1174,6 +1377,14 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6918);
 #ifdef SKIP_ASM
 extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int idx, int* type, int* a, int* b, int c, int d);
 
+/**
+ * Returns whether a world trigger is a swap trigger (bank 3 from a check-2 TriggerToPatch lookup).
+ *
+ * As in func_002B5838, an unresolved advanced trigger leaves bank uninitialised. No caller found.
+ *
+ * @param trigger  the trigger number
+ * @return 1 or 0
+ */
 extern "C" int func_002B6918(void* self, int trigger)
 {
     int bank;
@@ -1188,6 +1399,15 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6950);
 #ifdef SKIP_ASM
 extern "C" void cSSXAudio_DelayMonitorTriggers(void* self);
 
+/**
+ * Turns world trigger monitoring on or off (+0x334), or with delay asks the audio system to turn it on later.
+ *
+ * With enable and delay both set it calls cSSXAudio_DelayMonitorTriggers, whose callback func_00289448 calls back with
+ * (1, 0) after 250 ms.
+ *
+ * @param enable  nonzero to monitor triggers
+ * @param delay  nonzero to enable after a delay
+ */
 extern "C" void func_002B6950(char* self, int enable, int delay)
 {
     if (enable == 0 || delay == 0) {
@@ -1201,6 +1421,12 @@ extern "C" void func_002B6950(char* self, int enable, int delay)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6988);
 #ifdef SKIP_ASM
+/**
+ * Returns whether trigger i syncs to its object's animation: its type data's +0x8 is 1 (never for i < 2).
+ *
+ * @param i  the trigger number
+ * @return 1 or 0
+ */
 extern "C" int func_002B6988(void* self, unsigned int i)
 {
     if (i < 2) {
@@ -1220,6 +1446,17 @@ struct sWtmVEntryF {
     float (*fn)(void*);
 };
 
+/**
+ * Returns whether an object's animation just restarted: the frame (virtual slot 30) went down and back up.
+ *
+ * Reads the object's animation through src+0xC, compares the frame with the instance's last frame (+0x68), returns 1
+ * when the previous update saw a decrease (+0x6C) and this one does not, then stores both. Returns 0 when the object
+ * has no animation.
+ *
+ * @param src  the object reference (instance record)
+ * @param state  the world trigger instance holding the last frame
+ * @return 1 on the first frame, else 0
+ */
 extern "C" int func_002B69B8(void* self, void* src, void* state)
 {
     void* obj = *(void**)((char*)src + 0xC);
@@ -1243,6 +1480,14 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6A38);
 struct sTrigObj_6A38 { char pad[0xC]; int state; };
 struct sTrigEnt_6A38 { int a; sTrigObj_6A38* obj; };
 
+/**
+ * Returns whether trigger idx ducks ambient audio: its type data's +0xC is 1 (never for idx < 2).
+ *
+ * No caller found.
+ *
+ * @param idx  the trigger number
+ * @return 1 or 0
+ */
 extern "C" int func_002B6A38(char* self, unsigned int idx)
 {
     if (idx < 2U) {
@@ -1255,6 +1500,11 @@ extern "C" int func_002B6A38(char* self, unsigned int idx)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6A68);
 #ifdef SKIP_ASM
+/**
+ * Marks every in-use world trigger instance touched (+0x34) so the next update keeps them all.
+ *
+ * Called by cSSXAudio_ResumeSFX.
+ */
 extern "C" void func_002B6A68(sWorldTrigger70** self)
 {
     for (int i = 0; i < 40; i++) {
@@ -1284,6 +1534,14 @@ struct sTriggerSlots {
     sTriggerSlot120 slots[2];
 };
 
+/**
+ * Constructs a cWorldSound: empties its two viewport overlap lists (count 0, last position zero).
+ *
+ * The game load allocates it (cMemMan_alloc(592, "cWorldSound")) and passes 0 as a second argument the C declaration
+ * does not take.
+ *
+ * @return self
+ */
 extern "C" sTriggerSlots* func_002B6AA0(sTriggerSlots* self)
 {
     sTriggerSlot120* p = self->slots;
@@ -1300,6 +1558,13 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6AE0);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a cWorldSound: nothing to release; deletes the object when bit 0 of flags is set.
+ *
+ * The game unload calls it with 3.
+ *
+ * @param flags  g++ 2.95 destructor flags (bit 0: operator delete the object)
+ */
 extern "C" void func_002B6AE0(int* self, int flags)
 {
     if (flags & 1) {
@@ -1313,6 +1578,14 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6B08);
 #ifdef SKIP_ASM
 extern "C" void func_002B6B50(void*);
 
+/**
+ * Registers a loaded world audio file: calls func_002B6B50 when a1 is set; returns 1.
+ *
+ * The world view calls it with the file data and its resource id when a world audio file loads.
+ *
+ * @param a1  the world audio file data, or 0
+ * @return 1
+ */
 extern "C" int func_002B6B08(void* self, int a1)
 {
     if (a1 != 0) {
@@ -1327,6 +1600,13 @@ extern "C" void func_002B6C20(void*);
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6B30);
 #ifdef SKIP_ASM
+/**
+ * Releases a world audio file before it is purged: calls func_002B6C20 when a1 is set.
+ *
+ * The world view calls it for type-13 resources (world audio files).
+ *
+ * @param a1  the world audio file data, or 0
+ */
 extern "C" void func_002B6B30(void* self, int a1)
 {
     if (a1 != 0) {
@@ -1355,6 +1635,14 @@ extern "C" void func_002B7410(void* self, sWtmEnt18* e);
 // PORT: the unit declares func_002B6C20 as void(void*); its callers pass a1 through.
 int func_002B6C20_impl(void* self, sWtmEntList* list) __asm__("func_002B6C20");
 
+/**
+ * Removes every active audio instance of a world audio file from the audio grid (func_002B7410); returns 1.
+ *
+ * The C declaration has one parameter; the data pointer arrives as the second argument.
+ *
+ * @param list  the file data (count at +0xC, then 0x18-byte instances)
+ * @return 1
+ */
 int func_002B6C20_impl(void* self, sWtmEntList* list)
 {
     int n = list->count;
@@ -1383,6 +1671,14 @@ struct sTriggerEntry18 {
 
 extern "C" void func_002B7318(void* self, sTriggerEntry18* e);
 
+/**
+ * Adds every active audio instance in a list to the audio grid (func_002B7318); returns 1.
+ *
+ * @param a1  the world audio file data (not used)
+ * @param entries  the 0x18-byte audio instances
+ * @param n  their count
+ * @return 1
+ */
 extern "C" int func_002B6C90(void* self, int a1, sTriggerEntry18* entries, int n)
 {
     for (int i = 0; i < n; i++) {
@@ -1407,6 +1703,16 @@ struct sVec3_2B6CF8 {
 
 extern "C" void func_002B6F40(void* self, int* shape, sVec3_2B6CF8* lo, sVec3_2B6CF8* hi);
 
+/**
+ * Computes an audio instance's world bounding box from its audio volumes (func_002B6F40) and its object position.
+ *
+ * Starts from +-10000, merges each volume record's box (records are 0x1C, 0x30, 0x30 or 0x18 bytes by type) and offsets
+ * both corners by the object's position (+0x40).
+ *
+ * @param entry  the audio instance
+ * @param lo  receives the minimum corner
+ * @param hi  receives the maximum corner
+ */
 extern "C" void func_002B6CF8(void* self, sWtmEnt18* entry, sVec3_2B6CF8* lo, sVec3_2B6CF8* hi)
 {
     *lo = sVec3_2B6CF8(10000.0f, 10000.0f, 10000.0f);
@@ -1497,6 +1803,16 @@ struct sShape_2B6F40 {
     float ax, ay, az;       // 0x20
 };
 
+/**
+ * Computes the local bounding box of one audio volume record by its type.
+ *
+ * Types 0, 2 and 3 (sphere-like) use centre +- radius; type 1 builds an orthonormal basis from its axis (+0x20) and the
+ * z axis and extends the centre by the three half-extents along it.
+ *
+ * @param shape  the volume record (type, id, centre, extents, axis)
+ * @param lo  receives the minimum corner
+ * @param hi  receives the maximum corner
+ */
 extern "C" void func_002B6F40(void* self, int* shape, sVec3_2B6CF8* lo, sVec3_2B6CF8* hi)
 {
     sShape_2B6F40* s = (sShape_2B6F40*)shape;
@@ -1582,7 +1898,13 @@ static inline void insert_7318(char* w, void* item, const sWtBox_7318* box)
     nash_Octant_addnode(rz, 2, item, &c);
 }
 
-// Registers an active sound trigger in the world's spatial tree using its bounds.
+/**
+ * Inserts an audio instance into the world octree (game +0x20) by its bounding box, tagging it as type 5.
+ *
+ * Skips null, inactive or volume-less instances; the box comes from func_002B6CF8 and the cell from nash_Nash_findkey.
+ *
+ * @param entry  the audio instance
+ */
 extern "C" void func_002B7318(void* self, sTriggerEntry18* entry)
 {
     char* trig = (char*)entry;
@@ -1648,6 +1970,13 @@ static inline bool QEmpty_2B7410(int* c)
     return true;
 }
 
+/**
+ * Removes an audio instance from the world octree and from both viewport overlap lists (func_002B77C0).
+ *
+ * Skips null, inactive or volume-less instances; frees a cell's item list when it becomes empty.
+ *
+ * @param e  the audio instance
+ */
 extern "C" void func_002B7410(void* self, sWtmEnt18* e)
 {
     if (e == 0) return;
@@ -1747,6 +2076,14 @@ static inline float Length_75D0(const sV4_75D0& v)
     return r;
 }
 
+/**
+ * Refreshes a viewport's overlap list when the position moved more than 10 units (or on first use).
+ *
+ * Clears the count and queries the eight octree roots (game +0x20) around pos with func_002B83F8, then stores pos as
+ * the last position. Called by cWorldSound_TriggerWorldAudio.
+ *
+ * @param pos  the listener position
+ */
 extern "C" void func_002B75D0(sWtm_75D0* self, const sV4_75D0* pos)
 {
     if (self->last.w == 0.0f || Length_75D0(Sub_75D0(*pos, self->last)) > 10.0f) {
@@ -1797,6 +2134,11 @@ static inline void clearTriggerId(sTriggerIdSlot120* s, int j)
     s->ids[j] = 0;
 }
 
+/**
+ * Removes an audio instance from both viewport overlap lists by clearing its entries.
+ *
+ * @param id  the audio instance
+ */
 extern "C" void func_002B77C0(sTriggerIdSlot120* self, int id)
 {
     for (int i = 0; i < 2; i++) {
@@ -1823,7 +2165,6 @@ extern "C" void func_002B7908(void* self, const sV4_75D0* pos, int k, int id);
  * @param pos  world position to trigger around (On Tour wpos)
  * @param k  viewport index (On Tour ViewPort)
  */
-// Refresh slot k's trigger list for pos, then fire every live trigger id in it.
 extern "C" void cWorldSound_TriggerWorldAudio(sTriggerIdSlot120* self, const sV4_75D0* pos, int k)
 {
     func_002B75D0((sWtm_75D0*)&self[k], pos);
@@ -1897,6 +2238,19 @@ struct sWtTrig_7908 {
 
 extern "C" void wtEval_7908(void* self, const sV4_75D0* listener, int c, sWtTrig_7908* e) __asm__("func_002B7908");
 
+/**
+ * Fires the audio volumes of one grid audio instance that contain the listener position.
+ *
+ * For each volume record, at the object position plus its centre: type 0 (sphere) inside the radius, type 1 (ellipsoid
+ * along its axis basis) inside 1, type 2 (cone) inside the radius and the cone angle, type 3 inside the radius (volume
+ * 1.0 up to 0.9, then 10 x (1 - distance)). The volume comes from func_002B82B8 with the record's decay curve; hits go
+ * to func_002B5C68 (positional except type 3). Called by cWorldSound_TriggerWorldAudio for each instance in the overlap
+ * list.
+ *
+ * @param listener  the listener position
+ * @param c  the viewport
+ * @param e  the audio instance
+ */
 extern "C" void wtEval_7908(void* self, const sV4_75D0* listener, int c, sWtTrig_7908* e)
 {
     sVec3_2B6CF8 org;
@@ -2009,6 +2363,17 @@ extern "C" void wtEval_7908(void* self, const sV4_75D0* listener, int c, sWtTrig
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B8190);
 #ifdef SKIP_ASM
+/**
+ * Returns the trigger numbers of an object's (up to four) audio volumes through id0..id3 (0 when absent).
+ *
+ * Walks the object's audio data (+0x8C -> +0x10) record by record.
+ *
+ * @param obj  the instance record
+ * @param id0  receives the first trigger
+ * @param id1  receives the second
+ * @param id2  receives the third
+ * @param id3  receives the fourth
+ */
 extern "C" void func_002B8190(void* self, void* obj, int* id0, int* id1, int* id2, int* id3)
 {
     int* hdr = *(int**)(*(char**)((char*)obj + 0x8C) + 0x10);
@@ -2082,8 +2447,17 @@ extern "C" void func_002B8190(void* self, void* obj, int* id0, int* id1, int* id
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B82B8);
 #ifdef SKIP_ASM
+/**
+ * Maps a distance ratio (0..1) to a volume with decay curve type 0-5; other types give 0.
+ *
+ * 0: 1 - r^2; 1: 1 - r / (1.5 - r / 2); 2: 1 - r; 3: (1 - r) / (1.5 - (1 - r) / 2); 4: (1 - r)^2; 5: 1 up to 0.7, then
+ * (1 - r) x 3.33. The curve arrives as a float. Called by func_002B7908 (with the cWorldSound in a0).
+ *
+ * @param curve  the decay curve type
+ * @param ratio  the distance ratio
+ * @return the volume
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
-// Evaluates one of the trigger fade curves (selected by curve) at t.
 extern "C" float func_002B82B8(float curve, float ratio)
 {
     switch ((int)curve) {
@@ -2125,6 +2499,13 @@ extern "C" float func_002B82B8(float curve, float ratio)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B83B8);
 #ifdef SKIP_ASM
+/**
+ * Returns self; no other effect.
+ *
+ * Declared variadic; no caller found.
+ *
+ * @return self
+ */
 extern "C" void* func_002B83B8(void* self, ...)
 {
     return self;
@@ -2185,6 +2566,19 @@ static inline int Classify83F8(const float* v, const sOctKey83F8* key)
     return 2;
 }
 
+/**
+ * Recursively collects the octree's audio items (type 5) near a position into the crossing or inside list.
+ *
+ * A node whose cell (key, grown by 0.2 cells) contains the position adds its type-5 items to *partial and recurses into
+ * its children down to level 11; otherwise nothing. Quirk: the cell test only returns 1 or 2, so the inside branch (all
+ * items to *inside via func_002BADD0) is never taken. Called by func_002B75D0 for each root.
+ *
+ * @param partial  the list for crossing cells
+ * @param inside  the list for cells fully inside
+ * @param pos  the position
+ * @param node  the octree cell
+ * @param key  its cell key (level, x, y, z)
+ */
 extern "C" void func_002B83F8(void* self, sOctList83F8** partial, sOctList83F8** inside, float** pos,
                               sOctNode83F8* node, sOctKey83F8* key)
 {
@@ -2349,7 +2743,15 @@ static inline void Pair_8818(sPair_8818* p)
 
 extern "C" void func_002B8818_impl(int init, int prio) __asm__("func_002B8818");
 
-// Static initialisation of the colour tables and colour keys.
+/**
+ * Static initializer of the unit: fills the colour tables D_004D3B18.. and the 14 colour keys D_004A5268..
+ *
+ * Runs only for (1, 0xFFFF): sets the float colour tables, clears D_004A5260 and gives each key D_004A5268 + 8k index
+ * and id k (0..13). Listed in the global constructor table.
+ *
+ * @param init  nonzero to initialise
+ * @param prio  the initialisation priority (acts on 0xFFFF)
+ */
 extern "C" void func_002B8818_impl(int init, int prio)
 {
     if (prio == 0xFFFF && init) {

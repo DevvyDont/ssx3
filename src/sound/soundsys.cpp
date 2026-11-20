@@ -248,7 +248,6 @@ static inline void snd0018AddVoice(void* vself, int a, int b)
  * @param req  the cMonitorInstance that fired (On Tour Inst)
  * @return 1
  */
-// Adds a voice on the global sound system for the request, sets its target and volume (clamped to 0..127), then commits.
 extern "C" int cBankSys_Play2DCallback(cBankSys* self, sSnd0018Req* req)
 {
     snd0018AddVoice((sSnd0018Sys*)gBankSys, req->f1C, req->f20);
@@ -364,7 +363,6 @@ static inline void snd0358AddVoice(void* vself, int a, int b)
  * @param req  the cMonitorInstance that fired (On Tour Inst)
  * @return 1
  */
-// Adds a voice on the global sound system for the request, sets its target and volume (clamped to 0..127), stores its 16-bit field, then commits.
 extern "C" int cBankSys_Play2DCallbackWithPitchMult(cBankSys* self, sSnd0358Req* req)
 {
     snd0358AddVoice((sSnd0358Sys*)gBankSys, req->f1C, req->f20);
@@ -541,6 +539,18 @@ struct sCurve_290B58 {
 // Piecewise-linear lookup in a 5-point curve; 0 above the last key gap.
 // Named _impl: a later block declares func_00290B58 with its own curve struct.
 extern "C" float func_00290B58_impl(sCurve_290B58* c, float x) __asm__("func_00290B58");
+/**
+ * Evaluates a 5-point piecewise-linear curve at a value, clamping to the end values outside its keys.
+ *
+ * The curve holds 5 ascending keys at +0x0 and their values at +0x14. Between two keys it interpolates linearly; below
+ * the first key it returns the first value and from the last key on the last value. It returns 0 only when no case
+ * applies (a NaN input or unsorted keys). The audio code keeps its volume and pitch curves in D_00482AF8..D_00482DA0
+ * and gAudioTables (func_00290C10).
+ *
+ * @param c  the curve
+ * @param x  the input value
+ * @return the curve's value at @p x
+ */
 extern "C" float func_00290B58_impl(sCurve_290B58* c, float x)
 {
     for (int i = 1; i < 5; i++) {
@@ -568,6 +578,15 @@ struct func_00290B58_sCurve {
 extern "C" float func_00290B58(func_00290B58_sCurve* c, float v);
 extern func_00290B58_sCurve gAudioTables[];
 
+/**
+ * Evaluates audio curve gAudioTables[i] at a value (func_00290B58).
+ *
+ * func_00290C40 uses curve 3.
+ *
+ * @param i  the gAudioTables index
+ * @param v  the input value
+ * @return the curve's value
+ */
 extern "C" float func_00290C10(int i, float v)
 {
     return func_00290B58(&gAudioTables[i], v);
@@ -608,6 +627,15 @@ static inline float sndVu0Length(const sSndVec4& v)
 
 extern "C" float func_00290C10(int i, float v);
 
+/**
+ * Returns a rider's grunt volume (0..127) from the length of its velocity, through audio curve 3.
+ *
+ * Gets the velocity from virtual slot 2 of the rider's +0x6C0 sub-object, takes its 4-component length (VU0) and maps
+ * it through func_00290C10(3, ...), clamped to 0..127. cSSXAudio_PlayGrunt uses it as the grunt's volume.
+ *
+ * @param src  the rider
+ * @return the volume, 0..127
+ */
 extern "C" int func_00290C40(void* self, void* src)
 {
     char* obj = (char*)src + 0x6C0;
@@ -744,6 +772,17 @@ int cRider_getMotionState(void*);
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 
+/**
+ * Returns a trick-power level for a view's focus rider: 0, 1 or 2 by mCurTrickPower, or 3 when none applies.
+ *
+ * Takes the focus rider of view @p which (cSSXAudio_GetFocusRider) and returns 3 unless its motion state is 1. The
+ * rider's +0x788 object gives a gap (+0x98 minus +0xA0) when its mode (+0xAC) is 1 or 3, else 4. When the gap is at
+ * most 3 and mCurTrickPower[@p which] is above 0 the result is 0 below 0.25, 1 below 0.5 and 2 otherwise; every other
+ * case returns 3. Virtual slot 2 of cSSXAudio_vtbl.
+ *
+ * @param which  the view index (also indexes mCurTrickPower)
+ * @return 0, 1 or 2 by trick power, or 3
+ */
 extern "C" int func_00290FD0(void* self, int which)
 {
     int result = 3;
@@ -859,6 +898,16 @@ struct sSndKey8_10E0 {
 } __attribute__((packed));
 extern sSndKey8_10E0 D_004A3680[];
 
+/**
+ * Starts the looping wind sound once (bank 0, patch 0x20) with mWindVolume as its volume control.
+ *
+ * Does nothing while mWindPlaying is set. Opens a play-option level with the default options (the inlined SFX_Begin)
+ * for bank 0, patch 0x20, points the level's volume control at mWindVolume, clears its +0x7C option, arms the callback
+ * key D_004A3680 (func_00291430, empty), plays it with cBankSys_SFX_End and sets mWindPlaying. The handle is not kept:
+ * cSSXAudio_EndWind stops the sound through the same callback key. Called by func_0028C8C8.
+ *
+ * @param vself  the audio system (cSSXAudio)
+ */
 // PORT: 64-bit long sound key; voice target stored as int
 extern "C" void func_002910E0(cSSXAudio* vself)
 {
@@ -908,6 +957,11 @@ extern "C" void cSSXAudio_EndWind(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_00291430);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the monitor callback of the wind loop (key D_004A3680, armed by func_002910E0).
+ *
+ * cSSXAudio_EndWind cancels the loop by this key.
+ */
 extern "C" void func_00291430(void) {
 
 }
@@ -1068,6 +1122,15 @@ extern "C" int cSSXAudio_Surface_impl(void* self, void* rider)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002917B8);
 #ifdef SKIP_ASM
+/**
+ * Returns the board sound bank for a surface: 1 (BOARD) above 3, else 0x10 (SPUBOARD).
+ *
+ * func_002917D0 asks with 0; func_00291C88 and func_00292508 pass the rider's surface, whose patches start at surface *
+ * 8.
+ *
+ * @param a1  the surface
+ * @return the bank number
+ */
 extern "C" int func_002917B8(void* self, int a1)
 {
     if (a1 > 3) {
@@ -1140,6 +1203,19 @@ extern sSndKey8_17D0 D_004A3688_17D0[] __asm__("D_004A3688");
 
 // PORT: 64-bit long sound key
 void func_002917D0_17D0(void* vself, void* obj) __asm__("func_002917D0");
+/**
+ * Starts a local human rider's chatter loop: board-bank patch 0, following the rider, with func_00292CB8 as callback.
+ *
+ * Only for a local human (+0x874 and +0x87C set). Opens a play-option level for bank func_002917B8(0) and patch 0 (the
+ * inlined SFX_Begin), sets volume 0 and volume control func_00287968(6, 0), follows the rider's position (+0x110), arms
+ * callback key D_004A3688 (func_00292CB8) with the rider as user data, sets the listening view (func_00288A20) and a 3D
+ * distance of 100 (func_002A9988), clears the +0x7C option and, when the byte at D_00535C11 is 2 and not replaying,
+ * gives the level the rider's own viewport (+0x870). cBankSys_SFX_End plays it; the handle is not kept. Called by
+ * cSSXAudio_BeginRiderSound; func_00292B48 cancels the callback key.
+ *
+ * @param vself  the audio system (cSSXAudio)
+ * @param obj  the rider
+ */
 void func_002917D0_17D0(void* vself, void* obj)
 {
     sSnd17D0Sys* self = (sSnd17D0Sys*)vself;
@@ -1305,6 +1381,23 @@ static inline void snd1C88AddVoice(sSnd1C88Sys* self, int a, int b)
 
 // PORT: 64-bit long sound key
 void func_00291C88_1C88(void* vself, void* obj, int n) __asm__("func_00291C88");
+/**
+ * Starts a rider's glide loop on a surface: board-bank patch n * 8 + 4 for a local human, n * 8 + 6 for others.
+ *
+ * Both branches open a play-option level for bank func_002917B8(@p n) with volume 0, volume control func_00287968(6,
+ * 0), the rider's position (+0x110) to follow, the rider as user data, the +0x7C option cleared and a 3D distance of
+ * 100 (func_002A9988). A local human (+0x874 and +0x87C set) gets callback key D_004A3690 (cSSXAudio_HandleGlide), the
+ * listening view (func_00288A20) and, when the byte at D_00535C11 is 2 and not replaying, its own viewport (+0x870);
+ * other riders get D_004A3698 (cSSXAudio_HandleAIGlide) and no listening view. cBankSys_SFX_End plays it; the handle is
+ * not kept.
+ *
+ * Called by cSSXAudio_BeginRiderSound, and by cSSXAudio_HandleGlide / cSSXAudio_HandleAIGlide with the new surface when
+ * the rider's surface changes.
+ *
+ * @param vself  the audio system (cSSXAudio)
+ * @param obj  the rider
+ * @param n  the surface (its patches start at n * 8)
+ */
 void func_00291C88_1C88(void* vself, void* obj, int n)
 {
     sSnd1C88Sys* self = (sSnd1C88Sys*)vself;
@@ -1446,6 +1539,20 @@ extern sSndKey8_2508 D_004A36A0_2508[] __asm__("D_004A36A0");
 
 // PORT: 64-bit long sound key
 void func_00292508_2508(void* vself, void* obj, int n) __asm__("func_00292508");
+/**
+ * Starts a local human rider's carve loop on a surface: board-bank patch n * 8 + 3 with cSSXAudio_HandleCarve.
+ *
+ * Only for a local human (+0x874 and +0x87C set). Opens a play-option level for bank func_002917B8(@p n) and patch @p n
+ * * 8 + 3 with volume 0, volume control func_00287968(6, 0), the rider's position (+0x110) to follow, callback key
+ * D_004A36A0 (cSSXAudio_HandleCarve), the +0x7C option cleared, the rider as user data, the listening view
+ * (func_00288A20), a 3D distance of 100 (func_002A9988) and, when the byte at D_00535C11 is 2 and not replaying, its
+ * own viewport (+0x870). cBankSys_SFX_End plays it; the handle is not kept. Called by cSSXAudio_BeginRiderSound, and by
+ * cSSXAudio_HandleCarve on a surface change.
+ *
+ * @param vself  the audio system (cSSXAudio)
+ * @param obj  the rider
+ * @param n  the surface (its patches start at n * 8)
+ */
 void func_00292508_2508(void* vself, void* obj, int n)
 {
     sSnd2508Sys* self = (sSnd2508Sys*)vself;
@@ -1600,7 +1707,6 @@ struct sSys292AE8 {
  *
  * @param Rider  the rider (On Tour cRider* Rider)
  */
-// Notifies the sound bank, then (re)starts the default ambient stream.
 // PORT: the 8-byte stream id is passed by value from an unaligned global (64-bit `long`).
 extern "C" void cSSXAudio_StopRiderSound(cSSXAudio* self, int Rider)
 {
@@ -1649,6 +1755,15 @@ static inline void sndKeyCall(void* self, long key)
     (**(cSndObj292B48***)((char*)self + 0x118))->v03(key);
 }
 
+/**
+ * Stops every rider sound loop: the wind, the chatter, glide and carve loops, the turbo sound and the wipeout loops.
+ *
+ * Calls cSSXAudio_EndWind, then cancels the monitors armed with the callback keys D_004A3688 (func_00292CB8),
+ * D_004A3690 (cSSXAudio_HandleGlide), D_004A3698 (cSSXAudio_HandleAIGlide) and D_004A36A0 (cSSXAudio_HandleCarve)
+ * through virtual slot 3 of the bank manager at *(this + 0x118), and D_004A36A8 (func_00298D88) with func_002ADDE0.
+ * When mTurboRef is positive it stops mTurboHandle (cBankMonitor_BANKMONITOR_StopHandle, type 1, no fade) and clears
+ * mTurboRef. Last it cancels D_004A36B0 (func_00296E18) and D_004A36B8 (func_00297430).
+ */
 // PORT: 64-bit long sound keys
 extern "C" void func_00292B48(void* self)
 {
@@ -1676,6 +1791,16 @@ extern "C" void* cAudioInterface_getGame();
 extern "C" int cReplay_isPauseAI(void* p);
 extern int cPauseState_Flags;
 
+/**
+ * Updates a chatter loop for one frame: in motion state 0 its volume and bend come from func_00293168.
+ *
+ * The instance's rider is at +0x80 (its user data). Starts from volume 0 and bend 0x40; in motion state 0 func_00293168
+ * fills both. Motion state 2, a finished rider (mFinishTime >= 0), cPauseState_Flags bit 0 or a paused replay
+ * (cReplay_isPauseAI) force volume 0. Stores the volume at the instance's +0x64 and passes the bend to
+ * cBankMonitorInstance_PitchUpdate. Monitor callback of key D_004A3688, armed by func_002917D0.
+ *
+ * @param obj  the bank-monitor instance
+ */
 extern "C" void func_00292CB8(void* self, void* obj) {
     int volume;
     int b;
@@ -1871,6 +1996,16 @@ INCLUDE_ASM("sound/soundsys", func_00293168);
 extern func_00290B58_sCurve D_00482AF8;
 extern func_00290B58_sCurve D_00482B20;
 
+/**
+ * Computes a chatter loop's volume and pitch bend from the rider's audio speed through two curves.
+ *
+ * The volume is curve D_00482AF8 at mAudioSpeed (func_00290B58) and the bend is curve D_00482B20 at the same speed
+ * times 4096 (0x1000 is no bend). Called by func_00292CB8.
+ *
+ * @param vrider  the rider
+ * @param out1  receives the volume
+ * @param out2  receives the pitch bend
+ */
 extern "C" void func_00293168(void* self, void* vrider, int* out1, int* out2) {
     cRider* rider = (cRider*)vrider;
     float spd = rider->mAudioSpeed;
@@ -1976,6 +2111,18 @@ extern "C" void cSSXAudio_CarveProgram(cSSXAudio* self, int id, void* rider, int
 //100%
 INCLUDE_ASM("sound/soundsys", func_002934D0);
 #ifdef SKIP_ASM
+/**
+ * Classifies a surface for the glide and carve sound programs: 0, 1 or 2.
+ *
+ * Surfaces 1 and 2 give 1 and surfaces 4 to 8 give 2; surface 3 gives 2 only while the rider's motion state
+ * (cRider_getMotionState) is 4, else 0; 0 and any other value give 0. cSSXAudio_GlideProgram, cSSXAudio_AIGlideProgram
+ * and cSSXAudio_CarveProgram pick one of three programs by the result, and cSSXAudio_HandleGlide switches the rider's
+ * surface to 9 when it is 2 in motion states 1 and 5.
+ *
+ * @param kind  the surface
+ * @param rider  the rider
+ * @return the program type: 0, 1 or 2
+ */
 extern "C" int func_002934D0(void *self, int kind, void *rider)
 {
     int result;
@@ -2014,6 +2161,19 @@ extern const func_00290B58_sCurve D_00482BA0;
 static inline float* getLevels_3538(void* self) { return (float*)((char*)self + 0x59B8); }
 
 void func_00293538_impl(void* self, cRider* rider, int* volume, int* pitch) __asm__("func_00293538");
+/**
+ * Computes a rider's glide volume and bend for surface program 0 from its pressure, edging, braking and speed.
+ *
+ * The level is mAudioPressure * (1 - (mAudioEdging + mAudioBraking)), scaled by mAudioSpeed * 10 below speed 0.1. When
+ * it differs from the rider's last glide level (mLastGlide at the rider's AI index) by more than 0.1 it moves only a
+ * quarter of the way there. The level is stored back; the volume is curve D_00482B78 at the level and the bend curve
+ * D_00482BA0 at the level times 4096. cSSXAudio_GlideProgram runs it for program type 0 and func_00293B50 for computer
+ * riders.
+ *
+ * @param rider  the rider
+ * @param volume  receives the volume
+ * @param pitch  receives the pitch bend
+ */
 void func_00293538_impl(void* self, cRider* rider, int* volume, int* pitch)
 {
     float level = rider->mAudioPressure;
@@ -2052,6 +2212,19 @@ extern const func_00290B58_sCurve D_00482BF0;
 static inline float* getLevels_3740(void* self) { return (float*)((char*)self + 0x59B8); }
 
 void func_00293740_impl(void* self, cRider* rider, int* volume, int* pitch) __asm__("func_00293740");
+/**
+ * Computes a rider's glide volume and bend for surface program 1 from its pressure, edging, braking and speed.
+ *
+ * The level is mAudioPressure * (1 - (mAudioEdging + mAudioBraking)), scaled by mAudioSpeed * 10 below speed 0.1. When
+ * it differs from the rider's last glide level (mLastGlide at the rider's AI index) by more than 0.1 it moves only a
+ * quarter of the way there. The level is stored back; the volume is curve D_00482BC8 at the level and the bend curve
+ * D_00482BF0 at the level times 4096. cSSXAudio_GlideProgram runs it for program type 1 and func_00293B70 for computer
+ * riders.
+ *
+ * @param rider  the rider
+ * @param volume  receives the volume
+ * @param pitch  receives the pitch bend
+ */
 void func_00293740_impl(void* self, cRider* rider, int* volume, int* pitch)
 {
     float level = rider->mAudioPressure;
@@ -2090,6 +2263,19 @@ extern const func_00290B58_sCurve D_00482C40;
 static inline float* getLevels_3948(void* self) { return (float*)((char*)self + 0x59B8); }
 
 void func_00293948_impl(void* self, cRider* rider, int* volume, int* pitch) __asm__("func_00293948");
+/**
+ * Computes a rider's glide volume and bend for surface program 2 from its pressure, edging, braking and speed.
+ *
+ * The level is mAudioPressure * (1 - (mAudioEdging + mAudioBraking)), scaled by mAudioSpeed * 10 below speed 0.1. When
+ * it differs from the rider's last glide level (mLastGlide at the rider's AI index) by more than 0.1 it moves only a
+ * quarter of the way there. The level is stored back; the volume is curve D_00482C18 at the level and the bend curve
+ * D_00482C40 at the level times 4096. cSSXAudio_GlideProgram runs it for program type 2 and func_00293B90 for computer
+ * riders.
+ *
+ * @param rider  the rider
+ * @param volume  receives the volume
+ * @param pitch  receives the pitch bend
+ */
 void func_00293948_impl(void* self, cRider* rider, int* volume, int* pitch)
 {
     float level = rider->mAudioPressure;
@@ -2122,6 +2308,12 @@ INCLUDE_ASM("sound/soundsys", func_00293B50);
 #ifdef SKIP_ASM
 extern "C" void func_00293538();
 
+/**
+ * Runs the type-0 glide program func_00293538 for a computer rider, passing its arguments through.
+ *
+ * Declared without parameters, it calls func_00293538 with the argument registers it was given;
+ * cSSXAudio_AIGlideProgram calls it as (this, rider, volume, bend) for program type 0.
+ */
 extern "C" void func_00293B50(void) {
     func_00293538();
 }
@@ -2131,6 +2323,12 @@ INCLUDE_ASM("sound/soundsys", func_00293B70);
 #ifdef SKIP_ASM
 extern "C" void func_00293740();
 
+/**
+ * Runs the type-1 glide program func_00293740 for a computer rider, passing its arguments through.
+ *
+ * Declared without parameters, it calls func_00293740 with the argument registers it was given;
+ * cSSXAudio_AIGlideProgram calls it as (this, rider, volume, bend) for program type 1.
+ */
 extern "C" void func_00293B70(void) {
     func_00293740();
 }
@@ -2140,6 +2338,12 @@ INCLUDE_ASM("sound/soundsys", func_00293B90);
 #ifdef SKIP_ASM
 extern "C" void func_00293948();
 
+/**
+ * Runs the type-2 glide program func_00293948 for a computer rider, passing its arguments through.
+ *
+ * Declared without parameters, it calls func_00293948 with the argument registers it was given;
+ * cSSXAudio_AIGlideProgram calls it as (this, rider, volume, bend) for program type 2.
+ */
 extern "C" void func_00293B90(void) {
     func_00293948();
 }
@@ -2155,6 +2359,18 @@ static inline float* sndLevels5990(void* self) { return (float*)((char*)self + 0
 extern const func_00290B58_sCurve D_00482C68;
 extern const func_00290B58_sCurve D_00482C90;
 
+/**
+ * Computes a rider's carve volume and bend for surface program 0 from its edging, braking, pressure and speed.
+ *
+ * The level is mAudioEdging + mAudioBraking. When it differs from the rider's last carve level (mLastCarveEdging at the
+ * rider's AI index) by more than 0.1 it falls by half the gap or rises by an eighth of it. The level is stored back;
+ * the volume is curve D_00482C68 at the level and the bend curve D_00482C90 at mAudioPressure times 4096. Below
+ * mAudioSpeed 0.1 the volume is scaled by speed * 10. cSSXAudio_CarveProgram runs it for program type 0.
+ *
+ * @param rider  the rider
+ * @param volume  receives the volume
+ * @param pitch  receives the pitch bend
+ */
 extern "C" void func_00293BB0(void* self, cRider* rider, int* volume, int* pitch)
 {
     float pressure = rider->mAudioPressure;
@@ -2235,6 +2451,17 @@ INCLUDE_ASM("sound/soundsys", func_00293FC8);
 struct sSsVt_3FC8 { short delta; short index; int (*fn)(void*); };
 extern const func_00290B58_sCurve D_00482D08;
 
+/**
+ * Computes a rider's carve volume and bend for surface program 2: full volume, with the bend from its pressure.
+ *
+ * Smooths and stores the edging + braking level in mLastCarveEdging as func_00293BB0 does, but does not use it: the
+ * volume is 127 and the bend is curve D_00482D08 at mAudioPressure times 4096. Below mAudioSpeed 0.1 the volume is
+ * scaled by speed * 10. cSSXAudio_CarveProgram runs it for program type 2.
+ *
+ * @param rider  the rider
+ * @param volume  receives the volume
+ * @param pitch  receives the pitch bend
+ */
 extern "C" void func_00293FC8(void* self, cRider* rider, int* volume, int* pitch)
 {
     float pressure = rider->mAudioPressure;
@@ -2517,7 +2744,6 @@ extern "C" void cSSXAudio_LiftWithAirTime(cSSXAudio* self, char* rider);
 /**
  * Runs LiftWithAirTime() for each rider flagged in mNeedLift, clearing the flags of riders that do not exist.
  */
-// Refresh the six rider slots at 0x59E8, clearing those whose rider is gone.
 extern "C" void cSSXAudio_UpdateLift(cSSXAudio* self)
 {
     sSnd4860* audio = (sSnd4860*)self;
@@ -2537,6 +2763,14 @@ extern "C" void cSSXAudio_UpdateLift(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_00294860);
 #ifdef SKIP_ASM
+/**
+ * Returns mNeedLift[i] for a rider index below 6, else 0.
+ *
+ * Nothing calls it directly; func_00294880 sets the flags and cSSXAudio_ResetLift clears them.
+ *
+ * @param i  the rider index
+ * @return the flag, or 0 for an index of 6 or more
+ */
 extern "C" int func_00294860(void* self, int i)
 {
     if (i < 6) {
@@ -2549,6 +2783,14 @@ extern "C" int func_00294860(void* self, int i)
 //100%
 INCLUDE_ASM("sound/soundsys", func_00294880);
 #ifdef SKIP_ASM
+/**
+ * Sets mNeedLift[i] for a rider index below 6; larger indexes are ignored.
+ *
+ * cSSXAudio_LiftWithAirTime calls it with the rider's AI index and 1 or 0.
+ *
+ * @param i  the rider index
+ * @param needLift  the new flag
+ */
 extern "C" void func_00294880(void* self, int i, int needLift)
 {
     if (i < 6) {
@@ -2729,6 +2971,13 @@ struct sSndVEntry294F48 {
     int (*fn)(void*, int, int);
 };
 
+/**
+ * Plays bank 0, patch 0 as a 2D sound through virtual slot 1 of cSSXAudio_vtbl (cSSXAudio_SFX_Play2D).
+ *
+ * Called with the audio system when the pause menu opens, right after cSSXAudio_PauseAudio.
+ *
+ * @return the voice handle from the virtual call
+ */
 extern "C" int func_00294F48(void* self)
 {
     sSndVEntry294F48* vt = *(sSndVEntry294F48**)((char*)self + 0xC);
@@ -2888,8 +3137,17 @@ static inline void sndRingPush_5208(sSnd5028Sys* s, int v)
     if (++s->ring.head >= s->ring.cap) s->ring.head = 0;
 }
 
-// Ages the queue of pending one-shot sounds (records of 5: event, handle, end time, stop flag, index): finished
-// sounds are dropped, timed-out ones are stopped if flagged, the others go back into the queue.
+/**
+ * Ages the play history: drops records whose sound has ended or whose time has passed, stopping looping ones.
+ *
+ * Walks mPlayHistory once, popping each 5-word record (event key, voice handle, time, looping flag, hull). A record
+ * with a negative handle, or with a nonzero handle the bank monitor no longer has (cBankMonitor_BANKMONITOR_GetHandle,
+ * type 1), is dropped. A record whose time is still ahead of the bank clock (+0x260 of the bank manager) or is -1 goes
+ * back into the queue; any other is dropped, its voice stopped first (cBankMonitor_BANKMONITOR_StopHandle, type 1, no
+ * fade) when the looping flag is set. Called by func_00285BF8.
+ *
+ * @param vself  the audio system (cSSXAudio)
+ */
 extern "C" void func_00295208(cSSXAudio* vself)
 {
     sSnd5028Sys* self = (sSnd5028Sys*)vself;
@@ -3053,8 +3311,17 @@ static inline void ring5CC8Push(sSnd5028Sys* s, int v)
     if (++s->ring.head >= s->ring.cap) s->ring.head = 0;
 }
 
-// Drops every queued 5-word event record whose first word is evt (stopping its voice if the
-// record's fourth word is set) and requeues the rest.
+/**
+ * Removes every play-history record for an event key, stopping its voice first when the record is looping.
+ *
+ * Pops each 5-word record of mPlayHistory: one whose event key is @p evt is dropped, after
+ * cBankMonitor_BANKMONITOR_StopHandle (type 1, no fade) on its handle when its looping flag is set; the others go back
+ * into the queue. Likely bug: the loop count is the number of words in the queue, not of records (func_00295208 divides
+ * by 5), so it cycles the queue five times; the outcome is the same. Nothing calls it directly.
+ *
+ * @param vself  the audio system (cSSXAudio)
+ * @param evt  the event key (an instance pointer or event id)
+ */
 extern "C" void func_00295CC8(cSSXAudio* vself, int evt)
 {
     sSnd5028Sys* self = (sSnd5028Sys*)vself;
@@ -3147,6 +3414,17 @@ static inline float absf_961F0(float x)
     return r;
 }
 
+/**
+ * Makes the crowd react to a rider's wipeout by the size of its boost loss, then calls func_0028F108.
+ *
+ * The view is 0 when replaying, the rider's viewport (+0x870) for a local human, else -1; nothing happens unless the
+ * rider is that view's focus rider (cSSXAudio_GetFocusRider). With |@p intensity| at 0 or below the crowd gets
+ * func_002A7438, else func_002A73D8 with level 0 (below 0.25), 1 (below 0.65) or 2. Then func_0028F108(rider).
+ * cRider_flagEventWipeout calls it with the boost from cRiderMetrix_evWipeout.
+ *
+ * @param rider  the rider
+ * @param intensity  the boost change from cRiderMetrix_evWipeout
+ */
 extern "C" void func_002961F0(void* self, char* rider, float intensity)
 {
     int idx = -1;
@@ -3178,6 +3456,11 @@ extern "C" void func_002961F0(void* self, char* rider, float intensity)
 //100%
 INCLUDE_ASM("sound/soundsys", func_00296308);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * No code references it; it sits between func_002961F0 and func_00296310.
+ */
 extern "C" void func_00296308(void) {
 
 }
@@ -3411,6 +3694,23 @@ static inline void sfxBegin_6310(struct sSSXAudioView* self, int a, int b)
 }
 
 extern func_00290B58_sCurve D_00482DA0;
+/**
+ * Plays a rider's wipeout impact sound: bank 10 patch 9 in states 2 and 3, else a random bank-0 patch from 48.
+ *
+ * Computer and non-local riders (virtual slot 9 of the rider's +0x6C0 object set, or +0x87C clear) farther than 100
+ * units from every camera (cSSXAudio_CameraInRange) play nothing. The volume is curve D_00482DA0 at the rider's +0x770,
+ * clamped to 0..127. When the rider's +0x438 is 2 or 3 the sound is bank 10, patch 9; otherwise bank 0, patch 48 +
+ * (func_002ADF60 & 0x7FFF) * 3 / 0x7FFF. Opens a play-option level (the inlined SFX_Begin) with that volume, volume
+ * control func_00287968(5, 0), the rider's position (+0x110) to follow and the listening view (func_00288A20), plus the
+ * rider's viewport (+0x870) for a local human when the byte at D_00535C11 is 2 and not replaying. cBankSys_SFX_End
+ * plays it; the handle is not kept.
+ *
+ * Likely bug: a random value of 0x7FFF gives offset 3, patch 51, which is the wipeout-slide sound of func_00296868.
+ * Called by cRider_flagEventWipeout.
+ *
+ * @param vself  the audio system (cSSXAudio)
+ * @param obj  the rider
+ */
 extern "C" void func_00296310(cSSXAudio* vself, char* obj)
 {
     struct sSSXAudioView* self = (struct sSSXAudioView*)vself;
@@ -3499,7 +3799,22 @@ extern "C" unsigned int func_002ADF60(void* rng);
 
 extern sSndCallback D_004A36B0_cb[] __asm__("D_004A36B0");
 extern func_00290B58_sCurve D_00482DA0;
-// Board slide sound of an owner's rider: started once per rider, volume from the speed curve.
+/**
+ * Starts a wiping-out rider's slide loop (bank 0, patch 51) unless it is already playing.
+ *
+ * Does nothing while the slide handle (+0x774 of the rider at @p t's +0x80) is 0 or more. Computer and non-local riders
+ * farther than 100 units from every camera (cSSXAudio_CameraInRange) get nothing. The volume is curve D_00482DA0 at the
+ * rider's +0x770, clamped to 0..127. The play-option level (the inlined SFX_Begin) gets that volume, volume control
+ * func_00287968(5, 0), the rider's position (+0x110) to follow, the listening view (func_00288A20), @p t as user data,
+ * callback key D_004A36B0 (func_00296E18, empty), the +0x7C option cleared and, for a local human when the byte at
+ * D_00535C11 is 2 and not replaying, the rider's viewport (+0x870). cBankSys_SFX_End's handle goes to the rider's
+ * +0x774; func_00296E20 stops it.
+ *
+ * The wipeout control calls it when the rider's animation category is 29 or 25.
+ *
+ * @param vself  the audio system (cSSXAudio)
+ * @param t  the wipeout control (its rider at +0x80)
+ */
 extern "C" void func_00296868(cSSXAudio* vself, sSndOwner* t)
 {
     sSSXAudioView* self = (sSSXAudioView*)vself;
@@ -3585,6 +3900,11 @@ extern "C" void func_00296868(cSSXAudio* vself, sSndOwner* t)
 //100%
 INCLUDE_ASM("sound/soundsys", func_00296E18);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the monitor callback of the wipeout-slide loop (key D_004A36B0, armed by func_00296868).
+ *
+ * func_00292B48 cancels monitors by this key.
+ */
 extern "C" void func_00296E18(void) {
 
 }
@@ -3596,6 +3916,15 @@ INCLUDE_ASM("sound/soundsys", func_00296E20);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
+/**
+ * Stops a rider's wipeout-slide loop with a 0.75 fade and clears its handle.
+ *
+ * When the rider's +0x774 handle is 0 or more it calls cBankMonitor_BANKMONITOR_StopHandle (type 1, fade 0.75) on the
+ * bank monitor of cAudioInterface_bxAudio(), not of @p self, and sets the handle to -1. Called by the wipeout control
+ * with its rider, and by the audio code for rider 0 (func_0028E8C0 among others).
+ *
+ * @param obj  the rider
+ */
 extern "C" void func_00296E20(void* self, void* obj)
 {
     if (*(int*)((char*)obj + 0x774) >= 0) {
@@ -3635,7 +3964,21 @@ extern "C" unsigned int func_002ADF60(void* rng);
 
 extern sSndCallback D_004A36B8_cb[] __asm__("D_004A36B8");
 extern func_00290B58_sCurve D_00482DA0;
-// Board slide sound of an owner's rider: started once per rider, volume from the speed curve.
+/**
+ * Starts the wipeout tumble sound of the rider a wipeout control drives, unless one is already playing.
+ *
+ * Does nothing while the rider's mWipeoutTumbleHandle is set (>= 0). Computer and non-local riders more than 100 units
+ * from every camera (cSSXAudio_CameraInRange on the position from cRider vtable slot 5) are skipped. The volume is the
+ * curve D_00482DA0 (func_00290B58) of the rider's unk_770, clamped to 0..127. A play-option level is pushed with
+ * defaults (the inlined SFX_Begin) for bank 0, patch 52 and gets that volume, the volume control func_00287968(vself,
+ * 5, 0), the rider's mPosition to follow, the view from func_00288A20, @p t as its pointer, the empty callback
+ * func_00297430 (pointer to member D_004A36B8) and mCloseOnEnd 0. For a local human (mIsHuman and mIsLocal) when the
+ * new-race game path (byte D_00535C11) is 2 (multiplayer) and not replaying, it also gets two-player pan on side
+ * mViewIndex. cBankSys_SFX_End starts it and the handle is stored in mWipeoutTumbleHandle.
+ *
+ * @param vself  the audio system
+ * @param t  the rider's wipeout control (cWipeoutControl; its rider pointer at +0x80)
+ */
 extern "C" void func_00296E80(cSSXAudio* vself, sSndOwner* t)
 {
     sSSXAudioView* self = (sSSXAudioView*)vself;
@@ -3721,6 +4064,11 @@ extern "C" void func_00296E80(cSSXAudio* vself, sSndOwner* t)
 //100%
 INCLUDE_ASM("sound/soundsys", func_00297430);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the callback of the wipeout tumble sound.
+ *
+ * func_00296E80 installs it (pointer to member D_004A36B8) as the play-option callback of the tumble voice.
+ */
 extern "C" void func_00297430(void) {
 
 }
@@ -3732,6 +4080,15 @@ INCLUDE_ASM("sound/soundsys", func_00297438);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
+/**
+ * Stops a rider's wipeout tumble sound, if one is playing.
+ *
+ * When the rider's mWipeoutTumbleHandle is set (>= 0) it is stopped through cBankMonitor_BANKMONITOR_StopHandle (stop
+ * mode 1, 0.75) on the cBankMonitor of cAudioInterface_bxAudio() (not
+ * @p self), and the handle is reset to -1.
+ *
+ * @param obj  the rider (cRider)
+ */
 extern "C" void func_00297438(void* self, void* obj)
 {
     if (*(int*)((char*)obj + 0x778) >= 0) {
@@ -3744,6 +4101,9 @@ extern "C" void func_00297438(void* self, void* obj)
 //100%
 INCLUDE_ASM("sound/soundsys", func_00297498);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (an empty function; the retail image has no call or data reference to it).
+ */
 extern "C" void func_00297498(void) {
 
 }
@@ -4447,6 +4807,20 @@ static inline int snd8488Add(void* vself, void* obj, int a, int b, int c)
 }
 
 void func_00298488_8488(void* self, sSs8488Rider* a, sSs8488Rider* b) __asm__("func_00298488");
+/**
+ * Plays the collision sound of two riders that bump into each other, near a camera.
+ *
+ * Plays nothing when @p a is more than 100 units from every camera (cSSXAudio_CameraInRange) or outside every camera
+ * view (func_00288C08), when neither rider is a local human (mIsHuman and mIsLocal), or while play-history event 7 is
+ * still live (cSSXAudio_PlayHistoryExists). The volume is func_00290C10(1, length of the sum of both riders'
+ * velocities, from cRider vtable slot 2). A play-option level is pushed with defaults for bank 0, patch 54 with that
+ * volume, the volume control func_00287968(self, 5, 0), a 3D radius of 100 (func_002A9988), the view of @p a
+ * (func_00288A20) and @p a's mPosition to follow; cBankSys_SFX_End starts it and the handle goes into the play history
+ * as event 7 for 50 ms past the monitor clock (cSSXAudio_PlayHistoryAdd).
+ *
+ * @param a  the rider whose position the sound follows
+ * @param b  the other rider
+ */
 void func_00298488_8488(void* self, sSs8488Rider* a, sSs8488Rider* b)
 {
     if (cSSXAudio_CameraInRange(self, a->v05(), 100.0f) < 0) return;
@@ -4608,6 +4982,14 @@ extern "C" void cSSXAudio_KnockdownSFX(cSSXAudio* self, void* obj)
 //100%
 INCLUDE_ASM("sound/soundsys", func_00298D88);
 #ifdef SKIP_ASM
+/**
+ * Returns 1: the monitor callback of the turbo sound.
+ *
+ * Its pointer to member is D_004A36A8: func_00298D90 and func_00299638 destroy every monitor that uses it
+ * (func_002ADDE0), and func_00299638 creates a 3-second one with it.
+ *
+ * @return 1
+ */
 extern "C" int func_00298D88(void) {
     return 1;
 }
@@ -4737,6 +5119,19 @@ static inline void snd8D90Start(sSnd8D90Sys* self, int a, int b)
     }
 }
 
+/**
+ * Starts the turbo (boost) sound for a local human rider and counts the request.
+ *
+ * Does nothing while replaying or for a rider that is not a local human (mIsHuman and mIsLocal). Destroys every monitor
+ * that uses the callback D_004A36A8 (func_00298D88) through func_002ADDE0. When mTurboRef is 0 it starts bank 0, patch
+ * 122 with the volume control func_00287968(this, 9, 0) and keeps its handle in mTurboHandle; when
+ * @p flag is set it also plays the one-shot bank 0, patch 74 with the same control. mTurboRef then grows by 1
+ * (func_002992D8 counts it down).
+ *
+ * @param vself  the audio system
+ * @param obj  the rider (cRider)
+ * @param flag  nonzero when the boost has just been switched on (adds the one-shot)
+ */
 // PORT: 64-bit long sound key
 extern "C" void func_00298D90(cSSXAudio* vself, void* obj, int flag)
 {
@@ -4760,6 +5155,15 @@ INCLUDE_ASM("sound/soundsys", func_002992D8);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
+/**
+ * Releases one turbo-sound request of a local human rider and stops the sound when none is left.
+ *
+ * Does nothing while replaying or for a rider that is not a local human. Decrements mTurboRef; when it reaches 0
+ * mTurboHandle is stopped (cBankMonitor_BANKMONITOR_StopHandle, mode 1, fade 0), and a count at or below 0 is reset to
+ * 0.
+ *
+ * @param obj  the rider (cRider)
+ */
 extern "C" void func_002992D8(void* self, void* obj)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
@@ -4872,7 +5276,6 @@ static inline void AddVoice299368(cSSXAudio* self, int a, int bb, int type)
  *
  * @param obj  the rider
  */
-// Starts the "crowd cheer" voice for the object if the bank is ready and nothing else is playing.
 // PORT: the 8-byte stream id is passed by value from an unaligned global (64-bit `long`).
 extern "C" void cSSXAudio_TurboDeny(cSSXAudio* self, char* obj)
 {
@@ -4902,8 +5305,19 @@ extern sSndKey8_9638 D_004A3678_key[] __asm__("D_004A3678");
 extern "C" int func_002ADCA0_key(void*, int, long, int, int, int, int, int) __asm__("func_002ADCA0");
 extern "C" void func_002A3C00(cSSXAudio* self, void* obj, int flags);
 
+/**
+ * Reacts to a local human rider reaching maximum boost power: a delayed chime, a DJ line and a turbo-use monitor.
+ *
+ * Does nothing while replaying, for a rider that is not a local human, or once the rider is past the finish line
+ * (mFinishTime >= 0). Creates a 400 ms monitor (func_002ADCA0) that plays bank 0, patch 107 at volume 127 through
+ * cBankSys_Play2DCallback (D_004A3678) with the volume control func_00287968(self, 9, 0). Then raises the DJ event
+ * func_002A3C00 with 0x10 when mUberLevel is 10, 8 when it is 5 or more, else 4. Finally destroys the monitors of
+ * func_00298D88 (D_004A36A8) and, when mTurboRef is 0, creates a 3000 ms one with the rider as its pointer. The peak3
+ * comment above it ("landing thud ... airborne-and-dropping") is wrong: +0x470 is mFinishTime.
+ *
+ * @param obj  the rider (cRider)
+ */
 // PORT: 64-bit long sound keys
-// Plays the landing thud for a rider that is airborne-and-dropping, sets its board effect and restarts the ambient loop.
 extern "C" void func_00299638(void* self, char* obj)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
@@ -5401,6 +5815,16 @@ extern "C" void func_0028F108(void* self, void* rider);
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 
+/**
+ * Resets a rider's sounds when the rider is put back on the course.
+ *
+ * For a local human when not replaying, plays bank 0, patch 123 with the volume control func_00287968(self, 5, 0). Then
+ * stops the wipeout slide and tumble sounds (func_00296E20, func_00297438), releases the turbo sound (func_002992D8)
+ * while mTurboRef is above 0, and calls func_0028F108 when the rider is the focus rider (cSSXAudio_GetFocusRider(self,
+ * -1)).
+ *
+ * @param obj  the rider (cRider)
+ */
 extern "C" void func_0029A220(void* self, void* obj)
 {
     bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
@@ -5638,6 +6062,15 @@ extern "C" void cSSXAudio_PointsEvent(cSSXAudio* self, void* obj, int n)
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029AB08);
 #ifdef SKIP_ASM
+/**
+ * Resets the boost-bar tick pitch of a local human rider's view to its base, 0x1000.
+ *
+ * For a local human (mIsHuman and mIsLocal) sets mBoostBarPitchMult[mViewIndex] to 0x1000; func_0029AB40 raises it by
+ * 0x100 for every tick it plays while the bar fills. Its caller (cComputer, ai/computer.cpp) passes the bar's previous
+ * value and the amount added as two more arguments, which the code does not use.
+ *
+ * @param obj  the rider (cRider)
+ */
 extern "C" void func_0029AB08(void* self, void* obj)
 {
     bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
@@ -5794,6 +6227,20 @@ static inline int sndAB40Add(void* vself, int a, int b, int type)
     return cBankSys_SFX_End((cBankSys*)self);
 }
 
+/**
+ * Plays the boost-bar sounds of each local view: a rising tick as the bar fills and a countdown beep as uber runs out.
+ *
+ * Does nothing while replaying. Handles riders 0..1 in the multiplayer game path (byte D_00535C11 == 2), else rider 0;
+ * riders that are not local humans are skipped. The bar fill in tenths is floor(10 * f8 / f4) of the rider's metrix HUD
+ * fx (mMetrix + 0x1B0, + 0x3A8); when it rose above mBoostBarPreviousValue[i] (and is above 0) a 150 ms monitor
+ * (func_002ADCA0, callback cBankSys_Play2DCallbackWithPitchMult through D_004A36C0) plays bank 0, patch 101 at volume
+ * 127 with the volume control func_00287968(self, 9, 0) and pitch mBoostBarPitchMult[mViewIndex], which then grows by
+ * 0x100. The half-seconds left of uber, floor(mUberTimer * 2), are kept in mUberSecPreviousValue[i]; when they drop by
+ * one to a value below 13 that is even or below 5, and the rider is not past the finish line, the game is not paused
+ * (cPauseState_Flags bit 0, cReplay_isPauseAI) and the game state is 4, bank 0, patch 104 plays at volume 127.
+ *
+ * @param vself  the audio system
+ */
 // PORT: 64-bit long sound key; PS2-only FPU asm
 extern "C" void func_0029AB40(cSSXAudio* vself)
 {
@@ -6096,6 +6543,14 @@ extern "C" int cSSXAudio_GetFocusRider(void* self, int which);
 extern "C" void* cAudioInterface_getGame();
 extern "C" void func_002A3DE0(cSSXAudio* self, void* obj, int ev);
 
+/**
+ * Raises the DJ event func_002A3DE0 when the focus rider's uber level reaches 10.
+ *
+ * Does nothing while replaying. Takes the focus rider (cSSXAudio_GetFocusRider(self, -1)); when its mViewIndex differs
+ * from the one remembered in unk_5820 it only records the new view. Otherwise, when the rider's mUberLevel is 10,
+ * differs from the level remembered in unk_581C and the game state is 4, it calls func_002A3DE0(self, rider, 2). The
+ * level is remembered in unk_581C every time.
+ */
 extern "C" void func_0029B738(void* self)
 {
     if (cSSXAudio_ReplayMode(self) != 0) return;
@@ -6140,6 +6595,12 @@ INCLUDE_ASM("sound/soundsys", func_0029B818);
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029B960__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: called with a world trigger's swap-bank name when the trigger stops.
+ *
+ * func_002B5D78 (the world-trigger update) calls it for each stopped trigger whose name (+0x40) is not D_004A35A8;
+ * func_0029B818 handles the same name when a trigger starts.
+ */
 void func_0029B960(void* self)
 {
 }
@@ -6481,6 +6942,11 @@ extern "C" void cSSXAudio_UndoBindings(cSSXAudio* self, void* obj)
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029C418__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: called when the start-gate countdown begins.
+ *
+ * cGFGateState_gainFocus calls it right before func_0029C420(audio, 3), the first countdown beep.
+ */
 void func_0029C418(void* self)
 {
 }
@@ -6576,6 +7042,16 @@ extern "C" void func_0028D488(void* self);
 extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
 extern "C" void func_002B3A70(void*);
 
+/**
+ * Plays a start-gate countdown beep and, on the first and last beeps, prepares the race music.
+ *
+ * Does nothing while replaying. Plays bank 0, patch 78 with the volume control func_00287968(self, 5, 0). On beep 3,
+ * when the current song's state (func_002B49E0) is 201, 1, 2 or 3 and unk_627C is set, fades it over 2 seconds
+ * (func_002B3D48). On beep 1, when no song is playing (MusicSys.mSongPlaying) or the state is one of those, and
+ * unk_627C is set, it calls func_0028D488, func_0028CF98(self, 0, 0, -1, 0) and func_002B3A70 on the music system.
+ *
+ * @param mode  the countdown second (3, 2, 1; cGFGateState passes 3 first, then each whole second left)
+ */
 extern "C" void func_0029C420(void* self, int mode)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
@@ -6720,6 +7196,21 @@ static inline int snd7B0Add(void* vself, int a, int b)
         return cBankSys_SFX_End((cBankSys*)self);
 }
 
+/**
+ * Plays the start-gate drop and starts the race's music and opening DJ line.
+ *
+ * Calls func_002B3A98 on the music system and func_0028DF08 (unk_629C = -1), stores the cAI's AITick in mGruntCycle and
+ * plays bank 0, patch 98 through this object's vtable slot 1; when not replaying also bank 0, patch 94 at volume 127
+ * with the volume control func_00287968(vself, 9, 0). With unk_627C set the music system's vtable slot 4 gets 0. Unless
+ * play-history event 0 is live: in game paths 1 and 2 (D_00535C11) func_002A3170; otherwise on the last heat
+ * (cGameModeMan bIsLastHeat) func_002A3400, func_002B1758(SpeechSys, 0) and, when func_002A4078 or func_002A40E8 is
+ * nonzero, unk_5774 = 1 and unk_5778 = the current song's value from func_002B4908; on heat 1 the latter
+ * unconditionally, on heat 2 under the same test. When unk_627C is 0 it is set to 1 and music slot 4 gets 37 (not
+ * replaying), or slot 4 gets 37 when replaying with unk_6298 set. Finally play-history event 0 is moved to 50 ms past
+ * the monitor clock and unk_5824 records iHeatNum.
+ *
+ * @param vself  the audio system
+ */
 extern "C" void func_0029C7B0(void* vself)
 {
     sSnd7B0Sys* self = (sSnd7B0Sys*)vself;
@@ -7131,6 +7622,13 @@ static inline int sndD370AddVoice(void* vself, int a, int b)
     return cBankSys_SFX_End((cBankSys*)self);
 }
 
+/**
+ * Starts the track tone: plays bank 9, patch 0 when the track bank is loaded, and marks the tone as playing.
+ *
+ * When mTrackBankLoaded[1] is set the sound starts with the volume control func_00287968(self, 5, 0) and its handle
+ * goes to mToneHandle. mPlayingTone is set to 1 either way. cSSXAudio_UpdateTrackBanks and cSSXAudio_UpdateTone call it
+ * (the latter once the previous tone voice has finished).
+ */
 extern "C" void func_0029D370(void* self)
 {
     if (*(int*)((char*)self + 0x6C74) != 0) {
@@ -7192,6 +7690,11 @@ extern "C" void cSSXAudio_StopTone(cSSXAudio* self, float FadeTime)
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029D6D0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Sets mBigChallengeStarting to 1.
+ *
+ * The lodge overlay (fe/ovstateenterlodge.cpp) calls it when a big challenge is being started; func_0029D6E0 clears it.
+ */
 void func_0029D6D0(void* self)
 {
     *(int*)((char*)self + 0x5FD8) = 1;
@@ -7239,7 +7742,21 @@ extern "C" int cBEMissionInterface_getAudioType(void* iface, int mission);
 extern "C" int func_0028D960(void* self);
 extern "C" int func_0028DEF0_D6E0(void* self, int a1) __asm__("func_0028DEF0");
 
-// Mission start: resets the rider sounds, stops the front-end bank loops and picks the mission's music track.
+/**
+ * Starts the audio of a big challenge (mission): stops rider 0's wipeout and uber-spin sounds and picks the music.
+ *
+ * Clears mBigChallengeStarting and stops rider 0's wipeout slide and tumble sounds (func_00296E20, func_00297438) and
+ * its uber spin (cSSXAudio_EndUberSpin). When func_002B46E8 on the music system is nonzero, calls the music system's
+ * vtable slot 3 with 8 if func_0028D960 is nonzero, then func_002B4708. With unk_608C == 2 (a radio mode) it stops
+ * there. When the current song's state (func_002B49E0) is 1..3 it destroys the monitors of the three front-end
+ * callbacks D_004A3648, D_004A3650 and D_004A3658 (func_002ADDE0), calls func_0028DEF0(self, 18), func_0028D488 and
+ * func_0028CF98(self, 0, 0, -1, 0), and returns. Otherwise it stores the mission's audio type
+ * (cBEMissionInterface_getAudioType) in mCurBigChallengeType and maps it to a track (1: 33, 2: 34, 3: 38, 0 and 4: -1);
+ * when func_002B4620 is nonzero the music system's vtable slot 4 gets the track and mInBigChallenge is set;
+ * func_002B4708 follows.
+ *
+ * @param mission  the mission id (the script's LocalMissionId)
+ */
 extern "C" void func_0029D6E0(char* self, int mission)
 {
     char* bank = self + 0x118;
@@ -7376,6 +7893,13 @@ extern "C" void func_002A3C00(cSSXAudio* self, void* obj, int a2);
 
 struct sSndVtEntD8E0 { short delta; short index; void (*fn)(void*, int); };
 
+/**
+ * Plays the big-challenge (mission) completion audio.
+ *
+ * When mInBigChallenge is set, the music system's vtable slot 4 gets track 39 and mCurBigChallengeType and
+ * mInBigChallenge are cleared. Then bank 0, patch 109 plays with the volume control func_00287968(self, 9, 0) and the
+ * DJ event func_002A3C00 is raised for rider 0 with 1. cWScriptMission_processComplete calls it.
+ */
 extern "C" void func_0029D8E0(void* self)
 {
     if (*(int*)((char*)self + 0x5FD4) != 0) {
@@ -7595,7 +8119,21 @@ struct sOutDEF0 {
 extern "C" void cAvalanche_getAvalancheDataByPosition_c(sOutDEF0* out, sV3DEF0* in) __asm__("cAvalanche_getAvalancheDataByPosition");
 
 extern sSndCallback D_004A36D0_cb[] __asm__("D_004A36D0");
-// Grind/ride loop sound: reference-counted start (pushes the voice at the rider's position) and stop.
+/**
+ * Starts (reference-counted) or stops the avalanche rumble loop that follows the avalanche near the focus rider.
+ *
+ * With @p on set, the first start (mAvalancheInstanceCount becomes 1) takes the focus rider (view 0 when replaying),
+ * keeps its AI index (cRider vtable slot 7) in mpAvalancheRiderIndex, fills mAvalancheData from its position (slot 5)
+ * through cAvalanche_getAvalancheDataByPosition and plays bank 8, patch 2 with the volume func_0029E438(mAvalancheData), the volume control
+ * func_00287968(vself, 5, 0), mAvalancheData's position to follow, a 3D radius of 100 (func_002A9988), the callback
+ * func_0029E4A0 (D_004A36D0), the rider's view (func_00288A20) and mExternalVol 1; the handle goes to
+ * mAvalancheLoopHandle. With @p on clear, the last stop (count back to 0) stops that handle (mode 1, fade 2.0),
+ * destroys the bank monitor's instances with that callback (its vtable slot 3) and resets mAvalancheHitHandles[0..2] to
+ * -1. The peak3 comment above it ("Grind/ride loop sound") is wrong: visualfx/avalanche.cpp calls it.
+ *
+ * @param vself  the audio system
+ * @param on  nonzero to start, 0 to stop
+ */
 extern "C" void func_0029DEF0(cSSXAudio* vself, int on)
 {
     sSSXAudioView* self = (sSSXAudioView*)vself;
@@ -7659,8 +8197,15 @@ extern "C" void func_0029DEF0(cSSXAudio* vself, int on)
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029E438);
 #ifdef SKIP_ASM
+/**
+ * Returns the avalanche loop volume (0..127) for an avalanche's positional data.
+ *
+ * Computes (100 - m_distance * 0.01) * 1.27 * m_averageScale, scales it by 8.466667 and clamps the integer to 0..127.
+ *
+ * @param snd_  the avalanche data (tAvalanchePositionalData: m_averageScale at 0x10, m_distance at 0x14)
+ * @return the volume, 0..127
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
-// Converts the sound's volume (percent attenuation at 0x14, gain at 0x10) to a 0..127 level.
 extern "C" int func_0029E438(void* self, void* snd_)
 {
     char* snd = (char*)snd_;
@@ -7683,6 +8228,16 @@ extern "C" void cAvalanche_getAvalancheDataByPosition(void *, float *);
 
 struct sVEntryP_29E4A0 { short delta; short index; float* (*fn)(void*); };
 
+/**
+ * Updates the avalanche loop's voice: refreshes mAvalancheData around the avalanche rider and resets the volume.
+ *
+ * When mpAvalancheRiderIndex is below the cAI's NumberOfRidersAllocated, rebuilds mAvalancheData from that rider's
+ * position (cRider vtable slot 5, through cAvalanche_getAvalancheDataByPosition) and stores func_0029E438(mAvalancheData) into the voice's
+ * +0x64 (its volume). func_0029DEF0 installs it as the loop's callback (D_004A36D0).
+ *
+ * @param ssxAudio  the audio system
+ * @param voice  the playing voice (cBankMonitorInstance)
+ */
 extern "C" void func_0029E4A0(cSSXAudio* ssxAudio, void *voice) {
     if (ssxAudio->mpAvalancheRiderIndex < ((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated) {
         tAvalanchePositionalData positional;
@@ -7705,6 +8260,11 @@ extern "C" void func_0029E4A0(cSSXAudio* ssxAudio, void *voice) {
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029E560__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: called with the position of each avalanche ground hit.
+ *
+ * tActiveAvalanche_update calls it for every avalanche event that fires and every sound cue it reaches.
+ */
 void func_0029E560(void* self)
 {
 }
@@ -7713,6 +8273,9 @@ void func_0029E560(void* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029E568);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (an empty function; the retail image has no call or data reference to it).
+ */
 extern "C" void func_0029E568(void) {
 
 }
@@ -7720,6 +8283,9 @@ extern "C" void func_0029E568(void) {
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029E570);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (an empty function; the retail image has no call or data reference to it).
+ */
 extern "C" void func_0029E570(void) {
 
 }
@@ -7728,6 +8294,13 @@ extern "C" void func_0029E570(void) {
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029E578);
 #ifdef SKIP_ASM
+/**
+ * Resets the wipeout-recover progress of a rider's view: mLastWipeoutRecoverPercent[mViewIndex] = 0.
+ *
+ * cWipeoutControl_gainFocus calls it when a wipeout starts; cSSXAudio_PlayWipeoutRecoverHit compares against it.
+ *
+ * @param rider  the rider (cRider)
+ */
 extern "C" void func_0029E578(void* self, void* rider)
 {
     int idx = *(int*)((char*)rider + 0x870);
@@ -7992,6 +8565,13 @@ extern "C" void* cAudioInterface_getAI();
 extern "C" void cSSXAudio_EndUberSpin(cSSXAudio* self, void* obj);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
+/**
+ * Stops rider 0's looping sounds: the wipeout slide and tumble, the uber spin and the turbo.
+ *
+ * Calls func_00296E20, func_00297438 and cSSXAudio_EndUberSpin for the cAI's rider 0; while mTurboRef is above 0 it
+ * stops mTurboHandle (cBankMonitor_BANKMONITOR_StopHandle, mode 1, fade 0) and clears mTurboRef. cGame_update and
+ * cGame_updateUI call it when they bring up overlay 34.
+ */
 extern "C" void func_0029ED18(void* self)
 {
     func_00296E20(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
@@ -8028,6 +8608,18 @@ static inline void sndStreamLoad(const char* name, void** h)
     }
 }
 
+/**
+ * Opens the speech .big file of the language chosen in the options, and optionally restarts the speech system on it.
+ *
+ * Takes the language from func_0029F198 and returns when it equals unk_572C (the language already open). With
+ * @p restart set it first calls func_002B0DA0 on the speech system (SpeechSys, frees its bank buffer). The open stream
+ * in unk_5728 is closed (func_003DEDC0(h, 100)), then "data/audio/french.big" (2), "german.big" (4), "spanish.big" (8)
+ * or "english.big" (otherwise) is opened into unk_5728 through func_003DED50 when BXFILE_exists finds it, and the
+ * language is recorded in unk_572C. With @p restart set it then re-initialises the speech system (SPCH_Init) and starts
+ * speech instance 0 on "CHAR" with the Character volume control func_00287968(self, 4, 0) (func_002B0E60).
+ *
+ * @param restart  nonzero when the speech system is already running (the options screen); 0 from the constructor
+ */
 extern "C" void func_0029ED90(char* self, int restart)
 {
     int mode = func_0029F198(self);
@@ -8063,6 +8655,18 @@ INCLUDE_ASM("sound/soundsys", func_0029EEE0);
 #ifdef SKIP_ASM
 extern "C" int cAudioInterface_isInGame();
 
+/**
+ * Classifies a speech file by its name for speech instance 0, records the class in unk_5738 and returns it.
+ *
+ * Names starting "DJ_" give 2 (the DJ volume control) in game and 11 in the front end, "PA_" gives 3 (PA), "Arcade"
+ * gives 10 (ArcadeSpeech) and anything else 4 (Character). Other instances return -1, as the cSpeechSys base does. It
+ * fills slot 2 of cSSXAudio's cSpeechSys vtable (D_004836D8), where cSpeechSys has
+ * cSpeechSys_GetSpeechVolumeIdentifier; func_0029F000 maps the class to a volume.
+ *
+ * @param instanceIndex  the speech instance (0 is the only one handled)
+ * @param name  the speech file name
+ * @return the volume class, or -1
+ */
 extern "C" int func_0029EEE0(void* self, int instanceIndex, const char* name)
 {
     if (instanceIndex == 0) {
@@ -8090,6 +8694,19 @@ INCLUDE_ASM("sound/soundsys", func_0029F000);
 #ifdef SKIP_ASM
 extern "C" void func_00287F00(void* self, int a1, float f0, float f1);
 
+/**
+ * Returns the volume control a speech of a given class plays at, for speech instance 0 (0 for other instances).
+ *
+ * Class 2 (DJ) also ducks stream 0 to 0.65 over about a second (func_00287F00(self, 0, 0.9999, 0.65)). Class 11 (a DJ
+ * line in the front end) returns &unk_5730, a fixed 1.0; every other class returns func_00287968(self, type, a3), the
+ * applied volume of that control (per character for 4). It fills slot 3 of cSSXAudio's cSpeechSys vtable (D_004836D8),
+ * where cSpeechSys has cSpeechSys_UpdateSpeechVolume (which returns 0).
+ *
+ * @param instanceIndex  the speech instance (0 is the only one handled)
+ * @param type  the volume class from func_0029EEE0
+ * @param a3  the character index passed on to func_00287968
+ * @return a pointer to the volume (float), or 0
+ */
 extern "C" void* func_0029F000(cSSXAudio* self, int instanceIndex, int type, int a3)
 {
     if (instanceIndex == 0) {
@@ -8108,6 +8725,14 @@ extern "C" void* func_0029F000(cSSXAudio* self, int instanceIndex, int type, int
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029F088);
 #ifdef SKIP_ASM
+/**
+ * Returns the speech volume class last recorded for speech instance 0 (unk_5738, set by func_0029EEE0), else -1.
+ *
+ * cSSXAudio_ApplyRMSData reads it to pick the RMS duck level.
+ *
+ * @param instanceIndex  the speech instance
+ * @return the class (2 DJ, 3 PA, 4 Character, 10 ArcadeSpeech, 11 front-end DJ), or -1 for other instances
+ */
 extern "C" int func_0029F088(void* self, int instanceIndex)
 {
     if (instanceIndex == 0) {
@@ -8122,6 +8747,13 @@ INCLUDE_ASM("sound/soundsys", func_0029F0A0);
 #ifdef SKIP_ASM
 extern "C" float func_00287920(void* self, int ch);
 
+/**
+ * Tells whether character speech is audible: the set volume of control 4 (Character) is not 0.
+ *
+ * Every character speech event (cSSXAudio_PlayGrunt, func_0029FCC8 .. func_002A1778) checks it first.
+ *
+ * @return 1 when the Character volume (func_00287920(self, 4)) is nonzero, else 0
+ */
 extern "C" int func_0029F0A0(void* self)
 {
     if (func_00287920(self, 4) == 0.0f) {
@@ -8137,6 +8769,13 @@ INCLUDE_ASM("sound/soundsys", func_0029F0D8);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" float func_00287920(void* self, int ch);
 
+/**
+ * Tells whether DJ speech may play: not replaying and the set volume of control 2 (DJ) is not 0.
+ *
+ * The DJ speech events func_002A2018 .. func_002A2DA0 check it first.
+ *
+ * @return 1 when allowed, else 0
+ */
 extern "C" int func_0029F0D8(void* self)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
@@ -8154,6 +8793,13 @@ INCLUDE_ASM("sound/soundsys", func_0029F128);
 #ifdef SKIP_ASM
 extern "C" float func_00287920(void* self, int ch);
 
+/**
+ * Tells whether PA speech is audible: the set volume of control 3 (PA) is not 0.
+ *
+ * The PA speech events func_002A31C0 .. func_002A39E0 check it first.
+ *
+ * @return 1 when the PA volume (func_00287920(self, 3)) is nonzero, else 0
+ */
 extern "C" int func_0029F128(void* self)
 {
     if (func_00287920(self, 3) == 0.0f) {
@@ -8168,6 +8814,13 @@ INCLUDE_ASM("sound/soundsys", func_0029F160);
 #ifdef SKIP_ASM
 extern "C" float func_00287920(void* self, int ch);
 
+/**
+ * Tells whether arcade speech is audible: the set volume of control 10 (ArcadeSpeech) is not 0.
+ *
+ * The arcade announcer events func_002A3B18 .. func_002A3EB8 check it first.
+ *
+ * @return 1 when the ArcadeSpeech volume (func_00287920(self, 10)) is nonzero, else 0
+ */
 extern "C" int func_0029F160(void* self)
 {
     if (func_00287920(self, 10) == 0.0f) {
@@ -8190,6 +8843,14 @@ struct sSsOpts9F198 {
 };
 extern sSsOpts9F198 D_00535610_ss9F198 __asm__("cBEOptionInterface_mOption");
 
+/**
+ * Returns the speech language chosen in the options as a bit: 1 English, 2 French, 4 German, 8 Spanish.
+ *
+ * Reads bits 22..24 of the first word of cBEOptionInterface_mOption (after cBE_getInterface(kind 4)): 0 gives 1, 1
+ * gives 2, 2 gives 4, 3 gives 8, anything else 1.
+ *
+ * @return the language bit
+ */
 extern "C" int func_0029F198(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -8216,6 +8877,17 @@ INCLUDE_ASM("sound/soundsys", func_0029F2B0);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: the unit declares this as void(int, int); defined under an asm label with its real type
 extern "C" int func_0029F2B0_impl(unsigned int idx, int flag) __asm__("func_0029F2B0");
+/**
+ * Returns the speech-filter bit of a character identity, or 0 for a cheat identity.
+ *
+ * With @p flag 0 the identities map to 6: 0x1, 3: 0x2, 0: 0x4, 8: 0x8, 1: 0x10, 4: 0x20, 7: 0x40, 9: 0x80, 5: 0x100, 2:
+ * 0x200 (by func_0029F3F8's grunt banks: eli, mac, mob, psy, kao, zoe, nat, vig, grf, ari); other identities and a
+ * nonzero @p flag give 0. The unit declares it void(int, int).
+ *
+ * @param idx  the character identity (cRider_getIdentity)
+ * @param flag  the cheat identity (cRider_getCheatIdentity); nonzero gives 0
+ * @return the character's bit, or 0
+ */
 extern "C" int func_0029F2B0_impl(unsigned int idx, int flag)
 {
     if (flag == 0) {
@@ -8243,6 +8915,12 @@ extern "C" int cRider_getIdentity(void*);
 extern "C" int cRider_getCheatIdentity(void*);
 extern "C" void func_0029F2B0(int, int);
 
+/**
+ * Returns a rider's speech-filter bit: func_0029F2B0 of its identity and cheat identity (declared void).
+ *
+ * Its argument is the rider (cRider), not the audio system: the character speech events pass the rider and use the
+ * value left in v0.
+ */
 extern "C" void func_0029F330(void* self)
 {
     int identity = cRider_getIdentity(self);
@@ -8253,6 +8931,15 @@ extern "C" void func_0029F330(void* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_0029F378);
 #ifdef SKIP_ASM
+/**
+ * Returns the character whose grunt bank a rider uses.
+ *
+ * Without a cheat identity it is the rider's identity (cRider_getIdentity); cheat identities 14, 16 and 21 use 6 (eli)
+ * and all other cheat identities 7 (nat).
+ *
+ * @param obj  the rider (cRider)
+ * @return the character identity for the grunt bank
+ */
 extern "C" int func_0029F378(void* self, void* obj)
 {
     switch (cRider_getCheatIdentity(obj)) {
@@ -8289,6 +8976,13 @@ extern char str_GRNT_ari_bnk[];
 extern char str_GRNT_none_bnk[];
 extern char str_GRNT_AI_bnk[];
 
+/**
+ * Loads the grunt banks: rider 0's character into bank slot 14 and the shared AI grunts into slot 15.
+ *
+ * Picks "data/audio/GRNT_<char>.bnk" from func_0029F378 for the cAI's rider 0 (eli, mac, mob, psy, kao, zoe, vig, nat,
+ * grf or ari, "GRNT_none.bnk" for anything else) and "data/audio/GRNT_AI.bnk", and loads them with func_0028BC58 on the
+ * cBankManager (synchronous, slot 14 and 15). cSSXAudio_InGameLoad calls it.
+ */
 extern "C" void func_0029F3F8(cSSXAudio* self)
 {
     char buf[64];
@@ -8316,6 +9010,9 @@ INCLUDE_ASM("sound/soundsys", func_0029F5E0);
 #ifdef SKIP_ASM
 extern "C" void func_0028BCE8(void* self, int i);
 
+/**
+ * Unloads the grunt banks in bank slots 14 and 15 (func_0028BCE8); cSSXAudio_InGamePurge calls it.
+ */
 extern "C" void func_0029F5E0(cSSXAudio* self)
 {
     func_0028BCE8(*(void**)self->MusicSys.mpVStreamSys, 0xE);
@@ -8332,6 +9029,14 @@ struct sSndVEntry29F620 {
     int (*fn)(void*);
 };
 
+/**
+ * Returns the bank slot of a rider's grunts: 14 (its own character bank) for rider 0, 15 (the AI grunts) otherwise.
+ *
+ * Tests the rider's AI index (cRider vtable slot 7). cSSXAudio_PlayGrunt uses it.
+ *
+ * @param obj  the rider (cRider)
+ * @return 14 or 15
+ */
 extern "C" int func_0029F620(void* self, void* obj)
 {
     void* sub = (char*)obj + 0x6C0;
@@ -8515,6 +9220,19 @@ struct sSsFCC8Rider : public sSsFCC8RiderA, public cSsFCC8Obj {
     int f87C;
 };
 
+/**
+ * Requests a rider's big-air speech line when its predicted air time is at least about 4 seconds.
+ *
+ * Needs the Character volume on (func_0029F0A0), a location outside the back-country 14..16 (func_002A3FE8), no replay,
+ * a rider not past the finish line, the air predictor's +0x98 (mAirPredictor) of at least 4.000256, and for a computer
+ * or non-local rider that it is the focus rider. Then speech instance 0 must be ready (func_002B0E28) and the rider
+ * within 30 units of a camera (D_004A36D8). Speech 8324, 8323 or 8337 (peak 1, 2 or 3 of the location, from
+ * func_002A1E20) is requested for the rider on speech instance 0 (func_002B1458); when queued, the speech hook
+ * D_004A482C gets its packed id (func_003D8008(1, 0, id)), 2 arguments, the rider's speech bit (func_0029F330) and 3.
+ * cSSXAudio_LiftWithAirTime calls it.
+ *
+ * @param vrider  the rider (cRider)
+ */
 extern "C" void func_0029FCC8(cSSXAudio* self, void* vrider)
 {
     sSsFCC8Rider* rider = (sSsFCC8Rider*)vrider;
@@ -8593,6 +9311,18 @@ struct sSsFF80Rider : public sSsFF80RiderA, public cSsFF80Obj {
     int f87C;
 };
 
+/**
+ * Requests a rider's positive-reaction speech line (a cheer), the stronger set when @p alt is set.
+ *
+ * Needs the Character volume on (func_0029F0A0), no replay, a rider not past the finish line, and for a computer or
+ * non-local rider that it is the focus rider; the rider must be within 30 units of a camera. By the location's peak
+ * (func_002A1E20: 1, 2, other) it requests speech 8336/8347/8349 with @p alt set, else 8322/8346/8348, for the rider on
+ * speech instance 0 (func_002B1458) and, when queued, passes the packed id and the rider's speech bit (func_0029F330)
+ * to the speech hook D_004A482C. cRider_checkForReaction calls it for reaction types 1 (alt 0) and 2 (alt 1).
+ *
+ * @param rider  the rider (cRider)
+ * @param alt  nonzero for the uber reaction (type 2)
+ */
 extern "C" void func_0029FF80(cSSXAudio* self, sSsFF80Rider* rider, int alt)
 {
     if (func_0029F0A0(self) == 0) return;
@@ -8681,6 +9411,17 @@ struct sSs02D8Rider : public sSs02D8RiderA, public cSs02D8Obj {
     int f87C;
 };
 
+/**
+ * Requests a rider's wipeout speech line.
+ *
+ * Needs the Character volume on (func_0029F0A0), no replay, a rider not past the finish line, for a computer or
+ * non-local rider that it is the focus rider, speech instance 0 ready (func_002B0E28) and the rider within 30 units of
+ * a camera. By the location's peak (func_002A1E20: 1, 2, other) it requests speech 8328, 8352 or 8353 for the rider
+ * and, when queued, passes the packed id, the rider's speech bit and a mode to the speech hook D_004A482C: 1 at the
+ * locations 17..21 (func_002A3F90) or in game mode 4 (func_002A4040), else 3. cWipeoutControl_loseFocus calls it.
+ *
+ * @param rider  the rider (cRider)
+ */
 extern "C" void func_002A02D8(cSSXAudio* self, sSs02D8Rider* rider)
 {
     if (func_0029F0A0(self) == 0) return;
@@ -8792,6 +9533,21 @@ struct sSs0560Rider : public sSs0560RiderA, public cSs0560Obj {
 };
 
 void func_002A0560_0560(void* self, sSs0560Rider* a, sSs0560Rider* b) __asm__("func_002A0560");
+/**
+ * Requests the speech of two riders when one overtakes the other fast enough: a taunt and a reply.
+ *
+ * Needs the Character volume on, no NIS playing (ScriptEngine->mPlayingNISList == 2), no replay, no cheat identity on
+ * either rider, at least 600 AI ticks since mGruntCycle, neither rider past the finish line, and one of them the focus
+ * rider or a local human. Speech instance 0 must be ready, @p a within 30 units of a camera and @p b in the same camera
+ * range. The closing speed is @p a's velocity minus @p b's velocity along @p b's heading (the angle at +0x4CC,
+ * fSinCos); it must lie between 670.56 and 1788.16 (15 and 40 mph in cm/s), and from 1341.12 (30 mph) the mode is 2,
+ * else 1. With the relation func_002A1820 == 2, speech 8321 is requested for @p a and 8319 for @p b; with 0 or 1, 8320
+ * for @p a (its event also gets @p b's character bit func_002A1D48 ORed with 0x1000) and 8317 for @p b. Each queued
+ * request goes to the speech hook D_004A482C with the speaker's bit and the mode.
+ *
+ * @param a  the rider that passes
+ * @param b  the rider being passed
+ */
 void func_002A0560_0560(void* self, sSs0560Rider* a, sSs0560Rider* b)
 {
     if (func_0029F0A0(self) == 0) return;
@@ -8902,6 +9658,21 @@ struct sSs0A30Rider : public sSs0A30RiderA, public cSs0A30Obj {
 struct sSs1820Rider;
 extern "C" int func_002A1820(void* self, sSs1820Rider* a, sSs1820Rider* b);
 
+/**
+ * Plays the victim's grunt for a rider-on-rider hit and, for a plain punch, the attacker's and victim's speech.
+ *
+ * Needs the Character volume on, no NIS playing, no replay, no cheat identity on either rider, neither past the finish
+ * line and one of them the focus rider or a local human. Then @p b grunts (cSSXAudio_PlayGrunt(self, b, 0, 1)). The
+ * speech needs speech instance 0 ready, either rider within 30 units of a camera, and @p p7 and @p p8 both 0. By the
+ * riders' relation (func_002A1820) it requests 8335 for @p b and 8330 for @p a (2), 8318 and 8330 (1), or 8312 and 8334
+ * (0); each queued request goes to the speech hook D_004A482C with the speaker's bit and 3. cComputer's bump, knockdown
+ * and punch reactions call it.
+ *
+ * @param a  the attacking rider
+ * @param b  the rider that was hit
+ * @param p7  1 for a bump, 0 for a punch
+ * @param p8  1 when the hit knocks the rider down (or is the harder kind), else 0
+ */
 extern "C" void func_002A0A30(cSSXAudio* self, sSs0A30Rider* a, sSs0A30Rider* b, int p7, int p8)
 {
     if (func_0029F0A0(self) == 0) return;
@@ -8994,6 +9765,17 @@ struct sSs0E70Rider : public sSs0E70RiderA, public cSs0E70Obj {
     int f87C;
 };
 
+/**
+ * Plays a rider's bump grunt and, for a local human when asked, its bump speech line (8311).
+ *
+ * Needs the Character volume on, no replay, for a computer or non-local rider that it is the focus rider, a rider not
+ * past the finish line, speech instance 0 ready and the rider within 30 units of a camera. Plays
+ * cSSXAudio_PlayGrunt(self, rider, 2, 0); with @p play set and a local human rider it then requests speech 8311 and,
+ * when queued, passes its packed id and the rider's speech bit to the speech hook D_004A482C.
+ *
+ * @param rider  the rider (cRider)
+ * @param play  nonzero to also request the speech line
+ */
 extern "C" void func_002A0E70(cSSXAudio* self, sSs0E70Rider* rider, int play)
 {
     if (func_0029F0A0(self) == 0) return;
@@ -9026,6 +9808,16 @@ extern "C" int func_002AB150(void* self, int i);
 extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(void* self, int idx, int a2);
 extern "C" void func_002B11B0(void*, int);
 
+/**
+ * Stops speech instance 0 when it is saying a line for the given character identity; returns whether nothing blocks.
+ *
+ * Maps speech instance 0's stream (func_002B1220) to a stream index (func_002AB150); none (< 0) returns 1. The bank
+ * monitor's voice for that index (cBankMonitor_BANKMONITOR_GetHandle(.., 3)) missing returns 0. When its +0x80 equals
+ * @p id the speech is stopped (func_002B11B0) and 1 is returned, otherwise 0. cSSXAudio_PlayGrunt calls it.
+ *
+ * @param id  the character identity
+ * @return 1 when no speech is playing or the character's speech was stopped, else 0
+ */
 extern "C" int func_002A1028(cSSXAudio* self, int id)
 {
     int idx = func_002AB150(self->MusicSys.mpVStreamSys, func_002B1220((char*)self + 0x5560, 0));
@@ -9051,6 +9843,16 @@ extern "C" int func_002B1220(void* self, int i);
 extern "C" int func_002AB150(void* self, int i);
 extern "C" void* cBankMonitor_BANKMONITOR_GetHandle(void* self, int idx, int a2);
 
+/**
+ * Tells whether speech instance 0 is saying a line for the given character identity.
+ *
+ * Maps speech instance 0's stream (func_002B1220) to a stream index (func_002AB150) and compares the +0x80 of the bank
+ * monitor's voice for it (cBankMonitor_BANKMONITOR_GetHandle(.., 3)) with @p id; no stream or no voice gives 0.
+ * cSSXAudio_PlayGrunt, func_0028DF18 and func_002A4A38 (with 10) use it.
+ *
+ * @param id  the character identity
+ * @return 1 when that character's speech is playing, else 0
+ */
 extern "C" int func_002A10C0(cSSXAudio* self, int id)
 {
     int idx = func_002AB150(self->MusicSys.mpVStreamSys, func_002B1220((char*)self + 0x5560, 0));
@@ -9083,6 +9885,17 @@ struct sSsVt1138 { short delta; short index; int (*fn)(void*); };
 // PORT: callers declare func_002A1138 as (void*, int, int); the body takes (self, rider, obj).
 void func_002A1138_impl(void* self, char* rider, void* obj) __asm__("func_002A1138");
 
+/**
+ * Requests speech line 8403 for a rider, about another rider (script speech event type 0).
+ *
+ * Needs the Character volume on and no replay; @p rider defaults to the cAI's rider 1 and @p obj to rider 0. The rider
+ * must be within 30 units of a camera (position from cRider vtable slot 5). When the request is queued on speech
+ * instance 0 (func_002B1458), the speech hook D_004A482C gets its packed id, 3 arguments, the rider's speech bit
+ * (func_0029F330), @p obj's character bit (func_002A1D48) and 4. func_002A1B88 and func_002A43B8 call it.
+ *
+ * @param rider  the speaking rider, or 0 for rider 1
+ * @param obj  the rider spoken about, or 0 for rider 0
+ */
 void func_002A1138_impl(void* self, char* rider, void* obj)
 {
     if (func_0029F0A0(self) == 0) return;
@@ -9118,6 +9931,16 @@ struct sSsVt1280 { short delta; short index; int (*fn)(void*); };
 // PORT: callers declare func_002A1280 as (void*, int, int); the body takes (self, rider, obj).
 void func_002A1280_impl(void* self, char* rider, void* obj) __asm__("func_002A1280");
 
+/**
+ * Requests speech line 8404 for a rider, about another rider (script speech event type 1).
+ *
+ * Needs the Character volume on, no replay and @p rider within 30 units of a camera. When the request is queued on
+ * speech instance 0 (func_002B1458), the speech hook D_004A482C gets its packed id, the rider's speech bit
+ * (func_0029F330) and @p obj's character bit (func_002A1D48). func_002A1B88 calls it.
+ *
+ * @param rider  the speaking rider
+ * @param obj  the rider spoken about
+ */
 void func_002A1280_impl(void* self, char* rider, void* obj)
 {
     if (func_0029F0A0(self) == 0) return;
@@ -9138,6 +9961,15 @@ INCLUDE_ASM("sound/soundsys", func_002A1388);
 extern "C" void* cAudioInterface_getAI();
 extern "C" void func_002A1400(void* self, int a);
 
+/**
+ * Monitor callback: requests the place speech line (func_002A1400) for the rider whose index the monitor carries.
+ *
+ * The index is the monitor instance's +0x1C; one outside 0..NumberOfRidersAllocated - 1 uses rider 0. Its pointer to
+ * member is D_004A36E8, which func_002A34D0 and func_002A3708 pass to func_002ADCA0 (cMonitor's create).
+ *
+ * @param obj  the monitor instance (cMonitorInstance)
+ * @return 1
+ */
 extern "C" int func_002A1388(cSSXAudio* self, void* obj)
 {
     int i = *(int*)((char*)obj + 0x1C);
@@ -9163,6 +9995,16 @@ extern signed char D_00535C11[];
 // PORT: callers declare func_002A1400 as (void*, int); the body takes (self, rider).
 void func_002A1400_impl(void* self, char* rider) __asm__("func_002A1400");
 
+/**
+ * Requests a rider's place speech line (8377) with the place class from func_002A1E68.
+ *
+ * Needs the Character volume on, no replay and the rider within 30 units of a camera. When the request is queued on
+ * speech instance 0, the speech hook D_004A482C gets its packed id, the rider's speech bit and a mode: 1 when the place
+ * bit is 1 (first), 2 when func_002A4248 is nonzero or in the multiplayer game path (D_00535C11 == 2), 4 for the bits 2
+ * and 4, else 2. func_002A1388, func_002A1B58 and func_002A43B8 call it.
+ *
+ * @param rider  the rider (cRider)
+ */
 void func_002A1400_impl(void* self, char* rider)
 {
     if (func_0029F0A0(self) == 0) return;
@@ -9196,6 +10038,16 @@ INCLUDE_ASM("sound/soundsys", func_002A1560);
 extern "C" int func_002B0E28(void* self, int i);
 extern void (*D_004A482C)(void*, int, int);
 
+/**
+ * Requests a rider's off-balance speech line (8376) during a press.
+ *
+ * Needs the Character volume on, no replay, for a computer or non-local rider that it is the focus rider, speech
+ * instance 0 ready and the rider within 30 units of a camera. When queued, the speech hook D_004A482C gets its packed
+ * id and the rider's speech bit. The press-balance handler in ai/ai.cpp calls it while the press depth (mSlewed[11]) is
+ * above 0.8 (its doc calls it the Whooh speech).
+ *
+ * @param rider  the rider (cRider)
+ */
 extern "C" void func_002A1560(cSSXAudio* self, char* rider)
 {
     if (func_0029F0A0(self) == 0) return;
@@ -9231,6 +10083,15 @@ extern "C" void* func_003D8008(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 extern signed char D_00535C11[];
 
+/**
+ * Requests the character-select speech line (8380) for a character identity, outside the world-circuit game path.
+ *
+ * Needs the Character volume on, speech instance 0 ready and a game path (D_00535C11) other than 0. The request has no
+ * rider, the identity and refresh 1; when queued, the speech hook D_004A482C gets its packed id and the identity's
+ * speech bit (func_0029F2B0(identity, 0)). The front-end rider manager calls it.
+ *
+ * @param a1  the character identity
+ */
 extern "C" void func_002A16B0(cSSXAudio* self, int a1)
 {
     if (func_0029F0A0(self) != 0) {
@@ -9260,6 +10121,15 @@ int func_0029F2B0_r(int a, int b) __asm__("func_0029F2B0");
 extern "C" void* func_003D8008(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
+/**
+ * Requests the customize speech line (8381) for a character identity.
+ *
+ * Needs the Character volume on and speech instance 0 ready. The request has no rider, the identity and refresh 1; when
+ * queued, the speech hook D_004A482C gets its packed id and the identity's speech bit (func_0029F2B0(identity, 0)). The
+ * front-end rider manager calls it for the equip screen's customize request.
+ *
+ * @param a1  the character identity
+ */
 extern "C" void func_002A1778(cSSXAudio* self, int a1)
 {
     if (func_0029F0A0(self) != 0) {
@@ -9302,6 +10172,17 @@ struct sSs1820Rider : public sSs1820RiderA, public cSs1820Obj {
     int f87C;
 };
 
+/**
+ * Returns the relation of two riders for their speech: 0 or 1 from their rivalry state, 2 for none.
+ *
+ * Gives 2 with only 2 riders allocated or when both are local humans. Otherwise, when both aggression levels
+ * (cBEAggressionInterface_getAggression, each way between the riders' AI indices from cRider vtable slot 7) are below
+ * 2, the state cBEAggressionInterface_getState(a, b) 0 or 1 is returned; anything else gives 2.
+ *
+ * @param a  the first rider (the attacker or passer)
+ * @param b  the second rider
+ * @return 0, 1 or 2
+ */
 extern "C" int func_002A1820(void* self, sSs1820Rider* a, sSs1820Rider* b)
 {
     if (((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated == 2) return 2;
@@ -9338,8 +10219,18 @@ extern "C" void func_002A39E0(cSSXAudio* self);
 extern "C" void func_002A3708(cSSXAudio* self, char* rider);
 extern const sSndKey8 D_004A3648_19D8[] __asm__("D_004A3648");
 
+/**
+ * Plays a script-triggered speech event by id; returns whether the id is handled.
+ *
+ * 0: func_002A31C0, and when no song is playing (MusicSys.mSongPlaying) func_0028D488 and a 10 ms monitor
+ * (func_002ADCA0) with the callback D_004A3648 and data (0, 3, 1, 0, 0); 1: func_002A32B0; 2: func_002A3358; 3:
+ * func_002A3400; 5: func_002A3708 for rider 0; 7: func_002A3860; 8: func_002A2018; 10: func_002A2188; 12:
+ * func_002A2568(self, -1); 14: func_002A2638; 15: func_002A39E0. The script engine's speech events call it.
+ *
+ * @param ev  the event id
+ * @return 1 when handled, else 0
+ */
 // PORT: 64-bit long sound key
-// Front-end sound event dispatcher; returns 1 if the event was handled.
 extern "C" int func_002A19D8(cSSXAudio* self, int ev)
 {
     if (ev == 0) {
@@ -9380,6 +10271,15 @@ INCLUDE_ASM("sound/soundsys", func_002A1B58);
 #ifdef SKIP_ASM
 extern "C" void func_002A1400(void* self, int a);
 
+/**
+ * Handles a rider's anim speech message: 2 requests the place line (func_002A1400) and returns 1, others return 0.
+ *
+ * cRider sends it the event ids below 0x64.
+ *
+ * @param msg  the message id
+ * @param rider  the rider (cRider, as int)
+ * @return 1 when handled, else 0
+ */
 extern "C" int func_002A1B58(cSSXAudio* self, int msg, int rider)
 {
     if (msg == 2) {
@@ -9396,6 +10296,16 @@ INCLUDE_ASM("sound/soundsys", func_002A1B88);
 extern "C" void func_002A1138(void* self, int a, int b);
 extern "C" void func_002A1280(void* self, int a, int b);
 
+/**
+ * Handles a script speech event about a subject rider: type 0 plays func_002A1138, type 1 func_002A1280.
+ *
+ * cRider passes the rider and the event's subject rider (cSSXScriptEngine_GetSubjectRider).
+ *
+ * @param type  the event type
+ * @param rider  the speaking rider (as int)
+ * @param otherRider  the subject rider (as int)
+ * @return 1 when handled, else 0
+ */
 extern "C" int func_002A1B88(cSSXAudio* self, int type, int rider, int otherRider)
 {
     if (type == 0) {
@@ -9413,6 +10323,11 @@ extern "C" int func_002A1B88(cSSXAudio* self, int type, int rider, int otherRide
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A1BD0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 1; cRider_OnEndObjectUse and cScriptObjEvent_OnEndObjectUse call it when speech events fired during an NIS.
+ *
+ * @return 1
+ */
 int func_002A1BD0(void* self)
 {
     return 0x1;
@@ -9422,8 +10337,19 @@ int func_002A1BD0(void* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A1BD8);
 #ifdef SKIP_ASM
+/**
+ * Returns the bit of a location for the location-dependent speech; the combined locations 17..21 also need a part.
+ *
+ * Locations 0..4 give 0x1..0x10 and 5..16 give 0x40..0x20000 (0x20 is skipped). For 17..21 @p b picks the part (14, 15,
+ * 16 or 17): 17 gives 0x1 / 0x40 / 0x200 for 14 / 15 / 16, 18 gives 0x2 / 0x1000 for 14 / 17, 19 gives 0x4 / 0x400 /
+ * 0x2000 for 14 / 16 / 17, 20 gives 0x8 / 0x80 for 14 / 15, and 21 gives 0x10 / 0x100 / 0x800 / 0x4000 for 14 / 15 / 16
+ * / 17. Anything else, or @p b of -1, gives 0.
+ *
+ * @param location  the location id
+ * @param b  the part of a combined location, or -1
+ * @return the bit, or 0
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
-// Maps a sound id (and, for the combined ids 0x11..0x15, a sub-id) to its channel bit.
 extern "C" int func_002A1BD8(void* self, int location, int b)
 {
     switch (location) {
@@ -9478,6 +10404,11 @@ extern "C" int cRider_getIdentity(void*);
 extern "C" int cRider_getCheatIdentity(void*);
 extern "C" void func_002A1DA0(void* self, int a, int b);
 
+/**
+ * Returns the speech character bit of a rider: func_002A1DA0 of its identity and cheat identity (declared void).
+ *
+ * @param obj  the rider (cRider)
+ */
 extern "C" void func_002A1D48(void* self, void* obj)
 {
     int identity = cRider_getIdentity(obj);
@@ -9491,6 +10422,16 @@ INCLUDE_ASM("sound/soundsys", func_002A1DA0);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: the unit declares this as void(void*, int, int); defined under an asm label with its real type
 extern "C" int func_002A1DA0_impl(void* self, unsigned int idx, int flag) __asm__("func_002A1DA0");
+/**
+ * Returns the character bit of an identity used for the rider spoken about, or 0x1000 for a cheat identity.
+ *
+ * With @p flag 0: 6 gives 0x1, 3: 0x2, 0: 0x4, 8: 0x8, 1: 0x10, 4: 0x20, 9: 0x40, 7: 0x80, 5: 0x100, 2: 0x200 (unlike
+ * func_0029F2B0, 9 and 7 swap bits); anything else gives 0x1000. The unit declares it void(void*, int, int).
+ *
+ * @param idx  the character identity
+ * @param flag  the cheat identity; nonzero gives 0x1000
+ * @return the character's bit
+ */
 extern "C" int func_002A1DA0_impl(void* self, unsigned int idx, int flag)
 {
     if (flag == 0) {
@@ -9514,6 +10455,15 @@ extern "C" int func_002A1DA0_impl(void* self, unsigned int idx, int flag)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A1E20);
 #ifdef SKIP_ASM
+/**
+ * Returns the peak bit of a location: 1 for peak 1, 2 for peak 2, 4 for peak 3, 0 for unknown ids.
+ *
+ * 1: locations 0, 1, 5, 8, 11, 14, 17, 18; 2: 2, 3, 6, 9, 12, 15, 19, 20; 4: 4, 7, 10, 13, 16, 21 (14..16 are the
+ * peaks' back-country locations).
+ *
+ * @param x  the location id
+ * @return 1, 2, 4 or 0
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int func_002A1E20(void* self, unsigned int x)
 {
@@ -9534,6 +10484,17 @@ INCLUDE_ASM("sound/soundsys", func_002A1E68);
 #ifdef SKIP_ASM
 extern int D_00536730[];
 
+/**
+ * Returns a rider's place in the race as a bit (1 first, 2 second, ...), for the place speech.
+ *
+ * In the multiplayer game path (D_00535C11 == 2): when func_002A4078 is nonzero, the rider's unk_0EC (its place) 0..4
+ * gives 1, 2, 4, 8, 0x10 and anything else 0x200; otherwise 1 for place 0 and 2 for the rest. In the other paths rider
+ * 0's rank D_00536730[0] gives 0: 1, 1: 2, 2: 4, 3: 8, 4: 0x10, 5: 0x200, 6: 0x40, 7: 0x80, 8: 0x100, 9: 0x200, else 0
+ * (the @p obj rider is not used there).
+ *
+ * @param obj  the rider (cRider)
+ * @return the place bit
+ */
 extern "C" int func_002A1E68(void *self, void *obj)
 {
     int r;
@@ -9606,6 +10567,14 @@ extern "C" int func_002A1E68(void *self, void *obj)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A1FA0);
 #ifdef SKIP_ASM
+/**
+ * Returns a character group of a rider for speech: 2 for identities 1, 2, 4, 6, 1 for 0, 3, 5, 7, 8, 9, else 0.
+ *
+ * A rider with a cheat identity gives 0. (By func_0029F3F8's grunt banks 1, 2, 4, 6 are kao, ari, zoe, eli: the women.)
+ *
+ * @param obj  the rider (cRider)
+ * @return 1, 2 or 0
+ */
 extern "C" int func_002A1FA0(void *self, void *obj)
 {
     if (cRider_getCheatIdentity(obj) == 0) {
@@ -9645,6 +10614,14 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests DJ speech line 8392 with the language and the location's peak.
+ *
+ * Needs DJ speech allowed (func_0029F0D8). The request goes to speech instance 0 with identity 10 (the DJ,
+ * func_002B1458); when queued, the speech hook D_004A482C gets its packed id (func_003D8008(1, 0, 8392)), the language
+ * bit (func_0029F198) and the peak bit of the location (func_002A1E20). func_002A19D8 (event 8) and func_002A2E50 (pick
+ * 2) call it.
+ */
 extern "C" void func_002A2018(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
@@ -9672,6 +10649,13 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests DJ speech line 8393 with the language and the location's peak.
+ *
+ * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit (func_0029F198) and the peak bit (func_002A1E20).
+ * func_002A2E50 calls it (pick 7).
+ */
 extern "C" void func_002A20D0(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
@@ -9702,6 +10686,13 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests DJ speech line 8394 about rider 0's character, with the language and the location's peak.
+ *
+ * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit, rider 0's character bit (func_002A1D48) and the peak
+ * bit. func_002A19D8 (event 10) and func_002A2E50 (pick 0) call it.
+ */
 extern "C" void func_002A2188(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
@@ -9730,6 +10721,12 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests DJ speech line 8423 with the language and the location's peak.
+ *
+ * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the peak bit. func_002A2E50 calls it (pick 5).
+ */
 extern "C" void func_002A2260(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
@@ -9757,6 +10754,12 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests DJ speech line 8424 with the language and the location's peak.
+ *
+ * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the peak bit. func_002A2E50 calls it (pick 6).
+ */
 extern "C" void func_002A2318(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
@@ -9784,6 +10787,15 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests DJ speech line 8425 with the language and the peak of a location (the current one for -1).
+ *
+ * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the peak bit (func_002A1E20) of @p mode, or of the
+ * current location when @p mode is -1. func_002A2E50 (pick 1) and func_002A4770 (a back-country location) call it.
+ *
+ * @param mode  a location id, or -1 for the current location
+ */
 extern "C" void func_002A23D0(cSSXAudio* self, int mode)
 {
     if (func_0029F0D8(self) != 0) {
@@ -9813,6 +10825,15 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests DJ speech line 8396 about a location, with mode 3.
+ *
+ * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit, the location bit func_002A1BD8(@p a1, -1) and 3.
+ * func_002A4770 calls it.
+ *
+ * @param a1  the location id
+ */
 extern "C" void func_002A24B0(cSSXAudio* self, int a1)
 {
     if (func_0029F0D8(self) != 0) {
@@ -9840,6 +10861,15 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests DJ speech line 8396 about the current location (or a part of a combined location), with mode 3.
+ *
+ * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit, the bit func_002A1BD8(current location, @p a1) and 3.
+ * func_002A19D8 (event 12, with -1) and func_002A43B8 (with unk_575C) call it.
+ *
+ * @param a1  the part of a combined location (func_002A1BD8), or -1
+ */
 extern "C" void func_002A2568(cSSXAudio* self, int a1)
 {
     if (func_0029F0D8(self) != 0) {
@@ -9867,6 +10897,13 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests DJ speech line 8378 with the language and the location's peak.
+ *
+ * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the peak bit. func_002A19D8 (event 14) and
+ * func_002A43B8 (pending flag unk_576C) call it.
+ */
 extern "C" void func_002A2638(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
@@ -9891,6 +10928,17 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Interrupts speech instance 0 and requests DJ speech line 8421 with two yes/no choices.
+ *
+ * Needs DJ speech allowed (func_0029F0D8). Stops speech instance 0 (func_002B11B0), then requests 8421 with identity
+ * 10; when queued, clears unk_5794 and the speech hook D_004A482C gets its packed id, the language bit, 1 when @p a is
+ * set (else 2) and 2 when @p b is set (else 1). The music code (func_002872A8, func_0028E100, func_0028E8C0),
+ * func_002A3170 and func_002A43B8 call it, mostly with (0, 0).
+ *
+ * @param a  the first choice
+ * @param b  the second choice
+ */
 extern "C" void func_002A26F0(void* self, int a, int b)
 {
     if (func_0029F0D8(self) != 0) {
@@ -9920,6 +10968,12 @@ extern "C" int func_0029F198(void* self);
 extern "C" void* func_003D8008(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
+/**
+ * Requests DJ speech line 8422 with the language.
+ *
+ * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id and the language bit. func_002A43B8 calls it for the pending flag unk_5740.
+ */
 extern "C" void func_002A27D8(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
@@ -9942,6 +10996,16 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 6-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_6)(void*, int, int, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests the DJ's song announcement (speech 8399) for a song number.
+ *
+ * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, 4 arguments: the language bit, 3, and the song as one bit in two words: 1
+ * << n in the first for n below 100, 1 << (n - 100) in the second from 100 on, none for a negative n or 999.
+ * func_002A43B8 calls it with unk_5778 (the song value func_0029C7B0 and func_002A3170 store from func_002B4908).
+ *
+ * @param n  the song number, or -1 / 999 for none
+ */
 extern "C" void func_002A2860(cSSXAudio* self, int n)
 {
     if (func_0029F0D8(self) != 0) {
@@ -9981,6 +11045,13 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 5-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests DJ speech line 8450 about rider 0's character, with the language and the location's peak.
+ *
+ * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit, rider 0's character bit (func_002A1D48) and the peak
+ * bit. func_002A4770 calls it when rider 0 finished first.
+ */
 extern "C" void func_002A2938(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
@@ -10010,6 +11081,13 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests DJ speech line 8459 about the race's rival character.
+ *
+ * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the character bit (func_002A1DA0) of
+ * cBENewRaceInterface_getRival. func_002A2E50 calls it (pick 3).
+ */
 extern "C" void func_002A2A10(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
@@ -10037,6 +11115,13 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests DJ speech line 8491 with the language and the location's peak.
+ *
+ * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the peak bit. func_002A43B8 calls it for the pending
+ * flag unk_5784.
+ */
 extern "C" void func_002A2AD0(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
@@ -10060,6 +11145,13 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests DJ speech line 8492, telling it whether it was played before (unk_5780), and marks it played.
+ *
+ * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and unk_5780. unk_5780 is then set to 1 even when the
+ * request was not queued. func_002A2E50 (pick 4) and func_002A43B8 (pending flag unk_577C) call it.
+ */
 extern "C" void func_002A2B88(void* self)
 {
     if (func_0029F0D8(self) != 0) {
@@ -10088,6 +11180,13 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests DJ speech line 8493 about the current location.
+ *
+ * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the location bit func_002A1BD8(location, -1).
+ * func_002A43B8 calls it for the pending flag unk_5770.
+ */
 extern "C" void func_002A2C30(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
@@ -10112,6 +11211,15 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests DJ speech line 8494 about a location (rider 0's frags after an event).
+ *
+ * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the location bit func_002A1BD8(@p a1, -1).
+ * func_002A4770 calls it for the frag result (5 or more frags).
+ *
+ * @param a1  the location id
+ */
 extern "C" void func_002A2CF0(cSSXAudio* self, int a1)
 {
     if (func_0029F0D8(self) != 0) {
@@ -10136,6 +11244,15 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests DJ speech line 8495 about a location (rider 0's uber tricks after an event).
+ *
+ * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the location bit func_002A1BD8(@p a1, -1).
+ * func_002A4770 calls it for the uber-trick result.
+ *
+ * @param a1  the location id
+ */
 extern "C" void func_002A2DA0(cSSXAudio* self, int a1)
 {
     if (func_0029F0D8(self) != 0) {
@@ -10171,8 +11288,21 @@ int cBENewPlayerInterface_getRiderCharID_i(void* self, int riderIndex) __asm__("
 int cBERewardInterface_getTrackMedal(void* self, int a1, int ch, int a3, int track);
 void func_002B1758(void* snd, int a1);
 
-// Front-end music: picks the next track (a queued one, else a random one not played yet in this round of
-// 5 or 8 tracks; the bonus track joins once both medals are won), marks it played and starts it.
+/**
+ * Picks and plays the DJ's next between-events line, avoiding lines already used.
+ *
+ * The first time (unk_5790 and unk_6258 both 0) it sets unk_5790, queues pick 3 for next time (unk_5798), marks pick 7
+ * used in the mask unk_573C, clears unk_578C and plays pick 0. Otherwise it returns at once when func_002A4770 played
+ * an event-result line; a queued pick is used next (when unk_6258 is 0); else one of the first 8 picks (5 with
+ * @p bonus) not yet set in unk_573C is chosen at random (func_002ADF60). When all are used the mask is cleared, and bit
+ * 3 is pre-set when the human rider's character holds both the medal 4 and 5 of the peak's track 14, 15 or 16
+ * (cBERewardInterface_getTrackMedal). The pick is marked in unk_573C and played: 0 func_002A2188, 1 func_002A23D0(-1),
+ * 2 func_002A2018, 3 func_002A2A10, 4 func_002A2B88, 5 func_002A2260, 6 func_002A2318, 7 func_002A20D0. Finally
+ * func_002B1758(SpeechSys, 0). func_002A43B8 and func_002A4770 call it.
+ *
+ * @param vself  the audio system
+ * @param bonus  nonzero to choose among the first 5 lines only
+ */
 extern "C" void func_002A2E50(void* vself, int bonus)
 {
     char* self = (char*)vself;
@@ -10260,6 +11390,13 @@ extern "C" void func_002A26F0(void* self, int a, int b);
 void func_002B1758(void* self, int a1);
 int func_002B4908(void* self);
 
+/**
+ * Starts the DJ intro of a race: DJ line 8421 with (0, 0), then queues the song announcement.
+ *
+ * Calls func_002A26F0(self, 0, 0) and func_002B1758(SpeechSys, 0), then sets unk_5774 (pending announcement) and stores
+ * the current song's value func_002B4908 in unk_5778 for func_002A43B8 / func_002A2860. func_0029C7B0 calls it in game
+ * paths 1 and 2.
+ */
 extern "C" void func_002A3170(void* self)
 {
     func_002A26F0(self, 0, 0);
@@ -10285,6 +11422,14 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests PA speech line 8384 at the start of a single-player event's first heat.
+ *
+ * Needs PA speech audible (func_0029F128), a game mode other than 4 (func_002A4040), game path 0 (D_00535C11) and a
+ * cGameModeMan iHeatNum below 2, with play-history event 0 not live. The request goes to speech instance 0 with
+ * identity 11 (the PA); when queued, the speech hook D_004A482C gets its packed id, the language bit and 1.
+ * func_002A19D8 (event 0) and two front-end functions call it.
+ */
 extern "C" void func_002A31C0(cSSXAudio* self)
 {
     if (func_0029F128(self) == 0) return;
@@ -10314,6 +11459,13 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests PA speech line 8385 about rider 0's character.
+ *
+ * Needs PA speech audible (func_0029F128); the request goes to speech instance 0 with identity 11 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and rider 0's character bit (func_002A1D48).
+ * func_002A19D8 calls it (event 1).
+ */
 extern "C" void func_002A32B0(cSSXAudio* self)
 {
     if (func_0029F128(self) != 0) {
@@ -10340,6 +11492,13 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests PA speech line 8386 about rider 0's character.
+ *
+ * Needs PA speech audible (func_0029F128); the request goes to speech instance 0 with identity 11 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and rider 0's character bit (func_002A1D48).
+ * func_002A19D8 calls it (event 2).
+ */
 extern "C" void func_002A3358(cSSXAudio* self)
 {
     if (func_0029F128(self) != 0) {
@@ -10368,6 +11527,13 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests PA speech line 8387 about the current location.
+ *
+ * Needs PA speech audible (func_0029F128) and no replay; the request goes to speech instance 0 with identity 11 and,
+ * when queued, the speech hook D_004A482C gets its packed id, the language bit and the location bit
+ * func_002A1BD8(location, -1). func_002A19D8 (event 3) and func_0029C7B0 (the last heat) call it.
+ */
 extern "C" void func_002A3400(cSSXAudio* self)
 {
     if (func_0029F128(self) == 0) return;
@@ -10394,6 +11560,23 @@ extern "C" int func_002A42C8_p(void *) __asm__("func_002A42C8");
 
 struct sSsVt_34D0 { short delta; short index; int (*fn)(void *); };
 
+/**
+ * Requests the PA's place announcement (speech 8388) for a rider, or schedules it for event types 4 and 5.
+ *
+ * Returns 1 without speech when PA speech is muted or replaying. In game events 4 and 5 (func_002A4248) with a rider it
+ * creates a 1000 ms monitor (func_002ADCA0) with the callback D_004A36E8 (func_002A1388) and the rider's AI index, and
+ * returns 1. Events 6..11 (func_002A42C8) return 1. With @p flag set, speech instance 0 must be ready (func_002B0E28),
+ * else 0 is returned. Without a rider, the location must pass func_002A4078 and the game mode must not be 4, and the
+ * focus rider of view @p which is used, its place bit coming from unk_0EC (0..4: 1..0x10, 5: 0x200). Riders with a
+ * cheat identity give 1. When request 8388 (identity 11) is queued, the speech hook D_004A482C gets its packed id, the
+ * language bit, the rider's character bit (func_002A1D48) and the place bit (func_002A1E68 for a given rider).
+ *
+ * @param vself  the audio system
+ * @param rider  the rider, or 0 for the focus rider of @p which
+ * @param flag  nonzero to require speech instance 0 to be ready
+ * @param which  the view whose focus rider is used without a rider
+ * @return 0 when speech instance 0 was busy, else 1
+ */
 extern "C" int func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int which)
 {
     int sel;
@@ -10488,6 +11671,16 @@ int func_002A4248_s(void* self) __asm__("func_002A4248");
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 extern sSndKey8 D_004A36E8[];
 
+/**
+ * Requests the PA's speech line 8389 about a rider and its place, or schedules the place line for event types 4 and 5.
+ *
+ * Needs PA speech audible, no replay and no cheat identity. In game events 4 and 5 (func_002A4248) it only creates a
+ * 1000 ms monitor (func_002ADCA0) with the callback D_004A36E8 (func_002A1388) and the rider's AI index (cRider vtable
+ * slot 7). Otherwise, when request 8389 (identity 11) is queued, the speech hook D_004A482C gets its packed id, the
+ * language bit, the rider's character bit (func_002A1D48) and its place bit (func_002A1E68).
+ *
+ * @param rider  the rider (cRider)
+ */
 // PORT: 64-bit long sound key
 extern "C" void func_002A3708(cSSXAudio* self, char* rider)
 {
@@ -10525,6 +11718,15 @@ struct sSndRiderList3860 {
     void* r[8];
 };
 
+/**
+ * Requests PA speech line 8391 announcing a result: the leading human rider's character and its place.
+ *
+ * Needs PA speech audible and no replay. In the multiplayer game path the second human is used when it ranks ahead
+ * (D_00536730[1] < D_00536730[0]), else rider 0. When request 8391 (identity 11) is queued, the speech hook D_004A482C
+ * gets its packed id, the language bit, that rider's character bit (func_002A1D48, from the cAI's rider list at +0x28)
+ * and a place value: 8 outside the multiplayer path when the reward interface's +0x14 is 0, else 1, 2 or 4 for rank 0,
+ * 1 or 2 and 0 for any other rank. func_002A19D8 calls it (event 7).
+ */
 // FAKEMATCH: FM_OPAQUE(lst) after `lst = cAudioInterface_getAI() + 0x28` (keeps combine from folding +0x28 into the
 // lw offset; retail computes addiu 0x28 / addu / lw 0); plain form 96.86%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
@@ -10577,6 +11779,13 @@ extern "C" void* func_003D8008(int a, int b, int c);
 // 4-argument view of the D_004A482C callback (the unit declares a 3-argument one).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 
+/**
+ * Requests PA speech line 8379 about the current location.
+ *
+ * Needs PA speech audible (func_0029F128); the request goes to speech instance 0 with identity 11 and, when queued, the
+ * speech hook D_004A482C gets its packed id, the language bit and the location bit func_002A1BD8(location, -1).
+ * func_002A19D8 (event 15) and func_00286E20 call it.
+ */
 extern "C" void func_002A39E0(cSSXAudio* self)
 {
     if (func_0029F128(self) != 0) {
@@ -10595,6 +11804,16 @@ INCLUDE_ASM("sound/soundsys", func_002A3AA0);
 extern "C" int SNDSTRM_requeststatus(int, void *);
 extern "C" void func_002A73A8(cCrowdSys* self, int a1, int i);
 
+/**
+ * Raises the crowd level 0 reaction when a monitored stream has finished; returns whether it did.
+ *
+ * Asks the sound driver for the status of the stream whose handle is at @p arg1 + 0x1C (SNDSTRM_requeststatus inside
+ * SNDSYS_entercritical / SNDSYS_leavecritical); a status word of 3 calls func_002A73A8(self, 0, 0) and returns 1. The
+ * retail image has no direct reference to it.
+ *
+ * @param arg1  the monitor instance whose +0x1C holds the stream handle
+ * @return 1 when the stream reported state 3, else 0
+ */
 extern "C" int func_002A3AA0(void* self, void* arg1) {
     int st[4];
     SNDSYS_entercritical();
@@ -10623,6 +11842,16 @@ extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int 
 extern "C" void* func_003D8008(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
+/**
+ * Raises arcade announcer event 8359 with a value, for the focus rider before the finish line.
+ *
+ * Needs ArcadeSpeech audible (func_0029F160), a rider that is the focus rider and not past the finish line, and no
+ * replay. When request 8359 (speech instance 0, identity 12) is queued, the speech hook D_004A482C gets its packed id
+ * and @p a2. cRider_flagEventSpeedBoost and cRider_flagEventTrickBoost call it.
+ *
+ * @param obj  the rider (cRider)
+ * @param a2  the value passed to the event
+ */
 extern "C" void func_002A3B18(cSSXAudio* self, void* obj, int a2)
 {
     if (func_0029F160(self) == 0) return;
@@ -10649,6 +11878,18 @@ extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int 
 extern "C" void* func_003D8008(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
+/**
+ * Raises arcade announcer event 8360 (an event result) for the focus rider.
+ *
+ * Needs ArcadeSpeech audible (func_0029F160), a rider that is the focus rider and no replay; unless @p a2 is 2 the
+ * rider must not be past the finish line. When request 8360 (speech instance 0, identity 12) is queued, the speech hook
+ * D_004A482C gets its packed id and @p a2. Values seen: 1 big challenge complete (func_0029D8E0, rider 0), 2 time ran
+ * out (cRider_updateFinishTest, after the did-not-finish finish), 4 / 8 / 0x10 max power at an uber level below 5, 5..9
+ * or 10 (func_00299638).
+ *
+ * @param obj  the rider (cRider)
+ * @param a2  the result bit passed to the event
+ */
 extern "C" void func_002A3C00(cSSXAudio* self, void* obj, int a2)
 {
     if (func_0029F160(self) == 0) return;
@@ -10673,6 +11914,17 @@ extern void (*D_004A482C)(void*, int, int);
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 
+/**
+ * Raises arcade announcer event 8361 (a checkpoint reached) for a rider before the finish line.
+ *
+ * Needs ArcadeSpeech audible (func_0029F160), a rider not past the finish line, no replay and @p n nonzero; with
+ * @p n other than 1 the rider must also be the focus rider. When request 8361 (speech instance 0, identity 12) is
+ * queued, the speech hook D_004A482C gets its packed id and @p n. cRiderMetrix_evCheckpoint calls it with 1 when a
+ * checkpoint adds time (cGameModeMan_riderCheckpointHit).
+ *
+ * @param rider  the rider (cRider)
+ * @param n  the value passed to the event (1 from the checkpoint); 0 does nothing
+ */
 extern "C" void func_002A3CE8(cSSXAudio* self, char* rider, int n)
 {
     float zero;
@@ -10700,6 +11952,17 @@ extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int 
 extern "C" void* func_003D8008(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
+/**
+ * Raises arcade announcer event 8499 (an uber trick milestone) for a rider before the finish line.
+ *
+ * Needs ArcadeSpeech audible (func_0029F160), a rider not past the finish line and no replay. When request 8499 (speech
+ * instance 0, identity 12) is queued, the speech hook D_004A482C gets its packed id and @p ev: 1 when the landed uber
+ * tricks pass 4 (cSSXAudio_LandedUberTrick), 2 when the focus rider's uber level reaches 10 (func_0029B738), 8 for a
+ * monster combo (cSSXAudio_LandedMonsterCombo).
+ *
+ * @param obj  the rider (cRider)
+ * @param ev  the milestone bit passed to the event
+ */
 extern "C" void func_002A3DE0(cSSXAudio* self, void* obj, int ev)
 {
     if (func_0029F160(self) == 0) return;
@@ -10722,6 +11985,16 @@ extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int 
 extern "C" void* func_003D8008(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
 
+/**
+ * Raises arcade announcer event 8517 (a multiplier icon collected) for a rider before the finish line.
+ *
+ * Needs ArcadeSpeech audible (func_0029F160), a rider not past the finish line and no replay. When request 8517 (speech
+ * instance 0, identity 12) is queued, the speech hook D_004A482C gets its packed id and @p ev. cSSXAudio_PlayIconSound
+ * passes 1, 2, 4 or 8 for a multiplier icon of 2, 3, 5 or 10.
+ *
+ * @param obj  the rider (cRider)
+ * @param ev  the multiplier bit passed to the event
+ */
 extern "C" void func_002A3EB8(cSSXAudio* self, void* obj, int ev)
 {
     if (func_0029F160(self) == 0) return;
@@ -10744,6 +12017,11 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A3FD8(void* self, unsigned int a1);
 
+/**
+ * Tells whether the current location (cBENewRaceInterface_getLocation) is one of 17..21 (func_002A3FD8).
+ *
+ * @return 1 or 0
+ */
 extern "C" int func_002A3F90(void* self)
 {
     return func_002A3FD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
@@ -10753,6 +12031,12 @@ extern "C" int func_002A3F90(void* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A3FD8);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a location id is one of 17..21, the locations that span several peaks (func_002A1BD8 splits them).
+ *
+ * @param location  the location id
+ * @return 1 or 0
+ */
 extern "C" int func_002A3FD8(void* self, unsigned int location)
 {
     return location - 17 < 5;
@@ -10768,6 +12052,11 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A4030(void* self, unsigned int a1);
 
+/**
+ * Tells whether the current location (cBENewRaceInterface_getLocation) is one of 14..16 (func_002A4030).
+ *
+ * @return 1 or 0
+ */
 extern "C" int func_002A3FE8(void* self)
 {
     return func_002A4030(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
@@ -10777,6 +12066,12 @@ extern "C" int func_002A3FE8(void* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A4030);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a location id is one of 14..16, one per peak (func_002A1E20 gives them peaks 1, 2 and 3).
+ *
+ * @param location  the location id
+ * @return 1 or 0
+ */
 extern "C" int func_002A4030(void* self, unsigned int location)
 {
     return location - 0xe < 3;
@@ -10791,6 +12086,11 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern signed char D_00535C10[];
 
+/**
+ * Tells whether the race's game mode (cBENewRaceInterface_newRace.cGameMode, D_00535C10) is 4.
+ *
+ * @return 1 or 0
+ */
 extern "C" int func_002A4040(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -10808,6 +12108,11 @@ extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A40E0(void* self, unsigned int a1);
 extern signed char D_00535C10[];
 
+/**
+ * Tells whether the race is of the first kind: a location in 0..4 (func_002A40E0) or game mode 0 or 5.
+ *
+ * @return 1 or 0
+ */
 extern "C" int func_002A4078(void* self)
 {
     if (func_002A40E0(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
@@ -10823,6 +12128,12 @@ extern "C" int func_002A4078(void* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A40E0);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a location id is one of 0..4 (the group func_002A4078 pairs with game modes 0 and 5).
+ *
+ * @param location  the location id
+ * @return 1 or 0
+ */
 extern "C" int func_002A40E0(void* self, unsigned int location)
 {
     return location < 5;
@@ -10839,6 +12150,11 @@ extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A4158(void* self, unsigned int a1);
 extern signed char D_00535C10[];
 
+/**
+ * Tells whether the race is of the second kind: a location in 5..7 (func_002A4158) or game mode 1 or 6.
+ *
+ * @return 1 or 0
+ */
 extern "C" int func_002A40E8(void* self)
 {
     if (func_002A4158(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
@@ -10858,6 +12174,12 @@ extern "C" int func_002A40E8(void* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A4158);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a location id is one of 5..7 (the group func_002A40E8 pairs with game modes 1 and 6).
+ *
+ * @param location  the location id
+ * @return 1 or 0
+ */
 extern "C" int func_002A4158(void* self, unsigned int location)
 {
     return location - 5 < 3;
@@ -10874,6 +12196,11 @@ extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A41C8(void* self, unsigned int a1);
 extern signed char D_00535C10[];
 
+/**
+ * Tells whether the race is of the third kind: a location in 8..10 (func_002A41C8) or game mode 2.
+ *
+ * @return 1 or 0
+ */
 extern "C" int func_002A4168(void* self)
 {
     if (func_002A41C8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
@@ -10886,6 +12213,12 @@ extern "C" int func_002A4168(void* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A41C8);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a location id is one of 8..10 (the group func_002A4168 pairs with game mode 2).
+ *
+ * @param location  the location id
+ * @return 1 or 0
+ */
 extern "C" int func_002A41C8(void* self, unsigned int location)
 {
     return location - 8 < 3;
@@ -10902,6 +12235,11 @@ extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A4238(void* self, unsigned int a1);
 extern signed char D_00535C10[];
 
+/**
+ * Tells whether the race is of the fourth kind: a location in 11..13 (func_002A4238) or game mode 3.
+ *
+ * @return 1 or 0
+ */
 extern "C" int func_002A41D8(void* self)
 {
     if (func_002A4238(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
@@ -10914,6 +12252,12 @@ extern "C" int func_002A41D8(void* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A4238);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a location id is one of 11..13 (the group func_002A41D8 pairs with game mode 3).
+ *
+ * @param location  the location id
+ * @return 1 or 0
+ */
 extern "C" int func_002A4238(void* self, unsigned int location)
 {
     return location - 11 < 3;
@@ -10928,6 +12272,14 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern signed char D_00535C12[];
 
+/**
+ * Tells whether the race's game event (cBENewRaceInterface_newRace.cGameEvent, D_00535C12) is 4 or 5.
+ *
+ * In those events the place lines are deferred through a monitor (func_002A34D0, func_002A3708) and func_002A1400 uses
+ * place mode 2.
+ *
+ * @return 1 or 0
+ */
 extern "C" int func_002A4248(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -10950,6 +12302,11 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern signed char D_00535C12[];
 
+/**
+ * Tells whether the race's game event (D_00535C12) is 4; cSSXAudio_ChangePosition uses it outside game mode 0.
+ *
+ * @return 1 or 0
+ */
 extern "C" int func_002A4290(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -10965,6 +12322,13 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern signed char D_00535C12[];
 
+/**
+ * Tells whether the race's game event (D_00535C12) is one of 6..11 (func_002A4318 and func_002A4368 split them).
+ *
+ * In these events func_002A34D0 makes no place announcement; the music code checks it too.
+ *
+ * @return 1 or 0
+ */
 extern "C" int func_002A42C8(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -10985,6 +12349,11 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern signed char D_00535C12[];
 
+/**
+ * Tells whether the race's game event (D_00535C12) is one of 6..8; func_0028D8A0 uses it.
+ *
+ * @return 1 or 0
+ */
 extern "C" int func_002A4318(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -11005,6 +12374,11 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern signed char D_00535C12[];
 
+/**
+ * Tells whether the race's game event (D_00535C12) is one of 9..11; func_0028D8A0 uses it.
+ *
+ * @return 1 or 0
+ */
 extern "C" int func_002A4368(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -11033,6 +12407,16 @@ extern "C" void func_002A2B88(void* self);
 extern "C" void func_002A2C30(cSSXAudio* self);
 extern "C" void func_002A2E50(void* self, int a);
 
+/**
+ * Plays the most urgent pending DJ line when speech instance 0 is free, then any pending place line.
+ *
+ * Fills slot 4 of cSSXAudio's cSpeechSys vtable (D_004836D8); func_002AFC88 calls it while the speech instance is idle.
+ * The first set pending flag, in this order, is cleared and its line played: unk_5768 func_002A26F0(0, 0), unk_5784
+ * func_002A2AD0, unk_576C func_002A2638, unk_577C func_002A2B88, unk_5770 func_002A2C30, unk_5788 func_002A1138(0, 0),
+ * unk_5774 func_002A2860(unk_5778), unk_574C and unk_5750 func_002A2E50(0), unk_5754 func_002A2E50(1), unk_5758
+ * func_002A2568(unk_575C), unk_5740 func_002A27D8. Independently, unk_5744 requests the place line func_002A1400 for
+ * the cAI's rider unk_5748 (when there is one) and is cleared.
+ */
 extern "C" void func_002A43B8(char* self)
 {
     if (*(int*)(self + 0x5768) != 0) {
@@ -11086,6 +12470,11 @@ extern "C" void func_002A43B8(char* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A4550);
 #ifdef SKIP_ASM
+/**
+ * Clears every pending DJ / place line flag that func_002A43B8 checks (unk_5740 .. unk_5788, plus unk_5760).
+ *
+ * cSSXAudio_InGameDeInit, func_00289BB8 and func_0028E8C0 call it.
+ */
 extern "C" void func_002A4550(void* self)
 {
     *(int*)((char*)self + 0x5740) = 0;
@@ -11108,6 +12497,15 @@ extern "C" void func_002A4550(void* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A4590);
 #ifdef SKIP_ASM
+/**
+ * Resets the event-result tracking the DJ comments on after an event.
+ *
+ * Clears the pending flag unk_57F8, the allow flag unk_57FC and the frag and uber-trick sums (unk_5804, unk_5808), sets
+ * the place unk_5800 and the location unk_5810 to -1, the last location unk_5814 to 23 (none) and, with @p flag set,
+ * the last result line unk_580C to -1. The constructor calls it with 1 and func_002A45C0 with 0 in heat 1.
+ *
+ * @param flag  nonzero to also forget the last result line played
+ */
 extern "C" void func_002A4590(void* self, int flag)
 {
     *(int*)((char*)self + 0x57F8) = 0;
@@ -11132,6 +12530,13 @@ extern "C" int func_002A4078(void* self);
 extern "C" void func_002A4660(void* self, int id, int a, int b, int c);
 extern int D_00536730[];
 
+/**
+ * Records rider 0's result of the heat for the DJ's event-result lines (func_002A4660).
+ *
+ * In heat 1 (cGameModeMan iHeatNum) it first resets the tracking (func_002A4590(self, 0)). Passes rider 0's rank
+ * D_00536730[0], its frags (the metrix Totals.NumFrags, only when func_002A4078 holds, else 0), its uber tricks
+ * (Totals.NumUberTricks) and whether it finished (mDidNotFinish == 0). func_00286EA0 calls it.
+ */
 extern "C" void func_002A45C0(cSSXAudio* self)
 {
     if (*(int*)SSXApp->GameModeMan == 1) {
@@ -11157,6 +12562,18 @@ extern "C" void* cAudioInterface_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 
+/**
+ * Adds one heat's result to the event-result tracking, and on the event's last heat marks the result as pending.
+ *
+ * On the last heat (bIsLastHeat, or iNextHeat not above iHeatNum) it sets unk_57F8, sets unk_57FC when @p a4 is set and
+ * the heat is 3, and stores the place (unk_5800) and the current location (unk_5810). The frag and uber-trick counts
+ * are always added to unk_5804 and unk_5808. func_002A4770 picks the line from these.
+ *
+ * @param a1  the rider's rank (0 = first)
+ * @param a2  the frags of the heat
+ * @param a3  the uber tricks of the heat
+ * @param a4  nonzero when the rider finished
+ */
 extern "C" void func_002A4660(void* self, int a1, int a2, int a3, int a4)
 {
     char* gameModeMan = (char*)SSXApp->GameModeMan;
@@ -11181,6 +12598,13 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 
+/**
+ * Tells whether the location of the last event result (unk_5814) is set (not 23) and differs from the current one.
+ *
+ * func_0028E8C0 uses it.
+ *
+ * @return 1 or 0
+ */
 extern "C" int func_002A4718(void* self)
 {
     int id = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
@@ -11204,6 +12628,19 @@ extern "C" void func_002A2E50(void* self, int a);
 // bank-monitor method: returns BXrand()
 extern "C" unsigned int func_002ADF60(void* mon);
 
+/**
+ * Plays the DJ's comment on the last event's result when one is pending; returns whether a line was played.
+ *
+ * With unk_57F8 set it is cleared and up to three results qualify when unk_57FC allows: first place (unk_5800 == 0), 5
+ * or more frags (unk_5804), or at least 27 uber tricks (24 outside the locations 0..7 and 11..13; unk_5808). None
+ * qualifying: when unk_6254 is set and a last location unk_5814 is known, it plays func_002A2E50(0) for locations
+ * 17..21, func_002A23D0 for 14..16, else func_002A24B0, and returns 1 (0 otherwise). With two or more, the result
+ * played last time (unk_580C) is dropped. One is picked at random (func_002ADF60): func_002A2938 (first place),
+ * func_002A2CF0 (frags) or func_002A2DA0 (uber tricks) with unk_5810, and remembered in unk_580C. func_002A2E50 calls
+ * it before choosing a between-events line.
+ *
+ * @return 1 when a line was played, else 0
+ */
 extern "C" int func_002A4770(void* self)
 {
     char* audio = (char*)self;
@@ -11299,7 +12736,13 @@ struct sSndId2A49E8 {
 extern const sSndId2A49E8 D_004A36F0[];
 extern "C" void func_002ADCA0(void* bank, int a1, long id, int a3, int a4, int a5, int a6, int a7);
 
-// Flags the transition and fades the ambient stream back in.
+/**
+ * Marks a scripted DJ moment for 30 seconds: sets unk_5818 and starts a 30000 ms monitor that clears it.
+ *
+ * The monitor (func_002ADCA0) has the callback D_004A36F0 (func_002A4A68). While unk_5818 is set, func_002A4A38 reports
+ * a playing DJ line, so func_0028E8C0 leaves speech instance 0 alone. The script command SectionFunc calls it with its
+ * action 3 (cGame_setState(game, 0xE, 2, 0)).
+ */
 // PORT: the 8-byte stream id is passed by value from an unaligned global (64-bit `long`).
 extern "C" void func_002A49E8(char* self)
 {
@@ -11313,6 +12756,13 @@ INCLUDE_ASM("sound/soundsys", func_002A4A38);
 #ifdef SKIP_ASM
 extern "C" int func_002A10C0(cSSXAudio* self, int id);
 
+/**
+ * Tells whether a scripted DJ line is playing: unk_5818 is set (func_002A49E8) and speech instance 0 says identity 10.
+ *
+ * Uses func_002A10C0(self, 10). func_0028E8C0 checks it before it interrupts the speech.
+ *
+ * @return 1 or 0
+ */
 extern "C" int func_002A4A38(void* self)
 {
     if (*(int*)((char*)self + 0x5818) != 0) {
@@ -11325,6 +12775,14 @@ extern "C" int func_002A4A38(void* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A4A68);
 #ifdef SKIP_ASM
+/**
+ * Monitor callback: ends the scripted DJ moment by clearing unk_5818; returns 1.
+ *
+ * Its pointer to member is D_004A36F0, which func_002A49E8 installs with a 30 s delay.
+ *
+ * @param arg0  the audio system (cSSXAudio)
+ * @return 1
+ */
 extern "C" int func_002A4A68(void *arg0) {
     (*(int *)((char*)(arg0) + (0x5818))) = 0;
     return 1;
@@ -11342,6 +12800,13 @@ extern const sSndKey8_4A78 D_004A3650[];
 extern "C" void func_002ADCA0(void*, int, long, int, int, int, int, int);
 extern "C" int func_0028DEF0(void* self, int a1);
 
+/**
+ * Schedules the DJ's opening for the event in the world-circuit path, 2 ms later through func_0028E548.
+ *
+ * Only when unk_578C is 0 and the game path (D_00535C11) is 0. At the locations 17..21 (func_002A3F90) it sets unk_629C
+ * to 13 (func_0028DEF0) and creates a monitor (func_002ADCA0) with the callback D_004A3650 (func_0028E548) and kind 2;
+ * elsewhere the kind is 4 with the current song value (func_002B4908) as its argument. cSSXAudio_InGameInit calls it.
+ */
 // PORT: 64-bit long sound key
 extern "C" void func_002A4A78(void* self)
 {
@@ -11366,6 +12831,11 @@ INCLUDE_ASM("sound/soundsys", func_002A4B68);
 extern "C" int func_002B49E0(void*);
 extern "C" void func_002B11B0(void*, int);
 
+/**
+ * Stops speech instance 0 (func_002B11B0) when the current song's state (func_002B49E0) is 401.
+ *
+ * func_0028E8C0 sets state 401 when it starts the "pktrans" stream. cGFTrackStartState_gainFocus calls it.
+ */
 extern "C" void func_002A4B68(cSSXAudio* self)
 {
     if (func_002B49E0((char*)self + 0x118) == 401) {
@@ -11377,6 +12847,13 @@ extern "C" void func_002A4B68(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A4BA8);
 #ifdef SKIP_ASM
+/**
+ * Constructs a crowd sample list: no samples, all 5 pointers cleared.
+ *
+ * cCrowdSys_cCrowdSys runs it for the TRICK, FALL and ANTICIPATE lists of each of the 3 intensities.
+ *
+ * @return this
+ */
 extern "C" void* func_002A4BA8(tCrowdEventData* self)
 {
     int i;
@@ -11394,6 +12871,13 @@ INCLUDE_ASM("sound/soundsys", func_002A4BE0);
 extern "C" void func_002A4CF8(tCrowdEventData*);
 void operator_delete(int*);
 
+/**
+ * Destroys a crowd sample list: frees its samples (func_002A4CF8) and, with bit 0 of @p flags, the list itself.
+ *
+ * cCrowdSys__cCrowdSys runs it for each list.
+ *
+ * @param flags  bit 0 set to also delete the object
+ */
 extern "C" void func_002A4BE0(tCrowdEventData* self, int flags)
 {
     func_002A4CF8(self);
@@ -11412,6 +12896,17 @@ struct sSndHandleList5 {
 };
 extern "C" int FILE_loadz(int a, int b);
 
+/**
+ * Loads one crowd sample file (FILE_loadz) into the next free slot of a sample list; returns whether it was added.
+ *
+ * A full list (5 samples) or a failed load returns 0. func_002A7040 calls it for the TRICK, FALL and ANTICIPATE entries
+ * of crowd.inf.
+ *
+ * @param list  the sample list (tCrowdEventData)
+ * @param name  the file name
+ * @param flags  the FILE_loadz flags (0)
+ * @return 1 when the sample was added, else 0
+ */
 extern "C" int func_002A4C28(sSndHandleList5* list, int name, int flags)
 {
     if (list->count >= 5 || (list->items[list->count] = FILE_loadz(name, flags), list->items[list->count] == 0)) {
@@ -11432,6 +12927,12 @@ struct sSndRandList {
     int items[1];
 };
 
+/**
+ * Picks a random sample of a crowd sample list (items[BXrand() % count]), or 0 for an empty list.
+ *
+ * @param list  the sample list (tCrowdEventData)
+ * @return the sample data, or 0
+ */
 extern "C" int func_002A4CA0(sSndRandList* list)
 {
     if (list->count == 0) {
@@ -11446,6 +12947,9 @@ INCLUDE_ASM("sound/soundsys", func_002A4CF8);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 
+/**
+ * Frees every sample of a crowd sample list (cMemMan_free) and empties it.
+ */
 extern "C" void func_002A4CF8(tCrowdEventData* self)
 {
     tCrowdEventData* list = self;
@@ -11502,6 +13006,14 @@ struct func_002A4D68_sObj {
     func_002A4D68_sObj() __asm__("func_002A4D68");
 };
 
+/**
+ * Constructs a crowd instance: no viewport, no crowd objects or ambient loops, no cheer.
+ *
+ * Sets mViewPort, unk_0D8 and the cheer handle unk_174 to -1, mAmbientCheerIntensity to 3 (none), the averaged
+ * position, mNumCrowdObjects, mNumCrowdAmbience and the cheer fields to 0, clears the 15 crowd object slots and gives
+ * the 3 ambient loops their index (unk_20) and sampleID / handle -1. func_002A6D78 runs it on each element of its
+ * "CrowdInstances" array.
+ */
 func_002A4D68_sObj::func_002A4D68_sObj()
     : f0(-1), f10(0), f14(0), f18(0), f1C(0), fD4(0), fD8(-1),
       f170(0), f174(-1), f178(0), f17C(0), f180(0), f184(3), f188(0), f18C(0)
@@ -11528,6 +13040,14 @@ extern "C" void func_002A6848(cCrowdInstance* self);
 extern "C" void func_002A6430(cCrowdInstance* self, float v);
 void operator_delete(int*);
 
+/**
+ * Destroys a crowd instance: stops its cheer (func_002A6848), removes all its crowd objects (func_002A6430(self, 0))
+ * and, with bit 0 of @p flags, deletes it.
+ *
+ * func_002A6F38 runs it on each element of the "CrowdInstances" array, from the last one down.
+ *
+ * @param flags  bit 0 set to also delete the object
+ */
 extern "C" void func_002A4E38(cCrowdInstance* self, int flags)
 {
     func_002A6848(self);
@@ -11644,6 +13164,20 @@ extern "C" int func_002A4CA0(sSndRandList* list);
 
 // func_002A4E88 is declared with a void* parameter further down (the crowd update loop).
 void func_002A4E88_c(sCrowd4E88* self) __asm__("func_002A4E88");
+/**
+ * Updates a crowd instance each frame: its averaged position and loudness, its ambient loops and its cheer voice.
+ *
+ * With no crowd objects it does nothing. The objects' positions are averaged, each weighted by its loudness unk_4
+ * against the loudest so far, and every quieter object adds a quarter of its loudness; with two or more ambient loops
+ * (mNumCrowdAmbience) the same is done per loop. With one loop, that loop follows the overall average at the overall
+ * loudness; otherwise each used loop follows its own. A loop whose voice is gone is restarted (bank unk_0D8, its
+ * sampleID, the vol control unk_17C, viewport mViewPort, callback D_004A3700); a live one just gets the volume. When a
+ * cheer is wanted (unk_180), the crowd system's vtable slot 2 (in cSSXAudio func_00290FD0) gives the anticipation
+ * intensity 0..2 or 3 (none); 1 and 2 are kept in unk_18C, and state 1 with an intensity starts a random ANTICIPATE
+ * sample of it (func_002A8450 / func_002A86B8) at the averaged position, moving to state 2. A cheer voice that has
+ * ended is stopped (func_002A6848) and unk_18C cleared; a live one gets the loudness. The loudness and position are
+ * stored in unk_178 and unk_010. func_002A6D18 calls it for every instance.
+ */
 void func_002A4E88_c(sCrowd4E88* self)
 {
     if (self->count == 0) {
@@ -11881,6 +13415,14 @@ struct s2A5CD8 {
     s2A5CD8Entry entries[1];
 };
 
+/**
+ * Sets the loudness (unk_4) of one crowd object of a crowd instance, when that slot is in use.
+ *
+ * func_002A7340 calls it for a world trigger's crowd.
+ *
+ * @param i  the crowd object slot, or a negative value for none
+ * @param newValue  the loudness, 0..127
+ */
 extern "C" void func_002A5CD8(s2A5CD8* self, int i, int newValue)
 {
     if (i >= 0) {
@@ -11977,6 +13519,20 @@ extern sSndKey8_5D08 D_004A3700_5D08[] __asm__("D_004A3700");
 
 // PORT: 64-bit long sound key
 int func_002A5D08_5D08(sPool5D08* self, sSnd5D08Sub* P, int key) __asm__("func_002A5D08");
+/**
+ * Adds a crowd object to a crowd instance and starts or joins the ambient loop of its sample; returns its slot.
+ *
+ * Fails (-1) with 15 objects already or no position target in the current play-option level @p P. The object takes a
+ * free slot with the level's position pointer and volume (as its loudness). It joins the ambient loop playing the same
+ * sample (@p key); the first object also sets the instance's viewport, vol control and averaged position. Without a
+ * matching loop it takes a free one (mNumCrowdAmbience grows), places it at the object and starts the sample from the
+ * instance's bank unk_0D8 at the loop's position, with the object's loudness, the vol control, external volume, the
+ * viewport and the callback D_004A3700, keeping the handle. func_002A7678 calls it.
+ *
+ * @param P  the current play-option level (cBankManager + 0x1D8) that describes the object
+ * @param key  the ambient sample (patch) of the object
+ * @return the crowd object slot, or -1
+ */
 int func_002A5D08_5D08(sPool5D08* self, sSnd5D08Sub* P, int key)
 {
     int idx = -1;
@@ -12110,6 +13666,19 @@ struct sSsMgr62F0 {
     int f18C;                   // 0x18C
 };
 
+/**
+ * Removes a crowd object from a crowd instance, stopping its ambient loop when no object feeds it any more.
+ *
+ * Does nothing for a negative or unused slot. The slot is freed and its loop's numObjects drops; at 0 the loop's voice
+ * is stopped (mode 1 with @p fade), its sampleID and handle reset to -1, unk_18C cleared and mNumCrowdAmbience lowered.
+ * When the last object goes, the cheer time unk_188 is capped at 0.25, the cheer voice is stopped (only when
+ * @p fade is 0) and forgotten, a playing anticipation (state 2) drops back to 1, and unk_178 and mViewPort are reset.
+ * func_002A6430 and func_002A72D8 call it.
+ *
+ * @param vself  the crowd instance
+ * @param idx  the crowd object slot
+ * @param fade  the fade time for the loop's voice
+ */
 extern "C" void func_002A62F0(cCrowdInstance* vself, int idx, float fade)
 {
     sSsMgr62F0* self = (sSsMgr62F0*)vself;
@@ -12147,6 +13716,11 @@ INCLUDE_ASM("sound/soundsys", func_002A6430);
 #ifdef SKIP_ASM
 extern "C" void func_002A62F0(cCrowdInstance* voice, int b, float v);
 
+/**
+ * Removes every crowd object of a crowd instance (func_002A62F0 on each used slot) with the given fade.
+ *
+ * @param fade  the fade time for the ambient loops
+ */
 extern "C" void func_002A6430(cCrowdInstance* self, float fade)
 {
     for (int i = 0; i < 15; i++) {
@@ -12200,6 +13774,18 @@ struct sSnd64A0Mgr {
     sSnd64A0Sub sub;    // 0x1D8
 };
 
+/**
+ * Plays a TRICK cheer of a crowd instance at an intensity: a random sample of that intensity's TRICK list.
+ *
+ * Stops the current cheer (func_002A6848). With crowd objects present it records the intensity in
+ * mAmbientCheerIntensity, sets the cheer time unk_188 to mAttack + mDecay and, when the list has a sample, plays it
+ * from bank unk_0D8 (func_002A8450 / func_002A86B8) at the instance's averaged position, loudness unk_178, vol control
+ * unk_17C, external volume and viewport mViewPort; the handle goes to unk_174 and unk_18C becomes intensity + 1.
+ * func_002A73A8 calls it.
+ *
+ * @param vself  the crowd instance
+ * @param idx  the crowd intensity (0..2)
+ */
 extern "C" void func_002A64A0(cCrowdInstance* vself, int idx)
 {
     func_002A6848(vself);
@@ -12269,6 +13855,15 @@ struct sSnd6648Mgr {
     sSnd6648Sub sub;    // 0x1D8
 };
 
+/**
+ * Plays a FALL cheer of a crowd instance at an intensity: a random sample of that intensity's FALL list.
+ *
+ * As func_002A64A0 with the FALL list (tCrowdData + 0x18); unk_18C becomes ~intensity (negative). func_002A73D8 calls
+ * it.
+ *
+ * @param vself  the crowd instance
+ * @param idx  the crowd intensity (0..2)
+ */
 extern "C" void func_002A6648(cCrowdInstance* vself, int idx)
 {
     func_002A6848(vself);
@@ -12298,6 +13893,9 @@ extern "C" void func_002A6648(cCrowdInstance* vself, int idx)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A67F0);
 #ifdef SKIP_ASM
+/**
+ * Asks a crowd instance for an anticipation cheer: the cheer state unk_180 goes from 0 to 1 (func_002A4E88 starts it).
+ */
 extern "C" void func_002A67F0(cCrowdInstance* self)
 {
     if (self->unk_180 == 0) {
@@ -12311,6 +13909,9 @@ INCLUDE_ASM("sound/soundsys", func_002A6808);
 #ifdef SKIP_ASM
 extern "C" void func_002A6848(cCrowdInstance* self);
 
+/**
+ * Cancels a crowd instance's anticipation: stops the cheer when one is playing (state 2) and sets the state to 0.
+ */
 extern "C" void func_002A6808(cCrowdInstance* self)
 {
     if (self->unk_180 == 2) {
@@ -12325,6 +13926,11 @@ INCLUDE_ASM("sound/soundsys", func_002A6848);
 #ifdef SKIP_ASM
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
+/**
+ * Stops a crowd instance's cheer: caps the cheer time unk_188 at 0.25, clears the state and stops the voice unk_174.
+ *
+ * The voice is stopped with cBankMonitor_BANKMONITOR_StopHandle (mode 2, fade 0) and unk_174 reset to -1.
+ */
 extern "C" void func_002A6848(cCrowdInstance* self)
 {
     float lim = 0.25f;
@@ -12345,6 +13951,18 @@ INCLUDE_ASM("sound/soundsys", func_002A68B0);
 extern "C" void cBankMonitorInstance_Reset(void*);
 extern "C" void SNDpitchbend(int, int);
 
+/**
+ * Bends the pitch of a crowd ambient loop over a cheer's attack and decay, or resets the monitor once the voice is
+ * gone.
+ *
+ * A voice handle (+4) below 0 resets the instance (cBankMonitorInstance_Reset). Otherwise, while the cheer time unk_188
+ * is above 0 it is lowered by @p dt and the pitch bend (SNDpitchbend, in a sound-driver critical section) is set from
+ * the intensity's tCrowdData: rising to 0x40 + mMaxBend during mAttack, then falling back to 0x40 over mDecay.
+ * func_002A77A8 (the loops' callback D_004A3700) calls it.
+ *
+ * @param obj  the voice's monitor instance (cBankMonitorInstance)
+ * @param dt  the elapsed time
+ */
 extern "C" void func_002A68B0(cCrowdInstance* self, char* obj, float dt) {
     if (*(int*)(obj + 4) < 0) {
         cBankMonitorInstance_Reset(obj);
@@ -12544,6 +14162,9 @@ INCLUDE_ASM("sound/soundsys", func_002A6D18);
 #ifdef SKIP_ASM
 extern "C" void func_002A4E88(void* voice);
 
+/**
+ * Updates every crowd instance (func_002A4E88); the audio update func_002AB958 calls it each frame.
+ */
 extern "C" void func_002A6D18(cCrowdSys* self)
 {
     for (int i = 0; i < self->mNumInstances; i++) {
@@ -12593,6 +14214,19 @@ struct sSnd6D78Parser {
     char token[0x800];
 };
 
+/**
+ * Sets up the crowd system: @p n crowd instances, all sample lists cleared, then crowd.inf's GLOBAL and level sections.
+ *
+ * Allocates the instances (operator new[], "CrowdInstances") into mpCrowdInstances, clears every intensity's mAttack,
+ * mDecay, mMaxBend and sample lists, gives each instance the cheer bank @p v (unk_0D8), and reads the file
+ * @p name with a FileParser: section "GLOBAL" and then section @p key go through func_002A7040. cSSXAudio_InGameLoad
+ * calls it with 2 instances in the multiplayer game path, else 1, and bank 5.
+ *
+ * @param name  the crowd.inf path
+ * @param key  the section of the level
+ * @param n  the number of crowd instances (viewports)
+ * @param v  the bank the cheers play from
+ */
 extern "C" void func_002A6D78(sSnd6D78Self* self, const char* name, const char* key, int n, int v)
 {
     self->count = n;
@@ -12640,6 +14274,14 @@ struct sSsMgr6F38 {
     sSsChan6F38 chans[3];       // 0x1C
 };
 
+/**
+ * Shuts the crowd system down: removes all crowd objects, destroys the crowd instances and frees the sample lists.
+ *
+ * Calls func_002A7718, destroys each instance from the last one down (func_002A4E38(.., 0)), frees the array
+ * (cMemMan_free at its -0x10 header) and clears mpCrowdInstances and mNumInstances, then clears every intensity's
+ * mAttack, mDecay, mMaxBend and its ANTICIPATE, FALL and TRICK lists (func_002A4CF8). cSSXAudio_InGamePurge and
+ * cCrowdSys__cCrowdSys call it.
+ */
 extern "C" void func_002A6F38(sSsMgr6F38* self)
 {
     func_002A7718((cCrowdSys*)self);
@@ -12683,6 +14325,15 @@ extern const char str_ATTACKpct_d[];
 extern const char str_DECAYpct_d[];
 extern const char str_MAXBENDpct_d[];
 
+/**
+ * Reads the crowd entries of one crowd.inf section until the end of the file.
+ *
+ * For each name, intensities 1..3 are tried: TRICK<n>, FALL<n> and ANTICIPATE<n> load a sample file into that list
+ * (func_002A4C28); ATTACK<n>, DECAY<n> and MAXBEND<n> set mAttack, mDecay and mMaxBend (FileParser_AssignFloat). Names
+ * compare case-insensitively; others are skipped.
+ *
+ * @param parser  the FileParser positioned in the section
+ */
 extern "C" void func_002A7040(cCrowdSys* self, void* parser)
 {
     sSnd6D78Self* s = (sSnd6D78Self*)self;
@@ -12732,6 +14383,13 @@ extern "C" void func_002A7040(cCrowdSys* self, void* parser)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A72C0);
 #ifdef SKIP_ASM
+/**
+ * Splits a crowd object handle into its crowd instance (low 8 bits) and object slot (the rest).
+ *
+ * @param packedId  the handle from func_002A7678
+ * @param outInstance  receives the crowd instance (viewport)
+ * @param outSlot  receives the object slot
+ */
 extern "C" void func_002A72C0(cCrowdSys* self, int packedId, int* outInstance, int* outSlot)
 {
     *outInstance = packedId & 0xff;
@@ -12744,6 +14402,14 @@ INCLUDE_ASM("sound/soundsys", func_002A72D8);
 #ifdef SKIP_ASM
 extern "C" void func_002A62F0(cCrowdInstance* voice, int b, float v);
 
+/**
+ * Removes a crowd object by its handle (func_002A62F0), fading its ambient loop over @p fade.
+ *
+ * cWorldTriggerInstance_Stop calls it with 0.25 for a trigger with the crowd flag.
+ *
+ * @param id  the crowd object handle (func_002A7678), or negative for none
+ * @param fade  the fade time
+ */
 extern "C" void func_002A72D8(cCrowdSys* self, int id, float fade)
 {
     if (id >= 0 && self->mpCrowdInstances != 0) {
@@ -12758,6 +14424,14 @@ extern "C" void func_002A72D8(cCrowdSys* self, int id, float fade)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", func_002A7340);
 #ifdef SKIP_ASM
+/**
+ * Sets the loudness of a crowd object by its handle (func_002A5CD8).
+ *
+ * The world trigger update func_002B4C38 passes the trigger's level * 127.
+ *
+ * @param id  the crowd object handle (func_002A7678), or negative for none
+ * @param value  the loudness, 0..127
+ */
 extern "C" void func_002A7340(cCrowdSys* self, int id, int value)
 {
     if (id >= 0 && self->mpCrowdInstances != 0) {
@@ -12775,6 +14449,14 @@ INCLUDE_ASM("sound/soundsys", func_002A73A8);
 extern "C" void func_002A64A0(cCrowdInstance* voice, int a1);
 
 
+/**
+ * Plays a TRICK cheer at an intensity on the crowd instance of a viewport (func_002A64A0), when instances exist.
+ *
+ * cSSXAudio_Land uses intensities 0..2 by the landed trick, and func_002A3AA0 and func_00286EA0 use 0.
+ *
+ * @param slot  the crowd intensity (0..2)
+ * @param i  the crowd instance (viewport)
+ */
 extern "C" void func_002A73A8(cCrowdSys* self, int slot, int i)
 {
     cCrowdInstance* crowdInstance = self->mpCrowdInstances;
@@ -12789,6 +14471,14 @@ INCLUDE_ASM("sound/soundsys", func_002A73D8);
 #ifdef SKIP_ASM
 extern "C" void func_002A6648(cCrowdInstance* voice, int a1);
 
+/**
+ * Plays a FALL cheer at an intensity on the crowd instance of a viewport (func_002A6648), when instances exist.
+ *
+ * func_002961F0 (a wipeout) uses intensities 0..2.
+ *
+ * @param slot  the crowd intensity (0..2)
+ * @param i  the crowd instance (viewport)
+ */
 extern "C" void func_002A73D8(cCrowdSys* self, int slot, int i)
 {
     cCrowdInstance* crowdInstance = self->mpCrowdInstances;
@@ -12803,6 +14493,13 @@ INCLUDE_ASM("sound/soundsys", func_002A7408);
 #ifdef SKIP_ASM
 extern "C" void func_002A67F0(cCrowdInstance* voice);
 
+/**
+ * Asks the crowd instance of a viewport for an anticipation cheer (func_002A67F0), when instances exist.
+ *
+ * cSSXAudio_LiftWithAirTime calls it as the rider leaves the ground.
+ *
+ * @param i  the crowd instance (viewport)
+ */
 extern "C" void func_002A7408(cCrowdSys* self, int i)
 {
     cCrowdInstance* crowdInstance = self->mpCrowdInstances;
@@ -12817,6 +14514,13 @@ INCLUDE_ASM("sound/soundsys", func_002A7438);
 #ifdef SKIP_ASM
 extern "C" void func_002A6808(cCrowdInstance* voice);
 
+/**
+ * Cancels the anticipation cheer of a viewport's crowd instance (func_002A6808), when instances exist.
+ *
+ * cSSXAudio_Land (nothing gained) and func_002961F0 call it.
+ *
+ * @param i  the crowd instance (viewport)
+ */
 extern "C" void func_002A7438(cCrowdSys* self, int i)
 {
     cCrowdInstance* crowdInstance = self->mpCrowdInstances;
@@ -12871,6 +14575,15 @@ struct sSnd7468Mgr {
     sSnd7468Sub sub;        // 0x1D8
 };
 
+/**
+ * Opens a play-option level for a crowd object: pushes a level of the bank manager's options with the defaults.
+ *
+ * Copies the default channel, clears the position, volume, callback and other options, sets the delay to {100, 0, 90,
+ * 50}, mMapToMaxVol to 0x7F and mCloseOnEnd to 1 (the push of cBankSys's SFX_Begin, without a bank and patch). The
+ * world trigger update func_002B4C38 fills it and adds the object with func_002A7678, which pops it.
+ *
+ * @param sys  the crowd system (its first word is the cBankManager)
+ */
 extern "C" void func_002A7468(char** sys)
 {
     sSnd7468Mgr* m = *(sSnd7468Mgr**)sys;
@@ -12903,6 +14616,15 @@ INCLUDE_ASM("sound/soundsys", func_002A7678);
 #ifdef SKIP_ASM
 extern "C" int func_002A5D08(void* voice, void* bank, int a1);
 
+/**
+ * Adds a crowd object from the current play-option level to the crowd instance of that level's viewport.
+ *
+ * Calls func_002A5D08 on instance mViewport[cur] with the options and @p a1, then pops the level. Returns the handle
+ * (slot << 8 | viewport) or -1 (no instances, or no free slot). The world trigger update func_002B4C38 keeps it.
+ *
+ * @param a1  the ambient sample (patch) of the object
+ * @return the crowd object handle, or -1
+ */
 extern "C" int func_002A7678(cCrowdSys* self, int a1)
 {
     cCrowdInstance* crowdInstance = self->mpCrowdInstances;
@@ -12936,6 +14658,12 @@ struct sVE_7718 {
     void (*fn)(void*, long);
 };
 
+/**
+ * Removes every crowd object of every crowd instance and destroys the bank monitor instances of the crowd callback.
+ *
+ * Calls func_002A6430(instance, 0) for each instance, then the bank monitor's vtable slot 3 with the callback key
+ * D_004A3700 (func_002A77A8). func_00285F48 and func_002A6F38 call it.
+ */
 // PORT: 64-bit long sound key
 extern "C" void func_002A7718(cCrowdSys* self)
 {
@@ -12954,6 +14682,14 @@ INCLUDE_ASM("sound/soundsys", func_002A77A8);
 #ifdef SKIP_ASM
 extern "C" void func_002A68B0(cCrowdInstance* self, char* obj, float dt);
 
+/**
+ * Monitor callback of the crowd voices: forwards to func_002A68B0 for the crowd instance stored in the voice (+0x80).
+ *
+ * Its pointer to member is D_004A3700, which func_002A4E88, func_002A5D08 install on the loop voices.
+ *
+ * @param obj  the voice's monitor instance
+ * @param dt  the elapsed time
+ */
 extern "C" void func_002A77A8(cCrowdSys* self, char* obj, float dt)
 {
     func_002A68B0((cCrowdInstance*)(*(char**)(obj + 0x80)), obj, dt);
@@ -12964,6 +14700,15 @@ extern "C" void func_002A77A8(cCrowdSys* self, char* obj, float dt)
 INCLUDE_ASM("sound/soundsys", func_002A77C8);
 #ifdef SKIP_ASM
 
+/**
+ * Returns the cheer value unk_18C of a crowd instance, or 0 for an index past mNumInstances.
+ *
+ * The value is intensity + 1 for a TRICK cheer, ~intensity for a FALL cheer, the anticipation intensity 1 or 2, or 0.
+ * func_00229530 (main/ssxapp.cpp) reads it for instance 0.
+ *
+ * @param i  the crowd instance (viewport)
+ * @return the cheer value
+ */
 extern "C" int func_002A77C8(cCrowdSys* self, int i)
 {
     if (i < self->mNumInstances) {
@@ -13693,6 +15438,16 @@ struct sSnd8450Sys {
     sSnd8450E8* e10;         // 0x10
 };
 
+/**
+ * Opens a play-option level for a MIDI sequence: pushes a level with the defaults and records the bank and sequence.
+ *
+ * Same push as func_002A7468 (default channel, delay {100, 0, 90, 50}, mMapToMaxVol 0x7F, mCloseOnEnd 1); then
+ * mMidiBanks[level] gets (@p a, @p b). func_002A86B8 plays it. The crowd cheers and loops and func_002A8B28 use it.
+ *
+ * @param sys  the MIDI system (cMidiSys; the crowd system or D_004A3744)
+ * @param a  the bank (cBankManager bank index)
+ * @param b  the MIDI sequence data in that bank
+ */
 extern "C" void func_002A8450(char** sys, int a, int b)
 {
     sSnd8450Sys* self = (sSnd8450Sys*)sys;
@@ -13822,6 +15577,19 @@ static inline int snd86B8Handle(sSnd86B8Mgr* m, int id)
     return -1;
 }
 
+/**
+ * Plays the MIDI sequence of the current play-option level, registers its voice and its echoes, and pops the level.
+ *
+ * A positioned sound starts at volume 0 (the monitor sets it); otherwise the base volume is scaled by the vol control
+ * (clamped 0..127). When the level has no 3D radius (mRadius 0) and the bank is loaded, SNDMIDI_play starts the
+ * sequence now (in a sound-driver critical section). The voice goes to cBankMonitor_BANKMONITOR_Create(.., type 2) and
+ * func_002ABD38 records the sequence and bank on it. Each delay echo (count, step, decay % and first-echo %) adds a
+ * monitor (func_002ADCA0, callback D_004A3748 = func_002A8B28) at the accumulated delay and decayed volume, until the
+ * volume reaches 0. Pops the level (cur--).
+ *
+ * @param vself  the MIDI system (cMidiSys)
+ * @return the voice handle, or -1
+ */
 extern "C" int func_002A86B8(char** vself)
 {
     sSnd86B8Sys* self = (sSnd86B8Sys*)vself;
@@ -13876,6 +15644,17 @@ INCLUDE_ASM("sound/soundsys", func_002A8B28);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_002A86B8(char** sys);
 
+/**
+ * Monitor callback for a MIDI echo: plays the monitor's sequence again at its volume through D_004A3744.
+ *
+ * Opens a level (func_002A8450) with the bank (+0x1C) and sequence (+0x20) of the monitor instance, sets the vol
+ * control (+0x18) and the volume (+0x24, clamped to 0x7F and 0) and plays it (func_002A86B8). Its pointer to member is
+ * D_004A3748, which func_002A86B8 installs for each echo.
+ *
+ * @param midiSys  the MIDI system
+ * @param obj  the monitor instance
+ * @return 1
+ */
 extern "C" int func_002A8B28(cMidiSys* midiSys, char* obj)
 {
     func_002A8450((char**)D_004A3744, *(int*)(obj + 0x1C), *(int*)(obj + 0x20));
@@ -14139,6 +15918,14 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cPS2SoundManager_cPS2SoundManager(cPS2SoundManager* self);
 extern const char str_PS2SoundManager[];
 
+/**
+ * Creates the platform sound manager: allocates 800 bytes ("PS2SoundManager") and runs
+ * cPS2SoundManager_cPS2SoundManager.
+ *
+ * cSoundSys_cSoundSys calls it.
+ *
+ * @return the new cPS2SoundManager
+ */
 extern "C" void* func_002A8FA0()
 {
     return cPS2SoundManager_cPS2SoundManager((cPS2SoundManager*)cMemMan_alloc(800, str_PS2SoundManager, 0, 0));
@@ -14332,6 +16119,13 @@ struct s2A92B8 {
     int freeHead;
 };
 
+/**
+ * Takes a node from the PS2 sound manager's chain of unused memory nodes (unk_310), or returns 0 when none is left.
+ *
+ * The node is unlinked (next = -1). cPS2SoundManager_AllocSoundMem uses it.
+ *
+ * @return the node (tPS2SoundMemNode), or 0
+ */
 extern "C" tPS2SoundMemNode* func_002A92B8(cPS2SoundManager* self)
 {
     int i = self->unk_310;
@@ -14359,6 +16153,15 @@ struct s2A92F8Entry {
     int next;
 };
 
+/**
+ * Returns the block at the top of main sound memory to the pool and puts its node back on the unused chain.
+ *
+ * mMainMemHighAddr becomes the node's highAddr; the node's lowAddr / highAddr become -1, size and state 0 (unused), and
+ * it is pushed on unk_310. Unless load limits are set (unk_31C), func_003B5B20(-1, mMainMemHighAddr) applies the new
+ * limit. cPS2SoundManager_DeallocSoundMem calls it.
+ *
+ * @param e  the memory node
+ */
 extern "C" void func_002A92F8(cPS2SoundManager* self, s2A92F8Entry* e)
 {
     self->mMainMemHighAddr = e->unk8;

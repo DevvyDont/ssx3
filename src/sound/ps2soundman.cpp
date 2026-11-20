@@ -153,6 +153,17 @@ struct sSmVtbl97C0 {
 } __attribute__((aligned(8)));
 extern const sSmVtbl97C0 D_00483BE0;
 
+/**
+ * Destroys a sound play-option set: frees its per-level option arrays, then its virtual base and memory if asked.
+ *
+ * Points the virtual base's vtable (+4 of the base at *this) at D_00483BE0. When @p flags is 0 (a not-in-charge call)
+ * it installs a stack copy instead, whose entry 1 has its this-delta adjusted by this object's distance from where a
+ * complete object would start (the virtual base minus 0x88). Frees (cMemMan_free) each non-null array at +0x20, +0x34,
+ * +0x38, +0x3C and +0x60 to +0x84. Bit 1 of @p flags runs cSoundSys__cSoundSys(0) on the virtual base and bit 0 frees
+ * the object (operator_delete). The cMonitor destructor calls it with 0.
+ *
+ * @param flags  bit 0 frees the memory, bit 1 destroys the virtual base; 0 for a not-in-charge call
+ */
 // PORT: g++ 2.95 virtual-base destruction with a stack vtable this-adjust fix-up, written out by hand.
 extern "C" void func_002A97C0(char* self, int flags)
 {
@@ -198,6 +209,16 @@ extern "C" void func_002A97C0(char* self, int flags)
 //100%
 INCLUDE_ASM("sound/ps2soundman", func_002A9988);
 #ifdef SKIP_ASM
+/**
+ * Sets the current play-option level's two 3D distances; a negative second one copies the first.
+ *
+ * Stores @p dist at +0x6C[level] and @p vanish, or @p dist when @p vanish is negative, at +0x68[level]; the level is
+ * the current one (+0x1C). The audio code passes 100 for the rider loops, 30 for landings, 300 and about 30 elsewhere,
+ * always with -1 for @p vanish.
+ *
+ * @param dist  the first distance (+0x6C)
+ * @param vanish  the second distance (+0x68); negative to use @p dist
+ */
 extern "C" void func_002A9988(void* self, float dist, float vanish)
 {
     (*(float**)((char*)self + 0x6C))[*(int*)((char*)self + 0x1C)] = dist;
