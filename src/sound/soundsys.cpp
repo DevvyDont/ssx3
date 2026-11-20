@@ -4705,10 +4705,10 @@ static inline float vu0Length_8488(const sVec4_8488& v)
 class cSs8488Obj {
 public:
     virtual void v01();
-    virtual sVec4_8488* v02();
+    virtual sVec4_8488* getVelocity();
     virtual void v03();
     virtual void v04();
-    virtual int v05();
+    virtual int getPosition();
 };
 struct sSs8488RiderA {
     char pad0[0x6C0];
@@ -4821,15 +4821,15 @@ void cSSXAudio_RiderCollision_8488(void* self, sSs8488Rider* a, sSs8488Rider* b)
  */
 void cSSXAudio_RiderCollision_8488(void* self, sSs8488Rider* rider, sSs8488Rider* opponent)
 {
-    if (cSSXAudio_CameraInRange(self, rider->v05(), 100.0f) < 0) return;
-    if (cSSXAudio_InCameraView_8488(self, rider->v05(), 100.0f) == 0) return;
+    if (cSSXAudio_CameraInRange(self, rider->getPosition(), 100.0f) < 0) return;
+    if (cSSXAudio_InCameraView_8488(self, rider->getPosition(), 100.0f) == 0) return;
     bool okA = *(int*)((char*)rider + 0x874) && rider->f87C;
     if (!okA) {
         bool okB = *(int*)((char*)opponent + 0x874) && opponent->f87C;
         if (!okB) return;
     }
     if (cSSXAudio_PlayHistoryExists((cSSXAudio*)self, 7, 0) != 0) return;
-    sVec4_8488 sum = vu0Add_8488(*rider->v02(), *opponent->v02());
+    sVec4_8488 sum = vu0Add_8488(*rider->getVelocity(), *opponent->getVelocity());
     int volume = (int)func_00290C10(1, (float)(int)vu0Length_8488(sum));
     int handle = snd8488Add(self, rider, 0, 54, volume);
     cSSXAudio_PlayHistoryAdd((cSSXAudio*)self, (void*)7, handle, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
@@ -9197,11 +9197,11 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual int v05();
+    virtual int getPosition();
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual int v09();
+    virtual int isComputer();
 };
 struct sSsFCC8RiderA {
     char pad0[0x470];
@@ -9238,7 +9238,7 @@ extern "C" void func_0029FCC8(cSSXAudio* self, void* vrider)
     if (pos) return;
     if (*(float*)(rider->p788 + 0x98) < 4.000256061553955f) return;
     int chk = 0;
-    if (rider->v09() != 0 || rider->f87C == 0) chk = 1;
+    if (rider->isComputer() != 0 || rider->f87C == 0) chk = 1;
     if (chk && cSSXAudio_GetFocusRider_p(self, -1) != rider) return;
     float finishTime = rider->f470;
     float zero = 0.0f;
@@ -9247,7 +9247,7 @@ extern "C" void func_0029FCC8(cSSXAudio* self, void* vrider)
     char* snd = (char*)&self->SpeechSys;
     if (func_002B0E28(snd, 0) == 0) return;
     int speakerBit = func_0029F330_i(rider);
-    if (cSSXAudio_CameraInRange(self, rider->v05(), D_004A36D8) < 0) return;
+    if (cSSXAudio_CameraInRange(self, rider->getPosition(), D_004A36D8) < 0) return;
     int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
     if (sel == 1) {
         if (func_002B1458(snd, 0, 8324, (int)rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
@@ -9290,11 +9290,11 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual int v05();
+    virtual int getPosition();
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual int v09();
+    virtual int isComputer();
 };
 struct sSsFF80RiderA {
     char pad0[0x470];
@@ -9325,10 +9325,10 @@ extern "C" void func_0029FF80(cSSXAudio* self, sSsFF80Rider* rider, int alt)
     int pos = rider->f470 >= 0.0f;
     if (pos) return;
     int chk = 0;
-    if (rider->v09() != 0 || rider->f87C == 0) chk = 1;
+    if (rider->isComputer() != 0 || rider->f87C == 0) chk = 1;
     if (chk && cSSXAudio_GetFocusRider_p(self, -1) != rider) return;
     int speakerBit = func_0029F330_i(rider);
-    if (cSSXAudio_CameraInRange(self, rider->v05(), D_004A36D8) < 0) return;
+    if (cSSXAudio_CameraInRange(self, rider->getPosition(), D_004A36D8) < 0) return;
     if (alt != 0) {
         int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
         if (sel == 1) {
@@ -9390,11 +9390,11 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual int v05();
+    virtual int getPosition();
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual int v09();
+    virtual int isComputer();
 };
 struct sSs02D8RiderA {
     char pad0[0x470];
@@ -9424,7 +9424,7 @@ extern "C" void func_002A02D8(cSSXAudio* self, sSs02D8Rider* rider)
     int pos = rider->f470 >= 0.0f;
     if (pos) return;
     int chk = 0;
-    if (rider->v09() != 0 || rider->f87C == 0) chk = 1;
+    if (rider->isComputer() != 0 || rider->f87C == 0) chk = 1;
     if (chk && cSSXAudio_GetFocusRider_p(self, -1) != rider) return;
     if (func_002B0E28((char*)&self->SpeechSys, 0) == 0) return;
     int speakerBit = func_0029F330_i(rider);
@@ -9434,7 +9434,7 @@ extern "C" void func_002A02D8(cSSXAudio* self, sSs02D8Rider* rider)
     } else {
         mode = 3;
     }
-    if (cSSXAudio_CameraInRange(self, rider->v05(), D_004A36D8) < 0) return;
+    if (cSSXAudio_CameraInRange(self, rider->getPosition(), D_004A36D8) < 0) return;
     int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
     if (sel == 1) {
         if (func_002B1458((char*)&self->SpeechSys, 0, 8328, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
@@ -9506,14 +9506,14 @@ static inline float vu0Dot_0560(const sVec4_0560& a, const sVec4_0560& b)
 class cSs0560Obj {
 public:
     virtual void v01();
-    virtual sVec4_0560* v02();
+    virtual sVec4_0560* getVelocity();
     virtual void v03();
     virtual void v04();
-    virtual int v05();
+    virtual int getPosition();
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual int v09();
+    virtual int isComputer();
 };
 struct sSs0560RiderA {
     char pad0[0x470];
@@ -9556,16 +9556,16 @@ void func_002A0560_0560(void* self, sSs0560Rider* passer, sSs0560Rider* passed)
     int posB = passed->f470 >= 0.0f;
     if (posB) return;
     int chkA = 0;
-    if (passer->v09() != 0 || passer->f87C == 0) chkA = 1;
+    if (passer->isComputer() != 0 || passer->f87C == 0) chkA = 1;
     int chkB = 0;
-    if (passed->v09() != 0 || passed->f87C == 0) chkB = 1;
+    if (passed->isComputer() != 0 || passed->f87C == 0) chkB = 1;
     void* pl = cSSXAudio_GetFocusRider_p(self, -1);
     if (chkA && chkB && passer != pl && passed != pl) return;
     char* snd = (char*)self + 0x5560;
     if (func_002B0E28(snd, 0) == 0) return;
-    int okA = cSSXAudio_CameraInRange(self, passer->v05(), D_004A36D8);
+    int okA = cSSXAudio_CameraInRange(self, passer->getPosition(), D_004A36D8);
     if (okA < 0) return;
-    int okB = cSSXAudio_CameraInRange(self, passed->v05(), D_004A36D8);
+    int okB = cSSXAudio_CameraInRange(self, passed->getPosition(), D_004A36D8);
     if (okA != okB) return;
     float headingSin, headingCos;
     fSinCos_0560(passed->f4CC, &headingSin, &headingCos);
@@ -9574,8 +9574,8 @@ void func_002A0560_0560(void* self, sSs0560Rider* passer, sSs0560Rider* passed)
     headingDir.y = headingSin;
     headingDir.z = 0;
     headingDir.w = 0;
-    float closingSpeed = vu0Dot_0560(headingDir, *passer->v02());
-    closingSpeed -= vu0Dot_0560(headingDir, *passed->v02());
+    float closingSpeed = vu0Dot_0560(headingDir, *passer->getVelocity());
+    closingSpeed -= vu0Dot_0560(headingDir, *passed->getVelocity());
     if (!(closingSpeed > 670.55999755859375f)) return;
     if (!(closingSpeed < 1788.159912109375f)) return;
     int mode = 1;
@@ -9635,11 +9635,11 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual int v05();
+    virtual int getPosition();
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual int v09();
+    virtual int isComputer();
 };
 struct sSs0A30RiderA {
     char pad0[0x470];
@@ -9680,16 +9680,16 @@ extern "C" void func_002A0A30(cSSXAudio* self, sSs0A30Rider* attacker, sSs0A30Ri
     int posB = victim->f470 >= 0.0f;
     if (posB) return;
     int chkA = 0;
-    if (attacker->v09() != 0 || attacker->f87C == 0) chkA = 1;
+    if (attacker->isComputer() != 0 || attacker->f87C == 0) chkA = 1;
     int chkB = 0;
-    if (victim->v09() != 0 || victim->f87C == 0) chkB = 1;
+    if (victim->isComputer() != 0 || victim->f87C == 0) chkB = 1;
     void* pl = cSSXAudio_GetFocusRider_p(self, -1);
     if (chkA && chkB && attacker != pl && victim != pl) return;
     cSSXAudio_PlayGrunt(self, (cRider*)victim, 0, 1);
     char* snd = (char*)&self->SpeechSys;
     if (func_002B0E28(snd, 0) == 0) return;
-    int okB = cSSXAudio_CameraInRange(self, victim->v05(), D_004A36D8) >= 0;
-    int okA = cSSXAudio_CameraInRange(self, attacker->v05(), D_004A36D8) >= 0;
+    int okB = cSSXAudio_CameraInRange(self, victim->getPosition(), D_004A36D8) >= 0;
+    int okA = cSSXAudio_CameraInRange(self, attacker->getPosition(), D_004A36D8) >= 0;
     if (!okB && !okA) return;
     int rA = func_0029F330_i(attacker);
     int rB = func_0029F330_i(victim);
@@ -9742,11 +9742,11 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual int v05();
+    virtual int getPosition();
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual int v09();
+    virtual int isComputer();
 };
 struct sSs0E70RiderA {
     char pad0[0x470];
@@ -9776,7 +9776,7 @@ extern "C" void func_002A0E70(cSSXAudio* self, sSs0E70Rider* rider, int play)
     if (func_0029F0A0(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     int chk = 0;
-    if (rider->v09() != 0 || rider->f87C == 0) chk = 1;
+    if (rider->isComputer() != 0 || rider->f87C == 0) chk = 1;
     if (chk && cSSXAudio_GetFocusRider_p(self, -1) != rider) return;
     float finishTime = rider->f470;
     float zero = 0.0f;
@@ -9784,7 +9784,7 @@ extern "C" void func_002A0E70(cSSXAudio* self, sSs0E70Rider* rider, int play)
     if (pos) return;
     char* snd = (char*)&self->SpeechSys;
     if (func_002B0E28(snd, 0) == 0) return;
-    if (cSSXAudio_CameraInRange(self, rider->v05(), D_004A36D8) < 0) return;
+    if (cSSXAudio_CameraInRange(self, rider->getPosition(), D_004A36D8) < 0) return;
     cSSXAudio_PlayGrunt(self, (cRider*)rider, 2, 0);
     if (play == 0) return;
     int ok = rider->f874 != 0 && rider->f87C != 0;
@@ -10153,7 +10153,7 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual int v07();
+    virtual int getAIIndex();
 };
 struct sSs1820RiderA {
     char pad0[0x6C0];
@@ -10185,10 +10185,10 @@ extern "C" int func_002A1820(void* self, sSs1820Rider* firstRider, sSs1820Rider*
         if (okb) return 2;
     }
     int relation = 2;
-    int aggressionAB = cBEAggressionInterface_getAggression(cBEAggressionInterface_getThis(), firstRider->v07(), secondRider->v07());
-    int aggressionBA = cBEAggressionInterface_getAggression(cBEAggressionInterface_getThis(), secondRider->v07(), firstRider->v07());
+    int aggressionAB = cBEAggressionInterface_getAggression(cBEAggressionInterface_getThis(), firstRider->getAIIndex(), secondRider->getAIIndex());
+    int aggressionBA = cBEAggressionInterface_getAggression(cBEAggressionInterface_getThis(), secondRider->getAIIndex(), firstRider->getAIIndex());
     if (aggressionAB < 2 && aggressionBA < 2) {
-        int rivalState = cBEAggressionInterface_getState(cBEAggressionInterface_getThis(), firstRider->v07(), secondRider->v07());
+        int rivalState = cBEAggressionInterface_getState(cBEAggressionInterface_getThis(), firstRider->getAIIndex(), secondRider->getAIIndex());
         if (rivalState == 0) relation = 0;
         else if (rivalState == 1) relation = 1;
     }

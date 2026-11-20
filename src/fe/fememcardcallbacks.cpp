@@ -1086,7 +1086,7 @@ extern "C" void cMCOverlayManager_OnHighlightNextDevice(void* mp);
 class cMoviePlayerK1D8160 {
 public:
     char pad_0x000[0x748];
-    virtual void v01(int);
+    virtual void SetState(int);
 };
 
 class cMovieStreamK1D8160 {
@@ -1104,7 +1104,7 @@ public:
     virtual void v41(); virtual void v42(); virtual void v43(); virtual void v44();
     virtual void v45(); virtual void v46(); virtual void v47(); virtual void v48();
     virtual void v49(); virtual void v50(); virtual void v51();
-    virtual int v52(int);
+    virtual int IsAvailable(int);
 };
 
 /**
@@ -1123,21 +1123,21 @@ extern "C" void cFEMemCard_callbackCardsChecked(void)
     int next = *(int*)((char*)mp + 0x428) + 1;
     if (next < *(int*)((char*)mp + 0x424)) {
         cMCOverlayManager_selectDevice(mp, next);
-        mp->v01(49);
+        mp->SetState(49);
         return;
     }
     cMCOverlayManager_selectDevice(mp, 0);
-    if ((*(cMovieStreamK1D8160**)((char*)mp + 0x434))->v52(0) == 0) {
+    if ((*(cMovieStreamK1D8160**)((char*)mp + 0x434))->IsAvailable(0) == 0) {
         char* fe = (char*)cFEMemCard_mInstance;
         if (*(int*)(fe + 0x208) != 0) {
             *(int*)(fe + 0x1C0) = 6;
-            mp->v01(2);
+            mp->SetState(2);
             return;
         }
         cMCOverlayManager_OnHighlightNextDevice(mp);
     }
     cMCOverlayManager_setSelectedDevice(mp);
-    mp->v01(54);
+    mp->SetState(54);
 }
 #endif
 
@@ -1329,10 +1329,10 @@ public:
     virtual void v22();
     virtual void v23();
     virtual void v24();
-    virtual void v25(int);
+    virtual void setDefaultButton(int);
     virtual void v26();
     virtual void v27();
-    virtual void v28(int, int, int, int, int, int);
+    virtual void initPopup(int, int, int, int, int, int);
 };
 
 /**
@@ -1362,7 +1362,7 @@ extern "C" void cFEMemCard_getPopup(cFEMemCard* self_, int displayText, int yesO
     }
     cPopup_8530* existingPopup = (cPopup_8530*)self_->mStatusPopup;
     if (existingPopup != 0) {
-        existingPopup->v28(displayText, yesOnly, noButtons, layerOffset, passUpdate, snowFlake);
+        existingPopup->initPopup(displayText, yesOnly, noButtons, layerOffset, passUpdate, snowFlake);
     } else {
         void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm, 0x100, 0);
         void* engine = *(void**)((char*)cFEMemCard_mInstance + 0x10);
@@ -1371,7 +1371,7 @@ extern "C" void cFEMemCard_getPopup(cFEMemCard* self_, int displayText, int yesO
         cUIStateStack_pushPopup((char*)self_->mpEngine + 0x18, n);
     }
     if (*(int*)((char*)cFEMemCard_mInstance + 0x19C) == 1) {
-        ((cPopup_8530*)self_->mStatusPopup)->v25(1);
+        ((cPopup_8530*)self_->mStatusPopup)->setDefaultButton(1);
     }
 }
 #endif
@@ -1811,7 +1811,7 @@ class cStreamK1D8DE0 {
 public:
     virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06();
     virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10();
-    virtual int v11();
+    virtual int IsBusy();
     virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17();
     virtual void v18(); virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23();
     virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29();
@@ -1819,11 +1819,11 @@ public:
     virtual void v36(); virtual void v37(); virtual void v38(); virtual void v39(); virtual void v40(); virtual void v41();
     virtual void v42(); virtual void v43(); virtual void v44(); virtual void v45(); virtual void v46(); virtual void v47();
     virtual void v48(); virtual void v49(); virtual void v50(); virtual void v51(); virtual void v52();
-    virtual bool v53();
+    virtual bool IsAvailable1();
     virtual void v54(); virtual void v55(); virtual void v56(); virtual void v57(); virtual void v58(); virtual void v59();
     virtual void v60(); virtual void v61(); virtual void v62(); virtual void v63(); virtual void v64(); virtual void v65();
     virtual void v66();
-    virtual bool v67(int);
+    virtual bool HasFileName(int);
     virtual void v68(); virtual void v69(); virtual void v70(); virtual void v71(); virtual void v72(); virtual void v73();
     virtual void v74();
     virtual int v75();
@@ -1842,7 +1842,7 @@ public:
     virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18();
     virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23(); virtual void v24();
     virtual void v25(); virtual void v26();
-    virtual void v27(unsigned short*);
+    virtual void setMessage(unsigned short*);
 };
 
 class cMemCardK1D8DE0 {
@@ -1880,7 +1880,7 @@ struct sVEntryK1D8DE0 {
 #define VCALL_K1D8DE0(obj, off, idx) (*(sVEntryK1D8DE0**)((char*)(obj) + (off)))[idx].fn((char*)(obj) + (*(sVEntryK1D8DE0**)((char*)(obj) + (off)))[idx].delta
 
 #define BUSY_K1D8DE0(self, mp) ((*(int*)((self) + 0x1B0) == 1 && cMCOverlayManager_isManagerDone(mp) == 0) \
-        || (*(int*)((self) + 0x1B0) == 0 && (*(cStreamK1D8DE0**)((mp) + 0x434))->v11() != 0))
+        || (*(int*)((self) + 0x1B0) == 0 && (*(cStreamK1D8DE0**)((mp) + 0x434))->IsBusy() != 0))
 
 /**
  * Runs the memory-card screen's per-frame update: UI input, the memory-card manager, the screen-state handler and the
@@ -1959,7 +1959,7 @@ extern "C" void cFEMemCard_onUpdate(cMemCardK1D8DE0* card)
     if (*(int*)((char*)cFEMemCard_mInstance + 0x210) != 0) {
         unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
         cMCOverlayManager_GetMessage(mp, buf, 800);
-        (*(cPopupK1D8DE0**)(self + 0x218))->v27(buf);
+        (*(cPopupK1D8DE0**)(self + 0x218))->setMessage(buf);
         if (buf != 0) {
             cMemMan_free(buf);
         }
@@ -1973,9 +1973,9 @@ extern "C" void cFEMemCard_onUpdate(cMemCardK1D8DE0* card)
         }
         sVEntryK1D8DE0* vt = *(sVEntryK1D8DE0**)(self + 8);
         void (**pf)(void*, ...) = &vt[38].fn;
-        (*pf)(self + vt[38].delta, (*(cStreamK1D8DE0**)(mp + 0x434))->v67(sel) == 0 || (*(cStreamK1D8DE0**)(mp + 0x434))->v53() == 0);
-        bool slotEmpty = !(*(cStreamK1D8DE0**)(mp + 0x434))->v67(sel);
-        bool cardMissing = !(*(cStreamK1D8DE0**)(mp + 0x434))->v53();
+        (*pf)(self + vt[38].delta, (*(cStreamK1D8DE0**)(mp + 0x434))->HasFileName(sel) == 0 || (*(cStreamK1D8DE0**)(mp + 0x434))->IsAvailable1() == 0);
+        bool slotEmpty = !(*(cStreamK1D8DE0**)(mp + 0x434))->HasFileName(sel);
+        bool cardMissing = !(*(cStreamK1D8DE0**)(mp + 0x434))->IsAvailable1();
         VCALL_K1D8DE0(self, 8, 39), slotEmpty, cardMissing);
     }
 }
@@ -2382,7 +2382,7 @@ public:
     virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04();
     virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08();
     virtual void v09(); virtual void v10();
-    virtual int v11();
+    virtual int IsBusy();
     virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
     virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
     virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23();
@@ -2420,7 +2420,7 @@ extern "C" int cFEMemCard_displayFileOK(cFEMemCard* self)
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     int st = self->mState;
     if (st != 0 && st != 6 && *(int*)(mp + 0x340) != 0 && *(int*)(mp + 0xE0) == 0
-        && (*(cMovieStreamK1D9880**)(mp + 0x434))->v11() == 0) {
+        && (*(cMovieStreamK1D9880**)(mp + 0x434))->IsBusy() == 0) {
         if (!IsModeK1D9880(mp, 6) && !IsModeK1D9880(mp, 1)) {
             if ((*(cMovieStreamK1D9880**)(mp + 0x434))->v75() != 0) {
                 allowed = one;

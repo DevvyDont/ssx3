@@ -1708,7 +1708,7 @@ public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05();
     virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10();
-    virtual int v11(); // 0x58
+    virtual int IsBusy(); // 0x58
 };
 
 /**
@@ -1723,7 +1723,7 @@ public:
 extern "C" void cPS2MemCard_CheckDevice(cPS2MemCard* self, int device)
 {
     self->mDevice = device;
-    if (((cPS2MemCard_CheckDevice_cObj*)self)->v11() == 0) {
+    if (((cPS2MemCard_CheckDevice_cObj*)self)->IsBusy() == 0) {
         self->unk_010 = device;
         func_002C48C0(self, 3);
     }
@@ -1901,7 +1901,7 @@ public:
     virtual void v33();
     virtual void v34();
     virtual void v35();
-    virtual void v36(char* name, int a2, int a3); // 0x120
+    virtual void StartFileSlotWrite(char* name, int a2, int a3); // 0x120
 };
 
 extern "C" void func_002C54D0(cPS2MemCard* self, int a1, char* dst);
@@ -1918,7 +1918,7 @@ extern "C" void cPS2MemCard_StartFileSlotWrite2(cPS2MemCard* self, int fileSlot,
 {
     char name[64];
     func_002C54D0(self, fileSlot, name);
-    ((cPS2MemCard_StartFileSlotWrite2_cObj*)self)->v36(name, writeBuffer, writeSize);
+    ((cPS2MemCard_StartFileSlotWrite2_cObj*)self)->StartFileSlotWrite(name, writeBuffer, writeSize);
 }
 #endif
 
@@ -2167,7 +2167,7 @@ public:
     virtual void v56(); virtual void v57(); virtual void v58(); virtual void v59(); virtual void v60();
     virtual void v61(); virtual void v62(); virtual void v63(); virtual void v64(); virtual void v65();
     virtual void v66();
-    virtual int v67(int idx); // 0x218
+    virtual int HasFileName(int idx); // 0x218
 };
 
 static inline int slotOf_48C0(int state, int a, int b)
@@ -2422,7 +2422,7 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
     }
     case 7:
         for (I_48C0(40) = 0; I_48C0(40) < I_48C0(20); I_48C0(40)++) {
-            if (self->v67(I_48C0(40))) {
+            if (self->HasFileName(I_48C0(40))) {
                 sprintf(S_48C0(121), str_pct_s_pct_s_h, (char*)self + I_48C0(0x28) * 0x78 + 0x1B0, str_icon_sys);
                 func_002C48C0((cPS2MemCard*)self, 8);
                 break;
@@ -3586,9 +3586,9 @@ public:
     virtual void v17();
     virtual void v18();
     virtual void v19();
-    virtual int v20();
+    virtual int GetFreeSpace();
     virtual void v21();
-    virtual int v22(int a);
+    virtual int SpaceRequired(int a);
     virtual void v23();
     virtual void v24();
     virtual void v25();
@@ -3633,7 +3633,7 @@ public:
     virtual void v64();
     virtual void v65();
     virtual void v66();
-    virtual int v67(int i);
+    virtual int HasFileName(int i);
 };
 
 struct func_002C6280_sElem {
@@ -3657,11 +3657,11 @@ struct func_002C6280_sData {
 extern "C" void func_002C6280(cPS2MemCard* self)
 {
     int i = 0;
-    int remain = ((func_002C6280_cObj*)self)->v20();
-    int unit = ((func_002C6280_cObj*)self)->v22(self->unk_024);
+    int remain = ((func_002C6280_cObj*)self)->GetFreeSpace();
+    int unit = ((func_002C6280_cObj*)self)->SpaceRequired(self->unk_024);
     for (; i < self->mMaxFiles; i++) {
         ((func_002C6280_sData*)self)->elems[i].flag = 0;
-        if (((func_002C6280_cObj*)self)->v67(i) == 0) {
+        if (((func_002C6280_cObj*)self)->HasFileName(i) == 0) {
             if (remain >= unit) {
                 remain -= unit;
             } else {
@@ -3879,7 +3879,7 @@ struct sSaveMgrBase_2C64F8 {
     virtual void v52();
     virtual void v53();
     virtual void v54();
-    virtual int v55();
+    virtual int IsFormatted1();
     virtual void v56();
     virtual void v57();
     virtual void v58();
@@ -3891,7 +3891,7 @@ struct sSaveMgrBase_2C64F8 {
     virtual void v64();
     virtual void v65();
     virtual void v66();
-    virtual int v67(int slot);
+    virtual int HasFileName(int slot);
 };
 struct sSaveMgr_2C64F8 : sSaveMgrBase_2C64F8 {
     char pad4[0x1A0];
@@ -3911,11 +3911,11 @@ struct sSaveMgr_2C64F8 : sSaveMgrBase_2C64F8 {
 extern "C" int cPS2MemCard_GetLastSavedFile(sSaveMgr_2C64F8* self)
 {
     int best = -1;
-    if (self->v55() == 0) {
+    if (self->IsFormatted1() == 0) {
         return -1;
     }
     for (int i = 0; i < 6; i++) {
-        if (self->slots[i].busy == 0 && self->slots[i].locked == 0 && self->v67(i) != 0 && self->slots[i].bad == 0) {
+        if (self->slots[i].busy == 0 && self->slots[i].locked == 0 && self->HasFileName(i) != 0 && self->slots[i].bad == 0) {
             if (best != -1) {
                 unsigned int ct = self->slots[i].hour * 3600 + self->slots[i].min * 60 + self->slots[best].sec;
                 unsigned short cy = self->slots[i].year;
@@ -4041,7 +4041,7 @@ public:
     virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09();
     QT_V10(v1)
     virtual void v20(); virtual void v21();
-    virtual int v22(int a); // 0xB0
+    virtual int SpaceRequired(int a); // 0xB0
     virtual void v23(); virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27();
     virtual void v28(); virtual void v29();
     QT_V10(v3) QT_V10(v4)
@@ -4117,7 +4117,7 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SpaceRequired1);
  */
 extern "C" void cPS2MemCard_SpaceRequired1(cPS2MemCard* self)
 {
-    ((cQuadTreeVObj*)self)->v22(self->unk_024);
+    ((cQuadTreeVObj*)self)->SpaceRequired(self->unk_024);
 }
 #endif
 

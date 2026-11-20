@@ -758,7 +758,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 static inline int IsHash1A41C0(int id, char* name) { return id == GetHashValue32(name); }
@@ -777,15 +777,15 @@ extern "C" void cFEStateNetMessenger_onWidgetCreate(cFEStateNetMessenger* self, 
     cFEVObj_001A41C0* obj = (cFEVObj_001A41C0*)text;
     if (IsHash1A41C0(text->mHashName, str_TextTitle)) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_BTNEAMessenger));
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash1A41C0(text->mHashName, str_TextFindUser)) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_231FindPlayer));
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash1A41C0(text->mHashName, str_TextBuddyLocation)) {
-        obj->v09(1);
+        obj->setVisible(1);
         text->mAttr |= 0x80;
     } else if (IsHash1A41C0(text->mHashName, str_TextEqGoToNext)) {
-        obj->v09(0);
+        obj->setVisible(0);
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_279GoToNext));
     } else if (IsHash1A41C0(text->mHashName, str_playerMenu)) {
         text->mAttr |= 1;
@@ -1619,7 +1619,7 @@ struct cUIObj_001A5128 {
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int a1);
+    virtual void setVisible(int a1);
     virtual void v10();
     virtual void v11();
     virtual void v12();
@@ -1630,7 +1630,7 @@ struct cUIObj_001A5128 {
     virtual void v17();
     virtual void v18();
     virtual void v19();
-    virtual void v20(void* out);
+    virtual void getSize(void* out);
 };
 
 static inline sVec3_001A5128 GetPos_001A5128(cUIObj_001A5128* o)
@@ -1659,7 +1659,7 @@ extern "C" void func_001A5128(cFEStateNetMessenger* self, int pos, int count)
     if (thumb == 0) return;
     if (track == 0) return;
     sVec3_001A5128 size;
-    track->v20(&size);
+    track->getSize(&size);
     sVec3_001A5128 trackPos = *(sVec3_001A5128*)((char*)track + 0x44);
     float fpos = (float)pos;
     if (count >= 2) count--;
@@ -1668,8 +1668,8 @@ extern "C" void func_001A5128(cFEStateNetMessenger* self, int pos, int count)
     np.y += fpos * step;
     np.x += -2.0f;
     *(sVec3_001A5128*)((char*)thumb + 0x44) = np;
-    thumb->v09(1);
-    track->v09(1);
+    thumb->setVisible(1);
+    track->setVisible(1);
 }
 #endif
 
@@ -2148,7 +2148,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 /**
@@ -2193,8 +2193,8 @@ extern "C" int func_001A6070(cFEStateNetMessenger* self, int idx)
     }
     cBXString_operatorE1((char*)self + 0x6E0, str);
     cUIText_setAsciiString((cUIText*)name, str);
-    name->v09(1);
-    status->v09(1);
+    name->setVisible(1);
+    status->setVisible(1);
     if (func_00263338(GetSession_001A6070(), id) != 0) {
         func_001A7390((cFEStateNet*)self, str, func_002633F8(GetSession_001A6070(), id));
     } else {
@@ -2227,7 +2227,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 /**
@@ -2256,24 +2256,24 @@ extern "C" void func_001A63C8(cFEStateNetMessenger* self, unsigned int index, in
     cFEVObj_001A63C8* challengeIcon = (cFEVObj_001A63C8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
     switch (state) {
     case 0:
-        if (messageIcon) messageIcon->v09(0);
-        if (blockedIcon) blockedIcon->v09(1);
-        if (challengeIcon) challengeIcon->v09(0);
+        if (messageIcon) messageIcon->setVisible(0);
+        if (blockedIcon) blockedIcon->setVisible(1);
+        if (challengeIcon) challengeIcon->setVisible(0);
         break;
     case 1:
-        if (messageIcon) messageIcon->v09(1);
-        if (blockedIcon) blockedIcon->v09(0);
-        if (challengeIcon) challengeIcon->v09(0);
+        if (messageIcon) messageIcon->setVisible(1);
+        if (blockedIcon) blockedIcon->setVisible(0);
+        if (challengeIcon) challengeIcon->setVisible(0);
         break;
     case 2:
-        if (messageIcon) messageIcon->v09(0);
-        if (blockedIcon) blockedIcon->v09(0);
-        if (challengeIcon) challengeIcon->v09(1);
+        if (messageIcon) messageIcon->setVisible(0);
+        if (blockedIcon) blockedIcon->setVisible(0);
+        if (challengeIcon) challengeIcon->setVisible(1);
         break;
     default:
-        if (messageIcon) messageIcon->v09(0);
-        if (blockedIcon) blockedIcon->v09(0);
-        if (challengeIcon) challengeIcon->v09(0);
+        if (messageIcon) messageIcon->setVisible(0);
+        if (blockedIcon) blockedIcon->setVisible(0);
+        if (challengeIcon) challengeIcon->setVisible(0);
         break;
     }
 }
@@ -2363,7 +2363,7 @@ public:
     virtual void v08();
     virtual void v09(int on);
     virtual void v10();
-    virtual void v11(const sCol_001A66A8& c);
+    virtual void setColour(const sCol_001A66A8& c);
 };
 
 /**
@@ -2387,26 +2387,26 @@ extern "C" void func_001A66A8(cFEStateNetMessenger* self, unsigned int index, in
     sprintf(name, str_overlaypct_02d, index);
     cFEVObj_001A66A8* overlay = (cFEVObj_001A66A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
     if (flag != 0) {
-        overlay->v11(sCol_001A66A8(1.0f, 0.6078431606292725f, 0.24313727021217346f, 0.0f));
-        persona->v11(sCol_001A66A8(1.0f, 1.0f, 1.0f, 1.0f));
+        overlay->setColour(sCol_001A66A8(1.0f, 0.6078431606292725f, 0.24313727021217346f, 0.0f));
+        persona->setColour(sCol_001A66A8(1.0f, 1.0f, 1.0f, 1.0f));
         return;
     }
     unsigned int idx = func_001A4740(self, index);
     if (idx >= (unsigned int)((int*)self->mNames.mpFinish - (int*)self->mNames.mpStart)) {
-        overlay->v11(sCol_001A66A8());
+        overlay->setColour(sCol_001A66A8());
         return;
     }
-    persona->v11(sCol_001A66A8(1.0f));
+    persona->setColour(sCol_001A66A8(1.0f));
     switch (func_001A4670(self, func_002624F8(GetSession_001A66A8(), *(int*)((char*)self->mNames.mpStart + (idx << 2))))) {
     case 2:
-        overlay->v11(sCol_001A66A8(1.0f, 0.5372549295425415f, 0.7411764860153198f, 0.874509871006012f));
+        overlay->setColour(sCol_001A66A8(1.0f, 0.5372549295425415f, 0.7411764860153198f, 0.874509871006012f));
         break;
     case 0:
-        overlay->v11(sCol_001A66A8(1.0f, 0.501960813999176f, 0.501960813999176f, 0.501960813999176f));
+        overlay->setColour(sCol_001A66A8(1.0f, 0.501960813999176f, 0.501960813999176f, 0.501960813999176f));
         break;
     case 1:
     default:
-        overlay->v11(sCol_001A66A8(1.0f, 0.30588236451148987f, 0.545098066329956f, 0.7019608020782471f));
+        overlay->setColour(sCol_001A66A8(1.0f, 0.30588236451148987f, 0.545098066329956f, 0.7019608020782471f));
         break;
     }
 }
@@ -2590,7 +2590,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 /**
@@ -2608,24 +2608,24 @@ extern "C" void func_001A6CA0(cFEStateNetMessenger* self)
     int has = self->miSelectedIndex >= 0;
     cFEVObj_001A6CA0* hintObj = (cFEVObj_001A6CA0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2L1));
     if (hintObj != 0) {
-        hintObj->v09(has);
+        hintObj->setVisible(has);
     }
     hintObj = (cFEVObj_001A6CA0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextEqGoToNext));
     if (hintObj != 0) {
-        hintObj->v09(has);
+        hintObj->setVisible(has);
     }
     cFEVObj_001A6CA0* challengeIcon = (cFEVObj_001A6CA0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_IconNextChallenge));
     cFEVObj_001A6CA0* messageIcon = (cFEVObj_001A6CA0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_IconNextMessage));
     if (challengeIcon != 0 && messageIcon != 0) {
         if (!has) {
-            challengeIcon->v09(0);
-            messageIcon->v09(0);
+            challengeIcon->setVisible(0);
+            messageIcon->setVisible(0);
         } else if (Count1A6CA0((sSession1A6CA0*)GetSession_001A6CA0()) != 0) {
-            challengeIcon->v09(has);
-            messageIcon->v09(0);
+            challengeIcon->setVisible(has);
+            messageIcon->setVisible(0);
         } else {
-            messageIcon->v09(has);
-            challengeIcon->v09(0);
+            messageIcon->setVisible(has);
+            challengeIcon->setVisible(0);
         }
     }
 }
@@ -3158,9 +3158,9 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
     virtual void v10();
-    virtual void v11(const sCol1A7970& c);
+    virtual void setColour(const sCol1A7970& c);
 };
 
 /**
@@ -3193,9 +3193,9 @@ extern "C" void cFEStateReadMessagePopup_onCreateScreen(cFEStateReadMessagePopup
         cFEVObj_001A7970* obj = (cFEVObj_001A7970*)textScroll;
         *(int*)(textScroll + 0x74) |= 1;
         cUITextScroll_setInputMap(textScroll, 1);
-        obj->v09(1);
+        obj->setVisible(1);
         *(int*)(textScroll + 0x14) |= 0x80;
-        obj->v11(sCol1A7970(1.0f, 0.0f, 0.0f, 0.0f));
+        obj->setColour(sCol1A7970(1.0f, 0.0f, 0.0f, 0.0f));
         *(sBlk1A7970*)(textScroll + 0xA8) = *(sBlk1A7970*)&self->mTextColour;
         *(char**)(textScroll + 0xB8) = scrollBar;
     }
@@ -3295,7 +3295,7 @@ struct cFEObj_001A7BB8 {
     virtual void v14();
     virtual void v15();
     virtual void v16();
-    virtual void v17(void* a1, int a2);
+    virtual void onPopupEvent(void* a1, int a2);
 };
 
 /**
@@ -3315,7 +3315,7 @@ extern "C" void cFEStateReadMessagePopup_onWidgetEvent(cFEStateReadMessagePopup*
 {
     switch (msg) {
     case 6:
-        ((cFEObj_001A7BB8*)self->mpParentState)->v17(self, 20);
+        ((cFEObj_001A7BB8*)self->mpParentState)->onPopupEvent(self, 20);
         break;
     case 5:
         func_001A9090((cFEStateNet*)self, 0, (int)self->mszSender, (int)D_004A1408, 0, 0, 0x3F);
@@ -3678,7 +3678,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 /**
@@ -3699,7 +3699,7 @@ extern "C" void func_001A81F0(cFEStateReadMessagePopup* self)
         char* who = self->mszSender;
         sprintf1_1A81F0(buf, Loc1A81F0(str_kT_POPUP242PlayerID), who, msgEntry->desc, D_004A1408);
         cUIText_setUnicodeString(text, buf);
-        ((cFEVObj_001A81F0*)text)->v09(1);
+        ((cFEVObj_001A81F0*)text)->setVisible(1);
     }
     cUIText* list = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat));
     if (list == 0) {
@@ -4464,7 +4464,7 @@ public:
     virtual void v27();
     virtual void v28();
     virtual void v29();
-    virtual int v30();
+    virtual int isProcessingEvents();
     virtual int v31(int msg, void* data);
 };
 
@@ -4502,7 +4502,7 @@ extern "C" int cFEStateNet_handleEvent_impl(cFEState1A8B88* st, int msg, int* da
                 func_00261058(BuddyMan_mBuddyMan);
                 func_00261408(BuddyMan_mBuddyMan);
             }
-            if (st->v30() != 0) {
+            if (st->isProcessingEvents() != 0) {
                 if ((unsigned int)(msg - 277) < 2) {
                     st->v31(*data, data);
                 } else {
@@ -4519,7 +4519,7 @@ extern "C" int cFEStateNet_handleEvent_impl(cFEState1A8B88* st, int msg, int* da
         }
         sList1A8B88* first = (sList1A8B88*)((char*)st + 0x6C8);
         if (first->node->next != *(sNode1A8B88**)((char*)st + 0x6CC)) {
-            if (st->v30() == 0) {
+            if (st->isProcessingEvents() == 0) {
                 return 0;
             }
             if (*(int*)((char*)st + 0x1C) & 6) {
@@ -5417,7 +5417,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int a1);
+    virtual void setVisible(int a1);
 };
 
 int GetHashValue32(char* str);
@@ -5441,7 +5441,7 @@ extern "C" void func_001A9A18(cFEStateNet* self, cUIListBox_001A9A18* box, int v
     cUIListBox_addEntryByStringID(box, GetHashValue32(str_kT_CMNYes), 1);
     cUIListBox_addEntryByStringID(box, GetHashValue32(str_kT_CMNNo), 0);
     cUIListBox_setCurrentEntryByIndex(box, value == 0);
-    box->v09(1);
+    box->setVisible(1);
 }
 #endif
 
@@ -5459,7 +5459,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int a1);
+    virtual void setVisible(int a1);
 };
 
 int GetHashValue32(char* str);
@@ -5482,7 +5482,7 @@ extern "C" void func_001A9AB8(cFEStateNet* self, cUIListBox_001A9AB8* box, int v
     cUIListBox_addEntryByStringID(box, GetHashValue32(str_kT_CMNOn), 1);
     cUIListBox_addEntryByStringID(box, GetHashValue32(str_kT_CMNOff), 0);
     cUIListBox_setCurrentEntryByIndex(box, value == 0);
-    box->v09(1);
+    box->setVisible(1);
 }
 #endif
 
@@ -6090,7 +6090,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 /**
@@ -6106,23 +6106,23 @@ extern "C" void func_001AA9B0(cFEStateNet* self)
     cFEVObj_001AA9B0* hintIcon = (cFEVObj_001AA9B0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_IconChallengeHint));
     if (hintIcon != 0) {
         if (self->mChallengeHintFrame != 0) {
-            hintIcon->v09((now - self->mChallengeHintFrame) % 60 > 30);
+            hintIcon->setVisible((now - self->mChallengeHintFrame) % 60 > 30);
         } else {
-            hintIcon->v09(0);
+            hintIcon->setVisible(0);
         }
     }
     cFEVObj_001AA9B0* countText = (cFEVObj_001AA9B0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextMessageCount));
     hintIcon = (cFEVObj_001AA9B0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_IconMessageHint));
     if (hintIcon != 0) {
         if (self->mMessageHintFrame != 0) {
-            hintIcon->v09((now - self->mMessageHintFrame) % 60 > 30);
+            hintIcon->setVisible((now - self->mMessageHintFrame) % 60 > 30);
             if (countText != 0) {
-                countText->v09((now - self->mMessageHintFrame) % 60 > 30);
+                countText->setVisible((now - self->mMessageHintFrame) % 60 > 30);
             }
         } else {
-            hintIcon->v09(0);
+            hintIcon->setVisible(0);
             if (countText != 0) {
-                countText->v09(0);
+                countText->setVisible(0);
             }
         }
     }
@@ -6181,7 +6181,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
     virtual void v10();
     virtual void v11();
     virtual void v12();
@@ -6253,11 +6253,11 @@ extern "C" void func_001AAB68(cFEStateNet* self)
         return;
     }
     if (n > 0) {
-        text->v09(1);
+        text->setVisible(1);
         sprintf(buf, str_pct_d_b, n);
         cUIText_setAsciiString((cUIText*)text, buf);
     } else {
-        text->v09(0);
+        text->setVisible(0);
         cUIText_setAsciiString((cUIText*)text, str_sp);
     }
 }
@@ -6289,9 +6289,9 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
     virtual void v10();
-    virtual void v11(const sCol1AAD50& c);
+    virtual void setColour(const sCol1AAD50& c);
 };
 
 /**
@@ -6339,10 +6339,10 @@ extern "C" void func_001AAD50(void* screen, int slot, int ping)
     for (j = 0; j < 5; j++) {
         cFEVObj_001AAD50* barObj = objs[j];
         if (j < bars) {
-            barObj->v09(1);
-            barObj->v11(col);
+            barObj->setVisible(1);
+            barObj->setColour(col);
         } else {
-            barObj->v09(0);
+            barObj->setVisible(0);
         }
     }
 }
@@ -6367,7 +6367,7 @@ struct cLocStr_001AAF90 {
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual int v04(int hash);
+    virtual int getStringByHash(int hash);
 };
 
 /**
@@ -6420,7 +6420,7 @@ extern "C" int func_001AAF90(cFEStateNet* self, void* msg)
     default:
         return 0;
     }
-    return ((cLocStr_001AAF90*)SSXApp->FELocale)->v04(textId);
+    return ((cLocStr_001AAF90*)SSXApp->FELocale)->getStringByHash(textId);
 }
 #endif
 
@@ -7187,7 +7187,7 @@ struct cFEVObj_001AC170 {
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
+    virtual void setStatic(int on);
     virtual void v09();
     virtual void v10();
     virtual void v11();
@@ -7204,7 +7204,7 @@ struct cFEVObj_001AC170 {
     virtual void v22();
     virtual void v23();
     virtual void v24();
-    virtual void v25(int on);
+    virtual void setUseStaticColour(int on);
 };
 
 static inline int IsHash_001AC170(int id, char* name) { return id == GetHashValue32(name); }
@@ -7227,8 +7227,8 @@ extern "C" void cFEUseExistingAccount_onWidgetCreate(cFEUseExistingAccount* self
     } else if (IsHash_001AC170(text->mHashName, str_TextForgotPassword)) {
         self->mpTextForgotPassword = (cUIThing*)text;
         text->mMiscData = 2;
-        ((cFEVObj_001AC170*)self->mpTextForgotPassword)->v25(1);
-        ((cFEVObj_001AC170*)self->mpTextForgotPassword)->v08(1);
+        ((cFEVObj_001AC170*)self->mpTextForgotPassword)->setUseStaticColour(1);
+        ((cFEVObj_001AC170*)self->mpTextForgotPassword)->setStatic(1);
     } else if (IsHash_001AC170(text->mHashName, str_TextForgotAccount)) {
         text->mMiscData = 3;
     } else if (IsHash_001AC170(text->mHashName, str_EnterAccountName) || IsHash_001AC170(text->mHashName, str_EnterPassword)) {
@@ -8113,7 +8113,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 struct sFEGlobals1AD3E8 {
@@ -8138,13 +8138,13 @@ extern "C" void func_001AD3E8(cFEStateSelectPersona* self, cUIText* text)
         cUIText* item = cList_getByIndex((char*)&text->mAttrText, i);
         item->mMiscData = i;
         cUIText_setAsciiString(item, ((const char**)&lobbyMan->mPersonas[0])[i]);
-        ((cFEVObj_001AD3E8*)item)->v09(1);
+        ((cFEVObj_001AD3E8*)item)->setVisible(1);
     }
     for (; i < 4; i++) {
         cUIText* item = cList_getByIndex((char*)&text->mAttrText, i);
         item->mMiscData = i;
         cUIText_setUnicodeStringByID(item, GetHashValue32(str_kT_220CreateNewPersona));
-        ((cFEVObj_001AD3E8*)item)->v09(1);
+        ((cFEVObj_001AD3E8*)item)->setVisible(1);
     }
 }
 #endif
@@ -8919,7 +8919,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
     virtual void v10();
     virtual void v11();
     virtual void v12();
@@ -8956,40 +8956,40 @@ extern "C" void cFEStateChallengePopup_onWidgetCreate(cFEStateChallengePopup* se
 {
     cFEVObj_001AE128* obj = (cFEVObj_001AE128*)item;
     if (IsHash1AE128(item->mHashName, str_TextTitle)) {
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash1AE128(item->mHashName, str_TextPlayerName)) {
         cUIText_setAsciiString(item, ((const char*)LobbyMan_mLobbyMan->mOpponent));
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash1AE128(item->mHashName, str_TextSelectPeakEvent)) {
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash1AE128(item->mHashName, str_Textselectevent)) {
         item->mMiscData = 7;
         obj->v25(1);
     } else if (IsHash1AE128(item->mHashName, str_PeakLabel)) {
         cUIText_setUnicodeStringByID(item, GetHashValue32(str_kT_OVRCMNPeakColon));
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash1AE128(item->mHashName, str_CourseLabel)) {
         cUIText_setUnicodeStringByID(item, GetHashValue32(str_kT_OVRCMNCourseColon));
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash1AE128(item->mHashName, str_EventLabel)) {
         cUIText_setUnicodeStringByID(item, GetHashValue32(str_kT_OVRCMNEventColon));
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash1AE128(item->mHashName, str_TextRankedGame)) {
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash1AE128(item->mHashName, str_TextSubmit)) {
         cUIText_setUnicodeStringByID(item, GetHashValue32(str_kT_CMNSubmit));
         item->mMiscData = 9;
         obj->v25(1);
-        obj->v09(1);
+        obj->setVisible(1);
         obj->v25(1);
     } else if (IsHash1AE128(item->mHashName, str_TextCancel)) {
         cUIText_setUnicodeStringByID(item, GetHashValue32(str_kT_BTNCancel));
         item->mMiscData = 10;
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash1AE128(item->mHashName, str_ListBoxRankedGame)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNYes), 1);
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNNo), 0);
-        obj->v09(1);
+        obj->setVisible(1);
         obj->v24(1);
         self->mpLBRankedGame = (cUIListBox*)item;
     } else if (IsHash1AE128(item->mHashName, str_ListBoxCPURiders)) {
@@ -8998,26 +8998,26 @@ extern "C" void cFEStateChallengePopup_onWidgetCreate(cFEStateChallengePopup* se
         cUIListBox_addEntryByAsciiString(item, D_004A1500, 2);
         cUIListBox_addEntryByAsciiString(item, D_004A1508, 3);
         cUIListBox_addEntryByAsciiString(item, D_004A1510, 4);
-        obj->v09(1);
+        obj->setVisible(1);
         obj->v24(1);
         self->mpLBCPURiders = (cUIListBox*)item;
         cUIListBox_setCurrentEntryByIndex(item, D_004A4E88_E128[4]);
     } else if (IsHash1AE128(item->mHashName, str_ListBoxPowerUps)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNYes), 0);
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNNo), 1);
-        obj->v09(1);
+        obj->setVisible(1);
         obj->v24(1);
         self->mpLBPowerUps = (cUIListBox*)item;
     } else if (IsHash1AE128(item->mHashName, str_ListBoxMultipliers)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNYes), 0);
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNNo), 1);
-        obj->v09(1);
+        obj->setVisible(1);
         obj->v24(1);
         self->mpLBMultipliers = (cUIListBox*)item;
     } else if (IsHash1AE128(item->mHashName, str_ListBoxPointicons)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNYes), 0);
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNNo), 1);
-        obj->v09(1);
+        obj->setVisible(1);
         obj->v24(1);
         self->mpLBPointIcons = (cUIListBox*)item;
     } else if (IsHash1AE128(item->mHashName, str_MenuChallenge)) {
@@ -9292,7 +9292,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
+    virtual void setStatic(int on);
 };
 
 struct sVE_001AEC60 {
@@ -9321,12 +9321,12 @@ extern "C" void func_001AEC60(cFEStateChallengePopup* self, int on)
     int locked = cBENetworkInterface_networkOpt.bIsRankedGame;
     cFEVObj_001AEC60* widget = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_PairRankedGame));
     if (widget != 0) {
-        widget->v08(on);
+        widget->setStatic(on);
     }
     widget = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_PairNumCPURiders));
     if (widget != 0) {
-        ((cFEVObj_001AEC60*)self->mpLBCPURiders)->v08(on);
-        widget->v08(on);
+        ((cFEVObj_001AEC60*)self->mpLBCPURiders)->setStatic(on);
+        widget->setStatic(on);
         if (on == 0) {
             {
             sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)widget + 8);
@@ -9342,8 +9342,8 @@ extern "C" void func_001AEC60(cFEStateChallengePopup* self, int on)
     }
     widget = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_PairPowerUps));
     if (widget != 0) {
-        widget->v08(on);
-        ((cFEVObj_001AEC60*)self->mpLBPowerUps)->v08(on);
+        widget->setStatic(on);
+        ((cFEVObj_001AEC60*)self->mpLBPowerUps)->setStatic(on);
         if (on == 0) {
             {
             sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)((cFEVObj_001AEC60*)self->mpLBPowerUps) + 8);
@@ -9359,8 +9359,8 @@ extern "C" void func_001AEC60(cFEStateChallengePopup* self, int on)
     }
     widget = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_PairMultipliers));
     if (widget != 0) {
-        widget->v08(on);
-        ((cFEVObj_001AEC60*)self->mpLBMultipliers)->v08(on);
+        widget->setStatic(on);
+        ((cFEVObj_001AEC60*)self->mpLBMultipliers)->setStatic(on);
         if (on == 0) {
             {
             sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)((cFEVObj_001AEC60*)self->mpLBMultipliers) + 8);
@@ -9376,8 +9376,8 @@ extern "C" void func_001AEC60(cFEStateChallengePopup* self, int on)
     }
     widget = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_PairPointIcons));
     if (widget != 0) {
-        widget->v08(on);
-        ((cFEVObj_001AEC60*)self->mpLBPointIcons)->v08(on);
+        widget->setStatic(on);
+        ((cFEVObj_001AEC60*)self->mpLBPointIcons)->setStatic(on);
         if (on == 0) {
             {
             sVE_001AEC60* vt = *(sVE_001AEC60**)((char*)((cFEVObj_001AEC60*)self->mpLBPointIcons) + 8);
@@ -9393,9 +9393,9 @@ extern "C" void func_001AEC60(cFEStateChallengePopup* self, int on)
     }
     widget = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Textselectevent));
     if (widget != 0) {
-        widget->v08(on);
+        widget->setStatic(on);
     }
-    ((cFEVObj_001AEC60*)self->mpLBRankedGame)->v08(on);
+    ((cFEVObj_001AEC60*)self->mpLBRankedGame)->setStatic(on);
 }
 #endif
 
@@ -9491,7 +9491,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 static inline int IsHash1AF208(int id, char* name) { return id == GetHashValue32(name); }
@@ -9534,10 +9534,10 @@ extern "C" void func_001AF208(cFEStateChallengePopup* self, cUIText* item, int o
         leftArrow = Get1AF208(((cFEStateNet*)self), str_InformLeft5);
     }
     if (rightArrow != 0) {
-        rightArrow->v09(on);
+        rightArrow->setVisible(on);
     }
     if (leftArrow != 0) {
-        leftArrow->v09(on);
+        leftArrow->setVisible(on);
     }
 }
 #endif
@@ -9755,7 +9755,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int a1);
+    virtual void setStatic(int a1);
 };
 
 int GetHashValue32(char* str);
@@ -9779,7 +9779,7 @@ extern "C" void func_001AF688(cFEStateChallengePopup* self)
     cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_staticTextSetchallenge));
     if (text != 0) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_241SetChallengeOptions));
-        ((cUIObj_001AF688*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextSubmit)))->v08(0);
+        ((cUIObj_001AF688*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextSubmit)))->setStatic(0);
         func_001AEC60(self, 0);
     }
 }
@@ -9814,7 +9814,7 @@ public:
     int f4;
     int f8;
     // vptr at 0xC
-    virtual int v01();
+    virtual int submit();
 };
 
 class cFEVObj_001AF728 {
@@ -9828,7 +9828,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
+    virtual void setStatic(int on);
 };
 
 /**
@@ -9871,9 +9871,9 @@ extern "C" void func_001AF728(cFEStateChallengePopup* self, void* track, void* s
         if (cBENewRaceInterface_newRace.cGameEvent != 0) {
             cRaceIface_001AF728* iface = (cRaceIface_001AF728*)cBE_getInterface_Fv(cBE_getBE(), 0);
             cBENewRaceInterface_setNumberAI(iface, 0);
-            iface->v01();
+            iface->submit();
             cUIListBox_setCurrentEntryByIndex(self->mpLBCPURiders, 0);
-            ((cFEVObj_001AF728*)self->mpLBCPURiders)->v08(1);
+            ((cFEVObj_001AF728*)self->mpLBCPURiders)->setStatic(1);
         }
         cUIText_setAsciiString(uiText, cBENewRaceInterface_getEventName(track));
     }
@@ -10322,7 +10322,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 static inline int IsHash_001B0150(int id, char* name) { return id == GetHashValue32(name); }
@@ -10345,34 +10345,34 @@ extern "C" void cFEStateChallengeReceivedPopup_onWidgetCreate(cFEStateChallengeR
     char* widget = (char*)obj;
     cUIText* uiText = (cUIText*)obj;
     if (IsHash_001B0150(*(int*)(widget + 0x38), str_TextTitle)) {
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash_001B0150(*(int*)(widget + 0x38), str_TextAccept)) {
         cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_BTNAccept));
         *(int*)(widget + 0x18) = 11;
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash_001B0150(*(int*)(widget + 0x38), str_TextDecline)) {
         *(int*)(widget + 0x18) = 0xC;
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash_001B0150(*(int*)(widget + 0x38), str_TextPlayerName)) {
         cUIText_setAsciiString(uiText, ((const char*)LobbyMan_mLobbyMan->mOpponent));
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash_001B0150(*(int*)(widget + 0x38), str_TextSelectPeakEvent)) {
         *(int*)(widget + 0x18) = 7;
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash_001B0150(*(int*)(widget + 0x38), str_PeakLabel)) {
         cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCMNPeakColon));
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash_001B0150(*(int*)(widget + 0x38), str_CourseLabel)) {
         cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCMNCourseColon));
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash_001B0150(*(int*)(widget + 0x38), str_EventLabel)) {
         cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_OVRCMNEventColon));
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash_001B0150(*(int*)(widget + 0x38), str_TextRankedGame)) {
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash_001B0150(*(int*)(widget + 0x38), str_TextRankedGameResult)) {
         cUIText_setAsciiString(uiText, str_True);
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash_001B0150(*(int*)(widget + 0x38), str_TextCPURidersResult)) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         int n = cBENewRaceInterface_newRace.iNumberAI;
@@ -10403,13 +10403,13 @@ extern "C" void cFEStateChallengeReceivedPopup_onWidgetCreate(cFEStateChallengeR
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_CMNYes));
         }
     } else if (IsHash_001B0150(*(int*)(widget + 0x38), str_TextEventResult)) {
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash_001B0150(*(int*)(widget + 0x38), str_TextCourseResult)) {
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash_001B0150(*(int*)(widget + 0x38), str_TextRankedGameResult)) {
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash_001B0150(*(int*)(widget + 0x38), str_TextCPURidersResult)) {
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash_001B0150(*(int*)(widget + 0x38), str_MenuChallenge)) {
         *(int*)(widget + 0x14) |= 0x80;
     }
@@ -10865,9 +10865,9 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual void v07(int on);
-    virtual void v08(int on);
-    virtual void v09(int on);
+    virtual void setFocus(int on);
+    virtual void setStatic(int on);
+    virtual void setVisible(int on);
 };
 
 /**
@@ -10882,7 +10882,7 @@ extern "C" void func_001B0C08(cFEStateChallengeReceivedPopup* self)
     if (self->mpScreen != 0) {
         cFEVObj_001B0C08* widget = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextDecline));
         if (widget != 0) {
-            widget->v07(1);
+            widget->setFocus(1);
         }
         cUIText* menu = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_MenuChallenge));
         if (menu != 0) {
@@ -10890,12 +10890,12 @@ extern "C" void func_001B0C08(cFEStateChallengeReceivedPopup* self)
         }
         widget = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_staticTextSetchallenge));
         if (widget != 0) {
-            widget->v09(1);
+            widget->setVisible(1);
             cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_OVRCMNWaitPlayer));
         }
         widget = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextAccept));
         if (widget != 0) {
-            widget->v08(1);
+            widget->setStatic(1);
         }
     }
 }
@@ -10918,11 +10918,11 @@ extern "C" void func_001B0D30(cFEStateChallengeReceivedPopup* self)
     if (self->mpScreen != 0) {
         cFEVObj_001B0C08* widget = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextAccept));
         if (widget != 0) {
-            widget->v08(0);
+            widget->setStatic(0);
         }
         widget = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_staticTextSetchallenge));
         if (widget != 0) {
-            widget->v09(0);
+            widget->setVisible(0);
         }
         widget = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextDecline));
         if (widget != 0) {
@@ -11157,9 +11157,9 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
     virtual void v10();
-    virtual void v11(const sVec4_001B10F8& c);
+    virtual void setColour(const sVec4_001B10F8& c);
     virtual void v12();
     virtual void v13();
     virtual void v14();
@@ -11172,7 +11172,7 @@ public:
     virtual void v21();
     virtual void v22();
     virtual void v23();
-    virtual void v24(int on);
+    virtual void setUseStaticColour(int on);
 };
 
 static inline int IsHash_001B10F8(int id, char* name) { return id == GetHashValue32(name); }
@@ -11197,15 +11197,15 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetCreate(cFEStateOnlineChara
             cUIListBox_addEntryByAsciiString(text, (const char*)cBECharacterInterface_getShortNameByCharacter(cBE_getInterface_Fv(cBE_getBE(), 2), D_00440F68[i], 0), D_00440F68[i]);
         }
         text->mAttr &= ~1;
-        box->v09(1);
+        box->setVisible(1);
         int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(SSXApp->BE, 1), 0);
         self->miCharID = id;
         cUIListBox_setCurrentEntryByIndex(text, (unsigned char)func_001B0F28(id));
         self->mpLBChallengerSelect = (cUIListBox*)text;
-        box->v24(1);
+        box->setUseStaticColour(1);
     } else if (IsHash_001B10F8(text->mHashName, str_TextOpponentSelect)) {
         cUIText_setAsciiString(text, str_sp);
-        box->v11(sVec4_001B10F8(1.0f, 0.0f, 0.0f, 0.0f));
+        box->setColour(sVec4_001B10F8(1.0f, 0.0f, 0.0f, 0.0f));
     }
 }
 #endif
@@ -11250,7 +11250,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
+    virtual void setStatic(int on);
 };
 
 static inline int IsHash1B1280(int id, char* name) { return id == GetHashValue32(name); }
@@ -11295,7 +11295,7 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetEvent(cFEStateOnlineCharac
             func_00265018(mgr, cUIListBox_getCurrentEntryData(self->mpLBChallengerSelect));
         }
         self->miConfirmCtrl = self->mCurrentCtrl;
-        ((cFEVObj_001B1280*)obj)->v08(1);
+        ((cFEVObj_001B1280*)obj)->setStatic(1);
         func_001B1A08(self, 1, 0);
         self->mbConfirmed = 1;
         break;
@@ -11313,7 +11313,7 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetEvent(cFEStateOnlineCharac
             func_001A9BC0((cFEStateNet*)self, popup);
         } else {
             func_00265140(D_004A33CC);
-            ((cFEVObj_001B1280*)obj)->v08(0);
+            ((cFEVObj_001B1280*)obj)->setStatic(0);
             func_001B1A08(self, 0, 0);
             self->mbConfirmed = 0;
         }
@@ -11375,7 +11375,7 @@ public:
     virtual void v03();
     virtual void v04();
     virtual void v05();
-    virtual bool v06();
+    virtual bool isPrevious();
 };
 
 extern void* D_004A33CC;
@@ -11390,7 +11390,7 @@ extern void* D_004A33CC;
 extern "C" bool cFEStateOnlineCharacterSelect_onInputBegin(cFEStateOnlineCharacterSelect* self, cFEVObj_001B1590* obj)
 {
     if (self->mbConfirmed != 0 || D_004A33CC == 0) {
-        return !obj->v06();
+        return !obj->isPrevious();
     }
     return 0;
 }
@@ -11487,7 +11487,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int a1);
+    virtual void setVisible(int a1);
 };
 
 int GetHashValue32(char* str);
@@ -11513,7 +11513,7 @@ extern "C" void func_001B1760(cFEStateOnlineCharacterSelect* self, int player)
     if (self->mpScreen != 0) {
         const char* str = (const char*)cBECharacterInterface_getShortNameByCharacter(cBE_getInterface_Fv(cBE_getBE(), 2), player, 0);
         cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextOpponentSelect));
-        ((cFEVText_001B1760*)text)->v09(1);
+        ((cFEVText_001B1760*)text)->setVisible(1);
         cUIText_setAsciiString(text, str);
     }
 }
@@ -11561,7 +11561,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 /**
@@ -11580,12 +11580,12 @@ extern "C" void func_001B1808(cFEStateOnlineCharacterSelect* self)
     cFEVObj_001B1808* textObj = (cFEVObj_001B1808*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextPlayerName));
     if (textObj != 0) {
         cUIText_setAsciiString((cUIText*)textObj, ((const char*)LobbyMan_mLobbyMan->mPersona));
-        textObj->v09(1);
+        textObj->setVisible(1);
     }
     textObj = (cFEVObj_001B1808*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextChallengerName));
     if (textObj != 0) {
         cUIText_setAsciiString((cUIText*)textObj, ((const char*)LobbyMan_mLobbyMan->mOpponent));
-        textObj->v09(1);
+        textObj->setVisible(1);
     }
     textObj = (cFEVObj_001B1808*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextPlayerRank));
     if (textObj != 0) {
@@ -11593,7 +11593,7 @@ extern "C" void func_001B1808(cFEStateOnlineCharacterSelect* self)
         int name = Loc1B1808(str_kT_OVRCMNRanking);
         usprintf_1B1808(buf, str_pct_s_pct_d_b, name, mgr->mStats.mRank);
         cUIText_setUnicodeString((cUIText*)textObj, buf);
-        textObj->v09(1);
+        textObj->setVisible(1);
     }
     textObj = (cFEVObj_001B1808*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextChallengerRank));
     if (textObj != 0) {
@@ -11601,7 +11601,7 @@ extern "C" void func_001B1808(cFEStateOnlineCharacterSelect* self)
         int name = Loc1B1808(str_kT_OVRCMNRanking);
         usprintf_1B1808(buf, str_pct_s_pct_d_b, name, mgr->mOpponentStats.mRank);
         cUIText_setUnicodeString((cUIText*)textObj, buf);
-        textObj->v09(1);
+        textObj->setVisible(1);
     }
 }
 #endif
@@ -11636,7 +11636,7 @@ public:
     virtual void v08();
     virtual void v09();
     virtual void v10();
-    virtual void v11(const sColor1B1A08& c);
+    virtual void setColour(const sColor1B1A08& c);
 };
 
 // Packed flags word at 0x14 of the UI text object: bits 8..12 hold a 5-bit size.
@@ -11663,7 +11663,7 @@ extern "C" void func_001B1A08(cFEStateOnlineCharacterSelect* self, int up, int h
         if (highlight != 0) {
             frame = (sText1B1A08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_frameChallenger));
             cFEVObj_001B1A08* opponentText = (cFEVObj_001B1A08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextOpponentSelect));
-            opponentText->v11(sColor1B1A08(1.0f, 0.0f, 0.0f, 0.0f));
+            opponentText->setColour(sColor1B1A08(1.0f, 0.0f, 0.0f, 0.0f));
         } else {
             frame = (sText1B1A08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_framePlayer));
         }
@@ -11748,7 +11748,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 /**
@@ -11783,7 +11783,7 @@ extern "C" void func_001B1B98(cFEStateOnlineCharacterSelect* self, int index, in
     }
     cFEVObj_001B1B98* panel = (cFEVObj_001B1B98*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
     if (panel != 0) {
-        panel->v09(show);
+        panel->setVisible(show);
     }
     if (show == 0) {
         return;
@@ -11824,7 +11824,7 @@ extern "C" void func_001B1B98(cFEStateOnlineCharacterSelect* self, int index, in
             int attrValue = stats[i];
             int displayValue = attrValue / 5;
             sprintf(num, str_pct_d_b, displayValue);
-            valueText->v09(1);
+            valueText->setVisible(1);
             cUIText_setAsciiString((cUIText*)valueText, num);
             *(int*)((char*)attrBar + 0x80) = 55;
             cUIProgress_setValue(attrBar, attrValue);
@@ -12172,9 +12172,9 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
     virtual void v10();
-    virtual void v11(const sCol_001B2378& c);
+    virtual void setColour(const sCol_001B2378& c);
 };
 
 /**
@@ -12213,7 +12213,7 @@ extern "C" void func_001B2378(cFEStateChatRoom* vself, int reselect)
         int idx = vself->miMenuScroll[0] + i;
         sprintf(name.c, str_PlayerListItempct_02d, i);
         cFEVObj_001B2378* rowItem = (cFEVObj_001B2378*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(name.c));
-        rowItem->v11(sCol_001B2378(1.0f, 0.0f, 0.0f, 0.0f));
+        rowItem->setColour(sCol_001B2378(1.0f, 0.0f, 0.0f, 0.0f));
         if (idx < n) {
             cBXString_operatorE1(&rowText, func_0025F1E0_p(LobbyMan_mLobbyMan, idx, &flag));
             if (flag != 0) {
@@ -12402,11 +12402,11 @@ extern "C" void func_001B27B0(cFEStateChatRoom* vself, int idx)
         cFEVObj_001B2378* selectIcon = (cFEVObj_001B2378*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_ps2X));
         if (selectText != 0 && selectIcon != 0) {
             if (flag != 0) {
-                selectIcon->v09(0);
-                selectText->v09(0);
+                selectIcon->setVisible(0);
+                selectText->setVisible(0);
             } else {
-                selectIcon->v09(1);
-                selectText->v09(1);
+                selectIcon->setVisible(1);
+                selectText->setVisible(1);
             }
         }
         if (valid && *(int*)(playerName.str - 8) > 0) {
@@ -12612,9 +12612,9 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual void v07(int on);
+    virtual void setFocus(int on);
     virtual void v08(int on);
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 /**
@@ -12636,19 +12636,19 @@ extern "C" void cFEStateChatRoom_onWidgetCreate(cFEStateChatRoom* self, cFEVObj_
     int id = *(int*)(widget + 0x38);
     if (id == GetHashValue32(str_TextRoomName)) {
         self->mpTextRoomName = (cUIText*)obj;
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (id == GetHashValue32(str_TextChatWindowTitle)) {
         cUIText_setUnicodeStringByID((cUIText*)obj, GetHashValue32(str_kT_235MessageHistory));
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (id == GetHashValue32(str_TextPlayerName)) {
-        obj->v09(1);
+        obj->setVisible(1);
         cUIText_setAsciiString((cUIText*)obj, D_004A1408);
     } else if (id == GetHashValue32(str_TextAvailablePlayersTitle)) {
-        obj->v09(1);
+        obj->setVisible(1);
         cUIText_setUnicodeStringByID((cUIText*)obj, GetHashValue32(str_kT_235AvailablePlayers));
     } else if (id == GetHashValue32(str_PlayerListMenu)) {
         *(int*)(widget + 0x14) |= 0x80;
-        obj->v07(1);
+        obj->setFocus(1);
         int n = func_0025F1B0(LobbyMan_mLobbyMan);
         if (n <= 0) {
             cUIMenu_setScrollableMenu(obj, 6);
@@ -12657,7 +12657,7 @@ extern "C" void cFEStateChatRoom_onWidgetCreate(cFEStateChatRoom* self, cFEVObj_
         }
         self->mpMenu[0] = (cUIMenu*)obj;
     } else if (id == GetHashValue32(str_MenuChat)) {
-        obj->v07(1);
+        obj->setFocus(1);
         self->mpMenu[1] = (cUIMenu*)obj;
     } else if (id == GetHashValue32(str_Txt_Select)) {
         cUIText_setUnicodeStringByID((cUIText*)obj, GetHashValue32(str_kT_BTNSelect));
@@ -12831,7 +12831,7 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual void v07(int a1);
+    virtual void setFocus(int a1);
 };
 
 struct sFEObj_001B3490 {
@@ -12862,7 +12862,7 @@ extern "C" int cFEStateChatRoom_onGainTransition(cFEStateChatRoom* self, int bFi
         cUIScrollBar_setScrollVisibile(self->mpSlider2, 0);
         for (i = 0; i < 2; i++) {
             if (((cFEVObj_001B3490**)&self->mpMenu[0])[i] != 0) {
-                ((cFEVObj_001B3490**)&self->mpMenu[0])[i]->v07(1);
+                ((cFEVObj_001B3490**)&self->mpMenu[0])[i]->setFocus(1);
             }
         }
         func_001B3978(self, LobbyMan_mLobbyMan->mPersona);
@@ -13277,7 +13277,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 struct sInfo1B3BF0 {
@@ -13320,15 +13320,15 @@ extern "C" void func_001B3BF0(cFEStateChatRoom* feStateChatRoom)
         sprintf(buf, str_PlayerListItempct_02d, i);
         if (idx < n) {
             int userListFlag = func_0025F248(LobbyMan_mLobbyMan, idx);
-            self->items[i]->v09(1);
+            self->items[i]->setVisible(1);
             if (userListFlag != 0) {
-                self->items[i]->v09(0);
+                self->items[i]->setVisible(0);
             } else {
                 func_0025F288(LobbyMan_mLobbyMan, idx, &info);
                 func_001AAD50(self->screen, i, info.f10);
             }
         } else {
-            self->items[i]->v09(0);
+            self->items[i]->setVisible(0);
         }
     }
 }
@@ -13371,9 +13371,9 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
     virtual void v10();
-    virtual void v11(const sCol1B3D20& c);
+    virtual void setColour(const sCol1B3D20& c);
 };
 
 static inline cFEVObj_001B3D20* Get1B3D20(void* self, char* name)
@@ -13412,14 +13412,14 @@ extern "C" void func_001B3D20(void* self, int idx, int on)
     int i;
     for (i = 0; i < 6; i++) {
         sprintf(name, str_PlayerListItempct_02d, i);
-        Get1B3D20(self, name)->v11(sCol1B3D20(1.0f, 0.0f, 0.0f, 0.0f));
+        Get1B3D20(self, name)->setColour(sCol1B3D20(1.0f, 0.0f, 0.0f, 0.0f));
     }
     cFEVObj_001B3D20* hl = Get1B3D20(self, str_hl);
     if (hl == 0) {
         return;
     }
     if (on == 0) {
-        hl->v09(0);
+        hl->setVisible(0);
         return;
     }
     sprintf(name, str_whitebarpct_02d, idx);
@@ -13432,9 +13432,9 @@ extern "C" void func_001B3D20(void* self, int idx, int on)
     pos.r += 2.0f;
     pos.g += 3.0f;
     *(sVec3_1B3D20*)((char*)hl + 0x44) = *(sVec3_1B3D20*)&pos;
-    hl->v09(1);
+    hl->setVisible(1);
     func_001B27B0((cFEStateChatRoom*)self, *(int*)((char*)sel + 0x18));
-    sel->v11(sCol1B3D20(1.0f, 1.0f, 1.0f, 1.0f));
+    sel->setColour(sCol1B3D20(1.0f, 1.0f, 1.0f, 1.0f));
 }
 #endif
 
@@ -13444,7 +13444,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_cFEStateNetConfig);
 class cFEVObj_001B3F78 {
 public:
     virtual void v01();
-    virtual void v02();
+    virtual void Init();
 };
 
 extern void* cFEStateNetConfig_vtbl[];
@@ -13488,7 +13488,7 @@ extern "C" void* cFEStateNetConfig_cFEStateNetConfig(cFEStateNetConfig* mem, int
     mem->mHashName = 49;
     cFEVObj_001B3F78* memCard = cMemCard_CreateInstance();
     D_004A1B78 = memCard;
-    memCard->v02();
+    memCard->Init();
     mem->miWaitFrames = -1;
     return ((void*)mem);
 }
@@ -13776,9 +13776,9 @@ public:
     virtual void v50();
     virtual void v51();
     virtual void v52();
-    virtual int v53();
+    virtual int IsAvailable1();
     virtual void v54();
-    virtual int v55();
+    virtual int IsFormatted1();
 };
 
 /**
@@ -13792,8 +13792,8 @@ public:
  */
 extern "C" void func_001B43A8(cFEStateNetConfig* self)
 {
-    int cardAvailable = ((cFEVObj_001B43A8*)D_004A1B78)->v53();
-    if (((cFEVObj_001B43A8*)D_004A1B78)->v55() == 0) {
+    int cardAvailable = ((cFEVObj_001B43A8*)D_004A1B78)->IsAvailable1();
+    if (((cFEVObj_001B43A8*)D_004A1B78)->IsFormatted1() == 0) {
         self->miState = 0;
         func_001B5068(self, -1);
         func_001B4888(self, 2112, 20, -1);
@@ -13836,7 +13836,7 @@ extern "C" void func_001B4470(cFEStateNetConfig* self_)
 {
     int k;
     int result;
-    if (((cFEVObj_001B43A8*)D_004A1B78)->v53() == 0) {
+    if (((cFEVObj_001B43A8*)D_004A1B78)->IsAvailable1() == 0) {
         k = D_004A1B80;
         if (k == 0) {
             D_004A1B80 = 1;
@@ -13854,7 +13854,7 @@ extern "C" void func_001B4470(cFEStateNetConfig* self_)
             }
         }
     } else {
-        if (((cFEVObj_001B43A8*)D_004A1B78)->v55() == 0) {
+        if (((cFEVObj_001B43A8*)D_004A1B78)->IsFormatted1() == 0) {
             k = D_004A1B80;
                 if (k == 0) {
                 self_->miResult = -200;
@@ -13968,7 +13968,7 @@ public:
     virtual void v50();
     virtual void v51();
     virtual void v52();
-    virtual int v53();
+    virtual int IsAvailable1();
 };
 
 /**
@@ -13983,7 +13983,7 @@ public:
  */
 extern "C" void func_001B45E8(void* self)
 {
-    if (((cFEVObj_001B45E8*)D_004A1B78)->v53() == 0) {
+    if (((cFEVObj_001B45E8*)D_004A1B78)->IsAvailable1() == 0) {
         *(int*)((char*)self + 0x708) = 0;
         func_001B5068((cFEStateNetConfig*)self, -1);
         char* buf = (char*)self + 0x71C;
@@ -14283,7 +14283,7 @@ public:
     virtual void v17();
     virtual void v18();
     virtual void v19();
-    virtual void v20(void* out);
+    virtual void getSize(void* out);
 };
 
 /**
@@ -14329,7 +14329,7 @@ extern "C" void func_001B4CD8(cFEStateNetConfig* self)
             return;
         }
     } else {
-        ((cFEVObj_001B4CD8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_LBSettings)))->v20(&pos);
+        ((cFEVObj_001B4CD8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_LBSettings)))->getSize(&pos);
         scale = *(sVec3_001B4CD8*)((char*)self->mpLBSettings + 0x50);
         if (self->miNumSettings > 4) {
             self->miNumSettings = 4;
@@ -14425,10 +14425,10 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
-    virtual void v09(int on);
+    virtual void setStatic(int on);
+    virtual void setVisible(int on);
     virtual void v10();
-    virtual void v11(const sCol1B5068& c);
+    virtual void setColour(const sCol1B5068& c);
 };
 
 /**
@@ -14445,23 +14445,23 @@ extern "C" void func_001B5068(cFEStateNetConfig* self, int configCount)
     if (configCount <= 0) {
         cUIListBox_deleteAllEntries(((cFEVObj_001B5068*)self->mpLBAdapters));
         cUIListBox_deleteAllEntries(((cFEVObj_001B5068*)self->mpLBSettings));
-        ((cFEVObj_001B5068*)self->mpLBSettings)->v08(1);
-        ((cFEVObj_001B5068*)self->mpLBAdapters)->v08(1);
-        ((cFEVObj_001B5068*)self->mpPairSettings)->v08(1);
-        ((cFEVObj_001B5068*)self->mpLBSettings)->v09(0);
-        ((cFEVObj_001B5068*)self->mpLBAdapters)->v09(0);
-        ((cFEVObj_001B5068*)self->mpConfigRectangle)->v09(0);
-        ((cFEVObj_001B5068*)self->mpNoConfiguration)->v09(1);
-        ((cFEVObj_001B5068*)self->mpNoConfiguration)->v11(D_004C66C8);
+        ((cFEVObj_001B5068*)self->mpLBSettings)->setStatic(1);
+        ((cFEVObj_001B5068*)self->mpLBAdapters)->setStatic(1);
+        ((cFEVObj_001B5068*)self->mpPairSettings)->setStatic(1);
+        ((cFEVObj_001B5068*)self->mpLBSettings)->setVisible(0);
+        ((cFEVObj_001B5068*)self->mpLBAdapters)->setVisible(0);
+        ((cFEVObj_001B5068*)self->mpConfigRectangle)->setVisible(0);
+        ((cFEVObj_001B5068*)self->mpNoConfiguration)->setVisible(1);
+        ((cFEVObj_001B5068*)self->mpNoConfiguration)->setColour(D_004C66C8);
         cUIMenu_setSelectedByIndex(self->mpMenuConfig, 0);
     } else {
-        ((cFEVObj_001B5068*)self->mpPairSettings)->v08(0);
-        ((cFEVObj_001B5068*)self->mpLBSettings)->v08(0);
-        ((cFEVObj_001B5068*)self->mpLBAdapters)->v08(0);
-        ((cFEVObj_001B5068*)self->mpLBSettings)->v09(1);
-        ((cFEVObj_001B5068*)self->mpLBAdapters)->v09(1);
-        ((cFEVObj_001B5068*)self->mpConfigRectangle)->v09(1);
-        ((cFEVObj_001B5068*)self->mpNoConfiguration)->v09(0);
+        ((cFEVObj_001B5068*)self->mpPairSettings)->setStatic(0);
+        ((cFEVObj_001B5068*)self->mpLBSettings)->setStatic(0);
+        ((cFEVObj_001B5068*)self->mpLBAdapters)->setStatic(0);
+        ((cFEVObj_001B5068*)self->mpLBSettings)->setVisible(1);
+        ((cFEVObj_001B5068*)self->mpLBAdapters)->setVisible(1);
+        ((cFEVObj_001B5068*)self->mpConfigRectangle)->setVisible(1);
+        ((cFEVObj_001B5068*)self->mpNoConfiguration)->setVisible(0);
         cUIMenu_setSelectedByIndex(self->mpMenuConfig, 1);
     }
 }
@@ -14523,10 +14523,10 @@ public:
     virtual void v03();
     virtual void v04();
     virtual void v05();
-    virtual void v06(int on);
+    virtual void setEnabled(int on);
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
     virtual void v10();
     virtual void v11();
     virtual void v12();
@@ -14541,7 +14541,7 @@ public:
     virtual void v21();
     virtual void v22();
     virtual void v23();
-    virtual void v24(int on);
+    virtual void setUseStaticColour(int on);
 };
 
 static inline int IsHash1B52C8(int id, char* name) { return id == GetHashValue32(name); }
@@ -14562,24 +14562,24 @@ extern "C" void cFEStateNetConfig_onWidgetCreate(cFEStateNetConfig* self, cUITex
     cFEVObj_001B52C8* obj = (cFEVObj_001B52C8*)item;
     if (IsHash1B52C8(item->mHashName, str_TextCreateConfig)) {
         item->mMiscData = 1;
-        obj->v09(1);
-        obj->v06(1);
+        obj->setVisible(1);
+        obj->setEnabled(1);
     } else if (IsHash1B52C8(item->mHashName, str_TextTitle)) {
         item->mMiscData = -1;
-        obj->v09(1);
-        obj->v06(0);
+        obj->setVisible(1);
+        obj->setEnabled(0);
     } else if (IsHash1B52C8(item->mHashName, str_TextSettings)) {
         item->mMiscData = -1;
-        obj->v09(0);
-        obj->v06(0);
+        obj->setVisible(0);
+        obj->setEnabled(0);
     } else if (IsHash1B52C8(item->mHashName, str_TextInstructions)) {
         item->mMiscData = -1;
-        obj->v09(1);
-        obj->v06(0);
+        obj->setVisible(1);
+        obj->setEnabled(0);
     } else if (IsHash1B52C8(item->mHashName, str_LBSettings)) {
         item->mMiscData = 100;
         self->mpLBSettings = (cUIListBox*)item;
-        obj->v24(1);
+        obj->setUseStaticColour(1);
     } else if (IsHash1B52C8(item->mHashName, str_configrectangle1)) {
         self->mpConfigRectangle = (cUIThing*)item;
     } else if (IsHash1B52C8(item->mHashName, str_NoConfiguration)) {
@@ -14587,7 +14587,7 @@ extern "C" void cFEStateNetConfig_onWidgetCreate(cFEStateNetConfig* self, cUITex
     } else if (IsHash1B52C8(item->mHashName, str_LBAdapters)) {
         item->mMiscData = 101;
         self->mpLBAdapters = (cUIListBox*)item;
-        obj->v24(1);
+        obj->setUseStaticColour(1);
     } else if (IsHash1B52C8(item->mHashName, str_MenuConfig)) {
         self->mpMenuConfig = (cUIMenu*)item;
         item->mMiscData = -1;
@@ -14661,7 +14661,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
+    virtual void setStatic(int on);
 };
 
 static inline void* GetSession_001B55B0()
@@ -14696,7 +14696,7 @@ extern "C" void func_001B55B0(cFEStateNetConfig* self, void* popup, unsigned int
     case 20: {
         cFEVObj_001B55B0* pairSettings = (cFEVObj_001B55B0*)self->mpPairSettings;
         self->unk_6D8 = 1;
-        pairSettings->v08(0);
+        pairSettings->setStatic(0);
         func_00261408(GetSession_001B55B0());
         func_0025B800(LobbyMan_mLobbyMan);
         func_002636F0(func_002591B8(), 0);
@@ -14742,7 +14742,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int a1);
+    virtual void setStatic(int a1);
 };
 
 static inline void* GetSession_001B5740()
@@ -14774,7 +14774,7 @@ extern "C" void func_001B5740(cFEStateNetConfig* self, void* popup, int event)
         func_00261408(GetSession_001B5740());
         func_0025B800(LobbyMan_mLobbyMan);
         func_002636F0(func_002591B8(), 0);
-        ((cFEVObj_001B5740*)self->mpPairSettings)->v08(0);
+        ((cFEVObj_001B5740*)self->mpPairSettings)->setStatic(0);
         cFEStateNet_onPopupEvent(self, popup, event);
     } else {
         cFEStateNet_onPopupEvent(self, popup, event);
@@ -14827,7 +14827,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
+    virtual void setStatic(int on);
 };
 
 /**
@@ -14859,7 +14859,7 @@ extern "C" void func_001B5830(cFEStateNetConfig* self, void* popup, unsigned int
         func_0025B800(LobbyMan_mLobbyMan);
         func_002636F0(func_002591B8(), 0);
         self->unk_6D8 = 1;
-        ((cFEVObj_001B5830*)self->mpPairSettings)->v08(0);
+        ((cFEVObj_001B5830*)self->mpPairSettings)->setStatic(0);
         cFEStateNet_onPopupEvent_v(self, popup, 20);
         break;
     case 22:
@@ -14990,12 +14990,12 @@ public:
     virtual void v03();
     virtual void v04();
     virtual void v05();
-    virtual void v06(int on);
+    virtual void setEnabled(int on);
     virtual void v07();
     virtual void v08();
     virtual void v09();
     virtual void v10();
-    virtual void v11(const sColor1B5BD8& c);
+    virtual void setColour(const sColor1B5BD8& c);
 };
 
 struct sFlags1B5BD8 {
@@ -15022,8 +15022,8 @@ extern "C" void func_001B5BD8(cFEStateNetConfig* self, void* popup, unsigned int
         func_00256088();
         cFEVObj_001B5BD8* createConfigText = (cFEVObj_001B5BD8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextCreateConfig));
         if (createConfigText != 0) {
-            createConfigText->v06(0);
-            createConfigText->v11(sColor1B5BD8(1.0f, 0.5f, 0.5f, 0.5f));
+            createConfigText->setEnabled(0);
+            createConfigText->setColour(sColor1B5BD8(1.0f, 0.5f, 0.5f, 0.5f));
         }
         ((sFlags1B5BD8*)&self->mAttrState)->mode = 7;
         break;
@@ -15053,7 +15053,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int a1);
+    virtual void setStatic(int a1);
 };
 
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
@@ -15070,7 +15070,7 @@ extern "C" void func_001B5CF8(cFEStateNetConfig* self, void* popup, int event)
 {
     if (event == 22) {
         cFEStateNet_onPopupEvent(self, popup, event);
-        ((cFEVObj_001B5CF8*)self->mpPairSettings)->v08(0);
+        ((cFEVObj_001B5CF8*)self->mpPairSettings)->setStatic(0);
     } else {
         cFEStateNet_onPopupEvent(self, popup, event);
     }
@@ -15304,7 +15304,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
+    virtual void setStatic(int on);
 };
 
 static inline int IsHash1B60A8(int id, char* name) { return id == GetHashValue32(name); }
@@ -15334,7 +15334,7 @@ extern "C" void cFEStateNetConfig_onWidgetEvent(cFEStateNetConfig* self, int pWi
         int miscData = *(int*)(obj + 0x18);
         switch (miscData) {
         case 0:
-            ((cFEVObj_001B60A8*)self->mpPairSettings)->v08(1);
+            ((cFEVObj_001B60A8*)self->mpPairSettings)->setStatic(1);
             func_001B4198(self);
             break;
         case 1: {
@@ -15516,7 +15516,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 /**
@@ -15535,7 +15535,7 @@ extern "C" void cFEStateAuthDNAS_onCreateScreen(cFEStateAuthDNAS* self)
         cUIScreen_playFrame(screen, 0, 0);
         cFEVObj_001B63E8* widget = (cFEVObj_001B63E8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_dnasGroup));
         if (widget != 0) {
-            widget->v09(0);
+            widget->setVisible(0);
         }
     }
     self->mpAuth = func_002561B8(cMemMan_alloc(2640, str_cFEStateAuthDNASCreate, 0x100, 0));
@@ -15586,7 +15586,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 static inline int IsHash1B65C0(int id, char* name) { return id == GetHashValue32(name); }
@@ -15603,16 +15603,16 @@ extern "C" void cFEStateAuthDNAS_onWidgetCreate(cFEStateAuthDNAS* self, cUIText*
     cFEVObj_001B65C0* obj = (cFEVObj_001B65C0*)text;
     if (IsHash1B65C0(text->mHashName, str_TextCancel)) {
         self->mpTextCancel = text;
-        obj->v09(0);
+        obj->setVisible(0);
     } else if (IsHash1B65C0(text->mHashName, str_TextAuth)) {
         self->mpTextAuth = text;
         cUIText_setUnicodeStringByID(self->mpTextAuth, GetHashValue32(str_kT_ovrcmnloading));
     } else if (IsHash1B65C0(text->mHashName, str_XButton)) {
         self->mpXButton = (cUIThing*)text;
-        obj->v09(0);
+        obj->setVisible(0);
     } else if (IsHash1B65C0(text->mHashName, str_submitrect)) {
         self->mpSubmitRect = (cUIThing*)text;
-        obj->v09(0);
+        obj->setVisible(0);
     }
 }
 #endif
@@ -15627,8 +15627,8 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual int v05();
-    virtual int v06();
+    virtual int isNext();
+    virtual int isPrevious();
 };
 
 /**
@@ -15642,7 +15642,7 @@ public:
 extern "C" int cFEStateAuthDNAS_onInputBegin(cFEStateAuthDNAS* self, cFEVObj_001B66B8* obj)
 {
     if (self->miState == 2) {
-        if (obj->v05() || obj->v06()) {
+        if (obj->isNext() || obj->isPrevious()) {
             *(int*)((char*)self->mpAuth + 0x14) = 1;
             self->miState = 4;
         }
@@ -15680,7 +15680,7 @@ public:
     virtual int v21(int, int);
     virtual int v22(int, int);
     virtual int v23(int, int);
-    virtual int v24(int, int);
+    virtual int handleEvent(int, int);
 };
 
 /**
@@ -15696,7 +15696,7 @@ public:
  */
 extern "C" int cFEStateAuthDNAS_handleEvent(cFEStateAuthDNAS* self, int msg, int pParam)
 {
-    return ((cFEStateAuthDNAS_handleEvent_cObj*)self->mpParentState)->v24(msg, pParam);
+    return ((cFEStateAuthDNAS_handleEvent_cObj*)self->mpParentState)->handleEvent(msg, pParam);
 }
 #endif
 
@@ -15749,7 +15749,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
     virtual void v10();
     virtual void v11();
     virtual void v12();
@@ -15757,7 +15757,7 @@ public:
     virtual void v14();
     virtual void v15();
     virtual void v16();
-    virtual void v17(void* owner, int msg);
+    virtual void onPopupEvent(void* owner, int msg);
 };
 
 static inline int IsReady_001B6798(int* d) { return *d >= 3; }
@@ -15778,14 +15778,14 @@ extern "C" void cFEStateAuthDNAS_onUpdate(cFEStateAuthDNAS* self)
     switch (self->miState) {
     case 1:
         if (IsReady_001B6798((int*)self->mpAuth)) {
-            ((cFEVObj_001B6798*)self->mpTextCancel)->v09(1);
-            ((cFEVObj_001B6798*)self->mpXButton)->v09(1);
-            ((cFEVObj_001B6798*)self->mpSubmitRect)->v09(1);
-            ((cFEVObj_001B6798*)self->mpTextAuth)->v09(1);
+            ((cFEVObj_001B6798*)self->mpTextCancel)->setVisible(1);
+            ((cFEVObj_001B6798*)self->mpXButton)->setVisible(1);
+            ((cFEVObj_001B6798*)self->mpSubmitRect)->setVisible(1);
+            ((cFEVObj_001B6798*)self->mpTextAuth)->setVisible(1);
             cUIText_setUnicodeStringByID(self->mpTextAuth, GetHashValue32(str_kT_205Authenticating));
             cFEVObj_001B6798* widget = (cFEVObj_001B6798*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_dnasGroup));
             if (widget != 0) {
-                widget->v09(1);
+                widget->setVisible(1);
             }
             self->miState = 2;
             func_002562D0(self->mpAuth);
@@ -15821,15 +15821,15 @@ extern "C" void cFEStateAuthDNAS_onUpdate(cFEStateAuthDNAS* self)
             USTR_copy(*(void**)(parentState + 0x710), errorText1);
             USTR_copy(*(void**)(parentState + 0x714), errorText2);
             USTR_copy(*(void**)(parentState + 0x718), errorText3);
-            ((cFEVObj_001B6798*)self->mpParentState)->v17(self, 0x10);
+            ((cFEVObj_001B6798*)self->mpParentState)->onPopupEvent(self, 0x10);
         } else {
-            ((cFEVObj_001B6798*)self->mpParentState)->v17(self, 0xF);
+            ((cFEVObj_001B6798*)self->mpParentState)->onPopupEvent(self, 0xF);
         }
         break;
     }
     case 4:
         if (IsDone_001B6798((int*)self->mpAuth)) {
-            ((cFEVObj_001B6798*)self->mpParentState)->v17(self, 20);
+            ((cFEVObj_001B6798*)self->mpParentState)->onPopupEvent(self, 20);
         }
         break;
     }
@@ -15953,7 +15953,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int a1);
+    virtual void setVisible(int a1);
 };
 
 int GetHashValue32(char* str);
@@ -15981,7 +15981,7 @@ extern "C" void cFEStateAuthDNASError_onWidgetCreate(cFEStateAuthDNASError* self
     } else if (IsHash1B6BB8(*(int*)((char*)obj + 0x38), str_Title)) {
         self->mpTitle = (cUIText*)obj;
     } else if (IsHash1B6BB8(*(int*)((char*)obj + 0x38), str_dnasGroup)) {
-        ((cFEVText_001B6BB8*)obj)->v09(1);
+        ((cFEVText_001B6BB8*)obj)->setVisible(1);
     } else if (IsHash1B6BB8(*(int*)((char*)obj + 0x38), str_MenuDNAS)) {
         *(int*)((char*)obj + 0x90) |= 8;
     }
@@ -16013,7 +16013,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 static inline void PlayLabel_001B6C98(void* self, char* label)
@@ -16038,18 +16038,18 @@ extern "C" int cFEStateAuthDNASError_onGainTransition(cFEStateAuthDNASError* sel
     if (on) {
         if (strlen1(self->mpustrFooter) == 0) {
             PlayLabel_001B6C98(self, str_short);
-            ((cFEVObj_001B6C98*)self->mpFooter)->v09(0);
+            ((cFEVObj_001B6C98*)self->mpFooter)->setVisible(0);
         } else {
             PlayLabel_001B6C98(self, str_full);
             cUIText_setUnicodeStringWrap(self->mpFooter, self->mpustrFooter);
         }
         if (strlen1(self->mpustrBody) == 0) {
-            ((cFEVObj_001B6C98*)self->mpBody)->v09(0);
+            ((cFEVObj_001B6C98*)self->mpBody)->setVisible(0);
         } else {
             cUIText_setUnicodeStringWrap(self->mpBody, self->mpustrBody);
         }
         if (strlen1(self->mpustrTitle) == 0) {
-            ((cFEVObj_001B6C98*)self->mpTitle)->v09(0);
+            ((cFEVObj_001B6C98*)self->mpTitle)->setVisible(0);
         } else {
             cUIText_setUnicodeStringWrap(self->mpTitle, self->mpustrTitle);
         }
@@ -16088,7 +16088,7 @@ public:
     virtual int v21(int, int);
     virtual int v22(int, int);
     virtual int v23(int, int);
-    virtual int v24(int, int);
+    virtual int handleEvent(int, int);
 };
 
 /**
@@ -16104,7 +16104,7 @@ public:
  */
 extern "C" int cFEStateAuthDNASError_handleEvent(cFEStateAuthDNASError* self, int msg, int pParam)
 {
-    return ((cFEStateAuthDNASError_handleEvent_cObj*)self->mpParentState)->v24(msg, pParam);
+    return ((cFEStateAuthDNASError_handleEvent_cObj*)self->mpParentState)->handleEvent(msg, pParam);
 }
 #endif
 
@@ -16131,7 +16131,7 @@ public:
     virtual void v14();
     virtual void v15();
     virtual void v16();
-    virtual void v17(void* sender, int msg);
+    virtual void onPopupEvent(void* sender, int msg);
 };
 
 extern "C" void cFEStateNet_onWidgetEvent(cFEStateNet* self, int a1, int msg);
@@ -16149,7 +16149,7 @@ extern "C" void cFEStateAuthDNASError_onWidgetEvent(cFEStateAuthDNASError* self,
     switch (msg) {
     case 5:
     case 6:
-        ((cFEVObj_001B6E40*)self->mpParentState)->v17(((cFEStateNet*)self), 0xF);
+        ((cFEVObj_001B6E40*)self->mpParentState)->onPopupEvent(((cFEStateNet*)self), 0xF);
         break;
     case 7:
     case 8:
@@ -17390,7 +17390,7 @@ public:
     virtual void v14();
     virtual void v15();
     virtual void v16();
-    virtual void v17(void* owner, int v);
+    virtual void onPopupEvent(void* owner, int v);
 };
 
 /**
@@ -17444,7 +17444,7 @@ extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, 
         }
         case 22:
             cFEStateNet_onPopupEvent_v(self, w, 22);
-            ((cListener_001B84D8*)self->mpParentState)->v17(self, self->miResult);
+            ((cListener_001B84D8*)self->mpParentState)->onPopupEvent(self, self->miResult);
             break;
         default:
             cFEStateNet_onPopupEvent_v(self, w, msg);
@@ -17473,7 +17473,7 @@ extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, 
             cFEStateNet_onPopupEvent_v(self, w, 22);
             result = self->miResult;
             if (result != 0) {
-                ((cListener_001B84D8*)self->mpParentState)->v17(self, result);
+                ((cListener_001B84D8*)self->mpParentState)->onPopupEvent(self, result);
             }
             break;
         default:
@@ -17499,7 +17499,7 @@ extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, 
             cFEStateNet_onPopupEvent_v(self, w, 22);
             result = self->miResult;
             if (result != 0) {
-                ((cListener_001B84D8*)self->mpParentState)->v17(self, result);
+                ((cListener_001B84D8*)self->mpParentState)->onPopupEvent(self, result);
             }
             break;
         default:
@@ -17526,7 +17526,7 @@ extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, 
             cFEStateNet_onPopupEvent_v(self, w, 22);
             result = self->miResult;
             if (result != 0) {
-                ((cListener_001B84D8*)self->mpParentState)->v17(self, result);
+                ((cListener_001B84D8*)self->mpParentState)->onPopupEvent(self, result);
             }
             break;
         default:
@@ -17541,7 +17541,7 @@ extern "C" void cFEStateNetAccountMem_onPopupEvent(cFEStateNetAccountMem* self, 
     case 29:
         if (msg == 22) {
             cFEStateNet_onPopupEvent_v(self, w, 22);
-            ((cListener_001B84D8*)self->mpParentState)->v17(self, 0xF);
+            ((cListener_001B84D8*)self->mpParentState)->onPopupEvent(self, 0xF);
         } else {
             cFEStateNet_onPopupEvent_v(self, w, msg);
         }
@@ -17582,7 +17582,7 @@ public:
     virtual int v21(int, int);
     virtual int v22(int, int);
     virtual int v23(int, int);
-    virtual int v24(int, int);
+    virtual int handleEvent(int, int);
 };
 
 /**
@@ -17598,7 +17598,7 @@ public:
  */
 extern "C" int cFEStateNetAccountMem_handleEvent(cFEStateNetAccountMem* self, int msg, int pParam)
 {
-    return ((cFEStateNetAccountMem_handleEvent_cObj*)self->mpParentState)->v24(msg, pParam);
+    return ((cFEStateNetAccountMem_handleEvent_cObj*)self->mpParentState)->handleEvent(msg, pParam);
 }
 #endif
 
@@ -17795,7 +17795,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
+    virtual void setStatic(int on);
     virtual void v09();
     virtual void v10();
     virtual void v11();
@@ -17812,7 +17812,7 @@ public:
     virtual void v22();
     virtual void v23();
     virtual void v24();
-    virtual void v25(int on);
+    virtual void setUseStaticColour(int on);
 };
 
 static inline int IsHash1B8AA0(int id, char* name) { return id == GetHashValue32(name); }
@@ -17837,15 +17837,15 @@ extern "C" void cFEStateCreateStep1_onWidgetCreate(cFEStateCreateStep1* self, cU
         }
     } else if (IsHash1B8AA0(text->mHashName, str_StaticAccountName) || IsHash1B8AA0(text->mHashName, str_EnterAccountName)) {
         if (self->mbEditAccount == 0) {
-            obj->v25(1);
-            obj->v08(1);
+            obj->setUseStaticColour(1);
+            obj->setStatic(1);
         }
     } else if (IsHash1B8AA0(text->mHashName, str_LBInformYesNo) || IsHash1B8AA0(text->mHashName, str_LBShareInfoYesNo)) {
         func_001A9A18((cFEStateNet*)self, (cUIListBox_001A9A18*)text, 1);
     } else if (IsHash1B8AA0(text->mHashName, str_StaticContinue)) {
         if (self->mbEditAccount != 0) {
-            obj->v25(1);
-            obj->v08(1);
+            obj->setUseStaticColour(1);
+            obj->setStatic(1);
         } else {
             cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_CMNSubmit));
         }
@@ -18503,7 +18503,7 @@ public:
     virtual void v17();
     virtual void v18();
     virtual void v19();
-    virtual void v20(sRect1B9950* out);
+    virtual void getSize(sRect1B9950* out);
 };
 
 static inline void Measure1B9950(cUIText* text, const char* s, sRect1B9950* out)
@@ -18527,7 +18527,7 @@ extern "C" void func_001B9950(cFEStateCreateStep1* self, cUIText* text, char* st
     int cut = 0;
     sVec3_1B9950 scale = *(sVec3_1B9950*)&text->mScale;
     sRect1B9950 box;
-    ((cFEVObj_001B9950*)text)->v20(&box);
+    ((cFEVObj_001B9950*)text)->getSize(&box);
     char* font = cUIText_getFont(text);
     float sx = scale.x;
     float sy = scale.y;
@@ -19869,7 +19869,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int a1);
+    virtual void setVisible(int a1);
 };
 
 int GetHashValue32(char* str);
@@ -19897,7 +19897,7 @@ extern "C" void func_001BB520(cFEStateCreateStep2* self, void* box, int flag)
     cUIListBox_addEntryByStringID(box, GetHashValue32(str_kT_CMNFemale), 1);
     cUIListBox_getEntryByData(box, flag == 0, &out);
     cUIListBox_setCurrentEntryByIndex(box, out);
-    ((cFEVBox_001BB520*)box)->v09(1);
+    ((cFEVBox_001BB520*)box)->setVisible(1);
 }
 #endif
 
@@ -19933,7 +19933,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 /**
@@ -19965,7 +19965,7 @@ extern "C" void func_001BB5D0(cFEStateCreateStep2* self, void* box, int ignored)
     cUIListBox_getEntryByData(box, 1, &out);
     cUIListBox_setCurrentEntryByIndex(box, out);
     cUIListBox_setCurrentEntryByIndex(box, 1);
-    ((cFEVObj_001BB5D0*)box)->v09(1);
+    ((cFEVObj_001BB5D0*)box)->setVisible(1);
 }
 #endif
 
@@ -19983,7 +19983,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int a1);
+    virtual void setVisible(int a1);
 };
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -20012,7 +20012,7 @@ extern "C" void func_001BB798(cFEStateCreateStep2* self, void* box, int value)
     sprintf(buf, str_pct_d_b, value);
     cUIListBox_setEntryByAsciiString(box, 0, buf, 0);
     cUIListBox_setCurrentEntryByIndex(box, (unsigned char)(value - 108));
-    ((cFEVBox_001BB798*)box)->v09(1);
+    ((cFEVBox_001BB798*)box)->setVisible(1);
 }
 #endif
 
@@ -20040,7 +20040,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 /**
@@ -20075,7 +20075,7 @@ extern "C" void func_001BB840(cFEStateCreateStep2* self, void* box, int month, i
     idx = 0;
     cUIListBox_getEntryByData(box, sel, &idx);
     cUIListBox_setCurrentEntryByIndex(box, idx);
-    ((cFEVObj_001BB840*)box)->v09(1);
+    ((cFEVObj_001BB840*)box)->setVisible(1);
 }
 #endif
 
@@ -20651,7 +20651,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int a1);
+    virtual void setStatic(int a1);
 };
 
 
@@ -20681,10 +20681,10 @@ extern "C" void func_001BC400(cFEStateCreateDuplicate* self)
             tLobbyAccount* names = self->mpAccount;
             if (i < names->mNumNameOptions) {
                 cUIText_setAsciiString(text, ((char**)((char*)&names->mNameOptions))[i]);
-                ((cFEVText_001BC400*)text)->v08(0);
+                ((cFEVText_001BC400*)text)->setStatic(0);
             } else {
                 cUIText_setAsciiString(text, D_004A1408);
-                ((cFEVText_001BC400*)text)->v08(1);
+                ((cFEVText_001BC400*)text)->setStatic(1);
             }
         }
     }
@@ -21275,9 +21275,9 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual void v07(int on);
+    virtual void setFocus(int on);
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 /**
@@ -21302,7 +21302,7 @@ extern "C" void cFEStateLobbyMenu_onWidgetCreate(cFEStateLobbyMenu* self, cFEVOb
     } else if (id == GetHashValue32(str_MenuPlayers)) {
         self->mpMenuPlayers = (cUIMenu*)obj;
         cUIMenu_setInputMap(obj, 1);
-        ((cFEVObj_001BCE38*)self->mpMenuPlayers)->v07(1);
+        ((cFEVObj_001BCE38*)self->mpMenuPlayers)->setFocus(1);
         cUIMenu_setScrollableMenu(self->mpMenuPlayers, 1);
         self->mpMenuPlayers->mAttr &= ~0x80;
         self->mpMenuPlayers->mAttr |= 1;
@@ -21327,16 +21327,16 @@ extern "C" void cFEStateLobbyMenu_onWidgetCreate(cFEStateLobbyMenu* self, cFEVOb
         *(int*)(widget + 0x18) = 3;
     } else if (id == GetHashValue32(str_ArrowBeginner)) {
         self->mpChannelArrow[0] = (cUIThing*)obj;
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (id == GetHashValue32(str_ArrowVoice)) {
         self->mpChannelArrow[1] = (cUIThing*)obj;
-        obj->v09(0);
+        obj->setVisible(0);
     } else if (id == GetHashValue32(str_ArrowAdvanced)) {
         self->mpChannelArrow[2] = (cUIThing*)obj;
-        obj->v09(0);
+        obj->setVisible(0);
     } else if (id == GetHashValue32(str_ArrowElite)) {
         self->mpChannelArrow[3] = (cUIThing*)obj;
-        obj->v09(0);
+        obj->setVisible(0);
     } else if (id == GetHashValue32(str_player_up)) {
         self->mpPlayerUp = (cUIThing*)obj;
     } else if (id == GetHashValue32(str_player_down)) {
@@ -21355,16 +21355,16 @@ extern "C" void cFEStateLobbyMenu_onWidgetCreate(cFEStateLobbyMenu* self, cFEVOb
         *(int*)(widget + 0x14) &= ~1;
     } else if (id == GetHashValue32(str_LockBeginner)) {
         self->mpChannelLock[0] = (cUIThing*)obj;
-        obj->v09(0);
+        obj->setVisible(0);
     } else if (id == GetHashValue32(str_LockVoice)) {
         self->mpChannelLock[1] = (cUIThing*)obj;
-        obj->v09(0);
+        obj->setVisible(0);
     } else if (id == GetHashValue32(str_LockAdvanced)) {
         self->mpChannelLock[2] = (cUIThing*)obj;
-        obj->v09(0);
+        obj->setVisible(0);
     } else if (id == GetHashValue32(str_LockElite)) {
         self->mpChannelLock[3] = (cUIThing*)obj;
-        obj->v09(0);
+        obj->setVisible(0);
     } else {
         void** playerTextSlot = (void**)(((char*)self) + 0x6D8);
         int i;
@@ -22171,7 +22171,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int a1);
+    virtual void setVisible(int a1);
 };
 
 struct sFESlots1BDF60 {
@@ -22196,7 +22196,7 @@ extern "C" void func_001BDF60(sFESlots1BDF60* self, int id)
     func_001BDFD8((cFEStateLobbyMenu*)self);
     for (int i = 0; i < 4; i++) {
         if (id == self->ids[i]) {
-            self->objs[i]->v09(1);
+            self->objs[i]->setVisible(1);
             return;
         }
     }
@@ -22218,7 +22218,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int a1);
+    virtual void setVisible(int a1);
 };
 
 /**
@@ -22228,7 +22228,7 @@ extern "C" void func_001BDFD8(cFEStateLobbyMenu* self)
 {
     int i;
     for (i = 0; i < 4; i++) {
-        ((cFEVObj_001BDFD8**)&self->mpChannelArrow)[i]->v09(0);
+        ((cFEVObj_001BDFD8**)&self->mpChannelArrow)[i]->setVisible(0);
     }
 }
 #endif
@@ -22319,8 +22319,8 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
-    virtual void v09(int on);
+    virtual void setStatic(int on);
+    virtual void setVisible(int on);
 };
 
 /**
@@ -22386,15 +22386,15 @@ extern "C" void func_001BE0A8(cFEStateLobbyMenu* self)
         }
         if (counts[type] == 0) {
             int on = func_0025F180(LobbyMan_mLobbyMan, i);
-            (*(cFEVObj_001BE0A8**)(((char*)self) + (type << 2) + 0x740))->v09(on);
+            (*(cFEVObj_001BE0A8**)(((char*)self) + (type << 2) + 0x740))->setVisible(on);
         }
         cUIListBox_addEntryByAsciiString(list, ext.p, i);
-        list->v08(0);
+        list->setStatic(0);
     }
     for (int k = 0; k < 4; k++) {
         if (counts[k] == 0) {
             cUIListBox_addEntryByStringID_u(lists[k], GetHashValue32(str_kT_231NoAvailableRooms), 0xFFFFFFFF);
-            lists[k]->v08(1);
+            lists[k]->setStatic(1);
         }
     }
     func_001BE038((sFELists1BE038*)self);
@@ -22430,7 +22430,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 struct sVE_001BE3A8 {
@@ -22474,10 +22474,10 @@ extern "C" void func_001BE3A8(cFEStateLobbyMenu* feStateLobbyMenu, int id)
             if (*((unsigned char*)box + 0x318) != 0) {
                 sel = cUIListBox_getCurrentEntryData(box);
                 int on = func_0025F180(LobbyMan_mLobbyMan, sel);
-                self->objs[i]->v09(on);
+                self->objs[i]->setVisible(on);
             }
         } else {
-            self->objs[i]->v09(0);
+            self->objs[i]->setVisible(0);
         }
     }
     if (sel != -1) {
@@ -22553,8 +22553,8 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
-    virtual void v09(int on);
+    virtual void setStatic(int on);
+    virtual void setVisible(int on);
 };
 
 struct sSelf1BE540 {
@@ -22599,18 +22599,18 @@ extern "C" void func_001BE540_2(void* self, int page)
             if (idx < ((sSelf1BE540*)self)->count) {
                 cUIText_setAsciiString((cUIText*)((sSelf1BE540*)self)->items[i], func_0025F1E0(mgr, idx, 0));
                 *(int*)((char*)((sSelf1BE540*)self)->items[i] + 0x18) = idx;
-                ((sSelf1BE540*)self)->items[i]->v09(1);
-                ((sSelf1BE540*)self)->items[i]->v08(0);
+                ((sSelf1BE540*)self)->items[i]->setVisible(1);
+                ((sSelf1BE540*)self)->items[i]->setStatic(0);
             } else {
-                ((sSelf1BE540*)self)->items[i]->v09(0);
-                ((sSelf1BE540*)self)->items[i]->v08(1);
+                ((sSelf1BE540*)self)->items[i]->setVisible(0);
+                ((sSelf1BE540*)self)->items[i]->setStatic(1);
             }
         }
     } else {
         ((sSelf1BE540*)self)->count = 0;
         for (int j = 0; j < 10; j++) {
-            ((sSelf1BE540*)self)->items[j]->v09(0);
-            ((sSelf1BE540*)self)->items[j]->v08(1);
+            ((sSelf1BE540*)self)->items[j]->setVisible(0);
+            ((sSelf1BE540*)self)->items[j]->setStatic(1);
         }
     }
 }
@@ -22630,7 +22630,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int a1);
+    virtual void setVisible(int a1);
 };
 
 /**
@@ -22642,14 +22642,14 @@ public:
 extern "C" void func_001BE720(cFEStateLobbyMenu* self)
 {
     if (self->miFirstPlayer == 0) {
-        ((cFEVObj_001BE720*)self->mpPlayerUp)->v09(0);
+        ((cFEVObj_001BE720*)self->mpPlayerUp)->setVisible(0);
     } else {
-        ((cFEVObj_001BE720*)self->mpPlayerUp)->v09(1);
+        ((cFEVObj_001BE720*)self->mpPlayerUp)->setVisible(1);
     }
     if (self->miFirstPlayer + 10 >= self->miNumPlayers) {
-        ((cFEVObj_001BE720*)self->mpPlayerDown)->v09(0);
+        ((cFEVObj_001BE720*)self->mpPlayerDown)->setVisible(0);
     } else {
-        ((cFEVObj_001BE720*)self->mpPlayerDown)->v09(1);
+        ((cFEVObj_001BE720*)self->mpPlayerDown)->setVisible(1);
     }
 }
 #endif
@@ -22836,7 +22836,7 @@ public:
     virtual void v14();
     virtual void v15();
     virtual void v16();
-    virtual void v17(void* owner, int msg);
+    virtual void onPopupEvent(void* owner, int msg);
 };
 
 /**
@@ -22869,13 +22869,13 @@ extern "C" void cFEStateNetCreateRoomPopup_onWidgetEvent(cFEStateNetCreateRoomPo
             break;
         case 3:
             if (func_001BEC78(self)) {
-                ((cFEVObj_001BEA38*)self->mpParentState)->v17(self, 0xF);
+                ((cFEVObj_001BEA38*)self->mpParentState)->onPopupEvent(self, 0xF);
             }
             break;
         }
         break;
     case 6:
-        ((cFEVObj_001BEA38*)self->mpParentState)->v17(self, 20);
+        ((cFEVObj_001BEA38*)self->mpParentState)->onPopupEvent(self, 20);
         break;
     case 9:
         if (obj == (char*)self->mpLBChannelName) {
@@ -22981,7 +22981,7 @@ public:
     virtual int v21(int, int);
     virtual int v22(int, int);
     virtual int v23(int, int);
-    virtual int v24(int, int);
+    virtual int handleEvent(int, int);
 };
 
 /**
@@ -22995,7 +22995,7 @@ public:
  */
 extern "C" int func_001BED28(cFEStateNet* self, int netEvent, int eventData)
 {
-    return ((func_001BED28_cObj*)self->mpParentState)->v24(netEvent, eventData);
+    return ((func_001BED28_cObj*)self->mpParentState)->handleEvent(netEvent, eventData);
 }
 #endif
 
@@ -23175,8 +23175,8 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
-    virtual void v09(int on);
+    virtual void setStatic(int on);
+    virtual void setVisible(int on);
     virtual void v10();
     virtual void v11();
     virtual void v12();
@@ -23192,7 +23192,7 @@ public:
     virtual void v22();
     virtual void v23();
     virtual void v24();
-    virtual void v25(int on);
+    virtual void setUseStaticColour(int on);
 };
 
 /**
@@ -23214,40 +23214,40 @@ extern "C" void cFEStateLogin_onWidgetCreate(cFEStateLogin* self, cFEVObj_001BEF
         int locStr = Loc_001BEF60(str_kT_CMNUse);
         usprintf_1BEF60(buf, str_pct_s_pct_S, locStr, D_00536760);
         cUIText_setUnicodeString((cUIText*)pWidget, (char*)buf);
-        pWidget->v09(1);
+        pWidget->setVisible(1);
         if (strlen(D_00536760) == 0) {
-            pWidget->v25(1);
-            pWidget->v08(1);
-            pWidget->v09(0);
+            pWidget->setUseStaticColour(1);
+            pWidget->setStatic(1);
+            pWidget->setVisible(0);
         }
     } else if (IsHash_001BEF60(widget->mId, str_1rectangle)) {
         if (strlen(D_00536760) == 0) {
-            pWidget->v09(0);
+            pWidget->setVisible(0);
         } else {
-            pWidget->v09(1);
+            pWidget->setVisible(1);
         }
     } else if (IsHash_001BEF60(widget->mId, str_4rectangle)) {
         if (strlen(D_00536760) == 0) {
-            pWidget->v09(0);
+            pWidget->setVisible(0);
         } else {
-            pWidget->v09(1);
+            pWidget->setVisible(1);
         }
     } else if (IsHash_001BEF60(widget->mId, str_TextCreateAccount)) {
         widget->mState = 2;
-        pWidget->v09(1);
+        pWidget->setVisible(1);
     } else if (IsHash_001BEF60(widget->mId, str_TextExistingAccount)) {
         widget->mState = 1;
-        pWidget->v09(1);
+        pWidget->setVisible(1);
     } else if (IsHash_001BEF60(widget->mId, str_TextDelectAccount)) {
         widget->mState = 3;
         int locStr = Loc_001BEF60(str_kT_BTNDelete);
         usprintf_1BEF60(buf, str_pct_s_pct_S, locStr, D_00536760);
         cUIText_setUnicodeString((cUIText*)pWidget, (char*)buf);
-        pWidget->v09(1);
+        pWidget->setVisible(1);
         if (strlen(D_00536760) == 0) {
-            pWidget->v25(1);
-            pWidget->v08(1);
-            pWidget->v09(0);
+            pWidget->setUseStaticColour(1);
+            pWidget->setStatic(1);
+            pWidget->setVisible(0);
         }
     }
 }
@@ -23395,7 +23395,7 @@ public:
     virtual void v15();
     virtual void v16();
     virtual void v17();
-    virtual void v18(void* obj);
+    virtual void onWidgetCreate(void* obj);
 };
 
 /**
@@ -23415,25 +23415,25 @@ extern "C" void func_001BF438(cFEStateLogin* self, void* popup, int kind)
         {
             void* widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextUseAccount));
             if (widget) {
-                ((cFEVObj_001BF438*)self)->v18(widget);
+                ((cFEVObj_001BF438*)self)->onWidgetCreate(widget);
             }
         }
         {
             void* widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextDelectAccount));
             if (widget) {
-                ((cFEVObj_001BF438*)self)->v18(widget);
+                ((cFEVObj_001BF438*)self)->onWidgetCreate(widget);
             }
         }
         {
             void* widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_1rectangle));
             if (widget) {
-                ((cFEVObj_001BF438*)self)->v18(widget);
+                ((cFEVObj_001BF438*)self)->onWidgetCreate(widget);
             }
         }
         {
             void* widget = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_4rectangle));
             if (widget) {
-                ((cFEVObj_001BF438*)self)->v18(widget);
+                ((cFEVObj_001BF438*)self)->onWidgetCreate(widget);
             }
         }
         void* menu = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000));
@@ -24506,9 +24506,9 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual void v07(int on);
+    virtual void setFocus(int on);
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
     virtual void v10();
     virtual void v11();
     virtual void v12();
@@ -24572,9 +24572,9 @@ extern "C" int cFEStateOnlineAgreement_onGainTransition(cFEStateOnlineAgreement*
     char* x = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgTextScroll));
     *(char**)(x + 0xB8) = scrollBar;
     cUITextScroll_setInputMap(x, 1);
-    ((cFEVObj_001C0B20*)x)->v07(1);
+    ((cFEVObj_001C0B20*)x)->setFocus(1);
     if (scrollBar) {
-        ((cFEVObj_001C0B20*)scrollBar)->v09(1);
+        ((cFEVObj_001C0B20*)scrollBar)->setVisible(1);
     }
     return 1;
 }
@@ -24831,7 +24831,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
     virtual void v10();
     virtual void v11();
     virtual void v12();
@@ -24862,7 +24862,7 @@ public:
 extern "C" void cFEStateNetQuickPlayPopup_onWidgetCreate(cFEStateNetQuickPlayPopup* self, cFEVObj_001C1080* obj)
 {
     int id = *(int*)((char*)obj + 0x38);
-    obj->v09(1);
+    obj->setVisible(1);
     if (id == GetHashValue32(str_TextOK)) {
         self->mpTextOK = (cUIText*)obj;
         obj->v25(1);
@@ -24913,7 +24913,7 @@ extern "C" void cFEStateNetQuickPlayPopup_onWidgetCreate(cFEStateNetQuickPlayPop
         self->mpSlopestylePair = (cUIThing*)obj;
     } else if (id == GetHashValue32(str_TextSearching)) {
         self->mpTextSearching = (cUIText*)obj;
-        obj->v09(0);
+        obj->setVisible(0);
     }
 }
 #endif
@@ -24932,7 +24932,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int a1);
+    virtual void setVisible(int a1);
 };
 
 int GetHashValue32(char* str);
@@ -24954,11 +24954,11 @@ extern "C" void func_001C13E0(cFEStateNetQuickPlayPopup* self, int show)
     if (self->mpScreen != 0) {
         cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Txt_Options));
         if (text != 0) {
-            ((cFEVText_001C13E0*)text)->v09(show);
+            ((cFEVText_001C13E0*)text)->setVisible(show);
         }
         text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2Square));
         if (text != 0) {
-            ((cFEVText_001C13E0*)text)->v09(show);
+            ((cFEVText_001C13E0*)text)->setVisible(show);
         }
     }
 }
@@ -25034,8 +25034,8 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
-    virtual void v09(int on);
+    virtual void setStatic(int on);
+    virtual void setVisible(int on);
     virtual void v10();
     virtual void v11();
     virtual void v12();
@@ -25043,7 +25043,7 @@ public:
     virtual void v14();
     virtual void v15();
     virtual void v16();
-    virtual void v17(void* owner, int msg);
+    virtual void onPopupEvent(void* owner, int msg);
 };
 
 /**
@@ -25072,7 +25072,7 @@ extern "C" void cFEStateNetQuickPlayPopup_onWidgetEvent(cFEStateNetQuickPlayPopu
         if ((int)self->mpTextOK == pWidget) {
             if (self->mbSearching != 0) {
                 cUIText_setUnicodeStringByID(self->mpTextSearching, GetHashValue32(str_kT_233AbortingQuickmatch));
-                ((cFEVObj_001C1560*)self->mpTextOK)->v08(1);
+                ((cFEVObj_001C1560*)self->mpTextOK)->setStatic(1);
                 func_001C13E0(self, self->mbSearching ^ 1);
                 func_0025EED8(LobbyMan_mLobbyMan);
             } else {
@@ -25092,7 +25092,7 @@ extern "C" void cFEStateNetQuickPlayPopup_onWidgetEvent(cFEStateNetQuickPlayPopu
                 feStateNetQuickPlayPopup->miSearchOptions[3] = cUIListBox_getCurrentEntryData(self->mpLBSuperpipe);
                 feStateNetQuickPlayPopup->miSearchOptions[4] = cUIListBox_getCurrentEntryData(self->mpLBSlopeStyle);
                 func_0025EE20(LobbyMan_mLobbyMan, ids, self->mCurrentCtrl);
-                ((cFEVObj_001C1560*)self->mpTextSearching)->v09(1);
+                ((cFEVObj_001C1560*)self->mpTextSearching)->setVisible(1);
                 cUIText_setUnicodeStringByID(self->mpTextOK, GetHashValue32(str_kT_BTNCancel));
                 self->miBlinkFrames = 0x1E;
                 func_001C17F8(self, 1);
@@ -25103,10 +25103,10 @@ extern "C" void cFEStateNetQuickPlayPopup_onWidgetEvent(cFEStateNetQuickPlayPopu
         func_001C13E0(self, self->mbSearching ^ 1);
         if (self->mbSearching != 0) {
             cUIText_setUnicodeStringByID(self->mpTextSearching, GetHashValue32(str_kT_233AbortingQuickmatch));
-            ((cFEVObj_001C1560*)self->mpTextOK)->v08(1);
+            ((cFEVObj_001C1560*)self->mpTextOK)->setStatic(1);
             func_0025EED8(LobbyMan_mLobbyMan);
         } else {
-            ((cFEVObj_001C1560*)self->mpParentState)->v17(self, 20);
+            ((cFEVObj_001C1560*)self->mpParentState)->onPopupEvent(self, 20);
         }
         break;
     default:
@@ -25160,7 +25160,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
+    virtual void setStatic(int on);
 };
 
 /**
@@ -25174,21 +25174,21 @@ public:
  */
 extern "C" void func_001C17F8(cFEStateNetQuickPlayPopup* self, int on)
 {
-    ((cFEVObj_001C17F8*)self->mpStaticRanked)->v08(on);
-    ((cFEVObj_001C17F8*)self->mpStaticRace)->v08(on);
-    ((cFEVObj_001C17F8*)self->mpStaticBigAir)->v08(on);
-    ((cFEVObj_001C17F8*)self->mpStaticSuperpipe)->v08(on);
-    ((cFEVObj_001C17F8*)self->mpStaticSlopeStyle)->v08(on);
-    ((cFEVObj_001C17F8*)self->mpLBRanked)->v08(on);
-    ((cFEVObj_001C17F8*)self->mpLBRace)->v08(on);
-    ((cFEVObj_001C17F8*)self->mpLBBigAir)->v08(on);
-    ((cFEVObj_001C17F8*)self->mpLBSuperpipe)->v08(on);
-    ((cFEVObj_001C17F8*)self->mpLBSlopeStyle)->v08(on);
-    ((cFEVObj_001C17F8*)self->mpRankedPair)->v08(on);
-    ((cFEVObj_001C17F8*)self->mpRacePair)->v08(on);
-    ((cFEVObj_001C17F8*)self->mpBigAirPair)->v08(on);
-    ((cFEVObj_001C17F8*)self->mpSuperpipePair)->v08(on);
-    ((cFEVObj_001C17F8*)self->mpSlopestylePair)->v08(on);
+    ((cFEVObj_001C17F8*)self->mpStaticRanked)->setStatic(on);
+    ((cFEVObj_001C17F8*)self->mpStaticRace)->setStatic(on);
+    ((cFEVObj_001C17F8*)self->mpStaticBigAir)->setStatic(on);
+    ((cFEVObj_001C17F8*)self->mpStaticSuperpipe)->setStatic(on);
+    ((cFEVObj_001C17F8*)self->mpStaticSlopeStyle)->setStatic(on);
+    ((cFEVObj_001C17F8*)self->mpLBRanked)->setStatic(on);
+    ((cFEVObj_001C17F8*)self->mpLBRace)->setStatic(on);
+    ((cFEVObj_001C17F8*)self->mpLBBigAir)->setStatic(on);
+    ((cFEVObj_001C17F8*)self->mpLBSuperpipe)->setStatic(on);
+    ((cFEVObj_001C17F8*)self->mpLBSlopeStyle)->setStatic(on);
+    ((cFEVObj_001C17F8*)self->mpRankedPair)->setStatic(on);
+    ((cFEVObj_001C17F8*)self->mpRacePair)->setStatic(on);
+    ((cFEVObj_001C17F8*)self->mpBigAirPair)->setStatic(on);
+    ((cFEVObj_001C17F8*)self->mpSuperpipePair)->setStatic(on);
+    ((cFEVObj_001C17F8*)self->mpSlopestylePair)->setStatic(on);
 }
 #endif
 
@@ -25230,7 +25230,7 @@ struct cFEObj_001C19C8 {
     virtual void v14();
     virtual void v15();
     virtual void v16();
-    virtual void v17(void* a1, int a2);
+    virtual void onPopupEvent(void* a1, int a2);
 };
 
 /**
@@ -25269,7 +25269,7 @@ extern "C" void* func_001C19C8(cFEStateNetQuickPlayPopup* self, int netEvent, in
             func_001A9BC0((cFEStateNet*)self, timeoutPopup);
         } else {
             self->mbSearching = 0;
-            ((cFEObj_001C19C8*)self->mpParentState)->v17(self, 20);
+            ((cFEObj_001C19C8*)self->mpParentState)->onPopupEvent(self, 20);
         }
         break;
     case 243:
@@ -25324,7 +25324,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int a1);
+    virtual void setVisible(int a1);
 };
 
 int GetHashValue32(char* str);
@@ -25352,7 +25352,7 @@ extern "C" int func_001C1B88(cFEStateNetQuickPlayPopup* self, void* popup, int e
     int result;
     if (event == 0xF || event == 20) {
         self->mbSearching = 0;
-        ((cFEVText_001C1B88*)self->mpTextSearching)->v09(0);
+        ((cFEVText_001C1B88*)self->mpTextSearching)->setVisible(0);
         func_001C13E0(self, self->mbSearching ^ 1);
         cUIText_setUnicodeStringByID(self->mpTextOK, GetHashValue32(str_kT_BTNOK));
         func_001C17F8(self, 0);
@@ -25715,7 +25715,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 static inline int IsHash1C2298(int id, char* name) { return id == GetHashValue32(name); }
@@ -25738,7 +25738,7 @@ extern "C" void cFEStateNetQuickMessages_onWidgetCreate(cFEStateNetQuickMessages
     char buf[32];
     if (IsHash1C2298(text->mHashName, str_username)) {
         cUIText_setAsciiString(text, str_sp);
-        ((cFEVObj_001C2298*)text)->v09(1);
+        ((cFEVObj_001C2298*)text)->setVisible(1);
     } else if (IsHash1C2298(text->mHashName, str_Menu)) {
         text->mAttr |= 1;
     } else {
@@ -25747,7 +25747,7 @@ extern "C" void cFEStateNetQuickMessages_onWidgetCreate(cFEStateNetQuickMessages
             sprintf(buf, str_messagepct_02d, i);
             if (IsHash1C2298(text->mHashName, buf)) {
                 cUIText_setAsciiString(text, str_sp);
-                ((cFEVObj_001C2298*)text)->v09(1);
+                ((cFEVObj_001C2298*)text)->setVisible(1);
                 text->mMiscData = i;
                 self->mpMessage[i] = text;
             }
@@ -25944,7 +25944,7 @@ public:
     virtual void v17();
     virtual void v18();
     virtual void v19();
-    virtual void v20(sRect1C2578* out);
+    virtual void getSize(sRect1C2578* out);
 };
 
 static inline void Measure1C2578(cUIText* text, const char* s, sRect1C2578* out)
@@ -25971,7 +25971,7 @@ extern "C" void func_001C2578(cFEStateNetQuickMessages* self, void* vtext, char*
     int cut = 0;
     sVec3_1C2578 scale = *(sVec3_1C2578*)((char*)text + 0x50);
     sRect1C2578 box;
-    ((cFEVObj_001C2578*)text)->v20(&box);
+    ((cFEVObj_001C2578*)text)->getSize(&box);
     char* font = cUIText_getFont(text);
     float sx = scale.x;
     float sy = scale.y;
@@ -26216,7 +26216,7 @@ public:
     int f0;
     int f4;
     int f8;
-    virtual void v01();
+    virtual void submit();
 };
 
 extern "C" void* cBE_getBE();
@@ -26242,7 +26242,7 @@ extern "C" void func_001C2BA8(cFEStateNetQuickMessages* self, void* popup, int e
         cBEVIface_001C2BA8* iface = (cBEVIface_001C2BA8*)cBE_getInterface_Fv(cBE_getBE(), 4);
         cBEOptionInterface_resetAllQuickKeys(iface);
         self->mbChanged = 1;
-        iface->v01();
+        iface->submit();
         func_001C2418(self);
         cFEStateNet_onPopupEvent(self, popup, 0xF);
     } else {
@@ -26460,11 +26460,11 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual void v07(int on);
+    virtual void setFocus(int on);
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
     virtual void v10();
-    virtual void v11(const sCol_001C2F00& c);
+    virtual void setColour(const sCol_001C2F00& c);
 };
 
 static inline int IsHash_001C2F00(int id, char* name) { return id == GetHashValue32(name); }
@@ -26486,32 +26486,32 @@ extern "C" void cFEStateStats_onWidgetCreate(cFEStateStats* self, cFEVObj_001C2F
     char* widget = (char*)obj;
     if (IsHash_001C2F00(*(int*)(widget + 0x38), str_EventList) || IsHash_001C2F00(*(int*)(widget + 0x38), str_CourseList)) {
         *(int*)(widget + 0x14) &= ~1;
-        obj->v11(sCol_001C2F00(1.0f));
+        obj->setColour(sCol_001C2F00(1.0f));
     } else if (IsHash_001C2F00(*(int*)(widget + 0x38), str_EventLeftArrow)) {
-        obj->v09(0);
+        obj->setVisible(0);
     } else if (IsHash_001C2F00(*(int*)(widget + 0x38), str_rankhl)) {
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash_001C2F00(*(int*)(widget + 0x38), str_EventRightArrow)) {
-        obj->v09(0);
+        obj->setVisible(0);
     } else if (IsHash_001C2F00(*(int*)(widget + 0x38), str_CourseLeftArrow)) {
-        obj->v09(0);
+        obj->setVisible(0);
     } else if (IsHash_001C2F00(*(int*)(widget + 0x38), str_CourseRightArrow)) {
-        obj->v09(0);
+        obj->setVisible(0);
     } else if (IsHash_001C2F00(*(int*)(widget + 0x38), str_sliderbox)) {
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash_001C2F00(*(int*)(widget + 0x38), str_slider)) {
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash_001C2F00(*(int*)(widget + 0x38), str_Txt_Overal)) {
-        obj->v07(1);
+        obj->setFocus(1);
     } else if (IsHash_001C2F00(*(int*)(widget + 0x38), str_Txt_Race)) {
-        obj->v07(1);
+        obj->setFocus(1);
     } else if (IsHash_001C2F00(*(int*)(widget + 0x38), str_Txt_FreeStyle)) {
-        obj->v07(1);
+        obj->setFocus(1);
     } else if (IsHash_001C2F00(*(int*)(widget + 0x38), str_Title)) {
-        obj->v09(1);
+        obj->setVisible(1);
     } else if (IsHash_001C2F00(*(int*)(widget + 0x38), str_HeadingsMenu)) {
         *(int*)(widget + 0x14) &= ~1;
-        obj->v07(1);
+        obj->setFocus(1);
         self->mpMenus[0] = (cUIMenu*)obj;
     } else if (IsHash_001C2F00(*(int*)(widget + 0x38), str_EventsMenu)) {
         self->mpMenus[1] = (cUIMenu*)obj;
@@ -26523,23 +26523,23 @@ extern "C" void cFEStateStats_onWidgetCreate(cFEStateStats* self, cFEVObj_001C2F
         cUIMenu_setScrollableMenu(obj, 10);
         self->mpMenus[3] = (cUIMenu*)obj;
         cUIMenu_setInputMap(obj, 1);
-        ((cFEVObj_001C2F00*)self->mpMenus[3])->v07(1);
+        ((cFEVObj_001C2F00*)self->mpMenus[3])->setFocus(1);
     } else {
         char buf[32];
         for (int i = 0; i < 10; i++) {
             sprintf(buf, str_resultsItem0pct_d, i);
             if (IsHash_001C2F00(*(int*)(widget + 0x38), buf)) {
-                obj->v09(1);
+                obj->setVisible(1);
                 break;
             }
             sprintf(buf, str_pointsItem0pct_d, i);
             if (IsHash_001C2F00(*(int*)(widget + 0x38), buf)) {
-                obj->v09(1);
+                obj->setVisible(1);
                 break;
             }
             sprintf(buf, str_personaItem0pct_d, i);
             if (IsHash_001C2F00(*(int*)(widget + 0x38), buf)) {
-                obj->v09(1);
+                obj->setVisible(1);
                 break;
             }
         }
@@ -26975,7 +26975,7 @@ struct cUIObj_001C3D68 {
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int a1);
+    virtual void setVisible(int a1);
     virtual void v10();
     virtual void v11();
     virtual void v12();
@@ -26986,7 +26986,7 @@ struct cUIObj_001C3D68 {
     virtual void v17();
     virtual void v18();
     virtual void v19();
-    virtual void v20(void* out);
+    virtual void getSize(void* out);
 };
 
 static inline sVec3_001C3D68 GetPos_001C3D68(cUIObj_001C3D68* o)
@@ -27016,7 +27016,7 @@ extern "C" void func_001C3D68(cFEStateStats* self, int pos, int count)
     if (thumb == 0) return;
     if (track == 0) return;
     sVec3_001C3D68 size;
-    track->v20(&size);
+    track->getSize(&size);
     sVec3_001C3D68 trackPos = *(sVec3_001C3D68*)((char*)track + 0x44);
     float fpos = (float)pos;
     if (count >= 2) count--;
@@ -27024,8 +27024,8 @@ extern "C" void func_001C3D68(cFEStateStats* self, int pos, int count)
     sVec3_001C3D68 np = *(sVec3_001C3D68*)((char*)thumb + 0x44);
     np.y = trackPos.y + fpos * step + 20.0f;
     *(sVec3_001C3D68*)((char*)thumb + 0x44) = np;
-    thumb->v09(1);
-    track->v09(1);
+    thumb->setVisible(1);
+    track->setVisible(1);
 }
 #endif
 
@@ -27238,14 +27238,14 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 static inline void Show_001C4538(void* self, char* name, int on)
 {
     cFEVObj_001C4538* o = (cFEVObj_001C4538*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
     if (o != 0) {
-        o->v09(on);
+        o->setVisible(on);
     }
 }
 
@@ -27308,7 +27308,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
+    virtual void setStatic(int on);
 };
 
 /**
@@ -27329,11 +27329,11 @@ extern "C" void func_001C47A8(cFEStateStats* self)
     switch (self->miMode) {
     case 0:
         cUIListBox_deleteAllEntries(box);
-        box->v08(1);
+        box->setStatic(1);
         break;
     case 1:
         cUIListBox_deleteAllEntries(box);
-        box->v08(0);
+        box->setStatic(0);
         for (int i = 0; i < 2; i++) {
             int id = D_0046DB98[i];
             if (id == 4) {
@@ -27346,7 +27346,7 @@ extern "C" void func_001C47A8(cFEStateStats* self)
         break;
     case 2:
         cUIListBox_deleteAllEntries(box);
-        box->v08(0);
+        box->setStatic(0);
         for (int j = 0; j < 4; j++) {
             int id = D_0046DB88[j];
             if (id == 4) {
@@ -27831,9 +27831,9 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual void v07(int on);
+    virtual void setFocus(int on);
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 /**
@@ -27869,9 +27869,9 @@ extern "C" int cFEStateNetNews_onGainTransition(cFEStateNet* self, int on)
         *(cUIText**)(scrollBar + 0x84) = hideOnEmpty;
         char* x = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextScroll_News));
         *(char**)(x + 0xB8) = scrollBar;
-        ((cFEVObj_001C5198*)x)->v07(1);
+        ((cFEVObj_001C5198*)x)->setFocus(1);
         if (scrollBar) {
-            ((cFEVObj_001C5198*)scrollBar)->v09(1);
+            ((cFEVObj_001C5198*)scrollBar)->setVisible(1);
         }
     }
     return 0;
@@ -27894,7 +27894,7 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual void v07(int a1);
+    virtual void setFocus(int a1);
 };
 
 /**
@@ -27906,7 +27906,7 @@ extern "C" void cFEStateNetNews_onWidgetCreate(cFEStateNet* self, cFEVObj_001C53
 {
     int hash = *(int*)((char*)item + 0x38);
     if (hash == GetHashValue32(str_NewsMenu)) {
-        item->v07(1);
+        item->setFocus(1);
     }
 }
 #endif

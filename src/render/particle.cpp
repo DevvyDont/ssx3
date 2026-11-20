@@ -141,11 +141,11 @@ public:
     char v1D0[0x10];        // 0x1D0
     int f1E0;               // 0x1E0
     sGsState_00370DC8 gs;   // 0x1E4
-    virtual void v01(int a);
-    virtual void v02();
+    virtual void purge(int a);
+    virtual void reset();
     virtual void v03();
     virtual void v04();
-    virtual void v05();
+    virtual void Allocate();
 
     void setA(int v) { gs.a = v; }
     void setB(int v) { gs.b = v; }
@@ -238,9 +238,9 @@ extern "C" void cBaseClass_DynamicEmitter_setupEmitter(cEmitter_00370DC8* self, 
                   *(float*)(def + 0x20), *(float*)(def + 0xC));
     tParticleEmitter_setupEmitter(self->sys, t4mat_Identity, def, self->f180, seed);
     if (changed) {
-        self->v01(0);
-        self->v05();
-        self->v02();
+        self->purge(0);
+        self->Allocate();
+        self->reset();
     }
     self->active = 1;
     self->gs = sDrawState_s_defaultDrawState;
@@ -361,7 +361,7 @@ INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_writeToReplayFrame);
 class cStream003712B8 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
+    virtual void write(void* buf, int size);
 };
 
 /**
@@ -384,7 +384,7 @@ extern "C" void cBaseClass_DynamicEmitter_writeToReplayFrame(cBaseClass_DynamicE
     buf.d = self->m_initialized;
     buf.c = self->m_enabled;
     buf.e = self->m_subEmitterId;
-    stream->v01(&buf, 20);
+    stream->write(&buf, 20);
 }
 #endif
 
@@ -395,7 +395,7 @@ class cStream00371318 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
+    virtual void read(void* buf, int size);
 };
 
 /**
@@ -413,7 +413,7 @@ extern "C" void cBaseClass_DynamicEmitter_readFromReplayFrame(cBaseClass_Dynamic
         int d;
         int e;
     } buf;
-    stream->v02(&buf, 20);
+    stream->read(&buf, 20);
     self->Duration = buf.a;
     self->m_emitter.EndTime = buf.b;
     self->m_initialized = buf.d;
@@ -3049,7 +3049,7 @@ public:
     virtual void v64();
     virtual void v65();
     virtual void v66();
-    virtual void v67(const sPtVec4_5890& pos, void* a, void* b, int tex, float scale);
+    virtual void AddProjectiveTexture(const sPtVec4_5890& pos, void* a, void* b, int tex, float scale);
 };
 
 /**
@@ -3062,7 +3062,7 @@ public:
 extern "C" void cPlayerShadow_AddShadow(void* self)
 {
     char* shadow = (char*)self;
-    ((cGfxMan_5890*)cGraphicsMan_TheGraphicsMan_particle)->v67(sPtVec4_5890(*(float*)(shadow + 0xC), *(float*)(shadow + 0x10), *(float*)(shadow + 0x14), 1.0f),
+    ((cGfxMan_5890*)cGraphicsMan_TheGraphicsMan_particle)->AddProjectiveTexture(sPtVec4_5890(*(float*)(shadow + 0xC), *(float*)(shadow + 0x10), *(float*)(shadow + 0x14), 1.0f),
                                      shadow + 0x90, shadow + 0xD0, *(int*)(shadow + 0x170), 1.0f);
 }
 #endif
@@ -10186,13 +10186,13 @@ struct cRMgr2170 {
     virtual void v28();
     virtual void v29();
     virtual void v30();
-    virtual void v31();
-    virtual void v32();
+    virtual void PushView();
+    virtual void PopView();
     virtual void v33();
     virtual void v34();
-    virtual sMat2170* v35();
+    virtual sMat2170* GetView();
     virtual void v36();
-    virtual void v37();
+    virtual void IdentityView();
     virtual void v38();
     virtual void v39();
     virtual void v40();
@@ -10228,7 +10228,7 @@ struct cRMgr2170 {
     virtual void v70();
     virtual void v71();
     virtual void v72();
-    virtual void v73(int n, sVtx2170* v, int f);
+    virtual void RenderLineStrip(int n, sVtx2170* v, int f);
 };
 
 extern sPt2170 D_004FFBC0[];
@@ -10329,7 +10329,7 @@ extern "C" void cPS2GraphicsMan_DrawSphere(cPS2GraphicsMan* mgr, sPt2170* pos, f
     int i;
     int k;
 
-    CopyMat2170(&viewMat, ((cRMgr2170*)mgr)->v35());
+    CopyMat2170(&viewMat, ((cRMgr2170*)mgr)->GetView());
     sPt2170 viewCenter = MulMat2170(&viewMat, *pos);
     if (3000.0f < viewCenter.z) {
         return;
@@ -10412,8 +10412,8 @@ extern "C" void cPS2GraphicsMan_DrawSphere(cPS2GraphicsMan* mgr, sPt2170* pos, f
     }
     (mgr->m_pCurrentDrawState)->m_textureState.m_texid[0] = -1;
     (mgr->m_pCurrentDrawState)->unk_00[1] = (((int)(mgr->m_pCurrentDrawState)->unk_00[1]) & ~0x7C) | 4;
-    ((cRMgr2170*)mgr)->v31();
-    ((cRMgr2170*)mgr)->v37();
+    ((cRMgr2170*)mgr)->PushView();
+    ((cRMgr2170*)mgr)->IdentityView();
 
     sVtx2170 verts[17];
     i = 0;
@@ -10433,9 +10433,9 @@ extern "C" void cPS2GraphicsMan_DrawSphere(cPS2GraphicsMan* mgr, sPt2170* pos, f
     sPt2170 circlePoint = Add2170(viewCenter, Scale2170(D_004FFBC0[0], radius));
     verts[i].pos = circlePoint;
     i++;
-    ((cRMgr2170*)mgr)->v73(i, verts, 0);
+    ((cRMgr2170*)mgr)->RenderLineStrip(i, verts, 0);
     (mgr->m_pCurrentDrawState)->unk_00[1] = (((int)(mgr->m_pCurrentDrawState)->unk_00[1]) & ~0x7C) | 4;
-    ((cRMgr2170*)mgr)->v32();
+    ((cRMgr2170*)mgr)->PopView();
 }
 #endif
 
@@ -12113,7 +12113,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int, int, int);
+    virtual void Render1(int, int, int);
 };
 
 /**
@@ -12128,7 +12128,7 @@ public:
  */
 extern "C" void cPS2GridMesh_Render(cPartVirt* self, int meshMatrix, void* materialBlock, int texMatrix)
 {
-    self->v08(meshMatrix, **(short**)((char*)materialBlock + 4), texMatrix);
+    self->Render1(meshMatrix, **(short**)((char*)materialBlock + 4), texMatrix);
 }
 #endif
 

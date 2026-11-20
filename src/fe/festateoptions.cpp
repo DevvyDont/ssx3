@@ -121,7 +121,7 @@ struct sVE_188980p {
 class cListener_188980 {
 public:
     virtual void v01();
-    virtual void v02(int msg);
+    virtual void playSound(int msg);
 };
 
 struct sOpt_188980 {
@@ -215,9 +215,9 @@ extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, cUIThing* widge
             obj = sound;
         if (obj != 0) {
             if (r == 1) {
-                ((cListener_188980*)obj)->v02(6);
+                ((cListener_188980*)obj)->playSound(6);
             } else {
-                ((cListener_188980*)obj)->v02(4);
+                ((cListener_188980*)obj)->playSound(4);
             }
         }
         self->popup = 0;
@@ -2181,7 +2181,7 @@ public:
     virtual void v20();
     virtual void v21();
     virtual void v22();
-    virtual int v23(int a);
+    virtual int getData(int a);
 };
 
 /**
@@ -2208,7 +2208,7 @@ extern "C" void cFEStateOptionsController_onPopupEvent(cFEStateOptionsController
     }
     case 22:
         if (Is_0018C910(*(int*)((char*)obj + 0xC), str_111resetopts)) {
-            if (obj->v23(2) != 0) {
+            if (obj->getData(2) != 0) {
                 cBENewPlayerInterface_defaultCtrl(pi);
                 cFEStateOptionsController_updateWidget(self);
                 D_004A14DC = 1;
@@ -3321,7 +3321,7 @@ public:
     virtual void v64();
     virtual void v65();
     virtual void v66();
-    virtual int v67(int a);
+    virtual int HasFileName(int a);
 };
 
 /**
@@ -3370,14 +3370,14 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(sDevSel_18DEA0* self, 
             self->state = st;
             self->vt[47].fn((char*)self + self->vt[47].delta);
         } else if (self->mode == 1) {
-            if ((*(cDev_18DEA0**)(app + 0x434))->v67(self->slot)) {
+            if ((*(cDev_18DEA0**)(app + 0x434))->HasFileName(self->slot)) {
                 cMCOverlayManager_readSetFileType(app, 0);
                 self->vt[44].fn((char*)self + self->vt[44].delta);
             } else {
                 self->vt[47].fn((char*)self + self->vt[47].delta);
             }
         } else {
-            if ((*(cDev_18DEA0**)(app + 0x434))->v67(self->slot)) {
+            if ((*(cDev_18DEA0**)(app + 0x434))->HasFileName(self->slot)) {
                 cMCOverlayManager_readSetFileType(app, 2);
                 self->vt[44].fn((char*)self + self->vt[44].delta);
             } else {
@@ -3418,7 +3418,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(sDevSel_18DEA0* self, 
         int currentState = self->state;
         if (currentState != 1)
             return;
-        if ((*(cDev_18DEA0**)(mcManager + 0x434))->v67(self->slot)) {
+        if ((*(cDev_18DEA0**)(mcManager + 0x434))->HasFileName(self->slot)) {
             self->busy = currentState;
             self->state = 4;
             cMCOverlayManager_SetAction(mcManager, 0);
@@ -3632,8 +3632,8 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
-    virtual void v09(int on);
+    virtual void setStatic(int on);
+    virtual void setVisible(int on);
     virtual void v10();
     virtual void v11();
     virtual void v12();
@@ -3649,7 +3649,7 @@ public:
     virtual void v22();
     virtual void v23();
     virtual void v24();
-    virtual void v25(int on);
+    virtual void setUseStaticColour(int on);
 };
 
 // Device-list vtable entries (g++ 2.95 layout: delta, index, function).
@@ -3712,15 +3712,15 @@ public:
     virtual void v32();
     virtual void v33();
     virtual void v34();
-    virtual void v35(int s);
+    virtual void triggerDisplayState(int s);
     virtual void v36();
     virtual void v37();
     virtual void v38();
     virtual void v39();
     virtual void v40();
     virtual void v41();
-    virtual int v42();
-    virtual void v43();
+    virtual int displayFileOK();
+    virtual void setMenuHighlight();
 };
 
 struct cState_18E510 : cStateBase_18E510 {
@@ -3759,23 +3759,23 @@ extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cState_18E510* self)
 {
     char* pMC = (char*)cSSXApp_getMCManager(SSXApp);
     unsigned short ustrDisplay[800];
-    if (self->v42()) {
+    if (self->displayFileOK()) {
         if (DEV0_18E510(pMC, 53) == 0) {
             cFEMemCard_callbackDisplayNoCards();
         } else if (self->f214 != 3) {
-            self->v35(3);
+            self->triggerDisplayState(3);
         }
     }
-    if (self->v42()) {
+    if (self->displayFileOK()) {
         char text[80];
         cUIObj_18E510* pText;
         int bIsNewSet;
-        self->v43();
+        self->setMenuHighlight();
         cMCOverlayManager_GetDeviceDisplayString(pMC, *(int*)(pMC + 0x428), ustrDisplay, 800);
         cUIText_setUnicodeStringWrap(cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Memory_card_text)), ustrDisplay);
         self->dev = *(int*)(pMC + 0x428);
         pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_1percentage));
-        pText->v09(0);
+        pText->setVisible(0);
         bIsNewSet = 0;
         for (int i = 1; i < 5 && (self->mode == 1 || i < 2); i++) {
             char strObj[60];
@@ -3786,38 +3786,38 @@ extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cState_18E510* self)
             if (DEVI_18E510(pMC, 67, i - 1) == 0 && DEVI_18E510(pMC, 66, i - 1) == 0
                 && DEV0_18E510(pMC, 55) != 0) {
                 if (self->mode == 1) {
-                    pText->v25(1);
-                    pText->v08(1);
+                    pText->setUseStaticColour(1);
+                    pText->setStatic(1);
                 } else if (bIsNewSet == 0 && self->f22C != 0) {
                     bIsNewSet = 1;
-                    pText->v08(0);
-                    pText->v25(0);
+                    pText->setStatic(0);
+                    pText->setUseStaticColour(0);
                 } else {
-                    pText->v25(1);
-                    pText->v08(1);
+                    pText->setUseStaticColour(1);
+                    pText->setStatic(1);
                 }
             } else if (DEVI_18E510(pMC, 54, *(int*)(pMC + 1064)) != 0) {
                 if (DEVI_18E510(pMC, 66, i - 1) != 0) {
-                    pText->v08(1);
-                    pText->v25(1);
+                    pText->setStatic(1);
+                    pText->setUseStaticColour(1);
                 } else {
-                    pText->v08(0);
-                    pText->v25(0);
+                    pText->setStatic(0);
+                    pText->setUseStaticColour(0);
                 }
             } else {
-                pText->v25(1);
-                pText->v08(1);
+                pText->setUseStaticColour(1);
+                pText->setStatic(1);
             }
         }
         if (cFEMemCard_checkNextAvailableDevice(self, pMC, *(int*)(pMC + 0x428), 1) == -1) {
-            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_arrow_left)))->v09(0);
+            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_arrow_left)))->setVisible(0);
         } else {
-            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_arrow_left)))->v09(1);
+            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_arrow_left)))->setVisible(1);
         }
         if (cFEMemCard_checkNextAvailableDevice(self, pMC, *(int*)(pMC + 0x428), 0) == -1) {
-            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_arrow_right)))->v09(0);
+            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_arrow_right)))->setVisible(0);
         } else {
-            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_arrow_right)))->v09(1);
+            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_arrow_right)))->setVisible(1);
         }
     }
     if (self->f214 != 3) {
@@ -3826,8 +3826,8 @@ extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cState_18E510* self)
             sprintf(strObj, str_pct_dmemory_card, i);
             i++;
             cUIObj_18E510* pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(strObj));
-            pText->v25(0);
-            pText->v08(1);
+            pText->setUseStaticColour(0);
+            pText->setStatic(1);
         }
     }
 }

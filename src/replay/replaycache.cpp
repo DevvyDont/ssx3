@@ -563,7 +563,7 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual int v07();
+    virtual int getAIIndex();
 };
 
 struct sRcRider_0730 {
@@ -596,7 +596,7 @@ extern "C" int findPlayerId(int id)
 {
     int i;
     for (i = 0; i < world_0730()->numRiders; i++) {
-        if (((cRcIdObj_0730*)(world_0730()->riders[i]->obj + 0x6C0))->v07() == id) {
+        if (((cRcIdObj_0730*)(world_0730()->riders[i]->obj + 0x6C0))->getAIIndex() == id) {
             return i;
         }
     }
@@ -4069,8 +4069,8 @@ public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
     virtual void v02();
-    virtual void v03(void* src, int id, int h, float t);
-    virtual void v04(void* src, int id, int h, float t0, float t1);
+    virtual void OnInSeqKeyEvent(void* src, int id, int h, float t);
+    virtual void OnInSeqUpdate(void* src, int id, int h, float t0, float t1);
 };
 
 /**
@@ -4090,9 +4090,9 @@ extern "C" int cScriptPlayerEntity_ExecutePlay(cScriptPlayerEntity* self)
     if (obj != 0) {
         int eventBits = self->mSetupScriptInitialEventBits;
         if (eventBits != 0) {
-            obj->v03(self, self->mpSystemHeader->type, eventBits, 0.0f);
+            obj->OnInSeqKeyEvent(self, self->mpSystemHeader->type, eventBits, 0.0f);
         }
-        ((cRcListener3D20*)self->mpEntityComm)->v04(self,
+        ((cRcListener3D20*)self->mpEntityComm)->OnInSeqUpdate(self,
             self->mpSystemHeader->type,
             self->mSetupScriptInitialEventBits, 0.0f, 0.0f);
     }
@@ -4115,12 +4115,12 @@ public:
     int unk_0x0;
     // vptr at 0x4; slot N at vtable offset N*8
     virtual void v01();
-    virtual void v02();
+    virtual void Stop();
     virtual void v03();
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual int v07();
+    virtual int GetType();
     virtual void v08();
     virtual void v09();
     virtual void v10(int);
@@ -4130,7 +4130,7 @@ class cRcListener_3DC0 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* src, int id);
-    virtual void v02(void* src, int id);
+    virtual void OnInSeqRelease(void* src, int id);
 };
 
 /**
@@ -4147,15 +4147,15 @@ extern "C" void cScriptPlayerEntity_Stop(cScriptPlayerEntity* self)
         return;
     cRcListener_3DC0* entityComm = (cRcListener_3DC0*)self->mpEntityComm;
     if (entityComm != 0)
-        entityComm->v02(self, self->mpSystemHeader->type);
+        entityComm->OnInSeqRelease(self, self->mpSystemHeader->type);
     self->mpEntityComm = 0;
     if (self->mpSystemHeader->numChannels != 0)
     {
         for (int i = 0; i < self->mpSystemHeader->numChannels; i++)
         {
             cRcObj_3DC0** objs = (cRcObj_3DC0**)self->mpChannelPlayers;
-            objs[i]->v02();
-            switch (((cRcObj_3DC0**)self->mpChannelPlayers)[i]->v07())
+            objs[i]->Stop();
+            switch (((cRcObj_3DC0**)self->mpChannelPlayers)[i]->GetType())
             {
             case 0:
                 func_002724E8_impl(((cRcObj_3DC0**)self->mpChannelPlayers)[i]);
@@ -4197,8 +4197,8 @@ class cRcObj_3F68 {
 public:
     int unk_0x0;
     // vptr at 0x4; slot N at vtable offset N*8
-    virtual int v01(void* data, void* cache, int* mask);
-    virtual void v02();
+    virtual int Play(void* data, void* cache, int* mask);
+    virtual void Stop();
 };
 
 /**
@@ -4227,9 +4227,9 @@ extern "C" int cScriptPlayerEntity_Restart(cScriptPlayerEntity* self)
             unsigned char* rec = channelData;
             int ch = 0;
             channelData += 4;
-            ((cRcObj_3F68**)self->mpChannelPlayers)[i]->v02();
+            ((cRcObj_3F68**)self->mpChannelPlayers)[i]->Stop();
             int channelEvents = 0;
-            if (((cRcObj_3F68**)self->mpChannelPlayers)[i]->v01(channelData, self, &channelEvents) != 0 || changed)
+            if (((cRcObj_3F68**)self->mpChannelPlayers)[i]->Play(channelData, self, &channelEvents) != 0 || changed)
                 ch = 1;
             i++;
             channelData += *(unsigned short*)(rec + 2);
@@ -4241,8 +4241,8 @@ extern "C" int cScriptPlayerEntity_Restart(cScriptPlayerEntity* self)
     if (entityComm == 0)
         return changed;
     if (mask)
-        entityComm->v03(self, self->mpSystemHeader->type, mask, 0.0f);
-    ((cRcListener3D20*)self->mpEntityComm)->v04(self, self->mpSystemHeader->type, mask, 0.0f, 0.0f);
+        entityComm->OnInSeqKeyEvent(self, self->mpSystemHeader->type, mask, 0.0f);
+    ((cRcListener3D20*)self->mpEntityComm)->OnInSeqUpdate(self, self->mpSystemHeader->type, mask, 0.0f, 0.0f);
     return changed;
 }
 #endif
@@ -4334,8 +4334,8 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_SetEntityComm);
 class cRcListener4240 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* src, int id);
-    virtual void v02(void* src, int id);
+    virtual void OnInSeqLock(void* src, int id);
+    virtual void OnInSeqRelease(void* src, int id);
 };
 
 /**
@@ -4351,11 +4351,11 @@ extern "C" cRcListener4240* cScriptPlayerEntity_SetEntityComm(cScriptPlayerEntit
 {
     cRcListener4240* old = (cRcListener4240*)self->mpEntityComm;
     if (old != 0) {
-        old->v02(self, self->mpSystemHeader->type);
+        old->OnInSeqRelease(self, self->mpSystemHeader->type);
     }
     self->mpEntityComm = (cInSeqCommEntity*)pEntityComm;
     if (pEntityComm != 0) {
-        pEntityComm->v01(self, self->mpSystemHeader->type);
+        pEntityComm->OnInSeqLock(self, self->mpSystemHeader->type);
     }
     return old;
 }
@@ -4966,7 +4966,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual void v04(void* src);
+    virtual void OnInSeqStop(void* src);
 };
 
 /**
@@ -4995,7 +4995,7 @@ extern "C" void cScriptPlayerMain_Stop(cScriptPlayerMain* self)
     self->mJumpFrame = -1;
     cRcListener4918* inSeqComm = (cRcListener4918*)cScriptPlayerMain_GetInSeqCommInterface(self);
     if (inSeqComm != 0) {
-        inSeqComm->v04(self);
+        inSeqComm->OnInSeqStop(self);
     }
 }
 #endif
@@ -5355,11 +5355,11 @@ extern "C" void* cScriptPlayerMain_GetInSeqCommInterface_p(void) __asm__("cScrip
 
 class cRcListener4DE0 {
 public:
-    virtual void v01(void* src);
-    virtual void v02(void* src, float a, float b);
-    virtual void v03(void* src);
+    virtual void OnInSeqPlay(void* src);
+    virtual void OnInSeqUpdate(void* src, float a, float b);
+    virtual void OnInSeqPlayStopping(void* src);
     virtual void v04(void* src);
-    virtual int v05(void* src);
+    virtual int OnInSeqLoop(void* src);
 };
 
 struct sRcPlayHdr_4DE0 {
@@ -5388,7 +5388,7 @@ extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* self)
     if (*(int*)(self + 0x20) == 1) {
         *(int*)(self + 0x20) = 2;
         if (comm != 0) {
-            comm->v01(self);
+            comm->OnInSeqPlay(self);
         }
     }
     if (*(int*)(self + 0x2C) > 0 || *(int*)(self + 0x20) == 0) {
@@ -5437,7 +5437,7 @@ extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* self)
         *(int*)(self + 0x3C) = 0;
         *(int*)(self + 0x20) = 3;
         if (comm != 0) {
-            comm->v02(self, 0.0f, 0.0f);
+            comm->OnInSeqUpdate(self, 0.0f, 0.0f);
         }
     }
     if (*(int*)(self + 0x40) != 0 || *(int*)(self + 0x20) == 4) {
@@ -5470,7 +5470,7 @@ extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* self)
             int keepPlaying = *(int*)(self + 0x1C);
             if (keepPlaying != 0) {
                 if (comm != 0) {
-                    keepPlaying = comm->v05(self);
+                    keepPlaying = comm->OnInSeqLoop(self);
                 }
                 if (*(int*)(self + 0x20) == 0 || keepPlaying != 0) {
                     return;
@@ -5478,7 +5478,7 @@ extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* self)
             }
             *(int*)(self + 0x20) = 4;
             if (comm != 0) {
-                comm->v03(self);
+                comm->OnInSeqPlayStopping(self);
             }
         }
     }
@@ -5494,7 +5494,7 @@ extern "C" int cScriptPlayerMain_GetInSeqCommInterface(cScriptPlayerMain* self);
 class cRcListener51A0 {
 public:
     virtual void v01();
-    virtual void v02(void* src, float time, float speed);
+    virtual void OnInSeqUpdate(void* src, float time, float speed);
 };
 
 struct sRcAnim51A0 {
@@ -5541,7 +5541,7 @@ extern "C" int cScriptPlayerMain_DoUpdate(sRcAnim51A0* self, float time, float p
     }
     cRcListener51A0* comm = (cRcListener51A0*)cScriptPlayerMain_GetInSeqCommInterface((cScriptPlayerMain*)self);
     if (comm != 0) {
-        comm->v02(self, self->time, speed);
+        comm->OnInSeqUpdate(self, self->time, speed);
     }
     return changed;
 }
