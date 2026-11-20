@@ -3986,7 +3986,7 @@ cScriptObjCamera_GetNumScriptEntities = 0x00284A88; //type:func
 cScriptObjCamera_GetScriptEntity = 0x00284A90; //type:func
 cSSXAudio_GetFocusRider = 0x00285D98; //type:func
 cSSXAudio_InGameInit = 0x002867E8; //type:func
-cSSXAudio_SetArcadeSFX = 0x00287558; //type:func
+cSSXAudio_SetDJSpeech = 0x00287558; //type:func
 cSSXAudio_SetCurrVolume = 0x00287700; //type:func
 cSSXAudio_GetCameraPos__FPvi = 0x00288AC0; //type:func
 cSSXAudio_ReplayMode = 0x00288AE0; //type:func
@@ -9555,6 +9555,9 @@ cIrradiance_Clear = 0x00389260; //type:func
 cIrradiance_Scale = 0x003896C0; //type:func
 cIrradianceDataBase_Get = 0x0038ABF8; //type:func
 cIrradianceDataBase_Get1 = 0x0038AC20; //type:func
+
+// fn_arcade: names by evidence (docs/function_names.tsv)
+cSSXAudio_SetArcadeSFX = 0x002875D0; //type:func
 
 // Spreadsheet Auto Generation
 

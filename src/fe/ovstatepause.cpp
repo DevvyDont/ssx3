@@ -27,8 +27,8 @@ extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
+extern "C" void cSSXAudio_SetDJSpeech(void* snd, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
-extern "C" void func_002875D0(void* snd, int v);
 extern "C" void func_00266F90(void* self, int* a, int* b);
 extern "C" void func_00266E88(void* self);
 extern "C" void func_00266E30(void* self);
@@ -63,8 +63,8 @@ struct sOptions_PO {
     unsigned int f4 : 4;
     unsigned int f8 : 4;
     unsigned int pad12 : 4;
-    int f16 : 1;
-    int f17 : 1;
+    int iUseArcadeSFX : 1;
+    int iUseDJSpeech : 1;
     unsigned int pad18 : 12;
     unsigned int f30 : 2;
     int data[0x288 / 4 - 1];
@@ -76,8 +76,8 @@ struct sOptionsU_PO {
     unsigned int f4 : 4;
     unsigned int f8 : 4;
     unsigned int pad12 : 4;
-    unsigned int f16 : 1;
-    unsigned int f17 : 1;
+    unsigned int iUseArcadeSFX : 1;
+    unsigned int iUseDJSpeech : 1;
     unsigned int pad18 : 12;
     unsigned int f30 : 2;
     int data[0x288 / 4 - 1];
@@ -273,9 +273,9 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
             cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_CMNOff_b), 0);
             cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_CMNOn_b), 1);
             unsigned char sel2;
-            if (cUIListBox_getEntryByData(w, iface->getOptions().f17, &sel2))
+            if (cUIListBox_getEntryByData(w, iface->getOptions().iUseDJSpeech, &sel2))
                 cUIListBox_setCurrentEntryByIndex(w, sel2);
-            cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_PO().f17 != 0);
+            cSSXAudio_SetDJSpeech(cAudioInterface_bxAudio(), Cfg_PO().iUseDJSpeech != 0);
         }
     }
     {
@@ -284,9 +284,9 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
             cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_CMNOff_b), 0);
             cUIListBox_addEntryByStringID(w, GetHashValue32(str_kT_CMNOn_b), 1);
             unsigned char sel3;
-            if (cUIListBox_getEntryByData(w, iface->getOptions().f16, &sel3))
+            if (cUIListBox_getEntryByData(w, iface->getOptions().iUseArcadeSFX, &sel3))
                 cUIListBox_setCurrentEntryByIndex(w, sel3);
-            func_002875D0(cAudioInterface_bxAudio(), Cfg_PO().f16 != 0);
+            cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_PO().iUseArcadeSFX != 0);
         }
     }
     cUIObj_PO* eaTalkPair = (cUIObj_PO*)find_PO(self, str_EATalkPair);
@@ -414,8 +414,8 @@ extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
+extern "C" void cSSXAudio_SetDJSpeech(void* snd, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
-extern "C" void func_002875D0(void* snd, int v);
 extern "C" void func_00266F90(void* self, int* a, int* b);
 extern "C" void func_00266F58(void* self, int a, int b);
 extern "C" void func_00266E88(void* self);
@@ -438,8 +438,8 @@ struct sOptions_A238 {
     unsigned int f4 : 4;
     unsigned int f8 : 4;
     unsigned int pad12 : 4;
-    int f16 : 1;
-    int f17 : 1;
+    int iUseArcadeSFX : 1;
+    int iUseDJSpeech : 1;
     unsigned int pad18 : 12;
     unsigned int f30 : 2;
     int data[0x288 / 4 - 1];
@@ -531,11 +531,11 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsi
             SetF4_A238(*(int*)(obj + 0x74));
             func_00287520(cAudioInterface_bxAudio(), iface->getOptions().f4);
         } else if (IsId_A238(obj, str_7lb_b)) {
-            D_00535610_A238.f17 = cUIListBox_getCurrentEntryData(obj) != 0;
-            cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), iface->getOptions().f17 != 0);
+            D_00535610_A238.iUseDJSpeech = cUIListBox_getCurrentEntryData(obj) != 0;
+            cSSXAudio_SetDJSpeech(cAudioInterface_bxAudio(), iface->getOptions().iUseDJSpeech != 0);
         } else if (IsId_A238(obj, str_8lb)) {
-            D_00535610_A238.f16 = cUIListBox_getCurrentEntryData(obj) != 0;
-            func_002875D0(cAudioInterface_bxAudio(), iface->getOptions().f16 != 0);
+            D_00535610_A238.iUseArcadeSFX = cUIListBox_getCurrentEntryData(obj) != 0;
+            cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), iface->getOptions().iUseArcadeSFX != 0);
         }
         cBE_getInterface_Fv(SSXApp->BE, 7);
         if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && IsId_A238(obj, str_EATalksl)) {

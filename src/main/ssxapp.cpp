@@ -1050,8 +1050,8 @@ extern "C" void func_0031A6B8();
 extern "C" void func_00287410(void* opt, int v);
 extern "C" void cSSXAudio_SetSFXVolume(void* opt, int v);
 extern "C" void func_00287520(void* opt, int v);
+extern "C" void cSSXAudio_SetDJSpeech(void* opt, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* opt, int v);
-extern "C" void func_002875D0(void* opt, int v);
 void WORLDTRIGGERMANAGER_Init();
 extern "C" int func_004165A8(const void* a, const void* b);
 
@@ -1083,8 +1083,8 @@ struct sSndCfg_82D0 {
     unsigned int speechVol : 4;     // bits 8-11
     unsigned int output : 2;        // bits 12-13
     unsigned int pad14 : 2;
-    int f16 : 1;                    // bit 16
-    int f17 : 1;                    // bit 17
+    int iUseArcadeSFX : 1;          // bit 16
+    int iUseDJSpeech : 1;           // bit 17
     int pad18 : 14;
     char rest[0x288 - 4];
 };
@@ -1195,8 +1195,8 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     func_00287410(cAudioInterface_bxAudio(), Cfg_82D0().sfxVol);
     cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_82D0().speechVol);
     func_00287520(cAudioInterface_bxAudio(), Cfg_82D0().musicVol);
-    cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_82D0().f17 != 0);
-    func_002875D0(cAudioInterface_bxAudio(), Cfg_82D0().f16 != 0);
+    cSSXAudio_SetDJSpeech(cAudioInterface_bxAudio(), Cfg_82D0().iUseDJSpeech != 0);
+    cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_82D0().iUseArcadeSFX != 0);
     WORLDTRIGGERMANAGER_Init();
     if (func_004165A8(self->fCC, D_004A29E8)) {
         cBE_getInterface_Fv(cBE_getBE(), 0);

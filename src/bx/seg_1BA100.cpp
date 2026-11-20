@@ -1996,7 +1996,7 @@ extern "C" int func_002BADA8(void *audio) {
 INCLUDE_ASM("bx/seg_1BA100", func_002BADB0);
 #ifdef SKIP_ASM
 /**
- * Returns cSSXAudio's unk_62B8 (cSSXAudio_SetArcadeSFX stores 1 or 0 there).
+ * Returns cSSXAudio's unk_62B8 (cSSXAudio_SetDJSpeech stores 1 or 0 there).
  *
  * @param audio  the cSSXAudio
  * @return unk_62B8

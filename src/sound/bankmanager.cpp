@@ -818,7 +818,7 @@ extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
 extern "C" void func_0028D488(void* self);
 extern "C" int func_002B49E0(void* monitor);
 extern "C" int func_002B4AF0(void* monitor);
-extern "C" void cSSXAudio_SetArcadeSFX(void* self, int on);
+extern "C" void cSSXAudio_SetDJSpeech(void* self, int on);
 // PORT: func_002B4070 takes the 64-bit bank mask as a second argument (64-bit `long`).
 extern "C" void func_002B4070_BF78(void* monitor, long mask) __asm__("func_002B4070");
 
@@ -836,7 +836,7 @@ extern sCfg_BF78 D_00535610_BF78 __asm__("cBEOptionInterface_mOption");
  * playlist; the audio options menu passes its selection.
  *
  * Mode 0 activates the songs of MusicSys.mDefaultActiveMap (func_002B4070), re-applies the arcade SFX setting from bit
- * 17 of cBEOptionInterface_mOption's flags (cSSXAudio_SetArcadeSFX), and, in game with MusicSys.mSongPlaying set and a
+ * 17 of cBEOptionInterface_mOption's flags (cSSXAudio_SetDJSpeech), and, in game with MusicSys.mSongPlaying set and a
  * current song id (func_002B49E0) of 101-103 (a peak ambience), picks a new song (func_0028D488) and restarts with
  * func_0028CF98(self, 0, 0, -1, 0). Modes 1 and 3 do the same with mRadioPlayList, returning early when that is 0, when
  * the song id is 1-3, or when the current song is still active (func_002B4AF0) and its id is not 301. Mode 2 turns the
@@ -857,7 +857,7 @@ extern "C" void func_0028BF78(char* self, int state)
         func_002B4070_BF78(self + 0x118, *(long*)(self + 0x518));
         cBE_getInterface_Fv(cBE_getBE(), 4);
         sCfg_BF78 cfg = D_00535610_BF78;
-        cSSXAudio_SetArcadeSFX(self, (cfg.flags >> 17) & 1);
+        cSSXAudio_SetDJSpeech(self, (cfg.flags >> 17) & 1);
         if (cAudioInterface_isInGame() == 0)
             return;
         if (*(int*)(self + 0x530) == 0)
@@ -873,7 +873,7 @@ extern "C" void func_0028BF78(char* self, int state)
         func_002B4070_BF78(self + 0x118, *(long*)(self + 0x6098));
         cBE_getInterface_Fv(cBE_getBE(), 4);
         sCfg_BF78 cfg = D_00535610_BF78;
-        cSSXAudio_SetArcadeSFX(self, (cfg.flags >> 17) & 1);
+        cSSXAudio_SetDJSpeech(self, (cfg.flags >> 17) & 1);
         if (*(long*)(self + 0x6098) == 0)
             return;
         if (cAudioInterface_isInGame() == 0)
@@ -890,7 +890,7 @@ extern "C" void func_0028BF78(char* self, int state)
         break;
     }
     case 2:
-        cSSXAudio_SetArcadeSFX(self, 0);
+        cSSXAudio_SetDJSpeech(self, 0);
         if (cAudioInterface_isInGame() == 0)
             return;
         if ((unsigned int)(func_002B49E0(self + 0x118) - 101) < 3)

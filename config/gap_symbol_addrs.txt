@@ -3287,7 +3287,6 @@ lbl_002825E4 = 0x002825E4; //type:label
 func_002872A8 = 0x002872A8; //type:func
 func_00287410 = 0x00287410; //type:func
 func_00287520 = 0x00287520; //type:func
-func_002875D0 = 0x002875D0; //type:func
 func_00287670 = 0x00287670; //type:func
 func_002876D0 = 0x002876D0; //type:func
 lbl_00287760 = 0x00287760; //type:label

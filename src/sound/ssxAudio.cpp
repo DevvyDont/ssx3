@@ -1806,7 +1806,7 @@ extern "C" void func_00287520(cSSXAudio* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/ssxAudio", cSSXAudio_SetArcadeSFX);
+INCLUDE_ASM("sound/ssxAudio", cSSXAudio_SetDJSpeech);
 #ifdef SKIP_ASM
 extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio*, float, int);
 extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int a1);
@@ -1820,7 +1820,7 @@ extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int a1);
  *
  * @param on  nonzero to enable the arcade effects (On Tour bOn)
  */
-extern "C" void cSSXAudio_SetArcadeSFX(void* self, int on)
+extern "C" void cSSXAudio_SetDJSpeech(void* self, int on)
 {
     if (on != 0 && *(int*)((char*)self + 0x608C) != 2 && *(int*)((char*)self + 0x608C) != 3) {
         cSSXAudio_SetCurrVolume((cSSXAudio*)self, cSSXAudio_GetCurrSetVolume(self, 1), 2);
@@ -1833,7 +1833,7 @@ extern "C" void cSSXAudio_SetArcadeSFX(void* self, int on)
 #endif
 
 //100%
-INCLUDE_ASM("sound/ssxAudio", func_002875D0);
+INCLUDE_ASM("sound/ssxAudio", cSSXAudio_SetArcadeSFX);
 #ifdef SKIP_ASM
 extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio*, float, int);
 extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int a1);
@@ -1845,7 +1845,7 @@ extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int a1);
  *
  * @param on  nonzero to enable the arcade sounds
  */
-extern "C" void func_002875D0(void* self, int on)
+extern "C" void cSSXAudio_SetArcadeSFX(void* self, int on)
 {
     if (on != 0) {
         cSSXAudio_SetCurrVolume((cSSXAudio*)self, cSSXAudio_GetCurrSetVolume(self, 5), 9);
@@ -3155,7 +3155,7 @@ void cSSXAudio_SetCurrVolume_if(void*, int, float) __asm__("cSSXAudio_SetCurrVol
  *
  * Preset 0 sets controls 1..10 to 10/11 with arcade on; 1 silences speech (2, 3, 4, 9, 10); 2 silences the music (1); 3
  * keeps only the effects (5..8); 4 keeps only the music; 5 silences all; 4 and 5 turn the arcade sounds off
- * (func_002875D0).
+ * (cSSXAudio_SetArcadeSFX).
  *
  * @param mode  the preset, 0..5
  */
@@ -3174,7 +3174,7 @@ extern "C" void cSSXAudio_SetPreset(void* self, int mode)
         cSSXAudio_SetCurrVolume_if(self, 8, 0.9090909361839294f);
         cSSXAudio_SetCurrVolume_if(self, 9, 0.9090909361839294f);
         cSSXAudio_SetCurrVolume_if(self, 10, 0.9090909361839294f);
-        func_002875D0(self, 1);
+        cSSXAudio_SetArcadeSFX(self, 1);
         break;
     case 1:
         cSSXAudio_SetCurrVolume_if(self, 1, 0.9090909361839294f);
@@ -3187,7 +3187,7 @@ extern "C" void cSSXAudio_SetPreset(void* self, int mode)
         cSSXAudio_SetCurrVolume_if(self, 8, 0.9090909361839294f);
         cSSXAudio_SetCurrVolume_if(self, 9, 0.0f);
         cSSXAudio_SetCurrVolume_if(self, 10, 0.0f);
-        func_002875D0(self, 1);
+        cSSXAudio_SetArcadeSFX(self, 1);
         break;
     case 2:
         cSSXAudio_SetCurrVolume_if(self, 1, 0.0f);
@@ -3200,7 +3200,7 @@ extern "C" void cSSXAudio_SetPreset(void* self, int mode)
         cSSXAudio_SetCurrVolume_if(self, 8, 0.9090909361839294f);
         cSSXAudio_SetCurrVolume_if(self, 9, 0.9090909361839294f);
         cSSXAudio_SetCurrVolume_if(self, 10, 0.9090909361839294f);
-        func_002875D0(self, 1);
+        cSSXAudio_SetArcadeSFX(self, 1);
         break;
     case 3:
         cSSXAudio_SetCurrVolume_if(self, 1, 0.0f);
@@ -3213,7 +3213,7 @@ extern "C" void cSSXAudio_SetPreset(void* self, int mode)
         cSSXAudio_SetCurrVolume_if(self, 8, 0.9090909361839294f);
         cSSXAudio_SetCurrVolume_if(self, 9, 0.0f);
         cSSXAudio_SetCurrVolume_if(self, 10, 0.0f);
-        func_002875D0(self, 1);
+        cSSXAudio_SetArcadeSFX(self, 1);
         break;
     case 4:
         cSSXAudio_SetCurrVolume_if(self, 1, 0.9090909361839294f);
@@ -3226,7 +3226,7 @@ extern "C" void cSSXAudio_SetPreset(void* self, int mode)
         cSSXAudio_SetCurrVolume_if(self, 8, 0.0f);
         cSSXAudio_SetCurrVolume_if(self, 9, 0.0f);
         cSSXAudio_SetCurrVolume_if(self, 10, 0.0f);
-        func_002875D0(self, 0);
+        cSSXAudio_SetArcadeSFX(self, 0);
         break;
     case 5:
         cSSXAudio_SetCurrVolume_if(self, 1, 0.0f);
@@ -3239,7 +3239,7 @@ extern "C" void cSSXAudio_SetPreset(void* self, int mode)
         cSSXAudio_SetCurrVolume_if(self, 8, 0.0f);
         cSSXAudio_SetCurrVolume_if(self, 9, 0.0f);
         cSSXAudio_SetCurrVolume_if(self, 10, 0.0f);
-        func_002875D0(self, 0);
+        cSSXAudio_SetArcadeSFX(self, 0);
         break;
     }
 }
