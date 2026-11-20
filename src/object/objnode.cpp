@@ -62,13 +62,13 @@ extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
  * Runs cObjNode_cObjNode1 with the bucket, installs cTypeObjNode_vtbl, stores type at +0x10, clears the flags (+0x12)
  * and increments the live count for that type (D_0044AFF0[type]).
  *
- * @param a1  update bucket
+ * @param bucket  update bucket
  * @param type  node type (tObjNodeType)
  * @return self
  */
-extern "C" void* func_00354720(void* self, void* a1, int type)
+extern "C" void* func_00354720(void* self, void* bucket, int type)
 {
-    cObjNode_cObjNode1(self, a1);
+    cObjNode_cObjNode1(self, bucket);
     *(void***)((char*)self + 0xC) = cTypeObjNode_vtbl;
     *(short*)((char*)self + 0x10) = type;
     *(short*)((char*)self + 0x12) = 0;

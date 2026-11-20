@@ -1446,11 +1446,11 @@ extern "C" void cSpring_setupNodes(void* self);
  */
 extern "C" void* func_00353E80(void* self, void* stream)
 {
-    sMbVEntrySer3E80* e = &(*(sMbVEntrySer3E80**)stream)[2];
-    e->fn((char*)stream + e->delta, self, 36);
+    sMbVEntrySer3E80* readSlot = &(*(sMbVEntrySer3E80**)stream)[2];
+    readSlot->fn((char*)stream + readSlot->delta, self, 36);
     cSpring_setupNodes(self);
-    e = &(*(sMbVEntrySer3E80**)stream)[2];
-    e->fn((char*)stream + e->delta, *(void**)((char*)self + 0x24), *(int*)self * 80);
+    readSlot = &(*(sMbVEntrySer3E80**)stream)[2];
+    readSlot->fn((char*)stream + readSlot->delta, *(void**)((char*)self + 0x24), *(int*)self * 80);
     return self;
 }
 #endif

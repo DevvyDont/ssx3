@@ -601,14 +601,14 @@ struct sAnimInfo_EC58 {
  *
  * The world script loader (src/seg/seg_1FBE38.cpp) calls it on a cMemMan_alloc(0x7C) block.
  *
- * @param a1  the bucket the node is added to
- * @param a2  the instance record (tInstanceRecord) the node animates
+ * @param bucket  the bucket the node is added to
+ * @param instRecord  the instance record (tInstanceRecord) the node animates
  * @param info  the floating parameters: spring, damping and scale values at +0x4..+0x18
  * @return @p self
  */
-extern "C" void* func_0034EC58(cFloatingNode* self, void* a1, void* a2, sAnimInfo_EC58* info)
+extern "C" void* func_0034EC58(cFloatingNode* self, void* bucket, void* instRecord, sAnimInfo_EC58* info)
 {
-    func_00355280(self, a1, 0xE, a2);
+    func_00355280(self, bucket, 0xE, instRecord);
     self->mVtbl = cFloatingNode_vtbl;
     self->ZSpring = info->f4;
     self->ZDamp = info->f8;
@@ -616,7 +616,7 @@ extern "C" void* func_0034EC58(cFloatingNode* self, void* a1, void* a2, sAnimInf
     self->ASpring = info->fC;
     self->ADamp = info->f10;
     self->TorqueScale = info->f18 * 1e-6f;
-    sQ_EC58 p = *(sQ_EC58*)((char*)self->Instance + 0x40);
+    sQ_EC58 rootPos = *(sQ_EC58*)((char*)self->Instance + 0x40);
     *(int*)&self->OX = 0;
     *(int*)&self->WX = 0;
     *(int*)&self->TX = 0;
@@ -626,14 +626,14 @@ extern "C" void* func_0034EC58(cFloatingNode* self, void* a1, void* a2, sAnimInf
     *(int*)&self->Vel = 0;
     *(int*)&self->Force = 0;
     self->Info = 0;
-    self->Zo = p.z;
-    self->Z = p.z;
+    self->Zo = rootPos.z;
+    self->Z = rootPos.z;
     cFloatingNode_initInfo((cFloatingNode*)self);
     sAnimFrame_EC58** pf = (sAnimFrame_EC58**)(((char*)self) + 0x74);
     *pf = new (str_FloatingMats, 0x20000000, 0) sAnimFrame_EC58[*(int*)(*(char**)((char*)self->Instance + 0x80) + 0x4)];
     self->Flags |= 1;
-    char* m = (char*)self->Instance;
-    *(unsigned int*)(m + 8) = (*(unsigned int*)(m + 8) & 0xFFFFFFFD) | 4;
+    char* record = (char*)self->Instance;
+    *(unsigned int*)(record + 8) = (*(unsigned int*)(record + 8) & 0xFFFFFFFD) | 4;
     return ((void*)self);
 }
 #endif

@@ -151,13 +151,13 @@ struct sFlexRailElem_348D98 {
  * (func_00349220). Then builds the segment matrices (func_003492A8), BoundBox (func_00349110) and the space hash entry
  * (cFlexRailNode_addSpaceHash).
  *
- * @param a1  rail instance record
+ * @param instRecord  rail instance record
  * @param desc  float rail make-data
  * @return self
  */
-extern "C" void* func_00348D98(char* self, void* a1, char* desc)
+extern "C" void* func_00348D98(char* self, void* instRecord, char* desc)
 {
-    func_00347D90(self, 20, a1, desc);
+    func_00347D90(self, 20, instRecord, desc);
     *(void**)(self + 0xC) = D_0048FF30;
     *(float*)(self + 0x60) = *(float*)(desc + 0x48);
     *(float*)(self + 0x64) = *(float*)(desc + 0x4C);
@@ -229,13 +229,13 @@ struct sFrStreamVEntry_348FA0 {
  * node array (allocated as "FloatRailNodes" at +0x70), then rebuilds the matrices (func_003492A8), BoundBox
  * (func_00349110) and space hash entry (cFlexRailNode_addSpaceHash).
  *
- * @param a1  update bucket
+ * @param bucket  update bucket
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* func_00348FA0(char* self, void* a1, void* stream)
+extern "C" void* func_00348FA0(char* self, void* bucket, void* stream)
 {
-    func_00347EA8(self, a1, stream);
+    func_00347EA8(self, bucket, stream);
     *(void**)(self + 0xC) = D_0048FF30;
     sFrStreamVEntry_348FA0* vt = *(sFrStreamVEntry_348FA0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self + 0x60, 0xC);
@@ -270,9 +270,9 @@ extern "C" void func_003490B0(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0048FF30;
     func_00348C48(self);
-    void* p = *(void**)((char*)self + 0x70);
-    if (p != 0) {
-        cMemMan_free(p);
+    void* railNodes = *(void**)((char*)self + 0x70);
+    if (railNodes != 0) {
+        cMemMan_free(railNodes);
     }
     func_00347F90(self, flags);
 }
@@ -842,13 +842,13 @@ struct sFlexElem_9B48 {
  * vector to the next node's P. Then builds the segment matrices (func_0034A0B0), BoundBox (func_00349F18) and the space
  * hash entry (cFlexRailNode_addSpaceHash).
  *
- * @param a1  rail instance record
+ * @param instRecord  rail instance record
  * @param desc  spring rail make-data
  * @return self
  */
-extern "C" void* func_00349B48(char* self, void* a1, char* desc)
+extern "C" void* func_00349B48(char* self, void* instRecord, char* desc)
 {
-    func_00347D90(self, 21, a1, desc);
+    func_00347D90(self, 21, instRecord, desc);
     *(void**)(self + 0xC) = D_0048FD90;
     *(float*)(self + 0x60) = *(float*)(desc + 0x48);
     *(float*)(self + 0x64) = *(float*)(desc + 0x4C);
@@ -919,13 +919,13 @@ struct sFrStreamVEntry_349DB0 {
  * node array ("SpringRailNodes", +0x70), then rebuilds the matrices (func_0034A0B0) and the space hash entry. Unlike
  * the float rail's replay ctor it does not recompute BoundBox (it comes back from the replay state).
  *
- * @param a1  update bucket
+ * @param bucket  update bucket
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* func_00349DB0(char* self, void* a1, void* stream)
+extern "C" void* func_00349DB0(char* self, void* bucket, void* stream)
 {
-    func_00347EA8(self, a1, stream);
+    func_00347EA8(self, bucket, stream);
     *(void**)(self + 0xC) = D_0048FD90;
     sFrStreamVEntry_349DB0* vt = *(sFrStreamVEntry_349DB0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self + 0x60, 0xC);
@@ -959,9 +959,9 @@ extern "C" void func_00349EB8(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0048FD90;
     func_00348C48(self);
-    void* p = *(void**)((char*)self + 0x70);
-    if (p != 0) {
-        cMemMan_free(p);
+    void* railNodes = *(void**)((char*)self + 0x70);
+    if (railNodes != 0) {
+        cMemMan_free(railNodes);
     }
     func_00347F90(self, flags);
 }
@@ -1606,26 +1606,26 @@ static inline void vu0AddEq_A8C8(sV4_A8C8& dst, const sV4_A8C8& b)
 extern "C" void func_0034A8C8(sFrRailA8C8* self)
 {
     float dt = cObjectInterface_getUpdateTime();
-    sV4Slot_A8C8 f[8];
+    sV4Slot_A8C8 segTorque[8];
     for (int i = 0; i < self->count - 1; i++) {
-        f[i].v = vu0Scale_A8C8(self->elems[i].posA, -self->k[0]);
-        vu0AddEq_A8C8(f[i].v, vu0Scale_A8C8(self->elems[i].posB, -self->k[1]));
+        segTorque[i].v = vu0Scale_A8C8(self->elems[i].posA, -self->k[0]);
+        vu0AddEq_A8C8(segTorque[i].v, vu0Scale_A8C8(self->elems[i].posB, -self->k[1]));
     }
     for (int i = 0; i < self->count - 1; i++) {
-        vu0AddEq_A8C8(f[i].v, self->elems[i].force);
+        vu0AddEq_A8C8(segTorque[i].v, self->elems[i].force);
     }
     for (int i = 0; i < self->count - 1; i++) {
-        sV4_A8C8 a;
-        a = vu0Scale_A8C8(f[i].v, dt);
+        sV4_A8C8 angVelStep;
+        angVelStep = vu0Scale_A8C8(segTorque[i].v, dt);
         vu0AddEq_A8C8(self->elems[i].posA, vu0Scale_A8C8(self->elems[i].posB, dt));
-        vu0AddEq_A8C8(self->elems[i].posB, a);
+        vu0AddEq_A8C8(self->elems[i].posB, angVelStep);
     }
     sV4_A8C8 acc = D_004FF120_A8C8;
     for (int i = 0; i < self->count - 1; i++) {
         vu0AddEq_A8C8(acc, self->elems[i].posA);
         float len = vu0Len_A8C8(self->elems[i].vel);
-        sV4_A8C8 s = vu0Scale_A8C8(vu0Norm_A8C8(vu0Add_A8C8(self->elems[i].vel, vu0Cross_A8C8(self->elems[i].vel, acc))), len);
-        self->elems[i + 1].pos = vu0Add_A8C8(self->elems[i].pos, s);
+        sV4_A8C8 segVec = vu0Scale_A8C8(vu0Norm_A8C8(vu0Add_A8C8(self->elems[i].vel, vu0Cross_A8C8(self->elems[i].vel, acc))), len);
+        self->elems[i + 1].pos = vu0Add_A8C8(self->elems[i].pos, segVec);
     }
     for (int i = 0; i < self->count; i++) {
         self->elems[i].force = D_004FF120_A8C8;
@@ -1713,43 +1713,43 @@ static inline float perSec_34AC88(float x)
  */
 extern "C" sFrRailDesc* func_0034AC88(sFrRailDesc* out, void* src)
 {
-    sFrRailOut_AC88* d = (sFrRailOut_AC88*)out;
-    sFrRailSrc_AC88* s = (sFrRailSrc_AC88*)src;
-    d->on0 = s->on0 != 0;
-    d->on1 = s->on1 != 0;
-    d->on2 = s->on2 != 0;
-    d->on3 = s->on3 != 0;
+    sFrRailOut_AC88* flagState = (sFrRailOut_AC88*)out;
+    sFrRailSrc_AC88* makeData = (sFrRailSrc_AC88*)src;
+    flagState->on0 = makeData->on0 != 0;
+    flagState->on1 = makeData->on1 != 0;
+    flagState->on2 = makeData->on2 != 0;
+    flagState->on3 = makeData->on3 != 0;
     {
-        float x = s->p[0];
-        float y = s->p[1];
-        float z = s->p[2];
-        d->p[0] = x;
-        d->p[1] = y;
-        d->p[2] = z;
+        float x = makeData->p[0];
+        float y = makeData->p[1];
+        float z = makeData->p[2];
+        flagState->p[0] = x;
+        flagState->p[1] = y;
+        flagState->p[2] = z;
     }
     {
-        float x = s->q[0];
-        float y = s->q[1];
-        float z = s->q[2];
-        d->q[0] = x;
-        d->q[1] = y;
-        d->q[2] = z;
+        float x = makeData->q[0];
+        float y = makeData->q[1];
+        float z = makeData->q[2];
+        flagState->q[0] = x;
+        flagState->q[1] = y;
+        flagState->q[2] = z;
     }
-    d->q[3] = s->q[3];
-    d->r0 = perSec_34AC88(s->r0);
-    d->r1 = perSec_34AC88(s->r1);
-    d->a[0] = perSec_34AC88(s->t[0].a);
-    d->b[0] = s->t[0].b;
-    d->c[0] = s->t[0].c;
-    d->a[1] = perSec_34AC88(s->t[1].a);
-    d->b[1] = s->t[1].b;
-    d->c[1] = s->t[1].c;
-    d->a[2] = perSec_34AC88(s->t[2].a);
-    d->b[2] = s->t[2].b;
-    d->c[2] = s->t[2].c;
-    d->a[3] = perSec_34AC88(s->t[3].a);
-    d->b[3] = s->t[3].b;
-    d->c[3] = s->t[3].c;
+    flagState->q[3] = makeData->q[3];
+    flagState->r0 = perSec_34AC88(makeData->r0);
+    flagState->r1 = perSec_34AC88(makeData->r1);
+    flagState->a[0] = perSec_34AC88(makeData->t[0].a);
+    flagState->b[0] = makeData->t[0].b;
+    flagState->c[0] = makeData->t[0].c;
+    flagState->a[1] = perSec_34AC88(makeData->t[1].a);
+    flagState->b[1] = makeData->t[1].b;
+    flagState->c[1] = makeData->t[1].c;
+    flagState->a[2] = perSec_34AC88(makeData->t[2].a);
+    flagState->b[2] = makeData->t[2].b;
+    flagState->c[2] = makeData->t[2].c;
+    flagState->a[3] = perSec_34AC88(makeData->t[3].a);
+    flagState->b[3] = makeData->t[3].b;
+    flagState->c[3] = makeData->t[3].c;
     return out;
 }
 #endif
@@ -1912,17 +1912,17 @@ struct sFlexRail_AF38 {
  */
 extern "C" void* func_0034AF38(void* self)
 {
-    sFlexRail_AF38* s = (sFlexRail_AF38*)self;
+    sFlexRail_AF38* flagSet = (sFlexRail_AF38*)self;
     int i;
     func_0034AF20(self);
-    s->f60 = 0;
-    s->f74 = 0;
-    s->vt = D_0048FBF8;
+    flagSet->f60 = 0;
+    flagSet->f74 = 0;
+    flagSet->vt = D_0048FBF8;
     for (i = 0; i < 60; i++) {
-        s->slots[i] = 0;
+        flagSet->slots[i] = 0;
     }
     int id = D_004A4010;
-    s->f90 = id;
+    flagSet->f90 = id;
     D_004A4010 = id + 1;
     if (D_004A4010 >= 2) {
         D_004A4010 = 0;

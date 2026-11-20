@@ -1908,23 +1908,23 @@ extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
  * the record flags have both bits 0x1 and 0x2, the flags get 0x4 and lose 0x2; for a solid object they get 0x20 and
  * lose 0x40.
  *
- * @param a1  update bucket
- * @param a2  instance record
- * @param a3  solid flag
- * @param a4  force the instance visible
+ * @param bucket  update bucket
+ * @param instRecord  instance record
+ * @param isSolid  solid flag
+ * @param forceVisible  force the instance visible
  * @return self
  */
-extern "C" void* func_00356DB0(void* self, void* a1, void* a2, int a3, int a4)
+extern "C" void* func_00356DB0(void* self, void* bucket, void* instRecord, int isSolid, int forceVisible)
 {
-    func_00355280(self, a1, 17, a2);
+    func_00355280(self, bucket, 17, instRecord);
     *(void***)((char*)self + 0xC) = D_00490E80;
-    if (a4 != 0 || ((*(sMoveFlags_6DB0**)((char*)self + 0x18))->w & 3) == 3) {
-        sMoveFlags_6DB0* f = *(sMoveFlags_6DB0**)((char*)self + 0x18);
-        f->w = (f->w & ~2) | 4;
+    if (forceVisible != 0 || ((*(sMoveFlags_6DB0**)((char*)self + 0x18))->w & 3) == 3) {
+        sMoveFlags_6DB0* recordFlags = *(sMoveFlags_6DB0**)((char*)self + 0x18);
+        recordFlags->w = (recordFlags->w & ~2) | 4;
     }
-    if (a3 != 0) {
-        sMoveFlags_6DB0* f = *(sMoveFlags_6DB0**)((char*)self + 0x18);
-        f->w = (f->w & ~0x40) | 0x20;
+    if (isSolid != 0) {
+        sMoveFlags_6DB0* recordFlags = *(sMoveFlags_6DB0**)((char*)self + 0x18);
+        recordFlags->w = (recordFlags->w & ~0x40) | 0x20;
     }
     return self;
 }
@@ -2805,17 +2805,17 @@ extern void* cParticleNode_vtbl[];
  * Runs the cMoveNode record constructor func_00355280, installs cParticleNode_vtbl, takes the old node's modifiers
  * (cMoveNode_transferFromOld) and adds the particle effect (cMoveNode_addParticle).
  *
- * @param a1  update bucket
- * @param a2  instance record
+ * @param bucket  update bucket
+ * @param instRecord  instance record
  * @param particle  particle make-data
- * @param a4  node the instance had before
+ * @param oldNode  node the instance had before
  * @return self
  */
-extern "C" void* func_003578A8(cParticleNode* self, void* a1, void* a2, void* particle, void* a4)
+extern "C" void* func_003578A8(cParticleNode* self, void* bucket, void* instRecord, void* particle, void* oldNode)
 {
-    func_00355280(((cMoveNode*)self), a1, 13, a2);
+    func_00355280(((cMoveNode*)self), bucket, 13, instRecord);
     self->mVtbl = cParticleNode_vtbl;
-    cMoveNode_transferFromOld(((cMoveNode*)self), a4);
+    cMoveNode_transferFromOld(((cMoveNode*)self), oldNode);
     cMoveNode_addParticle(((cMoveNode*)self), particle);
     return ((cMoveNode*)self);
 }
@@ -3195,23 +3195,23 @@ extern "C" void cMultiParticle_setupMultiParticle(void* self);
  * from the emitter position with w = 0.
  *
  * @param mem  storage for the system
- * @param a1  particle data (tParticleData, 216 bytes)
- * @param a2  maximum instance count
+ * @param particleData  particle data (tParticleData, 216 bytes)
+ * @param maxInst  maximum instance count
  * @return mem
  */
-extern "C" void* func_00357DD8(cMultiParticle* mem, void* a1, void* a2)
+extern "C" void* func_00357DD8(cMultiParticle* mem, void* particleData, void* maxInst)
 {
     cMultiParticle* self = mem;
-    (*(void**)&self->MaxInst) = a2;
+    (*(void**)&self->MaxInst) = maxInst;
     self->NumInst = 0;
     void* buf = cMemMan_alloc(216, str_Particle_b, 0x20000000, 0);
     (*(void**)&self->Particle) = buf;
-    MEM_copy(buf, a1, 216);
+    MEM_copy(buf, particleData, 216);
     cMultiParticle_setupMultiParticle(self);
-    sPartDesc_7DD8* d = ((sPartDesc_7DD8*)self->Emitter);
-    (*(sQuad_7DD8*)&self->BoundBox) = d->a;
-    (*(sQuad_7DD8*)&self->BoundBox.MaxPoint) = d->b;
-    (*(sQuad_7DD8*)&self->Offset) = sQuad_7DD8(d->pos[0], d->pos[1], d->pos[2], 0.0f);
+    sPartDesc_7DD8* emitterDesc = ((sPartDesc_7DD8*)self->Emitter);
+    (*(sQuad_7DD8*)&self->BoundBox) = emitterDesc->a;
+    (*(sQuad_7DD8*)&self->BoundBox.MaxPoint) = emitterDesc->b;
+    (*(sQuad_7DD8*)&self->Offset) = sQuad_7DD8(emitterDesc->pos[0], emitterDesc->pos[1], emitterDesc->pos[2], 0.0f);
     return self;
 }
 #endif

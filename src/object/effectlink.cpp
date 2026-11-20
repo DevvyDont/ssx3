@@ -301,15 +301,15 @@ extern "C" void* func_003459A8(cParticleModifier* self, void* stream)
     func_003457C8((cEffectModifier*)self, stream);
     self->mVtbl = cParticleModifier_vtbl;
     cStaticEmitter_cStaticEmitter(((char*)self) + 0x50);
-    sEffectLinkVEntry_3459A8* e = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
-    e->fn((char*)stream + e->delta, ((char*)self) + 0x1E4, 4);
+    sEffectLinkVEntry_3459A8* readSlot = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
+    readSlot->fn((char*)stream + readSlot->delta, ((char*)self) + 0x1E4, 4);
     if (self->Complete == 0) {
         void* buf = operator_new1(216);
         self->ParticleData = (tParticleData*)buf;
-        e = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
-        e->fn((char*)stream + e->delta, buf, 216);
-        e = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
-        e->fn((char*)stream + e->delta, ((char*)self) + 0x10, 0x40);
+        readSlot = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
+        readSlot->fn((char*)stream + readSlot->delta, buf, 216);
+        readSlot = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
+        readSlot->fn((char*)stream + readSlot->delta, ((char*)self) + 0x10, 0x40);
         cStaticEmitter_setupEmitter(((char*)self) + 0x50, ((char*)self) + 0x10, (int)self->ParticleData);
         cStaticEmitter_readFromReplayFrame(((char*)self) + 0x50, stream);
     } else {
@@ -774,12 +774,12 @@ struct sEffSrc_6120 {
  * +0x20 and Speed (+0x20) to +0x2C; zeroes +0x30 and increments the halo count D_004A4000.
  *
  * @param src  halo make-data (tAddHaloData layout)
- * @param a2  instance record the halo belongs to
+ * @param instRecord  instance record the halo belongs to
  * @return self
  */
-extern "C" void* func_00346120(sEffObj_6120* self, sEffSrc_6120* src, int a2)
+extern "C" void* func_00346120(sEffObj_6120* self, sEffSrc_6120* src, int instRecord)
 {
-    cEffectModifier_cEffectModifier((cEffectModifier*)self, a2);
+    cEffectModifier_cEffectModifier((cEffectModifier*)self, instRecord);
     self->vt = cHaloModifier_vtbl;
     self->f24 = src->f4;
     self->f28 = src->f8;

@@ -1858,8 +1858,8 @@ extern "C" sRailDF70* func_0035DF70(sRailDF70* self, cStreamDF70* stream)
     cRigidBody_readFromReplayFrame(self->body, (cRigidBody_readFromReplayFrame_cObj*)stream);
     stream->v02(self->data, 40);
     self->id = stream->v03();
-    void* r = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo(cObjectInterface_getWorld_DF70(), (void*)self->id), 0);
-    bxSphereTree_operatorE(self->mover, r);
+    void* meshTree = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo(cObjectInterface_getWorld_DF70(), (void*)self->id), 0);
+    bxSphereTree_operatorE(self->mover, meshTree);
     sRmSrcDF70* src = self->src;
     sRmVec4 off;
     off.x = src->x;
@@ -2810,23 +2810,23 @@ struct sRmState_F6E8 {
  * Angle, AngVel = AngVel (+0x20) / frame rate, Axis = (AxisX, AxisY, AxisZ, 0) and UVScroll from UScroll/VScroll
  * (+0x10, +0x14).
  *
- * @param d  UV-scroll make-data (tAddUVScrollData)
+ * @param scrollData  UV-scroll make-data (tAddUVScrollData)
  * @return self
  */
-extern "C" void* func_0035F6E8(sRmState_F6E8* self, sRmDesc_F6E8* d)
+extern "C" void* func_0035F6E8(sRmState_F6E8* self, sRmDesc_F6E8* scrollData)
 {
     self->f40 = 1;
-    self->f0 = d->f4;
-    self->f30 = d->f8;
-    self->f34 = d->fC;
-    self->f8 = d->f18;
-    self->fC = d->f1C;
+    self->f0 = scrollData->f4;
+    self->f30 = scrollData->f8;
+    self->f34 = scrollData->fC;
+    self->f8 = scrollData->f18;
+    self->fC = scrollData->f1C;
     self->f4 = 0;
     self->f10 = 0;
-    self->f14 = d->f20 * (1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
-    self->q = sRmQuad_F6E8(d->f24, d->f28, d->f2C, 0.0f);
-    self->f38 = d->f10;
-    self->f3C = d->f14;
+    self->f14 = scrollData->f20 * (1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
+    self->q = sRmQuad_F6E8(scrollData->f24, scrollData->f28, scrollData->f2C, 0.0f);
+    self->f38 = scrollData->f10;
+    self->f3C = scrollData->f14;
     return self;
 }
 #endif
@@ -5114,11 +5114,11 @@ INCLUDE_ASM("object/railmodifier", func_00360D98);
 /**
  * Returns a rail modifier's SplineId (+0x30).
  *
- * @param arg0  the rail modifier
+ * @param railModifier  the rail modifier
  * @return SplineId
  */
-extern "C" int func_00360D98(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x30)));
+extern "C" int func_00360D98(void *railModifier) {
+    return (*(int *)((char*)(railModifier) + (0x30)));
 }
 #endif
 
@@ -5617,11 +5617,11 @@ INCLUDE_ASM("object/railmodifier", func_00361140);
  * The animated-node update functions (func_00358EB8, func_003592D0) store the same 1e10 into these fields of their
  * embedded animated node.
  *
- * @param arg0  the animated node
+ * @param animNode  the animated node
  */
-extern "C" void func_00361140(void *arg0) {
-    (*(float *)((char*)(arg0) + (8))) = 1e10f;
-    (*(float *)((char*)(arg0) + (0xC))) = 1e10f;
+extern "C" void func_00361140(void *animNode) {
+    (*(float *)((char*)(animNode) + (8))) = 1e10f;
+    (*(float *)((char*)(animNode) + (0xC))) = 1e10f;
 }
 #endif
 
@@ -6290,13 +6290,13 @@ INCLUDE_ASM("object/railmodifier", func_003615A8);
  * Returns the mesh of a float rail segment: the int at +0x44 of that segment's entry in the 0x50-byte node array
  * (+0x70).
  *
- * @param a1  segment index
+ * @param segIndex  segment index
  * @return the segment mesh index
  */
-extern "C" int func_003615A8(void* self, int a1)
+extern "C" int func_003615A8(void* self, int segIndex)
 {
-    sRailEntry50* p = *(sRailEntry50**)((char*)self + 0x70);
-    return p[a1].field_0x44;
+    sRailEntry50* railNodes = *(sRailEntry50**)((char*)self + 0x70);
+    return railNodes[segIndex].field_0x44;
 }
 #endif
 
@@ -6313,13 +6313,13 @@ INCLUDE_ASM("object/railmodifier", func_003615C0);
  * Returns the mesh of a spring rail segment: the int at +0x54 of that segment's entry in the 0x60-byte node array
  * (+0x70).
  *
- * @param a1  segment index
+ * @param segIndex  segment index
  * @return the segment mesh index
  */
-extern "C" int func_003615C0(void* self, int a1)
+extern "C" int func_003615C0(void* self, int segIndex)
 {
-    sRailEntry60* p = *(sRailEntry60**)((char*)self + 0x70);
-    return p[a1].field_0x54;
+    sRailEntry60* railNodes = *(sRailEntry60**)((char*)self + 0x70);
+    return railNodes[segIndex].field_0x54;
 }
 #endif
 
@@ -6387,29 +6387,29 @@ typedef int tMmiQuad __attribute__((mode(TI)));
  * it.
  *
  * @param out  receives the matrix
- * @param a  first control point
- * @param b  second control point
- * @param c  third control point
- * @param d  fourth control point
+ * @param ctrlPoint0  first control point
+ * @param ctrlPoint1  second control point
+ * @param ctrlPoint2  third control point
+ * @param ctrlPoint3  fourth control point
  */
 // PORT: hand-written MMI 4x4 transpose (MMI_TRANSPOSE4: lq/pextlw/pextuw/pcpyld/pcpyud/sq, no gcc 2.95 pattern;
 // retail's registers differ per call site, so an operand asm) plus VU0 macro asm; a port replaces them with a
 // plain C transpose and a C vector-matrix product.
-extern "C" void func_003615D8(void* self, t4Matrix* out, const float* a, const float* b, const float* c, const float* d)
+extern "C" void func_003615D8(void* self, t4Matrix* out, const float* ctrlPoint0, const float* ctrlPoint1, const float* ctrlPoint2, const float* ctrlPoint3)
 {
-    t4Matrix L;
-    t4Vector v;
-    L.row[1].x = a[0]; L.row[1].y = b[0]; L.row[1].z = c[0]; L.row[1].w = d[0];
-    vu0BasisMul_15D8(L.row[2], L.row[1], D_004FFAC0);
-    L.row[0] = L.row[2];
-    L.row[2].x = a[1]; L.row[2].y = b[1]; L.row[2].z = c[1]; L.row[2].w = d[1];
-    vu0BasisMul_15D8(L.row[3], L.row[2], D_004FFAC0);
-    L.row[1] = L.row[3];
-    L.row[3].x = a[2]; L.row[3].y = b[2]; L.row[3].z = c[2]; L.row[3].w = d[2];
-    vu0BasisMul_15D8(v, L.row[3], D_004FFAC0);
-    L.row[2] = v;
-    L.row[3].x = 0.0f; L.row[3].y = 0.0f; L.row[3].z = 0.0f; L.row[3].w = 1.0f;
-    *out = L;
+    t4Matrix coeffMat;
+    t4Vector zCoeffs;
+    coeffMat.row[1].x = ctrlPoint0[0]; coeffMat.row[1].y = ctrlPoint1[0]; coeffMat.row[1].z = ctrlPoint2[0]; coeffMat.row[1].w = ctrlPoint3[0];
+    vu0BasisMul_15D8(coeffMat.row[2], coeffMat.row[1], D_004FFAC0);
+    coeffMat.row[0] = coeffMat.row[2];
+    coeffMat.row[2].x = ctrlPoint0[1]; coeffMat.row[2].y = ctrlPoint1[1]; coeffMat.row[2].z = ctrlPoint2[1]; coeffMat.row[2].w = ctrlPoint3[1];
+    vu0BasisMul_15D8(coeffMat.row[3], coeffMat.row[2], D_004FFAC0);
+    coeffMat.row[1] = coeffMat.row[3];
+    coeffMat.row[3].x = ctrlPoint0[2]; coeffMat.row[3].y = ctrlPoint1[2]; coeffMat.row[3].z = ctrlPoint2[2]; coeffMat.row[3].w = ctrlPoint3[2];
+    vu0BasisMul_15D8(zCoeffs, coeffMat.row[3], D_004FFAC0);
+    coeffMat.row[2] = zCoeffs;
+    coeffMat.row[3].x = 0.0f; coeffMat.row[3].y = 0.0f; coeffMat.row[3].z = 0.0f; coeffMat.row[3].w = 1.0f;
+    *out = coeffMat;
     MMI_TRANSPOSE4(out);
 }
 #endif
@@ -6419,11 +6419,11 @@ INCLUDE_ASM("object/railmodifier", func_00361750);
 /**
  * Tells whether a flag set holds no flags: its flag count (+0x5C) is 0.
  *
- * @param arg0  the flag set
+ * @param flagSet  the flag set
  * @return 1 if empty, else 0
  */
-extern "C" int func_00361750(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x5C))) == 0;
+extern "C" int func_00361750(void *flagSet) {
+    return (*(int *)((char*)(flagSet) + (0x5C))) == 0;
 }
 #endif
 //100%
@@ -6432,11 +6432,11 @@ INCLUDE_ASM("object/railmodifier", func_00361760);
 /**
  * Returns a flag manager's current wind factor (+0x10).
  *
- * @param arg0  the flag manager
+ * @param flagManager  the flag manager
  * @return the wind factor
  */
-extern "C" float func_00361760(void *arg0) {
-    return (*(float *)((char*)(arg0) + (0x10)));
+extern "C" float func_00361760(void *flagManager) {
+    return (*(float *)((char*)(flagManager) + (0x10)));
 }
 #endif
 
@@ -8618,16 +8618,16 @@ extern "C" void func_00362CC8(char* self)
     *(int*)(self + 0x0) = 0;
     *(int*)(self + 0x57494) = 0;
     *(int*)(self + 0x51480) = *(int*)(self + 0x57484);
-    char* a = self + 0x674A0;
-    func_004247D8(a, self + 0x6789F);
-    char* b = self + 0x678A0;
-    func_004247D8(b, self + 0x67C9F);
+    char* stateHashTable = self + 0x674A0;
+    func_004247D8(stateHashTable, self + 0x6789F);
+    char* nodeHashTable = self + 0x678A0;
+    func_004247D8(nodeHashTable, self + 0x67C9F);
     MEM_fill(D_004A5B84, 0, 0x400);
-    func_0038F738(a, 0x400, 2);
-    func_0038F738(b, 0x400, 2);
+    func_0038F738(stateHashTable, 0x400, 2);
+    func_0038F738(nodeHashTable, 0x400, 2);
     *(int*)(self + 0x67CA4) = 0;
-    sRail20_2CC8* d = (sRail20_2CC8*)(self + 0x69CA8);
-    *d = sDrawState_s_defaultDrawState;
+    sRail20_2CC8* currentState = (sRail20_2CC8*)(self + 0x69CA8);
+    *currentState = sDrawState_s_defaultDrawState;
     *(int*)(self + 0x6AED0) = 0;
     *(int*)(self + 0x69CC0) = -1;
     *(int*)(self + 0x69CC8) = 0;
@@ -8795,11 +8795,11 @@ extern "C" void func_00362DE8(void* vself)
     for (int i = 0; i < nChunks; i++) {
         sRmEntry_2DE8* next = (sRmEntry_2DE8*)func_0038F4F8(ring, &self->entries[(i + 1) * chunk], chunkBytes, 4);
         for (int j = 0; j < chunk; j++) {
-            sRmEntry_2DE8* e = &buf[j];
-            unsigned int* state = findState_2DE8(self, e);
+            sRmEntry_2DE8* drawRecord = &buf[j];
+            unsigned int* state = findState_2DE8(self, drawRecord);
             sRmTexKey_2DE8 key;
-            key.set(e->tex[0], e->tex[1]);
-            addEntry_2DE8(self, e, state, key.i);
+            key.set(drawRecord->tex[0], drawRecord->tex[1]);
+            addEntry_2DE8(self, drawRecord, state, key.i);
         }
         buf = next;
         func_0038F6A8(ring);
@@ -8807,11 +8807,11 @@ extern "C" void func_00362DE8(void* vself)
     }
     func_0038F7B0();
     for (int j = 0; j < self->count - chunk * nChunks; j++) {
-        sRmEntry_2DE8* e = &buf[j];
-        unsigned int* state = findState_2DE8(self, e);
+        sRmEntry_2DE8* drawRecord = &buf[j];
+        unsigned int* state = findState_2DE8(self, drawRecord);
         sRmTexKey_2DE8 key;
-        key.set(e->tex[0], e->tex[1]);
-        addEntry_2DE8(self, e, state, key.i);
+        key.set(drawRecord->tex[0], drawRecord->tex[1]);
+        addEntry_2DE8(self, drawRecord, state, key.i);
     }
     func_0038F6A8(ring);
 }
@@ -8927,15 +8927,15 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
         int pass;
         for (int i = 0; i < self->nItems; i++) {
             for (sRmNode_3490* n = self->items[i].node; n != 0; n = n->link) {
-                short u = ((short*)&n->key)[0];
-                if (u >= 0) {
-                    D_0053AB80_3490[u].first = idx;
-                    D_0053AB80_3490[u].count++;
+                short primaryTex = ((short*)&n->key)[0];
+                if (primaryTex >= 0) {
+                    D_0053AB80_3490[primaryTex].first = idx;
+                    D_0053AB80_3490[primaryTex].count++;
                 }
-                short v = ((short*)&n->key)[1];
-                if (v >= 0) {
-                    D_0053AB80_3490[v].first = idx;
-                    D_0053AB80_3490[v].count++;
+                short secondaryTex = ((short*)&n->key)[1];
+                if (secondaryTex >= 0) {
+                    D_0053AB80_3490[secondaryTex].first = idx;
+                    D_0053AB80_3490[secondaryTex].count++;
                 }
                 idx++;
             }
@@ -8977,9 +8977,9 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
                             pkt[0] = ((ulong)(unsigned int)n->packet << 32) | 0x50000000;
                             pkt[1] = 0;
                             pkt += 2;
-                            ulong* t = (ulong*)(n->tail | 0x30000000);
-                            t[0] = 0x60000000;
-                            t[1] = 0;
+                            ulong* tailTag = (ulong*)(n->tail | 0x30000000);
+                            tailTag[0] = 0x60000000;
+                            tailTag[1] = 0;
                         }
                         n = n->link;
                     } while (n != 0);
@@ -9003,9 +9003,9 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
                 pkt[0] = 0x70000000;
                 pkt[1] = 0;
                 pkt += 2;
-                ulong* q = (ulong*)(*path | 0x20000000);
-                q[0] = 0x70000000;
-                q[1] = 0;
+                ulong* pathTag = (ulong*)(*path | 0x20000000);
+                pathTag[0] = 0x70000000;
+                pathTag[1] = 0;
                 *path += 0x10;
                 *out1 = (int)pkt & 0x0FFFFFFF;
                 *out2 = *path;
@@ -9033,15 +9033,15 @@ extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int*
         *out1 = (int)pkt & 0x0FFFFFFF;
     }
     if (*out2 == 0) {
-        ulong* q = (ulong*)(*path | 0x20000000);
-        q[0] = 0x70000000;
-        q[1] = 0;
+        ulong* pathTag = (ulong*)(*path | 0x20000000);
+        pathTag[0] = 0x70000000;
+        pathTag[1] = 0;
         *path += 0x10;
         *out2 = *path;
     }
-    ulong* q = (ulong*)(*path | 0x20000000);
-    q[0] = 0x70000000;
-    q[1] = 0;
+    ulong* pathTag = (ulong*)(*path | 0x20000000);
+    pathTag[0] = 0x70000000;
+    pathTag[1] = 0;
     *path += 0x10;
     pkt[0] = 0x70000000;
     pkt[1] = 0;
@@ -9116,10 +9116,10 @@ extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sRmGs3C20* st, int a2, u
  *
  * @param selfi  the defer manager (passed as an integer)
  * @param st  draw state to switch to
- * @param a2  the bucket's matrix/layer index
+ * @param nodeLayer  the bucket's matrix/layer index
  * @param pp  DMA chain cursor
  */
-extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sRmGs3C20* st, int a2, ulong** pp)
+extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sRmGs3C20* st, int nodeLayer, ulong** pp)
 {
     sRmRend3C20* self = (sRmRend3C20*)selfi;
     sRmPkt27A8 pkt;
@@ -9130,20 +9130,20 @@ extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sRmGs3C20* st, int a2, u
     *pp += 4;
     int ctx = (st->w0 & 0x3C0) >> 6;
     if (ctx != 0) {
-        unsigned int c = Mask3C20(0x3FFFFFFF, st->w3);
+        unsigned int frameWord = Mask3C20(0x3FFFFFFF, st->w3);
         if (((State3C20(self)->w0 & 0x3C0) >> 6) != ctx) {
-            self->buf = a2;
-            self->frame = c;
-            func_00364CD0(self, (st->w0 & 0x3C0) >> 6, 0, c, pp);
-        } else if (a2 != self->buf) {
-            self->buf = a2;
-            self->frame = c;
-            func_00364CD0(self, (st->w0 & 0x3C0) >> 6, 1, c, pp);
+            self->buf = nodeLayer;
+            self->frame = frameWord;
+            func_00364CD0(self, (st->w0 & 0x3C0) >> 6, 0, frameWord, pp);
+        } else if (nodeLayer != self->buf) {
+            self->buf = nodeLayer;
+            self->frame = frameWord;
+            func_00364CD0(self, (st->w0 & 0x3C0) >> 6, 1, frameWord, pp);
         }
-        if (self->frame != c) {
-            self->buf = a2;
-            self->frame = c;
-            func_00364CD0(self, (st->w0 & 0x3C0) >> 6, 2, c, pp);
+        if (self->frame != frameWord) {
+            self->buf = nodeLayer;
+            self->frame = frameWord;
+            func_00364CD0(self, (st->w0 & 0x3C0) >> 6, 2, frameWord, pp);
         }
     }
     pkt.count = 0;
@@ -9231,14 +9231,14 @@ extern "C" void func_00364050(char* self)
     }
     int shift;
     for (shift = 0; shift < 32; shift += 8) {
-        int* h = (int*)hist + ((shift << 5) + (shift >> 3));
+        int* digitCounts = (int*)hist + ((shift << 5) + (shift >> 3));
         for (int i = 0; i < n; i++) {
-            int idx = h[(src[i].key >> shift) & 0xFF]++;
+            int idx = digitCounts[(src[i].key >> shift) & 0xFF]++;
             dst[idx] = src[i];
         }
-        sRmSortItem4050* t = dst;
+        sRmSortItem4050* sortedBuf = dst;
         dst = src;
-        src = t;
+        src = sortedBuf;
     }
     func_0038F6A8(ring);
 }
@@ -9262,47 +9262,47 @@ INCLUDE_ASM("object/railmodifier", func_00364240);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" unsigned int func_00364240(unsigned int* self, int key)
 {
-    int a = 31 - ((self[2] & 0x3E0) >> 5);
-    int b;
+    int layerRank = 31 - ((self[2] & 0x3E0) >> 5);
+    int modeRank;
     int sel = self[1] & 3;
     switch (sel) {
     case 0:
-        b = 0x3FF;
+        modeRank = 0x3FF;
         break;
     case 1:
-        b = 0x3FE;
+        modeRank = 0x3FE;
         break;
     case 2:
-        b = (self[2] & 0x1FFFFC00) >> 10;
+        modeRank = (self[2] & 0x1FFFFC00) >> 10;
         break;
     default:
-        b = 0;
+        modeRank = 0;
         break;
     }
-    int c;
+    int programRank;
     switch ((self[0] & 0x3C0) >> 6) {
-    case 5: c = 6; break;
-    case 2: c = 5; break;
-    case 1: c = 4; break;
-    case 3: c = 3; break;
+    case 5: programRank = 6; break;
+    case 2: programRank = 5; break;
+    case 1: programRank = 4; break;
+    case 3: programRank = 3; break;
     case 6:
-    case 7: c = 2; break;
+    case 7: programRank = 2; break;
     case 4:
-    case 8: c = 1; break;
+    case 8: programRank = 1; break;
     case 0:
-    default: c = 0; break;
+    default: programRank = 0; break;
     }
     int lo = (short)key;
     int hi = key >> 16;
-    int d = 0;
+    int texBits = 0;
     if (lo >= 0) {
-        d = lo;
+        texBits = lo;
     }
     if (hi >= 0) {
-        d |= (hi & 0xF) << 6;
+        texBits |= (hi & 0xF) << 6;
     }
-    d &= 0x3FF;
-    return ~((a << 26) | (b << 16) | (c << 13) | (d << 3));
+    texBits &= 0x3FF;
+    return ~((layerRank << 26) | (modeRank << 16) | (programRank << 13) | (texBits << 3));
 }
 #endif
 
@@ -9709,7 +9709,7 @@ extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, 
 {
     sDefer_4CD0* self = (sDefer_4CD0*)vself;
     sPkt_4CD0 pk(*pp);
-    sMtxRec_4CD0* M = &self->mtx[self->curMtx];
+    sMtxRec_4CD0* mtxRec = &self->mtx[self->curMtx];
     switch (type) {
     case 0:
         break;
@@ -9726,12 +9726,12 @@ extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, 
             pk.p[1] = 0;
             pk.p[2] = 0;
             pk.p[3] = 0x6C06000000000000;
-            ((cQuad128*)pk.p)[2] = ((cQuad128*)M)[8];
-            ((cQuad128*)pk.p)[3] = ((cQuad128*)M)[9];
-            ((cQuad128*)pk.p)[4] = ((cQuad128*)M)[10];
-            ((cQuad128*)pk.p)[5] = ((cQuad128*)M)[11];
-            ((cQuad128*)pk.p)[6] = ((cQuad128*)M)[12];
-            ((cQuad128*)pk.p)[7] = ((cQuad128*)M)[13];
+            ((cQuad128*)pk.p)[2] = ((cQuad128*)mtxRec)[8];
+            ((cQuad128*)pk.p)[3] = ((cQuad128*)mtxRec)[9];
+            ((cQuad128*)pk.p)[4] = ((cQuad128*)mtxRec)[10];
+            ((cQuad128*)pk.p)[5] = ((cQuad128*)mtxRec)[11];
+            ((cQuad128*)pk.p)[6] = ((cQuad128*)mtxRec)[12];
+            ((cQuad128*)pk.p)[7] = ((cQuad128*)mtxRec)[13];
             pk.p += 16;
             break;
         case 2:
@@ -9749,12 +9749,12 @@ extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, 
             pk.p[3] = 0;
             pk.p[4] = 0;
             pk.p[5] = 0x6C0B000000000000;
-            ((cQuad128*)pk.p)[3] = ((cQuad128*)M)[8];
-            ((cQuad128*)pk.p)[4] = ((cQuad128*)M)[9];
-            ((cQuad128*)pk.p)[5] = ((cQuad128*)M)[10];
-            ((cQuad128*)pk.p)[6] = ((cQuad128*)M)[11];
-            ((cQuad128*)pk.p)[7] = ((cQuad128*)M)[12];
-            ((cQuad128*)pk.p)[8] = ((cQuad128*)M)[13];
+            ((cQuad128*)pk.p)[3] = ((cQuad128*)mtxRec)[8];
+            ((cQuad128*)pk.p)[4] = ((cQuad128*)mtxRec)[9];
+            ((cQuad128*)pk.p)[5] = ((cQuad128*)mtxRec)[10];
+            ((cQuad128*)pk.p)[6] = ((cQuad128*)mtxRec)[11];
+            ((cQuad128*)pk.p)[7] = ((cQuad128*)mtxRec)[12];
+            ((cQuad128*)pk.p)[8] = ((cQuad128*)mtxRec)[13];
             pk.p[18] = 0x0000008000000080;
             pk.p[19] = 0x0000008000000080;
             pk.p[20] = 0x302E400000008000;
@@ -9767,10 +9767,10 @@ extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, 
             pk.p[27] = 1042;
             pk.p[0x1C] = 0;
             pk.p[29] = 0x6C2A020000000000;
-            char* g = cBezierMan_TheBezierMan;
-            pk.p[0x1E] = ((ulong)*(int*)(g + 0x1A0) << 32) | 0x30000012;
+            char* bezierMan = cBezierMan_TheBezierMan;
+            pk.p[0x1E] = ((ulong)*(int*)(bezierMan + 0x1A0) << 32) | 0x30000012;
             pk.p[0x1F] = 0;
-            ulong ref2 = ((ulong)*(int*)(g + 0x320) << 32) | 0x30000012;
+            ulong ref2 = ((ulong)*(int*)(bezierMan + 0x320) << 32) | 0x30000012;
             pk.p += 0x20;
             pk.p[0] = ref2;
             pk.p[1] = 0;
@@ -9801,12 +9801,12 @@ extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, 
             pk.p[1] = 0;
             pk.p[2] = 0;
             pk.p[3] = 0x6C06000000000000;
-            ((cQuad128*)pk.p)[2] = ((cQuad128*)M)[8];
-            ((cQuad128*)pk.p)[3] = ((cQuad128*)M)[9];
-            ((cQuad128*)pk.p)[4] = ((cQuad128*)M)[10];
-            ((cQuad128*)pk.p)[5] = ((cQuad128*)M)[11];
-            ((cQuad128*)pk.p)[6] = ((cQuad128*)M)[12];
-            ((cQuad128*)pk.p)[7] = ((cQuad128*)M)[13];
+            ((cQuad128*)pk.p)[2] = ((cQuad128*)mtxRec)[8];
+            ((cQuad128*)pk.p)[3] = ((cQuad128*)mtxRec)[9];
+            ((cQuad128*)pk.p)[4] = ((cQuad128*)mtxRec)[10];
+            ((cQuad128*)pk.p)[5] = ((cQuad128*)mtxRec)[11];
+            ((cQuad128*)pk.p)[6] = ((cQuad128*)mtxRec)[12];
+            ((cQuad128*)pk.p)[7] = ((cQuad128*)mtxRec)[13];
             pk.p += 16;
             break;
         case 2:
@@ -9822,12 +9822,12 @@ extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, 
             pk.p[3] = 0;
             pk.p[4] = 0;
             pk.p[5] = 0x6C07000000000000;
-            ((cQuad128*)pk.p)[3] = ((cQuad128*)M)[8];
-            ((cQuad128*)pk.p)[4] = ((cQuad128*)M)[9];
-            ((cQuad128*)pk.p)[5] = ((cQuad128*)M)[10];
-            ((cQuad128*)pk.p)[6] = ((cQuad128*)M)[11];
-            ((cQuad128*)pk.p)[7] = ((cQuad128*)M)[12];
-            ((cQuad128*)pk.p)[8] = ((cQuad128*)M)[13];
+            ((cQuad128*)pk.p)[3] = ((cQuad128*)mtxRec)[8];
+            ((cQuad128*)pk.p)[4] = ((cQuad128*)mtxRec)[9];
+            ((cQuad128*)pk.p)[5] = ((cQuad128*)mtxRec)[10];
+            ((cQuad128*)pk.p)[6] = ((cQuad128*)mtxRec)[11];
+            ((cQuad128*)pk.p)[7] = ((cQuad128*)mtxRec)[12];
+            ((cQuad128*)pk.p)[8] = ((cQuad128*)mtxRec)[13];
             pk.p[18] = 0x000002C20000010C;
             pk.p[19] = 0;
             pk.p += 0x14;
@@ -9840,12 +9840,12 @@ extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, 
             pk.p[1] = 0;
             pk.p[2] = 0;
             pk.p[3] = 0x6C06000000000000;
-            ((cQuad128*)pk.p)[2] = ((cQuad128*)M)[8];
-            ((cQuad128*)pk.p)[3] = ((cQuad128*)M)[9];
-            ((cQuad128*)pk.p)[4] = ((cQuad128*)M)[10];
-            ((cQuad128*)pk.p)[5] = ((cQuad128*)M)[11];
-            ((cQuad128*)pk.p)[6] = ((cQuad128*)M)[12];
-            ((cQuad128*)pk.p)[7] = ((cQuad128*)M)[13];
+            ((cQuad128*)pk.p)[2] = ((cQuad128*)mtxRec)[8];
+            ((cQuad128*)pk.p)[3] = ((cQuad128*)mtxRec)[9];
+            ((cQuad128*)pk.p)[4] = ((cQuad128*)mtxRec)[10];
+            ((cQuad128*)pk.p)[5] = ((cQuad128*)mtxRec)[11];
+            ((cQuad128*)pk.p)[6] = ((cQuad128*)mtxRec)[12];
+            ((cQuad128*)pk.p)[7] = ((cQuad128*)mtxRec)[13];
             pk.p += 16;
             break;
         case 2:
@@ -9862,19 +9862,19 @@ extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, 
             pk.p[4] = 0;
             pk.p[5] = 0x6C07000000000000;
             pk.p += 6;
-            putQw_4CD0(pk.p, M->worldView, 4);
-            sVec_4CD0 a = M->guardScale;
-            a.z *= 0.0625f;
-            putQw_4CD0(pk.p, &a, 1);
-            sVec_4CD0 b = M->guardOffset;
-            b.z *= 0.0625f;
-            putQw_4CD0(pk.p, &b, 1);
-            sVec_4CD0 c;
-            c.x = M->view[0];
-            c.y = M->view[5];
-            c.z = 0;
-            c.w = 0;
-            putQw_4CD0(pk.p, &c, 1);
+            putQw_4CD0(pk.p, mtxRec->worldView, 4);
+            sVec_4CD0 scaleVec = mtxRec->guardScale;
+            scaleVec.z *= 0.0625f;
+            putQw_4CD0(pk.p, &scaleVec, 1);
+            sVec_4CD0 offsetVec = mtxRec->guardOffset;
+            offsetVec.z *= 0.0625f;
+            putQw_4CD0(pk.p, &offsetVec, 1);
+            sVec_4CD0 projScale;
+            projScale.x = mtxRec->view[0];
+            projScale.y = mtxRec->view[5];
+            projScale.z = 0;
+            projScale.w = 0;
+            putQw_4CD0(pk.p, &projScale, 1);
             break;
         }
         case 1: {
@@ -9883,19 +9883,19 @@ extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, 
             pk.p[2] = 0;
             pk.p[3] = 0x6C07000000000000;
             pk.p += 4;
-            putQw_4CD0(pk.p, M->worldClip, 4);
-            sVec_4CD0 a = M->screenScale;
-            a.z *= 0.0625f;
-            putQw_4CD0(pk.p, &a, 1);
-            sVec_4CD0 b = M->screenOffset;
-            b.z *= 0.0625f;
-            putQw_4CD0(pk.p, &b, 1);
-            sVec_4CD0 c;
-            c.x = M->viewProj[0];
-            c.y = M->viewProj[5];
-            c.z = 0;
-            c.w = 0;
-            putQw_4CD0(pk.p, &c, 1);
+            putQw_4CD0(pk.p, mtxRec->worldClip, 4);
+            sVec_4CD0 scaleVec = mtxRec->screenScale;
+            scaleVec.z *= 0.0625f;
+            putQw_4CD0(pk.p, &scaleVec, 1);
+            sVec_4CD0 offsetVec = mtxRec->screenOffset;
+            offsetVec.z *= 0.0625f;
+            putQw_4CD0(pk.p, &offsetVec, 1);
+            sVec_4CD0 projScale;
+            projScale.x = mtxRec->viewProj[0];
+            projScale.y = mtxRec->viewProj[5];
+            projScale.z = 0;
+            projScale.w = 0;
+            putQw_4CD0(pk.p, &projScale, 1);
             break;
         }
         case 2:
@@ -9912,18 +9912,18 @@ extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, 
             pk.p[4] = 0;
             pk.p[5] = 0x6C03000000000000;
             pk.p += 6;
-            sVec_4CD0 a = M->screenScale;
-            a.z *= 0.0625f;
-            putQw_4CD0(pk.p, &a, 1);
-            sVec_4CD0 b = M->screenOffset;
-            b.z *= 0.0625f;
-            putQw_4CD0(pk.p, &b, 1);
-            sVec_4CD0 c;
-            c.x = M->viewProj[0];
-            c.y = M->viewProj[5];
-            c.z = 0;
-            c.w = 0;
-            putQw_4CD0(pk.p, &c, 1);
+            sVec_4CD0 scaleVec = mtxRec->screenScale;
+            scaleVec.z *= 0.0625f;
+            putQw_4CD0(pk.p, &scaleVec, 1);
+            sVec_4CD0 offsetVec = mtxRec->screenOffset;
+            offsetVec.z *= 0.0625f;
+            putQw_4CD0(pk.p, &offsetVec, 1);
+            sVec_4CD0 projScale;
+            projScale.x = mtxRec->viewProj[0];
+            projScale.y = mtxRec->viewProj[5];
+            projScale.z = 0;
+            projScale.w = 0;
+            putQw_4CD0(pk.p, &projScale, 1);
             break;
         }
         case 1: {
@@ -9932,18 +9932,18 @@ extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, 
             pk.p[2] = 0;
             pk.p[3] = 0x6C03000000000000;
             pk.p += 4;
-            sVec_4CD0 a = M->screenScale;
-            a.z *= 0.0625f;
-            putQw_4CD0(pk.p, &a, 1);
-            sVec_4CD0 b = M->screenOffset;
-            b.z *= 0.0625f;
-            putQw_4CD0(pk.p, &b, 1);
-            sVec_4CD0 c;
-            c.x = M->viewProj[0];
-            c.y = M->viewProj[5];
-            c.z = 0;
-            c.w = 0;
-            putQw_4CD0(pk.p, &c, 1);
+            sVec_4CD0 scaleVec = mtxRec->screenScale;
+            scaleVec.z *= 0.0625f;
+            putQw_4CD0(pk.p, &scaleVec, 1);
+            sVec_4CD0 offsetVec = mtxRec->screenOffset;
+            offsetVec.z *= 0.0625f;
+            putQw_4CD0(pk.p, &offsetVec, 1);
+            sVec_4CD0 projScale;
+            projScale.x = mtxRec->viewProj[0];
+            projScale.y = mtxRec->viewProj[5];
+            projScale.z = 0;
+            projScale.w = 0;
+            putQw_4CD0(pk.p, &projScale, 1);
             break;
         }
         case 2:
@@ -9963,23 +9963,23 @@ extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, 
             pk.p[3] = 0;
             pk.p[4] = 0;
             pk.p[5] = 0x6C06000000000000;
-            ((cQuad128*)pk.p)[3] = ((cQuad128*)M)[8];
-            ((cQuad128*)pk.p)[4] = ((cQuad128*)M)[9];
-            ((cQuad128*)pk.p)[5] = ((cQuad128*)M)[10];
-            ((cQuad128*)pk.p)[6] = ((cQuad128*)M)[11];
-            ((cQuad128*)pk.p)[7] = ((cQuad128*)M)[12];
-            ((cQuad128*)pk.p)[8] = ((cQuad128*)M)[13];
+            ((cQuad128*)pk.p)[3] = ((cQuad128*)mtxRec)[8];
+            ((cQuad128*)pk.p)[4] = ((cQuad128*)mtxRec)[9];
+            ((cQuad128*)pk.p)[5] = ((cQuad128*)mtxRec)[10];
+            ((cQuad128*)pk.p)[6] = ((cQuad128*)mtxRec)[11];
+            ((cQuad128*)pk.p)[7] = ((cQuad128*)mtxRec)[12];
+            ((cQuad128*)pk.p)[8] = ((cQuad128*)mtxRec)[13];
             pk.p[18] = 0x10000005;
             pk.p[19] = 0;
             pk.p[20] = 0;
             pk.p[21] = 0x6C04039200000000;
             pk.p[22] = 0x312E400000008000;
             pk.p[23] = 1042;
-            sMtx_4CD0 m = M->world;
-            m = D_004FFB80_4CD0 * m;
-            ((cQuad128*)pk.p)[0xC] = *(cQuad128*)&m.m[0];
-            ((cQuad128*)pk.p)[0xD] = *(cQuad128*)&m.m[4];
-            ((cQuad128*)pk.p)[0xE] = *(cQuad128*)&m.m[8];
+            sMtx_4CD0 biasedWorld = mtxRec->world;
+            biasedWorld = D_004FFB80_4CD0 * biasedWorld;
+            ((cQuad128*)pk.p)[0xC] = *(cQuad128*)&biasedWorld.m[0];
+            ((cQuad128*)pk.p)[0xD] = *(cQuad128*)&biasedWorld.m[4];
+            ((cQuad128*)pk.p)[0xE] = *(cQuad128*)&biasedWorld.m[8];
             pk.p += 0x1E;
             if (w3 != 0) {
                 pk.p[0] = DMA_CALL_4CD0(w3);
@@ -9993,23 +9993,23 @@ extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, 
             pk.p[1] = 0;
             pk.p[2] = 0;
             pk.p[3] = 0x6C06000000000000;
-            ((cQuad128*)pk.p)[2] = ((cQuad128*)M)[8];
-            ((cQuad128*)pk.p)[3] = ((cQuad128*)M)[9];
-            ((cQuad128*)pk.p)[4] = ((cQuad128*)M)[10];
-            ((cQuad128*)pk.p)[5] = ((cQuad128*)M)[11];
-            ((cQuad128*)pk.p)[6] = ((cQuad128*)M)[12];
-            ((cQuad128*)pk.p)[7] = ((cQuad128*)M)[13];
+            ((cQuad128*)pk.p)[2] = ((cQuad128*)mtxRec)[8];
+            ((cQuad128*)pk.p)[3] = ((cQuad128*)mtxRec)[9];
+            ((cQuad128*)pk.p)[4] = ((cQuad128*)mtxRec)[10];
+            ((cQuad128*)pk.p)[5] = ((cQuad128*)mtxRec)[11];
+            ((cQuad128*)pk.p)[6] = ((cQuad128*)mtxRec)[12];
+            ((cQuad128*)pk.p)[7] = ((cQuad128*)mtxRec)[13];
             pk.p[0x10] = 0x10000005;
             pk.p[17] = 0;
             pk.p[18] = 0;
             pk.p[19] = 0x6C04039200000000;
             pk.p[20] = 0x312E400000008000;
             pk.p[21] = 1042;
-            sMtx_4CD0 m = M->world;
-            m = D_004FFB80_4CD0 * m;
-            ((cQuad128*)pk.p)[0xB] = *(cQuad128*)&m.m[0];
-            ((cQuad128*)pk.p)[0xC] = *(cQuad128*)&m.m[4];
-            ((cQuad128*)pk.p)[0xD] = *(cQuad128*)&m.m[8];
+            sMtx_4CD0 biasedWorld = mtxRec->world;
+            biasedWorld = D_004FFB80_4CD0 * biasedWorld;
+            ((cQuad128*)pk.p)[0xB] = *(cQuad128*)&biasedWorld.m[0];
+            ((cQuad128*)pk.p)[0xC] = *(cQuad128*)&biasedWorld.m[4];
+            ((cQuad128*)pk.p)[0xD] = *(cQuad128*)&biasedWorld.m[8];
             pk.p += 0x1C;
             if (w3 != 0) {
                 pk.p[0] = DMA_CALL_4CD0(w3);
@@ -10110,17 +10110,17 @@ struct sRailModE40 {
  * block 0 is filed into its size class (func_003660A8). pool (+0x23E8) is the owner table freed blocks report to.
  *
  * @param list  the allocator
- * @param a1  start address
- * @param a2  size
+ * @param startAddr  start address
+ * @param heapSize  size
  * @param pool  owner table
  */
-extern "C" void func_00365E40(void* list, int a1, int a2, void* pool)
+extern "C" void func_00365E40(void* list, int startAddr, int heapSize, void* pool)
 {
     sRailModE40* self = (sRailModE40*)list;
     int i;
-    self->f1FF4 = a2;
-    self->links[0].flags = a1;
-    self->links[0].f4 = a2;
+    self->f1FF4 = heapSize;
+    self->links[0].flags = startAddr;
+    self->links[0].f4 = heapSize;
     self->links[0].fC = -1;
     self->links[0].next = -1;
     self->links[0].prev = -1;
@@ -10302,12 +10302,12 @@ extern "C" void func_003660A8(void* selfp, int idx)
         heads = self->headsB;
         tag = 0xA0000000;
     }
-    int b = railFloorLog2_60A8(node->size) - 6;
-    sRailNode* head = &heads[b];
+    int sizeClass = railFloorLog2_60A8(node->size) - 6;
+    sRailNode* head = &heads[sizeClass];
     int first = head->next2;
     if (first == -1) {
         head->next2 = idx;
-        node->prev2 = b | tag;
+        node->prev2 = sizeClass | tag;
         node->next2 = first;
         return;
     }
@@ -10446,13 +10446,13 @@ extern "C" void func_003663D8(void* selfp, int idx)
     func_00366238(self, idx);
     func_003660A8(self, idx);
     for (;;) {
-        int l = n->prev;
-        if (l >= 0 && (self->nodes[l].field_0x0 & 1) == 0) {
-            idx = l;
-            n = &self->nodes[l];
+        int prevIdx = n->prev;
+        if (prevIdx >= 0 && (self->nodes[prevIdx].field_0x0 & 1) == 0) {
+            idx = prevIdx;
+            n = &self->nodes[prevIdx];
         } else {
-            int r = n->next;
-            if (r < 0 || (self->nodes[r].field_0x0 & 1)) {
+            int nextIdx = n->next;
+            if (nextIdx < 0 || (self->nodes[nextIdx].field_0x0 & 1)) {
                 return;
             }
         }
@@ -10592,10 +10592,10 @@ extern "C" void func_003666F8()
 {
     cQuad128 fill = makeFill66F8(0xFFFFFFFF, 0xFFFFFFFF);
     func_004247D8(D_0053AB80, D_0053E9FF);
-    cQuad128* p = (cQuad128*)D_004A5B84;
+    cQuad128* spadCursor = (cQuad128*)D_004A5B84;
     unsigned int n = spadFree66F8() >> 4;
     for (; n != 0; n--) {
-        *p++ = fill;
+        *spadCursor++ = fill;
     }
     int chunk = spadFree66F8() >> 3;
     for (int i = 0; i < 2000; i += chunk) {
@@ -10662,16 +10662,16 @@ struct sRailLink6888 {
 // Returns the index of the disabled link with the largest f4 (at least 0), or -1.
 extern "C" int func_00366888(void* self)
 {
-    char* s = (char*)self;
-    int i = *(int*)(s + 0x23C0);
+    char* heapBase = (char*)self;
+    int i = *(int*)(heapBase + 0x23C0);
     int best = 0;
     int idx = -1;
     while (i >= 0) {
-        sRailLink6888* links = *(sRailLink6888**)(s + 0x1FF0);
+        sRailLink6888* links = *(sRailLink6888**)(heapBase + 0x1FF0);
         if (!(links[i].flags & 1)) {
-            int v = links[i].f4;
-            if (v >= best) {
-                best = v;
+            int blockSize = links[i].f4;
+            if (blockSize >= best) {
+                best = blockSize;
                 idx = i;
             }
         }

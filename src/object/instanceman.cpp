@@ -536,14 +536,14 @@ void func_00351A60_vf(void* self, float f) __asm__("func_00351A60__FPv");
  * (func_00351A60).
  *
  * @param src  anim record
- * @param f  time to evaluate at
+ * @param animTime  time to evaluate at
  * @return self
  */
-extern "C" void* func_00351A10(void* self, float* src, float f)
+extern "C" void* func_00351A10(void* self, float* src, float animTime)
 {
-    func_00351330(self, src, f);
+    func_00351330(self, src, animTime);
     *(void***)((char*)self + 0x84) = D_00490AB0;
-    func_00351A60_vf(self, f);
+    func_00351A60_vf(self, animTime);
     return self;
 }
 #endif
@@ -846,16 +846,16 @@ struct sImSrc {
  * scaled by |speed| * VelScale when a collision is given. The record flags get bit 0x4, lose 0x2 and 0x60, then
  * func_00352230 randomises the motion.
  *
- * @param a1  update bucket
- * @param a2  instance record to break apart
+ * @param bucket  update bucket
+ * @param instRecord  instance record to break apart
  * @param def  mesh-anim make-data (tMakeMeshAnimData layout)
  * @param src  collision that caused it (direction and speed), or 0
  * @param owner  node the instance had before, deleted here, or 0
  * @return self
  */
-extern "C" sImInst* func_00351B40(sImInst* self, void* a1, void* a2, sImDef* def, sImSrc* src, sImObj* owner)
+extern "C" sImInst* func_00351B40(sImInst* self, void* bucket, void* instRecord, sImDef* def, sImSrc* src, sImObj* owner)
 {
-    func_0034FB00(self, a1, 11, a2);
+    func_0034FB00(self, bucket, 11, instRecord);
     self->vt = cMeshAnimNode_vtbl;
     new (&self->rot) sImV4[24];
     new (&self->arr1) sImV4[24];
@@ -873,18 +873,18 @@ extern "C" sImInst* func_00351B40(sImInst* self, void* a1, void* a2, sImDef* def
     sImObj* obj = owner;
     sImMtx* root = (sImMtx*)((char*)self->model + 0x10);
     if (~def->model.id != 0) {
-        sImModelInst* m = (sImModelInst*)def->model.get();
-        if (m != 0 && m->getOwner() != 0) {
-            obj = m->getOwner();
+        sImModelInst* rootInst = (sImModelInst*)def->model.get();
+        if (rootInst != 0 && rootInst->getOwner() != 0) {
+            obj = rootInst->getOwner();
         }
     }
     if (obj != 0) {
-        sImVEntry* e = &obj->vt[24];
-        root = (sImMtx*)e->fn((char*)obj + e->delta);
-        e = &obj->vt[26];
-        if (e->fn((char*)obj + e->delta) != 0) {
-            e = &obj->vt[27];
-            mats = (sImMtx*)e->fn((char*)obj + e->delta);
+        sImVEntry* ownerSlot = &obj->vt[24];
+        root = (sImMtx*)ownerSlot->fn((char*)obj + ownerSlot->delta);
+        ownerSlot = &obj->vt[26];
+        if (ownerSlot->fn((char*)obj + ownerSlot->delta) != 0) {
+            ownerSlot = &obj->vt[27];
+            mats = (sImMtx*)ownerSlot->fn((char*)obj + ownerSlot->delta);
             if (def->bone != -1) {
                 root = &mats[def->bone];
                 mats = local;
@@ -892,21 +892,21 @@ extern "C" sImInst* func_00351B40(sImInst* self, void* a1, void* a2, sImDef* def
         }
     }
     if (mats == local) {
-        sImBone* b = skel->bones;
-        float s = self->model->scale;
-        sImV4 scale(s, s, s, 1.0f);
-        for (int i = 0; i < skel->count; i++, b++) {
-            if (b->parent != -1) {
-                local[i] = mulScaledIM(local[b->parent], *b->mtx, scale);
+        sImBone* boneIter = skel->bones;
+        float modelScale = self->model->scale;
+        sImV4 scale(modelScale, modelScale, modelScale, 1.0f);
+        for (int i = 0; i < skel->count; i++, boneIter++) {
+            if (boneIter->parent != -1) {
+                local[i] = mulScaledIM(local[boneIter->parent], *boneIter->mtx, scale);
             } else {
-                local[i] = mulScaledIM(*root, *b->mtx, scale);
+                local[i] = mulScaledIM(*root, *boneIter->mtx, scale);
             }
         }
     }
     for (int i = 0; i < skel->count; i++) {
-        sImPair p = tPose_tPose(&mats[i]);
-        self->rot[i] = p.rot;
-        self->pos[i] = p.pos;
+        sImPair bonePose = tPose_tPose(&mats[i]);
+        self->rot[i] = bonePose.rot;
+        self->pos[i] = bonePose.pos;
     }
     if (owner != 0) {
         sImVEntryI* vt = (sImVEntryI*)owner->vt;

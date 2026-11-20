@@ -247,20 +247,20 @@ extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
  * Rotate flags (+0x20) from desc +0x10..+0x17 (entries 8 and up are left as they are). Finally clears bit 0x2 and sets
  * bit 0x4 in the instance record's flags.
  *
- * @param a1  update bucket the node joins
- * @param a2  instance record the node drives
+ * @param bucket  update bucket the node joins
+ * @param instRecord  instance record the node drives
  * @param desc  conveyor make-data (Vel, UScroll, VScroll, Rotate0..7)
  * @return self
  */
-extern "C" void* func_00343010(sDebounce_3010* self, void* a1, void* a2, sDesc_3010* desc)
+extern "C" void* func_00343010(sDebounce_3010* self, void* bucket, void* instRecord, sDesc_3010* desc)
 {
-    func_0034FB00(self, a1, 0xF, a2);
+    func_0034FB00(self, bucket, 0xF, instRecord);
     self->vt = D_00490570;
     self->f1C = desc->f4;
-    sVec2_3010 v;
-    v.x = desc->f8;
-    v.y = desc->fC;
-    self->v38 = v;
+    sVec2_3010 uvScroll;
+    uvScroll.x = desc->f8;
+    uvScroll.y = desc->fC;
+    self->v38 = uvScroll;
     self->f40 = 0;
     self->f44 = 0;
     for (int i = 0; i < 8; i++) {
@@ -289,13 +289,13 @@ extern char D_00490570[];
  * Runs the replay constructor cInstanceNode_cInstanceNode, installs the conveyor vtable D_00490570 and reads the
  * 44-byte node state (+0x1C..+0x47: Vel, Rotate flags, UVScroll, UV) through the stream's read slot (vtable entry 2).
  *
- * @param unused  update bucket, passed on to cInstanceNode_cInstanceNode
+ * @param bucket  update bucket, passed on to cInstanceNode_cInstanceNode
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* func_003430D0(void* self, void* unused, void* stream)
+extern "C" void* func_003430D0(void* self, void* bucket, void* stream)
 {
-    cInstanceNode_cInstanceNode(self, unused, stream);
+    cInstanceNode_cInstanceNode(self, bucket, stream);
     *(void**)((char*)self + 0xC) = D_00490570;
     sDebounceVEntry30D0* vt = *(sDebounceVEntry30D0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x1C, 44);
@@ -737,16 +737,16 @@ extern "C" void func_00343588(char* self)
     {
         sDfGfxVt_343588* vt = (sDfGfxVt_343588*)gfx->mVtbl;
         char* thisp = (char*)gfx + vt[93].delta;
-        sDfVec_343588 b[2];
-        b[0].x = OBJ_343588(self)->pos[0];
-        b[0].y = OBJ_343588(self)->pos[1];
-        b[0].z = OBJ_343588(self)->pos[2];
-        b[0].w = 1.0f;
-        b[1].x = OBJ_343588(self)->scl[0];
-        b[1].y = OBJ_343588(self)->scl[1];
-        b[1].z = OBJ_343588(self)->scl[2];
-        b[1].w = 1.0f;
-        int res = ((DfCullFn_343588)vt[93].fn)(thisp, &b[0], &b[1], ((DfViewFn_343588)((sDfGfxVt_343588*)gfx->mVtbl)[43].fn)((char*)gfx + ((sDfGfxVt_343588*)gfx->mVtbl)[43].delta));
+        sDfVec_343588 cullBox[2];
+        cullBox[0].x = OBJ_343588(self)->pos[0];
+        cullBox[0].y = OBJ_343588(self)->pos[1];
+        cullBox[0].z = OBJ_343588(self)->pos[2];
+        cullBox[0].w = 1.0f;
+        cullBox[1].x = OBJ_343588(self)->scl[0];
+        cullBox[1].y = OBJ_343588(self)->scl[1];
+        cullBox[1].z = OBJ_343588(self)->scl[2];
+        cullBox[1].w = 1.0f;
+        int res = ((DfCullFn_343588)vt[93].fn)(thisp, &cullBox[0], &cullBox[1], ((DfViewFn_343588)((sDfGfxVt_343588*)gfx->mVtbl)[43].fn)((char*)gfx + ((sDfGfxVt_343588*)gfx->mVtbl)[43].delta));
         if (res == 1) {
             return;
         }
@@ -1005,19 +1005,19 @@ struct sState00343A68 {
  */
 extern "C" sState00343A68* func_00343A68(sState00343A68* self)
 {
-    sState00343A68* p = self;
+    sState00343A68* crowdBlock = self;
     int i;
     for (i = 4; i != -1; i--) {
-        sState00343A68* next = p + 1;
-        p->f4 = 0xFFFFFFFF;
-        sSlot00343A68* q = p->slots;
+        sState00343A68* next = crowdBlock + 1;
+        crowdBlock->f4 = 0xFFFFFFFF;
+        sSlot00343A68* memberSlot = crowdBlock->slots;
         int j;
         for (j = 31; j != -1; j--) {
-            q->id = 0xFFFFFFFF;
-            q++;
+            memberSlot->id = 0xFFFFFFFF;
+            memberSlot++;
         }
-        func_003442E0((sDebounceState*)p);
-        p = next;
+        func_003442E0((sDebounceState*)crowdBlock);
+        crowdBlock = next;
     }
     D_004A3FF0_p = self;
     for (i = 0; i < 5; i++) {
@@ -1053,17 +1053,17 @@ struct sDebounce_343B28 {
  */
 extern "C" void func_00343B28(void* self, int flags)
 {
-    sDebounce_343B28* d = (sDebounce_343B28*)self;
+    sDebounce_343B28* crowdMan = (sDebounce_343B28*)self;
     int i;
     for (i = 0; i < 5; i++) {
-        func_00344348(&d->elems[i]);
+        func_00344348(&crowdMan->elems[i]);
     }
     D_004A3FF0 = 0;
-    if (d->elems != 0) {
-        sDebounceElem_343B28* p = d->elems + 5;
-        while (d->elems != p) {
-            p--;
-            func_00344348(p);
+    if (crowdMan->elems != 0) {
+        sDebounceElem_343B28* blockIter = crowdMan->elems + 5;
+        while (crowdMan->elems != blockIter) {
+            blockIter--;
+            func_00344348(blockIter);
         }
     }
     if (flags & 1) {
@@ -1114,13 +1114,13 @@ extern "C" void func_00344898(void* elem, void* arg);
  * Calls func_00344898 on each block; that drops the members whose instance id has the section in its low byte and frees
  * a block that becomes empty. cGame_sectionUnloading calls it with the unloading section.
  *
- * @param arg  world section id being unloaded
+ * @param sectionId  world section id being unloaded
  */
-extern "C" void func_00343C08(sDebounceElem3C08* self, void* arg)
+extern "C" void func_00343C08(sDebounceElem3C08* self, void* sectionId)
 {
     int i;
     for (i = 0; i < 5; i++) {
-        func_00344898(&self[i], arg);
+        func_00344898(&self[i], sectionId);
     }
 }
 #endif
@@ -1271,12 +1271,12 @@ extern "C" void func_003449F0(void* elem);
 extern "C" void func_003440C8(sDebounceElem40C8* self)
 {
     int i;
-    sDebounceElem40C8* p = self;
+    sDebounceElem40C8* crowdBlock = self;
     for (i = 0; i < 5; i++) {
         if (self[i].field_0x8 != 0xFFFFFFFF) {
-            func_003449F0(p);
+            func_003449F0(crowdBlock);
         }
-        p++;
+        crowdBlock++;
     }
 }
 #endif
@@ -1302,12 +1302,12 @@ extern "C" void func_00344E18(void* elem);
 extern "C" void func_00344138(sDebounceElem4138* self)
 {
     int i;
-    sDebounceElem4138* p = self;
+    sDebounceElem4138* crowdBlock = self;
     for (i = 0; i < 5; i++) {
         if (self[i].field_0x8 != 0xFFFFFFFF) {
-            func_00344E18(p);
+            func_00344E18(crowdBlock);
         }
-        p++;
+        crowdBlock++;
     }
 }
 #endif
@@ -1337,16 +1337,16 @@ struct sDebounceVEntry41A8 {
  * For each of the five blocks it writes the 4-byte key (+0x8) through the stream's write slot (vtable entry 1) and, for
  * a block in use, the block's member data (func_00344FC0).
  *
- * @param s  replay stream to write to
+ * @param replayStream  replay stream to write to
  */
-extern "C" void func_003441A8(sDebounceElem41A8* self, cDebounceStream* s)
+extern "C" void func_003441A8(sDebounceElem41A8* self, cDebounceStream* replayStream)
 {
     int i;
     for (i = 0; i < 5; i++) {
-        sDebounceVEntry41A8* e = &(*(sDebounceVEntry41A8**)s)[1];
-        e->fn((char*)s + e->delta, &self[i].field_0x8, 4);
+        sDebounceVEntry41A8* writeSlot = &(*(sDebounceVEntry41A8**)replayStream)[1];
+        writeSlot->fn((char*)replayStream + writeSlot->delta, &self[i].field_0x8, 4);
         if (self[i].field_0x8 != 0xFFFFFFFF) {
-            func_00344FC0(&self[i], s);
+            func_00344FC0(&self[i], replayStream);
         }
     }
 }
@@ -1377,17 +1377,17 @@ struct sDebounceVEntry4240 {
  * Empties all blocks first (func_00343BC0), then for each of the five reads the 4-byte key (+0x8) through the stream's
  * read slot (vtable entry 2) and, for a block in use, its member data and animation (func_00344FF8).
  *
- * @param s  replay stream to read from
+ * @param replayStream  replay stream to read from
  */
-extern "C" void func_00344240(sDebounceElem4240* self, cDebounceStream* s)
+extern "C" void func_00344240(sDebounceElem4240* self, cDebounceStream* replayStream)
 {
     int i;
     func_00343BC0((sDebounceBlock*)self);
     for (i = 0; i < 5; i++) {
-        sDebounceVEntry4240* e = &(*(sDebounceVEntry4240**)s)[2];
-        e->fn((char*)s + e->delta, &self[i].field_0x8, 4);
+        sDebounceVEntry4240* readSlot = &(*(sDebounceVEntry4240**)replayStream)[2];
+        readSlot->fn((char*)replayStream + readSlot->delta, &self[i].field_0x8, 4);
         if (self[i].field_0x8 != 0xFFFFFFFF) {
-            func_00344FF8(&self[i], s);
+            func_00344FF8(&self[i], replayStream);
         }
     }
 }
@@ -1669,8 +1669,8 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
         }
     }
     for (i = 0; i < self->nActive; i++) {
-        sDbMesh_43A8* p = (sDbMesh_43A8*)(i * 0xD0 + (int)self->meshes);
-        ((sDbVEntry_43A8*)p->vtable)[2].fn((char*)p + ((sDbVEntry_43A8*)p->vtable)[2].delta, self->time);
+        sDbMesh_43A8* slotIds = (sDbMesh_43A8*)(i * 0xD0 + (int)self->meshes);
+        ((sDbVEntry_43A8*)slotIds->vtable)[2].fn((char*)slotIds + ((sDbVEntry_43A8*)slotIds->vtable)[2].delta, self->time);
     }
     func_00344AA0_43A8(self);
     self->first = 0;
@@ -1689,9 +1689,9 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
         if (item->data != 0) {
             self->ptrs[i] = &self->slots[i];
             self->ptrs[i]->fC = item->fC;
-            short* p = (short*)self->slots;
+            short* slotIds = (short*)self->slots;
             for (int j = 1; j < 4; j++) {
-                p[j] = -1;
+                slotIds[j] = -1;
             }
             self->slots[i].value = *(unsigned short*)(item->data + 4);
         } else {
@@ -2213,11 +2213,11 @@ public:
 /**
  * Writes a crowd block's member data (its first 268 bytes: count, model id, key, 32 entries) to a replay frame.
  *
- * @param s  replay stream to write to (vtable entry 1)
+ * @param replayStream  replay stream to write to (vtable entry 1)
  */
-extern "C" void func_00344FC0(void* self, cDebounceStream* s)
+extern "C" void func_00344FC0(void* self, cDebounceStream* replayStream)
 {
-    s->write(self, 268);
+    replayStream->write(self, 268);
 }
 #endif
 
@@ -2232,11 +2232,11 @@ extern "C" void func_003443A8(void* self);
  * Reads the first 268 bytes (count, model id, key, 32 entries) through the stream's vtable entry 2, then frees
  * (func_00344800) and rebuilds (func_003443A8) the animation data.
  *
- * @param s  replay stream to read from
+ * @param replayStream  replay stream to read from
  */
-extern "C" void func_00344FF8(void* self, cDebounceStream* s)
+extern "C" void func_00344FF8(void* self, cDebounceStream* replayStream)
 {
-    s->read(self, 268);
+    replayStream->read(self, 268);
     func_00344800(self);
     func_003443A8(self);
 }
@@ -2620,9 +2620,9 @@ struct sCtl00345430 {
  * (+0x68: count +0x20, first +0x24, next +0x64) and, for each segment that func_00345638 reports visible, calls
  * graphics-manager slot 75 with the segment data (+0x10), the colour and 10.
  *
- * @param arg  address of the colour to draw with (cSplineModifier passes its +0x20)
+ * @param lineColour  address of the colour to draw with (cSplineModifier passes its +0x20)
  */
-extern "C" void func_00345430(void* self, int arg)
+extern "C" void func_00345430(void* self, int lineColour)
 {
     cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
     char* list = *(char**)(*(char**)((char*)self + 8) + 0x68);
@@ -2633,7 +2633,7 @@ extern "C" void func_00345430(void* self, int arg)
     int i;
     for (i = 0; i < n; i++) {
         if (func_00345638(node) != 0) {
-            ((cWorld00345430*)w)->v75(node + 0x10, arg, 10);
+            ((cWorld00345430*)w)->v75(node + 0x10, lineColour, 10);
         }
         node = *(char**)(node + 0x64);
     }

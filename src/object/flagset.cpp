@@ -252,10 +252,10 @@ extern "C" void func_0034B818(void* elem)
     }
     char* wind = (char*)func_002D1CB0();
     float k = self->blend;
-    float t = k + *(float*)(wind + 0x10) * (1.0f - k);
+    float windBlend = k + *(float*)(wind + 0x10) * (1.0f - k);
     int i;
     for (i = 0; i < 4; i++) {
-        self->phase[i] += self->speed[i] * t;
+        self->phase[i] += self->speed[i] * windBlend;
         if (1.0f <= self->phase[i]) {
             self->phase[i] -= 1.0f;
         }
@@ -263,9 +263,9 @@ extern "C" void func_0034B818(void* elem)
     if (func_002D1C98() % 2 == self->parity) {
         sFlagVert_B818 verts[50];
         func_0034BCA0(self, verts);
-        sFlagMesh_B818* m = self->mesh;
-        sFlagVEntry_B818* e = &m->vt[3];
-        e->fn((char*)m + e->delta, verts);
+        sFlagMesh_B818* gridMesh = self->mesh;
+        sFlagVEntry_B818* setVertsSlot = &gridMesh->vt[3];
+        setVertsSlot->fn((char*)gridMesh + setVertsSlot->delta, verts);
     }
     if (0.001f < self->scrollU || 0.001f < self->scrollV) {
         self->u += self->scrollU;
@@ -376,11 +376,11 @@ struct sFSE_34B9B0 {
  * (+0x88, +0x8C) and draws the grid mesh (+0x60, its vtable entry 7, with the instance matrix and its +0x94) or,
  * without a mesh, the instance itself (graphics-manager slot 96). Pops the draw state.
  *
- * @param e  the flag set
+ * @param flagSet  the flag set
  */
-extern "C" void func_0034B9B0(sFlagSetEntry* e)
+extern "C" void func_0034B9B0(sFlagSetEntry* flagSet)
 {
-    char* self = (char*)e;
+    char* self = (char*)flagSet;
     if (D_004A4244 == 0) {
         return;
     }
@@ -395,35 +395,35 @@ extern "C" void func_0034B9B0(sFlagSetEntry* e)
     }
     float one = 1.0f;
     for (int i = 0; i < *(int*)(self + 0x5C); i++) {
-        sModel_34B9B0* m = ((sFSE_34B9B0*)self)->models[i];
-        if (!IsLoaded_34B9B0(m)) {
+        sModel_34B9B0* instRecord = ((sFSE_34B9B0*)self)->models[i];
+        if (!IsLoaded_34B9B0(instRecord)) {
             continue;
         }
         {
             sVE93_34B9B0* vt = *(sVE93_34B9B0**)(ctx + 0x10D8);
             char* thisp = ctx + vt[93].delta;
-            sVec4_34B9B0 a(*(float*)((char*)m + 0x60), *(float*)((char*)m + 0x64), *(float*)((char*)m + 0x68), one);
-            sVec4_34B9B0 b(*(float*)((char*)m + 0x6C), *(float*)((char*)m + 0x70), *(float*)((char*)m + 0x74), one);
-            sVec4_34B9B0* pb = &b;
+            sVec4_34B9B0 boxMin(*(float*)((char*)instRecord + 0x60), *(float*)((char*)instRecord + 0x64), *(float*)((char*)instRecord + 0x68), one);
+            sVec4_34B9B0 boxMax(*(float*)((char*)instRecord + 0x6C), *(float*)((char*)instRecord + 0x70), *(float*)((char*)instRecord + 0x74), one);
+            sVec4_34B9B0* pb = &boxMax;
             sVE43_34B9B0* vt43 = *(sVE43_34B9B0**)(ctx + 0x10D8);
-            sPair_34B9B0 c = vt43[43].fn(ctx + vt43[43].delta);
-            if (vt[93].fn(thisp, &a, pb, &c) == 1) {
+            sPair_34B9B0 viewMat = vt43[43].fn(ctx + vt43[43].delta);
+            if (vt[93].fn(thisp, &boxMin, pb, &viewMat) == 1) {
                 continue;
             }
         }
         {
-            char* pos = (char*)m + 0x10;
+            char* pos = (char*)instRecord + 0x10;
             sMat_34B9B0 mat;
             MatCopy_34B9B0(&mat, (sMat_34B9B0*)t4mat_Identity);
             mat.r[3].x = *(float*)(self + 0x88);
             mat.r[3].y = *(float*)(self + 0x8C);
-            char* h = *(char**)(self + 0x60);
-            if (h != 0) {
-                sVE7_34B9B0* hv = *(sVE7_34B9B0**)(h + 4);
-                hv[7].fn(h + hv[7].delta, pos, *(void**)((char*)m + 0x94), &mat);
+            char* gridMesh = *(char**)(self + 0x60);
+            if (gridMesh != 0) {
+                sVE7_34B9B0* hv = *(sVE7_34B9B0**)(gridMesh + 4);
+                hv[7].fn(gridMesh + hv[7].delta, pos, *(void**)((char*)instRecord + 0x94), &mat);
             } else {
-                sVE96_34B9B0* v96 = *(sVE96_34B9B0**)(ctx + 0x10D8);
-                v96[96].fn(ctx + v96[96].delta, m, 0, 0, 0);
+                sVE96_34B9B0* drawSlot = *(sVE96_34B9B0**)(ctx + 0x10D8);
+                drawSlot[96].fn(ctx + drawSlot[96].delta, instRecord, 0, 0, 0);
             }
         }
     }
@@ -519,21 +519,21 @@ extern "C" void func_0034BCA0(void* vself, void* vout)
         } else if (self->mode == 1) {
             idx = self->cols - i - 1;
         }
-        float a = iRatio * 6.2831854820251465f;
-        int n = (int)((aTime[0] + a * self->freqX) * 81.4873275756836f) & 0x1FF;
-        float s = D_00504FB8[n];
-        float c = D_00504FB8[n + 0x80];
+        float colAngle = iRatio * 6.2831854820251465f;
+        int n = (int)((aTime[0] + colAngle * self->freqX) * 81.4873275756836f) & 0x1FF;
+        float waveSin = D_00504FB8[n];
+        float waveCos = D_00504FB8[n + 0x80];
         if (!bothHeld) {
-            accX += mag[0] * iRatioMultiplier * c;
+            accX += mag[0] * iRatioMultiplier * waveCos;
         }
-        horizontalOffset[idx] = sFsV3_CM(mag[0] * iRatioMultiplier * s, accX, 0.0f);
-        n = (int)((aTime[1] + a * self->freqY) * 81.4873275756836f) & 0x1FF;
-        s = D_00504FB8[n];
-        c = D_00504FB8[n + 0x80];
+        horizontalOffset[idx] = sFsV3_CM(mag[0] * iRatioMultiplier * waveSin, accX, 0.0f);
+        n = (int)((aTime[1] + colAngle * self->freqY) * 81.4873275756836f) & 0x1FF;
+        waveSin = D_00504FB8[n];
+        waveCos = D_00504FB8[n + 0x80];
         if (!bothHeld) {
-            accY += mag[1] * iRatioMultiplier * c;
+            accY += mag[1] * iRatioMultiplier * waveCos;
         }
-        horizontalOffset[idx] += sFsV3_CM(mag[1] * iRatioMultiplier * s, accY, 0.0f);
+        horizontalOffset[idx] += sFsV3_CM(mag[1] * iRatioMultiplier * waveSin, accY, 0.0f);
         sFsV3_CM highWindMovement(self->b.x * iRatioMultiplier * windRatio, self->b.y * iRatioMultiplier * windRatio, self->b.z * iRatioMultiplier * windRatio);
         sFsV3_CM lowWindMovement(self->a.x * iRatioMultiplier * (1.0f - windRatio), self->a.y * iRatioMultiplier * (1.0f - windRatio), self->a.z * iRatioMultiplier * (1.0f - windRatio));
         horizontalOffset[idx] += highWindMovement + lowWindMovement;
@@ -567,17 +567,17 @@ extern "C" void func_0034BCA0(void* vself, void* vout)
                     float tRatio = (iRatio + jRatio) * 0.5f;
                     float tRatioMultiplier = (iRatioMultiplier + jRatio) * 0.5f;
                     int n = (int)((aTime[2] + tRatio * (self->freqZ0 * 6.2831854820251465f)) * 81.4873275756836f) & 0x1FF;
-                    float s = D_00504FB8[n];
-                    float c = D_00504FB8[n + 0x80];
-                    out[vertexIndex] += sFsV3_CM(mag[2] * iRatioMultiplier * s, mag[2] * tRatioMultiplier * c, mag[2] * jRatio * s);
+                    float waveSin = D_00504FB8[n];
+                    float waveCos = D_00504FB8[n + 0x80];
+                    out[vertexIndex] += sFsV3_CM(mag[2] * iRatioMultiplier * waveSin, mag[2] * tRatioMultiplier * waveCos, mag[2] * jRatio * waveSin);
                 }
                 if (iRatio > 0.0f && mag[3] > 0.01f) {
                     float tRatio = (iRatio + jRatio) * 0.5f;
                     float tRatioMultiplier = (iRatioMultiplier + jRatio) * 0.5f;
                     int n = (int)((aTime[3] + tRatio * (self->freqZ1 * 6.2831854820251465f)) * 81.4873275756836f) & 0x1FF;
-                    float s = D_00504FB8[n];
-                    float c = D_00504FB8[n + 0x80];
-                    out[vertexIndex] += sFsV3_CM(mag[3] * iRatioMultiplier * s, mag[3] * tRatioMultiplier * c, mag[3] * (1.0f - jRatio) * s);
+                    float waveSin = D_00504FB8[n];
+                    float waveCos = D_00504FB8[n + 0x80];
+                    out[vertexIndex] += sFsV3_CM(mag[3] * iRatioMultiplier * waveSin, mag[3] * tRatioMultiplier * waveCos, mag[3] * (1.0f - jRatio) * waveSin);
                 }
                 vertexIndex++;
             }
@@ -829,14 +829,14 @@ extern "C" int func_0034B168(void* elem, void* arg);
  *
  * Walks the 15 sets at +0x20 and stops at the first set in use whose func_0034B168 removes the instance.
  *
- * @param arg  instance record of the flag
+ * @param instRecord  instance record of the flag
  */
-extern "C" void func_0034C600(sFlagSet_C600* self, void* arg)
+extern "C" void func_0034C600(sFlagSet_C600* self, void* instRecord)
 {
     int i;
     sFlagSetElem_C600* elem = self->elems;
     for (i = 0; i < 15; i++, elem++) {
-        if (elem->active != 0 && func_0034B168(elem, arg) != 0) {
+        if (elem->active != 0 && func_0034B168(elem, instRecord) != 0) {
             return;
         }
     }
@@ -1220,16 +1220,16 @@ extern "C" sFlagSet_CAB8* func_0034CAB8_ctor(sFlagSet_CAB8* self, int a1, void* 
  * into FenceData with InstId -1, zeroes Force/ForceMax/ForceStep, builds the grid (cFenceNode_setupFence), applies dt
  * (func_0034D6F0) and sets both NextPropTime and PrevPropTime (+0x38, +0x3C) to 4. flag is not used.
  *
- * @param a1  update bucket the node joins
+ * @param bucket  update bucket the node joins
  * @param obj  fence instance record
  * @param desc  fence make-data copied from the pushing fence
  * @param flag  whether this is the next (1) or previous (0) neighbour; unused
  * @param dt  force to start with
  * @return self
  */
-extern "C" sFlagSet_CAB8* func_0034CAB8_ctor(sFlagSet_CAB8* self, int a1, void* obj, sFlagBlock_CAB8* desc, int flag, float dt)
+extern "C" sFlagSet_CAB8* func_0034CAB8_ctor(sFlagSet_CAB8* self, int bucket, void* obj, sFlagBlock_CAB8* desc, int flag, float dt)
 {
-    func_0034FB00(self, a1, 9, obj);
+    func_0034FB00(self, bucket, 9, obj);
     self->block.w[0] = 0xFFFFFFFF;
     self->vtable = cFenceNode_vtbl;
     new ((char*)self + 0x40) sFlagElem_CAB8[16];
@@ -1592,21 +1592,21 @@ struct sFlagSet_CF98 {
  * (+0xA4) moves too when the fence Type (+0x20) is 1, otherwise it stays at rest. The 16 points go to the mesh's vtable
  * entry 3.
  *
- * @param p  the fence node
+ * @param fenceNode  the fence node
  */
-extern "C" void func_0034CF98(void* p)
+extern "C" void func_0034CF98(void* fenceNode)
 {
-    sFlagSet_CF98* self = (sFlagSet_CF98*)p;
+    sFlagSet_CF98* self = (sFlagSet_CF98*)fenceNode;
     if (self->mesh == 0) {
         return;
     }
-    float s = self->wind * self->scale;
+    float swing = self->wind * self->scale;
     sFsVec4_CF98 dir(200.0f, 0.0f, 0.0f, 0.0f);
-    fsScaleIn_CF98(dir, s);
+    fsScaleIn_CF98(dir, swing);
     sFsVec4_CF98 offs[8];
-    sFsVec4_CF98* o = offs;
+    sFsVec4_CF98* offsetIter = offs;
     for (int i = 0; i < 8; i++) {
-        *o++ = fsScale_CF98(dir, D_0044AFD0[i]);
+        *offsetIter++ = fsScale_CF98(dir, D_0044AFD0[i]);
     }
     sFsVec3_CF98 pts[16];
     if (self->mode == 1) {
@@ -1620,9 +1620,9 @@ extern "C" void func_0034CF98(void* p)
             pts[i + 8] = self->bottom[i];
         }
     }
-    sFlagMesh_CF98* m = self->mesh;
-    sFlagVEntry_CF98* e = &m->vt[3];
-    e->fn((char*)m + e->delta, pts);
+    sFlagMesh_CF98* gridMesh = self->mesh;
+    sFlagVEntry_CF98* setVertsSlot = &gridMesh->vt[3];
+    setVertsSlot->fn((char*)gridMesh + setVertsSlot->delta, pts);
 }
 #endif
 
@@ -1937,27 +1937,27 @@ struct sFlagSlot_34D9B0 {
  * force is set or the record flags have bit 0, the record flags get bit 0x4 and lose bit 0x2. Ends with
  * cAnimNode_cacheFrame.
  *
- * @param a1  update bucket
- * @param a2  node type
- * @param a3  instance record to animate
+ * @param bucket  update bucket
+ * @param nodeType  node type
+ * @param instRecord  instance record to animate
  * @param force  force the instance visible
  * @return self
  */
-extern "C" void* func_0034D9B0(char* self, void* a1, int a2, void* a3, int force)
+extern "C" void* func_0034D9B0(char* self, void* bucket, int nodeType, void* instRecord, int force)
 {
     char* node = self + 0x14;
-    func_00355280(node, a1, a2, a3);
+    func_00355280(node, bucket, nodeType, instRecord);
     *(void***)(self + 0x20) = D_00490CC8;
     sFlagSlot_34D9B0** slot = (sFlagSlot_34D9B0**)(self + 0x44);
     *slot = new (str_AnimMats, 0x20000000, 0) sFlagSlot_34D9B0[*(int*)(*(char**)(*(char**)(node + 0x18) + 0x80) + 4)];
     cAnimNode_setAnimMeshCache(self);
-    float f = 0.0f;
+    float startTime = 0.0f;
     if (*(void**)(self + 0x48) != 0) {
-        f = cAnimFrame_getStartTime(*(void**)(self + 0x48));
+        startTime = cAnimFrame_getStartTime(*(void**)(self + 0x48));
     }
-    *(float*)(self + 0x0) = f;
+    *(float*)(self + 0x0) = startTime;
     *(float*)(self + 0x8) = 10000000000.0f;
-    *(float*)(self + 0x4) = f;
+    *(float*)(self + 0x4) = startTime;
     *(int*)(self + 0x10) = 1;
     *(float*)(self + 0xC) = 10000000000.0f;
     char* sub = self + 0x14;
@@ -1995,23 +1995,23 @@ struct sFlagSlot_34DAC8 {
  * the mesh cache, reads the 20-byte frame block at +0x0 and one more 4-byte word that it discards, then
  * cAnimNode_cacheFrame.
  *
- * @param a1  update bucket
+ * @param bucket  update bucket
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* func_0034DAC8(char* self, void* a1, void* stream)
+extern "C" void* func_0034DAC8(char* self, void* bucket, void* stream)
 {
-    int unusedFlag;
+    int skippedWord;
     char* node = self + 0x14;
     sFlagSlot_34DAC8** slot = (sFlagSlot_34DAC8**)(self + 0x44);
-    cMoveNode_cMoveNode_3(node, a1, stream);
+    cMoveNode_cMoveNode_3(node, bucket, stream);
     *(void***)(self + 0x20) = D_00490CC8;
     *slot = new (str_AnimMats, 0x20000000, 0) sFlagSlot_34DAC8[*(int*)(*(char**)(*(char**)(node + 0x18) + 0x80) + 4)];
     cAnimNode_setAnimMeshCache(self);
     sStreamVE_DAC8* vt = *(sStreamVE_DAC8**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self, 20);
     sStreamVE_DAC8* vt2 = *(sStreamVE_DAC8**)stream;
-    vt2[2].fn((char*)stream + vt2[2].delta, &unusedFlag, 4);
+    vt2[2].fn((char*)stream + vt2[2].delta, &skippedWord, 4);
     cAnimNode_cacheFrame((sFlagOwner_E348*)self);
     return self;
 }
@@ -2064,10 +2064,10 @@ extern "C" void func_0034DBA8(sFlagOwner_DBA8* self, int flags)
     }
     sFlagItem_DBA8* items = self->items;
     if (items != 0) {
-        sFlagItem_DBA8* p = items + ((int*)items)[-4];
-        while (self->items != p) {
-            p--;
-            p->vt[1].fn((char*)p + p->vt[1].delta, 0);
+        sFlagItem_DBA8* frameIter = items + ((int*)items)[-4];
+        while (self->items != frameIter) {
+            frameIter--;
+            frameIter->vt[1].fn((char*)frameIter + frameIter->vt[1].delta, 0);
         }
         cMemMan_free((char*)self->items - 0x10);
     }

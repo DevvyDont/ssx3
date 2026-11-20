@@ -384,22 +384,22 @@ extern "C" void* func_00354850(void* self, void* a1, int type);
  * Runs the sort-node constructor func_00354850, installs cRailManNode_vtbl, sets all 128 rail slots (+0x18) to -1,
  * stores itself in D_004A4040 (the active rail manager) and clears the slots again.
  *
- * @param a1  update bucket
+ * @param bucket  update bucket
  * @return self
  */
-extern "C" void* func_003584F0(void* self, void* a1)
+extern "C" void* func_003584F0(void* self, void* bucket)
 {
-    char* s = (char*)self;
+    char* nodeBytes = (char*)self;
     int i;
-    func_00354850(self, a1, 18);
-    *(void***)(s + 0xC) = cRailManNode_vtbl;
-    unsigned int* p = (unsigned int*)(s + 0x18);
-    for (i = 0x7F; i != -1; i--, p++) {
-        *p = 0xFFFFFFFF;
+    func_00354850(self, bucket, 18);
+    *(void***)(nodeBytes + 0xC) = cRailManNode_vtbl;
+    unsigned int* railSlot = (unsigned int*)(nodeBytes + 0x18);
+    for (i = 0x7F; i != -1; i--, railSlot++) {
+        *railSlot = 0xFFFFFFFF;
     }
     D_004A4040 = self;
     for (i = 0; i < 0x80; i++) {
-        ((unsigned int*)(s + 0x18))[i] = 0xFFFFFFFF;
+        ((unsigned int*)(nodeBytes + 0x18))[i] = 0xFFFFFFFF;
     }
     return self;
 }
@@ -515,9 +515,9 @@ extern "C" void func_00358700(int kind)
     int i;
     if (D_004A4040 != 0) {
         for (i = 0; i < 0x80; i++) {
-            sMpMgr_8700* m = (sMpMgr_8700*)D_004A4040;
-            if (((unsigned int*)((char*)m + 0x18))[i] != 0xFFFFFFFF && m->slots[i].kind == kind) {
-                func_00358998(m, i);
+            sMpMgr_8700* railMan = (sMpMgr_8700*)D_004A4040;
+            if (((unsigned int*)((char*)railMan + 0x18))[i] != 0xFFFFFFFF && railMan->slots[i].kind == kind) {
+                func_00358998(railMan, i);
             }
         }
     }
@@ -821,8 +821,8 @@ extern "C" void func_00358B28(sMPRef8B28 key, int add)
 found:
     sMPMgr8B28* mgr = D_004A4040_mgr8B28;
     if (idx != -1) {
-        sMPRef8B28& s = mgr->slots[idx];
-        if (s.id == key.id) {
+        sMPRef8B28& railSlot = mgr->slots[idx];
+        if (railSlot.id == key.id) {
             if (add == 0) {
                 return;
             }
@@ -1070,9 +1070,9 @@ extern "C" int func_00358EB8(void* self)
                 } else {
                     float pos = *(float*)(comboNode + 0x4) + *(float*)(comboNode + 0x0);
                     float max = *(float*)(comboNode + 0xC);
-                    float v = *(float*)(comboNode + 0x34);
-                    *(float*)(comboNode + 0x3C) = v;
-                    *(float*)(comboNode + 0x40) = v;
+                    float frameTime = *(float*)(comboNode + 0x34);
+                    *(float*)(comboNode + 0x3C) = frameTime;
+                    *(float*)(comboNode + 0x40) = frameTime;
                     *(float*)(comboNode + 0x4) = pos;
                     if (max <= pos) {
                         *(float*)(comboNode + 0x4) = max;
@@ -1380,14 +1380,14 @@ extern void* D_0048EA70[];
  *
  * Builds the cAnimObjectNode base (func_00341AA0), installs D_0048EA70 at +0x3C and zeroes Delta (+0x6C) and +0x4.
  *
- * @param a  update bucket
- * @param b  instance record
- * @param c  anim delta make-data
+ * @param bucket  update bucket
+ * @param instRecord  instance record
+ * @param animData  anim delta make-data
  * @return self
  */
-extern "C" void* func_00359228(void* self, int a, int b, int c)
+extern "C" void* func_00359228(void* self, int bucket, int instRecord, int animData)
 {
-    func_00341AA0(self, a, 2, b, c);
+    func_00341AA0(self, bucket, 2, instRecord, animData);
     *(void***)((char*)self + 0x3C) = D_0048EA70;
     *(int*)((char*)self + 0x6C) = 0;
     *(int*)((char*)self + 0x4) = 0;

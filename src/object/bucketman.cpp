@@ -545,8 +545,8 @@ extern "C" void func_003551A8(cBucketMan* self, int index, int key)
     void* node = cBucketMan_first(self, index);
     while (node != 0) {
         void* next = cBucketMan_next(self, node, index);
-        sBucketVEntry51A8* e = &(*(sBucketVEntry51A8**)((char*)node + 0xC))[11];
-        if (e->fn((char*)node + e->delta) == key) {
+        sBucketVEntry51A8* sectionIdSlot = &(*(sBucketVEntry51A8**)((char*)node + 0xC))[11];
+        if (sectionIdSlot->fn((char*)node + sectionIdSlot->delta) == key) {
             if (node != 0) {
                 sBucketVEntry51A8b* vt = *(sBucketVEntry51A8b**)((char*)node + 0xC);
                 vt[1].fn((char*)node + vt[1].delta, 3);
@@ -594,14 +594,14 @@ extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
  * RootTransformDirty bit in Flags and zeroes ModifierBlock, Debounce and TransferHack. Subclass constructors call it as
  * their base with their node type: cFloatingNode (0xE), cParticleNode (0xD), the object node (17).
  *
- * @param a1  the bucket the node is added to
+ * @param bucket  the bucket the node is added to
  * @param type  the node type (tObjNodeType)
- * @param a3  the instance record the node belongs to
+ * @param instRecord  the instance record the node belongs to
  * @return @p self
  */
-extern "C" void* func_00355280(void* self, void* a1, int type, void* a3)
+extern "C" void* func_00355280(void* self, void* bucket, int type, void* instRecord)
 {
-    func_0034FB00(self, a1, type, a3);
+    func_0034FB00(self, bucket, type, instRecord);
     *(void***)((char*)self + 0xC) = cMoveNode_vtbl;
     *(float*)((char*)self + 0x24) = 1.0f;
     *(unsigned short*)((char*)self + 0x12) |= 1;

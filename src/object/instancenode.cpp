@@ -744,9 +744,9 @@ extern "C" int func_00350698(void* self)
     sInstNodeList* list = *(sInstNodeList**)((char*)self + 0x80);
     int i;
     int count = list->count;
-    sInstNodeEntry* e = list->entries;
-    for (i = 0; i < count; i++, e++) {
-        if (e->field_0x8 != 0) {
+    sInstNodeEntry* meshEntry = list->entries;
+    for (i = 0; i < count; i++, meshEntry++) {
+        if (meshEntry->field_0x8 != 0) {
             return 1;
         }
     }

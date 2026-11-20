@@ -500,17 +500,17 @@ extern char D_00491800[];
  * vtable D_00491800, then in the record's flags (+0x8) clears bits 5 and 6 (0x60) and bit 1 and sets bit 2. The world
  * script code (src/seg/seg_1FBE38.cpp) calls it on a cMemMan_alloc(0x1C) block.
  *
- * @param a1  the instance record to hide
+ * @param instRecord  the instance record to hide
  * @return @p self
  */
-extern "C" void* func_00350E90(void* self, void* a1)
+extern "C" void* func_00350E90(void* self, void* instRecord)
 {
-    func_0034FB00(self, 1, 0x10, a1);
+    func_0034FB00(self, 1, 0x10, instRecord);
     *(void**)((char*)self + 0xC) = D_00491800;
-    unsigned int* f = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
-    *f &= 0xFFFFFF9F;
-    f = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
-    *f = (*f & 0xFFFFFFFD) | 4;
+    unsigned int* recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
+    *recordFlags &= 0xFFFFFF9F;
+    recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
+    *recordFlags = (*recordFlags & 0xFFFFFFFD) | 4;
     return self;
 }
 #endif
@@ -566,17 +566,17 @@ extern char D_00491680[];
  * D_00491680, then in the record's flags (+0x8) clears bits 5 and 6 (0x60) and bit 1 and sets bit 2. World script code
  * and the debounce node code call it on a cMemMan_alloc(0x1C, "RestoreNode") block.
  *
- * @param a1  the instance record to restore
+ * @param instRecord  the instance record to restore
  * @return @p self
  */
-extern "C" void* func_00350F60(void* self, void* a1)
+extern "C" void* func_00350F60(void* self, void* instRecord)
 {
-    func_0034FB00(self, 1, 19, a1);
+    func_0034FB00(self, 1, 19, instRecord);
     *(void**)((char*)self + 0xC) = D_00491680;
-    unsigned int* f = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
-    *f &= 0xFFFFFF9F;
-    f = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
-    *f = (*f & 0xFFFFFFFD) | 4;
+    unsigned int* recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
+    *recordFlags &= 0xFFFFFF9F;
+    recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
+    *recordFlags = (*recordFlags & 0xFFFFFFFD) | 4;
     return self;
 }
 #endif

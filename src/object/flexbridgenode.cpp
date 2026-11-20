@@ -1352,14 +1352,14 @@ struct sFlexDef_347D90 {
  * - 1 segment matrices ("FlexNodeMats", +0x50) and a "Tube" object (+0x58) built by func_00372520 with NumNodes * 8 -
  * 9.
  *
- * @param a2  node type (20 float rail, 21 spring rail)
- * @param a3  rail instance record
+ * @param nodeType  node type (20 float rail, 21 spring rail)
+ * @param instRecord  rail instance record
  * @param def  rail make-data
  * @return self
  */
-extern "C" void* func_00347D90(char* self, void* a2, void* a3, sFlexDef_347D90* def)
+extern "C" void* func_00347D90(char* self, void* nodeType, void* instRecord, sFlexDef_347D90* def)
 {
-    func_0034FB00(self, 1, a2, a3);
+    func_0034FB00(self, 1, nodeType, instRecord);
     *(char**)(self + 0xC) = D_004900D0;
     int len = def->f44;
     *(int*)(self + 0x20) = 0;
@@ -1394,17 +1394,17 @@ extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a, void* stream);
  * (NumNodes, RailFlags, BoundBox) through the stream's read slot (vtable entry 2) and allocates Mats and Tube as
  * func_00347D90 does.
  *
- * @param a  update bucket
+ * @param bucket  update bucket
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* func_00347EA8(char* self, void* a, void* stream)
+extern "C" void* func_00347EA8(char* self, void* bucket, void* stream)
 {
     sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(self + 0x50);
-    cInstanceNode_cInstanceNode(self, a, stream);
+    cInstanceNode_cInstanceNode(self, bucket, stream);
     *(char**)(self + 0xC) = D_004900D0;
-    sSerVEntry_00347EA8* e = &(*(sSerVEntry_00347EA8**)stream)[2];
-    e->fn((char*)stream + e->delta, self + 0x20, 0x30);
+    sSerVEntry_00347EA8* readSlot = &(*(sSerVEntry_00347EA8**)stream)[2];
+    readSlot->fn((char*)stream + readSlot->delta, self + 0x20, 0x30);
     *segs = new (str_FlexNodeMats, 0x20000000, 0) sFlexSeg_347D90[*(int*)(self + 0x20) - 1];
     *(void**)(self + 0x58) = func_00372520(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), *(int*)(self + 0x20) * 8 - 9);
     return self;
@@ -1883,7 +1883,7 @@ extern "C" void func_00348290(char* self, const sFbV_8290* minBpos, const sFbV_8
         sFbV_8290 lastp;
         const float kTopSplit = 0.6180340051651001f;
         const float kBottomSplit = 1.0f - kTopSplit;
-        float f0, f1, f2, f3;
+        float distLo, distMidLo, distMidHi, distHi;
         float x0 = 0.0f;
         float x3 = 1.0f;
         sFbV_8290 nextp;
@@ -1895,13 +1895,13 @@ extern "C" void func_00348290(char* self, const sFbV_8290* minBpos, const sFbV_8
         for (i = 1; i < 5; i++) {
             nextp = splineEval_8290(mat, i * 0.25f);
             tmp = fbSub_8290(nextp, lastp);
-            float r = fbDot_8290(fbSub_8290(*bpos, lastp), tmp) / fbDot_8290(tmp, tmp);
-            r = bracket_8290(0.0f, r, 1.0f);
-            tmp = fbAdd_8290(lastp, fbScale_8290(tmp, r));
-            float d = fbLength_8290(fbSub_8290(*bpos, tmp));
-            if (d < cd) {
+            float chordParam = fbDot_8290(fbSub_8290(*bpos, lastp), tmp) / fbDot_8290(tmp, tmp);
+            chordParam = bracket_8290(0.0f, chordParam, 1.0f);
+            tmp = fbAdd_8290(lastp, fbScale_8290(tmp, chordParam));
+            float chordDist = fbLength_8290(fbSub_8290(*bpos, tmp));
+            if (chordDist < cd) {
                 ci = i;
-                cd = d;
+                cd = chordDist;
             }
             lastp = nextp;
         }
@@ -1915,28 +1915,28 @@ extern "C" void func_00348290(char* self, const sFbV_8290* minBpos, const sFbV_8
         float x2 = x0 + (x3 - x0) * kTopSplit;
         float lastd, lastt;
         lastp = splineEval_8290(mat, x0);
-        f0 = fbLength_8290(fbSub_8290(lastp, *bpos));
+        distLo = fbLength_8290(fbSub_8290(lastp, *bpos));
         lastp = splineEval_8290(mat, x1);
-        f1 = fbLength_8290(fbSub_8290(lastp, *bpos));
+        distMidLo = fbLength_8290(fbSub_8290(lastp, *bpos));
         lastp = splineEval_8290(mat, x2);
-        f2 = fbLength_8290(fbSub_8290(lastp, *bpos));
+        distMidHi = fbLength_8290(fbSub_8290(lastp, *bpos));
         lastp = splineEval_8290(mat, x3);
-        f3 = fbLength_8290(fbSub_8290(lastp, *bpos));
-        lastd = f2;
+        distHi = fbLength_8290(fbSub_8290(lastp, *bpos));
+        lastd = distMidHi;
         lastt = x2;
         for (i = 0; i < 24; i++) {
             if (fbAbs_8290(x3 - x0) <= 0.0005000000237487257f) {
                 break;
             }
-            if (f2 < f1) {
+            if (distMidHi < distMidLo) {
                 x0 = x1;
                 x1 = x2;
                 x2 = kTopSplit * x1 + kBottomSplit * x3;
                 lastp = splineEval_8290(mat, x2);
                 float tmp = fbLength_8290(fbSub_8290(lastp, *bpos));
-                f0 = f1;
-                f1 = f2;
-                f2 = tmp;
+                distLo = distMidLo;
+                distMidLo = distMidHi;
+                distMidHi = tmp;
                 lastt = x2;
                 lastd = tmp;
             } else {
@@ -1945,9 +1945,9 @@ extern "C" void func_00348290(char* self, const sFbV_8290* minBpos, const sFbV_8
                 x1 = kTopSplit * x2 + kBottomSplit * x0;
                 lastp = splineEval_8290(mat, x1);
                 float tmp = fbLength_8290(fbSub_8290(lastp, *bpos));
-                f3 = f2;
-                f2 = f1;
-                f1 = tmp;
+                distHi = distMidHi;
+                distMidHi = distMidLo;
+                distMidLo = tmp;
                 lastt = x1;
                 lastd = tmp;
             }
