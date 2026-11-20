@@ -666,6 +666,25 @@ extern "C" unsigned int func_0038F668_C7B0(sDma_C7B0* dma, unsigned long* p, int
 
 static inline int FBits_C7B0(float f) { return *(int*)&f; }
 
+/**
+ * Draws the queued fog sprites as GS sprite primitives, far to near, in DMA chunks.
+ *
+ * Called through slot 3 of the cPS2FogParticleMan vtable (D_004882E0) by cFogParticleMan_render after it has sorted the
+ * sort keys in D_00537AC0. Each chunk holds at most (D_004A4474 buffer size - 4) * 2 / 5 - 1 sprites. For a chunk it
+ * opens a packet at the graphics manager's current buffer address (+0x5A00) with func_0038F460, writes a DMA cnt tag, a
+ * VIF DIRECT code, a GIF tag that sets PRIM to 0x56 (textured, alpha-blended sprite) and a REGLIST GIF tag of 5
+ * registers (ST, RGBAQ, XYZ2, ST, XYZ2) looped once per sprite, then five words per sprite taken in mSortKey order from
+ * mSprites: ST (0,0) and (1,1) scaled by the sprite's mTopLeft.w (its 1/w, also the Q of RGBAQ), the colour from
+ * mColour (alpha in mColour[0]), and the two corners from mTopLeft and mBottomRight with z scaled by 1/w. An odd sprite
+ * count gets one zero filler word.
+ *
+ * func_0038F668 closes the packet; when the graphics manager's render ring (+0x18F0) holds fewer than 2600 entries a
+ * new 128-byte entry is appended (written through the uncached 0x30000000 alias) with a copy of the top render state
+ * (+0xE84, its low 5 bits of word 2 replaced from ring +0x69CC4), the packet start and end and the sort key at ring
+ * +0x69CC0. The buffer address then moves to the end + 0x10. Does nothing when miNumSphere is 0 or less.
+ *
+ * @param list  the fog particle manager whose miNumSphere sprites are drawn
+ */
 extern "C" void func_002DC7B0(cPS2FogParticleMan* list)
 {
     int left = list->miNumSphere;

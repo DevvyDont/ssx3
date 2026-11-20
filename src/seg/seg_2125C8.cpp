@@ -80,6 +80,24 @@ struct sWeighted_1710 {
 extern sWeighted_1710 D_00449960[];
 unsigned int AIrand();
 
+/**
+ * Picks the game animation for an AI animation id: a weighted random choice among the id's variants that pass a filter.
+ *
+ * The id's run of variants (start, count) comes from @p t's range table, built by cAIAnimEventMap_initMaps; the
+ * variants are 12-byte entries of D_00449960 (value, weight, flags). An id with one variant returns its value without
+ * checking the filter. Otherwise the weights of the variants whose flags contain every bit of @p mask are summed,
+ * AIrand() % total is drawn and reduced by each eligible weight in turn, and the first variant that brings it to 0 or
+ * below wins; the run's last variant is the fallback.
+ *
+ * Quirks: when no variant passes the filter the total is 0 and the modulo divides by zero; because the test is <= 0,
+ * the first eligible variant gets one draw more than its weight and the last one draw fewer (likely bug: < 0 was
+ * meant).
+ *
+ * @param t  the AI animation event map (only its range table is read)
+ * @param idx  the AI animation id
+ * @param mask  the filter bits a variant must have
+ * @return the chosen variant's value (a game animation data id)
+ */
 extern "C" int func_00311710(RangeTable_15E0* t, int idx, int mask)
 {
     int start = t->r[idx].start;
@@ -106,6 +124,14 @@ INCLUDE_ASM("seg/seg_2125C8", func_00311860);
 #ifdef SKIP_ASM
 extern char str_error[];
 
+/**
+ * Returns str_error.
+ *
+ * cRiderAnimBase_getAIAnimName calls it (passing the animation id, which it ignores), so every AI animation name in
+ * this build is that string.
+ *
+ * @return str_error
+ */
 extern "C" void *func_00311860(void) {
     return str_error;
 }
@@ -140,6 +166,12 @@ INCLUDE_ASM("seg/seg_2125C8", func_003118A8);
 extern "C" void operator_delete__FPi(int);
 extern int cRiderAnimBase_AIAnimEventMap;
 
+/**
+ * Frees the shared AI animation event map and clears its pointer.
+ *
+ * Deletes cRiderAnimBase_AIAnimEventMap (operator delete) and sets it to 0; the undo of
+ * cRiderAnimBase_initAIAnimEventMap.
+ */
 extern "C" void func_003118A8(void) {
     operator_delete__FPi(cRiderAnimBase_AIAnimEventMap);
     cRiderAnimBase_AIAnimEventMap = 0;

@@ -74,12 +74,22 @@ extern "C" int BXFILE_size(const char *name) {
 }
 #endif
 
+/**
+ * Does nothing (an empty function).
+ *
+ * Its only caller is func_00317FC8, which nothing in retail calls.
+ */
 extern "C" void func_00317FC0(void) {
 }
 
 //100%
 INCLUDE_ASM("seg/seg_218F38", func_00317FC8);
 #ifdef SKIP_ASM
+/**
+ * Calls func_00317FC0, which does nothing.
+ *
+ * No retail code calls it.
+ */
 extern "C" void func_00317FC8(void) {
     func_00317FC0();
 }

@@ -692,6 +692,15 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F1768);
 extern "C" void cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter();
 extern char D_004881E8[];
 
+/**
+ * Constructs an attached dynamic emitter (0x210 bytes, "cAttachedDynamicEmitter") on @p arg0 and returns it.
+ *
+ * Runs the cBaseClass_DynamicEmitter constructor, then installs the subclass vtable D_004881E8 (+0x1F8) and zeroes the
+ * attach-bone index (+0x200), the stopped flag (+0x204) and the pulse phase (+0x208). func_002F2130 is its only caller.
+ *
+ * @param arg0  the memory to construct in
+ * @return the constructed emitter (@p arg0)
+ */
 extern "C" void *func_002F1768(void *arg0) {
     cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter();
     *(int *)((char*)arg0 + 0x200) = 0;
@@ -708,6 +717,14 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F17A8);
 extern "C" void cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(void *);
 extern char D_004881E8[];
 
+/**
+ * Destroys an attached dynamic emitter: restores its vtable D_004881E8 (+0x1F8), then runs the base destructor.
+ *
+ * Slot 4 of D_004881E8. The g++ delete flags arrive in the second argument register, which this body leaves alone, so
+ * cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter receives them and frees the object when bit 0 is set.
+ *
+ * @param arg0  the emitter
+ */
 extern "C" void func_002F17A8(void *arg0) {
     *(char **)((char*)arg0 + 0x1F8) = D_004881E8;
     cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(arg0);
@@ -724,6 +741,13 @@ extern "C" void* operator_new__FUi_17D0(unsigned int size, const char* tag, int 
 extern char str_AttachedEmitterTypeData[];
 extern int D_004A3BB0;
 
+/**
+ * Allocates and fills the shared attached-emitter type table D_004A3BB0.
+ *
+ * Takes 5440 bytes (20 records of 0x110) through operator new[] tagged "AttachedEmitterTypeData", then fills types 0 to
+ * 9 (func_002F83B0) and 10 to 19 (func_002F9838). func_002F18D8 calls it when the first attached-emitter FX object is
+ * set up.
+ */
 extern "C" void func_002F17D0(void) {
     D_004A3BB0 = (int)operator_new__FUi_17D0(5440, str_AttachedEmitterTypeData, 0, 0);
     func_002F83B0();
@@ -739,6 +763,12 @@ extern "C" void func_002F8FF8__FPv();
 extern "C" void func_002FA5F8__FPv();
 extern int D_004A3BB0;
 
+/**
+ * Frees the shared attached-emitter type table D_004A3BB0 and clears the pointer.
+ *
+ * Calls the two empty hooks func_002F8FF8__FPv and func_002FA5F8__FPv first and frees only a non-null table.
+ * func_002F1940 calls it when the last attached-emitter FX object is destroyed.
+ */
 extern "C" void func_002F1810(void) {
     func_002F8FF8__FPv();
     func_002FA5F8__FPv();
@@ -755,6 +785,19 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F1850);
 extern "C" void func_002F18D8(void *);
 extern char D_004881D0[];
 
+/**
+ * Constructs an attached-emitter FX object for an in-game rider and returns it.
+ *
+ * The attached-emitter FX object (0xA8 bytes, "AttachedEmitterFX"): +0x0 bones-looked-up flag, +0x4 26 bone indices,
+ * +0x6C 10 emitter slots, +0x94 model, +0x98 cRider, +0x9C front-end rider, +0xA0 spread flag, +0xA4 vtable D_004881D0.
+ *
+ * Clears the model and the front-end rider, stores @p arg1 as the rider (+0x98) and the vtable, then sets the object up
+ * with func_002F18D8. The cRider constructor builds one into mAttachedEmitterFX.
+ *
+ * @param arg0  the memory to construct in (0xA8 bytes)
+ * @param arg1  the owning cRider
+ * @return the constructed object (@p arg0)
+ */
 extern "C" void *func_002F1850(void *arg0, int arg1) {
     *(int *)((char*)arg0 + 0x94) = 0;
     *(int *)((char*)arg0 + 0x9C) = 0;
@@ -772,6 +815,16 @@ extern "C" void func_002F18D8(void *);
 extern "C" void func_002F1A00(void *);
 extern char D_004881D0[];
 
+/**
+ * Constructs an attached-emitter FX object for a front-end rider and returns it.
+ *
+ * Like func_002F1850, but the cRider slot (+0x98) stays 0 and @p arg1 goes to +0x9C; after the set-up (func_002F18D8)
+ * it also clears the spread flag (func_002F1A00). The front-end rider builds one at its +0xC70.
+ *
+ * @param arg0  the memory to construct in (0xA8 bytes)
+ * @param arg1  the owning front-end rider
+ * @return the constructed object (@p arg0)
+ */
 extern "C" void *func_002F1890(void *arg0, int arg1) {
     *(int *)((char*)arg0 + 0x94) = 0;
     *(int *)((char*)arg0 + 0x98) = 0;
@@ -789,6 +842,14 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F18D8);
 extern "C" void func_002F17D0();
 extern int D_004A3BB4;
 
+/**
+ * Sets up an attached-emitter FX object: counts it in and empties its 10 emitter slots (+0x6C).
+ *
+ * The first instance (the count D_004A3BB4 still 0) loads the shared type table with func_002F17D0; the count then goes
+ * up by one.
+ *
+ * @param arg0  the attached-emitter FX object
+ */
 extern "C" void func_002F18D8(void *arg0) {
     if (D_004A3BB4 == 0) {
         func_002F17D0();
@@ -814,6 +875,16 @@ struct Obj1940 : Base1940 {
     virtual ~Obj1940();
 };
 
+/**
+ * Destroys an attached-emitter FX object: deletes its emitters and, with the last instance, the type table.
+ *
+ * Slot 1 of the vtable D_004881D0 (restored at +0xA4 first). Drops the instance count D_004A3BB4 and calls
+ * func_002F1810 when it reaches 0, then deletes every emitter in the 10 slots (+0x6C) through its virtual destructor
+ * and clears the slot. Frees the object when bit 0 of @p arg1 is set.
+ *
+ * @param arg0  the attached-emitter FX object
+ * @param arg1  the g++ destructor flags (bit 0: free the memory)
+ */
 extern "C" void func_002F1940(void *arg0, int arg1) {
     int c = D_004A3BB4 - 1;
     *(char **)((char*)arg0 + 0xA4) = D_004881D0;
@@ -840,6 +911,15 @@ extern "C" void func_002F1940(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F19F0);
 #ifdef SKIP_ASM
+/**
+ * Gives an attached-emitter FX object its model (+0x94) and clears its bones-looked-up flag (+0x0).
+ *
+ * The next update (func_002F1A08) then finds the bones again in the new model (func_002F22C8). The front-end rider
+ * calls it with its new cAnimModel.
+ *
+ * @param emitterFx  the attached-emitter FX object
+ * @param arg1  the cAnimModel the emitters follow
+ */
 extern "C" void func_002F19F0(void *emitterFx, int arg1) {
     (*(int *)((char*)(emitterFx) + (0x94))) = arg1;
     (*(int *)((char*)(emitterFx) + (0))) = 0;
@@ -849,6 +929,14 @@ extern "C" void func_002F19F0(void *emitterFx, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F1A00);
 #ifdef SKIP_ASM
+/**
+ * Clears an attached-emitter FX object's spread flag (+0xA0).
+ *
+ * func_002F1A08 clears the flag at the start of every update and sets it while an emitter sits on attach point 25.
+ * cRider's reset paths and func_002F1890 call this.
+ *
+ * @param emitterFx  the attached-emitter FX object
+ */
 extern "C" void func_002F1A00(void *emitterFx) {
     (*(int *)((char*)(emitterFx) + (0xA0))) = 0;
 }
@@ -1007,6 +1095,22 @@ static inline sVec4_1150 bonePos_1A08(char* model, int i)
     return *(sVec4_1150*)(*(char**)(model + 0x30) + (i << 6) + 0x30);
 }
 
+/**
+ * Updates an attached-emitter FX object's emitters: moves each to its bone and decides whether it emits.
+ *
+ * Looks the bones up first if needed (func_002F22C8). The rider's velocity (cRider virtual getVelocity) and
+ * mGroundNormal give the motion (zero velocity and +Z without a rider); speed is the velocity's length. For each used
+ * slot of the 10, the emitter (type record at its +0x20C) emits only when it is not stopped (+0x204) and the speed lies
+ * between the record's minimum and maximum (km/h times 27.78); a chance below 0.99 can veto it at random, and a pulse
+ * below 0.99 advances the emitter's phase (+0x208, by rate / 60, wrapping at 4) and vetoes it while (perlinNoise(3,
+ * phase) + 1) / 2 exceeds the pulse.
+ *
+ * The position is the bone's translation (model +0x30 matrices) plus the record's offset scaled by the model's scale
+ * (+0x140..+0x148) and turned by the bone matrix; attach points 23 and 24 add +75 and -75 to x, and point 25 adds a
+ * random -85..85 to x and -14..14 to z and sets the spread flag (+0xA0). An emitting update passes velocity * velocity
+ * factor + normal * normal factor + normal * speed factor * speed, plus the record's direction turned by the bone;
+ * cBaseClass_DynamicEmitter_updateBASE runs with dt 1/60 either way (no velocity and enable 0 when not emitting).
+ */
 extern "C" void func_002F1A08(sFxMgr_1A08* self)
 {
     if (self->ready == 0)
@@ -1125,6 +1229,13 @@ struct sOwner_2088 {
     sRiderInfo_2088* b;     // 0x9C
 };
 
+/**
+ * Renders an attached-emitter FX object's emitters with cDynamicEmitter_render.
+ *
+ * Each used slot of the 10 is drawn only when the cRider (+0x98) is on screen (mIsOnScreen) or the front-end rider
+ * (+0x9C) is shown (its +0xCC8). The draw layer is 7, or for a front-end rider its layer (+0xC2C) + 1, or 22 when that
+ * layer is negative. cRider's func_00122638 and cFERider_render call it.
+ */
 extern "C" void func_002F2088(sOwner_2088* self)
 {
     int i;
@@ -1155,6 +1266,19 @@ extern "C" void *func_002F1768(void *);
 extern char str_cAttachedDynamicEmitter[];
 extern int D_004A3BB0;
 
+/**
+ * Creates an attached dynamic emitter of a type on a bone in the first free emitter slot.
+ *
+ * Builds it with cMemMan_alloc(528, "cAttachedDynamicEmitter") and func_002F1768, stores @p arg2 as its bone (+0x200),
+ * clears its stopped flag (+0x204) and points it (+0x20C) at type record @p arg1 of D_004A3BB0 (0x110 bytes each), then
+ * calls its virtual setupEmitter (slot 3) with that record and the emitter's current seed (m_emitter.SeedX0) and its
+ * virtual reset (slot 2). The bolt-on FX code (func_002ECC28) calls it.
+ *
+ * @param arg0  the attached-emitter FX object
+ * @param arg1  the emitter type (record index in D_004A3BB0)
+ * @param arg2  the attach point (index into the 26 bone indices)
+ * @return the slot index (0-9), or -1 when all 10 slots are used
+ */
 extern "C" int func_002F2130(void *arg0, int arg1, int arg2) {
     Obj2130 **p = (Obj2130 **)((char*)arg0 + 0x6C);
     int i;
@@ -1185,6 +1309,14 @@ struct sVE_2F2218 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Deletes the emitter in one slot of an attached-emitter FX object and clears the slot.
+ *
+ * A used slot's emitter is destroyed through its virtual destructor (slot 4) with flags 3 (destroy and free). The
+ * bolt-on FX code calls it to release its entries.
+ *
+ * @param idx  the slot index (0-9)
+ */
 extern "C" void func_002F2218(char* self, int idx)
 {
     int off = idx * 4;
@@ -1202,6 +1334,14 @@ extern "C" void func_002F2218(char* self, int idx)
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2268);
 #ifdef SKIP_ASM
+/**
+ * Stops the emitter in one slot from emitting: sets its stopped flag (+0x204) to 1.
+ *
+ * func_002F1A08 then updates it with emission off. No retail code calls it.
+ *
+ * @param emitterFx  the attached-emitter FX object
+ * @param emitterIndex  the slot index (0-9); the slot must be used
+ */
 extern "C" void func_002F2268(void *emitterFx, int emitterIndex) {
     *(int *)((char *)(*(void **)((char *)emitterFx + (emitterIndex << 2) + 0x6C)) + 0x204) = 1;
 }
@@ -1210,6 +1350,14 @@ extern "C" void func_002F2268(void *emitterFx, int emitterIndex) {
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2280);
 #ifdef SKIP_ASM
+/**
+ * Lets the emitter in one slot emit again: clears its stopped flag (+0x204).
+ *
+ * The counterpart of func_002F2268. No retail code calls it.
+ *
+ * @param emitterFx  the attached-emitter FX object
+ * @param emitterIndex  the slot index (0-9); the slot must be used
+ */
 extern "C" void func_002F2280(void *emitterFx, int emitterIndex) {
     *(int *)((char *)(*(void **)((char *)emitterFx + (emitterIndex << 2) + 0x6C)) + 0x204) = 0;
 }
@@ -1218,6 +1366,14 @@ extern "C" void func_002F2280(void *emitterFx, int emitterIndex) {
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2298);
 #ifdef SKIP_ASM
+/**
+ * Disables the emitter in one slot: clears its m_enabled (+0x174).
+ *
+ * No retail code calls it.
+ *
+ * @param emitterFx  the attached-emitter FX object
+ * @param emitterIndex  the slot index (0-9); the slot must be used
+ */
 extern "C" void func_002F2298(void *emitterFx, int emitterIndex) {
     *(int *)((char *)(*(void **)((char *)emitterFx + (emitterIndex << 2) + 0x6C)) + 0x174) = 0;
 }
@@ -1226,6 +1382,14 @@ extern "C" void func_002F2298(void *emitterFx, int emitterIndex) {
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F22B0);
 #ifdef SKIP_ASM
+/**
+ * Enables the emitter in one slot: sets its m_enabled (+0x174) to 1.
+ *
+ * The counterpart of func_002F2298. No retail code calls it.
+ *
+ * @param emitterFx  the attached-emitter FX object
+ * @param emitterIndex  the slot index (0-9); the slot must be used
+ */
 extern "C" void func_002F22B0(void *emitterFx, int emitterIndex) {
     *(int *)((char *)(*(void **)((char *)emitterFx + (emitterIndex << 2) + 0x6C)) + 0x174) = 1;
 }
@@ -1267,6 +1431,14 @@ struct sObj_22C8 {
     void* model;
 };
 
+/**
+ * Looks up the 26 attach-point bone indices of an attached-emitter FX object's model and marks them found.
+ *
+ * Indices 0-21 come from model part 0 with cAnimModel_getBoneSkelIndex: head, neck, upper/middle/lower spine, hips,
+ * then the left arm (clavicle, bicep, bicep twist, forearm, hand), the right arm, the left leg (thigh, shin, foot) and
+ * the right leg. Indices 22-25 are all "board_childg" in part 1 (the board); the update offsets 23 and 24 along x and
+ * spreads 25 at random. Sets the found flag (+0x0) to 1; func_002F1A08 calls it on demand.
+ */
 extern "C" void func_002F22C8(sObj_22C8* self)
 {
     self->h[0] = cAnimModel_getBoneSkelIndex(self->model, 0, str_head_b);
@@ -1305,6 +1477,12 @@ extern "C" void func_002F22C8(sObj_22C8* self)
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2588);
 #ifdef SKIP_ASM
+/**
+ * Constructs a screen-splash drop: clears its active flag and returns it.
+ *
+ * @param drop  the drop (0x3C bytes)
+ * @return the drop
+ */
 extern "C" int *func_002F2588(int *drop) {
     *drop = 0;
     return drop;
@@ -1376,6 +1554,20 @@ static inline sV4_2598 operator+(const sV4_2598& a, const sV4_2598& b)
 }
 
 extern "C" void func_002F2598_2598(sPart_2598* p, const sV2_2598& pos, sV2_2598* range) __asm__("func_002F2598");
+/**
+ * Starts a screen-splash drop at a position with a random size, life, spin and tint.
+ *
+ * The width is random between "Drop Min Size" (D_004A4294) and @p range x; the height is the width plus a random amount
+ * within "Drop Max Width Height Difference" (D_004A429C), clamped to the minimum size and @p range y. The life is
+ * random between "Drop Min/Max Life Span" (D_004A428C, D_004A4290); the velocity starts at D_004A5960, the rotation at
+ * a random 0-360 degrees and its change over the life within +/- D_004A42CC (the menu labels this one "Crystal Max
+ * Rotation Overall Change"); the tint is a random blend of "Drop Tint Min" (D_005046E0) and "Drop Tint Max"
+ * (D_005046F0). Sets the drop active and its age to 0.
+ *
+ * @param p  the drop
+ * @param pos  the screen position
+ * @param range  the largest width (x) and height (y)
+ */
 extern "C" void func_002F2598_2598(sPart_2598* p, const sV2_2598& pos, sV2_2598* range)
 {
     float maxY = range->y;
@@ -1491,6 +1683,18 @@ static inline void addRand_2810(float& v, float lo, float hi)
 }
 
 extern "C" void func_002F2810_2810(sPart_2810* p, float t) __asm__("func_002F2810");
+/**
+ * Moves a screen-splash drop one frame and deactivates it when it expires or leaves the 640x480 screen.
+ *
+ * Ages it by 1/60, jiggles the velocity by random amounts ("Drop Min/Max Velocity Jiggle X/Y", D_004A42A0..AC) and
+ * pushes it away from the screen centre (D_004A55B8, D_004A55BC) by a random "Drop Min/Max Push Off Speed" scaled by
+ * how far @p t is above "Min Velocity For Pushoff" (D_004A4288) towards 120 (clamped 0-1). The size grows by a random
+ * "Drop Min/Max Size Growth", the speed is capped at "Drop Maximum Velocity" and the position moves by the velocity
+ * scaled per axis by a random "Drop Min/Max Velocity Usage" factor.
+ *
+ * @param p  the drop
+ * @param t  the camera speed (km/h) from cSplashManager_update
+ */
 extern "C" void func_002F2810_2810(sPart_2810* p, float t)
 {
     p->age += 0.016666667f;
@@ -1643,6 +1847,17 @@ static inline float lerp_2C30(float a, float d, float t)
 
 // PORT: the unit declares func_002F2C30 later as (void*, sV2_3E28*); typed body bound by asm label.
 extern "C" void func_002F2C30_impl(char* obj, sVec2_2C30* off) __asm__("func_002F2C30");
+/**
+ * Draws a screen-splash drop as a rotated sprite offset by @p off.
+ *
+ * The alpha (first tint component) fades by 1 - (age / life)^2 and the angle is rotation + rotation change * age / life
+ * degrees. Puts _EffectTexMap[66] into the current draw state's texture and calls cPS2GraphicsMan_DrawRotatedSprite
+ * (virtual slot 79) with the drop's size, UVs (0,0)-(1,1) kept in function statics, and count 1. cSplashManager_render
+ * calls it.
+ *
+ * @param obj  the drop
+ * @param off  the screen offset added to the drop position
+ */
 extern "C" void func_002F2C30_impl(char* obj, sVec2_2C30* off)
 {
     if (!D_004A54F8) {
@@ -1671,6 +1886,12 @@ extern "C" void func_002F2C30_impl(char* obj, sVec2_2C30* off)
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F2D60);
 #ifdef SKIP_ASM
+/**
+ * Constructs a screen-splash ice crystal: clears its active flag (+0x4) and returns it.
+ *
+ * @param crystal  the crystal (0x4C bytes)
+ * @return the crystal
+ */
 extern "C" void *func_002F2D60(void *crystal) {
     (*(int *)((char*)(crystal) + (4))) = 0;
     return crystal;
@@ -1757,6 +1978,20 @@ static inline sV4_2D70 operator+(const sV4_2D70& a, const sV4_2D70& b)
 }
 
 extern "C" void func_002F2D70_2D70(sPart_2D70* p, const sV2_2D70& pos, int n) __asm__("func_002F2D70");
+/**
+ * Starts a screen-splash ice crystal at a position with a random size, life, tint and spin.
+ *
+ * The width is random between "Crystal Min/Max Size" (D_004A42E0, D_004A42E4); the height is the width plus a random
+ * amount within "Crystal Max Width Height Difference", clamped to the same range; both shrink by 0.7 per crystal
+ * already placed in the group (@p n). The life is random between "Crystal Min/Max Life Span"; the velocity starts at
+ * D_004A5960, the tint is a random blend of "Crystal Tint Min/Max" (D_00504700, D_00504710), the rotation a random
+ * 0-360 degrees and its change within +/- D_004A4318. Clears the jiggle timer and direction (+0x40..+0x48) and +0x0 (On
+ * Tour mNumSpawned), and sets the crystal active.
+ *
+ * @param p  the crystal
+ * @param pos  the screen position
+ * @param n  its number within the group (0 for the first)
+ */
 extern "C" void func_002F2D70_2D70(sPart_2D70* p, const sV2_2D70& pos, int n)
 {
     float x = randRange_2D70(D_004A42E0_2D70.v, D_004A42E4_2D70.v);
@@ -1878,6 +2113,18 @@ static inline void addRand_3030(float& v, float lo, float hi)
 }
 
 extern "C" void func_002F3030_3030(sPart_3030* p, float t) __asm__("func_002F3030");
+/**
+ * Moves a screen-splash ice crystal one frame and deactivates it when it expires or leaves the 640x480 screen.
+ *
+ * Ages it by 1/60; when its jiggle timer (+0x40) runs out it picks a new one ("Crsytal Min/Max Time In One Jiggle
+ * Direction") and a new random jiggle (+0x44, +0x48, "Crystal Min/Max Velocity Jiggle X/Y") that is added to the
+ * velocity every frame. It is pushed away from the screen centre (D_004A55B8, D_004A55BC) by a random "Crystal Min/Max
+ * Push Off Speed" scaled by how far @p t is above "Min Velocity For Pushoff" towards 120 (clamped 0-1), grows by a
+ * random "Crystal Min/Max Size Growth", has its speed capped at "Crystal Maximum Velocity" and moves by its velocity.
+ *
+ * @param p  the crystal
+ * @param t  the camera speed (km/h) from cSplashManager_update
+ */
 extern "C" void func_002F3030_3030(sPart_3030* p, float t)
 {
     p->f40 -= 0.016666667f;
@@ -1991,6 +2238,16 @@ extern float D_004A5520_3418 __asm__("D_004A5520");
 extern float D_004A5524_3418 __asm__("D_004A5524");
 extern int D_004A5528_3418 __asm__("D_004A5528");
 
+/**
+ * Draws a screen-splash ice crystal as a rotated sprite offset by @p off.
+ *
+ * The alpha (first tint component) fades by 1 - (age / life)^2 and the angle is rotation + rotation change * age / life
+ * degrees. Puts _EffectTexMap[67] into the current draw state's texture and calls cPS2GraphicsMan_DrawRotatedSprite
+ * (virtual slot 79) with the crystal's size, UVs (0,0)-(1,1) kept in function statics, and count 1.
+ * cSplashManager_render calls it.
+ *
+ * @param off  the screen offset added to the crystal position
+ */
 extern "C" void func_002F3418(sEm_3418* self, const sV2_3418* off)
 {
     if (D_004A5518_3418 == 0) {
@@ -2126,6 +2383,16 @@ static inline float randRange_3640(float lo, float hi)
     return lo + (hi - lo) * randf_3640();
 }
 
+/**
+ * Adds a group of @p n ice crystals around a screen position to the splash manager.
+ *
+ * Each crystal, while fewer than "Max Crystals" (D_004A4258) are active (+0x18), goes to @p p plus a random offset
+ * within +/- "Crystal Group Spacing X/Y" (D_004A42D0, D_004A42D4) and is started by func_002F2D70 with its number in
+ * the group; the active count then grows.
+ *
+ * @param p  the group position
+ * @param n  how many crystals to add
+ */
 extern "C" void func_002F3640(sEmit_3640* self, sVec2_3640* p, int n)
 {
     for (int i = 0; i < n; i++) {
@@ -2152,6 +2419,16 @@ extern "C" void func_002F2598(void *, S37A8, void *);
 extern int D_004A4254;
 
 extern "C" void func_002F37A8_37A8(void *arg0, S37A8 *arg1, void *arg2) __asm__("func_002F37A8");
+/**
+ * Adds one drop to the splash manager when fewer than "Max Drops" (D_004A4254) are active.
+ *
+ * Starts the next free drop (0x3C bytes from +0x1C) with func_002F2598 and bumps the active drop count (+0x14).
+ * cSplashManager_update (a crystal shedding a drop) and func_002F3810 call it.
+ *
+ * @param arg0  the splash manager
+ * @param arg1  the drop position (copied)
+ * @param arg2  the largest drop size
+ */
 extern "C" void func_002F37A8_37A8(void *arg0, S37A8 *arg1, void *arg2) {
     int n = *(int *)((char*)arg0 + 0x14);
     if (n < D_004A4254) {
@@ -2189,6 +2466,16 @@ static inline float randScaled_3810(float s)
     return randf_3810() * s;
 }
 
+/**
+ * Spawns the splashes owed this frame at random screen positions.
+ *
+ * Takes the whole part of the splash counter (+0x1024, On Tour mNumSplashesToAdd) and keeps the fraction. Each splash
+ * goes to a random point of the 640x480 screen; with the chance "Percentage Ice Crystals" (D_004A425C) it is a group of
+ * "Ice Crystal Minimum in Group" to "Maximum in Group" crystals (BXrand, at least 1, all counted) added by
+ * func_002F3640, otherwise one drop of "Drop Max Size" (D_004A4298) square added by func_002F37A8. Quirk: the group
+ * size is BXrand() % (maximum - minimum), a division by zero when the two settings are equal. cSplashManager_update
+ * calls it.
+ */
 extern "C" void func_002F3810(char* self)
 {
     float acc = *(float*)(self + 0x1024);
@@ -2559,6 +2846,15 @@ extern "C" void func_002F4260_4118(void *, float, void *) __asm__("func_002F4260
 struct N4118 { char pad[0x84]; N4118 *c; };
 struct M4118 { char pad[0x10]; unsigned int cnt; };
 
+/**
+ * Reports a snow impact at a world position to the splash manager of every view.
+ *
+ * For each view of the game's view manager (count at its +0x10) it calls func_002F4260 on cGame_getSplashManager's
+ * result. The board-wake effect calls it with its burst point and strength.
+ *
+ * @param position  the impact position in the world
+ * @param speed  the impact strength (a speed)
+ */
 extern "C" void func_002F4118(void *position, float speed) {
     unsigned int i = 0;
     if (((M4118 *)((N4118 *)((N4118 *)SSXApp)->c)->c)->cnt != 0) {
@@ -2658,6 +2954,17 @@ extern float D_004A4274;
 extern float D_004A4278;
 extern float D_004A427C;
 
+/**
+ * Adds screen splashes for a snow impact near the view's camera.
+ *
+ * Nearness is 1 - (distance from the last camera position (+0x1010) to @p p) / "Farthest Impact Distance" (D_004A4270).
+ * When that is positive and the last snowfall intensity (+0x1028) is above "Lowest Snowfall For Impacts", it adds
+ * nearness * clamp((@p speed * 0.036 - "Lowest Impact Intensity") / (120 - that), 0, 1) * "Impact Multiplier" to the
+ * splash counter (+0x1024).
+ *
+ * @param p  the impact position
+ * @param speed  the impact strength (times 0.036, km/h)
+ */
 extern "C" void func_002F4260(char* self, sV4_4260* p, float speed)
 {
     float k = 1.0f - Length_4260(Sub_4260(*(sV4_4260*)(self + 0x1010), *p)) / D_004A4270;
@@ -2676,6 +2983,16 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F4330);
 extern float D_004A4280;
 extern float D_004A4284;
 
+/**
+ * Records the view's snowfall intensity and adds screen splashes for heavy snowfall.
+ *
+ * Stores @p arg1 as the last snowfall intensity (+0x1028). Above "Lowest Snowfall Amount" (D_004A4280) it adds @p arg1
+ * * (last camera speed (+0x1020) + 10) * "Snowfall Multiplier" / 130 to the splash counter (+0x1024). The board-wake
+ * code calls it per view with the snow intensity.
+ *
+ * @param arg0  the splash manager
+ * @param arg1  the snowfall intensity
+ */
 extern "C" void func_002F4330(void *arg0, float arg1) {
     *(float *)((char*)arg0 + 0x1028) = arg1;
     if (D_004A4280 < arg1) {
@@ -2897,6 +3214,15 @@ public:
 };
 
 
+/**
+ * Draws the sun's lens-flare elements along the line from the screen centre through the sun.
+ *
+ * Sets the current draw state's texture from the graphics manager's +0x1004 (_EffectTexMap[45]). Each of the mNumLens
+ * (+0x200) entries of the lens table (+0x30, 0x1C each: kind, distance, size, colour) sits at centre + (sun - centre) *
+ * distance, where the sun is mScreenPosition (+0x1F0); its alpha is scaled by mfOcclude (+0x204) *
+ * cRenderStateMan_LensIntensity(6), its UVs pick a quarter of the texture by kind (0-3; others the left half) and it is
+ * drawn as a size * 300 square with cPS2GraphicsMan_DrawSprite (virtual slot 78). func_002F4A08 calls it.
+ */
 extern "C" void func_002F4690(sFlare_4690* self)
 {
     float cx = (float)((cWorld_4690*)GrMan)->GetScreenWidth() * 0.5f;
@@ -3033,6 +3359,18 @@ struct sSun_4A08 {
     float intensity;
 };
 
+/**
+ * Draws the sun sprite and its lens flare for one view, in a pushed orthographic viewport.
+ *
+ * Skipped while the sun is not on screen (mbOnScreen, +0x2C). Uses render-state set 6, or 7 when @p flag is set: the
+ * colour is (1, SunColorR/G/B) with its alpha scaled by mfOcclude (+0x204) * SunIntensity, the size is SunRadius (1
+ * means 320) and the texture is _EffectTexMap[51 + SunType]; nothing is drawn when the alpha is not positive. Pushes a
+ * default draw state (blend and texture fields set), the viewport @p vp and an identity view, draws a size-square
+ * sprite at mScreenPosition (+0x1F0) with cPS2GraphicsMan_DrawSprite, calls func_002F4690 and pops everything again.
+ *
+ * @param vp  the viewport rectangle (x, y, width, height)
+ * @param flag  nonzero picks render-state set 7 instead of 6
+ */
 extern "C" void func_002F4A08(sSun_4A08* self, sV4_4A08* vp, int flag)
 {
     if (self->visible == 0)
@@ -3188,6 +3526,21 @@ static inline float clamp_4DB8(float v, float lo, float hi)
     return (v >= lo) ? (v <? hi) : lo; // PORT: g++ <? operator
 }
 
+/**
+ * Places the sun on screen for one view and works out whether it is visible.
+ *
+ * With no sun (cRenderStateMan_SunType(6) == -1) it clears mbOnScreen and mbRequestZSample (+0x2C, +0x2E). Otherwise
+ * the direction comes from render-state set 6, or 7 when @p flag is set: SunYawOffset and SunPitchOffset in degrees, or
+ * a default of 107 and 16 degrees when both are 0. The sun is put that direction at the view's far clip (+0x58) - 500
+ * from the camera position (from the view matrix); if cPS2GraphicsMan_GetOutCode (slot 91) culls it, both flags and
+ * mfOcclude (+0x204) are cleared. Else both flags are set, mScreenPosition (+0x1F0) becomes
+ * cPS2GraphicsMan_GetScreenCoord's result (slot 92), the 16x16 rectangle around it is mZRect (+0x0), a copy clamped to
+ * the view is mZSRect (+0x10) and the depth is mZDist (+0x24). Likely bug: the y clamp uses the viewport's x plus its
+ * height as the upper bound.
+ *
+ * @param cam  the view info: viewport rectangle, view matrix (+0x10) and far clip (+0x58)
+ * @param flag  nonzero picks render-state set 7 instead of 6
+ */
 extern "C" void func_002F4DB8(sSun_4DB8* self, sCam_4DB8* cam, int flag)
 {
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
@@ -3261,6 +3614,14 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F5148);
 #ifdef SKIP_ASM
 extern "C" void cWorldLightMan_getRealTimeLights(int, void *, int);
 
+/**
+ * Fetches the real-time lights for a lit object from the game's world light manager.
+ *
+ * Calls cWorldLightMan_getRealTimeLights(SSXApp->Game->WorldLightMan, @p litObject, bit 12 of the object's +0x8 as the
+ * force flag). cPS2GraphicsMan_RenderModel calls it.
+ *
+ * @param litObject  the object being lit
+ */
 extern "C" void func_002F5148(void *litObject) {
     cWorldLightMan_getRealTimeLights(((int)SSXApp->Game->WorldLightMan), litObject, ((int) (*(int *)((char*)(litObject) + (8))) >> 0xC) & 1);
 }

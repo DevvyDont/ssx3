@@ -3,6 +3,15 @@
 //100%
 INCLUDE_ASM("seg/seg_218AE8", func_00317AE8);
 #ifdef SKIP_ASM
+/**
+ * Adds a sample to running statistics: sum, sum of squares, minimum, maximum and count.
+ *
+ * @p self is laid out as On Tour's cStatsCalc: Sum (+0x0), SumSquare (+0x4), MinSample (+0x8), MaxSample (+0xC),
+ * Samples (+0x10). The first sample sets both the minimum and the maximum; later ones widen them. No retail code calls
+ * it.
+ *
+ * @param x  the sample
+ */
 extern "C" void func_00317AE8(char *self, float x) {
     if (*(int*)(self + 0x10) == 0) {
         *(float*)(self + 8) = *(float*)(self + 0xC) = x;
@@ -66,6 +75,18 @@ static inline void setPlane_7B50(sVec4_7B50* out, const sVec4_7B50& n, const sVe
     out->w = vu0Dot_7B50(vu0Scale_7B50(n, -1.0f), p);
 }
 
+/**
+ * Sets a half-space: the plane through a point with a given normal, flipped so that a reference point lies on its
+ * positive side.
+ *
+ * @p out gets the normal in xyz and -dot(normal, point) in w. When the 4-component dot product of that plane with @p
+ * frontPoint is negative, it is rebuilt from the negated normal. No retail code calls it.
+ *
+ * @param out  the plane to set (normal xyz, offset w)
+ * @param n  the plane normal
+ * @param point  a point on the plane
+ * @param frontPoint  a point that must end up on the positive side
+ */
 extern "C" void func_00317B50(sVec4_7B50* out, sVec4_7B50* n, sVec4_7B50* point, sVec4_7B50* frontPoint)
 {
     setPlane_7B50(out, *n, *point);
@@ -115,6 +136,17 @@ static inline float fabs_7C48(float x)
     return r;
 }
 
+/**
+ * Returns whether two planes are nearly the same.
+ *
+ * The offsets (w) must agree: when @p planeA's is 0, @p planeB's must be within 0.1 of 0, otherwise their ratio must
+ * lie between 0.999 and 1.001. The normals' dot product (xyz, w taken as 0) must be at least 0.999. No retail code
+ * calls it.
+ *
+ * @param planeA  the first plane (normal xyz, offset w)
+ * @param planeB  the second plane
+ * @return 1 when similar, else 0
+ */
 extern "C" int func_00317C48(char *planeA, char *planeB) {
     float distA = *(float*)(planeA + 0xC);
     if (distA == 0.0f) {
@@ -134,6 +166,13 @@ INCLUDE_ASM("seg/seg_218AE8", func_00317D10);
 #ifdef SKIP_ASM
 extern int D_004A3E80;
 
+/**
+ * Stores the bx output-channel mask D_004A3E80 (initially 1).
+ *
+ * func_00317D18 reads it back; no retail code calls either.
+ *
+ * @param arg0  the new mask
+ */
 extern "C" void func_00317D10(int arg0) {
     D_004A3E80 = arg0;
 }
@@ -144,6 +183,13 @@ INCLUDE_ASM("seg/seg_218AE8", func_00317D18);
 #ifdef SKIP_ASM
 extern int D_004A3E80;
 
+/**
+ * Returns the bx output-channel mask D_004A3E80 (initially 1).
+ *
+ * func_00317D10 sets it; no retail code calls either.
+ *
+ * @return the mask
+ */
 extern "C" int func_00317D18(void) {
     return D_004A3E80;
 }

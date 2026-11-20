@@ -84,6 +84,25 @@ extern int D_004A55C0;
 extern const int D_00445E70[];
 extern "C" void* MEM_copy_B060(void*, void*, int) __asm__("MEM_copy");
 struct Ent_B060 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[4]): animates a world instance with a new AnimDelta node, unless its current node is
+ * busy.
+ *
+ * Copies the static defaults (set up on the first call) into a 44-byte parameter block (On Tour tMakeAnimDeltaData:
+ * InstId, Type, Dir, FromTime, ToTime, Speed, SpeedRange, StartTime, RandomStart, ForceVisible) and lets each argument
+ * override the field its index names, turning an int into a float where the field type table D_00445E70 says 2.
+ * Defaults: InstId -1, Type 1, FromTime -1, ToTime -1, Speed 30, StartTime -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
+ * (+0xC) is kept by checkActiveNode(node, 2 = ATYPE_ANIMDELTA, block), which keeps a busy or same-type node and
+ * replaces some kinds itself; otherwise it builds a cAnimDeltaNode (cAnimDeltaNode_cAnimDeltaNode1, 0x70 bytes, bucket
+ * 1) on the instance from the block.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_B060 func_002FB060(int n, Ent_B060 *e) {
     if (D_004A55C0 == 0) {
         D_B060[0] = 0xFFFFFFFF;
@@ -160,6 +179,26 @@ extern int D_004A55C4;
 extern const int D_00445E98[];
 extern "C" void* MEM_copy_B270(void*, void*, int) __asm__("MEM_copy");
 struct Ent_B270 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[5]): plays a two-stage animation on a world instance with a new AnimCombo node,
+ * unless its current node is busy.
+ *
+ * Copies the static defaults (set up on the first call) into a 60-byte parameter block (On Tour tMakeAnimComboData:
+ * InstId, Type, Dir, FromTime, ToTime, Speed, SpeedRange, StartTime, RandomStart, ForceVisible, FromTime2, ToTime2,
+ * Speed2, Stop) and lets each argument override the field its index names, turning an int into a float where the field
+ * type table D_00445E98 says 2. Defaults: InstId -1, Type 1, FromTime -1, ToTime 30, Speed 30, StartTime -1, FromTime2
+ * 31, ToTime2 -1, Speed2 30.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
+ * (+0xC) is kept by checkActiveNode(node, 3 = ATYPE_ANIMCOMBO, block), which keeps a busy or same-type node and
+ * replaces some kinds itself; otherwise it builds a cAnimComboNode (cAnimComboNode_cAnimComboNode1, 136 bytes, bucket
+ * 1) on the instance from the block.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_B270 func_002FB270(int n, Ent_B270 *e) {
     if (D_004A55C4 == 0) {
         D_B270[0] = 0xFFFFFFFF;
@@ -240,6 +279,25 @@ extern int D_004A55C8;
 extern const int D_00445ED0[];
 extern "C" void* MEM_copy_B498(void*, void*, int) __asm__("MEM_copy");
 struct Ent_B498 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[6]): makes a world instance teeter (a new AnimTeeter node), unless its current node
+ * is busy.
+ *
+ * Copies the static defaults (set up on the first call) into a 44-byte parameter block (On Tour tMakeAnimTeeterData:
+ * InstId, TorqueScale, BounceFactor, MaxSpeed, Spring, PivotTime, Damp, AnimSign, FromTime, ToTime) and lets each
+ * argument override the field its index names, turning an int into a float where the field type table D_00445ED0 says
+ * 2. Defaults: InstId -1, TorqueScale 0.6, MaxSpeed 60, Spring 0.02, PivotTime -10, Damp 0.6, FromTime -1, ToTime -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
+ * (+0xC) is kept by checkActiveNode(node, 4 = ATYPE_ANIMTEETER, block), which keeps a busy or same-type node and
+ * replaces some kinds itself; otherwise it builds a cAnimTeeterNode (cAnimTeeterNode_cAnimTeeterNode1, 0x80 bytes,
+ * bucket 1) on the instance from the block.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_B498 func_002FB498(int n, Ent_B498 *e) {
     if (D_004A55C8 == 0) {
         D_B498[0] = 0xFFFFFFFF;
@@ -316,6 +374,25 @@ extern int D_004A55CC;
 extern const int D_00445EF8[];
 extern "C" void* MEM_copy_B6B8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_B6B8 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[8]): turns a world instance into a conveyor (a new Conveyor node), unless its
+ * current node is busy.
+ *
+ * Copies the static defaults (set up on the first call) into a 52-byte parameter block (On Tour tMakeConveyorData:
+ * InstId, Vel, UScroll, VScroll, Rotate0, Rotate1, Rotate2, Rotate3, Rotate4, Rotate5, Rotate6, Rotate7) and lets each
+ * argument override the field its index names, turning an int into a float where the field type table D_00445EF8 says
+ * 2. Defaults: InstId -1, Vel 100.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
+ * (+0xC) is kept by checkActiveNode(node, 15 = ATYPE_CONVEYOR, block), which keeps a busy or same-type node and
+ * replaces some kinds itself; otherwise it builds a cConveyorNode (cConveyorNode_cConveyorNode, 72 bytes, bucket 1) on
+ * the instance from the block.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_B6B8 func_002FB6B8(int n, Ent_B6B8 *e) {
     if (D_004A55CC == 0) {
         D_B6B8[0] = 0xFFFFFFFF;
@@ -395,6 +472,24 @@ extern int D_004A55D0;
 extern int D_004A3BE0_B8D0[2] __asm__("D_004A3BE0");
 extern "C" void* MEM_copy_B8D0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_B8D0 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[9]): gives a world instance a hit counter (a new Counter node), unless its current
+ * node is busy.
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tMakeCounterData:
+ * InstId, StartCount) and lets each argument override the field its index names, turning an int into a float where the
+ * field type table D_004A3BE0 says 2. Defaults: InstId -1, StartCount 3.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
+ * (+0xC) is kept by checkActiveNode(node, 7 = ATYPE_COUNTER, block), which keeps a busy or same-type node and replaces
+ * some kinds itself; otherwise it builds a cCounterNode (cCounterNode_cCounterNode1, 36 bytes, bucket 1) on the
+ * instance from the block.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_B8D0 func_002FB8D0(int n, Ent_B8D0 *e) {
     if (D_004A55D0 == 0) {
         D_B8D0[0] = 0xFFFFFFFF;
@@ -463,6 +558,25 @@ extern int D_004A55D4;
 extern const int D_00445F28[];
 extern "C" void* MEM_copy_BAB0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_BAB0 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[14]): makes a world instance float on springs (a new Floating node), unless its
+ * current node is busy.
+ *
+ * Copies the static defaults (set up on the first call) into a 32-byte parameter block (On Tour tMakeFloatingData:
+ * InstId, LSpring, LDamp, ASpring, ADamp, ForceScale, TorqueScale) and lets each argument override the field its index
+ * names, turning an int into a float where the field type table D_00445F28 says 2. Defaults: InstId -1, LSpring 10,
+ * LDamp 10, ASpring 40, ADamp 10, ForceScale 0.2, TorqueScale 10.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
+ * (+0xC) is kept by checkActiveNode(node, 14 = ATYPE_FLOATING, block), which keeps a busy or same-type node and
+ * replaces some kinds itself; otherwise it builds a cFloatingNode (cFloatingNode_cFloatingNode, 0x7C bytes, bucket 1)
+ * on the instance from the block.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_BAB0 func_002FBAB0(int n, Ent_BAB0 *e) {
     if (D_004A55D4 == 0) {
         D_BAB0[0] = 0xFFFFFFFF;
@@ -536,6 +650,25 @@ extern int D_004A55D8;
 extern const int D_00445F48[];
 extern "C" void* MEM_copy_BCB8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_BCB8 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[3]): animates a world instance as an animated object (a new AnimObject node), unless
+ * its current node is busy.
+ *
+ * Copies the static defaults (set up on the first call) into a 44-byte parameter block (On Tour tMakeAnimObjectData:
+ * InstId, Type, Dir, FromTime, ToTime, Speed, SpeedRange, StartTime, RandomStart, ForceVisible) and lets each argument
+ * override the field its index names, turning an int into a float where the field type table D_00445F48 says 2.
+ * Defaults: InstId -1, Type 1, FromTime -1, ToTime -1, Speed 30, StartTime -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
+ * (+0xC) is kept by checkActiveNode(node, 1 = ATYPE_ANIMOBJECT, block), which keeps a busy or same-type node and
+ * replaces some kinds itself; otherwise it builds a cAnimObjectNode (cAnimObjectNode_cAnimObjectNode1, 108 bytes,
+ * bucket 1, node type 1) on the instance from the block.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_BCB8 func_002FBCB8(int n, Ent_BCB8 *e) {
     if (D_004A55D8 == 0) {
         D_BCB8[0] = 0xFFFFFFFF;
@@ -612,6 +745,25 @@ extern int D_004A55DC;
 extern const int D_00445F70[];
 extern "C" void* MEM_copy_BEC8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_BEC8 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[7]): turns a world instance into a boost object (a new Boost node), unless its
+ * current node is busy.
+ *
+ * Copies the static defaults (set up on the first call) into a 36-byte parameter block (On Tour tMakeBoostData: InstId,
+ * Type, BoostTime, Drag, MaxSpeed, BoostX, BoostY, BoostZ) and lets each argument override the field its index names,
+ * turning an int into a float where the field type table D_00445F70 says 2. Defaults: InstId -1, BoostTime 1, MaxSpeed
+ * 1, BoostY 1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
+ * (+0xC) is kept by checkActiveNode(node, 8 = ATYPE_BOOST, block), which keeps a busy or same-type node and replaces
+ * some kinds itself; otherwise it builds a cBoostNode (cBoostNode_cBoostNode1, 80 bytes, bucket 1, node type 8) on the
+ * instance from the block.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_BEC8 func_002FBEC8(int n, Ent_BEC8 *e) {
     if (D_004A55DC == 0) {
         D_BEC8[0] = 0xFFFFFFFF;
@@ -687,6 +839,24 @@ extern int D_004A55E0;
 extern const int D_00445F90[];
 extern "C" void* MEM_copy_C0D0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_C0D0 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[0]): gives a world instance a plain object node (a new Object node), unless its
+ * current node is busy.
+ *
+ * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tMakeObjectData:
+ * InstId, Solid, ForceVisible) and lets each argument override the field its index names, turning an int into a float
+ * where the field type table D_00445F90 says 2. Defaults: InstId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
+ * (+0xC) is kept by checkActiveNode(node, 17 = ATYPE_OBJECT, block), which keeps a busy or same-type node and replaces
+ * some kinds itself; otherwise it builds a cObjectNode (cObjectNode_cObjectNode, 44 bytes, bucket 1) with Solid and
+ * ForceVisible != 0 as its arguments on the instance from the block.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_C0D0 func_002FC0D0(int n, Ent_C0D0 *e) {
     if (D_004A55E0 == 0) {
         D_C0D0[0] = 0xFFFFFFFF;
@@ -754,6 +924,19 @@ static inline void del_obj(char* o) {
     ((DtorFn) * (void**)(vt + 0xC))(o + *(short*)(vt + 8), 3);
 }
 
+/**
+ * Applies a dead/restore request to a world instance by the request's Type.
+ *
+ * @p ev is a tMakeDeadData-style block (On Tour: InstId, Type). Type 0 replaces the instance's node (+0xC) with a new
+ * cDeadNode (cMemMan_alloc 0x1C, "DeadNode"); type 3 replaces it with a new cRestoreNode (0x1C, "RestoreNode"); type 1
+ * deletes the node and rewrites the instance flags (+0x8) as (f & 0xFFFF0300) | ((f & 0xFFFF0300) >> 16) | 2. An
+ * existing node is deleted through its virtual destructor first, except that a dead node (node type 6 at +0x10) is
+ * never touched (and a restore node, type 19, is kept for type 3), which ends the request. Other types do nothing.
+ *
+ * func_002FC420 calls it for the script, func_002D1CC0 for cDeadFadeNode when its fade ends.
+ *
+ * @param ev  the request block: InstId at +0x0, Type at +0x4
+ */
 extern "C" void func_002FC2C0(char* self, char* ev) {
     switch (*(int*)(ev + 4)) {
     case 1: {
@@ -810,6 +993,22 @@ extern int D_004A55E4;
 extern int D_004A3C00;
 extern "C" void* MEM_copy_C420(void*, void*, int) __asm__("MEM_copy");
 struct Ent_C420 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[2]): makes a world instance dead or restores it, unless its current node is busy.
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tMakeDeadData: InstId,
+ * Type) and lets each argument override the field its index names, turning an int into a float where the field type
+ * table D_004A3C00 says 2. Defaults: InstId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. Nothing happens when the instance is not found. When it has no
+ * active node (+0xC), or checkActiveNode(node, 6 = ATYPE_DEAD, block) lets the node go, the instance and block go to
+ * func_002FC2C0, which acts by Type (0 dead node, 1 delete the node and flag the instance, 3 restore node).
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_C420 func_002FC420(int n, Ent_C420 *e) {
     if (D_004A55E4 == 0) {
         D_C420[0] = 0xFFFFFFFF;
@@ -1042,6 +1241,27 @@ extern int D_004A55F0;
 extern const int D_00445FC0[];
 extern "C" void* MEM_copy_C9C8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_C9C8 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[12]): makes a world instance wave like a flag (a new Flag node), unless its current
+ * node is busy.
+ *
+ * Copies the static defaults (set up on the first call) into a 108-byte parameter block (On Tour tMakeFlagData: InstId,
+ * BaseSideHeld, OppositeSideHeld, PerpSideHeld, Speed1, Magnitude1, Frequency1, Speed2, Magnitude2, Frequency2, Speed3,
+ * Magnitude3, Frequency3, Speed4, Magnitude4, Frequency4, LowWindX, LowWindY, LowWindZ, HighWindX, HighWindY,
+ * HighWindZ, MinWindFactor, UScroll, VScroll, OverSaturate) and lets each argument override the field its index names,
+ * turning an int into a float where the field type table D_00445FC0 says 2. Defaults: InstId -1, BaseSideHeld 1, Speed1
+ * 1, Magnitude1 25, Frequency1 1, Speed2 1, Frequency2 1, Speed3 1, Frequency3 1, Speed4 1, Frequency4 1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
+ * (+0xC) is kept by checkActiveNode(node, 10 = ATYPE_FLAG, block), which keeps a busy or same-type node and replaces
+ * some kinds itself; otherwise it builds a cFlagNode (cFlagNode_cFlagNode1, 0x1C bytes, bucket 1) on the instance from
+ * the block.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_C9C8 func_002FC9C8(int n, Ent_C9C8 *e) {
     if (D_004A55F0 == 0) {
         D_C9C8[0] = 0xFFFFFFFF;
@@ -1132,6 +1352,24 @@ struct Ent_CC20 { int idx; int val; int pad; int type; };
 extern "C" int checkActiveNode(void*, int, void*);
 #define ASSERT_CC20(c) do { } while (0)
 
+/**
+ * Script function (gLunoCFunctions[10]): settles a world instance's current node as a fence request; builds no node.
+ *
+ * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tMakeFenceData: InstId,
+ * Type, Flexibility) and lets each argument override the field its index names, turning an int into a float where the
+ * field type table D_00446028 says 2. Defaults: InstId -1, Flexibility 0.5.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance exists and has an active node (+0xC), it only
+ * calls checkActiveNode(node, 9 = ATYPE_FENCE, block) and ignores the result: a busy or fence node is kept (a fence is
+ * retriggered) and any other node is deleted. Unlike its siblings it never builds a fence node. The nil value is
+ * written through the hidden result pointer @p ret.
+ *
+ * @param ret  where the returned script value is stored
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return @p ret
+ */
 // PORT: struct return written with the hidden return pointer explicit.
 extern "C" V3_CC20* func_002FCC20(V3_CC20* ret, int n, Ent_CC20 *e) {
     if (D_004A55F4 == 0) {
@@ -1457,6 +1695,30 @@ extern int D_004A5604;
 extern const int D_004460B0[];
 extern "C" void* MEM_copy_D420(void*, void*, int) __asm__("MEM_copy");
 struct Ent_D420 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[16]): attaches a particle effect to a world instance (a new Particle node), unless
+ * its current node is busy.
+ *
+ * Copies the static defaults (set up on the first call) into a 224-byte parameter block (On Tour tMakeParticleData:
+ * NumParticles, NumBlur, Duration, Damp, Size, Life, SizeR, LifeR, BlurStep, OffX, OffY, OffZ, R0X, R0Y, R0Z, R1X, R1Y,
+ * R1Z, VelX, VelY, VelZ, R0VX, R0VY, R0VZ, R1VX, R1VY, R1VZ, R2VX, R2VY, R2VZ, ForceX, ForceY, ForceZ, StartColA,
+ * StartColR, StartColG, StartColB, EndColA, EndColR, EndColG, EndColB, R0A, R0R, R0G, R0B, R1A, R1R, R1G, R1B,
+ * TextureId, BlendMode, SizeFinal, NumFlipTextures, FlipTextureRate, InstId) and lets each argument override the field
+ * its index names, turning an int into a float where the field type table D_004460B0 says 2. Defaults: NumParticles 1,
+ * Duration -1, Damp 1, Size 4, StartColA 1, EndColA 1, EndColR 1, EndColG 1, EndColB 1, R0A 1, R1A 1, TextureId 16,
+ * NumFlipTextures 1, FlipTextureRate 20, InstId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. The block is heap-allocated (cMemMan_alloc 0xE0) because the node
+ * keeps it; InstId is its last field (+0xD8). It is freed when the instance is not found or checkActiveNode(node, 13 =
+ * ATYPE_PARTICLE, block) keeps the old node (a positive result); a negative result means checkActiveNode already built
+ * the replacement from it. Otherwise LifeR is capped at Life and a cParticleNode (cParticleNode_cParticleNode1, 44
+ * bytes, bucket 1, no old node) is built on the instance with the block.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_D420 func_002FD420(int n, Ent_D420 *e) {
     if (D_004A5604 == 0) {
         ((int*)D_D420)[0] = 1;
@@ -1630,6 +1892,27 @@ extern int D_004A5608;
 extern const int D_00446190[];
 extern "C" void* MEM_copy_D758(void*, void*, int) __asm__("MEM_copy");
 struct Ent_D758 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[23]): adds a position modifier that puts a moving world instance at a rider, with an
+ * offset.
+ *
+ * Copies the static defaults (set up on the first call) into a 24-byte parameter block (On Tour tAddRiderPositionData:
+ * InstId, Being, OffsetX, OffsetY, OffsetZ) and lets each argument override the field its index names, turning an int
+ * into a float where the field type table D_00446190 says 2. Defaults: InstId -1, Being -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance's active node (+0xC) is a move node (virtual
+ * isMoveNode) and Being is not -1, the target is rider Being's position (SSXApp->Game->AI->Riders[Being], cRider
+ * virtual getPosition) plus the offset (OffsetX, OffsetY, OffsetZ) turned by that rider's transform (virtual
+ * getTransform); cMoveNode_addPosition gets it.
+ *
+ * Quirk: an instance that is not found is not checked; its node is read through a null pointer. An empty rider slot is
+ * not checked either.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_D758 func_002FD758(int n, Ent_D758 *e) {
     if (D_004A5608 == 0) {
         D_D758[0] = 0xFFFFFFFF;
@@ -1703,6 +1986,25 @@ extern int D_004A560C;
 extern const int D_004461A8[];
 extern "C" void* MEM_copy_D9F8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_D9F8 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[17]): attaches a moving world instance to a parent instance (a parent modifier).
+ *
+ * Copies the static defaults (set up on the first call) into a 28-byte parameter block (On Tour tAddParentData: InstId,
+ * ParentId, Mesh, OffsetX, OffsetY, OffsetZ) and lets each argument override the field its index names, turning an int
+ * into a float where the field type table D_004461A8 says 2. Defaults: InstId -1, ParentId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. Nothing happens when ParentId is -1, the parent is not found, has
+ * no active node or that node is ATYPE_DEAD (virtual isType(6)). Otherwise, when the instance's own active node is a
+ * move node (virtual isMoveNode), cMoveNode_addParent gets the parent node's instance record (+0x18), Mesh and the
+ * offset (OffsetX, OffsetY, OffsetZ, 0).
+ *
+ * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_D9F8 func_002FD9F8(int n, Ent_D9F8 *e) {
     if (D_004A560C == 0) {
         D_D9F8[0] = 0xFFFFFFFF;
@@ -1790,6 +2092,26 @@ extern int D_004A5610;
 extern const int D_004461C0[];
 extern "C" void* MEM_copy_DC60(void*, void*, int) __asm__("MEM_copy");
 struct Ent_DC60 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[18]): makes a world instance the parent of a moving child instance (a parent
+ * modifier on the child).
+ *
+ * Copies the static defaults (set up on the first call) into a 28-byte parameter block (On Tour tAddChildData: InstId,
+ * ChildId, Mesh, OffsetX, OffsetY, OffsetZ) and lets each argument override the field its index names, turning an int
+ * into a float where the field type table D_004461C0 says 2. Defaults: InstId -1, ChildId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. Nothing happens when ChildId is -1, the instance has no active
+ * node (+0xC) or that node is ATYPE_DEAD (virtual isType(6)). Otherwise ChildId is looked up the same way and, when the
+ * child's active node is a move node (virtual isMoveNode), cMoveNode_addParent gets the instance's node record (+0x18),
+ * Mesh and the offset (OffsetX, OffsetY, OffsetZ, 0), so the child follows this instance.
+ *
+ * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_DC60 func_002FDC60(int n, Ent_DC60 *e) {
     if (D_004A5610 == 0) {
         D_DC60[0] = 0xFFFFFFFF;
@@ -2055,6 +2377,24 @@ extern int D_004A561C;
 extern const int D_00446238[];
 extern "C" void* MEM_copy_E2C0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_E2C0 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[21]): adds a UV-scroll modifier to a moving world instance.
+ *
+ * Copies the static defaults (set up on the first call) into a 52-byte parameter block (On Tour tAddUVScrollData:
+ * InstId, Type, UStart, VStart, UScroll, VScroll, TimeOn, TimeOff, AngVel, AxisX, AxisY, AxisZ) and lets each argument
+ * override the field its index names, turning an int into a float where the field type table D_00446238 says 2.
+ * Defaults: InstId -1, Type 5, UScroll 0.0166667, VScroll 0.0166667, TimeOn 1, AxisZ 1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance's active node (+0xC) is a move node (virtual
+ * isMoveNode), cMoveNode_addUVScroll gets the whole block.
+ *
+ * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_E2C0 func_002FE2C0(int n, Ent_E2C0 *e) {
     if (D_004A561C == 0) {
         D_E2C0[0] = 0xFFFFFFFF;
@@ -2125,6 +2465,23 @@ extern int D_004A5620;
 extern const int D_00446268[];
 extern "C" void* MEM_copy_E4A8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_E4A8 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[22]): adds a texture-flip modifier to a moving world instance.
+ *
+ * Copies the static defaults (set up on the first call) into a 24-byte parameter block (On Tour tAddTexFlipData:
+ * InstId, Type, StartId, Dir, Speed) and lets each argument override the field its index names, turning an int into a
+ * float where the field type table D_00446268 says 2. Defaults: InstId -1, Speed 2.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance's active node (+0xC) is a move node (virtual
+ * isMoveNode), cMoveNode_addTexFlip gets the whole block.
+ *
+ * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_E4A8 func_002FE4A8(int n, Ent_E4A8 *e) {
     if (D_004A5620 == 0) {
         D_E4A8[0] = 0xFFFFFFFF;
@@ -2186,6 +2543,24 @@ extern int D_004A5624;
 extern const int D_00446280[];
 extern "C" void* MEM_copy_E668(void*, void*, int) __asm__("MEM_copy");
 struct Ent_E668 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[24]): adds a boost modifier to a moving world instance.
+ *
+ * Copies the static defaults (set up on the first call) into a 36-byte parameter block (On Tour tAddBoostData: InstId,
+ * Type, BoostTime, Drag, MaxSpeed, BoostX, BoostY, BoostZ) and lets each argument override the field its index names,
+ * turning an int into a float where the field type table D_00446280 says 2. Defaults: InstId -1, Type 1, Drag 0.1,
+ * MaxSpeed 20, BoostZ 1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance's active node (+0xC) is a move node (virtual
+ * isMoveNode), cMoveNode_addBoost gets the whole block.
+ *
+ * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_E668 func_002FE668(int n, Ent_E668 *e) {
     if (D_004A5624 == 0) {
         D_E668[0] = 0xFFFFFFFF;
@@ -2465,6 +2840,30 @@ extern int D_004A562C;
 extern const int D_00446380[];
 extern "C" void* MEM_copy_EE98(void*, void*, int) __asm__("MEM_copy");
 struct Ent_EE98 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[26]): adds a dynamic (moving) particle emitter to a moving world instance.
+ *
+ * Copies the static defaults (set up on the first call) into a 240-byte parameter block (On Tour
+ * tAddDynamicParticleData: NumParticles, NumBlur, Duration, Damp, Size, Life, SizeR, LifeR, BlurStep, OffX, OffY, OffZ,
+ * R0X, R0Y, R0Z, R1X, R1Y, R1Z, VelX, VelY, VelZ, R0VX, R0VY, R0VZ, R1VX, R1VY, R1VZ, R2VX, R2VY, R2VZ, ForceX, ForceY,
+ * ForceZ, StartColA, StartColR, StartColG, StartColB, EndColA, EndColR, EndColG, EndColB, R0A, R0R, R0G, R0B, R1A, R1R,
+ * R1G, R1B, TextureId, BlendMode, SizeFinal, NumFlipTextures, FlipTextureRate, InstId, Mesh, OffsetX, OffsetY, OffsetZ)
+ * and lets each argument override the field its index names, turning an int into a float where the field type table
+ * D_00446380 says 2. Defaults: NumParticles 1, Duration -1, Damp 1, Size 4, StartColA 1, EndColA 1, EndColR 1, EndColG
+ * 1, EndColB 1, R0A 1, R1A 1, TextureId 16, NumFlipTextures 1, FlipTextureRate 20, InstId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. The block is heap-allocated (cMemMan_alloc 0xF0,
+ * "AddDynamicParticleData") because the modifier keeps it; InstId sits at +0xD8. When the instance's active node (+0xC)
+ * is a move node (virtual isMoveNode), cMoveNode_addDynamicParticle gets the block, Mesh and the offset (OffsetX,
+ * OffsetY, OffsetZ, 1); otherwise the block is freed.
+ *
+ * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_EE98 func_002FEE98(int n, Ent_EE98 *e) {
     if (D_004A562C == 0) {
         ((int*)D_EE98)[0] = 1;
@@ -2664,6 +3063,27 @@ extern int D_004A5634;
 extern const int D_00446480[];
 extern "C" void* MEM_copy_F390(void*, void*, int) __asm__("MEM_copy");
 struct Ent_F390 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[49]): hangs a world instance on up to eight others as a floating rail (a new
+ * FloatRail node), unless its current node is busy.
+ *
+ * Copies the static defaults (set up on the first call) into an 88-byte parameter block (On Tour tMakeFloatRailData:
+ * InstId, InstId1, InstId2, InstId3, InstId4, InstId5, InstId6, InstId7, InstId8, Mesh1, Mesh2, Mesh3, Mesh4, Mesh5,
+ * Mesh6, Mesh7, Mesh8, Flags, LSpring, LDamp, ForceScale) and lets each argument override the field its index names,
+ * turning an int into a float where the field type table D_00446480 says 2. Defaults: InstId -1, InstId1 -1, InstId2
+ * -1, InstId3 -1, InstId4 -1, InstId5 -1, InstId6 -1, InstId7 -1, InstId8 -1, Mesh1 -1, Mesh2 -1, Mesh3 -1, Mesh4 -1,
+ * Mesh5 -1, Mesh6 -1, Mesh7 -1, Mesh8 -1, Flags 1, LSpring 0.5, LDamp 0.5, ForceScale 1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
+ * (+0xC) is kept by checkActiveNode(node, 20 = ATYPE_FLOATRAIL, block), which keeps a busy or same-type node and
+ * replaces some kinds itself; otherwise it builds a cFloatRailNode (cFloatRailNode_cFloatRailNode, cMemMan_alloc 0x80,
+ * "FloatRail") on the instance from the block.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_F390 func_002FF390(int n, Ent_F390 *e) {
     if (D_004A5634 == 0) {
         D_F390[0] = 0xFFFFFFFF;
@@ -2759,6 +3179,27 @@ extern int D_004A5638;
 extern const int D_004464D8[];
 extern "C" void* MEM_copy_F5E8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_F5E8 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[70]): hangs a world instance on up to eight others as a springy rail (a new
+ * SpringRail node), unless its current node is busy.
+ *
+ * Copies the static defaults (set up on the first call) into an 88-byte parameter block (On Tour tMakeSpringRailData:
+ * InstId, InstId1, InstId2, InstId3, InstId4, InstId5, InstId6, InstId7, InstId8, Mesh1, Mesh2, Mesh3, Mesh4, Mesh5,
+ * Mesh6, Mesh7, Mesh8, Flags, ASpring, ADamp, TorqueScale) and lets each argument override the field its index names,
+ * turning an int into a float where the field type table D_004464D8 says 2. Defaults: InstId -1, InstId1 -1, InstId2
+ * -1, InstId3 -1, InstId4 -1, InstId5 -1, InstId6 -1, InstId7 -1, InstId8 -1, Mesh1 -1, Mesh2 -1, Mesh3 -1, Mesh4 -1,
+ * Mesh5 -1, Mesh6 -1, Mesh7 -1, Mesh8 -1, Flags 1, ASpring 0.5, ADamp 0.5, TorqueScale 1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
+ * (+0xC) is kept by checkActiveNode(node, 21 = ATYPE_SPRINGRAIL, block), which keeps a busy or same-type node and
+ * replaces some kinds itself; otherwise it builds a cSpringRailNode (cSpringRailNode_cSpringRailNode, cMemMan_alloc
+ * 0x80, "SpringRail") on the instance from the block, after scaling TorqueScale by 0.001.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_F5E8 func_002FF5E8(int n, Ent_F5E8 *e) {
     if (D_004A5638 == 0) {
         D_F5E8[0] = 0xFFFFFFFF;
@@ -2854,6 +3295,20 @@ extern char* D_004A28A8_F850 __asm__("SSXApp");
 extern int D_004A563C_F850 __asm__("D_004A563C");
 struct T12_F850 { int a; int b; int e; Flag_F850 f; };
 extern T12_F850 D_004FBAE8_F850 __asm__("D_004FBAE8");
+/**
+ * Script function (gLunoCFunctions[27]): flags a world event on a rider (cRider_flagEventWorld).
+ *
+ * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tAIEventData: Being,
+ * EventId, Arg) and lets each argument override the field its index names, turning an int into a float where the field
+ * type table D_00446530 says 2. Defaults: Being -1, EventId 0, Arg 0.
+ *
+ * Being -1 means the script's rider (cWScriptMan_TheWScriptMan->Being). Calls
+ * cRider_flagEventWorld(SSXApp->Game->AI->Riders[Being], EventId, Arg); the rider slot is not checked.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" R12_F850 func_002FF850(int n, Ent_F850* e) {
     if (D_004A563C_F850 == 0) {
         D_004FBAE8_F850.a = -1;
@@ -2909,6 +3364,23 @@ extern int D_004A5640;
 extern const int D_00446540[];
 extern "C" void* MEM_copy_F9A8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_F9A8 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[28]): sends a signal to a world instance's active node.
+ *
+ * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tSignalData: InstId,
+ * Signal, Arg) and lets each argument override the field its index names, turning an int into a float where the field
+ * type table D_00446540 says 2. Defaults: InstId -1, Signal -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance has an active node (+0xC), its virtual signal
+ * (cInstanceNode_signal, slot 36) gets Signal and Arg.
+ *
+ * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_F9A8 func_002FF9A8(int n, Ent_F9A8 *e) {
     if (D_004A5640 == 0) {
         D_F9A8[0] = 0xFFFFFFFF;
@@ -2959,6 +3431,22 @@ struct V3_FB50 { float x, y, z; };
 extern V3_FB50 D_004C9098_FB50 __asm__("luno_gLunoNil");
 extern "C" void* MEM_copy_FB50(void*, void*, int) __asm__("MEM_copy");
 struct Ent_FB50 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[29]): hides a world instance by giving it a new Hide node.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tHideInstanceData:
+ * InstId) and lets each argument override the field its index names, turning an int into a float where the field type
+ * table D_004A3C10 says 2. Defaults: InstId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. Nothing happens when the instance is not found or its active node
+ * (+0xC) is already ATYPE_HIDE (16) or ATYPE_DEAD (6) (virtual isType); any other node is deleted (virtual slot 1,
+ * flags 3). Then a cHideNode (cHideNode_cHideNode, cMemMan_alloc 0x1C, "Hide") is built on the instance.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_FB50 func_002FFB50(int n, Ent_FB50 *e) {
     if (D_004A5650_FB50 == 0) {
         D_004A5648_FB50 = 0xFFFFFFFF;
@@ -3036,6 +3524,21 @@ extern int D_004A5660;
 extern int D_004A3C20;
 extern "C" void* MEM_copy_FD58(void*, void*, int) __asm__("MEM_copy");
 struct Ent_FD58 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[58]): shows a hidden world instance again by deleting its Hide node.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tShowInstanceData:
+ * InstId) and lets each argument override the field its index names, turning an int into a float where the field type
+ * table D_004A3C20 says 2. Defaults: InstId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance exists and its active node (+0xC) is ATYPE_HIDE
+ * (16, virtual isType), that node is deleted (virtual slot 1, flags 3).
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_FD58 func_002FFD58(int n, Ent_FD58 *e) {
     if (D_004A5660 == 0) {
         D_FD58 = 0xFFFFFFFF;
@@ -3086,6 +3589,21 @@ extern int D_004A5664;
 extern int D_004A3C28;
 extern "C" void* MEM_copy_FF00(void*, void*, int) __asm__("MEM_copy");
 struct Ent_FF00 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[30]): plays a world sound at a world instance.
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tPlayAudioData: InstId,
+ * SoundId) and lets each argument override the field its index names, turning an int into a float where the field type
+ * table D_004A3C28 says 2. Defaults: InstId -1, SoundId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance is found,
+ * cSSXAudio_WorldSound(cAudioInterface_bxAudio(), instance, SoundId) plays it.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_FF00 func_002FFF00(int n, Ent_FF00 *e) {
     if (D_004A5664 == 0) {
         D_FF00[0] = 0xFFFFFFFF;
@@ -3150,6 +3668,21 @@ extern int D_004A5668;
 extern const int D_00446550[];
 extern "C" void* MEM_copy_00A8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_00A8 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[31]): attaches a looping sound to a world instance.
+ *
+ * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tAttachAudioData:
+ * InstId, SoundId, Mesh) and lets each argument override the field its index names, turning an int into a float where
+ * the field type table D_00446550 says 2. Defaults: InstId -1, SoundId -1, Mesh -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance is found,
+ * cSSXAudio_AttachSound(cAudioInterface_bxAudio(), instance, SoundId, Mesh) attaches it.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_00A8 func_003000A8(int n, Ent_00A8 *e) {
     if (D_004A5668 == 0) {
         D_00A8[0] = 0xFFFFFFFF;
@@ -3216,6 +3749,21 @@ extern int D_004A566C;
 extern const int D_00446560[];
 extern "C" void* MEM_copy_0260(void*, void*, int) __asm__("MEM_copy");
 struct Ent_0260 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[73]): detaches a sound from a world instance.
+ *
+ * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tDetachAudioData:
+ * InstId, SoundId, Mesh) and lets each argument override the field its index names, turning an int into a float where
+ * the field type table D_00446560 says 2. Defaults: InstId -1, SoundId -1, Mesh -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance is found,
+ * cSSXAudio_DetachSound(cAudioInterface_bxAudio(), instance, SoundId, Mesh) detaches it.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_0260 func_00300260(int n, Ent_0260 *e) {
     if (D_004A566C == 0) {
         D_0260[0] = 0xFFFFFFFF;
@@ -3279,6 +3827,23 @@ extern int D_004A5670;
 extern int D_004A3C30;
 extern "C" void* MEM_copy_0418(void*, void*, int) __asm__("MEM_copy");
 struct Ent_0418 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[32]): expires a world instance's active node.
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tExpireData: InstId,
+ * Type) and lets each argument override the field its index names, turning an int into a float where the field type
+ * table D_004A3C30 says 2. Defaults: InstId -1, Type 0.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance has an active node (+0xC), Type 0 or 1 is
+ * passed to its virtual expire (cInstanceNode_expire, slot 34); other types do nothing.
+ *
+ * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_0418 func_00300418(int n, Ent_0418 *e) {
     if (D_004A5670 == 0) {
         D_0418[0] = 0xFFFFFFFF;
@@ -3339,6 +3904,23 @@ extern int D_004A5680;
 extern int D_004A3C38;
 extern "C" void* MEM_copy_05E8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_05E8 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[33]): tells a world instance's active node that it lost focus.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tLoseFocusData: InstId)
+ * and lets each argument override the field its index names, turning an int into a float where the field type table
+ * D_004A3C38 says 2. Defaults: InstId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance has an active node (+0xC), its virtual
+ * loseFocus (cInstanceNode_loseFocus, slot 35) runs.
+ *
+ * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_05E8 func_003005E8(int n, Ent_05E8 *e) {
     if (D_004A5680 == 0) {
         D_05E8 = 0xFFFFFFFF;
@@ -3399,6 +3981,23 @@ struct V3_0770 { float x, y, z; };
 extern V3_0770 D_004C9098_0770 __asm__("luno_gLunoNil");
 extern "C" void* MEM_copy_0770(void*, void*, int) __asm__("MEM_copy");
 struct Ent_0770 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[34]): transports the script's rider to a world instance.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tTransportData: InstId)
+ * and lets each argument override the field its index names, turning an int into a float where the field type table
+ * D_004A3C40 says 2. Defaults: InstId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the script's rider index (cWScriptMan_TheWScriptMan->Being)
+ * is not negative and the instance is found, the target transform is the instance node's virtual getRootTransform (slot
+ * 24) or, without a node, the instance's own transform (+0x10); the rider (SSXApp->Game->AI->Riders[Being]) gets it
+ * through its virtual transport (cRider_transport, slot 10).
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_0770 func_00300770(int n, Ent_0770 *e) {
     if (D_004A5690_0770 == 0) {
         D_004A5688_0770 = 0xFFFFFFFF;
@@ -3470,6 +4069,23 @@ struct V3_0948 { float x, y, z; };
 extern V3_0948 D_004C9098_0948 __asm__("luno_gLunoNil");
 extern "C" void* MEM_copy_0948(void*, void*, int) __asm__("MEM_copy");
 struct Ent_0948 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[64]): sets the script's rider up for a mission at a world instance.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tSetupMissionRiderData:
+ * InstId) and lets each argument override the field its index names, turning an int into a float where the field type
+ * table D_004A3C48 says 2. Defaults: InstId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the script's rider index (cWScriptMan_TheWScriptMan->Being)
+ * is not negative and the instance is found, the transform is the instance node's virtual getRootTransform (slot 24)
+ * or, without a node, the instance's own transform (+0x10); the rider (SSXApp->Game->AI->Riders[Being]) gets it through
+ * its virtual initForMission (cRider_initForMission, slot 12).
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_0948 func_00300948(int n, Ent_0948 *e) {
     if (D_004A56A0_0948 == 0) {
         D_004A5698_0948 = 0xFFFFFFFF;
@@ -3537,6 +4153,20 @@ extern "C" void func_00358B28(unsigned, int);
 extern int D_004A56A4_0B20 __asm__("D_004A56A4");
 struct T12_0B20 { unsigned a; int b; Flag_0B20 f; };
 extern T12_0B20 D_004FBB48_0B20 __asm__("D_004FBB48");
+/**
+ * Script function (gLunoCFunctions[35]): switches a rail (spline) on or off.
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tRailData: SplineId,
+ * Cmd) and lets each argument override the field its index names, turning an int into a float where the field type
+ * table D_004A3C50 says 2. Defaults: SplineId -1, Cmd 1.
+ *
+ * When SplineId is not -1, Cmd 1 switches the rail on and Cmd 0 off through func_00358B28 (the rail manager); other
+ * values do nothing.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" R12_0B20 func_00300B20(int n, Ent_0B20* e) {
     if (D_004A56A4_0B20 == 0) {
         D_004FBB48_0B20.a = -1;
@@ -3585,6 +4215,22 @@ extern int D_004A56A8;
 extern int D_004A3C58;
 extern "C" void* MEM_copy_0C78(void*, void*, int) __asm__("MEM_copy");
 struct Ent_0C78 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[36]): queues or plays an in-game cinematic (NIS) through the script engine.
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tNISData: ScriptId,
+ * Cmd) and lets each argument override the field its index names, turning an int into a float where the field type
+ * table D_004A3C58 says 2. Defaults: ScriptId -1.
+ *
+ * Cmd 0 adds the NIS whose script hash is ScriptId to list 0 (cSSXScriptEngine_AddToNISListByScriptHashID, mode 3) and
+ * readies the list (cSSXScriptEngine_ReadyNISList); Cmd 1 adds the NIS of script category ScriptId instead
+ * (cSSXScriptEngine_AddToNISListByScriptCategory) and readies it; Cmd 2 plays list 0 (cSSXScriptEngine_PlayNISList).
+ * Other values do nothing.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_0C78 func_00300C78(int n, Ent_0C78 *e) {
     if (D_004A56A8 == 0) {
         D_0C78[0] = 0xFFFFFFFF;
@@ -3639,6 +4285,19 @@ extern int D_004A3DD8_0E28 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A56AC_0E28 __asm__("D_004A56AC");
 struct T12u_0E28 { unsigned a; int b; Flag_0E28 f; };
 extern T12u_0E28 D_004FBB68_0E28 __asm__("D_004FBB68");
+/**
+ * Script function (gLunoCFunctions[37]): sets up a collection pool (cWScriptMan_collectPool).
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tCollectPoolData:
+ * PoolId, PoolSize) and lets each argument override the field its index names, turning an int into a float where the
+ * field type table D_004A3C60 says 2. Defaults: PoolId -1, PoolSize 1.
+ *
+ * When PoolId is not -1, cWScriptMan_collectPool(cWScriptMan_TheWScriptMan, PoolId, PoolSize) runs.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" R12_0E28 func_00300E28(int n, Ent_0E28* e) {
     if (D_004A56AC_0E28 == 0) {
         D_004FBB68_0E28.a = 0xFFFFFFFFu;
@@ -3680,6 +4339,23 @@ extern const int D_00446570_0F50[] __asm__("D_00446570");
 extern "C" void* MEM_copy_0F50(void*, void*, int) __asm__("MEM_copy");
 extern "C" void cWScriptMan_collectInst_0F50(void*, unsigned, unsigned*, int) __asm__("cWScriptMan_collectInst");
 struct Ent_0F50 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[38]): registers up to 20 instances with a collection pool (cWScriptMan_collectInst).
+ *
+ * Copies the static defaults (set up on the first call) into an 88-byte parameter block (On Tour tCollectInstData:
+ * PoolId, InstId1, InstId2, InstId3, InstId4, InstId5, InstId6, InstId7, InstId8, InstId9, InstId10, InstId11,
+ * InstId12, InstId13, InstId14, InstId15, InstId16, InstId17, InstId18, InstId19, InstId20) and lets each argument
+ * override the field its index names, turning an int into a float where the field type table D_00446570 says 2.
+ * Defaults: PoolId -1, InstId1 -1, InstId2 -1, InstId3 -1, InstId4 -1, InstId5 -1, InstId6 -1, InstId7 -1, InstId8 -1,
+ * InstId9 -1, InstId10 -1, InstId11 -1, InstId12 -1, InstId13 -1, InstId14 -1, InstId15 -1, InstId16 -1, InstId17 -1,
+ * InstId18 -1, InstId19 -1, InstId20 -1.
+ *
+ * When PoolId is not -1, cWScriptMan_collectInst(cWScriptMan_TheWScriptMan, PoolId, &InstId1, 20) runs.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_0F50 func_00300F50(int n, Ent_0F50 *e) {
     if (D_56B0_0F50 == 0) {
         D_0F50[0] = 0xFFFFFFFF;
@@ -3846,6 +4522,20 @@ extern int D_004A3DD8_12F0 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A56B8_12F0 __asm__("D_004A56B8");
 struct T12_12F0 { unsigned a; int b; Flag_12F0 f; };
 extern T12_12F0 D_004FBBE0_12F0 __asm__("D_004FBBE0");
+/**
+ * Script function (gLunoCFunctions[40]): runs a mission command and returns its result (cWScriptMan_doMissionCmd).
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tMissionData:
+ * MissionId, Cmd) and lets each argument override the field its index names, turning an int into a float where the
+ * field type table D_004A3C70 says 2. Defaults: MissionId -1, Cmd -1.
+ *
+ * When MissionId is not -1, the result of cWScriptMan_doMissionCmd(cWScriptMan_TheWScriptMan, MissionId, Cmd, -1) is
+ * returned as an int script value (type 1); otherwise nil. The value is built in the hidden result slot self.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return self, set to an int script value, or nil
+ */
 extern "C" void* func_003012F0(void* self, int n, Ent_12F0* e) {
     if (D_004A56B8_12F0 == 0) {
         D_004FBBE0_12F0.a = -1;
@@ -3917,6 +4607,20 @@ struct T12_1440 { unsigned a; int b; sBindEnd_1FBE38_1440 f; };
 extern T12_1440 D_004FBBF0_1440 __asm__("D_004FBBF0");
 extern int D_004A56BC_1440 __asm__("D_004A56BC");
 extern int D_004A3C78_1440[2] __asm__("D_004A3C78");
+/**
+ * Script function (gLunoCFunctions[41]): looks up a world instance and does nothing else (a stubbed movie command).
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tMovieData: InstId,
+ * Cmd) and lets each argument override the field its index names, turning an int into a float where the field type
+ * table D_004A3C78 says 2. Defaults: InstId -1, Cmd 1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. The instance is resolved but not used; Cmd is ignored.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 // FAKEMATCH: the dead lookup of the object for the packed reference id buf[0] (`obj`, never used: in retail only its
 // `lw; nor` survive, the branch being removed after register allocation; the release build's user was debug code);
 // plain form 97.22%.
@@ -3976,6 +4680,21 @@ extern int D_004A3DD8_1560 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A56C8_1560 __asm__("D_004A56C8");
 extern unsigned D_004A56C0_1560 __asm__("D_004A56C0");
 extern Flag_1560 D_004A56C4_1560 __asm__("D_004A56C4");
+/**
+ * Script function (gLunoCFunctions[53]): returns how many items of a collection pool are collected
+ * (cWScriptMan_collectCount).
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tCollectCountData:
+ * PoolId) and lets each argument override the field its index names, turning an int into a float where the field type
+ * table D_004A3C80 says 2. Defaults: PoolId -1.
+ *
+ * Returns cWScriptMan_collectCount(cWScriptMan_TheWScriptMan, PoolId) as an int script value, or int 0 when PoolId is
+ * -1. The value is built in the hidden result slot self.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return self, set to an int script value
+ */
 extern "C" void* func_00301560(void* self, int n, Ent_1560* e) {
     if (D_004A56C8_1560 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
@@ -4034,6 +4753,23 @@ extern int D_004A56D8;
 extern int D_004A3C88;
 extern "C" void* MEM_copy_1680(void*, void*, int) __asm__("MEM_copy");
 struct Ent_1680 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[54]): returns a world instance's current animation frame as a float.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tAnimFrameData: InstId)
+ * and lets each argument override the field its index names, turning an int into a float where the field type table
+ * D_004A3C88 says 2. Defaults: InstId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. The result is the active node's (+0xC) virtual getAnimFrame
+ * (cInstanceNode_getAnimFrame, slot 30), or -1.0 when the instance or its node is missing; it is stored in @p ret as a
+ * float script value (type 2).
+ *
+ * @param ret  the result slot
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return @p ret
+ */
 extern "C" V3_1680* func_00301680(V3_1680 *ret, int n, Ent_1680 *e) {
     if (D_004A56D8 == 0) {
         D_1680 = 0xFFFFFFFF;
@@ -4099,6 +4835,23 @@ extern int D_004A56E8;
 extern int D_004A3C90;
 extern "C" void* MEM_copy_1830(void*, void*, int) __asm__("MEM_copy");
 struct Ent_1830 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[109]): returns a world instance's animation direction as an int.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tAnimDirData: InstId)
+ * and lets each argument override the field its index names, turning an int into a float where the field type table
+ * D_004A3C90 says 2. Defaults: InstId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. The result is the active node's (+0xC) virtual getAnimDir
+ * (cInstanceNode_getAnimDir, slot 31), or 0 when the instance or its node is missing; it is stored in @p ret as an int
+ * script value.
+ *
+ * @param ret  the result slot
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return @p ret
+ */
 extern "C" V3_1830* func_00301830(V3_1830 *ret, int n, Ent_1830 *e) {
     if (D_004A56E8 == 0) {
         D_1830 = 0xFFFFFFFF;
@@ -4165,6 +4918,24 @@ extern int D_004A56EC;
 extern int D_004A3C98;
 extern "C" void* MEM_copy_19C8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_19C8 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[55]): asks a world instance's active node whether its animation has passed a frame
+ * (frameUpdateEvent).
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tFrameUpdateEventData:
+ * InstId, Frame) and lets each argument override the field its index names, turning an int into a float where the field
+ * type table D_004A3C98 says 2. Defaults: InstId -1, Frame -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. The result is the active node's (+0xC) virtual frameUpdateEvent
+ * (cInstanceNode_frameUpdateEvent, slot 32) called with Frame / 30 (frames turned into seconds), or 0 when the instance
+ * or its node is missing; it is stored in @p ret as an int script value.
+ *
+ * @param ret  the result slot
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return @p ret
+ */
 extern "C" V3_19C8* func_003019C8(V3_19C8 *ret, int n, Ent_19C8 *e) {
     if (D_004A56EC == 0) {
         D_19C8[0] = 0xFFFFFFFF;
@@ -4232,6 +5003,20 @@ int* luno_cLunoVar_castInt(void*);
 
 struct Ent_1B88 { int idx; int val; int pad; int kind; };
 
+/**
+ * Script function (gLunoCFunctions[56]): makes the script's process jump to a task (cWScriptMan_gotoTask).
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tGotoTaskData: TaskId)
+ * and lets each argument override the field its index names, turning an int into a float where the field type table
+ * D_004A3CA0 says 2. Defaults: TaskId -1.
+ *
+ * Calls cWScriptMan_gotoTask(cWScriptMan_TheWScriptMan, TaskId), even for the default -1, and returns int 0 in the
+ * hidden result slot self.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return self, set to int 0
+ */
 extern "C" void* func_00301B88(void* self, int n, Ent_1B88* e) {
     if (D_004A56F8_1B88 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
@@ -4274,6 +5059,20 @@ int* luno_cLunoVar_castInt(void*);
 
 struct Ent_1C80 { int idx; int val; int pad; int kind; };
 
+/**
+ * Script function (gLunoCFunctions[57]): advances the script's process to a task (cWScriptMan_advanceToTask).
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tAdvanceToTaskData:
+ * TaskId) and lets each argument override the field its index names, turning an int into a float where the field type
+ * table D_004A3CA8 says 2. Defaults: TaskId -1.
+ *
+ * Calls cWScriptMan_advanceToTask(cWScriptMan_TheWScriptMan, TaskId), even for the default -1, and returns int 0 in the
+ * hidden result slot self.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return self, set to int 0
+ */
 extern "C" void* func_00301C80(void* self, int n, Ent_1C80* e) {
     if (D_004A5708_1C80 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
@@ -4322,6 +5121,26 @@ extern "C" void* MEM_copy_1D78(void*, void*, int) __asm__("MEM_copy");
 struct Chk_1D78 { virtual void v01(); virtual void v02(); virtual int v03(char*); };
 int* luno_cLunoVar_castInt_1D78(void*) __asm__("luno_cLunoVar_castInt__FPv");
 struct Ent_1D78 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[65]): returns whether the script's rider has the world instance in its list of
+ * visited ids.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tRiderInVolumeData:
+ * InstId) and lets each argument override the field its index names, turning an int into a float where the field type
+ * table D_004A3CB0 says 2. Defaults: InstId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance is found, the script's rider
+ * (SSXApp->Game->AI->Riders[cWScriptMan_TheWScriptMan->Being]) is asked through its virtual slot 3 (func_00108C28: is
+ * the instance's id, +0x78, among the rider's 64 mVisitedIds); the int result in the hidden result slot self is 1 when
+ * it is, else 0.
+ *
+ * The rider slot is not checked for -1 or an empty entry.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return self, set to int 1 or 0
+ */
 extern "C" void* func_00301D78(void* self, int n, Ent_1D78 *e) {
     if (D_004A5718_1D78 == 0) {
         D_004A5710_1D78 = 0xFFFFFFFF;
@@ -4396,6 +5215,19 @@ struct Ent_1F48 { int idx; int val; int pad; int kind; };
 struct R12_1F48 { int a; int b; int c; };
 extern R12_1F48 D_004C9098_1F48 __asm__("luno_gLunoNil");
 
+/**
+ * Script function (gLunoCFunctions[66]): does nothing in effect: it hands Path to the empty stub func_00303D88.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tSetGamePathData: Path)
+ * and lets each argument override the field its index names, turning an int into a float where the field type table
+ * D_004A3CB8 says 2. Defaults: Path -1.
+ *
+ * Calls func_00303D88(Path), which has an empty body in this build, so the game path is not changed.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" R12_1F48 func_00301F48(int n, Ent_1F48* e) {
     if (D_004A5728_1F48 == 0) {
         D_004A5720_1F48 = -1;
@@ -4636,6 +5468,22 @@ extern "C" void* MEM_copy_2490(void*, void*, int) __asm__("MEM_copy");
 extern "C" void tModifierBlock_fadeEffectModifier_2490(char*) __asm__("tModifierBlock_fadeEffectModifier");
 extern "C" void tModifierBlock_remHaloModifier_2490(char*) __asm__("tModifierBlock_remHaloModifier");
 struct Ent_2490 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[69]): removes a modifier (effect fade or halo) from a moving world instance.
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tRemoveModifierData:
+ * InstId, Type) and lets each argument override the field its index names, turning an int into a float where the field
+ * type table D_004A3CC8 says 2. Defaults: InstId -1, Type -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance is found and its active node (+0xC) is a move
+ * node (virtual isMoveNode), Type 0 calls tModifierBlock_fadeEffectModifier and Type 1 tModifierBlock_remHaloModifier
+ * on the node's modifier block (+0x1C) when it has one; other types do nothing.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_2490 func_00302490(int n, Ent_2490 *e) {
     if (D_5734_2490 == 0) {
         D_4FBC30_2490.a = 0xFFFFFFFF;
@@ -4739,6 +5587,20 @@ extern "C" int func_00303D90(unsigned);
 extern int D_004A5740_2680 __asm__("D_004A5740");
 extern int D_004A5738_2680 __asm__("D_004A5738");
 extern sBindEnd_1FBE38 D_004A573C_2680 __asm__("D_004A573C");
+/**
+ * Script function (gLunoCFunctions[42]): returns whether the game is on a given game path.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tIsGamePathData: Path)
+ * and lets each argument override the field its index names, turning an int into a float where the field type table
+ * D_004A3CD0 says 2. Defaults: Path -1.
+ *
+ * Stores func_00303D90(Path) (1 when the race DB's cGamePath matches) in @p ret as an int script value.
+ *
+ * @param ret  the result slot
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return @p ret
+ */
 extern "C" cLunoValue* func_00302680(cLunoValue* ret, int n, sBindArg_1FBE38* e) {
     if (D_004A5740_2680 == 0) {
         // NOTE: guarded static-local init (defaults record = { int, sBindEnd_1FBE38 }).
@@ -4788,6 +5650,20 @@ extern "C" int func_00303DF8(unsigned);
 extern int D_004A5750_2778 __asm__("D_004A5750");
 extern int D_004A5748_2778 __asm__("D_004A5748");
 extern sBindEnd_1FBE38 D_004A574C_2778 __asm__("D_004A574C");
+/**
+ * Script function (gLunoCFunctions[43]): returns whether the game is in a given game mode.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tIsGameModeData: Mode)
+ * and lets each argument override the field its index names, turning an int into a float where the field type table
+ * D_004A3CD8 says 2. Defaults: Mode -1.
+ *
+ * Stores func_00303DF8(Mode) (1 when the race DB's cGameMode matches) in @p ret as an int script value.
+ *
+ * @param ret  the result slot
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return @p ret
+ */
 extern "C" cLunoValue* func_00302778(cLunoValue* ret, int n, sBindArg_1FBE38* e) {
     if (D_004A5750_2778 == 0) {
         // NOTE: guarded static-local init (defaults record = { int, sBindEnd_1FBE38 }).
@@ -4837,6 +5713,21 @@ extern "C" int func_00303E60(unsigned);
 extern int D_004A5760_2870 __asm__("D_004A5760");
 extern int D_004A5758_2870 __asm__("D_004A5758");
 extern sBindEnd_1FBE38 D_004A575C_2870 __asm__("D_004A575C");
+/**
+ * Script function (gLunoCFunctions[108]): returns whether the game is running a given game event.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tIsGameEventData:
+ * Event) and lets each argument override the field its index names, turning an int into a float where the field type
+ * table D_004A3CE0 says 2. Defaults: Event -1.
+ *
+ * Stores func_00303E60(Event) (1 when the race DB's cGameEvent matches) in @p ret as an int script value. It sits at
+ * table index 108, after the On Tour-era entries.
+ *
+ * @param ret  the result slot
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return @p ret
+ */
 extern "C" cLunoValue* func_00302870(cLunoValue* ret, int n, sBindArg_1FBE38* e) {
     if (D_004A5760_2870 == 0) {
         // NOTE: guarded static-local init (defaults record = { int, sBindEnd_1FBE38 }).
@@ -4868,6 +5759,20 @@ extern char* D_004A3DD8_2968 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A5770_2968 __asm__("D_004A5770");
 extern unsigned D_004A5768_2968 __asm__("D_004A5768");
 extern Flag_2968 D_004A576C_2968 __asm__("D_004A576C");
+/**
+ * Script function (gLunoCFunctions[44]): makes a world instance the script's current instance.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour
+ * tSetCurrentInstanceData: InstId) and lets each argument override the field its index names, turning an int into a
+ * float where the field type table D_004A3CE8 says 2. Defaults: InstId -1.
+ *
+ * Sets cWScriptMan_TheWScriptMan->Inst to the instance InstId names (its low byte picks a world-cache section, the rest
+ * an instance in it), or to 0 when it is not found. -1 is not special here: it looks in section 0xFF.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" R12_2968 func_00302968(int n, Ent_2968* e) {
     if (D_004A5770_2968 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
@@ -4920,6 +5825,20 @@ extern int D_004A3DD8_2AC0 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A5774_2AC0 __asm__("D_004A5774");
 struct T12_2AC0 { unsigned a; int b; Flag_2AC0 f; };
 extern T12_2AC0 D_004FBC40_2AC0 __asm__("D_004FBC40");
+/**
+ * Script function (gLunoCFunctions[45]): sends a command to a script process (cWScriptMan_doProcessCmd).
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tProcessData:
+ * ProcessId, Cmd) and lets each argument override the field its index names, turning an int into a float where the
+ * field type table D_004A3CF0 says 2. Defaults: ProcessId -1, Cmd 0.
+ *
+ * Calls cWScriptMan_doProcessCmd(cWScriptMan_TheWScriptMan, ProcessId, Cmd): -1 is the current process; Cmd 1 starts
+ * it, 0 stops it, 2 ends its task, 18 ends it.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" R12_2AC0 func_00302AC0(int n, Ent_2AC0* e) {
     if (D_004A5774_2AC0 == 0) {
         D_004FBC40_2AC0.a = -1;
@@ -4962,6 +5881,19 @@ extern int D_004A3DD8_2BD8 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A5780_2BD8 __asm__("D_004A5780");
 extern unsigned D_004A5778_2BD8 __asm__("D_004A5778");
 extern Flag_2BD8 D_004A577C_2BD8 __asm__("D_004A577C");
+/**
+ * Script function (gLunoCFunctions[51]): ends a mission (mission command 0).
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tEndMissionData:
+ * MissionId) and lets each argument override the field its index names, turning an int into a float where the field
+ * type table D_004A3CF8 says 2. Defaults: MissionId -1.
+ *
+ * Calls cWScriptMan_doMissionCmd(cWScriptMan_TheWScriptMan, MissionId, 0, -1); -1 is the current mission.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" R12_2BD8 func_00302BD8(int n, Ent_2BD8* e) {
     if (D_004A5780_2BD8 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
@@ -5003,6 +5935,19 @@ extern int D_004A3DD8_2CE8 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A5790_2CE8 __asm__("D_004A5790");
 extern unsigned D_004A5788_2CE8 __asm__("D_004A5788");
 extern Flag_2CE8 D_004A578C_2CE8 __asm__("D_004A578C");
+/**
+ * Script function (gLunoCFunctions[46]): stops a script process (process command 0).
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tEndProcessData:
+ * ProcessId) and lets each argument override the field its index names, turning an int into a float where the field
+ * type table D_004A3D00 says 2. Defaults: ProcessId -1.
+ *
+ * Calls cWScriptMan_doProcessCmd(cWScriptMan_TheWScriptMan, ProcessId, 0); -1 is the current process.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" R12_2CE8 func_00302CE8(int n, Ent_2CE8* e) {
     if (D_004A5790_2CE8 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
@@ -5044,6 +5989,19 @@ extern int D_004A3DD8_2DF0 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A57A0_2DF0 __asm__("D_004A57A0");
 extern unsigned D_004A5798_2DF0 __asm__("D_004A5798");
 extern Flag_2DF0 D_004A579C_2DF0 __asm__("D_004A579C");
+/**
+ * Script function (gLunoCFunctions[47]): ends a script process's current task (process command 2).
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tEndTaskData:
+ * ProcessId) and lets each argument override the field its index names, turning an int into a float where the field
+ * type table D_004A3D08 says 2. Defaults: ProcessId -1.
+ *
+ * Calls cWScriptMan_doProcessCmd(cWScriptMan_TheWScriptMan, ProcessId, 2); -1 is the current process.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" R12_2DF0 func_00302DF0(int n, Ent_2DF0* e) {
     if (D_004A57A0_2DF0 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
@@ -5088,6 +6046,26 @@ struct B_2EF8 { virtual void v01(); };
 struct D_2EF8 : A_2EF8, B_2EF8 { };
 struct Tab_2EF8 { char pad[0x28]; D_2EF8 *arr[1]; };
 extern "C" int cRider_getMissionInt_2EF8(D_2EF8*, int) __asm__("cRider_getMissionInt");
+/**
+ * Script function (gLunoCFunctions[50]): answers a rider-action question about the script's rider
+ * (cRider_getMissionInt).
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tRiderActionData: Type)
+ * and lets each argument override the field its index names, turning an int into a float where the field type table
+ * D_004A3D10 says 2. Defaults: Type 0.
+ *
+ * Cmd/Type is mapped to a cRider_getMissionInt query (0 ground 3, 1 air 2, 2 railslide 4, 3 wipeout 0, 4 reset 1, 5-7
+ * grab/tweak/uber 5-7, 8 query 17, 9 points 8, 10 and 11 PressMode 9 and 10, 12 boosting 11, 13-17 queries 12-16, 18
+ * query 18); any other value gives 0. The answer for the script's rider
+ * (SSXApp->Game->AI->Riders[cWScriptMan_TheWScriptMan->Being]) is returned as an int in the hidden result slot self.
+ * func_003037B0 does the same.
+ *
+ * The rider slot is not checked for -1 or an empty entry.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return self, set to the int answer
+ */
 // Script call: maps the script condition id to a rider condition and returns whether the current rider meets it.
 extern "C" void* func_00302EF8(void* self, int n, Ent_2EF8* e) {
     if (D_004A57B0_2EF8 == 0) {
@@ -5164,6 +6142,22 @@ extern int D_004A57B4;
 extern int D_004A3D18;
 extern "C" void* MEM_copy_3130(void*, void*, int) __asm__("MEM_copy");
 struct Ent_3130 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[52]): returns whether a world instance has an active node.
+ *
+ * Copies the static defaults (InstId -1, then 1; set up on the first call) into a 12-byte parameter block and lets each
+ * argument override the field its index names, turning an int into a float where the field type table D_004A3D18 says
+ * 2. Only InstId is used.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. The int result stored in @p ret is 1 when the instance exists and
+ * has an active node (+0xC), else 0.
+ *
+ * @param ret  the result slot
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return @p ret
+ */
 extern "C" V3_3130* func_00303130(V3_3130 *ret, int n, Ent_3130 *e) {
     if (D_004A57B4 == 0) {
         D_3130[0] = 0xFFFFFFFF;
@@ -5227,6 +6221,17 @@ static inline float len_32C0(const Vec_32C0 &v) {
         : "m"(v));
     return r;
 }
+/**
+ * Script function (gLunoCFunctions[59]): returns how far the script's rider moves per frame.
+ *
+ * Takes no script arguments. The float result is the length of the velocity (cRider virtual getVelocity) of the
+ * script's rider (SSXApp->Game->AI->Riders[cWScriptMan_TheWScriptMan->Being]) times the frame time (SSXApp + 0x14),
+ * stored in the hidden result slot self.
+ *
+ * The rider slot is not checked for -1 or an empty entry.
+ *
+ * @return self
+ */
 extern "C" void* func_003032C0(void* self) {
     D_32C0 *r = (*(Tab_32C0**)(*(char**)(D_004A28A8_32C0 + 0x84) + 0xC))->arr[*(int*)D_004A3DD8_32C0];
     B_32C0 *b = r;
@@ -5269,6 +6274,16 @@ static inline float len_3380(const Vec_3380 &v) {
         : "m"(v));
     return r;
 }
+/**
+ * Script function (gLunoCFunctions[60]): returns the script's rider's speed.
+ *
+ * Takes no script arguments. The float result is the length of the velocity (cRider virtual getVelocity) of the
+ * script's rider (SSXApp->Game->AI->Riders[cWScriptMan_TheWScriptMan->Being]), stored in the hidden result slot self.
+ *
+ * The rider slot is not checked for -1 or an empty entry.
+ *
+ * @return self
+ */
 extern "C" void* func_00303380(void* self) {
     D_3380 *r = (*(Tab_3380**)(*(char**)(D_004A28A8_3380 + 0x84) + 0xC))->arr[*(int*)D_004A3DD8_3380];
     B_3380 *b = r;
@@ -5302,6 +6317,15 @@ static inline void setInt_3430(cLunoValue* r, const unsigned& v) {
     r->type = 1;
     *luno_cLunoVar_castInt(r) = v;
 }
+/**
+ * Script function (gLunoCFunctions[61]): returns the id of the script's current instance.
+ *
+ * Takes no script arguments. The int result stored in @p ret is the resource id (+0x78) of
+ * cWScriptMan_TheWScriptMan->Inst, or -1 when there is none.
+ *
+ * @param ret  the result slot
+ * @return @p ret
+ */
 extern "C" cLunoValue* func_00303430(cLunoValue* ret) {
     char *p = cWScriptMan_TheWScriptMan->f290;
     unsigned v;
@@ -5321,6 +6345,15 @@ INCLUDE_ASM("seg/seg_1FBE38", func_00303490);
 int* luno_cLunoVar_castIndex_3490(void*) __asm__("luno_cLunoVar_castIndex__FPv");
 extern char *D_004A3DD8_3490 __asm__("cWScriptMan_TheWScriptMan");
 extern "C" unsigned cWScriptProcess_getRunningTaskId_3490(char*) __asm__("cWScriptProcess_getRunningTaskId");
+/**
+ * Script function (gLunoCFunctions[62]): returns the id of the running task of the current script process.
+ *
+ * Takes no script arguments. The result is cWScriptProcess_getRunningTaskId on
+ * cWScriptMan_TheWScriptMan->CurrentProcess, or -1 without a process, stored as an index script value (type 3) in the
+ * hidden result slot self.
+ *
+ * @return self
+ */
 extern "C" void* func_00303490(void* self) {
     char *p = *(char**)(D_004A3DD8_3490 + 0x2A4);
     unsigned v;
@@ -5346,6 +6379,17 @@ struct B_34F8 { virtual void v01(); };
 struct D_34F8 : A_34F8, B_34F8 { };
 struct Tab_34F8 { char pad[0x28]; D_34F8 *arr[1]; };
 extern "C" int cRider_getMissionInt_34F8(D_34F8*, int) __asm__("cRider_getMissionInt");
+/**
+ * Script function (gLunoCFunctions[63]): returns the rail the script's rider is grinding.
+ *
+ * Takes no script arguments. When the script's rider (SSXApp->Game->AI->Riders[cWScriptMan_TheWScriptMan->Being])
+ * railslides (cRider_getMissionInt query 4), the int result is the rail spline id of its rider handler (mRiderHandler,
+ * SplineID at +0xD4); otherwise -1. It is stored in the hidden result slot self.
+ *
+ * The rider slot is not checked for -1 or an empty entry.
+ *
+ * @return self
+ */
 extern "C" void* func_003034F8(void* self) {
     D_34F8 *r = (*(Tab_34F8**)(*(char**)(D_004A28A8_34F8 + 0x84) + 0xC))->arr[*(int*)D_004A3DD8_34F8];
     B_34F8 *b = r;
@@ -5378,6 +6422,19 @@ void* luno_cLunoVar_castFloat(void*);
 extern int D_004A57B8_3598 __asm__("D_004A57B8");
 struct T12_3598 { float a; float b; Flag_3598 f; };
 extern T12_3598 D_004FBC60_3598 __asm__("D_004FBC60");
+/**
+ * Script function (gLunoCFunctions[77]): returns a random float between two bounds (AIrandf).
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tAIRandomData: Lo, Hi)
+ * and lets each argument override the field its index names, turning an int into a float where the field type table
+ * D_004A3D20 says 2. Defaults: Lo 0, Hi 1.
+ *
+ * Returns AIrandf(Lo, Hi) as a float script value in the hidden result slot self.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return self, set to the random float
+ */
 extern "C" void* func_00303598(void* self, int n, Ent_3598* e) {
     if (D_004A57B8_3598 == 0) {
         D_004FBC60_3598.a = 0;
@@ -5421,6 +6478,20 @@ int* luno_cLunoVar_castInt(void*);
 
 struct Ent_36B0 { int idx; int val; int pad; int kind; };
 
+/**
+ * Script function (gLunoCFunctions[78]): returns a field of the current trick definition (cWScriptMan_getCurrentTrick).
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tCurrentTrickData: Cmd)
+ * and lets each argument override the field its index names, turning an int into a float where the field type table
+ * D_004A3D28 says 2. Defaults: Cmd -1.
+ *
+ * Returns cWScriptMan_getCurrentTrick(cWScriptMan_TheWScriptMan, Being, Cmd), field Cmd of cWScriptMan::TrickDef (0 for
+ * the default -1), as an int in the hidden result slot self.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return self, set to the field value
+ */
 extern "C" void* func_003036B0(void* self, int n, Ent_36B0* e) {
     if (D_004A57C8_36B0 == 0) {
         D_004A57C0_36B0 = -1;
@@ -5465,6 +6536,26 @@ extern "C" int cRider_getMissionInt_37B0(char* rider, int which) __asm__("cRider
 
 struct Ent_37B0 { int idx; int val; int pad; int kind; };
 
+/**
+ * Script function (gLunoCFunctions[79]): answers a rider-metric question about the script's rider
+ * (cRider_getMissionInt).
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tRiderMetricData: Cmd)
+ * and lets each argument override the field its index names, turning an int into a float where the field type table
+ * D_004A3D30 says 2. Defaults: Cmd -1.
+ *
+ * Cmd/Type is mapped to a cRider_getMissionInt query (0 ground 3, 1 air 2, 2 railslide 4, 3 wipeout 0, 4 reset 1, 5-7
+ * grab/tweak/uber 5-7, 8 query 17, 9 points 8, 10 and 11 PressMode 9 and 10, 12 boosting 11, 13-17 queries 12-16, 18
+ * query 18); any other value gives 0. The answer for the script's rider
+ * (SSXApp->Game->AI->Riders[cWScriptMan_TheWScriptMan->Being]) is returned as an int in the hidden result slot self.
+ * Same body as func_00302EF8.
+ *
+ * The rider slot is not checked for -1 or an empty entry.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return self, set to the int answer
+ */
 extern "C" void* func_003037B0(void* self, int n, Ent_37B0* e)
 {
     if (D_004A57D8_37B0 == 0) {
@@ -5535,6 +6626,22 @@ extern int D_004A57DC;
 extern int D_004A3D38;
 extern "C" void* MEM_copy_39F0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_39F0 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[80]): adds a world instance to, or removes it from, its 3D crowd.
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tCrowd3dData: InstId,
+ * Cmd) and lets each argument override the field its index names, turning an int into a float where the field type
+ * table D_004A3D38 says 2. Defaults: InstId -1, Cmd -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance is found, Cmd 0 passes its id (+0x78) to
+ * func_00343C60 (joins the crowd block for its model) and Cmd 1 to func_00343F38 (leaves it), both on the 3D crowd
+ * manager D_004A3FF0; other values do nothing.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_39F0 func_003039F0(int n, Ent_39F0 *e) {
     if (D_004A57DC == 0) {
         D_39F0[0] = 0xFFFFFFFF;
@@ -5598,6 +6705,23 @@ extern "C" void func_00229820_3BA0(int, unsigned, int, int) __asm__("func_002298
 extern "C" void func_00229788_3BA0(int, unsigned, int, int) __asm__("func_00229788");
 extern "C" void func_002297D8_3BA0(int, unsigned, int, int) __asm__("func_002297D8");
 struct Ent_3BA0 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[88]): runs a 2D-crowd command on a world instance.
+ *
+ * Copies the static defaults (set up on the first call) into a 20-byte parameter block (On Tour tCrowd2dData: InstId,
+ * Cmd, Mesh, Context) and lets each argument override the field its index names, turning an int into a float where the
+ * field type table D_004465D8 says 2. Defaults: InstId -1, Cmd -1, Mesh 0, Context 0.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance is found, its id (+0x78) goes to the 2D crowd
+ * manager D_004A2A00: Cmd 0 calls func_00229820 (points bone Context of part Mesh at the shared crowd record), Cmd 2
+ * func_00229788 (takes a crowd quad slot for the instance) and Cmd 3 func_002297D8 (releases it); Cmd 1 and others do
+ * nothing.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_3BA0 func_00303BA0(int n, Ent_3BA0 *e) {
     if (D_57E0_3BA0 == 0) {
         D_4FBC80_3BA0.a = 0xFFFFFFFF;
@@ -5651,6 +6775,12 @@ extern "C" V3_3BA0 func_00303BA0(int n, Ent_3BA0 *e) {
 }
 #endif
 
+/**
+ * Does nothing (an empty function).
+ *
+ * func_00301F48, the script command that takes a game path, calls it with the path, so setting the game path from a
+ * script has no effect in this build.
+ */
 extern "C" void func_00303D88(void) {
 }
 
@@ -5662,6 +6792,15 @@ extern "C" int cBE_getBE_3D90(void) __asm__("cBE_getBE");
 void* cBE_getInterface_Fv_3D90(int be, int kind) __asm__("cBE_getInterface__Fv");
 extern const int D_004465E8_3D90[] __asm__("D_004465E8");
 extern signed char D_00535C11_3D90[] __asm__("D_00535C11");
+/**
+ * Returns whether script game path @p i is the current game path.
+ *
+ * For @p i below 4 it maps @p i through D_004465E8 (0, 1, 2, 0) and compares it with the race DB's cGamePath
+ * (D_00535C11); 4 and above give 0. The cBE_getInterface call before it has no effect on the result.
+ *
+ * @param i  the script game path (0-3)
+ * @return 1 when it matches, else 0
+ */
 extern "C" int func_00303D90(unsigned i) {
     if (i < 4) {
         cBE_getInterface_Fv_3D90(cBE_getBE_3D90(), 0);
@@ -5679,6 +6818,15 @@ extern "C" int cBE_getBE_3DF8(void) __asm__("cBE_getBE");
 void* cBE_getInterface_Fv_3DF8(int be, int kind) __asm__("cBE_getInterface__Fv");
 extern const int D_004465F8_3DF8[] __asm__("D_004465F8");
 extern signed char D_00535C10_3DF8[] __asm__("D_00535C10");
+/**
+ * Returns whether script game mode @p i is the current game mode.
+ *
+ * For @p i below 8 it maps @p i through D_004465F8 (0-6, then 0) and compares it with the race DB's cGameMode
+ * (D_00535C10); 8 and above give 0. The cBE_getInterface call before it has no effect on the result.
+ *
+ * @param i  the script game mode (0-7)
+ * @return 1 when it matches, else 0
+ */
 extern "C" int func_00303DF8(unsigned i) {
     if (i < 8) {
         cBE_getInterface_Fv_3DF8(cBE_getBE_3DF8(), 0);
@@ -5696,6 +6844,15 @@ extern "C" int cBE_getBE_3E60(void) __asm__("cBE_getBE");
 void* cBE_getInterface_Fv_3E60(int be, int kind) __asm__("cBE_getInterface__Fv");
 extern const int D_00446618_3E60[] __asm__("D_00446618");
 extern signed char D_00535C12_3E60[] __asm__("D_00535C12");
+/**
+ * Returns whether script game event @p i is the current game event.
+ *
+ * For @p i below 15 it maps @p i through D_00446618 (0-13, then 0) and compares it with the race DB's cGameEvent
+ * (D_00535C12); 15 and above give 0. The cBE_getInterface call before it has no effect on the result.
+ *
+ * @param i  the script game event (0-14)
+ * @return 1 when it matches, else 0
+ */
 extern "C" int func_00303E60(unsigned i) {
     if (i < 0xF) {
         cBE_getInterface_Fv_3E60(cBE_getBE_3E60(), 0);
@@ -5725,6 +6882,15 @@ static inline bool isIdle_3EC8(int slot) {
     }
     return false;
 }
+/**
+ * Script function (gLunoCFunctions[72]): returns whether the script's rider is human.
+ *
+ * Takes no script arguments. The int result in the hidden result slot self is 1 when cWScriptMan_TheWScriptMan->Being
+ * is not -1 and that rider (SSXApp->Game->AI->Riders[Being]) is not a computer rider (cRider virtual isComputer), else
+ * 0.
+ *
+ * @return self
+ */
 extern "C" void* func_00303EC8(void* self) {
     if (isIdle_3EC8(*(int*)D_004A3DD8_3EC8)) {
         *(int*)((char*)self + 8) = 1;
@@ -5749,6 +6915,14 @@ struct A_3F80 { char pad[0x6C0]; };
 struct B_3F80 { virtual void v01(); };
 struct D_3F80 : A_3F80, B_3F80 { };
 struct Tab_3F80 { char pad[0x28]; D_3F80 *arr[1]; };
+/**
+ * Script function (gLunoCFunctions[74]): marks the script's rider as being in a tunnel.
+ *
+ * Takes no script arguments. When cWScriptMan_TheWScriptMan->Being is not -1, sets that rider's +0x3FC (the word
+ * cRider_setInTunnel and cRider_isInTunnel use; rider.h unk_3FC) to 1. cRider_updateSplit1 clears it again.
+ *
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_3F80 func_00303F80(void) {
     int slot = *(int*)D_004A3DD8_3F80;
     if (slot != -1) {
@@ -5778,6 +6952,20 @@ extern void* D_004A3DD8_3FF0 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A57E4_3FF0 __asm__("D_004A57E4");
 struct T12_3FF0 { int a; int b; Flag_3FF0 f; };
 extern T12_3FF0 D_004FBC98_3FF0 __asm__("D_004FBC98");
+/**
+ * Script function (gLunoCFunctions[98]): shows the mission points display with a value and a goal.
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour
+ * tUpdateDisplayPointsData: Points, Goal) and lets each argument override the field its index names, turning an int
+ * into a float where the field type table D_004A3D40 says 2. Defaults: Points 0, Goal -1.
+ *
+ * Calls cWScriptMan_updateMissionPoints(cWScriptMan_TheWScriptMan, Points, Goal), which sets MissionPointsEnable,
+ * MissionPoints and MissionPointsGoal.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" R12_3FF0 func_00303FF0(int n, Ent_3FF0* e) {
     if (D_004A57E4_3FF0 == 0) {
         D_004FBC98_3FF0.a = 0;
@@ -5820,6 +7008,20 @@ extern void* D_004A3DD8_4100 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A57E8_4100 __asm__("D_004A57E8");
 struct T12_4100 { int a; int b; Flag_4100 f; };
 extern T12_4100 D_004FBCA8_4100 __asm__("D_004FBCA8");
+/**
+ * Script function (gLunoCFunctions[75]): shows the mission count display with a count and a maximum.
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour
+ * tUpdateDisplayCountData: Count, Max) and lets each argument override the field its index names, turning an int into a
+ * float where the field type table D_004A3D48 says 2. Defaults: Count 0, Max 0.
+ *
+ * Calls cWScriptMan_updateMissionCount(cWScriptMan_TheWScriptMan, Count, Max), which sets MissionCountEnable,
+ * MissionCount and MissionCountMax.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" R12_4100 func_00304100(int n, Ent_4100* e) {
     if (D_004A57E8_4100 == 0) {
         D_004FBCA8_4100.a = 0;
@@ -5862,6 +7064,20 @@ extern void* D_004A3DD8_4210 __asm__("cWScriptMan_TheWScriptMan");
 extern int D_004A57EC_4210 __asm__("D_004A57EC");
 struct T12_4210 { int a; int b; Flag_4210 f; };
 extern T12_4210 D_004FBCB8_4210 __asm__("D_004FBCB8");
+/**
+ * Script function (gLunoCFunctions[76]): shows the mission clock with a tick count and a direction.
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour
+ * tUpdateDisplayTicksData: Ticks, Dir) and lets each argument override the field its index names, turning an int into a
+ * float where the field type table D_004A3D50 says 2. Defaults: Ticks 0, Dir -1.
+ *
+ * Calls cWScriptMan_updateMissionTicks(cWScriptMan_TheWScriptMan, Ticks, Dir), which sets MissionTicksEnable,
+ * MissionTicks and MissionTicksDir.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" R12_4210 func_00304210(int n, Ent_4210* e) {
     if (D_004A57EC_4210 == 0) {
         D_004FBCB8_4210.a = 0;
@@ -5937,6 +7153,23 @@ extern int D_004A3D58_4320[2] __asm__("D_004A3D58");
 // out-of-line copy). Calling it at each use gives the shared copy of the pointer the target keeps (lw; move) instead of one cached local.
 static inline cWScriptMan *curProcess_4320() { return cWScriptMan_TheWScriptMan; }
 void cWScriptMan_updateMissionHeight(void*, int, void*);
+/**
+ * Script function (gLunoCFunctions[81]): shows the mission height display for the script's rider above a world
+ * instance.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour
+ * tUpdateDisplayHeightData: InstId) and lets each argument override the field its index names, turning an int into a
+ * float where the field type table D_004A3D58 says 2. Defaults: InstId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance is found,
+ * cWScriptMan_updateMissionHeight(cWScriptMan_TheWScriptMan, Being, instance) sets MissionHeightEnable,
+ * MissionHeightBeing and MissionHeightInstId.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" cLunoValue func_00304320(int n, sBindArg_1FBE38* e) {
     if (D_004A57F8_4320 == 0) {
         D_004A57F0_4320 = 0xFFFFFFFF;
@@ -6000,6 +7233,20 @@ extern char* D_004A28A8_44A8 __asm__("SSXApp");
 extern int D_004A5808_44A8 __asm__("D_004A5808");
 extern int D_004A5800_44A8 __asm__("D_004A5800");
 extern Flag_44A8 D_004A5804_44A8 __asm__("D_004A5804");
+/**
+ * Script function (gLunoCFunctions[82]): reports that the script's rider passed a gate.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tPassthroughGateData:
+ * GateId) and lets each argument override the field its index names, turning an int into a float where the field type
+ * table D_004A3D60 says 2. Defaults: GateId -1.
+ *
+ * Calls cGameModeMan_riderGateHit(SSXApp->GameModeMan, cWScriptMan_TheWScriptMan->Being, GateId), which forwards it to
+ * the current game-mode handler.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" R12_44A8 func_003044A8(int n, Ent_44A8* e) {
     if (D_004A5808_44A8 == 0) {
         D_004A5800_44A8 = -1;
@@ -6053,6 +7300,21 @@ struct BF_45B8 {
 };
 extern "C" void cWScriptMan_updateMissionTrick_45B8(char*, BF_45B8*) __asm__("cWScriptMan_updateMissionTrick");
 struct Ent_45B8 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[83]): shows the mission trick display for a trick built from script arguments.
+ *
+ * Copies the static defaults (set up on the first call) into a 68-byte parameter block (On Tour
+ * tUpdateDisplayTrickData: Rail, RailSpin, TakeOff, Orient, Spin, Reps, Flip, Special, PostSpin, UberGrind, Grab,
+ * ToLate, LateGrab, HandPlant, Land, Press) and lets each argument override the field its index names, turning an int
+ * into a float where the field type table D_00446650 says 2. Defaults: all 0.
+ *
+ * Packs the 16 values into an 8-byte trick definition (bit fields; Land and Press are stored in the opposite order of
+ * the block) and passes it to cWScriptMan_updateMissionTrick, which sets MissionTrickEnable and MissionTrick.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_45B8 func_003045B8(int n, Ent_45B8 *e) {
     if (D_580C_45B8 == 0) {
         D_4FBCC8_45B8.a0 = 0;
@@ -6127,6 +7389,23 @@ extern int D_004A5810;
 extern int D_004A3D68;
 extern "C" void* MEM_copy_4980(void*, void*, int) __asm__("MEM_copy");
 struct Ent_4980 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[84]): adds a fade modifier to a moving world instance.
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tAddFadeData: InstId,
+ * Fade) and lets each argument override the field its index names, turning an int into a float where the field type
+ * table D_004A3D68 says 2. Defaults: InstId -1, Fade 1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance's active node (+0xC) is a move node (virtual
+ * isMoveNode), cMoveNode_addFade gets the block.
+ *
+ * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_4980 func_00304980(int n, Ent_4980 *e) {
     if (D_004A5810 == 0) {
         D_4980[0] = 0xFFFFFFFF;
@@ -6187,6 +7466,19 @@ extern char* D_004A28A8_4B38 __asm__("SSXApp");
 extern int D_004A5820_4B38 __asm__("D_004A5820");
 extern int D_004A5818_4B38 __asm__("D_004A5818");
 extern Flag_4B38 D_004A581C_4B38 __asm__("D_004A581C");
+/**
+ * Script function (gLunoCFunctions[85]): records a world-script event in the replay.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tReplayData: Cmd) and
+ * lets each argument override the field its index names, turning an int into a float where the field type table
+ * D_004A3D70 says 2. Defaults: Cmd -1.
+ *
+ * Calls cReplay_eventWScript(SSXApp->Game->Replay, cWScriptMan_TheWScriptMan->Being, Cmd).
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" R12_4B38 func_00304B38(int n, Ent_4B38* e) {
     if (D_004A5820_4B38 == 0) {
         D_004A5818_4B38 = -1;
@@ -6231,6 +7523,22 @@ struct B_4C50 { virtual void v01(); virtual void v02(); virtual void v03(); virt
 struct D_4C50 : A_4C50, B_4C50 { };
 struct Tab_4C50 { char pad[0x28]; D_4C50 *arr[1]; };
 static inline Vec_4C50 pos_4C50(char *o) { return *(Vec_4C50*)(o + 0x40); }
+/**
+ * Script function (gLunoCFunctions[86]): returns how high the script's rider is above a world instance.
+ *
+ * Copies the static defaults (InstId -1; set up on the first call) into an 8-byte parameter block and lets each
+ * argument override the field its index names, turning an int into a float where the field type table D_004A3D78 says
+ * 2.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. The float result in the hidden result slot self is the z of the
+ * script's rider (SSXApp->Game->AI->Riders[cWScriptMan_TheWScriptMan->Being]) (cRider virtual getPosition) minus the
+ * instance's position z (+0x40), 0 when the rider slot is empty, and 0 when the instance is not found.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return self, set to the height difference
+ */
 extern "C" void* func_00304C50(void* self, int n, Ent_4C50 *e) {
     if (D_5830_4C50 == 0) {
         D_5828_4C50 = 0xFFFFFFFF;
@@ -6304,6 +7612,23 @@ extern int D_004A5834;
 extern int D_004A3D80;
 extern "C" void* MEM_copy_4E38(void*, void*, int) __asm__("MEM_copy");
 struct Ent_4E38 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[87]): adds a debounce modifier to a moving world instance.
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tAddDebounceData:
+ * InstId, Time) and lets each argument override the field its index names, turning an int into a float where the field
+ * type table D_004A3D80 says 2. Defaults: InstId -1, Time 1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance's active node (+0xC) is a move node (virtual
+ * isMoveNode), cMoveNode_addDebounce gets the block.
+ *
+ * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_4E38 func_00304E38(int n, Ent_4E38 *e) {
     if (D_004A5834 == 0) {
         D_4E38[0] = 0xFFFFFFFF;
@@ -6361,6 +7686,19 @@ struct T12_4FF0 { int a; int b; Flag_4FF0 f; };
 extern T12_4FF0 D_004FBD30_4FF0 __asm__("D_004FBD30");
 extern R12_4FF0 D_004C9098_4FF0 __asm__("luno_gLunoNil");
 
+/**
+ * Script function (gLunoCFunctions[89]): reads its arguments and does nothing else (a stubbed camera command).
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tCameraData: Cmd, Type)
+ * and lets each argument override the field its index names, turning an int into a float where the field type table
+ * D_004A3D88 says 2. Defaults: Cmd 0, Type 0.
+ *
+ * No camera call follows; the block is unused.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" R12_4FF0 func_00304FF0(int n, Ent_4FF0* e) {
     if (D_004A5838_4FF0 == 0) {
         D_004FBD30_4FF0.a = 0;
@@ -6576,6 +7914,25 @@ extern int D_004A3BD8[2];  // shake type per camera-shake keyword
 extern "C" void cCamera_shakeCamera(char* cam, int type, float amount, float dist);
 // Translation row of a transform (by value).
 static inline t4Vector trans_50F0(const t4Matrix *m) { return m->row[3]; }
+/**
+ * Script function (gLunoCFunctions[91]): shakes the cameras of local riders, scaled by their distance from a world
+ * instance, or of the script's rider only.
+ *
+ * Copies the static defaults (set up on the first call) into a 20-byte parameter block (On Tour tCameraShakeData: Type,
+ * Proximity, InstId, Scale) and lets each argument override the field its index names, turning an int into a float
+ * where the field type table D_00446690 says 2. Defaults: Type 0, Proximity 1, InstId -1, Scale 1.
+ *
+ * Only Type 0 does anything (shake type D_004A3BD8[Type]). With Proximity set the instance is looked up (InstId -1:
+ * cWScriptMan_TheWScriptMan->Inst). With an instance, each race player's rider (SSXApp->Game +0xC: players at +0x40,
+ * count at +0x7C) that is local (mIsLocal) gets cCamera_shakeCamera on its view's camera (mViewIndex) with weight 1 and
+ * its distance to the instance's root transform (node virtual getRootTransform, or the instance's own transform) times
+ * Scale. Without one, only the player whose rider's AI index (virtual getAIIndex) is the script's Being shakes, at
+ * distance 0.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *e) {
     if (D_004A583C == 0) {
         D_004FBD40_50F0.keyword = 0;
@@ -6665,6 +8022,22 @@ extern const int D_004466A0_5478[] __asm__("D_004466A0");
 extern "C" void* MEM_copy_5478(void*, void*, int) __asm__("MEM_copy");
 extern "C" void cMoveNode_addMagnet_5478(O_5478*, void*, float, float) __asm__("cMoveNode_addMagnet");
 struct Ent_5478 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[90]): adds a magnet modifier to a moving world instance.
+ *
+ * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tAddMagnetData: InstId,
+ * Radius, Speed) and lets each argument override the field its index names, turning an int into a float where the field
+ * type table D_004466A0 says 2. Defaults: InstId -1, Radius 400, Speed 30.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance is found and its active node (+0xC) is a move
+ * node (virtual isMoveNode), cMoveNode_addMagnet gets the node's root transform (virtual getRootTransform), Radius and
+ * Speed.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_5478 func_00305478(int n, Ent_5478 *e) {
     if (D_5840_5478 == 0) {
         D_4FBD58_5478.id = 0xFFFFFFFF;
@@ -6728,6 +8101,22 @@ extern int D_004A5850;
 extern int D_004A3D90;
 extern "C" void* MEM_copy_5660(void*, void*, int) __asm__("MEM_copy");
 struct Ent_5660 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[92]): starts a lightning flash when the script's rider is human.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tLightningData: InstId)
+ * and lets each argument override the field its index names, turning an int into a float where the field type table
+ * D_004A3D90 says 2. Defaults: InstId -1.
+ *
+ * InstId is not used. When cWScriptMan_TheWScriptMan->Being is not -1 and that rider (SSXApp->Game->AI->Riders[Being])
+ * is human (cRider virtual isHuman), func_00390EC8(0) starts a flash at distance 0.
+ *
+ * Quirk: an empty rider slot is not checked; its virtual call goes through a null pointer.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_5660 func_00305660(int n, Ent_5660 *e) {
     if (D_004A5850 == 0) {
         D_5660 = 0xFFFFFFFF;
@@ -6777,6 +8166,22 @@ extern const int D_004466B0_57C0[] __asm__("D_004466B0");
 extern "C" void* MEM_copy_57C0(void*, void*, int) __asm__("MEM_copy");
 extern "C" void cMoveNode_addHalo_57C0(void*, void*) __asm__("cMoveNode_addHalo");
 struct Ent_57C0 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[97]): adds a halo modifier to a moving world instance.
+ *
+ * Copies the static defaults (set up on the first call) into a 40-byte parameter block (On Tour tAddHaloData: InstId,
+ * Type, Mesh, ColourA, ColourR, ColourG, ColourB, Radius, Speed) and lets each argument override the field its index
+ * names, turning an int into a float where the field type table D_004466B0 says 2. Defaults: InstId -1, Type 0, Mesh
+ * -1, ColourA, ColourR, ColourG and ColourB 1, Radius 100, Speed 0.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance is found and its active node (+0xC) is a move
+ * node (virtual isMoveNode), cMoveNode_addHalo gets the block.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_57C0 func_003057C0(int n, Ent_57C0 *e) {
     if (D_5854_57C0 == 0) {
         D_4FBD68_57C0.id = 0xFFFFFFFF;
@@ -6867,6 +8272,21 @@ extern const int D_004466D8_59A0[] __asm__("D_004466D8");
 extern int D_004A5858_59A0 __asm__("D_004A5858");
 static inline char *conv_59A0(unsigned i) { return i ? refToPtr_1FBE38(i) : 0; }
 extern "C" void cAvalanche_addAvalancheNode(int, void*, float, float, float, float, int);
+/**
+ * Script function (gLunoCFunctions[93]): adds up to eight world instances as falling nodes of an avalanche.
+ *
+ * Copies the static defaults (set up on the first call) into a 200-byte parameter block and lets each argument override
+ * the field its index names, turning an int into a float where the field type table D_004466D8 says 2. The block holds
+ * the avalanche id (default 0) and eight sets of instance id (-1), type (0), life (10 s), fade-in (0 s), fade-out (3 s)
+ * and speed (1).
+ *
+ * For each instance id that is not -1, the instance is looked up (a missing one passes 0) and
+ * cAvalanche_addAvalancheNode(avalanche id, instance, type, life, fade-in, fade-out, speed) adds it.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" cLunoValue func_003059A0(int n, sBindArg_1FBE38* e) {
     if (D_004A5858_59A0 == 0) {
         D_004FBD90_59A0.head = 0;
@@ -6935,6 +8355,19 @@ extern int D_004A3AC4_5C88 __asm__("cAvalanche_m_badCookie");
 extern int D_004A5868_5C88 __asm__("D_004A5868");
 extern int D_004A5860_5C88 __asm__("D_004A5860");
 extern Flag_5C88 D_004A5864_5C88 __asm__("D_004A5864");
+/**
+ * Script function (gLunoCFunctions[94]): triggers an avalanche (cAvalanche_triggerAvalanche).
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (the avalanche id) and lets each
+ * argument override the field its index names, turning an int into a float where the field type table D_004A3D98 says
+ * 2. Defaults: avalanche id 0.
+ *
+ * Calls cAvalanche_triggerAvalanche with the avalanche id when cAvalanche_m_badCookie is 0.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" R12_5C88 func_00305C88(int n, Ent_5C88* e) {
     if (D_004A5868_5C88 == 0) {
         D_004A5868_5C88 = 1;
@@ -6980,6 +8413,21 @@ extern int D_004A5878;
 extern int D_004A3DA0;
 extern "C" void* MEM_copy_5D90(void*, void*, int) __asm__("MEM_copy");
 struct Ent_5D90 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[95]): puts a moving world instance on the avalanche spline.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (InstId) and lets each argument
+ * override the field its index names, turning an int into a float where the field type table D_004A3DA0 says 2.
+ * Defaults: InstId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance is found and its active node (+0xC) is a move
+ * node (virtual isMoveNode), cMoveNode_addAvaSpline gets the node and the instance (which it does not read).
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_5D90 func_00305D90(int n, Ent_5D90 *e) {
     if (D_004A5878 == 0) {
         D_5D90 = 0xFFFFFFFF;
@@ -7050,6 +8498,22 @@ extern "C" void cAvalanche_setAvalancheNodeEmitterData_5F40(char*, Rec_5F40*) __
 static inline char *refToPtr_5F40(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_5F40(unsigned i) { if (i == 0) return 0; return refToPtr_5F40(i); }
 struct Ent_5F40 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[96]): sets the particle-emitter parameters of the avalanche node bound to a world
+ * instance.
+ *
+ * Copies the static defaults (set up on the first call) into a 224-byte parameter block and lets each argument override
+ * the field its index names, turning an int into a float where the field type table D_004467A0 says 2. The first 0xD8
+ * bytes are emitter parameters in the layout of On Tour's tAddDynamicParticleData (NumParticles 1, Duration -1, Damp 1,
+ * Size 4, ...); InstId sits at +0xD8 (default -1).
+ *
+ * When InstId is not -1 the instance is looked up (no current-instance shortcut; a missing one passes 0) and
+ * cAvalanche_setAvalancheNodeEmitterData copies the parameters to its node.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_5F40 func_00305F40(int n, Ent_5F40 *e) {
     if (D_587C_5F40 == 0) {
         Rec_5F40 &r = D_4FBE58_5F40;
@@ -7180,6 +8644,21 @@ extern int D_005308D0_61B0[] __asm__("D_005308D0");
 extern int D_004A5888_61B0 __asm__("D_004A5888");
 extern int D_004A5880_61B0 __asm__("D_004A5880");
 extern sBindEnd_1FBE38 D_004A5884_61B0 __asm__("D_004A5884");
+/**
+ * Script function (gLunoCFunctions[99]): returns whether a type of on-course icon is enabled by the custom race rules.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tIsIconEnabledData:
+ * Type) and lets each argument override the field its index names, turning an int into a float where the field type
+ * table D_004A3DA8 says 2. Defaults: Type 0.
+ *
+ * Type 0, 1 and 2 test bits 6, 8 and 7 of the rule word D_005308D0 (rules 10, 12 and 11 of
+ * cFEStateRuleSelect_updateBE): the int result in @p ret is 1 when the bit is clear, else 0. Other types give 1.
+ *
+ * @param ret  the result slot
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return @p ret
+ */
 extern "C" cLunoValue* func_003061B0(cLunoValue* ret, int n, sBindArg_1FBE38 *e) {
     if (D_004A5888_61B0 == 0) {
         // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp (lbu; sb 0(sp)).
@@ -7240,6 +8719,20 @@ extern char* D_004A28A8_6300 __asm__("SSXApp");
 extern int D_004A588C_6300 __asm__("D_004A588C");
 struct T12_6300 { int a; int b; Flag_6300 f; };
 extern T12_6300 D_004FBF38_6300 __asm__("D_004FBF38");
+/**
+ * Script function (gLunoCFunctions[100]): shows a message-centre popup, except in a network game.
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tMessageCenterData:
+ * TitleId, MsgId) and lets each argument override the field its index names, turning an int into a float where the
+ * field type table D_004A3DB0 says 2. Defaults: TitleId 0, MsgId 0.
+ *
+ * Unless cBENetworkInterface_networkOpt.bIsNetworkGame is set, calls func_001E3510(TitleId, MsgId) (fe/fepopup3). The
+ * cBE_getInterface call before it has no effect.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" R12_6300 func_00306300(int n, Ent_6300* e) {
     if (D_004A588C_6300 == 0) {
         D_004FBF38_6300.a = 0;
@@ -7284,6 +8777,22 @@ extern int D_004A5890;
 extern const int D_00446880[];
 extern "C" void* MEM_copy_6438(void*, void*, int) __asm__("MEM_copy");
 struct Ent_6438 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[101]): registers a world instance as a danger the AI riders track.
+ *
+ * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tDangerStartData:
+ * InstId, Radius, Delay) and lets each argument override the field its index names, turning an int into a float where
+ * the field type table D_00446880 says 2. Defaults: InstId -1, Radius 1000, Delay 0.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance is found, func_00101728 on the AI's danger
+ * manager (SSXApp->Game->AI +0xA8) records its id (+0x78), Radius, Delay and position, replacing any earlier record for
+ * it (a dead instance is skipped).
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_6438 func_00306438(int n, Ent_6438 *e) {
     if (D_004A5890 == 0) {
         D_6438[0] = 0xFFFFFFFF;
@@ -7355,6 +8864,21 @@ extern int D_004A58A0;
 extern int D_004A3DB8;
 extern "C" void* MEM_copy_65E8(void*, void*, int) __asm__("MEM_copy");
 struct Ent_65E8 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[102]): stops tracking a world instance as a danger.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tDangerEndData: InstId)
+ * and lets each argument override the field its index names, turning an int into a float where the field type table
+ * D_004A3DB8 says 2. Defaults: InstId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance is found, func_00101888 on the AI's danger
+ * manager (SSXApp->Game->AI +0xA8) deletes its tracked danger record (cDangerMan_DeleteTrackedDangerElemRecord).
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_65E8 func_003065E8(int n, Ent_65E8 *e) {
     if (D_004A58A0 == 0) {
         D_65E8 = 0xFFFFFFFF;
@@ -7409,6 +8933,22 @@ extern int D_004A58A4;
 extern int D_004A3DC0;
 extern "C" void* MEM_copy_6770(void*, void*, int) __asm__("MEM_copy");
 struct Ent_6770 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[103]): enables a danger zone around a world instance.
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tEnableDangerZoneData:
+ * InstId, Level) and lets each argument override the field its index names, turning an int into a float where the field
+ * type table D_004A3DC0 says 2. Defaults: InstId -1, Level 0.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance is found, func_00101900 on the AI's danger
+ * manager (SSXApp->Game->AI +0xA8) adds a zone for its id (+0x78) with Level, or counts one more reference when the
+ * zone is already active.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_6770 func_00306770(int n, Ent_6770 *e) {
     if (D_004A58A4 == 0) {
         D_6770[0] = 0xFFFFFFFF;
@@ -7469,6 +9009,21 @@ extern int D_004A58B0;
 extern int D_004A3DC8;
 extern "C" void* MEM_copy_6908(void*, void*, int) __asm__("MEM_copy");
 struct Ent_6908 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[104]): disables a danger zone around a world instance.
+ *
+ * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tDisableDangerZoneData:
+ * InstId) and lets each argument override the field its index names, turning an int into a float where the field type
+ * table D_004A3DC8 says 2. Defaults: InstId -1.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance is found, func_00101970 on the AI's danger
+ * manager (SSXApp->Game->AI +0xA8) drops one reference to its zone and frees the zone at zero.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_6908 func_00306908(int n, Ent_6908 *e) {
     if (D_004A58B0 == 0) {
         D_6908 = 0xFFFFFFFF;
@@ -7641,6 +9196,22 @@ extern int D_004A58B8;
 extern const int D_00446970[];
 extern "C" void* MEM_copy_6CB0(void*, void*, int) __asm__("MEM_copy");
 struct Ent_6CB0 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[106]): attaches a world instance to a multi-particle effect, or detaches it.
+ *
+ * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tMultiParticleInstData:
+ * Id, InstId, Cmd) and lets each argument override the field its index names, turning an int into a float where the
+ * field type table D_00446970 says 2. Defaults: Id 0, InstId -1, Cmd 0.
+ *
+ * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
+ * world-cache section and the rest an instance in it. When the instance is found, Cmd 0 calls
+ * cMultiParticleMan_addInst(cMultiParticleMan_TheMultiParticleMan, Id, the instance's id +0x78) and any other Cmd
+ * cMultiParticleMan_remInst.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return the nil script value (luno_gLunoNil)
+ */
 extern "C" V3_6CB0 func_00306CB0(int n, Ent_6CB0 *e) {
     if (D_004A58B8 == 0) {
         ((int*)D_6CB0)[0] = 0;
@@ -7705,6 +9276,23 @@ extern int D_004A58BC;
 extern const int D_00446980[];
 extern "C" void* MEM_copy_6E68(void*, void*, int) __asm__("MEM_copy");
 struct Ent_6E68 { int idx; int val; int pad; int type; };
+/**
+ * Script function (gLunoCFunctions[107]): checks the script's rider against a gate (cWScriptMan_checkGate) and plays a
+ * sound when it passed.
+ *
+ * Copies the static defaults (set up on the first call) into a 16-byte parameter block (On Tour tCheckGateData:
+ * InstId1, InstId2, InstId3) and lets each argument override the field its index names, turning an int into a float
+ * where the field type table D_00446980 says 2. Defaults: InstId1 -1, InstId2 -1, InstId3 -1.
+ *
+ * Returns cWScriptMan_checkGate(cWScriptMan_TheWScriptMan, InstId1, InstId2, InstId3) (previous, gate, next: 1 passed,
+ * 0 near, -1 missed) as an int in @p ret; on 1 it plays world sound 92 at the gate instance InstId2
+ * (cSSXAudio_WorldSound).
+ *
+ * @param ret  the result slot
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return @p ret
+ */
 extern "C" V3_6E68* func_00306E68(V3_6E68 *ret, int n, Ent_6E68 *e) {
     if (D_004A58BC == 0) {
         D_6E68[0] = 0xFFFFFFFF;
@@ -7768,6 +9356,20 @@ extern "C" int func_001E3570(int, int);
 extern int D_004A58C0_7020 __asm__("D_004A58C0");
 struct T12_7020 { int a; int b; Flag_7020 f; };
 extern T12_7020 D_004FC070_7020 __asm__("D_004FC070");
+/**
+ * Script function (gLunoCFunctions[110]): shows a message icon and returns whether it was shown.
+ *
+ * Copies the static defaults (set up on the first call) into a 12-byte parameter block (On Tour tShowMessageIconData:
+ * TitleId, MsgId) and lets each argument override the field its index names, turning an int into a float where the
+ * field type table D_004A3DD0 says 2. Defaults: TitleId 0, MsgId 0.
+ *
+ * Returns 1 when func_001E3570(TitleId, MsgId) (fe/fepopup3) returns non-zero, else 0, as an int in the hidden result
+ * slot self.
+ *
+ * @param n  the number of script arguments
+ * @param e  the script arguments (each: field index, value, value type)
+ * @return self, set to int 1 or 0
+ */
 extern "C" void* func_00307020(void* self, int n, Ent_7020* e) {
     if (D_004A58C0_7020 == 0) {
         D_004FC070_7020.a = 0;

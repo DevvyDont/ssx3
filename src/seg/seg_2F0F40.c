@@ -14,6 +14,17 @@ extern void func_003EFED0(char *, const char *, ...);
 struct I_FF40 { int f0; int f4; int f8; char *fC; };
 
 void func_003EFF40_impl(char *self, char *x, struct I_FF40 *info) __asm__("func_003EFF40");
+/**
+ * Logs a buddy packet: its tags and a summary of its text.
+ *
+ * Prints @p x and two four-letter tags ("%s%c%c%c%c/%c%c%c%c", via func_003EFED0): @p info's [1] and [2]; a [1] of -1
+ * prints "****" with [2] shown as "conn" (-1), "disc" (0xFEFEFEFE) or "----", and a [2] of 0 prints "----". Then the
+ * text at @p info [3]: " [null data]" when empty, " [binary data]" when it has a control character other than tab, line
+ * feed or carriage return, " [long data]" at 513 characters or more, else the text itself.
+ *
+ * @param x  the line prefix (such as "send: ")
+ * @param info  the packet: [1] command tag, [2] kind, [3] text
+ */
 void func_003EFF40_impl(char *self, char *x, struct I_FF40 *info) {
     int a, b;
     int n, flag;
@@ -70,6 +81,16 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F00D8);
 extern char str_send[];
 extern int func_003F5910(int, int, int, int, int);
 extern void func_003EFF40(int*, char*, int*);
+/**
+ * Sends a buddy command packet and logs it.
+ *
+ * Calls func_003F5910 on the connection at @p buddyApi [1] with the command tag and message, then, when a log callback
+ * is set (+0x508), logs it with func_003EFF40 and the prefix "send: ".
+ *
+ * @param buddyApi  the buddy-API object
+ * @param cmdTag  the four-letter command tag
+ * @param message  the message text
+ */
 void func_003F00D8(int* buddyApi, int cmdTag, int message) {
     int logInfo[4];
     func_003F5910(buddyApi[1], cmdTag, 0, message, -1);
@@ -88,6 +109,13 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F0150);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char* strchr(const char* s, int c);
+/**
+ * Cuts a buddy name at the first '@' and then at the first '/', in place.
+ *
+ * func_003F17D8 calls it.
+ *
+ * @param name  the name to shorten
+ */
 void func_003F0150(char* name) {
     char* sep = strchr(name, '@');
     if (sep) *sep = 0;

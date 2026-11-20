@@ -11,6 +11,16 @@ struct Cubic_D5A8 {
     float d;
     float x0; // 0x10
 };
+/**
+ * Evaluates one cubic segment of a spline interpolant at @p x.
+ *
+ * With t = @p x - X0 (+0x10) it returns A t^3 + B t^2 + C t + D from the segment's coefficients (+0x0 to +0xC, On Tour
+ * cCSICubicSpline).
+ *
+ * @param p  the segment (A, B, C, D, X0)
+ * @param x  where to evaluate
+ * @return the cubic's value
+ */
 extern "C" float func_0031D5A8(Cubic_D5A8 *p, float x) {
     float t = x - p->x0;
     float a = p->a;
@@ -37,6 +47,14 @@ struct Flags_D5E8 {
     int w4;
     int w8;
 };
+/**
+ * Constructs an empty cubic-spline interpolant.
+ *
+ * Clears CubicSplines (+0x8) and the Initialized, Loaded and NumSplines bit fields of the first word (On Tour
+ * cCubicSplineInterpolant layout); the other bits and MaxX are left as they are.
+ *
+ * @return @p self
+ */
 extern "C" Flags_D5E8 *func_0031D5E8(Flags_D5E8 *self) {
     self->w8 = 0;
     self->b = 0;
@@ -51,6 +69,14 @@ INCLUDE_ASM("seg/seg_21E5A8", func_0031D618);
 #ifdef SKIP_ASM
 void cCubicSplineInterpolant_purge(void *);
 void operator_delete(int *);
+/**
+ * Destroys a cubic-spline interpolant: frees its segments and, when asked, the object.
+ *
+ * Calls cCubicSplineInterpolant_purge and, when bit 0 of @p flags is set, operator delete on @p self (the g++
+ * deleting-destructor flag).
+ *
+ * @param flags  bit 0 set: also free the object
+ */
 extern "C" void func_0031D618(int *self, int flags) {
     cCubicSplineInterpolant_purge(self);
     if (flags & 1) operator_delete(self);

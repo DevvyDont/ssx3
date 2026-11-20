@@ -17,6 +17,20 @@ extern "C" void cBXString_releaseBuffer(cBXString_91C0* self, int len);
 #define MAX_91C0(a, b) (((a) > (b)) ? (a) : (b))
 #define MIN_91C0(a, b) (((a) < (b)) ? (a) : (b))
 
+/**
+ * Formats text into a string, printf style, from an argument list (vsprintf into a cBXString).
+ *
+ * It first estimates the length: one per plain character, and per conversion its flags ('#' adds 2), width and
+ * precision (also from '*' arguments), then 2 for %c, the string length (at least 1) for %s, 128 for e/f/g/G and 32 for
+ * integer and pointer conversions, limited by width and precision. It reserves that much (cBXString_getBuffer), formats
+ * with func_004186C8 (vsprintf) and lets cBXString_releaseBuffer(-1) take the length from the text.
+ *
+ * Each argument is taken as 8 bytes (the EE's va_list slots).
+ *
+ * @param self_  the string (cBXString)
+ * @param fmt  the printf format
+ * @param args  the argument list
+ */
 // vsprintf into a cBXString: estimates the formatted length first (the MFC CString::FormatV
 // scheme), reserves it, then formats in place.
 extern "C" void func_003191C0(void* self_, const char* fmt, char* args)
@@ -133,6 +147,14 @@ INCLUDE_ASM("seg/seg_21A1C0", func_003194A8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_003191C0(void* str, const char* fmt, char* ap);
 
+/**
+ * Formats text into a string, printf style (sprintf into a cBXString).
+ *
+ * Builds the argument list from its variadic arguments and calls func_003191C0.
+ *
+ * @param str  the string (cBXString)
+ * @param fmt  the printf format, followed by its arguments
+ */
 // sprintf into a cBXString.
 // PORT: SN-specific va_start (gcc 2.95 EE EABI form); use <stdarg.h> off-PS2.
 extern "C" void func_003194A8(void* str, const char* fmt, ...)
@@ -153,6 +175,12 @@ struct cBXString_94F0 {
 extern "C" void cBXString_copyBeforeWrite(void* self);
 extern unsigned char D_00499C81[];
 
+/**
+ * Removes trailing white space from a string.
+ *
+ * Makes the text unshared (cBXString_copyBeforeWrite), finds where the last run of white space (bit 3 of the ctype
+ * table D_00499C81) starts, cuts the text there and sets the header's DataLength (text - 8). No retail code calls it.
+ */
 // Strips trailing white space (D_00499C81 is the ctype table + 1, bit 8 = space).
 extern "C" void func_003194F0(cBXString_94F0* self)
 {
@@ -183,6 +211,13 @@ extern "C" void cBXString_copyBeforeWrite(void* self);
 extern "C" void* func_0041610C(void* dst, const void* src, int n);
 extern unsigned char D_00499C81[];
 
+/**
+ * Removes leading white space from a string.
+ *
+ * Makes the text unshared (cBXString_copyBeforeWrite), skips the leading white space (bit 3 of the ctype table
+ * D_00499C81), moves the rest (with its terminator) to the front (func_0041610C) and sets the header's DataLength (text
+ * - 8). No retail code calls it.
+ */
 // Strips leading white space.
 extern "C" void func_00319578(cBXString_9578* self)
 {
@@ -207,6 +242,12 @@ extern "C" void func_00401718(int a);
 extern "C" void func_00402450(int a);
 extern "C" void func_00427D28(void);
 
+/**
+ * Prepares the IOP at start-up, rebooting it with the DNAS image.
+ *
+ * Calls func_00426408(0) and func_0042AB18, reboots the IOP with DNAS271.IMG (func_00319820), then calls
+ * func_00401718(0), func_00402450(2) and func_00427D28. systemInit calls it; @p self is not used.
+ */
 extern "C" void func_00319610(void* self)
 {
     func_00426408(0);
@@ -226,6 +267,13 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_pct_sDATA_MODULES[];
 extern char str_cdrom0_b[];
 
+/**
+ * Writes the IOP module directory, "cdrom0:\DATA\MODULES\", into a buffer.
+ *
+ * sprintf of str_pct_sDATA_MODULES with str_cdrom0_b. @p self is not used.
+ *
+ * @param out  the buffer
+ */
 // Builds the IOP module directory ("cdrom0:\DATA\MODULES\").
 extern "C" void func_00319660(void* self, char* out)
 {
@@ -244,6 +292,15 @@ extern "C" void func_00319660(void* self, char* out);
 extern char str_pct_spct_spct_s_c[];
 extern char str_1_b[];
 
+/**
+ * Builds the full path of an IOP module.
+ *
+ * A @p name that contains ':' (it names a device) is copied as is; otherwise the path is the module directory
+ * (func_00319660), @p name and the ISO version suffix ";1". @p self is not used.
+ *
+ * @param out  the buffer for the path
+ * @param name  the module file name
+ */
 // Full path of an IOP module: names with a device prefix are used as is, others get
 // the module directory and the ";1" ISO version suffix.
 extern "C" void func_00319690(void* self, char* out, const char* name)
@@ -265,6 +322,18 @@ INCLUDE_ASM("seg/seg_21A1C0", func_00319718);
 extern "C" void func_00319690(void* self, char* out, const char* name);
 extern "C" int func_0042BA68(const char* path, int argLen, const char* args);
 
+/**
+ * Loads an IOP module, retrying while the load fails.
+ *
+ * Builds the path (func_00319690) and calls func_0042BA68(path, @p argLen, @p args) until it returns a non-negative
+ * result; a failure is retried when it is -204 (IOP busy) or when @p retry is set, otherwise returned.
+ *
+ * @param name  the module file name
+ * @param retry  non-zero to retry every failure
+ * @param argLen  the length of the module arguments
+ * @param args  the module arguments
+ * @return the module id, or the error code
+ */
 // Loads an IOP module, retrying while the IOP is busy (-204) or always when 'retry' is set.
 extern "C" int func_00319718(void* self, const char* name, int retry, int argLen, const char* args)
 {
@@ -285,6 +354,13 @@ INCLUDE_ASM("seg/seg_21A1C0", func_00319790);
 extern "C" void func_0042B438(int fd, int a, int b, void* out);
 extern "C" void func_0042B640(int fd);
 
+/**
+ * Calls func_0042B438(@p fd, 0, 0, a 16-byte scratch buffer) and then func_0042B640(@p fd).
+ *
+ * No retail code calls it; @p self is not used.
+ *
+ * @param fd  the id passed to both calls
+ */
 extern "C" void func_00319790(void* self, int fd)
 {
     char scratch[16];
@@ -301,6 +377,11 @@ extern "C" int func_00319718(void* self, const char* name, int retry, int argLen
 extern void* D_004A3E94;
 extern char str_MSIFRPC_IRX[];
 
+/**
+ * Loads the IOP module MSIFRPC.IRX.
+ *
+ * Calls func_00319718(D_004A3E94, "MSIFRPC.IRX", retry 1, no arguments). initOnline calls it; @p self is not used.
+ */
 // Loads MSIFRPC.IRX.
 extern "C" void func_003197D0(void* self)
 {
@@ -314,6 +395,11 @@ INCLUDE_ASM("seg/seg_21A1C0", func_00319800);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_0040B1F8(void);
 
+/**
+ * Calls func_0040B1F8.
+ *
+ * No retail code calls it; @p self is not used.
+ */
 extern "C" void func_00319800(void* self)
 {
     func_0040B1F8();
@@ -333,6 +419,13 @@ extern "C" int func_0042BF30(void);
 extern "C" void func_0042AB18(void);
 extern char str_DNAS271_IMG[];
 
+/**
+ * Reboots the IOP with the DNAS image DNAS271.IMG and waits until it is done.
+ *
+ * Calls func_00426408(0), func_00401718(0) and func_00402450(2), builds the image path (func_00319690), retries
+ * func_0042BF68 (the IOP reboot through rom0:UDNL) until it succeeds, polls func_0042BF30 until it reports done, then
+ * calls func_00426408(0) and func_0042AB18 again. func_00319610 calls it; @p self is not used.
+ */
 // Loads the DNAS image (DNAS271.IMG) and waits for it to finish.
 extern "C" void func_00319820(void* self)
 {
@@ -359,6 +452,17 @@ extern "C" int func_0042A538(void* client, int cmd, int a, int b, int c, int d);
 extern "C" int func_00402398(int* status);
 extern char str_dev9x[];
 
+/**
+ * Runs a worker thread that, on each semaphore signal, sends the "dev9x" request 0x4402 and then calls func_00402398
+ * until both succeed.
+ *
+ * Loops forever: waits on @p sema (WaitSema), retries func_0042A538("dev9x", 0x4402, ...) until it succeeds, then
+ * retries func_00402398(&status) until it returns non-zero with status 0. func_00319930 starts it as a thread;
+ * func_00319910 signals the semaphore. The shape is that of the usual PS2 power-off handler (dev9 shutdown, then
+ * console power-off), but the callees are not named in this build.
+ *
+ * @param sema  the semaphore id to wait on
+ */
 // IOP poll thread: waits for its semaphore, then issues RPC 0x4402 and waits for completion.
 extern "C" void func_003198A0(int sema)
 {
@@ -379,6 +483,12 @@ INCLUDE_ASM("seg/seg_21A1C0", func_00319910);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void iSignalSema(void);
 
+/**
+ * Signals the power-off thread's semaphore (iSignalSema).
+ *
+ * func_00319930 installs it as the power-off callback (func_00400D58); the semaphore id arrives as the callback
+ * argument.
+ */
 extern "C" void func_00319910(void)
 {
     iSignalSema();
@@ -426,6 +536,14 @@ extern char D_00538B10[];
 extern int D_004A5B54;
 extern int D_004A5B70;
 
+/**
+ * Sets up a semaphore, a worker thread running func_003198A0 and a callback (func_00319910) that wakes it.
+ *
+ * Only when func_0042B6D0("dev9") succeeds: creates a semaphore (initial count 0, maximum 1; D_004A5B54), creates and
+ * starts a thread (priority 1, 0x2000-byte stack D_00538B10, _gp; id in D_004A5B70) on func_003198A0 with the semaphore
+ * as its argument, and registers func_00319910 with func_00400D58 as the callback, with the same argument. initOnline
+ * calls it.
+ */
 extern "C" void func_00319930(void)
 {
     sThreadParam_9930 tp;
