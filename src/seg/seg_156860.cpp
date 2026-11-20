@@ -505,15 +505,15 @@ extern int cCommSystem_mNumNetConn;
 /**
  * Reads the list of network configurations into cCommSystem_mNetConns.
  *
- * Asks for up to 10 entries (NetConnQuery with @p arg1 and the 0x100-byte records of cCommSystem_mNetConns) and stores
+ * Asks for up to 10 entries (NetConnQuery with @p listParam and the 0x100-byte records of cCommSystem_mNetConns) and stores
  * the count in cCommSystem_mNumNetConn. The debug menu screen and func_001B4CD8 call it.
  *
- * @param arg0  the connection manager (not used)
- * @param arg1  passed to NetConnQuery first
+ * @param commSystem  the connection manager (not used)
+ * @param listParam  passed to NetConnQuery first
  * @return 1
  */
-extern "C" int func_00255F20(void *arg0, int arg1) {
-    cCommSystem_mNumNetConn = NetConnQuery_5F20(arg1, cCommSystem_mNetConns, 10);
+extern "C" int func_00255F20(void *commSystem, int listParam) {
+    cCommSystem_mNumNetConn = NetConnQuery_5F20(listParam, cCommSystem_mNetConns, 10);
     return 1;
 }
 #endif
@@ -775,13 +775,13 @@ extern "C" void *operator_new__FUi_6258(unsigned int, int *, int, int) __asm__("
 /**
  * Starts a DNAS authentication: begins loading its program file.
  *
- * Stores @p arg1 at +0x20, clears +0x14 and +0x1C, sets the state (+0) to 1, allocates a 0x195000-byte "ElfData" buffer
+ * Stores @p authMode at +0x20, clears +0x14 and +0x1C, sets the state (+0) to 1, allocates a 0x195000-byte "ElfData" buffer
  * (+4) and starts loading "OVERLAY.DAT" into it (ASYNCFILE_loadat; handle at +0x18). func_002563F8 continues.
  *
- * @param arg1  the mode, passed on to the authentication (+0x20)
+ * @param authMode  the mode, passed on to the authentication (+0x20)
  */
-extern "C" void func_00256258(char *self, int arg1) {
-    *(int *)(self + 0x20) = arg1;
+extern "C" void func_00256258(char *self, int authMode) {
+    *(int *)(self + 0x20) = authMode;
     *(int *)(self + 0x14) = 0;
     *(int *)(self + 0x1C) = 0;
     *(int *)(self + 0) = 1;
@@ -947,16 +947,16 @@ extern "C" void func_00256510(char *self) {
     if (ASYNCFILE_getstatus_6510(*(int *)(self + 0x18)) == 1) {
         *(int *)(self + 0x10) = 0;
         ASYNCFILE_release_6510(*(int *)(self + 0x18), 0, self + 0x10);
-        unsigned char *d = *(unsigned char **)(self + 0xC);
-        if (d != 0) {
+        unsigned char *fileData = *(unsigned char **)(self + 0xC);
+        if (fileData != 0) {
             int n = *(int *)(self + 0x10);
             if (n > 0) {
                 *(int *)(self + 0) = 3;
                 K6510 key = D_004A2EE8[0];
                 int i;
-                unsigned char *p;
-                for (i = 0, p = d; i < *(int *)(self + 0x10); i++, p++) {
-                    *p ^= key.b[i % 4];
+                unsigned char *bytePtr;
+                for (i = 0, bytePtr = fileData; i < *(int *)(self + 0x10); i++, bytePtr++) {
+                    *bytePtr ^= key.b[i % 4];
                 }
             }
         }
@@ -984,15 +984,15 @@ extern "C" void func_002565E0(char *self) {
     if (func_003FD100_65E0(*(int *)(self + 0x14)) == 0) {
         char *infoBuf = self + 0xC4;
         MEM_fill_65E0(infoBuf, 0, 908);
-        char *b = self + 0x650;
-        char *c = self + 0x850;
+        char *secondText = self + 0x650;
+        char *thirdText = self + 0x850;
         int result = func_003FD128_65E0(infoBuf);
         *(short *)(self + 0x450) = 0;
-        *(short *)b = 0;
-        *(short *)c = 0;
+        *(short *)secondText = 0;
+        *(short *)thirdText = 0;
         USTR_copy_65E0(self + 0x450, self + 0xCC);
-        USTR_copy_65E0(b, self + 0x10C);
-        USTR_copy_65E0(c, self + 0x20C);
+        USTR_copy_65E0(secondText, self + 0x10C);
+        USTR_copy_65E0(thirdText, self + 0x20C);
         if (result == 0) {
             *(int *)(self + 0x1C) = 1;
         } else {
@@ -2257,10 +2257,10 @@ extern "C" void func_00257A80(cGameComm* gameComm)
     if (gameComm->mPauseMenu[0] == 0) {
         if (gameComm->mGameStartGate != 0) {
             if (gameComm->mPauseMenu[1] == 0 && gameComm->mUnPauseTimer <= 0) {
-                char* g = (char*)SSXApp;
+                char* appObj = (char*)SSXApp;
                 int n = ++gameComm->mStallThreshold;
                 ++gameComm->unk_060;
-                unsigned int st = *(int*)(*(char**)(*(char**)(g + 0x84) + 0xC)) - 4;
+                unsigned int st = *(int*)(*(char**)(*(char**)(appObj + 0x84) + 0xC)) - 4;
                 if (st < 2) {
                     if (n >= 10) gameComm->mStallTimer += 1.0f;
                     if (gameComm->mStallThreshold == 10) ++gameComm->mStallCount;
@@ -2386,21 +2386,21 @@ extern "C" void func_00257CD8_7CD8(Conn_7CD8* c) __asm__("func_00257CD8");
  * that could not be filled is deleted and the loop ends. It also stops, keeping the packet held, when that queue has 31
  * or more packets.
  *
- * @param c  the game link
+ * @param gameComm  the game link
  */
-extern "C" void func_00257CD8_7CD8(Conn_7CD8* c)
+extern "C" void func_00257CD8_7CD8(Conn_7CD8* gameComm)
 {
-    while (c->busy == 0
-           && (c->pending != 0
-               || (c->pending = func_00258188_7CD8(c), func_00255DC0((void*)cCommSystem_mCommSystem, c->unk6C, (int)c->pending, 0xF0) != 0)
-               || (operator_delete__FPi_7CD8(c->pending), c->pending = 0, 0))) {
-        Packet_7BD8* p = c->pending;
-        PacketQueue_7BD8* q = &c->queues[p->type];
-        if (queueFull_7CD8(q)) {
+    while (gameComm->busy == 0
+           && (gameComm->pending != 0
+               || (gameComm->pending = func_00258188_7CD8(gameComm), func_00255DC0((void*)cCommSystem_mCommSystem, gameComm->unk6C, (int)gameComm->pending, 0xF0) != 0)
+               || (operator_delete__FPi_7CD8(gameComm->pending), gameComm->pending = 0, 0))) {
+        Packet_7BD8* inPacket = gameComm->pending;
+        PacketQueue_7BD8* typeQueue = &gameComm->queues[inPacket->type];
+        if (queueFull_7CD8(typeQueue)) {
             return;
         }
-        q->slots[q->wr++ % 32] = p;
-        c->pending = 0;
+        typeQueue->slots[typeQueue->wr++ % 32] = inPacket;
+        gameComm->pending = 0;
     }
 }
 #endif
@@ -2863,19 +2863,19 @@ struct S83A8 {
  *
  * Only when no ping is running (+0x138 not positive): clears the ping count (+0xB8), stores the address (+0xC0), sends
  * the first ping "SSXPingServer" (func_003E7450 on the ping object +0x140, size 0xE) and keeps its id, sets +0xBC to 4,
- * the running time (+0x138) to @p arg2 * 60 frames and clears +0x13C. +0x13C is set when the connection is not
+ * the running time (+0x138) to @p durationSecs * 60 frames and clears +0x13C. +0x13C is set when the connection is not
  * broadband. The online-error pause screen calls it with the lobby server's address and 3.
  *
- * @param arg1  the server address
- * @param arg2  how long to ping, in seconds
+ * @param serverAddr  the server address
+ * @param durationSecs  how long to ping, in seconds
  */
-extern "C" void func_002583A8(cGameComm* self, int arg1, int arg2) {
+extern "C" void func_002583A8(cGameComm* self, int serverAddr, int durationSecs) {
     if (self->unk_138 <= 0) {
         self->unk_0B8 = 0;
-        self->unk_0C0 = arg1;
-        self->unk_0C4[self->unk_0B8++] = func_003E7450_83A8((int)self->unk_140, arg1, str_SSXPingServer, 0xE);
+        self->unk_0C0 = serverAddr;
+        self->unk_0C4[self->unk_0B8++] = func_003E7450_83A8((int)self->unk_140, serverAddr, str_SSXPingServer, 0xE);
         self->unk_0BC = 4;
-        self->unk_138 = arg2 * 0x3C;
+        self->unk_138 = durationSecs * 0x3C;
         self->unk_13C = 0;
     }
     if (cCommSystem_mCommSystem->mBroadBand == 0) {
@@ -3073,15 +3073,15 @@ INCLUDE_ASM("seg/seg_156860", func_00258870);
 /**
  * Arms the game link's link timeout (+0x94, which func_002577C8 counts down).
  *
- * Stores @p arg1 when @p arg2 is set, when neither player is in the pause menu, or once the start gate is up.
+ * Stores @p timeoutFrames when @p forceArm is set, when neither player is in the pause menu, or once the start gate is up.
  *
  * @param gameComm  the game link
- * @param arg1  the timeout in frames (1800, 3600 or 3660)
- * @param arg2  nonzero to store it in any case
+ * @param timeoutFrames  the timeout in frames (1800, 3600 or 3660)
+ * @param forceArm  nonzero to store it in any case
  */
-extern "C" void func_00258870(cGameComm* gameComm, int arg1, int arg2) {
-    if ((arg2 != 0) || (((gameComm->mPauseMenu[1]) == 0) && ((gameComm->mPauseMenu[0]) == 0)) || ((gameComm->mGameStartGate) != 0)) {
-        (gameComm->unk_094) = arg1;
+extern "C" void func_00258870(cGameComm* gameComm, int timeoutFrames, int forceArm) {
+    if ((forceArm != 0) || (((gameComm->mPauseMenu[1]) == 0) && ((gameComm->mPauseMenu[0]) == 0)) || ((gameComm->mGameStartGate) != 0)) {
+        (gameComm->unk_094) = timeoutFrames;
     }
 }
 #endif
@@ -3553,16 +3553,16 @@ struct VEnt_9098 {
  * and calls its virtual slot 1. Then it calls func_002639E0 with the peer address and the host flag. LobbyMan_onplaymsg
  * calls it with func_002591D0's object.
  *
- * @param a0  the game-connection object
- * @param a1  passed to func_002639E0 as the controller id
- * @param a2  passed to func_002639E0 as its cancel flag
+ * @param peerSession  the game-connection object
+ * @param ctrlId  passed to func_002639E0 as the controller id
+ * @param cancelFlag  passed to func_002639E0 as its cancel flag
  */
-extern "C" void func_00259098(int a0, int a1, int a2)
+extern "C" void func_00259098(int peerSession, int ctrlId, int cancelFlag)
 {
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int v;
-    if (lobbyMan->mIsHost) v = lobbyMan->mOppoAddr;
-    else v = lobbyMan->mHostAddr;
+    int peerAddr;
+    if (lobbyMan->mIsHost) peerAddr = lobbyMan->mOppoAddr;
+    else peerAddr = lobbyMan->mHostAddr;
     void* pi = cBE_getInterface_9098(cBE_getBE(), 1);
     char* ri = (char*)cBE_getInterface_9098(SSXApp->BE, 7);
     D_00534E58[0] = cBENewPlayerInterface_getPlayerCharID(pi, 0);
@@ -3572,7 +3572,7 @@ extern "C" void func_00259098(int a0, int a1, int a2)
         VEnt_9098* vt = *(VEnt_9098**)(ri + 0xC);
         vt[1].fn(ri + vt[1].delta);
     }
-    func_002639E0(a0, v, lobbyMan->mIsHost, a1, a2);
+    func_002639E0(peerSession, peerAddr, lobbyMan->mIsHost, ctrlId, cancelFlag);
 }
 #endif
 

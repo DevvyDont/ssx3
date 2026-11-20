@@ -592,13 +592,13 @@ struct VEnt_3980 { short delta; short idx; void (*fn)(void*, int, int, int); };
  * cPS2MemCard_GetDeviceName reads only the port and the buffer. It is word 143 (slot 71) of cPS2MemCard_vtbl.
  *
  * @param pS2MemCard  the memory card
- * @param a1  the port
- * @param a2  the 16-bit buffer for the name
- * @param a3  passed on as the third argument
+ * @param device  the port
+ * @param nameBuffer  the 16-bit buffer for the name
+ * @param extraArg  passed on as the third argument
  */
-extern "C" void func_002D3980(cPS2MemCard* pS2MemCard, int a1, int a2, int a3) {
+extern "C" void func_002D3980(cPS2MemCard* pS2MemCard, int device, int nameBuffer, int extraArg) {
     VEnt_3980 *vtEntry = (VEnt_3980*)(*(char **)pS2MemCard + 0x230);
-    vtEntry->fn((char*)pS2MemCard + vtEntry->delta, a1, a2, a3);
+    vtEntry->fn((char*)pS2MemCard + vtEntry->delta, device, nameBuffer, extraArg);
 }
 #endif
 
@@ -717,11 +717,11 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A00);
 /**
  * Sets a menu item's ID (+8).
  *
- * @param arg0  the menu item
- * @param arg1  the new ID
+ * @param menuItem  the menu item
+ * @param itemId  the new ID
  */
-extern "C" void func_002D3A00(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (8))) = arg1;
+extern "C" void func_002D3A00(void *menuItem, int itemId) {
+    (*(int *)((char*)(menuItem) + (8))) = itemId;
 }
 #endif
 
@@ -731,11 +731,11 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A08);
 /**
  * Returns a menu item's ID (+8).
  *
- * @param arg0  the menu item
+ * @param menuItem  the menu item
  * @return the ID
  */
-extern "C" int func_002D3A08(void *arg0) {
-    return (*(int *)((char*)(arg0) + (8)));
+extern "C" int func_002D3A08(void *menuItem) {
+    return (*(int *)((char*)(menuItem) + (8)));
 }
 #endif
 
@@ -745,11 +745,11 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A10);
 /**
  * Sets a menu item's Arg word (+0xC).
  *
- * @param arg0  the menu item
- * @param arg1  the new value
+ * @param menuItem  the menu item
+ * @param itemArg  the new value
  */
-extern "C" void func_002D3A10(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xC))) = arg1;
+extern "C" void func_002D3A10(void *menuItem, int itemArg) {
+    (*(int *)((char*)(menuItem) + (0xC))) = itemArg;
 }
 #endif
 
@@ -759,11 +759,11 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A18);
 /**
  * Returns a menu item's Arg word (+0xC).
  *
- * @param arg0  the menu item
+ * @param menuItem  the menu item
  * @return Arg
  */
-extern "C" int func_002D3A18(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xC)));
+extern "C" int func_002D3A18(void *menuItem) {
+    return (*(int *)((char*)(menuItem) + (0xC)));
 }
 #endif
 
@@ -773,11 +773,11 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A20);
 /**
  * Returns the menu a menu item belongs to (Menu, +0; cMenu_addItem fills it).
  *
- * @param arg0  the menu item
+ * @param menuItem  the menu item
  * @return the menu
  */
-extern "C" int func_002D3A20(int *arg0) {
-    return *arg0;
+extern "C" int func_002D3A20(int *menuItem) {
+    return *menuItem;
 }
 #endif
 
@@ -785,14 +785,14 @@ extern "C" int func_002D3A20(int *arg0) {
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A28);
 #ifdef SKIP_ASM
 /**
- * Returns one of a menu's items: Items[@p arg1] (+0xC + 4 * index). The index is not checked.
+ * Returns one of a menu's items: Items[@p itemIndex] (+0xC + 4 * index). The index is not checked.
  *
- * @param arg0  the menu
- * @param arg1  the item index
+ * @param menu  the menu
+ * @param itemIndex  the item index
  * @return the item
  */
-extern "C" int func_002D3A28(char *arg0, int arg1) {
-    return *(int *)(arg0 + (arg1 << 2) + 0xC);
+extern "C" int func_002D3A28(char *menu, int itemIndex) {
+    return *(int *)(menu + (itemIndex << 2) + 0xC);
 }
 #endif
 
@@ -802,11 +802,11 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A38);
 /**
  * Returns the number of items in a menu (NumItems, +0).
  *
- * @param arg0  the menu
+ * @param menu  the menu
  * @return NumItems
  */
-extern "C" int func_002D3A38(int *arg0) {
-    return *arg0;
+extern "C" int func_002D3A38(int *menu) {
+    return *menu;
 }
 #endif
 
@@ -816,11 +816,11 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A40);
 /**
  * Returns the menu system that shows a menu (MenuSys, +0x124; cMenu_onGainFocus sets it).
  *
- * @param arg0  the menu
+ * @param menu  the menu
  * @return MenuSys
  */
-extern "C" int func_002D3A40(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x124)));
+extern "C" int func_002D3A40(void *menu) {
+    return (*(int *)((char*)(menu) + (0x124)));
 }
 #endif
 
@@ -830,11 +830,11 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A48);
 /**
  * Returns the font of a menu's menu system: the word at +0x58 of MenuSys (+0x124).
  *
- * @param arg0  the menu
+ * @param menu  the menu
  * @return the font
  */
-extern "C" int func_002D3A48(void *arg0) {
-    return (*(int *)((char*)((*(void **)((char*)(arg0) + (0x124)))) + (0x58)));
+extern "C" int func_002D3A48(void *menu) {
+    return (*(int *)((char*)((*(void **)((char*)(menu) + (0x124)))) + (0x58)));
 }
 #endif
 
@@ -845,11 +845,11 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A58);
  * Returns the font of the menu system that shows a menu item: the word at +0x58 of the MenuSys (+0x124) of the item's
  * Menu (+0).
  *
- * @param arg0  the menu item
+ * @param menuItem  the menu item
  * @return the font
  */
-extern "C" int func_002D3A58(void **arg0) {
-    return (*(int *)((char*)((*(void **)((char*)(*arg0) + (0x124)))) + (0x58)));
+extern "C" int func_002D3A58(void **menuItem) {
+    return (*(int *)((char*)((*(void **)((char*)(*menuItem) + (0x124)))) + (0x58)));
 }
 #endif
 
@@ -921,12 +921,12 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3AB8);
  * (+0x1C).
  *
  * @param menuItem  the list-choice item
- * @param arg1  the number of entries
- * @param arg2  the entries, 8 bytes each
+ * @param numTags  the number of entries
+ * @param tagTable  the entries, 8 bytes each
  */
-extern "C" void func_002D3AB8(void *menuItem, int arg1, int arg2) {
-    (*(int *)((char*)(menuItem) + (0x18))) = arg1;
-    (*(int *)((char*)(menuItem) + (0x1C))) = arg2;
+extern "C" void func_002D3AB8(void *menuItem, int numTags, int tagTable) {
+    (*(int *)((char*)(menuItem) + (0x18))) = numTags;
+    (*(int *)((char*)(menuItem) + (0x1C))) = tagTable;
 }
 #endif
 
@@ -1806,11 +1806,11 @@ extern int (*D_004A54BC)(int, int);
  * cMenu_sortItems stores its comparison function in D_004A54BC and passes this function to the qsort func_00418EF8. The
  * C declares no return value; the comparison's result is left in the return register.
  *
- * @param arg0  points to the first item pointer
- * @param arg1  points to the second item pointer
+ * @param lhsItem  points to the first item pointer
+ * @param rhsItem  points to the second item pointer
  */
-extern "C" void func_002D4008(int *arg0, int *arg1) {
-    D_004A54BC(*arg0, *arg1);
+extern "C" void func_002D4008(int *lhsItem, int *rhsItem) {
+    D_004A54BC(*lhsItem, *rhsItem);
 }
 #endif
 

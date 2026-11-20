@@ -152,15 +152,15 @@ extern "C" int HUFF_decompress(int, int);
 /**
  * Decompresses HUFF data into a buffer: returns HUFF_decompress(@p packBuf, @p unpackBuf).
  *
- * @p b is not used. The replay code (cReplayFramePtr_loadBlock, cPlaybackMan_setupFile, cReplayCache_load) calls it
+ * @p packedSizePtr is not used. The replay code (cReplayFramePtr_loadBlock, cPlaybackMan_setupFile, cReplayCache_load) calls it
  * with 0 there.
  *
  * @param packBuf  the compressed data
- * @param b  not used (callers pass 0)
+ * @param packedSizePtr  not used (callers pass 0)
  * @param unpackBuf  the output buffer
  * @return what HUFF_decompress returns
  */
-extern "C" int func_002C85A0(int packBuf, int b, int unpackBuf) {
+extern "C" int func_002C85A0(int packBuf, int packedSizePtr, int unpackBuf) {
     return HUFF_decompress(packBuf, unpackBuf);
 }
 #endif

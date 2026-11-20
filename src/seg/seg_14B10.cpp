@@ -927,21 +927,21 @@ extern "C" void func_00114298(char* self, float speedFactor)
     if (cRider_getMotionState(self) == 4) {
         AddEq_4298(VEL_4298, Scale_4298(Up_4298(self), push));
     } else {
-        float t = (*(float*)(self + 0x378) - lo) * (1.0f / (hi - lo));
+        float tParam = (*(float*)(self + 0x378) - lo) * (1.0f / (hi - lo));
         sV4_4298 dir = Normalize_4298(Add_4298(*(sV4_4298*)(self + 0x370), Scale_4298(*(sV4_4298*)(self + 0x3A0), 0.2f)));
-        if (*(float*)(self + 0x3A8) < 0.0f || t < 0.0f || *(float*)(self + 0x1E8) < 0.0f) {
+        if (*(float*)(self + 0x3A8) < 0.0f || tParam < 0.0f || *(float*)(self + 0x1E8) < 0.0f) {
             AddEq_4298(VEL_4298, Scale_4298(dir, push));
         } else {
             sV4_4298 flat = Normalize_4298(sV4_4298(*(float*)(self + 0x370), *(float*)(self + 0x374), 0.0f, 0.0f));
             sV4_4298 side = Normalize_4298(Sub_4298(*(sV4_4298*)(self + 0x3A0), Scale_4298(flat, Dot_4298(*(sV4_4298*)(self + 0x3A0), flat))));
             sV4_4298 vdir = Normalize_4298(Sub_4298(VEL_4298, Scale_4298(flat, Dot_4298(VEL_4298, flat))));
-            float s0 = fSin(0.0f);
-            float s1 = fSin(0.349065899848938f);
-            float f = t * (side.z - s0) * (1.0f / (s1 - s0));
-            f = Clamp_4298(f, 0.0f, 0.949999988079071f);
+            float sinLow = fSin(0.0f);
+            float sinHigh = fSin(0.349065899848938f);
+            float sideBlend = tParam * (side.z - sinLow) * (1.0f / (sinHigh - sinLow));
+            sideBlend = Clamp_4298(sideBlend, 0.0f, 0.949999988079071f);
             steered = 1;
-            dir = Normalize_4298(Add_4298(Scale_4298(dir, 1.0f - f), Scale_4298(side, f)));
-            VEL_4298 = Add_4298(Add_4298(Scale_4298(VEL_4298, 1.0f - f), Scale_4298(vdir, f * speed)), Scale_4298(Scale_4298(dir, push), 0.5f));
+            dir = Normalize_4298(Add_4298(Scale_4298(dir, 1.0f - sideBlend), Scale_4298(side, sideBlend)));
+            VEL_4298 = Add_4298(Add_4298(Scale_4298(VEL_4298, 1.0f - sideBlend), Scale_4298(vdir, sideBlend * speed)), Scale_4298(Scale_4298(dir, push), 0.5f));
         }
     }
     cReplay_eventJump((int)SSXApp->Game->Replay, *(int*)(self + 0x86C), *(char**)(self + 0x790) + 0xFC);
@@ -953,12 +953,12 @@ extern "C" void func_00114298(char* self, float speedFactor)
         ov.z = 0.0f;
         dv.z = 0.0f;
         if (Dot_4298(ov, dv) < 0.0f) {
-            float a = *(float*)(self + 0x2E4) * 0.5f;
-            float b = *(float*)(self + 0x2E4) * 0.699999988079071f;
+            float slowSpeed = *(float*)(self + 0x2E4) * 0.5f;
+            float fastSpeed = *(float*)(self + 0x2E4) * 0.699999988079071f;
             float k;
-            if (a <= speed) {
-                if (speed <= b)
-                    k = (speed - a) / (b - a);
+            if (slowSpeed <= speed) {
+                if (speed <= fastSpeed)
+                    k = (speed - slowSpeed) / (fastSpeed - slowSpeed);
                 else
                     k = 1.0f;
             } else {
@@ -968,17 +968,17 @@ extern "C" void func_00114298(char* self, float speedFactor)
         }
     }
     float slope = *(float*)(self + 0x388);
-    sV4_4298 h = *(sV4_4298*)(self + 0x380);
-    h.z = 0.0f;
-    if (Abs_4298(h.x) > 0.0f || Abs_4298(h.y) > 0.0f)
-        DivEq_4298(h, Len_4298(h));
+    sV4_4298 headingDir = *(sV4_4298*)(self + 0x380);
+    headingDir.z = 0.0f;
+    if (Abs_4298(headingDir.x) > 0.0f || Abs_4298(headingDir.y) > 0.0f)
+        DivEq_4298(headingDir, Len_4298(headingDir));
     else
-        h = D_004FF140_4298;
-    *(sV4_4298*)(self + 0x3C0) = h;
+        headingDir = D_004FF140_4298;
+    *(sV4_4298*)(self + 0x3C0) = headingDir;
     if (slope < 0.05000000074505806f && slope > -0.05000000074505806f) {
-        sV4_4298 lat = Scale_4298(h, Dot_4298(VEL_4298, h) / Dot_4298(h, h));
+        sV4_4298 lat = Scale_4298(headingDir, Dot_4298(VEL_4298, headingDir) / Dot_4298(headingDir, headingDir));
         SubEq_4298(VEL_4298, lat);
-        AddEq_4298(*(sV4_4298*)(self + 0x110), Scale_4298(h, 4.0f));
+        AddEq_4298(*(sV4_4298*)(self + 0x110), Scale_4298(headingDir, 4.0f));
         if (!(Flags_4298(self) & 0x20))
             ScaleEq_4298(VEL_4298, 0.799975574016571f);
     }
@@ -986,21 +986,21 @@ extern "C" void func_00114298(char* self, float speedFactor)
     if (*(float*)(self + 0x2E4) < len)
         ScaleEq_4298(VEL_4298, *(float*)(self + 0x2E4) / len);
     if (speedFactor >= 0.0f && (*(int*)(self + 0x434) < 11 || *(int*)(self + 0x434) > 13)) {
-        float t = (float)(AITick() - *(int*)(*(char**)(self + 0x77C) + 0x10)) * 0.01666666753590107f;
+        float tParam = (float)(AITick() - *(int*)(*(char**)(self + 0x77C) + 0x10)) * 0.01666666753590107f;
         float k;
-        if (t <= 0.5388872623443604f) {
+        if (tParam <= 0.5388872623443604f) {
             k = 0.6939882636070251f;
         } else {
-            float u = (t - 0.5388872623443604f) * 1.2326725721359253f <? 1.0f; // PORT: g++ minimum operator
-            k = u + (1.0f - u) * 0.6939882636070251f;
+            float rampUp = (tParam - 0.5388872623443604f) * 1.2326725721359253f <? 1.0f; // PORT: g++ minimum operator
+            k = rampUp + (1.0f - rampUp) * 0.6939882636070251f;
         }
         ScaleEq_4298(VEL_4298, k);
     }
-    sV4_4298 c = Cross_4298(D_004FF160_4298, VEL_4298);
-    float cl = Len_4298(c);
+    sV4_4298 velCross = Cross_4298(D_004FF160_4298, VEL_4298);
+    float cl = Len_4298(velCross);
     if (cl > 0.0f) {
-        ScaleEq_4298(c, 1.0f / cl);
-        sV4_4298 side = Cross_4298(c, *(sV4_4298*)(self + 0x370));
+        ScaleEq_4298(velCross, 1.0f / cl);
+        sV4_4298 side = Cross_4298(velCross, *(sV4_4298*)(self + 0x370));
         *(float*)(self + 0x5A4) = Dot_4298(VEL_4298, *(sV4_4298*)(self + 0x370)) * Len_4298(side);
     } else {
         *(float*)(self + 0x5A4) = 0.0f;
@@ -2196,16 +2196,16 @@ INCLUDE_ASM("seg/seg_14B10", func_00116938);
 extern int D_0043D160[];
 
 /**
- * Returns a grab's name text: entry @p arg0 of the table D_0043D160 ("", "Combo Grab ", "", "Indy ", "Method ", ...),
+ * Returns a grab's name text: entry @p grabIndex of the table D_0043D160 ("", "Combo Grab ", "", "Indy ", "Method ", ...),
  * the table gGenTrickName builds trick names from.
  *
  * cFEStateUberTrick_onWidgetEvent and cFEStateUberTrick_updateTrickMenu use it.
  *
- * @param arg0  the table index
+ * @param grabIndex  the table index
  * @return the name (as an int)
  */
-extern "C" int func_00116938(int arg0) {
-    return D_0043D160[arg0];
+extern "C" int func_00116938(int grabIndex) {
+    return D_0043D160[grabIndex];
 }
 #endif
 
@@ -2389,12 +2389,12 @@ INCLUDE_ASM("seg/seg_14B10", func_00116FA8);
  *
  * The cRiderMetrix HUD slots are built with it (cRiderMetrix_linkToRider).
  *
- * @param arg0  the effect slot
- * @return @p arg0
+ * @param hudFx  the effect slot
+ * @return @p hudFx
  */
-extern "C" int* func_00116FA8(int *arg0) {
-    *arg0 = 52;
-    return arg0;
+extern "C" int* func_00116FA8(int *hudFx) {
+    *hudFx = 52;
+    return hudFx;
 }
 #endif
 
@@ -2537,26 +2537,26 @@ extern char str_pct_d[];
 /**
  * Starts a HUD effect showing a number, timed by an animation position rather than a decay limit.
  *
- * Formats @p arg2 with "%d" into the shared buffer D_004A5E20 and copies it as the text (cHUDFX_copyDispStr). Sets the
- * number (+0x14) to @p arg2, the ID (+0) to @p arg1, the current decay (+8) to -@p fparg0, the data (+0xC) to
- * @p arg3 and the decay limit (+4) to -1 (no limit). cRiderMetrix_updateStaticHUD, cRiderMetrix_evCollectMultiplier and
+ * Formats @p displayInt with "%d" into the shared buffer D_004A5E20 and copies it as the text (cHUDFX_copyDispStr). Sets the
+ * number (+0x14) to @p displayInt, the ID (+0) to @p fxId, the current decay (+8) to -@p fparg0, the data (+0xC) to
+ * @p fxData and the decay limit (+4) to -1 (no limit). cRiderMetrix_updateStaticHUD, cRiderMetrix_evCollectMultiplier and
  * cRiderMetrix_addToComboChain use it.
  *
- * @param arg0  the effect slot
- * @param arg1  the effect
- * @param arg2  the number to show
+ * @param hudFx  the effect slot
+ * @param fxId  the effect
+ * @param displayInt  the number to show
  * @param fparg0  the animation position (stored negated)
- * @param arg3  the effect's data
+ * @param fxData  the effect's data
  */
 // Variant of func_00117138 that names the entry from a number (formatted into a shared buffer).
-extern "C" void func_001171A8(char *arg0, int arg1, int arg2, float fparg0, int arg3) {
-    sprintf((char*)D_004A5E20, str_pct_d, arg2);
-    cHUDFX_copyDispStr((cHUDFX*)arg0, D_004A5E20);
-    *(int *)(arg0 + 0x14) = arg2;
-    *(int *)(arg0 + 0) = arg1;
-    *(float *)(arg0 + 8) = -fparg0;
-    *(int *)(arg0 + 0xC) = arg3;
-    *(float *)(arg0 + 4) = -1.0f;
+extern "C" void func_001171A8(char *hudFx, int fxId, int displayInt, float fparg0, int fxData) {
+    sprintf((char*)D_004A5E20, str_pct_d, displayInt);
+    cHUDFX_copyDispStr((cHUDFX*)hudFx, D_004A5E20);
+    *(int *)(hudFx + 0x14) = displayInt;
+    *(int *)(hudFx + 0) = fxId;
+    *(float *)(hudFx + 8) = -fparg0;
+    *(int *)(hudFx + 0xC) = fxData;
+    *(float *)(hudFx + 4) = -1.0f;
 }
 #endif
 

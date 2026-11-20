@@ -582,60 +582,60 @@ static inline int outcode_C190(const sCtx_C190* g, const sV4_C190& v)
  */
 extern "C" void func_002DC190(cPS2FogParticleMan* out, sObj_C190** objs, int n, int clip)
 {
-    sCtx_C190* g = D_C190;
-    if (g->ready == 0)
-        func_0037D968(g);
+    sCtx_C190* graphicsMan = D_C190;
+    if (graphicsMan->ready == 0)
+        func_0037D968(graphicsMan);
     for (int i = 0; i < n; i++) {
         sObj_C190* obj = objs[i];
-        sV4_C190 c = mulMatVec_C190(&g->view, sV4_C190(sV3_C190(obj->min.x + obj->max.x, obj->min.y + obj->max.y, obj->min.z + obj->max.z) * 0.5f, 1.0f));
-        float d = (int)c.w;
-        if (d >= 25000.0f)
+        sV4_C190 viewCentre = mulMatVec_C190(&graphicsMan->view, sV4_C190(sV3_C190(obj->min.x + obj->max.x, obj->min.y + obj->max.y, obj->min.z + obj->max.z) * 0.5f, 1.0f));
+        float centreDepth = (int)viewCentre.w;
+        if (centreDepth >= 25000.0f)
             continue;
         float fade;
-        if (d < 18000.0f)
+        if (centreDepth < 18000.0f)
             fade = 1.0f;
         else
-            fade = (25000.0f - d) * 0.000142857141f;
-        sMat_C190 m;
-        m = sMat_C190(g->view, obj->mat);
+            fade = (25000.0f - centreDepth) * 0.000142857141f;
+        sMat_C190 modelView;
+        modelView = sMat_C190(graphicsMan->view, obj->mat);
         sMesh_C190* mesh = obj->mesh;
         sList_C190* list = mesh->list;
         for (int j = 0; j < mesh->count; j++) {
             sPart_C190* part = list->part;
             if (part != 0 && part->count != 0) {
-                sVert_C190* v = part->verts;
-                for (int k = 0; k < part->count; k++, v++) {
-                    sV4_C190 p = mulMatVec_C190(&m, sV4_C190(v->pos.x, v->pos.y, v->pos.z, 1.0f));
-                    int depth = (int)p.w;
+                sVert_C190* vertex = part->verts;
+                for (int k = 0; k < part->count; k++, vertex++) {
+                    sV4_C190 viewPos = mulMatVec_C190(&modelView, sV4_C190(vertex->pos.x, vertex->pos.y, vertex->pos.z, 1.0f));
+                    int depth = (int)viewPos.w;
                     if (depth > 0) {
                         float fd = depth;
-                        float t;
+                        float nearFade;
                         if (fd <= 500.0f)
-                            t = 0.0f;
+                            nearFade = 0.0f;
                         else if (fd < 2499.66748046875f)
-                            t = (fd - 500.0f) * 0.00050008314f;
+                            nearFade = (fd - 500.0f) * 0.00050008314f;
                         else
-                            t = 1.0f;
-                        float a = fade * t;
-                        if (a != 0.0f) {
-                            p.w = 1.0f / p.w;
+                            nearFade = 1.0f;
+                        float alpha = fade * nearFade;
+                        if (alpha != 0.0f) {
+                            viewPos.w = 1.0f / viewPos.w;
                             unsigned short id = out->miNumSphere;
                             D_00537AC0_C190[id].idx = id;
                             D_00537AC0_C190[id].depth = depth;
-                            p.x *= p.w;
-                            p.y *= p.w;
-                            float s = v->size * p.w;
-                            sV4_C190 off(g->sx * s, g->sy * s);
-                            (*(sV4_C190*)&((&out->mSprites[0]))[out->miNumSphere].mTopLeft) = sub_C190(p, off);
-                            (*(sV4_C190*)&((&out->mSprites[0]))[out->miNumSphere].mBottomRight) = add4_C190(p, off);
+                            viewPos.x *= viewPos.w;
+                            viewPos.y *= viewPos.w;
+                            float spriteSize = vertex->size * viewPos.w;
+                            sV4_C190 off(graphicsMan->sx * spriteSize, graphicsMan->sy * spriteSize);
+                            (*(sV4_C190*)&((&out->mSprites[0]))[out->miNumSphere].mTopLeft) = sub_C190(viewPos, off);
+                            (*(sV4_C190*)&((&out->mSprites[0]))[out->miNumSphere].mBottomRight) = add4_C190(viewPos, off);
                             if (clip != 0) {
-                                if (outcode_C190(g, (*(sV4_C190*)&((&out->mSprites[0]))[out->miNumSphere].mTopLeft)) & outcode_C190(g, (*(sV4_C190*)&((&out->mSprites[0]))[out->miNumSphere].mBottomRight)))
+                                if (outcode_C190(graphicsMan, (*(sV4_C190*)&((&out->mSprites[0]))[out->miNumSphere].mTopLeft)) & outcode_C190(graphicsMan, (*(sV4_C190*)&((&out->mSprites[0]))[out->miNumSphere].mBottomRight)))
                                     continue;
                             }
-                            ((&out->mSprites[0]))[out->miNumSphere].mColour[0] = a * 128.0f;
-                            ((&out->mSprites[0]))[out->miNumSphere].mColour[1] = v->col[0] * 128.0f;
-                            ((&out->mSprites[0]))[out->miNumSphere].mColour[2] = v->col[1] * 128.0f;
-                            ((&out->mSprites[0]))[out->miNumSphere].mColour[3] = v->col[2] * 128.0f;
+                            ((&out->mSprites[0]))[out->miNumSphere].mColour[0] = alpha * 128.0f;
+                            ((&out->mSprites[0]))[out->miNumSphere].mColour[1] = vertex->col[0] * 128.0f;
+                            ((&out->mSprites[0]))[out->miNumSphere].mColour[2] = vertex->col[1] * 128.0f;
+                            ((&out->mSprites[0]))[out->miNumSphere].mColour[3] = vertex->col[2] * 128.0f;
                             out->miNumSphere++;
                         }
                     }

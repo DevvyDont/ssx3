@@ -267,23 +267,23 @@ extern "C" float func_00100348_0348(char* self, sV4_0348* target)
         up = D_004FF160_v0348;
     sV4_0348 fwd = *Obj_0348(self)->GetDir();
     sV4_0348 side = Cross_0348(fwd, up);
-    sV4_0348 d = Sub_0348(*target, *Obj_0348(self)->GetPos());
-    d.z = 0.0f;
-    d = Norm_0348(d);
-    d = Norm_0348(Sub_0348(d, Scale_0348(up, Dot_0348(d, up))));
-    float x = Dot_0348(d, fwd);
-    float y = Dot_0348(d, side);
-    float a = Atan2_0348(y, x);
-    float t = Abs_0348(a) * 6.289702415466309f;
-    if (t < 0.019999999552965164f) {
-        t = 0.0f;
+    sV4_0348 toTarget = Sub_0348(*target, *Obj_0348(self)->GetPos());
+    toTarget.z = 0.0f;
+    toTarget = Norm_0348(toTarget);
+    toTarget = Norm_0348(Sub_0348(toTarget, Scale_0348(up, Dot_0348(toTarget, up))));
+    float x = Dot_0348(toTarget, fwd);
+    float y = Dot_0348(toTarget, side);
+    float turnAngle = Atan2_0348(y, x);
+    float turnAmount = Abs_0348(turnAngle) * 6.289702415466309f;
+    if (turnAmount < 0.019999999552965164f) {
+        turnAmount = 0.0f;
     } else {
-        if (t > 0.9800000190734863f)
-            t = 0.9800000190734863f;
-        if (a < 0.0f)
-            t = -t;
+        if (turnAmount > 0.9800000190734863f)
+            turnAmount = 0.9800000190734863f;
+        if (turnAngle < 0.0f)
+            turnAmount = -turnAmount;
     }
-    return t;
+    return turnAmount;
 }
 #endif
 
@@ -462,55 +462,55 @@ static inline float Len_0680(const sV4_0680& v)
  * 7) returns 0. The entry's pointer-to-member goes to +0xF44 and its index to +0xF38. This function is entry 1 of the
  * table D_0043CF20.
  *
- * @param pad  the cruise command to fill
+ * @param cruiseCmd  the cruise command to fill
  */
-extern "C" void func_00100680_0680(char* self, sPad_0680* pad)
+extern "C" void func_00100680_0680(char* self, sPad_0680* cruiseCmd)
 {
-    sV4_0680 v;
+    sV4_0680 targetPos;
     int x;
     int y;
-    int below, o3, o4, o5, o6;
+    int below, toPipe, toRail, isSpin, isFlip;
     int z;
-    func_00100610_0680(&v, self);
-    pad->b20 = (int)(func_00100348_0680(self, &v) * 31.0f);
+    func_00100610_0680(&targetPos, self);
+    cruiseCmd->b20 = (int)(func_00100348_0680(self, &targetPos) * 31.0f);
     if (func_0010BB18_0680(self, (float*)(self + 0xDF0), &x)) {
         float sp = *(float*)(self + 0xDF0);
         float len = Len_0680(*(sV4_0680*)(*(char**)(self + 0x18) + 0x1E0));
         if (sp + 138.88890075683594f < len) {
             if (x)
-                pad->w0 = 0x1F;
+                cruiseCmd->w0 = 0x1F;
         } else if (len < sp - 138.88890075683594f) {
             if (x)
-                cComputer_setupRecklessCrouch_0680(self, pad);
+                cComputer_setupRecklessCrouch_0680(self, cruiseCmd);
             else
-                cComputer_setupCrouch_0680(self, pad);
+                cComputer_setupCrouch_0680(self, cruiseCmd);
         }
     } else if (func_0010BBF8_0680(self, &y)) {
-        float s = 1.0f;
+        float turnSign = 1.0f;
         if (y)
-            s = -1.0f;
-        int c = *(int*)(self + 0xE40);
-        if (c == 0) {
-            pad->w6 = (int)(-s * 31.0f);
+            turnSign = -1.0f;
+        int steerTimer = *(int*)(self + 0xE40);
+        if (steerTimer == 0) {
+            cruiseCmd->w6 = (int)(-turnSign * 31.0f);
             *(int*)(self + 0xE40) = 60;
-        } else if (c > 0) {
-            *(int*)(self + 0xE40) = c - 1;
-            if (c - 1 <= 0)
+        } else if (steerTimer > 0) {
+            *(int*)(self + 0xE40) = steerTimer - 1;
+            if (steerTimer - 1 <= 0)
                 *(int*)(self + 0xE40) = -1;
-            pad->w6 = (int)(-s * 31.0f);
+            cruiseCmd->w6 = (int)(-turnSign * 31.0f);
         } else {
-            pad->w6 = (int)(s * 31.0f);
+            cruiseCmd->w6 = (int)(turnSign * 31.0f);
         }
     } else {
         *(int*)(self + 0xE40) = 0;
-        char* r = *(char**)(self + 0x18);
-        if (*(float*)(r + 0x2F8) >= 0.8999999761581421f && *(float*)(r + 0x2F0) > 0.0f && *(float*)(self + 0xDF8) > 50.0f)
-            pad->b17 = 1;
-        cComputer_setupCrouch_0680(self, pad);
+        char* riderPtr = *(char**)(self + 0x18);
+        if (*(float*)(riderPtr + 0x2F8) >= 0.8999999761581421f && *(float*)(riderPtr + 0x2F0) > 0.0f && *(float*)(self + 0xDF8) > 50.0f)
+            cruiseCmd->b17 = 1;
+        cComputer_setupCrouch_0680(self, cruiseCmd);
     }
     float* spd = (float*)(self + 0xDF0);
     z = 0;
-    if (cComputer_checkForJumpEvent_0680(self, spd, &below, &o3, &o4, &o5, &o6)) {
+    if (cComputer_checkForJumpEvent_0680(self, spd, &below, &toPipe, &toRail, &isSpin, &isFlip)) {
         *(int*)(self + 0xE70) = -1;
         *(Fn_0680*)(self + 0xF44) = D_0043CF20_0680[0];
         *(short*)(self + 0xF38) = 0;
@@ -1905,10 +1905,10 @@ extern "C" void func_00101B60(sFocusBoxes* self)
     int moved = 0;
     sFocusBox boxes[6];
     for (int i = 0; i < self->NumFocusInstances; i++) {
-        t4Vector p = *self->inst[i].pos;
-        boxes[i].min = Sub_1B60(p, D_004A61E0);
-        boxes[i].max = Add_1B60(p, D_004A61E0);
-        if (Len_1B60(Sub_1B60(self->inst[i].last, p)) >= 2000.0f) {
+        t4Vector focusPos = *self->inst[i].pos;
+        boxes[i].min = Sub_1B60(focusPos, D_004A61E0);
+        boxes[i].max = Add_1B60(focusPos, D_004A61E0);
+        if (Len_1B60(Sub_1B60(self->inst[i].last, focusPos)) >= 2000.0f) {
             moved = 1;
         }
     }
@@ -1932,8 +1932,8 @@ extern "C" void func_00101B60(sFocusBoxes* self)
     }
     self->lastTime = AITick();
     for (int i = 0; i < self->NumFocusInstances; i++) {
-        t4Vector p = *self->inst[i].pos;
-        self->inst[i].last = p;
+        t4Vector focusPos = *self->inst[i].pos;
+        self->inst[i].last = focusPos;
     }
     tFocusRec* focusinstances[256];
     tFocusRec* unfocusinstances[256];
@@ -1941,22 +1941,22 @@ extern "C" void func_00101B60(sFocusBoxes* self)
     int numunfocusinstances = 0;
     self->parity ^= 1;
     for (int i = 0; i < list.n; i++) {
-        tFocusRec* r = list.items[i];
-        if (!(r->flags & 0x100)) {
-            focusinstances[numfocusinstances++] = r;
-            r->flags |= 0x100;
+        tFocusRec* focusRec = list.items[i];
+        if (!(focusRec->flags & 0x100)) {
+            focusinstances[numfocusinstances++] = focusRec;
+            focusRec->flags |= 0x100;
         }
         if (self->parity) {
-            r->flags &= ~0x200;
+            focusRec->flags &= ~0x200;
         } else {
-            r->flags |= 0x200;
+            focusRec->flags |= 0x200;
         }
     }
     for (int i = 0; i < self->numInstances; i++) {
-        tFocusRec* r = self->instances[i];
-        if (((r->flags & 0x200) == 0) != self->parity) {
-            unfocusinstances[numunfocusinstances++] = r;
-            r->flags &= ~0x100;
+        tFocusRec* focusRec = self->instances[i];
+        if (((focusRec->flags & 0x200) == 0) != self->parity) {
+            unfocusinstances[numunfocusinstances++] = focusRec;
+            focusRec->flags &= ~0x100;
         }
     }
     self->numInstances = list.n;
@@ -3637,16 +3637,16 @@ INCLUDE_ASM("seg/seg_1218", func_00104D50);
 /**
  * Links the rider animation object to a front-end rider instead of a game rider.
  *
- * Stores @p arg1 at +0x64, clears the rider pointer +0x60 and copies the word at +8 of @p arg1 into +0x54.
+ * Stores @p feRider at +0x64, clears the rider pointer +0x60 and copies the word at +8 of @p feRider into +0x54.
  * cFERider_compileModel calls it; func_00104B48 tests +0x64.
  *
  * @param riderAnim  the rider animation object
- * @param arg1  the front-end rider
+ * @param feRider  the front-end rider
  */
-extern "C" void func_00104D50(void *riderAnim, void *arg1) {
-    (*(void **)((char*)(riderAnim) + (0x64))) = arg1;
+extern "C" void func_00104D50(void *riderAnim, void *feRider) {
+    (*(void **)((char*)(riderAnim) + (0x64))) = feRider;
     (*(int *)((char*)(riderAnim) + (0x60))) = 0;
-    (*(int *)((char*)(riderAnim) + (0x54))) = (int) (*(int *)((char*)(arg1) + (8)));
+    (*(int *)((char*)(riderAnim) + (0x54))) = (int) (*(int *)((char*)(feRider) + (8)));
 }
 #endif
 
@@ -3986,19 +3986,19 @@ extern "C" float func_00104E70(char* self, cScope_4E70* sc, sHit_4E70* out)
         }
         if (dd == bestD) {
             // PORT: index-first address arithmetic through int
-            sHit_4E70* a = (sHit_4E70*)((i << 7) + (int)hits);
-            sHit_4E70* b = (sHit_4E70*)((best << 7) + (int)hits);
+            sHit_4E70* tieHit = (sHit_4E70*)((i << 7) + (int)hits);
+            sHit_4E70* bestHit = (sHit_4E70*)((best << 7) + (int)hits);
             int take;
-            if (a->surf) {
-                if (!b->surf)
+            if (tieHit->surf) {
+                if (!bestHit->surf)
                     take = 1;
                 else
-                    take = a->surf->id < b->surf->id;
+                    take = tieHit->surf->id < bestHit->surf->id;
             } else {
-                if (b->surf)
+                if (bestHit->surf)
                     take = 0;
                 else
-                    take = a->owner->order < b->owner->order;
+                    take = tieHit->owner->order < bestHit->owner->order;
             }
             if (take)
                 best = i;
@@ -4988,16 +4988,16 @@ extern "C" void func_001065B0_impl(char* self, char* arg) __asm__("func_001065B0
 /**
  * Turns the rider away from a surface it hit.
  *
- * n is the normalized cross product of the up axis (+0x1C0) and the hit normal (@p arg + 0x10), and the in-plane
+ * n is the normalized cross product of the up axis (+0x1C0) and the hit normal (@p hitInfo + 0x10), and the in-plane
  * direction is up x n. The angle is atan2 of the forward axis (+0x1B0) against n and the in-plane direction. A positive
  * angle below 110 degrees (1.9198622 rad) gives a turn of min(110 degrees - angle, 20 degrees), mirrored for negative
  * angles; the orientation quaternion (+0x120) is then rotated about the up axis by minus that turn.
  *
- * @param arg  the hit (normal at +0x10)
+ * @param hitInfo  the hit (normal at +0x10)
  */
-extern "C" void func_001065B0_impl(char* self, char* arg)
+extern "C" void func_001065B0_impl(char* self, char* hitInfo)
 {
-    sV4_65B0 n = Norm_65B0(Cross_65B0(Up_65B0(self), *(sV4_65B0*)(arg + 0x10)));
+    sV4_65B0 n = Norm_65B0(Cross_65B0(Up_65B0(self), *(sV4_65B0*)(hitInfo + 0x10)));
     sV4_65B0 inPlaneDir = Cross_65B0(Up_65B0(self), n);
     float x = Dot_65B0(Fwd_65B0(self), inPlaneDir);
     float y = Dot_65B0(Fwd_65B0(self), n);
@@ -6939,19 +6939,19 @@ struct S_8C28 { char pad[0x5B8]; unsigned arr[64]; };
  * Compares the instance's id (+0x78) with the ids at +0x5B8 that func_00104E70 records (at most 64, ended by
  * 0xFFFFFFFF). Virtual slot 3 (word 7) of the rider vtables.
  *
- * @param arg0  the rider
- * @param arg1  the instance
+ * @param rider  the rider
+ * @param instance  the instance
  * @return 1 when the id is listed, else 0
  */
-extern "C" int func_00108C28(S_8C28 *arg0, void *arg1) {
+extern "C" int func_00108C28(S_8C28 *rider, void *instance) {
     int i = 0;
-    if (~arg0->arr[0]) {
+    if (~rider->arr[0]) {
         do {
-            if (arg0->arr[i] == *(unsigned *)((char*)arg1 + 0x78)) {
+            if (rider->arr[i] == *(unsigned *)((char*)instance + 0x78)) {
                 return 1;
             }
             i++;
-        } while (i < 64 && arg0->arr[i] != 0xFFFFFFFF);
+        } while (i < 64 && rider->arr[i] != 0xFFFFFFFF);
     }
     return 0;
 }
@@ -7379,23 +7379,23 @@ extern "C" int cComputer_checkForPunching(void*, int*);
  * both. Then it calls the current cruise logic, the pointer-to-member at +0xF44 (set from D_0043CF20), with the
  * command. cComputer_getControlCmd calls it.
  *
- * @param f  the cruise command
+ * @param cruiseCmd  the cruise command
  */
-extern "C" void func_0010A960(cObj_A960* self, sFlags_A960* f)
+extern "C" void func_0010A960(cObj_A960* self, sFlags_A960* cruiseCmd)
 {
-    int t;
-    f->b12 = cComputer_checkForReset(self);
+    int punchRight;
+    cruiseCmd->b12 = cComputer_checkForReset(self);
     self->fE20 = 0;
-    if (cComputer_checkForPunching(self, &t)) {
-        if (t)
-            f->b19 = 1;
+    if (cComputer_checkForPunching(self, &punchRight)) {
+        if (punchRight)
+            cruiseCmd->b19 = 1;
         else
-            f->b18 = 1;
+            cruiseCmd->b18 = 1;
     } else if (cComputer_checkForBlock(self)) {
-        f->b19 = 1;
-        f->b18 = 1;
+        cruiseCmd->b19 = 1;
+        cruiseCmd->b18 = 1;
     }
-    (self->*(self->state))(f);
+    (self->*(self->state))(cruiseCmd);
 }
 #endif
 

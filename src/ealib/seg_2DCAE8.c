@@ -7670,51 +7670,51 @@ int func_003E4508_4508(char *path, int unused, int *out) __asm__("func_003E4508"
  * FILEDEV_open, which tags the number with device 1 in the top byte, and by func_003E4968.
  *
  * @param path  the file path ('/' or '\\' separated)
- * @param unused  the open-mode flags FILEDEV_open passes (not used)
+ * @param modeFlags  the open-mode flags FILEDEV_open passes (not used)
  * @param out  receives the 1-based entry number, or 0 when not found
  * @return 1 when found, 0 otherwise
  */
 // FAKEMATCH: register pin `register int slash FM_REG("$2") = '/'; buf[0] = slash;` (fakematch.h) breaks the
 // local-alloc tie between the '/' constant for buf[0] and the first path char c0 (retail: v0 / v1, ours swapped); plain form 99.62%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-int func_003E4508_4508(char *path, int unused, int *out) {
+int func_003E4508_4508(char *path, int modeFlags, int *out) {
     char buf[256];
     int key;
-    char *d;
-    char *p;
-    unsigned int r;
-    char c;
-    int t;
-    p = path;
+    char *bufCursor;
+    char *pathCursor;
+    unsigned int foundEntry;
+    char pathChar;
+    int upperChar;
+    pathCursor = path;
     {
-        char c0 = *p++;
-        if (c0 != '/') p = path;
+        char firstChar = *pathCursor++;
+        if (firstChar != '/') pathCursor = path;
     }
     {
         register int slash FM_REG("$2") = '/';
         buf[0] = slash;
     }
-    d = buf + 1;
-    while (*p != 0) {
-        c = *p;
-        if (c == '\\') {
-            *d = '/';
+    bufCursor = buf + 1;
+    while (*pathCursor != 0) {
+        pathChar = *pathCursor;
+        if (pathChar == '\\') {
+            *bufCursor = '/';
         } else {
-            t = c - 0x20;
-            if (!(D_00499C81_4508[c] & 2)) t = c;
-            *d = t;
+            upperChar = pathChar - 0x20;
+            if (!(D_00499C81_4508[pathChar] & 2)) upperChar = pathChar;
+            *bufCursor = upperChar;
         }
-        p++;
-        d++;
+        pathCursor++;
+        bufCursor++;
     }
-    *d = 0;
+    *bufCursor = 0;
     key = func_003E36F8_4508(buf, D_00519C40_4508[6]);
-    r = func_004187E8_4508(&key, D_00519C40_4508[14], D_00519C40_4508[1], D_00450C58_4508[1] + 0xC, func_003E3968_4508);
-    if (r == 0) {
+    foundEntry = func_004187E8_4508(&key, D_00519C40_4508[14], D_00519C40_4508[1], D_00450C58_4508[1] + 0xC, func_003E3968_4508);
+    if (foundEntry == 0) {
         *out = 0;
         return 0;
     }
-    *out = (r - D_00519C40_4508[14]) / (unsigned)(D_00450C58_4508[1] + 0xC) + 1;
+    *out = (foundEntry - D_00519C40_4508[14]) / (unsigned)(D_00450C58_4508[1] + 0xC) + 1;
     return 1;
 }
 #endif
@@ -7738,25 +7738,25 @@ int func_003E48D8_48D8(int, char *, int *, int *) __asm__("func_003E48D8");
  * name (D_00450C5C bytes, copied with strncpy). Every output pointer may be 0. FILEDEV_getsize calls it for the size of
  * an open disc file (device 1) and FILEDEV_getstartsector for its start sector.
  *
- * @param arg0  the 1-based entry number
- * @param arg1  receives the stored name, or 0
- * @param arg2  receives the size (+8), or 0
- * @param arg3  receives the start sector (+4), or 0
+ * @param fileIndex  the 1-based entry number
+ * @param nameOut  receives the stored name, or 0
+ * @param sizeOut  receives the size (+8), or 0
+ * @param sectorOut  receives the start sector (+4), or 0
  * @return the entry's size (+8)
  */
-int func_003E48D8_48D8(int arg0, char *arg1, int *arg2, int *arg3) {
-    char *e;
-    e = D_00519C78_48D8[0] + (arg0 - 1) * (D_00450C5C_48D8[0] + 0xC);
-    if (arg1 != 0) {
-        strncpy(arg1, e + 0xC, D_00450C5C_48D8[0]);
+int func_003E48D8_48D8(int fileIndex, char *nameOut, int *sizeOut, int *sectorOut) {
+    char *entry;
+    entry = D_00519C78_48D8[0] + (fileIndex - 1) * (D_00450C5C_48D8[0] + 0xC);
+    if (nameOut != 0) {
+        strncpy(nameOut, entry + 0xC, D_00450C5C_48D8[0]);
     }
-    if (arg2 != 0) {
-        *arg2 = *(int *)(e + 8);
+    if (sizeOut != 0) {
+        *sizeOut = *(int *)(entry + 8);
     }
-    if (arg3 != 0) {
-        *arg3 = *(int *)(e + 4);
+    if (sectorOut != 0) {
+        *sectorOut = *(int *)(entry + 4);
     }
-    return *(int *)(e + 8);
+    return *(int *)(entry + 8);
 }
 #endif
 
@@ -7774,19 +7774,19 @@ extern int D_00519C78_9C78[] __asm__("D_00519C78");
  * Finds the entry number with func_003E4508 and turns it into a pointer into D_00519C78 (entries of D_00450C5C + 12
  * bytes).
  *
- * @param a0  the file path
+ * @param filePath  the file path
  * @return the entry (start sector at +4, size at +8, name at +0xC), or 0
  */
-int func_003E4968(int a0) {
-    int sp0;
-    int r;
+int func_003E4968(int filePath) {
+    int entryNumber;
+    int entry;
 
-    if (func_003E4508(a0, 0, &sp0) == 0) {
-        r = 0;
+    if (func_003E4508(filePath, 0, &entryNumber) == 0) {
+        entry = 0;
     } else {
-        r = D_00519C78_9C78[0] + (sp0 - 1) * (D_00450C5C_0C5C[0] + 0xC);
+        entry = D_00519C78_9C78[0] + (entryNumber - 1) * (D_00450C5C_0C5C[0] + 0xC);
     }
-    return r;
+    return entry;
 }
 #endif
 
@@ -7837,21 +7837,21 @@ extern int D_00450C78_4A30[] __asm__("D_00450C78");
 /**
  * Registers a routine to run at exit, once.
  *
- * Does nothing when @p a is already in the 64-entry exit table D_00450C78 (the routines REAL_restore runs); otherwise
+ * Does nothing when @p exitFunc is already in the 64-entry exit table D_00450C78 (the routines REAL_restore runs); otherwise
  * stores it in the first empty slot, and drops it silently when the table is full. The timer setup func_003E4AF0
  * registers its teardown func_003E4D68 here; the sound library (func_003B5478) registers one too.
  *
- * @param a  the routine to call at exit
+ * @param exitFunc  the routine to call at exit
  */
-void func_003E4A30(int a) {
+void func_003E4A30(int exitFunc) {
     int i;
     for (i = 0; i < 0x40; i++) {
-        if (D_00450C78_4A30[i] == a) return;
+        if (D_00450C78_4A30[i] == exitFunc) return;
     }
     i = 0;
     while (i < 0x40) {
         if (D_00450C78_4A30[i] == 0) {
-            D_00450C78_4A30[i] = a;
+            D_00450C78_4A30[i] = exitFunc;
             break;
         }
         i++;
@@ -7867,15 +7867,15 @@ extern void (*D_00450C78[64])(void);     /* exit handlers (REAL_restore runs the
 /**
  * Removes a routine from the exit table.
  *
- * Clears the first slot of the 64-entry table D_00450C78 (the routines REAL_restore runs) that holds @p a; does nothing
+ * Clears the first slot of the 64-entry table D_00450C78 (the routines REAL_restore runs) that holds @p exitFunc; does nothing
  * when it isn't there. The counterpart of func_003E4A30. Nothing in the build calls it.
  *
- * @param a  the routine to remove
+ * @param exitFunc  the routine to remove
  */
-void func_003E4AA0(void (*a)(void)) {
+void func_003E4AA0(void (*exitFunc)(void)) {
     int i;
     for (i = 0; i < 0x40; i++) {
-        if (D_00450C78[i] == a) {
+        if (D_00450C78[i] == exitFunc) {
             D_00450C78[i] = 0;
             break;
         }
@@ -7930,7 +7930,7 @@ int func_003E4AF0(int hz) {
     int count;
     int tmode;
     int end;
-    int d;
+    int hblankCount;
 
     if (D_00450DDC != 0) {
         return D_00450DC8;
@@ -7967,17 +7967,17 @@ int func_003E4AF0(int hz) {
             do {
             } while (D_00450DCC < end);
         }
-        d = T0_COUNT_4AF0 - count;
+        hblankCount = T0_COUNT_4AF0 - count;
         T0_COUNT_4AF0 = count;
         T0_COUNT_4AF0 = tmode;
-        if (d < 0) {
-            d += 0x10000;
+        if (hblankCount < 0) {
+            hblankCount += 0x10000;
         }
-        if ((unsigned int)(d - 15701) < 99) {
+        if ((unsigned int)(hblankCount - 15701) < 99) {
             func_003E6690_4AF0(1);
-        } else if ((unsigned int)(d - 15576) < 99) {
+        } else if ((unsigned int)(hblankCount - 15576) < 99) {
             func_003E6690_4AF0(2);
-        } else if ((unsigned int)(d - 28801) < 3199) {
+        } else if ((unsigned int)(hblankCount - 28801) < 3199) {
             func_003E6690_4AF0(3);
         }
     }
@@ -8116,10 +8116,10 @@ extern volatile int D_00450DCC_4EE8[] __asm__("D_00450DCC");
  */
 // Resets the timer state.
 void func_003E4EE8(void) {
-    int *p = D_00450DE8_4EE8;
+    int *deadlinePtr = D_00450DE8_4EE8;
     D_00450DEC_4EE8[0] = 0;
     D_00450DCC_4EE8[0] = 0;
-    p[0] = 0;
+    deadlinePtr[0] = 0;
 }
 #endif
 
@@ -8133,14 +8133,14 @@ extern int D_00450DE8_4F08[] __asm__("D_00450DE8");
 /**
  * Sets the tick deadline a number of ticks from now.
  *
- * Stores the current tick count (func_003E4E98) plus @p arg0 in D_00450DE8; func_003E4F80 tests it and func_003E4F40
+ * Stores the current tick count (func_003E4E98) plus @p delayTicks in D_00450DE8; func_003E4F80 tests it and func_003E4F40
  * waits for it.
  *
- * @param arg0  ticks from now
+ * @param delayTicks  ticks from now
  */
-void func_003E4F08(int arg0) {
-    int *p = D_00450DE8_4F08;
-    *p = func_003E4E98_4F08() + arg0;
+void func_003E4F08(int delayTicks) {
+    int *deadlinePtr = D_00450DE8_4F08;
+    *deadlinePtr = func_003E4E98_4F08() + delayTicks;
 }
 #endif
 
@@ -8181,7 +8181,7 @@ extern int D_00450DE8_4F80[] __asm__("D_00450DE8");
  * @return 1 when the deadline is now or past, 0 before it
  */
 int func_003E4F80(void) {
-    int r = func_003E4E98() - D_00450DE8_4F80[0]; if (r > -1) return 1; return 0;
+    int sinceDeadline = func_003E4E98() - D_00450DE8_4F80[0]; if (sinceDeadline > -1) return 1; return 0;
 }
 #endif
 
@@ -8246,10 +8246,10 @@ extern int D_0051ED88_5018[] __asm__("D_0051ED88");
  * by systemInit.
  */
 void func_003E5018(void) {
-    int t = GetThreadId_5018();
+    int mainThreadId = GetThreadId_5018();
     D_00450DF8_5018[0] = 0x50533254;
-    D_00450DF8_5018[1] = t;
-    ChangeThreadPriority_5018(t, 100);
+    D_00450DF8_5018[1] = mainThreadId;
+    ChangeThreadPriority_5018(mainThreadId, 100);
     MUTEX_create_5018(D_0051ED88_5018);
 }
 #endif
@@ -8285,14 +8285,14 @@ extern void func_003E50C8(int, int, int, int, int, int);
  *
  * Calls func_003E50C8 with the same arguments and a start parameter of 0.
  *
- * @param arg0  the thread record to fill
- * @param arg1  the thread's entry routine
- * @param arg2  the stack base
- * @param arg3  the stack size in bytes
- * @param arg4  the priority code (97-103, anything else means 100)
+ * @param thread  the thread record to fill
+ * @param entryProc  the thread's entry routine
+ * @param stackAddr  the stack base
+ * @param stackSize  the stack size in bytes
+ * @param priority  the priority code (97-103, anything else means 100)
  */
-void func_003E5098(int arg0, int arg1, int arg2, int arg3, int arg4) {
-    func_003E50C8(arg0, arg1, 0, arg2, arg3, arg4);
+void func_003E5098(int thread, int entryProc, int stackAddr, int stackSize, int priority) {
+    func_003E50C8(thread, entryProc, 0, stackAddr, stackSize, priority);
 }
 #endif
 
@@ -8318,25 +8318,25 @@ int func_003E50C8_a(int *self, int arg1, int arg2, int arg3, int arg4, int arg5)
 /**
  * Creates a kernel thread and starts it with a parameter.
  *
- * Fills a ThreadParam on the stack (entry @p arg1, stack @p arg3 / @p arg4, gp D_004A30F0, initial priority @p arg5
+ * Fills a ThreadParam on the stack (entry @p entryProc, stack @p stackAddr / @p stackSize, gp D_004A30F0, initial priority @p priority
  * when it is 97, 98, 99, 101, 102 or 103, else 100) and calls CreateThread. The id goes to the record's +4 even on
  * failure; on success the record's +0 gets the signature 0x50533254 ('PS2T') and the thread is started with StartThread
- * and @p arg2. func_003E5098 calls it with a parameter of 0; the quadtree loader (func_002C29D0) starts its thread
+ * and @p startParam. func_003E5098 calls it with a parameter of 0; the quadtree loader (func_002C29D0) starts its thread
  * here.
  *
- * @param arg1  the entry routine
- * @param arg2  the parameter StartThread passes to it
- * @param arg3  the stack base
- * @param arg4  the stack size in bytes
- * @param arg5  the priority code (97-103; anything else means 100)
+ * @param entryProc  the entry routine
+ * @param startParam  the parameter StartThread passes to it
+ * @param stackAddr  the stack base
+ * @param stackSize  the stack size in bytes
+ * @param priority  the priority code (97-103; anything else means 100)
  * @return 1 when the thread was created and started, 0 otherwise
  */
-int func_003E50C8_a(int *self, int arg1, int arg2, int arg3, int arg4, int arg5) {
+int func_003E50C8_a(int *self, int entryProc, int startParam, int stackAddr, int stackSize, int priority) {
     struct sReq_50C8 req;
-    int r;
+    int threadId;
     int kind;
 
-    switch (arg5) {
+    switch (priority) {
     case 97:
         kind = 97;
         break;
@@ -8359,16 +8359,16 @@ int func_003E50C8_a(int *self, int arg1, int arg2, int arg3, int arg4, int arg5)
         kind = 100;
         break;
     }
-    req.a = arg1;
-    req.b = arg3;
-    req.c = arg4;
+    req.a = entryProc;
+    req.b = stackAddr;
+    req.c = stackSize;
     req.kind = kind;
     req.tbl = &D_004A30F0;
-    r = CreateThread(&req);
-    self[1] = r;
-    if (r != 0) {
+    threadId = CreateThread(&req);
+    self[1] = threadId;
+    if (threadId != 0) {
         self[0] = 0x50533254;
-        StartThread(r, arg2);
+        StartThread(threadId, startParam);
         return 1;
     }
     return 0;
@@ -8386,38 +8386,38 @@ void func_003E51A0_51A0(char *arg0) __asm__("func_003E51A0");
 /**
  * Ends and deletes a thread.
  *
- * Takes the thread id from the record's +4, or the calling thread's when @p arg0 is -1, and reads its status
+ * Takes the thread id from the record's +4, or the calling thread's when @p thread is -1, and reads its status
  * (iReferThreadStatus inside the timer interrupt, flag D_00450DE4, else ReferThreadStatus). A thread that is running,
  * ready, waiting or suspended (status & 0xF) is terminated (iTerminateThread / TerminateThread) and deleted; a dormant
  * one (status & 0x10) is only deleted.
  *
- * @param arg0  the thread record, or -1 for the calling thread
+ * @param thread  the thread record, or -1 for the calling thread
  */
-void func_003E51A0_51A0(char *arg0) {
-    int h;
+void func_003E51A0_51A0(char *thread) {
+    int threadId;
     int st[12];
 
-    if (arg0 == (char*)0xFFFFFFFF) {
-        h = GetThreadId();
+    if (thread == (char*)0xFFFFFFFF) {
+        threadId = GetThreadId();
     } else {
-        h = *(int*)(arg0 + 4);
+        threadId = *(int*)(thread + 4);
     }
     if (D_00450DE4_51A0[0] != 0) {
-        iReferThreadStatus(h, st);
+        iReferThreadStatus(threadId, st);
     } else {
-        ReferThreadStatus(h, st);
+        ReferThreadStatus(threadId, st);
     }
     if (st[0] & 0xF) {
         if (D_00450DE4_51A0[0] != 0) {
-            iTerminateThread_51A0(h);
+            iTerminateThread_51A0(threadId);
         } else {
-            TerminateThread(h);
+            TerminateThread(threadId);
         }
-        DeleteThread(h);
+        DeleteThread(threadId);
         return;
     }
     if (st[0] & 0x10) {
-        DeleteThread(h);
+        DeleteThread(threadId);
     }
 }
 #endif
@@ -8453,14 +8453,14 @@ extern void func_00424C50(int);
  * Kernel alarm handler that wakes the thread THREAD_yieldticks put to sleep.
  *
  * THREAD_yieldticks sets an alarm with this handler and its own thread id as the argument, then sleeps; on expiry this
- * passes that id (@p c) to func_00424C50.
+ * passes that id (@p threadId) to func_00424C50.
  *
- * @param a  the alarm id (unused)
- * @param b  the alarm time (unused)
- * @param c  the argument given to SetAlarm: the sleeping thread's id
+ * @param alarmId  the alarm id (unused)
+ * @param alarmTime  the alarm time (unused)
+ * @param threadId  the argument given to SetAlarm: the sleeping thread's id
  */
-void func_003E5290(int a, int b, int c) {
-    func_00424C50(c);
+void func_003E5290(int alarmId, int alarmTime, int threadId) {
+    func_00424C50(threadId);
 }
 #endif
 
@@ -8540,11 +8540,11 @@ void func_003E5398_impl(int ms) __asm__("func_003E5398");
 void func_003E5398_impl(int ms) {
     int info[12];
     if (ms != 0) {
-        int t = ms * D_00450DC8_5398 / 1000;
-        if (t <= 0) {
-            t = 1;
+        int yieldTicks = ms * D_00450DC8_5398 / 1000;
+        if (yieldTicks <= 0) {
+            yieldTicks = 1;
         }
-        THREAD_yieldticks_5398(t);
+        THREAD_yieldticks_5398(yieldTicks);
     } else if (D_00450DE4_5398 != 0) {
         iReferThreadStatus_5398(GetThreadId_5398(), info);
         func_00424CE8_5398(info[6]);
@@ -8564,22 +8564,22 @@ extern int D_00450DFC_0DFC[] __asm__("D_00450DFC");
 /**
  * Tells whether a thread is the calling thread.
  *
- * For a null @p arg0 it compares GetThreadId with the main thread's id (D_00450DFC, set by func_003E5018); -1 always
+ * For a null @p thread it compares GetThreadId with the main thread's id (D_00450DFC, set by func_003E5018); -1 always
  * matches; otherwise it compares with the record's +4. The file and stream code uses it with 0 to run the sync tasks
  * only on the main thread.
  *
- * @param arg0  the thread record, 0 for the main thread, or -1 for the calling thread
+ * @param thread  the thread record, 0 for the main thread, or -1 for the calling thread
  * @return 1 when it is the calling thread, 0 otherwise
  */
-int func_003E5440(char *arg0) {
+int func_003E5440(char *thread) {
     int cur = GetThreadId();
-    if (arg0 == 0) {
+    if (thread == 0) {
         return cur == D_00450DFC_0DFC[0];
     }
-    if (arg0 == (char *)-1) {
+    if (thread == (char *)-1) {
         return 1;
     }
-    return cur == *(int *)(arg0 + 4);
+    return cur == *(int *)(thread + 4);
 }
 #endif
 
@@ -8600,23 +8600,23 @@ extern int D_00450DFC_5498[] __asm__("D_00450DFC");
  * current-priority word (6) of its status (iReferThreadStatus inside the timer interrupt, else ReferThreadStatus).
  * Nothing in the build calls it.
  *
- * @param a0  the thread record, 0 for the main thread, or -1 for the calling thread
+ * @param thread  the thread record, 0 for the main thread, or -1 for the calling thread
  * @return the thread's current priority
  */
-int func_003E5498(int *a0) {
+int func_003E5498(int *thread) {
     int sp[12];
-    int t;
-    if (a0 == 0) {
-        t = D_00450DFC_5498[0];
-    } else if (a0 == (int *)-1) {
-        t = GetThreadId();
+    int threadId;
+    if (thread == 0) {
+        threadId = D_00450DFC_5498[0];
+    } else if (thread == (int *)-1) {
+        threadId = GetThreadId();
     } else {
-        t = a0[1];
+        threadId = thread[1];
     }
     if (D_00450DE4_5498[0] != 0) {
-        iReferThreadStatus(t, sp);
+        iReferThreadStatus(threadId, sp);
     } else {
-        ReferThreadStatus(t, sp);
+        ReferThreadStatus(threadId, sp);
     }
     return sp[6];
 }
@@ -8638,24 +8638,24 @@ extern int D_00450DFC_5508[] __asm__("D_00450DFC");
  * Picks the id (0: main thread D_00450DFC, -1: calling thread, else the record's +4) and calls iChangeThreadPriority
  * inside the timer interrupt (flag D_00450DE4), ChangeThreadPriority otherwise.
  *
- * @param arg0  the thread record, 0 for the main thread, or -1 for the calling thread
- * @param arg1  the new kernel priority
+ * @param thread  the thread record, 0 for the main thread, or -1 for the calling thread
+ * @param priority  the new kernel priority
  * @return 1
  */
-int func_003E5508(void *arg0, int arg1) {
+int func_003E5508(void *thread, int priority) {
     int var_4;
 
-    if (arg0 == 0) {
+    if (thread == 0) {
         var_4 = D_00450DFC_5508[0];
-    } else if (arg0 == (void *)0xFFFFFFFF) {
+    } else if (thread == (void *)0xFFFFFFFF) {
         var_4 = GetThreadId_5508();
     } else {
-        var_4 = (*(int *)((char*)(arg0) + (4)));
+        var_4 = (*(int *)((char*)(thread) + (4)));
     }
     if (D_00450DE4_5508[0] != 0) {
-        iChangeThreadPriority_5508(var_4, arg1);
+        iChangeThreadPriority_5508(var_4, priority);
     } else {
-        ChangeThreadPriority_5508(var_4, arg1);
+        ChangeThreadPriority_5508(var_4, priority);
     }
     return 1;
 }
@@ -8676,23 +8676,23 @@ typedef struct { int pad; int f4; } A_5580;
  * Reads the status of the record's thread (+4; iReferThreadStatus inside the timer interrupt, else ReferThreadStatus).
  * Nothing in the build calls it.
  *
- * @param arg0  the thread record
+ * @param thread  the thread record
  * @return 1 when the thread is dormant (status bit 0x10) or the status is 0, else 0
  */
-int func_003E5580(A_5580 *arg0) {
+int func_003E5580(A_5580 *thread) {
     struct { int v; char rest[44]; } st;
-    int r;
+    int finished;
 
     if (D_00450DE4_0DE4[0] != 0) {
-        iReferThreadStatus(arg0->f4, &st);
+        iReferThreadStatus(thread->f4, &st);
     } else {
-        ReferThreadStatus(arg0->f4, &st);
+        ReferThreadStatus(thread->f4, &st);
     }
-    r = 0;
+    finished = 0;
     if ((st.v & 0x10) || st.v == 0) {
-        r = 1;
+        finished = 1;
     }
-    return r;
+    return finished;
 }
 #endif
 
@@ -8779,10 +8779,10 @@ extern void DeleteSema(int);
  * Used for the library mutex (func_003E5068), memory classes (MEMCLASS_remove), the file system, async files, streams,
  * the quadtree loader and cCommSystem's destructor.
  *
- * @param arg0  the mutex
+ * @param mutex  the mutex
  */
-void func_003E56E0(void *arg0) {
-    DeleteSema((*(int *)((char*)(arg0) + (0xC))));
+void func_003E56E0(void *mutex) {
+    DeleteSema((*(int *)((char*)(mutex) + (0xC))));
 }
 #endif
 
@@ -9255,16 +9255,16 @@ extern int D_00451008_1008[] __asm__("PRINTinitialized");
  * Runs PRINT_init first when printing is not set up, then returns bit 0 of the device's flags (PRINTdevicelist entry,
  * +8). Nothing in the build calls it.
  *
- * @param a0  the device index (0-7)
+ * @param device  the device index (0-7)
  * @return 1 when the device is enabled, 0 otherwise
  */
-int func_003E5E38(int a0) {
-    char *b;
+int func_003E5E38(int device) {
+    char *entry;
     if (D_00451008_1008[0] == 0) {
         PRINT_init();
     }
-    b = D_00451250_1250 + a0 * 12;
-    return *(int *)(b + 8) & 1;
+    entry = D_00451250_1250 + device * 12;
+    return *(int *)(entry + 8) & 1;
 }
 #endif
 
@@ -9280,20 +9280,20 @@ extern int D_00451008_5E88[] __asm__("PRINTinitialized");
 /**
  * Installs a debug print device: its name and its output routine.
  *
- * Runs PRINT_init first when printing is not set up, then stores @p a1 and @p a2 in the device's PRINTdevicelist entry
+ * Runs PRINT_init first when printing is not set up, then stores @p deviceName and @p outputFunc in the device's PRINTdevicelist entry
  * (+0 and +4; device 2 is preset to "debugger" with func_003E6428). The device's enable flag is left as it was. Nothing
  * in the build calls it.
  *
- * @param a0  the device index (0-7)
- * @param a1  the device name
- * @param a2  the routine that receives (channel, text) for every message
+ * @param device  the device index (0-7)
+ * @param deviceName  the device name
+ * @param outputFunc  the routine that receives (channel, text) for every message
  */
-void func_003E5E88(int a0, int a1, int a2) {
+void func_003E5E88(int device, int deviceName, int outputFunc) {
     if (D_00451008_5E88[0] == 0) {
         PRINT_init();
     }
-    D_00451250_5E88[a0].a = a1;
-    D_00451250_5E88[a0].b = a2;
+    D_00451250_5E88[device].a = deviceName;
+    D_00451250_5E88[device].b = outputFunc;
 }
 #endif
 
@@ -9334,14 +9334,14 @@ void PRINT_init_5F48(void) __asm__("PRINT_init");
  * Runs PRINT_init first when printing is not set up, then returns bit 0 of the channel's flags (PRINTchannellist entry,
  * +4). Nothing in the build calls it.
  *
- * @param arg0  the channel index (0-63)
+ * @param channel  the channel index (0-63)
  * @return 1 when the channel is enabled, 0 otherwise
  */
-int func_003E5F48(int arg0) {
+int func_003E5F48(int channel) {
     if (D_00451008_5F48[0] == 0) {
         PRINT_init_5F48();
     }
-    return (D_00450E08_5F48 + arg0)->b & 1;
+    return (D_00450E08_5F48 + channel)->b & 1;
 }
 #endif
 
@@ -9356,17 +9356,17 @@ void PRINT_init_5F98(void) __asm__("PRINT_init");
 /**
  * Sets a debug print channel's name.
  *
- * Runs PRINT_init first when printing is not set up, then stores @p arg1 in the channel's PRINTchannellist entry (+0;
+ * Runs PRINT_init first when printing is not set up, then stores @p channelName in the channel's PRINTchannellist entry (+0;
  * the preset ones are "all", "real", "alert", "general" and so on). Nothing in the build calls it.
  *
- * @param arg0  the channel index (0-63)
- * @param arg1  the channel name
+ * @param channel  the channel index (0-63)
+ * @param channelName  the channel name
  */
-void func_003E5F98(int arg0, int arg1) {
+void func_003E5F98(int channel, int channelName) {
     if (D_00451008_1008[0] == 0) {
         PRINT_init_5F98();
     }
-    D_00450E08_0E08[arg0 * 2] = arg1;
+    D_00450E08_0E08[channel * 2] = channelName;
 }
 #endif
 
@@ -9384,18 +9384,18 @@ extern void PRINT_init_5FF0(void) __asm__("PRINT_init");
  * Sends text straight to one debug print device.
  *
  * Runs PRINT_init first when printing is not set up, then calls the device's output routine (PRINTdevicelist entry +4)
- * with @p a and @p b when it has one, whether or not the device or channel is enabled. Nothing in the build calls it.
+ * with @p channel and @p text when it has one, whether or not the device or channel is enabled. Nothing in the build calls it.
  *
  * @param i  the device index (0-7)
- * @param a  the channel number passed to the routine
- * @param b  the text
+ * @param channel  the channel number passed to the routine
+ * @param text  the text
  */
-void func_003E5FF0(int i, int a, int b) {
-    E_5FF0 *e;
+void func_003E5FF0(int i, int channel, int text) {
+    E_5FF0 *deviceEntry;
     if (D_00451008_5FF0[0] == 0) PRINT_init_5FF0();
     if (D_00451250_5FF0[i].fn != 0) {
-        e = &D_00451250_5FF0[i];
-        e->fn(a, b);
+        deviceEntry = &D_00451250_5FF0[i];
+        deviceEntry->fn(channel, text);
     }
 }
 #endif
@@ -9587,28 +9587,28 @@ extern unsigned short D_00451018_1018[] __asm__("D_00451018");
 /**
  * Computes a table-driven CRC-16 of a block of bytes.
  *
- * For each byte: crc = D_00451018[(crc ^ byte) & 0xFF] ^ (crc >> 8), starting from @p arg2. Every caller uses seed
+ * For each byte: crc = D_00451018[(crc ^ byte) & 0xFF] ^ (crc >> 8), starting from @p seed. Every caller uses seed
  * 64490 (0xFBEA): the save-game and profile checks (cBESaveInterface, cBE_writeToData), the trophy-room memory card
  * read and memstd's block checks.
  *
- * @param arg0  the data
- * @param arg1  the number of bytes
- * @param arg2  the starting value
+ * @param data  the data
+ * @param byteCount  the number of bytes
+ * @param seed  the starting value
  * @return the CRC (16 bits)
  */
-int func_003E62D0(unsigned char *arg0, int arg1, int arg2) {
-    unsigned char *p;
+int func_003E62D0(unsigned char *data, int byteCount, int seed) {
+    unsigned char *cursor;
     unsigned int crc;
     unsigned char *end;
-    p = arg0;
-    crc = arg2 & 0xFFFF;
-    end = p + arg1;
-    if (p < end) {
+    cursor = data;
+    crc = seed & 0xFFFF;
+    end = cursor + byteCount;
+    if (cursor < end) {
         do {
-            unsigned char c = *p;
-            p += 1;
-            crc = D_00451018_1018[(c ^ crc) & 0xFF] ^ (crc >> 8);
-        } while (p < end);
+            unsigned char dataByte = *cursor;
+            cursor += 1;
+            crc = D_00451018_1018[(dataByte ^ crc) & 0xFF] ^ (crc >> 8);
+        } while (cursor < end);
     }
     return crc & 0xFFFF;
 }
@@ -9672,11 +9672,11 @@ extern void func_004175C8(int);
  * PRINTdevicelist presets device 2 with the name "debugger" and this routine; PRINT_vstring calls it for every message
  * on an enabled channel while the device is enabled.
  *
- * @param a  the print channel (unused)
- * @param b  the text
+ * @param channel  the print channel (unused)
+ * @param text  the text
  */
-void func_003E6428(int a, int b) {
-    func_004175C8(b);
+void func_003E6428(int channel, int text) {
+    func_004175C8(text);
 }
 #endif
 
@@ -9887,10 +9887,10 @@ extern int D_00450DA0_0DA0[] __asm__("D_00450DA0");
  * other value leaves it. THREAD_yieldticks converts ticks to H-blank counts with it. Called by the timer calibration in
  * func_003E4AF0, by systemInit with 1 and by func_0037BD98 (3 or 1).
  *
- * @param arg0  the video mode (1 NTSC, 2 PAL, 3 31 kHz)
+ * @param videoMode  the video mode (1 NTSC, 2 PAL, 3 31 kHz)
  */
-void func_003E6690(int arg0) {
-    switch (arg0) {
+void func_003E6690(int videoMode) {
+    switch (videoMode) {
     case 1:
         D_00450DA0_0DA0[0] = 15750;
         return;
@@ -9921,17 +9921,17 @@ extern void func_00416210_66F0(char *, int, int) __asm__("func_00416210");
  * buffers, the receive buffer (@p n bytes; address +0x16C, size +0x168), the 336-byte status copy area (+0x158) and a
  * 4-byte word (+0x17C) where the IOP reports its send-buffer read position. Sets the status flag +4 to -1 (no status
  * read yet) and the send window +0x174 to @p n, passes the three buffers to func_003F4E80, then sends 'gmlk'/'crea'
- * (func_003F4C98 binds the request to that command, func_003F4C68 sends it) with @p arg0, @p n and the address of the
+ * (func_003F4C98 binds the request to that command, func_003F4C68 sends it) with @p commRef, @p n and the address of the
  * +0x17C word, waiting for the IOP's link reference, which lands in the block's +0. The channel (cDSockChannel) keeps
- * the block as mGameLink; @p arg1 is not sent.
+ * the block as mGameLink; @p owner is not sent.
  *
- * @param arg0  the connection (comm ref) from func_003E6FC8
- * @param arg1  owner value (unused)
+ * @param commRef  the connection (comm ref) from func_003E6FC8
+ * @param owner  owner value (unused)
  * @param n  the receive buffer size in bytes (the channel passes 9084)
  * @return the link block
  */
 // `buf` is advanced in place, so the 0x158 store is not forwarded to the first call (it reloads the field).
-char *func_003E66F0(int arg0, int arg1, int n) {
+char *func_003E66F0(int commRef, int owner, int n) {
     int msg[4];
     int size;
     int buf;
@@ -9955,7 +9955,7 @@ char *func_003E66F0(int arg0, int arg1, int n) {
     func_003F4E80_66F0(*(int *)(block + 0x16C), *(int *)(block + 0x168));
     func_003F4E80_66F0(*(int *)(block + 0x17C), 4);
     func_003F4C98_66F0(msg, 0x676D6C6B, 0x63726561);
-    func_003F4C68_66F0(msg, 1, arg0, n, (int)(block + 0x17C), 4, 0, 0, 1, (int)block);
+    func_003F4C68_66F0(msg, 1, commRef, n, (int)(block + 0x17C), 4, 0, 0, 1, (int)block);
     return block;
 }
 #endif
@@ -9997,17 +9997,17 @@ struct S_6878 { int f0; int f4; char pad[0x158 - 8]; int f158; };
  * 0x20000000) to the block's +8 and clears the busy flag +4. The SIF reply dispatcher passes it the request key, its
  * argument, the reply words and the reply data; only the block (the last argument) is used.
  *
- * @param a0  the request key (unused)
+ * @param requestKey  the request key (unused)
  * @param a1  the callback argument (unused)
  * @param a2  a reply word (unused)
- * @param a3  the reply's result word (unused)
- * @param a4  the reply data address (unused)
- * @param a5  the reply data length (unused)
+ * @param result  the reply's result word (unused)
+ * @param replyData  the reply data address (unused)
+ * @param replyLen  the reply data length (unused)
  * @param a6  a reply word (unused)
  * @param a7  a reply word (unused)
  * @return 0
  */
-int func_003E6878(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, struct S_6878 *self) {
+int func_003E6878(int requestKey, int a1, int a2, int result, int replyData, int replyLen, int a6, int a7, struct S_6878 *self) {
     char *src = (char *)((self->f158 & 0x0FFFFFFF) | 0x20000000);
     __builtin_memcpy((char *)self + 8, src, 336);
     self->f4 = 0;
@@ -10119,14 +10119,14 @@ int func_003E6B10_impl(char *self, short *out, int n) __asm__("func_003E6B10");
 int func_003E6B10_impl(char *self, short *out, int n) {
     int loc;
     int ret = 0;
-    int h;
+    int fillId;
 
     if (*(int *)(self + 0x164) < 0) {
-        h = func_003F4EA0(*(int *)(self + 0x16C), &loc);
-        if (h >= 0) {
-            if (h != *(int *)(self + 0x15C)) {
+        fillId = func_003F4EA0(*(int *)(self + 0x16C), &loc);
+        if (fillId >= 0) {
+            if (fillId != *(int *)(self + 0x15C)) {
                 *(int *)(self + 0x160) = 0x10;
-                *(int *)(self + 0x15C) = h;
+                *(int *)(self + 0x15C) = fillId;
                 *(int *)(self + 0x164) = loc + 0x10;
             }
         }
@@ -10206,19 +10206,19 @@ int func_003E6D78_impl(int *p, int b, int c) __asm__("func_003E6D78");
 /**
  * Sends a control request to the game link on the IOP and returns its answer.
  *
- * Sends 'gmlk'/'ctrl' (into D_0051EED8) with the link's IOP reference (*@p p), @p b and the 4 bytes of @p c, and waits
+ * Sends 'gmlk'/'ctrl' (into D_0051EED8) with the link's IOP reference (*@p link), @p selector and the 4 bytes of @p value, and waits
  * for the result. Nothing in the build calls it.
  *
- * @param p  the link block (its +0 is the IOP reference)
- * @param b  the control selector
- * @param c  the value
+ * @param link  the link block (its +0 is the IOP reference)
+ * @param selector  the control selector
+ * @param value  the value
  * @return the IOP's result
  */
-int func_003E6D78_impl(int *p, int b, int c) {
+int func_003E6D78_impl(int *link, int selector, int value) {
     int out;
 
     func_003F4C98_6D78(D_0051EED8_6D78, 0x676D6C6B, 0x6374726C);
-    func_003F4C68_6D78(D_0051EED8_6D78, 1, *p, b, &c, 4, 0, 0, 1, &out);
+    func_003F4C68_6D78(D_0051EED8_6D78, 1, *link, selector, &value, 4, 0, 0, 1, &out);
     return out;
 }
 #endif
@@ -10302,20 +10302,20 @@ int func_003E6F40_impl(int a, int b, int c) __asm__("func_003E6F40");
 /**
  * Starts a game-util connection (listen or connect) on the IOP.
  *
- * Sends 'gmut'/'conn' with @p handle, @p b and the string @p c (length -1: up to its terminator) and waits for the
+ * Sends 'gmut'/'conn' with @p handle, @p connectKind and the string @p address (length -1: up to its terminator) and waits for the
  * result. The connection is picked up later with func_003E6FC8.
  *
  * @param handle  the IOP game-util reference
- * @param b  the connection kind (listen or connect, as the channel passes it)
- * @param c  the address string the channel formats
+ * @param connectKind  the connection kind (listen or connect, as the channel passes it)
+ * @param address  the address string the channel formats
  * @return the IOP's result
  */
-int func_003E6F40_impl(int handle, int b, int c) {
+int func_003E6F40_impl(int handle, int connectKind, int address) {
     int msg[4];
     int result;
 
     func_003F4C98_6F40(msg, 0x676D7574, 0x636F6E6E);
-    func_003F4C68_6F40(msg, 1, handle, b, c, -1, 0, 0, 1, &result);
+    func_003F4C68_6F40(msg, 1, handle, connectKind, address, -1, 0, 0, 1, &result);
     return result;
 }
 #endif
@@ -10357,18 +10357,18 @@ int func_003E7038_impl(int a, int b) __asm__("func_003E7038");
 /**
  * Queries a game-util object's status on the IOP.
  *
- * Sends 'gmut'/'stat' with @p handle and @p b and waits for the result. Nothing in the build calls it.
+ * Sends 'gmut'/'stat' with @p handle and @p selector and waits for the result. Nothing in the build calls it.
  *
  * @param handle  the IOP game-util reference
- * @param b  the status selector
+ * @param selector  the status selector
  * @return the IOP's answer
  */
-int func_003E7038_impl(int handle, int b) {
+int func_003E7038_impl(int handle, int selector) {
     int msg[4];
     int result;
 
     func_003F4C98_7038(msg, 0x676D7574, 0x73746174);
-    func_003F4C68_7038(msg, 1, handle, b, 0, 0, 0, 0, 1, &result);
+    func_003F4C68_7038(msg, 1, handle, selector, 0, 0, 0, 0, 1, &result);
     return result;
 }
 #endif
@@ -10408,20 +10408,20 @@ extern int D_004A4860_7120[] __asm__("D_004A4860");
 /**
  * Advertises a name of a given kind on the network through the IOP game util.
  *
- * Joins @p arg1 and @p arg2 with a tab ("%s\t%s", D_004A4860) and sends the text with 'gmut'/'advt'. LobbyMan's
+ * Joins @p kind and @p name with a tab ("%s\t%s", D_004A4860) and sends the text with 'gmut'/'advt'. LobbyMan's
  * func_0025A650 calls it with its config util, "SSX-PS2-2004" and the persona name.
  *
- * @param arg0  the IOP game-util reference
- * @param arg1  the advert kind (game id string)
- * @param arg2  the advertised name
+ * @param util  the IOP game-util reference
+ * @param kind  the advert kind (game id string)
+ * @param name  the advertised name
  */
-void func_003E7120(int arg0, int arg1, int arg2) {
-    char sp10[256];
-    int sp110[4];
+void func_003E7120(int util, int kind, int name) {
+    char advertText[256];
+    int request[4];
 
-    sprintf_7120(sp10, D_004A4860_7120, arg1, arg2);
-    func_003F4C98_7120(sp110, 0x676D7574, 0x61647674);
-    func_003F4C68_7120(sp110, 1, arg0, 0, sp10, -1, 0, 0, 1, 0);
+    sprintf_7120(advertText, D_004A4860_7120, kind, name);
+    func_003F4C98_7120(request, 0x676D7574, 0x61647674);
+    func_003F4C68_7120(request, 1, util, 0, advertText, -1, 0, 0, 1, 0);
 }
 #endif
 
@@ -10457,24 +10457,24 @@ int func_003E7218_impl(int a, int b, char *c) __asm__("func_003E7218");
 /**
  * Looks up the address of an advertised name through the IOP game util.
  *
- * Sends 'gmut'/'loca' with @p a and the string @p c (an empty string when null) and waits for the address. @p b is not
+ * Sends 'gmut'/'loca' with @p util and the string @p name (an empty string when null) and waits for the address. @p kind is not
  * sent. LobbyMan's func_0025A730 uses it to find a persona's host.
  *
- * @param a  the IOP game-util reference
- * @param b  the advert kind (unused)
- * @param c  the name to locate, or null for ""
+ * @param util  the IOP game-util reference
+ * @param kind  the advert kind (unused)
+ * @param name  the name to locate, or null for ""
  * @return the address found (0 when none)
  */
-int func_003E7218_impl(int a, int b, char *c) {
-    int sp10[4];
-    int sp20;
+int func_003E7218_impl(int util, int kind, char *name) {
+    int request[4];
+    int foundAddress;
 
-    if (c == 0) {
-        c = D_004A4868_7218;
+    if (name == 0) {
+        name = D_004A4868_7218;
     }
-    func_003F4C98_7218(sp10, 0x676D7574, 0x6C6F6361);
-    func_003F4C68_7218(sp10, 1, a, 0, (int)c, -1, 0, 0, 1, &sp20);
-    return sp20;
+    func_003F4C98_7218(request, 0x676D7574, 0x6C6F6361);
+    func_003F4C68_7218(request, 1, util, 0, (int)name, -1, 0, 0, 1, &foundAddress);
+    return foundAddress;
 }
 #endif
 
@@ -10490,25 +10490,25 @@ int func_003E72A0_impl(int a, char *b, int c, int d) __asm__("func_003E72A0");
 /**
  * Queries the network adverts of a kind through the IOP game util.
  *
- * Sends 'gmut'/'quer' (mode 5) with @p a, the kind string @p b (empty when null) and the output buffer @p c / @p d, and
+ * Sends 'gmut'/'quer' (mode 5) with @p util, the kind string @p kind (empty when null) and the output buffer @p buffer / @p bufferSize, and
  * waits for the result. Nothing in the build calls it.
  *
- * @param a  the IOP game-util reference
- * @param b  the advert kind, or null for ""
- * @param c  receives the adverts found
- * @param d  the size of @p c in bytes
+ * @param util  the IOP game-util reference
+ * @param kind  the advert kind, or null for ""
+ * @param buffer  receives the adverts found
+ * @param bufferSize  the size of @p buffer in bytes
  * @return the number of adverts found
  */
-int func_003E72A0_impl(int a, char *b, int c, int d) {
-    int sp10[4];
-    int sp20;
+int func_003E72A0_impl(int util, char *kind, int buffer, int bufferSize) {
+    int request[4];
+    int count;
 
-    if (b == 0) {
-        b = D_004A4868_72A0;
+    if (kind == 0) {
+        kind = D_004A4868_72A0;
     }
-    func_003F4C98_72A0(sp10, 0x676D7574, 0x71756572);
-    func_003F4C68_72A0(sp10, 5, a, 0, (int)b, -1, c, d, 1, &sp20);
-    return sp20;
+    func_003F4C98_72A0(request, 0x676D7574, 0x71756572);
+    func_003F4C68_72A0(request, 5, util, 0, (int)kind, -1, buffer, bufferSize, 1, &count);
+    return count;
 }
 #endif
 
@@ -10578,22 +10578,22 @@ int func_003E7450_impl(char *o, int a, int b, int c) __asm__("func_003E7450");
 /**
  * Sends a ping request through a ping object.
  *
- * Sends 'ping'/'requ' with the block's IOP reference (+0xC), @p a, @p b and @p c, and waits for the result. The lobby
+ * Sends 'ping'/'requ' with the block's IOP reference (+0xC), @p address, @p payload and @p payloadLen, and waits for the result. The lobby
  * pings servers and players with a tag payload (func_003E8DC0), cGameComm_update and the pause-overlay check
  * (func_002583A8) use it too; replies are collected with func_003E7500.
  *
  * @param block  the ping block
- * @param a  the address to ping
- * @param b  the payload
- * @param c  the payload length in bytes
+ * @param address  the address to ping
+ * @param payload  the payload
+ * @param payloadLen  the payload length in bytes
  * @return the IOP's result
  */
-int func_003E7450_impl(char *block, int a, int b, int c) {
+int func_003E7450_impl(char *block, int address, int payload, int payloadLen) {
     int msg[4];
     int result;
 
     func_003F4C98_7450(msg, 0x70696E67, 0x72657175);
-    func_003F4C68_7450(msg, 1, *(int *)(block + 0xC), a, b, c, 0, 0, 1, &result);
+    func_003F4C68_7450(msg, 1, *(int *)(block + 0xC), address, payload, payloadLen, 0, 0, 1, &result);
     return result;
 }
 #endif
@@ -10607,24 +10607,24 @@ struct S_7500 { volatile int f0; volatile int f4; int f8; int fC; char *f10; }; 
 /**
  * Completion routine of the ping-response request sent by func_003E7500.
  *
- * Stores @p a7 (the byte count the IOP wrote into the response buffer) in the block's +0 and clears its busy flag +4.
+ * Stores @p recvBytes (the byte count the IOP wrote into the response buffer) in the block's +0 and clears its busy flag +4.
  * The SIF reply dispatcher passes it the request key, its argument, the reply words and the reply data; the rest is
  * unused.
  *
- * @param a0  the request key (unused)
+ * @param requestKey  the request key (unused)
  * @param a1  the callback argument (unused)
  * @param a2  a reply word (unused)
- * @param a3  the reply's result word (unused)
- * @param a4  the reply data address (unused)
- * @param a5  the reply data length (unused)
+ * @param result  the reply's result word (unused)
+ * @param replyData  the reply data address (unused)
+ * @param replyLen  the reply data length (unused)
  * @param a6  a reply word (unused)
- * @param a7  the number of response bytes received
+ * @param recvBytes  the number of response bytes received
  * @param out  the ping block
  * @return 0
  */
-int func_003E74E8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, struct S_7500 *out)
+int func_003E74E8(int requestKey, int a1, int a2, int result, int replyData, int replyLen, int a6, int recvBytes, struct S_7500 *out)
 {
-    out->f0 = a7;
+    out->f0 = recvBytes;
     out->f4 = 0;
     return 0;
 }
@@ -10648,33 +10648,33 @@ int func_003E7500_impl(struct S_7500 *self, char *buf, int *a2, int *a3) __asm__
  * Collects a ping reply, if one has arrived, and keeps a response request outstanding.
  *
  * When the block holds a reply (+0 > 0 bytes in the 2 KB buffer +0x10): the result is its first word; the 16-byte
- * header is copied to @p a3 and the payload (up to *@p a2 bytes, *@p a2 updated) to @p buf; then the count and the time
+ * header is copied to @p response and the payload (up to *@p bufLen bytes, *@p bufLen updated) to @p buf; then the count and the time
  * stamp +8 are cleared. Then, when no request is in flight (+4 == 0) and no reply waits, it sends a new 'ping'/'resp'
  * request (into D_0051EEE8) with the 2 KB buffer and func_003E74E8 as completion, at most once per 6 units of
  * func_003F4DE8 (+8 holds the last send) and, for a fresh buffer, after passing it to func_004247D8 and marking the
  * count -1.
  *
  * @param buf  receives the reply payload, or 0
- * @param a2  in: the size of @p buf; out: the payload bytes copied (or 0 to skip the payload)
- * @param a3  receives the 16-byte reply header (round-trip time, address, ...), or 0
+ * @param bufLen  in: the size of @p buf; out: the payload bytes copied (or 0 to skip the payload)
+ * @param response  receives the 16-byte reply header (round-trip time, address, ...), or 0
  * @return the reply's first word (the round-trip time), 0 when no reply was waiting
  */
-int func_003E7500_impl(struct S_7500 *self, char *buf, int *a2, int *a3) {
+int func_003E7500_impl(struct S_7500 *self, char *buf, int *bufLen, int *response) {
     int res = 0;
 
     if (self->f0 > 0) {
         *(U4_7500 *)&res = *(U4_7500 *)self->f10;
-        if (a3 != 0) {
-            *a3 = res;
-            *(U4_7500 *)(a3 + 1) = *(U4_7500 *)(self->f10 + 4);
-            *(U4_7500 *)(a3 + 2) = *(U4_7500 *)(self->f10 + 8);
-            *(U4_7500 *)(a3 + 3) = *(U4_7500 *)(self->f10 + 12);
+        if (response != 0) {
+            *response = res;
+            *(U4_7500 *)(response + 1) = *(U4_7500 *)(self->f10 + 4);
+            *(U4_7500 *)(response + 2) = *(U4_7500 *)(self->f10 + 8);
+            *(U4_7500 *)(response + 3) = *(U4_7500 *)(self->f10 + 12);
         }
-        if (a2 != 0) {
-            if (self->f0 - 0x10 < *a2) {
-                *a2 = self->f0 - 0x10;
+        if (bufLen != 0) {
+            if (self->f0 - 0x10 < *bufLen) {
+                *bufLen = self->f0 - 0x10;
             }
-            func_0041605C_7500(buf, self->f10 + 0x10, *a2);
+            func_0041605C_7500(buf, self->f10 + 0x10, *bufLen);
         }
         self->f0 = 0;
         self->f8 = 0;
@@ -10740,11 +10740,11 @@ extern void *func_002591E8_7718(int) __asm__("func_002591E8");
  *
  * @param lobby  the lobby
  * @param tag  the command FourCC ('auth', 'skey', 'ping', ...)
- * @param arg2  the routine to call when the reply arrives
- * @param arg3  the context passed to it
+ * @param callback  the routine to call when the reply arrives
+ * @param context  the context passed to it
  * @return the record, or 0 when the allocation failed
  */
-void *func_003E7718(char *lobby, int tag, int arg2, int arg3) {
+void *func_003E7718(char *lobby, int tag, int callback, int context) {
     char **pp;
     char *n;
     char *cur;
@@ -10754,8 +10754,8 @@ void *func_003E7718(char *lobby, int tag, int arg2, int arg3) {
     n = func_002591E8_7718(68);
     if (n != 0) {
         *(int*)(n + 4) = tag;
-        *(int*)(n + 0x38) = arg2;
-        *(int*)(n + 0x3C) = arg3;
+        *(int*)(n + 0x38) = callback;
+        *(int*)(n + 0x3C) = context;
         pp = (char**)(lobby + 0x53C);
         *(char**)(n + 0x40) = 0;
         *(int*)n = *(int*)(lobby + 0x54C);
@@ -10881,28 +10881,28 @@ extern int D_004A4870_7B00[] __asm__("D_004A4870");
 /**
  * Updates a room's user count in the lobby's room list.
  *
- * When the room list (slot 0: index +0x310, list +0x314) exists, finds room @p arg1 (func_003EEEE8, func_003EE468) and,
- * if its count (+0x10) differs from @p arg2, stores the count, writes it as text at +0x14 ("%d") and puts the record
+ * When the room list (slot 0: index +0x310, list +0x314) exists, finds room @p roomId (func_003EEEE8, func_003EE468) and,
+ * if its count (+0x10) differs from @p population, stores the count, writes it as text at +0x14 ("%d") and puts the record
  * back (func_003EE3E0). func_003E95C8 calls it for "+who", "+pop", "+usr" and move / room replies.
  *
- * @param arg0  the lobby
- * @param arg1  the room id
- * @param arg2  the room's user count
+ * @param lobby  the lobby
+ * @param roomId  the room id
+ * @param population  the room's user count
  */
-void func_003E7B00(void *arg0, int arg1, int arg2) {
+void func_003E7B00(void *lobby, int roomId, int population) {
     int temp_2;
     int temp_4;
     void *temp_2_2;
 
-    temp_4 = (*(int *)((char*)(arg0) + (0x310)));
+    temp_4 = (*(int *)((char*)(lobby) + (0x310)));
     if (temp_4 != 0) {
         temp_2 = func_003EEEE8(temp_4);
         if (temp_2 != 0) {
-            temp_2_2 = func_003EE468((*(int *)((char*)(arg0) + (0x314))), temp_2);
-            if ((temp_2_2 != 0) && (arg2 != (*(int *)((char*)(temp_2_2) + (0x10))))) {
-                (*(int *)((char*)(temp_2_2) + (0x10))) = arg2;
-                sprintf(temp_2_2 + 0x14, D_004A4870_7B00, arg2);
-                func_003EE3E0((*(int *)((char*)(arg0) + (0x314))), temp_2, temp_2_2);
+            temp_2_2 = func_003EE468((*(int *)((char*)(lobby) + (0x314))), temp_2);
+            if ((temp_2_2 != 0) && (population != (*(int *)((char*)(temp_2_2) + (0x10))))) {
+                (*(int *)((char*)(temp_2_2) + (0x10))) = population;
+                sprintf(temp_2_2 + 0x14, D_004A4870_7B00, population);
+                func_003EE3E0((*(int *)((char*)(lobby) + (0x314))), temp_2, temp_2_2);
             }
         }
     }
@@ -10930,15 +10930,15 @@ void func_003E7BA0_impl(struct O_7BA0 *self) __asm__("func_003E7BA0");
 void func_003E7BA0_impl(struct O_7BA0 *self) {
     int i;
     for (i = 0; i < 8; i++) {
-        struct S_7BA0 *s = &self->s[i];
-        if (s->h != 0 && s->fn != 0) {
-            if (func_003EE620_7BA0(s->f4) > 0) {
-                struct M_7BA0 m;
-                m.h = s->f4;
-                m.type = 2;
-                m.idx = i;
-                m.zero = 0;
-                s->fn(self, &m, s->fC);
+        struct S_7BA0 *listSlot = &self->s[i];
+        if (listSlot->h != 0 && listSlot->fn != 0) {
+            if (func_003EE620_7BA0(listSlot->f4) > 0) {
+                struct M_7BA0 changeEvent;
+                changeEvent.h = listSlot->f4;
+                changeEvent.type = 2;
+                changeEvent.idx = i;
+                changeEvent.zero = 0;
+                listSlot->fn(self, &changeEvent, listSlot->fC);
             }
         }
     }
@@ -11004,7 +11004,7 @@ void func_003E7C40(char *self) {
     char evbuf[0x200];
     int len;
     unsigned int addr;
-    int t;
+    int currentTick;
 
     for (;;) {
         len = 0x100;
@@ -11025,11 +11025,11 @@ void func_003E7C40(char *self) {
             rec.fn(self, &ev, rec.ctx);
         }
         if (*(int *)(self + 0x310) != 0) {
-            char *e;
+            char *listEntry;
 
-            for (len = 0; (e = func_003EE560_7C40(*(int *)(self + 0x314), len)) != 0; len++) {
-                if (*(unsigned int *)(e + 0x64) == addr) {
-                    sprintf_7C40(e + 0x5C, str_pct_dms, info[0]);
+            for (len = 0; (listEntry = func_003EE560_7C40(*(int *)(self + 0x314), len)) != 0; len++) {
+                if (*(unsigned int *)(listEntry + 0x64) == addr) {
+                    sprintf_7C40(listEntry + 0x5C, str_pct_dms, info[0]);
                     if (len < func_003EE558_7C40(*(int *)(self + 0x314))) {
                         func_003EE600_7C40(*(int *)(self + 0x314), 1);
                     }
@@ -11037,18 +11037,18 @@ void func_003E7C40(char *self) {
             }
         }
         if (*(int *)(self + 0x324) != 0) {
-            char *e;
+            char *listEntry;
 
-            for (len = 0; (e = func_003EE560_7C40(*(int *)(self + 0x328), len)) != 0; len++) {
-                if (strcasecmp_7C40(e + 8, name) == 0) {
-                    sprintf_7C40(e + 0x28, str_pct_dms, info[0]);
+            for (len = 0; (listEntry = func_003EE560_7C40(*(int *)(self + 0x328), len)) != 0; len++) {
+                if (strcasecmp_7C40(listEntry + 8, name) == 0) {
+                    sprintf_7C40(listEntry + 0x28, str_pct_dms, info[0]);
                     func_003EE600_7C40(*(int *)(self + 0x328), 1);
                 }
             }
         }
     }
-    t = func_003F5D88_7C40(*(int *)self);
-    while (func_003E7918_7C40(self, &rec, name, -1, t) != 0) {
+    currentTick = func_003F5D88_7C40(*(int *)self);
+    while (func_003E7918_7C40(self, &rec, name, -1, currentTick) != 0) {
         if (rec.fn != 0) {
             ev.f0 = 0;
             ev.type = 0x70696E67;
@@ -11128,38 +11128,38 @@ extern void func_003E80C0_7FF0(void *) __asm__("func_003E80C0");
 /**
  * Creates a lobby client object (1360 bytes) and returns it.
  *
- * Zeroes the block and stores the default tags (+0x34, 256 bytes): @p arg0 is duplicated as tags when it contains '=',
+ * Zeroes the block and stores the default tags (+0x34, 256 bytes): @p tagString is duplicated as tags when it contains '=',
  * otherwise stored as the "VERS" tag. Creates the lobby protocol (func_003F5478(0x8000), +0) and a ping object
  * (func_003E7340, +4), stores the debug routine and its data (+0x548, +0x544; see func_003E76A8) and resets everything
  * with func_003E80C0. LobbyMan (func_0025A948) creates its mpLobbyApi with it.
  *
- * @param arg0  the default tags, or a version string, or 0
- * @param arg1  data passed to the debug routine
- * @param arg2  the debug output routine, or 0
+ * @param tagString  the default tags, or a version string, or 0
+ * @param debugData  data passed to the debug routine
+ * @param debugProc  the debug output routine, or 0
  * @return the lobby, or 0 when the allocation failed
  */
-void *func_003E7FF0(char *arg0, int arg1, int arg2) {
-    char *r;
-    int t;
+void *func_003E7FF0(char *tagString, int debugData, int debugProc) {
+    char *lobbyRef;
+    int pingRef;
 
-    r = func_002591E8_7FF0(1360);
-    if (r != 0) {
-        func_00416210_7FF0(r, 0, 1360);
-        if (arg0 != 0) {
-            if (strchr_7FF0(arg0, 61) != 0) {
-                cDirtysock_tag_TagFieldDupl_7FF0(r + 0x34, 0x100, arg0);
+    lobbyRef = func_002591E8_7FF0(1360);
+    if (lobbyRef != 0) {
+        func_00416210_7FF0(lobbyRef, 0, 1360);
+        if (tagString != 0) {
+            if (strchr_7FF0(tagString, 61) != 0) {
+                cDirtysock_tag_TagFieldDupl_7FF0(lobbyRef + 0x34, 0x100, tagString);
             } else {
-                cDirtysock_tag_TagFieldSetString_7FF0(r + 0x34, 0x100, D_004A48A8_7FF0, arg0);
+                cDirtysock_tag_TagFieldSetString_7FF0(lobbyRef + 0x34, 0x100, D_004A48A8_7FF0, tagString);
             }
         }
-        *(int*)r = func_003F5478_7FF0(0x8000);
-        t = func_003E7340_7FF0();
-        *(int*)(r + 0x544) = arg1;
-        *(int*)(r + 0x548) = arg2;
-        *(int*)(r + 4) = t;
-        func_003E80C0_7FF0(r);
+        *(int*)lobbyRef = func_003F5478_7FF0(0x8000);
+        pingRef = func_003E7340_7FF0();
+        *(int*)(lobbyRef + 0x544) = debugData;
+        *(int*)(lobbyRef + 0x548) = debugProc;
+        *(int*)(lobbyRef + 4) = pingRef;
+        func_003E80C0_7FF0(lobbyRef);
     }
-    return r;
+    return lobbyRef;
 }
 #endif
 
@@ -11184,28 +11184,28 @@ struct S_80C0 { int f0, f4, f8, fC; char pad[0x310 - 0x10]; struct E_80C0 e[8]; 
  * clears the outstanding-ping count +0x540 and the request id counter +0x54C. Used by func_003E7FF0, func_003E81C8 and
  * LobbyMan's disconnect.
  *
- * @param s  the lobby
+ * @param lobby  the lobby
  */
-void func_003E80C0(struct S_80C0 *s) {
-    int i, t;
-    char *p;
-    s->fC = 0x6F66666C;
-    func_003F5738_80C0(s->f0);
+void func_003E80C0(struct S_80C0 *lobby) {
+    int i, entryRef;
+    char *request;
+    lobby->fC = 0x6F66666C;
+    func_003F5738_80C0(lobby->f0);
     for (i = 0; i < 8; i++) {
-        if (s->e[i].a != 0) {
-            while ((t = func_003EE9A0_80C0(s->e[i].a)) != 0) {
-                func_00259210_80C0(func_003EE480_80C0(s->e[i].b, t));
+        if (lobby->e[i].a != 0) {
+            while ((entryRef = func_003EE9A0_80C0(lobby->e[i].a)) != 0) {
+                func_00259210_80C0(func_003EE480_80C0(lobby->e[i].b, entryRef));
             }
         }
     }
-    while (s->f53C != 0) {
-        p = s->f53C;
-        s->f53C = *(char **)(p + 0x40);
-        func_00259210_80C0(p);
+    while (lobby->f53C != 0) {
+        request = lobby->f53C;
+        lobby->f53C = *(char **)(request + 0x40);
+        func_00259210_80C0(request);
     }
-    func_003E7F58_80C0(s);
-    s->f540 = 0;
-    s->f54C = 0;
+    func_003E7F58_80C0(lobby);
+    lobby->f540 = 0;
+    lobby->f54C = 0;
 }
 #endif
 
@@ -11259,12 +11259,12 @@ typedef struct { char pad[0x514]; E8248_pair e[1]; } E8248_S;
  *
  * @param table  the lobby
  * @param i  the routine slot (0-4)
- * @param a  the routine
- * @param b  its context
+ * @param callback  the routine
+ * @param context  its context
  */
-void func_003E8248(E8248_S *table, int i, int a, int b) {
-    table->e[i].a = a;
-    table->e[i].b = b;
+void func_003E8248(E8248_S *table, int i, int callback, int context) {
+    table->e[i].a = callback;
+    table->e[i].b = context;
 }
 #endif
 
@@ -11294,32 +11294,32 @@ struct S_8260 { int f0, f4, f8, fC, f10, f14; char pad[0x34 - 0x18]; char f34[0x
  * func_003E76A8, sends '@dir' with the default tags (+0x34), sets the state +0xC to 'rdir', the timeout +0x10 to now +
  * 120000 and +0x14 to now, and clears the server-down text +0x3B8. LobbyMan calls it with port 11000.
  *
- * @param s  the lobby
- * @param a1  the server address
- * @param a2  the server port
- * @param a3  the routine to call when the session key exchange completes
- * @param a4  its context
+ * @param lobby  the lobby
+ * @param serverAddr  the server address
+ * @param serverPort  the server port
+ * @param callback  the routine to call when the session key exchange completes
+ * @param context  its context
  * @return 0, or -1 when the request record could not be made
  */
-int func_003E8260(struct S_8260 *s, int a1, int a2, int a3, int a4) {
+int func_003E8260(struct S_8260 *lobby, int serverAddr, int serverPort, int callback, int context) {
     char buf[0x100];
-    s->f3B4 = a1;
-    s->f3B0 = a2;
+    lobby->f3B4 = serverAddr;
+    lobby->f3B0 = serverPort;
     func_003E7AC0_8260();
-    s->f50C = 0;
-    func_003E7F58_8260(s);
-    if (func_003E7718_8260(s, 0x736B6579, a3, a4) == 0) {
+    lobby->f50C = 0;
+    func_003E7F58_8260(lobby);
+    if (func_003E7718_8260(lobby, 0x736B6579, callback, context) == 0) {
         return -1;
     }
-    func_003F5738_8260(s->f0);
-    func_003F5638_8260(s->f0, s->f3B4, s->f3B0);
-    func_003E76A8_8260(s, D_00495F30_8260, s->f3B4, s->f3B0);
-    cDirtysock_tag_TagFieldDupl_8260(buf, 0x100, s->f34);
-    func_003F5910_8260(s->f0, 0x40646972, 0, buf, -1);
-    s->fC = 0x72646972;
-    s->f10 = func_003F5D88_8260(s->f0) + 0x1D4C0;
-    s->f14 = func_003F5D88_8260(s->f0);
-    s->f3B8 = 0;
+    func_003F5738_8260(lobby->f0);
+    func_003F5638_8260(lobby->f0, lobby->f3B4, lobby->f3B0);
+    func_003E76A8_8260(lobby, D_00495F30_8260, lobby->f3B4, lobby->f3B0);
+    cDirtysock_tag_TagFieldDupl_8260(buf, 0x100, lobby->f34);
+    func_003F5910_8260(lobby->f0, 0x40646972, 0, buf, -1);
+    lobby->fC = 0x72646972;
+    lobby->f10 = func_003F5D88_8260(lobby->f0) + 0x1D4C0;
+    lobby->f14 = func_003F5D88_8260(lobby->f0);
+    lobby->f3B8 = 0;
     return 0;
 }
 #endif
@@ -11362,7 +11362,7 @@ struct O_8368 { int lobby; char pad[0x8]; int state; char pad2[0x300]; struct S_
  */
 int func_003E8368(struct O_8368 *self, unsigned int i, int on) {
     char buf[256];
-    int r;
+    int entryRef;
 
     if (i >= 8) {
         return 0;
@@ -11393,8 +11393,8 @@ int func_003E8368(struct O_8368 *self, unsigned int i, int on) {
         if (self->s[i].h != 0) {
             int state;
 
-            while ((r = func_003EE9A0_8368(self->s[i].h)) != 0) {
-                func_00259210_8368(func_003EE480_8368(self->s[i].f4, r));
+            while ((entryRef = func_003EE9A0_8368(self->s[i].h)) != 0) {
+                func_00259210_8368(func_003EE480_8368(self->s[i].f4, entryRef));
             }
             func_003EE820_8368(self->s[i].h);
             self->s[i].h = 0;
@@ -11431,21 +11431,21 @@ int func_003E85B0_impl(struct O_85B0 *self, unsigned int i, int a, int b) __asm_
  * already open. LobbyMan opens the room, user and rank lists (slots 0-2) and rank snapshots (slot 4) with it.
  *
  * @param i  the list slot (0-7)
- * @param a  the routine func_003E7BA0 calls when the list changes
- * @param b  its context
+ * @param callback  the routine func_003E7BA0 calls when the list changes
+ * @param context  its context
  * @return the new list, or 0 when @p i is out of range
  */
-int func_003E85B0_impl(struct O_85B0 *self, unsigned int i, int a, int b) {
-    int r = 0;
+int func_003E85B0_impl(struct O_85B0 *self, unsigned int i, int callback, int context) {
+    int listRef = 0;
     if (i < 8) {
-    self->s[i].a = a;
-    self->s[i].b = b;
+    self->s[i].a = callback;
+    self->s[i].b = context;
     self->s[i].h = func_003EE778_85B0(1000, 2000);
     self->s[i].f4 = func_003EE1E8_85B0(100, 100, 0);
     func_003EE768_85B0(self->s[i].f4, self->s[i].h);
-    r = self->s[i].f4;
+    listRef = self->s[i].f4;
     }
-    return r;
+    return listRef;
 }
 #endif
 
@@ -11460,18 +11460,18 @@ typedef struct { char pad[0x314]; Q_8650 q[8]; } S_8650;
  *
  * @param table  the lobby
  * @param i  the list slot (0-7)
- * @param arg2  the new routine
- * @param arg3  its context
+ * @param callback  the new routine
+ * @param context  its context
  * @return the slot's list, or 0 when @p i is out of range
  */
-int func_003E8650(S_8650 *table, unsigned int i, int arg2, int arg3) {
-    int r = 0;
+int func_003E8650(S_8650 *table, unsigned int i, int callback, int context) {
+    int listRef = 0;
     if (i < 8U) {
-        table->q[i].b = arg2;
-        table->q[i].c = arg3;
-        r = table->q[i].a;
+        table->q[i].b = callback;
+        table->q[i].c = context;
+        listRef = table->q[i].a;
     }
-    return r;
+    return listRef;
 }
 #endif
 
@@ -11497,19 +11497,19 @@ extern void func_003EE260_8688(int) __asm__("func_003EE260");
  * any case. LobbyMan closes its room, user, rank and snapshot lists with it.
  *
  * @param i  the list slot (0-7)
- * @param h  the list
+ * @param listRef  the list
  */
-void func_003E8688(T_8688 *self, unsigned int i, int h) {
+void func_003E8688(T_8688 *self, unsigned int i, int listRef) {
     int iter;
     int item;
-    if (i < 8 && h != 0) {
-        iter = func_003EE770_8688(h);
+    if (i < 8 && listRef != 0) {
+        iter = func_003EE770_8688(listRef);
         while ((item = func_003EE9A0_8688(iter)) != 0) {
-            func_00259210_8688(func_003EE480_8688(h, item));
+            func_00259210_8688(func_003EE480_8688(listRef, item));
         }
         func_003EE820_8688(iter);
-        func_003EE260_8688(h);
-        if (self->e[i].b == h) {
+        func_003EE260_8688(listRef);
+        if (self->e[i].b == listRef) {
             self->e[i].a = 0;
             self->e[i].b = 0;
         }
@@ -11542,37 +11542,37 @@ int func_003E8778_impl(struct O_8778 *self, unsigned int i, char *arg) __asm__("
  * Nothing in the build calls it.
  *
  * @param i  the list slot (3-7)
- * @param arg  the name (slot 3) or the record to copy (slots 4-7)
+ * @param record  the name (slot 3) or the record to copy (slots 4-7)
  * @return 1 when added, 0 when the name was present, -1 when @p i is invalid or the slot is closed
  */
-int func_003E8778_impl(struct O_8778 *self, unsigned int i, char *arg) {
+int func_003E8778_impl(struct O_8778 *self, unsigned int i, char *record) {
     if (i < 8) {
         if (self->s[i].h == 0) {
             return -1;
         }
         if (i == 3) {
-            char *p;
-            int r;
-            if (func_003EEC88_8778(self->s[3].h, arg) != 0) {
+            char *newRecord;
+            int entryRef;
+            if (func_003EEC88_8778(self->s[3].h, record) != 0) {
                 return 0;
             }
-            p = func_002591E8_8778(312);
-            func_00416210_8778(p, 0, 312);
-            strcpy(p + 8, arg);
-            r = func_003EE320_8778(self->s[3].f4, p);
-            func_003EEB30_8778(self->s[3].h, p + 8, r);
+            newRecord = func_002591E8_8778(312);
+            func_00416210_8778(newRecord, 0, 312);
+            strcpy(newRecord + 8, record);
+            entryRef = func_003EE320_8778(self->s[3].f4, newRecord);
+            func_003EEB30_8778(self->s[3].h, newRecord + 8, entryRef);
             return 1;
         }
         if (i - 4 < 4) {
-            char *p;
-            int r;
-            if (func_003EEC88_8778(self->s[i].h, arg + 8) != 0) {
+            char *newRecord;
+            int entryRef;
+            if (func_003EEC88_8778(self->s[i].h, record + 8) != 0) {
                 return 0;
             }
-            p = func_002591E8_8778(168);
-            *(struct B_8778 *)p = *(struct B_8778 *)arg;
-            r = func_003EE320_8778(self->s[i].f4, p);
-            func_003EEB30_8778(self->s[i].h, p + 8, r);
+            newRecord = func_002591E8_8778(168);
+            *(struct B_8778 *)newRecord = *(struct B_8778 *)record;
+            entryRef = func_003EE320_8778(self->s[i].f4, newRecord);
+            func_003EEB30_8778(self->s[i].h, newRecord + 8, entryRef);
             return 1;
         }
         return -1;
@@ -11601,11 +11601,11 @@ int func_003E8968_impl(struct O_8968 *self, unsigned int i, int arg) __asm__("fu
  * list (func_003EE480). Nothing in the build calls it.
  *
  * @param i  the list slot (3-7)
- * @param arg  the entry's name
+ * @param entryName  the entry's name
  * @return 1 when removed, 0 when not found, -1 when @p i is invalid or the slot is closed
  */
-int func_003E8968_impl(struct O_8968 *self, unsigned int i, int arg) {
-    int r;
+int func_003E8968_impl(struct O_8968 *self, unsigned int i, int entryName) {
+    int entryRef;
     if (i < 8) {
         if (self->s[i].h == 0) {
             return -1;
@@ -11613,12 +11613,12 @@ int func_003E8968_impl(struct O_8968 *self, unsigned int i, int arg) {
         if (i - 3 >= 5) {
             return -1;
         }
-        r = func_003EEC88_8968(self->s[i].h, arg);
-        if (r == 0) {
+        entryRef = func_003EEC88_8968(self->s[i].h, entryName);
+        if (entryRef == 0) {
             return 0;
         }
-        func_003EED08_8968(self->s[i].h, arg);
-        func_00259210_8968(func_003EE480_8968(self->s[i].f4, r));
+        func_003EED08_8968(self->s[i].h, entryName);
+        func_00259210_8968(func_003EE480_8968(self->s[i].f4, entryRef));
         return 1;
     }
     return -1;
@@ -11635,16 +11635,16 @@ extern int func_003EEC88(int, int);
  *
  * @param lobby  the lobby
  * @param slot  the list slot (0-7)
- * @param arg2  the name or key to look up (func_003EEC88)
+ * @param entryName  the name or key to look up (func_003EEC88)
  * @return 1 when present, 0 when not, -1 when @p slot is invalid or closed
  */
-int func_003E8A28(int lobby, unsigned int slot, int arg2) {
+int func_003E8A28(int lobby, unsigned int slot, int entryName) {
     int temp_4;
 
     if (slot < 8U) {
         temp_4 = (*(int *)((char*)(((slot * 0x14) + lobby)) + (0x310)));
         if (temp_4 != 0) {
-            return func_003EEC88(temp_4, arg2) != 0;
+            return func_003EEC88(temp_4, entryName) != 0;
         }
     }
     return -1;
@@ -11743,23 +11743,23 @@ struct O_8B10 {
  *
  * @param cmd  the command FourCC
  * @param tags  the command's tag text
- * @param a3  the routine for the reply, or 0
- * @param a4  its context
+ * @param callback  the routine for the reply, or 0
+ * @param context  its context
  * @return the request id, -1 in the wrong state, -2 when the record could not be made
  */
-int func_003E8B10(struct O_8B10 *self, int cmd, char *tags, int a3, int a4) {
+int func_003E8B10(struct O_8B10 *self, int cmd, char *tags, int callback, int context) {
     char buf[0x200];
     char str[0x20];
     int *n;
     int st;
     int k;
-    int t;
+    int entryRef;
 
     st = self->fC;
     if (st != 0x69646C65 && st != 0x61757468 && st != 0x61636374 && st != 0x736B6579) {
         return -1;
     }
-    n = func_003E7718_8B10(self, cmd, a3, a4);
+    n = func_003E7718_8B10(self, cmd, callback, context);
     if (n == 0) {
         return -2;
     }
@@ -11780,8 +11780,8 @@ int func_003E8B10(struct O_8B10 *self, int cmd, char *tags, int a3, int a4) {
     if (cmd == 0x736E6170) {
         k = cDirtysock_tag_TagFieldGetNumber_8B10(cDirtysock_tag_TagFieldFind_8B10(tags, str_CHAN_b), 0);
         if (k >= 4 && k < 8 && self->s[k].h != 0) {
-            while ((t = func_003EE9A0_8B10(self->s[k].h)) != 0) {
-                func_00259210_8B10(func_003EE480_8B10(self->s[k].f4, t));
+            while ((entryRef = func_003EE9A0_8B10(self->s[k].h)) != 0) {
+                func_00259210_8B10(func_003EE480_8B10(self->s[k].f4, entryRef));
             }
         }
         self->f508 = 0;
@@ -11856,18 +11856,18 @@ extern char D_004A4890_8DC0[] __asm__("str_ADDR_b");
  * @param name  the host's name
  * @param addr  the host's address
  * @param x  the timeout, in protocol time units
- * @param a4  the routine for the result
- * @param a5  its context
+ * @param callback  the routine for the result
+ * @param context  its context
  * @return the ping's request id, or a negative error
  */
-int func_003E8DC0(S_8DC0 *self, char *name, int addr, int x, int a4, int a5) {
+int func_003E8DC0(S_8DC0 *self, char *name, int addr, int x, int callback, int context) {
     char buf[0x100];
     N_8DC0 *n;
     int st = self->fC;
     if (st != 0x636F6E6E && st != 0x69646C65 && st != 0x61757468 && st != 0x61636374) return -1;
     if (self->f4 == 0) return -2;
     if (self->f540 >= 0x40) return -3;
-    n = func_003E7718_8DC0(self, 0x70696E67, a4, a5);
+    n = func_003E7718_8DC0(self, 0x70696E67, callback, context);
     if (n == 0) return -4;
     n->addr = addr;
     n->t = func_003F5D88_8DC0(self->f0) + x;
@@ -11960,31 +11960,31 @@ extern char D_004A48F0_8FD0[] __asm__("D_004A48F0");
  * characters, otherwise the text itself. LobbyMan_onincomingmsg calls it.
  *
  * @param out  the lobby (for its debug routine)
- * @param p  the event (+4 kind, +8 code, +0xC text)
+ * @param event  the event (+4 kind, +8 code, +0xC text)
  */
-void func_003E8FD0(void *out, int *p) {
-    int a = p[1];
-    int b = p[2];
-    char *s = (char *)p[3];
+void func_003E8FD0(void *out, int *event) {
+    int eventKind = event[1];
+    int eventCode = event[2];
+    char *eventText = (char *)event[3];
     int n;
     int bad;
 
-    if (b == 0) b = 0x2D2D2D2D;
-    if (a == -1) {
-        a = 0x2A2A2A2A;
-        if (b == -1) {
-            b = 0x636F6E6E;
-        } else if (b == (int)0xFEFEFEFE) {
-            b = 0x64697363;
+    if (eventCode == 0) eventCode = 0x2D2D2D2D;
+    if (eventKind == -1) {
+        eventKind = 0x2A2A2A2A;
+        if (eventCode == -1) {
+            eventCode = 0x636F6E6E;
+        } else if (eventCode == (int)0xFEFEFEFE) {
+            eventCode = 0x64697363;
         } else {
-            b = 0x2D2D2D2D;
+            eventCode = 0x2D2D2D2D;
         }
     }
-    func_003E76A8_8FD0(out, D_00495F48_8FD0, a >> 24, a >> 16, a >> 8, a, b >> 24, b >> 16, b >> 8, b);
+    func_003E76A8_8FD0(out, D_00495F48_8FD0, eventKind >> 24, eventKind >> 16, eventKind >> 8, eventKind, eventCode >> 24, eventCode >> 16, eventCode >> 8, eventCode);
     n = 0;
     bad = 0;
-    for (; s[n] != 0 && s[n] < 0x7F; n++) {
-        if (s[n] < 0x20 && !(s[n] == '\t' || s[n] == '\n') && s[n] != '\r') {
+    for (; eventText[n] != 0 && eventText[n] < 0x7F; n++) {
+        if (eventText[n] < 0x20 && !(eventText[n] == '\t' || eventText[n] == '\n') && eventText[n] != '\r') {
             bad = 1;
             break;
         }
@@ -11996,7 +11996,7 @@ void func_003E8FD0(void *out, int *p) {
     } else if (n > 0xF0) {
         func_003E76A8_8FD0(out, D_00495F88_8FD0);
     } else {
-        func_003E76A8_8FD0(out, D_004A48F0_8FD0, s);
+        func_003E76A8_8FD0(out, D_004A48F0_8FD0, eventText);
     }
 }
 #endif
@@ -12027,40 +12027,40 @@ extern char D_004A48F8_9160[] __asm__("D_004A48F8") __attribute__((aligned(8)));
  * @return the number of ranked entries kept
  */
 int func_003E9160(char *self, int limit) {
-    int b = *(int *)(self + 0x33C);
-    int a = *(int *)(self + 0x338);
+    int rankList = *(int *)(self + 0x33C);
+    int rankIndex = *(int *)(self + 0x338);
     int k, sum, res;
     short *hist;
-    short *p;
-    int *e;
-    if (a == 0 || b == 0) {
+    short *histSlot;
+    int *rankEntry;
+    if (rankIndex == 0 || rankList == 0) {
         return -1;
     }
     k = 0;
     hist = (short *)func_002591E8_9160(0x4000);
     func_00416210_9160(hist, 0, 0x4000);
-    while ((e = func_003EE560_9160(b, k)) != 0) {
-        if ((unsigned)(e[0] - 1) >= 0x1FFF) {
-            e[0] = 500;
-            __builtin_memcpy(e + 2, D_004A48F8_9160, 6);
+    while ((rankEntry = func_003EE560_9160(rankList, k)) != 0) {
+        if ((unsigned)(rankEntry[0] - 1) >= 0x1FFF) {
+            rankEntry[0] = 500;
+            __builtin_memcpy(rankEntry + 2, D_004A48F8_9160, 6);
         }
         k++;
-        hist[e[0]]++;
+        hist[rankEntry[0]]++;
     }
     sum = 1;
     k = 0x1FFF;
-    p = hist + 0x1FFF;
+    histSlot = hist + 0x1FFF;
     do {
-        res = *p;
-        *p = sum;
+        res = *histSlot;
+        *histSlot = sum;
         sum += res;
         if (sum > limit) {
-            int cnt = func_003EE550_9160(b);
+            int cnt = func_003EE550_9160(rankList);
             if (cnt >= sum) {
                 int i = 0;
-                while ((e = func_003EE560_9160(b, i)) != 0) {
-                    if (e[0] <= k) {
-                        e[0] = 0;
+                while ((rankEntry = func_003EE560_9160(rankList, i)) != 0) {
+                    if (rankEntry[0] <= k) {
+                        rankEntry[0] = 0;
                     }
                     i++;
                 }
@@ -12068,21 +12068,21 @@ int func_003E9160(char *self, int limit) {
             break;
         }
         k--;
-        p--;
+        histSlot--;
     } while (k >= 0);
     res = 0;
     k = 0;
-    while ((e = func_003EE560_9160(b, k)) != 0) {
-        if (e[0] > 0) {
+    while ((rankEntry = func_003EE560_9160(rankList, k)) != 0) {
+        if (rankEntry[0] > 0) {
             res++;
-            e[1] = hist[e[0]];
+            rankEntry[1] = hist[rankEntry[0]];
         }
         k++;
     }
     k = 0;
-    while ((e = func_003EE560_9160(b, k)) != 0) {
-        if (e[0] == 0) {
-            func_00259210_9160(func_003EE480_9160(b, func_003EED08_9160(a, e + 2)));
+    while ((rankEntry = func_003EE560_9160(rankList, k)) != 0) {
+        if (rankEntry[0] == 0) {
+            func_00259210_9160(func_003EE480_9160(rankList, func_003EED08_9160(rankIndex, rankEntry + 2)));
         } else {
             k++;
         }
@@ -12136,18 +12136,18 @@ int func_003E9378_impl(char *self, int limit, unsigned int mask, unsigned int va
     func_003EE600(*(int *)(self + 0x314), func_003EE620_9378(*(int *)(self + 0x314)));
     for (; i < func_003EE558_9378(*(int *)(self + 0x314)); i++) {
         struct N_9378 *n = func_003EE560_9378(*(int *)(self + 0x314), i);
-        int r;
+        int fullness;
         if ((n->f8 & mask) != val) continue;
         if (func_00416B18(n->name, name, strlen(name)) != 0) continue;
-        r = n->f10 * 100 / n->fC;
-        if (r < limit) {
-            if (best < r) {
+        fullness = n->f10 * 100 / n->fC;
+        if (fullness < limit) {
+            if (best < fullness) {
                 def = i;
-                best = r;
+                best = fullness;
             }
         }
-        if (r < minv) {
-            minv = r;
+        if (fullness < minv) {
+            minv = fullness;
             mini = i;
         }
     }
@@ -12179,25 +12179,25 @@ extern char D_004A4898_94F0[] __asm__("str_PING_b");
  * (+0x1C, later reported to the server in '~png' replies) and the next ping is scheduled 30000 later with the failure
  * count cleared.
  *
- * @param arg0  the lobby
- * @param arg1  the event (+4 kind, +0xC tag text)
+ * @param lobby  the lobby
+ * @param event  the event (+4 kind, +0xC tag text)
  */
-void func_003E94F0(void *arg0, void *arg1) {
+void func_003E94F0(void *lobby, void *event) {
     int n;
-    if (*(int *)((char *)arg1 + 4) == 0x70696E67) {
-        n = cDirtysock_tag_TagFieldGetNumber_94F0(cDirtysock_tag_TagFieldFind_94F0(*(int *)((char *)arg1 + 0xC), D_004A4898_94F0), 0);
+    if (*(int *)((char *)event + 4) == 0x70696E67) {
+        n = cDirtysock_tag_TagFieldGetNumber_94F0(cDirtysock_tag_TagFieldFind_94F0(*(int *)((char *)event + 0xC), D_004A4898_94F0), 0);
         if (n == 0) {
-            func_003E76A8_94F0(arg0, D_00495F98_94F0);
-            *(int *)((char *)arg0 + 0x20) += 1;
-            if (*(int *)((char *)arg0 + 0x20) == 3) {
-                *(int *)((char *)arg0 + 0x20) = 0;
+            func_003E76A8_94F0(lobby, D_00495F98_94F0);
+            *(int *)((char *)lobby + 0x20) += 1;
+            if (*(int *)((char *)lobby + 0x20) == 3) {
+                *(int *)((char *)lobby + 0x20) = 0;
             } else {
-                *(int *)((char *)arg0 + 0x18) = func_003F4330_94F0();
+                *(int *)((char *)lobby + 0x18) = func_003F4330_94F0();
             }
         } else {
-            *(int *)((char *)arg0 + 0x1C) = n;
-            *(int *)((char *)arg0 + 0x18) = func_003F4330_94F0() + 30000;
-            *(int *)((char *)arg0 + 0x20) = 0;
+            *(int *)((char *)lobby + 0x1C) = n;
+            *(int *)((char *)lobby + 0x18) = func_003F4330_94F0() + 30000;
+            *(int *)((char *)lobby + 0x20) = 0;
         }
     }
 }
@@ -12215,10 +12215,10 @@ extern char func_003E94F0_9590[] __asm__("func_003E94F0");
  * Pings the lobby server: func_003E8DC0 with the name "@server", the server address (+0x3B4), a 3000 timeout and
  * func_003E94F0 as the routine. Called by func_003E95C8 after the redirect.
  *
- * @param arg0  the lobby
+ * @param lobby  the lobby
  */
-void func_003E9590(void *arg0) {
-    func_003E8DC0_9590(arg0, D_004A4900_9590, *(int *)((char *)arg0 + 0x3B4), 3000, func_003E94F0_9590, 0);
+void func_003E9590(void *lobby) {
+    func_003E8DC0_9590(lobby, D_004A4900_9590, *(int *)((char *)lobby + 0x3B4), 3000, func_003E94F0_9590, 0);
 }
 #endif
 
@@ -12439,7 +12439,7 @@ void func_003E95C8(struct Lob_95C8 *self)
     char *data;
     unsigned int now;
     int len;
-    int e;
+    int entryRef;
     int id;
 
     if (self->f0 == 0) {
@@ -12617,8 +12617,8 @@ void func_003E95C8(struct Lob_95C8 *self)
                     self->f1BC = TagGetFlags_95C8(TagFind_95C8(data, D_004A49D0_95C8), 0);
                     self->f8 |= 8;
                     if (self->s[1].h != 0) {
-                        while ((e = func_003EE9A0_95C8(self->s[1].h)) != 0) {
-                            func_00259210_95C8(func_003EE480_95C8(self->s[1].f4, e));
+                        while ((entryRef = func_003EE9A0_95C8(self->s[1].h)) != 0) {
+                            func_00259210_95C8(func_003EE480_95C8(self->s[1].f4, entryRef));
                         }
                         self->f8 |= 0x40;
                     }
@@ -12628,40 +12628,40 @@ void func_003E95C8(struct Lob_95C8 *self)
                 id = TagGetNumber_95C8(TagFind_95C8(data, D_004A49D8_95C8), -1);
                 if (id >= 0) {
                     if (TagFind_95C8(data, D_004A49B0_95C8) != 0) {
-                        struct Room_95C8 *r = func_002591E8_95C8(sizeof(struct Room_95C8));
-                        func_00416210_95C8(r, 0, sizeof(struct Room_95C8));
-                        r->id = id;
-                        TagGetString_95C8(TagFind_95C8(data, D_004A49B0_95C8), r->name, 0x20, D_004A4888_95C8);
-                        TagGetString_95C8(TagFind_95C8(data, D_004A49E0_95C8), r->host, 0x20, D_004A4888_95C8);
-                        r->flags = TagGetFlags_95C8(TagFind_95C8(data, D_004A49A8_95C8), -1);
-                        r->addr = TagGetAddr_95C8(TagFind_95C8(data, D_004A49E8_95C8), 0);
-                        r->f10 = TagGetNumber_95C8(TagFind_95C8(data, D_004A49F0_95C8), 0);
-                        r->f0C = TagGetNumber_95C8(TagFind_95C8(data, D_004A49F8_95C8), 0);
-                        sprintf_95C8(r->f14, D_004A4870_95C8, r->f10);
-                        strcpy(r->f18, (r->flags & 0x10000) ? D_004A4A00_95C8 : D_004A4A08_95C8);
-                        r->ping[0] = 0;
+                        struct Room_95C8 *roomRecord = func_002591E8_95C8(sizeof(struct Room_95C8));
+                        func_00416210_95C8(roomRecord, 0, sizeof(struct Room_95C8));
+                        roomRecord->id = id;
+                        TagGetString_95C8(TagFind_95C8(data, D_004A49B0_95C8), roomRecord->name, 0x20, D_004A4888_95C8);
+                        TagGetString_95C8(TagFind_95C8(data, D_004A49E0_95C8), roomRecord->host, 0x20, D_004A4888_95C8);
+                        roomRecord->flags = TagGetFlags_95C8(TagFind_95C8(data, D_004A49A8_95C8), -1);
+                        roomRecord->addr = TagGetAddr_95C8(TagFind_95C8(data, D_004A49E8_95C8), 0);
+                        roomRecord->f10 = TagGetNumber_95C8(TagFind_95C8(data, D_004A49F0_95C8), 0);
+                        roomRecord->f0C = TagGetNumber_95C8(TagFind_95C8(data, D_004A49F8_95C8), 0);
+                        sprintf_95C8(roomRecord->f14, D_004A4870_95C8, roomRecord->f10);
+                        strcpy(roomRecord->f18, (roomRecord->flags & 0x10000) ? D_004A4A00_95C8 : D_004A4A08_95C8);
+                        roomRecord->ping[0] = 0;
                         len = TagGetNumber_95C8(TagFind_95C8(data, D_004A4A10_95C8), -1);
                         if (len == 0) {
-                            __builtin_memcpy(r->ping, D_004A4A18_95C8, 4);
+                            __builtin_memcpy(roomRecord->ping, D_004A4A18_95C8, 4);
                         } else if (len > 0) {
-                            sprintf_95C8(r->ping, D_004A4A20_95C8, len);
+                            sprintf_95C8(roomRecord->ping, D_004A4A20_95C8, len);
                         }
-                        e = func_003EEEE8_95C8(self->s[0].h, r->id);
-                        if (e != 0) {
-                            struct Room_95C8 *old = func_003EE468_95C8(self->s[0].f4, e);
+                        entryRef = func_003EEEE8_95C8(self->s[0].h, roomRecord->id);
+                        if (entryRef != 0) {
+                            struct Room_95C8 *old = func_003EE468_95C8(self->s[0].f4, entryRef);
                             if (old != 0 && old->ping[0] >= '0' && old->ping[0] <= '9') {
-                                strcpy(r->ping, old->ping);
+                                strcpy(roomRecord->ping, old->ping);
                             }
                             func_00259210_95C8(old);
-                            func_003EE3E0_95C8(self->s[0].f4, e, r);
+                            func_003EE3E0_95C8(self->s[0].f4, entryRef, roomRecord);
                         } else {
-                            func_003EEDA0_95C8(self->s[0].h, r->id, func_003EE320_95C8(self->s[0].f4, r));
+                            func_003EEDA0_95C8(self->s[0].h, roomRecord->id, func_003EE320_95C8(self->s[0].f4, roomRecord));
                         }
                     } else {
-                        e = func_003EEEE8_95C8(self->s[0].h, id);
-                        if (e != 0) {
+                        entryRef = func_003EEEE8_95C8(self->s[0].h, id);
+                        if (entryRef != 0) {
                             func_003EEF40_95C8(self->s[0].h, id);
-                            func_00259210_95C8(func_003EE480_95C8(self->s[0].f4, e));
+                            func_00259210_95C8(func_003EE480_95C8(self->s[0].f4, entryRef));
                             self->f8 |= 0x20;
                         }
                     }
@@ -12669,31 +12669,31 @@ void func_003E95C8(struct Lob_95C8 *self)
                 }
             }
             if (kind == 0x2B706F70 && self->s[0].h != 0) {
-                char *p;
+                char *popCursor;
                 TagGetString_95C8(TagFind_95C8(data, D_004A4A28_95C8), pop, sizeof(pop), D_004A4888_95C8);
-                p = pop;
-                while (*p != 0) {
+                popCursor = pop;
+                while (*popCursor != 0) {
                     int count;
                     {
-                        unsigned int c;
-                        for (id = 0; (c = (unsigned char)*p) - '0' < 10; p++) {
-                            id = id * 10 + (c & 0xF);
+                        unsigned int digitChar;
+                        for (id = 0; (digitChar = (unsigned char)*popCursor) - '0' < 10; popCursor++) {
+                            id = id * 10 + (digitChar & 0xF);
                         }
                     }
                     if (id == 0) {
                         break;
                     }
-                    if (*p != 0) {
-                        p++;
+                    if (*popCursor != 0) {
+                        popCursor++;
                     }
                     {
-                        unsigned int c;
-                        for (count = 0; (c = (unsigned char)*p) - '0' < 10; p++) {
-                            count = count * 10 + (c & 0xF);
+                        unsigned int digitChar;
+                        for (count = 0; (digitChar = (unsigned char)*popCursor) - '0' < 10; popCursor++) {
+                            count = count * 10 + (digitChar & 0xF);
                         }
                     }
-                    if (*p != 0) {
-                        p++;
+                    if (*popCursor != 0) {
+                        popCursor++;
                     }
                     if (id != self->f1B8) {
                         func_003E7B00_95C8(self, id, count);
@@ -12704,34 +12704,34 @@ void func_003E95C8(struct Lob_95C8 *self)
                 id = TagGetNumber_95C8(TagFind_95C8(data, D_004A49D8_95C8), -1);
                 if (id >= 0) {
                     if (TagFind_95C8(data, D_004A49B0_95C8) != 0) {
-                        struct User_95C8 *u = func_002591E8_95C8(sizeof(struct User_95C8));
-                        func_00416210_95C8(u, 0, sizeof(struct User_95C8));
-                        u->id = id;
-                        TagGetString_95C8(TagFind_95C8(data, D_004A49B0_95C8), u->name, 0x20, D_004A4888_95C8);
-                        u->addr = TagGetAddr_95C8(TagFind_95C8(data, D_004A49E8_95C8), 0);
-                        TagGetString_95C8(TagFind_95C8(data, D_004A4A10_95C8), u->f28, 8, D_004A4888_95C8);
-                        u->flags = TagGetFlags_95C8(TagFind_95C8(data, D_004A49A8_95C8), 0);
-                        TagGetString_95C8(TagFind_95C8(data, D_004A4A30_95C8), u->f38, 0x80, D_004A4888_95C8);
-                        u->f34 = TagGetNumber_95C8(TagFind_95C8(data, D_004A49C8_95C8), 0);
-                        TagGetString_95C8(TagFind_95C8(data, D_004A4A38_95C8), u->fB8, 0x80, D_004A4888_95C8);
-                        e = func_003EEEE8_95C8(self->s[1].h, u->id);
-                        if (e != 0) {
-                            struct User_95C8 *old = func_003EE468_95C8(self->s[1].f4, e);
-                            __builtin_memcpy(old, u, sizeof(struct User_95C8));
-                            func_003EE3E0_95C8(self->s[1].f4, e, old);
-                            func_00259210_95C8(u);
-                            u = old;
+                        struct User_95C8 *userRecord = func_002591E8_95C8(sizeof(struct User_95C8));
+                        func_00416210_95C8(userRecord, 0, sizeof(struct User_95C8));
+                        userRecord->id = id;
+                        TagGetString_95C8(TagFind_95C8(data, D_004A49B0_95C8), userRecord->name, 0x20, D_004A4888_95C8);
+                        userRecord->addr = TagGetAddr_95C8(TagFind_95C8(data, D_004A49E8_95C8), 0);
+                        TagGetString_95C8(TagFind_95C8(data, D_004A4A10_95C8), userRecord->f28, 8, D_004A4888_95C8);
+                        userRecord->flags = TagGetFlags_95C8(TagFind_95C8(data, D_004A49A8_95C8), 0);
+                        TagGetString_95C8(TagFind_95C8(data, D_004A4A30_95C8), userRecord->f38, 0x80, D_004A4888_95C8);
+                        userRecord->f34 = TagGetNumber_95C8(TagFind_95C8(data, D_004A49C8_95C8), 0);
+                        TagGetString_95C8(TagFind_95C8(data, D_004A4A38_95C8), userRecord->fB8, 0x80, D_004A4888_95C8);
+                        entryRef = func_003EEEE8_95C8(self->s[1].h, userRecord->id);
+                        if (entryRef != 0) {
+                            struct User_95C8 *old = func_003EE468_95C8(self->s[1].f4, entryRef);
+                            __builtin_memcpy(old, userRecord, sizeof(struct User_95C8));
+                            func_003EE3E0_95C8(self->s[1].f4, entryRef, old);
+                            func_00259210_95C8(userRecord);
+                            userRecord = old;
                         } else {
-                            func_003EEDA0_95C8(self->s[1].h, u->id, func_003EE320_95C8(self->s[1].f4, u));
+                            func_003EEDA0_95C8(self->s[1].h, userRecord->id, func_003EE320_95C8(self->s[1].f4, userRecord));
                         }
-                        if (u->flags & 0x200000) {
-                            self->f1B4 = u->flags;
+                        if (userRecord->flags & 0x200000) {
+                            self->f1B4 = userRecord->flags;
                         }
                     } else {
-                        e = func_003EEEE8_95C8(self->s[1].h, id);
-                        if (e != 0) {
+                        entryRef = func_003EEEE8_95C8(self->s[1].h, id);
+                        if (entryRef != 0) {
                             func_003EEF40_95C8(self->s[1].h, id);
-                            func_00259210_95C8(func_003EE480_95C8(self->s[1].f4, e));
+                            func_00259210_95C8(func_003EE480_95C8(self->s[1].f4, entryRef));
                         }
                     }
                     func_003E7B00_95C8(self, self->f1B8, TagGetNumber_95C8(TagFind_95C8(data, D_004A49F0_95C8), 0));
@@ -12740,8 +12740,8 @@ void func_003E95C8(struct Lob_95C8 *self)
             }
             if (kind == 0x2B726E6B && self->s[2].h != 0) {
                 if (TagGetNumber_95C8(TagFind_95C8(data, D_004A4A40_95C8), 0) == -2) {
-                    while ((e = func_003EE9A0_95C8(self->s[2].h)) != 0) {
-                        func_00259210_95C8(func_003EE480_95C8(self->s[2].f4, e));
+                    while ((entryRef = func_003EE9A0_95C8(self->s[2].h)) != 0) {
+                        func_00259210_95C8(func_003EE480_95C8(self->s[2].f4, entryRef));
                     }
                 } else {
                     struct Rank_95C8 *k = func_002591E8_95C8(sizeof(struct Rank_95C8));
@@ -12752,14 +12752,14 @@ void func_003E95C8(struct Lob_95C8 *self)
                     if (k->score >= 0x2000) {
                         k->score = 0x1FFF;
                     }
-                    e = func_003EEC88_95C8(self->s[2].h, k->name);
-                    if (e == 0 && k->score > 0) {
+                    entryRef = func_003EEC88_95C8(self->s[2].h, k->name);
+                    if (entryRef == 0 && k->score > 0) {
                         func_003EEB30_95C8(self->s[2].h, k->name, func_003EE320_95C8(self->s[2].f4, k));
-                    } else if (e != 0) {
+                    } else if (entryRef != 0) {
                         if (k->score > 0) {
-                            struct Rank_95C8 *old = func_003EE468_95C8(self->s[2].f4, e);
+                            struct Rank_95C8 *old = func_003EE468_95C8(self->s[2].f4, entryRef);
                             __builtin_memcpy(old, k, sizeof(struct Rank_95C8));
-                            func_003EE3E0_95C8(self->s[2].f4, e, old);
+                            func_003EE3E0_95C8(self->s[2].f4, entryRef, old);
                         } else {
                             func_00259210_95C8(func_003EE480_95C8(self->s[2].f4, func_003EED08_95C8(self->s[2].h, k->name)));
                         }
@@ -12779,14 +12779,14 @@ void func_003E95C8(struct Lob_95C8 *self)
                 if (k->score >= 0x2000) {
                     k->score = 0x1FFF;
                 }
-                e = func_003EEC88_95C8(self->s[self->f508].h, k->name);
-                if (e == 0) {
+                entryRef = func_003EEC88_95C8(self->s[self->f508].h, k->name);
+                if (entryRef == 0) {
                     int ref = func_003EE320_95C8(self->s[self->f508].f4, k);
                     func_003EEB30_95C8(self->s[self->f508].h, k->name, ref);
                 } else {
-                    struct Rank_95C8 *old = func_003EE468_95C8(self->s[self->f508].f4, e);
+                    struct Rank_95C8 *old = func_003EE468_95C8(self->s[self->f508].f4, entryRef);
                     __builtin_memcpy(old, k, sizeof(struct Rank_95C8));
-                    func_003EE3E0_95C8(self->s[self->f508].f4, e, old);
+                    func_003EE3E0_95C8(self->s[self->f508].f4, entryRef, old);
                     func_00259210_95C8(k);
                 }
                 self->f8 |= 0x80;
@@ -12807,8 +12807,8 @@ void func_003E95C8(struct Lob_95C8 *self)
                     self->f1BC = TagGetFlags_95C8(TagFind_95C8(data, D_004A4A68_95C8), 0);
                     self->f8 |= 8;
                     if (self->s[1].h != 0) {
-                        while ((e = func_003EE9A0_95C8(self->s[1].h)) != 0) {
-                            func_00259210_95C8(func_003EE480_95C8(self->s[1].f4, e));
+                        while ((entryRef = func_003EE9A0_95C8(self->s[1].h)) != 0) {
+                            func_00259210_95C8(func_003EE480_95C8(self->s[1].f4, entryRef));
                         }
                         self->f8 |= 0x40;
                     }
@@ -12880,20 +12880,20 @@ struct sTm_3EAEB8 {
  * Used by the tag time routines (TagFieldSetEpoch and others) and by func_003EB090.
  *
  * @param tm  the 9-word time structure to fill
- * @param t  seconds since 1970-01-01 (unsigned)
+ * @param seconds  seconds since 1970-01-01 (unsigned)
  * @return @p tm
  */
 // Seconds since 1970 -> broken-down time (no wday). D_004969E0 holds two rows of month
 // lengths: row 0 is picked for a 366-day year, row 1 for a 365-day year.
-struct sTm_3EAEB8* func_003EAEB8(struct sTm_3EAEB8* tm, long t)
+struct sTm_3EAEB8* func_003EAEB8(struct sTm_3EAEB8* tm, long seconds)
 {
     int days;
     int rem;
     int y = 1970;
     int ylen;
     int* ip;
-    days = (unsigned int)t / 86400;
-    rem = (unsigned int)t % 86400;
+    days = (unsigned int)seconds / 86400;
+    rem = (unsigned int)seconds % 86400;
     tm->sec = rem % 60;
     rem /= 60;
     tm->min = rem % 60;
