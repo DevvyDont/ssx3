@@ -1792,16 +1792,16 @@ extern void* cFEStateRewardGalleryPosters_vtbl[];
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters(void* self, cUIEngine* engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters(cFEStateRewardGalleryPosters* self, cUIEngine* engine, signed char idx, int inStore)
 {
     cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(self, engine, idx, inStore, 3);
-    *(void***)((char*)self + 0x8) = cFEStateRewardGalleryPosters_vtbl;
-    *(int*)((char*)self + 0x68) = 0;
-    *(int*)((char*)self + 0xA24) = 0;
+    self->mVtbl = cFEStateRewardGalleryPosters_vtbl;
+    self->mNumTotalRewards = 0;
+    self->mpDBPosters = 0;
     for (int i = 42; i >= 0; i--) {
         ((void**)((char*)self + 0xA28))[i] = 0;
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1838,7 +1838,7 @@ extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
  *
  * @param i  index into the gallery's reward list
  */
-extern "C" void cFEStateRewardGalleryPosters_getIconID(void* self, int i)
+extern "C" void cFEStateRewardGalleryPosters_getIconID(cFEStateRewardGalleryPosters* self, int i)
 {
     char buf[5];
     void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
@@ -1893,11 +1893,11 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryPosters_purgeRewards);
  *
  * Vtable slot 29 of the posters vtable cFEStateRewardGalleryPosters_vtbl.
  */
-extern "C" void cFEStateRewardGalleryPosters_purgeRewards(void* self)
+extern "C" void cFEStateRewardGalleryPosters_purgeRewards(cFEStateRewardGalleryPosters* self)
 {
     int i;
-    *(int*)((char*)self + 0x68) = 0;
-    *(int*)((char*)self + 0xa24) = 0;
+    self->mNumTotalRewards = 0;
+    self->mpDBPosters = 0;
     for (i = 42; i >= 0; i--) {
         ((int*)((char*)self + 0xa28))[i] = 0;
     }
@@ -1923,15 +1923,15 @@ extern void* cFEStateRewardGalleryTradingCards_vtbl[];
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards(void* self, cUIEngine* engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards(cFEStateRewardGalleryTradingCards* self, cUIEngine* engine, signed char idx, int inStore)
 {
     cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(self, engine, idx, inStore, 4);
-    *(void***)((char*)self + 0x8) = cFEStateRewardGalleryTradingCards_vtbl;
-    *(int*)((char*)self + 0xA24) = 0;
+    self->mVtbl = cFEStateRewardGalleryTradingCards_vtbl;
+    self->mpDBTradingCards = 0;
     for (int i = 115; i >= 0; i--) {
         ((void**)((char*)self + 0xA28))[i] = 0;
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1968,7 +1968,7 @@ extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
  *
  * @param i  index into the gallery's reward list
  */
-extern "C" void cFEStateRewardGalleryTradingCards_getIconID(void* self, int i)
+extern "C" void cFEStateRewardGalleryTradingCards_getIconID(cFEStateRewardGalleryTradingCards* self, int i)
 {
     char buf[5];
     void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
@@ -2023,11 +2023,11 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryTradingCards_purgeRewards)
  *
  * Vtable slot 29 of the trading-card vtable cFEStateRewardGalleryTradingCards_vtbl.
  */
-extern "C" void cFEStateRewardGalleryTradingCards_purgeRewards(void* self)
+extern "C" void cFEStateRewardGalleryTradingCards_purgeRewards(cFEStateRewardGalleryTradingCards* self)
 {
     int i;
-    *(int*)((char*)self + 0x68) = 0;
-    *(int*)((char*)self + 0xa24) = 0;
+    self->mNumTotalRewards = 0;
+    self->mpDBTradingCards = 0;
     for (i = 115; i >= 0; i--) {
         ((int*)((char*)self + 0xa28))[i] = 0;
     }
@@ -2053,15 +2053,15 @@ extern void* cFEStateRewardGalleryConceptArts_vtbl[];
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts(void* self, cUIEngine* engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts(cFEStateRewardGalleryConceptArts* self, cUIEngine* engine, signed char idx, int inStore)
 {
     cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(self, engine, idx, inStore, 5);
-    *(void***)((char*)self + 0x8) = cFEStateRewardGalleryConceptArts_vtbl;
-    *(int*)((char*)self + 0xA24) = 0;
+    self->mVtbl = cFEStateRewardGalleryConceptArts_vtbl;
+    self->mpDBConceptArts = 0;
     for (int i = 99; i >= 0; i--) {
         ((void**)((char*)self + 0xA28))[i] = 0;
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2098,7 +2098,7 @@ extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
  *
  * @param i  index into the gallery's reward list
  */
-extern "C" void cFEStateRewardGalleryConceptArts_getIconID(void* self, int i)
+extern "C" void cFEStateRewardGalleryConceptArts_getIconID(cFEStateRewardGalleryConceptArts* self, int i)
 {
     char buf[5];
     void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
@@ -2153,11 +2153,11 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryConceptArts_purgeRewards);
  *
  * Vtable slot 29 of the art vtable cFEStateRewardGalleryConceptArts_vtbl.
  */
-extern "C" void cFEStateRewardGalleryConceptArts_purgeRewards(void* self)
+extern "C" void cFEStateRewardGalleryConceptArts_purgeRewards(cFEStateRewardGalleryConceptArts* self)
 {
     int i;
-    *(int*)((char*)self + 0x68) = 0;
-    *(int*)((char*)self + 0xa24) = 0;
+    self->mNumTotalRewards = 0;
+    self->mpDBConceptArts = 0;
     for (i = 99; i >= 0; i--) {
         ((int*)((char*)self + 0xa28))[i] = 0;
     }
@@ -2183,15 +2183,15 @@ extern void* cFEStateRewardGalleryVideos_vtbl[];
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos(void* self, cUIEngine* engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos(cFEStateRewardGalleryVideos* self, cUIEngine* engine, signed char idx, int inStore)
 {
     cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(self, engine, idx, inStore, 6);
-    *(void***)((char*)self + 0x8) = cFEStateRewardGalleryVideos_vtbl;
-    *(int*)((char*)self + 0xA24) = 0;
+    self->mVtbl = cFEStateRewardGalleryVideos_vtbl;
+    self->mpDBVideos = 0;
     for (int i = 1; i >= 0; i--) {
         ((void**)((char*)self + 0xA28))[i] = 0;
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2228,7 +2228,7 @@ extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
  *
  * @param i  index into the gallery's reward list
  */
-extern "C" void cFEStateRewardGalleryVideos_getIconID(void* self, int i)
+extern "C" void cFEStateRewardGalleryVideos_getIconID(cFEStateRewardGalleryVideos* self, int i)
 {
     char buf[5];
     void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
@@ -2283,11 +2283,11 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryVideos_purgeRewards);
  *
  * Vtable slot 29 of the video vtable cFEStateRewardGalleryVideos_vtbl.
  */
-extern "C" void cFEStateRewardGalleryVideos_purgeRewards(void* self)
+extern "C" void cFEStateRewardGalleryVideos_purgeRewards(cFEStateRewardGalleryVideos* self)
 {
     int i;
-    *(int*)((char*)self + 0x68) = 0;
-    *(int*)((char*)self + 0xa24) = 0;
+    self->mNumTotalRewards = 0;
+    self->mpDBVideos = 0;
     for (i = 1; i >= 0; i--) {
         ((int*)((char*)self + 0xa28))[i] = 0;
     }
@@ -2313,15 +2313,15 @@ extern void* cFEStateRewardGalleryToys_vtbl[];
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryToys_cFEStateRewardGalleryToys(void* self, cUIEngine* engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardGalleryToys_cFEStateRewardGalleryToys(cFEStateRewardGalleryToys* self, cUIEngine* engine, signed char idx, int inStore)
 {
     cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(self, engine, idx, inStore, 7);
-    *(void***)((char*)self + 0x8) = cFEStateRewardGalleryToys_vtbl;
-    *(int*)((char*)self + 0xA24) = 0;
+    self->mVtbl = cFEStateRewardGalleryToys_vtbl;
+    self->mpDBToys = 0;
     for (int i = 27; i >= 0; i--) {
         ((void**)((char*)self + 0xA28))[i] = 0;
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2358,7 +2358,7 @@ extern "C" void cFEStateRewardGalleryBase_getIconID(void* self, char* name);
  *
  * @param i  index into the gallery's reward list
  */
-extern "C" void cFEStateRewardGalleryToys_getIconID(void* self, int i)
+extern "C" void cFEStateRewardGalleryToys_getIconID(cFEStateRewardGalleryToys* self, int i)
 {
     char buf[5];
     void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
@@ -2413,11 +2413,11 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryToys_purgeRewards);
  *
  * Vtable slot 29 of the toy vtable cFEStateRewardGalleryToys_vtbl.
  */
-extern "C" void cFEStateRewardGalleryToys_purgeRewards(void* self)
+extern "C" void cFEStateRewardGalleryToys_purgeRewards(cFEStateRewardGalleryToys* self)
 {
     int i;
-    *(int*)((char*)self + 0x68) = 0;
-    *(int*)((char*)self + 0xa24) = 0;
+    self->mNumTotalRewards = 0;
+    self->mpDBToys = 0;
     for (i = 27; i >= 0; i--) {
         ((int*)((char*)self + 0xa28))[i] = 0;
     }
@@ -2444,15 +2444,15 @@ extern void* cFEStateRewardGalleryCheatChars_vtbl[];
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars(void* self, cUIEngine* engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars(cFEStateRewardGalleryCheatChars* self, cUIEngine* engine, signed char idx, int inStore)
 {
     cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(self, engine, idx, inStore, 8);
-    *(void***)((char*)self + 0x8) = cFEStateRewardGalleryCheatChars_vtbl;
-    *(int*)((char*)self + 0xA24) = 0;
+    self->mVtbl = cFEStateRewardGalleryCheatChars_vtbl;
+    self->mpDBCheatChars = 0;
     for (int i = 27; i >= 0; i--) {
         ((void**)((char*)self + 0xA28))[i] = 0;
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2501,11 +2501,11 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryCheatChars_purgeRewards);
  *
  * Vtable slot 29 of the cheat-character vtable cFEStateRewardGalleryCheatChars_vtbl.
  */
-extern "C" void cFEStateRewardGalleryCheatChars_purgeRewards(void* self)
+extern "C" void cFEStateRewardGalleryCheatChars_purgeRewards(cFEStateRewardGalleryCheatChars* self)
 {
     int i;
-    *(int*)((char*)self + 0x68) = 0;
-    *(int*)((char*)self + 0xa24) = 0;
+    self->mNumTotalRewards = 0;
+    self->mpDBCheatChars = 0;
     for (i = 27; i >= 0; i--) {
         ((int*)((char*)self + 0xa28))[i] = 0;
     }
@@ -2529,9 +2529,9 @@ extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
  *
  * @param i  index into the gallery's reward list
  */
-extern "C" void cFEStateRewardGalleryCheatChars_getTextureElement(void* self, int i)
+extern "C" void cFEStateRewardGalleryCheatChars_getTextureElement(cFEStateRewardGalleryCheatChars* self, int i)
 {
-    char* obj = *(char**)((char*)self + 0x10);
+    char* obj = (char*)self->mpEngine;
     void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
     int textureHash = GetHashValue32(*(char**)((char*)reward + 4));
     cUITextureBank_getElementByHashname(obj + 0x58, textureHash);

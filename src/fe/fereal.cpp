@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fereal.h"
 #include "fe/fecustom.h"
 #include "ui/uistate.h"
 #include "ui/uiengine.h"
@@ -754,16 +755,16 @@ extern void* cRealFE_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cRealFE_cRealFE(void* self)
+extern "C" void* cRealFE_cRealFE(cRealFE* self)
 {
     cFE_cFE(self);
     *(void***)self = cRealFE_vtbl;
     cConnMan_cConnMan((char*)self + 0xB5AB0);
     cGameConnMan_cGameConnMan((char*)self + 0xB5ABC);
-    *(int*)((char*)self + 0xB5AD4) = 0;
-    *(int*)((char*)self + 0xB5AD8) = 0;
-    *(int*)((char*)self + 0xB5ADC) = 0;
-    return self;
+    self->mpMoviePlayer = 0;
+    self->mMovieSkippable = 0;
+    self->mWaitRenderNum = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -784,7 +785,7 @@ extern "C" void cFE__cFE(void* self, int flags);
  *
  * @param flags  the destructor flags (bit 0: free the memory)
  */
-extern "C" void cRealFE__cRealFE(void* self, int flags)
+extern "C" void cRealFE__cRealFE(cRealFE* self, int flags)
 {
     *(void***)self = cRealFE_vtbl;
     cGameConnMan__cGameConnMan((char*)self + 0xB5ABC, 2);
@@ -827,7 +828,7 @@ typedef void (*tVoid_1A1DC0)(void*);
  * fog, screen tint and light glow, sets the graphics manager's clear colour to black (slot 15 with (0, 0, 0)), gives
  * the front-end flow state D_004A4E80 86 states and finally calls its own virtual slot 8 (cRealFE_loadStartState()).
  */
-extern "C" void cRealFE_gainFocus(char* self)
+extern "C" void cRealFE_gainFocus(cRealFE* self)
 {
     char* graphicsMan;
     char* vt;
@@ -838,8 +839,8 @@ extern "C" void cRealFE_gainFocus(char* self)
         MEM_fill(D_005308B8, 0, 0x20);
         gWeHaveToClearTheBackEnd = 0;
     }
-    *(int*)(self + 0xB5AD8) = 0;
-    *(int*)(self + 0xB5ADC) = 0;
+    self->mMovieSkippable = 0;
+    self->mWaitRenderNum = 0;
     cBE_setState(0);
     cGraphicsMan_UploadTextures(GrMan);
     cFELocale_unloadOV(SSXApp->FELocale);
@@ -850,7 +851,7 @@ extern "C" void cRealFE_gainFocus(char* self)
     vt = *(char**)(graphicsMan + 0x10D8);
     ((tFn_1A1DC0)*(void**)(vt + 0x7C))(graphicsMan + *(short*)(vt + 0x78), sVec3K1A1DC0());
     cFEFlowState_setNumStates(&D_004A4E80, 86);
-    ((tVoid_1A1DC0)*(void**)(*(char**)self + 0x44))(self + *(short*)(*(char**)self + 0x40));
+    ((tVoid_1A1DC0)*(void**)(*(char**)self + 0x44))(((char*)self) + *(short*)(*(char**)self + 0x40));
 }
 #endif
 
@@ -1015,19 +1016,19 @@ extern char D_004A4E80;
  *
  * @return 1 when focus may move on, 0 to keep it
  */
-extern "C" int cRealFE_loseFocus(void* self)
+extern "C" int cRealFE_loseFocus(cRealFE* self)
 {
     if (cFadeScreen_loseFocus(self) == 0) {
         return 0;
     }
-    void* moviePlayer = *(void**)((char*)self + 0xB5AD4);
+    void* moviePlayer = self->mpMoviePlayer;
     if (moviePlayer != 0) {
         cMoviePlayer__cMoviePlayer(moviePlayer, 3);
-        *(void**)((char*)self + 0xB5AD4) = 0;
+        self->mpMoviePlayer = 0;
     }
-    *(int*)((char*)self + 0xB5AD8) = 0;
+    self->mMovieSkippable = 0;
     cRealFE_mMovieList = 0;
-    *(int*)((char*)self + 0xB5ADC) = 0;
+    self->mWaitRenderNum = 0;
     cFEFlowState_purge(&D_004A4E80);
     return 1;
 }
@@ -1043,7 +1044,7 @@ struct sVEntry001A2190 {
 };
 
 extern char D_005047F8[];
-extern "C" void cRealFE_purgeCharAnimations(void* self);
+extern "C" void cRealFE_purgeCharAnimations(cRealFE* self);
 extern "C" void cFERiderManager_purge(void* p);
 extern "C" void func_0019CF40(void* p);
 extern "C" void cIrradianceDataBase_Purge(void* p);
@@ -1058,7 +1059,7 @@ extern "C" void cSSXAudio_FrontEndPurge(void* p);
  * func_0019CF40 on +0x1A70 and cIrradianceDataBase_Purge on D_005047F8, clears the app's words at +0x7C and +0x80 and finally
  * calls cSSXAudio_FrontEndPurge() on the audio object.
  */
-extern "C" void cRealFE_purge(void* self)
+extern "C" void cRealFE_purge(cRealFE* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVEntry001A2190* vt = (sVEntry001A2190*)ps2GraphicsMan->mVtbl;
@@ -1167,19 +1168,19 @@ static inline unsigned int feCallU(int slot)
  *
  * @return 1 when a frame was drawn, 0 when the renderer was not ready
  */
-extern "C" int cRealFE_render(void* self)
+extern "C" int cRealFE_render(cRealFE* self)
 {
     if (feCallU(17) == 0) {
         return 0;
     }
-    if (*(int*)((char*)self + 0xB5ADC) != 0) {
-        *(int*)((char*)self + 0xB5ADC) -= 1;
+    if (self->mWaitRenderNum != 0) {
+        self->mWaitRenderNum -= 1;
     }
     if (cFadeScreen_drawFade(self) != 0) {
         feCall(20);
         return 1;
     }
-    void* moviePlayer = *(void**)((char*)self + 0xB5AD4);
+    void* moviePlayer = self->mpMoviePlayer;
     if (moviePlayer != 0) {
         cMoviePlayer_asyncRender(moviePlayer, 0);
         feCall(20);
@@ -1273,12 +1274,12 @@ extern "C" int cRealFE_render(void* self)
     feW()->top->setG12(13);
     feW()->top->setAlpha(21);
     feW()->top->setG2(5);
-    cUIEngine_render3D(*(void**)((char*)self + 0xC));
+    cUIEngine_render3D(self->mpUI);
     cFERiderManager_render((char*)self + 0xB0);
     feW()->top--;
     feCall(32);
     feCall(22);
-    cUIEngine_render2D(*(void**)((char*)self + 0xC));
+    cUIEngine_render2D(self->mpUI);
     feCall(20);
     cSSXAudio_Update(cAudioInterface_bxAudio(), 0, 0.019999999552965164f);
     return 1;
@@ -1349,18 +1350,18 @@ struct sVE_27A0 {
  * +0x1A70, the rider manager (+0xB0, cFERiderManager_update) and the async file manager, and, when D_004A29EC is set, the
  * online members at +0xB5AB0 and +0xB5ABC and the lobby manager.
  */
-extern "C" void cRealFE_update(char* self)
+extern "C" void cRealFE_update(cRealFE* self)
 {
-    if (*(int*)(self + 0xB5ADC) != 0) return;
-    cFadeScreen_update(self);
-    if (*(void**)(self + 0xB5AD4) == 0) {
+    if (self->mWaitRenderNum != 0) return;
+    cFadeScreen_update(((char*)self));
+    if (self->mpMoviePlayer == 0) {
         if (cRealFE_mMovieList != 0) {
-            *(void**)(self + 0xB5AD4) = cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, str_MoviePlayer, 0x100, 0));
+            self->mpMoviePlayer = (cMoviePlayer*)cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, str_MoviePlayer, 0x100, 0));
             func_002B3A70((char*)cAudioInterface_bxAudio() + 0x118);
             sVidInfo_27A0 info;
             tMoviePlayOptions_SetDefaults(&info);
             int movieBits = cRealFE_mMovieList;
-            *(int*)(self + 0xB5AD8) = 0;
+            self->mMovieSkippable = 0;
             if (movieBits & 1) {
                 info.a = D_00441248[0];
                 cRealFE_mMovieList = movieBits & 0xFFFFFFFE;
@@ -1380,19 +1381,19 @@ extern "C" void cRealFE_update(char* self)
                 }
                 cRealFE_mMovieList &= 0xFFFFFFFB;
                 D_004A19D0 = 4;
-                *(int*)(self + 0xB5AD8) = 1;
+                self->mMovieSkippable = 1;
             }
             info.c = 1;
-            cMoviePlayer_init(*(void**)(self + 0xB5AD4), &info);
-            cMoviePlayer_asyncPlay(*(void**)(self + 0xB5AD4));
+            cMoviePlayer_init(self->mpMoviePlayer, &info);
+            cMoviePlayer_asyncPlay(self->mpMoviePlayer);
         }
-        if (*(void**)(self + 0xB5AD4) == 0) goto noh;
+        if (self->mpMoviePlayer == 0) goto noh;
     }
     {
-    int done = **(int**)(self + 0xB5AD4);
+    int done = *(int*)self->mpMoviePlayer;
     if (done == 0) {
-        cMoviePlayer_asyncUpdate(*(void**)(self + 0xB5AD4));
-        if (*(int*)(self + 0xB5AD8) != 0) {
+        cMoviePlayer_asyncUpdate(self->mpMoviePlayer);
+        if (self->mMovieSkippable != 0) {
             for (int i = 0; i < 2; i++) {
                 void** input = *(void***)((char*)SSXApp + (i << 2) + 0xB0);
                 int ok = *input != 0 && **(int**)input != 0;
@@ -1407,13 +1408,13 @@ extern "C" void cRealFE_update(char* self)
     out:
         if (done == 0) return;
     }
-    if (*(void**)(self + 0xB5AD4) != 0) {
-        cMoviePlayer__cMoviePlayer(*(void**)(self + 0xB5AD4), 3);
+    if (self->mpMoviePlayer != 0) {
+        cMoviePlayer__cMoviePlayer(self->mpMoviePlayer, 3);
     }
     int movieBits = cRealFE_mMovieList;
-    *(int*)(self + 0xB5ADC) = 1;
-    *(void**)(self + 0xB5AD4) = 0;
-    *(int*)(self + 0xB5AD8) = 0;
+    self->mWaitRenderNum = 1;
+    self->mpMoviePlayer = 0;
+    self->mMovieSkippable = 0;
     if (movieBits == 0) {
         func_002B3A98((char*)cAudioInterface_bxAudio() + 0x118);
     }
@@ -1421,21 +1422,21 @@ extern "C" void cRealFE_update(char* self)
     }
 noh:
         if (*(int*)((char*)SSXApp + 4) == 0) {
-            cUIEngine_update(*(void**)(self + 0xC));
+            cUIEngine_update(self->mpUI);
         } else {
-            *(int*)(self + 8) = 1;
+            self->IsEnding = 1;
         }
-        sVE_27A0* vt = *(sVE_27A0**)(self + 0xA0);
-        char* obj = self + 0x10;
+        sVE_27A0* vt = *(sVE_27A0**)(((char*)self) + 0xA0);
+        char* obj = ((char*)self) + 0x10;
         vt[3].fn(obj + vt[3].delta);
-        func_0019D250(self + 0x1A70);
-        cFERiderManager_update(self + 0xB0);
+        func_0019D250(((char*)self) + 0x1A70);
+        cFERiderManager_update(((char*)self) + 0xB0);
         if ((void*)SSXApp->mFEAsyncManager != 0) {
             cFEAsyncManager_Update(SSXApp->mFEAsyncManager);
         }
         if (D_004A29EC != 0) {
-            func_00263828(self + 0xB5AB0);
-            func_00263CF0(self + 0xB5ABC);
+            func_00263828(((char*)self) + 0xB5AB0);
+            func_00263CF0(((char*)self) + 0xB5ABC);
             if (LobbyMan_mLobbyMan != 0) {
                 func_0025AC50(LobbyMan_mLobbyMan);
             }
@@ -1499,7 +1500,7 @@ extern "C" void cAdfDataSource__cAdfDataSource(void* a, int b);
  * cGameAnimMap_TheGameAnimMap (cGameAnimMap_remSource), clears the slot, calls cAnimDataBase_purgeChanCache on the table and destroys the data
  * (cAdfDataSource__cAdfDataSource with 3).
  */
-extern "C" void cRealFE_purgeCharAnimations(void* self)
+extern "C" void cRealFE_purgeCharAnimations(cRealFE* self)
 {
     int i;
     for (i = 0; i < 1; i++) {
@@ -1570,31 +1571,31 @@ struct sRealFE_1A2C40 {
  * the online session (comm system, lobby manager, the network character profile, BE state calls). The last
  * two reset cRealFE_mStartState to 0.
  */
-extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
+extern "C" void cRealFE_loadStartState(cRealFE* self)
 {
     sStartState_1A2C40* backState = new (str_cFEStateBackground, 0, 0) sStartState_1A2C40;
-    cUIState_cUIState(backState, self->ui);
+    cUIState_cUIState(backState, (char*)self->mpUI);
     backState->vt = (sVEnt_1A2C40*)cFEStateBackground_vtbl;
     backState->vt[4].fn((char*)backState + backState->vt[4].delta);
-    cUIStateStack_pushExplicit(self->ui + 0x18, backState);
+    cUIStateStack_pushExplicit((char*)self->mpUI + 0x18, backState);
     switch (cRealFE_mStartState) {
     case 0: {
         D_004A19D8 = 0;
-        void* st = cFEStateTitle_cFEStateTitle1(cMemMan_alloc(76, str_cFEStateTitle, 0, 0), self->ui);
-        cUIStateStack_push(self->ui + 0x18, st);
+        void* st = cFEStateTitle_cFEStateTitle1(cMemMan_alloc(76, str_cFEStateTitle, 0, 0), (char*)self->mpUI);
+        cUIStateStack_push((char*)self->mpUI + 0x18, st);
         break;
     }
     case 39: {
         D_004A19D8 = 1;
-        void* st = cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge, 0, 0), self->ui);
-        cUIStateStack_push(self->ui + 0x18, st);
+        void* st = cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge, 0, 0), (char*)self->mpUI);
+        cUIStateStack_push((char*)self->mpUI + 0x18, st);
         cRealFE_mStartState = 0;
         break;
     }
     case 52: {
         D_004A19D8 = 0;
-        void* st = cFEStateRelogin_cFEStateRelogin(cMemMan_alloc(1748, str_cFEStateRelogin, 0, 0), self->ui);
-        cUIStateStack_push(self->ui + 0x18, st);
+        void* st = cFEStateRelogin_cFEStateRelogin(cMemMan_alloc(1748, str_cFEStateRelogin, 0, 0), (char*)self->mpUI);
+        cUIStateStack_push((char*)self->mpUI + 0x18, st);
         cCommSystem_closeChannel(cCommSystem_mCommSystem, cGameComm_mGameComm->unk_06C);
         func_00266E88(D_004A33F4);
         func_00266DF8(D_004A33F4);

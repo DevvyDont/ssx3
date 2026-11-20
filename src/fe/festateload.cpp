@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatememcard.h"
 #include "fe/festateload.h"
 #include "ui/uithing.h"
 #include "main/ssxapp.h"
@@ -376,24 +377,24 @@ struct sMemCardK186A08 {
  * @param engine  the UI engine
  * @return @p self
  */
-extern "C" sFEStateLoadK186A08* func_00186A08(sFEStateLoadK186A08* self, void* engine)
+extern "C" sFEStateLoadK186A08* func_00186A08(cFEStateMemCard* self, void* engine)
 {
-    cFEMemCard_cFEMemCard2(self, engine, 2);
+    cFEMemCard_cFEMemCard2(((sFEStateLoadK186A08*)self), engine, 2);
     int one = 1;
-    self->vtbl = cFEStateMemCard_vtbl;
-    D_004A14B8_K186A08 = self;
+    self->mVtbl = cFEStateMemCard_vtbl;
+    D_004A14B8_K186A08 = ((sFEStateLoadK186A08*)self);
     D_004A14B4 = 0;
     D_004A14BC = 0;
-    self->f204 = one;
-    self->fC = one;
-    self->f23C = one;
-    self->f230 = 0;
-    self->f234 = 0;
-    self->f240 = 0;
-    self->f244 = 0;
-    self->f19C = 26;
-    self->f22C = -1;
-    self->f238 = -1;
+    self->mAutoLoadOn = one;
+    self->mHashName = one;
+    self->mCard1Available = one;
+    self->mTotalSpaceRequired = 0;
+    self->mFreespaceCheckDone = 0;
+    self->mCard1Full = 0;
+    self->mCard1Error = 0;
+    self->mPopupType = 26;
+    self->mMissingSavedFileTypeFlags = -1;
+    self->mCard1MissingSavedFileTypeFlags = -1;
     sMemCardK186A08* mc = (sMemCardK186A08*)cSSXApp_getMCManager(SSXApp);
     mc->f12C = one;
     mc->f124 = one;
@@ -409,7 +410,7 @@ extern "C" sFEStateLoadK186A08* func_00186A08(sFEStateLoadK186A08* self, void* e
     mc->cb5C = (void*)cFEStateMemCard_callbackConfirmNoFreeBlocks;
     mc->f128 = 0;
     mc->f11C = 0;
-    return self;
+    return ((sFEStateLoadK186A08*)self);
 }
 #endif
 
@@ -425,9 +426,9 @@ extern "C" void cFEMemCard__cFEMemCard(void* self, int flags);
  *
  * @param flags  destructor flags, passed on
  */
-extern "C" void cFEStateMemCard__cFEStateMemCard(void* self, int flags)
+extern "C" void cFEStateMemCard__cFEStateMemCard(cFEStateMemCard* self, int flags)
 {
-    *(void***)((char*)self + 8) = cFEStateMemCard_vtbl;
+    self->mVtbl = cFEStateMemCard_vtbl;
     D_004A14B8 = 0;
     cFEMemCard__cFEMemCard(self, flags);
 }

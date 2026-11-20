@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/ovstatehud.h"
 #include "ui/uithing.h"
 #include "be/beintnewrace.h"
 #include "fe/bxloadindicator.h"
@@ -644,22 +645,21 @@ struct sElem_9A30 {
  * @return @p hud
  */
 // HUD overlay state constructor: base state, vtable, the two sub-panels and default scales.
-extern "C" void* cOVStateHUD1P_cOVStateHUD1P(void* hud, int pEngine)
+extern "C" void* cOVStateHUD1P_cOVStateHUD1P(cOVStateHUD1P* hud, int pEngine)
 {
-    char* self = (char*)hud;
-    cUIState_cUIState_9A30(self, pEngine);
-    *(char**)(self + 8) = cOVStateHUD1P_vtbl;
-    new (self + 0x48) sElem_9A30[2];
-    *(int*)(self + 0x474) = -1;
-    *(int*)(self + 0x3D4) = 0;
-    *(int*)(self + 0x3D8) = 0;
-    *(float*)(self + 0x478) = 1.0f;
-    *(float*)(self + 0x47C) = 1.0f;
-    *(int*)(self + 0x480) = 0;
-    *(int*)(self + 0x484) = 0;
-    *(float*)(self + 0x488) = 1.0f;
-    *(float*)(self + 0x48C) = 1.0f;
-    return hud;
+    cUIState_cUIState_9A30(((char*)hud), pEngine);
+    hud->mVtbl = (void**)cOVStateHUD1P_vtbl;
+    new (((char*)hud) + 0x48) sElem_9A30[2];
+    hud->mGlow.mSourceShape = -1;
+    hud->mbHideHUD = 0;
+    hud->mHideHUDOV = 0;
+    hud->mGlow.mWidth = 1.0f;
+    hud->mGlow.mHeight = 1.0f;
+    *(int*)&hud->mGlow.mTop = 0;
+    *(int*)&hud->mGlow.mLeft = 0;
+    hud->mGlow.mRight = 1.0f;
+    hud->mGlow.mBottom = 1.0f;
+    return ((void*)hud);
 }
 #endif
 
@@ -827,10 +827,6 @@ struct sSlot_9AD0 {
     int pad10[2];
 };
 
-struct tBarConfig {
-    float scale;
-    int count;
-};
 
 struct sGameOpts_9AD0 {
     unsigned int flags;         // 0x000: bits 22-24 = language
@@ -928,8 +924,8 @@ static inline void calcBarSegments_9AD0(int& n, float d)
 // A vertical bar of 23-pixel segments over a 54-pixel base: segment count and scale for an element height h.
 static inline void setupVertBar_9AD0(tBarConfig* b, const float& h)
 {
-    calcBarSegments_9AD0(b->count, h - 54.0f);
-    b->scale = h / ((float)b->count * 23.0f + 54.0f);
+    calcBarSegments_9AD0(b->numMidSegments, h - 54.0f);
+    b->partScale = h / ((float)b->numMidSegments * 23.0f + 54.0f);
 }
 
 // Localised string by name from the game's text table (SSXApp + 0x8C; vptr at 0x4, slot 4 = lookup by hash).
@@ -957,7 +953,7 @@ static inline unsigned short* getLocString_9AD0(char* id)
  *
  * @param vself  the HUD state (this)
  */
-extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
+extern "C" void cOVStateHUD1P_onCreateScreen(cOVStateHUD1P* vself)
 {
     sHUD1P* self = (sHUD1P*)vself;
     self->hash = GetHashValue32(str_hud_b);
@@ -1120,20 +1116,20 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
     getElemSize_9AD0(&D_00477480, &a, 0);
     setupVertBar_9AD0(&self->bars[1], a.y);
     getElemSize_9AD0(&D_00477048, &a, 0);
-    self->bars[2].count = 1;
-    self->bars[2].scale = 1.0f;
+    self->bars[2].numMidSegments = 1;
+    self->bars[2].partScale = 1.0f;
     a.x -= 23.0f;
     if (a.x - 18.0f < 0.0f) {
-        self->bars[2].count = 0;
-        self->bars[2].scale = a.x * (1.0f / 18.0f);
+        self->bars[2].numMidSegments = 0;
+        self->bars[2].partScale = a.x * (1.0f / 18.0f);
     }
     getElemSize_9AD0(&D_00477B88, &a, 0);
-    self->bars[3].count = 1;
-    self->bars[3].scale = 1.0f;
+    self->bars[3].numMidSegments = 1;
+    self->bars[3].partScale = 1.0f;
     a.x -= 23.0f;
     if (a.x - 18.0f < 0.0f) {
-        self->bars[3].count = 0;
-        self->bars[3].scale = a.x * (1.0f / 18.0f);
+        self->bars[3].numMidSegments = 0;
+        self->bars[3].partScale = a.x * (1.0f / 18.0f);
     }
     }
     {
@@ -1195,83 +1191,83 @@ extern "C" void* func_002B40F0(void* self, int i);
  * @return always 0
  */
 // HUD overlay message handler: flags, counters, the two message strings and the track-name hash.
-extern "C" int cOVStateHUD1P_handleEvent(char* self, int msg, unsigned short* str)
+extern "C" int cOVStateHUD1P_handleEvent(cOVStateHUD1P* self, int msg, unsigned short* str)
 {
     switch (msg) {
     case 0:
-        *(int*)(self + 0x3D4) = 1;
+        self->mbHideHUD = 1;
         break;
     case 1:
-        *(int*)(self + 0x3D4) = 0;
+        self->mbHideHUD = 0;
         break;
     case 2:
-        *(int*)(self + 0x3D8) = 0;
+        self->mHideHUDOV = 0;
         break;
     case 3:
-        *(int*)(self + 0x3D8) += 1;
+        self->mHideHUDOV += 1;
         break;
     case 4:
-        if (*(int*)(self + 0x3D8) > 0) {
-            *(int*)(self + 0x3D8) -= 1;
+        if (self->mHideHUDOV > 0) {
+            self->mHideHUDOV -= 1;
         }
         break;
     case 12:
-        *(unsigned int*)(self + 0x3CC) |= 0x20000;
-        *(int*)(self + 0xA44) = 0;
-        strcpy1((unsigned short*)(self + 0x944), str);
+        self->mRenderFlags |= 0x20000;
+        *(int*)&self->mMessageFrame = 0;
+        strcpy1((unsigned short*)(((char*)self) + 0x944), str);
         break;
     case 13:
-        *(unsigned short*)(self + 0x944) = 0;
-        *(int*)(self + 0xA44) = 0;
-        *(unsigned int*)(self + 0x3CC) &= ~0x20000;
+        self->mMessage[0] = 0;
+        *(int*)&self->mMessageFrame = 0;
+        self->mRenderFlags &= ~0x20000;
         break;
     case 14:
-        *(unsigned int*)(self + 0x3CC) |= 0x40000;
-        strcpy1((unsigned short*)(self + 0xA48), str);
+        self->mRenderFlags |= 0x40000;
+        strcpy1((unsigned short*)(((char*)self) + 0xA48), str);
         break;
     case 15:
-        *(unsigned short*)(self + 0xA48) = 0;
-        *(unsigned int*)(self + 0x3CC) &= ~0x40000;
+        self->mNetStatusMessage[0] = 0;
+        self->mRenderFlags &= ~0x40000;
         break;
     case 5: {
-        *(unsigned int*)(self + 0x3CC) &= ~0x10000;
+        self->mRenderFlags &= ~0x10000;
         char* name = (char*)func_002B40F0((char*)cAudioInterface_bxAudio() + 0x118, -1);
         unsigned int hash = 0xF0000000;
         if (name != 0 && *name != 0) {
-            *(unsigned int*)(self + 0x3CC) |= 0x10000;
+            self->mRenderFlags |= 0x10000;
             hash = GetHashValue32(name);
         }
-        if (!(*(unsigned int*)(self + 0x3CC) & 0x10000) || hash != *(unsigned int*)(self + 0x3B4)) {
-            *(int*)(self + 0x3B4) = hash;
-            *(float*)(self + 0x190) = -1.0f;
-            *(int*)(self + 0x198) = 0;
-            *(int*)(self + 0x3A4) = 0;
-            *(int*)(self + 0x3A8) = 0;
-            *(int*)(self + 0x194) = 0;
+        if (!(self->mRenderFlags & 0x10000) || hash != self->mLastSongNameHashId) {
+            self->mLastSongNameHashId = (unsigned int)hash;
+            self->mBigRadioAnimFrame = -1.0f;
+            *(int*)&self->mBigRadioTextAnimFrame = 0;
+            self->mBigRadioTextLinesNum = 0;
+            self->mBigRadioTextLineSongIndexMax = 0;
+            *(int*)&self->mBigRadioBkgdAnimFrame = 0;
         }
         break;
     }
     case 6:
-        *(int*)(self + 0x3C8) = 0;
-        *(int*)(self + 0x3C0) = 0;
-        *(int*)(self + 0x3C4) = 8;
+        self->mEventStateData = 0;
+        *(int*)&self->mEventStateFrame = 0;
+        self->mEventStateHFX = 8;
         break;
     case 7:
-        *(unsigned int*)(self + 0x3CC) &= 0xFFBDC3FF;
-        *(int*)(self + 0x3C4) = 80;
-        *(int*)(self + 0x3C0) = 0;
-        *(int*)(self + 0xA44) = 0;
-        *(unsigned short*)(self + 0x944) = 0;
-        *(unsigned int*)(self + 0x18C) = 0xFFFFFFFF;
+        self->mRenderFlags &= 0xFFBDC3FF;
+        self->mEventStateHFX = 80;
+        *(int*)&self->mEventStateFrame = 0;
+        *(int*)&self->mMessageFrame = 0;
+        self->mMessage[0] = 0;
+        self->mLastMissionID = 0xFFFFFFFF;
         break;
     case 8:
-        *(int*)(self + 0x168) = 0;
-        *(int*)(self + 0x160) = 1;
+        *(int*)&self->unk_168 = 0;
+        self->unk_160 = 1;
         break;
     case 9:
-        *(int*)(self + 0x160) = 0;
-        *(int*)(self + 0x168) = 0;
-        *(int*)(self + 0x164) = 0;
+        self->unk_160 = 0;
+        *(int*)&self->unk_168 = 0;
+        *(int*)&self->unk_164 = 0;
         break;
     }
     return 0;
@@ -1301,7 +1297,7 @@ extern "C" float cOVStateHUD1P_calcElemPosY(void* self, int align, float pos, fl
  * @param alignY  vertical pivot (On Tour pivotY), the same way
  * @param flags  reflect bits: 1 mirrors x about 640, 2 then keeps the horizontal pivot unflipped
  */
-extern "C" void cOVStateHUD1P_calcElemPos(void* self, float* out, float* pos, float* size, float* scale, int alignX, int alignY, int flags)
+extern "C" void cOVStateHUD1P_calcElemPos(cOVStateHUD1P* self, float* out, float* pos, float* size, float* scale, int alignX, int alignY, int flags)
 {
     out[0] = cOVStateHUD1P_calcElemPosX(self, alignX, flags, pos[0], size[0], scale[0]);
     out[1] = cOVStateHUD1P_calcElemPosY(self, alignY, pos[1], size[1], scale[1]);
@@ -1341,7 +1337,7 @@ struct sVEnt_001F1190 { short delta; short index; void (*fn)(void*, int, sHudVer
  * @param scale  the scale
  * @param color  the colour (tARGB, 1.0 = full)
  */
-extern "C" void cOVStateHUD1P_renderBitmap(void* self, cOVStateHUDElem* elem, float* pos, float* size, float* scale, float* color)
+extern "C" void cOVStateHUD1P_renderBitmap(cOVStateHUD1P* self, cOVStateHUDElem* elem, float* pos, float* size, float* scale, float* color)
 {
     if (elem != 0) {
         *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = texOf_001F1190(elem);
@@ -1425,7 +1421,7 @@ struct sVEnt_001F1338 { short delta; short index; void (*fn)(void*, int, sHudVer
  * @param scale  the scale
  * @param color  the colour (tARGB)
  */
-extern "C" void cOVStateHUD1P_renderQuad(void* self, float* pos, float* size, float* scale, float* color)
+extern "C" void cOVStateHUD1P_renderQuad(cOVStateHUD1P* self, float* pos, float* size, float* scale, float* color)
 {
     sHudVert_001F1338 verts[4];
     int alpha = (int)(color[0] * 128.0f);
@@ -1538,7 +1534,7 @@ struct sVec2_1F14B0 {
  * @param x  the left edge
  * @param y  the top
  */
-extern "C" void cOVStateHUD1P_renderExplodeText(void* self, const char* str, sGlyphTable_1F14B0* font, float amp, float x, float y)
+extern "C" void cOVStateHUD1P_renderExplodeText(cOVStateHUD1P* self, const char* str, sGlyphTable_1F14B0* font, float amp, float x, float y)
 {
     sVec2_1F14B0 sc;
     sc.x = font->f38 / font->f30;
@@ -1586,7 +1582,7 @@ struct sHudElemDef_001F16C0 {
     signed char flags;      // 0x21
     char pad22[2];
 };
-extern "C" void cOVStateHUD1P_renderTime(void* self, int a1, int a2, int a3, int a4, int a5, float* pos, float* scale, sColor_001F16C0* color, int align, int flags, int a11);
+extern "C" void cOVStateHUD1P_renderTime(cOVStateHUD1P* self, int a1, int a2, int a3, int a4, int a5, float* pos, float* scale, sColor_001F16C0* color, int align, int flags, int a11);
 
 /**
  * Draws a clock time placed, scaled and coloured by a HUD element definition.
@@ -1607,7 +1603,7 @@ extern "C" void cOVStateHUD1P_renderTime(void* self, int a1, int a2, int a3, int
  * @param posOff  offset added to the position, or 0
  * @param color  colour override (tARGB), or 0 for the element's
  */
-extern "C" void cOVStateHUD1P_renderTime1(void* self, int hour, int minute, int sec, int secFrac, int timeRenderFlags, sHudElemDef_001F16C0* defs, int idx, int reflect, float* scaleMul, float* posOff, sColor_001F16C0* color)
+extern "C" void cOVStateHUD1P_renderTime1(cOVStateHUD1P* self, int hour, int minute, int sec, int secFrac, int timeRenderFlags, sHudElemDef_001F16C0* defs, int idx, int reflect, float* scaleMul, float* posOff, sColor_001F16C0* color)
 {
     float pos[4];
     float scale[4];
@@ -1695,7 +1691,7 @@ static inline float oneAdj_001F1840(const char* s, float w)
  * @param reflect  the reflect flags for cOVStateHUD1P_calcElemPos: bit 0 mirrors x about 640, bit 1 then keeps the horizontal
  *             alignment unflipped
  */
-extern "C" void cOVStateHUD1P_renderTime(void* self_, int hour, int minute, int sec, int secFrac, int timeRenderFlags, float* pos, float* scale, sColor_001F16C0* color, int align, int flags, int reflect)
+extern "C" void cOVStateHUD1P_renderTime(cOVStateHUD1P* self_, int hour, int minute, int sec, int secFrac, int timeRenderFlags, float* pos, float* scale, sColor_001F16C0* color, int align, int flags, int reflect)
 {
     sHUD_001F1840* self = (sHUD_001F1840*)self_;
     float size[2];
@@ -1705,7 +1701,7 @@ extern "C" void cOVStateHUD1P_renderTime(void* self_, int hour, int minute, int 
     if (timeRenderFlags & 1) n = 4.0f;
     size[1] = (float)self->font->count * self->font->f34;
     size[0] = self->f170 * n + (self->digitW + 2.0f + 2.0f) * (n - 1.0f);
-    cOVStateHUD1P_calcElemPos(self, out, pos, size, scale, align, flags, reflect);
+    cOVStateHUD1P_calcElemPos((cOVStateHUD1P*)self, out, pos, size, scale, align, flags, reflect);
     sFont_001F1840* font = self->font;
     font->f38 = font->f30 * scale[0];
     font->f3C = font->f34 * scale[1];
@@ -1782,7 +1778,7 @@ struct sFont_001F1B30 {
  * @param align  horizontal pivot override, 0x7F for the element's
  * @param flags  vertical pivot override, 0x7F for the element's
  */
-extern "C" void cOVStateHUD1P_renderText(void* ctx, sFont_001F1B30* font, sHudElemDef_001F16C0* defs, int idx, const char* str, int reflect, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
+extern "C" void cOVStateHUD1P_renderText(cOVStateHUD1P* ctx, sFont_001F1B30* font, sHudElemDef_001F16C0* defs, int idx, const char* str, int reflect, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
 {
     float scale[2];
     float pos[4];
@@ -1945,7 +1941,7 @@ static inline sV4_001F1E28 vu0Scale_1E28(const sV4_001F1E28& v, float s)
  * @param flags  vertical pivot override, 0x7F for the elements'
  */
 // Draws text blended between two HUD element layouts (t = 0 is element idx1, t = 1 is element idx2).
-extern "C" void cOVStateHUD1P_renderText1(void* ctx, float blend, sFont_001F1E28* font, sHudElemDef_001F16C0* defs, int idx1, int idx2, const char* str, int reflect, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
+extern "C" void cOVStateHUD1P_renderText1(cOVStateHUD1P* ctx, float blend, sFont_001F1E28* font, sHudElemDef_001F16C0* defs, int idx1, int idx2, const char* str, int reflect, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
 {
     float scale[2];
     float extent[4];
@@ -2085,7 +2081,7 @@ struct sFont_001F22E8 {
  * @param align  horizontal pivot override, 0x7F for the element's
  * @param flags  vertical pivot override, 0x7F for the element's
  */
-extern "C" void cOVStateHUD1P_renderText2(void* ctx, sFont_001F22E8* font, sHudElemDef_001F16C0* defs, int idx, const unsigned short* str, int reflect, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
+extern "C" void cOVStateHUD1P_renderText2(cOVStateHUD1P* ctx, sFont_001F22E8* font, sHudElemDef_001F16C0* defs, int idx, const unsigned short* str, int reflect, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
 {
     float scale[2];
     float pos[4];
@@ -2234,7 +2230,7 @@ static inline sV4_001F25E0 vu0Scale_25E0(const sV4_001F25E0& v, float s)
  * @param flags  vertical pivot override, 0x7F for the elements'
  */
 // Draws text blended between two HUD element layouts (t = 0 is element idx1, t = 1 is element idx2).
-extern "C" void func_001F25E0(void* ctx, float blend, sFont_001F25E0* font, sHudElemDef_001F16C0* defs, int idx1, int idx2, const unsigned short* str, int reflect, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
+extern "C" void func_001F25E0(cOVStateHUD1P* ctx, float blend, sFont_001F25E0* font, sHudElemDef_001F16C0* defs, int idx1, int idx2, const unsigned short* str, int reflect, float* scaleMul, float* posOff, sColor_001F16C0* color, float* rect, int align, int flags)
 {
     float scale[2];
     float extent[4];
@@ -2378,7 +2374,7 @@ static inline float alignPos_001F2AA0(float v, int a, float size)
  * @param flags  reflect bits: 1 mirrors x about 640, 2 then keeps the pivot unflipped
  * @param rect  receives the drawn area (x, y, width, height), or 0
  */
-extern "C" void cOVStateHUD1P_renderMultiText(void* self, sFont_001F2AA0* font, sHudElemDef_001F16C0* defs, int idx, const char* str, int flags, float* rect)
+extern "C" void cOVStateHUD1P_renderMultiText(cOVStateHUD1P* self, sFont_001F2AA0* font, sHudElemDef_001F16C0* defs, int idx, const char* str, int flags, float* rect)
 {
     float wrap[2];
     float pos[2];
@@ -2391,12 +2387,12 @@ extern "C" void cOVStateHUD1P_renderMultiText(void* self, sFont_001F2AA0* font, 
     tHUDDef_getSize(hudDef, wrap, 0);
     tHUDDef_getPos(hudDef, pos);
     tHUDDef_getScale(hudDef, escale);
-    sFont_001F2AA0* sf = *(sFont_001F2AA0**)((char*)self + 0x428);
+    sFont_001F2AA0* sf = (sFont_001F2AA0*)self->unk_428;
     sf->f38 = sf->f30 * escale[0];
     sf->f3C = sf->f34 * escale[1];
     const char* remaining = str;
     while (remaining != 0) {
-        remaining = cFont_textSmartLimit(*(sFont_001F2AA0**)((char*)self + 0x428), remaining, lines[n], 50, (*(sFont_001F2AA0**)((char*)self + 0x428))->f38, wrap[0]);
+        remaining = cFont_textSmartLimit((sFont_001F2AA0*)self->unk_428, remaining, lines[n], 50, ((sFont_001F2AA0*)self->unk_428)->f38, wrap[0]);
         n++;
     }
     tHUDDef_getColour(&defs[idx], &col);
@@ -2485,7 +2481,7 @@ static inline float alignPos_001F2DB0(float v, int a, float size)
  * @param flags  reflect bits: 1 mirrors x about 640, 2 then keeps the pivot unflipped
  * @param rect  receives the drawn area (x, y, width, height), or 0
  */
-extern "C" void cOVStateHUD1P_renderMultiText1(void* self, sFont_001F2DB0* font, sHudElemDef_001F16C0* defs, int idx, const unsigned short* str, int flags, float* rect)
+extern "C" void cOVStateHUD1P_renderMultiText1(cOVStateHUD1P* self, sFont_001F2DB0* font, sHudElemDef_001F16C0* defs, int idx, const unsigned short* str, int flags, float* rect)
 {
     float wrap[2];
     float pos[2];
@@ -2498,12 +2494,12 @@ extern "C" void cOVStateHUD1P_renderMultiText1(void* self, sFont_001F2DB0* font,
     sHudElemDef_001F16C0* hudDef = &defs[idx];
     tHUDDef_getPos(hudDef, pos);
     tHUDDef_getScale(hudDef, escale);
-    sFont_001F2DB0* sf = *(sFont_001F2DB0**)((char*)self + 0x428);
+    sFont_001F2DB0* sf = (sFont_001F2DB0*)self->unk_428;
     sf->f38 = sf->f30 * escale[0];
     sf->f3C = sf->f34 * escale[1];
     const unsigned short* remaining = str;
     while (remaining != 0) {
-        remaining = cFont_textSmartLimit1(*(sFont_001F2DB0**)((char*)self + 0x428), (*(sFont_001F2DB0**)((char*)self + 0x428))->f38, wrap[0], remaining, lines[n], 50);
+        remaining = cFont_textSmartLimit1((sFont_001F2DB0*)self->unk_428, ((sFont_001F2DB0*)self->unk_428)->f38, wrap[0], remaining, lines[n], 50);
         n++;
     }
     tHUDDef_getColour(&defs[idx], &col);

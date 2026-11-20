@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/screenkeyboard.h"
+#include "fe/festatememcard.h"
 #include "util/locale.h"
 #include "fe/festateriderdetail.h"
 #include "fe/fecustom.h"
@@ -2496,23 +2498,23 @@ extern int cUIGroup_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *cScreenKeyboard_cScreenKeyboard(char *self) {
-    *(char **)(self + 4) = self;
-    *(char **)(self + 0) = self;
-    *(int *)(self + 0xC) = 0;
-    *(int *)(self + 0x10) = 0;
-    *(int **)(self + 8) = cUIScreen_vtbl;
-    tAttrScreen_tAttrScreen((unsigned short*)(self + 0x14));
-    cList_cList(self + 0x18);
-    *(int *)(self + 0x34) = 0;
-    *(int *)(self + 0x38) = 0;
-    *(int *)(self + 0x3C) = 0;
-    cUIThing_cUIThing(self + 0x40, 0, 0);
-    *(int **)(self + 0x48) = cUIGroup_vtbl;
-    cList_cList(self + 0xB4);
-    *(int *)(self + 0xD0) = 0;
-    *(int **)(self + 8) = cScreenKeyboard_vtbl;
-    return self;
+extern "C" void *cScreenKeyboard_cScreenKeyboard(cScreenKeyboard* self) {
+    self->mpNext = (cListNode*)((char*)self);
+    self->mpPrev = (cListNode*)((char*)self);
+    self->mpBuffer = 0;
+    self->mpScreenHeader = 0;
+    self->mVtbl = (void**)cUIScreen_vtbl;
+    tAttrScreen_tAttrScreen((unsigned short*)(((char*)self) + 0x14));
+    cList_cList(((char*)self) + 0x18);
+    self->mpKeyframeBlock = 0;
+    self->mpObjectBlock = 0;
+    self->mppObjectList = 0;
+    cUIThing_cUIThing(((char*)self) + 0x40, 0, 0);
+    *(int **)(((char*)self) + 0x48) = cUIGroup_vtbl;
+    cList_cList(((char*)self) + 0xB4);
+    self->mpState = 0;
+    self->mVtbl = (void**)cScreenKeyboard_vtbl;
+    return ((char*)self);
 }
 #endif
 
@@ -2539,8 +2541,8 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_getCurrentKey);
  * @param screen  the keyboard
  * @return the word at +0x170
  */
-extern "C" int cScreenKeyboard_getCurrentKey(void *screen) {
-    return (*(int *)((char*)(screen) + (0x170)));
+extern "C" int cScreenKeyboard_getCurrentKey(cScreenKeyboard* screen) {
+    return (screen->mCurrentKey);
 }
 #endif
 
@@ -2553,8 +2555,8 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_setIncludeNumbers);
  * @param screen  the keyboard
  * @param includeNumbers  the new value
  */
-extern "C" void cScreenKeyboard_setIncludeNumbers(void *screen, int includeNumbers) {
-    (*(int *)((char*)(screen) + (0xD8))) = includeNumbers;
+extern "C" void cScreenKeyboard_setIncludeNumbers(cScreenKeyboard* screen, int includeNumbers) {
+    (screen->mIncludeNumbers) = includeNumbers;
 }
 #endif
 
@@ -2567,8 +2569,8 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_setIncludeShift);
  * @param screen  the keyboard
  * @param includeShift  the new value
  */
-extern "C" void cScreenKeyboard_setIncludeShift(void *screen, int includeShift) {
-    (*(int *)((char*)(screen) + (0xDC))) = includeShift;
+extern "C" void cScreenKeyboard_setIncludeShift(cScreenKeyboard* screen, int includeShift) {
+    (screen->mIncludeShift) = includeShift;
 }
 #endif
 
@@ -2581,8 +2583,8 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_setIncludeSpace);
  * @param screen  the keyboard
  * @param includeSpace  the new value
  */
-extern "C" void cScreenKeyboard_setIncludeSpace(void *screen, int includeSpace) {
-    (*(int *)((char*)(screen) + (0xE0))) = includeSpace;
+extern "C" void cScreenKeyboard_setIncludeSpace(cScreenKeyboard* screen, int includeSpace) {
+    (screen->mIncludeSpace) = includeSpace;
 }
 #endif
 
@@ -2597,12 +2599,12 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_cursorRight);
  *
  * @param screen  the keyboard
  */
-extern "C" void cScreenKeyboard_cursorRight(void *screen) {
+extern "C" void cScreenKeyboard_cursorRight(cScreenKeyboard* screen) {
     int temp_3;
 
-    temp_3 = (*(int *)((char*)(screen) + (0x16C))) + 1;
-    if (temp_3 < (*(int *)((char*)(screen) + (0xD4)))) {
-        (*(int *)((char*)(screen) + (0x16C))) = temp_3;
+    temp_3 = (screen->mCursorPos) + 1;
+    if (temp_3 < (screen->mMaxChars)) {
+        (screen->mCursorPos) = temp_3;
     }
 }
 #endif
@@ -2617,12 +2619,12 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_cursorLeft);
  *
  * @param screen  the keyboard
  */
-extern "C" void cScreenKeyboard_cursorLeft(void *screen) {
+extern "C" void cScreenKeyboard_cursorLeft(cScreenKeyboard* screen) {
     int temp_2;
 
-    temp_2 = (*(int *)((char*)(screen) + (0x16C)));
+    temp_2 = (screen->mCursorPos);
     if (temp_2 > 0) {
-        (*(int *)((char*)(screen) + (0x16C))) = (int) (temp_2 - 1);
+        (screen->mCursorPos) = (int) (temp_2 - 1);
     }
 }
 #endif
@@ -4517,8 +4519,8 @@ extern void* cFEStateOptionsDeviceSelect_vtbl[];
  *
  * @return no meaningful value (cFEMemCard__cFEMemCard returns nothing)
  */
-extern "C" void* cFEStateOptionsDeviceSelect__cFEStateOptionsDeviceSelect(void *self) {
-    *(void***)((char*)self + 8) = cFEStateOptionsDeviceSelect_vtbl;
+extern "C" void* cFEStateOptionsDeviceSelect__cFEStateOptionsDeviceSelect(cFEStateOptionsDeviceSelect* self) {
+    self->mVtbl = cFEStateOptionsDeviceSelect_vtbl;
     return cFEMemCard__cFEMemCard_E150(self);
 }
 #endif
@@ -4536,10 +4538,10 @@ extern int D_0046C228_E178[] __asm__("cFEStateOptionsDeviceSelect_vtbl");
  *
  * @return @p self
  */
-extern "C" void *cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect(void *self) {
+extern "C" void *cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect(cFEStateOptionsDeviceSelect* self) {
     cFEMemCard_cFEMemCard_E178(self, 0, 0);
-    *(int **)((char *)self + 8) = D_0046C228_E178;
-    return self;
+    self->mVtbl = (void**)D_0046C228_E178;
+    return ((void*)self);
 }
 #endif
 
@@ -5665,10 +5667,10 @@ extern int cFEStateMemCard_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *cFEStateMemCard_cFEStateMemCard(void *self) {
+extern "C" void *cFEStateMemCard_cFEStateMemCard(cFEStateMemCard* self) {
     cFEMemCard_cFEMemCard_E950(self, 0, 0);
-    *(int **)((char *)self + 8) = cFEStateMemCard_vtbl;
-    return self;
+    self->mVtbl = (void**)cFEStateMemCard_vtbl;
+    return ((void*)self);
 }
 #endif
 

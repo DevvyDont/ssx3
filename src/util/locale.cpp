@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateaudiooptions.h"
 #include "util/locale.h"
 #include "ui/uiengine.h"
 #include "main/ssxapp.h"
@@ -424,36 +425,35 @@ extern char str_empty_box[];
  * @param inStore  nonzero when opened from the store (+0x74)
  * @return self
  */
-extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, cUIEngine* engine, signed char idx, int inStore)
+extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(cFEStateAudioOptions* self, cUIEngine* engine, signed char idx, int inStore)
 {
-    char* selfBytes = (char*)self;
     cUIState_cUIState(self, engine);
-    *(int*)(selfBytes + 0xC) = 0x10;
-    *(void***)(selfBytes + 0x8) = cFEStateAudioOptions_vtbl;
-    *(signed char*)(selfBytes + 0x44) = idx;
-    void* feCustom = **(void***)(selfBytes + 0x10);
+    self->mHashName = 0x10;
+    self->mVtbl = cFEStateAudioOptions_vtbl;
+    self->mUserNum = idx;
+    void* feCustom = *(void**)self->mpEngine;
     if (feCustom != 0) {
-        *(unsigned char*)(selfBytes + 0x15) = cFECustom_getPlayerCtrlMask(feCustom, idx);
+        self->mCtrlBits = cFECustom_getPlayerCtrlMask(feCustom, idx);
     }
-    *(int*)(selfBytes + 0x48) = 0;
-    *(int*)(selfBytes + 0x64) = 0;
-    *(int*)(selfBytes + 0x68) = 0;
-    *(int*)(selfBytes + 0x6C) = 0;
+    self->mpHelpText = 0;
+    self->mpEditRequestOption = 0;
+    self->mpRequestLineOption = 0;
+    self->mpPlaylistOption = 0;
     for (int i = 3; i >= 0; i--) {
-        ((int*)(selfBytes + 0x4C))[i] = 0;
+        ((int*)(((char*)self) + 0x4C))[i] = 0;
     }
-    *(int*)(selfBytes + 0x74) = inStore;
-    char* engineObj = *(char**)(selfBytes + 0x10);
+    self->mInStore = inStore;
+    char* engineObj = (char*)self->mpEngine;
     int hash = GetHashValue32(str_checkbox);
-    *(void**)(selfBytes + 0x5C) = cUITextureBank_getElementByHashname(engineObj + 0x58, hash);
-    char* engineObj2 = *(char**)(selfBytes + 0x10);
+    self->mpCheckBox = (cTextureElement*)cUITextureBank_getElementByHashname(engineObj + 0x58, hash);
+    char* engineObj2 = (char*)self->mpEngine;
     int emptyBoxHash = GetHashValue32(str_empty_box);
-    *(void**)(selfBytes + 0x60) = cUITextureBank_getElementByHashname(engineObj2 + 0x58, emptyBoxHash);
-    *(int*)(selfBytes + 0x70) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(selfBytes + 0x44));
+    self->mpEmptyBox = (cTextureElement*)cUITextureBank_getElementByHashname(engineObj2 + 0x58, emptyBoxHash);
+    self->mCharID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
     void* ri = cBE_getInterface_Fv(cBE_getBE(), 13);
-    *(int*)(selfBytes + 0x78) = cBERewardInterface_getRadioMode(ri, *(signed char*)(selfBytes + 0x44), *(int*)(selfBytes + 0x70));
-    *(int*)(selfBytes + 0x7C) = cBERewardInterface_getNumSongsInPlayList(ri, *(signed char*)(selfBytes + 0x44), *(int*)(selfBytes + 0x70)) > 0;
-    return self;
+    self->mRadioMode = cBERewardInterface_getRadioMode(ri, self->mUserNum, self->mCharID);
+    self->mCreatedRequestList = cBERewardInterface_getNumSongsInPlayList(ri, self->mUserNum, self->mCharID) > 0;
+    return ((void*)self);
 }
 #endif
 
@@ -507,12 +507,12 @@ public:
  * In game it tells the "hud" state v24(3, 0); in the front end it calls func_0028F140(cAudioInterface_bxAudio(), 4).
  * The new screen is kept at +0x40 and starts at frame 0.
  */
-extern "C" void cFEStateAudioOptions_onCreateScreen(void* self)
+extern "C" void cFEStateAudioOptions_onCreateScreen(cFEStateAudioOptions* self)
 {
     char* name;
     if ((void*)SSXApp->Game != 0) {
         name = str_142audio_pda;
-        cFEStateAudioOptions_onCreateScreen_cObj* obj = (cFEStateAudioOptions_onCreateScreen_cObj*)cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(str_hud));
+        cFEStateAudioOptions_onCreateScreen_cObj* obj = (cFEStateAudioOptions_onCreateScreen_cObj*)cUIStateStack_findState((char*)self->mpEngine + 0x18, GetHashValue32(str_hud));
         if (obj != 0) {
             obj->handleEvent(3, 0);
         }
@@ -520,9 +520,9 @@ extern "C" void cFEStateAudioOptions_onCreateScreen(void* self)
         name = str_140audio;
         func_0028F140(cAudioInterface_bxAudio(), 4);
     }
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(name), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -571,10 +571,10 @@ extern "C" cFEStateAudioOptions_onDestroyScreen_cObj* cUIStateStack_findState(vo
 /**
  * Closes the audio options screen; in game it first tells the "hud" state v24(4, 0).
  */
-extern "C" void cFEStateAudioOptions_onDestroyScreen(void* self)
+extern "C" void cFEStateAudioOptions_onDestroyScreen(cFEStateAudioOptions* self)
 {
     if ((void*)SSXApp->Game != 0) {
-        cFEStateAudioOptions_onDestroyScreen_cObj* obj = cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(str_hud));
+        cFEStateAudioOptions_onDestroyScreen_cObj* obj = cUIStateStack_findState((char*)self->mpEngine + 0x18, GetHashValue32(str_hud));
         if (obj != 0) {
             obj->handleEvent(4, 0);
         }
@@ -607,15 +607,15 @@ static inline void cFEStateAudioOptions_onGainTransition_show(char* o, int on)
  * @param bFirstTime  nonzero on the state's first transition
  * @return always 0
  */
-extern "C" int cFEStateAudioOptions_onGainTransition(void* self, int bFirstTime)
+extern "C" int cFEStateAudioOptions_onGainTransition(cFEStateAudioOptions* self, int bFirstTime)
 {
-    if (bFirstTime != 0 && *(int*)((char*)self + 0x7C) == 0) {
-        cFEStateAudioOptions_onGainTransition_show(*(char**)((char*)self + 0x68), 0);
-        cFEStateAudioOptions_onGainTransition_show(*(char**)((char*)self + 0x6C), 0);
-        cFEStateAudioOptions_onGainTransition_show(*(char**)((char*)self + 0x50), 0);
-        cFEStateAudioOptions_onGainTransition_show(*(char**)((char*)self + 0x58), 0);
-        if (*(int*)((char*)self + 0x74) == 0) {
-            cFEStateAudioOptions_onGainTransition_show(*(char**)((char*)self + 0x64), 0);
+    if (bFirstTime != 0 && self->mCreatedRequestList == 0) {
+        cFEStateAudioOptions_onGainTransition_show((char*)self->mpRequestLineOption, 0);
+        cFEStateAudioOptions_onGainTransition_show((char*)self->mpPlaylistOption, 0);
+        cFEStateAudioOptions_onGainTransition_show((char*)self->mpChecks[1], 0);
+        cFEStateAudioOptions_onGainTransition_show((char*)self->mpChecks[3], 0);
+        if (self->mInStore == 0) {
+            cFEStateAudioOptions_onGainTransition_show((char*)self->mpEditRequestOption, 0);
         }
     }
     return 0;
@@ -661,24 +661,23 @@ static inline void cFEStateAudioOptions_onGainFocus_callp(char* o, int slot, voi
  *
  * @param pPrevState  the state that had focus before (On Tour cUIState*)
  */
-extern "C" void cFEStateAudioOptions_onGainFocus(void* self, int pPrevState)
+extern "C" void cFEStateAudioOptions_onGainFocus(cFEStateAudioOptions* self, int pPrevState)
 {
-    char* selfBytes = (char*)self;
-    if (*(int*)(selfBytes + 0x7C) == 0) {
-        cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x68), 9, 1);
-        cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x50), 9, 1);
-        cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x64), 9, 1);
-        cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x6C), 9, 1);
-        cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x58), 9, 1);
-        cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x68), 26, 1);
-        cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x68), 6, 0);
-        cFEStateAudioOptions_onGainFocus_callp(*(char**)(selfBytes + 0x50), 11, gDisableColour);
-        cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x6C), 26, 1);
-        cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x6C), 6, 0);
-        cFEStateAudioOptions_onGainFocus_callp(*(char**)(selfBytes + 0x58), 11, gDisableColour);
-        if (*(int*)(selfBytes + 0x74) == 0) {
-            cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x64), 26, 1);
-            cFEStateAudioOptions_onGainFocus_call(*(char**)(selfBytes + 0x64), 6, 0);
+    if (self->mCreatedRequestList == 0) {
+        cFEStateAudioOptions_onGainFocus_call((char*)self->mpRequestLineOption, 9, 1);
+        cFEStateAudioOptions_onGainFocus_call((char*)self->mpChecks[1], 9, 1);
+        cFEStateAudioOptions_onGainFocus_call((char*)self->mpEditRequestOption, 9, 1);
+        cFEStateAudioOptions_onGainFocus_call((char*)self->mpPlaylistOption, 9, 1);
+        cFEStateAudioOptions_onGainFocus_call((char*)self->mpChecks[3], 9, 1);
+        cFEStateAudioOptions_onGainFocus_call((char*)self->mpRequestLineOption, 26, 1);
+        cFEStateAudioOptions_onGainFocus_call((char*)self->mpRequestLineOption, 6, 0);
+        cFEStateAudioOptions_onGainFocus_callp((char*)self->mpChecks[1], 11, gDisableColour);
+        cFEStateAudioOptions_onGainFocus_call((char*)self->mpPlaylistOption, 26, 1);
+        cFEStateAudioOptions_onGainFocus_call((char*)self->mpPlaylistOption, 6, 0);
+        cFEStateAudioOptions_onGainFocus_callp((char*)self->mpChecks[3], 11, gDisableColour);
+        if (self->mInStore == 0) {
+            cFEStateAudioOptions_onGainFocus_call((char*)self->mpEditRequestOption, 26, 1);
+            cFEStateAudioOptions_onGainFocus_call((char*)self->mpEditRequestOption, 6, 0);
         }
     }
     cFEState_onGainFocus(self, pPrevState);

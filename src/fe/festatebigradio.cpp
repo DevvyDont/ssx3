@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateruleselect.h"
 #include "ui/uistate.h"
 #include "be/beintnewrace.h"
 #include "online/lobbyman.h"
@@ -301,11 +302,11 @@ static inline int get6F8_3338(void* p) { return *(int*)((char*)p + 0x6F8); }
  * on a locked panel unlocks it, rebuilds it, selects its first row and plays the label "11" or "21"; online
  * that is also sent to the peer (func_00265700).
  */
-extern "C" void cFEStateBraggingRights_onUpdate(sBragging_2DB0* self)
+extern "C" void cFEStateBraggingRights_onUpdate(cFEStateBraggingRights* self)
 {
     int n = isNet_2DB0() ? 1 : 2;
     int i;
-    void* obj = *(void**)((char*)self->engine + 0xC);
+    void* obj = *(void**)((char*)self->mpEngine + 0xC);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     for (i = 0; i < n; i++) {
         int panelIdx;
@@ -330,14 +331,14 @@ extern "C" void cFEStateBraggingRights_onUpdate(sBragging_2DB0* self)
                 char label[5];  // "11", "21" for the second panel
                 *(struct sStr3_3338*)label = *(struct sStr3_3338*)str_11;
                 func_00416210_3338(label + 3, 0, 2);
-                cBraggingRightsMenu_setConfirmed(&self->panels[panelIdx], 0);
-                cBraggingRightsMenu_setEnableItem_2DB0(&self->panels[panelIdx], self->screen);
+                cBraggingRightsMenu_setConfirmed(&((sRadioPanel_2DB0*)&self->mMenuCtrl[0])[panelIdx], 0);
+                cBraggingRightsMenu_setEnableItem_2DB0(&((sRadioPanel_2DB0*)&self->mMenuCtrl[0])[panelIdx], self->mpScreen);
                 if (panelIdx != 0)
                     label[0] = '2';
                 cUIMenu_setSelectedByIndex_3338(*(void**)((char*)self + panelIdx * 0x34 + 0x6D0), 0);
-                int frame = cUIScreen_getFrameByLabel((cUIScreen*)self->screen, GetHashValue32(label));
+                int frame = cUIScreen_getFrameByLabel((cUIScreen*)self->mpScreen, GetHashValue32(label));
                 if (frame != 0xFFFF)
-                    cUIScreen_playFrame(self->screen, frame, 1);
+                    cUIScreen_playFrame(self->mpScreen, frame, 1);
                 if (isNet_2DB0())
                     func_00265700(D_004A33CC);
             }
@@ -378,22 +379,22 @@ static inline int get6F8_3568(void* p) { return *(int*)((char*)p + 0x6F8); }
  *
  * @param pPrevState  the state that had focus before (passed on online only)
  */
-extern "C" void cFEStateBraggingRights_onGainFocus(void* self, int pPrevState)
+extern "C" void cFEStateBraggingRights_onGainFocus(cFEStateBraggingRights* self, int pPrevState)
 {
     if (isOn00193568()) {
         cFEStateNet_onGainFocus(self, pPrevState);
         return;
     }
     cUIState_onGainFocus_v(self);
-    if (*(int*)((char*)self + 0x6F8) != 0 && *(int*)((char*)self + 0x72C) == 0) {
-        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_wait_1));
+    if (self->mMenuCtrl[0].mbConfirmed != 0 && self->mMenuCtrl[1].mbConfirmed == 0) {
+        int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_wait_1));
         if (frame != 0xFFFF) {
-            cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
+            cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
-    } else if (get6F8_3568(self) == 0 && *(int*)((char*)self + 0x72C) != 0) {
-        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_wait_2));
+    } else if (get6F8_3568(self) == 0 && self->mMenuCtrl[1].mbConfirmed != 0) {
+        int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_wait_2));
         if (frame != 0xFFFF) {
-            cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
+            cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
     }
     cBraggingRightsMenu_setMenuItemColor((char*)self + 0x6D0);
@@ -461,19 +462,19 @@ static inline int Is_193650(int id, char* s) { return id == GetHashValue32(s); }
  *
  * @param w  the widget being created
  */
-extern "C" void cFEStateBraggingRights_onWidgetCreate(char* self, cUIObj_193650* w)
+extern "C" void cFEStateBraggingRights_onWidgetCreate(cFEStateBraggingRights* self, cUIObj_193650* w)
 {
     char* wp = (char*)w;
     if (Is_193650(*(int*)(wp + 0x38), str_1Menu)) {
-        *(void**)(self + 0x6D0) = 0;
+        *(void**)&self->mMenuCtrl[0] = 0;
         w->setFocus(1);
-        *(void**)(self + 0x6D0) = w;
+        *(void**)&self->mMenuCtrl[0] = w;
         *(int*)(wp + 0x14) |= 1;
         *(int*)(wp + 0x90) |= 1;
     } else if (Is_193650(*(int*)(wp + 0x38), str_2Menu)) {
-        *(void**)(self + 0x704) = 0;
+        *(void**)&self->mMenuCtrl[1] = 0;
         w->setFocus(1);
-        *(void**)(self + 0x704) = w;
+        *(void**)&self->mMenuCtrl[1] = w;
         *(int*)(wp + 0x14) |= 1;
         *(int*)(wp + 0x90) |= 1;
     } else if (Is_193650(*(int*)(wp + 0x38), str_Player1_title) || Is_193650(*(int*)(wp + 0x38), str_Player1_name)) {
@@ -485,14 +486,14 @@ extern "C" void cFEStateBraggingRights_onWidgetCreate(char* self, cUIObj_193650*
         void* character = cBE_getInterface_Fv(cBE_getBE(), 2);
         cUIText_setAsciiString((cUIText*)w, cBECharacterInterface_getShortName(character, cBENewPlayerInterface_getHumanRider(newPlayer, 1)));
     } else if (Is_193650(*(int*)(wp + 0x38), str_player1_info)) {
-        *(void**)(self + 0x6D4) = w;
+        self->mMenuCtrl[0].mpGroup = (cUIGroup*)w;
     } else if (Is_193650(*(int*)(wp + 0x38), str_player2_info)) {
-        *(void**)(self + 0x708) = w;
+        self->mMenuCtrl[1].mpGroup = (cUIGroup*)w;
     } else {
         char name[3];
         name[2] = 0;
         for (int i = 0; i < 2; i++) {
-            void** slots = (void**)(self + i * 0x34 + 0x6D8);
+            void** slots = (void**)(((char*)self) + i * 0x34 + 0x6D8);
             for (int j = 0; j < 8; j++) {
                 name[0] = '1' + i;
                 name[1] = '1' + j;
@@ -517,8 +518,8 @@ int GetHashValue32(char* str);
 extern int D_004A1A70;
 extern void* D_004A33CC;
 extern "C" void cBraggingRightsMenu_setMenuItemColor(void* p);
-extern "C" void cFEStateBraggingRights_updateConfirmedState(void* self);
-extern "C" void cFEStateBraggingRights_updateBE(void* self, int player, int which, int value);
+extern "C" void cFEStateBraggingRights_updateConfirmedState(cFEStateBraggingRights* self);
+extern "C" void cFEStateBraggingRights_updateBE(cFEStateBraggingRights* self, int player, int which, int value);
 extern "C" int cBraggingRightsMenu_findListBoxP_38F8(void* panel, void* item) __asm__("cBraggingRightsMenu_findListBoxP");
 extern "C" int cUIListBox_getCurrentEntryData_38F8(void* item) __asm__("cUIListBox_getCurrentEntryData");
 extern "C" void cBraggingRightsMenu_setConfirmed_38F8(void* panel, int on) __asm__("cBraggingRightsMenu_setConfirmed");
@@ -575,17 +576,17 @@ static inline void* vcall_38F8(char* self, int slot, sWidget_38F8* w)
  * @param event  the widget event
  */
 // Widget event handler of the big radio-button screen (two radio panels at self+0x6D0).
-extern "C" void cFEStateBraggingRights_onWidgetEvent(char* self, sWidget_38F8* w, int event)
+extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* self, sWidget_38F8* w, int event)
 {
     int panel;
     switch (event) {
     case 5: {
         int i = 0;
         do {
-            if (cBraggingRightsMenu_findListBoxP_38F8(self + 0x6D0 + i * 52, w) != -1) {
+            if (cBraggingRightsMenu_findListBoxP_38F8(((char*)self) + 0x6D0 + i * 52, w) != -1) {
                 if (isOn_38F8() && i == 0)
                     func_00265688(D_004A33CC);
-                cBraggingRightsMenu_setConfirmed_38F8(self + 0x6D0 + i * 52, 1);
+                cBraggingRightsMenu_setConfirmed_38F8(((char*)self) + 0x6D0 + i * 52, 1);
                 cFEStateBraggingRights_updateConfirmedState(self);
                 break;
             }
@@ -593,18 +594,18 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(char* self, sWidget_38F8* w
         } while (i < 2);
         if (isOn_38F8())
             break;
-        if (*(int*)(self + 0x6F8) == 0)
+        if (self->mMenuCtrl[0].mbConfirmed == 0)
             break;
-        if (*(int*)(self + 0x72C) == 0)
+        if (self->mMenuCtrl[1].mbConfirmed == 0)
             break;
-        void* nextState = vcall_38F8(self, 4, w);
+        void* nextState = vcall_38F8(((char*)self), 4, w);
         if (nextState != 0)
-            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         break;
     }
     case 6:
         if (isOn_38F8()) {
-            char* popup = (char*)func_001A9C50(self);
+            char* popup = (char*)func_001A9C50(((char*)self));
             char* sub = popup + 0xBC;
             *(int*)(popup + 0xBC) = 2;
             *(int*)(popup + 0xC4) = GetHashValue32(str_kT_POPUPCMNCancelChallenge);
@@ -613,32 +614,32 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(char* self, sWidget_38F8* w
             func_001C57C0(sub, 1, GetHashValue32(str_kT_CMNNo));
             *(int*)(popup + 0x150) = 2104;
             *(int*)(popup + 0x168) = 1;
-            func_001A9BC0(self, popup);
+            func_001A9BC0(((char*)self), popup);
         } else {
-            void* nextState = vcall_38F8(self, 5, w);
+            void* nextState = vcall_38F8(((char*)self), 5, w);
             if (nextState != 0)
-                cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
+                cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
             MEM_fill(D_005308B8, 0, 0x20);
         }
         break;
     case 1:
     case 2:
         panel = w->panel;
-        cBraggingRightsMenu_setMenuItemColor(self + 0x6D0 + panel * 52);
+        cBraggingRightsMenu_setMenuItemColor(((char*)self) + 0x6D0 + panel * 52);
         break;
     case 7:
         if (isOn_38F8())
-            cFEStateNet_onWidgetEvent(self, w);
+            cFEStateNet_onWidgetEvent(((char*)self), w);
         break;
     case 9:
         if (isOn_38F8()) {
             void* snd = D_004A33CC;
-            int slot = cBraggingRightsMenu_findListBoxP_38F8(self + 0x6D0, w);
+            int slot = cBraggingRightsMenu_findListBoxP_38F8(((char*)self) + 0x6D0, w);
             func_00265568(snd, slot, cUIListBox_getCurrentEntryData_38F8(w));
         } else {
             panel = w->panel;
-            int slot = cBraggingRightsMenu_findListBoxP_38F8(self + 0x6D0 + panel * 52, w);
-            int which = (*(signed char**)(self + 0x738))[slot];
+            int slot = cBraggingRightsMenu_findListBoxP_38F8(((char*)self) + 0x6D0 + panel * 52, w);
+            int which = ((signed char*)self->mpGameEventMapping)[slot];
             if (which != -1)
                 cFEStateBraggingRights_updateBE(self, panel, which, cUIListBox_getCurrentEntryData_38F8(w));
         }
@@ -671,7 +672,7 @@ extern char str_kT_HELP65Cancel[];
  *
  * @param popup  the help popup (cFEStateNetHelpPopup)
  */
-extern "C" void func_00193C00(void* self, void* popup)
+extern "C" void func_00193C00(cFEStateBraggingRights* self, void* popup)
 {
     cFEStateNetHelpPopup_setNumHelpOptions(popup, 4);
     *(int*)((char*)popup + 0x54) = GetHashValue32(str_kT_HELP65BraggingRights);
@@ -707,7 +708,7 @@ static inline int isOn00193CF8()
  * @return 0x100, 1 or 0 as above, else 0x101
  */
 // Handles a menu event for one of the two radio list controls.
-extern "C" int cFEStateBraggingRights_onWidgetMenu(void* self, void* ctrl, int msg)
+extern "C" int cFEStateBraggingRights_onWidgetMenu(cFEStateBraggingRights* self, void* ctrl, int msg)
 {
     int found = 0;
     void** item;
@@ -729,7 +730,7 @@ extern "C" int cFEStateBraggingRights_onWidgetMenu(void* self, void* ctrl, int m
         cBraggingRightsMenu_setMenuItemColor(item);
         return 257;
     case 6:
-        if (*(int*)((char*)self + 0x6F8) == 0 || *(int*)((char*)self + 0x72C) == 0) return 1;
+        if (self->mMenuCtrl[0].mbConfirmed == 0 || self->mMenuCtrl[1].mbConfirmed == 0) return 1;
         return 257;
     case 7:
         if (isOn00193CF8()) return 0;
@@ -773,7 +774,7 @@ static inline int other_193DE0(int p)
  * @param which   the rule (0-7)
  * @param value   the chosen value
  */
-extern "C" void cFEStateBraggingRights_updateBE(void* self, int player, int which, int value)
+extern "C" void cFEStateBraggingRights_updateBE(cFEStateBraggingRights* self, int player, int which, int value)
 {
     switch (which) {
     case 0: D_005308B8_193DE0[other_193DE0(player)].f8 = value; break;
@@ -857,17 +858,17 @@ static inline int get6F8_4080(void* p) { return *(int*)((char*)p + 0x6F8); }
  * "wait 1" when the first panel's flag (+0x6F8) is set and the second's (+0x72C) clear, "wait 2" the other way round;
  * nothing when both or neither are locked.
  */
-extern "C" void cFEStateBraggingRights_updateConfirmedState(void* self)
+extern "C" void cFEStateBraggingRights_updateConfirmedState(cFEStateBraggingRights* self)
 {
-    if (*(int*)((char*)self + 0x6F8) != 0 && *(int*)((char*)self + 0x72C) == 0) {
-        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_wait_1));
+    if (self->mMenuCtrl[0].mbConfirmed != 0 && self->mMenuCtrl[1].mbConfirmed == 0) {
+        int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_wait_1));
         if (frame != 0xFFFF) {
-            cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
+            cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
-    } else if (get6F8_4080(self) == 0 && *(int*)((char*)self + 0x72C) != 0) {
-        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_wait_2));
+    } else if (get6F8_4080(self) == 0 && self->mMenuCtrl[1].mbConfirmed != 0) {
+        int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_wait_2));
         if (frame != 0xFFFF) {
-            cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
+            cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
     }
 }
@@ -894,7 +895,7 @@ static inline int isOn00194138()
  * @param data   the event data (On Tour: void *pParam)
  * @return the handler's result, or 0
  */
-extern "C" void* cFEStateBraggingRights_handleEvent(void* self, int msgId, int data)
+extern "C" void* cFEStateBraggingRights_handleEvent(cFEStateBraggingRights* self, int msgId, int data)
 {
     if (isOn00194138()) {
         return cFEStateNet_handleEvent(self, msgId, data);
@@ -923,7 +924,7 @@ static inline int isOn00194168()
  * @param pPopup  the popup that sent the event
  * @param Event  the popup event
  */
-extern "C" void cFEStateBraggingRights_onPopupEvent(void* self, cUIState* pPopup, int Event)
+extern "C" void cFEStateBraggingRights_onPopupEvent(cFEStateBraggingRights* self, cUIState* pPopup, int Event)
 {
     if (isOn00194168()) {
         if (pPopup->miMiscData == 2104) {
@@ -986,21 +987,21 @@ struct sRadioMsg_41B0 {
  * @param data  the message data (+0x8 panel, +0xC row or list index, +0x10 key)
  * @return 0, or func_001A8E40's result for other messages
  */
-extern "C" int func_001941B0(char* self, int msg, sRadioMsg_41B0* data)
+extern "C" int func_001941B0(cFEStateBraggingRights* self, int msg, sRadioMsg_41B0* data)
 {
     switch (msg) {
     case 251:
-        cUIMenu_setSelectedByIndex_41B0(((sRadioPanel_41B0*)(self + 0x6D0))[data->panel].menu, *(unsigned char*)&data->idx);
+        cUIMenu_setSelectedByIndex_41B0(((sRadioPanel_41B0*)(((char*)self) + 0x6D0))[data->panel].menu, *(unsigned char*)&data->idx);
         break;
     case 252: {
         unsigned char out;
-        void* item = ((sRadioPanel_41B0*)(self + 0x6D0))[data->panel].items[data->idx];
+        void* item = ((sRadioPanel_41B0*)(((char*)self) + 0x6D0))[data->panel].items[data->idx];
         if (!cUIListBox_getEntryByData_41B0(item, data->key, &out)) {
             break;
         }
         cUIListBox_setCurrentEntryByIndex_41B0(item, out);
-        int slot = cBraggingRightsMenu_findListBoxP_41B0(&((sRadioPanel_41B0*)(self + 0x6D0))[data->panel], item);
-        int which = (*(signed char**)(self + 0x738))[slot];
+        int slot = cBraggingRightsMenu_findListBoxP_41B0(&((sRadioPanel_41B0*)(((char*)self) + 0x6D0))[data->panel], item);
+        int which = ((signed char*)self->mpGameEventMapping)[slot];
         if (which == -1) {
             break;
         }
@@ -1009,32 +1010,32 @@ extern "C" int func_001941B0(char* self, int msg, sRadioMsg_41B0* data)
         break;
     }
     case 253:
-        cBraggingRightsMenu_setConfirmed_41B0(&((sRadioPanel_41B0*)(self + 0x6D0))[data->panel], 1);
+        cBraggingRightsMenu_setConfirmed_41B0(&((sRadioPanel_41B0*)(((char*)self) + 0x6D0))[data->panel], 1);
         cFEStateBraggingRights_updateConfirmedState(self);
         break;
     case 238: case 241: case 248: case 250: case 274: case 275:
-        func_001AB288_41B0(self);
+        func_001AB288_41B0(((char*)self));
         break;
     case 268:
         if (func_0025DA90_41B0(LobbyMan_mLobbyMan)) {
-            func_001A8A40_41B0(self, cFEStateChatRoom_cFEStateChatRoom_41B0(cMemMan_alloc_41B0(1852, str_cFEStateChatRoom, 0, 0), *(int*)(self + 0x10)));
+            func_001A8A40_41B0(((char*)self), cFEStateChatRoom_cFEStateChatRoom_41B0(cMemMan_alloc_41B0(1852, str_cFEStateChatRoom, 0, 0), (int)self->mpEngine));
         } else {
-            func_001A8A40_41B0(self, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu_41B0(cMemMan_alloc_41B0(1744, str_cFEStateOnlineMainMenu, 0, 0), *(int*)(self + 0x10)));
+            func_001A8A40_41B0(((char*)self), cFEStateOnlineMainMenu_cFEStateOnlineMainMenu_41B0(cMemMan_alloc_41B0(1744, str_cFEStateOnlineMainMenu, 0, 0), (int)self->mpEngine));
         }
         break;
     case 254: {
-        cBraggingRightsMenu_setConfirmed_41B0(&((sRadioPanel_41B0*)(self + 0x6D0))[data->panel], 0);
-        cBraggingRightsMenu_setEnableItem_41B0(&((sRadioPanel_41B0*)(self + 0x6D0))[data->panel], *(void**)(self + 0x40));
-        cUIMenu_setSelectedByIndex_41B0(((sRadioPanel_41B0*)(self + 0x6D0))[data->panel].menu, 0);
-        int frame = data->panel == 0 ? cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(str_11)) : cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(str_21));
+        cBraggingRightsMenu_setConfirmed_41B0(&((sRadioPanel_41B0*)(((char*)self) + 0x6D0))[data->panel], 0);
+        cBraggingRightsMenu_setEnableItem_41B0(&((sRadioPanel_41B0*)(((char*)self) + 0x6D0))[data->panel], self->mpScreen);
+        cUIMenu_setSelectedByIndex_41B0(((sRadioPanel_41B0*)(((char*)self) + 0x6D0))[data->panel].menu, 0);
+        int frame = data->panel == 0 ? cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_11)) : cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_21));
         if (frame == 0xFFFF) {
             break;
         }
-        cUIScreen_playFrame(*(void**)(self + 0x40), frame, 1);
+        cUIScreen_playFrame(self->mpScreen, frame, 1);
         break;
     }
     default:
-        return func_001A8E40_41B0(self, msg, data);
+        return func_001A8E40_41B0(((char*)self), msg, data);
     }
     return 0;
 }

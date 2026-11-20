@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/screenkeyboard.h"
 #include "fe/heartbeat.h"
 #include "fe/feinput.h"
 #include "online/lobbyman.h"
@@ -3067,33 +3068,33 @@ extern int cUIGroup_vtbl[];
  * @param parentState  the owning UI state; cScreenKeyboard_pressKey calls its virtual slot 19 after each key press
  * @return @p self
  */
-extern "C" void* func_00180508(char* self, int parentState)
+extern "C" void* func_00180508(cScreenKeyboard* self, int parentState)
 {
-    *(char**)(self + 4) = self;
-    *(char**)(self + 0) = self;
-    *(int*)(self + 0xC) = 0;
-    *(int*)(self + 0x10) = 0;
-    *(int**)(self + 8) = cUIScreen_vtbl;
-    tAttrScreen_tAttrScreen((unsigned short*)(self + 0x14));
-    cList_cList(self + 0x18);
-    *(int*)(self + 0x34) = 0;
-    *(int*)(self + 0x38) = 0;
-    *(int*)(self + 0x3C) = 0;
-    cUIThing_cUIThing(self + 0x40, 0, 0);
-    *(int**)(self + 0x48) = cUIGroup_vtbl;
-    cList_cList(self + 0xB4);
-    *(int*)(self + 0xD0) = parentState;
-    *(int**)(self + 8) = cScreenKeyboard_vtbl;
-    *(int*)(self + 0xD8) = 0;
-    *(int*)(self + 0xDC) = 0;
-    *(int*)(self + 0xE0) = 0;
-    *(int*)(self + 0xE4) = 1;
-    *(int*)(self + 0xE8) = 1;
-    *(int*)(self + 0x170) = 10;
-    *(int*)(self + 0xD4) = 45;
-    *(char*)(self + 0xEC) = 0;
-    *(int*)(self + 0x16C) = 0;
-    return self;
+    self->mpNext = (cListNode*)((char*)self);
+    self->mpPrev = (cListNode*)((char*)self);
+    self->mpBuffer = 0;
+    self->mpScreenHeader = 0;
+    self->mVtbl = (void**)cUIScreen_vtbl;
+    tAttrScreen_tAttrScreen((unsigned short*)(((char*)self) + 0x14));
+    cList_cList(((char*)self) + 0x18);
+    self->mpKeyframeBlock = 0;
+    self->mpObjectBlock = 0;
+    self->mppObjectList = 0;
+    cUIThing_cUIThing(((char*)self) + 0x40, 0, 0);
+    *(int**)(((char*)self) + 0x48) = cUIGroup_vtbl;
+    cList_cList(((char*)self) + 0xB4);
+    self->mpState = (cUIState*)parentState;
+    self->mVtbl = (void**)cScreenKeyboard_vtbl;
+    self->mIncludeNumbers = 0;
+    self->mIncludeShift = 0;
+    self->mIncludeSpace = 0;
+    self->mShiftOn = 1;
+    self->mFirstKey = 1;
+    self->mCurrentKey = 10;
+    self->mMaxChars = 45;
+    *(char*)(((char*)self) + 0xEC) = 0;
+    self->mCursorPos = 0;
+    return ((char*)self);
 }
 #endif
 
@@ -3111,11 +3112,11 @@ extern "C" int strlen(const char* s);
  *
  * @param text  the new text
  */
-extern "C" void cScreenKeyboard_setInputText(void* self, const char* text)
+extern "C" void cScreenKeyboard_setInputText(cScreenKeyboard* self, const char* text)
 {
     char* buf = (char*)self + 0xEC;
     strcpy(buf, text);
-    *(int*)((char*)self + 0x16C) = strlen(buf);
+    self->mCursorPos = strlen(buf);
 }
 #endif
 
@@ -3129,15 +3130,15 @@ INCLUDE_ASM("fe/debugfe", cScreenKeyboard_kbMoveLeft);
  * first key of a row (0, 10, 20, 30) wraps to the last (+9); from 39 it jumps to 37 when mIncludeSpace (+0xE0) is 0,
  * skipping the space key; otherwise it steps back one. Called by the keyboard's input handler cScreenKeyboard_onInput.
  */
-extern "C" void cScreenKeyboard_kbMoveLeft(void* self)
+extern "C" void cScreenKeyboard_kbMoveLeft(cScreenKeyboard* self)
 {
-    int keyIndex = *(int*)((char*)self + 0x170);
+    int keyIndex = self->mCurrentKey;
     if (keyIndex == 0 || keyIndex == 10 || keyIndex == 20 || keyIndex == 30) {
-        *(int*)((char*)self + 0x170) += 9;
-    } else if (keyIndex == 39 && *(int*)((char*)self + 0xE0) == 0) {
-        *(int*)((char*)self + 0x170) = 37;
+        self->mCurrentKey += 9;
+    } else if (keyIndex == 39 && self->mIncludeSpace == 0) {
+        self->mCurrentKey = 37;
     } else {
-        *(int*)((char*)self + 0x170) -= 1;
+        self->mCurrentKey -= 1;
     }
 }
 #endif
@@ -3152,15 +3153,15 @@ INCLUDE_ASM("fe/debugfe", cScreenKeyboard_kbMoveRight);
  * 0, skipping the space key; otherwise mCurrentKey (+0x170) steps forward one. Called by the keyboard's input handler
  * cScreenKeyboard_onInput.
  */
-extern "C" void cScreenKeyboard_kbMoveRight(void* self)
+extern "C" void cScreenKeyboard_kbMoveRight(cScreenKeyboard* self)
 {
-    int keyIndex = *(int*)((char*)self + 0x170);
+    int keyIndex = self->mCurrentKey;
     if (keyIndex == 9 || keyIndex == 19 || keyIndex == 29 || keyIndex == 39) {
-        *(int*)((char*)self + 0x170) -= 9;
-    } else if (keyIndex == 37 && *(int*)((char*)self + 0xE0) == 0) {
-        *(int*)((char*)self + 0x170) = 39;
+        self->mCurrentKey -= 9;
+    } else if (keyIndex == 37 && self->mIncludeSpace == 0) {
+        self->mCurrentKey = 39;
     } else {
-        *(int*)((char*)self + 0x170) += 1;
+        self->mCurrentKey += 1;
     }
 }
 #endif
@@ -3176,23 +3177,23 @@ INCLUDE_ASM("fe/debugfe", cScreenKeyboard_kbMoveUp);
  * bottom row (+20), again 39 from key 18 without space. Otherwise mCurrentKey (+0x170) goes up one row (-10). Called by
  * the keyboard's input handler cScreenKeyboard_onInput.
  */
-extern "C" void cScreenKeyboard_kbMoveUp(void* self)
+extern "C" void cScreenKeyboard_kbMoveUp(cScreenKeyboard* self)
 {
-    int keyIndex = *(int*)((char*)self + 0x170);
+    int keyIndex = self->mCurrentKey;
     if (keyIndex >= 0 && keyIndex < 10) {
-        if (keyIndex == 8 && *(int*)((char*)self + 0xE0) == 0) {
-            *(int*)((char*)self + 0x170) = 39;
+        if (keyIndex == 8 && self->mIncludeSpace == 0) {
+            self->mCurrentKey = 39;
         } else {
-            *(int*)((char*)self + 0x170) += 30;
+            self->mCurrentKey += 30;
         }
-    } else if (keyIndex >= 10 && keyIndex < 20 && *(int*)((char*)self + 0xD8) == 0) {
-        if (keyIndex == 18 && *(int*)((char*)self + 0xE0) == 0) {
-            *(int*)((char*)self + 0x170) = 39;
+    } else if (keyIndex >= 10 && keyIndex < 20 && self->mIncludeNumbers == 0) {
+        if (keyIndex == 18 && self->mIncludeSpace == 0) {
+            self->mCurrentKey = 39;
         } else {
-            *(int*)((char*)self + 0x170) += 20;
+            self->mCurrentKey += 20;
         }
     } else {
-        *(int*)((char*)self + 0x170) -= 10;
+        self->mCurrentKey -= 10;
     }
 }
 #endif
@@ -3207,19 +3208,19 @@ INCLUDE_ASM("fe/debugfe", cScreenKeyboard_kbMoveDown);
  * (-20). From key 28 with mIncludeSpace (+0xE0) 0 it goes to 39 (skipping the space key 38). Otherwise mCurrentKey
  * (+0x170) goes down one row (+10). Called by the keyboard's input handler cScreenKeyboard_onInput.
  */
-extern "C" void cScreenKeyboard_kbMoveDown(void* self)
+extern "C" void cScreenKeyboard_kbMoveDown(cScreenKeyboard* self)
 {
-    int keyIndex = *(int*)((char*)self + 0x170);
+    int keyIndex = self->mCurrentKey;
     if (keyIndex >= 30 && keyIndex < 40) {
-        if (*(int*)((char*)self + 0xD8) != 0) {
-            *(int*)((char*)self + 0x170) = keyIndex - 30;
+        if (self->mIncludeNumbers != 0) {
+            self->mCurrentKey = keyIndex - 30;
         } else {
-            *(int*)((char*)self + 0x170) = keyIndex - 20;
+            self->mCurrentKey = keyIndex - 20;
         }
-    } else if (keyIndex == 28 && *(int*)((char*)self + 0xE0) == 0) {
-        *(int*)((char*)self + 0x170) = 39;
+    } else if (keyIndex == 28 && self->mIncludeSpace == 0) {
+        self->mCurrentKey = 39;
     } else {
-        *(int*)((char*)self + 0x170) += 10;
+        self->mCurrentKey += 10;
     }
 }
 #endif
@@ -3232,10 +3233,10 @@ INCLUDE_ASM("fe/debugfe", cScreenKeyboard_toggleShift);
  *
  * @return the new mShiftOn value
  */
-extern "C" int cScreenKeyboard_toggleShift(void* self)
+extern "C" int cScreenKeyboard_toggleShift(cScreenKeyboard* self)
 {
-    int toggled = *(int*)((char*)self + 0xe4) ^ 1;
-    *(int*)((char*)self + 0xe4) = toggled;
+    int toggled = self->mShiftOn ^ 1;
+    self->mShiftOn = toggled;
     return toggled;
 }
 #endif
@@ -3374,7 +3375,7 @@ extern "C" char* strcat(char*, const char*);
  * @param keyIndex  key index (0-39)
  * @param dst  output buffer (at least 18 bytes)
  */
-extern "C" void cScreenKeyboard_getKeyObjName(void* self, int keyIndex, char* dst)
+extern "C" void cScreenKeyboard_getKeyObjName(cScreenKeyboard* self, int keyIndex, char* dst)
 {
     char buf[2];
     *(sStr10*)dst = D_0045D550;
@@ -3419,7 +3420,7 @@ extern "C" char* strcat(char*, const char*);
  * @param keyIndex  key index (0-39)
  * @param dst  output buffer (at least 16 bytes)
  */
-extern "C" void cScreenKeyboard_getCursorObjName(void* self, int keyIndex, char* dst)
+extern "C" void cScreenKeyboard_getCursorObjName(cScreenKeyboard* self, int keyIndex, char* dst)
 {
     char buf[2];
     *(sStr8*)dst = *(sStr8*)str_cursor;

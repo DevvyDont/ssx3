@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/screenkeyboard.h"
 #include "ui/uiscreen.h"
 #include "ui/uiengine.h"
 #include "fe/festatecharselect.h"
@@ -49,7 +50,7 @@ public:
  *
  * @param screen  the screen holding the keyboard (On Tour mpScreen)
  */
-extern "C" void cScreenKeyboard_initScreenKeyboard(char* self, cUIScreen* screen)
+extern "C" void cScreenKeyboard_initScreenKeyboard(cScreenKeyboard* self, cUIScreen* screen)
 {
     cUIObjK180B60* textObj;
     textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_keyboard_arrLeft));
@@ -85,11 +86,11 @@ extern "C" void cScreenKeyboard_initScreenKeyboard(char* self, cUIScreen* screen
     ch[0] = 'A';
     for (int i = 0; i < 26; i++)
     {
-        cScreenKeyboard_getKeyObjName(self, i + 10, name);
+        cScreenKeyboard_getKeyObjName(((char*)self), i + 10, name);
         textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         if (textObj != 0)
             cUIText_setAsciiString((cUIText*)textObj, ch);
-        cScreenKeyboard_getCursorObjName(self, i + 10, name);
+        cScreenKeyboard_getCursorObjName(((char*)self), i + 10, name);
         textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         if (textObj != 0)
             textObj->setVisible(0);
@@ -98,11 +99,11 @@ extern "C" void cScreenKeyboard_initScreenKeyboard(char* self, cUIScreen* screen
     ch[0] = '0';
     for (int j = 0; j < 10; j++)
     {
-        cScreenKeyboard_getKeyObjName(self, j, name);
+        cScreenKeyboard_getKeyObjName(((char*)self), j, name);
         textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         if (textObj != 0)
             cUIText_setAsciiString((cUIText*)textObj, ch);
-        cScreenKeyboard_getCursorObjName(self, j, name);
+        cScreenKeyboard_getCursorObjName(((char*)self), j, name);
         textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
         if (textObj != 0)
             textObj->setVisible(0);
@@ -111,10 +112,10 @@ extern "C" void cScreenKeyboard_initScreenKeyboard(char* self, cUIScreen* screen
     textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cursor_A));
     if (textObj != 0)
         textObj->setVisible(1);
-    cScreenKeyboard_setInputText(self, str_mypro1);
+    cScreenKeyboard_setInputText(((char*)self), str_mypro1);
     textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_profilename));
     if (textObj != 0)
-        cUIText_setAsciiString((cUIText*)textObj, self + 0xEC);
+        cUIText_setAsciiString((cUIText*)textObj, ((char*)self) + 0xEC);
 }
 #endif
 
@@ -192,29 +193,29 @@ struct sDbgState_180EF0 {
  * @param in  the UI input to read
  * @return always 1 (input consumed)
  */
-extern "C" int cScreenKeyboard_onInput(sDbgState_180EF0* self, sDbgInput_180EF0* in)
+extern "C" int cScreenKeyboard_onInput(cScreenKeyboard* self, sDbgInput_180EF0* in)
 {
     char buf[0x20];
-    cScreenKeyboard_getCursorObjName(self, self->sel, buf);
-    sDbgObj_180EF0* keyObject = (sDbgObj_180EF0*)cUIScreen_getObjectByHashName(self, GetHashValue32(buf));
+    cScreenKeyboard_getCursorObjName(((sDbgState_180EF0*)self), self->mCurrentKey, buf);
+    sDbgObj_180EF0* keyObject = (sDbgObj_180EF0*)cUIScreen_getObjectByHashName(((sDbgState_180EF0*)self), GetHashValue32(buf));
     if (keyObject) {
         keyObject->setVisible(0);
     }
     if (in->isLeft()) {
-        cScreenKeyboard_kbMoveLeft(self);
+        cScreenKeyboard_kbMoveLeft(((sDbgState_180EF0*)self));
     } else if (in->isRight()) {
-        cScreenKeyboard_kbMoveRight(self);
+        cScreenKeyboard_kbMoveRight(((sDbgState_180EF0*)self));
     } else if (in->isUp()) {
-        cScreenKeyboard_kbMoveUp(self);
+        cScreenKeyboard_kbMoveUp(((sDbgState_180EF0*)self));
     } else if (in->isDown()) {
-        cScreenKeyboard_kbMoveDown(self);
+        cScreenKeyboard_kbMoveDown(((sDbgState_180EF0*)self));
     } else if (in->isNext()) {
-        cScreenKeyboard_pressKey(self);
+        cScreenKeyboard_pressKey(((sDbgState_180EF0*)self));
     } else if (in->isRShift2()) {
-        cScreenKeyboard_toggleShift(self);
+        cScreenKeyboard_toggleShift(((sDbgState_180EF0*)self));
     }
-    cScreenKeyboard_getCursorObjName(self, self->sel, buf);
-    keyObject = (sDbgObj_180EF0*)cUIScreen_getObjectByHashName(self, GetHashValue32(buf));
+    cScreenKeyboard_getCursorObjName(((sDbgState_180EF0*)self), self->mCurrentKey, buf);
+    keyObject = (sDbgObj_180EF0*)cUIScreen_getObjectByHashName(((sDbgState_180EF0*)self), GetHashValue32(buf));
     if (keyObject) {
         keyObject->setVisible(1);
     }

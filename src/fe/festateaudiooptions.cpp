@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateaudiooptions.h"
 #include "fe/festatebigradio.h"
 #include "ui/uithing.h"
 #include "main/ssxapp.h"
@@ -33,48 +34,48 @@ static inline void SetText_6540(void* w, int text)
  *
  * @param w  the widget being created
  */
-extern "C" void cFEStateAudioOptions_onWidgetCreate(void* self, cUIThing* w)
+extern "C" void cFEStateAudioOptions_onWidgetCreate(cFEStateAudioOptions* self, cUIThing* w)
 {
     int id = w->mHashName;
     if (id == GetHashValue32(str_0box))
     {
-        *(void**)((char*)self + 0x4C) = ((void*)w);
-        if (*(int*)((char*)self + 0x78) == 0)
-            SetText_6540(w, *(int*)((char*)self + 0x5C));
+        self->mpChecks[0] = (cUIIcon*)((void*)w);
+        if (self->mRadioMode == 0)
+            SetText_6540(w, (int)self->mpCheckBox);
         else
-            SetText_6540(w, *(int*)((char*)self + 0x60));
+            SetText_6540(w, (int)self->mpEmptyBox);
     }
     else if (id == GetHashValue32(str_1box))
     {
-        *(void**)((char*)self + 0x54) = ((void*)w);
-        if (*(int*)((char*)self + 0x78) == 2)
-            SetText_6540(w, *(int*)((char*)self + 0x5C));
+        self->mpChecks[2] = (cUIIcon*)((void*)w);
+        if (self->mRadioMode == 2)
+            SetText_6540(w, (int)self->mpCheckBox);
         else
-            SetText_6540(w, *(int*)((char*)self + 0x60));
+            SetText_6540(w, (int)self->mpEmptyBox);
     }
     else if (id == GetHashValue32(str_2box))
     {
-        *(void**)((char*)self + 0x50) = ((void*)w);
-        if (*(int*)((char*)self + 0x78) == 1)
-            SetText_6540(w, *(int*)((char*)self + 0x5C));
+        self->mpChecks[1] = (cUIIcon*)((void*)w);
+        if (self->mRadioMode == 1)
+            SetText_6540(w, (int)self->mpCheckBox);
         else
-            SetText_6540(w, *(int*)((char*)self + 0x60));
+            SetText_6540(w, (int)self->mpEmptyBox);
     }
     else if (id == GetHashValue32(str_2box))
     {
-        *(void**)((char*)self + 0x50) = ((void*)w);
-        if (*(int*)((char*)self + 0x78) == 1)
-            SetText_6540(w, *(int*)((char*)self + 0x5C));
+        self->mpChecks[1] = (cUIIcon*)((void*)w);
+        if (self->mRadioMode == 1)
+            SetText_6540(w, (int)self->mpCheckBox);
         else
-            SetText_6540(w, *(int*)((char*)self + 0x60));
+            SetText_6540(w, (int)self->mpEmptyBox);
     }
     else if (id == GetHashValue32(str_3box))
     {
-        *(void**)((char*)self + 0x58) = ((void*)w);
-        if (*(int*)((char*)self + 0x78) == 3)
-            SetText_6540(w, *(int*)((char*)self + 0x5C));
+        self->mpChecks[3] = (cUIIcon*)((void*)w);
+        if (self->mRadioMode == 3)
+            SetText_6540(w, (int)self->mpCheckBox);
         else
-            SetText_6540(w, *(int*)((char*)self + 0x60));
+            SetText_6540(w, (int)self->mpEmptyBox);
     }
     else if (id == GetHashValue32(str_radio_big))
     {
@@ -86,17 +87,17 @@ extern "C" void cFEStateAudioOptions_onWidgetCreate(void* self, cUIThing* w)
     }
     else if (id == GetHashValue32(str_request_line))
     {
-        *(void**)((char*)self + 0x68) = ((void*)w);
+        self->mpRequestLineOption = (cUIText*)((void*)w);
         w->mMiscData = 1;
     }
     else if (id == GetHashValue32(str_edit_req))
     {
-        *(void**)((char*)self + 0x64) = ((void*)w);
+        self->mpEditRequestOption = (cUIText*)((void*)w);
         w->mMiscData = 4;
     }
     else if (id == GetHashValue32(str_playlist))
     {
-        *(void**)((char*)self + 0x6C) = ((void*)w);
+        self->mpPlaylistOption = (cUIText*)((void*)w);
         w->mMiscData = 3;
     }
 }
@@ -333,16 +334,16 @@ INCLUDE_ASM("fe/festateaudiooptions", cFEStateAudioOptions_onWidgetMenu);
  * @param index  the menu item index
  * @return 0x10 for a refused event 6, 0 for events 8 and 9, otherwise 0x101
  */
-extern "C" int cFEStateAudioOptions_onWidgetMenu(void* self, int pMenu, int Event, int index)
+extern "C" int cFEStateAudioOptions_onWidgetMenu(cFEStateAudioOptions* self, int pMenu, int Event, int index)
 {
     if (Event == 6 && (index == 2 || index == 3 || index == 4)) {
-        if (index == 2 && *(int*)((char*)self + 0x7C) == 0) {
+        if (index == 2 && self->mCreatedRequestList == 0) {
             goto ok;
         }
-        if (index == 3 && *(int*)((char*)self + 0x7C) == 0) {
+        if (index == 3 && self->mCreatedRequestList == 0) {
             goto ok;
         }
-        if (index == 4 && *(int*)((char*)self + 0x74) == 0 && *(int*)((char*)self + 0x7C) == 0) {
+        if (index == 4 && self->mInStore == 0 && self->mCreatedRequestList == 0) {
         ok:
             return 0x10;
         }

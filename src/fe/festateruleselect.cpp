@@ -814,18 +814,18 @@ extern void* D_0046B078[];
  *
  * @return @p self
  */
-extern "C" void* cBraggingRightsMenu_cBraggingRightsMenu(void* self)
+extern "C" void* cBraggingRightsMenu_cBraggingRightsMenu(cBraggingRightsMenu* self)
 {
     int i;
-    *(void***)((char*)self + 0x30) = D_0046B078;
+    self->mVtbl = D_0046B078;
     for (i = 7; i >= 0; i--) {
         ((int*)((char*)self + 0x8))[i] = 0;
     }
-    *(int*)((char*)self + 0x0) = 0;
-    *(int*)((char*)self + 0x2c) = 0;
-    *(int*)((char*)self + 0x28) = 0;
-    *(int*)((char*)self + 0x4) = 0;
-    return self;
+    self->mpPlayerMenu = 0;
+    self->mcItemEnableFlag = 0;
+    self->mbConfirmed = 0;
+    self->mpGroup = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -852,10 +852,10 @@ struct sObj00192740 {
  *
  * @param enabled  the new flag: 1 confirms (locks), 0 unlocks
  */
-extern "C" void cBraggingRightsMenu_setConfirmed(void* self, int enabled)
+extern "C" void cBraggingRightsMenu_setConfirmed(cBraggingRightsMenu* self, int enabled)
 {
     int i;
-    *(int*)((char*)self + 0x28) = enabled;
+    self->mbConfirmed = enabled;
     for (i = 0; i < 8; i++) {
         sObj00192740* item = ((sObj00192740**)((char*)self + 0x8))[i];
         if (item != 0) {
@@ -869,7 +869,7 @@ extern "C" void cBraggingRightsMenu_setConfirmed(void* self, int enabled)
 INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_setMenuItemColor);
 #ifdef SKIP_ASM
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
-extern "C" int cBraggingRightsMenu_isItemEnable(void* self, int idx);
+extern "C" int cBraggingRightsMenu_isItemEnable(cBraggingRightsMenu* self, int idx);
 
 struct sColor_001927B0 {
     float r, g, b, a;
@@ -898,7 +898,7 @@ extern "C" void cBraggingRightsMenu_setMenuItemColor(sRuleSel_001927B0* self)
         if (self->items[i] == 0) {
             continue;
         }
-        if (cBraggingRightsMenu_isItemEnable(self, i) == 0) {
+        if (cBraggingRightsMenu_isItemEnable((cBraggingRightsMenu*)self, i) == 0) {
             continue;
         }
         if (i == sel) {
@@ -927,7 +927,7 @@ INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_findListBoxP);
  * @param val  the list box to look for
  * @return its index, or -1 when the panel does not hold it
  */
-extern "C" int cBraggingRightsMenu_findListBoxP(void* self, int val)
+extern "C" int cBraggingRightsMenu_findListBoxP(cBraggingRightsMenu* self, int val)
 {
     int i;
     for (i = 0; i < 8; i++) {
@@ -951,10 +951,10 @@ INCLUDE_ASM("fe/festateruleselect", cBraggingRightsMenu_isItemEnable);
  * @param itemIndex  the row (0-7)
  * @return 1 when the row's bit is set, else 0
  */
-extern "C" int cBraggingRightsMenu_isItemEnable(void* self, int itemIndex)
+extern "C" int cBraggingRightsMenu_isItemEnable(cBraggingRightsMenu* self, int itemIndex)
 {
     int mask = (int)(0x1000000 << itemIndex) >> 24;
-    return (*(int*)((char*)self + 0x2c) & mask) != 0;
+    return (self->mcItemEnableFlag & mask) != 0;
 }
 #endif
 
@@ -1088,19 +1088,19 @@ extern "C" void* cFEStateNet_cFEStateNet(void* self, int a1, int a2);
  * @param engine  the UI engine
  * @return @p self
  */
-extern "C" void* cFEStateBraggingRights_cFEStateBraggingRights(void* self, int engine)
+extern "C" void* cFEStateBraggingRights_cFEStateBraggingRights(cFEStateBraggingRights* self, int engine)
 {
     char* ruleSel;
     int i;
     cFEStateNet_cFEStateNet(self, engine, 0);
-    *(void***)((char*)self + 0x8) = cFEStateBraggingRights_vtbl;
+    self->mVtbl = cFEStateBraggingRights_vtbl;
     ruleSel = (char*)self + 0x6D0;
     for (i = 1; i != -1; i--, ruleSel += 0x34) {
-        cBraggingRightsMenu_cBraggingRightsMenu(ruleSel);
+        cBraggingRightsMenu_cBraggingRightsMenu((cBraggingRightsMenu*)ruleSel);
     }
-    *(int*)((char*)self + 0xC) = 20;
-    *(int*)((char*)self + 0x738) = 0;
-    return self;
+    self->mHashName = 20;
+    self->mpGameEventMapping = 0;
+    return ((void*)self);
 }
 #endif
 

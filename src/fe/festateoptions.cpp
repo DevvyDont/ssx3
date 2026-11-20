@@ -2939,19 +2939,19 @@ extern void* cFEStateOptionsDeviceSelect_vtbl[];
  *            choice 2
  * @return @p self
  */
-extern "C" void* cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1(void* self, int engine, int cardMode, int isSave, int isOnline)
+extern "C" void* cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1(cFEStateOptionsDeviceSelect* self, int engine, int cardMode, int isSave, int isOnline)
 {
     cFEMemCard_cFEMemCard2(self, engine, cardMode);
-    *(int*)((char*)self + 0x230) = isOnline;
-    *(void***)((char*)self + 8) = cFEStateOptionsDeviceSelect_vtbl;
-    *(int*)((char*)self + 0xC) = 33;
-    *(int*)((char*)self + 0x22C) = isSave;
-    *(int*)((char*)self + 0x234) = 0;
-    *(int*)((char*)self + 0x238) = 0;
+    self->mbOnline = isOnline;
+    self->mVtbl = cFEStateOptionsDeviceSelect_vtbl;
+    self->mHashName = 33;
+    self->mIsSaveScreen = isSave;
+    self->mIsHidden = 0;
+    self->mbChoseToSave = 0;
     if (isSave == 0) {
         *(int*)((char*)cSSXApp_getMCManager(SSXApp) + 0x11C) = 0;
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -3184,12 +3184,12 @@ extern "C" void* cSSXApp_getMCManager(void* app);
  * @param msg  the menu event
  * @return 0x100 to refuse the event, 0x101 to allow it
  */
-extern "C" int cFEStateOptionsDeviceSelect_onWidgetMenu(void* self, void* widget, unsigned int msg)
+extern "C" int cFEStateOptionsDeviceSelect_onWidgetMenu(cFEStateOptionsDeviceSelect* self, void* widget, unsigned int msg)
 {
     char* app = (char*)cSSXApp_getMCManager(SSXApp);
     switch (msg) {
     case 8:
-        if (*(int*)((char*)self + 0x22C) != 0 && (*(cList0018DDD0**)(app + 0x434))->v54(*(int*)(app + 0x428)) != 0) {
+        if (self->mIsSaveScreen != 0 && (*(cList0018DDD0**)(app + 0x434))->v54(*(int*)(app + 0x428)) != 0) {
             return 257;
         }
     case 6:
@@ -3452,20 +3452,20 @@ extern char str_ps2sq[];
  *
  * @param on  1 to hide the buttons, 0 to show them
  */
-extern "C" void cFEStateOptionsDeviceSelect_hideActionButtons(void* self, int on)
+extern "C" void cFEStateOptionsDeviceSelect_hideActionButtons(cFEStateOptionsDeviceSelect* self, int on)
 {
-    if (*(int*)((char*)self + 0x234) == on)
+    if (self->mIsHidden == on)
         return;
     int off = on ^ 1;
-    ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x)))->setVisible(off);
-    if (*(int*)((char*)self + 0x22C) != 0) {
-        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3)))->setVisible(off);
-        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext5)))->setVisible(off);
-        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq)))->setVisible(off);
+    ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x)))->setVisible(off);
+    if (self->mIsSaveScreen != 0) {
+        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3)))->setVisible(off);
+        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext5)))->setVisible(off);
+        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq)))->setVisible(off);
     } else {
-        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3a)))->setVisible(off);
+        ((cUIObj_18CF50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3a)))->setVisible(off);
     }
-    *(int*)((char*)self + 0x234) = on;
+    self->mIsHidden = on;
 }
 #endif
 
@@ -3498,14 +3498,14 @@ struct cUIObj_E2C0 {
  *
  * @param on  true to hide the button
  */
-extern "C" void cFEStateOptionsDeviceSelect_hideDeleteButton(void* self, bool on)
+extern "C" void cFEStateOptionsDeviceSelect_hideDeleteButton(cFEStateOptionsDeviceSelect* self, bool on)
 {
-    if (*(int*)((char*)self + 0x22C) != 0) {
+    if (self->mIsSaveScreen != 0) {
         int off = !on;
-        ((cUIObj_E2C0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext5)))->setVisible(off);
-        ((cUIObj_E2C0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq)))->setVisible(off);
+        ((cUIObj_E2C0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext5)))->setVisible(off);
+        ((cUIObj_E2C0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq)))->setVisible(off);
     }
-    *(int*)((char*)self + 0x220) = !on;
+    self->mDeleteButtonActive = !on;
 }
 #endif
 
@@ -3542,18 +3542,18 @@ struct cUIObj_E368 {
  * @param loadBlocked  true to hide the button on a load screen
  * @param saveBlocked  true to hide the button on a save screen
  */
-extern "C" void cFEStateOptionsDeviceSelect_hideMainButton(void* self, bool loadBlocked, bool saveBlocked)
+extern "C" void cFEStateOptionsDeviceSelect_hideMainButton(cFEStateOptionsDeviceSelect* self, bool loadBlocked, bool saveBlocked)
 {
-    cUIObj_E368* xButton = (cUIObj_E368*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x));
-    if (*(int*)((char*)self + 0x22C) != 0) {
+    cUIObj_E368* xButton = (cUIObj_E368*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x));
+    if (self->mIsSaveScreen != 0) {
         int showButton = !saveBlocked;
-        ((cUIObj_E368*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3)))->setVisible(showButton);
-        *(int*)((char*)self + 0x224) = showButton;
+        ((cUIObj_E368*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3)))->setVisible(showButton);
+        self->mMainButtonActive = showButton;
         xButton->setVisible(showButton);
     } else {
         int showButton = !loadBlocked;
-        ((cUIObj_E368*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_btext3a)))->setVisible(showButton);
-        *(int*)((char*)self + 0x224) = showButton;
+        ((cUIObj_E368*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_btext3a)))->setVisible(showButton);
+        self->mMainButtonActive = showButton;
         xButton->setVisible(showButton);
     }
 }
@@ -3579,27 +3579,27 @@ struct sVEntry0018E478 {
  * cFECustom_vtbl) with this state and the choice, and pushes the result on the engine's state stack (+0x18) with
  * cUIStateStack_pushCheck. Sets +0x1AC afterwards. Fills slot +0x10C (cFEMemCard_updateDone's slot).
  */
-extern "C" void cFEStateOptionsDeviceSelect_updateDone(void* self)
+extern "C" void cFEStateOptionsDeviceSelect_updateDone(cFEStateOptionsDeviceSelect* self)
 {
-    if (*(int*)((char*)self + 0x1AC) == 0) {
-        int mode = *(int*)((char*)self + 0x1BC) == 1;
-        if (*(int*)((char*)self + 0x1E4) == 1) {
+    if (self->mIsDone == 0) {
+        int mode = self->mType == 1;
+        if (self->mIsCancelPressed == 1) {
             mode = 0;
         }
-        if (*(int*)((char*)self + 0x1B4) == 0) {
+        if (self->mIsLoadDoneOK == 0) {
             mode = 0;
         }
-        if (*(int*)((char*)self + 0x230) != 0) {
+        if (self->mbOnline != 0) {
             mode = 2;
         }
-        void* obj = **(void***)((char*)self + 0x10);
+        void* obj = *(void**)self->mpEngine;
         sVEntry0018E478* vt = *(sVEntry0018E478**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, mode);
         if (nextState != 0) {
-            cUIStateStack_pushCheck(*(char**)((char*)self + 0x10) + 0x18, nextState);
+            cUIStateStack_pushCheck((char*)self->mpEngine + 0x18, nextState);
         }
     }
-    *(int*)((char*)self + 0x1AC) = 1;
+    self->mIsDone = 1;
 }
 #endif
 
@@ -3755,40 +3755,40 @@ struct cState_18E510 : cStateBase_18E510 {
  * (cFEMemCard_displayStatus's slot).
  * On Tour: cOVState_SAVEOPTIONS::displayStatus (ovstatereplay.cpp).
  */
-extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cState_18E510* self)
+extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cFEStateOptionsDeviceSelect* self)
 {
     char* pMC = (char*)cSSXApp_getMCManager(SSXApp);
     unsigned short ustrDisplay[800];
-    if (self->displayFileOK()) {
+    if (((cState_18E510*)self)->displayFileOK()) {
         if (DEV0_18E510(pMC, 53) == 0) {
             cFEMemCard_callbackDisplayNoCards();
-        } else if (self->f214 != 3) {
-            self->triggerDisplayState(3);
+        } else if (self->mScreenStatus != 3) {
+            ((cState_18E510*)self)->triggerDisplayState(3);
         }
     }
-    if (self->displayFileOK()) {
+    if (((cState_18E510*)self)->displayFileOK()) {
         char text[80];
         cUIObj_18E510* pText;
         int bIsNewSet;
-        self->setMenuHighlight();
+        ((cState_18E510*)self)->setMenuHighlight();
         cMCOverlayManager_GetDeviceDisplayString(pMC, *(int*)(pMC + 0x428), ustrDisplay, 800);
-        cUIText_setUnicodeStringWrap(cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Memory_card_text)), ustrDisplay);
-        self->dev = *(int*)(pMC + 0x428);
-        pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_1percentage));
+        cUIText_setUnicodeStringWrap(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Memory_card_text)), ustrDisplay);
+        self->mLastSelectedDevice = *(int*)(pMC + 0x428);
+        pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_1percentage));
         pText->setVisible(0);
         bIsNewSet = 0;
-        for (int i = 1; i < 5 && (self->mode == 1 || i < 2); i++) {
+        for (int i = 1; i < 5 && (self->mType == 1 || i < 2); i++) {
             char strObj[60];
             sprintf(strObj, str_pct_dmemory_card, i);
-            pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(strObj));
+            pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(strObj));
             DEVS_18E510(pMC, 14, i - 1, text);
             cUIText_setUnicodeString(pText, text);
             if (DEVI_18E510(pMC, 67, i - 1) == 0 && DEVI_18E510(pMC, 66, i - 1) == 0
                 && DEV0_18E510(pMC, 55) != 0) {
-                if (self->mode == 1) {
+                if (self->mType == 1) {
                     pText->setUseStaticColour(1);
                     pText->setStatic(1);
-                } else if (bIsNewSet == 0 && self->f22C != 0) {
+                } else if (bIsNewSet == 0 && self->mIsSaveScreen != 0) {
                     bIsNewSet = 1;
                     pText->setStatic(0);
                     pText->setUseStaticColour(0);
@@ -3809,23 +3809,23 @@ extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cState_18E510* self)
                 pText->setStatic(1);
             }
         }
-        if (cFEMemCard_checkNextAvailableDevice(self, pMC, *(int*)(pMC + 0x428), 1) == -1) {
-            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_arrow_left)))->setVisible(0);
+        if (cFEMemCard_checkNextAvailableDevice(((cState_18E510*)self), pMC, *(int*)(pMC + 0x428), 1) == -1) {
+            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_left)))->setVisible(0);
         } else {
-            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_arrow_left)))->setVisible(1);
+            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_left)))->setVisible(1);
         }
-        if (cFEMemCard_checkNextAvailableDevice(self, pMC, *(int*)(pMC + 0x428), 0) == -1) {
-            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_arrow_right)))->setVisible(0);
+        if (cFEMemCard_checkNextAvailableDevice(((cState_18E510*)self), pMC, *(int*)(pMC + 0x428), 0) == -1) {
+            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_right)))->setVisible(0);
         } else {
-            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_arrow_right)))->setVisible(1);
+            ((cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrow_right)))->setVisible(1);
         }
     }
-    if (self->f214 != 3) {
-        for (int i = 1; i < 5 && (self->mode == 1 || i < 2); ) {
+    if (self->mScreenStatus != 3) {
+        for (int i = 1; i < 5 && (self->mType == 1 || i < 2); ) {
             char strObj[80];
             sprintf(strObj, str_pct_dmemory_card, i);
             i++;
-            cUIObj_18E510* pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(strObj));
+            cUIObj_18E510* pText = (cUIObj_18E510*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(strObj));
             pText->setUseStaticColour(0);
             pText->setStatic(1);
         }

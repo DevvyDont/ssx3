@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatememcard.h"
 #include "ui/uistate.h"
 #include "main/ssxapp.h"
 
@@ -33,16 +34,16 @@ public:
  * Also calls cSSXApp_getMCManager() and discards the result; the "mc messages" object is used without a null
  * check.
  */
-extern "C" void cFEStateMemCard_onCreateScreen(void* self)
+extern "C" void cFEStateMemCard_onCreateScreen(cFEStateMemCard* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_06cAutoload), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     cSSXApp_getMCManager(SSXApp);
-    ((cUIObjK186B50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_mc_messages)))->setVisible(0);
+    ((cUIObjK186B50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_mc_messages)))->setVisible(0);
 }
 #endif
 
@@ -75,15 +76,15 @@ public:
  * done (cMCOverlayManager_isManagerDone) or the state word at +0x1C0 is 6, it deletes the animation of the "!"
  * object, when there is one, and hides "mc messages" (slot 9 with 0). "mc messages" is used without a null check.
  */
-extern "C" void cFEStateMemCard_onUpdate(void* self)
+extern "C" void cFEStateMemCard_onUpdate(cFEStateMemCard* self)
 {
     cFEMemCard_onUpdate(self);
-    if (cMCOverlayManager_isManagerDone(cSSXApp_getMCManager(SSXApp)) != 0 || *(int*)((char*)self + 0x1C0) == 6) {
-        void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_exclam));
+    if (cMCOverlayManager_isManagerDone(cSSXApp_getMCManager(SSXApp)) != 0 || self->mState == 6) {
+        void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_exclam));
         if (obj != 0) {
             cUIThing_deleteAnimation(obj);
         }
-        ((cUIObjK186BF0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_mc_messages)))->setVisible(0);
+        ((cUIObjK186BF0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_mc_messages)))->setVisible(0);
     }
 }
 #endif
@@ -298,7 +299,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBESaveInterface_getSaveProfileSize();
 struct sFEMemCardK187270;
-extern "C" void cFEStateMemCard_terminateFreeSpaceCheck(sFEMemCardK187270* self);
+extern "C" void cFEStateMemCard_terminateFreeSpaceCheck(cFEStateMemCard* self);
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern "C" int cMCOverlayManager_hasCardStatusCriticalError(void* mp);
 extern "C" int cMCOverlayManager_GetFreeSpace(void* mp, int card);
@@ -366,7 +367,7 @@ extern "C" void cFEStateMemCard_callbackLoadReady(void)
             return;
         }
     }
-    cFEStateMemCard_terminateFreeSpaceCheck((sFEMemCardK187270*)D_004A14B8_86F90);
+    cFEStateMemCard_terminateFreeSpaceCheck((cFEStateMemCard*)((sFEMemCardK187270*)D_004A14B8_86F90));
 }
 #endif
 
@@ -441,7 +442,7 @@ INCLUDE_ASM("fe/fememcard", cFEStateMemCard_callbackFileChecked);
 #ifdef SKIP_ASM
 extern void* D_004A14B8;
 extern "C" void cFEMemCard_callbackFileChecked(void);
-extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(void* self);
+extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(cFEStateMemCard* self);
 
 /**
  * Handles a finished file check on the memory-card state: runs the base handler, then advances the free-space check.
@@ -452,7 +453,7 @@ extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(void* self);
 extern "C" void cFEStateMemCard_callbackFileChecked(void)
 {
     cFEMemCard_callbackFileChecked();
-    cFEStateMemCard_updateFreeSpaceCheckState(D_004A14B8);
+    cFEStateMemCard_updateFreeSpaceCheckState((cFEStateMemCard*)D_004A14B8);
 }
 #endif
 
@@ -541,7 +542,7 @@ extern "C" void cFEStateMemCard_callbackSysRecheckFile(void)
 //100%
 INCLUDE_ASM("fe/fememcard", cFEStateMemCard_terminateFreeSpaceCheck);
 #ifdef SKIP_ASM
-extern "C" void cFEStateMemCard_exitScreen(void* self);
+extern "C" void cFEStateMemCard_exitScreen(cFEStateMemCard* self);
 extern "C" void cFEStateMemCard_startProfileRead(void);
 extern "C" void cFEStateMemCard_startSettingsRead(void);
 
@@ -559,11 +560,11 @@ struct sFEMemCardK187270 {
  * 1 clear) selects device 0 (cMCOverlayManager_selectDevice, cMCOverlayManager_setSelectedDevice) and runs cFEStateMemCard_startSettingsRead; else profile
  * present (bit 0 clear) selects device 0 and runs cFEStateMemCard_startProfileRead; else cFEStateMemCard_exitScreen leaves the screen.
  */
-extern "C" void cFEStateMemCard_terminateFreeSpaceCheck(sFEMemCardK187270* self)
+extern "C" void cFEStateMemCard_terminateFreeSpaceCheck(cFEStateMemCard* self)
 {
-    self->f234 = 1;
+    self->mFreespaceCheckDone = 1;
     void* mp = cSSXApp_getMCManager(SSXApp);
-    int flags = self->flags;
+    int flags = self->mCard1MissingSavedFileTypeFlags;
     if (!(flags & 2)) {
         cMCOverlayManager_selectDevice(mp, 0);
         cMCOverlayManager_setSelectedDevice(mp);
@@ -588,12 +589,12 @@ extern "C" void cSSXApp_startFELoad(void* p);
  *
  * Calls cSSXApp_startFELoad(SSXApp) only while the done flag (+0x1AC) is clear, then sets it.
  */
-extern "C" void cFEStateMemCard_exitScreen(void* self)
+extern "C" void cFEStateMemCard_exitScreen(cFEStateMemCard* self)
 {
-    *(int*)((char*)self + 0x1C0) = 6;
-    if (*(int*)((char*)self + 0x1AC) == 0)
+    self->mState = 6;
+    if (self->mIsDone == 0)
         cSSXApp_startFELoad(SSXApp);
-    *(int*)((char*)self + 0x1AC) = 1;
+    self->mIsDone = 1;
 }
 #endif
 
@@ -686,7 +687,7 @@ extern int D_004A14BC;
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern "C" void cMCOverlayManager_ReturnToDevSelectScreen(void* mp);
 extern "C" void cFEStateMemCard_startProfileRead(void);
-extern "C" void cFEStateMemCard_exitScreen(void* self);
+extern "C" void cFEStateMemCard_exitScreen(cFEStateMemCard* self);
 
 static inline int moviePlaying_K1874E8(void* mp)
 {
@@ -706,14 +707,14 @@ static inline int moviePlaying_K1874E8(void* mp)
  * (cMCOverlayManager_ReturnToDevSelectScreen) and starts the profile read (cFEStateMemCard_startProfileRead); otherwise cFEStateMemCard_exitScreen
  * leaves the screen.
  */
-extern "C" void cFEStateMemCard_updateDone(void* self)
+extern "C" void cFEStateMemCard_updateDone(cFEStateMemCard* self)
 {
-    if (*(int*)((char*)self + 0x1AC) != 0)
+    if (self->mIsDone != 0)
         return;
     void* mp = cSSXApp_getMCManager(SSXApp);
     if (moviePlaying_K1874E8(mp))
         return;
-    if (D_004A14BC == 4 && ((*(int*)((char*)self + 0x238) ^ 1) & 1)) {
+    if (D_004A14BC == 4 && ((self->mCard1MissingSavedFileTypeFlags ^ 1) & 1)) {
         cMCOverlayManager_ReturnToDevSelectScreen(mp);
         cFEStateMemCard_startProfileRead();
         return;
@@ -757,16 +758,16 @@ struct sVtEntK187580
  * @param popup  the popup state that sent the event (passed on to cFEMemCard_onPopupEvent)
  * @param key  the popup event: 0xF / 0x10 / 0x11 for buttons 0-2, 0x16 when the popup closes
  */
-extern "C" void cFEStateMemCard_onPopupEvent(void *self, cUIState* popup, int key)
+extern "C" void cFEStateMemCard_onPopupEvent(cFEStateMemCard* self, cUIState* popup, int key)
 {
   cFEMemCard_onPopupEvent(self, popup, key);
-  int st = *((int *) (((char *) self) + 0x19C));
+  int st = self->mPopupType;
   if (st == 21)
   {
     void *mp = cSSXApp_getMCManager(SSXApp);
     cMCOverlayManager_selectDevice(mp, 0);
     cMCOverlayManager_setSelectedDevice(mp);
-    int flags = *((int *) (((char *) self) + 0x238));
+    int flags = self->mCard1MissingSavedFileTypeFlags;
     if (!(flags & 2))
     {
       cFEStateMemCard_startSettingsRead();
@@ -785,25 +786,25 @@ extern "C" void cFEStateMemCard_onPopupEvent(void *self, cUIState* popup, int ke
     cFEStateMemCard_exitScreen(self);
     return;
   }
-  if ((*((int *) (((char *) self) + 0x19C))) == 4)
+  if ((self->mPopupType) == 4)
   {
     cFEStateMemCard_exitScreen(self);
     return;
   }
-  if (((key == 0xF) || (key == 0x10)) && ((*((int *) (((char *) self) + 0x19C))) == 20))
+  if (((key == 0xF) || (key == 0x10)) && ((self->mPopupType) == 20))
   {
     int cancel = key == 0x10;
     if (!cancel)
     {
-      sVtEntK187580 *vt = *((sVtEntK187580 **) (((char *) self) + 8));
+      sVtEntK187580 *vt = (sVtEntK187580*)self->mVtbl;
       vt[41].fn(((char *) self) + vt[41].delta);
       cMCOverlayManager_update(cSSXApp_getMCManager(SSXApp));
-      cFEStateMemCard_terminateFreeSpaceCheck((sFEMemCardK187270 *) self);
+      cFEStateMemCard_terminateFreeSpaceCheck(self);
     }
     else
     {
       st = 1;
-      *((int *) (((char *) self) + 0x1EC)) = st;
+      self->mIsRetryPressed = st;
     }
   }
 }
@@ -1036,7 +1037,7 @@ static inline void mpNotify_87A38(char* mp, int msg)
  *
  * @param memCardState  the memory-card state (D_004A14B8)
  */
-extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(void* memCardState)
+extern "C" void cFEStateMemCard_updateFreeSpaceCheckState(cFEStateMemCard* memCardState)
 {
     sMemCard_87A38* self = (sMemCard_87A38*)memCardState;
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);

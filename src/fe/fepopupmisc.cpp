@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateaudiooptions.h"
 #include "fe/festatetrophyroom.h"
 #include "fe/festatenethelppopup.h"
 #include "fe/festatevideoplayer.h"
@@ -529,9 +530,9 @@ extern void* D_0046B078[];
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_001DF440(void* self, int flags)
+extern "C" void func_001DF440(cBraggingRightsMenu* self, int flags)
 {
-    *(void***)((char*)self + 0x30) = D_0046B078;
+    self->mVtbl = D_0046B078;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -562,12 +563,12 @@ struct sElem_F470 {
  *
  * @return @p self
  */
-extern "C" void* cFEStateBraggingRights_cFEStateBraggingRights1(void* self)
+extern "C" void* cFEStateBraggingRights_cFEStateBraggingRights1(cFEStateBraggingRights* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    *(void***)((char*)self + 0x8) = cFEStateBraggingRights_vtbl;
+    self->mVtbl = cFEStateBraggingRights_vtbl;
     new ((char*)self + 0x6D0) sElem_F470[2];
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -592,9 +593,9 @@ struct sVEntry001DF4E8 {
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cFEStateBraggingRights__cFEStateBraggingRights(void* self, int flags)
+extern "C" void cFEStateBraggingRights__cFEStateBraggingRights(cFEStateBraggingRights* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cFEStateBraggingRights_vtbl;
+    self->mVtbl = cFEStateBraggingRights_vtbl;
     if ((char*)self + 0x6D0 != 0) {
         char* panel = (char*)self + 0x6D0 + 0x68;
         while ((char*)self + 0x6D0 != panel) {
@@ -1460,11 +1461,11 @@ extern void* cFEStateRewardGalleryPosters_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters1(void* self)
+extern "C" void* cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters1(cFEStateRewardGalleryPosters* self)
 {
     cUIState_cUIState(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStateRewardGalleryPosters_vtbl;
-    return self;
+    self->mVtbl = cFEStateRewardGalleryPosters_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -1487,12 +1488,12 @@ extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cFEStateRewardGalleryPosters__cFEStateRewardGalleryPosters(void* self, int flags)
+extern "C" void cFEStateRewardGalleryPosters__cFEStateRewardGalleryPosters(cFEStateRewardGalleryPosters* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cFEStateRewardGalleryBase_vtbl;
+    self->mVtbl = cFEStateRewardGalleryBase_vtbl;
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
-    *(void***)((char*)self + 0x8) = cFEState_vtbl;
+    self->mVtbl = cFEState_vtbl;
     cUIState__cUIState_dtor(self, flags);
 }
 #endif
@@ -1525,7 +1526,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_getRewardCost);
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryPosters_getRewardCost(void* self, void* reward)
+extern "C" int cFEStateRewardGalleryPosters_getRewardCost(cFEStateRewardGalleryPosters* self, void* reward)
 {
     int value = *(short*)((char*)reward + 0xc);
     if (value > 0) value = value * 10;
@@ -1581,11 +1582,11 @@ extern void* cFEStateRewardGalleryTradingCards_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards1(void* self)
+extern "C" void* cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards1(cFEStateRewardGalleryTradingCards* self)
 {
     cUIState_cUIState(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStateRewardGalleryTradingCards_vtbl;
-    return self;
+    self->mVtbl = cFEStateRewardGalleryTradingCards_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -1608,12 +1609,12 @@ extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cFEStateRewardGalleryTradingCards__cFEStateRewardGalleryTradingCards(void* self, int flags)
+extern "C" void cFEStateRewardGalleryTradingCards__cFEStateRewardGalleryTradingCards(cFEStateRewardGalleryTradingCards* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cFEStateRewardGalleryBase_vtbl;
+    self->mVtbl = cFEStateRewardGalleryBase_vtbl;
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
-    *(void***)((char*)self + 0x8) = cFEState_vtbl;
+    self->mVtbl = cFEState_vtbl;
     cUIState__cUIState_dtor(self, flags);
 }
 #endif
@@ -1646,7 +1647,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_getRewardCost);
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryTradingCards_getRewardCost(void* self, void* reward)
+extern "C" int cFEStateRewardGalleryTradingCards_getRewardCost(cFEStateRewardGalleryTradingCards* self, void* reward)
 {
     int value = *(short*)((char*)reward + 0xc);
     if (value > 0) value = value * 10;
@@ -1702,11 +1703,11 @@ extern void* cFEStateRewardGalleryConceptArts_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts1(void* self)
+extern "C" void* cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts1(cFEStateRewardGalleryConceptArts* self)
 {
     cUIState_cUIState(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStateRewardGalleryConceptArts_vtbl;
-    return self;
+    self->mVtbl = cFEStateRewardGalleryConceptArts_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -1729,12 +1730,12 @@ extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cFEStateRewardGalleryConceptArts__cFEStateRewardGalleryConceptArts(void* self, int flags)
+extern "C" void cFEStateRewardGalleryConceptArts__cFEStateRewardGalleryConceptArts(cFEStateRewardGalleryConceptArts* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cFEStateRewardGalleryBase_vtbl;
+    self->mVtbl = cFEStateRewardGalleryBase_vtbl;
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
-    *(void***)((char*)self + 0x8) = cFEState_vtbl;
+    self->mVtbl = cFEState_vtbl;
     cUIState__cUIState_dtor(self, flags);
 }
 #endif
@@ -1767,7 +1768,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_getRewardCost);
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryConceptArts_getRewardCost(void* self, void* reward)
+extern "C" int cFEStateRewardGalleryConceptArts_getRewardCost(cFEStateRewardGalleryConceptArts* self, void* reward)
 {
     int value = *(short*)((char*)reward + 0xc);
     if (value > 0) value = value * 10;
@@ -1823,11 +1824,11 @@ extern void* cFEStateRewardGalleryVideos_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos1(void* self)
+extern "C" void* cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos1(cFEStateRewardGalleryVideos* self)
 {
     cUIState_cUIState(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStateRewardGalleryVideos_vtbl;
-    return self;
+    self->mVtbl = cFEStateRewardGalleryVideos_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -1850,12 +1851,12 @@ extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cFEStateRewardGalleryVideos__cFEStateRewardGalleryVideos(void* self, int flags)
+extern "C" void cFEStateRewardGalleryVideos__cFEStateRewardGalleryVideos(cFEStateRewardGalleryVideos* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cFEStateRewardGalleryBase_vtbl;
+    self->mVtbl = cFEStateRewardGalleryBase_vtbl;
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
-    *(void***)((char*)self + 0x8) = cFEState_vtbl;
+    self->mVtbl = cFEState_vtbl;
     cUIState__cUIState_dtor(self, flags);
 }
 #endif
@@ -1888,7 +1889,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_getRewardCost);
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryVideos_getRewardCost(void* self, void* reward)
+extern "C" int cFEStateRewardGalleryVideos_getRewardCost(cFEStateRewardGalleryVideos* self, void* reward)
 {
     int value = *(short*)((char*)reward + 0xc);
     if (value > 0) value = value * 10;
@@ -1944,11 +1945,11 @@ extern void* cFEStateRewardGalleryToys_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryToys_cFEStateRewardGalleryToys1(void* self)
+extern "C" void* cFEStateRewardGalleryToys_cFEStateRewardGalleryToys1(cFEStateRewardGalleryToys* self)
 {
     cUIState_cUIState(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStateRewardGalleryToys_vtbl;
-    return self;
+    self->mVtbl = cFEStateRewardGalleryToys_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -1971,12 +1972,12 @@ extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cFEStateRewardGalleryToys__cFEStateRewardGalleryToys(void* self, int flags)
+extern "C" void cFEStateRewardGalleryToys__cFEStateRewardGalleryToys(cFEStateRewardGalleryToys* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cFEStateRewardGalleryBase_vtbl;
+    self->mVtbl = cFEStateRewardGalleryBase_vtbl;
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
-    *(void***)((char*)self + 0x8) = cFEState_vtbl;
+    self->mVtbl = cFEState_vtbl;
     cUIState__cUIState_dtor(self, flags);
 }
 #endif
@@ -2009,7 +2010,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_getRewardCost);
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryToys_getRewardCost(void* self, void* reward)
+extern "C" int cFEStateRewardGalleryToys_getRewardCost(cFEStateRewardGalleryToys* self, void* reward)
 {
     int value = *(short*)((char*)reward + 0xc);
     if (value > 0) value = value * 10;
@@ -2065,11 +2066,11 @@ extern void* cFEStateRewardGalleryCheatChars_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars1(void* self)
+extern "C" void* cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars1(cFEStateRewardGalleryCheatChars* self)
 {
     cUIState_cUIState(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStateRewardGalleryCheatChars_vtbl;
-    return self;
+    self->mVtbl = cFEStateRewardGalleryCheatChars_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -2092,12 +2093,12 @@ extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cFEStateRewardGalleryCheatChars__cFEStateRewardGalleryCheatChars(void* self, int flags)
+extern "C" void cFEStateRewardGalleryCheatChars__cFEStateRewardGalleryCheatChars(cFEStateRewardGalleryCheatChars* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cFEStateRewardGalleryBase_vtbl;
+    self->mVtbl = cFEStateRewardGalleryBase_vtbl;
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
-    *(void***)((char*)self + 0x8) = cFEState_vtbl;
+    self->mVtbl = cFEState_vtbl;
     cUIState__cUIState_dtor(self, flags);
 }
 #endif
@@ -2130,7 +2131,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_getRewardCost);
  * @param reward  the reward record
  * @return the price
  */
-extern "C" int cFEStateRewardGalleryCheatChars_getRewardCost(void* self, void* reward)
+extern "C" int cFEStateRewardGalleryCheatChars_getRewardCost(cFEStateRewardGalleryCheatChars* self, void* reward)
 {
     int value = *(short*)((char*)reward + 0xc);
     if (value > 0) value = value * 10;
@@ -2815,11 +2816,11 @@ extern void* cFEStateAudioOptions_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions1(void* self)
+extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions1(cFEStateAudioOptions* self)
 {
     cUIState_cUIState(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStateAudioOptions_vtbl;
-    return self;
+    self->mVtbl = cFEStateAudioOptions_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -2853,8 +2854,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateAudioOptions_isInStore);
  * @param audioOptions  the audio-options state
  * @return the in-store flag
  */
-extern "C" int cFEStateAudioOptions_isInStore(void *audioOptions) {
-    return (*(int *)((char*)(audioOptions) + (0x74)));
+extern "C" int cFEStateAudioOptions_isInStore(cFEStateAudioOptions* audioOptions) {
+    return (audioOptions->mInStore);
 }
 #endif
 //100%

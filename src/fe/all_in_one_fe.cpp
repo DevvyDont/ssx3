@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/ovstatehud.h"
 #include "ai/rider.h"
 #include "be/beintnewrace.h"
 #include "fe/ovtemplatedialog.h"
@@ -725,19 +726,18 @@ struct sElem_CBA0 {
  * @param state  the object to construct
  * @return @p state
  */
-extern "C" void *func_0021CBA0(void *state) {
-    char* self = (char*)state;
-    cUIState_cUIState_CBA0(self, 0);
-    *(char**)(self + 8) = cOVStateHUD1P_vtbl;
-    new (self + 0x48) sElem_CBA0[2];
-    *(int*)(self + 0x474) = -1;
-    *(float*)(self + 0x478) = 1.0f;
-    *(float*)(self + 0x47C) = 1.0f;
-    *(int*)(self + 0x480) = 0;
-    *(int*)(self + 0x484) = 0;
-    *(float*)(self + 0x488) = 1.0f;
-    *(float*)(self + 0x48C) = 1.0f;
-    return state;
+extern "C" void *func_0021CBA0(cOVStateHUD1P* state) {
+    cUIState_cUIState_CBA0(((char*)state), 0);
+    state->mVtbl = (void**)cOVStateHUD1P_vtbl;
+    new (((char*)state) + 0x48) sElem_CBA0[2];
+    state->mGlow.mSourceShape = -1;
+    state->mGlow.mWidth = 1.0f;
+    state->mGlow.mHeight = 1.0f;
+    *(int*)&state->mGlow.mTop = 0;
+    *(int*)&state->mGlow.mLeft = 0;
+    state->mGlow.mRight = 1.0f;
+    state->mGlow.mBottom = 1.0f;
+    return ((void*)state);
 }
 #endif
 
@@ -758,8 +758,8 @@ extern char cOVStateHUD1P_vtbl[];
  *
  * @param flags  g++ destructor flags, passed on to cUIState__cUIState(); bit 0 set frees the object
  */
-extern "C" void cOVStateHUD1P__cOVStateHUD1P(void *self, int flags) {
-    (*(char **)((char*)(self) + (8))) = cOVStateHUD1P_vtbl;
+extern "C" void cOVStateHUD1P__cOVStateHUD1P(cOVStateHUD1P* self, int flags) {
+    ((char*)self->mVtbl) = cOVStateHUD1P_vtbl;
     if ((char*)self + 0x48 != 0) {
         char *element = (char*)self + 0x48 + 0x118;
         while ((char*)self + 0x48 != element) {
@@ -767,7 +767,7 @@ extern "C" void cOVStateHUD1P__cOVStateHUD1P(void *self, int flags) {
             func_0020EB08(element + 8, 2);
         }
     }
-    cUIState__cUIState(self, flags);
+    cUIState__cUIState(((void*)self), flags);
 }
 #endif
 
@@ -1871,7 +1871,7 @@ extern "C" void func_0021E7E0_E1B0(char* self, sColour* colp, t2Vector* pos, t2V
  *               +0x48 / +0x4C
  * @param x  reflect flags for cOVStateHUD1P_calcElemPos
  */
-extern "C" void cOVStateHUD1P_renderRank(char* self, char* obj, int* rider, int x)
+extern "C" void cOVStateHUD1P_renderRank(cOVStateHUD1P* self, char* obj, int* rider, int x)
 {
     t2Vector scale;
     sColour col;
@@ -1901,7 +1901,7 @@ extern "C" void cOVStateHUD1P_renderRank(char* self, char* obj, int* rider, int 
         }
     }
     tHUDDef_getScale(obj + 0x360, &sc);
-    int* tex = (int*)(self + 0x444);
+    int* tex = (int*)(((char*)self) + 0x444);
     tHUDDef_getPos(obj + 0x360, &elemPos);
     tHUDDef_getSize(D_00477F30 + 0xD8, &size1, 0);
     size1.x *= sc.x;
@@ -1912,7 +1912,7 @@ extern "C" void cOVStateHUD1P_renderRank(char* self, char* obj, int* rider, int 
     size2.y *= sc.y;
     dim.x = size2.x + size1.x;
     dim.y = size2.y;
-    cOVStateHUD1P_calcElemPos(self, &drawPos, &elemPos, &dim, &scale, obj[0x380], obj[0x381], x);
+    cOVStateHUD1P_calcElemPos(((char*)self), &drawPos, &elemPos, &dim, &scale, obj[0x380], obj[0x381], x);
     drawPos.x += size2.x;
     drawPos.y += size1.y;
     int* w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
@@ -1921,13 +1921,13 @@ extern "C" void cOVStateHUD1P_renderRank(char* self, char* obj, int* rider, int 
     tHUDDef_getSize(D_00477F30 + 0xFC, &size3, 0);
     size3.x *= sc.x;
     size3.y *= sc.y;
-    cOVStateHUD1P_renderBitmap(self, *(int*)(self + 0x46C), &drawPos, &size3, &scale, &totalColour);
+    cOVStateHUD1P_renderBitmap(((char*)self), (int)self->mpNumSlash, &drawPos, &size3, &scale, &totalColour);
     drawPos.x += size3.x;
     tHUDDef_getColour(D_00477F30 + 0x120, &totalColour);
     tHUDDef_getSize(D_00477F30 + 0x120, &size3, 0);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int off3 = (cBENewRaceInterface_newRace.iNumberRiders - 1) << 2;
-    cOVStateHUD1P_renderBitmap(self, *(int*)((char*)tex + off3), &drawPos, &size3, &sc, &totalColour);
+    cOVStateHUD1P_renderBitmap(((char*)self), *(int*)((char*)tex + off3), &drawPos, &size3, &sc, &totalColour);
     if (k != 1.0f) {
         size2.x *= k;
         size2.y *= k;
@@ -1936,26 +1936,26 @@ extern "C" void cOVStateHUD1P_renderRank(char* self, char* obj, int* rider, int 
         dim.x *= k;
         dim.y *= k;
     }
-    cOVStateHUD1P_calcElemPos(self, &drawPos, &elemPos, &dim, &scale, obj[0x380], obj[0x381], x);
+    cOVStateHUD1P_calcElemPos(((char*)self), &drawPos, &elemPos, &dim, &scale, obj[0x380], obj[0x381], x);
     w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     *w = (*w & ~0x3E0) | ((obj[0x382] << 5) & 0x3E0);
     int off4 = *(int*)(panelRider + 0xEC) << 2;
-    cOVStateHUD1P_renderBitmap(self, *(int*)((char*)tex + off4), &drawPos, &size2, &scale, &col);
+    cOVStateHUD1P_renderBitmap(((char*)self), *(int*)((char*)tex + off4), &drawPos, &size2, &scale, &col);
     signed char n = *(int*)(panelRider + 0xEC) < 4 ? *(int*)(panelRider + 0xEC) : 3;
     suffixPos = drawPos;
     int off5 = n * 4;
-    int tx = *(int*)(self + off5 + 0x45C);
+    int tx = *(int*)(((char*)self) + off5 + 0x45C);
     suffixPos.x += size2.x;
-    cOVStateHUD1P_renderBitmap(self, tx, &suffixPos, &size1, &scale, &col);
+    cOVStateHUD1P_renderBitmap(((char*)self), tx, &suffixPos, &size1, &scale, &col);
     if (((float*)rider)[0x13] >= 0.0f) {
         w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
         *w = (*w & ~0x3E0) | (((obj[0x382] - 1) << 5) & 0x3E0);
         pa = drawPos;
         sa = size2;
-        func_0021E7E0_E1B0(self, &col, &pa, &sa, ((float*)rider)[0x13], 1.8101750612258911f, 1.8101750612258911f, 0.5f, 1.0f);
+        func_0021E7E0_E1B0(((char*)self), &col, &pa, &sa, ((float*)rider)[0x13], 1.8101750612258911f, 1.8101750612258911f, 0.5f, 1.0f);
         pa = suffixPos;
         sb = size1;
-        func_0021E7E0_E1B0(self, &col, &pa, &sb, ((float*)rider)[0x13], 1.8101750612258911f, 1.8101750612258911f, 0.5f, 1.0f);
+        func_0021E7E0_E1B0(((char*)self), &col, &pa, &sb, ((float*)rider)[0x13], 1.8101750612258911f, 1.8101750612258911f, 0.5f, 1.0f);
     }
 }
 #endif
@@ -2052,7 +2052,7 @@ extern "C" void func_0021EA00_E7E0(void* self, Col_E7E0* col, float* pos, float 
  * @param amin  alpha factor at phase 0 and 2
  * @param amax  alpha factor at phase 1
  */
-extern "C" void func_0021E7E0(char* self, Col_E7E0* colp, float* pos, float* size,
+extern "C" void func_0021E7E0(cOVStateHUD1P* self, Col_E7E0* colp, float* pos, float* size,
                               float phase, float sx, float sy, float amin, float amax) {
     Col_E7E0 col = *colp;
     Col_E7E0* colour = &col;
@@ -2065,17 +2065,17 @@ extern "C" void func_0021E7E0(char* self, Col_E7E0* colp, float* pos, float* siz
     pos[1] -= dh * 0.5f;
     size[0] += dw;
     size[1] += dh;
-    int id = *(int*)(self + 0x474);
+    int id = self->mGlow.mSourceShape;
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = id;
     if (size[0] > 72.0f) {
-        float mid = (*(float*)(self + 0x484) + *(float*)(self + 0x488)) * 0.5f;
-        func_0021EA00_E7E0(self, colour, pos, 36.0f, size[1], *(float*)(self + 0x484), *(float*)(self + 0x480), mid, *(float*)(self + 0x48C));
+        float mid = (self->mGlow.mLeft + self->mGlow.mRight) * 0.5f;
+        func_0021EA00_E7E0(((char*)self), colour, pos, 36.0f, size[1], self->mGlow.mLeft, self->mGlow.mTop, mid, self->mGlow.mBottom);
         pos[0] += 36.0f;
-        func_0021EA00_E7E0(self, colour, pos, size[0] - 72.0f, size[1], mid, *(float*)(self + 0x480), mid, *(float*)(self + 0x48C));
+        func_0021EA00_E7E0(((char*)self), colour, pos, size[0] - 72.0f, size[1], mid, self->mGlow.mTop, mid, self->mGlow.mBottom);
         pos[0] += size[0] - 72.0f;
-        func_0021EA00_E7E0(self, colour, pos, 36.0f, size[1], mid, *(float*)(self + 0x480), *(float*)(self + 0x488), *(float*)(self + 0x48C));
+        func_0021EA00_E7E0(((char*)self), colour, pos, 36.0f, size[1], mid, self->mGlow.mTop, self->mGlow.mRight, self->mGlow.mBottom);
     } else {
-        func_0021EA00_E7E0(self, colour, pos, size[0], size[1], *(float*)(self + 0x484), *(float*)(self + 0x480), *(float*)(self + 0x488), *(float*)(self + 0x48C));
+        func_0021EA00_E7E0(((char*)self), colour, pos, size[0], size[1], self->mGlow.mLeft, self->mGlow.mTop, self->mGlow.mRight, self->mGlow.mBottom);
     }
 }
 #endif
@@ -2121,7 +2121,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021EA00);
  * @param uMax  right u
  * @param vMax  bottom v
  */
-extern "C" void func_0021EA00(void* self, sColour* col, float* pos, float w, float height, float uMin, float vMin, float uMax, float vMax)
+extern "C" void func_0021EA00(cOVStateHUD1P* self, sColour* col, float* pos, float w, float height, float uMin, float vMin, float uMax, float vMax)
 {
     if (height > 72.0f) {
         sHudVertex vtx[8];
@@ -2268,7 +2268,7 @@ static inline void draw_ED48(char* self, const Col_E7E0* colp, const V2_ED48* po
  * @param layer  added to the elements' layer bytes
  */
 // PORT: elems is a pointer passed as int
-extern "C" void cOVStateHUD1P_renderUberChar(char* self, int elems, char* rider, int mode, int idx, float* scale, V2_ED48* sc2, int kind, int layer) {
+extern "C" void cOVStateHUD1P_renderUberChar(cOVStateHUD1P* self, int elems, char* rider, int mode, int idx, float* scale, V2_ED48* sc2, int kind, int layer) {
     V2_ED48 one;
     Tab_ED48 tab;
     Str_ED48 str;
@@ -2298,17 +2298,17 @@ extern "C" void cOVStateHUD1P_renderUberChar(char* self, int elems, char* rider,
     char* letterDef = (char*)(defIndex * 0x24 + elems);
     tHUDDef_getPos(letterDef, &elemPos);
     tHUDDef_getSize(letterDef, &size, 0);
-    cOVStateHUD1P_calcElemPos(self, &drawPos, &elemPos, &size, scale, letterDef[0x20], letterDef[0x21], mode);
+    cOVStateHUD1P_calcElemPos(((char*)self), &drawPos, &elemPos, &size, scale, letterDef[0x20], letterDef[0x21], mode);
     scale[0] = scale[0] * 0.0555555559694767f * size.x;
     scale[1] = scale[1] * 0.0555555559694767f * size.y;
     int* w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     *w = (*w & ~0x3E0) | (((letterDef[0x22] + layer) << 5) & 0x3E0);
-    *(Col_E7E0*)(*(char**)(self + 0x42C) + 0x40) = col;
-    char* hudFont = *(char**)(self + 0x42C);
+    *(Col_E7E0*)((char*)self->mpHUDFont + 0x40) = col;
+    char* hudFont = (char*)self->mpHUDFont;
     *(float*)(hudFont + 0x38) = *(float*)(hudFont + 0x30) * scale[0];
     *(float*)(hudFont + 0x3C) = *(float*)(hudFont + 0x34) * scale[1];
-    cFont_text(*(char**)(self + 0x42C), drawPos.x, drawPos.y, str.c);
-    char* hudFont2 = *(char**)(self + 0x42C);
+    cFont_text((char*)self->mpHUDFont, drawPos.x, drawPos.y, str.c);
+    char* hudFont2 = (char*)self->mpHUDFont;
     *(float*)(hudFont2 + 0x38) = *(float*)(hudFont2 + 0x30) * one.x;
     *(float*)(hudFont2 + 0x3C) = *(float*)(hudFont2 + 0x34) * one.y;
     if (kind != 0) {
@@ -2317,17 +2317,17 @@ extern "C" void cOVStateHUD1P_renderUberChar(char* self, int elems, char* rider,
         tHUDDef_getSize(bkgdDef, &size, 0);
         size.x *= sc2->x;
         size.y *= sc2->y;
-        cOVStateHUD1P_calcElemPos(self, &drawPos, &elemPos, &size, &one, letterDef[0x20], letterDef[0x21], mode);
+        cOVStateHUD1P_calcElemPos(((char*)self), &drawPos, &elemPos, &size, &one, letterDef[0x20], letterDef[0x21], mode);
         tHUDDef_getColour(bkgdDef, cp);
-        *(Col_E7E0*)(*(char**)(self + 0x42C) + 0x40) = col;
+        *(Col_E7E0*)((char*)self->mpHUDFont + 0x40) = col;
         w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
         *w = (*w & ~0x3E0) | (((bkgdDef[0x22] + layer) << 5) & 0x3E0);
-        cOVStateHUD1P_renderBitmap(self, *(int*)(self + 0x494), &drawPos, &size, &one, cp);
+        cOVStateHUD1P_renderBitmap(((char*)self), (int)self->mpGenTexElem[0], &drawPos, &size, &one, cp);
         if (kind == 2 && *(float*)(rider + 0x64) >= 0.0f) {
             int under = layer - 1;
             w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
             *w = (*w & ~0x3E0) | (((bkgdDef[0x22] + under) << 5) & 0x3E0);
-            draw_ED48(self, (Col_E7E0*)(rider + 0x54), &drawPos, &size, *(float*)(rider + 0x64), 3.4000000953674316f, 3.4000000953674316f, 0.2603548765182495f, 0.49998536705970764f);
+            draw_ED48(((char*)self), (Col_E7E0*)(rider + 0x54), &drawPos, &size, *(float*)(rider + 0x64), 3.4000000953674316f, 3.4000000953674316f, 0.2603548765182495f, 0.49998536705970764f);
         }
     }
 }
@@ -2366,7 +2366,7 @@ extern "C" void cOVStateHUD1P_renderBitmap(void*, int, void*, void*, void*, void
  * @param scale  optional x / y scale multiplier
  * @param alpha  opacity multiplier
  */
-extern "C" void cOVStateHUD1P_renderTrickLevel(char* self, char* obj, int n, int x, V2_F338* pos, V2_F338* scale, float alpha) {
+extern "C" void cOVStateHUD1P_renderTrickLevel(cOVStateHUD1P* self, char* obj, int n, int x, V2_F338* pos, V2_F338* scale, float alpha) {
     if (n > 0) {
         V4_F338 cols[5];
         V4_F338 elemPos;
@@ -2383,7 +2383,7 @@ extern "C" void cOVStateHUD1P_renderTrickLevel(char* self, char* obj, int n, int
         cols[3] = D_004C85C8;
         cols[4] = D_004C85E8;
         tHUDDef_getPos(obj + 0x240, &elemPos);
-        tHUDDef_getSize(obj + 0x240, &size, *(int*)(self + 0x4A0));
+        tHUDDef_getSize(obj + 0x240, &size, (int)self->mpGenTexElem[3]);
         tHUDDef_getScale(obj + 0x240, &sc);
         if (scale) {
             sc.x *= scale->x;
@@ -2392,7 +2392,7 @@ extern "C" void cOVStateHUD1P_renderTrickLevel(char* self, char* obj, int n, int
         if (pos == 0) {
             dim.x = size.x * n + (n - 1) * 2.0f;
             dim.y = size.y;
-            cOVStateHUD1P_calcElemPos(self, &starPos, &elemPos, &dim, &sc, obj[0x260], obj[0x261], x);
+            cOVStateHUD1P_calcElemPos(((char*)self), &starPos, &elemPos, &dim, &sc, obj[0x260], obj[0x261], x);
         } else {
             starPos = *pos;
             starPos.x -= (size.x * n + (n - 1) * 2.0f) * sc.x * 0.5f;
@@ -2404,7 +2404,7 @@ extern "C" void cOVStateHUD1P_renderTrickLevel(char* self, char* obj, int n, int
         col = cols[n - 1];
         col.x *= alpha;
         for (i = 0; i < n; i++) {
-            cOVStateHUD1P_renderBitmap(self, *(int*)(self + 0x4A0), &starPos, &size, &sc, &col);
+            cOVStateHUD1P_renderBitmap(((char*)self), (int)self->mpGenTexElem[3], &starPos, &size, &sc, &col);
             starPos.x += step;
         }
     }
@@ -2459,7 +2459,7 @@ extern "C" void cFont_centertext(void*, float, float, char*);
  * @param x  reflect flags for cOVStateHUD1P_calcElemPos
  * @param flag  nonzero: out of time, draw "timeup" and no value
  */
-extern "C" void cOVStateHUD1P_renderFinishMessage(char* self, int elems, int* rider, int x, int flag) {
+extern "C" void cOVStateHUD1P_renderFinishMessage(cOVStateHUD1P* self, int elems, int* rider, int x, int flag) {
     V2_F660 scale;
     V2_F660 drawPos;
     V4_F660 elemPos;
@@ -2470,9 +2470,9 @@ extern "C" void cOVStateHUD1P_renderFinishMessage(char* self, int elems, int* ri
     V4_F660 col;
     int idx = 66;
     char* panelRider = (char*)SSXApp->Game->AI->Riders[*rider];
-    int sz = *(int*)(self + 0x4B4);
+    int sz = (int)self->mpGenTexElem[8];
     if (flag) {
-        sz = *(int*)(self + 0x49C);
+        sz = (int)self->mpGenTexElem[2];
         idx = 27;
     }
     char* msgDef = (char*)(idx * 0x24 + elems); // PORT: pointer passed as int
@@ -2483,11 +2483,11 @@ extern "C" void cOVStateHUD1P_renderFinishMessage(char* self, int elems, int* ri
     tHUDDef_getScale(msgDef, &sc);
     size.x *= sc.x;
     size.y *= sc.y;
-    cOVStateHUD1P_calcElemPos(self, &drawPos, &elemPos, &size, &scale, msgDef[0x20], msgDef[0x21], x);
+    cOVStateHUD1P_calcElemPos(((char*)self), &drawPos, &elemPos, &size, &scale, msgDef[0x20], msgDef[0x21], x);
     tHUDDef_getColour(msgDef, &spriteColour);
     int* w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     *w = (*w & ~0x3E0) | ((msgDef[0x22] << 5) & 0x3E0);
-    cOVStateHUD1P_renderBitmap(self, sz, &drawPos, &size, &scale, &spriteColour);
+    cOVStateHUD1P_renderBitmap(((char*)self), sz, &drawPos, &size, &scale, &spriteColour);
     if (flag == 0) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         signed char mode = cBENewRaceInterface_newRace.cGameMode;
@@ -2501,7 +2501,7 @@ extern "C" void cOVStateHUD1P_renderFinishMessage(char* self, int elems, int* ri
         } else {
             sprintf(buf, D_004A2138, val + rider[0x7C / 4]);
         }
-        char* t = *(char**)(self + 0x42C);
+        char* t = (char*)self->mpHUDFont;
         drawPos.x += size.x * 0.5f;
         drawPos.y += size.y;
         sc.x *= 1.907578468322754f;
@@ -2509,9 +2509,9 @@ extern "C" void cOVStateHUD1P_renderFinishMessage(char* self, int elems, int* ri
         *(float*)(t + 0x38) = *(float*)(t + 0x30) * sc.x;
         *(float*)(t + 0x3C) = *(float*)(t + 0x34) * sc.y;
         col = D_004C8808;
-        *(V4_F660*)(*(char**)(self + 0x42C) + 0x40) = col;
-        cFont_centertext(*(char**)(self + 0x42C), drawPos.x, drawPos.y, buf);
-        t = *(char**)(self + 0x42C);
+        *(V4_F660*)((char*)self->mpHUDFont + 0x40) = col;
+        cFont_centertext((char*)self->mpHUDFont, drawPos.x, drawPos.y, buf);
+        t = (char*)self->mpHUDFont;
         *(float*)(t + 0x38) = *(float*)(t + 0x30) * scale.x;
         *(float*)(t + 0x3C) = *(float*)(t + 0x34) * scale.y;
     }
@@ -2569,7 +2569,7 @@ extern "C" void cFont_text(void*, float, float, char*);
  * @param x  reflect flags for cOVStateHUD1P_calcElemPos
  * @param animFrame  the counter's animation time; below 0.44 it pulses
  */
-extern "C" void func_0021F9B0(char* self, char* obj, char* rider, int x, float animFrame) {
+extern "C" void func_0021F9B0(cOVStateHUD1P* self, char* obj, char* rider, int x, float animFrame) {
     V2_F9B0 scale;
     V2_F9B0 drawPos;
     V4_F9B0 elemPos;
@@ -2589,21 +2589,21 @@ extern "C" void func_0021F9B0(char* self, char* obj, char* rider, int x, float a
             pulseScale = D_00504FB8[(int)(pulsePhase * 12.566370964050293f * 81.4873275756836f) & 0x1FF] * 0.19996199011802673f * (1.0f - pulsePhase * pulsePhase) + 1.0f;
         }
         tHUDDef_getPos(obj + 0x804, &elemPos);
-        tHUDDef_getSize(obj + 0x804, &size, *(int*)(self + 0x4A8));
+        tHUDDef_getSize(obj + 0x804, &size, (int)self->mpGenTexElem[5]);
         tHUDDef_getScale(obj + 0x804, &sc);
         size.x *= pulseScale;
         size.y *= pulseScale;
         sc.x *= pulseScale;
         sc.y *= pulseScale;
-        cOVStateHUD1P_calcElemPos(self, &drawPos, &elemPos, &size, &scale, obj[0x824], obj[0x825], x);
+        cOVStateHUD1P_calcElemPos(((char*)self), &drawPos, &elemPos, &size, &scale, obj[0x824], obj[0x825], x);
         int* w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
         *w = (*w & ~0x3E0) | ((obj[0x826] << 5) & 0x3E0);
         col.x = 1.0f;
         col.y = 1.0f;
         col.z = 1.0f;
         col.w = 1.0f;
-        cOVStateHUD1P_renderBitmap(self, *(int*)(self + 0x4A8), &drawPos, &size, &scale, &col);
-        char* tx = *(char**)(self + 0x42C);
+        cOVStateHUD1P_renderBitmap(((char*)self), (int)self->mpGenTexElem[5], &drawPos, &size, &scale, &col);
+        char* tx = (char*)self->mpHUDFont;
         drawPos.x += size.x;
         drawPos.y += (size.y - (float)*(int*)(tx + 0x14) * *(float*)(tx + 0x34) * sc.y) * 0.5f;
         if (animFrame > 0.4399542808532715f) {
@@ -2611,14 +2611,14 @@ extern "C" void func_0021F9B0(char* self, char* obj, char* rider, int x, float a
         } else {
             col = D_004C8648;
         }
-        char* tx2 = *(char**)(self + 0x42C);
+        char* tx2 = (char*)self->mpHUDFont;
         *(float*)(tx2 + 0x38) = *(float*)(tx2 + 0x30) * sc.x;
         *(float*)(tx2 + 0x3C) = *(float*)(tx2 + 0x34) * sc.y;
-        *(V4_F9B0*)(*(char**)(self + 0x42C) + 0x40) = col;
+        *(V4_F9B0*)((char*)self->mpHUDFont + 0x40) = col;
         Obj_F9B0* being = (Obj_F9B0*)(rider + 0x6C0);
         sprintf(buf, str_pct_d_pct_d_b, cBEMissionInterface_getCurrentCollectForSection(iface, being->getAIIndex(), id), cBEMissionInterface_getTotalCollectForSection(iface, id));
-        cFont_text(*(char**)(self + 0x42C), drawPos.x, drawPos.y, buf);
-        tx = *(char**)(self + 0x42C);
+        cFont_text((char*)self->mpHUDFont, drawPos.x, drawPos.y, buf);
+        tx = (char*)self->mpHUDFont;
         *(float*)(tx + 0x38) = *(float*)(tx + 0x30) * scale.x;
         *(float*)(tx + 0x3C) = *(float*)(tx + 0x34) * scale.y;
     }
@@ -2683,7 +2683,7 @@ static inline float* scaleP() { return &D_004A5B38; }
  *
  * @param obj  the HUD element table (0x24-byte tHUDDef records)
  */
-extern "C" void func_0021FD38(char* self, char* obj) {
+extern "C" void func_0021FD38(cOVStateHUD1P* self, char* obj) {
     t2Vector circleCentre;
     t2Vector half;
     sColour col;
@@ -2707,14 +2707,14 @@ extern "C" void func_0021FD38(char* self, char* obj) {
     circleCentre.y = D_004A5B34 + half.y;
     int drawLayer = obj[0x9D6];
     tHUDDef_getPos(obj + 0x9B4, &elemPos);
-    tHUDDef_getSize(obj + 0x9B4, &size, *(int*)(self + 0x4CC));
-    cOVStateHUD1P_calcElemPos(self, &half, &elemPos, &size, scaleP(), obj[0x9D4], obj[0x9D5], 0);
+    tHUDDef_getSize(obj + 0x9B4, &size, (int)self->mpGenTexElem[14]);
+    cOVStateHUD1P_calcElemPos(((char*)self), &half, &elemPos, &size, scaleP(), obj[0x9D4], obj[0x9D5], 0);
     tHUDDef_getColour(obj + 0x9B4, &col);
     int* w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     *w = (*w & ~0x3E0) | ((drawLayer << 5) & 0x3E0);
-    cOVStateHUD1P_renderBitmap(self, *(int*)(self + 0x4CC), &half, &size, scaleP(), &col);
+    cOVStateHUD1P_renderBitmap(((char*)self), (int)self->mpGenTexElem[14], &half, &size, scaleP(), &col);
     void* be = cBE_getInterface_Fv(cBE_getBE(), 10);
-    if (cBEMissionInterface_isMissionCompleted(be, *(int*)(self + 0x18C)) == 0) {
+    if (cBEMissionInterface_isMissionCompleted(be, (int)self->mLastMissionID) == 0) {
         col = D_004C8848;
     } else {
         col = D_004C8828;
@@ -2723,18 +2723,18 @@ extern "C" void func_0021FD38(char* self, char* obj) {
     circlePos.y = half.x + D_004A5B34;
     w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     *w = (*w & ~0x3E0) | (((++drawLayer) << 5) & 0x3E0);
-    cOVStateHUD1P_renderBitmap(self, *(int*)(self + 0x4D0), &circlePos, &D_004A5B40, scaleP(), &col);
-    float halfTextHeight = (float)*(int*)(*(char**)(self + 0x42C) + 0x14) * *(float*)(*(char**)(self + 0x42C) + 0x34) * 0.38805678486824036f;
-    int n = cBEMissionInterface_getMissionIdx(be, *(int*)(self + 0x18C));
+    cOVStateHUD1P_renderBitmap(((char*)self), (int)self->mpGenTexElem[15], &circlePos, &D_004A5B40, scaleP(), &col);
+    float halfTextHeight = (float)*(int*)((char*)self->mpHUDFont + 0x14) * *(float*)((char*)self->mpHUDFont + 0x34) * 0.38805678486824036f;
+    int n = cBEMissionInterface_getMissionIdx(be, (int)self->mLastMissionID);
     col = D_004C8868;
-    *(sColour*)(*(char**)(self + 0x42C) + 0x40) = col;
-    char* hudFont = *(char**)(self + 0x42C);
+    *(sColour*)((char*)self->mpHUDFont + 0x40) = col;
+    char* hudFont = (char*)self->mpHUDFont;
     *(float*)(hudFont + 0x38) = *(float*)(hudFont + 0x30) * 0.7761135697364807f;
     *(float*)(hudFont + 0x3C) = *(float*)(hudFont + 0x34) * 0.7761135697364807f;
     w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     *w = (*w & ~0x3E0) | (((drawLayer += 2) << 5) & 0x3E0);
-    PrintAt_FD38(*(char**)(self + 0x42C), circleCentre.x, circleCentre.y, half, halfTextHeight, n + 1);
-    char* hudFont2 = *(char**)(self + 0x42C);
+    PrintAt_FD38((char*)self->mpHUDFont, circleCentre.x, circleCentre.y, half, halfTextHeight, n + 1);
+    char* hudFont2 = (char*)self->mpHUDFont;
     *(float*)(hudFont2 + 0x38) = *(float*)(hudFont2 + 0x30);
     *(float*)(hudFont2 + 0x3C) = *(float*)(hudFont2 + 0x34);
 }
@@ -2880,7 +2880,7 @@ static inline void TextSize_00C0(sFont_00C0* f, const char* str, float* rect, t2
  * @param rider  the rider (cRider; its cBeing interface at +0x6C0 gives the velocity)
  * @param x  reflect flags for cOVStateHUD1P_calcElemPos
  */
-extern "C" void cOVStateHUD1P_renderSpeed(char* self, char* obj, cRider* rider, int x)
+extern "C" void cOVStateHUD1P_renderSpeed(cOVStateHUD1P* self, char* obj, cRider* rider, int x)
 {
     sSettings_00C0 settings;
     t2Vector elemPos;
@@ -2906,22 +2906,22 @@ extern "C" void cOVStateHUD1P_renderSpeed(char* self, char* obj, cRider* rider, 
     tHUDDef_getPos(speedDef, &elemPos);
     tHUDDef_getScale(speedDef, &sc);
     tHUDDef_getColour(speedDef, &col);
-    font_00C0(self)->colour = col;
-    SetScale_00C0(font_00C0(self), sc);
-    TextSize_00C0(font_00C0(self), units, rect, size);
-    cOVStateHUD1P_calcElemPos_00C0(self, &drawPos, &elemPos, &size, sV2_00C0(1.0f, 1.0f), obj[0x3A4], obj[0x3A5], x);
-    cFont_text(font_00C0(self), drawPos.x, drawPos.y, units);
+    font_00C0(((char*)self))->colour = col;
+    SetScale_00C0(font_00C0(((char*)self)), sc);
+    TextSize_00C0(font_00C0(((char*)self)), units, rect, size);
+    cOVStateHUD1P_calcElemPos_00C0(((char*)self), &drawPos, &elemPos, &size, sV2_00C0(1.0f, 1.0f), obj[0x3A4], obj[0x3A5], x);
+    cFont_text(font_00C0(((char*)self)), drawPos.x, drawPos.y, units);
     char buf[8];
     sprintf(buf, D_004A2138, (int)(speed + 0.5f));
     if (strlen(buf) > 2)
         ScaleV2_00C0(sc, 1.1214120388031006f);
     else
         ScaleV2_00C0(sc, 1.3623675107955933f);
-    SetScale_00C0(font_00C0(self), sc);
+    SetScale_00C0(font_00C0(((char*)self)), sc);
     drawPos.x += size.x * 0.5f;
-    drawPos.y -= (float)font_00C0(self)->lineHeight * font_00C0(self)->scaleY * sc.y * 0.5f + 14.003287315368652f;
-    cFont_centertext(font_00C0(self), drawPos.x, drawPos.y, buf);
-    SetScale_00C0(font_00C0(self), sV2_00C0(1.0f, 1.0f));
+    drawPos.y -= (float)font_00C0(((char*)self))->lineHeight * font_00C0(((char*)self))->scaleY * sc.y * 0.5f + 14.003287315368652f;
+    cFont_centertext(font_00C0(((char*)self)), drawPos.x, drawPos.y, buf);
+    SetScale_00C0(font_00C0(((char*)self)), sV2_00C0(1.0f, 1.0f));
 }
 #endif
 
@@ -2956,7 +2956,7 @@ extern "C" void func_001E95A0(void*, void*, void*, void*, int, int);
  * @param obj  the HUD element table (0x24-byte tHUDDef records)
  * @param progress  animation progress, 0..1; the prompt is fully opaque at 0.5
  */
-extern "C" void cOVStateHUD1P_renderNISSkipMessage(char* self, char* obj, float progress) {
+extern "C" void cOVStateHUD1P_renderNISSkipMessage(cOVStateHUD1P* self, char* obj, float progress) {
     V2_0AD0 pos;
     V4_0AD0 scale;
     Big_0AD0 big;
@@ -2980,11 +2980,11 @@ extern "C" void cOVStateHUD1P_renderNISSkipMessage(char* self, char* obj, float 
     }
     spriteScale.x = 2.0f;
     spriteScale.y = 2.0f;
-    *(V2_0AD0*)(*(char**)(self + 0xB50) + 0x28) = spriteScale;
+    *(V2_0AD0*)(*(char**)(((char*)self) + 0xB50) + 0x28) = spriteScale;
     int* w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     *w = (*w & ~0x3E0) | ((obj[0xAF6] << 5) & 0x3E0);
     drawPos = pos;
-    func_001E95A0(self + 0xB48, &drawPos, &scale, &colour, obj[0xAF4], obj[0xAF5]);
+    func_001E95A0(((char*)self) + 0xB48, &drawPos, &scale, &colour, obj[0xAF4], obj[0xAF5]);
 }
 #endif
 
