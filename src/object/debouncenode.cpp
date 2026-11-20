@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/debouncenode.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
 
@@ -24,15 +25,15 @@ extern char cDebounceNode_vtbl[];
  * @param stream  the replay frame to read (On Tour cBxReplayFrame*)
  * @return self
  */
-extern "C" void* cDebounceNode_cDebounceNode(void* self, void* bucket, void* stream)
+extern "C" void* cDebounceNode_cDebounceNode(cDebounceNode* self, void* bucket, void* stream)
 {
     cMoveNode_cMoveNode(self, bucket, stream);
-    *(void**)((char*)self + 0xC) = cDebounceNode_vtbl;
+    self->mVtbl = (void**)cDebounceNode_vtbl;
     sDebounceVEntry2D10* readEntry = &(*(sDebounceVEntry2D10**)stream)[2];
     readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x2C, 4);
     readEntry = &(*(sDebounceVEntry2D10**)stream)[2];
     readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x30, 4);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -53,14 +54,14 @@ struct sDebounceVEntry2D88 {
  *
  * @return 0 on the tick the node expires, otherwise 1
  */
-extern "C" int cDebounceNode_updateNode(void* self)
+extern "C" int cDebounceNode_updateNode(cDebounceNode* self)
 {
-    int n = *(int*)((char*)self + 0x2C);
+    int n = self->Life;
     if (n > 0) {
         n--;
-        *(int*)((char*)self + 0x2C) = n;
+        self->Life = n;
         if (n == 0) {
-            sDebounceVEntry2D88* vt = *(sDebounceVEntry2D88**)((char*)self + 0xC);
+            sDebounceVEntry2D88* vt = (sDebounceVEntry2D88*)self->mVtbl;
             vt[34].fn((char*)self + vt[34].delta, 1);
             return 0;
         }
@@ -87,19 +88,19 @@ struct sDebounceVEntry2DD8 {
  *
  * The node deletes itself; with expire mode 0 (+0x30) the instance then gets a new dead node ("DeadNode").
  */
-extern "C" void cDebounceNode_loseFocus(void* self)
+extern "C" void cDebounceNode_loseFocus(cDebounceNode* self)
 {
-    if (*(int*)((char*)self + 0x2C) >= 0) {
-        if (*(int*)((char*)self + 0x30) == 0) {
-            void* parent = *(void**)((char*)self + 0x18);
-            if (self != 0) {
-                sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
+    if (self->Life >= 0) {
+        if (self->Type == 0) {
+            void* parent = self->Instance;
+            if (((void*)self) != 0) {
+                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)self->mVtbl;
                 vt[1].fn((char*)self + vt[1].delta, 3);
             }
             cDeadNode_cDeadNode(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), parent);
         } else {
-            if (self != 0) {
-                sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
+            if (((void*)self) != 0) {
+                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)self->mVtbl;
                 vt[1].fn((char*)self + vt[1].delta, 3);
             }
         }
@@ -142,30 +143,30 @@ extern const char str_RestoreNode_b[];
  *
  * @param check  nonzero to run the instance's script first (On Tour runscript)
  */
-extern "C" void cDebounceNode_expire(void* self, int check)
+extern "C" void cDebounceNode_expire(cDebounceNode* self, int check)
 {
     if (check != 0 && cInstanceNode_runExpireScript(self) != 0) {
         return;
     }
-    if (*(int*)((char*)self + 0x2C) >= 0) {
-        int mode = *(int*)((char*)self + 0x30);
+    if (self->Life >= 0) {
+        int mode = self->Type;
         if (mode == 0) {
-            void* parent = *(void**)((char*)self + 0x18);
-            if (self != 0) {
-                sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
+            void* parent = self->Instance;
+            if (((void*)self) != 0) {
+                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)self->mVtbl;
                 vt[1].fn((char*)self + vt[1].delta, 3);
             }
             cDeadNode_cDeadNode(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), parent);
         } else if (mode == 3) {
-            void* parent = *(void**)((char*)self + 0x18);
-            if (self != 0) {
-                sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
+            void* parent = self->Instance;
+            if (((void*)self) != 0) {
+                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)self->mVtbl;
                 vt[1].fn((char*)self + vt[1].delta, 3);
             }
             cRestoreNode_cRestoreNode(cMemMan_alloc(0x1C, str_RestoreNode_b, 0x20000000, 0), parent);
         } else {
-            if (self != 0) {
-                sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
+            if (((void*)self) != 0) {
+                sDebounceVEntry2DD8* vt = (sDebounceVEntry2DD8*)self->mVtbl;
                 vt[1].fn((char*)self + vt[1].delta, 3);
             }
         }
@@ -192,7 +193,7 @@ extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay frame to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cDebounceNode_writeToReplayFrame(void* self, void* stream)
+extern "C" void cDebounceNode_writeToReplayFrame(cDebounceNode* self, void* stream)
 {
     cMoveNode_writeToReplayFrame(self, stream);
     sDebounceVEntry2FA8* writeEntry = &(*(sDebounceVEntry2FA8**)stream)[1];

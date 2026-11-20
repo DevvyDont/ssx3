@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateriderdetail.h"
 #include "fe/festatecharsetup.h"
 #include "ui/uiengine.h"
 #include "ui/uithing.h"
@@ -468,15 +469,15 @@ extern void* cFEStateRiderDetail_vtbl[];
  * @param idx  the user (controller) index
  * @return @p self
  */
-extern "C" void* cFEStateRiderDetail_cFEStateRiderDetail(void* self, cUIEngine* engine, signed char idx)
+extern "C" void* cFEStateRiderDetail_cFEStateRiderDetail(cFEStateRiderDetail* self, cUIEngine* engine, signed char idx)
 {
     cFEStateCharSetup_cFEStateCharSetup(self, engine, idx);
-    *(int*)((char*)self + 0xC) = 13;
-    *(void***)((char*)self + 0x8) = cFEStateRiderDetail_vtbl;
-    *(signed char*)((char*)self + 0x44) = idx;
-    *(unsigned char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), idx);
-    *(int*)((char*)self + 0x4C) = 0;
-    return self;
+    self->mHashName = 13;
+    self->mVtbl = cFEStateRiderDetail_vtbl;
+    self->mUserNum = idx;
+    self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
+    self->mbDraw3D = 0;
+    return ((void*)self);
 }
 #endif
 

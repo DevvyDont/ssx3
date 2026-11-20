@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateriderdetail.h"
 #include "ui/uistate.h"
 #include "ui/uithing.h"
 #include "fe/festateubertrick.h"
@@ -35,25 +36,25 @@ struct sVE_32A8 {
  * front-end rider with the player's character, calls func_0028F140 with 1, and sets +0x50 when the character
  * has any cheat characters unlocked (cBERewardInterface_getNumOwnedCheatChars).
  */
-extern "C" void cFEStateRiderDetail_onCreateScreen(void* self)
+extern "C" void cFEStateRiderDetail_onCreateScreen(cFEStateRiderDetail* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_154rider_details), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     cFEStateCharSetup_updateWidget(self);
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
-    int charID = cBENewPlayerInterface_getPlayerCharID(pi, *(signed char*)((char*)self + 0x44));
+    int charID = cBENewPlayerInterface_getPlayerCharID(pi, self->mUserNum);
     sVE_32A8* vt = *(sVE_32A8**)((char*)pi + 0xC);
     vt[2].fn((char*)pi + vt[2].delta);
-    cFERiderManager_setHumanVisible((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), 0);
-    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), charID, 0);
+    cFERiderManager_setHumanVisible((char*)SSXApp->RealFE + 0xB0, self->mUserNum, 0);
+    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, self->mUserNum, charID, 0);
     func_0028F140(cAudioInterface_bxAudio(), 1);
-    *(int*)((char*)self + 0x50) = 1;
-    if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44), charID) == 0) {
-        *(int*)((char*)self + 0x50) = 0;
+    self->mbCheatCharEnable = 1;
+    if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum, charID) == 0) {
+        self->mbCheatCharEnable = 0;
     }
 }
 #endif
@@ -91,7 +92,7 @@ static inline void showObj_001833D0(void* self, char* name, int id)
  *
  * @param pPrevState  the state that had focus before (On Tour pPrevState), passed on to cFEState_onGainFocus()
  */
-extern "C" void cFEStateRiderDetail_onGainFocus(void* self, int pPrevState)
+extern "C" void cFEStateRiderDetail_onGainFocus(cFEStateRiderDetail* self, int pPrevState)
 {
     showObj_001833D0(self, str_Option_1, 5);
     showObj_001833D0(self, str_Option_2, 6);
@@ -115,10 +116,10 @@ extern char str_Option_2[];
  *
  * DisableTextWidget disables the widget and caps its alpha at 0.5.
  */
-extern "C" void cFEStateRiderDetail_onPreRender2D(void* self)
+extern "C" void cFEStateRiderDetail_onPreRender2D(cFEStateRiderDetail* self)
 {
-    if (*(int*)((char*)self + 0x50) == 0) {
-        void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Option_2));
+    if (self->mbCheatCharEnable == 0) {
+        void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Option_2));
         if (obj != 0) {
             DisableTextWidget(obj);
         }
@@ -155,7 +156,7 @@ extern "C" void cFEStateCharSetup_updateCharacter3DPos(void*);
  * cFEStateCharSetup_updateCharacter3DPos() (shared with the character-setup state) places the loaded rider model and, when the state asks
  * for it, restarts its animation.
  */
-extern "C" void cFEStateRiderDetail_onUpdate(void* self)
+extern "C" void cFEStateRiderDetail_onUpdate(cFEStateRiderDetail* self)
 {
     cUIState_onUpdate(self);
     cFEStateCharSetup_updateCharacter3DPos(self);
@@ -193,7 +194,7 @@ static inline int Is_001835F8(int id, char* s) { return id == GetHashValue32(s);
  * @param item  the popup that sent the event
  * @param msg  the popup event; only 0x16 is handled
  */
-extern "C" void cFEStateRiderDetail_onPopupEvent(void* self, cUIState* item, int msg)
+extern "C" void cFEStateRiderDetail_onPopupEvent(cFEStateRiderDetail* self, cUIState* item, int msg)
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     if (msg == 22) {
@@ -201,14 +202,14 @@ extern "C" void cFEStateRiderDetail_onPopupEvent(void* self, cUIState* item, int
             int cheatCharId = *(int*)((char*)item + 0x70);
             if (*(int*)((char*)item + 0x74) != 0) {
                 void* pi2 = cBE_getInterface_Fv(cBE_getBE(), 1);
-                cBENewPlayerInterface_setPlayerCheatCharID(pi2, *(signed char*)((char*)self + 0x44), cheatCharId);
+                cBENewPlayerInterface_setPlayerCheatCharID(pi2, self->mUserNum, cheatCharId);
                 sVE_35F8* vt = *(sVE_35F8**)((char*)pi2 + 0xC);
                 vt[1].fn((char*)pi2 + vt[1].delta);
             }
         } else if (item->mHashName == 0) {
             char* name = (char*)item + 0x74;
             if (*(int*)((char*)item + 0x5C) != 0 && strlen(name) != 0) {
-                cBENewPlayerInterface_setPlayerName(pi, *(signed char*)((char*)self + 0x44), name);
+                cBENewPlayerInterface_setPlayerName(pi, self->mUserNum, name);
                 sVE_35F8* vt = *(sVE_35F8**)((char*)pi + 0xC);
                 vt[1].fn((char*)pi + vt[1].delta);
             }
@@ -265,14 +266,14 @@ struct sBits_3710 {
  * @param item  the widget (ignored when 0); its miscellaneous data (+0x18) is the option
  * @param msg  the widget event
  */
-extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, cUIThing* item, unsigned int msg)
+extern "C" void cFEStateRiderDetail_onWidgetEvent(cFEStateRiderDetail* self, cUIThing* item, unsigned int msg)
 {
     if (((char*)item) == 0) return;
     switch (msg) {
     case 5: {
         int sub = item->mMiscData;
         if (sub == 8) {
-            char* w = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_cKeyboardPopup, 0x100, 0), *(void**)(self + 0x10), self, 0, 0xF);
+            char* w = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_cKeyboardPopup, 0x100, 0), self->mpEngine, ((char*)self), 0, 0xF);
             *(int*)(w + 0x140) = 55;
             cKeyboardPopup_setMaxCharacters(w, 8);
             cKeyboardPopup_setIncludeKey(w, 75, 1, 2);
@@ -288,42 +289,42 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, cUIThing* item, un
             cKeyboardPopup_setIncludeKey(w, 0x40, 0, 2);
             cKeyboardPopup_setIncludeKey(w, 65, 0, 2);
             cKeyboardPopup_setIncludeKey(w, 66, 0, 2);
-            cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, w);
-            cKeyboardPopup_setInputText(w, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(self + 0x44)));
-            cFEStateCharSetup_show3DCharacter(self, 0);
+            cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, w);
+            cKeyboardPopup_setInputText(w, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum));
+            cFEStateCharSetup_show3DCharacter(((char*)self), 0);
         } else if (sub == 6) {
-            int cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(self + 0x44));
-            if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)(self + 0x44), cid) > 0) {
-                char* w = (char*)cFEStateCheatCharSelect_cFEStateCheatCharSelect(cMemMan_alloc(484, str_cFEStateCheatCharSelect, 0, 0), *(void**)(self + 0x10), self, *(signed char*)(self + 0x44), cid);
-                *(unsigned char*)(w + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)(self + 0x10), *(signed char*)(self + 0x44));
-                cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, w);
-                cFEStateCharSetup_show3DCharacter(self, 0);
+            int cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
+            if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum, cid) > 0) {
+                char* w = (char*)cFEStateCheatCharSelect_cFEStateCheatCharSelect(cMemMan_alloc(484, str_cFEStateCheatCharSelect, 0, 0), self->mpEngine, ((char*)self), self->mUserNum, cid);
+                *(unsigned char*)(w + 0x15) = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, self->mUserNum);
+                cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, w);
+                cFEStateCharSetup_show3DCharacter(((char*)self), 0);
             }
         } else {
-            char* obj = **(char***)(self + 0x10);
+            char* obj = *(char**)self->mpEngine;
             sVE_3710* vt = *(sVE_3710**)(obj + 4);
-            void* nextState = vt[4].fn(obj + vt[4].delta, self, sub);
+            void* nextState = vt[4].fn(obj + vt[4].delta, ((char*)self), sub);
             if (nextState != 0) {
-                cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
+                cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
             }
         }
-        cFEStateCharSetup_show3DCharacter(self, 0);
+        cFEStateCharSetup_show3DCharacter(((char*)self), 0);
         break;
     }
     case 6: {
-        char* obj = **(char***)(self + 0x10);
+        char* obj = *(char**)self->mpEngine;
         sVE_3710* vt = *(sVE_3710**)(obj + 4);
-        void* nextState = vt[5].fn(obj + vt[5].delta, self, item->mMiscData);
+        void* nextState = vt[5].fn(obj + vt[5].delta, ((char*)self), item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
-            cFEStateCharSetup_show3DCharacter(self, 0);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cFEStateCharSetup_show3DCharacter(((char*)self), 0);
         }
         break;
     }
     case 7: {
-        char* w = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), *(void**)(self + 0x10), 1);
+        char* w = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self->mpEngine, 1);
         ((sBits_3710*)(w + 0x1C))->mode = 1;
-        cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, w, 0, 0);
+        cUIStateStack_pushSpecial((char*)self->mpEngine + 0x18, w, 0, 0);
         break;
     }
     }

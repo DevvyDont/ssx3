@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/flexbridgenode.h"
 #include "object/flexrailnode.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
@@ -501,13 +502,13 @@ static inline float Torque_6E38(float k, const sV4_6E38& a, const sV4_6E38& b)
  * @param intInfo  the hit (On Tour tIntersectInfo): position and triangle index
  * @param force    the force to apply
  */
-extern "C" void cFlexBridgeNode_applyForce(cBridge_6E38* self, sNode_6E38* intInfo, sV4_6E38* force)
+extern "C" void cFlexBridgeNode_applyForce(cFlexBridgeNode* self, sNode_6E38* intInfo, sV4_6E38* force)
 {
     sBridgeData_6E38* data = (sBridgeData_6E38*)self;
     if (intInfo->idx < 0) {
         return;
     }
-    sMat_6E38* transform = self->GetMatrix();
+    sMat_6E38* transform = ((cBridge_6E38*)self)->GetMatrix();
     sV4_6E38 relPos = vu0Sub_6E38(intInfo->pos, Pos_6E38(transform));
     sV4_6E38 y = vu0MulMat_6E38(transform, vu0Norm_6E38(data->axis));
     sV4_6E38 n = vu0MulMat_6E38(transform, data->pts[intInfo->idx]);
@@ -657,13 +658,13 @@ struct sFlState_70D0 {
  *
  * @param intInfo  the hit (On Tour tIntersectInfo); nothing happens without a triangle index
  */
-extern "C" void cFlexBridgeNode_updateIntersectInfo(sFlBridge_70D0* self, sFlState_70D0* intInfo)
+extern "C" void cFlexBridgeNode_updateIntersectInfo(cFlexBridgeNode* self, sFlState_70D0* intInfo)
 {
     int idx = intInfo->idx;
     if (idx >= 0) {
         int pairIndex = idx / 2;
-        sFlEnt_70D0* ents = self->ents;
-        sFlVE_70D0* vt = self->vt;
+        sFlEnt_70D0* ents = (sFlEnt_70D0*)self->Mesh.Nodes;
+        sFlVE_70D0* vt = (sFlVE_70D0*)self->mVtbl;
         sV4_70D0* matrix = vt[24].fn((char*)self + vt[24].delta);
         sFlEnt_70D0* entry = (sFlEnt_70D0*)(pairIndex * 0x50 + (int)ents);
         sV4_70D0 axisVec = vu0MtxMul_70D0(matrix, vu0ScaleP_70D0(&D_004FF140_70D0, entry->f24));
@@ -913,14 +914,14 @@ extern "C" int cFlexBridgeNode_intersect(sFNode_7268* self, sFTester_7268* teste
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_update);
 #ifdef SKIP_ASM
 extern "C" void cSpring_update(void*);
-extern "C" void cFlexBridgeNode_updateGrid(void*);
+extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode*);
 
 /**
  * Updates a flexible bridge for one frame: steps its spring mesh (Mesh, +0x50), then rebuilds its grid.
  *
  * Calls cSpring_update() and then cFlexBridgeNode_updateGrid().
  */
-extern "C" void cFlexBridgeNode_update(void* self)
+extern "C" void cFlexBridgeNode_update(cFlexBridgeNode* self)
 {
     cSpring_update((char*)self + 0x50);
     cFlexBridgeNode_updateGrid(self);
@@ -1145,7 +1146,7 @@ static inline sV4_75D8 MulMat_75D8(const sMat_75D8* m, const sV4_75D8& v)
  */
 // Re-poses the bridge strip from its nodes: two rows of points (node pos +/- the rotated
 // side/up offsets), per-triangle normals, the transformed bounding box and the mesh update.
-extern "C" void cFlexBridgeNode_updateGrid(void* vself)
+extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode* vself)
 {
     sFlexBridge_75D8* self = (sFlexBridge_75D8*)vself;
     int n = self->count;
@@ -1255,9 +1256,9 @@ struct sVE24_7B80 { short delta; short index; void* (*fn)(void*); };
  * render state with field 5 set for the draw and pops it afterwards.
  */
 // Draws the bridge piece's model (through its handler if it has one) unless it is culled or not streamed in.
-extern "C" void cFlexBridgeNode_render(char* self)
+extern "C" void cFlexBridgeNode_render(cFlexBridgeNode* self)
 {
-    sModel_7B80* model = *(sModel_7B80**)(self + 0x18);
+    sModel_7B80* model = (sModel_7B80*)self->Instance;
     if (!IsLoaded_7B80(model)) {
         return;
     }
@@ -1265,27 +1266,27 @@ extern "C" void cFlexBridgeNode_render(char* self)
     {
         sVE93_7B80* vt = *(sVE93_7B80**)(ctx + 0x10D8);
         char* thisp = ctx + vt[93].delta;
-        char* lo = self + 0x90;
-        char* hi = self + 0xA0;
+        char* lo = ((char*)self) + 0x90;
+        char* hi = ((char*)self) + 0xA0;
         sVE43_7B80* vt43 = *(sVE43_7B80**)(ctx + 0x10D8);
         sPair_7B80 viewMatrix = vt43[43].fn(ctx + vt43[43].delta);
         if (vt[93].fn(thisp, lo, hi, &viewMatrix) == 1) {
             return;
         }
     }
-    sVE24_7B80* sv = *(sVE24_7B80**)(self + 0xC);
-    void* mtx = sv[24].fn(self + sv[24].delta);
+    sVE24_7B80* sv = (sVE24_7B80*)self->mVtbl;
+    void* mtx = sv[24].fn(((char*)self) + sv[24].delta);
     TOP_7B80(ctx)[1] = TOP_7B80(ctx)[0];
     sRS_7B80* state = TOP_7B80(ctx);
     TOP_7B80(ctx) = state + 1;
     state[1].f4_2 = 5;
-    char* renderer = *(char**)(self + 0x78);
+    char* renderer = (char*)self->GridMesh;
     if (renderer != 0) {
         sVE7_7B80* hv = *(sVE7_7B80**)(renderer + 4);
-        hv[7].fn(renderer + hv[7].delta, mtx, (*(sModel_7B80**)(self + 0x18))->mesh, 0);
+        hv[7].fn(renderer + hv[7].delta, mtx, ((sModel_7B80*)self->Instance)->mesh, 0);
     } else {
         sVE96_7B80* ctxVtbl = *(sVE96_7B80**)(ctx + 0x10D8);
-        ctxVtbl[96].fn(ctx + ctxVtbl[96].delta, *(void**)(self + 0x18), 0, 0, 0);
+        ctxVtbl[96].fn(ctx + ctxVtbl[96].delta, self->Instance, 0, 0, 0);
     }
     TOP_7B80(ctx)--;
 }
@@ -1312,7 +1313,7 @@ extern "C" void cSpring_writeToReplayFrame(void* p, void* stream);
  *
  * @param stream  the replay frame stream to write to (On Tour cBxReplayFrame*)
  */
-extern "C" void cFlexBridgeNode_writeToReplayFrame(void* self, void* stream)
+extern "C" void cFlexBridgeNode_writeToReplayFrame(cFlexBridgeNode* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     cSpring_writeToReplayFrame((char*)self + 0x50, stream);

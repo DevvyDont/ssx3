@@ -1,4 +1,6 @@
 #include "common.h"
+#include "object/springrailnode.h"
+#include "object/floatrailnode.h"
 #include "object/flexrailnode.h"
 
 //100%
@@ -114,12 +116,12 @@ extern "C" void cFlexRailNode_remSpaceHash(cFlexRailNode* self)
 INCLUDE_ASM("object/flexrailnode", cFloatRailNode_cFloatRailNode);
 #ifdef SKIP_ASM
 extern "C" void cFlexRailNode_cFlexRailNode(void* self, int type, void* a1, void* desc);
-extern "C" void cFloatRailNode_updateMats(void* self);
+extern "C" void cFloatRailNode_updateMats(cFloatRailNode* self);
 struct sFrBoxRail;
-extern "C" void cFloatRailNode_updateBoundBox(sFrBoxRail* self);
+extern "C" void cFloatRailNode_updateBoundBox(cFloatRailNode* self);
 extern "C" void cFlexRailNode_addSpaceHash(cFlexRailNode* self);
 struct sFrNode9220;
-extern "C" void cFloatRailNode_getPosition(void* self, sFrNode9220* node);
+extern "C" void cFloatRailNode_getPosition(cFloatRailNode* self, sFrNode9220* node);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern char cFloatRailNode_vtbl[];
@@ -156,13 +158,13 @@ struct sFlexRailElem_348D98 {
  * @param desc  float rail make-data
  * @return self
  */
-extern "C" void* cFloatRailNode_cFloatRailNode(char* self, void* instRecord, char* desc)
+extern "C" void* cFloatRailNode_cFloatRailNode(cFloatRailNode* self, void* instRecord, char* desc)
 {
-    cFlexRailNode_cFlexRailNode(self, 20, instRecord, desc);
-    *(void**)(self + 0xC) = cFloatRailNode_vtbl;
-    *(float*)(self + 0x60) = *(float*)(desc + 0x48);
-    *(float*)(self + 0x64) = *(float*)(desc + 0x4C);
-    *(float*)(self + 0x68) = *(float*)(desc + 0x50);
+    cFlexRailNode_cFlexRailNode(((char*)self), 20, instRecord, desc);
+    self->mVtbl = (void**)cFloatRailNode_vtbl;
+    self->LSpring = *(float*)(desc + 0x48);
+    self->LDamp = *(float*)(desc + 0x4C);
+    self->ForceScale = *(float*)(desc + 0x50);
     sFlexRailRef_348D98 refs[8];
     int bones[8];
     int n = 0;
@@ -176,20 +178,20 @@ extern "C" void* cFloatRailNode_cFloatRailNode(char* self, void* instRecord, cha
             n++;
         }
     }
-    sFlexRailElem_348D98*& elems = *(sFlexRailElem_348D98**)(self + 0x70);
-    elems = new (str_FloatRailNodes, 0x20000000, 0) sFlexRailElem_348D98[*(int*)(self + 0x20)];
-    for (int j = 0; j < *(int*)(self + 0x20); j++) {
-        (*(sFlexRailElem_348D98**)(self + 0x70))[j].link.id = refs[j].id;
-        (*(sFlexRailElem_348D98**)(self + 0x70))[j].bone = bones[j];
-        (*(sFlexRailElem_348D98**)(self + 0x70))[j].vel = t4vect_Zero;
-        (*(sFlexRailElem_348D98**)(self + 0x70))[j].force = t4vect_Zero;
-        cFloatRailNode_getPosition(self, (sFrNode9220*)&(*(sFlexRailElem_348D98**)(self + 0x70))[j]);
-        (*(sFlexRailElem_348D98**)(self + 0x70))[j].posB = (*(sFlexRailElem_348D98**)(self + 0x70))[j].posA;
+    sFlexRailElem_348D98*& elems = (sFlexRailElem_348D98*)self->Nodes;
+    elems = new (str_FloatRailNodes, 0x20000000, 0) sFlexRailElem_348D98[self->NumNodes];
+    for (int j = 0; j < self->NumNodes; j++) {
+        ((sFlexRailElem_348D98*)self->Nodes)[j].link.id = refs[j].id;
+        ((sFlexRailElem_348D98*)self->Nodes)[j].bone = bones[j];
+        ((sFlexRailElem_348D98*)self->Nodes)[j].vel = t4vect_Zero;
+        ((sFlexRailElem_348D98*)self->Nodes)[j].force = t4vect_Zero;
+        cFloatRailNode_getPosition(self, (sFrNode9220*)&((sFlexRailElem_348D98*)self->Nodes)[j]);
+        ((sFlexRailElem_348D98*)self->Nodes)[j].posB = ((sFlexRailElem_348D98*)self->Nodes)[j].posA;
     }
     cFloatRailNode_updateMats(self);
-    cFloatRailNode_updateBoundBox((sFrBoxRail*)self);
+    cFloatRailNode_updateBoundBox(self);
     cFlexRailNode_addSpaceHash((cFlexRailNode*)self);
-    return self;
+    return ((char*)self);
 }
 #endif
 
@@ -197,9 +199,9 @@ extern "C" void* cFloatRailNode_cFloatRailNode(char* self, void* instRecord, cha
 INCLUDE_ASM("object/flexrailnode", cFloatRailNode_cFloatRailNode1);
 #ifdef SKIP_ASM
 extern "C" void* cFlexRailNode_cFlexRailNode1(void* self, void* a1, void* stream);
-extern "C" void cFloatRailNode_updateMats(void* self);
+extern "C" void cFloatRailNode_updateMats(cFloatRailNode* self);
 struct sFrBoxRail;
-extern "C" void cFloatRailNode_updateBoundBox(sFrBoxRail* self);
+extern "C" void cFloatRailNode_updateBoundBox(cFloatRailNode* self);
 extern "C" void cFlexRailNode_addSpaceHash(cFlexRailNode* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
@@ -234,20 +236,20 @@ struct sFrStreamVEntry_348FA0 {
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cFloatRailNode_cFloatRailNode1(char* self, void* bucket, void* stream)
+extern "C" void* cFloatRailNode_cFloatRailNode1(cFloatRailNode* self, void* bucket, void* stream)
 {
-    cFlexRailNode_cFlexRailNode1(self, bucket, stream);
-    *(void**)(self + 0xC) = cFloatRailNode_vtbl;
+    cFlexRailNode_cFlexRailNode1(((char*)self), bucket, stream);
+    self->mVtbl = (void**)cFloatRailNode_vtbl;
     sFrStreamVEntry_348FA0* vt = *(sFrStreamVEntry_348FA0**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, self + 0x60, 0xC);
-    sFlexRailElem_348FA0** elems = (sFlexRailElem_348FA0**)(self + 0x70);
-    *elems = new (str_FloatRailNodes, 0x20000000, 0) sFlexRailElem_348FA0[*(int*)(self + 0x20)];
+    vt[2].fn((char*)stream + vt[2].delta, ((char*)self) + 0x60, 0xC);
+    sFlexRailElem_348FA0** elems = (sFlexRailElem_348FA0**)(((char*)self) + 0x70);
+    *elems = new (str_FloatRailNodes, 0x20000000, 0) sFlexRailElem_348FA0[self->NumNodes];
     sFrStreamVEntry_348FA0* vt2 = *(sFrStreamVEntry_348FA0**)stream;
-    vt2[2].fn((char*)stream + vt2[2].delta, *(void**)(self + 0x70), *(int*)(self + 0x20) * 80);
+    vt2[2].fn((char*)stream + vt2[2].delta, self->Nodes, self->NumNodes * 80);
     cFloatRailNode_updateMats(self);
-    cFloatRailNode_updateBoundBox((sFrBoxRail*)self);
+    cFloatRailNode_updateBoundBox(self);
     cFlexRailNode_addSpaceHash((cFlexRailNode*)self);
-    return self;
+    return ((char*)self);
 }
 #endif
 
@@ -267,11 +269,11 @@ extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags);
  *
  * @param flags  destructor flags
  */
-extern "C" void cFloatRailNode__cFloatRailNode(void* self, int flags)
+extern "C" void cFloatRailNode__cFloatRailNode(cFloatRailNode* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cFloatRailNode_vtbl;
+    self->mVtbl = (void**)cFloatRailNode_vtbl;
     cFlexRailNode_remSpaceHash((cFlexRailNode*)self);
-    void* railNodes = *(void**)((char*)self + 0x70);
+    void* railNodes = self->Nodes;
     if (railNodes != 0) {
         cMemMan_free(railNodes);
     }
@@ -330,30 +332,30 @@ static inline void vu0AddFRBox(sFrBoxVec4& dst, sFrBoxVec4& b)
  * Recomputes a float rail's BoundBox from its node positions, padded by 200 on each axis.
  */
 // bounding box of the rail elements, padded by 200 on x/y/z
-extern "C" void cFloatRailNode_updateBoundBox(sFrBoxRail* self)
+extern "C" void cFloatRailNode_updateBoundBox(cFloatRailNode* self)
 {
-    sFrBoxElem* points = self->elems;
-    int n = self->count;
-    self->min = self->max = points[0].pos;
+    sFrBoxElem* points = (sFrBoxElem*)self->Nodes;
+    int n = self->NumNodes;
+    (*(sFrBoxVec4*)&self->BoundBox) = (*(sFrBoxVec4*)&self->BoundBox.MaxPoint) = points[0].pos;
     for (int i = 1; i < n; i++) {
         sFrBoxVec4* point = &points[i].pos;
-        if (point->x < self->min.x) {
-            self->min.x = point->x;
+        if (point->x < self->BoundBox.MinPoint.x) {
+            self->BoundBox.MinPoint.x = point->x;
         }
-        if (point->y < self->min.y) {
-            self->min.y = point->y;
+        if (point->y < self->BoundBox.MinPoint.y) {
+            self->BoundBox.MinPoint.y = point->y;
         }
-        if (point->z < self->min.z) {
-            self->min.z = point->z;
+        if (point->z < self->BoundBox.MinPoint.z) {
+            self->BoundBox.MinPoint.z = point->z;
         }
-        if (point->x > self->max.x) {
-            self->max.x = point->x;
+        if (point->x > self->BoundBox.MaxPoint.x) {
+            self->BoundBox.MaxPoint.x = point->x;
         }
-        if (point->y > self->max.y) {
-            self->max.y = point->y;
+        if (point->y > self->BoundBox.MaxPoint.y) {
+            self->BoundBox.MaxPoint.y = point->y;
         }
-        if (point->z > self->max.z) {
-            self->max.z = point->z;
+        if (point->z > self->BoundBox.MaxPoint.z) {
+            self->BoundBox.MaxPoint.z = point->z;
         }
     }
     sFrBoxVec4 margin;
@@ -361,8 +363,8 @@ extern "C" void cFloatRailNode_updateBoundBox(sFrBoxRail* self)
     margin.y = 200.0f;
     margin.z = 200.0f;
     margin.w = 0.0f;
-    vu0SubFRBox(self->min, margin);
-    vu0AddFRBox(self->max, margin);
+    vu0SubFRBox((*(sFrBoxVec4*)&self->BoundBox), margin);
+    vu0AddFRBox((*(sFrBoxVec4*)&self->BoundBox.MaxPoint), margin);
 }
 #endif
 
@@ -427,7 +429,7 @@ struct sFrNode9220 {
  *
  * @param node  rail node to update
  */
-extern "C" void cFloatRailNode_getPosition(void* self, sFrNode9220* node)
+extern "C" void cFloatRailNode_getPosition(cFloatRailNode* self, sFrNode9220* node)
 {
     sFrNodeMtx boneMat;
     cInstanceNode_buildMeshMat(node->model.get(), node->bone, &boneMat);
@@ -551,7 +553,7 @@ static inline void updateMat_92A8(sFrM4_92A8& out, const sFrV4_92A8& a, const sF
 // PORT: hand-written MMI 4x4 transpose (MMI_TRANSPOSE4: lq/pextlw/pextuw/pcpyld/pcpyud/sq, no gcc 2.95 pattern;
 // retail's registers differ per call site, so an operand asm) plus VU0 macro asm; a port replaces them with a
 // plain C transpose and a C vector-matrix product.
-extern "C" void cFloatRailNode_updateMats(void* selfv)
+extern "C" void cFloatRailNode_updateMats(cFloatRailNode* selfv)
 {
     sFrNode_92A8* self = (sFrNode_92A8*)selfv;
     int i = 1;
@@ -614,12 +616,12 @@ static inline void vu0AddFR(sFrVec4& dst, sFrVec4 b)
  * @param node  intersect info of the hit (segment +0x64, t +0x68)
  * @param offset  force to apply
  */
-extern "C" void cFloatRailNode_applyForce(void* self, void* node, sFrVec4* offset)
+extern "C" void cFloatRailNode_applyForce(cFloatRailNode* self, void* node, sFrVec4* offset)
 {
     if (*(int*)((char*)node + 0x64) >= 0) {
-        vu0AddFR((*(sFrElem**)((char*)self + 0x70))[*(int*)((char*)node + 0x64)].pos,
+        vu0AddFR(((sFrElem*)self->Nodes)[*(int*)((char*)node + 0x64)].pos,
                  vu0ScaleFR(*offset, 1.0f - *(float*)((char*)node + 0x68)));
-        vu0AddFR((*(sFrElem**)((char*)self + 0x70))[*(int*)((char*)node + 0x64) + 1].pos,
+        vu0AddFR(((sFrElem*)self->Nodes)[*(int*)((char*)node + 0x64) + 1].pos,
                  vu0ScaleFR(*offset, *(float*)((char*)node + 0x68)));
     }
 }
@@ -640,14 +642,14 @@ INCLUDE_ASM("object/flexrailnode", cFloatRailNode_updateIntersectInfo);
  */
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-extern "C" void cFloatRailNode_updateIntersectInfo(void* self, void* node)
+extern "C" void cFloatRailNode_updateIntersectInfo(cFloatRailNode* self, void* node)
 {
     if (*(int*)((char*)node + 0x64) >= 0) {
         vu0AddFR(*(sFrVec4*)((char*)node + 0x20),
-                 vu0ScaleFR((*(sFrElem**)((char*)self + 0x70))[*(int*)((char*)node + 0x64)].vel,
+                 vu0ScaleFR(((sFrElem*)self->Nodes)[*(int*)((char*)node + 0x64)].vel,
                             *(float*)((char*)node + 0x68)));
         vu0AddFR(*(sFrVec4*)((char*)node + 0x20),
-                 vu0ScaleFR((*(sFrElem**)((char*)self + 0x70))[*(int*)((char*)node + 0x64) + 1].vel,
+                 vu0ScaleFR(((sFrElem*)self->Nodes)[*(int*)((char*)node + 0x64) + 1].vel,
                             1.0f - *(float*)((char*)node + 0x68)));
     }
 }
@@ -671,7 +673,7 @@ struct sFrN_98E8 {
 };
 
 extern "C" float cObjectInterface_getUpdateTime();
-extern "C" void cFloatRailNode_getPosition(void* self, sFrNode9220* node);
+extern "C" void cFloatRailNode_getPosition(cFloatRailNode* self, sFrNode9220* node);
 // View (cFloatRailNode_cFloatRailNode earlier in this unit declares it with its own type).
 extern sFrV_98E8 D_004FF120_98E8 __asm__("t4vect_Zero");
 
@@ -741,18 +743,18 @@ static inline void vu0AddEq_98E8(sFrV_98E8& dst, sFrV_98E8 b)
  * accel = -(Pos - OPos) * LSpring (+0x60) + Force * ForceScale (+0x68) - Vel * LDamp (+0x64); Pos += Vel * dt; Vel +=
  * accel * dt (dt from cObjectInterface_getUpdateTime); Force is cleared.
  */
-extern "C" void cFloatRailNode_updateNodes(char* self)
+extern "C" void cFloatRailNode_updateNodes(cFloatRailNode* self)
 {
     float dt = cObjectInterface_getUpdateTime();
-    sFrN_98E8* n = *(sFrN_98E8**)(self + 0x70);
-    for (int i = 0; i < *(int*)(self + 0x20); i++, n++) {
+    sFrN_98E8* n = (sFrN_98E8*)self->Nodes;
+    for (int i = 0; i < self->NumNodes; i++, n++) {
         if (*(int*)((char*)n->model.get() + 0xC))
             cFloatRailNode_getPosition(self, (sFrNode9220*)n);
-        float* k = (float*)(self + 0x60);
-        float ks = -*(float*)(self + 0x60);
+        float* k = (float*)(((char*)self) + 0x60);
+        float ks = -self->LSpring;
         sFrV_98E8 acc = vu0Add_98E8(vu0Scale_98E8(vu0Sub_98E8(n->posA, n->posB), ks),
                                     vu0Scale_98E8(n->force, k[2]));
-        vu0AddEq_98E8(acc, vu0Scale_98E8(n->vel, -*(float*)(self + 0x64)));
+        vu0AddEq_98E8(acc, vu0Scale_98E8(n->vel, -self->LDamp));
         vu0AddEq_98E8(n->posA, vu0Scale_98E8(n->vel, dt));
         vu0AddEq_98E8(n->vel, vu0Scale_98E8(acc, dt));
         n->force = D_004FF120_98E8;
@@ -779,13 +781,13 @@ extern "C" void cFlexRailNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cFloatRailNode_writeToReplayFrame(void* self, void* stream)
+extern "C" void cFloatRailNode_writeToReplayFrame(cFloatRailNode* self, void* stream)
 {
     cFlexRailNode_writeToReplayFrame(self, stream);
     sFlexRailVEntry9AD0* writeFn = &(*(sFlexRailVEntry9AD0**)stream)[1];
     writeFn->fn((char*)stream + writeFn->delta, (char*)self + 0x60, 0xC);
     writeFn = &(*(sFlexRailVEntry9AD0**)stream)[1];
-    writeFn->fn((char*)stream + writeFn->delta, *(void**)((char*)self + 0x70), *(int*)((char*)self + 0x20) * 80);
+    writeFn->fn((char*)stream + writeFn->delta, self->Nodes, self->NumNodes * 80);
 }
 #endif
 
@@ -793,11 +795,11 @@ extern "C" void cFloatRailNode_writeToReplayFrame(void* self, void* stream)
 INCLUDE_ASM("object/flexrailnode", cSpringRailNode_cSpringRailNode);
 #ifdef SKIP_ASM
 extern "C" void cFlexRailNode_cFlexRailNode(void* self, int type, void* a1, void* desc);
-extern "C" void cSpringRailNode_updateMats(void* self);
+extern "C" void cSpringRailNode_updateMats(cSpringRailNode* self);
 struct sFrBoxRail60;
-extern "C" void cSpringRailNode_updateBoundBox(sFrBoxRail60* self);
+extern "C" void cSpringRailNode_updateBoundBox(cSpringRailNode* self);
 struct sFrNodeA028;
-extern "C" void cSpringRailNode_getPosition(void* self, sFrNodeA028* node);
+extern "C" void cSpringRailNode_getPosition(cSpringRailNode* self, sFrNodeA028* node);
 extern char cSpringRailNode_vtbl[];
 extern char str_SpringRailNodes[];
 
@@ -847,13 +849,13 @@ struct sFlexElem_9B48 {
  * @param desc  spring rail make-data
  * @return self
  */
-extern "C" void* cSpringRailNode_cSpringRailNode(char* self, void* instRecord, char* desc)
+extern "C" void* cSpringRailNode_cSpringRailNode(cSpringRailNode* self, void* instRecord, char* desc)
 {
-    cFlexRailNode_cFlexRailNode(self, 21, instRecord, desc);
-    *(void**)(self + 0xC) = cSpringRailNode_vtbl;
-    *(float*)(self + 0x60) = *(float*)(desc + 0x48);
-    *(float*)(self + 0x64) = *(float*)(desc + 0x4C);
-    *(float*)(self + 0x68) = *(float*)(desc + 0x50);
+    cFlexRailNode_cFlexRailNode(((char*)self), 21, instRecord, desc);
+    self->mVtbl = (void**)cSpringRailNode_vtbl;
+    self->ASpring = *(float*)(desc + 0x48);
+    self->ADamp = *(float*)(desc + 0x4C);
+    self->TorqueScale = *(float*)(desc + 0x50);
     sFlexRef_9B48 refs[8];
     int bones[8];
     int n = 0;
@@ -867,25 +869,25 @@ extern "C" void* cSpringRailNode_cSpringRailNode(char* self, void* instRecord, c
             n++;
         }
     }
-    sFlexElem_9B48*& elems = *(sFlexElem_9B48**)(self + 0x70);
-    elems = new (str_SpringRailNodes, 0x20000000, 0) sFlexElem_9B48[*(int*)(self + 0x20)];
-    for (int j = 0; j < *(int*)(self + 0x20); j++) {
-        (*(sFlexElem_9B48**)(self + 0x70))[j].link.id = refs[j].id;
-        (*(sFlexElem_9B48**)(self + 0x70))[j].bone = bones[j];
-        (*(sFlexElem_9B48**)(self + 0x70))[j].v30 = D_004FF120_9B48;
-        (*(sFlexElem_9B48**)(self + 0x70))[j].v40 = D_004FF120_9B48;
-        (*(sFlexElem_9B48**)(self + 0x70))[j].v20 = D_004FF120_9B48;
-        (*(sFlexElem_9B48**)(self + 0x70))[j].dir = D_004FF120_9B48;
-        cSpringRailNode_getPosition(self, (sFrNodeA028*)&(*(sFlexElem_9B48**)(self + 0x70))[j]);
+    sFlexElem_9B48*& elems = (sFlexElem_9B48*)self->Nodes;
+    elems = new (str_SpringRailNodes, 0x20000000, 0) sFlexElem_9B48[self->NumNodes];
+    for (int j = 0; j < self->NumNodes; j++) {
+        ((sFlexElem_9B48*)self->Nodes)[j].link.id = refs[j].id;
+        ((sFlexElem_9B48*)self->Nodes)[j].bone = bones[j];
+        ((sFlexElem_9B48*)self->Nodes)[j].v30 = D_004FF120_9B48;
+        ((sFlexElem_9B48*)self->Nodes)[j].v40 = D_004FF120_9B48;
+        ((sFlexElem_9B48*)self->Nodes)[j].v20 = D_004FF120_9B48;
+        ((sFlexElem_9B48*)self->Nodes)[j].dir = D_004FF120_9B48;
+        cSpringRailNode_getPosition(self, (sFrNodeA028*)&((sFlexElem_9B48*)self->Nodes)[j]);
     }
-    for (int k = 0; k < *(int*)(self + 0x20) - 1; k++) {
-        (*(sFlexElem_9B48**)(self + 0x70))[k].dir =
-            Sub_9B48((*(sFlexElem_9B48**)(self + 0x70))[k + 1].pos, (*(sFlexElem_9B48**)(self + 0x70))[k].pos);
+    for (int k = 0; k < self->NumNodes - 1; k++) {
+        ((sFlexElem_9B48*)self->Nodes)[k].dir =
+            Sub_9B48(((sFlexElem_9B48*)self->Nodes)[k + 1].pos, ((sFlexElem_9B48*)self->Nodes)[k].pos);
     }
     cSpringRailNode_updateMats(self);
-    cSpringRailNode_updateBoundBox((sFrBoxRail60*)self);
+    cSpringRailNode_updateBoundBox(self);
     cFlexRailNode_addSpaceHash((cFlexRailNode*)self);
-    return self;
+    return ((char*)self);
 }
 #endif
 
@@ -893,7 +895,7 @@ extern "C" void* cSpringRailNode_cSpringRailNode(char* self, void* instRecord, c
 INCLUDE_ASM("object/flexrailnode", cSpringRailNode_cSpringRailNode1);
 #ifdef SKIP_ASM
 extern "C" void* cFlexRailNode_cFlexRailNode1(void* self, void* a1, void* stream);
-extern "C" void cSpringRailNode_updateMats(void* self);
+extern "C" void cSpringRailNode_updateMats(cSpringRailNode* self);
 extern "C" void cFlexRailNode_addSpaceHash(cFlexRailNode* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
@@ -924,19 +926,19 @@ struct sFrStreamVEntry_349DB0 {
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cSpringRailNode_cSpringRailNode1(char* self, void* bucket, void* stream)
+extern "C" void* cSpringRailNode_cSpringRailNode1(cSpringRailNode* self, void* bucket, void* stream)
 {
-    cFlexRailNode_cFlexRailNode1(self, bucket, stream);
-    *(void**)(self + 0xC) = cSpringRailNode_vtbl;
+    cFlexRailNode_cFlexRailNode1(((char*)self), bucket, stream);
+    self->mVtbl = (void**)cSpringRailNode_vtbl;
     sFrStreamVEntry_349DB0* vt = *(sFrStreamVEntry_349DB0**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, self + 0x60, 0xC);
-    sFlexRailElem_349DB0** elems = (sFlexRailElem_349DB0**)(self + 0x70);
-    *elems = new (str_SpringRailNodes, 0x20000000, 0) sFlexRailElem_349DB0[*(int*)(self + 0x20)];
+    vt[2].fn((char*)stream + vt[2].delta, ((char*)self) + 0x60, 0xC);
+    sFlexRailElem_349DB0** elems = (sFlexRailElem_349DB0**)(((char*)self) + 0x70);
+    *elems = new (str_SpringRailNodes, 0x20000000, 0) sFlexRailElem_349DB0[self->NumNodes];
     sFrStreamVEntry_349DB0* vt2 = *(sFrStreamVEntry_349DB0**)stream;
-    vt2[2].fn((char*)stream + vt2[2].delta, *(void**)(self + 0x70), *(int*)(self + 0x20) * 0x60);
+    vt2[2].fn((char*)stream + vt2[2].delta, self->Nodes, self->NumNodes * 0x60);
     cSpringRailNode_updateMats(self);
     cFlexRailNode_addSpaceHash((cFlexRailNode*)self);
-    return self;
+    return ((char*)self);
 }
 #endif
 
@@ -956,11 +958,11 @@ extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags);
  *
  * @param flags  destructor flags
  */
-extern "C" void cSpringRailNode__cSpringRailNode(void* self, int flags)
+extern "C" void cSpringRailNode__cSpringRailNode(cSpringRailNode* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cSpringRailNode_vtbl;
+    self->mVtbl = (void**)cSpringRailNode_vtbl;
     cFlexRailNode_remSpaceHash((cFlexRailNode*)self);
-    void* railNodes = *(void**)((char*)self + 0x70);
+    void* railNodes = self->Nodes;
     if (railNodes != 0) {
         cMemMan_free(railNodes);
     }
@@ -992,30 +994,30 @@ struct sFrBoxRail60 {
 // PORT: PS2-only VU0 inline asm (vector sub-assign).
 // PORT: PS2-only VU0 inline asm (vector add-assign).
 // bounding box of the rail elements, padded by 200 on x/y/z
-extern "C" void cSpringRailNode_updateBoundBox(sFrBoxRail60* self)
+extern "C" void cSpringRailNode_updateBoundBox(cSpringRailNode* self)
 {
-    sFrBoxElem60* points = self->elems;
-    int n = self->count;
-    self->min = self->max = points[0].pos;
+    sFrBoxElem60* points = (sFrBoxElem60*)self->Nodes;
+    int n = self->NumNodes;
+    (*(sFrBoxVec4*)&self->BoundBox) = (*(sFrBoxVec4*)&self->BoundBox.MaxPoint) = points[0].pos;
     for (int i = 1; i < n; i++) {
         sFrBoxVec4* point = &points[i].pos;
-        if (point->x < self->min.x) {
-            self->min.x = point->x;
+        if (point->x < self->BoundBox.MinPoint.x) {
+            self->BoundBox.MinPoint.x = point->x;
         }
-        if (point->y < self->min.y) {
-            self->min.y = point->y;
+        if (point->y < self->BoundBox.MinPoint.y) {
+            self->BoundBox.MinPoint.y = point->y;
         }
-        if (point->z < self->min.z) {
-            self->min.z = point->z;
+        if (point->z < self->BoundBox.MinPoint.z) {
+            self->BoundBox.MinPoint.z = point->z;
         }
-        if (point->x > self->max.x) {
-            self->max.x = point->x;
+        if (point->x > self->BoundBox.MaxPoint.x) {
+            self->BoundBox.MaxPoint.x = point->x;
         }
-        if (point->y > self->max.y) {
-            self->max.y = point->y;
+        if (point->y > self->BoundBox.MaxPoint.y) {
+            self->BoundBox.MaxPoint.y = point->y;
         }
-        if (point->z > self->max.z) {
-            self->max.z = point->z;
+        if (point->z > self->BoundBox.MaxPoint.z) {
+            self->BoundBox.MaxPoint.z = point->z;
         }
     }
     sFrBoxVec4 margin;
@@ -1023,8 +1025,8 @@ extern "C" void cSpringRailNode_updateBoundBox(sFrBoxRail60* self)
     margin.y = 200.0f;
     margin.z = 200.0f;
     margin.w = 0.0f;
-    vu0SubFRBox(self->min, margin);
-    vu0AddFRBox(self->max, margin);
+    vu0SubFRBox((*(sFrBoxVec4*)&self->BoundBox), margin);
+    vu0AddFRBox((*(sFrBoxVec4*)&self->BoundBox.MaxPoint), margin);
 }
 #endif
 
@@ -1046,7 +1048,7 @@ struct sFrNodeA028 {
  *
  * @param node  rail node to update
  */
-extern "C" void cSpringRailNode_getPosition(void* self, sFrNodeA028* node)
+extern "C" void cSpringRailNode_getPosition(cSpringRailNode* self, sFrNodeA028* node)
 {
     sFrNodeMtx boneMat;
     cInstanceNode_buildMeshMat(node->model.get(), node->bone, &boneMat);
@@ -1187,7 +1189,7 @@ static inline void updateMatEnd_A0B0(sFrM4_A0B0& out, const sFrV4_A0B0& a, const
 // PORT: hand-written MMI 4x4 transpose (MMI_TRANSPOSE4: lq/pextlw/pextuw/pcpyld/pcpyud/sq, no gcc 2.95 pattern;
 // retail's registers differ per call site, so an operand asm) plus VU0 macro asm; a port replaces them with a
 // plain C transpose and a C vector-matrix product.
-extern "C" void cSpringRailNode_updateMats(void* selfv)
+extern "C" void cSpringRailNode_updateMats(cSpringRailNode* selfv)
 {
     sFrNode_A0B0* self = (sFrNode_A0B0*)selfv;
     int i = 1;
@@ -1653,13 +1655,13 @@ extern "C" void cFlexRailNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cSpringRailNode_writeToReplayFrame(void* self, void* stream)
+extern "C" void cSpringRailNode_writeToReplayFrame(cSpringRailNode* self, void* stream)
 {
     cFlexRailNode_writeToReplayFrame(self, stream);
     sFlexRailVEntryAC10* writeFn = &(*(sFlexRailVEntryAC10**)stream)[1];
     writeFn->fn((char*)stream + writeFn->delta, (char*)self + 0x60, 0xC);
     writeFn = &(*(sFlexRailVEntryAC10**)stream)[1];
-    writeFn->fn((char*)stream + writeFn->delta, *(void**)((char*)self + 0x70), *(int*)((char*)self + 0x20) * 0x60);
+    writeFn->fn((char*)stream + writeFn->delta, self->Nodes, self->NumNodes * 0x60);
 }
 #endif
 

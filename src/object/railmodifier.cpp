@@ -1,4 +1,9 @@
 #include "common.h"
+#include "object/springrailnode.h"
+#include "object/floatrailnode.h"
+#include "object/animobject.h"
+#include "object/animnode.h"
+#include "object/objnode.h"
 #include "object/flexrailnode.h"
 #include "object/animcombonode.h"
 #include "world/worldview.h"
@@ -3325,12 +3330,12 @@ extern void* cObjNode_vtbl[];
  *
  * @return self
  */
-extern "C" void* cObjNode_cObjNode2(void* self)
+extern "C" void* cObjNode_cObjNode2(cObjNode* self)
 {
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0xc) = (int)(void*)cObjNode_vtbl;
-    *(int*)((char*)self + 0x8) = 0;
-    return self;
+    self->Next = 0;
+    self->mVtbl = (void**)((int)(void*)cObjNode_vtbl);
+    self->Prev = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -3529,9 +3534,9 @@ INCLUDE_ASM("object/railmodifier", cTypeObjNode_isType);
  * @param type  node type to compare with
  * @return 1 when the types match, otherwise 0
  */
-extern "C" int cTypeObjNode_isType(void* self, int type)
+extern "C" int cTypeObjNode_isType(cTypeObjNode* self, int type)
 {
-    return *(short*)((char*)self + 0x10) == type;
+    return self->ObjNodeType == type;
 }
 #endif
 
@@ -3544,8 +3549,8 @@ INCLUDE_ASM("object/railmodifier", cTypeObjNode_getType);
  * @param node  the typed object node
  * @return ObjNodeType
  */
-extern "C" short cTypeObjNode_getType(void *node) {
-    return (*(short *)((char*)(node) + (0x10)));
+extern "C" short cTypeObjNode_getType(cTypeObjNode* node) {
+    return (node->ObjNodeType);
 }
 #endif
 //100%
@@ -3556,8 +3561,8 @@ INCLUDE_ASM("object/railmodifier", cTypeObjNode_setRootTransformDirty);
  *
  * @param node  the typed object node
  */
-extern "C" void cTypeObjNode_setRootTransformDirty(void *node) {
-    (*(unsigned short *)((char*)(node) + (0x12))) = (unsigned short) ((*(unsigned short *)((char*)(node) + (0x12))) | 1);
+extern "C" void cTypeObjNode_setRootTransformDirty(cTypeObjNode* node) {
+    (node->Flags) = (unsigned short) ((node->Flags) | 1);
 }
 #endif
 //100%
@@ -3569,8 +3574,8 @@ INCLUDE_ASM("object/railmodifier", cTypeObjNode_isRootTransformDirty);
  * @param node  the typed object node
  * @return that bit (0 or 1)
  */
-extern "C" int cTypeObjNode_isRootTransformDirty(void *node) {
-    return (*(unsigned short *)((char*)(node) + (0x12))) & 1;
+extern "C" int cTypeObjNode_isRootTransformDirty(cTypeObjNode* node) {
+    return (node->Flags) & 1;
 }
 #endif
 //100%
@@ -3581,8 +3586,8 @@ INCLUDE_ASM("object/railmodifier", cTypeObjNode_resetRootTransformDirty);
  *
  * @param node  the typed object node
  */
-extern "C" void cTypeObjNode_resetRootTransformDirty(void *node) {
-    (*(unsigned short *)((char*)(node) + (0x12))) = (unsigned short) ((*(unsigned short *)((char*)(node) + (0x12))) & 0xFFFE);
+extern "C" void cTypeObjNode_resetRootTransformDirty(cTypeObjNode* node) {
+    (node->Flags) = (unsigned short) ((node->Flags) & 0xFFFE);
 }
 #endif
 //100%
@@ -3622,10 +3627,10 @@ struct sRailVEntryU800 {
  * @param obj  the other node (On Tour cObjNode*)
  * @return 1 when obj's sort index is greater than or equal to this node's, otherwise 0
  */
-extern "C" int cSortObjNode_compare(void* self, void* obj)
+extern "C" int cSortObjNode_compare(cSortObjNode* self, void* obj)
 {
     sRailVEntryU800* vt = *(sRailVEntryU800**)((char*)obj + 0xC);
-    return vt[8].fn((char*)obj + vt[8].delta) >= *(unsigned int*)((char*)self + 0x14);
+    return vt[8].fn((char*)obj + vt[8].delta) >= self->SortIndex;
 }
 #endif
 
@@ -3646,10 +3651,10 @@ struct sRailVEntryU840 {
  * @param obj  the other node (On Tour cObjNode*)
  * @return 1 when the two sort indices are equal, otherwise 0
  */
-extern "C" int cSortObjNode_equal(void* self, void* obj)
+extern "C" int cSortObjNode_equal(cSortObjNode* self, void* obj)
 {
     sRailVEntryU840* vt = *(sRailVEntryU840**)((char*)obj + 0xC);
-    return *(unsigned int*)((char*)self + 0x14) == vt[8].fn((char*)obj + vt[8].delta);
+    return self->SortIndex == vt[8].fn((char*)obj + vt[8].delta);
 }
 #endif
 
@@ -5517,9 +5522,9 @@ INCLUDE_ASM("object/railmodifier", cAnimNode_getAnimFrame);
  *
  * @return the float at +0x0 multiplied by 30
  */
-extern "C" float cAnimNode_getAnimFrame(void* self)
+extern "C" float cAnimNode_getAnimFrame(cAnimNode* self)
 {
-    float input = *(float*)((char*)self + 0x0);
+    float input = self->CurrTime;
     return input * 30.0f;
 }
 #endif
@@ -5569,14 +5574,14 @@ struct sRailVEntry1098 {
  *
  * @return the matrix array pointer stored at +0x44
  */
-extern "C" int cAnimNode_getAnimMats(void* self)
+extern "C" int cAnimNode_getAnimMats(cAnimNode* self)
 {
-    if (*(unsigned short*)((char*)self + 0x26) & 1) {
+    if (self->Flags & 1) {
         void* sub = (char*)self + 0x14;
-        sRailVEntry1098* vt = *(sRailVEntry1098**)((char*)self + 0x20);
+        sRailVEntry1098* vt = (sRailVEntry1098*)self->mVtbl;
         vt[51].fn((char*)sub + vt[51].delta);
     }
-    return *(int*)((char*)self + 0x44);
+    return (int)self->AnimMats;
 }
 #endif
 
@@ -5602,14 +5607,14 @@ struct sElem003610E0 {
  * @param i  index of the matrix in the array at +0x44 (0x40-byte matrices)
  * @return the address of matrix @p i
  */
-extern "C" sElem003610E0* cAnimNode_getAnimMat(void* self, int i)
+extern "C" sElem003610E0* cAnimNode_getAnimMat(cAnimNode* self, int i)
 {
     char* obj = (char*)self + 0x14;
-    if (*(unsigned short*)((char*)self + 0x26) & 1) {
-        sVEntry003610E0* vt = *(sVEntry003610E0**)((char*)self + 0x20);
+    if (self->Flags & 1) {
+        sVEntry003610E0* vt = (sVEntry003610E0*)self->mVtbl;
         vt[51].fn(obj + vt[51].delta);
     }
-    return &(*(sElem003610E0**)((char*)self + 0x44))[i];
+    return &((sElem003610E0*)self->AnimMats)[i];
 }
 #endif
 
@@ -5624,9 +5629,9 @@ INCLUDE_ASM("object/railmodifier", cAnimNode_clearFrameEvent);
  *
  * @param animNode  the animated node
  */
-extern "C" void cAnimNode_clearFrameEvent(void *animNode) {
-    (*(float *)((char*)(animNode) + (8))) = 1e10f;
-    (*(float *)((char*)(animNode) + (0xC))) = 1e10f;
+extern "C" void cAnimNode_clearFrameEvent(cAnimNode* animNode) {
+    (animNode->FrameStart) = 1e10f;
+    (animNode->FrameEnd) = 1e10f;
 }
 #endif
 
@@ -5652,9 +5657,9 @@ INCLUDE_ASM("object/railmodifier", cAnimObjectNode_getAnimSpeed);
  *
  * @return the speed, or 0.0f
  */
-extern "C" float cAnimObjectNode_getAnimSpeed(void* self)
+extern "C" float cAnimObjectNode_getAnimSpeed(cAnimObjectNode* self)
 {
-    return *(int*)((char*)self + 0x8) == 0 ? *(float*)((char*)self + 0x10) : 0.0f;
+    return self->AnimComplete == 0 ? self->AnimSpeed : 0.0f;
 }
 #endif
 
@@ -5666,10 +5671,10 @@ INCLUDE_ASM("object/railmodifier", cAnimObjectNode_getAnimDir);
  *
  * @return 1 or -1
  */
-extern "C" int cAnimObjectNode_getAnimDir(void* self)
+extern "C" int cAnimObjectNode_getAnimDir(cAnimObjectNode* self)
 {
     int direction = -1;
-    if (*(float*)((char*)self + 0x10) >= 0.0f) {
+    if (self->AnimSpeed >= 0.0f) {
         direction = 1;
     }
     return direction;
@@ -6297,9 +6302,9 @@ INCLUDE_ASM("object/railmodifier", cFloatRailNode_getMesh);
  * @param segIndex  segment index
  * @return the segment mesh index
  */
-extern "C" int cFloatRailNode_getMesh(void* self, int segIndex)
+extern "C" int cFloatRailNode_getMesh(cFloatRailNode* self, int segIndex)
 {
-    sRailEntry50* railNodes = *(sRailEntry50**)((char*)self + 0x70);
+    sRailEntry50* railNodes = (sRailEntry50*)self->Nodes;
     return railNodes[segIndex].field_0x44;
 }
 #endif
@@ -6320,9 +6325,9 @@ INCLUDE_ASM("object/railmodifier", cSpringRailNode_getMesh);
  * @param segIndex  segment index
  * @return the segment mesh index
  */
-extern "C" int cSpringRailNode_getMesh(void* self, int segIndex)
+extern "C" int cSpringRailNode_getMesh(cSpringRailNode* self, int segIndex)
 {
-    sRailEntry60* railNodes = *(sRailEntry60**)((char*)self + 0x70);
+    sRailEntry60* railNodes = (sRailEntry60*)self->Nodes;
     return railNodes[segIndex].field_0x54;
 }
 #endif

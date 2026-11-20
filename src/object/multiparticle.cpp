@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/railmannode.h"
 #include "object/animcombonode.h"
 #include "object/multiparticle.h"
 #include "object/splinemodifier.h"
@@ -388,21 +389,20 @@ extern "C" void* cSortObjNode_cSortObjNode1(void* self, void* a1, int type);
  * @param bucket  update bucket
  * @return self
  */
-extern "C" void* cRailManNode_cRailManNode1(void* self, void* bucket)
+extern "C" void* cRailManNode_cRailManNode1(cRailManNode* self, void* bucket)
 {
-    char* nodeBytes = (char*)self;
     int i;
     cSortObjNode_cSortObjNode1(self, bucket, 18);
-    *(void***)(nodeBytes + 0xC) = cRailManNode_vtbl;
-    unsigned int* railSlot = (unsigned int*)(nodeBytes + 0x18);
+    self->mVtbl = cRailManNode_vtbl;
+    unsigned int* railSlot = (unsigned int*)(((char*)self) + 0x18);
     for (i = 0x7F; i != -1; i--, railSlot++) {
         *railSlot = 0xFFFFFFFF;
     }
-    D_004A4040 = self;
+    D_004A4040 = ((void*)self);
     for (i = 0; i < 0x80; i++) {
-        ((unsigned int*)(nodeBytes + 0x18))[i] = 0xFFFFFFFF;
+        ((unsigned int*)(((char*)self) + 0x18))[i] = 0xFFFFFFFF;
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -412,7 +412,7 @@ INCLUDE_ASM("object/multiparticle", cRailManNode_cRailManNode);
 extern void* D_004A4040;
 extern void* cRailManNode_vtbl[];
 extern "C" void* cSortObjNode_cSortObjNode(void* self, void* a1, void* stream);
-extern "C" void cRailManNode_disableRail(void* self, int idx);
+extern "C" void cRailManNode_disableRail(cRailManNode* self, int idx);
 
 class cRailManNode_cRailManNode_cStream {
 public:
@@ -432,25 +432,24 @@ public:
  * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
  * @return @p self
  */
-extern "C" void* cRailManNode_cRailManNode(void* self, void* bucket, cRailManNode_cRailManNode_cStream* stream)
+extern "C" void* cRailManNode_cRailManNode(cRailManNode* self, void* bucket, cRailManNode_cRailManNode_cStream* stream)
 {
-    char* selfBytes = (char*)self;
     int i;
     int j;
     cSortObjNode_cSortObjNode(self, bucket, stream);
-    *(void***)(selfBytes + 0xC) = cRailManNode_vtbl;
-    unsigned int* slot = (unsigned int*)(selfBytes + 0x18);
+    self->mVtbl = cRailManNode_vtbl;
+    unsigned int* slot = (unsigned int*)(((char*)self) + 0x18);
     for (j = 0x7F; j != -1; j--, slot++) {
         *slot = 0xFFFFFFFF;
     }
-    D_004A4040 = self;
-    stream->read(selfBytes + 0x18, 0x200);
+    D_004A4040 = ((void*)self);
+    stream->read(((char*)self) + 0x18, 0x200);
     for (i = 0; i < 0x80; i++) {
-        if (((unsigned int*)(selfBytes + 0x18))[i] != 0xFFFFFFFF) {
+        if (((unsigned int*)(((char*)self) + 0x18))[i] != 0xFFFFFFFF) {
             cRailManNode_disableRail(self, i);
         }
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -459,7 +458,7 @@ INCLUDE_ASM("object/multiparticle", cRailManNode__cRailManNode);
 #ifdef SKIP_ASM
 extern void* D_004A4040;
 extern void* cRailManNode_vtbl[];
-extern "C" void cRailManNode_enableRail(void* self, int idx);
+extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx);
 // PORT: cSortObjNode__cSortObjNode__FPv is the ObjNode deleting dtor; it takes (self, flags).
 extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSortObjNode__cSortObjNode__FPv");
 
@@ -472,13 +471,12 @@ extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSo
  *
  * @param flags  g++ destructor flags, passed on to the cSortObjNode destructor (bit 0 frees the memory)
  */
-extern "C" void cRailManNode__cRailManNode(void* self, int flags)
+extern "C" void cRailManNode__cRailManNode(cRailManNode* self, int flags)
 {
-    char* selfBytes = (char*)self;
     int i;
-    *(void***)(selfBytes + 0xC) = cRailManNode_vtbl;
+    self->mVtbl = cRailManNode_vtbl;
     for (i = 0; i < 0x80; i++) {
-        if (((unsigned int*)(selfBytes + 0x18))[i] != 0xFFFFFFFF) {
+        if (((unsigned int*)(((char*)self) + 0x18))[i] != 0xFFFFFFFF) {
             cRailManNode_enableRail(self, i);
         }
     }
@@ -491,7 +489,7 @@ extern "C" void cRailManNode__cRailManNode(void* self, int flags)
 INCLUDE_ASM("object/multiparticle", func_00358700);
 #ifdef SKIP_ASM
 extern void* D_004A4040;
-extern "C" void cRailManNode_enableRail(void* self, int idx);
+extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx);
 
 struct sMpSlot_8700 {
     unsigned char kind;
@@ -518,7 +516,7 @@ extern "C" void func_00358700(int kind)
         for (i = 0; i < 0x80; i++) {
             sMpMgr_8700* railMan = (sMpMgr_8700*)D_004A4040;
             if (((unsigned int*)((char*)railMan + 0x18))[i] != 0xFFFFFFFF && railMan->slots[i].kind == kind) {
-                cRailManNode_enableRail(railMan, i);
+                cRailManNode_enableRail((cRailManNode*)railMan, i);
             }
         }
     }
@@ -638,7 +636,7 @@ static inline void remove_8780(char* w, void* item, const sMpBox_8780* box)
  * @param idx  rail slot index
  */
 // Removes every particle node of slot 'idx' from the world's spatial tree.
-extern "C" void cRailManNode_disableRail(void* self, int idx)
+extern "C" void cRailManNode_disableRail(cRailManNode* self, int idx)
 {
     sMpRef_8780 ref = ((sMpRef_8780*)((char*)self + 0x18))[idx];
     sMpPart_8780* part = (sMpPart_8780*)ref.get(*cObjectInterface_getWorld_8780());
@@ -749,7 +747,7 @@ static inline void insert_8998(char* w, void* item, const sMpBox_8998* box)
  * @param idx  rail slot index
  */
 // Re-inserts every particle node of slot 'idx' into the world's spatial tree, then frees the slot.
-extern "C" void cRailManNode_enableRail(void* self, int idx)
+extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx)
 {
     sMpRef_8998 ref = ((sMpRef_8998*)((char*)self + 0x18))[idx];
     sMpPart_8998* part = (sMpPart_8998*)ref.get(*cObjectInterface_getWorld_8998());
@@ -789,9 +787,9 @@ extern void* D_004A4040;
 extern sMPMgr8B28* D_004A4040_mgr8B28 __asm__("D_004A4040");
 extern char str_RailMan_b[];
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
-extern "C" void* cRailManNode_cRailManNode1(void* self, void* a1);
-extern "C" void cRailManNode_disableRail(void* self, int idx);
-extern "C" void cRailManNode_enableRail(void* self, int idx);
+extern "C" void* cRailManNode_cRailManNode1(cRailManNode* self, void* a1);
+extern "C" void cRailManNode_disableRail(cRailManNode* self, int idx);
+extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx);
 
 /**
  * Switches a rail (spline) off or back on, creating the rail manager on first use.
@@ -806,7 +804,7 @@ extern "C" void cRailManNode_enableRail(void* self, int idx);
 extern "C" void func_00358B28(sMPRef8B28 key, int add)
 {
     if (D_004A4040 == 0) {
-        cRailManNode_cRailManNode1(cMemMan_alloc(536, str_RailMan_b, 0x20000000, 0), (void*)1);
+        cRailManNode_cRailManNode1((cRailManNode*)cMemMan_alloc(536, str_RailMan_b, 0x20000000, 0), (void*)1);
     }
     sMPRef8B28 kFree;
     int idx = -1;
@@ -832,9 +830,9 @@ found:
         }
         mgr->slots[idx] = key;
         if (add != 0) {
-            cRailManNode_enableRail(mgr, idx);
+            cRailManNode_enableRail((cRailManNode*)mgr, idx);
         } else {
-            cRailManNode_disableRail(mgr, idx);
+            cRailManNode_disableRail((cRailManNode*)mgr, idx);
         }
     }
 }
@@ -859,7 +857,7 @@ extern "C" void cSortObjNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cRailManNode_writeToReplayFrame(void* self, void* stream)
+extern "C" void cRailManNode_writeToReplayFrame(cRailManNode* self, void* stream)
 {
     cSortObjNode_writeToReplayFrame(self, stream);
     sSerVEntry_00358C30* vt = *(sSerVEntry_00358C30**)stream;

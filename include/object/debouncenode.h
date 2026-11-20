@@ -1,0 +1,78 @@
+#ifndef OBJECT_DEBOUNCENODE_H
+#define OBJECT_DEBOUNCENODE_H
+
+// cDebounceNode: a temporary node the world script puts on an instance (MakeDebounceFunc, tMakeDebounceData) to make
+// it ignore further hits for a while: it takes over the old node's modifiers (cMoveNode_transferFromOld), counts Life
+// frames down in updateNode and then expires; expire / loseFocus replace it by a cDeadNode (Type 0), a cRestoreNode
+// (Type 3, expire only) or nothing. The data's Visible word sets the record's visibility flags. Node type 0. Also
+// made by checkActiveNode and the replay loader. No EA source path in the preview asserts; retail methods: the ctor in
+// the intersect/worldsphtree splat unit (0x00342C08), the rest at the start of object/debouncenode (0x00342D10..
+// 0x00342FA8) and the dtor / onCollide in object/railmodifier (0x003614D0, 0x003614F8).
+// Size 0x34: [R] cMemMan_alloc(0x34, "Debounce") in cReplay_restoreObject (src/replay/replay.cpp); the last member
+// (Type) is at 0x30 (the replay ctor reads 4 bytes there); [O] On Tour 0x30 (Life 0x28, Type 0x2C: its cMoveNode is 4
+// bytes smaller); [P] the preview's paired methods have Life/Type at 0x28/0x2C (+ 4 in retail, tools/layout_xlate.py).
+// Base: cMoveNode (0x00-0x2C, object/movenode.h: cObjNode/cTypeObjNode/cSortObjNode/cInstanceNode/cMoveNode), written
+// out inline with that header's member names; the vptr is at 0xC.
+// Constructors: cDebounceNode_cDebounceNode1 (bucket, record, tMakeDebounceData*, cInstanceNode* old:
+// cMoveNode_cMoveNode1 type 0, vtable, Life = (int)(Time * frame rate), Type, transferFromOld(old), record flags from
+// Visible) and cDebounceNode_cDebounceNode (bucket, cBxReplayFrame*: cMoveNode_cMoveNode, then Life and Type, 4 bytes
+// each). Destructor cDebounceNode__cDebounceNode__FPv (vtable, cMoveNode__cMoveNode). Vtable cDebounceNode_vtbl
+// (0x004906F0, 51 slots: 1 dtor, 12 writeToReplayFrame, 15 updateNode, 34 expire, 35 loseFocus, 36 signal, 40 onCollide
+// (empty: no hits while debouncing); the rest are cMoveNode's / cInstanceNode's).
+//
+// A FLAT layout like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
+//   [R] retail ctors/dtor (src/intersect/worldsphtree.cpp, src/object/debouncenode.cpp) and the 0x34 allocation;
+//   [P] the July 2003 preview via tools/layout_xlate.py: 7 paired methods, 0xC and 0x18 equal, Life/Type + 4;
+//   [U] how retail code uses the field (src/object/debouncenode.cpp and the retail asm);
+//   [O] SSX On Tour's DWARF (cMoveNode chain, cDebounceNode, tMakeDebounceData).
+
+#include "layout.h"
+
+struct cObjNode;
+struct tInstanceRecord;
+struct tModifierBlock;
+
+struct cDebounceNode {
+    // --- cMoveNode (0x2C; object/movenode.h): cObjNode / cTypeObjNode / cSortObjNode / cInstanceNode first
+    int unk_00;                     // 0x00 cObjNode's leading word; no ctor writes it (see object/objnode.h)
+    cObjNode* Next;                 // 0x04 [O] cObjNode::Next; [U] bucket list
+    cObjNode* Prev;                 // 0x08 [O] cObjNode::Prev; [U] bucket list
+    void** mVtbl;                   // 0x0C [R] cDebounceNode_vtbl (0x004906F0) in both ctors and the dtor; [P]; [U]
+                                    //      updateNode calls slot 34 (expire), expire / loseFocus slot 1 (delete)
+    short ObjNodeType;              // 0x10 [O] cTypeObjNodeState; [R] node type 0 (cMoveNode_cMoveNode1)
+    unsigned short Flags;           // 0x12 [O] cTypeObjNodeState
+    unsigned int SortIndex;         // 0x14 [O] cSortObjNodeState
+    tInstanceRecord* Instance;      // 0x18 [O] cInstanceNode::Instance; [P]; [R] ctor1 sets the record's flags (+0x8)
+                                    //      from the data's Visible word; [U] expire / loseFocus hand it to the
+                                    //      cDeadNode / cRestoreNode that replaces this node
+    tModifierBlock* ModifierBlock;  // 0x1C [O] cMoveNode; [R] taken over from the old node (cMoveNode_transferFromOld)
+    int Debounce;                   // 0x20 [O] cMoveNode
+    float Fade;                     // 0x24 [O] cMoveNode
+    int TransferHack;               // 0x28 [O] cMoveNode (bool, 4 bytes)
+    // --- cDebounceNode (On Tour 0x28 / 0x2C, + 4 here)
+    int Life;                       // 0x2C [O]; [P] preview 0x28; [R] ctor1 (int)(data Time * frame rate) (cvt.w.s +
+                                    //      swc1: an int through the FPU); the replay ctor reads 4 bytes; [U] updateNode
+                                    //      counts it down and expires at 0 (lw/sw); expire / loseFocus do nothing when
+                                    //      it is negative
+    int Type;                       // 0x30 [O]; [P] preview 0x2C; [R] ctor1 = data Type (+0x8); the replay ctor reads 4
+                                    //      bytes; [U] expire: 0 -> cDeadNode, 3 -> cRestoreNode, else just delete;
+                                    //      loseFocus: 0 -> cDeadNode, else delete
+};
+
+CHECK_OFFSET(cDebounceNode, unk_00, 0x00);
+CHECK_OFFSET(cDebounceNode, Next, 0x04);
+CHECK_OFFSET(cDebounceNode, Prev, 0x08);
+CHECK_OFFSET(cDebounceNode, mVtbl, 0x0C);
+CHECK_OFFSET(cDebounceNode, ObjNodeType, 0x10);
+CHECK_OFFSET(cDebounceNode, Flags, 0x12);
+CHECK_OFFSET(cDebounceNode, SortIndex, 0x14);
+CHECK_OFFSET(cDebounceNode, Instance, 0x18);
+CHECK_OFFSET(cDebounceNode, ModifierBlock, 0x1C);
+CHECK_OFFSET(cDebounceNode, Debounce, 0x20);
+CHECK_OFFSET(cDebounceNode, Fade, 0x24);
+CHECK_OFFSET(cDebounceNode, TransferHack, 0x28);
+CHECK_OFFSET(cDebounceNode, Life, 0x2C);
+CHECK_OFFSET(cDebounceNode, Type, 0x30);
+CHECK_SIZE(cDebounceNode, 0x34);
+
+#endif /* OBJECT_DEBOUNCENODE_H */

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/animnode.h"
 #include "object/floatingnode.h"
 
 //100%
@@ -128,17 +129,17 @@ struct sVEntry_E600b {
  * @param idx  the mesh index (On Tour mesh)
  * @param out  receives the position (x, y, z, w)
  */
-extern "C" void cAnimNode_calcPosition(void* self, int id, int idx, sVec4_E600* out)
+extern "C" void cAnimNode_calcPosition(cAnimNode* self, int id, int idx, sVec4_E600* out)
 {
     void* obj = (char*)self + 0x14;
-    if (id == *(int*)((char*)self + 0x2C)) {
-        sVEntry_E600a* vt = *(sVEntry_E600a**)((char*)self + 0x20);
+    if (id == (int)self->Instance) {
+        sVEntry_E600a* vt = (sVEntry_E600a*)self->mVtbl;
         sVec4_E600 position = vt[29].fn((char*)obj + vt[29].delta, idx)->r[3];
         *out = position;
         return;
     }
     sMat_E600 buf[24];
-    sVEntry_E600b* vt = *(sVEntry_E600b**)((char*)self + 0x20);
+    sVEntry_E600b* vt = (sVEntry_E600b*)self->mVtbl;
     vt[33].fn((char*)obj + vt[33].delta, id + 0x10, buf);
     sVec4_E600 position = buf[idx].r[3];
     *out = position;
@@ -171,7 +172,7 @@ struct sBody_E698 {
 
 // Takes the body as a second (out) argument, as in multiparticle.cpp.
 extern "C" void cMoveNode_updateIntersectInfo(void* self, sBody_E698* body);
-extern "C" void cAnimNode_updateMeshVelocity(char* self);
+extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self);
 extern "C" void cAnimNode_calcPosition_E698(void* self, int id, int idx, sVec4_E698* out) __asm__("cAnimNode_calcPosition");
 
 // PORT: PS2-only VU0 inline asm (a - b).
@@ -246,20 +247,20 @@ static inline void vu0AddEq_E698(sVec4_E698& a, const sVec4_E698& b)
  *              velocity +0x30, instance +0x50, mesh index +0x5C
  */
 // Applies the attached bone's motion delta to the body: vel += delta.pos + (body.pos - bonePos) x delta.rot; angVel += delta.rot.
-extern "C" void cAnimNode_updateIntersectInfo(char* self, sBody_E698* body)
+extern "C" void cAnimNode_updateIntersectInfo(cAnimNode* self, sBody_E698* body)
 {
-    cMoveNode_updateIntersectInfo(self + 0x14, body);
+    cMoveNode_updateIntersectInfo(((char*)self) + 0x14, body);
     int bone = body->bone;
     if (bone < 0)
         return;
-    if (*(int*)(self + 0x10) != 0)
+    if (self->MeshVelocityDirty != 0)
         cAnimNode_updateMeshVelocity(self);
     sVec4_E698 meshPos;
-    cAnimNode_calcPosition_E698(self, body->anim, bone, &meshPos);
+    cAnimNode_calcPosition_E698(((char*)self), body->anim, bone, &meshPos);
     sVec4_E698 offset = vu0Sub_E698(body->pos, meshPos);
-    sVec4_E698 rot = ((sDelta_E698*)*(char**)(self + 0x4C))[bone].rot;
-    vu0AddEq_E698(body->vel, vu0Add_E698(((sDelta_E698*)*(char**)(self + 0x4C))[bone].pos,
-                                          vu0Cross_E698(offset, ((sDelta_E698*)*(char**)(self + 0x4C))[bone].rot)));
+    sVec4_E698 rot = ((sDelta_E698*)(char*)self->MeshVelocity)[bone].rot;
+    vu0AddEq_E698(body->vel, vu0Add_E698(((sDelta_E698*)(char*)self->MeshVelocity)[bone].pos,
+                                          vu0Cross_E698(offset, ((sDelta_E698*)(char*)self->MeshVelocity)[bone].rot)));
     vu0AddEq_E698(body->angVel, rot);
 }
 #endif
@@ -421,28 +422,28 @@ static inline sVec4_E798 boneE798Pos(char* self, int i)
  * mesh's AnimMats (+0x44) matrix. A mesh with a parent adds the parent's velocity plus (offset x parent angular
  * velocity) and the parent's angular velocity. Clears MeshVelocityDirty (+0x10) at the end.
  */
-extern "C" void cAnimNode_updateMeshVelocity(char* self)
+extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
 {
-    char* obj = self + 0x14;
-    if (*(unsigned short*)(self + 0x26) & 1) {
-        sVE_E798* vt = *(sVE_E798**)(self + 0x20);
+    char* obj = ((char*)self) + 0x14;
+    if (self->Flags & 1) {
+        sVE_E798* vt = (sVE_E798*)self->mVtbl;
         ((void (*)(void*))vt[51].fn)(obj + vt[51].delta);
     }
     char* info = *(char**)(*(char**)(obj + 0x18) + 0x80);
     int k = 0;
     sBone_E798* ent = *(sBone_E798**)(info + 8);
     for (int i = 0; i < *(int*)(info + 4); i++, ent++) {
-        ((sDelta_E798*)*(char**)(self + 0x4C))[i].pos = t4vect_Zero;
-        ((sDelta_E798*)*(char**)(self + 0x4C))[i].rot = t4vect_Zero;
+        ((sDelta_E798*)(char*)self->MeshVelocity)[i].pos = t4vect_Zero;
+        ((sDelta_E798*)(char*)self->MeshVelocity)[i].rot = t4vect_Zero;
         float d2r = 0.01745329424738884f;
         if (ent->active == 0) continue;
-        char* node = *(char**)(self + 0x48) + k * 208;
+        char* node = (char*)self->AnimFrames + k * 208;
         k++;
-        sVE_E798* vt = *(sVE_E798**)(self + 0x20);
-        float animSpeed = ((float (*)(void*))vt[53].fn)(self + vt[53].delta);
+        sVE_E798* vt = (sVE_E798*)self->mVtbl;
+        float animSpeed = ((float (*)(void*))vt[53].fn)(((char*)self) + vt[53].delta);
         sVec4_E798 pos;
         sVec4_E798 rotv;
-        cAnimFrame_getDeriv(node, &pos, &rotv, *(float*)(self + 4));
+        cAnimFrame_getDeriv(node, &pos, &rotv, self->CacheTime);
         sVec4_E798 rot;
         rot = sVec4_E798(-*(float*)(node + 0x50), -*(float*)(node + 0x54), -*(float*)(node + 0x58), 0.0f);
         vu0ScaleEq_E798(pos, animSpeed * (float)*(int*)(cAppMan_TheAppMan + 0x10));
@@ -474,18 +475,18 @@ extern "C" void cAnimNode_updateMeshVelocity(char* self)
             eulerMat.r[3].w = 1.0f;
         }
         rotv = vu0MulMat_E798(&eulerMat, rotv);
-        pos = vu0MulMat_E798(&(*(sMat_E798**)(self + 0x44))[i], pos);
-        rotv = vu0MulMat_E798(&(*(sMat_E798**)(self + 0x44))[i], rotv);
+        pos = vu0MulMat_E798(&((sMat_E798*)self->AnimMats)[i], pos);
+        rotv = vu0MulMat_E798(&((sMat_E798*)self->AnimMats)[i], rotv);
         if (ent->parent >= 0) {
-            sVec4_E798 parentOffset = vu0Sub_E798(boneE798Pos(self, i), boneE798Pos(self, ent->parent));
-            vu0AddEq_E798(rotv, ((sDelta_E798*)*(char**)(self + 0x4C))[ent->parent].rot);
-            vu0AddEq_E798(pos, vu0Add_E798(((sDelta_E798*)*(char**)(self + 0x4C))[ent->parent].pos,
-                                           vu0Cross_E798(parentOffset, ((sDelta_E798*)*(char**)(self + 0x4C))[ent->parent].rot)));
+            sVec4_E798 parentOffset = vu0Sub_E798(boneE798Pos(((char*)self), i), boneE798Pos(((char*)self), ent->parent));
+            vu0AddEq_E798(rotv, ((sDelta_E798*)(char*)self->MeshVelocity)[ent->parent].rot);
+            vu0AddEq_E798(pos, vu0Add_E798(((sDelta_E798*)(char*)self->MeshVelocity)[ent->parent].pos,
+                                           vu0Cross_E798(parentOffset, ((sDelta_E798*)(char*)self->MeshVelocity)[ent->parent].rot)));
         }
-        ((sDelta_E798*)*(char**)(self + 0x4C))[i].pos = pos;
-        vu0AddEq_E798(((sDelta_E798*)*(char**)(self + 0x4C))[i].rot, rotv);
+        ((sDelta_E798*)(char*)self->MeshVelocity)[i].pos = pos;
+        vu0AddEq_E798(((sDelta_E798*)(char*)self->MeshVelocity)[i].rot, rotv);
     }
-    *(int*)(self + 0x10) = 0;
+    self->MeshVelocityDirty = 0;
 }
 #endif
 
@@ -523,10 +524,10 @@ struct sAnimNode_EBA0 {
  * @return 1 if the node at @p self + 0x14 is still the record's active node, otherwise 0
  */
 // is this node's link at the head of its list, after cObjectInterface_runFrameUpdateScript?
-extern "C" int func_0034EBA0(sAnimNode_EBA0* self)
+extern "C" int func_0034EBA0(cAnimNode* self)
 {
-    sAnimLink_EBA0* link = &self->link;
-    cObjectInterface_runFrameUpdateScript(self->link.list);
+    sAnimLink_EBA0* link = &(*(sAnimLink_EBA0*)&self->unk_014);
+    cObjectInterface_runFrameUpdateScript((sAnimLinkList_EBA0*)self->Instance);
     return link->list->head == link;
 }
 #endif
@@ -550,15 +551,15 @@ struct sRange_EBE0 {
  * @return 1 if @p frame is inside the range, otherwise 0
  */
 // Is t between the two bounds: [start, end) when start < end, else [end, start).
-extern "C" int cAnimNode_frameUpdateEvent(sRange_EBE0* self, float frame)
+extern "C" int cAnimNode_frameUpdateEvent(cAnimNode* self, float frame)
 {
     int inRange = 0;
-    if (self->start != 1e10f) {
-        if (self->start < self->end) {
-            if (self->start <= frame && frame < self->end) inRange = 1;
+    if (self->FrameStart != 1e10f) {
+        if (self->FrameStart < self->FrameEnd) {
+            if (self->FrameStart <= frame && frame < self->FrameEnd) inRange = 1;
         } else {
-            if (!(self->end <= frame)) return 0;
-            inRange = frame < self->start;
+            if (!(self->FrameEnd <= frame)) return 0;
+            inRange = frame < self->FrameStart;
         }
     }
     return inRange;

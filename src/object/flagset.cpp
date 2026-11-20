@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/animnode.h"
 #include "object/fencenode.h"
 #include "ui/uithing.h"
 #include "bx/math3d.h"
@@ -1917,7 +1918,7 @@ extern "C" void* cMoveNode_cMoveNode1(void* self, void* a1, int type, void* a3);
 extern "C" void cAnimNode_setAnimMeshCache(void* self);
 extern "C" float cAnimFrame_getStartTime(void* p);
 struct sFlagOwner_E348;
-extern "C" void cAnimNode_cacheFrame(sFlagOwner_E348* self);
+extern "C" void cAnimNode_cacheFrame(cAnimNode* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern void* D_00490CC8[];
@@ -1944,30 +1945,30 @@ struct sFlagSlot_34D9B0 {
  * @param force  force the instance visible
  * @return self
  */
-extern "C" void* cAnimNode_cAnimNode(char* self, void* bucket, int nodeType, void* instRecord, int force)
+extern "C" void* cAnimNode_cAnimNode(cAnimNode* self, void* bucket, int nodeType, void* instRecord, int force)
 {
-    char* node = self + 0x14;
+    char* node = ((char*)self) + 0x14;
     cMoveNode_cMoveNode1(node, bucket, nodeType, instRecord);
-    *(void***)(self + 0x20) = D_00490CC8;
-    sFlagSlot_34D9B0** slot = (sFlagSlot_34D9B0**)(self + 0x44);
+    self->mVtbl = D_00490CC8;
+    sFlagSlot_34D9B0** slot = (sFlagSlot_34D9B0**)(((char*)self) + 0x44);
     *slot = new (str_AnimMats, 0x20000000, 0) sFlagSlot_34D9B0[*(int*)(*(char**)(*(char**)(node + 0x18) + 0x80) + 4)];
-    cAnimNode_setAnimMeshCache(self);
+    cAnimNode_setAnimMeshCache(((char*)self));
     float startTime = 0.0f;
-    if (*(void**)(self + 0x48) != 0) {
-        startTime = cAnimFrame_getStartTime(*(void**)(self + 0x48));
+    if (self->AnimFrames != 0) {
+        startTime = cAnimFrame_getStartTime(self->AnimFrames);
     }
-    *(float*)(self + 0x0) = startTime;
-    *(float*)(self + 0x8) = 10000000000.0f;
-    *(float*)(self + 0x4) = startTime;
-    *(int*)(self + 0x10) = 1;
-    *(float*)(self + 0xC) = 10000000000.0f;
-    char* sub = self + 0x14;
+    self->CurrTime = startTime;
+    self->FrameStart = 10000000000.0f;
+    self->CacheTime = startTime;
+    self->MeshVelocityDirty = 1;
+    self->FrameEnd = 10000000000.0f;
+    char* sub = ((char*)self) + 0x14;
     if (force != 0 || (*(unsigned int*)(*(char**)(sub + 0x18) + 8) & 1)) {
         char* n = *(char**)(sub + 0x18);
         *(unsigned int*)(n + 8) = (*(unsigned int*)(n + 8) & ~2u) | 4;
     }
-    cAnimNode_cacheFrame((sFlagOwner_E348*)self);
-    return self;
+    cAnimNode_cacheFrame(self);
+    return ((char*)self);
 }
 #endif
 
@@ -2000,21 +2001,21 @@ struct sFlagSlot_34DAC8 {
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cAnimNode_cAnimNode1(char* self, void* bucket, void* stream)
+extern "C" void* cAnimNode_cAnimNode1(cAnimNode* self, void* bucket, void* stream)
 {
     int skippedWord;
-    char* node = self + 0x14;
-    sFlagSlot_34DAC8** slot = (sFlagSlot_34DAC8**)(self + 0x44);
+    char* node = ((char*)self) + 0x14;
+    sFlagSlot_34DAC8** slot = (sFlagSlot_34DAC8**)(((char*)self) + 0x44);
     cMoveNode_cMoveNode_3(node, bucket, stream);
-    *(void***)(self + 0x20) = D_00490CC8;
+    self->mVtbl = D_00490CC8;
     *slot = new (str_AnimMats, 0x20000000, 0) sFlagSlot_34DAC8[*(int*)(*(char**)(*(char**)(node + 0x18) + 0x80) + 4)];
-    cAnimNode_setAnimMeshCache(self);
+    cAnimNode_setAnimMeshCache(((char*)self));
     sStreamVE_DAC8* vt = *(sStreamVE_DAC8**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, self, 20);
+    vt[2].fn((char*)stream + vt[2].delta, ((char*)self), 20);
     sStreamVE_DAC8* vt2 = *(sStreamVE_DAC8**)stream;
     vt2[2].fn((char*)stream + vt2[2].delta, &skippedWord, 4);
-    cAnimNode_cacheFrame((sFlagOwner_E348*)self);
-    return self;
+    cAnimNode_cacheFrame(self);
+    return ((char*)self);
 }
 #endif
 
@@ -2057,25 +2058,25 @@ extern void* D_00490CC8[];
  *
  * @param flags  destructor flags; bit 0 deletes the storage
  */
-extern "C" void cAnimNode__cAnimNode(sFlagOwner_DBA8* self, int flags)
+extern "C" void cAnimNode__cAnimNode(cAnimNode* self, int flags)
 {
-    self->vtable = D_00490CC8;
-    if (self->cache != 0) {
-        cMemMan_free(self->cache);
+    self->mVtbl = D_00490CC8;
+    if (self->AnimMats != 0) {
+        cMemMan_free(self->AnimMats);
     }
-    sFlagItem_DBA8* items = self->items;
+    sFlagItem_DBA8* items = (sFlagItem_DBA8*)self->AnimFrames;
     if (items != 0) {
         sFlagItem_DBA8* frameIter = items + ((int*)items)[-4];
-        while (self->items != frameIter) {
+        while ((sFlagItem_DBA8*)self->AnimFrames != frameIter) {
             frameIter--;
             frameIter->vt[1].fn((char*)frameIter + frameIter->vt[1].delta, 0);
         }
-        cMemMan_free((char*)self->items - 0x10);
+        cMemMan_free((char*)(sFlagItem_DBA8*)self->AnimFrames - 0x10);
     }
-    if (self->buf != 0) {
-        cMemMan_free(self->buf);
+    if (self->MeshVelocity != 0) {
+        cMemMan_free(self->MeshVelocity);
     }
-    cMoveNode__cMoveNode(self->node, 0);
+    cMoveNode__cMoveNode(((char*)&self->unk_014), 0);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -2111,23 +2112,23 @@ struct sFlagSetVEntry_DC90c {
  * and clears RootTransformDirty (bit 0 of the cMoveNode part's Flags, +0x26). Overrides
  * cMoveNode_updateRootTransform (vtable slot 51).
  */
-extern "C" void cAnimNode_updateRootTransform(void* self)
+extern "C" void cAnimNode_updateRootTransform(cAnimNode* self)
 {
-    sFlagSetVEntry_DC90a* vt = *(sFlagSetVEntry_DC90a**)((char*)self + 0x20);
+    sFlagSetVEntry_DC90a* vt = (sFlagSetVEntry_DC90a*)self->mVtbl;
     vt[52].fn((char*)self + vt[52].delta);
     char* sub = (char*)self + 0x14;
-    sFlagSetVEntry_DC90c* vt2 = *(sFlagSetVEntry_DC90c**)((char*)self + 0x20);
+    sFlagSetVEntry_DC90c* vt2 = (sFlagSetVEntry_DC90c*)self->mVtbl;
     void* objB = sub + vt2[33].delta;
     void* rootTransform = ((sFlagSetVEntry_DC90b*)vt2)[24].fn(sub + vt2[24].delta);
-    vt2[33].fn(objB, rootTransform, *(int*)((char*)self + 0x44));
-    *(unsigned short*)((char*)self + 0x26) &= ~1;
+    vt2[33].fn(objB, rootTransform, (int)self->AnimMats);
+    self->Flags &= ~1;
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/flagset", cAnimNode_makeAnimMats);
 #ifdef SKIP_ASM
-extern "C" void* cAnimNode_getFrameMat(void* self, int i);
+extern "C" void* cAnimNode_getFrameMat(cAnimNode* self, int i);
 
 struct sFsMat44_DD18 {
     float m[4][4];
@@ -2259,10 +2260,10 @@ struct sFsModel_DD18 {
  * @param out  receives one matrix per bone (On Tour animMats)
  */
 // Builds the world matrix of every bone: root or parent * (bone matrix with its translation scaled).
-extern "C" void cAnimNode_makeAnimMats(void* self, t4Matrix* vroot, sFsMtx_DD18* out)
+extern "C" void cAnimNode_makeAnimMats(cAnimNode* self, t4Matrix* vroot, sFsMtx_DD18* out)
 {
     sFsMtx_DD18* root = (sFsMtx_DD18*)vroot;
-    sFsModel_DD18* model = *(sFsModel_DD18**)((char*)self + 0x2C);
+    sFsModel_DD18* model = (sFsModel_DD18*)self->Instance;
     sFsSkel_DD18* skel = model->skel;
     float modelScale = model->scale;
     sFsBone_DD18* bone = skel->bones;
@@ -2297,8 +2298,8 @@ extern char t4mat_Identity[];
  * @param i  animated-mesh index
  * @return AnimFrames[i] +0x90 (0xD0-byte frames at +0x48), or t4mat_Identity
  */
-extern "C" void* cAnimNode_getFrameMat(void* self, int i) {
-    char* base = *(char**)((char*)self + 0x48);
+extern "C" void* cAnimNode_getFrameMat(cAnimNode* self, int i) {
+    char* base = (char*)self->AnimFrames;
     if (base == 0) {
         return t4mat_Identity;
     }
@@ -2339,17 +2340,17 @@ struct sFlagOwner_E348 {
  * 2 with CacheTime (+0x4); then sets MeshVelocityDirty (+0x10) so cAnimNode_updateMeshVelocity recomputes the velocities on demand.
  * Slot 52 of cAnimNode's vtable.
  */
-extern "C" void cAnimNode_cacheFrame(sFlagOwner_E348* self)
+extern "C" void cAnimNode_cacheFrame(cAnimNode* self)
 {
     int i;
-    if (self->items != 0) {
-        for (i = 0; i < self->count; i++) {
+    if ((sFlagItem_E348*)self->AnimFrames != 0) {
+        for (i = 0; i < self->NumAnimMeshes; i++) {
             // PORT: pointer arithmetic done in int (gives the target's offset-first addu).
-            sFlagItem_E348* animFrame = (sFlagItem_E348*)(i * 0xD0 + (int)self->items);
-            animFrame->vt[2].fn((char*)animFrame + animFrame->vt[2].delta, self->time);
+            sFlagItem_E348* animFrame = (sFlagItem_E348*)(i * 0xD0 + (int)(sFlagItem_E348*)self->AnimFrames);
+            animFrame->vt[2].fn((char*)animFrame + animFrame->vt[2].delta, self->CacheTime);
         }
     }
-    self->dirty = 1;
+    self->MeshVelocityDirty = 1;
 }
 #endif
 
@@ -2372,7 +2373,7 @@ extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cAnimNode_writeToReplayFrame(void* self, void* stream)
+extern "C" void cAnimNode_writeToReplayFrame(cAnimNode* self, void* stream)
 {
     int dummy;
     cMoveNode_writeToReplayFrame((char*)self + 0x14, stream);

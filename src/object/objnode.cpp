@@ -1,13 +1,10 @@
 #include "common.h"
+#include "object/objnode.h"
 
 extern "C" void cBucketMan_add(void* mgr, void* node, void* param);
 extern void* cObjNode_vtbl[16];
 extern char gBucketMan;
 
-struct cObjNode {
-    char pad_0x00[0xC];
-    void* field_0xC;
-};
 
 //99.94%
 INCLUDE_ASM("object/objnode", cObjNode_cObjNode__FP8cObjNodePv);
@@ -20,7 +17,7 @@ INCLUDE_ASM("object/objnode", cObjNode_cObjNode__FP8cObjNodePv);
  */
 cObjNode* cObjNode_cObjNode(cObjNode* self, void* bucket)
 {
-    self->field_0xC = cObjNode_vtbl;
+    (*(void**)&self->mVtbl) = cObjNode_vtbl;
     cBucketMan_add(&gBucketMan, self, bucket);
     return self;
 }
@@ -39,9 +36,9 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cObjNode__cObjNode(void* self, int flags)
+extern "C" void cObjNode__cObjNode(cObjNode* self, int flags)
 {
-    *(void***)((char*)self + 0xC) = cObjNode_vtbl;
+    self->mVtbl = cObjNode_vtbl;
     cBucketMan_remove(&gBucketMan, self);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -66,14 +63,14 @@ extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
  * @param type  node type (tObjNodeType)
  * @return self
  */
-extern "C" void* cTypeObjNode_cTypeObjNode1(void* self, void* bucket, int type)
+extern "C" void* cTypeObjNode_cTypeObjNode1(cTypeObjNode* self, void* bucket, int type)
 {
     cObjNode_cObjNode1(self, bucket);
-    *(void***)((char*)self + 0xC) = cTypeObjNode_vtbl;
-    *(short*)((char*)self + 0x10) = type;
-    *(short*)((char*)self + 0x12) = 0;
-    D_0044AFF0[*(short*)((char*)self + 0x10)]++;
-    return self;
+    self->mVtbl = cTypeObjNode_vtbl;
+    self->ObjNodeType = type;
+    *(short*)&self->Flags = 0;
+    D_0044AFF0[self->ObjNodeType]++;
+    return ((void*)self);
 }
 #endif
 
@@ -98,21 +95,21 @@ cObjNode* cObjNode_cObjNode_3(cObjNode* self, void* param2, void* stream) __asm_
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  * @return @p self
  */
-extern "C" void* cTypeObjNode_cTypeObjNode(void* self, void* bucket, void* stream)
+extern "C" void* cTypeObjNode_cTypeObjNode(cTypeObjNode* self, void* bucket, void* stream)
 {
     cObjNode_cObjNode_3((cObjNode*)self, bucket, stream);
-    *(void***)((char*)self + 0xC) = cTypeObjNode_vtbl;
+    self->mVtbl = cTypeObjNode_vtbl;
     sObjNodeVEntry4788* vt = *(sObjNodeVEntry4788**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x10, 4);
-    D_0044AFF0[*(short*)((char*)self + 0x10)]++;
-    return self;
+    D_0044AFF0[self->ObjNodeType]++;
+    return ((void*)self);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/objnode", cTypeObjNode__cTypeObjNode);
 #ifdef SKIP_ASM
-extern "C" void cObjNode__cObjNode(void* self, int flags);
+extern "C" void cObjNode__cObjNode(cObjNode* self, int flags);
 extern void* cTypeObjNode_vtbl[];
 extern int D_0044AFF0[];
 
@@ -129,7 +126,7 @@ void cTypeObjNode__cTypeObjNode_impl(void* self, int flags)
 {
     *(void***)((char*)self + 0xC) = cTypeObjNode_vtbl;
     D_0044AFF0[*(short*)((char*)self + 0x10)]--;
-    cObjNode__cObjNode(self, flags);
+    cObjNode__cObjNode((cObjNode*)self, flags);
 }
 #endif
 
@@ -155,18 +152,18 @@ static inline int objNextId_4850(int* c)
  * @param type  node type
  * @return self
  */
-extern "C" void* cSortObjNode_cSortObjNode1(void* self, void* bucket, int type)
+extern "C" void* cSortObjNode_cSortObjNode1(cSortObjNode* self, void* bucket, int type)
 {
     int id;
-    cTypeObjNode_cTypeObjNode1(self, bucket, type);
-    *(void***)((char*)self + 0xC) = cSortObjNode_vtbl;
+    cTypeObjNode_cTypeObjNode1((cTypeObjNode*)self, bucket, type);
+    self->mVtbl = cSortObjNode_vtbl;
     if (type == 6) {
         id = objNextId_4850(&cSortObjNode_ObjNodeNoSortIndex);
     } else {
         id = objNextId_4850(&cSortObjNode_ObjNodeSortIndex);
     }
-    *(int*)((char*)self + 0x14) = id;
-    return self;
+    self->SortIndex = (unsigned int)id;
+    return ((void*)self);
 }
 #endif
 
@@ -180,7 +177,7 @@ struct sVEntryCSortObjNode {
 };
 
 extern void* cSortObjNode_vtbl[];
-extern "C" void* cTypeObjNode_cTypeObjNode(void* self, void* a, void* stream);
+extern "C" void* cTypeObjNode_cTypeObjNode(cTypeObjNode* self, void* a, void* stream);
 
 /**
  * Recreates a sorted object node from a replay frame: the typed-node part and its sort index.
@@ -189,13 +186,13 @@ extern "C" void* cTypeObjNode_cTypeObjNode(void* self, void* a, void* stream);
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  * @return @p self
  */
-extern "C" void* cSortObjNode_cSortObjNode(void* self, void* bucket, void* stream)
+extern "C" void* cSortObjNode_cSortObjNode(cSortObjNode* self, void* bucket, void* stream)
 {
-    cTypeObjNode_cTypeObjNode(self, bucket, stream);
-    *(void***)((char*)self + 0xC) = cSortObjNode_vtbl;
+    cTypeObjNode_cTypeObjNode((cTypeObjNode*)self, bucket, stream);
+    self->mVtbl = cSortObjNode_vtbl;
     sVEntryCSortObjNode* vt = *(sVEntryCSortObjNode**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x14, 4);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -233,7 +230,7 @@ public:
  *
  * @param obj  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cTypeObjNode_writeToReplayFrame(void* self, cTypeObjNode_writeToReplayFrame_cObj* obj)
+extern "C" void cTypeObjNode_writeToReplayFrame(cTypeObjNode* self, cTypeObjNode_writeToReplayFrame_cObj* obj)
 {
     obj->write((char*)self + 0x10, 4);
 }
@@ -247,9 +244,9 @@ INCLUDE_ASM("object/objnode", cSortObjNode_writeToReplayFrame);
  *
  * @param obj  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cSortObjNode_writeToReplayFrame(void* self, cTypeObjNode_writeToReplayFrame_cObj* obj)
+extern "C" void cSortObjNode_writeToReplayFrame(cSortObjNode* self, cTypeObjNode_writeToReplayFrame_cObj* obj)
 {
-    cTypeObjNode_writeToReplayFrame(self, obj);
+    cTypeObjNode_writeToReplayFrame((cTypeObjNode*)self, obj);
     obj->write((char*)self + 0x14, 4);
 }
 #endif

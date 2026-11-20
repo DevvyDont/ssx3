@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/objnode.h"
 
 //100%
 INCLUDE_ASM("object/spring", cSpring_setupNodes);
@@ -306,10 +307,6 @@ extern "C" void cBucketMan_add(void* mgr, void* node, void* param);
 extern void* cObjNode_vtbl[16];
 extern char gBucketMan;
 
-struct cObjNode {
-    char pad_0x00[0xC];
-    void* field_0xC;
-};
 
 /**
  * Constructs an object node and adds it to a render bucket.
@@ -322,7 +319,7 @@ struct cObjNode {
  */
 extern "C" cObjNode* cObjNode_cObjNode1(cObjNode* self, void* bucket)
 {
-    self->field_0xC = cObjNode_vtbl;
+    (*(void**)&self->mVtbl) = cObjNode_vtbl;
     cBucketMan_add(&gBucketMan, self, bucket);
     return self;
 }

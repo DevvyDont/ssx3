@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/animobject.h"
 #include "intersect/worldsphtree.h"
 #include "intersect/worldsphere.h"
 #include "object/rollermodifier.h"
@@ -6066,48 +6067,48 @@ static inline void setRateMax_1AA0(sFloat_1AA0* dst, float v, char* info)
  * @return @p self
  */
 // Animated float constructor: range and start value (frames -> seconds), optional random start and speed.
-extern "C" void* cAnimObjectNode_cAnimObjectNode1(sSphFloat_1AA0* self, int bucket, int nodeType, char* obj, sSphFloatDef_1AA0* def)
+extern "C" void* cAnimObjectNode_cAnimObjectNode1(cAnimObjectNode* self, int bucket, int nodeType, char* obj, sSphFloatDef_1AA0* def)
 {
     cAnimNode_cAnimNode((char*)self + 0x1C, bucket, nodeType, obj, def->f24 != 0);
-    self->vt = D_00490B10;
+    self->mVtbl = D_00490B10;
     float frameTime = 0.0f;
     char* info = *(char**)(obj + 0x80);
-    if (self->inst != 0) {
-        frameTime = cAnimFrame_getStartTime(self->inst);
+    if (self->AnimFrames != 0) {
+        frameTime = cAnimFrame_getStartTime(self->AnimFrames);
     }
-    self->id = def->id;
-    setRate_1AA0((sFloat_1AA0*)&self->min, def->min, frameTime);
-    setRateMax_1AA0((sFloat_1AA0*)&self->max, def->max, info);
+    *(unsigned short*)&self->AnimType = def->id;
+    setRate_1AA0((sFloat_1AA0*)&self->FromTime, def->min, frameTime);
+    setRateMax_1AA0((sFloat_1AA0*)&self->ToTime, def->max, info);
     frameTime = def->value;
     if (frameTime < 0.0f) {
-        frameTime = self->min;
+        frameTime = self->FromTime;
     } else {
         frameTime *= 0.03333333507180214f;
     }
-    if (frameTime < self->min) {
-        frameTime = self->min;
+    if (frameTime < self->FromTime) {
+        frameTime = self->FromTime;
     }
-    if (self->max < frameTime) {
-        frameTime = self->max;
+    if (self->ToTime < frameTime) {
+        frameTime = self->ToTime;
     }
     if (def->random != 0) {
-        frameTime = AIrandf(self->min, self->max);
+        frameTime = AIrandf(self->FromTime, self->ToTime);
     }
-    self->value = frameTime;
+    self->CurrTime = frameTime;
     if (def->speedVar != 0.0f) {
-        self->speed = func_00317890(def->speed * 0.03333333507180214f, def->speedVar * 0.03333333507180214f) / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+        self->AnimSpeed = func_00317890(def->speed * 0.03333333507180214f, def->speedVar * 0.03333333507180214f) / (float)*(int*)(cAppMan_TheAppMan + 0x10);
     } else {
-        self->speed = def->speed * 0.03333333507180214f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+        self->AnimSpeed = def->speed * 0.03333333507180214f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
     }
     if (def->dir == 1) {
-        self->speed = -self->speed;
+        self->AnimSpeed = -self->AnimSpeed;
     }
-    self->start = self->value;
-    self->active = 1;
-    self->flags |= 1;
-    self->fC = 0;
-    self->atLimit = 0;
-    return self;
+    self->CacheTime = self->CurrTime;
+    self->AnimActive = 1;
+    self->Flags |= 1;
+    self->Delay = 0;
+    self->AnimComplete = 0;
+    return ((sSphFloat_1AA0*)self);
 }
 #endif
 
@@ -6134,13 +6135,13 @@ extern void* D_00490B10[];
  * @param stream  the replay frame to read from (On Tour cBxReplayFrame* data)
  * @return @p self
  */
-extern "C" void* cAnimObjectNode_cAnimObjectNode(void* self, int bucket, sVEntry00341C80** stream)
+extern "C" void* cAnimObjectNode_cAnimObjectNode(cAnimObjectNode* self, int bucket, sVEntry00341C80** stream)
 {
     cAnimNode_cAnimNode1((char*)self + 0x1C, bucket, stream);
-    *(void***)((char*)self + 0x3C) = D_00490B10;
+    self->mVtbl = D_00490B10;
     (*stream)[2].fn((char*)stream + (*stream)[2].delta, self, 0x1C);
-    *(unsigned short*)((char*)self + 0x42) |= 1;
-    return self;
+    self->Flags |= 1;
+    return ((void*)self);
 }
 #endif
 
@@ -6159,9 +6160,9 @@ extern void* D_00490B10[];
  *
  * @param flags  destructor flags; bit 0 frees the memory
  */
-extern "C" void cAnimObjectNode__cAnimObjectNode(void* self, int flags)
+extern "C" void cAnimObjectNode__cAnimObjectNode(cAnimObjectNode* self, int flags)
 {
-    *(void***)((char*)self + 0x3C) = D_00490B10;
+    self->mVtbl = D_00490B10;
     cAnimNode__cAnimNode((char*)self + 0x1C, 0);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -6175,9 +6176,9 @@ INCLUDE_ASM("intersect/worldsphtree", cAnimObjectNode_updateNode);
 struct sWrapFloat_1E48;
 struct sBounceFloat_1EC0;
 struct sClampFloat_1F38;
-extern "C" void cAnimObjectNode_updateCycle(sWrapFloat_1E48* s);
-extern "C" void cAnimObjectNode_updateOscillate(sBounceFloat_1EC0* s);
-extern "C" void cAnimObjectNode_updateOnce(sClampFloat_1F38* s);
+extern "C" void cAnimObjectNode_updateCycle(cAnimObjectNode* s);
+extern "C" void cAnimObjectNode_updateOscillate(cAnimObjectNode* s);
+extern "C" void cAnimObjectNode_updateOnce(cAnimObjectNode* s);
 extern "C" int func_0034EBA0(void* p);
 
 struct sVEntry_00341D48 {
@@ -6199,27 +6200,27 @@ struct sVEntry_00341D48 {
  *
  * @return 0 after a failed frame update or once the node expired, else 1
  */
-extern "C" int cAnimObjectNode_updateNode(void* self)
+extern "C" int cAnimObjectNode_updateNode(cAnimObjectNode* self)
 {
-    *(float*)((char*)self + 0x24) = 10000000000.0f;
-    *(float*)((char*)self + 0x28) = 10000000000.0f;
-    if (*(int*)((char*)self + 0x8) != 0) {
+    self->FrameStart = 10000000000.0f;
+    self->FrameEnd = 10000000000.0f;
+    if (self->AnimComplete != 0) {
         return 1;
     }
-    if (*(int*)((char*)self + 0x4) != 0 && *(int*)((char*)self + 0xC) >= 0) {
-        if (*(int*)((char*)self + 0xC) > 0) {
-            *(int*)((char*)self + 0xC) -= 1;
+    if (self->AnimActive != 0 && self->Delay >= 0) {
+        if (self->Delay > 0) {
+            self->Delay -= 1;
         } else {
-            *(float*)((char*)self + 0x24) = *(float*)((char*)self + 0x1C);
+            self->FrameStart = self->CurrTime;
             switch (*(short*)self) {
             case 2:
-                cAnimObjectNode_updateOscillate((sBounceFloat_1EC0*)self);
+                cAnimObjectNode_updateOscillate(self);
                 break;
             case 1:
-                cAnimObjectNode_updateCycle((sWrapFloat_1E48*)self);
+                cAnimObjectNode_updateCycle(self);
                 break;
             default:
-                cAnimObjectNode_updateOnce((sClampFloat_1F38*)self);
+                cAnimObjectNode_updateOnce(self);
                 break;
             }
             if (func_0034EBA0((char*)self + 0x1C) == 0) {
@@ -6228,12 +6229,12 @@ extern "C" int cAnimObjectNode_updateNode(void* self)
         }
     }
     char* obj = (char*)self + 0x30;
-    *(unsigned short*)((char*)self + 0x42) |= 1;
-    *(float*)((char*)self + 0x20) = *(float*)((char*)self + 0x1C);
-    if (*(int*)((char*)self + 0x8) == 0) {
+    self->Flags |= 1;
+    self->CacheTime = self->CurrTime;
+    if (self->AnimComplete == 0) {
         return 1;
     }
-    sVEntry_00341D48* vt = *(sVEntry_00341D48**)((char*)self + 0x3C);
+    sVEntry_00341D48* vt = (sVEntry_00341D48*)self->mVtbl;
     vt[34].fn(obj + vt[34].delta, 1);
     return 0;
 }
@@ -6260,19 +6261,19 @@ struct sWrapFloat_1E48 {
  *
  * @param wrapValue  the animated object node
  */
-extern "C" void cAnimObjectNode_updateCycle(sWrapFloat_1E48* wrapValue)
+extern "C" void cAnimObjectNode_updateCycle(cAnimObjectNode* wrapValue)
 {
-    if (wrapValue->speed >= 0.0f) {
-        wrapValue->value += wrapValue->speed;
-        wrapValue->last = wrapValue->value;
-        if (wrapValue->value > wrapValue->max) {
-            wrapValue->value = wrapValue->min + (wrapValue->value - wrapValue->max);
+    if (wrapValue->AnimSpeed >= 0.0f) {
+        wrapValue->CurrTime += wrapValue->AnimSpeed;
+        wrapValue->FrameEnd = wrapValue->CurrTime;
+        if (wrapValue->CurrTime > wrapValue->ToTime) {
+            wrapValue->CurrTime = wrapValue->FromTime + (wrapValue->CurrTime - wrapValue->ToTime);
         }
     } else {
-        wrapValue->value += wrapValue->speed;
-        wrapValue->last = wrapValue->value;
-        if (wrapValue->value < wrapValue->min) {
-            wrapValue->value = wrapValue->max - (wrapValue->min - wrapValue->value);
+        wrapValue->CurrTime += wrapValue->AnimSpeed;
+        wrapValue->FrameEnd = wrapValue->CurrTime;
+        if (wrapValue->CurrTime < wrapValue->FromTime) {
+            wrapValue->CurrTime = wrapValue->ToTime - (wrapValue->FromTime - wrapValue->CurrTime);
         }
     }
 }
@@ -6299,21 +6300,21 @@ struct sBounceFloat_1EC0 {
  *
  * @param bounceValue  the animated object node
  */
-extern "C" void cAnimObjectNode_updateOscillate(sBounceFloat_1EC0* bounceValue)
+extern "C" void cAnimObjectNode_updateOscillate(cAnimObjectNode* bounceValue)
 {
-    if (bounceValue->speed >= 0.0f) {
-        bounceValue->value += bounceValue->speed;
-        bounceValue->last = bounceValue->value;
-        if (bounceValue->value > bounceValue->max) {
-            bounceValue->speed = -bounceValue->speed;
-            bounceValue->value = bounceValue->max - (bounceValue->value - bounceValue->max);
+    if (bounceValue->AnimSpeed >= 0.0f) {
+        bounceValue->CurrTime += bounceValue->AnimSpeed;
+        bounceValue->FrameEnd = bounceValue->CurrTime;
+        if (bounceValue->CurrTime > bounceValue->ToTime) {
+            bounceValue->AnimSpeed = -bounceValue->AnimSpeed;
+            bounceValue->CurrTime = bounceValue->ToTime - (bounceValue->CurrTime - bounceValue->ToTime);
         }
     } else {
-        bounceValue->value += bounceValue->speed;
-        bounceValue->last = bounceValue->value;
-        if (bounceValue->value < bounceValue->min) {
-            bounceValue->speed = -bounceValue->speed;
-            bounceValue->value = bounceValue->min + (bounceValue->min - bounceValue->value);
+        bounceValue->CurrTime += bounceValue->AnimSpeed;
+        bounceValue->FrameEnd = bounceValue->CurrTime;
+        if (bounceValue->CurrTime < bounceValue->FromTime) {
+            bounceValue->AnimSpeed = -bounceValue->AnimSpeed;
+            bounceValue->CurrTime = bounceValue->FromTime + (bounceValue->FromTime - bounceValue->CurrTime);
         }
     }
 }
@@ -6342,25 +6343,25 @@ struct sClampFloat_1F38 {
  *
  * @param clampValue  the animated object node
  */
-extern "C" void cAnimObjectNode_updateOnce(sClampFloat_1F38* clampValue)
+extern "C" void cAnimObjectNode_updateOnce(cAnimObjectNode* clampValue)
 {
-    if (clampValue->speed >= 0.0f) {
-        if (clampValue->value == clampValue->max) {
-            clampValue->atLimit = 1;
+    if (clampValue->AnimSpeed >= 0.0f) {
+        if (clampValue->CurrTime == clampValue->ToTime) {
+            clampValue->AnimComplete = 1;
         }
-        clampValue->value += clampValue->speed;
-        clampValue->last = clampValue->value;
-        if (clampValue->value > clampValue->max) {
-            clampValue->value = clampValue->max;
+        clampValue->CurrTime += clampValue->AnimSpeed;
+        clampValue->FrameEnd = clampValue->CurrTime;
+        if (clampValue->CurrTime > clampValue->ToTime) {
+            clampValue->CurrTime = clampValue->ToTime;
         }
     } else {
-        if (clampValue->value == clampValue->min) {
-            clampValue->atLimit = 1;
+        if (clampValue->CurrTime == clampValue->FromTime) {
+            clampValue->AnimComplete = 1;
         }
-        clampValue->value += clampValue->speed;
-        clampValue->last = clampValue->value;
-        if (clampValue->value < clampValue->min) {
-            clampValue->value = clampValue->min;
+        clampValue->CurrTime += clampValue->AnimSpeed;
+        clampValue->FrameEnd = clampValue->CurrTime;
+        if (clampValue->CurrTime < clampValue->FromTime) {
+            clampValue->CurrTime = clampValue->FromTime;
         }
     }
 }
@@ -6379,7 +6380,7 @@ INCLUDE_ASM("intersect/worldsphtree", cAnimObjectNode_expire);
  *
  * @param runscript  nonzero to run the script
  */
-extern "C" void cAnimObjectNode_expire(void* self, int runscript)
+extern "C" void cAnimObjectNode_expire(cAnimObjectNode* self, int runscript)
 {
     if (runscript != 0) {
         cInstanceNode_runExpireScript((char*)self + 0x30);
@@ -6406,43 +6407,43 @@ extern "C" void cMoveNode_signal(void* p);
  * @param msg  the signal number
  * @param msgValue  its argument
  */
-extern "C" void cAnimObjectNode_signal(sClampFloat_1F38* self, int msg, float msgValue)
+extern "C" void cAnimObjectNode_signal(cAnimObjectNode* self, int msg, float msgValue)
 {
     if (msg == 100) {
-        *(int*)((char*)self + 0xC) = (int)(msgValue * (float)*(int*)(cAppMan_TheAppMan + 0x10));
+        self->Delay = (int)(msgValue * (float)*(int*)(cAppMan_TheAppMan + 0x10));
     } else if (msg == 101) {
         msgValue = msgValue * 0.03333333507180214f;
-        if (self->min <= msgValue && msgValue <= self->max) {
-            self->value = msgValue;
+        if (self->FromTime <= msgValue && msgValue <= self->ToTime) {
+            self->CurrTime = msgValue;
         }
     } else if (msg == 102) {
         msgValue = msgValue * 0.03333333507180214f;
-        self->speed = msgValue / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+        self->AnimSpeed = msgValue / (float)*(int*)(cAppMan_TheAppMan + 0x10);
     } else if (msg == 103) {
         msgValue = msgValue * 0.03333333507180214f;
-        float lim = *(float*)(*(char**)(*(char**)((char*)self + 0x48) + 0x80) + 0x14);
+        float lim = *(float*)(*(char**)((char*)self->Instance + 0x80) + 0x14);
         if (lim < msgValue) {
             msgValue = lim;
         }
         if (msgValue < 0.0f) {
             msgValue = 0.0f;
         }
-        self->max = msgValue;
-        if (msgValue < self->value) {
-            self->value = msgValue;
+        self->ToTime = msgValue;
+        if (msgValue < self->CurrTime) {
+            self->CurrTime = msgValue;
         }
     } else if (msg == 104) {
         msgValue = msgValue * 0.03333333507180214f;
-        float lim = *(float*)(*(char**)(*(char**)((char*)self + 0x48) + 0x80) + 0x14);
+        float lim = *(float*)(*(char**)((char*)self->Instance + 0x80) + 0x14);
         if (lim < msgValue) {
             msgValue = lim;
         }
         if (msgValue < 0.0f) {
             msgValue = 0.0f;
         }
-        self->min = msgValue;
-        if (self->value < msgValue) {
-            self->value = msgValue;
+        self->FromTime = msgValue;
+        if (self->CurrTime < msgValue) {
+            self->CurrTime = msgValue;
         }
     } else if (msg == 105) {
         *(short*)self = 0;
@@ -6470,7 +6471,7 @@ struct sVEntry_cAnimObjectNode_writeToReplayFrame {
  *
  * @param stream  the replay frame to write to (On Tour cBxReplayFrame* data)
  */
-extern "C" void cAnimObjectNode_writeToReplayFrame(void* self, void* stream)
+extern "C" void cAnimObjectNode_writeToReplayFrame(cAnimObjectNode* self, void* stream)
 {
     cAnimNode_writeToReplayFrame((char*)self + 0x1C, stream);
     sVEntry_cAnimObjectNode_writeToReplayFrame* vt = *(sVEntry_cAnimObjectNode_writeToReplayFrame**)stream;

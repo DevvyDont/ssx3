@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateriderdetail.h"
 #include "fe/fecustom.h"
 #include "fe/festatecharsetup.h"
 #include "fe/festateoptions.h"
@@ -2859,8 +2860,8 @@ extern void* cFEState_vtbl[];
  * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  */
-extern "C" void cFEStateRiderDetail__cFEStateRiderDetail(void *self) {
-    *(void***)((char*)self + 8) = cFEState_vtbl;
+extern "C" void cFEStateRiderDetail__cFEStateRiderDetail(cFEStateRiderDetail* self) {
+    self->mVtbl = cFEState_vtbl;
     cUIState__cUIState_DD8C8(self);
 }
 #endif

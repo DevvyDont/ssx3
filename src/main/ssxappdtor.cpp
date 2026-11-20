@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/gamestate.h"
 #include "main/sectionman.h"
 #include "be/beintnewrace.h"
 #include "main/loadscreens.h"
@@ -774,14 +775,14 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *cGFEndState_cGFEndState(void *self) {
-    *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = cGameState_vtbl;
+extern "C" void *cGFEndState_cGFEndState(cGFEndState* self) {
+    self->mNextState = 0;
+    self->mVtbl = (void**)cGameState_vtbl;
     cGameState_mpGame = 0;
-    *(int *)((char *)self + 0) = 8;
-    *(void **)((char *)self + 0xC) = cGFEndState_vtbl;
-    *(int *)((char *)self + 4) = 0;
-    return self;
+    self->mNextState = 8;
+    self->mVtbl = (void**)cGFEndState_vtbl;
+    self->mStartupFlag = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -872,14 +873,14 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *cGFTransportWaitState_cGFTransportWaitState(void *self) {
-    *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = cGameState_vtbl;
+extern "C" void *cGFTransportWaitState_cGFTransportWaitState(cGFTransportWaitState* self) {
+    self->mNextState = 0;
+    self->mVtbl = (void**)cGameState_vtbl;
     cGameState_mpGame = 0;
-    *(int *)((char *)self + 0) = 10;
-    *(void **)((char *)self + 0xC) = cGFTransportWaitState_vtbl;
-    *(int *)((char *)self + 4) = 0;
-    return self;
+    self->mNextState = 10;
+    self->mVtbl = (void**)cGFTransportWaitState_vtbl;
+    self->mStartupFlag = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -940,14 +941,14 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *cGFGateState_cGFGateState(void *self) {
-    *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = cGameState_vtbl;
+extern "C" void *cGFGateState_cGFGateState(cGFGateState* self) {
+    self->mNextState = 0;
+    self->mVtbl = (void**)cGameState_vtbl;
     cGameState_mpGame = 0;
-    *(int *)((char *)self + 0) = 4;
-    *(void **)((char *)self + 0xC) = cGFGateState_vtbl;
-    *(int *)((char *)self + 4) = 0;
-    return self;
+    self->mNextState = 4;
+    self->mVtbl = (void**)cGFGateState_vtbl;
+    self->mStartupFlag = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -988,14 +989,14 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *cGFRidingState_cGFRidingState(void *self) {
-    *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = cGameState_vtbl;
+extern "C" void *cGFRidingState_cGFRidingState(cGFRidingState* self) {
+    self->mNextState = 0;
+    self->mVtbl = (void**)cGameState_vtbl;
     cGameState_mpGame = 0;
-    *(int *)((char *)self + 0) = 5;
-    *(void **)((char *)self + 0xC) = cGFRidingState_vtbl;
-    *(int *)((char *)self + 4) = 0;
-    return self;
+    self->mNextState = 5;
+    self->mVtbl = (void**)cGFRidingState_vtbl;
+    self->mStartupFlag = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1056,16 +1057,16 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *cGFNextHeatState_cGFNextHeatState(void *self) {
-    *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = cGameState_vtbl;
+extern "C" void *cGFNextHeatState_cGFNextHeatState(cGFNextHeatState* self) {
+    self->mNextState = 0;
+    self->mVtbl = (void**)cGameState_vtbl;
     cGameState_mpGame = 0;
-    *(void **)((char *)self + 0xC) = cGFNextHeatState_vtbl;
-    *(int *)((char *)self + 0) = 1;
-    *(int *)((char *)self + 4) = 3;
-    *(int *)((char *)self + 0x14) = 0;
-    *(int *)((char *)self + 0x18) = 0;
-    return self;
+    self->mVtbl = (void**)cGFNextHeatState_vtbl;
+    self->mNextState = 1;
+    self->mStartupFlag = 3;
+    self->WaitTicks = 0;
+    self->PlayTransport = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1104,14 +1105,14 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *cGFSessionTeleportState_cGFSessionTeleportState(void *self) {
-    *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = cGameState_vtbl;
+extern "C" void *cGFSessionTeleportState_cGFSessionTeleportState(cGFSessionTeleportState* self) {
+    self->mNextState = 0;
+    self->mVtbl = (void**)cGameState_vtbl;
     cGameState_mpGame = 0;
-    *(int *)((char *)self + 0) = 10;
-    *(void **)((char *)self + 0xC) = cGFSessionTeleportState_vtbl;
-    *(int *)((char *)self + 4) = 0;
-    return self;
+    self->mNextState = 10;
+    self->mVtbl = (void**)cGFSessionTeleportState_vtbl;
+    self->mStartupFlag = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1146,8 +1147,8 @@ INCLUDE_ASM("main/ssxappdtor", cGFUserSelectState_setNextLocation);
  * @param userSelectState  the user-select game-flow state
  * @param location  the location to go to next
  */
-extern "C" void cGFUserSelectState_setNextLocation(void *userSelectState, int location) {
-    (*(int *)((char*)(userSelectState) + (0x18))) = location;
+extern "C" void cGFUserSelectState_setNextLocation(cGFUserSelectState* userSelectState, int location) {
+    (userSelectState->mNextLocation) = location;
 }
 #endif
 
@@ -1212,14 +1213,14 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *cGFPreEventState_cGFPreEventState(void *self) {
-    *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = cGameState_vtbl;
+extern "C" void *cGFPreEventState_cGFPreEventState(cGFPreEventState* self) {
+    self->mNextState = 0;
+    self->mVtbl = (void**)cGameState_vtbl;
     cGameState_mpGame = 0;
-    *(int *)((char *)self + 0) = 3;
-    *(void **)((char *)self + 0xC) = cGFPreEventState_vtbl;
-    *(int *)((char *)self + 4) = 0;
-    return self;
+    self->mNextState = 3;
+    self->mVtbl = (void**)cGFPreEventState_vtbl;
+    self->mStartupFlag = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1260,14 +1261,14 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *cGFPostEventState_cGFPostEventState(void *self) {
-    *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = cGameState_vtbl;
+extern "C" void *cGFPostEventState_cGFPostEventState(cGFPostEventState* self) {
+    self->mNextState = 0;
+    self->mVtbl = (void**)cGameState_vtbl;
     cGameState_mpGame = 0;
-    *(int *)((char *)self + 0) = 8;
-    *(void **)((char *)self + 0xC) = cGFPostEventState_vtbl;
-    *(int *)((char *)self + 4) = 0;
-    return self;
+    self->mNextState = 8;
+    self->mVtbl = (void**)cGFPostEventState_vtbl;
+    self->mStartupFlag = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1306,14 +1307,14 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *cGFPodiumState_cGFPodiumState(void *self) {
-    *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = cGameState_vtbl;
+extern "C" void *cGFPodiumState_cGFPodiumState(cGFPodiumState* self) {
+    self->mNextState = 0;
+    self->mVtbl = (void**)cGameState_vtbl;
     cGameState_mpGame = 0;
-    *(int *)((char *)self + 0) = 7;
-    *(void **)((char *)self + 0xC) = cGFPodiumState_vtbl;
-    *(int *)((char *)self + 4) = 0;
-    return self;
+    self->mNextState = 7;
+    self->mVtbl = (void**)cGFPodiumState_vtbl;
+    self->mStartupFlag = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1352,14 +1353,14 @@ extern int cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void *cGFReplayStartState_cGFReplayStartState(void *self) {
-    *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = cGameState_vtbl;
+extern "C" void *cGFReplayStartState_cGFReplayStartState(cGFReplayStartState* self) {
+    self->mNextState = 0;
+    self->mVtbl = (void**)cGameState_vtbl;
     cGameState_mpGame = 0;
-    *(int *)((char *)self + 0) = 4;
-    *(void **)((char *)self + 0xC) = cGFReplayStartState_vtbl;
-    *(int *)((char *)self + 4) = 0;
-    return self;
+    self->mNextState = 4;
+    self->mVtbl = (void**)cGFReplayStartState_vtbl;
+    self->mStartupFlag = 0;
+    return ((void*)self);
 }
 #endif
 //100%

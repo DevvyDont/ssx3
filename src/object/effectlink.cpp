@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/flexbridgenode.h"
 #include "object/effectmodifier.h"
 #include "render/ps2graphicsman.h"
 #include "object/effectlink.h"
@@ -1000,18 +1001,18 @@ struct sEffFlags_346350 {
  * @param tdata   the bridge data (On Tour tMakeFlexBridgeData*)
  * @return self
  */
-extern "C" void* cFlexBridgeNode_cFlexBridgeNode(void* self, int bucket, int pInst, int tdata)
+extern "C" void* cFlexBridgeNode_cFlexBridgeNode(cFlexBridgeNode* self, int bucket, int pInst, int tdata)
 {
     cInstanceNode_cInstanceNode1(self, bucket, 5, pInst);
-    *(void***)((char*)self + 0xC) = cFlexBridgeNode_vtbl;
+    self->mVtbl = cFlexBridgeNode_vtbl;
     cSpring_cSpring((char*)self + 0x50);
-    *(int*)((char*)self + 0x44) = 12;
-    *(float*)((char*)self + 0x40) = 100.0f;
+    self->TextureId = 12;
+    self->RailHeight = 100.0f;
     sEffV3_346350 pts[4];
     sEffV2_346350 uv[4];
     sEffV4_346350 col[4];
     sEffVE_346350* vt = (sEffVE_346350*)cGraphicsMan_TheGraphicsMan->mVtbl;
-    vt[97].fn((char*)cGraphicsMan_TheGraphicsMan + vt[97].delta, *(void**)((char*)self + 0x18), 0, pts, uv, col);
+    vt[97].fn((char*)cGraphicsMan_TheGraphicsMan + vt[97].delta, self->Instance, 0, pts, uv, col);
     sEffV3_346350 span;
     span.x = pts[1].x - pts[0].x;
     span.y = pts[1].y - pts[0].y;
@@ -1020,11 +1021,11 @@ extern "C" void* cFlexBridgeNode_cFlexBridgeNode(void* self, int bucket, int pIn
     cFlexBridgeNode_setupGrid(self);
     cFlexBridgeNode_initSpringNodes(self);
     cFlexBridgeNode_updateGrid(self);
-    unsigned int* flags = (unsigned int*)(*(char**)((char*)self + 0x18) + 8);
+    unsigned int* flags = (unsigned int*)((char*)self->Instance + 8);
     *flags = (*flags & 0xFFFFFFFD) | 4;
-    flags = (unsigned int*)(*(char**)((char*)self + 0x18) + 8);
+    flags = (unsigned int*)((char*)self->Instance + 8);
     *flags = (*flags & 0xFFFFFFDF) | 0x40;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1053,17 +1054,17 @@ struct sEffectLinkVEntry64E0 {
  * @param stream  the replay frame to read (On Tour cBxReplayFrame*)
  * @return self
  */
-extern "C" void* cFlexBridgeNode_cFlexBridgeNode1(void* self, void* bucket, void* stream)
+extern "C" void* cFlexBridgeNode_cFlexBridgeNode1(cFlexBridgeNode* self, void* bucket, void* stream)
 {
     void* payload = (char*)self + 0x20;
     cInstanceNode_cInstanceNode(self, bucket, stream);
-    *(void***)((char*)self + 0xC) = cFlexBridgeNode_vtbl;
+    self->mVtbl = cFlexBridgeNode_vtbl;
     cSpring_cSpring1((char*)self + 0x50, stream);
     cFlexBridgeNode_setupGrid(self);
     sEffectLinkVEntry64E0* readEntry = &(*(sEffectLinkVEntry64E0**)stream)[2];
     readEntry->fn((char*)stream + readEntry->delta, payload, 0x30);
     cFlexBridgeNode_updateGrid(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1112,36 +1113,36 @@ struct sRCtx_346568 {
  *
  * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
  */
-extern "C" void cFlexBridgeNode__cFlexBridgeNode(char* self, int flags)
+extern "C" void cFlexBridgeNode__cFlexBridgeNode(cFlexBridgeNode* self, int flags)
 {
-    *(void***)(self + 0xC) = cFlexBridgeNode_vtbl;
-    if (*(void**)(self + 0x84) != 0) {
-        cMemMan_free(*(void**)(self + 0x84));
+    self->mVtbl = cFlexBridgeNode_vtbl;
+    if (self->Faces != 0) {
+        cMemMan_free(self->Faces);
     }
-    if (*(void**)(self + 0x80) != 0) {
-        cMemMan_free(*(void**)(self + 0x80));
+    if (self->FaceNorms != 0) {
+        cMemMan_free(self->FaceNorms);
     }
-    if (*(void**)(self + 0x7C) != 0) {
-        cMemMan_free(*(void**)(self + 0x7C));
+    if (self->Verts != 0) {
+        cMemMan_free(self->Verts);
     }
-    sBox_346568* box = (sBox_346568*)(self + 0x90);
-    ((sRVEntry_346568*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].fn((char*)cGraphicsMan_TheGraphicsMan + ((sRVEntry_346568*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].delta, *(void**)(self + 0x78));
-    sBox_346568 old = *(sBox_346568*)(self + 0x90);
-    sInst_346568* inst = *(sInst_346568**)(self + 0x18);
+    sBox_346568* box = (sBox_346568*)(((char*)self) + 0x90);
+    ((sRVEntry_346568*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].fn((char*)cGraphicsMan_TheGraphicsMan + ((sRVEntry_346568*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].delta, self->GridMesh);
+    sBox_346568 old = *(sBox_346568*)&self->BoundBox;
+    sInst_346568* inst = (sInst_346568*)self->Instance;
     sVec4_346568 corner;
     corner.x = inst->min[0];
     corner.y = inst->min[1];
     corner.z = inst->min[2];
     corner.w = 1.0f;
-    *(sVec4_346568*)(self + 0x90) = corner;
+    *(sVec4_346568*)&self->BoundBox = corner;
     corner.x = inst->max[0];
     corner.y = inst->max[1];
     corner.z = inst->max[2];
     corner.w = 1.0f;
-    *(sVec4_346568*)(self + 0xA0) = corner;
+    *(sVec4_346568*)&self->BoundBox.MaxPoint = corner;
     nash_Nash_movenode(cObjectInterface_getNash(), 0, inst, box, &old);
-    cSpring__cSpring(self + 0x50, 2);
-    cInstanceNode__cInstanceNode(self, flags);
+    cSpring__cSpring(((char*)self) + 0x50, 2);
+    cInstanceNode__cInstanceNode(((char*)self), flags);
 }
 #endif
 
