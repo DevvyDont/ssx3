@@ -2661,7 +2661,7 @@ extern "C" void cScriptPlayerMain_DeInit(cScriptPlayerMain* p);
 extern "C" void cInSeq_RecyclePlayer(cInSeq* self, int playerID)
 {
     cInSeq_Stop((cInSeq*)self, playerID);
-    char* base = *(char**)((char*)self + 0x14);
+    char* base = (char*)self->mpScriptHeap;
     sRcNode272938* n = (sRcNode272938*)(base + playerID * 0x58);
     cScriptPlayerMain_DeInit((cScriptPlayerMain*)n->data);
     if (n->prev == 0) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uitext.h"
 #include "fe/ovstateenterlodge.h"
 #include "fe/ovstatetoptimes.h"
 #include "fe/ovstatebigchallenge.h"
@@ -729,16 +730,16 @@ static inline int isHashTOPTIMES(int id, char* s)
  */
 extern "C" void cOVState_TOPTIMES_onWidgetCreate(cOVState_TOPTIMES* self, cUIText* w)
 {
-    int id = *(int*)((char*)w + 0x38);
+    int id = w->mHashName;
     if (isHashTOPTIMES(id, str_continue)) {
         if (cOVStateManager_mMiscData == 0) {
             cUIText_setUnicodeStringByID(w, GetHashValue32(str_kT_CMNContinue_b));
         } else {
             cUIText_setUnicodeStringByID(w, GetHashValue32(str_kT_OVRCMNReturn));
         }
-        *(int*)((char*)w + 0x18) = 0;
+        w->mMiscData = 0;
     } else if (isHashTOPTIMES(id, str_saverecords)) {
-        *(int*)((char*)w + 0x18) = 1;
+        w->mMiscData = 1;
     }
 }
 #endif

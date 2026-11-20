@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uitext.h"
 #include "fe/festatelogin.h"
 #include "fe/festatenetcreateroompopup.h"
 #include "fe/festateauthdnas.h"
@@ -770,20 +771,20 @@ static inline int IsHash1A41C0(int id, char* name) { return id == GetHashValue32
 extern "C" void cFEStateNetMessenger_onWidgetCreate(cFEStateNetMessenger* self, cUIText* text)
 {
     cFEVObj_001A41C0* obj = (cFEVObj_001A41C0*)text;
-    if (IsHash1A41C0(*(int*)((char*)text + 0x38), str_TextTitle)) {
+    if (IsHash1A41C0(text->mHashName, str_TextTitle)) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_BTNEAMessenger));
         obj->v09(1);
-    } else if (IsHash1A41C0(*(int*)((char*)text + 0x38), str_TextFindUser)) {
+    } else if (IsHash1A41C0(text->mHashName, str_TextFindUser)) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_231FindPlayer));
         obj->v09(1);
-    } else if (IsHash1A41C0(*(int*)((char*)text + 0x38), str_TextBuddyLocation)) {
+    } else if (IsHash1A41C0(text->mHashName, str_TextBuddyLocation)) {
         obj->v09(1);
-        *(int*)((char*)text + 0x14) |= 0x80;
-    } else if (IsHash1A41C0(*(int*)((char*)text + 0x38), str_TextEqGoToNext)) {
+        text->mAttr |= 0x80;
+    } else if (IsHash1A41C0(text->mHashName, str_TextEqGoToNext)) {
         obj->v09(0);
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_279GoToNext));
-    } else if (IsHash1A41C0(*(int*)((char*)text + 0x38), str_playerMenu)) {
-        *(int*)((char*)text + 0x14) |= 1;
+    } else if (IsHash1A41C0(text->mHashName, str_playerMenu)) {
+        text->mAttr |= 1;
     }
 }
 #endif
@@ -7214,21 +7215,21 @@ static inline int IsHash_001AC170(int id, char* name) { return id == GetHashValu
  */
 extern "C" void cFEUseExistingAccount_onWidgetCreate(cFEUseExistingAccount* self, cUIText* text)
 {
-    if (IsHash_001AC170(*(int*)((char*)text + 0x38), str_PairAccountName)) {
-        *(int*)((char*)text + 0x18) = 0;
-    } else if (IsHash_001AC170(*(int*)((char*)text + 0x38), str_PairPassword)) {
-        *(int*)((char*)text + 0x18) = 1;
-    } else if (IsHash_001AC170(*(int*)((char*)text + 0x38), str_TextForgotPassword)) {
+    if (IsHash_001AC170(text->mHashName, str_PairAccountName)) {
+        text->mMiscData = 0;
+    } else if (IsHash_001AC170(text->mHashName, str_PairPassword)) {
+        text->mMiscData = 1;
+    } else if (IsHash_001AC170(text->mHashName, str_TextForgotPassword)) {
         self->mpTextForgotPassword = (cUIThing*)text;
-        *(int*)((char*)text + 0x18) = 2;
+        text->mMiscData = 2;
         ((cFEVObj_001AC170*)self->mpTextForgotPassword)->v25(1);
         ((cFEVObj_001AC170*)self->mpTextForgotPassword)->v08(1);
-    } else if (IsHash_001AC170(*(int*)((char*)text + 0x38), str_TextForgotAccount)) {
-        *(int*)((char*)text + 0x18) = 3;
-    } else if (IsHash_001AC170(*(int*)((char*)text + 0x38), str_EnterAccountName) || IsHash_001AC170(*(int*)((char*)text + 0x38), str_EnterPassword)) {
+    } else if (IsHash_001AC170(text->mHashName, str_TextForgotAccount)) {
+        text->mMiscData = 3;
+    } else if (IsHash_001AC170(text->mHashName, str_EnterAccountName) || IsHash_001AC170(text->mHashName, str_EnterPassword)) {
         cUIText_setAsciiString(text, D_004A1408);
-    } else if (IsHash_001AC170(*(int*)((char*)text + 0x38), str_TextOK)) {
-        *(int*)((char*)text + 0x18) = 4;
+    } else if (IsHash_001AC170(text->mHashName, str_TextOK)) {
+        text->mMiscData = 4;
     }
 }
 #endif
@@ -8072,13 +8073,13 @@ static inline int IsHash1AD308(int id, char* name) { return id == GetHashValue32
 extern "C" void cFEStateSelectPersona_onWidgetCreate(cFEStateSelectPersona* self, cUIText* text)
 {
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    if (IsHash1AD308(*(int*)((char*)text + 0x38), str_PersonaMenu)) {
+    if (IsHash1AD308(text->mHashName, str_PersonaMenu)) {
         func_001AD3E8(self, text);
-    } else if (IsHash1AD308(*(int*)((char*)text + 0x38), str_EditAccount)) {
-        *(int*)((char*)text + 0x18) = -1;
-    } else if (IsHash1AD308(*(int*)((char*)text + 0x38), str_TextAccountName)) {
+    } else if (IsHash1AD308(text->mHashName, str_EditAccount)) {
+        text->mMiscData = -1;
+    } else if (IsHash1AD308(text->mHashName, str_TextAccountName)) {
         cUIText_setAsciiString(text, ((const char*)lobbyMan->mUserName));
-    } else if (IsHash1AD308(*(int*)((char*)text + 0x38), str_TextESRBNotice)) {
+    } else if (IsHash1AD308(text->mHashName, str_TextESRBNotice)) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_220ESRBNotice));
     }
 }
@@ -8951,44 +8952,44 @@ static inline int IsHash1AE128(int id, char* name) { return id == GetHashValue32
 extern "C" void cFEStateChallengePopup_onWidgetCreate(cFEStateChallengePopup* self, cUIText* item)
 {
     cFEVObj_001AE128* obj = (cFEVObj_001AE128*)item;
-    if (IsHash1AE128(*(int*)((char*)item + 0x38), str_TextTitle)) {
+    if (IsHash1AE128(item->mHashName, str_TextTitle)) {
         obj->v09(1);
-    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), str_TextPlayerName)) {
+    } else if (IsHash1AE128(item->mHashName, str_TextPlayerName)) {
         cUIText_setAsciiString(item, ((const char*)LobbyMan_mLobbyMan->mOpponent));
         obj->v09(1);
-    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), str_TextSelectPeakEvent)) {
+    } else if (IsHash1AE128(item->mHashName, str_TextSelectPeakEvent)) {
         obj->v09(1);
-    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), str_Textselectevent)) {
-        *(int*)((char*)item + 0x18) = 7;
+    } else if (IsHash1AE128(item->mHashName, str_Textselectevent)) {
+        item->mMiscData = 7;
         obj->v25(1);
-    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), str_PeakLabel)) {
+    } else if (IsHash1AE128(item->mHashName, str_PeakLabel)) {
         cUIText_setUnicodeStringByID(item, GetHashValue32(str_kT_OVRCMNPeakColon));
         obj->v09(1);
-    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), str_CourseLabel)) {
+    } else if (IsHash1AE128(item->mHashName, str_CourseLabel)) {
         cUIText_setUnicodeStringByID(item, GetHashValue32(str_kT_OVRCMNCourseColon));
         obj->v09(1);
-    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), str_EventLabel)) {
+    } else if (IsHash1AE128(item->mHashName, str_EventLabel)) {
         cUIText_setUnicodeStringByID(item, GetHashValue32(str_kT_OVRCMNEventColon));
         obj->v09(1);
-    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), str_TextRankedGame)) {
+    } else if (IsHash1AE128(item->mHashName, str_TextRankedGame)) {
         obj->v09(1);
-    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), str_TextSubmit)) {
+    } else if (IsHash1AE128(item->mHashName, str_TextSubmit)) {
         cUIText_setUnicodeStringByID(item, GetHashValue32(str_kT_CMNSubmit));
-        *(int*)((char*)item + 0x18) = 9;
+        item->mMiscData = 9;
         obj->v25(1);
         obj->v09(1);
         obj->v25(1);
-    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), str_TextCancel)) {
+    } else if (IsHash1AE128(item->mHashName, str_TextCancel)) {
         cUIText_setUnicodeStringByID(item, GetHashValue32(str_kT_BTNCancel));
-        *(int*)((char*)item + 0x18) = 10;
+        item->mMiscData = 10;
         obj->v09(1);
-    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), str_ListBoxRankedGame)) {
+    } else if (IsHash1AE128(item->mHashName, str_ListBoxRankedGame)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNYes), 1);
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNNo), 0);
         obj->v09(1);
         obj->v24(1);
         self->mpLBRankedGame = (cUIListBox*)item;
-    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), str_ListBoxCPURiders)) {
+    } else if (IsHash1AE128(item->mHashName, str_ListBoxCPURiders)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNHUDNone), 0);
         cUIListBox_addEntryByAsciiString(item, D_004A14F8, 1);
         cUIListBox_addEntryByAsciiString(item, D_004A1500, 2);
@@ -8998,26 +8999,26 @@ extern "C" void cFEStateChallengePopup_onWidgetCreate(cFEStateChallengePopup* se
         obj->v24(1);
         self->mpLBCPURiders = (cUIListBox*)item;
         cUIListBox_setCurrentEntryByIndex(item, D_004A4E88_E128[4]);
-    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), str_ListBoxPowerUps)) {
+    } else if (IsHash1AE128(item->mHashName, str_ListBoxPowerUps)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNYes), 0);
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNNo), 1);
         obj->v09(1);
         obj->v24(1);
         self->mpLBPowerUps = (cUIListBox*)item;
-    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), str_ListBoxMultipliers)) {
+    } else if (IsHash1AE128(item->mHashName, str_ListBoxMultipliers)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNYes), 0);
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNNo), 1);
         obj->v09(1);
         obj->v24(1);
         self->mpLBMultipliers = (cUIListBox*)item;
-    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), str_ListBoxPointicons)) {
+    } else if (IsHash1AE128(item->mHashName, str_ListBoxPointicons)) {
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNYes), 0);
         cUIListBox_addEntryByStringID(item, GetHashValue32(str_kT_CMNNo), 1);
         obj->v09(1);
         obj->v24(1);
         self->mpLBPointIcons = (cUIListBox*)item;
-    } else if (IsHash1AE128(*(int*)((char*)item + 0x38), str_MenuChallenge)) {
-        *(int*)((char*)item + 0x14) |= 0x80;
+    } else if (IsHash1AE128(item->mHashName, str_MenuChallenge)) {
+        item->mAttr |= 0x80;
     }
 }
 #endif
@@ -9518,19 +9519,19 @@ extern "C" void func_001AF208(cFEStateChallengePopup* self, cUIText* item, int o
     }
     cFEVObj_001AF208* rightArrow = 0;
     cFEVObj_001AF208* leftArrow = 0;
-    if (IsHash1AF208(*(int*)((char*)item + 0x38), str_ListBoxRankedGame)) {
+    if (IsHash1AF208(item->mHashName, str_ListBoxRankedGame)) {
         rightArrow = Get1AF208(((cFEStateNet*)self), str_InformRight1);
         leftArrow = Get1AF208(((cFEStateNet*)self), str_InformLeft1);
-    } else if (IsHash1AF208(*(int*)((char*)item + 0x38), str_ListBoxCPURiders)) {
+    } else if (IsHash1AF208(item->mHashName, str_ListBoxCPURiders)) {
         rightArrow = Get1AF208(((cFEStateNet*)self), str_InformRight2);
         leftArrow = Get1AF208(((cFEStateNet*)self), str_InformLeft2);
-    } else if (IsHash1AF208(*(int*)((char*)item + 0x38), str_ListBoxPowerUps)) {
+    } else if (IsHash1AF208(item->mHashName, str_ListBoxPowerUps)) {
         rightArrow = Get1AF208(((cFEStateNet*)self), str_InformRight3);
         leftArrow = Get1AF208(((cFEStateNet*)self), str_InformLeft3);
-    } else if (IsHash1AF208(*(int*)((char*)item + 0x38), str_ListBoxMultipliers)) {
+    } else if (IsHash1AF208(item->mHashName, str_ListBoxMultipliers)) {
         rightArrow = Get1AF208(((cFEStateNet*)self), str_InformRight4);
         leftArrow = Get1AF208(((cFEStateNet*)self), str_InformLeft4);
-    } else if (IsHash1AF208(*(int*)((char*)item + 0x38), str_ListBoxPointicons)) {
+    } else if (IsHash1AF208(item->mHashName, str_ListBoxPointicons)) {
         rightArrow = Get1AF208(((cFEStateNet*)self), str_InformRight5);
         leftArrow = Get1AF208(((cFEStateNet*)self), str_InformLeft5);
     }
@@ -11197,20 +11198,20 @@ static inline int IsHash_001B10F8(int id, char* name) { return id == GetHashValu
 extern "C" void cFEStateOnlineCharacterSelect_onWidgetCreate(cFEStateOnlineCharacterSelect* self, cUIText* text)
 {
     cFEVObj_001B10F8* box = (cFEVObj_001B10F8*)text;
-    if (IsHash_001B10F8(*(int*)((char*)text + 0x38), str_LBChallengerSelect)) {
-        *(int*)((char*)text + 0x14) &= ~1;
+    if (IsHash_001B10F8(text->mHashName, str_LBChallengerSelect)) {
+        text->mAttr &= ~1;
         int i;
         for (i = 0; i < 10; i++) {
             cUIListBox_addEntryByAsciiString(text, (const char*)cBECharacterInterface_getShortNameByCharacter(cBE_getInterface_Fv(cBE_getBE(), 2), D_00440F68[i], 0), D_00440F68[i]);
         }
-        *(int*)((char*)text + 0x14) &= ~1;
+        text->mAttr &= ~1;
         box->v09(1);
         int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(SSXApp->BE, 1), 0);
         self->miCharID = id;
         cUIListBox_setCurrentEntryByIndex(text, (unsigned char)func_001B0F28(id));
         self->mpLBChallengerSelect = (cUIListBox*)text;
         box->v24(1);
-    } else if (IsHash_001B10F8(*(int*)((char*)text + 0x38), str_TextOpponentSelect)) {
+    } else if (IsHash_001B10F8(text->mHashName, str_TextOpponentSelect)) {
         cUIText_setAsciiString(text, D_004A1390);
         box->v11(sVec4_001B10F8(1.0f, 0.0f, 0.0f, 0.0f));
     }
@@ -14569,39 +14570,39 @@ static inline int IsHash1B52C8(int id, char* name) { return id == GetHashValue32
 extern "C" void cFEStateNetConfig_onWidgetCreate(cFEStateNetConfig* self, cUIText* item)
 {
     cFEVObj_001B52C8* obj = (cFEVObj_001B52C8*)item;
-    if (IsHash1B52C8(*(int*)((char*)item + 0x38), str_TextCreateConfig)) {
-        *(int*)((char*)item + 0x18) = 1;
+    if (IsHash1B52C8(item->mHashName, str_TextCreateConfig)) {
+        item->mMiscData = 1;
         obj->v09(1);
         obj->v06(1);
-    } else if (IsHash1B52C8(*(int*)((char*)item + 0x38), str_TextTitle)) {
-        *(int*)((char*)item + 0x18) = -1;
+    } else if (IsHash1B52C8(item->mHashName, str_TextTitle)) {
+        item->mMiscData = -1;
         obj->v09(1);
         obj->v06(0);
-    } else if (IsHash1B52C8(*(int*)((char*)item + 0x38), str_TextSettings)) {
-        *(int*)((char*)item + 0x18) = -1;
+    } else if (IsHash1B52C8(item->mHashName, str_TextSettings)) {
+        item->mMiscData = -1;
         obj->v09(0);
         obj->v06(0);
-    } else if (IsHash1B52C8(*(int*)((char*)item + 0x38), str_TextInstructions)) {
-        *(int*)((char*)item + 0x18) = -1;
+    } else if (IsHash1B52C8(item->mHashName, str_TextInstructions)) {
+        item->mMiscData = -1;
         obj->v09(1);
         obj->v06(0);
-    } else if (IsHash1B52C8(*(int*)((char*)item + 0x38), str_LBSettings)) {
-        *(int*)((char*)item + 0x18) = 100;
+    } else if (IsHash1B52C8(item->mHashName, str_LBSettings)) {
+        item->mMiscData = 100;
         self->mpLBSettings = (cUIListBox*)item;
         obj->v24(1);
-    } else if (IsHash1B52C8(*(int*)((char*)item + 0x38), str_configrectangle1)) {
+    } else if (IsHash1B52C8(item->mHashName, str_configrectangle1)) {
         self->mpConfigRectangle = (cUIThing*)item;
-    } else if (IsHash1B52C8(*(int*)((char*)item + 0x38), str_NoConfiguration)) {
+    } else if (IsHash1B52C8(item->mHashName, str_NoConfiguration)) {
         self->mpNoConfiguration = (cUIThing*)item;
-    } else if (IsHash1B52C8(*(int*)((char*)item + 0x38), str_LBAdapters)) {
-        *(int*)((char*)item + 0x18) = 101;
+    } else if (IsHash1B52C8(item->mHashName, str_LBAdapters)) {
+        item->mMiscData = 101;
         self->mpLBAdapters = (cUIListBox*)item;
         obj->v24(1);
-    } else if (IsHash1B52C8(*(int*)((char*)item + 0x38), str_MenuConfig)) {
+    } else if (IsHash1B52C8(item->mHashName, str_MenuConfig)) {
         self->mpMenuConfig = (cUIMenu*)item;
-        *(int*)((char*)item + 0x18) = -1;
-        *(int*)((char*)item + 0x14) |= 0x80;
-    } else if (IsHash1B52C8(*(int*)((char*)item + 0x38), str_PairSettings)) {
+        item->mMiscData = -1;
+        item->mAttr |= 0x80;
+    } else if (IsHash1B52C8(item->mHashName, str_PairSettings)) {
         self->mpPairSettings = (cUIThing*)item;
     }
 }
@@ -15610,16 +15611,16 @@ static inline int IsHash1B65C0(int id, char* name) { return id == GetHashValue32
 extern "C" void cFEStateAuthDNAS_onWidgetCreate(cFEStateAuthDNAS* self, cUIText* text)
 {
     cFEVObj_001B65C0* obj = (cFEVObj_001B65C0*)text;
-    if (IsHash1B65C0(*(int*)((char*)text + 0x38), str_TextCancel)) {
+    if (IsHash1B65C0(text->mHashName, str_TextCancel)) {
         self->mpTextCancel = text;
         obj->v09(0);
-    } else if (IsHash1B65C0(*(int*)((char*)text + 0x38), str_TextAuth)) {
+    } else if (IsHash1B65C0(text->mHashName, str_TextAuth)) {
         self->mpTextAuth = text;
         cUIText_setUnicodeStringByID(self->mpTextAuth, GetHashValue32(str_kT_ovrcmnloading));
-    } else if (IsHash1B65C0(*(int*)((char*)text + 0x38), str_XButton)) {
+    } else if (IsHash1B65C0(text->mHashName, str_XButton)) {
         self->mpXButton = (cUIThing*)text;
         obj->v09(0);
-    } else if (IsHash1B65C0(*(int*)((char*)text + 0x38), str_submitrect)) {
+    } else if (IsHash1B65C0(text->mHashName, str_submitrect)) {
         self->mpSubmitRect = (cUIThing*)text;
         obj->v09(0);
     }
@@ -17840,18 +17841,18 @@ static inline int IsHash1B8AA0(int id, char* name) { return id == GetHashValue32
 extern "C" void cFEStateCreateStep1_onWidgetCreate(cFEStateCreateStep1* self, cUIText* text)
 {
     cFEVObj_001B8AA0* obj = (cFEVObj_001B8AA0*)text;
-    if (IsHash1B8AA0(*(int*)((char*)text + 0x38), str_TextTitle)) {
+    if (IsHash1B8AA0(text->mHashName, str_TextTitle)) {
         if (self->mbEditAccount == 0) {
             cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_TITLEEditAccount));
         }
-    } else if (IsHash1B8AA0(*(int*)((char*)text + 0x38), str_StaticAccountName) || IsHash1B8AA0(*(int*)((char*)text + 0x38), str_EnterAccountName)) {
+    } else if (IsHash1B8AA0(text->mHashName, str_StaticAccountName) || IsHash1B8AA0(text->mHashName, str_EnterAccountName)) {
         if (self->mbEditAccount == 0) {
             obj->v25(1);
             obj->v08(1);
         }
-    } else if (IsHash1B8AA0(*(int*)((char*)text + 0x38), str_LBInformYesNo) || IsHash1B8AA0(*(int*)((char*)text + 0x38), str_LBShareInfoYesNo)) {
+    } else if (IsHash1B8AA0(text->mHashName, str_LBInformYesNo) || IsHash1B8AA0(text->mHashName, str_LBShareInfoYesNo)) {
         func_001A9A18((cFEStateNet*)self, (cUIListBox_001A9A18*)text, 1);
-    } else if (IsHash1B8AA0(*(int*)((char*)text + 0x38), str_StaticContinue)) {
+    } else if (IsHash1B8AA0(text->mHashName, str_StaticContinue)) {
         if (self->mbEditAccount != 0) {
             obj->v25(1);
             obj->v08(1);
@@ -18534,7 +18535,7 @@ static inline void Measure1B9950(cUIText* text, const char* s, sRect1B9950* out)
 extern "C" void func_001B9950(cFEStateCreateStep1* self, cUIText* text, char* str)
 {
     int cut = 0;
-    sVec3_1B9950 scale = *(sVec3_1B9950*)((char*)text + 0x50);
+    sVec3_1B9950 scale = *(sVec3_1B9950*)&text->mScale;
     sRect1B9950 box;
     ((cFEVObj_001B9950*)text)->v20(&box);
     char* font = cUIText_getFont(text);
@@ -20402,19 +20403,19 @@ static inline int IsHash1BBE00(int id, char* name) { return id == GetHashValue32
 extern "C" void cFEStateCreateDuplicate_onWidgetCreate(cFEStateCreateDuplicate* self, cUIText* text)
 {
     char buf[0x40];
-    if (IsHash1BBE00(*(int*)((char*)text + 0x38), str_SelectNew)) {
-        *(int*)((char*)text + 0x18) = 4;
-    } else if (self->mbAccount == 0 && IsHash1BBE00(*(int*)((char*)text + 0x38), str_TextTitle)) {
+    if (IsHash1BBE00(text->mHashName, str_SelectNew)) {
+        text->mMiscData = 4;
+    } else if (self->mbAccount == 0 && IsHash1BBE00(text->mHashName, str_TextTitle)) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_TITLEDuplicateUser));
-    } else if (self->mbAccount == 0 && IsHash1BBE00(*(int*)((char*)text + 0x38), str_StaticMenuName)) {
+    } else if (self->mbAccount == 0 && IsHash1BBE00(text->mHashName, str_StaticMenuName)) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_212SuggestedUser));
     } else {
         int i;
         for (i = 0; i < 4; i++) {
             sprintf(buf, str_SelectNamepct_d, i);
-            if (IsHash1BBE00(*(int*)((char*)text + 0x38), buf)) {
+            if (IsHash1BBE00(text->mHashName, buf)) {
                 cUIText_setAsciiString(text, buf);
-                *(int*)((char*)text + 0x18) = i;
+                text->mMiscData = i;
                 break;
             }
         }
@@ -22764,7 +22765,7 @@ extern char D_004A1408[];
  */
 extern "C" void cFEStateNetCreateRoomPopup_onWidgetCreate(cFEStateNetCreateRoomPopup* self, cUIText* text)
 {
-    int id = *(int*)((char*)text + 0x38);
+    int id = text->mHashName;
     if (id == GetHashValue32(str_LBChannelName)) {
         cUIListBox_addEntryByStringID(text, GetHashValue32(str_kT_POPUP232Beginner), 2);
         cUIListBox_addEntryByStringID(text, GetHashValue32(str_kT_POPUP232Advanced), 1);
@@ -22779,13 +22780,13 @@ extern "C" void cFEStateNetCreateRoomPopup_onWidgetCreate(cFEStateNetCreateRoomP
         cUIText_setAsciiString(text, D_004A1408);
         self->mpTextPassword = text;
     } else if (id == GetHashValue32(str_PairChannelName)) {
-        *(int*)((char*)text + 0x18) = 0;
+        text->mMiscData = 0;
     } else if (id == GetHashValue32(str_PairRoomName)) {
-        *(int*)((char*)text + 0x18) = 1;
+        text->mMiscData = 1;
     } else if (id == GetHashValue32(str_PairPassword)) {
-        *(int*)((char*)text + 0x18) = 2;
+        text->mMiscData = 2;
     } else if (id == GetHashValue32(str_TextDone)) {
-        *(int*)((char*)text + 0x18) = 3;
+        text->mMiscData = 3;
     }
 }
 #endif
@@ -25745,19 +25746,19 @@ struct sOwner1C2298 {
 extern "C" void cFEStateNetQuickMessages_onWidgetCreate(cFEStateNetQuickMessages* self, cUIText* text)
 {
     char buf[32];
-    if (IsHash1C2298(*(int*)((char*)text + 0x38), str_username)) {
+    if (IsHash1C2298(text->mHashName, str_username)) {
         cUIText_setAsciiString(text, D_004A1390);
         ((cFEVObj_001C2298*)text)->v09(1);
-    } else if (IsHash1C2298(*(int*)((char*)text + 0x38), str_Menu)) {
-        *(int*)((char*)text + 0x14) |= 1;
+    } else if (IsHash1C2298(text->mHashName, str_Menu)) {
+        text->mAttr |= 1;
     } else {
         int i;
         for (i = 0; i < 10; i++) {
             sprintf(buf, str_messagepct_02d, i);
-            if (IsHash1C2298(*(int*)((char*)text + 0x38), buf)) {
+            if (IsHash1C2298(text->mHashName, buf)) {
                 cUIText_setAsciiString(text, D_004A1390);
                 ((cFEVObj_001C2298*)text)->v09(1);
-                *(int*)((char*)text + 0x18) = i;
+                text->mMiscData = i;
                 self->mpMessage[i] = text;
             }
         }

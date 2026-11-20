@@ -3620,7 +3620,7 @@ extern "C" void* cUIScreen_cUIScreen1(cUIScreen* self)
     tAttrScreen_tAttrScreen(((char*)self) + 0x14);
     cList_cList(((char*)self) + 0x18);
     cUIThing_cUIThing(((char*)self) + 0x40, 0, 0);
-    *(void***)(((char*)self) + 0x48) = cUIGroup_vtbl;
+    self->mRootGroup.mVtbl = cUIGroup_vtbl;
     cList_cList(((char*)self) + 0xB4);
     return ((char*)self);
 }
@@ -3768,7 +3768,7 @@ INCLUDE_ASM("ui/uivector", cUIScreen_isVisible);
  * @return 1 when visible, else 0
  */
 extern "C" int cUIScreen_isVisible(cUIScreen* uiScreen) {
-    return ((int) (*(int *)((char*)(uiScreen) + (0x54))) >> 6) & 1;
+    return ((int) (uiScreen->mRootGroup.mAttr) >> 6) & 1;
 }
 #endif
 //100%

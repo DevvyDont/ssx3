@@ -77,7 +77,7 @@ extern "C" void *cOVState_cOVState(cOVState* ovState, int engine, int overlayId)
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
 #endif
@@ -173,7 +173,7 @@ extern "C" void *cOVTemplate_Simple_cOVTemplate_Simple(cOVState* ovState, int en
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = D_00474D30;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
 #endif
@@ -233,7 +233,7 @@ extern "C" void *cOVTemplate_Dialog_cOVTemplate_Dialog(cOVTemplate_Dialog* ovSta
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = D_00474C58;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
 #endif
@@ -329,7 +329,7 @@ extern "C" void *cOVState_REPLAY_cOVState_REPLAY(cOVState_REPLAY* ovState, int e
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = cOVState_REPLAY_vtbl;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
 #endif
@@ -412,7 +412,7 @@ extern "C" void *func_0021C950(cOVTemplate_Dialog* ovState, int engine, int over
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = D_004748F8;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     (ovState->mDialogType) = 1;
     return ((void*)ovState);
 }
@@ -3197,7 +3197,7 @@ extern "C" void *cOVState_ENTERLODGE_cOVState_ENTERLODGE(cOVState_ENTERLODGE* ov
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = cOVState_ENTERLODGE_vtbl;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
 #endif
@@ -3230,7 +3230,7 @@ extern "C" void *func_00220F48(cOVState_BIGCHALLENGE_START* ovState) {
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = cOVState_BIGCHALLENGE_START_vtbl;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
 #endif
@@ -3269,7 +3269,7 @@ extern "C" void *cOVState_BIGCHALLENGE_START_cOVState_BIGCHALLENGE_START(cOVStat
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = cOVState_BIGCHALLENGE_START_vtbl;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     cOVState_BIGCHALLENGE_START_getChallengeData(ovState);
     return ((void*)ovState);
 }
@@ -3323,7 +3323,7 @@ extern "C" void *func_00221040(cOVState_BIGCHALLENGE_FAIL* ovState) {
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = D_004735B0;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
 #endif
@@ -3363,7 +3363,7 @@ extern "C" void *func_002210A0(cOVState_BIGCHALLENGE_FAIL* ovState, int engine, 
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = D_004735B0;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     cOVState_BIGCHALLENGE_FAIL_getChallengeData(ovState);
     return ((void*)ovState);
 }
@@ -3445,7 +3445,7 @@ extern "C" void *cOVState_TOPTIMES_cOVState_TOPTIMES(cOVState_TOPTIMES* ovState,
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = cOVState_TOPTIMES_vtbl;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
 #endif
@@ -3478,7 +3478,7 @@ extern "C" void *func_002211C8(cOVState_TRANSPORT* ovState) {
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = D_004733F8;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
 #endif
@@ -3518,7 +3518,7 @@ extern "C" void *func_00221228(cOVState_TRANSPORT* ovState, int engine, int over
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = D_004733F8;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     cUITemplate_MAP_init((char*)ovState + 0x9C);
     return ((void*)ovState);
 }
@@ -3583,7 +3583,7 @@ extern "C" void *func_002212C8(cOVState_MAP* ovState) {
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = cOVState_MAP_vtbl;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     new ((char*)ovState + 0x9C) Elem[8];
     return ((void*)ovState);
 }
@@ -3622,7 +3622,7 @@ extern "C" void *cOVState_MAP_cOVState_MAP(cOVState_MAP* ovState, int engine, in
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = cOVState_MAP_vtbl;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     new ((char*)ovState + 0x9C) Elem[8];
     return ((void*)ovState);
 }
@@ -3775,7 +3775,7 @@ extern "C" void *func_002214F8(cOVTemplate_PauseMenu* ovState) {
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = cOVTemplate_PauseMenu_vtbl;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
 #endif
@@ -4461,7 +4461,7 @@ extern "C" void *cOVState_PAUSE_OPTIONS_cOVState_PAUSE_OPTIONS(cOVState_PAUSE_OP
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = cOVState_PAUSE_OPTIONS_vtbl;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
 #endif
@@ -4494,7 +4494,7 @@ extern "C" void *func_00221C80(cOVState_PAUSE_ONLINE_ERROR* ovState) {
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = cOVState_PAUSE_ONLINE_ERROR_vtbl;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
 #endif
@@ -4532,7 +4532,7 @@ extern "C" void *cOVState_PAUSE_ONLINE_ERROR_cOVState_PAUSE_ONLINE_ERROR(cOVStat
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = cOVState_PAUSE_ONLINE_ERROR_vtbl;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     (ovState->mbShouldDisplayAuxInfo) = 1;
     ((int)ovState->miStartPingTick) = 0;
     return ((void*)ovState);
@@ -4662,7 +4662,7 @@ extern "C" void *func_00221E18(cOVState_HEAT_PREEVENT* ovState, int engine, int 
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = D_00472850;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
 #endif
@@ -5070,7 +5070,7 @@ extern "C" void *cOVState_REWARDS_cOVState_REWARDS(cOVState_REWARDS* ovState, in
     (ovState->mRemovePDA) = 0;
     unsigned short chatInit = D_004A2088[0];
     ((char*)ovState->mVtbl) = cOVState_REWARDS_vtbl;
-    (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
+    (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
 #endif

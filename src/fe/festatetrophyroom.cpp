@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uitext.h"
 #include "fe/fememcard.h"
 #include "ui/uiengine.h"
 #include "fe/festaterewardsroom.h"
@@ -908,7 +909,7 @@ extern char str_kT_POPUPCMNReconnecting[];
  */
 extern "C" void cFEStateRelogin_onWidgetCreate(void* self, cUIText* item)
 {
-    int id = *(int*)((char*)item + 0x38);
+    int id = item->mHashName;
     if (id == GetHashValue32(str_TextReconnecting)) {
         cUIText_setUnicodeStringByID(item, GetHashValue32(str_kT_POPUPCMNReconnecting));
     }
