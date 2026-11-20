@@ -98,7 +98,7 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     self->mRiderAnim = 0;
     self->mAnimModel = 0;
     self->mSphereTree = 0;
-    self->unk_3FC = 0;
+    self->InTunnel = 0;
     self->mGroundPolyId = none;
     *(sKey8_B698*)&self->unk_AAC = D_004A5960[0];
     self->mTrackPathHint = (int*)cMemMan_alloc(0x20, str_Track_path_intersect_info, 0, 0);
@@ -765,7 +765,7 @@ void cRider_initAlways_impl(cRider* self)
         if (cBENewRaceInterface_newRace.cGamePath != 0)
             cRider_initBoost(self);
         self->mFinishTime = -1.0f;
-        self->unk_3FC = 0;
+        self->InTunnel = 0;
         self->mUberTimer = 0;
         self->mUberLevel = 0;
         self->mDidNotFinish = 0;
@@ -3150,7 +3150,7 @@ static inline int IsState1_120F20(void* obj)
 /**
  * First step of the rider's frame update: overlap list, NIS ground probe and per-frame resets.
  *
- * Clears unk_3FC and unk_AA4 (shadow drawn). The overlap list and active lights are refreshed on the AI ticks
+ * Clears InTunnel and unk_AA4 (shadow drawn). The overlap list and active lights are refreshed on the AI ticks
  * where AITick % 3 equals mAIIndex % 3, and on other ticks too unless the list's word +4 equals the Nash
  * grid's word +0xA0 while the playback manager's state (+0x70) is neither 1 nor 3.
  *
@@ -3161,7 +3161,7 @@ static inline int IsState1_120F20(void* obj)
  */
 extern "C" void cRider_updateSplit1(cRider* self)
 {
-    self->unk_3FC = 0;
+    self->InTunnel = 0;
     self->unk_AA4 = 0;
     int frameSlot = AITick() % 3;
     if (frameSlot != self->mAIIndex % 3)
@@ -4785,7 +4785,8 @@ extern "C" int func_001446A0(void* self, int a1);
  * 1), 3 ground, 4 railslide, 5-7 grab / tweak / uber held during a spin (cSpinControl_isGrabHeld, isTweakHeld,
  * isUberHeld on the handler's spin control at +0x230), 8 the metrix's points (+0x198), 9 / 10 PressMode 1 / 2, 11
  * boosting (mBoostStrength non-zero), 15-17 the metrix's +0x138, +0x13C and +0x19C, 18 a layer-1 anim of category 13
- * with event flag 0 set and flag 1 clear. 12-14 and others return 0. Nothing in the source calls it.
+ * with event flag 0 set and flag 1 clear. 12-14 and others return 0. The script functions RiderActionFunc,
+ * RiderMetricFunc and CurrentRailFunc call it.
  *
  * @param query  the query number
  * @return the answer (a flag or a count)

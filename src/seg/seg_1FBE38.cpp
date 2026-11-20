@@ -6918,7 +6918,7 @@ struct Tab_3F80 { char pad[0x28]; D_3F80 *arr[1]; };
  * Script function (gLunoCFunctions[74]): marks the script's rider as being in a tunnel.
  *
  * Takes no script arguments. When cWScriptMan_TheWScriptMan->Being is not -1, sets that rider's +0x3FC (the word
- * cRider_setInTunnel and cRider_isInTunnel use; rider.h unk_3FC) to 1. cRider_updateSplit1 clears it again.
+ * cRider_setInTunnel and cRider_isInTunnel use; cRider::InTunnel) to 1. cRider_updateSplit1 clears it again.
  *
  * @return the nil script value (luno_gLunoNil)
  */
@@ -7797,7 +7797,7 @@ struct sVec4_1FBE38 { float x, y, z, w; sVec4_1FBE38(float a, float b, float c, 
 // rider's own data, so converting between cRider_1FBE38* and cBeing* adds/subtracts 0x6C0 with a null check.
 struct cRiderData_1FBE38 {
     char pad_0x0[0x3FC];
-    int unk_3FC;                // 0x3FC (cRider::unk_3FC)
+    int InTunnel;               // 0x3FC (cRider::InTunnel)
     char pad_0x400[0x2C0];
 };
 struct sRiderHandler_1FBE38 {

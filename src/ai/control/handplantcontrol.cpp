@@ -6685,26 +6685,26 @@ extern "C" void cRider_setSafeRenderTick(cRider* rider, int safeRenderTick) {
 INCLUDE_ASM("ai/control/handplantcontrol", cRider_isInTunnel);
 #ifdef SKIP_ASM
 /**
- * Returns the rider's word at +0x3FC (unk_3FC), which cRider_updateSplit1 clears each frame.
+ * Returns whether the rider is in a tunnel (InTunnel, which cRider_updateSplit1 clears each frame).
  *
  * @param rider  the cRider
- * @return unk_3FC
+ * @return InTunnel
  */
 extern "C" int cRider_isInTunnel(cRider* rider) {
-    return (rider->unk_3FC);
+    return (rider->InTunnel);
 }
 #endif
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cRider_setInTunnel);
 #ifdef SKIP_ASM
 /**
- * Sets the rider's word at +0x3FC (unk_3FC).
+ * Sets whether the rider is in a tunnel (InTunnel).
  *
  * @param rider  the cRider
- * @param value  the new value
+ * @param value  nonzero when in a tunnel
  */
 extern "C" void cRider_setInTunnel(cRider* rider, int value) {
-    (rider->unk_3FC) = value;
+    (rider->InTunnel) = value;
 }
 #endif
 //100%

@@ -144,7 +144,7 @@ struct cRider {
     /* 0x3F0 */ float mImpactAccum; // [X]
     /* 0x3F4 */ float mImpactAccum2; // [X]
     /* 0x3F8 */ char unk_3F8[0x4];
-    /* 0x3FC */ int unk_3FC;
+    /* 0x3FC */ int InTunnel; // [O] (On Tour bool, +0x100C there) [U] set/isInTunnel; RiderInTunnelFunc sets it
     /* 0x400 */ t4Vector mBoundsMin; // [X] with 0x410: box tested against the view (cRider_renderClip)
     /* 0x410 */ t4Vector mBoundsMax; // [X]
     /* 0x420 */ t4Vector mBoundSphere; // [X] tested by the VU0 frustum program
@@ -324,7 +324,7 @@ CHECK_OFFSET(cRider, unk_3D0, 0x3D0);
 CHECK_OFFSET(cRider, mImpulse, 0x3E0);
 CHECK_OFFSET(cRider, mImpactAccum, 0x3F0);
 CHECK_OFFSET(cRider, mImpactAccum2, 0x3F4);
-CHECK_OFFSET(cRider, unk_3FC, 0x3FC);
+CHECK_OFFSET(cRider, InTunnel, 0x3FC);
 CHECK_OFFSET(cRider, mBoundsMin, 0x400);
 CHECK_OFFSET(cRider, mBoundsMax, 0x410);
 CHECK_OFFSET(cRider, mBoundSphere, 0x420);
