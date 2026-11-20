@@ -159,18 +159,18 @@ extern "C" void func_0042C6A0(int, int, int);
  * sceCdInit; mode 5 shuts the CD client down), func_00425FB8 (removes the DMAC 5 handler), and finally passes the
  * arguments to func_0042C6A0, which packs them with func_0042C510 and calls _LoadExecPS2.
  *
- * @param a0  path of the executable to load
- * @param a1  argument count
- * @param a2  argument strings
+ * @param path  path of the executable to load
+ * @param argc  argument count
+ * @param argv  argument strings
  */
-extern "C" void func_0031B008(int a0, int a1, int a2)
+extern "C" void func_0031B008(int path, int argc, int argv)
 {
     D_004A5B64_B008->v02();
     func_00402450(2);
     func_00401718(0);
     func_00401718(5);
     func_00425FB8();
-    func_0042C6A0(a0, a1, a2);
+    func_0042C6A0(path, argc, argv);
 }
 #endif
 

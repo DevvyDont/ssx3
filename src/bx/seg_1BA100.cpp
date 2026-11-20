@@ -28,11 +28,11 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9138);
 /**
  * Returns the first word of a cSoundSys, its sound manager pointer (pManager).
  *
- * @param arg0  the cSoundSys
+ * @param soundSys  the cSoundSys
  * @return pManager
  */
-extern "C" int func_002B9138(int *arg0) {
-    return *arg0;
+extern "C" int func_002B9138(int *soundSys) {
+    return *soundSys;
 }
 #endif
 
@@ -401,28 +401,28 @@ extern "C" void* func_00416210(void*, int, unsigned int);
  * mPtr, mViewport, mVanish, mRadius, mExternalVol, mTwoPlayerPan and mTwoPlayerSide are cleared; mDelay[mInst] becomes
  * time 100, count 0, feedback 90, level 50; mMapToMaxVol becomes 127 and mCloseOnEnd 1.
  *
- * @param p  the play options
+ * @param playOpts  the play options
  */
-extern "C" void func_002B93B8(Obj_93B8* p) {
-    p->recs[p->idx] = p->cur;
-    p->arr24[p->idx] = 0;
-    p->p34[p->idx] = 0;
-    p->vals[p->idx] = p->recs[p->idx].v;
-    p->p3C[p->idx] = 0;
-    func_00416210((char*)p + p->idx * 8 + 0x40, 0, 8);
-    p->p60[p->idx] = 0;
-    p->p64[p->idx] = 0;
-    p->p68[p->idx] = 0;
-    p->p6C[p->idx] = 0;
-    p->q70[p->idx].b = 0;
-    p->q70[p->idx].a = 100;
-    p->q70[p->idx].c = 90;
-    p->q70[p->idx].d = 50;
-    p->p74[p->idx] = 0;
-    p->p80[p->idx] = 0;
-    p->p84[p->idx] = 0;
-    p->p78[p->idx] = 127;
-    p->p7C[p->idx] = 1;
+extern "C" void func_002B93B8(Obj_93B8* playOpts) {
+    playOpts->recs[playOpts->idx] = playOpts->cur;
+    playOpts->arr24[playOpts->idx] = 0;
+    playOpts->p34[playOpts->idx] = 0;
+    playOpts->vals[playOpts->idx] = playOpts->recs[playOpts->idx].v;
+    playOpts->p3C[playOpts->idx] = 0;
+    func_00416210((char*)playOpts + playOpts->idx * 8 + 0x40, 0, 8);
+    playOpts->p60[playOpts->idx] = 0;
+    playOpts->p64[playOpts->idx] = 0;
+    playOpts->p68[playOpts->idx] = 0;
+    playOpts->p6C[playOpts->idx] = 0;
+    playOpts->q70[playOpts->idx].b = 0;
+    playOpts->q70[playOpts->idx].a = 100;
+    playOpts->q70[playOpts->idx].c = 90;
+    playOpts->q70[playOpts->idx].d = 50;
+    playOpts->p74[playOpts->idx] = 0;
+    playOpts->p80[playOpts->idx] = 0;
+    playOpts->p84[playOpts->idx] = 0;
+    playOpts->p78[playOpts->idx] = 127;
+    playOpts->p7C[playOpts->idx] = 1;
 }
 #endif
 
@@ -463,29 +463,29 @@ extern "C" void* func_00416210(void*, int, unsigned int);
  *
  * There is no check against the four levels the arrays hold.
  *
- * @param p  the play options
+ * @param playOpts  the play options
  */
-extern "C" void func_002B95B0(Obj_95B0* p) {
-    p->idx++;
-    p->recs[p->idx] = p->cur;
-    p->arr24[p->idx] = 0;
-    p->p34[p->idx] = 0;
-    p->vals[p->idx] = p->recs[p->idx].v;
-    p->p3C[p->idx] = 0;
-    func_00416210((char*)p + p->idx * 8 + 0x40, 0, 8);
-    p->p60[p->idx] = 0;
-    p->p64[p->idx] = 0;
-    p->p68[p->idx] = 0;
-    p->p6C[p->idx] = 0;
-    p->q70[p->idx].b = 0;
-    p->q70[p->idx].a = 100;
-    p->q70[p->idx].c = 90;
-    p->q70[p->idx].d = 50;
-    p->p74[p->idx] = 0;
-    p->p80[p->idx] = 0;
-    p->p84[p->idx] = 0;
-    p->p78[p->idx] = 127;
-    p->p7C[p->idx] = 1;
+extern "C" void func_002B95B0(Obj_95B0* playOpts) {
+    playOpts->idx++;
+    playOpts->recs[playOpts->idx] = playOpts->cur;
+    playOpts->arr24[playOpts->idx] = 0;
+    playOpts->p34[playOpts->idx] = 0;
+    playOpts->vals[playOpts->idx] = playOpts->recs[playOpts->idx].v;
+    playOpts->p3C[playOpts->idx] = 0;
+    func_00416210((char*)playOpts + playOpts->idx * 8 + 0x40, 0, 8);
+    playOpts->p60[playOpts->idx] = 0;
+    playOpts->p64[playOpts->idx] = 0;
+    playOpts->p68[playOpts->idx] = 0;
+    playOpts->p6C[playOpts->idx] = 0;
+    playOpts->q70[playOpts->idx].b = 0;
+    playOpts->q70[playOpts->idx].a = 100;
+    playOpts->q70[playOpts->idx].c = 90;
+    playOpts->q70[playOpts->idx].d = 50;
+    playOpts->p74[playOpts->idx] = 0;
+    playOpts->p80[playOpts->idx] = 0;
+    playOpts->p84[playOpts->idx] = 0;
+    playOpts->p78[playOpts->idx] = 127;
+    playOpts->p7C[playOpts->idx] = 1;
 }
 #endif
 
@@ -898,10 +898,10 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9D88);
 /**
  * Pauses the monitor: sets mPaused to 1.
  *
- * @param arg0  the cMonitor
+ * @param monitor  the cMonitor
  */
-extern "C" void func_002B9D88(void *arg0) {
-    (*(int *)((char*)(arg0) + (0x94))) = 1;
+extern "C" void func_002B9D88(void *monitor) {
+    (*(int *)((char*)(monitor) + (0x94))) = 1;
 }
 #endif
 
@@ -911,10 +911,10 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9D98);
 /**
  * Resumes the monitor: clears mPaused.
  *
- * @param arg0  the cMonitor
+ * @param monitor  the cMonitor
  */
-extern "C" void func_002B9D98(void *arg0) {
-    (*(int *)((char*)(arg0) + (0x94))) = 0;
+extern "C" void func_002B9D98(void *monitor) {
+    (*(int *)((char*)(monitor) + (0x94))) = 0;
 }
 #endif
 
@@ -924,11 +924,11 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9DA0);
 /**
  * Returns the monitor's mPaused flag.
  *
- * @param arg0  the cMonitor
+ * @param monitor  the cMonitor
  * @return mPaused
  */
-extern "C" int func_002B9DA0(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x94)));
+extern "C" int func_002B9DA0(void *monitor) {
+    return (*(int *)((char*)(monitor) + (0x94)));
 }
 #endif
 
@@ -938,13 +938,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9DA8);
 /**
  * Returns the monitor's tick counter, mCounter (read as volatile).
  *
- * @param arg0  the cMonitor
+ * @param monitor  the cMonitor
  * @return mCounter
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
 // volatile keeps the load out of the jr delay slot, as in the target.
-extern "C" int func_002B9DA8(void *arg0) {
-    return (*(volatile int *)((char*)(arg0) + (0x88)));
+extern "C" int func_002B9DA8(void *monitor) {
+    return (*(volatile int *)((char*)(monitor) + (0x88)));
 }
 #endif
 
@@ -956,16 +956,16 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9DB8);
  *
  * Stores mCounter in mLastCounter for the next call.
  *
- * @param arg0  the cMonitor
+ * @param monitor  the cMonitor
  * @return the elapsed ticks times 0.01
  */
-extern "C" float func_002B9DB8(void *arg0) {
+extern "C" float func_002B9DB8(void *monitor) {
     int temp_2;
     int temp_3;
 
-    temp_2 = (*(volatile int *)((char*)(arg0) + (0x88)));
-    temp_3 = (*(int *)((char*)(arg0) + (0x8C)));
-    (*(int *)((char*)(arg0) + (0x8C))) = temp_2;
+    temp_2 = (*(volatile int *)((char*)(monitor) + (0x88)));
+    temp_3 = (*(int *)((char*)(monitor) + (0x8C)));
+    (*(int *)((char*)(monitor) + (0x8C))) = temp_2;
     return (float) (temp_2 - temp_3) * 0.01f;
 }
 #endif
@@ -1294,31 +1294,31 @@ struct Outer_9FF8 { char pad[0x1D8]; Obj_9FF8 sub; };
  * Through mpVBankManager, the cBankManager's play options (its cBankMonitor at mpVBankManager + 0x1D8) get a new level
  * exactly as func_002B95B0 pushes one (mInst incremented, the level reset to mDefault and the defaults).
  *
- * @param arg  the cBankSys
+ * @param bankSys  the cBankSys
  */
-extern "C" void func_002B9FF8(Outer_9FF8** arg) {
-    Outer_9FF8* o = *arg;
-    Obj_9FF8* p = &o->sub;
-    o->sub.idx++;
-    p->recs[o->sub.idx] = o->sub.cur;
-    o->sub.arr24[o->sub.idx] = 0;
-    p->p34[o->sub.idx] = 0;
-    p->vals[o->sub.idx] = p->recs[o->sub.idx].v;
-    p->p3C[o->sub.idx] = 0;
-    func_00416210((char*)p + o->sub.idx * 8 + 0x40, 0, 8);
-    p->p60[o->sub.idx] = 0;
-    p->p64[o->sub.idx] = 0;
-    p->p68[o->sub.idx] = 0;
-    p->p6C[o->sub.idx] = 0;
-    p->q70[o->sub.idx].b = 0;
-    p->q70[o->sub.idx].a = 100;
-    p->q70[o->sub.idx].c = 90;
-    p->q70[o->sub.idx].d = 50;
-    p->p74[o->sub.idx] = 0;
-    p->p80[o->sub.idx] = 0;
-    p->p84[o->sub.idx] = 0;
-    p->p78[o->sub.idx] = 127;
-    p->p7C[o->sub.idx] = 1;
+extern "C" void func_002B9FF8(Outer_9FF8** bankSys) {
+    Outer_9FF8* bankManager = *bankSys;
+    Obj_9FF8* playOpts = &bankManager->sub;
+    bankManager->sub.idx++;
+    playOpts->recs[bankManager->sub.idx] = bankManager->sub.cur;
+    bankManager->sub.arr24[bankManager->sub.idx] = 0;
+    playOpts->p34[bankManager->sub.idx] = 0;
+    playOpts->vals[bankManager->sub.idx] = playOpts->recs[bankManager->sub.idx].v;
+    playOpts->p3C[bankManager->sub.idx] = 0;
+    func_00416210((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
+    playOpts->p60[bankManager->sub.idx] = 0;
+    playOpts->p64[bankManager->sub.idx] = 0;
+    playOpts->p68[bankManager->sub.idx] = 0;
+    playOpts->p6C[bankManager->sub.idx] = 0;
+    playOpts->q70[bankManager->sub.idx].b = 0;
+    playOpts->q70[bankManager->sub.idx].a = 100;
+    playOpts->q70[bankManager->sub.idx].c = 90;
+    playOpts->q70[bankManager->sub.idx].d = 50;
+    playOpts->p74[bankManager->sub.idx] = 0;
+    playOpts->p80[bankManager->sub.idx] = 0;
+    playOpts->p84[bankManager->sub.idx] = 0;
+    playOpts->p78[bankManager->sub.idx] = 127;
+    playOpts->p7C[bankManager->sub.idx] = 1;
 }
 #endif
 
@@ -1358,35 +1358,35 @@ struct Arg_A208 { Outer_A208* o; int* vals; };
  *
  * Through mpVBankManager, the cBankManager's play options (its cBankMonitor at mpVBankManager + 0x1D8) get a new level
  * exactly as func_002B95B0 pushes one (mInst incremented, the level reset to mDefault and the defaults), then
- * mBank[mInst] = @p v.
+ * mBank[mInst] = @p bank.
  *
- * @param arg  the cBankSys
- * @param v  the bank index
+ * @param bankSys  the cBankSys
+ * @param bank  the bank index
  */
-extern "C" void func_002BA208(Arg_A208* arg, int v) {
-    Outer_A208* o = arg->o;
-    Obj_A208* p = &o->sub;
-    o->sub.idx++;
-    p->recs[o->sub.idx] = o->sub.cur;
-    o->sub.arr24[o->sub.idx] = 0;
-    p->p34[o->sub.idx] = 0;
-    p->vals[o->sub.idx] = p->recs[o->sub.idx].v;
-    p->p3C[o->sub.idx] = 0;
-    func_00416210((char*)p + o->sub.idx * 8 + 0x40, 0, 8);
-    p->p60[o->sub.idx] = 0;
-    p->p64[o->sub.idx] = 0;
-    p->p68[o->sub.idx] = 0;
-    p->p6C[o->sub.idx] = 0;
-    p->q70[o->sub.idx].b = 0;
-    p->q70[o->sub.idx].a = 100;
-    p->q70[o->sub.idx].c = 90;
-    p->q70[o->sub.idx].d = 50;
-    p->p74[o->sub.idx] = 0;
-    p->p80[o->sub.idx] = 0;
-    p->p84[o->sub.idx] = 0;
-    p->p78[o->sub.idx] = 127;
-    p->p7C[o->sub.idx] = 1;
-    arg->vals[arg->o->sub.idx] = v;
+extern "C" void func_002BA208(Arg_A208* bankSys, int bank) {
+    Outer_A208* bankManager = bankSys->o;
+    Obj_A208* playOpts = &bankManager->sub;
+    bankManager->sub.idx++;
+    playOpts->recs[bankManager->sub.idx] = bankManager->sub.cur;
+    bankManager->sub.arr24[bankManager->sub.idx] = 0;
+    playOpts->p34[bankManager->sub.idx] = 0;
+    playOpts->vals[bankManager->sub.idx] = playOpts->recs[bankManager->sub.idx].v;
+    playOpts->p3C[bankManager->sub.idx] = 0;
+    func_00416210((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
+    playOpts->p60[bankManager->sub.idx] = 0;
+    playOpts->p64[bankManager->sub.idx] = 0;
+    playOpts->p68[bankManager->sub.idx] = 0;
+    playOpts->p6C[bankManager->sub.idx] = 0;
+    playOpts->q70[bankManager->sub.idx].b = 0;
+    playOpts->q70[bankManager->sub.idx].a = 100;
+    playOpts->q70[bankManager->sub.idx].c = 90;
+    playOpts->q70[bankManager->sub.idx].d = 50;
+    playOpts->p74[bankManager->sub.idx] = 0;
+    playOpts->p80[bankManager->sub.idx] = 0;
+    playOpts->p84[bankManager->sub.idx] = 0;
+    playOpts->p78[bankManager->sub.idx] = 127;
+    playOpts->p7C[bankManager->sub.idx] = 1;
+    bankSys->vals[bankSys->o->sub.idx] = bank;
 }
 #endif
 
@@ -1408,37 +1408,37 @@ extern "C" void* func_00416210(void*, int, unsigned int);
  *
  * Through mpVBankManager, the cBankManager's play options (its cBankMonitor at mpVBankManager + 0x1D8) get a new level
  * exactly as func_002B95B0 pushes one (mInst incremented, the level reset to mDefault and the defaults), then
- * mBank[mInst] = @p v and mPatch[mInst] = @p v2.
+ * mBank[mInst] = @p bank and mPatch[mInst] = @p patch.
  *
- * @param arg  the cBankSys
- * @param v  the bank index
- * @param v2  the patch index
+ * @param bankSys  the cBankSys
+ * @param bank  the bank index
+ * @param patch  the patch index
  */
-extern "C" void func_002BA448(sSndOptsUser* arg, int v, int v2) {
-    sSoundSysView* o = arg->o;
-    sSndPlayOpts* p = &o->sub;
-    o->sub.idx++;
-    p->recs[o->sub.idx] = o->sub.cur;
-    o->sub.arr24[o->sub.idx] = 0;
-    p->p34[o->sub.idx] = 0;
-    p->vals[o->sub.idx] = p->recs[o->sub.idx].v;
-    p->p3C[o->sub.idx] = 0;
-    func_00416210((char*)p + o->sub.idx * 8 + 0x40, 0, 8);
-    p->p60[o->sub.idx] = 0;
-    p->p64[o->sub.idx] = 0;
-    p->p68[o->sub.idx] = 0;
-    p->p6C[o->sub.idx] = 0;
-    p->q70[o->sub.idx].b = 0;
-    p->q70[o->sub.idx].a = 100;
-    p->q70[o->sub.idx].c = 90;
-    p->q70[o->sub.idx].d = 50;
-    p->p74[o->sub.idx] = 0;
-    p->p80[o->sub.idx] = 0;
-    p->p84[o->sub.idx] = 0;
-    p->p78[o->sub.idx] = 127;
-    p->p7C[o->sub.idx] = 1;
-    arg->vals[arg->o->sub.idx] = v;
-    arg->vals2[arg->o->sub.idx] = v2;
+extern "C" void func_002BA448(sSndOptsUser* bankSys, int bank, int patch) {
+    sSoundSysView* bankManager = bankSys->o;
+    sSndPlayOpts* playOpts = &bankManager->sub;
+    bankManager->sub.idx++;
+    playOpts->recs[bankManager->sub.idx] = bankManager->sub.cur;
+    bankManager->sub.arr24[bankManager->sub.idx] = 0;
+    playOpts->p34[bankManager->sub.idx] = 0;
+    playOpts->vals[bankManager->sub.idx] = playOpts->recs[bankManager->sub.idx].v;
+    playOpts->p3C[bankManager->sub.idx] = 0;
+    func_00416210((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
+    playOpts->p60[bankManager->sub.idx] = 0;
+    playOpts->p64[bankManager->sub.idx] = 0;
+    playOpts->p68[bankManager->sub.idx] = 0;
+    playOpts->p6C[bankManager->sub.idx] = 0;
+    playOpts->q70[bankManager->sub.idx].b = 0;
+    playOpts->q70[bankManager->sub.idx].a = 100;
+    playOpts->q70[bankManager->sub.idx].c = 90;
+    playOpts->q70[bankManager->sub.idx].d = 50;
+    playOpts->p74[bankManager->sub.idx] = 0;
+    playOpts->p80[bankManager->sub.idx] = 0;
+    playOpts->p84[bankManager->sub.idx] = 0;
+    playOpts->p78[bankManager->sub.idx] = 127;
+    playOpts->p7C[bankManager->sub.idx] = 1;
+    bankSys->vals[bankSys->o->sub.idx] = bank;
+    bankSys->vals2[bankSys->o->sub.idx] = patch;
 }
 #endif
 
@@ -1454,38 +1454,38 @@ extern "C" int cBankSys_SFX_End(void*);
  *
  * Through mpVBankManager, the cBankManager's play options (its cBankMonitor at mpVBankManager + 0x1D8) get a new level
  * exactly as func_002B95B0 pushes one (mInst incremented, the level reset to mDefault and the defaults), then
- * mBank[mInst] = @p v, mPatch[mInst] = @p v2, and cBankSys_SFX_End plays the patch (and pops the level).
+ * mBank[mInst] = @p bank, mPatch[mInst] = @p patch, and cBankSys_SFX_End plays the patch (and pops the level).
  *
- * @param arg  the cBankSys
- * @param v  the bank index
- * @param v2  the patch index
+ * @param bankSys  the cBankSys
+ * @param bank  the bank index
+ * @param patch  the patch index
  */
-extern "C" void func_002BA6B0(sSndOptsUser* arg, int v, int v2) {
-    sSoundSysView* o = arg->o;
-    sSndPlayOpts* p = &o->sub;
-    o->sub.idx++;
-    p->recs[o->sub.idx] = o->sub.cur;
-    o->sub.arr24[o->sub.idx] = 0;
-    p->p34[o->sub.idx] = 0;
-    p->vals[o->sub.idx] = p->recs[o->sub.idx].v;
-    p->p3C[o->sub.idx] = 0;
-    func_00416210((char*)p + o->sub.idx * 8 + 0x40, 0, 8);
-    p->p60[o->sub.idx] = 0;
-    p->p64[o->sub.idx] = 0;
-    p->p68[o->sub.idx] = 0;
-    p->p6C[o->sub.idx] = 0;
-    p->q70[o->sub.idx].b = 0;
-    p->q70[o->sub.idx].a = 100;
-    p->q70[o->sub.idx].c = 90;
-    p->q70[o->sub.idx].d = 50;
-    p->p74[o->sub.idx] = 0;
-    p->p80[o->sub.idx] = 0;
-    p->p84[o->sub.idx] = 0;
-    p->p78[o->sub.idx] = 127;
-    p->p7C[o->sub.idx] = 1;
-    arg->vals[arg->o->sub.idx] = v;
-    arg->vals2[arg->o->sub.idx] = v2;
-    cBankSys_SFX_End(arg);
+extern "C" void func_002BA6B0(sSndOptsUser* bankSys, int bank, int patch) {
+    sSoundSysView* bankManager = bankSys->o;
+    sSndPlayOpts* playOpts = &bankManager->sub;
+    bankManager->sub.idx++;
+    playOpts->recs[bankManager->sub.idx] = bankManager->sub.cur;
+    bankManager->sub.arr24[bankManager->sub.idx] = 0;
+    playOpts->p34[bankManager->sub.idx] = 0;
+    playOpts->vals[bankManager->sub.idx] = playOpts->recs[bankManager->sub.idx].v;
+    playOpts->p3C[bankManager->sub.idx] = 0;
+    func_00416210((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
+    playOpts->p60[bankManager->sub.idx] = 0;
+    playOpts->p64[bankManager->sub.idx] = 0;
+    playOpts->p68[bankManager->sub.idx] = 0;
+    playOpts->p6C[bankManager->sub.idx] = 0;
+    playOpts->q70[bankManager->sub.idx].b = 0;
+    playOpts->q70[bankManager->sub.idx].a = 100;
+    playOpts->q70[bankManager->sub.idx].c = 90;
+    playOpts->q70[bankManager->sub.idx].d = 50;
+    playOpts->p74[bankManager->sub.idx] = 0;
+    playOpts->p80[bankManager->sub.idx] = 0;
+    playOpts->p84[bankManager->sub.idx] = 0;
+    playOpts->p78[bankManager->sub.idx] = 127;
+    playOpts->p7C[bankManager->sub.idx] = 1;
+    bankSys->vals[bankSys->o->sub.idx] = bank;
+    bankSys->vals2[bankSys->o->sub.idx] = patch;
+    cBankSys_SFX_End(bankSys);
 }
 #endif
 
@@ -1503,46 +1503,46 @@ extern "C" int cBankSys_SFX_End(void*);
  *
  * Through mpVBankManager, the cBankManager's play options (its cBankMonitor at mpVBankManager + 0x1D8) get a new level
  * exactly as func_002B95B0 pushes one (mInst incremented, the level reset to mDefault and the defaults), then
- * mBank[mInst] = @p v, mPatch[mInst] = @p v2, the level's volume is set as func_002B9810 does (mBaseVol = @p v3,
+ * mBank[mInst] = @p bank, mPatch[mInst] = @p patch, the level's volume is set as func_002B9810 does (mBaseVol = @p volume,
  * SNDPLAYOPTS volume clamped to 0..127), and cBankSys_SFX_End plays the patch.
  *
- * @param arg  the cBankSys
- * @param v  the bank index
- * @param v2  the patch index
- * @param v3  the volume
+ * @param bankSys  the cBankSys
+ * @param bank  the bank index
+ * @param patch  the patch index
+ * @param volume  the volume
  */
-extern "C" void func_002BA920(sSndOptsUser* arg, int v, int v2, int v3) {
-    sSoundSysView* o = arg->o;
-    sSndPlayOpts* p = &o->sub;
-    o->sub.idx++;
-    p->recs[o->sub.idx] = o->sub.cur;
-    o->sub.arr24[o->sub.idx] = 0;
-    p->p34[o->sub.idx] = 0;
-    p->vals[o->sub.idx] = p->recs[o->sub.idx].v;
-    p->p3C[o->sub.idx] = 0;
-    func_00416210((char*)p + o->sub.idx * 8 + 0x40, 0, 8);
-    p->p60[o->sub.idx] = 0;
-    p->p64[o->sub.idx] = 0;
-    p->p68[o->sub.idx] = 0;
-    p->p6C[o->sub.idx] = 0;
-    p->q70[o->sub.idx].b = 0;
-    p->q70[o->sub.idx].a = 100;
-    p->q70[o->sub.idx].c = 90;
-    p->q70[o->sub.idx].d = 50;
-    p->p74[o->sub.idx] = 0;
-    p->p80[o->sub.idx] = 0;
-    p->p84[o->sub.idx] = 0;
-    p->p78[o->sub.idx] = 127;
-    p->p7C[o->sub.idx] = 1;
-    arg->vals[arg->o->sub.idx] = v;
-    arg->vals2[arg->o->sub.idx] = v2;
+extern "C" void func_002BA920(sSndOptsUser* bankSys, int bank, int patch, int volume) {
+    sSoundSysView* bankManager = bankSys->o;
+    sSndPlayOpts* playOpts = &bankManager->sub;
+    bankManager->sub.idx++;
+    playOpts->recs[bankManager->sub.idx] = bankManager->sub.cur;
+    bankManager->sub.arr24[bankManager->sub.idx] = 0;
+    playOpts->p34[bankManager->sub.idx] = 0;
+    playOpts->vals[bankManager->sub.idx] = playOpts->recs[bankManager->sub.idx].v;
+    playOpts->p3C[bankManager->sub.idx] = 0;
+    func_00416210((char*)playOpts + bankManager->sub.idx * 8 + 0x40, 0, 8);
+    playOpts->p60[bankManager->sub.idx] = 0;
+    playOpts->p64[bankManager->sub.idx] = 0;
+    playOpts->p68[bankManager->sub.idx] = 0;
+    playOpts->p6C[bankManager->sub.idx] = 0;
+    playOpts->q70[bankManager->sub.idx].b = 0;
+    playOpts->q70[bankManager->sub.idx].a = 100;
+    playOpts->q70[bankManager->sub.idx].c = 90;
+    playOpts->q70[bankManager->sub.idx].d = 50;
+    playOpts->p74[bankManager->sub.idx] = 0;
+    playOpts->p80[bankManager->sub.idx] = 0;
+    playOpts->p84[bankManager->sub.idx] = 0;
+    playOpts->p78[bankManager->sub.idx] = 127;
+    playOpts->p7C[bankManager->sub.idx] = 1;
+    bankSys->vals[bankSys->o->sub.idx] = bank;
+    bankSys->vals2[bankSys->o->sub.idx] = patch;
     {
-        sSoundSysView* o2 = arg->o;
-        sSndPlayOpts* p2 = &o2->sub;
-        p2->vals[o2->sub.idx] = v3;
-        p2->recs[o2->sub.idx].v = MAX_A920(MIN_A920(p2->vals[p2->idx], 127), 0);
+        sSoundSysView* volBankManager = bankSys->o;
+        sSndPlayOpts* p2 = &volBankManager->sub;
+        p2->vals[volBankManager->sub.idx] = volume;
+        p2->recs[volBankManager->sub.idx].v = MAX_A920(MIN_A920(p2->vals[p2->idx], 127), 0);
     }
-    cBankSys_SFX_End(arg);
+    cBankSys_SFX_End(bankSys);
 }
 #endif
 
@@ -2510,17 +2510,17 @@ extern "C" void func_002BB4D8_B4D8(void *self, int arg) __asm__("func_002BB4D8")
  * and opens it with ASYNCFILE_load; the handle goes to m_iAsyncHandle. m_iState becomes 1 (loading, finished by
  * func_002BB3F0) for a positive handle, else 2 (kWPSection_Loaded, with no data).
  *
- * @param arg  the file name (a cBXString)
+ * @param fileName  the file name (a cBXString)
  */
-extern "C" void func_002BB4D8_B4D8(void *self, int arg) {
-    sBXStr_B4D8 a;
-    sBXStr_B4D8 b;
+extern "C" void func_002BB4D8_B4D8(void *self, int fileName) {
+    sBXStr_B4D8 swpPath;
+    sBXStr_B4D8 basePath;
     *(short*)((char*)self + 2) = 0;
-    func_003186D0_B4D8(&b, D_004A3870, arg);
-    func_00318630_B4D8(&a, &b, str_swp);
-    *(int*)((char*)self + 4) = ASYNCFILE_load_B4D8(a.p, 0);
-    cBXString_dt_B4D8(&a, 2);
-    cBXString_dt_B4D8(&b, 2);
+    func_003186D0_B4D8(&basePath, D_004A3870, fileName);
+    func_00318630_B4D8(&swpPath, &basePath, str_swp);
+    *(int*)((char*)self + 4) = ASYNCFILE_load_B4D8(swpPath.p, 0);
+    cBXString_dt_B4D8(&swpPath, 2);
+    cBXString_dt_B4D8(&basePath, 2);
     int n = *(int*)((char*)self + 4);
     *(short*)((char*)self + 0) = n <= 0 ? 2 : 1;
 }
@@ -2703,18 +2703,18 @@ extern "C" void func_002BB6E0_impl(cWorldPainterMan_B6E0* self) {
                         (*(sDrawState**)&gm->m_pCurrentDrawState)++;
                         *(gm->m_pCurrentDrawState) = sDrawState_s_defaultDrawState;
                         tBxVertex_B6E0 quadVerts[5];
-                        tBxVertex_B6E0* v;
+                        tBxVertex_B6E0* quadVert;
                         int i;
                         for (i = 0; i < 5; i++) {
-                            v = &quadVerts[i];
-                            v->a = 255;
-                            v->r = 0;
-                            v->g = 255;
-                            v->b = 0;
-                            v->z = 1.0f;
-                            v->w = 0;
-                            v->x = 0;
-                            v->y = 0;
+                            quadVert = &quadVerts[i];
+                            quadVert->a = 255;
+                            quadVert->r = 0;
+                            quadVert->g = 255;
+                            quadVert->b = 0;
+                            quadVert->z = 1.0f;
+                            quadVert->w = 0;
+                            quadVert->x = 0;
+                            quadVert->y = 0;
                         }
                         t4Vector_B6E0 mincorner((float)(int)tree->minx, (float)(int)tree->miny, 0.0f, 1.0f);
                         t4Vector_B6E0 maxcorner((float)(int)(32768.0f / tree->scale + tree->minx),
@@ -2813,80 +2813,80 @@ static inline sQtVec4_B928 qtDiv_B928(const sQtVec4_B928& v, float s)
  *
  * An inner node (bit 0 of its first child word set) splits the rectangle (@p lo, @p hi) at its midpoint and recurses
  * into its four children (child index = word >> 1): lower-left (lo, mid), the left/top quarter, the bottom/right
- * quarter and upper-right (mid, hi). A leaf writes the rectangle's four corners plus the first again into @p v at the
+ * quarter and upper-right (mid, hi). A leaf writes the rectangle's four corners plus the first again into @p verts at the
  * height (z) of a camera position read through virtual slot 5 of the object at +0x6C0 of the first AI rider
  * (SSXApp->Game->AI), and submits the five vertices through virtual slot 73 of cGraphicsMan_TheGraphicsMan.
  *
  * @param ctx  the world-painter manager (passed down, otherwise unused)
  * @param tree  the quad tree (its node array at +0x20)
  * @param node  the node to draw
- * @param v  the five-vertex scratch array (positions at +0x20 of each vertex)
+ * @param verts  the five-vertex scratch array (positions at +0x20 of each vertex)
  * @param lo  the rectangle's minimum corner
  * @param hi  the rectangle's maximum corner
  */
 // Walks a quadtree: inner nodes split the rect (lo, hi) at its midpoint into four children;
 // leaves submit the rect's outline as a 5-vertex strip at the camera's height.
-extern "C" void func_002BB928(cWorldPainterMan* ctx, sQtTree_B928* tree, sQtNode_B928* node, sQtVtx_B928* v,
+extern "C" void func_002BB928(cWorldPainterMan* ctx, sQtTree_B928* tree, sQtNode_B928* node, sQtVtx_B928* verts,
                               sQtVec4_B928* lo, sQtVec4_B928* hi)
 {
     if (node->child[0] & 1) {
         sQtVec4_B928 mid = qtDiv_B928(qtAdd_B928(*lo, *hi), 2.0f);
-        sQtVec4_B928 a;
-        a.x = lo->x;
-        a.y = mid.y;
-        a.z = 0.0f;
-        a.w = 1.0f;
-        sQtVec4_B928 b;
-        b.x = hi->x;
-        b.y = mid.y;
-        b.z = 0.0f;
-        b.w = 1.0f;
-        sQtVec4_B928 c;
-        c.x = mid.x;
-        c.y = lo->y;
-        c.z = 0.0f;
-        c.w = 1.0f;
-        sQtVec4_B928 d;
-        d.x = mid.x;
-        d.y = hi->y;
-        d.z = 0.0f;
-        d.w = 1.0f;
-        func_002BB928(ctx, tree, tree->nodes + (node->child[0] >> 1), v, lo, &mid);
-        func_002BB928(ctx, tree, tree->nodes + (node->child[1] >> 1), v, &a, &d);
-        func_002BB928(ctx, tree, tree->nodes + (node->child[2] >> 1), v, &c, &b);
-        func_002BB928(ctx, tree, tree->nodes + (node->child[3] >> 1), v, &mid, hi);
+        sQtVec4_B928 leftEdgeMid;
+        leftEdgeMid.x = lo->x;
+        leftEdgeMid.y = mid.y;
+        leftEdgeMid.z = 0.0f;
+        leftEdgeMid.w = 1.0f;
+        sQtVec4_B928 rightEdgeMid;
+        rightEdgeMid.x = hi->x;
+        rightEdgeMid.y = mid.y;
+        rightEdgeMid.z = 0.0f;
+        rightEdgeMid.w = 1.0f;
+        sQtVec4_B928 bottomEdgeMid;
+        bottomEdgeMid.x = mid.x;
+        bottomEdgeMid.y = lo->y;
+        bottomEdgeMid.z = 0.0f;
+        bottomEdgeMid.w = 1.0f;
+        sQtVec4_B928 topEdgeMid;
+        topEdgeMid.x = mid.x;
+        topEdgeMid.y = hi->y;
+        topEdgeMid.z = 0.0f;
+        topEdgeMid.w = 1.0f;
+        func_002BB928(ctx, tree, tree->nodes + (node->child[0] >> 1), verts, lo, &mid);
+        func_002BB928(ctx, tree, tree->nodes + (node->child[1] >> 1), verts, &leftEdgeMid, &topEdgeMid);
+        func_002BB928(ctx, tree, tree->nodes + (node->child[2] >> 1), verts, &bottomEdgeMid, &rightEdgeMid);
+        func_002BB928(ctx, tree, tree->nodes + (node->child[3] >> 1), verts, &mid, hi);
     } else {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
         char* rider = *(char**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18);
         sQtVec4_B928 cam = *((cQtCam_B928*)(rider + 0x6C0))->v05();
-        sQtVec4_B928 t;
-        t.x = lo->x;
-        t.y = lo->y;
-        t.z = cam.z;
-        t.w = 1.0f;
-        v[0].pos = t;
-        t.x = hi->x;
-        t.y = lo->y;
-        t.z = cam.z;
-        t.w = 1.0f;
-        v[1].pos = t;
-        t.x = hi->x;
-        t.y = hi->y;
-        t.z = cam.z;
-        t.w = 1.0f;
-        v[2].pos = t;
-        t.x = lo->x;
-        t.y = hi->y;
-        t.z = cam.z;
-        t.w = 1.0f;
-        v[3].pos = t;
-        t.x = lo->x;
-        t.y = lo->y;
-        t.z = cam.z;
-        t.w = 1.0f;
-        v[4].pos = t;
+        sQtVec4_B928 corner;
+        corner.x = lo->x;
+        corner.y = lo->y;
+        corner.z = cam.z;
+        corner.w = 1.0f;
+        verts[0].pos = corner;
+        corner.x = hi->x;
+        corner.y = lo->y;
+        corner.z = cam.z;
+        corner.w = 1.0f;
+        verts[1].pos = corner;
+        corner.x = hi->x;
+        corner.y = hi->y;
+        corner.z = cam.z;
+        corner.w = 1.0f;
+        verts[2].pos = corner;
+        corner.x = lo->x;
+        corner.y = hi->y;
+        corner.z = cam.z;
+        corner.w = 1.0f;
+        verts[3].pos = corner;
+        corner.x = lo->x;
+        corner.y = lo->y;
+        corner.z = cam.z;
+        corner.w = 1.0f;
+        verts[4].pos = corner;
         sQtVEntry_B928* vt = (sQtVEntry_B928*)ps2GraphicsMan->mVtbl;
-        vt[73].fn((char*)ps2GraphicsMan + vt[73].delta, 5, v, 0);
+        vt[73].fn((char*)ps2GraphicsMan + vt[73].delta, 5, verts, 0);
     }
 }
 #endif
@@ -2897,11 +2897,11 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BBBF8);
 /**
  * Returns its first argument and ignores the rest (a varargs stub, like a compiled-out debug print).
  *
- * @param a  the value returned
- * @return @p a
+ * @param first  the value returned
+ * @return @p first
  */
-extern "C" int func_002BBBF8(int a, ...) {
-    return a;
+extern "C" int func_002BBBF8(int first, ...) {
+    return first;
 }
 #endif
 
@@ -3969,18 +3969,18 @@ extern char D_00485AF8[];
  * Constructs a tWPInGameData_MusicTrigger: vtable D_00485AF8, m_wpTravelDistance -99999.0f (no position yet), and
  * m_Type, m_lastType, m_Value and m_lastValue -1.
  *
- * @param arg0  the object (0x18 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag
+ * @param musicTrigger  the object (0x18 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag
  *              "tWPIGD_MusicTrigger")
- * @return @p arg0
+ * @return @p musicTrigger
  */
-extern "C" void *func_002BC6F8(tWPInGameData_MusicTrigger* arg0) {
-    arg0->mVtbl = (void**)D_00485AF8;
-    arg0->m_wpTravelDistance = -99999.0f;
-    arg0->m_lastType = -1;
-    arg0->m_Type = -1;
-    arg0->m_lastValue = -1;
-    arg0->m_Value = -1;
-    return ((void*)arg0);
+extern "C" void *func_002BC6F8(tWPInGameData_MusicTrigger* musicTrigger) {
+    musicTrigger->mVtbl = (void**)D_00485AF8;
+    musicTrigger->m_wpTravelDistance = -99999.0f;
+    musicTrigger->m_lastType = -1;
+    musicTrigger->m_Type = -1;
+    musicTrigger->m_lastValue = -1;
+    musicTrigger->m_Value = -1;
+    return ((void*)musicTrigger);
 }
 #endif
 
@@ -3992,15 +3992,15 @@ extern char D_004858C0[];
  * Constructs a tWPInGameData_Mix: vtable D_004858C0, m_wpTravelDistance -99999.0f (no position yet), and m_MixPreset
  * and m_lastMixPreset -1.
  *
- * @param arg0  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Mix")
- * @return @p arg0
+ * @param mix  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Mix")
+ * @return @p mix
  */
-extern "C" void *func_002BC728(tWPInGameData_Mix* arg0) {
-    arg0->mVtbl = (void**)D_004858C0;
-    arg0->m_wpTravelDistance = -99999.0f;
-    arg0->m_lastMixPreset = -1;
-    arg0->m_MixPreset = -1;
-    return ((void*)arg0);
+extern "C" void *func_002BC728(tWPInGameData_Mix* mix) {
+    mix->mVtbl = (void**)D_004858C0;
+    mix->m_wpTravelDistance = -99999.0f;
+    mix->m_lastMixPreset = -1;
+    mix->m_MixPreset = -1;
+    return ((void*)mix);
 }
 #endif
 
@@ -4012,15 +4012,15 @@ extern char D_00485688[];
  * Constructs a tWPInGameData_Ambience: vtable D_00485688, m_wpTravelDistance -99999.0f (no position yet), and m_BankID
  * and m_lastBankID -1.
  *
- * @param arg0  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Ambience")
- * @return @p arg0
+ * @param ambience  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Ambience")
+ * @return @p ambience
  */
-extern "C" void *func_002BC750(tWPInGameData_Ambience* arg0) {
-    arg0->mVtbl = (void**)D_00485688;
-    arg0->m_wpTravelDistance = -99999.0f;
-    arg0->m_lastBankID = -1;
-    arg0->m_BankID = -1;
-    return ((void*)arg0);
+extern "C" void *func_002BC750(tWPInGameData_Ambience* ambience) {
+    ambience->mVtbl = (void**)D_00485688;
+    ambience->m_wpTravelDistance = -99999.0f;
+    ambience->m_lastBankID = -1;
+    ambience->m_BankID = -1;
+    return ((void*)ambience);
 }
 #endif
 
@@ -4032,15 +4032,15 @@ extern char D_00485450[];
  * Constructs a tWPInGameData_Speech: vtable D_00485450, m_wpTravelDistance -99999.0f (no position yet), and m_SpeechID
  * and m_lastSpeechID -1.
  *
- * @param arg0  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Speech")
- * @return @p arg0
+ * @param speech  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Speech")
+ * @return @p speech
  */
-extern "C" void *func_002BC778(tWPInGameData_Speech* arg0) {
-    arg0->mVtbl = (void**)D_00485450;
-    arg0->m_wpTravelDistance = -99999.0f;
-    arg0->m_lastSpeechID = -1;
-    arg0->m_SpeechID = -1;
-    return ((void*)arg0);
+extern "C" void *func_002BC778(tWPInGameData_Speech* speech) {
+    speech->mVtbl = (void**)D_00485450;
+    speech->m_wpTravelDistance = -99999.0f;
+    speech->m_lastSpeechID = -1;
+    speech->m_SpeechID = -1;
+    return ((void*)speech);
 }
 #endif
 
@@ -4052,15 +4052,15 @@ extern char D_00485218[];
  * Constructs a tWPInGameData_Camera: vtable D_00485218, m_wpTravelDistance -99999.0f (no position yet), and
  * m_DrawDistance and m_lastDrawDistance 30000.0f.
  *
- * @param arg0  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Camera")
- * @return @p arg0
+ * @param camera  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Camera")
+ * @return @p camera
  */
-extern "C" void *func_002BC7A0(tWPInGameData_Camera* arg0) {
-    arg0->mVtbl = (void**)D_00485218;
-    arg0->m_lastDrawDistance = 30000.0f;
-    arg0->m_wpTravelDistance = -99999.0f;
-    arg0->m_DrawDistance = 30000.0f;
-    return ((void*)arg0);
+extern "C" void *func_002BC7A0(tWPInGameData_Camera* camera) {
+    camera->mVtbl = (void**)D_00485218;
+    camera->m_lastDrawDistance = 30000.0f;
+    camera->m_wpTravelDistance = -99999.0f;
+    camera->m_DrawDistance = 30000.0f;
+    return ((void*)camera);
 }
 #endif
 
@@ -4073,27 +4073,27 @@ extern char D_00484FE0[];
  * current and the last values of m_FogDensity (0), m_FogNear (3000), m_FogFar (30000) and the fog colour (0.43, 0.55,
  * 0.71).
  *
- * @param arg0  the object (0x38 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Fog")
- * @return @p arg0
+ * @param fog  the object (0x38 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Fog")
+ * @return @p fog
  */
-extern "C" void *func_002BC7C8(tWPInGameData_Fog* arg0) {
+extern "C" void *func_002BC7C8(tWPInGameData_Fog* fog) {
     float zero = 0.0f;
-    float a = 3000.0f, b = 30000.0f, c = 0.43f, d = 0.55f, e = 0.71f;
-    arg0->mVtbl = (void**)((int*)D_00484FE0);
-    arg0->m_wpTravelDistance = -99999.0f;
-    arg0->m_lastFogDensity = zero;
-    arg0->m_lastFogNear = a;
-    arg0->m_lastFogFar = b;
-    arg0->m_lastFogColourR = c;
-    arg0->m_lastFogColourG = d;
-    arg0->m_lastFogColourB = e;
-    arg0->m_FogDensity = zero;
-    arg0->m_FogNear = a;
-    arg0->m_FogFar = b;
-    arg0->m_FogColourR = c;
-    arg0->m_FogColourG = d;
-    arg0->m_FogColourB = e;
-    return ((void*)arg0);
+    float fogNear = 3000.0f, fogFar = 30000.0f, fogRed = 0.43f, fogGreen = 0.55f, fogBlue = 0.71f;
+    fog->mVtbl = (void**)((int*)D_00484FE0);
+    fog->m_wpTravelDistance = -99999.0f;
+    fog->m_lastFogDensity = zero;
+    fog->m_lastFogNear = fogNear;
+    fog->m_lastFogFar = fogFar;
+    fog->m_lastFogColourR = fogRed;
+    fog->m_lastFogColourG = fogGreen;
+    fog->m_lastFogColourB = fogBlue;
+    fog->m_FogDensity = zero;
+    fog->m_FogNear = fogNear;
+    fog->m_FogFar = fogFar;
+    fog->m_FogColourR = fogRed;
+    fog->m_FogColourG = fogGreen;
+    fog->m_FogColourB = fogBlue;
+    return ((void*)fog);
 }
 #endif
 
@@ -4172,16 +4172,16 @@ extern char D_00484938[];
  * Constructs a tWPInGameData_SkyBox: vtable D_00484938, m_wpTravelDistance -99999.0f (no position yet), and
  * m_SkyBoxRotation and m_lastSkyBoxRotation 0.
  *
- * @param arg0  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_SkyBox")
- * @return @p arg0
+ * @param skyBox  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_SkyBox")
+ * @return @p skyBox
  */
-extern "C" void *func_002BC8E8(tWPInGameData_SkyBox* arg0) {
+extern "C" void *func_002BC8E8(tWPInGameData_SkyBox* skyBox) {
     float zero = 0.0f;
-    arg0->mVtbl = (void**)D_00484938;
-    arg0->m_lastSkyBoxRotation = zero;
-    arg0->m_wpTravelDistance = -99999.0f;
-    arg0->m_SkyBoxRotation = zero;
-    return ((void*)arg0);
+    skyBox->mVtbl = (void**)D_00484938;
+    skyBox->m_lastSkyBoxRotation = zero;
+    skyBox->m_wpTravelDistance = -99999.0f;
+    skyBox->m_SkyBoxRotation = zero;
+    return ((void*)skyBox);
 }
 #endif
 
@@ -4232,16 +4232,16 @@ extern char D_004844C8[];
  * Constructs a tWPInGameData_Surface: vtable D_004844C8, m_wpTravelDistance -99999.0f (no position yet), and
  * m_SnowSparkleDensity and m_lastSnowSparkleDensity 1.0f.
  *
- * @param arg0  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Surface")
- * @return @p arg0
+ * @param surface  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Surface")
+ * @return @p surface
  */
-extern "C" void *func_002BC980(tWPInGameData_Surface* arg0) {
+extern "C" void *func_002BC980(tWPInGameData_Surface* surface) {
     float one = 1.0f;
-    arg0->mVtbl = (void**)D_004844C8;
-    arg0->m_lastSnowSparkleDensity = one;
-    arg0->m_wpTravelDistance = -99999.0f;
-    arg0->m_SnowSparkleDensity = one;
-    return ((void*)arg0);
+    surface->mVtbl = (void**)D_004844C8;
+    surface->m_lastSnowSparkleDensity = one;
+    surface->m_wpTravelDistance = -99999.0f;
+    surface->m_SnowSparkleDensity = one;
+    return ((void*)surface);
 }
 #endif
 
@@ -4256,30 +4256,30 @@ extern char D_00484290[];
  * then set to the null name D_004A53D0 (which the worldpainterquery static initializer func_002C0B70 zeroes), and
  * m_AmbientLightIntensityOffset 1.0f and m_RimLightIntensityOffset 0.75f (current and last).
  *
- * @param o  the object (0x58 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Lighting")
- * @return @p o
+ * @param lighting  the object (0x58 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Lighting")
+ * @return @p lighting
  */
-extern "C" void* func_002BC9B0(tWPInGameData_Lighting* o)
+extern "C" void* func_002BC9B0(tWPInGameData_Lighting* lighting)
 {
-    o->mVtbl = (void**)D_00484290;
-    o->m_wpTravelDistance = -99999.0f;
-    ((&o->m_LightIrradianceName))[0].m_nameId[0] = ((&o->m_LightIrradianceName))[0].m_nameId[1] = 0;
-    ((&o->m_LightIrradianceName))[1].m_nameId[0] = ((&o->m_LightIrradianceName))[1].m_nameId[1] = 0;
-    ((&o->m_LightIrradianceName))[2].m_nameId[0] = ((&o->m_LightIrradianceName))[2].m_nameId[1] = 0;
-    ((&o->m_LightIrradianceName))[3].m_nameId[0] = ((&o->m_LightIrradianceName))[3].m_nameId[1] = 0;
-    ((&o->m_LightIrradianceName))[4].m_nameId[0] = ((&o->m_LightIrradianceName))[4].m_nameId[1] = 0;
-    ((&o->m_LightIrradianceName))[5].m_nameId[0] = ((&o->m_LightIrradianceName))[5].m_nameId[1] = 0;
-    ((&o->m_LightIrradianceName))[6].m_nameId[0] = ((&o->m_LightIrradianceName))[6].m_nameId[1] = 0;
-    ((&o->m_LightIrradianceName))[7].m_nameId[0] = ((&o->m_LightIrradianceName))[7].m_nameId[1] = 0;
-    { tWPNameField t = D_004A53D0_2BC9B0; ((&o->m_LightIrradianceName))[0] = ((&o->m_LightIrradianceName))[1] = t; }
-    { tWPNameField t = D_004A53D0_2BC9B0; ((&o->m_LightIrradianceName))[2] = ((&o->m_LightIrradianceName))[3] = t; }
-    { tWPNameField t = D_004A53D0_2BC9B0; ((&o->m_LightIrradianceName))[4] = ((&o->m_LightIrradianceName))[5] = t; }
-    { tWPNameField t = D_004A53D0_2BC9B0; ((&o->m_LightIrradianceName))[6] = ((&o->m_LightIrradianceName))[7] = t; }
-    o->m_lastAmbientLightIntensityOffset = 1.0f;
-    o->m_lastRimLightIntensityOffset = 0.75f;
-    o->m_AmbientLightIntensityOffset = 1.0f;
-    o->m_RimLightIntensityOffset = 0.75f;
-    return (o);
+    lighting->mVtbl = (void**)D_00484290;
+    lighting->m_wpTravelDistance = -99999.0f;
+    ((&lighting->m_LightIrradianceName))[0].m_nameId[0] = ((&lighting->m_LightIrradianceName))[0].m_nameId[1] = 0;
+    ((&lighting->m_LightIrradianceName))[1].m_nameId[0] = ((&lighting->m_LightIrradianceName))[1].m_nameId[1] = 0;
+    ((&lighting->m_LightIrradianceName))[2].m_nameId[0] = ((&lighting->m_LightIrradianceName))[2].m_nameId[1] = 0;
+    ((&lighting->m_LightIrradianceName))[3].m_nameId[0] = ((&lighting->m_LightIrradianceName))[3].m_nameId[1] = 0;
+    ((&lighting->m_LightIrradianceName))[4].m_nameId[0] = ((&lighting->m_LightIrradianceName))[4].m_nameId[1] = 0;
+    ((&lighting->m_LightIrradianceName))[5].m_nameId[0] = ((&lighting->m_LightIrradianceName))[5].m_nameId[1] = 0;
+    ((&lighting->m_LightIrradianceName))[6].m_nameId[0] = ((&lighting->m_LightIrradianceName))[6].m_nameId[1] = 0;
+    ((&lighting->m_LightIrradianceName))[7].m_nameId[0] = ((&lighting->m_LightIrradianceName))[7].m_nameId[1] = 0;
+    { tWPNameField nullName = D_004A53D0_2BC9B0; ((&lighting->m_LightIrradianceName))[0] = ((&lighting->m_LightIrradianceName))[1] = nullName; }
+    { tWPNameField nullName = D_004A53D0_2BC9B0; ((&lighting->m_LightIrradianceName))[2] = ((&lighting->m_LightIrradianceName))[3] = nullName; }
+    { tWPNameField nullName = D_004A53D0_2BC9B0; ((&lighting->m_LightIrradianceName))[4] = ((&lighting->m_LightIrradianceName))[5] = nullName; }
+    { tWPNameField nullName = D_004A53D0_2BC9B0; ((&lighting->m_LightIrradianceName))[6] = ((&lighting->m_LightIrradianceName))[7] = nullName; }
+    lighting->m_lastAmbientLightIntensityOffset = 1.0f;
+    lighting->m_lastRimLightIntensityOffset = 0.75f;
+    lighting->m_AmbientLightIntensityOffset = 1.0f;
+    lighting->m_RimLightIntensityOffset = 0.75f;
+    return (lighting);
 }
 #endif
 
@@ -4332,18 +4332,18 @@ extern char D_00483E20[];
  * Constructs a tWPInGameData_Danger: vtable D_00483E20, m_wpTravelDistance -99999.0f (no position yet), and m_Level,
  * m_lastLevel, m_PointRate and m_lastPointRate 0.
  *
- * @param arg0  the object (0x18 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Danger")
- * @return @p arg0
+ * @param danger  the object (0x18 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Danger")
+ * @return @p danger
  */
-extern "C" void *func_002BCBD0(tWPInGameData_Danger* arg0) {
+extern "C" void *func_002BCBD0(tWPInGameData_Danger* danger) {
     float zero = 0.0f;
-    arg0->mVtbl = (void**)D_00483E20;
-    arg0->m_lastLevel = 0;
-    arg0->m_Level = 0;
-    arg0->m_wpTravelDistance = -99999.0f;
-    arg0->m_lastPointRate = zero;
-    arg0->m_PointRate = zero;
-    return ((void*)arg0);
+    danger->mVtbl = (void**)D_00483E20;
+    danger->m_lastLevel = 0;
+    danger->m_Level = 0;
+    danger->m_wpTravelDistance = -99999.0f;
+    danger->m_lastPointRate = zero;
+    danger->m_PointRate = zero;
+    return ((void*)danger);
 }
 #endif
 
@@ -5522,17 +5522,17 @@ struct sPairSet_002BE1F8
  * Also sets m_wpTravelDistance to 0 (the constructor and cWorldPainterQuery_reset use -99999.0f). Slot 69 of
  * tWPInGameData_Lighting's vtable D_00484290.
  *
- * @param o  the in-game data
+ * @param lighting  the in-game data
  */
-extern "C" void func_002BE1F8(tWPInGameData_Lighting* o)
+extern "C" void func_002BE1F8(tWPInGameData_Lighting* lighting)
 {
-    (*(&o->m_LightIrradianceName)) = D_004A53D0;
-    (*(&o->m_ShadowIrradianceName)) = D_004A53D0;
-    (*(&o->m_TunnelIrradianceName)) = D_004A53D0;
-    (*(&o->m_ObjectIrradianceName)) = D_004A53D0;
-    o->m_AmbientLightIntensityOffset = 1.0f;
-    o->m_RimLightIntensityOffset = 0.75f;
-    *(int*)&o->m_wpTravelDistance = 0;
+    (*(&lighting->m_LightIrradianceName)) = D_004A53D0;
+    (*(&lighting->m_ShadowIrradianceName)) = D_004A53D0;
+    (*(&lighting->m_TunnelIrradianceName)) = D_004A53D0;
+    (*(&lighting->m_ObjectIrradianceName)) = D_004A53D0;
+    lighting->m_AmbientLightIntensityOffset = 1.0f;
+    lighting->m_RimLightIntensityOffset = 0.75f;
+    *(int*)&lighting->m_wpTravelDistance = 0;
 }
 #endif
 

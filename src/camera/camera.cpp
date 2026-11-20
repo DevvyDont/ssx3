@@ -461,51 +461,51 @@ extern "C" void func_0015E050_impl(char* self, char* a1, char* a2) __asm__("func
 /**
  * Points a camera from a position at a target point.
  *
- * Constructs a temporary cDEFAULT_3ChaseAlgorithm on the stack, sets its Position to @p a1 and its CamTargetPos to
- * @p a2 (both with w = 1), computes its pitch and heading (func_00166640 with 1) and pose (func_00166F90), and stores
+ * Constructs a temporary cDEFAULT_3ChaseAlgorithm on the stack, sets its Position to @p camPos and its CamTargetPos to
+ * @p camTargetPos (both with w = 1), computes its pitch and heading (func_00166640 with 1) and pose (func_00166F90), and stores
  * cLookAtChaseAlgorithm_getPose's result in Pose. CamMat becomes the axis-flip matrix D_004C53A0 times the rotation of
  * Pose's quaternion, translated by minus Pose's position; Direction becomes the z column of its rotation rows (w = 0).
  * The temporary is destroyed with cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm.
  *
- * @param a1  the camera position
- * @param a2  the point to look at
+ * @param camPos  the camera position
+ * @param camTargetPos  the point to look at
  */
-extern "C" void func_0015E050_impl(char* self, char* a1, char* a2)
+extern "C" void func_0015E050_impl(char* self, char* camPos, char* camTargetPos)
 {
-    sObj_E050 o;
-    cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm(&o);
-    *(cQuad128*)((char*)&o + 0x20) = *(cQuad128*)a2;
-    *(cQuad128*)((char*)&o + 0x40) = *(cQuad128*)a1;
-    *(float*)((char*)&o + 0x4C) = 1.0f;
-    *(float*)((char*)&o + 0x2C) = 1.0f;
-    func_00166640(&o, 1);
-    func_00166F90(&o);
-    sXf out = cLookAtChaseAlgorithm_getPose_E050(&o);
-    t4Vector* q = (t4Vector*)(self + 0x30);
-    t4Matrix* m = (t4Matrix*)(self + 0x40);
+    sObj_E050 lookAtAlgo;
+    cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm(&lookAtAlgo);
+    *(cQuad128*)((char*)&lookAtAlgo + 0x20) = *(cQuad128*)camTargetPos;
+    *(cQuad128*)((char*)&lookAtAlgo + 0x40) = *(cQuad128*)camPos;
+    *(float*)((char*)&lookAtAlgo + 0x4C) = 1.0f;
+    *(float*)((char*)&lookAtAlgo + 0x2C) = 1.0f;
+    func_00166640(&lookAtAlgo, 1);
+    func_00166F90(&lookAtAlgo);
+    sXf out = cLookAtChaseAlgorithm_getPose_E050(&lookAtAlgo);
+    t4Vector* poseQuat = (t4Vector*)(self + 0x30);
+    t4Matrix* camMatrix = (t4Matrix*)(self + 0x40);
     *(sXf*)(self + 0x20) = out;
-    vu0CopyMtx_E050(m, &D_004C53A0_E050);
+    vu0CopyMtx_E050(camMatrix, &D_004C53A0_E050);
     t4Matrix rot;
-    vu0QuatToMtx_E050(&rot, q);
-    vu0MulEqMtx_E050(m, &rot);
-    t4Vector p;
-    p.x = *(float*)(self + 0x20);
-    p.y = *(float*)(self + 0x24);
-    p.z = *(float*)(self + 0x28);
-    out.rot.x = -p.x;
-    out.rot.y = -p.y;
-    out.rot.z = -p.z;
-    out.pos.x = -p.x;
-    out.pos.y = -p.y;
-    out.pos.z = -p.z;
+    vu0QuatToMtx_E050(&rot, poseQuat);
+    vu0MulEqMtx_E050(camMatrix, &rot);
+    t4Vector posePos;
+    posePos.x = *(float*)(self + 0x20);
+    posePos.y = *(float*)(self + 0x24);
+    posePos.z = *(float*)(self + 0x28);
+    out.rot.x = -posePos.x;
+    out.rot.y = -posePos.y;
+    out.rot.z = -posePos.z;
+    out.pos.x = -posePos.x;
+    out.pos.y = -posePos.y;
+    out.pos.z = -posePos.z;
     out.pos.w = 1.0f;
-    vu0TransMtx_E050(m, out.pos);
+    vu0TransMtx_E050(camMatrix, out.pos);
     out.pos.x = *(float*)(self + 0x48);
     out.pos.y = *(float*)(self + 0x58);
     out.pos.z = *(float*)(self + 0x68);
     out.pos.w = 0.0f;
     *(t4Vector*)(self + 0x80) = out.pos;
-    cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm_E050(&o, 2);
+    cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm_E050(&lookAtAlgo, 2);
 }
 #endif
 
@@ -1378,34 +1378,34 @@ extern "C" void func_0015EE00_impl(char* self)
     ScaleEq_EE00(screenLeft, dir * 50.0f / Length_EE00(screenLeft));
     char line[176];
     func_0032E100(line, Add_EE00(testHigh, screenLeft), Add_EE00(testLow, screenLeft), 0.5f, 2);
-    float param = func_00336850(nash, line, &info, (int)(self + 0x480));
-    if (param > 0.0f) {
+    float hitFraction = func_00336850(nash, line, &info, (int)(self + 0x480));
+    if (hitFraction > 0.0f) {
         float normZ = info.normal.z;
         float move;
-        if (param > 0.5f) {
-            float d = testLen * (param + param - 1.0f);
+        if (hitFraction > 0.5f) {
+            float hitDistance = testLen * (hitFraction + hitFraction - 1.0f);
             if (normZ > 0.0f) {
                 move = 0.0f;
-                if (d < avoidDist)
-                    move = avoidDist - d;
+                if (hitDistance < avoidDist)
+                    move = avoidDist - hitDistance;
                 *(float*)(self + 0x460) += move;
             } else {
-                move = d + avoidDist;
+                move = hitDistance + avoidDist;
                 if (move > 150.0f)
                     move = 0.0f;
                 *(float*)(self + 0x460) -= move;
             }
         } else {
-            float d = testLen * (1.0f - (param + param));
+            float hitDistance = testLen * (1.0f - (hitFraction + hitFraction));
             if (normZ > 0.0f) {
-                move = d + avoidDist;
+                move = hitDistance + avoidDist;
                 if (move > 150.0f)
                     move = 0.0f;
                 *(float*)(self + 0x460) += move;
             } else {
                 move = 0.0f;
-                if (d < avoidDist)
-                    move = avoidDist - d;
+                if (hitDistance < avoidDist)
+                    move = avoidDist - hitDistance;
                 *(float*)(self + 0x460) -= move;
             }
         }
@@ -2164,12 +2164,12 @@ static inline void RotAxis_15F9B8(sM_15F9B8* m, const sV_15F9B8& axis, float ang
  */
 extern "C" sPair_15F9B8 func_0015F9B8(char* src)
 {
-    sM_15F9B8 m;
-    vu0CopyMtx_15F9B8(&m, &D_004FF1A0_15F9B8);
-    vu0TransMtx_15F9B8(&m, *(sV_15F9B8*)(src + 0x20));
-    RotAxis_15F9B8(&m, D_004FF150_15F9B8, -*(float*)(src + 0x30));
-    RotAxis_15F9B8(&m, D_004FF160_v15F9B8, *(float*)(src + 0x34));
-    return func_0031B748_15F9B8(&m);
+    sM_15F9B8 poseMatrix;
+    vu0CopyMtx_15F9B8(&poseMatrix, &D_004FF1A0_15F9B8);
+    vu0TransMtx_15F9B8(&poseMatrix, *(sV_15F9B8*)(src + 0x20));
+    RotAxis_15F9B8(&poseMatrix, D_004FF150_15F9B8, -*(float*)(src + 0x30));
+    RotAxis_15F9B8(&poseMatrix, D_004FF160_v15F9B8, *(float*)(src + 0x34));
+    return func_0031B748_15F9B8(&poseMatrix);
 }
 #endif
 
@@ -2570,27 +2570,27 @@ static inline sVec_00160228 Cross_00160228(const sVec_00160228& a, const sVec_00
 /**
  * Returns the current positional jitter as an offset across the view.
  *
- * Returns t4vect_Zero when FocusJitterFactor is 0. Otherwise builds the view's forward vector from the angles @p a and
- * @p b (cosines and sines from func_0031C040 and func_0031BF60), the side vector (sin a, -cos a, 0) and up = forward x
+ * Returns t4vect_Zero when FocusJitterFactor is 0. Otherwise builds the view's forward vector from the angles @p heading and
+ * @p pitch (cosines and sines from func_0031C040 and func_0031BF60), the side vector (sin a, -cos a, 0) and up = forward x
  * side, and returns (side * sx + up * sy) * FocusJitterFactor * 10, where k = CurrFocusJitterTime / FocusJitterTime,
  * sx = k * (RandomSideJitter - OldRandomSideJitter) and sy = k * (RandomUpJitter - OldRandomUpJitter).
  *
- * @param p  the jitterer
- * @param a  the view heading (radians)
- * @param b  the view pitch (radians)
+ * @param jitterer  the jitterer
+ * @param heading  the view heading (radians)
+ * @param pitch  the view pitch (radians)
  * @return the offset (w = 0)
  */
-extern "C" sVec_00160228 func_00160228(char* p, float a, float b)
+extern "C" sVec_00160228 func_00160228(char* jitterer, float heading, float pitch)
 {
     float zero = 0.0f;
-    if (*(float*)(p + 0x18) == zero) return D_004FF120_v160228;
-    sVec_00160228 fwd(func_0031C040(b) * func_0031C040(a), func_0031C040(b) * func_0031BF60(a), -func_0031BF60(b), zero);
-    sVec_00160228 right(func_0031BF60(a), -func_0031C040(a), zero, zero);
+    if (*(float*)(jitterer + 0x18) == zero) return D_004FF120_v160228;
+    sVec_00160228 fwd(func_0031C040(pitch) * func_0031C040(heading), func_0031C040(pitch) * func_0031BF60(heading), -func_0031BF60(pitch), zero);
+    sVec_00160228 right(func_0031BF60(heading), -func_0031C040(heading), zero, zero);
     sVec_00160228 up = Cross_00160228(fwd, right);
-    float k = *(float*)(p + 0x20) / *(float*)(p + 0x28);
-    float sx = k * (*(float*)(p + 0xC) - *(float*)(p + 0x0));
-    float sy = k * (*(float*)(p + 0x10) - *(float*)(p + 0x4));
-    float sz = *(float*)(p + 0x18) * 10.0f;
+    float k = *(float*)(jitterer + 0x20) / *(float*)(jitterer + 0x28);
+    float sx = k * (*(float*)(jitterer + 0xC) - *(float*)(jitterer + 0x0));
+    float sy = k * (*(float*)(jitterer + 0x10) - *(float*)(jitterer + 0x4));
+    float sz = *(float*)(jitterer + 0x18) * 10.0f;
     sVec_00160228 res = Scale_00160228(Add_00160228(Scale_00160228(right, sx), Scale_00160228(up, sy)), sz);
     return res;
 }
@@ -4952,8 +4952,8 @@ extern "C" void func_00162568_impl(char* self, char* out, float a, float b, floa
  * The target's velocity (Target virtual slot 3, cRiderCameraTarget_getVelocity) is replaced by LastOriginalVel when
  * slower than 27.78 and stored back there. Its horizontal part is smoothed into LastHorizontalVel with a lerp factor
  * between the min and max smoothness, picked by the steepness of the velocity (|z| of its direction, mapped from the
- * start slope to the end slope): the powder parameters (@p e .. @p h) when the target's surface type (slot 20) is 2, 3
- * or 13, else the normal ones (@p a .. @p d). While airborne (motion state 1) with a horizontal speed under 27.78,
+ * start slope to the end slope): the powder parameters (@p powderVelMinSmoothness .. @p powderVelEndSlope) when the target's surface type (slot 20) is 2, 3
+ * or 13, else the normal ones (@p normalVelMinSmoothness .. @p normalVelEndSlope). While airborne (motion state 1) with a horizontal speed under 27.78,
  * LastHorizontalVel is the target of the lerp instead.
  *
  * The setup gets: +0x0 (SavedPos) = Position, +0x10 (TPos) = the target's position (slot 1), +0x20 (TVel) = smoothed
@@ -4963,61 +4963,61 @@ extern "C" void func_00162568_impl(char* self, char* out, float a, float b, floa
  * Setup_VisualBoost and Setup_IsTargetHandplanting copy +0x4C, +0x50 and +0x5C.
  *
  * @param out  the setup to fill (On Tour's cChaseSetup)
- * @param a  minimum smoothness on normal snow
- * @param b  maximum smoothness on normal snow
- * @param c  slope at which normal smoothing starts rising from the minimum
- * @param d  slope at which normal smoothing reaches the maximum
- * @param e  minimum smoothness on powder
- * @param f  maximum smoothness on powder
- * @param g  slope at which powder smoothing starts rising
- * @param h  slope at which powder smoothing reaches the maximum
+ * @param normalVelMinSmoothness  minimum smoothness on normal snow
+ * @param normalVelMaxSmoothness  maximum smoothness on normal snow
+ * @param normalVelStartSlope  slope at which normal smoothing starts rising from the minimum
+ * @param normalVelEndSlope  slope at which normal smoothing reaches the maximum
+ * @param powderVelMinSmoothness  minimum smoothness on powder
+ * @param powderVelMaxSmoothness  maximum smoothness on powder
+ * @param powderVelStartSlope  slope at which powder smoothing starts rising
+ * @param powderVelEndSlope  slope at which powder smoothing reaches the maximum
  */
-extern "C" void func_00162568_impl(char* self, char* out, float a, float b, float c, float d, float e, float f,
-                                   float g, float h)
+extern "C" void func_00162568_impl(char* self, char* out, float normalVelMinSmoothness, float normalVelMaxSmoothness, float normalVelStartSlope, float normalVelEndSlope, float powderVelMinSmoothness, float powderVelMaxSmoothness,
+                                   float powderVelStartSlope, float powderVelEndSlope)
 {
-    sVec_001607E0 v = cmGet_001607E0(self, 3);
+    sVec_001607E0 targetVelocity = cmGet_001607E0(self, 3);
     int mode = cRider_getMotionState(*(void**)(*(char**)(self + 0x30) + 4));
-    if (cmLength_001607E0(v) < 27.77777862548828f) {
-        v = *(sVec_001607E0*)(self + 0x1B0);
+    if (cmLength_001607E0(targetVelocity) < 27.77777862548828f) {
+        targetVelocity = *(sVec_001607E0*)(self + 0x1B0);
     }
-    *(sVec_001607E0*)(self + 0x1B0) = v;
-    sVec_001607E0 w = v;
+    *(sVec_001607E0*)(self + 0x1B0) = targetVelocity;
+    sVec_001607E0 w = targetVelocity;
     w.z = 0.0f;
-    sVec_001607E0 dz = cmSub_162568(v, w);
-    sVec_001607E0 n = cmDot_162568(v, v) > 0.0f ? cmNormalized_162568(v) : D_004FF120_v162568;
+    sVec_001607E0 dz = cmSub_162568(targetVelocity, w);
+    sVec_001607E0 n = cmDot_162568(targetVelocity, targetVelocity) > 0.0f ? cmNormalized_162568(targetVelocity) : D_004FF120_v162568;
     int k = cmGetI_162568(self, 20);
-    float lo, hi, t0, t1;
+    float lo, hi, startSlope, endSlope;
     if ((unsigned)(k - 2) < 2 || k == 13) {
-        lo = e;
-        hi = f;
-        t0 = g;
-        t1 = h;
+        lo = powderVelMinSmoothness;
+        hi = powderVelMaxSmoothness;
+        startSlope = powderVelStartSlope;
+        endSlope = powderVelEndSlope;
     } else {
-        lo = a;
-        hi = b;
-        t0 = c;
-        t1 = d;
+        lo = normalVelMinSmoothness;
+        hi = normalVelMaxSmoothness;
+        startSlope = normalVelStartSlope;
+        endSlope = normalVelEndSlope;
     }
     float x = __builtin_fabsf(n.z);
     float frac;
-    if (x >= t0) {
-        if (x <= t1) {
-            frac = (x - t0) / (t1 - t0);
+    if (x >= startSlope) {
+        if (x <= endSlope) {
+            frac = (x - startSlope) / (endSlope - startSlope);
         } else {
             frac = 1.0f;
         }
     } else {
         frac = 0.0f;
     }
-    float r = lo + (hi - lo) * frac;
+    float smoothness = lo + (hi - lo) * frac;
     if (mode == 1) {
         if (cmLength_001607E0(w) < 27.77777862548828f) {
             w = *(sVec_001607E0*)(self + 0x100);
         }
     }
-    sVec_001607E0 nf = cmLerp_162568(*(sVec_001607E0*)(self + 0x100), w, r);
+    sVec_001607E0 nf = cmLerp_162568(*(sVec_001607E0*)(self + 0x100), w, smoothness);
     *(sVec_001607E0*)(self + 0x100) = nf;
-    sVec_001607E0 p = cmAdd_001607E0(nf, dz);
+    sVec_001607E0 chaseVelocity = cmAdd_001607E0(nf, dz);
     *(int*)(out + 0x64) = mode == 4;
     *(int*)(out + 0x58) = mode == 2;
     *(int*)(out + 0x5C) = mode == 5;
@@ -5025,15 +5025,15 @@ extern "C" void func_00162568_impl(char* self, char* out, float a, float b, floa
     *(int*)(out + 0x40) = mode;
     *(float*)(out + 0x4C) = cmGetF_162568(self, 17);
     *(float*)(out + 0x54) = cmGetF_162568(self, 18);
-    SetFrame_162568(out, *(sVec_001607E0*)(self + 0x40), p, cmGetR_162568(self, 1));
+    SetFrame_162568(out, *(sVec_001607E0*)(self + 0x40), chaseVelocity, cmGetR_162568(self, 1));
     *(float*)(out + 0x44) = cmLength_001607E0(*(sVec_001607E0*)(out + 0x20));
-    float s;
+    float visualBoost;
     if (*(float*)(out + 0x4C) > 0.0f) {
-        s = (*(float*)(out + 0x4C) + 1.0f) * 0.5f;
+        visualBoost = (*(float*)(out + 0x4C) + 1.0f) * 0.5f;
     } else {
-        s = 0.0f;
+        visualBoost = 0.0f;
     }
-    *(float*)(out + 0x50) = s;
+    *(float*)(out + 0x50) = visualBoost;
     *(float*)(self + 0x2F4) = *(float*)(out + 0x4C);
     *(float*)(self + 0x2F8) = *(float*)(out + 0x50);
     *(int*)(self + 0x2FC) = *(int*)(out + 0x5C);
@@ -8614,11 +8614,11 @@ extern "C" void func_001668B8_impl(char* self, sV_1668B8* out) __asm__("func_001
  */
 extern "C" void func_001668B8_impl(char* self, sV_1668B8* out)
 {
-    sM_1668B8 m;
-    vu0CopyMtx_1668B8(&m, &D_004FF1A0_1668B8);
-    Rotate_1668B8(&m, D_004FF150_1668B8, -*(float*)(self + 0x54));
-    Rotate_1668B8(&m, D_004FF160_v1668B8, -*(float*)(self + 0x50));
-    *out = Row_1668B8(m, 0);
+    sM_1668B8 lookMatrix;
+    vu0CopyMtx_1668B8(&lookMatrix, &D_004FF1A0_1668B8);
+    Rotate_1668B8(&lookMatrix, D_004FF150_1668B8, -*(float*)(self + 0x54));
+    Rotate_1668B8(&lookMatrix, D_004FF160_v1668B8, -*(float*)(self + 0x50));
+    *out = Row_1668B8(lookMatrix, 0);
 }
 #endif
 
@@ -9048,14 +9048,14 @@ extern "C" void func_00166F90_impl(char* self)
 {
     *(float*)(self + 0x4C) = 1.0f;
     sV_166F90* pos = (sV_166F90*)(self + 0x40);
-    sM_166F90 m;
-    vu0CopyMtx_166F90(&m, &D_004FF1A0_166F90);
-    vu0TransMtx_166F90(&m, pos);
-    Rotate_166F90(&m, D_004FF150_166F90, -*(float*)(self + 0x54));
-    Rotate_166F90(&m, D_004FF160_v166F90, -*(float*)(self + 0x50));
+    sM_166F90 poseMatrix;
+    vu0CopyMtx_166F90(&poseMatrix, &D_004FF1A0_166F90);
+    vu0TransMtx_166F90(&poseMatrix, pos);
+    Rotate_166F90(&poseMatrix, D_004FF150_166F90, -*(float*)(self + 0x54));
+    Rotate_166F90(&poseMatrix, D_004FF160_v166F90, -*(float*)(self + 0x50));
     {
         sPair_166F90 xf;
-        func_0031B748_166F90(&xf, &m);
+        func_0031B748_166F90(&xf, &poseMatrix);
         ((sCamXf_166F90*)self)->xf = xf;
     }
     *(sV_166F90*)(self + 0x70) = ConjF_166F90(*(float*)(self + 0x70), *(float*)(self + 0x74), *(float*)(self + 0x78), *(float*)(self + 0x7C));
@@ -10375,18 +10375,18 @@ static inline float cmLength_168150b(const t4Vector& v)
 // allowed range, snap it back behind the target.
 extern "C" void func_00168150_def(char* self)
 {
-    t4Vector d = cmSub_168150b(*(t4Vector*)(self + 0x20), *(t4Vector*)(self + 0x40));
-    float len = cmLength_168150b(d);
+    t4Vector eyeToTarget = cmSub_168150b(*(t4Vector*)(self + 0x20), *(t4Vector*)(self + 0x40));
+    float len = cmLength_168150b(eyeToTarget);
     if (len < 20.0f || len > 1.0000000200408773e+20f) {
-        char* o = *(char**)(self + 0x30);
-        t4Vector x = *(t4Vector*)(*(char**)(o + 4) + 0x1B0);
-        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[1];
-        t4Vector p = vEntry->fn(o + vEntry->delta);
+        char* riderTarget = *(char**)(self + 0x30);
+        t4Vector x = *(t4Vector*)(*(char**)(riderTarget + 4) + 0x1B0);
+        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)riderTarget)[1];
+        t4Vector targetPos = vEntry->fn(riderTarget + vEntry->delta);
         int one = 1;
-        float k50 = 50.0f;
-        t4Vector np = cmAdd_168150(cmSub2_168150(p, cmScale_168150(x, 200.0f)), cmScaleP_168150(&D_004FF160_8150, k50));
+        float liftHeight = 50.0f;
+        t4Vector np = cmAdd_168150(cmSub2_168150(targetPos, cmScale_168150(x, 200.0f)), cmScaleP_168150(&D_004FF160_8150, liftHeight));
         *(t4Vector*)(self + 0x40) = np;
-        *(t4Vector*)(self + 0x20) = p;
+        *(t4Vector*)(self + 0x20) = targetPos;
         *(int*)(self + 0x2F0) = one;
     }
 }

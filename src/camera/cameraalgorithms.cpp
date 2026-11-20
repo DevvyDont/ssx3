@@ -503,7 +503,7 @@ extern "C" void func_0015D928_impl(void* self)
     sM_D928 rot;
     vu0QuatToMtx_D928(&rot, *(sV_D928*)((char*)self + 0x30));
     vu0MulMtx_D928(view, view, &rot);
-    sV_D928 t;
+    sV_D928 invTranslation;
     sV_D928 neg;
     sV_D928 pos;
     pos.x = *(float*)((char*)self + 0x20);
@@ -512,11 +512,11 @@ extern "C" void func_0015D928_impl(void* self)
     neg.x = -pos.x;
     neg.y = -pos.y;
     neg.z = -pos.z;
-    t.x = neg.x;
-    t.y = neg.y;
-    t.z = neg.z;
-    t.w = 1.0f;
-    vu0TransMtx_D928(view, t);
+    invTranslation.x = neg.x;
+    invTranslation.y = neg.y;
+    invTranslation.z = neg.z;
+    invTranslation.w = 1.0f;
+    vu0TransMtx_D928(view, invTranslation);
 }
 #endif
 

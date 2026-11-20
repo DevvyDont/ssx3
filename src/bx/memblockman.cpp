@@ -947,9 +947,9 @@ struct sSemaParam_31A6D8 {
 extern "C" void func_0031A6D8(sMgr_31A6D8* self)
 {
     sThreadParam_31A6D8 st;
-    sSemaParam_31A6D8 s1;
-    sSemaParam_31A6D8 s2;
-    sSemaParam_31A6D8 s3;
+    sSemaParam_31A6D8 haltSemaParam;
+    sSemaParam_31A6D8 syncSemaParam;
+    sSemaParam_31A6D8 countingSemaParam;
     sThreadParam_31A6D8 tp;
     self->f20 = 0;
     func_0031A308(self->vu0);
@@ -957,14 +957,14 @@ extern "C" void func_0031A6D8(sMgr_31A6D8* self)
     func_00416210(&st, 0, 0x30);
     ReferThreadStatus(self->f10, &st);
     self->f14 = st.currentPriority;
-    func_00416210(&s1, 0, 0x18);
-    self->fC = CreateSema(&s1);
-    func_00416210(&s2, 0, 0x18);
-    self->f18 = CreateSema(&s2);
+    func_00416210(&haltSemaParam, 0, 0x18);
+    self->fC = CreateSema(&haltSemaParam);
+    func_00416210(&syncSemaParam, 0, 0x18);
+    self->f18 = CreateSema(&syncSemaParam);
     self->f1C = 0;
-    func_00416210(&s3, 0, 0x18);
-    s3.maxCount = 0x400;
-    self->f14044 = CreateSema(&s3);
+    func_00416210(&countingSemaParam, 0, 0x18);
+    countingSemaParam.maxCount = 0x400;
+    self->f14044 = CreateSema(&countingSemaParam);
     self->f14048 = 0;
     func_00416210(&tp, 0, 0x30);
     tp.status = 0x10;
@@ -980,9 +980,9 @@ extern "C" void func_0031A6D8(sMgr_31A6D8* self)
     D_004A3ECC = self->f14040;
     StartThread(self->f14040, self);
     self->f4038 = 0;
-    func_00416210(&s3, 0, 0x18);
-    s3.maxCount = 0x400;
-    self->f4034 = CreateSema(&s3);
+    func_00416210(&countingSemaParam, 0, 0x18);
+    countingSemaParam.maxCount = 0x400;
+    self->f4034 = CreateSema(&countingSemaParam);
     func_00416210(&tp, 0, 0x30);
     tp.status = 0x10;
     tp.entry = func_0031AC08;
@@ -1200,18 +1200,18 @@ struct sMbOwner_AB30 {
 // Halt request: on the execution thread checks the halt directly; otherwise forwards it and wakes the worker.
 extern "C" void func_0031AB30(void* self)
 {
-    char* s = (char*)self;
-    *(volatile int*)(s + 0x4038) = 1;
+    char* selfBytes = (char*)self;
+    *(volatile int*)(selfBytes + 0x4038) = 1;
     int cur = GetThreadId();
-    if (cur != *(int*)(s + 0x14040)) {
-        SuspendThread(*(int*)(s + 0x14040));
+    if (cur != *(int*)(selfBytes + 0x14040)) {
+        SuspendThread(*(int*)(selfBytes + 0x14040));
     }
-    if (cur == *(int*)(s + 0x10)) {
+    if (cur == *(int*)(selfBytes + 0x10)) {
         cExecutionMan_checkHalt(self, 0);
         return;
     }
-    sMbOwner_AB30* o = *(sMbOwner_AB30**)(s + 0x8);
-    o->vt5.fn(s + o->vt5.delta);
+    sMbOwner_AB30* vtable = *(sMbOwner_AB30**)(selfBytes + 0x8);
+    vtable->vt5.fn(selfBytes + vtable->vt5.delta);
     func_0031AAF0(self);
 }
 #endif
@@ -1330,11 +1330,11 @@ extern "C" void SignalSema(int);
  *
  * func_0031AC60 then calls the object's virtual slot 2 and clears the job; func_0031AD00 reports when it has.
  *
- * @param a1  the job object
+ * @param module  the job object
  */
-extern "C" void func_0031ACD8(void* self, int a1)
+extern "C" void func_0031ACD8(void* self, int module)
 {
-    *(int*)((char*)self + 0x14048) = a1;
+    *(int*)((char*)self + 0x14048) = module;
     SignalSema(*(int*)((char*)self + 0x14044));
 }
 #endif
@@ -1393,15 +1393,15 @@ extern "C" int func_0031AD20(void)
 {
     int flags = D_00519C40[0];
     if (D_004A3ED4 != 0) {
-        int r;
+        int trayStatus;
         D_004A3ED4 = 0;
-        r = 0;
-        func_00402618(2, &r);
+        trayStatus = 0;
+        func_00402618(2, &trayStatus);
     }
     if ((flags & 6) == 6) {
-        int r2 = 0;
-        func_00402618(2, &r2);
-        if (r2 != 0)
+        int trayChanged = 0;
+        func_00402618(2, &trayChanged);
+        if (trayChanged != 0)
             D_004A3ED0 = 1;
         D_00519C40[0] &= ~6;
         func_003E3D78();
