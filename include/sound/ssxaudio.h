@@ -220,7 +220,7 @@ struct cSSXAudio {
     int unk_6090;                       // 0x6090 [R] ctor 0; [U] func_00285FB0 copies unk_608C into it, cSSXAudio_FrontEndPurge tests == 2
     char unk_6094[0x4];                 // 0x6094 no retail access seen (or padding)
     unsigned long mRadioPlayList;       // 0x6098 PORT: 64-bit long; [P] GetRadioPlayList (preview 0x6138, retail 0x2BAD70 ld 0x6098; layout_xlate pair-seen); [R] ctor sd 0
-    char unk_60A0[0x4];                 // 0x60A0 no retail access seen (or padding)
+    float unk_60A0;                     // 0x60A0 [U] func_0028C8C8: the song's overlay level during a long jump
     char mPlayListName[20][20];         // 0x60A4 [P] GetPlayListName(int) returns this + 0x60A4 + i * 20 (retail 0x2BAD80; preview 0x6144)
     int mNumPlayLists;                  // 0x6234 [P] GetNumPlayLists (preview 0x62D4, same -0xA0 shift; retail accessor 0x2BAD78); [U] func_00289470 counts them
     int mPlayListIndex;                 // 0x6238 [P] GetPlayListIndex (preview 0x62D8; retail accessor 0x2BAD98); [U] func_00289520 stores it
@@ -228,7 +228,10 @@ struct cSSXAudio {
                                         //        func_0028D898 returns it, func_0028D740 / func_0028D7D8 end it,
                                         //        func_0028CF98 clears it
     int unk_6240;                       // 0x6240 [U] the event to follow it: func_0028D740 records it
-    char unk_6244[0xC];                 // 0x6244 no retail access seen (or padding)
+    float unk_6244;                     // 0x6244 [U] func_0028C8C8: the air time, cached on the jump's first frame
+    float unk_6248;                     // 0x6248 [U] func_0028C8C8: the largest current air time of the jump
+    float unk_624C;                     // 0x624C [U] func_0028C8C8: the volume scale's air time, set on the
+                                        //        jump's first frame
     int unk_6250;                       // 0x6250 [R] ctor 0; [U] func_0028C8C8 counts it down, func_0028C8C0 sets
                                         //        it; nothing reads it otherwise
     int unk_6254;                       // 0x6254 [R] ctor 0; [U] func_002A4770; retail accessor 0x2BAD30 sets it to 1
@@ -422,6 +425,8 @@ CHECK_OFFSET(cSSXAudio, mPlayListIndex, 0x6238);
 CHECK_OFFSET(cSSXAudio, unk_623C, 0x623C);
 CHECK_OFFSET(cSSXAudio, unk_6240, 0x6240);
 CHECK_OFFSET(cSSXAudio, unk_6244, 0x6244);
+CHECK_OFFSET(cSSXAudio, unk_6248, 0x6248);
+CHECK_OFFSET(cSSXAudio, unk_624C, 0x624C);
 CHECK_OFFSET(cSSXAudio, unk_6250, 0x6250);
 CHECK_OFFSET(cSSXAudio, unk_6254, 0x6254);
 CHECK_OFFSET(cSSXAudio, unk_6258, 0x6258);

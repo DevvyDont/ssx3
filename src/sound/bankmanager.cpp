@@ -594,18 +594,18 @@ struct sBankInst60 { char pad0[8]; int f8; char pad1[0x60 - 0xC]; };
  *
  * When func_0028B830 says slot @p i (a 0x60-byte bank instance of the array at +0xACC) is not loaded from @p id, it
  * cancels any queued load of the slot (cAsyncSys_ASYNCSYS_Cancel) and calls cAsyncSys_ASYNCSYS_QueueLoad with the
- * slot's allocation location (+0x8 of the instance) and @p a3. Called from func_002B43D8 (with 0x100) and
+ * slot's allocation location (+0x8 of the instance) and @p mainMemFlag. Called from func_002B43D8 (with 0x100) and
  * func_0029B818.
  *
  * @param i  bank slot index
  * @param id  bank file name
- * @param a3  main-memory allocation flags for the load
+ * @param mainMemFlag  main-memory allocation flags for the load
  */
-extern "C" void func_0028BD10(void* self, int i, void* id, int a3)
+extern "C" void func_0028BD10(void* self, int i, void* id, int mainMemFlag)
 {
     if (func_0028B830((char*)*(void**)((char*)self + 0xACC) + i * 0x60, id) == 0) {
         cAsyncSys_ASYNCSYS_Cancel(self, i);
-        cAsyncSys_ASYNCSYS_QueueLoad(self, i, id, (*(sBankInst60**)((char*)self + 0xACC))[i].f8, a3);
+        cAsyncSys_ASYNCSYS_QueueLoad(self, i, id, (*(sBankInst60**)((char*)self + 0xACC))[i].f8, mainMemFlag);
     }
 }
 #endif
@@ -1071,13 +1071,13 @@ static inline void bmPush_C430(sMgr_C430** self, int kind, int data)
  * mAsynclevel / 100 (clamped to 0..127), copies the song's delay settings in with func_002B2850 and plays it with
  * cBankSys_SFX_End. It then increments mData2 and sets mCountReset to mData3, so the monitor calls back one beat later.
  *
- * @param p  the cSSXAudio (this, adjusted from its cMusicSys base)
+ * @param audio  the cSSXAudio (this, adjusted from its cMusicSys base)
  * @param cue  the cMonitorInstance that fired
  * @return 0
  */
-extern "C" int func_0028C430(void* p, sCue_C430* cue)
+extern "C" int func_0028C430(void* audio, sCue_C430* cue)
 {
-    sMgr_C430** self = (sMgr_C430**)p;
+    sMgr_C430** self = (sMgr_C430**)audio;
     int* pidx = &cue->idx;
     char* data = cue->data;
     int saved = cue->f24;
@@ -1099,9 +1099,9 @@ extern "C" int func_0028C430(void* p, sCue_C430* cue)
         bmPush_C430(self, kind, (int)(data + idx));
         sMgr_C430** pp = *(sMgr_C430***)((char*)self + 0x118);
         (*pp)->st.a3C[(*pp)->st.depth] = (int)((char*)self + 0x60A0);
-        sMgr_C430* m2 = **(sMgr_C430***)((char*)self + 0x118);
-        sStack_C430* st2 = &m2->st;
-        st2->a38[m2->st.depth] = (int)BM_MAX_C430(BM_MIN_C430(st2->a38[st2->depth] * (vol * 0.009999999776482582f), 127.0f), 0.0f);
+        sMgr_C430* bankManager = **(sMgr_C430***)((char*)self + 0x118);
+        sStack_C430* st2 = &bankManager->st;
+        st2->a38[bankManager->st.depth] = (int)BM_MAX_C430(BM_MIN_C430(st2->a38[st2->depth] * (vol * 0.009999999776482582f), 127.0f), 0.0f);
         st2->entries[st2->depth].kind = BM_MAX_C430(BM_MIN_C430(st2->a38[st2->depth], 127), 0);
         func_002B2850(*(void**)((char*)self + 0x520), (char*)self + 0x118);
         cBankSys_SFX_End(self);
@@ -1187,7 +1187,7 @@ struct sBmC8C8 {
     int f6250;                  // 0x6250
 };
 
-static inline float bmSpeed_C8C8(sBmC8C8* self, sRiderC8C8* rider)
+static inline float bmAirTime_C8C8(sBmC8C8* self, sRiderC8C8* rider)
 {
     int s = rider->ap->state;
     int air = 0;
@@ -1212,7 +1212,7 @@ static inline float bmSpeed_C8C8(sBmC8C8* self, sRiderC8C8* rider)
  * Counts unk_6250 down. For the focus rider (cSSXAudio_GetFocusRider(-1)) in motion state 1 with its mAirPredictor's
  * state (+0xAC, On Tour SimState) 1 or 3, the air time is the predictor's +0x98 (On Tour TotalAirTime), cached in
  * unk_6244 on the first frame (unk_6248 cleared); while D_004A361C is 1 the cached value is reused; otherwise it is 0.
- * The local spd holds this air time, not a speed. unk_60A0 is set to the music volume (func_00287968(self, 1, 0)), and
+ * unk_60A0 is set to the music volume (func_00287968(self, 1, 0)), and
  * D_004A3620 takes last frame's D_004A361C, which is cleared. Above 3.9995 s, when the song's mDuckToLoops
  * (func_002B4878) is 1, func_002A4168 and func_002A41D8 are false and no rider event runs (func_0028D898), the song is
  * driven too (local play). Outside replays, above 2 s: D_004A361C = 1; unk_6248 keeps the largest current air time
@@ -1229,42 +1229,42 @@ extern "C" void func_0028C8C8(sBmC8C8* self)
     if (self->f6250 > 0)
         self->f6250--;
     sRiderC8C8* rider = cSSXAudio_GetFocusRider_p(self, -1);
-    float spd;
+    float airTime;
     if (cRider_getMotionState(rider) == 1) {
-        int s = rider->ap->state;
+        int simState = rider->ap->state;
         int air = 0;
-        if (s == 1 || s == 3)
+        if (simState == 1 || simState == 3)
             air = 1;
         if (air) {
             if (D_004A361C == 1) {
-                spd = self->f6244;
+                airTime = self->f6244;
             } else {
-                spd = rider->ap->f98;
+                airTime = rider->ap->f98;
                 self->f6248 = 0.0f;
-                self->f6244 = spd;
+                self->f6244 = airTime;
             }
             goto have;
         }
         if (D_004A361C == 1) {
-            spd = self->f6244;
+            airTime = self->f6244;
             goto have;
         }
     }
-    spd = 0.0f;
+    airTime = 0.0f;
 have:
     int play = 0;
     self->f60A0 = *(float*)func_00287968(self, 1, 0);
     D_004A3620 = D_004A361C;
     D_004A361C = 0;
-    if (3.9994986057281494f < spd) {
-        int r = func_002B4878(self->mon);
-        if (r == 1 && !func_002A4168(self) && !func_002A41D8(self)) {
+    if (3.9994986057281494f < airTime) {
+        int duckToLoops = func_002B4878(self->mon);
+        if (duckToLoops == 1 && !func_002A4168(self) && !func_002A41D8(self)) {
             if (!func_0028D898(self))
-                play = r;
+                play = duckToLoops;
         }
     }
     if (cSSXAudio_ReplayMode(self) == 0) {
-        if (2.0f < spd) {
+        if (2.0f < airTime) {
             D_004A361C = 1;
             float lo = rider->ap->fA0;
             if (lo < self->f6248)
@@ -1282,24 +1282,24 @@ have:
             }
             float vmax = 127.0f;
             float inv = 0.007874015718698502f;
-            float vol = ((1.0f - spd * 0.8425197005271912f * 0.5f) * vmax <? vmax) >? 20.0f;
+            float vol = ((1.0f - airTime * 0.8425197005271912f * 0.5f) * vmax <? vmax) >? 20.0f;
             if (lo < hi) {
                 float ratio = lo / hi;
                 int full = 127;
-                float t = vmax - ratio * 107.0f;
-                char v = (int)((t <? vmax) >? 20.0f);
+                float rawVolume = vmax - ratio * 107.0f;
+                char clampedVolume = (int)((rawVolume <? vmax) >? 20.0f);
                 if (play) {
                     float k = *(float*)func_00287968(self, 1, 0);
-                    int d = v - 20;
-                    float f = (float)(full - d) * (k * inv);
-                    self->f60A0 = f;
-                    func_002B3D10(self->mon, (int)(f * 100.0f));
+                    int volumeAboveMin = clampedVolume - 20;
+                    float musicLevel = (float)(full - volumeAboveMin) * (k * inv);
+                    self->f60A0 = musicLevel;
+                    func_002B3D10(self->mon, (int)(musicLevel * 100.0f));
                 }
-                t = vmax - (vmax - vol) * ratio;
-                v = (int)((t <? vmax) >? vol);
-                self->f5830 = (float)(full - v) * inv;
+                rawVolume = vmax - (vmax - vol) * ratio;
+                clampedVolume = (int)((rawVolume <? vmax) >? vol);
+                self->f5830 = (float)(full - clampedVolume) * inv;
                 if (play)
-                    func_002B3C98(self->mon, v);
+                    func_002B3C98(self->mon, clampedVolume);
             } else {
                 self->f5830 = (vmax - vol) * inv;
                 if (play) {
@@ -1484,18 +1484,18 @@ static inline void bmLoad_CF98(void* self, char* name, int bank, int id)
  * In radio mode 2 (unk_608C) it starts the ambience "Peak1Amb", "Peak2Amb" or "Peak3Amb" by @p type, or, when that is
  * -1, by func_002A1E20 of the race location (1, 2, anything else), on the ambient control (8) and tagged 101-103; then
  * func_002B46D0, sets unk_6280 to 1 and calls func_002B3CC0(0) and func_002B3C28. Else, at location 17 or above with @p
- * a2 and @p a4 zero and func_002A42C8 false, it starts the theme "Peak1", "Peak2" or "Peak3" (by the location) on the
+ * a2 and @p requestLine zero and func_002A42C8 false, it starts the theme "Peak1", "Peak2" or "Peak3" (by the location) on the
  * music control, tagged 1-3, func_002B3CC0(1), event 12 and func_002B3C28. Otherwise it starts the current song of the
  * active list (null name), with MusicSys.mCurrentSongNum saved in unk_62A4 and the song's SEDVALUE (func_002B4908) in
- * unk_5778, func_002B3CC0(1), event @p a1 (36 when @p a4 is set at location 17 or above), then func_0028F108 with the
+ * unk_5778, func_002B3CC0(1), event @p startEvent (36 when @p requestLine is set at location 17 or above), then func_0028F108 with the
  * focus rider (cSSXAudio_GetFocusRider(-1)).
  *
- * @param a1  music event sent to the playlist song (callers pass 0 or 36)
- * @param a2  non-zero skips the peak theme (func_0028E100 passes 1)
+ * @param startEvent  music event sent to the playlist song (callers pass 0 or 36)
+ * @param skipPeakTheme  non-zero skips the peak theme (func_0028E100 passes 1)
  * @param type  peak for radio mode 2 (1, 2, else 3), or -1 to take it from the location
- * @param a4  non-zero skips the peak theme and selects event 36 on the peaks; cFEStateRequestLine_onWidgetMenu passes 1
+ * @param requestLine  non-zero skips the peak theme and selects event 36 on the peaks; cFEStateRequestLine_onWidgetMenu passes 1
  */
-extern "C" void func_0028CF98(void* self, int a1, int a2, int type, int a4)
+extern "C" void func_0028CF98(void* self, int startEvent, int skipPeakTheme, int type, int requestLine)
 {
     if (cSSXAudio_ReplayMode(self) != 0 && *(int*)((char*)self + 0x6294) == 0) {
         return;
@@ -1505,10 +1505,10 @@ extern "C" void func_0028CF98(void* self, int a1, int a2, int type, int a4)
     *(int*)((char*)self + 0x623C) = 0;
     *(int*)((char*)self + 0x6240) = 0;
     if (*(int*)((char*)self + 0x608C) == 2) {
-        int t = type == -1 ? func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0))) : type;
-        if (t == 1) {
+        int peakNumber = type == -1 ? func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0))) : type;
+        if (peakNumber == 1) {
             bmLoad_CF98(self, str_Peak1Amb, 8, 101);
-        } else if (t == 2) {
+        } else if (peakNumber == 2) {
             bmLoad_CF98(self, str_Peak2Amb, 8, 102);
         } else {
             bmLoad_CF98(self, str_Peak3Amb, 8, 103);
@@ -1522,11 +1522,11 @@ extern "C" void func_0028CF98(void* self, int a1, int a2, int type, int a4)
     }
     sBmInfo_CF98 info = *(sBmInfo_CF98*)cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
     char* mon = (char*)self + 0x118;
-    if (info.f0 >= 17 && a2 == 0 && a4 == 0 && func_002A42C8(self) == 0) {
-        int t = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-        if (t == 1) {
+    if (info.f0 >= 17 && skipPeakTheme == 0 && requestLine == 0 && func_002A42C8(self) == 0) {
+        int peakNumber = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+        if (peakNumber == 1) {
             bmLoad_CF98(self, str_Peak1_b, 1, 1);
-        } else if (t == 2) {
+        } else if (peakNumber == 2) {
             bmLoad_CF98(self, str_Peak2_b, 1, 2);
         } else {
             bmLoad_CF98(self, str_Peak3_b, 1, 3);
@@ -1542,11 +1542,11 @@ extern "C" void func_0028CF98(void* self, int a1, int a2, int type, int a4)
     *(int*)((char*)self + 0x62A4) = *(int*)((char*)self + 0x508);
     *(int*)((char*)self + 0x5778) = func_002B4908(mon);
     func_002B3CC0(mon, 1);
-    if (a4 != 0 && info.f0 >= 17) {
-        a1 = 36;
+    if (requestLine != 0 && info.f0 >= 17) {
+        startEvent = 36;
     }
     sBmVtCD48* vt2 = *(sBmVtCD48**)((char*)self + 0x5558);
-    ((tBmSetCD48)vt2[4].fn)(mon + vt2[4].delta, a1);
+    ((tBmSetCD48)vt2[4].fn)(mon + vt2[4].delta, startEvent);
     func_0028F108(self, cSSXAudio_GetFocusRider(self, -1));
 }
 #endif
@@ -1936,10 +1936,10 @@ extern "C" int func_0028DF18(void* self, int quiet)
         ((tBmSetDF18)vt[4].fn)(mon + vt[4].delta, 18);
         func_0028D488(self);
         func_002ADCA0_DF18(**(char***)((char*)self + 0x118) + 0x1D8, 2000, D_004A3648_DF18->v, 0, 1, 1, 0, 0);
-        char* p = **(char***)((char*)self + 0x118) + 0x1D8;
+        char* bankMonitor = **(char***)((char*)self + 0x118) + 0x1D8;
         const sSndKey8_DF18* key = D_004A3650_DF18;
-        int r = func_002B4908(mon);
-        func_002ADCA0_DF18(p, 1500, key->v, 0, 3, r, 0, 0);
+        int sedValue = func_002B4908(mon);
+        func_002ADCA0_DF18(bankMonitor, 1500, key->v, 0, 3, sedValue, 0, 0);
     } else if (quiet == 0) {
         func_002ADCA0_DF18(**(char***)((char*)self + 0x118) + 0x1D8, 100, D_004A3658_DF18->v, 0, 0, 0, 0, 0);
     }

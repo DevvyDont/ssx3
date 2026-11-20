@@ -348,11 +348,11 @@ static inline int clutPsm_7440(int f)
  * and optionally copies the pixels and CLUT and reserves VRAM.
  *
  * The id is @p bindId when it is 0 or more (cPSPGraphicsMan_NewBindTexID) or a free non-bound one
- * (cPSPGraphicsMan_NewNonBindTexID). The 0x58-byte info gets: the copy flag (+0x0), 8 characters of @p a2 (+0x4), the
+ * (cPSPGraphicsMan_NewNonBindTexID). The 0x58-byte info gets: the copy flag (+0x0), 8 characters of @p texName (+0x4), the
  * texel format (+0xC), mip count (+0x24), -1 in the four VRAM fields (+0x28..+0x34), and the bits per pixel (+0x18) of
- * the GS format chosen from @p a6 (8 -> PSMCT24, 2 -> PSMCT16, 9/10 -> PSMT8, 11/12 -> PSMT4, else PSMCT32). With
+ * the GS format chosen from @p texelFormat (8 -> PSMCT24, 2 -> PSMCT16, 9/10 -> PSMT8, 11/12 -> PSMT4, else PSMCT32). With
  * pixels it sums the data size (+0x10, each level at least 0x100 bytes) and the page-rounded VRAM size (+0x14) over
- * levels 0 to @p a5, and either copies the data into a new buffer tagged with the name (when @p ownsData) or keeps the
+ * levels 0 to @p mipCount, and either copies the data into a new buffer tagged with the name (when @p ownsData) or keeps the
  * pointer (+0x1C); without pixels the data size is 0 and the VRAM size covers one level. A CLUT (16 entries for formats
  * 11/12, else 256) is copied or referenced likewise (+0x20).
  *
@@ -362,31 +362,31 @@ static inline int clutPsm_7440(int f)
  * 8-bit format 9 texture becomes PSMT8H, or is converted by func_00366E90 when it owns its data, the free space at
  * +0x6344 is smaller than its VRAM size and @p vramMode is 0. cPS2GraphicsMan_AddTexture1 and func_00367CD0 call it.
  *
- * @param a1  the pixel data (all mip levels), or null
- * @param a2  the texture name (8 characters are kept)
- * @param a3  width in texels
- * @param a4  height in texels
- * @param a5  number of extra mip levels
- * @param a6  texel format (8 24-bit, 2 16-bit, 9/10 8-bit, 11/12 4-bit, other 32-bit)
- * @param a7  CLUT format (1 32-bit, 2 16-bit, 0 none)
- * @param a8  the CLUT, or null
+ * @param pixelData  the pixel data (all mip levels), or null
+ * @param texName  the texture name (8 characters are kept)
+ * @param texWidth  width in texels
+ * @param texHeight  height in texels
+ * @param mipCount  number of extra mip levels
+ * @param texelFormat  texel format (8 24-bit, 2 16-bit, 9/10 8-bit, 11/12 4-bit, other 32-bit)
+ * @param clutFormat  CLUT format (1 32-bit, 2 16-bit, 0 none)
+ * @param clutData  the CLUT, or null
  * @param vramMode  VRAM handling: 0 on demand, 1 allocate now, 3 allocate now and lock
  * @param ownsData  nonzero to copy the pixels and CLUT into the manager's own buffers
  * @param bindId  the id to use, or a negative value to take a free non-bound id
  * @return the texture id, or -1 for a format with no bit depth
  */
-extern "C" int func_00367440(void* self, int a1, void* a2, int a3, int a4, int a5, int a6, int a7,
-                             int a8, int vramMode, int ownsData, int bindId)
+extern "C" int func_00367440(void* self, int pixelData, void* texName, int texWidth, int texHeight, int mipCount, int texelFormat, int clutFormat,
+                             int clutData, int vramMode, int ownsData, int bindId)
 {
     char* texMan = (char*)self;
-    void* data = (void*)a1;
-    const char* name = (const char*)a2;
-    unsigned int w = a3;
-    unsigned int height = a4;
-    int mip = a5;
-    int fmt = a6;
-    int clutFmt = a7;
-    void* clut = (void*)a8;
+    void* data = (void*)pixelData;
+    const char* name = (const char*)texName;
+    unsigned int w = texWidth;
+    unsigned int height = texHeight;
+    int mip = mipCount;
+    int fmt = texelFormat;
+    int clutFmt = clutFormat;
+    void* clut = (void*)clutData;
     int id;
     if (bindId < 0) {
         id = cPSPGraphicsMan_NewNonBindTexID((cTexSlots367150*)self);
@@ -658,14 +658,14 @@ extern "C" void func_00369098(void* self, int idx);
  * @param data  the new pixels, or null
  * @param width  not used
  * @param height  not used
- * @param a5  not used (the mip count of the caller's overload)
- * @param a6  not used (the texel format)
- * @param a7  not used (the CLUT format)
+ * @param mipCount  not used (the mip count of the caller's overload)
+ * @param texelFormat  not used (the texel format)
+ * @param clutFormat  not used (the CLUT format)
  * @param clut  the new CLUT, or null
  * @param upload  nonzero to copy the data into the texture's buffers
  */
-extern "C" void func_00367D20(void* self, int idx, void* data, int width, int height, int a5, int a6,
-                              int a7, void* clut, int upload)
+extern "C" void func_00367D20(void* self, int idx, void* data, int width, int height, int mipCount, int texelFormat,
+                              int clutFormat, void* clut, int upload)
 {
     char* tex = *(char**)((char*)self + (idx << 2) + 8);
     if (upload != 0) {
@@ -1119,62 +1119,62 @@ struct sUpMgr_8660 {
  * *@p pp instead. Finally func_00368970 emits the register settings for each given texture. The rail/particle batch
  * renderer func_00363490 calls it per draw node.
  *
- * @param a  texture id for context 1 (negative for none)
- * @param b  texture id for context 2 (negative for none)
- * @param a3  passed to the VRAM allocator as its eviction level (the caller's running draw index)
+ * @param context1Tex  texture id for context 1 (negative for none)
+ * @param context2Tex  texture id for context 2 (negative for none)
+ * @param evictLevel  passed to the VRAM allocator as its eviction level (the caller's running draw index)
  * @param pp  the DMA chain cursor
  * @param gifOut  the upload buffer cursor, updated when an upload chain was built
  */
 // PORT: 64-bit `ulong` GIF/DMA packet words.
-extern "C" void func_00368660(char* self, int a, int b, int a3, ulong** pp, void** gifOut)
+extern "C" void func_00368660(char* self, int context1Tex, int context2Tex, int evictLevel, ulong** pp, void** gifOut)
 {
     ulong* cur = *pp;
     sUpTex_8660* objs[2];
-    if (a < 0 && b < 0)
+    if (context1Tex < 0 && context2Tex < 0)
         return;
-    objs[0] = a >= 0 ? ((sUpMgr_8660*)self)->texs[a] : 0;
-    objs[1] = b >= 0 ? ((sUpMgr_8660*)self)->texs[b] : 0;
+    objs[0] = context1Tex >= 0 ? ((sUpMgr_8660*)self)->texs[context1Tex] : 0;
+    objs[1] = context2Tex >= 0 ? ((sUpMgr_8660*)self)->texs[context2Tex] : 0;
     int sent = 0;
     ulong* gif = 0;
     for (int k = 0; k < 2; k++) {
-        int idx = b;
+        int idx = context2Tex;
         if (k == 0)
-            idx = a;
+            idx = context1Tex;
         if (idx < 0)
             continue;
-        int other = a;
+        int other = context1Tex;
         if (k == 0)
-            other = b;
-        sUpTex_8660* t = ((sUpMgr_8660*)self)->texs[idx];
+            other = context2Tex;
+        sUpTex_8660* texRecord = ((sUpMgr_8660*)self)->texs[idx];
         sUpHeap_8660* heap;
         int shift;
-        if (t->psm == 9) {
+        if (texRecord->psm == 9) {
             heap = (sUpHeap_8660*)(self + 0x4350);
             shift = 2;
         } else {
             heap = (sUpHeap_8660*)(self + 0x1F60);
             shift = 0;
         }
-        if (t->addr < 0) {
+        if (texRecord->addr < 0) {
             ((sUpMgr_8660*)self)->state[k] = -1;
-            int n = func_00366CE0(heap, t->size, idx, other, a3, 1);
+            int n = func_00366CE0(heap, texRecord->size, idx, other, evictLevel, 1);
             sUpNode_8660* nd = &heap->nodes[n];
             int fl = nd->flags;
-            t->node = n;
-            t->addr = (fl >> 8) << shift;
+            texRecord->node = n;
+            texRecord->addr = (fl >> 8) << shift;
             if (gif == 0)
                 gif = func_0038F460(D_004A4474, *(unsigned int*)gifOut, -1, 0);
             func_00368170(self, idx, &cur, &gif);
             sent = 1;
         }
-        if (t->clut != 0 && t->caddr < 0) {
+        if (texRecord->clut != 0 && texRecord->caddr < 0) {
             *(int*)(self + 0x1F54) = -1;
-            int n = func_00366CE0(self + 0x1F60, t->psm - 11 < 2 ? 0x100 : 0x400, idx, other, a3, 0);
-            int* f = &((sUpHeap_8660*)(self + 0x1F60))->nodes[n].flags;
-            int fl = *f | 4;
-            *f = fl;
-            t->cnode = n;
-            t->caddr = fl >> 8;
+            int n = func_00366CE0(self + 0x1F60, texRecord->psm - 11 < 2 ? 0x100 : 0x400, idx, other, evictLevel, 0);
+            int* nodeFlags = &((sUpHeap_8660*)(self + 0x1F60))->nodes[n].flags;
+            int fl = *nodeFlags | 4;
+            *nodeFlags = fl;
+            texRecord->cnode = n;
+            texRecord->caddr = fl >> 8;
             if (gif == 0)
                 gif = func_0038F460(D_004A4474, *(unsigned int*)gifOut, -1, 0);
             func_003684F0((sPs2UpMgr*)self, idx, &cur, &gif);
@@ -1190,10 +1190,10 @@ extern "C" void func_00368660(char* self, int a, int b, int a3, ulong** pp, void
         cur[3] = (ulong)34816 << 45;
         cur += 4;
     }
-    if (a >= 0)
-        func_00368970(self, a, 0, &cur);
-    if (b >= 0)
-        func_00368970(self, b, 1, &cur);
+    if (context1Tex >= 0)
+        func_00368970(self, context1Tex, 0, &cur);
+    if (context2Tex >= 0)
+        func_00368970(self, context2Tex, 1, &cur);
     *pp = cur;
 }
 #endif
