@@ -358,15 +358,15 @@ INCLUDE_ASM("util/objectinterface", func_002D21C0);
 extern void* D_004A3A00;
 
 /**
- * Constructs the stats manager: stores @p p in D_004A3A00, the global func_002D20F8 returns.
+ * Constructs the stats manager: stores @p statsMan in D_004A3A00, the global func_002D20F8 returns.
  *
- * @param p  the object being constructed
- * @return @p p
+ * @param statsMan  the object being constructed
+ * @return @p statsMan
  */
-extern "C" void* func_002D21C0(void* p)
+extern "C" void* func_002D21C0(void* statsMan)
 {
-    D_004A3A00 = p;
-    return p;
+    D_004A3A00 = statsMan;
+    return statsMan;
 }
 #endif
 

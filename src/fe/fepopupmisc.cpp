@@ -3279,9 +3279,9 @@ extern int cBXString_EmptyString;
 extern "C" void* cFEUseExistingAccount_cFEUseExistingAccount1(cFEUseExistingAccount* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    int g = cBXString_EmptyString;
+    int emptyString = cBXString_EmptyString;
     self->mVtbl = cFEUseExistingAccount_vtbl;
-    self->mszEmail = (char*)g;
+    self->mszEmail = (char*)emptyString;
     self->unk_6D0 = 0;
     self->mpTextForgotPassword = 0;
     return ((void*)self);
@@ -4186,11 +4186,11 @@ static inline void InitVec_E0F60(void* self, const sAlloc_E0F60& a = sAlloc_E0F6
 extern "C" void* cFEStateNetMessenger_cFEStateNetMessenger1(cFEStateNetMessenger* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
-    int d = cBXString_EmptyString;
+    int emptyString = cBXString_EmptyString;
     self->mVtbl = D_00467F28;
-    self->mszFoundName = (char*)d;
-    self->mszSearchName = (char*)d;
-    self->unk_6E0 = (char*)d;
+    self->mszFoundName = (char*)emptyString;
+    self->mszSearchName = (char*)emptyString;
+    self->unk_6E0 = (char*)emptyString;
     InitVec_E0F60(self);
     return ((void*)self);
 }

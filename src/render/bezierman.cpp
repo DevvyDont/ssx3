@@ -183,62 +183,62 @@ struct sBezObj_B190 {
 /**
  * Queues one Bezier patch for drawing in the list that matches its four edge LODs.
  *
- * When all four bytes of @p t are equal, the patch goes to the uniform list for that LOD: 4 to m4x4Patches (at most
+ * When all four bytes of @p edgeLods are equal, the patch goes to the uniform list for that LOD: 4 to m4x4Patches (at most
  * 900, mLod 0, unk_0C = tex4, the halfword at +0x1A6 of the patch record), 6 to m6x6Patches (at most 220, mLod 1, tex6
  * at +0x1A8) and 8 to m8x8Patches (at most 50, mLod 2, tex8 at +0x1AA); any other uniform value is dropped. Otherwise
  * it goes to mMixedPatches (at most 75) with mLod 2 when any edge is 8 (else 0), unk_0C = tex8 and the four edge LODs
- * copied into mEdgeLods. Each entry stores @p o in mpPatch and @p extra in unk_04. A full list drops the patch
+ * copied into mEdgeLods. Each entry stores @p patchRec in mpPatch and @p extra in unk_04. A full list drops the patch
  * silently. This is slot 22 of the cPS2BezierMan vtable (cPSPBezierMan_vtbl).
  *
  * @param bezierMan  the patch manager (this)
- * @param o  the patch record
- * @param t  the four edge LODs (4, 6 or 8 each)
- * @param unused  ignored
+ * @param patchRec  the patch record
+ * @param edgeLods  the four edge LODs (4, 6 or 8 each)
+ * @param ignoredArg  ignored
  * @param extra  stored in the entry's unk_04 (used as the patch's program/table index when the patch is drawn)
  */
-extern "C" void func_0038B190(cPS2BezierMan* bezierMan, sBezObj_B190* o, unsigned char* t, int unused, int extra)
+extern "C" void func_0038B190(cPS2BezierMan* bezierMan, sBezObj_B190* patchRec, unsigned char* edgeLods, int ignoredArg, int extra)
 {
-    if (t[0] == t[2] && t[1] == t[3] && t[0] == t[1]) {
-        switch (t[0]) {
+    if (edgeLods[0] == edgeLods[2] && edgeLods[1] == edgeLods[3] && edgeLods[0] == edgeLods[1]) {
+        switch (edgeLods[0]) {
         case 4:
             if (bezierMan->mNum4x4Patches < 900) {
-                tBezierPatchEntry* e = &((&bezierMan->m4x4Patches[0]))[bezierMan->mNum4x4Patches++];
-                (*(int*)&e->unk_04) = extra;
-                e->mpPatch = o;
-                e->mLod = 0;
-                e->unk_0C = o->tex4;
+                tBezierPatchEntry* patchEntry = &((&bezierMan->m4x4Patches[0]))[bezierMan->mNum4x4Patches++];
+                (*(int*)&patchEntry->unk_04) = extra;
+                patchEntry->mpPatch = patchRec;
+                patchEntry->mLod = 0;
+                patchEntry->unk_0C = patchRec->tex4;
             }
             break;
         case 6:
             if (bezierMan->mNum6x6Patches < 220) {
-                tBezierPatchEntry* e = &((&bezierMan->m6x6Patches[0]))[bezierMan->mNum6x6Patches++];
-                (*(int*)&e->unk_04) = extra;
-                e->mLod = 1;
-                e->mpPatch = o;
-                e->unk_0C = o->tex6;
+                tBezierPatchEntry* patchEntry = &((&bezierMan->m6x6Patches[0]))[bezierMan->mNum6x6Patches++];
+                (*(int*)&patchEntry->unk_04) = extra;
+                patchEntry->mLod = 1;
+                patchEntry->mpPatch = patchRec;
+                patchEntry->unk_0C = patchRec->tex6;
             }
             break;
         case 8:
             if (bezierMan->mNum8x8Patches < 50) {
-                tBezierPatchEntry* e = &((&bezierMan->m8x8Patches[0]))[bezierMan->mNum8x8Patches++];
-                (*(int*)&e->unk_04) = extra;
-                e->mLod = 2;
-                e->mpPatch = o;
-                e->unk_0C = o->tex8;
+                tBezierPatchEntry* patchEntry = &((&bezierMan->m8x8Patches[0]))[bezierMan->mNum8x8Patches++];
+                (*(int*)&patchEntry->unk_04) = extra;
+                patchEntry->mLod = 2;
+                patchEntry->mpPatch = patchRec;
+                patchEntry->unk_0C = patchRec->tex8;
             }
             break;
         }
         return;
     }
     if (bezierMan->mNumMixedPatches < 75) {
-        tBezierMixedPatchEntry* e = &((&bezierMan->mMixedPatches[0]))[bezierMan->mNumMixedPatches++];
-        (*(int*)&e->unk_04) = extra;
-        e->mpPatch = o;
-        int* pk = &e->mLod;
-        *pk = (t[0] == 8 || t[1] == 8 || t[2] == 8 || t[3] == 8) ? 2 : 0;
-        e->unk_0C = o->tex8;
+        tBezierMixedPatchEntry* patchEntry = &((&bezierMan->mMixedPatches[0]))[bezierMan->mNumMixedPatches++];
+        (*(int*)&patchEntry->unk_04) = extra;
+        patchEntry->mpPatch = patchRec;
+        int* pk = &patchEntry->mLod;
+        *pk = (edgeLods[0] == 8 || edgeLods[1] == 8 || edgeLods[2] == 8 || edgeLods[3] == 8) ? 2 : 0;
+        patchEntry->unk_0C = patchRec->tex8;
         for (int i = 0; i < 4; i++) {
-            e->mEdgeLods[i] = t[i];
+            patchEntry->mEdgeLods[i] = edgeLods[i];
         }
     }
 }
@@ -1158,12 +1158,12 @@ extern "C" void func_0038D448(void* self, int kind, void* tbl, void* patch, int 
 extern "C" void func_0038CA70(sBezMan_CA70* self, int kind, int sub, sPatch_CA70* patch, unsigned int* handle)
 {
     int draw = 0;
-    int a1 = self->base28[kind] + sub * 12;
-    char* o = (char*)func_0038F708(patch->obj, 432, 2);
+    int cacheEntry = self->base28[kind] + sub * 12;
+    char* patchCopy = (char*)func_0038F708(patch->obj, 432, 2);
     sGfx_CA70* gfx = D_004A5B80_CA70;
     unsigned int addr = self->base44C[kind] + (sub << 8);
     unsigned int n = kind * 2 + 4;
-    int doA = (*(int*)(o + 0xC) & 0x600000) && n;
+    int doA = (*(int*)(patchCopy + 0xC) & 0x600000) && n;
     if (doA) {
         if (D_004A44D8 != 0)
             doA = 0;
@@ -1172,7 +1172,7 @@ extern "C" void func_0038CA70(sBezMan_CA70* self, int kind, int sub, sPatch_CA70
     }
     int res = 0;
     if (kind == 2)
-        res = func_0038CA08_i(self, o);
+        res = func_0038CA08_i(self, patchCopy);
     int doB = res != 0;
     if (doB) {
         if (D_004A44DC != 0)
@@ -1180,7 +1180,7 @@ extern "C" void func_0038CA70(sBezMan_CA70* self, int kind, int sub, sPatch_CA70
         else
             draw |= doB;
     }
-    switch (*(int*)(o + 0xC) & 0x180000) {
+    switch (*(int*)(patchCopy + 0xC) & 0x180000) {
     case 0x80000:
         draw = 1;
         gfx->top->f0 = (gfx->top->f0 & ~0xC) | 8;
@@ -1198,43 +1198,43 @@ extern "C" void func_0038CA70(sBezMan_CA70* self, int kind, int sub, sPatch_CA70
         break;
     }
     if (draw) {
-        int tex = *(short*)(o + 0x1A0);
+        int tex = *(short*)(patchCopy + 0x1A0);
         gfx->top->tex = tex;
-        int tex2 = *(short*)(o + 0x1A2);
+        int tex2 = *(short*)(patchCopy + 0x1A2);
         gfx->top->tex2 = tex2;
         unsigned int buf = *handle;
-        long* p = (long*)(buf | 0x30000000);
-        p[0] = ((long)addr << 32) | 0x50000000;
-        p[2] = 0x10000001;
-        p[1] = 0;
-        p[3] = 0;
+        long* packetCursor = (long*)(buf | 0x30000000);
+        packetCursor[0] = ((long)addr << 32) | 0x50000000;
+        packetCursor[2] = 0x10000001;
+        packetCursor[1] = 0;
+        packetCursor[3] = 0;
         char* tbl = str_at_HP[kind];
         int extra = patch->extra;
-        p[4] = 0;
-        p[5] = (long)(*(int*)(tbl + extra * 8 + 0x10) | 0x14000000) << 32;
-        p += 6;
-        unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+        packetCursor[4] = 0;
+        packetCursor[5] = (long)(*(int*)(tbl + extra * 8 + 0x10) | 0x14000000) << 32;
+        packetCursor += 6;
+        unsigned int next = (unsigned int)packetCursor & 0x0FFFFFFF;
         *handle = next;
         sRing_CA70* ring = gfx->ring;
         sRS_CA70* rs = gfx->top;
         if (ring->count < 2600) {
             rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
             int key = *(int*)((char*)ring + 0x69CC0);
-            sEnt_CA70* e = (sEnt_CA70*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-            e->rs = *rs;
-            e->buf = buf;
-            e->next = next;
-            e->key = key;
-            e->flag = 0;
+            sEnt_CA70* ringEntry = (sEnt_CA70*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+            ringEntry->rs = *rs;
+            ringEntry->buf = buf;
+            ringEntry->next = next;
+            ringEntry->key = key;
+            ringEntry->flag = 0;
         }
         *handle += 0x10;
         if (doA)
-            func_0038D168(self, a1, o, kind, tbl, patch, handle);
+            func_0038D168(self, cacheEntry, patchCopy, kind, tbl, patch, handle);
         if (doB)
             func_0038D448(self, kind, tbl, patch, res, handle);
     } else {
-        self->defer[self->nDefer].tex = *(unsigned short*)(o + 0x1A0);
-        self->defer[self->nDefer].tex2 = *(unsigned short*)(o + 0x1A2);
+        self->defer[self->nDefer].tex = *(unsigned short*)(patchCopy + 0x1A0);
+        self->defer[self->nDefer].tex2 = *(unsigned short*)(patchCopy + 0x1A2);
         self->defer[self->nDefer].kind = kind;
         self->defer[self->nDefer].addr = addr;
         self->defer[self->nDefer].patch = patch;
@@ -1315,24 +1315,24 @@ extern "C" void func_0038D448(void* self, int kind, void* tbl, void* patch, int 
 // PORT: uncached (0x30000000) pointers held in int.
 extern "C" void func_0038CE20(sBezMan_CE20* self, int sub, sPatch_CE20* patch, int* ext, unsigned int* handle)
 {
-    int a1 = self->base28[2] + sub * 12;
-    char* o = (char*)func_0038F708(patch->obj, 432, 2);
+    int cacheEntry = self->base28[2] + sub * 12;
+    char* patchCopy = (char*)func_0038F708(patch->obj, 432, 2);
     sGfx_CE20* gfx = D_004A5B80_CE20;
     unsigned int addr = self->base44C[2] + (sub << 8);
-    int doA = (*(int*)(o + 0xC) & 0x600000) != 0;
+    int doA = (*(int*)(patchCopy + 0xC) & 0x600000) != 0;
     if (doA) {
         if (D_004A44D8 != 0)
             doA = 0;
     }
-    int res = func_0038CA08_i(self, o);
+    int res = func_0038CA08_i(self, patchCopy);
     int doB = res != 0;
     if (D_004A44DC != 0)
         doB = 0;
-    int tex = *(short*)(o + 0x1A0);
+    int tex = *(short*)(patchCopy + 0x1A0);
     gfx->top->tex = tex;
-    int tex2 = *(short*)(o + 0x1A2);
+    int tex2 = *(short*)(patchCopy + 0x1A2);
     gfx->top->tex2 = tex2;
-    switch (*(int*)(o + 0xC) & 0x180000) {
+    switch (*(int*)(patchCopy + 0xC) & 0x180000) {
     case 0x80000:
         gfx->top->f0 = (gfx->top->f0 & ~0xC) | 8;
         break;
@@ -1347,44 +1347,44 @@ extern "C" void func_0038CE20(sBezMan_CE20* self, int sub, sPatch_CE20* patch, i
         break;
     }
     unsigned int buf = *handle;
-    long* p = (long*)(buf | 0x30000000);
+    long* packetCursor = (long*)(buf | 0x30000000);
     if (ext) {
-        p[0] = 0x10000002;
-        p[1] = 0;
-        p[2] = ((long)*ext << 32) | 0x6E0180D0;
-        p[3] = 0;
-        p[4] = 0;
-        p[5] = (long)0x6C1080C0 << 32;
-        p[6] = ((long)((int)patch->obj + 0x40) << 32) | 0x30000010;
-        p[7] = 0;
-        p += 8;
+        packetCursor[0] = 0x10000002;
+        packetCursor[1] = 0;
+        packetCursor[2] = ((long)*ext << 32) | 0x6E0180D0;
+        packetCursor[3] = 0;
+        packetCursor[4] = 0;
+        packetCursor[5] = (long)0x6C1080C0 << 32;
+        packetCursor[6] = ((long)((int)patch->obj + 0x40) << 32) | 0x30000010;
+        packetCursor[7] = 0;
+        packetCursor += 8;
     }
-    p[0] = ((long)addr << 32) | 0x50000000;
-    p[2] = 0x10000001;
-    p[1] = 0;
-    p[3] = 0;
+    packetCursor[0] = ((long)addr << 32) | 0x50000000;
+    packetCursor[2] = 0x10000001;
+    packetCursor[1] = 0;
+    packetCursor[3] = 0;
     sTex_CE20* tbl = D_00504960;
     int extra = patch->extra;
-    p[4] = 0;
-    p[5] = (long)(D_00504960[extra + 2].addr | 0x14000000) << 32;
-    p += 6;
-    unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+    packetCursor[4] = 0;
+    packetCursor[5] = (long)(D_00504960[extra + 2].addr | 0x14000000) << 32;
+    packetCursor += 6;
+    unsigned int next = (unsigned int)packetCursor & 0x0FFFFFFF;
     *handle = next;
     sRing_CE20* ring = gfx->ring;
     sRS_CE20* rs = gfx->top;
     if (ring->count < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
-        sEnt_CE20* e = (sEnt_CE20*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-        e->rs = *rs;
-        e->buf = buf;
-        e->next = next;
-        e->key = key;
-        e->flag = 0;
+        sEnt_CE20* ringEntry = (sEnt_CE20*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        ringEntry->rs = *rs;
+        ringEntry->buf = buf;
+        ringEntry->next = next;
+        ringEntry->key = key;
+        ringEntry->flag = 0;
     }
     *handle += 0x10;
     if (doA)
-        func_0038D168(self, a1, o, 2, tbl, patch, handle);
+        func_0038D168(self, cacheEntry, patchCopy, 2, tbl, patch, handle);
     if (doB)
         func_0038D448(self, 2, tbl, patch, res, handle);
 }
@@ -1488,24 +1488,24 @@ extern "C" void func_0038D168_impl(void* self, void* patch, void* obj, int type,
  */
 extern "C" void func_0038D168_impl(void* self, void* patch, void* obj, int type, char* progs, void* prog, unsigned int* handle)
 {
-    char* s = (char*)self;
+    char* manager = (char*)self;
     sGfx_D168* gfx = D_004A5B80_D168;
     gfx->top[1] = gfx->top[0];
     gfx->top++;
     int idx = *(int*)((char*)patch + 8);
-    int a;
+    int vecDataAddr;
     switch (type) {
     case 0:
-        a = *(int*)(s + 0x1C4) + idx * 0xC0;
+        vecDataAddr = *(int*)(manager + 0x1C4) + idx * 0xC0;
         break;
     case 1:
-        a = *(int*)(s + 0x1C8) + idx * 432;
+        vecDataAddr = *(int*)(manager + 0x1C8) + idx * 432;
         break;
     case 2:
-        a = *(int*)(s + 0x1CC) + idx * 0x300;
+        vecDataAddr = *(int*)(manager + 0x1CC) + idx * 0x300;
         break;
     default:
-        a = 0;
+        vecDataAddr = 0;
         break;
     }
     gfx->top->tex = -1;
@@ -1523,24 +1523,24 @@ extern "C" void func_0038D168_impl(void* self, void* patch, void* obj, int type,
     int n = type * 2 + 4;
     int nn = n * n;
     unsigned int buf = *handle;
-    long* p = (long*)(buf | 0x30000000);
-    p[0] = 0x10000001;
-    p[1] = 0;
-    p[2] = 0x4040404020000000;
-    p[3] = (unsigned long)(unsigned int)((nn << 16) | 0x78008040) << 32;
-    p[4] = (((nn * 3) >> 2) | 0x30000000) | ((long)a << 32);
-    p[5] = 0;
-    p[6] = 0x10000006;
-    p[7] = 0;
+    long* packetCursor = (long*)(buf | 0x30000000);
+    packetCursor[0] = 0x10000001;
+    packetCursor[1] = 0;
+    packetCursor[2] = 0x4040404020000000;
+    packetCursor[3] = (unsigned long)(unsigned int)((nn << 16) | 0x78008040) << 32;
+    packetCursor[4] = (((nn * 3) >> 2) | 0x30000000) | ((long)vecDataAddr << 32);
+    packetCursor[5] = 0;
+    packetCursor[6] = 0x10000006;
+    packetCursor[7] = 0;
     register long k FM_REG("$8") = 0x20000000;
-    p[8] = k;
-    p[9] = (long)0x6C048080 << 32;
-    CopyMat_D168(p + 10, s + 0x360);
+    packetCursor[8] = k;
+    packetCursor[9] = (long)0x6C048080 << 32;
+    CopyMat_D168(packetCursor + 10, manager + 0x360);
     int extra = ((sPatch_D168*)prog)->extra;
-    p[18] = 0;
-    p[19] = (long)(((sProg_D168*)progs)[extra + 8].addr | 0x14000000) << 32;
-    p += 20;
-    unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+    packetCursor[18] = 0;
+    packetCursor[19] = (long)(((sProg_D168*)progs)[extra + 8].addr | 0x14000000) << 32;
+    packetCursor += 20;
+    unsigned int next = (unsigned int)packetCursor & 0x0FFFFFFF;
     *handle = next;
     QueueRecord_D168(gfx, buf, next, 1);
     *handle += 0x10;
@@ -1661,25 +1661,25 @@ static inline void QueueRecord_D448(sGfx_D448* gfx, unsigned int buf, unsigned i
 extern "C" void func_0038D448(void* self, int kind, void* tbl, void* patch, int mask, unsigned int* handle)
 {
     sGfx_D448* gfx = D_004A5B80_D448;
-    sTex_D448* t = (sTex_D448*)tbl;
+    sTex_D448* programTable = (sTex_D448*)tbl;
     int extra = ((sPatch_D448*)patch)->extra;
     unsigned int i;
     for (i = 0; i < gfx->nLights; i++) {
-        sLight_D448* l = &gfx->lights[i];
+        sLight_D448* projTex = &gfx->lights[i];
         if ((mask >> i) & 1) {
             unsigned int buf = *handle;
-            gfx->top->tex2 = Tex_D448(l);
-            long* p = (long*)(buf | 0x30000000);
+            gfx->top->tex2 = Tex_D448(projTex);
+            long* packetCursor = (long*)(buf | 0x30000000);
             gfx->top->f0 = (gfx->top->f0 & ~0x30) | 0x30;
-            p[0] = 0x10000006;
-            p[1] = 0;
-            p[2] = 0x20000000;
-            p[3] = (long)0x6C048080 << 32;
-            CopyMat_D448(p + 4, &l->mat);
-            p[12] = 0;
-            p[13] = (long)(t[extra + 6].addr | 0x14000000) << 32;
-            p += 14;
-            unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+            packetCursor[0] = 0x10000006;
+            packetCursor[1] = 0;
+            packetCursor[2] = 0x20000000;
+            packetCursor[3] = (long)0x6C048080 << 32;
+            CopyMat_D448(packetCursor + 4, &projTex->mat);
+            packetCursor[12] = 0;
+            packetCursor[13] = (long)(programTable[extra + 6].addr | 0x14000000) << 32;
+            packetCursor += 14;
+            unsigned int next = (unsigned int)packetCursor & 0x0FFFFFFF;
             *handle = next;
             QueueRecord_D448(gfx, buf, next, 1);
             *handle += 0x10;
@@ -1833,17 +1833,17 @@ static inline void CopyQuads_D690(char** pp, sQuad_D690* src, int n)
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int.
 extern "C" void func_0038D690(void* self, void* obj, void* patch, unsigned int* handle)
 {
-    char* s = (char*)self;
-    char* o = (char*)obj;
-    if ((*(int*)(o + 0xC) & 0x800000) == 0) {
+    char* manager = (char*)self;
+    char* patchRec = (char*)obj;
+    if ((*(int*)(patchRec + 0xC) & 0x800000) == 0) {
         return;
     }
-    sVec3_D690 d;
-    d.z = *(float*)(o + 0x160) - *(float*)(o + 0x16C);
+    sVec3_D690 boxDiagonal;
+    boxDiagonal.z = *(float*)(patchRec + 0x160) - *(float*)(patchRec + 0x16C);
     sGfx_D690* gfx = D_004A5B80_D690;
-    d.x = *(float*)(o + 0x158) - *(float*)(o + 0x164);
-    d.y = *(float*)(o + 0x15C) - *(float*)(o + 0x168);
-    int n = (int)((d.x * d.x + d.y * d.y + d.z * d.z) * (D_004A4348 * 3.3333333249174757e-07f) * gfx->detailScale);
+    boxDiagonal.x = *(float*)(patchRec + 0x158) - *(float*)(patchRec + 0x164);
+    boxDiagonal.y = *(float*)(patchRec + 0x15C) - *(float*)(patchRec + 0x168);
+    int n = (int)((boxDiagonal.x * boxDiagonal.x + boxDiagonal.y * boxDiagonal.y + boxDiagonal.z * boxDiagonal.z) * (D_004A4348 * 3.3333333249174757e-07f) * gfx->detailScale);
     if (*(int*)((char*)patch + 8) < 2) {
         n /= 2;
     }
@@ -1851,32 +1851,32 @@ extern "C" void func_0038D690(void* self, void* obj, void* patch, unsigned int* 
         return;
     }
     unsigned int buf = *handle;
-    char* p = func_0038F460(D_004A4474, buf, -1, 0);
-    ((long*)p)[0] = 0x10000018;
-    ((long*)p)[1] = 0;
-    ((long*)p)[2] = 0;
-    ((long*)p)[3] = (long)0x6C168000 << 32;
-    *(int*)(s + 0x43C) = n;
-    p += 0x20;
-    CopyQuads_D690(&p, (sQuad_D690*)(o + 0x40), 16);
-    CopyQuads_D690(&p, (sQuad_D690*)(s + 0x3E0), 4);
-    CopyQuads_D690(&p, (sQuad_D690*)(s + 0x420), 2);
-    ((long*)p)[0] = (long)(((unsigned int)D_1460 >> 3) | 0x14000000) << 32;
-    ((long*)p)[1] = (long)0x11000000 << 32;
-    p += 0x10;
-    unsigned int next = func_0038F668(D_004A4474, p, 4);
+    char* packetCursor = func_0038F460(D_004A4474, buf, -1, 0);
+    ((long*)packetCursor)[0] = 0x10000018;
+    ((long*)packetCursor)[1] = 0;
+    ((long*)packetCursor)[2] = 0;
+    ((long*)packetCursor)[3] = (long)0x6C168000 << 32;
+    *(int*)(manager + 0x43C) = n;
+    packetCursor += 0x20;
+    CopyQuads_D690(&packetCursor, (sQuad_D690*)(patchRec + 0x40), 16);
+    CopyQuads_D690(&packetCursor, (sQuad_D690*)(manager + 0x3E0), 4);
+    CopyQuads_D690(&packetCursor, (sQuad_D690*)(manager + 0x420), 2);
+    ((long*)packetCursor)[0] = (long)(((unsigned int)D_1460 >> 3) | 0x14000000) << 32;
+    ((long*)packetCursor)[1] = (long)0x11000000 << 32;
+    packetCursor += 0x10;
+    unsigned int next = func_0038F668(D_004A4474, packetCursor, 4);
     *handle = next;
     sRing_D690* ring = gfx->ring;
     sRS_D690* rs = gfx->top;
     if (ring->count < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
-        sEnt_D690* e = (sEnt_D690*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-        e->rs = *rs;
-        e->buf = buf;
-        e->next = next;
-        e->key = key;
-        e->flag = 0;
+        sEnt_D690* ringEntry = (sEnt_D690*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        ringEntry->rs = *rs;
+        ringEntry->buf = buf;
+        ringEntry->next = next;
+        ringEntry->key = key;
+        ringEntry->flag = 0;
     }
     *handle += 0x10;
 }
@@ -1939,19 +1939,19 @@ extern "C" void func_0038D690(void* self, void* obj, void* patch, unsigned int* 
  * matrices with func_0037D968 when mMatricesValid is 0, then copies each patch record to the scratchpad (func_0038F708)
  * and adds its pass; finally pops the draw state. Called at the end of cPS2BezierMan_DrawPatches.
  *
- * @param a1  the packet write cursor
+ * @param packetHandle  the packet write cursor
  */
-extern "C" void func_0038D968(sBezMan_D968* self, unsigned int* a1)
+extern "C" void func_0038D968(sBezMan_D968* self, unsigned int* packetHandle)
 {
     if (D_004A44E0 != 0) {
         return;
     }
     sCtx_D968* ctx = D_004A5B80_D968;
     ctx->top[1] = ctx->top[0];
-    sRS_D968* t = ctx->top;
-    ctx->top = t + 1;
+    sRS_D968* savedState = ctx->top;
+    ctx->top = savedState + 1;
     int tex = ctx->texIds[ctx->texSel];
-    t[1].tex = tex;
+    savedState[1].tex = tex;
     ctx->top->flagsA = (ctx->top->flagsA & ~0x7C) | 0x54;
     ctx->top->flagsB = (ctx->top->flagsB & ~0x3E0) | 0x80;
     ctx->top->flagsA = (ctx->top->flagsA & 0xFE7FFFFF) | 0x800000;
@@ -1966,13 +1966,13 @@ extern "C" void func_0038D968(sBezMan_D968* self, unsigned int* a1)
     ctx->top->flagsA = (ctx->top->flagsA & ~3) | 2;
     ctx->top->flagsB = ctx->top->flagsB & 0xE00003FF;
     for (int i = 0; i < self->n8; i++) {
-        sBezPatch_D968* e = &self->list8[i];
-        func_0038D690(self, func_0038F708(e->obj, 432, 2), e, a1);
+        sBezPatch_D968* patchEntry = &self->list8[i];
+        func_0038D690(self, func_0038F708(patchEntry->obj, 432, 2), patchEntry, packetHandle);
     }
     for (int i = 0; i < self->nMix; i++) {
-        sBezMixPatch_D968* e = &self->mix[i];
-        if (e->kind > 0) {
-            func_0038D690(self, func_0038F708(e->obj, 432, 2), e, a1);
+        sBezMixPatch_D968* patchEntry = &self->mix[i];
+        if (patchEntry->kind > 0) {
+            func_0038D690(self, func_0038F708(patchEntry->obj, 432, 2), patchEntry, packetHandle);
         }
     }
     ctx->top--;

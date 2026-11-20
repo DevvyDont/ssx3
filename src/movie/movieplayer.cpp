@@ -3834,19 +3834,19 @@ struct sMovieVEntry0FB0 {
 
 /**
  * Starts writing a file to the card: sets cMCOverlayManager_mSaveInProgress, calls mpMemCard's slot 36 (the first of On
- * Tour's three cMemCard::StartFileSlotWrite overloads) with @p a, @p data and @p size, and stores @p size in
+ * Tour's three cMemCard::StartFileSlotWrite overloads) with @p fileId, @p data and @p size, and stores @p size in
  * mSavedSize.
  *
- * @param a  the file to write (the slot's first argument)
+ * @param fileId  the file to write (the slot's first argument)
  * @param data  the data
  * @param size  the data size
  */
-extern "C" void func_00240FB0(void* self, int a, int data, int size)
+extern "C" void func_00240FB0(void* self, int fileId, int data, int size)
 {
     void* memCard = *(void**)((char*)self + 0x434);
     cMCOverlayManager_mSaveInProgress = 1;
     sMovieVEntry0FB0* vt = *(sMovieVEntry0FB0**)memCard;
-    vt[36].fn((char*)memCard + vt[36].delta, a, data, size);
+    vt[36].fn((char*)memCard + vt[36].delta, fileId, data, size);
     *(int*)((char*)self + 0xE4) = size;
 }
 #endif
@@ -3891,18 +3891,18 @@ struct sMovieVEntry1050 {
 
 /**
  * Starts writing a file to the card: sets cMCOverlayManager_mSaveInProgress, calls mpMemCard's slot 38 (the third
- * cMemCard::StartFileSlotWrite overload) with @p a, @p data and @p size, and stores @p size in mSavedSize.
+ * cMemCard::StartFileSlotWrite overload) with @p fileId, @p data and @p size, and stores @p size in mSavedSize.
  *
- * @param a  the file to write (the slot's first argument)
+ * @param fileId  the file to write (the slot's first argument)
  * @param data  the data
  * @param size  the data size
  */
-extern "C" void func_00241050(void* self, int a, int data, int size)
+extern "C" void func_00241050(void* self, int fileId, int data, int size)
 {
     void* memCard = *(void**)((char*)self + 0x434);
     cMCOverlayManager_mSaveInProgress = 1;
     sMovieVEntry1050* vt = *(sMovieVEntry1050**)memCard;
-    vt[38].fn((char*)memCard + vt[38].delta, a, data, size);
+    vt[38].fn((char*)memCard + vt[38].delta, fileId, data, size);
     *(int*)((char*)self + 0xE4) = size;
 }
 #endif

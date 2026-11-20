@@ -509,23 +509,23 @@ void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
  * otherwise D_004D5390 and D_004D53B0. The text colour is built with alpha 1 and the stored r, g, b. The unit's other
  * declarations give it four arguments; the body reads the fifth.
  *
- * @param a1  the row's rect
- * @param a2  text at the left edge, or 0
- * @param a3  centred text, or 0
- * @param a4  text at the right edge, or 0
+ * @param rect  the row's rect
+ * @param leftText  text at the left edge, or 0
+ * @param centerText  centred text, or 0
+ * @param rightText  text at the right edge, or 0
  * @return func_002CA768's return value (it returns nothing)
  */
-void* func_002CA988_5(void* self, int a1, int a2, int a3, void* a4)
+void* func_002CA988_5(void* self, int rect, int leftText, int centerText, void* rightText)
 {
     int focused = self == cMenu_getFocusItem((cMenu*)(*(void**)self));
     char* style = focused ? D_004D5380 : D_004D5390;
-    func_002CA988_sVec3* v = focused ? &D_004D53A0 : &D_004D53B0;
-    func_002CA988_sColor c;
-    c.a = 1.0f;
-    c.r = v->x;
-    c.g = v->y;
-    c.b = v->z;
-    return func_002CA768(self, a1, a2, a3, a4, style, &c);
+    func_002CA988_sVec3* textRgb = focused ? &D_004D53A0 : &D_004D53B0;
+    func_002CA988_sColor textColor;
+    textColor.a = 1.0f;
+    textColor.r = textRgb->x;
+    textColor.g = textRgb->y;
+    textColor.b = textRgb->z;
+    return func_002CA768(self, rect, leftText, centerText, rightText, style, &textColor);
 }
 #endif
 
@@ -1128,31 +1128,31 @@ public:
 // Typed view of the render context (the unit declares GrMan with another class later).
 
 /**
- * Draws one textured screen quad: rect @p r with texture window @p t, as a 4-vertex strip.
+ * Draws one textured screen quad: rect @p screenRect with texture window @p texRect, as a 4-vertex strip.
  *
- * Fills the positions (x, y, 0, 1) of the four corners (top-left, top-right, bottom-left, bottom-right) of @p r and
- * their u, v from @p t, leaving the vertices' colours as the caller set them, and sends them through GrMan's vtable
+ * Fills the positions (x, y, 0, 1) of the four corners (top-left, top-right, bottom-left, bottom-right) of @p screenRect and
+ * their u, v from @p texRect, leaving the vertices' colours as the caller set them, and sends them through GrMan's vtable
  * slot 71 (cPS2GraphicsMan_RenderTriStrip) with flags 0. func_002CB498 draws the nine pieces of a menu box with it.
  *
- * @param v  four vertices (colour already set) to fill and draw
- * @param r  screen rect (x, y, w, h)
- * @param t  texture rect (u, v, du, dv)
+ * @param quadVerts  four vertices (colour already set) to fill and draw
+ * @param screenRect  screen rect (x, y, w, h)
+ * @param texRect  texture rect (u, v, du, dv)
  */
-extern "C" void func_002CB350(func_002CB350_sVtx* v, float* r, float* t)
+extern "C" void func_002CB350(func_002CB350_sVtx* quadVerts, float* screenRect, float* texRect)
 {
-    v[0].pos = func_002CB350_sVec4(r[0], r[1], 0.0f, 1.0f);
-    v[0].u = t[0];
-    v[0].v = t[1];
-    v[1].pos = func_002CB350_sVec4(r[0] + r[2], r[1], 0.0f, 1.0f);
-    v[1].u = t[0] + t[2];
-    v[1].v = t[1];
-    v[2].pos = func_002CB350_sVec4(r[0], r[1] + r[3], 0.0f, 1.0f);
-    v[2].u = t[0];
-    v[2].v = t[1] + t[3];
-    v[3].pos = func_002CB350_sVec4(r[0] + r[2], r[1] + r[3], 0.0f, 1.0f);
-    v[3].u = t[0] + t[2];
-    v[3].v = t[1] + t[3];
-    ((func_002CB350_cCtx*)GrMan)->v71(4, v, 0);
+    quadVerts[0].pos = func_002CB350_sVec4(screenRect[0], screenRect[1], 0.0f, 1.0f);
+    quadVerts[0].u = texRect[0];
+    quadVerts[0].v = texRect[1];
+    quadVerts[1].pos = func_002CB350_sVec4(screenRect[0] + screenRect[2], screenRect[1], 0.0f, 1.0f);
+    quadVerts[1].u = texRect[0] + texRect[2];
+    quadVerts[1].v = texRect[1];
+    quadVerts[2].pos = func_002CB350_sVec4(screenRect[0], screenRect[1] + screenRect[3], 0.0f, 1.0f);
+    quadVerts[2].u = texRect[0];
+    quadVerts[2].v = texRect[1] + texRect[3];
+    quadVerts[3].pos = func_002CB350_sVec4(screenRect[0] + screenRect[2], screenRect[1] + screenRect[3], 0.0f, 1.0f);
+    quadVerts[3].u = texRect[0] + texRect[2];
+    quadVerts[3].v = texRect[1] + texRect[3];
+    ((func_002CB350_cCtx*)GrMan)->v71(4, quadVerts, 0);
 }
 #endif
 
@@ -1210,55 +1210,55 @@ static inline void func_002CB498_setF8_5(sRS_2CB498* rs, int v)
  */
 extern "C" void func_002CB498(void* self, float* rect, func_002CA988_sColor* col)
 {
-    sVtx_2CB498 v[4];
+    sVtx_2CB498 quadVerts[4];
     int i;
     for (i = 0; i < 4; i++) {
-        v[i].a = (int)(col->a * 128.0f);
-        v[i].r = (int)(col->r * 128.0f);
-        v[i].g = (int)(col->g * 128.0f);
-        v[i].b = (int)(col->b * 128.0f);
-        v[i].q = 1.0f;
+        quadVerts[i].a = (int)(col->a * 128.0f);
+        quadVerts[i].r = (int)(col->r * 128.0f);
+        quadVerts[i].g = (int)(col->g * 128.0f);
+        quadVerts[i].b = (int)(col->b * 128.0f);
+        quadVerts[i].q = 1.0f;
     }
     int old = func_002CB498_getF8_5(((sRS_2CB498*)GrMan->m_pCurrentDrawState));
     func_002CB498_setF8_5(((sRS_2CB498*)GrMan->m_pCurrentDrawState), old - 2);
     ((sRS_2CB498*)GrMan->m_pCurrentDrawState)->f4_2 = 5;
     int id = *(int*)(*(char**)((char*)self + 0x124) + 0x60);
     ((sRS_2CB498*)GrMan->m_pCurrentDrawState)->f10 = id;
-    float r[4];
-    float t[4];
+    float pieceRect[4];
+    float pieceUv[4];
     float left = rect[0] + 5.0f;
     float top = rect[1] + 5.0f;
     float right = rect[0] + rect[2] - 5.0f;
     float bot = rect[1] + rect[3] - 5.0f;
     float w = rect[2] - 10.0f;
-    float h = rect[3] - 10.0f;
-    r[0] = rect[0]; r[1] = rect[1]; r[2] = 5.0f; r[3] = 5.0f;
-    t[0] = 0.0f; t[1] = 0.0f; t[2] = 0.25f; t[3] = 0.25f;
-    func_002CB350((func_002CB350_sVtx*)v, r, t);
-    r[0] = right; r[1] = rect[1]; r[2] = 5.0f; r[3] = 5.0f;
-    t[0] = 0.75f; t[1] = 0.0f; t[2] = 0.25f; t[3] = 0.25f;
-    func_002CB350((func_002CB350_sVtx*)v, r, t);
-    r[0] = right; r[1] = bot; r[2] = 5.0f; r[3] = 5.0f;
-    t[0] = 0.75f; t[1] = 0.75f; t[2] = 0.25f; t[3] = 0.25f;
-    func_002CB350((func_002CB350_sVtx*)v, r, t);
-    r[0] = rect[0]; r[1] = bot; r[2] = 5.0f; r[3] = 5.0f;
-    t[0] = 0.0f; t[1] = 0.75f; t[2] = 0.25f; t[3] = 0.25f;
-    func_002CB350((func_002CB350_sVtx*)v, r, t);
-    r[0] = left; r[1] = rect[1]; r[2] = w; r[3] = 5.0f;
-    t[0] = 0.25f; t[1] = 0.0f; t[2] = 0.5f; t[3] = 0.25f;
-    func_002CB350((func_002CB350_sVtx*)v, r, t);
-    r[0] = left; r[1] = bot; r[2] = w; r[3] = 5.0f;
-    t[0] = 0.25f; t[1] = 0.75f; t[2] = 0.5f; t[3] = 0.25f;
-    func_002CB350((func_002CB350_sVtx*)v, r, t);
-    r[0] = rect[0]; r[1] = top; r[2] = 5.0f; r[3] = h;
-    t[0] = 0.0f; t[1] = 0.25f; t[2] = 0.25f; t[3] = 0.5f;
-    func_002CB350((func_002CB350_sVtx*)v, r, t);
-    r[0] = right; r[1] = top; r[2] = 5.0f; r[3] = h;
-    t[0] = 0.75f; t[1] = 0.25f; t[2] = 0.25f; t[3] = 0.5f;
-    func_002CB350((func_002CB350_sVtx*)v, r, t);
-    r[0] = left; r[1] = top; r[2] = w; r[3] = h;
-    t[0] = 0.25f; t[1] = 0.25f; t[2] = 0.5f; t[3] = 0.5f;
-    func_002CB350((func_002CB350_sVtx*)v, r, t);
+    float innerHeight = rect[3] - 10.0f;
+    pieceRect[0] = rect[0]; pieceRect[1] = rect[1]; pieceRect[2] = 5.0f; pieceRect[3] = 5.0f;
+    pieceUv[0] = 0.0f; pieceUv[1] = 0.0f; pieceUv[2] = 0.25f; pieceUv[3] = 0.25f;
+    func_002CB350((func_002CB350_sVtx*)quadVerts, pieceRect, pieceUv);
+    pieceRect[0] = right; pieceRect[1] = rect[1]; pieceRect[2] = 5.0f; pieceRect[3] = 5.0f;
+    pieceUv[0] = 0.75f; pieceUv[1] = 0.0f; pieceUv[2] = 0.25f; pieceUv[3] = 0.25f;
+    func_002CB350((func_002CB350_sVtx*)quadVerts, pieceRect, pieceUv);
+    pieceRect[0] = right; pieceRect[1] = bot; pieceRect[2] = 5.0f; pieceRect[3] = 5.0f;
+    pieceUv[0] = 0.75f; pieceUv[1] = 0.75f; pieceUv[2] = 0.25f; pieceUv[3] = 0.25f;
+    func_002CB350((func_002CB350_sVtx*)quadVerts, pieceRect, pieceUv);
+    pieceRect[0] = rect[0]; pieceRect[1] = bot; pieceRect[2] = 5.0f; pieceRect[3] = 5.0f;
+    pieceUv[0] = 0.0f; pieceUv[1] = 0.75f; pieceUv[2] = 0.25f; pieceUv[3] = 0.25f;
+    func_002CB350((func_002CB350_sVtx*)quadVerts, pieceRect, pieceUv);
+    pieceRect[0] = left; pieceRect[1] = rect[1]; pieceRect[2] = w; pieceRect[3] = 5.0f;
+    pieceUv[0] = 0.25f; pieceUv[1] = 0.0f; pieceUv[2] = 0.5f; pieceUv[3] = 0.25f;
+    func_002CB350((func_002CB350_sVtx*)quadVerts, pieceRect, pieceUv);
+    pieceRect[0] = left; pieceRect[1] = bot; pieceRect[2] = w; pieceRect[3] = 5.0f;
+    pieceUv[0] = 0.25f; pieceUv[1] = 0.75f; pieceUv[2] = 0.5f; pieceUv[3] = 0.25f;
+    func_002CB350((func_002CB350_sVtx*)quadVerts, pieceRect, pieceUv);
+    pieceRect[0] = rect[0]; pieceRect[1] = top; pieceRect[2] = 5.0f; pieceRect[3] = innerHeight;
+    pieceUv[0] = 0.0f; pieceUv[1] = 0.25f; pieceUv[2] = 0.25f; pieceUv[3] = 0.5f;
+    func_002CB350((func_002CB350_sVtx*)quadVerts, pieceRect, pieceUv);
+    pieceRect[0] = right; pieceRect[1] = top; pieceRect[2] = 5.0f; pieceRect[3] = innerHeight;
+    pieceUv[0] = 0.75f; pieceUv[1] = 0.25f; pieceUv[2] = 0.25f; pieceUv[3] = 0.5f;
+    func_002CB350((func_002CB350_sVtx*)quadVerts, pieceRect, pieceUv);
+    pieceRect[0] = left; pieceRect[1] = top; pieceRect[2] = w; pieceRect[3] = innerHeight;
+    pieceUv[0] = 0.25f; pieceUv[1] = 0.25f; pieceUv[2] = 0.5f; pieceUv[3] = 0.5f;
+    func_002CB350((func_002CB350_sVtx*)quadVerts, pieceRect, pieceUv);
     func_002CB498_setF8_5(((sRS_2CB498*)GrMan->m_pCurrentDrawState), old);
 }
 #endif
@@ -1279,18 +1279,18 @@ struct sVEntry2CB880 {
 
 /**
  * Draws a menu box in the selected or normal colour: calls the menu's vtable slot 8 (func_002CB498 for cMenu) with
- * @p a1 and D_004D5380 when @p on is nonzero, else D_004D5390.
+ * @p rect and D_004D5380 when @p on is nonzero, else D_004D5390.
  *
  * cMenu's vtable slot 9.
  *
- * @param a1  the box rect
+ * @param rect  the box rect
  * @param on  nonzero for the selected colour
  */
-extern "C" void func_002CB880(void* self, void* a1, int on)
+extern "C" void func_002CB880(void* self, void* rect, int on)
 {
     sVEntry2CB880* vt = *(sVEntry2CB880**)((char*)self + 0x12C);
-    fn2CB880* f = &vt[8].fn;
-    (*f)((char*)self + vt[8].delta, a1, on ? D_004D5380 : D_004D5390);
+    fn2CB880* drawBoxFn = &vt[8].fn;
+    (*drawBoxFn)((char*)self + vt[8].delta, rect, on ? D_004D5380 : D_004D5390);
 }
 #endif
 
@@ -1418,36 +1418,36 @@ extern "C" void func_002CB8C8(void* self, float* rect)
     vt[8].fn((char*)self + vt[8].delta, rect, D_004D5380);
     *(short*)((char*)((cCtx_2CB8C8*)GrMan)->top + 0x10) = -1;
     ((cCtx_2CB8C8*)GrMan)->top->f4_2 = 1;
-    sVtx_2CB8C8 v[6];
+    sVtx_2CB8C8 arrowVerts[6];
     int i;
     for (i = 0; i < 6; i++) {
-        v[i].a = 0x80;
-        v[i].r = (int)(D_004D53A0.x * 128.0f);
-        v[i].g = (int)(D_004D53A0.y * 128.0f);
-        v[i].b = (int)(D_004D53A0.z * 128.0f);
-        v[i].u = 0;
-        v[i].v = 0;
-        v[i].q = 1.0f;
+        arrowVerts[i].a = 0x80;
+        arrowVerts[i].r = (int)(D_004D53A0.x * 128.0f);
+        arrowVerts[i].g = (int)(D_004D53A0.y * 128.0f);
+        arrowVerts[i].b = (int)(D_004D53A0.z * 128.0f);
+        arrowVerts[i].u = 0;
+        arrowVerts[i].v = 0;
+        arrowVerts[i].q = 1.0f;
     }
     float bot = rect[1] + rect[3] - 4.0f;
     float left = rect[0] + 6.0f;
     float right = rect[0] + rect[2] - 6.0f;
     float mid = rect[0] + rect[2] * 0.5f;
     float top = rect[1] + 3.0f;
-    sVec4_2CB8C8 p;
-    p.x = left; p.y = bot; p.z = 0.0f; p.w = 1.0f;
-    v[0].pos = p;
-    p.x = left; p.y = bot - 3.0f; p.z = 0.0f; p.w = 1.0f;
-    v[1].pos = p;
-    p.x = mid; p.y = top + 3.0f; p.z = 0.0f; p.w = 1.0f;
-    v[2].pos = p;
-    p.x = mid; p.y = top; p.z = 0.0f; p.w = 1.0f;
-    v[3].pos = p;
-    p.x = right; p.y = bot; p.z = 0.0f; p.w = 1.0f;
-    v[4].pos = p;
-    p.x = right; p.y = bot - 3.0f; p.z = 0.0f; p.w = 1.0f;
-    v[5].pos = p;
-    ((cCtx_2CB8C8*)GrMan)->v71(6, v, 0);
+    sVec4_2CB8C8 vertexPos;
+    vertexPos.x = left; vertexPos.y = bot; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
+    arrowVerts[0].pos = vertexPos;
+    vertexPos.x = left; vertexPos.y = bot - 3.0f; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
+    arrowVerts[1].pos = vertexPos;
+    vertexPos.x = mid; vertexPos.y = top + 3.0f; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
+    arrowVerts[2].pos = vertexPos;
+    vertexPos.x = mid; vertexPos.y = top; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
+    arrowVerts[3].pos = vertexPos;
+    vertexPos.x = right; vertexPos.y = bot; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
+    arrowVerts[4].pos = vertexPos;
+    vertexPos.x = right; vertexPos.y = bot - 3.0f; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
+    arrowVerts[5].pos = vertexPos;
+    ((cCtx_2CB8C8*)GrMan)->v71(6, arrowVerts, 0);
 }
 #endif
 
@@ -1573,36 +1573,36 @@ extern "C" void func_002CBAC8(void* self, float* rect)
     vt[8].fn((char*)self + vt[8].delta, rect, D_004D5380);
     *(short*)((char*)((cCtx_2CBAC8*)GrMan)->top + 0x10) = -1;
     ((cCtx_2CBAC8*)GrMan)->top->f4_2 = 1;
-    sVtx_2CBAC8 v[6];
+    sVtx_2CBAC8 arrowVerts[6];
     int i;
     for (i = 0; i < 6; i++) {
-        v[i].a = 0x80;
-        v[i].r = (int)(D_004D53A0.x * 128.0f);
-        v[i].g = (int)(D_004D53A0.y * 128.0f);
-        v[i].b = (int)(D_004D53A0.z * 128.0f);
-        v[i].u = 0;
-        v[i].v = 0;
-        v[i].q = 1.0f;
+        arrowVerts[i].a = 0x80;
+        arrowVerts[i].r = (int)(D_004D53A0.x * 128.0f);
+        arrowVerts[i].g = (int)(D_004D53A0.y * 128.0f);
+        arrowVerts[i].b = (int)(D_004D53A0.z * 128.0f);
+        arrowVerts[i].u = 0;
+        arrowVerts[i].v = 0;
+        arrowVerts[i].q = 1.0f;
     }
     float top = rect[1] + 3.0f;
     float left = rect[0] + 6.0f;
     float right = rect[0] + rect[2] - 6.0f;
     float mid = rect[0] + rect[2] * 0.5f;
     float bot = rect[1] + rect[3] - 4.0f;
-    sVec4_2CBAC8 p;
-    p.x = left; p.y = top; p.z = 0.0f; p.w = 1.0f;
-    v[0].pos = p;
-    p.x = left; p.y = top + 3.0f; p.z = 0.0f; p.w = 1.0f;
-    v[1].pos = p;
-    p.x = mid; p.y = bot - 3.0f; p.z = 0.0f; p.w = 1.0f;
-    v[2].pos = p;
-    p.x = mid; p.y = bot; p.z = 0.0f; p.w = 1.0f;
-    v[3].pos = p;
-    p.x = right; p.y = top; p.z = 0.0f; p.w = 1.0f;
-    v[4].pos = p;
-    p.x = right; p.y = top + 3.0f; p.z = 0.0f; p.w = 1.0f;
-    v[5].pos = p;
-    ((cCtx_2CBAC8*)GrMan)->v71(6, v, 0);
+    sVec4_2CBAC8 vertexPos;
+    vertexPos.x = left; vertexPos.y = top; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
+    arrowVerts[0].pos = vertexPos;
+    vertexPos.x = left; vertexPos.y = top + 3.0f; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
+    arrowVerts[1].pos = vertexPos;
+    vertexPos.x = mid; vertexPos.y = bot - 3.0f; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
+    arrowVerts[2].pos = vertexPos;
+    vertexPos.x = mid; vertexPos.y = bot; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
+    arrowVerts[3].pos = vertexPos;
+    vertexPos.x = right; vertexPos.y = top; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
+    arrowVerts[4].pos = vertexPos;
+    vertexPos.x = right; vertexPos.y = top + 3.0f; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
+    arrowVerts[5].pos = vertexPos;
+    ((cCtx_2CBAC8*)GrMan)->v71(6, arrowVerts, 0);
 }
 #endif
 
@@ -2241,9 +2241,9 @@ struct func_002CC350_sStack {
 extern "C" void func_002CC350(void* self)
 {
     func_002CC350_sVec2 scale(0.8500000238418579f, 0.8500000238418579f);
-    char* o = *(char**)((char*)self + 0x58);
-    *(float*)(o + 0x38) = *(float*)(o + 0x30) * scale.x;
-    *(float*)(o + 0x3C) = *(float*)(o + 0x34) * scale.y;
+    char* font = *(char**)((char*)self + 0x58);
+    *(float*)(font + 0x38) = *(float*)(font + 0x30) * scale.x;
+    *(float*)(font + 0x3C) = *(float*)(font + 0x34) * scale.y;
     func_002CC350_sStack* st = (func_002CC350_sStack*)self;
     st->items[st->count - 1]->v05();
 }
@@ -2321,11 +2321,11 @@ struct func_002CC460_sStack {
  * slot 6 (onGainFocus) with the menu system; with none left it calls func_002CC0B8 (activate) with 0. There is no
  * underflow check.
  *
- * @param p  the menu system
+ * @param menuSys  the menu system
  */
-extern "C" void func_002CC460(void* p)
+extern "C" void func_002CC460(void* menuSys)
 {
-    func_002CC460_sStack* self = (func_002CC460_sStack*)p;
+    func_002CC460_sStack* self = (func_002CC460_sStack*)menuSys;
     self->count--;
     self->entries[self->count]->v07();
     if (self->count != 0) {
@@ -2346,24 +2346,24 @@ extern void* D_00486E80[];
 /**
  * Constructs an on/off menu item: a caption plus the text shown for each state of an int flag.
  *
- * Runs the base cMenuItem_cMenuItem with @p text as the ID, then sets the caption (+0x14) = @p a3, on text (+0x18) =
- * @p a4, off text (+0x1C) = @p a5, flag pointer (+0x20) = @p a2, and the vtable D_00486E80 (input func_002CC578,
+ * Runs the base cMenuItem_cMenuItem with @p text as the ID, then sets the caption (+0x14) = @p caption, on text (+0x18) =
+ * @p onText, off text (+0x1C) = @p offText, flag pointer (+0x20) = @p flagPtr, and the vtable D_00486E80 (input func_002CC578,
  * preRender func_002CC648, render func_002CC758).
  *
  * @param text  the item's ID
- * @param a2  the flag the item toggles
- * @param a3  caption
- * @param a4  text shown when the flag is set, or 0
- * @param a5  text shown when it is clear, or 0
+ * @param flagPtr  the flag the item toggles
+ * @param caption  caption
+ * @param onText  text shown when the flag is set, or 0
+ * @param offText  text shown when it is clear, or 0
  * @return @p self
  */
-extern "C" void* func_002CC500(void* self, void* text, int a2, int a3, int a4, int a5)
+extern "C" void* func_002CC500(void* self, void* text, int flagPtr, int caption, int onText, int offText)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
-    *(int*)((char*)self + 0x14) = a3;
-    *(int*)((char*)self + 0x18) = a4;
-    *(int*)((char*)self + 0x1C) = a5;
-    *(int*)((char*)self + 0x20) = a2;
+    *(int*)((char*)self + 0x14) = caption;
+    *(int*)((char*)self + 0x18) = onText;
+    *(int*)((char*)self + 0x1C) = offText;
+    *(int*)((char*)self + 0x20) = flagPtr;
     *(void***)((char*)self + 0x10) = D_00486E80;
     return self;
 }
@@ -2397,14 +2397,14 @@ public:
  */
 extern "C" int func_002CC578(void** self)
 {
-    int r = func_002CA2B0(self);
-    if (cMenuItem_isLocked(self) == 0 && r == 0) {
+    int baseResult = func_002CA2B0(self);
+    if (cMenuItem_isLocked(self) == 0 && baseResult == 0) {
         if ((self[6] != 0 && self[7] != 0 && (func_002CA3E8(self) == 2 || func_002CA3E8(self) == 3)) || func_002CA3E8(self) == 6) {
             *(int*)self[8] ^= 1;
             ((func_002CC578_cMenu*)self[0])->v04(self);
         }
     }
-    return r;
+    return baseResult;
 }
 #endif
 
@@ -2526,24 +2526,24 @@ extern void* D_00486E30[];
 /**
  * Constructs a list-choice item: a caption and an int that takes one of the values of a {name, value} table.
  *
- * Runs cMenuItem_cMenuItem with @p text as the ID, stores the vtable D_00486E30, the caption (+0x14) = @p a3, the value
- * pointer (+0x20) = @p a2, the entry count (+0x18) = @p a4 and the entry table (+0x1C) = @p a5.
+ * Runs cMenuItem_cMenuItem with @p text as the ID, stores the vtable D_00486E30, the caption (+0x14) = @p caption, the value
+ * pointer (+0x20) = @p enumPtr, the entry count (+0x18) = @p numTags and the entry table (+0x1C) = @p tags.
  *
  * @param text  the item's ID
- * @param a2  the int the item sets
- * @param a3  caption
- * @param a4  number of entries in @p a5
- * @param a5  the entries, 8 bytes each: name, value
+ * @param enumPtr  the int the item sets
+ * @param caption  caption
+ * @param numTags  number of entries in @p tags
+ * @param tags  the entries, 8 bytes each: name, value
  * @return @p self
  */
-extern "C" void* func_002CC838(void* self, void* text, int a2, int a3, int a4, int a5)
+extern "C" void* func_002CC838(void* self, void* text, int enumPtr, int caption, int numTags, int tags)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
     *(void***)((char*)self + 0x10) = D_00486E30;
-    *(int*)((char*)self + 0x14) = a3;
-    *(int*)((char*)self + 0x20) = a2;
-    *(int*)((char*)self + 0x18) = a4;
-    *(int*)((char*)self + 0x1C) = a5;
+    *(int*)((char*)self + 0x14) = caption;
+    *(int*)((char*)self + 0x20) = enumPtr;
+    *(int*)((char*)self + 0x18) = numTags;
+    *(int*)((char*)self + 0x1C) = tags;
     return self;
 }
 #endif
@@ -3005,23 +3005,23 @@ struct func_002CCF98_sItem {
 };
 
 /**
- * Constructs a command item: ID @p text, caption (+0x14) @p a2 and argument (+0x1C) @p a3, which selecting the item
+ * Constructs a command item: ID @p text, caption (+0x14) @p caption and argument (+0x1C) @p commandArg, which selecting the item
  * passes to the menu's onCommand.
  *
  * State text (+0x18) and data (+0x20) start at 0; vtable D_00486D40. Used for "Abort", "Create", "Chat" and similar
  * entries.
  *
  * @param text  the item's ID
- * @param a2  caption
- * @param a3  argument for onCommand
+ * @param caption  caption
+ * @param commandArg  argument for onCommand
  * @return @p self
  */
-extern "C" func_002CCF98_sItem* func_002CCF98(func_002CCF98_sItem* self, void* text, int a2, int a3)
+extern "C" func_002CCF98_sItem* func_002CCF98(func_002CCF98_sItem* self, void* text, int caption, int commandArg)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
-    self->field_0x14 = a2;
+    self->field_0x14 = caption;
     self->vtable = D_00486D40;
-    self->field_0x1C = a3;
+    self->field_0x1C = commandArg;
     self->field_0x20 = 0;
     self->field_0x18 = 0;
     return self;
@@ -3036,11 +3036,11 @@ INCLUDE_ASM("util/menu", func_002CCFF8);
  *
  * @param item  the command item
  * @param label  caption
- * @param arg2  argument for onCommand
+ * @param commandArg  argument for onCommand
  */
-extern "C" void func_002CCFF8(void *item, int label, int arg2) {
+extern "C" void func_002CCFF8(void *item, int label, int commandArg) {
     (*(int *)((char*)(item) + (0x14))) = label;
-    (*(int *)((char*)(item) + (0x1C))) = arg2;
+    (*(int *)((char*)(item) + (0x1C))) = commandArg;
     (*(int *)((char*)(item) + (0x18))) = 0;
 }
 #endif
@@ -3068,11 +3068,11 @@ extern "C" int func_002CA3E8(void** self);
  */
 extern "C" int func_002CD008(void* self)
 {
-    int r = func_002CA2B0(self);
-    if (cMenuItem_isLocked(self) == 0 && r == 0 && func_002CA3E8((void**)self) == 6) {
-        r = (*(func_002CD008_cMenu**)self)->v03(self, *(void**)((char*)self + 0x1C));
+    int baseResult = func_002CA2B0(self);
+    if (cMenuItem_isLocked(self) == 0 && baseResult == 0 && func_002CA3E8((void**)self) == 6) {
+        baseResult = (*(func_002CD008_cMenu**)self)->v03(self, *(void**)((char*)self + 0x1C));
     }
-    return r;
+    return baseResult;
 }
 #endif
 
@@ -3153,21 +3153,21 @@ INCLUDE_ASM("util/menu", func_002CD168);
 extern void* D_00486CF0[];
 
 /**
- * Constructs a callback item: ID @p text, caption (+0x14) @p a2 and the function (+0x18) @p a3 that selecting the item
+ * Constructs a callback item: ID @p text, caption (+0x14) @p caption and the function (+0x18) @p callback that selecting the item
  * calls.
  *
  * Stores the vtable D_00486CF0.
  *
  * @param text  the item's ID
- * @param a2  caption
- * @param a3  function called on select
+ * @param caption  caption
+ * @param callback  function called on select
  * @return @p self
  */
-extern "C" void* func_002CD168(void* self, void* text, int a2, int a3)
+extern "C" void* func_002CD168(void* self, void* text, int caption, int callback)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
-    *(int*)((char*)self + 0x14) = a2;
-    *(int*)((char*)self + 0x18) = a3;
+    *(int*)((char*)self + 0x14) = caption;
+    *(int*)((char*)self + 0x18) = callback;
     *(void***)((char*)self + 0x10) = D_00486CF0;
     return self;
 }
@@ -3219,12 +3219,12 @@ extern void* D_004866C8[];
  * Measures a callback item: its caption on the left and "[Callback on Select]" (D_004866C8) on the right
  * (func_002CA4C8).
  *
- * @param a1  the callback item
+ * @param item  the callback item
  * @return @p self, the hidden return rect
  */
-extern "C" void* func_002CD240(void* self, void* a1)
+extern "C" void* func_002CD240(void* self, void* item)
 {
-    func_002CA4C8(self, a1, *(int*)((char*)a1 + 0x14), 0, D_004866C8);
+    func_002CA4C8(self, item, *(int*)((char*)item + 0x14), 0, D_004866C8);
     return self;
 }
 #endif
@@ -3242,12 +3242,12 @@ void* func_002CA988_5(void*, int, int, int, void*) __asm__("func_002CA988");
 /**
  * Draws a callback item: its caption on the left and "[Callback on Select]" (D_004866C8) on the right (func_002CA988).
  *
- * @param a1  the row's rect
+ * @param rect  the row's rect
  * @return func_002CA988's return value
  */
-void* func_002CD278(void* self, int a1)
+void* func_002CD278(void* self, int rect)
 {
-    return func_002CA988_5(self, a1, *(int*)((char*)self + 0x14), 0, D_004866C8);
+    return func_002CA988_5(self, rect, *(int*)((char*)self + 0x14), 0, D_004866C8);
 }
 #endif
 
@@ -3485,26 +3485,26 @@ INCLUDE_ASM("util/menu", func_002CD4A0);
 extern void* D_00486C00[];
 
 /**
- * Constructs a signed-byte item that edits the byte at @p a2 within [@p a3, @p a4].
+ * Constructs a signed-byte item that edits the byte at @p valuePtr within [@p minValue, @p maxValue].
  *
- * Runs cMenuItem_cMenuItem with @p text as the ID, then caption (+0x14) = @p a5, value pointer (+0x18) = @p a2, minimum
- * (+0x1C) = @p a3, maximum (+0x1D) = @p a4, vtable D_00486C00, and zeroes the held-frames counter (+0x20), direction
+ * Runs cMenuItem_cMenuItem with @p text as the ID, then caption (+0x14) = @p caption, value pointer (+0x18) = @p valuePtr, minimum
+ * (+0x1C) = @p minValue, maximum (+0x1D) = @p maxValue, vtable D_00486C00, and zeroes the held-frames counter (+0x20), direction
  * (+0x24) and fraction (+0x28).
  *
  * @param text  the item's ID
- * @param a2  the signed byte the item edits
- * @param a3  minimum value
- * @param a4  maximum value
- * @param a5  caption
+ * @param valuePtr  the signed byte the item edits
+ * @param minValue  minimum value
+ * @param maxValue  maximum value
+ * @param caption  caption
  * @return @p self
  */
-extern "C" void* func_002CD4A0(void* self, void* text, int a2, signed char a3, signed char a4, int a5)
+extern "C" void* func_002CD4A0(void* self, void* text, int valuePtr, signed char minValue, signed char maxValue, int caption)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
-    *(int*)((char*)self + 0x14) = a5;
-    *(int*)((char*)self + 0x18) = a2;
-    *(char*)((char*)self + 0x1C) = a3;
-    *(char*)((char*)self + 0x1D) = a4;
+    *(int*)((char*)self + 0x14) = caption;
+    *(int*)((char*)self + 0x18) = valuePtr;
+    *(char*)((char*)self + 0x1C) = minValue;
+    *(char*)((char*)self + 0x1D) = maxValue;
     *(void***)((char*)self + 0x10) = D_00486C00;
     *(int*)((char*)self + 0x24) = 0;
     *(int*)((char*)self + 0x20) = 0;
@@ -3665,12 +3665,12 @@ extern void* D_004866E0[];
  * Measures a signed-byte item: its caption on the left with room for "-99999999" (D_004866E0) on the right
  * (func_002CA4C8).
  *
- * @param a1  the item
+ * @param item  the item
  * @return @p self, the hidden return rect
  */
-extern "C" void* func_002CD7B8(void* self, void* a1)
+extern "C" void* func_002CD7B8(void* self, void* item)
 {
-    func_002CA4C8(self, a1, *(int*)((char*)a1 + 0x14), 0, D_004866E0);
+    func_002CA4C8(self, item, *(int*)((char*)item + 0x14), 0, D_004866E0);
     return self;
 }
 #endif
@@ -4312,26 +4312,26 @@ INCLUDE_ASM("util/menu", func_002CE170);
 extern void* cAngleMenuItem_vtbl[];
 
 /**
- * Constructs an angle item that edits the float at @p a2 within [@p f1, @p f2].
+ * Constructs an angle item that edits the float at @p valuePtr within [@p minValue, @p maxValue].
  *
- * Runs cMenuItem_cMenuItem with @p text as the ID, then caption (+0x14) = @p a3, value pointer (+0x18) = @p a2, minimum
- * (+0x1C) = @p f1, maximum (+0x20) = @p f2, vtable cAngleMenuItem_vtbl, and zeroes the direction (+0x28) and
+ * Runs cMenuItem_cMenuItem with @p text as the ID, then caption (+0x14) = @p caption, value pointer (+0x18) = @p valuePtr, minimum
+ * (+0x1C) = @p minValue, maximum (+0x20) = @p maxValue, vtable cAngleMenuItem_vtbl, and zeroes the direction (+0x28) and
  * held-frames counter (+0x24).
  *
  * @param text  the item's ID
- * @param a2  the float the item edits
- * @param a3  caption
- * @param f1  minimum value
- * @param f2  maximum value
+ * @param valuePtr  the float the item edits
+ * @param caption  caption
+ * @param minValue  minimum value
+ * @param maxValue  maximum value
  * @return @p self
  */
-extern "C" void* func_002CE170(void* self, void* text, int a2, int a3, float f1, float f2)
+extern "C" void* func_002CE170(void* self, void* text, int valuePtr, int caption, float minValue, float maxValue)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
-    *(int*)((char*)self + 0x14) = a3;
-    *(int*)((char*)self + 0x18) = a2;
-    *(float*)((char*)self + 0x1C) = f1;
-    *(float*)((char*)self + 0x20) = f2;
+    *(int*)((char*)self + 0x14) = caption;
+    *(int*)((char*)self + 0x18) = valuePtr;
+    *(float*)((char*)self + 0x1C) = minValue;
+    *(float*)((char*)self + 0x20) = maxValue;
     *(void***)((char*)self + 0x10) = cAngleMenuItem_vtbl;
     *(int*)((char*)self + 0x28) = 0;
     *(int*)((char*)self + 0x24) = 0;
@@ -4473,20 +4473,20 @@ struct func_002CE418_sItem {
 };
 
 /**
- * Constructs a text-entry item: ID -1, caption (+0x14) @p a1, the text (+0x18, 16 bytes) copied from @p name (at most
+ * Constructs a text-entry item: ID -1, caption (+0x14) @p caption, the text (+0x18, 16 bytes) copied from @p name (at most
  * 15 characters, always terminated) and the cursor (+0x28) at 0.
  *
  * Stores the vtable D_00486AC0 (input func_002CE488, preRender func_002CE820, render func_002CE910). The net help
  * popups use it for "Login Name", "Password", "Persona Name" and "Enter Chat".
  *
- * @param a1  caption
+ * @param caption  caption
  * @param name  initial text
  * @return @p self
  */
-extern "C" func_002CE418_sItem* func_002CE418(func_002CE418_sItem* self, int a1, const char* name)
+extern "C" func_002CE418_sItem* func_002CE418(func_002CE418_sItem* self, int caption, const char* name)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
-    self->field_0x14 = a1;
+    self->field_0x14 = caption;
     self->field_0x28 = 0;
     self->vtable = D_00486AC0;
     strncpy(self->name, name, 0xF);
@@ -4640,8 +4640,8 @@ extern "C" func_002CE820_sResult func_002CE820(void* item)
     if (focused && *(int*)((char*)item + 0x28) == len && *(int*)((char*)item + 0x28) < 15) {
         strcat(buf, D_004A39D0);
     }
-    func_002CE820_sResult r = func_002CE820_make(item, *(int*)((char*)item + 0x14), buf);
-    return r;
+    func_002CE820_sResult rowRect = func_002CE820_make(item, *(int*)((char*)item + 0x14), buf);
+    return rowRect;
 }
 #endif
 
@@ -4783,16 +4783,16 @@ extern "C" void func_002CE910(void* self, float* rect)
     {
         char* menu = *(char**)self;
         sVEntry2CB880* vt = *(sVEntry2CB880**)(menu + 0x12C);
-        fn2CB880* f = &vt[8].fn;
-        (*f)(menu + vt[8].delta, rect, focused ? D_004D5380 : D_004D5390);
+        fn2CB880* drawBoxFn = &vt[8].fn;
+        (*drawBoxFn)(menu + vt[8].delta, rect, focused ? D_004D5380 : D_004D5390);
     }
     func_002CA988_sVec3* col = self == cMenu_getFocusItem((cMenu*)(*(void**)self)) ? &D_004D53A0 : &D_004D53B0;
-    func_002CA988_sColor c;
-    c.a = 1.0f;
-    c.r = col->x;
-    c.g = col->y;
-    c.b = col->z;
-    *(func_002CA988_sColor*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x40) = c;
+    func_002CA988_sColor textColor;
+    textColor.a = 1.0f;
+    textColor.r = col->x;
+    textColor.g = col->y;
+    textColor.b = col->z;
+    *(func_002CA988_sColor*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x40) = textColor;
     *(sVec2_2CE910*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x28) = sVec2_2CE910(2.0f, 2.0f);
     char* label = *(char**)((char*)self + 0x14);
     if (label) {
@@ -4812,31 +4812,31 @@ extern "C" void func_002CE910(void* self, float* rect)
         float x2 = rect[0] + (rect[2] - w2) - 16.0f;
         float y1 = bot - 4.0f;
         float y2 = bot - 1.0f;
-        sVtx_2CE910 v[4];
+        sVtx_2CE910 cursorVerts[4];
         float zero = 0.0f;
         float one = 1.0f;
-        sVec4_2CE910 p;
-        p.Set(x1, y1, zero, one);
-        v[0].v = zero;
-        v[0].u = zero;
-        v[0].q = one;
-        v[0].r = (int)(c.r * 127.0f);
-        v[0].g = (int)(c.g * 127.0f);
-        v[0].b = (int)(c.b * 127.0f);
-        v[0].a = 0x7F;
-        v[0].pos = p;
-        p.Set(x1, y2, zero, one);
-        v[1] = v[0];
-        v[1].pos = p;
-        p.Set(x2, y1, zero, one);
-        v[2] = v[0];
-        v[2].pos = p;
-        p.Set(x2, y2, zero, one);
-        v[3] = v[0];
-        v[3].pos = p;
+        sVec4_2CE910 vertexPos;
+        vertexPos.Set(x1, y1, zero, one);
+        cursorVerts[0].v = zero;
+        cursorVerts[0].u = zero;
+        cursorVerts[0].q = one;
+        cursorVerts[0].r = (int)(textColor.r * 127.0f);
+        cursorVerts[0].g = (int)(textColor.g * 127.0f);
+        cursorVerts[0].b = (int)(textColor.b * 127.0f);
+        cursorVerts[0].a = 0x7F;
+        cursorVerts[0].pos = vertexPos;
+        vertexPos.Set(x1, y2, zero, one);
+        cursorVerts[1] = cursorVerts[0];
+        cursorVerts[1].pos = vertexPos;
+        vertexPos.Set(x2, y1, zero, one);
+        cursorVerts[2] = cursorVerts[0];
+        cursorVerts[2].pos = vertexPos;
+        vertexPos.Set(x2, y2, zero, one);
+        cursorVerts[3] = cursorVerts[0];
+        cursorVerts[3].pos = vertexPos;
         ((cCtx_2CE910*)GrMan)->top->f4_2 = 1;
         *(short*)((char*)((cCtx_2CE910*)GrMan)->top + 0x10) = -1;
-        ((cCtx_2CE910*)GrMan)->v71(4, v, 0);
+        ((cCtx_2CE910*)GrMan)->v71(4, cursorVerts, 0);
     }
     *(sVec2_2CE910*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x28) = sVec2_2CE910(0.0f, 0.0f);
 }
@@ -6145,20 +6145,20 @@ cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cM
 extern void* D_004868B8[];
 
 /**
- * Constructs a vector title item: ID -1, caption (+0x18) @p a1 and the vector (+0x14) @p a2 that it shows; vtable
+ * Constructs a vector title item: ID -1, caption (+0x18) @p caption and the vector (+0x14) @p vector that it shows; vtable
  * D_004868B8.
  *
  * cVectorMenuItem_cVectorMenuItem builds its title row (+0x654) with it.
  *
- * @param a1  caption
- * @param a2  the vector (three floats) shown
+ * @param caption  caption
+ * @param vector  the vector (three floats) shown
  * @return @p self
  */
-extern "C" void* func_002D03F0(void* self, int a1, int a2)
+extern "C" void* func_002D03F0(void* self, int caption, int vector)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
-    *(int*)((char*)self + 0x14) = a2;
-    *(int*)((char*)self + 0x18) = a1;
+    *(int*)((char*)self + 0x14) = vector;
+    *(int*)((char*)self + 0x18) = caption;
     *(void***)((char*)self + 0x10) = D_004868B8;
     return self;
 }
@@ -6363,33 +6363,33 @@ struct sPair8_D0808 {
 };
 
 /**
- * Constructs a graph item: an editable curve of @p a1 points with per-point axis locks, a slope rule and a range.
+ * Constructs a graph item: an editable curve of @p numPoints points with per-point axis locks, a slope rule and a range.
  *
- * ID -1, caption (+0x14) "Hello there!" (D_00486738), point count (+0x18) = @p a1, x-lock bits (+0x1C) = @p a2, y-lock
- * bits (+0x20) = @p a3, slope rule (+0x3C) = @p a4, points (+0x28) = @p a5, minimum point (+0x2C) = *@p p6, maximum
- * point (+0x34) = *@p p7, current point (+0x24) and edit mode (+0x40) 0; vtable D_00486808 (input func_002D0908,
+ * ID -1, caption (+0x14) "Hello there!" (D_00486738), point count (+0x18) = @p numPoints, x-lock bits (+0x1C) = @p xLockBits, y-lock
+ * bits (+0x20) = @p yLockBits, slope rule (+0x3C) = @p slope, points (+0x28) = @p points, minimum point (+0x2C) = *@p minPoint, maximum
+ * point (+0x34) = *@p maxPoint, current point (+0x24) and edit mode (+0x40) 0; vtable D_00486808 (input func_002D0908,
  * preRender func_002D0D48, render func_002D0EF8, gainFocus func_002D08E0).
  *
- * @param a1  number of points
- * @param a2  bit i set: point i's x cannot move
- * @param a3  bit i set: point i's y cannot move
- * @param a4  slope rule: > 0 keeps the y values rising, < 0 falling, 0 free
- * @param a5  the points (x, y floats)
- * @param p6  the minimum point (x, y)
- * @param p7  the maximum point (x, y)
+ * @param numPoints  number of points
+ * @param xLockBits  bit i set: point i's x cannot move
+ * @param yLockBits  bit i set: point i's y cannot move
+ * @param slope  slope rule: > 0 keeps the y values rising, < 0 falling, 0 free
+ * @param points  the points (x, y floats)
+ * @param minPoint  the minimum point (x, y)
+ * @param maxPoint  the maximum point (x, y)
  * @return @p self
  */
-extern "C" void* func_002D0808(void* self, int a1, int a2, int a3, int a4, int a5, sPair8_D0808* p6, sPair8_D0808* p7)
+extern "C" void* func_002D0808(void* self, int numPoints, int xLockBits, int yLockBits, int slope, int points, sPair8_D0808* minPoint, sPair8_D0808* maxPoint)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
-    *(int*)((char*)self + 0x18) = a1;
-    *(int*)((char*)self + 0x28) = a5;
-    *(int*)((char*)self + 0x1C) = a2;
-    *(int*)((char*)self + 0x20) = a3;
+    *(int*)((char*)self + 0x18) = numPoints;
+    *(int*)((char*)self + 0x28) = points;
+    *(int*)((char*)self + 0x1C) = xLockBits;
+    *(int*)((char*)self + 0x20) = yLockBits;
     *(void***)((char*)self + 0x10) = D_00486808;
-    *(int*)((char*)self + 0x3C) = a4;
-    *(sPair8_D0808*)((char*)self + 0x2C) = *p6;
-    *(sPair8_D0808*)((char*)self + 0x34) = *p7;
+    *(int*)((char*)self + 0x3C) = slope;
+    *(sPair8_D0808*)((char*)self + 0x2C) = *minPoint;
+    *(sPair8_D0808*)((char*)self + 0x34) = *maxPoint;
     *(void***)((char*)self + 0x14) = D_00486738;
     *(int*)((char*)self + 0x24) = 0;
     *(int*)((char*)self + 0x40) = 0;
@@ -6850,47 +6850,47 @@ extern "C" void func_002D0EF8(cGraphMenuItem_D0EF8* self, float* rect)
     char* font = *(char**)(*(char**)(*(char**)self + 0x124) + 0x58);
     float lineH = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
     func_002CA988_sVec3* col = self == cMenu_getFocusItem((cMenu*)self->owner) ? &D_004D53A0 : &D_004D53B0;
-    sColor c;
-    c.a = 1.0f;
-    c.r = col->x;
-    c.g = col->y;
-    c.b = col->z;
-    *(sColor*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x40) = c;
+    sColor textColor;
+    textColor.a = 1.0f;
+    textColor.r = col->x;
+    textColor.g = col->y;
+    textColor.b = col->z;
+    *(sColor*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x40) = textColor;
     *(sVec2r_D0EF8*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x28) = sVec2r_D0EF8(2.0f, 2.0f);
     cFont_text(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 16.0f, rect[1] + 6.0f - 1.0f, self->label);
     if (self->showCur && focused) {
         cBXStr_D0EF8 str = FormatValue_D0EF8(self->pts[self->cur].x) + D_004A39F0 + FormatValue_D0EF8(self->pts[self->cur].y);
         cFont_text(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 32.0f, rect[1] + 12.0f - 1.0f + lineH, str.str);
     }
-    float h;
+    float graphHeight;
     if (focused && self->showCur) {
-        h = rect[3] - 24.0f;
+        graphHeight = rect[3] - 24.0f;
     } else {
-        h = rect[3] - 12.0f;
+        graphHeight = rect[3] - 12.0f;
     }
     sRect gr;
     gr.w = 100.0f;
-    gr.h = h;
-    gr.y = rect[1] + (rect[3] - h) * 0.5f;
+    gr.h = graphHeight;
+    gr.y = rect[1] + (rect[3] - graphHeight) * 0.5f;
     gr.x = rect[0] + rect[2] - 16.0f - gr.w;
     int old = GetDepth_D0EF8(((cRenderCtx*)GrMan)->top);
-    sVtxF v[4];
+    sVtxF quadVerts[4];
     int i;
     for (i = 0; i < 4; i++) {
-        v[i].a = (int)(D_004D53C0.a * 128.0f);
-        v[i].r = (int)(D_004D53C0.r * 128.0f);
-        v[i].g = (int)(D_004D53C0.g * 128.0f);
-        v[i].b = (int)(D_004D53C0.b * 128.0f);
-        v[i].q = 1.0f;
+        quadVerts[i].a = (int)(D_004D53C0.a * 128.0f);
+        quadVerts[i].r = (int)(D_004D53C0.r * 128.0f);
+        quadVerts[i].g = (int)(D_004D53C0.g * 128.0f);
+        quadVerts[i].b = (int)(D_004D53C0.b * 128.0f);
+        quadVerts[i].q = 1.0f;
     }
     ((cRenderCtx*)GrMan)->top->f10 = -1;
     {
-        float t[4];
-        t[0] = 0.0f;
-        t[1] = 0.0f;
-        t[2] = 1.0f;
-        t[3] = 1.0f;
-        func_002CB350_0EF8((func_002CB350_sVtx*)v, &gr.x, t);
+        float fullUv[4];
+        fullUv[0] = 0.0f;
+        fullUv[1] = 0.0f;
+        fullUv[2] = 1.0f;
+        fullUv[3] = 1.0f;
+        func_002CB350_0EF8((func_002CB350_sVtx*)quadVerts, &gr.x, fullUv);
     }
     float sx = gr.w / (self->maxX - self->minX);
     float sy = gr.h / (self->maxY - self->minY);
@@ -6899,70 +6899,70 @@ extern "C" void func_002D0EF8(cGraphMenuItem_D0EF8* self, float* rect)
     if ((self->maxY >= 0.0f) != (self->minY > 0.0f)) {
         SetDepth_D0EF8(((cRenderCtx*)GrMan)->top, old, 1);
         for (i = 0; i < 2; i++) {
-            v[i].a = (int)(D_004D5380_c.a * 128.0f);
-            v[i].r = (int)(D_004D5380_c.r * 128.0f);
-            v[i].g = (int)(D_004D5380_c.g * 128.0f);
-            v[i].b = (int)(D_004D5380_c.b * 128.0f);
+            quadVerts[i].a = (int)(D_004D5380_c.a * 128.0f);
+            quadVerts[i].r = (int)(D_004D5380_c.r * 128.0f);
+            quadVerts[i].g = (int)(D_004D5380_c.g * 128.0f);
+            quadVerts[i].b = (int)(D_004D5380_c.b * 128.0f);
         }
-        sVec4 p;
-        p.x = gr.x;
-        p.y = oy;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        *(sVec4*)v[0].pos = p;
-        p.x = gr.x + gr.w;
-        p.y = oy;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        *(sVec4*)v[1].pos = p;
-        ((cRenderCtx*)cGraphicsMan_TheGraphicsMan)->v73(2, v, 0);
+        sVec4 vertexPos;
+        vertexPos.x = gr.x;
+        vertexPos.y = oy;
+        vertexPos.z = 0.0f;
+        vertexPos.w = 1.0f;
+        *(sVec4*)quadVerts[0].pos = vertexPos;
+        vertexPos.x = gr.x + gr.w;
+        vertexPos.y = oy;
+        vertexPos.z = 0.0f;
+        vertexPos.w = 1.0f;
+        *(sVec4*)quadVerts[1].pos = vertexPos;
+        ((cRenderCtx*)cGraphicsMan_TheGraphicsMan)->v73(2, quadVerts, 0);
     }
     SetDepth_D0EF8(((cRenderCtx*)GrMan)->top, old, 2);
     for (i = 0; i < 2; i++) {
-        v[i].a = (int)(D_004D53D0.a * 128.0f);
-        v[i].r = (int)(D_004D53D0.r * 128.0f);
-        v[i].g = (int)(D_004D53D0.g * 128.0f);
-        v[i].b = (int)(D_004D53D0.b * 128.0f);
+        quadVerts[i].a = (int)(D_004D53D0.a * 128.0f);
+        quadVerts[i].r = (int)(D_004D53D0.r * 128.0f);
+        quadVerts[i].g = (int)(D_004D53D0.g * 128.0f);
+        quadVerts[i].b = (int)(D_004D53D0.b * 128.0f);
     }
     for (i = 1; i < self->count; i++) {
         float x0 = GraphX_D0EF8(self->pts[i - 1], sx, ox);
         float y0 = GraphY_D0EF8(self->pts[i - 1], sy, oy);
         float x1 = GraphX_D0EF8(self->pts[i], sx, ox);
         float y1 = GraphY_D0EF8(self->pts[i], sy, oy);
-        sVec4 p;
-        p.x = x0;
-        p.y = y0;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        *(sVec4*)v[0].pos = p;
-        p.x = x1;
-        p.y = y1;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        *(sVec4*)v[1].pos = p;
-        ((cRenderCtx*)cGraphicsMan_TheGraphicsMan)->v73(2, v, 0);
+        sVec4 vertexPos;
+        vertexPos.x = x0;
+        vertexPos.y = y0;
+        vertexPos.z = 0.0f;
+        vertexPos.w = 1.0f;
+        *(sVec4*)quadVerts[0].pos = vertexPos;
+        vertexPos.x = x1;
+        vertexPos.y = y1;
+        vertexPos.z = 0.0f;
+        vertexPos.w = 1.0f;
+        *(sVec4*)quadVerts[1].pos = vertexPos;
+        ((cRenderCtx*)cGraphicsMan_TheGraphicsMan)->v73(2, quadVerts, 0);
     }
     if (self->showCur) {
         SetDepth_D0EF8(((cRenderCtx*)GrMan)->top, old, 3);
         for (i = 0; i < 4; i++) {
-            v[i].a = (int)(D_004D53E0.a * 128.0f);
-            v[i].r = (int)(D_004D53E0.r * 128.0f);
-            v[i].g = (int)(D_004D53E0.g * 128.0f);
-            v[i].b = (int)(D_004D53E0.b * 128.0f);
+            quadVerts[i].a = (int)(D_004D53E0.a * 128.0f);
+            quadVerts[i].r = (int)(D_004D53E0.r * 128.0f);
+            quadVerts[i].g = (int)(D_004D53E0.g * 128.0f);
+            quadVerts[i].b = (int)(D_004D53E0.b * 128.0f);
         }
-        float r[4];
+        float markerRect[4];
         float tt[4];
         float px = GraphX_D0EF8(self->pts[self->cur], sx, ox);
         float py = GraphY_D0EF8(self->pts[self->cur], sy, oy);
-        r[0] = px - 2.0f;
-        r[1] = py - 2.0f;
-        r[2] = 5.0f;
-        r[3] = 5.0f;
+        markerRect[0] = px - 2.0f;
+        markerRect[1] = py - 2.0f;
+        markerRect[2] = 5.0f;
+        markerRect[3] = 5.0f;
         tt[0] = 0.0f;
         tt[1] = 0.0f;
         tt[2] = 1.0f;
         tt[3] = 1.0f;
-        func_002CB350_0EF8((func_002CB350_sVtx*)v, r, tt);
+        func_002CB350_0EF8((func_002CB350_sVtx*)quadVerts, markerRect, tt);
     }
     // Restore the depth the item started with.
     ((cRenderCtx*)GrMan)->top->f8 = (((cRenderCtx*)GrMan)->top->f8 & ~0x3E0) | ((old << 5) & 0x3E0);
@@ -6985,12 +6985,12 @@ extern void* D_004867B0[];
  */
 extern "C" void* func_002D1740(void* self)
 {
-    char* s = (char*)self;
-    char* nullItem = s + 0x130;
-    char* spaceItem = s + 0x14C;
-    char* item3 = s + 0x164;
+    char* errorMenu = (char*)self;
+    char* nullItem = errorMenu + 0x130;
+    char* spaceItem = errorMenu + 0x14C;
+    char* item3 = errorMenu + 0x164;
     cMenu_cMenu(self);
-    *(void***)(s + 0x12C) = D_004867B0;
+    *(void***)(errorMenu + 0x12C) = D_004867B0;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)nullItem, 0);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)spaceItem, (void*)10);
     func_002CCDF0((s2CCDF0Item*)item3, 0);
@@ -7016,12 +7016,12 @@ extern void* D_004867B0[];
  */
 extern "C" void* func_002D17F0(void* self, void* nullText, void* text3)
 {
-    char* s = (char*)self;
-    char* nullItem = s + 0x130;
+    char* errorMenu = (char*)self;
+    char* nullItem = errorMenu + 0x130;
     cMenu_cMenu(self);
-    char* item3 = s + 0x164;
-    *(void***)(s + 0x12C) = D_004867B0;
-    char* spaceItem = s + 0x14C;
+    char* item3 = errorMenu + 0x164;
+    *(void***)(errorMenu + 0x12C) = D_004867B0;
+    char* spaceItem = errorMenu + 0x14C;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)nullItem, nullText);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)spaceItem, (void*)0x1E);
     func_002CCDF0((s2CCDF0Item*)item3, text3);
@@ -7038,21 +7038,21 @@ INCLUDE_ASM("util/menu", func_002D18B0);
 extern float D_00445AB0[];
 
 /**
- * Returns a smooth 1D noise value: @p t * 160 split into an index and a fraction, interpolated linearly between entries
+ * Returns a smooth 1D noise value: @p phase * 160 split into an index and a fraction, interpolated linearly between entries
  * index % 160 and index % 160 + 1 of the float table D_00445AB0.
  *
  * Negative inputs give a negative index (truncation and % keep the sign), so they read before the table.
  *
- * @param t  noise coordinate (one period is 1.0)
+ * @param phase  noise coordinate (one period is 1.0)
  * @return the interpolated table value
  */
-extern "C" float func_002D18B0(float t)
+extern "C" float func_002D18B0(float phase)
 {
-    t = t * 160.0f;
-    int i = (int)t;
-    t = t - (float)i;
+    phase = phase * 160.0f;
+    int i = (int)phase;
+    phase = phase - (float)i;
     i = i % 160;
-    return D_00445AB0[i] * (1.0f - t) + D_00445AB0[i + 1] * t;
+    return D_00445AB0[i] * (1.0f - phase) + D_00445AB0[i + 1] * phase;
 }
 #endif
 
@@ -7308,8 +7308,8 @@ public:
 extern "C" void func_002D1B58(int i)
 {
     char* base = (char*)SSXApp->Game->AI;
-    char* p = *(char**)(base + (i << 2) + 0x28);
-    ((func_002D1B58_cObj*)(p + 0x6C0))->v05();
+    char* rider = *(char**)(base + (i << 2) + 0x28);
+    ((func_002D1B58_cObj*)(rider + 0x6C0))->v05();
 }
 #endif
 
@@ -7371,17 +7371,17 @@ INCLUDE_ASM("util/menu", func_002D1BF0);
 extern "C" int func_001032C0(void* self, int a);
 
 /**
- * Hands instance record @p a to the AI's focus manager (func_001032C0 on SSXApp->Game->AI->FocusMan), which marks it
+ * Hands instance record @p instanceRecord to the AI's focus manager (func_001032C0 on SSXApp->Game->AI->FocusMan), which marks it
  * (record flags bit 0x100) and adds it to the focus boxes.
  *
  * cInstanceNode's constructor calls it for records without that bit, except types 6, 0x10 and 22.
  *
- * @param a  the instance record
+ * @param instanceRecord  the instance record
  * @return func_001032C0's result
  */
-extern "C" int func_002D1BF0(int a)
+extern "C" int func_002D1BF0(int instanceRecord)
 {
-    return func_001032C0(SSXApp->Game->AI->FocusMan, a);
+    return func_001032C0(SSXApp->Game->AI->FocusMan, instanceRecord);
 }
 #endif
 

@@ -458,32 +458,32 @@ struct sTarget00345C90 {
  * Constructs a dynamic particle modifier attached to mesh @p bone of @p owner.
  *
  * Runs cEffectModifier_cEffectModifier(self, owner), installs cDynamicParticleModifier_vtbl, constructs the embedded
- * Emitter (cDynamicEmitter_vtbl), stores ParticleData = @p t, Mesh = @p bone and Offset = *@p pos, copies the data's
- * velocity (+0x48..+0x50) into InitVel and then zeroes it in @p t itself, clears Fade, sets up the emitter
+ * Emitter (cDynamicEmitter_vtbl), stores ParticleData = @p particleDesc, Mesh = @p bone and Offset = *@p pos, copies the data's
+ * velocity (+0x48..+0x50) into InitVel and then zeroes it in @p particleDesc itself, clears Fade, sets up the emitter
  * (cBaseClass_DynamicEmitter_setupEmitter with -1), places it (cDynamicParticleModifier_updatePosition), counts it in
  * D_004A3FFC and clears Complete. cMoveNode_addEffectModifier's caller allocates it (624 bytes,
  * "DynamicParticleModifier").
  *
- * @param t  the particle data record (its velocity is consumed)
+ * @param particleDesc  the particle data record (its velocity is consumed)
  * @param owner  the owning instance
  * @param bone  the mesh to follow
  * @param pos  offset from that mesh
  * @return @p self
  */
-extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier1(cDynamicParticleModifier* self, sTarget00345C90* t, int owner, int bone, sVec4_00345C90* pos)
+extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier1(cDynamicParticleModifier* self, sTarget00345C90* particleDesc, int owner, int bone, sVec4_00345C90* pos)
 {
     cEffectModifier_cEffectModifier((cEffectModifier*)self, owner);
     self->mVtbl = cDynamicParticleModifier_vtbl;
     cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(((char*)&self->Emitter));
     self->Emitter.mVtbl = cDynamicEmitter_vtbl;
-    self->ParticleData = (tParticleData*)t;
+    self->ParticleData = (tParticleData*)particleDesc;
     self->Mesh = bone;
     (*(sVec4_00345C90*)&self->Offset) = *pos;
-    (*(sVec4_00345C90*)&self->InitVel) = sVec4_00345C90(t->x, t->y, t->z, 0.0f);
+    (*(sVec4_00345C90*)&self->InitVel) = sVec4_00345C90(particleDesc->x, particleDesc->y, particleDesc->z, 0.0f);
     self->Fade = 0;
-    t->x = 0.0f;
-    t->y = 0.0f;
-    t->z = 0.0f;
+    particleDesc->x = 0.0f;
+    particleDesc->y = 0.0f;
+    particleDesc->z = 0.0f;
     cBaseClass_DynamicEmitter_setupEmitter(((char*)&self->Emitter), (sTarget00345C90*)self->ParticleData, -1.0f);
     cDynamicParticleModifier_updatePosition(self);
     D_004A3FFC++;

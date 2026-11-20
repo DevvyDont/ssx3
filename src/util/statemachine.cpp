@@ -758,18 +758,18 @@ extern "C" int func_002C76C0(unsigned char* packbuf, unsigned char* unpackbuf)
                     /* handle clue */
                     {
                         int runlen = 0;
-                        unsigned char* d = qd;
+                        unsigned char* runCursor = qd;
                         unsigned char* dest;
 
                         HUFF_GETNUM_76C0(runlen);
                         if (runlen) { /* runlength sequence */
-                            dest = d + runlen;
-                            code = *(d - 1);
+                            dest = runCursor + runlen;
+                            code = *(runCursor - 1);
                             do {
-                                *d++ = code;
-                            } while (d < dest);
+                                *runCursor++ = code;
+                            } while (runCursor < dest);
 
-                            qd = d;
+                            qd = runCursor;
                             goto nextloop;
                         }
                     }

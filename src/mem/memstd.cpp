@@ -144,16 +144,16 @@ extern "C" int func_00251998(int id)
 {
     void** slot = &D_004D2438[id & 0x3F];
     sMemClass_251718* cls = (sMemClass_251718*)*slot;
-    int r = 0;
+    int removed = 0;
     if (cls != 0) {
         if (cls->locked != 0) {
             func_003E56E0(cls->sema);
         }
         MEM_fill(cls, 0, 80);
         *slot = 0;
-        r = 1;
+        removed = 1;
     }
-    return r;
+    return removed;
 }
 #endif
 //100%
@@ -184,13 +184,13 @@ struct sMemClass_251A08 {
 extern "C" void* func_00251A08(int id)
 {
     sMemClass_251A08* cls = (sMemClass_251A08*)D_004D2438[id & 0x3F];
-    void* r = (void*)1;
-    for (sMemNode_251A08* n = cls->first; n != 0 && r != 0; n = n->next) {
+    void* freeResult = (void*)1;
+    for (sMemNode_251A08* n = cls->first; n != 0 && freeResult != 0; n = n->next) {
         if (!(n->flags & 0xC000)) {
-            r = MEM_free((char*)n + 0x10);
+            freeResult = MEM_free((char*)n + 0x10);
         }
     }
-    return r;
+    return freeResult;
 }
 #endif
 //100%
@@ -237,14 +237,14 @@ extern "C" int func_00251AC0(int id)
     sMemClass_251718* cls = (sMemClass_251718*)D_004D2438[id & 0x3F];
     sMemNode_251718* n = cls->head.next;
     sMemNode_251718* best = 0;
-    int v = 0;
+    int largestData = 0;
     for (;;) {
-        if (v < n->size - 0x10) {
+        if (largestData < n->size - 0x10) {
             if (n->tag == 16979) {
                 break;
             }
             best = n;
-            v = best->size - 0x10;
+            largestData = best->size - 0x10;
         }
         n = n->next;
     }
@@ -368,8 +368,8 @@ extern "C" void* func_00251C38(int name)
             sMemNode_251C38* n = cls->first;
             void* data = (char*)n + 0x10;
             do {
-                int s = func_00252658(data);
-                if (s != 0 && strcasecmp(s, name) == 0) {
+                int blockName = func_00252658(data);
+                if (blockName != 0 && strcasecmp(blockName, name) == 0) {
                     return data;
                 }
                 n = n->next;
@@ -695,8 +695,8 @@ extern "C" int func_00252248(void* self)
 {
     int ok = 0;
     if (func_003E6240(self, 0x18, 0) != 0) {
-        unsigned short m = *(unsigned short*)self;
-        if (m == 16966 || m == 16979) {
+        unsigned short blockTag = *(unsigned short*)self;
+        if (blockTag == 16966 || blockTag == 16979) {
             ok = 1;
         } else {
             D_004A2E74 = 1;
@@ -856,8 +856,8 @@ extern "C" int func_002523D0(void* mem)
     sMemNode_2523D0* back;
     sMemNode_2523D0* fwd;
     sMemNode_2523D0* split;
-    sMemNode_2523D0* p;
-    sMemNode_2523D0* q;
+    sMemNode_2523D0* prevFree;
+    sMemNode_2523D0* nextFree;
 
     int size;
     int sz;
@@ -902,25 +902,25 @@ extern "C" int func_002523D0(void* mem)
             back->end = blk;
             fwd->back = blk;
         }
-        q = &cls->head;
-        p = q;
+        nextFree = &cls->head;
+        prevFree = nextFree;
         sz = (char*)blk->end - (char*)blk;
         if ((char*)cls->head.next + ((char*)cls->head.prev - (char*)cls->head.next) / 2 < (char*)blk) {
             do
-                p = p->prev;
-            while (blk < p);
-            q = p->next;
+                prevFree = prevFree->prev;
+            while (blk < prevFree);
+            nextFree = prevFree->next;
         } else {
             do
-                q = q->next;
-            while (q < blk);
-            p = q->prev;
+                nextFree = nextFree->next;
+            while (nextFree < blk);
+            prevFree = nextFree->prev;
         }
         blk->size = sz;
-        blk->next = q;
-        blk->prev = p;
-        p->next = blk;
-        q->prev = blk;
+        blk->next = nextFree;
+        blk->prev = prevFree;
+        prevFree->next = blk;
+        nextFree->prev = blk;
         blk->tag = 16966;
         blk->flags |= 0x4000;
         if (cls->locked) {
@@ -1133,8 +1133,8 @@ extern "C" void* func_00252718(void* mem, int size)
     sMemNode_252718* blk = (sMemNode_252718*)((int)mem - 0x10);
     sMemNode_252718* fwd;
     sMemNode_252718* nb;
-    sMemNode_252718* p;
-    sMemNode_252718* q;
+    sMemNode_252718* prevFree;
+    sMemNode_252718* nextFree;
     int want;
     int avail;
     int hdr;
@@ -1172,25 +1172,25 @@ extern "C" void* func_00252718(void* mem, int size)
     if (avail - want > 0x40) {
         nb = (sMemNode_252718*)((char*)mem + (want + 0x10));
         MEM_initblock(nb, 0, 0, 0, 0, blk, fwd);
-        q = &cls->head;
-        p = q;
+        nextFree = &cls->head;
+        prevFree = nextFree;
         sz = (char*)nb->end - (char*)nb;
         if ((char*)cls->head.next + ((char*)cls->head.prev - (char*)cls->head.next) / 2 < (char*)nb) {
             do
-                p = p->prev;
-            while (nb < p);
-            q = p->next;
+                prevFree = prevFree->prev;
+            while (nb < prevFree);
+            nextFree = prevFree->next;
         } else {
             do
-                q = q->next;
-            while (q < nb);
-            p = q->prev;
+                nextFree = nextFree->next;
+            while (nextFree < nb);
+            prevFree = nextFree->prev;
         }
         nb->size = sz;
-        nb->next = q;
-        nb->prev = p;
-        p->next = nb;
-        q->prev = nb;
+        nb->next = nextFree;
+        nb->prev = prevFree;
+        prevFree->next = nb;
+        nextFree->prev = nb;
         nb->tag = 16966;
         nb->flags |= 0x4000;
         fwd->back = nb;
@@ -1208,11 +1208,11 @@ INCLUDE_ASM("mem/memstd", func_00252960);
 /**
  * Returns the per-block tail size of memory class @p id: the class record's int at +0x30 (MEMCLASS_create's hdr).
  *
- * @param unused  ignored (callers pass 0 or a block name)
+ * @param ignoredName  ignored (callers pass 0 or a block name)
  * @param id  memory class id (masked with 63)
  * @return the tail bytes each block of the class reserves
  */
-extern "C" int func_00252960(int unused, int id)
+extern "C" int func_00252960(int ignoredName, int id)
 {
     return *(int*)((char*)D_004D2438[id & 0x3F] + 0x30);
 }
@@ -1398,13 +1398,13 @@ extern "C" char* func_00252A10_impl(void* name, int size, int align, int offset,
  * @param align  alignment, or 0 for the class default
  * @param offset  offset within the block that must be aligned
  * @param flags  memory class id and placement flags
- * @param unused  abort-on-failure flag, ignored here
+ * @param abortFlag  abort-on-failure flag, ignored here
  * @return the data pointer, or 0
  */
-extern "C" char* func_00252A10_impl(void* name, int size, int align, int offset, int flags, int unused)
+extern "C" char* func_00252A10_impl(void* name, int size, int align, int offset, int flags, int abortFlag)
 {
     sMemHdr_2A10 save;
-    char* p = 0;
+    char* allocation = 0;
     int retry;
     if (flags == 0)
         flags = D_004A2E78_2A10;
@@ -1429,8 +1429,8 @@ extern "C" char* func_00252A10_impl(void* name, int size, int align, int offset,
         int n = size + func_00252960(0, flags);
         if (n < 8)
             n = 8;
-        int pad = mask + 0x10;
-        int need = n + pad;
+        int alignSlack = mask + 0x10;
+        int need = n + alignSlack;
         sMemNode_2A10* blk;
         if (top)
             blk = BestFit_2A10(cls, need, back);
@@ -1443,26 +1443,26 @@ extern "C" char* func_00252A10_impl(void* name, int size, int align, int offset,
             save.pnext = blk->pnext;
             save.pprev = blk->pprev;
             if (back) {
-                p = (char*)(((int)blk + bsize - n + offset) & ~mask) - offset;
+                allocation = (char*)(((int)blk + bsize - n + offset) & ~mask) - offset;
                 rest = blk;
             } else {
-                p = (char*)(((int)((char*)blk + (mask + 0x10)) + offset) & ~mask) - offset;
+                allocation = (char*)(((int)((char*)blk + (mask + 0x10)) + offset) & ~mask) - offset;
             }
-            blk = (sMemNode_2A10*)(p - 0x10);
-            ((sMemHdr_2A10*)((int)p - 0x10))->pnext = save.pnext;
-            ((sMemHdr_2A10*)((int)p - 0x10))->pprev = save.pprev;
+            blk = (sMemNode_2A10*)(allocation - 0x10);
+            ((sMemHdr_2A10*)((int)allocation - 0x10))->pnext = save.pnext;
+            ((sMemHdr_2A10*)((int)allocation - 0x10))->pprev = save.pprev;
             if (amask + 0x30 < bsize - need) {
                 if (back) {
                     rest->pnext->pprev = blk;
-                    ((sMemHdr_2A10*)((int)p - 0x10))->pnext = rest->pnext;
-                    ((sMemHdr_2A10*)((int)p - 0x10))->pprev = rest;
+                    ((sMemHdr_2A10*)((int)allocation - 0x10))->pnext = rest->pnext;
+                    ((sMemHdr_2A10*)((int)allocation - 0x10))->pprev = rest;
                     MEM_initblock(rest, 0, 0, 0, 0, rest->pprev, blk);
                     InsertFree_2A10(cls, rest);
                 } else {
-                    rest = (sMemNode_2A10*)(((int)p + n + amask) & ~amask);
+                    rest = (sMemNode_2A10*)(((int)allocation + n + amask) & ~amask);
                     blk->pnext->pprev = rest;
                     blk->pprev->pnext = blk;
-                    MEM_initblock(rest, 0, 0, 0, 0, blk, ((sMemHdr_2A10*)((int)p - 0x10))->pnext);
+                    MEM_initblock(rest, 0, 0, 0, 0, blk, ((sMemHdr_2A10*)((int)allocation - 0x10))->pnext);
                     InsertFree_2A10(cls, rest);
                     blk->pnext = rest;
                 }
@@ -1470,14 +1470,14 @@ extern "C" char* func_00252A10_impl(void* name, int size, int align, int offset,
                 blk->pnext->pprev = blk;
                 blk->pprev->pnext = blk;
             }
-            MEM_initblock((sMemNode_2A10*)(p - 0x10), 0, size, cls->hdr, flags, blk->pprev, blk->pnext);
+            MEM_initblock((sMemNode_2A10*)(allocation - 0x10), 0, size, cls->hdr, flags, blk->pprev, blk->pnext);
         } else if (D_004A2E7C_2A10 != 0) {
             retry = D_004A2E7C_2A10(0, size, flags);
         }
         if (cls->locked != 0)
             MUTEX_unlock(cls->sema);
     } while (retry == 1);
-    return p;
+    return allocation;
 }
 #endif
 
@@ -1920,17 +1920,17 @@ struct func_00253460_sInfo {
 extern "C" void func_002534A8(void* self, void* info);
 
 /**
- * Opens the movie @p v with default play options: purges the player (func_002535F8), fills a play-options block with
- * defaults (func_00253390), sets its video file to @p v and opens it (func_002534A8).
+ * Opens the movie @p videoFile with default play options: purges the player (func_002535F8), fills a play-options block with
+ * defaults (func_00253390), sets its video file to @p videoFile and opens it (func_002534A8).
  *
- * @param v  the video file name
+ * @param videoFile  the video file name
  */
-extern "C" void func_00253460(void* self, int v)
+extern "C" void func_00253460(void* self, int videoFile)
 {
     func_00253460_sInfo info;
     func_002535F8(self);
     func_00253390(&info);
-    info.f0 = v;
+    info.f0 = videoFile;
     func_002534A8(self, &info);
 }
 #endif
@@ -1978,23 +1978,23 @@ extern "C" int func_002534A8_impl(void* self, sMemCfg_2534A8* cfg) __asm__("func
 extern "C" int func_002534A8_impl(void* self, sMemCfg_2534A8* cfg)
 {
     func_002535F8(self);
-    int b = 1;
+    int soundOff = 1;
     *(sMemCfg_2534A8*)((char*)self + 0x14) = *cfg;
-    int a = 0;
+    int optionSet = 0;
     if (*(int*)((char*)self + 0x24) != 0) {
-        a = 1;
+        optionSet = 1;
     }
     if (*(int*)((char*)self + 0x1C) != 0) {
-        b = 0;
+        soundOff = 0;
     }
     *(float*)((char*)self + 0x10) = *(float*)((char*)self + 0x34);
     char* name = *(char**)((char*)self + 0x18);
     if (name != 0 && *name != 0) {
         void* mem = D_00509430_2534A8.alloc(D_004A2E98, 0x78, 0, 0, D_00509430_2534A8.field_0x8);
-        *(void**)((char*)self + 0x38) = func_003ADE08(mem, *(int*)((char*)self + 0x14), 0x60000, *(char**)((char*)self + 0x18), 0x20000, a, b);
+        *(void**)((char*)self + 0x38) = func_003ADE08(mem, *(int*)((char*)self + 0x14), 0x60000, *(char**)((char*)self + 0x18), 0x20000, optionSet, soundOff);
     } else {
         void* mem = D_00509430_2534A8.alloc(D_004A2E98, 0x78, 0, 0, D_00509430_2534A8.field_0x8);
-        *(void**)((char*)self + 0x38) = func_003ADDC0(mem, *(int*)((char*)self + 0x14), 0x80000, a, b);
+        *(void**)((char*)self + 0x38) = func_003ADDC0(mem, *(int*)((char*)self + 0x14), 0x80000, optionSet, soundOff);
     }
     return 1;
 }
@@ -2059,30 +2059,30 @@ struct sStream002535F8 {
  */
 extern "C" void func_002535F8(void* self)
 {
-    sStream002535F8* s = (sStream002535F8*)self;
-    if (s->f38 != 0 && s->f3C != 0) {
+    sStream002535F8* moviePlayer = (sStream002535F8*)self;
+    if (moviePlayer->f38 != 0 && moviePlayer->f3C != 0) {
         ((cWorld002535F8*)cGraphicsMan_TheGraphicsMan)->v19();
     }
-    if (s->f40 != 0 && s->fC != 0) {
-        RCMP_DECODER_ReleaseFrame(*(void**)(s->f38 + 0x64), s->fC);
+    if (moviePlayer->f40 != 0 && moviePlayer->fC != 0) {
+        RCMP_DECODER_ReleaseFrame(*(void**)(moviePlayer->f38 + 0x64), moviePlayer->fC);
     }
-    void* o = s->f3C;
-    if (o != 0) {
-        sVEntry002535F8* e = &(*(sVEntry002535F8**)((char*)o + 4))[1];
-        e->fn((char*)o + e->delta, 3);
-        s->f3C = 0;
+    void* videoDriver = moviePlayer->f3C;
+    if (videoDriver != 0) {
+        sVEntry002535F8* dtorEntry = &(*(sVEntry002535F8**)((char*)videoDriver + 4))[1];
+        dtorEntry->fn((char*)videoDriver + dtorEntry->delta, 3);
+        moviePlayer->f3C = 0;
         D_004A2E9C--;
     }
-    char* m = s->f38;
-    if (m != 0) {
-        func_003AE300(m, 3);
-        s->f38 = 0;
+    char* decoderObj = moviePlayer->f38;
+    if (decoderObj != 0) {
+        func_003AE300(decoderObj, 3);
+        moviePlayer->f38 = 0;
     }
-    s->f0 = 0;
-    s->f4 = 0;
-    s->f8 = 0;
-    s->fC = 0;
-    s->f40 = 0;
+    moviePlayer->f0 = 0;
+    moviePlayer->f4 = 0;
+    moviePlayer->f8 = 0;
+    moviePlayer->fC = 0;
+    moviePlayer->f40 = 0;
 }
 #endif
 
@@ -2106,15 +2106,15 @@ int func_003AE958_i(void*) __asm__("func_003AE958__FPv");
  */
 extern "C" void func_002536C8(void* self)
 {
-    char* s = (char*)self;
-    *(int*)(s + 0x0) = 0;
-    *(int*)(s + 0x4) = 0;
-    *(int*)(s + 0xC) = 0;
-    *(int*)(s + 0xC) = func_003AE450(*(void**)(s + 0x38), 1, 33);
-    *(int*)(s + 0x40) = 1;
-    func_003AE938(*(void**)(s + 0x38));
-    *(void**)(s + 0x3C) = func_00254368(*(void**)(*(char**)(s + 0x38) + 0x64), *(int*)(s + 0xC), (int)cGraphicsMan_TheGraphicsMan, *(int*)(s + 0x30));
-    func_003AE958_i(*(void**)(s + 0x38));
+    char* moviePlayer = (char*)self;
+    *(int*)(moviePlayer + 0x0) = 0;
+    *(int*)(moviePlayer + 0x4) = 0;
+    *(int*)(moviePlayer + 0xC) = 0;
+    *(int*)(moviePlayer + 0xC) = func_003AE450(*(void**)(moviePlayer + 0x38), 1, 33);
+    *(int*)(moviePlayer + 0x40) = 1;
+    func_003AE938(*(void**)(moviePlayer + 0x38));
+    *(void**)(moviePlayer + 0x3C) = func_00254368(*(void**)(*(char**)(moviePlayer + 0x38) + 0x64), *(int*)(moviePlayer + 0xC), (int)cGraphicsMan_TheGraphicsMan, *(int*)(moviePlayer + 0x30));
+    func_003AE958_i(*(void**)(moviePlayer + 0x38));
     D_004A2E9C++;
 }
 #endif
@@ -2157,38 +2157,38 @@ struct sWorld_253748 {
  */
 extern "C" void func_00253748(void* self)
 {
-    sStream002535F8* s = (sStream002535F8*)self;
-    if (s->f38 != 0) {
-        func_002536C8(s);
+    sStream002535F8* moviePlayer = (sStream002535F8*)self;
+    if (moviePlayer->f38 != 0) {
+        func_002536C8(moviePlayer);
         do {
-            if (s->f4 != 0) {
-                char* o = (char*)s->f3C;
-                sVE0_253748* e = &(*(sVE0_253748**)(o + 4))[5];
-                e->fn(o + e->delta);
+            if (moviePlayer->f4 != 0) {
+                char* videoDriver = (char*)moviePlayer->f3C;
+                sVE0_253748* slotEntry = &(*(sVE0_253748**)(videoDriver + 4))[5];
+                slotEntry->fn(videoDriver + slotEntry->delta);
             } else {
-                char* o = (char*)s->f3C;
-                sVE1_253748* e = &(*(sVE1_253748**)(o + 4))[4];
-                e->fn(o + e->delta, s->fC);
+                char* videoDriver = (char*)moviePlayer->f3C;
+                sVE1_253748* slotEntry = &(*(sVE1_253748**)(videoDriver + 4))[4];
+                slotEntry->fn(videoDriver + slotEntry->delta, moviePlayer->fC);
             }
             sVE0_253748* w = &((sVE0_253748*)cGraphicsMan_TheGraphicsMan->mVtbl)[20];
             w->fn((char*)cGraphicsMan_TheGraphicsMan + w->delta);
             SYNCTASK_run(0);
             func_003E5398(0);
-            if (func_003AE780(s->f38) != 0) {
-                char* o = (char*)s->f3C;
-                sVE0_253748* e = &(*(sVE0_253748**)(o + 4))[6];
-                e->fn(o + e->delta);
-                s->fC = (void*)func_003AE6C8(s->f38, *(float*)(s->f38 + 0x48));
-                s->f4 = 0;
+            if (func_003AE780(moviePlayer->f38) != 0) {
+                char* videoDriver = (char*)moviePlayer->f3C;
+                sVE0_253748* slotEntry = &(*(sVE0_253748**)(videoDriver + 4))[6];
+                slotEntry->fn(videoDriver + slotEntry->delta);
+                moviePlayer->fC = (void*)func_003AE6C8(moviePlayer->f38, *(float*)(moviePlayer->f38 + 0x48));
+                moviePlayer->f4 = 0;
             } else {
-                s->f4 = 1;
+                moviePlayer->f4 = 1;
             }
-            if (s->fC == 0) {
-                s->f4 = 1;
-                s->f0 = func_003AE860(s->f38);
+            if (moviePlayer->fC == 0) {
+                moviePlayer->f4 = 1;
+                moviePlayer->f0 = func_003AE860(moviePlayer->f38);
             }
-        } while (s->f0 == 0);
-        s->f40 = 0;
+        } while (moviePlayer->f0 == 0);
+        moviePlayer->f40 = 0;
     }
 }
 #endif
@@ -2380,19 +2380,19 @@ void* func_00253AD0_impl(void* a0, int a1, int align, int a3, int a4) __asm__("f
  * Movie allocation callback: allocates through func_00252F60 (MEM_allocaligna with abort) with at least 64-byte
  * alignment.
  *
- * @param a0  the block's name
- * @param a1  bytes wanted
+ * @param blockName  the block's name
+ * @param byteCount  bytes wanted
  * @param align  alignment, raised to 64
- * @param a3  header bytes
- * @param a4  memory class and flags
+ * @param hdrSize  header bytes
+ * @param memType  memory class and flags
  * @return the new block
  */
-void* func_00253AD0_impl(void* a0, int a1, int align, int a3, int a4)
+void* func_00253AD0_impl(void* blockName, int byteCount, int align, int hdrSize, int memType)
 {
     if (align < 64) {
         align = 64;
     }
-    return func_00252F60_5(a0, a1, align, a3, a4);
+    return func_00252F60_5(blockName, byteCount, align, hdrSize, memType);
 }
 #endif
 
@@ -2562,16 +2562,16 @@ typedef void* (*tMemAlloc5_00254368)(void*, int, int, int, int);
  * Creates the movie's video driver: allocates 84 bytes from the movie allocator table D_00509430 and constructs the
  * tiled-texture driver in it (func_00254410).
  *
- * @param a0  the decoder (handed to RCMP_DECODER_ReleaseFrame later)
- * @param a1  the first frame
- * @param a2  the graphics manager (cGraphicsMan_TheGraphicsMan)
- * @param a3  the draw layer
+ * @param framesDecoder  the decoder (handed to RCMP_DECODER_ReleaseFrame later)
+ * @param firstFrame  the first frame
+ * @param graphicsMan  the graphics manager (cGraphicsMan_TheGraphicsMan)
+ * @param drawLayer  the draw layer
  * @return the new driver
  */
-extern "C" void* func_00254368(void* a0, int a1, int a2, int a3)
+extern "C" void* func_00254368(void* framesDecoder, int firstFrame, int graphicsMan, int drawLayer)
 {
-    void* p = ((tMemAlloc5_00254368)D_00509430.alloc)(D_004A2EA0, 84, 0, 0, D_00509430.field_0x8);
-    return func_00254410(p, a0, a1, a2, a3);
+    void* driverMem = ((tMemAlloc5_00254368)D_00509430.alloc)(D_004A2EA0, 84, 0, 0, D_00509430.field_0x8);
+    return func_00254410(driverMem, framesDecoder, firstFrame, graphicsMan, drawLayer);
 }
 #endif
 
@@ -2706,10 +2706,10 @@ extern "C" void* func_00254410_body(sTexSheet_4410* self, void* owner, char* res
  * @param owner  the decoder
  * @param res  the first frame
  * @param rend  the graphics manager
- * @param a3  the draw layer
+ * @param drawLayer  the draw layer
  * @return @p self
  */
-extern "C" void* func_00254410_body(sTexSheet_4410* self, void* owner, char* res, cRend_4410* rend, int a3)
+extern "C" void* func_00254410_body(sTexSheet_4410* self, void* owner, char* res, cRend_4410* rend, int drawLayer)
 {
     self->owner = owner;
     self->vt = D_00480270;
@@ -2723,29 +2723,29 @@ extern "C" void* func_00254410_body(sTexSheet_4410* self, void* owner, char* res
         data = hdr + 0x10;
     }
     int w = *(short*)(self->hdr + 4);
-    int h = *(short*)(self->hdr + 6);
+    int frameHeight = *(short*)(self->hdr + 6);
     self->rows = 0;
     self->cols = w / 16;
-    int rem = h;
+    int rem = frameHeight;
     for (;;) {
-        int p = 1 << func_00254350(rem);
-        if (rem == p) {
+        int stripHeight = 1 << func_00254350(rem);
+        if (rem == stripHeight) {
             self->heights[self->rows] = rem;
             self->rows++;
             break;
         }
-        self->heights[self->rows] = p;
+        self->heights[self->rows] = stripHeight;
         rem -= self->heights[self->rows++];
     }
     self->count = self->cols * self->rows;
     self->tiles = (sTile_4410**)D_00509430_4410.alloc(str_VD_VD_TEXTURE_POINTER, self->count * 12, 0, 0, D_00509430_4410.flags);
-    float fh = (float)h;
+    float fh = (float)frameHeight;
     float fw = (float)w;
     int k = 0;
     for (int i = 0; i < self->cols; i++) {
         int y = 0;
         for (int j = 0; j < self->rows; j++) {
-            self->tiles[k++] = new sTile_4410(data + ((y << 6) + h * (i << 6)), self->heights[j]);
+            self->tiles[k++] = new sTile_4410(data + ((y << 6) + frameHeight * (i << 6)), self->heights[j]);
             y += self->heights[j];
         }
     }
@@ -2754,7 +2754,7 @@ extern "C" void* func_00254410_body(sTexSheet_4410* self, void* owner, char* res
     float sh = (float)self->rend->height() - fh;
     func_002543F0(self, (sw - fw) * 0.5f, sh * 0.5f, D_004A2EB0[0]);
     func_00254400(self, 1.0f, 1.0f);
-    self->f3C = a3;
+    self->f3C = drawLayer;
     return self;
 }
 #endif
@@ -2801,11 +2801,11 @@ extern "C" void func_002547B8(sTexCache_2547B8* self, int flags)
 {
     self->vt = D_00480270;
     for (int i = 0; i < self->count; i++) {
-        int* t = self->texs[i];
-        if (t != 0) {
-            ((sRVEntry_2547B8*)cGraphicsMan_TheGraphicsMan->mVtbl)[50].fn((char*)cGraphicsMan_TheGraphicsMan + ((sRVEntry_2547B8*)cGraphicsMan_TheGraphicsMan->mVtbl)[50].delta, *t);
-            *t = -1;
-            D_00509430.free(t);
+        int* tileEntry = self->texs[i];
+        if (tileEntry != 0) {
+            ((sRVEntry_2547B8*)cGraphicsMan_TheGraphicsMan->mVtbl)[50].fn((char*)cGraphicsMan_TheGraphicsMan + ((sRVEntry_2547B8*)cGraphicsMan_TheGraphicsMan->mVtbl)[50].delta, *tileEntry);
+            *tileEntry = -1;
+            D_00509430.free(tileEntry);
         }
     }
     if (self->texs != 0) {
@@ -2957,39 +2957,39 @@ extern "C" void func_002548D0_impl(void* p) __asm__("func_002548D0");
  * scale X (+0x4C) wide, each row its height (+0x24 table) times scale Y (+0x50), with grey (0x80) vertex colour and
  * full UVs, and the tile's texture set as the current one.
  *
- * @param p  the video driver
+ * @param videoDriver  the video driver
  */
-extern "C" void func_002548D0_impl(void* p)
+extern "C" void func_002548D0_impl(void* videoDriver)
 {
-    sMesh_2548D0* self = (sMesh_2548D0*)p;
+    sMesh_2548D0* self = (sMesh_2548D0*)videoDriver;
     while (self->world->v17() == 0) {
     }
     float w = (float)self->world->v10();
-    float h = (float)self->world->v11();
-    self->world->v26(0, 0, 0.0f, 0.0f, w, h, 0.0f, 1.0f);
+    float screenHeight = (float)self->world->v11();
+    self->world->v26(0, 0, 0.0f, 0.0f, w, screenHeight, 0.0f, 1.0f);
     self->world->v34(t4mat_Identity);
     sRS_2548D0* rs = self->world->top;
     rs->f8 = (rs->f8 & ~0x3E0) | ((self->f3C << 5) & 0x3E0);
-    sVtx_2548D0 v[4];
+    sVtx_2548D0 quadVerts[4];
     int i;
     for (i = 0; i < 4; i++) {
-        v[i].a = 0x80;
-        v[i].r = 0x80;
-        v[i].g = 0x80;
-        v[i].b = 0x80;
-        v[i].q = 1.0f;
+        quadVerts[i].a = 0x80;
+        quadVerts[i].r = 0x80;
+        quadVerts[i].g = 0x80;
+        quadVerts[i].b = 0x80;
+        quadVerts[i].q = 1.0f;
     }
     float cw = self->cw * 16.0f;
     float x0 = self->x + 0.5f;
-    v[0].u = 0.0f;
-    v[0].v = 0.0f;
+    quadVerts[0].u = 0.0f;
+    quadVerts[0].v = 0.0f;
     float x1 = x0 + cw;
-    v[1].u = 1.0f;
-    v[1].v = 0.0f;
-    v[2].u = 0.0f;
-    v[2].v = 1.0f;
-    v[3].u = 1.0f;
-    v[3].v = 1.0f;
+    quadVerts[1].u = 1.0f;
+    quadVerts[1].v = 0.0f;
+    quadVerts[2].u = 0.0f;
+    quadVerts[2].v = 1.0f;
+    quadVerts[3].u = 1.0f;
+    quadVerts[3].v = 1.0f;
     int cell = 0;
     int row;
     for (row = 0; row < self->rows; row++) {
@@ -3002,15 +3002,15 @@ extern "C" void func_002548D0_impl(void* p)
                 float ch = (float)*wp * self->ch;
                 int id = *self->items[cell];
                 ((cWorld_2548D0*)cGraphicsMan_TheGraphicsMan)->top->f10 = id;
-                { sVec4_2548D0 q; q.v[0] = x0; q.v[1] = y; q.v[2] = self->z; q.v[3] = 1.0f; v[0].pos = q; }
-                { sVec4_2548D0 q; q.v[0] = x1; q.v[1] = y; q.v[2] = self->z; q.v[3] = 1.0f; v[1].pos = q; }
-                { sVec4_2548D0 q; q.v[0] = x0; q.v[1] = y + ch; q.v[2] = self->z; q.v[3] = 1.0f; v[2].pos = q; }
-                { sVec4_2548D0 q; q.v[0] = x1; q.v[1] = y + ch; q.v[2] = self->z; q.v[3] = 1.0f; v[3].pos = q; }
+                { sVec4_2548D0 cornerPos; cornerPos.v[0] = x0; cornerPos.v[1] = y; cornerPos.v[2] = self->z; cornerPos.v[3] = 1.0f; quadVerts[0].pos = cornerPos; }
+                { sVec4_2548D0 cornerPos; cornerPos.v[0] = x1; cornerPos.v[1] = y; cornerPos.v[2] = self->z; cornerPos.v[3] = 1.0f; quadVerts[1].pos = cornerPos; }
+                { sVec4_2548D0 cornerPos; cornerPos.v[0] = x0; cornerPos.v[1] = y + ch; cornerPos.v[2] = self->z; cornerPos.v[3] = 1.0f; quadVerts[2].pos = cornerPos; }
+                { sVec4_2548D0 cornerPos; cornerPos.v[0] = x1; cornerPos.v[1] = y + ch; cornerPos.v[2] = self->z; cornerPos.v[3] = 1.0f; quadVerts[3].pos = cornerPos; }
                 yoff += ch;
                 cell++;
                 wp++;
                 col++;
-                self->world->v71(4, v, 0);
+                self->world->v71(4, quadVerts, 0);
             } while (col < self->cols);
         }
         x0 += cw;
@@ -3117,8 +3117,8 @@ extern "C" void func_00254C48(sMesh_254C48* self, void* res)
     for (int i = 0; i < self->rows; i++) {
         int off = 0;
         for (int j = 0; j < self->cols; j++) {
-            int* e = ((int**)self->items)[k];
-            ((cWorld_254C48*)cGraphicsMan_TheGraphicsMan)->v49(e[0], data + ((off << 6) + stride * (i << 6)), e[1], e[2], 0, 0, 0, 0, 0);
+            int* tileEntry = ((int**)self->items)[k];
+            ((cWorld_254C48*)cGraphicsMan_TheGraphicsMan)->v49(tileEntry[0], data + ((off << 6) + stride * (i << 6)), tileEntry[1], tileEntry[2], 0, 0, 0, 0, 0);
             k++;
             off += self->widths[j];
         }
@@ -3313,27 +3313,27 @@ extern "C" void* func_00254E60(int, int);
 INCLUDE_ASM("mem/memstd", func_00255670);
 #ifdef SKIP_ASM
 /**
- * Allocates @p arg0 bytes through the movie allocator table (D_00509430's allocate with name D_004A2EA0 and memory type
+ * Allocates @p allocSize bytes through the movie allocator table (D_00509430's allocate with name D_004A2EA0 and memory type
  * +0x8); the video driver's class operator new.
  *
  * The result is left in the return register.
  *
- * @param arg0  bytes wanted
+ * @param allocSize  bytes wanted
  */
-extern "C" void func_00255670(int arg0) {
-    (*(int (**)(int *, int, int, int, int))((char*)(&(*(int*)&D_00509430)) + (0)))(&(*(int*)&D_004A2EA0), arg0, 0, 0, (*(int *)((char*)(&(*(int*)&D_00509430)) + (8))));
+extern "C" void func_00255670(int allocSize) {
+    (*(int (**)(int *, int, int, int, int))((char*)(&(*(int*)&D_00509430)) + (0)))(&(*(int*)&D_004A2EA0), allocSize, 0, 0, (*(int *)((char*)(&(*(int*)&D_00509430)) + (8))));
 }
 #endif
 //100%
 INCLUDE_ASM("mem/memstd", func_002556B0);
 #ifdef SKIP_ASM
 /**
- * Allocates @p arg0 bytes through the movie allocator table, like func_00255670; the video driver's array operator new.
+ * Allocates @p allocSize bytes through the movie allocator table, like func_00255670; the video driver's array operator new.
  *
- * @param arg0  bytes wanted
+ * @param allocSize  bytes wanted
  */
-extern "C" void func_002556B0(int arg0) {
-    (*(int (**)(int *, int, int, int, int))((char*)(&(*(int*)&D_00509430)) + (0)))(&(*(int*)&D_004A2EA0), arg0, 0, 0, (*(int *)((char*)(&(*(int*)&D_00509430)) + (8))));
+extern "C" void func_002556B0(int allocSize) {
+    (*(int (**)(int *, int, int, int, int))((char*)(&(*(int*)&D_00509430)) + (0)))(&(*(int*)&D_004A2EA0), allocSize, 0, 0, (*(int *)((char*)(&(*(int*)&D_00509430)) + (8))));
 }
 #endif
 //100%
@@ -3346,12 +3346,12 @@ INCLUDE_ASM("mem/memstd", func_002556F0);
  * @param size  bytes wanted
  * @param tag  the block's name
  * @param align  alignment
- * @param d  header bytes
+ * @param hdrSize  header bytes
  * @param flags  memory class and flags
  */
-extern "C" void func_002556F0(int size, void* tag, int align, int d, int flags)
+extern "C" void func_002556F0(int size, void* tag, int align, int hdrSize, int flags)
 {
-    ((tMemAlloc5_00254368)D_00509430.alloc)(tag, size, align, d, flags);
+    ((tMemAlloc5_00254368)D_00509430.alloc)(tag, size, align, hdrSize, flags);
 }
 #endif
 //100%
@@ -3364,12 +3364,12 @@ INCLUDE_ASM("mem/memstd", func_00255720);
  * @param size  bytes wanted
  * @param tag  the block's name
  * @param align  alignment
- * @param d  header bytes
+ * @param hdrSize  header bytes
  * @param flags  memory class and flags
  */
-extern "C" void func_00255720(int size, void* tag, int align, int d, int flags)
+extern "C" void func_00255720(int size, void* tag, int align, int hdrSize, int flags)
 {
-    ((tMemAlloc5_00254368)D_00509430.alloc)(tag, size, align, d, flags);
+    ((tMemAlloc5_00254368)D_00509430.alloc)(tag, size, align, hdrSize, flags);
 }
 #endif
 //100%

@@ -399,9 +399,9 @@ static inline int fontGetTex1E30(void* s)
  *
  * @param x  the screen x
  * @param y  the screen y
- * @param m  the 0-terminated 16-bit string
+ * @param unicodeStr  the 0-terminated 16-bit string
  */
-extern "C" void func_00391E30(cFont* self, float x, float y, void* m)
+extern "C" void func_00391E30(cFont* self, float x, float y, void* unicodeStr)
 {
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     (ps2GraphicsMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = fontGetTex1E30(self);
@@ -410,18 +410,18 @@ extern "C" void func_00391E30(cFont* self, float x, float y, void* m)
     if (self->ShadowOffset[0] != 0.0f || self->ShadowOffset[1] != 0.0f) {
         sDrawState* top = ps2GraphicsMan->m_pCurrentDrawState;
         int saved = (unsigned)(((int)top->unk_00[2]) & 0x3E0) >> 5;
-        int a = saved - 1;
-        if (a < 0) a = 0;
-        top->unk_00[2] = (((int)top->unk_00[2]) & ~0x3E0) | ((a << 5) & 0x3E0);
+        int shadowLayer = saved - 1;
+        if (shadowLayer < 0) shadowLayer = 0;
+        top->unk_00[2] = (((int)top->unk_00[2]) & ~0x3E0) | ((shadowLayer << 5) & 0x3E0);
         sFontVEntry1E30* vt = (sFontVEntry1E30*)ps2GraphicsMan->mVtbl;
-        vt[81].fn((char*)ps2GraphicsMan + vt[81].delta, self, m, ((char*)self) + 0x50,
+        vt[81].fn((char*)ps2GraphicsMan + vt[81].delta, self, unicodeStr, ((char*)self) + 0x50,
                   pos.x + self->ShadowOffset[0], pos.y + self->ShadowOffset[1],
                   self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
         sDrawState* top2 = ps2GraphicsMan->m_pCurrentDrawState;
         top2->unk_00[2] = (((int)top2->unk_00[2]) & ~0x3E0) | (saved << 5);
     }
     sFontVEntry1E30* vt = (sFontVEntry1E30*)ps2GraphicsMan->mVtbl;
-    vt[81].fn((char*)ps2GraphicsMan + vt[81].delta, self, m, ((char*)self) + 0x40, pos.x, pos.y,
+    vt[81].fn((char*)ps2GraphicsMan + vt[81].delta, self, unicodeStr, ((char*)self) + 0x40, pos.x, pos.y,
               self->Scale[0], self->Scale[1], self->UVScale[0], self->UVScale[1], pos.z);
 }
 #endif
@@ -557,7 +557,7 @@ static inline tGlyph* sFontRes21F0_find(cFont* font, int c)
  * local rectangle is used.
  *
  * @param f_  the font (this)
- * @param s  the 0-terminated 16-bit string
+ * @param unicodeText  the 0-terminated 16-bit string
  * @param r_  the rectangle (x0, y0, x1, y1) to fill, or null
  * @param mono  nonzero to measure each character by its advance instead of its glyph width
  * @param sx  the horizontal scale
@@ -565,20 +565,20 @@ static inline tGlyph* sFontRes21F0_find(cFont* font, int c)
  * @return the rectangle's x1 (the text width including the shadow)
  */
 // PORT: g++ `<?`/`>?` (min/max) operators, removed in GCC 4.3.
-extern "C" float func_003921F0(cFont* f_, const unsigned short* s, void* r_, int mono, float sx, float sy)
+extern "C" float func_003921F0(cFont* f_, const unsigned short* unicodeText, void* r_, int mono, float sx, float sy)
 {
     cFont* font = f_;
-    sRect21F0* r = (sRect21F0*)r_;
-    sRect21F0 tmp;
-    sRect21F0* rc = r ? r : &tmp;
+    sRect21F0* outRect = (sRect21F0*)r_;
+    sRect21F0 localRect;
+    sRect21F0* rc = outRect ? outRect : &localRect;
     rc->x0 = 0.0f;
     rc->y0 = 0.0f;
     rc->x1 = 0.0f;
     rc->y1 = 0.0f;
     float x = 0.0f;
     float y = 0.0f;
-    for (; *s; s++) {
-        tGlyph* glyph = sFontRes21F0_find(font, *s);
+    for (; *unicodeText; unicodeText++) {
+        tGlyph* glyph = sFontRes21F0_find(font, *unicodeText);
         if (glyph) {
             float adv = glyph->advance * sx;
             rc->x0 = (x + glyph->xoffset * sx) <? rc->x0;
@@ -998,12 +998,12 @@ static inline tGlyph* findGlyph(cFont* font, int c)
  * search by code, falling back to MissingGlyph).
  *
  * @param font  the font (this)
- * @param c  the character
+ * @param charCode  the character
  * @return the glyph's advance, or 0.0
  */
-extern "C" float func_00392BA8(cFont* font, char c)
+extern "C" float func_00392BA8(cFont* font, char charCode)
 {
-    tGlyph* glyph = findGlyph((font), c);
+    tGlyph* glyph = findGlyph((font), charCode);
     if (glyph)
         return glyph->advance;
     return 0.0f;
@@ -1020,12 +1020,12 @@ INCLUDE_ASM("render/font", func_00392C60);
  * fallback, nothing below FirstCode).
  *
  * @param font  the font (this)
- * @param c  the character code
+ * @param charCode  the character code
  * @return the glyph's advance, or 0.0
  */
-extern "C" float func_00392C60(cFont* font, unsigned short c)
+extern "C" float func_00392C60(cFont* font, unsigned short charCode)
 {
-    tGlyph* glyph = findGlyph((font), c);
+    tGlyph* glyph = findGlyph((font), charCode);
     if (glyph)
         return glyph->advance;
     return 0.0f;
