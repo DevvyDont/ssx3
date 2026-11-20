@@ -268,17 +268,17 @@ struct sRefH_EB48 {
  */
 extern "C" void* func_0026EB48(cReplayFramePtr* stream)
 {
-    void* r = 0;
-    sRefH_EB48 h;
-    ((cStream_EB48*)stream)->v02(&h, 4);
-    if (~h.id != 0) {
-        r = func_003512C0(SSXApp->Game->InstanceMan, h.id);
-        if (r == 0) {
-            void* t = lookup_EB48(h.id);
-            r = t;
+    void* instRecord = 0;
+    sRefH_EB48 savedId;
+    ((cStream_EB48*)stream)->v02(&savedId, 4);
+    if (~savedId.id != 0) {
+        instRecord = func_003512C0(SSXApp->Game->InstanceMan, savedId.id);
+        if (instRecord == 0) {
+            void* cachedRecord = lookup_EB48(savedId.id);
+            instRecord = cachedRecord;
         }
     }
-    return r;
+    return instRecord;
 }
 #endif
 
@@ -349,16 +349,16 @@ static inline void* lookup_EC08(unsigned int id)
  */
 extern "C" void* func_0026EC08(cReplayFramePtr* stream, void* owner)
 {
-    sNode_EC08* r = 0;
+    sNode_EC08* instRecord = 0;
     sRec_EC08 rec;
     ((cStream_EC08*)stream)->v02(&rec, 8);
     if (~rec.id != 0) {
-        void* t = lookup_EC08(rec.id);
-        r = (sNode_EC08*)t;
-        r->owner = owner;
-        r->flags = (r->flags & 0xFFFF0300) | (rec.type & 0xFCFF);
+        void* cachedRecord = lookup_EC08(rec.id);
+        instRecord = (sNode_EC08*)cachedRecord;
+        instRecord->owner = owner;
+        instRecord->flags = (instRecord->flags & 0xFFFF0300) | (rec.type & 0xFCFF);
     }
-    return r;
+    return instRecord;
 }
 #endif
 

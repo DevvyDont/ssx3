@@ -1461,10 +1461,10 @@ extern "C" void func_00271380(cReplay* self)
         hdr[7] = ((sRcFrame1380*)self->WriteFrame)->f28;
         hdr[8] = ((sRcFrame1380*)self->WriteFrame)->f2C;
         cReplay_writeSetup((cReplay*)self, (signed char*)hdr, 40);
-        sRcFrame1380* f = ((sRcFrame1380*)self->WriteFrame);
-        (*(void**)&self->WriteBlockData) = f->data;
-        self->WriteBlockDataSize = f->size;
-        sRcFrame1380* next = f->next;
+        sRcFrame1380* currentFrame = ((sRcFrame1380*)self->WriteFrame);
+        (*(void**)&self->WriteBlockData) = currentFrame->data;
+        self->WriteBlockDataSize = currentFrame->size;
+        sRcFrame1380* next = currentFrame->next;
         (*(sRcFrame1380**)&self->WriteFrame) = next;
         if (next != 0 && next == ((sRcFrame1380*)self->SaveFrame)) {
             (*(sRcFrame1380**)&self->WriteFrame) = next->next;
@@ -1554,13 +1554,13 @@ extern "C" void func_00271510(sReplayCache1510* self)
         self->pending = 0;
         self->header = 0;
         self->pendingSize = 0;
-        sRcEntry1510* e = self->entries[cur];
-        if (e != 0) {
-            self->pending = e->data;
+        sRcEntry1510* inputCache = self->entries[cur];
+        if (inputCache != 0) {
+            self->pending = inputCache->data;
             self->header = self->out;
             self->pendingSize = 0x8000;
             *self->out = 0x11111112;
-            self->header[1] = e->field_0x0;
+            self->header[1] = inputCache->field_0x0;
             self->cur++;
         } else {
             self->cur = cur + 1;
@@ -1978,15 +1978,15 @@ extern "C" int func_00272240(cReplayFramePtr* replayFramePtr) {
 INCLUDE_ASM("replay/replaycache", func_00272248);
 #ifdef SKIP_ASM
 /**
- * Stores @p arg1 into the int @p arg0 points to.
+ * Stores @p newValue into the int @p dest points to.
  *
  * One of the small out-of-line copies kept after the cReplayFramePtr accessors; no retail caller was found.
  *
- * @param arg0  the int to write
- * @param arg1  the value to store
+ * @param dest  the int to write
+ * @param newValue  the value to store
  */
-extern "C" void func_00272248(int *arg0, int arg1) {
-    *arg0 = arg1;
+extern "C" void func_00272248(int *dest, int newValue) {
+    *dest = newValue;
 }
 #endif
 //100%
@@ -2243,9 +2243,9 @@ extern "C" void* func_00272488_impl(int size, void* heap) __asm__("func_00272488
  */
 extern "C" void* func_00272488_impl(int size, void* heap)
 {
-    void** p = (void**)cScriptHeap_AllocMem(heap, size + kScriptHeapPointerSize);
-    *p = heap;
-    return (char*)p + kScriptHeapPointerSize;
+    void** heapBlock = (void**)cScriptHeap_AllocMem(heap, size + kScriptHeapPointerSize);
+    *heapBlock = heap;
+    return (char*)heapBlock + kScriptHeapPointerSize;
 }
 #endif
 
@@ -2278,15 +2278,15 @@ extern "C" void func_002724E8_impl(void* p) __asm__("func_002724E8");
 /**
  * Frees memory from func_00272488: steps back over the stored heap pointer and returns the block to that script heap.
  *
- * Reads the cScriptHeap pointer kScriptHeapPointerSize bytes before @p p and calls cScriptHeap_FreeMem on it with the
+ * Reads the cScriptHeap pointer kScriptHeapPointerSize bytes before @p userBlock and calls cScriptHeap_FreeMem on it with the
  * block start. The script channel and entity destructors free themselves through it.
  *
- * @param p  the memory func_00272488 returned
+ * @param userBlock  the memory func_00272488 returned
  */
-extern "C" void func_002724E8_impl(void* p)
+extern "C" void func_002724E8_impl(void* userBlock)
 {
-    char* h = (char*)p - kScriptHeapPointerSize;
-    cScriptHeap_FreeMem((cScriptHeap*)(*(sRcHeap**)h), h);
+    char* allocBase = (char*)userBlock - kScriptHeapPointerSize;
+    cScriptHeap_FreeMem((cScriptHeap*)(*(sRcHeap**)allocBase), allocBase);
 }
 #endif
 
@@ -2324,12 +2324,12 @@ extern "C" void func_00272530(void *mem) {
 INCLUDE_ASM("replay/replaycache", func_00272550);
 #ifdef SKIP_ASM
 /**
- * Frees script heap memory by forwarding @p arg0 to func_002724E8.
+ * Frees script heap memory by forwarding @p userBlock to func_002724E8.
  *
- * @param arg0  the memory func_00272488 returned
+ * @param userBlock  the memory func_00272488 returned
  */
-extern "C" void func_00272550(void *arg0) {
-    func_002724E8(arg0);
+extern "C" void func_00272550(void *userBlock) {
+    func_002724E8(userBlock);
 }
 #endif
 
@@ -4858,22 +4858,22 @@ INCLUDE_ASM("replay/replaycache", func_00274830);
 void func_00274830_impl(void* self, int a1) __asm__("func_00274830");
 
 /**
- * Starts the script player: a stopped player becomes PlayPending (mPlayState 1) with mLoopScript set to @p a1.
+ * Starts the script player: a stopped player becomes PlayPending (mPlayState 1) with mLoopScript set to @p loopScript.
  *
  * If the player is not stopped and an entity update is in progress (mEntityUpdateInProgress), a stop requested during
  * it (mDoStopInEntityUpdate) is cancelled instead; otherwise a running player is left alone. cInSeq_Play,
  * cInSeq_Preview and func_00274810 call it.
  *
- * @param a1  non-zero to loop the script
+ * @param loopScript  non-zero to loop the script
  */
-void func_00274830_impl(void* self, int a1)
+void func_00274830_impl(void* self, int loopScript)
 {
     if (*(int*)((char*)self + 0x20) != 0) {
         if (*(int*)((char*)self + 0x3c) != 0) {
             *(int*)((char*)self + 0x40) = 0;
         }
     } else {
-        *(int*)((char*)self + 0x1c) = a1;
+        *(int*)((char*)self + 0x1c) = loopScript;
         *(int*)((char*)self + 0x20) = 1;
     }
 }

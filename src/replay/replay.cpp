@@ -771,21 +771,21 @@ void func_0026D730(void*, int, int);
 extern "C" int func_0026E838(void* self, void* stats, int mode)
 {
     if (mode) {
-        int d = *(int*)((char*)stats + 0x9C) - *(int*)((char*)self + 0xA0);
-        if (d == 0) return 0;
-        if (d >= 1000) {
-            func_0026D730(*(void**)((char*)self + 0xB0), *(int*)self, d);
+        int pointsGained = *(int*)((char*)stats + 0x9C) - *(int*)((char*)self + 0xA0);
+        if (pointsGained == 0) return 0;
+        if (pointsGained >= 1000) {
+            func_0026D730(*(void**)((char*)self + 0xB0), *(int*)self, pointsGained);
             return 1;
         }
-        float v = *(float*)((char*)stats + 0x44);
-        if (v >= 5.0f) {
-            func_0026D730(*(void**)((char*)self + 0xB0), *(int*)self, (int)(v * 1000.0f));
+        float airTime = *(float*)((char*)stats + 0x44);
+        if (airTime >= 5.0f) {
+            func_0026D730(*(void**)((char*)self + 0xB0), *(int*)self, (int)(airTime * 1000.0f));
             return 1;
         }
     }
-    int e = *(int*)((char*)stats + 0xA4) - *(int*)((char*)self + 0xA8);
-    if (e == 0) return 0;
-    func_0026D730(*(void**)((char*)self + 0xB0), *(int*)self, -e);
+    int pointsLost = *(int*)((char*)stats + 0xA4) - *(int*)((char*)self + 0xA8);
+    if (pointsLost == 0) return 0;
+    func_0026D730(*(void**)((char*)self + 0xB0), *(int*)self, -pointsLost);
     return 1;
 }
 #endif

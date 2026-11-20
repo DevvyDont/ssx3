@@ -291,32 +291,32 @@ void cMemMan_free(void*);
 extern void** cAnimDataBase_TheAnimDataBase;
 
 /**
- * Unlinks animation bank record @p e: removes its data source from the anim database and clears the record.
+ * Unlinks animation bank record @p bankInfo: removes its data source from the anim database and clears the record.
  *
  * Takes the source out of cAnimDataBase_TheAnimDataBase at the bank number (low byte of +0x4), purges the database's
  * channel cache (cAnimDataBase_purgeChanCache), deletes the source (cAdfDataSource__cAdfDataSource with flags 3), frees
  * the anim ID table (+0x10) when the record has anims (+0xC), and resets the user ID (-1), anim count, data and table.
  *
- * @param e  the bank record
+ * @param bankInfo  the bank record
  */
-extern "C" void func_00275760(void* self, sAnimEntry* e)
+extern "C" void func_00275760(void* self, sAnimEntry* bankInfo)
 {
     void** tbl = cAnimDataBase_TheAnimDataBase;
-    void** slot = &tbl[*(unsigned char*)&e->unk4];
+    void** slot = &tbl[*(unsigned char*)&bankInfo->unk4];
     void* obj = *slot;
     *slot = 0;
     cAnimDataBase_purgeChanCache(tbl);
     if (obj != 0) {
         cAdfDataSource__cAdfDataSource(obj, 3);
     }
-    if (e->unkC != 0 && e->unk10 != 0) {
-        cMemMan_free((void*)e->unk10);
+    if (bankInfo->unkC != 0 && bankInfo->unk10 != 0) {
+        cMemMan_free((void*)bankInfo->unk10);
     }
     //PSTART
-    e->id = -1;
-    e->unkC = 0;
-    e->data = 0;
-    e->unk10 = 0;
+    bankInfo->id = -1;
+    bankInfo->unkC = 0;
+    bankInfo->data = 0;
+    bankInfo->unk10 = 0;
     //PEND
 }
 #endif

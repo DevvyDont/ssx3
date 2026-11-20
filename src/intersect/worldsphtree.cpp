@@ -5430,30 +5430,30 @@ struct sTree_3411B8 {
  * itself on each non-null child. Used by func_00337A48 and func_0033ED60 for cells wholly inside the query box.
  *
  * @param tree  the octree cell (On Tour nash::Cell)
- * @param q  the spline query (On Tour SplineCallback)
+ * @param splineQuery  the spline query (On Tour SplineCallback)
  */
-extern "C" void func_003411B8(sTree_3411B8* tree, sQuery_3411B8* q)
+extern "C" void func_003411B8(sTree_3411B8* tree, sQuery_3411B8* splineQuery)
 {
-    for (char* o = tree->objs; o != 0; o = *(char**)o) {
-        int type = *(int*)(o + 8);
+    for (char* typedNode = tree->objs; typedNode != 0; typedNode = *(char**)typedNode) {
+        int type = *(int*)(typedNode + 8);
         if (type == 2) {
-            cRailModifier_splineIntersect(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
+            cRailModifier_splineIntersect(*(void**)(typedNode + 0xC), splineQuery->box, splineQuery->box, splineQuery->pos, splineQuery->mask, splineQuery->cnt, splineQuery->dist, splineQuery->a7);
         } else if (type == 3) {
-            func_00348290(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
+            func_00348290(*(void**)(typedNode + 0xC), splineQuery->box, splineQuery->box, splineQuery->pos, splineQuery->mask, splineQuery->cnt, splineQuery->dist, splineQuery->a7);
         } else if (type == 1) {
-            if (*(int*)(*(char**)(o + 0x68) + 0x1C) & q->mask) {
-                func_00335128(o, q->box, q->pos, q->cnt, q->dist, q->a7);
+            if (*(int*)(*(char**)(typedNode + 0x68) + 0x1C) & splineQuery->mask) {
+                func_00335128(typedNode, splineQuery->box, splineQuery->pos, splineQuery->cnt, splineQuery->dist, splineQuery->a7);
             }
         }
     }
-    if (tree->child[0] != 0) func_003411B8(tree->child[0], q);
-    if (tree->child[1] != 0) func_003411B8(tree->child[1], q);
-    if (tree->child[2] != 0) func_003411B8(tree->child[2], q);
-    if (tree->child[3] != 0) func_003411B8(tree->child[3], q);
-    if (tree->child[4] != 0) func_003411B8(tree->child[4], q);
-    if (tree->child[5] != 0) func_003411B8(tree->child[5], q);
-    if (tree->child[6] != 0) func_003411B8(tree->child[6], q);
-    if (tree->child[7] != 0) func_003411B8(tree->child[7], q);
+    if (tree->child[0] != 0) func_003411B8(tree->child[0], splineQuery);
+    if (tree->child[1] != 0) func_003411B8(tree->child[1], splineQuery);
+    if (tree->child[2] != 0) func_003411B8(tree->child[2], splineQuery);
+    if (tree->child[3] != 0) func_003411B8(tree->child[3], splineQuery);
+    if (tree->child[4] != 0) func_003411B8(tree->child[4], splineQuery);
+    if (tree->child[5] != 0) func_003411B8(tree->child[5], splineQuery);
+    if (tree->child[6] != 0) func_003411B8(tree->child[6], splineQuery);
+    if (tree->child[7] != 0) func_003411B8(tree->child[7], splineQuery);
 }
 #endif
 
@@ -5573,7 +5573,7 @@ static inline sVec4_341388 vu0Xform_341388(const sVec4_341388& v, const char* m)
  * Constructs a boost node from its script data (the record counterpart of the replay constructor
  * cBoostNode_cBoostNode).
  *
- * Runs the base constructor func_0034FB00(self, @p a1, @p a2, @p a3) and stores cBoostNode_vtbl at +0xC. From @p def
+ * Runs the base constructor func_0034FB00(self, @p bucket, @p nodeType, @p instance) and stores cBoostNode_vtbl at +0xC. From @p def
  * (On Tour tMakeBoostData) it takes the type (+0x4, read as a short) into +0x40; the duration BoostTime (+0x8) times
  * the frame rate (cAppMan_TheAppMan +0x10) into +0x38 as a frame count; the direction BoostX/Y/Z (+0x14) normalised
  * into +0x20, or when it is zero the Y axis (t4vect_YAxis) for type 2 and the zero vector otherwise; MaxSpeed (+0x10)
@@ -5583,15 +5583,15 @@ static inline sVec4_341388 vu0Xform_341388(const sVec4_341388& v, const char* m)
  *
  * func_002FBEC8 (a world-script maker) allocates it as 0x50 bytes tagged "Boost" and passes bucket 1, type 8.
  *
- * @param a1  the bucket list the node joins
- * @param a2  the object-node type (8)
- * @param a3  the instance record
+ * @param bucket  the bucket list the node joins
+ * @param nodeType  the object-node type (8)
+ * @param instance  the instance record
  * @param def  the script's boost data (On Tour tMakeBoostData)
  * @return @p self
  */
-extern "C" sObj_341388* func_00341388(sObj_341388* self, void* a1, int a2, void* a3, sDef_341388* def)
+extern "C" sObj_341388* func_00341388(sObj_341388* self, void* bucket, int nodeType, void* instance, sDef_341388* def)
 {
-    func_0034FB00(self, a1, a2, a3);
+    func_0034FB00(self, bucket, nodeType, instance);
     self->vt = cBoostNode_vtbl;
     int type = def->type;
     self->type = type;
@@ -5609,8 +5609,8 @@ extern "C" sObj_341388* func_00341388(sObj_341388* self, void* a1, int a2, void*
     self->f34 = def->f0C;
     self->t3C = self->type ? self->t38 : 0;
     if (self->type == 2) {
-        char* m = self->mtx + 0x10;
-        self->pos = vu0Xform_341388(vu0Scale_341388(self->pos, -1.0f), m);
+        char* instMatrix = self->mtx + 0x10;
+        self->pos = vu0Xform_341388(vu0Scale_341388(self->pos, -1.0f), instMatrix);
         self->speed = -self->speed;
     }
     return self;
@@ -6044,7 +6044,7 @@ static inline void setRateMax_1AA0(sFloat_1AA0* dst, float v, char* info)
  * Constructs an animated object node from its script data (the record counterpart of the replay constructor
  * cAnimObjectNode_cAnimObjectNode).
  *
- * Builds the animation-node base at +0x1C with func_0034D9B0(base, @p a1, @p a2, @p obj, ForceVisible != 0) and stores
+ * Builds the animation-node base at +0x1C with func_0034D9B0(base, @p bucket, @p nodeType, @p obj, ForceVisible != 0) and stores
  * the vtable D_00490B10 at +0x3C. From @p def (On Tour tMakeAnimObjectData, times in 30 fps frames converted to
  * seconds) it sets the play type (+0x0) from +0x4; min (+0x14) from FromTime (+0xC), or the animation's start time
  * (cAnimFrame_getStartTime on the animation at +0x64) when negative; max (+0x18) from ToTime (+0x10), or the animation
@@ -6056,41 +6056,41 @@ static inline void setRateMax_1AA0(sFloat_1AA0* dst, float v, char* info)
  * to +0x20, sets active (+0x4) and the dirty flag (bit 0 of +0x42), and clears +0xC (the start delay) and atLimit
  * (+0x8). The struct calls the play type at +0x0 "id"; func_00341D48 switches on it.
  *
- * @param a1  the bucket list the node joins
- * @param a2  the object-node type
+ * @param bucket  the bucket list the node joins
+ * @param nodeType  the object-node type
  * @param obj  the instance record
  * @param def  the script's animation data (On Tour tMakeAnimObjectData)
  * @return @p self
  */
 // Animated float constructor: range and start value (frames -> seconds), optional random start and speed.
-extern "C" void* func_00341AA0(sSphFloat_1AA0* self, int a1, int a2, char* obj, sSphFloatDef_1AA0* def)
+extern "C" void* func_00341AA0(sSphFloat_1AA0* self, int bucket, int nodeType, char* obj, sSphFloatDef_1AA0* def)
 {
-    func_0034D9B0((char*)self + 0x1C, a1, a2, obj, def->f24 != 0);
+    func_0034D9B0((char*)self + 0x1C, bucket, nodeType, obj, def->f24 != 0);
     self->vt = D_00490B10;
-    float v = 0.0f;
+    float frameTime = 0.0f;
     char* info = *(char**)(obj + 0x80);
     if (self->inst != 0) {
-        v = cAnimFrame_getStartTime(self->inst);
+        frameTime = cAnimFrame_getStartTime(self->inst);
     }
     self->id = def->id;
-    setRate_1AA0((sFloat_1AA0*)&self->min, def->min, v);
+    setRate_1AA0((sFloat_1AA0*)&self->min, def->min, frameTime);
     setRateMax_1AA0((sFloat_1AA0*)&self->max, def->max, info);
-    v = def->value;
-    if (v < 0.0f) {
-        v = self->min;
+    frameTime = def->value;
+    if (frameTime < 0.0f) {
+        frameTime = self->min;
     } else {
-        v *= 0.03333333507180214f;
+        frameTime *= 0.03333333507180214f;
     }
-    if (v < self->min) {
-        v = self->min;
+    if (frameTime < self->min) {
+        frameTime = self->min;
     }
-    if (self->max < v) {
-        v = self->max;
+    if (self->max < frameTime) {
+        frameTime = self->max;
     }
     if (def->random != 0) {
-        v = AIrandf(self->min, self->max);
+        frameTime = AIrandf(self->min, self->max);
     }
-    self->value = v;
+    self->value = frameTime;
     if (def->speedVar != 0.0f) {
         self->speed = func_00317890(def->speed * 0.03333333507180214f, def->speedVar * 0.03333333507180214f) / (float)*(int*)(cAppMan_TheAppMan + 0x10);
     } else {
@@ -6534,7 +6534,7 @@ static inline void setRateMax_003421A0(sFloat_003421A0* dst, float v, char* info
  * Constructs an animated teeter node from its script data (the record counterpart of the replay constructor
  * cAnimTeeterNode_cAnimTeeterNode).
  *
- * Builds the animation-node base at +0x30 with func_0034D9B0(base, @p a1, 4, @p obj, 0) and stores the vtable
+ * Builds the animation-node base at +0x30 with func_0034D9B0(base, @p bucket, 4, @p obj, 0) and stores the vtable
  * D_004908F8 at +0x50. From @p def (On Tour tMakeAnimTeeterData) it sets min (+0x10) from FromTime (+0x20, a 30 fps
  * frame; negative means the animation's start time) and max (+0x14) from ToTime (+0x24; negative means the animation
  * length, the instance's info +0x80, +0x14); BounceFactor (+0x8) to +0xC; TorqueScale (+0x4) times 1e-6 to +0x8;
@@ -6544,21 +6544,21 @@ static inline void setRateMax_003421A0(sFloat_003421A0* dst, float v, char* info
  *
  * func_002FB498 (a world-script maker) allocates it as 0x80 bytes tagged "AnimTeeter" and passes bucket 1.
  *
- * @param a1  the bucket list the node joins
+ * @param bucket  the bucket list the node joins
  * @param obj  the instance record
  * @param def  the script's teeter data (On Tour tMakeAnimTeeterData)
  * @return @p self
  */
-extern "C" void* func_003421A0(sSphCtl_003421A0* self, int a1, char* obj, char* def)
+extern "C" void* func_003421A0(sSphCtl_003421A0* self, int bucket, char* obj, char* def)
 {
-    func_0034D9B0((char*)self + 0x30, a1, 4, obj, 0);
+    func_0034D9B0((char*)self + 0x30, bucket, 4, obj, 0);
     self->vt = D_004908F8;
-    float t = 0.0f;
+    float animStart = 0.0f;
     char* info = *(char**)(obj + 0x80);
     if (self->inst != 0) {
-        t = cAnimFrame_getStartTime(self->inst);
+        animStart = cAnimFrame_getStartTime(self->inst);
     }
-    setRate_003421A0((sFloat_003421A0*)&self->f10, *(float*)(def + 0x20), t);
+    setRate_003421A0((sFloat_003421A0*)&self->f10, *(float*)(def + 0x20), animStart);
     setRateMax_003421A0((sFloat_003421A0*)&self->f14, *(float*)(def + 0x24), info);
     self->f0C = *(float*)(def + 0x8);
     self->f08 = *(float*)(def + 0x4) * 9.999999974752427e-07f;
@@ -6877,51 +6877,51 @@ static inline float vu0Dot_342538(const sVec4_342538& a, const sVec4_342538& b)
 /**
  * Adds the torque a force applied at a hit point exerts about the teeter's pivot axis.
  *
- * Only for a hit on a mesh (@p o +0x5C >= 0) whose entry in the instance's mesh table (instance info +0x80, table +0x8,
- * 16-byte entries, word +0x8) is non-zero, and only when |@p p| > 100. It fetches the mesh's animation matrix (slot 29
+ * Only for a hit on a mesh (@p intInfo +0x5C >= 0) whose entry in the instance's mesh table (instance info +0x80, table +0x8,
+ * 16-byte entries, word +0x8) is non-zero, and only when |@p force| > 100. It fetches the mesh's animation matrix (slot 29
  * of the move-node part at +0x44, cAnimNode_getAnimMat), takes the lever arm from the matrix's translation (+0x30) to
- * the hit position (@p o +0x0), negates it when TorqueScale (+0x8) is negative and again when the mesh's bit in
+ * the hit position (@p intInfo +0x0), negates it when TorqueScale (+0x8) is negative and again when the mesh's bit in
  * AnimSign (+0x2C) is set, and adds dot(matrix * Y axis, cross(arm, force)) to the torque (+0x0).
  *
  * cAnimTeeterNode's update (func_00342358) consumes the torque. Slot of D_004908F8 where D_00490B10 has
  * cMoveNode_applyForce.
  *
- * @param o  the hit (On Tour tIntersectInfo: position at +0x0, mesh index at +0x5C)
- * @param p  the force vector
+ * @param intInfo  the hit (On Tour tIntersectInfo: position at +0x0, mesh index at +0x5C)
+ * @param force  the force vector
  */
-extern "C" void func_00342538(sSelf_342538* self, sObj_342538* o, sVec4_342538* p)
+extern "C" void func_00342538(sSelf_342538* self, sObj_342538* intInfo, sVec4_342538* force)
 {
-    int idx = o->idx;
+    int idx = intInfo->idx;
     if (idx >= 0) {
         sSub_342538* sub = (sSub_342538*)((char*)self + 0x44);
         char* ents = sub->inf->tbl->ents;
         if (*(int*)(ents + idx * 16 + 8) != 0) {
             sWsVtSlot* vt = *(sWsVtSlot**)((char*)self + 0x50);
-            char* m = ((GetMat_342538)vt[29].fn)((char*)sub + vt[29].delta, idx);
-            char* m2 = m;
-            if (vu0Length_342538(*p) > 100.0f) {
-                sVec4_342538 d;
+            char* animMat = ((GetMat_342538)vt[29].fn)((char*)sub + vt[29].delta, idx);
+            char* pivotMat = animMat;
+            if (vu0Length_342538(*force) > 100.0f) {
+                sVec4_342538 leverArm;
                 sVec4_342538 a;
-                sVec4_342538 t;
-                sVec4_342538 u;
-                a = *(sVec4_342538*)(m + 0x30);
-                vu0Sub_342538(t, o->pos, a);
-                d = t;
+                sVec4_342538 vuResult;
+                sVec4_342538 torqueVec;
+                a = *(sVec4_342538*)(animMat + 0x30);
+                vu0Sub_342538(vuResult, intInfo->pos, a);
+                leverArm = vuResult;
                 if (self->dir < 0.0f) {
-                    vu0Scale_342538(t, d, -1.0f);
-                    a = t;
-                    d = t;
+                    vu0Scale_342538(vuResult, leverArm, -1.0f);
+                    a = vuResult;
+                    leverArm = vuResult;
                 }
-                if ((self->mask >> o->idx) & 1) {
-                    vu0Scale_342538(t, d, -1.0f);
-                    a = t;
-                    d = t;
+                if ((self->mask >> intInfo->idx) & 1) {
+                    vu0Scale_342538(vuResult, leverArm, -1.0f);
+                    a = vuResult;
+                    leverArm = vuResult;
                 }
-                vu0Xform_342538(t, D_004FF150_342538[0], m2);
-                a = t;
-                vu0Cross_342538(u, d, *p);
-                t = u;
-                self->sum += vu0Dot_342538(a, t);
+                vu0Xform_342538(vuResult, D_004FF150_342538[0], pivotMat);
+                a = vuResult;
+                vu0Cross_342538(torqueVec, leverArm, *force);
+                vuResult = torqueVec;
+                self->sum += vu0Dot_342538(a, vuResult);
             }
         }
     }
@@ -6975,7 +6975,7 @@ extern char* cAppMan_TheAppMan;
 /**
  * Constructs a boost modifier from its script data and instance.
  *
- * Sets Active, stores cBoostModifier_vtbl and Instance (@p a2), and from @p def (On Tour tAddBoostData) takes Type
+ * Sets Active, stores cBoostModifier_vtbl and Instance (@p instRecord), and from @p def (On Tour tAddBoostData) takes Type
  * (+0x4, read as a short), BoostTime (+0x8 seconds times the frame rate at cAppMan_TheAppMan +0x10, in frames), Boost
  * (BoostX/Y/Z at +0x14, w = 0, not normalised), MaxSpeed (+0x10 times 100) and Drag (+0xC). Time starts at BoostTime
  * for type 1, else 0. Unlike the boost node (func_00341388), which converts MaxSpeed from km/h, it scales by 100.
@@ -6983,27 +6983,27 @@ extern char* cAppMan_TheAppMan;
  * Called by cMoveNode_addBoost.
  *
  * @param def  the script's boost data (On Tour tAddBoostData)
- * @param a2  the instance record the modifier belongs to
+ * @param instRecord  the instance record the modifier belongs to
  * @return @p self
  */
-extern "C" void* func_00342768(cBoostModifier* self, sSphDef_342768* def, int a2)
+extern "C" void* func_00342768(cBoostModifier* self, sSphDef_342768* def, int instRecord)
 {
     self->Active = 1;
     self->mVtbl = cBoostModifier_vtbl;
-    self->Instance = (tInstanceRecord*)a2;
+    self->Instance = (tInstanceRecord*)instRecord;
     int type = def->type;
     self->Type = type;
-    int t = (int)(def->time * (float)*(int*)(cAppMan_TheAppMan + 0x10));
-    self->BoostTime = t;
-    sVec4_342768 v;
-    v.x = def->x;
-    v.y = def->y;
-    v.z = def->z;
-    v.w = 0.0f;
-    (*(sVec4_342768*)&self->Boost) = v;
+    int boostFrames = (int)(def->time * (float)*(int*)(cAppMan_TheAppMan + 0x10));
+    self->BoostTime = boostFrames;
+    sVec4_342768 boostDir;
+    boostDir.x = def->x;
+    boostDir.y = def->y;
+    boostDir.z = def->z;
+    boostDir.w = 0.0f;
+    (*(sVec4_342768*)&self->Boost) = boostDir;
     self->MaxSpeed = def->f10 * 100.0f;
     self->Drag = def->f0C;
-    self->Time = type == 1 ? t : 0;
+    self->Time = type == 1 ? boostFrames : 0;
     return (self);
 }
 #endif
@@ -7324,28 +7324,28 @@ struct sSelf_342C08 {
 /**
  * Constructs a debounce node that takes over from an instance's old node, and sets the instance's visibility.
  *
- * Runs the base constructor func_00355280(self, @p a1, 0, @p a2), stores cDebounceNode_vtbl at +0xC, sets the debounce
+ * Runs the base constructor func_00355280(self, @p bucket, 0, @p instance), stores cDebounceNode_vtbl at +0xC, sets the debounce
  * time (+0x2C) to Time (+0x4) seconds times the frame rate (cAppMan_TheAppMan +0x10) and +0x30 to Type (+0x8), and
- * hands over from @p a4 with cMoveNode_transferFromOld. Visible (+0xC) then edits the instance's flags (instance record
+ * hands over from @p oldNode with cMoveNode_transferFromOld. Visible (+0xC) then edits the instance's flags (instance record
  * at +0x18, flags at +0x8): 0 clears the low four bits; 1 sets bit 0, clears bit 1 and sets bit 2; otherwise bit 1
  * becomes bit 2 only when bits 0 and 1 are both set.
  *
  * Callers allocate 52 bytes and pass bucket 1: MakeDebounceFunc (tag "Debounce", no old node) and checkActiveNode (tag
  * "cDebounce", passing the node being replaced).
  *
- * @param a1  the bucket list the node joins
- * @param a2  the instance record
+ * @param bucket  the bucket list the node joins
+ * @param instance  the instance record
  * @param def  the script's debounce data (On Tour tMakeDebounceData)
- * @param a4  the node it replaces (On Tour pOldNode)
+ * @param oldNode  the node it replaces (On Tour pOldNode)
  * @return @p self
  */
-extern "C" void* func_00342C08(sSelf_342C08* self, void* a1, void* a2, sDef_342C08* def, void* a4)
+extern "C" void* func_00342C08(sSelf_342C08* self, void* bucket, void* instance, sDef_342C08* def, void* oldNode)
 {
-    func_00355280(self, a1, 0, a2);
+    func_00355280(self, bucket, 0, instance);
     self->vt = cDebounceNode_vtbl;
     self->t2C = (int)(def->time * (float)*(int*)(cAppMan_TheAppMan + 0x10));
     self->t30 = def->f08;
-    cMoveNode_transferFromOld(self, a4);
+    cMoveNode_transferFromOld(self, oldNode);
     if (def->mode == 0) {
         self->node->flags &= 0xFFFFFFF0;
     } else if (def->mode == 1) {

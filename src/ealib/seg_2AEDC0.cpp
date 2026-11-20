@@ -162,24 +162,24 @@ static inline bool wsCanAlloc_ADEC8(sAlloc_ADEC8* a)
  * func_003E0AD8(stream, 152, 52) is called on both streams first; func_003AE450 later calls it with 151, 51.
  *
  * @param selfp  the player object
- * @param a1  the video file name or data address
- * @param a2  size of the in-memory video data (type 2)
- * @param a3  size of the video stream buffer
- * @param a4  the audio file name or data address; 0 for one interleaved stream
- * @param a5  size of the in-memory audio data
- * @param a6  size of the audio stream buffer
- * @param a7  source type: 0 stream, 1 async load, 2 memory
- * @param a8  nonzero to play without sound
+ * @param videoSource  the video file name or data address
+ * @param videoDataSize  size of the in-memory video data (type 2)
+ * @param videoBufferSize  size of the video stream buffer
+ * @param audioSource  the audio file name or data address; 0 for one interleaved stream
+ * @param audioDataSize  size of the in-memory audio data
+ * @param audioBufferSize  size of the audio stream buffer
+ * @param sourceType  source type: 0 stream, 1 async load, 2 memory
+ * @param noAudio  nonzero to play without sound
  */
-extern "C" void func_003ADEC8(void* selfp, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8)
+extern "C" void func_003ADEC8(void* selfp, int videoSource, int videoDataSize, int videoBufferSize, int audioSource, int audioDataSize, int audioBufferSize, int sourceType, int noAudio)
 {
     char* self = (char*)selfp;
     if (func_003B5440() == 0) {
-        a8 = 1;
+        noAudio = 1;
     }
     MEM_fill(self, 0, 0x78);
-    *(int*)(self + 0x18) = a7;
-    *(int*)(self + 0x1C) = a8;
+    *(int*)(self + 0x18) = sourceType;
+    *(int*)(self + 0x1C) = noAudio;
     *(int*)(self + 0x20) = 0;
     *(int*)(self + 0x28) = 0;
     *(int*)(self + 0x24) = 0;
@@ -190,18 +190,18 @@ extern "C" void func_003ADEC8(void* selfp, int a1, int a2, int a3, int a4, int a
     *(int*)(self + 0x0) = 0;
     *(int*)(self + 0x70) = 0;
     *(int*)(self + 0x74) = 0;
-    *(int*)(self + 0xC) = a1;
-    *(int*)(self + 0x10) = a4;
+    *(int*)(self + 0xC) = videoSource;
+    *(int*)(self + 0x10) = audioSource;
     if (!wsCanAlloc_ADEC8(&D_00509430_ADEC8)) {
         func_003E62B0();
         return;
     }
-    if (a4 != 0) {
+    if (audioSource != 0) {
         *(int*)(self + 0x14) = 1;
-        *(void**)(self + 0x4) = D_00509430_ADEC8.alloc(str_AV_VideoStreamBuffer, a3, 0, 0, D_00509430_ADEC8.flags);
-        *(void**)(self + 0x8) = D_00509430_ADEC8.alloc(str_AV_AudioStreamBuffer, a6, 0, 0, D_00509430_ADEC8.flags);
-        *(int*)(self + 0x30) = STREAM_create(2, 2, 1, *(void**)(self + 0x4), a3);
-        *(int*)(self + 0x34) = STREAM_create(2, 2, 1, *(void**)(self + 0x8), a6);
+        *(void**)(self + 0x4) = D_00509430_ADEC8.alloc(str_AV_VideoStreamBuffer, videoBufferSize, 0, 0, D_00509430_ADEC8.flags);
+        *(void**)(self + 0x8) = D_00509430_ADEC8.alloc(str_AV_AudioStreamBuffer, audioBufferSize, 0, 0, D_00509430_ADEC8.flags);
+        *(int*)(self + 0x30) = STREAM_create(2, 2, 1, *(void**)(self + 0x4), videoBufferSize);
+        *(int*)(self + 0x34) = STREAM_create(2, 2, 1, *(void**)(self + 0x8), audioBufferSize);
         func_003E0AD8(*(int*)(self + 0x34), 152, 52);
         func_003E0AD8(*(int*)(self + 0x30), 152, 52);
         func_003E0948(*(int*)(self + 0x30), 1, 0xFF, 77, 1);
@@ -214,20 +214,20 @@ extern "C" void func_003ADEC8(void* selfp, int a1, int a2, int a3, int a4, int a
         func_003E0948(*(int*)(self + 0x34), 2, 0, 0, -2);
         int type = *(int*)(self + 0x18);
         if (type == 1) {
-            *(int*)(self + 0x2C) = ASYNCFILE_load(a4, D_00509430_ADEC8.flags);
-            *(int*)(self + 0x24) = ASYNCFILE_load(a1, D_00509430_ADEC8.flags);
+            *(int*)(self + 0x2C) = ASYNCFILE_load(audioSource, D_00509430_ADEC8.flags);
+            *(int*)(self + 0x24) = ASYNCFILE_load(videoSource, D_00509430_ADEC8.flags);
         } else if (type == 0) {
-            *(int*)(self + 0x3C) = STREAM_queuefile(*(int*)(self + 0x34), a4, 0, 0);
-            *(int*)(self + 0x38) = STREAM_queuefile(*(int*)(self + 0x30), a1, 0, 0);
+            *(int*)(self + 0x3C) = STREAM_queuefile(*(int*)(self + 0x34), audioSource, 0, 0);
+            *(int*)(self + 0x38) = STREAM_queuefile(*(int*)(self + 0x30), videoSource, 0, 0);
         } else if (type == 2) {
-            *(int*)(self + 0x38) = func_003E0D80(*(int*)(self + 0x30), *(int*)(self + 0xC), a2, 0);
-            *(int*)(self + 0x3C) = func_003E0D80(*(int*)(self + 0x34), *(int*)(self + 0x10), a5, 0);
+            *(int*)(self + 0x38) = func_003E0D80(*(int*)(self + 0x30), *(int*)(self + 0xC), videoDataSize, 0);
+            *(int*)(self + 0x3C) = func_003E0D80(*(int*)(self + 0x34), *(int*)(self + 0x10), audioDataSize, 0);
         }
     } else {
         *(int*)(self + 0x14) = 0;
-        *(void**)(self + 0x4) = D_00509430_ADEC8.alloc(str_AV_VideoStreamBuffer, a3, 0, 0, D_00509430_ADEC8.flags);
+        *(void**)(self + 0x4) = D_00509430_ADEC8.alloc(str_AV_VideoStreamBuffer, videoBufferSize, 0, 0, D_00509430_ADEC8.flags);
         *(void**)(self + 0x8) = 0;
-        *(int*)(self + 0x30) = STREAM_create(2, 3, 2, *(void**)(self + 0x4), a3);
+        *(int*)(self + 0x30) = STREAM_create(2, 3, 2, *(void**)(self + 0x4), videoBufferSize);
         *(int*)(self + 0x34) = func_003E0BF8(*(int*)(self + 0x30), 2);
         func_003E0AD8(*(int*)(self + 0x34), 152, 52);
         func_003E0AD8(*(int*)(self + 0x30), 152, 52);
@@ -240,11 +240,11 @@ extern "C" void func_003ADEC8(void* selfp, int a1, int a2, int a3, int a4, int a
         }
         int type = *(int*)(self + 0x18);
         if (type == 1) {
-            *(int*)(self + 0x24) = ASYNCFILE_load(a1, D_00509430_ADEC8.flags);
+            *(int*)(self + 0x24) = ASYNCFILE_load(videoSource, D_00509430_ADEC8.flags);
         } else if (type == 0) {
-            *(int*)(self + 0x38) = STREAM_queuefile(*(int*)(self + 0x30), a1, 0, 0);
+            *(int*)(self + 0x38) = STREAM_queuefile(*(int*)(self + 0x30), videoSource, 0, 0);
         } else if (type == 2) {
-            *(int*)(self + 0x38) = func_003E0D80(*(int*)(self + 0x30), *(int*)(self + 0xC), a2, 0);
+            *(int*)(self + 0x38) = func_003E0D80(*(int*)(self + 0x30), *(int*)(self + 0xC), videoDataSize, 0);
         }
     }
 }
@@ -300,10 +300,10 @@ extern "C" void STREAM_destroy(void* p);
  */
 extern "C" void func_003AE300(char* self, int flags)
 {
-    char* o = *(char**)(self + 0x64);
-    if (o != 0) {
-        sWSVtE300* vt = *(sWSVtE300**)(o + 0x18);
-        vt[1].fn(o + vt[1].delta, 3);
+    char* decoder = *(char**)(self + 0x64);
+    if (decoder != 0) {
+        sWSVtE300* vt = *(sWSVtE300**)(decoder + 0x18);
+        vt[1].fn(decoder + vt[1].delta, 3);
         *(void**)(self + 0x64) = 0;
     }
     if (*(void**)(self + 0x0) != 0) {
@@ -321,22 +321,22 @@ extern "C" void func_003AE300(char* self, int flags)
         *(void**)(self + 0x34) = 0;
     }
     {
-        void* p = *(void**)(self + 0x20);
-        if (p != 0) {
+        void* fileData = *(void**)(self + 0x20);
+        if (fileData != 0) {
             sWSMemIfE300 mi;
             mi.size = 0x20;
             func_003DE928(&mi);
-            mi.release(p);
+            mi.release(fileData);
             *(void**)(self + 0x20) = 0;
         }
     }
     {
-        void* p = *(void**)(self + 0x28);
-        if (p != 0) {
+        void* fileData = *(void**)(self + 0x28);
+        if (fileData != 0) {
             sWSMemIfE300 mi;
             mi.size = 0x20;
             func_003DE928(&mi);
-            mi.release(p);
+            mi.release(fileData);
             *(void**)(self + 0x28) = 0;
         }
     }
@@ -418,12 +418,12 @@ static inline bool wsCanAlloc_AE450(sAlloc_AE450* a)
  *
  * The game calls it as func_003AE450(player, 1, 33) in func_002536C8.
  *
- * @param a1  number of frames the decoder keeps (the CODEC_IDATA frame count)
- * @param a2  milliseconds added to the playback time when choosing the frame (+0x40)
+ * @param framesToBuffer  number of frames the decoder keeps (the CODEC_IDATA frame count)
+ * @param timeOffsetMs  milliseconds added to the playback time when choosing the frame (+0x40)
  * @return the first decoded frame (+0x74)
  */
 // PORT: 64-bit long tick counter
-extern "C" int func_003AE450(char* self, int a1, int a2)
+extern "C" int func_003AE450(char* self, int framesToBuffer, int timeOffsetMs)
 {
     func_003E0AD8(*(int*)(self + 0x34), 151, 51);
     func_003E0AD8(*(int*)(self + 0x30), 151, 51);
@@ -441,9 +441,9 @@ extern "C" int func_003AE450(char* self, int a1, int a2)
         *(int*)(self + 0x3C) = *(int*)(self + 0x38);
     }
     if (*(int*)(self + 0x1C) == 0) {
-        char* s = (char*)func_003AED40(wsAlloc_AE450(&D_00509430_AE450, 20), *(int*)(self + 0x34), *(int*)(self + 0x3C));
-        *(char**)(self + 0x0) = s;
-        *(unsigned int*)(self + 0x54) = *(int*)(s + 0xC) >= 0;
+        char* audioObj = (char*)func_003AED40(wsAlloc_AE450(&D_00509430_AE450, 20), *(int*)(self + 0x34), *(int*)(self + 0x3C));
+        *(char**)(self + 0x0) = audioObj;
+        *(unsigned int*)(self + 0x54) = *(int*)(audioObj + 0xC) >= 0;
     } else {
         *(unsigned int*)(self + 0x54) = 0;
     }
@@ -451,18 +451,18 @@ extern "C" int func_003AE450(char* self, int a1, int a2)
     if (wsCanAlloc_AE450(&D_00509430_AE450)) {
         char key[0x10];
         *(char**)(self + 0x60) = self;
-        func_003B0758_AE450(key, self + 0x60, (void*)func_003AECB8, (void*)func_003AED20, a1);
+        func_003B0758_AE450(key, self + 0x60, (void*)func_003AECB8, (void*)func_003AED20, framesToBuffer);
         *(func_003B0430_sObj**)(self + 0x64) = func_003B0430((func_003B0430_sObj*)wsAlloc_AE450(&D_00509430_AE450, 0x1C), (func_003B0430_sKey*)key);
     }
     *(int*)(self + 0x74) = func_003B0600(*(void**)(self + 0x64), 0);
-    sTimer_AE450* t = (sTimer_AE450*)wsAlloc_AE450(&D_00509430_AE450, 0x18);
-    t->ticks = 0;
-    t->start = func_003E4E98();
-    t->period = 0x1000;
-    *(sTimer_AE450**)(self + 0x5C) = t;
-    func_0042E508(t);
-    unsigned int ms = (unsigned int)(t->ticks * 1000) / func_003E5008();
-    *(int*)(self + 0x40) = a2;
+    sTimer_AE450* msTimer = (sTimer_AE450*)wsAlloc_AE450(&D_00509430_AE450, 0x18);
+    msTimer->ticks = 0;
+    msTimer->start = func_003E4E98();
+    msTimer->period = 0x1000;
+    *(sTimer_AE450**)(self + 0x5C) = msTimer;
+    func_0042E508(msTimer);
+    unsigned int ms = (unsigned int)(msTimer->ticks * 1000) / func_003E5008();
+    *(int*)(self + 0x40) = timeOffsetMs;
     *(int*)(self + 0x50) = 0;
     *(int*)(self + 0x58) = 0;
     *(unsigned int*)(self + 0x4C) = ms;
@@ -738,21 +738,21 @@ struct func_003AE9A0_sSync {
  */
 extern "C" int func_003AE9A0(func_003AE9A0_sSync* self)
 {
-    func_003AE9A0_sInfo b;
-    func_003AE9A0_sInfo a;
-    func_003AE9A0_sTimer* t = self->timer;
-    func_0042E508(t);
-    unsigned int ms = (unsigned int)(t->accum * 1000) / func_003E5008();
+    func_003AE9A0_sInfo requestStatus;
+    func_003AE9A0_sInfo streamStatus;
+    func_003AE9A0_sTimer* msTimer = self->timer;
+    func_0042E508(msTimer);
+    unsigned int ms = (unsigned int)(msTimer->accum * 1000) / func_003E5008();
     int res = ms - self->offset;
     if (self->enabled != 0) {
         func_003B58A0();
-        func_003B7B48(self->owner->id, &a);
-        func_003B7C40(a.field_0x4, &b);
+        func_003B7B48(self->owner->id, &streamStatus);
+        func_003B7C40(streamStatus.field_0x4, &requestStatus);
         func_003B58D8();
-        int d = b.field_0x4 - func_003B5F60();
-        if (self->last < d) {
-            self->last = d;
-            self->drift = self->drift - self->drift / 8 + (d - res);
+        int audioMs = requestStatus.field_0x4 - func_003B5F60();
+        if (self->last < audioMs) {
+            self->last = audioMs;
+            self->drift = self->drift - self->drift / 8 + (audioMs - res);
             int av = -self->drift;
             if (av < self->drift) av = self->drift;
             if (av > 264) {
@@ -822,42 +822,42 @@ extern "C" void func_003AEAD0_impl(char* self, char* ctx, sChunk_AEAD0** out) __
 extern "C" void func_003AEAD0_impl(char* self, char* ctx, sChunk_AEAD0** out)
 {
     int kind = 0;
-    void* q = *(void**)(self + 0x30);
+    void* videoStream = *(void**)(self + 0x30);
     *out = 0;
     for (;;) {
-        unsigned char* p = func_003E12E0(q);
+        unsigned char* blockData = func_003E12E0(videoStream);
         SYNCTASK_run(0);
-        if (p != 0) {
-            unsigned int tag = (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
+        if (blockData != 0) {
+            unsigned int tag = (blockData[0] << 24) | (blockData[1] << 16) | (blockData[2] << 8) | blockData[3];
             if (func_003B11F0(tag))
                 kind = 3;
             if (kind != 0) {
-                sChunk_AEAD0* c = (sChunk_AEAD0*)func_003B0720(D_00509430_AEAD0.alloc(D_00495210, 0xC, 0, 0, D_00509430_AEAD0.flags));
-                *out = c;
-                c->data = p;
+                sChunk_AEAD0* newChunk = (sChunk_AEAD0*)func_003B0720(D_00509430_AEAD0.alloc(D_00495210, 0xC, 0, 0, D_00509430_AEAD0.flags));
+                *out = newChunk;
+                newChunk->data = blockData;
                 if (kind == 2) {
-                    unsigned int size = le32_AEAD0(p + 4);
-                    c->body = p;
-                    c->size = size;
+                    unsigned int size = le32_AEAD0(blockData + 4);
+                    newChunk->body = blockData;
+                    newChunk->size = size;
                 } else {
-                    unsigned int size = le32_AEAD0(p + 4);
-                    c->body = p + 8;
-                    c->size = size;
+                    unsigned int size = le32_AEAD0(blockData + 4);
+                    newChunk->body = blockData + 8;
+                    newChunk->size = size;
                 }
                 if (*(int*)(ctx + 0x14) != 0)
                     return;
                 if (kind != 3)
                     return;
-                if (func_003B04F8_i(ctx, func_003B11A0(), c) != 2)
+                if (func_003B04F8_i(ctx, func_003B11A0(), newChunk) != 2)
                     func_003B0538(ctx);
                 return;
             }
             char name[8];
             *(unsigned int*)name = tag;
             name[4] = 0;
-            func_003E13E8(q, (int)p);
+            func_003E13E8(videoStream, (int)blockData);
         }
-        if (func_003E1530(q))
+        if (func_003E1530(videoStream))
             return;
     }
 }
@@ -896,17 +896,17 @@ extern void* (*D_00509434[])(void*);
  * Hands the CHUNK's block (m_UserChunkData) back to the video STREAM (+0x30) with func_003E13E8, then frees the CHUNK
  * with the RCMP free function (D_00509434). Likely bug: it reads the CHUNK before checking it for null.
  *
- * @param a1  the CHUNK
+ * @param chunkAddr  the CHUNK
  * @return the free function's result
  */
-extern "C" void* func_003AECE0(int self, int a1)
+extern "C" void* func_003AECE0(int self, int chunkAddr)
 {
-    int* obj = (int*)a1;
-    void* r = func_003E13E8(*(void**)(self + 0x30), *obj);
+    int* obj = (int*)chunkAddr;
+    void* lastResult = func_003E13E8(*(void**)(self + 0x30), *obj);
     if (obj != 0) {
-        r = D_00509434[0](obj);
+        lastResult = D_00509434[0](obj);
     }
-    return r;
+    return lastResult;
 }
 #endif
 
@@ -957,11 +957,11 @@ extern "C" int func_003B7DE8(int h, int a, int b);
  * func_003B7E38 (handle at +0xC), queues the source with func_003B7DE8 (request at +0x10) and sets +0x0 to 1.0f. The
  * object is 20 bytes; func_003AE450 allocates it.
  *
- * @param a1  the audio STREAM
- * @param a2  the audio source handle to queue
+ * @param sourceStream  the audio STREAM
+ * @param sourceHandle  the audio source handle to queue
  * @return self
  */
-extern "C" void* func_003AED40(void* self, int a1, int a2)
+extern "C" void* func_003AED40(void* self, int sourceStream, int sourceHandle)
 {
     char desc[0x18];
     if (func_003B5440() == 0) {
@@ -974,9 +974,9 @@ extern "C" void* func_003AED40(void* self, int a1, int a2)
         int size = func_003B7AC8(1, 0x1E);
         void* mem = D_00509430_v.alloc(str_AV_audiobuff, size, 0, 0, D_00509430_v.flags);
         *(void**)((char*)self + 0x4) = mem;
-        int h = func_003B7E38(a1, desc, 1, 0x1E, mem, size);
-        *(int*)((char*)self + 0xC) = h;
-        *(int*)((char*)self + 0x10) = func_003B7DE8(h, -1, a2);
+        int streamHandle = func_003B7E38(sourceStream, desc, 1, 0x1E, mem, size);
+        *(int*)((char*)self + 0xC) = streamHandle;
+        *(int*)((char*)self + 0x10) = func_003B7DE8(streamHandle, -1, sourceHandle);
         *(float*)self = 1.0f;
     }
     return self;
@@ -1218,17 +1218,17 @@ struct sSelf_F0C8 { sElem_F0C8* arr; unsigned int count; };
  *
  * @param vself  the subtitle array
  * @param count  number of subtitles
- * @param a2  x position
- * @param a3  y position
- * @param a4  width
- * @param a5  height
+ * @param posX  x position
+ * @param posY  y position
+ * @param width  width
+ * @param height  height
  */
-extern "C" void func_003AF0C8(void* vself, unsigned int count, int a2, int a3, int a4, int a5)
+extern "C" void func_003AF0C8(void* vself, unsigned int count, int posX, int posY, int width, int height)
 {
     sSelf_F0C8* self = (sSelf_F0C8*)vself;
     unsigned int* raw;
     char* arr;
-    char* p;
+    char* subtitle;
     int i;
     unsigned int k;
 
@@ -1236,12 +1236,12 @@ extern "C" void func_003AF0C8(void* vself, unsigned int count, int a2, int a3, i
     raw = (unsigned int*)D_00509430_F0C8.alloc(D_00495260, count * 52 + 0x10, 0, 0, D_00509430_F0C8.flags);
     arr = (char*)raw + 0x10;
     *raw = count;
-    p = arr;
+    subtitle = arr;
     if (count != 0) {
         do {
             i--;
-            func_003B0340(p);
-            p += 0x34;
+            func_003B0340(subtitle);
+            subtitle += 0x34;
         } while (i != -1);
     }
     self->arr = (sElem_F0C8*)arr;
@@ -1250,10 +1250,10 @@ extern "C" void func_003AF0C8(void* vself, unsigned int count, int a2, int a3, i
         f03D0_F0C8(arr, 0);
     }
     for (k = 0; k < self->count; k++) {
-        f03A8_F0C8(&self->arr[k], a2);
-        f03B0_F0C8(&self->arr[k], a3);
-        f03B8_F0C8(&self->arr[k], a4);
-        f03C0_F0C8(&self->arr[k], a5);
+        f03A8_F0C8(&self->arr[k], posX);
+        f03B0_F0C8(&self->arr[k], posY);
+        f03B8_F0C8(&self->arr[k], width);
+        f03C0_F0C8(&self->arr[k], height);
         f03C8_F0C8(&self->arr[k], k);
     }
 }
@@ -1304,12 +1304,12 @@ extern "C" void* func_003AF258_impl(void* self, unsigned int key) __asm__("func_
 extern "C" void* func_003AF258_impl(void* self, unsigned int key)
 {
     struct S { char* arr; int n; };
-    S* s = (S*)self;
-    if (s->n == 0) {
+    S* subtitleArray = (S*)self;
+    if (subtitleArray->n == 0) {
         return 0;
     }
-    int hi = s->n;
-    char* arr = s->arr;
+    int hi = subtitleArray->n;
+    char* arr = subtitleArray->arr;
     int lo = -1;
     while (hi - lo >= 2) {
         int mid = (hi + lo) / 2;
@@ -1321,7 +1321,7 @@ extern "C" void* func_003AF258_impl(void* self, unsigned int key)
     }
     int i = hi - 1;
     if (i < 0) i = 0;
-    i = (i < s->n - 1) ? i : s->n - 1;
+    i = (i < subtitleArray->n - 1) ? i : subtitleArray->n - 1;
     return arr + i * 52;
 }
 #endif
@@ -1415,38 +1415,38 @@ extern "C" int func_003AF378(const char*, const char*) __asm__("func_003AF378");
  * JUSTIFY_ENUM), then restores the character. Used by the subtitle-file parser func_003AF7F0 for JUSTIFY_X and
  * JUSTIFY_Y.
  *
- * @param s  the text, modified temporarily
+ * @param text  the text, modified temporarily
  * @param len  its length
  * @return the justification value, or 0xFFFFFFFF for an unknown word
  */
-extern "C" unsigned int func_003AF428(char* s, unsigned int len)
+extern "C" unsigned int func_003AF428(char* text, unsigned int len)
 {
     unsigned int i;
     char ch = 9;
-    unsigned int r;
+    unsigned int justify;
     unsigned int j;
 
     for (i = 0; i < len; i++) {
-        char c = s[i];
-        if (c == 9 || c == 13) {
-            s[i] = 0;
-            ch = c;
+        char curChar = text[i];
+        if (curChar == 9 || curChar == 13) {
+            text[i] = 0;
+            ch = curChar;
             break;
         }
     }
     sNames_F428 names = D_00495290;
     sVals_F428 vals = D_004952A8;
-    r = 0xFFFFFFFF;
+    justify = 0xFFFFFFFF;
     for (j = 0; j < 5; j++) {
-        if (func_003AF378(names.e[j], s) == 0) {
-            r = vals.e[j];
+        if (func_003AF378(names.e[j], text) == 0) {
+            justify = vals.e[j];
             break;
         }
     }
     if (i != len) {
-        s[i] = ch;
+        text[i] = ch;
     }
-    return r;
+    return justify;
 }
 #endif
 //100%
@@ -1792,10 +1792,10 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003B0410__FPv);
  */
 void* func_003B0410(void* self)
 {
-    int t0 = 0;
-    *(int*)self = t0;
+    int zero = 0;
+    *(int*)self = zero;
     *(int*)((char*)self + 0xc) = (int)(void*)D_00456890;
-    *(int*)((char*)self + 0x4) = t0;
+    *(int*)((char*)self + 0x4) = zero;
     return self;
 }
 #endif
@@ -1885,13 +1885,13 @@ public:
  * through in $v0 although the declaration is void. func_003AEAD0 calls it and frees the codec unless the result is 2.
  *
  * @param obj  the codec
- * @param a2  the first CHUNK
+ * @param firstChunk  the first CHUNK
  */
-extern "C" void func_003B04F8(void* self, func_003B04F8_cObj* obj, int a2)
+extern "C" void func_003B04F8(void* self, func_003B04F8_cObj* obj, int firstChunk)
 {
     *(func_003B04F8_cObj**)((char*)self + 0x14) = obj;
-    *(int*)self = a2;
-    obj->v02(self, a2);
+    *(int*)self = firstChunk;
+    obj->v02(self, firstChunk);
 }
 #endif
 
@@ -1986,25 +1986,25 @@ struct func_003B0600_sObj {
  * for the movie player also chooses the codec (func_003AEAD0). Then it asks the codec's slot 3 for the frame. Called by
  * func_003AE450 and func_003AE6C8.
  *
- * @param p  the DECODER
- * @param a1  the goal frame number
+ * @param decoder  the DECODER
+ * @param goalFrame  the goal frame number
  * @return the frame, or 0 without a codec
  */
-extern "C" int func_003B0600(void* p, int a1)
+extern "C" int func_003B0600(void* decoder, int goalFrame)
 {
-    func_003B0600_sObj* self = (func_003B0600_sObj*)p;
+    func_003B0600_sObj* self = (func_003B0600_sObj*)decoder;
     if (self->obj == 0) {
         if (self->loaded == 0) {
             self->load(self, self->arg, self);
         }
     }
-    int r;
+    int frame;
     if (self->obj != 0) {
-        r = self->obj->v03(a1);
+        frame = self->obj->v03(goalFrame);
     } else {
-        r = 0;
+        frame = 0;
     }
-    return r;
+    return frame;
 }
 #endif
 
@@ -2028,11 +2028,11 @@ public:
  * Calls the codec's slot 6 without checking that a codec exists. The game's movie code (func_002535F8, func_002547B8,
  * func_00254DC0) calls it on frames it got from func_003AE6C8.
  *
- * @param a  the frame
+ * @param frame  the frame
  */
-extern "C" void func_003B0680(void* self, int a)
+extern "C" void func_003B0680(void* self, int frame)
 {
-    (*(func_003B0680_cObj**)((char*)self + 0x14))->v06(a);
+    (*(func_003B0680_cObj**)((char*)self + 0x14))->v06(frame);
 }
 #endif
 
@@ -2146,12 +2146,12 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003B0758);
  * @param context  the streamer pointer passed back to the callbacks
  * @param fetchFn  the get-data function
  * @param releaseFn  the release-data function
- * @param a4  number of frames the codec keeps
+ * @param framesToBuffer  number of frames the codec keeps
  * @return self
  */
-extern "C" void* func_003B0758(void* self, int context, int fetchFn, int releaseFn, int a4)
+extern "C" void* func_003B0758(void* self, int context, int fetchFn, int releaseFn, int framesToBuffer)
 {
-    *(int*)((char*)self + 0xc) = a4;
+    *(int*)((char*)self + 0xc) = framesToBuffer;
     *(int*)self = context;
     *(int*)((char*)self + 0x4) = fetchFn;
     *(int*)((char*)self + 0x8) = releaseFn;
@@ -2248,22 +2248,22 @@ static inline char* func_003B07F8_data(char* p)
  * to 5. Called by the Sony codec's Init (func_003B0C58) and func_0042E020.
  *
  * @param w  width in pixels
- * @param h  height in pixels
+ * @param height  height in pixels
  * @return self
  */
-extern "C" void* func_003B07F8(void* self, unsigned int w, int h)
+extern "C" void* func_003B07F8(void* self, unsigned int w, int height)
 {
     *(int*)((char*)self + 0x0) = 2;
     *(int*)((char*)self + 0x8) = 3;
     *(int*)((char*)self + 0xC) = 3;
     *(int*)((char*)self + 0x10) = 0;
-    char* img = (char*)SHAPE_create(w, h, 0x20, 0, 0, D_00509438[0], 0, 0xF0);
+    char* img = (char*)SHAPE_create(w, height, 0x20, 0, 0, D_00509438[0], 0, 0xF0);
     *(char**)((char*)self + 0x4) = img;
     char* hdr = (char*)func_003B3D40(img);
     hdr[4] = 50;
     hdr[5] = 52;
     hdr[6] = 0x30;
-    unsigned int size = ((w >> 4) * h >> 4) << 10;
+    unsigned int size = ((w >> 4) * height >> 4) << 10;
     MEM_fill(func_003B07F8_data(*(char**)((char*)self + 0x4)), 0, size);
     **(char**)((char*)self + 0x4) = 5;
     return self;
@@ -2418,13 +2418,13 @@ extern "C" void func_003B0B40(void* a, void* b, void* c);
  * Registered by func_003B0C58 through func_00402C08 with type 1; calls func_003B0B40(codec, decoder state,
  * callbackArg).
  *
- * @param a1  the callback's second argument (passed on unused)
+ * @param callbackArg  the callback's second argument (passed on unused)
  * @param source  the Sony codec object (callback data)
  * @return 1
  */
-extern "C" int func_003B0B10(void* self, void* a1, void* source)
+extern "C" int func_003B0B10(void* self, void* callbackArg, void* source)
 {
-    func_003B0B40(source, self, a1);
+    func_003B0B40(source, self, callbackArg);
     return 1;
 }
 #endif
@@ -2462,10 +2462,10 @@ struct func_003B0B40_sScript {
  *
  * @param source  the Sony codec object
  * @param consumer  the MPEG decoder state passed to func_004029D0
- * @param c  the callback argument (unused)
+ * @param callbackArg  the callback argument (unused)
  */
 // PORT: func_003B06B0 returns the block pointer as int.
-extern "C" void func_003B0B40(void* source, void* consumer, void* c)
+extern "C" void func_003B0B40(void* source, void* consumer, void* callbackArg)
 {
     func_003B0B40_sScript* self = (func_003B0B40_sScript*)source;
     void* data = 0;
@@ -2582,10 +2582,10 @@ struct sPlayer_B0C58 {
  * registers func_003B0B10 with func_00402C08. Slot 2 of D_00456850.
  *
  * @param script  the DECODER
- * @param d  the first CHUNK
+ * @param firstChunk  the first CHUNK
  * @return 2 (usable)
  */
-extern "C" int func_003B0C58(sPlayer_B0C58* self, sScript_B0C58* script, sData_B0C58* d)
+extern "C" int func_003B0C58(sPlayer_B0C58* self, sScript_B0C58* script, sData_B0C58* firstChunk)
 {
     self->script = script;
     self->f10 = 0;
@@ -2599,7 +2599,7 @@ extern "C" int func_003B0C58(sPlayer_B0C58* self, sScript_B0C58* script, sData_B
         self->ipuBuf = 0;
     }
     self->state = 1;
-    void* data = d->data;
+    void* data = firstChunk->data;
     ld = (layer_data*)D_00509648;
     func_003B1228(data);
     func_003B13D8();
@@ -2616,17 +2616,17 @@ extern "C" int func_003B0C58(sPlayer_B0C58* self, sScript_B0C58* script, sData_B
     int w = D_005094FC_s * 16;
     D_005094D4_s = w;
     self->w = w;
-    int h = D_00509500_s * 16;
-    D_005094D8_s = h;
-    self->h = h;
+    int codedHeight = D_00509500_s * 16;
+    D_005094D8_s = codedHeight;
+    self->h = codedHeight;
     D_005094DC_s = w >> 1;
-    D_005094E0_s = h >> 1;
+    D_005094E0_s = codedHeight >> 1;
     int n = self->script->count;
     for (int i = 0; i < n; i++) {
         int cw = self->w;
         int ch = self->h;
-        char* r = (char*)func_003B07F8(D_00509430_B0C58.alloc(D_004953E8, 20, 0, 0, D_00509430_B0C58.flags), cw, ch);
-        sWSNode_B0C58* node = r ? (sWSNode_B0C58*)(r + 8) : 0;
+        char* newFrame = (char*)func_003B07F8(D_00509430_B0C58.alloc(D_004953E8, 20, 0, 0, D_00509430_B0C58.flags), cw, ch);
+        sWSNode_B0C58* node = newFrame ? (sWSNode_B0C58*)(newFrame + 8) : 0;
         sWSNode_B0C58* head = &self->frames;
         sWSNode_B0C58* old = head->next;
         head->next = node;
@@ -2893,14 +2893,14 @@ extern int D_00495448[];
  *
  * Compares with the two tags in D_00495448. Called by func_003AEAD0 on each stream block's big-endian tag.
  *
- * @param v  the four-character tag as a big-endian word
+ * @param chunkTag  the four-character tag as a big-endian word
  * @return 1 for an MPEG chunk, else 0
  */
-extern "C" int func_003B11F0(int v)
+extern "C" int func_003B11F0(int chunkTag)
 {
     unsigned int i;
     for (i = 0; i < 2; i++) {
-        if (D_00495448[i] == v) {
+        if (D_00495448[i] == chunkTag) {
             return 1;
         }
     }
@@ -3336,27 +3336,27 @@ extern int D_005094F8_B1878[] __asm__("D_005094F8");
  */
 extern "C" int func_003B1878(void)
 {
-    int r;
+    int verticalExtension;
     int v;
-    int t;
+    int quantizerScaleCode;
 
     if (*(int*)((char*)ld + 0x420) != 0) {
-        r = 0;
+        verticalExtension = 0;
         if (D_005094F8_B1878[0] >= 2801) {
-            r = (int)func_003B1300(3);
+            verticalExtension = (int)func_003B1300(3);
         }
     } else {
-        r = 0;
+        verticalExtension = 0;
     }
     if (*(int*)((char*)ld + 0x424) == 1) {
         *(int*)((char*)ld + 0x434) = (int)func_003B1300(7);
     }
-    t = (int)func_003B1300(5);
+    quantizerScaleCode = (int)func_003B1300(5);
     {
-        char *p = (char*)ld;
-        *(int*)(p + 0x438) = *(int*)(p + 0x420) != 0
-            ? (*(int*)(p + 0x428) != 0 ? (int)D_0044C2D8[t] : t * 2)
-            : t;
+        char *layer = (char*)ld;
+        *(int*)(layer + 0x438) = *(int*)(layer + 0x420) != 0
+            ? (*(int*)(layer + 0x428) != 0 ? (int)D_0044C2D8[quantizerScaleCode] : quantizerScaleCode * 2)
+            : quantizerScaleCode;
     }
     if (func_003B1300(1) != 0) {
         *(int*)((char*)ld + 0x43C) = (int)func_003B1300(1);
@@ -3366,7 +3366,7 @@ extern "C" int func_003B1878(void)
     } else {
         *(int*)((char*)ld + 0x43C) = 0;
     }
-    return r;
+    return verticalExtension;
 }
 #endif
 
@@ -3469,9 +3469,9 @@ struct sMpegCtx1AB0 {
 // Parse an MPEG-2 sequence extension.
 extern "C" void func_003B1AB0(void)
 {
-    sMpegCtx1AB0* g = (sMpegCtx1AB0*)ld;
-    g->f420 = 1;
-    g->f424 = 0;
+    sMpegCtx1AB0* layer = (sMpegCtx1AB0*)ld;
+    layer->f420 = 1;
+    layer->f424 = 0;
     D_005095DC[0] = 0;
     D_00509520[0] = (int)func_003B1300(8);
     D_00509524[0] = (int)func_003B1300(1);
@@ -3567,56 +3567,56 @@ extern "C" void func_003B1D58(void)
 {
     layer_data** gd = &ld;
     {
-        void* p = func_003B1300(1);
-        ((sWSTables1D58*)*gd)->p410 = p;
-        if (p != 0) {
+        void* loadFlag = func_003B1300(1);
+        ((sWSTables1D58*)*gd)->p410 = loadFlag;
+        if (loadFlag != 0) {
             int i;
             for (i = 0; i < 64; i++) {
-                void* q = func_003B1300(8);
+                void* quantValue = func_003B1300(8);
                 int k = D_0044C218[i];
-                sWSTables1D58* g = ((sWSTables1D58*)ld);
-                g->a10[k] = q;
-                g->a210[k] = q;
+                sWSTables1D58* layer = ((sWSTables1D58*)ld);
+                layer->a10[k] = quantValue;
+                layer->a210[k] = quantValue;
             }
         }
     }
     {
-        void* p = func_003B1300(1);
-        ((sWSTables1D58*)ld)->p414 = p;
-        if (p != 0) {
+        void* loadFlag = func_003B1300(1);
+        ((sWSTables1D58*)ld)->p414 = loadFlag;
+        if (loadFlag != 0) {
             int i;
             for (i = 0; i < 64; i++) {
-                void* q = func_003B1300(8);
+                void* quantValue = func_003B1300(8);
                 int k = D_0044C218[i];
-                sWSTables1D58* g = ((sWSTables1D58*)ld);
-                g->a110[k] = q;
-                g->a310[k] = q;
+                sWSTables1D58* layer = ((sWSTables1D58*)ld);
+                layer->a110[k] = quantValue;
+                layer->a310[k] = quantValue;
             }
         }
     }
     {
-        void* p = func_003B1300(1);
-        ((sWSTables1D58*)ld)->p418 = p;
-        if (p != 0) {
+        void* loadFlag = func_003B1300(1);
+        ((sWSTables1D58*)ld)->p418 = loadFlag;
+        if (loadFlag != 0) {
             int i;
             for (i = 0; i < 64; i++) {
-                void* q = func_003B1300(8);
+                void* quantValue = func_003B1300(8);
                 int k = D_0044C218[i];
-                sWSTables1D58* g = ((sWSTables1D58*)ld);
-                g->a210[k] = q;
+                sWSTables1D58* layer = ((sWSTables1D58*)ld);
+                layer->a210[k] = quantValue;
             }
         }
     }
     {
-        void* p = func_003B1300(1);
-        ((sWSTables1D58*)ld)->p41C = p;
-        if (p != 0) {
+        void* loadFlag = func_003B1300(1);
+        ((sWSTables1D58*)ld)->p41C = loadFlag;
+        if (loadFlag != 0) {
             int i;
             for (i = 0; i < 64; i++) {
-                void* q = func_003B1300(8);
+                void* quantValue = func_003B1300(8);
                 int k = D_0044C218[i];
-                sWSTables1D58* g = ((sWSTables1D58*)ld);
-                g->a310[k] = q;
+                sWSTables1D58* layer = ((sWSTables1D58*)ld);
+                layer->a310[k] = quantValue;
             }
         }
     }

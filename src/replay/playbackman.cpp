@@ -330,16 +330,16 @@ INCLUDE_ASM("replay/playbackman", func_0026C998);
 extern "C" int func_0026CFE8();
 
 /**
- * Returns whether playback file @p a1 is ready to use: 1 when it is listed and its load has finished.
+ * Returns whether playback file @p fileId is ready to use: 1 when it is listed and its load has finished.
  *
- * Looks the id up with func_0026CFE8 (declared without arguments here: self and @p a1 pass through in registers). The
+ * Looks the id up with func_0026CFE8 (declared without arguments here: self and @p fileId pass through in registers). The
  * file counts as ready when its entry's data pointer (+0x4) is set, or when no async load is pending (handle +0x78
  * negative), so a failed load also reports ready. An unknown id gives 0.
  *
- * @param a1  the playback file id
+ * @param fileId  the playback file id
  * @return 1 when the file is loaded or no load is pending, 0 otherwise
  */
-extern "C" int func_0026C998(void* self, int a1)
+extern "C" int func_0026C998(void* self, int fileId)
 {
     int idx = func_0026CFE8();
     if (idx >= 0) {
@@ -403,9 +403,9 @@ extern "C" int func_0026C9F0(void* self_, int key)
         self->handle = -1;
         int num = D_004A3410;
         sprintf(path, D_004A3414, D_004A3430, num, self->name, entry->id);
-        int h = ASYNCFILE_load(path, 0x100);
-        self->handle = h;
-        if (h >= 0)
+        int asyncHandle = ASYNCFILE_load(path, 0x100);
+        self->handle = asyncHandle;
+        if (asyncHandle >= 0)
             return 1;
         self->handle = -1;
     }
@@ -451,21 +451,21 @@ extern "C" int func_0026CFE8();
 extern "C" int func_0026D020(void* self, int idx);
 
 /**
- * Loads playback file @p a1 and unpacks it into the current frame, waiting for the load; returns 1 if it holds input.
+ * Loads playback file @p fileId and unpacks it into the current frame, waiting for the load; returns 1 if it holds input.
  *
  * Only while the manager is idle (mode +0x70 == 0) and the id is listed (func_0026CFE8): starts the load
  * (func_0026C9F0), then blocks until func_0026C998 reports it ready, running cPlaybackMan_update, SYNCTASK_run(0) and
  * THREAD_yieldticks(1) each pass. func_0026D020 then unpacks the file into the current frame (+0x4). func_0030B590
  * (wscript) calls it before starting a preview.
  *
- * @param a1  the playback file id
+ * @param fileId  the playback file id
  * @return 1 when the file was unpacked and its recorded input end (current frame +0xC) is above 0, else 0
  */
-extern "C" int func_0026CAF8(void* self, int a1)
+extern "C" int func_0026CAF8(void* self, int fileId)
 {
     int idx;
-    if (*(int*)((char*)self + 0x70) == 0 && (idx = func_0026CFE8()) >= 0 && func_0026C9F0(self, a1) != 0) {
-        while (func_0026C998(self, a1) == 0) {
+    if (*(int*)((char*)self + 0x70) == 0 && (idx = func_0026CFE8()) >= 0 && func_0026C9F0(self, fileId) != 0) {
+        while (func_0026C998(self, fileId) == 0) {
             cPlaybackMan_update((cPlaybackMan_C5F8*)self);
             SYNCTASK_run(0);
             THREAD_yieldticks(1);
@@ -923,10 +923,10 @@ int func_0026D420_D178(void* self, int a1) __asm__("func_0026D420");
  * recorded one (func_0026D420). Every other state leaves it and returns 1. cPlayer_getControlCmd calls it each frame
  * when a replay recorder is attached.
  *
- * @param a1  the 8-byte control command: read when recording, overwritten during playback
+ * @param controlCmd  the 8-byte control command: read when recording, overwritten during playback
  * @return 0 when recording or idle, func_0026D420's result during playback, 1 in the other states
  */
-extern "C" int func_0026D178(void* self, int a1)
+extern "C" int func_0026D178(void* self, int controlCmd)
 {
     if (*(int*)((char*)self + 0xC) == 0) {
         return 0;
@@ -938,14 +938,14 @@ extern "C" int func_0026D178(void* self, int a1)
         if (*(int*)(replay + 0x60C) != 0 || *(int*)(replay + 0x608) != 0 || *(int*)(replay + 0x610) != 0) {
             break;
         }
-        func_0026D2B0_D178(self, a1);
+        func_0026D2B0_D178(self, controlCmd);
     }
         /* fall through */
     case 10: case 11: case 12: case 14:
         result = 0;
         break;
     case 1: case 2: case 4:
-        result = func_0026D420_D178(self, a1);
+        result = func_0026D420_D178(self, controlCmd);
         break;
     case 3: case 5: case 6: case 7: case 8: case 9: case 13:
         break;

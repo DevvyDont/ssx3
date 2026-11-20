@@ -495,10 +495,10 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B3D40);
  * chain). The data starts after the 16-byte block header; the flag is the halfword at +6. Called by the movie frame
  * constructor func_003B07F8 on a shape made with SHAPE_create.
  *
- * @param arg0  the shape
+ * @param shape  the shape
  * @return the block data, or 0 when there is no such block or the flag is clear
  */
-void *func_003B3D40(int *arg0) {
+void *func_003B3D40(int *shape) {
     int *temp_4;
     int *var_5;
     int temp_2;
@@ -506,7 +506,7 @@ void *func_003B3D40(int *arg0) {
     unsigned short var_2_2;
     void *var_6;
 
-    var_5 = arg0;
+    var_5 = shape;
     var_6 = 0;
     if (var_5 != 0) {
         if (*(unsigned char *)var_5 == 105) {
@@ -788,10 +788,10 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B42B0);
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 int func_003B42B0(int x, int y, int w) {
-    int m = (y & 0x70) >> 1;
-    int b = (y & 2) << 1;
-    int lo = m + ((x & 7) ^ b ^ (y & 4));
-    int lx = (x & 0x18) + b;
+    int blockRow = (y & 0x70) >> 1;
+    int pairSwap = (y & 2) << 1;
+    int lo = blockRow + ((x & 7) ^ pairSwap ^ (y & 4));
+    int lx = (x & 0x18) + pairSwap;
     y = ((y >> 7) << 5) + (((x & 0x60) >> 2) + ((y & 0xC) >> 1) + (y & 1));
     x = ((x >> 7) << 6) + lo;
     w = (y * w / 2 + x) << 5;
@@ -864,14 +864,14 @@ extern int D_0044C458[];
  * Stores them in D_0044C450, SHAPE_memallocalign and D_0044C458; SHAPE_destroy-like func_003B2B68 frees through the
  * last. Nothing in the code or data calls it.
  *
- * @param arg0  the allocate function
- * @param arg1  the aligned allocate function
- * @param arg2  the free function
+ * @param memAlloc  the allocate function
+ * @param memAllocAlign  the aligned allocate function
+ * @param memFree  the free function
  */
-void func_003B4458(int arg0, int arg1, int arg2) {
-    D_0044C450[0] = arg0;
-    SHAPE_memallocalign[0] = arg1;
-    D_0044C458[0] = arg2;
+void func_003B4458(int memAlloc, int memAllocAlign, int memFree) {
+    D_0044C450[0] = memAlloc;
+    SHAPE_memallocalign[0] = memAllocAlign;
+    D_0044C458[0] = memFree;
 }
 #endif
 
@@ -1579,12 +1579,12 @@ int func_003B4FC0_impl(struct sA8E8Setup *p) __asm__("func_003B4FC0");
  * func_003C0E28, then copies the configuration into the saved block (D_0050A8E8 +0xD4). The first 0x20 bytes of the
  * options are not applied.
  *
- * @param p  the options (as filled by func_003B4DD8)
+ * @param sysOpts  the options (as filled by func_003B4DD8)
  * @return 0
  */
-int func_003B4FC0_impl(struct sA8E8Setup *p) {
-    __builtin_memcpy(&D_0050A908, &p->cfg, sizeof(struct sA8E8Cfg));
-    D_0050A9A8 = p->tail;
+int func_003B4FC0_impl(struct sA8E8Setup *sysOpts) {
+    __builtin_memcpy(&D_0050A908, &sysOpts->cfg, sizeof(struct sA8E8Cfg));
+    D_0050A9A8 = sysOpts->tail;
     func_003C0E28();
     /* D_0050A8E8.saved = D_0050A8E8.setup.cfg, addressed from D_0050A9A8 as in the target */
     __builtin_memcpy((char *)&D_0050A9A8 + 0x14, (char *)&D_0050A9A8 - 0xA0, sizeof(struct sA8E8Cfg));
@@ -1634,14 +1634,14 @@ int func_003B5158_impl(void *buf, int size, int arg2) __asm__("func_003B5158");
  * @return 0, or a negative error
  */
 int func_003B5158_impl(void *buf, int size, int arg2) {
-    int r;
+    int result;
     str_SNDAUTHOR_Rgerhards_Thursday_10_51AM_Aug = 'S';
     if (D_0050A8E8.f174 != 0) return 0;
     func_00416210_5158(buf, 0, size);
     func_003B5BD0_5158(buf, size);
     if (D_0050A8E8.f17E == 0) {
-        r = func_003B4DD8_5158(&D_0050A8E8.setup);
-        if (r < 0) return r;
+        result = func_003B4DD8_5158(&D_0050A8E8.setup);
+        if (result < 0) return result;
         func_003B4FC0_impl(&D_0050A8E8.setup);
     }
     func_003BC588(D_0050A8E8.setup.cfg.f04);
@@ -1657,12 +1657,12 @@ int func_003B5158_impl(void *buf, int size, int arg2) {
     D_0050A8E8.f179 = 0;
     D_0050A8E8.f177 = 0;
     D_0050A8E8.f178 = 0;
-    r = func_003C1B80();
-    if (r < 0) {
+    result = func_003C1B80();
+    if (result < 0) {
         func_003C2268_5320();
         func_003C3358();
         D_0050A8E8.f174 = 0;
-        return r;
+        return result;
     }
     if (D_0050A8E8.setup.cfg.f27 == 2) {
         D_0050A8E8.f2E0[1][0] = 0xC000;
@@ -1726,7 +1726,7 @@ extern struct G_5320 D_0050A8E8_5320 __asm__("D_0050A8E8");
  * @return func_003B5C40's result, or -14 when not started
  */
 int func_003B5320(void) {
-    int r;
+    int memResult;
     if (func_003B5440_5320() == 0) return -14;
     func_003B82B8_5320(0, 0, 0, -1, -1);
     if (D_0050A8E8_5320.f1D8) D_0050A8E8_5320.f1D8();
@@ -1742,10 +1742,10 @@ int func_003B5320(void) {
     func_003B5E98_5320(D_0050A8E8_5320.f1F0);
     func_003B5E98_5320(D_0050A8E8_5320.f1F4);
     func_003B58D8_5320();
-    r = func_003B5C40_5320();
+    memResult = func_003B5C40_5320();
     D_0050A8E8_5320.f174 = 0;
     func_003C3358_5320();
-    return r;
+    return memResult;
 }
 #endif
 
@@ -1840,11 +1840,11 @@ extern int D_0044C468_C468[] __asm__("D_0044C468");
  */
 void func_003B54E0(void) {
     N_54E0 *n;
-    G_54E0 *g = (G_54E0 *)D_0050A8E8_A8E8_54E0;
+    G_54E0 *sndState = (G_54E0 *)D_0050A8E8_A8E8_54E0;
 
-    if (g->cnt != D_0044C468_C468[0]) {
-        n = g->list;
-        D_0044C468_C468[0] = g->cnt;
+    if (sndState->cnt != D_0044C468_C468[0]) {
+        n = sndState->list;
+        D_0044C468_C468[0] = sndState->cnt;
         if (n != 0) {
             do {
                 n->fn(n->arg);
@@ -1870,18 +1870,18 @@ extern void func_003B55F0_5540(void) __asm__("func_003B55F0");
  * While started: a new rate resets the call count (+0x330) and the tick (+0x180); each call adds one and runs
  * func_003B55F0 until the tick passes calls * 100 / rate. Called by func_003C19A8.
  *
- * @param arg0  the calling timer's rate in Hz
+ * @param timerHertz  the calling timer's rate in Hz
  */
-void func_003B5540(unsigned arg0) {
+void func_003B5540(unsigned timerHertz) {
     unsigned lim;
     if (D_0050A8E8.f174 != 0) {
-        if ((int)arg0 != (short)D_0050A8E8.f334) {
-            D_0050A8E8.f334 = arg0;
+        if ((int)timerHertz != (short)D_0050A8E8.f334) {
+            D_0050A8E8.f334 = timerHertz;
             D_0050A8E8.f180 = 0;
             D_0050A8E8.f330 = 0;
         }
         D_0050A8E8.f330++;
-        lim = D_0050A8E8.f330 * 100 / arg0;
+        lim = D_0050A8E8.f330 * 100 / timerHertz;
         while (lim >= D_0050A8E8.f180) {
             func_003B55F0_5540();
         }
@@ -1914,8 +1914,8 @@ extern void f_2A50_55F0(int) __asm__("func_003C2A50");
 void func_003B55F0(void) {
     int i;
     int dirty;
-    struct sA8E8Chan *e;
-    struct sA8E8Env *q;
+    struct sA8E8Chan *channel;
+    struct sA8E8Env *envStep;
 
     D_0050A8E8.f180++;
     func_003C2438();
@@ -1923,62 +1923,62 @@ void func_003B55F0(void) {
         D_0050A8E8.f184[i]();
     }
     for (i = 0; i < D_0050A8E8.f17E; i++) {
-        e = &D_0050A8E8.f1F0[i];
-        if (e->f69 != 1 || e->f00 < 0) {
+        channel = &D_0050A8E8.f1F0[i];
+        if (channel->f69 != 1 || channel->f00 < 0) {
             continue;
         }
-        if (e->f7C != 0) {
-            if (++e->f68 >= e->f66) {
-                e->f68 = 0;
+        if (channel->f7C != 0) {
+            if (++channel->f68 >= channel->f66) {
+                channel->f68 = 0;
             }
-            e->f86 = 0;
+            channel->f86 = 0;
             func_003BA938(i);
             f_25E0_55F0(i);
         }
         dirty = 0;
-        if (e->f78 != 0) {
+        if (channel->f78 != 0) {
             dirty = 1;
-            if (++e->f67 >= e->f65) {
-                e->f67 = 0;
+            if (++channel->f67 >= channel->f65) {
+                channel->f67 = 0;
             }
         }
-        if (e->f30 != 0) {
-            e->f38 += e->f30;
+        if (channel->f30 != 0) {
+            channel->f38 += channel->f30;
             dirty = 1;
-            if (e->f30 < 0) {
-                if (e->f38 <= e->f34) {
-                    e->f38 = e->f34;
-                    e->f30 = 0;
+            if (channel->f30 < 0) {
+                if (channel->f38 <= channel->f34) {
+                    channel->f38 = channel->f34;
+                    channel->f30 = 0;
                 }
-            } else if (e->f38 >= e->f34) {
-                e->f38 = e->f34;
-                e->f30 = 0;
+            } else if (channel->f38 >= channel->f34) {
+                channel->f38 = channel->f34;
+                channel->f30 = 0;
             }
-            if (e->f38 < 0) {
-                f_89E0_55F0(e->f00);
+            if (channel->f38 < 0) {
+                f_89E0_55F0(channel->f00);
                 continue;
             }
         }
-        e->f44--;
-        if (e->f3C != 0) {
-            e->f40 += e->f3C;
+        channel->f44--;
+        if (channel->f3C != 0) {
+            channel->f40 += channel->f3C;
             dirty = 1;
         }
-        if (e->f44 == 0) {
-            if (++e->f5D >= e->f5C) {
-                f_89E0_55F0(e->f00);
+        if (channel->f44 == 0) {
+            if (++channel->f5D >= channel->f5C) {
+                f_89E0_55F0(channel->f00);
                 continue;
             }
-            q = &e->f6C[e->f5D];
-            e->f44 = q->f00;
-            if (e->f44 < 0) {
-                e->f44 = 0x7FFFFFFF;
+            envStep = &channel->f6C[channel->f5D];
+            channel->f44 = envStep->f00;
+            if (channel->f44 < 0) {
+                channel->f44 = 0x7FFFFFFF;
             }
-            e->f3C = ((q->f04 << 16) - e->f40) / e->f44;
+            channel->f3C = ((envStep->f04 << 16) - channel->f40) / channel->f44;
         }
         if (dirty) {
             f_A7B0_55F0(i);
-            if (e->f00 >= 0) {
+            if (channel->f00 >= 0) {
                 f_2A50_55F0(i);
             }
         }
@@ -2078,11 +2078,11 @@ extern struct S_5910 D_0050A8E8_5910 __asm__("D_0050A8E8");
  * bound check. func_003B55F0 calls each client every tick. Used by cMonitor_MONITOR_BeginMonitoring__FPv, func_003B97D8
  * and func_002AE048.
  *
- * @param arg0  the client function
+ * @param client  the client function
  */
-void func_003B5910(int arg0) {
+void func_003B5910(int client) {
     if (D_0050A8E8_5910.f174 != 0) {
-        D_0050A8E8_5910.q[D_0050A8E8_5910.f177] = arg0;
+        D_0050A8E8_5910.q[D_0050A8E8_5910.f177] = client;
         D_0050A8E8_5910.f177++;
     }
 }
@@ -2142,11 +2142,11 @@ extern struct S_5A28 D_0050A8E8_5A28 __asm__("D_0050A8E8");
  * check. The clients get user-data event records from func_003B5F98 and the stream parser func_003B6BD0.
  * cSSXAudio_cSSXAudio registers func_00289650 with it.
  *
- * @param arg0  the callback, called with an event record
+ * @param client  the callback, called with an event record
  */
-void func_003B5A28(int arg0) {
+void func_003B5A28(int client) {
     if (D_0050A8E8_5A28.f174 != 0) {
-        D_0050A8E8_5A28.q[D_0050A8E8_5A28.f179] = arg0;
+        D_0050A8E8_5A28.q[D_0050A8E8_5A28.f179] = client;
         D_0050A8E8_5A28.f179++;
     }
 }
@@ -2164,13 +2164,13 @@ extern struct G_5A60 D_0050A8E8_5A60[] __asm__("D_0050A8E8");
  *
  * Inside the critical section; shifts the later entries down. cSSXAudio__cSSXAudio removes func_00289650 with it.
  *
- * @param arg  the callback
+ * @param client  the callback
  */
-void func_003B5A60(int arg) {
+void func_003B5A60(int client) {
     int i;
     func_003B58A0();
     for (i = 0; i < D_0050A8E8_5A60[0].cnt; i++) {
-        if (D_0050A8E8_5A60[0].list[i] == arg) {
+        if (D_0050A8E8_5A60[0].list[i] == client) {
             D_0050A8E8_5A60[0].cnt--;
             if (i < D_0050A8E8_5A60[0].cnt) {
                 do {
@@ -2250,14 +2250,14 @@ extern struct G_5BA0 *D_0050AB1C_5BA0[] __asm__("D_0050AB1C");
  * Clamps the space so that address + space does not pass the heap state's end (+0xC of D_0050AB1C). Called by
  * func_003B5C60 for every candidate gap.
  *
- * @param a  in: the span's heap offset
- * @param b  in/out: the span's size
+ * @param freeAddr  in: the span's heap offset
+ * @param freeSpace  in/out: the span's size
  */
-void func_003B5BA0(int *a, int *b) {
-    int x = *a;
+void func_003B5BA0(int *freeAddr, int *freeSpace) {
+    int x = *freeAddr;
     unsigned int lim = D_0050AB1C_5BA0[0]->lim;
-    if (lim < (unsigned int)(x + *b))
-        *b = lim - x;
+    if (lim < (unsigned int)(x + *freeSpace))
+        *freeSpace = lim - x;
 }
 #endif
 
@@ -2276,19 +2276,19 @@ extern struct G_5BD0 D_0050A8E8_5BD0 __asm__("D_0050A8E8");
  * aligned after 0x18 bytes, the record table growing down from the end - 8, the size, the free end (size - 15 - 0x20)
  * and the low-water mark (size - 15). Called by func_003B5158.
  *
- * @param a0  the buffer
- * @param a1  its size in bytes
+ * @param heap  the buffer
+ * @param heapSize  its size in bytes
  */
-void func_003B5BD0(struct H_5BD0 *a0, int a1) {
-    D_0050A8E8_5BD0.cur = a0;
-    a0->f8 = a1;
-    D_0050A8E8_5BD0.cur->f4 = (int)a0 + a1 - 8;
-    a1 -= 0xF;
-    D_0050A8E8_5BD0.cur->f0 = (int)a0 + 0x18;
+void func_003B5BD0(struct H_5BD0 *heap, int heapSize) {
+    D_0050A8E8_5BD0.cur = heap;
+    heap->f8 = heapSize;
+    D_0050A8E8_5BD0.cur->f4 = (int)heap + heapSize - 8;
+    heapSize -= 0xF;
+    D_0050A8E8_5BD0.cur->f0 = (int)heap + 0x18;
     D_0050A8E8_5BD0.cur->f0 += 0xF;
     D_0050A8E8_5BD0.cur->f0 &= 0xFFFFFFF0;
-    D_0050A8E8_5BD0.cur->fC = a1 - 0x20;
-    D_0050A8E8_5BD0.cur->f10 = a1;
+    D_0050A8E8_5BD0.cur->fC = heapSize - 0x20;
+    D_0050A8E8_5BD0.cur->f10 = heapSize;
 }
 #endif
 
@@ -2414,16 +2414,16 @@ extern struct G_5E98 D_0050A8E8_5E98[] __asm__("D_0050A8E8");
  * Finds the record whose offset matches (address - heap start), removes it, closes the gap in the record table and
  * gives its 8 bytes back to the free end. An unknown address is ignored.
  *
- * @param a  the block's address
+ * @param address  the block's address
  */
-void func_003B5E98_5E98(int a) {
+void func_003B5E98_5E98(int address) {
     int i = 0;
-    int d = a - D_0050A8E8_5E98[0].s->base;
+    int heapOffset = address - D_0050A8E8_5E98[0].s->base;
     if (D_0050A8E8_5E98[0].s->cnt >= 0) return;
     while (1) {
-        struct S_5E98 *s = D_0050A8E8_5E98[0].s;
-        if (((struct E_5E98 *)((char *)s->arr + (i << 3)))->key == d) {
-            s->cnt++;
+        struct S_5E98 *memState = D_0050A8E8_5E98[0].s;
+        if (((struct E_5E98 *)((char *)memState->arr + (i << 3)))->key == heapOffset) {
+            memState->cnt++;
             D_0050A8E8_5E98[0].s->x += 8;
             if (!(D_0050A8E8_5E98[0].s->cnt < i)) return;
             do {
@@ -2433,7 +2433,7 @@ void func_003B5E98_5E98(int a) {
             return;
         }
         i--;
-        if (!(s->cnt < i)) return;
+        if (!(memState->cnt < i)) return;
     }
 }
 #endif
@@ -2452,13 +2452,13 @@ extern char D_0050AA5C[];
  * @return the latency (in ms, as func_003AE9A0 uses it)
  */
 int func_003B5F60(void) {
-    int r;
+    int latencyMs;
     if (D_0050AA5C[0] != 0) {
-        r = func_003C51E0();
+        latencyMs = func_003C51E0();
     } else {
-        r = 0;
+        latencyMs = 0;
     }
-    return r;
+    return latencyMs;
 }
 #endif
 
@@ -2478,20 +2478,20 @@ extern struct G_5F98 D_0050A8E8_5F98 __asm__("D_0050A8E8");
  * Pops the pending pairs (count at +0x17, values at +0x34 and +0x44) last first and calls every client of the sound
  * driver state D_0050A8E8 +0x1C8 with a record {arg, first value, second value}.
  *
- * @param s  the source holding the pending events
- * @param arg  passed as the record's first word
+ * @param source  the source holding the pending events
+ * @param eventArg  passed as the record's first word
  */
-void func_003B5F98(struct S_5F98 *s, int arg) {
-    struct M_5F98 m;
+void func_003B5F98(struct S_5F98 *source, int eventArg) {
+    struct M_5F98 eventRec;
     int i;
 
-    while (s->n > 0) {
-        s->n--;
-        m.arg = arg;
-        m.a = s->a[s->n];
-        m.b = s->b[s->n];
+    while (source->n > 0) {
+        source->n--;
+        eventRec.arg = eventArg;
+        eventRec.a = source->a[source->n];
+        eventRec.b = source->b[source->n];
         for (i = 0; i < D_0050A8E8_5F98.cnt; i++) {
-            D_0050A8E8_5F98.fn[i](&m);
+            D_0050A8E8_5F98.fn[i](&eventRec);
         }
     }
 }
@@ -2527,8 +2527,8 @@ extern int f_6788_6098(int, char *, char *, int *) __asm__("func_003B6788");
  */
 int func_003B6098(int *out, struct Hdr_6098 *hdr) {
     struct Ent_6098 *ent;
-    int i, n, h;
-    int tmp;
+    int i, n, xferHandle;
+    int firstOffset;
 
     D_0050A8E8_6098.cb = func_003B6300_6098;
     *out = f_6500_6098();
@@ -2543,14 +2543,14 @@ int func_003B6098(int *out, struct Hdr_6098 *hdr) {
         }
         for (i = 0; i < hdr->size1; i += 0x1000) {
             n = hdr->size1 - i;
-            h = f_42D8_6098(0x100, (char *)hdr + hdr->off + i, ent->buf1 + i, n < 4097 ? n : 0x1000);
-            while (f_42F8_6098(h) == 0) {
+            xferHandle = f_42D8_6098(0x100, (char *)hdr + hdr->off + i, ent->buf1 + i, n < 4097 ? n : 0x1000);
+            while (f_42F8_6098(xferHandle) == 0) {
             }
         }
-        tmp = 0;
+        firstOffset = 0;
         for (i = 0; i < hdr->n; i++) {
             if (hdr->tbl[i] != 0) {
-                f_6788_6098(0x100, (char *)&hdr->tbl[i] + hdr->tbl[i], ent->buf1, &tmp);
+                f_6788_6098(0x100, (char *)&hdr->tbl[i] + hdr->tbl[i], ent->buf1, &firstOffset);
             }
         }
     }
@@ -2565,14 +2565,14 @@ fail:
         }
         for (i = 0; i < hdr->size2; i += 0x1000) {
             n = hdr->size2 - i;
-            h = f_42D8_6098(8, (char *)hdr + hdr->off + hdr->size1 + i, ent->buf2 + i, n < 4097 ? n : 0x1000);
-            while (f_42F8_6098(h) == 0) {
+            xferHandle = f_42D8_6098(8, (char *)hdr + hdr->off + hdr->size1 + i, ent->buf2 + i, n < 4097 ? n : 0x1000);
+            while (f_42F8_6098(xferHandle) == 0) {
             }
         }
-        tmp = 0;
+        firstOffset = 0;
         for (i = 0; i < hdr->n; i++) {
             if (hdr->tbl[i] != 0) {
-                f_6788_6098(8, (char *)&hdr->tbl[i] + hdr->tbl[i], ent->buf2, &tmp);
+                f_6788_6098(8, (char *)&hdr->tbl[i] + hdr->tbl[i], ent->buf2, &firstOffset);
             }
         }
     }
@@ -2626,51 +2626,51 @@ extern char *func_003C6540_6300(void *p, int i) __asm__("func_003C6540");
  * bank (func_003B89E0), sends each patch's user data with type 2 (func_003BAAC0, func_003B5F98), frees the two sample
  * areas with func_003C4D78 (kinds 0x100 and 8) and clears the slot.
  *
- * @param arg0  the bank handle, or -1 for every slot
+ * @param bankHandle  the bank handle, or -1 for every slot
  * @return 0, or -8 for an invalid or busy bank
  */
-int func_003B6300(int arg0) {
+int func_003B6300(int bankHandle) {
     char buf[208];
-    char *q;
+    char *patchData;
     void *obj;
     int i;
-    int r;
+    int moreTags;
 
-    if (arg0 == -1) {
+    if (bankHandle == -1) {
         for (i = 0; i < D_0050A8E8_6300.f28; i++) {
             func_003B6300(i);
         }
         return 0;
     }
-    if (func_003B64D8_6300(arg0) != 0) {
+    if (func_003B64D8_6300(bankHandle) != 0) {
         return -8;
     }
     func_003B58A0_6300();
-    obj = D_0050A8E8_6300.f1F4[arg0].p0;
+    obj = D_0050A8E8_6300.f1F4[bankHandle].p0;
     for (i = 0; i < D_0050A8E8_6300.f17E; i++) {
-        struct E_6300 *e = &D_0050A8E8_6300.f1F0[i];
-        if (e->f12 == arg0) {
-            func_003B89E0_6300(e->p);
+        struct E_6300 *channel = &D_0050A8E8_6300.f1F0[i];
+        if (channel->f12 == bankHandle) {
+            func_003B89E0_6300(channel->p);
         }
     }
     for (i = 0; i < *(unsigned short *)((char *)obj + 6); i++) {
-        q = func_003C6540_6300(obj, i);
-        if (q != 0) {
-            q += 4;
+        patchData = func_003C6540_6300(obj, i);
+        if (patchData != 0) {
+            patchData += 4;
             do {
-                r = func_003BAAC0_6300(&q, buf);
+                moreTags = func_003BAAC0_6300(&patchData, buf);
                 func_003B5F98_6300(buf, 2);
-            } while (r != 0);
+            } while (moreTags != 0);
         }
     }
-    if (D_0050A8E8_6300.f1F4[arg0].p4 != 0) {
-        func_003C4D78_6300(0x100, D_0050A8E8_6300.f1F4[arg0].p4);
+    if (D_0050A8E8_6300.f1F4[bankHandle].p4 != 0) {
+        func_003C4D78_6300(0x100, D_0050A8E8_6300.f1F4[bankHandle].p4);
     }
-    if (D_0050A8E8_6300.f1F4[arg0].p8 != 0) {
-        func_003C4D78_6300(8, D_0050A8E8_6300.f1F4[arg0].p8);
+    if (D_0050A8E8_6300.f1F4[bankHandle].p8 != 0) {
+        func_003C4D78_6300(8, D_0050A8E8_6300.f1F4[bankHandle].p8);
     }
-    D_0050A8E8_6300.f1F4[arg0].p0 = 0;
-    D_0050A8E8_6300.f1F4[arg0].fC = 0;
+    D_0050A8E8_6300.f1F4[bankHandle].p0 = 0;
+    D_0050A8E8_6300.f1F4[bankHandle].fC = 0;
     func_003B58D8_6300();
     return 0;
 }
@@ -2690,17 +2690,17 @@ extern struct sA8E8 D_0050A8E8;
  *
  * Looks at the slot in the sound driver state D_0050A8E8 +0x1F4 (count at +0x08 of the options).
  *
- * @param arg0  the bank handle
+ * @param bankHandle  the bank handle
  * @return 0 when usable, -18 when the slot is busy, -8 otherwise
  */
-int func_003B64D8(int arg0) {
-    struct sA8E8Slot *r;
-    if (arg0 < 0 || arg0 >= D_0050A8E8.setup.cfg.f08) {
+int func_003B64D8(int bankHandle) {
+    struct sA8E8Slot *slot;
+    if (bankHandle < 0 || bankHandle >= D_0050A8E8.setup.cfg.f08) {
         return -8;
     }
-    r = (struct sA8E8Slot *)(arg0 * 16 + (int)D_0050A8E8.f1F4);
-    if (r->f00 != 0) {
-        return r->f0C ? -18 : 0;
+    slot = (struct sA8E8Slot *)(bankHandle * 16 + (int)D_0050A8E8.f1F4);
+    if (slot->f00 != 0) {
+        return slot->f0C ? -18 : 0;
     }
     return -8;
 }
@@ -2718,11 +2718,11 @@ extern B6528_ent *D_0050AADC[];
  *
  * Reads +0x08 of the bank header in slot arg0 (no validation). Called by func_003B6548.
  *
- * @param arg0  the bank handle
+ * @param bankHandle  the bank handle
  * @return the header size in bytes
  */
-int func_003B6528(int arg0) {
-    return D_0050AADC[0][arg0].p->c;
+int func_003B6528(int bankHandle) {
+    return D_0050AADC[0][bankHandle].p->c;
 }
 #endif
 
@@ -2743,20 +2743,20 @@ extern struct G_6548 D_0050A8E8_6548 __asm__("D_0050A8E8");
  * Gets the size with func_003B6528, copies with func_0041610C(dest, old header, size) and stores the destination in the
  * slot.
  *
- * @param a  where to copy the header
+ * @param destMem  where to copy the header
  * @param n  the bank handle
  * @return 0, or func_003B6528's negative result
  */
-int func_003B6548(int a, int n) {
-    int r = 0;
+int func_003B6548(int destMem, int n) {
+    int result = 0;
     int x = func_003B6528_6548(n);
     if (x < 0) {
-        r = x;
+        result = x;
     } else {
-        func_0041610C_6548(a, D_0050A8E8_6548.slots[n].data, x);
-        D_0050A8E8_6548.slots[n].data = a;
+        func_0041610C_6548(destMem, D_0050A8E8_6548.slots[n].data, x);
+        D_0050A8E8_6548.slots[n].data = destMem;
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -2786,8 +2786,8 @@ int func_003B65D0(int id) {
     if (func_003B64D8_65D0(id) != 0) return -8;
     func_003B58A0();
     for (i = 0; i < D_0050A8E8_65D0.n; i++) {
-        struct E_65D0 *e = &D_0050A8E8_65D0.tab[i];
-        if (e->id == id && func_003B8AB8_65D0(e->f0) == 0) {
+        struct E_65D0 *channel = &D_0050A8E8_65D0.tab[i];
+        if (channel->id == id && func_003B8AB8_65D0(channel->f0) == 0) {
             found = 1;
             break;
         }
@@ -2815,34 +2815,34 @@ extern struct G_6670 D_0050A8E8_6670 __asm__("D_0050A8E8");
  * attributes, one per channel) with func_003B5E98 and clears them and their sizes (+0x30 + 4n). Used by the game's bank
  * monitor.
  *
- * @param a0  the bank handle
- * @param a1  the patch number
- * @param a2  receives the sample format (+2 is the channel count)
- * @param a3  receives the sample attributes
- * @param a4  receives the sample description
+ * @param bankHandle  the bank handle
+ * @param patchNum  the patch number
+ * @param formatOut  receives the sample format (+2 is the channel count)
+ * @param attrOut  receives the sample attributes
+ * @param descOut  receives the sample description
  * @return 0, or -8
  */
-int func_003B6670(int a0, int a1, char *a2, int a3, int a4) {
-    int off, o, i;
-    int *p;
+int func_003B6670(int bankHandle, int patchNum, char *formatOut, int attrOut, int descOut) {
+    int off, patch, i;
+    int *chanBuf;
     if (func_003B64D8_6670() < 0) return -8;
-    off = a0 * 0x10;
-    o = func_003C6540_6670(*(int *)(off + D_0050A8E8_6670.f1F4), a1);
-    if (o == 0) return -8;
+    off = bankHandle * 0x10;
+    patch = func_003C6540_6670(*(int *)(off + D_0050A8E8_6670.f1F4), patchNum);
+    if (patch == 0) return -8;
     i = 0;
     func_003B58A0();
-    func_003BB820_6670(*(int *)(off + D_0050A8E8_6670.f1F4), o, a2, a3, a4, 0);
-    if (*(unsigned char *)(a2 + 2) != 0) {
-        p = (int *)(a3 + 0x18);
+    func_003BB820_6670(*(int *)(off + D_0050A8E8_6670.f1F4), patch, formatOut, attrOut, descOut, 0);
+    if (*(unsigned char *)(formatOut + 2) != 0) {
+        chanBuf = (int *)(attrOut + 0x18);
         do {
-            if (*p != 0) {
-                func_003B5E98(*p);
-                *p = 0;
-                p[6] = 0;
+            if (*chanBuf != 0) {
+                func_003B5E98(*chanBuf);
+                *chanBuf = 0;
+                chanBuf[6] = 0;
             }
             i++;
-            p++;
-        } while (i < *(unsigned char *)(a2 + 2));
+            chanBuf++;
+        } while (i < *(unsigned char *)(formatOut + 2));
     }
     func_003B58D8();
     return 0;
@@ -2905,17 +2905,17 @@ extern int func_003BB588_6820(void *, int, int, int, int) __asm__("func_003BB588
  * Validates the bank (-8) and the patch number against the bank's count (+0x06), then calls func_003BB588 with the
  * bank, the patch (func_003C6540) and the arguments. Used by the game's stream system and bank monitor.
  *
- * @param a  the bank handle
- * @param b  the patch number
- * @param c  the play options
+ * @param bankHandle  the bank handle
+ * @param patchNum  the patch number
+ * @param playOpts  the play options
  * @return the sound handle from func_003BB588, or -8
  */
-int func_003B6820(int a, int b, int c) {
+int func_003B6820(int bankHandle, int patchNum, int playOpts) {
     struct Ch_6820 *ch;
-    if (func_003B64D8_6820(a) < 0) return -8;
-    ch = D_0050AADC_6820[0][a].p;
-    if (b < 0 || b >= ch->n) return -8;
-    return func_003BB588_6820(ch, func_003C6540_6820(ch, b), a, b, c);
+    if (func_003B64D8_6820(bankHandle) < 0) return -8;
+    ch = D_0050AADC_6820[0][bankHandle].p;
+    if (patchNum < 0 || patchNum >= ch->n) return -8;
+    return func_003BB588_6820(ch, func_003C6540_6820(ch, patchNum), bankHandle, patchNum, playOpts);
 }
 #endif
 
@@ -2936,16 +2936,16 @@ extern int func_003C6760(int, int, int, int);
  */
 void func_003B68B8(char *stream) {
     int i = 0;
-    char *q = stream + 0x104;
-    int *f = (int*)(stream + 0x114);
+    char *trackEntry = stream + 0x104;
+    int *trackFlag = (int*)(stream + 0x114);
     *(volatile int *)(stream + 4) = func_003C6760(*(volatile int *)(stream + 8), (int)(stream + 0x14), (int)(stream + 0x1C), (int)(stream + 0xEC));
     do {
-        if (*f != 0) {
-            func_003B8CC8(*(volatile int *)(stream + 4), (int)q);
+        if (*trackFlag != 0) {
+            func_003B8CC8(*(volatile int *)(stream + 4), (int)trackEntry);
         }
-        q += 0x18;
+        trackEntry += 0x18;
         i++;
-        f += 6;
+        trackFlag += 6;
     } while (i == 0);
     *(volatile char *)(stream + 0x10) = 1;
 }
@@ -3021,14 +3021,14 @@ extern unsigned char D_0050A92E_6A38[] __asm__("D_0050A92E");
  *
  * Looks the slot up in D_0050A0A0; the count is the halfword D_0050A92E.
  *
- * @param arg0  the slot number (low byte of a stream handle)
+ * @param slotNum  the slot number (low byte of a stream handle)
  * @return the stream, or 0 when out of range
  */
-int func_003B6A38(int arg0) {
-    if (arg0 >= D_0050A92E_6A38[0] || arg0 < 0) {
+int func_003B6A38(int slotNum) {
+    if (slotNum >= D_0050A92E_6A38[0] || slotNum < 0) {
         return 0;
     }
-    return D_0050A0A0[arg0];
+    return D_0050A0A0[slotNum];
 }
 #endif
 
@@ -3047,14 +3047,14 @@ extern void func_003C6288_6A70(void *, int) __asm__("func_003C6288");
  * The stream is chosen by the handle's low byte; the request comes from func_003B7A70. It is removed from the queued
  * list (+0x11C, func_003C6320), added to the free list (+0x128, func_003C6288) and cleared as current (+0x134).
  *
- * @param c  the request handle
+ * @param requestHandle  the request handle
  */
-void func_003B6A70(int c) {
-    char *p = D_0050A0A0_6A70[c & 0xFF];
-    int r = func_003B7A70_6A70(c);
-    func_003C6320_6A70(p + 0x11C, r);
-    func_003C6288_6A70(p + 0x128, r);
-    if (*(int *)(p + 0x134) == r) *(int *)(p + 0x134) = 0;
+void func_003B6A70(int requestHandle) {
+    char *stream = D_0050A0A0_6A70[requestHandle & 0xFF];
+    int request = func_003B7A70_6A70(requestHandle);
+    func_003C6320_6A70(stream + 0x11C, request);
+    func_003C6288_6A70(stream + 0x128, request);
+    if (*(int *)(stream + 0x134) == request) *(int *)(stream + 0x134) = 0;
 }
 #endif
 
@@ -3071,11 +3071,11 @@ extern int *D_0050A0A0_6AD8[] __asm__("D_0050A0A0");
  * The block's header pointer sits just before the samples; its first byte is the stream slot. Calls func_003E13E8 with
  * that stream's queue (first word).
  *
- * @param arg0  the sample data pointer
+ * @param samples  the sample data pointer
  */
-void func_003B6AD8(void *arg0) {
-    unsigned char *t = ((unsigned char **)arg0)[-1];
-    func_003E13E8_6AD8(*D_0050A0A0_6AD8[*t], t);
+void func_003B6AD8(void *samples) {
+    unsigned char *chunkHdr = ((unsigned char **)samples)[-1];
+    func_003E13E8_6AD8(*D_0050A0A0_6AD8[*chunkHdr], chunkHdr);
 }
 #endif
 
@@ -3092,11 +3092,11 @@ struct C_6B10 { char pad[0x11C]; struct Q_6B10 *q; };
  * its end is retired with func_003B6A70, and any overflow carries on to the next request. After 200 passes it retires
  * the current request and stops.
  *
- * @param a  unused
+ * @param packetChan  unused
  * @param n  the amount played
  * @param stream  the stream
  */
-void func_003B6B10(int a, unsigned int n, struct C_6B10 *stream) {
+void func_003B6B10(int packetChan, unsigned int n, struct C_6B10 *stream) {
     unsigned int rem = 0;
     int i = 0;
     while (1) {
@@ -3231,52 +3231,52 @@ extern int func_00415FC8(void *, void *, int);
  * +0x14/+0x18 current/next format, +0x1C/+0x84 current/next header, +0x11C queued requests, +0x128 free requests,
  * +0x134 current request.
  *
- * @param h  the stream slot
+ * @param streamSlot  the stream slot
  * @param chunk  the header chunk
  * @return 0
  */
-int func_003B6BD0(int h, int *chunk) {
-    struct sA0A0Strm *p = D_0050A0A0_6BD0[h];
+int func_003B6BD0(int streamSlot, int *chunk) {
+    struct sA0A0Strm *stream = D_0050A0A0_6BD0[streamSlot];
     struct sA0A0Node *n;
     struct Ext_6BD0 ext;
     struct Ev_6BD0 ev;
     int i = 0;
     int j;
 
-    if (p->f134 == 0) {
-        p->f134 = p->f11C.f00;
+    if (stream->f134 == 0) {
+        stream->f134 = stream->f11C.f00;
     } else {
-        p->f134 = p->f134->f00;
+        stream->f134 = stream->f134->f00;
     }
-    n = (struct sA0A0Node *)p->f134;
-    func_003BB820_6BD0(0, chunk + 2, &p->f18, &p->f84, &ext, n->f25);
+    n = (struct sA0A0Node *)stream->f134;
+    func_003BB820_6BD0(0, chunk + 2, &stream->f18, &stream->f84, &ext, n->f25);
     n->f18 = ext.f00;
     n->f24 = 0;
-    while (p->f84.f48[i] != 0) {
+    while (stream->f84.f48[i] != 0) {
         ev.a = 3;
-        ev.b = p->f84.f48[i];
-        ev.c = p->f84.f58[i];
+        ev.b = stream->f84.f48[i];
+        ev.c = stream->f84.f58[i];
         ev.e = n->f0C;
-        p->f84.f48[i] = 0;
-        p->f84.f58[i++] = 0;
+        stream->f84.f48[i] = 0;
+        stream->f84.f58[i++] = 0;
         for (j = 0; j < D_0050A8E8.f179; j++) {
             D_0050A8E8.f1C8[j](&ev);
         }
     }
-    func_003E13E8_6BD0(p->f00, chunk);
-    n->f10 = func_003B6948_6BD0((unsigned char *)&p->f18);
-    if (func_00415FC8(&p->f14, &p->f18, 4) != 0 || func_00415FC8(&p->f1C, &p->f84, 104) != 0 || p->f84.f18[0] != 0) {
-        if (*(unsigned short *)&p->f14 != 0) {
-            p->f10 = 2;
+    func_003E13E8_6BD0(stream->f00, chunk);
+    n->f10 = func_003B6948_6BD0((unsigned char *)&stream->f18);
+    if (func_00415FC8(&stream->f14, &stream->f18, 4) != 0 || func_00415FC8(&stream->f1C, &stream->f84, 104) != 0 || stream->f84.f18[0] != 0) {
+        if (*(unsigned short *)&stream->f14 != 0) {
+            stream->f10 = 2;
             return 0;
         }
-        p->f14 = p->f18;
-        __builtin_memcpy(&p->f1C, &p->f84, sizeof(p->f1C));
-        p->f84.f18[0] = 0;
+        stream->f14 = stream->f18;
+        __builtin_memcpy(&stream->f1C, &stream->f84, sizeof(stream->f1C));
+        stream->f84.f18[0] = 0;
     }
-    if (p->f10 != 1) {
-        func_003B68B8_6BD0(p);
-        p->f10 = 1;
+    if (stream->f10 != 1) {
+        func_003B68B8_6BD0(stream);
+        stream->f10 = 1;
     }
     return 0;
 }
@@ -3322,16 +3322,16 @@ static inline unsigned int reqsize_6EA8(REQ_6EA8 *r) {
  * player (+0x8).
  *
  * @param own  the stream
- * @param f  the data chunk
+ * @param dataChunk  the data chunk
  */
 // FAKEMATCH: per-function volatile view of the stream's current-request pointer, `hdr = *(struct sA0A0Node *volatile *)&own->f134;`
 // (evidence: func_003B6BD0 stores f134 and immediately reloads it), plus the register pin
 // `register FILE_6EA8 **p0 FM_REG("$4") = (FILE_6EA8 **)req.ptrs[0];` (fakematch.h; retail loads ptrs[0] into a0 in the bnez slot
 // and keeps the 0x7FFFFFFF size mask in a2, ours swaps them); plain form 97.43% (volatile view alone 99.70%).
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-void func_003B6EA8(struct sA0A0Strm *own, FILE_6EA8 *f) {
+void func_003B6EA8(struct sA0A0Strm *own, FILE_6EA8 *dataChunk) {
     REQ_6EA8 req;
-    unsigned int tmp;
+    unsigned int swapped;
     struct sA0A0Node *hdr;
     char *base;
     int *offs;
@@ -3339,29 +3339,29 @@ void func_003B6EA8(struct sA0A0Strm *own, FILE_6EA8 *f) {
 
     hdr = *(struct sA0A0Node *volatile *)&own->f134;
     if (((unsigned char *)hdr->f25)[0]) {
-        swap_6EA8(&tmp, f->f8);
-        req.size = tmp;
+        swap_6EA8(&swapped, dataChunk->f8);
+        req.size = swapped;
     } else {
-        req.size = f->f8;
+        req.size = dataChunk->f8;
     }
-    offs = f->offs;
+    offs = dataChunk->offs;
     base = (char *)(offs + own->f14.b[2]);
     for (i = 0; i < own->f14.b[2]; i++) {
         if (((unsigned char *)hdr->f25)[0]) {
-            swap_6EA8(&tmp, offs[i]);
-            req.ptrs[i] = base + tmp;
+            swap_6EA8(&swapped, offs[i]);
+            req.ptrs[i] = base + swapped;
         } else {
             req.ptrs[i] = base + offs[i];
         }
     }
     if (!reqsize_6EA8(&req)) {
-        func_003E13E8_6EA8(own->f00, f);
+        func_003E13E8_6EA8(own->f00, dataChunk);
     } else {
         {
-            register FILE_6EA8 **p0 FM_REG("$4") = (FILE_6EA8 **)req.ptrs[0];
-            p0[-1] = f;
+            register FILE_6EA8 **firstChan FM_REG("$4") = (FILE_6EA8 **)req.ptrs[0];
+            firstChan[-1] = dataChunk;
         }
-        f->f0 = hdr->f0C;
+        dataChunk->f0 = hdr->f0C;
         hdr->f1C += req.size;
         req.flag = hdr->f24;
         func_003C6AB8_6EA8(own->f08, &req);
@@ -3389,24 +3389,24 @@ extern void func_003E13E8_7080(int, int *) __asm__("func_003E13E8");
  * "SCDl" goes to func_003B6EA8, "SCHl" to func_003B6BD0 (the chunk passes through in $a1); anything else goes back to
  * the file queue. Called by func_003B71D8.
  *
- * @param arg0  the stream slot
- * @param arg1  the chunk
+ * @param streamSlot  the stream slot
+ * @param chunk  the chunk
  * @return 0 after a header (stop reading this pass), else 1
  */
-int func_003B7080(int arg0, int *arg1) {
-    struct sA0A0Strm *o = D_0050A0A0_7080[arg0];
-    int r;
-    if (*arg1 == 0x6C444353) {
-        func_003B6EA8_7080(o, arg1);
-        r = 1;
-    } else if (*arg1 == 0x6C484353) {
-        func_003B6BD0_7080(arg0);
-        r = 0;
+int func_003B7080(int streamSlot, int *chunk) {
+    struct sA0A0Strm *stream = D_0050A0A0_7080[streamSlot];
+    int readMore;
+    if (*chunk == 0x6C444353) {
+        func_003B6EA8_7080(stream, chunk);
+        readMore = 1;
+    } else if (*chunk == 0x6C484353) {
+        func_003B6BD0_7080(streamSlot);
+        readMore = 0;
     } else {
-        func_003E13E8_7080(o->f00, arg1);
-        r = 1;
+        func_003E13E8_7080(stream->f00, chunk);
+        readMore = 1;
     }
-    return r;
+    return readMore;
 }
 #endif
 
@@ -3428,30 +3428,30 @@ extern int f_14F8_70F8(int) __asm__("func_003E14F8");
  * @return 1 while held, else 0
  */
 int func_003B70F8(struct sA0A0Strm *self) {
-    struct sA0A0Node *t = self->f134;
-    if (t == 0) {
+    struct sA0A0Node *request = self->f134;
+    if (request == 0) {
         return 0;
     }
-    if (t->f10 == 0) {
+    if (request->f10 == 0) {
         return 0;
     }
-    if (t->f20 < 0) {
+    if (request->f20 < 0) {
         return 1;
     }
-    if (t->f20 != 0) {
-        unsigned int u = f_14C8_70F8(self->f00);
-        if (u > 4000000) u = 4000000;
-        if (u * 1000 / t->f10 >= t->f20) {
-            t->f20 = 0;
+    if (request->f20 != 0) {
+        unsigned int buffered = f_14C8_70F8(self->f00);
+        if (buffered > 4000000) buffered = 4000000;
+        if (buffered * 1000 / request->f10 >= request->f20) {
+            request->f20 = 0;
             return 0;
         }
         if (f_14F8_70F8(self->f00) == 2) {
-            t->f20 = 0;
+            request->f20 = 0;
             return 0;
         }
         if (self->f128.f08 > 0) return 1;
         if (f_14F8_70F8(self->f00) == 0) {
-            t->f20 = 0;
+            request->f20 = 0;
             return 0;
         }
         return 1;
@@ -3485,35 +3485,35 @@ extern int *func_003E12E0(int);
  */
 void func_003B71D8(void) {
     int i = 0;
-    struct sA0A0Strm *p;
+    struct sA0A0Strm *stream;
     int n;
-    int r;
-    int *q;
+    int readMore;
+    int *chunk;
     func_003B58A0();
     for (; i < D_0050A8E8.setup.cfg.f26; i++) {
-        p = D_0050A0A0_71D8[i];
-        if (p == 0 || p->f11C.f08 == 0) continue;
-        if (p->f10 == 2) {
-            if (func_003C6C98(p->f08) > 0) continue;
-            p->f14 = p->f18;
-            __builtin_memcpy(&p->f1C, &p->f84, sizeof(p->f1C));
-            p->f84.f18[0] = 0;
-            func_003C6CE8(p->f08);
-            func_003B68B8(p);
+        stream = D_0050A0A0_71D8[i];
+        if (stream == 0 || stream->f11C.f08 == 0) continue;
+        if (stream->f10 == 2) {
+            if (func_003C6C98(stream->f08) > 0) continue;
+            stream->f14 = stream->f18;
+            __builtin_memcpy(&stream->f1C, &stream->f84, sizeof(stream->f1C));
+            stream->f84.f18[0] = 0;
+            func_003C6CE8(stream->f08);
+            func_003B68B8(stream);
         }
-        if (func_003B70F8(p) == 0) {
-            if (p->f10 == 1) {
-                n = func_003C6C28(p->f08);
+        if (func_003B70F8(stream) == 0) {
+            if (stream->f10 == 1) {
+                n = func_003C6C28(stream->f08);
                 if (n <= 0) continue;
             } else {
                 n = 8;
             }
-            r = 0;
+            readMore = 0;
             do {
                 n--;
-                q = func_003E12E0(p->f00);
-                if (q != 0) r = func_003B7080(i, q);
-            } while (r != 0 && n > 0);
+                chunk = func_003E12E0(stream->f00);
+                if (chunk != 0) readMore = func_003B7080(i, chunk);
+            } while (readMore != 0 && n > 0);
         }
     }
     func_003B58D8();
@@ -3603,69 +3603,69 @@ int f_7450(struct sA0A0Parm *src, int n, int a2, char *buf, int size, int h, int
  *
  * @param src  the play options (0x18 bytes)
  * @param n  maximum queued requests
- * @param a2  maximum chunks for the packet player
+ * @param maxChunks  maximum chunks for the packet player
  * @param buf  the stream's memory
  * @param size  its size
- * @param h  an existing file STREAM to read from (when ext is set)
+ * @param tapStream  an existing file STREAM to read from (when ext is set)
  * @param ext  nonzero to read from that STREAM instead of creating one
  * @return the stream handle (slot), or a negative error
  */
-int f_7450(struct sA0A0Parm *src, int n, int a2, char *buf, int size, int h, int ext) {
-    struct sA0A0Strm *s;
+int f_7450(struct sA0A0Parm *src, int n, int maxChunks, char *buf, int size, int tapStream, int ext) {
+    struct sA0A0Strm *stream;
     int i;
     int slot;
     int k;
     struct sA0A0Node *ents;
-    char *q;
-    int r;
+    char *packetMem;
+    int fileStream;
     for (i = 0; i < D_0050A8E8.setup.cfg.f26; i++) {
         if (D_0050A0A0_7450[i] == 0) goto found;
     }
     return -9;
 found:
     slot = i;
-    s = (struct sA0A0Strm *)buf;
-    f_6210_7450(s, 0, 312);
+    stream = (struct sA0A0Strm *)buf;
+    f_6210_7450(stream, 0, 312);
     buf += 0x138;
     ents = (struct sA0A0Node *)buf;
     buf += n * 40;
     size -= 312;
     size -= n * 40;
-    k = func_003C65F0_7450(a2);
-    q = buf;
+    k = func_003C65F0_7450(maxChunks);
+    packetMem = buf;
     buf += k;
     size -= k;
-    func_003C6278_7450(&s->f11C);
-    func_003C6278_7450(&s->f128);
+    func_003C6278_7450(&stream->f11C);
+    func_003C6278_7450(&stream->f128);
     for (i = 0; i < n; i++) {
-        func_003C6288_7450(&s->f128, &ents[i]);
+        func_003C6288_7450(&stream->f128, &ents[i]);
     }
-    s->f08 = f_6620_7450(func_003B6AD8_7450, func_003B6B10_7450, s, q, func_003C65F0_7450(a2));
-    if (s->f08 < 0) return s->f08;
+    stream->f08 = f_6620_7450(func_003B6AD8_7450, func_003B6B10_7450, stream, packetMem, func_003C65F0_7450(maxChunks));
+    if (stream->f08 < 0) return stream->f08;
     if (ext) {
-        s->f11 = 1;
-        s->f00 = h;
+        stream->f11 = 1;
+        stream->f00 = tapStream;
     } else {
-        r = STREAM_create(n + 2, 1, 1, buf, size);
-        if (r == 0) {
-            func_003C6DA0_7450(s->f08);
+        fileStream = STREAM_create(n + 2, 1, 1, buf, size);
+        if (fileStream == 0) {
+            func_003C6DA0_7450(stream->f08);
             return -9;
         }
-        s->f00 = r;
-        s->f11 = 0;
+        stream->f00 = fileStream;
+        stream->f11 = 0;
     }
-    s->f0C = 0;
-    s->f04 = -1;
-    s->fEC = *src;
+    stream->f0C = 0;
+    stream->f04 = -1;
+    stream->fEC = *src;
     if (func_003B7410_7450() == 0) {
         func_003C6018_7450(func_003B71D8_7450);
         D_0050A8E8.f1EC = (void (*)(void))func_003B69D8_7450;
     }
-    D_0050A0A0_7450[slot] = s;
+    D_0050A0A0_7450[slot] = stream;
     if (ext == 0) {
-        func_003B8120_7450(slot, func_003E1580(s->f00) / 3);
+        func_003B8120_7450(slot, func_003E1580(stream->f00) / 3);
     }
-    s->f84.f18[0] = 0;
+    stream->f84.f18[0] = 0;
     func_003B78F8_7450(slot);
     return slot;
 }
@@ -3695,40 +3695,40 @@ extern struct sA0A0Strm *func_003B6A38_76E8(int) __asm__("func_003B6A38");
  * sequence (+0x0C, by 0x100, back to 0 on overflow) and gives the node the handle sequence | stream and the hold time
  * (+0x20). Called by func_003B78D8 (type 0) and func_003B7DE8 (type 2).
  *
- * @param a0  the stream handle
- * @param a1  the hold time (ms; -1 holds until changed)
- * @param a2  the file name (type 0) or memory block (type 1)
- * @param a3  the file offset (type 0) or file-queue request (type 2)
- * @param a4  the queue type
+ * @param streamHandle  the stream handle
+ * @param holdTime  the hold time (ms; -1 holds until changed)
+ * @param source  the file name (type 0) or memory block (type 1)
+ * @param offsetOrRequest  the file offset (type 0) or file-queue request (type 2)
+ * @param queueType  the queue type
  * @return the request handle, or a negative error
  */
-int func_003B76E8_76E8(int a0, int a1, int a2, int a3, int a4) {
-    struct sA0A0Strm *o = func_003B6A38_76E8(a0);
-    struct sA0A0Node *s;
-    int r;
-    if (o == 0) return -8;
-    if (o->f128.f08 == 0) return -13;
-    if (a4 == 0) {
-        r = f_0C88_76E8(o->f00, a2, a3, 0x6C454353);
-    } else if (a4 == 1) {
-        r = f_0D80_76E8(o->f00, a2, 0, 0x6C454353);
+int func_003B76E8_76E8(int streamHandle, int holdTime, int source, int offsetOrRequest, int queueType) {
+    struct sA0A0Strm *stream = func_003B6A38_76E8(streamHandle);
+    struct sA0A0Node *request;
+    int fileRequest;
+    if (stream == 0) return -8;
+    if (stream->f128.f08 == 0) return -13;
+    if (queueType == 0) {
+        fileRequest = f_0C88_76E8(stream->f00, source, offsetOrRequest, 0x6C454353);
+    } else if (queueType == 1) {
+        fileRequest = f_0D80_76E8(stream->f00, source, 0, 0x6C454353);
     } else {
-        r = a3;
+        fileRequest = offsetOrRequest;
     }
-    if (r == 0) return -1;
+    if (fileRequest == 0) return -1;
     func_003B58A0();
-    a4 = (int)f_62E8_76E8(&o->f128);
-    s = (struct sA0A0Node *)a4;
-    f_6210_76E8(s, 0, 40);
-    f_62B8_76E8(&o->f11C, s);
-    s->f08 = r;
-    o->f0C += 0x100;
-    if (o->f0C < 0) o->f0C = 0;
-    s->f0C = o->f0C | a0;
-    s->f20 = a1;
-    o = (struct sA0A0Strm *)s->f0C;
+    queueType = (int)f_62E8_76E8(&stream->f128);
+    request = (struct sA0A0Node *)queueType;
+    f_6210_76E8(request, 0, 40);
+    f_62B8_76E8(&stream->f11C, request);
+    request->f08 = fileRequest;
+    stream->f0C += 0x100;
+    if (stream->f0C < 0) stream->f0C = 0;
+    request->f0C = stream->f0C | streamHandle;
+    request->f20 = holdTime;
+    stream = (struct sA0A0Strm *)request->f0C;
     func_003B58D8();
-    return (int)o;
+    return (int)stream;
 }
 #endif
 
@@ -3776,24 +3776,24 @@ int func_003B7838_7838(int) __asm__("func_003B7838");
  * D_0050AAD4. Destroys the packet player (func_003C6DA0), frees the slot and destroys the file STREAM unless it was
  * borrowed (+0x11). Used by func_003B69D8 and the movie player's audio object (func_003AEE30).
  *
- * @param h  the stream handle
+ * @param streamHandle  the stream handle
  * @return 0, or -8 for an unknown stream
  */
-int func_003B7838_7838(int h) {
-    struct sA0A0Strm *o = func_003B6A38_7838(h);
+int func_003B7838_7838(int streamHandle) {
+    struct sA0A0Strm *stream = func_003B6A38_7838(streamHandle);
     int w;
-    signed char c;
-    if (o == 0) return -8;
-    func_003B78F8(h);
+    signed char borrowed;
+    if (stream == 0) return -8;
+    func_003B78F8(streamHandle);
     if (func_003B7410() == 1) {
         func_003C6040_7838(func_003B71D8_7838);
         D_0050AAD4 = 0;
     }
-    func_003C6DA0(o->f08);
-    w = o->f00;
-    c = o->f11;
-    D_0050A0A0_7838[h] = 0;
-    if (c == 0)
+    func_003C6DA0(stream->f08);
+    w = stream->f00;
+    borrowed = stream->f11;
+    D_0050A0A0_7838[streamHandle] = 0;
+    if (borrowed == 0)
         STREAM_destroy(w);
     return 0;
 }
@@ -3840,47 +3840,47 @@ extern void f_6210_78F8(void *, int, int) __asm__("func_00416210");
  * requests to the free list, clears the current request and state and zeroes both formats and headers. Called by
  * func_003B7450 and func_003B7838.
  *
- * @param arg0  the stream handle
+ * @param streamHandle  the stream handle
  * @return 0, or -8 for an unknown stream
  */
-int func_003B78F8(int arg0) {
-    struct sA0A0Strm *o;
-    struct sA0A0Node *s;
+int func_003B78F8(int streamHandle) {
+    struct sA0A0Strm *stream;
+    struct sA0A0Node *request;
     int i;
     func_003B58A0();
-    o = func_003B6A38(arg0);
-    if (o == 0) {
+    stream = func_003B6A38(streamHandle);
+    if (stream == 0) {
         func_003B58D8();
         return -8;
     }
-    if (o->f04 >= 0) {
-        func_003C6CE8(o->f08);
+    if (stream->f04 >= 0) {
+        func_003C6CE8(stream->f08);
     }
-    o->f04 = -1;
-    if (o->f11 == 0) {
-        f_1110_78F8(o->f00);
+    stream->f04 = -1;
+    if (stream->f11 == 0) {
+        f_1110_78F8(stream->f00);
     }
-    if (o->f84.f18[0] != 0) {
+    if (stream->f84.f18[0] != 0) {
         i = 0;
-        if (o->f18.b[2] != 0) {
-            int *p = &o->f84.f18[0];
+        if (stream->f18.b[2] != 0) {
+            int *chanBuf = &stream->f84.f18[0];
             do {
                 i++;
-                f_5E98_78F8(*p++);
-            } while (i < o->f18.b[2]);
+                f_5E98_78F8(*chanBuf++);
+            } while (i < stream->f18.b[2]);
         }
     }
     do {
-        s = f_62E8_78F8(&o->f11C);
-        if (s == 0) break;
-        func_003C6288(&o->f128, s);
+        request = f_62E8_78F8(&stream->f11C);
+        if (request == 0) break;
+        func_003C6288(&stream->f128, request);
     } while (1);
-    o->f134 = 0;
-    o->f10 = 0;
-    f_6210_78F8(&o->f14, 0, 4);
-    f_6210_78F8(&o->f18, 0, 4);
-    f_6210_78F8(&o->f1C, 0, 104);
-    f_6210_78F8(&o->f84, 0, 104);
+    stream->f134 = 0;
+    stream->f10 = 0;
+    f_6210_78F8(&stream->f14, 0, 4);
+    f_6210_78F8(&stream->f18, 0, 4);
+    f_6210_78F8(&stream->f1C, 0, 104);
+    f_6210_78F8(&stream->f84, 0, 104);
     func_003B58D8();
     return 0;
 }
@@ -3978,35 +3978,35 @@ int func_003B7B48_impl(int, int *) __asm__("func_003B7B48");
  * buffered bytes (func_003E14C8, capped at 4000000) * 1000 / the request's data rate. Returns early with out[2] = 0
  * when the current rate or the data rate is 0. Used by the movie player's audio object and the game's stream system.
  *
- * @param arg0  the stream handle
+ * @param streamHandle  the stream handle
  * @param out  receives the three status words
  * @return 0, or -8 for an unknown stream
  */
-int func_003B7B48_impl(int arg0, int *out) {
-    struct sA0A0Strm *s;
+int func_003B7B48_impl(int streamHandle, int *out) {
+    struct sA0A0Strm *stream;
     struct sA0A0Node *n;
-    unsigned int t;
-    int v;
+    unsigned int bufferedBytes;
+    int requestCount;
     
     out[2] = 0;
     out[1] = 0;
     out[0] = 0;
-    s = func_003B6A38(arg0);
-    if (s == 0) return -8;
-    v = s->f11C.f08;
-    out[0] = v;
-    if (v != 0) {
-        n = s->f11C.f00;
+    stream = func_003B6A38(streamHandle);
+    if (stream == 0) return -8;
+    requestCount = stream->f11C.f08;
+    out[0] = requestCount;
+    if (requestCount != 0) {
+        n = stream->f11C.f00;
         out[1] = n->f0C;
-        if (*(unsigned short *)s->f14.b == 0) return 0;
+        if (*(unsigned short *)stream->f14.b == 0) return 0;
         do {
-            out[2] = f_6C98_7B48(s->f08) * 1000 / *(unsigned short *)s->f14.b;
+            out[2] = f_6C98_7B48(stream->f08) * 1000 / *(unsigned short *)stream->f14.b;
             if (out[2] != 0) return 0;
             n = func_003B7A70(out[1]);
             if (n->f10 == 0) return 0;
         } while (0);
-        t = func_003E14C8(s->f00);
-        out[2] = (t > 0x3D0900 ? 0x3D0900 : t) * 1000 / n->f10;
+        bufferedBytes = func_003E14C8(stream->f00);
+        out[2] = (bufferedBytes > 0x3D0900 ? 0x3D0900 : bufferedBytes) * 1000 / n->f10;
     }
     return 0;
 }
@@ -4034,36 +4034,36 @@ extern int f64A8_7C40(L64_7C40, int) __asm__("func_003C64A8");
  * head request and from the next format otherwise. Used by the movie player's audio object and the game's stream
  * system.
  *
- * @param h  the request handle
+ * @param requestHandle  the request handle
  * @param out  receives the four status words
  * @return 0, or -8 for an invalid handle
  */
-int func_003B7C40(int h, int *out) {
-    struct sA0A0Strm *a;
-    struct sA0A0Node *b;
-    unsigned int d;
+int func_003B7C40(int requestHandle, int *out) {
+    struct sA0A0Strm *stream;
+    struct sA0A0Node *request;
+    unsigned int sampleRate;
     out[0] = 0;
     out[1] = 0;
     out[2] = 0;
     out[3] = 0;
-    if (h < 0 || (a = func_003B6A38(h & 0xFF)) == 0) {
+    if (requestHandle < 0 || (stream = func_003B6A38(requestHandle & 0xFF)) == 0) {
         return -8;
     }
-    b = func_003B7A70(h);
-    if (b != 0) {
-        if (b->f24 == 0) {
+    request = func_003B7A70(requestHandle);
+    if (request != 0) {
+        if (request->f24 == 0) {
             out[0] = 0;
         } else {
-            if (a->f11C.f00 == b) {
+            if (stream->f11C.f00 == request) {
                 out[0] = 2;
-                d = *(unsigned short *)a->f14.b;
+                sampleRate = *(unsigned short *)stream->f14.b;
             } else {
                 out[0] = 1;
-                d = *(unsigned short *)a->f18.b;
+                sampleRate = *(unsigned short *)stream->f18.b;
             }
-            out[1] = f64A8_7C40(f6380_7C40(b->f14, 1000), d);
-            out[2] = f64A8_7C40(f6380_7C40(b->f18 - b->f14, 1000), d);
-            out[3] = b->f1C * 1000 / d;
+            out[1] = f64A8_7C40(f6380_7C40(request->f14, 1000), sampleRate);
+            out[2] = f64A8_7C40(f6380_7C40(request->f18 - request->f14, 1000), sampleRate);
+            out[3] = request->f1C * 1000 / sampleRate;
         }
     } else {
         out[0] = 3;
@@ -4118,10 +4118,10 @@ extern void func_003B76E8(int, int, int, int, int);
  *
  * @param streamHandle  the stream
  * @param holdTime  hold before playing (ms, -1 until released)
- * @param c  the file STREAM request to play
+ * @param fileRequest  the file STREAM request to play
  */
-void func_003B7DE8(int streamHandle, int holdTime, int c) {
-    func_003B76E8(streamHandle, holdTime, 0, c, 2);
+void func_003B7DE8(int streamHandle, int holdTime, int fileRequest) {
+    func_003B76E8(streamHandle, holdTime, 0, fileRequest, 2);
 }
 #endif
 
@@ -4250,22 +4250,22 @@ int func_003B86C0_7F18(int) __asm__("func_003B86C0");
  * Asks the voice with func_003B86C0; when the stream has no live voice it returns the volume in the stream's play
  * options (+0xEC).
  *
- * @param h  the stream handle
+ * @param streamHandle  the stream handle
  * @return the volume, or -8 for an unknown stream
  */
-int func_003B7F18(int h) {
-    struct sA0A0Strm *p;
-    int r;
+int func_003B7F18(int streamHandle) {
+    struct sA0A0Strm *stream;
+    int volume;
 
-    p = func_003B6A38(h);
-    if (p == 0) {
+    stream = func_003B6A38(streamHandle);
+    if (stream == 0) {
         return -8;
     }
-    r = func_003B86C0_7F18(p->f04);
-    if (r < 0) {
-        r = p->fEC.f00;
+    volume = func_003B86C0_7F18(stream->f04);
+    if (volume < 0) {
+        volume = stream->fEC.f00;
     }
-    return r;
+    return volume;
 }
 #endif
 
@@ -4282,21 +4282,21 @@ int func_003B8C00(int, int, int);
  * Stores both in the stream's play options (+0xEC) (+0x08, +0x0A) and passes them to the voice with func_003B8C00. Used
  * by the game's stream system.
  *
- * @param arg0  the stream handle
- * @param arg1  the azimuth
- * @param arg2  the elevation
+ * @param streamHandle  the stream handle
+ * @param azimuth  the azimuth
+ * @param elevation  the elevation
  * @return 0, or -8 for an unknown stream
  */
-int func_003B7F60(int arg0, int arg1, int arg2) {
-    struct sA0A0Strm *p;
+int func_003B7F60(int streamHandle, int azimuth, int elevation) {
+    struct sA0A0Strm *stream;
 
-    p = func_003B6A38(arg0);
-    if (p == 0) {
+    stream = func_003B6A38(streamHandle);
+    if (stream == 0) {
         return -8;
     }
-    p->fEC.f08 = arg1;
-    p->fEC.f0A = arg2;
-    func_003B8C00(p->f04, arg1, arg2);
+    stream->fEC.f08 = azimuth;
+    stream->fEC.f0A = elevation;
+    func_003B8C00(stream->f04, azimuth, elevation);
     return 0;
 }
 #endif
@@ -4316,21 +4316,21 @@ int func_003B8790(int, int);
  * Caps it at 0x4000 (4.0 in 4.12 fixed point), stores it in the stream's play options (+0xEC) (+0x0C) and passes it to
  * the voice with func_003B8790. The movie player sets its playback speed with it.
  *
- * @param arg0  the stream handle
- * @param arg1  the pitch multiplier (0x1000 = 1.0)
+ * @param streamHandle  the stream handle
+ * @param pitchMult  the pitch multiplier (0x1000 = 1.0)
  * @return 0, or -8 for an unknown stream
  */
-int func_003B7FB8(int arg0, int arg1) {
-    struct sA0A0Strm *p;
-    p = func_003B6A38(arg0);
-    if (p == 0) {
+int func_003B7FB8(int streamHandle, int pitchMult) {
+    struct sA0A0Strm *stream;
+    stream = func_003B6A38(streamHandle);
+    if (stream == 0) {
         return -8;
     }
-    if (arg1 > 0x4000) {
-        arg1 = 0x4000;
+    if (pitchMult > 0x4000) {
+        pitchMult = 0x4000;
     }
-    p->fEC.f0C = arg1;
-    func_003B8790(p->f04, arg1);
+    stream->fEC.f0C = pitchMult;
+    func_003B8790(stream->f04, pitchMult);
     return 0;
 }
 #endif
@@ -4348,10 +4348,10 @@ void func_003B8700_func_003B8010(int, int) __asm__("func_003B8700");
  * Stores it in the stream's play options (+0xEC) (+0x04) and passes it to the voice with func_003B8700.
  *
  * @param streamHandle  the stream
- * @param arg1  the dry level (0..127)
+ * @param dryLevel  the dry level (0..127)
  * @return 0, or -8 for an unknown stream
  */
-int func_003B8010(int streamHandle, int arg1) {
+int func_003B8010(int streamHandle, int dryLevel) {
     volatile int *stream;
 
     stream = func_003B6A38_func_003B8010();
@@ -4359,8 +4359,8 @@ int func_003B8010(int streamHandle, int arg1) {
         return -8;
         do { } while (0);
     }
-    *(char *)((char *)stream + 0xF0) = arg1;
-    func_003B8700_func_003B8010(stream[1], arg1);
+    *(char *)((char *)stream + 0xF0) = dryLevel;
+    func_003B8700_func_003B8010(stream[1], dryLevel);
     return 0;
 }
 #endif
@@ -4378,20 +4378,20 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B8050);
  * Stores the level in the stream's play options (+0xEC) (+0x05, whatever the bus) and passes both to the voice with
  * func_003B88C8. Used by the game's bank monitor.
  *
- * @param arg0  the stream handle
- * @param arg1  the effect bus
- * @param arg2  the send level (0..127)
+ * @param streamHandle  the stream handle
+ * @param busIndex  the effect bus
+ * @param fxLevel  the send level (0..127)
  * @return 0, or -8 for an unknown stream
  */
-int func_003B8050(int arg0, int arg1, int arg2) {
-    struct sA0A0Strm *p;
+int func_003B8050(int streamHandle, int busIndex, int fxLevel) {
+    struct sA0A0Strm *stream;
 
-    p = func_003B6A38(arg0);
-    if (p == 0) {
+    stream = func_003B6A38(streamHandle);
+    if (stream == 0) {
         return -8;
     }
-    p->fEC.f05 = arg2;
-    func_003B88C8(p->f04, arg1, arg2);
+    stream->fEC.f05 = fxLevel;
+    func_003B88C8(stream->f04, busIndex, fxLevel);
     return 0;
 }
 #endif
@@ -4410,10 +4410,10 @@ void func_003B8978_func_003B80A0(int, int) __asm__("func_003B8978");
  * with func_003B8978.
  *
  * @param streamHandle  the stream
- * @param arg1  the cutoff
+ * @param lowPassCutoff  the cutoff
  * @return 0, or -8 for an unknown stream
  */
-int func_003B80A0(int streamHandle, int arg1) {
+int func_003B80A0(int streamHandle, int lowPassCutoff) {
     volatile int *stream;
 
     stream = func_003B6A38_func_003B80A0();
@@ -4421,8 +4421,8 @@ int func_003B80A0(int streamHandle, int arg1) {
         return -8;
         do { } while (0);
     }
-    *(short *)((char *)stream + 0x100) = arg1;
-    func_003B8978_func_003B80A0(stream[1], arg1);
+    *(short *)((char *)stream + 0x100) = lowPassCutoff;
+    func_003B8978_func_003B80A0(stream[1], lowPassCutoff);
     return 0;
 }
 #endif
@@ -4441,10 +4441,10 @@ void func_003B8838_func_003B80E0(int, int) __asm__("func_003B8838");
  * with func_003B8838.
  *
  * @param streamHandle  the stream
- * @param arg1  the time multiplier (0x1000 = 1.0)
+ * @param timeMult  the time multiplier (0x1000 = 1.0)
  * @return 0, or -8 for an unknown stream
  */
-int func_003B80E0(int streamHandle, int arg1) {
+int func_003B80E0(int streamHandle, int timeMult) {
     volatile int *stream;
 
     stream = func_003B6A38_func_003B80E0();
@@ -4452,8 +4452,8 @@ int func_003B80E0(int streamHandle, int arg1) {
         return -8;
         do { } while (0);
     }
-    *(short *)((char *)stream + 0xFA) = arg1;
-    func_003B8838_func_003B80E0(stream[1], arg1);
+    *(short *)((char *)stream + 0xFA) = timeMult;
+    func_003B8838_func_003B80E0(stream[1], timeMult);
     return 0;
 }
 #endif
@@ -4471,17 +4471,17 @@ void func_003E0B28_8120(int, int) __asm__("func_003E0B28");
  * func_003B7450 sets it to a third of the file queue's size for every stream it creates its own queue for.
  *
  * @param streamHandle  the stream
- * @param arg1  the read-ahead threshold
+ * @param greedyLevel  the read-ahead threshold
  * @return 0, or -8 for an unknown stream
  */
-int func_003B8120(int streamHandle, int arg1) {
+int func_003B8120(int streamHandle, int greedyLevel) {
     int *temp_2;
 
     temp_2 = func_003B6A38_8120();
     if (temp_2 == 0) {
         return -8;
     }
-    func_003E0B28_8120(*temp_2, arg1);
+    func_003E0B28_8120(*temp_2, greedyLevel);
     return 0;
 }
 #endif
@@ -4502,17 +4502,17 @@ extern struct G_8160 D_0050A8E8_8160[] __asm__("D_0050A8E8");
  * Stores the volume at the sound driver state D_0050A8E8 +0x175 in the critical section, then recomputes each active
  * channel's volume (func_003BA7B0, func_003C2A50). cSSXAudio's volume control passes out * 127.
  *
- * @param arg0  the master volume (0..127)
+ * @param masterVol  the master volume (0..127)
  * @return 0
  */
-int func_003B8160(int arg0) {
+int func_003B8160(int masterVol) {
     int i;
-    struct T_8160 *e;
+    struct T_8160 *channel;
     func_003B58A0();
-    D_0050A8E8_8160[0].c = arg0;
+    D_0050A8E8_8160[0].c = masterVol;
     for (i = 0; i < D_0050A8E8_8160[0].n; i++) {
-        e = (struct T_8160 *)((char *)D_0050A8E8_8160[0].tab + i * 0x8C);
-        if (e->c69 == 1 && e->w0 >= 0) {
+        channel = (struct T_8160 *)((char *)D_0050A8E8_8160[0].tab + i * 0x8C);
+        if (channel->c69 == 1 && channel->w0 >= 0) {
             f_A7B0_8160(i);
             f_2A50_8160(i);
         }
@@ -4536,18 +4536,18 @@ extern char D_0050AB08_8218[] __asm__("D_0050AB08");
  * Kind 8 selects the table D_0050AB08, 4 D_0050AAE0 and 0x100 D_0050AAF4 (0x14-byte records, the buses at +0x220,
  * +0x1F8 and +0x20C of the sound driver state D_0050A8E8); other kinds give 0.
  *
- * @param arg0  the bus number
- * @param arg1  the render mode (masked with 0x71C)
+ * @param busIndex  the bus number
+ * @param renderMode  the render mode (masked with 0x71C)
  * @return the bus record, or 0
  */
-void *func_003B8218(int arg0, int arg1) {
-    switch (arg1 & 0x71C) {
+void *func_003B8218(int busIndex, int renderMode) {
+    switch (renderMode & 0x71C) {
     case 8:
-        return (arg0 * 20) + D_0050AB08_8218;
+        return (busIndex * 20) + D_0050AB08_8218;
     case 4:
-        return (arg0 * 20) + D_0050AAE0_8218;
+        return (busIndex * 20) + D_0050AAE0_8218;
     case 0x100:
-        return (arg0 * 20) + D_0050AAF4_8218;
+        return (busIndex * 20) + D_0050AAF4_8218;
     }
     return 0;
 }
@@ -4591,33 +4591,33 @@ extern void func_003B83A0_82B8(int, int) __asm__("func_003B83A0");
  * and applies it with func_003C36A8; then sets the level with func_003B83A0, forcing 0 when b is 0.
  *
  * @param flags  bus number plus selector bits (0x10, 0x20, 0x40)
- * @param a  the level
+ * @param busLevel  the level
  * @param b  stored in the record's first halfword; 0 also zeroes the level
  * @param c  stored in the record's +4 word
  * @param d  stored in the record's +8 word
  * @return 0
  */
-int func_003B82B8(int flags, int a, int b, int c, int d) {
+int func_003B82B8(int flags, int busLevel, int b, int c, int d) {
     int bits;
-    int m = 4;
+    int kindBit = 4;
     int base;
-    struct E_82B8 *e;
+    struct E_82B8 *busRec;
 
     if (!(flags & 0x1F8)) flags |= 0x1F8;
     bits = func_003B8290_82B8(flags);
     base = flags & ~0x1F8;
     while (bits) {
-        if (m & bits) {
-            e = func_003B8218_82B8(base, m);
-            e->s0 = b;
-            e->w4 = c;
-            e->w8 = d;
-            func_003C36A8_82B8(base, m);
-            bits &= ~m;
+        if (kindBit & bits) {
+            busRec = func_003B8218_82B8(base, kindBit);
+            busRec->s0 = b;
+            busRec->w4 = c;
+            busRec->w8 = d;
+            func_003C36A8_82B8(base, kindBit);
+            bits &= ~kindBit;
         }
-        m <<= 1;
+        kindBit <<= 1;
     }
-    func_003B83A0_82B8(flags, b ? a : 0);
+    func_003B83A0_82B8(flags, b ? busLevel : 0);
     return 0;
 }
 #endif
@@ -4642,36 +4642,36 @@ extern int func_003B88C8(int, int, int);
  * kind 8 it also sets both sides of the bus pan pair to level / 127 (func_003B84E0). Then, in the critical section,
  * every channel's send for the bus is recomputed through func_003B88C8.
  *
- * @param arg0  bus number plus selector bits
- * @param arg1  the level (0..127)
+ * @param busFlags  bus number plus selector bits
+ * @param busLevel  the level (0..127)
  * @return 0
  */
-int func_003B83A0(int arg0, int arg1) {
-    int id = arg0 & ~0x1F8;
+int func_003B83A0(int busFlags, int busLevel) {
+    int id = busFlags & ~0x1F8;
     int i;
-    int f40;
-    if ((arg0 & 0x1F8) == 0) {
-        arg0 |= 0x1F8;
+    int selectsKind8;
+    if ((busFlags & 0x1F8) == 0) {
+        busFlags |= 0x1F8;
     }
-    if (arg0 & 0x10) {
-        D_0050A8E8.f1F8[id].f02 = arg1;
+    if (busFlags & 0x10) {
+        D_0050A8E8.f1F8[id].f02 = busLevel;
     }
-    if (arg0 & 0x20) {
-        D_0050A8E8.f20C[id].f02 = arg1;
+    if (busFlags & 0x20) {
+        D_0050A8E8.f20C[id].f02 = busLevel;
     }
-    f40 = arg0 & 0x40;
-    if (f40) {
-        D_0050A8E8.f220[id].f02 = arg1;
+    selectsKind8 = busFlags & 0x40;
+    if (selectsKind8) {
+        D_0050A8E8.f220[id].f02 = busLevel;
     }
     func_003B58A0();
-    if (f40) {
-        struct sA8E8Pan v;
-        v.r = v.l = (float)arg1 * 0.007874016f;
-        f84E0_83Ab(id, 8, 0, &v);
+    if (selectsKind8) {
+        struct sA8E8Pan panPair;
+        panPair.r = panPair.l = (float)busLevel * 0.007874016f;
+        f84E0_83Ab(id, 8, 0, &panPair);
     }
     for (i = 0; i < D_0050A8E8.f17E; i++) {
-        struct sA8E8Chan *e = &D_0050A8E8.f1F0[i];
-        func_003B88C8(e->f00, id, e->f61[id]);
+        struct sA8E8Chan *channel = &D_0050A8E8.f1F0[i];
+        func_003B88C8(channel->f00, id, channel->f61[id]);
     }
     func_003B58D8();
     return 0;
@@ -4692,17 +4692,17 @@ extern void func_003C36C8_84E0(int, int, int, struct V_84E0 *) __asm__("func_003
  *
  * With flag 8 the pair goes to D_0050AB14[bus]; func_003C36C8 then writes the scaled values to the output state.
  *
- * @param arg0  the bus number
+ * @param busIndex  the bus number
  * @param flags  render-kind flags
  * @param arg2  passed on to func_003C36C8
- * @param v  the left/right gains
+ * @param panPair  the left/right gains
  * @return 0
  */
-int func_003B84E0(int arg0, int flags, int arg2, struct V_84E0 *v) {
+int func_003B84E0(int busIndex, int flags, int arg2, struct V_84E0 *panPair) {
     if (flags & 8) {
-        D_0050AB14_84E0[arg0].v = *v;
+        D_0050AB14_84E0[busIndex].v = *panPair;
     }
-    func_003C36C8_84E0(arg0, flags, arg2, v);
+    func_003C36C8_84E0(busIndex, flags, arg2, panPair);
     return 0;
 }
 #endif
@@ -4723,25 +4723,25 @@ extern struct G_8530 D_0050A8E8_8530[] __asm__("D_0050A8E8");
  * (func_003BAA00), sets the fade target (+0x34) and the per-tick step (+0x30) from the current volume (+0x38); the 100
  * Hz server func_003B55F0 then moves the volume. A time of 0 or less counts as 1.
  *
- * @param a  the sound handle
+ * @param soundHandle  the sound handle
  * @param n  the fade time in 100 Hz ticks
- * @param v  the target volume (0..127)
+ * @param targetVol  the target volume (0..127)
  * @return the channel index, or -8 for a dead handle
  */
-int func_003B8530(int a, int n, int v) {
-    int h = func_003BA6E8_8530();
-    int sp0;
-    if (h >= 0) {
+int func_003B8530(int soundHandle, int n, int targetVol) {
+    int chanIndex = func_003BA6E8_8530();
+    int setChan;
+    if (chanIndex >= 0) {
         if (n <= 0) n = 1;
-        sp0 = -1;
-        v <<= 16;
-        while (func_003BAA00_8530(h, &sp0)) {
-            char *e = D_0050A8E8_8530[0].tab + sp0 * 140;
-            *(int *)(e + 0x34) = v;
-            *(int *)(e + 0x30) = (v - *(int *)(e + 0x38)) / n;
+        setChan = -1;
+        targetVol <<= 16;
+        while (func_003BAA00_8530(chanIndex, &setChan)) {
+            char *channel = D_0050A8E8_8530[0].tab + setChan * 140;
+            *(int *)(channel + 0x34) = targetVol;
+            *(int *)(channel + 0x30) = (targetVol - *(int *)(channel + 0x38)) / n;
         }
     }
-    return h;
+    return chanIndex;
 }
 #endif
 
@@ -4769,29 +4769,29 @@ int func_003B85F0_impl(int a, int v) __asm__("func_003B85F0");
  * recomputes the volume (func_003BA7B0, func_003C2A50) and refreshes the send through func_003C27E0 when +0x62 is
  * positive. Quirk: a channel already at that volume makes it return 0 at once, skipping the rest of the group.
  *
- * @param a  the sound handle
- * @param v  the volume (0..127)
+ * @param soundHandle  the sound handle
+ * @param volume  the volume (0..127)
  * @return the channel index, -8 for a dead handle, or 0 when unchanged
  */
-int func_003B85F0_impl(int a, int v) {
-    int sp0;
-    int h;
-    struct E_85F0 *e;
+int func_003B85F0_impl(int soundHandle, int volume) {
+    int setChan;
+    int chanIndex;
+    struct E_85F0 *channel;
 
-    h = func_003BA6E8_85F0();
-    if (h >= 0) {
-        sp0 = -1;
-        while (func_003BAA00_85F0(h, &sp0) != 0) {
-            e = &D_0050A8E8_85F0.tab[sp0];
-            e->f30 = 0;
-            if (e->f38 == v << 16) return 0;
-            e->f38 = v << 16;
-            func_003BA7B0_85F0(sp0);
-            func_003C2A50_85F0(sp0);
-            if (e->s62 > 0) func_003C27E0_85F0(e->s4, 0);
+    chanIndex = func_003BA6E8_85F0();
+    if (chanIndex >= 0) {
+        setChan = -1;
+        while (func_003BAA00_85F0(chanIndex, &setChan) != 0) {
+            channel = &D_0050A8E8_85F0.tab[setChan];
+            channel->f30 = 0;
+            if (channel->f38 == volume << 16) return 0;
+            channel->f38 = volume << 16;
+            func_003BA7B0_85F0(setChan);
+            func_003C2A50_85F0(setChan);
+            if (channel->s62 > 0) func_003C27E0_85F0(channel->s4, 0);
         }
     }
-    return h;
+    return chanIndex;
 }
 #endif
 
@@ -4832,24 +4832,24 @@ extern struct G_8700 D_0050A8E8_8700 __asm__("D_0050A8E8");
  *
  * Stores it in each grouped channel's +0x5F and applies it with func_003C2EC8.
  *
- * @param arg0  the sound handle
- * @param arg1  the dry level (0..127)
+ * @param soundHandle  the sound handle
+ * @param dryLevel  the dry level (0..127)
  * @return the channel index, or -8 for a dead handle
  */
-int func_003B8700(int arg0, int arg1) {
-    int sp0;
-    int h;
+int func_003B8700(int soundHandle, int dryLevel) {
+    int setChan;
+    int chanIndex;
 
-    h = func_003BA6E8();
-    if (h >= 0) {
-        sp0 = -1;
-        while (func_003BAA00_8700(h, &sp0) != 0) {
+    chanIndex = func_003BA6E8();
+    if (chanIndex >= 0) {
+        setChan = -1;
+        while (func_003BAA00_8700(chanIndex, &setChan) != 0) {
             
-            *(char *)(D_0050A8E8_8700.tbl + sp0 * 0x8C + 0x5F) = arg1;
-            func_003C2EC8_8700(sp0);
+            *(char *)(D_0050A8E8_8700.tbl + setChan * 0x8C + 0x5F) = dryLevel;
+            func_003C2EC8_8700(setChan);
         }
     }
-    return h;
+    return chanIndex;
 }
 #endif
 
@@ -4870,32 +4870,32 @@ int func_003B8790_8790(int a0, int arg1) __asm__("func_003B8790");
  * Stores it in each grouped channel's +0x88 and recomputes with func_003BA938 and func_003C25E0. Quirk: a channel
  * already at that value makes it return 0 at once, skipping the rest of the group.
  *
- * @param a0  the sound handle
- * @param arg1  the pitch multiplier (0x1000 = 1.0)
+ * @param soundHandle  the sound handle
+ * @param pitchMult  the pitch multiplier (0x1000 = 1.0)
  * @return the channel index, -8 for a dead handle, or 0 when unchanged
  */
-int func_003B8790_8790(int a0, int arg1) {
-    int sp0;
-    int h;
-    char *e;
-    char *g;
+int func_003B8790_8790(int soundHandle, int pitchMult) {
+    int setChan;
+    int chanIndex;
+    char *channel;
+    char *sndState;
     int i;
-    h = func_003BA6E8_8790();
-    if (h >= 0) {
-        sp0 = -1;
-        g = D_0050A8E8_8790;
-        while (func_003BAA00_8790(h, &sp0) != 0) {
-            i = sp0;
-            e = *(char **)(g + 0x1F0) + i * 140;
-            if (*(unsigned short *)(e + 0x88) == arg1) {
+    chanIndex = func_003BA6E8_8790();
+    if (chanIndex >= 0) {
+        setChan = -1;
+        sndState = D_0050A8E8_8790;
+        while (func_003BAA00_8790(chanIndex, &setChan) != 0) {
+            i = setChan;
+            channel = *(char **)(sndState + 0x1F0) + i * 140;
+            if (*(unsigned short *)(channel + 0x88) == pitchMult) {
                 return 0;
             }
-            *(unsigned short *)(e + 0x88) = arg1;
+            *(unsigned short *)(channel + 0x88) = pitchMult;
             func_003BA938_8790(i, i);
-            func_003C25E0_8790(sp0);
+            func_003C25E0_8790(setChan);
         }
     }
-    return h;
+    return chanIndex;
 }
 #endif
 
@@ -4914,21 +4914,21 @@ extern struct G_8838 D_0050A8E8_8838 __asm__("D_0050A8E8");
  * Stores it in each grouped channel's +0x6A (func_003B8AD8 divides the remaining time by it) and applies it with
  * func_003C3010. Always returns 0, even for a dead handle.
  *
- * @param arg0  the sound handle
- * @param arg1  the time multiplier (0x1000 = 1.0)
+ * @param soundHandle  the sound handle
+ * @param timeMult  the time multiplier (0x1000 = 1.0)
  * @return 0
  */
-int func_003B8838(int arg0, int arg1) {
-    int sp0;
-    int h;
+int func_003B8838(int soundHandle, int timeMult) {
+    int setChan;
+    int chanIndex;
 
-    h = func_003BA6E8();
-    if (h >= 0) {
-        sp0 = -1;
-        while (func_003BAA00_8838(h, &sp0) != 0) {
-            int i = sp0;
-            *(short *)(D_0050A8E8_8838.tbl + i * 0x8C + 0x6A) = arg1;
-            func_003C3010_8838(i, arg1);
+    chanIndex = func_003BA6E8();
+    if (chanIndex >= 0) {
+        setChan = -1;
+        while (func_003BAA00_8838(chanIndex, &setChan) != 0) {
+            int i = setChan;
+            *(short *)(D_0050A8E8_8838.tbl + i * 0x8C + 0x6A) = timeMult;
+            func_003C3010_8838(i, timeMult);
         }
     }
     return 0;
@@ -4951,26 +4951,26 @@ extern char D_0050A8E8_88C8[] __asm__("D_0050A8E8");
  * Stores the level in each grouped channel's per-bus byte (+0x61 + bus), recomputes the send with func_003BA740 and
  * applies it with func_003C27E0.
  *
- * @param arg0  the sound handle
- * @param arg1  the effect bus
- * @param arg2  the send level (0..127)
+ * @param soundHandle  the sound handle
+ * @param busIndex  the effect bus
+ * @param fxLevel  the send level (0..127)
  * @return the channel index, or -8 for a dead handle
  */
-int func_003B88C8(int arg0, int arg1, int arg2) {
-    int sp0;
-    int t;
-    char *b;
-    t = func_003BA6E8_88C8();
-    if (t >= 0) {
-        sp0 = -1;
-        b = D_0050A8E8_88C8;
-        while (func_003BAA00_88C8(t, &sp0) != 0) {
-            *(char *)(sp0 * 0x8C + *(int *)(b + 0x1F0) + arg1 + 0x61) = arg2;
-            func_003BA740_88C8(arg1, sp0);
-            func_003C27E0_88C8(sp0, arg1);
+int func_003B88C8(int soundHandle, int busIndex, int fxLevel) {
+    int setChan;
+    int chanIndex;
+    char *sndState;
+    chanIndex = func_003BA6E8_88C8();
+    if (chanIndex >= 0) {
+        setChan = -1;
+        sndState = D_0050A8E8_88C8;
+        while (func_003BAA00_88C8(chanIndex, &setChan) != 0) {
+            *(char *)(setChan * 0x8C + *(int *)(sndState + 0x1F0) + busIndex + 0x61) = fxLevel;
+            func_003BA740_88C8(busIndex, setChan);
+            func_003C27E0_88C8(setChan, busIndex);
         }
     }
-    return t;
+    return chanIndex;
 }
 #endif
 
@@ -4985,10 +4985,10 @@ extern void func_003C3178_8978(int, int) __asm__("func_003C3178");
  * Sets a sound's low-pass cutoff on each of its voices (func_003C3178).
  *
  * @param soundHandle  the sound handle
- * @param arg1  the cutoff
+ * @param lowPassCutoff  the cutoff
  * @return the channel index, or -8 for a dead handle
  */
-int func_003B8978(int soundHandle, int arg1) {
+int func_003B8978(int soundHandle, int lowPassCutoff) {
     int setVoice;
     int voice;
 
@@ -4996,7 +4996,7 @@ int func_003B8978(int soundHandle, int arg1) {
     if (voice >= 0) {
         setVoice = -1;
         while (func_003BAA00_8978(voice, &setVoice) != 0) {
-            func_003C3178_8978(setVoice, arg1);
+            func_003C3178_8978(setVoice, lowPassCutoff);
         }
     }
     return voice;
@@ -5100,27 +5100,27 @@ extern int func_003C4318_8AD8(int) __asm__("func_003C4318");
  */
 int func_003B8AD8(void) {
     int best = -7;
-    int h = func_003BA6E8_8AD8();
-    int sp0;
-    if (h >= 0) {
-        sp0 = -1;
-        while (func_003BAA00_8AD8(h, &sp0) != 0) {
-            struct sA8E8Chan *e = &D_0050A8E8.f1F0[sp0];
-            int v;
-            if (e->f18 > 0) {
-                v = -7;
+    int chanIndex = func_003BA6E8_8AD8();
+    int setChan;
+    if (chanIndex >= 0) {
+        setChan = -1;
+        while (func_003BAA00_8AD8(chanIndex, &setChan) != 0) {
+            struct sA8E8Chan *channel = &D_0050A8E8.f1F0[setChan];
+            int curFrame;
+            if (channel->f18 > 0) {
+                curFrame = -7;
             } else {
-                v = func_003C4318_8AD8(sp0);
+                curFrame = func_003C4318_8AD8(setChan);
             }
-            if (v >= 0) {
-                int t = (e->f14 - v) * 100 / e->f20;
-                if (e->f8A > 0x10) {
-                    t = ((t << 12) / e->f8A << 12) / e->f6A;
+            if (curFrame >= 0) {
+                int remaining = (channel->f14 - curFrame) * 100 / channel->f20;
+                if (channel->f8A > 0x10) {
+                    remaining = ((remaining << 12) / channel->f8A << 12) / channel->f6A;
                 } else {
-                    t = 0x7FFFFFFF;
+                    remaining = 0x7FFFFFFF;
                 }
-                if (best < t) {
-                    best = t;
+                if (best < remaining) {
+                    best = remaining;
                 }
             }
         }
@@ -5143,30 +5143,30 @@ extern struct G_8C00 D_0050A8E8_8C00[] __asm__("D_0050A8E8");
  * The elevation is clamped to -0x4000..0x3FFF. For each grouped channel the azimuth (+0x1C) becomes the built-in
  * azimuth (+0x4C) plus the argument, the elevation goes to +0x1E, and func_003C38E0 applies them.
  *
- * @param a  the sound handle
- * @param b  the azimuth (0x10000 = full circle)
- * @param c  the elevation
+ * @param soundHandle  the sound handle
+ * @param azimuth  the azimuth (0x10000 = full circle)
+ * @param elevation  the elevation
  * @return the channel index, or -8 for a dead handle
  */
-int func_003B8C00(int a, int b, int c) {
-    int h;
-    int sp0;
-    if (c >= 0x4000) {
-        c = 0x3FFF;
-    } else if (c < -0x4000) {
-        c = -0x4000;
+int func_003B8C00(int soundHandle, int azimuth, int elevation) {
+    int chanIndex;
+    int setChan;
+    if (elevation >= 0x4000) {
+        elevation = 0x3FFF;
+    } else if (elevation < -0x4000) {
+        elevation = -0x4000;
     }
-    h = func_003BA6E8();
-    if (h >= 0) {
-        sp0 = -1;
-        while (func_003BAA00(h, &sp0)) {
-            struct E_8C00 *e = &D_0050A8E8_8C00[0].tab[sp0];
-            e->s1c = e->s4c + b;
-            e->s1e = c;
-            func_003C38E0(sp0);
+    chanIndex = func_003BA6E8();
+    if (chanIndex >= 0) {
+        setChan = -1;
+        while (func_003BAA00(chanIndex, &setChan)) {
+            struct E_8C00 *channel = &D_0050A8E8_8C00[0].tab[setChan];
+            channel->s1c = channel->s4c + azimuth;
+            channel->s1e = elevation;
+            func_003C38E0(setChan);
         }
     }
-    return h;
+    return chanIndex;
 }
 #endif
 
@@ -5242,17 +5242,17 @@ extern E_8D98 D_0050A120_8D98[] __asm__("D_0050A120");
  *
  * The slot is the low 5 bits (below 16) and the slot's handle (+0x10) must equal the argument.
  *
- * @param arg0  the sequence handle
+ * @param seqHandle  the sequence handle
  * @return the slot, or -8
  */
-int func_003B8D98(int arg0) {
+int func_003B8D98(int seqHandle) {
     int idx;
-    int v = arg0;
-    if (v < 0)
+    int handleValue = seqHandle;
+    if (handleValue < 0)
         return -8;
-    idx = v & 0x1F;
+    idx = handleValue & 0x1F;
     if (idx < 0x10)
-        return (D_0050A120_8D98[idx].key ^ v) == 0 ? idx : -8;
+        return (D_0050A120_8D98[idx].key ^ handleValue) == 0 ? idx : -8;
     return -8;
 }
 #endif
@@ -5324,33 +5324,33 @@ int func_003B8DE8_impl(int) __asm__("func_003B8DE8");
  * @return 1 when the fade stopped the sequence, else 0
  */
 int func_003B8DE8_impl(int id) {
-    struct sA120Song *e = &D_0050A120.f000[id];
-    struct sA120Voice *v;
+    struct sA120Song *seqInst = &D_0050A120.f000[id];
+    struct sA120Voice *voiceSlot;
     int i;
-    e->f14 = e->f14 + e->f18;
-    if (e->f18 < 0) {
-        if (!(e->f1C < e->f14)) {
-            e->f14 = e->f1C;
-            e->f18 = 0;
+    seqInst->f14 = seqInst->f14 + seqInst->f18;
+    if (seqInst->f18 < 0) {
+        if (!(seqInst->f1C < seqInst->f14)) {
+            seqInst->f14 = seqInst->f1C;
+            seqInst->f18 = 0;
         }
     } else {
-        if (!(e->f14 < e->f1C)) {
-            e->f14 = e->f1C;
-            e->f18 = 0;
+        if (!(seqInst->f14 < seqInst->f1C)) {
+            seqInst->f14 = seqInst->f1C;
+            seqInst->f18 = 0;
         }
     }
-    if (e->f14 < 0) {
-        func_003B9920_8DE8(e->f10);
+    if (seqInst->f14 < 0) {
+        func_003B9920_8DE8(seqInst->f10);
         return 1;
     }
     i = 23;
-    v = D_0050A820;
+    voiceSlot = D_0050A820;
     do {
-        if (v->f04 == id && v->f00 >= 0) {
-            f_85F0_8DE8(v->f00, (unsigned int)(e->f30[v->f05].b10 * (e->f14 >> 16)) >> 7);
+        if (voiceSlot->f04 == id && voiceSlot->f00 >= 0) {
+            f_85F0_8DE8(voiceSlot->f00, (unsigned int)(seqInst->f30[voiceSlot->f05].b10 * (seqInst->f14 >> 16)) >> 7);
         }
         i--;
-        v++;
+        voiceSlot++;
     } while (i >= 0);
     return 0;
 }
@@ -5369,19 +5369,19 @@ extern int func_003BA6E8_8EE8(int) __asm__("func_003BA6E8");
  *
  * Looks for a note voice of the slot whose handle is still live (func_003BA6E8).
  *
- * @param arg0  the sequence slot
+ * @param seqIndex  the sequence slot
  * @return 1 when none is playing, else 0
  */
-int func_003B8EE8(int arg0) {
+int func_003B8EE8(int seqIndex) {
     int i;
-    int r = 1;
+    int isOver = 1;
     for (i = 0; i < 0x18; i++) {
-        if (D_0050A820_8EE8[i].owner == arg0 && D_0050A820_8EE8[i].id >= 0 && func_003BA6E8_8EE8(D_0050A820_8EE8[i].id) >= 0) {
-            r = 0;
+        if (D_0050A820_8EE8[i].owner == seqIndex && D_0050A820_8EE8[i].id >= 0 && func_003BA6E8_8EE8(D_0050A820_8EE8[i].id) >= 0) {
+            isOver = 0;
             break;
         }
     }
-    return r;
+    return isOver;
 }
 #endif
 
@@ -5425,61 +5425,61 @@ extern int func_003B6820_8F78(int, int, struct sNoteParm_8F78 *) __asm__("func_0
  * +0x27 ticks to wait, +0x28 state, +0x2C/+0x2E bank handles, +0x30 sixteen channel words); D_0050A820 holds 24 note
  * voices (handle, sequence, channel, key, velocity).
  *
- * @param h  the sequence slot
- * @param c  the MIDI channel state
+ * @param seqSlot  the sequence slot
+ * @param midiChan  the MIDI channel state
  * @param ch  the MIDI channel
  * @param key  the key
  */
-void func_003B8F78(struct sSongHandle_8F78 h, struct sA120Chan *c, int ch, int key) {
+void func_003B8F78(struct sSongHandle_8F78 seqSlot, struct sA120Chan *midiChan, int ch, int key) {
     struct sNoteParm_8F78 parm;
-    struct sA120Song *e = &D_0050A120.f000[h.id];
-    struct sA120Voice *v = 0;
+    struct sA120Song *seqInst = &D_0050A120.f000[seqSlot.id];
+    struct sA120Voice *voiceSlot = 0;
     int found = 0;
     int i, end;
-    int a, b;
+    int bankHandle, patchNum;
     struct sA120Chan cc;
     unsigned short azimuth;
-    unsigned char t17;
+    unsigned char chanBend;
 
     end = D_0044C474 + 25;
     i = ++D_0044C474;
     for (; i < end; i++) {
         D_0044C474 = i % 24;
-        v = &D_0050A820[D_0044C474];
-        if (func_003BA6E8_8F78(v->f00) < 0) {
+        voiceSlot = &D_0050A820[D_0044C474];
+        if (func_003BA6E8_8F78(voiceSlot->f00) < 0) {
             found = 1;
             break;
         }
     }
     if (found) {
         func_003BA020_8F78(&parm);
-        cc = *c;
-        parm.vol = (unsigned int)(cc.b10 * (e->f14 >> 16)) >> 7;
-        parm.velocity = *e->f08;
+        cc = *midiChan;
+        parm.vol = (unsigned int)(cc.b10 * (seqInst->f14 >> 16)) >> 7;
+        parm.velocity = *seqInst->f08;
         azimuth = cc.b00 << 6;
-        t17 = cc.b17; /* FAKEMATCH: early read, see header */
-        azimuth += e->f20;
+        chanBend = cc.b17; /* FAKEMATCH: early read, see header */
+        azimuth += seqInst->f20;
         parm.azimuth = azimuth;
-        parm.pitchmult = e->f22;
-        parm.bend = t17;
-        if (ch == 9 && e->f2E >= 0) {
-            a = e->f2E;
-            b = key;
+        parm.pitchmult = seqInst->f22;
+        parm.bend = chanBend;
+        if (ch == 9 && seqInst->f2E >= 0) {
+            bankHandle = seqInst->f2E;
+            patchNum = key;
             parm.keynum = 0x3C;
         } else {
-            b = c->b24;
-            a = e->f2C;
+            patchNum = midiChan->b24;
+            bankHandle = seqInst->f2C;
             parm.keynum = key;
         }
-        v->f00 = func_003B6820_8F78(a, b, &parm);
-        v->f07 = *e->f08++;
-        if (v->f00 >= 0) {
-            v->f04 = h.id;
-            v->f05 = ch;
-            v->f06 = key;
+        voiceSlot->f00 = func_003B6820_8F78(bankHandle, patchNum, &parm);
+        voiceSlot->f07 = *seqInst->f08++;
+        if (voiceSlot->f00 >= 0) {
+            voiceSlot->f04 = seqSlot.id;
+            voiceSlot->f05 = ch;
+            voiceSlot->f06 = key;
         }
     } else {
-        e->f08++;
+        seqInst->f08++;
     }
 }
 #endif
@@ -5501,19 +5501,19 @@ extern void func_003C7138_9140(int) __asm__("func_003C7138");
  * with that channel and key that is still sounding (func_003C7138), marking it released.
  *
  * @param ch  the sequence slot
- * @param a  the MIDI channel
- * @param b  the key
+ * @param midiChannel  the MIDI channel
+ * @param keyNum  the key
  */
-void func_003B9140(int ch, int a, int b) {
-    struct V_9140 *p;
+void func_003B9140(int ch, int midiChannel, int keyNum) {
+    struct V_9140 *voiceSlot;
     int i;
 
     ((struct Ch_9140 *)D_0050A120_9140)[ch].cnt++;
-    p = (struct V_9140 *)(D_0050A120_9140 + 0x700);
-    for (i = 0; i < 0x18; i++, p++) {
-        if (p->ch == ch && p->a == a && p->b == b && p->st >= 0) {
-            func_003C7138_9140(p->h);
-            p->st = -1;
+    voiceSlot = (struct V_9140 *)(D_0050A120_9140 + 0x700);
+    for (i = 0; i < 0x18; i++, voiceSlot++) {
+        if (voiceSlot->ch == ch && voiceSlot->a == midiChannel && voiceSlot->b == keyNum && voiceSlot->st >= 0) {
+            func_003C7138_9140(voiceSlot->h);
+            voiceSlot->st = -1;
             return;
         }
     }
@@ -5562,60 +5562,60 @@ extern int func_003BC570_91E0(int v) __asm__("func_003BC570");
  * volume * sequence volume / 128 through func_003B85F0); 10 sets the channel pan (func_003BC570) and repositions the
  * channel's notes with func_003B8C00 (pan + base azimuth, elevation 0). Other controllers skip their value byte.
  *
- * @param h  the sequence slot
+ * @param seqIndex  the sequence slot
  * @param bits  the MIDI channel state
  * @param x  the MIDI channel
  * @param cmd  the controller number
  */
-void func_003B91E0(int h, struct Bits_91E0 *bits, int x, int cmd) {
-    struct V_91E0 *p = (struct V_91E0 *)&D_0050A120_91E0;
-    struct Ch_91E0 *e = (struct Ch_91E0 *)((char *)p + h * 0x70);
-    unsigned char *s;
+void func_003B91E0(int seqIndex, struct Bits_91E0 *bits, int x, int cmd) {
+    struct V_91E0 *voiceSlot = (struct V_91E0 *)&D_0050A120_91E0;
+    struct Ch_91E0 *seqInst = (struct Ch_91E0 *)((char *)voiceSlot + seqIndex * 0x70);
+    unsigned char *readPos;
     int i;
 
     if (cmd == 20) {
-        unsigned char *t = e->p8 + 1;
-        e->p8 = t;
-        e->pC = t;
+        unsigned char *loopStart = seqInst->p8 + 1;
+        seqInst->p8 = loopStart;
+        seqInst->pC = loopStart;
         return;
     } else if (cmd == 30) {
-        if (e->f26 >= 0x7F) {
-            e->f26 = *e->p8;
+        if (seqInst->f26 >= 0x7F) {
+            seqInst->f26 = *seqInst->p8;
         }
-        if (e->f26 != 0) {
-            e->f26--;
-            e->p8 = e->pC;
+        if (seqInst->f26 != 0) {
+            seqInst->f26--;
+            seqInst->p8 = seqInst->pC;
             return;
         }
     } else if (cmd == 7) {
-        s = e->p8;
-        p = (struct V_91E0 *)((char *)p + 0x700);
+        readPos = seqInst->p8;
+        voiceSlot = (struct V_91E0 *)((char *)voiceSlot + 0x700);
         i = 23;
-        bits->b = *s;
-        e->p8 = s + 1;
+        bits->b = *readPos;
+        seqInst->p8 = readPos + 1;
         do {
-            if (p->ch == h && p->x == x) {
-                func_003B85F0(p->h, (unsigned int)(bits->b * e->f16) >> 7);
+            if (voiceSlot->ch == seqIndex && voiceSlot->x == x) {
+                func_003B85F0(voiceSlot->h, (unsigned int)(bits->b * seqInst->f16) >> 7);
             }
             i--;
-            p++;
+            voiceSlot++;
         } while (i >= 0);
         return;
     } else if (cmd == 10) {
-        p = (struct V_91E0 *)((char *)p + 0x700);
+        voiceSlot = (struct V_91E0 *)((char *)voiceSlot + 0x700);
         i = 23;
-        bits->a = func_003BC570_91E0(*e->p8++) >> 6;
+        bits->a = func_003BC570_91E0(*seqInst->p8++) >> 6;
         do {
-            if (p->ch == h && p->x == x) {
-                int v = ((*(unsigned int *)bits & 0x3FF) << 6) + e->f20;
-                func_003B8C00(p->h, (unsigned short)v, 0);
+            if (voiceSlot->ch == seqIndex && voiceSlot->x == x) {
+                int azimuthValue = ((*(unsigned int *)bits & 0x3FF) << 6) + seqInst->f20;
+                func_003B8C00(voiceSlot->h, (unsigned short)azimuthValue, 0);
             }
             i--;
-            p++;
+            voiceSlot++;
         } while (i >= 0);
         return;
     }
-    e->p8++;
+    seqInst->p8++;
 }
 #endif
 
@@ -5681,67 +5681,67 @@ extern void f93C8_94B0(int, struct sA120Chan *, int, int) __asm__("func_003B93C8
  * goes to func_003B8F78, 0x80 to func_003B9140, 0xB0 to func_003B91E0, 0xE0 to func_003B93C8 and 0xC0 sets the channel
  * program; parsing stops at a nonzero delay or when the sequence leaves state 3.
  *
- * @param h  the sequence slot
+ * @param seqIndex  the sequence slot
  */
-void func_003B94B0(int h) {
-    struct sA120Song *c = &D_0050A120.f000[h];
-    unsigned char ev, a, b;
-    unsigned char *s;
+void func_003B94B0(int seqIndex) {
+    struct sA120Song *seqInst = &D_0050A120.f000[seqIndex];
+    unsigned char ev, statusByte, dataByte;
+    unsigned char *readPos;
     int hi, lo;
 
-    s = c->f08;
-    s++;
-    c->f08 = s;
-    c->f27--;
-    hi = *s & 0xF0;
-    c->f08 = s + 1;
-    b = s[1];
-    c->f08 = s - 1;
-    if (hi == 0xF0 && b == 47) {
-        if (f8EE8_94B0(h) != 0) f9920_94B0(c->f10);
+    readPos = seqInst->f08;
+    readPos++;
+    seqInst->f08 = readPos;
+    seqInst->f27--;
+    hi = *readPos & 0xF0;
+    seqInst->f08 = readPos + 1;
+    dataByte = readPos[1];
+    seqInst->f08 = readPos - 1;
+    if (hi == 0xF0 && dataByte == 47) {
+        if (f8EE8_94B0(seqIndex) != 0) f9920_94B0(seqInst->f10);
         return;
     }
-    if (c->f27 != 0) return;
+    if (seqInst->f27 != 0) return;
     for (;;) {
-        struct sA120Chan *q;
-        ev = *c->f08++;
-        a = *c->f08++;
-        b = *c->f08++;
-        hi = a & 0xF0;
-        lo = a & 0xF;
-        q = &c->f30[lo];
+        struct sA120Chan *midiChan;
+        ev = *seqInst->f08++;
+        statusByte = *seqInst->f08++;
+        dataByte = *seqInst->f08++;
+        hi = statusByte & 0xF0;
+        lo = statusByte & 0xF;
+        midiChan = &seqInst->f30[lo];
         switch (hi) {
         case 144:
-            f8F78_94B0(h, q, lo, b);
+            f8F78_94B0(seqIndex, midiChan, lo, dataByte);
             break;
         case 0x80:
-            f9140_94B0(h, lo, b);
+            f9140_94B0(seqIndex, lo, dataByte);
             break;
         case 176:
-            f91E0_94B0(h, q, lo, b);
+            f91E0_94B0(seqIndex, midiChan, lo, dataByte);
             break;
         case 0xE0:
-            f93C8_94B0(h, q, lo, b);
+            f93C8_94B0(seqIndex, midiChan, lo, dataByte);
             break;
         case 0xC0:
-            q->b24 = b;
+            midiChan->b24 = dataByte;
             break;
         case 0xF0:
-            if (b == 47) {
-                if (f8EE8_94B0(h) != 0) {
-                    f9920_94B0(c->f10);
+            if (dataByte == 47) {
+                if (f8EE8_94B0(seqIndex) != 0) {
+                    f9920_94B0(seqInst->f10);
                 } else {
                     ev = 1;
-                    c->f08 -= 3;
-                    c->f27++;
+                    seqInst->f08 -= 3;
+                    seqInst->f27++;
                 }
             }
             break;
         }
         if (ev != 0) break;
-        if (c->f28 != 3) break;
+        if (seqInst->f28 != 3) break;
     }
-    c->f27 = ev;
+    seqInst->f27 = ev;
 }
 #endif
 
@@ -5762,22 +5762,22 @@ extern struct E_96B8 D_0050A120_96B8[] __asm__("D_0050A120");
  */
 void func_003B96B8(void) {
     int i;
-    struct E_96B8 *e;
+    struct E_96B8 *seqInst;
     signed char st;
     unsigned int lim;
-    int t;
+    int tickCount;
     for (i = 0; i < 16; i++) {
-        e = &D_0050A120_96B8[i];
-        st = e->st;
-        if (st == 3 && (e->f18 == 0 || func_003B8DE8_96B8(i) == 0)) {
-            t = e->f0;
-            lim = (unsigned int)(t * e->u24) / 100u;
-            e->f0 = t + 1;
-            if (lim >= e->f4 && e->st == st) {
+        seqInst = &D_0050A120_96B8[i];
+        st = seqInst->st;
+        if (st == 3 && (seqInst->f18 == 0 || func_003B8DE8_96B8(i) == 0)) {
+            tickCount = seqInst->f0;
+            lim = (unsigned int)(tickCount * seqInst->u24) / 100u;
+            seqInst->f0 = tickCount + 1;
+            if (lim >= seqInst->f4 && seqInst->st == st) {
                 do {
                     func_003B94B0_96B8(i);
-                    e->f4++;
-                } while (lim >= e->f4 && e->st == 3);
+                    seqInst->f4++;
+                } while (lim >= seqInst->f4 && seqInst->st == 3);
             }
         }
     }
@@ -5809,7 +5809,7 @@ extern int func_003B9880_97D8(void) __asm__("func_003B9880");
  */
 int func_003B97D8(void) {
     int i;
-    struct C_97D8 *c;
+    struct C_97D8 *seqInst;
 
     func_003B58A0();
     for (i = 0; i < 24; i++) {
@@ -5818,12 +5818,12 @@ int func_003B97D8(void) {
         D_0050A820_97D8[i].b7 = 0;
         D_0050A820_97D8[i].id = -1;
     }
-    c = D_0050A120_97D8;
+    seqInst = D_0050A120_97D8;
     do {
-        c->f10 = -1;
-        c->f28 = 0;
-        c++;
-    } while ((int)c < (int)(D_0050A120_97D8 + 16));
+        seqInst->f10 = -1;
+        seqInst->f28 = 0;
+        seqInst++;
+    } while ((int)seqInst < (int)(D_0050A120_97D8 + 16));
     func_003B5910_97D8(func_003B96B8_97D8);
     D_0050A8E8_97D8.f1E8 = func_003B9880_97D8;
     func_003B58D8();
@@ -5874,17 +5874,17 @@ extern E_98C0 D_0050A120_A120_98C0[] __asm__("D_0050A120");
  */
 int func_003B98C0(void) {
     E_98C0 *tbl;
-    int *p;
+    int *seqHandlePtr;
     int i;
 
     i = 0xF;
     func_003B58A0();
     tbl = D_0050A120_A120_98C0;
-    p = &tbl->v;
+    seqHandlePtr = &tbl->v;
     do {
         i -= 1;
-        func_003B9920(*p);
-        p += 0x1C;
+        func_003B9920(*seqHandlePtr);
+        seqHandlePtr += 0x1C;
     } while (i >= 0);
     func_003B58D8();
     return 0;
@@ -5910,30 +5910,30 @@ int func_003B9920_impl(int h) __asm__("func_003B9920");
  * Fails with -1 when the slot is free (state 0). Otherwise stops every note voice of the sequence (func_003B89E0),
  * frees them, clears the slot handle and sets state 2.
  *
- * @param h  the sequence handle
+ * @param seqHandle  the sequence handle
  * @return 0, -1 when not active, or -8 for an invalid handle
  */
-int func_003B9920_impl(int h) {
-    int ch = func_003B8D98(h);
-    struct C_9920 *c;
-    struct V_9920 *p;
+int func_003B9920_impl(int seqHandle) {
+    int ch = func_003B8D98(seqHandle);
+    struct C_9920 *seqInst;
+    struct V_9920 *voiceSlot;
     int i;
 
     if (ch < 0) return ch;
-    c = &D_0050A120_9920[ch];
-    if (c->f28 != 0) {
-        p = (struct V_9920 *)((char *)D_0050A120_9920 + 0x700);
-        for (i = 0; i < 24; i++, p++) {
-            if (p->ch == ch) {
-                if (p->h >= 0) func_003B89E0_9920(p->h);
-                p->b5 = -1;
-                p->b6 = 0;
-                p->b7 = 0;
-                p->h = -1;
+    seqInst = &D_0050A120_9920[ch];
+    if (seqInst->f28 != 0) {
+        voiceSlot = (struct V_9920 *)((char *)D_0050A120_9920 + 0x700);
+        for (i = 0; i < 24; i++, voiceSlot++) {
+            if (voiceSlot->ch == ch) {
+                if (voiceSlot->h >= 0) func_003B89E0_9920(voiceSlot->h);
+                voiceSlot->b5 = -1;
+                voiceSlot->b6 = 0;
+                voiceSlot->b7 = 0;
+                voiceSlot->h = -1;
             }
         }
-        c->f10 = -1;
-        c->f28 = 2;
+        seqInst->f10 = -1;
+        seqInst->f28 = 2;
         return 0;
     }
     return -1;
@@ -5963,13 +5963,13 @@ struct H_9A00 { signed char f00; char pad01[7]; unsigned short f08; char pad0A[2
  *
  * @param hdr  the play options
  * @param data  the sequence data
- * @param arg2  the bank for normal channels
- * @param arg3  the bank for channel 9 (drums)
+ * @param bankHandle  the bank for normal channels
+ * @param drumBankHandle  the bank for channel 9 (drums)
  * @return the sequence handle, or -9 when all slots are busy
  */
-int func_003B9A00(struct H_9A00 *hdr, unsigned char *data, int arg2, int arg3) {
+int func_003B9A00(struct H_9A00 *hdr, unsigned char *data, int bankHandle, int drumBankHandle) {
     int ret = -9;
-    struct sA120Song *e;
+    struct sA120Song *seqInst;
     int i;
     int j;
     if (*(short *)data == 17485) {
@@ -5980,31 +5980,31 @@ int func_003B9A00(struct H_9A00 *hdr, unsigned char *data, int arg2, int arg3) {
     D_0050A120.f7C0 += 0x20;
     if (D_0050A120.f7C0 < 0) D_0050A120.f7C0 = 0;
     for (i = 0; i < 16; i++) {
-        e = &D_0050A120.f000[i];
-        if (e->f10 < 0) {
-            e->f04 = 0;
-            e->f00 = 0;
-            e->f24 = (hdr->f10 * 100) >> 12;
-            e->f10 = D_0050A120.f7C0 | i;
-            e->f08 = data;
-            e->f2C = arg2;
-            e->f2E = arg3;
-            e->f26 = 0xFF;
-            e->f27 = 1;
-            e->f18 = 0;
-            e->f0C = 0;
-            e->f14 = hdr->f00 << 16;
-            e->f28 = 3;
-            e->f20 = hdr->f08;
-            e->f22 = hdr->f0C;
+        seqInst = &D_0050A120.f000[i];
+        if (seqInst->f10 < 0) {
+            seqInst->f04 = 0;
+            seqInst->f00 = 0;
+            seqInst->f24 = (hdr->f10 * 100) >> 12;
+            seqInst->f10 = D_0050A120.f7C0 | i;
+            seqInst->f08 = data;
+            seqInst->f2C = bankHandle;
+            seqInst->f2E = drumBankHandle;
+            seqInst->f26 = 0xFF;
+            seqInst->f27 = 1;
+            seqInst->f18 = 0;
+            seqInst->f0C = 0;
+            seqInst->f14 = hdr->f00 << 16;
+            seqInst->f28 = 3;
+            seqInst->f20 = hdr->f08;
+            seqInst->f22 = hdr->f0C;
             for (j = 0; j < 16; j++) {
-                struct sA120Chan *q = &e->f30[j];
-                q->b00 = 0;
-                q->b10 = 0x7F;
-                q->b17 = 0x40;
-                q->b24 = -1;
+                struct sA120Chan *midiChan = &seqInst->f30[j];
+                midiChan->b00 = 0;
+                midiChan->b10 = 0x7F;
+                midiChan->b17 = 0x40;
+                midiChan->b24 = -1;
             }
-            ret = e->f10;
+            ret = seqInst->f10;
             break;
         }
     }
@@ -6028,30 +6028,30 @@ extern int func_003B8790_9B68(int, int) __asm__("func_003B8790");
  * Stores it (+0x22; new notes copy it) and passes it to every playing note voice with func_003B8790. Fails with -1 when
  * the value changes and the sequence is not playing.
  *
- * @param h  the sequence handle
- * @param v  the pitch multiplier (0x1000 = 1.0)
+ * @param seqHandle  the sequence handle
+ * @param pitchMult  the pitch multiplier (0x1000 = 1.0)
  * @return 0, -1, or -8 for an invalid handle
  */
-int func_003B9B68(int h, int v) {
-    int r = -1;
-    int ch = func_003B8D98(h);
-    struct C_9B68 *c;
-    struct V_9B68 *p;
+int func_003B9B68(int seqHandle, int pitchMult) {
+    int result = -1;
+    int ch = func_003B8D98(seqHandle);
+    struct C_9B68 *seqInst;
+    struct V_9B68 *voiceSlot;
     int i;
 
     if (ch < 0) return ch;
-    c = &D_0050A120_9B68[ch];
-    if (v != c->f22) {
-        if (c->f28 != 3) goto out;
-        c->f22 = v;
-        p = (struct V_9B68 *)((char *)D_0050A120_9B68 + 0x700);
-        for (i = 23; i >= 0; i--, p++) {
-            if (p->ch == ch && p->h >= 0) func_003B8790_9B68(p->h, v);
+    seqInst = &D_0050A120_9B68[ch];
+    if (pitchMult != seqInst->f22) {
+        if (seqInst->f28 != 3) goto out;
+        seqInst->f22 = pitchMult;
+        voiceSlot = (struct V_9B68 *)((char *)D_0050A120_9B68 + 0x700);
+        for (i = 23; i >= 0; i--, voiceSlot++) {
+            if (voiceSlot->ch == ch && voiceSlot->h >= 0) func_003B8790_9B68(voiceSlot->h, pitchMult);
         }
     }
-    r = 0;
+    result = 0;
 out:
-    return r;
+    return result;
 }
 #endif
 
@@ -6073,33 +6073,33 @@ int func_003B9C20(int h, int v) __asm__("func_003B9C20");
  * Stores it (+0x20) and repositions every playing note with func_003B8C00 at base + the note channel's pan (elevation
  * 0). Fails with -1 when the value changes and the sequence is not playing.
  *
- * @param h  the sequence handle
- * @param v  the azimuth
+ * @param seqHandle  the sequence handle
+ * @param azimuth  the azimuth
  * @return 0, -1, or -8 for an invalid handle
  */
-int func_003B9C20(int h, int v) {
-    int r = -1;
-    int ch = func_003B8D98(h);
-    struct C_9C20 *c;
-    struct V_9C20 *p;
+int func_003B9C20(int seqHandle, int azimuth) {
+    int result = -1;
+    int ch = func_003B8D98(seqHandle);
+    struct C_9C20 *seqInst;
+    struct V_9C20 *voiceSlot;
     int i;
 
     if (ch < 0) return ch;
-    c = &D_0050A120_9C20[ch];
-    if (v != c->f20) {
-        if (c->f28 != 3) goto out;
-        c->f20 = v;
-        p = (struct V_9C20 *)((char *)D_0050A120_9C20 + 0x700);
-        for (i = 23; i >= 0; i--, p++) {
-            if (p->ch == ch && p->h >= 0) {
-                v = c->f20 + ((*(int *)((char *)c + (p->b5 << 2) + 0x30) & 0x3FF) << 6);
-                func_003B8C00_9C20(p->h, v, 0);
+    seqInst = &D_0050A120_9C20[ch];
+    if (azimuth != seqInst->f20) {
+        if (seqInst->f28 != 3) goto out;
+        seqInst->f20 = azimuth;
+        voiceSlot = (struct V_9C20 *)((char *)D_0050A120_9C20 + 0x700);
+        for (i = 23; i >= 0; i--, voiceSlot++) {
+            if (voiceSlot->ch == ch && voiceSlot->h >= 0) {
+                azimuth = seqInst->f20 + ((*(int *)((char *)seqInst + (voiceSlot->b5 << 2) + 0x30) & 0x3FF) << 6);
+                func_003B8C00_9C20(voiceSlot->h, azimuth, 0);
             }
         }
     }
-    r = 0;
+    result = 0;
 out:
-    return r;
+    return result;
 }
 #endif
 
@@ -6116,37 +6116,37 @@ typedef struct { int a; signed char b; char pad[3]; } E_9D00;
  *
  * Only a playing sequence (state 3) changes. Runs in the critical section.
  *
- * @param arg0  the sequence handle
+ * @param seqHandle  the sequence handle
  * @return the new status from func_003B9FC8, or -8 for an invalid handle
  */
-int func_003B9D00(int arg0) {
-    int r, h, i;
+int func_003B9D00(int seqHandle) {
+    int status, seqIndex, i;
 
-    E_9D00 *p;
-    char *t;
+    E_9D00 *voiceSlot;
+    char *seqInst;
 
     func_003B58A0();
-    h = func_003B8D98(arg0);
-    if (h < 0) {
+    seqIndex = func_003B8D98(seqHandle);
+    if (seqIndex < 0) {
         func_003B58D8();
-        return h;
+        return seqIndex;
     }
-    t = (char*)D_0050A120_9D00 + h * 0x70;
-    if (*(signed char*)(t + 0x28) == 3) {
-        p = (E_9D00*)(((char*)D_0050A120_9D00) + 0x700);
-        *(signed char*)(t + 0x28) = 5;
+    seqInst = (char*)D_0050A120_9D00 + seqIndex * 0x70;
+    if (*(signed char*)(seqInst + 0x28) == 3) {
+        voiceSlot = (E_9D00*)(((char*)D_0050A120_9D00) + 0x700);
+        *(signed char*)(seqInst + 0x28) = 5;
         i = 23;
         do {
             i--;
-            if (p->b == h) {
-                if (p->a >= 0) func_003B89E0_9D00(p->a);
+            if (voiceSlot->b == seqIndex) {
+                if (voiceSlot->a >= 0) func_003B89E0_9D00(voiceSlot->a);
             }
-            p++;
+            voiceSlot++;
         } while (i >= 0);
     }
-    r = func_003B9FC8(arg0);
+    status = func_003B9FC8(seqHandle);
     func_003B58D8();
-    return r;
+    return status;
 }
 #endif
 
@@ -6165,15 +6165,15 @@ extern char D_0050A120_9DC8[] __asm__("D_0050A120");
  *
  * Runs in the critical section. Notes stopped by the pause are not restarted.
  *
- * @param arg0  the sequence handle
+ * @param seqHandle  the sequence handle
  * @return the new status from func_003B9FC8, or -8 for an invalid handle
  */
-int func_003B9DC8(int arg0) {
+int func_003B9DC8(int seqHandle) {
     int var_16;
     char *temp_4;
 
     func_003B58A0();
-    var_16 = func_003B8D98(arg0);
+    var_16 = func_003B8D98(seqHandle);
     if (var_16 < 0) {
         func_003B58D8();
         return var_16;
@@ -6182,7 +6182,7 @@ int func_003B9DC8(int arg0) {
     if (*(signed char *)(temp_4 + 0x28) == 5) {
         *(signed char *)(temp_4 + 0x28) = 3;
     }
-    var_16 = func_003B9FC8_9DC8(arg0);
+    var_16 = func_003B9FC8_9DC8(seqHandle);
     func_003B58D8();
     return var_16;
 }
@@ -6203,11 +6203,11 @@ extern void func_003B85F0(int, unsigned int);
  * (16.16) and updates every note (channel volume * volume / 128 through func_003B85F0); a change on a sequence that is
  * not playing fails with -1.
  *
- * @param a0  the sequence handle
+ * @param seqHandle  the sequence handle
  * @param vol  the volume (0..127)
  * @return 0, -1, or -8 for an invalid handle
  */
-int func_003B9E48(int a0, int vol) {
+int func_003B9E48(int seqHandle, int vol) {
     int ret = 0;
     int idx = func_003B8D98_9E48();
     if (idx < 0) {
@@ -6215,25 +6215,25 @@ int func_003B9E48(int a0, int vol) {
     }
     {
         int key = vol << 16;
-        char *e = D_0050A120_9E48 + idx * 0x70;
-        *(int *)(e + 0x18) = 0;
-        if (*(int *)(e + 0x14) != key) {
-            if (*(signed char *)(e + 0x28) == 3) {
-                char *p;
+        char *seqInst = D_0050A120_9E48 + idx * 0x70;
+        *(int *)(seqInst + 0x18) = 0;
+        if (*(int *)(seqInst + 0x14) != key) {
+            if (*(signed char *)(seqInst + 0x28) == 3) {
+                char *voiceSlot;
                 int i;
-                *(int *)(e + 0x14) = key;
-                p = D_0050A120_9E48 + 0x700;
+                *(int *)(seqInst + 0x14) = key;
+                voiceSlot = D_0050A120_9E48 + 0x700;
                 i = 23;
                 do {
-                    if (*(signed char *)(p + 4) == idx) {
-                        int v = *(int *)p;
-                        if (v >= 0) {
-                            unsigned x = *(unsigned *)(e + (*(signed char *)(p + 5) << 2) + 0x30);
-                            func_003B85F0(v, ((x >> 10 & 0x7F) * vol) >> 7);
+                    if (*(signed char *)(voiceSlot + 4) == idx) {
+                        int voiceHandle = *(int *)voiceSlot;
+                        if (voiceHandle >= 0) {
+                            unsigned x = *(unsigned *)(seqInst + (*(signed char *)(voiceSlot + 5) << 2) + 0x30);
+                            func_003B85F0(voiceHandle, ((x >> 10 & 0x7F) * vol) >> 7);
                         }
                     }
                     i -= 1;
-                    p += 8;
+                    voiceSlot += 8;
                 } while (i >= 0);
             } else {
                 ret = -1;
@@ -6256,23 +6256,23 @@ extern char D_0050A120_9F38[] __asm__("D_0050A120");
  * Sets the target (+0x1C) and the per-tick step (+0x18) from the current volume; func_003B8DE8 applies it. A time of 0
  * or less counts as 1; a sequence that is not playing is left alone.
  *
- * @param arg0  the sequence handle
- * @param arg1  the fade time in ticks
- * @param arg2  the target volume (0..127)
+ * @param seqHandle  the sequence handle
+ * @param fadeTicks  the fade time in ticks
+ * @param targetVol  the target volume (0..127)
  * @return 0, or -8 for an invalid handle
  */
-int func_003B9F38(int arg0, int arg1, int arg2) {
-    int r;
-    char *e;
-    int t;
-    r = func_003B8D98(arg0);
-    if (r < 0) return r;
-    e = D_0050A120_9F38 + r * 0x70;
-    if (*(signed char *)(e + 0x28) == 3) {
-        if (arg1 <= 0) arg1 = 1;
-        t = arg2 << 16;
-        *(int *)(e + 0x1C) = t;
-        *(int *)(e + 0x18) = (t - *(int *)(e + 0x14)) / arg1;
+int func_003B9F38(int seqHandle, int fadeTicks, int targetVol) {
+    int seqIndex;
+    char *seqInst;
+    int targetFixed;
+    seqIndex = func_003B8D98(seqHandle);
+    if (seqIndex < 0) return seqIndex;
+    seqInst = D_0050A120_9F38 + seqIndex * 0x70;
+    if (*(signed char *)(seqInst + 0x28) == 3) {
+        if (fadeTicks <= 0) fadeTicks = 1;
+        targetFixed = targetVol << 16;
+        *(int *)(seqInst + 0x1C) = targetFixed;
+        *(int *)(seqInst + 0x18) = (targetFixed - *(int *)(seqInst + 0x14)) / fadeTicks;
     }
     return 0;
 }
@@ -6325,24 +6325,24 @@ struct S_A020 {
  * Volume, velocity, dry and effect levels 0x7F, bend 0x40, key 0x3C, azimuth and elevation 0, pitch, time and tempo
  * multipliers 0x1000 (1.0), low-pass 0xFFFF and high-pass 0.
  *
- * @param s  the play options (0x18 bytes)
+ * @param playOpts  the play options (0x18 bytes)
  * @return 0
  */
-int func_003BA020(struct S_A020 *s) {
-    s->hC = 0x1000;
-    s->b2 = 0x3C;
-    s->hE = 0x1000;
-    s->h10 = 0x1000;
-    s->h12 = 0;
-    s->h14 = 0xFFFF;
-    s->h16 = 0;
-    s->b1 = 0x40;
-    s->b3 = 0x7F;
-    s->b0 = 0x7F;
-    s->b4 = 0x7F;
-    s->b5 = 0x7F;
-    s->h8 = 0;
-    s->hA = 0;
+int func_003BA020(struct S_A020 *playOpts) {
+    playOpts->hC = 0x1000;
+    playOpts->b2 = 0x3C;
+    playOpts->hE = 0x1000;
+    playOpts->h10 = 0x1000;
+    playOpts->h12 = 0;
+    playOpts->h14 = 0xFFFF;
+    playOpts->h16 = 0;
+    playOpts->b1 = 0x40;
+    playOpts->b3 = 0x7F;
+    playOpts->b0 = 0x7F;
+    playOpts->b4 = 0x7F;
+    playOpts->b5 = 0x7F;
+    playOpts->h8 = 0;
+    playOpts->hA = 0;
     return 0;
 }
 #endif
@@ -6357,14 +6357,14 @@ extern short D_0050AC20[];
  *
  * Searches the first entries of D_0050AC20.
  *
- * @param arg0  the channel
- * @param arg1  how many entries are filled
+ * @param voice  the channel
+ * @param voicesAllocated  how many entries are filled
  * @return 1 when listed, else 0
  */
-int func_003BA078(int arg0, int arg1) {
+int func_003BA078(int voice, int voicesAllocated) {
     int i;
-    for (i = 0; i < arg1; i++) {
-        if (D_0050AC20[i] == arg0) {
+    for (i = 0; i < voicesAllocated; i++) {
+        if (D_0050AC20[i] == voice) {
             return 1;
         }
     }
@@ -6411,7 +6411,7 @@ short func_003BA0B0(int n, int tag, unsigned int *out, int lo, int hi) {
     int best;
     unsigned int key;
     int lim;
-    struct sA8E8Chan *e;
+    struct sA8E8Chan *channel;
 
     for (i = 0; i < n; i++) {
         D_0050AC20_A0B0[i] = -1;
@@ -6424,9 +6424,9 @@ short func_003BA0B0(int n, int tag, unsigned int *out, int lo, int hi) {
         best = -1;
         key = 0xFFFFFFFF;
         for (k = lo; k < hi; k++) {
-            e = &D_0050A8E8.f1F0[k];
-            if (e->f69 == 0 && f_A078_A0B0(k, sel) == 0 && e->f2C < key) {
-                key = e->f2C;
+            channel = &D_0050A8E8.f1F0[k];
+            if (channel->f69 == 0 && f_A078_A0B0(k, sel) == 0 && channel->f2C < key) {
+                key = channel->f2C;
                 best = k;
             }
         }
@@ -6442,14 +6442,14 @@ short func_003BA0B0(int n, int tag, unsigned int *out, int lo, int hi) {
         key = 0xFFFFFFFF;
         for (k = lo; k < hi; k++) {
             if (f_A078_A0B0(k, sel) == 0) {
-                e = &D_0050A8E8.f1F0[k];
-                if (e->f2A < 101) {
-                    if (e->f2A < lim) {
-                        lim = e->f2A;
-                        key = e->f2C;
+                channel = &D_0050A8E8.f1F0[k];
+                if (channel->f2A < 101) {
+                    if (channel->f2A < lim) {
+                        lim = channel->f2A;
+                        key = channel->f2C;
                         best = k;
-                    } else if (e->f2A == lim && e->f2C < key) {
-                        key = e->f2C;
+                    } else if (channel->f2A == lim && channel->f2C < key) {
+                        key = channel->f2C;
                         best = k;
                     }
                 }
@@ -6466,11 +6466,11 @@ short func_003BA0B0(int n, int tag, unsigned int *out, int lo, int hi) {
         do {
             sorted = 1;
             for (i = 0; i < sel - 1; i++) {
-                short t = D_0050AC20_A0B0[i];
-                if (D_0050AC20_A0B0[i + 1] < t) {
+                short earlierChan = D_0050AC20_A0B0[i];
+                if (D_0050AC20_A0B0[i + 1] < earlierChan) {
                     D_0050AC20_A0B0[i] = D_0050AC20_A0B0[i + 1];
                     sorted = 0;
-                    D_0050AC20_A0B0[i + 1] = t;
+                    D_0050AC20_A0B0[i + 1] = earlierChan;
                 }
             }
         } while (!sorted);
@@ -6478,17 +6478,17 @@ short func_003BA0B0(int n, int tag, unsigned int *out, int lo, int hi) {
         result = D_0050AC20_A0B0[0];
         for (i = 0; i < sel; i++) {
             int w;
-            e = &D_0050A8E8.f1F0[D_0050AC20_A0B0[i]];
-            w = e->f00;
-            if (e->f69 != 0) {
+            channel = &D_0050A8E8.f1F0[D_0050AC20_A0B0[i]];
+            w = channel->f00;
+            if (channel->f69 != 0) {
                 if (w < 0) {
-                    w = D_0050A8E8.f1F0[e->f28].f00;
+                    w = D_0050A8E8.f1F0[channel->f28].f00;
                 }
                 f_89E0_A0B0(w);
             }
-            e->f69 = 1;
-            e->f2C = D_0050A8E8.f180;
-            e->f2A = tag;
+            channel->f69 = 1;
+            channel->f2C = D_0050A8E8.f180;
+            channel->f2A = tag;
         }
         D_0050A8E8.f1F0[D_0050AC20_A0B0[0]].f00 = *out;
         D_0050A8E8.f1F0[D_0050AC20_A0B0[0]].f04[0] = D_0050AC20_A0B0[0];
@@ -6522,32 +6522,32 @@ extern struct G_A550 D_0050A8E8_A550 __asm__("D_0050A8E8");
  * @param u  unused
  */
 void func_003BA550(int i, unsigned char u) {
-    struct E_A550 *e = &D_0050A8E8_A550.tab[i];
-    unsigned char k = e->f26;
+    struct E_A550 *channel = &D_0050A8E8_A550.tab[i];
+    unsigned char k = channel->f26;
     int n = 0;
     int sel = -1;
     int j;
     if (k != 0) {
         for (j = 0; j < D_0050A8E8_A550.cnt; j++) {
-            struct E_A550 *q = &D_0050A8E8_A550.tab[j];
-            if (q->f26 == k && q->f0 >= 0 && q->f69 != 0) {
+            struct E_A550 *otherChan = &D_0050A8E8_A550.tab[j];
+            if (otherChan->f26 == k && otherChan->f0 >= 0 && otherChan->f69 != 0) {
                 n++;
-                if (q->f27) sel = j;
+                if (otherChan->f27) sel = j;
             }
         }
-        e = &D_0050A8E8_A550.tab[i];
+        channel = &D_0050A8E8_A550.tab[i];
         if (n == 1) {
-            e->f69 = 0;
-            e->f26 = 0;
-            e->f27 = 0;
-            e->f2C = D_0050A8E8_A550.f180;
+            channel->f69 = 0;
+            channel->f26 = 0;
+            channel->f27 = 0;
+            channel->f2C = D_0050A8E8_A550.f180;
             return;
         }
         if (D_0050A8E8_A550.tab[sel].f69 == 2 && i != sel && n == 2) {
-            e->f69 = 0;
-            e->f26 = 0;
-            e->f27 = 0;
-            e->f2C = D_0050A8E8_A550.f180;
+            channel->f69 = 0;
+            channel->f26 = 0;
+            channel->f27 = 0;
+            channel->f2C = D_0050A8E8_A550.f180;
             D_0050A8E8_A550.tab[sel].f69 = 0;
             D_0050A8E8_A550.tab[sel].f26 = 0;
             D_0050A8E8_A550.tab[sel].f27 = 0;
@@ -6558,16 +6558,16 @@ void func_003BA550(int i, unsigned char u) {
             D_0050A8E8_A550.tab[sel].f69 = 2;
             return;
         }
-        e->f69 = 0;
-        e->f26 = 0;
-        e->f27 = 0;
-        e->f2C = D_0050A8E8_A550.f180;
+        channel->f69 = 0;
+        channel->f26 = 0;
+        channel->f27 = 0;
+        channel->f2C = D_0050A8E8_A550.f180;
         return;
     }
-    e->f69 = 0;
-    e->f26 = 0;
-    e->f27 = 0;
-    e->f2C = D_0050A8E8_A550.f180;
+    channel->f69 = 0;
+    channel->f26 = 0;
+    channel->f27 = 0;
+    channel->f2C = D_0050A8E8_A550.f180;
 }
 #endif
 
@@ -6583,19 +6583,19 @@ int func_003BA6E8_A6E8(int arg0) __asm__("func_003BA6E8");
  *
  * The channel is the handle's low byte; it must be in range, busy (+0x69) and hold the same handle.
  *
- * @param arg0  the sound handle
+ * @param soundHandle  the sound handle
  * @return the channel index, or -8
  */
-int func_003BA6E8_A6E8(int arg0) {
+int func_003BA6E8_A6E8(int soundHandle) {
     int var_5;
     char *temp_2;
-    char *g;
+    char *sndState;
 
-    if ((arg0 < 0) || (g = D_0050A8E8_A8E8, var_5 = arg0 & 0xFF, (var_5 < *(short *)(g + 0x17E)) == 0)) {
+    if ((soundHandle < 0) || (sndState = D_0050A8E8_A8E8, var_5 = soundHandle & 0xFF, (var_5 < *(short *)(sndState + 0x17E)) == 0)) {
         return -8;
     }
-    temp_2 = *(char **)(g + 0x1F0) + (var_5 * 140);
-    if ((*(signed char *)(temp_2 + 0x69) == 0) || (*(int *)temp_2 != arg0)) {
+    temp_2 = *(char **)(sndState + 0x1F0) + (var_5 * 140);
+    if ((*(signed char *)(temp_2 + 0x69) == 0) || (*(int *)temp_2 != soundHandle)) {
         var_5 = -8;
     }
     return var_5;
@@ -6611,10 +6611,10 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003BA740);
    their offsets). Some fields are also reached through their own splat symbols (declared below), which the
    functions that address them directly must keep using. */
 extern struct sA8E8Chan *D_0050AAD8;    /* D_0050A8E8.f1F0 */
-void func_003BA740(int a, int i) {
-    struct sA8E8Chan *e = &D_0050AAD8[i];
-    struct sA8E8Bus *q = func_003B8218(a, e->f24);
-    e->f62[a] = (e->f60[a] * e->f61[a] * q->f02) >> 6;
+void func_003BA740(int busIndex, int i) {
+    struct sA8E8Chan *channel = &D_0050AAD8[i];
+    struct sA8E8Bus *busRec = func_003B8218(busIndex, channel->f24);
+    channel->f62[busIndex] = (channel->f60[busIndex] * channel->f61[busIndex] * busRec->f02) >> 6;
 }
 #endif
 
@@ -6636,7 +6636,7 @@ extern unsigned char D_0044C480_A888[] __asm__("D_0044C480");
  */
 int func_003BA888(int x) {
     int scale = 0x1000;
-    int t;
+    int tableIndex;
     while (x >= 1200) {
         x -= 1200;
         scale <<= 1;
@@ -6645,13 +6645,13 @@ int func_003BA888(int x) {
         x += 1200;
         scale >>= 1;
     }
-    t = (x * 13981) >> 16;
-    if (t <= -0x100)
-        t = -0xFF;
-    if (t < 0)
-        scale = (scale * (D_0044C480_A888[t + 0x100] + 0x100)) >> 9;
+    tableIndex = (x * 13981) >> 16;
+    if (tableIndex <= -0x100)
+        tableIndex = -0xFF;
+    if (tableIndex < 0)
+        scale = (scale * (D_0044C480_A888[tableIndex + 0x100] + 0x100)) >> 9;
     else
-        scale = (scale * (D_0044C480_A888[t] + 0x100)) >> 8;
+        scale = (scale * (D_0044C480_A888[tableIndex] + 0x100)) >> 8;
     return scale;
 }
 #endif
@@ -6710,22 +6710,22 @@ extern struct G_AA00 D_0050A8E8_AA00[] __asm__("D_0050A8E8");
  * Start with *pos = -1. A channel without a patch key (+0x26) yields only itself; otherwise every later channel with
  * the same key, busy (state 1) and holding a handle is returned in turn.
  *
- * @param h  the sound's channel
+ * @param chanIndex  the sound's channel
  * @param pos  in/out: the last channel returned
  * @return 1 while there is another channel, else 0
  */
-int func_003BAA00(int h, int *pos) {
-    struct E_AA00 *e = &D_0050A8E8_AA00[0].tab[h];
-    unsigned char t = e->type;
-    if (t != 0) {
+int func_003BAA00(int chanIndex, int *pos) {
+    struct E_AA00 *chanEntry = &D_0050A8E8_AA00[0].tab[chanIndex];
+    unsigned char patchKey = chanEntry->type;
+    if (patchKey != 0) {
         (*pos)++;
         while (*pos < D_0050A8E8_AA00[0].cnt) {
-            e = &D_0050A8E8_AA00[0].tab[*pos];
-            if (e->type == t && e->b == 1 && e->w >= 0) return 1;
+            chanEntry = &D_0050A8E8_AA00[0].tab[*pos];
+            if (chanEntry->type == patchKey && chanEntry->b == 1 && chanEntry->w >= 0) return 1;
             (*pos)++;
         }
     } else if (*pos < 0) {
-        *pos = h;
+        *pos = chanIndex;
         return 1;
     }
     return 0;
@@ -7341,32 +7341,32 @@ int func_003BB588_impl(int *self, int *cur, int a2, int a3, signed char *pos) __
  * several share the new key with the last as master (+0x27).
  *
  * @param cur  the patch
- * @param a2  the bank handle
- * @param a3  the patch number
+ * @param bankHandle  the bank handle
+ * @param patchNum  the patch number
  * @param pos  the play options
  * @return the last sound handle, -9 when nothing played, or -8
  */
-int func_003BB588_impl(int *self, int *cur, int a2, int a3, signed char *pos) {
+int func_003BB588_impl(int *self, int *cur, int bankHandle, int patchNum, signed char *pos) {
     struct Rec_B588 rec;
     int ids[12];
     int n;
-    int m;
+    int startedCount;
     int i;
     int k;
-    char *e;
+    char *chanEntry;
     int ret;
     int first;
-    int h;
+    int masterDetune;
     int x;
     int y;
     int tag;
     int more;
 
     n = 0;
-    e = 0;
+    chanEntry = 0;
     ret = -9;
     first = 0;
-    h = 0;
+    masterDetune = 0;
     if (cur == 0) {
         return -8;
     }
@@ -7381,12 +7381,12 @@ int func_003BB588_impl(int *self, int *cur, int a2, int a3, signed char *pos) {
         more = f_AAC0_B588(&cur, &rec);
         if (!first) {
             if (rec.id) {
-                h = f_72A0_B588(rec.id);
+                masterDetune = f_72A0_B588(rec.id);
             }
             first = 1;
         }
         if (x >= (signed char)rec.x0 && x <= (signed char)rec.x1 && y >= (signed char)rec.y0 && y <= (signed char)rec.y1) {
-            ret = f_B140_B588(a2, a3, self, pos, &rec, y, x, h);
+            ret = f_B140_B588(bankHandle, patchNum, self, pos, &rec, y, x, masterDetune);
             if (ret < 0) {
                 goto fail;
             }
@@ -7395,9 +7395,9 @@ int func_003BB588_impl(int *self, int *cur, int a2, int a3, signed char *pos) {
         }
     } while (more);
 
-    m = n;
+    startedCount = n;
     n = 0;
-    for (i = 0; i < m; i++) {
+    for (i = 0; i < startedCount; i++) {
         if (f_8AB8_B588(ids[i]) == 0) {
             ids[n++] = ids[i];
         }
@@ -7408,20 +7408,20 @@ int func_003BB588_impl(int *self, int *cur, int a2, int a3, signed char *pos) {
     if (n == 1) {
         k = f_A6E8_B588(ids[0]);
         if (k >= 0) {
-            e = D_0050AAD8_B588 + k * 140;
-            e[0x26] = 0;
-            e[0x27] = 0;
+            chanEntry = D_0050AAD8_B588 + k * 140;
+            chanEntry[0x26] = 0;
+            chanEntry[0x27] = 0;
         }
     } else {
         for (i = 0; i < n; i++) {
             k = f_A6E8_B588(ids[i]);
             if (k >= 0) {
-                e = D_0050A8E8_B588.ents + k * 140;
-                e[0x26] = tag;
-                e[0x27] = 0;
+                chanEntry = D_0050A8E8_B588.ents + k * 140;
+                chanEntry[0x26] = tag;
+                chanEntry[0x27] = 0;
             }
         }
-        e[0x27] = 1;
+        chanEntry[0x27] = 1;
     }
     return ret;
 fail:
@@ -7641,10 +7641,10 @@ extern unsigned short D_0050ABC8_BDA0[][6] __asm__("D_0050ABC8");
  * @param extra  receives the sample description (frames first)
  */
 void func_003BBDA0(int unused, int src, unsigned char *hdr, char *out, int *extra) {
-    int a[43];
-    int c[43];
-    int d[46];
-    int b[46];
+    int commonVals[43];
+    int commonPtrs[43];
+    int platformVals[46];
+    int platformPtrs[46];
     struct Rec_BDA0 rec;
     int i;
     int k;
@@ -7656,19 +7656,19 @@ void func_003BBDA0(int unused, int src, unsigned char *hdr, char *out, int *extr
     f_7218_BDA0(out);
     rec.p = src + 8;
     for (i = 42; i >= 0; i--) {
-        c[i] = 0;
+        commonPtrs[i] = 0;
     }
     for (i = 45; i >= 0; i--) {
-        b[i] = 0;
+        platformPtrs[i] = 0;
     }
-    d[2] = 1;
-    d[4] = 48000;
-    d[0x20] = 10;
-    d[5] = 0;
+    platformVals[2] = 1;
+    platformVals[4] = 48000;
+    platformVals[0x20] = 10;
+    platformVals[5] = 0;
     while (f_7388_BDA0(&rec) != 0) {
         if (rec.id < 43) {
-            a[rec.id] = rec.v1;
-            c[rec.id] = rec.v2;
+            commonVals[rec.id] = rec.v1;
+            commonPtrs[rec.id] = rec.v2;
             if (rec.id == 20) {
                 ((struct O_BDA0 *)out)->a[k] = rec.v2;
                 ((struct O_BDA0 *)out)->b[k] = rec.v3;
@@ -7680,14 +7680,14 @@ void func_003BBDA0(int unused, int src, unsigned char *hdr, char *out, int *extr
             }
             break;
         } else {
-            d[rec.id - 0x80] = rec.v1;
-            b[rec.id - 0x80] = rec.v2;
+            platformVals[rec.id - 0x80] = rec.v1;
+            platformPtrs[rec.id - 0x80] = rec.v2;
         }
     }
-    hdr[2] = d[2];
-    hdr[3] = d[0x20];
-    *(unsigned short *)hdr = d[4];
-    *extra = d[5];
+    hdr[2] = platformVals[2];
+    hdr[3] = platformVals[0x20];
+    *(unsigned short *)hdr = platformVals[4];
+    *extra = platformVals[5];
     *(short *)(out + 8) = 4;
     out[7] = 3;
     for (i = 0; i < hdr[2]; i++) {
@@ -7743,12 +7743,12 @@ extern unsigned char* D_0050AC38[];
  * out[i] = speaker table i (D_0050AC38) at the azimuth's high byte / 255, for each configured speaker (options speaker
  * count). Called by func_003C38E0.
  *
- * @param a  the azimuth (16 bits a turn)
+ * @param azimuth  the azimuth (16 bits a turn)
  * @param out  receives one gain per speaker
  */
-void func_003BC4C0(int a, float* out)
+void func_003BC4C0(int azimuth, float* out)
 {
-    int idx = (a & 0xFFFF) >> 8;
+    int idx = (azimuth & 0xFFFF) >> 8;
     int i;
     for (i = 0; i < D_0050A8E8.setup.cfg.f27; i++) {
         out[i] = (float)D_0050AC38[i][idx] / 255.0f;
@@ -7789,11 +7789,11 @@ extern unsigned short D_0044C590_C570[128] __asm__("D_0044C590");
 /**
  * Converts a MIDI pan (0..127) to an azimuth through the table D_0044C590.
  *
- * @param arg0  the pan
+ * @param pan  the pan
  * @return the azimuth
  */
-unsigned short func_003BC570(int arg0) {
-    return D_0044C590_C570[arg0];
+unsigned short func_003BC570(int pan) {
+    return D_0044C590_C570[pan];
 }
 #endif
 
@@ -7809,12 +7809,12 @@ extern int D_0050AC50[];
  * Each of the six state words (D_0050AC50) becomes its constant (D_0044C690) plus the seed. The init func_003B5158
  * passes the options' seed field.
  *
- * @param arg0  the seed
+ * @param seed  the seed
  */
-void func_003BC588(int arg0) {
+void func_003BC588(int seed) {
     int i;
     for (i = 0; i < 6; i++) {
-        D_0050AC50[i] = D_0044C690[i] + arg0;
+        D_0050AC50[i] = D_0044C690[i] + seed;
     }
 }
 #endif
@@ -7835,38 +7835,38 @@ extern unsigned int D_0050AC50_C5C8[6] __asm__("D_0050AC50");
  * @return the new first state word
  */
 unsigned int func_003BC5C8(void) {
-    unsigned int s, c, n;
+    unsigned int runningSum, carryBit, n;
 
-    s = D_0050AC50_C5C8[5] + D_0050AC50_C5C8[4];
-    c = 0;
-    if (s < D_0050AC50_C5C8[5] || s < D_0050AC50_C5C8[4]) {
-        c = 1;
+    runningSum = D_0050AC50_C5C8[5] + D_0050AC50_C5C8[4];
+    carryBit = 0;
+    if (runningSum < D_0050AC50_C5C8[5] || runningSum < D_0050AC50_C5C8[4]) {
+        carryBit = 1;
     }
-    D_0050AC50_C5C8[4] = s;
-    s = s + D_0050AC50_C5C8[3] + c;
-    c = s < D_0050AC50_C5C8[3];
-    D_0050AC50_C5C8[3] = s;
-    s = s + D_0050AC50_C5C8[2] + c;
-    c = s < D_0050AC50_C5C8[2];
-    D_0050AC50_C5C8[2] = s;
+    D_0050AC50_C5C8[4] = runningSum;
+    runningSum = runningSum + D_0050AC50_C5C8[3] + carryBit;
+    carryBit = runningSum < D_0050AC50_C5C8[3];
+    D_0050AC50_C5C8[3] = runningSum;
+    runningSum = runningSum + D_0050AC50_C5C8[2] + carryBit;
+    carryBit = runningSum < D_0050AC50_C5C8[2];
+    D_0050AC50_C5C8[2] = runningSum;
     n = ++D_0050AC50_C5C8[5];
-    s = s + D_0050AC50_C5C8[1] + c;
-    c = s < D_0050AC50_C5C8[1];
-    D_0050AC50_C5C8[1] = s;
-    s = s + D_0050AC50_C5C8[0] + c;
-    D_0050AC50_C5C8[0] = s;
+    runningSum = runningSum + D_0050AC50_C5C8[1] + carryBit;
+    carryBit = runningSum < D_0050AC50_C5C8[1];
+    D_0050AC50_C5C8[1] = runningSum;
+    runningSum = runningSum + D_0050AC50_C5C8[0] + carryBit;
+    D_0050AC50_C5C8[0] = runningSum;
     if (n == 0) {
         if (++D_0050AC50_C5C8[4] == 0) {
             if (++D_0050AC50_C5C8[3] == 0) {
                 if (++D_0050AC50_C5C8[2] == 0) {
                     if (++D_0050AC50_C5C8[1] == 0) {
-                        s = ++D_0050AC50_C5C8[0];
+                        runningSum = ++D_0050AC50_C5C8[0];
                     }
                 }
             }
         }
     }
-    return s;
+    return runningSum;
 }
 #endif
 
@@ -7888,30 +7888,30 @@ extern struct G_C6B8 D_0050A8E8_C6B8[] __asm__("D_0050A8E8");
  * recomputes it (func_003BA938, func_003C25E0). Quirk: a channel already at that bend, or one without a bend range,
  * makes it return 0 at once, skipping the rest of the group.
  *
- * @param arg0  the sound handle
- * @param arg1  the bend (0x40 = centre)
+ * @param soundHandle  the sound handle
+ * @param bend  the bend (0x40 = centre)
  * @return the channel index, -8 for a dead handle, or 0
  */
-int func_003BC6B8(int arg0, int arg1) {
-    int sp0;
-    int r = f_A6E8_C6B8();
-    char *e;
-    if (r >= 0) {
-        sp0 = -1;
-        while (f_AA00_C6B8(r, &sp0) != 0) {
-            e = D_0050A8E8_C6B8[0].tab + sp0 * 140;
-            if (*(char *)(e + 0x64) == arg1)
+int func_003BC6B8(int soundHandle, int bend) {
+    int setChan;
+    int chanIndex = f_A6E8_C6B8();
+    char *channel;
+    if (chanIndex >= 0) {
+        setChan = -1;
+        while (f_AA00_C6B8(chanIndex, &setChan) != 0) {
+            channel = D_0050A8E8_C6B8[0].tab + setChan * 140;
+            if (*(char *)(channel + 0x64) == bend)
                 return 0;
-            if (*(short *)(e + 0x82) != 0) {
-                *(short *)(e + 0x86) = 0;
-                *(char *)(e + 0x64) = arg1;
-                f_A938_C6B8(sp0);
-                f_25E0_C6B8(sp0);
+            if (*(short *)(channel + 0x82) != 0) {
+                *(short *)(channel + 0x86) = 0;
+                *(char *)(channel + 0x64) = bend;
+                f_A938_C6B8(setChan);
+                f_25E0_C6B8(setChan);
             } else
                 return 0;
         }
     }
-    return r;
+    return chanIndex;
 }
 #endif
 

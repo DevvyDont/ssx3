@@ -448,10 +448,10 @@ struct sDmCmd5DD8 {
 };
 
 /**
- * Appends a video entry of category @p a1 to the NIS list, then sets up the next script if the list is running.
+ * Appends a video entry of category @p videoCategory to the NIS list, then sets up the next script if the list is running.
  *
  * Returns 0 when the five-entry buffer is full (func_00283C58). The entry (category, script index -1, control bits
- * @p a2, no handle, AI rider indexes -1) is pushed with func_00283C80. When the list is active (state +0xA4 nonzero)
+ * @p controlBits, no handle, AI rider indexes -1) is pushed with func_00283C80. When the list is active (state +0xA4 nonzero)
  * and nothing is pending yet (+0xBC < 0), the new entry is set up as the pending one (tNISList_SetupNextScript), and if
  * the list is playing (3) while the head's script player (cBXScriptEngine_GetRequestPlayerByReqHandle) is ending
  * (mPlayState 4), func_002776E0 checks whether to wait for it.
@@ -459,19 +459,19 @@ struct sDmCmd5DD8 {
  * Quirk: unlike func_00275ED0 and func_00276048 it does not test whether the head entry is a video before asking for
  * its script player.
  *
- * @param a1  the video category
- * @param a2  the entry's control bits
+ * @param videoCategory  the video category
+ * @param controlBits  the entry's control bits
  * @return 1 when queued, 0 when the list is full
  */
-extern "C" int func_00275DD8(char* self, int a1, int a2)
+extern "C" int func_00275DD8(char* self, int videoCategory, int controlBits)
 {
     if (func_00283C58(self + 0xC) != 0) {
         return 0;
     }
     sDmCmd5DD8 cmd;
-    cmd.a1 = a1;
+    cmd.a1 = videoCategory;
     cmd.id = -1;
-    cmd.a2 = a2;
+    cmd.a2 = controlBits;
     cmd.field_0xC = -1;
     cmd.a4 = -1;
     cmd.a5 = -1;
@@ -523,7 +523,7 @@ struct sDmCmd5ED0 {
 };
 
 /**
- * Appends a script entry of category @p a1 to the NIS list, then sets up the next script if the list is running.
+ * Appends a script entry of category @p scriptCategory to the NIS list, then sets up the next script if the list is running.
  *
  * Returns 0 when the buffer is full (func_00283C58). With @p lookup set, the script is chosen now
  * (cSSXScriptEngine_SelectScriptFromCategory with the three AI rider indexes) and a failed choice returns 0; otherwise
@@ -531,29 +531,29 @@ struct sDmCmd5ED0 {
  * list with nothing pending sets the new entry up as pending; while playing, if the head (a video: func_00283BB8 on the
  * video engine; a script: its player in mPlayState 4) is ending, func_002776E0 checks whether to wait for it.
  *
- * @param a1  the script category
- * @param a2  the entry's control bits
+ * @param scriptCategory  the script category
+ * @param controlBits  the entry's control bits
  * @param lookup  nonzero to choose the script now
- * @param a4  the main AI rider index
- * @param a5  the first supporting AI rider index
- * @param a6  the second supporting AI rider index
+ * @param aiCharIndexMain  the main AI rider index
+ * @param aiCharIndexSupport0  the first supporting AI rider index
+ * @param aiCharIndexSupport1  the second supporting AI rider index
  * @return 1 when queued, 0 when full or no script was found
  */
-extern "C" int func_00275ED0(char* self, int a1, int a2, int lookup, int a4, int a5, int a6)
+extern "C" int func_00275ED0(char* self, int scriptCategory, int controlBits, int lookup, int aiCharIndexMain, int aiCharIndexSupport0, int aiCharIndexSupport1)
 {
     if (func_00283C58(self + 0xC) != 0) {
         return 0;
     }
     sDmCmd5ED0 cmd;
-    cmd.a1 = a1;
+    cmd.a1 = scriptCategory;
     cmd.id = -1;
-    cmd.a2 = a2;
+    cmd.a2 = controlBits;
     cmd.field_0xC = -1;
-    cmd.a4 = a4;
-    cmd.a5 = a5;
-    cmd.a6 = a6;
+    cmd.a4 = aiCharIndexMain;
+    cmd.a5 = aiCharIndexSupport0;
+    cmd.a6 = aiCharIndexSupport1;
     if (lookup != 0) {
-        int id = cSSXScriptEngine_SelectScriptFromCategory(*(void**)self, a1, a4, a5, a6);
+        int id = cSSXScriptEngine_SelectScriptFromCategory(*(void**)self, scriptCategory, aiCharIndexMain, aiCharIndexSupport0, aiCharIndexSupport1);
         if (id < 0) {
             return 0;
         }
@@ -609,32 +609,32 @@ struct sDmCmd6048 {
 };
 
 /**
- * Appends the script with master-table index @p a1 to the NIS list, then sets up the next script if the list is
+ * Appends the script with master-table index @p scriptIndex to the NIS list, then sets up the next script if the list is
  * running.
  *
- * Returns 0 when the buffer is full (func_00283C58). The entry has category 0x1C (no category), script index @p a1, no
+ * Returns 0 when the buffer is full (func_00283C58). The entry has category 0x1C (no category), script index @p scriptIndex, no
  * handle and the given control bits and AI rider indexes. After the push the follow-up matches func_00275ED0: an active
  * list with nothing pending sets the new entry up, and an ending head while playing triggers func_002776E0.
  *
- * @param a1  the script's master-table index
- * @param a2  the entry's control bits
- * @param a3  the main AI rider index
- * @param a4  the first supporting AI rider index
- * @param a5  the second supporting AI rider index
+ * @param scriptIndex  the script's master-table index
+ * @param controlBits  the entry's control bits
+ * @param aiCharIndexMain  the main AI rider index
+ * @param aiCharIndexSupport0  the first supporting AI rider index
+ * @param aiCharIndexSupport1  the second supporting AI rider index
  * @return 1 when queued, 0 when the list is full
  */
-extern "C" int func_00276048(char* self, int a1, int a2, int a3, int a4, int a5)
+extern "C" int func_00276048(char* self, int scriptIndex, int controlBits, int aiCharIndexMain, int aiCharIndexSupport0, int aiCharIndexSupport1)
 {
     if (func_00283C58(self + 0xC) == 0) {
         void* list = self + 0xC;
         sDmCmd6048 cmd;
         cmd.type = 0x1C;
         cmd.id = -1;
-        cmd.a2 = a2;
-        cmd.a1 = a1;
-        cmd.a3 = a3;
-        cmd.a4 = a4;
-        cmd.a5 = a5;
+        cmd.a2 = controlBits;
+        cmd.a1 = scriptIndex;
+        cmd.a3 = aiCharIndexMain;
+        cmd.a4 = aiCharIndexSupport0;
+        cmd.a5 = aiCharIndexSupport1;
         func_00283C80(list, &cmd);
         if (*(int*)(self + 0xA4) != 0 && *(int*)(self + 0xBC) < 0) {
         *(int*)(self + 0xBC) = tNISList_SetupNextScript(self, func_00283D28_count(list) - 1, 0);
@@ -941,14 +941,14 @@ extern "C" void* func_00277C08(void*, int, int);
 INCLUDE_ASM("scripter/datamanager", func_002766B0__FPvi);
 #ifdef SKIP_ASM
 /**
- * Pauses or resumes a NIS list: func_00277C08(self, @p a1, 0).
+ * Pauses or resumes a NIS list: func_00277C08(self, @p pauseList, 0).
  *
- * @param a1  nonzero to pause, 0 to resume
+ * @param pauseList  nonzero to pause, 0 to resume
  * @return func_00277C08's return register (it returns nothing)
  */
-void* func_002766B0(void* self, int a1)
+void* func_002766B0(void* self, int pauseList)
 {
-    return func_00277C08(self, a1, 0);
+    return func_00277C08(self, pauseList, 0);
 }
 #endif
 
@@ -2247,19 +2247,19 @@ extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard)
         return;
     }
     if (hard == 0) {
-        int c = self->pauseCount;
+        int prevPauses = self->pauseCount;
         if (on) {
-            self->pauseCount = c + 1;
-            if (c != 0) {
+            self->pauseCount = prevPauses + 1;
+            if (prevPauses != 0) {
                 return;
             }
         } else {
-            if (c <= 0) {
+            if (prevPauses <= 0) {
                 return;
             }
-            int d = c - 1;
-            self->pauseCount = d;
-            if (d != 0) {
+            int remainingPauses = prevPauses - 1;
+            self->pauseCount = remainingPauses;
+            if (remainingPauses != 0) {
                 return;
             }
         }
@@ -2287,9 +2287,9 @@ extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard)
         }
         if (self->f4) {
             func_002EA8B8(SSXApp->Game->CutSceneTransitionMan, 1);
-            char* p = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
-            if (*(int*)(p + 0x44)) {
-                func_002E4638(p, 1);
+            char* transitionMan = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
+            if (*(int*)(transitionMan + 0x44)) {
+                func_002E4638(transitionMan, 1);
             }
         }
     } else {
@@ -2303,9 +2303,9 @@ extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard)
         }
         if (self->f4) {
             func_002EA8B8(SSXApp->Game->CutSceneTransitionMan, 0);
-            char* p = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
-            if (*(int*)(p + 0x44)) {
-                func_002E4638(p, 0);
+            char* transitionMan = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
+            if (*(int*)(transitionMan + 0x44)) {
+                func_002E4638(transitionMan, 0);
             }
         }
     }

@@ -259,11 +259,11 @@ struct sVEnt_5638 {
  */
 extern "C" int func_00345638(void* self)
 {
-    char* s = (char*)self;
+    char* nodeBytes = (char*)self;
     cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
     sVEnt_5638* vt = (sVEnt_5638*)w->mVtbl;
-    return vt[93].fn((char*)w + vt[93].delta, sV4_5638(*(float*)(s + 0x6C), *(float*)(s + 0x70), *(float*)(s + 0x74), 1.0f),
-                  sV4_5638(*(float*)(s + 0x78), *(float*)(s + 0x7C), *(float*)(s + 0x80), 1.0f),
+    return vt[93].fn((char*)w + vt[93].delta, sV4_5638(*(float*)(nodeBytes + 0x6C), *(float*)(nodeBytes + 0x70), *(float*)(nodeBytes + 0x74), 1.0f),
+                  sV4_5638(*(float*)(nodeBytes + 0x78), *(float*)(nodeBytes + 0x7C), *(float*)(nodeBytes + 0x80), 1.0f),
                   ((cWorld_5638*)w)->v43()) != 1;
 }
 #endif

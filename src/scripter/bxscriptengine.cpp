@@ -230,40 +230,40 @@ struct sBXThread21A0 {
  * virtual at vtable slot 7 (cSSXScriptEngine_OnDataUnavailable) is asked to fetch it, and on refusal the request goes
  * to state 7, is reset with func_00282C88, and -1 is returned. Otherwise the request is ready (state 2, index at +0x8):
  * an InSeq player is readied (cInSeq_ReadyPlayer, cInSeq_GetPlayer on mpInSeq), stored at +0x0 and given the request as
- * user data (func_00274C10), and the script's lock count (+0x4) goes up. @p arg is stored at +0xC.
+ * user data (func_00274C10), and the script's lock count (+0x4) goes up. @p userData is stored at +0xC.
  *
  * Likely bug: func_00282C38 returns 0 when all 16 requests are in use, and the result is used unchecked.
  *
  * @param idx  the script index
- * @param arg  user data stored with the request
+ * @param userData  user data stored with the request
  * @return the request handle (+0x1C), or -1 when the data cannot be had
  */
-extern "C" int func_002821A0(void* self, int idx, int arg)
+extern "C" int func_002821A0(void* self, int idx, int userData)
 {
-    sBXSlot21A0* s = &(*(sBXSlot21A0**)((char*)self + 0x2B0))[idx];
-    sBXThread21A0* t = (sBXThread21A0*)func_00282C38(self, 1);
-    if (s->data == 0) {
+    sBXSlot21A0* scriptState = &(*(sBXSlot21A0**)((char*)self + 0x2B0))[idx];
+    sBXThread21A0* request = (sBXThread21A0*)func_00282C38(self, 1);
+    if (scriptState->data == 0) {
         int one = 1;
-        t->pending = idx;
-        t->state = one;
-        t->f12 = one;
-        sBxsVEntry21A0* e = &(*(sBxsVEntry21A0**)((char*)self + 0x2A8))[7];
-        if (e->fn((char*)self + e->delta, idx) == 0) {
-            t->state = 7;
-            func_00282C88(self, t);
+        request->pending = idx;
+        request->state = one;
+        request->f12 = one;
+        sBxsVEntry21A0* vtableEntry = &(*(sBxsVEntry21A0**)((char*)self + 0x2A8))[7];
+        if (vtableEntry->fn((char*)self + vtableEntry->delta, idx) == 0) {
+            request->state = 7;
+            func_00282C88(self, request);
             return -1;
         }
     } else {
-        t->slot = idx;
-        t->state = 2;
-        int id = cInSeq_ReadyPlayer(*(void**)((char*)self + 0x2B8), s->data);
+        request->slot = idx;
+        request->state = 2;
+        int id = cInSeq_ReadyPlayer(*(void**)((char*)self + 0x2B8), scriptState->data);
         void* obj = cInSeq_GetPlayer_2(*(void**)((char*)self + 0x2B8), id);
-        t->owner = obj;
-        func_00274C10(obj, (int)t);
-        s->uses++;
+        request->owner = obj;
+        func_00274C10(obj, (int)request);
+        scriptState->uses++;
     }
-    t->arg = arg;
-    return t->result;
+    request->arg = userData;
+    return request->result;
 }
 #endif
 
@@ -581,8 +581,8 @@ extern "C" int func_00282540_impl(sScriptEngine_282540* self, int id)
     switch (s->state) {
     case 1:
         {
-            sTblEnt_282540* t = self->tbl + s->f14;
-            if (t->f0 == 0) {
+            sTblEnt_282540* loadingState = self->tbl + s->f14;
+            if (loadingState->f0 == 0) {
                 VCALL1(self, 8, s->f14);
             }
         }
@@ -603,8 +603,8 @@ extern "C" int func_00282540_impl(sScriptEngine_282540* self, int id)
         cInSeq_RecyclePlayer(self->mgr, *s->obj);
     }
     if (s->tblIdx >= 0) {
-        sTblEnt_282540* e = self->tbl + s->tblIdx;
-        if (--e->refs == 0) {
+        sTblEnt_282540* scriptState = self->tbl + s->tblIdx;
+        if (--scriptState->refs == 0) {
             VCALL1(self, 9, s->tblIdx);
         }
     }
@@ -879,23 +879,23 @@ struct sBXThread282908 {
  */
 extern "C" void func_00282908(void* self, void* script)
 {
-    sBXThread282908* t = (sBXThread282908*)script;
-    int idx = t->pending;
-    sBXSlot282908* s = &(*(sBXSlot282908**)((char*)self + 0x2B0))[idx];
-    if (s->data == 0) return;
-    t->slot = idx;
-    t->pending = -1;
-    t->state = 2;
-    t->f12 = 0;
-    int id = cInSeq_ReadyPlayer(*(void**)((char*)self + 0x2B8), s->data);
+    sBXThread282908* request = (sBXThread282908*)script;
+    int idx = request->pending;
+    sBXSlot282908* scriptState = &(*(sBXSlot282908**)((char*)self + 0x2B0))[idx];
+    if (scriptState->data == 0) return;
+    request->slot = idx;
+    request->pending = -1;
+    request->state = 2;
+    request->f12 = 0;
+    int id = cInSeq_ReadyPlayer(*(void**)((char*)self + 0x2B8), scriptState->data);
     void* obj = cInSeq_GetPlayer_2(*(void**)((char*)self + 0x2B8), id);
-    t->owner = obj;
-    func_00274C10(obj, (int)t);
-    if (t->time > 0.0f) {
-        func_00274808(t->owner, t->time);
-        t->time = 0.0f;
+    request->owner = obj;
+    func_00274C10(obj, (int)request);
+    if (request->time > 0.0f) {
+        func_00274808(request->owner, request->time);
+        request->time = 0.0f;
     }
-    s->uses++;
+    scriptState->uses++;
 }
 #endif
 
@@ -980,21 +980,21 @@ public:
  *
  * Lists up to 30 candidate entities for the entity's owner player (its mpOwner's mID) with func_0027D578 and returns
  * the first whose virtual at slot 5 (the entity match test, e.g. cScriptObjRider_IsMatchingEntity) accepts (@p ctx,
- * @p arg).
+ * @p entityType).
  *
  * @param ctx  the InSeq player entity (cScriptPlayerEntity)
- * @param arg  the entity type passed to the match test
+ * @param entityType  the entity type passed to the match test
  * @return the matching script entity, or 0
  */
-extern "C" cBxsHandler2A80* func_00282A80(void* self, void* ctx, int arg)
+extern "C" cBxsHandler2A80* func_00282A80(void* self, void* ctx, int entityType)
 {
     cBxsHandler2A80* buf[30];
     cBxsHandler2A80* found = 0;
     int n = func_0027D578(self, **(int**)((char*)ctx + 0x8), (void**)buf, 30);
     for (int i = 0; i < n; i++) {
-        cBxsHandler2A80* h = buf[i];
-        if (h->v05(ctx, arg)) {
-            found = h;
+        cBxsHandler2A80* candidate = buf[i];
+        if (candidate->v05(ctx, entityType)) {
+            found = candidate;
             break;
         }
     }

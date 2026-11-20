@@ -1937,16 +1937,16 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
     switch (id) {
     case 40: case 41: case 42: case 43: case 44: case 45: case 46: case 47: case 48: case 49: case 50:
     case 51: case 52: case 53: case 54: case 55: case 56: case 57: case 58: case 59: case 60: {
-        void* o = cSSXScriptEngine_GetSubjectRider((cSSXScriptEngine*)self, id - 40, (int)obj);
-        if (o != 0)
-            cSSXScriptEngine_FillOrientationFromRiderOrientationInfo_v(self, o, pos, baseRotX, baseRotY, baseRotZ);
+        void* subjectRider = cSSXScriptEngine_GetSubjectRider((cSSXScriptEngine*)self, id - 40, (int)obj);
+        if (subjectRider != 0)
+            cSSXScriptEngine_FillOrientationFromRiderOrientationInfo_v(self, subjectRider, pos, baseRotX, baseRotY, baseRotZ);
         break;
     }
     case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12:
     case 13: case 14: case 15: case 16: case 17: case 18: {
-        void* o = cSSXScriptEngine_GetSubjectRider((cSSXScriptEngine*)self, id + 2, (int)obj);
-        if (o != 0)
-            cSSXScriptEngine_FillOrientationFromStartPointInfo_v(self, o, pos, baseRotX, baseRotY, baseRotZ);
+        void* subjectRider = cSSXScriptEngine_GetSubjectRider((cSSXScriptEngine*)self, id + 2, (int)obj);
+        if (subjectRider != 0)
+            cSSXScriptEngine_FillOrientationFromStartPointInfo_v(self, subjectRider, pos, baseRotX, baseRotY, baseRotZ);
         break;
     }
     case 25:
@@ -1954,36 +1954,36 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         ((float*)pos)[2] -= 1000.0f;
         {
             sVec_27A0D8 n;
-            sVec_27A0D8 p;
-            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &p, &n))
-                pos->z = p.z;
+            sVec_27A0D8 groundHit;
+            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
+                pos->z = groundHit.z;
         }
         break;
     case 26:
         cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 2, pos, baseRotX, baseRotY, baseRotZ, 50, 0);
         {
             sVec_27A0D8 n;
-            sVec_27A0D8 p;
-            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &p, &n))
-                pos->z = p.z;
+            sVec_27A0D8 groundHit;
+            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
+                pos->z = groundHit.z;
         }
         break;
     case 27:
         cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 3, pos, baseRotX, baseRotY, baseRotZ, 50, 0);
         {
             sVec_27A0D8 n;
-            sVec_27A0D8 p;
-            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &p, &n))
-                pos->z = p.z;
+            sVec_27A0D8 groundHit;
+            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
+                pos->z = groundHit.z;
         }
         break;
     case 28:
         cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 4, pos, baseRotX, baseRotY, baseRotZ, 50, 0);
         {
             sVec_27A0D8 n;
-            sVec_27A0D8 p;
-            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &p, &n))
-                pos->z = p.z;
+            sVec_27A0D8 groundHit;
+            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
+                pos->z = groundHit.z;
         }
         break;
     case 29:
@@ -2006,9 +2006,9 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 9, pos, baseRotX, baseRotY, baseRotZ, 50, 0);
         {
             sVec_27A0D8 n;
-            sVec_27A0D8 p;
-            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &p, &n))
-                pos->z = p.z;
+            sVec_27A0D8 groundHit;
+            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
+                pos->z = groundHit.z;
         }
         break;
     case 32:
@@ -2021,9 +2021,9 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, id - 22, pos, baseRotX, baseRotY, baseRotZ, 50, 0);
         {
             sVec_27A0D8 n;
-            sVec_27A0D8 p;
-            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &p, &n))
-                pos->z = p.z;
+            sVec_27A0D8 groundHit;
+            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
+                pos->z = groundHit.z;
         }
         break;
     case 37: case 38: case 39:
@@ -2033,9 +2033,9 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 7, pos, baseRotX, baseRotY, baseRotZ, 50, 0);
         {
             sVec_27A0D8 n;
-            sVec_27A0D8 p;
-            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &p, &n))
-                pos->z = p.z;
+            sVec_27A0D8 groundHit;
+            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
+                pos->z = groundHit.z;
         }
         break;
     case 20: case 21: case 22: {
@@ -2051,8 +2051,8 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
             D_004D3770[2].z = 280.0f;
             D_004A51D8 = 1;
         }
-        sV3_27A0D8* t = &D_004D3680[id];
-        sVec_27A0D8 off(t->x, t->y, t->z, 0.0f);
+        sV3_27A0D8* anchorOffset = &D_004D3680[id];
+        sVec_27A0D8 off(anchorOffset->x, anchorOffset->y, anchorOffset->z, 0.0f);
         cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 0, pos, baseRotX, baseRotY, baseRotZ, 50, &off);
         break;
     }
@@ -2060,9 +2060,9 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 0, pos, baseRotX, baseRotY, baseRotZ, 50, 0);
         {
             sVec_27A0D8 n;
-            sVec_27A0D8 p;
-            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &p, &n))
-                pos->z = p.z;
+            sVec_27A0D8 groundHit;
+            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
+                pos->z = groundHit.z;
         }
         break;
     case 24:
@@ -3395,17 +3395,17 @@ extern "C" void func_0027BDB8_def(void* self, int* flags, int p0, int p1, int p2
  * Fills @p flags[0..20] with the character bit of the rider in each script role slot, 0 for an empty slot.
  *
  * Riders come from the game's AI rider set (SSXApp->Game->AI); a rider's bit is D_00481BB0[cRider_getIdentity(rider)].
- * Slots 0-2 take the riders at @p p0, @p p1 and @p p2 of the list at +0x28 (skipped when negative); slots 3-4 the first
+ * Slots 0-2 take the riders at @p mainCharAIIndex, @p supportChar0AIIndex and @p supportChar1AIIndex of the list at +0x28 (skipped when negative); slots 3-4 the first
  * two of the list at +0x40 (count +0x7C); 5-9 the list at +0x48 (count +0x80); 10-14 the list at +0x5C (count +0x84);
  * 15-20 the list at +0x28 in order (count +0x78). The last three lists hold objects whose rider is at +0x18.
  *
  * @param flags  receives 21 character bits
- * @param p0  the main character's AI index
- * @param p1  the first supporting character's AI index
- * @param p2  the second supporting character's AI index
+ * @param mainCharAIIndex  the main character's AI index
+ * @param supportChar0AIIndex  the first supporting character's AI index
+ * @param supportChar1AIIndex  the second supporting character's AI index
  */
 // Fills the 21 per-slot team flags of the script engine from the current rider set.
-extern "C" void func_0027BDB8_def(void* self, int* flags, int p0, int p1, int p2)
+extern "C" void func_0027BDB8_def(void* self, int* flags, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
 {
     sRiderSet_BDB8* set = (sRiderSet_BDB8*)SSXApp->Game->AI;
     int numA = set->numA;
@@ -3415,16 +3415,16 @@ extern "C" void func_0027BDB8_def(void* self, int* flags, int p0, int p1, int p2
         flags[i] = 0;
         switch (i) {
         case 0:
-            if (p0 >= 0)
-                flags[i] = D_00481BB0[cRider_getIdentity(set->players[p0])];
+            if (mainCharAIIndex >= 0)
+                flags[i] = D_00481BB0[cRider_getIdentity(set->players[mainCharAIIndex])];
             break;
         case 1:
-            if (p1 >= 0)
-                flags[i] = D_00481BB0[cRider_getIdentity(set->players[p1])];
+            if (supportChar0AIIndex >= 0)
+                flags[i] = D_00481BB0[cRider_getIdentity(set->players[supportChar0AIIndex])];
             break;
         case 2:
-            if (p2 >= 0)
-                flags[i] = D_00481BB0[cRider_getIdentity(set->players[p2])];
+            if (supportChar1AIIndex >= 0)
+                flags[i] = D_00481BB0[cRider_getIdentity(set->players[supportChar1AIIndex])];
             break;
         case 3:
         case 4:
@@ -3654,17 +3654,17 @@ extern "C" void func_00274318(int, int);
 extern "C" int func_00274D90();
 
 /**
- * Returns the custom header of variation @p arg2 of entity @p arg1 in camera script data @p self: finds the entity's
+ * Returns the custom header of variation @p variationIndex of entity @p entityIndex in camera script data @p self: finds the entity's
  * block with func_00274D90 (the data and index pass through in the argument registers) and reads the header with
  * func_00274318.
  *
  * The C declares no return value; func_00274318's result is left in the return register.
  *
- * @param arg1  the entity index
- * @param arg2  the variation index
+ * @param entityIndex  the entity index
+ * @param variationIndex  the variation index
  */
-extern "C" void func_0027C0C0(void* self, void* arg1, int arg2) {
-    func_00274318(func_00274D90(), arg2);
+extern "C" void func_0027C0C0(void* self, void* entityIndex, int variationIndex) {
+    func_00274318(func_00274D90(), variationIndex);
 }
 #endif
 
@@ -3743,17 +3743,17 @@ extern "C" void func_00274318(int, int);
 extern "C" int func_00274D90();
 
 /**
- * Returns the custom header of variation @p arg2 of entity @p arg1 in camera script data @p self: finds the entity's
+ * Returns the custom header of variation @p variationIndex of entity @p entityIndex in camera script data @p self: finds the entity's
  * block with func_00274D90 (the data and index pass through in the argument registers) and reads the header with
  * func_00274318.
  *
  * The C declares no return value; func_00274318's result is left in the return register.
  *
- * @param arg1  the entity index
- * @param arg2  the variation index
+ * @param entityIndex  the entity index
+ * @param variationIndex  the variation index
  */
-extern "C" void func_0027C2D0(void* self, void* arg1, int arg2) {
-    func_00274318(func_00274D90(), arg2);
+extern "C" void func_0027C2D0(void* self, void* entityIndex, int variationIndex) {
+    func_00274318(func_00274D90(), variationIndex);
 }
 #endif
 
@@ -3832,17 +3832,17 @@ extern "C" void func_00274318(int, int);
 extern "C" int func_00274D90();
 
 /**
- * Returns the custom header of variation @p arg2 of entity @p arg1 in camera script data @p self: finds the entity's
+ * Returns the custom header of variation @p variationIndex of entity @p entityIndex in camera script data @p self: finds the entity's
  * block with func_00274D90 (the data and index pass through in the argument registers) and reads the header with
  * func_00274318.
  *
  * The C declares no return value; func_00274318's result is left in the return register.
  *
- * @param arg1  the entity index
- * @param arg2  the variation index
+ * @param entityIndex  the entity index
+ * @param variationIndex  the variation index
  */
-extern "C" void func_0027C4E0(void* self, void* arg1, int arg2) {
-    func_00274318(func_00274D90(), arg2);
+extern "C" void func_0027C4E0(void* self, void* entityIndex, int variationIndex) {
+    func_00274318(func_00274D90(), variationIndex);
 }
 #endif
 
@@ -3920,17 +3920,17 @@ extern "C" void func_00274318(int, int);
 extern "C" int func_00274D90();
 
 /**
- * Returns the custom header of variation @p arg2 of entity @p arg1 in camera script data @p self: finds the entity's
+ * Returns the custom header of variation @p variationIndex of entity @p entityIndex in camera script data @p self: finds the entity's
  * block with func_00274D90 (the data and index pass through in the argument registers) and reads the header with
  * func_00274318.
  *
  * The C declares no return value; func_00274318's result is left in the return register.
  *
- * @param arg1  the entity index
- * @param arg2  the variation index
+ * @param entityIndex  the entity index
+ * @param variationIndex  the variation index
  */
-extern "C" void func_0027C6C8(void* self, void* arg1, int arg2) {
-    func_00274318(func_00274D90(), arg2);
+extern "C" void func_0027C6C8(void* self, void* entityIndex, int variationIndex) {
+    func_00274318(func_00274D90(), variationIndex);
 }
 #endif
 
@@ -4008,17 +4008,17 @@ extern "C" void func_00274318(int, int);
 extern "C" int func_00274D90();
 
 /**
- * Returns the custom header of variation @p arg2 of entity @p arg1 in camera script data @p self: finds the entity's
+ * Returns the custom header of variation @p variationIndex of entity @p entityIndex in camera script data @p self: finds the entity's
  * block with func_00274D90 (the data and index pass through in the argument registers) and reads the header with
  * func_00274318.
  *
  * The C declares no return value; func_00274318's result is left in the return register.
  *
- * @param arg1  the entity index
- * @param arg2  the variation index
+ * @param entityIndex  the entity index
+ * @param variationIndex  the variation index
  */
-extern "C" void func_0027C8B0(void* self, void* arg1, int arg2) {
-    func_00274318(func_00274D90(), arg2);
+extern "C" void func_0027C8B0(void* self, void* entityIndex, int variationIndex) {
+    func_00274318(func_00274D90(), variationIndex);
 }
 #endif
 
@@ -4091,17 +4091,17 @@ extern "C" void func_00274318(int, int);
 extern "C" int func_00274D90();
 
 /**
- * Returns the custom header of variation @p arg2 of entity @p arg1 in actor script data @p self: finds the entity's
+ * Returns the custom header of variation @p variationIndex of entity @p entityIndex in actor script data @p self: finds the entity's
  * block with func_00274D90 (the data and index pass through in the argument registers) and reads the header with
  * func_00274318.
  *
  * The C declares no return value; func_00274318's result is left in the return register.
  *
- * @param arg1  the entity index
- * @param arg2  the variation index
+ * @param entityIndex  the entity index
+ * @param variationIndex  the variation index
  */
-extern "C" void func_0027C980(void* self, void* arg1, int arg2) {
-    func_00274318(func_00274D90(), arg2);
+extern "C" void func_0027C980(void* self, void* entityIndex, int variationIndex) {
+    func_00274318(func_00274D90(), variationIndex);
 }
 #endif
 
@@ -4297,20 +4297,20 @@ struct sScrOwnersCEA8 {
 /**
  * Adds a script object to the database and registers its script entities; returns the object's ID.
  *
- * Stores @p o in the first free of the 20 mpObjectDatabase slots, then registers each of its script entities (its
+ * Stores @p scriptObject in the first free of the 20 mpObjectDatabase slots, then registers each of its script entities (its
  * virtual GetScriptEntity, slot 7, for 0 to its slot 6 count) with func_0027D330 under that ID.
  *
  * Likely bug: with all 20 slots taken the object is not stored, yet its entities are registered under ID 20 and 20 is
  * returned.
  *
  * @param engine  the script database (the script engine)
- * @param o  the script object
+ * @param scriptObject  the script object
  * @return the object ID (slot index)
  */
-extern "C" int func_0027CEA8(void* engine, void* o)
+extern "C" int func_0027CEA8(void* engine, void* scriptObject)
 {
     sScrOwnersCEA8* self = (sScrOwnersCEA8*)engine;
-    cScriptOwnerCEA8* obj = (cScriptOwnerCEA8*)o;
+    cScriptOwnerCEA8* obj = (cScriptOwnerCEA8*)scriptObject;
     int i;
     for (i = 0; i < 20; i++) {
         if (self->owners[i] == 0) {
@@ -6073,10 +6073,10 @@ extern "C" void func_002807B0(sSeEngine07B0* self)
         if (id >= 0) {
             cBankMonitor_BANKMONITOR_StopHandle(*(char**)*(char**)((char*)cAudioInterface_bxAudio() + 0x118) + 0x1D8, id, 1, 0.0f);
         }
-        sSeSound07B0* s = &self->sounds[i];
-        s->field_0x8 = -1;
-        s->id = -1;
-        s->field_0x4 = 0;
+        sSeSound07B0* soundSlot = &self->sounds[i];
+        soundSlot->field_0x8 = -1;
+        soundSlot->id = -1;
+        soundSlot->field_0x4 = 0;
     }
     func_0027CC28(self->owner, &info);
     if (info.active != 0) {
@@ -6262,11 +6262,11 @@ struct sSeEngine_08E8 {
  * Likely bug: the abort list holds 20 entries and its count is never checked.
  *
  * @param obj  the InSeq player entity
- * @param unused  the entity type (unused)
+ * @param entityType  the entity type (unused)
  * @param when  the current frame
  * @param flags  the event bits
  */
-extern "C" void func_002808E8(sSeEngine_08E8* self, void* obj, int unused, float when, int flags)
+extern "C" void func_002808E8(sSeEngine_08E8* self, void* obj, int entityType, float when, int flags)
 {
     sSeInfo_08E8 info;
     func_0027CC28(obj, &info);
@@ -6280,9 +6280,9 @@ extern "C" void func_002808E8(sSeEngine_08E8* self, void* obj, int unused, float
     }
     int i;
     for (i = 0; i < info.nLinks; i++) {
-        sSeLink_08E8* l = &info.links[i];
-        cWScriptMan_runFunc(cWScriptMan_TheWScriptMan, owner, l->a);
-        int id = *l->b;
+        sSeLink_08E8* worldEvent = &info.links[i];
+        cWScriptMan_runFunc(cWScriptMan_TheWScriptMan, owner, worldEvent->a);
+        int id = *worldEvent->b;
         if (id != D_004A525C) {
             int found = 0;
             int j;
@@ -6307,15 +6307,15 @@ extern "C" void func_002808E8(sSeEngine_08E8* self, void* obj, int unused, float
     }
     sWtSnd_08E8* snd = (sWtSnd_08E8*)cAudioInterface_bxAudio();
     for (i = 0; i < info.nStops; i++) {
-        sSeCmd_08E8* c = &info.stops[i];
-        int id = c->id;
+        sSeCmd_08E8* audioEvent = &info.stops[i];
+        int id = audioEvent->id;
         if (id != 0xFF) {
             func_0028E8C0(snd, id, 0);
         }
     }
     for (i = 0; i < info.nCmds; i++) {
-        sSeCmd_08E8* c = &info.cmds[i];
-        int id = c->id;
+        sSeCmd_08E8* audioEvent = &info.cmds[i];
+        int id = audioEvent->id;
         if (id != 17) {
             if (id == 0x10) {
                 self->field_0xF4 = 1;
@@ -6331,69 +6331,69 @@ extern "C" void func_002808E8(sSeEngine_08E8* self, void* obj, int unused, float
                 self->sounds[i].count = 1;
             }
         }
-        for (sSfxEnt_08E8* e = info.sfx; e != 0; e = e->next) {
-            self->sounds[e->slot].count = 0;
+        for (sSfxEnt_08E8* soundEntry = info.sfx; soundEntry != 0; soundEntry = soundEntry->next) {
+            self->sounds[soundEntry->slot].count = 0;
         }
     }
     if (flags & 1) {
-        for (sSfxEnt_08E8* e = info.sfx; e != 0; e = e->next) {
-            if ((float)e->when < when)
+        for (sSfxEnt_08E8* soundEntry = info.sfx; soundEntry != 0; soundEntry = soundEntry->next) {
+            if ((float)soundEntry->when < when)
                 break;
-            int slot = e->slot;
+            int slot = soundEntry->slot;
             int play = 1;
             if (self->sounds[slot].id >= 0) {
                 play = 0;
-                if (self->sounds[slot].target != e->id) {
+                if (self->sounds[slot].target != soundEntry->id) {
                     cBankMonitor_BANKMONITOR_StopHandle((char*)*snd->cur + 0x1D8, self->sounds[slot].id, 1, 0.0f);
                     play = 1;
                 }
             }
             if (play) {
-                int a, type;
-                func_00281000(self, e->id, &a, &type);
+                int gameSoundIndex, type;
+                func_00281000(self, soundEntry->id, &gameSoundIndex, &type);
                 int tp = type;
-                int ar = a;
-                sWtTrack_08E8* t = snd->track;
-                sWtSub_08E8* sb = &t->sub;
-                t->sub.cur++;
-                sb->ents[t->sub.cur] = sb->cfg;
-                t->sub.arr24[t->sub.cur] = 0;
-                sb->p34[t->sub.cur] = 0;
-                sb->p38[t->sub.cur] = sb->ents[t->sub.cur].b0;
-                sb->p3C[t->sub.cur] = 0;
-                func_00416210((char*)sb + t->sub.cur * 8 + 0x40, 0, 8);
-                sb->p60[t->sub.cur] = 0;
-                sb->p64[t->sub.cur] = 0;
-                sb->p68[t->sub.cur] = 0;
-                sb->p6C[t->sub.cur] = 0;
-                sb->p70[t->sub.cur].f4 = 0;
-                sb->p70[t->sub.cur].f0 = 100;
-                sb->p70[t->sub.cur].f8 = 90;
-                sb->p70[t->sub.cur].fC = 50;
-                sb->p74[t->sub.cur] = 0;
-                sb->p80[t->sub.cur] = 0;
-                sb->p84[t->sub.cur] = 0;
-                sb->p78[t->sub.cur] = 0x7F;
-                sb->p7C[t->sub.cur] = 1;
+                int ar = gameSoundIndex;
+                sWtTrack_08E8* pushSystem = snd->track;
+                sWtSub_08E8* sb = &pushSystem->sub;
+                pushSystem->sub.cur++;
+                sb->ents[pushSystem->sub.cur] = sb->cfg;
+                pushSystem->sub.arr24[pushSystem->sub.cur] = 0;
+                sb->p34[pushSystem->sub.cur] = 0;
+                sb->p38[pushSystem->sub.cur] = sb->ents[pushSystem->sub.cur].b0;
+                sb->p3C[pushSystem->sub.cur] = 0;
+                func_00416210((char*)sb + pushSystem->sub.cur * 8 + 0x40, 0, 8);
+                sb->p60[pushSystem->sub.cur] = 0;
+                sb->p64[pushSystem->sub.cur] = 0;
+                sb->p68[pushSystem->sub.cur] = 0;
+                sb->p6C[pushSystem->sub.cur] = 0;
+                sb->p70[pushSystem->sub.cur].f4 = 0;
+                sb->p70[pushSystem->sub.cur].f0 = 100;
+                sb->p70[pushSystem->sub.cur].f8 = 90;
+                sb->p70[pushSystem->sub.cur].fC = 50;
+                sb->p74[pushSystem->sub.cur] = 0;
+                sb->p80[pushSystem->sub.cur] = 0;
+                sb->p84[pushSystem->sub.cur] = 0;
+                sb->p78[pushSystem->sub.cur] = 0x7F;
+                sb->p7C[pushSystem->sub.cur] = 1;
                 snd->types[snd->track->sub.cur] = tp;
                 snd->args[snd->track->sub.cur] = ar;
                 {
-                    sWtTrack_08E8* t2 = *snd->cur;
-                    sWtSub_08E8* s2 = &t2->sub;
-                    s2->p38[t2->sub.cur] = *e->vol;
-                    s2->ents[t2->sub.cur].b0 = MAX_08E8(MIN_08E8(s2->p38[s2->cur], 0x7F), 0);
+                    sWtTrack_08E8* volumeSystem = *snd->cur;
+                    sWtSub_08E8* s2 = &volumeSystem->sub;
+                    s2->p38[volumeSystem->sub.cur] = *soundEntry->vol;
+                    s2->ents[volumeSystem->sub.cur].b0 = MAX_08E8(MIN_08E8(s2->p38[s2->cur], 0x7F), 0);
                 }
                 {
                     sWtTrack_08E8** pt = snd->cur;
-                    int h = func_00287968(snd, 4, 0);
-                    (*pt)->sub.p3C[(*pt)->sub.cur] = h;
+                    int volumeSetting = func_00287968(snd, 4, 0);
+                    (*pt)->sub.p3C[(*pt)->sub.cur] = volumeSetting;
                 }
                 {
-                    sWtTrack_08E8* t3 = *snd->cur;
-                    t3->sub.p64[t3->sub.cur] = 0;
+                    sWtTrack_08E8* resetSystem = *snd->cur;
+                    resetSystem->sub.p64[resetSystem->sub.cur] = 0;
                 }
                 self->sounds[slot].id = cBankSys_SFX_End(snd);
-                self->sounds[slot].target = e->id;
+                self->sounds[slot].target = soundEntry->id;
                 self->sounds[slot].count = 0;
             }
         }

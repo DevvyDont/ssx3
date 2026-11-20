@@ -1020,8 +1020,8 @@ extern "C" void func_0030A3A0(void* self, void* obj)
             (*(cWScriptCtl**)((char*)obj + 0xC))->v21(obj);
         }
     } else {
-        func_0030A3A0_sType* t = *(func_0030A3A0_sType**)(*(char**)(*(char**)((char*)self + 0x28C) + 0x4) + 0x4);
-        bool isScript = t[*(unsigned char*)((char*)obj + 0x78)].type == 3;
+        func_0030A3A0_sType* instTypes = *(func_0030A3A0_sType**)(*(char**)(*(char**)((char*)self + 0x28C) + 0x4) + 0x4);
+        bool isScript = instTypes[*(unsigned char*)((char*)obj + 0x78)].type == 3;
         if (isScript) {
             if (func_0030A270(self, (int)obj) != 0) {
                 func_0030A298(self, (int)obj);
@@ -1617,32 +1617,32 @@ struct func_0030ADA8_sCall {
 /**
  * Runs a piece of world script code for a script task, discarding its result.
  *
- * Makes @p obj the current task (+0x2A8) and runs a Luno value built from @p a2 (func_00226600) in a fresh Luno VM
+ * Makes @p obj the current task (+0x2A8) and runs a Luno value built from @p scriptCode (func_00226600) in a fresh Luno VM
  * against the local table (+0x1C) of the task's process (+0x3C). Without a local table a temporary one is allocated
  * ("SetupLocalTable"), used and destroyed. The current task and the current instance (+0x290) are restored afterwards.
  *
  * @param obj  the script task
- * @param a2  the script code
+ * @param scriptCode  the script code
  */
-extern "C" void func_0030ADA8(void* self, void* obj, int a2)
+extern "C" void func_0030ADA8(void* self, void* obj, int scriptCode)
 {
-    func_0030ADA8_sValue arg;
+    func_0030ADA8_sValue codeVar;
     func_0030ADA8_sValue ret;
     func_0030ADA8_sCall call;
     int savedId;
     void* savedObj = *(void**)((char*)self + 0x2A8);
     *(void**)((char*)self + 0x2A8) = obj;
     savedId = *(int*)((char*)self + 0x290);
-    func_00226600(&arg, a2, 0);
+    func_00226600(&codeVar, scriptCode, 0);
     ret.type = 0;
     ret.word0 = 0;
     luno_cLunoVM_cLunoVM(&call);
     void* table = *(void**)(*(char**)(*(char**)((char*)self + 0x2A8) + 0x3C) + 0x1C);
     if (table != 0) {
-        luno_cLunoVM_run(&call, &arg, table, &ret);
+        luno_cLunoVM_run(&call, &codeVar, table, &ret);
     } else {
         table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_SetupLocalTable, 0x20000000, 0), 8);
-        luno_cLunoVM_run(&call, &arg, table, &ret);
+        luno_cLunoVM_run(&call, &codeVar, table, &ret);
         if (table != 0) {
             luno_cLunoTable__cLunoTable(table, 3);
         }
@@ -1707,12 +1707,12 @@ struct sScriptFlags_AF08 {
  * Returns field @p which of the current trick definition (+0x29C, packed bit fields): fields 0-11 and 13-15; field 12,
  * any other index and a missing definition give 0.
  *
- * @param a1  the being (unused)
+ * @param beingIndex  the being (unused)
  * @param which  the field index
  * @return the field value
  */
 // Reads one packed script setting; 0 when no settings block is loaded.
-extern "C" int func_0030AF08(void* self, int a1, int which)
+extern "C" int func_0030AF08(void* self, int beingIndex, int which)
 {
     sScriptFlags_AF08* fl = *(sScriptFlags_AF08**)((char*)self + 0x29C);
     if (fl != 0) {
@@ -2039,12 +2039,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030B320);
  */
 extern "C" void* func_0030B320(void* self, int id)
 {
-    void* p = *(void**)self;
-    while (p != 0) {
-        if (*(int*)((char*)p + 0x20) == id) {
-            return p;
+    void* process = *(void**)self;
+    while (process != 0) {
+        if (*(int*)((char*)process + 0x20) == id) {
+            return process;
         }
-        p = *(void**)((char*)p + 0x18);
+        process = *(void**)((char*)process + 0x18);
     }
     return 0;
 }
@@ -2092,10 +2092,10 @@ extern "C" func_0030B388_cObj* func_0030B388(void* self, unsigned int id)
 {
     func_0030B388_cObj* result = 0;
     if (id != 0xFFFFFFFF) {
-        func_0030B388_cObj* p = (func_0030B388_cObj*)func_0030B320(self, id);
-        if (p != 0) {
-            if (p->v03()) {
-                result = p;
+        func_0030B388_cObj* process = (func_0030B388_cObj*)func_0030B320(self, id);
+        if (process != 0) {
+            if (process->v03()) {
+                result = process;
             }
         }
     }
@@ -2717,10 +2717,10 @@ extern "C" void func_0030BB10(sWSManBB10* self, void* stream)
     for (j = 0; j < 50; j++) {
         if (self->objs[j] != 0) {
             sWSVtVBB10* vtEntry = &(*(sWSVtVBB10**)stream)[1];
-            int r;
+            int scriptBase;
             vtEntry->fn((char*)stream + vtEntry->delta, &j, 4);
-            r = cWScriptCache_getScriptBase(*(void**)(self->world + 4), j);
-            func_002257E0(self->objs[j], stream, r);
+            scriptBase = cWScriptCache_getScriptBase(*(void**)(self->world + 4), j);
+            func_002257E0(self->objs[j], stream, scriptBase);
         }
     }
 }
@@ -3246,15 +3246,15 @@ public:
 };
 
 /**
- * Writes collect pool @p a into a replay stream: its 0x10C bytes through the stream's virtual slot 1.
+ * Writes collect pool @p collectPool into a replay stream: its 0x10C bytes through the stream's virtual slot 1.
  *
- * @param a  the collect pool
+ * @param collectPool  the collect pool
  * @param obj  the replay stream
  * @return the stream call's result
  */
-extern "C" int func_0030C6C8(void* a, func_0030C6C8_cObj* obj)
+extern "C" int func_0030C6C8(void* collectPool, func_0030C6C8_cObj* obj)
 {
-    return obj->v01(a, 268);
+    return obj->v01(collectPool, 268);
 }
 #endif
 
@@ -3269,15 +3269,15 @@ public:
 };
 
 /**
- * Reads collect pool @p a from a replay stream: its 0x10C bytes through the stream's virtual slot 2.
+ * Reads collect pool @p collectPool from a replay stream: its 0x10C bytes through the stream's virtual slot 2.
  *
- * @param a  the collect pool
+ * @param collectPool  the collect pool
  * @param obj  the replay stream
  * @return the stream call's result
  */
-extern "C" int func_0030C700(void* a, func_0030C700_cObj* obj)
+extern "C" int func_0030C700(void* collectPool, func_0030C700_cObj* obj)
 {
-    return obj->v02(a, 268);
+    return obj->v02(collectPool, 268);
 }
 #endif
 
