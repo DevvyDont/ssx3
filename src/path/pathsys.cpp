@@ -419,43 +419,43 @@ struct sPathSys_B880 {
  * (+0xC, 0x40 bytes each; stored at +0x24) and the track path array (+0x14, 0x3C bytes each; stored at +0x20), so it
  * must run after those are loaded. cPathSys_resolvePaths calls it last.
  *
- * @param p  the file data at the startpoint count
+ * @param cursor  the file data at the startpoint count
  * @return the number of bytes consumed
  */
-extern "C" int func_0026B880(sPathSys_B880* self, char* p)
+extern "C" int func_0026B880(sPathSys_B880* self, char* cursor)
 {
-    int tmp;
-    int a;
-    int b;
-    char* start = p;
-    pathREAD_tInt32(&tmp, p);
-    p += 4;
-    self->nodes = (sPathNode_B880*)p;
-    self->count = tmp;
+    int fileWord;
+    int aiPathIndex;
+    int trackPathIndex;
+    char* start = cursor;
+    pathREAD_tInt32(&fileWord, cursor);
+    cursor += 4;
+    self->nodes = (sPathNode_B880*)cursor;
+    self->count = fileWord;
     for (int i = 0; i < self->count; i++) {
-        pathREAD_tInt32(&self->nodes[i].id, p);
-        p += 4;
-        pathREAD_tInt32(&tmp, p);
-        p += 4;
-        func_0026BA48(self->nodes[i].pos, p);
-        p += 0xC;
-        func_0026BA48(self->nodes[i].dir, p);
-        p += 0xC;
-        pathREAD_tInt32(&a, p);
-        p += 4;
-        pathREAD_tInt32(&b, p);
-        p += 4;
+        pathREAD_tInt32(&self->nodes[i].id, cursor);
+        cursor += 4;
+        pathREAD_tInt32(&fileWord, cursor);
+        cursor += 4;
+        func_0026BA48(self->nodes[i].pos, cursor);
+        cursor += 0xC;
+        func_0026BA48(self->nodes[i].dir, cursor);
+        cursor += 0xC;
+        pathREAD_tInt32(&aiPathIndex, cursor);
+        cursor += 4;
+        pathREAD_tInt32(&trackPathIndex, cursor);
+        cursor += 4;
         self->nodes[i].type = 0;
         for (int j = 0; j < 3; j++) {
-            if (D_00445428[j] == tmp) {
+            if (D_00445428[j] == fileWord) {
                 self->nodes[i].type = j;
                 break;
             }
         }
-        self->nodes[i].f24 = self->fC + a * 0x40;
-        self->nodes[i].f20 = self->f14 + b * 0x3C;
+        self->nodes[i].f24 = self->fC + aiPathIndex * 0x40;
+        self->nodes[i].f20 = self->f14 + trackPathIndex * 0x3C;
     }
-    return p - start;
+    return cursor - start;
 }
 #endif
 
@@ -750,11 +750,11 @@ INCLUDE_ASM("path/pathsys", func_0026C400);
 /**
  * Returns a path's event array (+0x4, On Tour Events).
  *
- * @param arg0  the path
+ * @param path  the path
  * @return the 16-byte event nodes
  */
-extern "C" int func_0026C400(void *arg0) {
-    return (*(int *)((char*)(arg0) + (4)));
+extern "C" int func_0026C400(void *path) {
+    return (*(int *)((char*)(path) + (4)));
 }
 #endif
 //100%
@@ -763,11 +763,11 @@ INCLUDE_ASM("path/pathsys", func_0026C408);
 /**
  * Returns a path's event count (+0x0, On Tour NumEvents).
  *
- * @param arg0  the path
+ * @param path  the path
  * @return the number of events
  */
-extern "C" int func_0026C408(int *arg0) {
-    return *arg0;
+extern "C" int func_0026C408(int *path) {
+    return *path;
 }
 #endif
 
@@ -801,11 +801,11 @@ INCLUDE_ASM("path/pathsys", func_0026C420);
 /**
  * Returns an AI path's attribute word (+0x38, On Tour PathAttributes).
  *
- * @param arg0  the AI path
+ * @param aiPath  the AI path
  * @return the attributes
  */
-extern "C" int func_0026C420(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x38)));
+extern "C" int func_0026C420(void *aiPath) {
+    return (*(int *)((char*)(aiPath) + (0x38)));
 }
 #endif
 //100%
@@ -814,11 +814,11 @@ INCLUDE_ASM("path/pathsys", func_0026C428);
 /**
  * Returns an AI path's reset-path flag (+0x3C, On Tour IsResetPath).
  *
- * @param arg0  the AI path
+ * @param aiPath  the AI path
  * @return nonzero for a reset path
  */
-extern "C" int func_0026C428(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x3C)));
+extern "C" int func_0026C428(void *aiPath) {
+    return (*(int *)((char*)(aiPath) + (0x3C)));
 }
 #endif
 //100%
@@ -827,11 +827,11 @@ INCLUDE_ASM("path/pathsys", func_0026C430);
 /**
  * Returns a track path's base distance left (+0x38, On Tour BaseDistanceLeft), the float cTrackPath_populateData reads.
  *
- * @param arg0  the track path
+ * @param trackPath  the track path
  * @return the distance
  */
-extern "C" float func_0026C430(void *arg0) {
-    return (*(float *)((char*)(arg0) + (0x38)));
+extern "C" float func_0026C430(void *trackPath) {
+    return (*(float *)((char*)(trackPath) + (0x38)));
 }
 #endif
 

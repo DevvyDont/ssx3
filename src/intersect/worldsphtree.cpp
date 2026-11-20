@@ -2363,7 +2363,7 @@ extern "C" void func_00335128_typed(sCurveObj_335128* pSplineSeg, sBox_00334680*
     sV_335128 lastp;
     const float kTopSplit = 0.6180340051651001f;
     const float kBottomSplit = 1.0f - kTopSplit;
-    float f0, f1, f2, f3;
+    float dist0, dist1, dist2, dist3;
     float x0 = 0.0f;
     float x3 = 1.0f;
     sV_335128 nextp;
@@ -2374,13 +2374,13 @@ extern "C" void func_00335128_typed(sCurveObj_335128* pSplineSeg, sBox_00334680*
     for (i = 1; i < 5; i++) {
         nextp = splineEval_335128(pSplineSeg->m, i * 0.25f);
         tmp = Sub_335128(nextp, lastp);
-        float r = Dot_335128(Sub_335128(*intersectpos, lastp), tmp) / Dot_335128(tmp, tmp);
-        r = Clamp_335128(r, 1.0f);
-        tmp = Add_335128(lastp, Scale_335128(tmp, r));
-        float d = Length_335128(Sub_335128(*intersectpos, tmp));
-        if (d < cd) {
+        float chordFraction = Dot_335128(Sub_335128(*intersectpos, lastp), tmp) / Dot_335128(tmp, tmp);
+        chordFraction = Clamp_335128(chordFraction, 1.0f);
+        tmp = Add_335128(lastp, Scale_335128(tmp, chordFraction));
+        float chordDist = Length_335128(Sub_335128(*intersectpos, tmp));
+        if (chordDist < cd) {
             ci = i;
-            cd = d;
+            cd = chordDist;
         }
         lastp = nextp;
     }
@@ -2391,25 +2391,25 @@ extern "C" void func_00335128_typed(sCurveObj_335128* pSplineSeg, sBox_00334680*
     float x1 = x0 + (x3 - x0) * kBottomSplit;
     float x2 = x0 + (x3 - x0) * kTopSplit;
     lastp = splineEval_335128(pSplineSeg->m, x0);
-    f0 = Length_335128(Sub_335128(lastp, *intersectpos));
+    dist0 = Length_335128(Sub_335128(lastp, *intersectpos));
     lastp = splineEval_335128(pSplineSeg->m, x1);
-    f1 = Length_335128(Sub_335128(lastp, *intersectpos));
+    dist1 = Length_335128(Sub_335128(lastp, *intersectpos));
     lastp = splineEval_335128(pSplineSeg->m, x2);
-    f2 = Length_335128(Sub_335128(lastp, *intersectpos));
+    dist2 = Length_335128(Sub_335128(lastp, *intersectpos));
     lastp = splineEval_335128(pSplineSeg->m, x3);
-    f3 = Length_335128(Sub_335128(lastp, *intersectpos));
-    float lastd = f2;
+    dist3 = Length_335128(Sub_335128(lastp, *intersectpos));
+    float lastd = dist2;
     float lastt = x2;
     for (i = 0; i < 24 && !(Abs_335128(x3 - x0) <= 0.0005000000237487257f); i++) {
-        if (f2 < f1) {
+        if (dist2 < dist1) {
             x0 = x1;
             x1 = x2;
             x2 = x1 * kTopSplit + x3 * kBottomSplit;
             lastp = splineEval_335128(pSplineSeg->m, x2);
             float tmp = Length_335128(Sub_335128(lastp, *intersectpos));
-            f0 = f1;
-            f1 = f2;
-            f2 = tmp;
+            dist0 = dist1;
+            dist1 = dist2;
+            dist2 = tmp;
             lastt = x2;
             lastd = tmp;
         } else {
@@ -2418,9 +2418,9 @@ extern "C" void func_00335128_typed(sCurveObj_335128* pSplineSeg, sBox_00334680*
             x1 = x2 * kTopSplit + x0 * kBottomSplit;
             lastp = splineEval_335128(pSplineSeg->m, x1);
             float tmp = Length_335128(Sub_335128(lastp, *intersectpos));
-            f3 = f2;
-            f2 = f1;
-            f1 = tmp;
+            dist3 = dist2;
+            dist2 = dist1;
+            dist1 = tmp;
             lastt = x1;
             lastd = tmp;
         }
@@ -2844,28 +2844,28 @@ static inline int isBetter_00336850(sHit_00336850* a, sHit_00336850* b)
  * SSXApp->Game->BXNash by the camera (cCamera_avoidGround), the rider (cRider_putAt, cRider_GetNISEndPosition), the air
  * predictor and others.
  *
- * @param q  the query (On Tour cWorldIntersectType)
+ * @param intersectType  the query (On Tour cWorldIntersectType)
  * @param out  out: the chosen hit (0x80 bytes)
- * @param a3  passed through to func_00335D78 (On Tour tIntHint *hint; cCamera_avoidGround passes its intersection hint)
+ * @param hint  passed through to func_00335D78 (On Tour tIntHint *hint; cCamera_avoidGround passes its intersection hint)
  * @return the chosen hit's parameter, or -1.0
  */
-extern "C" float func_00336850(void* self, char* q, sHit_00336850* out, int a3)
+extern "C" float func_00336850(void* self, char* intersectType, sHit_00336850* out, int hint)
 {
     sHit_00336850 hits[64];
-    int n = func_00335D78(self, q, hits, 0x40, a3);
+    int n = func_00335D78(self, intersectType, hits, 0x40, hint);
     if (n == 0) {
         return -1.0f;
     }
     int best = 0;
-    sVEnt_00336850* vt = *(sVEnt_00336850**)(q + 0x50);
-    float ref = vt[3].fn(q + vt[3].delta);
+    sVEnt_00336850* vt = *(sVEnt_00336850**)(intersectType + 0x50);
+    float ref = vt[3].fn(intersectType + vt[3].delta);
     float bestDiff = absf_00336850(hits[0].dist - ref);
     for (int i = 1; i < n; i++) {
-        float d = absf_00336850(hits[i].dist - ref);
-        if (d < bestDiff) {
-            bestDiff = d;
+        float paramDiff = absf_00336850(hits[i].dist - ref);
+        if (paramDiff < bestDiff) {
+            bestDiff = paramDiff;
             best = i;
-        } else if (d == bestDiff) {
+        } else if (paramDiff == bestDiff) {
             if (isBetter_00336850(&hits[i], &hits[best])) {
                 best = i;
             }
@@ -2975,48 +2975,48 @@ extern "C" int func_003369D8(sCell_369D8* self, float* pos, sQuad_369D8* outP, s
     char seg[176];
     float lo = pos[2] - 100000.0f;
     float hi = pos[2] + 100000.0f;
-    float t = clamp_003369D8((pos[2] + 20.0f - lo) / (hi - lo), 0.0f, 1.0f);
+    float idealParam = clamp_003369D8((pos[2] + 20.0f - lo) / (hi - lo), 0.0f, 1.0f);
     {
-        sQuad_369D8 a;
-        a.x = pos[0];
-        a.y = pos[1];
-        a.z = lo;
-        a.w = 1.0f;
-        sQuad_369D8 b;
-        b.x = pos[0];
-        b.y = pos[1];
-        b.z = hi;
-        b.w = 1.0f;
-        cWorldLine_cWorldLine(seg, a, b, 2, t);
+        sQuad_369D8 lineStart;
+        lineStart.x = pos[0];
+        lineStart.y = pos[1];
+        lineStart.z = lo;
+        lineStart.w = 1.0f;
+        sQuad_369D8 lineEnd;
+        lineEnd.x = pos[0];
+        lineEnd.y = pos[1];
+        lineEnd.z = hi;
+        lineEnd.w = 1.0f;
+        cWorldLine_cWorldLine(seg, lineStart, lineEnd, 2, idealParam);
     }
     sHit_003369D8 hits[64];
-    sQuery_369D8 q;
-    q.seg = seg;
-    q.hits = hits;
-    q.max = 0x40;
+    sQuery_369D8 terrainQuery;
+    terrainQuery.seg = seg;
+    terrainQuery.hits = hits;
+    terrainQuery.max = 0x40;
     sTrav_369D8 tr;
-    q.count = &tr.count;
-    q.f10 = 0;
-    q.f14 = *(void**)((char*)self + 0xA4);
+    terrainQuery.count = &tr.count;
+    terrainQuery.f10 = 0;
+    terrainQuery.f14 = *(void**)((char*)self + 0xA4);
     tr.count = 0;
     tr.ctx.pos = pos;
     sCtx_369D8* ctx = &tr.ctx;
-    sCell_369D8* c0 = &self[0];
-    sCell_369D8* c1 = &self[1];
-    sCell_369D8* c2 = &self[2];
-    sCell_369D8* c3 = &self[3];
-    sCell_369D8* c4 = &self[4];
-    sCell_369D8* c5 = &self[5];
-    sCell_369D8* c6 = &self[6];
-    sCell_369D8* c7 = &self[7];
-    if (self[0].node) visit_003369D8(c0, &tr.ctx.flags[0], &q, ctx);
-    if (self[1].node) visit_003369D8(c1, &tr.ctx.flags[1], &q, ctx);
-    if (self[2].node) visit_003369D8(c2, &tr.ctx.flags[2], &q, ctx);
-    if (self[3].node) visit_003369D8(c3, &tr.ctx.flags[3], &q, ctx);
-    if (self[4].node) visit_003369D8(c4, &tr.ctx.flags[4], &q, ctx);
-    if (self[5].node) visit_003369D8(c5, &tr.ctx.flags[5], &q, ctx);
-    if (self[6].node) visit_003369D8(c6, &tr.ctx.flags[6], &q, ctx);
-    if (self[7].node) visit_003369D8(c7, &tr.ctx.flags[7], &q, ctx);
+    sCell_369D8* octant0 = &self[0];
+    sCell_369D8* octant1 = &self[1];
+    sCell_369D8* octant2 = &self[2];
+    sCell_369D8* octant3 = &self[3];
+    sCell_369D8* octant4 = &self[4];
+    sCell_369D8* octant5 = &self[5];
+    sCell_369D8* octant6 = &self[6];
+    sCell_369D8* octant7 = &self[7];
+    if (self[0].node) visit_003369D8(octant0, &tr.ctx.flags[0], &terrainQuery, ctx);
+    if (self[1].node) visit_003369D8(octant1, &tr.ctx.flags[1], &terrainQuery, ctx);
+    if (self[2].node) visit_003369D8(octant2, &tr.ctx.flags[2], &terrainQuery, ctx);
+    if (self[3].node) visit_003369D8(octant3, &tr.ctx.flags[3], &terrainQuery, ctx);
+    if (self[4].node) visit_003369D8(octant4, &tr.ctx.flags[4], &terrainQuery, ctx);
+    if (self[5].node) visit_003369D8(octant5, &tr.ctx.flags[5], &terrainQuery, ctx);
+    if (self[6].node) visit_003369D8(octant6, &tr.ctx.flags[6], &terrainQuery, ctx);
+    if (self[7].node) visit_003369D8(octant7, &tr.ctx.flags[7], &terrainQuery, ctx);
     if (tr.count == 0) {
         return 0;
     }
@@ -3024,11 +3024,11 @@ extern "C" int func_003369D8(sCell_369D8* self, float* pos, sQuad_369D8* outP, s
     int best = 0;
     float bestDiff = absf_003369D8(hits[0].p.z - ref);
     for (int i = 1; i < tr.count; i++) {
-        float d = absf_003369D8((hits + i)->p.z - ref);
-        if (d < bestDiff) {
-            bestDiff = d;
+        float heightDiff = absf_003369D8((hits + i)->p.z - ref);
+        if (heightDiff < bestDiff) {
+            bestDiff = heightDiff;
             best = i;
-        } else if (d == bestDiff) {
+        } else if (heightDiff == bestDiff) {
             if (isBetter_003369D8(hits + i, hits + best)) {
                 best = i;
             }
@@ -3421,9 +3421,9 @@ static inline void queryCell_337A48(sGrid_337A48* grid, int i, sBox_00334680* bo
 }
 
 /**
- * Finds the rails and spline segments of the Nash's octree near @p pos and records the nearest in @p a2.
+ * Finds the rails and spline segments of the Nash's octree near @p pos and records the nearest in @p intInfo.
  *
- * Builds a box of half-size @p r around @p pos and a spline query (the point, @p a2, @p mask, a hit flag, a distance,
+ * Builds a box of half-size @p testRadius around @p pos and a spline query (the point, @p intInfo, @p mask, a hit flag, a distance,
  * the box). For each of the eight octants with a root cell, nash_CellKey_proximitytest 0 (inside) walks the cell's
  * typed list (+0x28) and its children (func_003411B8); 2 (crossing) goes to func_0033ED60. Typed nodes of type 2 are
  * tested with cRailModifier_splineIntersect, type 3 with func_00348290, and type 1 (a spline segment whose owner's
@@ -3432,43 +3432,43 @@ static inline void queryCell_337A48(sGrid_337A48* grid, int i, sBox_00334680* bo
  *
  * @param grid  the Nash
  * @param pos  the point to test
- * @param a2  out: the nearest hit (On Tour intInfo)
+ * @param intInfo  out: the nearest hit (On Tour intInfo)
  * @param mask  which spline types to accept (On Tour splineFilterMask)
- * @param r  the test radius
+ * @param testRadius  the test radius
  * @return nonzero when a hit was recorded
  */
-extern "C" int func_00337A48(sGrid_337A48* grid, sWsVec4* pos, int a2, int mask, float r)
+extern "C" int func_00337A48(sGrid_337A48* grid, sWsVec4* pos, int intInfo, int mask, float testRadius)
 {
     sBox_00334680 box;
     sWsVec4 ext;
-    sQry_337A48 q;
+    sQry_337A48 splineQuery;
     int cnt;
     float dist;
     box.min = *pos;
     box.max = *pos;
-    ext.x = r;
-    ext.y = r;
-    ext.z = r;
+    ext.x = testRadius;
+    ext.y = testRadius;
+    ext.z = testRadius;
     ext.w = 0.0f;
     wsSubEq_334680(box.min, ext);
     wsAddEq_334680(box.max, ext);
     sBox_00334680* pbox = &box;
-    q.pos = pos;
-    q.a7 = a2;
-    q.mask = mask;
-    q.cnt = &cnt;
-    q.dist = &dist;
-    q.box = pbox;
+    splineQuery.pos = pos;
+    splineQuery.a7 = intInfo;
+    splineQuery.mask = mask;
+    splineQuery.cnt = &cnt;
+    splineQuery.dist = &dist;
+    splineQuery.box = pbox;
     dist = 0.0f;
     cnt = 0;
-    queryCell_337A48(grid, 0, pbox, &q);
-    queryCell_337A48(grid, 1, pbox, &q);
-    queryCell_337A48(grid, 2, pbox, &q);
-    queryCell_337A48(grid, 3, pbox, &q);
-    queryCell_337A48(grid, 4, pbox, &q);
-    queryCell_337A48(grid, 5, pbox, &q);
-    queryCell_337A48(grid, 6, pbox, &q);
-    queryCell_337A48(grid, 7, pbox, &q);
+    queryCell_337A48(grid, 0, pbox, &splineQuery);
+    queryCell_337A48(grid, 1, pbox, &splineQuery);
+    queryCell_337A48(grid, 2, pbox, &splineQuery);
+    queryCell_337A48(grid, 3, pbox, &splineQuery);
+    queryCell_337A48(grid, 4, pbox, &splineQuery);
+    queryCell_337A48(grid, 5, pbox, &splineQuery);
+    queryCell_337A48(grid, 6, pbox, &splineQuery);
+    queryCell_337A48(grid, 7, pbox, &splineQuery);
     return cnt;
 }
 #endif

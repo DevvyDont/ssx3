@@ -291,19 +291,19 @@ extern "C" const char* getDollarString(int id);
  */
 extern "C" void func_00184520(sWSMission4520* self)
 {
-    signed char b = self->p4C->rider->slot;
-    signed char a = self->p50->rider->slot;
+    signed char categoryIndex = self->p4C->rider->slot;
+    signed char trickIndex = self->p50->rider->slot;
     char buf[16];
-    sWSMEntry4520* tbl = func_0014FF90(cBE_getInterface_Fv(cBE_getBE(), 6), self->player, b, buf);
+    sWSMEntry4520* tbl = func_0014FF90(cBE_getInterface_Fv(cBE_getBE(), 6), self->player, categoryIndex, buf);
     void* screen = cList_first((cList*)self->list);
-    cUIText* t = (cUIText*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cost_num));
-    if (t != 0) {
-        cUIText_setAsciiString(t, getDollarString(tbl[a].id));
+    cUIText* costText = (cUIText*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cost_num));
+    if (costText != 0) {
+        cUIText_setAsciiString(costText, getDollarString(tbl[trickIndex].id));
     }
-    cUIText* t2 = (cUIText*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_have_num));
-    if (t2 != 0) {
+    cUIText* moneyText = (cUIText*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_have_num));
+    if (moneyText != 0) {
         signed char cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->player);
-        cUIText_setAsciiString(t2, getDollarString(cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->player, cid)));
+        cUIText_setAsciiString(moneyText, getDollarString(cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->player, cid)));
     }
 }
 #endif

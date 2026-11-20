@@ -304,13 +304,13 @@ public:
  *
  * cWScriptMan_update calls it for events flagged 0x10000.
  *
- * @param a1  the event
+ * @param event  the event
  */
-extern "C" void func_00307A10(cWScriptProcList* self, int a1)
+extern "C" void func_00307A10(cWScriptProcList* self, int event)
 {
     int i = self->cur;
     if (i < self->count) {
-        ((func_00307A10_cObj*)self->entries)[i].v03(a1);
+        ((func_00307A10_cObj*)self->entries)[i].v03(event);
     }
 }
 #endif
@@ -919,9 +919,9 @@ extern "C" void func_00308118(void* self, func_00308118_cStream* stream)
     int has;
     stream->v02(&has, 4);
     if (has) {
-        void* t = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_ProcessLocalTable, 0x20000000, 0), 8);
-        *(void**)((char*)self + 0x1C) = t;
-        luno_cLunoTable_readFromReplayFrame(t, stream, x);
+        void* localTable = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_ProcessLocalTable, 0x20000000, 0), 8);
+        *(void**)((char*)self + 0x1C) = localTable;
+        luno_cLunoTable_readFromReplayFrame(localTable, stream, x);
     }
     int i;
     for (i = 0; i < *(int*)((char*)self + 0x4); i++) {
@@ -1359,13 +1359,13 @@ public:
  *
  * func_00308038 calls it for each of a process's tasks.
  *
- * @param a  the task
+ * @param task  the task
  * @param obj  the replay frame
  * @return the frame call's result
  */
-extern "C" int func_00308760(void* a, func_00308760_cObj* obj)
+extern "C" int func_00308760(void* task, func_00308760_cObj* obj)
 {
-    return obj->v01(a, 4);
+    return obj->v01(task, 4);
 }
 #endif
 
@@ -1384,13 +1384,13 @@ public:
  *
  * func_00308118 calls it for each of a process's tasks.
  *
- * @param a  the task
+ * @param task  the task
  * @param obj  the replay frame
  * @return the frame call's result
  */
-extern "C" int func_00308798(void* a, func_00308798_cObj* obj)
+extern "C" int func_00308798(void* task, func_00308798_cObj* obj)
 {
-    return obj->v02(a, 4);
+    return obj->v02(task, 4);
 }
 #endif
 

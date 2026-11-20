@@ -3454,65 +3454,65 @@ extern "C" void func_0030C8D8_impl(int init, int prio)
 INCLUDE_ASM("wscript/wscriptman", func_0030D238);
 #ifdef SKIP_ASM
 /**
- * Stores @p arg1 in the first word of @p arg0 and @p arg2 in the second.
+ * Stores @p firstWord in the first word of @p dest and @p secondWord in the second.
  *
  * An out-of-line inline method emitted after this unit's static initialiser; nothing in the build calls it.
  *
- * @param arg0  the two-word object to fill
- * @param arg1  value for the word at +0x0
- * @param arg2  value for the word at +0x4
+ * @param dest  the two-word object to fill
+ * @param firstWord  value for the word at +0x0
+ * @param secondWord  value for the word at +0x4
  */
-extern "C" void func_0030D238(void *arg0, int arg1, int arg2) {
-    (*(int *)((char*)(arg0) + (0))) = arg1;
-    (*(int *)((char*)(arg0) + (4))) = arg2;
+extern "C" void func_0030D238(void *dest, int firstWord, int secondWord) {
+    (*(int *)((char*)(dest) + (0))) = firstWord;
+    (*(int *)((char*)(dest) + (4))) = secondWord;
 }
 #endif
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D248);
 #ifdef SKIP_ASM
 /**
- * Returns @p arg0 unchanged.
+ * Returns @p value unchanged.
  *
  * One of three identical out-of-line copies here (func_0030D248, func_0030D250, func_0030D258), the shape of an
  * empty inline constructor that returns this; nothing in the build calls it.
  *
- * @param arg0  the value to return
- * @return @p arg0
+ * @param value  the value to return
+ * @return @p value
  */
-extern "C" int func_0030D248(int arg0) {
-    return arg0;
+extern "C" int func_0030D248(int value) {
+    return value;
 }
 #endif
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D250);
 #ifdef SKIP_ASM
 /**
- * Returns @p arg0 unchanged.
+ * Returns @p value unchanged.
  *
  * Identical to func_0030D248 and func_0030D258 (the shape of an empty inline constructor that returns this); nothing in
  * the build calls it.
  *
- * @param arg0  the value to return
- * @return @p arg0
+ * @param value  the value to return
+ * @return @p value
  */
-extern "C" int func_0030D250(int arg0) {
-    return arg0;
+extern "C" int func_0030D250(int value) {
+    return value;
 }
 #endif
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D258);
 #ifdef SKIP_ASM
 /**
- * Returns @p arg0 unchanged.
+ * Returns @p value unchanged.
  *
  * Identical to func_0030D248 and func_0030D250 (the shape of an empty inline constructor that returns this); nothing in
  * the build calls it.
  *
- * @param arg0  the value to return
- * @return @p arg0
+ * @param value  the value to return
+ * @return @p value
  */
-extern "C" int func_0030D258(int arg0) {
-    return arg0;
+extern "C" int func_0030D258(int value) {
+    return value;
 }
 #endif
 //100%
@@ -3760,11 +3760,11 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D2E8);
 /**
  * Returns the script manager's current being (On Tour Being, +0x0), the index of the rider scripts act on.
  *
- * @param arg0  the script manager
+ * @param wscriptMan  the script manager
  * @return the being index
  */
-extern "C" int func_0030D2E8(int *arg0) {
-    return *arg0;
+extern "C" int func_0030D2E8(int *wscriptMan) {
+    return *wscriptMan;
 }
 #endif
 //100%
@@ -3909,28 +3909,28 @@ extern "C" void func_0030D368(char* self)
 INCLUDE_ASM("wscript/wscriptman", func_0030D388);
 #ifdef SKIP_ASM
 /**
- * Sets the script manager's current being (On Tour Being, +0x0) to @p arg1.
+ * Sets the script manager's current being (On Tour Being, +0x0) to @p being.
  *
- * @param arg0  the script manager
- * @param arg1  the being (rider) index
+ * @param wscriptMan  the script manager
+ * @param being  the being (rider) index
  */
-extern "C" void func_0030D388(int *arg0, int arg1) {
-    *arg0 = arg1;
+extern "C" void func_0030D388(int *wscriptMan, int being) {
+    *wscriptMan = being;
 }
 #endif
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D390);
 #ifdef SKIP_ASM
 /**
- * Returns whether @p a1 is one of the 10 process event ids (0-9, unsigned compare); @p self is not used.
+ * Returns whether @p eventId is one of the 10 process event ids (0-9, unsigned compare); @p self is not used.
  *
  * func_003078C0 dispatches exactly these ten ids to a process's event handlers.
  *
- * @param a1  the event id
- * @return 1 when @p a1 < 10, else 0
+ * @param eventId  the event id
+ * @return 1 when @p eventId < 10, else 0
  */
-extern "C" int func_0030D390(void* self, unsigned int a1) {
-    return a1 < 10;
+extern "C" int func_0030D390(void* self, unsigned int eventId) {
+    return eventId < 10;
 }
 #endif
 //100%
@@ -3939,10 +3939,10 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D398);
 /**
  * Clears a script process's state word (+0x0) to 0.
  *
- * @param arg0  the process
+ * @param process  the process
  */
-extern "C" void func_0030D398(int *arg0) {
-    *arg0 = 0;
+extern "C" void func_0030D398(int *process) {
+    *process = 0;
 }
 #endif
 //100%
@@ -3953,24 +3953,24 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D3A0);
  *
  * cWScriptMan_update walks the active list through this link.
  *
- * @param arg0  the process
+ * @param process  the process
  * @return the next process, or 0 at the end of the list
  */
-extern "C" int func_0030D3A0(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x18)));
+extern "C" int func_0030D3A0(void *process) {
+    return (*(int *)((char*)(process) + (0x18)));
 }
 #endif
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D3A8);
 #ifdef SKIP_ASM
 /**
- * Sets the next process in a process's list link (On Tour Next, +0x18) to @p arg1.
+ * Sets the next process in a process's list link (On Tour Next, +0x18) to @p nextProcess.
  *
- * @param arg0  the process
- * @param arg1  the process to link after it (passed as an int), or 0
+ * @param process  the process
+ * @param nextProcess  the process to link after it (passed as an int), or 0
  */
-extern "C" void func_0030D3A8(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x18))) = arg1;
+extern "C" void func_0030D3A8(void *process, int nextProcess) {
+    (*(int *)((char*)(process) + (0x18))) = nextProcess;
 }
 #endif
 //100%
@@ -3981,11 +3981,11 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D3B0);
  *
  * cWScriptProcess_cWScriptProcess stores it there.
  *
- * @param arg0  the process
+ * @param process  the process
  * @return the section id
  */
-extern "C" int func_0030D3B0(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x24)));
+extern "C" int func_0030D3B0(void *process) {
+    return (*(int *)((char*)(process) + (0x24)));
 }
 #endif
 //100%
@@ -3996,11 +3996,11 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D3B8);
  *
  * The same store as func_0030D260, made through the process's manager pointer.
  *
- * @param arg0  the process
+ * @param process  the process
  * @param trickDef  the trick definition (passed as an int), or 0
  */
-extern "C" void func_0030D3B8(void *arg0, int trickDef) {
-    (*(int *)((char*)((*(void **)((char*)(arg0) + (0x10)))) + (0x29C))) = trickDef;
+extern "C" void func_0030D3B8(void *process, int trickDef) {
+    (*(int *)((char*)((*(void **)((char*)(process) + (0x10)))) + (0x29C))) = trickDef;
 }
 #endif
 //100%
@@ -4009,11 +4009,11 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D3C8);
 /**
  * Returns a script process's local Luno table (On Tour Local, +0x1C).
  *
- * @param arg0  the process
+ * @param process  the process
  * @return the table, or 0 when the process has none
  */
-extern "C" int func_0030D3C8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x1C)));
+extern "C" int func_0030D3C8(void *process) {
+    return (*(int *)((char*)(process) + (0x1C)));
 }
 #endif
 //100%
@@ -4022,11 +4022,11 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D3D0);
 /**
  * Returns a script process's id (On Tour ProcessId, +0x20), copied from its definition by the constructor.
  *
- * @param arg0  the process
+ * @param process  the process
  * @return the process id
  */
-extern "C" int func_0030D3D0(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x20)));
+extern "C" int func_0030D3D0(void *process) {
+    return (*(int *)((char*)(process) + (0x20)));
 }
 #endif
 
@@ -4106,11 +4106,11 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D450);
 /**
  * Returns a script task's local Luno table: that of its process (+0x3C, then the process's +0x1C).
  *
- * @param arg0  the task
+ * @param task  the task
  * @return the process's local table, or 0
  */
-extern "C" int func_0030D450(void *arg0) {
-    return (*(int *)((char*)((*(void **)((char*)(arg0) + (0x3C)))) + (0x1C)));
+extern "C" int func_0030D450(void *task) {
+    return (*(int *)((char*)((*(void **)((char*)(task) + (0x3C)))) + (0x1C)));
 }
 #endif
 //100%
@@ -4121,11 +4121,11 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D460);
  *
  * func_00307EC0 and func_00307F58 look tasks up by it.
  *
- * @param arg0  the task
+ * @param task  the task
  * @return the task id
  */
-extern "C" int func_0030D460(void *arg0) {
-    return (*(int *)((char*)(arg0) + (4)));
+extern "C" int func_0030D460(void *task) {
+    return (*(int *)((char*)(task) + (4)));
 }
 #endif
 //100%
@@ -4136,10 +4136,10 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D468);
  *
  * func_00307EC0 does the same to the task it leaves.
  *
- * @param arg0  the task
+ * @param task  the task
  */
-extern "C" void func_0030D468(int *arg0) {
-    *arg0 = 3;
+extern "C" void func_0030D468(int *task) {
+    *task = 3;
 }
 #endif
 //100%
@@ -4148,11 +4148,11 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D478);
 /**
  * Returns a mission's sort key (On Tour SortKey, +0x64).
  *
- * @param arg0  the mission
+ * @param mission  the mission
  * @return the sort key
  */
-extern "C" int func_0030D478(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x64)));
+extern "C" int func_0030D478(void *mission) {
+    return (*(int *)((char*)(mission) + (0x64)));
 }
 #endif
 
@@ -4178,11 +4178,11 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D488);
 /**
  * Returns whether a mission's scope (On Tour Scope, +0x60) is 2, i.e. the mission is local.
  *
- * @param arg0  the mission
+ * @param mission  the mission
  * @return 1 when the scope is 2, else 0
  */
-extern "C" int func_0030D488(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x60))) == 2;
+extern "C" int func_0030D488(void *mission) {
+    return (*(int *)((char*)(mission) + (0x60))) == 2;
 }
 #endif
 
@@ -4427,16 +4427,16 @@ struct func_0030D840_sPool {
 /**
  * Sets up an animated model's part storage: allocates @p count zeroed 0x58-byte sAnimModelPart records.
  *
- * Stores @p count as the part capacity (+0x0) and @p a2 as numLodRefs (+0x4), allocates parts (+0xC) with operator
+ * Stores @p count as the part capacity (+0x0) and @p maxVariants as numLodRefs (+0x4), allocates parts (+0xC) with operator
  * new tagged "ModelRefs", clears them with MEM_fill, and zeroes numParts (+0x8) and the word at +0x60.
  * feridermanager calls it with (100, 15) right after func_0030D4B8.
  *
  * @param count  how many parts the model can hold
- * @param a2  refs per LOD slot (numLodRefs), how many cAnimModel_addModelPartLOD allocates
+ * @param maxVariants  refs per LOD slot (numLodRefs), how many cAnimModel_addModelPartLOD allocates
  */
-extern "C" void func_0030D840(func_0030D840_sPool* self, int count, int a2)
+extern "C" void func_0030D840(func_0030D840_sPool* self, int count, int maxVariants)
 {
-    self->field_0x4 = a2;
+    self->field_0x4 = maxVariants;
     self->count = count;
     self->items = operator_new_tag(count * 88, str_ModelRefs, 0, 0);
     MEM_fill(self->items, 0, self->count * 88);
