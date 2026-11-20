@@ -2725,7 +2725,6 @@ lbl_00241F90 = 0x00241F90; //type:label
 func_00242EB8 = 0x00242EB8; //type:func
 
 // --- src/main/ssxappdtor.cpp ---
-func_00243D58 = 0x00243D58; //type:func
 func_00244240 = 0x00244240; //type:func
 func_002443C0 = 0x002443C0; //type:func
 func_00244560 = 0x00244560; //type:func

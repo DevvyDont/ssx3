@@ -375,7 +375,7 @@ extern char cGFNextHeatState_vtbl[];
 extern char cGFRidingState_vtbl[];
 extern char cGFGateState_vtbl[];
 extern char cGFTransportWaitState_vtbl[];
-extern char D_0047D638[];
+extern char cGFEndWaitState_vtbl[];
 extern char cGFEndState_vtbl[];
 extern char cGameState_vtbl[];
 extern char* cGameState_mpGame;
@@ -441,7 +441,7 @@ extern "C" char* cGame_cGame(cGame* self)
     cGFFinishlineState_cGFFinishlineState(((char*)self) + 0x100);
     Init_22E968(((char*)self), 280, cGFEndState_vtbl, 8);
     Init_22E968(((char*)self), 296, cGFPostEventState_vtbl, 8);
-    Init_22E968(((char*)self), 312, D_0047D638, 11);
+    Init_22E968(((char*)self), 312, cGFEndWaitState_vtbl, 11);
     Init_22E968(((char*)self), 328, cGFTransportWaitState_vtbl, 10);
     cGFTrackStartState_cGFTrackStartState(((char*)self) + 0x158);
     cGFSectionLoadState_cGFSectionLoadState(((char*)self) + 0x178);

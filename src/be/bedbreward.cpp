@@ -597,30 +597,30 @@ extern "C" void cBEMissionInterface_purgeInterface(void)
 }
 #endif
 //100%
-INCLUDE_ASM("be/bedbreward", cBEMissionInterface_isMissionSetFromFE);
+INCLUDE_ASM("be/bedbreward", cBEMissionInterface_getNextSessionID);
 #ifdef SKIP_ASM
 /**
- * Returns the mission interface's word at +0x10, the flag func_0015BD00 sets (whether the mission was chosen in the
- * front end).
+ * Returns the mission interface's next session ID (+0x10): the session point the map overlay chose, which
+ * cBEMissionInterface_setNextSessionID stores.
  *
  * @param missionInterface  the mission interface
  * @return the flag
  */
-extern "C" int cBEMissionInterface_isMissionSetFromFE(cBEMissionInterface* missionInterface) {
+extern "C" int cBEMissionInterface_getNextSessionID(cBEMissionInterface* missionInterface) {
     return ((int)missionInterface->nextSessionID);
 }
 #endif
 //100%
-INCLUDE_ASM("be/bedbreward", func_0015BD00);
+INCLUDE_ASM("be/bedbreward", cBEMissionInterface_setNextSessionID);
 #ifdef SKIP_ASM
 /**
- * Stores @p setFromFE in the mission interface's word at +0x10 (the flag cBEMissionInterface_isMissionSetFromFE returns).
+ * Sets the mission interface's next session ID (+0x10), which cBEMissionInterface_getNextSessionID returns.
  *
  * @param missionInterface  the mission interface
- * @param setFromFE  nonzero when the mission was chosen in the front end
+ * @param sessionID  the session point to start the next session at
  */
-extern "C" void func_0015BD00(cBEMissionInterface* missionInterface, int setFromFE) {
-    ((int)missionInterface->nextSessionID) = setFromFE;
+extern "C" void cBEMissionInterface_setNextSessionID(cBEMissionInterface* missionInterface, int sessionID) {
+    missionInterface->nextSessionID = sessionID;
 }
 #endif
 //100%

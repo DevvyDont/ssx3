@@ -7006,7 +7006,7 @@ cBENewPlayerInterface_setNewPlayerActive = 0x0015BCB0; //type:func
 cBEMissionInterface_submit__FPv = 0x0015BCC0; //type:func
 cBEMissionInterface_discard__FPv = 0x0015BCC8; //type:func
 cBEMissionInterface_purgeInterface = 0x0015BCD0; //type:func
-cBEMissionInterface_isMissionSetFromFE = 0x0015BCF8; //type:func
+cBEMissionInterface_getNextSessionID = 0x0015BCF8; //type:func
 cBEMissionInterface_setMissionActive = 0x0015BD08; //type:func
 cBEMissionInterface_cBEMissionInterface = 0x0015BD18; //type:func
 cBEOptionInterface_purgeInterface = 0x0015BD30; //type:func
@@ -10716,6 +10716,10 @@ cPS2ExecutionMan__cPS2ExecutionMan = 0x00320AD8; //type:func
 cAI_hasRaceStarted = 0x0012A240; //type:func
 cGameComm_getQueuedChat = 0x00258160; //type:func
 cWorldPainterSection_load = 0x002BB4D8; //type:func
+
+// fn_states_2026-11-20: names by evidence (docs/function_names.tsv)
+cBEMissionInterface_setNextSessionID = 0x0015BD00; //type:func
+cGFEndWaitState__cGFEndWaitState = 0x00243D58; //type:func
 
 // Spreadsheet Auto Generation
 
@@ -16440,3 +16444,8 @@ str_underscore = 0x004A39D0;
 str_comma = 0x004A39F0;
 str_bar_e = 0x004A47C0;
 str_tilde_tilde = 0x004A4A78;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round globals_2026-11-20b (docs/ontour_globals.tsv)
+cGFEndWaitState_vtbl = 0x0047D638;
+cMoviePlayer_m_isPlaying = 0x004A2E9C;
+gpAsyncSys = 0x004A3610;

@@ -2007,7 +2007,7 @@ INCLUDE_ASM("mem/memstd", cMoviePlayer_purge);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void RCMP_DECODER_ReleaseFrame(void*, void*);
 extern "C" void func_003AE300(void* p, int flags);
-extern int D_004A2E9C;
+extern int cMoviePlayer_m_isPlaying;
 
 class cWorld002535F8 {
 public:
@@ -2055,7 +2055,7 @@ struct sStream002535F8 {
  *
  * With a decoder (+0x38) and a video driver (+0x3C) it first flushes the renderer (graphics manager slot 19,
  * cGraphicsMan_FlushRenderer); a pending frame (+0x40, +0xC) goes back to the decoder (RCMP_DECODER_ReleaseFrame). The
- * driver is deleted (vtable slot 1, flags 3) and the active-player count D_004A2E9C decremented, the decoder is deleted
+ * driver is deleted (vtable slot 1, flags 3) and the active-player count cMoviePlayer_m_isPlaying decremented, the decoder is deleted
  * (func_003AE300, flags 3), and the finished, redraw, paused, frame and new-frame words are cleared.
  */
 extern "C" void cMoviePlayer_purge(cMoviePlayer* self)
@@ -2072,7 +2072,7 @@ extern "C" void cMoviePlayer_purge(cMoviePlayer* self)
         sVEntry002535F8* dtorEntry = &(*(sVEntry002535F8**)((char*)videoDriver + 4))[1];
         dtorEntry->fn((char*)videoDriver + dtorEntry->delta, 3);
         moviePlayer->f3C = 0;
-        D_004A2E9C--;
+        cMoviePlayer_m_isPlaying--;
     }
     char* decoderObj = moviePlayer->f38;
     if (decoderObj != 0) {
@@ -2091,7 +2091,7 @@ extern "C" void cMoviePlayer_purge(cMoviePlayer* self)
 INCLUDE_ASM("mem/memstd", cMoviePlayer_startPlay);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int D_004A2E9C;
+extern int cMoviePlayer_m_isPlaying;
 extern "C" int func_003AE450(void* p, int a, int b);
 extern "C" void* SSX_VD_create(void* a0, int a1, int a2, int a3);
 int func_003AE938(void*);
@@ -2101,7 +2101,7 @@ int func_003AE958_i(void*) __asm__("func_003AE958__FPv");
  * Starts playback: fetches the first frame (func_003AE450(decoder, 1, 33)) into +0xC and sets the new-frame flag
  * (+0x40), pauses the decoder (func_003AE938), creates the video driver for that frame (SSX_VD_create with the
  * decoder's +0x64, the frame, cGraphicsMan_TheGraphicsMan and the draw layer +0x30) into +0x3C, resumes the decoder
- * (func_003AE958) and increments the active-player count D_004A2E9C.
+ * (func_003AE958) and increments the active-player count cMoviePlayer_m_isPlaying.
  *
  * Clears the finished (+0x0) and redraw (+0x4) words first.
  */
@@ -2115,7 +2115,7 @@ extern "C" void cMoviePlayer_startPlay(cMoviePlayer* self)
     func_003AE938(self->m_pPlayer);
     self->m_pVd = SSX_VD_create(*(void**)((char*)self->m_pPlayer + 0x64), (int)self->mpCurrFrame, (int)cGraphicsMan_TheGraphicsMan, self->m_PlayOp.iDrawLayer);
     func_003AE958_i(self->m_pPlayer);
-    D_004A2E9C++;
+    cMoviePlayer_m_isPlaying++;
 }
 #endif
 

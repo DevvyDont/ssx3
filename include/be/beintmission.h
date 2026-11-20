@@ -19,9 +19,9 @@
 // the 4 bytes at &bIsActive).
 // [O] On Tour's cBEMissionInterface (size 0x14 with its 8-byte base) has m_bMissionSetFromFE, m_missionSet and
 // nextSessionID; retail has room for one word, and every retail use of it is a session point, so it is nextSessionID.
-// NOTE: the retail getter at 0x15BCF8 is named cBEMissionInterface_isMissionSetFromFE in symbol_addrs, but it is the
-// preview's getNextSessionID (both `lw v0, 0x10(a0)`), and func_0015BD00 after it is setNextSessionID; they follow
-// each other in be/bedbreward in the same order as On Tour's declarations getNextSessionID / setNextSessionID.
+// The retail getter at 0x15BCF8 is the preview's getNextSessionID (both `lw v0, 0x10(a0)`; it was named
+// isMissionSetFromFE until 2026-11-20), and the setter after it is setNextSessionID; they follow each other in
+// be/bedbreward in the same order as On Tour's declarations getNextSessionID / setNextSessionID.
 //
 // Evidence tags:
 //   [R] retail's getThis (allocation, bIsActive, vptr) and constructor cBEMissionInterface_cBEMissionInterface (vptr);
@@ -48,9 +48,10 @@ struct cBEMissionInterface {
     // cBEMissionInterface
     unsigned int nextSessionID;      // 0x010 [O] (On Tour 0x010, after m_bMissionSetFromFE and m_missionSet, which
                                      //       retail lacks); [P] get/setNextSessionID (lw / sw 0x10, unsigned int); [R]
-                                     //       0x15BCF8 (misnamed cBEMissionInterface_isMissionSetFromFE) returns it,
-                                     //       func_0015BD00 stores it; [U] cOVState_MAP_onWidgetEvent stores the map's
-                                     //       selected session point (mSelectedSessionPoint) before cGame_setState(0xF),
+                                     //       cBEMissionInterface_getNextSessionID returns it,
+                                     //       cBEMissionInterface_setNextSessionID stores it; [U]
+                                     //       cOVState_MAP_onWidgetEvent stores the map's selected session point
+                                     //       (mSelectedSessionPoint) before cGame_setState(0xF),
                                      //       cGFSessionTeleportState_gainFocus passes it to cRider_putAtStartpoint;
                                      //       cGFUserSelectState_update and cOVTemplate_Dialog_onWidgetEvent store it
                                      //       too

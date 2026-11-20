@@ -4104,14 +4104,14 @@ INCLUDE_ASM("sound/ssxAudio", cAsyncSys_cAsyncSys);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char cAsyncSys_vtbl[];
 extern char str_CircFIFOBuff[];
-extern void* D_004A3610;
+extern void* gpAsyncSys;
 
 /**
  * Constructs the asynchronous sound-bank loader.
  *
  * Creates four circular FIFOs of 6 entries (each a 0x18-byte "CircFIFOBuff" buffer at +0x190, +0x1A0, +0x1B0, +0x1C0
  * with zeroed read/write indices), clears the other counters, installs the vtable cAsyncSys_vtbl at +0x1D4 and stores
- * itself in D_004A3610.
+ * itself in gpAsyncSys.
  *
  * @return this
  */
@@ -4138,7 +4138,7 @@ extern "C" void* cAsyncSys_cAsyncSys(cAsyncSys* self)
     self->mMainMemFlags.Array = (int*)operator_new_tag(0x18, str_CircFIFOBuff, 0, 0);
     self->mpBuffer = 0;
     self->mBufferSize = 0;
-    D_004A3610 = ((void*)self);
+    gpAsyncSys = ((void*)self);
     return ((void*)self);
 }
 #endif
@@ -4150,7 +4150,7 @@ extern "C" void cAsyncSys_ASYNCSYS_DeInit(void*);
 void cMemMan_free(void*);
 void operator_delete(int*);
 extern char cAsyncSys_vtbl[];
-extern void* D_004A3610;
+extern void* gpAsyncSys;
 
 struct sAudioSys_A148 {
     char pad0[0x190];
@@ -4168,7 +4168,7 @@ struct sAudioSys_A148 {
 /**
  * Destroys the asynchronous sound-bank loader.
  *
- * Calls cAsyncSys_ASYNCSYS_DeInit, clears the singleton D_004A3610, frees the FIFO buffers at +0x1C0, +0x1B0, +0x1A0
+ * Calls cAsyncSys_ASYNCSYS_DeInit, clears the singleton gpAsyncSys, frees the FIFO buffers at +0x1C0, +0x1B0, +0x1A0
  * and +0x190 and deletes the object when bit 0 of @p flags is set.
  *
  * @param flags  g++ 2.95 in-charge flags; bit 0 deletes the object
@@ -4177,7 +4177,7 @@ extern "C" void cAsyncSys__cAsyncSys(cAsyncSys* self, int flags)
 {
     self->mVtbl = (void**)cAsyncSys_vtbl;
     cAsyncSys_ASYNCSYS_DeInit(((sAudioSys_A148*)self));
-    D_004A3610 = 0;
+    gpAsyncSys = 0;
     if (self->mMainMemFlags.Array != 0) {
         cMemMan_free(self->mMainMemFlags.Array);
     }

@@ -294,15 +294,16 @@ CHECK_SIZE(cGFPostEventState, 0x10);
 // cGFEndWaitState (kGFSM_EndWait, 8): overrides nothing but the destructor (On Tour: only the replay methods).
 // Size 0x10, no fields of its own: [R] cGame + 0x138 .. 0x148 (cGFTransportWaitState); [O] 0x10.
 // No out-of-line ctor: cGame_cGame builds it inline (mNextState 11 = kGFSM_SectionLoad, mStartupFlag 0, vtable
-// D_0047D638). Its vtable has no symbol: D_0047D638 (9 slots: 1 func_00243D58 = the destructor (main/ssxappdtor),
-// 2-9 cGameState_*__FPv); cGame_updateState / cGame_readFromReplayFrame map id 8 to cGame + 0x138.
+// cGFEndWaitState_vtbl). Its vtable, cGFEndWaitState_vtbl (9 slots: 1 cGFEndWaitState__cGFEndWaitState = the
+// destructor (main/ssxappdtor), 2-9 cGameState_*__FPv), was unnamed (D_0047D638) until 2026-11-20;
+// cGame_updateState / cGame_readFromReplayFrame map id 8 to cGame + 0x138.
 struct cGFEndWaitState {
     // --- cGameState
     int mNextState;                 // 0x00 [O] eGFState; [R] cGame_cGame 0 then 11 (kGFSM_SectionLoad)
     int mStartupFlag;               // 0x04 [O]; [R] cGame_cGame 0
     int mOverlayDone;               // 0x08 [O] bool; no access in this class's methods
-    void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then D_0047D638 (cGame_cGame); cGameState_vtbl
-                                    //      (func_00243D58, the dtor)
+    void** mVtbl;                   // 0x0C [R] cGameState_vtbl, then cGFEndWaitState_vtbl (cGame_cGame);
+                                    //      cGameState_vtbl (cGFEndWaitState__cGFEndWaitState, the dtor)
 };
 
 CHECK_OFFSET(cGFEndWaitState, mNextState, 0x00);

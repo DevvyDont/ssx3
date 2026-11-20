@@ -36,7 +36,7 @@ INCLUDE_ASM("main/ssxapp2", cGameState_onWidgetEvent);
 
 INCLUDE_ASM("main/ssxapp2", cGFEndState__cGFEndState);
 
-INCLUDE_ASM("main/ssxapp2", func_00243D58);
+INCLUDE_ASM("main/ssxapp2", cGFEndWaitState__cGFEndWaitState);
 
 INCLUDE_ASM("main/ssxapp2", cGFFinishlineState__cGFFinishlineState);
 

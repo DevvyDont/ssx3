@@ -787,7 +787,7 @@ extern "C" void *cGFEndState_cGFEndState(cGFEndState* self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00243D58);
+INCLUDE_ASM("main/ssxappdtor", cGFEndWaitState__cGFEndWaitState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -797,12 +797,12 @@ extern char cGameState_vtbl[];
  * Destroys the end-wait game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable cGameState_vtbl and
  * frees the object when asked.
  *
- * It is the destructor slot of D_0047D638, a vtable that keeps every other default (On Tour's cGFEndWaitState overrides
+ * It is the destructor slot of cGFEndWaitState_vtbl, a vtable that keeps every other default (On Tour's cGFEndWaitState overrides
  * only the replay methods).
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_00243D58(int* self, int flags)
+extern "C" void cGFEndWaitState__cGFEndWaitState(int* self, int flags)
 {
     *(void**)((char*)self + 0xC) = cGameState_vtbl;
     if (flags & 1) {

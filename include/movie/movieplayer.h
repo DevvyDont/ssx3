@@ -11,7 +11,8 @@
 // Size 0x44 [R]: cVidEngine_ReadyVideo = cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, "VidEnginePlayer", 0x100, 0));
 // cRealFE_update the same with "MoviePlayer"; cFEStateVideoPlayer keeps one too. On Tour's cMoviePlayer (0x30) is the
 // PSP one (PspAvPlayer, byte bools, a 0x18-byte tMoviePlayOptions): retail has its member order with 4-byte bools,
-// which places every retail access exactly. cMoviePlayer::m_isPlaying [O] (On Tour static int) is retail D_004A2E9C:
+// which places every retail access exactly. cMoviePlayer::m_isPlaying [O] (On Tour static int) is
+// cMoviePlayer_m_isPlaying (retail 0x4A2E9C):
 // startPlay increments it, purge decrements it when it deletes the video driver.
 //
 // A FLAT layout, like main/game.h. Evidence tags:

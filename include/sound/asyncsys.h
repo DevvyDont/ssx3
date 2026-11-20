@@ -13,7 +13,7 @@
 //
 // Size 0x1D8 [O] (On Tour class cAsyncSys, same offsets): data 0x1D4, then the vptr. cAsyncSys declares virtuals and
 // has no base, so g++ 2.95 puts its vptr after its data (0x1D4) [R] (ctor stores cAsyncSys_vtbl 0x483B10: slot 1 the
-// dtor, slots 2..5 __pure_virtual). gpAsyncSys (retail D_004A3610) is the current cAsyncSys [O] (On Tour static
+// dtor, slots 2..5 __pure_virtual). gpAsyncSys (retail 0x4A3610) is the current cAsyncSys [O] (On Tour static
 // gpAsyncSys, next to gpBankManager in both builds); [R] the ctor stores this, the dtor clears it.
 //
 // cCircBuffer is defined here because cAsyncSys embeds four of them; it used to live in sound/ssxaudio.h (cSSXAudio's

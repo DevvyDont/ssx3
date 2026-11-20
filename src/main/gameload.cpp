@@ -2293,7 +2293,7 @@ extern "C" void cGame_readFromReplayFrame(cGame* self_, cStream_14D0* stream)
 //100%
 INCLUDE_ASM("main/gameload", cGame_activatePauseMenu);
 #ifdef SKIP_ASM
-extern int D_004A2E9C;
+extern int cMoviePlayer_m_isPlaying;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2346,7 +2346,7 @@ extern "C" int cGame_activatePauseMenu(cGame* self)
         void** controller = PlayerObj_1840(ctrlId);
         if (!IsReady_1840(controller)) {
             mask = 1 << ctrlId;
-        } else if (D_004A2E9C == 0) {
+        } else if (cMoviePlayer_m_isPlaying == 0) {
             if (cInput_getState(controller, 0x3C)) {
                 sel = ctrlId;
             }
@@ -2360,7 +2360,7 @@ extern "C" int cGame_activatePauseMenu(cGame* self)
                 void** controller = PlayerObj_1840(ctrlId);
                 if (!IsReady_1840(controller)) {
                     mask |= 1 << ctrlId;
-                } else if (sel < 0 && D_004A2E9C == 0) {
+                } else if (sel < 0 && cMoviePlayer_m_isPlaying == 0) {
                     if (cInput_getState(controller, 0x3C)) {
                         sel = ctrlId;
                     }
