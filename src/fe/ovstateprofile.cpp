@@ -1025,13 +1025,13 @@ extern "C" void cOVState_PROFILE_initGeneral(void* self)
 //100%
 INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_cOVState_AUTOSAVE);
 #ifdef SKIP_ASM
-extern "C" void* cFEMemCard_cFEMemCard(void* self, void* a1, int a2);
+extern "C" void* cFEMemCard_cFEMemCard2(void* self, void* a1, int a2);
 extern void* cOVState_AUTOSAVE_vtbl[];
 
 /**
  * Constructs the autosave overlay.
  *
- * Runs cFEMemCard_cFEMemCard (the memory card screen base, type 0), installs cOVState_AUTOSAVE_vtbl, sets the state id
+ * Runs cFEMemCard_cFEMemCard2 (the memory card screen base, type 0), installs cOVState_AUTOSAVE_vtbl, sets the state id
  * (+0xC) to 0x25 and +0x208 to 1, stores @p iParent at +0x22C and clears +0x1C4 and +0x230.
  *
  * @param pEngine  the UI engine
@@ -1040,7 +1040,7 @@ extern void* cOVState_AUTOSAVE_vtbl[];
  */
 extern "C" void* cOVState_AUTOSAVE_cOVState_AUTOSAVE(void* self, void* pEngine, int iParent)
 {
-    cFEMemCard_cFEMemCard(self, pEngine, 0);
+    cFEMemCard_cFEMemCard2(self, pEngine, 0);
     *(void***)((char*)self + 0x8) = cOVState_AUTOSAVE_vtbl;
     *(int*)((char*)self + 0xC) = 37;
     *(int*)((char*)self + 0x208) = 1;

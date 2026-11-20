@@ -9,7 +9,7 @@
 // (0x001D66B0 ... 0x001D9948) and main/all_in_one_main (the is*Pressed accessors 0x001DDD28 ... 0x001DDE18).
 //
 // Size 0x22C:
-//   [R] every subclass constructor runs cFEMemCard_cFEMemCard and then writes its own fields from 0x22C on
+//   [R] every subclass constructor runs cFEMemCard_cFEMemCard2 and then writes its own fields from 0x22C on
 //       (cFEStateOptionsDeviceSelect 0x22C-0x238, cFEStateMemCard 0x22C-0x244 (alloc 584 = 0x248), cFEStateProfileLoad
 //       0x22C/0x230/0x234/0x27C), and cFEMemCard_initFEMemCard clears the last base word, 0x228.
 //   On Tour's DWARF says 0x164: its cOVState is 0x90 (retail 0x9C), its two file names are unsigned short[32] (retail
@@ -17,7 +17,7 @@
 //   names fill retail's 0x19C-0x22C exactly, in On Tour's order, and every one is confirmed by retail use below.
 //
 // Base: cOVState (fe/ovstate.h, 0x9C) : cUIState (0x48) : cListNode (vptr at 0x8). There are two constructors:
-// cFEMemCard_cFEMemCard(engine, iType) (cOVState inlined, mOVID = 0) and func_001D5330(engine, iType, eOVState)
+// cFEMemCard_cFEMemCard2(engine, iType) (cOVState inlined, mOVID = 0) and cFEMemCard_cFEMemCard(engine, iType, eOVState)
 // (mOVID = eOVState; used by cOVState_SAVEREPLAY & co. via ovstatepause.cpp), plus the default one
 // cFEMemCard_cFEMemCard1. All three store cOVState_vtbl, then cFEMemCard_vtbl (_vt$10cFEMemCard, 47 slots) at 0x8.
 // The one live screen is the class static cFEMemCard::mInstance = cFEMemCard_mInstance (D_004A2028), set by
@@ -70,7 +70,7 @@ struct cFEMemCard {
     int mRestoreCutSceneMode;       // 0x050 [O] (bool)
     int mRemovePDA;                 // 0x054 [O] (bool); [R] the ctors zero it
     char mszChatBuff[0x40];         // 0x058 [O] (char[63] in On Tour); [R] the ctors copy " " into it (one sh)
-    int mOVID;                      // 0x098 [O] tOVStateEnum; [R] 0, or func_001D5330's eOVState argument
+    int mOVID;                      // 0x098 [O] tOVStateEnum; [R] 0, or cFEMemCard_cFEMemCard's eOVState argument
     // --- cFEMemCard
     unsigned short mLastLoadFileName[64]; // 0x09C [O] ([32] in On Tour); [R] initFEMemCard clears the first char (sh);
                                     //       [U] cFEMemCard_SetLoadPressed(1) has the card (manager +0x434, slot 14)

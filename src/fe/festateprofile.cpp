@@ -106,14 +106,14 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* self, int a1);
-extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2);
+extern "C" void* cFEMemCard_cFEMemCard2(void* self, int a1, int a2);
 extern void* cFEStateProfileLoad_vtbl[];
 extern int cFEStateProfileLoad_mScreenAction;
 
 /**
  * Constructs the profile load screen for the controller that asked for it.
  *
- * Runs cFEMemCard_cFEMemCard (the memory card screen base, with 0), sets the state id (+0xC) to 0x23 and the vtable,
+ * Runs cFEMemCard_cFEMemCard2 (the memory card screen base, with 0), sets the state id (+0xC) to 0x23 and the vtable,
  * stores @p iType in cFEStateProfileLoad_mScreenAction, clears the work fields, turns the lowest set bit of
  * @p flags (of the first three) into a controller index (+0x22C) and finds which player (one, or two in a
  * two-player race) uses that controller (cBENewPlayerInterface_getPlayerCtrlID), storing it at +0x1CC and +0x44.
@@ -125,7 +125,7 @@ extern int cFEStateProfileLoad_mScreenAction;
  */
 extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(void* self, int pEngine, int iType, unsigned char flags)
 {
-    cFEMemCard_cFEMemCard(self, pEngine, 0);
+    cFEMemCard_cFEMemCard2(self, pEngine, 0);
     *(int*)((char*)self + 0xC) = 35;
     *(void***)((char*)self + 0x8) = cFEStateProfileLoad_vtbl;
     cFEStateProfileLoad_mScreenAction = iType;

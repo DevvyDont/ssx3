@@ -348,7 +348,7 @@ extern "C" void cAppMan_lockThirtyFps(cAppMan* appMan, int value) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/execman", func_00320AD8);
+INCLUDE_ASM("bx/execman", cPS2ExecutionMan__cPS2ExecutionMan);
 #ifdef SKIP_ASM
 /**
  * Destroys the PS2 execution manager: restores cExecutionMan_vtbl at +0x8 and frees the object when bit 0 of @p flags
@@ -358,7 +358,7 @@ INCLUDE_ASM("bx/execman", func_00320AD8);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void func_00320AD8(cExecutionMan* self, int flags)
+extern "C" void cPS2ExecutionMan__cPS2ExecutionMan(cExecutionMan* self, int flags)
 {
     self->field_0x8 = cExecutionMan_vtbl;
     if (flags & 1) {

@@ -1034,7 +1034,7 @@ extern "C" void func_001D5280(void* self, void* item, int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", func_001D5330);
+INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_cFEMemCard);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_cUIState(void* self);
 extern "C" void cFEMemCard_initFEMemCard(cFEMemCard* self, int a1);
@@ -1043,7 +1043,7 @@ extern void* cFEMemCard_vtbl[];
 extern unsigned short D_004A1390[];
 
 /**
- * Constructs a memory-card overlay state with an overlay id: cFEMemCard_cFEMemCard's work, but with mOVID (+0x98) = @p
+ * Constructs a memory-card overlay state with an overlay id: cFEMemCard_cFEMemCard2's work, but with mOVID (+0x98) = @p
  * a3.
  *
  * Runs cUIState's constructor (cUIState_cUIState; @p engine reaches it untouched in the second argument register as the
@@ -1056,7 +1056,7 @@ extern unsigned short D_004A1390[];
  * @param overlayId  the overlay id stored in mOVID
  * @return @p self
  */
-extern "C" void* func_001D5330(cFEMemCard* self, int engine, int memCardType, int overlayId)
+extern "C" void* cFEMemCard_cFEMemCard(cFEMemCard* self, int engine, int memCardType, int overlayId)
 {
     cUIState_cUIState(self);
     self->mOVID = overlayId;
@@ -1072,7 +1072,7 @@ extern "C" void* func_001D5330(cFEMemCard* self, int engine, int memCardType, in
 #endif
 
 //100%
-INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_cFEMemCard);
+INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_cFEMemCard2);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_cUIState(void* self);
 extern "C" void cFEMemCard_initFEMemCard(cFEMemCard* self, int a1);
@@ -1091,7 +1091,7 @@ extern unsigned short D_004A1390[];
  * @param iType  what the screen is for (On Tour iType)
  * @return @p self
  */
-extern "C" void* cFEMemCard_cFEMemCard(cFEMemCard* self, int pEngine, int iType)
+extern "C" void* cFEMemCard_cFEMemCard2(cFEMemCard* self, int pEngine, int iType)
 {
     cUIState_cUIState(self);
     self->mOVID = 0;

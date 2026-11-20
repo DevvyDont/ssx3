@@ -1655,7 +1655,7 @@ extern "C" void cWorldSound_InitWorldAudioFile(void* self, void* obj, unsigned i
 extern char* D_004A28A8_AE68 __asm__("SSXApp");
 extern "C" int cAI_swaploadInjectedPathFile(void* self, int a, unsigned int b, void* obj);
 void cMemMan_free(void* p);
-extern "C" void cWorldPainterMan_load(void* self, int a, void* obj);
+extern "C" void cWorldPainterMan_load1(void* self, int a, void* obj);
 extern "C" void func_003ACA10(void* self, int a, void* obj);
 extern "C" void* func_003AD188();
 extern "C" void cGame_loadWScriptManSection(void* self, int a);
@@ -1777,7 +1777,7 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
         break;
     case 15:
         if (cWorld_m_pTheWorld) {
-            cWorldPainterMan_load((char**)cWorld_m_pTheWorld->m_pWorldPainterMan, RID & 0xFF, obj);
+            cWorldPainterMan_load1((char**)cWorld_m_pTheWorld->m_pWorldPainterMan, RID & 0xFF, obj);
         }
         break;
     case 16:

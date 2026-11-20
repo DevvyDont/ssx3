@@ -3777,7 +3777,7 @@ cScreenPopup_increaseBoxSize = 0x001C9B68; //type:func
 cScreenPopup_adjustLayer = 0x001C9CD0; //type:func
 cScreenPopup_hideWidgetSafe = 0x001CA488; //type:func
 cScreenPopup_showWidgetSafe = 0x001CA4C0; //type:func
-cFEMemCard_cFEMemCard = 0x001D53B0; //type:func
+cFEMemCard_cFEMemCard2 = 0x001D53B0; //type:func
 cFEMemCard_onDestroyScreen = 0x001D58B8; //type:func
 cFEMemCard_writeStart = 0x001D59A0; //type:func
 cFEMemCard_callbackReadUpdate = 0x001D5C28; //type:func
@@ -6483,7 +6483,7 @@ cSSXAudio_GetPlayListIndex = 0x002BAD98; //type:func
 cSSXAudio_GetPreset = 0x002BADC0; //type:func
 cSSXAudio_GetAudioUpdateState = 0x002BADC8; //type:func
 cWorldPainterLayer_getQuadTreeContents = 0x002BAF90; //type:func
-cWorldPainterMan_load = 0x002BB348; //type:func
+cWorldPainterMan_load1 = 0x002BB348; //type:func
 cWorldPainterSection_cWorldPainterSection = 0x002BB370; //type:func
 cWorldPainterSection_load = 0x002BB570; //type:func
 cWorldPainterSection_unload = 0x002BB5A8; //type:func
@@ -10700,6 +10700,17 @@ isceSifSendCmd = 0x004261F0; //type:func
 sceSifExitRpc = 0x004265A8; //type:func
 sceSifGetOtherData = 0x004268F0; //type:func
 sceSifBindRpc = 0x00426B48; //type:func
+
+// fn_namesf: names by evidence (docs/function_names.tsv)
+cComputer_checkForRail = 0x0010BC98; //type:func
+cFEMemCard_cFEMemCard = 0x001D5330; //type:func
+cOVTemplate_Simple_cOVTemplate_Simple = 0x0021C730; //type:func
+cGMRaceHandler_raceFinish = 0x0023A760; //type:func
+cGameComm_sendUnplugCmd = 0x00258C00; //type:func
+cGameComm_sendChat = 0x00258C50; //type:func
+cWorldPainterMan_load = 0x002BB318; //type:func
+cWorldPainterSection_update = 0x002BB3F0; //type:func
+cPS2ExecutionMan__cPS2ExecutionMan = 0x00320AD8; //type:func
 
 // Spreadsheet Auto Generation
 

@@ -302,7 +302,7 @@ extern "C" void cFEStateEventSelect_onUpdate(void* self)
 INCLUDE_ASM("fe/festateload", func_00186A08);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* cFEMemCard_cFEMemCard(void* self, void* a1, int a2);
+extern "C" void* cFEMemCard_cFEMemCard2(void* self, void* a1, int a2);
 extern "C" void* cSSXApp_getMCManager(void* p);
 extern void* cFEStateMemCard_vtbl[];
 // D_004A14B8 holds the active load state (the unit declares it as int elsewhere).
@@ -364,7 +364,7 @@ struct sMemCardK186A08 {
 /**
  * Constructs the memory-card load state and points the memory-card manager's callbacks at the load handlers.
  *
- * Runs cFEMemCard_cFEMemCard() with type 2, stores cFEStateMemCard_vtbl, makes itself the active load state
+ * Runs cFEMemCard_cFEMemCard2() with type 2, stores cFEStateMemCard_vtbl, makes itself the active load state
  * (D_004A14B8) and clears D_004A14B4 and D_004A14BC. Sets mHashName (+0xC), +0x204 and +0x23C to 1, +0x230, +0x234,
  * +0x240 and +0x244 to 0, +0x19C to 26 and +0x22C and +0x238 to -1. On cSSXApp_getMCManager()'s manager it sets +0x120,
  * +0x124 and +0x12C to 1, +0x11C and +0x128 to 0, and installs nine callbacks from fememcard (cFEStateMemCard_callbackLoadReady,
@@ -376,7 +376,7 @@ struct sMemCardK186A08 {
  */
 extern "C" sFEStateLoadK186A08* func_00186A08(sFEStateLoadK186A08* self, void* engine)
 {
-    cFEMemCard_cFEMemCard(self, engine, 2);
+    cFEMemCard_cFEMemCard2(self, engine, 2);
     int one = 1;
     self->vtbl = cFEStateMemCard_vtbl;
     D_004A14B8_K186A08 = self;

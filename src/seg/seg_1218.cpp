@@ -8134,7 +8134,7 @@ extern "C" int cComputer_checkForBoardPress(cComputer* self_, int* out) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010BC98);
+INCLUDE_ASM("seg/seg_1218", cComputer_checkForRail);
 #ifdef SKIP_ASM
 struct sHit_BC98 { int type; int d[3]; };
 /**
@@ -8145,7 +8145,7 @@ struct sHit_BC98 { int type; int d[3]; };
  *
  * @return 1 when such a marker was found, else 0
  */
-extern "C" int func_0010BC98(cComputer* self) {
+extern "C" int cComputer_checkForRail(cComputer* self) {
     sHit_BC98 buf[12];
     char* rider = (char*)self->mRider;
     char* track = *(char**)(rider + 0xAB8);

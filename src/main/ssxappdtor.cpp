@@ -2129,7 +2129,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_raceFinish__FPv);
  * Does nothing: the base game mode handler's race-finish handler.
  *
  * Slot +0x44 of the base handler vtable cGameModeHandler_vtbl; the event handlers override it to record a rider's result (for
- * example func_00239230, func_0023A760).
+ * example func_00239230, cGMRaceHandler_raceFinish).
  */
 void cGameModeHandler_raceFinish(void* self)
 {

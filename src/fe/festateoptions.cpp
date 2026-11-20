@@ -2919,20 +2919,20 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(char* self, char* widget, 
 //100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1);
 #ifdef SKIP_ASM
-extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2);
+extern "C" void* cFEMemCard_cFEMemCard2(void* self, int a1, int a2);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern void* cFEStateOptionsDeviceSelect_vtbl[];
 
 /**
  * Constructs the memory-card device select state (state id 33) for a load or a save.
  *
- * Runs cFEMemCard_cFEMemCard with @p engine and @p cardMode, installs cFEStateOptionsDeviceSelect_vtbl, stores @p
+ * Runs cFEMemCard_cFEMemCard2 with @p engine and @p cardMode, installs cFEStateOptionsDeviceSelect_vtbl, stores @p
  * isSave at +0x22C and @p isOnline at +0x230, and clears +0x234 (the hidden-buttons flag) and +0x238. A load screen (@p
  * isSave 0) also clears the card manager's mPollForFullCard. cFECustom_getNextState creates it with (2, 1, 0), (1, 0,
  * 0) or (2, 0, 0), and the quick-messages popup (func_001C2C50) with (2, 1, 1).
  *
  * @param engine  the UI engine
- * @param cardMode  the memory-card screen type passed to cFEMemCard_cFEMemCard (kept at +0x1BC)
+ * @param cardMode  the memory-card screen type passed to cFEMemCard_cFEMemCard2 (kept at +0x1BC)
  * @param isSave  nonzero for a save screen
  * @param isOnline  nonzero when opened from the online front end (On Tour bOnline); cFEStateOptionsDeviceSelect_updateDone then picks next-state
  *            choice 2
@@ -2940,7 +2940,7 @@ extern void* cFEStateOptionsDeviceSelect_vtbl[];
  */
 extern "C" void* cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect1(void* self, int engine, int cardMode, int isSave, int isOnline)
 {
-    cFEMemCard_cFEMemCard(self, engine, cardMode);
+    cFEMemCard_cFEMemCard2(self, engine, cardMode);
     *(int*)((char*)self + 0x230) = isOnline;
     *(void***)((char*)self + 8) = cFEStateOptionsDeviceSelect_vtbl;
     *(int*)((char*)self + 0xC) = 33;

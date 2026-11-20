@@ -50,7 +50,7 @@ enum tGameComm {
 // flat here.
 struct tGameCommPacket {
     unsigned char mType;         // 0x00 [O] tGameCommHeader::mType; [U] the queue it goes to (mReadQueue[mType]):
-                                 //      0 input samples (cInputSync), 1 chat (sendChat func_00258C50, getQueuedChat
+                                 //      0 input samples (cInputSync), 1 chat (sendChat cGameComm_sendChat, getQueuedChat
                                  //      func_00258160), 2 BE sync data (asyncRead/asyncWrite), 3 commands (tGameCmdPacket)
     unsigned char mPlayerID;     // 0x01 [O]; [U] writePacket (cGameComm_writePacket) stores 0
     unsigned short mSize;        // 0x02 [O]; [U] the packet size including this header (writePacket: len + 4)
@@ -58,7 +58,7 @@ struct tGameCommPacket {
 };
 
 // tGameCmdPacket: the 0xC-byte payload of a type-3 (command) packet (On Tour tGameCmdPacket, same layout). Retail
-// commands: 0 pause and 1 unpause (sendPauseCmd cGameComm_sendPauseCmd), 2 controller unplugged (sendUnplugCmd func_00258C00),
+// commands: 0 pause and 1 unpause (sendPauseCmd cGameComm_sendPauseCmd), 2 controller unplugged (sendUnplugCmd cGameComm_sendUnplugCmd),
 // 3 sync-wait done (syncWait cGameComm_syncWait), 4 checksum (updateSyncPacket cGameComm_updateSyncPacket), 5 exit game (sendExitGame
 // cGameComm_sendExitGame); handled by updateCmdQueue cGameComm_updateCmdQueue.
 struct tGameCmdPacket {

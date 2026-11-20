@@ -2394,13 +2394,13 @@ extern "C" void func_001FDB88(void* self, int widget, int event)
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_cOVState_SAVEREPLAY);
 #ifdef SKIP_ASM
-extern "C" void* func_001D5330(void* self, int a1, int a2, int a3);
+extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2, int a3);
 extern void* cOVState_SAVEREPLAY_vtbl[];
 
 /**
  * Constructs the save-replay memory-card overlay.
  *
- * Runs the 4-argument cFEMemCard constructor func_001D5330 with iType 1 (replay), installs this class's vtable
+ * Runs the 4-argument cFEMemCard constructor cFEMemCard_cFEMemCard with iType 1 (replay), installs this class's vtable
  * cOVState_SAVEREPLAY_vtbl and clears +0x22C (mIsHidden in On Tour, the hideActionButtons state). The overlay factory
  * (cOVStateManager_triggerOverlay, cOVStateManager_triggerPopup) builds it in 628 bytes for overlay type 18.
  *
@@ -2410,7 +2410,7 @@ extern void* cOVState_SAVEREPLAY_vtbl[];
  */
 extern "C" void* cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(void* self, int engine, int ovStateId)
 {
-    func_001D5330(self, engine, 1, ovStateId);
+    cFEMemCard_cFEMemCard(self, engine, 1, ovStateId);
     *(void***)((char*)self + 0x8) = cOVState_SAVEREPLAY_vtbl;
     *(int*)((char*)self + 0x22C) = 0;
     return self;
@@ -3157,13 +3157,13 @@ extern "C" void cOVState_SAVEREPLAY_onPopupEvent(void* self, void* popup, int ke
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS);
 #ifdef SKIP_ASM
-extern "C" void* func_001D5330(void* self, int a1, int a2, int a3);
+extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2, int a3);
 extern void* cOVState_SAVEOPTIONS_vtbl[];
 
 /**
  * Constructs the save-records memory-card overlay.
  *
- * Runs the 4-argument cFEMemCard constructor func_001D5330 with iType 2 (settings), installs this class's vtable
+ * Runs the 4-argument cFEMemCard constructor cFEMemCard_cFEMemCard with iType 2 (settings), installs this class's vtable
  * cOVState_SAVEOPTIONS_vtbl and clears +0x22C (mIsHidden in On Tour). The overlay factory (cOVStateManager_triggerOverlay,
  * cOVStateManager_triggerPopup) builds it in 628 bytes for overlay type 19.
  *
@@ -3173,7 +3173,7 @@ extern void* cOVState_SAVEOPTIONS_vtbl[];
  */
 extern "C" void* cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(void* self, int engine, int ovStateId)
 {
-    func_001D5330(self, engine, 2, ovStateId);
+    cFEMemCard_cFEMemCard(self, engine, 2, ovStateId);
     *(void***)((char*)self + 0x8) = cOVState_SAVEOPTIONS_vtbl;
     *(int*)((char*)self + 0x22C) = 0;
     return self;

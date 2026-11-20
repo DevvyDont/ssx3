@@ -46,9 +46,9 @@ INCLUDE_ASM("fe/festaterewards2", cFEStateRelogin_onPopupEvent);
 
 INCLUDE_ASM("fe/festaterewards2", func_001D5280);
 
-INCLUDE_ASM("fe/festaterewards2", func_001D5330);
-
 INCLUDE_ASM("fe/festaterewards2", cFEMemCard_cFEMemCard);
+
+INCLUDE_ASM("fe/festaterewards2", cFEMemCard_cFEMemCard2);
 
 INCLUDE_ASM("fe/festaterewards2", cFEMemCard__cFEMemCard);
 

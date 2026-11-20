@@ -2360,20 +2360,20 @@ extern "C" void cWorldPainterMan_init(cWorldPainterMan* self, int n) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_update);
 #ifdef SKIP_ASM
-extern "C" void func_002BB3F0(cWorldPainterSection*);
+extern "C" void cWorldPainterSection_update(cWorldPainterSection*);
 /**
- * Updates every world-painter section: calls func_002BB3F0 on each of the m_uiNumSections entries of m_pCache.
+ * Updates every world-painter section: calls cWorldPainterSection_update on each of the m_uiNumSections entries of m_pCache.
  */
 extern "C" void cWorldPainterMan_update(cWorldPainterMan* self) {
     unsigned i;
     for (i = 0; i < *(unsigned*)self; i++) {
-        func_002BB3F0((cWorldPainterSection*)((char*)(self->m_pCache) + i * 12));
+        cWorldPainterSection_update((cWorldPainterSection*)((char*)(self->m_pCache) + i * 12));
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BB318);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_load);
 #ifdef SKIP_ASM
 extern "C" void func_002BB4D8(int, int);
 
@@ -2384,13 +2384,13 @@ extern "C" void func_002BB4D8(int, int);
  * @param sectionId  the section index into m_pCache (12-byte cWorldPainterSection entries)
  * @param fileName  the file name (a cBXString, passed through to func_002BB4D8)
  */
-extern "C" void func_002BB318(cWorldPainterMan* worldPainterMan, int sectionId, int fileName) {
+extern "C" void cWorldPainterMan_load(cWorldPainterMan* worldPainterMan, int sectionId, int fileName) {
     func_002BB4D8(((int)worldPainterMan->m_pCache) + (sectionId * 0xC), fileName);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_load);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_load1);
 #ifdef SKIP_ASM
 extern "C" void cWorldPainterSection_load(void*, int, int);
 /**
@@ -2400,7 +2400,7 @@ extern "C" void cWorldPainterSection_load(void*, int, int);
  * @param sectionId  the section index into m_pCache
  * @param wpData  the section's world-painter data (a tWPHeader), kept in place (streamed)
  */
-extern "C" void cWorldPainterMan_load(cWorldPainterMan* worldPainterMan, int sectionId, int wpData) {
+extern "C" void cWorldPainterMan_load1(cWorldPainterMan* worldPainterMan, int sectionId, int wpData) {
     cWorldPainterSection_load((char*)worldPainterMan->m_pCache + sectionId * 12, sectionId, wpData);
 }
 #endif
@@ -2448,7 +2448,7 @@ extern "C" void cWorldPainterSection__cWorldPainterSection(cWorldPainterSection*
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BB3F0);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterSection_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void ASYNCFILE_release_B3F0(int, int *, int *) __asm__("ASYNCFILE_release");
@@ -2469,7 +2469,7 @@ extern char str_WPFile[];
  *
  * @param self_  the section
  */
-extern "C" void func_002BB3F0(cWorldPainterSection* self_) {
+extern "C" void cWorldPainterSection_update(cWorldPainterSection* self_) {
     short st = *(short*)self_;
     if (st == 1 && ASYNCFILE_getstatus_B3F0(self_->m_iAsyncHandle) == st) {
         int packData = 0;
@@ -2512,7 +2512,7 @@ extern "C" void func_002BB4D8_B4D8(void *self, int arg) __asm__("func_002BB4D8")
  *
  * Clears m_iStreamed, builds the path D_004A3870 + the name (func_003186D0), appends str_swp (".swp", func_00318630)
  * and opens it with ASYNCFILE_load; the handle goes to m_iAsyncHandle. m_iState becomes 1 (loading, finished by
- * func_002BB3F0) for a positive handle, else 2 (kWPSection_Loaded, with no data).
+ * cWorldPainterSection_update) for a positive handle, else 2 (kWPSection_Loaded, with no data).
  *
  * @param fileName  the file name (a cBXString)
  */

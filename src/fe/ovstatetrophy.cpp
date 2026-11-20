@@ -1851,7 +1851,7 @@ INCLUDE_ASM("fe/ovstatetrophy", func_00210DF0);
 extern char D_004A2560[];
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void cOVState_onWidgetEvent(void* self);
-extern "C" void func_00258C50(int a, char* name);
+extern "C" void cGameComm_sendChat(int a, char* name);
 // PORT: cUIStateStack_pop returns the last node it touched; bound with its value return.
 void* cUIStateStack_pop_r(void* list, int a1) __asm__("cUIStateStack_pop");
 extern "C" int strlen(const char* s);
@@ -1863,7 +1863,7 @@ extern "C" int strlen(const char* s);
  * stack) and sets this state's mAttrState to mode 7 with mPendingDelete. Event 5, while no keyboard is open, opens the
  * keyboard (func_00210F40, empty texts, 61 characters) and calls cKeyboardPopup_setIncludeKey(75, 1, 2) on it. Event 13
  * first shows any incoming message (func_00258160, func_00210BD8), then sends the keyboard's mszEditString (+0x74) when
- * it is not empty (func_00258C50 on cGameComm_mGameComm) and appends it as our own line. Other events go to
+ * it is not empty (cGameComm_sendChat on cGameComm_mGameComm) and appends it as our own line. Other events go to
  * cOVState_onWidgetEvent. Event 13 reads the keyboard at +0xE0 without checking that one is open.
  *
  * @param item  the widget (not read)
@@ -1895,7 +1895,7 @@ extern "C" void func_00210DF0(void* self, void* item, unsigned int key)
         }
         char* typedText = *(char**)((char*)self + 0xE0) + 0x74;
         if (strlen(typedText) != 0) {
-            func_00258C50((int)cGameComm_mGameComm, typedText);
+            cGameComm_sendChat((int)cGameComm_mGameComm, typedText);
             func_00210BD8(self, typedText, 1);
         }
         break;
@@ -1981,7 +1981,7 @@ INCLUDE_ASM("fe/ovstatetrophy", cOVState_PROFILE_cOVState_PROFILE);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char cBENewRaceInterface_newRace[];
 extern char cOVState_PROFILE_vtbl[];
-extern "C" void cFEMemCard_cFEMemCard(void* self, int a, int b);
+extern "C" void cFEMemCard_cFEMemCard2(void* self, int a, int b);
 extern "C" int cBENewPlayerInterface_getPlayerCtrlID(void* iface, int i);
 struct sOVTrophy_1088 {
     char pad_0x0[8];
@@ -1998,7 +1998,7 @@ struct sOVTrophy_1088 {
 /**
  * Constructs the in-game profile (load/save) overlay for the controller that opened it.
  *
- * Runs cFEMemCard_cFEMemCard (the memory card screen base, type 0), sets the state id (+0xC) to 0x24, installs
+ * Runs cFEMemCard_cFEMemCard2 (the memory card screen base, type 0), sets the state id (+0xC) to 0x24, installs
  * cOVState_PROFILE_vtbl, stores @p parentOverlay (the overlay to return to) at +0x278 and clears +0x1CC, +0x22C and +0x230.
  * Then turns @p ucActiveControl into a controller index and stores at +0x1CC which player (one, or two in a two-player race)
  * uses that controller (cBENewPlayerInterface_getPlayerCtrlID).
@@ -2014,7 +2014,7 @@ struct sOVTrophy_1088 {
 extern "C" sOVTrophy_1088* cOVState_PROFILE_cOVState_PROFILE(sOVTrophy_1088* self, int pEngine, unsigned char ucActiveControl, int parentOverlay)
 {
     int idx = 0;
-    cFEMemCard_cFEMemCard(self, pEngine, 0);
+    cFEMemCard_cFEMemCard2(self, pEngine, 0);
     self->f0C = 36;
     self->vtable = cOVState_PROFILE_vtbl;
     self->f278 = parentOverlay;

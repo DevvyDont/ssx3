@@ -3291,7 +3291,7 @@ extern "C" void cGameComm_sendExitGame(cGameComm* gameComm) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_156860", func_00258C00);
+INCLUDE_ASM("seg/seg_156860", cGameComm_sendUnplugCmd);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cGameComm_writePacket_8C00(void *, int, void *, int) __asm__("cGameComm_writePacket");
@@ -3304,7 +3304,7 @@ extern "C" void cGameComm_writePacket_8C00(void *, int, void *, int) __asm__("cG
  *
  * @param gameComm  the game link
  */
-extern "C" void func_00258C00(cGameComm* gameComm) {
+extern "C" void cGameComm_sendUnplugCmd(cGameComm* gameComm) {
     if (gameComm->mError == 0 && gameComm->mConnected != 0) {
         char buf[12];
         buf[0] = 2;
@@ -3315,7 +3315,7 @@ extern "C" void func_00258C00(cGameComm* gameComm) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_156860", func_00258C50);
+INCLUDE_ASM("seg/seg_156860", cGameComm_sendChat);
 #ifdef SKIP_ASM
 extern "C" void cGameComm_writePacket(void *, int, int, int);
 extern "C" int strlen(int);
@@ -3329,7 +3329,7 @@ extern "C" int strlen(int);
  * @param gameComm  the game link
  * @param message  the text
  */
-extern "C" void func_00258C50(cGameComm* gameComm, int message) {
+extern "C" void cGameComm_sendChat(cGameComm* gameComm, int message) {
     if (((gameComm->mError) == 0) && ((gameComm->mConnected) != 0)) {
         cGameComm_writePacket(gameComm, 1, message, strlen(message) + 1);
     }

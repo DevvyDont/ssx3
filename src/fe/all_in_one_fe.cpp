@@ -129,7 +129,7 @@ extern "C" void cOVTemplate_Simple__cOVTemplate_Simple(void *ovState) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021C730);
+INCLUDE_ASM("fe/all_in_one_fe", cOVTemplate_Simple_cOVTemplate_Simple);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char D_00474D30[];
@@ -150,7 +150,7 @@ extern unsigned short D_004A2088[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_0021C730(cOVState* ovState, int engine, int overlayId) {
+extern "C" void *cOVTemplate_Simple_cOVTemplate_Simple(cOVState* ovState, int engine, int overlayId) {
     cUIState_cUIState(ovState);
     (ovState->mOVID) = overlayId;
     (ovState->mDoneTransition) = 0;
@@ -4576,11 +4576,11 @@ extern "C" void* cOVState_PROFILE__cOVState_PROFILE(void *self) {
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00221DB0);
 #ifdef SKIP_ASM
-extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2);
+extern "C" void* cFEMemCard_cFEMemCard2(void* self, int a1, int a2);
 extern char cOVState_PROFILE_vtbl[];
 
 /**
- * Constructs a cOVState_PROFILE without an engine: runs cFEMemCard_cFEMemCard(@p state, 0, 0) and installs
+ * Constructs a cOVState_PROFILE without an engine: runs cFEMemCard_cFEMemCard2(@p state, 0, 0) and installs
  * cOVState_PROFILE_vtbl.
  *
  * Out-of-line copy with no callers; the real constructor is cOVState_PROFILE_cOVState_PROFILE.
@@ -4589,7 +4589,7 @@ extern char cOVState_PROFILE_vtbl[];
  * @return @p state
  */
 extern "C" void *func_00221DB0(void *state) {
-    cFEMemCard_cFEMemCard(state, 0, 0);
+    cFEMemCard_cFEMemCard2(state, 0, 0);
     (*(char **)((char*)(state) + (8))) = cOVState_PROFILE_vtbl;
     return state;
 }
@@ -4851,12 +4851,12 @@ extern "C" void* cOVState_SAVEREPLAY__cOVState_SAVEREPLAY(void *self) {
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_00222058);
 #ifdef SKIP_ASM
-extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2);
+extern "C" void* cFEMemCard_cFEMemCard2(void* self, int a1, int a2);
 extern char cOVState_SAVEREPLAY_vtbl[];
 
 /**
  * Constructs the memory-card save overlay with vtable cOVState_SAVEREPLAY_vtbl (overlay id 18) without an engine: runs
- * cFEMemCard_cFEMemCard(@p ovState, 0, 0) and installs cOVState_SAVEREPLAY_vtbl.
+ * cFEMemCard_cFEMemCard2(@p ovState, 0, 0) and installs cOVState_SAVEREPLAY_vtbl.
  *
  * Out-of-line copy with no callers; cOVStateManager_triggerOverlay builds id 18 through cOVState_SAVEREPLAY_cOVState_SAVEREPLAY instead.
  *
@@ -4864,7 +4864,7 @@ extern char cOVState_SAVEREPLAY_vtbl[];
  * @return @p ovState
  */
 extern "C" void *func_00222058(void *ovState) {
-    cFEMemCard_cFEMemCard(ovState, 0, 0);
+    cFEMemCard_cFEMemCard2(ovState, 0, 0);
     (*(char **)((char*)(ovState) + (8))) = cOVState_SAVEREPLAY_vtbl;
     return ovState;
 }
@@ -4894,12 +4894,12 @@ extern "C" void* cOVState_SAVEOPTIONS__cOVState_SAVEOPTIONS(void *self) {
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002220C0);
 #ifdef SKIP_ASM
-extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2);
+extern "C" void* cFEMemCard_cFEMemCard2(void* self, int a1, int a2);
 extern char cOVState_SAVEOPTIONS_vtbl[];
 
 /**
  * Constructs the memory-card save overlay with vtable cOVState_SAVEOPTIONS_vtbl (overlay id 19) without an engine: runs
- * cFEMemCard_cFEMemCard(@p ovState, 0, 0) and installs cOVState_SAVEOPTIONS_vtbl.
+ * cFEMemCard_cFEMemCard2(@p ovState, 0, 0) and installs cOVState_SAVEOPTIONS_vtbl.
  *
  * Out-of-line copy with no callers; cOVStateManager_triggerOverlay builds id 19 through cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS instead.
  *
@@ -4907,7 +4907,7 @@ extern char cOVState_SAVEOPTIONS_vtbl[];
  * @return @p ovState
  */
 extern "C" void *func_002220C0(void *ovState) {
-    cFEMemCard_cFEMemCard(ovState, 0, 0);
+    cFEMemCard_cFEMemCard2(ovState, 0, 0);
     (*(char **)((char*)(ovState) + (8))) = cOVState_SAVEOPTIONS_vtbl;
     return ovState;
 }
@@ -5099,11 +5099,11 @@ extern "C" void cOVState_AUTOSAVE_hideActionButtons(void) {
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", func_002222B8);
 #ifdef SKIP_ASM
-extern "C" void* cFEMemCard_cFEMemCard(void* self, int a1, int a2);
+extern "C" void* cFEMemCard_cFEMemCard2(void* self, int a1, int a2);
 extern char cOVState_AUTOSAVE_vtbl[];
 
 /**
- * Constructs a cOVState_AUTOSAVE without an engine: runs cFEMemCard_cFEMemCard(@p state, 0, 0) and installs
+ * Constructs a cOVState_AUTOSAVE without an engine: runs cFEMemCard_cFEMemCard2(@p state, 0, 0) and installs
  * cOVState_AUTOSAVE_vtbl.
  *
  * Out-of-line copy with no callers; the real constructor is cOVState_AUTOSAVE_cOVState_AUTOSAVE.
@@ -5112,7 +5112,7 @@ extern char cOVState_AUTOSAVE_vtbl[];
  * @return @p state
  */
 extern "C" void *func_002222B8(void *state) {
-    cFEMemCard_cFEMemCard(state, 0, 0);
+    cFEMemCard_cFEMemCard2(state, 0, 0);
     (*(char **)((char*)(state) + (8))) = cOVState_AUTOSAVE_vtbl;
     return state;
 }

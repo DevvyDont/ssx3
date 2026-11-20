@@ -1826,7 +1826,7 @@ extern "C" void func_0023A668_A668(cGMRaceHandler* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023A760);
+INCLUDE_ASM("main/gamemode", cGMRaceHandler_raceFinish);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type).
@@ -1835,7 +1835,7 @@ INCLUDE_ASM("main/gamemode", func_0023A760);
 
 // The game-mode manager (cGameModeMan, 0xA0 bytes; cGameModeMan_getGM creates it). cGameModeMan_instance owns it and
 // D_004A2C70_A760 is the pointer the handlers read it through. iNumberAI is the prototype's name (assert
-// `iRider < (pManager->iNumberAI+1)` in func_0023A760); mode indexes the handler table D_00536668.
+// `iRider < (pManager->iNumberAI+1)` in cGMRaceHandler_raceFinish); mode indexes the handler table D_00536668.
 
 // The race (seg/seg_1FBE38 layout): riders by being index at 0x28; each player holds its rider at +0x18.
 struct sRacePlayer {
@@ -1935,7 +1935,7 @@ static inline int vcall_23A760(char* obj, int slot)
  * @param idx  the rider index
  */
 // cGMRaceHandler slot 7: records rider idx's heat time, ranks the heat and moves the heat state on.
-extern "C" void func_0023A760(cGMRaceHandler* self, int idx)
+extern "C" void cGMRaceHandler_raceFinish(cGMRaceHandler* self, int idx)
 {
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);

@@ -4082,7 +4082,7 @@ extern "C" void cFEMemCard_onCreateScreen(void) {
 /**
  * Does nothing: the memory-card screens' onMenuGainFocus (slot +0x6C).
  *
- * It sits in cFEMemCard_vtbl (the cFEMemCard_cFEMemCard vtable) and is inherited unchanged by cFEStateMemCard,
+ * It sits in cFEMemCard_vtbl (the cFEMemCard_cFEMemCard2 vtable) and is inherited unchanged by cFEStateMemCard,
  * cFEStateProfileLoad, cFEStateOptionsDeviceSelect, cOVState_AUTOSAVE, cOVState_PROFILE and two more vtables
  * (cOVState_SAVEOPTIONS_vtbl, cOVState_SAVEREPLAY_vtbl).
  */
@@ -4519,11 +4519,11 @@ extern "C" void* cFEStateOptionsDeviceSelect__cFEStateOptionsDeviceSelect(void *
 INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *cFEMemCard_cFEMemCard_E178(void *, int, int) __asm__("cFEMemCard_cFEMemCard");
+extern "C" void *cFEMemCard_cFEMemCard_E178(void *, int, int) __asm__("cFEMemCard_cFEMemCard2");
 extern int D_0046C228_E178[] __asm__("cFEStateOptionsDeviceSelect_vtbl");
 
 /**
- * Constructs the memory-card device select state with no engine: runs cFEMemCard_cFEMemCard with null engine and type
+ * Constructs the memory-card device select state with no engine: runs cFEMemCard_cFEMemCard2 with null engine and type
  * 0, then stores cFEStateOptionsDeviceSelect_vtbl at +0x8.
  *
  * @return @p self
@@ -4602,11 +4602,11 @@ extern "C" void* cFEStateProfileLoad__cFEStateProfileLoad(void *self) {
 INCLUDE_ASM("main/all_in_one_main", func_001DE240);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *cFEMemCard_cFEMemCard_E240(void *, int, int) __asm__("cFEMemCard_cFEMemCard");
+extern "C" void *cFEMemCard_cFEMemCard_E240(void *, int, int) __asm__("cFEMemCard_cFEMemCard2");
 extern int D_0046BFD0_E240[] __asm__("cFEStateProfileLoad_vtbl");
 
 /**
- * Constructs the profile load/save state with no engine: runs cFEMemCard_cFEMemCard with null engine and type 0, then
+ * Constructs the profile load/save state with no engine: runs cFEMemCard_cFEMemCard2 with null engine and type 0, then
  * stores cFEStateProfileLoad_vtbl at +0x8.
  *
  * Unlike cFEStateProfileLoad_cFEStateProfileLoad it sets none of the state's own fields.
@@ -5648,11 +5648,11 @@ extern "C" void func_001DE948(void) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateMemCard_cFEStateMemCard);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *cFEMemCard_cFEMemCard_E950(void *, int, int) __asm__("cFEMemCard_cFEMemCard");
+extern "C" void *cFEMemCard_cFEMemCard_E950(void *, int, int) __asm__("cFEMemCard_cFEMemCard2");
 extern int cFEStateMemCard_vtbl[];
 
 /**
- * Constructs the memory-card state with no engine: runs cFEMemCard_cFEMemCard with null engine and type 0, then stores
+ * Constructs the memory-card state with no engine: runs cFEMemCard_cFEMemCard2 with null engine and type 0, then stores
  * cFEStateMemCard_vtbl at +0x8.
  *
  * @return @p self

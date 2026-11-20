@@ -1224,7 +1224,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cOVStateManager_triggerOverlay(int state);
-extern "C" void func_00258C00(void* net);
+extern "C" void cGameComm_sendUnplugCmd(void* net);
 extern "C" void cGameComm_sendPauseCmd(void* net, int a1);
 extern "C" int cWScriptMan_isLocalMissionActive(void* self);
 extern void* cWScriptMan_TheWScriptMan;
@@ -1240,7 +1240,7 @@ static inline bool notMode4_0020CA10(signed char* g)
  * Pauses the game by opening the pause overlay that fits the current game.
  *
  * Online (cBENetworkInterface_networkOpt.bIsNetworkGame) it first, when cGameComm_mGameComm exists, sends the
- * controller-unplugged command (func_00258C00) if SSXApp->Game's ControllerUnplugged is set, sends the pause command
+ * controller-unplugged command (cGameComm_sendUnplugCmd) if SSXApp->Game's ControllerUnplugged is set, sends the pause command
  * (cGameComm_sendPauseCmd with 1) and starts mPauseTimeout = 3600 and mOverlayTimeout = 1800; then triggers overlay 6.
  * Offline: overlay 2 while a local mission is active (cWScriptMan_isLocalMissionActive), else overlay 1 on game path 0
  * outside cGameMode 4, overlay 4 in game state 11 (mCurrentStateID), overlay 3 in cGameMode 4 and overlay 5 otherwise
@@ -1259,7 +1259,7 @@ extern "C" void func_0020CA10(void)
         if (net != 0) {
             char* game = (char*)SSXApp->Game;
             if (game != 0 && *(int*)(game + 0x224) != 0) {
-                func_00258C00((char*)net);
+                cGameComm_sendUnplugCmd((char*)net);
             }
             cGameComm_sendPauseCmd((char*)cGameComm_mGameComm, 1);
             cGameComm* n = cGameComm_mGameComm;

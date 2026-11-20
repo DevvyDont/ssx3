@@ -1906,7 +1906,6 @@ lbl_001D1F00 = 0x001D1F00; //type:label
 // --- src/fe/festatetrophyroom.cpp ---
 func_001D5138 = 0x001D5138; //type:func
 func_001D5280 = 0x001D5280; //type:func
-func_001D5330 = 0x001D5330; //type:func
 
 // --- src/fe/fememcardcallbacks.cpp ---
 lbl_001D8778 = 0x001D8778; //type:label
@@ -2593,7 +2592,6 @@ func_0023A070 = 0x0023A070; //type:func
 func_0023A108 = 0x0023A108; //type:func
 func_0023A4F0 = 0x0023A4F0; //type:func
 func_0023A668 = 0x0023A668; //type:func
-func_0023A760 = 0x0023A760; //type:func
 func_0023AC10__FPv = 0x0023AC10; //type:func
 func_0023AC18 = 0x0023AC18; //type:func
 func_0023AC50 = 0x0023AC50; //type:func
@@ -4183,7 +4181,6 @@ func_00320540__Fv = 0x00320540; //type:func
 func_00320548__Fv = 0x00320548; //type:func
 
 // --- src/bx/execman.cpp ---
-func_00320AD8 = 0x00320AD8; //type:func
 func_00320B08__FPv = 0x00320B08; //type:func
 func_00320B28__FPv = 0x00320B28; //type:func
 func_00320B48__FPv = 0x00320B48; //type:func
