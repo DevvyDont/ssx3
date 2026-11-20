@@ -3938,7 +3938,7 @@ INCLUDE_ASM("movie/movieplayer", func_002412A0);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00152758(void* iface);
+extern "C" int cBESaveInterface_generateSaveGame(void* iface);
 // PORT: cBESaveInterface_getSaveGameSize__FPv ignores its argument; this caller passes none.
 int cBESaveInterface_getSaveGameSize_r() __asm__("cBESaveInterface_getSaveGameSize__FPv");
 extern "C" void func_002C2540(void*, void*);
@@ -3957,7 +3957,7 @@ extern "C" void func_002412A0(void* self)
     char desc[0x200];
     char fmt[0x200];
     cMCOverlayManager_mSaveInProgress = 1;
-    int saveData = func_00152758(cBE_getInterface_Fv(cBE_getBE(), 5));
+    int saveData = cBESaveInterface_generateSaveGame(cBE_getInterface_Fv(cBE_getBE(), 5));
     int saveSize = cBESaveInterface_getSaveGameSize_r();
     func_002C2540(fmt, str_pct_s_pct_spct_04d_b);
     func_00241D40_r(self, 2, name, 130);

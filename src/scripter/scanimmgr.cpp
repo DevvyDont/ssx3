@@ -89,7 +89,7 @@ INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_LinkBank);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_00311220(void* mem, void* data);
+extern "C" void* cAdfDataSource_cAdfDataSource1(void* mem, void* data);
 extern const char str_cAdfDataSource[];
 extern const char str_pTableAnimID[];
 extern void** cAnimDataBase_TheAnimDataBase;
@@ -132,7 +132,7 @@ extern "C" void* func_002757F0_v(void* self) __asm__("func_002757F0");
  * Links attached animation bank data to the script anim bank manager, creating the bank's entry if needed.
  *
  * When no in-use entry has @p id yet, it takes the first free entry (no check for a full table), stores @p id
- * and @p data, wraps the data in a new 0x18-byte cAdfDataSource (func_00311220) and installs that in the anim
+ * and @p data, wraps the data in a new 0x18-byte cAdfDataSource (cAdfDataSource_cAdfDataSource1) and installs that in the anim
  * database's bank table (cAnimDataBase_TheAnimDataBase) at the entry's slot. It also counts the bank's non-null items and, if there
  * are any, builds pTableAnimID, the table of their indices. An existing entry is returned unchanged.
  *
@@ -147,7 +147,7 @@ extern "C" int cScriptAnimBankManager_LinkBank(sScLinkList* self, int id, void* 
         bankInfo = (sScLinkEntry*)func_002757F0_v(self);
         bankInfo->id = id;
         bankInfo->data = data;
-        sScBank* bank = (sScBank*)func_00311220(cMemMan_alloc(0x18, str_cAdfDataSource, self->flags, 0), bankInfo->data);
+        sScBank* bank = (sScBank*)cAdfDataSource_cAdfDataSource1(cMemMan_alloc(0x18, str_cAdfDataSource, self->flags, 0), bankInfo->data);
         int n = bank->hdr->count;
         bankInfo->used = 0;
         for (int i = 0; i < n; i++) {
@@ -268,8 +268,8 @@ extern "C" void* func_00275718(sAnimList* self, int id)
 //100%
 INCLUDE_ASM("scripter/scanimmgr", func_00275760);
 #ifdef SKIP_ASM
-extern "C" void func_00311110(void** tbl);
-extern "C" void func_003112C8(void* self, int flags);
+extern "C" void cAnimDataBase_purgeChanCache(void** tbl);
+extern "C" void cAdfDataSource__cAdfDataSource(void* self, int flags);
 void cMemMan_free(void*);
 extern void** cAnimDataBase_TheAnimDataBase;
 
@@ -279,9 +279,9 @@ extern "C" void func_00275760(void* self, sAnimEntry* e)
     void** slot = &tbl[*(unsigned char*)&e->unk4];
     void* obj = *slot;
     *slot = 0;
-    func_00311110(tbl);
+    cAnimDataBase_purgeChanCache(tbl);
     if (obj != 0) {
-        func_003112C8(obj, 3);
+        cAdfDataSource__cAdfDataSource(obj, 3);
     }
     if (e->unkC != 0 && e->unk10 != 0) {
         cMemMan_free((void*)e->unk10);

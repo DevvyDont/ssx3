@@ -34,34 +34,34 @@ void* cBEAggressionInterface_getThis()
 #endif
 
 //100%
-INCLUDE_ASM("be/beintaggression", func_00155AA0__FPv);
+INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_submit__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the aggression interface's submit (slot 1 of its vtable D_0045AC48).
  */
-void func_00155AA0(void* self)
+void cBEAggressionInterface_submit(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintaggression", func_00155AA8__FPv);
+INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_discard__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the aggression interface's discard (slot 2 of its vtable D_0045AC48).
  */
-void func_00155AA8(void* self)
+void cBEAggressionInterface_discard(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintaggression", func_00155AB0);
+INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_getState);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 void* cBENewRaceInterface_getThis();
-extern "C" int func_00145750(void* race);
+extern "C" int cBENewRaceInterface_getRival(void* race);
 
 struct sAggrTriple {
     signed char v[3];
@@ -81,50 +81,50 @@ extern sAggrCharProfile cBELibrary_profileLib[][10];
  *
  * The record is cBELibrary_profileLib[profile of @p rider][character of @p rider].aggression[character of
  * @p targetRider] (3 bytes: state, level, ticks; see cBEAggressionInterface_applyAggression). The rival comes from
- * func_00145750 on the new-race interface.
+ * cBENewRaceInterface_getRival on the new-race interface.
  *
  * @param targetRider  the rider being looked at
  * @param rider  the rider whose feelings are read
  * @return the relation state (0-3; On Tour friend, neutral, rival, enemy)
  */
-extern "C" int func_00155AB0(void* self, int targetRider, int rider)
+extern "C" int cBEAggressionInterface_getState(void* self, int targetRider, int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int ca = cBELibrary_getCharacterID(targetRider);
     int cb = cBELibrary_getCharacterID(rider);
-    if (func_00145750(cBENewRaceInterface_getThis()) == ca)
+    if (cBENewRaceInterface_getRival(cBENewRaceInterface_getThis()) == ca)
         return 2;
     return cBELibrary_profileLib[profile][cb].aggression[ca].v[0];
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintaggression", func_00155B50);
+INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_getAggression);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 void* cBENewRaceInterface_getThis();
-extern "C" int func_00145750(void* race);
+extern "C" int cBENewRaceInterface_getRival(void* race);
 
 extern sAggrCharProfile cBELibrary_profileLib[][10];
 
 /**
  * Returns how aggressive @p rider is toward @p targetRider: the level byte of @p rider's relation record for the
- * target's character, or 3 when the target is the rival of the current peak (func_00145750).
+ * target's character, or 3 when the target is the rival of the current peak (cBENewRaceInterface_getRival).
  *
- * Same record as func_00155AB0; the level is the record's tick count / 5, clamped by its state
+ * Same record as cBEAggressionInterface_getState; the level is the record's tick count / 5, clamped by its state
  * (cBEAggressionInterface_applyAggression).
  *
  * @param targetRider  the rider being looked at
  * @param rider  the rider whose aggression is read
  * @return the aggression level (0-4; On Tour none, mild, moderate, hard, chase)
  */
-extern "C" int func_00155B50(void* self, int targetRider, int rider)
+extern "C" int cBEAggressionInterface_getAggression(void* self, int targetRider, int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int ca = cBELibrary_getCharacterID(targetRider);
     int cb = cBELibrary_getCharacterID(rider);
-    if (func_00145750(cBENewRaceInterface_getThis()) == ca)
+    if (cBENewRaceInterface_getRival(cBENewRaceInterface_getThis()) == ca)
         return 3;
     return cBELibrary_profileLib[profile][cb].aggression[ca].v[1];
 }
@@ -222,7 +222,7 @@ extern "C" void cBEAggressionInterface_applyAggression(void* self, int iRider1, 
 #endif
 
 //100%
-INCLUDE_ASM("be/beintaggression", func_00155E58);
+INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_regressAggression);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int cBELibrary_getProfileIndex(int);
@@ -248,7 +248,7 @@ extern sRaceSettings_155E58 cBELibrary_raceDB;
  * (cBELibrary_raceDB +0x49) is set.
  */
 // Re-clamps every player's aggression level towards the other riders to the limits of its current state.
-extern "C" void func_00155E58(void)
+extern "C" void cBEAggressionInterface_regressAggression(void)
 {
     for (int i = 0; i < cBELibrary_raceDB.numPlayers; i++) {
         int profile = cBELibrary_getProfileIndex(i);
@@ -304,7 +304,7 @@ extern "C" void func_00155E58(void)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintaggression", func_001560A0);
+INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_writeToReplayFrame);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -317,11 +317,11 @@ struct sStreamVE_1560A0 { short delta; short index; void (*fn)(void*, void*, int
  * profile's ten 3-byte relation records (one per character).
  *
  * Each write goes through vtable slot 1 of @p stream (the write method, as in cBEInterface_writeToReplayFrame).
- * func_001561B0 reads the same layout.
+ * cBEAggressionInterface_readFromReplayFrame reads the same layout.
  *
  * @param stream  the replay frame stream
  */
-extern "C" void func_001560A0(void* self, void* stream)
+extern "C" void cBEAggressionInterface_writeToReplayFrame(void* self, void* stream)
 {
     int n = D_005305E0[0];
     sStreamVE_1560A0* vt = *(sStreamVE_1560A0**)stream;
@@ -340,7 +340,7 @@ extern "C" void func_001560A0(void* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintaggression", func_001561B0);
+INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_readFromReplayFrame);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -355,7 +355,7 @@ struct sStreamVE_1561B0 { short delta; short index; void (*fn)(void*, void*, int
  *
  * @param stream  the replay frame stream
  */
-extern "C" void func_001561B0(void* self, void* stream)
+extern "C" void cBEAggressionInterface_readFromReplayFrame(void* self, void* stream)
 {
     int n;
     sStreamVE_1561B0* vt = *(sStreamVE_1561B0**)stream;
@@ -375,7 +375,7 @@ extern "C" void func_001561B0(void* self, void* stream)
 
 
 //100%
-INCLUDE_ASM("be/beintaggression", func_001562B8);
+INCLUDE_ASM("be/beintaggression", cBEState_gotoNextState);
 #ifdef SKIP_ASM
 extern int cBE_currentState;
 extern char* cBE_aBEState[];
@@ -387,7 +387,7 @@ extern char* cBE_aBEState[];
  * The states are cBE_aBEState[cBE_currentState]; onExit and onEnter are vtable slots 3 and 4 (vtable pointer at +0x4
  * of each state).
  */
-extern "C" void func_001562B8(int *self) {
+extern "C" void cBEState_gotoNextState(int *self) {
     char* obj;
     char* vtbl;
     char* obj2;

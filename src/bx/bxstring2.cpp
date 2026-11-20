@@ -2,9 +2,9 @@
 
 INCLUDE_ASM("bx/bxstring2", cBXString_cBXString__FP10cBXString2);
 
-INCLUDE_ASM("bx/bxstring2", func_00268950);
+INCLUDE_ASM("bx/bxstring2", cChallenger__cChallenger);
 
-INCLUDE_ASM("bx/bxstring2", func_002689B8);
+INCLUDE_ASM("bx/bxstring2", BuddyMan__BuddyMan);
 
 INCLUDE_ASM("bx/bxstring2", func_00268A90);
 
@@ -134,19 +134,19 @@ INCLUDE_ASM("bx/bxstring2", cTrackPath_getEventsInRange);
 
 INCLUDE_ASM("bx/bxstring2", cTrackPath_isForkInPath);
 
-INCLUDE_ASM("bx/bxstring2", func_0026A180);
+INCLUDE_ASM("bx/bxstring2", cPath_initPath);
 
-INCLUDE_ASM("bx/bxstring2", func_0026A338);
+INCLUDE_ASM("bx/bxstring2", cPath_populateNode);
 
-INCLUDE_ASM("bx/bxstring2", func_0026A378);
+INCLUDE_ASM("bx/bxstring2", cPath_populateEvent);
 
-INCLUDE_ASM("bx/bxstring2", func_0026A428);
+INCLUDE_ASM("bx/bxstring2", cPath_intersectPath);
 
-INCLUDE_ASM("bx/bxstring2", func_0026A638);
+INCLUDE_ASM("bx/bxstring2", cPath_intersectPath1);
 
 INCLUDE_ASM("bx/bxstring2", cPath_getPathHeading);
 
-INCLUDE_ASM("bx/bxstring2", func_0026A9B0);
+INCLUDE_ASM("bx/bxstring2", cPath_getProximity);
 
 INCLUDE_ASM("bx/bxstring2", cPath_getEventsInRange);
 
@@ -156,21 +156,21 @@ INCLUDE_ASM("bx/bxstring2", cPath_getLength);
 
 INCLUDE_ASM("bx/bxstring2", cPath_isForkInPath);
 
-INCLUDE_ASM("bx/bxstring2", func_0026AD70);
+INCLUDE_ASM("bx/bxstring2", cPathSys_loadInjectedPaths);
 
-INCLUDE_ASM("bx/bxstring2", func_0026ADA0);
+INCLUDE_ASM("bx/bxstring2", cPathSys_removeInjectedPathFile);
 
-INCLUDE_ASM("bx/bxstring2", func_0026ADF0);
+INCLUDE_ASM("bx/bxstring2", cPathSys_resolvePaths);
 
 INCLUDE_ASM("bx/bxstring2", cPathSys_purgePaths);
 
-INCLUDE_ASM("bx/bxstring2", func_0026AF70);
+INCLUDE_ASM("bx/bxstring2", cPathSys_getTrackPath);
 
-INCLUDE_ASM("bx/bxstring2", func_0026AF88);
+INCLUDE_ASM("bx/bxstring2", cPathSys_getAIPath);
 
 INCLUDE_ASM("bx/bxstring2", cPathSys_getNearResetPaths);
 
 INCLUDE_ASM("bx/bxstring2", cPathSys_getNearAIPaths);
 
-INCLUDE_ASM("bx/bxstring2", func_0026B178);
+INCLUDE_ASM("bx/bxstring2", cPathSys_getNearTrackPaths);
 

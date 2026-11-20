@@ -123,7 +123,7 @@ extern "C" void cBESaveInterface_releaseReplayBuffer(void)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintsavefile", func_00152758);
+INCLUDE_ASM("be/beintsavefile", cBESaveInterface_generateSaveGame);
 #ifdef SKIP_ASM
 int cBESaveInterface_getSaveGameSize(void* self);
 // PORT: the unit defines cBESaveInterface_releaseBuffer(void); this caller passes self in $a0.
@@ -146,11 +146,11 @@ struct sSaveBits6_2758 { sSaveBits_2758 e[6]; };
  * tagged "save file buffer" into cBESaveInterface_buffer. Writes the 0x288-byte block D_00535898, the 26 high-score
  * tables D_00535C18 (2600 bytes, the ones func_0014AB20 returns), then two bits per player of cBELibrary_playerDB (bit
  * 1 of the word at +0x10 and the byte at +0x13, six players), and ends with a CRC of everything before it
- * (func_003E62D0, seed 64490). func_00152BB0 reads this layout back.
+ * (func_003E62D0, seed 64490). cBESaveInterface_loadSaveGame reads this layout back.
  *
  * @return the save buffer (cBESaveInterface_buffer)
  */
-extern "C" void* func_00152758(void* self)
+extern "C" void* cBESaveInterface_generateSaveGame(void* self)
 {
     int size = cBESaveInterface_getSaveGameSize(self);
     cBESaveInterface_releaseBuffer_s(self);
@@ -281,7 +281,7 @@ extern "C" int cBESaveInterface_getSaveProfileSize()
 #endif
 
 //100%
-INCLUDE_ASM("be/beintsavefile", func_00152BB0);
+INCLUDE_ASM("be/beintsavefile", cBESaveInterface_loadSaveGame);
 #ifdef SKIP_ASM
 class cBEIface_2BB0 {
 public:
@@ -296,7 +296,7 @@ extern "C" void cSSXApp_initLocale(void* app);
 extern "C" void cSSXApp_activateBEOptions(void* app);
 
 /**
- * Loads a game save written by func_00152758, after checking its CRC.
+ * Loads a game save written by cBESaveInterface_generateSaveGame, after checking its CRC.
  *
  * Compares the CRC of the first cBESaveInterface_getSaveGameSize() - 4 bytes (func_003E62D0, seed 64490) with the
  * stored one and returns 0 on a mismatch. Otherwise restores D_00535898 and calls the option interface's onLoad,
@@ -307,7 +307,7 @@ extern "C" void cSSXApp_activateBEOptions(void* app);
  * @param buf  the save data read from the memory card
  * @return 1 when loaded, 0 when the CRC is wrong
  */
-extern "C" int func_00152BB0(void* self, char* buf)
+extern "C" int cBESaveInterface_loadSaveGame(void* self, char* buf)
 {
     int size = cBESaveInterface_getSaveGameSize(self) - 4;
     int crc = func_003E62D0(buf, size, 64490);
@@ -340,7 +340,7 @@ extern "C" int func_00152BB0(void* self, char* buf)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintsavefile", func_00152DE0);
+INCLUDE_ASM("be/beintsavefile", cBESaveInterface_loadSaveProfile);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -367,7 +367,7 @@ extern sCharFlag_2DE0 D_00535B31[];
  * @param idx  the profile slot to load into (On Tour iProfile)
  * @return 1 when loaded, 0 when the CRC is wrong
  */
-extern "C" int func_00152DE0(void* self, char* buf, int idx)
+extern "C" int cBESaveInterface_loadSaveProfile(void* self, char* buf, int idx)
 {
     int size = cBESaveInterface_getSaveProfileSize() - 4;
     int crc = func_003E62D0(buf, size, 64490);

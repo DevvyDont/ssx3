@@ -456,7 +456,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* t, int id);
-extern "C" int func_00150B48(void* self, int a, int b, int amount);
+extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount);
 extern "C" int func_0014FE08(void* self, int rider, int idx, int bit);
 extern "C" void func_00184520(void* self);
 extern "C" void cFEStateUberTrick_updateTrickMenu(void* self);
@@ -473,7 +473,7 @@ struct sVE_4F40 {
  * Pays for and unlocks the selected uber trick when the buy popup closes accepted.
  *
  * On event 22, when the popup's mbAccept (+0x6C) is set: subtracts its mInfo.mCost (+0x48) from the character's money
- * (func_00150B48 on cBE interface 11), clears flag bit "trick" (the trick menu's selected mMiscData) of the category's
+ * (cBEEconInterface_reduceMoney on cBE interface 11), clears flag bit "trick" (the trick menu's selected mMiscData) of the category's
  * entry (the category menu's selected mMiscData) with func_0014FE08 on interface 6, calls that interface's vtable slot
  * 1, sets "helptext_custom" to "kT_66HELPCustomUber" and refreshes the cost numbers (func_00184520). On event 22 the
  * trick list is refilled either way (cFEStateUberTrick_updateTrickMenu). Other events do nothing. onPopupEvent slot (+0x8C) of the
@@ -490,7 +490,7 @@ extern "C" void cFEStateUberTrick_onPopupEvent(void* self, void* item, int msg)
     case 22:
         if (*(int*)((char*)item + 0x6C) != 0) {
             int charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
-            func_00150B48(cBE_getInterface_Fv(cBE_getBE(), 11), *(signed char*)((char*)self + 0x44), charID, *(int*)((char*)item + 0x48));
+            cBEEconInterface_reduceMoney(cBE_getInterface_Fv(cBE_getBE(), 11), *(signed char*)((char*)self + 0x44), charID, *(int*)((char*)item + 0x48));
             int entryIndex = *(signed char*)(*(char**)(*(char**)((char*)self + 0x4C) + 0xA0) + 0x18);
             int flagBit = *(signed char*)(*(char**)(*(char**)((char*)self + 0x50) + 0xA0) + 0x18);
             void* pi = cBE_getInterface_Fv(cBE_getBE(), 6);

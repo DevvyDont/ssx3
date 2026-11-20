@@ -156,9 +156,9 @@ INCLUDE_ASM("bx/appman", cAppMan_mainLoop);
 #ifdef SKIP_ASM
 // PORT: cAppMan_checkHalt returns int; the main loop ignores it (void call here).
 void cAppMan_checkHalt_v(cAppMan* self) __asm__("cAppMan_checkHalt__FP7cAppMan");
-void func_00317530(void* self, float arg);
-void func_003175A0(void* self);
-void func_00317600(void* self);
+void cLoadTimer_startload(void* self, float arg);
+void cLoadTimer_update(void* self);
+void cLoadTimer_endload(void* self);
 // PORT: func_00319D10 takes no arguments at this call site.
 void func_00319D10_0() __asm__("func_00319D10__FPv");
 int func_00319D18(void* self);
@@ -204,9 +204,9 @@ extern "C" void cAppMan_mainLoop(void* appMan)
         case 1:
             if (calli_6F00(*(char**)(self + 0x8), 8, 10)) {
                 *(volatile int*)(self + 0x58) = 2;
-                func_00317600(self + 0x38);
+                cLoadTimer_endload(self + 0x38);
             } else {
-                func_003175A0(self + 0x38);
+                cLoadTimer_update(self + 0x38);
             }
             break;
         case 2:
@@ -244,7 +244,7 @@ extern "C" void cAppMan_mainLoop(void* appMan)
             break;
         case 0:
             if (*(int*)(self + 0x4)) {
-                func_00317530(self + 0x38, 10.0f);
+                cLoadTimer_startload(self + 0x38, 10.0f);
                 call1_6F00(*(char**)(self + 0x8), 8, 9, *(int*)(self + 0x4));
                 *(volatile int*)(self + 0x58) = 1;
             }
@@ -282,7 +282,7 @@ extern "C" void cAppMan_mainLoop(void* appMan)
 int cExecutionMan_checkHalt(void* self, int flag);
 
 //100%
-INCLUDE_ASM("bx/appman", func_00317308);
+INCLUDE_ASM("bx/appman", cAppMan_halt);
 #ifdef SKIP_ASM
 extern "C" void cExecutionMan_halt(int);
 
@@ -294,7 +294,7 @@ extern "C" void cExecutionMan_halt(int);
  *
  * @param appMan  the application manager
  */
-extern "C" void func_00317308(void *appMan) {
+extern "C" void cAppMan_halt(void *appMan) {
     cExecutionMan_halt((*(int *)((char*)(appMan) + (8))));
 }
 #endif
@@ -314,7 +314,7 @@ int cAppMan_checkHalt(cAppMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/appman", func_00317348__FPv);
+INCLUDE_ASM("bx/appman", cAppMan_timerFunction__FPv);
 #ifdef SKIP_ASM
 class cAppSubK2 {
 public:
@@ -350,12 +350,12 @@ public:
  *
  * Increments TimerTick (+0x18), adds GameRate (+0x24) to the fractional tick FracTick (+0x28), calls the app manager's
  * virtual slot 7 once per whole tick crossed and keeps the remainder, then calls the execution manager's (+0x8) virtual
- * slot 5. func_00317500 calls it on cAppMan_TheAppMan.
+ * slot 5. cExecutionMan_timerFunction calls it on cAppMan_TheAppMan.
  *
  * @param appMan  the application manager
  * @return no meaningful value; the body sets no return value
  */
-int func_00317348(void* appMan)
+int cAppMan_timerFunction(void* appMan)
 {
     cAppTickK2* self = (cAppTickK2*)appMan;
     float fracTick = self->accum;
@@ -433,7 +433,7 @@ cExecutionMan* cExecutionMan_cExecutionMan(cExecutionMan* self)
 INCLUDE_ASM("bx/appman", cExecutionMan_halt);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// LANDING: the unit declares `extern "C" void cExecutionMan_halt(int);` (line ~245, used by func_00317308);
+// LANDING: the unit declares `extern "C" void cExecutionMan_halt(int);` (line ~245, used by cAppMan_halt);
 // retype it to (cExecutionMan*, int, int) or keep the alias below.
 struct sVEntry00317478 {
     short delta;
@@ -489,24 +489,24 @@ int cExecutionMan_checkHalt(void* self, int flag)
 #endif
 
 //99.25%
-INCLUDE_ASM("bx/appman", func_00317500__Fv);
+INCLUDE_ASM("bx/appman", cExecutionMan_timerFunction__Fv);
 #ifdef SKIP_ASM
 /**
- * Runs the app manager's timer step (func_00317348) on cAppMan_TheAppMan.
+ * Runs the app manager's timer step (cAppMan_timerFunction) on cAppMan_TheAppMan.
  *
  * The PS2 execution manager's timer thread (func_0031AC08) calls it after each semaphore wait, passing itself, which is
  * ignored.
  *
- * @return no meaningful value (func_00317348 sets none)
+ * @return no meaningful value (cAppMan_timerFunction sets none)
  */
-int func_00317500(void)
+int cExecutionMan_timerFunction(void)
 {
-    return func_00317348(cAppMan_TheAppMan);
+    return cAppMan_timerFunction(cAppMan_TheAppMan);
 }
 #endif
 
 //99.67%
-INCLUDE_ASM("bx/appman", func_00317520__Fv);
+INCLUDE_ASM("bx/appman", getTheExecutionMan__Fv);
 #ifdef SKIP_ASM
 /**
  * Returns the execution manager (+0x8 of cAppMan_TheAppMan).
@@ -515,14 +515,14 @@ INCLUDE_ASM("bx/appman", func_00317520__Fv);
  *
  * @return the execution manager
  */
-int func_00317520(void)
+int getTheExecutionMan(void)
 {
     return *(int*)((char*)cAppMan_TheAppMan + 0x8);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/appman", func_00317530__FPvf);
+INCLUDE_ASM("bx/appman", cLoadTimer_startload__FPvf);
 #ifdef SKIP_ASM
 /**
  * Starts a load-progress timer: stores the estimated load time (+0xC) and zeroes the percentage, target, offset, scale
@@ -532,9 +532,9 @@ INCLUDE_ASM("bx/appman", func_00317530__FPvf);
  * timer (+0x38) with 10 when a module begins loading; the game and front-end loaders restart it with their own
  * estimates.
  *
- * @param rateScale  the estimated load time; func_00317550 scales the approach rate by it
+ * @param rateScale  the estimated load time; cLoadTimer_setnextpercent scales the approach rate by it
  */
-void func_00317530(void* self, float rateScale)
+void cLoadTimer_startload(void* self, float rateScale)
 {
     *(float*)((char*)self + 0xC) = rateScale;
     *(int*)((char*)self + 0x0) = 0;
@@ -547,7 +547,7 @@ void func_00317530(void* self, float rateScale)
 
 
 //99.9%
-INCLUDE_ASM("bx/appman", func_00317550__FPvf);
+INCLUDE_ASM("bx/appman", cLoadTimer_setnextpercent__FPvf);
 #ifdef SKIP_ASM
 /**
  * Sets the next target percentage of a load-progress timer, from which the shown percentage eases towards it.
@@ -559,7 +559,7 @@ INCLUDE_ASM("bx/appman", func_00317550__FPvf);
  *
  * @param newValue  the new target percentage
  */
-void func_00317550(void* self, float newValue)
+void cLoadTimer_setnextpercent(void* self, float newValue)
 {
     float old8 = *(float*)((char*)self + 0x8);
     float raw = *(float*)((char*)self + 0xC);
@@ -582,7 +582,7 @@ void func_00317550(void* self, float newValue)
 extern "C" float func_0040D758(float);
 
 //99.96%
-INCLUDE_ASM("bx/appman", func_003175A0__FPv);
+INCLUDE_ASM("bx/appman", cLoadTimer_update__FPv);
 #ifdef SKIP_ASM
 /**
  * Updates a load-progress timer's shown percentage from the time since its last target was set.
@@ -591,7 +591,7 @@ INCLUDE_ASM("bx/appman", func_003175A0__FPv);
  * the app manager's Tick (+0x1C) and TimerPeriod (+0x14); func_0040D758 is the exponential. cAppMan_mainLoop calls it
  * each frame while a module is loading.
  */
-void func_003175A0(void* self)
+void cLoadTimer_update(void* self)
 {
     int delta = *(int*)((char*)cAppMan_TheAppMan + 0x1C) - *(int*)((char*)self + 0x10);
     float ret = func_0040D758((float)delta * *(float*)((char*)cAppMan_TheAppMan + 0x14) * *(float*)((char*)self + 0x1C));
@@ -600,14 +600,14 @@ void func_003175A0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/appman", func_00317600__FPv);
+INCLUDE_ASM("bx/appman", cLoadTimer_endload__FPv);
 #ifdef SKIP_ASM
 /**
  * Ends a load-progress timer: sets the offset and the shown percentage to 100 and the scale to 0.
  *
  * cAppMan_mainLoop calls it once the loading module reports it is done.
  */
-void func_00317600(void* self)
+void cLoadTimer_endload(void* self)
 {
     *(float*)((char*)self + 0x14) = 100.0f;
     *(int*)((char*)self + 0x18) = 0;

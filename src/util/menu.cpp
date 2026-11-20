@@ -6444,11 +6444,11 @@ INCLUDE_ASM("util/menu", func_002D1BA0);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00144C98(void* iface);
+extern "C" int cBENewRaceInterface_getLocationPeak1(void* iface);
 
 extern "C" int func_002D1BA0()
 {
-    return func_00144C98(cBE_getInterface_Fv(cBE_getBE(), 0)) + 1;
+    return cBENewRaceInterface_getLocationPeak1(cBE_getInterface_Fv(cBE_getBE(), 0)) + 1;
 }
 #endif
 

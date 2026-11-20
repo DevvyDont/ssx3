@@ -792,7 +792,7 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int strlen(const char* s);
-extern "C" void func_00147138(void* player, int idx, char* name);
+extern "C" void cBENewPlayerInterface_setPlayerName(void* player, int idx, char* name);
 extern "C" void* cBENewPlayerInterface_getPlayerName(void* player, int idx);
 extern "C" void func_0023CAE8(void* app, int a1, int a2);
 extern "C" void* cKeyboardPopup_cKeyboardPopup(void* mem, void* engine, void* owner, int a3, int a4);
@@ -875,7 +875,7 @@ static inline void* GetText_K211BC8(char* key)
  * and backing out.
  *
  * Event 13 (the keyboard finished): widens the typed name (+0x74 of the keyboard at +0x1A4) into the manager's
- * mNewFileName, gives the profile +0x1CC (On Tour mPlayerIdx) that name through func_00147138 on the player interface
+ * mNewFileName, gives the profile +0x1CC (On Tour mPlayerIdx) that name through cBENewPlayerInterface_setPlayerName on the player interface
  * (back-end interface 1), or, for an empty name, the localised "kT_MEMPlayerName" format with the profile number; then
  * calls the interface's virtual slot 1, starts the save with func_0023CAE8(manager, 1, profile), and sets +0x1A8
  * (processing), +0x1DC (save pressed) and the card state +0x1C0 = 3.
@@ -909,11 +909,11 @@ extern "C" void cOVState_PROFILE_onWidgetEvent(void* vself, char* item, int even
         func_002C2540((char*)cSSXApp_getMCManager(SSXApp) + 0x276, name);
         char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
         if (strlen(name) != 0) {
-            func_00147138(player, self->slot, name);
+            cBENewPlayerInterface_setPlayerName(player, self->slot, name);
         } else {
             strcpy2(fmt, GetText_K211BC8(str_kT_MEMPlayerName_c));
             sprintf(buf, fmt, self->slot + 1);
-            func_00147138(player, self->slot, buf);
+            cBENewPlayerInterface_setPlayerName(player, self->slot, buf);
         }
         VCALLV_K211BC8(player, 0xC, 1));
         func_0023CAE8(cSSXApp_getMCManager(SSXApp), 1, self->slot);

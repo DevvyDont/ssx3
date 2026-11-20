@@ -5,7 +5,7 @@
 INCLUDE_ASM("bx/bxstring", cBXString_cBXString1);
 #ifdef SKIP_ASM
 extern char* cBXString_EmptyString;
-extern "C" cBXString* cBXString_cBXString4(cBXString* self, const char* str);
+extern "C" cBXString* cBXString_operatorE1(cBXString* self, const char* str);
 
 /**
  * Copy-constructs a string: shares the other string's buffer, or copies it when that buffer is static or
@@ -13,7 +13,7 @@ extern "C" cBXString* cBXString_cBXString4(cBXString* self, const char* str);
  *
  * A NumRefs of 0 or more means a shared heap buffer: the pointer is copied and NumRefs incremented. A
  * negative count (the static empty string or a locked buffer) makes a fresh copy through
- * cBXString_cBXString4().
+ * cBXString_operatorE1().
  *
  * @param other  the string to copy
  * @return @p self
@@ -30,7 +30,7 @@ extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other)
     else
     {
         self->Str = cBXString_EmptyString;
-        cBXString_cBXString4(self, other->Str);
+        cBXString_operatorE1(self, other->Str);
     }
     return self;
 }
@@ -155,7 +155,7 @@ extern "C" void cBXString_Resize(cBXString* self, int size)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstring", func_003181E8);
+INCLUDE_ASM("bx/bxstring", cBXString_allocCopy);
 #ifdef SKIP_ASM
 extern char* cBXString_EmptyString;
 extern "C" void cBXString_Realloc(cBXString* self, int size);
@@ -174,7 +174,7 @@ extern "C" void* func_0041605C(void* dst, const void* src, int n);
  * @param pos  offset of the first character to copy
  * @param extra  extra characters to allocate
  */
-extern "C" void func_003181E8(cBXString* src, cBXString* dst, int len, int pos, int extra)
+extern "C" void cBXString_allocCopy(cBXString* src, cBXString* dst, int len, int pos, int extra)
 {
     int total = len + extra;
     if (total == 0)
@@ -257,7 +257,7 @@ extern "C" cBXString* cBXString_cBXString2(cBXString* self, const char* str)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstring", func_00318350);
+INCLUDE_ASM("bx/bxstring", cBXString_cBXString3);
 #ifdef SKIP_ASM
 extern char* cBXString_EmptyString;
 extern "C" unsigned int strlen(const char* s);
@@ -275,7 +275,7 @@ extern "C" void* func_0041605C(void* dst, const void* src, int n);
  * @param n  the most characters to take
  * @return @p self
  */
-extern "C" cBXString* func_00318350(cBXString* self, const char* str, int n)
+extern "C" cBXString* cBXString_cBXString3(cBXString* self, const char* str, int n)
 {
     self->Str = cBXString_EmptyString;
     if (n >= strlen(str))
@@ -354,7 +354,7 @@ extern "C" cBXString* cBXString_operatorE(cBXString* self, cBXString* other)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("bx/bxstring", cBXString_cBXString4);
+INCLUDE_ASM("bx/bxstring", cBXString_operatorE1);
 #ifdef SKIP_ASM
 extern "C" unsigned int strlen(const char* s);
 extern "C" void cBXString_InitFromCString(cBXString* self, int len, const char* str);
@@ -367,7 +367,7 @@ extern "C" void cBXString_InitFromCString(cBXString* self, int len, const char* 
  * @param str  NUL-terminated text, or 0
  * @return self
  */
-extern "C" cBXString* cBXString_cBXString4(cBXString* self, const char* str)
+extern "C" cBXString* cBXString_operatorE1(cBXString* self, const char* str)
 {
     int len;
     if (str != 0)
@@ -820,7 +820,7 @@ extern "C" char* cBXString_lockBuffer(cBXString* self)
 }
 #endif
 //100%
-INCLUDE_ASM("bx/bxstring", func_00318BF8);
+INCLUDE_ASM("bx/bxstring", cBXString_unlockBuffer);
 #ifdef SKIP_ASM
 /**
  * Unlocks a string's buffer: sets the reference count (Str - 0xC) back to 1.
@@ -830,7 +830,7 @@ INCLUDE_ASM("bx/bxstring", func_00318BF8);
  *
  * @param bxString  the string
  */
-extern "C" void func_00318BF8(void **bxString) {
+extern "C" void cBXString_unlockBuffer(void **bxString) {
     void *temp_4;
 
     temp_4 = *bxString;
@@ -841,21 +841,21 @@ extern "C" void func_00318BF8(void **bxString) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstring", cBXString_FindLastOf__FP9cBXStringci);
+INCLUDE_ASM("bx/bxstring", cBXString_find__FP9cBXStringci);
 #ifdef SKIP_ASM
 /**
  * Finds a character in the string, searching from a start offset.
  *
- * Despite the name (the symbol EA shipped), this is a forward search: it calls strchr() on the text from
- * @p len onwards, so it returns the first occurrence at or after that offset.
+ * A forward search: it calls strchr() on the text from @p start onwards, so it returns the first occurrence at or
+ * after that offset. (EA's symbol called it FindLastOf.)
  *
  * @param ch   character to look for
- * @param len  offset into the string to start searching at
+ * @param start  offset into the string to start searching at
  * @return the offset of the match from the start of the string, or -1 if there is none
  */
-int cBXString_FindLastOf(cBXString* self, char ch, int len)
+int cBXString_find(cBXString* self, char ch, int start)
 {
-    char* result = strchr(self->Str + len, ch);
+    char* result = strchr(self->Str + start, ch);
     if (result == 0) {
         return -1;
     }
@@ -866,7 +866,7 @@ int cBXString_FindLastOf(cBXString* self, char ch, int len)
 extern "C" char* func_0041ACC0(char* str, int ch);
 
 //100%
-INCLUDE_ASM("bx/bxstring", func_00318C60);
+INCLUDE_ASM("bx/bxstring", cBXString_findOneOf);
 #ifdef SKIP_ASM
 extern "C" int func_0041AC40(int);
 
@@ -879,7 +879,7 @@ extern "C" int func_0041AC40(int);
  * @param string  the string
  * @return the offset from the start of the text, or -1
  */
-extern "C" int func_00318C60(int *string) {
+extern "C" int cBXString_findOneOf(int *string) {
     int temp_2;
 
     temp_2 = func_0041AC40(*string);
@@ -891,18 +891,18 @@ extern "C" int func_00318C60(int *string) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstring", cBXString_FindFirstOf__FP9cBXStringc);
+INCLUDE_ASM("bx/bxstring", cBXString_reverseFind__FP9cBXStringc);
 #ifdef SKIP_ASM
 /**
  * Finds a character in the string, searching from the end.
  *
- * Despite the name, this is a reverse search: it calls func_0041ACC0(), which behaves like strrchr(), so it
- * returns the last occurrence of @p ch.
+ * A reverse search: it calls func_0041ACC0() (newlib strrchr), so it returns the last occurrence of @p ch. (EA's
+ * symbol called it FindFirstOf.)
  *
  * @param ch  character to look for
  * @return the offset of the last match from the start of the string, or -1 if there is none
  */
-int cBXString_FindFirstOf(cBXString* self, char ch)
+int cBXString_reverseFind(cBXString* self, char ch)
 {
     char* result = func_0041ACC0(self->Str, ch);
     if (result == 0) {
@@ -913,7 +913,7 @@ int cBXString_FindFirstOf(cBXString* self, char ch)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstring", func_00318CE8);
+INCLUDE_ASM("bx/bxstring", cBXString_find1);
 #ifdef SKIP_ASM
 extern "C" char* func_0041AD80(char* str);
 
@@ -927,7 +927,7 @@ extern "C" char* func_0041AD80(char* str);
  * @param start  offset to start searching at
  * @return the offset from the start of the text, or -1
  */
-extern "C" int func_00318CE8(cBXString* self, int subString, int start)
+extern "C" int cBXString_find1(cBXString* self, int subString, int start)
 {
     char* result = func_0041AD80(self->Str + start);
     if (result == 0) {
@@ -1031,7 +1031,7 @@ extern "C" void cBXString_setAt(cBXString* self, int idx, char ch)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstring", func_00318EB8);
+INCLUDE_ASM("bx/bxstring", cBXString_cBXString6);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void*, int, unsigned int);
 
@@ -1045,7 +1045,7 @@ extern "C" void* func_00416210(void*, int, unsigned int);
  * @param n  the number of copies
  * @return @p self
  */
-extern "C" cBXString* func_00318EB8(cBXString* self, char ch, int n)
+extern "C" cBXString* cBXString_cBXString6(cBXString* self, char ch, int n)
 {
     self->Str = cBXString_EmptyString;
     if (n > 0) {
@@ -1056,7 +1056,7 @@ extern "C" cBXString* func_00318EB8(cBXString* self, char ch, int n)
 }
 #endif
 //100%
-INCLUDE_ASM("bx/bxstring", func_00318F20);
+INCLUDE_ASM("bx/bxstring", cBXString_operatorE2);
 #ifdef SKIP_ASM
 /**
  * Assigns a single character to the string (cBXString_InitFromCString with a length of 1).
@@ -1066,7 +1066,7 @@ INCLUDE_ASM("bx/bxstring", func_00318F20);
  * @param ch  the character
  * @return @p self
  */
-extern "C" cBXString* func_00318F20(cBXString* self, char ch)
+extern "C" cBXString* cBXString_operatorE2(cBXString* self, char ch)
 {
     char buf = ch;
     cBXString_InitFromCString(self, 1, &buf);
@@ -1074,12 +1074,12 @@ extern "C" cBXString* func_00318F20(cBXString* self, char ch)
 }
 #endif
 //100%
-INCLUDE_ASM("bx/bxstring", func_00318F58);
+INCLUDE_ASM("bx/bxstring", cBXString_mid);
 #ifdef SKIP_ASM
-extern "C" cBXString* func_00318F90(cBXString* self, cBXString* other, int start, int count);
+extern "C" cBXString* cBXString_mid1(cBXString* self, cBXString* other, int start, int count);
 
 /**
- * Builds @p self from @p other's characters from @p start to the end (func_00318F90 with count = length - start).
+ * Builds @p self from @p other's characters from @p start to the end (cBXString_mid1 with count = length - start).
  *
  * The result is returned by value: @p self is the caller's result slot. Nothing in the C calls it.
  *
@@ -1087,20 +1087,20 @@ extern "C" cBXString* func_00318F90(cBXString* self, cBXString* other, int start
  * @param start  offset of the first character
  * @return @p self
  */
-extern "C" cBXString* func_00318F58(cBXString* self, cBXString* other, int start)
+extern "C" cBXString* cBXString_mid(cBXString* self, cBXString* other, int start)
 {
-    func_00318F90(self, other, start, *(int*)((int)other->Str - 8) - start);
+    cBXString_mid1(self, other, start, *(int*)((int)other->Str - 8) - start);
     return self;
 }
 #endif
 //100%
-INCLUDE_ASM("bx/bxstring", func_00318F90);
+INCLUDE_ASM("bx/bxstring", cBXString_mid1);
 #ifdef SKIP_ASM
 /**
  * Builds @p self from @p count characters of @p other starting at @p start.
  *
  * Negative @p start or @p count become 0, @p count is cut to the end of the text, and a @p start past the end gives an
- * empty result. The characters are copied with func_003181E8 into a temporary, @p self is copy-constructed from it
+ * empty result. The characters are copied with cBXString_allocCopy into a temporary, @p self is copy-constructed from it
  * (cBXString_cBXString1) and the temporary is destroyed. The result is returned by value: @p self is the caller's
  * result slot.
  *
@@ -1110,7 +1110,7 @@ INCLUDE_ASM("bx/bxstring", func_00318F90);
  * @return @p self
  */
 // Mid(start, count). PORT: pointer held in int for the header offset.
-extern "C" cBXString* func_00318F90(cBXString* self, cBXString* other, int start, int count)
+extern "C" cBXString* cBXString_mid1(cBXString* self, cBXString* other, int start, int count)
 {
     if (start < 0)
         start = 0;
@@ -1122,7 +1122,7 @@ extern "C" cBXString* func_00318F90(cBXString* self, cBXString* other, int start
     if (len < start)
         count = 0;
     char* substr = cBXString_EmptyString;
-    func_003181E8(other, (cBXString*)&substr, count, start, 0);
+    cBXString_allocCopy(other, (cBXString*)&substr, count, start, 0);
     cBXString_cBXString1(self, (cBXString*)&substr);
     cBXString__cBXString((cBXString*)&substr, 2);
     return self;
@@ -1133,7 +1133,7 @@ extern "C" cBXString* func_00318F90(cBXString* self, cBXString* other, int start
 INCLUDE_ASM("bx/bxstring", cBXString_right);
 #ifdef SKIP_ASM
 extern char* cBXString_EmptyString;
-extern "C" void func_003181E8(cBXString* src, cBXString* dst, int len, int pos, int extra);
+extern "C" void cBXString_allocCopy(cBXString* src, cBXString* dst, int len, int pos, int extra);
 extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
 extern "C" void cBXString__cBXString(cBXString* self, int flags);
 
@@ -1141,7 +1141,7 @@ extern "C" void cBXString__cBXString(cBXString* self, int flags);
  * Returns the last @p n characters of a string (right(n)), with @p n clamped to 0 and the string's length.
  *
  * Returns a cBXString by value: @p self is the hidden result pointer and @p other the source (On Tour's
- * this). The tail is copied into a temporary with func_003181E8, @p self is copy-constructed from it and the
+ * this). The tail is copied into a temporary with cBXString_allocCopy, @p self is copy-constructed from it and the
  * temporary destroyed.
  *
  * @param other  the source string (On Tour this)
@@ -1160,7 +1160,7 @@ extern "C" cBXString* cBXString_right(cBXString* self, cBXString* other, int n)
             n = len;
     }
     char* dest = cBXString_EmptyString;
-    func_003181E8(other, (cBXString*)&dest, n, *(int*)((int)other->Str - 8) - n, 0);
+    cBXString_allocCopy(other, (cBXString*)&dest, n, *(int*)((int)other->Str - 8) - n, 0);
     cBXString_cBXString1(self, (cBXString*)&dest);
     cBXString__cBXString((cBXString*)&dest, 2);
     return self;
@@ -1171,7 +1171,7 @@ extern "C" cBXString* cBXString_right(cBXString* self, cBXString* other, int n)
 INCLUDE_ASM("bx/bxstring", cBXString_cBXString5);
 #ifdef SKIP_ASM
 extern char* cBXString_EmptyString;
-extern "C" void func_003181E8(cBXString* src, cBXString* dst, int len, int pos, int extra);
+extern "C" void cBXString_allocCopy(cBXString* src, cBXString* dst, int len, int pos, int extra);
 extern "C" cBXString* cBXString_cBXString1(cBXString* self, cBXString* other);
 extern "C" void cBXString__cBXString(cBXString* self, int flags);
 
@@ -1179,7 +1179,7 @@ extern "C" void cBXString__cBXString(cBXString* self, int flags);
  * Makes @p self a copy of the first @p n characters of another string (like left(n)), @p n clamped to its
  * length.
  *
- * The same shape as cBXString_right() with copy position 0: func_003181E8 copies into a temporary, @p self is
+ * The same shape as cBXString_right() with copy position 0: cBXString_allocCopy copies into a temporary, @p self is
  * copy-constructed from it and the temporary destroyed. cSSXApp_parseCommandLine() uses it to cut a file
  * extension.
  *
@@ -1199,7 +1199,7 @@ extern "C" cBXString* cBXString_cBXString5(cBXString* self, cBXString* other, in
             n = len;
     }
     char* dest = cBXString_EmptyString;
-    func_003181E8(other, (cBXString*)&dest, n, 0, 0);
+    cBXString_allocCopy(other, (cBXString*)&dest, n, 0, 0);
     cBXString_cBXString1(self, (cBXString*)&dest);
     cBXString__cBXString((cBXString*)&dest, 2);
     return self;

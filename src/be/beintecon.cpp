@@ -59,7 +59,7 @@ extern "C" int cBEEconInterface_getMoney(void* self, int iHuman, int charType)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00150960);
+INCLUDE_ASM("be/beintecon", cBEEconInterface_getMoney1);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -71,7 +71,7 @@ int cBELibrary_getCharacterID(int);
  * @param rider  the rider (selects profile slot and character)
  * @return the money
  */
-extern "C" int func_00150960(void* self, int rider)
+extern "C" int cBEEconInterface_getMoney1(void* self, int rider)
 {
     int profileSlot = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -133,7 +133,7 @@ extern "C" int cBEEconInterface_getTotalMoneyEarned1(void* self, int rider)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00150A58);
+INCLUDE_ASM("be/beintecon", cBEEconInterface_setMoney);
 #ifdef SKIP_ASM
 /**
  * Sets the money (+0xAC4) of character @p characterId in profile slot @p profileIndex; does nothing for slots >= 2.
@@ -142,7 +142,7 @@ INCLUDE_ASM("be/beintecon", func_00150A58);
  * @param characterId  the character
  * @param value  the new amount
  */
-extern "C" void func_00150A58(void* self, int profileIndex, int characterId, int value)
+extern "C" void cBEEconInterface_setMoney(void* self, int profileIndex, int characterId, int value)
 {
     if (profileIndex < 2) {
         int bOff = characterId * 3976;
@@ -155,7 +155,7 @@ extern "C" void func_00150A58(void* self, int profileIndex, int characterId, int
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00150A90);
+INCLUDE_ASM("be/beintecon", cBEEconInterface_addMoney);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
 
@@ -167,7 +167,7 @@ extern int cBELibrary_profileLib[];
  * @param amount  the money earned
  * @return the new money, or 0
  */
-extern "C" int func_00150A90(void* self, int humanIndex, int characterId, int amount)
+extern "C" int cBEEconInterface_addMoney(void* self, int humanIndex, int characterId, int amount)
 {
     if (humanIndex >= 2) {
         return 0;
@@ -183,27 +183,27 @@ extern "C" int func_00150A90(void* self, int humanIndex, int characterId, int am
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00150AE0);
+INCLUDE_ASM("be/beintecon", cBEEconInterface_addMoney1);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
 /**
- * Adds @p amount to @p rider's money and total earned: func_00150A90 with the rider's profile slot and character.
+ * Adds @p amount to @p rider's money and total earned: cBEEconInterface_addMoney with the rider's profile slot and character.
  *
  * @param rider  the rider
  * @param amount  the money earned
  * @return the new money, or 0 for profile slots >= 2
  */
-extern "C" int func_00150AE0(void* self, int rider, int amount)
+extern "C" int cBEEconInterface_addMoney1(void* self, int rider, int amount)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    return func_00150A90(self, profile, cBELibrary_getCharacterID(rider), amount);
+    return cBEEconInterface_addMoney(self, profile, cBELibrary_getCharacterID(rider), amount);
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00150B48);
+INCLUDE_ASM("be/beintecon", cBEEconInterface_reduceMoney);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
 
@@ -217,7 +217,7 @@ extern int cBELibrary_profileLib[];
  * @param amount  the money spent
  * @return the money left, or 0
  */
-extern "C" int func_00150B48(void* self, int profileIndex, int characterId, int amount)
+extern "C" int cBEEconInterface_reduceMoney(void* self, int profileIndex, int characterId, int amount)
 {
     if (profileIndex >= 2) {
         return 0;
@@ -231,7 +231,7 @@ extern "C" int func_00150B48(void* self, int profileIndex, int characterId, int 
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00150B88);
+INCLUDE_ASM("be/beintecon", cBEEconInterface_getPeakPass);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
 
@@ -256,7 +256,7 @@ struct sPeakBits_0B88 {
  * @return 1, or 0 for profile slots >= 2
  */
 // Sets the locked state of a peak for a profile/character: stores the inverse of `unlocked`.
-extern "C" int func_00150B88(void* self, int profileIndex, int characterId, int peak, int unlocked)
+extern "C" int cBEEconInterface_getPeakPass(void* self, int profileIndex, int characterId, int peak, int unlocked)
 {
     if (profileIndex >= 2) {
         return 0;
@@ -280,7 +280,7 @@ extern "C" int func_00150B88(void* self, int profileIndex, int characterId, int 
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00150C20);
+INCLUDE_ASM("be/beintecon", cBEEconInterface_buyAttribute);
 #ifdef SKIP_ASM
 struct sEconRec_0C20 {
     char pad0[0xAC4];
@@ -296,11 +296,11 @@ public:
     virtual void v2();
 };
 extern "C" cBEIface_0C20* cBEStatInterface_getThis();
-int func_00150E50(void* self, int a1);
+int cBEEconInterface_getAttribCost(void* self, int a1);
 /**
  * Buys one point of attribute @p attribute for character @p characterId of profile slot @p humanIndex, if affordable.
  *
- * The seven attribute bytes start at +0xBDF of the character profile. The price is func_00150E50(points / 5 - 1);
+ * The seven attribute bytes start at +0xBDF of the character profile. The price is cBEEconInterface_getAttribCost(points / 5 - 1);
  * when the money (+0xAC4) covers it and the attribute is not at 55, the money drops by the price, the attribute rises
  * by 1 and the stat interface's vtable slot 2 runs.
  *
@@ -309,7 +309,7 @@ int func_00150E50(void* self, int a1);
  * @param attribute  the attribute, 0-6 (others read a null pointer)
  * @return 1 if bought, else 0
  */
-extern "C" int func_00150C20(void* self, int humanIndex, int characterId, unsigned int attribute) {
+extern "C" int cBEEconInterface_buyAttribute(void* self, int humanIndex, int characterId, unsigned int attribute) {
     signed char *attribLevel;
     int cur;
     int cost;
@@ -343,7 +343,7 @@ extern "C" int func_00150C20(void* self, int humanIndex, int characterId, unsign
             attribLevel = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[6];
             break;
         }
-        cost = func_00150E50(self, *attribLevel / 5 - 1);
+        cost = cBEEconInterface_getAttribCost(self, *attribLevel / 5 - 1);
         if (cur < cost || *attribLevel == 55) {
             return 0;
         }
@@ -359,7 +359,7 @@ extern "C" int func_00150C20(void* self, int humanIndex, int characterId, unsign
 extern void* D_00440550[];
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00150E50__FPvi);
+INCLUDE_ASM("be/beintecon", cBEEconInterface_getAttribCost__FPvi);
 #ifdef SKIP_ASM
 struct sEconEntry {
     int key;
@@ -376,14 +376,14 @@ struct sEconTable {
  * @param levelIndex  the level index (callers pass level - 1)
  * @return the price
  */
-int func_00150E50(void* self, int levelIndex)
+int cBEEconInterface_getAttribCost(void* self, int levelIndex)
 {
     return ((sEconTable*)D_00440550)->entries[levelIndex].value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00150E68);
+INCLUDE_ASM("be/beintecon", cBEEconInterface_sellAttribute);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
@@ -402,7 +402,7 @@ extern sEcon0E68 D_00440550_0E68[] __asm__("D_00440550");
  * @param kind  the attribute, 0-6
  * @return 1 if refunded, else 0
  */
-extern "C" int func_00150E68(void* self, int profile, int characterId, unsigned int kind)
+extern "C" int cBEEconInterface_sellAttribute(void* self, int profile, int characterId, unsigned int kind)
 {
     char* attribLevel;
     if (profile >= 2) return 0;
@@ -429,12 +429,12 @@ extern "C" int func_00150E68(void* self, int profile, int characterId, unsigned 
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00151040);
+INCLUDE_ASM("be/beintecon", cBEEconInterface_getCashReward);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00145630(void* race, int place, int kind);
+extern "C" int cBENewRaceInterface_getPeakRewardAmount(void* race, int place, int kind);
 
 struct sEconPrize_151040
 {
@@ -446,7 +446,7 @@ extern sEconPrize_151040 D_004405A0[];
 /**
  * Returns the prize money for medal @p medal.
  *
- * For @p place 6-11: func_00145630(race, @p place, tier) with tier 2 for medals 0-1, 1 for medal 2 and 0 for medal 3.
+ * For @p place 6-11: cBENewRaceInterface_getPeakRewardAmount(race, @p place, tier) with tier 2 for medals 0-1, 1 for medal 2 and 0 for medal 3.
  * Otherwise the D_004405A0 row (17 rows) whose key is @p key, column @p medal, times 100. 0 when nothing matches.
  *
  * @param medal  the medal, 0-3
@@ -454,7 +454,7 @@ extern sEconPrize_151040 D_004405A0[];
  * @param place  the event (6-11 are the peak events)
  * @return the money
  */
-extern "C" int func_00151040(void* self, int medal, int key, int place)
+extern "C" int cBEEconInterface_getCashReward(void* self, int medal, int key, int place)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     int reward = 0;
@@ -464,13 +464,13 @@ extern "C" int func_00151040(void* self, int medal, int key, int place)
         {
         case 0:
         case 1:
-            reward = func_00145630(race, place, 2);
+            reward = cBENewRaceInterface_getPeakRewardAmount(race, place, 2);
             break;
         case 2:
-            reward = func_00145630(race, place, 1);
+            reward = cBENewRaceInterface_getPeakRewardAmount(race, place, 1);
             break;
         case 3:
-            reward = func_00145630(race, place, 0);
+            reward = cBENewRaceInterface_getPeakRewardAmount(race, place, 0);
             break;
         }
     }
@@ -501,7 +501,7 @@ extern "C" int func_00151040(void* self, int medal, int key, int place)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00151178);
+INCLUDE_ASM("be/beintecon", cBEEconInterface_getCollectableCash);
 #ifdef SKIP_ASM
 /**
  * Returns the cash a collectible is worth on peak @p level: 1000 for 1, 2000 for 2, otherwise 500.
@@ -509,7 +509,7 @@ INCLUDE_ASM("be/beintecon", func_00151178);
  * @param level  the peak, 0-2
  * @return the cash
  */
-extern "C" int func_00151178(void* self, int level)
+extern "C" int cBEEconInterface_getCollectableCash(void* self, int level)
 {
     switch (level)
     {
@@ -525,7 +525,7 @@ extern "C" int func_00151178(void* self, int level)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_001511B0);
+INCLUDE_ASM("be/beintecon", cBEEconInterface_getMissionCash);
 #ifdef SKIP_ASM
 /**
  * Returns the cash a mission of difficulty @p level pays: 4000 for 2, 6000 for 3, otherwise 2000.
@@ -533,7 +533,7 @@ INCLUDE_ASM("be/beintecon", func_001511B0);
  * @param level  the mission level, 1-3
  * @return the cash
  */
-extern "C" int func_001511B0(void* self, int level)
+extern "C" int cBEEconInterface_getMissionCash(void* self, int level)
 {
     switch (level)
     {
@@ -549,7 +549,7 @@ extern "C" int func_001511B0(void* self, int level)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_001511E8);
+INCLUDE_ASM("be/beintecon", cBEEconInterface_getCostForNextIncrement);
 #ifdef SKIP_ASM
 struct sEconRec {
     char pad0[0xBDF];
@@ -560,14 +560,14 @@ struct sEconRec {
  * Returns the attribute-cost table price for the next point of attribute @p attribute of character @p characterId in slot @p humanIndex:
  * D_00440550[(points + 1) / 5].
  *
- * Note func_00150C20 charges D_00440550[points / 5 - 1] instead.
+ * Note cBEEconInterface_buyAttribute charges D_00440550[points / 5 - 1] instead.
  *
  * @param humanIndex  the profile slot (2 and up return 0)
  * @param characterId  the character
  * @param attribute  the attribute, 0-6
  * @return the price
  */
-extern "C" int func_001511E8(void* self, int humanIndex, int characterId, unsigned int attribute) {
+extern "C" int cBEEconInterface_getCostForNextIncrement(void* self, int humanIndex, int characterId, unsigned int attribute) {
     signed char *attribLevel;
     if (humanIndex >= 2) {
         return 0;
@@ -603,7 +603,7 @@ extern "C" int func_001511E8(void* self, int humanIndex, int characterId, unsign
 #endif
 
 //100%
-INCLUDE_ASM("be/beintecon", func_00151368);
+INCLUDE_ASM("be/beintecon", cBECharProfileDB__cBECharProfileDB);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
@@ -614,7 +614,7 @@ void operator_delete(int*);
  *
  * @param flags  bit 0: operator_delete the object
  */
-extern "C" void func_00151368(void* self, int flags)
+extern "C" void cBECharProfileDB__cBECharProfileDB(void* self, int flags)
 {
     void* buffer = *(void**)((char*)self + 0x288);
     if (buffer != 0)

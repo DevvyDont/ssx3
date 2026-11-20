@@ -29,8 +29,8 @@
 // 0x15BB00, 0x15BB08, cBEInterface_writeToReplayFrame, cBEInterface_readFromReplayFrame). Names and order from the
 // preview's out-of-line cBEInterface methods and On Tour's cBEInterface function list.
 enum {
-    kBEInterfaceVt_submit = 1,              // func_0015BB00 (empty)
-    kBEInterfaceVt_discard = 2,             // func_0015BB08 (empty)
+    kBEInterfaceVt_submit = 1,              // cBEInterface_submit (empty)
+    kBEInterfaceVt_discard = 2,             // cBEInterface_discard (empty)
     kBEInterfaceVt_writeToReplayFrame = 3,  // cBEInterface_writeToReplayFrame (empty)
     kBEInterfaceVt_readFromReplayFrame = 4  // cBEInterface_readFromReplayFrame (empty)
 };
@@ -44,10 +44,10 @@ struct cBERewardInterface {
                                      //       cBEPostRaceState_onExit/cBEPostRaceState_onEnter/cBEPreRaceState_onExit/cBEPreRaceState_onEnter)
     void** mVtbl;                    // 0x00C [R] getThis stores D_0045AE88 (cBEInterface's vtable, shared with BEBoltInt)
     // cBERewardInterface
-    unsigned int mLastEventCashReward; // 0x010 [O] (On Tour 0x008, first own member); [U] func_001591E8 stores the cash
-                                     //       from func_00151040 (halved when the medal isn't better); clearUserAwards
+    unsigned int mLastEventCashReward; // 0x010 [O] (On Tour 0x008, first own member); [U] cBERewardInterface_calculateUserTrackMedalRewards stores the cash
+                                     //       from cBEEconInterface_getCashReward (halved when the medal isn't better); clearUserAwards
                                      //       zeroes it; cOVStateManager_gotoOverlay/cOVStateManager_gotoNextOverlay test it != 0
-    int mLastEventMedal;             // 0x014 [O] eBEMedalID (On Tour 0x00C); [U] func_001591E8 stores the event's medal;
+    int mLastEventMedal;             // 0x014 [O] eBEMedalID (On Tour 0x00C); [U] cBERewardInterface_calculateUserTrackMedalRewards stores the event's medal;
                                      //       clearUserAwards sets -1 (no medal, as in isBetterMedal); compared with
                                      //       0..3 by func_001E7BB0/func_001E8200, ==0 by func_002A3860, read by
                                      //       cOVState_REWARDS_checkRewardList (asm)

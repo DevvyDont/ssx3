@@ -113,7 +113,7 @@ struct cFEUseExistingAccount {
     int unk_6BC;                    // 0x6BC [R] 2; [U] func_001A92D8 (popup events): 2 on event 21, 0 on event 15;
                                     //       on event 22 it tells the parent state (slot 17, event 0xF) when 0
     char* unk_6C0;                  // 0x6C0 [R] cBXString built from D_004A1390 (cBXString_cBXString2), destroyed by the
-                                    //       dtor; [U] func_001A9890 assigns it (cBXString_cBXString4), func_001A98B0
+                                    //       dtor; [U] func_001A9890 assigns it (cBXString_operatorE1), func_001A98B0
                                     //       returns the text: the user name passed to the session calls (func_00262690);
                                     //       the messenger sets it to the selected buddy (func_001A4928)
     int unk_6C4;                    // 0x6C4 [R] 0; [U] func_001DE8A0 (inline setter) and func_001AB370 set it,
@@ -133,7 +133,7 @@ struct cFEUseExistingAccount {
     char* mszEmail;                 // 0x6DC [R] cBXString: the empty-string rep cBXString_EmptyString (both ctors), destroyed by
                                     //       cFEUseExistingAccount__cFEUseExistingAccount (cBXString__cBXString(.., 2)); [U] func_001AC9C0 assigns
                                     //       the e-mail address the request popup returned (popup + 0x2B0;
-                                    //       cBXString_cBXString4); func_001AC448 opens "kT_POPUP204RequestAccount"
+                                    //       cBXString_operatorE1); func_001AC448 opens "kT_POPUP204RequestAccount"
                                     //       when its length (the word before the text) is 0; func_001ACEF8 passes it
                                     //       to func_0025C1E0
     cUIThing* mpTextForgotPassword; // 0x6E0 [R] 0; [U] onWidgetCreate cFEUseExistingAccount_onWidgetCreate: widget "TextForgotPassword"
@@ -255,7 +255,7 @@ struct cFEStateSelectPersona {
     int unk_6BC;                    // 0x6BC [R] 2; [U] func_001A92D8 (popup events): 2 on event 21, 0 on event 15;
                                     //       on event 22 it tells the parent state (slot 17, event 0xF) when 0
     char* unk_6C0;                  // 0x6C0 [R] cBXString built from D_004A1390 (cBXString_cBXString2), destroyed by the
-                                    //       dtor; [U] func_001A9890 assigns it (cBXString_cBXString4), func_001A98B0
+                                    //       dtor; [U] func_001A9890 assigns it (cBXString_operatorE1), func_001A98B0
                                     //       returns the text: the user name passed to the session calls (func_00262690);
                                     //       the messenger sets it to the selected buddy (func_001A4928)
     int unk_6C4;                    // 0x6C4 [R] 0; [U] func_001DE8A0 (inline setter) and func_001AB370 set it,

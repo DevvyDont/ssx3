@@ -112,7 +112,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
-extern "C" void func_001587F8(void* iface, int player, int a2, int a3);
+extern "C" void cBERewardInterface_setRadioMode(void* iface, int player, int a2, int a3);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028BF78(void* audio, int a1);
 extern "C" void* cFEStateRequestLine_cFEStateRequestLine(void* p, int a1, signed char idx, int a3);
@@ -187,7 +187,7 @@ static inline void setText_AOWE(cUIText* t, char* str)
 
 static inline void applyMode_AOWE(sAudioOptions_AOWE* self)
 {
-    func_001587F8(cBE_getInterface_Fv(cBE_getBE(), 0xD), self->player, self->f70, self->sel);
+    cBERewardInterface_setRadioMode(cBE_getInterface_Fv(cBE_getBE(), 0xD), self->player, self->f70, self->sel);
     func_0028BF78(cAudioInterface_bxAudio(), self->sel);
 }
 
@@ -365,8 +365,8 @@ extern "C" void MEM_fill(void* p, int c, int n);
 extern "C" int cUITextureBank_getElementByHashname(void* list, int hash);
 extern "C" int cBEEconInterface_getMoney(void* iface, int idx, int ch);
 // PORT: 64-bit results (long is 8 bytes on the EE).
-extern "C" long func_00158728(void* iface, int idx, int ch);
-extern "C" long func_00158750(void* iface, int idx, int ch);
+extern "C" long cBERewardInterface_getOwnedSongList(void* iface, int idx, int ch);
+extern "C" long cBERewardInterface_getPlayList(void* iface, int idx, int ch);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cFEStateRequestLine_generatePlayList(void* self);
 extern void* cFEStateRequestLine_vtbl[];
@@ -421,7 +421,7 @@ static inline int Find_196B90(char* mgr, int hash)
  * custom interface (cFECustom_getPlayerCtrlMask) into +0x15 when there is one. Zeroes the 0x100-byte buffer at +0x4C and the fields
  * up to +0x200, keeps @p inStore at +0x16C, finds the "checkbox", "empty_box" and "yell_dollar_sign" texture elements
  * (+0x204, +0x208, +0x20C), reads the user's character (+0x48, cBENewPlayerInterface_getPlayerCharID), money (+0x168,
- * cBEEconInterface_getMoney) and two 64-bit values of BE interface 13 (func_00158728 into +0x160, func_00158750 into
+ * cBEEconInterface_getMoney) and two 64-bit values of BE interface 13 (cBERewardInterface_getOwnedSongList into +0x160, cBERewardInterface_getPlayList into
  * +0x158), copies the audio object's word +0x504 into +0x14C and runs cFEStateRequestLine_generatePlayList.
  *
  * @param requestLine    the state's memory (528 bytes)
@@ -481,8 +481,8 @@ extern "C" void* cFEStateRequestLine_cFEStateRequestLine(void* requestLine, int 
     *(int*)((char*)self + 0x48) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
     self->f168 = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
     void* ifc = cBE_getInterface_Fv(cBE_getBE(), 13);
-    self->f160 = func_00158728(ifc, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
-    self->f158 = func_00158750(ifc, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
+    self->f160 = cBERewardInterface_getOwnedSongList(ifc, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
+    self->f158 = cBERewardInterface_getPlayList(ifc, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
     self->f14C = *(int*)((char*)cAudioInterface_bxAudio() + 0x504);
     cFEStateRequestLine_generatePlayList(self);
     return self;

@@ -228,8 +228,8 @@ extern "C" void cFEStateRequestLine_updateHelpText(void* self, int idx);
 extern "C" void cFEStateRequestLine_updateButtonsText(void* self, int idx);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_00158848(void* iface, int a, int b, unsigned long m);
-extern "C" void func_00158820(void* iface, int a, int b, unsigned long m);
+extern "C" void cBERewardInterface_setPlayList(void* iface, int a, int b, unsigned long m);
+extern "C" void cBERewardInterface_setOwnedSongList(void* iface, int a, int b, unsigned long m);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028C2D0(void* p, unsigned long m);
 extern "C" void func_0039F190(void* list, int a);
@@ -335,8 +335,8 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, void* item,
     }
     case 6: {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
-        func_00158848(iface, self->player, self->f48, self->done);
-        func_00158820(iface, self->player, self->f48, self->sel);
+        cBERewardInterface_setPlayList(iface, self->player, self->f48, self->done);
+        cBERewardInterface_setOwnedSongList(iface, self->player, self->f48, self->sel);
         func_0028C2D0(cAudioInterface_bxAudio(), self->done);
         if (self->f16C != 0) {
             char* pl = (char*)cAudioInterface_bxAudio();
@@ -1276,7 +1276,7 @@ INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_buySong);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00158558(void* iface, int rider, int a, int idx, int full);
+extern "C" int cBERewardInterface_buySong(void* iface, int rider, int a, int idx, int full);
 
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 struct sMsgCenter_988D8 {
@@ -1295,8 +1295,8 @@ struct sMsgCenter_988D8 {
  * and adds it to the playlist.
  *
  * Counts the bits of the owned-songs mask (+0x160); with 6 or more already owned the purchase costs money.
- * func_00158558 on back-end interface 13 sets the song's owned bit for the user (+0x44) and character (+0x48) and, when
- * charging, takes 5000 from the character's cash (func_00150B48); its result, the cash left (from
+ * cBERewardInterface_buySong on back-end interface 13 sets the song's owned bit for the user (+0x44) and character (+0x48) and, when
+ * charging, takes 5000 from the character's cash (cBEEconInterface_reduceMoney); its result, the cash left (from
  * cBEEconInterface_getMoney), is stored at +0x168. Finally sets the song's bit in both the owned mask (+0x160) and the
  * playlist mask (+0x158).
  *
@@ -1311,7 +1311,7 @@ extern "C" void cFEStateRequestLine_buySong(void* self, int idx)
         n += (int)((requestLine->mask >> j) & 1);
     }
     int full = n >= 6;
-    requestLine->result = func_00158558(cBE_getInterface_Fv(cBE_getBE(), 13), requestLine->rider, requestLine->a48, idx, full);
+    requestLine->result = cBERewardInterface_buySong(cBE_getInterface_Fv(cBE_getBE(), 13), requestLine->rider, requestLine->a48, idx, full);
     ulong bit = (ulong)1 << idx;
     requestLine->mask |= bit;
     requestLine->seen |= bit;

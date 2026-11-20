@@ -10,7 +10,7 @@ rom:0x28258C reloc:MIPS_LO16 symbol:D_0 // cPS2GraphicsMan_RenderSnowBoxFlakes
 
 // Unpaired %lo uses: splat relocated some uses of a base register that holds %hi(SYM) and left later identical
 // instructions as raw immediates. Each entry below has the same bytes and base register as a relocated sibling.
-// be/beintecon func_00150C20: `addiu $4, $19, %lo(cBELibrary_profileLib)` (siblings at rom 0x51CB0 and 0x51DF0 are paired).
+// be/beintecon cBEEconInterface_buyAttribute: `addiu $4, $19, %lo(cBELibrary_profileLib)` (siblings at rom 0x51CB0 and 0x51DF0 are paired).
 rom:0x51CD4 reloc:MIPS_LO16 symbol:cBELibrary_profileLib
 rom:0x51CF8 reloc:MIPS_LO16 symbol:cBELibrary_profileLib
 rom:0x51D1C reloc:MIPS_LO16 symbol:cBELibrary_profileLib
@@ -617,7 +617,7 @@ rom:0x21A97C reloc:MIPS_LO16 symbol:_gp
 // fe/festatecharequipdetail cFEStateCharEquip_update3DPositions: two unpaired %lo uses of $23 = %hi(t4vect_XAxis) (raw -0xEC0).
 rom:0x9D3FC reloc:MIPS_LO16 symbol:t4vect_XAxis
 rom:0x9D6E0 reloc:MIPS_LO16 symbol:t4vect_XAxis
-// be/beintaggression func_00155E58: D_004A7869/786A/786B are cBELibrary_profileLib+0xBC1/0xBC2/0xBC3 (no other users).
+// be/beintaggression cBEAggressionInterface_regressAggression: D_004A7869/786A/786B are cBELibrary_profileLib+0xBC1/0xBC2/0xBC3 (no other users).
 rom:0x56EE4 reloc:MIPS_HI16 symbol:cBELibrary_profileLib addend:0xBC3
 rom:0x56EE8 reloc:MIPS_LO16 symbol:cBELibrary_profileLib addend:0xBC3
 rom:0x56F04 reloc:MIPS_HI16 symbol:cBELibrary_profileLib addend:0xBC1

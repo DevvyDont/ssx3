@@ -288,7 +288,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void* func_0014EEC8(void* self, int player, int index);
+extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index);
 extern "C" void cUITextScroll_clearBuffer(void* self);
 extern "C" void cUITextScroll_addUnicodeStringByID(void* self, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
@@ -298,7 +298,7 @@ extern char str_kT_FULLBIO1pct_s[];
 /**
  * Fills the biography page: puts "kT_FULLBIO1" + the rider's name into the "BIOAutoScrollText" scroller.
  *
- * The name is what func_0014EEC8() returns for the character ID at +0x48 (its character record, which
+ * The name is what cBECharacterInterface_getShortNameByCharacter() returns for the character ID at +0x48 (its character record, which
  * probably starts with the name; character interface, BE interface 2). The scroller's old lines are freed
  * (cUITextScroll_clearBuffer) before cUITextScroll_addUnicodeStringByID() sets the new string ID. Nothing happens when the object is missing.
  */
@@ -308,7 +308,7 @@ extern "C" void cFEStateRiderBio_fillBioInfo(void* self)
     if (obj) {
         char buf[64];
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 2);
-        sprintf(buf, str_kT_FULLBIO1pct_s, func_0014EEC8(iface, *(int*)((char*)self + 0x48), 0));
+        sprintf(buf, str_kT_FULLBIO1pct_s, cBECharacterInterface_getShortNameByCharacter(iface, *(int*)((char*)self + 0x48), 0));
         cUITextScroll_clearBuffer(obj);
         cUITextScroll_addUnicodeStringByID(obj, GetHashValue32(buf));
     }

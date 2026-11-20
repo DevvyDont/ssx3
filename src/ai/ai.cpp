@@ -1293,13 +1293,13 @@ INCLUDE_ASM("ai/ai", cAI_swaploadPathFile);
 #ifdef SKIP_ASM
 extern "C" void cRider_initPath(void* rider, int v);
 extern "C" void cPathSys_purgePaths(void* self);
-extern "C" void func_0026ADA8(void*, int);
+extern "C" void cPathSys_loadPaths(void*, int);
 extern char gPaths[];
 /**
  * Swaps in a different AI path file: purges the loaded paths, loads the new file and re-initialises every rider's
  * path.
  *
- * Calls cPathSys_purgePaths (On Tour cPathSys::purgePaths) and func_0026ADA8 on PathSys (gPaths) with the file, then
+ * Calls cPathSys_purgePaths (On Tour cPathSys::purgePaths) and cPathSys_loadPaths on PathSys (gPaths) with the file, then
  * cRider_initPath (cRider::initPath(false)) on each of the NumberOfRidersAllocated riders (+0x28 table).
  *
  * @param filename  the path file name, passed as an int (On Tour const char* filename)
@@ -1307,7 +1307,7 @@ extern char gPaths[];
 extern "C" void cAI_swaploadPathFile(cAI* self, int filename) {
     int i;
     cPathSys_purgePaths(gPaths);
-    func_0026ADA8(gPaths, filename);
+    cPathSys_loadPaths(gPaths, filename);
     for (i = 0; i < self->NumberOfRidersAllocated; i++) {
         cRider_initPath(*(void**)((char*)self + 0x28 + (i << 2)), 0);
     }
@@ -1322,7 +1322,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(void* self);
 extern char gPaths[];
 extern "C" void cPathSys_purgePaths(void* self);
-extern "C" int func_0026AD70(void* self, int v);
+extern "C" int cPathSys_loadInjectedPaths(void* self, int v);
 extern "C" void cRider_initPath(void* rider, int v);
 
 struct sAiObj12A340
@@ -1372,7 +1372,7 @@ ok:
     if (lvl < 22)
     {
         cPathSys_purgePaths(gPaths);
-        func_0026AD70(gPaths, data);
+        cPathSys_loadInjectedPaths(gPaths, data);
         if ((void*)SSXApp->Game->AI == 0)
             return 1;
         for (int i = 0; i < self->NumberOfRidersAllocated; i++)
@@ -1389,14 +1389,14 @@ ok:
 INCLUDE_ASM("ai/ai", cAI_removeInjectedFile);
 #ifdef SKIP_ASM
 extern "C" int cSectionMan_getBESectionIDFromWorldSectionID(void* self);
-void func_0026ADA0(void* self);
+void cPathSys_removeInjectedPathFile(void* self);
 extern char gPaths[];
 
 /**
  * Drops the AI path data injected with a world chunk when that chunk is unloaded.
  *
  * Callers pass (AI, resourceId); the section id reaches cSectionMan_getBESectionIDFromWorldSectionID untouched in a1
- * (the C declaration has no parameters). When the BE section id is below 22 it calls func_0026ADA0 on gPaths, which has
+ * (the C declaration has no parameters). When the BE section id is below 22 it calls cPathSys_removeInjectedPathFile on gPaths, which has
  * an empty body in retail, so the call does nothing. Called by cPS2ChunkResolve_unresolve for resource type 14; the
  * load side is cAI_swaploadInjectedPathFile.
  */
@@ -1404,7 +1404,7 @@ extern "C" void cAI_removeInjectedFile(void)
 {
     if (cSectionMan_getBESectionIDFromWorldSectionID(SSXApp->Game->SectionMan) < 22)
     {
-        func_0026ADA0(gPaths);
+        cPathSys_removeInjectedPathFile(gPaths);
     }
 }
 #endif
@@ -1412,16 +1412,16 @@ extern "C" void cAI_removeInjectedFile(void)
 //100%
 INCLUDE_ASM("ai/ai", func_0012A4D0);
 #ifdef SKIP_ASM
-extern "C" void func_0026ADE8(int *);
+extern "C" void cPathSys_isPathfileLoaded(int *);
 
 /**
- * Returns whether the AI path file is loaded: gPaths' loaded flag (+0x4C, via func_0026ADE8).
+ * Returns whether the AI path file is loaded: gPaths' loaded flag (+0x4C, via cPathSys_isPathfileLoaded).
  *
- * The C body discards the value, but func_0026ADE8's result is left in v0, so callers get the flag. The flag is set to
- * 1 by func_0026ADA8 when the path pack loads. Nothing in the source calls it.
+ * The C body discards the value, but cPathSys_isPathfileLoaded's result is left in v0, so callers get the flag. The flag is set to
+ * 1 by cPathSys_loadPaths when the path pack loads. Nothing in the source calls it.
  */
 extern "C" void func_0012A4D0(void) {
-    func_0026ADE8(&(*(int*)&gPaths));
+    cPathSys_isPathfileLoaded(&(*(int*)&gPaths));
 }
 #endif
 //100%
@@ -1452,8 +1452,8 @@ extern "C" void func_0012A558(void) {
 //100%
 INCLUDE_ASM("ai/ai", func_0012A560);
 #ifdef SKIP_ASM
-extern "C" void* func_0026AF70(void* tree, int id);
-extern "C" float func_0026A138(void* node);
+extern "C" void* cPathSys_getTrackPath(void* tree, int id);
+extern "C" float cTrackPath_getFinishLineParam(void* node);
 t4Vector cPath_getPathPos_A560(void* path, int* inRange, float t) __asm__("cPath_getPathPos");
 void cRider_putAt_A560(cRider* self, t4Vector* pos, t4Vector* dir, int n, float t) __asm__("cRider_putAt");
 // PORT: prototype mismatch. cRider_setControlState/cRider_setMotionState are defined with one param, but callers pass a mode in $a1.
@@ -1524,7 +1524,7 @@ static inline t4Vector Front_A560(cRider* rider)
 /**
  * Puts all riders, or one, back at the start of the first AI path that has a marker distance, facing along the path.
  *
- * Walks gPaths' nodes (count at gPaths + 0x10, func_0026AF70) to the first whose func_0026A138 distance is not -1. The
+ * Walks gPaths' nodes (count at gPaths + 0x10, cPathSys_getTrackPath) to the first whose cTrackPath_getFinishLineParam distance is not -1. The
  * position is the path point 1000 units before that distance (at least 0), the facing is the normalised vector from
  * there to the point at the distance (the rider's current front row when that is shorter than 1). Each chosen rider
  * (all when @p which is -1) gets cRider_setControlState and cRider_setMotionState with 0 and is placed with
@@ -1537,8 +1537,8 @@ extern "C" void func_0012A560(sAiObj12A340* self, int which)
 {
     int n = NodeCount_A560(gPaths);
     for (int i = 0; i < n; i++) {
-        void* node = func_0026AF70(gPaths, i);
-        float markerDist = func_0026A138(node);
+        void* node = cPathSys_getTrackPath(gPaths, i);
+        float markerDist = cTrackPath_getFinishLineParam(node);
         if (markerDist != -1.0f) {
             float back = markerDist - 1000.0f;
             if (back < 0.0f)
@@ -1566,8 +1566,8 @@ extern "C" void func_0012A560(sAiObj12A340* self, int which)
 //100%
 INCLUDE_ASM("ai/ai", func_0012A768);
 #ifdef SKIP_ASM
-extern "C" void* func_0026AF70(void* tree, int id);
-extern "C" float func_0026A138(void* node);
+extern "C" void* cPathSys_getTrackPath(void* tree, int id);
+extern "C" float cTrackPath_getFinishLineParam(void* node);
 // NOTE: float before the flags pointer. EABI numbers int and float args separately, so this is the same ABI as
 // the (self, int*, float) definition; this caller's arg-load order needs it (every other landed user is order-neutral).
 t4Vector cPath_getPathPos_A768(void* path, float t, int* inRange) __asm__("cPath_getPathPos");
@@ -1654,8 +1654,8 @@ extern "C" void func_0012A768(sAiObj12A340* self, int n)
 {
     int count = NodeCount_A768(gPaths);
     for (int i = 0; i < count; i++) {
-        void* node = func_0026AF70(gPaths, i);
-        float markerDist = func_0026A138(node);
+        void* node = cPathSys_getTrackPath(gPaths, i);
+        float markerDist = cTrackPath_getFinishLineParam(node);
         if (markerDist != -1.0f) {
             for (int j = 0; j < self->mCount; j++) {
                 if (n == 0)
@@ -2212,15 +2212,15 @@ INCLUDE_ASM("ai/ai", cAI_purgeAnims);
 #ifdef SKIP_ASM
 extern void** cAnimDataBase_TheAnimDataBase;
 extern void* cGameAnimMap_TheGameAnimMap;
-extern "C" void func_00314FE8(void*, void*);
-extern "C" void func_00311110(void*);
-extern "C" void func_003112C8(void*, int);
+extern "C" void cGameAnimMap_remSource(void*, void*);
+extern "C" void cAnimDataBase_purgeChanCache(void*);
+extern "C" void cAdfDataSource__cAdfDataSource(void*, int);
 
 /**
  * Unloads the character animation file that cAI_loadAnims() loaded.
  *
  * For the one entry of the anim table cAnimDataBase_TheAnimDataBase: removes its animations from the game anim map cGameAnimMap_TheGameAnimMap,
- * clears the entry, frees the animation banks (func_00311110) and deletes the data source (func_003112C8,
+ * clears the entry, frees the animation banks (cAnimDataBase_purgeChanCache) and deletes the data source (cAdfDataSource__cAdfDataSource,
  * flags 3).
  */
 extern "C" void cAI_purgeAnims(cAI* self)
@@ -2231,11 +2231,11 @@ extern "C" void cAI_purgeAnims(cAI* self)
         void* bank = *(void**)((char*)cAnimDataBase_TheAnimDataBase + ((unsigned char)i << 2));
         if (bank != 0)
         {
-            func_00314FE8(cGameAnimMap_TheGameAnimMap, bank);
+            cGameAnimMap_remSource(cGameAnimMap_TheGameAnimMap, bank);
             void** animTable = cAnimDataBase_TheAnimDataBase;
             *(void**)((char*)animTable + ((unsigned char)i << 2)) = 0;
-            func_00311110(animTable);
-            func_003112C8(bank, 3);
+            cAnimDataBase_purgeChanCache(animTable);
+            cAdfDataSource__cAdfDataSource(bank, 3);
         }
     }
 }
@@ -2247,8 +2247,8 @@ INCLUDE_ASM("ai/ai", cAI_loadAnims);
 extern "C" void func_003DED50(char* name, int a1, int a2, void* out);
 extern "C" void func_003DEDC0(void* handle, int arg);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_00311250(void* mem, char* name);
-extern "C" void func_00314F30(void* map, int i, void* anim);
+extern "C" void* cAdfDataSource_cAdfDataSource(void* mem, char* name);
+extern "C" void cGameAnimMap_addSource(void* map, int i, void* anim);
 // PORT: the original passes the map to cGameAnimMap_testResolve(), whose symbol is declared with no params.
 void cGameAnimMap_testResolve_impl(void* map) __asm__("cGameAnimMap_testResolve__Fv");
 struct sAnimTable { void* anims[1]; };
@@ -2270,9 +2270,9 @@ extern "C" void cAI_loadAnims(void)
     func_003DED50(str_data_char_anm_big, 0, 100, &handle);
     for (i = 0; i < 1; i++)
     {
-        void* bank = func_00311250(cMemMan_alloc(0x18, str_AdfDataSource, 0, 0), kAnimBankName[i]);
+        void* bank = cAdfDataSource_cAdfDataSource(cMemMan_alloc(0x18, str_AdfDataSource, 0, 0), kAnimBankName[i]);
         ((sAnimTable*)cAnimDataBase_TheAnimDataBase)->anims[(unsigned char)i] = bank;
-        func_00314F30(cGameAnimMap_TheGameAnimMap, i, bank);
+        cGameAnimMap_addSource(cGameAnimMap_TheGameAnimMap, i, bank);
     }
     cGameAnimMap_testResolve_impl(cGameAnimMap_TheGameAnimMap);
     func_003DEDC0(handle, 100);
@@ -2355,7 +2355,7 @@ INCLUDE_ASM("ai/ai", cAI_applyPlayerRulesCustom);
 extern "C" void cRider_initBoost(void* self);
 extern "C" void cRider_setUbersAllowed(void* self, int a1);
 extern "C" void cRiderMetrix_setInitialPointsTotal(void* self, int a1);
-extern "C" int func_0014F7A8(int i);
+extern "C" int cBERules_getPlayerStartDelaySecs(int i);
 
 struct sRider_12B498
 {
@@ -2390,7 +2390,7 @@ static inline int OptBit_12B498(sOptView_12B498* o, int b)
  * mBoostMode is 3 with global bit 3, 0 with global bit 0, 2 with the player's bit 5, else 1; then
  * cRider_initBoost(). Player bits: 3 full boost meter, 4 no Ubers (else global bit 1 allows them), 0 unk_B20
  * = 2 (faster wipeout recovery), 2 metrix +0x1C4 = 0.5, 1 mStatsIndex 1 offline (ranked online games always
- * get 8); global bit 4 sets mBoostSourceMask 2. mStartHandicap = func_0014F7A8(i); the player's second rule
+ * get 8); global bit 4 sets mBoostSourceMask 2. mStartHandicap = cBERules_getPlayerStartDelaySecs(i); the player's second rule
  * word goes to metrix +0x1C8.
  *
  * @param obj  the new cPlayer (On Tour pPlayer)
@@ -2418,7 +2418,7 @@ extern "C" void cAI_applyPlayerRulesCustom(cAI* self, void* obj, int i)
         cRider_setUbersAllowed(*(void**)((char*)obj + 0x18), 1);
     if (D_005308B8_12B498.e[i].f0 & 1)
         *(int*)(*(char**)((char*)obj + 0x18) + 0xB20) = 2;
-    (*(sRider_12B498**)((char*)obj + 0x18))->fB30 = func_0014F7A8(i);
+    (*(sRider_12B498**)((char*)obj + 0x18))->fB30 = cBERules_getPlayerStartDelaySecs(i);
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0)
     {
@@ -2439,7 +2439,7 @@ INCLUDE_ASM("ai/ai", cAI_applyComputerRulesCustom);
 #ifdef SKIP_ASM
 extern "C" void cRider_initBoost(void* self);
 extern "C" void cRider_setUbersAllowed(void* self, int a1);
-extern "C" int func_0014F7E8();
+extern "C" int cBERules_getAIStartDelaySecs();
 
 struct sOptFlags_0012B698
 {
@@ -2458,7 +2458,7 @@ static inline int OptBit_0012B698(sOptFlags_0012B698* o, int b)
  * Applies the custom game rules (D_005308B8) to a newly created computer rider.
  *
  * Same boost-mode choice as for players, then cRider_initBoost(); global bit 4 sets mBoostSourceMask 2,
- * global bit 1 allows Ubers, and mStartHandicap = func_0014F7E8(). The per-player bits it reads (5: boost
+ * global bit 1 allows Ubers, and mStartHandicap = cBERules_getAIStartDelaySecs(). The per-player bits it reads (5: boost
  * mode 2, 3: full boost meter) are player 0's entry.
  *
  * @param rider  the new cComputer (On Tour pComputer)
@@ -2481,7 +2481,7 @@ extern "C" void cAI_applyComputerRulesCustom(cAI* self, void* rider)
         *(int*)(*(char**)((char*)rider + 0x18) + 0xB28) = 2;
     if (OptBit_0012B698(&D_005308B8, 1))
         cRider_setUbersAllowed(*(void**)((char*)rider + 0x18), 1);
-    *(int*)(*(char**)((char*)rider + 0x18) + 0xB30) = func_0014F7E8();
+    *(int*)(*(char**)((char*)rider + 0x18) + 0xB30) = cBERules_getAIStartDelaySecs();
 }
 #endif
 
@@ -2928,7 +2928,7 @@ INCLUDE_ASM("ai/ai", cGateControl_doGetupFromSit);
 #ifdef SKIP_ASM
 extern "C" void cRider_setupCrouchBrake(void* rider, float a, float b);
 int cRiderAnimBase_getCurrentAnimID(void* self, int i);
-extern "C" float func_00312AB0(void* self, int i);
+extern "C" float cRiderAnimBase_getCurrentAnimFramePercent(void* self, int i);
 int cRider_getMotionState(void* self);
 // PORT: prototype mismatch. cRider_setControlState/cRider_setMotionState are defined with one param, but callers pass a mode in $a1.
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
@@ -2972,7 +2972,7 @@ extern "C" void cGateControl_doGetupFromSit(cGateControl* self, void* cmd)
     {
         if (cRider_getMotionState(self->mRider) == 3)
         {
-            if (func_00312AB0(*(void**)((char*)self->mRider + 0x784), 2) > 0.5f)
+            if (cRiderAnimBase_getCurrentAnimFramePercent(*(void**)((char*)self->mRider + 0x784), 2) > 0.5f)
             {
                 char* rider = (char*)self->mRider;
                 *(sVec4_12C130*)(rider + 0x1E0) = vu0Scale_12C130(*(sVec4_12C130*)(rider + 0x1B0), 555.5555419921875f);
@@ -3620,11 +3620,11 @@ INCLUDE_ASM("ai/ai", cWipeoutControl_updateLaunch);
 #ifdef SKIP_ASM
 extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
-extern "C" float func_00312AB0(void* self, int i);
+extern "C" float cRiderAnimBase_getCurrentAnimFramePercent(void* self, int i);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
-extern "C" float func_00312AB0(void* self, int i);
+extern "C" float cRiderAnimBase_getCurrentAnimFramePercent(void* self, int i);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cWipeoutControl_playWipeoutHitTransitionAnim(cWipeoutControl* self);
 extern "C" void cWipeoutMotion_throwRider(char* self, void* vel, void* angvel);
@@ -3726,7 +3726,7 @@ extern "C" void cWipeoutControl_updateLaunch(cWipeoutControl* self)
     tPose* nodes = *(tPose**)(*(char**)(rider + 0x780) + 0x2C);
     tPose* pose = &nodes[*(int*)(rider + 0x89C)];
     tPose* boardPose = &nodes[*(int*)(rider + 0x8A4)];
-    float framePercent = func_00312AB0(*(void**)(rider + 0x784), 2);
+    float framePercent = cRiderAnimBase_getCurrentAnimFramePercent(*(void**)(rider + 0x784), 2);
     if (cRiderAnimBase_isCurrentAnimEndFlag(*(void**)((char*)self->mRider + 0x784), 2))
     {
         char* an = cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2);
@@ -3933,9 +3933,9 @@ extern "C" void func_00296868(void* mgr, void* self);
 extern "C" void func_00296E80(void* mgr, void* self);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
-extern "C" float func_00312AB0(void* self, int i);
+extern "C" float cRiderAnimBase_getCurrentAnimFramePercent(void* self, int i);
 extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
-extern "C" void func_00313CF0(void* self, int idx, float v);
+extern "C" void cAnimSequence_setSubAnimTime(void* self, int idx, float v);
 
 struct sAiVec4_12D4E8
 {
@@ -4031,10 +4031,10 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
                 }
                 else
                 {
-                    float framePercent = func_00312AB0(*(void**)((char*)self->mRider + 0x784), 2);
+                    float framePercent = cRiderAnimBase_getCurrentAnimFramePercent(*(void**)((char*)self->mRider + 0x784), 2);
                     cWipeoutControl_playWipeoutGroundAnim(self);
                     float animDuration = *(float*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2) + 0x10);
-                    func_00313CF0(cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2), 0, animDuration * framePercent);
+                    cAnimSequence_setSubAnimTime(cRiderAnimBase_getCurrentAnimSequence(*(void**)((char*)self->mRider + 0x784), 2), 0, animDuration * framePercent);
                     func_00296E80(cAudioInterface_bxAudio(), self);
                 }
                 *(int*)self = 2;
@@ -4114,7 +4114,7 @@ extern "C" void cWipeoutControl_updateRecover(cWipeoutControl* self)
     {
         sVEntry12D848* vt = *(sVEntry12D848**)(rider + 0x6C0);
         char* thisp = rider + vt[18].delta;
-        float percentLeft = 1.0f - func_00312AB0(*(void**)(rider + 0x784), 2);
+        float percentLeft = 1.0f - cRiderAnimBase_getCurrentAnimFramePercent(*(void**)(rider + 0x784), 2);
         vt[18].fn(thisp, percentLeft + percentLeft);
     }
     if (cRiderAnimBase_isCurrentAnimEndFlag(*(void**)((char*)self->mRider + 0x784), 2) != 0)
@@ -9491,15 +9491,15 @@ extern "C" float cSpinControl_calcFlipAxisWeight(cSpinControl* self)
 INCLUDE_ASM("ai/ai", cSpinControl_isGrabPlaying);
 #ifdef SKIP_ASM
 extern "C" float cRider_getGrabAnimSpeedScale(void* rider);
-extern "C" unsigned short func_001500D8(void* self, int a1, int a2);
-extern "C" unsigned short func_001500F8(void* self, int a1, int a2);
-extern "C" unsigned short func_00150118(void* self, int a1, int a2);
-extern "C" unsigned short func_00150138(void* self, int a1, int a2);
-extern "C" unsigned short func_00150158(void* self, int a1, int a2);
-extern "C" unsigned short func_00150178(void* self, int a1, int a2);
-extern "C" int func_00150198(void* self, int rider, int idx, int second);
-extern "C" int func_001502C8(void* self, int rider, int idx, int second);
-extern "C" int func_001503F8(void* self, int rider, int idx, int second);
+extern "C" unsigned short cBEBAGTInterface_getGrabAnim(void* self, int a1, int a2);
+extern "C" unsigned short cBEBAGTInterface_getGrabCycleAnim(void* self, int a1, int a2);
+extern "C" unsigned short cBEBAGTInterface_getGrabName(void* self, int a1, int a2);
+extern "C" unsigned short cBEBAGTInterface_getTweakAnim(void* self, int a1, int a2);
+extern "C" unsigned short cBEBAGTInterface_getTweakCycleAnim(void* self, int a1, int a2);
+extern "C" unsigned short cBEBAGTInterface_getTweakName(void* self, int a1, int a2);
+extern "C" int cBEBAGTInterface_getUberAnim(void* self, int rider, int idx, int second);
+extern "C" int cBEBAGTInterface_getUberCycleAnim(void* self, int rider, int idx, int second);
+extern "C" int cBEBAGTInterface_getUberName(void* self, int rider, int idx, int second);
 extern "C" float cRiderMetrix_evGrabHold(void* metrix, int id);
 extern "C" float cRiderMetrix_evReleaseGrab(void* metrix, int id);
 extern "C" void cSSXAudio_Tweak(void* self, void* obj);
@@ -9508,7 +9508,7 @@ extern "C" void cSSXAudio_Tweak(void* self, void* obj);
 /**
  * Advances the grab state machine (GrabState) for this frame and tells whether a grab anim is on layer 2.
  *
- * Anims and trick ids come from BE interface 6 (func_001500D8 .. func_001503F8). A new @p trick starts its
+ * Anims and trick ids come from BE interface 6 (cBEBAGTInterface_getGrabAnim .. cBEBAGTInterface_getUberName). A new @p trick starts its
  * grab; anim events 0 and 1 reach the held pose (scored by cRiderMetrix_evGrabHold); @p held plays the tweak, or the
  * uber variant while the uber timer runs; letting go ends the trick (cRiderMetrix_evReleaseGrab) and returns to GS_Start.
  *
@@ -9536,10 +9536,10 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
             self->CurrentGrab = trick;
             if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 18) {
                 cRider* rider = self->mRider;
-                cRiderAnimBase_play(rider->mRiderAnim, func_001500D8(iface, rider->mAIIndex, self->CurrentGrab), 1, -1.0f);
+                cRiderAnimBase_play(rider->mRiderAnim, cBEBAGTInterface_getGrabAnim(iface, rider->mAIIndex, self->CurrentGrab), 1, -1.0f);
             } else {
                 cRider* rider = self->mRider;
-                cRiderAnimBase_play(rider->mRiderAnim, func_001500D8(iface, rider->mAIIndex, self->CurrentGrab), 0, -1.0f);
+                cRiderAnimBase_play(rider->mRiderAnim, cBEBAGTInterface_getGrabAnim(iface, rider->mAIIndex, self->CurrentGrab), 0, -1.0f);
             }
             *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = speed;
         } else if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 0)) {
@@ -9549,11 +9549,11 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
     if (self->GrabState == 1) {
         if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
             cRider* rider = self->mRider;
-            cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, func_00150118(iface, rider->mAIIndex, self->CurrentGrab)));
+            cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, cBEBAGTInterface_getGrabName(iface, rider->mAIIndex, self->CurrentGrab)));
             *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = 0.0f;
-            if (func_001500F8(iface, self->mRider->mAIIndex, self->CurrentGrab) != 438) {
+            if (cBEBAGTInterface_getGrabCycleAnim(iface, self->mRider->mAIIndex, self->CurrentGrab) != 438) {
                 cRider* rider2 = self->mRider;
-                cRiderAnimBase_play_i(rider2->mRiderAnim, func_001500F8(iface, rider2->mAIIndex, self->CurrentGrab), 0, -1.0f);
+                cRiderAnimBase_play_i(rider2->mRiderAnim, cBEBAGTInterface_getGrabCycleAnim(iface, rider2->mAIIndex, self->CurrentGrab), 0, -1.0f);
                 *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1) + 0x90) = speed;
             }
             self->GrabState = 2;
@@ -9562,7 +9562,7 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
     if (self->GrabState == 2) {
         if (trick != self->CurrentGrab) {
             cRider* rider = self->mRider;
-            cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider->mMetrix, func_00150118(iface, rider->mAIIndex, self->CurrentGrab)));
+            cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider->mMetrix, cBEBAGTInterface_getGrabName(iface, rider->mAIIndex, self->CurrentGrab)));
             cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
             *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = speed;
             self->GrabState = 5;
@@ -9570,12 +9570,12 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
             cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 1, 0.10000000149011612f);
             cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 2, 0.10000000149011612f);
             if (self->mRider->mUberTimer == 0.0f || (self->mRider->mUberFlags & 1) == 0
-                || func_00150198(iface, self->mRider->mAIIndex, self->CurrentGrab, hi) == 438) {
+                || cBEBAGTInterface_getUberAnim(iface, self->mRider->mAIIndex, self->CurrentGrab, hi) == 438) {
                 cRider* rider = self->mRider;
-                cRiderAnimBase_play(rider->mRiderAnim, func_00150138(iface, rider->mAIIndex, self->CurrentGrab), 0, -1.0f);
+                cRiderAnimBase_play(rider->mRiderAnim, cBEBAGTInterface_getTweakAnim(iface, rider->mAIIndex, self->CurrentGrab), 0, -1.0f);
             } else {
                 cRider* rider = self->mRider;
-                cRiderAnimBase_play(rider->mRiderAnim, func_00150198(iface, rider->mAIIndex, self->CurrentGrab, hi), 0, -1.0f);
+                cRiderAnimBase_play(rider->mRiderAnim, cBEBAGTInterface_getUberAnim(iface, rider->mAIIndex, self->CurrentGrab, hi), 0, -1.0f);
             }
             cSSXAudio_Tweak(cAudioInterface_bxAudio(), self->mRider);
             *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = speed;
@@ -9588,18 +9588,18 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
             *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = 0.0f;
             if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 19) {
                 cRider* rider = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, func_00150178(iface, rider->mAIIndex, self->CurrentGrab)));
-                if (func_00150158(iface, self->mRider->mAIIndex, self->CurrentGrab) != 438) {
+                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, cBEBAGTInterface_getTweakName(iface, rider->mAIIndex, self->CurrentGrab)));
+                if (cBEBAGTInterface_getTweakCycleAnim(iface, self->mRider->mAIIndex, self->CurrentGrab) != 438) {
                     cRider* rider2 = self->mRider;
-                    cRiderAnimBase_play_i(rider2->mRiderAnim, func_00150158(iface, rider2->mAIIndex, self->CurrentGrab), 0, -1.0f);
+                    cRiderAnimBase_play_i(rider2->mRiderAnim, cBEBAGTInterface_getTweakCycleAnim(iface, rider2->mAIIndex, self->CurrentGrab), 0, -1.0f);
                     *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1) + 0x90) = speed;
                 }
             } else {
                 cRider* rider = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, func_001503F8(iface, rider->mAIIndex, self->CurrentGrab, hi)));
-                if (func_001502C8(iface, self->mRider->mAIIndex, self->CurrentGrab, hi) != 438) {
+                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, cBEBAGTInterface_getUberName(iface, rider->mAIIndex, self->CurrentGrab, hi)));
+                if (cBEBAGTInterface_getUberCycleAnim(iface, self->mRider->mAIIndex, self->CurrentGrab, hi) != 438) {
                     cRider* rider2 = self->mRider;
-                    cRiderAnimBase_play_i(rider2->mRiderAnim, func_001502C8(iface, rider2->mAIIndex, self->CurrentGrab, hi), 0, -1.0f);
+                    cRiderAnimBase_play_i(rider2->mRiderAnim, cBEBAGTInterface_getUberCycleAnim(iface, rider2->mAIIndex, self->CurrentGrab, hi), 0, -1.0f);
                     *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 1) + 0x90) = speed;
                 }
             }
@@ -9609,14 +9609,14 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
                    || func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 2)) {
             if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 19) {
                 cRider* rider = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, func_00150178(iface, rider->mAIIndex, self->CurrentGrab)));
+                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, cBEBAGTInterface_getTweakName(iface, rider->mAIIndex, self->CurrentGrab)));
                 cRider* rider2 = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider2->mMetrix, func_00150178(iface, rider2->mAIIndex, self->CurrentGrab)));
+                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider2->mMetrix, cBEBAGTInterface_getTweakName(iface, rider2->mAIIndex, self->CurrentGrab)));
             } else {
                 cRider* rider = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, func_001503F8(iface, rider->mAIIndex, self->CurrentGrab, hi)));
+                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, cBEBAGTInterface_getUberName(iface, rider->mAIIndex, self->CurrentGrab, hi)));
                 cRider* rider2 = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider2->mMetrix, func_001503F8(iface, rider2->mAIIndex, self->CurrentGrab, hi)));
+                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider2->mMetrix, cBEBAGTInterface_getUberName(iface, rider2->mAIIndex, self->CurrentGrab, hi)));
             }
             self->GrabState = 5;
         }
@@ -9625,10 +9625,10 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
         if (trick != self->CurrentGrab || held == 0) {
             if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 19) {
                 cRider* rider = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider->mMetrix, func_00150178(iface, rider->mAIIndex, self->CurrentGrab)));
+                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider->mMetrix, cBEBAGTInterface_getTweakName(iface, rider->mAIIndex, self->CurrentGrab)));
             } else {
                 cRider* rider = self->mRider;
-                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider->mMetrix, func_001503F8(iface, rider->mAIIndex, self->CurrentGrab, hi)));
+                cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReleaseGrab(rider->mMetrix, cBEBAGTInterface_getUberName(iface, rider->mAIIndex, self->CurrentGrab, hi)));
             }
             cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
             *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = speed;
@@ -9639,11 +9639,11 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
     if (self->GrabState == 5) {
         if (anim == 2 || func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 3)) {
             if (anim == 20 && held != 0 && trick != -1
-                && func_00150198(iface, self->mRider->mAIIndex, trick, hi) != 438) {
+                && cBEBAGTInterface_getUberAnim(iface, self->mRider->mAIIndex, trick, hi) != 438) {
                 self->CurrentGrab = trick;
                 cRiderAnimBase_blendOutAll(self->mRider->mRiderAnim, 1, 0.33000001311302185f);
                 cRider* rider = self->mRider;
-                cRiderAnimBase_play_i(rider->mRiderAnim, func_00150198(iface, rider->mAIIndex, self->CurrentGrab, hi), 1, -1.0f);
+                cRiderAnimBase_play_i(rider->mRiderAnim, cBEBAGTInterface_getUberAnim(iface, rider->mAIIndex, self->CurrentGrab, hi), 1, -1.0f);
                 *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = speed;
                 self->GrabState = 3;
             } else {

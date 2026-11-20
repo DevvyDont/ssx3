@@ -3357,10 +3357,10 @@ INCLUDE_ASM("camera/camera", cSplineCamAlgorithm_cSplineCamAlgorithm);
 #ifdef SKIP_ASM
 extern void* cSplineCamAlgorithm_vtbl[];
 extern "C" void func_0031D5E8(void* spline);
-// PORT: func_0031D700 is declared (void*) but forwards a second argument (the key count) in $a1.
-void func_0031D700_2(void* spline, int n) __asm__("func_0031D700__FPv");
-extern "C" void func_0031D7E0(void* spline, float x, float y);
-extern "C" float func_0031DEE0(void* spline, float x);
+// PORT: cCubicSplineInterpolant_initAsNatural is declared (void*) but forwards a second argument (the key count) in $a1.
+void cCubicSplineInterpolant_initAsNatural_2(void* spline, int n) __asm__("cCubicSplineInterpolant_initAsNatural__FPv");
+extern "C" void cCubicSplineInterpolant_addPoint(void* spline, float x, float y);
+extern "C" float cCubicSplineInterpolant_evaluate(void* spline, float x);
 
 struct sVec_161060 {
     float x, y, z, w;
@@ -3409,9 +3409,9 @@ static inline float Length_161060(const sVec_161060& v)
  *
  * Runs the look-at chase constructor, stores cSplineCamAlgorithm_vtbl and constructs the X/Y/Z interpolants XOfT,
  * YOfT and ZOfT (+0x390, +0x39C, +0x3A8; func_0031D5E8). Sets LeadDistance, HeightOffset, View = @p fov and
- * AlgorithmType 0x4B (On Tour CAMERA_ALGORITHM_SPLINE = 75). Each interpolant gets four keys (func_0031D700,
- * func_0031D7E0) at times 0, dur/3, 2dur/3 and dur from the points' x, y and z. TotalTime = dur and LastEvaluatedTime
- * = 0; the path length is then summed over 100 samples (func_0031DEE0, cCubicSplineInterpolant::evaluate) and Speed =
+ * AlgorithmType 0x4B (On Tour CAMERA_ALGORITHM_SPLINE = 75). Each interpolant gets four keys (cCubicSplineInterpolant_initAsNatural,
+ * cCubicSplineInterpolant_addPoint) at times 0, dur/3, 2dur/3 and dur from the points' x, y and z. TotalTime = dur and LastEvaluatedTime
+ * = 0; the path length is then summed over 100 samples (cCubicSplineInterpolant_evaluate, cCubicSplineInterpolant::evaluate) and Speed =
  * 0.9 * length / dur.
  *
  * @param point1  first point, three floats x, y, z (On Tour const t4Vector&)
@@ -3439,30 +3439,30 @@ extern "C" void* cSplineCamAlgorithm_cSplineCamAlgorithm(cSplineCamAlgorithm* se
     self->HeightOffset = heightOffset;
     self->View = fov;
     self->AlgorithmType = 75;
-    func_0031D700_2(sx, 4);
-    func_0031D700_2(sy, 4);
-    func_0031D700_2(sz, 4);
+    cCubicSplineInterpolant_initAsNatural_2(sx, 4);
+    cCubicSplineInterpolant_initAsNatural_2(sy, 4);
+    cCubicSplineInterpolant_initAsNatural_2(sz, 4);
     float firstKeyTime = dur * 0.33333298563957214f;
     float secondKeyTime = dur * 0.6666669845581055f;
-    func_0031D7E0(sx, 0.0f, point1[0]);
-    func_0031D7E0(sx, firstKeyTime, point2[0]);
-    func_0031D7E0(sx, secondKeyTime, point3[0]);
-    func_0031D7E0(sx, dur, point4[0]);
-    func_0031D7E0(sy, 0.0f, point1[1]);
-    func_0031D7E0(sy, firstKeyTime, point2[1]);
-    func_0031D7E0(sy, secondKeyTime, point3[1]);
-    func_0031D7E0(sy, dur, point4[1]);
-    func_0031D7E0(sz, 0.0f, point1[2]);
-    func_0031D7E0(sz, firstKeyTime, point2[2]);
-    func_0031D7E0(sz, secondKeyTime, point3[2]);
-    func_0031D7E0(sz, dur, point4[2]);
+    cCubicSplineInterpolant_addPoint(sx, 0.0f, point1[0]);
+    cCubicSplineInterpolant_addPoint(sx, firstKeyTime, point2[0]);
+    cCubicSplineInterpolant_addPoint(sx, secondKeyTime, point3[0]);
+    cCubicSplineInterpolant_addPoint(sx, dur, point4[0]);
+    cCubicSplineInterpolant_addPoint(sy, 0.0f, point1[1]);
+    cCubicSplineInterpolant_addPoint(sy, firstKeyTime, point2[1]);
+    cCubicSplineInterpolant_addPoint(sy, secondKeyTime, point3[1]);
+    cCubicSplineInterpolant_addPoint(sy, dur, point4[1]);
+    cCubicSplineInterpolant_addPoint(sz, 0.0f, point1[2]);
+    cCubicSplineInterpolant_addPoint(sz, firstKeyTime, point2[2]);
+    cCubicSplineInterpolant_addPoint(sz, secondKeyTime, point3[2]);
+    cCubicSplineInterpolant_addPoint(sz, dur, point4[2]);
     self->TotalTime = dur;
     self->LastEvaluatedTime = 0.0f;
     float total = 0.0f;
-    sVec_161060 prev(func_0031DEE0(sx, total), func_0031DEE0(sy, total), func_0031DEE0(sz, total), 1.0f);
+    sVec_161060 prev(cCubicSplineInterpolant_evaluate(sx, total), cCubicSplineInterpolant_evaluate(sy, total), cCubicSplineInterpolant_evaluate(sz, total), 1.0f);
     for (int i = 1; i < 101; i++) {
         float testTime = (dur * (float)i * 0.009999999776482582f) <? dur;
-        sVec_161060 cur(func_0031DEE0(((char*)self) + 0x390, testTime), func_0031DEE0(((char*)self) + 0x39C, testTime), func_0031DEE0(((char*)self) + 0x3A8, testTime), 1.0f);
+        sVec_161060 cur(cCubicSplineInterpolant_evaluate(((char*)self) + 0x390, testTime), cCubicSplineInterpolant_evaluate(((char*)self) + 0x39C, testTime), cCubicSplineInterpolant_evaluate(((char*)self) + 0x3A8, testTime), 1.0f);
         sVec_161060 chord = Sub_161060(cur, prev);
         total += Length_161060(chord);
         prev = cur;
@@ -3546,7 +3546,7 @@ struct sVec4R : t4Vector
 
 extern t4Vector D_004FF160_13F0 __asm__("t4vect_ZAxis");
 
-extern "C" float func_0031DEE0(void* spline, float x);
+extern "C" float cCubicSplineInterpolant_evaluate(void* spline, float x);
 
 
 // PORT: PS2-only VU0 inline asm (a - b).
@@ -3644,7 +3644,7 @@ static inline sVec4R Get_13F0(char* self, int slot)
 /**
  * Moves the spline camera one frame along its path at constant speed and aims it ahead of the rider.
  *
- * Evaluates the x/y/z splines (+0x390/+0x39C/+0x3A8, func_0031DEE0) one 1/60 s step past LastEvaluatedTime (capped at
+ * Evaluates the x/y/z splines (+0x390/+0x39C/+0x3A8, cCubicSplineInterpolant_evaluate) one 1/60 s step past LastEvaluatedTime (capped at
  * TotalTime), then rescales the step so the camera moves Speed / 60 units: LastEvaluatedTime advances by the step
  * times (Speed / 60) / distance and Position is re-evaluated there. CamTargetPos becomes the target's position +
  * HeightOffset up (t4vect_ZAxis) + LeadDistance along the target's front (target slots 1 and 4).
@@ -3658,14 +3658,14 @@ extern "C" void cSplineCamAlgorithm_update(cSplineCamAlgorithm* self)
     float speed = self->Speed * 0.01666666753590107f;
     {
         sVec4R prev = *(sVec4R*)&self->Position;
-        sVec4R cur(func_0031DEE0(sx, nextTime), func_0031DEE0(sy, nextTime), func_0031DEE0(sz, nextTime), 1.0f);
+        sVec4R cur(cCubicSplineInterpolant_evaluate(sx, nextTime), cCubicSplineInterpolant_evaluate(sy, nextTime), cCubicSplineInterpolant_evaluate(sz, nextTime), 1.0f);
         sVec4R step = Sub_13F0(cur, prev);
         float len = Length_13F0(step);
         if (0.0f < len) {
             float lastTime = self->LastEvaluatedTime;
             float nt = (lastTime + (nextTime - lastTime) / (len / speed)) <? self->TotalTime;
             self->LastEvaluatedTime = nt;
-            *(sVec4R*)&self->Position = sVec4R(func_0031DEE0(sx, nt), func_0031DEE0(sy, nt), func_0031DEE0(sz, nt), 1.0f);
+            *(sVec4R*)&self->Position = sVec4R(cCubicSplineInterpolant_evaluate(sx, nt), cCubicSplineInterpolant_evaluate(sy, nt), cCubicSplineInterpolant_evaluate(sz, nt), 1.0f);
         }
     }
     *(sVec4R*)&self->CamTargetPos = Add_13F0(Add_13F0(Get_13F0(((char*)self), 1), ScaleP_13F0(self->HeightOffset, (const sVec4R*)&D_004FF160_13F0)),
@@ -6274,7 +6274,7 @@ static inline float CallF_1635F8(char* self, int slot)
  * keys over 4 s) scaled by amplitude * fullScalar * a 0..1 ramp of the target's vertical jump (slot 21, 300..500),
  * and sets ApplyingFullAirFunc. At 0 it builds AirTargetSpline and AirPositionSpline with the same keys stretched to
  * the total air time (slot 12) and scaled by amplitude * VerticalJumpFactor * a smoothstep of the air time over
- * 1.7..2.8 s, and sets ApplyingAirFunc. Running curves are evaluated (func_0031DEE0,
+ * 1.7..2.8 s, and sets ApplyingAirFunc. Running curves are evaluated (cCubicSplineInterpolant_evaluate,
  * cCubicSplineInterpolant::evaluate) into the Last*Delta fields; D_004A1288, D_004A4DD8 and D_004A4DDC publish the
  * active air splines. On landing AirExitSmoothness is set (0.93 toward @p exitSmoothness over 1.2..2.2 s of full-air
  * time, then halfway toward 1 for landing angles 1.05..1.4, slot 23), the curves stop, and from then on the deltas
@@ -6306,34 +6306,34 @@ extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, 
             if (0.0f < airAmplitude) {
                 void* sa = S_1635F8 + 0x31C;
                 void* sb = S_1635F8 + 0x328;
-                func_0031D700_2(sa, 13);
-                func_0031D7E0(sa, 0.0f, 0.0f);
-                func_0031D7E0(sa, 0.33000001311302185f, airAmplitude * -121.1346664428711f);
-                func_0031D7E0(sa, 0.6600000262260437f, airAmplitude * -217.7401123046875f);
-                func_0031D7E0(sa, 0.998885452747345f, airAmplitude * -254.97467041015625f);
-                func_0031D7E0(sa, 1.3300000429153442f, airAmplitude * -250.5922088623047f);
-                func_0031D7E0(sa, 1.659999966621399f, airAmplitude * -193.38156127929688f);
-                func_0031D7E0(sa, 2.0f, airAmplitude * -63.02951431274414f);
-                func_0031D7E0(sa, 2.3299999237060547f, airAmplitude * 110.80419158935547f);
-                func_0031D7E0(sa, 2.6600000858306885f, airAmplitude * 307.46771240234375f);
-                func_0031D7E0(sa, 3.0f, airAmplitude * 496.44952392578125f);
-                func_0031D7E0(sa, 3.3299999237060547f, airAmplitude * 689.6500854492188f);
-                func_0031D7E0(sa, 3.6600000858306885f, airAmplitude * 820.5333862304688f);
-                func_0031D7E0(sa, 4.0f, airAmplitude * 849.3922119140625f);
-                func_0031D700_2(sb, 13);
-                func_0031D7E0(sb, 0.0f, 0.0f);
-                func_0031D7E0(sb, 0.33000001311302185f, airAmplitude * -22.06365966796875f);
-                func_0031D7E0(sb, 0.6600000262260437f, airAmplitude * -34.630374908447266f);
-                func_0031D7E0(sb, 1.0f, airAmplitude * 13.823330879211426f);
-                func_0031D7E0(sb, 1.3290001153945923f, airAmplitude * 92.12850952148438f);
-                func_0031D7E0(sb, 1.659500002861023f, airAmplitude * 213.1912384033203f);
-                func_0031D7E0(sb, 2.0000672340393066f, airAmplitude * 383.46197509765625f);
-                func_0031D7E0(sb, 2.333711624145508f, airAmplitude * 624.2830200195312f);
-                func_0031D7E0(sb, 2.6603856086730957f, airAmplitude * 813.0820922851562f);
-                func_0031D7E0(sb, 3.0f, airAmplitude * 977.65869140625f);
-                func_0031D7E0(sb, 3.3299999237060547f, airAmplitude * 1070.9466552734375f);
-                func_0031D7E0(sb, 3.659675359725952f, airAmplitude * 1104.7698974609375f);
-                func_0031D7E0(sb, 4.0f, airAmplitude * 1131.4307861328125f);
+                cCubicSplineInterpolant_initAsNatural_2(sa, 13);
+                cCubicSplineInterpolant_addPoint(sa, 0.0f, 0.0f);
+                cCubicSplineInterpolant_addPoint(sa, 0.33000001311302185f, airAmplitude * -121.1346664428711f);
+                cCubicSplineInterpolant_addPoint(sa, 0.6600000262260437f, airAmplitude * -217.7401123046875f);
+                cCubicSplineInterpolant_addPoint(sa, 0.998885452747345f, airAmplitude * -254.97467041015625f);
+                cCubicSplineInterpolant_addPoint(sa, 1.3300000429153442f, airAmplitude * -250.5922088623047f);
+                cCubicSplineInterpolant_addPoint(sa, 1.659999966621399f, airAmplitude * -193.38156127929688f);
+                cCubicSplineInterpolant_addPoint(sa, 2.0f, airAmplitude * -63.02951431274414f);
+                cCubicSplineInterpolant_addPoint(sa, 2.3299999237060547f, airAmplitude * 110.80419158935547f);
+                cCubicSplineInterpolant_addPoint(sa, 2.6600000858306885f, airAmplitude * 307.46771240234375f);
+                cCubicSplineInterpolant_addPoint(sa, 3.0f, airAmplitude * 496.44952392578125f);
+                cCubicSplineInterpolant_addPoint(sa, 3.3299999237060547f, airAmplitude * 689.6500854492188f);
+                cCubicSplineInterpolant_addPoint(sa, 3.6600000858306885f, airAmplitude * 820.5333862304688f);
+                cCubicSplineInterpolant_addPoint(sa, 4.0f, airAmplitude * 849.3922119140625f);
+                cCubicSplineInterpolant_initAsNatural_2(sb, 13);
+                cCubicSplineInterpolant_addPoint(sb, 0.0f, 0.0f);
+                cCubicSplineInterpolant_addPoint(sb, 0.33000001311302185f, airAmplitude * -22.06365966796875f);
+                cCubicSplineInterpolant_addPoint(sb, 0.6600000262260437f, airAmplitude * -34.630374908447266f);
+                cCubicSplineInterpolant_addPoint(sb, 1.0f, airAmplitude * 13.823330879211426f);
+                cCubicSplineInterpolant_addPoint(sb, 1.3290001153945923f, airAmplitude * 92.12850952148438f);
+                cCubicSplineInterpolant_addPoint(sb, 1.659500002861023f, airAmplitude * 213.1912384033203f);
+                cCubicSplineInterpolant_addPoint(sb, 2.0000672340393066f, airAmplitude * 383.46197509765625f);
+                cCubicSplineInterpolant_addPoint(sb, 2.333711624145508f, airAmplitude * 624.2830200195312f);
+                cCubicSplineInterpolant_addPoint(sb, 2.6603856086730957f, airAmplitude * 813.0820922851562f);
+                cCubicSplineInterpolant_addPoint(sb, 3.0f, airAmplitude * 977.65869140625f);
+                cCubicSplineInterpolant_addPoint(sb, 3.3299999237060547f, airAmplitude * 1070.9466552734375f);
+                cCubicSplineInterpolant_addPoint(sb, 3.659675359725952f, airAmplitude * 1104.7698974609375f);
+                cCubicSplineInterpolant_addPoint(sb, 4.0f, airAmplitude * 1131.4307861328125f);
                 self->AirCamMaxTime = 4.0f;
                 self->ApplyingFullAirFunc = 1;
                 self->AirSplineScalar = 1.0f;
@@ -6364,34 +6364,34 @@ extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, 
             if (0.0f < airAmplitude) {
                 void* sc = S_1635F8 + 0x304;
                 void* sd = S_1635F8 + 0x310;
-                func_0031D700_2(sc, 13);
-                func_0031D7E0(sc, 0.0f, 0.0f);
-                func_0031D7E0(sc, sx * 0.33000001311302185f, airAmplitude * -121.1346664428711f);
-                func_0031D7E0(sc, sx * 0.6600000262260437f, airAmplitude * -217.7401123046875f);
-                func_0031D7E0(sc, sx * 0.998885452747345f, airAmplitude * -254.97467041015625f);
-                func_0031D7E0(sc, sx * 1.3300000429153442f, airAmplitude * -250.5922088623047f);
-                func_0031D7E0(sc, sx * 1.659999966621399f, airAmplitude * -193.38156127929688f);
-                func_0031D7E0(sc, sx * 2.0f, airAmplitude * -63.02951431274414f);
-                func_0031D7E0(sc, sx * 2.3299999237060547f, airAmplitude * 110.80419158935547f);
-                func_0031D7E0(sc, sx * 2.6600000858306885f, airAmplitude * 307.46771240234375f);
-                func_0031D7E0(sc, sx * 3.0f, airAmplitude * 496.44952392578125f);
-                func_0031D7E0(sc, sx * 3.3299999237060547f, airAmplitude * 689.6500854492188f);
-                func_0031D7E0(sc, sx * 3.6600000858306885f, airAmplitude * 820.5333862304688f);
-                func_0031D7E0(sc, sx * 4.0f, airAmplitude * 849.3922119140625f);
-                func_0031D700_2(sd, 13);
-                func_0031D7E0(sd, 0.0f, 0.0f);
-                func_0031D7E0(sd, sx * 0.33000001311302185f, airAmplitude * -22.06365966796875f);
-                func_0031D7E0(sd, sx * 0.6600000262260437f, airAmplitude * -34.630374908447266f);
-                func_0031D7E0(sd, sx * 1.0f, airAmplitude * 13.823330879211426f);
-                func_0031D7E0(sd, sx * 1.3290001153945923f, airAmplitude * 92.12850952148438f);
-                func_0031D7E0(sd, sx * 1.659500002861023f, airAmplitude * 213.1912384033203f);
-                func_0031D7E0(sd, sx * 2.0000672340393066f, airAmplitude * 383.46197509765625f);
-                func_0031D7E0(sd, sx * 2.333711624145508f, airAmplitude * 624.2830200195312f);
-                func_0031D7E0(sd, sx * 2.6603856086730957f, airAmplitude * 813.0820922851562f);
-                func_0031D7E0(sd, sx * 3.0f, airAmplitude * 977.65869140625f);
-                func_0031D7E0(sd, sx * 3.3299999237060547f, airAmplitude * 1070.9466552734375f);
-                func_0031D7E0(sd, sx * 3.659675359725952f, airAmplitude * 1104.7698974609375f);
-                func_0031D7E0(sd, sx * 4.0f, airAmplitude * 1131.4307861328125f);
+                cCubicSplineInterpolant_initAsNatural_2(sc, 13);
+                cCubicSplineInterpolant_addPoint(sc, 0.0f, 0.0f);
+                cCubicSplineInterpolant_addPoint(sc, sx * 0.33000001311302185f, airAmplitude * -121.1346664428711f);
+                cCubicSplineInterpolant_addPoint(sc, sx * 0.6600000262260437f, airAmplitude * -217.7401123046875f);
+                cCubicSplineInterpolant_addPoint(sc, sx * 0.998885452747345f, airAmplitude * -254.97467041015625f);
+                cCubicSplineInterpolant_addPoint(sc, sx * 1.3300000429153442f, airAmplitude * -250.5922088623047f);
+                cCubicSplineInterpolant_addPoint(sc, sx * 1.659999966621399f, airAmplitude * -193.38156127929688f);
+                cCubicSplineInterpolant_addPoint(sc, sx * 2.0f, airAmplitude * -63.02951431274414f);
+                cCubicSplineInterpolant_addPoint(sc, sx * 2.3299999237060547f, airAmplitude * 110.80419158935547f);
+                cCubicSplineInterpolant_addPoint(sc, sx * 2.6600000858306885f, airAmplitude * 307.46771240234375f);
+                cCubicSplineInterpolant_addPoint(sc, sx * 3.0f, airAmplitude * 496.44952392578125f);
+                cCubicSplineInterpolant_addPoint(sc, sx * 3.3299999237060547f, airAmplitude * 689.6500854492188f);
+                cCubicSplineInterpolant_addPoint(sc, sx * 3.6600000858306885f, airAmplitude * 820.5333862304688f);
+                cCubicSplineInterpolant_addPoint(sc, sx * 4.0f, airAmplitude * 849.3922119140625f);
+                cCubicSplineInterpolant_initAsNatural_2(sd, 13);
+                cCubicSplineInterpolant_addPoint(sd, 0.0f, 0.0f);
+                cCubicSplineInterpolant_addPoint(sd, sx * 0.33000001311302185f, airAmplitude * -22.06365966796875f);
+                cCubicSplineInterpolant_addPoint(sd, sx * 0.6600000262260437f, airAmplitude * -34.630374908447266f);
+                cCubicSplineInterpolant_addPoint(sd, sx * 1.0f, airAmplitude * 13.823330879211426f);
+                cCubicSplineInterpolant_addPoint(sd, sx * 1.3290001153945923f, airAmplitude * 92.12850952148438f);
+                cCubicSplineInterpolant_addPoint(sd, sx * 1.659500002861023f, airAmplitude * 213.1912384033203f);
+                cCubicSplineInterpolant_addPoint(sd, sx * 2.0000672340393066f, airAmplitude * 383.46197509765625f);
+                cCubicSplineInterpolant_addPoint(sd, sx * 2.333711624145508f, airAmplitude * 624.2830200195312f);
+                cCubicSplineInterpolant_addPoint(sd, sx * 2.6603856086730957f, airAmplitude * 813.0820922851562f);
+                cCubicSplineInterpolant_addPoint(sd, sx * 3.0f, airAmplitude * 977.65869140625f);
+                cCubicSplineInterpolant_addPoint(sd, sx * 3.3299999237060547f, airAmplitude * 1070.9466552734375f);
+                cCubicSplineInterpolant_addPoint(sd, sx * 3.659675359725952f, airAmplitude * 1104.7698974609375f);
+                cCubicSplineInterpolant_addPoint(sd, sx * 4.0f, airAmplitude * 1131.4307861328125f);
                 self->ApplyingAirFunc = 1;
                 self->AirSplineScalar = 1.0f;
                 self->AirTimeScalar = 1.0f;
@@ -6406,15 +6406,15 @@ extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, 
         } else {
             self->FullAirCamTimeInAir = (self->FullAirCamTimeInAir + 0.01666666753590107f) <? 4.0f;
         }
-        float yb = self->AirSplineScalar * func_0031DEE0(S_1635F8 + 0x328, self->AirTimeScalar * self->FullAirCamTimeInAir);
-        float ya = self->AirSplineScalar * func_0031DEE0(S_1635F8 + 0x31C, self->AirTimeScalar * self->FullAirCamTimeInAir);
+        float yb = self->AirSplineScalar * cCubicSplineInterpolant_evaluate(S_1635F8 + 0x328, self->AirTimeScalar * self->FullAirCamTimeInAir);
+        float ya = self->AirSplineScalar * cCubicSplineInterpolant_evaluate(S_1635F8 + 0x31C, self->AirTimeScalar * self->FullAirCamTimeInAir);
         self->LastFullAirPositionDelta = yb;
         self->LastFullAirTargetDelta = ya;
     }
     if (self->ApplyingAirFunc != 0) {
         Approach_1635F8(self->AirCamTimeInAir, self->AirCamMaxTime);
-        float yd = self->AirSplineScalar * func_0031DEE0(S_1635F8 + 0x310, self->AirTimeScalar * self->AirCamTimeInAir);
-        float yc = self->AirSplineScalar * func_0031DEE0(S_1635F8 + 0x304, self->AirTimeScalar * self->AirCamTimeInAir);
+        float yd = self->AirSplineScalar * cCubicSplineInterpolant_evaluate(S_1635F8 + 0x310, self->AirTimeScalar * self->AirCamTimeInAir);
+        float yc = self->AirSplineScalar * cCubicSplineInterpolant_evaluate(S_1635F8 + 0x304, self->AirTimeScalar * self->AirCamTimeInAir);
         self->LastAirPositionDelta = yd;
         self->LastAirTargetDelta = yc;
         D_004A1288 = 1;
@@ -7067,8 +7067,8 @@ struct sVE_164878 {
 
 extern sVec_164878 D_004FF160_v164878 __asm__("t4vect_ZAxis");
 extern int D_004A128C;
-// PORT: func_0031D738 takes (spline, knot count, x, y); its mangled name says (void*, float, float).
-void func_0031D738_ivff(void* spline, int n, float x, float y) __asm__("func_0031D738__FPvff");
+// PORT: cCubicSplineInterpolant_initAsClamped takes (spline, knot count, x, y); its mangled name says (void*, float, float).
+void cCubicSplineInterpolant_initAsClamped_ivff(void* spline, int n, float x, float y) __asm__("cCubicSplineInterpolant_initAsClamped__FPvff");
 
 // PORT: PS2-only VU0 inline asm (a - b).
 static inline sVec_164878 Sub_164878(const sVec_164878& a, const sVec_164878& b)
@@ -7447,16 +7447,16 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* s
                 }
                 F_164878(568) = ang;
                 void* spl = S_164878 + 0x334;
-                func_0031D738_ivff(spl, 9, 0.0f, 0.0f);
-                func_0031D7E0(spl, 0.0f, 0.0f);
-                func_0031D7E0(spl, 0.125f, 0.0639725923538208f);
-                func_0031D7E0(spl, 0.25f, 0.30785250663757324f);
-                func_0031D7E0(spl, 0.375f, 0.5528385043144226f);
-                func_0031D7E0(spl, 0.5f, 0.6577425003051758f);
-                func_0031D7E0(spl, 0.625f, 0.728873610496521f);
-                func_0031D7E0(spl, 0.75f, 0.827086865901947f);
-                func_0031D7E0(spl, 0.875f, 0.9414384365081787f);
-                func_0031D7E0(spl, 1.0f, 1.0f);
+                cCubicSplineInterpolant_initAsClamped_ivff(spl, 9, 0.0f, 0.0f);
+                cCubicSplineInterpolant_addPoint(spl, 0.0f, 0.0f);
+                cCubicSplineInterpolant_addPoint(spl, 0.125f, 0.0639725923538208f);
+                cCubicSplineInterpolant_addPoint(spl, 0.25f, 0.30785250663757324f);
+                cCubicSplineInterpolant_addPoint(spl, 0.375f, 0.5528385043144226f);
+                cCubicSplineInterpolant_addPoint(spl, 0.5f, 0.6577425003051758f);
+                cCubicSplineInterpolant_addPoint(spl, 0.625f, 0.728873610496521f);
+                cCubicSplineInterpolant_addPoint(spl, 0.75f, 0.827086865901947f);
+                cCubicSplineInterpolant_addPoint(spl, 0.875f, 0.9414384365081787f);
+                cCubicSplineInterpolant_addPoint(spl, 1.0f, 1.0f);
                 self->HalfPipeCamInitialized = 1;
             }
         }
@@ -7467,7 +7467,7 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* s
                 D_004A128C = 1;
                 // PORT: spline pointer kept in an int global.
                 D_004A4DE0 = (int)(S_164878 + 0x334);
-                float fraction = func_0031DEE0(S_164878 + 0x334, timeFraction);
+                float fraction = cCubicSplineInterpolant_evaluate(S_164878 + 0x334, timeFraction);
                 float sn, cs;
                 fSinCos(&sn, &cs, fraction * F_164878(568) * 0.5f);
                 sQuat_164878 rotation = Quat_164878(sn * V_164878(304).x, sn * V_164878(304).y, sn * V_164878(304).z, cs);

@@ -1984,7 +1984,7 @@ extern "C" int cOverlapList_splineIntersect(void* world, t4Vector* from, void* h
 extern "C" int func_001086B8(void* rider, t4Vector* tgt, t4Vector* dir);
 extern "C" void* cBE_getBE();
 extern "C" void* cBE_getInterface__Fv(void* be, int kind);
-extern "C" float func_00149208(void* self, int rider, int value);
+extern "C" float cBEStatInterface_getBalanceAttrib(void* self, int rider, int value);
 // PORT: the unit declares cRailslideMotion_getRailUpNorm earlier as returning sVec4HP; same symbol.
 extern "C" t4Vector cRailslideMotion_getRailUpNorm_AF28(char* p, const t4Vector& n) __asm__("cRailslideMotion_getRailUpNorm");
 extern "C" void fSinCos(float* s, float* c, float angle);
@@ -2366,7 +2366,7 @@ extern "C" void cRailslideMotion_step(char* self)
                     k = k + k;
                 else if (Abs_AF28(side) < 2.5f)
                     k = Min_AF28(k, -1.0f);
-                k *= 1.0f / (func_00149208(cBE_getInterface__Fv(cBE_getBE(), 3), *(int*)(RIDER_AF28 + 0x86C), *(int*)(RIDER_AF28 + 0xB34)) * 1.650076150894165f + 1.0f);
+                k *= 1.0f / (cBEStatInterface_getBalanceAttrib(cBE_getInterface__Fv(cBE_getBE(), 3), *(int*)(RIDER_AF28 + 0x86C), *(int*)(RIDER_AF28 + 0xB34)) * 1.650076150894165f + 1.0f);
             }
             float clampedSide = side;
             if (k >= 0.0f)
@@ -3176,7 +3176,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_getBoostForce);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
-extern "C" float func_001493D8(void* self, int rider, int value);
+extern "C" float cBEStatInterface_getAccelerationAttrib(void* self, int rider, int value);
 extern "C" float func_0031C228(float x);
 int cRiderAnimBase_getCurrentAnimID(void* anim, int n);
 
@@ -3308,7 +3308,7 @@ extern "C" float cGroundMotion_getBoostForce(cGroundMotion* self, char* snow)
     float boostDelta = speed < 1111.111083984375f ? speed : 1111.111083984375f;
     if (0.0f < boostDelta)
     {
-        func_001493D8(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER + 0x86C), *(int*)(RIDER + 0xB34));
+        cBEStatInterface_getAccelerationAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER + 0x86C), *(int*)(RIDER + 0xB34));
         float getGoingFactor = cRiderAnimBase_getCurrentAnimID(*(void**)(RIDER + 0x784), 2) == 22 ? 0.20000000298023224f : 0.0f;
         int st = *(int*)(RIDER + 0x434);
         if (st == 11 || st == 12 || st == 13)
@@ -3326,9 +3326,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_getSlipForce);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
-extern "C" float func_001494C0(void* self, int rider, int value);
-extern "C" float func_001493D8(void* self, int rider, int value);
-extern "C" float func_00148D80(void* self, int rider, int value);
+extern "C" float cBEStatInterface_getSpeedAttrib(void* self, int rider, int value);
+extern "C" float cBEStatInterface_getAccelerationAttrib(void* self, int rider, int value);
+extern "C" float cBEStatInterface_getBrakingAttrib(void* self, int rider, int value);
 
 struct sCurvePt_13CCF0 { float x, y; };
 
@@ -3405,9 +3405,9 @@ extern "C" float cGroundMotion_getSlipForce(cGroundMotion* self, sHpCfg_13CCF0* 
 {
     float one = 1.0f;
     float spd = hpAbs_13CCF0(*(float*)(RIDER + 0x214));
-    func_001494C0(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER + 0x86C), *(int*)(RIDER + 0xB34));
-    float accelFactor = one / (func_001493D8(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER + 0x86C), *(int*)(RIDER + 0xB34)) * 0.31941401958465576f + one);
-    float brakeFactor = func_00148D80(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER + 0x86C), *(int*)(RIDER + 0xB34)) * 0.46218693256378174f + one;
+    cBEStatInterface_getSpeedAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER + 0x86C), *(int*)(RIDER + 0xB34));
+    float accelFactor = one / (cBEStatInterface_getAccelerationAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER + 0x86C), *(int*)(RIDER + 0xB34)) * 0.31941401958465576f + one);
+    float brakeFactor = cBEStatInterface_getBrakingAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(RIDER + 0x86C), *(int*)(RIDER + 0xB34)) * 0.46218693256378174f + one;
     float slipCurve = hpCurve_13CCF0(cfg, hpAbs_13CCF0(forwardVel) * 0.035999998450279236f);
     float speedBlend = hpClamp_13CCF0(hpAbs_13CCF0(forwardVel) / 1666.666748046875f, 0.0f, 1.0f);
     slipCurve = slipCurve * (one * (accelFactor * (1.0f - speedBlend) + one * speedBlend));
@@ -3437,7 +3437,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_getDigForce);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
-extern "C" void func_00148E68(void* iface, int rider, int b);
+extern "C" void cBEStatInterface_getEdgingAttrib(void* iface, int rider, int b);
 
 struct sCurvePt_13D028 { float x, y; };
 extern sCurvePt_13D028* D_004A1140;
@@ -3480,7 +3480,7 @@ static inline float hpCurve_13D028(const sCurvePt_13D028* p, float x)
  * Zero unless the lean and the sideways velocity have opposite signs. Otherwise it is the sideways velocity
  * times |lean|, times the curve D_004A1140 at the forward speed in km/h (|b| * 0.036), times -(snow +0x8) so
  * a positive factor opposes the slide, divided by (1 + 4.0 * mBoostStrength) while boosting. The stat
- * func_00148E68() is read but unused.
+ * cBEStatInterface_getEdgingAttrib() is read but unused.
  *
  * @param snow  the surface data (SurfPropCache entry read as floats; On Tour tSurfData* snow)
  * @param dv  the sideways velocity relative to the ground (along mGroundSide)
@@ -3504,7 +3504,7 @@ extern "C" float cGroundMotion_getDigForce(cGroundMotion* self, float* snow, flo
     }
     dv = dv * hpCurve_13D028(D_004A1140, hpAbs_13D028(sv) * 0.035999998450279236f);
     dv = dv * -snow[2];
-    func_00148E68(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)((char*)self->mRider + 0x86C), *(int*)((char*)self->mRider + 0xB34));
+    cBEStatInterface_getEdgingAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)((char*)self->mRider + 0x86C), *(int*)((char*)self->mRider + 0xB34));
     float boostStrength = *(float*)((char*)self->mRider + 0x2FC);
     float one = 1.0f;
     if (0.0f < boostStrength)
@@ -3854,8 +3854,8 @@ extern sCurvePt_13D818* D_004A1158;
 extern "C" float cGroundMotion_getSnowForce_13D818(void* self, sSurf_13D818* e, float h, float vn, float dt) __asm__("cGroundMotion_getSnowForce");
 extern float cGroundMotion_getBoostForce_D818(void* self, sSurf_13D818* e) __asm__("cGroundMotion_getBoostForce");
 extern "C" float cGroundMotion_getSlipForce_13D818(void* self, sSurf_13D818* e, float a, float b) __asm__("cGroundMotion_getSlipForce");
-// PORT: func_00148E68 is declared void in this unit; this caller uses its float result.
-extern "C" float func_00148E68_f(void* iface, int rider, int b) __asm__("func_00148E68");
+// PORT: cBEStatInterface_getEdgingAttrib is declared void in this unit; this caller uses its float result.
+extern "C" float cBEStatInterface_getEdgingAttrib_f(void* iface, int rider, int b) __asm__("cBEStatInterface_getEdgingAttrib");
 extern "C" void cRider_rotateOrientation(cRider* self, const t4Vector& axis, float angle);
 extern "C" float fCos(float a);
 extern "C" float func_0031C128(float x);
@@ -4234,7 +4234,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
 
     float lo = curve_13D818(D_004A1148, spd * 0.035999998450279236f);
     float hi = curve_13D818(D_004A1150, spd * 0.035999998450279236f);
-    float k = func_00148E68_f(cBE_getInterface_Fv(cBE_getBE(), 3), self->mRider->mAIIndex, self->mRider->mStatsIndex);
+    float k = cBEStatInterface_getEdgingAttrib_f(cBE_getInterface_Fv(cBE_getBE(), 3), self->mRider->mAIIndex, self->mRider->mStatsIndex);
     float curveRange = hi - lo;
     float sinBank, c;
     fSinCos(&sinBank, &c, snow->m0C * (lo + (k * curveRange + curveRange)) * 0.01745329424738884f * lean);

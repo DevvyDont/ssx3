@@ -279,7 +279,7 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onInputAlways);
 // PORT: cUIState_onInputAlways__FPv is called with (self, widget) here; bind the 2-arg form to that symbol.
 void cUIState_onInputAlways_2(void* self, void* w) __asm__("cUIState_onInputAlways__FPv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-int func_00150E50(void* iface, int level);
+int cBEEconInterface_getAttribCost(void* iface, int level);
 extern "C" void cFEStateBuyAttrib_updateTotalCost(void* self);
 extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(void* self);
 extern char str_AttribMenu[];
@@ -327,7 +327,7 @@ static inline void playFrame_4C30(sBuyAttrib_4C30* s, char* name)
  *
  * Works on the row selected in "AttribMenu". Left (input slot 19) takes back one of the points bought this
  * visit (0x84); right (slot 20) adds one while the level (0x68) is below 11, the bank covers the new total
- * and the points stay below (level + 1) * 5. A point costs func_00150E50(level - 1). A change plays "hl left"
+ * and the points stay below (level + 1) * 5. A point costs cBEEconInterface_getAttribCost(level - 1). A change plays "hl left"
  * or "hl right" with UI sound 1; nothing to take back, level 11 or too little money plays sound 4, while a
  * point at the level boundary is refused silently. Either key refreshes the bars. Nothing happens while the
  * prompt flag (0xA8) is set.
@@ -348,7 +348,7 @@ extern "C" void cFEStateBuyAttrib_onInputAlways(sBuyAttrib_4C30* self, char* w)
             changed = 1;
             if (*cnt > 0) {
                 (*cnt)--;
-                self->cost -= func_00150E50(iface, self->level[idx] - 1);
+                self->cost -= cBEEconInterface_getAttribCost(iface, self->level[idx] - 1);
                 cFEStateBuyAttrib_updateTotalCost(self);
                 playFrame_4C30(self, str_hl_left_b);
             } else {
@@ -360,13 +360,13 @@ extern "C" void cFEStateBuyAttrib_onInputAlways(sBuyAttrib_4C30* self, char* w)
                 int* level = self->level;
                 int* lvl = &level[idx];
                 changed = 1;
-                int total = func_00150E50(iface, *lvl - 1) + self->cost;
+                int total = cBEEconInterface_getAttribCost(iface, *lvl - 1) + self->cost;
                 if (*lvl < 11 && total <= self->bank) {
                     int* bought = self->bought;
                     int* cnt = &bought[idx];
                     if (self->max4C[idx] + *cnt < (*lvl + 1) * 5) {
                         (*cnt)++;
-                        self->cost += func_00150E50(iface, *lvl - 1);
+                        self->cost += cBEEconInterface_getAttribCost(iface, *lvl - 1);
                         cFEStateBuyAttrib_updateTotalCost(self);
                         playFrame_4C30(self, str_hl_right_b);
                     }
@@ -441,7 +441,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-int func_00150E50(void* iface, int level);
+int cBEEconInterface_getAttribCost(void* iface, int level);
 extern char str_costpct_d[];
 struct sVE4FC0 {
     short delta;
@@ -452,7 +452,7 @@ struct sVE4FC0 {
 /**
  * Shows the price of one more point for each of the seven attributes in its "cost%d" text.
  *
- * The price is func_00150E50(level - 1) for the attribute's level (0x68), formatted by getDollarString(); at
+ * The price is cBEEconInterface_getAttribCost(level - 1) for the attribute's level (0x68), formatted by getDollarString(); at
  * level 11 or more the text is hidden instead (setVisible(0), vtable slot 9).
  */
 extern "C" void cFEStateBuyAttrib_updateCostPerLevel(void* self)
@@ -465,7 +465,7 @@ extern "C" void cFEStateBuyAttrib_updateCostPerLevel(void* self)
         sprintf(buf, str_costpct_d, i);
         cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x48), GetHashValue32(buf));
         if (text != 0) {
-            cUIText_setAsciiString(text, getDollarString(func_00150E50(iface, *levels - 1)));
+            cUIText_setAsciiString(text, getDollarString(cBEEconInterface_getAttribCost(iface, *levels - 1)));
             if (*levels >= 11) {
                 sVE4FC0* vt = *(sVE4FC0**)((char*)text + 8);
                 vt[9].fn((char*)text + vt[9].delta, 0);
@@ -602,7 +602,7 @@ extern "C" void cFEStateBuyAttrib_updateCostPerLevel(void* self);
 extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(void* self);
 extern "C" void cFEStateBuyAttrib_updateBank(void* self);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
-extern "C" int func_00150C20(void* iface, int a1, int charID, int attr);
+extern "C" int cBEEconInterface_buyAttribute(void* iface, int a1, int charID, int attr);
 extern char str_PopupGroup[];
 extern const int D_004780B0[];
 
@@ -644,7 +644,7 @@ struct sBuyAttrib_5300 {
  *
  * Takes the total cost (+0xA0) from the bank (+0xA4) and zeroes it (cFEStateBuyAttrib_updateTotalCost), clears the
  * prompt flag (+0xA8), hides "PopupGroup" and focuses the attribute menu (+0xAC, vtable entry 7 with 1). For each of
- * the seven attributes it calls func_00150C20(BE interface 11, 0, character, D_004780B0[i]) once per point bought
+ * the seven attributes it calls cBEEconInterface_buyAttribute(BE interface 11, 0, character, D_004780B0[i]) once per point bought
  * (+0x84), then calls that interface's vtable entry 1; adds the bought points to the experience (+0x4C) and zeroes
  * them, and refreshes the levels, cost per level, experience display and bank. cFEStateBuyAttrib_onPopupEvent calls it
  * when the confirm popup closes with a yes.
@@ -665,7 +665,7 @@ extern "C" void cFEStateBuyAttrib_buyExperience(void* buyState)
     int* bought = self->bought;
     for (int i = 0; i < 7; i++) {
         for (int j = 0; j < self->bought[i]; j++) {
-            func_00150C20(iface, 0, cBELibrary_getCharacterID(0), D_004780B0[i]);
+            cBEEconInterface_buyAttribute(iface, 0, cBELibrary_getCharacterID(0), D_004780B0[i]);
         }
     }
     iface->vt[1].fn((char*)iface + iface->vt[1].delta);
@@ -1308,7 +1308,7 @@ extern "C" void cUIState_showObjSafe(void* self, char* name);
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" char* cBENewRaceInterface_getLocationName(void* race, int track);
-extern "C" int func_001456A0(void* race, int track, int mode);
+extern "C" int cBENewRaceInterface_getPlatinumGoal(void* race, int track, int mode);
 extern "C" char* func_0020A1A8(int time);
 extern char str_race_arrowup[];
 extern char str_race_arrowdown[];
@@ -1340,7 +1340,7 @@ struct sCareer_60E0 {
  * Shows "race_arrowup" while the scroll is above 0 and "race_arrowdown" while rows remain below; "race_medals" reads
  * "%d / %d" (owned +0x5C of the total +0x58). Each row gets its peak number (D_004780F0 + 1), the location name
  * (cBENewRaceInterface_getLocationName of D_004780D0; "%s Race" with the mode-4 time for every third event, else the
- * mode-0 time), the best time formatted by func_0020A1A8 (func_001456A0) and the "race_medal%d" icon when bit idx of
+ * mode-0 time), the best time formatted by func_0020A1A8 (cBENewRaceInterface_getPlatinumGoal) and the "race_medal%d" icon when bit idx of
  * +0x60 is set; rows past the total are hidden.
  *
  * @param vself  the career-stats state
@@ -1380,10 +1380,10 @@ extern "C" void cFEStateCareerStats_setupRacePlatinumMedalsList(void* vself)
             int raceTime;
             if (idx % 3 == 0) {
                 sprintf(text, str_pct_s_Race, cBENewRaceInterface_getLocationName(race, D_004780D0[idx]));
-                raceTime = func_001456A0(race, D_004780D0[idx], 4);
+                raceTime = cBENewRaceInterface_getPlatinumGoal(race, D_004780D0[idx], 4);
                 cUIText_setAsciiString(textWidget, text);
             } else {
-                raceTime = func_001456A0(race, D_004780D0[idx], 0);
+                raceTime = cBENewRaceInterface_getPlatinumGoal(race, D_004780D0[idx], 0);
                 cUIText_setAsciiString(textWidget, cBENewRaceInterface_getLocationName(race, D_004780D0[idx]));
             }
             sprintf(text, str_timepct_d_b, i);
@@ -1427,8 +1427,8 @@ extern "C" void cUIState_showObjSafe(void* self, char* name);
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" char* cBENewRaceInterface_getLocationName(void* race, int track);
-extern "C" int func_001456A0(void* race, int track, int mode);
-extern "C" int func_00145870(void* game, int track);
+extern "C" int cBENewRaceInterface_getPlatinumGoal(void* race, int track, int mode);
+extern "C" int cBENewRaceInterface_getLocationDefaultGameEvent(void* game, int track);
 extern char str_fs_arrowup[];
 extern char str_fs_arrowdown[];
 extern char str_fs_medals[];
@@ -1456,7 +1456,7 @@ struct sCareer_6490 {
  * Fills the career-stats freestyle platinum medal list: five rows from the scroll position (+0x54).
  *
  * Like the race list with the "fs_" widgets: the peak number is idx / 4 + 1, the location name of D_00478110 ("%s Jam"
- * with the mode-5 score for every fourth event, else the score of the location's mode from func_00145870), the points
+ * with the mode-5 score for every fourth event, else the score of the location's mode from cBENewRaceInterface_getLocationDefaultGameEvent), the points
  * as "%d" and the medal icon by bit idx of +0x70; the counter reads +0x6C of +0x68.
  *
  * @param vself  the career-stats state
@@ -1500,10 +1500,10 @@ extern "C" void cFEStateCareerStats_setupFSPlatinumMedalsList(void* vself)
             if (idx % 4 == 0) {
                 sprintf(text, str_pct_s_Jam, cBENewRaceInterface_getLocationName(race, D_00478110[idx]));
                 cUIText_setAsciiString(textWidget, text);
-                eventPoints = func_001456A0(race, D_00478110[idx], 5);
+                eventPoints = cBENewRaceInterface_getPlatinumGoal(race, D_00478110[idx], 5);
             } else {
                 cUIText_setAsciiString(textWidget, cBENewRaceInterface_getLocationName(race, D_00478110[idx]));
-                eventPoints = func_001456A0(race, D_00478110[idx], func_00145870(race, D_00478110[idx]));
+                eventPoints = cBENewRaceInterface_getPlatinumGoal(race, D_00478110[idx], cBENewRaceInterface_getLocationDefaultGameEvent(race, D_00478110[idx]));
             }
             sprintf(text, D_004A2138, eventPoints);
             sprintf(timeName, str_fs_pointspct_d, i);
@@ -1605,7 +1605,7 @@ struct sRidersBest_6890 {
     int pad40[5];               // 0x40
 };
 
-extern "C" sRidersBest_6890* func_00155288(void* iface, int a, int charId);
+extern "C" sRidersBest_6890* cBEScoreInterface_getPlayerBestStats(void* iface, int a, int charId);
 
 struct sCareerStats_6890 {
     char pad0[0x40];
@@ -1615,7 +1615,7 @@ struct sCareerStats_6890 {
 /**
  * Fills the rider's-best page with the best records of user 0's character and the location of each.
  *
- * The record block comes from func_00155288() on the score interface (8), profile 0. Knockouts, ubers, super
+ * The record block comes from cBEScoreInterface_getPlayerBestStats() on the score interface (8), profile 0. Knockouts, ubers, super
  * ubers and uber grinds show as "%d", handplants and airtime as "%d sec.", the longest rail as "%0.1f m."
  * (value / 100), each with "[location]" from the race interface; a record of 0 or less shows "-" and "- - -".
  * "favoriteEvent" shows the best combo (record 4) under the label kT_ovrcmnBestCombo, whose text widget is
@@ -1629,7 +1629,7 @@ extern "C" void cFEStateCareerStats_setupRidersBest(void* vself)
     char buf[112];
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* iface8 = cBE_getInterface_Fv(cBE_getBE(), 8);
-    sRidersBest_6890 best = *func_00155288(iface8, 0, cBELibrary_getCharacterID(0));
+    sRidersBest_6890 best = *cBEScoreInterface_getPlayerBestStats(iface8, 0, cBELibrary_getCharacterID(0));
     int value;
     int track;
 
@@ -1766,8 +1766,8 @@ INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_initTotalEventMedal);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 extern "C" int cBENewPlayerInterface_getHumanRider(void* player, int idx);
-extern "C" int func_00157B08(void* reward, int id, int n);
-extern "C" int func_00145870(void* game, int track);
+extern "C" int cBERewardInterface_isPeakLocked(void* reward, int id, int n);
+extern "C" int cBENewRaceInterface_getLocationDefaultGameEvent(void* game, int track);
 int cBENewPlayerInterface_getRiderCharID(void* self, int idx);
 int cBERewardInterface_getTrackMedal(void* self, int a, int charID, int mode, int track);
 extern int D_004780D0[];
@@ -1776,9 +1776,9 @@ extern int D_00478110[];
 /**
  * Counts the career-stats events and the platinum medals the human rider owns.
  *
- * For each peak not locked for the human rider (func_00157B08 returns 0; peaks 1 and 2 can be) adds 3, 3 or 2 race
+ * For each peak not locked for the human rider (cBERewardInterface_isPeakLocked returns 0; peaks 1 and 2 can be) adds 3, 3 or 2 race
  * events (+0x58) and 4 freestyle events (+0x68). Then for the 8 race events (D_004780D0; mode 4 for every third, else
- * 0) and the 12 freestyle events (D_00478110; mode 5 for every fourth, else func_00145870's mode) whose
+ * 0) and the 12 freestyle events (D_00478110; mode 5 for every fourth, else cBENewRaceInterface_getLocationDefaultGameEvent's mode) whose
  * cBERewardInterface_getTrackMedal is 0, sets bit i of +0x60 / +0x70 and counts +0x5C / +0x6C. All events are checked
  * whether or not their peak is counted.
  *
@@ -1791,15 +1791,15 @@ extern "C" void cFEStateCareerStats_initTotalEventMedal(void* vself)
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* game = cBE_getInterface_Fv(cBE_getBE(), 0);
     char charID = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
-    if (func_00157B08(reward, cBENewPlayerInterface_getHumanRider(player, 0), 0) == 0) {
+    if (cBERewardInterface_isPeakLocked(reward, cBENewPlayerInterface_getHumanRider(player, 0), 0) == 0) {
         *(int*)(self + 0x58) += 3;
         *(int*)(self + 0x68) += 4;
     }
-    if (func_00157B08(reward, cBENewPlayerInterface_getHumanRider(player, 0), 1) == 0) {
+    if (cBERewardInterface_isPeakLocked(reward, cBENewPlayerInterface_getHumanRider(player, 0), 1) == 0) {
         *(int*)(self + 0x58) += 3;
         *(int*)(self + 0x68) += 4;
     }
-    if (func_00157B08(reward, cBENewPlayerInterface_getHumanRider(player, 0), 2) == 0) {
+    if (cBERewardInterface_isPeakLocked(reward, cBENewPlayerInterface_getHumanRider(player, 0), 2) == 0) {
         *(int*)(self + 0x58) += 2;
         *(int*)(self + 0x68) += 4;
     }
@@ -1817,7 +1817,7 @@ extern "C" void cFEStateCareerStats_initTotalEventMedal(void* vself)
         if ((i & 3) == 0) {
             mode = 5;
         } else {
-            mode = func_00145870(game, D_00478110[i]);
+            mode = cBENewRaceInterface_getLocationDefaultGameEvent(game, D_00478110[i]);
         }
         char medal = cBERewardInterface_getTrackMedal(reward, 0, charID, mode, D_00478110[i]);
         if (medal == 0) {

@@ -338,7 +338,7 @@ void sti_003150F8(int init, int prio)
 extern "C" void* func_003150F8(int, int);
 
 //100%
-INCLUDE_ASM("animation/gameanimmap", func_003158B8);
+INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_getFrameRateFactor);
 #ifdef SKIP_ASM
 /**
  * Returns the rider animation's FrameRateFactor (the playback-rate factor copied into each sequence it starts).
@@ -346,12 +346,12 @@ INCLUDE_ASM("animation/gameanimmap", func_003158B8);
  * @param riderAnim  the cRiderAnimBase
  * @return FrameRateFactor
  */
-extern "C" float func_003158B8(void *riderAnim) {
+extern "C" float cRiderAnimBase_getFrameRateFactor(void *riderAnim) {
     return (*(float *)((char*)(riderAnim) + (0x1C)));
 }
 #endif
 //100%
-INCLUDE_ASM("animation/gameanimmap", func_003158C0);
+INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_getGraftingMask);
 #ifdef SKIP_ASM
 /**
  * Returns the rider animation's 64-bit GraftMask (the bone mask copied into each sequence it starts).
@@ -360,12 +360,12 @@ INCLUDE_ASM("animation/gameanimmap", func_003158C0);
  * @return GraftMask
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long func_003158C0(void *riderAnim) {
+extern "C" long cRiderAnimBase_getGraftingMask(void *riderAnim) {
     return (*(long *)((char*)(riderAnim) + (0x20)));
 }
 #endif
 //100%
-INCLUDE_ASM("animation/gameanimmap", func_003158C8);
+INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_getOrientationOffset);
 #ifdef SKIP_ASM
 /**
  * Returns the address of the rider animation's OrientationOffset (the tPose at +0x30).
@@ -373,12 +373,12 @@ INCLUDE_ASM("animation/gameanimmap", func_003158C8);
  * @param riderAnim  the cRiderAnimBase (passed as an int)
  * @return @p riderAnim + 0x30
  */
-extern "C" int func_003158C8(int riderAnim) {
+extern "C" int cRiderAnimBase_getOrientationOffset(int riderAnim) {
     return riderAnim + 0x30;
 }
 #endif
 //100%
-INCLUDE_ASM("animation/gameanimmap", func_003158D0);
+INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_isFlipped);
 #ifdef SKIP_ASM
 /**
  * Returns the rider animation's IsFlipped flag (mirrored animations).
@@ -386,27 +386,27 @@ INCLUDE_ASM("animation/gameanimmap", func_003158D0);
  * @param riderAnim  the cRiderAnimBase
  * @return IsFlipped
  */
-extern "C" int func_003158D0(void *riderAnim) {
+extern "C" int cRiderAnimBase_isFlipped(void *riderAnim) {
     return (*(int *)((char*)(riderAnim) + (0x18)));
 }
 #endif
 //100%
-INCLUDE_ASM("animation/gameanimmap", func_003158D8);
+INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_setIsFlipped);
 #ifdef SKIP_ASM
 /**
  * Sets the rider animation's IsFlipped flag; only sequences started afterwards pick it up.
  *
- * func_00311D88 also changes the flag of the sequences already playing.
+ * cRiderAnimBase_changeIsFlipped also changes the flag of the sequences already playing.
  *
  * @param riderAnim  the cRiderAnimBase
  * @param isFlipped  nonzero to mirror the animations
  */
-extern "C" void func_003158D8(void *riderAnim, int isFlipped) {
+extern "C" void cRiderAnimBase_setIsFlipped(void *riderAnim, int isFlipped) {
     (*(int *)((char*)(riderAnim) + (0x18))) = isFlipped;
 }
 #endif
 //100%
-INCLUDE_ASM("animation/gameanimmap", func_003158E0);
+INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_setFrameRateFactor);
 #ifdef SKIP_ASM
 /**
  * Sets the rider animation's FrameRateFactor (the playback-rate factor copied into each sequence it starts).
@@ -414,12 +414,12 @@ INCLUDE_ASM("animation/gameanimmap", func_003158E0);
  * @param riderAnim  the cRiderAnimBase
  * @param fparg0  the new factor
  */
-extern "C" void func_003158E0(void *riderAnim, float fparg0) {
+extern "C" void cRiderAnimBase_setFrameRateFactor(void *riderAnim, float fparg0) {
     (*(float *)((char*)(riderAnim) + (0x1C))) = fparg0;
 }
 #endif
 //100%
-INCLUDE_ASM("animation/gameanimmap", func_003158E8);
+INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_setHeadingOffset);
 #ifdef SKIP_ASM
 #include "bx/math3d.h"
 extern "C" void fSinCos(float *, float *, float);
@@ -435,7 +435,7 @@ extern t4Vector t4vect_ZAxis;
  *
  * @param angle  the heading offset (applied with the opposite sign)
  */
-extern "C" void func_003158E8(void *self, float angle) {
+extern "C" void cRiderAnimBase_setHeadingOffset(void *self, float angle) {
     t4Vector rotation;
     float sinHalf;
     float cosHalf;
@@ -451,7 +451,7 @@ extern "C" void func_003158E8(void *self, float angle) {
 }
 #endif
 //100%
-INCLUDE_ASM("animation/gameanimmap", func_00315988);
+INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_setOrientationOffset);
 #ifdef SKIP_ASM
 /**
  * Copies the 32-byte pose @p offset (position, rotation) into the rider animation's OrientationOffset (+0x30).
@@ -460,13 +460,13 @@ INCLUDE_ASM("animation/gameanimmap", func_00315988);
  * @param offset  the new orientation offset (tPose)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_00315988(void *riderAnim, void *offset) {
+extern "C" void cRiderAnimBase_setOrientationOffset(void *riderAnim, void *offset) {
     (*(long long *)((char*)(riderAnim) + (0x30))) = (long long) (*(long long *)((char*)(offset) + (0)));
     (*(long long *)((char*)(riderAnim) + (0x40))) = (long long) (*(long long *)((char*)(offset) + (0x10)));
 }
 #endif
 //100%
-INCLUDE_ASM("animation/gameanimmap", func_003159A0);
+INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_setGraftingMask);
 #ifdef SKIP_ASM
 /**
  * Sets the rider animation's 64-bit GraftMask (the bones the sequences it starts may drive).
@@ -475,12 +475,12 @@ INCLUDE_ASM("animation/gameanimmap", func_003159A0);
  * @param graftMask  the new mask
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_003159A0(void *riderAnim, long graftMask) {
+extern "C" void cRiderAnimBase_setGraftingMask(void *riderAnim, long graftMask) {
     (*(long *)((char*)(riderAnim) + (0x20))) = graftMask;
 }
 #endif
 //100%
-INCLUDE_ASM("animation/gameanimmap", func_003159A8);
+INCLUDE_ASM("animation/gameanimmap", cRiderAnimBase_clearGraftingMask);
 #ifdef SKIP_ASM
 /**
  * Resets the rider animation's GraftMask to -1 (all bits set: no bone is excluded).
@@ -488,12 +488,12 @@ INCLUDE_ASM("animation/gameanimmap", func_003159A8);
  * @param riderAnim  the cRiderAnimBase
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_003159A8(void *riderAnim) {
+extern "C" void cRiderAnimBase_clearGraftingMask(void *riderAnim) {
     (*(long *)((char*)(riderAnim) + (0x20))) = -1;
 }
 #endif
 //100%
-INCLUDE_ASM("animation/gameanimmap", func_003159B8);
+INCLUDE_ASM("animation/gameanimmap", tEventFlags_clear);
 #ifdef SKIP_ASM
 /**
  * Clears bit @p bit of the first 64-bit word of @p bits and, if it was set, sets it in the second word.
@@ -505,7 +505,7 @@ INCLUDE_ASM("animation/gameanimmap", func_003159B8);
  * @param bit  the bit number, 0-63
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_003159B8(long* bits, int bit)
+extern "C" void tEventFlags_clear(long* bits, int bit)
 {
     long old = bits[0];
     long mask = (long)1 << bit;
@@ -514,17 +514,17 @@ extern "C" void func_003159B8(long* bits, int bit)
 }
 #endif
 //100%
-INCLUDE_ASM("animation/gameanimmap", func_003159E8);
+INCLUDE_ASM("animation/gameanimmap", tEventFlags_isSet);
 #ifdef SKIP_ASM
 /**
- * Returns whether bit @p bit of the first 64-bit word of @p bits is set (see func_003159B8).
+ * Returns whether bit @p bit of the first 64-bit word of @p bits is set (see tEventFlags_clear).
  *
  * @param bits  the event flag words
  * @param bit  the bit number, 0-63
  * @return true when the bit is set
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" bool func_003159E8(long* bits, int bit)
+extern "C" bool tEventFlags_isSet(long* bits, int bit)
 {
     long mask = (long)1 << bit;
     return (*bits & mask) != 0;

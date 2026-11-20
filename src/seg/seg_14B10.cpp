@@ -1928,7 +1928,7 @@ extern "C" void cRiderAnimBase_blendOutAll(void* anim, int layer, float t);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 int cRiderAnimBase_getCurrentAnimID(void* anim, int layer);
 struct cAnimSequence;
-void cAnimSequence_fadeWeight(cAnimSequence* seq, float a, float b);
+void cAnimSequence_fadeWeight(cAnimSequence* seq, float targetWeight, float time);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline t4Vector GetSide_163B0(cRider* rider)

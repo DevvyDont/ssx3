@@ -37,7 +37,7 @@ CHECK_SIZE(tStringData, 0xC);
 
 struct cBXString {
     char* Str;          // 0x000 [O] Str; [R] cBXString_Realloc stores the block + 0xC; [U] every method reads it as the
-                        //       text (strchr in cBXString_FindFirstOf/FindLastOf, the copies in cBXString_concatCopy)
+                        //       text (strchr / strrchr in cBXString_find / cBXString_reverseFind, the copies in cBXString_concatCopy)
 #ifdef __cplusplus
     // EA's class has user-declared constructors (here the out-of-line ones are the cBXString_cBXString* functions,
     // called explicitly). Declaring them keeps the type non-POD, as in EA's source: g++ 2.95 lays out non-POD locals

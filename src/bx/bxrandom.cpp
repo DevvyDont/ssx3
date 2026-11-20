@@ -132,7 +132,7 @@ extern void* D_0048DCB0[];
 extern "C" void* MEM_copy(void*, void*, int);
 
 //100%
-INCLUDE_ASM("bx/bxrandom", func_00317930__FPv);
+INCLUDE_ASM("bx/bxrandom", cRandom_init__FPv);
 #ifdef SKIP_ASM
 /**
  * Resets a random generator's six-word state to the fixed default state D_0048DCB0 (MEM_copy of 0x18 bytes).
@@ -141,7 +141,7 @@ INCLUDE_ASM("bx/bxrandom", func_00317930__FPv);
  *
  * @return MEM_copy's result (@p self)
  */
-void* func_00317930(void* self)
+void* cRandom_init(void* self)
 {
     return MEM_copy(self, (void*)D_0048DCB0, 0x18);
 }

@@ -678,7 +678,7 @@ int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void* cBEAggressionInterface_getThis();
-extern "C" void func_00155E58(void* p);
+extern "C" void cBEAggressionInterface_regressAggression(void* p);
 extern "C" void cBXLoadIndicator_Hide(void* hud, int a);
 extern "C" void cOVStateManager_triggerFinishOverlay();
 extern "C" void cGameState_gotoNextState(void* self);
@@ -785,7 +785,7 @@ public:
  * object is longer than 277.78 (a function-local static float); also waits while the race mode is not 4 and the game
  * mode manager has +0x98 set and +0x9C clear. Then it builds and readies NIS list 0 with the end-event sequence
  * (cSSXScriptEngine_AppendEndEventSequence()), sets mNextState (+0x0) to 12 when the list is not empty, calls
- * func_00155E58() on the aggression interface in race mode 0, and moves to sub-state 1. Sub-state 1: once the NIS list
+ * cBEAggressionInterface_regressAggression() on the aggression interface in race mode 0, and moves to sub-state 1. Sub-state 1: once the NIS list
  * is no longer playing (state 1), calls "finishov"'s handleEvent with (1, 0), hides load indicator bit 4 and moves to
  * 2. Sub-state 2: calls cGameState_gotoNextState() when the race's mode (+0x48) is 4 and its +0x49 flag is clear.
  * update slot of vtable D_0047D5E0.
@@ -840,7 +840,7 @@ extern "C" void cGFFinishlineState_update(void* self)
         }
         sRace_233CD8* rc2 = &(*(sRace_233CD8*)&cBENewRaceInterface_newRace);
         if (rc2->mode48 == 0) {
-            func_00155E58(cBEAggressionInterface_getThis());
+            cBEAggressionInterface_regressAggression(cBEAggressionInterface_getThis());
         }
         *(int*)(stateBytes + 0x10) = 1;
         break;
@@ -1269,7 +1269,7 @@ extern "C" void cAI_setRaceRankType(void* p, int a);
 extern "C" void cWScriptMan_purgeMissions(void* a);
 extern "C" void cWScriptMan_setupMissions(void* a);
 extern "C" void cAI_updateAnimation(void* p);
-extern "C" void func_00155E58(void* p);
+extern "C" void cBEAggressionInterface_regressAggression(void* p);
 extern void* cGameState_mpGame;
 extern void* cWScriptMan_TheWScriptMan;
 
@@ -1336,7 +1336,7 @@ extern "C" void cGFEventStartState_loseFocus(void* self)
     cAI_updateAnimation(*(void**)((char*)cGameState_mpGame + 0xC));
     cBERaceDB* raceDB = &(*(&cBENewRaceInterface_newRace));
     if (raceDB->cGamePath != 0)
-        func_00155E58(cBEAggressionInterface_getThis());
+        cBEAggressionInterface_regressAggression(cBEAggressionInterface_getThis());
     *(int*)((char*)self + 0x14) = 0;
     char* game = (char*)SSXApp->Game;
     char* x = *(char**)(game + 0x84);

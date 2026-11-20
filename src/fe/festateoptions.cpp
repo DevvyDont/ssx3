@@ -622,7 +622,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onPopupEvent);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_0014F4F8(void* iface);
+extern "C" void cBEOptionInterface_defaultGame(void* iface);
 extern "C" void cFEStateOptionsGame_updateWidget(void* self);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0029ED90(void* p, int a);
@@ -677,7 +677,7 @@ static inline sGameCfg_189610 Cfg_189610()
  *
  * Event 21 does nothing. On event 22 the popup's answer is its virtual slot 23 (getData) with 2, nonzero meaning
  * accepted, and the popup is told apart by its mHashName (+0xC):
- * - "111resetopts" accepted: resets the game options to their defaults (func_0014F4F8), sets the changed flag
+ * - "111resetopts" accepted: resets the game options to their defaults (cBEOptionInterface_defaultGame), sets the changed flag
  *   D_004A14D0, refreshes the widgets (cFEStateOptionsGame_updateWidget) and reloads the language audio (func_0029ED90 on cAudioInterface_bxAudio's
  *   gSSXAudio, restart 1).
  * - "24screen_position" accepted: stores the popup's getData(0) and getData(1) into bytes 6 and 5 (f6, f5) of
@@ -699,7 +699,7 @@ extern "C" void cFEStateOptionsGame_onPopupEvent(void* self, char* popup, int ev
     case 22:
         if (Is_189610(*(int*)(popup + 0xC), str_111resetopts)) {
             if (GetOpt_189610(popup, 2)) {
-                func_0014F4F8(iface);
+                cBEOptionInterface_defaultGame(iface);
                 D_004A14D0 = 1;
                 cFEStateOptionsGame_updateWidget(self);
                 func_0029ED90(cAudioInterface_bxAudio(), 1);
@@ -721,7 +721,7 @@ extern "C" void cFEStateOptionsGame_onPopupEvent(void* self, char* popup, int ev
             }
         } else if (*(int*)(popup + 0xC) == 27) {
             if (GetOpt_189610(popup, 2)) {
-                func_0014F4F8(iface);
+                cBEOptionInterface_defaultGame(iface);
                 D_004A14D0 = 1;
                 cFEStateOptionsGame_updateWidget(self);
             }
@@ -1140,7 +1140,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_onPopupEvent);
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_0014F458(void* iface);
+extern "C" void cBEOptionInterface_defaultSound(void* iface);
 extern "C" void cFEStateOptionsSound_setSoundMode(void* self, unsigned int mode);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00287410(void* snd, int v);
@@ -1193,7 +1193,7 @@ static inline sSndCfg_18A3D8 Cfg_18A3D8()
  * them.
  *
  * Only event 22 from the popup hashed "111resetopts" does anything. When the popup's virtual slot 23 (getData) with 2
- * is nonzero it resets the sound options (func_0014F458, the sound step of cBEOptionInterface_revert), switches the
+ * is nonzero it resets the sound options (cBEOptionInterface_defaultSound, the sound step of cBEOptionInterface_revert), switches the
  * speaker mode to bits 12-13 (`output`) with cFEStateOptionsSound_setSoundMode, re-applies the effects, speech and music volumes
  * (func_00287410, func_00287488, func_00287520 on gSSXAudio), bit 17 (`f17`) through cSSXAudio_SetArcadeSFX and bit 16
  * (`f16`) through func_002875D0, and refreshes the widgets with cFEStateOptionsSound_updateWidget.
@@ -1212,7 +1212,7 @@ extern "C" void cFEStateOptionsSound_onPopupEvent(void* self, char* popup, int e
     case 22:
         if (Is_18A3D8(*(int*)(popup + 0xC), str_111resetopts)) {
             if (GetOpt_18A3D8(popup, 2)) {
-                func_0014F458(iface);
+                cBEOptionInterface_defaultSound(iface);
                 cFEStateOptionsSound_setSoundMode(self, D_00535610_18A3D8.output);
                 func_00287410(cAudioInterface_bxAudio(), Cfg_18A3D8().sfxVol);
                 func_00287488(cAudioInterface_bxAudio(), Cfg_18A3D8().speechVol);
@@ -1788,14 +1788,14 @@ extern int D_004A14D8;
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_0014F600(void* self);
+extern "C" void cBEOptionInterface_defaultHUD(void* self);
 extern "C" void cFEStateOptionsHUD_updateWidget(void* self);
 
 /**
  * Handles the HUD options screen's reset popup: on acceptance it restores the default HUD options.
  *
  * Only event 22 from the popup hashed "111resetopts" does anything: when the popup's virtual slot 23 (getData) with 2
- * is nonzero it resets the HUD options (func_0014F600, the HUD step of cBEOptionInterface_revert, on cBE interface 4),
+ * is nonzero it resets the HUD options (cBEOptionInterface_defaultHUD, the HUD step of cBEOptionInterface_revert, on cBE interface 4),
  * refreshes the menu (cFEStateOptionsHUD_updateWidget) and sets the HUD changed flag D_004A14D8.
  *
  * @param widget  the popup state (despite the name); its mHashName (+0xC) is checked
@@ -1812,7 +1812,7 @@ extern "C" void cFEStateOptionsHUD_onPopupEvent(void* self, void* widget, int ms
         if (popupHash == GetHashValue32(str_111resetopts)) {
             sVE_18C1B8* getDataEntry = &(*(sVE_18C1B8**)((char*)widget + 8))[23];
             if (getDataEntry->fn((char*)widget + getDataEntry->delta, 2) != 0) {
-                func_0014F600(iface);
+                cBEOptionInterface_defaultHUD(iface);
                 cFEStateOptionsHUD_updateWidget(self);
                 D_004A14D8 = 1;
             }
@@ -2228,9 +2228,9 @@ extern "C" void func_0039E318(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
-extern "C" void func_00147528(void* self, int index, int value);
-extern "C" void func_00147658(void* self, int index, int value);
-extern "C" int func_001474E8(void* iface, int a1);
+extern "C" void cBENewPlayerInterface_setUseDualShock(void* self, int index, int value);
+extern "C" void cBENewPlayerInterface_setControllerMapping(void* self, int index, int value);
+extern "C" int cBENewPlayerInterface_getUseDualShock(void* iface, int a1);
 extern "C" void cFEStateOptionsController_displayPadConfig(void* self, int on);
 extern "C" void cFEStateOptionsController_vibratePad(void* self, int idx, float x, float y);
 extern char str_cFEPopupOptionReset[];
@@ -2262,10 +2262,10 @@ static inline int Is_0018CA10(int id, char* s) { return id == GetHashValue32(s);
  * virtual slot 1 of the player interface (cBE interface 1) and pushes the state that virtual slot 5 of the engine's
  * custom interface (engine + 0x0) returns for the widget's mMiscData.
  *
- * Event 9 (a value changed): "1lb" and "2lb" set pad 0's or pad 1's vibration flag (func_00147528) to the chosen entry;
- * when the flag reads back set (func_001474E8) the pad buzzes (cFEStateOptionsController_vibratePad with 10, 10), its timer (+0x48 for pad 0,
+ * Event 9 (a value changed): "1lb" and "2lb" set pad 0's or pad 1's vibration flag (cBENewPlayerInterface_setUseDualShock) to the chosen entry;
+ * when the flag reads back set (cBENewPlayerInterface_getUseDualShock) the pad buzzes (cFEStateOptionsController_vibratePad with 10, 10), its timer (+0x48 for pad 0,
  * +0x4C for pad 1) is set to 60 and its bit (1 or 2) is set in +0x50 so cFEStateOptionsController_onUpdate stops it later; otherwise its
- * motors are set to 0. "3lb" and "4lb" store pad 0's or pad 1's button layout (func_00147658) and show the default or
+ * motors are set to 0. "3lb" and "4lb" store pad 0's or pad 1's button layout (cBENewPlayerInterface_setControllerMapping) and show the default or
  * pro layout picture (cFEStateOptionsController_displayPadConfig with entry data == 0). Every event 9 sets the controller changed flag D_004A14DC.
  *
  * @param widget  the widget the event is for (null: nothing happens)
@@ -2299,8 +2299,8 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(char* self, char* widget
     }
     case 9:
         if (Is_0018CA10(*(int*)(widget + 0x38), str_1lb)) {
-            func_00147528(iface, 0, cUIListBox_getCurrentEntryData(widget) != 0);
-            if (func_001474E8(iface, 0)) {
+            cBENewPlayerInterface_setUseDualShock(iface, 0, cUIListBox_getCurrentEntryData(widget) != 0);
+            if (cBENewPlayerInterface_getUseDualShock(iface, 0)) {
                 cFEStateOptionsController_vibratePad(self, 0, 10.0f, 10.0f);
                 *(int*)(self + 0x48) = 0x3C;
                 *(unsigned char*)(self + 0x50) |= 1;
@@ -2308,8 +2308,8 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(char* self, char* widget
                 cFEStateOptionsController_vibratePad(self, 0, 0.0f, 0.0f);
             }
         } else if (Is_0018CA10(*(int*)(widget + 0x38), str_2lb)) {
-            func_00147528(iface, 1, cUIListBox_getCurrentEntryData(widget) != 0);
-            if (func_001474E8(iface, 1)) {
+            cBENewPlayerInterface_setUseDualShock(iface, 1, cUIListBox_getCurrentEntryData(widget) != 0);
+            if (cBENewPlayerInterface_getUseDualShock(iface, 1)) {
                 cFEStateOptionsController_vibratePad(self, 1, 10.0f, 10.0f);
                 *(int*)(self + 0x4C) = 0x3C;
                 *(unsigned char*)(self + 0x50) |= 2;
@@ -2317,10 +2317,10 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(char* self, char* widget
                 cFEStateOptionsController_vibratePad(self, 1, 0.0f, 0.0f);
             }
         } else if (Is_0018CA10(*(int*)(widget + 0x38), str_3lb)) {
-            func_00147658(iface, 0, cUIListBox_getCurrentEntryData(widget));
+            cBENewPlayerInterface_setControllerMapping(iface, 0, cUIListBox_getCurrentEntryData(widget));
             cFEStateOptionsController_displayPadConfig(self, cUIListBox_getCurrentEntryData(widget) == 0);
         } else if (Is_0018CA10(*(int*)(widget + 0x38), str_4lb)) {
-            func_00147658(iface, 1, cUIListBox_getCurrentEntryData(widget));
+            cBENewPlayerInterface_setControllerMapping(iface, 1, cUIListBox_getCurrentEntryData(widget));
             cFEStateOptionsController_displayPadConfig(self, cUIListBox_getCurrentEntryData(widget) == 0);
         }
         D_004A14DC = 1;
@@ -2402,7 +2402,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_001474E8(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getUseDualShock(void* iface, int a1);
 extern "C" int cBENewPlayerInterface_getControllerMapping(void* iface, int a1);
 extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
@@ -2415,7 +2415,7 @@ extern char str_4lb[];
 /**
  * Sets the controller options lists from the current player settings.
  *
- * On mpScreen (+0x40), "1lb" and "2lb" get pad 0's and pad 1's vibration flag (func_001474E8), "3lb" and "4lb" their
+ * On mpScreen (+0x40), "1lb" and "2lb" get pad 0's and pad 1's vibration flag (cBENewPlayerInterface_getUseDualShock), "3lb" and "4lb" their
  * button layout (cBENewPlayerInterface_getControllerMapping on cBE interface 1); each list selects the entry whose data
  * matches (cUIListBox_getEntryByData, cUIListBox_setCurrentEntryByIndex). With "3lb" present it also shows pad 0's
  * layout picture (cFEStateOptionsController_displayPadConfig with layout == 0). Missing lists are skipped.
@@ -2429,12 +2429,12 @@ extern "C" void cFEStateOptionsController_updateWidget(void* self)
     unsigned char vals[4];
     void* listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_1lb));
     if (listBox != 0) {
-        cUIListBox_getEntryByData(listBox, func_001474E8(np, 0), &vals[0]);
+        cUIListBox_getEntryByData(listBox, cBENewPlayerInterface_getUseDualShock(np, 0), &vals[0]);
         cUIListBox_setCurrentEntryByIndex(listBox, vals[0]);
     }
     listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_2lb));
     if (listBox != 0) {
-        cUIListBox_getEntryByData(listBox, func_001474E8(np, 1), &vals[1]);
+        cUIListBox_getEntryByData(listBox, cBENewPlayerInterface_getUseDualShock(np, 1), &vals[1]);
         cUIListBox_setCurrentEntryByIndex(listBox, vals[1]);
     }
     listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_3lb));
@@ -2741,8 +2741,8 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_0039F190(void* list, int a1);
 extern "C" void cUIStateStack_push(void* list, void* item);
-extern "C" void func_00147138(void* self, int a1, const char* name);
-extern "C" void func_0014DE28(void* self, int c);
+extern "C" void cBENewPlayerInterface_setPlayerName(void* self, int a1, const char* name);
+extern "C" void cBE_newProfile(void* self, int c);
 extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFERider_purge(void* self);
 extern "C" int cFERider_init(void* self, int a1, int a2, int a3);
@@ -2768,7 +2768,7 @@ struct sVE_18D460p {
  *
  * Events 0xF and 0x10 store the answer (1 or 0) in the popup's misc data (+0x18) and pop the state stack.
  * Event 0x16 with a yes answer resets the player for the user (+0x44, at least 0) through back-end interface
- * 1 (func_00147138 with an empty name, then slot 1) and func_0014DE28, re-inits both front-end riders
+ * 1 (cBENewPlayerInterface_setPlayerName with an empty name, then slot 1) and cBE_newProfile, re-inits both front-end riders
  * (cFERider_init), pushes the state from the custom interface's slot 4 for (1 << +0x48) | 0x100 and plays
  * "TransitionOut".
  *
@@ -2797,10 +2797,10 @@ extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(char* self, char* widget, u
             sel = 0;
         }
         char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
-        func_00147138(iface, sel, D_004A1408);
+        cBENewPlayerInterface_setPlayerName(iface, sel, D_004A1408);
         sVE_18D460n* vt = *(sVE_18D460n**)(iface + 0xC);
         vt[1].fn(iface + vt[1].delta);
-        func_0014DE28(cBE_getBE(), sel);
+        cBE_newProfile(cBE_getBE(), sel);
         void* feRider = cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, 0);
         cFERider_purge(feRider);
         cFERider_init(feRider, 0, 4, 0);

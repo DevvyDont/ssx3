@@ -901,7 +901,7 @@ extern "C" float cSpinControl_getFlipSpinInputAng(void* p, int* fail);
 extern "C" float cSpinControl_getFlipSpinAng(void* p, int* fail);
 extern "C" float cSpinControl_getInvertScale(void* p);
 extern "C" float cSpinControl_getOffAxisScale(void* p);
-extern "C" int func_00150960(void* iface, int a);
+extern "C" int cBEEconInterface_getMoney1(void* iface, int a);
 extern "C" void cSSXAudio_PointsEvent(void* audio, void* rider, int points);
 extern "C" void cSSXAudio_StartUberSpin(void* audio, void* rider);
 extern "C" void cSSXAudio_EndUberSpin(void* audio, void* rider);
@@ -1313,7 +1313,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(void* vself)
     void* stats = cBE_getInterface_Fv(cBE_getBE(), 11);
     char* obj = (char*)self->rider + 0x6C0;
     sVE_117FE0* vt = *(sVE_117FE0**)obj;
-    int moneyTotal = func_00150960(stats, vt[7].fn(obj + vt[7].delta));
+    int moneyTotal = cBEEconInterface_getMoney1(stats, vt[7].fn(obj + vt[7].delta));
     func_001171A8_f(&self->slots[25], 25, moneyTotal, 0.0f, 0);
     if (!slotFree_117FE0(&self->slots[4])) {
         int have = self->slots[4].f14;
@@ -2324,7 +2324,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evAddCash);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_001E3760(int id, int amount);
-extern "C" void func_001597B0(void* iface, int id, int amount);
+extern "C" void cBERewardInterface_awardUserCash(void* iface, int id, int amount);
 int cRiderMetrix_addHUDfx1_i(void* self, int type, int value, int arg, float duration) __asm__("cRiderMetrix_addHUDfx1");
 
 struct sVE119EF8 {
@@ -2354,7 +2354,7 @@ float cRiderMetrix_evAddCash_impl(char* self, unsigned int kind, int amount) __a
  *
  * Does nothing for 0, or while the replay is in a playback state (State 1 to 9). Otherwise it checks the
  * earnings unlocks (func_001E3760) and credits the money through the back end's reward interface
- * (func_001597B0), both for the rider's AI index (being slot 7), then posts the total flash (0x18, 0.7 s)
+ * (cBERewardInterface_awardUserCash), both for the rider's AI index (being slot 7), then posts the total flash (0x18, 0.7 s)
  * and, by @p kind, popup 0x2F (0), 0x2E (1), 0x30 (2, data = the combo count at +0x9C) for 2.5 s or 0x31 (3,
  * data = the amount) for 1.5 s; kind 4 posts no popup.
  *
@@ -2368,7 +2368,7 @@ float cRiderMetrix_evAddCash_impl(char* self, unsigned int kind, int amount)
     if (amount != 0 && !IsBusy119EF8()) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
         func_001E3760(GetId119EF8(self), amount);
-        func_001597B0(iface, GetId119EF8(self), amount);
+        cBERewardInterface_awardUserCash(iface, GetId119EF8(self), amount);
         cRiderMetrix_addHUDfx1_i(self, 0x18, amount, 0, 0.7f);
         switch (kind) {
         case 3:
@@ -3124,7 +3124,7 @@ extern "C" void InitTerminalVelocityTable(void)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRider_updateTerminalVelocity);
 #ifdef SKIP_ASM
-extern "C" float func_001494C0(void* iface, int a1, int a2);
+extern "C" float cBEStatInterface_getSpeedAttrib(void* iface, int a1, int a2);
 int cRider_getMotionState(void* self);
 extern float kTerminalVelocityTable[2][3][4][2];
 
@@ -3132,14 +3132,14 @@ extern float kTerminalVelocityTable[2][3][4][2];
  * Recomputes the rider's top speed from snow type, tuck, boost level and the rider's speed stat.
  *
  * Interpolates kTerminalVelocityTable (filled by InitTerminalVelocityTable) by surface property and tuck amount for each
- * speed-attribute row, mixes the rows by the rider's speed attribute (func_001494C0 on the stat interface), scales by
+ * speed-attribute row, mixes the rows by the rider's speed attribute (cBEStatInterface_getSpeedAttrib on the stat interface), scales by
  * 27.78 and smooths it into the old value (+0x2E4) with 0.9 (0.97 when slowing), losing 2% when off natural stance
  * without boost. In motion state 1 the limit is 3333.33. At uber level 11+ while boosting it never drops below +0x30C.
  */
 // cRider::updateTerminalVelocity (On Tour name; pairing unverified, structure fits the retail asm)
 extern "C" void cRider_updateTerminalVelocity(char* self)
 {
-    float speedAttribute = func_001494C0(cBE_getInterface(cBE_getBE(), 3), *(int*)(self + 0x86C), *(int*)(self + 0xB34));
+    float speedAttribute = cBEStatInterface_getSpeedAttrib(cBE_getInterface(cBE_getBE(), 3), *(int*)(self + 0x86C), *(int*)(self + 0xB34));
     // NOTE: the retail code adds and subtracts 1.0 (likely an inlined bx range helper).
     speedAttribute = speedAttribute + 1.0f - 1.0f;
     char* surfPropCache = (char*)SSXApp->Game;

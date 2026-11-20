@@ -59,21 +59,21 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void func_002C2868(char* s);
-extern "C" int func_00158618(void* iface, int a, int i, int item, int b);
-extern "C" int func_00150B88(void* iface, int a, int i, int item, int b);
-int func_00157350(void* iface);
-int func_001572B0(void* iface);
-int func_001572D0(void* iface);
-int func_001572F0(void* iface);
-int func_00157310(void* iface);
-int func_00157330(void* iface);
-extern "C" int func_00158558(void* iface, int a, int i, int j, int b);
-extern "C" void func_00158848(void* iface, int a, int i, long mask);
-extern "C" int func_00157FD0(void* iface, int a, int i, int j, int b);
-extern "C" int func_001580F8(void* iface, int a, int i, int j, int b);
-extern "C" int func_00158220(void* iface, int a, int i, int j, int b);
-extern "C" int func_00158470(void* iface, int a, int i, int j, int b);
-extern "C" int func_00158348(void* iface, int a, int i, int j, int b);
+extern "C" int cBERewardInterface_buyCheatChar(void* iface, int a, int i, int item, int b);
+extern "C" int cBEEconInterface_getPeakPass(void* iface, int a, int i, int item, int b);
+int cBERewardInterface_getTotalNumSongs(void* iface);
+int cBERewardInterface_getTotalNumPosters(void* iface);
+int cBERewardInterface_getTotalNumTradingCards(void* iface);
+int cBERewardInterface_getTotalNumConceptArts(void* iface);
+int cBERewardInterface_getTotalNumToys(void* iface);
+int cBERewardInterface_getTotalNumVideos(void* iface);
+extern "C" int cBERewardInterface_buySong(void* iface, int a, int i, int j, int b);
+extern "C" void cBERewardInterface_setPlayList(void* iface, int a, int i, long mask);
+extern "C" int cBERewardInterface_buyPoster(void* iface, int a, int i, int j, int b);
+extern "C" int cBERewardInterface_buyTradingCard(void* iface, int a, int i, int j, int b);
+extern "C" int cBERewardInterface_buyConceptArt(void* iface, int a, int i, int j, int b);
+extern "C" int cBERewardInterface_buyVideo(void* iface, int a, int i, int j, int b);
+extern "C" int cBERewardInterface_buyToy(void* iface, int a, int i, int j, int b);
 // PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
 void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
 extern "C" char* func_0014D998(void* db, int type);
@@ -94,12 +94,12 @@ static inline int ItemType_7D38(char* item)
  *
  * Copies @p code into a 128-byte buffer (strcpy, no length check), lower-cases it (func_002C2868()) and compares
  * GetHashValue32() of it (recomputed for every comparison) against a fixed list. Uses the BE interfaces 11 (econ), 13
- * (rewards) and 9 (profiles). Most codes call func_00158618() for characters 0-9 with one reward index (10, 11, 13, 15,
+ * (rewards) and 9 (profiles). Most codes call cBERewardInterface_buyCheatChar() for characters 0-9 with one reward index (10, 11, 13, 15,
  * 17-28) and no money award. 0x82DE683 unlocks peak 1 and 0x4B1FF67 peaks 1 and 2 for all characters through
- * func_00150B88(). 0x61F9F02 sets every bit below func_00157350()'s count with func_00158558() and stores the mask with
- * func_00158848(); 0x5B65653, 0xA0CF7C4, 0xB5D8914, 0x717257D and 0x74F6CF4 do every index below the matching count
- * (func_001572B0, func_001572D0, func_001572F0, func_00157330, func_00157310) with func_00157FD0, func_001580F8,
- * func_00158220, func_00158470 and func_00158348. 0xBCF3974 marks every library item of types 1-3 that passes
+ * cBEEconInterface_getPeakPass(). 0x61F9F02 sets every bit below cBERewardInterface_getTotalNumSongs()'s count with cBERewardInterface_buySong() and stores the mask with
+ * cBERewardInterface_setPlayList(); 0x5B65653, 0xA0CF7C4, 0xB5D8914, 0x717257D and 0x74F6CF4 do every index below the matching count
+ * (cBERewardInterface_getTotalNumPosters, cBERewardInterface_getTotalNumTradingCards, cBERewardInterface_getTotalNumConceptArts, cBERewardInterface_getTotalNumVideos, cBERewardInterface_getTotalNumToys) with cBERewardInterface_buyPoster, cBERewardInterface_buyTradingCard,
+ * cBERewardInterface_buyConceptArt, cBERewardInterface_buyVideo and cBERewardInterface_buyToy. 0xBCF3974 marks every library item of types 1-3 that passes
  * func_0014D908() against D_004A11E0 as owned (func_00151C48()) for profiles 0-2 and characters 0-9; 0x70694D5 does the
  * same for every type-1 item without the check. cFEStateOptions_onWidgetEvent() calls it with the text typed into its
  * popup.
@@ -117,118 +117,118 @@ extern "C" int func_00187D38(char* code)
     func_002C2868(buf);
     if (GetHashValue32(buf) == 0x7E68D) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 11, 0);
+            cBERewardInterface_buyCheatChar(unlocks, 0, i, 11, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x699649F) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 13, 0);
+            cBERewardInterface_buyCheatChar(unlocks, 0, i, 13, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x80C4F45) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 0xF, 0);
+            cBERewardInterface_buyCheatChar(unlocks, 0, i, 0xF, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0xFA26044) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 17, 0);
+            cBERewardInterface_buyCheatChar(unlocks, 0, i, 17, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x539AB42) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 10, 0);
+            cBERewardInterface_buyCheatChar(unlocks, 0, i, 10, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x61C8197) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 18, 0);
+            cBERewardInterface_buyCheatChar(unlocks, 0, i, 18, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x64694E5) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 19, 0);
+            cBERewardInterface_buyCheatChar(unlocks, 0, i, 19, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x3F22E2B) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 20, 0);
+            cBERewardInterface_buyCheatChar(unlocks, 0, i, 20, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0xCD28689) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 21, 0);
+            cBERewardInterface_buyCheatChar(unlocks, 0, i, 21, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0xB582D1C) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 22, 0);
+            cBERewardInterface_buyCheatChar(unlocks, 0, i, 22, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x1CB90E5) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 23, 0);
+            cBERewardInterface_buyCheatChar(unlocks, 0, i, 23, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x715E0E4) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 0x18, 0);
+            cBERewardInterface_buyCheatChar(unlocks, 0, i, 0x18, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0xF3223E) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 25, 0);
+            cBERewardInterface_buyCheatChar(unlocks, 0, i, 25, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0xEAFC69E) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 27, 0);
+            cBERewardInterface_buyCheatChar(unlocks, 0, i, 27, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0xDD36D88) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 0x1C, 0);
+            cBERewardInterface_buyCheatChar(unlocks, 0, i, 0x1C, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0xDE3475) {
         for (int i = 0; i < 10; i++)
-            func_00158618(unlocks, 0, i, 26, 0);
+            cBERewardInterface_buyCheatChar(unlocks, 0, i, 26, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x82DE683) {
         for (int i = 0; i < 10; i++)
-            func_00150B88(gear, 0, i, 1, 1);
+            cBEEconInterface_getPeakPass(gear, 0, i, 1, 1);
         return 1;
     } else if (GetHashValue32(buf) == 0x4B1FF67) {
         for (int i = 0; i < 10; i++) {
-            func_00150B88(gear, 0, i, 1, 1);
-            func_00150B88(gear, 0, i, 2, 1);
+            cBEEconInterface_getPeakPass(gear, 0, i, 1, 1);
+            cBEEconInterface_getPeakPass(gear, 0, i, 2, 1);
         }
         return 1;
     } else if (GetHashValue32(buf) == 0x61F9F02) {
-        int n = func_00157350(unlocks);
+        int n = cBERewardInterface_getTotalNumSongs(unlocks);
         for (int i = 0; i < 10; i++) {
             long mask = 0;
             for (int j = 0; j < n; j++) {
-                func_00158558(unlocks, 0, i, j, 0);
+                cBERewardInterface_buySong(unlocks, 0, i, j, 0);
                 mask |= (long)1 << j;
             }
-            func_00158848(unlocks, 0, i, mask);
+            cBERewardInterface_setPlayList(unlocks, 0, i, mask);
         }
         return 1;
     } else if (GetHashValue32(buf) == 0x5B65653) {
-        int n = func_001572B0(unlocks);
+        int n = cBERewardInterface_getTotalNumPosters(unlocks);
         for (int j = 0; j < n; j++)
             for (int i = 0; i < 10; i++)
-                func_00157FD0(unlocks, 0, i, j, 0);
+                cBERewardInterface_buyPoster(unlocks, 0, i, j, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0xA0CF7C4) {
-        int n = func_001572D0(unlocks);
+        int n = cBERewardInterface_getTotalNumTradingCards(unlocks);
         for (int j = 0; j < n; j++)
             for (int i = 0; i < 10; i++)
-                func_001580F8(unlocks, 0, i, j, 0);
+                cBERewardInterface_buyTradingCard(unlocks, 0, i, j, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0xB5D8914) {
-        int n = func_001572F0(unlocks);
+        int n = cBERewardInterface_getTotalNumConceptArts(unlocks);
         for (int j = 0; j < n; j++)
             for (int i = 0; i < 10; i++)
-                func_00158220(unlocks, 0, i, j, 0);
+                cBERewardInterface_buyConceptArt(unlocks, 0, i, j, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x717257D) {
-        int n = func_00157330(unlocks);
+        int n = cBERewardInterface_getTotalNumVideos(unlocks);
         for (int j = 0; j < n; j++)
             for (int i = 0; i < 10; i++)
-                func_00158470(unlocks, 0, i, j, 0);
+                cBERewardInterface_buyVideo(unlocks, 0, i, j, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0x74F6CF4) {
-        int n = func_00157310(unlocks);
+        int n = cBERewardInterface_getTotalNumToys(unlocks);
         for (int j = 0; j < n; j++)
             for (int i = 0; i < 10; i++)
-                func_00158348(unlocks, 0, i, j, 0);
+                cBERewardInterface_buyToy(unlocks, 0, i, j, 0);
         return 1;
     } else if (GetHashValue32(buf) == 0xBCF3974) {
         for (int team = 0; team < 3; team++) {

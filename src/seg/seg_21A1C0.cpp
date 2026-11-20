@@ -463,7 +463,7 @@ struct sMallinfo_99D0 {
     int fordblks;
     int keepcost;
 };
-extern "C" sMallinfo_99D0 func_0031FC20(void* ms);
+extern "C" sMallinfo_99D0 cDynamicMemMan_dlmallinfo(void* ms);
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
 extern void* cMemMan_m_mutex[16];
@@ -473,7 +473,7 @@ extern unsigned int cMemMan_m_heapSize;
 /**
  * Returns the free bytes in the dynamic heap.
  *
- * Locks cMemMan_m_mutex, takes func_0031FC20's mallinfo of TheDynamicMemMan and returns cMemMan_m_heapSize minus its
+ * Locks cMemMan_m_mutex, takes cDynamicMemMan_dlmallinfo's mallinfo of TheDynamicMemMan and returns cMemMan_m_heapSize minus its
  * uordblks (the bytes handed out), then unlocks. On Tour calls cDynamicMemMan::totalUsed, which retail inlines.
  *
  * @return the unused heap bytes
@@ -482,7 +482,7 @@ extern unsigned int cMemMan_m_heapSize;
 extern "C" int cMemMan_totalUnused(void)
 {
     MUTEX_lock(cMemMan_m_mutex);
-    sMallinfo_99D0 mi = func_0031FC20(TheDynamicMemMan);
+    sMallinfo_99D0 mi = cDynamicMemMan_dlmallinfo(TheDynamicMemMan);
     int freeBytes = cMemMan_m_heapSize - mi.uordblks;
     MUTEX_unlock(cMemMan_m_mutex);
     return freeBytes;

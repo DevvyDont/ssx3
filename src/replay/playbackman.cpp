@@ -1336,7 +1336,7 @@ struct sPbTime {
 int func_0026E9C0(void* self);
 void* AIgetseed(void* self);
 extern "C" void* cBE_getBE();
-extern "C" void func_0014DF08(void* self, cPbStream* s);
+extern "C" void cBE_writeToReplayFrame(void* self, cPbStream* s);
 extern "C" void func_002D9CB0(cPbStream* s);
 extern "C" void func_0030BB10(void* self, cPbStream* s);
 extern "C" void func_00229E20(void* self, cPbStream* s);
@@ -1382,7 +1382,7 @@ extern "C" void cReplay_saveFrame(cReplay* self, void* stream)
     out->write(&id, 4);
     id = cSortObjNode_ObjNodeNoSortIndex;
     out->write(&id, 4);
-    func_0014DF08(cBE_getBE(), out);
+    cBE_writeToReplayFrame(cBE_getBE(), out);
     D_004A28A8_D818->objs->save(out);
     pbWorld(D_004A28A8_D818->objs)->save(out);
     func_002D9CB0(out);

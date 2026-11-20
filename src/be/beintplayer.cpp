@@ -78,14 +78,14 @@ struct sRecords_59B8 {
 extern sRecords_59B8 D_00535B20_59B8 __asm__("cBELibrary_playerDB");
 extern sRecords_59B8 D_00534FE0_59B8 __asm__("cBENewPlayerInterface_tempPlayers");
 extern void* cBENewPlayerInterface_instance;
-// PORT: func_00145A98 takes no arguments; this caller passes its own self through untouched in $a0.
-extern "C" void func_00145A98_59B8(void* self) __asm__("func_00145A98");
+// PORT: cBENewPlayerInterface_ingameSubmit takes no arguments; this caller passes its own self through untouched in $a0.
+extern "C" void cBENewPlayerInterface_ingameSubmit_59B8(void* self) __asm__("cBENewPlayerInterface_ingameSubmit");
 
 /**
  * Commits the working player table cBENewPlayerInterface_tempPlayers to the library's cBELibrary_playerDB.
  *
  * When the player interface singleton's flag at +0x8 is set the whole 0xA8-byte table is copied; otherwise
- * only the names and flag bit 1 of the six entries (func_00145A98).
+ * only the names and flag bit 1 of the six entries (cBENewPlayerInterface_ingameSubmit).
  */
 // Copies the 0xA8-byte character table from its backup when cBENewPlayerInterface_instance says so, otherwise rebuilds it.
 extern "C" void cBENewPlayerInterface_submit(void* self)
@@ -93,13 +93,13 @@ extern "C" void cBENewPlayerInterface_submit(void* self)
     if (*(int*)((char*)cBENewPlayerInterface_instance + 8) != 0) {
         D_00535B20_59B8 = D_00534FE0_59B8;
     } else {
-        func_00145A98_59B8(self);
+        cBENewPlayerInterface_ingameSubmit_59B8(self);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00145A98);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_ingameSubmit);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
@@ -123,7 +123,7 @@ extern sCharEntryBits_00145A98 D_00535B20_bits[] __asm__("cBELibrary_playerDB");
  *
  * cBENewPlayerInterface_submit runs it instead of the whole-table copy while the interface's word at +0x8 is clear.
  */
-extern "C" void func_00145A98(void)
+extern "C" void cBENewPlayerInterface_ingameSubmit(void)
 {
     for (int i = 0; i < 6; i++)
     {
@@ -190,7 +190,7 @@ extern "C" void cBENewPlayerInterface_defaultCtrl(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00145C38);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isFirstTimeWC);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
@@ -205,7 +205,7 @@ extern int cBELibrary_profileLib[];
  * @param index  the rider (On Tour iRider)
  * @return the flag word
  */
-extern "C" int func_00145C38(void* self, int index)
+extern "C" int cBENewPlayerInterface_isFirstTimeWC(void* self, int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -217,7 +217,7 @@ extern "C" int func_00145C38(void* self, int index)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00145CB0);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setIsFirstTimeWC);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
@@ -231,7 +231,7 @@ extern int cBELibrary_profileLib[];
  * @param index  the rider (On Tour iRider)
  * @param value  the new flag
  */
-extern "C" void func_00145CB0(void* self, int index, int value)
+extern "C" void cBENewPlayerInterface_setIsFirstTimeWC(void* self, int index, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -304,12 +304,12 @@ extern "C" void cBENewPlayerInterface_setFirstTimeOnTrack(void* self, bool flag,
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00145E68);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_hasVisitedPeakWC);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
 extern int cBELibrary_profileLib[];
-extern "C" int func_001523E8(void* self, int kind);
+extern "C" int cBECharProfileDB_hasVisitedPeak(void* self, int kind);
 
 struct sProfileSlot_00145E68 {
     char data[0xF88];
@@ -319,23 +319,23 @@ struct sProfileSlot_00145E68 {
  * Returns whether a rider's character has visited any location of a peak.
  *
  * Passes the rider's character record (profile cBELibrary_getProfileIndex(@p index), character
- * tempPlayers[getPlayerID(@p index)].mCharID) to func_001523E8, which tests its visited-location mask.
+ * tempPlayers[getPlayerID(@p index)].mCharID) to cBECharProfileDB_hasVisitedPeak, which tests its visited-location mask.
  *
  * @param index  the rider (On Tour iRider)
  * @param kind  the peak, 0-2
  * @return 1 when visited, else 0
  */
-extern "C" int func_00145E68(void* self, int index, int kind)
+extern "C" int cBENewPlayerInterface_hasVisitedPeakWC(void* self, int index, int kind)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    return func_001523E8(&((sProfileSlot_00145E68 (*)[10])cBELibrary_profileLib)[profile][charId], kind);
+    return cBECharProfileDB_hasVisitedPeak(&((sProfileSlot_00145E68 (*)[10])cBELibrary_profileLib)[profile][charId], kind);
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00145EF0);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_hasPlayedEvent);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
@@ -358,7 +358,7 @@ struct sProfileSlot_00145EF0 {
  * @param event  the game event (On Tour eBEGameEvent)
  * @return 1 when the byte is nonzero, else 0
  */
-extern "C" int func_00145EF0(void* self, int index, int locationId, int event)
+extern "C" int cBENewPlayerInterface_hasPlayedEvent(void* self, int index, int locationId, int event)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -433,7 +433,7 @@ extern "C" int cBENewPlayerInterface_isPeakLocked1(void* self, int rider, int pe
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00146070);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setPeakLocked);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
@@ -456,7 +456,7 @@ struct sProfBits_146070 {
  * @param kind  the peak (0-based): 1, or 2 (any other value also writes bit 13)
  * @param value  1 to lock, 0 to unlock
  */
-extern "C" void func_00146070(void* self, int index, int kind, int value)
+extern "C" void cBENewPlayerInterface_setPeakLocked(void* self, int index, int kind, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -472,7 +472,7 @@ extern "C" void func_00146070(void* self, int index, int kind, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00146150);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isRivalChallengePlayed);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
@@ -490,7 +490,7 @@ extern int cBELibrary_profileLib[];
  * @return the bit, 0 or 1
  */
 // PORT: 64-bit `long` flag word (8 bytes on EE); use int64_t off-PS2.
-extern "C" int func_00146150(void* self, int index, int kind, int flag)
+extern "C" int cBENewPlayerInterface_isRivalChallengePlayed(void* self, int index, int kind, int flag)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -529,7 +529,7 @@ extern "C" int func_00146150(void* self, int index, int kind, int flag)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00146320);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setRivalChallengePlayed);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
@@ -550,14 +550,14 @@ struct sProfBits6320 {
  *
  * Writes bit 3 + @p kind (when @p flag is set) or bit @p kind of the 64-bit flag word at +0x278 of the character record
  * (profile cBELibrary_getProfileIndex(@p index), character tempPlayers[getPlayerID(@p index)].mCharID), the bit
- * func_00146150 reads. A peak outside 0-2 writes nothing.
+ * cBENewPlayerInterface_isRivalChallengePlayed reads. A peak outside 0-2 writes nothing.
  *
  * @param index  the rider (On Tour iRider)
  * @param kind  the peak, 0-2
  * @param flag  selects bits 3-5 when nonzero, bits 0-2 when 0
  * @param value  the new bit
  */
-extern "C" void func_00146320(void* self, int index, int kind, int flag, int value)
+extern "C" void cBENewPlayerInterface_setRivalChallengePlayed(void* self, int index, int kind, int flag, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -589,7 +589,7 @@ extern "C" void func_00146320(void* self, int index, int kind, int flag, int val
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_001464D0);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isRivalEventLocked);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 extern int cBELibrary_profileLib[];
@@ -607,7 +607,7 @@ extern int cBELibrary_profileLib[];
  * @return 1 when locked, else 0
  */
 // PORT: 64-bit `long` flag word (8 bytes on EE); use int64_t off-PS2.
-extern "C" int func_001464D0(void* self, int index, int character, int kind, int flag)
+extern "C" int cBENewPlayerInterface_isRivalEventLocked(void* self, int index, int character, int kind, int flag)
 {
     int profile = cBELibrary_getProfileIndex(index);
     if (flag) {
@@ -658,7 +658,7 @@ extern "C" int func_001464D0(void* self, int index, int character, int kind, int
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_001466A0);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_isRivalEventLocked1);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
@@ -682,7 +682,7 @@ extern sTrackInfo_1466A0 cBELibrary_locationDB[];
  * @return 1 when locked, else 0
  */
 // PORT: 64-bit `long` flag word (8 bytes on EE); use int64_t off-PS2.
-extern "C" int func_001466A0(void* self, int index)
+extern "C" int cBENewPlayerInterface_isRivalEventLocked1(void* self, int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -735,7 +735,7 @@ extern "C" int func_001466A0(void* self, int index)
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintplayer", func_001468B0);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setRivalEventLocked);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 extern int cBELibrary_profileLib[];
@@ -757,7 +757,7 @@ struct sProfBits_1468B0 {
  * Locks or unlocks a peak's rival event for a character.
  *
  * Writes bit 6 + @p kind (when @p flag is set) or bit 9 + @p kind of the 64-bit flag word at +0x278 of character
- * @p character's record in the profile of @p index (cBELibrary_getProfileIndex), the bit func_001464D0 reads. A peak outside
+ * @p character's record in the profile of @p index (cBELibrary_getProfileIndex), the bit cBENewPlayerInterface_isRivalEventLocked reads. A peak outside
  * 0-2 writes nothing.
  *
  * @param index  the rider whose profile is used (On Tour iRider)
@@ -766,7 +766,7 @@ struct sProfBits_1468B0 {
  * @param flag  selects bits 6-8 when nonzero, bits 9-11 when 0
  * @param value  1 to lock, 0 to unlock
  */
-extern "C" void func_001468B0(void* self, int index, int character, int kind, int flag, int value)
+extern "C" void cBENewPlayerInterface_setRivalEventLocked(void* self, int index, int character, int kind, int flag, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
     if (flag) {
@@ -857,7 +857,7 @@ extern "C" int cBENewPlayerInterface_isEventLocked(void* self, int index, int ch
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00146C10);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setEventLocked);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 struct sPlayerSub_6C10 {
@@ -883,7 +883,7 @@ struct sPlayerSub_6C10 {
  * @param event  the game event, 6-11
  * @param locked  1 to lock, 0 to unlock
  */
-extern "C" void func_00146C10(void* self, int rider, int character, int event, int locked) {
+extern "C" void cBENewPlayerInterface_setEventLocked(void* self, int rider, int character, int event, int locked) {
     int profile = cBELibrary_getProfileIndex(rider);
     switch (event) {
     case 6:
@@ -1080,7 +1080,7 @@ extern "C" char* func_00146F88(void* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147138);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setPlayerName);
 #ifdef SKIP_ASM
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 
@@ -1092,7 +1092,7 @@ extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
  * @param playerIndex  the player slot (On Tour iPlayer)
  * @param name  the new name
  */
-extern "C" void func_00147138(void* self, int playerIndex, const char* name)
+extern "C" void cBENewPlayerInterface_setPlayerName(void* self, int playerIndex, const char* name)
 {
     strncpy(cBENewPlayerInterface_tempPlayers[playerIndex].pad_0x00, name, 0xC);
 }
@@ -1310,7 +1310,7 @@ extern "C" void cBENewPlayerInterface_setRiderCheatCharID(void* self, int index,
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147410);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getRiderCheatCharID);
 #ifdef SKIP_ASM
 /**
  * Returns the cheat character a rider appears as (0 for none).
@@ -1321,7 +1321,7 @@ INCLUDE_ASM("be/beintplayer", func_00147410);
  * @param index  the rider (On Tour iRider)
  * @return the cheat character id
  */
-extern "C" signed char func_00147410(void* self, int index)
+extern "C" signed char cBENewPlayerInterface_getRiderCheatCharID(void* self, int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     return cBENewPlayerInterface_tempPlayers[id].field_0x12;
@@ -1380,7 +1380,7 @@ signed char cBENewPlayerInterface_getPlayerCharID(void* self, int index)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_001474A8);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setPlayerCheatCharID);
 #ifdef SKIP_ASM
 /**
  * Sets the cheat character of player slot @p playerId: byte +0x12 of cBENewPlayerInterface_tempPlayers[@p playerId].
@@ -1388,7 +1388,7 @@ INCLUDE_ASM("be/beintplayer", func_001474A8);
  * @param playerId  the player slot (On Tour iPlayer)
  * @param value  the cheat character id, 0 for none
  */
-extern "C" void func_001474A8(void* self, int playerId, int value)
+extern "C" void cBENewPlayerInterface_setPlayerCheatCharID(void* self, int playerId, int value)
 {
     char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[0] + playerId * 0x1c;
     *(char*)(playerEntry + 0x12) = value;
@@ -1396,7 +1396,7 @@ extern "C" void func_001474A8(void* self, int playerId, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_001474C8);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getPlayerCheatCharID);
 #ifdef SKIP_ASM
 /**
  * Returns the cheat character of player slot @p playerId: signed byte +0x12 of cBENewPlayerInterface_tempPlayers.
@@ -1404,7 +1404,7 @@ INCLUDE_ASM("be/beintplayer", func_001474C8);
  * @param playerId  the player slot (On Tour iPlayer)
  * @return the cheat character id, 0 for none
  */
-extern "C" signed char func_001474C8(void* self, int playerId)
+extern "C" signed char cBENewPlayerInterface_getPlayerCheatCharID(void* self, int playerId)
 {
     char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[0] + playerId * 0x1c;
     return *(signed char*)(playerEntry + 0x12);
@@ -1412,7 +1412,7 @@ extern "C" signed char func_001474C8(void* self, int playerId)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_001474E8);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getUseDualShock);
 #ifdef SKIP_ASM
 struct sPlayerCharFlags_0x10 {
     unsigned int bit0 : 1;
@@ -1431,7 +1431,7 @@ struct sPlayerCharFlags_0x10 {
  * @param index  the rider (On Tour iRider)
  * @return 1 when on, else 0
  */
-extern "C" int func_001474E8(void* self, int index)
+extern "C" int cBENewPlayerInterface_getUseDualShock(void* self, int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[0] + id * 0x1c;
@@ -1440,7 +1440,7 @@ extern "C" int func_001474E8(void* self, int index)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147528);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setUseDualShock);
 #ifdef SKIP_ASM
 struct sPlayerCharFlags_00147528 {
     unsigned int bit0 : 1;
@@ -1456,7 +1456,7 @@ struct sPlayerCharFlags_00147528 {
  * @param index  the rider (On Tour iRider)
  * @param value  the new setting
  */
-extern "C" void func_00147528(void* self, int index, int value)
+extern "C" void cBENewPlayerInterface_setUseDualShock(void* self, int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     sPlayerCharEntry* playerEntry = &cBENewPlayerInterface_tempPlayers[id];
@@ -1465,7 +1465,7 @@ extern "C" void func_00147528(void* self, int index, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147580);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getHelpDone);
 #ifdef SKIP_ASM
 /**
  * Returns flag bit 3 at +0x10 of a rider's player entry (tempPlayers[getPlayerID(@p index)]).
@@ -1476,7 +1476,7 @@ INCLUDE_ASM("be/beintplayer", func_00147580);
  * @param index  the rider (On Tour iRider)
  * @return the bit, 0 or 1
  */
-extern "C" int func_00147580(void* self, int index)
+extern "C" int cBENewPlayerInterface_getHelpDone(void* self, int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[0] + id * 0x1c;
@@ -1485,7 +1485,7 @@ extern "C" int func_00147580(void* self, int index)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_001475C0);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setHelpDone);
 #ifdef SKIP_ASM
 struct sPlayerCharFlags_001475C0 {
     unsigned int bit0 : 1;
@@ -1501,7 +1501,7 @@ struct sPlayerCharFlags_001475C0 {
  * @param index  the rider (On Tour iRider)
  * @param value  the new bit
  */
-extern "C" void func_001475C0(void* self, int index, int value)
+extern "C" void cBENewPlayerInterface_setHelpDone(void* self, int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     sPlayerCharEntry* playerEntry = &cBENewPlayerInterface_tempPlayers[id];
@@ -1527,7 +1527,7 @@ extern "C" signed char cBENewPlayerInterface_getControllerMapping(void* self, in
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147658);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setControllerMapping);
 #ifdef SKIP_ASM
 /**
  * Sets a rider's button layout: byte +0x13 of cBENewPlayerInterface_tempPlayers[getPlayerID(@p index)].
@@ -1535,7 +1535,7 @@ INCLUDE_ASM("be/beintplayer", func_00147658);
  * @param index  the rider (On Tour iRider)
  * @param value  the controller mapping id
  */
-extern "C" void func_00147658(void* self, int index, int value)
+extern "C" void cBENewPlayerInterface_setControllerMapping(void* self, int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
     cBENewPlayerInterface_tempPlayers[id].pad_0x13[0] = value;
@@ -1893,7 +1893,7 @@ extern "C" int func_00147BB0(void* self, int index, int slot)
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147C40);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_setDifficultyLevel);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 extern int cBELibrary_profileLib[];
@@ -1907,7 +1907,7 @@ extern int cBELibrary_profileLib[];
  * @param value  the level, 0-2 (func_00147D20 caps it at 2)
  * @param flag  picks the pair: nonzero +0x280, 0 +0x284
  */
-extern "C" void func_00147C40(void* self, int value, int flag)
+extern "C" void cBENewPlayerInterface_setDifficultyLevel(void* self, int value, int flag)
 {
     int charId = cBELibrary_getCharacterID(0);
     if (flag != 0) {
@@ -1923,7 +1923,7 @@ extern "C" void func_00147C40(void* self, int value, int flag)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147CB8);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getDifficultyLevel);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 
@@ -1935,7 +1935,7 @@ int cBELibrary_getCharacterID(int);
  * @param which  picks the pair: nonzero +0x280, 0 +0x284 (cComputer passes game mode == 0)
  * @return the level, 0-2
  */
-extern "C" short func_00147CB8(void* self, int which)
+extern "C" short cBENewPlayerInterface_getDifficultyLevel(void* self, int which)
 {
     int charId = cBELibrary_getCharacterID(0);
     if (which != 0)
@@ -2068,7 +2068,7 @@ extern "C" void func_00147E18(void* self, int which)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00147F10);
+INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getDifficultyDifference);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 extern int cBELibrary_profileLib[];
@@ -2082,7 +2082,7 @@ extern int cBELibrary_profileLib[];
  * @param flag  picks the pair: nonzero +0x282, 0 +0x286
  * @return the streak, -1 to 1
  */
-extern "C" short func_00147F10(void* self, int flag)
+extern "C" short cBENewPlayerInterface_getDifficultyDifference(void* self, int flag)
 {
     int charId = cBELibrary_getCharacterID(0);
     short result;
@@ -2202,7 +2202,7 @@ extern "C" void cBEStatInterface_discard(void)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148158);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getStatFromProfile);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int cBELibrary_getCharacterID(int);
@@ -2219,7 +2219,7 @@ extern int cBELibrary_profileLib[];
  * @return the attribute value, or -1
  */
 // Returns one of a character's seven stat levels for the given profile, or -1.
-extern "C" int func_00148158(void* self, int profile, unsigned int stat)
+extern "C" int cBEStatInterface_getStatFromProfile(void* self, int profile, unsigned int stat)
 {
     int charId = cBELibrary_getCharacterID(profile);
     switch (stat) {
@@ -2320,7 +2320,7 @@ extern "C" sCharStat_00148328* func_00148328(sCharStat_00148328* dst, int iface,
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_001483A0);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_setSpeed);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -2344,7 +2344,7 @@ extern sPlayerStatRowView_001483A0 D_00535538_view001483A0[] __asm__("D_00535538
  * @param rider  the rider (On Tour iRider)
  * @param value  the stat value
  */
-extern "C" void func_001483A0(void* self, int rider, int value)
+extern "C" void cBEStatInterface_setSpeed(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2353,7 +2353,7 @@ extern "C" void func_001483A0(void* self, int rider, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148410);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getSpeed);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -2376,7 +2376,7 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  * @param rider  the rider (On Tour iRider)
  * @return the stat value
  */
-extern "C" signed char func_00148410(void* self, int rider)
+extern "C" signed char cBEStatInterface_getSpeed(void* self, int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2385,7 +2385,7 @@ extern "C" signed char func_00148410(void* self, int rider)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148470);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_setAccel);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -2402,7 +2402,7 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  * @param rider  the rider (On Tour iRider)
  * @param value  the stat value
  */
-extern "C" void func_00148470(void* self, int rider, int value)
+extern "C" void cBEStatInterface_setAccel(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2411,7 +2411,7 @@ extern "C" void func_00148470(void* self, int rider, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_001484E0);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getAccel);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -2428,7 +2428,7 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  * @param rider  the rider (On Tour iRider)
  * @return the stat value
  */
-extern "C" signed char func_001484E0(void* self, int rider)
+extern "C" signed char cBEStatInterface_getAccel(void* self, int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2437,7 +2437,7 @@ extern "C" signed char func_001484E0(void* self, int rider)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148540);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_setTrick);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -2454,7 +2454,7 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  * @param rider  the rider (On Tour iRider)
  * @param value  the stat value
  */
-extern "C" void func_00148540(void* self, int rider, int value)
+extern "C" void cBEStatInterface_setTrick(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2463,7 +2463,7 @@ extern "C" void func_00148540(void* self, int rider, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_001485B0);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getTrick);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -2480,7 +2480,7 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  * @param rider  the rider (On Tour iRider)
  * @return the stat value
  */
-extern "C" signed char func_001485B0(void* self, int rider)
+extern "C" signed char cBEStatInterface_getTrick(void* self, int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2489,7 +2489,7 @@ extern "C" signed char func_001485B0(void* self, int rider)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148610);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_setEdging);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -2506,7 +2506,7 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  * @param rider  the rider (On Tour iRider)
  * @param value  the stat value
  */
-extern "C" void func_00148610(void* self, int rider, int value)
+extern "C" void cBEStatInterface_setEdging(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2515,7 +2515,7 @@ extern "C" void func_00148610(void* self, int rider, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148680);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getEdging);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -2532,7 +2532,7 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  * @param rider  the rider (On Tour iRider)
  * @return the stat value
  */
-extern "C" signed char func_00148680(void* self, int rider)
+extern "C" signed char cBEStatInterface_getEdging(void* self, int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2541,7 +2541,7 @@ extern "C" signed char func_00148680(void* self, int rider)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_001486E0);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_setSpin);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -2558,7 +2558,7 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  * @param rider  the rider (On Tour iRider)
  * @param value  the stat value
  */
-extern "C" void func_001486E0(void* self, int rider, int value)
+extern "C" void cBEStatInterface_setSpin(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2567,7 +2567,7 @@ extern "C" void func_001486E0(void* self, int rider, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148750);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getSpin);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -2584,7 +2584,7 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  * @param rider  the rider (On Tour iRider)
  * @return the stat value
  */
-extern "C" signed char func_00148750(void* self, int rider)
+extern "C" signed char cBEStatInterface_getSpin(void* self, int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2593,7 +2593,7 @@ extern "C" signed char func_00148750(void* self, int rider)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_001487B0);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_setToughness);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -2610,7 +2610,7 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  * @param rider  the rider (On Tour iRider)
  * @param value  the stat value
  */
-extern "C" void func_001487B0(void* self, int rider, int value)
+extern "C" void cBEStatInterface_setToughness(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2619,7 +2619,7 @@ extern "C" void func_001487B0(void* self, int rider, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148820);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getToughness);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -2636,7 +2636,7 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  * @param rider  the rider (On Tour iRider)
  * @return the stat value
  */
-extern "C" signed char func_00148820(void* self, int rider)
+extern "C" signed char cBEStatInterface_getToughness(void* self, int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charId = cBELibrary_getCharacterID(rider);
@@ -2645,7 +2645,7 @@ extern "C" signed char func_00148820(void* self, int rider)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148880);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_setStability);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -2663,7 +2663,7 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  * @param rider  race rider slot (On Tour iRider)
  * @param value  new stat value (On Tour var)
  */
-extern "C" void func_00148880(void* self, int rider, int value)
+extern "C" void cBEStatInterface_setStability(void* self, int rider, int value)
 {
     int profileIndex = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);
@@ -2672,7 +2672,7 @@ extern "C" void func_00148880(void* self, int rider, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_001488F0);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getStability);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -2689,7 +2689,7 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  * @param rider  race rider slot (On Tour iRider)
  * @return the stability stat (5 per level)
  */
-extern "C" signed char func_001488F0(void* self, int rider)
+extern "C" signed char cBEStatInterface_getStability(void* self, int rider)
 {
     int profileIndex = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);
@@ -2698,43 +2698,43 @@ extern "C" signed char func_001488F0(void* self, int rider)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148950);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getStatLevel);
 #ifdef SKIP_ASM
-extern "C" signed char func_00148410(void* self, int rider);
-extern "C" signed char func_001484E0(void* self, int rider);
-extern "C" signed char func_001485B0(void* self, int rider);
-extern "C" signed char func_00148680(void* self, int rider);
-extern "C" signed char func_00148750(void* self, int rider);
-extern "C" signed char func_00148820(void* self, int rider);
-extern "C" signed char func_001488F0(void* self, int rider);
+extern "C" signed char cBEStatInterface_getSpeed(void* self, int rider);
+extern "C" signed char cBEStatInterface_getAccel(void* self, int rider);
+extern "C" signed char cBEStatInterface_getTrick(void* self, int rider);
+extern "C" signed char cBEStatInterface_getEdging(void* self, int rider);
+extern "C" signed char cBEStatInterface_getSpin(void* self, int rider);
+extern "C" signed char cBEStatInterface_getToughness(void* self, int rider);
+extern "C" signed char cBEStatInterface_getStability(void* self, int rider);
 
 /**
  * Returns a rider's overall stat level: the average of its seven stat levels, at least 1.
  *
- * Reads the speed, acceleration, trick, edging, spin, toughness and stability stats (func_00148410, func_001484E0,
- * func_001485B0, func_00148680, func_00148750, func_00148820, func_001488F0), divides each by 5 (5 stat points per
+ * Reads the speed, acceleration, trick, edging, spin, toughness and stability stats (cBEStatInterface_getSpeed, cBEStatInterface_getAccel,
+ * cBEStatInterface_getTrick, cBEStatInterface_getEdging, cBEStatInterface_getSpin, cBEStatInterface_getToughness, cBEStatInterface_getStability), divides each by 5 (5 stat points per
  * level), sums the seven levels and divides by 7, rounding down. The inverse of cBEStatInterface_setStatLevel(), which
  * stores level * 5 in each stat. The front end shows it as the rider's level (ovstatelodge, festateloadhint).
  *
  * @param rider  race rider slot (On Tour iRider)
  * @return the average level, or 1 when it would be 0 or less
  */
-extern "C" int func_00148950(void* self, int rider)
+extern "C" int cBEStatInterface_getStatLevel(void* self, int rider)
 {
     int statValue;
-    statValue = func_001484E0(self, rider);
+    statValue = cBEStatInterface_getAccel(self, rider);
     int sum = statValue / 5;
-    statValue = func_00148680(self, rider);
+    statValue = cBEStatInterface_getEdging(self, rider);
     sum += statValue / 5;
-    statValue = func_00148410(self, rider);
+    statValue = cBEStatInterface_getSpeed(self, rider);
     sum += statValue / 5;
-    statValue = func_00148750(self, rider);
+    statValue = cBEStatInterface_getSpin(self, rider);
     sum += statValue / 5;
-    statValue = func_00148820(self, rider);
+    statValue = cBEStatInterface_getToughness(self, rider);
     sum += statValue / 5;
-    statValue = func_001488F0(self, rider);
+    statValue = cBEStatInterface_getStability(self, rider);
     sum += statValue / 5;
-    statValue = func_001485B0(self, rider);
+    statValue = cBEStatInterface_getTrick(self, rider);
     sum += statValue / 5;
     int average = sum / 7;
     if (average > 0)
@@ -2749,7 +2749,7 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setStatLevel);
 /**
  * Sets every attribute of a rider to the same stat level.
  *
- * Each of func_00148470, func_00148610, func_001483A0, func_001486E0, func_001487B0, func_00148880 and func_00148540
+ * Each of cBEStatInterface_setAccel, cBEStatInterface_setEdging, cBEStatInterface_setSpeed, cBEStatInterface_setSpin, cBEStatInterface_setToughness, cBEStatInterface_setStability and cBEStatInterface_setTrick
  * (On Tour setAccel, setEdging, setSpeed, setSpin, setToughness, setStability, setTrick) gets @p value * 5. The release
  * build drops On Tour's range and read-back asserts.
  *
@@ -2759,21 +2759,21 @@ INCLUDE_ASM("be/beintplayer", cBEStatInterface_setStatLevel);
 extern "C" void cBEStatInterface_setStatLevel(void* self, int rider, int value)
 {
     int statPoints = value * 5;
-    func_00148470(self, rider, statPoints);
-    func_00148610(self, rider, statPoints);
-    func_001483A0(self, rider, statPoints);
-    func_001486E0(self, rider, statPoints);
-    func_001487B0(self, rider, statPoints);
-    func_00148880(self, rider, statPoints);
-    func_00148540(self, rider, statPoints);
+    cBEStatInterface_setAccel(self, rider, statPoints);
+    cBEStatInterface_setEdging(self, rider, statPoints);
+    cBEStatInterface_setSpeed(self, rider, statPoints);
+    cBEStatInterface_setSpin(self, rider, statPoints);
+    cBEStatInterface_setToughness(self, rider, statPoints);
+    cBEStatInterface_setStability(self, rider, statPoints);
+    cBEStatInterface_setTrick(self, rider, statPoints);
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148B50);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanSpeed);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// Same layout as the unit's sPlayerStatRow (defined at func_00148B78, later in the unit).
+// Same layout as the unit's sPlayerStatRow (defined at cBEStatInterface_getHumanSpeed, later in the unit).
 struct sPlayerStat7View_00148B50 {
     signed char v[7];
 };
@@ -2792,14 +2792,14 @@ extern sPlayerStatRowView_00148B50 D_00535538_view00148B50[] __asm__("D_00535538
  * @param value  new stat value (On Tour var)
  * @param charType  character ID (On Tour charType)
  */
-extern "C" void func_00148B50(void* self, int humanIndex, int value, int charType)
+extern "C" void cBEStatInterface_setHumanSpeed(void* self, int humanIndex, int value, int charType)
 {
     D_00535538_view00148B50[humanIndex].e[charType].v[0] = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148B78);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanSpeed);
 #ifdef SKIP_ASM
 struct sPlayerStat7 {
     signed char v[7];
@@ -2818,14 +2818,14 @@ extern sPlayerStatRow D_00535538[];
  * @param charType  character ID (On Tour charType)
  * @return the speed stat (5 per level)
  */
-extern "C" signed char func_00148B78(void* self, int humanIndex, int charType)
+extern "C" signed char cBEStatInterface_getHumanSpeed(void* self, int humanIndex, int charType)
 {
     return D_00535538[humanIndex].e[charType].v[0];
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148BA0);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanAccel);
 #ifdef SKIP_ASM
 /**
  * Stores a profile's acceleration stat for one character (byte 1 of the character's stat record) in the current-stat
@@ -2838,14 +2838,14 @@ INCLUDE_ASM("be/beintplayer", func_00148BA0);
  * @param value  new stat value (On Tour var)
  * @param charType  character ID (On Tour charType)
  */
-extern "C" void func_00148BA0(void* self, int humanIndex, int value, int charType)
+extern "C" void cBEStatInterface_setHumanAccel(void* self, int humanIndex, int value, int charType)
 {
     D_00535538[humanIndex].e[charType].v[1] = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148BC8);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanAccel);
 #ifdef SKIP_ASM
 /**
  * Returns a profile's acceleration stat for one character (byte 1 of the character's stat record) from the current-stat
@@ -2857,14 +2857,14 @@ INCLUDE_ASM("be/beintplayer", func_00148BC8);
  * @param charType  character ID (On Tour charType)
  * @return the acceleration stat (5 per level)
  */
-extern "C" signed char func_00148BC8(void* self, int humanIndex, int charType)
+extern "C" signed char cBEStatInterface_getHumanAccel(void* self, int humanIndex, int charType)
 {
     return D_00535538[humanIndex].e[charType].v[1];
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148BF0);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanTrick);
 #ifdef SKIP_ASM
 /**
  * Stores a profile's trick stat for one character (byte 2 of the character's stat record) in the current-stat table.
@@ -2876,14 +2876,14 @@ INCLUDE_ASM("be/beintplayer", func_00148BF0);
  * @param value  new stat value (On Tour var)
  * @param charType  character ID (On Tour charType)
  */
-extern "C" void func_00148BF0(void* self, int humanIndex, int value, int charType)
+extern "C" void cBEStatInterface_setHumanTrick(void* self, int humanIndex, int value, int charType)
 {
     D_00535538[humanIndex].e[charType].v[2] = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148C18);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanTrick);
 #ifdef SKIP_ASM
 /**
  * Returns a profile's trick stat for one character (byte 2 of the character's stat record) from the current-stat table.
@@ -2894,14 +2894,14 @@ INCLUDE_ASM("be/beintplayer", func_00148C18);
  * @param charType  character ID (On Tour charType)
  * @return the trick stat (5 per level)
  */
-extern "C" signed char func_00148C18(void* self, int humanIndex, int charType)
+extern "C" signed char cBEStatInterface_getHumanTrick(void* self, int humanIndex, int charType)
 {
     return D_00535538[humanIndex].e[charType].v[2];
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148C40);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanEdging);
 #ifdef SKIP_ASM
 /**
  * Stores a profile's edging stat for one character (byte 3 of the character's stat record) in the current-stat table.
@@ -2913,14 +2913,14 @@ INCLUDE_ASM("be/beintplayer", func_00148C40);
  * @param value  new stat value (On Tour var)
  * @param charType  character ID (On Tour charType)
  */
-extern "C" void func_00148C40(void* self, int humanIndex, int value, int charType)
+extern "C" void cBEStatInterface_setHumanEdging(void* self, int humanIndex, int value, int charType)
 {
     D_00535538[humanIndex].e[charType].v[3] = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148C68);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanEdging);
 #ifdef SKIP_ASM
 /**
  * Returns a profile's edging stat for one character (byte 3 of the character's stat record) from the current-stat
@@ -2932,14 +2932,14 @@ INCLUDE_ASM("be/beintplayer", func_00148C68);
  * @param charType  character ID (On Tour charType)
  * @return the edging stat (5 per level)
  */
-extern "C" signed char func_00148C68(void* self, int humanIndex, int charType)
+extern "C" signed char cBEStatInterface_getHumanEdging(void* self, int humanIndex, int charType)
 {
     return D_00535538[humanIndex].e[charType].v[3];
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148C90);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanSpin);
 #ifdef SKIP_ASM
 /**
  * Stores a profile's spin stat for one character (byte 4 of the character's stat record) in the current-stat table.
@@ -2951,14 +2951,14 @@ INCLUDE_ASM("be/beintplayer", func_00148C90);
  * @param value  new stat value (On Tour var)
  * @param charType  character ID (On Tour charType)
  */
-extern "C" void func_00148C90(void* self, int humanIndex, int value, int charType)
+extern "C" void cBEStatInterface_setHumanSpin(void* self, int humanIndex, int value, int charType)
 {
     D_00535538[humanIndex].e[charType].v[4] = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148CB8);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanSpin);
 #ifdef SKIP_ASM
 /**
  * Returns a profile's spin stat for one character (byte 4 of the character's stat record) from the current-stat table.
@@ -2969,14 +2969,14 @@ INCLUDE_ASM("be/beintplayer", func_00148CB8);
  * @param charType  character ID (On Tour charType)
  * @return the spin stat (5 per level)
  */
-extern "C" signed char func_00148CB8(void* self, int humanIndex, int charType)
+extern "C" signed char cBEStatInterface_getHumanSpin(void* self, int humanIndex, int charType)
 {
     return D_00535538[humanIndex].e[charType].v[4];
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148CE0);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanToughness);
 #ifdef SKIP_ASM
 /**
  * Stores a profile's toughness stat for one character (byte 5 of the character's stat record) in the current-stat
@@ -2989,14 +2989,14 @@ INCLUDE_ASM("be/beintplayer", func_00148CE0);
  * @param value  new stat value (On Tour var)
  * @param charType  character ID (On Tour charType)
  */
-extern "C" void func_00148CE0(void* self, int humanIndex, int value, int charType)
+extern "C" void cBEStatInterface_setHumanToughness(void* self, int humanIndex, int value, int charType)
 {
     D_00535538[humanIndex].e[charType].v[5] = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148D08);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanToughness);
 #ifdef SKIP_ASM
 /**
  * Returns a profile's toughness stat for one character (byte 5 of the character's stat record) from the current-stat
@@ -3008,14 +3008,14 @@ INCLUDE_ASM("be/beintplayer", func_00148D08);
  * @param charType  character ID (On Tour charType)
  * @return the toughness stat (5 per level)
  */
-extern "C" signed char func_00148D08(void* self, int humanIndex, int charType)
+extern "C" signed char cBEStatInterface_getHumanToughness(void* self, int humanIndex, int charType)
 {
     return D_00535538[humanIndex].e[charType].v[5];
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148D30);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_setHumanStability);
 #ifdef SKIP_ASM
 /**
  * Stores a profile's stability stat for one character (byte 6 of the character's stat record) in the current-stat
@@ -3028,14 +3028,14 @@ INCLUDE_ASM("be/beintplayer", func_00148D30);
  * @param value  new stat value (On Tour var)
  * @param charType  character ID (On Tour charType)
  */
-extern "C" void func_00148D30(void* self, int humanIndex, int value, int charType)
+extern "C" void cBEStatInterface_setHumanStability(void* self, int humanIndex, int value, int charType)
 {
     D_00535538[humanIndex].e[charType].v[6] = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintplayer", func_00148D58);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getHumanStability);
 #ifdef SKIP_ASM
 /**
  * Returns a profile's stability stat for one character (byte 6 of the character's stat record) from the current-stat
@@ -3047,14 +3047,14 @@ INCLUDE_ASM("be/beintplayer", func_00148D58);
  * @param charType  character ID (On Tour charType)
  * @return the stability stat (5 per level)
  */
-extern "C" signed char func_00148D58(void* self, int humanIndex, int charType)
+extern "C" signed char cBEStatInterface_getHumanStability(void* self, int humanIndex, int charType)
 {
     return D_00535538[humanIndex].e[charType].v[6];
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintplayer", func_00148D80);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getBrakingAttrib);
 #ifdef SKIP_ASM
 int cBENewPlayerInterface_isMissionMan(int index);
 
@@ -3069,14 +3069,14 @@ extern sCharStat_005308D8 D_005308D8[];
  *
  * Mission riders (cBENewPlayerInterface_isMissionMan()) get 0.5. The level is @p value when positive, else the
  * profile's edging stat for the character (D_00535538[profile][character][3], On Tour cEdging) divided by 5; the result
- * is that level over the character's cMaxEdging (byte 0xB of its D_005308D8 default-stat record). func_00148D80 and
- * func_00148E68 have identical bodies.
+ * is that level over the character's cMaxEdging (byte 0xB of its D_005308D8 default-stat record). cBEStatInterface_getBrakingAttrib and
+ * cBEStatInterface_getEdgingAttrib have identical bodies.
  *
  * @param rider  race rider slot (On Tour iRider)
  * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
  * @return the attribute level divided by the character's edging maximum
  */
-extern "C" float func_00148D80(void* self, int rider, int value)
+extern "C" float cBEStatInterface_getBrakingAttrib(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);
@@ -3092,7 +3092,7 @@ extern "C" float func_00148D80(void* self, int rider, int value)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintplayer", func_00148E68);
+INCLUDE_ASM("be/beintplayer", cBEStatInterface_getEdgingAttrib);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBENewPlayerInterface_isMissionMan(int index);
@@ -3108,14 +3108,14 @@ extern sCharStat_00148E68 D_005308D8_00148E68[] __asm__("D_005308D8");
  *
  * Mission riders (cBENewPlayerInterface_isMissionMan()) get 0.5. The level is @p value when positive, else the
  * profile's edging stat for the character (D_00535538[profile][character][3], On Tour cEdging) divided by 5; the result
- * is that level over the character's cMaxEdging (byte 0xB of its D_005308D8 default-stat record). func_00148D80 and
- * func_00148E68 have identical bodies.
+ * is that level over the character's cMaxEdging (byte 0xB of its D_005308D8 default-stat record). cBEStatInterface_getBrakingAttrib and
+ * cBEStatInterface_getEdgingAttrib have identical bodies.
  *
  * @param rider  race rider slot (On Tour iRider)
  * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
  * @return the attribute level divided by the character's edging maximum
  */
-extern "C" float func_00148E68(void* self, int rider, int value)
+extern "C" float cBEStatInterface_getEdgingAttrib(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);

@@ -74,7 +74,7 @@ extern "C" void func_002D4BE0(cAngerFX* self)
 INCLUDE_ASM("visualfx/angerfx", func_002D4C08);
 #ifdef SKIP_ASM
 void* cBEAggressionInterface_getThis();
-extern "C" int func_00155B50(void* self, int a, int b);
+extern "C" int cBEAggressionInterface_getAggression(void* self, int a, int b);
 extern float D_00488EA0[];
 extern float D_00488F48[];
 extern float D_00488FF0[];
@@ -165,7 +165,7 @@ extern "C" void func_002D4C08(sAnger_2D4C08* self)
         }
         void* aggr = cBEAggressionInterface_getThis();
         int a = riderV_2D4C08(self->rider, 7);
-        int lvl = func_00155B50(aggr, a, riderV_2D4C08(other, 7));
+        int lvl = cBEAggressionInterface_getAggression(aggr, a, riderV_2D4C08(other, 7));
         int old = st->anger;
         st->anger = lvl;
         if (lvl >= 4) {

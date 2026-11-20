@@ -39,15 +39,15 @@ INCLUDE_ASM("bx/memblockman", cMemMan_internalAlloc);
 extern "C" void* cMemBlockMan_alloc(unsigned int size);
 extern "C" void MEM_clear(void* p, unsigned int n);
 extern char TheDynamicMemMan[];
-// PORT: func_00320058__FPv / func_00320078__FPv take (heap, align, size); the defining unit declares 1 arg.
-void* func_00320058_K2(void* heap, unsigned int align, unsigned int size) __asm__("func_00320058__FPv");
-void* func_00320078_K2(void* heap, unsigned int align, unsigned int size) __asm__("func_00320078__FPv");
+// PORT: cDynamicMemMan_allocAlign__FPv / cDynamicMemMan_allocAlignHdr__FPv take (heap, align, size); the defining unit declares 1 arg.
+void* cDynamicMemMan_allocAlign_K2(void* heap, unsigned int align, unsigned int size) __asm__("cDynamicMemMan_allocAlign__FPv");
+void* cDynamicMemMan_allocAlignHdr_K2(void* heap, unsigned int align, unsigned int size) __asm__("cDynamicMemMan_allocAlignHdr__FPv");
 
 /**
  * Allocates memory from the fixed-size block pools or the dynamic heap.
  *
  * A request of 1-0x200 bytes with @p top clear uses cMemBlockMan_alloc (cMemBlockMan::alloc). Otherwise the alignment is
- * raised to at least 16 and TheDynamicMemMan allocates from the top (func_00320078) or bottom (func_00320058) of the
+ * raised to at least 16 and TheDynamicMemMan allocates from the top (cDynamicMemMan_allocAlignHdr) or bottom (cDynamicMemMan_allocAlign) of the
  * heap. A negative @p flags fills the new block with MEM_clear.
  *
  * @param size  bytes wanted
@@ -65,9 +65,9 @@ extern "C" void* cMemMan_internalAlloc(unsigned int size, unsigned int align, in
         if (align <= 15)
             align = 16;
         if (top != 0)
-            block = func_00320078_K2(TheDynamicMemMan, align, size);
+            block = cDynamicMemMan_allocAlignHdr_K2(TheDynamicMemMan, align, size);
         else
-            block = func_00320058_K2(TheDynamicMemMan, align, size);
+            block = cDynamicMemMan_allocAlign_K2(TheDynamicMemMan, align, size);
     }
     if (block != 0 && flags < 0)
         MEM_clear(block, size);
@@ -109,25 +109,25 @@ extern "C" void cMemMan_internalFree(void* block)
 #endif
 
 //100%
-INCLUDE_ASM("bx/memblockman", func_00319B98);
+INCLUDE_ASM("bx/memblockman", cMemMan_internalBlockSize);
 #ifdef SKIP_ASM
 extern "C" int func_0031A130(void* self);
-void func_0031FBB8(void* list, void* item);
+void cDynamicMemMan_dlmalloc_usable_size(void* list, void* item);
 extern char TheDynamicMemMan[];
 
 /**
  * Returns the usable size of a block: its pool's block size, or for a heap block its usable size in the dynamic heap.
  *
- * func_0031A130 gives 8 to 512 for an address inside one of the cMemBlockMan pools; otherwise func_0031FBB8 measures
+ * func_0031A130 gives 8 to 512 for an address inside one of the cMemBlockMan pools; otherwise cDynamicMemMan_dlmalloc_usable_size measures
  * the chunk in TheDynamicMemMan. The C declares it void, but the size is left in the return register: func_002525F8
  * returns it under the cMemMan mutex and cMemMan_internalResizeBlock uses it for the old block.
  *
  * @return the block size (declared void)
  */
-extern "C" void func_00319B98(void* self)
+extern "C" void cMemMan_internalBlockSize(void* self)
 {
     if (func_0031A130(self) == 0) {
-        func_0031FBB8(TheDynamicMemMan, self);
+        cDynamicMemMan_dlmalloc_usable_size(TheDynamicMemMan, self);
     }
 }
 #endif
@@ -142,13 +142,13 @@ extern void* cMemMan_m_mutex[16];
 extern char str_resizeBlock[];
 // PORT: operator_new__FUi takes (size, tag, flags, align) here.
 void* operator_new_K2(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-// PORT: func_00319B98 returns the block size; the unit declares it void.
-extern "C" unsigned int func_00319B98_K2(void* p) __asm__("func_00319B98");
+// PORT: cMemMan_internalBlockSize returns the block size; the unit declares it void.
+extern "C" unsigned int cMemMan_internalBlockSize_K2(void* p) __asm__("cMemMan_internalBlockSize");
 
 static inline unsigned int cMemMan_blockSizeK2(void* p)
 {
     MUTEX_lock(cMemMan_m_mutex);
-    unsigned int n = func_00319B98_K2(p);
+    unsigned int n = cMemMan_internalBlockSize_K2(p);
     MUTEX_unlock(cMemMan_m_mutex);
     return n;
 }
@@ -465,7 +465,7 @@ static inline int func_0031A130_in(void* p, void* base, unsigned int size)
  * (0x2000, 16), cMemBlockMan_m_container32 (0x6000, 32), cMemBlockMan_m_container64 (0x32000, 64),
  * cMemBlockMan_m_container128 (0x25800, 128), cMemBlockMan_m_container256 (0x20000, 256) and
  * cMemBlockMan_m_container512 (0x20000, 512). The same range test as cMemBlockMan_isMemBlock, but it returns the size.
- * func_00319B98 uses it to tell pool blocks from heap blocks.
+ * cMemMan_internalBlockSize uses it to tell pool blocks from heap blocks.
  *
  * @param addr  the address to look up
  * @return 8, 16, 32, 64, 128, 256 or 512 for a pool address, else 0
@@ -1270,19 +1270,19 @@ int cPS2ExecutionMan_getTimerHz(void* self)
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031ABD0);
 #ifdef SKIP_ASM
-void* func_00317520();
+void* getTheExecutionMan();
 extern "C" void iSignalSema(int);
 
 /**
  * Wakes the timer thread from the INTC 3 interrupt unless a halt has been requested.
  *
- * Runs inside func_0031A490 (the handler cPS2ExecutionMan_init installs). Gets the execution manager with func_00317520 and,
+ * Runs inside func_0031A490 (the handler cPS2ExecutionMan_init installs). Gets the execution manager with getTheExecutionMan and,
  * while its halt-request flag (+0x4038) is clear, signals the timer semaphore (+0x4034) with iSignalSema, releasing
  * one pass of func_0031AC08.
  */
 extern "C" void func_0031ABD0(void)
 {
-    char* app = (char*)func_00317520();
+    char* app = (char*)getTheExecutionMan();
     if (*(volatile int*)(app + 0x4038) == 0) {
         iSignalSema(*(int*)(app + 0x4034));
     }
@@ -1295,21 +1295,21 @@ INCLUDE_ASM("bx/memblockman", func_0031AC08);
 extern "C" void* WaitSema(int);
 extern "C" void WakeupThread(int);
 extern "C" void SleepThread();
-// PORT: func_00317500__Fv is called with self here; bind the 1-arg form to that symbol.
-int func_00317500_1(void* self) __asm__("func_00317500__Fv");
+// PORT: cExecutionMan_timerFunction__Fv is called with self here; bind the 1-arg form to that symbol.
+int cExecutionMan_timerFunction_1(void* self) __asm__("cExecutionMan_timerFunction__Fv");
 
 /**
  * Runs the PS2 execution manager's timer thread (its entry point).
  *
  * Each time the timer semaphore (+0x4034, signalled from the interrupt by func_0031ABD0) is released and the quit flag
- * (+0x20) is still clear, calls func_00317500 (which runs func_00317348 on cAppMan_TheAppMan, the per-tick update).
+ * (+0x20) is still clear, calls cExecutionMan_timerFunction (which runs cAppMan_timerFunction on cAppMan_TheAppMan, the per-tick update).
  * Once the quit flag is set, wakes the main thread (+0x10) and sleeps.
  */
 extern "C" void func_0031AC08(void* self)
 {
     while (WaitSema(*(int*)((char*)self + 0x4034)), *(volatile int*)((char*)self + 0x20) == 0)
     {
-        func_00317500_1(self);
+        cExecutionMan_timerFunction_1(self);
     }
     WakeupThread(*(int*)((char*)self + 0x10));
     SleepThread();

@@ -573,9 +573,9 @@ extern "C" int cRider_isSafeToDelete(cRider* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/rider", cRider_parsePartsFromBuf);
 #ifdef SKIP_ASM
-void* func_00314978(void* self);
-void func_00314A18(void* self, int a1);
-extern "C" void func_00314988(int* self, int flags);
+void* cMdfArchive_cMdfArchive(void* self);
+void cMdfArchive_attachArchive(void* self, int a1);
+extern "C" void cMdfArchive__cMdfArchive(int* self, int flags);
 extern "C" void* cMdfArchive_getModelPart(void* self, const char* name);
 extern "C" int func_0011BBE8(void* self, char** list);
 extern "C" void cAnimModel_addModelPartLOD(void* model, int lod, void* part, int a3);
@@ -588,10 +588,10 @@ struct sMdfArchive_11C138
 /**
  * Adds the rider's outfit model parts from an MDF archive buffer to its animation model.
  *
- * Wraps @p pData in a local cMdfArchive (func_00314978, func_00314A18) and gets the rider's part entries
+ * Wraps @p pData in a local cMdfArchive (cMdfArchive_cMdfArchive, cMdfArchive_attachArchive) and gets the rider's part entries
  * (func_0011BBE8: the equipped items of its character, or every part of a cheat character, into a 52-entry
  * list). For each entry's four LOD part names (at +0x18), the named archive part is added to mAnimModel at
- * that LOD as variant 0. The archive is destroyed with func_00314988(arc, 2).
+ * that LOD as variant 0. The archive is destroyed with cMdfArchive__cMdfArchive(arc, 2).
  *
  * @param pData  the MDF archive data, passed as an int (On Tour: pData)
  */
@@ -599,8 +599,8 @@ extern "C" void cRider_parsePartsFromBuf(cRider* self, int pData)
 {
     sMdfArchive_11C138 arc;
     char* list[52];
-    func_00314978(&arc);
-    func_00314A18(&arc, pData);
+    cMdfArchive_cMdfArchive(&arc);
+    cMdfArchive_attachArchive(&arc, pData);
     int n = func_0011BBE8(self, list);
     for (int i = 0; i < n; i++)
     {
@@ -618,7 +618,7 @@ extern "C" void cRider_parsePartsFromBuf(cRider* self, int pData)
             }
         }
     }
-    func_00314988((int*)&arc, 2);
+    cMdfArchive__cMdfArchive((int*)&arc, 2);
 }
 #endif
 
@@ -666,7 +666,7 @@ extern "C" void cRiderMetrix_reset(void* metrix);
 extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" bool cBECharacterInterface_getIsGoofyFoot(void* iface, int riderIndex);
 extern "C" void cRider_initPath(void* rider, int v);
-extern "C" int func_00145C38(void* iface, int index);
+extern "C" int cBENewPlayerInterface_isFirstTimeWC(void* iface, int index);
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cRider_putAtDropOffBC(cRider* self);
 extern "C" void cRiderMetrix_evTakeoff(void* p, int flip, int c);
@@ -689,7 +689,7 @@ void cRider_initAlways_impl(cRider* self) __asm__("cRider_initAlways");
  * +0xDE4 = 13), clears the rubber-band values, resets the metrix and anim base, sets IsGoofyStance from cBECharacterInterface_getIsGoofyFoot
  * (On Tour getIsGoofyFoot) and calls cRider_initPath (initPath(true)).
  *
- * Placement: a rider flagged by func_00145C38 on location 14 with no game path, in game mode 4, is put at the
+ * Placement: a rider flagged by cBENewPlayerInterface_isFirstTimeWC on location 14 with no game path, in game mode 4, is put at the
  * back-country drop-off (cRider_putAtDropOffBC, motion 1, control 4, takeoff scored); in modes 4-6 it goes to a start
  * point chosen by the location (17-21: start 0 of type 2; 14-16: its own start of type 1; else start 1 of type 2) and
  * cRider_cleanupAfterPutAt; otherwise motion state 3 and control state 6. With a game path set the boost is
@@ -711,7 +711,7 @@ void cRider_initAlways_impl(cRider* self)
         cRider_initPath(self, 1);
         void* iface = cBE_getInterface_11D390(cBE_getBE(), 0);
         // PORT: the gotos reproduce the shared compare chain (mode 4, 5, 6) that two different entry conditions fall into.
-        if (func_00145C38(cBE_getInterface_11D390(cBE_getBE(), 1), self->mAIIndex) != 0
+        if (cBENewPlayerInterface_isFirstTimeWC(cBE_getInterface_11D390(cBE_getBE(), 1), self->mAIIndex) != 0
             && cBENewRaceInterface_newRace.cGamePath == 0 && *cBENewRaceInterface_getLocation(iface) == 0xE)
         {
             if (cBENewRaceInterface_newRace.cGameMode == 4)
@@ -4875,21 +4875,21 @@ extern "C" int cRider_getIdentity(cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", cRider_getCheatIdentity);
 #ifdef SKIP_ASM
-extern "C" int func_00147410(void* iface, int riderIndex);
+extern "C" int cBENewPlayerInterface_getRiderCheatCharID(void* iface, int riderIndex);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 /**
  * Returns the cheat character chosen for this rider's player.
  *
- * Asks the new-player interface (cBE interface kind 1) through func_00147410 for the rider's mAIIndex; game mode code
+ * Asks the new-player interface (cBE interface kind 1) through cBENewPlayerInterface_getRiderCheatCharID for the rider's mAIIndex; game mode code
  * stores the same value in iCheatCharacters.
  *
  * @return the cheat character id for the rider's player
  */
 extern "C" int cRider_getCheatIdentity(cRider* self)
 {
-    return func_00147410(cBE_getInterface_Fv(cBE_getBE(), 1), self->mAIIndex);
+    return cBENewPlayerInterface_getRiderCheatCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mAIIndex);
 }
 #endif
 
@@ -6144,7 +6144,7 @@ extern "C" float cRider_getStartGateKneeOffset(cRider* self);
 extern "C" float func_00115B08(void* self);
 extern "C" void cRiderAnimBase_playFromAnimID(void* anim, int id, tAnimID animId, float t);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
-extern "C" void func_00313CF0(void* p, int a1, float t);
+extern "C" void cAnimSequence_setSubAnimTime(void* p, int a1, float t);
 extern "C" void cRiderAnimBase_setupAnimation(void* anim, int a1);
 extern "C" void cRider_EulerToQuat(cRider* self, sQuat_001241C0* out, float rx, float ry, float rz);
 extern "C" void cRider_updateAnimation(cRider* self, float value);
@@ -6439,7 +6439,7 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* 
         float start = pCurrMainAnim->start;
         *(float*)((char*)self->mRiderAnim + 0x1C) = pCurrMainAnim->speed;
         cRiderAnimBase_playFromAnimID(self->mRiderAnim, 432, animInfo, start * 0.01666666753590107f);
-        func_00313CF0(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2), 0, startTime);
+        cAnimSequence_setSubAnimTime(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2), 0, startTime);
         cRiderAnimBase_setupAnimation(self->mRiderAnim, 0);
         *(float*)((char*)self->mRiderAnim + 0x1C) = 1.0f;
     } else if ((eventBits & 2) && pFrameInfo->active == 0) {
@@ -7394,7 +7394,7 @@ INCLUDE_ASM("ai/rider", cPlayer_vibrationUpdate);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_001474E8(void* iface, int id);
+extern "C" int cBENewPlayerInterface_getUseDualShock(void* iface, int id);
 extern "C" void func_00125B18(void* p, int a, int b);
 
 struct sVEntry001278E8 { short delta; short index; int (*fn)(void*); };
@@ -7407,7 +7407,7 @@ static inline bool riderInRange_1278E8(int v)
 /**
  * Updates the player's pad vibration once a frame (cRider virtual slot 19).
  *
- * Only with a Pad. Vibration stays on when the option interface (cBE_getInterface kind 1, func_001474E8) allows it for
+ * Only with a Pad. Vibration stays on when the option interface (cBE_getInterface kind 1, cBENewPlayerInterface_getUseDualShock) allows it for
  * the rider's AI index and the replay's first word is not 1-9; then func_00125B18 decays the levels and drives the pad.
  */
 extern "C" void cPlayer_vibrationUpdate(void* self)
@@ -7419,7 +7419,7 @@ extern "C" void cPlayer_vibrationUpdate(void* self)
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
         char* sub = *(char**)(player + 0x18) + 0x6C0;
         sVEntry001278E8* vt = *(sVEntry001278E8**)sub;
-        if (func_001474E8(iface, vt[7].fn(sub + vt[7].delta)) != 0)
+        if (cBENewPlayerInterface_getUseDualShock(iface, vt[7].fn(sub + vt[7].delta)) != 0)
         {
             flag = !riderInRange_1278E8(*(int*)SSXApp->Game->Replay);
         }

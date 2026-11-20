@@ -8,7 +8,7 @@ INCLUDE_ASM("path/pathsys", cPathSys_loadTrackPaths);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void pathREAD_tInt32(void* dst, void* src);
-extern "C" int func_0026A180(void* path, char* data);
+extern "C" int cPath_initPath(void* path, char* data);
 extern char str_TrackPaths[];
 extern void* D_00481448[];
 
@@ -44,7 +44,7 @@ extern "C" int cPathSys_loadTrackPaths(sPathSysB310* self, char* data)
     self->count = count;
     *slot = new (operator_new_tag(count * sizeof(sPathB310), str_TrackPaths, 0, 0)) sPathB310[count];
     for (int i = 0; i < self->count; i++) {
-        data += func_0026A180(&self->paths[i], data);
+        data += cPath_initPath(&self->paths[i], data);
     }
     return data - start;
 }
@@ -56,7 +56,7 @@ INCLUDE_ASM("path/pathsys", cPathSys_loadAIPaths);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void pathREAD_tInt32(void* dst, void* src);
-extern "C" int func_0026A180(void* path, char* data);
+extern "C" int cPath_initPath(void* path, char* data);
 extern char str_AIPaths[];
 extern void* D_00481478[];
 
@@ -91,7 +91,7 @@ extern "C" int cPathSys_loadAIPaths(sPathSysB410* self, char* data)
     self->count = count;
     *slot = new (operator_new_tag(count * sizeof(sPathB410), str_AIPaths, 0, 0)) sPathB410[count];
     for (int i = 0; i < self->count; i++) {
-        data += func_0026A180(&self->paths[i], data);
+        data += cPath_initPath(&self->paths[i], data);
     }
     return data - start;
 }

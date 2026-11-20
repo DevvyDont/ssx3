@@ -1662,7 +1662,7 @@ void gCamTriggerMan_resolve(void* a, int b);
 extern "C" void cSSXScriptEngine_AttachAnchorDataTable(void* self, int a, void* obj);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-void func_001547D8_AE68(void* self, int a, void* p, int v) __asm__("func_001547D8__FPv");
+void cBEMissionInterface_addStreamData_AE68(void* self, int a, void* p, int v) __asm__("cBEMissionInterface_addStreamData__FPv");
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00286CA8(void* self, unsigned int arg, void* obj);
 extern "C" void func_002105D0(void* obj);
@@ -1793,7 +1793,7 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
         func_00286CA8(cAudioInterface_bxAudio(), RID, obj);
         break;
     case 19:
-        func_001547D8_AE68(cBE_getInterface_Fv(cBE_getBE(), 10), RID & 0xFF, obj + 4, *(int*)obj);
+        cBEMissionInterface_addStreamData_AE68(cBE_getInterface_Fv(cBE_getBE(), 10), RID & 0xFF, obj + 4, *(int*)obj);
         break;
     case 21:
         func_002105D0(obj);
@@ -1824,8 +1824,8 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void operator_delete(int*);
 extern "C" void cAI_removeInjectedFile(void* p, unsigned char id);
-// PORT: func_001547E0__FPv is called with a second (byte) argument here.
-void func_001547E0_2(void* iface, unsigned char id) __asm__("func_001547E0__FPv");
+// PORT: cBEMissionInterface_remStreamData__FPv is called with a second (byte) argument here.
+void cBEMissionInterface_remStreamData_2(void* iface, unsigned char id) __asm__("cBEMissionInterface_remStreamData__FPv");
 extern "C" void func_0016CF18(unsigned int param);
 extern "C" void func_00210608(void* data);
 extern "C" void func_00242570(void* p, void* data);
@@ -2009,7 +2009,7 @@ extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsign
         cSSXAudio_UnAttachAudioBank(cAudioInterface_bxAudio(), resourceId, data);
         break;
     case 19:
-        func_001547E0_2(cBE_getInterface_Fv(cBE_getBE(), 10), resourceId);
+        cBEMissionInterface_remStreamData_2(cBE_getInterface_Fv(cBE_getBE(), 10), resourceId);
         break;
     case 21:
         func_00210608(data);

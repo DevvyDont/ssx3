@@ -877,7 +877,7 @@ struct sVEK18FAF0b {
  * first word of the engine at +0x10) for the next state through its vtable slot 5 (cFECustom_getPrevState in cFECustom_vtbl)
  * with this state and the mode (+0x1BC), and pushes it with cUIStateStack_pushCheck. 1 sets up a race on the new-race
  * interface (game mode 4, event 0xC), sets D_004A11B8 to 1 and the location (D_00535C08[0]) to the player's last hub
- * (cBENewPlayerInterface_getLastHub), submits it (the interface's vtable slot 1, func_00144928) and makes a new
+ * (cBENewPlayerInterface_getLastHub), submits it (the interface's vtable slot 1, cBENewRaceInterface_submit) and makes a new
  * cPreGameLoadScreen the next app module. 2 clears D_004A19D8 and pushes a new title state (cFEStateTitle_cFEStateTitle1,
  * "cFEStateTitle"). Sets +0x1AC afterwards. Fills slot +0x10C of cFEStateProfileLoad_vtbl (cFEMemCard_updateDone's
  * slot).
@@ -1028,7 +1028,7 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int strlen(const char* s);
-extern "C" void func_00147138(void* player, int idx, char* name);
+extern "C" void cBENewPlayerInterface_setPlayerName(void* player, int idx, char* name);
 extern "C" void* cBENewPlayerInterface_getPlayerName(void* player, int idx);
 extern "C" void func_0018FC98(void* p);
 extern "C" void* cKeyboardPopup_cKeyboardPopup(void* mem, void* engine, void* owner, int a3, int a4);
@@ -1119,7 +1119,7 @@ static inline void* GetText_K18FD90(char* key)
  * On the load screen (2) with the main button active it starts a load of file type 1 (func_0023C8F0) and calls this
  * state's vtable slot 44 (cFEMemCard_confirmLoad).
  *
- * Event 13 (the keyboard is done): stores the entered name (mszEditString) as the player's name (func_00147138, for the
+ * Event 13 (the keyboard is done): stores the entered name (mszEditString) as the player's name (cBENewPlayerInterface_setPlayerName, for the
  * player at +0x1CC) and in the manager's mNewFileName, or "kT_MEMPlayerName" formatted with the player number when it
  * is empty; submits the player interface (vtable slot 1, cBENewPlayerInterface_submit) and starts the save
  * (func_0018FC98).
@@ -1146,12 +1146,12 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(void* vself, char* item, int e
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
         if (strlen(name) != 0) {
-            func_00147138(player, self->slot, name);
+            cBENewPlayerInterface_setPlayerName(player, self->slot, name);
             func_002C2540(mp + 0x276, name);
         } else {
             strcpy2(fmt, GetText_K18FD90(str_kT_MEMPlayerName_b));
             sprintf(buf, fmt, self->slot + 1);
-            func_00147138(player, self->slot, buf);
+            cBENewPlayerInterface_setPlayerName(player, self->slot, buf);
             func_002C2540(mp + 0x276, buf);
         }
         VCALLV_K18FD90(player, 0xC, 1));

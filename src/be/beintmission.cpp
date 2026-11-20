@@ -33,7 +33,7 @@ void* cBEMissionInterface_getThis()
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001532F0);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getTotalCollectForMnt);
 #ifdef SKIP_ASM
 extern signed char D_0043FA70[];
 
@@ -44,7 +44,7 @@ extern signed char D_0043FA70[];
  * @param start  the first section
  * @return the total
  */
-extern "C" int func_001532F0(void* self, int start)
+extern "C" int cBEMissionInterface_getTotalCollectForMnt(void* self, int start)
 {
     int sum = 0;
     for (int i = 0; i < 17; i++)
@@ -55,7 +55,7 @@ extern "C" int func_001532F0(void* self, int start)
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintmission", func_00153330);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getTotalCollectByType);
 #ifdef SKIP_ASM
 extern signed char D_0043FA70[];
 extern int D_005305F0[];
@@ -67,14 +67,14 @@ extern int D_005305F0[];
  * @param start  the offset from the race's location
  * @return the total
  */
-extern "C" int func_00153330(void* self, int start)
+extern "C" int cBEMissionInterface_getTotalCollectByType(void* self, int start)
 {
     return D_0043FA70[start + D_005305F0[0]];
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153350);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getTotalCollectForSection);
 #ifdef SKIP_ASM
 extern signed char D_0043FA70[];
 
@@ -84,7 +84,7 @@ extern signed char D_0043FA70[];
  * @param start  the location
  * @return the total
  */
-extern "C" int func_00153350(void* self, int start)
+extern "C" int cBEMissionInterface_getTotalCollectForSection(void* self, int start)
 {
     int sum = 0;
     for (int i = 0; i < 1; i++)
@@ -135,7 +135,7 @@ extern "C" int cBEMissionInterface_getTotalCollectForPeak(void* self, int owner)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001533F8);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectForMnt);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -152,7 +152,7 @@ extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
  * @param idx  the first section
  * @return the count
  */
-extern "C" int func_001533F8(void* self, int rider, int idx)
+extern "C" int cBEMissionInterface_getCurrentCollectForMnt(void* self, int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -169,7 +169,7 @@ extern "C" int func_001533F8(void* self, int rider, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153498);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectByType);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -186,7 +186,7 @@ extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
  * @param idx  the offset from the race's location
  * @return the count
  */
-extern "C" int func_00153498(void* self, int rider, int idx)
+extern "C" int cBEMissionInterface_getCurrentCollectByType(void* self, int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -197,7 +197,7 @@ extern "C" int func_00153498(void* self, int rider, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153520);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectForSection);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -213,7 +213,7 @@ extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
  * @param idx  the location
  * @return the count
  */
-extern "C" int func_00153520(void* self, int rider, int idx)
+extern "C" int cBEMissionInterface_getCurrentCollectForSection(void* self, int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -282,7 +282,7 @@ extern "C" int cBEMissionInterface_getCurrentCollectForPeak(void* self, int ride
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153688);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCurrentCollectForPeak1);
 #ifdef SKIP_ASM
 struct sEconRecord_00153688
 {
@@ -311,7 +311,7 @@ extern sEconChar_00153688 cBELibrary_profileLib[][10];
  * @param owner  the peak
  * @return the count
  */
-extern "C" int func_00153688(void* self, int profile, int character, int owner)
+extern "C" int cBEMissionInterface_getCurrentCollectForPeak1(void* self, int profile, int character, int owner)
 {
     int sum = 0;
     for (int i = 0; i < 1; i++)
@@ -386,7 +386,7 @@ extern "C" int cBEMissionInterface_getCurrentCollectForPeakByChar(void* self, in
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153858);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getCollectBits);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -401,7 +401,7 @@ extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
  * @param idx  the offset from the race's location
  * @return the bit words
  */
-extern "C" char* func_00153858(void* self, int rider, int idx)
+extern "C" char* cBEMissionInterface_getCollectBits(void* self, int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -414,7 +414,7 @@ extern "C" char* func_00153858(void* self, int rider, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001538E8);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_isBitSet);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -430,7 +430,7 @@ extern char D_004A6CAC[];
  * @param idx  the offset from the race's location
  * @return 1 if found, else 0
  */
-extern "C" int func_001538E8(void* self, int rider, int bit, int idx)
+extern "C" int cBEMissionInterface_isBitSet(void* self, int rider, int bit, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -443,7 +443,7 @@ extern "C" int func_001538E8(void* self, int rider, int bit, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001539A8);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_setBits);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getProfileIndex(int);
@@ -468,7 +468,7 @@ extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
  * @param idx  the offset from the race's location
  * @param src  the new bit words
  */
-extern "C" void func_001539A8(void* self, int rider, int idx, sBits8_1539A8* src)
+extern "C" void cBEMissionInterface_setBits(void* self, int rider, int idx, sBits8_1539A8* src)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -490,7 +490,7 @@ extern "C" void func_001539A8(void* self, int rider, int idx, sBits8_1539A8* src
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153B00);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_setBit);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
@@ -532,7 +532,7 @@ extern sEconBitsChar_00153B00 D_004A6CAC_bits153B00[][10] __asm__("D_004A6CAC");
  * @param bit  the collectible's bit, 0-63
  * @param idx  the offset from the race's location
  */
-extern "C" void func_00153B00(void* self, int rider, int bit, int idx)
+extern "C" void cBEMissionInterface_setBit(void* self, int rider, int bit, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -564,7 +564,7 @@ struct sMissionDefView_00153C88
     char pad_0x08[0x1C];
 };
 extern sMissionDefView_00153C88 D_0043EE10_v00153C88[] __asm__("cBELibrary_missionInfo");
-extern "C" int func_00154240(void* self, int id);
+extern "C" int cBEMissionInterface_getMissionIdx(void* self, int id);
 
 class cMissionObj_00153C88
 {
@@ -585,13 +585,13 @@ public:
  */
 extern "C" void cBEMissionInterface_getMissionName(void* self, int id)
 {
-    int i = func_00154240(self, id);
+    int i = cBEMissionInterface_getMissionIdx(self, id);
     ((cMissionObj_00153C88*)(void*)SSXApp->FELocale)->v4(D_0043EE10_v00153C88[i].f4);
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153CD8);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getMissionShortDesc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sMissionDefView_00153CD8
@@ -602,7 +602,7 @@ struct sMissionDefView_00153CD8
     char pad_0x0C[0x18];
 };
 extern sMissionDefView_00153CD8 D_0043EE10_v00153CD8[] __asm__("cBELibrary_missionInfo");
-extern "C" int func_00154240(void* self, int id);
+extern "C" int cBEMissionInterface_getMissionIdx(void* self, int id);
 
 class cMissionObj_00153CD8
 {
@@ -616,15 +616,15 @@ public:
 
 /**
  * Looks up a mission's short description in the front-end locale: SSXApp->FELocale's vtable slot 4 with the text id at
- * +0x8 of the mission's cBELibrary_missionInfo record (index from func_00154240).
+ * +0x8 of the mission's cBELibrary_missionInfo record (index from cBEMissionInterface_getMissionIdx).
  *
  * Declared void here; the locale call's result is left in $v0, as in cBEMissionInterface_getMissionName.
  *
  * @param id  the mission id
  */
-extern "C" void func_00153CD8(void* self, int id)
+extern "C" void cBEMissionInterface_getMissionShortDesc(void* self, int id)
 {
-    int i = func_00154240(self, id);
+    int i = cBEMissionInterface_getMissionIdx(self, id);
     ((cMissionObj_00153CD8*)(void*)SSXApp->FELocale)->v4(D_0043EE10_v00153CD8[i].f8);
 }
 #endif
@@ -642,7 +642,7 @@ struct sMissionDefView_00153D28
     char pad_0x10[0x14];
 };
 extern sMissionDefView_00153D28 D_0043EE10_v00153D28[] __asm__("cBELibrary_missionInfo");
-extern "C" int func_00154240(void* self, int id);
+extern "C" int cBEMissionInterface_getMissionIdx(void* self, int id);
 
 class cMissionObj_00153D28
 {
@@ -663,7 +663,7 @@ public:
  */
 extern "C" void cBEMissionInterface_getMissionLongDesc(void* self, int id)
 {
-    int i = func_00154240(self, id);
+    int i = cBEMissionInterface_getMissionIdx(self, id);
     ((cMissionObj_00153D28*)(void*)SSXApp->FELocale)->v4(D_0043EE10_v00153D28[i].fC);
 }
 #endif
@@ -672,7 +672,7 @@ extern "C" void cBEMissionInterface_getMissionLongDesc(void* self, int id)
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_isMissionCompleted);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
-extern "C" int func_00154240(void* self, int id);
+extern "C" int cBEMissionInterface_getMissionIdx(void* self, int id);
 
 /**
  * Tells whether rider 0's character has completed a mission (bit 3 of its saved mission flags in profile 0).
@@ -682,7 +682,7 @@ extern "C" int func_00154240(void* self, int id);
  */
 extern "C" int cBEMissionInterface_isMissionCompleted(void* self, int id)
 {
-    int i = func_00154240(self, id);
+    int i = cBEMissionInterface_getMissionIdx(self, id);
     int characterId = cBELibrary_getCharacterID(0);
     int off = (i << 2) + characterId * 3976;
     char* profile = (char*)cBELibrary_profileLib + off;
@@ -691,10 +691,10 @@ extern "C" int cBEMissionInterface_isMissionCompleted(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153DD0);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_isMissionReady);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
-extern "C" int func_00154240(void* self, int id);
+extern "C" int cBEMissionInterface_getMissionIdx(void* self, int id);
 
 /**
  * Tells whether a mission is ready: bit 1 of its flag word (+0x118 + index * 4 of rider 0's character in profile 0).
@@ -702,9 +702,9 @@ extern "C" int func_00154240(void* self, int id);
  * @param id  the mission id
  * @return 1 or 0
  */
-extern "C" int func_00153DD0(void* self, int id)
+extern "C" int cBEMissionInterface_isMissionReady(void* self, int id)
 {
-    int i = func_00154240(self, id);
+    int i = cBEMissionInterface_getMissionIdx(self, id);
     int charId = cBELibrary_getCharacterID(0);
     int off = (i << 2) + charId * 3976;
     char* recordBase = (char*)cBELibrary_profileLib + off;
@@ -716,12 +716,12 @@ extern "C" int func_00153DD0(void* self, int id)
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_isMissionLocked);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
-extern "C" int func_00154240(void* self, int id);
+extern "C" int cBEMissionInterface_getMissionIdx(void* self, int id);
 
 /**
  * Tells whether a mission is still locked for the player.
  *
- * Index from func_00154240 (On Tour getMissionIdx); the flag word is at +0x118 + index * 4 of the profile of rider 0's
+ * Index from cBEMissionInterface_getMissionIdx (On Tour getMissionIdx); the flag word is at +0x118 + index * 4 of the profile of rider 0's
  * character in cBELibrary_profileLib (profile 0).
  *
  * @param id  the mission id (On Tour uiMissionId)
@@ -729,7 +729,7 @@ extern "C" int func_00154240(void* self, int id);
  */
 extern "C" int cBEMissionInterface_isMissionLocked(void* self, int id)
 {
-    int i = func_00154240(self, id);
+    int i = cBEMissionInterface_getMissionIdx(self, id);
     int characterId = cBELibrary_getCharacterID(0);
     int off = (i << 2) + characterId * 3976;
     char* profile = (char*)cBELibrary_profileLib + off;
@@ -741,7 +741,7 @@ extern "C" int cBEMissionInterface_isMissionLocked(void* self, int id)
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_isMissionAvailable);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
-extern "C" int func_00154240(void* self, int id);
+extern "C" int cBEMissionInterface_getMissionIdx(void* self, int id);
 
 /**
  * Tells whether a mission is available to rider 0's character (bit 2 of its saved mission flags in profile
@@ -752,7 +752,7 @@ extern "C" int func_00154240(void* self, int id);
  */
 extern "C" int cBEMissionInterface_isMissionAvailable(void* self, int id)
 {
-    int i = func_00154240(self, id);
+    int i = cBEMissionInterface_getMissionIdx(self, id);
     int characterId = cBELibrary_getCharacterID(0);
     int off = (i << 2) + characterId * 3976;
     char* profile = (char*)cBELibrary_profileLib + off;
@@ -761,10 +761,10 @@ extern "C" int cBEMissionInterface_isMissionAvailable(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153ED8);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_isMissionShowIcon);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
-extern "C" int func_00154240(void* self, int id);
+extern "C" int cBEMissionInterface_getMissionIdx(void* self, int id);
 
 /**
  * Tells whether a mission's map icon is shown: bit 4 of its flag word (+0x118 + index * 4 of rider 0's character in
@@ -773,9 +773,9 @@ extern "C" int func_00154240(void* self, int id);
  * @param id  the mission id
  * @return 1 or 0
  */
-extern "C" int func_00153ED8(void* self, int id)
+extern "C" int cBEMissionInterface_isMissionShowIcon(void* self, int id)
 {
-    int i = func_00154240(self, id);
+    int i = cBEMissionInterface_getMissionIdx(self, id);
     int charId = cBELibrary_getCharacterID(0);
     int off = (i << 2) + charId * 3976;
     char* recordBase = (char*)cBELibrary_profileLib + off;
@@ -784,7 +784,7 @@ extern "C" int func_00153ED8(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153F30);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getLocationID);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sMissionDefView_00153F30
@@ -796,22 +796,22 @@ struct sMissionDefView_00153F30
     char pad_0x18[0xC];
 };
 extern sMissionDefView_00153F30 D_0043EE10_v00153F30[] __asm__("cBELibrary_missionInfo");
-extern "C" int func_00154240(void* self, int id);
+extern "C" int cBEMissionInterface_getMissionIdx(void* self, int id);
 
 /**
- * Returns the word at +0x10 of a mission's cBELibrary_missionInfo record (index from func_00154240), its location.
+ * Returns the word at +0x10 of a mission's cBELibrary_missionInfo record (index from cBEMissionInterface_getMissionIdx), its location.
  *
  * @param id  the mission id
  * @return the location
  */
-extern "C" int func_00153F30(void* self, int id)
+extern "C" int cBEMissionInterface_getLocationID(void* self, int id)
 {
-    int i = func_00154240(self, id);
+    int i = cBEMissionInterface_getMissionIdx(self, id);
     return D_0043EE10_v00153F30[i].f10;
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintmission", func_00153F68);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getPoints);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sMissionDefView_00153F68
@@ -823,26 +823,26 @@ struct sMissionDefView_00153F68
     char pad_0x18[0xC];
 };
 extern sMissionDefView_00153F68 D_0043EE10_v00153F68[] __asm__("cBELibrary_missionInfo");
-extern "C" int func_00154240(void* self, int id);
+extern "C" int cBEMissionInterface_getMissionIdx(void* self, int id);
 
 /**
- * Returns the word at +0x14 of a mission's cBELibrary_missionInfo record (index from func_00154240).
+ * Returns the word at +0x14 of a mission's cBELibrary_missionInfo record (index from cBEMissionInterface_getMissionIdx).
  *
  * @param id  the mission id
  * @return the value
  */
-extern "C" int func_00153F68(void* self, int id)
+extern "C" int cBEMissionInterface_getPoints(void* self, int id)
 {
-    int i = func_00154240(self, id);
+    int i = cBEMissionInterface_getMissionIdx(self, id);
     return D_0043EE10_v00153F68[i].f14;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00153FA0);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getDiffLevel);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// The unit's sMissionDef_0043EE10 is defined later (with func_00154240) and lacks
+// The unit's sMissionDef_0043EE10 is defined later (with cBEMissionInterface_getMissionIdx) and lacks
 // the fields at 0x18/0x1C; this local view of the same table binds to cBELibrary_missionInfo.
 struct sMissionDefView_0043EE10
 {
@@ -858,18 +858,18 @@ struct sMissionDefView_0043EE10
 };
 extern sMissionDefView_0043EE10 D_0043EE10_view[] __asm__("cBELibrary_missionInfo");
 
-extern "C" int func_00154240(void* self, int id);
+extern "C" int cBEMissionInterface_getMissionIdx(void* self, int id);
 
 /**
- * Returns the halfword at +0x18 of a mission's cBELibrary_missionInfo record (index from func_00154240), its
+ * Returns the halfword at +0x18 of a mission's cBELibrary_missionInfo record (index from cBEMissionInterface_getMissionIdx), its
  * difficulty level.
  *
  * @param id  the mission id
  * @return the level, 1-3
  */
-extern "C" short func_00153FA0(void* self, int id)
+extern "C" short cBEMissionInterface_getDiffLevel(void* self, int id)
 {
-    int i = func_00154240(self, id);
+    int i = cBEMissionInterface_getMissionIdx(self, id);
     return D_0043EE10_view[i].field_0x18;
 }
 #endif
@@ -878,16 +878,16 @@ extern "C" short func_00153FA0(void* self, int id)
 INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNextMissionID);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// The unit's sMissionDef_0043EE10 is defined later (with func_00154240) and lacks
+// The unit's sMissionDef_0043EE10 is defined later (with cBEMissionInterface_getMissionIdx) and lacks
 // the fields at 0x18/0x1C; this local view of the same table binds to cBELibrary_missionInfo.
 extern sMissionDefView_0043EE10 D_0043EE10_view[] __asm__("cBELibrary_missionInfo");
 
-extern "C" int func_00154240(void* self, int id);
+extern "C" int cBEMissionInterface_getMissionIdx(void* self, int id);
 
 /**
  * Returns the ID of the mission that follows a given one.
  *
- * Finds the mission's index with func_00154240() (On Tour getMissionIdx, which asserts "Mission id not found")
+ * Finds the mission's index with cBEMissionInterface_getMissionIdx() (On Tour getMissionIdx, which asserts "Mission id not found")
  * and reads the next-mission field (+0x1C) of its mission table entry (cBELibrary_missionInfo, On Tour
  * cBELibrary::missionInfo).
  *
@@ -896,16 +896,16 @@ extern "C" int func_00154240(void* self, int id);
  */
 extern "C" int cBEMissionInterface_getNextMissionID(void* self, int id)
 {
-    int i = func_00154240(self, id);
+    int i = cBEMissionInterface_getMissionIdx(self, id);
     return D_0043EE10_view[i].field_0x1C;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154010);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_setIsLocked);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
-extern "C" int func_00154240(void* self, int id);
+extern "C" int cBEMissionInterface_getMissionIdx(void* self, int id);
 
 /**
  * Sets bit 0 (locked) of a mission's flag word (+0x118 + index * 4 of rider 0's character in profile 0) to
@@ -914,9 +914,9 @@ extern "C" int func_00154240(void* self, int id);
  * @param id  the mission id
  * @param value  1 to lock
  */
-extern "C" void func_00154010(void* self, int id, int value)
+extern "C" void cBEMissionInterface_setIsLocked(void* self, int id, int value)
 {
-    int i = func_00154240(self, id);
+    int i = cBEMissionInterface_getMissionIdx(self, id);
     int charId = cBELibrary_getCharacterID(0);
     int off = (i << 2) + charId * 3976;
     char* recordBase = (char*)cBELibrary_profileLib + off;
@@ -925,10 +925,10 @@ extern "C" void func_00154010(void* self, int id, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154080);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_setIsReady);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
-extern "C" int func_00154240(void* self, int id);
+extern "C" int cBEMissionInterface_getMissionIdx(void* self, int id);
 
 /**
  * Sets bit 1 (ready) of a mission's flag word (+0x118 + index * 4 of rider 0's character in profile 0) to
@@ -937,9 +937,9 @@ extern "C" int func_00154240(void* self, int id);
  * @param id  the mission id
  * @param value  1 for ready
  */
-extern "C" void func_00154080(void* self, int id, int value)
+extern "C" void cBEMissionInterface_setIsReady(void* self, int id, int value)
 {
-    int i = func_00154240(self, id);
+    int i = cBEMissionInterface_getMissionIdx(self, id);
     int charId = cBELibrary_getCharacterID(0);
     int off = (i << 2) + charId * 3976;
     char* recordBase = (char*)cBELibrary_profileLib + off;
@@ -948,10 +948,10 @@ extern "C" void func_00154080(void* self, int id, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001540F0);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_setIsAvailable);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
-extern "C" int func_00154240(void* self, int id);
+extern "C" int cBEMissionInterface_getMissionIdx(void* self, int id);
 
 /**
  * Sets bit 2 (available) of a mission's flag word (+0x118 + index * 4 of rider 0's character in profile 0) to
@@ -960,9 +960,9 @@ extern "C" int func_00154240(void* self, int id);
  * @param id  the mission id
  * @param value  1 for available
  */
-extern "C" void func_001540F0(void* self, int id, int value)
+extern "C" void cBEMissionInterface_setIsAvailable(void* self, int id, int value)
 {
-    int i = func_00154240(self, id);
+    int i = cBEMissionInterface_getMissionIdx(self, id);
     int charId = cBELibrary_getCharacterID(0);
     int off = (i << 2) + charId * 3976;
     char* recordBase = (char*)cBELibrary_profileLib + off;
@@ -971,10 +971,10 @@ extern "C" void func_001540F0(void* self, int id, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154160);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_setIsCompleted);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
-extern "C" int func_00154240(void* self, int id);
+extern "C" int cBEMissionInterface_getMissionIdx(void* self, int id);
 
 /**
  * Sets bit 3 (completed) of a mission's flag word (+0x118 + index * 4 of rider 0's character in profile 0) to
@@ -983,9 +983,9 @@ extern "C" int func_00154240(void* self, int id);
  * @param id  the mission id
  * @param value  1 for completed
  */
-extern "C" void func_00154160(void* self, int id, int value)
+extern "C" void cBEMissionInterface_setIsCompleted(void* self, int id, int value)
 {
-    int i = func_00154240(self, id);
+    int i = cBEMissionInterface_getMissionIdx(self, id);
     int charId = cBELibrary_getCharacterID(0);
     int off = (i << 2) + charId * 3976;
     char* recordBase = (char*)cBELibrary_profileLib + off;
@@ -994,10 +994,10 @@ extern "C" void func_00154160(void* self, int id, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001541D0);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_setIsShowIcon);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
-extern "C" int func_00154240(void* self, int id);
+extern "C" int cBEMissionInterface_getMissionIdx(void* self, int id);
 
 /**
  * Sets bit 4 (icon shown) of a mission's flag word (+0x118 + index * 4 of rider 0's character in profile 0) to
@@ -1006,9 +1006,9 @@ extern "C" int func_00154240(void* self, int id);
  * @param id  the mission id
  * @param value  1 to show the icon
  */
-extern "C" void func_001541D0(void* self, int id, int value)
+extern "C" void cBEMissionInterface_setIsShowIcon(void* self, int id, int value)
 {
-    int i = func_00154240(self, id);
+    int i = cBEMissionInterface_getMissionIdx(self, id);
     int charId = cBELibrary_getCharacterID(0);
     int off = (i << 2) + charId * 3976;
     char* recordBase = (char*)cBELibrary_profileLib + off;
@@ -1017,7 +1017,7 @@ extern "C" void func_001541D0(void* self, int id, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154240);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getMissionIdx);
 #ifdef SKIP_ASM
 struct sMissionDef_0043EE10
 {
@@ -1036,7 +1036,7 @@ extern sMissionDef_0043EE10 cBELibrary_missionInfo[];
  * @param id  the mission id
  * @return the index, or -1
  */
-extern "C" int func_00154240(void* self, int id)
+extern "C" int cBEMissionInterface_getMissionIdx(void* self, int id)
 {
     for (int i = 0; i < 88; i++) {
         if (cBELibrary_missionInfo[i].id == id) {
@@ -1089,7 +1089,7 @@ extern "C" int cBEMissionInterface_getNumberMissionsOnTrack(void* self, int grou
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintmission", func_001542E0);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getNumberCompletedMissionsOnTrack);
 #ifdef SKIP_ASM
 extern "C" int cBEMissionInterface_isMissionCompleted(void* self, int id);
 
@@ -1100,7 +1100,7 @@ extern "C" int cBEMissionInterface_isMissionCompleted(void* self, int id);
  * @param group  the location
  * @return the number completed
  */
-extern "C" int func_001542E0(void* self, int group)
+extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnTrack(void* self, int group)
 {
     int n = 0;
     for (int i = 0; i < 88; i++)
@@ -1393,7 +1393,7 @@ extern "C" void* cBEMissionInterface_getPictureFileName(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001547A0);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_getAudioType);
 #ifdef SKIP_ASM
 extern sMissionDef_0043EE10 cBELibrary_missionInfo[];
 
@@ -1403,7 +1403,7 @@ extern sMissionDef_0043EE10 cBELibrary_missionInfo[];
  * @param id  the mission id
  * @return the value (the sound system uses it as the mission's audio kind)
  */
-extern "C" int func_001547A0(void* self, int id)
+extern "C" int cBEMissionInterface_getAudioType(void* self, int id)
 {
     for (int i = 0; i < 88; i++) {
         if (cBELibrary_missionInfo[i].id == id) {
@@ -1415,29 +1415,29 @@ extern "C" int func_001547A0(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001547D8__FPv);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_addStreamData__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  */
-void func_001547D8(void* self)
+void cBEMissionInterface_addStreamData(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001547E0__FPv);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_remStreamData__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  */
-void func_001547E0(void* self)
+void cBEMissionInterface_remStreamData(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_001547E8);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sSerVEntry_001547E8 {
     short delta;
@@ -1451,11 +1451,11 @@ extern char D_004A6CAC[];
  * Writes the mission state of rider 0's character (profile 0) to a replay stream: its 23 collect records (0x114
  * bytes from profile +0x4), its 88 mission flag words (0x160 bytes from +0x118), then the interface's word at +0x8.
  *
- * Each write is vtable slot 1 of @p stream; func_00154898 reads the same layout.
+ * Each write is vtable slot 1 of @p stream; cBEMissionInterface_readFromReplayFrame reads the same layout.
  *
  * @param stream  the replay frame stream
  */
-extern "C" void func_001547E8(void* self, void* stream)
+extern "C" void cBEMissionInterface_writeToReplayFrame(void* self, void* stream)
 {
     int characterId = cBELibrary_getCharacterID(0);
     char* base = D_004A6CAC;
@@ -1471,7 +1471,7 @@ extern "C" void func_001547E8(void* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintmission", func_00154898);
+INCLUDE_ASM("be/beintmission", cBEMissionInterface_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sSerVEntry_00154898 {
     short delta;
@@ -1489,7 +1489,7 @@ extern char D_004A6CAC[];
  *
  * @param stream  the replay frame stream
  */
-extern "C" void func_00154898(void* self, void* stream)
+extern "C" void cBEMissionInterface_readFromReplayFrame(void* self, void* stream)
 {
     int characterId = cBELibrary_getCharacterID(0);
     char* base = D_004A6CAC;

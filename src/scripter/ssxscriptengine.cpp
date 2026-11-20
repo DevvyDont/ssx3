@@ -2383,9 +2383,9 @@ extern "C" void cSSXScriptEngine_AppendStartSequence(cSSXScriptEngine* self, int
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AppendEndEventSequence);
 #ifdef SKIP_ASM
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
-extern "C" int func_00146150(void* self, int index, int kind, int flag);
-extern "C" void func_00146320(void* self, int index, int kind, int flag, int value);
-extern "C" int func_001464D0(void* self, int index, int rc, int kind, int flag);
+extern "C" int cBENewPlayerInterface_isRivalChallengePlayed(void* self, int index, int kind, int flag);
+extern "C" void cBENewPlayerInterface_setRivalChallengePlayed(void* self, int index, int kind, int flag, int value);
+extern "C" int cBENewPlayerInterface_isRivalEventLocked(void* self, int index, int rc, int kind, int flag);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int idx);
 extern "C" signed char cBELibrary_getCheatCharacterID(int index);
 int cBENewPlayerInterface_getRiderCharID(void* self, int index);
@@ -2452,7 +2452,7 @@ static inline int Call_AC60(sScRider_AC60* r, int slot)
  * (category
  * by the best place; some cheat characters get category 10). Then, for race modes below 4, it probably queues
  * an
- * unlock scene (categories 24 and 25) depending on func_00146150() and func_001464D0(). Mode 4 and unfinished
+ * unlock scene (categories 24 and 25) depending on cBENewPlayerInterface_isRivalChallengePlayed() and cBENewPlayerInterface_isRivalEventLocked(). Mode 4 and unfinished
  * events queue nothing.
  */
 extern "C" void cSSXScriptEngine_AppendEndEventSequence(cSSXScriptEngine* self)
@@ -2514,12 +2514,12 @@ done:
     sScBlk_AC60 blk = *(sScBlk_AC60*)cBENewRaceInterface_getLocation(econ);
     int first = mode == 0;
     int idx = cBENewPlayerInterface_getHumanRider(players, 0);
-    int result = func_00146150(players, idx, blk.kind, first);
+    int result = cBENewPlayerInterface_isRivalChallengePlayed(players, idx, blk.kind, first);
     if ((unsigned)(cBELibrary_getCheatCharacterID(idx) - 10) < 11) {
         return;
     }
     int rc = cBENewPlayerInterface_getRiderCharID(players, idx);
-    if (func_001464D0(players, idx, rc, blk.kind, first)) {
+    if (cBENewPlayerInterface_isRivalEventLocked(players, idx, rc, blk.kind, first)) {
         return;
     }
     if (result != 0) {
@@ -2533,7 +2533,7 @@ done:
     }
     cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 0, 0x18, 1, 0, aiIndex, -1, -1);
     cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 0, 25, 3, 0, aiIndex, -1, -1);
-    func_00146320(players, idx, blk.kind, first, 1);
+    cBENewPlayerInterface_setRivalChallengePlayed(players, idx, blk.kind, first, 1);
 }
 #endif
 

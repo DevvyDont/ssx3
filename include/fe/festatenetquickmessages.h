@@ -100,7 +100,7 @@ struct cFEStateNetQuickMessages {
     int unk_6BC;                    // 0x6BC [R] 2; [U] func_001A92D8 (popup events): 2 on event 21, 0 on event 15;
                                     //       on event 22 it tells the parent state (slot 17, event 0xF) when 0
     char* unk_6C0;                  // 0x6C0 [R] cBXString built from D_004A1390 (cBXString_cBXString2), destroyed by the
-                                    //       dtor; [U] func_001A9890 assigns it (cBXString_cBXString4), func_001A98B0
+                                    //       dtor; [U] func_001A9890 assigns it (cBXString_operatorE1), func_001A98B0
                                     //       returns the text: the user name passed to the session calls (func_00262690);
                                     //       the messenger sets it to the selected buddy (func_001A4928)
     int unk_6C4;                    // 0x6C4 [R] 0; [U] func_001DE8A0 (inline setter) and func_001AB370 set it,
@@ -108,7 +108,7 @@ struct cFEStateNetQuickMessages {
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEStateNetQuickMessages
     int mbChanged;                  // 0x6D0 [U] onCreateScreen cFEStateNetQuickMessages_onCreateScreen clears it; func_001C2A18 (a message
-                                    //       edited) and func_001C2BA8 (popup 0xF: defaults restored, func_0014F758)
+                                    //       edited) and func_001C2BA8 (popup 0xF: defaults restored, cBEOptionInterface_resetAllQuickKeys)
                                     //       set 1; onWidgetEvent cFEStateNetQuickMessages_onWidgetEvent on "back" asks
                                     //       "kT_POPUP206SaveQuickMessage" when set, else returns to
                                     //       cFEStateNetSSXWorld

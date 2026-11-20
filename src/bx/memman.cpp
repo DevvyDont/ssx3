@@ -61,7 +61,7 @@ extern "C" void* cMemMan_internalAlloc(unsigned int size, unsigned int align, in
  * @param type        allocation flags: alignment in bits 24-27, bit 0x400 for 128-byte alignment, bit 31 to
  *                    zero-fill the block
  * @param headersize  passed on as cMemMan_internalAlloc()'s fourth argument; nonzero bypasses the small-block pool and
- *                    uses the other dynamic-heap allocator (func_00320078 instead of func_00320058)
+ *                    uses the other dynamic-heap allocator (cDynamicMemMan_allocAlignHdr instead of cDynamicMemMan_allocAlign)
  * @return the new block, or 0 if the allocation failed
  */
 // On Tour: operator new(unsigned int size, const char* name, int type, int headersize); its debug build keeps this

@@ -8,7 +8,7 @@
 // game flow, front end, sound, network). The labels D_00535BF8 ... D_00535C12 are its fields (below).
 // EA's header is ../source/be/beintnewrace.h (preview assert path); the class is declared with cBENewRaceInterface.
 //
-// Size 0x4C: [R] func_00144928 / func_001449E8 save and restore it whole into cBELibrary_raceDB (a 0x4C-byte struct copy,
+// Size 0x4C: [R] cBENewRaceInterface_submit / cBENewRaceInterface_discard save and restore it whole into cBELibrary_raceDB (a 0x4C-byte struct copy,
 // 0x00-0x4B). The six-rider cap is playerID[6] / riderID[6] (notes/subsystems/riders-cap.md).
 // No vtable, no base class. A FLAT layout, like main/game.h.
 //
@@ -17,8 +17,8 @@
 //   [P] the July 2003 preview's cBENewRaceInterface inline accessors on newRace (preview 0x005B6540, same offsets
 //       as retail): getNumberRiders lw 0x30, getNumberHumans 0x34, getNumberMission 0x38, getAIRiders_Num 0x3C,
 //       setLocationID sw 0x40, get/setRaceTime 0x44, getGameMode lb 0x48, getGamePath lb 0x49, getGameEvent lb 0x4A,
-//       get/setDifficultyLevel lb/sb 0x4B. Retail keeps some out of line (be/bedbreward: func_0015BB48 = 0x30,
-//       func_0015BB78 = 0x38, func_0015BB88/func_0015BB98 = set/get 0x44);
+//       get/setDifficultyLevel lb/sb 0x4B. Retail keeps some out of line (be/bedbreward: cBENewRaceInterface_getNumberRiders = 0x30,
+//       cBENewRaceInterface_getNumberMission = 0x38, cBENewRaceInterface_setRaceTime/cBENewRaceInterface_getRaceTime = set/get 0x44);
 //   [R] retail's setters: cBENewRaceInterface_assignPlayer(gate, player) writes playerID[gate] = player and
 //       riderID[player] = gate; setNumberHumans/setNumberMission/setNumberAI recompute iNumberRiders;
 //       setGameMode sb 0x48, cBENewRaceInterface_setGamePath (setGamePath) sb 0x49, setGameEvent sb 0x4A;
@@ -37,7 +37,7 @@ struct cBERaceDB {
     int iNumberMissionRiders;   // 0x38 [P] getNumberMission; [R] setNumberMission (D_00535C00)
     int iNumberAI;              // 0x3C [P] getAIRiders_Num; [R] setNumberAI (D_00535C04); [U] cAI_initComputerRiders
     int iLocationIdx;           // 0x40 [P] setLocationID; [U] cBENewRaceInterface_getLocation(ID) (D_00535C08)
-    int iRaceTime;              // 0x44 [P] get/setRaceTime; [R] func_0015BB88 / func_0015BB98 (D_00535C0C)
+    int iRaceTime;              // 0x44 [P] get/setRaceTime; [R] cBENewRaceInterface_setRaceTime / cBENewRaceInterface_getRaceTime (D_00535C0C)
     signed char cGameMode;      // 0x48 [P] getGameMode; [R] setGameMode stores its argument (D_00535C10)
     signed char cGamePath;      // 0x49 [P] getGamePath; [R] cBENewRaceInterface_setGamePath (setGamePath): 0, 1, 2 = online
                                 //      (D_00535C11); [U] cGameModeMan::iCurrentGamePath copies it

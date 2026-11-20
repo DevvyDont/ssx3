@@ -319,8 +319,8 @@ extern int D_00536730[];
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
-extern "C" void func_00154AB8(void* self, int idx, int a2, unsigned int v);
-extern "C" void func_00154EE8(void* self, int idx, int a2, unsigned int v);
+extern "C" void cBEScoreInterface_processEventRiderStats(void* self, int idx, int a2, unsigned int v);
+extern "C" void cBEScoreInterface_processRiderRanking(void* self, int idx, int a2, unsigned int v);
 extern "C" int cBERewardInterface_isMountainConquered(void* self, int a, int b);
 extern "C" int cBERewardInterface_isAwardReceived(void* self, int a1, int a2, int bit);
 extern "C" void cBERewardInterface_awardUser(void* self, int a1, int a2, int bit);
@@ -356,7 +356,7 @@ extern "C" void cGameModeMan_raceFinish(cGameModeMan* self, int idx, int pRiderS
         if (!ok) {
             void* score = cBE_getInterface_Fv(cBE_getBE(), 8);
             unsigned int riderScore = D_00536640[idx];
-            func_00154AB8(score, idx, pRiderStats, riderScore);
+            cBEScoreInterface_processEventRiderStats(score, idx, pRiderStats, riderScore);
             if (idx == 0) {
                 int prof = cBELibrary_getProfileIndex(0);
                 int ch = cBELibrary_getCharacterID(0);
@@ -368,7 +368,7 @@ extern "C" void cGameModeMan_raceFinish(cGameModeMan* self, int idx, int pRiderS
                 }
             }
             if (self->bAreResultsLocked) {
-                func_00154EE8(score, idx, D_00536730[idx], riderScore);
+                cBEScoreInterface_processRiderRanking(score, idx, D_00536730[idx], riderScore);
             }
         }
     }
@@ -758,7 +758,7 @@ INCLUDE_ASM("main/gamemode", func_00238E20);
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
-extern "C" int func_001454F8(void* iface, int a1);
+extern "C" int cBENewRaceInterface_getTimeLimit(void* iface, int a1);
 extern "C" void cGameModeMan_sortScores(void* self, int n);
 // PORT: func_00239938 is defined as (void); this caller passes self.
 extern "C" void func_00239938_self(void* self) __asm__("func_00239938");
@@ -819,7 +819,7 @@ static inline sRace_238E20* race_238E20()
 /**
  * Starts a heat of the scored three-heat event (handler 0, vtable D_0047CFA0; offline events 1-3).
  *
- * Sets the time limit from func_001454F8(race, heat) * 60 and iHeatNum from iNextHeat. Heat 1 (or 0) sets five timed AI
+ * Sets the time limit from cBENewRaceInterface_getTimeLimit(race, heat) * 60 and iHeatNum from iNextHeat. Heat 1 (or 0) sets five timed AI
  * riders and, when the event was done, clears the score table (+0x4, 3 heats x 10 riders), runs slot +0x24, picks the
  * line-up (func_00239938) and the AI scores (func_00239AA0); it then ranks twice with sortScores (cGameModeMan_sortScores) and
  * puts the two leaders' characters in the race (AI + 0x20, + 0x24). Heat 2 ranks on heats 1 + 2; heat 3 is the last
@@ -859,7 +859,7 @@ extern "C" void func_00238E20(sScore_238E20* self)
         modeMan->iRestoreHeat = 3;
         func_00239AA0((sScore_239AA0*)self);
     }
-    cGameModeHandler_pManager->uiTimeLimit = func_001454F8(race, cGameModeHandler_pManager->iHeatNum) * 60;
+    cGameModeHandler_pManager->uiTimeLimit = cBENewRaceInterface_getTimeLimit(race, cGameModeHandler_pManager->iHeatNum) * 60;
     cGameModeMan* modeManager = cGameModeHandler_pManager;
     if (modeManager->iCurrentGameEvent == 2) {
         modeManager->unk_94 = 0;
@@ -1136,8 +1136,8 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
-extern "C" int func_00145750(void* iface);
-extern "C" int func_00147410(void* iface, int player);
+extern "C" int cBENewRaceInterface_getRival(void* iface);
+extern "C" int cBENewPlayerInterface_getRiderCheatCharID(void* iface, int player);
 extern "C" void func_0023C770(int* arr, unsigned int n);
 
 struct sGM_239938 {
@@ -1154,9 +1154,9 @@ struct sGM_239938 {
 /**
  * Builds the AI line-up: the player's character, the rival, then the other characters in random order.
  *
- * Takes the human rider's character (cBENewPlayerInterface_getRiderCharID) and the rival (func_00145750), shuffles the
+ * Takes the human rider's character (cBENewPlayerInterface_getRiderCharID) and the rival (cBENewRaceInterface_getRival), shuffles the
  * remaining characters 0-9 with func_0023C770 and stores them in iCharacters (cheat characters 0, the player's from
- * func_00147410). Off the career path (cGamePath != 0) the rival slot gets the last shuffled character instead.
+ * cBENewPlayerInterface_getRiderCheatCharID). Off the career path (cGamePath != 0) the rival slot gets the last shuffled character instead.
  */
 extern "C" void func_00239938(void)
 {
@@ -1165,7 +1165,7 @@ extern "C" void func_00239938(void)
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     int humanRider = cBENewPlayerInterface_getHumanRider(player, 0);
     int charA = cBENewPlayerInterface_getRiderCharID(player, humanRider);
-    int charB = func_00145750(race);
+    int charB = cBENewRaceInterface_getRival(race);
     int list[10];
 
     for (int i = 0; i < 10; i++) {
@@ -1176,7 +1176,7 @@ extern "C" void func_00239938(void)
     }
     func_0023C770(list, n);
     cGameModeHandler_pManager->iCharacters[0] = charA;
-    cGameModeHandler_pManager->iCheatCharacters[0] = func_00147410(player, humanRider);
+    cGameModeHandler_pManager->iCheatCharacters[0] = cBENewPlayerInterface_getRiderCheatCharID(player, humanRider);
     cGameModeHandler_pManager->iCharacters[1] = charB;
     cGameModeHandler_pManager->iCheatCharacters[1] = 0;
     for (int j = 0; j < n && j + 2 < 10; j++) {
@@ -1195,8 +1195,8 @@ INCLUDE_ASM("main/gamemode", func_00239AA0);
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
-extern "C" short func_00147CB8(void* self, int which);
-extern "C" int func_001453D0(void* self, int kind, int place, int mode);
+extern "C" short cBENewPlayerInterface_getDifficultyLevel(void* self, int which);
+extern "C" int cBENewRaceInterface_getSimThreshold(void* self, int kind, int place, int mode);
 extern "C" void cGameModeMan_sortScores(void* self, int n);
 extern unsigned int D_00536640[];
 extern int D_00536730[];
@@ -1220,7 +1220,7 @@ static inline int opt49_239AA0(sOpts_239AA0* o)
  * Fills the AI riders' scores for all three heats of the scored event.
  *
  * For the non-simulated riders it clears all three heats and ranks them 5, 4, ...; for each simulated AI rider it asks
- * the race interface (func_001453D0) for a score per heat (or repeats heat 1's when the race setting at newRace + 0x49
+ * the race interface (cBENewRaceInterface_getSimThreshold) for a score per heat (or repeats heat 1's when the race setting at newRace + 0x49
  * is set), then ranks everyone with sortScores (cGameModeMan_sortScores).
  */
 extern "C" void func_00239AA0(sScore_239AA0* self)
@@ -1248,7 +1248,7 @@ extern "C" void func_00239AA0(sScore_239AA0* self)
             if (same) {
                 self->t[heat][k] = self->t[0][k];
             } else {
-                self->t[heat][k] = func_001453D0(race, heat + 1, simRider, func_00147CB8(player, 0));
+                self->t[heat][k] = cBENewRaceInterface_getSimThreshold(race, heat + 1, simRider, cBENewPlayerInterface_getDifficultyLevel(player, 0));
             }
         }
         D_00536640[k] = self->t[0][k];
@@ -1333,8 +1333,8 @@ INCLUDE_ASM("main/gamemode", func_00239D88);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getPlayerCharID(void* iface, int player);
-extern "C" int func_001454F8(void* iface, int a1);
-extern "C" int func_001474C8(void* iface, int player);
+extern "C" int cBENewRaceInterface_getTimeLimit(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getPlayerCheatCharID(void* iface, int player);
 
 struct sGM_239D88 {
     int f0;
@@ -1370,7 +1370,7 @@ struct sVEntry_239D88 {
 /**
  * Starts the two-player online event of handler 9 (vtable D_0047CE68; online events 1-3).
  *
- * Sets a single last heat (3) with no AI, a time limit of func_001454F8(race, 3) * 60, runs slot +0x24, puts both
+ * Sets a single last heat (3) with no AI, a time limit of cBENewRaceInterface_getTimeLimit(race, 3) * 60, runs slot +0x24, puts both
  * players' characters and cheat characters in the tables and clears the two per-player counters (+0x4, +0x6).
  */
 extern "C" void func_00239D88(void* self)
@@ -1392,7 +1392,7 @@ extern "C" void func_00239D88(void* self)
     gm->iNextHeat = 3;
     gm->iRestoreHeat = 3;
     gm->bIsTimedEvent = 1;
-    int heatTimeLimit = func_001454F8(race, 3);
+    int heatTimeLimit = cBENewRaceInterface_getTimeLimit(race, 3);
     cGameModeMan* gm2 = cGameModeHandler_pManager;
     gm2->uiPointTarget = 0;
     gm2->bHasPointTarget = 0;
@@ -1402,8 +1402,8 @@ extern "C" void func_00239D88(void* self)
     vtEntry->fn((char*)self + vtEntry->delta);
     cGameModeHandler_pManager->iCharacters[0] = cBENewPlayerInterface_getPlayerCharID(player, 0);
     cGameModeHandler_pManager->iCharacters[1] = cBENewPlayerInterface_getPlayerCharID(player, 1);
-    cGameModeHandler_pManager->iCheatCharacters[0] = func_001474C8(player, 0);
-    cGameModeHandler_pManager->iCheatCharacters[1] = func_001474C8(player, 1);
+    cGameModeHandler_pManager->iCheatCharacters[0] = cBENewPlayerInterface_getPlayerCheatCharID(player, 0);
+    cGameModeHandler_pManager->iCheatCharacters[1] = cBENewPlayerInterface_getPlayerCheatCharID(player, 1);
     *(short*)((char*)self + 0x4) = 0;
     *(short*)((char*)self + 0x6) = 0;
 }
@@ -1494,7 +1494,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
-extern "C" int func_00145750(void* iface);
+extern "C" int cBENewRaceInterface_getRival(void* iface);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void func_0023A4F0(void* self);
 extern "C" void func_0023A668(void* self);
@@ -1672,7 +1672,7 @@ extern "C" void func_0023A108(sMode_23A108* self)
             } else {
                 int humanRider = cBENewPlayerInterface_getHumanRider(player, 0);
                 self->charB = cBENewPlayerInterface_getRiderCharID(player, humanRider);
-                self->charC = func_00145750(race);
+                self->charC = cBENewRaceInterface_getRival(race);
                 fillOthers_23A108(self->othersB, humanRider);
                 func_0023A668(self);
             }
@@ -1710,7 +1710,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
-extern "C" int func_00145750(void* iface);
+extern "C" int cBENewRaceInterface_getRival(void* iface);
 extern "C" unsigned int GMrand(void);
 extern "C" void func_0023C770(int* arr, unsigned int n);
 
@@ -1718,7 +1718,7 @@ extern "C" void func_0023C770(int* arr, unsigned int n);
  * Builds the timed event's heat line-ups: the player, two random characters from 10-16, then the other characters.
  *
  * Draws two distinct values with GMrand (10 + rand % 7, and 10 + rand % 6 skipping the first), lists the characters 0-9
- * other than the player's and the rival's (func_00145750), shuffles all ten with func_0023C770 and stores the player's
+ * other than the player's and the rival's (cBENewRaceInterface_getRival), shuffles all ten with func_0023C770 and stores the player's
  * character and the shuffled values in the line-up rows at +0x10 .. +0x54.
  */
 extern "C" void func_0023A4F0(void* self)
@@ -1726,7 +1726,7 @@ extern "C" void func_0023A4F0(void* self)
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     int charA = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
-    int charB = func_00145750(race);
+    int charB = cBENewRaceInterface_getRival(race);
     int arr[10];
     arr[0] = GMrand() % 7 + 10;
     unsigned int cheatRoll = GMrand() % 6;
@@ -1792,7 +1792,7 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 
-extern "C" int func_00147410(void* iface, int player);
+extern "C" int cBENewPlayerInterface_getRiderCheatCharID(void* iface, int player);
 
 extern "C" void func_0023A668_A668(cGMRaceHandler* self) __asm__("func_0023A668");
 /**
@@ -1800,14 +1800,14 @@ extern "C" void func_0023A668_A668(cGMRaceHandler* self) __asm__("func_0023A668"
  *
  * For the row of heat iHeatNum - 1 (+0x10, six entries) it copies each character to iCharacters; values of 10 and above
  * go to iCheatCharacters with the player's character in iCharacters. The human rider's slot gets the player's cheat
- * character (func_00147410).
+ * character (cBENewPlayerInterface_getRiderCheatCharID).
  */
 extern "C" void func_0023A668_A668(cGMRaceHandler* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     int id = cBENewPlayerInterface_getHumanRider(iface, 0);
     int ch = cBENewPlayerInterface_getRiderCharID(iface, id);
-    int cheatChar = func_00147410(iface, id);
+    int cheatChar = cBENewPlayerInterface_getRiderCheatCharID(iface, id);
     int k = cGameModeHandler_pManager->iHeatNum - 1;
     if (k < 0) k = 0;
     for (int i = 0; i < 6; i++) {
@@ -2065,7 +2065,7 @@ INCLUDE_ASM("main/gamemode", func_0023AC88);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getPlayerCharID(void* iface, int player);
-extern "C" int func_001474C8(void* iface, int player);
+extern "C" int cBENewPlayerInterface_getPlayerCheatCharID(void* iface, int player);
 extern "C" void func_0023B0A8(void* self);
 extern int D_00535C04[];
 
@@ -2140,8 +2140,8 @@ extern "C" void func_0023AC88(void* self)
     vtEntry->fn((char*)self + vtEntry->delta);
     cGameModeHandler_pManager->iCharacters[0] = cBENewPlayerInterface_getPlayerCharID(player, 0);
     cGameModeHandler_pManager->iCharacters[1] = cBENewPlayerInterface_getPlayerCharID(player, 1);
-    cGameModeHandler_pManager->iCheatCharacters[0] = func_001474C8(player, 0);
-    cGameModeHandler_pManager->iCheatCharacters[1] = func_001474C8(player, 1);
+    cGameModeHandler_pManager->iCheatCharacters[0] = cBENewPlayerInterface_getPlayerCheatCharID(player, 0);
+    cGameModeHandler_pManager->iCheatCharacters[1] = cBENewPlayerInterface_getPlayerCheatCharID(player, 1);
     if (cGameModeHandler_pManager->bIsEventDone == one) {
         func_0023B0A8(self);
     }
@@ -2361,8 +2361,8 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
-extern "C" int func_001455D0(void* iface, int mode, int a2);
-extern "C" int func_001558F8(void* iface, int a1, int a2, int a3);
+extern "C" int cBENewRaceInterface_getPeakGoal(void* iface, int mode, int a2);
+extern "C" int cBEScoreInterface_getBestMedalOnTrack(void* iface, int a1, int a2, int a3);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern signed char D_00535C12[];
 
@@ -2407,9 +2407,9 @@ struct sMode_23B268 {
 /**
  * Starts the timed event of handler 4 (vtable D_0047CD98; events 6-8) at its location.
  *
- * Event 6, 7 or 8 maps to location 14, 15 or 16 (next locations 0, 3, 4). The medal already won there (func_001558F8)
+ * Event 6, 7 or 8 maps to location 14, 15 or 16 (next locations 0, 3, 4). The medal already won there (cBEScoreInterface_getBestMedalOnTrack)
  * picks the target tier (+0xA: 2 for results 1-2, 1 for 3, else 0); the time limit (+0x4 and uiTimeLimit) is
- * func_001455D0(race, event, tier) * 60 and also becomes the point target. Runs slot +0x2C, gives the human its
+ * cBENewRaceInterface_getPeakGoal(race, event, tier) * 60 and also becomes the point target. Runs slot +0x2C, gives the human its
  * character and clears the checkpoint counter (+0x8). Slot +0x14 (init) of D_0047CD98.
  */
 extern "C" void func_0023B268(void* self)
@@ -2438,14 +2438,14 @@ extern "C" void func_0023B268(void* self)
         gm->iNextLocation = 4;
         break;
     }
-    int medalResult = func_001558F8(score, 0, cGameModeHandler_pManager->iLocation, cGameModeHandler_pManager->iCurrentGameEvent);
+    int medalResult = cBEScoreInterface_getBestMedalOnTrack(score, 0, cGameModeHandler_pManager->iLocation, cGameModeHandler_pManager->iCurrentGameEvent);
     *(short*)((char*)self + 0xA) = 0;
     if (medalResult == 1 || medalResult == 2) {
         *(short*)((char*)self + 0xA) = 2;
     } else if (medalResult == 3) {
         *(short*)((char*)self + 0xA) = 1;
     }
-    int tierTime = func_001455D0(race, cGameModeHandler_pManager->iCurrentGameEvent, *(short*)((char*)self + 0xA));
+    int tierTime = cBENewRaceInterface_getPeakGoal(race, cGameModeHandler_pManager->iCurrentGameEvent, *(short*)((char*)self + 0xA));
     cGameModeMan* gm2 = cGameModeHandler_pManager;
     *(int*)((char*)self + 4) = tierTime * 60;
     gm2->bIsTimedEvent = 1;
@@ -2475,7 +2475,7 @@ INCLUDE_ASM("main/gamemode", func_0023B468);
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
-extern "C" int func_001455D0(void* iface, int mode, int a2);
+extern "C" int cBENewRaceInterface_getPeakGoal(void* iface, int mode, int a2);
 extern int D_00536730[];
 extern unsigned int D_00536640[];
 extern int D_005366A8[];
@@ -2515,7 +2515,7 @@ static inline char* rider_23B468(char* g, int off)
  *
  * Copies the rider's finish tick (+0x478) to D_00536640; did-not-finish stores 0x57E40 and retries the heat. A time
  * above the limit (+0x4) also retries; otherwise the event is done and the rank is 0, 1 or 2 against the tier-2 and
- * tier-1 times (func_001455D0 * 60). Always locks the results. Slot +0x44 (raceFinish) of D_0047CD98.
+ * tier-1 times (cBENewRaceInterface_getPeakGoal * 60). Always locks the results. Slot +0x44 (raceFinish) of D_0047CD98.
  *
  * @param riderIndex  the rider index
  */
@@ -2542,8 +2542,8 @@ extern "C" void func_0023B468(void* self, int riderIndex)
     } else {
         *(int*)(rider + 0x100) = one;
         gm->bIsEventDone = one;
-        unsigned int tier2Time = func_001455D0(race, gm->iCurrentGameEvent, 2) * 60;
-        unsigned int tier1Time = func_001455D0(race, cGameModeHandler_pManager->iCurrentGameEvent, 1) * 60;
+        unsigned int tier2Time = cBENewRaceInterface_getPeakGoal(race, gm->iCurrentGameEvent, 2) * 60;
+        unsigned int tier1Time = cBENewRaceInterface_getPeakGoal(race, cGameModeHandler_pManager->iCurrentGameEvent, 1) * 60;
         if (tier2Time >= *timeSlot) {
             D_00536730[riderIndex] = 0;
         } else if (tier1Time >= *timeSlot) {
@@ -2562,7 +2562,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
-extern "C" int func_00145668(void* iface, int a1, int a2, int a3);
+extern "C" int cBENewRaceInterface_getPeakSplitTimePoints(void* iface, int a1, int a2, int a3);
 extern "C" float cRiderMetrix_evSplitTime(void* self, int value);
 extern signed char D_00535C12[];
 
@@ -2570,7 +2570,7 @@ extern signed char D_00535C12[];
  * Handles a checkpoint in the timed event of handler 4: at locations 17-21 subtracts that checkpoint's bonus from the
  * race clock.
  *
- * Asks func_00145668 for the bonus of checkpoint +0x8 (then advances it) at the target tier (+0xA) and, when non-zero,
+ * Asks cBENewRaceInterface_getPeakSplitTimePoints for the bonus of checkpoint +0x8 (then advances it) at the target tier (+0xA) and, when non-zero,
  * calls cRiderMetrix_evSplitTime on the first rider's object (+0x790) with the clock in seconds minus the bonus. Slot
  * +0x34 (riderCheckpointHit) of D_0047CD98.
  *
@@ -2587,7 +2587,7 @@ extern "C" int func_0023B5F8(void* self)
         ok = ok < 22;
     }
     if (ok) {
-        int bonus = func_00145668(iface, D_00535C12[0], *(short*)((char*)self + 0xA), *(unsigned short*)((char*)self + 8));
+        int bonus = cBENewRaceInterface_getPeakSplitTimePoints(iface, D_00535C12[0], *(short*)((char*)self + 0xA), *(unsigned short*)((char*)self + 8));
         void* clk = SSXApp->Game->AI;
         int secs = (int)((float)*(int*)((char*)clk + 0xC) * 0.01666666753590107f);
         if (bonus != 0) {
@@ -2607,8 +2607,8 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
-extern "C" int func_00145750(void* iface);
-extern "C" int func_00147410(void* iface, int player);
+extern "C" int cBENewRaceInterface_getRival(void* iface);
+extern "C" int cBENewPlayerInterface_getRiderCheatCharID(void* iface, int player);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern signed char D_00535C11[];
 
@@ -2647,7 +2647,7 @@ struct sVEntry_23B6C0 {
  * Starts the head-to-head event of handler 5 (vtable D_0047CD30; event 4): one last heat against one AI rider.
  *
  * Runs slot +0x2C. Online (path 2) both players take their characters and no AI; offline the human gets its character
- * and the next slot gets the rival (func_00145750). Slot +0x14 (init) of D_0047CD30.
+ * and the next slot gets the rival (cBENewRaceInterface_getRival). Slot +0x14 (init) of D_0047CD30.
  */
 extern "C" void func_0023B6C0(void* self)
 {
@@ -2679,14 +2679,14 @@ extern "C" void func_0023B6C0(void* self)
         int firstHuman = cBENewPlayerInterface_getHumanRider(player, 0);
         int secondHuman = cBENewPlayerInterface_getHumanRider(player, 1);
         cGameModeHandler_pManager->iCharacters[firstHuman] = cBENewPlayerInterface_getRiderCharID(player, firstHuman);
-        cGameModeHandler_pManager->iCheatCharacters[firstHuman] = func_00147410(player, firstHuman);
+        cGameModeHandler_pManager->iCheatCharacters[firstHuman] = cBENewPlayerInterface_getRiderCheatCharID(player, firstHuman);
         cGameModeHandler_pManager->iCharacters[secondHuman] = cBENewPlayerInterface_getRiderCharID(player, secondHuman);
-        cGameModeHandler_pManager->iCheatCharacters[secondHuman] = func_00147410(player, secondHuman);
+        cGameModeHandler_pManager->iCheatCharacters[secondHuman] = cBENewPlayerInterface_getRiderCheatCharID(player, secondHuman);
     } else {
         func_00416210(cGameModeHandler_pManager->iCharacters, -1, 40);
         int humanRider = cBENewPlayerInterface_getHumanRider(player, 0);
         cGameModeHandler_pManager->iCharacters[humanRider] = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
-        cGameModeHandler_pManager->iCharacters[cBENewPlayerInterface_getHumanRider(player, 0) + 1] = func_00145750(race);
+        cGameModeHandler_pManager->iCharacters[cBENewPlayerInterface_getHumanRider(player, 0) + 1] = cBENewRaceInterface_getRival(race);
         cGameModeHandler_pManager->iCheatCharacters[cBENewPlayerInterface_getHumanRider(player, 0) + 1] = 0;
     }
 }
@@ -2804,9 +2804,9 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
-extern "C" int func_00145750(void* iface);
-extern "C" int func_00147410(void* iface, int player);
-extern "C" int func_001454F8(void* iface, int a1);
+extern "C" int cBENewRaceInterface_getRival(void* iface);
+extern "C" int cBENewPlayerInterface_getRiderCheatCharID(void* iface, int player);
+extern "C" int cBENewRaceInterface_getTimeLimit(void* iface, int a1);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern signed char D_00535C11[];
 
@@ -2845,8 +2845,8 @@ struct sVEntry_23BB98 {
  * Starts the head-to-head scored event of handler 6 (vtable D_0047CCC8; event 5): one timed last heat against one AI
  * rider.
  *
- * The time limit is func_001454F8(race, 1) * 60. Runs slot +0x24; online both players take their characters, offline
- * the human and the rival (func_00145750). Slot +0x14 (init) of D_0047CCC8.
+ * The time limit is cBENewRaceInterface_getTimeLimit(race, 1) * 60. Runs slot +0x24; online both players take their characters, offline
+ * the human and the rival (cBENewRaceInterface_getRival). Slot +0x14 (init) of D_0047CCC8.
  */
 extern "C" void func_0023BB98(void* self)
 {
@@ -2861,7 +2861,7 @@ extern "C" void func_0023BB98(void* self)
     gm->iSimAI = 0;
     gm->iNextHeat = one;
     gm->iNextLocation = -1;
-    int heatTimeLimit = func_001454F8(race, 1);
+    int heatTimeLimit = cBENewRaceInterface_getTimeLimit(race, 1);
     cGameModeMan* gm2 = cGameModeHandler_pManager;
     gm2->bAreResultsLocked = 0;
     gm2->uiPointTarget = 0;
@@ -2880,14 +2880,14 @@ extern "C" void func_0023BB98(void* self)
         int firstHuman = cBENewPlayerInterface_getHumanRider(player, 0);
         int secondHuman = cBENewPlayerInterface_getHumanRider(player, 1);
         cGameModeHandler_pManager->iCharacters[firstHuman] = cBENewPlayerInterface_getRiderCharID(player, firstHuman);
-        cGameModeHandler_pManager->iCheatCharacters[firstHuman] = func_00147410(player, firstHuman);
+        cGameModeHandler_pManager->iCheatCharacters[firstHuman] = cBENewPlayerInterface_getRiderCheatCharID(player, firstHuman);
         cGameModeHandler_pManager->iCharacters[secondHuman] = cBENewPlayerInterface_getRiderCharID(player, secondHuman);
-        cGameModeHandler_pManager->iCheatCharacters[secondHuman] = func_00147410(player, secondHuman);
+        cGameModeHandler_pManager->iCheatCharacters[secondHuman] = cBENewPlayerInterface_getRiderCheatCharID(player, secondHuman);
     } else {
         func_00416210(cGameModeHandler_pManager->iCharacters, -1, 40);
         int humanRider = cBENewPlayerInterface_getHumanRider(player, 0);
         cGameModeHandler_pManager->iCharacters[humanRider] = cBENewPlayerInterface_getRiderCharID(player, cBENewPlayerInterface_getHumanRider(player, 0));
-        cGameModeHandler_pManager->iCharacters[cBENewPlayerInterface_getHumanRider(player, 0) + 1] = func_00145750(race);
+        cGameModeHandler_pManager->iCharacters[cBENewPlayerInterface_getHumanRider(player, 0) + 1] = cBENewRaceInterface_getRival(race);
         cGameModeHandler_pManager->iCheatCharacters[cBENewPlayerInterface_getHumanRider(player, 0) + 1] = 0;
     }
 }
@@ -2994,9 +2994,9 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
-extern "C" int func_001455D0(void* iface, int mode, int a2);
-extern "C" int func_00145600(void* iface, int mode, int a2);
-extern "C" int func_001558F8(void* iface, int a1, int a2, int a3);
+extern "C" int cBENewRaceInterface_getPeakGoal(void* iface, int mode, int a2);
+extern "C" int cBENewRaceInterface_getPeakTimeLimit(void* iface, int mode, int a2);
+extern "C" int cBEScoreInterface_getBestMedalOnTrack(void* iface, int a1, int a2, int a3);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern signed char D_00535C12[];
 
@@ -3034,9 +3034,9 @@ struct sVEntry_23C0D0 {
 /**
  * Starts the point-target event of handler 7 (vtable D_0047CC60; events 9-11) at its location.
  *
- * Event 9, 10 or 11 maps to location 14, 15 or 16 (next locations 5, 6, 4). The medal already won (func_001558F8) picks
- * the tier (+0xA); the point target (+0x4) is func_001455D0(race, event, tier) * 100 and the time limit
- * func_00145600(..) * 60. Runs slot +0x24, gives the human its character and clears the checkpoint counter (+0x8). Slot
+ * Event 9, 10 or 11 maps to location 14, 15 or 16 (next locations 5, 6, 4). The medal already won (cBEScoreInterface_getBestMedalOnTrack) picks
+ * the tier (+0xA); the point target (+0x4) is cBENewRaceInterface_getPeakGoal(race, event, tier) * 100 and the time limit
+ * cBENewRaceInterface_getPeakTimeLimit(..) * 60. Runs slot +0x24, gives the human its character and clears the checkpoint counter (+0x8). Slot
  * +0x14 (init) of D_0047CC60.
  */
 extern "C" void func_0023C0D0(void* self)
@@ -3064,18 +3064,18 @@ extern "C" void func_0023C0D0(void* self)
         gm->iNextLocation = 4;
         break;
     }
-    unsigned int medalResult = (unsigned int)func_001558F8(score, 0, cGameModeHandler_pManager->iLocation, cGameModeHandler_pManager->iCurrentGameEvent);
+    unsigned int medalResult = (unsigned int)cBEScoreInterface_getBestMedalOnTrack(score, 0, cGameModeHandler_pManager->iLocation, cGameModeHandler_pManager->iCurrentGameEvent);
     *(short*)((char*)self + 0xA) = 0;
     if (medalResult < 3) {
         *(short*)((char*)self + 0xA) = 2;
     } else if (medalResult == 3) {
         *(short*)((char*)self + 0xA) = 1;
     }
-    int pointTarget = func_001455D0(race, cGameModeHandler_pManager->iCurrentGameEvent, *(short*)((char*)self + 0xA)) * 100;
+    int pointTarget = cBENewRaceInterface_getPeakGoal(race, cGameModeHandler_pManager->iCurrentGameEvent, *(short*)((char*)self + 0xA)) * 100;
     cGameModeMan* gm2 = cGameModeHandler_pManager;
     *(int*)((char*)self + 4) = pointTarget;
     gm2->uiPointTarget = pointTarget;
-    int heatTimeLimit = func_00145600(race, gm2->iCurrentGameEvent, *(short*)((char*)self + 0xA));
+    int heatTimeLimit = cBENewRaceInterface_getPeakTimeLimit(race, gm2->iCurrentGameEvent, *(short*)((char*)self + 0xA));
     cGameModeMan* gm3 = cGameModeHandler_pManager;
     gm3->iNextHeat = 2;
     gm3->iRestoreHeat = 2;
@@ -3104,7 +3104,7 @@ INCLUDE_ASM("main/gamemode", func_0023C2D8);
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
-extern "C" int func_001455D0(void* iface, int mode, int a2);
+extern "C" int cBENewRaceInterface_getPeakGoal(void* iface, int mode, int a2);
 extern unsigned int D_00536640[];
 extern int D_005366A8[];
 extern int D_00536730[];
@@ -3149,7 +3149,7 @@ struct sClk_23C2D8 {
  * Records the rider's score in the point-target event of handler 7 and awards a place by the medal scores.
  *
  * Did-not-finish or a score below uiPointTarget retries the heat; otherwise the event is done and the rank is 0, 1 or 2
- * against the tier-2 and tier-1 targets (func_001455D0 * 100). Always locks the results. Slot +0x44 (raceFinish) of
+ * against the tier-2 and tier-1 targets (cBENewRaceInterface_getPeakGoal * 100). Always locks the results. Slot +0x44 (raceFinish) of
  * D_0047CC60.
  *
  * @param idx  the rider index
@@ -3173,8 +3173,8 @@ extern "C" void func_0023C2D8(void* self, int idx)
             gm->iNextHeat = 1;
             D_005366A8[idx] = 0;
         } else {
-            int tier2Target = func_001455D0(race, gm->iCurrentGameEvent, 2) * 100;
-            int tier1Target = func_001455D0(race, cGameModeHandler_pManager->iCurrentGameEvent, 1) * 100;
+            int tier2Target = cBENewRaceInterface_getPeakGoal(race, gm->iCurrentGameEvent, 2) * 100;
+            int tier1Target = cBENewRaceInterface_getPeakGoal(race, cGameModeHandler_pManager->iCurrentGameEvent, 1) * 100;
             cGameModeMan* gm2 = cGameModeHandler_pManager;
             *(int*)(((sClk_23C2D8*)SSXApp->Game->AI)->riders[idx] + 0x100) = 1;
             D_00536640[idx] = st.time;
@@ -3199,7 +3199,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
-extern "C" int func_00145668(void* iface, int a1, int a2, int a3);
+extern "C" int cBENewRaceInterface_getPeakSplitTimePoints(void* iface, int a1, int a2, int a3);
 extern "C" float cRiderMetrix_evSplitPoints(void* self, int value);
 extern signed char D_00535C12[];
 
@@ -3207,7 +3207,7 @@ extern signed char D_00535C12[];
  * Handles a checkpoint in the point-target event of handler 7: at locations 17-21 subtracts that checkpoint's bonus
  * points from the first rider's score.
  *
- * Asks func_00145668 for the bonus of checkpoint +0x8 (then advances it) at the tier (+0xA), times 100, and calls
+ * Asks cBENewRaceInterface_getPeakSplitTimePoints for the bonus of checkpoint +0x8 (then advances it) at the tier (+0xA), times 100, and calls
  * cRiderMetrix_evSplitPoints on the first rider's object (+0x790) with its score (+0x198) minus the bonus. Slot +0x34
  * (riderCheckpointHit) of D_0047CC60.
  *
@@ -3224,7 +3224,7 @@ extern "C" int func_0023C560(void* self)
         ok = ok < 22;
     }
     if (ok) {
-        int bonusPoints = func_00145668(iface, D_00535C12[0], *(short*)((char*)self + 0xA), *(unsigned short*)((char*)self + 8)) * 100;
+        int bonusPoints = cBENewRaceInterface_getPeakSplitTimePoints(iface, D_00535C12[0], *(short*)((char*)self + 0xA), *(unsigned short*)((char*)self + 8)) * 100;
         void* riderMetrix = *(void**)(*(char**)((char*)SSXApp->Game->AI + 0x28) + 0x790);
         int curScore = *(int*)((char*)riderMetrix + 0x198);
         if (bonusPoints != 0) {

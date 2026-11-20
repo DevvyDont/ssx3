@@ -4,19 +4,19 @@ INCLUDE_ASM("bx/blockman", cBlockMan_init);
 
 
 //100%
-INCLUDE_ASM("bx/blockman", func_00316BE0);
+INCLUDE_ASM("bx/blockman", cBlockMan_isBlock);
 #ifdef SKIP_ASM
 /**
  * Returns whether an address lies inside the block manager's memory (+0x0, size +0x4).
  *
  * The test is offset > 0, so the very first block, at the start of the memory, is reported as outside; likely bug
- * (func_00316C60 tests offset >= 0). Nothing in the C calls it.
+ * (cBlockMan_free tests offset >= 0). Nothing in the C calls it.
  *
  * @param block  the block manager
  * @param addr  the address to test
  * @return 1 when inside, else 0
  */
-extern "C" int func_00316BE0(void *block, int addr) {
+extern "C" int cBlockMan_isBlock(void *block, int addr) {
     int temp_5;
     int var_3;
 
@@ -29,7 +29,7 @@ extern "C" int func_00316BE0(void *block, int addr) {
 }
 #endif
 //100%
-INCLUDE_ASM("bx/blockman", func_00316C00);
+INCLUDE_ASM("bx/blockman", cBlockMan_alloc);
 #ifdef SKIP_ASM
 struct sPool_6C00 {
     int base;
@@ -47,7 +47,7 @@ struct sPool_6C00 {
  * @param size  the size needed in bytes
  * @return the block, or null when no group can serve it
  */
-extern "C" int* func_00316C00(void* self, unsigned int size) {
+extern "C" int* cBlockMan_alloc(void* self, unsigned int size) {
     int i;
     sPool_6C00* pool;
     int* head;
@@ -66,7 +66,7 @@ extern "C" int* func_00316C00(void* self, unsigned int size) {
 }
 #endif
 //100%
-INCLUDE_ASM("bx/blockman", func_00316C60);
+INCLUDE_ASM("bx/blockman", cBlockMan_free);
 #ifdef SKIP_ASM
 struct sPool_6C60 {
     int base;
@@ -83,7 +83,7 @@ struct sPool_6C60 {
  *
  * @param ptr  the block to free
  */
-extern "C" void func_00316C60(void* self, int* ptr) {
+extern "C" void cBlockMan_free(void* self, int* ptr) {
     int i;
     int off;
     sPool_6C60* pool;
@@ -105,7 +105,7 @@ INCLUDE_ASM("bx/blockman", func_00316CC8);
 /**
  * Does nothing.
  *
- * Last function of the blockman unit, after the free routine func_00316C60. Nothing calls it.
+ * Last function of the blockman unit, after the free routine cBlockMan_free. Nothing calls it.
  */
 extern "C" void func_00316CC8(void) {
 

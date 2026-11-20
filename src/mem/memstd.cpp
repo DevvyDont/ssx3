@@ -834,14 +834,14 @@ INCLUDE_ASM("mem/memstd", func_002525F8);
 #ifdef SKIP_ASM
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
-extern "C" int func_00319B98(int);
+extern "C" int cMemMan_internalBlockSize(int);
 extern void* cMemMan_m_mutex[16];
 
 extern "C" int func_002525F8(int memBlock) {
     int result;
 
     MUTEX_lock(&cMemMan_m_mutex);
-    result = func_00319B98(memBlock);
+    result = cMemMan_internalBlockSize(memBlock);
     MUTEX_unlock(&cMemMan_m_mutex);
     return result;
 }

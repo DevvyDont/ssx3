@@ -1408,15 +1408,15 @@ extern char str_OV_darkblue[];
 extern char D_004A2138[];
 
 extern "C" void cOVTemplate_Simple_onCreateScreen(void* self);
-extern "C" char* func_00144BF0(void* iface);
+extern "C" char* cBENewRaceInterface_getLocationName1(void* iface);
 extern "C" unsigned short* func_002C2540_BD20(unsigned short* dst, char* src) __asm__("func_002C2540");
 extern "C" int sprintf2(unsigned short* buf, unsigned short* fmt, ...);
 extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, ...);
 extern "C" int cGameModeMan_getHeatScore(void* stats, int id, int kind);
-extern "C" char* func_0014EEC8(void* iface, int id, int a2);
+extern "C" char* cBECharacterInterface_getShortNameByCharacter(void* iface, int id, int a2);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex);
-extern "C" signed char func_00147410(void* self, int index);
+extern "C" signed char cBENewPlayerInterface_getRiderCheatCharID(void* self, int index);
 extern "C" void* func_00155130(void* iface, int idx);
 extern int D_00536708[];
 // The "%d" format D_004A2138, reached gp-relative here: a sized declaration of the same string.
@@ -1481,7 +1481,7 @@ static inline void* getObj_1FBD20(void* self, char* name)
  * cOVTemplate_Simple_onCreateScreen (cOVState_onCreateScreen plus the "overlayMenu" option). Reads cBENewRaceInterface_newRace's cGameMode
  * and cGamePath and SSXApp->GameModeMan's iHeatNum.
  *
- * "track_event" gets "<location> - <event>" ("%s - %s" through sprintf2; the location name from func_00144BF0, the
+ * "track_event" gets "<location> - <event>" ("%s - %s" through sprintf2; the location name from cBENewRaceInterface_getLocationName1, the
  * event kT_cmnSlopeCaps / kT_cmnBigAirCaps / kT_cmnPipeCaps for cGameMode 1 / 2 / 3). On game path 0 (career) the
  * objectives depend on the heat: heat 1 shows kT_FSOBJ2HeatsQF and kT_FSOBJHeatsGrandTtl; heat 2 shows how many points
  * the player still needs (kT_FSOBJEarnXpts with the third-placed rider's two-heat total minus the player's heat-1
@@ -1493,7 +1493,7 @@ static inline void* getObj_1FBD20(void* self, char* name)
  *
  * The table: column "heat1" reads kT_OVRCMNHeat1, or kT_OVRCMNScoreColon in the final heat and outside career, where
  * "column_secondrun" and "column_total" are hidden too (also in heat 1). Rows "rider1".."rider3" list the first three
- * riders of the standings order D_00536708 other than the human player: name (func_0014EEC8 with GameModeMan's
+ * riders of the standings order D_00536708 other than the human player: name (cBECharacterInterface_getShortNameByCharacter with GameModeMan's
  * iCharacters / iCheatCharacters), heat score (cGameModeMan_getHeatScore heat 0, or 2 in the final), and in career heat
  * 2 the second-run and total scores; "- - -" otherwise. "p0rider" gets the player's name and "p0run1" the player's
  * heat-1 score in career heat 2 ("- - -" otherwise); "p1rider" gets the second player online, else it and "p1dashes"
@@ -1521,7 +1521,7 @@ extern "C" void func_001FBD20(void* self)
     cGameModeMan* stats = SSXApp->GameModeMan;
     int mode = stats->iHeatNum;
     void* textObj = getObj_1FBD20(self, str_track_event);
-    func_002C2540_BD20(title, func_00144BF0(iface0));
+    func_002C2540_BD20(title, cBENewRaceInterface_getLocationName1(iface0));
     unsigned short* str = 0;
     switch (cBENewRaceInterface_newRace[0x48]) {
     case 1:
@@ -1620,7 +1620,7 @@ extern "C" void func_001FBD20(void* self)
             sprintf(name, str_rider_pct_d, i);
             void* cell = getObj_1FBD20(self, name);
             if (cell != 0)
-                cUIText_setAsciiString((cUIText*)cell, func_0014EEC8(iface2, stats->iCharacters[id], stats->iCheatCharacters[id]));
+                cUIText_setAsciiString((cUIText*)cell, cBECharacterInterface_getShortNameByCharacter(iface2, stats->iCharacters[id], stats->iCheatCharacters[id]));
             sprintf(name, str_run_1_pct_d, i);
             cell = getObj_1FBD20(self, name);
             if (cell != 0) {
@@ -1647,7 +1647,7 @@ extern "C" void func_001FBD20(void* self)
     }
     int idx = cBENewPlayerInterface_getHumanRider(iface1, 0);
     textObj = getObj_1FBD20(self, str_p0rider);
-    cUIText_setAsciiString((cUIText*)textObj, func_0014EEC8(iface2, cBENewPlayerInterface_getRiderCharID(iface1, idx), func_00147410(iface1, idx)));
+    cUIText_setAsciiString((cUIText*)textObj, cBECharacterInterface_getShortNameByCharacter(iface2, cBENewPlayerInterface_getRiderCharID(iface1, idx), cBENewPlayerInterface_getRiderCheatCharID(iface1, idx)));
     textObj = getObj_1FBD20(self, str_p0run1);
     if (cBENewRaceInterface_newRace[0x49] == 0 && mode == 2) {
         char buf[0x10];
@@ -1660,7 +1660,7 @@ extern "C" void func_001FBD20(void* self)
     textObj = getObj_1FBD20(self, str_p1rider);
     if (cBENewRaceInterface_newRace[0x49] == 2) {
         idx = cBENewPlayerInterface_getHumanRider(iface1, 1);
-        cUIText_setAsciiString((cUIText*)textObj, func_0014EEC8(iface2, cBENewPlayerInterface_getRiderCharID(iface1, idx), func_00147410(iface1, idx)));
+        cUIText_setAsciiString((cUIText*)textObj, cBECharacterInterface_getShortNameByCharacter(iface2, cBENewPlayerInterface_getRiderCharID(iface1, idx), cBENewPlayerInterface_getRiderCheatCharID(iface1, idx)));
     } else {
         ((cUIThing*)textObj)->setVisible(0);
         cUIState_hideObjSafe(self, str_p1dashes);
@@ -1739,7 +1739,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cOVState_onCreateScreen(void* self);
-extern "C" char* func_00144BF0(void* iface);
+extern "C" char* cBENewRaceInterface_getLocationName1(void* iface);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int idx);
 extern "C" char* func_00146F88(void* iface, int idx);
 extern "C" char* cBECharacterInterface_getShortName(void* iface, int id);
@@ -1813,7 +1813,7 @@ static inline void* getObj_1FC878(void* self, char* name)
  * cOVState_onCreateScreen. Reads cBENewRaceInterface_newRace's cGameMode, cGamePath and cGameEvent.
  *
  * "title1" reads kT_CMNStateMultiPlay (set twice). "title2" gets "<location> - <event>" ("%s - %s" through sprintf2;
- * the location from func_00144BF0, the event kT_cmnRaceCaps_b / kT_cmnSlopeCaps / kT_cmnBigAirCaps / kT_cmnPipeCaps for
+ * the location from cBENewRaceInterface_getLocationName1, the event kT_cmnRaceCaps_b / kT_cmnSlopeCaps / kT_cmnBigAirCaps / kT_cmnPipeCaps for
  * cGameMode 5 / 1 / 2 / 3), or "<location> - Jam" for cGameMode 6. Quirk: the "%s - %s" call passes only the location;
  * the event string reaches it because the compiler keeps it in $a3 (fine on the PS2, undefined elsewhere). "name" gets
  * player 1 (the online player name func_00146F88 on game path 2, else cBECharacterInterface_getShortName of the first
@@ -1853,7 +1853,7 @@ extern "C" void func_001FC878(void* self)
     void* widget = getObj_1FC878(self, str_title1);
     cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_CMNStateMultiPlay));
     widget = getObj_1FC878(self, str_title2);
-    func_002C2540(title, func_00144BF0(iface0));
+    func_002C2540(title, cBENewRaceInterface_getLocationName1(iface0));
     unsigned short* str = 0;
     switch (getField_1FC878(gs, 72))
     {
@@ -2153,10 +2153,10 @@ INCLUDE_ASM("fe/ovstatepause", func_001FD320);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int cBELibrary_getCharacterID(int idx);
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
-extern "C" int func_00145750(void* iface);
-extern "C" char* func_0014EEC8(void* iface, int id, int a2);
+extern "C" int cBENewRaceInterface_getRival(void* iface);
+extern "C" char* cBECharacterInterface_getShortNameByCharacter(void* iface, int id, int a2);
 extern "C" int cBENewPlayerInterface_isEventLocked(void* iface, int a1, int charId, int item);
-extern "C" int func_00157B08(void* iface, int a1, int a2);
+extern "C" int cBERewardInterface_isPeakLocked(void* iface, int a1, int a2);
 extern "C" void* func_004139F8(float x);
 extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
 // func_002C2540 returns dst (the unit declares it void)
@@ -2206,7 +2206,7 @@ static inline void* getObj_1FD320(void* self, char* name)
  *
  * Only when @p msg is nonzero. Works from cBENewRaceInterface_newRace's cGameEvent. "name" first gets the player's
  * short character name, then (wrapped) the challenge line: kT_OVRCMNChallengeBy (events 4-5), kT_HELPChalPeakRace (6-8)
- * or kT_HELPChalPeakJam (9-11) formatted with the rival's name (func_0014EEC8 of func_00145750), which replaces it.
+ * or kT_HELPChalPeakJam (9-11) formatted with the rival's name (cBECharacterInterface_getShortNameByCharacter of cBENewRaceInterface_getRival), which replaces it.
  * "title1" reads kT_TITLERivalChallenge; "title2" gets "<location> - <kT_cmnRaceCaps_b>" (event 4), "<location> - Jam"
  * (5) or the event name func_001FD190 (6-11).
  *
@@ -2216,7 +2216,7 @@ static inline void* getObj_1FD320(void* self, char* name)
  * (cBENewPlayerInterface_isEventLocked), and hide "timescoretobeat". Events 6-8 show "<Time to beat:> <time>"
  * (kT_OVRCMNTimeToBeatColon and SSXApp->GameModeMan's uiTimeLimit / 60 as a time string, func_0020A1A8), with
  * kT_HELPRaceToBottom and kT_HELPBeatPostedTime, or kT_HELPBeatPostedTimePass while that peak (1 for event 6, 2 for
- * event 7) is still locked for the player (func_00157B08 on BE interface 13; event 8 always uses the plain text).
+ * event 7) is still locked for the player (cBERewardInterface_isPeakLocked on BE interface 13; event 8 always uses the plain text).
  * Events 9-11 do the same with kT_OVRCMNScoreToBeatColon and uiPointTarget, kT_HELPMakeWayDnSlope and
  * kT_HELPBeatPostedScore(Pass).
  *
@@ -2244,13 +2244,13 @@ extern "C" int func_001FD320(void* self, void* msg)
         widget = getObj_1FD320(self, str_title2);
         switch (mode) {
         case 4:
-            func_002C2540_r(title, func_00144BF0(iface0));
+            func_002C2540_r(title, cBENewRaceInterface_getLocationName1(iface0));
             func_002C2540_r(fmt, (char*)D_004A2140);
             sprintf1(out, fmt, title, lookupString_1FD320(str_kT_cmnRaceCaps_b));
             cUIText_setUnicodeString(widget, out);
             break;
         case 5:
-            func_002C2540_r(title, func_00144BF0(iface0));
+            func_002C2540_r(title, cBENewRaceInterface_getLocationName1(iface0));
             func_002C2540_r(fmt, (char*)D_0046E558);
             sprintf1(out, fmt, title);
             cUIText_setUnicodeString(widget, out);
@@ -2268,7 +2268,7 @@ extern "C" int func_001FD320(void* self, void* msg)
         cUIText* statusB = (cUIText*)getObj_1FD320(self, str_obj2);
         widget = getObj_1FD320(self, str_title1);
         cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_TITLERivalChallenge));
-        func_002C2540_r(name, func_0014EEC8(iface2, func_00145750(iface0), 0));
+        func_002C2540_r(name, cBECharacterInterface_getShortNameByCharacter(iface2, cBENewRaceInterface_getRival(iface0), 0));
         unsigned short* lineFmt;
         if (mode >= 4 && mode <= 5)
             lineFmt = lookupString_1FD320(str_kT_OVRCMNChallengeBy);
@@ -2315,7 +2315,7 @@ extern "C" int func_001FD320(void* self, void* msg)
             sprintf1(text, title, labelText, num);
             cUIText_setUnicodeStringWrap(widget, text);
             cUIText_setUnicodeStringByID(statusA, GetHashValue32(str_kT_HELPRaceToBottom));
-            if (mode == 8 || (mode == 7 && !func_00157B08(iface13, 0, 2)) || (mode == 6 && !func_00157B08(iface13, 0, 1)))
+            if (mode == 8 || (mode == 7 && !cBERewardInterface_isPeakLocked(iface13, 0, 2)) || (mode == 6 && !cBERewardInterface_isPeakLocked(iface13, 0, 1)))
                 cUIText_setUnicodeStringByID(statusB, GetHashValue32(str_kT_HELPBeatPostedTime));
             else
                 cUIText_setUnicodeStringByID(statusB, GetHashValue32(str_kT_HELPBeatPostedTimePass));
@@ -2330,7 +2330,7 @@ extern "C" int func_001FD320(void* self, void* msg)
             sprintf1(num, title, labelText, n);
             cUIText_setUnicodeStringWrap(getObj_1FD320(self, str_timescoretobeat), num);
             cUIText_setUnicodeStringByID(statusA, GetHashValue32(str_kT_HELPMakeWayDnSlope));
-            if (mode == 11 || (mode == 10 && !func_00157B08(iface13, 0, 2)) || (mode == 9 && !func_00157B08(iface13, 0, 1)))
+            if (mode == 11 || (mode == 10 && !cBERewardInterface_isPeakLocked(iface13, 0, 2)) || (mode == 9 && !cBERewardInterface_isPeakLocked(iface13, 0, 1)))
                 cUIText_setUnicodeStringByID(statusB, GetHashValue32(str_kT_HELPBeatPostedScore));
             else
                 cUIText_setUnicodeStringByID(statusB, GetHashValue32(str_kT_HELPBeatPostedScorePass));
@@ -4104,7 +4104,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" char* func_00144BF0(void* iface);
+extern "C" char* cBENewRaceInterface_getLocationName1(void* iface);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int idx);
 extern "C" char* cBECharacterInterface_getShortName(void* iface, int id);
 extern "C" int func_001FD190(int id);
@@ -4167,7 +4167,7 @@ extern "C" int cOVState_REWARDS_onGainTransition(void* self)
             break;
         case 5:
             func_002C2540(fmt, str_pct_S_Jam);
-            sprintf1(result, fmt, func_00144BF0(race));
+            sprintf1(result, fmt, cBENewRaceInterface_getLocationName1(race));
             break;
         default: {
             unsigned short* label = 0;
@@ -4187,7 +4187,7 @@ extern "C" int cOVState_REWARDS_onGainTransition(void* self)
                 break;
             }
             func_002C2540(fmt, str_pct_S_pct_s);
-            sprintf1(result, fmt, func_00144BF0(race), label);
+            sprintf1(result, fmt, cBENewRaceInterface_getLocationName1(race), label);
             break;
         }
         }

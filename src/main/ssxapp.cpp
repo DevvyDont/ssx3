@@ -637,13 +637,13 @@ extern "C" int cSSXApp_loadInputMap(cSSXApp* self, const char* path)
 INCLUDE_ASM("main/ssxapp", cSSXApp_parseCommandLine);
 #ifdef SKIP_ASM
 extern "C" void* cBXString_cBXString2(cBXString* self, const char* str);
-extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" cBXString* cBXString_cBXString5(cBXString* self, cBXString* other, int n);
 extern "C" cBXString* cBXString_right(cBXString* self, cBXString* other, int n);
 extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
-int cBXString_FindFirstOf(cBXString* self, char ch);
-int cBXString_FindLastOf(cBXString* self, char ch, int len);
+int cBXString_reverseFind(cBXString* self, char ch);
+int cBXString_find(cBXString* self, char ch, int len);
 extern "C" int strcasecmp(const char* a, const char* b);
 extern int cRenderToggles_m_DisableHUD;
 extern char str_track[];
@@ -682,9 +682,9 @@ extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
                 }
                 cBXString track;
                 cBXString_cBXString2(&track, argv[i]);
-                int a = cBXString_FindFirstOf(&track, '/');
-                int b = cBXString_FindFirstOf(&track, '\\');
-                int c = cBXString_FindFirstOf(&track, ':');
+                int a = cBXString_reverseFind(&track, '/');
+                int b = cBXString_reverseFind(&track, '\\');
+                int c = cBXString_reverseFind(&track, ':');
                 int sepPos = MAX_7BF0(a, MAX_7BF0(b, c));
                 if (sepPos >= 0) {
                     cBXString trimmed;
@@ -692,7 +692,7 @@ extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
                     cBXString_operatorE(&track, &trimmed);
                     cBXString__cBXString(&trimmed, 2);
                 }
-                int dot = cBXString_FindLastOf(&track, '.', 0);
+                int dot = cBXString_find(&track, '.', 0);
                 if (dot >= 0) {
                     cBXString trimmed;
                     cBXString_cBXString5(&trimmed, &track, dot);
@@ -706,13 +706,13 @@ extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv)
                 if (i >= argc) {
                     break;
                 }
-                cBXString_cBXString4(((char*)self) + 0xC4, argv[i]);
+                cBXString_operatorE1(((char*)self) + 0xC4, argv[i]);
             } else if (strcasecmp(opt, str_password) == 0) {
                 i++;
                 if (i >= argc) {
                     break;
                 }
-                cBXString_cBXString4(((char*)self) + 0xC8, argv[i]);
+                cBXString_operatorE1(((char*)self) + 0xC8, argv[i]);
             } else if (strcasecmp(opt, str_realfe) == 0) {
                 self->unk_60 = 1;
             } else if (strcasecmp(opt, str_nohud) == 0) {
@@ -1040,7 +1040,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cSSXApp_activateBEOptions_self(void* self) __asm__("cSSXApp_activateBEOptions");
 extern "C" void cSSXApp_initLocale(cSSXApp* self);
 extern "C" void cRiderAnimBase_initAIAnimEventMap();
-extern "C" void* func_00314D98(void* self);
+extern "C" void* cGameAnimMap_cGameAnimMap(void* self);
 extern "C" void cGameAnimMap_initMap(void* self);
 extern "C" void* cAnimDataBase_cAnimDataBase(void* self);
 extern "C" void* cAudioInterface_bxAudio();
@@ -1186,7 +1186,7 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     cSSXApp_activateBEOptions_self(self);
     cSSXApp_initLocale((cSSXApp*)self);
     cRiderAnimBase_initAIAnimEventMap();
-    self->f94 = func_00314D98(cMemMan_alloc(6216, str_GameAnimMap, 0, 0));
+    self->f94 = cGameAnimMap_cGameAnimMap(cMemMan_alloc(6216, str_GameAnimMap, 0, 0));
     cGameAnimMap_initMap(self->f94);
     self->f90 = cAnimDataBase_cAnimDataBase(cMemMan_alloc(0x3FC, str_AnimDataBase, 0, 0));
     cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -1200,7 +1200,7 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     WORLDTRIGGERMANAGER_Init();
     if (func_004165A8(self->fCC, D_004A29E8)) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        cBXString_cBXString4(&D_004A4CB8, self->fCC);
+        cBXString_operatorE1(&D_004A4CB8, self->fCC);
     }
 }
 #endif

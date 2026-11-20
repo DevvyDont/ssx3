@@ -2527,8 +2527,8 @@ extern "C" void cOVStateHUD1P_calcElemPos(void*, void*, void*, void*, void*, int
 extern "C" void cOVStateHUD1P_renderBitmap(void*, int, void*, void*, void*, void*);
 extern "C" int sprintf(char*, const char*, ...);
 extern "C" int cSectionMan_isActive(void*, int);
-extern "C" int func_00153520(void*, int, int);
-extern "C" int func_00153350(void*, int);
+extern "C" int cBEMissionInterface_getCurrentCollectForSection(void*, int, int);
+extern "C" int cBEMissionInterface_getTotalCollectForSection(void*, int);
 extern "C" void cFont_text(void*, float, float, char*);
 
 /**
@@ -2541,8 +2541,8 @@ extern "C" void cFont_text(void*, float, float, char*);
  * cOVStateHUD1P_calcElemPos places the icon with the element's alignment and @p x, and it is drawn white at the element's size
  * (times the pulse) on the element's layer; the element's scale applies to the text only. The text goes right of the
  * icon, centred on it vertically, in the HUD font (+0x42C), coloured D_004C8648 while @p animFrame <= 0.44 and in the element's
- * colour after. It prints "%d/%d" with func_00153520 (the rider's collected count for the location, from its profile)
- * and func_00153350 (the location's total) on back-end interface 10, the rider given by its AI index (cBeing interface
+ * colour after. It prints "%d/%d" with cBEMissionInterface_getCurrentCollectForSection (the rider's collected count for the location, from its profile)
+ * and cBEMissionInterface_getTotalCollectForSection (the location's total) on back-end interface 10, the rider given by its AI index (cBeing interface
  * at +0x6C0, virtual getAIIndex). The font Scale is then restored to BaseScale.
  *
  * @param obj  the HUD element table (0x24-byte tHUDDef records)
@@ -2597,7 +2597,7 @@ extern "C" void func_0021F9B0(char* self, char* obj, char* rider, int x, float a
         *(float*)(tx2 + 0x3C) = *(float*)(tx2 + 0x34) * sc.y;
         *(V4_F9B0*)(*(char**)(self + 0x42C) + 0x40) = col;
         Obj_F9B0* being = (Obj_F9B0*)(rider + 0x6C0);
-        sprintf(buf, str_pct_d_pct_d_b, func_00153520(iface, being->v07(), id), func_00153350(iface, id));
+        sprintf(buf, str_pct_d_pct_d_b, cBEMissionInterface_getCurrentCollectForSection(iface, being->v07(), id), cBEMissionInterface_getTotalCollectForSection(iface, id));
         cFont_text(*(char**)(self + 0x42C), drawPos.x, drawPos.y, buf);
         tx = *(char**)(self + 0x42C);
         *(float*)(tx + 0x38) = *(float*)(tx + 0x30) * scale.x;
@@ -2632,7 +2632,7 @@ extern sColour D_004C8848;
 extern sColour D_004C8868;
 extern char D_004A2138[];
 extern "C" int cBEMissionInterface_isMissionCompleted(void*, int);
-extern "C" int func_00154240(void*, int);
+extern "C" int cBEMissionInterface_getMissionIdx(void*, int);
 extern "C" void cFont_centertextf(void* font, float x, float y, const char* fmt, ...);
 
 static inline void PrintAt_FD38(void* font, float x, float y, const t2Vector& off, float f, int n)
@@ -2650,7 +2650,7 @@ static inline float* scaleP() { return &D_004A5B38; }
  * / D_004A5B3C), on the element's layer. The circle "bigcCIRC" (icons[15], +0x4D0) is 34 by 34 (D_004A5B40 /
  * D_004A5B44) at offset (6, 6) (D_004A5B30 / D_004A5B34), one layer up, in D_004C8828 when
  * cBEMissionInterface_isMissionCompleted (back-end interface 10) says so, else in D_004C8848. The number is
- * func_00154240's index of the mission in cBELibrary_missionInfo plus 1, printed "%d" with cFont_centertextf, centred
+ * cBEMissionInterface_getMissionIdx's index of the mission in cBELibrary_missionInfo plus 1, printed "%d" with cFont_centertextf, centred
  * on the element position + (23, 23) in D_004C8868 with the HUD font (+0x42C) at 0.776 times BaseScale, three layers
  * up; the font Scale is then restored. The three statics are set once under the guards D_004A4E9C, D_004A4EA0 and
  * D_004A4EA4. The local half first holds half the circle size, then the element's placed position.
@@ -2702,7 +2702,7 @@ extern "C" void func_0021FD38(char* self, char* obj) {
     *w = (*w & ~0x3E0) | (((++drawLayer) << 5) & 0x3E0);
     cOVStateHUD1P_renderBitmap(self, *(int*)(self + 0x4D0), &circlePos, &D_004A5B40, scaleP(), &col);
     float halfTextHeight = (float)*(int*)(*(char**)(self + 0x42C) + 0x14) * *(float*)(*(char**)(self + 0x42C) + 0x34) * 0.38805678486824036f;
-    int n = func_00154240(be, *(int*)(self + 0x18C));
+    int n = cBEMissionInterface_getMissionIdx(be, *(int*)(self + 0x18C));
     col = D_004C8868;
     *(sColour*)(*(char**)(self + 0x42C) + 0x40) = col;
     char* hudFont = *(char**)(self + 0x42C);

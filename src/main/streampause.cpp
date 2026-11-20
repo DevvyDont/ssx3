@@ -128,7 +128,7 @@ struct sSlot_2EB8 {
 };
 
 extern "C" void* cSSXApp_cSSXApp(void* self);
-void func_00317930(void* self);
+void cRandom_init(void* self);
 extern "C" void cBXString__cBXString(void* self, int flags);
 void cAppMan__cAppMan(void* self, int flags);
 
@@ -161,7 +161,7 @@ extern sSlot_2EB8 D_004A4F68, D_004A4F78, D_004A4F80, D_004A4F88, D_004A4F90, D_
  * Only priority 0xFFFF does anything. With @p init set it constructs the 56 four-float constants D_004C90A8..D_004C9418
  * (colour and blend vectors), the fifteen two-word slots D_004A4F68 (-1) and D_004A4F78..D_004A4FE0 (0..13) whose first
  * word packs the number twice (8 + 24 bits), clears D_004A4F70 / D_004A4F74, constructs the application object at
- * D_004C9428 with cSSXApp_cSSXApp and GMrandom with func_00317930. With @p init clear it destroys the application
+ * D_004C9428 with cSSXApp_cSSXApp and GMrandom with cRandom_init. With @p init clear it destroys the application
  * object (its three cBXString members, then the cAppMan base). func_00247E20 calls it with (1, 0xFFFF) and
  * func_00247E40 with (0, 0xFFFF).
  *
@@ -246,7 +246,7 @@ extern "C" void func_00242EB8(int init, int prio)
             new (&D_004A4FD8) sSlot_2EB8(12);
             new (&D_004A4FE0) sSlot_2EB8(13);
             cSSXApp_cSSXApp(D_004C9428);
-            func_00317930(GMrandom);
+            cRandom_init(GMrandom);
         } else {
             ((sSSXApp_2EB8*)D_004C9428)->~sSSXApp_2EB8();
         }

@@ -25,7 +25,7 @@ extern void* cFEStateMountainRoom_vtbl[];
 
 extern "C" int cBENewPlayerInterface_isPeakLocked(void* self, int a, int b, int peak);
 int cBELibrary_getRiderIndex(int rider) __asm__("cBELibrary_getRiderIndex__Fi");
-extern "C" int func_00148950(void* iface, int rider);
+extern "C" int cBEStatInterface_getStatLevel(void* iface, int rider);
 extern "C" char* cBERewardInterface_getPeakPass(void* self, int a1, int a2);
 extern "C" void cFEStateMountainRoom_loadPeakPass_Room(void* self) __asm__("cFEStateMountainRoom_loadPeakPass");
 extern char str_dot_loc_arrow[];
@@ -108,7 +108,7 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* ui,
         }
     }
     void* iface3 = cBE_getInterface_Fv(cBE_getBE(), 3);
-    room->fB8 = func_00148950(iface3, cBELibrary_getRiderIndex(room->player));
+    room->fB8 = cBEStatInterface_getStatLevel(iface3, cBELibrary_getRiderIndex(room->player));
     void* iface13 = cBE_getInterface_Fv(cBE_getBE(), 13);
     char* item = cBERewardInterface_getPeakPass(iface13, room->fB4, room->charID);
     room->fBC = -1;

@@ -257,7 +257,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern "C" void* func_0014EEC8(void* self, int player, int index);
+extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index);
 extern "C" void cSimpleCamera_setupCamWithPosAndTarget(void* cam, sVec4_182DB8* a, sVec4_182DB8* b);
 extern "C" void cFEStateCharSetup_show3DCharacter(void* self, int a1);
 extern "C" void cFEStateCharSetup_updateCharacter3DPos(void* self);
@@ -267,7 +267,7 @@ extern char str_rider_name[];
  * Shows the user's character name and sets up the front-end camera and rider for the character-setup screen.
  *
  * Sets the "rider_name" text to the name of the user's character (cBENewPlayerInterface_getPlayerCharID, then
- * func_0014EEC8 on interface 2). Points the camera (cFE +0x10) from (0, 200, 0) at the origin (cSimpleCamera_setupCamWithPosAndTarget) with a
+ * cBECharacterInterface_getShortNameByCharacter on interface 2). Points the camera (cFE +0x10) from (0, 200, 0) at the origin (cSimpleCamera_setupCamWithPosAndTarget) with a
  * field of view of 0.436 (25 degrees), shows the rider (cFEStateCharSetup_show3DCharacter with 1), sets the restart-animation flag (+0x48)
  * and places the rider (cFEStateCharSetup_updateCharacter3DPos). Called by cFEStateCharSetup_onCreateScreen and
  * cFEStateRiderDetail_onCreateScreen.
@@ -276,7 +276,7 @@ extern "C" void cFEStateCharSetup_updateWidget(void* self)
 {
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_rider_name));
     signed char cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
-    cUIText_setAsciiString(text, (const char*)func_0014EEC8(cBE_getInterface_Fv(cBE_getBE(), 2), cid, 0));
+    cUIText_setAsciiString(text, (const char*)cBECharacterInterface_getShortNameByCharacter(cBE_getInterface_Fv(cBE_getBE(), 2), cid, 0));
     sCam_182DB8* cam = (sCam_182DB8*)SSXApp->RealFE;
     sVec4_182DB8 pos;
     pos.x = 0.0f;

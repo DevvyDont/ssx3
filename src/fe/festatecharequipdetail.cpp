@@ -4709,7 +4709,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019E330);
  * Detaches a slot's file data from the FE file cache and returns it.
  *
  * Clears the slot's data and size and subtracts the size from used (+0xB4000); state, name and use count stay. The
- * reward database (func_0015AEC0) takes the block this way and then drops its use with func_0019DC20, which frees the
+ * reward database (cBERewardDB_update) takes the block this way and then drops its use with func_0019DC20, which frees the
  * now empty slot.
  *
  * @param base  the FE file cache

@@ -282,7 +282,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern "C" void* func_0014EEC8(void* self, int player, int index);
+extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index);
 extern signed char D_00535C11[];
 extern signed char D_00440F68[];
 extern char str_names_menu[];
@@ -355,7 +355,7 @@ extern "C" void cFEStateCharSelect_onWidgetCreate(char* self, sWidget_1620* w)
     for (int i = 0; i < 10; i++) {
         key.c[0] = '0' + i;
         if (hashName == GetHashValue32(key.c)) {
-            cUIText_setAsciiString((cUIText*)w, (const char*)func_0014EEC8(cBE_getInterface_Fv(cBE_getBE(), 2), D_00440F68[i], 0));
+            cUIText_setAsciiString((cUIText*)w, (const char*)cBECharacterInterface_getShortNameByCharacter(cBE_getInterface_Fv(cBE_getBE(), 2), D_00440F68[i], 0));
             w->id18 = i;
             refresh_1620(w);
             return;
@@ -381,7 +381,7 @@ extern "C" void cFECustom_setPlayerCtrlMask(void* self, int rider, unsigned char
 extern "C" void cFEStateCharSelect_updateWidget(void* self, int index, signed char charID);
 extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* iface, int rider, int idx);
 extern "C" void cBENewPlayerInterface_setPlayerCharID(void* iface, int rider, int id);
-extern "C" void func_001474A8(void* iface, int rider, int id);
+extern "C" void cBENewPlayerInterface_setPlayerCheatCharID(void* iface, int rider, int id);
 extern "C" void cUIStateStack_push(void* stack, void* state);
 extern signed char D_00440F68[];
 extern char str_FEOptions[];
@@ -477,7 +477,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8*
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCtrlID(iface, rider, player);
         cBENewPlayerInterface_setPlayerCharID(iface, rider, ch);
-        func_001474A8(iface, rider, board);
+        cBENewPlayerInterface_setPlayerCheatCharID(iface, rider, board);
         refresh_17E8(iface);
         unsigned char mask = on << self->player;
         cFECustom_setPlayerCtrlMask(*(void**)self->engine, self->rider, mask);
@@ -507,7 +507,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8*
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCtrlID(iface, rider, player);
         cBENewPlayerInterface_setPlayerCharID(iface, rider, ch);
-        func_001474A8(iface, rider, board);
+        cBENewPlayerInterface_setPlayerCheatCharID(iface, rider, board);
         refresh_17E8(iface);
         break;
     }
@@ -555,13 +555,13 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* text, const char* str);
-extern "C" int func_00148B78(void* iface, int a, int b);
-extern "C" int func_00148BC8(void* iface, int a, int b);
-extern "C" int func_00148C18(void* iface, int a, int b);
-extern "C" int func_00148C68(void* iface, int a, int b);
-extern "C" int func_00148CB8(void* iface, int a, int b);
-extern "C" int func_00148D08(void* iface, int a, int b);
-extern "C" int func_00148D58(void* iface, int a, int b);
+extern "C" int cBEStatInterface_getHumanSpeed(void* iface, int a, int b);
+extern "C" int cBEStatInterface_getHumanAccel(void* iface, int a, int b);
+extern "C" int cBEStatInterface_getHumanTrick(void* iface, int a, int b);
+extern "C" int cBEStatInterface_getHumanEdging(void* iface, int a, int b);
+extern "C" int cBEStatInterface_getHumanSpin(void* iface, int a, int b);
+extern "C" int cBEStatInterface_getHumanToughness(void* iface, int a, int b);
+extern "C" int cBEStatInterface_getHumanStability(void* iface, int a, int b);
 extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int a2, int a3);
 extern "C" void cUIProgress_setValue(void* bar, int v);
 extern "C" double fptodp(float f);
@@ -595,8 +595,8 @@ extern "C" void cFEStateCharSelect_updateWidget_impl(void* self, signed char rid
 /**
  * Fills the character-select stats widgets for a character and puts it on the user's front-end rider.
  *
- * Reads the 7 attribute ratings from the player interface (cBE_getInterface kind 3: func_00148BC8, func_00148C68,
- * func_00148B78, func_00148CB8, func_00148D58, func_00148D08, func_00148C18). For attribute i it finds the text
+ * Reads the 7 attribute ratings from the player interface (cBE_getInterface kind 3: cBEStatInterface_getHumanAccel, cBEStatInterface_getHumanEdging,
+ * cBEStatInterface_getHumanSpeed, cBEStatInterface_getHumanSpin, cBEStatInterface_getHumanStability, cBEStatInterface_getHumanToughness, cBEStatInterface_getHumanTrick). For attribute i it finds the text
  * "NumAttr<i>" and the bar "<i>pb" on the screen (+0x40); when both exist it shows the text with rating * 0.2 ("%.1f"),
  * sets the bar's style (+0x80) to 55 and its value to the rating (at least 0). The total, rounded down to a multiple of
  * 5, gives "NumAttrOver" (total / 35, "%.1f") and the "overall" bar (total / 7); neither of these two lookups is
@@ -616,13 +616,13 @@ extern "C" void cFEStateCharSelect_updateWidget_impl(void* self, signed char rid
     int stats[7];
     float k = 0.2f;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
-    stats[0] = func_00148BC8(iface, rider, charID);
-    stats[1] = func_00148C68(iface, rider, charID);
-    stats[2] = func_00148B78(iface, rider, charID);
-    stats[3] = func_00148CB8(iface, rider, charID);
-    stats[4] = func_00148D58(iface, rider, charID);
-    stats[5] = func_00148D08(iface, rider, charID);
-    stats[6] = func_00148C18(iface, rider, charID);
+    stats[0] = cBEStatInterface_getHumanAccel(iface, rider, charID);
+    stats[1] = cBEStatInterface_getHumanEdging(iface, rider, charID);
+    stats[2] = cBEStatInterface_getHumanSpeed(iface, rider, charID);
+    stats[3] = cBEStatInterface_getHumanSpin(iface, rider, charID);
+    stats[4] = cBEStatInterface_getHumanStability(iface, rider, charID);
+    stats[5] = cBEStatInterface_getHumanToughness(iface, rider, charID);
+    stats[6] = cBEStatInterface_getHumanTrick(iface, rider, charID);
     int total = 0;
     for (int i = 0; i < 7; i++) {
         name.c[7] = '0' + i;
@@ -782,8 +782,8 @@ int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* func_0014EEC8(void* self, int player, int index);
-extern "C" int func_00157EE0(void* iface, int a1, int a2, int a3);
+extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index);
+extern "C" int cBERewardInterface_isCheatCharOwned(void* iface, int a1, int a2, int a3);
 extern "C" void* cBERewardInterface_getDB();
 extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
 extern "C" void* func_0039E318(void* self, void* engine, void* owner);
@@ -818,8 +818,8 @@ struct sCharSel_2220 {
  *
  * Builds the UI state (func_0039E318), sets state id 10, the cFEStateCheatCharSelect_vtbl vtable and the user. Entry 0
  * is the base character itself: id 0, its face picture (D_00440F78[@p slot], looked up in the owner's texture bank at
- * +0x58) and its name (func_0014EEC8 on interface 2). Then every reward-database character (cBERewardInterface_getDB)
- * that func_00157EE0 reports as owned by the user for @p slot is appended with its id, picture and name (count +0x78;
+ * +0x58) and its name (cBECharacterInterface_getShortNameByCharacter on interface 2). Then every reward-database character (cBERewardInterface_getDB)
+ * that cBERewardInterface_isCheatCharOwned reports as owned by the user for @p slot is appended with its id, picture and name (count +0x78;
  * ids +0x7C, pictures +0xF4, names +0x16C, 30 entries). Clears +0x70, the six picture slots (+0x54) and +0x74, and
  * stores cFECustom_getPlayerCtrlMask's value for the user at +0x15.
  *
@@ -846,7 +846,7 @@ extern "C" sCharSel_2220* cFEStateCheatCharSelect_cFEStateCheatCharSelect(sCharS
     int n = list->count;
     for (int i = 0; i < n; i++) {
         sCharEnt_2220* charEntry = &list->ents[i];
-        if (func_00157EE0(iface, self->player, slot, charEntry->id)) {
+        if (cBERewardInterface_isCheatCharOwned(iface, self->player, slot, charEntry->id)) {
             char* lbl = charEntry->label;
             self->ids[self->count] = charEntry->id;
             char* entryOwner = self->owner;
@@ -856,7 +856,7 @@ extern "C" sCharSel_2220* cFEStateCheatCharSelect_cFEStateCheatCharSelect(sCharS
             self->count++;
         }
     }
-    self->names[0] = (char*)func_0014EEC8(cBE_getInterface_Fv(cBE_getBE(), 2), slot, 0);
+    self->names[0] = (char*)cBECharacterInterface_getShortNameByCharacter(cBE_getInterface_Fv(cBE_getBE(), 2), slot, 0);
     for (int j = 5; j >= 0; j--)
         self->sel[j] = 0;
     self->f74 = 0;
@@ -1001,7 +1001,7 @@ void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_001474A8(void* iface, int rider, int id);
+extern "C" void cBENewPlayerInterface_setPlayerCheatCharID(void* iface, int rider, int id);
 extern "C" void func_0039F190(void*, int);
 extern char D_004C66A8[];
 extern char D_004C66B8[];
@@ -1021,7 +1021,7 @@ struct sVEK182690b {
  * Handles the cheat-character pictures: highlight, the shown name, picking one and backing out.
  *
  * Event 1 highlights the picture and shows its entry's name, 2 restores its colour. Event 5 stores the
- * entry's value (0 for the first entry) in +0x70 and in the player table (func_001474A8), commits it, sets
+ * entry's value (0 for the first entry) in +0x70 and in the player table (cBENewPlayerInterface_setPlayerCheatCharID), commits it, sets
  * +0x74 and closes the popup; 6 closes it with +0x70 = 0.
  *
  * @param menu  the picture widget (ignored when 0); its id plus the menu's scroll offset is the entry
@@ -1055,7 +1055,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(void* self, void* menu, un
         else
             *(int*)((char*)self + 0x70) = *(int*)((char*)self + (sel << 2) + 0x7C);
         char* pl = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
-        func_001474A8(pl, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x70));
+        cBENewPlayerInterface_setPlayerCheatCharID(pl, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x70));
         sVEK182690b* vt = *(sVEK182690b**)(pl + 0xC);
         vt[1].fn(pl + vt[1].delta);
         *(int*)((char*)self + 0x74) = 1;

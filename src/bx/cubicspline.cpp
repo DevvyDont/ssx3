@@ -3,7 +3,7 @@
 //100%
 INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_initCommon);
 #ifdef SKIP_ASM
-void func_0031D790(void* self);
+void cCubicSplineInterpolant_purge(void* self);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_cCSICubicSpline[];
 
@@ -26,7 +26,7 @@ extern "C" void cCubicSplineInterpolant_initCommon_impl(sCubicSpline* self, int 
 /**
  * Prepares the spline for @p n points: frees any old data and allocates n - 1 segment records.
  *
- * Purges the old data (func_0031D790), stores n - 1 in the 8-bit count field, allocates (n - 1) * 0x14 bytes
+ * Purges the old data (cCubicSplineInterpolant_purge), stores n - 1 in the 8-bit count field, allocates (n - 1) * 0x14 bytes
  * ("cCSICubicSpline"), sets the allocated flag (bit 1) and resets the added-point counter (bits 3-10).
  *
  * @param n  number of points (On Tour numPoints); at most 256 fit the count field
@@ -34,7 +34,7 @@ extern "C" void cCubicSplineInterpolant_initCommon_impl(sCubicSpline* self, int 
 extern "C" void cCubicSplineInterpolant_initCommon_impl(sCubicSpline* self, int n)
 {
     if (self->data != 0) {
-        func_0031D790(self);
+        cCubicSplineInterpolant_purge(self);
     }
     self->flags.count = n - 1;
     self->data = operator_new_tag(self->flags.count * 20, str_cCSICubicSpline, 0, 0);
@@ -46,7 +46,7 @@ extern "C" void cCubicSplineInterpolant_initCommon_impl(sCubicSpline* self, int 
 extern "C" void cCubicSplineInterpolant_initCommon(void* self);
 
 //99.62%
-INCLUDE_ASM("bx/cubicspline", func_0031D700__FPv);
+INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_initAsNatural__FPv);
 #ifdef SKIP_ASM
 /**
  * Prepares a spline interpolant as a natural spline: cCubicSplineInterpolant_initCommon, then clears the type bit (bit
@@ -55,7 +55,7 @@ INCLUDE_ASM("bx/cubicspline", func_0031D700__FPv);
  * The point count is the second argument, which the C does not declare; it reaches cCubicSplineInterpolant_initCommon
  * untouched in its register. The spline camera algorithm builds its interpolants with it.
  */
-void func_0031D700(void* self)
+void cCubicSplineInterpolant_initAsNatural(void* self)
 {
     cCubicSplineInterpolant_initCommon(self);
     *(int*)self &= -2;
@@ -63,19 +63,19 @@ void func_0031D700(void* self)
 #endif
 
 //99.76%
-INCLUDE_ASM("bx/cubicspline", func_0031D738__FPvff);
+INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_initAsClamped__FPvff);
 #ifdef SKIP_ASM
 /**
  * Prepares a spline interpolant as a clamped spline with given end slopes.
  *
  * Runs cCubicSplineInterpolant_initCommon (the point count is the undeclared second argument, passed through in its
  * register), sets the type bit (bit 0), and parks @p start in the first segment's fifth float (+0x10 of the data, +0x8)
- * and @p end in +0x4 until func_0031D8B0 reads them.
+ * and @p end in +0x4 until cCubicSplineInterpolant_calculateSplines reads them.
  *
  * @param start  the slope at the first point
  * @param end  the slope at the last point
  */
-void func_0031D738(void* self, float start, float end)
+void cCubicSplineInterpolant_initAsClamped(void* self, float start, float end)
 {
     cCubicSplineInterpolant_initCommon(self);
     unsigned int flags = *(unsigned int*)self;
@@ -90,7 +90,7 @@ void func_0031D738(void* self, float start, float end)
 void* cMemMan_free(void* ptr);
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031D790__FPv);
+INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_purge__FPv);
 #ifdef SKIP_ASM
 /**
  * Frees a spline interpolant's segment data (+0x8, cMemMan_free) and clears its allocated and loaded flags (bits 1 and
@@ -98,7 +98,7 @@ INCLUDE_ASM("bx/cubicspline", func_0031D790__FPv);
  *
  * cCubicSplineInterpolant_initCommon calls it before allocating new data.
  */
-void func_0031D790(void* self)
+void cCubicSplineInterpolant_purge(void* self)
 {
     if (*(void**)((char*)self + 0x8) != 0) {
         cMemMan_free(*(void**)((char*)self + 0x8));
@@ -112,7 +112,7 @@ void func_0031D790(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031D7E0);
+INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_addPoint);
 #ifdef SKIP_ASM
 struct sCubicSplineKeyK2 {
     float x;  // 0x0
@@ -122,25 +122,25 @@ struct sCubicSplineKeyK2 {
     float pad_0x10;
 };
 
-extern "C" void func_0031D8B0(sCubicSpline* self);
+extern "C" void cCubicSplineInterpolant_calculateSplines(sCubicSpline* self);
 
 /**
  * Adds the next point (@p x, @p y) to a spline interpolant; the last point completes it.
  *
  * While the added-point counter (bits 3-10) is below the segment count (bits 11-18), the point goes into that segment's
  * start (+0x0, +0x4 of its 0x14 bytes) and the counter goes up. The point after that becomes the last segment's end
- * (+0x8, +0xC); the coefficients are then computed (func_0031D8B0) and the loaded flag (bit 2) is set. The camera code
+ * (+0x8, +0xC); the coefficients are then computed (cCubicSplineInterpolant_calculateSplines) and the loaded flag (bit 2) is set. The camera code
  * feeds its key times and values through it.
  *
  * @param x  the point's input value (time)
  * @param y  the point's output value
  */
-extern "C" void func_0031D7E0(sCubicSpline* self, float x, float y)
+extern "C" void cCubicSplineInterpolant_addPoint(sCubicSpline* self, float x, float y)
 {
     if (self->flags.f3 == self->flags.count) {
         ((sCubicSplineKeyK2*)self->data)[self->flags.f3 - 1].tx = x;
         ((sCubicSplineKeyK2*)self->data)[self->flags.f3 - 1].ty = y;
-        func_0031D8B0(self);
+        cCubicSplineInterpolant_calculateSplines(self);
         self->flags.b2 = 1;
     } else {
         ((sCubicSplineKeyK2*)self->data)[self->flags.f3].x = x;
@@ -151,23 +151,23 @@ extern "C" void func_0031D7E0(sCubicSpline* self, float x, float y)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031D8B0);
+INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_calculateSplines);
 #ifdef SKIP_ASM
 /**
  * Computes a spline interpolant's cubic coefficients from its points, natural or clamped by the type bit.
  *
  * Copies the points into local arrays and solves the tridiagonal system for the second-derivative terms: with natural
- * end conditions (type bit 0 clear) or with the end slopes that func_0031D738 parked at +0x10 of the data and at +0x4.
+ * end conditions (type bit 0 clear) or with the end slopes that cCubicSplineInterpolant_initAsClamped parked at +0x10 of the data and at +0x4.
  * Each 0x14-byte segment then holds d, c, b, a and its start x, for y = a + b*u + c*u^2 + d*u^3 with u = t - x.
  *
  * +0x4 becomes the last point's x and the cached segment index (bits 19-26) is cleared. The local arrays hold 256
- * entries. func_0031D7E0 calls it after the last point.
+ * entries. cCubicSplineInterpolant_addPoint calls it after the last point.
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
 // self->data holds 5 floats per key: x, y, end x, end y, start slope on input;
 // d, c, b, a, x of each segment (y = a + b*u + c*u^2 + d*u^3, u = t - x) on output.
 // Builds the natural (flags.b0 == 0) or clamped (flags.b0 == 1) cubic spline through the added keys.
-extern "C" void func_0031D8B0(sCubicSpline* self)
+extern "C" void cCubicSplineInterpolant_calculateSplines(sCubicSpline* self)
 {
     float x[256];
     float yValues[256];
@@ -249,7 +249,7 @@ extern "C" void func_0031D8B0(sCubicSpline* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031DEE0);
+INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_evaluate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sSplFlags_31DEE0 {
@@ -274,7 +274,7 @@ struct sSpline_31DEE0 {
 
 extern "C" float func_0031D5A8(sSplSeg_31DEE0* seg, float t);
 
-extern "C" float func_0031DEE0_impl(sSpline_31DEE0* s, float t) __asm__("func_0031DEE0");
+extern "C" float cCubicSplineInterpolant_evaluate_impl(sSpline_31DEE0* s, float t) __asm__("cCubicSplineInterpolant_evaluate");
 /**
  * Evaluates a spline interpolant at @p time.
  *
@@ -289,7 +289,7 @@ extern "C" float func_0031DEE0_impl(sSpline_31DEE0* s, float t) __asm__("func_00
  * @param time  the input value
  * @return the interpolated value
  */
-extern "C" float func_0031DEE0_impl(sSpline_31DEE0* spline, float time)
+extern "C" float cCubicSplineInterpolant_evaluate_impl(sSpline_31DEE0* spline, float time)
 {
     int last = spline->flags.count - 1;
     float* pend;
@@ -344,9 +344,9 @@ extern "C" float func_0031DEE0_impl(sSpline_31DEE0* spline, float time)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("bx/cubicspline", func_0031E0E0);
+INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_SpewGraphPoints);
 #ifdef SKIP_ASM
-extern "C" void func_0031DEE0(void* self, float t);
+extern "C" void cCubicSplineInterpolant_evaluate(void* self, float t);
 
 /**
  * Steps through a spline interpolant's range in 99 steps, evaluating it at each one and discarding the values.
@@ -354,7 +354,7 @@ extern "C" void func_0031DEE0(void* self, float t);
  * The range runs from the first segment's start x (+0x10 of the data) to the end (+0x4). A first loop over the same
  * steps is empty; this is what remains of a debug dump. Nothing calls it.
  */
-extern "C" void func_0031E0E0(void* self)
+extern "C" void cCubicSplineInterpolant_SpewGraphPoints(void* self)
 {
     float end = *(float*)((char*)self + 4);
     float start = *(float*)(*(char**)((char*)self + 8) + 0x10);
@@ -362,12 +362,12 @@ extern "C" void func_0031E0E0(void* self)
     for (float firstPassT = start; firstPassT <= end; firstPassT += step) {
     }
     for (float sampleT = start; sampleT <= end; sampleT += step) {
-        func_0031DEE0(self, sampleT);
+        cCubicSplineInterpolant_evaluate(self, sampleT);
     }
 }
 #endif
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031E190);
+INCLUDE_ASM("bx/cubicspline", cCubicSplineInterpolant_SpewSplineNumbers);
 #ifdef SKIP_ASM
 // Number of spline segments (flags.count, bits 11..18); the empty loop is a stripped debug walk.
 static inline int cCubicSpline_getCount(sCubicSpline* s) { return s->flags.count; }
@@ -377,7 +377,7 @@ static inline int cCubicSpline_getCount(sCubicSpline* s) { return s->flags.count
  *
  * An empty loop, what remains of a debug dump. Nothing calls it.
  */
-extern "C" void func_0031E190(sCubicSpline* self)
+extern "C" void cCubicSplineInterpolant_SpewSplineNumbers(sCubicSpline* self)
 {
     for (int i = 0; i < cCubicSpline_getCount(self); i++) {
     }
@@ -385,19 +385,19 @@ extern "C" void func_0031E190(sCubicSpline* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031E1D8);
+INCLUDE_ASM("bx/cubicspline", largebin_index);
 #ifdef SKIP_ASM
 /**
  * Returns the large-bin index (32 to 95) for a chunk size, from its highest set bit and the next two bits.
  *
- * Sizes of 0x1000000 or more give 95. func_0031E818 uses it to find the bin to search and to file chunks.
+ * Sizes of 0x1000000 or more give 95. cDynamicMemMan_dlmalloc uses it to find the bin to search and to file chunks.
  *
  * @param sz  the chunk size in bytes
  * @return the bin index
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // dlmalloc 2.7 largebin_index() (portable highest-bit version).
-extern "C" int func_0031E1D8(unsigned int sz)
+extern "C" int largebin_index(unsigned int sz)
 {
     unsigned int x = sz >> 8;
     unsigned int shift;
@@ -419,7 +419,7 @@ extern "C" int func_0031E1D8(unsigned int sz)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031E260__FPv);
+INCLUDE_ASM("bx/cubicspline", malloc_init_state__FPv);
 #ifdef SKIP_ASM
 /**
  * Initialises a malloc state: empty circular bins, default limits, and the top chunk at the first bin.
@@ -427,9 +427,9 @@ INCLUDE_ASM("bx/cubicspline", func_0031E260__FPv);
  * Points both links of the 95 bins (from +0x38) at themselves, sets the fastbin limit (+0x0) to 0x50 keeping its low
  * two flag bits, trim threshold 0x8000 (+0x344), mmap threshold 0x40000 (+0x34C), top pad and mmap count 0 (+0x348,
  * +0x354), page size 0x1000 (+0x35C), the contiguous flag (bit 0 of +0x360) and the top (+0x30) to the first bin.
- * func_0031EEE8 calls it on a state whose fastbin limit is still 0.
+ * cDynamicMemMan_malloc_consolidate calls it on a state whose fastbin limit is still 0.
  */
-void func_0031E260(void* self)
+void malloc_init_state(void* self)
 {
     char* bin = (char*)self + 0x38;
     for (int i = 94; i >= 0; i--) {
@@ -449,14 +449,14 @@ void func_0031E260(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031E2D8);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_sYSMALLOc);
 #ifdef SKIP_ASM
 // dlmalloc 2.7 sYSMALLOc()
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" unsigned int func_0031FFD8(void* self, long incr); // PORT: 64-bit long param
-extern "C" void* func_0031E818(void* ms, unsigned int bytes);
+extern "C" unsigned int cDynamicMemMan_dlmorecore(void* self, long incr); // PORT: 64-bit long param
+extern "C" void* cDynamicMemMan_dlmalloc(void* ms, unsigned int bytes);
 struct sMState_31EEE8;
-extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av);
+extern "C" void cDynamicMemMan_malloc_consolidate(void* ms, sMState_31EEE8* av);
 // PORT: the unit declares cDynamicMemMan_dlfree(void*); the body really takes (ms, mem).
 extern "C" void cDynamicMemMan_dlfree_E2D8(void* ms, void* mem) __asm__("cDynamicMemMan_dlfree");
 extern "C" int* func_00415FB8();
@@ -486,14 +486,14 @@ struct sMState_31E2D8
 };
 
 /**
- * Gets more memory for the heap from its core (func_0031FFD8) and allocates a chunk of @p nb bytes from the grown top.
+ * Gets more memory for the heap from its core (cDynamicMemMan_dlmorecore) and allocates a chunk of @p nb bytes from the grown top.
  *
- * When fast chunks exist (bit 1 of +0x0) it consolidates them (func_0031EEE8) and retries func_0031E818 instead.
- * Otherwise it asks func_0031FFD8 for nb + top pad + 16 bytes rounded to the page (less the old top when the core is
+ * When fast chunks exist (bit 1 of +0x0) it consolidates them (cDynamicMemMan_malloc_consolidate) and retries cDynamicMemMan_dlmalloc instead.
+ * Otherwise it asks cDynamicMemMan_dlmorecore for nb + top pad + 16 bytes rounded to the page (less the old top when the core is
  * contiguous), fixes up a foreign or misaligned break with a second request, frees the old top when the new memory is
  * not adjacent, and updates sbrked_mem and its maxima.
  *
- * Returns the chunk carved from the new top, or sets *func_00415FB8() to 12 (ENOMEM) and returns null. func_0031E818
+ * Returns the chunk carved from the new top, or sets *func_00415FB8() to 12 (ENOMEM) and returns null. cDynamicMemMan_dlmalloc
  * ends with it.
  *
  * @param ms  the heap manager; its first word points to the malloc state
@@ -501,7 +501,7 @@ struct sMState_31E2D8
  * @param av  the malloc state
  * @return the new memory, or null
  */
-extern "C" void* func_0031E2D8(void* ms, unsigned int nb, sMState_31E2D8* av)
+extern "C" void* cDynamicMemMan_sYSMALLOc(void* ms, unsigned int nb, sMState_31E2D8* av)
 {
     sMChunk_31E2D8* old_top;
     unsigned int old_size;
@@ -520,8 +520,8 @@ extern "C" void* func_0031E2D8(void* ms, unsigned int nb, sMState_31E2D8* av)
     unsigned int pagemask = av->pagesize - 1;
 
     if (av->max_fast & 2) {
-        func_0031EEE8(ms, (sMState_31EEE8*)av);
-        return func_0031E818(ms, nb - 15);
+        cDynamicMemMan_malloc_consolidate(ms, (sMState_31EEE8*)av);
+        return cDynamicMemMan_dlmalloc(ms, nb - 15);
     }
 
     old_top = av->top;
@@ -535,7 +535,7 @@ extern "C" void* func_0031E2D8(void* ms, unsigned int nb, sMState_31E2D8* av)
         size -= old_size;
     size = (size + pagemask) & ~pagemask;
     if (size > 0)
-        brk = (char*)func_0031FFD8(ms, size);
+        brk = (char*)cDynamicMemMan_dlmorecore(ms, size);
 
     if (brk != (char*)0xFFFFFFFF) {
         av->sbrked_mem += size;
@@ -567,11 +567,11 @@ extern "C" void* func_0031E2D8(void* ms, unsigned int nb, sMState_31E2D8* av)
                 end_misalign = (unsigned int)(brk + size + correction);
                 correction += ((end_misalign + pagemask) & ~pagemask) - end_misalign;
 
-                snd_brk = (char*)func_0031FFD8(ms, correction);
+                snd_brk = (char*)cDynamicMemMan_dlmorecore(ms, correction);
 
                 if (snd_brk == (char*)0xFFFFFFFF) {
                     correction = 0;
-                    snd_brk = (char*)func_0031FFD8(ms, 0);
+                    snd_brk = (char*)cDynamicMemMan_dlmorecore(ms, 0);
                 } else if (snd_brk < brk) {
                     snd_brk = brk + size;
                     correction = 0;
@@ -579,7 +579,7 @@ extern "C" void* func_0031E2D8(void* ms, unsigned int nb, sMState_31E2D8* av)
                 }
             } else {
                 if (snd_brk == (char*)0xFFFFFFFF) {
-                    snd_brk = (char*)func_0031FFD8(ms, 0);
+                    snd_brk = (char*)cDynamicMemMan_dlmorecore(ms, 0);
                     av->sbrked_mem += snd_brk - brk - size;
                 }
             }
@@ -629,9 +629,9 @@ extern "C" void* func_0031E2D8(void* ms, unsigned int nb, sMState_31E2D8* av)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031E6D8);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_sYSTRIm);
 #ifdef SKIP_ASM
-extern "C" unsigned int func_0031FFD8(void* self, long incr); // PORT: 64-bit long param
+extern "C" unsigned int cDynamicMemMan_dlmorecore(void* self, long incr); // PORT: 64-bit long param
 // PORT: libgcc 64-bit helpers called by name so the relocations match
 // (__divdi3 / __muldi3 in the retail ELF's unnamed libgcc copy).
 extern "C" long func_0040FCB0(long a, long b);
@@ -654,7 +654,7 @@ struct sMState_31E6D8
 };
 
 /**
- * Gives unused memory at the top of the heap back to its core (func_0031FFD8 with a negative size), keeping @p topPad
+ * Gives unused memory at the top of the heap back to its core (cDynamicMemMan_dlmorecore with a negative size), keeping @p topPad
  * bytes.
  *
  * Releases whole pages only, and only when the core's current end is still the top chunk's end; updates the top size
@@ -665,7 +665,7 @@ struct sMState_31E6D8
  * @param av  the malloc state
  * @return 1 when memory was released, else 0
  */
-extern "C" int func_0031E6D8(void* ms, unsigned int topPad, sMState_31E6D8* av)
+extern "C" int cDynamicMemMan_sYSTRIm(void* ms, unsigned int topPad, sMState_31E6D8* av)
 {
     long top_size;
     long extra;
@@ -678,10 +678,10 @@ extern "C" int func_0031E6D8(void* ms, unsigned int topPad, sMState_31E6D8* av)
     top_size = av->top->size & ~3;
     extra = func_004114D0(func_0040FCB0(top_size - topPad - 16 + (pagesz - 1), pagesz) - 1, pagesz);
     if (extra > 0) {
-        current_brk = (char*)func_0031FFD8(ms, 0);
+        current_brk = (char*)cDynamicMemMan_dlmorecore(ms, 0);
         if (current_brk == (char*)av->top + top_size) {
-            func_0031FFD8(ms, -extra);
-            new_brk = (char*)func_0031FFD8(ms, 0);
+            cDynamicMemMan_dlmorecore(ms, -extra);
+            new_brk = (char*)cDynamicMemMan_dlmorecore(ms, 0);
             if (new_brk != (char*)0xFFFFFFFF) {
                 released = current_brk - new_brk;
                 if (released != 0) {
@@ -697,7 +697,7 @@ extern "C" int func_0031E6D8(void* ms, unsigned int topPad, sMState_31E6D8* av)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031E818);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlmalloc);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // dlmalloc 2.7.0 malloc()
@@ -719,10 +719,10 @@ struct sMState_31E818
     unsigned int binmap[3];             // 0x338
 };
 
-extern "C" int func_0031E1D8(unsigned int sz);
+extern "C" int largebin_index(unsigned int sz);
 // PORT: the unit declares these with their own state types; bind the malloc view by asm label.
-extern "C" void func_0031EEE8_E818(void* ms, sMState_31E818* av) __asm__("func_0031EEE8");
-extern "C" void* func_0031E2D8_E818(void* ms, unsigned int nb, sMState_31E818* av) __asm__("func_0031E2D8");
+extern "C" void cDynamicMemMan_malloc_consolidate_E818(void* ms, sMState_31E818* av) __asm__("cDynamicMemMan_malloc_consolidate");
+extern "C" void* cDynamicMemMan_sYSMALLOc_E818(void* ms, unsigned int nb, sMState_31E818* av) __asm__("cDynamicMemMan_sYSMALLOc");
 
 #define BIN_AT_31E818(av, i) ((sMChunk_31E818*)((char*)&(av)->bins[(i) << 1] - 8))
 
@@ -730,15 +730,15 @@ extern "C" void* func_0031E2D8_E818(void* ms, unsigned int nb, sMState_31E818* a
  * Allocates @p bytes from the heap (dlmalloc 2.7's malloc on 16-byte aligned chunks).
  *
  * Sizes of 0xFFFFFFE0 or more set *func_00415FB8() to 12 (ENOMEM) and return null. Otherwise it tries the fast bins,
- * the small bins, the unsorted chunks (filing them into their bins, func_0031E1D8 for large ones), the best-fitting
- * larger bin through the bin map, then the top chunk, and finally grows the heap with func_0031E2D8. Every other
- * allocator here (func_00320038, calloc, realloc, memalign, func_0031F858) goes through it.
+ * the small bins, the unsorted chunks (filing them into their bins, largebin_index for large ones), the best-fitting
+ * larger bin through the bin map, then the top chunk, and finally grows the heap with cDynamicMemMan_sYSMALLOc. Every other
+ * allocator here (cDynamicMemMan_alloc, calloc, realloc, memalign, cDynamicMemMan_iALLOc) goes through it.
  *
  * @param ms  the heap manager; its first word points to the malloc state
  * @param bytes  the size requested
  * @return the memory, or null
  */
-extern "C" void* func_0031E818(void* ms, unsigned int bytes)
+extern "C" void* cDynamicMemMan_dlmalloc(void* ms, unsigned int bytes)
 {
     sMState_31E818* av = *(sMState_31E818**)ms;
     unsigned int nb;
@@ -764,7 +764,7 @@ extern "C" void* func_0031E818(void* ms, unsigned int bytes)
 
     if (!(av->max_fast & 1)) {
         if (av->max_fast == 0)
-            func_0031EEE8_E818(ms, av);
+            cDynamicMemMan_malloc_consolidate_E818(ms, av);
         goto use_top;
     }
 
@@ -788,9 +788,9 @@ extern "C" void* func_0031E818(void* ms, unsigned int bytes)
             return (char*)victim + 8;
         }
     } else {
-        idx = func_0031E1D8(nb);
+        idx = largebin_index(nb);
         if (av->max_fast & 2)
-            func_0031EEE8_E818(ms, av);
+            cDynamicMemMan_malloc_consolidate_E818(ms, av);
     }
 
     while ((victim = BIN_AT_31E818(av, 1)->bk) != BIN_AT_31E818(av, 1)) {
@@ -823,7 +823,7 @@ extern "C" void* func_0031E818(void* ms, unsigned int bytes)
             bck = (sMChunk_31E818*)((char*)base - 8);
             fwd = base[0];
         } else {
-            victim_index = func_0031E1D8(size);
+            victim_index = largebin_index(size);
             sMChunk_31E818** base = &av->bins[victim_index << 1];
             bck = (sMChunk_31E818*)((char*)base - 8);
             fwd = base[0];
@@ -935,7 +935,7 @@ use_top:
         remainder->size = remainder_size | 1;
         return (char*)victim + 8;
     }
-    return func_0031E2D8_E818(ms, nb, av);
+    return cDynamicMemMan_sYSMALLOc_E818(ms, nb, av);
 }
 #endif
 
@@ -969,8 +969,8 @@ struct sMalloc_31ED60
 
 struct sMState_31EEE8;
 struct sMState_31E6D8;
-extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av);
-extern "C" int func_0031E6D8(void* ms, unsigned int pad, sMState_31E6D8* av);
+extern "C" void cDynamicMemMan_malloc_consolidate(void* ms, sMState_31EEE8* av);
+extern "C" int cDynamicMemMan_sYSTRIm(void* ms, unsigned int pad, sMState_31E6D8* av);
 
 // PORT: the unit declares cDynamicMemMan_dlfree(void*); the body really takes (ms, mem).
 extern "C" void cDynamicMemMan_dlfree_free(sMalloc_31ED60* ms, void* mem) __asm__("cDynamicMemMan_dlfree");
@@ -979,7 +979,7 @@ extern "C" void cDynamicMemMan_dlfree_free(sMalloc_31ED60* ms, void* mem) __asm_
  * Releases a heap block back to the dynamic memory manager (dlmalloc's free).
  *
  * Small chunks go to their fast bin; others are merged with free neighbours and put in the unsorted bin, or merged into
- * the top chunk, which may then be trimmed (func_0031E6D8) after consolidating the fast bins (func_0031EEE8). The C
+ * the top chunk, which may then be trimmed (cDynamicMemMan_sYSTRIm) after consolidating the fast bins (cDynamicMemMan_malloc_consolidate). The C
  * definition is cDynamicMemMan_dlfree, bound by asm label because the unit declares cDynamicMemMan_dlfree with one argument.
  *
  * @param ms  the memory manager (this); holds the malloc state pointer
@@ -1054,9 +1054,9 @@ extern "C" void cDynamicMemMan_dlfree_free(sMalloc_31ED60* ms, void* mem)
             if (size >= 0x4000)
             {
                 if (av->max_fast & 2)
-                    func_0031EEE8(ms, (sMState_31EEE8*)av);
+                    cDynamicMemMan_malloc_consolidate(ms, (sMState_31EEE8*)av);
                 if ((av->top->size & ~3U) >= av->trim_threshold)
-                    func_0031E6D8(ms, av->top_pad, (sMState_31E6D8*)av);
+                    cDynamicMemMan_sYSTRIm(ms, av->top_pad, (sMState_31E6D8*)av);
             }
         }
     }
@@ -1064,10 +1064,10 @@ extern "C" void cDynamicMemMan_dlfree_free(sMalloc_31ED60* ms, void* mem)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031EEE8);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_malloc_consolidate);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-void func_0031E260(void* av);
+void malloc_init_state(void* av);
 
 // dlmalloc 2.7 malloc_consolidate()
 struct sMChunk_31EEE8
@@ -1091,12 +1091,12 @@ struct sMState_31EEE8
  * Merges every chunk in the fast bins with its free neighbours and moves the results to the unsorted bin or the top.
  *
  * Clears the fast-chunks flag (bit 1 of +0x0) first. A state whose fastbin limit (+0x0) is 0 has never been set up and
- * gets func_0031E260 instead.
+ * gets malloc_init_state instead.
  *
  * @param ms  the heap manager; its first word points to the malloc state
  * @param av  the malloc state
  */
-extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av)
+extern "C" void cDynamicMemMan_malloc_consolidate(void* ms, sMState_31EEE8* av)
 {
     sMChunk_31EEE8** fb;
     sMChunk_31EEE8** maxfb;
@@ -1160,13 +1160,13 @@ extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av)
             }
         } while (fb++ != maxfb);
     } else {
-        func_0031E260(av);
+        malloc_init_state(av);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031F018);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlrealloc);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // dlmalloc 2.7 realloc() (no mmap support: an mmapped chunk fails with ENOMEM).
@@ -1183,7 +1183,7 @@ extern "C" void MEM_copy(void* d, void* s, int n);
 /**
  * Resizes an allocation (dlmalloc 2.7's realloc), in place when it can.
  *
- * A null @p oldmem allocates with func_0031E818. Otherwise it grows into the top or a free next chunk, or allocates a
+ * A null @p oldmem allocates with cDynamicMemMan_dlmalloc. Otherwise it grows into the top or a free next chunk, or allocates a
  * new block, copies the contents (MEM_copy) and frees the old one with cDynamicMemMan_dlfree; any surplus is split off
  * and freed. Sizes of 0xFFFFFFE0 or more set *func_00415FB8() to 12 (ENOMEM) and return null.
  *
@@ -1192,7 +1192,7 @@ extern "C" void MEM_copy(void* d, void* s, int n);
  * @param bytes  the new size
  * @return the resized allocation, or null
  */
-extern "C" void* func_0031F018(void* ms, void* oldmem, unsigned int bytes)
+extern "C" void* cDynamicMemMan_dlrealloc(void* ms, void* oldmem, unsigned int bytes)
 {
     char* av = *(char**)ms;
     unsigned int nb;
@@ -1207,7 +1207,7 @@ extern "C" void* func_0031F018(void* ms, void* oldmem, unsigned int bytes)
     unsigned int head;
 
     if (oldmem == 0)
-        return func_0031E818(ms, bytes);
+        return cDynamicMemMan_dlmalloc(ms, bytes);
 
     if (bytes >= (unsigned int)-32)
         goto nomem;
@@ -1243,7 +1243,7 @@ extern "C" void* func_0031F018(void* ms, void* oldmem, unsigned int bytes)
             goto split;
         }
 
-        newmem = (char*)func_0031E818(ms, nb - 15);
+        newmem = (char*)cDynamicMemMan_dlmalloc(ms, nb - 15);
         if (newmem == 0)
             return 0;
         newp = (sMChunk_31F018*)(newmem - 8);
@@ -1301,10 +1301,10 @@ nomem:
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031F2C8);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlmemalign);
 #ifdef SKIP_ASM
 // dlmalloc 2.7 mEMALIGn()
-extern "C" void* func_0031E818(void* ms, unsigned int bytes);
+extern "C" void* cDynamicMemMan_dlmalloc(void* ms, unsigned int bytes);
 // PORT: the unit declares cDynamicMemMan_dlfree(void*); the body really takes (ms, mem).
 extern "C" void cDynamicMemMan_dlfree_F2C8(void* ms, void* mem) __asm__("cDynamicMemMan_dlfree");
 extern "C" int* func_00415FB8();
@@ -1315,14 +1315,14 @@ struct sMChunk_31F2C8
     unsigned int size;           // 0x4
 };
 
-// PORT: the unit declares func_0031F2C8(void*); the body really takes (ms, alignment, bytes).
-extern "C" void* func_0031F2C8_memalign(void* ms, unsigned int alignment, unsigned int bytes) __asm__("func_0031F2C8");
+// PORT: the unit declares cDynamicMemMan_dlmemalign(void*); the body really takes (ms, alignment, bytes).
+extern "C" void* cDynamicMemMan_dlmemalign_memalign(void* ms, unsigned int alignment, unsigned int bytes) __asm__("cDynamicMemMan_dlmemalign");
 
 /**
  * Allocates @p bytes aligned to a power of two of at least @p alignment (dlmalloc 2.7's memalign).
  *
- * An alignment of 16 or less is a plain func_0031E818. Otherwise it over-allocates by the alignment, frees the leading
- * part and any surplus tail (cDynamicMemMan_dlfree) and returns the aligned chunk. func_0031FAA8 and func_0031FB00 call
+ * An alignment of 16 or less is a plain cDynamicMemMan_dlmalloc. Otherwise it over-allocates by the alignment, frees the leading
+ * part and any surplus tail (cDynamicMemMan_dlfree) and returns the aligned chunk. cDynamicMemMan_dlvalloc and cDynamicMemMan_dlpvalloc call
  * it with the page size.
  *
  * @param ms  the heap manager; its first word points to the malloc state
@@ -1330,7 +1330,7 @@ extern "C" void* func_0031F2C8_memalign(void* ms, unsigned int alignment, unsign
  * @param bytes  the size requested
  * @return the aligned memory, or null
  */
-extern "C" void* func_0031F2C8_memalign(void* ms, unsigned int alignment, unsigned int bytes)
+extern "C" void* cDynamicMemMan_dlmemalign_memalign(void* ms, unsigned int alignment, unsigned int bytes)
 {
     unsigned int nb;
     char* rawMem;
@@ -1344,7 +1344,7 @@ extern "C" void* func_0031F2C8_memalign(void* ms, unsigned int alignment, unsign
     unsigned int size;
 
     if (alignment <= 16)
-        return func_0031E818(ms, bytes);
+        return cDynamicMemMan_dlmalloc(ms, bytes);
     if (alignment < 16)
         alignment = 16;
     if ((alignment & (alignment - 1)) != 0) {
@@ -1358,7 +1358,7 @@ extern "C" void* func_0031F2C8_memalign(void* ms, unsigned int alignment, unsign
         return 0;
     }
     nb = (bytes + 4 + 15 < 16) ? 16 : (bytes + 4 + 15) & ~15;
-    rawMem = (char*)func_0031E818(ms, nb + alignment + 16);
+    rawMem = (char*)cDynamicMemMan_dlmalloc(ms, nb + alignment + 16);
     if (rawMem == 0)
         return 0;
     memChunk = (sMChunk_31F2C8*)(rawMem - 8);
@@ -1396,10 +1396,10 @@ extern "C" void* func_0031F2C8_memalign(void* ms, unsigned int alignment, unsign
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031F4E8);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlmemalignhdr);
 #ifdef SKIP_ASM
 // dlmalloc 2.7 mEMALIGn() variant: aligns the address mem + offset instead of mem
-extern "C" void* func_0031E818(void* ms, unsigned int bytes);
+extern "C" void* cDynamicMemMan_dlmalloc(void* ms, unsigned int bytes);
 // PORT: the unit declares cDynamicMemMan_dlfree(void*); the body really takes (ms, mem).
 extern "C" void cDynamicMemMan_dlfree_F4E8(void* ms, void* mem) __asm__("cDynamicMemMan_dlfree");
 extern "C" int* func_00415FB8();
@@ -1410,14 +1410,14 @@ struct sMChunk_31F4E8
     unsigned int size;           // 0x4
 };
 
-// PORT: the unit declares func_0031F4E8(void*); the body really takes (ms, alignment, bytes, offset).
-extern "C" void* func_0031F4E8_memalign(void* ms, unsigned int alignment, unsigned int bytes, unsigned int offset) __asm__("func_0031F4E8");
+// PORT: the unit declares cDynamicMemMan_dlmemalignhdr(void*); the body really takes (ms, alignment, bytes, offset).
+extern "C" void* cDynamicMemMan_dlmemalignhdr_memalign(void* ms, unsigned int alignment, unsigned int bytes, unsigned int offset) __asm__("cDynamicMemMan_dlmemalignhdr");
 
 /**
  * Allocates memory so that the address @p offset bytes into it is aligned to @p alignment (memalign with a header).
  *
- * Works like func_0031F2C8 on bytes + offset. Likely bug: for an alignment of 16 or less it returns
- * func_0031E818(bytes) without adding the offset, so the block lacks the header's room.
+ * Works like cDynamicMemMan_dlmemalign on bytes + offset. Likely bug: for an alignment of 16 or less it returns
+ * cDynamicMemMan_dlmalloc(bytes) without adding the offset, so the block lacks the header's room.
  *
  * @param ms  the heap manager; its first word points to the malloc state
  * @param alignment  the alignment wanted
@@ -1425,7 +1425,7 @@ extern "C" void* func_0031F4E8_memalign(void* ms, unsigned int alignment, unsign
  * @param offset  the header size: the address this far into the block is aligned
  * @return the memory, or null
  */
-extern "C" void* func_0031F4E8_memalign(void* ms, unsigned int alignment, unsigned int bytes, unsigned int offset)
+extern "C" void* cDynamicMemMan_dlmemalignhdr_memalign(void* ms, unsigned int alignment, unsigned int bytes, unsigned int offset)
 {
     unsigned int nb;
     char* rawMem;
@@ -1439,7 +1439,7 @@ extern "C" void* func_0031F4E8_memalign(void* ms, unsigned int alignment, unsign
     unsigned int size;
 
     if (alignment <= 16)
-        return func_0031E818(ms, bytes);
+        return cDynamicMemMan_dlmalloc(ms, bytes);
     if (alignment < 16)
         alignment = 16;
     if ((alignment & (alignment - 1)) != 0) {
@@ -1454,7 +1454,7 @@ extern "C" void* func_0031F4E8_memalign(void* ms, unsigned int alignment, unsign
         return 0;
     }
     nb = (bytes + 4 + 15 < 16) ? 16 : (bytes + 4 + 15) & ~15;
-    rawMem = (char*)func_0031E818(ms, nb + alignment + 16);
+    rawMem = (char*)cDynamicMemMan_dlmalloc(ms, nb + alignment + 16);
     if (rawMem == 0)
         return 0;
     memChunk = (sMChunk_31F4E8*)(rawMem - 8);
@@ -1492,12 +1492,12 @@ extern "C" void* func_0031F4E8_memalign(void* ms, unsigned int alignment, unsign
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031F718);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlcalloc);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int c, int n);
 
 /**
- * Allocates @p n * @p elem_size bytes with func_0031E818 and zeroes them (dlmalloc 2.7's calloc).
+ * Allocates @p n * @p elem_size bytes with cDynamicMemMan_dlmalloc and zeroes them (dlmalloc 2.7's calloc).
  *
  * Small chunks are cleared word by word, larger ones with MEM_fill. The product is not checked for overflow.
  *
@@ -1507,10 +1507,10 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * @return the zeroed memory, or null
  */
 // dlmalloc 2.7 cALLOc()
-extern "C" void* func_0031F718(void* ms, unsigned int n, unsigned int elem_size)
+extern "C" void* cDynamicMemMan_dlcalloc(void* ms, unsigned int n, unsigned int elem_size)
 {
     unsigned int bytes = n * elem_size;
-    void* mem = func_0031E818(ms, bytes);
+    void* mem = cDynamicMemMan_dlmalloc(ms, bytes);
     if (mem != 0) {
         unsigned int csz = *(unsigned int*)((char*)mem - 4);
         if (!(csz & 2)) {
@@ -1544,7 +1544,7 @@ extern "C" void* func_0031F718(void* ms, unsigned int n, unsigned int elem_size)
 }
 #endif
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031F7F0);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlcfree);
 #ifdef SKIP_ASM
 // PORT: the unit declares cDynamicMemMan_dlfree(void*); the body really takes (ms, mem).
 extern "C" void cDynamicMemMan_dlfree_F7F0(void* ms, void* mem) __asm__("cDynamicMemMan_dlfree");
@@ -1555,18 +1555,18 @@ extern "C" void cDynamicMemMan_dlfree_F7F0(void* ms, void* mem) __asm__("cDynami
  * @param ms  the heap manager; its first word points to the malloc state
  * @param mem  the allocation
  */
-extern "C" void func_0031F7F0(void* ms, void* mem)
+extern "C" void cDynamicMemMan_dlcfree(void* ms, void* mem)
 {
     cDynamicMemMan_dlfree_F7F0(ms, mem);
 }
 #endif
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031F810);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlindependent_calloc);
 #ifdef SKIP_ASM
-extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, int opts, void** chunks);
+extern "C" void* cDynamicMemMan_iALLOc(void* ms, unsigned int n, unsigned int* sizes, int opts, void** chunks);
 
 /**
- * Allocates @p n zeroed elements of @p elem_size bytes as separate chunks in one block (func_0031F858 with options 3).
+ * Allocates @p n zeroed elements of @p elem_size bytes as separate chunks in one block (cDynamicMemMan_iALLOc with options 3).
  *
  * @param ms  the heap manager; its first word points to the malloc state
  * @param n  the number of elements
@@ -1575,19 +1575,19 @@ extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, in
  * @return the pointer array, or null
  */
 // dlmalloc 2.7 independent_calloc()
-extern "C" void* func_0031F810(void* ms, unsigned int n, unsigned int elem_size, void** chunks)
+extern "C" void* cDynamicMemMan_dlindependent_calloc(void* ms, unsigned int n, unsigned int elem_size, void** chunks)
 {
     unsigned int sz = elem_size;
-    return func_0031F858(ms, n, &sz, 3, chunks);
+    return cDynamicMemMan_iALLOc(ms, n, &sz, 3, chunks);
 }
 #endif
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031F838);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlindependent_comalloc);
 #ifdef SKIP_ASM
-extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, int opts, void** chunks);
+extern "C" void* cDynamicMemMan_iALLOc(void* ms, unsigned int n, unsigned int* sizes, int opts, void** chunks);
 
 /**
- * Allocates @p n chunks of the sizes in @p sizes in one block (func_0031F858 with options 0).
+ * Allocates @p n chunks of the sizes in @p sizes in one block (cDynamicMemMan_iALLOc with options 0).
  *
  * @param ms  the heap manager; its first word points to the malloc state
  * @param n  the number of chunks
@@ -1596,13 +1596,13 @@ extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, in
  * @return the pointer array, or null
  */
 // dlmalloc 2.7 independent_comalloc()
-extern "C" void* func_0031F838(void* ms, unsigned int n, unsigned int* sizes, void** chunks)
+extern "C" void* cDynamicMemMan_dlindependent_comalloc(void* ms, unsigned int n, unsigned int* sizes, void** chunks)
 {
-    return func_0031F858(ms, n, sizes, 0, chunks);
+    return cDynamicMemMan_iALLOc(ms, n, sizes, 0, chunks);
 }
 #endif
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031F858);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_iALLOc);
 #ifdef SKIP_ASM
 // dlmalloc 2.7 iALLOc() (independent_calloc / independent_comalloc worker)
 struct sMChunk_31F858
@@ -1618,8 +1618,8 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * independent_calloc and independent_comalloc).
  *
  * Bit 0 of @p opts means all elements have the size *@p sizes, bit 1 zeroes the contents. Without @p chunks the pointer
- * array is carved from the same block. The mmap count limit (+0x354) is set to 0 around the func_0031E818 call. @p n of
- * 0 returns @p chunks, or func_0031E818(0) when that is null.
+ * array is carved from the same block. The mmap count limit (+0x354) is set to 0 around the cDynamicMemMan_dlmalloc call. @p n of
+ * 0 returns @p chunks, or cDynamicMemMan_dlmalloc(0) when that is null.
  *
  * @param ms  the heap manager; its first word points to the malloc state
  * @param n  the number of chunks
@@ -1628,7 +1628,7 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * @param chunks  receives the chunk pointers, or null
  * @return the pointer array, or null
  */
-extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, int opts, void** chunks)
+extern "C" void* cDynamicMemMan_iALLOc(void* ms, unsigned int n, unsigned int* sizes, int opts, void** chunks)
 {
     sMState_31EEE8* av = *(sMState_31EEE8**)ms;
     unsigned int element_size;
@@ -1644,7 +1644,7 @@ extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, in
     unsigned int i;
 
     if (av->max_fast == 0)
-        func_0031EEE8(ms, av);
+        cDynamicMemMan_malloc_consolidate(ms, av);
 
     if (chunks != 0) {
         if (n == 0)
@@ -1653,7 +1653,7 @@ extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, in
         array_size = 0;
     } else {
         if (n == 0)
-            return func_0031E818(ms, 0);
+            return cDynamicMemMan_dlmalloc(ms, 0);
         marray = 0;
         array_size = (n * sizeof(void*) + 4 + 15 < 16) ? 16 : (n * sizeof(void*) + 4 + 15) & ~15;
     }
@@ -1672,7 +1672,7 @@ extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, in
 
     mmx = *(int*)((char*)av + 0x354);
     *(int*)((char*)av + 0x354) = 0;
-    mem = func_0031E818(ms, size);
+    mem = cDynamicMemMan_dlmalloc(ms, size);
     *(int*)((char*)av + 0x354) = mmx;
     if (mem == 0)
         return 0;
@@ -1709,7 +1709,7 @@ extern "C" void* func_0031F858(void* ms, unsigned int n, unsigned int* sizes, in
 }
 #endif
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031FAA8);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlvalloc);
 #ifdef SKIP_ASM
 // dlmalloc 2.7 vALLOc(): memalign to the page size.
 struct sMState_31FAA8
@@ -1720,25 +1720,25 @@ struct sMState_31FAA8
 };
 
 /**
- * Allocates @p bytes aligned to the page size (+0x35C of the malloc state) with func_0031F2C8.
+ * Allocates @p bytes aligned to the page size (+0x35C of the malloc state) with cDynamicMemMan_dlmemalign.
  *
- * Sets the state up first (func_0031EEE8) when its fastbin limit is still 0.
+ * Sets the state up first (cDynamicMemMan_malloc_consolidate) when its fastbin limit is still 0.
  *
  * @param ms  the heap manager; its first word points to the malloc state
  * @param bytes  the size requested
  * @return the memory, or null
  */
-extern "C" void* func_0031FAA8(void** ms, unsigned int bytes)
+extern "C" void* cDynamicMemMan_dlvalloc(void** ms, unsigned int bytes)
 {
     sMState_31FAA8* av = *(sMState_31FAA8**)ms;
     if (av->max_fast == 0) {
-        func_0031EEE8(ms, (sMState_31EEE8*)av);
+        cDynamicMemMan_malloc_consolidate(ms, (sMState_31EEE8*)av);
     }
-    return func_0031F2C8_memalign(ms, av->pagesize, bytes);
+    return cDynamicMemMan_dlmemalign_memalign(ms, av->pagesize, bytes);
 }
 #endif
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031FB00);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlpvalloc);
 #ifdef SKIP_ASM
 // dlmalloc 2.7 pvALLOc(): memalign to the page size, with the size rounded up to a page.
 struct sMState_31FB00
@@ -1749,52 +1749,52 @@ struct sMState_31FB00
 };
 
 /**
- * Allocates @p bytes rounded up to whole pages, page-aligned, with func_0031F2C8.
+ * Allocates @p bytes rounded up to whole pages, page-aligned, with cDynamicMemMan_dlmemalign.
  *
- * Sets the state up first (func_0031EEE8) when its fastbin limit is still 0. The page size is +0x35C of the malloc
+ * Sets the state up first (cDynamicMemMan_malloc_consolidate) when its fastbin limit is still 0. The page size is +0x35C of the malloc
  * state.
  *
  * @param ms  the heap manager; its first word points to the malloc state
  * @param bytes  the size requested
  * @return the memory, or null
  */
-extern "C" void* func_0031FB00(void** ms, unsigned int bytes)
+extern "C" void* cDynamicMemMan_dlpvalloc(void** ms, unsigned int bytes)
 {
     sMState_31FB00* av = *(sMState_31FB00**)ms;
     if (av->max_fast == 0) {
-        func_0031EEE8(ms, (sMState_31EEE8*)av);
+        cDynamicMemMan_malloc_consolidate(ms, (sMState_31EEE8*)av);
     }
     unsigned int pagesize = av->pagesize;
-    return func_0031F2C8_memalign(ms, pagesize, (bytes + pagesize - 1) & ~(pagesize - 1));
+    return cDynamicMemMan_dlmemalign_memalign(ms, pagesize, (bytes + pagesize - 1) & ~(pagesize - 1));
 }
 #endif
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031FB68);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlmalloc_trim);
 #ifdef SKIP_ASM
 struct sMState_31EEE8;
 struct sMState_31E6D8;
-extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av);
-extern "C" int func_0031E6D8(void* ms, unsigned int pad, sMState_31E6D8* av);
+extern "C" void cDynamicMemMan_malloc_consolidate(void* ms, sMState_31EEE8* av);
+extern "C" int cDynamicMemMan_sYSTRIm(void* ms, unsigned int pad, sMState_31E6D8* av);
 
 /**
- * Consolidates the fast bins (func_0031EEE8) and returns unused top memory beyond @p topPad to the core
- * (func_0031E6D8).
+ * Consolidates the fast bins (cDynamicMemMan_malloc_consolidate) and returns unused top memory beyond @p topPad to the core
+ * (cDynamicMemMan_sYSTRIm).
  *
  * @param ms  the heap manager; its first word points to the malloc state
  * @param topPad  bytes to keep above what is in use
  * @return 1 when memory was released, else 0
  */
 // dlmalloc 2.7 malloc_trim(): consolidate fastbins, then sYSTRIm.
-extern "C" int func_0031FB68(void** ms, unsigned int topPad)
+extern "C" int cDynamicMemMan_dlmalloc_trim(void** ms, unsigned int topPad)
 {
     void* av = *ms;
-    func_0031EEE8(ms, (sMState_31EEE8*)av);
-    return func_0031E6D8(ms, topPad, (sMState_31E6D8*)av);
+    cDynamicMemMan_malloc_consolidate(ms, (sMState_31EEE8*)av);
+    return cDynamicMemMan_sYSTRIm(ms, topPad, (sMState_31E6D8*)av);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031FBB8__FPvT0);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlmalloc_usable_size__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Returns how many bytes of an allocation can be used: its chunk size minus the header overhead.
@@ -1804,7 +1804,7 @@ INCLUDE_ASM("bx/cubicspline", func_0031FBB8__FPvT0);
  * @param mem  the allocation
  * @return the usable size, or 0
  */
-unsigned int func_0031FBB8(void* self, void* mem)
+unsigned int cDynamicMemMan_dlmalloc_usable_size(void* self, void* mem)
 {
     if (mem != 0) {
         unsigned int size = *(unsigned int*)((char*)mem - 4);
@@ -1820,7 +1820,7 @@ unsigned int func_0031FBB8(void* self, void* mem)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031FC20);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlmallinfo);
 #ifdef SKIP_ASM
 // dlmalloc 2.7 mALLINFo()
 struct sMChunk_31FC20
@@ -1866,18 +1866,18 @@ struct sMallinfo_31FC20
 };
 
 struct sMState_31EEE8;
-extern "C" void func_0031EEE8(void* ms, sMState_31EEE8* av);
+extern "C" void cDynamicMemMan_malloc_consolidate(void* ms, sMState_31EEE8* av);
 
 /**
  * Returns heap statistics: free and used totals, block counts and the top size (dlmalloc 2.7's mallinfo).
  *
  * Counts the fast bins and walks every regular bin; unlike dlmalloc it stops a bin walk early when the links loop back
- * on themselves. A state with no top yet is set up first (func_0031EEE8). The structure is returned by value.
+ * on themselves. A state with no top yet is set up first (cDynamicMemMan_malloc_consolidate). The structure is returned by value.
  *
  * @param ms  the heap manager; its first word points to the malloc state
  * @return the statistics
  */
-extern "C" sMallinfo_31FC20 func_0031FC20(void* ms)
+extern "C" sMallinfo_31FC20 cDynamicMemMan_dlmallinfo(void* ms)
 {
     sMState_31FC20* av = *(sMState_31FC20**)ms;
     sMallinfo_31FC20 mi;
@@ -1890,7 +1890,7 @@ extern "C" sMallinfo_31FC20 func_0031FC20(void* ms)
     int nfastblocks;
 
     if (av->top == 0) {
-        func_0031EEE8(ms, (sMState_31EEE8*)av);
+        cDynamicMemMan_malloc_consolidate(ms, (sMState_31EEE8*)av);
     }
 
     avail = av->top->size & ~3U;
@@ -1939,19 +1939,19 @@ INCLUDE_ASM("bx/cubicspline", func_0031FE28);
 /**
  * Does nothing (empty body).
  *
- * Sits between func_0031FC20 and func_0031FE30, where dlmalloc 2.7 defines its statistics printer. Nothing calls it.
+ * Sits between cDynamicMemMan_dlmallinfo and cDynamicMemMan_dlmallopt, where dlmalloc 2.7 defines its statistics printer. Nothing calls it.
  */
 extern "C" void func_0031FE28(void) {
 
 }
 #endif
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031FE30);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlmallopt);
 #ifdef SKIP_ASM
 /**
  * Sets a heap parameter and returns whether the value was accepted (dlmalloc 2.7's mallopt).
  *
- * Consolidates the fast bins first (func_0031EEE8). @p kind 1 sets the fastbin limit (+0x0) for values up to 80; -1 the
+ * Consolidates the fast bins first (cDynamicMemMan_malloc_consolidate). @p kind 1 sets the fastbin limit (+0x0) for values up to 80; -1 the
  * trim threshold (+0x344), -2 the top pad (+0x348), -3 the mmap threshold (+0x34C), and -4 the mmap count (+0x354),
  * which only accepts 0.
  *
@@ -1959,9 +1959,9 @@ INCLUDE_ASM("bx/cubicspline", func_0031FE30);
  * @param val  the new value
  * @return 1 when accepted, else 0
  */
-extern "C" int func_0031FE30(void** self, int kind, unsigned int val) {
+extern "C" int cDynamicMemMan_dlmallopt(void** self, int kind, unsigned int val) {
     char* ms = (char*)*self;
-    func_0031EEE8(self, (sMState_31EEE8*)ms);
+    cDynamicMemMan_malloc_consolidate(self, (sMState_31EEE8*)ms);
     switch (kind) {
     case 1:
         if (val < 81U) {
@@ -2003,14 +2003,14 @@ extern "C" int func_0031FE30(void** self, int kind, unsigned int val) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031FF20__FPv);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_cDynamicMemMan__FPv);
 #ifdef SKIP_ASM
 /**
  * Constructs an empty dynamic heap manager: zeroes its four words (malloc state, heap, core top, heap size).
  *
  * @return @p self
  */
-void* func_0031FF20(void* self)
+void* cDynamicMemMan_cDynamicMemMan(void* self)
 {
     *(int*)((char*)self + 0x4) = 0;
     *(int*)((char*)self + 0x8) = 0;
@@ -2023,14 +2023,14 @@ void* func_0031FF20(void* self)
 void operator_delete(int* ptr);
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031FF38__FPvi);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan__cDynamicMemMan__FPvi);
 #ifdef SKIP_ASM
 /**
  * Destroys a dynamic heap manager: frees the object when bit 0 of @p flags is set; nothing else to release.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-void func_0031FF38(void* self, int flags)
+void cDynamicMemMan__cDynamicMemMan(void* self, int flags)
 {
     if (flags & 1) {
         operator_delete((int*)self);
@@ -2066,19 +2066,19 @@ extern "C" void cDynamicMemMan_init(void* self, unsigned int base, unsigned int 
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_0031FFD8);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlmorecore);
 #ifdef SKIP_ASM
 /**
  * Moves the heap's core top (+0x8) by @p incr bytes, like sbrk, within the heap (+0x4, size +0xC).
  *
  * A non-negative @p incr that still fits returns the old top; one that does not fit returns -1. A negative @p incr
- * moves the top down without a lower-bound check and returns the new top. func_0031E2D8 and func_0031E6D8 use it as
+ * moves the top down without a lower-bound check and returns the new top. cDynamicMemMan_sYSMALLOc and cDynamicMemMan_sYSTRIm use it as
  * their core.
  *
  * @param incr  the number of bytes to add (negative to give back)
  * @return the old top (new top when shrinking), or -1 (0xFFFFFFFF)
  */
-extern "C" unsigned int func_0031FFD8(void* self, long incr) // PORT: 64-bit long param
+extern "C" unsigned int cDynamicMemMan_dlmorecore(void* self, long incr) // PORT: 64-bit long param
 {
     if (incr >= 0) {
         unsigned int old = *(unsigned int*)((char*)self + 0x8);
@@ -2094,67 +2094,67 @@ extern "C" unsigned int func_0031FFD8(void* self, long incr) // PORT: 64-bit lon
 }
 #endif
 
-extern "C" int func_0031F2C8(void* self);
+extern "C" int cDynamicMemMan_dlmemalign(void* self);
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320038);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_alloc);
 #ifdef SKIP_ASM
-extern "C" void* func_0031E818(void* ms, unsigned int bytes);
+extern "C" void* cDynamicMemMan_dlmalloc(void* ms, unsigned int bytes);
 
 /**
- * Allocates @p bytes from the dynamic heap (func_0031E818).
+ * Allocates @p bytes from the dynamic heap (cDynamicMemMan_dlmalloc).
  *
  * @param ms  the heap manager; its first word points to the malloc state
  * @param bytes  the size requested
  * @return the memory, or null
  */
-extern "C" void* func_00320038(void* ms, unsigned int bytes)
+extern "C" void* cDynamicMemMan_alloc(void* ms, unsigned int bytes)
 {
-    return func_0031E818(ms, bytes);
+    return cDynamicMemMan_dlmalloc(ms, bytes);
 }
 #endif
 
 //99.29%
-INCLUDE_ASM("bx/cubicspline", func_00320058__FPv);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_allocAlign__FPv);
 #ifdef SKIP_ASM
 /**
- * Allocates aligned memory from the dynamic heap: forwards to func_0031F2C8 with the alignment and size passed through.
+ * Allocates aligned memory from the dynamic heap: forwards to cDynamicMemMan_dlmemalign with the alignment and size passed through.
  *
- * The C declares only the heap manager; the alignment and size reach func_0031F2C8 untouched in the second and third
+ * The C declares only the heap manager; the alignment and size reach cDynamicMemMan_dlmemalign untouched in the second and third
  * argument registers.
  *
  * @return the memory (declared int)
  */
-int func_00320058(void* self)
+int cDynamicMemMan_allocAlign(void* self)
 {
-    return func_0031F2C8(self);
+    return cDynamicMemMan_dlmemalign(self);
 }
 #endif
 
-extern "C" int func_0031F4E8(void* self);
+extern "C" int cDynamicMemMan_dlmemalignhdr(void* self);
 
 //99.29%
-INCLUDE_ASM("bx/cubicspline", func_00320078__FPv);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_allocAlignHdr__FPv);
 #ifdef SKIP_ASM
 /**
- * Allocates header-offset aligned memory from the dynamic heap: forwards to func_0031F4E8 with its arguments passed
+ * Allocates header-offset aligned memory from the dynamic heap: forwards to cDynamicMemMan_dlmemalignhdr with its arguments passed
  * through.
  *
- * The C declares only the heap manager; the alignment, size and header size reach func_0031F4E8 untouched in their
+ * The C declares only the heap manager; the alignment, size and header size reach cDynamicMemMan_dlmemalignhdr untouched in their
  * registers.
  *
  * @return the memory (declared int)
  */
-int func_00320078(void* self)
+int cDynamicMemMan_allocAlignHdr(void* self)
 {
-    return func_0031F4E8(self);
+    return cDynamicMemMan_dlmemalignhdr(self);
 }
 #endif
 
 extern "C" int cDynamicMemMan_dlfree(void* self);
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320098);
+INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_isBlock);
 #ifdef SKIP_ASM
 /**
  * Returns whether an address lies strictly inside the dynamic heap (between +0x4 and +0x4 plus the size at +0xC).
@@ -2162,7 +2162,7 @@ INCLUDE_ASM("bx/cubicspline", func_00320098);
  * @param addr  the address to test
  * @return 1 when inside, else 0
  */
-extern "C" int func_00320098(char* self, unsigned int addr)
+extern "C" int cDynamicMemMan_isBlock(char* self, unsigned int addr)
 {
     unsigned int base = *(unsigned int*)(self + 4);
     unsigned int end = base + *(unsigned int*)(self + 0xC);
@@ -2803,10 +2803,10 @@ void func_00320548(void)
 //100%
 INCLUDE_ASM("bx/cubicspline", __sti__all_in_one_bx_cpp);
 #ifdef SKIP_ASM
-void* func_00316A00(void* self);
-void* func_00317930(void* self);
-void* func_0031FF20(void* self);
-void func_0031FF38(void* self, int flags);
+void* cBlockMan_cBlockMan(void* self);
+void* cRandom_init(void* self);
+void* cDynamicMemMan_cDynamicMemMan(void* self);
+void cDynamicMemMan__cDynamicMemMan(void* self, int flags);
 
 inline void* operator new(unsigned int, void* p) { return p; }
 
@@ -2871,9 +2871,9 @@ extern char t3mat_Identity[], t4mat_Identity[], D_004FF1E0[], D_004FF220[], tPos
 /**
  * Static initialisation and destruction of the bx library's globals.
  *
- * Only for priority 0xFFFF. With @p init: func_00316A00 on D_004FF000, func_00317930 (cRandom constructor) on BXrandom
- * and AIrandom, then the colour/vector/matrix constants and tPose_Identity, and func_0031FF20 constructs
- * TheDynamicMemMan. Without: func_0031FF38 destroys TheDynamicMemMan.
+ * Only for priority 0xFFFF. With @p init: cBlockMan_cBlockMan on D_004FF000, cRandom_init (cRandom constructor) on BXrandom
+ * and AIrandom, then the colour/vector/matrix constants and tPose_Identity, and cDynamicMemMan_cDynamicMemMan constructs
+ * TheDynamicMemMan. Without: cDynamicMemMan__cDynamicMemMan destroys TheDynamicMemMan.
  *
  * @param init  nonzero to construct, zero to destroy
  * @param prio  the init priority; only 0xFFFF does anything
@@ -2882,9 +2882,9 @@ extern "C" void __sti__all_in_one_bx_cpp(int init, int prio)
 {
     if (prio == 0xFFFF) {
         if (init != 0) {
-            func_00316A00(D_004FF000);
-            func_00317930(BXrandom);
-            func_00317930(AIrandom);
+            cBlockMan_cBlockMan(D_004FF000);
+            cRandom_init(BXrandom);
+            cRandom_init(AIrandom);
             new (D_004FF048) sV3_0550(1.0f, 0.0f, 0.0f);
             new (D_004FF058) sV3_0550(0.0f, 0.0f, 1.0f);
             new (D_004FF068) sV3_0550(1.0f, 1.0f, 0.0f);
@@ -2912,9 +2912,9 @@ extern "C" void __sti__all_in_one_bx_cpp(int init, int prio)
             new (D_004FF1E0) sM44_0550(0.0f);
             new (D_004FF220) sQ_0550(0.0f, 0.0f, 0.0f, 1.0f);
             new (tPose_Identity) sXf_0550(*(sV4_0550*)t4vect_Origin, *(sQ_0550*)D_004FF220);
-            func_0031FF20(TheDynamicMemMan);
+            cDynamicMemMan_cDynamicMemMan(TheDynamicMemMan);
         } else {
-            func_0031FF38(TheDynamicMemMan, 2);
+            cDynamicMemMan__cDynamicMemMan(TheDynamicMemMan, 2);
         }
     }
 }

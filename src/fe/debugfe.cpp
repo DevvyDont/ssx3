@@ -46,12 +46,12 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* cBENewRaceInterface_getLocation(void* iface);
-extern "C" char* func_00145340(void* iface);
-extern "C" char* func_00145378(void* iface);
-extern "C" char* func_00145398(void* iface);
-extern "C" int func_00145C38(void* iface, int i);
+extern "C" char* cBENewRaceInterface_getEventName(void* iface);
+extern "C" char* cBENewRaceInterface_getPathName(void* iface);
+extern "C" char* cBENewRaceInterface_getModeName(void* iface);
+extern "C" int cBENewPlayerInterface_isFirstTimeWC(void* iface, int i);
 extern "C" int cBENewPlayerInterface_getControllerMapping(void* iface, int i);
-extern "C" char* func_0014EE28(void* iface, int i);
+extern "C" char* cBECharacterInterface_getName(void* iface, int i);
 extern "C" void cBackgroundMan_renderImage(void* self);
 extern "C" void cFont_textf(void* self, float x, float y, const char* fmt, ...);
 extern "C" void cFont_textf1(void* self, float x, float y, float sx, float sy, const char* str, int n);
@@ -142,19 +142,19 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     __SIZE_TYPE__ hi = (__SIZE_TYPE__)self + 0x8000;
     font->setColor(*(int*)(hi + 0xc1c) == 0 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Game_Path);
-    func_00392A60(font, func_00145378(newRace), 580.0f, y);
+    func_00392A60(font, cBENewRaceInterface_getPathName(newRace), 580.0f, y);
     y += lineheight;
     font->setColor(self->cursor == 1 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Game_Mode);
-    func_00392A60(font, func_00145398(newRace), 580.0f, y);
+    func_00392A60(font, cBENewRaceInterface_getModeName(newRace), 580.0f, y);
     y += lineheight;
     font->setColor(self->cursor == 2 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Game_Event);
-    func_00392A60(font, func_00145340(newRace), 580.0f, y);
+    func_00392A60(font, cBENewRaceInterface_getEventName(newRace), 580.0f, y);
     y += lineheight;
     font->setColor(self->cursor == 3 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_1st_Time_WC_Flag);
-    cFont_righttextf(font, 580.0f, y, str_pct_d_b, func_00145C38(intPlayer, 0));
+    cFont_righttextf(font, 580.0f, y, str_pct_d_b, cBENewPlayerInterface_isFirstTimeWC(intPlayer, 0));
     y += lineheight;
     if (D_004A11B8 != 0)
         sprintf(buf, str_pct_s_pct_s_pct_s, cBENewRaceInterface_getLocation(newRace) + 4, cBENewRaceInterface_getLocation(newRace) + 0x44, cBENewRaceInterface_getLocation(newRace) + 0x34);
@@ -166,7 +166,7 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     y += lineheight;
     font->setColor(self->cursor == 5 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Character);
-    func_00392A60(font, func_0014EE28(character, 0), 580.0f, y);
+    func_00392A60(font, cBECharacterInterface_getName(character, 0), 580.0f, y);
     y += lineheight;
     font->setColor(self->cursor == 6 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Control_Map);
@@ -676,7 +676,7 @@ extern "C" void cDebugLobbyScreen_update(sDebugFE17D688* self)
 INCLUDE_ASM("fe/debugfe", func_0017D6F0);
 #ifdef SKIP_ASM
 extern char str_A_West[];
-extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void func_002CC3B8(void* menu, void* items);
 extern "C" void func_002CC460(void* list);
@@ -775,8 +775,8 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
         break;
     case 201:
         if (SSXApp->unk_74 != 0) {
-            cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, SSXApp->UserName);
-            cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, SSXApp->Password);
+            cBXString_operatorE1((char*)LobbyMan_mLobbyMan + 0x48, SSXApp->UserName);
+            cBXString_operatorE1((char*)LobbyMan_mLobbyMan + 0x4C, SSXApp->Password);
             func_0025C610(LobbyMan_mLobbyMan);
             self->state = 5;
         } else {
@@ -786,8 +786,8 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
         break;
     case 203:
         self->state = 5;
-        cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, self->user);
-        cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, self->pass);
+        cBXString_operatorE1((char*)LobbyMan_mLobbyMan + 0x48, self->user);
+        cBXString_operatorE1((char*)LobbyMan_mLobbyMan + 0x4C, self->pass);
         func_0025C610(LobbyMan_mLobbyMan);
         break;
     case 212:
@@ -866,7 +866,7 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
 INCLUDE_ASM("fe/debugfe", func_0017DA30);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" void func_002CC3B8(void* menu, void* items);
 extern "C" void func_0025C610(void* net);
 static inline void SetMode0017DA30(void* self, int mode)
@@ -901,8 +901,8 @@ extern "C" void func_0017DA30(void* self, int errorCode)
         break;
     case 5:
         if (SSXApp->unk_74 != 0) {
-            cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, SSXApp->UserName);
-            cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, SSXApp->Password);
+            cBXString_operatorE1((char*)LobbyMan_mLobbyMan + 0x48, SSXApp->UserName);
+            cBXString_operatorE1((char*)LobbyMan_mLobbyMan + 0x4C, SSXApp->Password);
             func_0025C610(LobbyMan_mLobbyMan);
         } else {
             SetMode0017DA30(self, 21);
@@ -1203,7 +1203,7 @@ extern "C" void func_0017DE70(char* self)
 INCLUDE_ASM("fe/debugfe", func_0017E030);
 #ifdef SKIP_ASM
 extern "C" void func_002CC460(void* list);
-extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" void func_0025B9C8(void* mgr, void* req);
 extern char str_pleaseat_get_lost[];
 
@@ -1247,14 +1247,14 @@ extern "C" void func_0017E030(sDebugFEState17E030* self, const char* userName, c
     while (*list != 0) {
         func_002CC460(list);
     }
-    cBXString_cBXString4((char*)self + 0x1C04, userName);
-    cBXString_cBXString4((char*)self + 0x1C08, password);
+    cBXString_operatorE1((char*)self + 0x1C04, userName);
+    cBXString_operatorE1((char*)self + 0x1C08, password);
     self->state = 0x4;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    cBXString_cBXString4(&lobbyMan->mNewAccount.mName, userName);
-    cBXString_cBXString4(&lobbyMan->mNewAccount.mPassword, password);
-    cBXString_cBXString4(&lobbyMan->mNewAccount.unk_08, password);
-    cBXString_cBXString4(&lobbyMan->mNewAccount.mMail, str_pleaseat_get_lost);
+    cBXString_operatorE1(&lobbyMan->mNewAccount.mName, userName);
+    cBXString_operatorE1(&lobbyMan->mNewAccount.mPassword, password);
+    cBXString_operatorE1(&lobbyMan->mNewAccount.unk_08, password);
+    cBXString_operatorE1(&lobbyMan->mNewAccount.mMail, str_pleaseat_get_lost);
     lobbyMan->mNewAccount.mBornYear = 1950;
     lobbyMan->mNewAccount.mGender = 1;
     lobbyMan->mNewAccount.mBornMonth = 1;
@@ -1269,7 +1269,7 @@ extern "C" void func_0017E030(sDebugFEState17E030* self, const char* userName, c
 INCLUDE_ASM("fe/debugfe", func_0017E118);
 #ifdef SKIP_ASM
 extern "C" void func_002CC460(void* list);
-extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" void func_0025C610(void* mgr);
 
 struct sDebugFEState17E118 {
@@ -1297,11 +1297,11 @@ extern "C" void func_0017E118(sDebugFEState17E118* self, const char* userName, c
     while (*list != 0) {
         func_002CC460(list);
     }
-    cBXString_cBXString4(&self->user, userName);
-    cBXString_cBXString4(&self->pass, password);
+    cBXString_operatorE1(&self->user, userName);
+    cBXString_operatorE1(&self->pass, password);
     self->state = 0x5;
-    cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x48, self->user);
-    cBXString_cBXString4((char*)LobbyMan_mLobbyMan + 0x4C, self->pass);
+    cBXString_operatorE1((char*)LobbyMan_mLobbyMan + 0x48, self->user);
+    cBXString_operatorE1((char*)LobbyMan_mLobbyMan + 0x4C, self->pass);
     func_0025C610(LobbyMan_mLobbyMan);
 }
 #endif

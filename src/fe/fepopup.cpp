@@ -1523,7 +1523,7 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_setTextString1);
 #ifdef SKIP_ASM
 extern "C" int USTR_length(unsigned short* s);
 extern "C" char* strcpy2(char* dst, unsigned short* src);
-extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_operatorE1(void* self, const char* str);
 void cMemMan_free(void* ptr);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -1555,14 +1555,14 @@ extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* 
         unsigned short* unicode = (unsigned short*)info[1];
         char* buf = (char*)operator_new_tag(USTR_length(unicode) + 1, str_setTextString, 0x100, 0);
         strcpy2(buf, (unsigned short*)info[1]);
-        cBXString_cBXString4(dst, buf);
+        cBXString_operatorE1(dst, buf);
         if (buf != 0) {
             cMemMan_free(buf);
         }
         break;
     }
     case 2:
-        cBXString_cBXString4(dst, (const char*)info[1]);
+        cBXString_operatorE1(dst, (const char*)info[1]);
         break;
     case 3: {
         char* locale = (char*)SSXApp->FELocale;
@@ -1571,19 +1571,19 @@ extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* 
         if (str) {
             char* buf = (char*)operator_new_tag(USTR_length(str) + 1, str_setTextString, 0x100, 0);
             strcpy2(buf, str);
-            cBXString_cBXString4(dst, buf);
+            cBXString_operatorE1(dst, buf);
             if (buf != 0) {
                 cMemMan_free(buf);
             }
         } else {
             char idText[0x40];
             sprintf(idText, str_String_pct_08x, info[1]);
-            cBXString_cBXString4(dst, idText);
+            cBXString_operatorE1(dst, idText);
         }
         break;
     }
     case 0:
-        cBXString_cBXString4(dst, D_004A1408);
+        cBXString_operatorE1(dst, D_004A1408);
         break;
     }
 }
@@ -1597,7 +1597,7 @@ extern "C" char* cUIText_getAsciiString(cUIText* text);
 extern "C" unsigned short* cUIText_getUnicodeString(cUIText* text);
 extern "C" int USTR_length(unsigned short* s);
 extern "C" char* strcpy2(char* dst, unsigned short* src);
-extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_operatorE1(void* self, const char* str);
 void cMemMan_free(void* ptr);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
@@ -1617,19 +1617,19 @@ extern "C" void cScreenPopup_setTextString(cScreenPopup* self, void* dst, cUITex
 {
     char* ascii = cUIText_getAsciiString(text);
     if (ascii != 0) {
-        cBXString_cBXString4(dst, ascii);
+        cBXString_operatorE1(dst, ascii);
         return;
     }
     unsigned short* unicode = cUIText_getUnicodeString(text);
     if (unicode != 0) {
         char* buf = (char*)operator_new_tag(USTR_length(unicode) + 1, str_ScreenPopuponWidgetEvent, 0x100, 0);
         strcpy2(buf, unicode);
-        cBXString_cBXString4(dst, buf);
+        cBXString_operatorE1(dst, buf);
         if (buf != 0) {
             cMemMan_free(buf);
         }
     } else {
-        cBXString_cBXString4(dst, D_004A1408);
+        cBXString_operatorE1(dst, D_004A1408);
     }
 }
 #endif
@@ -2982,7 +2982,7 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
     case 8:
         break;
     case 13:
-        cBXString_cBXString4(((char*)self) + 0x2B0, (char*)self->mpKeyboard + 0x74);
+        cBXString_operatorE1(((char*)self) + 0x2B0, (char*)self->mpKeyboard + 0x74);
         if (self->mpEnterBox != 0 && *(int*)(self->mszInputText - 8) != 0) {
             cScreenPopup_checkAndFixTextEntry(self, self->mpEnterBox, (const char*)self->mszInputText);
         }
@@ -5330,7 +5330,7 @@ extern char str_StaticValue[];
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_operatorE1(void* self, const char* str);
 
 /**
  * Sets the keyboard popup's static label from an ascii string.
@@ -5343,7 +5343,7 @@ extern "C" void* cBXString_cBXString4(void* self, const char* str);
 extern "C" void cKeyboardPopup_setStatic2(cKeyboardPopup* self, const char* str)
 {
     if (self->mpScreen == 0) {
-        cBXString_cBXString4((char*)self + 0x424, str);
+        cBXString_operatorE1((char*)self + 0x424, str);
         return;
     }
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_StaticValue));
@@ -6371,7 +6371,7 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_handleQuickKeyPress);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" char* func_0014F6A8(void* self, int i);
+extern "C" char* cBEOptionInterface_getQuickKeyMessage(void* self, int i);
 int cBEOptionInterface_getDefaultQuickKeyMessageHashValue(void* self, int value);
 extern "C" void USTR_strcpyW(char* dst, void* src);
 extern "C" char* strcat(char* dst, const char* src);
@@ -6387,7 +6387,7 @@ struct sVEntryK1CE5E0 {
 /**
  * Appends a quick message to the edit string, cut to the room left, and moves the cursor to its end.
  *
- * The text is the player's message @p key from the option interface (func_0014F6A8) or, when unset, its localised
+ * The text is the player's message @p key from the option interface (cBEOptionInterface_getQuickKeyMessage) or, when unset, its localised
  * default (cBEOptionInterface_getDefaultQuickKeyMessageHashValue). The cursor ends on the last character when the
  * string is full, else just after it.
  *
@@ -6398,7 +6398,7 @@ extern "C" void cKeyboardPopup_handleQuickKeyPress(cKeyboardPopup* self, int key
     char buf[0x40];
     int room = self->miMaxCharacters - strlen((char*)self + 0x74);
     void* opt = cBE_getInterface_Fv(cBE_getBE(), 4);
-    char* msg = func_0014F6A8(opt, key);
+    char* msg = cBEOptionInterface_getQuickKeyMessage(opt, key);
     if (msg == 0) {
         char* locale = (char*)SSXApp->FELocale;
         sVEntryK1CE5E0* vt = *(sVEntryK1CE5E0**)(locale + 4);

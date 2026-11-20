@@ -38,7 +38,7 @@ void* cBEOptionInterface_getThis()
 #endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F2A8);
+INCLUDE_ASM("be/beintoption", cBEOptionInterface_submit);
 #ifdef SKIP_ASM
 struct sOptions_0014F2A8
 {
@@ -51,14 +51,14 @@ extern sOptions_0014F2A8 D_00535898;
 /**
  * Commits the options: copies cBEOptionInterface_mOption (0x288 bytes) into the saved copy D_00535898.
  */
-extern "C" void func_0014F2A8(void)
+extern "C" void cBEOptionInterface_submit(void)
 {
     D_00535898 = cBEOptionInterface_mOption;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F360);
+INCLUDE_ASM("be/beintoption", cBEOptionInterface_discard);
 #ifdef SKIP_ASM
 extern sOptions_0014F2A8 cBEOptionInterface_mOption;
 extern sOptions_0014F2A8 D_00535898;
@@ -66,7 +66,7 @@ extern sOptions_0014F2A8 D_00535898;
 /**
  * Drops option changes: copies the saved copy D_00535898 back into cBEOptionInterface_mOption (0x288 bytes).
  */
-extern "C" void func_0014F360(void)
+extern "C" void cBEOptionInterface_discard(void)
 {
     cBEOptionInterface_mOption = D_00535898;
 }
@@ -75,28 +75,28 @@ extern "C" void func_0014F360(void)
 //100%
 INCLUDE_ASM("be/beintoption", cBEOptionInterface_revert);
 #ifdef SKIP_ASM
-extern "C" void func_0014F648(void* self);
-extern "C" void func_0014F600(void* self);
-extern "C" void func_0014F4F8(void* self);
-extern "C" void func_0014F458(void* self);
+extern "C" void cBEOptionInterface_defaultCtrl(void* self);
+extern "C" void cBEOptionInterface_defaultHUD(void* self);
+extern "C" void cBEOptionInterface_defaultGame(void* self);
+extern "C" void cBEOptionInterface_defaultSound(void* self);
 
 /**
  * Resets all game options to their defaults.
  *
- * Calls func_0014F648, func_0014F600, func_0014F4F8 and func_0014F458 (On Tour defaultCtrl, defaultHUD, defaultGame,
+ * Calls cBEOptionInterface_defaultCtrl, cBEOptionInterface_defaultHUD, cBEOptionInterface_defaultGame and cBEOptionInterface_defaultSound (On Tour defaultCtrl, defaultHUD, defaultGame,
  * defaultSound).
  */
 extern "C" void cBEOptionInterface_revert(void* self)
 {
-    func_0014F648(self);
-    func_0014F600(self);
-    func_0014F4F8(self);
-    func_0014F458(self);
+    cBEOptionInterface_defaultCtrl(self);
+    cBEOptionInterface_defaultHUD(self);
+    cBEOptionInterface_defaultGame(self);
+    cBEOptionInterface_defaultSound(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F458);
+INCLUDE_ASM("be/beintoption", cBEOptionInterface_defaultSound);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sOptBits_0014F458
@@ -127,9 +127,9 @@ public:
  *
  * In the first option word: music, speech and effects volumes 10, sound mode 0, audio mix 0, arcade effects, DJ speech
  * and voice chat on; the low two bits of the second word become 1. Then calls the option interface's vtable slot 1
- * (func_0014F2A8).
+ * (cBEOptionInterface_submit).
  */
-extern "C" void func_0014F458(void* self)
+extern "C" void cBEOptionInterface_defaultSound(void* self)
 {
     sOptBits_0014F458* options = D_00535610_v0014F458;
     options->a = 10;
@@ -146,7 +146,7 @@ extern "C" void func_0014F458(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F4F8);
+INCLUDE_ASM("be/beintoption", cBEOptionInterface_defaultGame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 
@@ -178,9 +178,9 @@ public:
  *
  * Widescreen mode follows the console configuration (SSXApp->ConsoleConfig +0x24: 1 gives 2, 2 gives 1, else 0);
  * language, metric units and the replay option become 0, brightness 9, and the screen offsets (mOption +5, +6) 0. Then
- * calls the option interface's vtable slot 1 (func_0014F2A8).
+ * calls the option interface's vtable slot 1 (cBEOptionInterface_submit).
  */
-extern "C" void func_0014F4F8(void* self)
+extern "C" void cBEOptionInterface_defaultGame(void* self)
 {
     switch (*(int*)((char*)SSXApp->ConsoleConfig + 0x24))
     {
@@ -206,7 +206,7 @@ extern "C" void func_0014F4F8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F600);
+INCLUDE_ASM("be/beintoption", cBEOptionInterface_defaultHUD);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sOptBits_0014F600
@@ -224,9 +224,9 @@ public:
 };
 
 /**
- * Resets the HUD option (bits 30-31 of the first option word) to 0 and submits (vtable slot 1, func_0014F2A8).
+ * Resets the HUD option (bits 30-31 of the first option word) to 0 and submits (vtable slot 1, cBEOptionInterface_submit).
  */
-extern "C" void func_0014F600(void* self)
+extern "C" void cBEOptionInterface_defaultHUD(void* self)
 {
     D_00535610_v0014F600[0].top = 0;
     ((cBEOptionInterfaceV_0014F600*)cBEOptionInterface_instance)->apply();
@@ -234,7 +234,7 @@ extern "C" void func_0014F600(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F648);
+INCLUDE_ASM("be/beintoption", cBEOptionInterface_defaultCtrl);
 #ifdef SKIP_ASM
 class cBEOptionInterfaceV_0014F648
 {
@@ -244,9 +244,9 @@ public:
 };
 
 /**
- * Submits the options (the option interface's vtable slot 1, func_0014F2A8) without changing any.
+ * Submits the options (the option interface's vtable slot 1, cBEOptionInterface_submit) without changing any.
  */
-extern "C" void func_0014F648(void* self)
+extern "C" void cBEOptionInterface_defaultCtrl(void* self)
 {
     ((cBEOptionInterfaceV_0014F648*)cBEOptionInterface_instance)->apply();
 }
@@ -274,7 +274,7 @@ int cBEOptionInterface_getDefaultQuickKeyMessageHashValue(void* self, int value)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F6A8);
+INCLUDE_ASM("be/beintoption", cBEOptionInterface_getQuickKeyMessage);
 #ifdef SKIP_ASM
 extern "C" unsigned int strlen(const char* s);
 extern char D_00535617[][0x40];
@@ -286,7 +286,7 @@ extern char D_00535617[][0x40];
  * @param i  the message slot, 0-9
  * @return the message, or 0
  */
-extern "C" char* func_0014F6A8(void* self, int i)
+extern "C" char* cBEOptionInterface_getQuickKeyMessage(void* self, int i)
 {
     char* message = D_00535617[i];
     if (strlen(message) == 0) {
@@ -297,7 +297,7 @@ extern "C" char* func_0014F6A8(void* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F6E8);
+INCLUDE_ASM("be/beintoption", cBEOptionInterface_resetQuickKey);
 #ifdef SKIP_ASM
 extern "C" void USTR_strcpyW(char* dst, void* src);
 
@@ -315,7 +315,7 @@ struct sVEntry_0014F6E8
  *
  * @param i  the message slot, 0-9
  */
-extern "C" void func_0014F6E8(void* self, int i)
+extern "C" void cBEOptionInterface_resetQuickKey(void* self, int i)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_0014F6E8* vt = *(sVEntry_0014F6E8**)(obj + 0x4);
@@ -327,24 +327,24 @@ extern "C" void func_0014F6E8(void* self, int i)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/beintoption", func_0014F758);
+INCLUDE_ASM("be/beintoption", cBEOptionInterface_resetAllQuickKeys);
 #ifdef SKIP_ASM
-extern "C" void func_0014F6E8(void* self, int i);
+extern "C" void cBEOptionInterface_resetQuickKey(void* self, int i);
 
 /**
- * Restores all ten quick-chat messages to their defaults (func_0014F6E8 for slots 0-9).
+ * Restores all ten quick-chat messages to their defaults (cBEOptionInterface_resetQuickKey for slots 0-9).
  */
-extern "C" void func_0014F758(void* self)
+extern "C" void cBEOptionInterface_resetAllQuickKeys(void* self)
 {
     for (int i = 0; i < 10; i++)
     {
-        func_0014F6E8(self, i);
+        cBEOptionInterface_resetQuickKey(self, i);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F7A8);
+INCLUDE_ASM("be/beintoption", cBERules_getPlayerStartDelaySecs);
 #ifdef SKIP_ASM
 struct sOptionTripleView_0014F7A8 {
     int a;
@@ -358,42 +358,42 @@ struct sOptionTriplesView_0014F7A8 {
 
 struct sOptionGlobal_005308B8;
 extern sOptionGlobal_005308B8 D_005308B8;
-extern "C" int func_0014F870();
+extern "C" int cBERules_getMaxDelaySecs();
 
 /**
- * Returns how long player @p i is held at the start: the largest head start (func_0014F870) minus the player's own
+ * Returns how long player @p i is held at the start: the largest head start (cBERules_getMaxDelaySecs) minus the player's own
  * (word +8 of record @p i of the rules block D_005308B8).
  *
  * @param i  the player, 0 or 1
  * @return the delay in seconds
  */
-extern "C" int func_0014F7A8(int i)
+extern "C" int cBERules_getPlayerStartDelaySecs(int i)
 {
     int headStart = ((sOptionTriplesView_0014F7A8*)&D_005308B8)->triples[i].c;
-    return func_0014F870() - headStart;
+    return cBERules_getMaxDelaySecs() - headStart;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F7E8);
+INCLUDE_ASM("be/beintoption", cBERules_getAIStartDelaySecs);
 #ifdef SKIP_ASM
-extern "C" int func_0014F870();
+extern "C" int cBERules_getMaxDelaySecs();
 extern int D_005308D4[]; // D_005308B8 + 0x1C, addressed through its own symbol
 
 /**
- * Returns how long the AI riders are held at the start: the largest head start (func_0014F870) minus the AI head start
+ * Returns how long the AI riders are held at the start: the largest head start (cBERules_getMaxDelaySecs) minus the AI head start
  * (D_005308D4, the rules block's word at +0x1C).
  *
  * @return the delay in seconds
  */
-extern "C" int func_0014F7E8(void* self)
+extern "C" int cBERules_getAIStartDelaySecs(void* self)
 {
-    return func_0014F870() - D_005308D4[0];
+    return cBERules_getMaxDelaySecs() - D_005308D4[0];
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F810);
+INCLUDE_ASM("be/beintoption", cBERules_hasModifiedRules);
 #ifdef SKIP_ASM
 // View of D_005308B8 (the unit defines sOptionGlobal_005308B8 further down).
 struct sOptionTriple_005308B8 {
@@ -418,7 +418,7 @@ extern sOptionGlobal_005308B8 D_005308B8;
  * @param i  the player, 0 or 1
  * @return 1 when any is set, else 0
  */
-extern "C" int func_0014F810(int i)
+extern "C" int cBERules_hasModifiedRules(int i)
 {
     sOptionView_005308B8* rules = (sOptionView_005308B8*)&D_005308B8;
     if (rules->triples[i].a != 0 || rules->triples[i].b != 0 || rules->triples[i].c != 0 || rules->field_0x18 != 0 || rules->field_0x1C != 0)
@@ -430,7 +430,7 @@ extern "C" int func_0014F810(int i)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F870);
+INCLUDE_ASM("be/beintoption", cBERules_getMaxDelaySecs);
 #ifdef SKIP_ASM
 struct sOptionGlobal_005308B8 {
     char pad_0x00[0x8];
@@ -448,7 +448,7 @@ extern sOptionGlobal_005308B8 D_005308B8;
  *
  * @return the largest head start, in seconds
  */
-extern "C" int func_0014F870()
+extern "C" int cBERules_getMaxDelaySecs()
 {
     int maxHeadStart = D_005308B8.field_0x1C;
     if (maxHeadStart < D_005308B8.field_0x8)
@@ -460,7 +460,7 @@ extern "C" int func_0014F870()
 #endif
 
 //100%
-INCLUDE_ASM("be/beintoption", func_0014F898);
+INCLUDE_ASM("be/beintoption", cBERules_swap);
 #ifdef SKIP_ASM
 struct sOptionTriple_0014F898 {
     int a;
@@ -472,7 +472,7 @@ struct sOptionTriple_0014F898 {
  * Swaps the two 12-byte bragging-rights records at the start of the rules block D_005308B8 (all three words of each).
  */
 // Swaps the two 12-byte triples at the start of D_005308B8.
-extern "C" void func_0014F898()
+extern "C" void cBERules_swap()
 {
     sOptionTriple_0014F898* records = (sOptionTriple_0014F898*)&D_005308B8;
     sOptionTriple_0014F898 firstRecord = records[0];

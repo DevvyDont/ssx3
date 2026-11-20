@@ -12,14 +12,14 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_001474C8(void* iface, int player);
+extern "C" int cBENewPlayerInterface_getPlayerCheatCharID(void* iface, int player);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 
 /**
  * Opens the lodge screen ("28lodge"), reads the user's cheat character and disables lodge option 7.
  *
- * Keeps the screen at 0x40, stores the user's cheat character id (func_001474C8; On Tour mCheatCharID) at
+ * Keeps the screen at 0x40, stores the user's cheat character id (cBENewPlayerInterface_getPlayerCheatCharID; On Tour mCheatCharID) at
  * 0x48, clears entry 7 of the option-enabled table D_00441AF8 (written as D_00441B14[0]), switches the
  * front-end sound-bank mode to 1, clears bToNextState (0x4C) and mbIsYesOrNo (0x54) and sets
  * mPathToSaveProfile (0x50) to 0x12.
@@ -32,7 +32,7 @@ extern "C" void cFEStateLodge_onCreateScreen(void* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    *(int*)((char*)self + 0x48) = func_001474C8(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
+    *(int*)((char*)self + 0x48) = cBENewPlayerInterface_getPlayerCheatCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
     D_00441B14[0] = 0;
     func_0028F140(cAudioInterface_bxAudio(), 1);
     *(int*)((char*)self + 0x4C) = 0;
@@ -402,12 +402,12 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int player);
-extern "C" int func_001577A0(void* self, int a1, int a2);
+extern "C" int cBERewardInterface_getNumOwnedCheatChars(void* self, int a1, int a2);
 
 /**
  * Opens the rider-details screen ("155rider_details_conquer") and checks for unlocked cheat characters.
  *
- * Keeps the screen at 0x40 and sets 0x48 (On Tour mbCheatCharEnable) to 1, or to 0 when func_001577A0() on
+ * Keeps the screen at 0x40 and sets 0x48 (On Tour mbCheatCharEnable) to 1, or to 0 when cBERewardInterface_getNumOwnedCheatChars() on
  * the reward interface (13) counts no unlocked cheat characters (ids 10-29) for the user and their character.
  */
 extern "C" void cFEStateLodgeRiderDetail_onCreateScreen(void* self)
@@ -420,7 +420,7 @@ extern "C" void cFEStateLodgeRiderDetail_onCreateScreen(void* self)
     }
     *(int*)((char*)self + 0x48) = 1;
     int charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
-    if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44), charID) == 0) {
+    if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44), charID) == 0) {
         *(int*)((char*)self + 0x48) = 0;
     }
 }
@@ -433,8 +433,8 @@ int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_00147138(void* self, int a1, const char* name);
-extern "C" void func_001474A8(void* self, int a1, int a2);
+extern "C" void cBENewPlayerInterface_setPlayerName(void* self, int a1, const char* name);
+extern "C" void cBENewPlayerInterface_setPlayerCheatCharID(void* self, int a1, int a2);
 extern "C" int strlen(const char* s);
 extern char str_131cheat_char_b[];
 
@@ -459,8 +459,8 @@ static inline void commitK1F4108(void* np)
  * Applies the rider-details popups when they close: the chosen cheat character or a new player name.
  *
  * Only event 0x16. From the popup named "131cheat_char" with its confirm word (+0x74) set, stores its choice
- * (+0x70) as the user's cheat character (func_001474A8); from a popup with state id 0 (the keyboard) that was
- * accepted (+0x5C) with a non-empty text (+0x74), sets the user's player name (func_00147138). The player
+ * (+0x70) as the user's cheat character (cBENewPlayerInterface_setPlayerCheatCharID); from a popup with state id 0 (the keyboard) that was
+ * accepted (+0x5C) with a non-empty text (+0x74), sets the user's player name (cBENewPlayerInterface_setPlayerName). The player
  * interface's vtable slot 1 is then called, probably to commit the change.
  *
  * @param popup  the popup state that sent the event
@@ -475,14 +475,14 @@ extern "C" void cFEStateLodgeRiderDetail_onPopupEvent(void* self, char* popup, i
         int cheatCharId = *(int*)(popup + 0x70);
         if (*(int*)(popup + 0x74) != 0) {
             void* np2 = cBE_getInterface_Fv(cBE_getBE(), 1);
-            func_001474A8(np2, *(signed char*)((char*)self + 0x44), cheatCharId);
+            cBENewPlayerInterface_setPlayerCheatCharID(np2, *(signed char*)((char*)self + 0x44), cheatCharId);
             commitK1F4108(np2);
         }
     } else if (*(int*)(popup + 0xC) == 0) {
         if (*(int*)(popup + 0x5C) != 0) {
             char* name = popup + 0x74;
             if (strlen(name) != 0) {
-                func_00147138(np, *(signed char*)((char*)self + 0x44), name);
+                cBENewPlayerInterface_setPlayerName(np, *(signed char*)((char*)self + 0x44), name);
                 commitK1F4108(np);
             }
         }
@@ -499,7 +499,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
-extern "C" void* func_0014EEC8(void* self, int player, int index);
+extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern char str_Option_1_b[];
@@ -514,7 +514,7 @@ extern char str_rider_name_b[];
 /**
  * Numbers the rider-details options and shows the rider's name.
  *
- * "Option_1" to "Option_7" get misc data 9 to 15; "rider name" shows, as ASCII, func_0014EEC8()'s record (BE
+ * "Option_1" to "Option_7" get misc data 9 to 15; "rider name" shows, as ASCII, cBECharacterInterface_getShortNameByCharacter()'s record (BE
  * interface 2) for the character of human rider 0.
  *
  * @param w  the widget just created (its hash name is at +0x38)
@@ -539,7 +539,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetCreate(void* self, void* w)
     } else if (hashName == GetHashValue32(str_rider_name_b)) {
         void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
         signed char cid = cBENewPlayerInterface_getRiderCharID(np, cBENewPlayerInterface_getHumanRider(np, 0));
-        cUIText_setAsciiString((cUIText*)w, (const char*)func_0014EEC8(cBE_getInterface_Fv(cBE_getBE(), 2), cid, 0));
+        cUIText_setAsciiString((cUIText*)w, (const char*)cBECharacterInterface_getShortNameByCharacter(cBE_getInterface_Fv(cBE_getBE(), 2), cid, 0));
     }
 }
 #endif
@@ -615,7 +615,7 @@ extern "C" void* cFEStateCheatCharSelect_cFEStateCheatCharSelect(void* self, voi
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" int func_001577A0(void* self, int a1, int a2);
+extern "C" int cBERewardInterface_getNumOwnedCheatChars(void* self, int a1, int a2);
 int cBENewPlayerInterface_getPlayerCharID(void* self, int player);
 struct cUIScreen;
 int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
@@ -678,7 +678,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(char* self, char* w, int 
         }
         if (k == 11) {
             int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(self + 0x44));
-            if (func_001577A0(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)(self + 0x44), id) > 0) {
+            if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)(self + 0x44), id) > 0) {
                 void* mem = cMemMan_alloc(484, str_cFEStateCheatCharSelect_b, 0, 0);
                 void* popup = cFEStateCheatCharSelect_cFEStateCheatCharSelect(mem, *(void**)(self + 0x10), self, *(signed char*)(self + 0x44), id);
                 cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, popup);
@@ -715,7 +715,7 @@ extern "C" void* func_0039E2A0_4728(void* self, int a1) __asm__("func_0039E2A0")
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" unsigned char cFECustom_getPlayerCtrlMask_4728(void* p, int a1) __asm__("cFECustom_getPlayerCtrlMask");
-extern "C" int func_00148158_4728(void* iface, int a1, int stat) __asm__("func_00148158");
+extern "C" int cBEStatInterface_getStatFromProfile_4728(void* iface, int a1, int stat) __asm__("cBEStatInterface_getStatFromProfile");
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern void* cFEStateBuyAttrib_vtbl[];
 extern const int D_004780B0[];
@@ -733,7 +733,7 @@ struct sLodgeStats_4728 {
  *
  * Runs the cUIState constructor func_0039E2A0() on @p engine, stores mHashName 41 and the vtable, sets mUserNum (+0x44) to
  * 0 and mCtrlBits (+0x15) to rider slot 0's controller mask (cFECustom_getPlayerCtrlMask()), and clears the 0x1C bytes at +0x84. For
- * each of the seven attributes listed in D_004780B0 it stores func_00148158() (player interface, rider 0) at +0x4C[i]
+ * each of the seven attributes listed in D_004780B0 it stores cBEStatInterface_getStatFromProfile() (player interface, rider 0) at +0x4C[i]
  * and that value / 5 (the level) at +0x68[i]. cFECustom_getNextState() creates it.
  *
  * @param stateMemory  the memory for the state
@@ -752,8 +752,8 @@ extern "C" void* cFEStateBuyAttrib_cFEStateBuyAttrib(void* stateMemory, int engi
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
     MEM_fill(stateBytes + 0x84, 0, 0x1C);
     for (int i = 0; i < 7; i++) {
-        self->base[i] = func_00148158_4728(iface, 0, D_004780B0[i]);
-        self->level[i] = (signed char)(func_00148158_4728(iface, 0, D_004780B0[i]) / 5);
+        self->base[i] = cBEStatInterface_getStatFromProfile_4728(iface, 0, D_004780B0[i]);
+        self->level[i] = (signed char)(cBEStatInterface_getStatFromProfile_4728(iface, 0, D_004780B0[i]) / 5);
     }
     return stateMemory;
 }

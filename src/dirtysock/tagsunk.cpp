@@ -811,7 +811,7 @@ extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int
 extern "C" int cDirtysock_tag_TagFieldGetNumber(const char* tag, int defval);
 extern "C" int cDirtysock_tag_TagFieldGetTime(const char* tag, int defval);
 extern "C" int cDirtysock_tag_TagFieldGetAddr(const char* tag, int defval);
-extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" int func_0025A730(LobbyMan* self, const char* key, int def);
 extern "C" int func_004165A8(void*, void*);
 extern "C" int* func_002591D0();
@@ -912,13 +912,13 @@ extern "C" void LobbyMan_onplaymsg(LobbyMan* self, char* msg)
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_P1), p1Text, 0x100, D_004A2F40);
     self->mHostAddr = func_0025A730(self, hostName, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_FROM), 0));
     self->mOppoAddr = func_0025A730(self, oppoName, cDirtysock_tag_TagFieldGetAddr(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_ADDR), 0));
-    cBXString_cBXString4(((char*)self) + 0x88, name);
-    cBXString_cBXString4(((char*)self) + 0x90, hostName);
-    cBXString_cBXString4(((char*)self) + 0x94, oppoName);
-    cBXString_cBXString4(((char*)self) + 0x9C, auth);
+    cBXString_operatorE1(((char*)self) + 0x88, name);
+    cBXString_operatorE1(((char*)self) + 0x90, hostName);
+    cBXString_operatorE1(((char*)self) + 0x94, oppoName);
+    cBXString_operatorE1(((char*)self) + 0x9C, auth);
     int same = func_004165A8(selfName, hostName) == 0;
     self->mIsHost = same;
-    cBXString_cBXString4(((char*)self) + 0x98, same ? oppoName : hostName);
+    cBXString_operatorE1(((char*)self) + 0x98, same ? oppoName : hostName);
     self->mSeed = cDirtysock_tag_TagFieldGetNumber(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_SEED), 0);
     if (*(int*)self != 0x18 && *(int*)self != 20)
     {
@@ -1981,7 +1981,7 @@ extern char str_OPTS[];
 extern "C" const char* cDirtysock_tag_TagFieldFind(const char* record, const char* name);
 // PORT: TagFieldGetString really takes a 4th (default value) argument; the unit declares 3.
 extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetString");
-extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_operatorE1(void* self, const char* str);
 
 struct sDsNameListK2 {
     char pad_0x00[0x274];
@@ -2012,7 +2012,7 @@ extern "C" void func_0025BC48(LobbyMan* self, char* msg)
             cursor++;
         if (*cursor != 0)
             *cursor++ = 0;
-        cBXString_cBXString4(&self->mNewAccount.mNameOptions[self->mNewAccount.mNumNameOptions++], start);
+        cBXString_operatorE1(&self->mNewAccount.mNameOptions[self->mNewAccount.mNumNameOptions++], start);
     }
 }
 #endif
@@ -2635,7 +2635,7 @@ INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onauthentication);
 extern "C" const char* cDirtysock_tag_TagFieldFind(const char* record, const char* name);
 extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetString");
 extern "C" void* cBXString_cBXString2(void* self, const char* s);
-extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" unsigned int strlen(const char*);
 extern "C" void func_003EFD30(const char* s, int len, void* out, int n);
@@ -2696,11 +2696,11 @@ extern "C" void LobbyMan_onauthentication(LobbyMan* self, char *msg)
         *cursor = 0;
         cursor++;
       }
-      cBXString_cBXString4(&((sBXStrC8A8*)&(self)->mPersonas[0])[(self)->mNumPersonas++], start);
+      cBXString_operatorE1(&((sBXStrC8A8*)&(self)->mPersonas[0])[(self)->mNumPersonas++], start);
     }
 
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), str_MAIL), mail, 0x100, D_004A2F40);
-    cBXString_cBXString4(((char*)self) + 0x2BC, mail);
+    cBXString_operatorE1(((char*)self) + 0x2BC, mail);
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*((char **) (msg + 0xC)), str_SPAM), spam, 3, D_004A2F40);
     self->mAccount.mSpam[0] = spam[0] == 'Y';
     self->mAccount.mSpam[1] = spam[1] == 'Y';
@@ -2792,7 +2792,7 @@ extern char str_PID[];
 extern char str_CDEV[];
 extern char str_SSX_PS2_2004[];
 extern "C" const char* func_003F3F78();
-extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" void func_0025B608(LobbyMan* self, int a1, int tag, void* cb, int a4, float f);
 extern "C" void func_00268C98(void* self, void* a1, int a2);
 extern void* online_Event_vtbl[];
@@ -2838,7 +2838,7 @@ extern "C" void func_0025CD50_impl(char* self, const char* name) __asm__("func_0
  */
 extern "C" void func_0025CD50_impl(char* self, const char* name)
 {
-    cBXString_cBXString4(self + 0x80, name);
+    cBXString_operatorE1(self + 0x80, name);
     char buf[0x200];
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PERS, name);
@@ -3043,7 +3043,7 @@ extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
 extern char str_PERS[];
-extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" void func_00268CE8(void* self, void* a1, int a2);
 
 struct sMsgListNodeD1B8 {
@@ -3092,7 +3092,7 @@ extern "C" void func_0025D1B8(LobbyMan* self, const char* name)
         // PORT: function pointer passed through func_0025B608's int parameter.
         func_0025B608(self, 10, 0x63706572, buf, (int)func_00268CE8, 20.0f);
         LobbyMan* lobbyMan = self;
-        cBXString_cBXString4(&((char**)&lobbyMan->mPersonas[0])[lobbyMan->mNumPersonas], name);
+        cBXString_operatorE1(&((char**)&lobbyMan->mPersonas[0])[lobbyMan->mNumPersonas], name);
         int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         event[0] = type;
         *(void***)((char*)event + 0x4) = online_Event_vtbl;
@@ -3524,7 +3524,7 @@ extern "C" void LobbyMan_onroomselected(LobbyMan* self, char* msg)
     if (*(int*)(msg + 0x8) == 0) {
         char buf[0x100];
         cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_NAME), buf, 0x100, D_004A2F40);
-        cBXString_cBXString4(((char*)self) + 0x84, buf);
+        cBXString_operatorE1(((char*)self) + 0x84, buf);
         int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         event[0] = 220;
         *(void***)((char*)event + 0x4) = online_Event_vtbl;
@@ -3613,7 +3613,7 @@ extern char str_NAME[];
 extern char D_004A2F40[];
 extern "C" const char* cDirtysock_tag_TagFieldFind(const char* record, const char* name);
 extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetString");
-extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern void* online_Event_vtbl[];
 extern void* online_ErrorEvent_vtbl[];
 
@@ -3665,7 +3665,7 @@ extern "C" void LobbyMan_onRoomCreated(LobbyMan* self, char* msg)
         int type = 228;
         char buf[0x100];
         cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_NAME), buf, 0x100, D_004A2F40);
-        cBXString_cBXString4(((char*)self) + 0x84, buf);
+        cBXString_operatorE1(((char*)self) + 0x84, buf);
         int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         event[0] = type;
         *(void***)((char*)event + 0x4) = online_Event_vtbl;
@@ -5073,7 +5073,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025F4C0);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern int cCommSystem_getSignature_F4C0(void* comm) __asm__("cCommSystem_getSignature");
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
 extern "C" void* func_0025FB80(LobbyMan*, int, void*);
@@ -5114,7 +5114,7 @@ extern "C" void func_0025F4C0_impl(char* self, const char* name, int matchType)
     if (*(int*)self == 0)
         return;
     *(int*)(self + 0xB4) = 1;
-    cBXString_cBXString4(self + 0x98, name);
+    cBXString_operatorE1(self + 0x98, name);
     *(int*)(self + 0xA4) = matchType;
     cBE_getInterface_Fv(SSXApp->BE, 7);
     int locationID = cBENewRaceInterface_getLocationID(cBE_getInterface_Fv(cBE_getBE(), 0));
@@ -6288,13 +6288,13 @@ void func_00261058(void* self);
 struct sVec261070;
 extern "C" void func_00261070(BuddyMan* self);
 extern "C" void func_00261408(BuddyMan* self);
-extern "C" void func_002689B8(void* self, int flags);
+extern "C" void BuddyMan__BuddyMan(void* self, int flags);
 
 /**
  * Destroys the buddy-list manager singleton, if there is one, and clears BuddyMan_mBuddyMan.
  *
  * Clears the connect settings (func_00261058), deletes the received messages (func_00261070), disconnects
- * (func_00261408), then destroys and frees the object with func_002689B8(.., 3).
+ * (func_00261408), then destroys and frees the object with BuddyMan__BuddyMan(.., 3).
  */
 extern "C" void func_00261008(void)
 {
@@ -6303,7 +6303,7 @@ extern "C" void func_00261008(void)
         func_00261070(BuddyMan_mBuddyMan);
         func_00261408(BuddyMan_mBuddyMan);
         if (BuddyMan_mBuddyMan != 0) {
-            func_002689B8(BuddyMan_mBuddyMan, 3);
+            BuddyMan__BuddyMan(BuddyMan_mBuddyMan, 3);
         }
         BuddyMan_mBuddyMan = 0;
     }
@@ -6411,7 +6411,7 @@ extern "C" void func_002610D0()
 INCLUDE_ASM("dirtysock/tagsunk", func_00261248);
 #ifdef SKIP_ASM
 extern "C" void cBXString__cBXString(void* self, int flags);
-extern "C" void* cBXString_cBXString4(void* self, const char* str);
+extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" void* cBXString_Concat(void* self, const char* str);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" const char* func_00259198();
@@ -6470,13 +6470,13 @@ extern "C" void func_00261248(BuddyMan* self_, void* name_, int port, void* a3_,
     buddyMan->mbDisconnected = 0;
     buddyMan->mbLoggedIn = 0;
     sBXStr_261248 loginString;
-    cBXString_cBXString4(&loginString, userName);
+    cBXString_operatorE1(&loginString, userName);
     cBXString_Concat(&loginString, D_004A3330);
     cBXString_Concat(&loginString, password);
     sBXStr_261248 resourceString;
-    cBXString_cBXString4(&resourceString, str_cso);
+    cBXString_operatorE1(&resourceString, str_cso);
     cBXString_Concat(&resourceString, resource);
-    cBXString_cBXString4(((char*)self_) + 0xEC, resource);
+    cBXString_operatorE1(((char*)self_) + 0xEC, resource);
     func_003F08E8(self_->mpBuddyApi, name, port, 0x1E, loginString.p, resourceString.p, (void*)func_00268F18, ((char*)self_));
     cBXString__cBXString(&resourceString, 2);
     cBXString__cBXString(&loginString, 2);
@@ -10007,13 +10007,13 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00264E50);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_00264BE8(void* self, void* msg, int size);
-extern "C" int func_00148BC8(void* iface, int a, int rider);
-extern "C" int func_00148C68(void* iface, int a, int rider);
-extern "C" int func_00148B78(void* iface, int a, int rider);
-extern "C" int func_00148CB8(void* iface, int a, int rider);
-extern "C" int func_00148D58(void* iface, int a, int rider);
-extern "C" int func_00148D08(void* iface, int a, int rider);
-extern "C" int func_00148C18(void* iface, int a, int rider);
+extern "C" int cBEStatInterface_getHumanAccel(void* iface, int a, int rider);
+extern "C" int cBEStatInterface_getHumanEdging(void* iface, int a, int rider);
+extern "C" int cBEStatInterface_getHumanSpeed(void* iface, int a, int rider);
+extern "C" int cBEStatInterface_getHumanSpin(void* iface, int a, int rider);
+extern "C" int cBEStatInterface_getHumanStability(void* iface, int a, int rider);
+extern "C" int cBEStatInterface_getHumanToughness(void* iface, int a, int rider);
+extern "C" int cBEStatInterface_getHumanTrick(void* iface, int a, int rider);
 
 struct sTagMsg264E50 {
     int type;                   // 0x0
@@ -10026,8 +10026,8 @@ struct sTagMsg264E50 {
  * Sends a character-select message to the peer with the rider's 7 attribute values.
  *
  * Builds a 20-byte message {@p type, @p rider, @p state, 7 bytes}: on a ranked game (+0x128 set) every attribute is 40,
- * otherwise they come from interface 3's getters func_00148BC8, func_00148C68, func_00148B78, func_00148CB8,
- * func_00148D58, func_00148D08 and func_00148C18 (player 0, @p rider); then sends it with func_00264BE8().
+ * otherwise they come from interface 3's getters cBEStatInterface_getHumanAccel, cBEStatInterface_getHumanEdging, cBEStatInterface_getHumanSpeed, cBEStatInterface_getHumanSpin,
+ * cBEStatInterface_getHumanStability, cBEStatInterface_getHumanToughness and cBEStatInterface_getHumanTrick (player 0, @p rider); then sends it with func_00264BE8().
  *
  * @param type   message type (func_00264F88, func_00265018 and func_00265140 send 0..5: pick, confirm and withdraw,
  *               host then client)
@@ -10047,13 +10047,13 @@ extern "C" void func_00264E50(void* self, int type, int rider, int state)
         for (i = 0; i < 7; i++)
             msg.stats[i] = 40;
     } else {
-        msg.stats[0] = func_00148BC8(iface, 0, rider);
-        msg.stats[1] = func_00148C68(iface, 0, rider);
-        msg.stats[2] = func_00148B78(iface, 0, rider);
-        msg.stats[3] = func_00148CB8(iface, 0, rider);
-        msg.stats[4] = func_00148D58(iface, 0, rider);
-        msg.stats[5] = func_00148D08(iface, 0, rider);
-        msg.stats[6] = func_00148C18(iface, 0, rider);
+        msg.stats[0] = cBEStatInterface_getHumanAccel(iface, 0, rider);
+        msg.stats[1] = cBEStatInterface_getHumanEdging(iface, 0, rider);
+        msg.stats[2] = cBEStatInterface_getHumanSpeed(iface, 0, rider);
+        msg.stats[3] = cBEStatInterface_getHumanSpin(iface, 0, rider);
+        msg.stats[4] = cBEStatInterface_getHumanStability(iface, 0, rider);
+        msg.stats[5] = cBEStatInterface_getHumanToughness(iface, 0, rider);
+        msg.stats[6] = cBEStatInterface_getHumanTrick(iface, 0, rider);
     }
     func_00264BE8(self, &msg, sizeof(msg));
 }

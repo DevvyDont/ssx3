@@ -7234,7 +7234,7 @@ extern "C" void func_002ADDE0_D6E0(void* bank, sSndCallback key) __asm__("func_0
 extern "C" int func_002B46E8(void* monitor);
 extern "C" void func_002B4708(void* monitor);
 extern "C" int func_002B4620(void* monitor);
-extern "C" int func_001547A0(void* iface, int mission);
+extern "C" int cBEMissionInterface_getAudioType(void* iface, int mission);
 extern "C" int func_0028D960(void* self);
 extern "C" int func_0028DEF0_D6E0(void* self, int a1) __asm__("func_0028DEF0");
 
@@ -7266,7 +7266,7 @@ extern "C" void func_0029D6E0(char* self, int mission)
         return;
     }
     int track = -1;
-    int kind = func_001547A0(cBE_getInterface__Fv(cBE_getBE(), 10), mission);
+    int kind = cBEMissionInterface_getAudioType(cBE_getInterface__Fv(cBE_getBE(), 10), mission);
     *(int*)(self + 0x5FD0) = kind;
     switch (kind) {
     case 1: track = 33; break;
@@ -9278,8 +9278,8 @@ INCLUDE_ASM("sound/soundsys", func_002A1820);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_getAI();
 void* cBEAggressionInterface_getThis();
-extern "C" int func_00155B50(void* ag, int a, int b);
-extern "C" int func_00155AB0(void* ag, int a, int b);
+extern "C" int cBEAggressionInterface_getAggression(void* ag, int a, int b);
+extern "C" int cBEAggressionInterface_getState(void* ag, int a, int b);
 
 class cSs1820Obj {
 public:
@@ -9310,10 +9310,10 @@ extern "C" int func_002A1820(void* self, sSs1820Rider* a, sSs1820Rider* b)
         if (okb) return 2;
     }
     int r = 2;
-    int c1 = func_00155B50(cBEAggressionInterface_getThis(), a->v07(), b->v07());
-    int c2 = func_00155B50(cBEAggressionInterface_getThis(), b->v07(), a->v07());
+    int c1 = cBEAggressionInterface_getAggression(cBEAggressionInterface_getThis(), a->v07(), b->v07());
+    int c2 = cBEAggressionInterface_getAggression(cBEAggressionInterface_getThis(), b->v07(), a->v07());
     if (c1 < 2 && c2 < 2) {
-        int t = func_00155AB0(cBEAggressionInterface_getThis(), a->v07(), b->v07());
+        int t = cBEAggressionInterface_getState(cBEAggressionInterface_getThis(), a->v07(), b->v07());
         if (t == 0) r = 0;
         else if (t == 1) r = 1;
     }
@@ -10002,7 +10002,7 @@ extern "C" int func_0029F198(void* self);
 extern "C" void* cAudioInterface_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00145750(void*);
+extern "C" int cBENewRaceInterface_getRival(void*);
 // func_002A1DA0 returns a value (the unit declares it void).
 int func_002A1DA0_r(void* self, int a, int b) __asm__("func_002A1DA0");
 extern "C" void* func_003D8008(int a, int b, int c);
@@ -10014,7 +10014,7 @@ extern "C" void func_002A2A10(cSSXAudio* self)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8459, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int m = func_002A1DA0_r(self, func_00145750(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), 0);
+            int m = func_002A1DA0_r(self, cBENewRaceInterface_getRival(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), 0);
             D_004A482C_4(func_003D8008(1, 0, 8459), 2, r, m);
         }
     }

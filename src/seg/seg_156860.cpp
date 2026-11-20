@@ -2465,7 +2465,7 @@ void* operator_new_8448(unsigned int size, const char* tag, int flags, int align
 void cMemMan_free_8448(void* p) __asm__("cMemMan_free__FPv");
 extern "C" void cBENetworkInterface_preInitBE(void* iface);
 extern "C" void cBENetworkInterface_postInitBE(void* iface);
-extern "C" void func_0014F898();
+extern "C" void cBERules_swap();
 extern "C" void cBENetworkInterface_getSyncData_8448(void* iface, int which, void* buf) __asm__("cBENetworkInterface_getSyncData");
 extern "C" void cBENetworkInterface_setSyncData_8448(void* iface, int which, void* buf) __asm__("cBENetworkInterface_setSyncData");
 extern "C" void MEM_fill_8448(char* p, int c, int n) __asm__("MEM_fill");
@@ -2516,7 +2516,7 @@ extern "C" void cGameComm_syncGame(cGameComm* self)
         cBENetworkInterface_getSyncData_8448(iface, 0, self->mBEBuffer);
         cBENetworkInterface_setSyncData_8448(iface, 0, self->mBEBuffer);
     } else {
-        func_0014F898();
+        cBERules_swap();
         MEM_fill_8448(((char*)self) + 0x104, 0, 0x10);
         strncpy(((char*)self) + 0x104, str_NA_R_F004, 0xF);
         self->unk_100 = cCommSystem_mCommSystem->mBroadBand;

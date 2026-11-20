@@ -1669,7 +1669,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBE_setState(int state);
 extern "C" void cReplay_reset(void* p);
-extern "C" void func_00145CB0(void* iface, int i, int a);
+extern "C" void cBENewPlayerInterface_setIsFirstTimeWC(void* iface, int i, int a);
 extern char* cGameState_mpGame;
 
 struct sRace002368A0 {
@@ -1683,7 +1683,7 @@ struct sRace002368A0 {
  * Starts the section-load game state: back end state 0, replay reset, and on the career path resets each rider's entry.
  *
  * Calls cBE_setState(0) and cReplay_reset on the game's replay; when the race's cGamePath is 0, calls
- * func_00145CB0(player interface, i, 0) for each of the race's iNumberRiders. Clears the sub-state (+0x10). Slot +0x2C
+ * cBENewPlayerInterface_setIsFirstTimeWC(player interface, i, 0) for each of the race's iNumberRiders. Clears the sub-state (+0x10). Slot +0x2C
  * (gainFocus) of D_0047D2C8.
  */
 extern "C" void cGFSectionLoadState_gainFocus(void* self)
@@ -1695,7 +1695,7 @@ extern "C" void cGFSectionLoadState_gainFocus(void* self)
         int i = 0;
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
         for (; i < cBENewRaceInterface_newRace.iNumberRiders; i++) {
-            func_00145CB0(iface, i, 0);
+            cBENewPlayerInterface_setIsFirstTimeWC(iface, i, 0);
         }
     }
     *(int*)((char*)self + 0x10) = 0;
@@ -2070,7 +2070,7 @@ INCLUDE_ASM("main/gamestate", cGFPostEventState_gainFocus);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_00145CB0(void* iface, int i, int a);
+extern "C" void cBENewPlayerInterface_setIsFirstTimeWC(void* iface, int i, int a);
 extern "C" void cSSXScriptEngine_ResetNISList(void* a, int b);
 extern "C" void cOVStateManager_gotoOverlay(int a);
 
@@ -2085,7 +2085,7 @@ struct sRace00236DA0 {
  * Starts the post-event game state: on the career path resets each rider's entry, clears the NIS list and opens overlay
  * 7.
  *
- * When the race's cGamePath is 0, calls func_00145CB0(player interface, i, 0) for each rider; then
+ * When the race's cGamePath is 0, calls cBENewPlayerInterface_setIsFirstTimeWC(player interface, i, 0) for each rider; then
  * cSSXScriptEngine_ResetNISList(ScriptEngine, 0), clears the overlay-done flag (+0x8) and calls
  * cOVStateManager_gotoOverlay(7). Slot +0x2C (gainFocus) of D_0047D218.
  */
@@ -2096,7 +2096,7 @@ extern "C" void cGFPostEventState_gainFocus(void* self)
         int i = 0;
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
         for (; i < cBENewRaceInterface_newRace.iNumberRiders; i++) {
-            func_00145CB0(iface, i, 0);
+            cBENewPlayerInterface_setIsFirstTimeWC(iface, i, 0);
         }
     }
     cSSXScriptEngine_ResetNISList(ScriptEngine, 0);

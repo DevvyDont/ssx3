@@ -463,10 +463,10 @@ extern "C" int cTrackFileMan_getNextWCBAMStartLocation_b4(sLSSub_B1B0* s, int i)
 extern "C" int cBENewRaceInterface_setGameMode_b4(void* self, int mode) __asm__("cBENewRaceInterface_setGameMode");
 extern "C" int cBENewRaceInterface_setGameEvent_b4(void* self, int ev) __asm__("cBENewRaceInterface_setGameEvent");
 extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count);
-extern "C" int func_00145C38(void* self, int a1);
-extern "C" void func_00145CB0(void* self, int a1, int a2);
+extern "C" int cBENewPlayerInterface_isFirstTimeWC(void* self, int a1);
+extern "C" void cBENewPlayerInterface_setIsFirstTimeWC(void* self, int a1, int a2);
 extern "C" void cBENewPlayerInterface_setFirstTimeOnTrack(void* self, int a1, int a2, int a3);
-extern "C" void func_00147658(void* self, int a1, int a2);
+extern "C" void cBENewPlayerInterface_setControllerMapping(void* self, int a1, int a2);
 extern "C" void cBackgroundMan_setActiveImage(void* bg, int idx);
 extern "C" void func_00256088();
 extern "C" void func_002560B0();
@@ -564,7 +564,7 @@ static inline int bgCount_B4E0(sBgMan_17ACC8* bg)
  * (network) without a comm system and 13 without a network connection. Left / right (2 / 3) change the item: 0 game
  * path (3 values; path 0 needs the track list and a WCBAM start location), 1 game mode (7), 2 game event (14), 3
  * the player's first-time-on-track flag, 4 location (cTrackFileMan next / previous), 5 character (10), 6 a player
- * flag (func_00147658), 7 a one-value option stored in the BE's first word (always 0), 8 the AI rider count up to
+ * flag (cBENewPlayerInterface_setControllerMapping), 7 a one-value option stored in the BE's first word (always 0), 8 the AI rider count up to
  * getMaxAIRiders, 9 the background preview, 10 GrMan slot 8 toggled from slot 9, 11 the song, 12 the network mode
  * 0-4 (sets bIsNetworkGame / bIsHost and starts or stops the comm system), 13 (event 6) copies a word of the app's
  * +0x80 object. Mode, event, location and AI count are re-validated after each change.
@@ -762,7 +762,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
     case 3: {
         cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
         void* player = cBE_getInterface_B1B0(D_004A28A8_b4->be, 1);
-        int firstTimeOnTrack = func_00145C38(player, 0);
+        int firstTimeOnTrack = cBENewPlayerInterface_isFirstTimeWC(player, 0);
         if (D_00535C11[0] != 0) {
             break;
         }
@@ -774,7 +774,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         } else if (dir == 2) {
             firstTimeOnTrack = 0;
         }
-        func_00145CB0(player, 0, firstTimeOnTrack);
+        cBENewPlayerInterface_setIsFirstTimeWC(player, 0, firstTimeOnTrack);
         cBENewPlayerInterface_setFirstTimeOnTrack(player, firstTimeOnTrack, 0, 14);
         update_B4E0(player);
         break;
@@ -845,7 +845,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
             self->f8C2C = !self->f8C2C;
         }
         void* player = cBE_getInterface_B1B0(cBE_getBE(), 1);
-        func_00147658(player, 0, self->f8C2C);
+        cBENewPlayerInterface_setControllerMapping(player, 0, self->f8C2C);
         update_B4E0(player);
         break;
     }

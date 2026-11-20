@@ -537,7 +537,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
-extern "C" int func_00144BF0(void* iface);
+extern "C" int cBENewRaceInterface_getLocationName1(void* iface);
 extern "C" char* func_00155130(void* iface, int i);
 extern "C" char* func_00155190(void* iface, int i);
 extern "C" char* func_00155208(void* iface, int i);
@@ -630,7 +630,7 @@ extern "C" void cOVState_TOPTIMES_onCreateScreen(char* self)
         break;
     case 5:
         func_002C2540(wfmt, str_pct_S_Jam);
-        sprintf1_1F7958(wtext, wfmt, func_00144BF0(race));
+        sprintf1_1F7958(wtext, wfmt, cBENewRaceInterface_getLocationName1(race));
         break;
     default: {
         int name = 0;
@@ -650,7 +650,7 @@ extern "C" void cOVState_TOPTIMES_onCreateScreen(char* self)
             break;
         }
         func_002C2540(wfmt, str_pct_S_pct_s);
-        sprintf1_1F7958(wtext, wfmt, func_00144BF0(race), name);
+        sprintf1_1F7958(wtext, wfmt, cBENewRaceInterface_getLocationName1(race), name);
         break;
     }
     }

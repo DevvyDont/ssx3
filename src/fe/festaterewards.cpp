@@ -951,8 +951,8 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_loadRewards);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00156A38(void* iface);
-extern "C" void func_00156A10(void* iface);
+extern "C" int cBERewardInterface_isRewardsLoaded(void* iface);
+extern "C" void cBERewardInterface_loadRewards(void* iface);
 struct sVE_0180 {
     short delta;
     short index;
@@ -962,8 +962,8 @@ struct sVE_0180 {
 /**
  * Starts loading the reward list, or builds it at once when the reward database is ready.
  *
- * Uses the reward interface (cBE_getInterface__Fv kind 13). When func_00156A38() reports the database not ready, sets
- * bit 0 (rewards loading) of flags +0x48, clears bit 1 and starts it with func_00156A10() (cBERewardDB_init). Otherwise
+ * Uses the reward interface (cBE_getInterface__Fv kind 13). When cBERewardInterface_isRewardsLoaded() reports the database not ready, sets
+ * bit 0 (rewards loading) of flags +0x48, clears bit 1 and starts it with cBERewardInterface_loadRewards() (cBERewardDB_init). Otherwise
  * sets bit 1 (rewards loaded), clears bit 0, fills the gallery's list through vtable slot 28 (the per-gallery list
  * builder, e.g. cFEStateRewardGalleryPosters_allocRewards) and sets the total row count +0x60 to the reward count (+0x68) divided by the columns
  * (+0x5C), rounded up. Called by cFEStateRewardGalleryBase_onCreateScreen.
@@ -971,9 +971,9 @@ struct sVE_0180 {
 extern "C" void cFEStateRewardGalleryBase_loadRewards(void* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
-    if (func_00156A38(iface) == 0) {
+    if (cBERewardInterface_isRewardsLoaded(iface) == 0) {
         *(int*)((char*)self + 0x48) = (*(int*)((char*)self + 0x48) & ~2) | 1;
-        func_00156A10(iface);
+        cBERewardInterface_loadRewards(iface);
     } else {
         *(int*)((char*)self + 0x48) = (*(int*)((char*)self + 0x48) & ~1) | 2;
         sVE_0180* vt = *(sVE_0180**)((char*)self + 8);
@@ -989,7 +989,7 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_updateRewardsLoad);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00156A38(void* iface);
+extern "C" int cBERewardInterface_isRewardsLoaded(void* iface);
 struct sVE_0238a {
     short delta;
     short index;
@@ -1010,7 +1010,7 @@ struct sVE_0238c {
  * Finishes the reward-list load once the reward database is ready, and highlights the first cell when the icons are in
  * too.
  *
- * Only while bit 1 (rewards loaded) of flags +0x48 is clear and func_00156A38() reports the database (reward interface,
+ * Only while bit 1 (rewards loaded) of flags +0x48 is clear and cBERewardInterface_isRewardsLoaded() reports the database (reward interface,
  * kind 13) ready: sets bit 1, clears bit 0, builds the list (vtable slot 28) and sets the total row count +0x60 to the
  * reward count (+0x68) divided by the columns (+0x5C), rounded up. When the icons are loaded (bit 3), the first cell
  * (+0x924) becomes the current cell (+0x8FC) and slots 40 (cFEStateRewardGalleryBase_updateList) and 33
@@ -1019,7 +1019,7 @@ struct sVE_0238c {
 extern "C" void cFEStateRewardGalleryBase_updateRewardsLoad(void* self)
 {
     if (((*(int*)((char*)self + 0x48) >> 1) & 1) == 0) {
-        if (func_00156A38(cBE_getInterface_Fv(cBE_getBE(), 13)) != 0) {
+        if (cBERewardInterface_isRewardsLoaded(cBE_getInterface_Fv(cBE_getBE(), 13)) != 0) {
             *(int*)((char*)self + 0x48) = (*(int*)((char*)self + 0x48) & ~1) | 2;
             sVE_0238a* vt = *(sVE_0238a**)((char*)self + 8);
             vt[28].fn((char*)self + vt[28].delta);
@@ -1042,7 +1042,7 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_buyReward);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_00157F20(void* iface, int player, int a2, int a3, int a4, int a5);
+extern "C" void cBERewardInterface_buyReward(void* iface, int player, int a2, int a3, int a4, int a5);
 extern "C" int cBEEconInterface_getMoney(void* iface, int a1, int charID);
 struct sVE_0320a {
     short delta;
@@ -1058,7 +1058,7 @@ struct sVE_0320b {
 /**
  * Gives the player a reward bought in the gallery, then refreshes the cash and the reward display.
  *
- * Vtable slot 30 of the gallery vtables; cFEStateRewardGalleryBase_onPopupEvent calls it when the buy popup is accepted. Calls func_00157F20()
+ * Vtable slot 30 of the gallery vtables; cFEStateRewardGalleryBase_onPopupEvent calls it when the buy popup is accepted. Calls cBERewardInterface_buyReward()
  * on the reward interface (kind 13) with mUserNum, the character (+0x50), the gallery's reward type (+0x4C), @p
  * rewardIndex and 1; reads the cash back into +0x54 with cBEEconInterface_getMoney() (interface kind 11); then runs
  * vtable slots 42 (cFEStateRewardGalleryBase_updateRewardInfo, name and cost), 33 (cFEStateRewardGalleryBase_updateHelpText for @p rewardIndex), 43
@@ -1068,7 +1068,7 @@ struct sVE_0320b {
  */
 extern "C" void cFEStateRewardGalleryBase_buyReward(void* self, int rewardIndex)
 {
-    func_00157F20(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44),
+    cBERewardInterface_buyReward(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44),
                   *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x4C), rewardIndex, 1);
     *(int*)((char*)self + 0x54) = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), *(signed char*)((char*)self + 0x44),
                                                 *(int*)((char*)self + 0x50));
@@ -1185,12 +1185,12 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_isRewardOwned);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_00157468(void* iface, int a, int b, int c, int d);
+extern "C" void cBERewardInterface_isRewardOwned1(void* iface, int a, int b, int c, int d);
 
 /**
  * Tests whether the player owns a reward of the gallery.
  *
- * Vtable slot 38 of the gallery vtables. Calls func_00157468() on the reward interface (kind 13) with mUserNum, the
+ * Vtable slot 38 of the gallery vtables. Calls cBERewardInterface_isRewardOwned1() on the reward interface (kind 13) with mUserNum, the
  * character (+0x50), the reward type (+0x4C) and @p rewardIndex. The C definition is void, but the callee's result
  * stays in the return register, and the slot's callers (cFEStateRewardGalleryBase_onInputBegin, cFEStateRewardGalleryBase_updateRewardInfo, cFEStateRewardGalleryBase_updateHighlither) test it.
  *
@@ -1198,7 +1198,7 @@ extern "C" void func_00157468(void* iface, int a, int b, int c, int d);
  */
 extern "C" void cFEStateRewardGalleryBase_isRewardOwned(void* self, int rewardIndex)
 {
-    func_00157468(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44),
+    cBERewardInterface_isRewardOwned1(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44),
                   *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x4C), rewardIndex);
 }
 #endif
@@ -1847,7 +1847,7 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryPosters_allocRewards);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-int func_001572B0(void* self);
+int cBERewardInterface_getTotalNumPosters(void* self);
 extern "C" void* cBERewardInterface_getDB();
 
 struct sRewardList_11F8 {
@@ -1861,14 +1861,14 @@ struct sRewardList_11F8 {
 /**
  * Builds the posters gallery's reward list from the reward database.
  *
- * Vtable slot 28 of the posters vtable D_0046A248. The count comes from func_001572B0() on the reward interface (kind
+ * Vtable slot 28 of the posters vtable D_0046A248. The count comes from cBERewardInterface_getTotalNumPosters() on the reward interface (kind
  * 13); the list base +0xA24 is the posters array pointer at +0x14 of cBERewardInterface_getDB(); list entry k (+0xA28)
  * gets base + k * 16 (16-byte reward records) and the reward count +0x68 counts them. There is no check against the 43
  * entries the object has room for.
  */
 extern "C" void cFEStateRewardGalleryPosters_allocRewards(sRewardList_11F8* self)
 {
-    int n = func_001572B0(cBE_getInterface_Fv(cBE_getBE(), 13));
+    int n = cBERewardInterface_getTotalNumPosters(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
     self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x14);
     for (int i = 0; i < n; i++) {
@@ -1977,7 +1977,7 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryTradingCards_allocRewards)
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-int func_001572D0(void* self);
+int cBERewardInterface_getTotalNumTradingCards(void* self);
 extern "C" void* cBERewardInterface_getDB();
 
 struct sRewardList_1390 {
@@ -1991,14 +1991,14 @@ struct sRewardList_1390 {
 /**
  * Builds the trading-card gallery's reward list from the reward database.
  *
- * Vtable slot 28 of the trading-card vtable D_0046A0C8. The count comes from func_001572D0() on the reward interface
+ * Vtable slot 28 of the trading-card vtable D_0046A0C8. The count comes from cBERewardInterface_getTotalNumTradingCards() on the reward interface
  * (kind 13); the list base +0xA24 is the trading-card array pointer at +0x18 of cBERewardInterface_getDB(); list entry
  * k (+0xA28) gets base + k * 16 (16-byte reward records) and the reward count +0x68 counts them. There is no check
  * against the 116 entries the object has room for.
  */
 extern "C" void cFEStateRewardGalleryTradingCards_allocRewards(sRewardList_1390* self)
 {
-    int n = func_001572D0(cBE_getInterface_Fv(cBE_getBE(), 13));
+    int n = cBERewardInterface_getTotalNumTradingCards(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
     self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x18);
     for (int i = 0; i < n; i++) {
@@ -2107,7 +2107,7 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryConceptArts_allocRewards);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-int func_001572F0(void* self);
+int cBERewardInterface_getTotalNumConceptArts(void* self);
 extern "C" void* cBERewardInterface_getDB();
 
 struct sRewardList_1528 {
@@ -2121,14 +2121,14 @@ struct sRewardList_1528 {
 /**
  * Builds the art gallery's reward list from the reward database.
  *
- * Vtable slot 28 of the art vtable D_00469F48. The count comes from func_001572F0() on the reward interface (kind 13);
+ * Vtable slot 28 of the art vtable D_00469F48. The count comes from cBERewardInterface_getTotalNumConceptArts() on the reward interface (kind 13);
  * the list base +0xA24 is the art array pointer at +0x1C of cBERewardInterface_getDB(); list entry k (+0xA28) gets base
  * + k * 16 (16-byte reward records) and the reward count +0x68 counts them. There is no check against the 100 entries
  * the object has room for.
  */
 extern "C" void cFEStateRewardGalleryConceptArts_allocRewards(sRewardList_1528* self)
 {
-    int n = func_001572F0(cBE_getInterface_Fv(cBE_getBE(), 13));
+    int n = cBERewardInterface_getTotalNumConceptArts(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
     self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x1C);
     for (int i = 0; i < n; i++) {
@@ -2237,7 +2237,7 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryVideos_allocRewards);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-int func_00157330(void* self);
+int cBERewardInterface_getTotalNumVideos(void* self);
 extern "C" void* cBERewardInterface_getDB();
 
 struct sRewardList_16C0 {
@@ -2251,14 +2251,14 @@ struct sRewardList_16C0 {
 /**
  * Builds the video gallery's reward list from the reward database.
  *
- * Vtable slot 28 of the video vtable D_00469DC8. The count comes from func_00157330() on the reward interface (kind
+ * Vtable slot 28 of the video vtable D_00469DC8. The count comes from cBERewardInterface_getTotalNumVideos() on the reward interface (kind
  * 13); the list base +0xA24 is the video array pointer at +0x24 of cBERewardInterface_getDB(); list entry k (+0xA28)
  * gets base + k * 16 (16-byte reward records) and the reward count +0x68 counts them. There is no check against the 2
  * entries the object has room for, so more than 2 videos in the database would overrun it.
  */
 extern "C" void cFEStateRewardGalleryVideos_allocRewards(sRewardList_16C0* self)
 {
-    int n = func_00157330(cBE_getInterface_Fv(cBE_getBE(), 13));
+    int n = cBERewardInterface_getTotalNumVideos(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
     self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x24);
     for (int i = 0; i < n; i++) {
@@ -2367,7 +2367,7 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryToys_allocRewards);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-int func_00157310(void* self);
+int cBERewardInterface_getTotalNumToys(void* self);
 extern "C" void* cBERewardInterface_getDB();
 
 struct sRewardList_1858 {
@@ -2381,14 +2381,14 @@ struct sRewardList_1858 {
 /**
  * Builds the toy gallery's reward list from the reward database.
  *
- * Vtable slot 28 of the toy vtable D_00469C48. The count comes from func_00157310() on the reward interface (kind 13);
+ * Vtable slot 28 of the toy vtable D_00469C48. The count comes from cBERewardInterface_getTotalNumToys() on the reward interface (kind 13);
  * the list base +0xA24 is the toy array pointer at +0x20 of cBERewardInterface_getDB(); list entry k (+0xA28) gets base
  * + k * 16 (16-byte reward records) and the reward count +0x68 counts them. There is no check against the 28 entries
  * the object has room for.
  */
 extern "C" void cFEStateRewardGalleryToys_allocRewards(sRewardList_1858* self)
 {
-    int n = func_00157310(cBE_getInterface_Fv(cBE_getBE(), 13));
+    int n = cBERewardInterface_getTotalNumToys(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
     self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x20);
     for (int i = 0; i < n; i++) {
@@ -2455,7 +2455,7 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryCheatChars_allocRewards);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-int func_00157370(void* self);
+int cBERewardInterface_getTotalNumCheatChars(void* self);
 extern "C" void* cBERewardInterface_getDB();
 
 struct sRewardList_1990 {
@@ -2469,14 +2469,14 @@ struct sRewardList_1990 {
 /**
  * Builds the cheat-character gallery's reward list from the reward database.
  *
- * Vtable slot 28 of the cheat-character vtable D_00469AC8. The count comes from func_00157370() on the reward interface
+ * Vtable slot 28 of the cheat-character vtable D_00469AC8. The count comes from cBERewardInterface_getTotalNumCheatChars() on the reward interface
  * (kind 13); the list base +0xA24 is the cheat-character array pointer at +0x28 of cBERewardInterface_getDB(); list
  * entry k (+0xA28) gets base + k * 16 (16-byte reward records) and the reward count +0x68 counts them. There is no
  * check against the 28 entries the object has room for.
  */
 extern "C" void cFEStateRewardGalleryCheatChars_allocRewards(sRewardList_1990* self)
 {
-    int n = func_00157370(cBE_getInterface_Fv(cBE_getBE(), 13));
+    int n = cBERewardInterface_getTotalNumCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
     self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x28);
     for (int i = 0; i < n; i++) {

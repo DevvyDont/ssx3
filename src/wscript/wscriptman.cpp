@@ -1180,10 +1180,10 @@ extern "C" void tMissionMenuQueue_addEntry_a(void* queue, unsigned int id, int k
 extern "C" void* cWScriptMan_getCurrentMission(void* self);
 extern "C" int cWScriptMan_isLocalMissionActive(void* self);
 extern "C" int cBEMissionInterface_isMissionCompleted(void* iface, unsigned int id);
-extern "C" int func_00153DD0(void* iface, unsigned int id);
+extern "C" int cBEMissionInterface_isMissionReady(void* iface, unsigned int id);
 extern "C" int cBEMissionInterface_isMissionLocked(void* iface, unsigned int id);
 extern "C" int cBEMissionInterface_isMissionAvailable(void* iface, unsigned int id);
-extern "C" int func_00153ED8(void* iface, unsigned int id);
+extern "C" int cBEMissionInterface_isMissionShowIcon(void* iface, unsigned int id);
 extern "C" int cBEMissionInterface_getNextMissionID(void* iface, unsigned int id);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0029D6E0(void* p, unsigned int id);
@@ -1337,7 +1337,7 @@ extern "C" int cWScriptMan_doMissionCmd(char* self, unsigned int id, unsigned in
                 break;
             }
         }
-        result = func_00153DD0(iface, id) != 0;
+        result = cBEMissionInterface_isMissionReady(iface, id) != 0;
         break;
     case 16:
         if (id == 0xFFFFFFFF) {
@@ -1354,7 +1354,7 @@ extern "C" int cWScriptMan_doMissionCmd(char* self, unsigned int id, unsigned in
         if (cWScriptMan_isLocalMissionActive(self) != 0) {
             break;
         }
-        if (func_00153ED8(iface, id) != 0) {
+        if (cBEMissionInterface_isMissionShowIcon(iface, id) != 0) {
             result = 1;
         } else {
             result = 0;
@@ -2287,8 +2287,8 @@ struct func_0030C3E0_sTable;
 extern "C" void func_0030C3E0(func_0030C3E0_sTable* self, int id);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
-extern "C" int func_00144C98(void* iface);
-extern "C" int func_00151178(void* self, int level);
+extern "C" int cBENewRaceInterface_getLocationPeak1(void* iface);
+extern "C" int cBEEconInterface_getCollectableCash(void* self, int level);
 extern "C" void cRider_flagEventAddCollectible(void* rider, int level, int a2);
 
 struct sWSSlot_B9A0 {
@@ -2300,7 +2300,7 @@ struct sWSSlot_B9A0 {
  * Records that a rider picked up a collectible of the manager's pool.
  *
  * When the pool id matches, the instance is marked collected, the pickup sound plays and the rider gets an
- * add-collectible event with the current peak (func_00144C98) and its value (func_00151178).
+ * add-collectible event with the current peak (cBENewRaceInterface_getLocationPeak1) and its value (cBEEconInterface_getCollectableCash).
  *
  * @param rider   rider index (On Tour being)
  * @param id      collectible pool id (On Tour poolId)
@@ -2316,8 +2316,8 @@ extern "C" void cWScriptMan_collect(void* self, int rider, int id, int instId)
             cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 5, 0, 1.0f);
             void* newRace = cBE_getInterface_Fv(cBE_getBE(), 0);
             void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
-            int lvl = func_00144C98(newRace);
-            int cash = func_00151178(econ, lvl);
+            int lvl = cBENewRaceInterface_getLocationPeak1(newRace);
+            int cash = cBEEconInterface_getCollectableCash(econ, lvl);
             cRider_flagEventAddCollectible(*(void**)((char*)SSXApp->Game->AI + (rider << 2) + 0x28), lvl, cash);
             return;
         }
@@ -2769,7 +2769,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030C3E0);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
-extern "C" void func_00153B00(void* iface, int a1, int index, int value);
+extern "C" void cBEMissionInterface_setBit(void* iface, int a1, int index, int value);
 
 struct func_0030C3E0_sTable {
     int value;      // 0x0
@@ -2783,7 +2783,7 @@ extern "C" void func_0030C3E0(func_0030C3E0_sTable* self, int id)
     int i;
     for (i = 0; i < self->count; i++) {
         if (self->ids[i] == id) {
-            func_00153B00(cBE_getInterface_Fv(cBE_getBE(), 10), 0, i, self->value);
+            cBEMissionInterface_setBit(cBE_getInterface_Fv(cBE_getBE(), 10), 0, i, self->value);
             return;
         }
     }
@@ -2796,11 +2796,11 @@ INCLUDE_ASM("wscript/wscriptman", func_0030C468);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
-extern "C" int func_00153498(void* iface, int a1, int id);
+extern "C" int cBEMissionInterface_getCurrentCollectByType(void* iface, int a1, int id);
 
 extern "C" int func_0030C468(void* entry)
 {
-    return func_00153498(cBE_getInterface_Fv(cBE_getBE(), 10), 0, *(int*)entry);
+    return cBEMissionInterface_getCurrentCollectByType(cBE_getInterface_Fv(cBE_getBE(), 10), 0, *(int*)entry);
 }
 #endif
 
@@ -2811,7 +2811,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030C4A8);
 void* cBE_getInterface_C4A8(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" int func_001538E8(void* iface, int a, int b, int c);
+extern "C" int cBEMissionInterface_isBitSet(void* iface, int a, int b, int c);
 extern "C" void* cDeadNode_cDeadNode(void* mem, void* obj);
 extern char str_DeadNode[];
 
@@ -2886,7 +2886,7 @@ extern "C" void func_0030C4A8(void* ep, int instIds, int size)
         ((unsigned int*)((char*)pool + 0xC))[pool->count] = id;
         cBE_getInterface_C4A8(cBE_getBE(), 0);
         if (beRaceDB->cGamePath == 0) {
-            if (func_001538E8(iface, 0, pool->count, pool->id))
+            if (cBEMissionInterface_isBitSet(iface, 0, pool->count, pool->id))
                 respawn_C4A8(*ids);
         } else {
             respawn_C4A8(*ids);

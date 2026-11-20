@@ -149,25 +149,25 @@ extern "C" void cBE_purgeBE(void)
 #endif
 
 //100%
-INCLUDE_ASM("be/be", func_0014DE28);
+INCLUDE_ASM("be/be", cBE_newProfile);
 #ifdef SKIP_ASM
 extern void* cBE_library;
-extern "C" void func_00149A88(void* p, char c);
+extern "C" void cBELibrary_newProfile(void* p, char c);
 extern "C" void func_0014FC40(char c);
 
 /**
  * Starts a fresh profile in slot @p playerIndex: resets its library entry and its BAGT interface state.
  *
- * Calls func_00149A88(cBE_library, @p playerIndex) when the library exists (clears the player entry, gives it the
+ * Calls cBELibrary_newProfile(cBE_library, @p playerIndex) when the library exists (clears the player entry, gives it the
  * default player name, re-inits its profile and resets the new-player, stat and BAGT interfaces), then
  * func_0014FC40(@p playerIndex). fe/fereal resets slots 0-2 this way when the back end has to be cleared.
  *
  * @param playerIndex  the profile slot
  */
-extern "C" void func_0014DE28(void* self, char playerIndex)
+extern "C" void cBE_newProfile(void* self, char playerIndex)
 {
     if (cBE_library)
-        func_00149A88(cBE_library, playerIndex);
+        cBELibrary_newProfile(cBE_library, playerIndex);
     func_0014FC40(playerIndex);
 }
 #endif
@@ -217,7 +217,7 @@ extern "C" void func_0014DEE8(void) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/be", func_0014DF08);
+INCLUDE_ASM("be/be", cBE_writeToReplayFrame);
 #ifdef SKIP_ASM
 class cBEReplayStream {
 public:
@@ -245,7 +245,7 @@ cBEReplayIface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterfac
  *
  * @param stream  the replay output stream
  */
-extern "C" void func_0014DF08(void* self, cBEReplayStream* stream)
+extern "C" void cBE_writeToReplayFrame(void* self, cBEReplayStream* stream)
 {
     stream->write(&cBE_currentState, 4);
     for (int i = 0; i < 14; i++)
@@ -298,7 +298,7 @@ extern "C" int cBE_getDataSize()
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("be/be", func_0014E050);
+INCLUDE_ASM("be/be", cBE_writeToData);
 #ifdef SKIP_ASM
 extern "C" void func_0014A188(void* buf);
 // PORT: cBE_getDataSize is declared () in this unit but called with the BE object here.
@@ -315,7 +315,7 @@ extern "C" void* memcpy(void*, const void*, unsigned int);
  *
  * @param buf  the save buffer, cBE_getDataSize() bytes
  */
-extern "C" void func_0014E050(void* self, char* buf)
+extern "C" void cBE_writeToData(void* self, char* buf)
 {
     func_0014A188(buf);
     int crc = func_003E62D0(buf, cBE_getDataSize_self(self) - 4, 64490);

@@ -21,8 +21,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align).
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 void cMemMan_free(void* p);
-void func_00317530(void* bar, float v);
-void func_00317550(void* bar, float v);
+void cLoadTimer_startload(void* bar, float v);
+void cLoadTimer_setnextpercent(void* bar, float v);
 extern "C" void func_00195DE0(void* p);
 extern "C" void cSSXScriptEngine_Load(void* eng);
 extern "C" void* cFont_cFont(void* p, const char* name, int a);
@@ -204,7 +204,7 @@ struct sUIGL {
 /**
  * Loads a race: creates the game's managers, loads the track and enters the first game state.
  *
- * Progress (probably the load bar, func_00317550) goes from 13.2 % to 99 %. In order it creates the Nash
+ * Progress (probably the load bar, cLoadTimer_setnextpercent) goes from 13.2 % to 99 %. In order it creates the Nash
  * grid, the debug font, the world and its managers and loads the track (cGame_loadTrack). Then come the
  * replay, the network input sync (network games only) and the AI. Last are the views, the debug menu, the
  * transition and splash managers, the in-game audio, the UI engine, and the AI visual-effects, visual-effects
@@ -218,8 +218,8 @@ extern "C" void cGame_load(cGame* self)
     void** worlds = ((void**)&self->TransitionMan[0]);
     void* bm = &D_004A5988_gl;
     void** lights = ((void**)&self->SplashManager[0]);
-    func_00317530(cAppMan_TheAppMan + 0x38, 13.199999809265137f);
-    func_00317550(cAppMan_TheAppMan + 0x38, 43.5f);
+    cLoadTimer_startload(cAppMan_TheAppMan + 0x38, 13.199999809265137f);
+    cLoadTimer_setnextpercent(cAppMan_TheAppMan + 0x38, 43.5f);
     func_00195DE0(SSXApp->FELocale);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -270,7 +270,7 @@ extern "C" void cGame_load(cGame* self)
         sVEntryVoidGL* vt = *(sVEntryVoidGL**)(ai + 0xCC);
         vt[2].fn(ai + vt[2].delta);
     }
-    func_00317550(cAppMan_TheAppMan + 0x38, 55.0f);
+    cLoadTimer_setnextpercent(cAppMan_TheAppMan + 0x38, 55.0f);
     self->PlaybackMan = (cPlaybackMan*)cPlaybackMan_cPlaybackMan(operator new(0x7C, str_PlaybackMan, 0x20000000, 0), 40);
     cReplay_init(self->Replay);
     void* race = cBE_getInterface_Fv(SSXApp->BE, 5);
@@ -327,7 +327,7 @@ extern "C" void cGame_load(cGame* self)
     }
     if (file != 0)
         cMemMan_free(file);
-    func_00317550(cAppMan_TheAppMan + 0x38, 93.0f);
+    cLoadTimer_setnextpercent(cAppMan_TheAppMan + 0x38, 93.0f);
     for (unsigned int i = 0; i < 2; i++) {
         worlds[i] = cTransitionMan_cTransitionMan(operator new(132, str_cTransitionMan, 0, 0), 3, i);
         lights[i] = cSplashManager_cSplashManager(operator new(4144, str_cSplashManager, 0, 0), 2, i);
@@ -337,7 +337,7 @@ extern "C" void cGame_load(cGame* self)
     self->SnowFall = (cSnowFall*)cSnowFall_cSnowFall(operator new(0x60, str_SnowFall, 0, 0), 2);
     self->mUpdateTick = 0;
     cSSXAudio_InGameLoad(gSSXAudio);
-    func_00317550(cAppMan_TheAppMan + 0x38, 99.0f);
+    cLoadTimer_setnextpercent(cAppMan_TheAppMan + 0x38, 99.0f);
     sUIGL* ui = (sUIGL*)func_00397B08(operator new(0x70, str_UIEngine_b, 0, 0));
     self->UI = (cUIEngine*)ui;
     ui->p10 = (void*)SSXApp->FELocale;

@@ -72,7 +72,7 @@ extern "C" void func_002688E0(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_00268950);
+INCLUDE_ASM("bx/bxstringctor", cChallenger__cChallenger);
 #ifdef SKIP_ASM
 extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
@@ -87,7 +87,7 @@ extern char D_004810E0[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void func_00268950(void* self, int flags)
+extern "C" void cChallenger__cChallenger(void* self, int flags)
 {
     *(void**)((char*)self + 0x3C) = D_004810E0;
     cBXString__cBXString((char*)self + 4, 2);
@@ -100,7 +100,7 @@ extern "C" void func_00268950(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_002689B8);
+INCLUDE_ASM("bx/bxstringctor", BuddyMan__BuddyMan);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cBXString__cBXString(void* self, int flags);
@@ -143,7 +143,7 @@ struct sOwner89B8 {
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void func_002689B8(sOwner89B8* self, int flags)
+extern "C" void BuddyMan__BuddyMan(sOwner89B8* self, int flags)
 {
     cBXString__cBXString(self->str, 2);
     sVec89B8* vb = &self->mVecB;
@@ -2351,7 +2351,7 @@ extern "C" sBXVec4K2 cAIPath_getResetPos(sBXPath* path, float* pathParam)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A000);
+INCLUDE_ASM("bx/bxstringctor", cAIPath_isResetPermitted);
 #ifdef SKIP_ASM
 struct sEntry_0026A000 {
     int type;
@@ -2374,7 +2374,7 @@ struct sTable_0026A000 {
  * @param x  the position along the path
  * @return 1 when a reset is allowed, else 0
  */
-extern "C" int func_0026A000(sTable_0026A000* table, float x) {
+extern "C" int cAIPath_isResetPermitted(sTable_0026A000* table, float x) {
     int i;
     for (i = 0; i < table->count; i++) {
         sEntry_0026A000* entry = &table->entries[i];
@@ -2492,7 +2492,7 @@ extern "C" int cTrackPath_isForkInPath(sBXRangeList* self, float ldist, float hd
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A138);
+INCLUDE_ASM("bx/bxstringctor", cTrackPath_getFinishLineParam);
 #ifdef SKIP_ASM
 struct sEntry_0026A138 {
     int type;
@@ -2514,7 +2514,7 @@ struct sTable_0026A138 {
  * @param table  the track path
  * @return the position along the path, or -1.0
  */
-extern "C" float func_0026A138(sTable_0026A138* table)
+extern "C" float cTrackPath_getFinishLineParam(sTable_0026A138* table)
 {
     int i;
     for (i = 0; i < table->count; i++) {
@@ -2527,13 +2527,13 @@ extern "C" float func_0026A138(sTable_0026A138* table)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A180);
+INCLUDE_ASM("bx/bxstringctor", cPath_initPath);
 #ifdef SKIP_ASM
 // PORT: pathREAD_tInt32 takes (dst, src); the unit declares it with one arg
 void pathREAD_tInt32_A180(void* dst, void* src) __asm__("pathREAD_tInt32");
 extern "C" void func_0026BA48(void* p, void* q);
-extern "C" void func_0026A338(void* self, void* src, void* dst);
-extern "C" void func_0026A378(void* self, char* src, int* dst);
+extern "C" void cPath_populateNode(void* self, void* src, void* dst);
+extern "C" void cPath_populateEvent(void* self, char* src, int* dst);
 
 struct sVE0_26A180 { short delta; short index; void (*fn)(void*); };
 struct sVE1_26A180 { short delta; short index; void (*fn)(void*, char*, int, int); };
@@ -2555,15 +2555,15 @@ struct sBXStr_26A180
  *
  * Calls the path's virtual slot 3 (defaults), then for each of the data's chunks passes (data, id, size) to virtual
  * slot 4 and skips the chunk. Then reads the node count (+0x8) and event count (+0x0), the start point (+0xC) and the
- * bounds (+0x1C, +0x28) with func_0026BA48, and converts the 16-byte nodes (+0x18, func_0026A338) and events (+0x4,
- * func_0026A378) in place in the data.
+ * bounds (+0x1C, +0x28) with func_0026BA48, and converts the 16-byte nodes (+0x18, cPath_populateNode) and events (+0x4,
+ * cPath_populateEvent) in place in the data.
  *
  * The path-system loaders (cPathSys_loadTrackPaths, cPathSys_loadAIPaths) call it for each path.
  *
  * @param src  the serialized path data
  * @return the number of bytes read
  */
-extern "C" int func_0026A180(sBXStr_26A180* self, char* src)
+extern "C" int cPath_initPath(sBXStr_26A180* self, char* src)
 {
     char* start = src;
     int n;
@@ -2599,13 +2599,13 @@ extern "C" int func_0026A180(sBXStr_26A180* self, char* src)
     self->items1 = src;
     for (int i = 0; i < self->count1; i++)
     {
-        func_0026A338(self, src, self->items1 + i * 16);
+        cPath_populateNode(self, src, self->items1 + i * 16);
         src += 16;
     }
     self->items2 = src;
     for (int i = 0; i < self->count2; i++)
     {
-        func_0026A378(self, src, (int*)(self->items2 + i * 16));
+        cPath_populateEvent(self, src, (int*)(self->items2 + i * 16));
         src += 16;
     }
     return src - start;
@@ -2613,7 +2613,7 @@ extern "C" int func_0026A180(sBXStr_26A180* self, char* src)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A338);
+INCLUDE_ASM("bx/bxstringctor", cPath_populateNode);
 #ifdef SKIP_ASM
 extern "C" void func_0026BA48(void* p, void* q);
 // PORT: func_0026BA88 takes (dst, src); the unit declares it with one arg
@@ -2622,12 +2622,12 @@ void func_0026BA88_2(void* dst, void* src) __asm__("func_0026BA88");
 /**
  * Reads one 16-byte path node: its direction (func_0026BA48) and its length at +0xC (func_0026BA88).
  *
- * func_0026A180 calls it with the same address for @p src and @p dst, converting the node in place.
+ * cPath_initPath calls it with the same address for @p src and @p dst, converting the node in place.
  *
  * @param src  the node in the serialized data
  * @param dst  the node to fill
  */
-extern "C" void func_0026A338(void* self, void* src, void* dst)
+extern "C" void cPath_populateNode(void* self, void* src, void* dst)
 {
     func_0026BA48(dst, src);
     func_0026BA88_2((char*)dst + 0xC, (char*)src + 0xC);
@@ -2635,7 +2635,7 @@ extern "C" void func_0026A338(void* self, void* src, void* dst)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A378);
+INCLUDE_ASM("bx/bxstringctor", cPath_populateEvent);
 #ifdef SKIP_ASM
 // PORT: pathREAD_tInt32 takes (dst, src); the unit declares it with one arg
 void pathREAD_tInt32_K2(void* dst, void* src) __asm__("pathREAD_tInt32");
@@ -2645,13 +2645,13 @@ extern int D_004453D0[];
  * Reads one 16-byte path event: its type code, argument and start and end positions.
  *
  * The type code is looked up in the 21 codes of D_004453D0 and stored as its index (0 when not found); then the
- * argument (+0x4) and the two floats (+0x8, +0xC, func_0026BA88) follow. func_0026A180 converts the events in place
+ * argument (+0x4) and the two floats (+0x8, +0xC, func_0026BA88) follow. cPath_initPath converts the events in place
  * with it.
  *
  * @param src  the event in the serialized data
  * @param dst  the event to fill
  */
-extern "C" void func_0026A378(void* self, char* src, int* dst)
+extern "C" void cPath_populateEvent(void* self, char* src, int* dst)
 {
     int key;
     int i;
@@ -2672,7 +2672,7 @@ extern "C" void func_0026A378(void* self, char* src, int* dst)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A428);
+INCLUDE_ASM("bx/bxstringctor", cPath_intersectPath);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sBXVec4_A428 {
@@ -2800,7 +2800,7 @@ static inline float bxClamp_A428(float v, float lo, float hi)
  * @param flat  non-zero to measure in X and Y only
  * @return the position along the path of the nearest point
  */
-extern "C" float func_0026A428(sBXPath_A428* self, const sBXVec4_A428& cursor, sBXVec4_A428* outPos,
+extern "C" float cPath_intersectPath(sBXPath_A428* self, const sBXVec4_A428& cursor, sBXVec4_A428* outPos,
                                float* outDist, int flat)
 {
     float bestT = 0.0f;
@@ -2847,7 +2847,7 @@ extern "C" float func_0026A428(sBXPath_A428* self, const sBXVec4_A428& cursor, s
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A638);
+INCLUDE_ASM("bx/bxstringctor", cPath_intersectPath1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sBXVec4_A638 {
@@ -2984,7 +2984,7 @@ struct sBXPathCache_A638 {
  * @param flat  non-zero to measure in X and Y only
  * @return the position along the path of the nearest point
  */
-extern "C" float func_0026A638(sBXPath_A638* self, const sBXVec4_A638& cursor, sBXVec4_A638* outPos,
+extern "C" float cPath_intersectPath1(sBXPath_A638* self, const sBXVec4_A638& cursor, sBXVec4_A638* outPos,
                                float* outDist, sBXPathCache_A638* cache, int flat)
 {
     float bestT = 0.0f;
@@ -3092,7 +3092,7 @@ done:
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A920);
+INCLUDE_ASM("bx/bxstringctor", cPath_findEvent);
 #ifdef SKIP_ASM
 struct sEntry_0026A920 {
     int key0;
@@ -3114,7 +3114,7 @@ struct sTable_0026A920 {
  * @param secondKey  the event argument
  * @return the event, or null
  */
-extern "C" sEntry_0026A920* func_0026A920(sTable_0026A920* table, int firstKey, int secondKey)
+extern "C" sEntry_0026A920* cPath_findEvent(sTable_0026A920* table, int firstKey, int secondKey)
 {
     int i = 0;
     sEntry_0026A920* entry = table->entries;
@@ -3128,7 +3128,7 @@ extern "C" sEntry_0026A920* func_0026A920(sTable_0026A920* table, int firstKey, 
 }
 #endif
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A970);
+INCLUDE_ASM("bx/bxstringctor", cPath_findEvent1);
 #ifdef SKIP_ASM
 struct sEntry_0026A970 {
     int key;
@@ -3148,7 +3148,7 @@ struct sTable_0026A970 {
  * @param key  the event type
  * @return the event, or null
  */
-extern "C" sEntry_0026A970* func_0026A970(sTable_0026A970* table, int key)
+extern "C" sEntry_0026A970* cPath_findEvent1(sTable_0026A970* table, int key)
 {
     int i = 0;
     sEntry_0026A970* entry = table->entries;
@@ -3163,7 +3163,7 @@ extern "C" sEntry_0026A970* func_0026A970(sTable_0026A970* table, int key)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026A9B0);
+INCLUDE_ASM("bx/bxstringctor", cPath_getProximity);
 #ifdef SKIP_ASM
 struct sBXBox {
     char pad_0x00[0x1C];
@@ -3174,12 +3174,12 @@ struct sBXBox {
 /**
  * Returns how far a point is outside a path's bounding box: the largest per-axis distance, 0 inside.
  *
- * The box is +0x1C (minimum) to +0x28 (maximum). cPathSys_getNearAIPaths and func_0026B178 rank paths with it.
+ * The box is +0x1C (minimum) to +0x28 (maximum). cPathSys_getNearAIPaths and cPathSys_getNearTrackPaths rank paths with it.
  *
  * @param point  the point (x, y, z)
  * @return the largest of the X, Y and Z distances to the box
  */
-extern "C" float func_0026A9B0(sBXBox* self, float* point)
+extern "C" float cPath_getProximity(sBXBox* self, float* point)
 {
     float dx = 0.0f;
     float dy = 0.0f;
@@ -3413,7 +3413,7 @@ extern "C" int cPath_isForkInPath(sBXRangeList* self, float lo, float hi)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AD00);
+INCLUDE_ASM("bx/bxstringctor", cPath_isPathInBox);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct sBXBox2 {
@@ -3431,7 +3431,7 @@ struct sBXBox2 {
  * @param hi  the rectangle maximum (x, y)
  * @return 1 when they overlap, else 0
  */
-extern "C" int func_0026AD00(sBXBox2* self, float* lo, float* hi)
+extern "C" int cPath_isPathInBox(sBXBox2* self, float* lo, float* hi)
 {
     if (hi[0] < self->min[0])
         return 0;
@@ -3446,78 +3446,78 @@ extern "C" int func_0026AD00(sBXBox2* self, float* lo, float* hi)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AD70);
+INCLUDE_ASM("bx/bxstringctor", cPathSys_loadInjectedPaths);
 #ifdef SKIP_ASM
-extern "C" void func_0026ADF0(void* self);
+extern "C" void cPathSys_resolvePaths(void* self);
 
 /**
  * Installs path data that is already in memory: stores it (+0x48), marks the path file loaded (+0x4C) and parses it
- * (func_0026ADF0).
+ * (cPathSys_resolvePaths).
  *
  * cAI_swaploadInjectedPathFile calls it on gPaths after cPathSys_purgePaths.
  *
  * @param data  the path data
  * @return 1
  */
-extern "C" int func_0026AD70(void* self, int data)
+extern "C" int cPathSys_loadInjectedPaths(void* self, int data)
 {
     *(int*)((char*)self + 0x48) = data;
     *(int*)((char*)self + 0x4C) = 1;
-    func_0026ADF0(self);
+    cPathSys_resolvePaths(self);
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026ADA0__FPv);
+INCLUDE_ASM("bx/bxstringctor", cPathSys_removeInjectedPathFile__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing (empty body).
  *
  * cAI_removeInjectedFile calls it on gPaths when a chunk with injected AI paths is unloaded.
  */
-void func_0026ADA0(void* self)
+void cPathSys_removeInjectedPathFile(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026ADA8);
+INCLUDE_ASM("bx/bxstringctor", cPathSys_loadPaths);
 #ifdef SKIP_ASM
 extern "C" int FILE_loadpack(int, int);
 
 /**
- * Loads a path file: stores the pack (FILE_loadpack) at +0x48, marks it loaded (+0x4C) and parses it (func_0026ADF0).
+ * Loads a path file: stores the pack (FILE_loadpack) at +0x48, marks it loaded (+0x4C) and parses it (cPathSys_resolvePaths).
  *
- * cAI_swaploadPathFile calls it on gPaths after cPathSys_purgePaths; func_0026AE70 calls it when no file is loaded yet.
+ * cAI_swaploadPathFile calls it on gPaths after cPathSys_purgePaths; cPathSys_appendPaths calls it when no file is loaded yet.
  *
  * @param pathSys  the path system
  * @param name  the path file name (passed as an int)
  */
-extern "C" void func_0026ADA8(void *pathSys, int name) {
+extern "C" void cPathSys_loadPaths(void *pathSys, int name) {
     (*(int *)((char*)(pathSys) + (0x48))) = FILE_loadpack(name, 0);
     (*(int *)((char*)(pathSys) + (0x4C))) = 1;
-    func_0026ADF0(pathSys);
+    cPathSys_resolvePaths(pathSys);
 }
 #endif
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026ADE8);
+INCLUDE_ASM("bx/bxstringctor", cPathSys_isPathfileLoaded);
 #ifdef SKIP_ASM
 /**
  * Returns the path system's loaded flag (+0x4C).
  *
- * func_0026AD70 and func_0026ADA8 set it.
+ * cPathSys_loadInjectedPaths and cPathSys_loadPaths set it.
  *
  * @param pathSys  the path system
  * @return non-zero when a path file is loaded
  */
-extern "C" int func_0026ADE8(void *pathSys) {
+extern "C" int cPathSys_isPathfileLoaded(void *pathSys) {
     return (*(int *)((char*)(pathSys) + (0x4C)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026ADF0);
+INCLUDE_ASM("bx/bxstringctor", cPathSys_resolvePaths);
 #ifdef SKIP_ASM
 // PORT: pathREAD_tInt32 takes (dst, src); the unit declares it with one arg
 void pathREAD_tInt32_2(void* dst, void* src) __asm__("pathREAD_tInt32");
@@ -3531,9 +3531,9 @@ extern "C" void func_0026B880(void* self, char* p);
  *
  * Clears the startpoint, AI path and track path counts (+0x0, +0x8, +0x10), skips a header word, then runs
  * cPathSys_loadAIPaths, cPathSys_loadTrackPaths, func_0026B7D8 and func_0026B880 in turn, each starting where the
- * previous one stopped. func_0026AD70 and func_0026ADA8 call it.
+ * previous one stopped. cPathSys_loadInjectedPaths and cPathSys_loadPaths call it.
  */
-extern "C" void func_0026ADF0(void* self)
+extern "C" void cPathSys_resolvePaths(void* self)
 {
     int header;
     char* cursor = *(char**)((char*)self + 0x48);
@@ -3550,10 +3550,10 @@ extern "C" void func_0026ADF0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AE70);
+INCLUDE_ASM("bx/bxstringctor", cPathSys_appendPaths);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
-extern "C" void func_0026ADA8(void* self, int arg1);
+extern "C" void cPathSys_loadPaths(void* self, int arg1);
 extern "C" int FILE_loadpack(int, int);
 // PORT: pathREAD_tInt32 takes (dst, src); the unit declares it with one arg
 void pathREAD_tInt32_3(void* dst, void* src) __asm__("pathREAD_tInt32");
@@ -3563,20 +3563,20 @@ extern "C" int cPathSys_loadTrackPaths(void* self, char* p);
 /**
  * Loads a further path file and parses only its AI and track paths into the path system.
  *
- * Frees the current data (+0x48) when there is one; when there is none it first loads the same file with func_0026ADA8,
+ * Frees the current data (+0x48) when there is one; when there is none it first loads the same file with cPathSys_loadPaths,
  * whose buffer is then dropped without being freed. Then it loads the file again with FILE_loadpack, stores it at
  * +0x48, skips a header word and runs cPathSys_loadAIPaths and cPathSys_loadTrackPaths. Nothing in the C calls it.
  *
  * @param name  the path file name (passed as an int)
  */
-extern "C" void func_0026AE70(void* self, int name)
+extern "C" void cPathSys_appendPaths(void* self, int name)
 {
     int header;
     void* old = *(void**)((char*)self + 0x48);
     if (old != 0) {
         cMemMan_free(old);
     } else {
-        func_0026ADA8(self, name);
+        cPathSys_loadPaths(self, name);
     }
     *(int*)((char*)self + 0x48) = 0;
     char* cursor = (char*)FILE_loadpack(name, 0);
@@ -3615,7 +3615,7 @@ extern "C" void cPathSys_purgePaths(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AF70);
+INCLUDE_ASM("bx/bxstringctor", cPathSys_getTrackPath);
 #ifdef SKIP_ASM
 /**
  * Returns track path @p pathIndex: +0x14 plus pathIndex * 0x3C.
@@ -3625,14 +3625,14 @@ INCLUDE_ASM("bx/bxstringctor", func_0026AF70);
  * @param pathIndex  the track path index
  * @return the track path
  */
-extern "C" int func_0026AF70(void* self, int pathIndex)
+extern "C" int cPathSys_getTrackPath(void* self, int pathIndex)
 {
     return *(int*)((char*)self + 0x14) + pathIndex * 0x3c;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026AF88);
+INCLUDE_ASM("bx/bxstringctor", cPathSys_getAIPath);
 #ifdef SKIP_ASM
 /**
  * Returns AI path @p index: +0xC plus index * 0x40.
@@ -3642,7 +3642,7 @@ INCLUDE_ASM("bx/bxstringctor", func_0026AF88);
  * @param index  the AI path index
  * @return the AI path
  */
-extern "C" int func_0026AF88(void* self, int index)
+extern "C" int cPathSys_getAIPath(void* self, int index)
 {
     return *(int*)((char*)self + 0xc) + (index << 6);
 }
@@ -3700,7 +3700,7 @@ struct cPathSys_AFB8 {
 /**
  * Lists the AI paths nearest to a position, those containing it first.
  *
- * Proximity of each path comes from func_0026A9B0; with @p onlyResetPaths a path whose +0x3C flag is clear gets 1e37.
+ * Proximity of each path comes from cPath_getProximity; with @p onlyResetPaths a path whose +0x3C flag is clear gets 1e37.
  * Paths at proximity 0 (containing @p pos) are listed first; the list is then filled with the remaining nearest paths.
  * Likely bugs: the fill loop does not skip the 1e37 entries, so it can return non-reset paths and repeat paths already
  * listed when fewer suitable paths exist than requested; the proximity buffer is a fixed 200 floats with no check
@@ -3725,7 +3725,7 @@ int cPathSys_getNearAIPaths_impl(void* vself, float* pos, void** pathList, int m
         maxListLen = self->NumAIPaths;
     }
     for (i = 0; i < self->NumAIPaths; i++) {
-        prox[i] = func_0026A9B0((sBXBox*)&self->AIPaths[i], pos);
+        prox[i] = cPath_getProximity((sBXBox*)&self->AIPaths[i], pos);
         if (onlyResetPaths && self->AIPaths[i].mIsReset == 0) {
             prox[i] = 9.999999933815813e+36f;
         }
@@ -3754,7 +3754,7 @@ int cPathSys_getNearAIPaths_impl(void* vself, float* pos, void** pathList, int m
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_0026B178);
+INCLUDE_ASM("bx/bxstringctor", cPathSys_getNearTrackPaths);
 #ifdef SKIP_ASM
 struct sBXBox;
 struct sPathItem_B178 {
@@ -3767,7 +3767,7 @@ struct sPathList_B178 {
     sPathItem_B178* items;      // 0x14
 };
 
-extern "C" float func_0026A9B0(sBXBox* self, float* p);
+extern "C" float cPath_getProximity(sBXBox* self, float* p);
 
 static inline int minB178(int a, int b)
 {
@@ -3777,8 +3777,8 @@ static inline int minB178(int a, int b)
 /**
  * Collects up to @p max track paths nearest to @p pos into @p out, nearest first, and returns how many.
  *
- * Paths whose box contains the point (func_0026A9B0 gives 0) come first, in index order; the rest follow by increasing
- * func_0026A9B0 distance. The paths are the 0x3C-byte entries at +0x14 (count +0x10); the distances live in a fixed
+ * Paths whose box contains the point (cPath_getProximity gives 0) come first, in index order; the rest follow by increasing
+ * cPath_getProximity distance. The paths are the 0x3C-byte entries at +0x14 (count +0x10); the distances live in a fixed
  * 52-entry stack array, so more than 52 paths would overflow it.
  *
  * @param pos  the point
@@ -3786,14 +3786,14 @@ static inline int minB178(int a, int b)
  * @param max  the most paths to return
  * @return the number of paths written
  */
-extern "C" int func_0026B178(sPathList_B178* self, float* pos, sPathItem_B178** out, int max)
+extern "C" int cPathSys_getNearTrackPaths(sPathList_B178* self, float* pos, sPathItem_B178** out, int max)
 {
     float dist[52];
     int n = 0;
     int want = minB178(self->count, max);
     int i;
     for (i = 0; i < self->count; i++) {
-        dist[i] = func_0026A9B0((sBXBox*)&self->items[i], pos);
+        dist[i] = cPath_getProximity((sBXBox*)&self->items[i], pos);
         if (dist[i] == 0.0f) {
             dist[i] = 1e37f;
             out[n++] = &self->items[i];

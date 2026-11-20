@@ -222,7 +222,7 @@ struct sParser_1010 {
  *
  * Like cInputMap_getValue, but before running the statement through cInputExec_execute it stores @p modifier as the evaluator's
  * default button modifier (+0x0) and @p config0..@p config7 as its config values 1..8 (+0x10C..+0x128; config 0 always reads 0).
- * Called by func_00320C18, the cInput wrapper beside cInput_getValue.
+ * Called by cInput_getValue1, the cInput wrapper beside cInput_getValue.
  *
  * @param inputPad  the controller pad to read (On Tour cInputPad*)
  * @param stateId  statement slot (input state id) to evaluate
@@ -295,7 +295,7 @@ struct sParser_1188 {
  * config values.
  *
  * Same evaluation as cInputMap_getValue1 (modifier into +0x0, config values 1..8 into +0x10C..), compared with 0.0 like
- * cInputMap_getState. Called by func_00320C70, the cInput wrapper beside cInput_getState.
+ * cInputMap_getState. Called by cInput_getState1, the cInput wrapper beside cInput_getState.
  *
  * @param inputPad  the controller pad to read (On Tour cInputPad*)
  * @param stateId  statement slot (input state id) to evaluate

@@ -142,7 +142,7 @@ extern "C" void func_0014F100(void) {
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintcharacter", func_0014F108);
+INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getBloodType);
 #ifdef SKIP_ASM
 extern char D_005309BC[];
 
@@ -153,13 +153,13 @@ extern char D_005309BC[];
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
  * @return the text
  */
-extern "C" void* func_0014F108(void* self, int riderIndex)
+extern "C" void* cBECharacterInterface_getBloodType(void* self, int riderIndex)
 {
     return D_005309BC + cBELibrary_getCharacterID(riderIndex) * 136;
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintcharacter", func_0014F138);
+INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getIsFemale);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // View of the character table D_00530970 (0x88-byte entries) for fields at 0x5C/0x60/0x84.
@@ -178,13 +178,13 @@ extern sCharEntryView D_00530970_flags[] __asm__("D_00530970");
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
  * @return true when the word is nonzero
  */
-extern "C" bool func_0014F138(void* self, int riderIndex)
+extern "C" bool cBECharacterInterface_getIsFemale(void* self, int riderIndex)
 {
     return D_00530970_flags[cBELibrary_getCharacterID(riderIndex)].field_0x5C != 0;
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintcharacter", func_0014F170);
+INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getAge);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern sCharEntryView D_00530970_flags[] __asm__("D_00530970");
@@ -195,13 +195,13 @@ extern sCharEntryView D_00530970_flags[] __asm__("D_00530970");
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
  * @return the value
  */
-extern "C" int func_0014F170(void* self, int riderIndex)
+extern "C" int cBECharacterInterface_getAge(void* self, int riderIndex)
 {
     return D_00530970_flags[cBELibrary_getCharacterID(riderIndex)].field_0x60;
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintcharacter", func_0014F1B0);
+INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getHeight);
 #ifdef SKIP_ASM
 extern char D_005309D4[];
 
@@ -212,13 +212,13 @@ extern char D_005309D4[];
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
  * @return the text
  */
-extern "C" void* func_0014F1B0(void* self, int riderIndex)
+extern "C" void* cBECharacterInterface_getHeight(void* self, int riderIndex)
 {
     return D_005309D4 + cBELibrary_getCharacterID(riderIndex) * 136;
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintcharacter", func_0014F1E0);
+INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getNationality);
 #ifdef SKIP_ASM
 extern char D_005309E4[];
 
@@ -229,13 +229,13 @@ extern char D_005309E4[];
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
  * @return the text
  */
-extern "C" void* func_0014F1E0(void* self, int riderIndex)
+extern "C" void* cBECharacterInterface_getNationality(void* self, int riderIndex)
 {
     return D_005309E4 + cBELibrary_getCharacterID(riderIndex) * 136;
 }
 #endif
 //100%
-INCLUDE_ASM("be/beintcharacter", func_0014F210);
+INCLUDE_ASM("be/beintcharacter", cBECharacterInterface_getVoiceID);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern sCharEntryView D_00530970_flags[] __asm__("D_00530970");
@@ -246,7 +246,7 @@ extern sCharEntryView D_00530970_flags[] __asm__("D_00530970");
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
  * @return the value
  */
-extern "C" int func_0014F210(void* self, int riderIndex)
+extern "C" int cBECharacterInterface_getVoiceID(void* self, int riderIndex)
 {
     return D_00530970_flags[cBELibrary_getCharacterID(riderIndex)].field_0x84;
 }

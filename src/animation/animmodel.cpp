@@ -572,7 +572,7 @@ extern "C" void cAnimModel_buildSkelMatrices(cAnimModel* self)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00310458);
+INCLUDE_ASM("animation/animmodel", cAnimModel_transformHotSpot);
 #ifdef SKIP_ASM
 extern t4Vector t4vect_Origin;
 
@@ -615,7 +615,7 @@ struct sAmPoint_0458 {
  */
 // Returns point `index` of the part with this id, transformed by its bone matrix (unk_034),
 // or t4vect_Origin when no part has the id.
-extern "C" t4Vector func_00310458(cAnimModel* model, int id, int index)
+extern "C" t4Vector cAnimModel_transformHotSpot(cAnimModel* model, int id, int index)
 {
     for (int i = 0; i < model->numParts; i++)
     {
@@ -1198,25 +1198,25 @@ extern "C" void* cAnimDataBase_cAnimDataBase(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00311088);
+INCLUDE_ASM("animation/animmodel", cAnimDataBase__cAnimDataBase);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void operator_delete(int*);
-// func_00311110 ignores its argument (matched as (void)); the call here passes self in a0.
-extern "C" void func_00311110_self(void* self) __asm__("func_00311110");
+// cAnimDataBase_purgeChanCache ignores its argument (matched as (void)); the call here passes self in a0.
+extern "C" void cAnimDataBase_purgeChanCache_self(void* self) __asm__("cAnimDataBase_purgeChanCache");
 
 /**
  * Destroys the animation database: clears cAnimDataBase_TheAnimDataBase and frees the channel cache.
  *
- * Calls func_00311110 (passing @p self, which it ignores) and frees @p self with operator_delete when bit 0 of
+ * Calls cAnimDataBase_purgeChanCache (passing @p self, which it ignores) and frees @p self with operator_delete when bit 0 of
  * @p flags is set. Reverse of cAnimDataBase_cAnimDataBase.
  *
  * @param flags  bit 0: delete the object itself
  */
-extern "C" void func_00311088(void* self, int flags)
+extern "C" void cAnimDataBase__cAnimDataBase(void* self, int flags)
 {
     cAnimDataBase_TheAnimDataBase = 0;
-    func_00311110_self(self);
+    cAnimDataBase_purgeChanCache_self(self);
     if (flags & 1)
     {
         operator_delete((int*)self);
@@ -1247,7 +1247,7 @@ extern "C" void cAnimDataBase_initChanCache(void)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00311110);
+INCLUDE_ASM("animation/animmodel", cAnimDataBase_purgeChanCache);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void cMemMan_free(void*);
@@ -1270,10 +1270,10 @@ extern sAnimNode_311110* D_004FE860_311110[] __asm__("D_004FE860");
  *
  * For each of the 48 buckets that is non-null, each of its 20 nodes (0x24 bytes) gets its owner's byte at +0x5 set to
  * 0xFF (no cached node) and its data freed with cMemMan_free; then the bucket array is freed and D_004FE7A0[bank] and
- * D_004FE860[bank] (the bucket's current node) are zeroed. Called by func_00311088 and before animation data is
+ * D_004FE860[bank] (the bucket's current node) are zeroed. Called by cAnimDataBase__cAnimDataBase and before animation data is
  * unloaded (scripter/scanimmgr, fe/fereal, ai/ai).
  */
-extern "C" void func_00311110(void)
+extern "C" void cAnimDataBase_purgeChanCache(void)
 {
     for (int bank = 0; bank < 48; bank++)
     {
@@ -1302,20 +1302,20 @@ extern "C" void func_00311110(void)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00311220);
+INCLUDE_ASM("animation/animmodel", cAdfDataSource_cAdfDataSource1);
 #ifdef SKIP_ASM
 extern "C" void cAdfDataSource_populateFromData(void* self, char* data);
 
 /**
  * Constructs an animation data source over @p data that is already in memory, and returns @p self.
  *
- * Zeroes the first word (the loaded-file pointer that func_003112C8 frees, so the caller keeps ownership of @p data)
+ * Zeroes the first word (the loaded-file pointer that cAdfDataSource__cAdfDataSource frees, so the caller keeps ownership of @p data)
  * and calls cAdfDataSource_populateFromData(@p self, @p data). scripter/scanimmgr uses it for banks it has loaded.
  *
  * @param data  the animation file data
  * @return @p self
  */
-extern "C" void* func_00311220(void* self, char* data)
+extern "C" void* cAdfDataSource_cAdfDataSource1(void* self, char* data)
 {
     *(int*)self = 0;
     cAdfDataSource_populateFromData(self, data);
@@ -1324,20 +1324,20 @@ extern "C" void* func_00311220(void* self, char* data)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_00311250);
+INCLUDE_ASM("animation/animmodel", cAdfDataSource_cAdfDataSource);
 #ifdef SKIP_ASM
 extern "C" char* FILE_loadpack(void* src, int flags);
 
 /**
  * Constructs an animation data source by loading file @p src, and returns @p self.
  *
- * Loads the file with FILE_loadpack(@p src, 0), keeps the buffer in the first word (freed by func_003112C8) and calls
+ * Loads the file with FILE_loadpack(@p src, 0), keeps the buffer in the first word (freed by cAdfDataSource__cAdfDataSource) and calls
  * cAdfDataSource_populateFromData on it. ai/ai and fe/fereal create their animation banks with it.
  *
  * @param src  the file name of the animation bank
  * @return @p self
  */
-extern "C" void* func_00311250(char** self, void* src)
+extern "C" void* cAdfDataSource_cAdfDataSource(char** self, void* src)
 {
     char* data = FILE_loadpack(src, 0);
     *self = data;
@@ -1368,7 +1368,7 @@ extern "C" void cAdfDataSource_populateFromData(void* self, char* data)
 #endif
 
 //100%
-INCLUDE_ASM("animation/animmodel", func_003112C8);
+INCLUDE_ASM("animation/animmodel", cAdfDataSource__cAdfDataSource);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
@@ -1380,7 +1380,7 @@ void operator_delete(int*);
  *
  * @param flags  bit 0: delete the object itself
  */
-extern "C" void func_003112C8(void* self, int flags)
+extern "C" void cAdfDataSource__cAdfDataSource(void* self, int flags)
 {
     void* data = *(void**)self;
     if (data != 0)
@@ -1433,7 +1433,7 @@ extern sNodeAM* D_pool_AM[] __asm__("D_004FE7A0");
 extern sNodeAM* D_head_AM[] __asm__("D_004FE860");
 sNodeAM* gGenCacheBucket_AM(int kind, long n) __asm__("gGenCacheBucket");
 extern "C" void dcmpInitFrameAccessor(void* dst, void* src, int len);
-extern "C" void func_00312C20(void* node, float t, void* a, long b, void* c);
+extern "C" void dcmpGetFrame(void* node, float t, void* a, long b, void* c);
 
 void cAdfDataSource_getFramePartData_AM(sModelAM* self, void* p2, unsigned int* p3, int p4, void* p5, long p6) __asm__("cAdfDataSource_getFramePartData");
 /**
@@ -1442,7 +1442,7 @@ void cAdfDataSource_getFramePartData_AM(sModelAM* self, void* p2, unsigned int* 
  * The frame index is the time x 30; the animation's 0x14-byte sequence record gives the block (frames per
  * block at +0xE) and the block entry for the part. A cached block's node moves to the most-recently-used end
  * of its kind's ring; otherwise the ring's head node is taken from its previous owner (the bucket is created
- * on first use), set up with dcmpInitFrameAccessor() and claimed. dcmpGetFrame (func_00312C20) then writes
+ * on first use), set up with dcmpInitFrameAccessor() and claimed. dcmpGetFrame (dcmpGetFrame) then writes
  * the channels.
  *
  * @param dest  destination float buffer (On Tour: dest)
@@ -1491,7 +1491,7 @@ void cAdfDataSource_getFramePartData_AM(sModelAM* self, void* dest, unsigned int
             (*head)->prev->next = node;
             (*head)->prev = node;
         }
-        func_00312C20((char*)node + 4, findex, startChan, numChans, dest);
+        dcmpGetFrame((char*)node + 4, findex, startChan, numChans, dest);
     } else {
         int slot;
         node = D_head_AM[kind];
@@ -1509,7 +1509,7 @@ have_slot:
         D_head_AM[kind] = node->next;
         char* np = (char*)node + 4;
         dcmpInitFrameAccessor(np, self->data + ent->off, ent->len);
-        func_00312C20(np, findex, startChan, numChans, dest);
+        dcmpGetFrame(np, findex, startChan, numChans, dest);
     }
 }
 #endif

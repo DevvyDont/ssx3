@@ -5208,8 +5208,8 @@ int cBENewPlayerInterface_getRiderCharID(void* self, int player);
 extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E2FE0(int a, unsigned char b);
 extern "C" void func_001E3A78(int a, int b);
-extern "C" int func_001464D0(void* iface, int a, int ch, int b, int c);
-extern "C" int func_00145EF0(void* iface, int a, int b, int c);
+extern "C" int cBENewPlayerInterface_isRivalEventLocked(void* iface, int a, int ch, int b, int c);
+extern "C" int cBENewPlayerInterface_hasPlayedEvent(void* iface, int a, int b, int c);
 unsigned int BXrand();
 
 /**
@@ -5217,11 +5217,11 @@ unsigned int BXrand();
  * them.
  *
  * Skipped during replay playback (the replay's first word 1-9). For the first of groups 1, 2, 3 whose message flag is
- * clear (peak k = 0, 1, 2; later groups are not tried in the same call): when func_001464D0(player interface, 0,
- * character, k, 1) and func_00145EF0(player interface, 0, 14 + k, 4) both return 0, sets the group's flag
+ * clear (peak k = 0, 1, 2; later groups are not tried in the same call): when cBENewPlayerInterface_isRivalEventLocked(player interface, 0,
+ * character, k, 1) and cBENewPlayerInterface_hasPlayedEvent(player interface, 0, 14 + k, 4) both return 0, sets the group's flag
  * (func_001E3A78) and queues a random one of the group's first three messages (func_001E2FE0), or of its last three
  * when the human rider's character is 3, 7 or 8 respectively. Groups 4, 5, 6 are handled the same way, independently,
- * with func_001464D0(..., k, 0) and event 5. func_00154EE8 (race result) calls it except in modes 4 and 5.
+ * with cBENewPlayerInterface_isRivalEventLocked(..., k, 0) and event 5. cBEScoreInterface_processRiderRanking (race result) calls it except in modes 4 and 5.
  */
 extern "C" void func_001E1550(void)
 {
@@ -5231,7 +5231,7 @@ extern "C" void func_001E1550(void)
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
         int ch = cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0));
         if (func_001E3A30((void*)1) == 0) {
-            if (func_001464D0(iface, 0, ch, 0, 1) == 0 && func_00145EF0(iface, 0, 0xE, 4) == 0) {
+            if (cBENewPlayerInterface_isRivalEventLocked(iface, 0, ch, 0, 1) == 0 && cBENewPlayerInterface_hasPlayedEvent(iface, 0, 0xE, 4) == 0) {
                 func_001E3A78(1, 1);
                 if (ch != 3) {
                     func_001E2FE0(BXrand() % 3, 0);
@@ -5240,7 +5240,7 @@ extern "C" void func_001E1550(void)
                 }
             }
         } else if (func_001E3A30((void*)2) == 0) {
-            if (func_001464D0(iface, 0, ch, 1, 1) == 0 && func_00145EF0(iface, 0, 0xF, 4) == 0) {
+            if (cBENewPlayerInterface_isRivalEventLocked(iface, 0, ch, 1, 1) == 0 && cBENewPlayerInterface_hasPlayedEvent(iface, 0, 0xF, 4) == 0) {
                 func_001E3A78(2, 1);
                 if (ch != 7) {
                     func_001E2FE0(BXrand() % 3 + 6, 0);
@@ -5249,7 +5249,7 @@ extern "C" void func_001E1550(void)
                 }
             }
         } else if (func_001E3A30((void*)3) == 0) {
-            if (func_001464D0(iface, 0, ch, 2, 1) == 0 && func_00145EF0(iface, 0, 0x10, 4) == 0) {
+            if (cBENewPlayerInterface_isRivalEventLocked(iface, 0, ch, 2, 1) == 0 && cBENewPlayerInterface_hasPlayedEvent(iface, 0, 0x10, 4) == 0) {
                 func_001E3A78(3, 1);
                 if (ch != 8) {
                     func_001E2FE0(BXrand() % 3 + 0xC, 0);
@@ -5259,7 +5259,7 @@ extern "C" void func_001E1550(void)
             }
         }
         if (func_001E3A30((void*)4) == 0) {
-            if (func_001464D0(iface, 0, ch, 0, 0) == 0 && func_00145EF0(iface, 0, 0xE, 5) == 0) {
+            if (cBENewPlayerInterface_isRivalEventLocked(iface, 0, ch, 0, 0) == 0 && cBENewPlayerInterface_hasPlayedEvent(iface, 0, 0xE, 5) == 0) {
                 func_001E3A78(4, 1);
                 if (ch != 3) {
                     func_001E2FE0(BXrand() % 3 + 18, 0);
@@ -5268,7 +5268,7 @@ extern "C" void func_001E1550(void)
                 }
             }
         } else if (func_001E3A30((void*)5) == 0) {
-            if (func_001464D0(iface, 0, ch, 1, 0) == 0 && func_00145EF0(iface, 0, 0xF, 5) == 0) {
+            if (cBENewPlayerInterface_isRivalEventLocked(iface, 0, ch, 1, 0) == 0 && cBENewPlayerInterface_hasPlayedEvent(iface, 0, 0xF, 5) == 0) {
                 func_001E3A78(5, 1);
                 if (ch != 7) {
                     func_001E2FE0(BXrand() % 3 + 0x18, 0);
@@ -5277,7 +5277,7 @@ extern "C" void func_001E1550(void)
                 }
             }
         } else if (func_001E3A30((void*)6) == 0) {
-            if (func_001464D0(iface, 0, ch, 2, 0) == 0 && func_00145EF0(iface, 0, 0x10, 5) == 0) {
+            if (cBENewPlayerInterface_isRivalEventLocked(iface, 0, ch, 2, 0) == 0 && cBENewPlayerInterface_hasPlayedEvent(iface, 0, 0x10, 5) == 0) {
                 func_001E3A78(6, 1);
                 if (ch != 8) {
                     func_001E2FE0(BXrand() % 3 + 0x1E, 0);
@@ -5540,7 +5540,7 @@ extern "C" void func_001E2220(int which, int flag);
  * Skipped during replay playback. For peaks 0-2, pending flag 40/44/48 calls func_001E2220(peak, 0) and 41/45/49 calls
  * func_001E2220(peak, 1); pending flag 42/46/50 calls func_001E20D0(peak, 0) and 43/47/51 func_001E20D0(peak, 1). Each
  * handled flag is cleared (func_001E3A78(flag, 0)); the second of a pair is only checked when the first is clear.
- * func_00154EE8 (race result) calls it.
+ * cBEScoreInterface_processRiderRanking (race result) calls it.
  */
 extern "C" void func_001E1EB8(void)
 {
@@ -5863,7 +5863,7 @@ extern "C" void func_001E2828(void* a, int b);
 /**
  * Passes a back-country race result to the message system: mode 4 to func_001E2648, mode 5 to func_001E2828.
  *
- * Skipped during replay playback; other modes do nothing. func_00154EE8 (race result) calls it with the game mode, the
+ * Skipped during replay playback; other modes do nothing. cBEScoreInterface_processRiderRanking (race result) calls it with the game mode, the
  * event's location id and the result.
  *
  * @param key  the game mode
@@ -6808,7 +6808,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E3510);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_001475C0(void* iface, int a1, int a2);
+extern "C" void cBENewPlayerInterface_setHelpDone(void* iface, int a1, int a2);
 extern int D_004A20CC;
 extern signed char D_00535C11[];
 
@@ -6816,7 +6816,7 @@ extern signed char D_00535C11[];
  * Asks for the message center to open, from a world script (func_00306300, when not in a network game).
  *
  * When the new race's cGamePath (D_00535C11) is 0, sets D_004A20CC to 0, so the game update triggers overlay 0x22 (the
- * message center) on its next pass, and sets player 0's flag through func_001475C0(player interface, 0, 1); otherwise
+ * message center) on its next pass, and sets player 0's flag through cBENewPlayerInterface_setHelpDone(player interface, 0, 1); otherwise
  * does nothing.
  */
 extern "C" void func_001E3510(void)
@@ -6824,7 +6824,7 @@ extern "C" void func_001E3510(void)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535C11[0] == 0) {
         D_004A20CC = 0;
-        func_001475C0(cBE_getInterface_Fv(cBE_getBE(), 1), 0, 1);
+        cBENewPlayerInterface_setHelpDone(cBE_getInterface_Fv(cBE_getBE(), 1), 0, 1);
     }
 }
 #endif
@@ -6835,13 +6835,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E3570);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00147580(void* iface, int a1);
+extern "C" int cBENewPlayerInterface_getHelpDone(void* iface, int a1);
 
 /**
  * Reports whether a world script may open the message center (func_00307020 returns it to the script).
  *
  * Returns 0 when the new race's cGamePath is not 0 or its cGameEvent is 6 or 9; otherwise 1 while player 0's flag read
- * by func_00147580 is still clear (func_001E3510 sets it).
+ * by cBENewPlayerInterface_getHelpDone is still clear (func_001E3510 sets it).
  *
  * @return 1 when the message center may be opened, else 0
  */
@@ -6854,7 +6854,7 @@ extern "C" int func_001E3570(void)
     if (cBENewRaceInterface_newRace.cGameEvent == 6 || cBENewRaceInterface_newRace.cGameEvent == 9) {
         return 0;
     }
-    return func_00147580(cBE_getInterface_Fv(cBE_getBE(), 1), 0) == 0;
+    return cBENewPlayerInterface_getHelpDone(cBE_getInterface_Fv(cBE_getBE(), 1), 0) == 0;
 }
 #endif
 
@@ -8930,10 +8930,10 @@ struct sInfo5B80 {
 
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
-extern void* func_00144BF0_5B80(void* iface) __asm__("func_00144BF0");
+extern void* cBENewRaceInterface_getLocationName1_5B80(void* iface) __asm__("cBENewRaceInterface_getLocationName1");
 extern void func_002C2540_5B80(unsigned short* dst, const char* src) __asm__("func_002C2540");
 extern void sprintf2_5B80(unsigned short* dst, const unsigned short* fmt, ...) __asm__("sprintf2");
-extern "C" char* func_0014EEC8(void* iface, int a1, int a2);
+extern "C" char* cBECharacterInterface_getShortNameByCharacter(void* iface, int a1, int a2);
 extern "C" int cGameModeMan_getHeatScore(sInfo5B80* info, int idx, int which);
 extern int D_00536730[];
 extern int cGameModeMan_bGiveUp[];
@@ -8997,7 +8997,7 @@ public:
  * Adds the "42freestyle_standings" screen (kept at +0x40) over "OV_darkblue", runs cOVState_onCreateScreen and fills
  * it: "track_event" reads "<location> - <Slope|Big Air|Pipe>" by the new race's cGameMode; the title is
  * kT_OVRCMNQFHeat1Stand (hiding "total") or kT_OVRCMNQFHeat2Stand by the game mode manager's heat; "heat1" reads
- * kT_OVRCMNScoreColon off the career path. Each standing row (D_00536708 order) gets the rider's name (func_0014EEC8),
+ * kT_OVRCMNScoreColon off the career path. Each standing row (D_00536708 order) gets the rider's name (cBECharacterInterface_getShortNameByCharacter),
  * run 1 and run 2 scores and the total (cGameModeMan_getHeatScore) or DNF for a human rider who gave up
  * (cGameModeMan_bGiveUp); the player's help_current0N marker shows in heat 1 (kT_CMNHELPEarnedEnoughPoints in a final
  * qualifying round), help_advance or help_sorry in heat 2, and the five overlayOpt buttons take their option ids from
@@ -9026,7 +9026,7 @@ extern "C" void func_001E5B80(void* self)
     sInfo5B80* info = (sInfo5B80*)SSXApp->GameModeMan;
     int kind = info->kind;
     cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_track_event));
-    func_002C2540_5B80(title, (char*)func_00144BF0_5B80(iface0));
+    func_002C2540_5B80(title, (char*)cBENewRaceInterface_getLocationName1_5B80(iface0));
     unsigned short* fmt = 0;
     switch (event) {
     case 1: {
@@ -9088,7 +9088,7 @@ extern "C" void func_001E5B80(void* self)
             } else if (cBENewRaceInterface_newRace.cGamePath == 2 && i - 1 == D_00536730[pl1]) {
                 if (cGameModeMan_bGiveUp[pl1]) hl = 1; else hl = 0;
             }
-            cUIText_setAsciiString(uiText, func_0014EEC8(iface2, info->a18[idx], info->a40[idx]));
+            cUIText_setAsciiString(uiText, cBECharacterInterface_getShortNameByCharacter(iface2, info->a18[idx], info->a40[idx]));
             sprintf(name, str_run_1_pct_d, i);
             uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
             if (hl && kind == 1) {
@@ -9392,9 +9392,9 @@ extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" unsigned short* func_002C2540(void* dst, const char* s);
 extern "C" void sprintf2(void* dst, const char* fmt, ...);
-extern "C" const char* func_00144BF0(void* iface);
+extern "C" const char* cBENewRaceInterface_getLocationName1(void* iface);
 extern "C" char* func_00146F88(void* iface, int idx);
-extern "C" char* func_0014EEC8(void* iface, int id, int a2);
+extern "C" char* cBECharacterInterface_getShortNameByCharacter(void* iface, int id, int a2);
 extern "C" void cUIText_setUnicodeStringWrap(void* text, unsigned short* str);
 extern "C" void cUIIcon_setTextureByHashValue(void* obj, int hash);
 extern int D_00536708[];
@@ -9503,7 +9503,7 @@ extern "C" int func_001E6718(void* self)
         }
         cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_track_event));
         unsigned short name[0x38];
-        func_002C2540(name, func_00144BF0(iface0));
+        func_002C2540(name, cBENewRaceInterface_getLocationName1(iface0));
         unsigned short* str = 0;
         switch (cBENewRaceInterface_newRace.cGameMode) {
         case 0:
@@ -9594,7 +9594,7 @@ extern "C" int func_001E6718(void* self)
                 } else {
                     int rider = raceSetup->rider[idx];
                     int outfit = raceSetup->outfit[idx];
-                    cUIText_setAsciiString(uiText, func_0014EEC8(net, rider, outfit));
+                    cUIText_setAsciiString(uiText, cBECharacterInterface_getShortNameByCharacter(net, rider, outfit));
                 }
                 sprintf(buf, str_timePointspct_d, i + 1);
                 uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));

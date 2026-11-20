@@ -340,7 +340,7 @@ INCLUDE_ASM("util/locale", cFEStateAudioOptions_cFEStateAudioOptions);
 extern "C" void* func_0039E2A0(void* self, void* engine);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, signed char a1);
 extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
-extern "C" int func_00158700(void* self, int a1, int a2);
+extern "C" int cBERewardInterface_getRadioMode(void* self, int a1, int a2);
 extern "C" int cBERewardInterface_getNumSongsInPlayList(void* self, int a1, int a2);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -356,7 +356,7 @@ extern char str_empty_box[];
  *
  * Clears the widget pointers, looks up the "checkbox" and "empty box" entries (cUITextureBank_getElementByHashname on the engine's
  * +0x58 table) shown in the mode boxes, and reads the player's character, the selected music mode
- * (func_00158700; going by the menu items' ids, probably 0 radio big, 1 request line, 2 big mountain, 3
+ * (cBERewardInterface_getRadioMode; going by the menu items' ids, probably 0 radio big, 1 request line, 2 big mountain, 3
  * playlist) and whether the playlist has any songs.
  *
  * @param engine   the UI engine
@@ -391,7 +391,7 @@ extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* eng
     *(void**)(selfBytes + 0x60) = cUITextureBank_getElementByHashname(engineObj2 + 0x58, emptyBoxHash);
     *(int*)(selfBytes + 0x70) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)(selfBytes + 0x44));
     void* ri = cBE_getInterface_Fv(cBE_getBE(), 13);
-    *(int*)(selfBytes + 0x78) = func_00158700(ri, *(signed char*)(selfBytes + 0x44), *(int*)(selfBytes + 0x70));
+    *(int*)(selfBytes + 0x78) = cBERewardInterface_getRadioMode(ri, *(signed char*)(selfBytes + 0x44), *(int*)(selfBytes + 0x70));
     *(int*)(selfBytes + 0x7C) = cBERewardInterface_getNumSongsInPlayList(ri, *(signed char*)(selfBytes + 0x44), *(int*)(selfBytes + 0x70)) > 0;
     return self;
 }

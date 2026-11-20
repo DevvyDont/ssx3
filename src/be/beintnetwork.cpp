@@ -28,7 +28,7 @@ void* cBENetworkInterface_getThis()
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014E130);
+INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_submit);
 #ifdef SKIP_ASM
 // The submitted copy of the network options (discard restores it).
 extern tBENetworkDB D_00535088;
@@ -36,21 +36,21 @@ extern tBENetworkDB D_00535088;
 /**
  * Commits the network options: copies cBENetworkInterface_networkOpt into the saved copy D_00535088.
  */
-extern "C" void func_0014E130(void)
+extern "C" void cBENetworkInterface_submit(void)
 {
     D_00535088 = cBENetworkInterface_networkOpt;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014E1F8);
+INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_discard);
 #ifdef SKIP_ASM
 extern tBENetworkDB D_00535088;
 
 /**
  * Drops changes to the network options: copies the saved copy D_00535088 back into cBENetworkInterface_networkOpt.
  */
-extern "C" void func_0014E1F8(void)
+extern "C" void cBENetworkInterface_discard(void)
 {
     cBENetworkInterface_networkOpt = D_00535088;
 }
@@ -247,10 +247,10 @@ struct sBEPlayerData {
 };
 extern sBEPlayerData cBELibrary_profileLib[];
 
-extern "C" void func_00156858(sBEPlayerData* dst, sBEPlayerData* src);
+extern "C" void cBEProfileLib_copy(sBEPlayerData* dst, sBEPlayerData* src);
 
 /**
- * Copies one profile's ten character records over another's (func_00156858).
+ * Copies one profile's ten character records over another's (cBEProfileLib_copy).
  *
  * Each destination record keeps its own lookup-table pointer (+0x288), which is rebuilt from the copied 0x20D
  * entries at +0x290.
@@ -261,7 +261,7 @@ extern "C" void func_00156858(sBEPlayerData* dst, sBEPlayerData* src);
 extern "C" void cBENetworkInterface_copyProfile(cBENetworkInterface* self, int srcProfile, int destProfile)
 {
     sBEPlayerData* src = &cBELibrary_profileLib[srcProfile];
-    func_00156858(&cBELibrary_profileLib[destProfile], src);
+    cBEProfileLib_copy(&cBELibrary_profileLib[destProfile], src);
 }
 #endif
 
@@ -353,7 +353,7 @@ extern sNetSlot_0014EB08 D_005308B8[];
 
 /**
  * Swaps most of the two 12-byte bragging-rights records at the start of the rules block D_005308B8 (see
- * func_0015C228).
+ * cBERules_reset).
  *
  * Exchanges bit 0 and bit 3 of each record's flag word and its second and third words (starting points, head-start
  * seconds); flag bits 1-2 and 4-31 stay.
@@ -426,19 +426,19 @@ struct sCharEntry_0014EBF8
 
 extern sCharEntry_0014EBF8 cBELibrary_playerDB[];
 extern sCharEntry_0014EBF8 D_00534A88[];
-extern "C" void func_00156950(sBEPlayerData* data, int charID);
+extern "C" void cBEProfileLib_backupCharProfile(sBEPlayerData* data, int charID);
 
 /**
  * Saves one player's current character record and all six player records for restoreCharProfile.
  *
  * Copies the cBELibrary_profileLib record of that player's character into the backup buffer D_004C4090
- * (func_00156950) and the six cBELibrary_playerDB records into BackupPlayerDB (D_00534A88).
+ * (cBEProfileLib_backupCharProfile) and the six cBELibrary_playerDB records into BackupPlayerDB (D_00534A88).
  *
  * @param idx  the player (profile index) whose character record is saved
  */
 extern "C" void cBENetworkInterface_backupCharProfile(cBENetworkInterface* self, int idx)
 {
-    func_00156950(&cBELibrary_profileLib[idx], cBELibrary_playerDB[idx].charID);
+    cBEProfileLib_backupCharProfile(&cBELibrary_profileLib[idx], cBELibrary_playerDB[idx].charID);
     for (int i = 0; i < 6; i++)
     {
         D_00534A88[i] = cBELibrary_playerDB[i];
@@ -449,12 +449,12 @@ extern "C" void cBENetworkInterface_backupCharProfile(cBENetworkInterface* self,
 //100%
 INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_restoreCharProfile);
 #ifdef SKIP_ASM
-extern "C" void func_00156988(sBEPlayerData* data);
+extern "C" void cBEProfileLib_restoreCharProfile(sBEPlayerData* data);
 
 /**
  * Restores what backupCharProfile saved and reloads the player and BAGT interfaces.
  *
- * Copies the backup buffer back into the saved character's record of profile @p idx (func_00156988). On the
+ * Copies the backup buffer back into the saved character's record of profile @p idx (cBEProfileLib_restoreCharProfile). On the
  * client, player record 0 first takes record 1; records 1-5 then come back from BackupPlayerDB (record 0 is
  * never restored). Reloads NewPlayer (BE interface 1) and BAGT (6) through their virtual discard.
  *
@@ -462,7 +462,7 @@ extern "C" void func_00156988(sBEPlayerData* data);
  */
 extern "C" void cBENetworkInterface_restoreCharProfile(cBENetworkInterface* self, int idx)
 {
-    func_00156988(&cBELibrary_profileLib[idx]);
+    cBEProfileLib_restoreCharProfile(&cBELibrary_profileLib[idx]);
     if (D_00534B38[0] == 0)
     {
         cBELibrary_playerDB[0] = cBELibrary_playerDB[1];
@@ -513,7 +513,7 @@ extern "C" void* cBECharacterInterface_getThis(void)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EE28);
+INCLUDE_ASM("be/beintnetwork", cBECharacterInterface_getName);
 #ifdef SKIP_ASM
 signed char cBELibrary_getCharacterID(int index);
 
@@ -530,7 +530,7 @@ extern sNetChar_0014EE28 D_00530970[];
  * @param rider  the rider (cBELibrary_getCharacterID selects the record)
  * @return the name
  */
-extern "C" void* func_0014EE28(void* self, int rider)
+extern "C" void* cBECharacterInterface_getName(void* self, int rider)
 {
     return &D_00530970[cBELibrary_getCharacterID(rider)];
 }
@@ -578,7 +578,7 @@ extern "C" void* cBECharacterInterface_getShortName(void* self, int rider)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EEC8);
+INCLUDE_ASM("be/beintnetwork", cBECharacterInterface_getShortNameByCharacter);
 #ifdef SKIP_ASM
 struct sNetEntry8_0043FA38
 {
@@ -601,7 +601,7 @@ extern sNetEntry88_00530990 D_00530990[];
  * @param index  the cheat character id (0 for none)
  * @return the name
  */
-extern "C" void* func_0014EEC8(void* self, int player, int index)
+extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index)
 {
     if (index >= 10 && index < 30) {
         return &D_0043FA38[index];
@@ -612,7 +612,7 @@ extern "C" void* func_0014EEC8(void* self, int player, int index)
 
 
 //100%
-INCLUDE_ASM("be/beintnetwork", func_0014EF00);
+INCLUDE_ASM("be/beintnetwork", cBECharacterInterface_getNickName);
 #ifdef SKIP_ASM
 signed char cBELibrary_getCharacterID(int index);
 
@@ -629,7 +629,7 @@ extern sNetChar_0014EF00 D_005309A0[];
  * @param rider  the rider (cBELibrary_getCharacterID selects the record)
  * @return the text
  */
-extern "C" void* func_0014EF00(void* self, int rider)
+extern "C" void* cBECharacterInterface_getNickName(void* self, int rider)
 {
     return &D_005309A0[cBELibrary_getCharacterID(rider)];
 }

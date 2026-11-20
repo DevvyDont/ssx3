@@ -20,9 +20,9 @@ INCLUDE_ASM("be/bestate2", cBEProfileLib_init);
 
 INCLUDE_ASM("be/bestate2", func_00156810);
 
-INCLUDE_ASM("be/bestate2", func_00156858);
+INCLUDE_ASM("be/bestate2", cBEProfileLib_copy);
 
-INCLUDE_ASM("be/bestate2", func_00156950);
+INCLUDE_ASM("be/bestate2", cBEProfileLib_backupCharProfile);
 
-INCLUDE_ASM("be/bestate2", func_00156988);
+INCLUDE_ASM("be/bestate2", cBEProfileLib_restoreCharProfile);
 

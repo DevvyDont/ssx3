@@ -144,7 +144,7 @@ extern sBlk20_A188 D_005308B8_A188 __asm__("D_005308B8");
  * Copies, in order: the 0x4C-byte race DB (cBELibrary_raceDB), the 0xA8-byte player DB (cBELibrary_playerDB), player
  * 0's character record from profile 0 of cBELibrary_profileLib, player 1's character record from profile 1 (D_004B07F8)
  * when player 1 has a character (mCharID >= 0), the 0x9B50-byte profile D_004BA348 (profile 2) and the 0x20 bytes at
- * D_005308B8. func_0014E050 calls it and appends the CRC.
+ * D_005308B8. cBE_writeToData calls it and appends the CRC.
  *
  * @param data  the save buffer to fill
  */
@@ -993,7 +993,7 @@ void* func_0014BDB8_0() __asm__("func_0014BDB8__FPv");
 struct sBEGroupTable;
 extern "C" int func_0014D448(sBEGroupTable* self, int g, int key);
 extern "C" void func_00151C48(void* prof, int idx, int on);
-extern "C" void func_00150B48(void* iface, int a, int b, int v);
+extern "C" void cBEEconInterface_reduceMoney(void* iface, int a, int b, int v);
 extern "C" void cBEEconInterface_getMoney(void* iface, int a, int b);
 
 struct sBEEntry38_14B560 {
@@ -1029,7 +1029,7 @@ static inline int scale10_14B560(int v)
  * Marks the bolt owned (flag 0x2, func_00151C48) in the character record (cBELibrary_profileLib + profile * 0x9B50 +
  * character * 0xF88), and also every bolt of the character whose price (short +0xE, times 10 when positive) equals -@p
  * key. With @p flag, takes the bolt's price (its definition found with func_0014D448) times 10 off the character's
- * money (func_00150B48 on the economy interface); otherwise just calls cBEEconInterface_getMoney. The store's buy
+ * money (cBEEconInterface_reduceMoney on the economy interface); otherwise just calls cBEEconInterface_getMoney. The store's buy
  * action and cBERewardInterface_awardUser (unpaid, for item awards) call it.
  *
  * @param profileIndex  profile index
@@ -1052,7 +1052,7 @@ extern "C" void func_0014B560(void* self, int profileIndex, int characterId, int
     sBETbl_14B560* tbl = (sBETbl_14B560*)func_0014BDB8_0();
     boltDef = entry_14B560(tbl, func_0014D448((sBEGroupTable*)tbl, characterId, key));
     if (flag) {
-        func_00150B48(iface, profileIndex, characterId, scale10_14B560(boltDef->field_0xE));
+        cBEEconInterface_reduceMoney(iface, profileIndex, characterId, scale10_14B560(boltDef->field_0xE));
     } else {
         cBEEconInterface_getMoney(iface, profileIndex, characterId);
     }

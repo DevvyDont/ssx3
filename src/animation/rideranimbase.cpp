@@ -66,7 +66,7 @@ extern "C" void cRiderAnimBase__cRiderAnimBase(cRiderAnimBase* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_003119E8);
+INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getSequencer);
 #ifdef SKIP_ASM
 /**
  * Returns the address of animation sequencer @p slot of the rider animation (Sequencer + @p slot * 8).
@@ -75,12 +75,12 @@ INCLUDE_ASM("animation/rideranimbase", func_003119E8);
  * @param slot  the sequencer slot, 0-5
  * @return the sequencer, as an int
  */
-extern "C" int func_003119E8(void *riderAnim, int slot) {
+extern "C" int cRiderAnimBase_getSequencer(void *riderAnim, int slot) {
     return (*(int *)((char*)(riderAnim) + (0x50))) + (slot * 8);
 }
 #endif
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_003119F8);
+INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getAIAnimSequencerName);
 #ifdef SKIP_ASM
 extern "C" int* cAIAnimEventMap_getAnimPlayAttr(int anim);
 extern int D_0044AF80[];
@@ -94,14 +94,14 @@ extern int D_0044AF80[];
  * @param anim  the AI anim id
  * @return the sequencer name (as an int)
  */
-extern "C" int func_003119F8(void* self, int anim)
+extern "C" int cRiderAnimBase_getAIAnimSequencerName(void* self, int anim)
 {
     int i = cAIAnimEventMap_getAnimPlayAttr(anim)[3];
     return D_0044AF80[i];
 }
 #endif
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00311A30);
+INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getAIAnimName);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // func_00311860 is matched as (void) but this caller passes the anim in $4.
@@ -113,7 +113,7 @@ extern "C" const char* func_00311860_anim(int anim) __asm__("func_00311860");
  * @param anim  the AI anim id (passed through; func_00311860 ignores it)
  * @return str_error
  */
-extern "C" const char* func_00311A30(void* self, int anim)
+extern "C" const char* cRiderAnimBase_getAIAnimName(void* self, int anim)
 {
     return func_00311860_anim(anim);
 }
@@ -379,17 +379,17 @@ extern "C" void cRiderAnimBase_changeOrientationOffset(cRiderAnimBase* self, sRa
 #endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00311D88);
+INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_changeIsFlipped);
 #ifdef SKIP_ASM
 /**
  * Sets the flip flag (+0x80) of every playing sequence in all six sequencers to @p value.
  *
- * Only the sequences change; IsFlipped of the rider animation itself is not written (func_003158D8 sets that).
+ * Only the sequences change; IsFlipped of the rider animation itself is not written (cRiderAnimBase_setIsFlipped sets that).
  *
  * @param value  nonzero to mirror the animations
  */
 // Sets the field at 0x80 of every sequence node of all 6 sequencers.
-extern "C" void func_00311D88(sRiderAnimBase* self, int value)
+extern "C" void cRiderAnimBase_changeIsFlipped(sRiderAnimBase* self, int value)
 {
     for (int i = 0; i < 6; i++)
     {
@@ -405,7 +405,7 @@ extern "C" void func_00311D88(sRiderAnimBase* self, int value)
 }
 #endif
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00311E38);
+INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_removeAll);
 #ifdef SKIP_ASM
 /**
  * Stops everything on sequencer @p i: expires all its sequences and sets CurrentAnimID[@p i] to 0x1B6 (no anim).
@@ -415,7 +415,7 @@ INCLUDE_ASM("animation/rideranimbase", func_00311E38);
  * @param i  the sequencer slot, 0-5
  */
 // Resets sequencer i and marks its slot empty (0x1B6 = no anim, see cRiderAnimBase_getCurrentAnimCategory).
-extern "C" void func_00311E38(sRiderAnimBase* self, int i)
+extern "C" void cRiderAnimBase_removeAll(sRiderAnimBase* self, int i)
 {
     cAnimSequencer_expireAll(self->mSequencers + (i << 3));
     self->mAnims[i] = 438;
@@ -450,7 +450,7 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_onInput);
 #ifdef SKIP_ASM
 extern "C" int* cAIAnimEventMap_getAnimPlayAttr(int anim);
 struct cAnimSequence;
-void cAnimSequence_fadeWeight(cAnimSequence* self, float weight, float target);
+void cAnimSequence_fadeWeight(cAnimSequence* self, float targetWeight, float time);
 extern "C" void cAnimSequencer_expire(void* seq, void* node);
 extern "C" char* cAnimSequencer_playAndHold(cAnimSequencer* seq, int anim, unsigned int h, float t);
 extern "C" char* cAnimSequencer_playAndLoop(cAnimSequencer* seq, int anim, unsigned int h, float t);
@@ -459,8 +459,8 @@ extern "C" void cAnimSequence_removeEndTrigger(void* node, int key);
 extern "C" void cAnimSequence_fadeOutAndExpire(void* node, float v);
 extern "C" void cAnimSequence_addTrigger(void* node, int key, float t);
 extern "C" void cAnimSequence_setSubAnim(void* node, int i, int anim);
-extern "C" void func_00313CF0(void* node, int i, float t);
-extern "C" void func_00313D28(void* node, int i, float speed);
+extern "C" void cAnimSequence_setSubAnimTime(void* node, int i, float t);
+extern "C" void cAnimSequence_setSubAnimWeight(void* node, int i, float speed);
 extern char** cAnimDataBase_TheAnimDataBase;
 
 // A sequence node: three tracks, then the clip state (raw offsets from cRiderAnimBase_onInput's uses).
@@ -596,8 +596,8 @@ extern "C" int cRiderAnimBase_onInput(void* vself, void* vseq, int anim, int ani
                 if (match->tracks[k].active != 0)
                 {
                     cAnimSequence_setSubAnim(node, k, match->tracks[k].anim);
-                    func_00313CF0(node, k, match->tracks[k].time);
-                    func_00313D28(node, k, match->tracks[k].speed);
+                    cAnimSequence_setSubAnimTime(node, k, match->tracks[k].time);
+                    cAnimSequence_setSubAnimWeight(node, k, match->tracks[k].speed);
                 }
             }
             nd->weight = nd->targetWeight = match->weight;
@@ -741,7 +741,7 @@ extern "C" void cRiderAnimBase_setupAnimation(void* riderAnim, int animMinParts)
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getAIAnimFrame);
 #ifdef SKIP_ASM
 extern "C" int cRiderAnimBase_onInput(void* self, void* seq, int anim, int a3, int a4, int a5, float blend);
-extern "C" void func_00313CF0(void* node, int i, float t);
+extern "C" void cAnimSequence_setSubAnimTime(void* node, int i, float t);
 extern char* cGameAnimMap_TheGameAnimMap;
 extern int kAnimIDInvalid;
 
@@ -762,7 +762,7 @@ struct sAnimState_00312660
  * Samples one frame of an AI animation on a scratch sequencer and returns its first blend state.
  *
  * Starts the anim on a local cAnimSequencer (cRiderAnimBase_onInput, no blend), sets sequence 0's track 0 time
- * (func_00313CF0), gathers up to 64 states (cAnimSequencer_getAnimBlendFrames) and expires the scratch sequencer.
+ * (cAnimSequence_setSubAnimTime), gathers up to 64 states (cAnimSequencer_getAnimBlendFrames) and expires the scratch sequencer.
  *
  * Despite their names, @p startFrameTime is the clip and @p animid the time: On Tour's order is (anid, float
  * startFrameTime, tAnimID animid), and the int and the float travel in different registers.
@@ -770,7 +770,7 @@ struct sAnimState_00312660
  * @param anim            the AI anim to sample (On Tour tAIAnimID anid)
  * @param startFrameTime  the clip to play (On Tour tAnimID animid); kAnimIDInvalid (-1) means the AI anim's own
  *                        clip, found from its index (vtable slot 4) in the table at cGameAnimMap_TheGameAnimMap + 0x1030
- * @param animid          the time to sample, given to func_00313CF0 (On Tour startFrameTime)
+ * @param animid          the time to sample, given to cAnimSequence_setSubAnimTime (On Tour startFrameTime)
  * @return the first 0x50-byte blend state (On Tour tAnimBlendFrame)
  */
 // Samples anim at time t on a scratch sequencer and returns the first resulting state.
@@ -785,7 +785,7 @@ extern "C" sAnimState_00312660 cRiderAnimBase_getAIAnimFrame(cRiderAnimBase* sel
         animid = *(int*)(vt[4].fn(((char*)self) + vt[4].delta, anim) * 4 + cGameAnimMap_TheGameAnimMap + 0x1030);
     }
     cRiderAnimBase_onInput(((char*)self), &seq, anim, animid, 1, 0, 0.0f);
-    func_00313CF0(cAnimSequencer_getSequence(&seq, 0), 0, startFrameTime);
+    cAnimSequence_setSubAnimTime(cAnimSequencer_getSequence(&seq, 0), 0, startFrameTime);
     cAnimSequencer_getAnimBlendFrames(&seq, (sAnimState_00312598*)states, 0x40);
     cAnimSequencer_expireAll(&seq);
     return states[0];
@@ -827,7 +827,7 @@ extern "C" float cRiderAnimBase_getAIAnimDuration(char* self, int aid)
 #endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00312820);
+INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getAIAnimEventTime);
 #ifdef SKIP_ASM
 struct sVEntry00312820 {
     short delta;
@@ -852,7 +852,7 @@ struct sAnimKey00312820 {
  * @param frame  the tag number in the clip
  * @return the tag's time in seconds, -1 when the clip has no such tag, 0 when the anim has no game animation
  */
-extern "C" float func_00312820(char* self, int anim, int frame)
+extern "C" float cRiderAnimBase_getAIAnimEventTime(char* self, int anim, int frame)
 {
     sVEntry00312820* vt = *(sVEntry00312820**)(self + 0x58);
     int id = vt[4].fn(self + vt[4].delta, anim);
@@ -972,7 +972,7 @@ int cRiderAnimBase_getCurrentAnimID(void* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00312AB0);
+INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getCurrentAnimFramePercent);
 #ifdef SKIP_ASM
 /**
  * Returns how far the newest sequence of sequencer @p i has played: its first sub-animation's time over its length.
@@ -983,7 +983,7 @@ INCLUDE_ASM("animation/rideranimbase", func_00312AB0);
  * @param i  the sequencer slot, 0-5
  * @return the fraction played, 0-1
  */
-extern "C" float func_00312AB0(void* self, int i)
+extern "C" float cRiderAnimBase_getCurrentAnimFramePercent(void* self, int i)
 {
     cAnimSequencer* seqs = *(cAnimSequencer**)((char*)self + 0x50);
     cAnimSequenceNode* node = cAnimSequencer_getSequence(&seqs[i], 0);
@@ -1011,17 +1011,17 @@ extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/rideranimbase", func_00312B18);
+INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_playInto);
 #ifdef SKIP_ASM
 struct cAnimSequence;
-void cAnimSequence_fadeWeight(cAnimSequence* self, float weight, float target);
+void cAnimSequence_fadeWeight(cAnimSequence* self, float targetWeight, float time);
 extern "C" void cAnimSequencer_expire(void* seq, void* node);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
 /**
  * Replaces sequence @p node with AI anim @p anim, carrying the old sequence's blend weight and fade over.
  *
- * Saves the node's current weight (+0x94), target weight (+0x98) and fade time left (+0x9C), expires it
+ * Saves the node's CurrentWeight (+0x94), TargetWeight (+0x98) and WeightTimer (+0x9C, the fade time left), expires it
  * (cAnimSequencer_expire), plays @p anim with cRiderAnimBase_play(anim, 0, -1 = default blend), then gives the new
  * first sequence of @p seq the old current weight as both current and target weight and, if a fade was running,
  * restarts it with cAnimSequence_fadeWeight(old target, old time left).
@@ -1031,49 +1031,49 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
  * @param anim  the AI anim to play
  * @return @p anim
  */
-extern "C" int func_00312B18(void* self, cAnimSequencer* seq, char* node, int anim)
+extern "C" int cRiderAnimBase_playInto(void* self, cAnimSequencer* seq, char* node, int anim)
 {
-    float w = *(float*)(node + 0x94);
-    float target = *(float*)(node + 0x9C);
-    float weight = *(float*)(node + 0x98);
+    float currentWeight = *(float*)(node + 0x94);
+    float timeLeft = *(float*)(node + 0x9C);
+    float targetWeight = *(float*)(node + 0x98);
     cAnimSequencer_expire(seq, node);
     cRiderAnimBase_play(self, anim, 0, -1.0f);
     char* sequence = (char*)cAnimSequencer_getSequence(seq, 0);
-    *(float*)(sequence + 0x98) = w;
-    *(float*)(sequence + 0x94) = w;
-    if (target != 0.0f)
+    *(float*)(sequence + 0x98) = currentWeight;
+    *(float*)(sequence + 0x94) = currentWeight;
+    if (timeLeft != 0.0f)
     {
-        cAnimSequence_fadeWeight((cAnimSequence*)sequence, weight, target);
+        cAnimSequence_fadeWeight((cAnimSequence*)sequence, targetWeight, timeLeft);
     }
     return anim;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/rideranimbase", func_00312BD0);
+INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_playBlendIn);
 #ifdef SKIP_ASM
 extern "C" void func_00144670(void* self, int bit);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
 /**
- * Clears event bit 63 of sequence @p rider's event flags (+0xB0) and plays AI anim @p anim with the default blend-in.
+ * Clears event bit 63 of sequence @p sequence's event flags (+0xB0) and plays AI anim @p anim with the default blend-in.
  *
- * The bit is cleared with func_00144670 (the same clear-and-mark-changed operation as func_003159B8); the anim starts
- * with cRiderAnimBase_play(anim, 0, -1). Unlike func_00312B18 the old sequence is left to blend out.
+ * The bit is cleared with func_00144670 (the same clear-and-mark-changed operation as tEventFlags_clear); the anim starts
+ * with cRiderAnimBase_play(anim, 0, -1). Unlike cRiderAnimBase_playInto the old sequence is left to blend out.
  *
  * @param sequencer  the sequencer the sequence plays on (unused)
- * @param rider  the sequence (cAnimSequence) that ended; the name is misleading
+ * @param sequence  the sequence (cAnimSequence) that ended
  * @param anim  the AI anim to play
  */
-extern "C" void func_00312BD0(void* self, void* sequencer, void* rider, int anim)
+extern "C" void cRiderAnimBase_playBlendIn(void* self, void* sequencer, void* sequence, int anim)
 {
-    func_00144670((char*)rider + 0xB0, 0x3F);
+    func_00144670((char*)sequence + 0xB0, 0x3F);
     cRiderAnimBase_play(self, anim, 0, -1.0f);
 }
 #endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00312C20);
+INCLUDE_ASM("animation/rideranimbase", dcmpGetFrame);
 #ifdef SKIP_ASM
 // Packed animation channel table (built by dcmpInitFrameAccessor, sampled here).
 struct sRabChannel {
@@ -1111,7 +1111,7 @@ struct sRabChannelSet {
  * @param frameIndex  the frame index (time x 30, may be fractional)
  * @param out  receives @p count floats
  */
-extern "C" void func_00312C20(sRabChannelSet* self, int first, int count, float frameIndex, float* out)
+extern "C" void dcmpGetFrame(sRabChannelSet* self, int first, int count, float frameIndex, float* out)
 {
     float half = frameIndex * 0.5f;
     int it = (int)frameIndex;
@@ -1354,7 +1354,7 @@ extern "C" void dcmpInitFrameAccessor(sRabChannelSet* self, unsigned char* data,
 #endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00313508);
+INCLUDE_ASM("animation/rideranimbase", cAnimSequence_cAnimSequence);
 #ifdef SKIP_ASM
 struct sAnimSlot_00313508
 {
@@ -1427,20 +1427,20 @@ inline sRiderAnim_00313508::sRiderAnim_00313508(int o)
  * @param owner  the sequence id (the AI anim id for rider sequences)
  * @return @p self
  */
-extern "C" sRiderAnim_00313508* func_00313508(sRiderAnim_00313508* self, int owner)
+extern "C" sRiderAnim_00313508* cAnimSequence_cAnimSequence(sRiderAnim_00313508* self, int owner)
 {
     return new (self) sRiderAnim_00313508(owner);
 }
 #endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_003135B0);
+INCLUDE_ASM("animation/rideranimbase", cAnimSequence_updateSubAnim);
 #ifdef SKIP_ASM
 struct sAnimEvents_00313868;
 struct sAnimEvents_00313938;
-extern "C" void func_00313868(sAnimEvents_00313868* self, float from, float to);
-extern "C" void func_00313938(sAnimEvents_00313938* self, float time);
-extern "C" void func_003139A8(sAnimEvents_00313938* self);
+extern "C" void cAnimSequence_checkTriggers(sAnimEvents_00313868* self, float from, float to);
+extern "C" void cAnimSequence_checkTriggersAtTime(sAnimEvents_00313938* self, float time);
+extern "C" void cAnimSequence_setEndTriggers(sAnimEvents_00313938* self);
 
 struct sTrack_003135B0 {
     int field_0x0;
@@ -1477,7 +1477,7 @@ static inline float ffloor_003135B0(float x)
 
 static inline void fire_003135B0(sRab_003135B0* self, float from, float to)
 {
-    func_00313868((sAnimEvents_00313868*)self, from, to);
+    cAnimSequence_checkTriggers((sAnimEvents_00313868*)self, from, to);
 }
 
 /**
@@ -1485,16 +1485,16 @@ static inline void fire_003135B0(sRab_003135B0* self, float from, float to)
  *
  * The step is dt x the slot's time scale (+0x8 of the slot) x the sequence's time scale (+0x90). For slot 0 only: the
  * just-changed event bits (+0xB8) and the end flag (+0xC0) are cleared first, and if the +0xC4 flag is set (by
- * func_00313CF0) the triggers at the old time fire (func_00313938) and the flag is cleared. A hold slot (type 0)
- * clamps to [0, length] and at either end sets the end triggers (func_003139A8); a loop slot outside the range is
+ * cAnimSequence_setSubAnimTime) the triggers at the old time fire (cAnimSequence_checkTriggersAtTime) and the flag is cleared. A hold slot (type 0)
+ * clamps to [0, length] and at either end sets the end triggers (cAnimSequence_setEndTriggers); a loop slot outside the range is
  * wrapped by whole lengths, the end triggers are set, and the timed triggers over the wrapped span fire
- * (func_00313868, split at the wrap point). Triggers fire only for slot 0. Stores the new time in the slot.
+ * (cAnimSequence_checkTriggers, split at the wrap point). Triggers fire only for slot 0. Stores the new time in the slot.
  *
  * @param i  the sub-animation slot, 0-2
  * @param dt  the time step
  * @return always 0
  */
-extern "C" int func_003135B0(sRab_003135B0* self, int i, float dt)
+extern "C" int cAnimSequence_updateSubAnim(sRab_003135B0* self, int i, float dt)
 {
     float startTime = self->tracks[i].time;
     float len = self->tracks[i].length;
@@ -1503,7 +1503,7 @@ extern "C" int func_003135B0(sRab_003135B0* self, int i, float dt)
         self->triggered = 0;
         self->fC0 = 0;
         if (self->fC4 != 0) {
-            func_00313938((sAnimEvents_00313938*)self, startTime);
+            cAnimSequence_checkTriggersAtTime((sAnimEvents_00313938*)self, startTime);
             self->fC4 = 0;
         }
     }
@@ -1511,12 +1511,12 @@ extern "C" int func_003135B0(sRab_003135B0* self, int i, float dt)
         if (newTime <= 0.0f) {
             newTime = 0.0f;
             if (i == 0) {
-                func_003139A8((sAnimEvents_00313938*)self);
+                cAnimSequence_setEndTriggers((sAnimEvents_00313938*)self);
             }
         } else if (len <= newTime) {
             newTime = len;
             if (i == 0) {
-                func_003139A8((sAnimEvents_00313938*)self);
+                cAnimSequence_setEndTriggers((sAnimEvents_00313938*)self);
             }
         }
         if (i == 0) {
@@ -1526,7 +1526,7 @@ extern "C" int func_003135B0(sRab_003135B0* self, int i, float dt)
         int n = (int)ffloor_003135B0(newTime / len);
         newTime -= len * (float)n;
         if (i == 0) {
-            func_003139A8((sAnimEvents_00313938*)self);
+            cAnimSequence_setEndTriggers((sAnimEvents_00313938*)self);
             if (n >= 2) {
                 fire_003135B0(self, 0.0f, len);
             } else if (n < -1) {
@@ -1556,7 +1556,7 @@ extern "C" int func_003135B0(sRab_003135B0* self, int i, float dt)
 #endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00313800);
+INCLUDE_ASM("animation/rideranimbase", cAnimSequence_updateWeight);
 #ifdef SKIP_ASM
 struct sBlend_00313800
 {
@@ -1580,7 +1580,7 @@ struct sBlend_00313800
  */
 // Moves value toward target over the remaining time; returns 1 when the blend
 // finishes and notify is set.
-extern "C" int func_00313800(sBlend_00313800* self, float dt)
+extern "C" int cAnimSequence_updateWeight(sBlend_00313800* self, float dt)
 {
     float timeLeft = self->remaining;
     if (timeLeft != 0.0f)
@@ -1606,7 +1606,7 @@ extern "C" int func_00313800(sBlend_00313800* self, float dt)
 #endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00313868);
+INCLUDE_ASM("animation/rideranimbase", cAnimSequence_checkTriggers);
 #ifdef SKIP_ASM
 struct sAnimEvent_00313868
 {
@@ -1636,7 +1636,7 @@ struct sAnimEvents_00313868
 // Fires every kind-0 event whose time lies in (from, to] (or [to, from) when
 // playing backwards).
 // PORT: ulong is 64-bit here
-extern "C" void func_00313868(sAnimEvents_00313868* self, float from, float to)
+extern "C" void cAnimSequence_checkTriggers(sAnimEvents_00313868* self, float from, float to)
 {
     if (from == to)
     {
@@ -1668,7 +1668,7 @@ extern "C" void func_00313868(sAnimEvents_00313868* self, float from, float to)
 #endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_00313938);
+INCLUDE_ASM("animation/rideranimbase", cAnimSequence_checkTriggersAtTime);
 #ifdef SKIP_ASM
 struct sAnimEvent_00313938
 {
@@ -1695,7 +1695,7 @@ struct sAnimEvents_00313938
  * @param time  the time to check
  */
 // PORT: ulong is 64-bit here
-extern "C" void func_00313938(sAnimEvents_00313938* self, float time)
+extern "C" void cAnimSequence_checkTriggersAtTime(sAnimEvents_00313938* self, float time)
 {
     for (sAnimEvent_00313938* event = self->head; event != 0; event = event->next)
     {
@@ -1711,7 +1711,7 @@ extern "C" void func_00313938(sAnimEvents_00313938* self, float time)
 #endif
 
 //100%
-INCLUDE_ASM("animation/rideranimbase", func_003139A8);
+INCLUDE_ASM("animation/rideranimbase", cAnimSequence_setEndTriggers);
 #ifdef SKIP_ASM
 /**
  * Marks the sequence ended (+0xC0 = 1) and fires every end trigger of its list (+0xAC).
@@ -1719,7 +1719,7 @@ INCLUDE_ASM("animation/rideranimbase", func_003139A8);
  * Each end trigger's id bit is set in the event flags (+0xB0) and, if newly set, in the just-changed flags (+0xB8).
  */
 // PORT: ulong is 64-bit here
-extern "C" void func_003139A8(sAnimEvents_00313938* self)
+extern "C" void cAnimSequence_setEndTriggers(sAnimEvents_00313938* self)
 {
     self->dirty = 1;
     for (sAnimEvent_00313938* event = self->head; event != 0; event = event->next)

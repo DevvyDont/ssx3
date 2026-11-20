@@ -115,7 +115,7 @@ extern "C" void* cFEStateBonusMaterial_cFEStateBonusMaterial1(void* self, void* 
 extern "C" void* cFEStateNetConfig_cFEStateNetConfig(void* self, void* owner);
 extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode);
 extern "C" int cBENewRaceInterface_setGameEvent(void* self, int ev);
-extern "C" int func_00145C38(void* self, int index);
+extern "C" int cBENewPlayerInterface_isFirstTimeWC(void* self, int index);
 extern "C" int cBENewPlayerInterface_getLastHub(void* self, int index);
 extern "C" void* cFEStateMPCircuit_cFEStateMPCircuit(void* self, void* owner);
 extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* self, void* owner, int a, int b, int c);
@@ -294,7 +294,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
             case 0: {
                 cBENewRaceInterface_setGameMode(nr, 4);
                 cBENewRaceInterface_setGameEvent(nr, 12);
-                if (func_00145C38(pl, 0)) {
+                if (cBENewPlayerInterface_isFirstTimeWC(pl, 0)) {
                     D_004A11B8 = one;
                     beRaceDB->iLocationIdx = 14;
                 } else {
@@ -798,7 +798,7 @@ INCLUDE_ASM("fe/fereal", cRealFE_gainFocus);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void* cBE_getBE();
-extern "C" void func_0014DE28(void* be, int b);
+extern "C" void cBE_newProfile(void* be, int b);
 extern "C" void* MEM_fill(void* p, int c, int n);
 extern "C" void cBE_setState(int state);
 extern "C" void cGraphicsMan_UploadTextures(void* p);
@@ -821,7 +821,7 @@ typedef void (*tVoid_1A1DC0)(void*);
 /**
  * Prepares the front end when it gains focus and pushes its first states.
  *
- * If gWeHaveToClearTheBackEnd is set, it resets back-end entries 0-2 (func_0014DE28), zeroes the 0x20 bytes at
+ * If gWeHaveToClearTheBackEnd is set, it resets back-end entries 0-2 (cBE_newProfile), zeroes the 0x20 bytes at
  * D_005308B8 and clears the flag. It then clears +0xB5AD8 and +0xB5ADC, sets back-end state 0 (cBE_setState()),
  * uploads the textures (cGraphicsMan_UploadTextures()), calls func_00195E58 on the front-end locale, turns off depth
  * fog, screen tint and light glow, sets the graphics manager's clear colour to black (slot 15 with (0, 0, 0)), gives
@@ -832,9 +832,9 @@ extern "C" void cRealFE_gainFocus(char* self)
     char* graphicsMan;
     char* vt;
     if (gWeHaveToClearTheBackEnd != 0) {
-        func_0014DE28(cBE_getBE(), 0);
-        func_0014DE28(cBE_getBE(), 1);
-        func_0014DE28(cBE_getBE(), 2);
+        cBE_newProfile(cBE_getBE(), 0);
+        cBE_newProfile(cBE_getBE(), 1);
+        cBE_newProfile(cBE_getBE(), 2);
         MEM_fill(D_005308B8, 0, 0x20);
         gWeHaveToClearTheBackEnd = 0;
     }
@@ -859,8 +859,8 @@ INCLUDE_ASM("fe/fereal", cRealFE_load);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-void func_00317530(void* self, float t);
-void func_00317550(void* self, float t);
+void cLoadTimer_startload(void* self, float t);
+void cLoadTimer_setnextpercent(void* self, float t);
 void func_0014BD78(void* iface);
 extern "C" void func_0014AF10(void* iface);
 extern "C" void func_00195BE0(void* self);
@@ -920,7 +920,7 @@ struct sRealFE_1E80 {
 
 static inline void progress_1E80(float t)
 {
-    func_00317550(cAppMan_TheAppMan + 0x38, t);
+    cLoadTimer_setnextpercent(cAppMan_TheAppMan + 0x38, t);
 }
 
 /**
@@ -936,7 +936,7 @@ static inline void progress_1E80(float t)
 // Front end: loads the UI files, rider data and sound for the front end.
 extern "C" void cRealFE_load(sRealFE_1E80* self)
 {
-    func_00317530(cAppMan_TheAppMan + 0x38, 3.5f);
+    cLoadTimer_startload(cAppMan_TheAppMan + 0x38, 3.5f);
     progress_1E80(20.0f);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     func_0014BD78(iface);
@@ -1448,8 +1448,8 @@ INCLUDE_ASM("fe/fereal", cRealFE_loadCharAnimations);
 #ifdef SKIP_ASM
 extern "C" void func_003DED50(char* name, int a1, int a2, void* out);
 extern "C" void func_003DEDC0(void* handle, int arg);
-extern "C" void* func_00311250(void* self, void* src);
-extern "C" void func_00314F30(void* self, int kind, void* list);
+extern "C" void* cAdfDataSource_cAdfDataSource(void* self, void* src);
+extern "C" void cGameAnimMap_addSource(void* self, int kind, void* list);
 // PORT: cGameAnimMap_testResolve__Fv is called with the map in $a0; bind the 1-arg form to that symbol.
 void cGameAnimMap_testResolve_p(void* map) __asm__("cGameAnimMap_testResolve__Fv");
 extern char str_data_char_anm_big_b[];
@@ -1464,8 +1464,8 @@ extern void* cGameAnimMap_TheGameAnimMap;
 /**
  * Loads the front end's character animation data from "data/char/anm.big" into the game animation map.
  *
- * Opens the big file, creates one "AdfDataSourceFE" data source (func_00311250) from D_004A19C0[0], stores it
- * in the animation table cAnimDataBase_TheAnimDataBase and registers it in the map cGameAnimMap_TheGameAnimMap (func_00314F30), resolves the map
+ * Opens the big file, creates one "AdfDataSourceFE" data source (cAdfDataSource_cAdfDataSource) from D_004A19C0[0], stores it
+ * in the animation table cAnimDataBase_TheAnimDataBase and registers it in the map cGameAnimMap_TheGameAnimMap (cGameAnimMap_addSource), resolves the map
  * and closes the file.
  */
 extern "C" void cRealFE_loadCharAnimations(void)
@@ -1474,9 +1474,9 @@ extern "C" void cRealFE_loadCharAnimations(void)
     int i;
     func_003DED50(str_data_char_anm_big_b, 0, 100, &handle);
     for (i = 0; i < 1; i++) {
-        void* anim = func_00311250(cMemMan_alloc(0x18, str_AdfDataSourceFE, 0, 0), D_004A19C0[i]);
+        void* anim = cAdfDataSource_cAdfDataSource(cMemMan_alloc(0x18, str_AdfDataSourceFE, 0, 0), D_004A19C0[i]);
         D_004A3DF8_K1A2B00->anims[(unsigned char)i] = anim;
-        func_00314F30(cGameAnimMap_TheGameAnimMap, i, anim);
+        cGameAnimMap_addSource(cGameAnimMap_TheGameAnimMap, i, anim);
     }
     cGameAnimMap_testResolve_p(cGameAnimMap_TheGameAnimMap);
     func_003DEDC0(handle, 100);
@@ -1488,16 +1488,16 @@ INCLUDE_ASM("fe/fereal", cRealFE_purgeCharAnimations);
 #ifdef SKIP_ASM
 extern void** cAnimDataBase_TheAnimDataBase;
 extern void* cGameAnimMap_TheGameAnimMap;
-extern "C" void func_00314FE8(void* a, void* b);
-extern "C" void func_00311110(void* a);
-extern "C" void func_003112C8(void* a, int b);
+extern "C" void cGameAnimMap_remSource(void* a, void* b);
+extern "C" void cAnimDataBase_purgeChanCache(void* a);
+extern "C" void cAdfDataSource__cAdfDataSource(void* a, int b);
 
 /**
  * Releases the front end's character animation data loaded by cRealFE_loadCharAnimations.
  *
  * For its one animation slot: when cAnimDataBase_TheAnimDataBase holds data, removes it from
- * cGameAnimMap_TheGameAnimMap (func_00314FE8), clears the slot, calls func_00311110 on the table and destroys the data
- * (func_003112C8 with 3).
+ * cGameAnimMap_TheGameAnimMap (cGameAnimMap_remSource), clears the slot, calls cAnimDataBase_purgeChanCache on the table and destroys the data
+ * (cAdfDataSource__cAdfDataSource with 3).
  */
 extern "C" void cRealFE_purgeCharAnimations(void* self)
 {
@@ -1506,11 +1506,11 @@ extern "C" void cRealFE_purgeCharAnimations(void* self)
         unsigned char idx = i;
         void* animData = *(void**)((char*)cAnimDataBase_TheAnimDataBase + (idx << 2));
         if (animData != 0) {
-            func_00314FE8(cGameAnimMap_TheGameAnimMap, animData);
+            cGameAnimMap_remSource(cGameAnimMap_TheGameAnimMap, animData);
             void** tbl = cAnimDataBase_TheAnimDataBase;
             *(void**)((char*)tbl + (idx << 2)) = 0;
-            func_00311110(tbl);
-            func_003112C8(animData, 3);
+            cAnimDataBase_purgeChanCache(tbl);
+            cAdfDataSource__cAdfDataSource(animData, 3);
         }
     }
 }
@@ -1531,7 +1531,7 @@ extern "C" void func_00266E88(void* a);
 extern "C" void func_00266DF8(void* a);
 extern "C" void func_0025B6D8(void* a, int b);
 extern "C" void cBENetworkInterface_restoreCharProfile(void* a, int b);
-extern "C" void func_0014DE28(void* be, int b);
+extern "C" void cBE_newProfile(void* be, int b);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1600,8 +1600,8 @@ extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
         func_00266DF8(D_004A33F4);
         func_0025B6D8(LobbyMan_mLobbyMan, 1);
         cBENetworkInterface_restoreCharProfile(cBE_getInterface_Fv(SSXApp->BE, 7), 0);
-        func_0014DE28(cBE_getBE(), 1);
-        func_0014DE28(cBE_getBE(), 2);
+        cBE_newProfile(cBE_getBE(), 1);
+        cBE_newProfile(cBE_getBE(), 2);
         cRealFE_mStartState = 0;
         break;
     }

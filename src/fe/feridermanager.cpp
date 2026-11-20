@@ -1051,19 +1051,19 @@ extern "C" void cFERider_getAnimID(void *riderSlot) {
 //100%
 INCLUDE_ASM("fe/feridermanager", cFERider_getAnimPercent);
 #ifdef SKIP_ASM
-extern "C" void func_00312AB0(int, int);
+extern "C" void cRiderAnimBase_getCurrentAnimFramePercent(int, int);
 
 /**
- * Returns how far the front-end rider's current animation has played (func_00312AB0 on its animation +0xC, sequencer
+ * Returns how far the front-end rider's current animation has played (cRiderAnimBase_getCurrentAnimFramePercent on its animation +0xC, sequencer
  * 2).
  *
- * func_00312AB0 divides the playing sequence's time (+0x8) by its length (+0x10); its float result is passed through
+ * cRiderAnimBase_getCurrentAnimFramePercent divides the playing sequence's time (+0x8) by its length (+0x10); its float result is passed through
  * (the declared return type is void).
  *
  * @param riderSlot  the front-end rider
  */
 extern "C" void cFERider_getAnimPercent(void *riderSlot) {
-    func_00312AB0((*(int *)((char*)(riderSlot) + (0xC))), 2);
+    cRiderAnimBase_getCurrentAnimFramePercent((*(int *)((char*)(riderSlot) + (0xC))), 2);
 }
 #endif
 
@@ -1585,10 +1585,10 @@ extern "C" void func_0019CC30(void* self, int bit, int a2, int val);
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" int func_0019E238(void* mgr, int bank, int i);
 extern "C" void* func_0019E2B0(void* mgr, int bank, int i);
-void* func_00314978(void* self);
-// PORT: func_00314A40 forwards its second argument (the archive data); bind the 2-arg form.
-void* func_00314A40_data(void* self, void* data) __asm__("func_00314A40__FPv");
-extern "C" void func_00314988(int* self, int flags);
+void* cMdfArchive_cMdfArchive(void* self);
+// PORT: cMdfArchive_attachConstArchive forwards its second argument (the archive data); bind the 2-arg form.
+void* cMdfArchive_attachConstArchive_data(void* self, void* data) __asm__("cMdfArchive_attachConstArchive__FPv");
+extern "C" void cMdfArchive__cMdfArchive(int* self, int flags);
 extern "C" void* cMdfArchive_getModelPart(void* self, const char* name);
 extern "C" void cAnimModel_addModelPartLOD(void* model, int lod, void* part, int a3);
 extern void* D_004A1968;
@@ -1633,7 +1633,7 @@ static inline sBoneEnt_A0100* getEnt_A0100(sBoneDb_A0100* db, int id, int g)
  * Adds the front-end rider's loaded model parts to its model: reports whether all are done.
  *
  * Returns 1 at once when +0xCBC is set. Otherwise checks every queued part file (func_0019E238); when all are ready,
- * opens each loaded archive once (func_00314978, func_00314A40), adds the model part named by each item sharing it as
+ * opens each loaded archive once (cMdfArchive_cMdfArchive, cMdfArchive_attachConstArchive), adds the model part named by each item sharing it as
  * LOD (cMdfArchive_getModelPart, cAnimModel_addModelPartLOD), releases the files and closes the archive.
  *
  * @return 1 when every part is loaded, else 0
@@ -1669,10 +1669,10 @@ extern "C" int func_001A0100(int* self)
             int fileSlot = func_0019CBE0(D_004A1968, self[1], it->id);
             if (fileSlot >= 0) {
                 sMdfArchive_A0100 arc;
-                func_00314978(&arc);
+                cMdfArchive_cMdfArchive(&arc);
                 void* pkg = func_0019E2B0(mgr, self[0], fileSlot);
                 if (pkg) {
-                    func_00314A40_data(&arc, pkg);
+                    cMdfArchive_attachConstArchive_data(&arc, pkg);
                 }
                 for (int j = i; j < n; j++) {
                     sItem_A0100* jt = &list->items[j];
@@ -1696,7 +1696,7 @@ extern "C" int func_001A0100(int* self)
                         func_0019CC30(D_004A1968, self[1], jt->id, -1);
                     }
                 }
-                func_00314988((int*)&arc, 2);
+                cMdfArchive__cMdfArchive((int*)&arc, 2);
             }
             i = next;
         }

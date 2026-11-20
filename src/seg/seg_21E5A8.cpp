@@ -49,10 +49,10 @@ extern "C" Flags_D5E8 *func_0031D5E8(Flags_D5E8 *self) {
 //100%
 INCLUDE_ASM("seg/seg_21E5A8", func_0031D618);
 #ifdef SKIP_ASM
-void func_0031D790(void *);
+void cCubicSplineInterpolant_purge(void *);
 void operator_delete(int *);
 extern "C" void func_0031D618(int *self, int flags) {
-    func_0031D790(self);
+    cCubicSplineInterpolant_purge(self);
     if (flags & 1) operator_delete(self);
 }
 #endif

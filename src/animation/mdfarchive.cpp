@@ -72,7 +72,7 @@ extern "C" int gameanimcmp(int* lhs, int* rhs)
 #endif
 
 //100%
-INCLUDE_ASM("animation/mdfarchive", func_00314D98);
+INCLUDE_ASM("animation/mdfarchive", cGameAnimMap_cGameAnimMap);
 #ifdef SKIP_ASM
 inline void* operator new[](unsigned int, void* p) { return p; }
 // 0x206-entry member array with an empty constructor (only the dead loop setup remains).
@@ -90,7 +90,7 @@ extern void* cGameAnimMap_TheGameAnimMap;
  *
  * @return @p self
  */
-extern "C" void* func_00314D98(void* self)
+extern "C" void* cGameAnimMap_cGameAnimMap(void* self)
 {
     new (self) sMdfEntry_314D98[518];
     cGameAnimMap_TheGameAnimMap = self;
@@ -99,7 +99,7 @@ extern "C" void* func_00314D98(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("animation/mdfarchive", func_00314DB0);
+INCLUDE_ASM("animation/mdfarchive", cGameAnimMap__cGameAnimMap);
 #ifdef SKIP_ASM
 // cGameAnimMap_TheGameAnimMap is declared void* earlier in the unit.
 void operator_delete(int* ptr);
@@ -109,7 +109,7 @@ void operator_delete(int* ptr);
  *
  * @param flags  bit 0: delete the object itself
  */
-extern "C" void func_00314DB0(int* self, int flags)
+extern "C" void cGameAnimMap__cGameAnimMap(int* self, int flags)
 {
     cGameAnimMap_TheGameAnimMap = 0;
     if (flags & 1) {
@@ -140,7 +140,7 @@ struct sMdfHashTable_00314DD8
  *
  * Hashes the 518 names of D_0048CFC0 ("G_GATEROCK", "G_SIT_CYC", ...) with GetHashValue32() into hash[],
  * sorts order[] by hash with qsort (func_00418EF8; the comparator gameanimcmp reads the hashes through
- * gameanimcmphack, set only during the sort) and fills the 518-entry map with -1 (func_00416210). func_00314E88
+ * gameanimcmphack, set only during the sort) and fills the 518-entry map with -1 (func_00416210). cGameAnimMap_lookupGAD
  * (On Tour lookupGAD) binary-searches this index.
  */
 extern "C" void cGameAnimMap_initMap(sMdfHashTable_00314DD8* self)
@@ -159,7 +159,7 @@ extern "C" void cGameAnimMap_initMap(sMdfHashTable_00314DD8* self)
 #endif
 
 //100%
-INCLUDE_ASM("animation/mdfarchive", func_00314E88);
+INCLUDE_ASM("animation/mdfarchive", cGameAnimMap_lookupGAD);
 #ifdef SKIP_ASM
 struct sMdfIndex_00314E88
 {
@@ -176,7 +176,7 @@ struct sMdfIndex_00314E88
  * @return the game-animation index 0-517, or -1
  */
 // Binary search for `hash`; returns its entry index, or -1.
-extern "C" int func_00314E88(sMdfIndex_00314E88* self, unsigned int hash)
+extern "C" int cGameAnimMap_lookupGAD(sMdfIndex_00314E88* self, unsigned int hash)
 {
     int lo = 0;
     int hi = 518;
@@ -203,19 +203,19 @@ extern "C" int func_00314E88(sMdfIndex_00314E88* self, unsigned int hash)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/mdfarchive", func_00314EF0);
+INCLUDE_ASM("animation/mdfarchive", cGameAnimMap_setMap);
 #ifdef SKIP_ASM
 /**
  * Maps the game animation with name hash @p hash to @p value, if such a game animation exists.
  *
- * Looks the hash up with func_00314E88 and stores @p value in the 518-entry map at +0x1030. Unknown hashes are ignored.
+ * Looks the hash up with cGameAnimMap_lookupGAD and stores @p value in the 518-entry map at +0x1030. Unknown hashes are ignored.
  *
  * @param hash  the animation's name hash
  * @param value  the animation id to map it to (bank in the low 8 bits, index in the upper 24), or kAnimIDInvalid
  */
-extern "C" void func_00314EF0(sMdfIndex_00314E88* self, unsigned int hash, void* value)
+extern "C" void cGameAnimMap_setMap(sMdfIndex_00314E88* self, unsigned int hash, void* value)
 {
-    int i = func_00314E88(self, hash);
+    int i = cGameAnimMap_lookupGAD(self, hash);
     if (i >= 0)
     {
         ((void**)((char*)self + 0x1030))[i] = value;
@@ -224,7 +224,7 @@ extern "C" void func_00314EF0(sMdfIndex_00314E88* self, unsigned int hash, void*
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("animation/mdfarchive", func_00314F30);
+INCLUDE_ASM("animation/mdfarchive", cGameAnimMap_addSource);
 #ifdef SKIP_ASM
 struct sMdfHandle_00314F30
 {
@@ -235,54 +235,54 @@ struct sMdfHandle_00314F30
 static inline void SetKind_00314F30(sMdfHandle_00314F30* h, int v) { h->kind = v; }
 static inline void SetIndex_00314F30(sMdfHandle_00314F30* h, int v) { h->index = v; }
 
-// PORT: func_00314EF0's value slot receives the handle struct by value here.
-void func_00314EF0_handle(sMdfIndex_00314E88* self, unsigned int hash, sMdfHandle_00314F30 value) __asm__("func_00314EF0");
+// PORT: cGameAnimMap_setMap's value slot receives the handle struct by value here.
+void cGameAnimMap_setMap_handle(sMdfIndex_00314E88* self, unsigned int hash, sMdfHandle_00314F30 value) __asm__("cGameAnimMap_setMap");
 
 /**
  * Maps every animation of an animation bank into the game-animation map.
  *
  * For each animation i of @p list (count: short at +0x2 of its header at +0x4; 0x14-byte entries at +0x8 with the
- * name hash first) calls func_00314EF0 with the hash and the id (@p kind in the low 8 bits, i above them).
+ * name hash first) calls cGameAnimMap_setMap with the hash and the id (@p kind in the low 8 bits, i above them).
  *
  * @param kind  the bank number stored in each id
  * @param list  the animation data source (cAdfDataSource) of the bank
  */
-extern "C" void func_00314F30(sMdfIndex_00314E88* self, int kind, char* list)
+extern "C" void cGameAnimMap_addSource(sMdfIndex_00314E88* self, int kind, char* list)
 {
     sMdfHandle_00314F30 handle;
     for (int i = 0; i < *(short*)(*(char**)(list + 4) + 2); i++)
     {
         SetKind_00314F30(&handle, kind);
         SetIndex_00314F30(&handle, i);
-        func_00314EF0_handle(self, *(unsigned int*)(i * 0x14 + *(int*)(list + 8)), handle);
+        cGameAnimMap_setMap_handle(self, *(unsigned int*)(i * 0x14 + *(int*)(list + 8)), handle);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("animation/mdfarchive", func_00314FE8);
+INCLUDE_ASM("animation/mdfarchive", cGameAnimMap_remSource);
 #ifdef SKIP_ASM
 extern void* kAnimIDInvalid;
 
 /**
- * Unmaps every animation of an animation bank: sets each of its name hashes to kAnimIDInvalid (func_00314EF0).
+ * Unmaps every animation of an animation bank: sets each of its name hashes to kAnimIDInvalid (cGameAnimMap_setMap).
  *
- * Same walk as func_00314F30 over @p list's animation table; called before the bank is unloaded.
+ * Same walk as cGameAnimMap_addSource over @p list's animation table; called before the bank is unloaded.
  *
  * @param list  the animation data source (cAdfDataSource) of the bank
  */
-extern "C" void func_00314FE8(sMdfIndex_00314E88* self, char* list)
+extern "C" void cGameAnimMap_remSource(sMdfIndex_00314E88* self, char* list)
 {
     for (int i = 0; i < *(short*)(*(char**)(list + 4) + 2); i++)
     {
-        func_00314EF0(self, *(unsigned int*)(i * 0x14 + *(int*)(list + 8)), kAnimIDInvalid);
+        cGameAnimMap_setMap(self, *(unsigned int*)(i * 0x14 + *(int*)(list + 8)), kAnimIDInvalid);
     }
 }
 #endif
 
 
 //100%
-INCLUDE_ASM("animation/mdfarchive", func_00315070);
+INCLUDE_ASM("animation/mdfarchive", cGameAnimMap_getAnimName);
 #ifdef SKIP_ASM
 extern char str_error[];
 
@@ -294,7 +294,7 @@ extern char str_error[];
  * @param value  the animation id to look for
  * @return the game animation's name, or str_error
  */
-extern "C" char* func_00315070(char* self, void* value)
+extern "C" char* cGameAnimMap_getAnimName(char* self, void* value)
 {
     for (int i = 0; i < 518; i++)
     {

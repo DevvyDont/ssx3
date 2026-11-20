@@ -339,13 +339,13 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBELibrary_getCharacterID(int);
-extern "C" int func_001464D0(void* iface, int player, int charID, int x, int flag);
+extern "C" int cBENewPlayerInterface_isRivalEventLocked(void* iface, int player, int charID, int x, int flag);
 extern "C" int cBENewPlayerInterface_isEventLocked(void* iface, int player, int charID, int x);
 
 /**
  * Tells whether a map event is still locked for the current character.
  *
- * Nothing is locked while cUITemplate_MAP_mMapStyle is below 2. Kinds 4 and 5 ask func_001464D0 (On Tour
+ * Nothing is locked while cUITemplate_MAP_mMapStyle is below 2. Kinds 4 and 5 ask cBENewPlayerInterface_isRivalEventLocked (On Tour
  * isRivalEventLocked) for the peak, with its time-challenge flag 1 for kind 4 and 0 for kind 5; kinds 6 to 11 ask
  * cBENewPlayerInterface_isEventLocked; every other kind is unlocked. The character is cBELibrary_getCharacterID(0).
  *
@@ -360,10 +360,10 @@ extern "C" int cUITemplate_MAP_isMapEventLocked(void* self, int kind, int x)
         return 0;
     }
     if (kind == 4) {
-        return func_001464D0(iface, 0, cBELibrary_getCharacterID(0), x, 1);
+        return cBENewPlayerInterface_isRivalEventLocked(iface, 0, cBELibrary_getCharacterID(0), x, 1);
     }
     if (kind == 5) {
-        return func_001464D0(iface, 0, cBELibrary_getCharacterID(0), x, 0);
+        return cBENewPlayerInterface_isRivalEventLocked(iface, 0, cBELibrary_getCharacterID(0), x, 0);
     }
     if (kind >= 6 && kind <= 11) {
         return cBENewPlayerInterface_isEventLocked(iface, 0, cBELibrary_getCharacterID(0), kind);
@@ -2589,11 +2589,11 @@ void cUIText_setAsciiString(cUIText* text, const char* str);
 int cBERewardInterface_getTrackMedal(void* iface, int player, int charID, int type, int event);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" char* cBENewRaceInterface_getLocationName(void* iface, int event);
-extern "C" int func_00145870(void* iface, int event);
-extern "C" int func_00153350(void* iface, int event);
-extern "C" int func_00153520(void* iface, int a, int event);
+extern "C" int cBENewRaceInterface_getLocationDefaultGameEvent(void* iface, int event);
+extern "C" int cBEMissionInterface_getTotalCollectForSection(void* iface, int event);
+extern "C" int cBEMissionInterface_getCurrentCollectForSection(void* iface, int a, int event);
 extern "C" int cBEMissionInterface_getNumberMissionsOnTrack(void* iface, int event);
-extern "C" int func_001542E0(void* iface, int event);
+extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnTrack(void* iface, int event);
 extern "C" int func_001550E8(void* iface, int a, int event, int type);
 extern "C" char* func_0020A1A8(int t);
 extern "C" void strcpy1(void* dst, void* src);
@@ -2700,12 +2700,12 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(sMapTmpl_207430* self) __asm
  * help kT_CMNHELPStations). Otherwise the help text is the entry's own key when it has one, else depends on the event
  * type: 4 and 5 (rival races) show kT_HELPChalAvail or kT_HELPLockCompRace / kT_HELPLockCompFree by the unlock flag;
  * 6-8 and 9-11 build "kT_HELPLockCompEvent" around the location name (the second with the "%S Jam" format) through the
- * FE locale. Event type 12 is resolved with func_00145870. "SE_Event" and "PEAKno" then name the event type (race,
+ * FE locale. Event type 12 is resolved with cBENewRaceInterface_getLocationDefaultGameEvent. "SE_Event" and "PEAKno" then name the event type (race,
  * slopestyle, superpipe, big air, rival challenge, kT_MAPChal10 / kT_MAPChal9 with "Rival", freeride). In map state 2
  * the path named at +0x55 of the entry is shown (cUITemplate_MAP_showEventPath).
  *
- * For freeride the two data rows show collectibles found / total (func_00153520, func_00153350) and big challenges done
- * / total (func_001542E0, cBEMissionInterface_getNumberMissionsOnTrack, "N/A" when there are none); otherwise the medal
+ * For freeride the two data rows show collectibles found / total (cBEMissionInterface_getCurrentCollectForSection, cBEMissionInterface_getTotalCollectForSection) and big challenges done
+ * / total (cBEMissionInterface_getNumberCompletedMissionsOnTrack, cBEMissionInterface_getNumberMissionsOnTrack, "N/A" when there are none); otherwise the medal
  * (cBERewardInterface_getTrackMedal through cUITemplate_MAP_getMedalStr, or kT_CMNNoMedal) and the top time (races,
  * formatted by func_0020A1A8) or top score (func_001550E8), with D_004A2108 for no result.
  */
@@ -2859,7 +2859,7 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(sMapTmpl_207430* self)
             }
         }
         if (type == 0xC)
-            type = func_00145870(race, desc.w[0]);
+            type = cBENewRaceInterface_getLocationDefaultGameEvent(race, desc.w[0]);
     }
     switch (type) {
     case 0:
@@ -2906,12 +2906,12 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(sMapTmpl_207430* self)
         text = (cUIText*)getObj_207430(self, str_SE_Data1Label);
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_MAPCollectibles));
         text = (cUIText*)getObj_207430(self, str_SE_Data1);
-        sprintf(buf, str_pct_d_pct_d_d, func_00153520(mission, 0, desc.w[0]), func_00153350(mission, desc.w[0]));
+        sprintf(buf, str_pct_d_pct_d_d, cBEMissionInterface_getCurrentCollectForSection(mission, 0, desc.w[0]), cBEMissionInterface_getTotalCollectForSection(mission, desc.w[0]));
         cUIText_setAsciiString(text, buf);
         text = (cUIText*)getObj_207430(self, str_SE_Data2Label);
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_MAPBigChallenges));
         text = (cUIText*)getObj_207430(self, str_SE_Data2);
-        sprintf(buf, str_pct_d_pct_d_d, func_001542E0(mission, desc.w[0]), cBEMissionInterface_getNumberMissionsOnTrack(mission, desc.w[0]));
+        sprintf(buf, str_pct_d_pct_d_d, cBEMissionInterface_getNumberCompletedMissionsOnTrack(mission, desc.w[0]), cBEMissionInterface_getNumberMissionsOnTrack(mission, desc.w[0]));
         cUIText_setAsciiString(text, buf);
         if (cBEMissionInterface_getNumberMissionsOnTrack(mission, desc.w[0]) == 0)
             cUIText_setAsciiString(text, str_N_A);

@@ -132,10 +132,10 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 // PORT: SN soft-float float->double helper called by name
 extern "C" double fptodp(float f);
 extern "C" int cBEMissionInterface_getTotalCollectForPeak(void* iface, int peak);
-extern "C" int func_00153688(void* iface, int a, int b, int peak);
+extern "C" int cBEMissionInterface_getCurrentCollectForPeak1(void* iface, int a, int b, int peak);
 extern "C" int cBEMissionInterface_getNumberMissionsOnPeak(void* iface, int peak);
 extern "C" int cBEMissionInterface_getNumberCompletedMissionsOnPeakByChar(void* iface, int a, int b, int peak);
-extern "C" unsigned int func_00158960(void* self, int b, int c, int d, int e);
+extern "C" unsigned int cBERewardInterface_getTrackHighScore(void* self, int b, int c, int d, int e);
 extern char str_pct_S[];
 extern char str_kT_CMNYouEarnedNum[];
 extern char str_kT_CMNColllectNum[];
@@ -185,7 +185,7 @@ extern "C" void setChallengeStats(cUIText* text, int profileIndex, int character
         void* iface = cBE_getInterface_CE758(cBE_getBE(), 10);
         if (idx == 0) {
             int total = cBEMissionInterface_getTotalCollectForPeak(iface, peak);
-            int current = func_00153688(iface, profileIndex, characterID, peak);
+            int current = cBEMissionInterface_getCurrentCollectForPeak1(iface, profileIndex, characterID, peak);
             int fmt = Loc_CE758(str_kT_CMNColllectNum);
             if (fmt != 0) {
                 sprintf1_CE758(buf, (void*)fmt, current, total);
@@ -203,7 +203,7 @@ extern "C" void setChallengeStats(cUIText* text, int profileIndex, int character
     } else if (kind == 0) {
         int track = D_0045AAD8_CE758[peak][kind][idx].track;
         int type = D_0045AAD8_CE758[peak][kind][idx].type;
-        unsigned int time = func_00158960(reward, profileIndex, characterID, type, track);
+        unsigned int time = cBERewardInterface_getTrackHighScore(reward, profileIndex, characterID, type, track);
         unsigned int min = udiv_CE758(time, 60);
         unsigned int sec = umod_CE758(time, 60);
         sprintf(num, str_pct_02_0f_pct_02_0f, fptodp((float)(int)min), fptodp((float)(int)sec));
@@ -215,7 +215,7 @@ extern "C" void setChallengeStats(cUIText* text, int profileIndex, int character
     } else if (kind == 1) {
         int track = D_0045AAD8_CE758[peak][kind][idx].track;
         int type = D_0045AAD8_CE758[peak][kind][idx].type;
-        int current = func_00158960(reward, profileIndex, characterID, type, track);
+        int current = cBERewardInterface_getTrackHighScore(reward, profileIndex, characterID, type, track);
         int fmt = Loc_CE758(str_kT_OVRCMNYourBestScore);
         if (fmt != 0) {
             sprintf1_CE758(buf, (void*)fmt, current);

@@ -2347,19 +2347,19 @@ INCLUDE_ASM("seg/seg_1218", func_00103BE0);
 #ifdef SKIP_ASM
 extern char* cGameAnimMap_TheGameAnimMap;
 extern "C" void cAnimSequence_setSubAnim(void*, int, int);
-extern "C" void func_00313CF0(void*, int, float);
-extern "C" int func_00313800(void*, float);
+extern "C" void cAnimSequence_setSubAnimTime(void*, int, float);
+extern "C" int cAnimSequence_updateWeight(void*, float);
 extern "C" void cAnimSequencer_expire(void*, void*);
 extern "C" int func_00103BE0(void* self, void* x, char* anim, int posAnim, int negAnim, float dt, float weight)
 {
     if (weight < 0.0f) {
         cAnimSequence_setSubAnim(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + negAnim * 4 + 0x1030));
-        func_00313CF0(anim, 0, -weight * *(float*)(anim + 0x10));
+        cAnimSequence_setSubAnimTime(anim, 0, -weight * *(float*)(anim + 0x10));
     } else {
         cAnimSequence_setSubAnim(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + posAnim * 4 + 0x1030));
-        func_00313CF0(anim, 0, weight * *(float*)(anim + 0x10));
+        cAnimSequence_setSubAnimTime(anim, 0, weight * *(float*)(anim + 0x10));
     }
-    if (func_00313800(anim, dt * 0.01666666753590107f) != 0) {
+    if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
         cAnimSequencer_expire(x, anim);
         return 1;
     }
@@ -2371,12 +2371,12 @@ extern "C" int func_00103BE0(void* self, void* x, char* anim, int posAnim, int n
 INCLUDE_ASM("seg/seg_1218", func_00103CC8);
 #ifdef SKIP_ASM
 extern char* cGameAnimMap_TheGameAnimMap;
-extern "C" void func_00313D40(void*, int, int);
-extern "C" void func_003135B0(void*, int, float);
+extern "C" void cAnimSequence_setSubAnimType(void*, int, int);
+extern "C" void cAnimSequence_updateSubAnim(void*, int, float);
 extern "C" void cAnimSequence_setSubAnim(void*, int, int);
-extern "C" void func_00313CF0(void*, int, float);
-extern "C" void func_00313D28(void*, int, float);
-extern "C" int func_00313800(void*, float);
+extern "C" void cAnimSequence_setSubAnimTime(void*, int, float);
+extern "C" void cAnimSequence_setSubAnimWeight(void*, int, float);
+extern "C" int cAnimSequence_updateWeight(void*, float);
 extern "C" void cAnimSequencer_expire(void*, void*);
 
 extern "C" int func_00103CC8(void* self, void* x, char* anim, int negAnim, int cenAnim, float dt, float w, int posAnim)
@@ -2388,13 +2388,13 @@ extern "C" int func_00103CC8(void* self, void* x, char* anim, int negAnim, int c
         w = -w;
         cAnimSequence_setSubAnim(anim, 1, *(int*)(cGameAnimMap_TheGameAnimMap + negAnim * 4 + 0x1030));
     }
-    func_00313D28(anim, 0, 1.0f - w);
-    func_00313D28(anim, 1, w);
-    func_00313D40(anim, 0, 1);
+    cAnimSequence_setSubAnimWeight(anim, 0, 1.0f - w);
+    cAnimSequence_setSubAnimWeight(anim, 1, w);
+    cAnimSequence_setSubAnimType(anim, 0, 1);
     float stepTime = dt * 0.01666666753590107f;
-    func_003135B0(anim, 0, stepTime);
-    func_00313CF0(anim, 1, *(float*)(anim + 8) / *(float*)(anim + 0x10) * *(float*)(anim + 0x2C));
-    if (func_00313800(anim, stepTime)) {
+    cAnimSequence_updateSubAnim(anim, 0, stepTime);
+    cAnimSequence_setSubAnimTime(anim, 1, *(float*)(anim + 8) / *(float*)(anim + 0x10) * *(float*)(anim + 0x2C));
+    if (cAnimSequence_updateWeight(anim, stepTime)) {
         cAnimSequencer_expire(x, anim);
         return 1;
     }
@@ -2406,12 +2406,12 @@ extern "C" int func_00103CC8(void* self, void* x, char* anim, int negAnim, int c
 INCLUDE_ASM("seg/seg_1218", func_00103E28);
 #ifdef SKIP_ASM
 extern char* cGameAnimMap_TheGameAnimMap;
-extern "C" void func_00313D40(void*, int, int);
-extern "C" void func_003135B0(void*, int, float);
+extern "C" void cAnimSequence_setSubAnimType(void*, int, int);
+extern "C" void cAnimSequence_updateSubAnim(void*, int, float);
 extern "C" void cAnimSequence_setSubAnim(void*, int, int);
-extern "C" void func_00313CF0(void*, int, float);
-extern "C" void func_00313D28(void*, int, float);
-extern "C" int func_00313800(void*, float);
+extern "C" void cAnimSequence_setSubAnimTime(void*, int, float);
+extern "C" void cAnimSequence_setSubAnimWeight(void*, int, float);
+extern "C" int cAnimSequence_updateWeight(void*, float);
 extern "C" void cAnimSequencer_expire(void*, void*);
 
 extern "C" int func_00103E28(void* self, void* x, char* anim, int negEndAnim, int negMidAnim, int cenAnim, int posMidAnim, int posEndAnim, float dt, float weight)
@@ -2438,16 +2438,16 @@ extern "C" int func_00103E28(void* self, void* x, char* anim, int negEndAnim, in
     if (*(int*)(cGameAnimMap_TheGameAnimMap + from * 4 + 0x1030) != *(int*)(anim + 4)) {
         float frameFraction = *(float*)(anim + 8) / *(float*)(anim + 0x10);
         cAnimSequence_setSubAnim(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + from * 4 + 0x1030));
-        func_00313CF0(anim, 0, *(float*)(anim + 0x10) * frameFraction);
+        cAnimSequence_setSubAnimTime(anim, 0, *(float*)(anim + 0x10) * frameFraction);
     }
     cAnimSequence_setSubAnim(anim, 1, *(int*)(cGameAnimMap_TheGameAnimMap + to * 4 + 0x1030));
-    func_00313D28(anim, 0, w);
-    func_00313D28(anim, 1, 1.0f - w);
-    func_00313D40(anim, 0, 1);
+    cAnimSequence_setSubAnimWeight(anim, 0, w);
+    cAnimSequence_setSubAnimWeight(anim, 1, 1.0f - w);
+    cAnimSequence_setSubAnimType(anim, 0, 1);
     float stepTime = dt * 0.01666666753590107f;
-    func_003135B0(anim, 0, stepTime);
-    func_00313CF0(anim, 1, *(float*)(anim + 8) / *(float*)(anim + 0x10) * *(float*)(anim + 0x2C));
-    if (func_00313800(anim, stepTime)) {
+    cAnimSequence_updateSubAnim(anim, 0, stepTime);
+    cAnimSequence_setSubAnimTime(anim, 1, *(float*)(anim + 8) / *(float*)(anim + 0x10) * *(float*)(anim + 0x2C));
+    if (cAnimSequence_updateWeight(anim, stepTime)) {
         cAnimSequencer_expire(x, anim);
         return 1;
     }
@@ -2459,27 +2459,27 @@ extern "C" int func_00103E28(void* self, void* x, char* anim, int negEndAnim, in
 INCLUDE_ASM("seg/seg_1218", func_00103FF8);
 #ifdef SKIP_ASM
 extern char* cGameAnimMap_TheGameAnimMap;
-extern "C" void func_00313D40(void*, int, int);
-extern "C" void func_003135B0(void*, int, float);
+extern "C" void cAnimSequence_setSubAnimType(void*, int, int);
+extern "C" void cAnimSequence_updateSubAnim(void*, int, float);
 extern "C" void cAnimSequence_setSubAnim(void*, int, int);
-extern "C" void func_00313CF0(void*, int, float);
-extern "C" int func_00313800(void*, float);
+extern "C" void cAnimSequence_setSubAnimTime(void*, int, float);
+extern "C" int cAnimSequence_updateWeight(void*, float);
 extern "C" void cAnimSequencer_expire(void*, void*);
 
 extern "C" int func_00103FF8(void* self, void* x, char* anim, int intoAnim, float dt, int cycleAnim)
 {
     if (*(int*)(anim + 4) == *(int*)(cGameAnimMap_TheGameAnimMap + intoAnim * 4 + 0x1030)) {
-        func_00313D40(anim, 0, 0);
-        func_003135B0(anim, 0, dt * 0.01666666753590107f);
+        cAnimSequence_setSubAnimType(anim, 0, 0);
+        cAnimSequence_updateSubAnim(anim, 0, dt * 0.01666666753590107f);
         if (*(float*)(anim + 8) >= *(float*)(anim + 0x10)) {
             cAnimSequence_setSubAnim(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + cycleAnim * 4 + 0x1030));
-            func_00313D40(anim, 0, 1);
-            func_00313CF0(anim, 0, 0.0f);
+            cAnimSequence_setSubAnimType(anim, 0, 1);
+            cAnimSequence_setSubAnimTime(anim, 0, 0.0f);
         }
     } else {
-        func_003135B0(anim, 0, dt * 0.01666666753590107f);
+        cAnimSequence_updateSubAnim(anim, 0, dt * 0.01666666753590107f);
     }
-    if (func_00313800(anim, dt * 0.01666666753590107f)) {
+    if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f)) {
         cAnimSequencer_expire(x, anim);
         return 1;
     }
@@ -2633,8 +2633,8 @@ extern "C" int func_00104358(char* self, void* x, char* anim, float dt) {
     float absSlew15 = vAbs_4358(*(float*)(rider + 0x2A4));
     float absSlew16 = vAbs_4358(*(float*)(rider + 0x2B0));
     float framePercent = (absSlew16 < absSlew15) ? absSlew15 : absSlew16;
-    func_00313CF0(anim, 0, framePercent * *(float*)(anim + 0x10));
-    if (func_00313800(anim, dt * 0.01666666753590107f) != 0) {
+    cAnimSequence_setSubAnimTime(anim, 0, framePercent * *(float*)(anim + 0x10));
+    if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
         cAnimSequencer_expire(x, anim);
         return 1;
     }
@@ -2673,19 +2673,19 @@ extern "C" int func_001043F8(char* self, void* x, char* anim, float dt)
     case 304: slot = 169; break;
     }
     cAnimSequence_setSubAnim(anim, 1, *(int*)(cGameAnimMap_TheGameAnimMap + slot * 4 + 0x1030));
-    func_00313D40(anim, 1, 1);
+    cAnimSequence_setSubAnimType(anim, 1, 1);
     char* rider = *(char**)(self + 0x60);
     float absSlew14 = vAbs_43F8(*(float*)(rider + 0x298));
     float absSlew13 = vAbs_43F8(*(float*)(rider + 0x28C));
     float framePercent = (absSlew13 < absSlew14) ? absSlew14 : absSlew13;
     framePercent = clamp_43F8(framePercent, 0.0f, 1.0f);
     float w = framePercent * 0.75f + 0.25f;
-    func_00313D28(anim, 0, 1.0f - w);
-    func_00313D28(anim, 1, w);
-    func_00313CF0(anim, 0, framePercent * *(float*)(anim + 0x10));
+    cAnimSequence_setSubAnimWeight(anim, 0, 1.0f - w);
+    cAnimSequence_setSubAnimWeight(anim, 1, w);
+    cAnimSequence_setSubAnimTime(anim, 0, framePercent * *(float*)(anim + 0x10));
     float stepTime = dt * 0.01666666753590107f;
-    func_003135B0(anim, 1, stepTime);
-    if (func_00313800(anim, stepTime)) {
+    cAnimSequence_updateSubAnim(anim, 1, stepTime);
+    if (cAnimSequence_updateWeight(anim, stepTime)) {
         cAnimSequencer_expire(x, anim);
         return 1;
     }
@@ -2708,8 +2708,8 @@ extern "C" void func_001045B8(int riderAnim, int sequencer, int sequence) {
 INCLUDE_ASM("seg/seg_1218", func_001045D8);
 #ifdef SKIP_ASM
 extern "C" int func_001045D8(char* self, void* x, char* anim, float dt) {
-    func_00313CF0(anim, 0, *(float*)(anim + 0x10) * *(float*)(*(char**)(*(char**)(self + 0x60) + 0x77C) + 0x2A0));
-    if (func_00313800(anim, dt * 0.01666666753590107f) != 0) {
+    cAnimSequence_setSubAnimTime(anim, 0, *(float*)(anim + 0x10) * *(float*)(*(char**)(*(char**)(self + 0x60) + 0x77C) + 0x2A0));
+    if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
         cAnimSequencer_expire(x, anim);
         return 1;
     }
@@ -2775,8 +2775,8 @@ extern "C" int func_00104728(char* self, void* x, char* anim, float dt) {
     } else {
         framePercent = *(float*)(*(char**)(self + 0x60) + 0x268);
     }
-    func_00313CF0(anim, 0, framePercent * *(float*)(anim + 0x10));
-    if (func_00313800(anim, dt * 0.01666666753590107f) != 0) {
+    cAnimSequence_setSubAnimTime(anim, 0, framePercent * *(float*)(anim + 0x10));
+    if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
         cAnimSequencer_expire(x, anim);
         return 1;
     }
@@ -2809,8 +2809,8 @@ extern "C" int func_001047F0(char* self, void* x, char* anim, float dt) {
     } else {
         framePercent = vAbs_47F0(*(float*)(*(char**)(self + 0x60) + 0x280));
     }
-    func_00313CF0(anim, 0, clamp_47F0(framePercent, 0.0f, 1.0f) * *(float*)(anim + 0x10));
-    if (func_00313800(anim, dt * 0.01666666753590107f) != 0) {
+    cAnimSequence_setSubAnimTime(anim, 0, clamp_47F0(framePercent, 0.0f, 1.0f) * *(float*)(anim + 0x10));
+    if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
         cAnimSequencer_expire(x, anim);
         return 1;
     }
@@ -2822,14 +2822,14 @@ extern "C" int func_001047F0(char* self, void* x, char* anim, float dt) {
 INCLUDE_ASM("seg/seg_1218", func_001048C0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_003135B0_48C0(void*, int, float) __asm__("func_003135B0");
+extern "C" int cAnimSequence_updateSubAnim_48C0(void*, int, float) __asm__("cAnimSequence_updateSubAnim");
 extern "C" int func_001048C0(void* self, void* x, void* anim, float dt) {
     float stepTime = dt * 0.01666666753590107f;
     int done;
-    if (func_003135B0_48C0(anim, 0, stepTime) != 0) {
+    if (cAnimSequence_updateSubAnim_48C0(anim, 0, stepTime) != 0) {
         done = 1;
     } else {
-        done = func_00313800(anim, stepTime);
+        done = cAnimSequence_updateWeight(anim, stepTime);
     }
     if (done == 0) {
         return 0;
@@ -2843,14 +2843,14 @@ extern "C" int func_001048C0(void* self, void* x, void* anim, float dt) {
 INCLUDE_ASM("seg/seg_1218", func_00104940);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_003135B0_4940(void*, int, float) __asm__("func_003135B0");
+extern "C" int cAnimSequence_updateSubAnim_4940(void*, int, float) __asm__("cAnimSequence_updateSubAnim");
 extern "C" int func_00104940(void* self, void* x, void* anim, float dt) {
     float stepTime = dt * 0.01666666753590107f;
     int done;
-    if (func_003135B0_4940(anim, 0, stepTime) != 0) {
+    if (cAnimSequence_updateSubAnim_4940(anim, 0, stepTime) != 0) {
         done = 1;
     } else {
-        done = func_00313800(anim, stepTime);
+        done = cAnimSequence_updateWeight(anim, stepTime);
     }
     if (done == 0) {
         return 0;
@@ -2864,14 +2864,14 @@ extern "C" int func_00104940(void* self, void* x, void* anim, float dt) {
 INCLUDE_ASM("seg/seg_1218", func_001049C0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_003135B0_49C0(void*, int, float) __asm__("func_003135B0");
+extern "C" int cAnimSequence_updateSubAnim_49C0(void*, int, float) __asm__("cAnimSequence_updateSubAnim");
 extern "C" int func_001049C0(void* self, void* x, void* anim, float dt) {
     float stepTime = dt * 0.01666666753590107f;
     int done;
-    if (func_003135B0_49C0(anim, 0, stepTime) != 0) {
+    if (cAnimSequence_updateSubAnim_49C0(anim, 0, stepTime) != 0) {
         done = 1;
     } else {
-        done = func_00313800(anim, stepTime);
+        done = cAnimSequence_updateWeight(anim, stepTime);
     }
     if (done == 0) {
         return 0;
@@ -2885,10 +2885,10 @@ extern "C" int func_001049C0(void* self, void* x, void* anim, float dt) {
 INCLUDE_ASM("seg/seg_1218", func_00104A40);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00312B18_4A40(int, int, int, int) __asm__("func_00312B18");
+extern "C" void cRiderAnimBase_playInto_4A40(int, int, int, int) __asm__("cRiderAnimBase_playInto");
 
 extern "C" void func_00104A40(int riderAnim, int sequencer, int sequence) {
-    func_00312B18_4A40(riderAnim, sequencer, sequence, 287);
+    cRiderAnimBase_playInto_4A40(riderAnim, sequencer, sequence, 287);
 }
 #endif
 
@@ -2897,28 +2897,28 @@ INCLUDE_ASM("seg/seg_1218", func_00104A60);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_00312B18_4A60(void*, void*, int*, int) __asm__("func_00312B18");
+extern "C" int cRiderAnimBase_playInto_4A60(void*, void*, int*, int) __asm__("cRiderAnimBase_playInto");
 
 // Plays the landing animation that matches the current trick state.
 extern "C" int func_00104A60(void* riderAnim, void* sequencer, int* sequence)
 {
     switch (*sequence) {
     case 271: case 285:
-        return func_00312B18_4A60(riderAnim, sequencer, sequence, 291);
+        return cRiderAnimBase_playInto_4A60(riderAnim, sequencer, sequence, 291);
     case 272: case 280: case 281: case 286:
-        return func_00312B18_4A60(riderAnim, sequencer, sequence, 292);
+        return cRiderAnimBase_playInto_4A60(riderAnim, sequencer, sequence, 292);
     case 269: case 278: case 283:
-        return func_00312B18_4A60(riderAnim, sequencer, sequence, 289);
+        return cRiderAnimBase_playInto_4A60(riderAnim, sequencer, sequence, 289);
     case 270: case 279: case 284:
-        return func_00312B18_4A60(riderAnim, sequencer, sequence, 290);
+        return cRiderAnimBase_playInto_4A60(riderAnim, sequencer, sequence, 290);
     case 273:
-        return func_00312B18_4A60(riderAnim, sequencer, sequence, 293);
+        return cRiderAnimBase_playInto_4A60(riderAnim, sequencer, sequence, 293);
     case 274:
-        return func_00312B18_4A60(riderAnim, sequencer, sequence, 294);
+        return cRiderAnimBase_playInto_4A60(riderAnim, sequencer, sequence, 294);
     case 275:
-        return func_00312B18_4A60(riderAnim, sequencer, sequence, 295);
+        return cRiderAnimBase_playInto_4A60(riderAnim, sequencer, sequence, 295);
     case 276:
-        return func_00312B18_4A60(riderAnim, sequencer, sequence, 296);
+        return cRiderAnimBase_playInto_4A60(riderAnim, sequencer, sequence, 296);
     }
     return 438;
 }
@@ -2928,13 +2928,13 @@ extern "C" int func_00104A60(void* riderAnim, void* sequencer, int* sequence)
 INCLUDE_ASM("seg/seg_1218", func_00104B48);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_00312BD0_4B48(void*, int, int, int) __asm__("func_00312BD0");
+extern "C" int cRiderAnimBase_playBlendIn_4B48(void*, int, int, int) __asm__("cRiderAnimBase_playBlendIn");
 
 extern "C" int func_00104B48(void *riderAnim, int sequencer, int sequence) {
     if (*(int *)((char*)riderAnim + 0x64) != 0) {
-        return func_00312BD0_4B48(riderAnim, sequencer, sequence, 436);
+        return cRiderAnimBase_playBlendIn_4B48(riderAnim, sequencer, sequence, 436);
     }
-    return func_00312BD0_4B48(riderAnim, sequencer, sequence, 287);
+    return cRiderAnimBase_playBlendIn_4B48(riderAnim, sequencer, sequence, 287);
 }
 #endif
 
@@ -2942,10 +2942,10 @@ extern "C" int func_00104B48(void *riderAnim, int sequencer, int sequence) {
 INCLUDE_ASM("seg/seg_1218", func_00104B78);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00312B18_4B78(int, int, int, int) __asm__("func_00312B18");
+extern "C" void cRiderAnimBase_playInto_4B78(int, int, int, int) __asm__("cRiderAnimBase_playInto");
 
 extern "C" void func_00104B78(int riderAnim, int sequencer, int sequence) {
-    func_00312B18_4B78(riderAnim, sequencer, sequence, 5);
+    cRiderAnimBase_playInto_4B78(riderAnim, sequencer, sequence, 5);
 }
 #endif
 
@@ -2953,10 +2953,10 @@ extern "C" void func_00104B78(int riderAnim, int sequencer, int sequence) {
 INCLUDE_ASM("seg/seg_1218", func_00104B98);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00312B18_4B98(int, int, int, int) __asm__("func_00312B18");
+extern "C" void cRiderAnimBase_playInto_4B98(int, int, int, int) __asm__("cRiderAnimBase_playInto");
 
 extern "C" void func_00104B98(int riderAnim, int sequencer, int sequence) {
-    func_00312B18_4B98(riderAnim, sequencer, sequence, 3);
+    cRiderAnimBase_playInto_4B98(riderAnim, sequencer, sequence, 3);
 }
 #endif
 
@@ -2964,10 +2964,10 @@ extern "C" void func_00104B98(int riderAnim, int sequencer, int sequence) {
 INCLUDE_ASM("seg/seg_1218", func_00104BB8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00312B18_4BB8(int, int, int, int) __asm__("func_00312B18");
+extern "C" void cRiderAnimBase_playInto_4BB8(int, int, int, int) __asm__("cRiderAnimBase_playInto");
 
 extern "C" void func_00104BB8(int riderAnim, int sequencer, int sequence) {
-    func_00312B18_4BB8(riderAnim, sequencer, sequence, 19);
+    cRiderAnimBase_playInto_4BB8(riderAnim, sequencer, sequence, 19);
 }
 #endif
 
@@ -2975,13 +2975,13 @@ extern "C" void func_00104BB8(int riderAnim, int sequencer, int sequence) {
 INCLUDE_ASM("seg/seg_1218", func_00104BD8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_00312BD0_4BD8(void *, int, int, int) __asm__("func_00312BD0");
+extern "C" int cRiderAnimBase_playBlendIn_4BD8(void *, int, int, int) __asm__("cRiderAnimBase_playBlendIn");
 
 extern "C" int func_00104BD8(void *riderAnim, int sequencer, int sequence) {
     if ((*(int *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x330))) == 1) {
-        return func_00312BD0_4BD8(riderAnim, sequencer, sequence, 0x1C);
+        return cRiderAnimBase_playBlendIn_4BD8(riderAnim, sequencer, sequence, 0x1C);
     }
-    return func_00312BD0_4BD8(riderAnim, sequencer, sequence, 36);
+    return cRiderAnimBase_playBlendIn_4BD8(riderAnim, sequencer, sequence, 36);
 }
 #endif
 
@@ -2989,10 +2989,10 @@ extern "C" int func_00104BD8(void *riderAnim, int sequencer, int sequence) {
 INCLUDE_ASM("seg/seg_1218", func_00104C18);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00312BD0_4C18(int, int, int, int) __asm__("func_00312BD0");
+extern "C" void cRiderAnimBase_playBlendIn_4C18(int, int, int, int) __asm__("cRiderAnimBase_playBlendIn");
 
 extern "C" void func_00104C18(int riderAnim, int sequencer, int sequence) {
-    func_00312BD0_4C18(riderAnim, sequencer, sequence, 5);
+    cRiderAnimBase_playBlendIn_4C18(riderAnim, sequencer, sequence, 5);
 }
 #endif
 
@@ -3000,7 +3000,7 @@ extern "C" void func_00104C18(int riderAnim, int sequencer, int sequence) {
 INCLUDE_ASM("seg/seg_1218", func_00104C38);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00312BD0_4C38(int, int, int*, int) __asm__("func_00312BD0");
+extern "C" void cRiderAnimBase_playBlendIn_4C38(int, int, int*, int) __asm__("cRiderAnimBase_playBlendIn");
 
 extern "C" void func_00104C38(int riderAnim, int sequencer, int *sequence) {
     int var_7;
@@ -3015,7 +3015,7 @@ extern "C" void func_00104C38(int riderAnim, int sequencer, int *sequence) {
         var_7 = 18;
         break;
     }
-    func_00312BD0_4C38(riderAnim, sequencer, sequence, var_7);
+    cRiderAnimBase_playBlendIn_4C38(riderAnim, sequencer, sequence, var_7);
 }
 #endif
 
@@ -3023,10 +3023,10 @@ extern "C" void func_00104C38(int riderAnim, int sequencer, int *sequence) {
 INCLUDE_ASM("seg/seg_1218", func_00104C80);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00312BD0_4C80(int, int, int, int) __asm__("func_00312BD0");
+extern "C" void cRiderAnimBase_playBlendIn_4C80(int, int, int, int) __asm__("cRiderAnimBase_playBlendIn");
 
 extern "C" void func_00104C80(int riderAnim, int sequencer, int sequence) {
-    func_00312BD0_4C80(riderAnim, sequencer, sequence, 434);
+    cRiderAnimBase_playBlendIn_4C80(riderAnim, sequencer, sequence, 434);
 }
 #endif
 
@@ -3126,13 +3126,13 @@ INCLUDE_ASM("seg/seg_1218", func_00104D68);
 #ifdef SKIP_ASM
 class cStream_4D68 {
 public:
-    virtual void Read(void* dst, int n);
+    virtual void write(void* src, int n);  // slot 1 (slot 2 is read)
 };
-extern "C" void func_003147F0(void*, cStream_4D68*);
+extern "C" void cAnimSequencer_writeToReplayFrame(void*, cStream_4D68*);
 extern "C" void func_00104D68(char* self, cStream_4D68* stream) {
-    stream->Read(self, 80);
+    stream->write(self, 80);
     for (int i = 0; i < 6; i++) {
-        func_003147F0(*(char**)(self + 0x50) + i * 8, stream);
+        cAnimSequencer_writeToReplayFrame(*(char**)(self + 0x50) + i * 8, stream);
     }
 }
 #endif
@@ -3146,12 +3146,12 @@ public:
     virtual void Read(void* dst, int n);
 };
 extern "C" void cAnimSequencer_expireAll(void*);
-extern "C" void func_00314880(void*, cStream_4DE0*);
+extern "C" void cAnimSequencer_readFromReplayFrame(void*, cStream_4DE0*);
 extern "C" void func_00104DE0(char* self, cStream_4DE0* stream) {
     stream->Read(self, 80);
     for (int i = 0; i < 6; i++) {
         cAnimSequencer_expireAll(*(char**)(self + 0x50) + i * 8);
-        func_00314880(*(char**)(self + 0x50) + i * 8, stream);
+        cAnimSequencer_readFromReplayFrame(*(char**)(self + 0x50) + i * 8, stream);
     }
 }
 #endif
@@ -3711,7 +3711,7 @@ int cRider_getMotionState(void*);
 // PORT: the project names this cRider_setControlState__FPv (one param); callers pass a state too.
 void cRider_setControlState_57B8(void* self, int v) __asm__("cRider_setControlState__FPv");
 int cRiderAnimBase_getCurrentAnimID(void* anim, int ch);
-extern "C" float func_00312AB0(void* anim, int ch);
+extern "C" float cRiderAnimBase_getCurrentAnimFramePercent(void* anim, int ch);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cRiderAnimBase_play(void*, int, int, float);
 extern "C" void cRider_updateOrientationImplicit(cRider* self);
@@ -3954,7 +3954,7 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
         rider->mVelocity = Add_57B8(w, Scale_57B8(hit->n, out));
         sVEf_57B8* vt = *(sVEf_57B8**)&rider->mVtbl;
         vt[kRiderVt_vibrationBump].fn((char*)rider + vt[kRiderVt_vibrationBump].delta, vn);
-        if (cRiderAnimBase_getCurrentAnimID(rider->mRiderAnim, 2) != 268 || func_00312AB0(rider->mRiderAnim, 2) > 0.20000000298023224f) {
+        if (cRiderAnimBase_getCurrentAnimID(rider->mRiderAnim, 2) != 268 || cRiderAnimBase_getCurrentAnimFramePercent(rider->mRiderAnim, 2) > 0.20000000298023224f) {
             rider->mSurfaceType = 0;
             cRider_flagEventLand(rider, 0, 0, 0, hit, speed);
             cRiderMetrix_evTakeoff(rider->mMetrix, rider->IsRidingFakie != rider->IsGoofyStance, 0);

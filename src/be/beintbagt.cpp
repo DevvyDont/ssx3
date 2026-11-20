@@ -46,7 +46,7 @@ void* cBEBAGTInterface_getThis()
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_0014F960);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_submit);
 #ifdef SKIP_ASM
 struct sBagtRec {
     short data[0xFF];
@@ -67,7 +67,7 @@ extern sBagtRec D_00530EC0[3][10];
  * A record is 85 six-byte entries, one per grab: two chosen-variant bytes and two 16-bit variant masks (see
  * func_0014FEA8, func_0014FFB8, func_00150048).
  */
-extern "C" void func_0014F960(void)
+extern "C" void cBEBAGTInterface_submit(void)
 {
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 10; j++) {
@@ -78,7 +78,7 @@ extern "C" void func_0014F960(void)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_0014FAD0);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_discard);
 #ifdef SKIP_ASM
 extern sBagtSlot D_004A788E[3][10];
 extern sBagtRec D_00530EC0[3][10];
@@ -87,7 +87,7 @@ extern sBagtRec D_00530EC0[3][10];
  * Drops staged trick changes: copies each character profile's 0x1FE-byte trick record (D_004A788E, +0xBE6 of each
  * 0xF88-byte profile entry) back into D_00530EC0 (3 profiles x 10 characters).
  */
-extern "C" void func_0014FAD0(void)
+extern "C" void cBEBAGTInterface_discard(void)
 {
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 10; j++) {
@@ -107,7 +107,7 @@ extern sBagtRec D_00530EC0[3][10];
  * Reloads the staged trick records of one profile slot: copies the 10 characters' 0x1FE-byte records of profile @p i
  * (D_004A788E) into D_00530EC0[@p i].
  *
- * func_0014DE28 calls it with the profile index.
+ * cBE_newProfile calls it with the profile index.
  *
  * @param i  the profile slot, 0-2
  */
@@ -204,8 +204,8 @@ extern sPad20 D_0045AEB8;
  * @p second is set, else the first; -1 when the grab has no uber variants.
  *
  * The grab's 0x14-byte record in D_0045AEB8 holds the variant count at +0xC. The staged record is D_00530EC0 for the
- * rider's profile and character. The uber anim, cycle anim and name getters (func_00150198, func_001502C8,
- * func_001503F8) pass @p second = uber level >= 5.
+ * rider's profile and character. The uber anim, cycle anim and name getters (cBEBAGTInterface_getUberAnim, cBEBAGTInterface_getUberCycleAnim,
+ * cBEBAGTInterface_getUberName) pass @p second = uber level >= 5.
  *
  * @param rider  the rider (selects profile and character)
  * @param idx  the grab
@@ -331,7 +331,7 @@ struct sPad20 { char x; int pad[4]; };
 extern sPad20 D_0045AEB8;
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_001500D8);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabAnim);
 #ifdef SKIP_ASM
 /**
  * Returns the start animation of grab @p grabIndex: the halfword at +0x0 of its 0x14-byte record in D_0045AEB8.
@@ -342,14 +342,14 @@ INCLUDE_ASM("be/beintbagt", func_001500D8);
  * @param grabIndex  the grab
  * @return the animation id
  */
-extern "C" unsigned short func_001500D8(void* self, int rider, int grabIndex)
+extern "C" unsigned short cBEBAGTInterface_getGrabAnim(void* self, int rider, int grabIndex)
 {
     return *(unsigned short*)((char*)&D_0045AEB8 + grabIndex * 0x14);
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_001500F8);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabCycleAnim);
 #ifdef SKIP_ASM
 /**
  * Returns the held (looping) animation of grab @p grabIndex: the halfword at +0x2 of its record in D_0045AEB8.
@@ -360,7 +360,7 @@ INCLUDE_ASM("be/beintbagt", func_001500F8);
  * @param grabIndex  the grab
  * @return the animation id
  */
-extern "C" unsigned short func_001500F8(void* self, int rider, int grabIndex)
+extern "C" unsigned short cBEBAGTInterface_getGrabCycleAnim(void* self, int rider, int grabIndex)
 {
     char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
     return *(unsigned short*)(grabInfo + 0x2);
@@ -368,7 +368,7 @@ extern "C" unsigned short func_001500F8(void* self, int rider, int grabIndex)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_00150118);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabName);
 #ifdef SKIP_ASM
 /**
  * Returns the trick id of grab @p grabIndex: the halfword at +0x4 of its record in D_0045AEB8, scored when the grab is held
@@ -378,7 +378,7 @@ INCLUDE_ASM("be/beintbagt", func_00150118);
  * @param grabIndex  the grab
  * @return the trick id
  */
-extern "C" unsigned short func_00150118(void* self, int rider, int grabIndex)
+extern "C" unsigned short cBEBAGTInterface_getGrabName(void* self, int rider, int grabIndex)
 {
     char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
     return *(unsigned short*)(grabInfo + 0x4);
@@ -386,7 +386,7 @@ extern "C" unsigned short func_00150118(void* self, int rider, int grabIndex)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_00150138);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getTweakAnim);
 #ifdef SKIP_ASM
 /**
  * Returns the tweak animation of grab @p grabIndex: the halfword at +0x6 of its record in D_0045AEB8. @p rider is unused.
@@ -395,7 +395,7 @@ INCLUDE_ASM("be/beintbagt", func_00150138);
  * @param grabIndex  the grab
  * @return the animation id
  */
-extern "C" unsigned short func_00150138(void* self, int rider, int grabIndex)
+extern "C" unsigned short cBEBAGTInterface_getTweakAnim(void* self, int rider, int grabIndex)
 {
     char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
     return *(unsigned short*)(grabInfo + 0x6);
@@ -403,7 +403,7 @@ extern "C" unsigned short func_00150138(void* self, int rider, int grabIndex)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_00150158);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getTweakCycleAnim);
 #ifdef SKIP_ASM
 /**
  * Returns the held tweak animation of grab @p grabIndex: the halfword at +0x8 of its record in D_0045AEB8 (438 = none).
@@ -413,7 +413,7 @@ INCLUDE_ASM("be/beintbagt", func_00150158);
  * @param grabIndex  the grab
  * @return the animation id
  */
-extern "C" unsigned short func_00150158(void* self, int rider, int grabIndex)
+extern "C" unsigned short cBEBAGTInterface_getTweakCycleAnim(void* self, int rider, int grabIndex)
 {
     char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
     return *(unsigned short*)(grabInfo + 0x8);
@@ -421,7 +421,7 @@ extern "C" unsigned short func_00150158(void* self, int rider, int grabIndex)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_00150178);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getTweakName);
 #ifdef SKIP_ASM
 /**
  * Returns the trick id of grab @p grabIndex's tweak: the halfword at +0xA of its record in D_0045AEB8. @p rider is unused.
@@ -430,7 +430,7 @@ INCLUDE_ASM("be/beintbagt", func_00150178);
  * @param grabIndex  the grab
  * @return the trick id
  */
-extern "C" unsigned short func_00150178(void* self, int rider, int grabIndex)
+extern "C" unsigned short cBEBAGTInterface_getTweakName(void* self, int rider, int grabIndex)
 {
     char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
     return *(unsigned short*)(grabInfo + 0xa);
@@ -438,7 +438,7 @@ extern "C" unsigned short func_00150178(void* self, int rider, int grabIndex)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_00150198);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getUberAnim);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPad20;
@@ -473,7 +473,7 @@ extern sBagtCat_150198 D_0045AEB8_150198[] __asm__("D_0045AEB8");
  * @param second  passed to func_0014FEA8 (the callers pass uber level >= 5)
  * @return the animation id
  */
-extern "C" int func_00150198(void* self, int rider, int idx, int second)
+extern "C" int cBEBAGTInterface_getUberAnim(void* self, int rider, int idx, int second)
 {
     int ch = cBELibrary_getCheatCharacterID(rider);
     if (ch != 0)
@@ -499,7 +499,7 @@ extern "C" int func_00150198(void* self, int rider, int idx, int second)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_001502C8);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getUberCycleAnim);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPad20;
@@ -527,14 +527,14 @@ extern sBagtCat_1502C8 D_0045AEB8_1502C8[] __asm__("D_0045AEB8");
  * Returns the held uber animation of grab @p idx for @p rider: the cycle anim of the chosen variant
  * (func_0014FEA8), or 438 when the grab has none.
  *
- * The same cheat characters as in func_00150198 get fixed anims (209-212).
+ * The same cheat characters as in cBEBAGTInterface_getUberAnim get fixed anims (209-212).
  *
  * @param rider  the rider
  * @param idx  the grab
  * @param second  passed to func_0014FEA8 (uber level >= 5)
  * @return the animation id
  */
-extern "C" int func_001502C8(void* self, int rider, int idx, int second)
+extern "C" int cBEBAGTInterface_getUberCycleAnim(void* self, int rider, int idx, int second)
 {
     int ch = cBELibrary_getCheatCharacterID(rider);
     if (ch != 0)
@@ -560,7 +560,7 @@ extern "C" int func_001502C8(void* self, int rider, int idx, int second)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintbagt", func_001503F8);
+INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getUberName);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sPad20;
@@ -587,14 +587,14 @@ extern sBagtCat_1503F8 D_0045AEB8_1503F8[] __asm__("D_0045AEB8");
 /**
  * Returns the trick id of grab @p idx's chosen uber variant for @p rider (func_0014FEA8), or 0 when the grab has none.
  *
- * The same cheat characters as in func_00150198 get fixed ids (81-84).
+ * The same cheat characters as in cBEBAGTInterface_getUberAnim get fixed ids (81-84).
  *
  * @param rider  the rider
  * @param idx  the grab
  * @param second  passed to func_0014FEA8 (uber level >= 5)
  * @return the trick id
  */
-extern "C" int func_001503F8(void* self, int rider, int idx, int second)
+extern "C" int cBEBAGTInterface_getUberName(void* self, int rider, int idx, int second)
 {
     int ch = cBELibrary_getCheatCharacterID(rider);
     if (ch != 0)

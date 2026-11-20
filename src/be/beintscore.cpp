@@ -140,7 +140,7 @@ extern signed char D_005305F9[];
  *
  * Unless raceDB byte +0x49 (D_005305F9) is set, calls func_00155420(@p rider, @p riderStats, -1, -1) when the rider's profile
  * (cBELibrary_getProfileIndex) is 0 or 1. The AI code passes each rider's metrix stats block (metrix + 0xFC);
- * func_00154AB8 passes the event stats.
+ * cBEScoreInterface_processEventRiderStats passes the event stats.
  *
  * @param rider  race rider slot
  * @param riderStats  the rider stats block, passed as an int
@@ -156,7 +156,7 @@ extern "C" void func_00154A58(int rider, int riderStats)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00154AB8);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_processEventRiderStats);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int cBELibrary_getProfileIndex(int);
@@ -164,12 +164,12 @@ signed char cBELibrary_getCharacterID(int index);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" bool func_001557E0(void* self, int rider);
+extern "C" bool cBEScoreInterface_isEligibleForHighScore(void* self, int rider);
 extern "C" char* cBENewPlayerInterface_getPlayerName(void* self, int idx);
 extern "C" char* strcpy(char* dst, const char* src);
 
 struct sProfileChar_154AB8 { char data[0xF88]; };
-extern "C" int func_00152460(sProfileChar_154AB8* self, int event, int mode, unsigned int value);
+extern "C" int cBECharProfileDB_updateScoreStats(sProfileChar_154AB8* self, int event, int mode, unsigned int value);
 extern sProfileChar_154AB8 D_004A6CA8_154AB8[][10] __asm__("cBELibrary_profileLib");
 
 struct sRaceStats_154AB8 { int w[0xAC / 4]; };
@@ -221,17 +221,17 @@ extern sEvent_154AB8 D_0043D950_154AB8[] __asm__("cBELibrary_locationDB");
  * cBENewRaceInterface_newRace.cGameEvent. Race kinds 0 and 5 (raceDB +0x48) are timed: @p score is converted from ticks
  * to seconds.
  *
- * When func_001557E0 allows it, the score goes into the 5-entry table from func_0014AB20 (lower is better when timed):
+ * When cBEScoreInterface_isEligibleForHighScore allows it, the score goes into the 5-entry table from func_0014AB20 (lower is better when timed):
  * later entries shift down, the new one gets the character, score and player name
  * (cBENewPlayerInterface_getPlayerName), and with two humans the other profile's rank moves down (dropping off at 5).
  * Then func_00155420 gets the score as the time (timed) or the points, and unless raceDB +0x49 is set, the best flag is
- * func_00152460's result for the character record.
+ * cBECharProfileDB_updateScoreStats's result for the character record.
  *
  * @param rider  race rider slot (On Tour iRider)
  * @param stats  the rider's event stats, 0xAC bytes (On Tour pRiderStats)
  * @param score  the event score or time in ticks (On Tour uiPoints)
  */
-extern "C" void func_00154AB8(sScore_154AB8* self, int rider, sRaceStats_154AB8* stats, unsigned int score)
+extern "C" void cBEScoreInterface_processEventRiderStats(sScore_154AB8* self, int rider, sRaceStats_154AB8* stats, unsigned int score)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     if (profile >= 2)
@@ -255,7 +255,7 @@ extern "C" void func_00154AB8(sScore_154AB8* self, int rider, sRaceStats_154AB8*
         timed = 1;
         score = (int)(score * (1.0f / 60.0f));
     }
-    if (func_001557E0(self, profile)) {
+    if (cBEScoreInterface_isEligibleForHighScore(self, profile)) {
         sHighScore_154AB8* highScores = func_0014AB20_154AB8(event, mode);
         if (highScores != 0) {
             for (int i = 0; i < 5; i++) {
@@ -288,12 +288,12 @@ extern "C" void func_00154AB8(sScore_154AB8* self, int rider, sRaceStats_154AB8*
     else
         func_00155420(rider, (int)stats, score, -1);
     if (D_005305B0_154AB8.b49 == 0)
-        self->best[profile] = func_00152460(pc, event, mode, score);
+        self->best[profile] = cBECharProfileDB_updateScoreStats(pc, event, mode, score);
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00154EE8);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_processRiderRanking);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -304,8 +304,8 @@ extern "C" int cBEScoreInterface_convertRankToMedal(void* self, int a);
 extern "C" void func_001E25D8(int mode, int event, int result);
 extern "C" void func_001E1EB8(void);
 extern "C" void func_001E1550(void);
-extern "C" int func_001456A0(void* self, int idx, int mode);
-extern "C" void func_001591E8(void* iface, int profile, int charID, int mode, int event, int medal);
+extern "C" int cBENewRaceInterface_getPlatinumGoal(void* self, int idx, int mode);
+extern "C" void cBERewardInterface_calculateUserTrackMedalRewards(void* iface, int profile, int charID, int mode, int event, int medal);
 extern signed char D_00535C12[];
 
 struct sRaceSettings_154EE8 {
@@ -333,14 +333,14 @@ extern sEvent_154EE8 cBELibrary_locationDB[];
  * 5, func_001E1550).
  *
  * With a medal, unless raceDB +0x49 is set or raceDB +0x48 is 4: when @p score meets or beats the event's target from
- * func_001456A0 (time target * 60 for events 0 and 4, lower is better; a score target otherwise) the medal becomes 0
- * (the best). Then calls func_001591E8 on the reward interface.
+ * cBENewRaceInterface_getPlatinumGoal (time target * 60 for events 0 and 4, lower is better; a score target otherwise) the medal becomes 0
+ * (the best). Then calls cBERewardInterface_calculateUserTrackMedalRewards on the reward interface.
  *
  * @param rider  race rider slot (On Tour iRider)
  * @param result  the finishing rank, 0 first (On Tour iRanking)
  * @param score  the event score or time in ticks (On Tour uiPoints)
  */
-extern "C" void func_00154EE8(char* self, int rider, int result, int score)
+extern "C" void cBEScoreInterface_processRiderRanking(char* self, int rider, int result, int score)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     if (profile >= 2)
@@ -369,7 +369,7 @@ extern "C" void func_00154EE8(char* self, int rider, int result, int score)
         return;
     if (cBELibrary_raceDB.b48 == 4)
         return;
-    int best = func_001456A0(be, event, mode);
+    int best = cBENewRaceInterface_getPlatinumGoal(be, event, mode);
     if (best != -1) {
         if (mode == 0 || mode == 4) {
             if (best * 60 >= score)
@@ -379,7 +379,7 @@ extern "C" void func_00154EE8(char* self, int rider, int result, int score)
                 medal = 0;
         }
     }
-    func_001591E8(reward, profile, charID, mode, event, medal);
+    cBERewardInterface_calculateUserTrackMedalRewards(reward, profile, charID, mode, event, medal);
 }
 #endif
 
@@ -508,7 +508,7 @@ extern "C" void* func_00155208(void* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155270);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_getPlayerLastCompletedEventStats);
 #ifdef SKIP_ASM
 /**
  * Returns a profile's last-event block: the rider stats and rank stored at +0x20 + profile * 0xB0.
@@ -516,14 +516,14 @@ INCLUDE_ASM("be/beintscore", func_00155270);
  * @param profileIndex  profile index, 0 or 1 (On Tour iProfileIndex)
  * @return the stats block (0xAC bytes of stats, then the rank)
  */
-extern "C" void* func_00155270(void* self, int profileIndex)
+extern "C" void* cBEScoreInterface_getPlayerLastCompletedEventStats(void* self, int profileIndex)
 {
     return (char*)self + (profileIndex * 0xb0 + 0x20);
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155288);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_getPlayerBestStats);
 #ifdef SKIP_ASM
 extern char cBELibrary_profileLib[];
 
@@ -537,7 +537,7 @@ extern char cBELibrary_profileLib[];
  * @param characterId  character ID (On Tour iChar)
  * @return the best-stats block
  */
-extern "C" void* func_00155288(void* self, int profileIndex, int characterId)
+extern "C" void* cBEScoreInterface_getPlayerBestStats(void* self, int profileIndex, int characterId)
 {
     char* charRecord = cBELibrary_profileLib + (profileIndex * 39760 + characterId * 3976);
     return charRecord + 0xde4;
@@ -834,37 +834,37 @@ extern "C" void func_00155420(int rider, int statsArg, int eventPoints, int even
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_001557E0);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_isEligibleForHighScore);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" bool func_0014F810(int i);
+extern "C" bool cBERules_hasModifiedRules(int i);
 extern int D_00535BFC[];
 
 /**
  * Returns whether a profile may enter the high-score tables.
  *
- * False for profile 2 and up, and while func_0014F810(0) reports any of player 0's option flags in D_005308B8 set.
- * Likely bug: with two or more humans (cBENewRaceInterface_newRace +0x34) it tests func_0014F810(0) again instead of
+ * False for profile 2 and up, and while cBERules_hasModifiedRules(0) reports any of player 0's option flags in D_005308B8 set.
+ * Likely bug: with two or more humans (cBENewRaceInterface_newRace +0x34) it tests cBERules_hasModifiedRules(0) again instead of
  * player 1, so that branch always returns true.
  *
  * @param rider  the profile index (On Tour iProfile)
  * @return true when the profile is eligible
  */
-extern "C" bool func_001557E0(void* self, int rider)
+extern "C" bool cBEScoreInterface_isEligibleForHighScore(void* self, int rider)
 {
-    if (rider >= 2 || func_0014F810(0))
+    if (rider >= 2 || cBERules_hasModifiedRules(0))
         return false;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535BFC[0] >= 2)
-        return !func_0014F810(0);
+        return !cBERules_hasModifiedRules(0);
     return true;
 }
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155848);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_getNumberOfWinsOnTrack);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
@@ -882,7 +882,7 @@ extern signed char D_005305F9[];
  * @param eventID  the game event (On Tour iEvent)
  * @return the win count
  */
-extern "C" int func_00155848(void* self, int rider, int locationID, int eventID)
+extern "C" int cBEScoreInterface_getNumberOfWinsOnTrack(void* self, int rider, int locationID, int eventID)
 {
     if (D_005305F9[0] != 0)
         return 0;
@@ -898,7 +898,7 @@ extern "C" int func_00155848(void* self, int rider, int locationID, int eventID)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_001558F8);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_getBestMedalOnTrack);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
 signed char cBELibrary_getCharacterID(int index);
@@ -917,7 +917,7 @@ extern char cBELibrary_profileLib[];
  * @param eventID  the game event (On Tour iEvent)
  * @return the medal, 0 best to 3, or -1
  */
-extern "C" int func_001558F8(void* self, int rider, int locationID, int eventID)
+extern "C" int cBEScoreInterface_getBestMedalOnTrack(void* self, int rider, int locationID, int eventID)
 {
     if (D_005305F9[0] != 0)
         return -1;
@@ -934,14 +934,14 @@ extern "C" int func_001558F8(void* self, int rider, int locationID, int eventID)
 
 
 //100%
-INCLUDE_ASM("be/beintscore", func_001559A8);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_setBestMedalOnTrack);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
-extern "C" void func_00152528(void* iface, int a, int b, int c);
+extern "C" void cBECharProfileDB_updateMedalStats(void* iface, int a, int b, int c);
 extern signed char D_005305F9[];
 
 /**
- * Stores a medal in a race rider's character's score record for an event at a location (func_00152528).
+ * Stores a medal in a race rider's character's score record for an event at a location (cBECharProfileDB_updateMedalStats).
  *
  * Does nothing when raceDB +0x49 (D_005305F9) is set or the rider's profile is 3 or more. Nothing calls it.
  *
@@ -950,7 +950,7 @@ extern signed char D_005305F9[];
  * @param eventID  the game event (On Tour iEvent)
  * @param medal  the medal (On Tour iMedal)
  */
-extern "C" void func_001559A8(void* self, int rider, int locationID, int eventID, int medal)
+extern "C" void cBEScoreInterface_setBestMedalOnTrack(void* self, int rider, int locationID, int eventID, int medal)
 {
     if (D_005305F9[0] != 0)
         return;
@@ -958,6 +958,6 @@ extern "C" void func_001559A8(void* self, int rider, int locationID, int eventID
     if ((unsigned int)profile >= 3)
         return;
     int ch = cBELibrary_getCharacterID(rider);
-    func_00152528(cBELibrary_profileLib + profile * 39760 + ch * 3976, locationID, eventID, medal);
+    cBECharProfileDB_updateMedalStats(cBELibrary_profileLib + profile * 39760 + ch * 3976, locationID, eventID, medal);
 }
 #endif

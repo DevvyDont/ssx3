@@ -6917,7 +6917,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_scanTrackIndex)
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void* FILE_loadsizez(const char* name, int* size, int align);
-extern "C" void func_00318350(void* self, const char* s, int len);
+extern "C" void cBXString_cBXString3(void* self, const char* s, int len);
 extern "C" void* MEM_free(void* self);
 extern "C" void cBXString__cBXString(void* self, int flags);
 // PORT: alias; the unit defines cTrackFileMan_checkLocation later with a typed self (sCamMgr_A830*).
@@ -6949,7 +6949,7 @@ struct sStr_17A378 {
  * Loads @p file whole (FILE_loadsizez, 0x100 alignment) and splits it into names: whitespace separates them, a leading
  * quote and a trailing quote are skipped, a name runs over letters, digits and "_.-/", a "\" or ":" restarts it
  * (dropping any path), and everything from the first "." on is dropped. For each non-empty name, made into a cBXString
- * (func_00318350), cTrackFileMan_checkLocation is asked with the name as both location file and big file; when it says yes the name
+ * (cBXString_cBXString3), cTrackFileMan_checkLocation is asked with the name as both location file and big file; when it says yes the name
  * is copied into the next entry's File (+0x0) and BigFile (+0x40) fields (0x8C-byte entries from +0x4), the entry's
  * location id (+0x80) is set to 22 (one past the built-in locations) and its BAM flag (+0x84) to 0, and the count
  * (+0x0) grows. There is no check against the 256-entry limit. The buffer is freed with MEM_free.
@@ -7013,7 +7013,7 @@ extern "C" void cTrackFileMan_scanTrackIndex(void* selfp, const char* file)
         if (stop == start)
             continue;
         sStr_17A378 str;
-        func_00318350(&str, start, stop - start);
+        cBXString_cBXString3(&str, start, stop - start);
         if (cTrackFileMan_checkLocation_17A378(self, str.s, str.s)) {
             strcpy(self->entries[self->count].name, str.s);
             strcpy(self->entries[self->count].tag, str.s);

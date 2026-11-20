@@ -613,8 +613,8 @@ INCLUDE_ASM("fe/festateloadhint", func_00246278);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern "C" int func_00144C98(void* iface);
-extern "C" int func_00144BF0(void* iface);
+extern "C" int cBENewRaceInterface_getLocationPeak1(void* iface);
+extern "C" int cBENewRaceInterface_getLocationName1(void* iface);
 extern signed char D_00535C10[];
 extern char str_pct_s_pct_S_b[];
 extern char str_Location_Text[];
@@ -643,7 +643,7 @@ static inline int Loc_246278(char* key)
 static inline void Fmt_246278(char* buf, char* fmt, char* key, void* iface)
 {
     int str = Loc_246278(key);
-    sprintf2(buf, fmt, str, func_00144BF0(iface));
+    sprintf2(buf, fmt, str, cBENewRaceInterface_getLocationName1(iface));
 }
 
 struct sVEntryV_246278 {
@@ -668,8 +668,8 @@ static inline bool IsId_246278(char* obj, char* key)
  * Fills in one widget of the online load screen as it is created: the location text or the game-mode title.
  *
  * func_00245598() calls it when the game path (cBENewRaceInterface_newRace.cGamePath, D_00535C11) is 2 (online).
- * "Location Text" gets "%s-%S" of the localised peak name ("kT_Peak1name".."kT_Peak3name" by func_00144C98(), the
- * location's peak) and the location name (func_00144BF0()). Otherwise the title widget matching the game mode
+ * "Location Text" gets "%s-%S" of the localised peak name ("kT_Peak1name".."kT_Peak3name" by cBENewRaceInterface_getLocationPeak1(), the
+ * location's peak) and the location name (cBENewRaceInterface_getLocationName1()). Otherwise the title widget matching the game mode
  * (cGameMode, D_00535C10) is shown (setVisible, slot 9, with 1): "Title_Multi_Race" for modes 0 and 4, "_SS" 1, "_BA"
  * 2, "_SP" 3, "_BC" 5 and 6.
  *
@@ -682,7 +682,7 @@ extern "C" void func_00246278(void* self, char* obj)
         char buf[200];
         func_00416210(buf, 0, 200);
         char* fmt = str_pct_s_pct_S_b;
-        switch (func_00144C98(iface)) {
+        switch (cBENewRaceInterface_getLocationPeak1(iface)) {
         case 0:
             Fmt_246278(buf, fmt, str_kT_Peak1name_b, iface);
             break;
@@ -726,10 +726,10 @@ extern "C" void func_00246278(void* self, char* obj)
 INCLUDE_ASM("fe/festateloadhint", func_002464E8);
 #ifdef SKIP_ASM
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
-extern "C" int func_00144D18(void* iface, int idx);
+extern "C" int cBENewRaceInterface_getLocationDifficulty(void* iface, int idx);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" const char* cBECharacterInterface_getShortName(void* iface, int a1);
-extern "C" int func_00148950(void* iface, int id);
+extern "C" int cBEStatInterface_getStatLevel(void* iface, int id);
 extern "C" void* strcpy1(void* dst, void* src);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 extern char str_Location[];
@@ -804,7 +804,7 @@ static inline void Activate_2464E8(char* obj)
 static inline void Fmt_2464E8(char* buf, char* fmt, char* key, void* iface)
 {
     void* str = Loc_2464E8(key);
-    sprintf2(buf, fmt, str, func_00144BF0(iface));
+    sprintf2(buf, fmt, str, cBENewRaceInterface_getLocationName1(iface));
 }
 
 /**
@@ -814,11 +814,11 @@ static inline void Fmt_2464E8(char* buf, char* fmt, char* key, void* iface)
  * func_00245598() calls it when the game path (cGamePath, D_00535C11) is not 2. "Location" gets the peak and location
  * name as in func_00246278(). The widgets matching the game mode (cBENewRaceInterface_newRace.cGameMode) are shown
  * (setVisible, slot 9, with 1): "Title_Quick_Race/SS/BA/SP/BC" (modes 0/4, 1, 2, 3, 5/6) and "et_race/SS/BA/SP/TChal/
- * PChal" (modes 0, 1, 2, 3, 5, 6), and "ec_beg/inter/expert" by the location's func_00144D18() value (0-2).
+ * PChal" (modes 0, 1, 2, 3, 5, 6), and "ec_beg/inter/expert" by the location's cBENewRaceInterface_getLocationDifficulty() value (0-2).
  * "vert_drop_percent" and "cou_leng_percent" get "kT_OVRCMNNumberOfFeet" with the location's entry in the 17-entry
  * tables D_0047BB28 and D_0047BAE0. "rider_name" gets the first human rider's short name
  * (cBECharacterInterface_getShortName()), "player_rank_num" gets "kT_OVRCMNLevelNum" with the rider's level
- * (func_00148950(), or 1 when bit 1 of the rule record D_005308B8[rider] is set), and "map box" takes the portrait
+ * (cBEStatInterface_getStatLevel(), or 1 when bit 1 of the rule record D_005308B8[rider] is set), and "map box" takes the portrait
  * texture (into +0x78, clearing +0x7C) that func_00233640() loaded into the load screen at +0x48 (its +0x10), when
  * there is one.
  *
@@ -835,7 +835,7 @@ extern "C" void func_002464E8(void* self, char* obj)
     if (IsId_2464E8(obj, str_Location)) {
         func_00416210(buf, 0, 200);
         char* fmt = str_pct_s_pct_S_b;
-        switch (func_00144C98(iface)) {
+        switch (cBENewRaceInterface_getLocationPeak1(iface)) {
         case 0:
             Fmt_2464E8(buf, fmt, str_kT_Peak1name_b, iface);
             break;
@@ -894,7 +894,7 @@ extern "C" void func_002464E8(void* self, char* obj)
     case 7:
         break;
     }
-    switch (func_00144D18(iface, cBENewRaceInterface_getLocationID(iface))) {
+    switch (cBENewRaceInterface_getLocationDifficulty(iface, cBENewRaceInterface_getLocationID(iface))) {
     case 0:
         if (IsId_2464E8(obj, str_ec_beg)) { Activate_2464E8(obj); return; }
         break;
@@ -921,7 +921,7 @@ extern "C" void func_002464E8(void* self, char* obj)
         void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
         void* iface3 = cBE_getInterface_Fv(cBE_getBE(), 3);
         strcpy1(fmtA, Loc_2464E8(str_kT_OVRCMNLevelNum));
-        int v = func_00148950(iface3, cBENewPlayerInterface_getHumanRider(iface1, 0));
+        int v = cBEStatInterface_getStatLevel(iface3, cBENewPlayerInterface_getHumanRider(iface1, 0));
         int idx = cBENewPlayerInterface_getHumanRider(iface1, 0);
         sprintf1((unsigned short*)buf, fmtA, D_005308B8[idx].b1 ? 1 : v);
         cUIText_setUnicodeString(obj, buf);
@@ -970,19 +970,19 @@ void cUIText_setAsciiString(cUIText* text, const char* str);
 
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 
-extern "C" int func_00148950(void* iface, int id);
+extern "C" int cBEStatInterface_getStatLevel(void* iface, int id);
 
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 
 extern sOptTriple_2464E8 D_005308B8[];
 
-extern "C" signed char func_00148410(void* self, int rider);
-extern "C" signed char func_001484E0(void* self, int rider);
-extern "C" signed char func_001485B0(void* self, int rider);
-extern "C" signed char func_00148680(void* self, int rider);
-extern "C" signed char func_00148750(void* self, int rider);
-extern "C" signed char func_00148820(void* self, int rider);
-extern "C" signed char func_001488F0(void* self, int rider);
+extern "C" signed char cBEStatInterface_getSpeed(void* self, int rider);
+extern "C" signed char cBEStatInterface_getAccel(void* self, int rider);
+extern "C" signed char cBEStatInterface_getTrick(void* self, int rider);
+extern "C" signed char cBEStatInterface_getEdging(void* self, int rider);
+extern "C" signed char cBEStatInterface_getSpin(void* self, int rider);
+extern "C" signed char cBEStatInterface_getToughness(void* self, int rider);
+extern "C" signed char cBEStatInterface_getStability(void* self, int rider);
 extern "C" void cUIProgress_setValue(void* self, int pos);
 extern char str_100[];
 extern char D_004A2C18[];
@@ -999,7 +999,7 @@ struct sNetState_6CF8 {
     unsigned char stats[7];         // 0x4A8 (D_00534FD8)
 };
 extern unsigned char D_00534FD8[];
-// Inline copy of the BE stat-block getter (func_0015C600).
+// Inline copy of the BE stat-block getter (cBENetworkInterface_getOpponentAttributes).
 static inline unsigned char* GetStats_6CF8() { return D_00534FD8; }
 struct sLoadInfo_6CF8 {
     char pad0[0x10];
@@ -1013,9 +1013,9 @@ struct sName5_6CF8 { char c[5]; };
 /**
  * Shows one player's level and seven attribute bars on the online load screen.
  *
- * Does nothing unless the game path (cGamePath, D_00535C11) is 2 (online). The level is func_00148950() for the
+ * Does nothing unless the game path (cGamePath, D_00535C11) is 2 (online). The level is cBEStatInterface_getStatLevel() for the
  * player's human rider (1 when bit 1 of the rule record D_005308B8[rider] is set) and the stats are the rider's seven
- * attributes (func_001484E0, func_00148680, func_00148410, func_00148750, func_001488F0, func_00148820, func_001485B0).
+ * attributes (cBEStatInterface_getAccel, cBEStatInterface_getEdging, cBEStatInterface_getSpeed, cBEStatInterface_getSpin, cBEStatInterface_getStability, cBEStatInterface_getToughness, cBEStatInterface_getTrick).
  * With a comm system (cCommSystem_mCommSystem) and either player 1 or a ranked game
  * (cBENetworkInterface_networkOpt.bIsRankedGame): a ranked game shows level 8 and all stats 40, the rule bit shows all
  * stats 5, otherwise the level is the sum of oppCharacterAttributes / 35 and the stats come from the BE stat block
@@ -1041,7 +1041,7 @@ extern "C" void func_00246CF8(void* self, char player)
         void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
         int idx = cBENewPlayerInterface_getHumanRider(iface1, player != 0);
         void* iface3 = cBE_getInterface_Fv(cBE_getBE(), 3);
-        int rank = func_00148950(iface3, cBENewPlayerInterface_getHumanRider(iface1, player != 0));
+        int rank = cBEStatInterface_getStatLevel(iface3, cBENewPlayerInterface_getHumanRider(iface1, player != 0));
         if (D_005308B8[cBENewPlayerInterface_getHumanRider(iface1, player != 0)].b1) {
             rank = 1;
         }
@@ -1073,13 +1073,13 @@ extern "C" void func_00246CF8(void* self, char player)
                     stats[i] = 5;
                 }
             } else {
-                stats[0] = func_001484E0(iface3, idx);
-                stats[1] = func_00148680(iface3, idx);
-                stats[2] = func_00148410(iface3, idx);
-                stats[3] = func_00148750(iface3, idx);
-                stats[4] = func_001488F0(iface3, idx);
-                stats[5] = func_00148820(iface3, idx);
-                stats[6] = func_001485B0(iface3, idx);
+                stats[0] = cBEStatInterface_getAccel(iface3, idx);
+                stats[1] = cBEStatInterface_getEdging(iface3, idx);
+                stats[2] = cBEStatInterface_getSpeed(iface3, idx);
+                stats[3] = cBEStatInterface_getSpin(iface3, idx);
+                stats[4] = cBEStatInterface_getStability(iface3, idx);
+                stats[5] = cBEStatInterface_getToughness(iface3, idx);
+                stats[6] = cBEStatInterface_getTrick(iface3, idx);
             }
         }
         // fmt stays in $18 across both GetHashValue32/getObjectByHashName calls: the target computes
@@ -1156,7 +1156,7 @@ void cUIText_setAsciiString(cUIText* text, const char* str);
 
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 
-extern "C" int func_00148950(void* iface, int id);
+extern "C" int cBEStatInterface_getStatLevel(void* iface, int id);
 
 extern "C" void* strcpy1(void* dst, void* src);
 
@@ -1189,7 +1189,7 @@ extern char str_Time[];
 extern char str_Score[];
 extern int D_00536730[];
 extern "C" void* cGameModeMan_getGM();
-extern "C" char* func_00155270(void* iface, int a1);
+extern "C" char* cBEScoreInterface_getPlayerLastCompletedEventStats(void* iface, int a1);
 extern "C" unsigned int func_004139F8(float f);
 extern "C" char* func_0020A1A8(int v);
 extern "C" char* strcpy(char* dst, const char* src);
@@ -1254,7 +1254,7 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
     void* iface3 = cBE_getInterface_Fv(cBE_getBE(), 3);
     cGameModeMan_getGM();
     void* iface8 = cBE_getInterface_Fv(cBE_getBE(), 8);
-    char* st = func_00155270(iface8, cBENewPlayerInterface_getHumanRider(iface1, player != 0));
+    char* st = cBEScoreInterface_getPlayerLastCompletedEventStats(iface8, cBENewPlayerInterface_getHumanRider(iface1, player != 0));
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(rankNumName.c));
     if (obj != 0) {
         __builtin_memcpy(fmt, str_pct_d_g, sizeof("%d"));
@@ -1268,7 +1268,7 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
         if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cBENetworkInterface_networkOpt.bIsRankedGame != 0) {
             rank = 8;
         } else {
-            rank = func_00148950(iface3, cBENewPlayerInterface_getHumanRider(iface1, player != 0));
+            rank = cBEStatInterface_getStatLevel(iface3, cBENewPlayerInterface_getHumanRider(iface1, player != 0));
         }
         unsigned short fmtw[50];
         unsigned short text[100];
@@ -1359,9 +1359,9 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
-extern "C" char* func_00155270(void* iface, int a1);
+extern "C" char* cBEScoreInterface_getPlayerLastCompletedEventStats(void* iface, int a1);
 extern "C" const char* cBECharacterInterface_getShortName(void* iface, int a1);
-extern "C" int func_00148950(void* iface, int id);
+extern "C" int cBEStatInterface_getStatLevel(void* iface, int id);
 extern "C" void func_002C2540(void* dst, const char* s);
 extern "C" void* strcpy1(void* dst, void* src);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
@@ -1403,7 +1403,7 @@ extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget)
     void* iface2 = cBE_getInterface_Fv(cBE_getBE(), 2);
     void* iface3 = cBE_getInterface_Fv(cBE_getBE(), 3);
     void* iface8 = cBE_getInterface_Fv(cBE_getBE(), 8);
-    char* st = func_00155270(iface8, cBENewPlayerInterface_getHumanRider(iface1, 0));
+    char* st = cBEScoreInterface_getPlayerLastCompletedEventStats(iface8, cBENewPlayerInterface_getHumanRider(iface1, 0));
     unsigned short text[0x18];
     unsigned short fmtw[0x20];
     if (wHash_7AB0(w) == GetHashValue32(str_results_rider)) {
@@ -1413,7 +1413,7 @@ extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget)
         char* locale = (char*)SSXApp->FELocale;
         sVEnt_7AB0* vt = *(sVEnt_7AB0**)(locale + 4);
         strcpy1(fmtw, vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_OVRCMNLevelNum)));
-        sprintf1(text, fmtw, func_00148950(iface3, cBENewPlayerInterface_getHumanRider(iface1, 0)));
+        sprintf1(text, fmtw, cBEStatInterface_getStatLevel(iface3, cBENewPlayerInterface_getHumanRider(iface1, 0)));
         cUIText_setUnicodeString(widget, (char*)text);
     } else if (wHash_7AB0(w) == GetHashValue32(str_results_knockdown)) {
         func_002C2540(fmtw, str_pct_d_g);

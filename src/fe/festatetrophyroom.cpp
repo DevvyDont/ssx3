@@ -818,14 +818,14 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" int func_00157210(void* iface, int index);
-extern "C" int func_00157518(void* iface, int rider, int a, int index);
+extern "C" int cBERewardInterface_getTotalNumRewards(void* iface, int index);
+extern "C" int cBERewardInterface_getNumOwnedRewards(void* iface, int rider, int a, int index);
 extern char str_pct_d_pct_d[];
 
 /**
  * Sets a rewards-room text to "<got> / <total>" for one kind of reward.
  *
- * The total comes from func_00157210 and the count that the user's character (+0x48) has from func_00157518, both on
+ * The total comes from cBERewardInterface_getTotalNumRewards and the count that the user's character (+0x48) has from cBERewardInterface_getNumOwnedRewards, both on
  * reward interface 13.
  *
  * @param index  the reward kind
@@ -835,8 +835,8 @@ extern "C" void cFEStateRewardsRoom_setRewardsWidgetText(void* self, int index, 
 {
     char buf[256];
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
-    int total = func_00157210(iface, index);
-    int got = func_00157518(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48), index);
+    int total = cBERewardInterface_getTotalNumRewards(iface, index);
+    int got = cBERewardInterface_getNumOwnedRewards(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48), index);
     sprintf(buf, str_pct_d_pct_d, got, total);
     cUIText_setAsciiString(text, buf);
 }
@@ -1391,7 +1391,7 @@ extern "C" void func_002412A0(void* app);
 extern "C" void cReplay_initSave(void* p);
 extern "C" int cBE_getDataSize(void* be);
 extern "C" void cFEMemCard_createReadBuffer_59A0(void* self, int size) __asm__("cFEMemCard_createReadBuffer");
-extern "C" void func_0014E050(void* be, int a);
+extern "C" void cBE_writeToData(void* be, int a);
 extern "C" int cBESaveInterface_generateSaveProfile(void* iface, int a);
 extern "C" int cBESaveInterface_getSaveProfileSize();
 extern "C" void func_00241D40(void* app, int a, char* buf, int n);
@@ -1417,7 +1417,7 @@ struct sVE_59A0 {
  * Memory card callback: starts writing the current save (settings, replay or profile).
  *
  * Mode 2 (cFEMemCard_mInstance +0x1BC) writes settings (func_002412A0). Mode 1 saves the replay: cReplay_initSave,
- * a read buffer of the back end's data size filled by func_0014E050, then func_00241000 under a title built from
+ * a read buffer of the back end's data size filled by cBE_writeToData, then func_00241000 under a title built from
  * the file name and "%s %s%04d". Mode 0 saves the profile from the save interface (cBESaveInterface_generateSaveProfile,
  * cBESaveInterface_getSaveProfileSize). The first time (+0x210 and +0x208 clear), also shows the manager's current message through
  * virtual slot 36 and sets +0x210.
@@ -1440,7 +1440,7 @@ extern "C" void cFEMemCard_writeStart(void)
         cReplay_initSave(replay);
         int size = cBE_getDataSize(cBE_getBE());
         cFEMemCard_createReadBuffer_59A0(cFEMemCard_mInstance, size);
-        func_0014E050(cBE_getBE(), *(int*)((char*)cFEMemCard_mInstance + 0x1D4));
+        cBE_writeToData(cBE_getBE(), *(int*)((char*)cFEMemCard_mInstance + 0x1D4));
         func_00241D40(app, 0, name, 65);
         func_002C2540_59A0(fmt1, str_pct_s_pct_spct_04d);
         func_00241AA0(slot, 0x100);
@@ -1686,8 +1686,8 @@ void cFEMemCard_writeDone(void* self)
 INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_readDone);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_bxAudio();
-extern "C" int func_00152BB0(void* self, char* buf);
-extern "C" int func_00152DE0(void* self, char* buf, int idx);
+extern "C" int cBESaveInterface_loadSaveGame(void* self, char* buf);
+extern "C" int cBESaveInterface_loadSaveProfile(void* self, char* buf, int idx);
 extern "C" void cFEMemCard_setSoundMode(unsigned int mode);
 extern "C" void func_00287410(void* opt, int v);
 extern "C" void func_00287488(void* opt, int v);
@@ -1731,11 +1731,11 @@ struct sMemCard_1D5F40 {
  * Memory-card read-finished callback: loads what was read into the back end and frees the read buffer.
  *
  * With the save interface (back-end interface 5) it handles the read by the screen's mode (+0x1BC of
- * cFEMemCard_mInstance). Mode 2 (settings) loads the buffer at +0x1D0 with func_00152BB0 (On Tour
+ * cFEMemCard_mInstance). Mode 2 (settings) loads the buffer at +0x1D0 with cBESaveInterface_loadSaveGame (On Tour
  * cBESaveInterface::loadSaveGame) and, when the audio object exists (cAudioInterface_bxAudio), applies the loaded sound options
  * from cBEOptionInterface_mOption: the output mode (bits 12-13) through cFEMemCard_setSoundMode, the SFX, speech and music
  * volumes (4-bit fields) through func_00287410, func_00287488 and func_00287520, bit 17 through cSSXAudio_SetArcadeSFX
- * and bit 16 through func_002875D0. Mode 0 (profile) loads it with func_00152DE0 (On Tour loadSaveProfile) into slot
+ * and bit 16 through func_002875D0. Mode 0 (profile) loads it with cBESaveInterface_loadSaveProfile (On Tour loadSaveProfile) into slot
  * +0x1CC. Mode 1 (replay) does nothing here. A failed load returns 0 at once, keeping the buffer.
  *
  * Afterwards, when the buffer state (+0x228) is 1 (allocated by this screen), frees the allocation at +0x1D4 and clears
@@ -1749,7 +1749,7 @@ extern "C" int cFEMemCard_readDone()
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
     switch (((sMemCard_1D5F40*)cFEMemCard_mInstance)->op) {
     case 2:
-        if (!func_00152BB0(iface, ((sMemCard_1D5F40*)cFEMemCard_mInstance)->buf))
+        if (!cBESaveInterface_loadSaveGame(iface, ((sMemCard_1D5F40*)cFEMemCard_mInstance)->buf))
             return 0;
         if (cAudioInterface_bxAudio() != 0) {
             cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -1762,7 +1762,7 @@ extern "C" int cFEMemCard_readDone()
         }
         break;
     case 0:
-        if (!func_00152DE0(iface, ((sMemCard_1D5F40*)cFEMemCard_mInstance)->buf, ((sMemCard_1D5F40*)cFEMemCard_mInstance)->slot))
+        if (!cBESaveInterface_loadSaveProfile(iface, ((sMemCard_1D5F40*)cFEMemCard_mInstance)->buf, ((sMemCard_1D5F40*)cFEMemCard_mInstance)->slot))
             return 0;
         break;
     case 1:

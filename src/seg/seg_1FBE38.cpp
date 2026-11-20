@@ -4518,7 +4518,7 @@ struct V3_2210 { float x, y, z; };
 extern V3_2210 D_004C9098_2210 __asm__("luno_gLunoNil");
 extern "C" void* cBE_getBE_2210() __asm__("cBE_getBE");
 extern "C" void* cBE_getInterface_2210(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00144CE0_2210(void* iface, int id) __asm__("func_00144CE0");
+extern "C" int cBENewRaceInterface_getLocationIDFromScript_2210(void* iface, int id) __asm__("cBENewRaceInterface_getLocationIDFromScript");
 extern "C" void cSectionMan_load_2210(void* self, int hash, char* name) __asm__("cSectionMan_load");
 extern "C" void cSectionMan_activate_2210(void* self, int hash, char* name) __asm__("cSectionMan_activate");
 extern "C" void cGame_setState_2210(void* self, int a, int b, int refresh) __asm__("cGame_setState");
@@ -4538,7 +4538,7 @@ public:
  * Script command Section: loads or activates a location's world sections, or switches the game state.
  *
  * Defaults (D_004FBC20, under D_004A5730: -1, -1, -1) take the keyword arguments (types from D_004465C8). Only when the
- * script's rider is set and not busy: the location comes from the script ID through func_00144CE0 (BE interface 0) and
+ * script's rider is set and not busy: the location comes from the script ID through cBENewRaceInterface_getLocationIDFromScript (BE interface 0) and
  * the mode from D_00445E40 (index < 8). The action: 0 cSectionMan_load (load), 2 cSectionMan_activate, 3
  * cGame_setState(game, 0xE, 2, 0) and func_002A49E8(cAudioInterface_bxAudio()), 4 cGame_setState(game, 0xE, 0, 0), 5 sets
  * SectionMan +0x1A4; 1 does nothing (load and activate act on SSXApp->Game->SectionMan).
@@ -4593,7 +4593,7 @@ extern "C" V3_2210 SectionFunc(int n, Ent_2210* params)
         if ((unsigned int)sel < 8) {
             name = D_00445E40_2210[sel];
         }
-        int hash = func_00144CE0_2210(iface, id);
+        int hash = cBENewRaceInterface_getLocationIDFromScript_2210(iface, id);
         switch ((unsigned int)action) {
         case 0:
             cSectionMan_load_2210(ui, hash, name);
@@ -7904,17 +7904,17 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern char* D_004A28A8_7308 __asm__("SSXApp");
 extern "C" int cBEMissionInterface_isMissionCompleted(void* missions, int id);
-extern "C" void func_00154160(void* missions, int id, int done);
-extern "C" int func_00153FA0(void* missions, int id);
-extern "C" int func_001511B0(void* econ, int reward);
-extern "C" int func_00144C98(void* iface);
+extern "C" void cBEMissionInterface_setIsCompleted(void* missions, int id, int done);
+extern "C" int cBEMissionInterface_getDiffLevel(void* missions, int id);
+extern "C" int cBEEconInterface_getMissionCash(void* econ, int reward);
+extern "C" int cBENewRaceInterface_getLocationPeak1(void* iface);
 extern "C" void cRider_flagEventMissionSuccess(void* rider, int player, int money);
 extern "C" unsigned int cBEMissionInterface_getNextMissionID(void* missions, int id);
-extern "C" void func_001541D0(void* missions, int id, int active);
+extern "C" void cBEMissionInterface_setIsShowIcon(void* missions, int id, int active);
 extern "C" void cWScriptMan_runScriptCode(int, void *, int);
 extern "C" int cBEMissionInterface_isMissionLocked(void* missions, int id);
-extern "C" void func_00154010(void* missions, int id, int a);
-extern "C" void func_00154080(void* missions, int id, int a);
+extern "C" void cBEMissionInterface_setIsLocked(void* missions, int id, int a);
+extern "C" void cBEMissionInterface_setIsReady(void* missions, int id, int a);
 extern "C" void cWScriptMan_updateWorld(int script);
 extern "C" void cWScriptMan_processPass(int script, void* self);
 extern "C" void cReplay_reset(void* replay);
@@ -7928,12 +7928,12 @@ struct sGame_7308 {
 /**
  * Handles a passed mission: records it and pays the reward, unlocks the next mission and runs the pass script.
  *
- * On BE interface 0xA (missions), for the mission ID (+0x20): if not yet completed, func_00154160 marks it completed
- * and the reward is func_001511B0 (econ interface 0xB) of its func_00153FA0 level. cRider_flagEventMissionSuccess flags the success on
- * the script's rider with the BE interface 0 value from func_00144C98 and the money. If there is a next mission
- * (cBEMissionInterface_getNextMissionID != -1) this one's icon is hidden (func_001541D0), the pass script (+0x6C) runs
- * through cWScriptMan_runScriptCode, and a locked next mission is unlocked, made ready and shown (func_00154010,
- * func_00154080, func_001541D0); with no next mission only the pass script runs. Ends with cWScriptMan_updateWorld (updateWorld)
+ * On BE interface 0xA (missions), for the mission ID (+0x20): if not yet completed, cBEMissionInterface_setIsCompleted marks it completed
+ * and the reward is cBEEconInterface_getMissionCash (econ interface 0xB) of its cBEMissionInterface_getDiffLevel level. cRider_flagEventMissionSuccess flags the success on
+ * the script's rider with the BE interface 0 value from cBENewRaceInterface_getLocationPeak1 and the money. If there is a next mission
+ * (cBEMissionInterface_getNextMissionID != -1) this one's icon is hidden (cBEMissionInterface_setIsShowIcon), the pass script (+0x6C) runs
+ * through cWScriptMan_runScriptCode, and a locked next mission is unlocked, made ready and shown (cBEMissionInterface_setIsLocked,
+ * cBEMissionInterface_setIsReady, cBEMissionInterface_setIsShowIcon); with no next mission only the pass script runs. Ends with cWScriptMan_updateWorld (updateWorld)
  * and cWScriptMan_processPass (processPass) on the script manager (+0x10), then cReplay_reset and cReplay_startRace on
  * SSXApp->Game->Replay.
  *
@@ -7945,23 +7945,23 @@ extern "C" void cWScriptMission_missionPass(char* self)
     int money = 0;
     void* missions = cBE_getInterface_Fv(cBE_getBE(), 10);
     if (cBEMissionInterface_isMissionCompleted(missions, *(int*)(self + 0x20)) == 0) {
-        func_00154160(missions, *(int*)(self + 0x20), 1);
-        int reward = func_00153FA0(missions, *(int*)(self + 0x20));
-        money = func_001511B0(cBE_getInterface_Fv(cBE_getBE(), 11), reward);
+        cBEMissionInterface_setIsCompleted(missions, *(int*)(self + 0x20), 1);
+        int reward = cBEMissionInterface_getDiffLevel(missions, *(int*)(self + 0x20));
+        money = cBEEconInterface_getMissionCash(cBE_getInterface_Fv(cBE_getBE(), 11), reward);
     }
-    int pl = func_00144C98(cBE_getInterface_Fv(cBE_getBE(), 0));
+    int pl = cBENewRaceInterface_getLocationPeak1(cBE_getInterface_Fv(cBE_getBE(), 0));
     sGame_7308* game = *(sGame_7308**)(*(char**)(D_004A28A8_7308 + 0x84) + 0xC);
     cRider_flagEventMissionSuccess(game->riders[**(int**)(self + 0x10)], pl, money);
     unsigned int next = cBEMissionInterface_getNextMissionID(missions, *(int*)(self + 0x20));
     if (next != 0xFFFFFFFF) {
-        func_001541D0(missions, *(int*)(self + 0x20), 0);
+        cBEMissionInterface_setIsShowIcon(missions, *(int*)(self + 0x20), 0);
         if (*(int*)(self + 0x6C) != 0) {
             cWScriptMan_runScriptCode(*(int*)(self + 0x10), self, *(int*)(self + 0x6C));
         }
         if (cBEMissionInterface_isMissionLocked(missions, next) != 0) {
-            func_00154010(missions, next, 0);
-            func_00154080(missions, next, 1);
-            func_001541D0(missions, next, 1);
+            cBEMissionInterface_setIsLocked(missions, next, 0);
+            cBEMissionInterface_setIsReady(missions, next, 1);
+            cBEMissionInterface_setIsShowIcon(missions, next, 1);
         }
     } else if (*(int*)(self + 0x6C) != 0) {
         cWScriptMan_runScriptCode(*(int*)(self + 0x10), self, *(int*)(self + 0x6C));
@@ -7980,21 +7980,21 @@ INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_missionFail);
 extern "C" int cBE_getBE_74C0(void) __asm__("cBE_getBE");
 int cBE_getInterface_Fv_74C0(int be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBEMissionInterface_isMissionAvailable_74C0(int, int) __asm__("cBEMissionInterface_isMissionAvailable");
-extern "C" void func_001540F0_74C0(int, int, int) __asm__("func_001540F0");
+extern "C" void cBEMissionInterface_setIsAvailable_74C0(int, int, int) __asm__("cBEMissionInterface_setIsAvailable");
 extern "C" void cWScriptProcess_end_74C0(void*) __asm__("cWScriptProcess_end");
 extern "C" void cWScriptMan_runScriptCode(int, void *, int);
 struct P_74C0 { int state; char pad[0x58]; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19(); virtual void v20(); };
 /**
  * Handles a failed mission: makes it available again, runs the fail script and ends the process.
  *
- * If the mission (+0x20) is not available on BE interface 0xA, func_001540F0 sets it available. The fail script (+0x70)
+ * If the mission (+0x20) is not available on BE interface 0xA, cBEMissionInterface_setIsAvailable sets it available. The fail script (+0x70)
  * runs through cWScriptMan_runScriptCode if there is one; otherwise the virtual at vtable +0xA0 (cWScriptMission_missionUpdateWorld,
  * missionUpdateWorld) runs. A running process (state 2) is then ended with cWScriptProcess_end.
  */
 extern "C" void cWScriptMission_missionFail(P_74C0* self) {
     int iface = cBE_getInterface_Fv_74C0(cBE_getBE_74C0(), 10);
     if (!cBEMissionInterface_isMissionAvailable_74C0(iface, *(int*)((char*)self + 0x20)))
-        func_001540F0_74C0(iface, *(int*)((char*)self + 0x20), 1);
+        cBEMissionInterface_setIsAvailable_74C0(iface, *(int*)((char*)self + 0x20), 1);
     int failScript = *(int*)((char*)self + 0x70);
     if (failScript)
         cWScriptMan_runScriptCode(*(int*)((char*)self + 0x10), self, failScript);

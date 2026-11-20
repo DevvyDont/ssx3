@@ -37,7 +37,7 @@ void* cBECharProfileDB_getScoreStats(void* self, int locID, int event)
 #endif
 
 //100%
-INCLUDE_ASM("be/bedbprofile", func_001523E8);
+INCLUDE_ASM("be/bedbprofile", cBECharProfileDB_hasVisitedPeak);
 #ifdef SKIP_ASM
 // Local mask table; the original was likely `int masks[3] = { 0x64923, 0x18924C, 0x21A490 };`
 // whose compiler-generated literal splat names D_0045A7C0.
@@ -56,7 +56,7 @@ extern const sProfileMasks_001523E8 D_0045A7C0;
  * @param kind  the peak, 0-2
  * @return 1 when a location of that peak was visited, else 0
  */
-extern "C" int func_001523E8(void* self, int kind)
+extern "C" int cBECharProfileDB_hasVisitedPeak(void* self, int kind)
 {
     sProfileMasks_001523E8 masks = D_0045A7C0;
     return (*(int*)((char*)self + 0xACC) & masks.m[kind]) != 0;
@@ -85,7 +85,7 @@ extern "C" void cBECharProfileDB_setLocationVisited(void* self, int bit, int on)
 #endif
 
 //100%
-INCLUDE_ASM("be/bedbprofile", func_00152460);
+INCLUDE_ASM("be/bedbprofile", cBECharProfileDB_updateScoreStats);
 #ifdef SKIP_ASM
 struct sScoreStat_00152460
 {
@@ -126,7 +126,7 @@ static inline int IsBetter_00152460(int stat, sScoreStat_00152460* s, unsigned i
  * @param value  the new score or time
  * @return 1 when the record was updated, else 0
  */
-extern "C" int func_00152460(sCharProfile_00152460* self, int locationId, int stat, unsigned int value)
+extern "C" int cBECharProfileDB_updateScoreStats(sCharProfile_00152460* self, int locationId, int stat, unsigned int value)
 {
     int type = cBELibrary_getScoreType(locationId, stat);
     if (type == 26)
@@ -144,7 +144,7 @@ extern "C" int func_00152460(sCharProfile_00152460* self, int locationId, int st
 #endif
 
 //100%
-INCLUDE_ASM("be/bedbprofile", func_00152528);
+INCLUDE_ASM("be/bedbprofile", cBECharProfileDB_updateMedalStats);
 #ifdef SKIP_ASM
 struct sPlaceStat_00152528
 {
@@ -188,7 +188,7 @@ extern sEventDef_00152528 cBELibrary_locationDB[];
  * @param place  the finishing place / medal (0 best), or -1 for none
  * @return 1 when the best place was updated, else 0
  */
-extern "C" int func_00152528(sCharProfile_00152528* self, int ev, int mode, int place)
+extern "C" int cBECharProfileDB_updateMedalStats(sCharProfile_00152528* self, int ev, int mode, int place)
 {
     if (place != -1)
     {

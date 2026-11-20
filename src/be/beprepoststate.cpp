@@ -403,7 +403,7 @@ extern "C" void func_00156810(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/beprepoststate", func_00156858);
+INCLUDE_ASM("be/beprepoststate", cBEProfileLib_copy);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(void* dst, void* src, int n);
 extern int D_004A11E8;
@@ -430,7 +430,7 @@ struct sProfile_156858
  * @param dst  the destination profile (10 character records)
  * @param src  the source profile (On Tour pSrcProfileLib)
  */
-extern "C" void func_00156858(char* dst, char* src)
+extern "C" void cBEProfileLib_copy(char* dst, char* src)
 {
     int i;
     for (i = 0; i < 10; i++) {
@@ -453,7 +453,7 @@ extern "C" void func_00156858(char* dst, char* src)
 #endif
 
 //100%
-INCLUDE_ASM("be/beprepoststate", func_00156950);
+INCLUDE_ASM("be/beprepoststate", cBEProfileLib_backupCharProfile);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(void* dst, void* src, int n);
 extern signed char D_004A125C;
@@ -466,7 +466,7 @@ extern char D_004C4090[];
  * @param base  the profile (10 character records)
  * @param idx  the character whose record is saved
  */
-extern "C" void func_00156950(char* base, int idx)
+extern "C" void cBEProfileLib_backupCharProfile(char* base, int idx)
 {
     D_004A125C = idx;
     MEM_copy(D_004C4090, base + idx * 3976, 3976);
@@ -474,19 +474,19 @@ extern "C" void func_00156950(char* base, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("be/beprepoststate", func_00156988);
+INCLUDE_ASM("be/beprepoststate", cBEProfileLib_restoreCharProfile);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(void* dst, void* src, int n);
 extern signed char D_004A125C;
 extern char D_004C4090[];
 
 /**
- * Copies the backup buffer D_004C4090 back into the profile's character record that func_00156950 saved (index
+ * Copies the backup buffer D_004C4090 back into the profile's character record that cBEProfileLib_backupCharProfile saved (index
  * D_004A125C).
  *
  * @param base  the profile (10 character records)
  */
-extern "C" void func_00156988(char* base)
+extern "C" void cBEProfileLib_restoreCharProfile(char* base)
 {
     MEM_copy(base + D_004A125C * 3976, D_004C4090, 3976);
 }

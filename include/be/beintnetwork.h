@@ -10,8 +10,8 @@
 // d:/ssx/code/source/be/beintnetwork.cpp (the preview build's assert string).
 //
 // Size 0x10 [R] (the allocation above; the preview's getThis allocates 0x10 too). Base cBEInterface, written out
-// inline exactly as in be/beintreward.h (whose kBEInterfaceVt_* slot enum applies here: slot 1 submit = func_0014E130
-// copies networkOpt into cBELibrary::networkDB, slot 2 discard = func_0014E1F8 copies it back, slots 3/4 are
+// inline exactly as in be/beintreward.h (whose kBEInterfaceVt_* slot enum applies here: slot 1 submit = cBENetworkInterface_submit
+// copies networkOpt into cBELibrary::networkDB, slot 2 discard = cBENetworkInterface_discard copies it back, slots 3/4 are
 // cBEInterface's replay-frame hooks).
 //
 // Statics (retail addresses; names from On Tour's symbol table):
@@ -23,8 +23,8 @@
 //                                                   restoreCharProfile cBENetworkInterface_restoreCharProfile; On Tour: cBEPlayerDB[4])
 //
 // Evidence tags:
-//   [R] retail's own code: getThis (allocation, vptr, bIsActive), the constructor func_0015C660 (vptr), and the
-//       out-of-line accessors func_0015C250..func_0015C618 (be/bedbreward), each of which reads or writes one
+//   [R] retail's own code: getThis (allocation, vptr, bIsActive), the constructor cBENetworkInterface_cBENetworkInterface (vptr), and the
+//       out-of-line accessors cBENetworkInterface_purgeInterface..cBENetworkInterface_getOverallOpponentLevel (be/bedbreward), each of which reads or writes one
 //       tBENetworkDB field;
 //   [P] the July 2003 preview's inline accessors (getIsNetworkGame ... setOpponentStats), which address networkOpt
 //       (preview base 0x5B5358) at the same offsets as retail up to OpponentStats (preview 0x3D8, retail 0x3DC:
@@ -40,42 +40,42 @@
 // tBENetworkDB: the network-game options (cBENetworkInterface::networkOpt / cBELibrary::networkDB), 0x4B0 bytes
 // ([R] submit/discard copy 0x4B0 bytes).
 struct tBENetworkDB {
-    int bIsNetworkGame;              // 0x000 [O]; [P] get/setIsNetworkGame; [R] func_0015C278 / func_0015C288;
+    int bIsNetworkGame;              // 0x000 [O]; [P] get/setIsNetworkGame; [R] cBENetworkInterface_setIsNetworkGame / cBENetworkInterface_getIsNetworkGame;
                                      //       [U] tested by ~20 units ("is this an online race")
-    int bIsRankedGame;               // 0x004 [O]; [P] get/setIsRankedGame; [R] func_0015C298 / func_0015C2A8
-    int bIsHost;                     // 0x008 [O]; [P] get/setIsHost; [R] func_0015C2B8 / func_0015C2C8 (D_00534B38);
+    int bIsRankedGame;               // 0x004 [O]; [P] get/setIsRankedGame; [R] cBENetworkInterface_setIsRankedGame / cBENetworkInterface_getIsRankedGame
+    int bIsHost;                     // 0x008 [O]; [P] get/setIsHost; [R] cBENetworkInterface_setIsHost / cBENetworkInterface_getIsHost (D_00534B38);
                                      //       [U] cGameComm_syncGame / syncWait / gameExit, setSyncData (cBENetworkInterface_setSyncData),
                                      //       preInitBE (cBENetworkInterface_preInitBE) and the results report pick the host side by it
-    int iPort;                       // 0x00C [O]; [P] get/setPort; [R] func_0015C2D8 / func_0015C2E8 (D_00534B3C);
+    int iPort;                       // 0x00C [O]; [P] get/setPort; [R] cBENetworkInterface_setPort / cBENetworkInterface_getPort (D_00534B3C);
                                      //       [U] debugfe (func_0017D0A8, func_0017DE70) and tagsunk func_002639E0 read
                                      //       it as an unsigned short (lhu) for openDSockChannel
-    float fLatency;                  // 0x010 [O]; [P] get/setLatency (float); [R] func_0015C2F8 / func_0015C308
+    float fLatency;                  // 0x010 [O]; [P] get/setLatency (float); [R] cBENetworkInterface_setLatency / cBENetworkInterface_getLatency
                                      //       (D_00534B40); [U] cGameComm_syncGame stores cGameComm::mLatency, cGame_load
                                      //       sizes cInputSync from it
     char strLocalAddr[256];          // 0x014 [O] (On Tour 0x00C, same size); the 0x200 bytes between fLatency and
     char strRemoteAddr[256];         // 0x114 [O]  iClientID (both builds); no retail access except whole-struct copies
-    int iClientID;                   // 0x214 [O]; [P] get/setClientID (preview +0x214); [R] func_0015C318 / func_0015C328
+    int iClientID;                   // 0x214 [O]; [P] get/setClientID (preview +0x214); [R] cBENetworkInterface_setClientID / cBENetworkInterface_getClientID
                                      //       (D_00534D44)
-    char strHostName[120];           // 0x218 [O] (size 120); [P] get/setHostName; [R] func_0015C338 (strcpy) /
-                                     //       func_0015C358 (D_00534D48)
-    char strGameName[120];           // 0x290 [O]; [P] get/setGameName; [R] func_0015C368 / func_0015C388 (D_00534DC0)
-    char strPassword[30];            // 0x308 [O] (size 30); [P] get/setPassword; [R] func_0015C398 / func_0015C3B8
+    char strHostName[120];           // 0x218 [O] (size 120); [P] get/setHostName; [R] cBENetworkInterface_setHostName (strcpy) /
+                                     //       cBENetworkInterface_getHostName (D_00534D48)
+    char strGameName[120];           // 0x290 [O]; [P] get/setGameName; [R] cBENetworkInterface_setGameName / cBENetworkInterface_getGameName (D_00534DC0)
+    char strPassword[30];            // 0x308 [O] (size 30); [P] get/setPassword; [R] cBENetworkInterface_setPassword / cBENetworkInterface_getPassword
                                      //       (D_00534E38)
     char unk_326[0x2];               // 0x326 padding
     int MyCharacterID;               // 0x328 [P] get/setMyCharacterID (field name from the accessor; not in On Tour);
-                                     //       [R] func_0015C3D8 / func_0015C3E8 (D_00534E58); "CHARACTER0" in the report
-    int OpponentCharacterID;         // 0x32C [P] get/setOpponentCharacterID; [R] func_0015C3F8 / func_0015C408 (D_00534E5C)
-    char MyStats[0xAC];              // 0x330 [P] get/setMyStats(tRiderStats const&); [R] setter func_0015C418 copies 0xAC
-                                     //       bytes, getter func_0015C4D0 (D_00534E60); a tRiderStats (not modelled here)
-    char OpponentStats[0xAC];        // 0x3DC [P] get/setOpponentStats; [R] func_0015C4E0 / func_0015C598 (D_00534F0C)
+                                     //       [R] cBENetworkInterface_setMyCharacterID / cBENetworkInterface_getMyCharacterID (D_00534E58); "CHARACTER0" in the report
+    int OpponentCharacterID;         // 0x32C [P] get/setOpponentCharacterID; [R] cBENetworkInterface_setOpponentCharacterID / cBENetworkInterface_getOpponentCharacterID (D_00534E5C)
+    char MyStats[0xAC];              // 0x330 [P] get/setMyStats(tRiderStats const&); [R] setter cBENetworkInterface_setMyStats copies 0xAC
+                                     //       bytes, getter cBENetworkInterface_getMyStats (D_00534E60); a tRiderStats (not modelled here)
+    char OpponentStats[0xAC];        // 0x3DC [P] get/setOpponentStats; [R] cBENetworkInterface_setOpponentStats / cBENetworkInterface_getOpponentStats (D_00534F0C)
     char unk_488[0x10];              // 0x488 [R] func_0014EBD8 (strcpy) / func_0015C5B8 (D_00534FB8); [U] this player's
                                      //       name (from the lobby session +0x80, func_00259098); prefixes our own chat
                                      //       lines (ovstatetrophy func_00210BD8)
     char unk_498[0x10];              // 0x498 [R] func_0014EBB8 / func_0015C5A8 (D_00534FC8); [U] the opponent's name
                                      //       (lobby session +0x98); prefixes received chat, shown by func_00210940
-    unsigned char oppCharacterAttributes[7]; // 0x4A8 [O] (On Tour 0x326); [R] setOpponentAttributes func_0015C5C8
-                                     //       copies 7 bytes, getOpponentAttributes func_0015C600, getOverallOpponentLevel
-                                     //       func_0015C618 sums them / 35 (D_00534FD8)
+    unsigned char oppCharacterAttributes[7]; // 0x4A8 [O] (On Tour 0x326); [R] setOpponentAttributes cBENetworkInterface_setOpponentAttributes
+                                     //       copies 7 bytes, getOpponentAttributes cBENetworkInterface_getOpponentAttributes, getOverallOpponentLevel
+                                     //       cBENetworkInterface_getOverallOpponentLevel sums them / 35 (D_00534FD8)
     char unk_4AF[0x1];               // 0x4AF padding
 };
 
@@ -84,9 +84,9 @@ struct cBENetworkInterface {
     int bCanSubmit;                  // 0x000 [O] cBEInterface::bCanSubmit; no retail access seen
     int bDataChanged;                // 0x004 [O] cBEInterface::bDataChanged; no retail access seen
     int bIsActive;                   // 0x008 [O] cBEInterface::bIsActive; [R] getThis sets 0; [U] setNetworkActive
-                                     //       (func_0015C3C8, static: instance->bIsActive = arg); set 0/1 with every BE
+                                     //       (cBENetworkInterface_setNetworkActive, static: instance->bIsActive = arg); set 0/1 with every BE
                                      //       interface (cBEPostRaceState_onExit/cBEPostRaceState_onEnter/cBEPreRaceState_onExit/cBEPreRaceState_onEnter)
-    void** mVtbl;                    // 0x00C [R] D_0045AD98 (getThis, ctor func_0015C660); [P] the preview ctor
+    void** mVtbl;                    // 0x00C [R] D_0045AD98 (getThis, ctor cBENetworkInterface_cBENetworkInterface); [P] the preview ctor
                                      //       __19cBENetworkInterface stores _vt$19cBENetworkInterface at 0xC;
                                      //       [U] func_00259098 calls slot 1 (submit) through it
 };

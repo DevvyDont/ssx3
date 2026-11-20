@@ -1093,8 +1093,8 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* cAudioInterface_getAI();
 extern "C" void* cRider_getIdentity(void*);
-extern "C" int func_00158750(void* self, int a1, int a2);
-extern "C" int func_00158700(void* self, int a1, int a2);
+extern "C" int cBERewardInterface_getPlayList(void* self, int a1, int a2);
+extern "C" int cBERewardInterface_getRadioMode(void* self, int a1, int a2);
 extern "C" void func_0028BF78(void* self, int a1);
 extern "C" void func_0028C2D0(void* self, int a1);
 extern "C" int func_002B49E0(void*);
@@ -1133,7 +1133,7 @@ public:
 /**
  * Sets up the in-game audio when a race gains focus: music playlist, radio mode, world-painter queries and levels.
  *
- * Reads the player rider's playlist and radio mode from the reward interface (func_00158750, func_00158700) and applies
+ * Reads the player rider's playlist and radio mode from the reward interface (cBERewardInterface_getPlayList, cBERewardInterface_getRadioMode) and applies
  * them (func_0028BF78, func_0028C2D0). Unless the music stream already plays track 0x191, it restarts the music
  * (func_0028D488, func_0028CF98 with 0 or 0x24 depending on the race state byte). Then it resets the lift state,
  * creates six world-painter queries (+0x625C/+0x6260, +0x5FA0/+0x5FA4, +0x6C80/+0x6C84) from the world's painter
@@ -1145,8 +1145,8 @@ extern "C" void cSSXAudio_InGameInit(char* self)
     void* be = cBE_getInterface_Fv(cBE_getBE(), 13);
     char* bm = cAudioInterface_getAI();
     void* rider = cRider_getIdentity(*(void**)(bm + 0x28));
-    int radioPlaylist = func_00158750(be, 0, (int)rider);
-    func_0028BF78(self, func_00158700(be, 0, (int)rider));
+    int radioPlaylist = cBERewardInterface_getPlayList(be, 0, (int)rider);
+    func_0028BF78(self, cBERewardInterface_getRadioMode(be, 0, (int)rider));
     func_0028C2D0(self, radioPlaylist);
     char* musicSys = self + 0x118;
     if (*(int*)(self + 0x530) == 0 || func_002B49E0(musicSys) != 401) {
@@ -3471,7 +3471,7 @@ INCLUDE_ASM("sound/ssxAudio", func_00289C18);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int func_00148950(void* iface, int id);
+extern "C" int cBEStatInterface_getStatLevel(void* iface, int id);
 
 struct sSsxAudioVEntryI {
     short delta;
@@ -3484,7 +3484,7 @@ extern "C" int func_00289C18(void* self, void* src)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
     char* obj = (char*)src + 0x6C0;
     sSsxAudioVEntryI* vt = *(sSsxAudioVEntryI**)obj;
-    int n = func_00148950(iface, vt[7].fn(obj + vt[7].delta));
+    int n = cBEStatInterface_getStatLevel(iface, vt[7].fn(obj + vt[7].delta));
     if (n < 4) {
         return 0;
     }
