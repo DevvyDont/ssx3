@@ -8089,16 +8089,16 @@ extern BW_CAE8 *D_0050AC68_CAE8[] __asm__("D_0050AC68");
  * (the frame is stored as byte-swapped 16-bit words, as IEC 61937 carries it); each byte is cleared when first written,
  * and the position advances by @p n. Used by the frame-header writer func_003BCBA0.
  *
- * @param arg0  the value
+ * @param value  the value
  * @param n  the number of bits (1-32)
  */
-void func_003BCAE8(int arg0, int n) {
-    unsigned int v = arg0 << (0x20 - n);
+void func_003BCAE8(int value, int n) {
+    unsigned int fieldBits = value << (0x20 - n);
     int byte;
     int room;
     int take;
     int rem;
-    v = v >> (0x20 - n);
+    fieldBits = fieldBits >> (0x20 - n);
     while (n > 0) {
         byte = D_0050AC68_CAE8[0]->pos >> 3;
         if (byte & 1)
@@ -8110,7 +8110,7 @@ void func_003BCAE8(int arg0, int n) {
             D_0050AC68_CAE8[0]->buf[byte] = 0;
         take = (room >= n) ? n : room;
         rem = n - take;
-        D_0050AC68_CAE8[0]->buf[byte] |= (v >> rem) << (room - take);
+        D_0050AC68_CAE8[0]->buf[byte] |= (fieldBits >> rem) << (room - take);
         n = rem;
         D_0050AC68_CAE8[0]->pos += take;
     }
@@ -8223,11 +8223,11 @@ extern void *D_0050AC68;
  * otherwise from a log2 estimate taken from the float's bits, corrected against the scale-factor table D_0044C760. Each
  * sample is then scaled by 28.57 / D_0044C760[index] and truncated to a signed byte. Called by func_003BE6E0.
  *
- * @param a0  the LFE input samples
+ * @param lfeInput  the LFE input samples
  * @param out  receives the scale-factor index
  * @param out8  receives the 8 quantized samples
  */
-void func_003BD078(int a0, signed char *out, signed char *out8) {
+void func_003BD078(int lfeInput, signed char *out, signed char *out8) {
     float buf[8];
     float max;
     float min;
@@ -8238,7 +8238,7 @@ void func_003BD078(int a0, signed char *out, signed char *out8) {
 
     max = 0.0f;
     min = 0.0f;
-    func_003C06B0_D078(a0, buf, (char *)D_0050AC68 + 0x6C, D_0044DD00_D078);
+    func_003C06B0_D078(lfeInput, buf, (char *)D_0050AC68 + 0x6C, D_0044DD00_D078);
     for (i = 0; i < 8; i++) {
         if (max < buf[i]) {
             max = buf[i];
@@ -8325,42 +8325,42 @@ extern void f01A0_D220(void *, int, int, int) __asm__("func_003C01A0");
 /**
  * Runs one channel's 512 input samples through the DTS encoder's subband analysis filterbank.
  *
- * When the work area D_0050AC6C is in the scratchpad (+0xA3C) and neither @p a0 nor @p a2 is, the filter history (+0x04
+ * When the work area D_0050AC6C is in the scratchpad (+0xA3C) and neither @p pcmInput nor @p history is, the filter history (+0x04
  * words of the encoder state D_0050AC68) is DMA'd in with func_003BC968 and all 512 16-bit samples are converted to
  * floats behind it at once (func_003BF440); otherwise the history is copied with func_003BF3E0 and each 128-sample
  * block is converted on its own and the history shifted afterwards. For each of the 4 blocks the window stage
  * (func_003BF4C0, func_003BF5A0 or func_003BF6B0 for a filter length of 0xE0, 0x160 or 0x1E0) and the transform chain
- * func_003BF800 .. func_003C01A0 produce 4 samples of every band at @p a1 (advanced 0x10 bytes per block). The history
+ * func_003BF800 .. func_003C01A0 produce 4 samples of every band at @p bandSamples (advanced 0x10 bytes per block). The history
  * goes back with func_003BCA28 or func_003BF3E0.
  *
- * @param a0  the channel's 16-bit PCM input (16-byte aligned)
- * @param a1  the per-band sample array the results go to (the work area)
- * @param a2  the channel's filter history buffer
+ * @param pcmInput  the channel's 16-bit PCM input (16-byte aligned)
+ * @param bandSamples  the per-band sample array the results go to (the work area)
+ * @param history  the channel's filter history buffer
  */
-void func_003BD220(unsigned int a0, int a1, unsigned int a2) {
-    short b;
+void func_003BD220(unsigned int pcmInput, int bandSamples, unsigned int history) {
+    short useSprDma;
     int i;
     if (!(D_0050AC6C_D220->fA3C == 0)) {
-        b = 0;
-        if ((a0 & 0x70000000) != 0x70000000) {
-            b = (a2 & 0x70000000) != 0x70000000;
+        useSprDma = 0;
+        if ((pcmInput & 0x70000000) != 0x70000000) {
+            useSprDma = (history & 0x70000000) != 0x70000000;
         }
     } else {
-        b = 0;
+        useSprDma = 0;
     }
-    if (b) {
-        func_003BC968(a2, (int)D_0050AC6C_D220->fA20, D_0050AC68_D220->f04 >> 2, 0);
-        fF440_D220(a0, (int)D_0050AC6C_D220->fA20 + D_0050AC68_D220->f04 * 4, 0x200);
+    if (useSprDma) {
+        func_003BC968(history, (int)D_0050AC6C_D220->fA20, D_0050AC68_D220->f04 >> 2, 0);
+        fF440_D220(pcmInput, (int)D_0050AC6C_D220->fA20 + D_0050AC68_D220->f04 * 4, 0x200);
         if (*(volatile int *)0x1000D400 & 0x100) {
             do {
             } while (*(volatile int *)0x1000D400 & 0x100);
         }
     } else {
-        fF3E0_D220(a2, (int)D_0050AC6C_D220->fA20, D_0050AC68_D220->f04);
+        fF3E0_D220(history, (int)D_0050AC6C_D220->fA20, D_0050AC68_D220->f04);
     }
     i = 0;
     do {
-        if (b) {
+        if (useSprDma) {
             if (D_0050AC68_D220->f04 == 0xE0) {
                 fF4C0_D220((int)D_0050AC6C_D220->fA20 + i * 0x200, (int)D_0050AC6C_D220->fA24, D_0050AC6C_D220->f600);
             } else if (D_0050AC68_D220->f04 == 352) {
@@ -8369,7 +8369,7 @@ void func_003BD220(unsigned int a0, int a1, unsigned int a2) {
                 fF6B0_D220((int)D_0050AC6C_D220->fA20 + i * 0x200, (int)D_0050AC6C_D220->fA24, D_0050AC6C_D220->f600);
             }
         } else {
-            fF440_D220(a0, (int)D_0050AC6C_D220->fA20 + D_0050AC68_D220->f04 * 4, 0x80);
+            fF440_D220(pcmInput, (int)D_0050AC6C_D220->fA20 + D_0050AC68_D220->f04 * 4, 0x80);
             if (D_0050AC68_D220->f04 == 0xE0) {
                 fF4C0_D220((int)D_0050AC6C_D220->fA20, (int)D_0050AC6C_D220->fA24, D_0050AC6C_D220->f600);
             } else if (D_0050AC68_D220->f04 == 352) {
@@ -8380,7 +8380,7 @@ void func_003BD220(unsigned int a0, int a1, unsigned int a2) {
             fF3E0_D220((int)D_0050AC6C_D220->fA20 + 0x200, (int)D_0050AC6C_D220->fA20, D_0050AC68_D220->f04);
         }
         i++;
-        a0 += 0x100;
+        pcmInput += 0x100;
         fF800_D220(D_0050AC6C_D220->f600);
         fF8D0_D220(D_0050AC6C_D220->f600, D_0050AC6C_D220->f800);
         fF960_D220(D_0050AC6C_D220->f800, D_0050AC6C_D220->f600);
@@ -8390,13 +8390,13 @@ void func_003BD220(unsigned int a0, int a1, unsigned int a2) {
         fFD60_D220(D_0050AC6C_D220->f600, (int)D_0050AC6C_D220->fA2C, D_0050AC6C_D220->f800);
         fFE80_D220(D_0050AC6C_D220->f800, (int)D_0050AC6C_D220->fA30, D_0050AC6C_D220->f600);
         fFFA0_D220(D_0050AC6C_D220->f600, (int)D_0050AC6C_D220->fA34, D_0050AC6C_D220->f800);
-        f01A0_D220(D_0050AC6C_D220->f800, (int)D_0050AC6C_D220->fA38, a1, 0x40);
-        a1 += 0x10;
+        f01A0_D220(D_0050AC6C_D220->f800, (int)D_0050AC6C_D220->fA38, bandSamples, 0x40);
+        bandSamples += 0x10;
     } while (i < 4);
-    if (b) {
-        func_003BCA28((int)D_0050AC6C_D220->fA20 + 0x800, a2, D_0050AC68_D220->f04 >> 2, 0x10000);
+    if (useSprDma) {
+        func_003BCA28((int)D_0050AC6C_D220->fA20 + 0x800, history, D_0050AC68_D220->f04 >> 2, 0x10000);
     } else {
-        fF3E0_D220((int)D_0050AC6C_D220->fA20, a2, D_0050AC68_D220->f04);
+        fF3E0_D220((int)D_0050AC6C_D220->fA20, history, D_0050AC68_D220->f04);
     }
 }
 #endif
@@ -8447,8 +8447,8 @@ void func_003BD5B8(int ch) {
     struct Blk_D5B8 *blk;
     unsigned char *sf;
     unsigned char *out;
-    unsigned short *q;
-    unsigned char *b;
+    unsigned short *quantized;
+    unsigned char *codeBytes;
     float x;
     int i;
     int n;
@@ -8471,50 +8471,50 @@ void func_003BD5B8(int ch) {
         blk->sf[i] = idx;
     }
     out = D_0050AC68_D5B8->out + (ch * 220 + 234);
-    q = D_0050AC6C_D5B8->q;
+    quantized = D_0050AC6C_D5B8->q;
     for (i = 0; i < 14; i++) {
-        f0564_D5B8((char *)D_0050AC6C_D5B8 + i * 0x40, q, 1.0f / (float)D_0044C760_D5B8[sf[i]]);
-        out[1] = q[0] >> 2;
-        out[0] = (q[0] << 6) | (q[1] >> 4);
-        out[3] = (q[1] << 4) | (q[2] >> 6);
-        out[2] = (q[2] << 2) | (q[3] >> 8);
-        out[5] = q[3];
-        out[4] = q[4] >> 2;
-        out[7] = (q[4] << 6) | (q[5] >> 4);
-        out[6] = (q[5] << 4) | (q[6] >> 6);
-        out[9] = (q[6] << 2) | (q[7] >> 8);
-        out[8] = q[7];
-        out[0x371] = q[8] >> 2;
-        out[0x370] = (q[8] << 6) | (q[9] >> 4);
-        out[0x373] = (q[9] << 4) | (q[10] >> 6);
-        out[0x372] = (q[10] << 2) | (q[11] >> 8);
-        out[0x375] = q[11];
-        out[0x374] = q[12] >> 2;
-        out[0x377] = (q[12] << 6) | (q[13] >> 4);
-        out[0x376] = (q[13] << 4) | (q[14] >> 6);
-        out[0x379] = (q[14] << 2) | (q[15] >> 8);
-        out[0x378] = q[15];
+        f0564_D5B8((char *)D_0050AC6C_D5B8 + i * 0x40, quantized, 1.0f / (float)D_0044C760_D5B8[sf[i]]);
+        out[1] = quantized[0] >> 2;
+        out[0] = (quantized[0] << 6) | (quantized[1] >> 4);
+        out[3] = (quantized[1] << 4) | (quantized[2] >> 6);
+        out[2] = (quantized[2] << 2) | (quantized[3] >> 8);
+        out[5] = quantized[3];
+        out[4] = quantized[4] >> 2;
+        out[7] = (quantized[4] << 6) | (quantized[5] >> 4);
+        out[6] = (quantized[5] << 4) | (quantized[6] >> 6);
+        out[9] = (quantized[6] << 2) | (quantized[7] >> 8);
+        out[8] = quantized[7];
+        out[0x371] = quantized[8] >> 2;
+        out[0x370] = (quantized[8] << 6) | (quantized[9] >> 4);
+        out[0x373] = (quantized[9] << 4) | (quantized[10] >> 6);
+        out[0x372] = (quantized[10] << 2) | (quantized[11] >> 8);
+        out[0x375] = quantized[11];
+        out[0x374] = quantized[12] >> 2;
+        out[0x377] = (quantized[12] << 6) | (quantized[13] >> 4);
+        out[0x376] = (quantized[13] << 4) | (quantized[14] >> 6);
+        out[0x379] = (quantized[14] << 2) | (quantized[15] >> 8);
+        out[0x378] = quantized[15];
         out += 10;
     }
     for (; i < 24; i++) {
-        f05E0_D5B8((char *)D_0050AC6C_D5B8 + i * 0x40, q, 1.0f / (float)D_0044C760_D5B8[sf[i]]);
-        b = (unsigned char *)q;
-        out[1] = b[0];
-        out[0] = b[1];
-        out[3] = b[2];
-        out[2] = b[3];
-        out[5] = b[4];
-        out[4] = b[5];
-        out[7] = b[6];
-        out[6] = b[7];
-        out[0x371] = b[8];
-        out[0x370] = b[9];
-        out[0x373] = b[10];
-        out[0x372] = b[11];
-        out[0x375] = b[12];
-        out[0x374] = b[13];
-        out[0x377] = b[14];
-        out[0x376] = b[15];
+        f05E0_D5B8((char *)D_0050AC6C_D5B8 + i * 0x40, quantized, 1.0f / (float)D_0044C760_D5B8[sf[i]]);
+        codeBytes = (unsigned char *)quantized;
+        out[1] = codeBytes[0];
+        out[0] = codeBytes[1];
+        out[3] = codeBytes[2];
+        out[2] = codeBytes[3];
+        out[5] = codeBytes[4];
+        out[4] = codeBytes[5];
+        out[7] = codeBytes[6];
+        out[6] = codeBytes[7];
+        out[0x371] = codeBytes[8];
+        out[0x370] = codeBytes[9];
+        out[0x373] = codeBytes[10];
+        out[0x372] = codeBytes[11];
+        out[0x375] = codeBytes[12];
+        out[0x374] = codeBytes[13];
+        out[0x377] = codeBytes[14];
+        out[0x376] = codeBytes[15];
         out += 8;
     }
 }
@@ -8647,7 +8647,7 @@ void func_003BDE08(int ch) {
     struct Blk_DE08 *blk;
     unsigned char *sf;
     unsigned char *out;
-    unsigned short *q;
+    unsigned short *quantized;
     float x;
     int i;
     int n;
@@ -8670,82 +8670,82 @@ void func_003BDE08(int ch) {
         blk->sf[i] = idx;
     }
     out = D_0050AC68_DE08->out + (ch * 172 + 284);
-    q = D_0050AC6C_DE08->q;
+    quantized = D_0050AC6C_DE08->q;
     for (i = 0; i < 5; i++) {
-        f0564_DE08((char *)D_0050AC6C_DE08 + i * 0x40, q, 1.0f / (float)D_0044C760_DE08[sf[i]]);
-        out[1] = (out[1] & 0xF8) | (q[0] >> 7);
-        out[0] = (q[0] << 1) | (q[1] >> 9);
-        out[3] = q[1] >> 1;
-        out[2] = (q[1] << 7) | (q[2] >> 3);
-        out[5] = (q[2] << 5) | (q[3] >> 5);
-        out[4] = (q[3] << 3) | (q[4] >> 7);
-        out[7] = (q[4] << 1) | (q[5] >> 9);
-        out[6] = q[5] >> 1;
-        out[9] = (q[5] << 7) | (q[6] >> 3);
-        out[8] = (q[6] << 5) | (q[7] >> 5);
-        out[0xB] = (out[0xB] & 7) | (q[7] << 3);
-        out[0x35D] = (out[0x35D] & 0xF8) | (q[8] >> 7);
-        out[0x35C] = (q[8] << 1) | (q[9] >> 9);
-        out[0x35F] = q[9] >> 1;
-        out[0x35E] = (q[9] << 7) | (q[10] >> 3);
-        out[0x361] = (q[10] << 5) | (q[11] >> 5);
-        out[0x360] = (q[11] << 3) | (q[12] >> 7);
-        out[0x363] = (q[12] << 1) | (q[13] >> 9);
-        out[0x362] = q[13] >> 1;
-        out[0x365] = (q[13] << 7) | (q[14] >> 3);
-        out[0x364] = (q[14] << 5) | (q[15] >> 5);
-        out[0x367] = (out[0x367] & 7) | (q[15] << 3);
+        f0564_DE08((char *)D_0050AC6C_DE08 + i * 0x40, quantized, 1.0f / (float)D_0044C760_DE08[sf[i]]);
+        out[1] = (out[1] & 0xF8) | (quantized[0] >> 7);
+        out[0] = (quantized[0] << 1) | (quantized[1] >> 9);
+        out[3] = quantized[1] >> 1;
+        out[2] = (quantized[1] << 7) | (quantized[2] >> 3);
+        out[5] = (quantized[2] << 5) | (quantized[3] >> 5);
+        out[4] = (quantized[3] << 3) | (quantized[4] >> 7);
+        out[7] = (quantized[4] << 1) | (quantized[5] >> 9);
+        out[6] = quantized[5] >> 1;
+        out[9] = (quantized[5] << 7) | (quantized[6] >> 3);
+        out[8] = (quantized[6] << 5) | (quantized[7] >> 5);
+        out[0xB] = (out[0xB] & 7) | (quantized[7] << 3);
+        out[0x35D] = (out[0x35D] & 0xF8) | (quantized[8] >> 7);
+        out[0x35C] = (quantized[8] << 1) | (quantized[9] >> 9);
+        out[0x35F] = quantized[9] >> 1;
+        out[0x35E] = (quantized[9] << 7) | (quantized[10] >> 3);
+        out[0x361] = (quantized[10] << 5) | (quantized[11] >> 5);
+        out[0x360] = (quantized[11] << 3) | (quantized[12] >> 7);
+        out[0x363] = (quantized[12] << 1) | (quantized[13] >> 9);
+        out[0x362] = quantized[13] >> 1;
+        out[0x365] = (quantized[13] << 7) | (quantized[14] >> 3);
+        out[0x364] = (quantized[14] << 5) | (quantized[15] >> 5);
+        out[0x367] = (out[0x367] & 7) | (quantized[15] << 3);
         out += 10;
     }
     for (; i < 14; i++) {
-        f05E0_DE08((char *)D_0050AC6C_DE08 + i * 0x40, q, 1.0f / (float)D_0044C760_DE08[sf[i]]);
-        out[1] = (out[1] & 0xF8) | (((unsigned char *)q)[0] >> 5);
-        out[0] = (((unsigned char *)q)[0] << 3) | (((unsigned char *)q)[1] >> 5);
-        out[3] = (((unsigned char *)q)[1] << 3) | (((unsigned char *)q)[2] >> 5);
-        out[2] = (((unsigned char *)q)[2] << 3) | (((unsigned char *)q)[3] >> 5);
-        out[5] = (((unsigned char *)q)[3] << 3) | (((unsigned char *)q)[4] >> 5);
-        out[4] = (((unsigned char *)q)[4] << 3) | (((unsigned char *)q)[5] >> 5);
-        out[7] = (((unsigned char *)q)[5] << 3) | (((unsigned char *)q)[6] >> 5);
-        out[6] = (((unsigned char *)q)[6] << 3) | (((unsigned char *)q)[7] >> 5);
-        out[9] = (out[9] & 7) | (((unsigned char *)q)[7] << 3);
-        out[0x35D] = (out[0x35D] & 0xF8) | (((unsigned char *)q)[8] >> 5);
-        out[0x35C] = (((unsigned char *)q)[8] << 3) | (((unsigned char *)q)[9] >> 5);
-        out[0x35F] = (((unsigned char *)q)[9] << 3) | (((unsigned char *)q)[10] >> 5);
-        out[0x35E] = (((unsigned char *)q)[10] << 3) | (((unsigned char *)q)[11] >> 5);
-        out[0x361] = (((unsigned char *)q)[11] << 3) | (((unsigned char *)q)[12] >> 5);
-        out[0x360] = (((unsigned char *)q)[12] << 3) | (((unsigned char *)q)[13] >> 5);
-        out[0x363] = (((unsigned char *)q)[13] << 3) | (((unsigned char *)q)[14] >> 5);
-        out[0x362] = (((unsigned char *)q)[14] << 3) | (((unsigned char *)q)[15] >> 5);
-        out[0x365] = (out[0x365] & 7) | (((unsigned char *)q)[15] << 3);
+        f05E0_DE08((char *)D_0050AC6C_DE08 + i * 0x40, quantized, 1.0f / (float)D_0044C760_DE08[sf[i]]);
+        out[1] = (out[1] & 0xF8) | (((unsigned char *)quantized)[0] >> 5);
+        out[0] = (((unsigned char *)quantized)[0] << 3) | (((unsigned char *)quantized)[1] >> 5);
+        out[3] = (((unsigned char *)quantized)[1] << 3) | (((unsigned char *)quantized)[2] >> 5);
+        out[2] = (((unsigned char *)quantized)[2] << 3) | (((unsigned char *)quantized)[3] >> 5);
+        out[5] = (((unsigned char *)quantized)[3] << 3) | (((unsigned char *)quantized)[4] >> 5);
+        out[4] = (((unsigned char *)quantized)[4] << 3) | (((unsigned char *)quantized)[5] >> 5);
+        out[7] = (((unsigned char *)quantized)[5] << 3) | (((unsigned char *)quantized)[6] >> 5);
+        out[6] = (((unsigned char *)quantized)[6] << 3) | (((unsigned char *)quantized)[7] >> 5);
+        out[9] = (out[9] & 7) | (((unsigned char *)quantized)[7] << 3);
+        out[0x35D] = (out[0x35D] & 0xF8) | (((unsigned char *)quantized)[8] >> 5);
+        out[0x35C] = (((unsigned char *)quantized)[8] << 3) | (((unsigned char *)quantized)[9] >> 5);
+        out[0x35F] = (((unsigned char *)quantized)[9] << 3) | (((unsigned char *)quantized)[10] >> 5);
+        out[0x35E] = (((unsigned char *)quantized)[10] << 3) | (((unsigned char *)quantized)[11] >> 5);
+        out[0x361] = (((unsigned char *)quantized)[11] << 3) | (((unsigned char *)quantized)[12] >> 5);
+        out[0x360] = (((unsigned char *)quantized)[12] << 3) | (((unsigned char *)quantized)[13] >> 5);
+        out[0x363] = (((unsigned char *)quantized)[13] << 3) | (((unsigned char *)quantized)[14] >> 5);
+        out[0x362] = (((unsigned char *)quantized)[14] << 3) | (((unsigned char *)quantized)[15] >> 5);
+        out[0x365] = (out[0x365] & 7) | (((unsigned char *)quantized)[15] << 3);
         out += 8;
     }
     for (; i < 24; i += 2) {
-        f0640_DE08((char *)D_0050AC6C_DE08 + i * 0x40, q, 1.0f / (float)D_0044C760_DE08[sf[i]]);
-        out[1] = (out[1] & 0xF8) | (((unsigned char *)q)[0] >> 2);
-        out[0] = (((unsigned char *)q)[0] << 6) | (((unsigned char *)q)[1] << 1) | (((unsigned char *)q)[2] >> 4);
-        out[3] = (((unsigned char *)q)[2] << 4) | (((unsigned char *)q)[3] >> 1);
-        out[2] = (((unsigned char *)q)[3] << 7) | (((unsigned char *)q)[4] << 2) | (((unsigned char *)q)[5] >> 3);
-        out[5] = ((unsigned char *)q)[6] | (((unsigned char *)q)[5] << 5);
-        out[4] = (out[4] & 7) | (((unsigned char *)q)[7] << 3);
-        out[0x35D] = (out[0x35D] & 0xF8) | (((unsigned char *)q)[8] >> 2);
-        out[0x35C] = (((unsigned char *)q)[8] << 6) | (((unsigned char *)q)[9] << 1) | (((unsigned char *)q)[10] >> 4);
-        out[0x35F] = (((unsigned char *)q)[10] << 4) | (((unsigned char *)q)[11] >> 1);
-        out[0x35E] = (((unsigned char *)q)[11] << 7) | (((unsigned char *)q)[12] << 2) | (((unsigned char *)q)[13] >> 3);
-        out[0x361] = ((unsigned char *)q)[14] | (((unsigned char *)q)[13] << 5);
-        out[0x360] = (out[0x360] & 7) | (((unsigned char *)q)[15] << 3);
-        f0640_DE08((char *)D_0050AC6C_DE08 + (i + 1) * 0x40, q, 1.0f / (float)D_0044C760_DE08[sf[i + 1]]);
-        out[4] = (out[4] & 0xF8) | (((unsigned char *)q)[0] >> 2);
-        out[7] = (((unsigned char *)q)[0] << 6) | (((unsigned char *)q)[1] << 1) | (((unsigned char *)q)[2] >> 4);
-        out[6] = (((unsigned char *)q)[2] << 4) | (((unsigned char *)q)[3] >> 1);
-        out[9] = (((unsigned char *)q)[3] << 7) | (((unsigned char *)q)[4] << 2) | (((unsigned char *)q)[5] >> 3);
-        out[8] = ((unsigned char *)q)[6] | (((unsigned char *)q)[5] << 5);
-        out[0xB] = (out[0xB] & 7) | (((unsigned char *)q)[7] << 3);
-        out[0x360] = (out[0x360] & 0xF8) | (((unsigned char *)q)[8] >> 2);
-        out[0x363] = (((unsigned char *)q)[8] << 6) | (((unsigned char *)q)[9] << 1) | (((unsigned char *)q)[10] >> 4);
-        out[0x362] = (((unsigned char *)q)[10] << 4) | (((unsigned char *)q)[11] >> 1);
-        out[0x365] = (((unsigned char *)q)[11] << 7) | (((unsigned char *)q)[12] << 2) | (((unsigned char *)q)[13] >> 3);
-        out[0x364] = ((unsigned char *)q)[14] | (((unsigned char *)q)[13] << 5);
-        out[0x367] = (out[0x367] & 7) | (((unsigned char *)q)[15] << 3);
+        f0640_DE08((char *)D_0050AC6C_DE08 + i * 0x40, quantized, 1.0f / (float)D_0044C760_DE08[sf[i]]);
+        out[1] = (out[1] & 0xF8) | (((unsigned char *)quantized)[0] >> 2);
+        out[0] = (((unsigned char *)quantized)[0] << 6) | (((unsigned char *)quantized)[1] << 1) | (((unsigned char *)quantized)[2] >> 4);
+        out[3] = (((unsigned char *)quantized)[2] << 4) | (((unsigned char *)quantized)[3] >> 1);
+        out[2] = (((unsigned char *)quantized)[3] << 7) | (((unsigned char *)quantized)[4] << 2) | (((unsigned char *)quantized)[5] >> 3);
+        out[5] = ((unsigned char *)quantized)[6] | (((unsigned char *)quantized)[5] << 5);
+        out[4] = (out[4] & 7) | (((unsigned char *)quantized)[7] << 3);
+        out[0x35D] = (out[0x35D] & 0xF8) | (((unsigned char *)quantized)[8] >> 2);
+        out[0x35C] = (((unsigned char *)quantized)[8] << 6) | (((unsigned char *)quantized)[9] << 1) | (((unsigned char *)quantized)[10] >> 4);
+        out[0x35F] = (((unsigned char *)quantized)[10] << 4) | (((unsigned char *)quantized)[11] >> 1);
+        out[0x35E] = (((unsigned char *)quantized)[11] << 7) | (((unsigned char *)quantized)[12] << 2) | (((unsigned char *)quantized)[13] >> 3);
+        out[0x361] = ((unsigned char *)quantized)[14] | (((unsigned char *)quantized)[13] << 5);
+        out[0x360] = (out[0x360] & 7) | (((unsigned char *)quantized)[15] << 3);
+        f0640_DE08((char *)D_0050AC6C_DE08 + (i + 1) * 0x40, quantized, 1.0f / (float)D_0044C760_DE08[sf[i + 1]]);
+        out[4] = (out[4] & 0xF8) | (((unsigned char *)quantized)[0] >> 2);
+        out[7] = (((unsigned char *)quantized)[0] << 6) | (((unsigned char *)quantized)[1] << 1) | (((unsigned char *)quantized)[2] >> 4);
+        out[6] = (((unsigned char *)quantized)[2] << 4) | (((unsigned char *)quantized)[3] >> 1);
+        out[9] = (((unsigned char *)quantized)[3] << 7) | (((unsigned char *)quantized)[4] << 2) | (((unsigned char *)quantized)[5] >> 3);
+        out[8] = ((unsigned char *)quantized)[6] | (((unsigned char *)quantized)[5] << 5);
+        out[0xB] = (out[0xB] & 7) | (((unsigned char *)quantized)[7] << 3);
+        out[0x360] = (out[0x360] & 0xF8) | (((unsigned char *)quantized)[8] >> 2);
+        out[0x363] = (((unsigned char *)quantized)[8] << 6) | (((unsigned char *)quantized)[9] << 1) | (((unsigned char *)quantized)[10] >> 4);
+        out[0x362] = (((unsigned char *)quantized)[10] << 4) | (((unsigned char *)quantized)[11] >> 1);
+        out[0x365] = (((unsigned char *)quantized)[11] << 7) | (((unsigned char *)quantized)[12] << 2) | (((unsigned char *)quantized)[13] >> 3);
+        out[0x364] = ((unsigned char *)quantized)[14] | (((unsigned char *)quantized)[13] << 5);
+        out[0x367] = (out[0x367] & 7) | (((unsigned char *)quantized)[15] << 3);
         out += 10;
     }
 }
@@ -8774,84 +8774,84 @@ extern struct S_E6E0 *D_0050AC68_E6E0 __asm__("D_0050AC68");
  * Packs the scale factors and the LFE channel into a DTS 5.1 frame (mode 2).
  *
  * Writes each channel's 24 7-bit scale-factor indices from +0xAA of the output frame (21 bytes per channel, 3 bits out
- * of byte alignment, odd channels shifted one byte), then encodes the LFE input (the sixth input pointer, @p arg0 +
+ * of byte alignment, odd channels shifted one byte), then encodes the LFE input (the sixth input pointer, @p channelInputs +
  * 0x14) with func_003BD078 and packs its 8 samples and scale index from +0x112. Called by func_003BF0F0.
  *
- * @param arg0  the encoder's per-channel input pointer array
+ * @param channelInputs  the encoder's per-channel input pointer array
  */
-void func_003BE6E0(char *arg0) {
+void func_003BE6E0(char *channelInputs) {
     signed char vals[8];
     signed char idx;
-    unsigned char *o;
+    unsigned char *outCursor;
     unsigned char *sf;
     struct Blk_E6E0 *blk;
     int i;
 
-    o = D_0050AC68_E6E0->out + 0xAA;
+    outCursor = D_0050AC68_E6E0->out + 0xAA;
     for (i = 0; i < D_0050AC68_E6E0->n; i++) {
         blk = D_0050AC68_E6E0->ptrs[i];
         sf = blk->sf;
         if (i & 1) {
-            o[-1] = (o[-1] & 0xF8) | (sf[0] >> 4);
-            o[2] = (sf[0] << 4) | (sf[1] >> 3);
-            o[1] = (sf[1] << 5) | (sf[2] >> 2);
-            o[4] = (sf[2] << 6) | (sf[3] >> 1);
-            o[3] = (sf[3] << 7) | sf[4];
-            o[6] = (sf[5] << 1) | (sf[6] >> 6);
-            o[5] = (sf[6] << 2) | (sf[7] >> 5);
-            o[8] = (sf[7] << 3) | (sf[8] >> 4);
-            o[7] = (sf[8] << 4) | (sf[9] >> 3);
-            o[10] = (sf[9] << 5) | (sf[10] >> 2);
-            o[9] = (sf[10] << 6) | (sf[11] >> 1);
-            o[12] = (sf[11] << 7) | sf[12];
-            o[11] = (sf[13] << 1) | (sf[14] >> 6);
-            o[14] = (sf[14] << 2) | (sf[15] >> 5);
-            o[13] = (sf[15] << 3) | (sf[16] >> 4);
-            o[16] = (sf[16] << 4) | (sf[17] >> 3);
-            o[15] = (sf[17] << 5) | (sf[18] >> 2);
-            o[18] = (sf[18] << 6) | (sf[19] >> 1);
-            o[17] = (sf[19] << 7) | sf[20];
-            o[20] = (sf[21] << 1) | (sf[22] >> 6);
-            o[19] = (sf[22] << 2) | (sf[23] >> 5);
-            o[21] = (o[21] & 7) | (sf[23] << 3);
+            outCursor[-1] = (outCursor[-1] & 0xF8) | (sf[0] >> 4);
+            outCursor[2] = (sf[0] << 4) | (sf[1] >> 3);
+            outCursor[1] = (sf[1] << 5) | (sf[2] >> 2);
+            outCursor[4] = (sf[2] << 6) | (sf[3] >> 1);
+            outCursor[3] = (sf[3] << 7) | sf[4];
+            outCursor[6] = (sf[5] << 1) | (sf[6] >> 6);
+            outCursor[5] = (sf[6] << 2) | (sf[7] >> 5);
+            outCursor[8] = (sf[7] << 3) | (sf[8] >> 4);
+            outCursor[7] = (sf[8] << 4) | (sf[9] >> 3);
+            outCursor[10] = (sf[9] << 5) | (sf[10] >> 2);
+            outCursor[9] = (sf[10] << 6) | (sf[11] >> 1);
+            outCursor[12] = (sf[11] << 7) | sf[12];
+            outCursor[11] = (sf[13] << 1) | (sf[14] >> 6);
+            outCursor[14] = (sf[14] << 2) | (sf[15] >> 5);
+            outCursor[13] = (sf[15] << 3) | (sf[16] >> 4);
+            outCursor[16] = (sf[16] << 4) | (sf[17] >> 3);
+            outCursor[15] = (sf[17] << 5) | (sf[18] >> 2);
+            outCursor[18] = (sf[18] << 6) | (sf[19] >> 1);
+            outCursor[17] = (sf[19] << 7) | sf[20];
+            outCursor[20] = (sf[21] << 1) | (sf[22] >> 6);
+            outCursor[19] = (sf[22] << 2) | (sf[23] >> 5);
+            outCursor[21] = (outCursor[21] & 7) | (sf[23] << 3);
         } else {
-            o[1] = (o[1] & 0xF8) | (sf[0] >> 4);
-            o[0] = (sf[0] << 4) | (sf[1] >> 3);
-            o[3] = (sf[1] << 5) | (sf[2] >> 2);
-            o[2] = (sf[2] << 6) | (sf[3] >> 1);
-            o[5] = (sf[3] << 7) | sf[4];
-            o[4] = (sf[5] << 1) | (sf[6] >> 6);
-            o[7] = (sf[6] << 2) | (sf[7] >> 5);
-            o[6] = (sf[7] << 3) | (sf[8] >> 4);
-            o[9] = (sf[8] << 4) | (sf[9] >> 3);
-            o[8] = (sf[9] << 5) | (sf[10] >> 2);
-            o[11] = (sf[10] << 6) | (sf[11] >> 1);
-            o[10] = (sf[11] << 7) | sf[12];
-            o[13] = (sf[13] << 1) | (sf[14] >> 6);
-            o[12] = (sf[14] << 2) | (sf[15] >> 5);
-            o[15] = (sf[15] << 3) | (sf[16] >> 4);
-            o[14] = (sf[16] << 4) | (sf[17] >> 3);
-            o[17] = (sf[17] << 5) | (sf[18] >> 2);
-            o[16] = (sf[18] << 6) | (sf[19] >> 1);
-            o[19] = (sf[19] << 7) | sf[20];
-            o[18] = (sf[21] << 1) | (sf[22] >> 6);
-            o[21] = (sf[22] << 2) | (sf[23] >> 5);
-            o[20] = (o[20] & 7) | (sf[23] << 3);
+            outCursor[1] = (outCursor[1] & 0xF8) | (sf[0] >> 4);
+            outCursor[0] = (sf[0] << 4) | (sf[1] >> 3);
+            outCursor[3] = (sf[1] << 5) | (sf[2] >> 2);
+            outCursor[2] = (sf[2] << 6) | (sf[3] >> 1);
+            outCursor[5] = (sf[3] << 7) | sf[4];
+            outCursor[4] = (sf[5] << 1) | (sf[6] >> 6);
+            outCursor[7] = (sf[6] << 2) | (sf[7] >> 5);
+            outCursor[6] = (sf[7] << 3) | (sf[8] >> 4);
+            outCursor[9] = (sf[8] << 4) | (sf[9] >> 3);
+            outCursor[8] = (sf[9] << 5) | (sf[10] >> 2);
+            outCursor[11] = (sf[10] << 6) | (sf[11] >> 1);
+            outCursor[10] = (sf[11] << 7) | sf[12];
+            outCursor[13] = (sf[13] << 1) | (sf[14] >> 6);
+            outCursor[12] = (sf[14] << 2) | (sf[15] >> 5);
+            outCursor[15] = (sf[15] << 3) | (sf[16] >> 4);
+            outCursor[14] = (sf[16] << 4) | (sf[17] >> 3);
+            outCursor[17] = (sf[17] << 5) | (sf[18] >> 2);
+            outCursor[16] = (sf[18] << 6) | (sf[19] >> 1);
+            outCursor[19] = (sf[19] << 7) | sf[20];
+            outCursor[18] = (sf[21] << 1) | (sf[22] >> 6);
+            outCursor[21] = (sf[22] << 2) | (sf[23] >> 5);
+            outCursor[20] = (outCursor[20] & 7) | (sf[23] << 3);
         }
-        o += 21;
+        outCursor += 21;
     }
-    o = D_0050AC68_E6E0->out + 0x113;
-    func_003BD078(*(int *)(arg0 + 0x14), &idx, vals);
-    o[-1] = (o[-1] & 0xF8) | (vals[0] >> 5);
-    o[2] = (vals[0] << 5) | (vals[1] >> 5);
-    o[1] = (vals[1] << 5) | (vals[2] >> 5);
-    o[4] = (vals[2] << 5) | (vals[3] >> 5);
-    o[3] = (vals[3] << 5) | (vals[4] >> 5);
-    o[6] = (vals[4] << 5) | (vals[5] >> 5);
-    o[5] = (vals[5] << 5) | (vals[6] >> 5);
-    o[8] = (vals[6] << 5) | (vals[7] >> 5);
-    o[7] = (vals[7] << 5) | ((unsigned char)idx >> 5);
-    o[10] = (o[10] & 7) | (idx << 5);
+    outCursor = D_0050AC68_E6E0->out + 0x113;
+    func_003BD078(*(int *)(channelInputs + 0x14), &idx, vals);
+    outCursor[-1] = (outCursor[-1] & 0xF8) | (vals[0] >> 5);
+    outCursor[2] = (vals[0] << 5) | (vals[1] >> 5);
+    outCursor[1] = (vals[1] << 5) | (vals[2] >> 5);
+    outCursor[4] = (vals[2] << 5) | (vals[3] >> 5);
+    outCursor[3] = (vals[3] << 5) | (vals[4] >> 5);
+    outCursor[6] = (vals[4] << 5) | (vals[5] >> 5);
+    outCursor[5] = (vals[5] << 5) | (vals[6] >> 5);
+    outCursor[8] = (vals[6] << 5) | (vals[7] >> 5);
+    outCursor[7] = (vals[7] << 5) | ((unsigned char)idx >> 5);
+    outCursor[10] = (outCursor[10] & 7) | (idx << 5);
 }
 #endif
 
@@ -8865,24 +8865,24 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003BECA0);
  * and mode 2 (5.1) 5. The state size is (length * 4 + 0x3C) * channels + 168 and the work size (2 * length + 0x200) * 4
  * + 0xC00. func_003BC930 installs it as the size hook D_0050C840, which func_003C1B80 calls before allocating.
  *
- * @param a  the mode (1 = DTS 4.0, 2 = DTS 5.1)
- * @param b  the quality (0-100)
- * @param o1  receives the state size
- * @param o2  receives the work-area size
+ * @param mode  the mode (1 = DTS 4.0, 2 = DTS 5.1)
+ * @param quality  the quality (0-100)
+ * @param outStateSize  receives the state size
+ * @param outWorkSize  receives the work-area size
  * @return 0, -1 for a bad mode or -2 for a quality out of range
  */
-int func_003BECA0(int a, int b, int *o1, int *o2) {
-    int w, m;
-    if (b < 0) return -2;
-    if (b < 34) w = 0xE0;
-    else if (b < 67) w = 352;
-    else if (b < 101) w = 0x1E0;
+int func_003BECA0(int mode, int quality, int *outStateSize, int *outWorkSize) {
+    int w, channelCount;
+    if (quality < 0) return -2;
+    if (quality < 34) w = 0xE0;
+    else if (quality < 67) w = 352;
+    else if (quality < 101) w = 0x1E0;
     else return -2;
-    if (a == 1) m = 4;
-    else if (a == 2) m = 5;
+    if (mode == 1) channelCount = 4;
+    else if (mode == 2) channelCount = 5;
     else return -1;
-    *o1 = (w * 4 + 0x3C) * m + 168;
-    *o2 = (w + (w + 0x200)) * 4 + 0xC00;
+    *outStateSize = (w * 4 + 0x3C) * channelCount + 168;
+    *outWorkSize = (w + (w + 0x200)) * 4 + 0xC00;
     return 0;
 }
 #endif
@@ -11492,15 +11492,15 @@ extern char D_0050AD00_0A60[] __asm__("D_0050AD00");
  * after encoding.
  */
 void func_003C0A60(void) {
-    char *b = D_0050AD00_0A60;
-    func_003C4978_0A60(*(int *)(b + 0x1B38), D_0050A94C_0A60[0], *(unsigned short *)(b + 0x1AAE) >> 4, 0x10000);
-    *(volatile int *)0x1000D010 = *(int *)(b + 0x1B1C);
-    *(volatile int *)0x1000D080 = *(int *)(b + 0x1B20);
-    *(volatile int *)0x1000D020 = *(int *)(b + 0x1B24);
-    *(volatile int *)0x1000D410 = *(int *)(b + 0x1B28);
-    *(volatile int *)0x1000D430 = *(int *)(b + 0x1B2C);
-    *(volatile int *)0x1000D480 = *(int *)(b + 0x1B30);
-    *(volatile int *)0x1000D420 = *(int *)(b + 0x1B34);
+    char *soundState = D_0050AD00_0A60;
+    func_003C4978_0A60(*(int *)(soundState + 0x1B38), D_0050A94C_0A60[0], *(unsigned short *)(soundState + 0x1AAE) >> 4, 0x10000);
+    *(volatile int *)0x1000D010 = *(int *)(soundState + 0x1B1C);
+    *(volatile int *)0x1000D080 = *(int *)(soundState + 0x1B20);
+    *(volatile int *)0x1000D020 = *(int *)(soundState + 0x1B24);
+    *(volatile int *)0x1000D410 = *(int *)(soundState + 0x1B28);
+    *(volatile int *)0x1000D430 = *(int *)(soundState + 0x1B2C);
+    *(volatile int *)0x1000D480 = *(int *)(soundState + 0x1B30);
+    *(volatile int *)0x1000D420 = *(int *)(soundState + 0x1B34);
 }
 #endif
 
@@ -11624,26 +11624,26 @@ extern void func_00426D18(void *, int, int, void *, int, int, int, int, int);
 /**
  * Sends a command to the IOP sound driver over SIF RPC.
  *
- * Copies @p a2 bytes of @p a1 into the RPC send buffer (+0x000 of D_0050AD00, func_003C51E8) when the size is non-zero,
+ * Copies @p sendSize bytes of @p sendData into the RPC send buffer (+0x000 of D_0050AD00, func_003C51E8) when the size is non-zero,
  * waits (10000-iteration delay loops) while the client +0xC80 is busy (func_00426F08), then calls the function with
  * func_00426D18 (sceSifCallRpc), no-wait mode for function 2. Used by the platform init func_003C1B80 (function 0),
  * func_003C2268 and func_003C3450.
  *
- * @param a0  the RPC function number
- * @param a1  the command data
- * @param a2  its size in bytes
+ * @param rpcFunction  the RPC function number
+ * @param sendData  the command data
+ * @param sendSize  its size in bytes
  */
-void func_003C0B10(int a0, void *a1, int a2) {
+void func_003C0B10(int rpcFunction, void *sendData, int sendSize) {
     volatile int i;
-    int two = a0 == 2;
-    if (a2) {
-        func_003C51E8(D_0050AD00_0B10.f000, a1, a2);
+    int two = rpcFunction == 2;
+    if (sendSize) {
+        func_003C51E8(D_0050AD00_0B10.f000, sendData, sendSize);
     }
     while (func_00426F08(D_0050AD00_0B10.fC80)) {
         for (i = 0; i < 10000; i++) {
         }
     }
-    func_00426D18(D_0050AD00_0B10.fC80, a0, two, D_0050AD00_0B10.f000, a2, 0, 0, 0, 0);
+    func_00426D18(D_0050AD00_0B10.fC80, rpcFunction, two, D_0050AD00_0B10.f000, sendSize, 0, 0, 0, 0);
 }
 #endif
 
@@ -11662,10 +11662,10 @@ extern struct S_0BE8 D_0050A8E8_0BE8 __asm__("D_0050A8E8");
  * second count is passed too. The platform init func_003C1B80 hands it to the mixer setup func_003C7D00 as its
  * voice-free callback.
  *
- * @param arg0  the mixer voice index
+ * @param voiceIndex  the mixer voice index
  */
-void func_003C0BE8(int arg0) {
-    SNDVOICEI_free(arg0 + D_0050A8E8_0BE8.b + D_0050A8E8_0BE8.a, D_0050A8E8_0BE8.a);
+void func_003C0BE8(int voiceIndex) {
+    SNDVOICEI_free(voiceIndex + D_0050A8E8_0BE8.b + D_0050A8E8_0BE8.a, D_0050A8E8_0BE8.a);
 }
 #endif
 
@@ -11683,26 +11683,26 @@ extern unsigned char D_0050A918_0C18[] __asm__("D_0050A918");
  * software mixer) gives [+0x30 + +0x2F, +0x17E, the channel count). Other modes leave the outputs alone.
  * SNDBANKI_playtimbre and func_003C6760 pass the range to SNDVOICEI_alloc.
  *
- * @param arg0  the render mode
- * @param arg1  receives the first voice
- * @param arg2  receives the end of the range (exclusive)
+ * @param renderMode  the render mode
+ * @param minVoice  receives the first voice
+ * @param maxVoice  receives the end of the range (exclusive)
  */
-void func_003C0C18(int arg0, int *arg1, int *arg2) {
-    if (arg0 & 8) {
-        *arg1 = 0;
-        *arg2 = D_0050A918_0C18[0];
+void func_003C0C18(int renderMode, int *minVoice, int *maxVoice) {
+    if (renderMode & 8) {
+        *minVoice = 0;
+        *maxVoice = D_0050A918_0C18[0];
         return;
     }
-    if (arg0 & 0x100) {
-        char *b = D_0050A8E8_0C18;
-        *arg1 = *(unsigned char *)(b + 0x30);
-        *arg2 = *(unsigned char *)(b + 0x30) + *(unsigned char *)(b + 0x2F);
+    if (renderMode & 0x100) {
+        char *driverState = D_0050A8E8_0C18;
+        *minVoice = *(unsigned char *)(driverState + 0x30);
+        *maxVoice = *(unsigned char *)(driverState + 0x30) + *(unsigned char *)(driverState + 0x2F);
         return;
     }
-    if (arg0 & 4) {
-        char *b = D_0050A8E8_0C18;
-        *arg1 = *(unsigned char *)(b + 0x30) + *(unsigned char *)(b + 0x2F);
-        *arg2 = *(short *)(b + 0x17E);
+    if (renderMode & 4) {
+        char *driverState = D_0050A8E8_0C18;
+        *minVoice = *(unsigned char *)(driverState + 0x30) + *(unsigned char *)(driverState + 0x2F);
+        *maxVoice = *(short *)(driverState + 0x17E);
     }
 }
 #endif
@@ -11912,78 +11912,78 @@ extern void f38E0_0E28(int) __asm__("func_003C38E0");
  * @return 0
  */
 int func_003C0E28(void) {
-    struct Sub_0E28 s;
+    struct Sub_0E28 requested;
     int i;
 
-    s = D_0050A908_0E28;
+    requested = D_0050A908_0E28;
     if (D_0050A8E8_0E28.f174) {
         D_0050A8E8_0E28.sub = D_0050A8E8_0E28.saved;
-        if (D_0050A8E8_0E28.saved.b29 != s.b29) {
+        if (D_0050A8E8_0E28.saved.b29 != requested.b29) {
             return 0;
         }
     }
-    if (s.hA <= 24000) {
-        s.hA = 24000;
-    } else if (s.hA <= 36000) {
-        s.hA = 36000;
+    if (requested.hA <= 24000) {
+        requested.hA = 24000;
+    } else if (requested.hA <= 36000) {
+        requested.hA = 36000;
     } else {
-        s.hA = 48000;
+        requested.hA = 48000;
     }
-    if (s.hC <= 24000) {
-        s.hC = 24000;
-    } else if (s.hC <= 36000) {
-        s.hC = 36000;
+    if (requested.hC <= 24000) {
+        requested.hC = 24000;
+    } else if (requested.hC <= 36000) {
+        requested.hC = 36000;
     } else {
-        s.hC = 48000;
+        requested.hC = 48000;
     }
-    if (s.b29 & 2) {
-        s.b10 = 0x18;
-        if (s.b27 < 4) {
-            s.b27 = 4;
+    if (requested.b29 & 2) {
+        requested.b10 = 0x18;
+        if (requested.b27 < 4) {
+            requested.b27 = 4;
         }
     }
-    if (s.b29 & 1) {
-        if (s.b27 > 2) {
-            s.b27 = 2;
+    if (requested.b29 & 1) {
+        if (requested.b27 > 2) {
+            requested.b27 = 2;
         }
-        s.b28 = 0;
+        requested.b28 = 0;
     }
-    if (s.b2A > 100) {
-        s.b2A = 100;
+    if (requested.b2A > 100) {
+        requested.b2A = 100;
     }
-    if (s.b27 < D_0050A8E8_0E28.b4) {
-        s.b27 = D_0050A8E8_0E28.b4;
-    } else if (s.b27 > D_0050A8E8_0E28.b5) {
-        s.b27 = D_0050A8E8_0E28.b5;
+    if (requested.b27 < D_0050A8E8_0E28.b4) {
+        requested.b27 = D_0050A8E8_0E28.b4;
+    } else if (requested.b27 > D_0050A8E8_0E28.b5) {
+        requested.b27 = D_0050A8E8_0E28.b5;
     }
-    if (s.b27 == 5) {
-        s.b28 = 1;
+    if (requested.b27 == 5) {
+        requested.b28 = 1;
     } else {
-        s.b28 = 0;
+        requested.b28 = 0;
     }
-    if (s.bE > D_0050A8E8_0E28.b6) {
-        s.bE = D_0050A8E8_0E28.b6;
+    if (requested.bE > D_0050A8E8_0E28.b6) {
+        requested.bE = D_0050A8E8_0E28.b6;
     }
-    if (s.bF > D_0050A8E8_0E28.b7) {
-        s.bF = D_0050A8E8_0E28.b7;
+    if (requested.bF > D_0050A8E8_0E28.b7) {
+        requested.bF = D_0050A8E8_0E28.b7;
     }
-    if (s.b10 > D_0050A8E8_0E28.b8) {
-        s.b10 = D_0050A8E8_0E28.b8;
+    if (requested.b10 > D_0050A8E8_0E28.b8) {
+        requested.b10 = D_0050A8E8_0E28.b8;
     }
-    if (s.b26 > 0x20) {
-        s.b26 = 0x20;
+    if (requested.b26 > 0x20) {
+        requested.b26 = 0x20;
     }
-    f8148_0E28(s.b20);
-    if (D_0050A8E8_0E28.sub.w44 != 0 && (s.w44 & 0xF)) {
-        s.w44 = ((s.w44 + 0xF) >> 4) << 4;
-        s.w48 -= 0x10;
+    f8148_0E28(requested.b20);
+    if (D_0050A8E8_0E28.sub.w44 != 0 && (requested.w44 & 0xF)) {
+        requested.w44 = ((requested.w44 + 0xF) >> 4) << 4;
+        requested.w48 -= 0x10;
     }
     if (D_0050A8E8_0E28.f174) {
-        D_0050A8E8_0E28.sub.b20 = s.b20;
-        D_0050A8E8_0E28.sub.b21 = s.b21;
-        D_0050B9B0_0E28->b13 = s.b21;
-        if (D_0050A8E8_0E28.saved.b27 != s.b27) {
-            D_0050A8E8_0E28.sub.b27 = s.b27;
+        D_0050A8E8_0E28.sub.b20 = requested.b20;
+        D_0050A8E8_0E28.sub.b21 = requested.b21;
+        D_0050B9B0_0E28->b13 = requested.b21;
+        if (D_0050A8E8_0E28.saved.b27 != requested.b27) {
+            D_0050A8E8_0E28.sub.b27 = requested.b27;
             for (i = 0; i < D_0050A8E8_0E28.h17E; i++) {
                 if (D_0050A8E8_0E28.chans[i].b69 == 1 && D_0050A8E8_0E28.chans[i].h28 < 0) {
                     f38E0_0E28(i);
@@ -11992,8 +11992,8 @@ int func_003C0E28(void) {
         }
         return 0;
     }
-    D_0050A8E8_0E28.h17E = s.bE + s.bF + s.b10;
-    D_0050A8E8_0E28.sub = s;
+    D_0050A8E8_0E28.h17E = requested.bE + requested.bF + requested.b10;
+    D_0050A8E8_0E28.sub = requested;
     return 0;
 }
 #endif
@@ -12049,7 +12049,7 @@ extern void f_A550_1298(int) __asm__("SNDVOICEI_free");
 void func_003C1298(void) {
     int i;
     int j;
-    int h;
+    int groupVoice;
 
     for (i = 0; i < D_0050A8E8_1298.cnt1; i++) {
         if (D_0050AD00_1298.tbl->e[i].key != 0 && D_0050A8E8_1298.ents[i].f28 == -1) {
@@ -12058,11 +12058,11 @@ void func_003C1298(void) {
             }
             if (D_0050AD00_1298.k[i].val == 0) {
                 for (j = 0; j < D_0050A8E8_1298.ents[i].n; j++) {
-                    h = D_0050A8E8_1298.ents[i].list[j];
-                    D_0050AD00_1298.tbl->e[h].key = 0;
-                    f_A550_1298(h);
+                    groupVoice = D_0050A8E8_1298.ents[i].list[j];
+                    D_0050AD00_1298.tbl->e[groupVoice].key = 0;
+                    f_A550_1298(groupVoice);
                     if (D_0050A8E8_1298.mode == 2) {
-                        D_0050AD00_1298.tbl->e[h + 0x18].key = 0;
+                        D_0050AD00_1298.tbl->e[groupVoice + 0x18].key = 0;
                     }
                 }
             }
@@ -12075,9 +12075,9 @@ void func_003C1298(void) {
             }
             if (D_0050AD00_1298.k2[i].val == -1) {
                 for (j = 0; j < D_0050A8E8_1298.ents[i + D_0050A8E8_1298.cnt1].n; j++) {
-                    h = D_0050A8E8_1298.ents[i + D_0050A8E8_1298.cnt1].list[j];
-                    D_0050AD00_1298.tbl->f[h - D_0050A8E8_1298.cnt1].a = 0;
-                    f_A550_1298(h);
+                    groupVoice = D_0050A8E8_1298.ents[i + D_0050A8E8_1298.cnt1].list[j];
+                    D_0050AD00_1298.tbl->f[groupVoice - D_0050A8E8_1298.cnt1].a = 0;
+                    f_A550_1298(groupVoice);
                 }
             }
         }
@@ -12102,17 +12102,17 @@ extern G_1578 D_0050AD00_AD00 __asm__("D_0050AD00");
  * sound thread's semaphore (+0x1AA4) with iSignalSema; mode 3 and others are ignored. The platform init func_003C1B80
  * registers it as SIF command handler 1.
  *
- * @param arg0  the command packet
+ * @param command  the command packet
  */
-void func_003C1578(A_1578 *arg0) {
-    switch (arg0->mode) {
+void func_003C1578(A_1578 *command) {
+    switch (command->mode) {
     case 2:
-        func_003C4918_1578(arg0->v);
+        func_003C4918_1578(command->v);
         return;
     case 3:
         break;
     case 0:
-        D_0050AD00_AD00.b = arg0->v;
+        D_0050AD00_AD00.b = command->v;
         iSignalSema(D_0050AD00_AD00.a);
         break;
     }
@@ -12192,8 +12192,8 @@ extern void f_BC00_1638(char *) __asm__("func_003CBC00");
 void func_003C1638(void) {
     int rate;
     int len;
-    int *p;
-    unsigned short *t;
+    int *sizeField;
+    unsigned short *pcmSize;
     int n;
     int i;
 
@@ -12207,14 +12207,14 @@ void func_003C1638(void) {
     D_0050AD00_1638.pos += 0xC;
     *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 3;
     D_0050AD00_1638.pos += 4;
-    p = (int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos);
+    sizeField = (int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos);
     D_0050AD00_1638.pos += 4;
     D_0050AD00_1638.cb0 = D_0050AD00_1638.buf + D_0050AD00_1638.pos;
-    *p = 672;
+    *sizeField = 672;
     D_0050AD00_1638.pos += 672;
     while (D_0050AD00_1638.pos & 0xF) {
         D_0050AD00_1638.pos++;
-        (*p)++;
+        (*sizeField)++;
     }
     if (D_0050A8E8_1638.b42) {
         *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 2;
@@ -12224,22 +12224,22 @@ void func_003C1638(void) {
     }
     *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 1;
     D_0050AD00_1638.pos += 4;
-    t = (unsigned short *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos);
+    pcmSize = (unsigned short *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos);
     D_0050AD00_1638.pos += 0xC;
     n = D_0050A8E8_1638.b47 + D_0050A8E8_1638.b48;
     for (i = 0; i < n; i++) {
         D_0050AD00_1638.chan[i] = D_0050AD00_1638.buf + (D_0050AD00_1638.pos + i * len * 2);
     }
-    *t = len * ((D_0050A8E8_1638.b47 + D_0050A8E8_1638.b48) << 1);
+    *pcmSize = len * ((D_0050A8E8_1638.b47 + D_0050A8E8_1638.b48) << 1);
     if (D_0050A8E8_1638.b47 == 1) {
         D_0050AD00_1638.chan[1] = D_0050AD00_1638.buf + (D_0050AD00_1638.pos + rate * 2);
-        *t += rate * 2;
+        *pcmSize += rate * 2;
     }
-    D_0050AD00_1638.pos += *t;
+    D_0050AD00_1638.pos += *pcmSize;
     if (D_0050A8E8_1638.b49 & 2) {
         *(int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos) = 4;
         D_0050AD00_1638.pos += 4;
-        p = (int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos);
+        sizeField = (int *)(D_0050AD00_1638.buf + D_0050AD00_1638.pos);
         D_0050AD00_1638.pos += 0xC;
         D_0050AD00_1638.x1AF4 = D_0050AD00_1638.buf + D_0050AD00_1638.pos;
         D_0050AD00_1638.pos += 0x800;
@@ -12661,7 +12661,7 @@ int func_003C1B80(void) {
     int size0;
     int size1;
     int hz;
-    int t;
+    int encoderState;
     int size;
     unsigned int base;
     unsigned int i;
@@ -12687,8 +12687,8 @@ int func_003C1B80(void) {
             D_0050C840_1B80(1, D_0050A8E8_1B80.f4A, &size0, &size1);
         }
         if (D_0050A8E8_1B80.f64 != 0 && size1 < (int)D_0050A8E8_1B80.f68) {
-            t = func_003B5C60_1B80(size0);
-            D_0050AD00_1B80.f1AF8 = t;
+            encoderState = func_003B5C60_1B80(size0);
+            D_0050AD00_1B80.f1AF8 = encoderState;
             D_0050AD00_1B80.f1AFC = D_0050A8E8_1B80.f64;
             D_0050AD00_1B80.f1AAE = size1;
         } else {
@@ -12883,14 +12883,14 @@ extern void func_0042AD08_2268(int) __asm__("func_0042AD08");
  */
 int func_003C2268(void) {
     int st[12];
-    unsigned int t;
+    unsigned int targetTick;
     int i;
 
     while (D_0050A8E8_2268.f176 != 0) {
         SNDSYS_leavecritical_2268();
     }
-    t = D_0050A8E8_2268.f180 + 10;
-    while (D_0050A8E8_2268.f180 < t) {
+    targetTick = D_0050A8E8_2268.f180 + 10;
+    while (D_0050A8E8_2268.f180 < targetTick) {
         func_003C60E0_2268();
     }
     if (D_0050AD00_2268.f1AA8 >= 0) {
@@ -12972,24 +12972,24 @@ extern void f_8468_2440(int) __asm__("func_003C8468");
  * @return 0
  */
 int func_003C2440(int idx) {
-    struct E_2440 *e = &D_0050A8E8_2440.ents[idx];
+    struct E_2440 *channel = &D_0050A8E8_2440.ents[idx];
     int i;
-    if (e->flags & 8) {
-        for (i = 0; i < e->n; i++) {
-            D_0050AD00_2440.m->a[e->ch[i]].v = 0;
-            f_A550_2440(e->ch[i]);
+    if (channel->flags & 8) {
+        for (i = 0; i < channel->n; i++) {
+            D_0050AD00_2440.m->a[channel->ch[i]].v = 0;
+            f_A550_2440(channel->ch[i]);
             if (D_0050A8E8_2440.mode == 2)
-                D_0050AD00_2440.m->a[e->ch[i] + 0x18].v = 0;
+                D_0050AD00_2440.m->a[channel->ch[i] + 0x18].v = 0;
         }
-    } else if (e->flags & 0x100) {
-        for (i = 0; i < e->n; i++) {
-            ((struct V2_2440 *)D_0050AD00_2440.m)->a[e->ch[i] - D_0050A8E8_2440.b30].v = 0;
-            f_A550_2440(e->ch[i]);
+    } else if (channel->flags & 0x100) {
+        for (i = 0; i < channel->n; i++) {
+            ((struct V2_2440 *)D_0050AD00_2440.m)->a[channel->ch[i] - D_0050A8E8_2440.b30].v = 0;
+            f_A550_2440(channel->ch[i]);
         }
     } else {
-        for (i = 0; i < e->n; i++) {
-            f_8468_2440(e->ch[i] - (D_0050A8E8_2440.b30 + D_0050A8E8_2440.b2F));
-            f_A550_2440(e->ch[i]);
+        for (i = 0; i < channel->n; i++) {
+            f_8468_2440(channel->ch[i] - (D_0050A8E8_2440.b30 + D_0050A8E8_2440.b2F));
+            f_A550_2440(channel->ch[i]);
         }
     }
     return 0;
@@ -13058,30 +13058,30 @@ extern void func_003C8A88_25E0(int a, unsigned int v) __asm__("func_003C8A88");
  * @return 0
  */
 int func_003C25E0(int idx) {
-    struct E_25E0 *e = &D_0050A8E8_25E0.f1F0[idx];
-    unsigned int v;
+    struct E_25E0 *channel = &D_0050A8E8_25E0.f1F0[idx];
+    unsigned int hwPitch;
     int i;
 
-    if (e->flags & 8) {
-        v = (unsigned int)((e->f20 << 12) / 48000 * e->f8A) >> 12;
-        if (v >= 0x4000) {
-            v = 0x3FFF;
+    if (channel->flags & 8) {
+        hwPitch = (unsigned int)((channel->f20 << 12) / 48000 * channel->f8A) >> 12;
+        if (hwPitch >= 0x4000) {
+            hwPitch = 0x3FFF;
         }
-        for (i = 0; i < e->n; i++) {
-            D_0050AD00_25E0.tbl->a[e->h[i]].v = v;
+        for (i = 0; i < channel->n; i++) {
+            D_0050AD00_25E0.tbl->a[channel->h[i]].v = hwPitch;
             if (D_0050A8E8_25E0.f49 == 2) {
-                D_0050AD00_25E0.tbl->a[e->h[i] + 0x18].v = v;
+                D_0050AD00_25E0.tbl->a[channel->h[i] + 0x18].v = hwPitch;
             }
         }
-    } else if (e->flags & 0x100) {
-        v = (unsigned int)((e->f20 << 12) / D_0050A8E8_25E0.f2C * e->f8A) >> 12;
-        for (i = 0; i < e->n; i++) {
-            D_0050AD00_25E0.tbl->b[e->h[i] - D_0050A8E8_25E0.f30].v = v;
+    } else if (channel->flags & 0x100) {
+        hwPitch = (unsigned int)((channel->f20 << 12) / D_0050A8E8_25E0.f2C * channel->f8A) >> 12;
+        for (i = 0; i < channel->n; i++) {
+            D_0050AD00_25E0.tbl->b[channel->h[i] - D_0050A8E8_25E0.f30].v = hwPitch;
         }
     } else {
-        v = (unsigned int)((e->f20 << 12) / D_0050A8E8_25E0.f2A * e->f8A) >> 8;
-        for (i = 0; i < e->n; i++) {
-            func_003C8A88_25E0(e->h[i] - (D_0050A8E8_25E0.f30 + D_0050A8E8_25E0.f2F), v);
+        hwPitch = (unsigned int)((channel->f20 << 12) / D_0050A8E8_25E0.f2A * channel->f8A) >> 8;
+        for (i = 0; i < channel->n; i++) {
+            func_003C8A88_25E0(channel->h[i] - (D_0050A8E8_25E0.f30 + D_0050A8E8_25E0.f2F), hwPitch);
         }
     }
     return 0;
@@ -13125,8 +13125,8 @@ extern void f_8598_27E0(int, int, float) __asm__("func_003C8598");
  */
 int func_003C27E0(int id, int k) {
     struct Ch_27E0 *ch;
-    int i, v;
-    float f;
+    int i, sendLevel;
+    float sendGain;
 
     ch = (struct Ch_27E0 *)((char *)D_0050A8E8_27E0.chans + id * 0x8C);
     if (ch->flags & 8) {
@@ -13145,14 +13145,14 @@ int func_003C27E0(int id, int k) {
             }
         }
     } else if (ch->flags & 0x100) {
-        v = ch->vol * ch->vals[k] * 0.003875850699841976f;
+        sendLevel = ch->vol * ch->vals[k] * 0.003875850699841976f;
         for (i = 0; i < ch->n; i++) {
-            ((struct V_27E0 *)D_0050AD00_27E0.mask)->v[ch->ids[i] - D_0050A8E8_27E0.base][k] = v;
+            ((struct V_27E0 *)D_0050AD00_27E0.mask)->v[ch->ids[i] - D_0050A8E8_27E0.base][k] = sendLevel;
         }
     } else {
-        f = ch->vol * ch->vals[k] / 32767.0f;
+        sendGain = ch->vol * ch->vals[k] / 32767.0f;
         for (i = 0; i < ch->n; i++) {
-            f_8598_27E0(ch->ids[i] - (D_0050A8E8_27E0.base + D_0050A8E8_27E0.base2), k, f);
+            f_8598_27E0(ch->ids[i] - (D_0050A8E8_27E0.base + D_0050A8E8_27E0.base2), k, sendGain);
         }
     }
     return 0;
@@ -13222,7 +13222,7 @@ void func_003C2A50(int id) {
     float sc;
     int i;
     int j;
-    int m;
+    int outputCount;
 
     ch = (struct Ch_2A50 *)((char *)D_0050A8E8_2A50.chans + id * 0x8C);
     if (ch->flags & 8) {
@@ -13245,18 +13245,18 @@ void func_003C2A50(int id) {
             }
         }
     } else if (ch->flags & 0x100) {
-        m = D_0050A8E8_2A50.b47 + D_0050A8E8_2A50.b48;
+        outputCount = D_0050A8E8_2A50.b47 + D_0050A8E8_2A50.b48;
         sc = ch->vol * (float)ch->b5F * 0.0078740157186985016f;
         for (i = 0; i < ch->n; i++) {
-            for (j = 0; j < m; j++) {
+            for (j = 0; j < outputCount; j++) {
                 D_0050AD00_2A50.tbl->b[ch->ids[i] - D_0050A8E8_2A50.base].c[j] = sc * D_0050AD00_2A50.spk[ch->ids[i]].p[j] * 127.0f;
             }
         }
     } else {
-        m = D_0050A8E8_2A50.b47 + D_0050A8E8_2A50.b48;
+        outputCount = D_0050A8E8_2A50.b47 + D_0050A8E8_2A50.b48;
         sc = ch->vol * (float)ch->b5F * 0.0078740157186985016f;
         for (i = 0; i < ch->n; i++) {
-            for (j = 0; j < m; j++) {
+            for (j = 0; j < outputCount; j++) {
                 f8560_2A50(ch->ids[i] - (D_0050A8E8_2A50.base + D_0050A8E8_2A50.base2), j, sc * D_0050BB98_2A50[ch->ids[i]].p[j]);
             }
         }
@@ -13288,18 +13288,18 @@ extern void f_2A50_2EC8(int) __asm__("func_003C2A50");
  * @param idx  the channel index
  */
 void func_003C2EC8(int idx) {
-    struct E_2EC8 *e = &D_0050A8E8_2EC8.ents[idx];
+    struct E_2EC8 *channel = &D_0050A8E8_2EC8.ents[idx];
     int i;
-    if (e->flags & 8) {
-        for (i = 0; i < e->n; i++) {
-            if (e->on) D_0050AD00_2EC8.m->mask |= 1L << e->ch[i];
-            else D_0050AD00_2EC8.m->mask &= ~(1L << e->ch[i]);
+    if (channel->flags & 8) {
+        for (i = 0; i < channel->n; i++) {
+            if (channel->on) D_0050AD00_2EC8.m->mask |= 1L << channel->ch[i];
+            else D_0050AD00_2EC8.m->mask &= ~(1L << channel->ch[i]);
             if (D_0050A8E8_2EC8.mode == 2) {
-                if (e->on) D_0050AD00_2EC8.m->mask |= 1L << (e->ch[i] + 0x18);
-                else D_0050AD00_2EC8.m->mask &= ~(1L << (e->ch[i] + 0x18));
+                if (channel->on) D_0050AD00_2EC8.m->mask |= 1L << (channel->ch[i] + 0x18);
+                else D_0050AD00_2EC8.m->mask &= ~(1L << (channel->ch[i] + 0x18));
             }
         }
-    } else if (e->flags & 0x100) {
+    } else if (channel->flags & 0x100) {
         f_2A50_2EC8(idx);
     } else {
         f_2A50_2EC8(idx);
@@ -13321,17 +13321,17 @@ extern struct G_3010 D_0050A8E8_3010[] __asm__("D_0050A8E8");
  * Only render kind 4 (mixer) channels: each voice, as a mixer index (driver voice minus +0x30 and +0x2F of D_0050A8E8),
  * goes to func_003C8B40. Called by func_003B8838, func_003C3EE0 and func_003CE1B0.
  *
- * @param arg0  the channel index
- * @param arg1  the time multiplier (0x1000 = 1.0)
+ * @param channelIndex  the channel index
+ * @param timeMult  the time multiplier (0x1000 = 1.0)
  * @return 0
  */
-int func_003C3010(int arg0, int arg1) {
-    struct E_3010 *e;
+int func_003C3010(int channelIndex, int timeMult) {
+    struct E_3010 *channel;
     int i;
-    e = (struct E_3010 *)(D_0050A8E8_3010[0].tab + arg0 * 0x8C);
-    if (e->flags & 4) {
-        for (i = 0; i < e->cnt; i++)
-            func_003C8B40(e->v[i] - (D_0050A8E8_3010[0].b + D_0050A8E8_3010[0].a), arg1);
+    channel = (struct E_3010 *)(D_0050A8E8_3010[0].tab + channelIndex * 0x8C);
+    if (channel->flags & 4) {
+        for (i = 0; i < channel->cnt; i++)
+            func_003C8B40(channel->v[i] - (D_0050A8E8_3010[0].b + D_0050A8E8_3010[0].a), timeMult);
     }
     return 0;
 }
@@ -13353,16 +13353,16 @@ extern struct G_30C8 D_0050A8E8_30C8[] __asm__("D_0050A8E8");
  * 80-byte clipping node for a positive value (or updates it) and removes it for 0 or less. func_003C3EE0 passes its
  * fifth argument (between the time multiplier and the low-pass cutoff); func_003CE1B0 calls it too.
  *
- * @param arg0  the channel index
- * @param arg1  the clip level (0 or less removes the filter)
+ * @param channelIndex  the channel index
+ * @param amount  the clip level (0 or less removes the filter)
  */
-void func_003C30C8(int arg0, int arg1) {
-    struct E_30C8 *e;
+void func_003C30C8(int channelIndex, int amount) {
+    struct E_30C8 *channel;
     int i;
-    e = (struct E_30C8 *)(D_0050A8E8_30C8[0].tab + arg0 * 0x8C);
-    if (e->flags & 4) {
-        for (i = 0; i < e->cnt; i++)
-            func_003C8B80(e->v[i] - (D_0050A8E8_30C8[0].b + D_0050A8E8_30C8[0].a), arg1);
+    channel = (struct E_30C8 *)(D_0050A8E8_30C8[0].tab + channelIndex * 0x8C);
+    if (channel->flags & 4) {
+        for (i = 0; i < channel->cnt; i++)
+            func_003C8B80(channel->v[i] - (D_0050A8E8_30C8[0].b + D_0050A8E8_30C8[0].a), amount);
     }
 }
 #endif
@@ -13383,22 +13383,22 @@ extern void func_003C8D00_3178(int, float) __asm__("func_003C8D00");
  * with each voice's mixer index to func_003C8D00. Called by func_003B8978, func_003C3EE0 and func_003CE1B0.
  *
  * @param idx  the channel index
- * @param a  the cutoff frequency in Hz
+ * @param cutoff  the cutoff frequency in Hz
  */
-void func_003C3178(int idx, int a) {
-    char *e = D_0050A8E8_3178.f1F0 + idx * 140;
+void func_003C3178(int idx, int cutoff) {
+    char *channel = D_0050A8E8_3178.f1F0 + idx * 140;
     int i;
-    short *p;
-    float s;
+    short *voiceList;
+    float normCutoff;
 
-    if (*(unsigned short *)(e + 0x24) & 4) {
-        s = (float)a * (1.0f / ((float)D_0050A8E8_3178.u2A * 0.5f));
+    if (*(unsigned short *)(channel + 0x24) & 4) {
+        normCutoff = (float)cutoff * (1.0f / ((float)D_0050A8E8_3178.u2A * 0.5f));
         i = 0;
-        if (i < *(unsigned char *)(e + 0x23)) {
-            p = (short *)(e + 4);
+        if (i < *(unsigned char *)(channel + 0x23)) {
+            voiceList = (short *)(channel + 4);
             do {
-                func_003C8D00_3178(*p++ - (D_0050A8E8_3178.b30 + D_0050A8E8_3178.b2F), s);
-            } while (++i < *(unsigned char *)(e + 0x23));
+                func_003C8D00_3178(*voiceList++ - (D_0050A8E8_3178.b30 + D_0050A8E8_3178.b2F), normCutoff);
+            } while (++i < *(unsigned char *)(channel + 0x23));
         }
     }
 }
@@ -13420,16 +13420,16 @@ extern struct G_3250 D_0050A8E8_3250[] __asm__("D_0050A8E8");
  * updates) the voice's 288-byte filter for a positive cutoff and removes it for 0. Called by func_003C3EE0 and
  * func_003CE1B0.
  *
- * @param arg0  the channel index
- * @param arg1  the cutoff (0 or less removes the filter)
+ * @param channelIndex  the channel index
+ * @param cutoff  the cutoff (0 or less removes the filter)
  */
-void func_003C3250(int arg0, int arg1) {
-    struct E_3250 *e;
+void func_003C3250(int channelIndex, int cutoff) {
+    struct E_3250 *channel;
     int i;
-    e = (struct E_3250 *)(D_0050A8E8_3250[0].tab + arg0 * 0x8C);
-    if (e->flags & 4) {
-        for (i = 0; i < e->cnt; i++)
-            func_003C8C30(e->v[i] - (D_0050A8E8_3250[0].b + D_0050A8E8_3250[0].a), arg1);
+    channel = (struct E_3250 *)(D_0050A8E8_3250[0].tab + channelIndex * 0x8C);
+    if (channel->flags & 4) {
+        for (i = 0; i < channel->cnt; i++)
+            func_003C8C30(channel->v[i] - (D_0050A8E8_3250[0].b + D_0050A8E8_3250[0].a), cutoff);
     }
 }
 #endif
@@ -13604,13 +13604,13 @@ extern void WaitSema(int);
    cross-jumps the two count increments into one copy, and the return label left behind keeps the epilogue
    restores below the final store, as in the target. */
 void func_003C3380(void) {
-    int r = GetThreadId();
-    if (D_0050AD00.f1B14 == r) {
+    int threadId = GetThreadId();
+    if (D_0050AD00.f1B14 == threadId) {
         D_0050AD00.f1B18++;
         return;
     }
     WaitSema(D_0050AD00.f1B10);
-    D_0050AD00.f1B14 = r;
+    D_0050AD00.f1B14 = threadId;
     D_0050AD00.f1B18++;
 }
 #endif
@@ -13637,8 +13637,8 @@ extern void SignalSema(int);
  * DefaultMutexUnlockFn.
  */
 void func_003C33E0(void) {
-    int r = GetThreadId();
-    if (D_0050AD00.f1B14 == r) {
+    int threadId = GetThreadId();
+    if (D_0050AD00.f1B14 == threadId) {
         D_0050AD00.f1B18--;
         if (D_0050AD00.f1B18 == 0) {
             D_0050AD00.f1B14 = -1;
@@ -13670,25 +13670,25 @@ extern char f_C878_3450[] __asm__("func_003CC878");
  * the data by func_003C72F8; any other type sends the 4-byte D_0044DD70 (effect off) and clears the callback flag.
  * Called by func_003C35F8.
  *
- * @param arg0  the bus type (1 = custom effect data)
+ * @param busType  the bus type (1 = custom effect data)
  */
-void func_003C3450(int arg0) {
-    char *b = D_0050AAF4_3450;
-    char *t = b - 0x20C;
-    char *q;
-    if (*(unsigned char *)(t + 0x42) != 0) {
+void func_003C3450(int busType) {
+    char *busRecord = D_0050AAF4_3450;
+    char *driverState = busRecord - 0x20C;
+    char *effectData;
+    if (*(unsigned char *)(driverState + 0x42) != 0) {
         D_00515B40_3450[0].fn = f_C878_3450;
         D_00515B40_3450[0].c = 1;
     }
-    if (arg0 != 1) {
+    if (busType != 1) {
         f_0B10_3450(2, D_0044DD70_3450, 4);
-        if (*(unsigned char *)(t + 0x42) != 0)
+        if (*(unsigned char *)(driverState + 0x42) != 0)
             D_00515B40_3450[0].c = 0;
     } else {
-        q = *(char **)(b + 4);
-        if (*(unsigned char *)(t + 0x42) != 0)
-            D_00515B40_3450[0].c = arg0;
-        f_0B10_3450(2, q, f_72F8_3450(q + 4, 4));
+        effectData = *(char **)(busRecord + 4);
+        if (*(unsigned char *)(driverState + 0x42) != 0)
+            D_00515B40_3450[0].c = busType;
+        f_0B10_3450(2, effectData, f_72F8_3450(effectData + 4, 4));
     }
 }
 #endif
@@ -13721,33 +13721,33 @@ extern struct B_3500 D_0050A8E8_3500 __asm__("D_0050A8E8");
  * 6) in +0x1A9E of D_0050AD00 and the mode, then the bus record's +0x04 and +0x08 bytes (depth / delay), in
  * +0x10..+0x12 of the IOP voice block. Called by func_003C35F8.
  *
- * @param a  the bus type
+ * @param busType  the bus type
  */
-void func_003C3500(unsigned a) {
-    unsigned v = a;
-    if (a < 2) {
-        v = 0;
-    } else if (a == 5) {
-        v = 1;
-    } else if (a == 10) {
-        v = 2;
-    } else if (a == 20) {
-        v = 3;
-    } else if (a == 30) {
-        v = 4;
-    } else if (a == 40) {
-        v = 5;
-    } else if (a == 50) {
-        v = 6;
-    } else if (a == 100) {
-        v = 9;
-    } else if (a == 110) {
-        v = 8;
-    } else if (a == 120) {
-        v = 7;
+void func_003C3500(unsigned busType) {
+    unsigned reverbMode = busType;
+    if (busType < 2) {
+        reverbMode = 0;
+    } else if (busType == 5) {
+        reverbMode = 1;
+    } else if (busType == 10) {
+        reverbMode = 2;
+    } else if (busType == 20) {
+        reverbMode = 3;
+    } else if (busType == 30) {
+        reverbMode = 4;
+    } else if (busType == 40) {
+        reverbMode = 5;
+    } else if (busType == 50) {
+        reverbMode = 6;
+    } else if (busType == 100) {
+        reverbMode = 9;
+    } else if (busType == 110) {
+        reverbMode = 8;
+    } else if (busType == 120) {
+        reverbMode = 7;
     }
-    D_0050AD00_3500.s = (0x200000 - D_0044DD48_3500[v]) >> 6;
-    D_0050AD00_3500.p[0x10] = v;
+    D_0050AD00_3500.s = (0x200000 - D_0044DD48_3500[reverbMode]) >> 6;
+    D_0050AD00_3500.p[0x10] = reverbMode;
     D_0050AD00_3500.p[0x11] = D_0050A8E8_3500.a;
     D_0050AD00_3500.p[0x12] = D_0050A8E8_3500.b;
 }
@@ -13783,15 +13783,15 @@ extern void func_003CC848_35F8(void) __asm__("func_003CC848");
  * and +0x42 is clear, else func_003CC848 (clearing D_00515B50 when +0x42 is clear). Called by func_003C1B80 (kinds 8
  * and 4) and func_003C36A8.
  *
- * @param a  the render kind (8, 0x100 or 4)
+ * @param renderKind  the render kind (8, 0x100 or 4)
  */
-void func_003C35F8(int a) {
+void func_003C35F8(int renderKind) {
     SNDSYS_entercritical();
-    if (a == 8) {
+    if (renderKind == 8) {
         func_003C3500(D_0050AB08_35F8);
-    } else if (a == 0x100) {
+    } else if (renderKind == 0x100) {
         func_003C3450(D_0050AAF4_35F8);
-    } else if (a == 4) {
+    } else if (renderKind == 4) {
         if (D_0050A8E8_35F8.s1F8 != 1 || D_0050A8E8_35F8.b42 != 0) {
             if (D_0050A8E8_35F8.b42 == 0) D_00515B50_35F8 = 0;
             func_003CC848_35F8();
@@ -13813,12 +13813,12 @@ extern void func_003C35F8(int);
  *
  * func_003B82B8 calls it after writing a bus record; the bus number is not used.
  *
- * @param a  the bus number (unused)
- * @param b  the render kind
+ * @param busIndex  the bus number (unused)
+ * @param renderKind  the render kind
  * @return 0
  */
-int func_003C36A8(int a, int b) {
-    func_003C35F8(b);
+int func_003C36A8(int busIndex, int renderKind) {
+    func_003C35F8(renderKind);
     return 0;
 }
 #endif
@@ -13838,14 +13838,14 @@ extern float D_0050AB08_36C8[] __asm__("D_0050AB08");
  * With flag 8 and the IOP voice block set up, the bus's left/right gains (D_0050AB08 +0x0C / +0x10) times 32767 go to
  * +0x14 / +0x16 of the block. Called by func_003B84E0 and func_003C1B80.
  *
- * @param arg0  the bus number (unused)
+ * @param busIndex  the bus number (unused)
  * @param flags  render-kind flags (8 applies)
  */
-void func_003C36C8(int arg0, int flags) {
-    struct G_36C8 *g = &D_0050AD00_36C8[0];
-    if (g->o != 0 && (flags & 8)) {
-        g->o->x = (int)(D_0050AB08_36C8[3] * 32767.0f);
-        g->o->y = (int)(D_0050AB08_36C8[4] * 32767.0f);
+void func_003C36C8(int busIndex, int flags) {
+    struct G_36C8 *soundState = &D_0050AD00_36C8[0];
+    if (soundState->o != 0 && (flags & 8)) {
+        soundState->o->x = (int)(D_0050AB08_36C8[3] * 32767.0f);
+        soundState->o->y = (int)(D_0050AB08_36C8[4] * 32767.0f);
     }
 }
 #endif
@@ -13863,13 +13863,13 @@ extern struct S2_3728 D_0044DD78_3728[] __asm__("D_0044DD78");
  *
  * Bits 8-15 of the azimuth pick the entry; both of its shorts are divided by 32767. Used by func_003C38E0.
  *
- * @param a  the azimuth (0x10000 = full circle)
+ * @param azimuth  the azimuth (0x10000 = full circle)
  * @param out  receives the two gains
  */
-void func_003C3728(unsigned int a, float *out) {
+void func_003C3728(unsigned int azimuth, float *out) {
     int i;
     for (i = 0; i < 2; i++) {
-        out[i] = (float)D_0044DD78_3728[(a >> 8) & 0xFF].v[i] / 32767.0f;
+        out[i] = (float)D_0044DD78_3728[(azimuth >> 8) & 0xFF].v[i] / 32767.0f;
     }
 }
 #endif
@@ -14017,16 +14017,16 @@ extern void f8158_3EE0(int, int, int, int, int, int, int, int, int, int, int, in
  * and send on the first voice, then func_003C3010, func_003C30C8, func_003C3178 and func_003C3250, and are started with
  * func_003C83A0. Called by SNDBANKI_playtimbre.
  *
- * @param v  the parsed patch header
+ * @param patchHeader  the parsed patch header
  * @param base  the sample data address
  * @param id  the channel index
- * @param p3  the time multiplier
- * @param p4  the clip level for func_003C30C8
- * @param p5  the low-pass cutoff
- * @param p6  the high-pass cutoff
+ * @param timeMult  the time multiplier
+ * @param filterAmount  the clip level for func_003C30C8
+ * @param lowPassCutoff  the low-pass cutoff
+ * @param highPassCutoff  the high-pass cutoff
  * @return 0
  */
-int func_003C3EE0(struct V_3EE0 *v, int base, int id, int p3, int p4, int p5, int p6) {
+int func_003C3EE0(struct V_3EE0 *patchHeader, int base, int id, int timeMult, int filterAmount, int lowPassCutoff, int highPassCutoff) {
     struct Ch_3EE0 *ch;
     int i;
 
@@ -14037,7 +14037,7 @@ int func_003C3EE0(struct V_3EE0 *v, int base, int id, int p3, int p4, int p5, in
         f2EC8_3EE0(id);
         func_003C27E0(id, 0);
         for (i = 0; i < ch->n; i++) {
-            D_0050AD00_3EE0.e[ch->ids[i]].w = *v->p64 + (v->a68[i] - v->a68[0]);
+            D_0050AD00_3EE0.e[ch->ids[i]].w = *patchHeader->p64 + (patchHeader->a68[i] - patchHeader->a68[0]);
             D_0050AD00_3EE0.x1AB8 += 0x800000;
             D_0050AD00_3EE0.tbl->a[ch->ids[i]].w = D_0050AD00_3EE0.e[ch->ids[i]].w | D_0050AD00_3EE0.x1AB8;
             D_0050AD00_3EE0.x840[ch->ids[i]].w = D_0050AD00_3EE0.e[ch->ids[i]].w;
@@ -14051,24 +14051,24 @@ int func_003C3EE0(struct V_3EE0 *v, int base, int id, int p3, int p4, int p5, in
         f38E0_3EE0(id);
         func_003C27E0(id, 0);
         for (i = 0; i < ch->n; i++) {
-            D_0050AD00_3EE0.e[ch->ids[i]].w = *v->p64 + (v->a68[i] - v->a68[0]);
+            D_0050AD00_3EE0.e[ch->ids[i]].w = *patchHeader->p64 + (patchHeader->a68[i] - patchHeader->a68[0]);
             D_0050AD00_3EE0.x1AB8 += 0x800000;
             D_0050AD00_3EE0.tbl->b[ch->ids[i] - D_0050A8E8_3EE0.base].w = D_0050AD00_3EE0.e[ch->ids[i]].w | D_0050AD00_3EE0.x1AB8;
             D_0050AD00_3EE0.x9C0[ch->ids[i] - D_0050A8E8_3EE0.base].w = 0;
         }
     } else {
         for (i = 0; i < ch->n; i++) {
-            f8158_3EE0(ch->ids[i] - (D_0050A8E8_3EE0.base + D_0050A8E8_3EE0.base2), v->b13, 1,
-                       base + v->a68[i], base + v->a68[0] + v->a80[i], v->a98[i], ch->n, *(int *)((char *)ch + 0x14),
-                       v->x5C, v->x60, 0, 0, v->b2, i);
+            f8158_3EE0(ch->ids[i] - (D_0050A8E8_3EE0.base + D_0050A8E8_3EE0.base2), patchHeader->b13, 1,
+                       base + patchHeader->a68[i], base + patchHeader->a68[0] + patchHeader->a80[i], patchHeader->a98[i], ch->n, *(int *)((char *)ch + 0x14),
+                       patchHeader->x5C, patchHeader->x60, 0, 0, patchHeader->b2, i);
         }
         func_003C25E0(ch->ids[0]);
         f38E0_3EE0(ch->ids[0]);
         func_003C27E0(ch->ids[0], 0);
-        func_003C3010(ch->ids[0], p3);
-        func_003C30C8(ch->ids[0], p4);
-        f3178_3EE0(ch->ids[0], p5);
-        func_003C3250(ch->ids[0], p6);
+        func_003C3010(ch->ids[0], timeMult);
+        func_003C30C8(ch->ids[0], filterAmount);
+        f3178_3EE0(ch->ids[0], lowPassCutoff);
+        func_003C3250(ch->ids[0], highPassCutoff);
         for (i = 0; i < ch->n; i++) {
             f83A0_3EE0(ch->ids[i] - (D_0050A8E8_3EE0.base + D_0050A8E8_3EE0.base2));
         }
@@ -14088,13 +14088,13 @@ extern void func_003C4788(int, int, int, int, int);
  * SNDbankadd uploads banks with it (play location 0x100 or 8), polling the handle with func_003C42F8. Declared void,
  * but func_003C4788's handle passes through.
  *
- * @param a  the play location (render kind)
- * @param b  the source in main memory
- * @param c  the destination in sound memory
- * @param d  the size in bytes
+ * @param playLoc  the play location (render kind)
+ * @param srcAddr  the source in main memory
+ * @param dstAddr  the destination in sound memory
+ * @param byteCount  the size in bytes
  */
-void func_003C42D8(int a, int b, int c, int d) {
-    func_003C4788(a, b, c, d, 10);
+void func_003C42D8(int playLoc, int srcAddr, int dstAddr, int byteCount) {
+    func_003C4788(playLoc, srcAddr, dstAddr, byteCount, 10);
 }
 #endif
 
@@ -14138,12 +14138,12 @@ extern unsigned int func_003C8A40_4318(int) __asm__("func_003C8A40");
  * @return the position in samples
  */
 unsigned int func_003C4318(int n) {
-    struct E_4318 *e = &D_0050A8E8_4318.e[n];
-    struct Q_4318 *q = &D_0050BB98_4318[n];
-    if (e->flags & 8) {
-        return ((((struct P_4318 *)D_0050BB98_4318)[n - 203].a - q->v) * 0x1C) >> 4;
+    struct E_4318 *channel = &D_0050A8E8_4318.e[n];
+    struct Q_4318 *speakerRecord = &D_0050BB98_4318[n];
+    if (channel->flags & 8) {
+        return ((((struct P_4318 *)D_0050BB98_4318)[n - 203].a - speakerRecord->v) * 0x1C) >> 4;
     }
-    if (e->flags & 0x100) {
+    if (channel->flags & 0x100) {
         return ((struct P_4318 *)D_0050BB98_4318)[n - D_0050A8E8_4318.b30 - 155].a;
     }
     return func_003C8A40_4318(n - (D_0050A8E8_4318.b30 + D_0050A8E8_4318.b2F));
@@ -14167,28 +14167,28 @@ extern int D_0044E178_43C0[] __asm__("D_0044E178");
  * Copies a block from EE memory to IOP memory with one SIF DMA, waiting for the previous one first.
  *
  * Flushes the data cache, waits until the last transfer (D_0044E178) is done and starts the new one, remembering its
- * id; the interrupt-safe variants (iFlushCache, isceSifDmaStat, isceSifSetDma) are used when @p arg3 is set. Used by
+ * id; the interrupt-safe variants (iFlushCache, isceSifDmaStat, isceSifSetDma) are used when @p inInterrupt is set. Used by
  * the sound-memory transfer queue (func_003C4450, func_003C4668).
  *
- * @param arg0  the source in EE memory
- * @param arg1  the destination in IOP memory
- * @param arg2  the size in bytes
- * @param arg3  non-zero when called from an interrupt handler
+ * @param srcAddr  the source in EE memory
+ * @param iopAddr  the destination in IOP memory
+ * @param byteCount  the size in bytes
+ * @param inInterrupt  non-zero when called from an interrupt handler
  */
-void func_003C43C0(int arg0, int arg1, int arg2, int arg3) {
-    struct S_43C0 s;
-    s.a = arg0;
-    s.c = arg2;
-    s.b = arg1;
-    s.d = 0;
-    if (arg3 != 0) {
+void func_003C43C0(int srcAddr, int iopAddr, int byteCount, int inInterrupt) {
+    struct S_43C0 dmaDesc;
+    dmaDesc.a = srcAddr;
+    dmaDesc.c = byteCount;
+    dmaDesc.b = iopAddr;
+    dmaDesc.d = 0;
+    if (inInterrupt != 0) {
         iFlushCache(0);
         while (isceSifDmaStat(D_0044E178_43C0[0]) >= 0) {}
-        D_0044E178_43C0[0] = isceSifSetDma(&s, 1);
+        D_0044E178_43C0[0] = isceSifSetDma(&dmaDesc, 1);
     } else {
         FlushCache(0);
         while (sceSifDmaStat(D_0044E178_43C0[0]) >= 0) {}
-        D_0044E178_43C0[0] = sceSifSetDma(&s, 1);
+        D_0044E178_43C0[0] = sceSifSetDma(&dmaDesc, 1);
     }
 }
 #endif
@@ -14216,14 +14216,14 @@ extern void f61F0_4450(int, void *, int, int, int, int) __asm__("func_004261F0")
  * func_003C43C0), marks a transfer running (+0xCC2) and sends the IOP a 0x30-byte request (D_00515780: id, staging
  * address, destination, size, priority) with func_004261F0 (from an interrupt) or func_004261B0.
  *
- * @param arg0  non-zero when called from an interrupt handler
+ * @param inInterrupt  non-zero when called from an interrupt handler
  */
-void func_003C4450(int arg0) {
+void func_003C4450(int inInterrupt) {
     int cnt = 0;
     unsigned best = 0xFFFFFFFF;
     unsigned char pri = 0;
     int i;
-    struct sAD00Xfer *p;
+    struct sAD00Xfer *chosen;
     for (i = 0; i < 0x1C; i++) {
         struct sAD00Xfer *e = &D_0050AD00.fCC8[i];
         if (e->key != 0) {
@@ -14239,18 +14239,18 @@ void func_003C4450(int arg0) {
             if (cnt >= (signed char)D_0050AD00.fCC0) break;
         }
     }
-    p = &D_0050AD00.fCC8[(signed char)D_0050AD00.fCC1];
+    chosen = &D_0050AD00.fCC8[(signed char)D_0050AD00.fCC1];
     D_0050AD00.fCC4 = D_0050A8E8.f180;
-    func_003C43C0(p->f04, D_0050AD00.fE88[0].f04, p->f0C, arg0);
+    func_003C43C0(chosen->f04, D_0050AD00.fE88[0].f04, chosen->f0C, inInterrupt);
     D_0050AD00.fCC2 = 1;
     D_00515780_4450.b0 = 0x30;
     D_00515780_4450.f10 = 1;
-    D_00515780_4450.f14 = p->key;
+    D_00515780_4450.f14 = chosen->key;
     D_00515780_4450.f18 = D_0050AD00.fE88[0].f04;
-    D_00515780_4450.f1C = p->f08;
-    D_00515780_4450.h20 = p->f0C;
-    D_00515780_4450.h22 = p->f0E;
-    if (arg0 != 0) {
+    D_00515780_4450.f1C = chosen->f08;
+    D_00515780_4450.h20 = chosen->f0C;
+    D_00515780_4450.h22 = chosen->f0E;
+    if (inInterrupt != 0) {
         f61F0_4450(0, &D_00515780_4450, 0x30, 0, 0, 0);
         return;
     }
@@ -14286,11 +14286,11 @@ extern void func_003C4450(int);
  * Outside an interrupt handler it runs with interrupts disabled. Called when a transfer is queued (func_003C4668),
  * while waiting for room (func_003C4788) and when one completes (func_003C4918).
  *
- * @param arg0  non-zero when called from an interrupt handler
+ * @param inInterrupt  non-zero when called from an interrupt handler
  */
-void func_003C45E8(int arg0) {
+void func_003C45E8(int inInterrupt) {
     int s;
-    if (arg0 == 0) {
+    if (inInterrupt == 0) {
         do {
             DI_2B45();
             SYNCP_2B45();
@@ -14298,9 +14298,9 @@ void func_003C45E8(int arg0) {
         } while (s & 0x10000);
     }
     if (D_0050AD00.fCC2 == 0 && (signed char)D_0050AD00.fCC0 > 0) {
-        func_003C4450(arg0);
+        func_003C4450(inInterrupt);
     }
-    if (arg0 == 0) {
+    if (inInterrupt == 0) {
         EI_2B45();
     }
 }
@@ -14337,13 +14337,13 @@ extern void func_003C43C0_4668(int, int, int, int) __asm__("func_003C43C0");
  * idle. Called by func_003C4788.
  *
  * @param op  the play location (0x100 for a direct copy)
- * @param a  the source in main memory
- * @param b  the destination
+ * @param srcAddr  the source in main memory
+ * @param dstAddr  the destination
  * @param size  the size in bytes
- * @param d  the priority
+ * @param priority  the priority
  * @return the id, or 0 when all 28 slots are taken
  */
-int func_003C4668(int op, int a, int b, int size, int d) {
+int func_003C4668(int op, int srcAddr, int dstAddr, int size, int priority) {
     int s, i;
     if (size & 0x3F) {
         size += 0x40;
@@ -14359,19 +14359,19 @@ int func_003C4668(int op, int a, int b, int size, int d) {
         D_0050AD00.fCBC = 1;
     }
     if (op == 0x100) {
-        func_003C43C0_4668(a, b, size, 0);
+        func_003C43C0_4668(srcAddr, dstAddr, size, 0);
         EI_2B45();
         return D_0050AD00.fCBC;
     }
     for (i = 0; i < 28; i++) {
-        struct sAD00Xfer *e = &D_0050AD00.fCC8[i];
-        if (e->key == 0) {
+        struct sAD00Xfer *slot = &D_0050AD00.fCC8[i];
+        if (slot->key == 0) {
             D_0050AD00.fCC0++;
-            e->key = D_0050AD00.fCBC;
-            e->f04 = a;
-            e->f08 = b;
-            e->f0C = size;
-            e->f0E = d;
+            slot->key = D_0050AD00.fCBC;
+            slot->f04 = srcAddr;
+            slot->f08 = dstAddr;
+            slot->f0C = size;
+            slot->f0E = priority;
             EI_2B45();
             func_003C45E8_4668(0);
             return D_0050AD00.fCBC;
@@ -14397,31 +14397,31 @@ int func_003C4788_4788(int, int, int, int, int) __asm__("func_003C4788");
  * Before each piece it waits (driving func_003C45E8) until at least 5 of the 28 queue slots are free, then queues it
  * with func_003C4668. Called by func_003C42D8.
  *
- * @param a0  the play location
- * @param a1  the source
- * @param a2  the destination
- * @param a3  the size in bytes
- * @param a4  the priority
+ * @param playLoc  the play location
+ * @param srcAddr  the source
+ * @param dstAddr  the destination
+ * @param byteCount  the size in bytes
+ * @param priority  the priority
  * @return the id of the last piece, or 0 for a size of 0
  */
-int func_003C4788_4788(int a0, int a1, int a2, int a3, int a4) {
-    int r = 0;
-    int t;
-    int c;
-    while (a3 > 0) {
-        t = 0x1000;
-        if (!(a3 > 0xFFF)) t = a3;
-        c = D_0050AD00_4788[0xCC0];
-        while (0x1C - (signed char)c < 5) {
+int func_003C4788_4788(int playLoc, int srcAddr, int dstAddr, int byteCount, int priority) {
+    int transferId = 0;
+    int chunkSize;
+    int queuedCount;
+    while (byteCount > 0) {
+        chunkSize = 0x1000;
+        if (!(byteCount > 0xFFF)) chunkSize = byteCount;
+        queuedCount = D_0050AD00_4788[0xCC0];
+        while (0x1C - (signed char)queuedCount < 5) {
             func_003C45E8_4788(0);
-            c = D_0050AD00_4788[0xCC0];
+            queuedCount = D_0050AD00_4788[0xCC0];
         }
-        r = func_003C4668_4788(a0, a1, a2, t, a4);
-        a1 += t;
-        a2 += t;
-        a3 -= t;
+        transferId = func_003C4668_4788(playLoc, srcAddr, dstAddr, chunkSize, priority);
+        srcAddr += chunkSize;
+        dstAddr += chunkSize;
+        byteCount -= chunkSize;
     }
-    return r;
+    return transferId;
 }
 #endif
 
@@ -14573,29 +14573,29 @@ extern char D_0050AD00_4AF8[] __asm__("D_0050AD00");
 /**
  * Clips a free sound-RAM gap to the usable range (in 64-byte units).
  *
- * Raises @p arg0 to the low limit (+0x1A9A of D_0050AD00, shrinking the length to match) and cuts the length so the gap
+ * Raises @p start to the low limit (+0x1A9A of D_0050AD00, shrinking the length to match) and cuts the length so the gap
  * ends by the high limit (+0x1A9C) and by the reverb work area (+0x1A9E). Used by func_003C4B70 and func_003C4EC8.
  *
- * @param arg0  in/out: the gap's start
- * @param arg1  in/out: the gap's length
+ * @param start  in/out: the gap's start
+ * @param length  in/out: the gap's length
  */
-void func_003C4AF8(int *arg0, int *arg1) {
-    char *b = D_0050AD00_4AF8;
+void func_003C4AF8(int *start, int *length) {
+    char *soundState = D_0050AD00_4AF8;
     int temp_4;
     int temp_6;
-    int lo = *(unsigned short *)(b + 0x1A9A);
+    int lo = *(unsigned short *)(soundState + 0x1A9A);
 
-    temp_6 = *arg0;
+    temp_6 = *start;
     if (temp_6 < lo) {
-        *arg0 = lo;
-        *arg1 -= lo - temp_6;
+        *start = lo;
+        *length -= lo - temp_6;
     }
-    if ((int)*(unsigned short *)(b + 0x1A9C) < *arg0 + *arg1) {
-        *arg1 = *(unsigned short *)(b + 0x1A9C) - *arg0;
+    if ((int)*(unsigned short *)(soundState + 0x1A9C) < *start + *length) {
+        *length = *(unsigned short *)(soundState + 0x1A9C) - *start;
     }
-    temp_4 = *arg0;
-    if ((int)*(unsigned short *)(b + 0x1A9E) < temp_4 + *arg1) {
-        *arg1 = *(unsigned short *)(b + 0x1A9E) - temp_4;
+    temp_4 = *start;
+    if ((int)*(unsigned short *)(soundState + 0x1A9E) < temp_4 + *length) {
+        *length = *(unsigned short *)(soundState + 0x1A9E) - temp_4;
     }
 }
 #endif
@@ -14644,9 +14644,9 @@ int func_003C4B70(int type, int size) {
     int len;
     int i;
     int j;
-    register int s FM_REG("$3");
-    struct Blk_4B70 *p;
-    struct Blk_4B70 *q;
+    register int gapStart FM_REG("$3");
+    struct Blk_4B70 *segment;
+    struct Blk_4B70 *prevSegment;
 
     i = 0;
     if (type == 0x100) return func_0042ABA0_4B70(size + 0x40);
@@ -14660,16 +14660,16 @@ int func_003C4B70(int type, int size) {
         if (len < size) return 0;
     } else {
         for (i = 0; i < D_0050AD00_4B70.count; i++) {
-            p = &D_0050AD00_4B70.list[i];
+            segment = &D_0050AD00_4B70.list[i];
             if (i == 0) {
-                s = D_0050AD00_4B70.base;
+                gapStart = D_0050AD00_4B70.base;
             } else {
-                q = &D_0050AD00_4B70.list[i - 1];
-                s = q->start;
-                s += q->size;
+                prevSegment = &D_0050AD00_4B70.list[i - 1];
+                gapStart = prevSegment->start;
+                gapStart += prevSegment->size;
             }
-            start = s;
-            len = p->start - s;
+            start = gapStart;
+            len = segment->start - gapStart;
             do {} while (0);
             func_003C4AF8_4B70(&start, &len);
             if (len >= size) {
@@ -14677,8 +14677,8 @@ int func_003C4B70(int type, int size) {
                 goto insert;
             }
         }
-        q = &D_0050AD00_4B70.list[i - 1];
-        start = q->start + q->size;
+        prevSegment = &D_0050AD00_4B70.list[i - 1];
+        start = prevSegment->start + prevSegment->size;
         len = D_0050AD00_4B70.end - start;
         func_003C4AF8_4B70(&start, &len);
         if (len >= size) goto insert;
@@ -14686,10 +14686,10 @@ int func_003C4B70(int type, int size) {
     }
 insert:
     do {
-        register struct G_4B70 *g FM_REG("$4") = &D_0050AD00_4B70;
-        p = &g->list[i];
-        p->start = start;
-        p->size = size;
+        register struct G_4B70 *soundState FM_REG("$4") = &D_0050AD00_4B70;
+        segment = &soundState->list[i];
+        segment->start = start;
+        segment->size = size;
         D_0050AD00_4B70.count++;
         return start << 6;
     } while (0);
@@ -14712,17 +14712,17 @@ extern int func_0042AD08_4D78(unsigned int) __asm__("func_0042AD08");
  * Play location 0x100 frees the IOP heap block (func_0042AD08). Otherwise it removes the segment starting at that
  * address (in 64-byte units) from the sorted table +0x1AA0 of D_0050AD00, closing the gap. Called by SNDbankremove.
  *
- * @param a  the play location
- * @param b  the address func_003C4B70 returned
+ * @param playLoc  the play location
+ * @param address  the address func_003C4B70 returned
  * @return 0, or -8 when no segment starts there
  */
-int func_003C4D78(int a, unsigned int b) {
+int func_003C4D78(int playLoc, unsigned int address) {
     int i;
-    if (a == 0x100) return func_0042AD08_4D78(b);
-    b >>= 6;
+    if (playLoc == 0x100) return func_0042AD08_4D78(address);
+    address >>= 6;
     for (i = 0; i < D_0050AD00_4D78.cnt; i++) {
-        struct K_4D78 *p = &D_0050AD00_4D78.list[i];
-        if (p->key == b) {
+        struct K_4D78 *segment = &D_0050AD00_4D78.list[i];
+        if (segment->key == address) {
             D_0050AD00_4D78.cnt--;
             for (; i < D_0050AD00_4D78.cnt; i++) {
                 D_0050AD00_4D78.list[i] = D_0050AD00_4D78.list[i + 1];
@@ -14753,24 +14753,24 @@ extern struct sAD00 D_0050AD00;
  * past the reserved area), the end (+0x1A9C) at most 0x8000 units (2 MB); -1 selects those defaults. Called by
  * func_003B5B20.
  *
- * @param a  the first usable byte address, or -1
- * @param b  the end address, or -1
+ * @param startAddr  the first usable byte address, or -1
+ * @param endAddr  the end address, or -1
  * @return 0, or -8 for a limit out of range
  */
-int func_003C4E50(int a, int b) {
-    if (a == -1) {
+int func_003C4E50(int startAddr, int endAddr) {
+    if (startAddr == -1) {
         D_0050AD00.f1A9A = 321;
     } else {
-        a = (a + 0x3F) >> 6;
-        if (a < 321) return -8;
-        D_0050AD00.f1A9A = a;
+        startAddr = (startAddr + 0x3F) >> 6;
+        if (startAddr < 321) return -8;
+        D_0050AD00.f1A9A = startAddr;
     }
-    if (b == -1) {
+    if (endAddr == -1) {
         D_0050AD00.f1A9C = 0x8000;
     } else {
-        b = (b + 0x3F) >> 6;
-        if (b > 0x8000) return -8;
-        D_0050AD00.f1A9C = b;
+        endAddr = (endAddr + 0x3F) >> 6;
+        if (endAddr > 0x8000) return -8;
+        D_0050AD00.f1A9C = endAddr;
     }
     return 0;
 }
@@ -14861,18 +14861,18 @@ extern struct G_5068 D_0050A8E8_5068[] __asm__("D_0050A8E8");
  * func_003C8E28, which builds the filter and links it into the voice's chain. Reached through func_003B8CC8, which
  * SNDSTRMI_startstream calls with the stream's first track record.
  *
- * @param arg0  the channel index
- * @param arg1  the filter descriptor (+0x00 parameter, +0x04 state size, +0x08 order, +0x0C init, +0x10 process, +0x14
+ * @param channelIndex  the channel index
+ * @param filterDesc  the filter descriptor (+0x00 parameter, +0x04 state size, +0x08 order, +0x0C init, +0x10 process, +0x14
  * release)
  * @return 0, or -7 for a channel that is not on the mixer
  */
-int func_003C5068(int arg0, int arg1) {
-    struct E_5068 *e;
+int func_003C5068(int channelIndex, int filterDesc) {
+    struct E_5068 *channel;
     int i;
-    e = (struct E_5068 *)(D_0050A8E8_5068[0].tab + arg0 * 0x8C);
-    if (e->flags & 4) {
-        for (i = 0; i < e->cnt; i++)
-            func_003C8E28_5068(e->v[i] - (D_0050A8E8_5068[0].b + D_0050A8E8_5068[0].a), i, arg1);
+    channel = (struct E_5068 *)(D_0050A8E8_5068[0].tab + channelIndex * 0x8C);
+    if (channel->flags & 4) {
+        for (i = 0; i < channel->cnt; i++)
+            func_003C8E28_5068(channel->v[i] - (D_0050A8E8_5068[0].b + D_0050A8E8_5068[0].a), i, filterDesc);
         return 0;
     }
     return -7;
@@ -14893,17 +14893,17 @@ extern struct G_5128 D_0050A8E8_5128[] __asm__("D_0050A8E8");
  *
  * Only render kind 4 (mixer) channels; reached through func_003B8D30.
  *
- * @param arg0  the channel index
- * @param arg1  the filter's order (+0x18 of the node)
+ * @param channelIndex  the channel index
+ * @param filterOrder  the filter's order (+0x18 of the node)
  * @return 0
  */
-int func_003C5128(int arg0, int arg1) {
-    struct E_5128 *e;
+int func_003C5128(int channelIndex, int filterOrder) {
+    struct E_5128 *channel;
     int i;
-    e = (struct E_5128 *)(D_0050A8E8_5128[0].tab + arg0 * 0x8C);
-    if (e->flags & 4) {
-        for (i = 0; i < e->cnt; i++)
-            func_003C8EC0(e->v[i] - (D_0050A8E8_5128[0].b + D_0050A8E8_5128[0].a), arg1);
+    channel = (struct E_5128 *)(D_0050A8E8_5128[0].tab + channelIndex * 0x8C);
+    if (channel->flags & 4) {
+        for (i = 0; i < channel->cnt; i++)
+            func_003C8EC0(channel->v[i] - (D_0050A8E8_5128[0].b + D_0050A8E8_5128[0].a), filterOrder);
     }
     return 0;
 }
@@ -15307,16 +15307,16 @@ int func_003C54C0_5600(int, int *) __asm__("func_003C54C0");
  *
  * func_003C5C30 builds the render modes and output channels from it. No callers in the game.
  *
- * @param arg0  the output mode
+ * @param outputMode  the output mode
  * @return 0, or -5 when unsupported
  */
-int func_003C5600(int arg0) {
+int func_003C5600(int outputMode) {
     int buf[4];
-    func_003C54C0_5600(arg0, buf);
+    func_003C54C0_5600(outputMode, buf);
     if (buf[0] == 0) {
         return -5;
     }
-    D_0044E1C4_5600[0] = arg0;
+    D_0044E1C4_5600[0] = outputMode;
     return 0;
 }
 #endif
@@ -15330,11 +15330,11 @@ extern int D_0044E1C4_5648[4] __asm__("D_0044E1C4");
 /**
  * Reads the selected output mode (D_0044E1C4). No callers in the game.
  *
- * @param arg0  receives the mode
+ * @param outMode  receives the mode
  * @return 0
  */
-int func_003C5648(int *arg0) {
-    *arg0 = D_0044E1C4_5648[0];
+int func_003C5648(int *outMode) {
+    *outMode = D_0044E1C4_5648[0];
     return 0;
 }
 #endif
@@ -15851,14 +15851,14 @@ struct sInfo_5C30 {
  * voices (+0x2F), and 0x44, 0x140, 0x48 for Dolby Pro Logic II (mode 8, D_0044E1C4). Output channels +0x47: 1 for mono,
  * 4 / 5 for DTS 4.0 / 5.1 (option bits +0x49 = 2, DTS), 2 otherwise; +0x48 is cleared. The second device rate +0x2C
  * follows the first unless they are equal or 36000 / 24000. Then SNDSYS_setopts and func_003B5158(D_0044E1C0,
- * D_005157B0, @p arg0).
+ * D_005157B0, @p headerVersion).
  *
- * @param arg0  passed to func_003B5158 as its third argument
+ * @param headerVersion  passed to func_003B5158 as its third argument
  * @return 0
  */
-int func_003C5C30(int arg0) {
+int func_003C5C30(int headerVersion) {
     struct sInfo_5C30 info;
-    int t;
+    int mainRate;
     int ia;
 
     SNDSYS_getopts(&info);
@@ -15903,12 +15903,12 @@ int func_003C5C30(int arg0) {
         break;
     }
     ia = info.w2A;
-    t = ia & 0xFFFF;
-    if (t != info.w2C && (t != 36000 || info.w2C != 24000)) {
+    mainRate = ia & 0xFFFF;
+    if (mainRate != info.w2C && (mainRate != 36000 || info.w2C != 24000)) {
         info.w2C = ia;
     }
     SNDSYS_setopts_i(&info);
-    func_003B5158(D_0044E1C0, D_005157B0, arg0);
+    func_003B5158(D_0044E1C0, D_005157B0, headerVersion);
     return 0;
 }
 #endif
@@ -15961,15 +15961,15 @@ extern int D_005157B0_5E30[] __asm__("D_005157B0");
  *
  * func_003C5C30 passes them to func_003B5158. No callers in the game.
  *
- * @param a  the device (only 0)
- * @param b  the heap
- * @param c  its size
+ * @param device  the device (only 0)
+ * @param heap  the heap
+ * @param heapSize  its size
  * @return 0, or -5 for another device
  */
-int func_003C5E30(int a, int b, int c) {
-    if (a == 0) {
-        D_0044E1C0_5E30[0] = b;
-        D_005157B0_5E30[0] = c;
+int func_003C5E30(int device, int heap, int heapSize) {
+    if (device == 0) {
+        D_0044E1C0_5E30[0] = heap;
+        D_005157B0_5E30[0] = heapSize;
         return 0;
     }
     return -5;
@@ -15989,20 +15989,20 @@ extern int D_005157B0_5E58[] __asm__("D_005157B0");
  *
  * Both outputs are cleared first. No callers in the game.
  *
- * @param arg0  the device (only 0)
- * @param arg1  receives the heap
- * @param arg2  receives its size
+ * @param device  the device (only 0)
+ * @param outHeap  receives the heap
+ * @param outSize  receives its size
  * @return 0, -4 when not started, -5 for another device
  */
-int func_003C5E58(int arg0, int *arg1, int *arg2) {
-    *arg1 = 0;
-    *arg2 = 0;
-    if (arg0 == 0) {
+int func_003C5E58(int device, int *outHeap, int *outSize) {
+    *outHeap = 0;
+    *outSize = 0;
+    if (device == 0) {
         if (func_003C5DF0() == 0) {
             return -4;
         }
-        *arg1 = D_0044E1C0_5E58[0];
-        *arg2 = D_005157B0_5E58[0];
+        *outHeap = D_0044E1C0_5E58[0];
+        *outSize = D_005157B0_5E58[0];
     } else {
         return -5;
     }
@@ -16125,10 +16125,10 @@ extern struct S_6018 D_0050A8E8_6018 __asm__("D_0050A8E8");
  * Appends it to the table at +0x17C of D_0050A8E8 (count +0x178), whose entries func_003C60E0 calls while the system
  * runs. No bounds check. SNDSTRMI_create registers the stream service this way.
  *
- * @param a  the client function
+ * @param client  the client function
  */
-void func_003C6018(int a) {
-    D_0050A8E8_6018.v[D_0050A8E8_6018.n] = a;
+void func_003C6018(int client) {
+    D_0050A8E8_6018.v[D_0050A8E8_6018.n] = client;
     D_0050A8E8_6018.n = D_0050A8E8_6018.n + 1;
 }
 #endif
@@ -16145,13 +16145,13 @@ extern S_6040 D_0050A8E8_6040 __asm__("D_0050A8E8");
  *
  * Does nothing when it is not listed. Called by SNDSTRM_destroy.
  *
- * @param arg0  the client function
+ * @param client  the client function
  */
-void func_003C6040(int arg0) {
+void func_003C6040(int client) {
     int i;
 
     for (i = 0; i < D_0050A8E8_6040.n; i++) {
-        if (D_0050A8E8_6040.arr[i] == arg0) {
+        if (D_0050A8E8_6040.arr[i] == client) {
             D_0050A8E8_6040.n--;
             while (i < D_0050A8E8_6040.n) {
                 D_0050A8E8_6040.arr[i] = D_0050A8E8_6040.arr[i + 1];
@@ -16205,37 +16205,37 @@ extern struct G_6158 D_0050A8E8_6158 __asm__("D_0050A8E8");
  * the index past the mode it returns, or at the end. Called by SNDBANKI_playtimbre and func_003C6760.
  *
  * @param idx  in/out: the list index to start at
- * @param e  the sound's header (+0x03 channel count, +0x18 flags)
+ * @param patchHeader  the sound's header (+0x03 channel count, +0x18 flags)
  * @return the fitting mode's matching bits, or 0 when none is left
  */
-int func_003C6158(int *idx, struct E_6158 *e) {
-    int r = 0;
+int func_003C6158(int *idx, struct E_6158 *patchHeader) {
+    int matchBits = 0;
     while (*idx < D_0050A8E8_6158.n) {
-        int m = D_0050A8E8_6158.tbl[*idx] & 0x71C;
-        if (e->f18 & 0x71C) {
-            r = e->f18 & m;
-            if (r != 0) goto ok;
+        int modeKindBits = D_0050A8E8_6158.tbl[*idx] & 0x71C;
+        if (patchHeader->f18 & 0x71C) {
+            matchBits = patchHeader->f18 & modeKindBits;
+            if (matchBits != 0) goto ok;
             goto next;
         } else {
-            r = m;
+            matchBits = modeKindBits;
         }
     ok:
         {
-            int m2 = D_0050A8E8_6158.tbl[*idx] & 0xE0;
-            if (e->f18 & 0xE0) {
-                int t = e->f18 & m2;
-                r |= t;
-                if (t == 0) { r = 0; goto next; }
+            int modeFormatBits = D_0050A8E8_6158.tbl[*idx] & 0xE0;
+            if (patchHeader->f18 & 0xE0) {
+                int formatMatch = patchHeader->f18 & modeFormatBits;
+                matchBits |= formatMatch;
+                if (formatMatch == 0) { matchBits = 0; goto next; }
             } else {
-                r |= m2;
+                matchBits |= modeFormatBits;
             }
         }
-        if (e->b3 != 1 && (r & 0x80)) { r = 0; goto next; }
-        if (r) { (*idx)++; break; }
+        if (patchHeader->b3 != 1 && (matchBits & 0x80)) { matchBits = 0; goto next; }
+        if (matchBits) { (*idx)++; break; }
     next:
         (*idx)++;
     }
-    return r;
+    return matchBits;
 }
 #endif
 
@@ -16540,17 +16540,17 @@ extern struct E_6580 *D_0050AAD8_6580 __asm__("D_0050AAD8");
  * Scans the first n entries of the voice's 16-bit hardware voice list (+0x04 of its record in the D_0050AAD8 table).
  * func_003C6760 stores the result in the packet instance (+0x42); func_003C7010 only counts frames played on that one.
  *
- * @param a  the voice
+ * @param voice  the voice
  * @param n  the number of channels
  * @return the channel index, or -1 when n is 0
  */
-int func_003C6580(int a, int n) {
+int func_003C6580(int voice, int n) {
     int best = -1;
     int idx = -1;
     int i;
     for (i = 0; i < n; i++) {
-        if (best < D_0050AAD8_6580[a].v[i]) {
-            best = D_0050AAD8_6580[a].v[i];
+        if (best < D_0050AAD8_6580[voice].v[i]) {
+            best = D_0050AAD8_6580[voice].v[i];
             idx = i;
         }
     }
@@ -16885,45 +16885,45 @@ struct A_6AB8 { char pad0[4]; unsigned int sz : 31; unsigned int flag : 1; char 
  * channel's pending count, the queued frames (+0x48) and the write index (wrapping) advance. Called by
  * SNDSTRMI_parsedata.
  *
- * @param arg0  the instance
- * @param arg1  the packet: +0x04 frames and flag (top bit), +0x0C one sample pointer per channel
+ * @param instanceHandle  the instance
+ * @param packet  the packet: +0x04 frames and flag (top bit), +0x0C one sample pointer per channel
  * @return the packet's sequence number, or -13 when the ring is full
  */
-int func_003C6AB8(int arg0, struct A_6AB8 *arg1)
+int func_003C6AB8(int instanceHandle, struct A_6AB8 *packet)
 {
-  struct s7B8Queue *s = D_005157B8.f304[arg0];
-  struct s7B8Rec *e;
+  struct s7B8Queue *instance = D_005157B8.f304[instanceHandle];
+  struct s7B8Rec *record;
   int i;
-  int r;
-  for (i = 0; i < s->f60.n; i++)
+  int packetHandle;
+  for (i = 0; i < instance->f60.n; i++)
   {
-    if (s->f34[i] >= s->f40 - 1)
+    if (instance->f34[i] >= instance->f40 - 1)
     {
-      r = -13;
+      packetHandle = -13;
       goto done;
     }
   }
 
-  e = &s->f7C[s->f46];
-  e->len = arg1->sz;
-  e->flag = arg1->flag;
-  e->f00 = s->f04;
-  for (i = 0; i < s->f60.n; i++)
+  record = &instance->f7C[instance->f46];
+  record->len = packet->sz;
+  record->flag = packet->flag;
+  record->f00 = instance->f04;
+  for (i = 0; i < instance->f60.n; i++)
   {
-    e->f08[i] = arg1->w[i];
-    s->f34[i] += 1;
+    record->f08[i] = packet->w[i];
+    instance->f34[i] += 1;
   }
 
-  s->f48 += arg1->sz;
-  r = s->f04;
-  s->f04 = s->f04 + 1;
-  s->f46 = s->f46 + 1;
-  if (s->f46 >= s->f40)
+  instance->f48 += packet->sz;
+  packetHandle = instance->f04;
+  instance->f04 = instance->f04 + 1;
+  instance->f46 = instance->f46 + 1;
+  if (instance->f46 >= instance->f40)
   {
-    s->f46 = 0;
+    instance->f46 = 0;
   }
   done:
-  return r;
+  return packetHandle;
 
 }
 #endif
@@ -16941,18 +16941,18 @@ extern struct s7B8 D_005157B8;
  *
  * Called by SNDSTRMI_service.
  *
- * @param arg0  the instance
+ * @param instanceHandle  the instance
  * @return the free packet count
  */
-int func_003C6C28(int arg0) {
-    struct s7B8Queue *e = D_005157B8.f304[arg0];
-    int m = 0;
+int func_003C6C28(int instanceHandle) {
+    struct s7B8Queue *instance = D_005157B8.f304[instanceHandle];
+    int mostPending = 0;
     int i;
-    for (i = 0; i < e->f60.n; i++) {
-        if (!(e->f34[i] < m))
-            m = e->f34[i];
+    for (i = 0; i < instance->f60.n; i++) {
+        if (!(instance->f34[i] < mostPending))
+            mostPending = instance->f34[i];
     }
-    return e->f40 - m - 1;
+    return instance->f40 - mostPending - 1;
 }
 #endif
 
@@ -16972,8 +16972,8 @@ extern struct S_6C98 D_005157B8_6C98 __asm__("D_005157B8");
  * @return the frame count
  */
 int func_003C6C98(int i) {
-    struct Inner_6C98 *q = (&D_005157B8_6C98)[0].p[i];
-    return q->a + q->b;
+    struct Inner_6C98 *instance = (&D_005157B8_6C98)[0].p[i];
+    return instance->a + instance->b;
 }
 #endif
 
@@ -17032,20 +17032,20 @@ extern int f_6CE0_6CE8(int, int, int) __asm__("func_003C6CE0");
  * Stops its sound (SNDstop), runs the pending callbacks (func_003C7080), calls func_003C6CE0 over the whole range,
  * forgets the voice (-1) and frees each channel's buffer (SNDMEMI_free). Called by SNDSTRMI_service and SNDSTRM_purge.
  *
- * @param arg0  the instance
+ * @param instanceHandle  the instance
  * @return 0
  */
-int func_003C6CE8(int arg0) {
-    struct s7B8Queue *e = D_005157B8.f304[arg0];
+int func_003C6CE8(int instanceHandle) {
+    struct s7B8Queue *instance = D_005157B8.f304[instanceHandle];
     int i = 0;
 
-    f_89E0_6CE8(e->f00);
+    f_89E0_6CE8(instance->f00);
     func_003C7080();
-    f_6CE0_6CE8(arg0, 0, 0x7FFFFFFF);
-    e->f00 = -1;
+    f_6CE0_6CE8(instanceHandle, 0, 0x7FFFFFFF);
+    instance->f00 = -1;
 
-    for (; i < e->f60.n; i++) {
-        if (e->f64[i]) SNDMEMI_free(e->f64[i]);
+    for (; i < instance->f60.n; i++) {
+        if (instance->f64[i]) SNDMEMI_free(instance->f64[i]);
 
     }
     return 0;
@@ -17065,12 +17065,12 @@ extern W_6DA0 D_005157B8_6DA0 __asm__("D_005157B8");
  *
  * Called by SNDSTRMI_create (on failure) and SNDSTRM_destroy.
  *
- * @param arg0  the instance
+ * @param instanceHandle  the instance
  * @return 0
  */
-int func_003C6DA0(int arg0) {
+int func_003C6DA0(int instanceHandle) {
     func_003CE1A8_6DA0();
-    D_005157B8_6DA0.arr[arg0] = 0;
+    D_005157B8_6DA0.arr[instanceHandle] = 0;
     return 0;
 }
 #endif
@@ -17114,67 +17114,67 @@ extern struct G_6DE0 D_005157B8_6DE0 __asm__("D_005157B8");
  * func_003C9C08, func_003CA460).
  *
  * @param id  the instance
- * @param r  the channel
+ * @param channel  the channel
  * @param len  receives the packet's frame count
  * @param flag  receives the packet's flag bit
  * @return the samples (0xFFFFFFFF for a null pointer), or 0 when the channel has nothing pending
  */
-unsigned int func_003C6DE0(int id, int r, int *len, int *flag) {
-    struct Q_6DE0 *q;
-    struct E_6DE0 *e;
+unsigned int func_003C6DE0(int id, int channel, int *len, int *flag) {
+    struct Q_6DE0 *instance;
+    struct E_6DE0 *packet;
     struct Ev_6DE0 *ev;
     int ok, ok2, i;
-    unsigned int v;
+    unsigned int samples;
 
     ok = 1;
-    q = D_005157B8_6DE0.q[id];
+    instance = D_005157B8_6DE0.q[id];
     ok2 = 1;
-    for (i = 0; i < q->n; i++) {
-        if (q->pos[i] <= q->wr) {
+    for (i = 0; i < instance->n; i++) {
+        if (instance->pos[i] <= instance->wr) {
             ok = 0;
         }
     }
     if (ok) {
-        struct E_6DE0 *w = &q->e[q->widx];
-        if (q->flag) {
+        struct E_6DE0 *w = &instance->e[instance->widx];
+        if (instance->flag) {
             ev = &D_005157B8_6DE0.ev[D_005157B8_6DE0.count];
             ev->type = 1;
             ev->id = id;
             ev->val = w->val[0];
             D_005157B8_6DE0.count++;
         }
-        q->widx++;
-        q->wr++;
-        if (q->widx >= q->size) {
-            q->widx = 0;
+        instance->widx++;
+        instance->wr++;
+        if (instance->widx >= instance->size) {
+            instance->widx = 0;
         }
     }
-    if (q->cnt[r] == 0) {
+    if (instance->cnt[channel] == 0) {
         return 0;
     }
-    e = &q->e[q->ridx[r]];
-    *len = e->len;
-    *flag = e->flag;
-    q->ridx[r]++;
-    q->pos[r]++;
+    packet = &instance->e[instance->ridx[channel]];
+    *len = packet->len;
+    *flag = packet->flag;
+    instance->ridx[channel]++;
+    instance->pos[channel]++;
     i = 0;
     do {
-        if (q->pos[i] <= q->rd) {
+        if (instance->pos[i] <= instance->rd) {
             ok2 = 0;
         }
         i++;
-    } while (ok2 == 1 && i < q->n);
+    } while (ok2 == 1 && i < instance->n);
     if (ok2) {
-        q->rd++;
-        q->a -= e->len;
-        q->b += e->len;
+        instance->rd++;
+        instance->a -= packet->len;
+        instance->b += packet->len;
     }
-    if (q->ridx[r] >= q->size) {
-        q->ridx[r] = 0;
+    if (instance->ridx[channel] >= instance->size) {
+        instance->ridx[channel] = 0;
     }
-    q->cnt[r]--;
-    v = e->val[r];
-    return v ? v : 0xFFFFFFFF;
+    instance->cnt[channel]--;
+    samples = packet->val[channel];
+    return samples ? samples : 0xFFFFFFFF;
 }
 #endif
 
@@ -17194,20 +17194,20 @@ extern struct s7B8 D_005157B8;
  * func_003C96F0 and func_003C9C08.
  *
  * @param id  the instance
- * @param b  the channel
- * @param c  the number of frames
+ * @param channel  the channel
+ * @param frames  the number of frames
  */
-void func_003C7010(int id, int b, int c)
+void func_003C7010(int id, int channel, int frames)
 {
-    struct s7B8Queue* o = D_005157B8.f304[id];
-    if (b == (signed char)o->f42) {
+    struct s7B8Queue* instance = D_005157B8.f304[id];
+    if (channel == (signed char)instance->f42) {
 
-        o->f4C -= c;
-        if (o->f58) {
-            struct s7B8Event* e = &D_005157B8.f004[D_005157B8.f000];
-            e->f04 = c;
-            e->f02 = id;
-            e->f00 = 0;
+        instance->f4C -= frames;
+        if (instance->f58) {
+            struct s7B8Event* event = &D_005157B8.f004[D_005157B8.f000];
+            event->f04 = frames;
+            event->f02 = id;
+            event->f00 = 0;
             D_005157B8.f000++;
         }
     }
@@ -17235,11 +17235,11 @@ void func_003C7080(void) {
     int i;
     for (i = 0; i < D_005157B8_7080.count; i++) {
         struct Ev_7080 *ev = &D_005157B8_7080.ev[i];
-        struct Q_7080 *q = D_005157B8_7080.q[ev->id];
+        struct Q_7080 *instance = D_005157B8_7080.q[ev->id];
         if (ev->type == 0) {
-            q->f58(ev->id, ev->val, q->f5C);
+            instance->f58(ev->id, ev->val, instance->f5C);
         } else {
-            q->f54(ev->val, q->f5C);
+            instance->f54(ev->val, instance->f5C);
         }
     }
     D_005157B8_7080.count = 0;
@@ -17303,26 +17303,26 @@ struct S7218 { short s0; char b2, b3, b4, b5, b6, b7; short s8; short sA; short 
  * Volume +0x03 = 0x7F, pan +0x04 = 0x40, +0x08 = 8, the other bytes and +0x00 zero; clears the four words at +0x48 and
  * +0x58 and the six 16-bit levels (+0x0C) and words (+0x18). Called by SNDI_patchtohdr and SNDI_patchtohdrgen.
  *
- * @param p  the attributes
+ * @param sampleAttr  the attributes
  * @return 0
  */
-int func_003C7218(struct S7218 *p) {
+int func_003C7218(struct S7218 *sampleAttr) {
     int i;
-    p->b3 = 0x7F;
-    p->b4 = 0x40;
-    p->s8 = 8;
-    p->b2 = 0;
-    p->s0 = 0;
-    p->b5 = 0;
-    p->b6 = 0;
-    p->b7 = 0;
+    sampleAttr->b3 = 0x7F;
+    sampleAttr->b4 = 0x40;
+    sampleAttr->s8 = 8;
+    sampleAttr->b2 = 0;
+    sampleAttr->s0 = 0;
+    sampleAttr->b5 = 0;
+    sampleAttr->b6 = 0;
+    sampleAttr->b7 = 0;
     for (i = 0; i < 4; i++) {
-        p->a48[i] = 0;
-        p->a58[i] = 0;
+        sampleAttr->a48[i] = 0;
+        sampleAttr->a58[i] = 0;
     }
     for (i = 0; i < 6; i++) {
-        p->sC[i] = 0;
-        p->i18[i] = 0;
+        sampleAttr->sC[i] = 0;
+        sampleAttr->i18[i] = 0;
     }
     return 0;
 }
@@ -17404,45 +17404,45 @@ extern unsigned func_003C72F8_7388(unsigned char *, unsigned) __asm__("func_003C
  * length and, for data under 5 bytes, +0x08 its value (func_003C72F8). Called by SNDI_parsetimbre, SNDI_patchtohdr and
  * SNDI_patchtohdrgen.
  *
- * @param s  the tag reader: +0x00 the stream position, then the fields above
+ * @param tagInfo  the tag reader: +0x00 the stream position, then the fields above
  * @return 1 when a tag was read, 0 at the end of the stream
  */
-int func_003C7388(struct S_7388 *s) {
-    unsigned char *p = s->p;
-    unsigned char *q, *r;
+int func_003C7388(struct S_7388 *tagInfo) {
+    unsigned char *cursor = tagInfo->p;
+    unsigned char *prevByte, *tagStart;
     unsigned cur, len;
-    if (*p == 0xFC) {
+    if (*cursor == 0xFC) {
         do {
-            q = p;
-            s->p = q + 1;
-            p = q + 1;
-        } while (q[1] == 0xFC);
+            prevByte = cursor;
+            tagInfo->p = prevByte + 1;
+            cursor = prevByte + 1;
+        } while (prevByte[1] == 0xFC);
     }
-    r = s->p;
-    cur = *r;
-    s->cur = cur;
+    tagStart = tagInfo->p;
+    cur = *tagStart;
+    tagInfo->cur = cur;
     if (cur == 0xFF) {
         return 0;
     }
-    s->p = r + 1;
+    tagInfo->p = tagStart + 1;
     if (cur == 253) {
         return 1;
     }
     if (cur == 0xFE) {
         return 1;
     }
-    len = r[1];
-    s->len = len;
+    len = tagStart[1];
+    tagInfo->len = len;
     if (len == 0xFF) {
-        s->len = func_003C72F8_7388(r + 2, 4);
-        s->p = s->p + 4;
+        tagInfo->len = func_003C72F8_7388(tagStart + 2, 4);
+        tagInfo->p = tagInfo->p + 4;
     }
-    s->p = s->p + 1;
-    s->c = s->p;
-    if (s->len < 5) {
-        s->r8 = func_003C72F8_7388(s->p, s->len);
+    tagInfo->p = tagInfo->p + 1;
+    tagInfo->c = tagInfo->p;
+    if (tagInfo->len < 5) {
+        tagInfo->r8 = func_003C72F8_7388(tagInfo->p, tagInfo->len);
     }
-    s->p = s->p + s->len;
+    tagInfo->p = tagInfo->p + tagInfo->len;
     return 1;
 }
 #endif
@@ -17601,38 +17601,38 @@ extern void func_003C7828_7AB0(struct Snd_7AB0 *snd, void *name, float from, flo
  * ramps from the current gain to the wanted one (func_003C7828) or, when unchanged and non-zero, mixes at that gain
  * (the hook at +0x1E0 of D_00515B40). Called by func_003C85D0.
  *
- * @param s  the voice's mixer state (current gains +0x04, wanted +0x1C, effect send +0x34 / +0x38)
+ * @param mixVoice  the voice's mixer state (current gains +0x04, wanted +0x1C, effect send +0x34 / +0x38)
  * @return the frames mixed: 16, or 0
  */
-int func_003C7AB0(struct S_7AB0 *s) {
+int func_003C7AB0(struct S_7AB0 *mixVoice) {
     int i;
 
-    if (s->obj->fn(s->obj, 0x10, D_00515B40_7AB0.fB0, D_00515B40_7AB0.snd, 0) <= 0) {
+    if (mixVoice->obj->fn(mixVoice->obj, 0x10, D_00515B40_7AB0.fB0, D_00515B40_7AB0.snd, 0) <= 0) {
         for (i = 0; i < 1; i++) {
-            s->a[i] = s->b[i];
+            mixVoice->a[i] = mixVoice->b[i];
         }
         for (i = 0; i < D_00515B40_7AB0.n; i++) {
-            s->cur[i] = s->want[i];
+            mixVoice->cur[i] = mixVoice->want[i];
         }
         return 0;
     }
-    s->f3C = D_00515B40_7AB0.snd->f3C;
+    mixVoice->f3C = D_00515B40_7AB0.snd->f3C;
     for (i = 0; i < 1; i++) {
         if (D_00515B40_7AB0.on[i] != 0) {
-            if (s->a[i] != s->b[i]) {
-                func_003C7828_7AB0(D_00515B40_7AB0.snd, D_00515D80_7AB0, s->a[i], s->b[i]);
-                s->a[i] = s->b[i];
-            } else if (s->b[i] != 0.0f) {
-                D_00515B40_7AB0.set(0x10, D_00515B40_7AB0.snd, D_00515D80_7AB0, s->b[i]);
+            if (mixVoice->a[i] != mixVoice->b[i]) {
+                func_003C7828_7AB0(D_00515B40_7AB0.snd, D_00515D80_7AB0, mixVoice->a[i], mixVoice->b[i]);
+                mixVoice->a[i] = mixVoice->b[i];
+            } else if (mixVoice->b[i] != 0.0f) {
+                D_00515B40_7AB0.set(0x10, D_00515B40_7AB0.snd, D_00515D80_7AB0, mixVoice->b[i]);
             }
         }
     }
     for (i = 0; i < D_00515B40_7AB0.n; i++) {
-        if (s->cur[i] != s->want[i]) {
-            func_003C7828_7AB0(D_00515B40_7AB0.snd, D_00515B40_7AB0.names[i], s->cur[i], s->want[i]);
-            s->cur[i] = s->want[i];
-        } else if (s->want[i] != 0.0f) {
-            D_00515B40_7AB0.set(0x10, D_00515B40_7AB0.snd, D_00515B40_7AB0.names[i], s->want[i]);
+        if (mixVoice->cur[i] != mixVoice->want[i]) {
+            func_003C7828_7AB0(D_00515B40_7AB0.snd, D_00515B40_7AB0.names[i], mixVoice->cur[i], mixVoice->want[i]);
+            mixVoice->cur[i] = mixVoice->want[i];
+        } else if (mixVoice->want[i] != 0.0f) {
+            D_00515B40_7AB0.set(0x10, D_00515B40_7AB0.snd, D_00515B40_7AB0.names[i], mixVoice->want[i]);
         }
     }
     return 0x10;
@@ -17793,27 +17793,27 @@ extern void f_7AA8_8018(float) __asm__("func_003C7AA8");
  */
 void func_003C8018(void) {
     int i;
-    int v;
+    int buffer;
     f_58A0_8018();
     if (D_00515B40_8018.f1DC) {
         f_5E98_8018(D_00515B40_8018.f1DC);
         D_00515B40_8018.f1DC = 0;
     }
     for (i = 0; i < 2; i++) {
-        v = D_00515B40_8018.fA8[i];
-        if ((v & 0x70000000) == 0x70000000) {
+        buffer = D_00515B40_8018.fA8[i];
+        if ((buffer & 0x70000000) == 0x70000000) {
             D_00515B40_8018.fA8[i] = 0;
-        } else if (v != 0) {
-            f_5E98_8018(v);
+        } else if (buffer != 0) {
+            f_5E98_8018(buffer);
             D_00515B40_8018.fA8[i] = 0;
         }
     }
     for (i = 0; i < D_00515B40_8018.f5; i++) {
-        v = D_00515B40_8018.fB8[i];
-        if ((v & 0x70000000) == 0x70000000) {
+        buffer = D_00515B40_8018.fB8[i];
+        if ((buffer & 0x70000000) == 0x70000000) {
             D_00515B40_8018.fB8[i] = 0;
-        } else if (v != 0) {
-            f_5E98_8018(v);
+        } else if (buffer != 0) {
+            f_5E98_8018(buffer);
             D_00515B40_8018.fB8[i] = 0;
         }
     }
@@ -17851,10 +17851,10 @@ extern signed char D_00515B40_8148[16] __asm__("D_00515B40");
 /**
  * Sets the mixer's resampling quality (byte +0x0E of D_00515B40). Called by func_003C0E28.
  *
- * @param arg0  the quality
+ * @param quality  the quality
  */
-void func_003C8148(signed char arg0) {
-    D_00515B40_8148[0xE] = arg0;
+void func_003C8148(signed char quality) {
+    D_00515B40_8148[0xE] = quality;
 }
 #endif
 
@@ -17902,21 +17902,21 @@ extern void f_B280_8158(struct Obj_8158 *, int, int) __asm__("func_003CB280");
  * @param id  the mixer voice
  * @param fmt  the sample format code
  * @param ch  the play type
- * @param a  passed to the decoder
- * @param b  passed to the decoder
+ * @param sampleData  passed to the decoder
+ * @param loopStart  passed to the decoder
  * @param strm  the time-stretch data, or 0
- * @param c  passed to the decoder
- * @param d  passed to the decoder
- * @param e  passed to the decoder
- * @param f  passed to the decoder; also picks the variant of play type 1
+ * @param channelCount  passed to the decoder
+ * @param totalFrames  passed to the decoder
+ * @param sustainStart  passed to the decoder
+ * @param sustainEnd  passed to the decoder; also picks the variant of play type 1
  * @param u10  unused
  * @param u11  unused
- * @param g  passed to the decoder
+ * @param platformVersion  passed to the decoder
  * @param prio  stored in each node (+0x1A)
  */
-void func_003C8158(int id, int fmt, int ch, int a, int b, int strm, int c, int d,
-                   int e, int f, int u10, int u11, int g, int prio) {
-    struct Par_8158 p;
+void func_003C8158(int id, int fmt, int ch, int sampleData, int loopStart, int strm, int channelCount, int totalFrames,
+                   int sustainStart, int sustainEnd, int u10, int u11, int platformVersion, int prio) {
+    struct Par_8158 initParams;
     struct Ent_8158 *ent;
     int n, k;
 
@@ -17927,8 +17927,8 @@ void func_003C8158(int id, int fmt, int ch, int a, int b, int strm, int c, int d
     ent->x58 = 0;
     ent->x5C = 0;
     ent->strm = 0;
-    p.one = 1;
-    p.result = 0;
+    initParams.one = 1;
+    initParams.result = 0;
     n = -1;
     if (fmt == 8) {
         n = 0;
@@ -17945,7 +17945,7 @@ void func_003C8158(int id, int fmt, int ch, int a, int b, int strm, int c, int d
     }
     if (ch == 1) {
         k = 0;
-        if (f >= 1) {
+        if (sustainEnd >= 1) {
             k = 1;
         }
     } else {
@@ -17956,20 +17956,20 @@ void func_003C8158(int id, int fmt, int ch, int a, int b, int strm, int c, int d
     }
     if (D_00515B40_8158.fn[n][k] != 0) {
         ent->obj = f_5C60_8158(D_00515B40_8158.size[n][k]);
-        p.a = a;
-        p.b = b;
-        p.c = c;
-        p.g = g;
-        p.d = d;
-        p.e = e;
-        p.f = f;
-        p.flag = D_0050AA62_8158;
-        p.id = id;
+        initParams.a = sampleData;
+        initParams.b = loopStart;
+        initParams.c = channelCount;
+        initParams.g = platformVersion;
+        initParams.d = totalFrames;
+        initParams.e = sustainStart;
+        initParams.f = sustainEnd;
+        initParams.flag = D_0050AA62_8158;
+        initParams.id = id;
         ent->obj->x4 = 0;
         ent->obj->x18 = 0xF0;
         ent->obj->x1A = prio;
-        D_00515B40_8158.fn[n][k](ent->obj, &p);
-        ent->result = p.result;
+        D_00515B40_8158.fn[n][k](ent->obj, &initParams);
+        ent->result = initParams.result;
         f_8F48_8158(&ent->x40, ent->obj);
     }
     if (strm != 0) {
@@ -18000,34 +18000,34 @@ extern struct G_83A0 D_00515B40_83A0 __asm__("D_00515B40");
  * Clears the last sample (+0x3C) and the changed flag (+0x01), makes the wanted effect send and channel gains current
  * and sets the state to 2 (playing). Called by func_003C3EE0 and func_003CE1B0.
  *
- * @param arg0  the mixer voice
+ * @param voice  the mixer voice
  */
-void func_003C83A0(int arg0) {
+void func_003C83A0(int voice) {
     int i;
     int j;
-    char *e;
-    float *a;
-    float *b;
+    char *voiceState;
+    float *sendGain;
+    float *channelGain;
     i = 0;
-    e = D_00515B40_83A0.tbl + arg0 * 0x60;
-    *(int *)(e + 0x3C) = 0;
-    a = (float *)(e + 0x34);
-    e[1] = 0;
+    voiceState = D_00515B40_83A0.tbl + voice * 0x60;
+    *(int *)(voiceState + 0x3C) = 0;
+    sendGain = (float *)(voiceState + 0x34);
+    voiceState[1] = 0;
     do {
         i -= 1;
-        a[0] = a[1];
-        a++;
+        sendGain[0] = sendGain[1];
+        sendGain++;
     } while (i >= 0);
     j = 0;
     if (D_00515B40_83A0.cnt != 0) {
-        b = (float *)(e + 4);
+        channelGain = (float *)(voiceState + 4);
         do {
             j += 1;
-            b[0] = b[6];
-            b++;
+            channelGain[0] = channelGain[6];
+            channelGain++;
         } while (j < D_00515B40_83A0.cnt);
     }
-    e[0] = 2;
+    voiceState[0] = 2;
 }
 #endif
 
@@ -18043,11 +18043,11 @@ extern struct G_8430 D_00515B40_8430 __asm__("D_00515B40");
  *
  * Called by func_003C85D0.
  *
- * @param arg0  the mixer voice
+ * @param voice  the mixer voice
  */
-void func_003C8430(int arg0) {
+void func_003C8430(int voice) {
     func_003C8468();
-    D_00515B40_8430.handler(arg0);
+    D_00515B40_8430.handler(voice);
 }
 #endif
 
@@ -18090,26 +18090,26 @@ extern void SNDMEMI_free_8468(struct Node_8468 *) __asm__("SNDMEMI_free");
  * @param idx  the mixer voice
  */
 void func_003C8468(int idx) {
-    struct Ent_8468 *e = (struct Ent_8468 *)(D_00515B40_8468.tab + idx * 0x60);
+    struct Ent_8468 *voiceState = (struct Ent_8468 *)(D_00515B40_8468.tab + idx * 0x60);
     int i;
     struct Node_8468 *nd;
     struct Node_8468 *next;
     for (i = 0; i < 1; i++) {
-        D_00515B40_8468.g[i] += e->b[i] * e->scale;
+        D_00515B40_8468.g[i] += voiceState->b[i] * voiceState->scale;
     }
     for (i = 0; i < D_00515B40_8468.n; i++) {
-        D_00515B40_8468.f[i] += e->a[i] * e->scale;
+        D_00515B40_8468.f[i] += voiceState->a[i] * voiceState->scale;
     }
     do {
-        if (e->node->fn != 0) {
-            e->node->fn(e->node);
+        if (voiceState->node->fn != 0) {
+            voiceState->node->fn(voiceState->node);
         }
-        nd = e->node;
+        nd = voiceState->node;
         next = nd->next;
         SNDMEMI_free_8468(nd);
-        e->node = next;
+        voiceState->node = next;
     } while (next != 0);
-    e->c0 = 0;
+    voiceState->c0 = 0;
 }
 #endif
 
@@ -18137,10 +18137,10 @@ extern struct G_8560 D_00515B40_8560 __asm__("D_00515B40");
  *
  * @param idx  the mixer voice
  * @param k  the output channel
- * @param f  the gain
+ * @param gain  the gain
  */
-void func_003C8560(int idx, int k, float f) {
-    D_00515B40_8560.tab[idx].v[k] = f;
+void func_003C8560(int idx, int k, float gain) {
+    D_00515B40_8560.tab[idx].v[k] = gain;
     D_00515B40_8560.tab[idx].flag = 1;
 }
 #endif
@@ -18169,10 +18169,10 @@ extern struct G_8598 D_00515B40_8598 __asm__("D_00515B40");
  *
  * @param idx  the mixer voice
  * @param k  the effect bus (only 0)
- * @param f  the gain
+ * @param gain  the gain
  */
-void func_003C8598(int idx, int k, float f) {
-    D_00515B40_8598.tab[idx].v[k] = f;
+void func_003C8598(int idx, int k, float gain) {
+    D_00515B40_8598.tab[idx].v[k] = gain;
     D_00515B40_8598.tab[idx].flag = 1;
 }
 #endif
@@ -18235,12 +18235,12 @@ extern void f8430_85D0(int) __asm__("func_003C8430");
  * @param n  the number of frames (up to 512)
  */
 void func_003C85D0(int *outs, int n) {
-    struct Ent_85D0 *e;
+    struct Ent_85D0 *voiceState;
     int i;
     int j;
     int k;
-    int m;
-    int r;
+    int framesLeft;
+    int framesMixed;
 
     for (i = 0; i < 1; i++) {
         if (D_00515B40_85D0.on[i] != 0 && D_00515B40_85D0.g[i] != 0.0f) {
@@ -18254,30 +18254,30 @@ void func_003C85D0(int *outs, int n) {
         }
     }
     for (j = 0; j < D_00515B40_85D0.cnt; j++) {
-        e = &D_00515B40_85D0.tab[j];
-        if (e->state == 2) {
-            if (e->dirty != 0) {
-                k = f7AB0_85D0(e);
-                e->dirty = 0;
-                m = n - k;
+        voiceState = &D_00515B40_85D0.tab[j];
+        if (voiceState->state == 2) {
+            if (voiceState->dirty != 0) {
+                k = f7AB0_85D0(voiceState);
+                voiceState->dirty = 0;
+                framesLeft = n - k;
             } else {
                 k = 0;
-                m = n;
+                framesLeft = n;
             }
-            if (m != 0) {
-                r = e->obj->fn(e->obj, m, D_00515B40_85D0.fB0, D_00515B40_85D0.snd, 0);
-                if (r < 0) {
+            if (framesLeft != 0) {
+                framesMixed = voiceState->obj->fn(voiceState->obj, framesLeft, D_00515B40_85D0.fB0, D_00515B40_85D0.snd, 0);
+                if (framesMixed < 0) {
                     f8430_85D0(j);
-                } else if (r != 0) {
-                    e->f3C = D_00515B40_85D0.snd[r - 1];
+                } else if (framesMixed != 0) {
+                    voiceState->f3C = D_00515B40_85D0.snd[framesMixed - 1];
                     for (i = 0; i < D_00515B40_85D0.n; i++) {
-                        if (e->want[i] != 0.0f) {
-                            D_00515B40_85D0.set(r, D_00515B40_85D0.snd, D_00515B40_85D0.names[i] + k, e->want[i]);
+                        if (voiceState->want[i] != 0.0f) {
+                            D_00515B40_85D0.set(framesMixed, D_00515B40_85D0.snd, D_00515B40_85D0.names[i] + k, voiceState->want[i]);
                         }
                     }
                     for (i = 0; i < 1; i++) {
-                        if (D_00515B40_85D0.on[i] != 0 && e->b[i] != 0.0f) {
-                            D_00515B40_85D0.set(r, D_00515B40_85D0.snd, D_00515D80_85D0 + k, e->b[i]);
+                        if (D_00515B40_85D0.on[i] != 0 && voiceState->b[i] != 0.0f) {
+                            D_00515B40_85D0.set(framesMixed, D_00515B40_85D0.snd, D_00515D80_85D0 + k, voiceState->b[i]);
                             *(int *)((char *)D_00515D80_85D0 + 0x1800) = 0;
                         }
                     }
@@ -18349,10 +18349,10 @@ extern char *D_00515D1C_8A40[] __asm__("D_00515D1C");
  * @return the frame, or -1 when the voice has no decoder
  */
 int func_003C8A40(int idx) {
-    char *e = D_00515D1C_8A40[0] + idx * 0x60;
-    int (*fn)(int) = *(int (**)(int))(e + 0x44);
+    char *voiceState = D_00515D1C_8A40[0] + idx * 0x60;
+    int (*fn)(int) = *(int (**)(int))(voiceState + 0x44);
     if (fn != 0) {
-        return fn(*(int *)(e + 0x48));
+        return fn(*(int *)(voiceState + 0x48));
     }
     return -1;
 }
@@ -18458,20 +18458,20 @@ extern void func_003CB538_8A88(struct sB40Node *, int) __asm__("func_003CB538");
  * @param n  the pitch (16.16)
  */
 void func_003C8A88(int idx, int n) {
-    struct sB40Ent *e;
+    struct sB40Ent *voiceState;
     if (n > 0x20000) n = 0x20000;
-    e = &D_00515B40_8A88.f1DC[idx];
-    if (e->f50 == 0) {
+    voiceState = &D_00515B40_8A88.f1DC[idx];
+    if (voiceState->f50 == 0) {
         int big;
-        e->f50 = func_003B5C60_8A88(0x38);
+        voiceState->f50 = func_003B5C60_8A88(0x38);
         big = D_00515B40_8A88.f0E >= 50;
-        e->f50->f04 = 0;
-        e->f50->f18 = 160;
-        e->f50->f1A = 0;
-        func_003CBB28_8A88(e->f50, D_0050AA62, big);
-        func_003C8F48_8A88(&e->f40, e->f50);
+        voiceState->f50->f04 = 0;
+        voiceState->f50->f18 = 160;
+        voiceState->f50->f1A = 0;
+        func_003CBB28_8A88(voiceState->f50, D_0050AA62, big);
+        func_003C8F48_8A88(&voiceState->f40, voiceState->f50);
     }
-    func_003CB538_8A88(e->f50, n);
+    func_003CB538_8A88(voiceState->f50, n);
 }
 #endif
 
@@ -18490,15 +18490,15 @@ void func_003CB110_8B40(int, int) __asm__("func_003CB110");
  *
  * Called by func_003C3010.
  *
- * @param arg0  the mixer voice
- * @param arg1  the time multiplier
+ * @param voice  the mixer voice
+ * @param timeMult  the time multiplier
  */
-void func_003C8B40(int arg0, int arg1) {
+void func_003C8B40(int voice, int timeMult) {
     int temp_4;
 
-    temp_4 = D_00515D1C_8B40[0]->arr[arg0].f;
+    temp_4 = D_00515D1C_8B40[0]->arr[voice].f;
     if (temp_4 != 0) {
-        func_003CB110_8B40(temp_4, arg1);
+        func_003CB110_8B40(temp_4, timeMult);
     }
 }
 #endif
@@ -18524,27 +18524,27 @@ extern struct E_8B80 *D_00515D1C_8B80[] __asm__("D_00515D1C");
  * by func_003CB528 and linked by func_003C8F48) and sets its clip level from the value (func_003CB4A8). Zero or less
  * unlinks the node (func_003C8FB0) and frees it. Called by func_003C30C8.
  *
- * @param arg0  the mixer voice
- * @param arg1  the clip level (up to 0x8000), 0 or less to remove the filter
+ * @param voice  the mixer voice
+ * @param level  the clip level (up to 0x8000), 0 or less to remove the filter
  */
-void func_003C8B80(int arg0, int arg1) {
-    struct E_8B80 *p = D_00515D1C_8B80[0] + arg0;
-    if (arg1 > 0) {
-        if (p->q == 0) {
+void func_003C8B80(int voice, int level) {
+    struct E_8B80 *voiceState = D_00515D1C_8B80[0] + voice;
+    if (level > 0) {
+        if (voiceState->q == 0) {
             struct Q_8B80 *n = (struct Q_8B80 *)f_5C60_8B80(80);
-            p->q = n;
+            voiceState->q = n;
             n->w4 = 0;
-            p->q->h18 = 0x78;
-            f_B528_8B80(p->q);
-            f_8F48_8B80(p->sub, p->q);
+            voiceState->q->h18 = 0x78;
+            f_B528_8B80(voiceState->q);
+            f_8F48_8B80(voiceState->sub, voiceState->q);
         }
-        f_B4A8_8B80(p->q, arg1);
+        f_B4A8_8B80(voiceState->q, level);
         return;
     }
-    if (p->q != 0) {
-        f_8FB0_8B80(p->sub, p->q);
-        f_5E98_8B80(p->q);
-        p->q = 0;
+    if (voiceState->q != 0) {
+        f_8FB0_8B80(voiceState->sub, voiceState->q);
+        f_5E98_8B80(voiceState->q);
+        voiceState->q = 0;
     }
 }
 #endif
@@ -18569,35 +18569,35 @@ extern void func_003CA9D8_8C30(void *, int *) __asm__("func_003CA9D8");
  * by func_003CA990 and linked by func_003C8F48) and passes {cutoff << 8, output rate (D_0050A912) << 8} to
  * func_003CA9D8. Zero or less unlinks (func_003C8FB0) and frees the filter. Called by func_003C3250.
  *
- * @param arg0  the mixer voice
- * @param arg1  the cutoff in Hz, 0 or less to remove the filter
+ * @param voice  the mixer voice
+ * @param cutoff  the cutoff in Hz, 0 or less to remove the filter
  */
-void func_003C8C30(int arg0, int arg1) {
+void func_003C8C30(int voice, int cutoff) {
     int sp[2];
-    char *e;
+    char *voiceState;
     char *buf;
 
-    e = D_00515D1C_8C30[0] + arg0 * 0x60;
-    if (arg1 > 0) {
-        if (*(char**)(e + 0x5C) == 0) {
-            char *t2 = func_003B5C60_8C30(288);
-            *(char**)(e + 0x5C) = t2;
-            *(int*)(t2 + 4) = 0;
-            *(short*)(*(char**)(e + 0x5C) + 0x18) = 80;
-            *(signed char*)(*(char**)(e + 0x5C) + 0x1A) = 0;
-            func_003CA990_8C30(*(char**)(e + 0x5C));
-            func_003C8F48_8C30(e + 0x40, *(char**)(e + 0x5C));
+    voiceState = D_00515D1C_8C30[0] + voice * 0x60;
+    if (cutoff > 0) {
+        if (*(char**)(voiceState + 0x5C) == 0) {
+            char *hpfState = func_003B5C60_8C30(288);
+            *(char**)(voiceState + 0x5C) = hpfState;
+            *(int*)(hpfState + 4) = 0;
+            *(short*)(*(char**)(voiceState + 0x5C) + 0x18) = 80;
+            *(signed char*)(*(char**)(voiceState + 0x5C) + 0x1A) = 0;
+            func_003CA990_8C30(*(char**)(voiceState + 0x5C));
+            func_003C8F48_8C30(voiceState + 0x40, *(char**)(voiceState + 0x5C));
         }
-        sp[0] = arg1 << 8;
+        sp[0] = cutoff << 8;
         sp[1] = D_0050A912_8C30[0] << 8;
-        func_003CA9D8_8C30(*(char**)(e + 0x5C), sp);
+        func_003CA9D8_8C30(*(char**)(voiceState + 0x5C), sp);
         return;
     }
-    buf = *(char**)(e + 0x5C);
+    buf = *(char**)(voiceState + 0x5C);
     if (buf != 0) {
-        func_003C8FB0_8C30(e + 0x40, buf);
-        SNDMEMI_free_8C30(*(char**)(e + 0x5C));
-        *(char**)(e + 0x5C) = 0;
+        func_003C8FB0_8C30(voiceState + 0x40, buf);
+        SNDMEMI_free_8C30(*(char**)(voiceState + 0x5C));
+        *(char**)(voiceState + 0x5C) = 0;
     }
 }
 #endif
@@ -18619,24 +18619,24 @@ extern int D_00515D1C_8E28[] __asm__("D_00515D1C");
  * voice's channel index, then sets the node's order (+0x08), process (+0x10) and release (+0x14) functions and links it
  * (func_003C8F48). Called by func_003C5068.
  *
- * @param arg0  the mixer voice
- * @param arg1  the voice's channel index within its sound
- * @param arg2  the filter descriptor
+ * @param voice  the mixer voice
+ * @param channelIndex  the voice's channel index within its sound
+ * @param filterDesc  the filter descriptor
  */
-void func_003C8E28(int arg0, int arg1, void *arg2) {
-    int temp_18;
+void func_003C8E28(int voice, int channelIndex, void *filterDesc) {
+    int voiceState;
     int temp_7;
     void *temp_2;
 
-    temp_7 = arg0 * 0x60;
-    temp_18 = D_00515D1C_8E28[0] + temp_7;
-    temp_2 = func_003B5C60_8E28((*(int *)((char*)(arg2) + (4))));
-    (*(int (**)(void *, int, int))((char*)(arg2) + (0xC)))(temp_2, (*(int *)((char*)(arg2) + (0))), arg1);
-    (*(unsigned short *)((char*)(temp_2) + (0x18))) = (unsigned short) (*(unsigned short *)((char*)(arg2) + (8)));
-    (*(int *)((char*)(temp_2) + (0))) = (int) (*(int *)((char*)(arg2) + (0x10)));
-    (*(int *)((char*)(temp_2) + (4))) = (int) (*(int *)((char*)(arg2) + (0x14)));
+    temp_7 = voice * 0x60;
+    voiceState = D_00515D1C_8E28[0] + temp_7;
+    temp_2 = func_003B5C60_8E28((*(int *)((char*)(filterDesc) + (4))));
+    (*(int (**)(void *, int, int))((char*)(filterDesc) + (0xC)))(temp_2, (*(int *)((char*)(filterDesc) + (0))), channelIndex);
+    (*(unsigned short *)((char*)(temp_2) + (0x18))) = (unsigned short) (*(unsigned short *)((char*)(filterDesc) + (8)));
+    (*(int *)((char*)(temp_2) + (0))) = (int) (*(int *)((char*)(filterDesc) + (0x10)));
+    (*(int *)((char*)(temp_2) + (4))) = (int) (*(int *)((char*)(filterDesc) + (0x14)));
     (*(signed char *)((char*)(temp_2) + (0x1A))) = 0;
-    func_003C8F48_8E28(temp_18 + 0x40, temp_2);
+    func_003C8F48_8E28(voiceState + 0x40, temp_2);
 }
 #endif
 
@@ -18654,15 +18654,15 @@ extern void SNDMEMI_free_8EC0(char *) __asm__("SNDMEMI_free");
  *
  * Assumes the chain is not empty. Called by func_003C5128.
  *
- * @param arg0  the mixer voice
- * @param arg1  the filter's order (+0x18 of the node)
+ * @param voice  the mixer voice
+ * @param filterOrder  the filter's order (+0x18 of the node)
  */
-void func_003C8EC0(int arg0, int arg1) {
-    char *rec = D_00515D1C_8EC0[0] + arg0 * 0x60;
+void func_003C8EC0(int voice, int filterOrder) {
+    char *rec = D_00515D1C_8EC0[0] + voice * 0x60;
     char *node = *(char **)(rec + 0x40);
     void (*fn)(char *);
     do {
-        if (*(unsigned short *)(node + 0x18) == arg1) {
+        if (*(unsigned short *)(node + 0x18) == filterOrder) {
             fn = *(void (**)(char *))(node + 4);
             if (fn != 0) {
                 fn(node);
@@ -19016,11 +19016,11 @@ extern void func_00416210_9360(int *, int, int) __asm__("func_00416210");
  *
  * @param node  the decoder node
  * @param count  the frames wanted
- * @param arg2  unused (the source; decoders read their own data)
+ * @param srcBuffer  unused (the source; decoders read their own data)
  * @param buffer  the float destination
  * @return 1, or -1 when the sample has ended
  */
-int func_003C9360(void *node, int count, int arg2, int *buffer) {
+int func_003C9360(void *node, int count, int srcBuffer, int *buffer) {
     int *cursor;
     int temp_2;
 
@@ -19087,8 +19087,8 @@ extern int func_003CDDE8_9420(int, int, int, int) __asm__("func_003CDDE8");
  * @param cfg  the init block from func_003C8158
  */
 void func_003C9420(struct S_9420 *self, struct C_9420 *cfg) {
-    struct T_9420 q;
-    struct T_9420 t;
+    struct T_9420 newState;
+    struct T_9420 curState;
     self->f0 = func_003C9360_9420;
     self->f1C = cfg->fC;
     self->f20 = 0;
@@ -19096,10 +19096,10 @@ void func_003C9420(struct S_9420 *self, struct C_9420 *cfg) {
     cfg->f28 = func_003C9358_9420;
     self->f4 = func_003C93F8_9420;
     self->f28 = func_003CDDB8_9420(func_003CD1A8_9420(3432));
-    t = func_003CE078_9420(self->f28);
-    q = t;
-    q.c = 1;
-    func_003CE0B8_9420(self->f28, &q, 0);
+    curState = func_003CE078_9420(self->f28);
+    newState = curState;
+    newState.c = 1;
+    func_003CE0B8_9420(self->f28, &newState, 0);
     if (self->f24 < 3) {
         func_003CE0D8_9420(self->f28, 0);
     } else {
@@ -19141,11 +19141,11 @@ extern void func_003CDDE8_9520(int, int, int, int) __asm__("func_003CDDE8");
  *
  * @param node  the decoder node
  * @param count  the frames wanted
- * @param arg2  unused (the source)
+ * @param srcBuffer  unused (the source)
  * @param buffer  the float destination
  * @return 1
  */
-int func_003C9520(char *node, int count, int arg2, int buffer) {
+int func_003C9520(char *node, int count, int srcBuffer, int buffer) {
     Q_9520 state;
     int cursor;
     int n, loopLength;
@@ -19219,8 +19219,8 @@ extern int func_003CDDE8_9618(int, int, int, int) __asm__("func_003CDDE8");
  * @param cfg  the init block from func_003C8158
  */
 void func_003C9618(struct S_9618 *self, struct C_9618 *cfg) {
-    struct T_9618 q;
-    struct T_9618 t;
+    struct T_9618 newState;
+    struct T_9618 curState;
     self->f0 = func_003C9520_9618;
     self->f4 = func_003C95F0_9618;
     self->f2C = cfg->f4;
@@ -19228,10 +19228,10 @@ void func_003C9618(struct S_9618 *self, struct C_9618 *cfg) {
     self->f24 = cfg->f10;
     self->f28 = cfg->f14;
     self->f1C = func_003CDDB8_9618(func_003CD1A8_9618(3432));
-    t = func_003CE078_9618(self->f1C);
-    q = t;
-    q.c = 1;
-    func_003CE0B8_9618(self->f1C, &q, 0);
+    curState = func_003CE078_9618(self->f1C);
+    newState = curState;
+    newState.c = 1;
+    func_003CE0B8_9618(self->f1C, &newState, 0);
     func_003CDDE8_9618(self->f1C, cfg->f0, self->f24 * 4, self->f24);
     cfg->f28 = func_003C9518_9618;
 }
@@ -19261,11 +19261,11 @@ extern void f_6210_96F0(int, int, int) __asm__("func_00416210");
  * stops.
  *
  * @param n  the frames wanted
- * @param unused  unused (the source)
+ * @param srcBuffer  unused (the source)
  * @param buf  the float destination
  * @return the frames decoded
  */
-int func_003C96F0(char *self, int n, int unused, int buf) {
+int func_003C96F0(char *self, int n, int srcBuffer, int buf) {
     Q_96F0 newState;
     Q_96F0 curState;
     int last;
@@ -19416,11 +19416,11 @@ struct R_9A00 { char pad[0x1C]; short *data; unsigned int pos; unsigned int cap;
  *
  * @param reader  the decoder node
  * @param n  the frames wanted
- * @param arg2  unused (the source)
+ * @param srcBuffer  unused (the source)
  * @param buf  the float destination
  * @return 1, or -1 when the sample has ended
  */
-int func_003C9A00(struct R_9A00 *reader, unsigned int n, int arg2, int *buf) {
+int func_003C9A00(struct R_9A00 *reader, unsigned int n, int srcBuffer, int *buf) {
     unsigned int pos = reader->pos;
     unsigned int cap = reader->cap;
     if (pos >= cap) return -1;
@@ -19497,19 +19497,19 @@ struct R_9B10 { char pad[0x1C]; short *buf; unsigned cur; unsigned start; unsign
  * (func_003C9E50, when +0x2C is set). Never ends on its own.
  *
  * @param n  the frames wanted
- * @param unused  unused (the source)
- * @param src  the float destination (despite its name)
+ * @param srcBuffer  unused (the source)
+ * @param dst  the float destination
  * @return 1
  */
-int func_003C9B10(struct R_9B10 *self, int n, int unused, int *src) {
+int func_003C9B10(struct R_9B10 *self, int n, int srcBuffer, int *dst) {
     int runLength;
     while (n > 0) {
         runLength = self->end - self->cur + 1;
         if (n < runLength)
             runLength = n;
         if (self->en != 0)
-            f_9E50_9B10(runLength, self->buf + self->cur, src);
-        src += runLength;
+            f_9E50_9B10(runLength, self->buf + self->cur, dst);
+        dst += runLength;
         self->cur = self->cur + runLength;
         n -= runLength;
         if (self->end < self->cur)
@@ -19566,11 +19566,11 @@ int func_003C9C08_9C08(char *o, int n, int unused, int *buf) __asm__("func_003C9
  *
  * @param node  the decoder node
  * @param n  the frames wanted
- * @param unused  unused (the source)
+ * @param srcBuffer  unused (the source)
  * @param buf  the float destination
  * @return the frames produced since the report (0 when nothing was available)
  */
-int func_003C9C08_9C08(char *node, int n, int unused, int *buf) {
+int func_003C9C08_9C08(char *node, int n, int srcBuffer, int *buf) {
     int blockLen, last;
     int runLength;
     if (*(int *)(node + 0x2C) != 0) {
@@ -19771,11 +19771,11 @@ extern void func_00416210_9F58(char *, int, int) __asm__("func_00416210");
  *
  * @param node  the decoder node
  * @param count  the frames wanted
- * @param arg2  unused (the source)
+ * @param srcBuffer  unused (the source)
  * @param buffer  the float destination
  * @return the frames written (always @p count), or -1 when the sample has ended
  */
-int func_003C9F58(void *node, int count, int arg2, int buffer) {
+int func_003C9F58(void *node, int count, int srcBuffer, int buffer) {
     char *cursor;
     char *zeroFrom;
     int n;
@@ -19887,11 +19887,11 @@ extern void func_003CD190_A0B8(int, V2_A0B8 *) __asm__("func_003CD190");
  *
  * @param node  the decoder node
  * @param n  the frames wanted
- * @param unused  unused (the source)
+ * @param srcBuffer  unused (the source)
  * @param buf  the float destination
  * @return the frames decoded
  */
-int func_003CA0B8(char *node, int n, int unused, int *buf) {
+int func_003CA0B8(char *node, int n, int srcBuffer, int *buf) {
     int used = 0;
     int got;
     int *dst = buf;
@@ -20065,11 +20065,11 @@ extern void func_00416210_A460(void *, int, int) __asm__("func_00416210");
  * with func_003CD190 and skipped. Without a packet the rest is zero-filled once anything played, and decoding stops.
  *
  * @param n  the frames wanted
- * @param unused  unused (the source)
+ * @param srcBuffer  unused (the source)
  * @param buf  the float destination
  * @return the frames decoded
  */
-int func_003CA460(struct S_A460 *self, int n, int unused, int *buf) {
+int func_003CA460(struct S_A460 *self, int n, int srcBuffer, int *buf) {
     int flag = 0;
     int done = 0;
     if (self->f34) {
@@ -20083,18 +20083,18 @@ int func_003CA460(struct S_A460 *self, int n, int unused, int *buf) {
         done += k;
         self->f34 += k;
         if (k < n) {
-            int tmp;
-            short *p;
+            int continued;
+            short *packetSamples;
             n -= k;
-            p = func_003C6DE0_A460(self->f30, self->b38, &self->f24, &tmp);
-            self->f20 = p;
-            if (p) {
+            packetSamples = func_003C6DE0_A460(self->f30, self->b38, &self->f24, &continued);
+            self->f20 = packetSamples;
+            if (packetSamples) {
                 if (self->f2C <= 2) flag = 1;
                 if (flag) {
-                    float v[2];
-                    v[0] = p[0];
-                    v[1] = p[1];
-                    func_003CD190_A460(self->f1C, v);
+                    float history[2];
+                    history[0] = packetSamples[0];
+                    history[1] = packetSamples[1];
+                    func_003CD190_A460(self->f1C, history);
                     self->f20 += 2;
                 }
                 self->f28 = 0;
@@ -20190,8 +20190,8 @@ int func_003CA6A8_C(struct S3CA6A8 *self, int n, float *src, short *dst) __asm__
 // A port replaces it with a C clamp-and-convert loop.
 int func_003CA6A8_C(struct S3CA6A8 *self, int n, float *src, short *dst) {
     if (self->obj) {
-        int r = ((int (*)(int *, int, short *, float *, int))*self->obj)(self->obj, n, dst, src, self->f1A);
-        if (r <= 0) return r;
+        int framesIn = ((int (*)(int *, int, short *, float *, int))*self->obj)(self->obj, n, dst, src, self->f1A);
+        if (framesIn <= 0) return framesIn;
     }
     // PORT: PS2-only VU0 hand-written loop (clamp floats to the 16-bit range and pack); one inline asm block.
     __asm__ volatile(
@@ -20624,40 +20624,40 @@ extern int func_003CAB28_AEA0(float, int, int *, float *) __asm__("func_003CAB28
  * and error, counting the window steps the available input (+0x30) allows, and returns the shortfall over the buffered
  * input (+0x34), if any.
  *
- * @param p  the time-stretch state
+ * @param stretchState  the time-stretch state
  * @param n  the output frames wanted
  * @return the input frames to fetch, or 0
  */
-int func_003CAEA0(struct S_AEA0 *p, int n) {
+int func_003CAEA0(struct S_AEA0 *stretchState, int n) {
     int pos;
     float err;
     int tot;
-    int t;
+    int shift;
     int avail;
     int step;
     int used;
-    if (p->w38 < n) {
-        n -= p->w38;
-        pos = p->w1C;
-        err = p->f28;
+    if (stretchState->w38 < n) {
+        n -= stretchState->w38;
+        pos = stretchState->w1C;
+        err = stretchState->f28;
         tot = 0;
-        t = 0;
-        avail = p->w30;
+        shift = 0;
+        avail = stretchState->w30;
         while (n > 0) {
-            int lo = p->w2C;
+            int lo = stretchState->w2C;
             if (avail < lo) break;
-            t = 0;
-            if (avail >= p->w2C * 2) t = func_003CAB28_AEA0(p->f24, p->w2C, &pos, &err);
-            if (t >= 0) { step = p->w2C; used = step + t; } else { step = p->w2C * 2; used = step + t; }
+            shift = 0;
+            if (avail >= stretchState->w2C * 2) shift = func_003CAB28_AEA0(stretchState->f24, stretchState->w2C, &pos, &err);
+            if (shift >= 0) { step = stretchState->w2C; used = step + shift; } else { step = stretchState->w2C * 2; used = step + shift; }
             tot += step;
             avail -= step;
             if (used >= n) n = 0; else n -= used;
         }
-        if (t > 0) tot += p->w2C;
+        if (shift > 0) tot += stretchState->w2C;
         if (n > 0) {
             if (avail < n) tot += avail; else tot += n;
         }
-        if (p->w34 < tot) return tot - p->w34;
+        if (stretchState->w34 < tot) return tot - stretchState->w34;
     }
     return 0;
 }
@@ -20766,22 +20766,22 @@ extern void func_00416210_B1A8(void *, int, int) __asm__("func_00416210");
  * result of 0 or less, stretches it (func_003CAFD0) and zero-fills any shortfall.
  *
  * @param n  the output frames wanted
- * @param a2  the buffer for the input
+ * @param srcBuffer  the buffer for the input
  * @param buf  the output samples
  * @return n, 0 while waiting for packets, or the feeding node's result when it is 0 or less
  */
-int func_003CB1A8(struct S_B1A8 *self, int n, int a2, int *buf) {
+int func_003CB1A8(struct S_B1A8 *self, int n, int srcBuffer, int *buf) {
     int avail = func_003CAEA0_B1A8(self, n);
-    int r;
+    int framesDone;
     if (self->f20 >= 0) {
         if (func_003C6C98_B1A8(self->f20) < avail) return 0;
     }
     if (avail > 0) {
-        r = self->obj->fn(self->obj, avail, buf, a2, self->b1A);
-        if (r <= 0) return r;
+        framesDone = self->obj->fn(self->obj, avail, buf, srcBuffer, self->b1A);
+        if (framesDone <= 0) return framesDone;
     }
-    r = func_003CAFD0_B1A8(self, n, a2, buf);
-    if (r < n) func_00416210_B1A8(buf + r, 0, (n - r) * 4);
+    framesDone = func_003CAFD0_B1A8(self, n, srcBuffer, buf);
+    if (framesDone < n) func_00416210_B1A8(buf + framesDone, 0, (n - framesDone) * 4);
     return n;
 }
 #endif
@@ -20804,14 +20804,14 @@ extern char func_003CB1A8_B280[] __asm__("func_003CB1A8");
  *
  * @param node  the time-stretch node
  * @param header  the side-band data
- * @param arg2  the voice, or -1
+ * @param voice  the voice, or -1
  * @return 0
  */
-int func_003CB280(void *node, void *header, int arg2) {
+int func_003CB280(void *node, void *header, int voice) {
     (*(char **)((char*)(node) + (0))) = func_003CB1A8_B280;
     (*(int *)((char*)(node) + (4))) = 0;
-    if (arg2 >= 0) {
-        (*(int *)((char*)(node) + (0x20))) = func_003CE378(func_003CE0E0(arg2));
+    if (voice >= 0) {
+        (*(int *)((char*)(node) + (0x20))) = func_003CE378(func_003CE0E0(voice));
     } else {
         (*(int *)((char*)(node) + (0x20))) = -1;
     }
@@ -20842,39 +20842,39 @@ struct O_B328 {
  * Pulls the input from the node feeding it (+0x08), if any, passing on a result of 0 or less. Each 16-bit sample is
  * clamped to the node's range (+0x20 .. +0x30) and multiplied by +0x40 >> 7, four at a time.
  *
- * @param o  the filter node
+ * @param clipper  the filter node
  * @param n  the number of samples (a multiple of 4)
  * @param src  the input samples
  * @param dst  the output samples
  * @return n, or the feeding node's result when it is 0 or less
  */
-int func_003CB328(struct O_B328 *o, int n, short *src, short *dst) {
+int func_003CB328(struct O_B328 *clipper, int n, short *src, short *dst) {
     int i;
     short *sp;
     short *dp;
-    int r;
-    if (o->f8) {
-        r = (*o->f8)(o->f8, n, dst, src, o->b1A);
-        if (r <= 0) {
-            return r;
+    int framesIn;
+    if (clipper->f8) {
+        framesIn = (*clipper->f8)(clipper->f8, n, dst, src, clipper->b1A);
+        if (framesIn <= 0) {
+            return framesIn;
         }
     }
     sp = src;
     dp = dst;
     for (i = 0; i < n; i += 4) {
-        int a, b, c, d; short t0, t1, t2, t3;
-        a = sp[0];
-        if (a > o->s30) t0 = o->s30; else if (a < o->s20) t0 = o->s20; else t0 = a;
-        b = sp[1];
-        if (b > o->s30) t1 = o->s30; else if (b < o->s20) t1 = o->s20; else t1 = b;
-        c = sp[2];
-        if (c > o->s30) t2 = o->s30; else if (c < o->s20) t2 = o->s20; else t2 = c;
-        d = sp[3];
-        if (d > o->s30) t3 = o->s30; else if (d < o->s20) t3 = o->s20; else t3 = d;
-        dp[0] = (t0 * o->s40) >> 7;
-        dp[1] = (t1 * o->s40) >> 7;
-        dp[2] = (t2 * o->s40) >> 7;
-        dp[3] = (t3 * o->s40) >> 7;
+        int sample0, sample1, sample2, sample3; short clipped0, clipped1, clipped2, clipped3;
+        sample0 = sp[0];
+        if (sample0 > clipper->s30) clipped0 = clipper->s30; else if (sample0 < clipper->s20) clipped0 = clipper->s20; else clipped0 = sample0;
+        sample1 = sp[1];
+        if (sample1 > clipper->s30) clipped1 = clipper->s30; else if (sample1 < clipper->s20) clipped1 = clipper->s20; else clipped1 = sample1;
+        sample2 = sp[2];
+        if (sample2 > clipper->s30) clipped2 = clipper->s30; else if (sample2 < clipper->s20) clipped2 = clipper->s20; else clipped2 = sample2;
+        sample3 = sp[3];
+        if (sample3 > clipper->s30) clipped3 = clipper->s30; else if (sample3 < clipper->s20) clipped3 = clipper->s20; else clipped3 = sample3;
+        dp[0] = (clipped0 * clipper->s40) >> 7;
+        dp[1] = (clipped1 * clipper->s40) >> 7;
+        dp[2] = (clipped2 * clipper->s40) >> 7;
+        dp[3] = (clipped3 * clipper->s40) >> 7;
         sp += 4;
         dp += 4;
     }
@@ -20898,12 +20898,12 @@ struct P { char pad[0x20]; short A[8]; short B[8]; short C[8]; };
  */
 void func_003CB4A8(struct P* filter, int x)
 {
-    int t = (x * 32000) >> 15;
-    int b = 0x7FFF - t;
+    int clipLevel = (x * 32000) >> 15;
+    int ceiling = 0x7FFF - clipLevel;
     int i;
-    filter->A[0] = t - 0x8000;
-    filter->B[0] = b;
-    filter->C[0] = 0x3FDE00 / (short)b;
+    filter->A[0] = clipLevel - 0x8000;
+    filter->B[0] = ceiling;
+    filter->C[0] = 0x3FDE00 / (short)ceiling;
     for (i = 1; i < 8; i++) {
         filter->A[i] = filter->A[0];
         filter->B[i] = filter->B[0];
@@ -21035,10 +21035,10 @@ extern int D_00515B54_BC00[4] __asm__("D_00515B54");
  *
  * func_003C1638 sets it and func_003C2268 clears it at shutdown.
  *
- * @param arg0  the destination, or 0
+ * @param sendOutput  the destination, or 0
  */
-void func_003CBC00(int arg0) {
-    D_00515B54_BC00[0] = arg0;
+void func_003CBC00(int sendOutput) {
+    D_00515B54_BC00[0] = sendOutput;
 }
 #endif
 
@@ -21070,13 +21070,13 @@ extern unsigned char D_0044E770_BC20[][6][6] __asm__("D_0044E770");
  *
  * Called by func_003CC070 when it wires an effect's output nodes.
  *
- * @param arg0  the channel count the effect was made for
- * @param arg1  the mixer's output count
- * @param arg2  the node's channel code (1-6)
+ * @param effectChannels  the channel count the effect was made for
+ * @param mixerChannels  the mixer's output count
+ * @param channelCode  the node's channel code (1-6)
  * @return the output slot
  */
-unsigned char func_003CBC20(int arg0, int arg1, int arg2) {
-    return D_0044E770_BC20[arg0 - 1][arg1 - 1][arg2 - 1];
+unsigned char func_003CBC20(int effectChannels, int mixerChannels, int channelCode) {
+    return D_0044E770_BC20[effectChannels - 1][mixerChannels - 1][channelCode - 1];
 }
 #endif
 
@@ -21124,10 +21124,10 @@ extern void f_F798_BC58(int, void *) __asm__("func_003CF798");
  */
 void func_003CBC58(int n) {
     int done[6];
-    int a, b, i, j;
+    int scratchBuffer, wetBuffer, i, j;
     struct Obj_BC58 *obj;
-    signed char *p;
-    signed char *q;
+    signed char *routeEntry;
+    signed char *routeTable;
     char *buf;
 
     f_6210_BC58(done, 0, 0x18);
@@ -21137,8 +21137,8 @@ void func_003CBC58(int n) {
         return;
     }
     buf = D_00515D80_BC58;
-    a = D_00515B40_BC58.a;
-    b = D_00515B40_BC58.b;
+    scratchBuffer = D_00515B40_BC58.a;
+    wetBuffer = D_00515B40_BC58.b;
     if (++*(int *)(buf + 0x1800) >= 3000) {
         return;
     }
@@ -21148,15 +21148,15 @@ void func_003CBC58(int n) {
             if (done[i] != 0) continue;
             obj = D_00515D48_BC58[i + 1];
             if (obj == 0) continue;
-            obj->fn(obj, n, a, b, i + 1);
-            D_00515B40_BC58.set(n, b, D_00515B40_BC58.vals[i], 1.0f);
+            obj->fn(obj, n, scratchBuffer, wetBuffer, i + 1);
+            D_00515B40_BC58.set(n, wetBuffer, D_00515B40_BC58.vals[i], 1.0f);
             done[i] = 1;
-            q = (signed char *)D_0044E164_BC58[D_00515D58_BC58];
-            p = q + D_00515B40_BC58.n * 36 + i * 6;
-            for (j = 0; j < D_00515B40_BC58.n; j++, p++) {
-                if (*p >= 0) {
-                    D_00515B40_BC58.set(n, b, D_00515B40_BC58.vals[*p], 1.0f);
-                    done[*p] = 1;
+            routeTable = (signed char *)D_0044E164_BC58[D_00515D58_BC58];
+            routeEntry = routeTable + D_00515B40_BC58.n * 36 + i * 6;
+            for (j = 0; j < D_00515B40_BC58.n; j++, routeEntry++) {
+                if (*routeEntry >= 0) {
+                    D_00515B40_BC58.set(n, wetBuffer, D_00515B40_BC58.vals[*routeEntry], 1.0f);
+                    done[*routeEntry] = 1;
                 }
             }
         }
@@ -21231,7 +21231,7 @@ void func_003CC070(int rate) {
     int i;
     int last;
     int count;
-    unsigned char *p;
+    unsigned char *nodeRecord;
     unsigned char *link;
     void *obj;
     int params[4];
@@ -21244,65 +21244,65 @@ void func_003CC070(int rate) {
     D_00515D50 = D_005175FC;
     count = f_72F8_C070(&D_00515D40->cnt[last], 4);
     D_00515D44 = f_5C60_C070(count * 4);
-    p = D_00515D4C;
+    nodeRecord = D_00515D4C;
     for (i = 0; i < count; i++) {
-        D_00515D44[i] = f_5C60_C070(D_0044E848[*p]);
-        memset(D_00515D44[i], 0, D_0044E848[*p]);
+        D_00515D44[i] = f_5C60_C070(D_0044E848[*nodeRecord]);
+        memset(D_00515D44[i], 0, D_0044E848[*nodeRecord]);
         memset(params, 0, 0x10);
-        switch (*p) {
+        switch (*nodeRecord) {
         case 0:
             f_F7B0_C070(D_00515D44[i]);
             break;
         case 1:
             obj = D_00515D44[i];
-            params[0] = f_72F8_C070(p + 4, 2) << 8;
+            params[0] = f_72F8_C070(nodeRecord + 4, 2) << 8;
             params[1] = rate << 8;
-            params[2] = f_72F8_C070(p + 6, 2);
+            params[2] = f_72F8_C070(nodeRecord + 6, 2);
             func_003CA870(obj);
             func_003CA8A0(obj, params);
             break;
         case 2:
             obj = D_00515D44[i];
-            params[0] = f_72F8_C070(p + 2, 2) << 8;
+            params[0] = f_72F8_C070(nodeRecord + 2, 2) << 8;
             params[1] = rate << 8;
             f_EE88_C070(obj);
             f_EED0_C070(obj, params);
             break;
         case 3:
             obj = D_00515D44[i];
-            params[0] = f_72F8_C070(p + 2, 2) << 8;
+            params[0] = f_72F8_C070(nodeRecord + 2, 2) << 8;
             params[1] = rate << 8;
             func_003CA990(obj);
             f_A9D8_C070(obj, params);
             break;
         case 4:
             obj = D_00515D44[i];
-            params[0] = f_72F8_C070(p + 4, 2) << 8;
-            params[1] = f_72F8_C070(p + 6, 2) << 8;
+            params[0] = f_72F8_C070(nodeRecord + 4, 2) << 8;
+            params[1] = f_72F8_C070(nodeRecord + 6, 2) << 8;
             params[2] = rate << 8;
             f_EFB0_C070(obj);
             f_EFF8_C070(obj, params);
             break;
         case 5:
             obj = D_00515D44[i];
-            params[0] = f_72F8_C070(p + 2, 2) << 8;
+            params[0] = f_72F8_C070(nodeRecord + 2, 2) << 8;
             params[1] = rate << 8;
-            params[2] = f_72F8_C070(p + 4, 2) << 8;
-            params[3] = f_72F8_C070(p + 6, 2);
+            params[2] = f_72F8_C070(nodeRecord + 4, 2) << 8;
+            params[3] = f_72F8_C070(nodeRecord + 6, 2);
             f_F498_C070(obj);
             f_F4D0_C070(obj, params);
             break;
         case 6:
             obj = D_00515D44[i];
-            params[0] = f_72F8_C070(p + 2, 2);
+            params[0] = f_72F8_C070(nodeRecord + 2, 2);
             f_F128_C070(obj);
             f_F158_C070(obj, params);
             break;
         case 7:
             obj = D_00515D44[i];
-            params[0] = f_72F8_C070(p + 2, 2);
+            params[0] = f_72F8_C070(nodeRecord + 2, 2);
             params[1] = rate << 8;
-            params[2] = f_72F8_C070(p + 4, 2) << 8;
+            params[2] = f_72F8_C070(nodeRecord + 4, 2) << 8;
             f_F998_C070(obj);
             f_F9D8_C070(obj, params);
             break;
@@ -21313,16 +21313,16 @@ void func_003CC070(int rate) {
             f_F6F8_C070(D_00515D44[i]);
             break;
         }
-        if (p[1] != 0) {
-            if (p[0] == 9 && D_00515D40->ver >= 11) {
-                unsigned char ch = p[1];
+        if (nodeRecord[1] != 0) {
+            if (nodeRecord[0] == 9 && D_00515D40->ver >= 11) {
+                unsigned char ch = nodeRecord[1];
                 D_00515D48[func_003CBC20(D_00515D58, D_00515B40_C070.n, ch & 0xF)] = D_00515D44[i];
                 D_00515D48[func_003CBC20(D_00515D58, D_00515B40_C070.n, ch >> 4)] = D_00515D44[i];
             } else {
-                D_00515D48[func_003CBC20(D_00515D58, D_00515B40_C070.n, p[1])] = D_00515D44[i];
+                D_00515D48[func_003CBC20(D_00515D58, D_00515B40_C070.n, nodeRecord[1])] = D_00515D44[i];
             }
         }
-        p += D_0044E870_C070[*p];
+        nodeRecord += D_0044E870_C070[*nodeRecord];
     }
     link = D_00515D50;
     for (i = 0; i < f_72F8_C070(&D_00515D40->len[last], 4); i++) {
@@ -21331,12 +21331,12 @@ void func_003CC070(int rate) {
     }
     D_00515D80_C070[0x1800 / 4] = 3000;
     memset(D_00515D80_C070, 0, 0x800);
-    p = D_00515D4C;
+    nodeRecord = D_00515D4C;
     D_00517600 = 0;
-    while (*p != 0) {
-        unsigned char c = *p;
+    while (*nodeRecord != 0) {
+        unsigned char nodeKind = *nodeRecord;
         D_00517600++;
-        p += D_0044E870_C070[c];
+        nodeRecord += D_0044E870_C070[nodeKind];
     }
 }
 #endif
@@ -21381,11 +21381,11 @@ extern void func_003CC070_C630(int a, unsigned char *data) __asm__("func_003CC07
  * D_005175FC), builds the graph (func_003CC070), installs func_003CBC58 as the mixer's output hook (+0x10) and turns
  * the send on (+0x0F). Called by func_003C35F8.
  *
- * @param a0  the output sample rate
+ * @param outputRate  the output sample rate
  * @param data  the effect description
  */
-void func_003CC630(int a0, unsigned char *data) {
-    unsigned char *p = data + 0x38;
+void func_003CC630(int outputRate, unsigned char *data) {
+    unsigned char *nodeCursor = data + 0x38;
     int n;
     int i;
     int j;
@@ -21407,17 +21407,17 @@ void func_003CC630(int a0, unsigned char *data) {
     for (i = 0; i < n; i++) {
         k = func_003C72F8_C630(&D_005175C8_C630[i], 4);
         for (j = 0; j < k; j++) {
-            p += D_0044E870_C630[*p];
+            nodeCursor += D_0044E870_C630[*nodeCursor];
         }
-        p += func_003C72F8_C630(&D_005175C8_C630[i + 6], 4) * 12;
+        nodeCursor += func_003C72F8_C630(&D_005175C8_C630[i + 6], 4) * 12;
     }
-    D_005175F8 = p;
+    D_005175F8 = nodeCursor;
     k = func_003C72F8_C630(&D_005175C8_C630[n], 4);
     for (j = 0; j < k; j++) {
-        p += D_0044E870_C630[*p];
+        nodeCursor += D_0044E870_C630[*nodeCursor];
     }
-    D_005175FC = p;
-    func_003CC070_C630(a0, data);
+    D_005175FC = nodeCursor;
+    func_003CC070_C630(outputRate, data);
     D_00515B40_C630.f10 = func_003CBC58;
     D_00515B40_C630.fF = 1;
 }
@@ -21525,10 +21525,10 @@ extern int D_00517604_C918[4] __asm__("D_00517604");
 /**
  * Sets the allocator the decoder library uses (D_00517604). func_003C7D00 installs func_003C7CC0.
  *
- * @param arg0  the allocator
+ * @param allocFunc  the allocator
  */
-void func_003CC918(int arg0) {
-    D_00517604_C918[0] = arg0;
+void func_003CC918(int allocFunc) {
+    D_00517604_C918[0] = allocFunc;
 }
 #endif
 
@@ -21541,10 +21541,10 @@ extern int D_00517608_C928[4] __asm__("D_00517608");
 /**
  * Sets the deallocator the decoder library uses (D_00517608). func_003C7D00 installs func_003C7CE0.
  *
- * @param arg0  the deallocator
+ * @param freeFunc  the deallocator
  */
-void func_003CC928(int arg0) {
-    D_00517608_C928[0] = arg0;
+void func_003CC928(int freeFunc) {
+    D_00517608_C928[0] = freeFunc;
 }
 #endif
 
@@ -21956,10 +21956,10 @@ int func_003CCF18_CF18(int) __asm__("func_003CCF18");
  *
  * Called by the EA-XA release functions.
  *
- * @param a  the decoder
+ * @param decoder  the decoder
  * @return what the deallocator returns
  */
-int func_003CCF18_CF18(int a) {
+int func_003CCF18_CF18(int decoder) {
     return D_00517608_CF18[0]();
 }
 #endif
@@ -22141,10 +22141,10 @@ int func_003CD1A8_D1A8(int) __asm__("func_003CD1A8");
  *
  * The MicroTalk inits call it with 3432, then construct the decoder with func_003CDDB8.
  *
- * @param a  the size in bytes
+ * @param size  the size in bytes
  * @return the memory
  */
-int func_003CD1A8_D1A8(int a) {
+int func_003CD1A8_D1A8(int size) {
     return D_00517604_D1A8[0]();
 }
 #endif
@@ -22160,10 +22160,10 @@ int func_003CD1D0_D1D0(int) __asm__("func_003CD1D0");
  *
  * Called by the MicroTalk release functions.
  *
- * @param a  the decoder
+ * @param decoder  the decoder
  * @return what the deallocator returns
  */
-int func_003CD1D0_D1D0(int a) {
+int func_003CD1D0_D1D0(int decoder) {
     return D_00517608_D1D0[0]();
 }
 #endif
@@ -22181,18 +22181,18 @@ extern unsigned int D_0044E8C0_E8C0[] __asm__("D_0044E8C0");
  * Returns the low n bits of the bit buffer (+0x04; masks D_0044E8C0), shifts them out and, when fewer than 8 bits
  * remain (+0x08), appends the next byte (+0x00).
  *
- * @param p  the stream state
+ * @param bitReader  the stream state
  * @param n  the number of bits
  * @return the bits
  */
-int func_003CD1F8(BS_D1F8 *p, int n) {
-    unsigned int v = p->bits;
-    int ret = v & D_0044E8C0_E8C0[n];
-    p->bits >>= n;
-    p->cnt -= n;
-    if (p->cnt < 8) {
-        p->bits |= *p->ptr++ << p->cnt;
-        p->cnt += 8;
+int func_003CD1F8(BS_D1F8 *bitReader, int n) {
+    unsigned int bitBuffer = bitReader->bits;
+    int ret = bitBuffer & D_0044E8C0_E8C0[n];
+    bitReader->bits >>= n;
+    bitReader->cnt -= n;
+    if (bitReader->cnt < 8) {
+        bitReader->bits |= *bitReader->ptr++ << bitReader->cnt;
+        bitReader->cnt += 8;
     }
     return ret;
 }
@@ -22376,15 +22376,15 @@ extern void func_003CE410(int, void *, char *, char *);
  * of 12 samples of the decoded buffer (+0x684) from the index on, with the filter history at +0x144 (func_003CE410).
  * Called by func_003CD878.
  *
- * @param arg0  the decoder state
- * @param arg1  the first sample
- * @param arg2  the number of 12-sample blocks
+ * @param utkState  the decoder state
+ * @param sampleIndex  the first sample
+ * @param blockCount  the number of 12-sample blocks
  */
-void func_003CD690(char *arg0, int arg1, int arg2) {
+void func_003CD690(char *utkState, int sampleIndex, int blockCount) {
     char buf[0x30];
 
-    func_003CD590(arg0 + 0x114, buf);
-    func_003CE410(arg2, buf, arg0 + 0x144, arg0 + (arg1 * 4 + 1668));
+    func_003CD590(utkState + 0x114, buf);
+    func_003CE410(blockCount, buf, utkState + 0x144, utkState + (sampleIndex * 4 + 1668));
 }
 #endif
 
@@ -22405,36 +22405,36 @@ struct S_D6F0 {
  * bits + 1) * 8, each entry 1.04 + (6 bits) * 0.001 times the last); and it clears the reflection coefficients, filter
  * history and adaptive codebook.
  *
- * @param arg0  the decoder (unused)
- * @param arg1  the data
- * @param arg2  the decoder state
- * @param arg3  non-zero for a whole init
+ * @param decoder  the decoder (unused)
+ * @param data  the data
+ * @param stateMem  the decoder state
+ * @param wholeInit  non-zero for a whole init
  */
-void func_003CD6F0(char *arg0, unsigned char *arg1, char *arg2, int arg3) {
-    struct S_D6F0 *s = (struct S_D6F0 *)arg2;
+void func_003CD6F0(char *decoder, unsigned char *data, char *stateMem, int wholeInit) {
+    struct S_D6F0 *utkState = (struct S_D6F0 *)stateMem;
     int n;
-    float m;
+    float gainStep;
     int i;
 
-    s->w8 = 8;
-    s->src = arg1 + 1;
-    s->w4 = *arg1;
-    if (arg3 != 0) {
-        s->wC = func_003CD1F8((BS_D1F8 *)s, 1);
-        s->w10 = 0x20 - func_003CD1F8((BS_D1F8 *)s, 4);
-        n = func_003CD1F8((BS_D1F8 *)s, 4);
-        s->tab[0] = (float)(unsigned)(n + 1) * 8.0f;
-        i = func_003CD1F8((BS_D1F8 *)s, 6);
-        m = (float)(unsigned)i * 0.001f + 1.04f;
+    utkState->w8 = 8;
+    utkState->src = data + 1;
+    utkState->w4 = *data;
+    if (wholeInit != 0) {
+        utkState->wC = func_003CD1F8((BS_D1F8 *)utkState, 1);
+        utkState->w10 = 0x20 - func_003CD1F8((BS_D1F8 *)utkState, 4);
+        n = func_003CD1F8((BS_D1F8 *)utkState, 4);
+        utkState->tab[0] = (float)(unsigned)(n + 1) * 8.0f;
+        i = func_003CD1F8((BS_D1F8 *)utkState, 6);
+        gainStep = (float)(unsigned)i * 0.001f + 1.04f;
         for (i = 1; i < 64; i++) {
-            s->tab[i] = s->tab[i - 1] * m;
+            utkState->tab[i] = utkState->tab[i - 1] * gainStep;
         }
         for (i = 0; i < 12; i++) {
-            s->z1[i] = 0;
-            s->z2[i] = 0;
+            utkState->z1[i] = 0;
+            utkState->z2[i] = 0;
         }
         for (i = 323; i >= 0; i--) {
-            s->z3[i] = 0;
+            utkState->z3[i] = 0;
         }
     }
 }
