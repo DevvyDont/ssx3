@@ -1,17 +1,12 @@
 #include "common.h"
+#include "be/beintoption.h"
 #include "main/ssxapp.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void cBEOptionInterface_revert(void* self);
+extern "C" void cBEOptionInterface_revert(cBEOptionInterface* self);
 extern const char str_BEOptionInt[];
 extern void* cBEOptionInterface_vtbl[16];
-extern void* cBEOptionInterface_instance;
 
-struct cBEOptionInterface {
-    char pad_0x00[8];
-    int field_0x8;
-    void* vtable;
-};
 
 //100%
 INCLUDE_ASM("be/beintoption", cBEOptionInterface_getThis__Fv);
@@ -28,9 +23,9 @@ void* cBEOptionInterface_getThis()
 {
     if (cBEOptionInterface_instance == 0) {
         cBEOptionInterface* mem = (cBEOptionInterface*)cMemMan_alloc(0x10, str_BEOptionInt, 0, 0);
-        mem->vtable = cBEOptionInterface_vtbl;
-        cBEOptionInterface_instance = mem;
-        mem->field_0x8 = 0;
+        (*(void**)&mem->mVtbl) = cBEOptionInterface_vtbl;
+        cBEOptionInterface_instance = (cBEOptionInterface*)(mem);
+        mem->bIsActive = 0;
         cBEOptionInterface_revert(mem);
     }
     return cBEOptionInterface_instance;
@@ -75,10 +70,10 @@ extern "C" void cBEOptionInterface_discard(void)
 //100%
 INCLUDE_ASM("be/beintoption", cBEOptionInterface_revert);
 #ifdef SKIP_ASM
-extern "C" void cBEOptionInterface_defaultCtrl(void* self);
-extern "C" void cBEOptionInterface_defaultHUD(void* self);
-extern "C" void cBEOptionInterface_defaultGame(void* self);
-extern "C" void cBEOptionInterface_defaultSound(void* self);
+extern "C" void cBEOptionInterface_defaultCtrl(cBEOptionInterface* self);
+extern "C" void cBEOptionInterface_defaultHUD(cBEOptionInterface* self);
+extern "C" void cBEOptionInterface_defaultGame(cBEOptionInterface* self);
+extern "C" void cBEOptionInterface_defaultSound(cBEOptionInterface* self);
 
 /**
  * Resets all game options to their defaults.
@@ -86,7 +81,7 @@ extern "C" void cBEOptionInterface_defaultSound(void* self);
  * Calls cBEOptionInterface_defaultCtrl, cBEOptionInterface_defaultHUD, cBEOptionInterface_defaultGame and cBEOptionInterface_defaultSound (On Tour defaultCtrl, defaultHUD, defaultGame,
  * defaultSound).
  */
-extern "C" void cBEOptionInterface_revert(void* self)
+extern "C" void cBEOptionInterface_revert(cBEOptionInterface* self)
 {
     cBEOptionInterface_defaultCtrl(self);
     cBEOptionInterface_defaultHUD(self);
@@ -129,7 +124,7 @@ public:
  * and voice chat on; the low two bits of the second word become 1. Then calls the option interface's vtable slot 1
  * (cBEOptionInterface_submit).
  */
-extern "C" void cBEOptionInterface_defaultSound(void* self)
+extern "C" void cBEOptionInterface_defaultSound(cBEOptionInterface* self)
 {
     sOptBits_0014F458* options = D_00535610_v0014F458;
     options->a = 10;
@@ -180,7 +175,7 @@ public:
  * language, metric units and the replay option become 0, brightness 9, and the screen offsets (mOption +5, +6) 0. Then
  * calls the option interface's vtable slot 1 (cBEOptionInterface_submit).
  */
-extern "C" void cBEOptionInterface_defaultGame(void* self)
+extern "C" void cBEOptionInterface_defaultGame(cBEOptionInterface* self)
 {
     switch (*(int*)((char*)SSXApp->ConsoleConfig + 0x24))
     {
@@ -226,7 +221,7 @@ public:
 /**
  * Resets the HUD option (bits 30-31 of the first option word) to 0 and submits (vtable slot 1, cBEOptionInterface_submit).
  */
-extern "C" void cBEOptionInterface_defaultHUD(void* self)
+extern "C" void cBEOptionInterface_defaultHUD(cBEOptionInterface* self)
 {
     D_00535610_v0014F600[0].top = 0;
     ((cBEOptionInterfaceV_0014F600*)cBEOptionInterface_instance)->apply();
@@ -246,7 +241,7 @@ public:
 /**
  * Submits the options (the option interface's vtable slot 1, cBEOptionInterface_submit) without changing any.
  */
-extern "C" void cBEOptionInterface_defaultCtrl(void* self)
+extern "C" void cBEOptionInterface_defaultCtrl(cBEOptionInterface* self)
 {
     ((cBEOptionInterfaceV_0014F648*)cBEOptionInterface_instance)->apply();
 }
@@ -286,7 +281,7 @@ extern char D_00535617[][0x40];
  * @param i  the message slot, 0-9
  * @return the message, or 0
  */
-extern "C" char* cBEOptionInterface_getQuickKeyMessage(void* self, int i)
+extern "C" char* cBEOptionInterface_getQuickKeyMessage(cBEOptionInterface* self, int i)
 {
     char* message = D_00535617[i];
     if (strlen(message) == 0) {
@@ -315,7 +310,7 @@ struct sVEntry_0014F6E8
  *
  * @param i  the message slot, 0-9
  */
-extern "C" void cBEOptionInterface_resetQuickKey(void* self, int i)
+extern "C" void cBEOptionInterface_resetQuickKey(cBEOptionInterface* self, int i)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_0014F6E8* vt = *(sVEntry_0014F6E8**)(obj + 0x4);
@@ -329,12 +324,12 @@ extern "C" void cBEOptionInterface_resetQuickKey(void* self, int i)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("be/beintoption", cBEOptionInterface_resetAllQuickKeys);
 #ifdef SKIP_ASM
-extern "C" void cBEOptionInterface_resetQuickKey(void* self, int i);
+extern "C" void cBEOptionInterface_resetQuickKey(cBEOptionInterface* self, int i);
 
 /**
  * Restores all ten quick-chat messages to their defaults (cBEOptionInterface_resetQuickKey for slots 0-9).
  */
-extern "C" void cBEOptionInterface_resetAllQuickKeys(void* self)
+extern "C" void cBEOptionInterface_resetAllQuickKeys(cBEOptionInterface* self)
 {
     for (int i = 0; i < 10; i++)
     {

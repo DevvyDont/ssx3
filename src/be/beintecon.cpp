@@ -1,15 +1,10 @@
 #include "common.h"
+#include "be/beintecon.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BEEconInt[];
 extern void* D_0045AC78[16];
-extern void* cBEEconInterface_instance;
 
-struct cBEEconInterface {
-    char pad_0x00[8];
-    int field_0x8;
-    void* vtable;
-};
 
 //99.58%
 INCLUDE_ASM("be/beintecon", cBEEconInterface_getThis__Fv);
@@ -25,9 +20,9 @@ void* cBEEconInterface_getThis()
 {
     if (cBEEconInterface_instance == 0) {
         cBEEconInterface* mem = (cBEEconInterface*)cMemMan_alloc(0x10, str_BEEconInt, 0, 0);
-        mem->field_0x8 = 0;
-        mem->vtable = D_0045AC78;
-        cBEEconInterface_instance = mem;
+        mem->bIsActive = 0;
+        (*(void**)&mem->mVtbl) = D_0045AC78;
+        cBEEconInterface_instance = (cBEEconInterface*)(mem);
     }
     return cBEEconInterface_instance;
 }
@@ -45,7 +40,7 @@ extern int cBELibrary_profileLib[];
  * @param charType  the character id
  * @return the cash, or 0
  */
-extern "C" int cBEEconInterface_getMoney(void* self, int iHuman, int charType)
+extern "C" int cBEEconInterface_getMoney(cBEEconInterface* self, int iHuman, int charType)
 {
     if (iHuman >= 2) {
         return 0;
@@ -71,7 +66,7 @@ int cBELibrary_getCharacterID(int);
  * @param rider  the rider (selects profile slot and character)
  * @return the money
  */
-extern "C" int cBEEconInterface_getMoney1(void* self, int rider)
+extern "C" int cBEEconInterface_getMoney1(cBEEconInterface* self, int rider)
 {
     int profileSlot = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -120,7 +115,7 @@ int cBELibrary_getCharacterID(int);
  * @param rider  the rider index (On Tour: iRider)
  * @return the total earned (+0xAC8 of the profile record)
  */
-extern "C" int cBEEconInterface_getTotalMoneyEarned1(void* self, int rider)
+extern "C" int cBEEconInterface_getTotalMoneyEarned1(cBEEconInterface* self, int rider)
 {
     int profileIndex = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -142,7 +137,7 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_setMoney);
  * @param characterId  the character
  * @param value  the new amount
  */
-extern "C" void cBEEconInterface_setMoney(void* self, int profileIndex, int characterId, int value)
+extern "C" void cBEEconInterface_setMoney(cBEEconInterface* self, int profileIndex, int characterId, int value)
 {
     if (profileIndex < 2) {
         int bOff = characterId * 3976;
@@ -167,7 +162,7 @@ extern int cBELibrary_profileLib[];
  * @param amount  the money earned
  * @return the new money, or 0
  */
-extern "C" int cBEEconInterface_addMoney(void* self, int humanIndex, int characterId, int amount)
+extern "C" int cBEEconInterface_addMoney(cBEEconInterface* self, int humanIndex, int characterId, int amount)
 {
     if (humanIndex >= 2) {
         return 0;
@@ -195,7 +190,7 @@ int cBELibrary_getCharacterID(int);
  * @param amount  the money earned
  * @return the new money, or 0 for profile slots >= 2
  */
-extern "C" int cBEEconInterface_addMoney1(void* self, int rider, int amount)
+extern "C" int cBEEconInterface_addMoney1(cBEEconInterface* self, int rider, int amount)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     return cBEEconInterface_addMoney(self, profile, cBELibrary_getCharacterID(rider), amount);
@@ -217,7 +212,7 @@ extern int cBELibrary_profileLib[];
  * @param amount  the money spent
  * @return the money left, or 0
  */
-extern "C" int cBEEconInterface_reduceMoney(void* self, int profileIndex, int characterId, int amount)
+extern "C" int cBEEconInterface_reduceMoney(cBEEconInterface* self, int profileIndex, int characterId, int amount)
 {
     if (profileIndex >= 2) {
         return 0;
@@ -256,7 +251,7 @@ struct sPeakBits_0B88 {
  * @return 1, or 0 for profile slots >= 2
  */
 // Sets the locked state of a peak for a profile/character: stores the inverse of `unlocked`.
-extern "C" int cBEEconInterface_getPeakPass(void* self, int profileIndex, int characterId, int peak, int unlocked)
+extern "C" int cBEEconInterface_getPeakPass(cBEEconInterface* self, int profileIndex, int characterId, int peak, int unlocked)
 {
     if (profileIndex >= 2) {
         return 0;
@@ -309,7 +304,7 @@ int cBEEconInterface_getAttribCost(void* self, int a1);
  * @param attribute  the attribute, 0-6 (others read a null pointer)
  * @return 1 if bought, else 0
  */
-extern "C" int cBEEconInterface_buyAttribute(void* self, int humanIndex, int characterId, unsigned int attribute) {
+extern "C" int cBEEconInterface_buyAttribute(cBEEconInterface* self, int humanIndex, int characterId, unsigned int attribute) {
     signed char *attribLevel;
     int cur;
     int cost;
@@ -402,7 +397,7 @@ extern sEcon0E68 D_00440550_0E68[] __asm__("D_00440550");
  * @param kind  the attribute, 0-6
  * @return 1 if refunded, else 0
  */
-extern "C" int cBEEconInterface_sellAttribute(void* self, int profile, int characterId, unsigned int kind)
+extern "C" int cBEEconInterface_sellAttribute(cBEEconInterface* self, int profile, int characterId, unsigned int kind)
 {
     char* attribLevel;
     if (profile >= 2) return 0;
@@ -454,7 +449,7 @@ extern sEconPrize_151040 D_004405A0[];
  * @param place  the event (6-11 are the peak events)
  * @return the money
  */
-extern "C" int cBEEconInterface_getCashReward(void* self, int medal, int key, int place)
+extern "C" int cBEEconInterface_getCashReward(cBEEconInterface* self, int medal, int key, int place)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     int reward = 0;
@@ -509,7 +504,7 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_getCollectableCash);
  * @param level  the peak, 0-2
  * @return the cash
  */
-extern "C" int cBEEconInterface_getCollectableCash(void* self, int level)
+extern "C" int cBEEconInterface_getCollectableCash(cBEEconInterface* self, int level)
 {
     switch (level)
     {
@@ -533,7 +528,7 @@ INCLUDE_ASM("be/beintecon", cBEEconInterface_getMissionCash);
  * @param level  the mission level, 1-3
  * @return the cash
  */
-extern "C" int cBEEconInterface_getMissionCash(void* self, int level)
+extern "C" int cBEEconInterface_getMissionCash(cBEEconInterface* self, int level)
 {
     switch (level)
     {
@@ -567,7 +562,7 @@ struct sEconRec {
  * @param attribute  the attribute, 0-6
  * @return the price
  */
-extern "C" int cBEEconInterface_getCostForNextIncrement(void* self, int humanIndex, int characterId, unsigned int attribute) {
+extern "C" int cBEEconInterface_getCostForNextIncrement(cBEEconInterface* self, int humanIndex, int characterId, unsigned int attribute) {
     signed char *attribLevel;
     if (humanIndex >= 2) {
         return 0;

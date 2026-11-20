@@ -4,13 +4,7 @@
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BENewRaceInt[];
 extern void* cBENewRaceInterface_vtbl[16];
-extern void* cBENewRaceInterface_instance;
 
-struct cBENewRaceInterface {
-    char pad_0x00[8];
-    int field_0x8;
-    void* vtable;
-};
 
 
 // padded past the 8-byte gp-relative threshold so the compiler emits
@@ -56,9 +50,9 @@ void* cBENewRaceInterface_getThis()
 {
     if (cBENewRaceInterface_instance == 0) {
         cBENewRaceInterface* mem = (cBENewRaceInterface*)cMemMan_alloc(0x10, str_BENewRaceInt, 0, 0);
-        mem->field_0x8 = 0;
-        mem->vtable = cBENewRaceInterface_vtbl;
-        cBENewRaceInterface_instance = mem;
+        mem->bIsActive = 0;
+        (*(void**)&mem->mVtbl) = cBENewRaceInterface_vtbl;
+        cBENewRaceInterface_instance = (cBENewRaceInterface*)(mem);
     }
     return cBENewRaceInterface_instance;
 }
@@ -153,7 +147,7 @@ extern char str_dbg[];
  *
  * @param name  the track file name (On Tour fileName)
  */
-extern "C" void cBENewRaceInterface_setDebugLocationFile(void* self, const char* name)
+extern "C" void cBENewRaceInterface_setDebugLocationFile(cBENewRaceInterface* self, const char* name)
 {
     char* base = (char*)&D_0043D984;
     char* newRace = (char*)&(*(&cBENewRaceInterface_newRace));
@@ -222,7 +216,7 @@ extern char str_Snow_Jam[];
  *
  * @return the short name
  */
-extern "C" void* cBENewRaceInterface_getLocationShortName(void* self)
+extern "C" void* cBENewRaceInterface_getLocationShortName(cBENewRaceInterface* self)
 {
     return str_Snow_Jam + cBENewRaceInterface_newRace.iLocationIdx * 100;
 }
@@ -239,7 +233,7 @@ extern char str_BAM[];
  * @param i  the location
  * @return the archive name
  */
-extern "C" void* cBENewRaceInterface_getLocationBigFile(void* self, int i)
+extern "C" void* cBENewRaceInterface_getLocationBigFile(cBENewRaceInterface* self, int i)
 {
     return str_BAM + i * 100;
 }
@@ -254,7 +248,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationFile);
  * @param iLocation  the location index
  * @return the file name
  */
-extern "C" void* cBENewRaceInterface_getLocationFile(void* self, int iLocation)
+extern "C" void* cBENewRaceInterface_getLocationFile(cBENewRaceInterface* self, int iLocation)
 {
     return (char*)&D_0043D984 + iLocation * 0x64;
 }
@@ -269,7 +263,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationName);
  * @param iLocation  the location index
  * @return the name
  */
-extern "C" void* cBENewRaceInterface_getLocationName(void* self, int iLocation)
+extern "C" void* cBENewRaceInterface_getLocationName(cBENewRaceInterface* self, int iLocation)
 {
     return (char*)&D_0043D954 + iLocation * 0x64;
 }
@@ -284,7 +278,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationPeak);
  * @param location  the location
  * @return the peak
  */
-extern "C" int cBENewRaceInterface_getLocationPeak(void* self, int location)
+extern "C" int cBENewRaceInterface_getLocationPeak(cBENewRaceInterface* self, int location)
 {
     return cBELibrary_locationDB[location].field_0x54;
 }
@@ -315,7 +309,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationType);
  * @param iLocation  the location index (On Tour iLocation)
  * @return the location type (On Tour eBELocationType)
  */
-extern "C" int cBENewRaceInterface_getLocationType(void* self, int iLocation)
+extern "C" int cBENewRaceInterface_getLocationType(cBENewRaceInterface* self, int iLocation)
 {
     return cBELibrary_locationDB[iLocation].field_0x58;
 }
@@ -338,7 +332,7 @@ struct sRaceEntryFull_00144CE0 {
  * @param scriptId  the script id
  * @return the location id
  */
-extern "C" int cBENewRaceInterface_getLocationIDFromScript(void* self, int scriptId)
+extern "C" int cBENewRaceInterface_getLocationIDFromScript(cBENewRaceInterface* self, int scriptId)
 {
     sRaceEntryFull_00144CE0* locations = (sRaceEntryFull_00144CE0*)cBELibrary_locationDB;
     for (int i = 0; i < 23; i++) {
@@ -359,7 +353,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationDifficulty);
  * @param location  the location
  * @return the difficulty
  */
-extern "C" int cBENewRaceInterface_getLocationDifficulty(void* self, int location)
+extern "C" int cBENewRaceInterface_getLocationDifficulty(cBENewRaceInterface* self, int location)
 {
     return cBELibrary_locationDB[location].field_0x60;
 }
@@ -376,7 +370,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getSectionFile);
  * @param iSection  the section index (On Tour iSection)
  * @return the section's file name
  */
-extern "C" void* cBENewRaceInterface_getSectionFile(void* self, int iSection)
+extern "C" void* cBENewRaceInterface_getSectionFile(cBENewRaceInterface* self, int iSection)
 {
     return (char*)&D_0043E254 + iSection * 0x18;
 }
@@ -393,7 +387,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getSectionType);
  * @param iSection  the section index (On Tour iSection)
  * @return the section type (On Tour eBESectionType)
  */
-extern "C" int cBENewRaceInterface_getSectionType(void* self, int iSection)
+extern "C" int cBENewRaceInterface_getSectionType(cBENewRaceInterface* self, int iSection)
 {
     return D_0043E250[iSection].field_0x14;
 }
@@ -432,7 +426,7 @@ extern unsigned int D_0043D8F8[][7];
  * @param count  number of AI riders
  * @return 1 when @p count is within the limit (compared unsigned, so a negative count fails), else 0
  */
-extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count)
+extern "C" int cBENewRaceInterface_setNumberAI(cBENewRaceInterface* self, int count)
 {
     cBENewRaceInterface_newRace.iNumberAI = count;
     cBENewRaceInterface_newRace.iNumberRiders = cBENewRaceInterface_newRace.iNumberHumans + count + cBENewRaceInterface_newRace.iNumberMissionRiders;
@@ -445,8 +439,8 @@ extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count)
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGameMode);
 #ifdef SKIP_ASM
-extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count);
-extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event);
+extern "C" int cBENewRaceInterface_setNumberAI(cBENewRaceInterface* self, int count);
+extern "C" int cBENewRaceInterface_setGameEvent(cBENewRaceInterface* self, int event);
 extern "C" void cBENewPlayerInterface_resetFromMissionMan(void* self, int a1);
 extern "C" void cBENewPlayerInterface_setToMissionMan(int a0);
 int cBENewPlayerInterface_isMissionMan(int a0);
@@ -480,7 +474,7 @@ static inline char* Race_144DF0()
  * @param mode  the game mode
  * @return 1 when set, 0 when the mode is not allowed
  */
-extern "C" int cBENewRaceInterface_setGameMode(void* self, int mode)
+extern "C" int cBENewRaceInterface_setGameMode(cBENewRaceInterface* self, int mode)
 {
     sModeRow_144DF0 row = D_0043E700[*((signed char*)Race_144DF0() + 0x49)];
     int humans = 1;
@@ -551,7 +545,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGamePath);
  *
  * @param mode  the game path (On Tour eBEGamePath)
  */
-extern "C" void cBENewRaceInterface_setGamePath(void* self, int mode)
+extern "C" void cBENewRaceInterface_setGamePath(cBENewRaceInterface* self, int mode)
 {
     cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
     *((char*)&beRaceDB->cGamePath) = mode;
@@ -579,7 +573,7 @@ extern "C" void cBENewRaceInterface_setGamePath(void* self, int mode)
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGameEvent);
 #ifdef SKIP_ASM
-extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count);
+extern "C" int cBENewRaceInterface_setNumberAI(cBENewRaceInterface* self, int count);
 
 struct sGameEvent_001451E8
 {
@@ -599,7 +593,7 @@ static inline char* Race_1451E8()
  * @param event  the game event
  * @return whether the event's mode (cBELibrary_gameEventDB) matches the current game mode
  */
-extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event)
+extern "C" int cBENewRaceInterface_setGameEvent(cBENewRaceInterface* self, int event)
 {
     sGameEvent_001451E8 eventRec = cBELibrary_gameEventDB[event];
     *((signed char*)Race_1451E8() + 0x4A) = event;
@@ -643,7 +637,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getEventName1);
  * @param i  the game event
  * @return the event name
  */
-extern "C" void* cBENewRaceInterface_getEventName1(void* self, int i)
+extern "C" void* cBENewRaceInterface_getEventName1(cBENewRaceInterface* self, int i)
 {
     return (char*)&D_0043E97C + i * 0x54;
 }
@@ -689,7 +683,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getModeName1);
  * @param gameMode  the game mode
  * @return the mode name
  */
-extern "C" void* cBENewRaceInterface_getModeName1(void* self, int gameMode)
+extern "C" void* cBENewRaceInterface_getModeName1(cBENewRaceInterface* self, int gameMode)
 {
     return (char*)&D_0043E7D0 + gameMode * 0x3c;
 }
@@ -721,7 +715,7 @@ extern sPrizeRow_1453D0 D_00440B38_1453D0[] __asm__("D_00440B38");
  * @param mode  the difficulty, 0-2
  * @return the score, or -1
  */
-extern "C" int cBENewRaceInterface_getSimThreshold(void* self, int kind, int place, int mode)
+extern "C" int cBENewRaceInterface_getSimThreshold(cBENewRaceInterface* self, int kind, int place, int mode)
 {
     int k = 1;
     if (kind) k = kind;
@@ -748,7 +742,7 @@ extern "C" int cBENewRaceInterface_getSimThreshold(void* self, int kind, int pla
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getTimeLimit);
 #ifdef SKIP_ASM
-extern "C" int cBENewRaceInterface_getPeakTimeLimit(void* self, int a1, int a2);
+extern "C" int cBENewRaceInterface_getPeakTimeLimit(cBENewRaceInterface* self, int a1, int a2);
 extern int cBENewRaceInterface_mNextLocation;
 
 struct sRaceLookup_00440B38
@@ -770,7 +764,7 @@ extern sRaceLookup_00440B38 D_00440B38[];
  * @param kind  the round
  * @return the time limit, or -1
  */
-extern "C" int cBENewRaceInterface_getTimeLimit(void* self, int kind)
+extern "C" int cBENewRaceInterface_getTimeLimit(cBENewRaceInterface* self, int kind)
 {
     char* newRaceDb = (char*)&(*(&cBENewRaceInterface_newRace));
     unsigned char mode = *(unsigned char*)(newRaceDb + 0x4A);
@@ -822,7 +816,7 @@ extern sRaceTableEntry_00440D18 D_00440D18[];
  * @param tier  the tier, 0-2
  * @return the goal
  */
-extern "C" int cBENewRaceInterface_getPeakGoal(void* self, int gameEvent, int tier)
+extern "C" int cBENewRaceInterface_getPeakGoal(cBENewRaceInterface* self, int gameEvent, int tier)
 {
     return D_00440D18[tier + (gameEvent - 6) * 3].field_0x4;
 }
@@ -841,7 +835,7 @@ extern sRaceTableEntry_00440D18 D_00440D18[];
  * @param tier  the tier, 0-2
  * @return the time limit
  */
-extern "C" int cBENewRaceInterface_getPeakTimeLimit(void* self, int gameEvent, int tier)
+extern "C" int cBENewRaceInterface_getPeakTimeLimit(cBENewRaceInterface* self, int gameEvent, int tier)
 {
     return D_00440D18[tier + (gameEvent - 6) * 3].field_0x6;
 }
@@ -860,7 +854,7 @@ extern sRaceTableEntry_00440D18 D_00440D18[];
  * @param tier  the tier, 0-2
  * @return the money
  */
-extern "C" int cBENewRaceInterface_getPeakRewardAmount(void* self, int gameEvent, int tier)
+extern "C" int cBENewRaceInterface_getPeakRewardAmount(cBENewRaceInterface* self, int gameEvent, int tier)
 {
     return D_00440D18[tier + (gameEvent - 6) * 3].field_0x12 * 100;
 }
@@ -880,7 +874,7 @@ extern sRaceTableEntry_00440D18 D_00440D18[];
  * @param checkpoint  the checkpoint, 0-4
  * @return the bonus
  */
-extern "C" int cBENewRaceInterface_getPeakSplitTimePoints(void* self, int gameEvent, int tier, int checkpoint)
+extern "C" int cBENewRaceInterface_getPeakSplitTimePoints(cBENewRaceInterface* self, int gameEvent, int tier, int checkpoint)
 {
     return D_00440D18[tier + (gameEvent - 6) * 3].field_0x8[checkpoint];
 }
@@ -907,7 +901,7 @@ extern sRacePair_001456A0 D_00440E80[];
  * @param mode  the event
  * @return the target, or -1
  */
-extern "C" int cBENewRaceInterface_getPlatinumGoal(void* self, int idx, int mode)
+extern "C" int cBENewRaceInterface_getPlatinumGoal(cBENewRaceInterface* self, int idx, int mode)
 {
     if (mode == 9 || mode == 10 || mode == 11 || mode == 6 || mode == 7 || mode == 8)
         return -1;
@@ -938,7 +932,7 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* self, int a1);
  *
  * @return the rival's character id
  */
-extern "C" int cBENewRaceInterface_getRival(void* self)
+extern "C" int cBENewRaceInterface_getRival(cBENewRaceInterface* self)
 {
     void* players = cBENewPlayerInterface_getThis();
     int humanChar = cBENewPlayerInterface_getRiderCharID(players, cBENewPlayerInterface_getHumanRider(cBENewPlayerInterface_getThis(), 0));
@@ -965,7 +959,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationDefaultGameMode);
  * @param location  the location
  * @return the game mode
  */
-extern "C" int cBENewRaceInterface_getLocationDefaultGameMode(void* self, unsigned int location) {
+extern "C" int cBENewRaceInterface_getLocationDefaultGameMode(cBENewRaceInterface* self, unsigned int location) {
     switch (location) {
     case 14:
     case 15:
@@ -1006,7 +1000,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationDefaultGameEvent);
  * @return the game event
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int cBENewRaceInterface_getLocationDefaultGameEvent(void* self, int idx)
+extern "C" int cBENewRaceInterface_getLocationDefaultGameEvent(cBENewRaceInterface* self, int idx)
 {
     switch (idx)
     {
@@ -1047,7 +1041,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getDefaultGameMode);
  * @param gameEvent  the game event
  * @return the game mode
  */
-extern "C" int cBENewRaceInterface_getDefaultGameMode(void* self, unsigned int gameEvent) {
+extern "C" int cBENewRaceInterface_getDefaultGameMode(cBENewRaceInterface* self, unsigned int gameEvent) {
     switch (gameEvent) {
     case 0:
         return 0;

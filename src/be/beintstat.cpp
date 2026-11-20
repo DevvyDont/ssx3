@@ -1,4 +1,13 @@
 #include "common.h"
+#include "be/beintscore.h"
+#include "be/beintnewrace.h"
+#include "be/beintmission.h"
+#include "be/beintcharacter.h"
+#include "be/beintbagt.h"
+#include "be/beintoption.h"
+#include "be/beintecon.h"
+#include "be/beintstat.h"
+#include "be/beintplayer.h"
 #include "be/beintnetwork.h"
 #include "be/beintreward.h"
 #include "main/ssxapp.h"
@@ -33,7 +42,7 @@ extern sCharStat_getCollisionAttrib D_005308D8_getCollisionAttrib[] __asm__("D_0
  * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
  * @return the attribute level divided by the character's collision maximum
  */
-extern "C" float cBEStatInterface_getCollisionAttrib(void* self, int rider, int value)
+extern "C" float cBEStatInterface_getCollisionAttrib(cBEStatInterface* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);
@@ -78,7 +87,7 @@ extern sCharStat_cBEStatInterface_getStrikingAttrib D_005308D8_cBEStatInterface_
  * @param value  a level that overrides the rider's own when positive (On Tour overrideAttribLevel)
  * @return the striking attribute, usually 0 to 1
  */
-extern "C" float cBEStatInterface_getStrikingAttrib(void* self, int rider, int value)
+extern "C" float cBEStatInterface_getStrikingAttrib(cBEStatInterface* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int character = cBELibrary_getCharacterID(rider);
@@ -122,7 +131,7 @@ extern sCharStat_cBEStatInterface_getLandingAttrib D_005308D8_cBEStatInterface_g
  * @param value  a level that overrides the rider's own when positive (On Tour overrideAttribLevel)
  * @return the landing attribute, usually 0 to 1
  */
-extern "C" float cBEStatInterface_getLandingAttrib(void* self, int rider, int value)
+extern "C" float cBEStatInterface_getLandingAttrib(cBEStatInterface* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int character = cBELibrary_getCharacterID(rider);
@@ -168,7 +177,7 @@ extern sCharStat_cBEStatInterface_getBalanceAttrib D_005308D8_cBEStatInterface_g
  * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
  * @return the attribute level divided by the character's stability maximum
  */
-extern "C" float cBEStatInterface_getBalanceAttrib(void* self, int rider, int value)
+extern "C" float cBEStatInterface_getBalanceAttrib(cBEStatInterface* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);
@@ -198,7 +207,7 @@ INCLUDE_ASM("be/beintstat", cBEStatInterface_getRecoveryAttrib);
  * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
  * @return the attribute level divided by the character's stability maximum
  */
-extern "C" float cBEStatInterface_getRecoveryAttrib(void* self, int rider, int value)
+extern "C" float cBEStatInterface_getRecoveryAttrib(cBEStatInterface* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);
@@ -243,7 +252,7 @@ extern sCharStat_cBEStatInterface_getAccelerationAttrib D_005308D8_cBEStatInterf
  * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
  * @return the attribute level divided by the character's acceleration maximum
  */
-extern "C" float cBEStatInterface_getAccelerationAttrib(void* self, int rider, int value)
+extern "C" float cBEStatInterface_getAccelerationAttrib(cBEStatInterface* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);
@@ -288,7 +297,7 @@ extern sCharStat_cBEStatInterface_getSpeedAttrib D_005308D8_cBEStatInterface_get
  * @param value  attribute level to use instead of the stored one, when positive (On Tour overrideAttribLevel)
  * @return the attribute level divided by the character's speed maximum
  */
-extern "C" float cBEStatInterface_getSpeedAttrib(void* self, int rider, int value)
+extern "C" float cBEStatInterface_getSpeedAttrib(cBEStatInterface* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int charID = cBELibrary_getCharacterID(rider);
@@ -332,7 +341,7 @@ extern sCharStat_cBEStatInterface_getSpinAttrib D_005308D8_cBEStatInterface_getS
  * @param value  a level that overrides the rider's own when positive (On Tour overrideAttribLevel)
  * @return the spin attribute, usually 0 to 1
  */
-extern "C" float cBEStatInterface_getSpinAttrib(void* self, int rider, int value)
+extern "C" float cBEStatInterface_getSpinAttrib(cBEStatInterface* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int character = cBELibrary_getCharacterID(rider);
@@ -376,7 +385,7 @@ extern sCharStat_cBEStatInterface_getTrickAttrib D_005308D8_cBEStatInterface_get
  * @param value  a level that overrides the rider's own when positive (On Tour overrideAttribLevel)
  * @return the trick attribute, usually 0 to 1
  */
-extern "C" float cBEStatInterface_getTrickAttrib(void* self, int rider, int value)
+extern "C" float cBEStatInterface_getTrickAttrib(cBEStatInterface* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int character = cBELibrary_getCharacterID(rider);
@@ -415,7 +424,7 @@ extern const sLevelTable_00149778 D_0045A2B0;
  * @param value  the trick's points (On Tour iPoints)
  * @return 1 when the points reach the threshold
  */
-extern "C" int cBEStatInterface_shouldCelebrateTrick(void* self, int rider, int value)
+extern "C" int cBEStatInterface_shouldCelebrateTrick(cBEStatInterface* self, int rider, int value)
 {
     if (cBENewPlayerInterface_isMissionMan(rider))
         return 0;
@@ -498,16 +507,7 @@ INCLUDE_ASM("be/beintstat", cBELibrary__cBELibrary);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 extern "C" void cBESaveInterface_purgeInterface(void);
-extern int* cBENewRaceInterface_instance;
-extern int* cBENewPlayerInterface_instance;
-extern int* cBEStatInterface_instance;
 extern int* D_004A11C8;
-extern int* cBECharacterInterface_instance;
-extern int* cBEOptionInterface_instance;
-extern int* cBEBAGTInterface_instance;
-extern int* cBEEconInterface_instance;
-extern int* cBEMissionInterface_instance;
-extern int* cBEScoreInterface_instance;
 extern int* cBEAggressionInterface_instance;
 
 /**
@@ -520,28 +520,28 @@ extern int* cBEAggressionInterface_instance;
  */
 extern "C" void cBELibrary__cBELibrary(void* self, int flags)
 {
-    operator_delete(cBENewRaceInterface_instance);
+    operator_delete((int*)cBENewRaceInterface_instance);
     cBENewRaceInterface_instance = 0;
-    operator_delete(cBENewPlayerInterface_instance);
+    operator_delete((int*)cBENewPlayerInterface_instance);
     cBENewPlayerInterface_instance = 0;
-    operator_delete(cBECharacterInterface_instance);
+    operator_delete((int*)cBECharacterInterface_instance);
     cBECharacterInterface_instance = 0;
-    operator_delete(cBEStatInterface_instance);
+    operator_delete((int*)cBEStatInterface_instance);
     cBEStatInterface_instance = 0;
-    operator_delete(cBEOptionInterface_instance);
+    operator_delete((int*)cBEOptionInterface_instance);
     cBEOptionInterface_instance = 0;
     cBESaveInterface_purgeInterface();
-    operator_delete(cBEBAGTInterface_instance);
+    operator_delete((int*)cBEBAGTInterface_instance);
     cBEBAGTInterface_instance = 0;
     operator_delete((int*)cBENetworkInterface_instance);
     cBENetworkInterface_instance = 0;
-    operator_delete(cBEScoreInterface_instance);
+    operator_delete((int*)cBEScoreInterface_instance);
     cBEScoreInterface_instance = 0;
     operator_delete(D_004A11C8);
     D_004A11C8 = 0;
-    operator_delete(cBEMissionInterface_instance);
+    operator_delete((int*)cBEMissionInterface_instance);
     cBEMissionInterface_instance = 0;
-    operator_delete(cBEEconInterface_instance);
+    operator_delete((int*)cBEEconInterface_instance);
     cBEEconInterface_instance = 0;
     operator_delete(cBEAggressionInterface_instance);
     cBEAggressionInterface_instance = 0;

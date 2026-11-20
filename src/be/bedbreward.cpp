@@ -1,4 +1,10 @@
 #include "common.h"
+#include "be/beintmission.h"
+#include "be/beintbagt.h"
+#include "be/beintoption.h"
+#include "be/beintstat.h"
+#include "be/beintplayer.h"
+#include "be/beintscore.h"
 #include "be/beintnewrace.h"
 #include "be/berewarddb.h"
 #include "be/beintnetwork.h"
@@ -257,7 +263,6 @@ void cBEInterface_readFromReplayFrame(void* self)
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_purgeInterface);
 #ifdef SKIP_ASM
-extern void* cBENewRaceInterface_instance;
 void operator_delete(int* ptr);
 
 /**
@@ -330,7 +335,7 @@ INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_setRaceTime);
  *
  * @param raceTime  the race time
  */
-extern "C" void cBENewRaceInterface_setRaceTime(void* self, int raceTime) {
+extern "C" void cBENewRaceInterface_setRaceTime(cBENewRaceInterface* self, int raceTime) {
     cBENewRaceInterface_newRace.iRaceTime = raceTime;
 }
 #endif
@@ -402,7 +407,7 @@ extern int D_004A11B8;
  *
  * @param locationIndex  the location index
  */
-extern "C" void cBENewRaceInterface_setLocationID(void* self, int locationIndex)
+extern "C" void cBENewRaceInterface_setLocationID(cBENewRaceInterface* self, int locationIndex)
 {
     cBENewRaceInterface_newRace.iLocationIdx = locationIndex;
     D_004A11B8 = 1;
@@ -418,7 +423,7 @@ extern int cBENewRaceInterface_mNextLocation;
  *
  * @param nextLocation  the location to go to next
  */
-extern "C" void cBENewRaceInterface_setNextLocationID(void* self, int nextLocation) {
+extern "C" void cBENewRaceInterface_setNextLocationID(cBENewRaceInterface* self, int nextLocation) {
     cBENewRaceInterface_mNextLocation = nextLocation;
 }
 #endif
@@ -497,7 +502,6 @@ extern "C" void* cBENewRaceInterface_getCmdLineTrack(void* self)
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_setNewRaceActive);
 #ifdef SKIP_ASM
-extern void *cBENewRaceInterface_instance;
 
 /**
  * Sets bIsActive (+0x8) of the new-race interface singleton cBENewRaceInterface_instance to @p isActive.
@@ -505,7 +509,7 @@ extern void *cBENewRaceInterface_instance;
  * @param isActive  1 while the interface may be used, 0 otherwise
  */
 extern "C" void cBENewRaceInterface_setNewRaceActive(int isActive) {
-    (*(int *)((char*)(cBENewRaceInterface_instance) + (8))) = isActive;
+    (cBENewRaceInterface_instance->bIsActive) = isActive;
 }
 #endif
 //100%
@@ -521,16 +525,15 @@ extern char cBENewRaceInterface_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cBENewRaceInterface_cBENewRaceInterface(void* self)
+extern "C" void* cBENewRaceInterface_cBENewRaceInterface(cBENewRaceInterface* self)
 {
-    *(char**)((char*)self + 0xC) = cBENewRaceInterface_vtbl;
-    return self;
+    self->mVtbl = (void**)cBENewRaceInterface_vtbl;
+    return ((void*)self);
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewPlayerInterface_purgeInterface);
 #ifdef SKIP_ASM
-extern void* cBENewPlayerInterface_instance;
 void operator_delete(int* ptr);
 
 /**
@@ -546,7 +549,6 @@ extern "C" void cBENewPlayerInterface_purgeInterface(void)
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewPlayerInterface_setNewPlayerActive);
 #ifdef SKIP_ASM
-extern void *cBENewPlayerInterface_instance;
 
 /**
  * Sets bIsActive (+0x8) of the new-player interface singleton cBENewPlayerInterface_instance to @p isActive.
@@ -554,7 +556,7 @@ extern void *cBENewPlayerInterface_instance;
  * @param isActive  1 while the interface may be used, 0 otherwise
  */
 extern "C" void cBENewPlayerInterface_setNewPlayerActive(int isActive) {
-    (*(int *)((char*)(cBENewPlayerInterface_instance) + (8))) = isActive;
+    (cBENewPlayerInterface_instance->bIsActive) = isActive;
 }
 #endif
 
@@ -583,7 +585,6 @@ void cBEMissionInterface_discard(void* self)
 //100%
 INCLUDE_ASM("be/bedbreward", cBEMissionInterface_purgeInterface);
 #ifdef SKIP_ASM
-extern void* cBEMissionInterface_instance;
 void operator_delete(int* ptr);
 
 /**
@@ -605,8 +606,8 @@ INCLUDE_ASM("be/bedbreward", cBEMissionInterface_isMissionSetFromFE);
  * @param missionInterface  the mission interface
  * @return the flag
  */
-extern "C" int cBEMissionInterface_isMissionSetFromFE(void *missionInterface) {
-    return (*(int *)((char*)(missionInterface) + (0x10)));
+extern "C" int cBEMissionInterface_isMissionSetFromFE(cBEMissionInterface* missionInterface) {
+    return ((int)missionInterface->nextSessionID);
 }
 #endif
 //100%
@@ -618,14 +619,13 @@ INCLUDE_ASM("be/bedbreward", func_0015BD00);
  * @param missionInterface  the mission interface
  * @param setFromFE  nonzero when the mission was chosen in the front end
  */
-extern "C" void func_0015BD00(void *missionInterface, int setFromFE) {
-    (*(int *)((char*)(missionInterface) + (0x10))) = setFromFE;
+extern "C" void func_0015BD00(cBEMissionInterface* missionInterface, int setFromFE) {
+    ((int)missionInterface->nextSessionID) = setFromFE;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBEMissionInterface_setMissionActive);
 #ifdef SKIP_ASM
-extern void *cBEMissionInterface_instance;
 
 /**
  * Sets bIsActive (+0x8) of the mission interface singleton cBEMissionInterface_instance to @p isActive.
@@ -633,7 +633,7 @@ extern void *cBEMissionInterface_instance;
  * @param isActive  1 while the interface may be used, 0 otherwise
  */
 extern "C" void cBEMissionInterface_setMissionActive(int isActive) {
-    (*(int *)((char*)(cBEMissionInterface_instance) + (8))) = isActive;
+    (cBEMissionInterface_instance->bIsActive) = isActive;
 }
 #endif
 //100%
@@ -649,16 +649,15 @@ extern char cBEMissionInterface_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cBEMissionInterface_cBEMissionInterface(void* self)
+extern "C" void* cBEMissionInterface_cBEMissionInterface(cBEMissionInterface* self)
 {
-    *(char**)((char*)self + 0xC) = cBEMissionInterface_vtbl;
-    return self;
+    self->mVtbl = (void**)cBEMissionInterface_vtbl;
+    return ((void*)self);
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBEOptionInterface_purgeInterface);
 #ifdef SKIP_ASM
-extern void* cBEOptionInterface_instance;
 void operator_delete(int* ptr);
 
 /**
@@ -698,7 +697,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param src  the new options
  */
-extern "C" void cBEOptionInterface_setOptions(void* self, sBEOpt_BE10* src)
+extern "C" void cBEOptionInterface_setOptions(cBEOptionInterface* self, sBEOpt_BE10* src)
 {
     cBEOptionInterface_mOption = *src;
 }
@@ -713,7 +712,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param useMetricUnits  nonzero for metric units
  */
-extern "C" void cBEOptionInterface_setUseMetricUnits(void* self, int useMetricUnits)
+extern "C" void cBEOptionInterface_setUseMetricUnits(cBEOptionInterface* self, int useMetricUnits)
 {
     int enabled = useMetricUnits != 0;
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x80000) | (enabled << 19);
@@ -729,7 +728,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param widescreen  the widescreen mode, 0-3
  */
-extern "C" void cBEOptionInterface_setUseWidescreen(void* self, int widescreen)
+extern "C" void cBEOptionInterface_setUseWidescreen(cBEOptionInterface* self, int widescreen)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x300000) | ((widescreen & 3) << 20);
 }
@@ -744,7 +743,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param language  the language index, 0-7
  */
-extern "C" void cBEOptionInterface_setLanguage(void* self, int language)
+extern "C" void cBEOptionInterface_setLanguage(cBEOptionInterface* self, int language)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x1C00000) | ((language & 7) << 22);
 }
@@ -759,7 +758,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param brightness  the brightness level, 0-15
  */
-extern "C" void cBEOptionInterface_setBrightness(void* self, int brightness)
+extern "C" void cBEOptionInterface_setBrightness(cBEOptionInterface* self, int brightness)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x1E000000) | ((brightness & 0xF) << 25);
 }
@@ -774,7 +773,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param replayOption  the replay setting, 0 or 1
  */
-extern "C" void cBEOptionInterface_setReplayOption(void* self, int replayOption)
+extern "C" void cBEOptionInterface_setReplayOption(cBEOptionInterface* self, int replayOption)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x20000000) | ((replayOption & 1) << 29);
 }
@@ -814,7 +813,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param soundMode  the sound output mode, 0-3
  */
-extern "C" void cBEOptionInterface_setSoundMode(void* self, int soundMode)
+extern "C" void cBEOptionInterface_setSoundMode(cBEOptionInterface* self, int soundMode)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x3000) | ((soundMode & 3) << 12);
 }
@@ -829,7 +828,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param audioMix  the mix setting, 0-3
  */
-extern "C" void cBEOptionInterface_setAudioMix(void* self, int audioMix)
+extern "C" void cBEOptionInterface_setAudioMix(cBEOptionInterface* self, int audioMix)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0xC000) | ((audioMix & 3) << 14);
 }
@@ -844,7 +843,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param radioVolume  the volume, 0-15
  */
-extern "C" void cBEOptionInterface_setRadioBigVolume(void* self, int radioVolume)
+extern "C" void cBEOptionInterface_setRadioBigVolume(cBEOptionInterface* self, int radioVolume)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0xF) | (radioVolume & 0xF);
 }
@@ -860,7 +859,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param charVolume  the volume, 0-15
  */
-extern "C" void cBEOptionInterface_setCharacterVolume(void* self, int charVolume)
+extern "C" void cBEOptionInterface_setCharacterVolume(cBEOptionInterface* self, int charVolume)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0xF0) | ((charVolume & 0xF) << 4);
 }
@@ -875,7 +874,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param sfxVolume  the volume, 0-15
  */
-extern "C" void cBEOptionInterface_setSFXVolume(void* self, int sfxVolume)
+extern "C" void cBEOptionInterface_setSFXVolume(cBEOptionInterface* self, int sfxVolume)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0xF00) | ((sfxVolume & 0xF) << 8);
 }
@@ -891,7 +890,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param useArcadeSfx  nonzero to enable
  */
-extern "C" void cBEOptionInterface_setUseArcadeSFX(void* self, int useArcadeSfx)
+extern "C" void cBEOptionInterface_setUseArcadeSFX(cBEOptionInterface* self, int useArcadeSfx)
 {
     int enabled = useArcadeSfx != 0;
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x10000) | (enabled << 16);
@@ -907,7 +906,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param useDJSpeech  nonzero to enable
  */
-extern "C" void cBEOptionInterface_setUseDJSpeechSFX(void* self, int useDJSpeech)
+extern "C" void cBEOptionInterface_setUseDJSpeechSFX(cBEOptionInterface* self, int useDJSpeech)
 {
     int enabled = useDJSpeech != 0;
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x20000) | (enabled << 17);
@@ -923,7 +922,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param useVoip  nonzero to enable
  */
-extern "C" void cBEOptionInterface_setUseVOIP(void* self, int useVoip)
+extern "C" void cBEOptionInterface_setUseVOIP(cBEOptionInterface* self, int useVoip)
 {
     int enabled = useVoip != 0;
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & ~0x40000) | (enabled << 18);
@@ -1052,7 +1051,7 @@ extern char D_00535617[];
  * @param idx  the message slot
  * @param name  the message text
  */
-extern "C" void cBEOptionInterface_setQuickKeyMessage(void* self, int idx, const char* name)
+extern "C" void cBEOptionInterface_setQuickKeyMessage(cBEOptionInterface* self, int idx, const char* name)
 {
     strcpy(D_00535617 + (idx << 6), name);
 }
@@ -1069,7 +1068,7 @@ extern sBEOpt_BE10 cBEOptionInterface_mOption;
  *
  * @param value  the new value of the top bits
  */
-extern "C" void cBEOptionInterface_setHUDDetail(void* self, int value)
+extern "C" void cBEOptionInterface_setHUDDetail(cBEOptionInterface* self, int value)
 {
     cBEOptionInterface_mOption.v[0] = (cBEOptionInterface_mOption.v[0] & 0x3FFFFFFF) | (value << 30);
 }
@@ -1085,7 +1084,7 @@ extern char D_00535615[];
  *
  * @param vertDelta  the new value
  */
-extern "C" void cBEOptionInterface_setVtDelta(void* self, int vertDelta) {
+extern "C" void cBEOptionInterface_setVtDelta(cBEOptionInterface* self, int vertDelta) {
     *(char*)D_00535615 = vertDelta;
 }
 #endif
@@ -1100,14 +1099,13 @@ extern char D_00535616[];
  *
  * @param horzDelta  the new value
  */
-extern "C" void cBEOptionInterface_setHzDelta(void* self, int horzDelta) {
+extern "C" void cBEOptionInterface_setHzDelta(cBEOptionInterface* self, int horzDelta) {
     *(char*)D_00535616 = horzDelta;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBEOptionInterface_setOptionActive);
 #ifdef SKIP_ASM
-extern void *cBEOptionInterface_instance;
 
 /**
  * Sets bIsActive (+0x8) of the option interface singleton cBEOptionInterface_instance to @p isActive.
@@ -1115,7 +1113,7 @@ extern void *cBEOptionInterface_instance;
  * @param isActive  1 while the interface may be used, 0 otherwise
  */
 extern "C" void cBEOptionInterface_setOptionActive(int isActive) {
-    (*(int *)((char*)(cBEOptionInterface_instance) + (8))) = isActive;
+    (cBEOptionInterface_instance->bIsActive) = isActive;
 }
 #endif
 //100%
@@ -1130,10 +1128,10 @@ extern char cBEOptionInterface_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cBEOptionInterface_cBEOptionInterface(void* self)
+extern "C" void* cBEOptionInterface_cBEOptionInterface(cBEOptionInterface* self)
 {
-    *(char**)((char*)self + 0xC) = cBEOptionInterface_vtbl;
-    return self;
+    self->mVtbl = (void**)cBEOptionInterface_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -1647,7 +1645,6 @@ extern "C" void* cBENetworkInterface_cBENetworkInterface(cBENetworkInterface* se
 //100%
 INCLUDE_ASM("be/bedbreward", cBEStatInterface_purgeInterface);
 #ifdef SKIP_ASM
-extern void* cBEStatInterface_instance;
 void operator_delete(int* ptr);
 
 /**
@@ -1662,7 +1659,6 @@ extern "C" void cBEStatInterface_purgeInterface(void)
 //100%
 INCLUDE_ASM("be/bedbreward", cBEStatInterface_setStatActive);
 #ifdef SKIP_ASM
-extern void *cBEStatInterface_instance;
 
 /**
  * Sets bIsActive (+0x8) of the stat interface singleton cBEStatInterface_instance to @p isActive.
@@ -1670,7 +1666,7 @@ extern void *cBEStatInterface_instance;
  * @param isActive  1 while the interface may be used, 0 otherwise
  */
 extern "C" void cBEStatInterface_setStatActive(int isActive) {
-    (*(int *)((char*)(cBEStatInterface_instance) + (8))) = isActive;
+    (cBEStatInterface_instance->bIsActive) = isActive;
 }
 #endif
 //100%
@@ -1683,10 +1679,10 @@ extern char cBEStatInterface_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cBEStatInterface_cBEStatInterface(void* self)
+extern "C" void* cBEStatInterface_cBEStatInterface(cBEStatInterface* self)
 {
-    *(char**)((char*)self + 0xC) = cBEStatInterface_vtbl;
-    return self;
+    self->mVtbl = (void**)cBEStatInterface_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -1737,7 +1733,6 @@ void cBESaveInterface_discard(void* self)
 //100%
 INCLUDE_ASM("be/bedbreward", cBEBAGTInterface_purgeInterface);
 #ifdef SKIP_ASM
-extern void* cBEBAGTInterface_instance;
 void operator_delete(int* ptr);
 
 /**
@@ -1753,7 +1748,6 @@ extern "C" void cBEBAGTInterface_purgeInterface(void)
 //100%
 INCLUDE_ASM("be/bedbreward", cBEBAGTInterface_setBAGTActive);
 #ifdef SKIP_ASM
-extern void *cBEBAGTInterface_instance;
 
 /**
  * Sets bIsActive (+0x8) of the BAGT interface singleton cBEBAGTInterface_instance to @p isActive.
@@ -1761,7 +1755,7 @@ extern void *cBEBAGTInterface_instance;
  * @param isActive  1 while the interface may be used, 0 otherwise
  */
 extern "C" void cBEBAGTInterface_setBAGTActive(int isActive) {
-    (*(int *)((char*)(cBEBAGTInterface_instance) + (8))) = isActive;
+    (cBEBAGTInterface_instance->bIsActive) = isActive;
 }
 #endif
 //100%
@@ -1776,16 +1770,15 @@ extern char cBEBAGTInterface_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cBEBAGTInterface_cBEBAGTInterface(void* self)
+extern "C" void* cBEBAGTInterface_cBEBAGTInterface(cBEBAGTInterface* self)
 {
-    *(char**)((char*)self + 0xC) = cBEBAGTInterface_vtbl;
-    return self;
+    self->mVtbl = (void**)cBEBAGTInterface_vtbl;
+    return ((void*)self);
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBEScoreInterface_purgeInterface);
 #ifdef SKIP_ASM
-extern void* cBEScoreInterface_instance;
 void operator_delete(int* ptr);
 
 /**
@@ -1808,11 +1801,11 @@ INCLUDE_ASM("be/bedbreward", cBEScoreInterface_isNewPersonalHighScore);
  * @param scoreInterface  the score interface
  * @return 1 or 0
  */
-extern "C" int cBEScoreInterface_isNewPersonalHighScore(void *scoreInterface) {
+extern "C" int cBEScoreInterface_isNewPersonalHighScore(cBEScoreInterface* scoreInterface) {
     int var_3;
 
     var_3 = 0;
-    if (((*(int *)((char*)(scoreInterface) + (0x10))) != 0) || ((*(int *)((char*)(scoreInterface) + (0x14))) != 0)) {
+    if (((scoreInterface->bNewHighScore[0]) != 0) || ((scoreInterface->bNewHighScore[1]) != 0)) {
         var_3 = 1;
     }
     return var_3;
@@ -1829,11 +1822,11 @@ INCLUDE_ASM("be/bedbreward", cBEScoreInterface_isNewTrackHighScore);
  * @param scoreInterface  the score interface
  * @return 1 or 0
  */
-extern "C" int cBEScoreInterface_isNewTrackHighScore(void *scoreInterface) {
+extern "C" int cBEScoreInterface_isNewTrackHighScore(cBEScoreInterface* scoreInterface) {
     int var_3;
 
     var_3 = 0;
-    if (((*(int *)((char*)(scoreInterface) + (0x18))) >= 0) || ((*(int *)((char*)(scoreInterface) + (0x1C))) >= 0)) {
+    if (((scoreInterface->mNewTrackHighScoreIndex[0]) >= 0) || ((scoreInterface->mNewTrackHighScoreIndex[1]) >= 0)) {
         var_3 = 1;
     }
     return var_3;
@@ -1856,7 +1849,6 @@ extern "C" int cBEScoreInterface_GetRiderNewTrackHighScoreIndex(int scoreInterfa
 //100%
 INCLUDE_ASM("be/bedbreward", cBEScoreInterface_setScoreActive);
 #ifdef SKIP_ASM
-extern void *cBEScoreInterface_instance;
 
 /**
  * Sets bIsActive (+0x8) of the score interface singleton cBEScoreInterface_instance to @p isActive.
@@ -1864,7 +1856,7 @@ extern void *cBEScoreInterface_instance;
  * @param isActive  1 while the interface may be used, 0 otherwise
  */
 extern "C" void cBEScoreInterface_setScoreActive(int isActive) {
-    (*(int *)((char*)(cBEScoreInterface_instance) + (8))) = isActive;
+    (cBEScoreInterface_instance->bIsActive) = isActive;
 }
 #endif
 

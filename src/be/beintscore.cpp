@@ -1,20 +1,11 @@
 #include "common.h"
+#include "be/beintscore.h"
 #include "be/beintnewrace.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cBEScoreInterface_cBEScoreInterface(void* self);
 extern const char str_BEScoreInt[];
-extern void* cBEScoreInterface_instance;
 
-struct cBEScoreInterface {
-    char pad_0x00[8];
-    int field_0x8;
-    char pad_0xC[4];
-    int field_0x10;
-    int field_0x14;
-    int field_0x18;
-    int field_0x1C;
-};
 
 //100%
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_getThis__Fv);
@@ -35,12 +26,12 @@ void* cBEScoreInterface_getThis()
     if (cBEScoreInterface_instance == 0) {
         void* mem = cMemMan_alloc(560, str_BEScoreInt, 0, 0);
         cBEScoreInterface* scoreIface = (cBEScoreInterface*)cBEScoreInterface_cBEScoreInterface_impl(mem);
-        cBEScoreInterface_instance = scoreIface;
-        scoreIface->field_0x8 = 0;
-        scoreIface->field_0x10 = 0;
-        scoreIface->field_0x14 = 0;
-        scoreIface->field_0x18 = -1;
-        scoreIface->field_0x1C = -1;
+        cBEScoreInterface_instance = (cBEScoreInterface*)(scoreIface);
+        scoreIface->bIsActive = 0;
+        scoreIface->bNewHighScore[0] = 0;
+        scoreIface->bNewHighScore[1] = 0;
+        scoreIface->mNewTrackHighScoreIndex[0] = -1;
+        scoreIface->mNewTrackHighScoreIndex[1] = -1;
     }
     return cBEScoreInterface_instance;
 }
@@ -49,7 +40,7 @@ void* cBEScoreInterface_getThis()
 //100%
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_cBEScoreInterface);
 #ifdef SKIP_ASM
-extern "C" void cBEScoreInterface_discard(void* self);
+extern "C" void cBEScoreInterface_discard(cBEScoreInterface* self);
 extern void* cBEScoreInterface_vtbl[];
 
 // PORT: the unit declares cBEScoreInterface_cBEScoreInterface as returning void (used by getThis);
@@ -67,7 +58,7 @@ void* cBEScoreInterface_cBEScoreInterface_impl(void* self) __asm__("cBEScoreInte
 void* cBEScoreInterface_cBEScoreInterface_impl(void* self)
 {
     *(void***)((char*)self + 0xC) = cBEScoreInterface_vtbl;
-    cBEScoreInterface_discard(self);
+    cBEScoreInterface_discard((cBEScoreInterface*)self);
     return self;
 }
 #endif
@@ -113,7 +104,7 @@ struct sScore_001549E8 {
  *
  * @param scoreIface  the score interface (this)
  */
-extern "C" void cBEScoreInterface_discard(void* scoreIface)
+extern "C" void cBEScoreInterface_discard(cBEScoreInterface* scoreIface)
 {
     sScore_001549E8* self = (sScore_001549E8*)scoreIface;
     self->a = 0;
@@ -164,7 +155,7 @@ signed char cBELibrary_getCharacterID(int index);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" bool cBEScoreInterface_isEligibleForHighScore(void* self, int rider);
+extern "C" bool cBEScoreInterface_isEligibleForHighScore(cBEScoreInterface* self, int rider);
 extern "C" char* cBENewPlayerInterface_getPlayerName(void* self, int idx);
 extern "C" char* strcpy(char* dst, const char* src);
 
@@ -255,7 +246,7 @@ extern "C" void cBEScoreInterface_processEventRiderStats(sScore_154AB8* self, in
         timed = 1;
         score = (int)(score * (1.0f / 60.0f));
     }
-    if (cBEScoreInterface_isEligibleForHighScore(self, profile)) {
+    if (cBEScoreInterface_isEligibleForHighScore((cBEScoreInterface*)self, profile)) {
         sHighScore_154AB8* highScores = func_0014AB20_154AB8(event, mode);
         if (highScores != 0) {
             for (int i = 0; i < 5; i++) {
@@ -300,7 +291,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBELibrary_getProfileIndex(int);
 signed char cBELibrary_getCharacterID(int index);
-extern "C" int cBEScoreInterface_convertRankToMedal(void* self, int a);
+extern "C" int cBEScoreInterface_convertRankToMedal(cBEScoreInterface* self, int a);
 extern "C" void func_001E25D8(int mode, int event, int result);
 extern "C" void func_001E1EB8(void);
 extern "C" void func_001E1550(void);
@@ -339,12 +330,12 @@ extern sEvent_154EE8 cBELibrary_locationDB[];
  * @param result  the finishing rank, 0 first (On Tour iRanking)
  * @param score  the event score or time in ticks (On Tour uiPoints)
  */
-extern "C" void cBEScoreInterface_processRiderRanking(char* self, int rider, int result, int score)
+extern "C" void cBEScoreInterface_processRiderRanking(cBEScoreInterface* self, int rider, int result, int score)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     if (profile >= 2)
         return;
-    *(int*)(self + profile * 0xB0 + 0xCC) = result;
+    *(int*)(((char*)self) + profile * 0xB0 + 0xCC) = result;
     void* be = cBE_getInterface_Fv(cBE_getBE(), 0);
     int charID = cBELibrary_getCharacterID(rider);
     int mode = cBENewRaceInterface_newRace.cGameEvent;
@@ -401,7 +392,7 @@ extern "C" sScoreEntry_001550E8* func_0014AB20(int a, int b);
  * @param mode  the game event
  * @return the score, or 0 when the event has no table
  */
-extern "C" int func_001550E8(void* self, int i, int event, int mode)
+extern "C" int func_001550E8(cBEScoreInterface* self, int i, int event, int mode)
 {
     sScoreEntry_001550E8* highScores = func_0014AB20(event, mode);
     if (highScores != 0) {
@@ -428,7 +419,7 @@ extern int D_005305F0[];
  * @param i  entry index, 0 (best) to 4
  * @return the score, or 0 when the event has no table
  */
-extern "C" int func_00155130(void* self, int i)
+extern "C" int func_00155130(cBEScoreInterface* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     sScoreEntry_001550E8* highScores = func_0014AB20(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
@@ -466,7 +457,7 @@ extern void* D_004A1244;
  * @param i  entry index, 0 (best) to 4
  * @return the character record, or D_004A1244 when the event has no table
  */
-extern "C" void* func_00155190(void* self, int i)
+extern "C" void* func_00155190(cBEScoreInterface* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     sScoreEntryB_00155190* highScores = (sScoreEntryB_00155190*)func_0014AB20(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
@@ -495,7 +486,7 @@ extern void* D_004A1244;
  * @param i  entry index, 0 (best) to 4
  * @return the name, or D_004A1244 when the event has no table
  */
-extern "C" void* func_00155208(void* self, int i)
+extern "C" void* func_00155208(cBEScoreInterface* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     sScoreEntryB_00155208* highScores = (sScoreEntryB_00155208*)func_0014AB20(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
@@ -514,7 +505,7 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_getPlayerLastCompletedEventStats)
  * @param profileIndex  profile index, 0 or 1 (On Tour iProfileIndex)
  * @return the stats block (0xAC bytes of stats, then the rank)
  */
-extern "C" void* cBEScoreInterface_getPlayerLastCompletedEventStats(void* self, int profileIndex)
+extern "C" void* cBEScoreInterface_getPlayerLastCompletedEventStats(cBEScoreInterface* self, int profileIndex)
 {
     return (char*)self + (profileIndex * 0xb0 + 0x20);
 }
@@ -535,7 +526,7 @@ extern char cBELibrary_profileLib[];
  * @param characterId  character ID (On Tour iChar)
  * @return the best-stats block
  */
-extern "C" void* cBEScoreInterface_getPlayerBestStats(void* self, int profileIndex, int characterId)
+extern "C" void* cBEScoreInterface_getPlayerBestStats(cBEScoreInterface* self, int profileIndex, int characterId)
 {
     char* charRecord = cBELibrary_profileLib + (profileIndex * 39760 + characterId * 3976);
     return charRecord + 0xde4;
@@ -578,7 +569,7 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_isBetterMedal);
  * @param newMedal  the medal just won, or -1
  * @return 1 when the new medal is better, else 0
  */
-extern "C" int cBEScoreInterface_isBetterMedal(void* self, int currentMedal, int newMedal)
+extern "C" int cBEScoreInterface_isBetterMedal(cBEScoreInterface* self, int currentMedal, int newMedal)
 {
     if (newMedal == -1) {
         return 0;
@@ -600,7 +591,7 @@ INCLUDE_ASM("be/beintscore", cBEScoreInterface_convertRankToMedal);
  * @param rank  the finishing position, 0 for first
  * @return the medal id, or -1
  */
-extern "C" int cBEScoreInterface_convertRankToMedal(void* self, int rank)
+extern "C" int cBEScoreInterface_convertRankToMedal(cBEScoreInterface* self, int rank)
 {
     switch (rank) {
     case 0:
@@ -864,7 +855,7 @@ extern "C" bool cBERules_hasModifiedRules(int i);
  * @param rider  the profile index (On Tour iProfile)
  * @return true when the profile is eligible
  */
-extern "C" bool cBEScoreInterface_isEligibleForHighScore(void* self, int rider)
+extern "C" bool cBEScoreInterface_isEligibleForHighScore(cBEScoreInterface* self, int rider)
 {
     if (rider >= 2 || cBERules_hasModifiedRules(0))
         return false;
@@ -894,7 +885,7 @@ extern signed char D_005305F9[];
  * @param eventID  the game event (On Tour iEvent)
  * @return the win count
  */
-extern "C" int cBEScoreInterface_getNumberOfWinsOnTrack(void* self, int rider, int locationID, int eventID)
+extern "C" int cBEScoreInterface_getNumberOfWinsOnTrack(cBEScoreInterface* self, int rider, int locationID, int eventID)
 {
     if (D_005305F9[0] != 0)
         return 0;
@@ -929,7 +920,7 @@ extern char cBELibrary_profileLib[];
  * @param eventID  the game event (On Tour iEvent)
  * @return the medal, 0 best to 3, or -1
  */
-extern "C" int cBEScoreInterface_getBestMedalOnTrack(void* self, int rider, int locationID, int eventID)
+extern "C" int cBEScoreInterface_getBestMedalOnTrack(cBEScoreInterface* self, int rider, int locationID, int eventID)
 {
     if (D_005305F9[0] != 0)
         return -1;
@@ -962,7 +953,7 @@ extern signed char D_005305F9[];
  * @param eventID  the game event (On Tour iEvent)
  * @param medal  the medal (On Tour iMedal)
  */
-extern "C" void cBEScoreInterface_setBestMedalOnTrack(void* self, int rider, int locationID, int eventID, int medal)
+extern "C" void cBEScoreInterface_setBestMedalOnTrack(cBEScoreInterface* self, int rider, int locationID, int eventID, int medal)
 {
     if (D_005305F9[0] != 0)
         return;

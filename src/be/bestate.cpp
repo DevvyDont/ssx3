@@ -1,4 +1,10 @@
 #include "common.h"
+#include "be/beintscore.h"
+#include "be/beintnewrace.h"
+#include "be/beintmission.h"
+#include "be/beintoption.h"
+#include "be/beintecon.h"
+#include "be/beintplayer.h"
 #include "be/beintreward.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -109,14 +115,8 @@ struct sStateObj153200 {
     int f4;
     int f8;
 };
-extern sStateObj153200* cBENewRaceInterface_instance;
-extern sStateObj153200* cBENewPlayerInterface_instance;
 extern sStateObj153200* D_004A11C8;
-extern sStateObj153200* cBEOptionInterface_instance;
-extern sStateObj153200* cBEEconInterface_instance;
 extern sStateObj153200* cBESaveInterface_instance;
-extern sStateObj153200* cBEMissionInterface_instance;
-extern sStateObj153200* cBEScoreInterface_instance;
 extern sStateObj153200* cBEAggressionInterface_instance;
 
 /**
@@ -127,13 +127,13 @@ extern sStateObj153200* cBEAggressionInterface_instance;
  * cBERaceState_onEnter never sets them.
  */
 extern "C" void cBERaceState_onExit(void) {
-    cBEOptionInterface_instance->f8 = 0;
-    cBEScoreInterface_instance->f8 = 0;
+    cBEOptionInterface_instance->bIsActive = 0;
+    cBEScoreInterface_instance->bIsActive = 0;
     D_004A11C8->f8 = 0;
-    cBENewPlayerInterface_instance->f8 = 0;
-    cBENewRaceInterface_instance->f8 = 0;
-    cBEMissionInterface_instance->f8 = 0;
-    cBEEconInterface_instance->f8 = 0;
+    cBENewPlayerInterface_instance->bIsActive = 0;
+    cBENewRaceInterface_instance->bIsActive = 0;
+    cBEMissionInterface_instance->bIsActive = 0;
+    cBEEconInterface_instance->bIsActive = 0;
     cBEAggressionInterface_instance->f8 = 0;
     cBERewardInterface_instance->bIsActive = 0;
     cBESaveInterface_instance->f8 = 0;
@@ -144,11 +144,7 @@ extern "C" void cBERaceState_onExit(void) {
 INCLUDE_ASM("be/bestate", cBERaceState_onEnter);
 #ifdef SKIP_ASM
 extern sStateObj153200* D_004A11C8;
-extern sStateObj153200* cBEOptionInterface_instance;
-extern sStateObj153200* cBEEconInterface_instance;
 extern sStateObj153200* cBESaveInterface_instance;
-extern sStateObj153200* cBEMissionInterface_instance;
-extern sStateObj153200* cBEScoreInterface_instance;
 extern sStateObj153200* cBEAggressionInterface_instance;
 
 /**
@@ -158,11 +154,11 @@ extern sStateObj153200* cBEAggressionInterface_instance;
  * aggression, reward and save interfaces; the network, player and character interfaces stay as they were.
  */
 extern "C" void cBERaceState_onEnter(void) {
-    cBEOptionInterface_instance->f8 = 1;
-    cBEScoreInterface_instance->f8 = 1;
+    cBEOptionInterface_instance->bIsActive = 1;
+    cBEScoreInterface_instance->bIsActive = 1;
     D_004A11C8->f8 = 1;
-    cBEMissionInterface_instance->f8 = 1;
-    cBEEconInterface_instance->f8 = 1;
+    cBEMissionInterface_instance->bIsActive = 1;
+    cBEEconInterface_instance->bIsActive = 1;
     cBEAggressionInterface_instance->f8 = 1;
     cBERewardInterface_instance->bIsActive = 1;
     cBESaveInterface_instance->f8 = 1;

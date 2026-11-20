@@ -1,4 +1,11 @@
 #include "common.h"
+#include "be/beintnewrace.h"
+#include "be/beintcharacter.h"
+#include "be/beintbagt.h"
+#include "be/beintoption.h"
+#include "be/beintecon.h"
+#include "be/beintstat.h"
+#include "be/beintplayer.h"
 #include "be/beintnetwork.h"
 #include "be/beintreward.h"
 
@@ -105,14 +112,8 @@ extern "C" void* cBEPostRaceState_getInterface(void* self, int kind)
 //100%
 INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_onExit);
 #ifdef SKIP_ASM
-extern void* cBENewPlayerInterface_instance;
-extern void* cBECharacterInterface_instance;
-extern void* cBEStatInterface_instance;
-extern void* cBEOptionInterface_instance;
 extern void* cBESaveInterface_instance;
 extern void* D_004A11C8;
-extern void* cBEBAGTInterface_instance;
-extern void* cBEEconInterface_instance;
 extern void* cBEAggressionInterface_instance;
 
 struct sBEIface_001564B0
@@ -129,15 +130,15 @@ struct sBEIface_001564B0
  */
 extern "C" void cBEPostRaceState_onExit(void)
 {
-    ((sBEIface_001564B0*)cBENewPlayerInterface_instance)->active = 0;
-    ((sBEIface_001564B0*)cBECharacterInterface_instance)->active = 0;
-    ((sBEIface_001564B0*)cBEStatInterface_instance)->active = 0;
-    ((sBEIface_001564B0*)cBEOptionInterface_instance)->active = 0;
+    cBENewPlayerInterface_instance->bIsActive = 0;
+    cBECharacterInterface_instance->bIsActive = 0;
+    cBEStatInterface_instance->bIsActive = 0;
+    cBEOptionInterface_instance->bIsActive = 0;
     ((sBEIface_001564B0*)cBESaveInterface_instance)->active = 0;
     cBENetworkInterface_instance->bIsActive = 0;
     ((sBEIface_001564B0*)D_004A11C8)->active = 0;
-    ((sBEIface_001564B0*)cBEBAGTInterface_instance)->active = 0;
-    ((sBEIface_001564B0*)cBEEconInterface_instance)->active = 0;
+    cBEBAGTInterface_instance->bIsActive = 0;
+    cBEEconInterface_instance->bIsActive = 0;
     ((sBEIface_001564B0*)cBEAggressionInterface_instance)->active = 0;
     ((sBEIface_001564B0*)cBERewardInterface_instance)->active = 0;
 }
@@ -146,14 +147,8 @@ extern "C" void cBEPostRaceState_onExit(void)
 //100%
 INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_onEnter);
 #ifdef SKIP_ASM
-extern void* cBENewPlayerInterface_instance;
-extern void* cBECharacterInterface_instance;
-extern void* cBEStatInterface_instance;
-extern void* cBEOptionInterface_instance;
 extern void* cBESaveInterface_instance;
 extern void* D_004A11C8;
-extern void* cBEBAGTInterface_instance;
-extern void* cBEEconInterface_instance;
 extern void* cBEAggressionInterface_instance;
 
 struct sBEIface_00156510
@@ -170,15 +165,15 @@ struct sBEIface_00156510
  */
 extern "C" void cBEPostRaceState_onEnter(void)
 {
-    ((sBEIface_00156510*)cBENewPlayerInterface_instance)->active = 1;
-    ((sBEIface_00156510*)cBECharacterInterface_instance)->active = 1;
-    ((sBEIface_00156510*)cBEStatInterface_instance)->active = 1;
-    ((sBEIface_00156510*)cBEOptionInterface_instance)->active = 1;
+    cBENewPlayerInterface_instance->bIsActive = 1;
+    cBECharacterInterface_instance->bIsActive = 1;
+    cBEStatInterface_instance->bIsActive = 1;
+    cBEOptionInterface_instance->bIsActive = 1;
     ((sBEIface_00156510*)cBESaveInterface_instance)->active = 1;
     cBENetworkInterface_instance->bIsActive = 1;
     ((sBEIface_00156510*)D_004A11C8)->active = 1;
-    ((sBEIface_00156510*)cBEBAGTInterface_instance)->active = 1;
-    ((sBEIface_00156510*)cBEEconInterface_instance)->active = 1;
+    cBEBAGTInterface_instance->bIsActive = 1;
+    cBEEconInterface_instance->bIsActive = 1;
     ((sBEIface_00156510*)cBEAggressionInterface_instance)->active = 1;
     ((sBEIface_00156510*)cBERewardInterface_instance)->active = 1;
 }
@@ -277,15 +272,8 @@ extern "C" void* cBEPreRaceState_getInterface(void* self, int kind)
 //100%
 INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_onExit);
 #ifdef SKIP_ASM
-extern void* cBENewRaceInterface_instance;
-extern void* cBENewPlayerInterface_instance;
-extern void* cBECharacterInterface_instance;
-extern void* cBEStatInterface_instance;
-extern void* cBEOptionInterface_instance;
 extern void* cBESaveInterface_instance;
 extern void* D_004A11C8;
-extern void* cBEBAGTInterface_instance;
-extern void* cBEEconInterface_instance;
 extern void* cBEAggressionInterface_instance;
 
 struct sBEIface_001566E8
@@ -302,16 +290,16 @@ struct sBEIface_001566E8
  */
 extern "C" void cBEPreRaceState_onExit(void)
 {
-    ((sBEIface_001566E8*)cBENewRaceInterface_instance)->active = 0;
-    ((sBEIface_001566E8*)cBENewPlayerInterface_instance)->active = 0;
-    ((sBEIface_001566E8*)cBECharacterInterface_instance)->active = 0;
-    ((sBEIface_001566E8*)cBEStatInterface_instance)->active = 0;
-    ((sBEIface_001566E8*)cBEOptionInterface_instance)->active = 0;
+    cBENewRaceInterface_instance->bIsActive = 0;
+    cBENewPlayerInterface_instance->bIsActive = 0;
+    cBECharacterInterface_instance->bIsActive = 0;
+    cBEStatInterface_instance->bIsActive = 0;
+    cBEOptionInterface_instance->bIsActive = 0;
     ((sBEIface_001566E8*)cBESaveInterface_instance)->active = 0;
     cBENetworkInterface_instance->bIsActive = 0;
     ((sBEIface_001566E8*)D_004A11C8)->active = 0;
-    ((sBEIface_001566E8*)cBEBAGTInterface_instance)->active = 0;
-    ((sBEIface_001566E8*)cBEEconInterface_instance)->active = 0;
+    cBEBAGTInterface_instance->bIsActive = 0;
+    cBEEconInterface_instance->bIsActive = 0;
     ((sBEIface_001566E8*)cBEAggressionInterface_instance)->active = 0;
     ((sBEIface_001566E8*)cBERewardInterface_instance)->active = 0;
 }
@@ -320,15 +308,8 @@ extern "C" void cBEPreRaceState_onExit(void)
 //100%
 INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_onEnter);
 #ifdef SKIP_ASM
-extern void* cBENewRaceInterface_instance;
-extern void* cBENewPlayerInterface_instance;
-extern void* cBECharacterInterface_instance;
-extern void* cBEStatInterface_instance;
-extern void* cBEOptionInterface_instance;
 extern void* cBESaveInterface_instance;
 extern void* D_004A11C8;
-extern void* cBEBAGTInterface_instance;
-extern void* cBEEconInterface_instance;
 extern void* cBEAggressionInterface_instance;
 
 struct sBEIface_00156750
@@ -346,16 +327,16 @@ struct sBEIface_00156750
  */
 extern "C" void cBEPreRaceState_onEnter(void)
 {
-    ((sBEIface_00156750*)cBENewRaceInterface_instance)->active = 1;
-    ((sBEIface_00156750*)cBENewPlayerInterface_instance)->active = 1;
-    ((sBEIface_00156750*)cBECharacterInterface_instance)->active = 1;
-    ((sBEIface_00156750*)cBEStatInterface_instance)->active = 1;
-    ((sBEIface_00156750*)cBEOptionInterface_instance)->active = 1;
+    cBENewRaceInterface_instance->bIsActive = 1;
+    cBENewPlayerInterface_instance->bIsActive = 1;
+    cBECharacterInterface_instance->bIsActive = 1;
+    cBEStatInterface_instance->bIsActive = 1;
+    cBEOptionInterface_instance->bIsActive = 1;
     ((sBEIface_00156750*)cBESaveInterface_instance)->active = 1;
     cBENetworkInterface_instance->bIsActive = 1;
     ((sBEIface_00156750*)D_004A11C8)->active = 1;
-    ((sBEIface_00156750*)cBEBAGTInterface_instance)->active = 1;
-    ((sBEIface_00156750*)cBEEconInterface_instance)->active = 1;
+    cBEBAGTInterface_instance->bIsActive = 1;
+    cBEEconInterface_instance->bIsActive = 1;
     ((sBEIface_00156750*)cBEAggressionInterface_instance)->active = 1;
     ((sBEIface_00156750*)cBERewardInterface_instance)->active = 1;
 }

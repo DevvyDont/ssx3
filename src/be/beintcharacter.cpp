@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintcharacter.h"
 #include "be/beintnewrace.h"
 
 signed char cBELibrary_getCharacterID(int index);
@@ -51,7 +52,7 @@ extern sCharWeightEntryView D_00530970_view[] __asm__("D_00530970");
  * @param riderIndex  the rider (On Tour iRiderID)
  * @return true for a goofy-footed character
  */
-extern "C" bool cBECharacterInterface_getIsGoofyFoot(void* self, int riderIndex)
+extern "C" bool cBECharacterInterface_getIsGoofyFoot(cBECharacterInterface* self, int riderIndex)
 {
     int charID = cBELibrary_getCharacterID(riderIndex);
     return D_00530970_view[charID].field_0x44 != 0;
@@ -88,7 +89,7 @@ extern sCharScaleEntry_EFA8 D_00530970_EFA8[] __asm__("D_00530970");
  */
 // Model scale for a rider: fixed values for the cheat characters,
 // 0.8 for mission men, otherwise the character table's percentage.
-extern "C" float cBECharacterInterface_getScale(void* self, int riderIndex)
+extern "C" float cBECharacterInterface_getScale(cBECharacterInterface* self, int riderIndex)
 {
     int charID = cBELibrary_getCharacterID(riderIndex);
     int cheat = cBELibrary_getCheatCharacterID(riderIndex);
@@ -155,7 +156,7 @@ extern char D_005309BC[];
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
  * @return the text
  */
-extern "C" void* cBECharacterInterface_getBloodType(void* self, int riderIndex)
+extern "C" void* cBECharacterInterface_getBloodType(cBECharacterInterface* self, int riderIndex)
 {
     return D_005309BC + cBELibrary_getCharacterID(riderIndex) * 136;
 }
@@ -180,7 +181,7 @@ extern sCharEntryView D_00530970_flags[] __asm__("D_00530970");
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
  * @return true when the word is nonzero
  */
-extern "C" bool cBECharacterInterface_getIsFemale(void* self, int riderIndex)
+extern "C" bool cBECharacterInterface_getIsFemale(cBECharacterInterface* self, int riderIndex)
 {
     return D_00530970_flags[cBELibrary_getCharacterID(riderIndex)].field_0x5C != 0;
 }
@@ -197,7 +198,7 @@ extern sCharEntryView D_00530970_flags[] __asm__("D_00530970");
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
  * @return the value
  */
-extern "C" int cBECharacterInterface_getAge(void* self, int riderIndex)
+extern "C" int cBECharacterInterface_getAge(cBECharacterInterface* self, int riderIndex)
 {
     return D_00530970_flags[cBELibrary_getCharacterID(riderIndex)].field_0x60;
 }
@@ -214,7 +215,7 @@ extern char D_005309D4[];
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
  * @return the text
  */
-extern "C" void* cBECharacterInterface_getHeight(void* self, int riderIndex)
+extern "C" void* cBECharacterInterface_getHeight(cBECharacterInterface* self, int riderIndex)
 {
     return D_005309D4 + cBELibrary_getCharacterID(riderIndex) * 136;
 }
@@ -231,7 +232,7 @@ extern char D_005309E4[];
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
  * @return the text
  */
-extern "C" void* cBECharacterInterface_getNationality(void* self, int riderIndex)
+extern "C" void* cBECharacterInterface_getNationality(cBECharacterInterface* self, int riderIndex)
 {
     return D_005309E4 + cBELibrary_getCharacterID(riderIndex) * 136;
 }
@@ -248,7 +249,7 @@ extern sCharEntryView D_00530970_flags[] __asm__("D_00530970");
  * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
  * @return the value
  */
-extern "C" int cBECharacterInterface_getVoiceID(void* self, int riderIndex)
+extern "C" int cBECharacterInterface_getVoiceID(cBECharacterInterface* self, int riderIndex)
 {
     return D_00530970_flags[cBELibrary_getCharacterID(riderIndex)].field_0x84;
 }

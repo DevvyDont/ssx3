@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintcharacter.h"
 #include "be/beintnetwork.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -480,15 +481,7 @@ INCLUDE_ASM("be/beintnetwork", cBECharacterInterface_getThis);
 #ifdef SKIP_ASM
 extern const char str_BECharInt[];
 extern void* D_0045AD38[16];
-extern void* cBECharacterInterface_instance;
 
-// cBECharacterInterface is another 0x10-byte cBEInterface (three 4-byte bools, then the vptr; see be/beintreward.h).
-struct cBECharacterInterface {
-    int bCanSubmit;
-    int bDataChanged;
-    int bIsActive;
-    void** mVtbl;
-};
 
 /**
  * Returns the back end's character interface singleton, creating it on first use.
@@ -503,7 +496,7 @@ extern "C" void* cBECharacterInterface_getThis(void)
         cBECharacterInterface* mem = (cBECharacterInterface*)cMemMan_alloc(0x10, str_BECharInt, 0, 0);
         mem->bIsActive = 0;
         mem->mVtbl = D_0045AD38;
-        cBECharacterInterface_instance = mem;
+        cBECharacterInterface_instance = (cBECharacterInterface*)(mem);
     }
     return cBECharacterInterface_instance;
 }
@@ -527,7 +520,7 @@ extern sNetChar_0014EE28 D_00530970[];
  * @param rider  the rider (cBELibrary_getCharacterID selects the record)
  * @return the name
  */
-extern "C" void* cBECharacterInterface_getName(void* self, int rider)
+extern "C" void* cBECharacterInterface_getName(cBECharacterInterface* self, int rider)
 {
     return &D_00530970[cBELibrary_getCharacterID(rider)];
 }
@@ -563,7 +556,7 @@ extern sNetEntry88_0014EE58 D_00530990_0014EE58[] __asm__("D_00530990");
  * @param rider  the rider whose character is used
  * @return the name
  */
-extern "C" void* cBECharacterInterface_getShortName(void* self, int rider)
+extern "C" void* cBECharacterInterface_getShortName(cBECharacterInterface* self, int rider)
 {
     int characterId = cBELibrary_getCharacterID(rider);
     int index = cBELibrary_getCheatCharacterID(rider);
@@ -598,7 +591,7 @@ extern sNetEntry88_00530990 D_00530990[];
  * @param index  the cheat character id (0 for none)
  * @return the name
  */
-extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index)
+extern "C" void* cBECharacterInterface_getShortNameByCharacter(cBECharacterInterface* self, int player, int index)
 {
     if (index >= 10 && index < 30) {
         return &D_0043FA38[index];
@@ -626,7 +619,7 @@ extern sNetChar_0014EF00 D_005309A0[];
  * @param rider  the rider (cBELibrary_getCharacterID selects the record)
  * @return the text
  */
-extern "C" void* cBECharacterInterface_getNickName(void* self, int rider)
+extern "C" void* cBECharacterInterface_getNickName(cBECharacterInterface* self, int rider)
 {
     return &D_005309A0[cBELibrary_getCharacterID(rider)];
 }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintbagt.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BEBAGTInt[];
@@ -11,12 +12,6 @@ struct sVTableBAGT {
 };
 extern sVTableBAGT cBEBAGTInterface_vtbl;
 
-struct cBEBAGTInterface {
-    char pad_0x00[8];
-    int field_0x8;
-    void* vtable;
-};
-extern void* cBEBAGTInterface_instance;
 
 //100%
 INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getThis__Fv);
@@ -33,13 +28,13 @@ void* cBEBAGTInterface_getThis()
 {
     if (cBEBAGTInterface_instance == 0) {
         cBEBAGTInterface* mem = (cBEBAGTInterface*)cMemMan_alloc(0x10, str_BEBAGTInt, 0, 0);
-        cBEBAGTInterface_instance = mem;
+        cBEBAGTInterface_instance = (cBEBAGTInterface*)(mem);
         sVTableBAGT* vt = &cBEBAGTInterface_vtbl;
         short delta = vt->field_0x10;
         void (*fn)(void*) = vt->fn;
-        mem->vtable = vt;
+        (*(void**)&mem->mVtbl) = vt;
         fn((char*)mem + delta);
-        ((cBEBAGTInterface*)cBEBAGTInterface_instance)->field_0x8 = 0;
+        cBEBAGTInterface_instance->bIsActive = 0;
     }
     return cBEBAGTInterface_instance;
 }
@@ -139,7 +134,7 @@ extern char D_00530EC0_raw[] __asm__("D_00530EC0");
  * @param value  the variant index
  * @return 1
  */
-extern "C" int func_0014FD80(void* self, int rider, int idx, int value)
+extern "C" int func_0014FD80(cBEBAGTInterface* self, int rider, int idx, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -180,7 +175,7 @@ extern sBagtEntries D_00530EC0_e[3][10] __asm__("D_00530EC0");
  * @param bit  the variant
  * @return 1
  */
-extern "C" int func_0014FE08(void* self, int rider, int idx, int bit)
+extern "C" int func_0014FE08(cBEBAGTInterface* self, int rider, int idx, int bit)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -212,7 +207,7 @@ extern sPad20 D_0045AEB8;
  * @param second  nonzero to read the second (customisable) choice
  * @return the variant index, or -1
  */
-extern "C" int func_0014FEA8(void* self, int rider, int idx, int second)
+extern "C" int func_0014FEA8(cBEBAGTInterface* self, int rider, int idx, int second)
 {
     char* grabInfo = (char*)&D_0045AEB8 + idx * 0x14;
     if (*(unsigned short*)(grabInfo + 0xC) == 0)
@@ -260,7 +255,7 @@ extern sBagInfo_FF90 D_0045AEB8_FF90[] __asm__("D_0045AEB8");
  * @param count  receives the number of variants
  * @return the variant table
  */
-extern "C" int func_0014FF90(void* self, int rider, int idx, int* count)
+extern "C" int func_0014FF90(cBEBAGTInterface* self, int rider, int idx, int* count)
 {
     int uberTable = D_0045AEB8_FF90[idx].value;
     unsigned short uberCount;
@@ -291,7 +286,7 @@ extern sBagtEntries D_00530EC0_e[3][10] __asm__("D_00530EC0");
  * @param bit  the variant
  * @return 1 if the bit is set, else 0
  */
-extern "C" int func_0014FFB8(void* self, int rider, int idx, int bit)
+extern "C" int func_0014FFB8(cBEBAGTInterface* self, int rider, int idx, int bit)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -319,7 +314,7 @@ extern sBagtEntries D_00530EC0_e[3][10] __asm__("D_00530EC0");
  * @param bit  the variant
  * @return 1 if the bit is set, else 0
  */
-extern "C" int func_00150048(void* self, int rider, int idx, int bit)
+extern "C" int func_00150048(cBEBAGTInterface* self, int rider, int idx, int bit)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int characterId = cBELibrary_getCharacterID(rider);
@@ -342,7 +337,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabAnim);
  * @param grabIndex  the grab
  * @return the animation id
  */
-extern "C" unsigned short cBEBAGTInterface_getGrabAnim(void* self, int rider, int grabIndex)
+extern "C" unsigned short cBEBAGTInterface_getGrabAnim(cBEBAGTInterface* self, int rider, int grabIndex)
 {
     return *(unsigned short*)((char*)&D_0045AEB8 + grabIndex * 0x14);
 }
@@ -360,7 +355,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabCycleAnim);
  * @param grabIndex  the grab
  * @return the animation id
  */
-extern "C" unsigned short cBEBAGTInterface_getGrabCycleAnim(void* self, int rider, int grabIndex)
+extern "C" unsigned short cBEBAGTInterface_getGrabCycleAnim(cBEBAGTInterface* self, int rider, int grabIndex)
 {
     char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
     return *(unsigned short*)(grabInfo + 0x2);
@@ -378,7 +373,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getGrabName);
  * @param grabIndex  the grab
  * @return the trick id
  */
-extern "C" unsigned short cBEBAGTInterface_getGrabName(void* self, int rider, int grabIndex)
+extern "C" unsigned short cBEBAGTInterface_getGrabName(cBEBAGTInterface* self, int rider, int grabIndex)
 {
     char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
     return *(unsigned short*)(grabInfo + 0x4);
@@ -395,7 +390,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getTweakAnim);
  * @param grabIndex  the grab
  * @return the animation id
  */
-extern "C" unsigned short cBEBAGTInterface_getTweakAnim(void* self, int rider, int grabIndex)
+extern "C" unsigned short cBEBAGTInterface_getTweakAnim(cBEBAGTInterface* self, int rider, int grabIndex)
 {
     char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
     return *(unsigned short*)(grabInfo + 0x6);
@@ -413,7 +408,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getTweakCycleAnim);
  * @param grabIndex  the grab
  * @return the animation id
  */
-extern "C" unsigned short cBEBAGTInterface_getTweakCycleAnim(void* self, int rider, int grabIndex)
+extern "C" unsigned short cBEBAGTInterface_getTweakCycleAnim(cBEBAGTInterface* self, int rider, int grabIndex)
 {
     char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
     return *(unsigned short*)(grabInfo + 0x8);
@@ -430,7 +425,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getTweakName);
  * @param grabIndex  the grab
  * @return the trick id
  */
-extern "C" unsigned short cBEBAGTInterface_getTweakName(void* self, int rider, int grabIndex)
+extern "C" unsigned short cBEBAGTInterface_getTweakName(cBEBAGTInterface* self, int rider, int grabIndex)
 {
     char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
     return *(unsigned short*)(grabInfo + 0xa);
@@ -444,7 +439,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getUberAnim);
 struct sPad20;
 extern sPad20 D_0045AEB8;
 extern "C" int cBELibrary_getCheatCharacterID(int rider);
-extern "C" int func_0014FEA8(void* self, int rider, int idx, int second);
+extern "C" int func_0014FEA8(cBEBAGTInterface* self, int rider, int idx, int second);
 
 struct sBagtAnim_150198
 {
@@ -473,7 +468,7 @@ extern sBagtCat_150198 D_0045AEB8_150198[] __asm__("D_0045AEB8");
  * @param second  passed to func_0014FEA8 (the callers pass uber level >= 5)
  * @return the animation id
  */
-extern "C" int cBEBAGTInterface_getUberAnim(void* self, int rider, int idx, int second)
+extern "C" int cBEBAGTInterface_getUberAnim(cBEBAGTInterface* self, int rider, int idx, int second)
 {
     int ch = cBELibrary_getCheatCharacterID(rider);
     if (ch != 0)
@@ -505,7 +500,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getUberCycleAnim);
 struct sPad20;
 extern sPad20 D_0045AEB8;
 extern "C" int cBELibrary_getCheatCharacterID(int rider);
-extern "C" int func_0014FEA8(void* self, int rider, int idx, int second);
+extern "C" int func_0014FEA8(cBEBAGTInterface* self, int rider, int idx, int second);
 
 struct sBagtAnim_1502C8
 {
@@ -534,7 +529,7 @@ extern sBagtCat_1502C8 D_0045AEB8_1502C8[] __asm__("D_0045AEB8");
  * @param second  passed to func_0014FEA8 (uber level >= 5)
  * @return the animation id
  */
-extern "C" int cBEBAGTInterface_getUberCycleAnim(void* self, int rider, int idx, int second)
+extern "C" int cBEBAGTInterface_getUberCycleAnim(cBEBAGTInterface* self, int rider, int idx, int second)
 {
     int ch = cBELibrary_getCheatCharacterID(rider);
     if (ch != 0)
@@ -566,7 +561,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getUberName);
 struct sPad20;
 extern sPad20 D_0045AEB8;
 extern "C" int cBELibrary_getCheatCharacterID(int rider);
-extern "C" int func_0014FEA8(void* self, int rider, int idx, int second);
+extern "C" int func_0014FEA8(cBEBAGTInterface* self, int rider, int idx, int second);
 
 struct sBagtAnim_1503F8
 {
@@ -594,7 +589,7 @@ extern sBagtCat_1503F8 D_0045AEB8_1503F8[] __asm__("D_0045AEB8");
  * @param second  passed to func_0014FEA8 (uber level >= 5)
  * @return the trick id
  */
-extern "C" int cBEBAGTInterface_getUberName(void* self, int rider, int idx, int second)
+extern "C" int cBEBAGTInterface_getUberName(cBEBAGTInterface* self, int rider, int idx, int second)
 {
     int ch = cBELibrary_getCheatCharacterID(rider);
     if (ch != 0)
