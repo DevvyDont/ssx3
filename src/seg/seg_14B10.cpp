@@ -1686,8 +1686,8 @@ extern "C" float cBECharacterInterface_getScale(int, int);
  * @param rider  the rider
  * @return the offset (0 at scale 1)
  */
-extern "C" float cRider_getStartGateHorizOffset(void *rider) {
-    return (cBECharacterInterface_getScale(cBE_getInterface__Fv(cBE_getBE(), 2), (*(int *)((char*)(rider) + (0x86C)))) * 90.0f) - 90.0f;
+extern "C" float cRider_getStartGateHorizOffset(cRider* rider) {
+    return (cBECharacterInterface_getScale(cBE_getInterface__Fv(cBE_getBE(), 2), (rider->mAIIndex)) * 90.0f) - 90.0f;
 }
 #endif
 
@@ -2031,8 +2031,8 @@ extern "C" void cRider_setControlState_6378(void *, int) __asm__("cRider_setCont
  * @param rider  the rider
  * @return 1 when the state was set, else 0
  */
-extern "C" int cRider_checkForFinishLine(void *rider) {
-    if (*(float *)((char*)rider + 0x470) >= 0.0f) {
+extern "C" int cRider_checkForFinishLine(cRider* rider) {
+    if (rider->mFinishTime >= 0.0f) {
         cRider_setControlState_6378(rider, 10);
         return 1;
     }

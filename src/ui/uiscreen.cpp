@@ -1677,22 +1677,21 @@ extern void* cUIState_vtbl[];
  * @param engine  the UI engine
  * @return @p self
  */
-extern "C" void* cUIState_cUIState(void* self, int engine)
+extern "C" void* cUIState_cUIState(cUIState* self, int engine)
 {
-    char* stateBytes = (char*)self;
-    *(void**)(stateBytes + 0x4) = stateBytes;
-    *(void**)(stateBytes + 0x0) = stateBytes;
-    *(void***)(stateBytes + 0x8) = cUIState_vtbl;
-    *(int*)(stateBytes + 0xC) = 0;
-    *(int*)(stateBytes + 0x10) = engine;
-    *(signed char*)(stateBytes + 0x14) = -1;
-    *(signed char*)(stateBytes + 0x15) = 0xF;
-    *(short*)(stateBytes + 0x1C) = 536;
-    *(int*)(stateBytes + 0x20) = 0;
-    cList_cList(stateBytes + 0x24);
-    *(int*)(stateBytes + 0x40) = 0;
-    *(signed char*)(stateBytes + 0x44) = -1;
-    return self;
+    self->mpNext = (cListNode*)((char*)self);
+    self->mpPrev = (cListNode*)((char*)self);
+    self->mVtbl = cUIState_vtbl;
+    self->mHashName = 0;
+    self->mpEngine = (cUIEngine*)engine;
+    self->mCurrentCtrl = -1;
+    *(signed char*)&self->mCtrlBits = 0xF;
+    *(short*)&self->mAttrState = 536;
+    self->mpParentState = 0;
+    cList_cList(((char*)self) + 0x24);
+    self->mpScreen = 0;
+    self->mUserNum = -1;
+    return ((void*)self);
 }
 #endif
 
@@ -1711,22 +1710,21 @@ extern void* cUIState_vtbl[];
  * @param parentState  the parent state
  * @return @p self
  */
-extern "C" void* cUIState_cUIState1(void* self, int engine, int parentState)
+extern "C" void* cUIState_cUIState1(cUIState* self, int engine, int parentState)
 {
-    char* stateBytes = (char*)self;
-    *(void**)(stateBytes + 0x4) = stateBytes;
-    *(void**)(stateBytes + 0x0) = stateBytes;
-    *(void***)(stateBytes + 0x8) = cUIState_vtbl;
-    *(int*)(stateBytes + 0xC) = 0;
-    *(int*)(stateBytes + 0x10) = engine;
-    *(signed char*)(stateBytes + 0x14) = -1;
-    *(signed char*)(stateBytes + 0x15) = 0xF;
-    *(short*)(stateBytes + 0x1C) = 536;
-    *(int*)(stateBytes + 0x20) = parentState;
-    cList_cList(stateBytes + 0x24);
-    *(int*)(stateBytes + 0x40) = 0;
-    *(signed char*)(stateBytes + 0x44) = -1;
-    return self;
+    self->mpNext = (cListNode*)((char*)self);
+    self->mpPrev = (cListNode*)((char*)self);
+    self->mVtbl = cUIState_vtbl;
+    self->mHashName = 0;
+    self->mpEngine = (cUIEngine*)engine;
+    self->mCurrentCtrl = -1;
+    *(signed char*)&self->mCtrlBits = 0xF;
+    *(short*)&self->mAttrState = 536;
+    self->mpParentState = (cUIState*)parentState;
+    cList_cList(((char*)self) + 0x24);
+    self->mpScreen = 0;
+    self->mUserNum = -1;
+    return ((void*)self);
 }
 #endif
 
@@ -1748,9 +1746,9 @@ extern void* cListNode_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cUIState__cUIState(void* self, int flags)
+extern "C" void cUIState__cUIState(cUIState* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cUIState_vtbl;
+    self->mVtbl = cUIState_vtbl;
     cList_destroyList_v((char*)self + 0x24);
     *(void***)((char*)self + 0x3C) = cList_vtbl;
     cList_destroyList_v((char*)self + 0x24);
@@ -1758,7 +1756,7 @@ extern "C" void cUIState__cUIState(void* self, int flags)
     cListNode_destroyListNode((char*)self + 0x30);
     *(void***)((char*)self + 0x2C) = cListNode_vtbl;
     cListNode_destroyListNode((char*)self + 0x24);
-    *(void***)((char*)self + 0x8) = cListNode_vtbl;
+    self->mVtbl = cListNode_vtbl;
     cListNode_destroyListNode(self);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1779,12 +1777,12 @@ INCLUDE_ASM("ui/uiscreen", cUIState_setCtrlBitsByCtrlIndex);
  * @param uiState  the UI state
  * @param bit  the controller index, or -1 for all
  */
-extern "C" void cUIState_setCtrlBitsByCtrlIndex(void *uiState, signed char bit) {
+extern "C" void cUIState_setCtrlBitsByCtrlIndex(cUIState* uiState, signed char bit) {
     if (bit < 0) {
-        (*(unsigned char *)((char*)(uiState) + (0x15))) = 0xFFU;
+        (uiState->mCtrlBits) = 0xFFU;
         return;
     }
-    (*(unsigned char *)((char*)(uiState) + (0x15))) = (unsigned char) ((*(unsigned char *)((char*)(uiState) + (0x15))) | ((int) (0x01000000 << bit) >> 0x18));
+    (uiState->mCtrlBits) = (unsigned char) ((uiState->mCtrlBits) | ((int) (0x01000000 << bit) >> 0x18));
 }
 #endif
 //100%
@@ -1797,10 +1795,10 @@ INCLUDE_ASM("ui/uiscreen", cUIState_clearCtrlBits);
  *
  * @param bit  the controller index
  */
-extern "C" void cUIState_clearCtrlBits(void* self, signed char bit)
+extern "C" void cUIState_clearCtrlBits(cUIState* self, signed char bit)
 {
     signed char mask = ~(1 << bit);
-    *(unsigned char*)((char*)self + 0x15) &= mask;
+    self->mCtrlBits &= mask;
 }
 #endif
 
@@ -2044,7 +2042,7 @@ struct sVEntry_cUIState_hideScreens {
  *
  * Nothing in the retail code references it.
  */
-extern "C" void cUIState_hideScreens(void* self)
+extern "C" void cUIState_hideScreens(cUIState* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x24));
     if (n != 0) {
@@ -2079,7 +2077,7 @@ struct sVEntry_cUIState_showScreens {
  *
  * Nothing in the retail code references it.
  */
-extern "C" void cUIState_showScreens(void* self)
+extern "C" void cUIState_showScreens(cUIState* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x24));
     if (n != 0) {

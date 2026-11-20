@@ -6943,15 +6943,15 @@ struct S_8C28 { char pad[0x5B8]; unsigned arr[64]; };
  * @param instance  the instance
  * @return 1 when the id is listed, else 0
  */
-extern "C" int cRider_isIntersecting(S_8C28 *rider, void *instance) {
+extern "C" int cRider_isIntersecting(cRider* rider, void *instance) {
     int i = 0;
-    if (~rider->arr[0]) {
+    if (~((unsigned int*)&rider->mVisitedIds)[0]) {
         do {
-            if (rider->arr[i] == *(unsigned *)((char*)instance + 0x78)) {
+            if (((unsigned int*)&rider->mVisitedIds)[i] == *(unsigned *)((char*)instance + 0x78)) {
                 return 1;
             }
             i++;
-        } while (i < 64 && rider->arr[i] != 0xFFFFFFFF);
+        } while (i < 64 && ((unsigned int*)&rider->mVisitedIds)[i] != 0xFFFFFFFF);
     }
     return 0;
 }

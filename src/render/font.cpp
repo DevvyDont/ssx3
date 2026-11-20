@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/particle.h"
 #include "render/graphicsman.h"
 #include "render/ps2bezierman.h"
 #include "render/ps2lightman.h"
@@ -3927,10 +3928,10 @@ struct sFontState50C0 {
  * @param other  the entry to copy
  * @return @p self
  */
-extern "C" sFontState50C0* cPS2GraphicsMan_sViewportStack_operatorE(sFontState50C0* self, const sFontState50C0* other)
+extern "C" sFontState50C0* cPS2GraphicsMan_sViewportStack_operatorE(cPS2GraphicsMan* self, const sFontState50C0* other)
 {
-    *self = *other;
-    return self;
+    *((sFontState50C0*)self) = *other;
+    return ((sFontState50C0*)self);
 }
 #endif
 
@@ -5305,7 +5306,7 @@ extern "C" void func_00382AF0(void* self, int arg1, int arg2);
  *
  * @param arg1  passed through as func_00382AF0's second argument (preview: a bool)
  */
-extern "C" void cPS2GraphicsMan_PageFlip(void* self, int arg1) {
+extern "C" void cPS2GraphicsMan_PageFlip(cPS2GraphicsMan* self, int arg1) {
     func_00382AF0(self, arg1, 1);
 }
 #endif
@@ -6560,8 +6561,8 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_setSeed);
  * @param emitter  the dynamic emitter
  * @param fparg0  the seed
  */
-extern "C" void cBaseClass_DynamicEmitter_setSeed(void *emitter, float fparg0) {
-    (*(float *)((char*)(emitter) + (0x58))) = fparg0;
+extern "C" void cBaseClass_DynamicEmitter_setSeed(cBaseClass_DynamicEmitter* emitter, float fparg0) {
+    (emitter->m_emitter.SeedX0) = fparg0;
 }
 #endif
 //100%
@@ -6575,8 +6576,8 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_numSubEmitters);
  * @param emitter  the dynamic emitter
  * @return m_numSubEmitters
  */
-extern "C" int cBaseClass_DynamicEmitter_numSubEmitters(void *emitter) {
-    return (*(int *)((char*)(emitter) + (0x178)));
+extern "C" int cBaseClass_DynamicEmitter_numSubEmitters(cBaseClass_DynamicEmitter* emitter) {
+    return (emitter->m_numSubEmitters);
 }
 #endif
 //100%
@@ -6590,8 +6591,8 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_subEmitterId);
  * @param emitter  the dynamic emitter
  * @return m_subEmitterId
  */
-extern "C" int cBaseClass_DynamicEmitter_subEmitterId(void *emitter) {
-    return (*(int *)((char*)(emitter) + (0x17C)));
+extern "C" int cBaseClass_DynamicEmitter_subEmitterId(cBaseClass_DynamicEmitter* emitter) {
+    return (emitter->m_subEmitterId);
 }
 #endif
 //100%
@@ -6605,8 +6606,8 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_enabled);
  * @param emitter  the dynamic emitter
  * @return m_enabled
  */
-extern "C" int cBaseClass_DynamicEmitter_enabled(void *emitter) {
-    return (*(int *)((char*)(emitter) + (0x174)));
+extern "C" int cBaseClass_DynamicEmitter_enabled(cBaseClass_DynamicEmitter* emitter) {
+    return (emitter->m_enabled);
 }
 #endif
 //100%
@@ -6620,8 +6621,8 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_setEnabled);
  * @param emitter  the dynamic emitter
  * @param enable  nonzero to enable
  */
-extern "C" void cBaseClass_DynamicEmitter_setEnabled(void *emitter, int enable) {
-    (*(int *)((char*)(emitter) + (0x174))) = enable;
+extern "C" void cBaseClass_DynamicEmitter_setEnabled(cBaseClass_DynamicEmitter* emitter, int enable) {
+    (emitter->m_enabled) = enable;
 }
 #endif
 //100%
@@ -6635,8 +6636,8 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_getEnabledCount);
  * @param emitter  the dynamic emitter
  * @return m_enabledCount
  */
-extern "C" int cBaseClass_DynamicEmitter_getEnabledCount(void *emitter) {
-    return (*(int *)((char*)(emitter) + (0x1E0)));
+extern "C" int cBaseClass_DynamicEmitter_getEnabledCount(cBaseClass_DynamicEmitter* emitter) {
+    return (emitter->m_enabledCount);
 }
 #endif
 //100%
@@ -6655,10 +6656,10 @@ struct sFontQuad_6618 {
  * @param idx  the sub-emitter, counted from the oldest
  * @return the position
  */
-extern "C" sFontQuad_6618 cBaseClass_DynamicEmitter_getSubEmitterPosition(void* self, int idx)
+extern "C" sFontQuad_6618 cBaseClass_DynamicEmitter_getSubEmitterPosition(cBaseClass_DynamicEmitter* self, int idx)
 {
-    int next = *(int*)((char*)self + 0x17C) + 1;
-    return (*(sFontQuad_6618**)((char*)self + 0x1A0))[(idx + next) % *(int*)((char*)self + 0x178)];
+    int next = self->m_subEmitterId + 1;
+    return ((sFontQuad_6618*)self->m_positions)[(idx + next) % self->m_numSubEmitters];
 }
 #endif
 //100%
@@ -6677,10 +6678,10 @@ struct sFontQuad_6658 {
  * @param idx  the sub-emitter, counted from the oldest
  * @return the velocity
  */
-extern "C" sFontQuad_6658 cBaseClass_DynamicEmitter_getSubEmitterVelocity(void* self, int idx)
+extern "C" sFontQuad_6658 cBaseClass_DynamicEmitter_getSubEmitterVelocity(cBaseClass_DynamicEmitter* self, int idx)
 {
-    int next = *(int*)((char*)self + 0x17C) + 1;
-    return (*(sFontQuad_6658**)((char*)self + 0x1A4))[(idx + next) % *(int*)((char*)self + 0x178)];
+    int next = self->m_subEmitterId + 1;
+    return ((sFontQuad_6658*)self->m_velocities)[(idx + next) % self->m_numSubEmitters];
 }
 #endif
 //100%
@@ -6696,12 +6697,12 @@ INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_getSubEmitterPositionVeloci
  * @param outA  receives &m_positions[slot]
  * @param outB  receives &m_velocities[slot]
  */
-extern "C" void cBaseClass_DynamicEmitter_getSubEmitterPositionVelocity(void* self, int idx, int** outA, int** outB)
+extern "C" void cBaseClass_DynamicEmitter_getSubEmitterPositionVelocity(cBaseClass_DynamicEmitter* self, int idx, int** outA, int** outB)
 {
-    int next = *(int*)((char*)self + 0x17C) + 1;
-    int off = ((idx + next) % *(int*)((char*)self + 0x178)) * 0x10;
-    *outA = (int*)(*(char**)((char*)self + 0x1A0) + off);
-    *outB = (int*)(*(char**)((char*)self + 0x1A4) + off);
+    int next = self->m_subEmitterId + 1;
+    int off = ((idx + next) % self->m_numSubEmitters) * 0x10;
+    *outA = (int*)((char*)self->m_positions + off);
+    *outB = (int*)((char*)self->m_velocities + off);
 }
 #endif
 //100%
@@ -6721,12 +6722,12 @@ struct sFontQuad_66D8 {
  * @param outA  receives the position
  * @param outB  receives the velocity
  */
-extern "C" void cBaseClass_DynamicEmitter_getSubEmitterPositionVelocity1(void* self, int idx, sFontQuad_66D8* outA, sFontQuad_66D8* outB)
+extern "C" void cBaseClass_DynamicEmitter_getSubEmitterPositionVelocity1(cBaseClass_DynamicEmitter* self, int idx, sFontQuad_66D8* outA, sFontQuad_66D8* outB)
 {
-    int next = *(int*)((char*)self + 0x17C) + 1;
-    int i = (idx + next) % *(int*)((char*)self + 0x178);
-    *outA = (*(sFontQuad_66D8**)((char*)self + 0x1A0))[i];
-    *outB = (*(sFontQuad_66D8**)((char*)self + 0x1A4))[i];
+    int next = self->m_subEmitterId + 1;
+    int i = (idx + next) % self->m_numSubEmitters;
+    *outA = ((sFontQuad_66D8*)self->m_positions)[i];
+    *outB = ((sFontQuad_66D8*)self->m_velocities)[i];
 }
 #endif
 //100%
@@ -7664,7 +7665,7 @@ static inline void vu0CopyMtx_6C30(void* dst, const void* src)
  * @param mats  the matrix array
  * @param cur  the packet write pointer, advanced past the packet
  */
-extern "C" void cPS2GraphicsMan_SetBlendMatrices(void* self, sMtxList_6C30* list, sMtx_6C30* mats, unsigned long** cur)
+extern "C" void cPS2GraphicsMan_SetBlendMatrices(cPS2GraphicsMan* self, sMtxList_6C30* list, sMtx_6C30* mats, unsigned long** cur)
 {
     int n = list->count;
     int* idx = list->index;

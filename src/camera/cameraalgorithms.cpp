@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/camera.h"
 #include "camera/race/racecontroller.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -215,19 +216,19 @@ extern cSimpleCamera_cSimpleCamera_sVec4 t4vect_XAxis;
  *
  * @return @p self
  */
-extern "C" void* cSimpleCamera_cSimpleCamera(void* self)
+extern "C" void* cSimpleCamera_cSimpleCamera(cSimpleCamera* self)
 {
     cSimpleCamera_cSimpleCamera_sVec4 poseVec;
-    *(void***)((char*)self + 0x90) = cSimpleCamera_vtbl;
+    self->mVtbl = cSimpleCamera_vtbl;
     poseVec.x = 0; poseVec.y = 0; poseVec.z = 0; poseVec.w = 0;
-    *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x20) = poseVec;
+    *(cSimpleCamera_cSimpleCamera_sVec4*)&self->Pose = poseVec;
     poseVec.w = 1.0f;
     poseVec.x = 0;
     poseVec.y = 1.0f;
     poseVec.z = 0;
-    *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x30) = poseVec;
-    *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x80) = t4vect_XAxis;
-    return self;
+    *(cSimpleCamera_cSimpleCamera_sVec4*)&self->Pose.Q = poseVec;
+    *(cSimpleCamera_cSimpleCamera_sVec4*)&self->Direction = t4vect_XAxis;
+    return ((void*)self);
 }
 #endif
 
@@ -247,23 +248,23 @@ extern "C" void* cSimpleCamera_updateCamMat(void* self);
  * @param y  the near distance, also its minimum
  * @param z  the far distance, also its maximum
  */
-extern "C" void cSimpleCamera_init(void* self, float x, float y, float z)
+extern "C" void cSimpleCamera_init(cSimpleCamera* self, float x, float y, float z)
 {
     cSimpleCamera_cSimpleCamera_sVec4 poseVec;
-    *(float*)((char*)self + 0xC) = x;
-    *(float*)((char*)self + 0x10) = y;
-    *(float*)((char*)self + 0x14) = z;
-    *(float*)((char*)self + 0x0) = x;
-    *(float*)((char*)self + 0x4) = y;
-    *(float*)((char*)self + 0x8) = z;
+    self->MaxView = x;
+    self->MinNear = y;
+    self->MaxFar = z;
+    self->View = x;
+    self->Near = y;
+    self->Far = z;
     poseVec.x = 0; poseVec.y = 0; poseVec.z = 0; poseVec.w = 0;
-    *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x20) = poseVec;
+    *(cSimpleCamera_cSimpleCamera_sVec4*)&self->Pose = poseVec;
     poseVec.w = 1.0f;
     poseVec.x = 0;
     poseVec.y = 1.0f;
     poseVec.z = 0;
-    *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x30) = poseVec;
-    *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x80) = t4vect_XAxis;
+    *(cSimpleCamera_cSimpleCamera_sVec4*)&self->Pose.Q = poseVec;
+    *(cSimpleCamera_cSimpleCamera_sVec4*)&self->Direction = t4vect_XAxis;
     cSimpleCamera_updateCamMat(self);
 }
 #endif
@@ -298,12 +299,12 @@ static inline float atan2_15D780(float y, float x, float zero)
  *
  * @return the heading (radians)
  */
-extern "C" float cSimpleCamera_getHeading(void* self)
+extern "C" float cSimpleCamera_getHeading(cSimpleCamera* self)
 {
     cSimpleCamera_getHeading_V look;
-    float x = 2.0f * (*(float*)((char*)self + 0x34) * *(float*)((char*)self + 0x30) - *(float*)((char*)self + 0x3C) * *(float*)((char*)self + 0x38));
-    float y = 1.0f - 2.0f * (*(float*)((char*)self + 0x38) * *(float*)((char*)self + 0x38) + *(float*)((char*)self + 0x30) * *(float*)((char*)self + 0x30));
-    float z = 2.0f * (*(float*)((char*)self + 0x34) * *(float*)((char*)self + 0x38) + *(float*)((char*)self + 0x3C) * *(float*)((char*)self + 0x30));
+    float x = 2.0f * (self->Pose.Q.y * self->Pose.Q.x - self->Pose.Q.w * self->Pose.Q.z);
+    float y = 1.0f - 2.0f * (self->Pose.Q.z * self->Pose.Q.z + self->Pose.Q.x * self->Pose.Q.x);
+    float z = 2.0f * (self->Pose.Q.y * self->Pose.Q.z + self->Pose.Q.w * self->Pose.Q.x);
     look.x = x;
     look.y = y;
     look.z = z;
@@ -346,12 +347,12 @@ static inline float cSimpleCamera_getPitch_Length(const cSimpleCamera_getPitch_V
  *
  * @return the pitch (radians)
  */
-extern "C" float cSimpleCamera_getPitch(void* self)
+extern "C" float cSimpleCamera_getPitch(cSimpleCamera* self)
 {
     cSimpleCamera_getPitch_V look;
-    look.x = 2.0f * (*(float*)((char*)self + 0x34) * *(float*)((char*)self + 0x30) - *(float*)((char*)self + 0x3C) * *(float*)((char*)self + 0x38));
-    look.y = 1.0f - 2.0f * (*(float*)((char*)self + 0x38) * *(float*)((char*)self + 0x38) + *(float*)((char*)self + 0x30) * *(float*)((char*)self + 0x30));
-    look.z = 2.0f * (*(float*)((char*)self + 0x34) * *(float*)((char*)self + 0x38) + *(float*)((char*)self + 0x3C) * *(float*)((char*)self + 0x30));
+    look.x = 2.0f * (self->Pose.Q.y * self->Pose.Q.x - self->Pose.Q.w * self->Pose.Q.z);
+    look.y = 1.0f - 2.0f * (self->Pose.Q.z * self->Pose.Q.z + self->Pose.Q.x * self->Pose.Q.x);
+    look.z = 2.0f * (self->Pose.Q.y * self->Pose.Q.z + self->Pose.Q.w * self->Pose.Q.x);
     look.w = 0;
     return func_0031C128(look.z / cSimpleCamera_getPitch_Length(look));
 }

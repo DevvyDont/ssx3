@@ -114,18 +114,17 @@ extern void* cListNode_vtbl[];
  *
  * @return this
  */
-extern "C" void* cList_cList(void* self)
+extern "C" void* cList_cList(cList* self)
 {
-    char* list = (char*)self;
-    *(void**)(list + 0x4) = list;
-    *(void**)(list + 0x0) = list;
-    *(void***)(list + 0x18) = cList_vtbl;
-    *(void***)(list + 0x8) = cListNode_vtbl;
-    *(void**)(list + 0x10) = list + 0xC;
-    *(void***)(list + 0x14) = cListNode_vtbl;
-    *(void**)(list + 0xC) = list + 0xC;
-    cList_clear(list);
-    return self;
+    self->mStart.mpNext = (cListNode*)((char*)self);
+    *(void**)&self->mStart = ((char*)self);
+    self->mVtbl = cList_vtbl;
+    self->mStart.mVtbl = cListNode_vtbl;
+    self->mEnd.mpNext = (cListNode*)(((char*)self) + 0xC);
+    self->mEnd.mVtbl = cListNode_vtbl;
+    *(void**)&self->mEnd = ((char*)self) + 0xC;
+    cList_clear(((char*)self));
+    return ((void*)self);
 }
 #endif
 
@@ -155,10 +154,10 @@ INCLUDE_ASM("util/list", cList_last);
  * @param list  the cList
  * @return the last node, or 0 for an empty list
  */
-extern "C" int *cList_last(void *list) {
+extern "C" int *cList_last(cList* list) {
     int *temp_2;
 
-    temp_2 = (*(int **)((char*)(list) + (0xC)));
+    temp_2 = (*(int**)&list->mEnd);
     return ((*temp_2 ^ (int) temp_2) == 0) ? 0 : temp_2;
 }
 #endif
@@ -288,9 +287,9 @@ public:
  * deleting destructor (slot 1, flags 3), then relinks the empty list (cList_clear). The null check on each
  * node comes after its next link has been read.
  */
-extern "C" void cList_destroyList(void* self)
+extern "C" void cList_destroyList(cList* self)
 {
-    cList_destroyList_cVirt* n = *(cList_destroyList_cVirt**)((char*)self + 0x4);
+    cList_destroyList_cVirt* n = (cList_destroyList_cVirt*)self->mStart.mpNext;
     while (n->mpNext != n) {
         cList_destroyList_cVirt* nextNode = n->mpNext;
         if (n != 0) {
@@ -346,9 +345,9 @@ public:
  * @param pOperator  the operator to apply (On Tour cListOperator* pOperator)
  * @return the first nonzero node result, or 0 (On Tour returns void*)
  */
-extern "C" int cList_traverseFlat(void* self, void* pOperator)
+extern "C" int cList_traverseFlat(cList* self, void* pOperator)
 {
-    cList_traverseFlat_cVirt* n = *(cList_traverseFlat_cVirt**)((char*)self + 0x4);
+    cList_traverseFlat_cVirt* n = (cList_traverseFlat_cVirt*)self->mStart.mpNext;
     while (n->mpNext != n) {
         cList_traverseFlat_cVirt* nextNode = n->mpNext;
         int result = n->v02(pOperator);
@@ -382,9 +381,9 @@ public:
  * @param pOperator  the operator to apply (On Tour cListOperator* pOperator)
  * @return the first nonzero node result, or 0 (On Tour returns void*)
  */
-extern "C" int cList_traverseRecurse(void* self, void* pOperator)
+extern "C" int cList_traverseRecurse(cList* self, void* pOperator)
 {
-    cList_traverseRecurse_cVirt* n = *(cList_traverseRecurse_cVirt**)((char*)self + 0x4);
+    cList_traverseRecurse_cVirt* n = (cList_traverseRecurse_cVirt*)self->mStart.mpNext;
     while (n->mpNext != n) {
         cList_traverseRecurse_cVirt* nextNode = n->mpNext;
         int result = n->v03(pOperator);

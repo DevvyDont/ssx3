@@ -1,4 +1,5 @@
 #include "common.h"
+#include "util/menu.h"
 #include "util/bxps2memcard.h"
 
 //100%
@@ -720,8 +721,8 @@ INCLUDE_ASM("seg/seg_1D3510", cMenuItem_setID);
  * @param menuItem  the menu item
  * @param itemId  the new ID
  */
-extern "C" void cMenuItem_setID(void *menuItem, int itemId) {
-    (*(int *)((char*)(menuItem) + (8))) = itemId;
+extern "C" void cMenuItem_setID(cMenuItem* menuItem, int itemId) {
+    (menuItem->ID) = itemId;
 }
 #endif
 
@@ -734,8 +735,8 @@ INCLUDE_ASM("seg/seg_1D3510", cMenuItem_getID);
  * @param menuItem  the menu item
  * @return the ID
  */
-extern "C" int cMenuItem_getID(void *menuItem) {
-    return (*(int *)((char*)(menuItem) + (8)));
+extern "C" int cMenuItem_getID(cMenuItem* menuItem) {
+    return (menuItem->ID);
 }
 #endif
 
@@ -762,8 +763,8 @@ INCLUDE_ASM("seg/seg_1D3510", cMenuItem_getArg);
  * @param menuItem  the menu item
  * @return Arg
  */
-extern "C" int cMenuItem_getArg(void *menuItem) {
-    return (*(int *)((char*)(menuItem) + (0xC)));
+extern "C" int cMenuItem_getArg(cMenuItem* menuItem) {
+    return ((int)menuItem->Arg);
 }
 #endif
 
@@ -791,8 +792,8 @@ INCLUDE_ASM("seg/seg_1D3510", cMenu_getItem);
  * @param itemIndex  the item index
  * @return the item
  */
-extern "C" int cMenu_getItem(char *menu, int itemIndex) {
-    return *(int *)(menu + (itemIndex << 2) + 0xC);
+extern "C" int cMenu_getItem(cMenu* menu, int itemIndex) {
+    return *(int *)(((char*)menu) + (itemIndex << 2) + 0xC);
 }
 #endif
 
@@ -819,8 +820,8 @@ INCLUDE_ASM("seg/seg_1D3510", cMenu_getMenuSys);
  * @param menu  the menu
  * @return MenuSys
  */
-extern "C" int cMenu_getMenuSys(void *menu) {
-    return (*(int *)((char*)(menu) + (0x124)));
+extern "C" int cMenu_getMenuSys(cMenu* menu) {
+    return ((int)menu->MenuSys);
 }
 #endif
 
@@ -833,8 +834,8 @@ INCLUDE_ASM("seg/seg_1D3510", cMenu_getFont);
  * @param menu  the menu
  * @return the font
  */
-extern "C" int cMenu_getFont(void *menu) {
-    return (*(int *)((char*)((*(void **)((char*)(menu) + (0x124)))) + (0x58)));
+extern "C" int cMenu_getFont(cMenu* menu) {
+    return (*(int *)((char*)((menu->MenuSys)) + (0x58)));
 }
 #endif
 

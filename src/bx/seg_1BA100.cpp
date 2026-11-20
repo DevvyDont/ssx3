@@ -904,8 +904,8 @@ INCLUDE_ASM("bx/seg_1BA100", cMonitor_MONITOR_Pause);
  *
  * @param monitor  the cMonitor
  */
-extern "C" void cMonitor_MONITOR_Pause(void *monitor) {
-    (*(int *)((char*)(monitor) + (0x94))) = 1;
+extern "C" void cMonitor_MONITOR_Pause(cMonitor* monitor) {
+    (monitor->mPaused) = 1;
 }
 #endif
 
@@ -917,8 +917,8 @@ INCLUDE_ASM("bx/seg_1BA100", cMonitor_MONITOR_Resume);
  *
  * @param monitor  the cMonitor
  */
-extern "C" void cMonitor_MONITOR_Resume(void *monitor) {
-    (*(int *)((char*)(monitor) + (0x94))) = 0;
+extern "C" void cMonitor_MONITOR_Resume(cMonitor* monitor) {
+    (monitor->mPaused) = 0;
 }
 #endif
 
@@ -931,8 +931,8 @@ INCLUDE_ASM("bx/seg_1BA100", cMonitor_MONITOR_Paused);
  * @param monitor  the cMonitor
  * @return mPaused
  */
-extern "C" int cMonitor_MONITOR_Paused(void *monitor) {
-    return (*(int *)((char*)(monitor) + (0x94)));
+extern "C" int cMonitor_MONITOR_Paused(cMonitor* monitor) {
+    return (monitor->mPaused);
 }
 #endif
 
@@ -947,8 +947,8 @@ INCLUDE_ASM("bx/seg_1BA100", cMonitor_MONITOR_Counter);
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
 // volatile keeps the load out of the jr delay slot, as in the target.
-extern "C" int cMonitor_MONITOR_Counter(void *monitor) {
-    return (*(volatile int *)((char*)(monitor) + (0x88)));
+extern "C" int cMonitor_MONITOR_Counter(cMonitor* monitor) {
+    return (monitor->mCounter);
 }
 #endif
 
@@ -963,13 +963,13 @@ INCLUDE_ASM("bx/seg_1BA100", cMonitor_MONITOR_Delta);
  * @param monitor  the cMonitor
  * @return the elapsed ticks times 0.01
  */
-extern "C" float cMonitor_MONITOR_Delta(void *monitor) {
+extern "C" float cMonitor_MONITOR_Delta(cMonitor* monitor) {
     int temp_2;
     int temp_3;
 
-    temp_2 = (*(volatile int *)((char*)(monitor) + (0x88)));
-    temp_3 = (*(int *)((char*)(monitor) + (0x8C)));
-    (*(int *)((char*)(monitor) + (0x8C))) = temp_2;
+    temp_2 = (monitor->mCounter);
+    temp_3 = ((int)monitor->mLastCounter);
+    ((int)monitor->mLastCounter) = temp_2;
     return (float) (temp_2 - temp_3) * 0.01f;
 }
 #endif

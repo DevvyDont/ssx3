@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "ui/uitexturebank.h"
 #include "ui/uithing.h"
 #include "ui/uilistbox.h"
@@ -41,14 +42,14 @@ extern "C" void* cList_cList(void* self);
  *
  * @return @p self
  */
-extern "C" void* cUIEngine_cUIEngine(void* self)
+extern "C" void* cUIEngine_cUIEngine(cUIEngine* self)
 {
-    *(int*)((char*)self + 0x0) = 0;
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0xC) = 0;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x14) = 0;
+    self->mpCustom = 0;
+    self->mpData = 0;
+    self->mpFontInterface = 0;
+    self->mpInput = 0;
+    self->mpLocaleInterface = 0;
+    self->mpSound = 0;
     cList_cList((char*)self + 0x18);
     cList_cList((char*)self + 0x34);
     *(int*)((char*)self + 0x58) = 0;
@@ -56,9 +57,9 @@ extern "C" void* cUIEngine_cUIEngine(void* self)
     *(int*)((char*)self + 0x60) = 0;
     *(int*)((char*)self + 0x64) = 0;
     *(int*)((char*)self + 0x68) = 0;
-    *(void**)((char*)self + 0x54) = self;
-    *(void**)((char*)self + 0x6C) = self;
-    return self;
+    *(void**)((char*)self + 0x54) = ((void*)self);
+    *(void**)((char*)self + 0x6C) = ((void*)self);
+    return ((void*)self);
 }
 #endif
 
@@ -107,7 +108,7 @@ struct cUIEngine__cUIEngine_sSelf {
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cUIEngine__cUIEngine(void* self, int flags)
+extern "C" void cUIEngine__cUIEngine(cUIEngine* self, int flags)
 {
     cUIEngine__cUIEngine_sSelf* fields = (cUIEngine__cUIEngine_sSelf*)self;
     delete fields->a;
@@ -142,15 +143,15 @@ extern const char str_pct_s_lui[];
  * @param id  base name of the UI file (char*, passed as int)
  * @return 1 (the load result is not checked)
  */
-extern "C" int cUIEngine_loadFile(void* self, int id)
+extern "C" int cUIEngine_loadFile(cUIEngine* self, int id)
 {
     char name[100];
     sprintf(name, str_pct_s_lui, id);
     char* file = (char*)FILE_load(name, 0);
-    *(char**)((char*)self + 0x4) = file;
+    self->mpData = file;
     // PORT: the font setter stores the data pointer in an int.
     cUIAnimationBank_setData((char*)self + 0x50, (int)(file + *(int*)(file + 0x8)));
-    file = *(char**)((char*)self + 0x4);
+    file = self->mpData;
     cUITextureBank_setData((cUITextureBank*)((char*)self + 0x58), id, file + *(int*)(file + 0x10));
     return 1;
 }
@@ -204,9 +205,9 @@ struct sUIScrTbl { unsigned int count; sUIScrEnt ents[1]; };
  * @param screen  an existing screen object to fill, or 0 to allocate one
  * @return the screen
  */
-extern "C" void* cUIEngine_addScreenByHashName(void* self, void* owner, unsigned int hash, void* screen)
+extern "C" void* cUIEngine_addScreenByHashName(cUIEngine* self, void* owner, unsigned int hash, void* screen)
 {
-    char* bank = *(char**)((char*)self + 4);
+    char* bank = self->mpData;
     sUIScrTbl* tbl = (sUIScrTbl*)(bank + *(int*)(bank + 0xC));
     sUIScrEnt* found = 0;
     sUIScrEnt* screenOffset = tbl->ents;
@@ -324,7 +325,7 @@ static inline void setF4_2_7DF8(sUIRS_7DF8* rs, int v) { rs->f4_2 = v; }
  * stack (+0x18) with cUIStateStack_render2D and pops the draw state. cRealFE_render, the load screens and the game and app
  * render code call it each frame.
  */
-extern "C" void cUIEngine_render2D(void* self)
+extern "C" void cUIEngine_render2D(cUIEngine* self)
 {
     cUICtx_7DF8* ctx = D_004A289C_7df8;
     ctx->top[1] = ctx->top[0];
@@ -357,7 +358,7 @@ INCLUDE_ASM("ui/uiengine", cUIEngine_render3D);
  *
  * cRealFE_render calls it just before cUIEngine_render2D.
  */
-extern "C" void cUIEngine_render3D(void* self)
+extern "C" void cUIEngine_render3D(cUIEngine* self)
 {
     cUIStateStack_render3D((char*)self + 0x18);
 }
@@ -380,9 +381,9 @@ extern "C" void cUIStateStack_update(void*);
  *
  * cRealFE_update, cFELoadScreen_update, the game loader and the app's UI loops call it.
  */
-extern "C" void cUIEngine_update(void* self)
+extern "C" void cUIEngine_update(cUIEngine* self)
 {
-    void* obj = *(void**)((char*)self + 0xC);
+    void* obj = self->mpInput;
     sVEntry398038* vt = *(sVEntry398038**)((char*)obj + 8);
     vt[46].fn((char*)obj + vt[0x2E].delta);
     cUIStateStack_update((char*)self + 0x18);

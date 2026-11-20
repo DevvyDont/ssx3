@@ -77,7 +77,7 @@ extern "C" void cSSXAudio_ResetLift(void* self);
 extern "C" void func_002A4590(void* self, int flag);
 extern "C" void func_0029ED90(char* self, int restart);
 extern "C" void SPCH_Init(void* self);
-extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
+extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(cSSXAudio* self, int a1, int a2);
 extern "C" void func_002B0E60(void* self, int a, int b, char* name, int c, int d, int e);
 extern "C" void func_0028F700(void* self);
 extern char str_CircFIFOBuff[];
@@ -287,7 +287,7 @@ extern "C" char* cSSXAudio_cSSXAudio(void* self, int inchrg, int maxBanks, int m
     func_002A4590(self, 1);
     func_0029ED90(S_4C68, 0);
     SPCH_Init(A_4C68->m5560);
-    func_002B0E60(A_4C68->m5560, 0, 0, str_CHAR, (int)cSSXAudio_GetCurrAppliedVolumePtr(self, 4, 0), 1, -1);
+    func_002B0E60(A_4C68->m5560, 0, 0, str_CHAR, (int)cSSXAudio_GetCurrAppliedVolumePtr((cSSXAudio*)self, 4, 0), 1, -1);
     func_0028F700(self);
     return S_4C68;
 }
@@ -426,7 +426,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_PlayPositional);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBankMonitor_BANKMONITOR_Create(void* sub, int id, int vol, int a3);
-extern "C" int cSSXAudio_GetClosestCamera(void* self, int id);
+extern "C" int cSSXAudio_GetClosestCamera(cSSXAudio* self, int id);
 extern "C" int cSSXAudio_ReplayMode(cSSXAudio* self);
 extern "C" void cSndPlayOpts_OPTS_Radius(void* self, float a, float b);
 extern "C" int cStreamSys_STREAM_Queue(void* self, int i, int a, int b, int c);
@@ -901,7 +901,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void cBankManager_BANK_SyncLoad(void* p, int a1, char* msg, int a3);
 extern "C" void cSSXAudio_DuckToStream(void* self, int a1, float f0, float f1);
-extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
+extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(cSSXAudio* self, int a1, int a2);
 extern "C" void func_002B49C0(void* mon, int id);
 extern "C" void cSSXAudio_ResumeAudio(void* self);
 extern "C" void FileParser__FileParser(void* self, int flags);
@@ -966,7 +966,7 @@ extern "C" void cSSXAudio_FrontEndLoad(char* self)
     char* mon = self + 0x118;
     sSaVt5FB0* vt = *(sSaVt5FB0**)(self + 0x5558);
     char* thisp = mon + vt[2].delta;
-    vt[2].fn(thisp, str_charsel, 0xC, cSSXAudio_GetCurrAppliedVolumePtr(self, 1, 0), 1);
+    vt[2].fn(thisp, str_charsel, 0xC, cSSXAudio_GetCurrAppliedVolumePtr((cSSXAudio*)self, 1, 0), 1);
     func_002B49C0(mon, 301);
     *(int*)(self + 0x6290) = 10;
     *(int*)(self + 0x6090) = *(int*)(self + 0x608C);
@@ -1884,7 +1884,7 @@ extern "C" float cSSXAudio_GetCurrSetVolume(void* self, int a1);
  *
  * @return the setting
  */
-extern "C" int cSSXAudio_GetSFXVolume(void* self)
+extern "C" int cSSXAudio_GetSFXVolume(cSSXAudio* self)
 {
     return (int)(cSSXAudio_GetCurrSetVolume(self, 5) * 11.0f);
 }
@@ -2070,7 +2070,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCurrAppliedVolume);
  * @param charIndex  the character for control 4
  * @return the level
  */
-extern "C" float cSSXAudio_GetCurrAppliedVolume(void* self, int volumeIndex, int charIndex)
+extern "C" float cSSXAudio_GetCurrAppliedVolume(cSSXAudio* self, int volumeIndex, int charIndex)
 {
     if (volumeIndex != 4 || charIndex >= 10) {
         return *(float*)((char*)self + (volumeIndex << 4) + 0x62C8);
@@ -2091,7 +2091,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCurrAppliedVolumePtr);
  * @param charIndex  the character for control 4
  * @return a pointer to the level (float)
  */
-extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int volumeIndex, int charIndex)
+extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(cSSXAudio* self, int volumeIndex, int charIndex)
 {
     if (volumeIndex != 4 || charIndex >= 10) {
         // PORT: pointer held in int (only spelling found that gives idx-first addu)
@@ -2110,9 +2110,9 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCurrSetVolumePtr);
  * @param idx  the volume control (eVolumeControl)
  * @return a pointer to the level
  */
-extern "C" char* cSSXAudio_GetCurrSetVolumePtr(char* self, int idx)
+extern "C" char* cSSXAudio_GetCurrSetVolumePtr(cSSXAudio* self, int idx)
 {
-    return &self[25276 + (idx << 4)];
+    return &((char*)self)[25276 + (idx << 4)];
 }
 #endif
 //100%
@@ -2831,7 +2831,7 @@ static inline float audVu0Dot_8940(const sAudV4_8940& a, const sAudV4_8940& b)
 // FAKEMATCH: register pin `register int r FM_REG("$2")` (local-alloc gives v0 to the dot asm's block-local "=&r"
 // temps before the global r; retail keeps r in v0); plain form 94.02% (unpositioned).
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-extern "C" int cSSXAudio_GetClosestCamera(void* self, int id)
+extern "C" int cSSXAudio_GetClosestCamera(cSSXAudio* self, int id)
 {
     if (cSSXAudio_GetNumViews() < 2) {
         return 0;
@@ -2850,7 +2850,7 @@ extern "C" int cSSXAudio_GetClosestCamera(void* self, int id)
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetClosestCamera1);
 #ifdef SKIP_ASM
 extern "C" int cAudioInterface_isInGame(void);
-extern "C" int cSSXAudio_GetClosestCamera(void* self, int id);
+extern "C" int cSSXAudio_GetClosestCamera(cSSXAudio* self, int id);
 // PORT: callers pass self, but cSSXAudio_GetNumViews's body takes no arguments (the unit declares it ()).
 int cSSXAudio_GetNumViews_self(void* self) __asm__("cSSXAudio_GetNumViews");
 
@@ -2864,7 +2864,7 @@ struct sAudVtEnt { short delta; short index; int (*fn)(void*); };
  * @param obj  the rider (cRider)
  * @return the view index
  */
-extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* obj)
+extern "C" int cSSXAudio_GetClosestCamera1(cSSXAudio* self, void* obj)
 {
     if (cAudioInterface_isInGame() == 0) {
         return 0;
@@ -3014,7 +3014,7 @@ void* cSSXAudio_GetCameraPos(void* self, int a1);
  */
 // PORT: PS2-only VU0 inline asm (vector subtract).
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-extern "C" int cSSXAudio_InCameraView(void* self, sAudV4* pos, float radius)
+extern "C" int cSSXAudio_InCameraView(cSSXAudio* self, sAudV4* pos, float radius)
 {
     float radiusSq = radius * 100.0f;
     radiusSq = radiusSq * radiusSq;
@@ -3832,7 +3832,7 @@ struct sSsxAudioVEntryI {
  * @param src  the rider (cRider)
  * @return 0, 1 or 2
  */
-extern "C" int cSSXAudio_GetCharacterLevel(void* self, void* src)
+extern "C" int cSSXAudio_GetCharacterLevel(cSSXAudio* self, void* src)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
     char* obj = (char*)src + 0x6C0;
@@ -3889,7 +3889,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_BEAudioModeToAudioMode);
  * @param beMode  the options' sound mode
  * @return the driver mode (eSOUNDDEF_MODE)
  */
-extern "C" int cSSXAudio_BEAudioModeToAudioMode(void* self, unsigned char beMode)
+extern "C" int cSSXAudio_BEAudioModeToAudioMode(cSSXAudio* self, unsigned char beMode)
 {
     int result = 1;
     switch (beMode) {
@@ -3918,7 +3918,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_AudioModeToBEAudioMode);
  * @param audioMode  the driver mode (eSOUNDDEF_MODE)
  * @return the options' sound mode
  */
-extern "C" void* cSSXAudio_AudioModeToBEAudioMode(void* self, int audioMode)
+extern "C" void* cSSXAudio_AudioModeToBEAudioMode(cSSXAudio* self, int audioMode)
 {
     int result = 0;
     switch (audioMode) {
@@ -3938,7 +3938,7 @@ extern "C" void* cSSXAudio_AudioModeToBEAudioMode(void* self, int audioMode)
 }
 #endif
 
-extern "C" void* cSSXAudio_AudioModeToBEAudioMode(void*, int);
+extern "C" void* cSSXAudio_AudioModeToBEAudioMode(cSSXAudio*, int);
 
 //99.29%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCurrentSoundMode__FPv);
@@ -3952,7 +3952,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetCurrentSoundMode__FPv);
  */
 void* cSSXAudio_GetCurrentSoundMode(void* self)
 {
-    return cSSXAudio_AudioModeToBEAudioMode(self, *(int*)((char*)self + 0x62b0));
+    return cSSXAudio_AudioModeToBEAudioMode((cSSXAudio*)self, *(int*)((char*)self + 0x62b0));
 }
 #endif
 

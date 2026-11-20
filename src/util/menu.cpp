@@ -713,10 +713,10 @@ extern "C" void cMenu_prevFocus(cMenu* self);
  *
  * @return the focus item's input result, or 0 when the focus moved
  */
-extern "C" int cMenu_input(void* self)
+extern "C" int cMenu_input(cMenu* self)
 {
     cMenu_checkFocus((cMenu*)self);
-    cMenu_input_cItem* item = *(cMenu_input_cItem**)((char*)self + (*(int*)((char*)self + 0x4) << 2) + 0xC);
+    cMenu_input_cItem* item = *(cMenu_input_cItem**)((char*)self + (self->FocusItem << 2) + 0xC);
     int inputResult = item->v02();
     switch (inputResult) {
     case 3:
@@ -1202,7 +1202,7 @@ static inline void cMenu_drawBox_setF8_5(sRS_2CB498* rs, int v)
  * @param rect  the box (x, y, w, h)
  * @param col  the box colour, a tARGB (a, r, g, b)
  */
-extern "C" void cMenu_drawBox(void* self, float* rect, cMenuItem_textRender1_sColor* col)
+extern "C" void cMenu_drawBox(cMenu* self, float* rect, cMenuItem_textRender1_sColor* col)
 {
     sVtx_2CB498 quadVerts[4];
     int i;
@@ -1216,7 +1216,7 @@ extern "C" void cMenu_drawBox(void* self, float* rect, cMenuItem_textRender1_sCo
     int old = cMenu_drawBox_getF8_5(((sRS_2CB498*)GrMan->m_pCurrentDrawState));
     cMenu_drawBox_setF8_5(((sRS_2CB498*)GrMan->m_pCurrentDrawState), old - 2);
     ((sRS_2CB498*)GrMan->m_pCurrentDrawState)->f4_2 = 5;
-    int id = *(int*)(*(char**)((char*)self + 0x124) + 0x60);
+    int id = *(int*)((char*)self->MenuSys + 0x60);
     ((sRS_2CB498*)GrMan->m_pCurrentDrawState)->f10 = id;
     float pieceRect[4];
     float pieceUv[4];
@@ -1280,9 +1280,9 @@ struct sVEntry2CB880 {
  * @param rect  the box rect
  * @param on  nonzero for the selected colour
  */
-extern "C" void cMenu_drawBox1(void* self, void* rect, int on)
+extern "C" void cMenu_drawBox1(cMenu* self, void* rect, int on)
 {
-    sVEntry2CB880* vt = *(sVEntry2CB880**)((char*)self + 0x12C);
+    sVEntry2CB880* vt = (sVEntry2CB880*)self->mVtbl;
     fn2CB880* drawBoxFn = &vt[8].fn;
     (*drawBoxFn)((char*)self + vt[8].delta, rect, on ? D_004D5380 : D_004D5390);
 }
@@ -1406,9 +1406,9 @@ public:
  *
  * @param rect  the arrow's rect (x, y, w, h)
  */
-extern "C" void cMenu_renderUpArrow(void* self, float* rect)
+extern "C" void cMenu_renderUpArrow(cMenu* self, float* rect)
 {
-    sVEntry2CB880* vt = *(sVEntry2CB880**)((char*)self + 0x12C);
+    sVEntry2CB880* vt = (sVEntry2CB880*)self->mVtbl;
     vt[8].fn((char*)self + vt[8].delta, rect, D_004D5380);
     *(short*)((char*)((cCtx_2CB8C8*)GrMan)->top + 0x10) = -1;
     ((cCtx_2CB8C8*)GrMan)->top->f4_2 = 1;
@@ -1561,9 +1561,9 @@ public:
  *
  * @param rect  the arrow's rect (x, y, w, h)
  */
-extern "C" void cMenu_renderDownArrow(void* self, float* rect)
+extern "C" void cMenu_renderDownArrow(cMenu* self, float* rect)
 {
-    sVEntry2CB880* vt = *(sVEntry2CB880**)((char*)self + 0x12C);
+    sVEntry2CB880* vt = (sVEntry2CB880*)self->mVtbl;
     vt[8].fn((char*)self + vt[8].delta, rect, D_004D5380);
     *(short*)((char*)((cCtx_2CBAC8*)GrMan)->top + 0x10) = -1;
     ((cCtx_2CBAC8*)GrMan)->top->f4_2 = 1;
@@ -1683,9 +1683,9 @@ INCLUDE_ASM("util/menu", cMenu_remAllItems);
 /**
  * Empties a menu: sets FocusItem (+0x4) and NumItems (+0x0) to 0 (TopItem and the Items pointers stay).
  */
-extern "C" void cMenu_remAllItems(void *self) {
-    *(int *)((char *)self + 4) = 0;
-    *(int *)((char *)self + 0) = 0;
+extern "C" void cMenu_remAllItems(cMenu* self) {
+    self->FocusItem = 0;
+    self->NumItems = 0;
 }
 #endif
 //100%
@@ -1704,7 +1704,7 @@ extern "C" int func_002D4008(const void*, const void*);
  *
  * @param cmp  compares two items; called through func_002D4008
  */
-extern "C" void cMenu_sortItems(void* self, int (*cmp)(int, int))
+extern "C" void cMenu_sortItems(cMenu* self, int (*cmp)(int, int))
 {
     D_004A54BC = cmp;
     qsort((char*)self + 0xC, *(int*)self, 4, func_002D4008);
@@ -5483,7 +5483,7 @@ INCLUDE_ASM("util/menu", cExpandMenuItem_remAllItems);
 extern "C" void cExpandMenuItem_remAllItems(void* self)
 {
     char* expandItem = (char*)self;
-    cMenu_remAllItems(expandItem + 0x18);
+    cMenu_remAllItems((cMenu*)(expandItem + 0x18));
     void* item = *(void**)(expandItem + 0x14);
     if (item != 0) {
         cExpandMenuItem_addItem3(self, item, -1);

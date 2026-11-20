@@ -157,8 +157,8 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_update);
 extern "C" void NetConnIdle(void);
 extern "C" int NetConnStatus_5A20(int sel, int a, int b) __asm__("NetConnStatus");
 extern "C" int NetConnConnect(void* params, int a);
-extern "C" void cCommSystem_netConnFailed(void* self, int reason);
-extern "C" void cCommSystem_netConnLocalAddr(void* self, int* out);
+extern "C" void cCommSystem_netConnFailed(cCommSystem* self, int reason);
+extern "C" void cCommSystem_netConnLocalAddr(cCommSystem* self, int* out);
 // cCommSystem_mNetConns: the 'netw'/'list' reply buffer (func_00255F20), 10 entries of 0x100 bytes; +0x80 is an entry's name field
 extern char cCommSystem_mNetConns[];
 
@@ -194,35 +194,35 @@ struct sComm_5A20 {
  * 5 once cCommSystem_netConnLocalAddr reports a local address. In 5 each channel gets its virtual update. The timeout (+0x24) counts
  * down every call and fails the connection with 'time' when it runs out.
  */
-extern "C" void cCommSystem_update(sComm_5A20* self)
+extern "C" void cCommSystem_update(cCommSystem* self)
 {
     int i;
     NetConnIdle();
-    switch (self->state) {
+    switch (self->mNetConnState) {
     case 0:
     case 1:
     case 6:
         break;
     case 2:
         if (NetConnStatus_5A20(0x6F6E6C6E, 0, 0) == 0) {
-            NetConnConnect(cCommSystem_mNetConns + 0x80 + (self->index << 8), 0);
-            self->state = 3;
+            NetConnConnect(cCommSystem_mNetConns + 0x80 + (self->mActiveNetConn << 8), 0);
+            self->mNetConnState = 3;
         }
         break;
     case 3: {
         if (NetConnStatus_5A20(0x6F6E6C6E, 0, 0) != 0 && NetConnStatus_5A20(0x686F7374, 0, 0) != 0) {
-            self->state = 4;
-            self->timer = 1800;
-            self->type = NetConnStatus_5A20(0x74797065, 0, 0);
+            self->mNetConnState = 4;
+            self->mNetConnTimeOut = 1800;
+            self->mInterfaceType = NetConnStatus_5A20(0x74797065, 0, 0);
             int bb = NetConnStatus_5A20(0x62626E64, 0, 0);
             if (bb == 1) {
-                self->bband = bb;
+                self->mBroadBand = bb;
             }
         }
         int conn = NetConnStatus_5A20(0x636F6E6E, 0, 0);
         if ((conn >> 24) == '-') {
             cCommSystem_netConnFailed(self, conn);
-            self->timer = 0;
+            self->mNetConnTimeOut = 0;
         }
         break;
     }
@@ -230,25 +230,25 @@ extern "C" void cCommSystem_update(sComm_5A20* self)
         int addr;
         cCommSystem_netConnLocalAddr(self, &addr);
         if (addr != 0) {
-            self->timer = 0;
-            self->state = 5;
+            self->mNetConnTimeOut = 0;
+            self->mNetConnState = 5;
         }
         break;
     }
     case 5:
         for (i = 0; i < 1; i++) {
-            sCommObj_5A20* channel = self->objs[i];
+            sCommObj_5A20* channel = ((sCommObj_5A20**)&self->mChannels[0])[i];
             if (channel != 0) {
                 channel->vt[3].fn((char*)channel + channel->vt[3].delta);
             }
         }
         break;
     }
-    if (self->timer > 0) {
-        self->timer--;
-        if (self->timer <= 0) {
+    if (self->mNetConnTimeOut > 0) {
+        self->mNetConnTimeOut--;
+        if (self->mNetConnTimeOut <= 0) {
             cCommSystem_netConnFailed(self, 0x74696D65);
-            self->timer = 0;
+            self->mNetConnTimeOut = 0;
         }
     }
 }
@@ -308,8 +308,8 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_closeChannel);
  * @param commSystem  the connection manager
  * @param channelIndex  the channel slot
  */
-extern "C" void cCommSystem_closeChannel(char *commSystem, int channelIndex) {
-    void **slot = (void **)(commSystem + channelIndex * 4);
+extern "C" void cCommSystem_closeChannel(cCommSystem* commSystem, int channelIndex) {
+    void **slot = (void **)(((char*)commSystem) + channelIndex * 4);
     char *channel = (char *)*slot;
     if (*(int *)channel != 0) {
         char *vt = *(char **)(channel + 8);
@@ -336,7 +336,7 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_isChannelOpen);
  * @param channelIndex  the channel slot
  * @return 1 when the slot is set, else 0
  */
-extern "C" int cCommSystem_isChannelOpen(void *commSystem, int channelIndex) {
+extern "C" int cCommSystem_isChannelOpen(cCommSystem* commSystem, int channelIndex) {
     return *(int *)((char*)commSystem + (channelIndex << 2)) != 0;
 }
 #endif
@@ -353,7 +353,7 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_isChannelConnected);
  * @param channelIndex  the channel slot
  * @return the channel's answer
  */
-extern "C" int cCommSystem_isChannelConnected(void *commSystem, int channelIndex) {
+extern "C" int cCommSystem_isChannelConnected(cCommSystem* commSystem, int channelIndex) {
     char *obj = *(char **)((char*)commSystem + (channelIndex << 2));
     char *vt = *(char **)(obj + 8);
     return (*(int (**)(void *))(vt + 0x24))(obj + *(short *)(vt + 0x20));
@@ -393,7 +393,7 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_readPacket);
  * @param maxSize  the buffer size
  * @return the channel's result: nonzero when a packet was read
  */
-extern "C" int cCommSystem_readPacket(void *commSystem, int channelIndex, int data, int maxSize) {
+extern "C" int cCommSystem_readPacket(cCommSystem* commSystem, int channelIndex, int data, int maxSize) {
     char *obj = *(char **)((char*)commSystem + (channelIndex << 2));
     char *vt = *(char **)(obj + 8);
     return (*(int (**)(void *, int, int))(vt + 0x3C))(obj + *(short *)(vt + 0x38), data, maxSize);
@@ -414,7 +414,7 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_writePacket);
  * @param size  its size in bytes
  * @return the channel's result: nonzero when the packet was taken
  */
-extern "C" int cCommSystem_writePacket(void *commSystem, int channelIndex, int data, int size) {
+extern "C" int cCommSystem_writePacket(cCommSystem* commSystem, int channelIndex, int data, int size) {
     char *obj = *(char **)((char*)commSystem + (channelIndex << 2));
     char *vt = *(char **)(obj + 8);
     return (*(int (**)(void *, int, int))(vt + 0x44))(obj + *(short *)(vt + 0x40), data, size);
@@ -433,8 +433,8 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_getError);
  * @param channelIndex  the channel slot
  * @return nonzero on an error
  */
-extern "C" int cCommSystem_getError(void *commSystem, int channelIndex) {
-    if ((*(int *)((char*)(commSystem) + (0x28))) != 0) {
+extern "C" int cCommSystem_getError(cCommSystem* commSystem, int channelIndex) {
+    if ((commSystem->mNetConnError) != 0) {
         return 1;
     }
     return *(int *)((char*)(*(void **)((char*)commSystem + (channelIndex << 2))) + 4);
@@ -456,11 +456,11 @@ extern "C" void MUTEX_unlock(void *);
  * @param pool  the connection manager
  * @return the element
  */
-extern "C" int *cCommSystem_allocCommMsgElem(void *pool) {
+extern "C" int *cCommSystem_allocCommMsgElem(cCommSystem* pool) {
     void *mutex = (char*)pool + 4;
     MUTEX_lock(mutex);
-    int *node = *(int **)((char*)pool + 0x18);
-    *(int **)((char*)pool + 0x18) = (int *)*node;
+    int *node = (int*)pool->mFree;
+    pool->mFree = (tCommMsgElem*)((int *)*node);
     MUTEX_unlock(mutex);
     *node = 0;
     return node;
@@ -482,14 +482,14 @@ extern "C" void MUTEX_unlock(void *);
  * @param pool  the connection manager
  * @param node  the element
  */
-extern "C" void cCommSystem_freeCommMsgElem(void *pool, void *node) {
+extern "C" void cCommSystem_freeCommMsgElem(cCommSystem* pool, void *node) {
     void *mutex = (char*)pool + 4;
     MUTEX_lock(mutex);
-    void *head = *(void **)((char*)pool + 0x18);
+    void *head = pool->mFree;
     *(int *)((char*)node + 4) = 0;
     *(void **)((char*)node + 0) = head;
     *(int *)((char*)node + 8) = 0;
-    *(void **)((char*)pool + 0x18) = node;
+    pool->mFree = (tCommMsgElem*)node;
     MUTEX_unlock(mutex);
 }
 #endif
@@ -521,7 +521,7 @@ extern "C" int func_00255F20(void *commSystem, int listParam) {
 //100%
 INCLUDE_ASM("seg/seg_156860", cCommSystem_netConnConnect);
 #ifdef SKIP_ASM
-extern "C" void cCommSystem_netConnDisconnect(void *);
+extern "C" void cCommSystem_netConnDisconnect(cCommSystem*);
 
 /**
  * Starts bringing the network interface up with one of the listed configurations.
@@ -533,13 +533,13 @@ extern "C" void cCommSystem_netConnDisconnect(void *);
  * @param commSystem  the connection manager
  * @param configIndex  the cCommSystem_mNetConns entry
  */
-extern "C" void cCommSystem_netConnConnect(void *commSystem, int configIndex) {
+extern "C" void cCommSystem_netConnConnect(cCommSystem* commSystem, int configIndex) {
     cCommSystem_netConnDisconnect(commSystem);
-    (*(int *)((char*)(commSystem) + (0x1C))) = configIndex;
-    (*(int *)((char*)(commSystem) + (0x30))) = 1;
-    (*(int *)((char*)(commSystem) + (0x24))) = 9000;
-    (*(int *)((char*)(commSystem) + (0x20))) = 2;
-    (*(int *)((char*)(commSystem) + (0x2C))) = 0;
+    (commSystem->mActiveNetConn) = configIndex;
+    (commSystem->mInterfaceType) = 1;
+    (commSystem->mNetConnTimeOut) = 9000;
+    (commSystem->mNetConnState) = 2;
+    (commSystem->mBroadBand) = 0;
 }
 #endif
 
@@ -556,14 +556,14 @@ extern "C" void NetConnDisconnect();
  *
  * @param commSystem  the connection manager
  */
-extern "C" void cCommSystem_netConnDisconnect(void *commSystem) {
-    if ((*(int *)((char*)(commSystem) + (0x1C))) >= 0) {
-        (*(int *)((char*)(commSystem) + (0x1C))) = -1;
+extern "C" void cCommSystem_netConnDisconnect(cCommSystem* commSystem) {
+    if ((commSystem->mActiveNetConn) >= 0) {
+        (commSystem->mActiveNetConn) = -1;
         NetConnDisconnect();
     }
-    (*(int *)((char*)(commSystem) + (0x24))) = 0;
-    (*(int *)((char*)(commSystem) + (0x20))) = 1;
-    (*(int *)((char*)(commSystem) + (0x28))) = 0;
+    (commSystem->mNetConnTimeOut) = 0;
+    (commSystem->mNetConnState) = 1;
+    (commSystem->mNetConnError) = 0;
 }
 #endif
 
@@ -581,14 +581,14 @@ extern "C" void NetConnDisconnect();
  * @param commSystem  the connection manager
  * @param errorCode  the error ('time' or a status starting with '-')
  */
-extern "C" void cCommSystem_netConnFailed(void *commSystem, int errorCode) {
-    if ((*(int *)((char*)(commSystem) + (0x1C))) >= 0) {
-        (*(int *)((char*)(commSystem) + (0x1C))) = -1;
+extern "C" void cCommSystem_netConnFailed(cCommSystem* commSystem, int errorCode) {
+    if ((commSystem->mActiveNetConn) >= 0) {
+        (commSystem->mActiveNetConn) = -1;
         NetConnDisconnect();
     }
-    (*(int *)((char*)(commSystem) + (0x28))) = errorCode;
-    (*(int *)((char*)(commSystem) + (0x20))) = 6;
-    (*(int *)((char*)(commSystem) + (0x24))) = 0;
+    (commSystem->mNetConnError) = errorCode;
+    (commSystem->mNetConnState) = 6;
+    (commSystem->mNetConnTimeOut) = 0;
 }
 #endif
 
@@ -606,7 +606,7 @@ extern "C" int NetConnStatus_6038(int, int, int) __asm__("NetConnStatus");
  * @param commSystem  the connection manager (not used)
  * @param localAddr  receives the address, or 0
  */
-extern "C" void cCommSystem_netConnLocalAddr(void *commSystem, int *localAddr) {
+extern "C" void cCommSystem_netConnLocalAddr(cCommSystem* commSystem, int *localAddr) {
     int temp_2;
 
     *localAddr = 0;
@@ -2392,7 +2392,7 @@ extern "C" void cGameComm_updateReadQueue_7CD8(Conn_7CD8* gameComm)
 {
     while (gameComm->busy == 0
            && (gameComm->pending != 0
-               || (gameComm->pending = cGameComm_allocPacket_7CD8(gameComm), cCommSystem_readPacket((void*)cCommSystem_mCommSystem, gameComm->unk6C, (int)gameComm->pending, 0xF0) != 0)
+               || (gameComm->pending = cGameComm_allocPacket_7CD8(gameComm), cCommSystem_readPacket((cCommSystem*)((void*)cCommSystem_mCommSystem), gameComm->unk6C, (int)gameComm->pending, 0xF0) != 0)
                || (operator_delete__FPi_7CD8(gameComm->pending), gameComm->pending = 0, 0))) {
         Packet_7BD8* inPacket = gameComm->pending;
         PacketQueue_7BD8* typeQueue = &gameComm->queues[inPacket->type];
