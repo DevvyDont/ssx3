@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/feinput.h"
 #include "online/lobbyman.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
@@ -2418,7 +2419,7 @@ void* cInput_getState(int, int) __asm__("cInput_getState__FPvi");
  *
  * @param k  the state index, 0-7 (On Tour char state)
  */
-extern "C" void cFEInput_getState(void* self, signed char k)
+extern "C" void cFEInput_getState(cFEInput* self, signed char k)
 {
     int id = 0;
     switch (k) {
@@ -2431,7 +2432,7 @@ extern "C" void cFEInput_getState(void* self, signed char k)
     case 6: id = 0x78; break;
     case 7: id = 121; break;
     }
-    cInput_getState(*(int*)((char*)self + 0x18), id);
+    cInput_getState((int)self->mpInput, id);
 }
 #endif
 
@@ -2954,17 +2955,17 @@ INCLUDE_ASM("fe/debugfe", cFEInput_keyPressed);
  *
  * @return 1 when one of them is active, otherwise 0
  */
-extern "C" int cFEInput_keyPressed(void* self)
+extern "C" int cFEInput_keyPressed(cFEInput* self)
 {
     int pressed = 0;
-    if (cInput_getState(*(int*)((char*)self + 0x18), 114) || cInput_getState(*(int*)((char*)self + 0x18), 115) ||
-        cInput_getState(*(int*)((char*)self + 0x18), 116) || cInput_getState(*(int*)((char*)self + 0x18), 117) ||
-        cInput_getState(*(int*)((char*)self + 0x18), 118) || cInput_getState(*(int*)((char*)self + 0x18), 119) ||
-        cInput_getState(*(int*)((char*)self + 0x18), 0x78) || cInput_getState(*(int*)((char*)self + 0x18), 121) ||
-        cInput_getState(*(int*)((char*)self + 0x18), 122) || cInput_getState(*(int*)((char*)self + 0x18), 123) ||
-        cInput_getState(*(int*)((char*)self + 0x18), 125) || cInput_getState(*(int*)((char*)self + 0x18), 0x7C) ||
-        cInput_getState(*(int*)((char*)self + 0x18), 144) || cInput_getState(*(int*)((char*)self + 0x18), 146) ||
-        cInput_getState(*(int*)((char*)self + 0x18), 145) || cInput_getState(*(int*)((char*)self + 0x18), 113))
+    if (cInput_getState((int)self->mpInput, 114) || cInput_getState((int)self->mpInput, 115) ||
+        cInput_getState((int)self->mpInput, 116) || cInput_getState((int)self->mpInput, 117) ||
+        cInput_getState((int)self->mpInput, 118) || cInput_getState((int)self->mpInput, 119) ||
+        cInput_getState((int)self->mpInput, 0x78) || cInput_getState((int)self->mpInput, 121) ||
+        cInput_getState((int)self->mpInput, 122) || cInput_getState((int)self->mpInput, 123) ||
+        cInput_getState((int)self->mpInput, 125) || cInput_getState((int)self->mpInput, 0x7C) ||
+        cInput_getState((int)self->mpInput, 144) || cInput_getState((int)self->mpInput, 146) ||
+        cInput_getState((int)self->mpInput, 145) || cInput_getState((int)self->mpInput, 113))
         pressed = 1;
     return pressed;
 }
@@ -2981,11 +2982,11 @@ INCLUDE_ASM("fe/debugfe", cFEInput_setPadNum);
  *
  * @param idx  the pad number
  */
-extern "C" void cFEInput_setPadNum(void* self, unsigned char idx)
+extern "C" void cFEInput_setPadNum(cFEInput* self, unsigned char idx)
 {
     int controllerInput = *(int*)((char*)SSXApp + (idx << 2) + 0xB0);
-    *(unsigned char*)((char*)self + 0x4) = idx;
-    *(int*)((char*)self + 0x18) = controllerInput;
+    self->mPadNum = idx;
+    self->mpInput = (cInput*)controllerInput;
 }
 #endif
 
@@ -2997,9 +2998,9 @@ INCLUDE_ASM("fe/debugfe", cFEInput_isActive);
  *
  * @return 1 when the controller pointer (+0x18) and its device are set, otherwise 0
  */
-extern "C" int cFEInput_isActive(void* self)
+extern "C" int cFEInput_isActive(cFEInput* self)
 {
-    void* input = *(void**)((char*)self + 0x18);
+    void* input = self->mpInput;
     if (input != 0) {
         return **(int**)input != 0;
     }
@@ -3028,14 +3029,14 @@ struct sDebugFE1804B8 {
  * key press; when it returns one, key-ready becomes 1. cFEInput_getKeyReady, cFEInput_getVKey and cFEInput_getAsciiKey
  * return the results. The last virtual of cFEInput; On Tour's PSP version is empty.
  */
-extern "C" void cFEInput_update(sDebugFE1804B8* self)
+extern "C" void cFEInput_update(cFEInput* self)
 {
-    self->found = 0;
+    self->mbKeyReady = 0;
     if (D_004A33F0 != 0) {
-        self->b = 0;
-        self->a = 0;
-        if (func_00266BA8(D_004A33F0, 0, &self->a, &self->b) != 0)
-            self->found = 1;
+        self->miAsciiKey = 0;
+        self->miVKey = 0;
+        if (func_00266BA8(D_004A33F0, 0, &self->miVKey, &self->miAsciiKey) != 0)
+            self->mbKeyReady = 1;
     }
 }
 #endif

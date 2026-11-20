@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/feinput.h"
 #include "fe/festatecredits.h"
 #include "fe/festatetransition.h"
 #include "fe/festatetitle.h"
@@ -2367,8 +2368,8 @@ extern void* cUIInput_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cFEInput__cFEInput(void *self, int flags) {
-    *(void***)((char*)self + 8) = cUIInput_vtbl;
+extern "C" void cFEInput__cFEInput(cFEInput* self, int flags) {
+    self->mVtbl = cUIInput_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -2384,8 +2385,8 @@ INCLUDE_ASM("main/all_in_one_main", cFEInput_getKeyReady);
  * @param input  the input (this)
  * @return nonzero when a key is ready
  */
-extern "C" int cFEInput_getKeyReady(void *input) {
-    return (*(int *)((char*)(input) + (0xC)));
+extern "C" int cFEInput_getKeyReady(cFEInput* input) {
+    return (input->mbKeyReady);
 }
 #endif
 
@@ -2398,8 +2399,8 @@ INCLUDE_ASM("main/all_in_one_main", cFEInput_getVKey);
  * @param input  the input (this)
  * @return the virtual key code
  */
-extern "C" int cFEInput_getVKey(void *input) {
-    return (*(int *)((char*)(input) + (0x10)));
+extern "C" int cFEInput_getVKey(cFEInput* input) {
+    return (input->miVKey);
 }
 #endif
 
@@ -2412,8 +2413,8 @@ INCLUDE_ASM("main/all_in_one_main", cFEInput_getAsciiKey);
  * @param input  the input (this)
  * @return the character code
  */
-extern "C" int cFEInput_getAsciiKey(void *input) {
-    return (*(int *)((char*)(input) + (0x14)));
+extern "C" int cFEInput_getAsciiKey(cFEInput* input) {
+    return (input->miAsciiKey);
 }
 #endif
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiinput.h"
 #include "ui/uiengine.h"
 #include "fe/festaterewardsroom.h"
 #include "fe/festatepeakroom.h"
@@ -4483,9 +4484,9 @@ extern void* cUIInput_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cUIInput__cUIInput(void* self, int flags)
+extern "C" void cUIInput__cUIInput(cUIInput* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cUIInput_vtbl;
+    self->mVtbl = cUIInput_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
