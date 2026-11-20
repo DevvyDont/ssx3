@@ -2167,32 +2167,32 @@ extern void func_0042C0C0(void);
 /**
  * Initialises an RPC server queue for a thread and appends it to the RPC state's queue list.
  *
- * With interrupts disabled (func_0042C078 ... func_0042C0C0) it sets the queue's thread id (f0) to @p a1, clears its
+ * With interrupts disabled (func_0042C078 ... func_0042C0C0) it sets the queue's thread id (f0) to @p threadId, clears its
  * active flag (f4), its server list, the request start and end pointers (fC, f10) and its link, then appends it to the
  * end of D_0052D680.queues (the list func_00426A48 searches when a bind request names a server). No caller in this
  * build.
  *
  * @param n  the queue to set up
- * @param a1  id of the thread that serves the queue (the one woken when a request arrives)
+ * @param threadId  id of the thread that serves the queue (the one woken when a request arrives)
  */
-void func_00426F48(sSifQueue *n, int a1) {
-    sSifQueue *p;
-    sSifQueue *h;
+void func_00426F48(sSifQueue *n, int threadId) {
+    sSifQueue *lastQueue;
+    sSifQueue *firstQueue;
     func_0042C078_r();
-    n->f0 = a1;
+    n->f0 = threadId;
     n->f4 = 0;
     n->servers = 0;
     n->fC = 0;
     n->f10 = 0;
-    h = D_0052D680.queues;
+    firstQueue = D_0052D680.queues;
     n->next = 0;
-    if (h == 0) {
+    if (firstQueue == 0) {
         D_0052D680.queues = n;
     } else {
-        p = h;
-        for (; p->next != 0; p = p->next)
+        lastQueue = firstQueue;
+        for (; lastQueue->next != 0; lastQueue = lastQueue->next)
             ;
-        p->next = n;
+        lastQueue->next = n;
     }
     func_0042C0C0();
 }
@@ -2214,33 +2214,33 @@ extern void func_0042C0C0(void);
  * caller in this build.
  *
  * @param n  the server record to register
- * @param a1  server id that clients bind to
- * @param a2  service function called for each request
- * @param a3  buffer that receives the request data
- * @param a4  cancel function
- * @param a5  buffer for the cancel function
- * @param a6  the queue the server is added to
+ * @param serverId  server id that clients bind to
+ * @param serveFunc  service function called for each request
+ * @param serveBuf  buffer that receives the request data
+ * @param cancelFunc  cancel function
+ * @param cancelBuf  buffer for the cancel function
+ * @param serverQueue  the queue the server is added to
  */
-void func_00426FE0(struct N6FE0 *n, int a1, int a2, int a3, int a4, int a5, struct S6FE0 *a6) {
-    struct N6FE0 *p;
-    struct N6FE0 *h;
+void func_00426FE0(struct N6FE0 *n, int serverId, int serveFunc, int serveBuf, int cancelFunc, int cancelBuf, struct S6FE0 *serverQueue) {
+    struct N6FE0 *lastServer;
+    struct N6FE0 *firstServer;
     func_0042C078_r();
     n->f3C = 0;
     n->next = 0;
-    n->f0 = a1;
-    h = a6->head;
-    n->f4 = a2;
-    n->f8 = a3;
-    n->f10 = a4;
-    n->f14 = a5;
-    n->f40 = a6;
-    if (h == 0) {
-        a6->head = n;
+    n->f0 = serverId;
+    firstServer = serverQueue->head;
+    n->f4 = serveFunc;
+    n->f8 = serveBuf;
+    n->f10 = cancelFunc;
+    n->f14 = cancelBuf;
+    n->f40 = serverQueue;
+    if (firstServer == 0) {
+        serverQueue->head = n;
     } else {
-        p = h;
-        for (; p->next != 0; p = p->next)
+        lastServer = firstServer;
+        for (; lastServer->next != 0; lastServer = lastServer->next)
             ;
-        p->next = n;
+        lastServer->next = n;
     }
     func_0042C0C0();
 }
@@ -2299,21 +2299,21 @@ sSifQueue *f7148(sSifQueue *x) __asm__("func_00427148");
  * @return the old head when @p x was the head, else the predecessor of @p x (0 when not found)
  */
 sSifQueue *f7148(sSifQueue *x) {
-    sSifQueue *p;
+    sSifQueue *queueCursor;
     f7148a();
-    p = D_0052D680.queues;
-    if (p == x) {
-        D_0052D680.queues = p->next;
+    queueCursor = D_0052D680.queues;
+    if (queueCursor == x) {
+        D_0052D680.queues = queueCursor->next;
     } else {
-        for (; p != 0; p = p->next) {
-            if (p->next == x) {
-                p->next = x->next;
+        for (; queueCursor != 0; queueCursor = queueCursor->next) {
+            if (queueCursor->next == x) {
+                queueCursor->next = x->next;
                 break;
             }
         }
     }
     f7148b();
-    return p;
+    return queueCursor;
 }
 #endif
 
@@ -2330,20 +2330,20 @@ extern void func_0042C0C0(void);
  * With interrupts disabled it pops the head of the queue's request list (+0xC, linked through +0x3C) and sets the
  * queue's active flag (+4) to 1, or to 0 when the list is empty. Only func_004273F8 calls it.
  *
- * @param arg  the server queue (as an int)
+ * @param queueAddr  the server queue (as an int)
  * @return the server record with a request to run, or 0
  */
-int func_004271D8(int arg) {
-    struct S4271D8 *a0 = (struct S4271D8 *)arg;
+int func_004271D8(int queueAddr) {
+    struct S4271D8 *serverQueue = (struct S4271D8 *)queueAddr;
     struct N4271D8 *n;
     func_0042C078();
-    n = a0->head;
+    n = serverQueue->head;
     if (n == 0) {
-        a0->f4 = 0;
+        serverQueue->f4 = 0;
     } else {
-        struct N4271D8 *t = (struct N4271D8 *)n->next;
-        a0->f4 = 1;
-        a0->head = t;
+        struct N4271D8 *nextServer = (struct N4271D8 *)n->next;
+        serverQueue->f4 = 1;
+        serverQueue->head = nextServer;
     }
     func_0042C0C0();
     return (int)n;
@@ -2380,32 +2380,32 @@ void func_00427230_d(struct W7230 *) __asm__("func_00427230");
  * address (+0x20) with sceSifSetDma, spinning 0x100000 iterations between refused attempts. Only func_004273F8 calls
  * it.
  *
- * @param a0  the server record holding the request
+ * @param serveData  the server record holding the request
  */
-void func_00427230_d(struct W7230 *a0) {
-    int s4 = 0;
-    int t;
+void func_00427230_d(struct W7230 *serveData) {
+    int replySize = 0;
+    int replyData;
     int n;
     int i;
-    int r;
+    int dmaId;
     int fl;
-    int v;
+    int clientAddr;
     int w;
     int x4;
     struct R7230 *e;
     sSifDmaData ent[2];
-    t = a0->f4(a0->f24, a0->f8, a0->fC);
-    if (t != 0) {
-        s4 = a0->f2C;
+    replyData = serveData->f4(serveData->f24, serveData->f8, serveData->fC);
+    if (replyData != 0) {
+        replySize = serveData->f2C;
     }
-    if (a0->fC > 0) {
-        func_00426358(a0->f8, a0->fC);
+    if (serveData->fC > 0) {
+        func_00426358(serveData->f8, serveData->fC);
     }
-    if (s4 > 0) {
-        func_00426358(t, s4);
+    if (replySize > 0) {
+        func_00426358(replyData, replySize);
     }
     func_0042C078_w();
-    fl = a0->f34;
+    fl = serveData->f34;
     x4 = fl & 4;
     fl = (unsigned)fl >> 16;
     if (x4) {
@@ -2416,38 +2416,38 @@ void func_00427230_d(struct W7230 *a0) {
     func_0042C0C0_w();
     ASSERT_7230(e != 0);
     w = 0x8000000A;
-    v = a0->f1C;
+    clientAddr = serveData->f1C;
     e->f20 = w;
-    e->f1C = v;
-    if (a0->f30 != 0) {
-        while (func_004261B0_w(0x80000008, e, 0x40, t, a0->f28, s4) == 0) {
+    e->f1C = clientAddr;
+    if (serveData->f30 != 0) {
+        while (func_004261B0_w(0x80000008, e, 0x40, replyData, serveData->f28, replySize) == 0) {
         }
         return;
     }
     e->f18 = 0;
     n = 0;
     e->f10 = 0;
-    if (s4 > 0) {
+    if (replySize > 0) {
         n = 1;
-        ent[0].data = t;
-        ent[0].addr = a0->f28;
-        ent[0].size = s4;
+        ent[0].data = replyData;
+        ent[0].addr = serveData->f28;
+        ent[0].size = replySize;
         ent[0].attr = 0;
     }
     ent[n].data = (int)e;
-    ent[n].addr = a0->f20;
+    ent[n].addr = serveData->f20;
     ent[n].size = 0x40;
     ent[n].attr = 0;
     n++;
     do {
-        r = sceSifSetDma(ent, n);
-        if (r == 0) {
+        dmaId = sceSifSetDma(ent, n);
+        if (dmaId == 0) {
             i = 0x100000;
             do {
                 i--;
             } while (i != -1);
         }
-    } while (r == 0);
+    } while (dmaId == 0);
 }
 #endif
 
@@ -2515,19 +2515,19 @@ extern void SignalSema(int);
  * @return the slot, or 0 when all 32 are taken
  */
 sFioFile *func_00427498(void) {
-    sFioFile *p;
+    sFioFile *fileSlot;
     sFioFile *end;
     func_00427438();
     WaitSema_i(D_00455218);
-    p = D_0052EC00;
-    end = p + 32;
-    while (p < end) {
-        if (p->f4 == 0) {
-            p->f4 = 0x10000000;
+    fileSlot = D_0052EC00;
+    end = fileSlot + 32;
+    while (fileSlot < end) {
+        if (fileSlot->f4 == 0) {
+            fileSlot->f4 = 0x10000000;
             SignalSema(D_00455218);
-            return p;
+            return fileSlot;
         }
-        p++;
+        fileSlot++;
     }
     SignalSema(D_00455218);
     return 0;
@@ -2546,20 +2546,20 @@ extern void SignalSema(int);
  * Makes sure the semaphores exist (func_00427438) and takes D_00455218 around the bounds check. The slot is returned
  * whether or not it is open; callers check its flags (f4).
  *
- * @param a0  descriptor number (index into D_0052EC00)
- * @return &D_0052EC00[@p a0], or 0 when it is 32 or more
+ * @param fdIndex  descriptor number (index into D_0052EC00)
+ * @return &D_0052EC00[@p fdIndex], or 0 when it is 32 or more
  */
-sFioFile *func_00427520(unsigned a0) {
-    sFioFile *p;
+sFioFile *func_00427520(unsigned fdIndex) {
+    sFioFile *fileSlot;
     func_00427438();
     WaitSema_i(D_00455218);
-    if (a0 >= 0x20) {
+    if (fdIndex >= 0x20) {
         SignalSema(D_00455218);
         return 0;
     }
-    p = &D_0052EC00[a0];
+    fileSlot = &D_0052EC00[fdIndex];
     SignalSema(D_00455218);
-    return p;
+    return fileSlot;
 }
 #endif
 
@@ -2586,10 +2586,10 @@ extern void iSignalSema(int);
  * block to the address at +0x14; 23, 25 and 26 copy the length at +0x18 (capped at 0x400) of data from +0x1C. Finally a
  * no-wait call's entry is cleared to -1 in D_00455188, while a waiting caller's semaphore is signalled (iSignalSema).
  *
- * @param a0  the received SIF command packet
+ * @param cmdPacket  the received SIF command packet
  */
-void func_00427590(int *a0) {
-    char *p;
+void func_00427590(int *cmdPacket) {
+    char *replyBuf;
     int sema;
     int cmd;
     char *dst;
@@ -2598,55 +2598,55 @@ void func_00427590(int *a0) {
     unsigned len;
     int idx;
     int i;
-    D_00455208 = idx = D_00455210 != 0 ? a0[3] : 0;
-    p = (char *)((int)(D_0052E380 + idx * 0x440) | 0x20000000);
-    *(struct W7590 *)&sema = *(struct W7590 *)(p + 0x0);
-    *(struct W7590 *)&cmd = *(struct W7590 *)(p + 0x4);
-    *(struct W7590 *)&dst = *(struct W7590 *)(p + 0x8);
-    *(struct W7590 *)&size = *(struct W7590 *)(p + 0xC);
+    D_00455208 = idx = D_00455210 != 0 ? cmdPacket[3] : 0;
+    replyBuf = (char *)((int)(D_0052E380 + idx * 0x440) | 0x20000000);
+    *(struct W7590 *)&sema = *(struct W7590 *)(replyBuf + 0x0);
+    *(struct W7590 *)&cmd = *(struct W7590 *)(replyBuf + 0x4);
+    *(struct W7590 *)&dst = *(struct W7590 *)(replyBuf + 0x8);
+    *(struct W7590 *)&size = *(struct W7590 *)(replyBuf + 0xC);
     if (sema >= 0)
-        func_0041605C(dst, p + 0x10, size);
+        func_0041605C(dst, replyBuf + 0x10, size);
     switch (cmd) {
     case 2: {
-        struct L7590 *q = (struct L7590 *)(p + 0x14);
-        char *d;
-        char *u;
-        if (q->n1 > 0) {
-            d = q->d1;
-            u = (char *)((int)d | 0x20000000);
-            for (i = 0; i < q->n1; i++) {
-                unsigned char c = q->b1[i];
-                u[i] = c;
-                d[i] = c;
+        struct L7590 *readFixup = (struct L7590 *)(replyBuf + 0x14);
+        char *fixupDst;
+        char *fixupUncached;
+        if (readFixup->n1 > 0) {
+            fixupDst = readFixup->d1;
+            fixupUncached = (char *)((int)fixupDst | 0x20000000);
+            for (i = 0; i < readFixup->n1; i++) {
+                unsigned char fixupByte = readFixup->b1[i];
+                fixupUncached[i] = fixupByte;
+                fixupDst[i] = fixupByte;
             }
         }
-        if (q->n2 > 0) {
-            d = q->d2;
-            u = (char *)((int)d | 0x20000000);
-            for (i = 0; i < q->n2; i++) {
-                unsigned char c = q->b2[i];
-                u[i] = c;
-                d[i] = c;
+        if (readFixup->n2 > 0) {
+            fixupDst = readFixup->d2;
+            fixupUncached = (char *)((int)fixupDst | 0x20000000);
+            for (i = 0; i < readFixup->n2; i++) {
+                unsigned char fixupByte = readFixup->b2[i];
+                fixupUncached[i] = fixupByte;
+                fixupDst[i] = fixupByte;
             }
         }
         break;
     }
     case 11:
-        *(struct W7590 *)&buf = *(struct W7590 *)(p + 0x14);
-        *(struct B7590 *)buf = *(struct B7590 *)(p + 0x18);
+        *(struct W7590 *)&buf = *(struct W7590 *)(replyBuf + 0x14);
+        *(struct B7590 *)buf = *(struct B7590 *)(replyBuf + 0x18);
         break;
     case 0xC:
-        *(struct W7590 *)&buf = *(struct W7590 *)(p + 0x14);
-        *(struct C7590 *)buf = *(struct C7590 *)(p + 0x18);
+        *(struct W7590 *)&buf = *(struct W7590 *)(replyBuf + 0x14);
+        *(struct C7590 *)buf = *(struct C7590 *)(replyBuf + 0x18);
         break;
     case 23:
     case 25:
     case 26:
-        *(struct W7590 *)&buf = *(struct W7590 *)(p + 0x14);
-        *(struct W7590 *)&len = *(struct W7590 *)(p + 0x18);
+        *(struct W7590 *)&buf = *(struct W7590 *)(replyBuf + 0x14);
+        *(struct W7590 *)&len = *(struct W7590 *)(replyBuf + 0x18);
         if (len > 0x400)
             len = 0x400;
-        func_0041605C(buf, p + 0x1C, len);
+        func_0041605C(buf, replyBuf + 0x1C, len);
         break;
     }
     if (sema < 0) {
@@ -2725,26 +2725,26 @@ extern void func_004279B8(void);
  * Installs the callback run when the IOP file server sends SIF command 0x80000013, returning the previous one.
  *
  * Under the call lock (func_00427988 ... func_004279B8), initialising the library first when D_0045520C is 0
- * (func_00427A90), it stores @p a0 and @p a1 in D_0052EE80 with interrupts disabled (re-enabled only when they were
+ * (func_00427A90), it stores @p callbackFn and @p callbackArg in D_0052EE80 with interrupts disabled (re-enabled only when they were
  * on). func_00427A60 runs the callback. No caller in this build.
  *
- * @param a0  callback, called with @p a1
- * @param a1  argument for the callback
+ * @param callbackFn  callback, called with @p callbackArg
+ * @param callbackArg  argument for the callback
  * @return the previous callback
  */
-void (*func_004279C8(void (*a0)(int), int a1))(int) {
-    int r;
+void (*func_004279C8(void (*callbackFn)(int), int callbackArg))(int) {
+    int intrWasOn;
     void (*old)(int);
-    sFioCb *p = &D_0052EE80;
+    sFioCb *callbackSlot = &D_0052EE80;
     func_00427988_a(27);
     if (D_0045520C == 0) {
         func_00427A90();
     }
-    r = func_0042C078_i();
+    intrWasOn = func_0042C078_i();
     old = D_0052EE80.fn;
-    p->arg = a1;
-    D_0052EE80.fn = a0;
-    if (r != 0) {
+    callbackSlot->arg = callbackArg;
+    D_0052EE80.fn = callbackFn;
+    if (intrWasOn != 0) {
         func_0042C0C0();
     }
     func_004279B8();
@@ -2799,16 +2799,16 @@ int func_00427A90_d(void) __asm__("func_00427A90");
  */
 int func_00427A90_d(void) {
     int old;
-    int v;
-    sFioFile *p;
-    sFioCb *q = &D_0052EE80;
+    int spinCount;
+    sFioFile *fileSlot;
+    sFioCb *callbackSlot = &D_0052EE80;
     sRpcVer w;
     func_00426408_z(0);
     D_0052EE80.fn = 0;
-    q->arg = 0;
+    callbackSlot->arg = 0;
     old = func_0042C078_z();
     func_00426020_z(0x80000011, func_00427590_z, D_0052EE40);
-    func_00426020_z(0x80000013, func_00427A60_z, q);
+    func_00426020_z(0x80000013, func_00427A60_z, callbackSlot);
     if (old != 0)
         func_0042C0C0_z();
     for (;;) {
@@ -2816,15 +2816,15 @@ int func_00427A90_d(void) {
             return -1;
         if (D_0052EE00.server != 0)
             break;
-        v = 0x100000;
+        spinCount = 0x100000;
         do {
-            v--;
-        } while (v != -1);
+            spinCount--;
+        } while (spinCount != -1);
     }
     func_00427438_z();
     WaitSema_z(D_00455218);
-    for (p = D_0052EC00; p < &D_0052EC00[32]; p++)
-        p->f4 = 0;
+    for (fileSlot = D_0052EC00; fileSlot < &D_0052EC00[32]; fileSlot++)
+        fileSlot->f4 = 0;
     SignalSema_z(D_00455218);
     D_0052D6C0[0] = (int)D_0052E380;
     D_0052D6C0[1] = D_0052D6C0[0] + 1088;
@@ -2854,14 +2854,14 @@ extern int func_00415FC8(char *, char *, int);
  * @return 1 when the server's tag matches neither accepted tag, else 0
  */
 int func_00427C98(void) {
-    char *a = D_00455164;
-    char *b = D_0052EE28.b;
-    int r = 0;
-    if (func_00415FC8(b, a, 4) != 0 &&
-        func_00415FC8(b, D_00455220, 4) != 0) {
-        r = func_00415FC8(a, D_00455220, 4) != 0;
+    char *libVersion = D_00455164;
+    char *serverVersion = D_0052EE28.b;
+    int mismatch = 0;
+    if (func_00415FC8(serverVersion, libVersion, 4) != 0 &&
+        func_00415FC8(serverVersion, D_00455220, 4) != 0) {
+        mismatch = func_00415FC8(libVersion, D_00455220, 4) != 0;
     }
-    return r;
+    return mismatch;
 }
 #endif
 
@@ -2909,22 +2909,22 @@ int func_00427D60_d(unsigned char *, unsigned, ...) __asm__("func_00427D60");
  * descriptor goes to the slot's f0 and @p flags are or-ed into its f4. Likely bug: when the RPC fails or is refused
  * (-11) the slot taken by func_00427498 is never freed. Called by FILEDEV_open.
  *
- * @param s  path of the file
+ * @param filePath  path of the file
  * @param flags  open flags (bit 15 makes later calls on the descriptor no-wait)
  * @return the descriptor number (slot index); a negative error
  */
 // sceOpen
-int func_00427D60_d(unsigned char *s, unsigned flags, ...) {
+int func_00427D60_d(unsigned char *filePath, unsigned flags, ...) {
     int buf[12];
     int sem;
-    int v;
+    int result;
     int n;
     int idx;
-    char c;
+    char nameChar;
     int mode;
     char *ap;
-    sFioFile *t;
-    sFioOpenCmd *p = &D_0052D700.open;
+    sFioFile *fileSlot;
+    sFioOpenCmd *openCmd = &D_0052D700.open;
     func_00427988_b(0);
     if (D_0045520C == 0) {
         func_00427A90();
@@ -2933,45 +2933,45 @@ int func_00427D60_d(unsigned char *s, unsigned flags, ...) {
         func_004279B8();
         return 0xFFFEFFFC;
     }
-    t = func_00427498();
-    if (t == 0) {
+    fileSlot = func_00427498();
+    if (fileSlot == 0) {
         func_004279B8();
         return -19;
     }
     ap = (char *)__builtin_next_arg() - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0);
     mode = *(int *)ap;
-    c = (p->name[0] = s[0]);
+    nameChar = (openCmd->name[0] = filePath[0]);
     n = 0;
-    if (c != 0) {
+    if (nameChar != 0) {
         while (++n < 0x400) {
-            c = (p->name[n] = s[n]);
-            if (c == 0) {
+            nameChar = (openCmd->name[n] = filePath[n]);
+            if (nameChar == 0) {
                 break;
             }
         }
     }
     if (n == 0x400) {
-        p->name[0x3FF] = 0;
+        openCmd->name[0x3FF] = 0;
     }
-    idx = t - D_0052EC00;
-    p->fC = flags & 0x7FFFFFFF;
-    p->f10 = mode;
+    idx = fileSlot - D_0052EC00;
+    openCmd->fC = flags & 0x7FFFFFFF;
+    openCmd->f10 = mode;
     buf[1] = 1;
-    p->f414 = idx;
+    openCmd->f414 = idx;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    p->f0 = sem;
-    p->f4 = (int)&buf[8];
-    p->f8 = 4;
+    openCmd->f0 = sem;
+    openCmd->f4 = (int)&buf[8];
+    openCmd->f8 = 4;
     if (func_00426D18(&D_0052EE00, 0, 0, &D_0052D700.open, 1048, D_0052E340, 4, 0, 0) < 0) {
         db0i(sem);
         func_004279B8();
         return -11;
     }
-    v = *(int *)((int)D_0052E340 | 0x20000000);
+    result = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
-    if (v == 0) {
+    if (result == 0) {
         db0i(sem);
         return -11;
     }
@@ -2979,16 +2979,16 @@ int func_00427D60_d(unsigned char *s, unsigned flags, ...) {
     db0i(sem);
     if (buf[8] < 0) {
         WaitSema_i(D_00455218);
-        t->f4 = 0;
+        fileSlot->f4 = 0;
         SignalSema(D_00455218);
         return buf[8];
     }
-    v = idx;
+    result = idx;
     WaitSema_i(D_00455218);
-    t->f0 = buf[8];
-    t->f4 |= flags;
+    fileSlot->f0 = buf[8];
+    fileSlot->f4 |= flags;
     SignalSema(D_00455218);
-    return v;
+    return result;
 }
 #endif
 
@@ -3009,53 +3009,53 @@ extern int WaitSema_i(int) __asm__("WaitSema");
  * index (20 bytes); after a successful call it frees the slot (f4 = 0, without taking D_00455218). It waits on the
  * semaphore for the result even when the descriptor was opened no-wait. Called by FILEDEV_close.
  *
- * @param a0  descriptor number from func_00427D60
+ * @param fileDesc  descriptor number from func_00427D60
  * @return 0, the IOP's negative error, or -11 when the RPC fails or is refused
  */
 // sceClose
-int func_00427FE8(int a0) {
+int func_00427FE8(int fileDesc) {
     int buf[12];
     int sem;
-    int v;
-    sFioFile *t;
-    sFioFdCmd *p = &D_0052D700.close;
-    t = func_00427520(a0);
+    int accepted;
+    sFioFile *fileSlot;
+    sFioFdCmd *closeCmd = &D_0052D700.close;
+    fileSlot = func_00427520(fileDesc);
     func_00427988_b(1);
     if (D_0045520C == 0) {
         func_004279B8();
         return -1;
     }
-    if (t == 0 || t->f4 == 0) {
+    if (fileSlot == 0 || fileSlot->f4 == 0) {
         func_004279B8();
         return -9;
     }
-    p->fC = t->f0;
+    closeCmd->fC = fileSlot->f0;
     buf[1] = 1;
-    p->f10 = t - D_0052EC00;
+    closeCmd->f10 = fileSlot - D_0052EC00;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    p->f0 = sem;
-    p->f4 = (int)&buf[8];
-    p->f8 = 4;
-    if (func_00426D18(&D_0052EE00, 1, 0, p, 20, D_0052E340, 4, 0, 0) < 0) {
+    closeCmd->f0 = sem;
+    closeCmd->f4 = (int)&buf[8];
+    closeCmd->f8 = 4;
+    if (func_00426D18(&D_0052EE00, 1, 0, closeCmd, 20, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
         return -11;
     }
-    t->f4 = 0;
-    v = *(int *)((int)D_0052E340 | 0x20000000);
+    fileSlot->f4 = 0;
+    accepted = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
-    if (v == 0) {
+    if (accepted == 0) {
         DeleteSema(sem);
         return -11;
     }
     WaitSema_i(sem);
     DeleteSema(sem);
     {
-        int r = buf[8];
-        if (r < 0)
-            return r;
+        int ioResult = buf[8];
+        if (ioResult < 0)
+            return ioResult;
         return 0;
     }
 }
@@ -3075,51 +3075,51 @@ extern int WaitSema_i(int) __asm__("WaitSema");
  *
  * Takes the call lock (func_00427988; released by func_004279B8); returns -1 when the library is not initialised and -9
  * when the slot (func_00427520) is not open. Sends RPC function 4 with a new semaphore, the address and size (4) of a
- * stack result word, the IOP descriptor, @p a1, @p a2 and the slot index (0x1C bytes). For a descriptor opened with
+ * stack result word, the IOP descriptor, @p offset, @p whence and the slot index (0x1C bytes). For a descriptor opened with
  * flag 0x8000 (no wait) the semaphore is parked, negated in the request, in a free entry of D_00455188 (under
  * D_0045521C) and the call returns 0 without waiting; func_00427590 clears that entry when the IOP is done. Called by
  * FILEDEV_getsize, FILEDEV_readexec and FILEDEV_write.
  *
- * @param a0  descriptor number
- * @param a1  offset
- * @param a2  origin of @p a1 (passed to the IOP)
+ * @param fileDesc  descriptor number
+ * @param offset  offset
+ * @param whence  origin of @p offset (passed to the IOP)
  * @return the new position, 0 for a no-wait call, -11 when the RPC fails or is refused, or the IOP's error
  */
 // sceLseek
-int func_00428168(int a0, int a1, int a2)
+int func_00428168(int fileDesc, int offset, int whence)
 {
   int buf[12];
   int sem;
-  int v;
+  int accepted;
   int i;
   short flags;
-  sFioFile *t;
+  sFioFile *fileSlot;
   unsigned fl;
   int *out;
-  sFioLseekCmd *p = &D_0052D700.lseek;
-  t = func_00427520(a0);
+  sFioLseekCmd *lseekCmd = &D_0052D700.lseek;
+  fileSlot = func_00427520(fileDesc);
   func_00427988_b(4);
   if (D_0045520C == 0)
   {
     func_004279B8();
     return -1;
   }
-  if ((t == 0) || ((fl = t->f4) == 0))
+  if ((fileSlot == 0) || ((fl = fileSlot->f4) == 0))
   {
     func_004279B8();
     return -9;
   }
-  p->fC = t->f0;
-  p->f10 = a1;
-  p->f14 = a2;
-  p->f18 = t - D_0052EC00;
+  lseekCmd->fC = fileSlot->f0;
+  lseekCmd->f10 = offset;
+  lseekCmd->f14 = whence;
+  lseekCmd->f18 = fileSlot - D_0052EC00;
   buf[1] = 1;
   buf[2] = 0;
   buf[5] = 0;
   sem = CreateSema(&buf[0]);
   out = &buf[8];
-  p->f8 = 4;
-  p->f4 = (int) out;
+  lseekCmd->f8 = 4;
+  lseekCmd->f4 = (int) out;
   flags = fl;
   D_0052D700.lseek.f0 = sem;
   if (flags & 0x8000)
@@ -3129,8 +3129,8 @@ int func_00428168(int a0, int a1, int a2)
     {
       if (D_00455188[i] == (-1))
       {
-        D_00455188[i] = p->f0;
-        p->f0 = -p->f0;
+        D_00455188[i] = lseekCmd->f0;
+        lseekCmd->f0 = -lseekCmd->f0;
         break;
       }
     }
@@ -3143,9 +3143,9 @@ int func_00428168(int a0, int a1, int a2)
     func_004279B8();
     return -11;
   }
-  v = *((int *) (((int) D_0052E340) | 0x20000000));
+  accepted = *((int *) (((int) D_0052E340) | 0x20000000));
   func_004279B8();
-  if (v == 0)
+  if (accepted == 0)
   {
     DeleteSema(sem);
     return -11;
@@ -3175,51 +3175,51 @@ extern int WaitSema_i(int) __asm__("WaitSema");
  *
  * Takes the call lock (func_00427988; released by func_004279B8); returns -1 when the library is not initialised and -9
  * when the slot (func_00427520) is not open. Sends RPC function 2 with a new semaphore, the address and size (4) of a
- * stack result word, the IOP descriptor, @p a1, @p a2 and the slot index (0x20 bytes). Unless the descriptor has flag
+ * stack result word, the IOP descriptor, @p readBuf, @p readSize and the slot index (0x20 bytes). Unless the descriptor has flag
  * 0x20000000 it first writes the buffer back from the data cache, and it always writes back the request block
  * (func_00426358). The IOP fills the buffer by DMA; func_00427590 patches its unaligned head and tail bytes. A
  * descriptor opened with flag 0x8000 parks the semaphore in D_00455188 and returns 0 at once, as in func_00428168.
  * Called by FILEDEV_readexec.
  *
- * @param a0  descriptor number
- * @param a1  destination buffer
- * @param a2  bytes to read
+ * @param fileDesc  descriptor number
+ * @param readBuf  destination buffer
+ * @param readSize  bytes to read
  * @return bytes read, 0 for a no-wait call, -11 when the RPC fails or is refused, or the IOP's error
  */
-int func_004283A0(int a0, int a1, int a2)
+int func_004283A0(int fileDesc, int readBuf, int readSize)
 {
   int buf[12];
   int sem;
-  int v;
+  int accepted;
   int i;
   short flags;
-  sFioFile *t;
+  sFioFile *fileSlot;
   unsigned fl;
   int *out;
-  sFioReadCmd *p = &D_0052D700.read;
-  t = func_00427520(a0);
+  sFioReadCmd *readCmd = &D_0052D700.read;
+  fileSlot = func_00427520(fileDesc);
   func_00427988_b(2);
   if (D_0045520C == 0)
   {
     func_004279B8();
     return -1;
   }
-  if ((t == 0) || ((fl = t->f4) == 0))
+  if ((fileSlot == 0) || ((fl = fileSlot->f4) == 0))
   {
     func_004279B8();
     return -9;
   }
-  p->fC = t->f0;
-  p->f10 = a1;
-  p->f14 = a2;
-  p->f1C = t - D_0052EC00;
+  readCmd->fC = fileSlot->f0;
+  readCmd->f10 = readBuf;
+  readCmd->f14 = readSize;
+  readCmd->f1C = fileSlot - D_0052EC00;
   buf[1] = 1;
   buf[2] = 0;
   buf[5] = 0;
   sem = CreateSema(&buf[0]);
   out = &buf[8];
-  p->f8 = 4;
-  p->f4 = (int) out;
+  readCmd->f8 = 4;
+  readCmd->f4 = (int) out;
   flags = fl;
   D_0052D700.read.f0 = sem;
   if (flags & 0x8000)
@@ -3229,8 +3229,8 @@ int func_004283A0(int a0, int a1, int a2)
     {
       if (D_00455188[i] == (-1))
       {
-        D_00455188[i] = p->f0;
-        p->f0 = -p->f0;
+        D_00455188[i] = readCmd->f0;
+        readCmd->f0 = -readCmd->f0;
         break;
       }
     }
@@ -3238,17 +3238,17 @@ int func_004283A0(int a0, int a1, int a2)
     SignalSema(D_0045521C);
   }
   if (!(fl & 0x20000000))
-    func_00426358(a1, a2);
-  func_00426358((int) p, 0x20);
+    func_00426358(readBuf, readSize);
+  func_00426358((int) readCmd, 0x20);
   if (func_00426D18(&D_0052EE00, 2, 0, &D_0052D700.read, 0x20, D_0052E340, 4, 0, 0) < 0)
   {
     DeleteSema(sem);
     func_004279B8();
     return -11;
   }
-  v = *((int *) (((int) D_0052E340) | 0x20000000));
+  accepted = *((int *) (((int) D_0052E340) | 0x20000000));
   func_004279B8();
-  if (v == 0)
+  if (accepted == 0)
   {
     DeleteSema(sem);
     return -11;
@@ -3278,53 +3278,53 @@ extern int WaitSema_i(int) __asm__("WaitSema");
  *
  * Takes the call lock (func_00427988; released by func_004279B8); returns -1 when the library is not initialised and -9
  * when the slot (func_00427520) is not open. Sends RPC function 3 (0x30 bytes) with a new semaphore, the address and
- * size (4) of a stack result word, the IOP descriptor, @p a1, @p a2, the slot index and the unaligned head of the
- * buffer: the bytes up to the next 16-byte boundary (at most @p a2), copied through the uncached view, with their
+ * size (4) of a stack result word, the IOP descriptor, @p writeBuf, @p writeSize, the slot index and the unaligned head of the
+ * buffer: the bytes up to the next 16-byte boundary (at most @p writeSize), copied through the uncached view, with their
  * count. Unless the descriptor has flag 0x20000000 the buffer is written back from the data cache first. A descriptor
  * opened with flag 0x8000 parks the semaphore in D_00455188 and returns 0 at once, as in func_00428168. Called by
  * FILEDEV_write.
  *
- * @param a0  descriptor number
- * @param a1  source buffer
- * @param a2  bytes to write
+ * @param fileDesc  descriptor number
+ * @param writeBuf  source buffer
+ * @param writeSize  bytes to write
  * @return bytes written, 0 for a no-wait call, -11 when the RPC fails or is refused, or the IOP's error
  */
-int func_00428600(int a0, unsigned a1, int a2)
+int func_00428600(int fileDesc, unsigned writeBuf, int writeSize)
 {
   int buf[12];
   int sem;
-  int v;
+  int accepted;
   int i;
   int n;
   int j;
   short flags;
-  sFioFile *t;
+  sFioFile *fileSlot;
   unsigned fl;
   int *out;
-  sFioWriteCmd *p = &D_0052D700.write;
-  t = func_00427520(a0);
+  sFioWriteCmd *writeCmd = &D_0052D700.write;
+  fileSlot = func_00427520(fileDesc);
   func_00427988_b(3);
   if (D_0045520C == 0)
   {
     func_004279B8();
     return -1;
   }
-  if ((t == 0) || ((fl = t->f4) == 0))
+  if ((fileSlot == 0) || ((fl = fileSlot->f4) == 0))
   {
     func_004279B8();
     return -9;
   }
-  p->fC = t->f0;
-  p->f14 = a2;
-  p->f10 = a1;
-  p->f2C = t - D_0052EC00;
+  writeCmd->fC = fileSlot->f0;
+  writeCmd->f14 = writeSize;
+  writeCmd->f10 = writeBuf;
+  writeCmd->f2C = fileSlot - D_0052EC00;
   buf[1] = 1;
   buf[2] = 0;
   buf[5] = 0;
   sem = CreateSema(&buf[0]);
   out = &buf[8];
-  p->f8 = 4;
-  p->f4 = (int) out;
+  writeCmd->f8 = 4;
+  writeCmd->f4 = (int) out;
   flags = fl;
   D_0052D700.write.f0 = sem;
   if (flags & 0x8000)
@@ -3334,38 +3334,38 @@ int func_00428600(int a0, unsigned a1, int a2)
     {
       if (D_00455188[i] == (-1))
       {
-        D_00455188[i] = p->f0;
-        p->f0 = -p->f0;
+        D_00455188[i] = writeCmd->f0;
+        writeCmd->f0 = -writeCmd->f0;
         break;
       }
     }
 
     SignalSema(D_0045521C);
   }
-  if ((a1 & 0xF) == 0)
+  if ((writeBuf & 0xF) == 0)
     n = 0;
   else
     {
-      unsigned lo = a1 - 0x10;
-      n = ((a1 >> 4) << 4) - lo;
+      unsigned lo = writeBuf - 0x10;
+      n = ((writeBuf >> 4) << 4) - lo;
     }
-  if (a2 < n)
-    n = a2;
+  if (writeSize < n)
+    n = writeSize;
   if (!(fl & 0x20000000))
-    func_00426358(a1, a2);
-  a1 |= 0x20000000;
-  p->f18 = n;
+    func_00426358(writeBuf, writeSize);
+  writeBuf |= 0x20000000;
+  writeCmd->f18 = n;
   for (j = 0; j < n; j++)
-    p->data[j] = ((char *) a1)[j];
+    writeCmd->data[j] = ((char *) writeBuf)[j];
   if (func_00426D18(&D_0052EE00, 3, 0, &D_0052D700.write, 0x30, D_0052E340, 4, 0, 0) < 0)
   {
     DeleteSema(sem);
     func_004279B8();
     return -11;
   }
-  v = *((int *) (((int) D_0052E340) | 0x20000000));
+  accepted = *((int *) (((int) D_0052E340) | 0x20000000));
   func_004279B8();
-  if (v == 0)
+  if (accepted == 0)
   {
     DeleteSema(sem);
     return -11;
@@ -3400,41 +3400,41 @@ struct Blk88C0 { char b[0x400]; };
 /**
  * Performs a control request on a file descriptor: requests 1-3 are answered on the EE, the rest go to the IOP.
  *
- * Takes the call lock (func_00427988; released by func_004279B8), stores @p arg in D_0052D6C8 and initialises the
- * library when needed (func_00427A90); -9 when the slot (func_00427520) is not open. Request 1 sets *@p arg to 1 when
+ * Takes the call lock (func_00427988; released by func_004279B8), stores @p ioctlArg in D_0052D6C8 and initialises the
+ * library when needed (func_00427A90); -9 when the slot (func_00427520) is not open. Request 1 sets *@p ioctlArg to 1 when
  * any no-wait call is still pending in D_00455188 (under D_0045521C), else 0. Requests 2 and 3 copy the 32-bit or
- * 64-bit result word of the last completed reply buffer (D_0052E390 + D_00455208 * 0x440, uncached) to *@p arg. Any
+ * 64-bit result word of the last completed reply buffer (D_0052E390 + D_00455208 * 0x440, uncached) to *@p ioctlArg. Any
  * other request is sent as RPC function 5 (1056 bytes, written back first) with a new semaphore, the IOP descriptor,
- * the request number and 0x400 bytes copied from @p arg (length 0 when @p arg is 0); it waits for the result even on a
+ * the request number and 0x400 bytes copied from @p ioctlArg (length 0 when @p ioctlArg is 0); it waits for the result even on a
  * no-wait descriptor. No caller in this build.
  *
  * @param fd  descriptor number
  * @param req  request number
- * @param arg  request argument or result pointer
+ * @param ioctlArg  request argument or result pointer
  * @return 0 for requests 1-3; else the IOP's result, or -11 when the RPC fails or is refused
  */
 // FAKEMATCH: stand-in local `one = 1` (retail keeps the constant 1 in $21 from the prologue for the switch's case-1 compare) plus a dead `one = 0;` at the end of case 1, so jump1 keeps the local until cse substitutes it into the compare; plain form 97.75%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-int func_004288C0(int fd, int req, void *arg) {
+int func_004288C0(int fd, int req, void *ioctlArg) {
     int buf[12];
     int sem;
-    int v;
+    int accepted;
     int i;
-    sFioFile *t;
-    sFioIoctl2Cmd *p = &D_0052D700.ioctl2;
+    sFioFile *fileSlot;
+    sFioIoctl2Cmd *ioctlCmd = &D_0052D700.ioctl2;
     int one = 1; /* FAKEMATCH: stand-in for the case-1 constant */
-    t = func_00427520(fd);
+    fileSlot = func_00427520(fd);
     func_00427988_b(5);
-    D_0052D6C8 = arg;
+    D_0052D6C8 = ioctlArg;
     if (D_0045520C == 0) {
         func_00427A90();
     }
-    if (t == 0 || t->f4 == 0) {
+    if (fileSlot == 0 || fileSlot->f4 == 0) {
         func_004279B8();
         return -9;
     }
-    p->f414 = 0;
-    p->f418 = 0;
+    ioctlCmd->f414 = 0;
+    ioctlCmd->f418 = 0;
     switch (req) {
     case 1:
         WaitSema_i(D_0045521C);
@@ -3451,38 +3451,38 @@ int func_004288C0(int fd, int req, void *arg) {
         func_004279B8();
         return 0;
     case 2:
-        *(int *)arg = *(int *)((int)(D_0052E390 + D_00455208 * 0x440) | 0x20000000);
+        *(int *)ioctlArg = *(int *)((int)(D_0052E390 + D_00455208 * 0x440) | 0x20000000);
         func_004279B8();
         return 0;
     case 3:
-        *(long *)arg = *(long *)((int)(D_0052E390 + D_00455208 * 0x440) | 0x20000000);
+        *(long *)ioctlArg = *(long *)((int)(D_0052E390 + D_00455208 * 0x440) | 0x20000000);
         func_004279B8();
         return 0;
     default:
-        p->fC = t->f0;
-        p->f10 = req;
-        if (arg == 0) {
-            p->f41C = 0;
+        ioctlCmd->fC = fileSlot->f0;
+        ioctlCmd->f10 = req;
+        if (ioctlArg == 0) {
+            ioctlCmd->f41C = 0;
         } else {
-            p->f41C = 0x400;
-            *(struct Blk88C0 *)p->data = *(struct Blk88C0 *)arg;
+            ioctlCmd->f41C = 0x400;
+            *(struct Blk88C0 *)ioctlCmd->data = *(struct Blk88C0 *)ioctlArg;
         }
         buf[1] = 1;
         buf[2] = 0;
         buf[5] = 0;
         sem = CreateSema(&buf[0]);
-        p->f0 = sem;
-        p->f4 = (int)&buf[8];
-        p->f8 = 4;
+        ioctlCmd->f0 = sem;
+        ioctlCmd->f4 = (int)&buf[8];
+        ioctlCmd->f8 = 4;
         func_00426358((int)&D_0052D700.ioctl2, 1056);
         if (func_00426D18(&D_0052EE00, 5, 0, &D_0052D700.ioctl2, 1056, D_0052E340, 4, 0, 0) < 0) {
             DeleteSema(sem);
             func_004279B8();
             return -11;
         }
-        v = *(int *)((int)D_0052E340 | 0x20000000);
+        accepted = *(int *)((int)D_0052E340 | 0x20000000);
         func_004279B8();
-        if (v == 0) {
+        if (accepted == 0) {
             DeleteSema(sem);
             return -11;
         }
@@ -3509,65 +3509,65 @@ int func_00428C38_d(int, int, void *, unsigned, int, unsigned) __asm__("func_004
  * Performs an extended control request (input and output buffers) on a file descriptor through the IOP file server.
  *
  * Takes the call lock (func_00427988; released by func_004279B8) and initialises the library when needed
- * (func_00427A90); -9 when the slot (func_00427520) is not open, -22 when @p len or @p a5 exceeds 0x400. Copies @p len
+ * (func_00427A90); -9 when the slot (func_00427520) is not open, -22 when @p len or @p outLen exceeds 0x400. Copies @p len
  * bytes of @p data into the request (func_0041605C, memcpy) and sends RPC function 26 (1056 bytes, written back first)
- * with a new semaphore, the IOP descriptor, @p a1, the lengths and @p a4; func_00427590 copies the reply data to
- * @p a4. The length word is cleared when @p data is 0 and then overwritten with @p len anyway. It always waits for the
+ * with a new semaphore, the IOP descriptor, @p request, the lengths and @p outBuf; func_00427590 copies the reply data to
+ * @p outBuf. The length word is cleared when @p data is 0 and then overwritten with @p len anyway. It always waits for the
  * result. No caller in this build.
  *
- * @param a0  descriptor number
- * @param a1  request number
+ * @param fileDesc  descriptor number
+ * @param request  request number
  * @param data  input data (up to 0x400 bytes), or 0
  * @param len  bytes of @p data
- * @param a4  output buffer
- * @param a5  size of @p a4 (up to 0x400)
+ * @param outBuf  output buffer
+ * @param outLen  size of @p outBuf (up to 0x400)
  * @return the IOP's result, -9, -22, or -11 when the RPC fails or is refused
  */
-int func_00428C38_d(int a0, int a1, void *data, unsigned len, int a4, unsigned a5) {
+int func_00428C38_d(int fileDesc, int request, void *data, unsigned len, int outBuf, unsigned outLen) {
     int buf[12];
     int sem;
-    int v;
-    sFioFile *t;
-    sFioIoctl2Cmd *p = &D_0052D700.ioctl2;
-    t = func_00427520(a0);
+    int accepted;
+    sFioFile *fileSlot;
+    sFioIoctl2Cmd *ioctl2Cmd = &D_0052D700.ioctl2;
+    fileSlot = func_00427520(fileDesc);
     func_00427988_b(26);
     if (D_0045520C == 0) {
         func_00427A90();
     }
-    if (t == 0 || t->f4 == 0) {
+    if (fileSlot == 0 || fileSlot->f4 == 0) {
         func_004279B8();
         return -9;
     }
-    if (len > 0x400 || a5 > 0x400) {
+    if (len > 0x400 || outLen > 0x400) {
         func_004279B8();
         return -22;
     }
     if (data == 0) {
-        p->f41C = 0;
+        ioctl2Cmd->f41C = 0;
     } else {
-        func_0041605C(p->data, data, len);
+        func_0041605C(ioctl2Cmd->data, data, len);
     }
-    p->fC = t->f0;
-    p->f10 = a1;
-    p->f41C = len;
+    ioctl2Cmd->fC = fileSlot->f0;
+    ioctl2Cmd->f10 = request;
+    ioctl2Cmd->f41C = len;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    p->f418 = a5;
-    p->f4 = (int)&buf[8];
-    p->f8 = 4;
-    p->f414 = a4;
-    p->f0 = sem;
+    ioctl2Cmd->f418 = outLen;
+    ioctl2Cmd->f4 = (int)&buf[8];
+    ioctl2Cmd->f8 = 4;
+    ioctl2Cmd->f414 = outBuf;
+    ioctl2Cmd->f0 = sem;
     func_00426358((int)&D_0052D700.ioctl2, 1056);
     if (func_00426D18(&D_0052EE00, 26, 0, &D_0052D700.ioctl2, 1056, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
         return -11;
     }
-    v = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
-    if (v == 0) {
+    if (accepted == 0) {
         DeleteSema(sem);
         return -11;
     }
@@ -3590,53 +3590,53 @@ int func_00428E18_d(char *, int) __asm__("func_00428E18");
 /**
  * Sends a file-server request that takes only a path, and waits for its result.
  *
- * Takes the call lock (func_00427988 with @p a1; released by func_004279B8) and initialises the library when needed
- * (func_00427A90). Copies @p s (up to 0x3FF characters, truncated) into D_0052D700.path and sends RPC function @p a1
+ * Takes the call lock (func_00427988 with @p rpcFunc; released by func_004279B8) and initialises the library when needed
+ * (func_00427A90). Copies @p pathName (up to 0x3FF characters, truncated) into D_0052D700.path and sends RPC function @p rpcFunc
  * with a new semaphore and the address and size (4) of a stack result word; the request is the 12-byte header plus the
  * name and its NUL. Used for requests 6, 8, 9, 16, 18 and 21 (func_00428FC0, func_00429190, func_00429560,
  * func_00429540, func_00429EB8, func_0042A2E0).
  *
- * @param s  the path
- * @param a1  file-server RPC function number
+ * @param pathName  the path
+ * @param rpcFunc  file-server RPC function number
  * @return the IOP's result, or -11 when the RPC fails or is refused
  */
-int func_00428E18_d(char *s, int a1) {
+int func_00428E18_d(char *pathName, int rpcFunc) {
     int buf[12];
     int sem;
-    int v;
+    int accepted;
     int n;
-    sFioPathCmd *p = &D_0052D700.path;
-    func_00427988_b(a1);
+    sFioPathCmd *pathCmd = &D_0052D700.path;
+    func_00427988_b(rpcFunc);
     if (D_0045520C == 0) {
         func_00427A90();
     }
     n = 0;
-    if ((p->name[0] = s[0]) != 0) {
+    if ((pathCmd->name[0] = pathName[0]) != 0) {
         while (++n < 0x400) {
-            if ((p->name[n] = s[n]) == 0) {
+            if ((pathCmd->name[n] = pathName[n]) == 0) {
                 break;
             }
         }
     }
     if (n == 0x400) {
-        p->name[0x3FF] = 0;
+        pathCmd->name[0x3FF] = 0;
         n = 0x3FF;
     }
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    p->f4 = (int)&buf[8];
-    p->f0 = sem;
-    p->f8 = 4;
-    if (func_00426D18(&D_0052EE00, a1, 0, &D_0052D700.path, n + 13, D_0052E340, 4, 0, 0) < 0) {
+    pathCmd->f4 = (int)&buf[8];
+    pathCmd->f0 = sem;
+    pathCmd->f8 = 4;
+    if (func_00426D18(&D_0052EE00, rpcFunc, 0, &D_0052D700.path, n + 13, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
         return -11;
     }
-    v = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
-    if (v == 0) {
+    if (accepted == 0) {
         DeleteSema(sem);
         return -11;
     }
@@ -3674,52 +3674,52 @@ int func_00428FE0_d(char *, int) __asm__("func_00428FE0");
 /**
  * Creates a directory through the IOP file server.
  *
- * Takes the call lock and initialises the library when needed (func_00427A90). Copies @p s (up to 0x3FF characters) and
- * @p a1 into D_0052D700.mkdir and sends RPC function 7 (the 16-byte header plus the name and its NUL) with a new
+ * Takes the call lock and initialises the library when needed (func_00427A90). Copies @p dirPath (up to 0x3FF characters) and
+ * @p dirMode into D_0052D700.mkdir and sends RPC function 7 (the 16-byte header plus the name and its NUL) with a new
  * semaphore and a stack result word, then waits for the result.
  *
- * @param s  the directory's path
- * @param a1  mode passed to the IOP
+ * @param dirPath  the directory's path
+ * @param dirMode  mode passed to the IOP
  * @return the IOP's result, or -11 when the RPC fails or is refused
  */
-int func_00428FE0_d(char *s, int a1) {
+int func_00428FE0_d(char *dirPath, int dirMode) {
     int buf[12];
     int sem;
-    int v;
+    int accepted;
     int n;
-    sFioPathModeCmd *p = &D_0052D700.mkdir;
+    sFioPathModeCmd *mkdirCmd = &D_0052D700.mkdir;
     func_00427988_b(7);
     if (D_0045520C == 0) {
         func_00427A90();
     }
     n = 0;
-    if ((p->name[0] = s[0]) != 0) {
+    if ((mkdirCmd->name[0] = dirPath[0]) != 0) {
         while (++n < 0x400) {
-            if ((p->name[n] = s[n]) == 0) {
+            if ((mkdirCmd->name[n] = dirPath[n]) == 0) {
                 break;
             }
         }
     }
     if (n == 0x400) {
-        p->name[0x3FF] = 0;
+        mkdirCmd->name[0x3FF] = 0;
         n = 0x3FF;
     }
-    p->fC = a1;
+    mkdirCmd->fC = dirMode;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    p->f4 = (int)&buf[8];
-    p->f0 = sem;
-    p->f8 = 4;
+    mkdirCmd->f4 = (int)&buf[8];
+    mkdirCmd->f0 = sem;
+    mkdirCmd->f8 = 4;
     if (func_00426D18(&D_0052EE00, 7, 0, &D_0052D700.mkdir, n + 17, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
         return -11;
     }
-    v = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
-    if (v == 0) {
+    if (accepted == 0) {
         DeleteSema(sem);
         return -11;
     }
@@ -3758,52 +3758,52 @@ int func_004291B0_d(char *, char *, char *, int) __asm__("func_004291B0");
 /**
  * Formats a device through the IOP file server.
  *
- * Takes the call lock and initialises the library when needed (func_00427A90). Copies @p s and @p t (each up to 0x3FF
- * characters; an empty second name when @p t is 0) and @p len bytes of @p data into D_0052D700.format; -7 when @p len
+ * Takes the call lock and initialises the library when needed (func_00427A90). Copies @p devName and @p blockDev (each up to 0x3FF
+ * characters; an empty second name when @p blockDev is 0) and @p len bytes of @p data into D_0052D700.format; -7 when @p len
  * exceeds 0x400 (checked after the names are copied). Sends RPC function 14 (3088 bytes, written back first) with a new
  * semaphore and a stack result word and waits for the result.
  *
- * @param s  the device to format
- * @param t  the block device, or 0
+ * @param devName  the device to format
+ * @param blockDev  the block device, or 0
  * @param data  argument data
  * @param len  bytes of @p data (up to 0x400)
  * @return the IOP's result, -7, or -11 when the RPC fails or is refused
  */
-int func_004291B0_d(char *s, char *t, char *data, int len) {
+int func_004291B0_d(char *devName, char *blockDev, char *data, int len) {
     int buf[12];
     int sem;
-    int v;
+    int accepted;
     int n;
     int i;
-    sFioFormatCmd *p = &D_0052D700.format;
+    sFioFormatCmd *formatCmd = &D_0052D700.format;
     func_00427988_b(0xE);
     if (D_0045520C == 0) {
         func_00427A90();
     }
     n = 0;
-    if ((p->name[0] = s[0]) != 0) {
+    if ((formatCmd->name[0] = devName[0]) != 0) {
         while (++n < 0x400) {
-            if ((p->name[n] = s[n]) == 0) {
+            if ((formatCmd->name[n] = devName[n]) == 0) {
                 break;
             }
         }
     }
     if (n == 0x400) {
-        p->name[0x3FF] = 0;
+        formatCmd->name[0x3FF] = 0;
     }
-    if (t == 0) {
-        p->name2[0] = 0;
+    if (blockDev == 0) {
+        formatCmd->name2[0] = 0;
     } else {
         n = 0;
-        if ((p->name2[0] = t[0]) != 0) {
+        if ((formatCmd->name2[0] = blockDev[0]) != 0) {
             while (++n < 0x400) {
-                if ((p->name2[n] = t[n]) == 0) {
+                if ((formatCmd->name2[n] = blockDev[n]) == 0) {
                     break;
                 }
             }
         }
         if (n == 0x400) {
-            p->name2[0x3FF] = 0;
+            formatCmd->name2[0x3FF] = 0;
         }
     }
     if (len > 0x400) {
@@ -3811,25 +3811,25 @@ int func_004291B0_d(char *s, char *t, char *data, int len) {
         return -7;
     }
     for (i = 0; i < len; i++) {
-        p->data[i] = data[i];
+        formatCmd->data[i] = data[i];
     }
-    p->fC0C = len;
+    formatCmd->fC0C = len;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    p->f4 = (int)&buf[8];
-    p->f0 = sem;
-    p->f8 = 4;
+    formatCmd->f4 = (int)&buf[8];
+    formatCmd->f0 = sem;
+    formatCmd->f8 = 4;
     func_00426358((int)&D_0052D700.format, 3088);
     if (func_00426D18(&D_0052EE00, 0xE, 0, &D_0052D700.format, 3088, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
         return -11;
     }
-    v = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
-    if (v == 0) {
+    if (accepted == 0) {
         DeleteSema(sem);
         return -11;
     }
@@ -3852,37 +3852,37 @@ extern int WaitSema_i(int) __asm__("WaitSema");
  * Sends file-server request 15 with one word argument and waits for the result.
  *
  * Takes the call lock and initialises the library when needed (func_00427A90); the 16-byte request holds a new
- * semaphore, a stack result word's address and size, and @p a0. Unlike the other file calls it returns -1 (not -11)
+ * semaphore, a stack result word's address and size, and @p driverArg. Unlike the other file calls it returns -1 (not -11)
  * when the RPC fails or is refused. No caller in this build.
  *
- * @param a0  the word passed to the IOP
+ * @param driverArg  the word passed to the IOP
  * @return the IOP's result, or -1
  */
-int func_00429420(int a0) {
+int func_00429420(int driverArg) {
     int buf[12];
     int sem;
-    int v;
-    sFioCmd4 *p = &D_0052D700.adddrv;
+    int accepted;
+    sFioCmd4 *adddrvCmd = &D_0052D700.adddrv;
     func_00427988_b(0xF);
     if (D_0045520C == 0) {
         func_00427A90();
     }
-    p->fC = a0;
+    adddrvCmd->fC = driverArg;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
     D_0052D700.adddrv.f0 = sem;
-    p->f4 = (int)&buf[8];
-    p->f8 = 4;
+    adddrvCmd->f4 = (int)&buf[8];
+    adddrvCmd->f8 = 4;
     if (func_00426D18(&D_0052EE00, 0xF, 0, &D_0052D700.adddrv, 0x10, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
         return -1;
     }
-    v = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
-    if (v == 0) {
+    if (accepted == 0) {
         DeleteSema(sem);
         return -1;
     }
@@ -3924,33 +3924,33 @@ extern void SignalSema(int);
  * result frees the slot and is returned; otherwise the IOP's descriptor goes to the slot's f0 (under D_00455218). The
  * slot keeps only its in-use flag 0x10000000.
  *
- * @param a0  the directory's path
+ * @param dirPath  the directory's path
  * @return the descriptor number (slot index), or a negative error
  */
-int func_00429560(int a0) {
-    int r;
-    sFioFile *p;
+int func_00429560(int dirPath) {
+    int result;
+    sFioFile *dirSlot;
     func_00427988_b(9);
     if (D_0045520C == 0) {
         func_00427A90();
     }
     func_004279B8();
-    p = func_00427498();
-    if (p == 0) {
+    dirSlot = func_00427498();
+    if (dirSlot == 0) {
         return -19;
     }
-    r = func_00428E18(a0, 9);
-    if (r < 0) {
+    result = func_00428E18(dirPath, 9);
+    if (result < 0) {
         WaitSema_i(D_00455218);
-        p->f4 = 0;
+        dirSlot->f4 = 0;
         SignalSema(D_00455218);
-        return r;
+        return result;
     } else {
         WaitSema_i(D_00455218);
-        p->f0 = r;
-        r = p - D_0052EC00;
+        dirSlot->f0 = result;
+        result = dirSlot - D_0052EC00;
         SignalSema(D_00455218);
-        return r;
+        return result;
     }
 }
 #endif
@@ -3970,51 +3970,51 @@ extern int WaitSema_i(int) __asm__("WaitSema");
  * (func_00427520) is not open, sends RPC function 10 (20 bytes) with a new semaphore, a stack result word and the IOP
  * descriptor, frees the slot (f4 = 0) once the call is accepted and waits for the result.
  *
- * @param a0  descriptor number from func_00429560
+ * @param dirDesc  descriptor number from func_00429560
  * @return 0, the IOP's negative error, or -11 when the RPC fails or is refused
  */
-int func_00429628(int a0) {
+int func_00429628(int dirDesc) {
     int buf[12];
     int sem;
-    int v;
-    sFioFile *e;
-    sFioFdCmd *p = &D_0052D700.dclose;
-    e = func_00427520(a0);
+    int accepted;
+    sFioFile *dirSlot;
+    sFioFdCmd *dcloseCmd = &D_0052D700.dclose;
+    dirSlot = func_00427520(dirDesc);
     func_00427988_b(10);
     if (D_0045520C == 0) {
         func_004279B8();
         return -1;
     }
-    if (e == 0 || e->f4 == 0) {
+    if (dirSlot == 0 || dirSlot->f4 == 0) {
         func_004279B8();
         return -9;
     }
-    p->fC = e->f0;
+    dcloseCmd->fC = dirSlot->f0;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    p->f0 = sem;
-    p->f4 = (int)&buf[8];
-    p->f8 = 4;
-    if (func_00426D18(&D_0052EE00, 10, 0, p, 20, D_0052E340, 4, 0, 0) < 0) {
+    dcloseCmd->f0 = sem;
+    dcloseCmd->f4 = (int)&buf[8];
+    dcloseCmd->f8 = 4;
+    if (func_00426D18(&D_0052EE00, 10, 0, dcloseCmd, 20, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
         return -11;
     }
-    e->f4 = 0;
-    v = *(int *)((int)D_0052E340 | 0x20000000);
+    dirSlot->f4 = 0;
+    accepted = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
-    if (v == 0) {
+    if (accepted == 0) {
         DeleteSema(sem);
         return -11;
     }
     WaitSema_i(sem);
     DeleteSema(sem);
     {
-        int r = buf[8];
-        if (r < 0)
-            return r;
+        int ioResult = buf[8];
+        if (ioResult < 0)
+            return ioResult;
         return 0;
     }
 }
@@ -4033,47 +4033,47 @@ int func_00429790_d(int, int) __asm__("func_00429790");
  * Reads the next directory entry of a directory descriptor through the IOP file server.
  *
  * Takes the call lock; returns -1 when the library is not initialised and -9 when the slot (func_00427520) is not open.
- * Sends RPC function 11 (0x20 bytes) with a new semaphore, a stack result word, the IOP descriptor and @p a1;
- * func_00427590 copies the 0x144-byte entry to @p a1. Likely bug: when func_00426D18 fails it calls WaitSema on the new
+ * Sends RPC function 11 (0x20 bytes) with a new semaphore, a stack result word, the IOP descriptor and @p direntBuf;
+ * func_00427590 copies the 0x144-byte entry to @p direntBuf. Likely bug: when func_00426D18 fails it calls WaitSema on the new
  * semaphore instead of DeleteSema, which blocks (nothing signals it) and leaks the semaphore.
  *
- * @param a0  descriptor number from func_00429560
- * @param a1  where the 0x144-byte directory entry is stored
+ * @param dirDesc  descriptor number from func_00429560
+ * @param direntBuf  where the 0x144-byte directory entry is stored
  * @return the IOP's result (positive while entries remain), or -11 when the call is refused
  */
-int func_00429790_d(int a0, int a1) {
+int func_00429790_d(int dirDesc, int direntBuf) {
     int buf[12];
     int sem;
-    int v;
-    sFioFile *t;
-    sFioFdCmd *p = &D_0052D700.dread;
-    t = func_00427520(a0);
+    int accepted;
+    sFioFile *dirSlot;
+    sFioFdCmd *dreadCmd = &D_0052D700.dread;
+    dirSlot = func_00427520(dirDesc);
     func_00427988_b(11);
     if (D_0045520C == 0) {
         func_004279B8();
         return -1;
     }
-    if (t == 0 || t->f4 == 0) {
+    if (dirSlot == 0 || dirSlot->f4 == 0) {
         func_004279B8();
         return -9;
     }
-    p->fC = t->f0;
-    p->f10 = a1;
+    dreadCmd->fC = dirSlot->f0;
+    dreadCmd->f10 = direntBuf;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    p->f0 = sem;
-    p->f4 = (int)&buf[8];
-    p->f8 = 4;
-    if (func_00426D18(&D_0052EE00, 11, 0, p, 0x20, D_0052E340, 4, 0, 0) < 0) {
+    dreadCmd->f0 = sem;
+    dreadCmd->f4 = (int)&buf[8];
+    dreadCmd->f8 = 4;
+    if (func_00426D18(&D_0052EE00, 11, 0, dreadCmd, 0x20, D_0052E340, 4, 0, 0) < 0) {
         WaitSema_i(sem);
         func_004279B8();
         return -11;
     }
-    v = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
-    if (v == 0) {
+    if (accepted == 0) {
         DeleteSema(sem);
         return -11;
     }
@@ -4095,55 +4095,55 @@ extern int WaitSema_i(int) __asm__("WaitSema");
 /**
  * Reads a file's status block through the IOP file server.
  *
- * Takes the call lock and initialises the library when needed (func_00427A90). Copies @p a0 (up to 0x3FF characters)
- * and @p a1 into D_0052D700.getstat and sends RPC function 12 (the 16-byte header plus the name and its NUL) with a new
- * semaphore and a stack result word; func_00427590 copies the 0x40-byte status block to @p a1.
+ * Takes the call lock and initialises the library when needed (func_00427A90). Copies @p filePath (up to 0x3FF characters)
+ * and @p statBuf into D_0052D700.getstat and sends RPC function 12 (the 16-byte header plus the name and its NUL) with a new
+ * semaphore and a stack result word; func_00427590 copies the 0x40-byte status block to @p statBuf.
  *
- * @param a0  the file's path
- * @param a1  where the 0x40-byte status block is stored
+ * @param filePath  the file's path
+ * @param statBuf  where the 0x40-byte status block is stored
  * @return the IOP's result, or -11 when the RPC fails or is refused
  */
-int func_004298E8(char *a0, int a1) {
+int func_004298E8(char *filePath, int statBuf) {
     int buf[12];
     int sem;
-    int v;
+    int accepted;
     int i;
-    unsigned char c;
-    sFioPathModeCmd *p = &D_0052D700.getstat;
+    unsigned char nameChar;
+    sFioPathModeCmd *getstatCmd = &D_0052D700.getstat;
     func_00427988_b(0xC);
     if (D_0045520C == 0) {
         func_00427A90();
     }
-    c = (p->name[0] = a0[0]);
+    nameChar = (getstatCmd->name[0] = filePath[0]);
     i = 0;
-    if (c != 0) {
+    if (nameChar != 0) {
         while (++i < 0x400) {
-            c = (p->name[i] = a0[i]);
-            if (c == 0) {
+            nameChar = (getstatCmd->name[i] = filePath[i]);
+            if (nameChar == 0) {
                 break;
             }
         }
     }
     if (i == 0x400) {
-        p->name[0x3FF] = 0;
+        getstatCmd->name[0x3FF] = 0;
         i = 0x3FF;
     }
-    p->fC = a1;
+    getstatCmd->fC = statBuf;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    p->f4 = (int)&buf[8];
-    p->f0 = sem;
-    p->f8 = 4;
+    getstatCmd->f4 = (int)&buf[8];
+    getstatCmd->f0 = sem;
+    getstatCmd->f8 = 4;
     if (func_00426D18(&D_0052EE00, 0xC, 0, &D_0052D700.getstat, i + 17, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
         return -11;
     }
-    v = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
-    if (v == 0) {
+    if (accepted == 0) {
         DeleteSema(sem);
         return -11;
     }
@@ -4167,59 +4167,59 @@ int func_00429A88_d(char *, sFioStat *, int) __asm__("func_00429A88");
 /**
  * Changes a file's status through the IOP file server.
  *
- * Takes the call lock and initialises the library when needed (func_00427A90). Copies @p s (up to 0x3FF characters),
- * the 0x40-byte status block @p src and @p a2 into D_0052D700.chstat, writes the block back from the data cache (1104
+ * Takes the call lock and initialises the library when needed (func_00427A90). Copies @p filePath (up to 0x3FF characters),
+ * the 0x40-byte status block @p src and @p changeMask into D_0052D700.chstat, writes the block back from the data cache (1104
  * bytes) and sends RPC function 13 (the 0x50-byte header plus the name and its NUL) with a new semaphore and a stack
  * result word.
  *
- * @param s  the file's path
+ * @param filePath  the file's path
  * @param src  the new status values
- * @param a2  mask of the fields to change
+ * @param changeMask  mask of the fields to change
  * @return the IOP's result, or -11 when the RPC fails or is refused
  */
-int func_00429A88_d(char *s, sFioStat *src, int a2) {
+int func_00429A88_d(char *filePath, sFioStat *src, int changeMask) {
     int buf[12];
     int sem;
-    int v;
+    int accepted;
     int n;
-    unsigned char c;
-    sFioChstatCmd *p = &D_0052D700.chstat;
+    unsigned char nameChar;
+    sFioChstatCmd *chstatCmd = &D_0052D700.chstat;
     func_00427988_b(13);
     if (D_0045520C == 0) {
         func_00427A90();
     }
-    c = (p->name[0] = s[0]);
+    nameChar = (chstatCmd->name[0] = filePath[0]);
     n = 0;
-    if (c != 0) {
+    if (nameChar != 0) {
         while (++n < 0x400) {
-            c = (p->name[n] = s[n]);
-            if (c == 0) {
+            nameChar = (chstatCmd->name[n] = filePath[n]);
+            if (nameChar == 0) {
                 break;
             }
         }
     }
     if (n == 0x400) {
-        p->name[0x3FF] = 0;
+        chstatCmd->name[0x3FF] = 0;
         n = 0x3FF;
     }
-    p->v = *src;
-    p->fC = a2;
+    chstatCmd->v = *src;
+    chstatCmd->fC = changeMask;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    p->f0 = sem;
-    p->f4 = (int)&buf[8];
-    p->f8 = 4;
+    chstatCmd->f0 = sem;
+    chstatCmd->f4 = (int)&buf[8];
+    chstatCmd->f8 = 4;
     func_00426358((int)&D_0052D700.chstat, 1104);
     if (func_00426D18(&D_0052EE00, 13, 0, &D_0052D700.chstat, n + 81, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
         return -11;
     }
-    v = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
-    if (v == 0) {
+    if (accepted == 0) {
         DeleteSema(sem);
         return -11;
     }
@@ -4247,58 +4247,58 @@ int func_00429CC8_d(char *, char *) __asm__("func_00429CC8");
  * characters) into D_0052D700.rename, writes the 2060-byte request back and sends RPC function 17 with a new semaphore
  * and a stack result word.
  *
- * @param s  the current path
- * @param t  the new path
+ * @param oldPath  the current path
+ * @param newPath  the new path
  * @return the IOP's result, or -11 when the RPC fails or is refused
  */
-int func_00429CC8_d(char *s, char *t) {
+int func_00429CC8_d(char *oldPath, char *newPath) {
     int buf[12];
     int sem;
-    int v;
+    int accepted;
     int n;
-    sFioPath2Cmd *p = &D_0052D700.rename;
+    sFioPath2Cmd *renameCmd = &D_0052D700.rename;
     func_00427988_b(17);
     if (D_0045520C == 0) {
         func_00427A90();
     }
     n = 0;
-    if ((p->name[0] = s[0]) != 0) {
+    if ((renameCmd->name[0] = oldPath[0]) != 0) {
         while (++n < 0x400) {
-            if ((p->name[n] = s[n]) == 0) {
+            if ((renameCmd->name[n] = oldPath[n]) == 0) {
                 break;
             }
         }
     }
     if (n == 0x400) {
-        p->name[0x3FF] = 0;
+        renameCmd->name[0x3FF] = 0;
     }
     n = 0;
-    if ((p->name2[0] = t[0]) != 0) {
+    if ((renameCmd->name2[0] = newPath[0]) != 0) {
         while (++n < 0x400) {
-            if ((p->name2[n] = t[n]) == 0) {
+            if ((renameCmd->name2[n] = newPath[n]) == 0) {
                 break;
             }
         }
     }
     if (n == 0x400) {
-        p->name2[0x3FF] = 0;
+        renameCmd->name2[0x3FF] = 0;
     }
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    p->f4 = (int)&buf[8];
-    p->f0 = sem;
-    p->f8 = 4;
+    renameCmd->f4 = (int)&buf[8];
+    renameCmd->f0 = sem;
+    renameCmd->f8 = 4;
     func_00426358((int)&D_0052D700.rename, 2060);
     if (func_00426D18(&D_0052EE00, 17, 0, &D_0052D700.rename, 2060, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
         return -11;
     }
-    v = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
-    if (v == 0) {
+    if (accepted == 0) {
         DeleteSema(sem);
         return -11;
     }
@@ -4336,51 +4336,51 @@ int func_00429ED8_d(char *, int) __asm__("func_00429ED8");
 /**
  * Flushes a device through the IOP file server.
  *
- * Takes the call lock and initialises the library when needed (func_00427A90). Copies @p s (up to 0x3FF characters) and
- * @p a1 into D_0052D700.sync and sends RPC function 19 (1044 bytes) with a new semaphore and a stack result word.
+ * Takes the call lock and initialises the library when needed (func_00427A90). Copies @p devPath (up to 0x3FF characters) and
+ * @p syncFlag into D_0052D700.sync and sends RPC function 19 (1044 bytes) with a new semaphore and a stack result word.
  *
- * @param s  the device or path
- * @param a1  flag passed to the IOP
+ * @param devPath  the device or path
+ * @param syncFlag  flag passed to the IOP
  * @return the IOP's result, or -11 when the RPC fails or is refused
  */
-int func_00429ED8_d(char *s, int a1) {
+int func_00429ED8_d(char *devPath, int syncFlag) {
     int buf[12];
     int sem;
-    int v;
+    int accepted;
     int n;
-    sFioPathArgCmd *p = &D_0052D700.sync;
+    sFioPathArgCmd *syncCmd = &D_0052D700.sync;
     func_00427988_b(19);
     if (D_0045520C == 0) {
         func_00427A90();
     }
     n = 0;
-    if ((p->name[0] = s[0]) != 0) {
+    if ((syncCmd->name[0] = devPath[0]) != 0) {
         while (++n < 0x400) {
-            if ((p->name[n] = s[n]) == 0) {
+            if ((syncCmd->name[n] = devPath[n]) == 0) {
                 break;
             }
         }
     }
     if (n == 0x400) {
-        p->name[0x3FF] = 0;
+        syncCmd->name[0x3FF] = 0;
         n = 0x3FF;
     }
-    p->f10 = a1;
+    syncCmd->f10 = syncFlag;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    p->f4 = (int)&buf[8];
-    p->f0 = sem;
-    p->f8 = 4;
+    syncCmd->f4 = (int)&buf[8];
+    syncCmd->f0 = sem;
+    syncCmd->f8 = 4;
     if (func_00426D18(&D_0052EE00, 19, 0, &D_0052D700.sync, 1044, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
         return -11;
     }
-    v = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
-    if (v == 0) {
+    if (accepted == 0) {
         DeleteSema(sem);
         return -11;
     }
@@ -4405,74 +4405,74 @@ int func_0042A070_d(char *, char *, int, char *, int) __asm__("func_0042A070");
  * Mounts a file system through the IOP file server.
  *
  * Takes the call lock and initialises the library when needed (func_00427A90). Copies both names (each up to 0x3FF
- * characters), @p a2 and @p len bytes of @p data into D_0052D700.mount; -7 when @p len exceeds 0x400. Writes the
+ * characters), @p mountFlag and @p len bytes of @p data into D_0052D700.mount; -7 when @p len exceeds 0x400. Writes the
  * 3092-byte request back and sends RPC function 20 with a new semaphore and a stack result word.
  *
- * @param s  the file-system device to mount as
- * @param t  the block device
- * @param a2  mount flag
+ * @param fsDevice  the file-system device to mount as
+ * @param blockDev  the block device
+ * @param mountFlag  mount flag
  * @param data  argument data
  * @param len  bytes of @p data (up to 0x400)
  * @return the IOP's result, -7, or -11 when the RPC fails or is refused
  */
-int func_0042A070_d(char *s, char *t, int a2, char *data, int len) {
+int func_0042A070_d(char *fsDevice, char *blockDev, int mountFlag, char *data, int len) {
     int buf[12];
     int sem;
-    int v;
+    int accepted;
     int n;
     int i;
-    sFioMountCmd *p = &D_0052D700.mount;
+    sFioMountCmd *mountCmd = &D_0052D700.mount;
     func_00427988_b(20);
     if (D_0045520C == 0) {
         func_00427A90();
     }
     n = 0;
-    if ((p->name[0] = s[0]) != 0) {
+    if ((mountCmd->name[0] = fsDevice[0]) != 0) {
         while (++n < 0x400) {
-            if ((p->name[n] = s[n]) == 0) {
+            if ((mountCmd->name[n] = fsDevice[n]) == 0) {
                 break;
             }
         }
     }
     if (n == 0x400) {
-        p->name[0x3FF] = 0;
+        mountCmd->name[0x3FF] = 0;
     }
     n = 0;
-    if ((p->name2[0] = t[0]) != 0) {
+    if ((mountCmd->name2[0] = blockDev[0]) != 0) {
         while (++n < 0x400) {
-            if ((p->name2[n] = t[n]) == 0) {
+            if ((mountCmd->name2[n] = blockDev[n]) == 0) {
                 break;
             }
         }
     }
     if (n == 0x400) {
-        p->name2[0x3FF] = 0;
+        mountCmd->name2[0x3FF] = 0;
     }
     if (len > 0x400) {
         func_004279B8();
         return -7;
     }
     for (i = 0; i < len; i++) {
-        p->data[i] = data[i];
+        mountCmd->data[i] = data[i];
     }
-    p->fC10 = len;
-    p->fC0C = a2;
+    mountCmd->fC10 = len;
+    mountCmd->fC0C = mountFlag;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    p->f4 = (int)&buf[8];
-    p->f0 = sem;
-    p->f8 = 4;
+    mountCmd->f4 = (int)&buf[8];
+    mountCmd->f0 = sem;
+    mountCmd->f8 = 4;
     func_00426358((int)&D_0052D700.mount, 3092);
     if (func_00426D18(&D_0052EE00, 20, 0, &D_0052D700.mount, 3092, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
         return -11;
     }
-    v = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
-    if (v == 0) {
+    if (accepted == 0) {
         DeleteSema(sem);
         return -11;
     }
@@ -4509,47 +4509,47 @@ extern int WaitSema_i(int) __asm__("WaitSema");
 /**
  * Moves a file descriptor's position with a 64-bit offset through the IOP file server.
  *
- * Like func_00428168 but sends RPC function 22 (0x20 bytes) with the 64-bit @p a1, the origin, the slot index and an
+ * Like func_00428168 but sends RPC function 22 (0x20 bytes) with the 64-bit @p offset, the origin, the slot index and an
  * 8-byte stack result. A descriptor opened with flag 0x8000 parks the semaphore in D_00455188 and returns 0 at once.
  *
- * @param a0  descriptor number
- * @param a1  64-bit offset
- * @param a2  origin of @p a1 (passed to the IOP)
+ * @param fileDesc  descriptor number
+ * @param offset  64-bit offset
+ * @param whence  origin of @p offset (passed to the IOP)
  * @return the new 64-bit position, 0 for a no-wait call, -1 or -9 as in func_00428168, -11 when the RPC fails
  */
-long func_0042A300(int a0, long a1, int a2)
+long func_0042A300(int fileDesc, long offset, int whence)
 {
   int buf[8];
   long res;
   int sem;
-  int v;
+  int accepted;
   int i;
   short flags;
-  sFioFile *t;
+  sFioFile *fileSlot;
   unsigned fl;
-  sFioLseek64Cmd *p = &D_0052D700.lseek64;
-  t = func_00427520(a0);
+  sFioLseek64Cmd *lseek64Cmd = &D_0052D700.lseek64;
+  fileSlot = func_00427520(fileDesc);
   func_00427988_b(22);
   if (D_0045520C == 0)
   {
     func_004279B8();
     return -1;
   }
-  if ((t == 0) || ((fl = t->f4) == 0))
+  if ((fileSlot == 0) || ((fl = fileSlot->f4) == 0))
   {
     func_004279B8();
     return -9;
   }
-  p->fC = t->f0;
-  p->f10 = a1;
-  p->f18 = a2;
-  p->f1C = t - D_0052EC00;
+  lseek64Cmd->fC = fileSlot->f0;
+  lseek64Cmd->f10 = offset;
+  lseek64Cmd->f18 = whence;
+  lseek64Cmd->f1C = fileSlot - D_0052EC00;
   buf[1] = 1;
   buf[2] = 0;
   buf[5] = 0;
   sem = CreateSema(&buf[0]);
-  p->f4 = (int) &res;
-  p->f8 = 8;
+  lseek64Cmd->f4 = (int) &res;
+  lseek64Cmd->f8 = 8;
   flags = fl;
   D_0052D700.lseek64.f0 = sem;
   if (flags & 0x8000)
@@ -4559,8 +4559,8 @@ long func_0042A300(int a0, long a1, int a2)
     {
       if (D_00455188[i] == (-1))
       {
-        D_00455188[i] = p->f0;
-        p->f0 = -p->f0;
+        D_00455188[i] = lseek64Cmd->f0;
+        lseek64Cmd->f0 = -lseek64Cmd->f0;
         break;
       }
     }
@@ -4573,9 +4573,9 @@ long func_0042A300(int a0, long a1, int a2)
     func_004279B8();
     return -11;
   }
-  v = *((int *) (((int) D_0052E340) | 0x20000000));
+  accepted = *((int *) (((int) D_0052E340) | 0x20000000));
   func_004279B8();
-  if (v == 0)
+  if (accepted == 0)
   {
     DeleteSema(sem);
     return -11;
@@ -4606,68 +4606,68 @@ int func_0042A538_d(char *, int, char *, unsigned, int, unsigned) __asm__("func_
  * Sends a device control request (input and output buffers) to a device through the IOP file server.
  *
  * Takes the call lock and initialises the library when needed (func_00427A90). Copies the device name (up to 0x3FF
- * characters); -22 when @p len or @p a5 exceeds 0x400. Copies @p len bytes of @p data, the request number, the lengths
- * and @p a4 into D_0052D700.devctl, writes the 2076-byte request back and sends RPC function 23 with a new semaphore
- * and a stack result word; func_00427590 copies the reply data to @p a4. func_003198A0 (the power-off thread) sends
+ * characters); -22 when @p len or @p outLen exceeds 0x400. Copies @p len bytes of @p data, the request number, the lengths
+ * and @p outBuf into D_0052D700.devctl, writes the 2076-byte request back and sends RPC function 23 with a new semaphore
+ * and a stack result word; func_00427590 copies the reply data to @p outBuf. func_003198A0 (the power-off thread) sends
  * request 0x4402 to "dev9x" through it.
  *
- * @param s  the device name
- * @param a1  request number
+ * @param devName  the device name
+ * @param devCmd  request number
  * @param data  input data, or 0
  * @param len  bytes of @p data (up to 0x400)
- * @param a4  output buffer
- * @param a5  size of @p a4 (up to 0x400)
+ * @param outBuf  output buffer
+ * @param outLen  size of @p outBuf (up to 0x400)
  * @return the IOP's result, -22, or -11 when the RPC fails or is refused
  */
-int func_0042A538_d(char *s, int a1, char *data, unsigned len, int a4, unsigned a5) {
+int func_0042A538_d(char *devName, int devCmd, char *data, unsigned len, int outBuf, unsigned outLen) {
     int buf[12];
     int sem;
-    int v;
+    int accepted;
     int n;
     unsigned i;
-    sFioDevctlCmd *p = &D_0052D700.devctl;
+    sFioDevctlCmd *devctlCmd = &D_0052D700.devctl;
     func_00427988_b(23);
     if (D_0045520C == 0) {
         func_00427A90();
     }
     n = 0;
-    if ((p->name[0] = s[0]) != 0) {
+    if ((devctlCmd->name[0] = devName[0]) != 0) {
         while (++n < 0x400) {
-            if ((p->name[n] = s[n]) == 0) {
+            if ((devctlCmd->name[n] = devName[n]) == 0) {
                 break;
             }
         }
     }
     if (n == 0x400) {
-        p->name[0x3FF] = 0;
+        devctlCmd->name[0x3FF] = 0;
     }
-    if (len > 0x400 || a5 > 0x400) {
+    if (len > 0x400 || outLen > 0x400) {
         func_004279B8();
         return -22;
     }
     for (i = 0; i < len; i++) {
-        p->data[i] = data[i];
+        devctlCmd->data[i] = data[i];
     }
-    p->f810 = len;
-    p->f80C = a1;
+    devctlCmd->f810 = len;
+    devctlCmd->f80C = devCmd;
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    p->f818 = a5;
-    p->f4 = (int)&buf[8];
-    p->f8 = 4;
-    p->f814 = a4;
-    p->f0 = sem;
+    devctlCmd->f818 = outLen;
+    devctlCmd->f4 = (int)&buf[8];
+    devctlCmd->f8 = 4;
+    devctlCmd->f814 = outBuf;
+    devctlCmd->f0 = sem;
     func_00426358((int)&D_0052D700.devctl, 2076);
     if (func_00426D18(&D_0052EE00, 23, 0, &D_0052D700.devctl, 2076, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
         return -11;
     }
-    v = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
-    if (v == 0) {
+    if (accepted == 0) {
         DeleteSema(sem);
         return -11;
     }
@@ -4694,57 +4694,57 @@ int func_0042A770_d(char *, char *) __asm__("func_0042A770");
  * (func_00427A90). Copies both names (each up to 0x3FF characters) into D_0052D700.symlink and sends RPC function 24
  * (2060 bytes) with a new semaphore and a stack result word.
  *
- * @param s  the existing path
- * @param t  the link to create
+ * @param oldPath  the existing path
+ * @param linkPath  the link to create
  * @return the IOP's result, or -11 when the RPC fails or is refused
  */
-int func_0042A770_d(char *s, char *t) {
+int func_0042A770_d(char *oldPath, char *linkPath) {
     int buf[12];
     int sem;
-    int v;
+    int accepted;
     int n;
-    sFioPath2Cmd *p = &D_0052D700.symlink;
+    sFioPath2Cmd *symlinkCmd = &D_0052D700.symlink;
     func_00427988_b(17);
     if (D_0045520C == 0) {
         func_00427A90();
     }
     n = 0;
-    if ((p->name[0] = s[0]) != 0) {
+    if ((symlinkCmd->name[0] = oldPath[0]) != 0) {
         while (++n < 0x400) {
-            if ((p->name[n] = s[n]) == 0) {
+            if ((symlinkCmd->name[n] = oldPath[n]) == 0) {
                 break;
             }
         }
     }
     if (n == 0x400) {
-        p->name[0x3FF] = 0;
+        symlinkCmd->name[0x3FF] = 0;
     }
     n = 0;
-    if ((p->name2[0] = t[0]) != 0) {
+    if ((symlinkCmd->name2[0] = linkPath[0]) != 0) {
         while (++n < 0x400) {
-            if ((p->name2[n] = t[n]) == 0) {
+            if ((symlinkCmd->name2[n] = linkPath[n]) == 0) {
                 break;
             }
         }
     }
     if (n == 0x400) {
-        p->name2[0x3FF] = 0;
+        symlinkCmd->name2[0x3FF] = 0;
     }
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    p->f4 = (int)&buf[8];
-    p->f0 = sem;
-    p->f8 = 4;
+    symlinkCmd->f4 = (int)&buf[8];
+    symlinkCmd->f0 = sem;
+    symlinkCmd->f8 = 4;
     if (func_00426D18(&D_0052EE00, 0x18, 0, &D_0052D700.symlink, 2060, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
         return -11;
     }
-    v = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
-    if (v == 0) {
+    if (accepted == 0) {
         DeleteSema(sem);
         return -11;
     }
@@ -4769,58 +4769,58 @@ int func_0042A950_d(char *, int, unsigned) __asm__("func_0042A950");
  * Reads a symbolic link's target through the IOP file server.
  *
  * Takes the call lock (passing 17, ignored) and initialises the library when needed (func_00427A90). Copies the path
- * (up to 0x3FF characters), caps @p len at 0x3FF, stores @p a1 and the length, writes @p a1 back from the data cache
+ * (up to 0x3FF characters), caps @p len at 0x3FF, stores @p targetBuf and the length, writes @p targetBuf back from the data cache
  * and sends RPC function 25 with a new semaphore and a stack result word; func_00427590 copies the returned text to
- * @p a1. The send size (2060 bytes) is larger than this request's 1044-byte layout, so stale bytes of D_0052D700 go
+ * @p targetBuf. The send size (2060 bytes) is larger than this request's 1044-byte layout, so stale bytes of D_0052D700 go
  * along.
  *
- * @param s  the link's path
- * @param a1  buffer for the target
- * @param len  size of @p a1
+ * @param linkPath  the link's path
+ * @param targetBuf  buffer for the target
+ * @param len  size of @p targetBuf
  * @return the IOP's result, or -11 when the RPC fails or is refused
  */
-int func_0042A950_d(char *s, int a1, unsigned len) {
+int func_0042A950_d(char *linkPath, int targetBuf, unsigned len) {
     int buf[12];
     int sem;
-    int v;
+    int accepted;
     int n;
-    sFioPathArgCmd *p = &D_0052D700.readlink;
+    sFioPathArgCmd *readlinkCmd = &D_0052D700.readlink;
     func_00427988_b(17);
     if (D_0045520C == 0) {
         func_00427A90();
     }
     n = 0;
-    if ((p->name[0] = s[0]) != 0) {
+    if ((readlinkCmd->name[0] = linkPath[0]) != 0) {
         while (++n < 0x400) {
-            if ((p->name[n] = s[n]) == 0) {
+            if ((readlinkCmd->name[n] = linkPath[n]) == 0) {
                 break;
             }
         }
     }
     if (n == 0x400) {
-        p->name[0x3FF] = 0;
+        readlinkCmd->name[0x3FF] = 0;
     }
     if (len >= 0x400) {
         len = 0x3FF;
     }
-    p->f10 = a1;
-    p->fC = len;
-    func_00426358(a1, len);
+    readlinkCmd->f10 = targetBuf;
+    readlinkCmd->fC = len;
+    func_00426358(targetBuf, len);
     buf[1] = 1;
     buf[2] = 0;
     buf[5] = 0;
     sem = CreateSema(&buf[0]);
-    p->f4 = (int)&buf[8];
-    p->f0 = sem;
-    p->f8 = 4;
+    readlinkCmd->f4 = (int)&buf[8];
+    readlinkCmd->f0 = sem;
+    readlinkCmd->f8 = 4;
     if (func_00426D18(&D_0052EE00, 25, 0, &D_0052D700.readlink, 2060, D_0052E340, 4, 0, 0) < 0) {
         DeleteSema(sem);
         func_004279B8();
         return -11;
     }
-    v = *(int *)((int)D_0052E340 | 0x20000000);
+    accepted = *(int *)((int)D_0052E340 | 0x20000000);
     func_004279B8();
-    if (v == 0) {
+    if (accepted == 0) {
         DeleteSema(sem);
         return -11;
     }
@@ -4868,15 +4868,15 @@ INCLUDE_ASM("seg/seg_325220", func_0042ABA0);
 /**
  * Allocates a block of IOP memory through the heap RPC server.
  *
- * When the heap server is bound (D_00455224 >= 0) it sends request 1 with @p a0 (D_0052EF40) and returns the reply word
+ * When the heap server is bound (D_00455224 >= 0) it sends request 1 with @p allocSize (D_0052EF40) and returns the reply word
  * D_0052EF00.
  *
- * @param a0  bytes to allocate
+ * @param allocSize  bytes to allocate
  * @return the IOP address of the block, or 0 when unbound or the RPC fails
  */
-int func_0042ABA0(int a0) {
+int func_0042ABA0(int allocSize) {
     if (D_00455224 >= 0) {
-        D_0052EF40 = a0;
+        D_0052EF40 = allocSize;
         if (func_00426D18(&D_0052EEC0, 1, 0, &D_0052EF40, 4, &D_0052EF00, 4, 0, 0) >= 0) {
             return D_0052EF00;
         }
@@ -4900,15 +4900,15 @@ INCLUDE_ASM("seg/seg_325220", func_0042AC10);
  * @return the reply (an IOP address), or 0 when unbound or the RPC fails
  */
 int func_0042AC10(int a0, int a1, int a2) {
-    int *p;
+    int *rpcArgs;
     if (D_00455224 < 0) {
         return 0;
     }
-    p = &D_0052EF40;
-    p[0] = a1;
-    p[1] = a0;
-    p[2] = a2;
-    if (func_00426D18(&D_0052EEC0, 4, 0, p, 0xC, &D_0052EF00, 4, 0, 0) >= 0) {
+    rpcArgs = &D_0052EF40;
+    rpcArgs[0] = a1;
+    rpcArgs[1] = a0;
+    rpcArgs[2] = a2;
+    if (func_00426D18(&D_0052EEC0, 4, 0, rpcArgs, 0xC, &D_0052EF00, 4, 0, 0) >= 0) {
         return D_0052EF00;
     }
     return 0;
@@ -4922,17 +4922,17 @@ int func_0042AC90_impl(int a0) __asm__("func_0042AC90");
 /**
  * Frees a block of IOP memory through the heap RPC server.
  *
- * When the heap server is bound (D_00455224 >= 0) it sends request 2 with @p a0 and returns the reply word D_0052EF00.
+ * When the heap server is bound (D_00455224 >= 0) it sends request 2 with @p blockAddr and returns the reply word D_0052EF00.
  * func_0042AD08 forwards to it.
  *
- * @param a0  IOP address of the block
+ * @param blockAddr  IOP address of the block
  * @return the server's result; 0 when unbound, -1 when the RPC fails
  */
-int func_0042AC90_impl(int a0) {
+int func_0042AC90_impl(int blockAddr) {
     if (D_00455224 < 0) {
         return 0;
     }
-    D_0052EF40 = a0;
+    D_0052EF40 = blockAddr;
     if (func_00426D18(&D_0052EEC0, 2, 0, &D_0052EF40, 4, &D_0052EF00, 4, 0, 0) < 0) {
         return -1;
     }
@@ -4965,33 +4965,33 @@ extern struct S2AD28 D_0052EF80;
 /**
  * Loads a file into IOP memory through the heap RPC server.
  *
- * When the heap server is bound (D_00455224 >= 0) it sends request 3 with @p a1 and the path (copied into D_0052EF80,
+ * When the heap server is bound (D_00455224 >= 0) it sends request 3 with @p iopAddr and the path (copied into D_0052EF80,
  * up to 0xFB characters; the request is 4 bytes plus the name and its NUL) and returns the reply word D_0052EF00. No
  * caller in this build.
  *
- * @param a0  the file's path
- * @param a1  IOP address to load it to
+ * @param filePath  the file's path
+ * @param iopAddr  IOP address to load it to
  * @return the server's result; 0 when unbound, -1 when the RPC fails
  */
-int func_0042AD28(char *a0, int a1) {
+int func_0042AD28(char *filePath, int iopAddr) {
     int i;
     if (D_00455224 < 0) {
         return 0;
     }
     i = 0;
-    if ((D_0052EF80.name[0] = a0[0]) != 0) {
+    if ((D_0052EF80.name[0] = filePath[0]) != 0) {
         do {
             i++;
             if (i >= 0xFC) {
                 break;
             }
-        } while ((D_0052EF80.name[i] = a0[i]) != 0);
+        } while ((D_0052EF80.name[i] = filePath[i]) != 0);
     }
     if (i == 0xFC) {
         D_0052EF80.name[0xFB] = 0;
         i = 251;
     }
-    D_0052EF80.cmd = a1;
+    D_0052EF80.cmd = iopAddr;
     D_0052EF80.name[0xFB] = 0;
     if (func_00426D18(&D_0052EEC0, 3, 0, &D_0052EF80, i + 5, &D_0052EF00, 4, 0, 0) < 0) {
         return -1;
@@ -5071,14 +5071,14 @@ INCLUDE_ASM("seg/seg_325220", func_0042AF68);
  *
  * No caller in this build.
  *
- * @param a0  IOP address of a memory block
+ * @param blockAddr  IOP address of a memory block
  * @return the reply; 0 when the heap server is not bound, 0xFFFFFFFF when the RPC fails
  */
-unsigned int func_0042AF68(int a0) {
+unsigned int func_0042AF68(int blockAddr) {
     if (D_00455224 < 0) {
         return 0;
     }
-    D_0052EF40 = a0;
+    D_0052EF40 = blockAddr;
     if (func_00426D18(&D_0052EEC0, 8, 0, &D_0052EF40, 4, &D_0052EF00, 4, 0, 0) < 0) {
         return 0xFFFFFFFF;
     }
@@ -5094,14 +5094,14 @@ INCLUDE_ASM("seg/seg_325220", func_0042AFE8);
  *
  * No caller in this build.
  *
- * @param a0  IOP address of a memory block
+ * @param blockAddr  IOP address of a memory block
  * @return the reply; 0 when the heap server is not bound, 0xFFFFFFFF when the RPC fails
  */
-unsigned int func_0042AFE8(int a0) {
+unsigned int func_0042AFE8(int blockAddr) {
     if (D_00455224 < 0) {
         return 0;
     }
-    D_0052EF40 = a0;
+    D_0052EF40 = blockAddr;
     if (func_00426D18(&D_0052EEC0, 9, 0, &D_0052EF40, 4, &D_0052EF00, 4, 0, 0) < 0) {
         return 0xFFFFFFFF;
     }
@@ -5161,14 +5161,14 @@ extern int func_00415FC8(char *, char *, int);
  * @return 1 when the tag matches neither accepted tag, else 0
  */
 int func_0042B168(void) {
-    char *a = D_00455164;
-    char *b = D_0052F2A8.b;
-    int r = 0;
-    if (func_00415FC8(b, a, 4) != 0 &&
-        func_00415FC8(b, D_0045522C, 4) != 0) {
-        r = func_00415FC8(a, D_0045522C, 4) != 0;
+    char *libVersion = D_00455164;
+    char *serverVersion = D_0052F2A8.b;
+    int mismatch = 0;
+    if (func_00415FC8(serverVersion, libVersion, 4) != 0 &&
+        func_00415FC8(serverVersion, D_0045522C, 4) != 0) {
+        mismatch = func_00415FC8(libVersion, D_0045522C, 4) != 0;
     }
-    return r;
+    return mismatch;
 }
 #endif
 
@@ -5201,32 +5201,32 @@ int func_0042B230_i(int a0, int a1, sLfData *a2, int *a3) __asm__("func_0042B230
  * Sends a module-loader request that names an IOP memory address plus an argument block, and returns its results.
  *
  * Binds the loader when needed (func_0042B068; 0xFFFF0000 on failure) and refuses an unaccepted server version
- * (func_0042B168; 0xFFFEFFFC). D_0052F080 gets @p a0, the argument length and the arguments (at most 0xFC bytes; a
+ * (func_0042B168; 0xFFFEFFFC). D_0052F080 gets @p modAddr, the argument length and the arguments (at most 0xFC bytes; a
  * length of 253 or more copies a full 0xFC block); request 6 is sent (0x200 bytes) and the 8-byte reply read back in
  * place. Called by func_0042B800 and func_0042B820.
  *
- * @param a0  IOP address of the module image
- * @param a1  bytes of @p a2
- * @param a2  argument block, or 0
- * @param a3  receives the reply's second word
+ * @param modAddr  IOP address of the module image
+ * @param argLen  bytes of @p argBlock
+ * @param argBlock  argument block, or 0
+ * @param resultOut  receives the reply's second word
  * @return the reply's first word, or 0xFFFEFFFF when the RPC fails
  */
-int func_0042B230_i(int a0, int a1, sLfData *a2, int *a3) {
-    int r;
+int func_0042B230_i(int modAddr, int argLen, sLfData *argBlock, int *resultOut) {
+    int modId;
     if (func_0042B068() < 0) {
         return 0xFFFF0000;
     }
     if (func_0042B168() != 0) {
         return 0xFFFEFFFC;
     }
-    D_0052F080.cmd.f0 = a0;
-    if (a2 != 0) {
-        if (a1 >= 253) {
-            *(sLfData *)D_0052F080.cmd.n2 = *a2;
+    D_0052F080.cmd.f0 = modAddr;
+    if (argBlock != 0) {
+        if (argLen >= 253) {
+            *(sLfData *)D_0052F080.cmd.n2 = *argBlock;
             D_0052F080.cmd.f4 = 0xFC;
         } else {
-            func_0041605C(D_0052F080.cmd.n2, a2, a1);
-            D_0052F080.cmd.f4 = a1;
+            func_0041605C(D_0052F080.cmd.n2, argBlock, argLen);
+            D_0052F080.cmd.f4 = argLen;
         }
     } else {
         D_0052F080.cmd.f4 = 0;
@@ -5234,9 +5234,9 @@ int func_0042B230_i(int a0, int a1, sLfData *a2, int *a3) {
     if (func_00426D18(&D_0052F280, 6, 0, &D_0052F080, 0x200, &D_0052F080, 8, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    r = D_0052F080.cmd.f0;
-    *a3 = D_0052F080.cmd.f4;
-    return r;
+    modId = D_0052F080.cmd.f0;
+    *resultOut = D_0052F080.cmd.f4;
+    return modId;
 }
 #endif
 
@@ -5253,28 +5253,28 @@ int func_0042B438_i(int a0, int a1, sLfData *a2, int *a3) __asm__("func_0042B438
  * Same checks and request layout as func_0042B230 (module id, argument length and up to 0xFC bytes of arguments).
  * func_00319790 and func_003F5E90 call it with no arguments and then func_0042B640 on the same module.
  *
- * @param a0  IOP module id
- * @param a1  bytes of @p a2
- * @param a2  argument block, or 0
- * @param a3  receives the reply's second word
+ * @param modId  IOP module id
+ * @param argLen  bytes of @p argBlock
+ * @param argBlock  argument block, or 0
+ * @param resultOut  receives the reply's second word
  * @return the reply's first word, 0xFFFF0000 / 0xFFFEFFFC as in func_0042B230, or 0xFFFEFFFF when the RPC fails
  */
-int func_0042B438_i(int a0, int a1, sLfData *a2, int *a3) {
-    int r;
+int func_0042B438_i(int modId, int argLen, sLfData *argBlock, int *resultOut) {
+    int replyId;
     if (func_0042B068() < 0) {
         return 0xFFFF0000;
     }
     if (func_0042B168() != 0) {
         return 0xFFFEFFFC;
     }
-    D_0052F080.cmd.f0 = a0;
-    if (a2 != 0) {
-        if (a1 >= 253) {
-            *(sLfData *)D_0052F080.cmd.n2 = *a2;
+    D_0052F080.cmd.f0 = modId;
+    if (argBlock != 0) {
+        if (argLen >= 253) {
+            *(sLfData *)D_0052F080.cmd.n2 = *argBlock;
             D_0052F080.cmd.f4 = 0xFC;
         } else {
-            func_0041605C(D_0052F080.cmd.n2, a2, a1);
-            D_0052F080.cmd.f4 = a1;
+            func_0041605C(D_0052F080.cmd.n2, argBlock, argLen);
+            D_0052F080.cmd.f4 = argLen;
         }
     } else {
         D_0052F080.cmd.f4 = 0;
@@ -5282,9 +5282,9 @@ int func_0042B438_i(int a0, int a1, sLfData *a2, int *a3) {
     if (func_00426D18(&D_0052F280, 7, 0, &D_0052F080, 0x200, &D_0052F080, 8, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    r = D_0052F080.cmd.f0;
-    *a3 = D_0052F080.cmd.f4;
-    return r;
+    replyId = D_0052F080.cmd.f0;
+    *resultOut = D_0052F080.cmd.f4;
+    return replyId;
 }
 #endif
 
@@ -5299,17 +5299,17 @@ extern int func_0042B168(void);
  * Binds the loader when needed (func_0042B068) and checks its version (func_0042B168). Called after func_0042B438 by
  * func_00319790 and func_003F5E90.
  *
- * @param a0  IOP module id
+ * @param modId  IOP module id
  * @return the reply, 0xFFFF0000 / 0xFFFEFFFC as in func_0042B230, or 0xFFFEFFFF when the RPC fails
  */
-int func_0042B640(int a0) {
+int func_0042B640(int modId) {
     if (func_0042B068() < 0) {
         return 0xFFFF0000;
     }
     if (func_0042B168() != 0) {
         return 0xFFFEFFFC;
     }
-    D_0052F080.cmd.f0 = a0;
+    D_0052F080.cmd.f0 = modId;
     if (func_00426D18(&D_0052F280, 8, 0, &D_0052F080, 4, &D_0052F080, 4, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
@@ -5330,17 +5330,17 @@ extern char *strncpy(char *, const char *, int);
  * (0xFC bytes, last one forced to NUL). func_00319930 calls it with "dev9" and sets up the power-off thread only when
  * the result is not negative.
  *
- * @param a0  module name
+ * @param modName  module name
  * @return the reply (negative when not found), 0xFFFF0000 / 0xFFFEFFFC as in func_0042B230, or 0xFFFEFFFF
  */
-int func_0042B6D0(char *a0) {
+int func_0042B6D0(char *modName) {
     if (func_0042B068() < 0) {
         return 0xFFFF0000;
     }
     if (func_0042B168() != 0) {
         return 0xFFFEFFFC;
     }
-    strncpy(D_0052F080.cmd.n1, a0, 0xFC);
+    strncpy(D_0052F080.cmd.n1, modName, 0xFC);
     D_0052F080.cmd.n1[0xFB] = 0;
     if (func_00426D18(&D_0052F280, 9, 0, &D_0052F080, 0x200, &D_0052F080, 4, 0, 0) < 0) {
         return 0xFFFEFFFF;
@@ -5359,17 +5359,17 @@ extern int func_0042B168(void);
  *
  * Binds the loader when needed (func_0042B068) and checks its version (func_0042B168). No caller in this build.
  *
- * @param a0  the word sent (an IOP address)
+ * @param iopAddr  the word sent (an IOP address)
  * @return the reply, 0xFFFF0000 / 0xFFFEFFFC as in func_0042B230, or 0xFFFEFFFF when the RPC fails
  */
-int func_0042B770(int a0) {
+int func_0042B770(int iopAddr) {
     if (func_0042B068() < 0) {
         return 0xFFFF0000;
     }
     if (func_0042B168() != 0) {
         return 0xFFFEFFFC;
     }
-    D_0052F080.cmd.f0 = a0;
+    D_0052F080.cmd.f0 = iopAddr;
     if (func_00426D18(&D_0052F280, 10, 0, &D_0052F080, 4, &D_0052F080, 4, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
@@ -5431,44 +5431,44 @@ int func_0042B840_i(char *a0, int a1, sLfData *a2, int *a3, int a4) __asm__("fun
  * Binds the loader when needed (func_0042B068; 0xFFFF0000 on failure) and refuses an unaccepted server version
  * (func_0042B168; 0xFFFEFFFC). D_0052F080 gets the path (strncpy, 0xFC bytes, last forced to NUL), the argument length
  * and the arguments (at most 0xFC bytes; a length of 253 or more copies a full block; no arguments leave an empty
- * string). Request @p a4 is sent (0x200 bytes) and the 8-byte reply read back in place. Called by func_0042BA68 and
+ * string). Request @p rpcFunc is sent (0x200 bytes) and the 8-byte reply read back in place. Called by func_0042BA68 and
  * func_0042BA88 with request 0.
  *
- * @param a0  the module's path
- * @param a1  bytes of @p a2
- * @param a2  argument block, or 0
- * @param a3  receives the reply's second word
- * @param a4  module-loader request number
+ * @param modPath  the module's path
+ * @param argLen  bytes of @p argBlock
+ * @param argBlock  argument block, or 0
+ * @param resultOut  receives the reply's second word
+ * @param rpcFunc  module-loader request number
  * @return the reply's first word, or 0xFFFEFFFF when the RPC fails
  */
-int func_0042B840_i(char *a0, int a1, sLfData *a2, int *a3, int a4) {
-    int r;
+int func_0042B840_i(char *modPath, int argLen, sLfData *argBlock, int *resultOut, int rpcFunc) {
+    int modId;
     if (func_0042B068() < 0) {
         return 0xFFFF0000;
     }
     if (func_0042B168() != 0) {
         return 0xFFFEFFFC;
     }
-    strncpy(D_0052F080.cmd.n1, a0, 0xFC);
+    strncpy(D_0052F080.cmd.n1, modPath, 0xFC);
     D_0052F080.cmd.n1[0xFB] = 0;
-    if (a2 != 0) {
-        if (a1 >= 253) {
-            *(sLfData *)D_0052F080.cmd.n2 = *a2;
+    if (argBlock != 0) {
+        if (argLen >= 253) {
+            *(sLfData *)D_0052F080.cmd.n2 = *argBlock;
             D_0052F080.cmd.f0 = 0xFC;
         } else {
-            func_0041605C(D_0052F080.cmd.n2, a2, a1);
-            D_0052F080.cmd.f0 = a1;
+            func_0041605C(D_0052F080.cmd.n2, argBlock, argLen);
+            D_0052F080.cmd.f0 = argLen;
         }
     } else {
         D_0052F080.cmd.n2[0] = 0;
         D_0052F080.cmd.f0 = 0;
     }
-    if (func_00426D18(&D_0052F280, a4, 0, &D_0052F080, 0x200, &D_0052F080, 8, 0, 0) < 0) {
+    if (func_00426D18(&D_0052F280, rpcFunc, 0, &D_0052F080, 0x200, &D_0052F080, 8, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    r = D_0052F080.cmd.f0;
-    *a3 = D_0052F080.cmd.f4;
-    return r;
+    modId = D_0052F080.cmd.f0;
+    *resultOut = D_0052F080.cmd.f4;
+    return modId;
 }
 #endif
 
@@ -5525,34 +5525,34 @@ int func_0042BAA8_i(char *, char *, int *, int) __asm__("func_0042BAA8");
  *
  * Binds the loader when needed (func_0042B068; 0xFFFF0000) and checks its version (func_0042B168; 0xFFFEFFFC). Copies
  * the path and the section name (strncpy, 0xFC bytes each, last forced to NUL) into D_0052F080 and sends request
- * @p a3, reading a 16-byte reply back in place. A zero first reply word gives 0xFFFEFFFD; otherwise the first two words
- * go to @p a2[0] and @p a2[1]. Called by func_0042BBB0 and func_0042BBD0 with request 1.
+ * @p rpcFunc, reading a 16-byte reply back in place. A zero first reply word gives 0xFFFEFFFD; otherwise the first two words
+ * go to @p execData[0] and @p execData[1]. Called by func_0042BBB0 and func_0042BBD0 with request 1.
  *
- * @param a0  the ELF's path
- * @param a1  section name ("all" for the whole file)
- * @param a2  receives the entry point and gp
- * @param a3  module-loader request number
+ * @param elfPath  the ELF's path
+ * @param sectionName  section name ("all" for the whole file)
+ * @param execData  receives the entry point and gp
+ * @param rpcFunc  module-loader request number
  * @return 0, 0xFFFEFFFD when nothing was loaded, or 0xFFFEFFFF when the RPC fails
  */
-int func_0042BAA8_i(char *a0, char *a1, int *a2, int a3) {
+int func_0042BAA8_i(char *elfPath, char *sectionName, int *execData, int rpcFunc) {
     if (func_0042B068() < 0) {
         return 0xFFFF0000;
     }
     if (func_0042B168() != 0) {
         return 0xFFFEFFFC;
     }
-    strncpy(D_0052F080.cmd.n1, a0, 0xFC);
+    strncpy(D_0052F080.cmd.n1, elfPath, 0xFC);
     D_0052F080.cmd.n1[0xFB] = 0;
-    strncpy(D_0052F080.cmd.n2, a1, 0xFC);
+    strncpy(D_0052F080.cmd.n2, sectionName, 0xFC);
     D_0052F080.cmd.n2[0xFB] = 0;
-    if (func_00426D18(&D_0052F280, a3, 0, &D_0052F080, 0x200, &D_0052F080, 0x10, 0, 0) < 0) {
+    if (func_00426D18(&D_0052F280, rpcFunc, 0, &D_0052F080, 0x200, &D_0052F080, 0x10, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
     if (D_0052F080.cmd.f0 == 0) {
         return 0xFFFEFFFD;
     }
-    a2[0] = D_0052F080.cmd.f0;
-    a2[1] = D_0052F080.cmd.f4;
+    execData[0] = D_0052F080.cmd.f0;
+    execData[1] = D_0052F080.cmd.f4;
     return 0;
 }
 #endif
@@ -5582,12 +5582,12 @@ extern int func_0042BAA8(int a0, char *a1, int a2, int a3);
 /**
  * Loads a whole ELF file into EE memory: func_0042BAA8 with the section name "all" (D_0049AD58) and request 1.
  *
- * @param a0  the ELF's path
- * @param a1  receives the entry point and gp
+ * @param elfPath  the ELF's path
+ * @param execData  receives the entry point and gp
  * @return the result of func_0042BAA8
  */
-int func_0042BBD0(int a0, int a1) {
-    return func_0042BAA8(a0, D_0049AD58, a1, 1);
+int func_0042BBD0(int elfPath, int execData) {
+    return func_0042BAA8(elfPath, D_0049AD58, execData, 1);
 }
 #endif
 
@@ -5599,32 +5599,32 @@ extern int func_0042B068(void);
  * Reads a byte, halfword or word of IOP memory through the module loader.
  *
  * Binds the loader when needed (func_0042B068; 0xFFFF0000). Sizes above 2 give 0xFFFEFFFE. Sends request 3 with the
- * address and size (0x20 bytes) and stores the reply's first byte, halfword or word to @p a1. It does not check the
+ * address and size (0x20 bytes) and stores the reply's first byte, halfword or word to @p valueOut. It does not check the
  * server version. No caller in this build.
  *
- * @param a0  IOP address
- * @param a1  where the value is stored
- * @param a2  size: 0 byte, 1 halfword, 2 word
+ * @param iopAddr  IOP address
+ * @param valueOut  where the value is stored
+ * @param valueType  size: 0 byte, 1 halfword, 2 word
  * @return 0, 0xFFFEFFFE for a bad size, or 0xFFFEFFFF when the RPC fails
  */
-int func_0042BBF8(int a0, void *a1, unsigned a2) {
+int func_0042BBF8(int iopAddr, void *valueOut, unsigned valueType) {
     if (func_0042B068() < 0) {
         return 0xFFFF0000;
     }
-    if (a2 > 2) {
+    if (valueType > 2) {
         return 0xFFFEFFFE;
     }
-    D_0052F080.get.f0.w = a0;
-    D_0052F080.get.f4 = a2;
+    D_0052F080.get.f0.w = iopAddr;
+    D_0052F080.get.f4 = valueType;
     if (func_00426D18(&D_0052F280, 3, 0, &D_0052F080, 0x20, &D_0052F080, 0x20, 0, 0) < 0) {
         return 0xFFFEFFFF;
     }
-    if (a2 == 0) {
-        *(unsigned char *)a1 = D_0052F080.get.f0.b;
-    } else if (a2 == 1) {
-        *(unsigned short *)a1 = D_0052F080.get.f0.h;
-    } else if (a2 == 2) {
-        *(int *)a1 = D_0052F080.get.f0.w;
+    if (valueType == 0) {
+        *(unsigned char *)valueOut = D_0052F080.get.f0.b;
+    } else if (valueType == 1) {
+        *(unsigned short *)valueOut = D_0052F080.get.f0.h;
+    } else if (valueType == 2) {
+        *(int *)valueOut = D_0052F080.get.f0.w;
     } else {
         return 0xFFFEFFFE;
     }
@@ -5640,26 +5640,26 @@ extern int func_0042B068(void);
  * Writes a byte, halfword or word to IOP memory through the module loader.
  *
  * Binds the loader when needed (func_0042B068; 0xFFFF0000). Sizes above 2 give 0xFFFEFFFE. Sends request 2 with the
- * address, the size and the value read from @p a1 (0x20 bytes, 16-byte reply). It does not check the server version. No
+ * address, the size and the value read from @p valueIn (0x20 bytes, 16-byte reply). It does not check the server version. No
  * caller in this build.
  *
- * @param a0  IOP address
- * @param a1  the value to write
- * @param a2  size: 0 byte, 1 halfword, 2 word
+ * @param iopAddr  IOP address
+ * @param valueIn  the value to write
+ * @param valueType  size: 0 byte, 1 halfword, 2 word
  * @return 0, 0xFFFEFFFE for a bad size, or 0xFFFEFFFF when the RPC fails
  */
-int func_0042BCE8(int a0, void *a1, int a2) {
+int func_0042BCE8(int iopAddr, void *valueIn, int valueType) {
     if (func_0042B068() < 0) {
         return 0xFFFF0000;
     }
-    D_0052F080.set.f0 = a0;
-    D_0052F080.set.f4 = a2;
-    if (a2 == 0) {
-        D_0052F080.set.f8.b = *(unsigned char *)a1;
-    } else if (a2 == 1) {
-        D_0052F080.set.f8.h = *(unsigned short *)a1;
-    } else if (a2 == 2) {
-        D_0052F080.set.f8.w = *(unsigned *)a1;
+    D_0052F080.set.f0 = iopAddr;
+    D_0052F080.set.f4 = valueType;
+    if (valueType == 0) {
+        D_0052F080.set.f8.b = *(unsigned char *)valueIn;
+    } else if (valueType == 1) {
+        D_0052F080.set.f8.h = *(unsigned short *)valueIn;
+    } else if (valueType == 2) {
+        D_0052F080.set.f8.w = *(unsigned *)valueIn;
     } else {
         return 0xFFFEFFFE;
     }
@@ -5692,23 +5692,23 @@ extern void func_00426358(int, int);
  * Sends the IOP a reset command with a boot argument string over SIF DMA.
  *
  * Stops SIF DMA (sceSifStopDma) and reads the IOP's command buffer address (sceSifGetReg(0x80000000)). Builds the
- * 0x68-byte command D_0052F2C0: id 0x80000003, the argument string @p s (copied without its NUL, unchecked against the
+ * 0x68-byte command D_0052F2C0: id 0x80000003, the argument string @p bootArg (copied without its NUL, unchecked against the
  * 0x50-byte field), its length and @p mode. Writes it back from the data cache, sets SIF register 4 to 0x40000 and DMAs
  * it (attribute 0x44) with sceSifSetDma. When the transfer is queued it sets register 4 to 0x10000 and 0x20000 and
  * clears registers 0x80000002 and 0x80000000. Called by func_0042BF68.
  *
- * @param s  boot argument string (e.g. "rom0:UDNL <image>")
+ * @param bootArg  boot argument string (e.g. "rom0:UDNL <image>")
  * @param mode  reset mode passed to the IOP
  * @return 1 when the command was queued, 0 when the DMA was refused
  */
-int func_0042BDC8(char *s, int mode) {
+int func_0042BDC8(char *bootArg, int mode) {
     sSifDmaData dma;
     int reg;
     int n;
     fBDC8_stop();
     reg = fBDC8_getreg(0x80000000);
     D_0052F2C0.mode = mode;
-    for (n = 0; s[n] != 0; n++) D_0052F2C0.arg[n] = s[n];
+    for (n = 0; bootArg[n] != 0; n++) D_0052F2C0.arg[n] = bootArg[n];
     D_0052F2C0.dest = 0;
     D_0052F2C0.size = n;
     D_0052F2C0.cid = 0x80000003;
@@ -5785,14 +5785,14 @@ int func_0042BF68(const char *img) {
     const char *prefix = "rom0:UDNL ";
     char *dst;
     const char *imgEnd = img;
-    __SIZE_TYPE__ t;
+    __SIZE_TYPE__ imgBias;
     while (*imgEnd)
         imgEnd++;
     /* PORT: integer pointer arithmetic (__SIZE_TYPE__ is pointer-width). */
     /* NOTE: the length test is retail's p - (img - 11) > 80 (strlen + 11 > 80); the separate statement keeps fold from
        reassociating it into (p - img) + 11. Integer arithmetic, so no out-of-bounds pointer. */
-    t = (__SIZE_TYPE__)img - 11;
-    if ((__SIZE_TYPE__)imgEnd - t > 80) {
+    imgBias = (__SIZE_TYPE__)img - 11;
+    if ((__SIZE_TYPE__)imgEnd - imgBias > 80) {
         func_00425C60_s("too long parameter '%s'\n", img);
         return 0;
     }
@@ -5858,14 +5858,14 @@ extern int CreateSema(int *a0);
  * at start-up.
  */
 void func_0042C0D8(void) {
-    int a[8];
-    int b[8];
-    a[1] = 1;
-    a[2] = 1;
-    b[1] = 1;
-    b[2] = 1;
-    D_00455248 = CreateSema(a);
-    D_0045524C = CreateSema(b);
+    int firstSemaParam[8];
+    int secondSemaParam[8];
+    firstSemaParam[1] = 1;
+    firstSemaParam[2] = 1;
+    secondSemaParam[1] = 1;
+    secondSemaParam[2] = 1;
+    D_00455248 = CreateSema(firstSemaParam);
+    D_0045524C = CreateSema(secondSemaParam);
 }
 #endif
 
@@ -5942,18 +5942,18 @@ INCLUDE_ASM("seg/seg_325220", func_0042C1B8);
 #ifdef SKIP_ASM
 extern void func_0042C120(void *a0, int a1, int a2);
 /**
- * Returns entry @p a0 of the kernel's syscall table: copies the word at D_00455230 + 4 * @p a0 with syscall 90
+ * Returns entry @p syscallNum of the kernel's syscall table: copies the word at D_00455230 + 4 * @p syscallNum with syscall 90
  * (func_0042C120).
  *
  * D_00455230 is the table base func_0042C1F0 found. No caller in this build.
  *
- * @param a0  syscall number
+ * @param syscallNum  syscall number
  * @return the handler address in that slot
  */
-int func_0042C1B8(int a0) {
-    int v;
-    func_0042C120(&v, D_00455230 + a0 * 4, 4);
-    return v;
+int func_0042C1B8(int syscallNum) {
+    int handlerAddr;
+    func_0042C120(&handlerAddr, D_00455230 + syscallNum * 4, 4);
+    return handlerAddr;
 }
 #endif
 
@@ -5973,23 +5973,23 @@ extern void func_0042C2F0(int, int);
  * start-up.
  */
 void func_0042C1F0(void) {
-    int a;
-    int b;
+    int searchHit;
+    int copyHit;
     unsigned x;
     unsigned y;
     func_0042C2F0(D_00455238[0], D_00455238[1]);
     func_0042C2F0(D_00455238[2], D_00455238[3]);
-    a = FindAddress(0x80000000, 0x80080000, (void *)func_0042C168);
-    x = a - 524;
-    b = FindAddress(0x80000000, 0x80080000, (void *)func_0042C130);
-    y = b - 360;
+    searchHit = FindAddress(0x80000000, 0x80080000, (void *)func_0042C168);
+    x = searchHit - 524;
+    copyHit = FindAddress(0x80000000, 0x80080000, (void *)func_0042C130);
+    y = copyHit - 360;
     while (x != y) {
         if (x < y) {
-            a = FindAddress(a + 4, 0x80080000, (void *)func_0042C168);
-            x = a - 524;
+            searchHit = FindAddress(searchHit + 4, 0x80080000, (void *)func_0042C168);
+            x = searchHit - 524;
         } else {
-            b = FindAddress(b + 4, 0x80080000, (void *)func_0042C130);
-            y = b - 360;
+            copyHit = FindAddress(copyHit + 4, 0x80080000, (void *)func_0042C130);
+            y = copyHit - 360;
         }
     }
     D_00455230 = x;
@@ -6209,41 +6209,41 @@ int func_0042C510_d(char *, int, char **) __asm__("func_0042C510");
  * Copies a program name and its arguments into the kernel's argument area for the exec calls.
  *
  * Installs the byte-copy routine func_0042C4D0 as syscall 90 (D_00455A10) and caps @p argc at 15. The area at
- * D_00456538 holds a table of string addresses followed, from +0x40, by the strings: first @p a0, then each argv
+ * D_00456538 holds a table of string addresses followed, from +0x40, by the strings: first @p progName, then each argv
  * string, each with its NUL; the addresses and strings are written with syscall 90 (func_0042C4C0). Called by
  * func_0042C630, func_0042C6A0 and func_0042C710.
  *
- * @param a0  program name (first string)
+ * @param progName  program name (first string)
  * @param argc  number of argument strings
  * @param argv  the argument strings
  * @return the kernel address of the copied name (D_00456538 + 0x40)
  */
-int func_0042C510_d(char *a0, int argc, char **argv) {
+int func_0042C510_d(char *progName, int argc, char **argv) {
     int pos;
-    int p = D_00456538;
+    int ptrSlot = D_00456538;
     int ret;
     int len;
-    char **q;
-    pos = p + 0x40;
+    char **argvCursor;
+    pos = ptrSlot + 0x40;
     ret = pos;
     func_0042C500(D_00455A10[0], D_00455A10[1]);
     if (argc >= 0x10) {
         argc = 0xF;
     }
-    func_0042C4C0(p, &pos, 4);
-    p += 4;
-    len = strlen(a0) + 1;
-    func_0042C4C0(pos, a0, len);
+    func_0042C4C0(ptrSlot, &pos, 4);
+    ptrSlot += 4;
+    len = strlen(progName) + 1;
+    func_0042C4C0(pos, progName, len);
     pos += len;
     if (argc > 0) {
-        q = argv;
+        argvCursor = argv;
         do {
-            func_0042C4C0(p, &pos, 4);
-            p += 4;
+            func_0042C4C0(ptrSlot, &pos, 4);
+            ptrSlot += 4;
             argc--;
-            len = strlen(*q) + 1;
-            func_0042C4C0(pos, *q, len);
-            q++;
+            len = strlen(*argvCursor) + 1;
+            func_0042C4C0(pos, *argvCursor, len);
+            argvCursor++;
             pos += len;
         } while (argc != 0);
     }
@@ -6275,20 +6275,20 @@ extern int _ExecPS2(int, int, int, int);
 /**
  * Starts code already in memory with new arguments: copies the arguments to the kernel and calls the syscall 7 stub.
  *
- * Copies an empty name plus @p a3's @p a2 strings into the kernel argument area (func_0042C510), restores the TLB
+ * Copies an empty name plus @p argVector's @p argCount strings into the kernel argument area (func_0042C510), restores the TLB
  * layout (func_0042C628) and calls the syscall 7 stub (seg_3249A0) with the entry point, gp, the argument count and the
  * kernel copy of the argument table (D_00456538 + 4). No caller in this build.
  *
- * @param a0  entry point
- * @param a1  gp value
- * @param a2  argument count
- * @param a3  argument strings
+ * @param entryAddr  entry point
+ * @param gpValue  gp value
+ * @param argCount  argument count
+ * @param argVector  argument strings
  * @return the syscall's result (it does not return on success)
  */
-int func_0042C630(int a0, int a1, int a2, int a3) {
-    func_0042C510_v(D_0049AD90, a2, a3);
+int func_0042C630(int entryAddr, int gpValue, int argCount, int argVector) {
+    func_0042C510_v(D_0049AD90, argCount, argVector);
     func_0042C628();
-    return _ExecPS2(a0, a1, a2, D_00456538 + 4);
+    return _ExecPS2(entryAddr, gpValue, argCount, D_00456538 + 4);
 }
 #endif
 
@@ -6304,13 +6304,13 @@ extern void _LoadExecPS2(int a0, int a1, int a2);
  * func_0042C510. Restores the TLB layout (func_0042C628) and calls the syscall 6 stub (seg_3249A0) with the kernel copy
  * of the name, the count and the kernel argument table (D_00456538 + 4). Called by func_0031B008.
  *
- * @param a0  path of the program
- * @param a1  argument count
+ * @param progPath  path of the program
+ * @param argCount  argument count
  */
-void func_0042C6A0(int a0, int a1) {
-    int r = func_0042C510(a0, a1);
+void func_0042C6A0(int progPath, int argCount) {
+    int kernelPath = func_0042C510(progPath, argCount);
     func_0042C628();
-    _LoadExecPS2(r, a1, D_00456538 + 4);
+    _LoadExecPS2(kernelPath, argCount, D_00456538 + 4);
 }
 #endif
 
@@ -6345,13 +6345,13 @@ extern void _ExecOSD(int a0, int a1);
  * layout (func_0042C628) and calls the syscall 123 stub (seg_3249A0) with the count and the kernel argument table
  * (D_00456538 + 4). No caller in this build.
  *
- * @param a0  argument count
- * @param a1  argument strings
+ * @param argCount  argument count
+ * @param argVector  argument strings
  */
-void func_0042C710(int a0, int a1) {
-    func_0042C510_3(D_0049AD90, a0, a1);
+void func_0042C710(int argCount, int argVector) {
+    func_0042C510_3(D_0049AD90, argCount, argVector);
     func_0042C628();
-    _ExecOSD(a0, D_00456538 + 4);
+    _ExecOSD(argCount, D_00456538 + 4);
 }
 #endif
 
@@ -6433,7 +6433,7 @@ extern void func_0042C770(int, char *, int);
  */
 void func_0042C7C8(void) {
     unsigned i;
-    int *p;
+    int *syscallPair;
     if (!(*(volatile int *)0x10001810 & 0x100)) {
         func_0042C760(D_00456180[0], D_00456180[1]);
         func_0042C770(0x80076000, D_00455A18, 1856);
@@ -6441,10 +6441,10 @@ void func_0042C7C8(void) {
         FlushCache(0);
         FlushCache(2);
         func_0042C760(D_00456180[2], D_00456180[3]);
-        p = &D_00456180[4];
+        syscallPair = &D_00456180[4];
         for (i = 2; i < 8; i++) {
-            func_0042C760(p[0], func_0042C7B8(p[0]));
-            p += 2;
+            func_0042C760(syscallPair[0], func_0042C7B8(syscallPair[0]));
+            syscallPair += 2;
         }
     }
 }
@@ -6459,19 +6459,19 @@ int f8A0(unsigned short a0, int a1, int a2) __asm__("func_0042C8A0");
 /**
  * Opens a DECI2 socket for a protocol (DECI2 kernel call 1).
  *
- * Passes the protocol, @p a1, the event handler and the uncached address of the work area D_0052F328 to Deci2Call(1).
+ * Passes the protocol, @p handlerArg, the event handler and the uncached address of the work area D_0052F328 to Deci2Call(1).
  * The serial console set-up func_00425260 calls it.
  *
- * @param a0  DECI2 protocol number
- * @param a1  user data passed to the handler
- * @param a2  event handler
+ * @param protocol  DECI2 protocol number
+ * @param handlerArg  user data passed to the handler
+ * @param eventHandler  event handler
  * @return the socket id, or a negative error
  */
-int f8A0(unsigned short a0, int a1, int a2) {
+int f8A0(unsigned short protocol, int handlerArg, int eventHandler) {
     int buf[4];
-    buf[0] = a0;
-    buf[1] = a1;
-    buf[2] = a2;
+    buf[0] = protocol;
+    buf[1] = handlerArg;
+    buf[2] = eventHandler;
     buf[3] = (int)D_0052F328 | 0x20000000;
     return Deci2Call(1, buf);
 }
@@ -6653,19 +6653,19 @@ extern void SetVTLBRefillHandler(int, void (*)(void));
 /**
  * Installs a user handler for TLB exceptions (codes 1-3).
  *
- * Stores @p a0 in D_004564F0 and points the TLB-refill vectors for exception codes 1, 2 and 3 at the handler stub
+ * Stores @p excHandler in D_004564F0 and points the TLB-refill vectors for exception codes 1, 2 and 3 at the handler stub
  * func_0042CFC0 (SetVTLBRefillHandler), which saves the registers and calls the stored function. No caller in this
  * build.
  *
- * @param a0  function called on a TLB exception
- * @return @p a0
+ * @param excHandler  function called on a TLB exception
+ * @return @p excHandler
  */
-int func_0042CA80(int a0) {
-    D_004564F0 = a0;
+int func_0042CA80(int excHandler) {
+    D_004564F0 = excHandler;
     SetVTLBRefillHandler(1, func_0042CFC0);
     SetVTLBRefillHandler(2, func_0042CFC0);
     SetVTLBRefillHandler(3, func_0042CFC0);
-    return a0;
+    return excHandler;
 }
 #endif
 
@@ -6679,25 +6679,25 @@ extern void SetVCommonHandler(int, void *);
 /**
  * Installs a handler for one exception code, returning the previous one.
  *
- * Codes 1-13 only: records @p a1 in D_004564F8[@p a0] and points the kernel's vector for the code at the dispatch stub
+ * Codes 1-13 only: records @p excHandler in D_004564F8[@p excCode] and points the kernel's vector for the code at the dispatch stub
  * D_0042D200 (SetVTLBRefillHandler for codes 1-3, SetVCommonHandler otherwise), which calls the recorded handler. No
  * caller in this build.
  *
- * @param a0  exception code (1-13)
- * @param a1  the handler
+ * @param excCode  exception code (1-13)
+ * @param excHandler  the handler
  * @return the previous handler, or 0xFFFFFFFF for a code outside 1-13
  */
-unsigned func_0042CAE0(int a0, int a1) {
+unsigned func_0042CAE0(int excCode, int excHandler) {
     int old;
-    if (a0 - 1 >= 13U) {
+    if (excCode - 1 >= 13U) {
         return 0xFFFFFFFF;
     }
-    old = D_004564F8[a0];
-    D_004564F8[a0] = a1;
-    if (a0 - 1 < 3U) {
-        SetVTLBRefillHandler(a0, (void (*)(void))D_0042D200);
+    old = D_004564F8[excCode];
+    D_004564F8[excCode] = excHandler;
+    if (excCode - 1 < 3U) {
+        SetVTLBRefillHandler(excCode, (void (*)(void))D_0042D200);
     } else {
-        SetVCommonHandler(a0, (void (*)(void))D_0042D200);
+        SetVCommonHandler(excCode, (void (*)(void))D_0042D200);
     }
     return old;
 }
@@ -6780,17 +6780,17 @@ extern void func_0042CB68(int, char *, int);
  */
 void func_0042CBD0(void) {
     unsigned i;
-    int *p;
+    int *syscallPair;
     func_0042CBC0(D_00456540[0], D_00456540[1]);
     func_0042CB68(0x80075000, D_004561C0, 816);
     FlushCache(0);
     FlushCache(2);
     func_0042CBC0(D_00456540[2], D_00456540[3]);
     func_0042CBC0(D_00456540[4], D_00456540[5]);
-    p = &D_00456540[6];
+    syscallPair = &D_00456540[6];
     for (i = 3; i < 8; i++) {
-        func_0042CBC0(p[0], func_0042CBB0(p[0]));
-        p += 2;
+        func_0042CBC0(syscallPair[0], func_0042CBB0(syscallPair[0]));
+        syscallPair += 2;
     }
     D_00456538 = func_0042CBB0(3);
 }
@@ -6975,38 +6975,38 @@ extern int func_0042CCB8_tlb(int, int, int, int, int) __asm__("func_0042CCB8");
 // it as a register variable); plain form 88.93%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
 int func_0042CD98(void) {
-    struct sTlbCfg_4248 *c = &D_004567F0;
+    struct sTlbCfg_4248 *tlbLayout = &D_004567F0;
     register int i FM_REG("$25");
-    int n, k, *p;
-    func_00425C28_pf(D_0049AD98, c->a - 1, c->a, c->a + c->b - 1, c->a + c->b, c->a + c->b + c->c - 1);
+    int n, k, *entryWords;
+    func_00425C28_pf(D_0049AD98, tlbLayout->a - 1, tlbLayout->a, tlbLayout->a + tlbLayout->b - 1, tlbLayout->a + tlbLayout->b, tlbLayout->a + tlbLayout->b + tlbLayout->c - 1);
     MTC0_WIRED_4248(0);
-    n = c->a;
+    n = tlbLayout->a;
     i = 0;
     if (n > 48) {
         func_00425C28_pf(D_0049ADD0);
         func_0042C6E8(1);
     }
-    p = c->t1;
-    for (; i < n; i++, p += 4) func_0042CCB8_tlb(i, p[0], p[1], p[2], p[3]);
-    c = &D_004567F0;
-    n = i + c->b;
+    entryWords = tlbLayout->t1;
+    for (; i < n; i++, entryWords += 4) func_0042CCB8_tlb(i, entryWords[0], entryWords[1], entryWords[2], entryWords[3]);
+    tlbLayout = &D_004567F0;
+    n = i + tlbLayout->b;
     if (n > 48) {
         func_00425C28_pf(D_0049ADE8);
         func_0042C6E8(1);
     }
-    p = c->t2;
-    for (; i < n; i++, p += 4) func_0042CCB8_tlb(i, p[0], p[1], p[2], p[3]);
-    c = &D_004567F0;
-    c->cnt = i;
+    entryWords = tlbLayout->t2;
+    for (; i < n; i++, entryWords += 4) func_0042CCB8_tlb(i, entryWords[0], entryWords[1], entryWords[2], entryWords[3]);
+    tlbLayout = &D_004567F0;
+    tlbLayout->cnt = i;
     MTC0_WIRED_4248(i);
-    if (c->c > 0) {
-        n = i + c->c;
+    if (tlbLayout->c > 0) {
+        n = i + tlbLayout->c;
         if (n > 48) {
             func_00425C28_pf(D_0049AE00);
             func_0042C6E8(1);
         }
-        p = c->t3;
-        for (; i < n; i++, p += 4) func_0042CCB8_tlb(i, p[0], p[1], p[2], p[3]);
+        entryWords = tlbLayout->t3;
+        for (; i < n; i++, entryWords += 4) func_0042CCB8_tlb(i, entryWords[0], entryWords[1], entryWords[2], entryWords[3]);
     }
     k = i;
     i <<= 13;

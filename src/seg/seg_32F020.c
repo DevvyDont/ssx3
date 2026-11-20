@@ -13,19 +13,19 @@ extern int *func_003B07F8_x(int a0, int a1, int a2) __asm__("func_003B07F8");
  *
  * Allocates 20 bytes from the movie allocator (D_00509430 with an empty name and the memory type at D_00509438), builds
  * the frame with func_003B07F8 (a cleared 32-bit SHAPE of the given size) and links the frame's list node (+8) after
- * the list head at @p a0 + 0x20 (word 8). Likely bug: when the allocation fails the null node is still linked.
+ * the list head at @p sonyCodec + 0x20 (word 8). Likely bug: when the allocation fails the null node is still linked.
  *
- * @param a0  the PS2_SONY_CODEC_INTERNAL object
- * @param a1  frame width in pixels
- * @param a2  frame height in pixels
+ * @param sonyCodec  the PS2_SONY_CODEC_INTERNAL object
+ * @param frameWidth  frame width in pixels
+ * @param frameHeight  frame height in pixels
  */
-void func_0042E020(int *a0, int a1, int a2) {
-    int *n = func_003B07F8_x(D_00509430((int)D_004953E8, 20, 0, 0, ((int *)&D_00509430)[2]), a1, a2);
+void func_0042E020(int *sonyCodec, int frameWidth, int frameHeight) {
+    int *n = func_003B07F8_x(D_00509430((int)D_004953E8, 20, 0, 0, ((int *)&D_00509430)[2]), frameWidth, frameHeight);
     int *node = n ? n + 2 : 0;
-    int *head = (int *)a0[8];
-    a0[8] = (int)node;
+    int *head = (int *)sonyCodec[8];
+    sonyCodec[8] = (int)node;
     head[1] = (int)node;
-    node[1] = (int)(a0 + 8);
+    node[1] = (int)(sonyCodec + 8);
     node[0] = (int)head;
 }
 #endif
@@ -42,13 +42,13 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E0B8);
 /**
  * Returns @p value unchanged (a placement array new of the Sony codec class: returns the given address).
  *
- * @param a0  bytes requested (unused)
+ * @param allocSize  bytes requested (unused)
  * @param value  the address to construct at
  * @return @p value
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-long func_0042E0B8(int a0, long value) {
+long func_0042E0B8(int allocSize, long value) {
     return value;
 }
 #endif
@@ -65,13 +65,13 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E0C8);
 /**
  * Returns @p value unchanged (a placement new of the Sony codec class: returns the given address).
  *
- * @param a0  bytes requested (unused)
+ * @param allocSize  bytes requested (unused)
  * @param value  the address to construct at
  * @return @p value
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-long func_0042E0C8(int a0, long value) {
+long func_0042E0C8(int allocSize, long value) {
     return value;
 }
 #endif
@@ -116,17 +116,17 @@ extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
 /**
  * Allocates a Sony codec array with the movie allocator, naming the block.
  *
- * Calls the allocation function D_00509430 with (@p a1, @p a0, @p a2, @p a3, @p a4), i.e. name first and size second
+ * Calls the allocation function D_00509430 with (@p blockName, @p allocSize, @p alignment, @p hdrSize, @p memType), i.e. name first and size second
  * (cMoviePlayer_SSXAllocMemFunc in this game).
  *
- * @param a0  bytes requested
- * @param a1  block name
- * @param a2  alignment
- * @param a3  header bytes
- * @param a4  memory type and flags
+ * @param allocSize  bytes requested
+ * @param blockName  block name
+ * @param alignment  alignment
+ * @param hdrSize  header bytes
+ * @param memType  memory type and flags
  */
-void func_0042E120(int a0, int a1, int a2, int a3, int a4) {
-    D_00509430(a1, a0, a2, a3, a4);
+void func_0042E120(int allocSize, int blockName, int alignment, int hdrSize, int memType) {
+    D_00509430(blockName, allocSize, alignment, hdrSize, memType);
 }
 #endif
 
@@ -138,16 +138,16 @@ extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
 /**
  * Allocates a Sony codec object with the movie allocator, naming the block.
  *
- * Calls the allocation function D_00509430 with (@p a1, @p a0, @p a2, @p a3, @p a4), i.e. name first and size second.
+ * Calls the allocation function D_00509430 with (@p blockName, @p allocSize, @p alignment, @p hdrSize, @p memType), i.e. name first and size second.
  *
- * @param a0  bytes requested
- * @param a1  block name
- * @param a2  alignment
- * @param a3  header bytes
- * @param a4  memory type and flags
+ * @param allocSize  bytes requested
+ * @param blockName  block name
+ * @param alignment  alignment
+ * @param hdrSize  header bytes
+ * @param memType  memory type and flags
  */
-void func_0042E150(int a0, int a1, int a2, int a3, int a4) {
-    D_00509430(a1, a0, a2, a3, a4);
+void func_0042E150(int allocSize, int blockName, int alignment, int hdrSize, int memType) {
+    D_00509430(blockName, allocSize, alignment, hdrSize, memType);
 }
 #endif
 
@@ -158,13 +158,13 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E180);
 extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
 extern char D_004953E8[];
 /**
- * Allocates a Sony codec array with the movie allocator: D_00509430 with an empty name (D_004953E8), @p a0, alignment
+ * Allocates a Sony codec array with the movie allocator: D_00509430 with an empty name (D_004953E8), @p allocSize, alignment
  * 0, header 0 and the memory type at D_00509438.
  *
- * @param a0  bytes requested
+ * @param allocSize  bytes requested
  */
-void func_0042E180(int a0) {
-    D_00509430((int)D_004953E8, a0, 0, 0, ((int *)&D_00509430)[2]);
+void func_0042E180(int allocSize) {
+    D_00509430((int)D_004953E8, allocSize, 0, 0, ((int *)&D_00509430)[2]);
 }
 #endif
 
@@ -175,13 +175,13 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E1C0);
 extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
 extern char D_004953E8[];
 /**
- * Allocates a Sony codec object with the movie allocator: D_00509430 with an empty name (D_004953E8), @p a0, alignment
+ * Allocates a Sony codec object with the movie allocator: D_00509430 with an empty name (D_004953E8), @p allocSize, alignment
  * 0, header 0 and the memory type at D_00509438.
  *
- * @param a0  bytes requested
+ * @param allocSize  bytes requested
  */
-void func_0042E1C0(int a0) {
-    D_00509430((int)D_004953E8, a0, 0, 0, ((int *)&D_00509430)[2]);
+void func_0042E1C0(int allocSize) {
+    D_00509430((int)D_004953E8, allocSize, 0, 0, ((int *)&D_00509430)[2]);
 }
 #endif
 
@@ -221,15 +221,15 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E278);
 extern int D_00456810[];
 extern int (*D_00509434[])(void);
 /**
- * Destroys an RCMP::CODEC: restores its vtable (D_00456810, _vt$Q24RCMP5CODEC) and, when bit 0 of @p a1 is set, frees
+ * Destroys an RCMP::CODEC: restores its vtable (D_00456810, _vt$Q24RCMP5CODEC) and, when bit 0 of @p dtorFlags is set, frees
  * it through the movie allocator's free function (D_00509434).
  *
- * @param a0  the codec object
- * @param a1  destructor flags (bit 0: free the object)
+ * @param codecObj  the codec object
+ * @param dtorFlags  destructor flags (bit 0: free the object)
  */
-void func_0042E278(int *a0, int a1) {
-    *a0 = (int)D_00456810;
-    if (a1 & 1) {
+void func_0042E278(int *codecObj, int dtorFlags) {
+    *codecObj = (int)D_00456810;
+    if (dtorFlags & 1) {
         D_00509434[0]();
     }
 }
@@ -260,14 +260,14 @@ int *func_0042E2B0(void) {
 INCLUDE_ASM("seg/seg_32F020", func_0042E2F0);
 #ifdef SKIP_ASM
 /**
- * Returns the address of a decoder's codec instance data (@p a0 + 4).
+ * Returns the address of a decoder's codec instance data (@p decoderObj + 4).
  *
- * @param a0  the RCMP::DECODER
- * @return @p a0 + 4
+ * @param decoderObj  the RCMP::DECODER
+ * @return @p decoderObj + 4
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_0042E2F0(int a0) {
-    return a0 + 4;
+int func_0042E2F0(int decoderObj) {
+    return decoderObj + 4;
 }
 #endif
 
@@ -277,12 +277,12 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E2F8);
 /**
  * Returns whether a decoder has a codec chosen (word 5, +0x14, non-zero).
  *
- * @param a0  the RCMP::DECODER
+ * @param decoderObj  the RCMP::DECODER
  * @return 1 when a codec is set, else 0
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_0042E2F8(int *a0) {
-    return a0[5] != 0;
+int func_0042E2F8(int *decoderObj) {
+    return decoderObj[5] != 0;
 }
 #endif
 
@@ -298,13 +298,13 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E310);
 /**
  * Returns @p value unchanged (a placement array new of RCMP::DECODER: returns the given address).
  *
- * @param a0  bytes requested (unused)
+ * @param allocSize  bytes requested (unused)
  * @param value  the address to construct at
  * @return @p value
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-long func_0042E310(int a0, long value) {
+long func_0042E310(int allocSize, long value) {
     return value;
 }
 #endif
@@ -321,13 +321,13 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E320);
 /**
  * Returns @p value unchanged (a placement new of RCMP::DECODER: returns the given address).
  *
- * @param a0  bytes requested (unused)
+ * @param allocSize  bytes requested (unused)
  * @param value  the address to construct at
  * @return @p value
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-long func_0042E320(int a0, long value) {
+long func_0042E320(int allocSize, long value) {
     return value;
 }
 #endif
@@ -372,16 +372,16 @@ extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
 /**
  * Allocates an RCMP::DECODER array with the movie allocator, naming the block.
  *
- * Calls the allocation function D_00509430 with (@p a1, @p a0, @p a2, @p a3, @p a4), i.e. name first and size second.
+ * Calls the allocation function D_00509430 with (@p blockName, @p allocSize, @p alignment, @p hdrSize, @p memType), i.e. name first and size second.
  *
- * @param a0  bytes requested
- * @param a1  block name
- * @param a2  alignment
- * @param a3  header bytes
- * @param a4  memory type and flags
+ * @param allocSize  bytes requested
+ * @param blockName  block name
+ * @param alignment  alignment
+ * @param hdrSize  header bytes
+ * @param memType  memory type and flags
  */
-void func_0042E378(int a0, int a1, int a2, int a3, int a4) {
-    D_00509430(a1, a0, a2, a3, a4);
+void func_0042E378(int allocSize, int blockName, int alignment, int hdrSize, int memType) {
+    D_00509430(blockName, allocSize, alignment, hdrSize, memType);
 }
 #endif
 
@@ -393,16 +393,16 @@ extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
 /**
  * Allocates an RCMP::DECODER with the movie allocator, naming the block.
  *
- * Calls the allocation function D_00509430 with (@p a1, @p a0, @p a2, @p a3, @p a4), i.e. name first and size second.
+ * Calls the allocation function D_00509430 with (@p blockName, @p allocSize, @p alignment, @p hdrSize, @p memType), i.e. name first and size second.
  *
- * @param a0  bytes requested
- * @param a1  block name
- * @param a2  alignment
- * @param a3  header bytes
- * @param a4  memory type and flags
+ * @param allocSize  bytes requested
+ * @param blockName  block name
+ * @param alignment  alignment
+ * @param hdrSize  header bytes
+ * @param memType  memory type and flags
  */
-void func_0042E3A8(int a0, int a1, int a2, int a3, int a4) {
-    D_00509430(a1, a0, a2, a3, a4);
+void func_0042E3A8(int allocSize, int blockName, int alignment, int hdrSize, int memType) {
+    D_00509430(blockName, allocSize, alignment, hdrSize, memType);
 }
 #endif
 
@@ -413,13 +413,13 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E3D8);
 extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
 extern char D_004953B8[];
 /**
- * Allocates an RCMP::DECODER array with the movie allocator: D_00509430 with an empty name (D_004953B8), @p a0,
+ * Allocates an RCMP::DECODER array with the movie allocator: D_00509430 with an empty name (D_004953B8), @p allocSize,
  * alignment 0, header 0 and the memory type at D_00509438.
  *
- * @param a0  bytes requested
+ * @param allocSize  bytes requested
  */
-void func_0042E3D8(int a0) {
-    D_00509430((int)D_004953B8, a0, 0, 0, ((int *)&D_00509430)[2]);
+void func_0042E3D8(int allocSize) {
+    D_00509430((int)D_004953B8, allocSize, 0, 0, ((int *)&D_00509430)[2]);
 }
 #endif
 
@@ -430,13 +430,13 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E418);
 extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
 extern char D_004953B8[];
 /**
- * Allocates an RCMP::DECODER with the movie allocator: D_00509430 with an empty name (D_004953B8), @p a0, alignment 0,
+ * Allocates an RCMP::DECODER with the movie allocator: D_00509430 with an empty name (D_004953B8), @p allocSize, alignment 0,
  * header 0 and the memory type at D_00509438.
  *
- * @param a0  bytes requested
+ * @param allocSize  bytes requested
  */
-void func_0042E418(int a0) {
-    D_00509430((int)D_004953B8, a0, 0, 0, ((int *)&D_00509430)[2]);
+void func_0042E418(int allocSize) {
+    D_00509430((int)D_004953B8, allocSize, 0, 0, ((int *)&D_00509430)[2]);
 }
 #endif
 
@@ -469,15 +469,15 @@ extern int D_00456890[];
 extern void operator_delete__FPi(int *a0);
 /**
  * Destroys an RCMP::RCMP_SYSTEM: restores its vtable pointer (word 3, D_00456890, _vt$Q24RCMP11RCMP_SYSTEM) and, when
- * bit 0 of @p a1 is set, frees it with the global operator delete (operator_delete__FPi).
+ * bit 0 of @p dtorFlags is set, frees it with the global operator delete (operator_delete__FPi).
  *
- * @param a0  the RCMP_SYSTEM object
- * @param a1  destructor flags (bit 0: free the object)
+ * @param rcmpSystem  the RCMP_SYSTEM object
+ * @param dtorFlags  destructor flags (bit 0: free the object)
  */
-void func_0042E498(int *a0, int a1) {
-    a0[3] = (int)D_00456890;
-    if (a1 & 1) {
-        operator_delete__FPi(a0);
+void func_0042E498(int *rcmpSystem, int dtorFlags) {
+    rcmpSystem[3] = (int)D_00456890;
+    if (dtorFlags & 1) {
+        operator_delete__FPi(rcmpSystem);
     }
 }
 #endif

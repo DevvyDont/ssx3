@@ -252,33 +252,33 @@ extern sReq_ED90 D_0045AAD8_ED90[][4][5] __asm__("D_0045AAD8");
  * track and kind. Declared void here, but every path ends in the getter's call, whose result the callers read
  * (cFEStateTrophyRoom_updateBigArt, cFEStatePeakRoom_updateMedalsList, cFEStateMountainRoom_updateMarkers).
  *
- * @param arg0  profile (user) index
- * @param arg1  character id
- * @param arg2  peak number
- * @param arg3  trophy type (0, 1 track challenges; 2 collectibles / big challenges; 3 earnings)
- * @param arg4  challenge index within the trophy type
+ * @param profileIndex  profile (user) index
+ * @param charId  character id
+ * @param peakNum  peak number
+ * @param trophyType  trophy type (0, 1 track challenges; 2 collectibles / big challenges; 3 earnings)
+ * @param challengeIndex  challenge index within the trophy type
  */
-extern "C" void func_001CED90(int arg0, int arg1, int arg2, int arg3, int arg4)
+extern "C" void func_001CED90(int profileIndex, int charId, int peakNum, int trophyType, int challengeIndex)
 {
-    void* r = cBE_getInterface_ED90(cBE_getBE(), 13);
-    if (arg3 == 2)
+    void* rewardIface = cBE_getInterface_ED90(cBE_getBE(), 13);
+    if (trophyType == 2)
     {
-        if (arg4 == 0)
+        if (challengeIndex == 0)
         {
-            cBERewardInterface_getCollectiblesMedal(r, arg0, arg1, arg2);
+            cBERewardInterface_getCollectiblesMedal(rewardIface, profileIndex, charId, peakNum);
             return;
         }
-        cBERewardInterface_getBigChallengesMedal(r, arg0, arg1, arg2);
+        cBERewardInterface_getBigChallengesMedal(rewardIface, profileIndex, charId, peakNum);
         return;
     }
-    if (arg3 != 3)
+    if (trophyType != 3)
     {
-        int kind = D_0045AAD8_ED90[arg2][arg3][arg4].kind;
-        int track = D_0045AAD8_ED90[arg2][arg3][arg4].track;
-        cBERewardInterface_getTrackMedal(r, arg0, arg1, track, kind);
+        int kind = D_0045AAD8_ED90[peakNum][trophyType][challengeIndex].kind;
+        int track = D_0045AAD8_ED90[peakNum][trophyType][challengeIndex].track;
+        cBERewardInterface_getTrackMedal(rewardIface, profileIndex, charId, track, kind);
         return;
     }
-    cBERewardInterface_getEarningsMedal(r, arg0, arg1, arg2);
+    cBERewardInterface_getEarningsMedal(rewardIface, profileIndex, charId, peakNum);
 }
 #endif
 
@@ -337,7 +337,7 @@ struct sChallenge_1CEEA0 {
  * Constructs the reward gallery base state for a player.
  *
  * Runs cUIState_cUIState, sets mHashName to 47 and installs cFEStateRewardGalleryBase_vtbl; stores mUserNum and its
- * controller mask (cFECustom_getPlayerCtrlMask) in mCtrlBits, mRewardType = @p a4, 4 rows by 8 columns
+ * controller mask (cFECustom_getPlayerCtrlMask) in mCtrlBits, mRewardType = @p rewardType, 4 rows by 8 columns
  * (mMaxRewardRows, mMaxRewardColumns) and mIconsFileIndex = -2, and clears the loading state, counts, highlighter
  * offsets, menu and text pointers and the 4 x 8 icon and icon-back tables. mCharID comes from new-player interface 1
  * (cBENewPlayerInterface_getPlayerCharID). With @p rank set (opened in a store) mStoreNum follows the player's last hub
@@ -348,10 +348,10 @@ struct sChallenge_1CEEA0 {
  * @param parent  the UI engine
  * @param player  user number
  * @param rank  non-zero when the gallery is opened from a store (lodge); not a rank
- * @param a4  reward type (3-8 from the subclasses)
+ * @param rewardType  reward type (3-8 from the subclasses)
  * @return @p self
  */
-extern "C" sChallenge_1CEEA0* func_001CEEA0(sChallenge_1CEEA0* self, void* parent, signed char player, int rank, int a4)
+extern "C" sChallenge_1CEEA0* func_001CEEA0(sChallenge_1CEEA0* self, void* parent, signed char player, int rank, int rewardType)
 {
     int i;
     int j;
@@ -360,7 +360,7 @@ extern "C" sChallenge_1CEEA0* func_001CEEA0(sChallenge_1CEEA0* self, void* paren
     self->vtbl = cFEStateRewardGalleryBase_vtbl;
     self->player = player;
     self->f15 = cFECustom_getPlayerCtrlMask(*self->mgr, player);
-    self->f4C = a4;
+    self->f4C = rewardType;
     self->f58 = 4;
     self->f5C = 8;
     self->f8EC = -2;
