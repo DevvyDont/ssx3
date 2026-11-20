@@ -184,6 +184,14 @@ struct sScAnimVEntry {
 struct sAnimList;
 extern "C" void* func_00275718(sAnimList* self, int id);
 
+/**
+ * Unlinks the animation bank with user ID @p id, if linked.
+ *
+ * Looks the bank up with func_00275718 and passes it to the manager's virtual slot 2 (vtable at +0xC; func_00275760 in
+ * cScriptAnimBankManager_vtbl). cSSXScriptEngine_OnDetachData calls it on mAnimationBankManager (+0xA28).
+ *
+ * @param id  the bank's user ID
+ */
 extern "C" void func_00275650(sAnimList* self, int id)
 {
     void* bankInfo = func_00275718(self, id);
@@ -254,6 +262,15 @@ struct sAnimList {
     sAnimEntry* entries;
 };
 
+/**
+ * Returns the linked bank record (0x14 bytes: user ID, bank number, data, anim count, anim ID table) with user ID
+ * @p id.
+ *
+ * Searches the manager's records (+0x8, count at +0x4) for one with data (+0x8) and that ID (+0x0).
+ *
+ * @param id  the bank's user ID
+ * @return the record, or 0
+ */
 extern "C" void* func_00275718(sAnimList* self, int id)
 {
     for (int i = 0; i < self->count; i++) {
@@ -273,6 +290,15 @@ extern "C" void cAdfDataSource__cAdfDataSource(void* self, int flags);
 void cMemMan_free(void*);
 extern void** cAnimDataBase_TheAnimDataBase;
 
+/**
+ * Unlinks animation bank record @p e: removes its data source from the anim database and clears the record.
+ *
+ * Takes the source out of cAnimDataBase_TheAnimDataBase at the bank number (low byte of +0x4), purges the database's
+ * channel cache (cAnimDataBase_purgeChanCache), deletes the source (cAdfDataSource__cAdfDataSource with flags 3), frees
+ * the anim ID table (+0x10) when the record has anims (+0xC), and resets the user ID (-1), anim count, data and table.
+ *
+ * @param e  the bank record
+ */
 extern "C" void func_00275760(void* self, sAnimEntry* e)
 {
     void** tbl = cAnimDataBase_TheAnimDataBase;
@@ -298,6 +324,11 @@ extern "C" void func_00275760(void* self, sAnimEntry* e)
 //100%
 INCLUDE_ASM("scripter/scanimmgr", func_002757F0);
 #ifdef SKIP_ASM
+/**
+ * Returns the first unused bank record (data pointer at +0x8 is 0) of the manager's records (+0x8, count at +0x4).
+ *
+ * @return the record, or 0 when all are in use
+ */
 extern "C" sAnimEntry* func_002757F0(sAnimList* self)
 {
     for (int i = 0; i < self->count; i++) {

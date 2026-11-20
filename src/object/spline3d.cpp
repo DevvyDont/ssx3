@@ -247,6 +247,16 @@ struct sVEnt_5638 {
     int (*fn)(void*, const sV4_5638&, const sV4_5638&, const sM44_5638&);
 };
 
+/**
+ * Returns whether a node's bounding box is not culled by the graphics manager's box test.
+ *
+ * Builds the box corners (x, y, z, 1) from the floats at +0x6C..+0x74 and +0x78..+0x80, gets the current view matrix
+ * from the graphics manager's virtual slot 43 and passes all three to its box test (virtual slot 93). The result is 1
+ * unless that test returns 1 (the box is outside the view), the same test as func_00345320. func_00345430 draws only
+ * the nodes for which this returns non-zero.
+ *
+ * @return 1 when the box is (at least partly) in view, 0 when the test culls it
+ */
 extern "C" int func_00345638(void* self)
 {
     char* s = (char*)self;

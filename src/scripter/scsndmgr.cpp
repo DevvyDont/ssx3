@@ -128,6 +128,14 @@ struct sSndEntry;
 struct sSndList;
 extern "C" sSndEntry* func_002836D8(sSndList* self, int id);
 
+/**
+ * Unlinks the sound bank with user ID @p id, if linked.
+ *
+ * Looks the bank up with func_002836D8 and passes it to the manager's virtual slot 2 (vtable at +0xC;
+ * cScriptSoundBankManager_UnlinkBank). cSSXScriptEngine_OnDetachData calls it on mSoundBankManager (+0xA38).
+ *
+ * @param id  the bank's user ID
+ */
 extern "C" void func_00283610(sSndList* self, int id)
 {
     sSndEntry* bankInfo = func_002836D8(self, id);
@@ -195,6 +203,14 @@ struct sSndList {
     sSndEntry* entries;
 };
 
+/**
+ * Returns the linked sound bank record (user ID, bank number, data) with user ID @p id.
+ *
+ * Searches the manager's records (+0x8, count at +0x4) for one with data (+0x8) and that ID (+0x0).
+ *
+ * @param id  the bank's user ID
+ * @return the record, or 0
+ */
 extern "C" sSndEntry* func_002836D8(sSndList* self, int id)
 {
     for (int i = 0; i < self->count; i++) {
@@ -231,6 +247,12 @@ extern "C" void cScriptSoundBankManager_UnlinkBank(sSndList* self, sSndEntry* pB
 //100%
 INCLUDE_ASM("scripter/scsndmgr", func_00283760);
 #ifdef SKIP_ASM
+/**
+ * Returns the first unused sound bank record (data pointer at +0x8 is 0) of the manager's records (+0x8, count at
+ * +0x4).
+ *
+ * @return the record, or 0 when all are in use
+ */
 extern "C" sSndEntry* func_00283760(sSndList* self)
 {
     for (int i = 0; i < self->count; i++) {

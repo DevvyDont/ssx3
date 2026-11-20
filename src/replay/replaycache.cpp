@@ -390,6 +390,12 @@ extern "C" void cReplay_purgeIdleFrames(cReplay* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_002705A8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (empty body).
+ *
+ * cReplay_eventJump and cReplay_eventWScript call it where an instant-replay mark would begin;
+ * cReplay_endMarkInstantReplay and cReplay_cancelMarkInstantReplay do the real work.
+ */
 void func_002705A8(void* self)
 {
 }
@@ -813,6 +819,17 @@ struct sRcSlotB88 {
 };
 
 
+/**
+ * Begins marking a highlight for player @p playerId on the newest recorded frame, while the replay is recording.
+ *
+ * Only in kGameRecording (State 0) and when Highlight[playerId] is not already marking (its Frame is null): runs
+ * func_0026E6E0 on it with FrameList's Head (the newest frame) and @p id. cReplay_eventJump and cReplay_eventWScript
+ * call it.
+ *
+ * @param replay  the replay
+ * @param playerId  the player (0 or 1)
+ * @param id  the rider stats at the start (a tRiderStats pointer passed as int)
+ */
 extern "C" void func_00270B88(cReplay* replay, int playerId, int id)
 {
     cReplay* self = replay;
@@ -943,6 +960,20 @@ struct sRcSlotCE8 {
 };
 
 
+/**
+ * Ends player @p playerId's highlight mark: keeps it if it ranks, replacing the weakest highlight when the list is
+ * full.
+ *
+ * Only when Highlight[playerId] is marking a frame. func_0026E838 ranks it from @p id and @p positive; when it ranks
+ * and the player already has cReplay_maxHighlights(@p positive) highlights (cReplay_countHighlights), the frame
+ * cReplay_compareHighlights picks loses this player's highlight bit (+0x1E). When it does not rank the mark is
+ * cancelled (func_0026E800). Either way the mark ends with func_0026E7F8.
+ *
+ * @param replay  the replay
+ * @param playerId  the player (0 or 1)
+ * @param id  the rider stats at the end (a tRiderStats pointer passed as int)
+ * @param positive  non-zero for a landing (cReplay_eventLand), 0 for a wipeout (cReplay_eventWipeout)
+ */
 extern "C" void func_00270CE8(cReplay* replay, int playerId, int id, int positive)
 {
     cReplay* self = replay;
@@ -1037,6 +1068,14 @@ extern "C" void* cReplay_purgeSaveSpace(cReplay* self);
 //100%
 INCLUDE_ASM("replay/replaycache", func_00270ED8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Releases the replay save buffers by calling cReplay_purgeSaveSpace.
+ *
+ * The replay save screen (cOVState_SAVEREPLAY_onDestroyScreen, _onWidgetEvent, _onPopupEvent) calls it when it drops a
+ * held save buffer.
+ *
+ * @return cReplay_purgeSaveSpace's (meaningless) result
+ */
 void* func_00270ED8(void* self)
 {
     return cReplay_purgeSaveSpace((cReplay*)self);
@@ -1387,6 +1426,15 @@ struct sRcFrame1380 {
 };
 
 
+/**
+ * Writes the next piece of the recorded frames to the replay save data; one call per step of cReplay_getSaveData.
+ *
+ * If a frame block is pending (WriteBlockData) it is compressed with HUFF_encode into WriteTmp after a size word and
+ * written (cReplay_writeSetup), and the pending block is cleared. Otherwise, while WriteFrame is set, it counts the
+ * frame (WriteFrameCount), fetches its block, writes a 40-byte header (tag 0x11111113, size, the words at +0x30/+0x34
+ * and +0x20..+0x2C, end tag 0x11111111), makes the block pending and moves WriteFrame to the next frame, skipping
+ * SaveFrame. With no frame left it clears WriteSrc / WriteSrcSize and advances WriteState.
+ */
 extern "C" void func_00271380(cReplay* self)
 {
     if (((void*)self->WriteBlockData) != 0) {
@@ -1477,6 +1525,15 @@ struct sReplayCache1510 {
     int* header;            // 0x674
 };
 
+/**
+ * Writes the next piece of the input caches to the replay save data; one call per step of cReplay_getSaveData.
+ *
+ * A pending 8-byte cache header (WriteCacheSave) is written first, then the pending command data (WriteCmdFrame,
+ * WriteCmdFrameSize) compressed with HUFF_encode after a size word. Otherwise the next InputCache[WriteIndex] is taken:
+ * a present cache gets its header prepared in WriteTmp (tag 0x11111112, its chunk count) and its 0x8000-byte buffer
+ * (+0xC) queued; a missing one is skipped. After the last cache WriteState is advanced. The words at +0x644 and +0x648
+ * are cleared when moving on.
+ */
 extern "C" void func_00271510(sReplayCache1510* self)
 {
     if (self->header != 0) {
@@ -1682,6 +1739,13 @@ extern "C" int cReplay_load(cReplay* self, char* buf)
 //100%
 INCLUDE_ASM("replay/replaycache", func_002718A8);
 #ifdef SKIP_ASM
+/**
+ * Returns its first argument; the variadic body only spills its register arguments and does nothing else.
+ *
+ * No retail caller was found.
+ *
+ * @return @p self
+ */
 extern "C" void* func_002718A8(void* self, ...)
 {
     return self;
@@ -1711,6 +1775,17 @@ extern sSlot_18E8 D_004A5168, D_004A5170, D_004A5178, D_004A5180, D_004A5188, D_
 
 // PORT: the unit declares func_002718E8 as void*(int, int); it returns nothing.
 extern "C" void func_002718E8_impl(int initialize, int priority) __asm__("func_002718E8");
+/**
+ * Runs the replay/replaycache unit's static initialisers: builds its 56 float4 constants and 14 two-word slots.
+ *
+ * Only for @p initialize set and @p priority 0xFFFF (the g++ static-initialisation convention). It constructs the
+ * 16-byte vectors D_004D33F0 to D_004D3760 in place, zeroes D_004A5160 and D_004A5164 and fills the 8-byte slots
+ * D_004A5168 to D_004A51D0 with 0 to 13 (each slot's low byte and upper 24 bits both get its number). The unit's global
+ * constructor func_002722C0 calls it.
+ *
+ * @param initialize  non-zero to construct (0 would destroy; nothing is done then)
+ * @param priority  the initialisation priority; only 0xFFFF does anything
+ */
 extern "C" void func_002718E8_impl(int initialize, int priority)
 {
     if (priority == 0xFFFF && initialize != 0) {
@@ -1828,6 +1903,12 @@ extern "C" void cReplayFramePtr_clearBlock(cReplayFramePtr* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272210);
 #ifdef SKIP_ASM
+/**
+ * Returns the frame pointer's data block (Block).
+ *
+ * @param replayFramePtr  the frame pointer
+ * @return Block (as an int)
+ */
 extern "C" int func_00272210(cReplayFramePtr* replayFramePtr) {
     return ((int)replayFramePtr->Block);
 }
@@ -1835,6 +1916,14 @@ extern "C" int func_00272210(cReplayFramePtr* replayFramePtr) {
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272218);
 #ifdef SKIP_ASM
+/**
+ * Saves the frame pointer's read position: stores ReadData in the position record @p outPos (On Tour tFramePos).
+ *
+ * func_00272228 restores it. The preview's version asserted Block and ReadData; this one checks nothing.
+ *
+ * @param replayFramePtr  the frame pointer
+ * @param outPos  receives the read position
+ */
 extern "C" void func_00272218(cReplayFramePtr* replayFramePtr, int *outPos) {
     *outPos = ((int)replayFramePtr->ReadData);
 }
@@ -1842,6 +1931,15 @@ extern "C" void func_00272218(cReplayFramePtr* replayFramePtr, int *outPos) {
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272228);
 #ifdef SKIP_ASM
+/**
+ * Restores the frame pointer's read position: sets ReadData (+0xC) from the position record @p readPos.
+ *
+ * The record comes from func_00272218. The preview's version asserted Block and the saved position; this one checks
+ * nothing.
+ *
+ * @param framePtr  the frame pointer
+ * @param readPos  the saved read position
+ */
 extern "C" void func_00272228(void *framePtr, int *readPos) {
     (*(int *)((char*)(framePtr) + (0xC))) = (int) *readPos;
 }
@@ -1849,6 +1947,14 @@ extern "C" void func_00272228(void *framePtr, int *readPos) {
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272238);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of bytes written to the frame block (Size), the amount a save stores.
+ *
+ * func_00272240 returns the same field.
+ *
+ * @param replayFramePtr  the frame pointer
+ * @return Size
+ */
 extern "C" int func_00272238(cReplayFramePtr* replayFramePtr) {
     return (replayFramePtr->Size);
 }
@@ -1856,6 +1962,14 @@ extern "C" int func_00272238(cReplayFramePtr* replayFramePtr) {
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272240);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of bytes written to the frame block (Size).
+ *
+ * Same body as func_00272238.
+ *
+ * @param replayFramePtr  the frame pointer
+ * @return Size
+ */
 extern "C" int func_00272240(cReplayFramePtr* replayFramePtr) {
     return (replayFramePtr->Size);
 }
@@ -1863,6 +1977,14 @@ extern "C" int func_00272240(cReplayFramePtr* replayFramePtr) {
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272248);
 #ifdef SKIP_ASM
+/**
+ * Stores @p arg1 into the int @p arg0 points to.
+ *
+ * One of the small out-of-line copies kept after the cReplayFramePtr accessors; no retail caller was found.
+ *
+ * @param arg0  the int to write
+ * @param arg1  the value to store
+ */
 extern "C" void func_00272248(int *arg0, int arg1) {
     *arg0 = arg1;
 }
@@ -1870,6 +1992,14 @@ extern "C" void func_00272248(int *arg0, int arg1) {
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272250);
 #ifdef SKIP_ASM
+/**
+ * Stores @p block in the word at +0x4 of @p framePtr (Block, for a cReplayFramePtr).
+ *
+ * One of the small out-of-line copies kept after the cReplayFramePtr accessors; no retail caller was found.
+ *
+ * @param framePtr  the object to write
+ * @param block  the value to store
+ */
 extern "C" void func_00272250(void *framePtr, int block) {
     (*(int *)((char*)(framePtr) + (4))) = block;
 }
@@ -1894,6 +2024,11 @@ extern "C" void cReplayFrame__cReplayFrame(int* self, int flags)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272288);
 #ifdef SKIP_ASM
+/**
+ * Clears a highlight record: PlayerId = -1, Frame (+0xB0) = 0 and the 0xAC bytes of Stats (+0x4) zeroed.
+ *
+ * cReplay_cReplay runs it on both Highlight records; cReplay_reset then gives them their player numbers.
+ */
 extern "C" void func_00272288(int* self)
 {
     self[0] = -1;
@@ -1907,6 +2042,12 @@ extern "C" void* func_002718E8(int, int);
 //99.38%
 INCLUDE_ASM("replay/replaycache", func_002722C0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the replay/replaycache unit's static initialisers: calls func_002718E8(1, 0xFFFF) (the unit's global
+ * constructor).
+ *
+ * @return func_002718E8's (meaningless) result
+ */
 void* func_002722C0(void* self)
 {
     return func_002718E8(1, 0xffff);
@@ -2088,6 +2229,18 @@ extern int kScriptHeapPointerSize;
 
 // PORT: real arity is (size, heap); the unit declares func_00272488(void*) for its callers.
 extern "C" void* func_00272488_impl(int size, void* heap) __asm__("func_00272488");
+/**
+ * Allocates @p size bytes from script heap @p heap, with the heap pointer stored in front so the block can be freed
+ * alone.
+ *
+ * Takes size + kScriptHeapPointerSize bytes with cScriptHeap_AllocMem, stores @p heap in the first word and returns the
+ * memory after that header. func_002724E8 is the matching free. Declared in the unit with one argument; the real
+ * arguments are (size, heap), the form of cScriptMemOp's operator new.
+ *
+ * @param size  the number of bytes wanted
+ * @param heap  the script heap to allocate from
+ * @return the usable memory, just past the stored heap pointer
+ */
 extern "C" void* func_00272488_impl(int size, void* heap)
 {
     void** p = (void**)cScriptHeap_AllocMem(heap, size + kScriptHeapPointerSize);
@@ -2101,6 +2254,14 @@ extern "C" void* func_00272488(void* self);
 //99.29%
 INCLUDE_ASM("replay/replaycache", func_002724C8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Allocates script heap memory by forwarding its arguments (size, heap) to func_00272488.
+ *
+ * Declared with only self; the size and heap stay in the argument registers. func_00274578 uses it for its entity
+ * player array.
+ *
+ * @return the allocated memory
+ */
 void* func_002724C8(void* self)
 {
     return func_00272488(self);
@@ -2114,6 +2275,14 @@ extern int kScriptHeapPointerSize;
 
 // PORT: returns void; the unit declares func_002724E8 as returning void*.
 extern "C" void func_002724E8_impl(void* p) __asm__("func_002724E8");
+/**
+ * Frees memory from func_00272488: steps back over the stored heap pointer and returns the block to that script heap.
+ *
+ * Reads the cScriptHeap pointer kScriptHeapPointerSize bytes before @p p and calls cScriptHeap_FreeMem on it with the
+ * block start. The script channel and entity destructors free themselves through it.
+ *
+ * @param p  the memory func_00272488 returned
+ */
 extern "C" void func_002724E8_impl(void* p)
 {
     char* h = (char*)p - kScriptHeapPointerSize;
@@ -2126,6 +2295,13 @@ extern "C" void* func_002724E8(void* self);
 //99.29%
 INCLUDE_ASM("replay/replaycache", func_00272510__FPv);
 #ifdef SKIP_ASM
+/**
+ * Frees script heap memory by forwarding to func_002724E8.
+ *
+ * func_002746F8 frees its entity player array (allocated with func_002724C8) through it.
+ *
+ * @return func_002724E8's (meaningless) result
+ */
 void* func_00272510(void* self)
 {
     return func_002724E8(self);
@@ -2135,6 +2311,11 @@ void* func_00272510(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272530);
 #ifdef SKIP_ASM
+/**
+ * Frees script heap memory by forwarding @p mem to func_002724E8.
+ *
+ * @param mem  the memory func_00272488 returned
+ */
 extern "C" void func_00272530(void *mem) {
     func_002724E8(mem);
 }
@@ -2142,6 +2323,11 @@ extern "C" void func_00272530(void *mem) {
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272550);
 #ifdef SKIP_ASM
+/**
+ * Frees script heap memory by forwarding @p arg0 to func_002724E8.
+ *
+ * @param arg0  the memory func_00272488 returned
+ */
 extern "C" void func_00272550(void *arg0) {
     func_002724E8(arg0);
 }
@@ -2553,6 +2739,14 @@ extern "C" void* cInSeq_Play(cInSeq* self, int playerID, int loopScript)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00272B00);
 #ifdef SKIP_ASM
+/**
+ * Plays every script player on the used list (mpScriptUsed, linked through +0x50) with cInSeq_Play.
+ *
+ * Each node's id (+0x4) is passed with @p loopScript.
+ *
+ * @param inSeq  the in-game sequencer
+ * @param loopScript  non-zero to loop the scripts
+ */
 extern "C" void func_00272B00(cInSeq* inSeq, int loopScript) {
     void *node;
 
@@ -2683,6 +2877,11 @@ INCLUDE_ASM("replay/replaycache", func_00272CE0);
 #ifdef SKIP_ASM
 extern "C" void func_00274C58();
 
+/**
+ * Returns the project id of an InSeq script by forwarding the script data to func_00274C58 (header word +0x4).
+ *
+ * Declared without arguments: the script data pointer passes through in $a0. No retail caller was found.
+ */
 extern "C" void func_00272CE0(void) {
     func_00274C58();
 }
@@ -2692,6 +2891,11 @@ INCLUDE_ASM("replay/replaycache", func_00272D00);
 #ifdef SKIP_ASM
 extern "C" void func_00274C60();
 
+/**
+ * Returns the size of an InSeq script by forwarding the script data to func_00274C60 (header word +0x8).
+ *
+ * Declared without arguments: the script data pointer passes through in $a0. No retail caller was found.
+ */
 extern "C" void func_00272D00(void) {
     func_00274C60();
 }
@@ -2701,6 +2905,11 @@ INCLUDE_ASM("replay/replaycache", func_00272D20);
 #ifdef SKIP_ASM
 extern "C" void func_00274C68();
 
+/**
+ * Returns the entity count of an InSeq script by forwarding the script data to func_00274C68 (header byte +0x1).
+ *
+ * Declared without arguments: the script data pointer passes through in $a0. No retail caller was found.
+ */
 extern "C" void func_00272D20(void) {
     func_00274C68();
 }
@@ -2711,6 +2920,12 @@ INCLUDE_ASM("replay/replaycache", func_00272D40);
 extern "C" void func_00274398(int);
 extern "C" int func_00274D90();
 
+/**
+ * Returns the number of variations of one entity of an InSeq script.
+ *
+ * Declared without arguments: the script data and entity index pass through in $a0/$a1 to func_00274D90, which finds
+ * the entity's block; func_00274398 reads its numVariations. No retail caller was found.
+ */
 extern "C" void func_00272D40(void) {
     func_00274398(func_00274D90());
 }
@@ -4094,6 +4309,13 @@ extern "C" int cScriptPlayerEntity_Update(cScriptPlayerEntity* self_, float prev
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274230);
 #ifdef SKIP_ASM
+/**
+ * Replaces the entity's mpUserData with @p userData and returns the previous value.
+ *
+ * @param entity  the script player entity
+ * @param userData  the new user data
+ * @return the old mpUserData
+ */
 extern "C" int func_00274230(void *entity, int userData) {
     int temp_2;
 
@@ -4156,6 +4378,15 @@ int cScriptPlayerEntity_GetChannel(void* self, int channelIndex)
 //100%
 INCLUDE_ASM("replay/replaycache", func_002742E0);
 #ifdef SKIP_ASM
+/**
+ * Returns the custom header of variation @p i of the entity's script, or 0 when the variation has none.
+ *
+ * The variation's tInSeqEntityHeader is at mpData + mpVariationTable[@p i]; when its headerSize is above 8 the custom
+ * header starts at +0x8 (nextSectionStart). The script engine's per-type getters (func_0027C0A0 and the like) use it.
+ *
+ * @param i  the variation index
+ * @return the custom header, or 0
+ */
 extern "C" void* func_002742E0(cScriptPlayerEntity* self, int i)
 {
     int* table = (int*)self->mpVariationTable;
@@ -4170,6 +4401,16 @@ extern "C" void* func_002742E0(cScriptPlayerEntity* self, int i)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274318);
 #ifdef SKIP_ASM
+/**
+ * Returns the custom header of variation @p idx of an entity's script data block, or 0 when it has none.
+ *
+ * The variation header is at @p base + the variation offset table entry (@p base + 8 + 4 * @p idx); with a headerSize
+ * above 8 the custom header starts at its +0x8. The script engine passes the block func_00274D90 found.
+ *
+ * @param base  the entity's script data block (tInSeqScriptEntityBlockHeader)
+ * @param idx  the variation index
+ * @return the custom header, or 0
+ */
 extern "C" void* func_00274318(char* base, int idx)
 {
     char* entityHeader = base + *(int*)(base + (idx << 2) + 8);
@@ -4182,6 +4423,13 @@ extern "C" void* func_00274318(char* base, int idx)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274348__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the frame count of the entity's current variation (mpSystemHeader->numFrames).
+ *
+ * cScriptPlayerMain_GetScriptLength takes the maximum over all entities.
+ *
+ * @return the length in frames
+ */
 int func_00274348(void* self)
 {
     return *(int*)((char*)*(void**)((char*)self + 0x1c) + 0x4);
@@ -4191,6 +4439,14 @@ int func_00274348(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274358);
 #ifdef SKIP_ASM
+/**
+ * Returns the frame count of the entity's current variation, looked up through the variation table.
+ *
+ * Reads numFrames from the header at mpData + mpVariationTable[mCurrVariation]; the same value func_00274348 reads
+ * through mpSystemHeader once a variation is set. No retail caller was found.
+ *
+ * @return the length in frames
+ */
 extern "C" int func_00274358(cScriptPlayerEntity* self)
 {
     char* base = (char*)self->mpData;
@@ -4202,6 +4458,12 @@ extern "C" int func_00274358(cScriptPlayerEntity* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274380);
 #ifdef SKIP_ASM
+/**
+ * Returns the entity's current variation index (mCurrVariation).
+ *
+ * @param scriptPlayerEntity  the script player entity
+ * @return mCurrVariation
+ */
 extern "C" int func_00274380(cScriptPlayerEntity* scriptPlayerEntity) {
     return (scriptPlayerEntity->mCurrVariation);
 }
@@ -4210,6 +4472,13 @@ extern "C" int func_00274380(cScriptPlayerEntity* scriptPlayerEntity) {
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274388__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns how many variations the entity's script block has (mpBlockHeader->numVariations).
+ *
+ * cSSXScriptEngine_OnStartScript uses it to pick a variation.
+ *
+ * @return the variation count
+ */
 int func_00274388(void* self)
 {
     return *(int*)((char*)*(void**)((char*)self + 0x10) + 0x4);
@@ -4221,6 +4490,12 @@ INCLUDE_ASM("replay/replaycache", func_00274398);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00274398_impl(void *arg0) __asm__("func_00274398");
+/**
+ * Returns the variation count (+0x4) of an entity script data block (tInSeqScriptEntityBlockHeader).
+ *
+ * @param blockHeader  the entity's script data block
+ * @return its numVariations
+ */
 extern "C" int func_00274398_impl(void *blockHeader) {
     return (*(int *)((char*)(blockHeader) + (4)));
 }
@@ -4228,6 +4503,12 @@ extern "C" int func_00274398_impl(void *blockHeader) {
 //100%
 INCLUDE_ASM("replay/replaycache", func_002743A0);
 #ifdef SKIP_ASM
+/**
+ * Returns the project id of the script this entity belongs to (mpOwner's mpSystemHeader, word +0x4).
+ *
+ * @param scriptPlayerEntity  the script player entity
+ * @return the script's projectID
+ */
 extern "C" int func_002743A0(cScriptPlayerEntity* scriptPlayerEntity) {
     return (*(int *)((char*)((*(void **)((char*)((scriptPlayerEntity->mpOwner)) + (0x10)))) + (4)));
 }
@@ -4235,6 +4516,12 @@ extern "C" int func_002743A0(cScriptPlayerEntity* scriptPlayerEntity) {
 //100%
 INCLUDE_ASM("replay/replaycache", func_002743B0);
 #ifdef SKIP_ASM
+/**
+ * Returns the size in bytes of the entity's script data block (mpBlockHeader->blockSize).
+ *
+ * @param scriptPlayerEntity  the script player entity
+ * @return the block size
+ */
 extern "C" int func_002743B0(cScriptPlayerEntity* scriptPlayerEntity) {
     return *((int*)scriptPlayerEntity->mpBlockHeader);
 }
@@ -4242,6 +4529,14 @@ extern "C" int func_002743B0(cScriptPlayerEntity* scriptPlayerEntity) {
 //100%
 INCLUDE_ASM("replay/replaycache", func_002743C0);
 #ifdef SKIP_ASM
+/**
+ * Returns the size (blockSize, word +0x0) of an entity script data block.
+ *
+ * func_00274D90 steps over entity blocks with it.
+ *
+ * @param blockHeader  the entity's script data block
+ * @return its blockSize
+ */
 extern "C" int func_002743C0(int *blockHeader) {
     return *blockHeader;
 }
@@ -4250,6 +4545,14 @@ extern "C" int func_002743C0(int *blockHeader) {
 //100%
 INCLUDE_ASM("replay/replaycache", func_002743C8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the type of the entity's current variation (mpSystemHeader->type).
+ *
+ * The script engines (cSSXScriptEngine_OnStartScript, func_002830C8) and cScriptCameraController_addCamera switch on it
+ * to tell entity kinds apart (5 in OnStartScript; manual, target, subject and algorithmic cameras).
+ *
+ * @return the entity type
+ */
 unsigned char func_002743C8(void* self)
 {
     return *(unsigned char*)((char*)*(void**)((char*)self + 0x1c) + 0x3);
@@ -4259,6 +4562,15 @@ unsigned char func_002743C8(void* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_002743D8);
 #ifdef SKIP_ASM
+/**
+ * Returns the entity type of an entity script data block: the type byte of the variation header its first table entry
+ * (+0x8) points to.
+ *
+ * No retail caller was found.
+ *
+ * @param blockHeader  the entity's script data block
+ * @return the type byte
+ */
 extern "C" unsigned char func_002743D8(void *blockHeader) {
     return (*(unsigned char *)(((char*)(blockHeader) + (*(int *)((char*)(blockHeader) + (8)))) + (3)));
 }
@@ -4355,6 +4667,11 @@ extern "C" void* cScriptPlayerMain_cScriptPlayerMain(cScriptPlayerMain* self)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274578);
 #ifdef SKIP_ASM
+/**
+ * Destroys a script player: shuts it down with func_002746F8 and frees the object when asked.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void func_00274578(int* self, int flags)
 {
     func_002746F8((cScriptPlayerMain*)self);
@@ -4448,6 +4765,18 @@ void* func_00272510(void* self);
 
 
 
+/**
+ * Shuts a script player down: stops it, frees its entities and resets every field.
+ *
+ * Does nothing when no script is loaded (mpData null). Otherwise calls cScriptPlayerMain_Stop,
+ * cScriptPlayerEntity_DeInit on each of the numEntities entities, destroys the entity array back to front (count from
+ * the 16-byte array cookie, cScriptPlayerEntity__cScriptPlayerEntity) and frees it with func_00272510. Then clears mID
+ * (-1), mpData, mpManager, mpUserData, the header pointers, mLoopScript, mPlayState, mCurrFrame, mNumPaused and
+ * mNumSteps, and sets mScriptLength and mJumpFrame to -1 and mPlaySpeed to 1.0. cInSeq_RecyclePlayer and the destructor
+ * func_00274578 call it.
+ *
+ * @param scriptPlayerMain  the script player
+ */
 extern "C" void func_002746F8(cScriptPlayerMain* scriptPlayerMain)
 {
     cScriptPlayerMain* self = scriptPlayerMain;
@@ -4489,6 +4818,13 @@ extern "C" void func_002746F8(cScriptPlayerMain* scriptPlayerMain)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274808__FPvf);
 #ifdef SKIP_ASM
+/**
+ * Sets the script player's playback speed (mPlaySpeed).
+ *
+ * The BX script engine sets it from a play request's rate (func_00282498, func_00282908).
+ *
+ * @param val  the new speed (1.0 = normal)
+ */
 void func_00274808(void* self, float val)
 {
     *(float*)((char*)self + 0x24) = val;
@@ -4500,6 +4836,13 @@ extern "C" void* func_00274830(void*, int);
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274810__FPv);
 #ifdef SKIP_ASM
+/**
+ * Starts the script player with its current loop setting: calls func_00274830 with mLoopScript.
+ *
+ * cScriptPlayerMain_UpdateFrame calls it to restart a looping script.
+ *
+ * @return func_00274830's (meaningless) result
+ */
 void* func_00274810(void* self)
 {
     return func_00274830(self, *(int*)((char*)self + 0x1c));
@@ -4514,6 +4857,15 @@ INCLUDE_ASM("replay/replaycache", func_00274830);
 // so bind a void body to the symbol
 void func_00274830_impl(void* self, int a1) __asm__("func_00274830");
 
+/**
+ * Starts the script player: a stopped player becomes PlayPending (mPlayState 1) with mLoopScript set to @p a1.
+ *
+ * If the player is not stopped and an entity update is in progress (mEntityUpdateInProgress), a stop requested during
+ * it (mDoStopInEntityUpdate) is cancelled instead; otherwise a running player is left alone. cInSeq_Play,
+ * cInSeq_Preview and func_00274810 call it.
+ *
+ * @param a1  non-zero to loop the script
+ */
 void func_00274830_impl(void* self, int a1)
 {
     if (*(int*)((char*)self + 0x20) != 0) {
@@ -4530,6 +4882,12 @@ void func_00274830_impl(void* self, int a1)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274860);
 #ifdef SKIP_ASM
+/**
+ * Sets whether the script player loops (mLoopScript).
+ *
+ * @param scriptPlayerMain  the script player
+ * @param loopScript  non-zero to loop
+ */
 extern "C" void func_00274860(cScriptPlayerMain* scriptPlayerMain, int loopScript) {
     (scriptPlayerMain->mLoopScript) = loopScript;
 }
@@ -4570,6 +4928,12 @@ extern "C" void cScriptPlayerMain_Preview(cScriptPlayerMain* self, int flag)
 //100%
 INCLUDE_ASM("replay/replaycache", func_002748F8);
 #ifdef SKIP_ASM
+/**
+ * Asks the script player to jump to frame @p frameNum on its next update (mJumpFrame) and clears mNumSteps.
+ *
+ * @param scriptPlayerMain  the script player
+ * @param frameNum  the frame to jump to
+ */
 extern "C" void func_002748F8(cScriptPlayerMain* scriptPlayerMain, int frameNum) {
     (scriptPlayerMain->mJumpFrame) = frameNum;
     (scriptPlayerMain->mNumSteps) = 0;
@@ -4578,6 +4942,11 @@ extern "C" void func_002748F8(cScriptPlayerMain* scriptPlayerMain, int frameNum)
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274908);
 #ifdef SKIP_ASM
+/**
+ * Asks the script player to advance one more frame step (increments mNumSteps).
+ *
+ * @param scriptPlayerMain  the script player
+ */
 extern "C" void func_00274908(cScriptPlayerMain* scriptPlayerMain) {
     (scriptPlayerMain->mNumSteps) = (int) ((scriptPlayerMain->mNumSteps) + 1);
 }
@@ -4757,6 +5126,15 @@ extern "C" void cScriptPlayerMain_UpdateFrame(cScriptPlayerMain* scriptPlayerMai
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274C10__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Replaces the script player's mpUserData with @p userData and returns the previous value.
+ *
+ * The BX script engine stores its play request there (func_002821A0, func_00282908, func_00282B40) and clears it
+ * (func_00282540).
+ *
+ * @param userData  the new user data
+ * @return the old mpUserData
+ */
 int func_00274C10(void* self, int userData)
 {
     int old = *(int*)((char*)self + 0xc);
@@ -4783,6 +5161,14 @@ extern "C" void* cScriptPlayerMain_GetEntity(cScriptPlayerMain* self, int entity
 //100%
 INCLUDE_ASM("replay/replaycache", func_00274C38);
 #ifdef SKIP_ASM
+/**
+ * Returns the data header of InSeq script data (+0xC, nextSectionStart) when its headerSize (+0x2) is at least 13, else
+ * 0.
+ *
+ * func_0027C078 uses it.
+ *
+ * @return the data header, or 0
+ */
 extern "C" void* func_00274C38(void* self)
 {
     if (*(unsigned short*)((char*)self + 0x2) >= 13) {
@@ -4797,6 +5183,12 @@ INCLUDE_ASM("replay/replaycache", func_00274C58);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00274C58_impl(void *arg0) __asm__("func_00274C58");
+/**
+ * Returns the projectID (+0x4) of InSeq script data (tInSeqScriptHeader).
+ *
+ * @param scriptHeader  the script data
+ * @return its projectID
+ */
 extern "C" int func_00274C58_impl(void *scriptHeader) {
     return (*(int *)((char*)(scriptHeader) + (4)));
 }
@@ -4806,6 +5198,12 @@ INCLUDE_ASM("replay/replaycache", func_00274C60);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00274C60_impl(void *arg0) __asm__("func_00274C60");
+/**
+ * Returns the size (+0x8) of InSeq script data (tInSeqScriptHeader).
+ *
+ * @param scriptHeader  the script data
+ * @return its size in bytes
+ */
 extern "C" int func_00274C60_impl(void *scriptHeader) {
     return (*(int *)((char*)(scriptHeader) + (8)));
 }
@@ -4815,6 +5213,12 @@ INCLUDE_ASM("replay/replaycache", func_00274C68);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" unsigned char func_00274C68_impl(void *arg0) __asm__("func_00274C68");
+/**
+ * Returns the entity count (numEntities, byte +0x1) of InSeq script data (tInSeqScriptHeader).
+ *
+ * @param scriptHeader  the script data
+ * @return its numEntities
+ */
 extern "C" unsigned char func_00274C68_impl(void *scriptHeader) {
     return (*(unsigned char *)((char*)(scriptHeader) + (1)));
 }
@@ -4911,6 +5315,15 @@ INCLUDE_ASM("replay/replaycache", func_00274D90);
 // LANDING: unit declares `extern "C" int func_00274D90();` at line ~1887 (func_00272D40 caller); alias used here.
 extern "C" char* func_00274D90_impl(char* self, int count) __asm__("func_00274D90");
 
+/**
+ * Returns the script data block of entity @p count of InSeq script data @p self.
+ *
+ * Starts after the script header (@p self + headerSize, +0x2) and steps over @p count entity blocks by their blockSize
+ * (func_002743C0). The script engine looks entity headers up in the block (func_00274318).
+ *
+ * @param count  the entity index
+ * @return the entity's script data block
+ */
 extern "C" char* func_00274D90_impl(char* self, int count)
 {
     char* block = self + *(unsigned short*)(self + 2);

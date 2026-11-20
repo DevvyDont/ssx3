@@ -62,11 +62,11 @@ struct cReplayFrameList {
                            //       FreeFrameList.NumFrames
 };
 
-// One player's highlight being marked (On Tour cReplayHighlight, 0xB8; retail 0xB4 [R]: constructor func_00272288
+// One player's highlight being marked (On Tour cReplayHighlight, 0xB8; retail 0xB4 [R]: func_00272288 (reset)
 // writes +0, +0xB0 and fills +4..+0xB0, cReplay_reset strides 0xB4). Methods func_0026E6E0 (begin), func_0026E7F8,
 // func_0026E800, func_0026E838 (setRanking).
 struct cReplayHighlight {
-    int PlayerId;          // 0x000 [O]; [R] ctor func_00272288 stores -1; [U] cReplay_reset stores 0 / 1
+    int PlayerId;          // 0x000 [O]; [R] func_00272288 (reset) stores -1; [U] cReplay_reset stores 0 / 1
     char Stats[0xAC];      // 0x004 [O] tRiderStats (On Tour 0xB0, layout not placed); [R] ctor MEM_fill(this + 4, 0,
                            //       0xAC)
     cReplayFrame* Frame;   // 0x0B0 [O]; [R] ctor 0; [U] non-zero = marking (func_00270B88 begins only when 0,
@@ -134,7 +134,7 @@ struct cReplay {
     cReplayCache* InputCache[2];         // 0x48C [O] (On Tour 4); [R] cReplay_addCache: cMemMan_alloc(0x10,
                                          //       "ReplayCache") into the first free slot of 2, ctor cReplay_cReplay
                                          //       zeroes 2; [U] moved with the playback cursor (cReplayCache_moveTo)
-    cReplayHighlight Highlight[2];       // 0x494 [O] (On Tour 4 x 0xB8); [R] ctor cReplay_cReplay runs func_00272288
+    cReplayHighlight Highlight[2];       // 0x494 [O] (On Tour 4 x 0xB8); [R] reset by func_00272288 in cReplay_cReplay
                                          //       on 2 x 0xB4; [U] cReplay_reset sets PlayerId 0/1;
                                          //       func_00270B88/func_00270CE8/cReplay_cancelMarkHighlight index it by player
     int Chapters[2];                     // 0x5FC [O] (On Tour 4); [U] cReplay_eventChapter (eventChapter) sets bit `pos` of

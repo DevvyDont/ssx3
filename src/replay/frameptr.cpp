@@ -90,6 +90,13 @@ void cReplayFramePtr_readRewind(cReplayFramePtr* self)
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026E9C0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Rewinds the frame pointer's write position: sets WriteData to Block and Size to 0, so the block is rewritten.
+ *
+ * cReplay_saveFrame calls it before writing a frame; cReplayFramePtr_readRewind is the read-side counterpart.
+ *
+ * @return the block start (Block)
+ */
 int func_0026E9C0(void* self)
 {
     int block = *(int*)((char*)self + 0x4);
@@ -248,6 +255,17 @@ struct sRefH_EB48 {
     sRefH_EB48() : id(0xFFFFFFFF) {}
 };
 
+/**
+ * Reads a 4-byte instance id from the frame and returns the instance record it names, or 0.
+ *
+ * The id is read through the stream's read slot (virtual slot 2). An id of 0xFFFFFFFF gives 0. Otherwise the instance
+ * manager is asked first (func_003512C0 on SSXApp->Game->InstanceMan); if it has no record, the world cache of
+ * cWorld_m_pTheWorld is used: set (id & 0xFF), entry (id >> 8), whose upper 24 bits are the record address / 4.
+ * func_0026ECD8 writes what this reads.
+ *
+ * @param stream  the frame pointer to read from
+ * @return the instance record, or 0 for no id or an unknown one
+ */
 extern "C" void* func_0026EB48(cReplayFramePtr* stream)
 {
     void* r = 0;
@@ -317,6 +335,18 @@ static inline void* lookup_EC08(unsigned int id)
     return refToPtr_EC08(p);
 }
 
+/**
+ * Reads an 8-byte instance reference (id, type) from the frame, binds the record it names to @p owner and returns it.
+ *
+ * The id and a 16-bit type are read through the stream's read slot (virtual slot 2). An id of 0xFFFFFFFF gives 0;
+ * otherwise the record comes from the world cache of cWorld_m_pTheWorld (set id & 0xFF, entry id >> 8, upper 24 bits =
+ * address / 4), with no null check. The record's word at +0xC is set to @p owner and the low 16 bits of its flags
+ * (+0x8) are replaced by the saved type, keeping bits 8 and 9. func_0026ED28 writes what this reads.
+ *
+ * @param stream  the frame pointer to read from
+ * @param owner  the node that becomes the record's owner (stored at +0xC)
+ * @return the instance record, or 0 for no id
+ */
 extern "C" void* func_0026EC08(cReplayFramePtr* stream, void* owner)
 {
     sNode_EC08* r = 0;
@@ -345,6 +375,14 @@ struct sFpSerObj {
     sFpSerVEntry* vt;
 };
 
+/**
+ * Writes the 4-byte id of instance record @p obj (its word at +0x78) to the frame, or 0xFFFFFFFF when @p obj is null.
+ *
+ * The id goes through the stream's write slot (virtual slot 1); func_0026EB48 reads it back.
+ *
+ * @param out  the frame pointer to write to
+ * @param obj  the instance record, or null
+ */
 extern "C" void func_0026ECD8(sFpSerObj* out, void* obj)
 {
     unsigned int id = 0xFFFFFFFF;
@@ -358,6 +396,16 @@ extern "C" void func_0026ECD8(sFpSerObj* out, void* obj)
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026ED28);
 #ifdef SKIP_ASM
+/**
+ * Writes an 8-byte reference to the instance record of node @p obj (its pointer at +0x18) to the frame.
+ *
+ * The record holds the instance's id (+0x78) and the 16-bit type from its flags (+0x8); with no instance it is id
+ * 0xFFFFFFFF and type 0. It goes through the stream's write slot (virtual slot 1); func_0026EC08 reads it back. @p obj
+ * itself must not be null.
+ *
+ * @param out  the frame pointer to write to
+ * @param obj  the node whose instance is written
+ */
 extern "C" void func_0026ED28(sFpSerObj* out, void* obj)
 {
     struct {
@@ -517,6 +565,13 @@ extern void* gCamTriggerMan[];
 void cCameraTriggerMan_setInGameTriggers(void* self);
 extern "C" void cCamera_setCurrentController(void* self, int mode);
 
+/**
+ * Gives the cameras back to the game after an instant replay.
+ *
+ * Restores the in-game camera triggers (cCameraTriggerMan_setInGameTriggers on gCamTriggerMan) and sets the current
+ * controller of the view manager's first camera (+0x4) to 2. cReplay_stopReplay calls it instead of
+ * cReplay_setupGameCamerasOnExitReplay when InstantReplay is set after the save frame is restored.
+ */
 extern "C" void func_0026EF80()
 {
     cCameraTriggerMan_setInGameTriggers(gCamTriggerMan);
@@ -1052,6 +1107,11 @@ extern "C" void cReplay_popReplaySaveFrame(cReplay* self)
 //100%
 INCLUDE_ASM("replay/frameptr", func_0026F898__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Sets the replay's PadNum, the controller whose pad drives the replay controls.
+ *
+ * @param val  the pad number
+ */
 void func_0026F898(void* self, int val)
 {
     *(int*)((char*)self + 0x28) = val;

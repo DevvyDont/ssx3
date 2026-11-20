@@ -377,6 +377,14 @@ extern "C" void* func_0026E6A0(void*);
 //100%
 INCLUDE_ASM("replay/replay", func_0026E448__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the recorded frame that holds a tick, by searching FrameList (+0x3B0) with func_0026E6A0.
+ *
+ * Declared with only self: the tick the caller passes stays in $a1 and reaches func_0026E6A0. cReplay_findNextFrame,
+ * cReplay_findPrevFrame and cReplay_lastFrame use it.
+ *
+ * @return the frame containing the tick (see func_0026E6A0)
+ */
 void* func_0026E448(void* self)
 {
     return func_0026E6A0((char*)self + 0x3b0);
@@ -503,6 +511,13 @@ extern "C" void cReplay_prevFrame(cReplay* self)
 //100%
 INCLUDE_ASM("replay/replay", func_0026E5A8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs an empty replay frame list: zeroes Tail (+0x0), Head (+0x4) and NumFrames (+0x8).
+ *
+ * cReplay_cReplay builds FrameList and FreeFrameList with it.
+ *
+ * @return @p self
+ */
 void* func_0026E5A8(void* self)
 {
     int zero = 0;
@@ -572,6 +587,16 @@ extern "C" void cReplayFrameList_addFrame(sReplayList* list, sReplayNode* node)
 //100%
 INCLUDE_ASM("replay/replay", func_0026E608);
 #ifdef SKIP_ASM
+/**
+ * Unlinks frame @p node from the replay frame list and decrements its NumFrames.
+ *
+ * If the frame is the list's first (oldest, +0x0) or last (newest, +0x4) entry that end moves to its neighbour; the
+ * neighbours' Next (+0x14) and Prev (+0x18) are joined and the frame's own links cleared. The frame must be in the
+ * list: nothing is checked. cReplay_freeReplayFrame calls it on FrameList.
+ *
+ * @param list  the frame list
+ * @param node  the frame to remove
+ */
 extern "C" void func_0026E608(sReplayList* list, sReplayNode* node)
 {
     if (node == list->head) {
@@ -595,6 +620,15 @@ extern "C" void func_0026E608(sReplayList* list, sReplayNode* node)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replay", func_0026E670);
 #ifdef SKIP_ASM
+/**
+ * Removes the oldest frame (Tail, +0x0) from the replay frame list and returns it.
+ *
+ * Unlinks it with func_0026E608. The list must not be empty: a null Tail is passed on unchecked.
+ * cReplay_allocReplayFrame takes free frames from FreeFrameList with it.
+ *
+ * @param list  the frame list
+ * @return the removed frame
+ */
 extern "C" sReplayNode* func_0026E670(sReplayList* list)
 {
     sReplayNode* node = list->head;
@@ -623,6 +657,17 @@ struct sReplayFrameList {
 // the unit declares this with one arg; bind the real 2-arg body to the symbol
 sReplayFrame* func_0026E6A0_impl(sReplayFrameList* list, int time) __asm__("func_0026E6A0");
 
+/**
+ * Returns the frame of the list that holds tick @p time: the newest frame starting at or before it.
+ *
+ * Walks from the oldest frame (+0x0) along Next (+0x14) and stops at a frame whose FrameStartTick (+0x30) equals
+ * @p time or lies below it with the next frame starting above it; with no later frame the newest frame is returned, so
+ * a tick before the first frame also gives the oldest one only if it matches. The list must not be empty.
+ *
+ * @param list  the frame list
+ * @param time  the tick to look for
+ * @return the frame containing the tick (the newest frame when none matches)
+ */
 sReplayFrame* func_0026E6A0_impl(sReplayFrameList* list, int time)
 {
     sReplayFrame* frame = list->head;
@@ -654,6 +699,15 @@ struct sReplayObjE6E0 {
     void* rider;                // 0xB0
 };
 
+/**
+ * Starts marking a highlight for this player on frame @p rider: flags the frame and keeps a copy of the rider stats.
+ *
+ * Sets bit PlayerId in the frame's highlight byte (+0x1E), resets the player's ranking on the frame to 0
+ * (func_0026D730), stores the frame in Frame (+0xB0) and copies the 0xAC bytes of @p src into Stats (+0x4).
+ *
+ * @param rider  the replay frame the highlight starts on
+ * @param src  the rider stats at the start of the highlight
+ */
 extern "C" void func_0026E6E0(sReplayObjE6E0* self, char* rider, sReplayDataE6E0* src)
 {
     *(unsigned char*)(rider + 0x1E) |= 1 << self->index;
@@ -666,6 +720,11 @@ extern "C" void func_0026E6E0(sReplayObjE6E0* self, char* rider, sReplayDataE6E0
 //100%
 INCLUDE_ASM("replay/replay", func_0026E7F8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ends this player's highlight mark: clears Frame (+0xB0) and leaves the frame's highlight flag and ranking in place.
+ *
+ * func_00270CE8 calls it on Highlight[playerId] once the highlight is kept.
+ */
 void func_0026E7F8(void* self)
 {
     *(int*)((char*)self + 0xB0) = 0;
@@ -675,6 +734,12 @@ void func_0026E7F8(void* self)
 //100%
 INCLUDE_ASM("replay/replay", func_0026E800);
 #ifdef SKIP_ASM
+/**
+ * Cancels this player's highlight mark: clears bit PlayerId in the marked frame's highlight byte (+0x1E) and clears
+ * Frame.
+ *
+ * Does nothing when no frame is marked (Frame, +0xB0, is null).
+ */
 extern "C" void func_0026E800(void* self)
 {
     unsigned char* cache = *(unsigned char**)((char*)self + 0xb0);
@@ -690,6 +755,19 @@ INCLUDE_ASM("replay/replay", func_0026E838);
 #ifdef SKIP_ASM
 void func_0026D730(void*, int, int);
 
+/**
+ * Ranks this player's highlight from the rider stats at its end and stores the ranking on the marked frame.
+ *
+ * With @p mode set (a landing): the points gained since the highlight began (the stats word at +0x9C minus the kept
+ * copy) give the ranking when they are at least 1000; otherwise an air time (float at +0x44) of at least 5.0 gives air
+ * time * 1000. With no gain at all the result is 0. Without @p mode, or when neither rule applied, the ranking is minus
+ * the increase of the word at +0xA4 (On Tour TotalPointsLostToWipeouts), and 0 is returned when it did not change. The
+ * ranking is stored with func_0026D730 on Frame (+0xB0) for PlayerId.
+ *
+ * @param stats  the rider stats now (On Tour tRiderStats)
+ * @param mode  non-zero when the highlight ended with a landing
+ * @return 1 when a ranking was stored, 0 when nothing changed
+ */
 extern "C" int func_0026E838(void* self, void* stats, int mode)
 {
     if (mode) {

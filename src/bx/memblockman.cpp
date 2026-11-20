@@ -534,7 +534,9 @@ extern "C" void cMemBlockMan_validate(void)
 INCLUDE_ASM("bx/memblockman", func_0031A258);
 #ifdef SKIP_ASM
 /**
- * Returns 0.
+ * Returns 0; nothing in the code or data refers to it.
+ *
+ * An unreferenced stub between cMemBlockMan_validate and func_0031A268, next to the empty func_0031A260.
  *
  * @return 0
  */
@@ -546,7 +548,9 @@ extern "C" int func_0031A258(void) {
 INCLUDE_ASM("bx/memblockman", func_0031A260);
 #ifdef SKIP_ASM
 /**
- * Does nothing.
+ * Does nothing; nothing in the code or data refers to it.
+ *
+ * An empty stub right after func_0031A258.
  */
 extern "C" void func_0031A260(void) {
 

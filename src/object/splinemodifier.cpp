@@ -1219,6 +1219,17 @@ static inline int octEmpty_A780(sOctCell_A780* o)
     return 1;
 }
 
+/**
+ * Removes the modifier's segment copies 1 to NumModels - 1 from the Nash overlap octree.
+ *
+ * For each copy it takes the node NodeInst[i] and its bound box (+0x30 of the copy's 0x60-byte entry in Nodes), counts
+ * the removal in the Nash's word at +0xA0, finds the box's key with nash_Nash_findkey, picks one of the eight root
+ * octants by the signs of the key's x, y and z and removes the node from that cell with nash_Cell_remnode. A cell left
+ * with no children and empty lists is freed and cleared. Copy 0 is not touched. The destructor
+ * cMultiSplineModifier__cMultiSplineModifier calls it first; it undoes cMultiSplineModifier_setupOverlapSystem.
+ *
+ * @param vself  the multi-spline modifier
+ */
 // Removes every spline segment but the first from the space hash (freeing octree cells that become empty).
 extern "C" void func_0035A780(cMultiSplineModifier* vself)
 {
@@ -1375,6 +1386,13 @@ extern "C" void cMultiSplineModifier_updateOverlapSystem(cMultiSpline_A918* self
 //100%
 INCLUDE_ASM("object/splinemodifier", func_0035AAD0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Increments the modifier's FocusCount and returns the new count.
+ *
+ * cMoveNode_incFocusCount calls it (passing an instance record the body ignores); func_0035AAE0 is the reverse.
+ *
+ * @return the new FocusCount
+ */
 void* func_0035AAD0(void* self)
 {
     void* focusCount = (char*)*(void**)((char*)self + 0x34) + 0x1;
@@ -1386,6 +1404,13 @@ void* func_0035AAD0(void* self)
 //100%
 INCLUDE_ASM("object/splinemodifier", func_0035AAE0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Decrements the modifier's FocusCount and returns the new count (no check against going below zero).
+ *
+ * cMoveNode_decFocusCount calls it (passing an instance record the body ignores); func_0035AAD0 is the reverse.
+ *
+ * @return the new FocusCount
+ */
 void* func_0035AAE0(void* self)
 {
     void* focusCount = (char*)*(void**)((char*)self + 0x34) - 0x1;

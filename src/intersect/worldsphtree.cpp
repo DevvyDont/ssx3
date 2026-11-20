@@ -4709,6 +4709,31 @@ static inline void collect_33ED60(sOct_33ED60* node, sQuery_33ED60* q)
 
 struct sQry_337A48;
 
+/**
+ * Runs the spline query on an octree cell that crosses the query box, recursing into its children.
+ *
+ * First applies the crossing callback (@p vctx) to the cell's typed-node list (+0x28): rails (type 2) go to
+ * cRailModifier_splineIntersect, flex rails (type 3) to func_00348290, and instances (type 1) whose filter word (node
+ * +0x68, then +0x1C) shares a bit with the query mask to func_00335128; hits go to the query's count and distance.
+ * Cells at level 11 stop there.
+ *
+ * Otherwise the children are 2^(level - 1) units wide; for each axis it checks which of the two child spans, widened by
+ * 0.2 cell on both sides, overlap @p vbox (returning when neither does) and which lie wholly inside it. It then visits
+ * the eight children in the order 0, 1, 3, 2, 6, 7, 5, 4, keeping the child key up to date: an overlapping child wholly
+ * inside the box gets the inside callback (@p vctx2) on its own list and func_003411B8 on each of its children; any
+ * other overlapping child is handled by a recursive call. The same walk as nash_privy_QueryHelper_helpX with the spline
+ * callback inlined.
+ *
+ * Called by func_00337A48 for the root cells that cross the box.
+ *
+ * @param flag  the query helper object (this); unused, the caller passes the address of an empty local
+ * @param vctx  the crossing callback (On Tour SplineCallback): position, intInfo, mask, hit-count and distance
+ *   pointers, box
+ * @param vctx2  the callback for children wholly inside the box (the caller passes the same object)
+ * @param vbox  the query box (min, max)
+ * @param vnode  the octree cell (On Tour nash::Cell: children at +0x0, node lists from +0x20)
+ * @param vcell  the cell's key: level and x, y, z cell coordinates (On Tour CellKey)
+ */
 // Declared as func_00337A48 (its caller) declares it; sQry_337A48 has sQuery_33ED60's layout.
 extern "C" void func_0033ED60(char* flag, sQry_337A48* vctx, sQry_337A48* vctx2, sBox_00334680* vbox, void* vnode, void* vcell)
 {
@@ -4940,6 +4965,17 @@ extern sCorners_3400D8 D_004FF640_c __asm__("D_004FF640");
 // (g++ __static_initialization_and_destruction_0).
 // The unit declares func_003400D8 returning void*; bind this definition by asm label.
 extern "C" void func_003400D8_init(int initialize, int priority) __asm__("func_003400D8");
+/**
+ * Constructs the unit's static constants: 56 colours and the eight unit-cube corners.
+ *
+ * Runs only for @p initialize non-zero and @p priority 0xFFFF (func_00341368 passes 1, 0xFFFF). The colours
+ * (D_004FF2C0..D_004FF630, four floats each) are the table also built in pathsys, memstd and all_in_one_scripter;
+ * D_004FF640 gets the corners (+-1, +-1, +-1, 0) in x-major order, the default axes riderspheretree's sphere-tree code
+ * copies (g++ __static_initialization_and_destruction_0).
+ *
+ * @param initialize  non-zero to construct
+ * @param priority  the init priority; only 0xFFFF does anything
+ */
 extern "C" void func_003400D8_init(int initialize, int priority)
 {
     if (priority == 0xFFFF && initialize != 0) {
@@ -5021,6 +5057,12 @@ public:
     tAIFwdDiff();
 };
 
+/**
+ * Constructs a tAIFwdDiff (an AI forward-difference table): there is nothing to initialise.
+ *
+ * The element constructors are empty, so all that is left are three empty counting loops over the rows of the 10x10,
+ * 9x9 and 3x3 tables (a, b, c). cAIFwdDiffCache_Init calls it on each entry of a newly allocated cache.
+ */
 tAIFwdDiff::tAIFwdDiff()
 {
 }
@@ -5031,6 +5073,13 @@ __asm__(".globl func_00340970\n.type func_00340970,@function\nfunc_00340970 = __
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_00340A08__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base cWorldIntersectType default for the virtual slot cWorldLine fills with
+ * cWorldLine_IntersectSubPatch.
+ *
+ * Slot 8 of cWorldRider_vtbl, cWorldSphTree_vtbl and cWorldSphere_vtbl (between IsBoxInt and IsInBoxTransformed), which
+ * inherit it.
+ */
 void func_00340A08(void* self)
 {
 }
@@ -5078,6 +5127,15 @@ struct sSphNode_340A40 {
     sSphNode_340A40* child[8];
 };
 
+/**
+ * Collects the overlapping instances of an octree cell and of every cell below it.
+ *
+ * Runs OverlapInstancesCallback_operatorCall(@p ctx, @p node) on the cell, then calls itself on each non-null child
+ * (+0x0..+0x1C). Used for cells that lie wholly inside the query box (func_00330BA8).
+ *
+ * @param node  the octree cell (On Tour nash::Cell)
+ * @param ctx  the instance callback: list, count pointer, maximum, query box (On Tour OverlapInstancesCallback)
+ */
 extern "C" void func_00340A40(sSphNode_340A40* node, sCtx_3309D8* ctx)
 {
     OverlapInstancesCallback_operatorCall(ctx, node);
@@ -5100,6 +5158,15 @@ struct sOctCollect {
     int* count;
 };
 
+/**
+ * Appends every typed node of an octree cell and of every cell below it to a list.
+ *
+ * Walks the cell's typed-node list (+0x28) appending each node at @p out arr[*count] and incrementing the count (no
+ * limit check), then calls itself on each non-null child (+0x0..+0x1C). func_00331450 uses it for cells wholly inside
+ * the query box; the list it fills (+0x210 count, +0x214 array) is the one cOverlapList_splineIntersect reads.
+ *
+ * @param out  the output list: node array and count pointer
+ */
 extern "C" void func_00340B18(void* self, sOctCollect* out)
 {
     void** objNode;
@@ -5144,6 +5211,17 @@ static inline int overlapObj_340C20(const sBox_3309D8* b, const sObj_340C20* n)
     return r;
 }
 
+/**
+ * Collects the overlapping instances and patches of an octree cell and of every cell below it.
+ *
+ * Runs OverlapInstancesCallback_operatorCall on the cell with the instance part of @p ctx, then appends each patch on
+ * the cell's patch list (+0x24) whose box (+0x158 min, +0x164 max) overlaps the query box to the patch part (@p ctx
+ * +0x10: list, count pointer, box at +0xC), and calls itself on each non-null child. Used by func_00331E90 and
+ * func_0033A3D8 for cells wholly inside the query box.
+ *
+ * @param tree  the octree cell (On Tour nash::Cell)
+ * @param ctx  the callback: instance part (+0x0) and patch part (+0x10)
+ */
 extern "C" void func_00340C20(sTree_340C20* tree, sCtx_3309D8* ctx)
 {
     OverlapInstancesCallback_operatorCall(ctx, tree);
@@ -5224,6 +5302,16 @@ static inline int overlap_340DC0(const sBox_340DC0* b, const sObjNode_340DC0* n)
     return r;
 }
 
+/**
+ * Collects every instance, patch and typed node of an octree cell and of every cell below it.
+ *
+ * Runs OverlapInstancesCallback_operatorCall with the instance part of @p ctx (+0x0), appends the patches on the +0x24
+ * list whose box (+0x158/+0x164) overlaps the patch part's box to that part (+0x10), appends every typed node (+0x28)
+ * to the third part (+0x20) unconditionally, then calls itself on each non-null child. Used by func_00332DB8 for cells
+ * wholly inside the query box.
+ *
+ * @param ctx  the callback: instance (+0x0), patch (+0x10) and typed-node (+0x20) parts, each list, count pointer, box
+ */
 extern "C" void func_00340DC0(sTree_340DC0* self, sCtx_340DC0* ctx)
 {
     OverlapInstancesCallback_operatorCall((sCtx_3309D8*)ctx, self);
@@ -5254,6 +5342,15 @@ INCLUDE_ASM("intersect/worldsphtree", func_00340FA0);
 extern "C" void func_00335960(void* ctx, void* obj);
 extern "C" void func_00335B90(void* ctx, void* obj);
 
+/**
+ * Intersects a world query with the terrain of an octree cell and of every cell below it.
+ *
+ * Calls func_00335960(@p ctx, patch) for each patch on the cell's patch list (+0x24) and func_00335B90(@p ctx,
+ * instance) for each instance on its instance list (+0x20), then calls itself on each non-null child (+0x0..+0x1C).
+ * Used by func_00335D78 and func_0033DBE8 for cells wholly inside the query.
+ *
+ * @param ctx  the terrain callback (query, hit buffer and count) passed to both tests
+ */
 extern "C" void func_00340FA0(void* self, void* ctx)
 {
     void** objNode;
@@ -5279,6 +5376,14 @@ INCLUDE_ASM("intersect/worldsphtree", func_003410C0);
 #ifdef SKIP_ASM
 extern "C" void func_00336D40(void* ctx, void* obj);
 
+/**
+ * Intersects a world query with the static objects of an octree cell and of every cell below it.
+ *
+ * Calls func_00336D40(@p ctx, instance) for each instance on the cell's instance list (+0x20), then itself on each
+ * non-null child (+0x0..+0x1C). Used by func_00336F30 and func_0033DFD8 for cells wholly inside the query box.
+ *
+ * @param ctx  the static-object callback passed to func_00336D40
+ */
 extern "C" void func_003410C0(void* self, void* ctx)
 {
     void** objNode;
@@ -5316,6 +5421,17 @@ struct sTree_3411B8 {
     char* objs;                 // 0x28
 };
 
+/**
+ * Runs the spline query on every typed node of an octree cell and of every cell below it.
+ *
+ * For each node on the typed list (+0x28): rails (type 2) go to cRailModifier_splineIntersect, flex rails (type 3) to
+ * func_00348290, and instances (type 1) whose filter word (node +0x68, then +0x1C) shares a bit with the query mask to
+ * func_00335128, all with the query box, position, mask, hit-count and distance pointers and intInfo. It then calls
+ * itself on each non-null child. Used by func_00337A48 and func_0033ED60 for cells wholly inside the query box.
+ *
+ * @param tree  the octree cell (On Tour nash::Cell)
+ * @param q  the spline query (On Tour SplineCallback)
+ */
 extern "C" void func_003411B8(sTree_3411B8* tree, sQuery_3411B8* q)
 {
     for (char* o = tree->objs; o != 0; o = *(char**)o) {
@@ -5344,6 +5460,11 @@ extern "C" void func_003411B8(sTree_3411B8* tree, sQuery_3411B8* q)
 //99.38%
 INCLUDE_ASM("intersect/worldsphtree", func_00341368__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the unit's static initialiser: func_003400D8(1, 0xFFFF).
+ *
+ * @return func_003400D8's result register (that function returns nothing)
+ */
 void* func_00341368(void* self)
 {
     return func_003400D8(1, 0xffff);
@@ -5448,6 +5569,26 @@ static inline sVec4_341388 vu0Xform_341388(const sVec4_341388& v, const char* m)
     return r;
 }
 
+/**
+ * Constructs a boost node from its script data (the record counterpart of the replay constructor
+ * cBoostNode_cBoostNode).
+ *
+ * Runs the base constructor func_0034FB00(self, @p a1, @p a2, @p a3) and stores cBoostNode_vtbl at +0xC. From @p def
+ * (On Tour tMakeBoostData) it takes the type (+0x4, read as a short) into +0x40; the duration BoostTime (+0x8) times
+ * the frame rate (cAppMan_TheAppMan +0x10) into +0x38 as a frame count; the direction BoostX/Y/Z (+0x14) normalised
+ * into +0x20, or when it is zero the Y axis (t4vect_YAxis) for type 2 and the zero vector otherwise; MaxSpeed (+0x10)
+ * times 27.7778 (km/h to cm/s) into +0x30; and Drag (+0xC) into +0x34. The timer (+0x3C) starts at the duration for a
+ * non-zero type, else 0. For type 2 the direction is negated and transformed by the instance's matrix (instance record
+ * at +0x18, matrix at its +0x10) and the speed is negated.
+ *
+ * func_002FBEC8 (a world-script maker) allocates it as 0x50 bytes tagged "Boost" and passes bucket 1, type 8.
+ *
+ * @param a1  the bucket list the node joins
+ * @param a2  the object-node type (8)
+ * @param a3  the instance record
+ * @param def  the script's boost data (On Tour tMakeBoostData)
+ * @return @p self
+ */
 extern "C" sObj_341388* func_00341388(sObj_341388* self, void* a1, int a2, void* a3, sDef_341388* def)
 {
     func_0034FB00(self, a1, a2, a3);
@@ -5899,6 +6040,28 @@ static inline void setRateMax_1AA0(sFloat_1AA0* dst, float v, char* info)
     dst->v = r;
 }
 
+/**
+ * Constructs an animated object node from its script data (the record counterpart of the replay constructor
+ * cAnimObjectNode_cAnimObjectNode).
+ *
+ * Builds the animation-node base at +0x1C with func_0034D9B0(base, @p a1, @p a2, @p obj, ForceVisible != 0) and stores
+ * the vtable D_00490B10 at +0x3C. From @p def (On Tour tMakeAnimObjectData, times in 30 fps frames converted to
+ * seconds) it sets the play type (+0x0) from +0x4; min (+0x14) from FromTime (+0xC), or the animation's start time
+ * (cAnimFrame_getStartTime on the animation at +0x64) when negative; max (+0x18) from ToTime (+0x10), or the animation
+ * length (the instance's info at +0x80, its +0x14) when negative; and the frame (+0x1C) from StartTime (+0x1C; negative
+ * means min), clamped to [min, max] or replaced by AIrandf(min, max) when RandomStart (+0x20) is set.
+ *
+ * The per-frame speed (+0x10) is Speed (+0x14) / 30 / the frame rate (cAppMan_TheAppMan +0x10), randomised by
+ * func_00317890 with SpeedRange (+0x18) when that is non-zero, and negated for Dir (+0x8) 1. It then copies the frame
+ * to +0x20, sets active (+0x4) and the dirty flag (bit 0 of +0x42), and clears +0xC (the start delay) and atLimit
+ * (+0x8). The struct calls the play type at +0x0 "id"; func_00341D48 switches on it.
+ *
+ * @param a1  the bucket list the node joins
+ * @param a2  the object-node type
+ * @param obj  the instance record
+ * @param def  the script's animation data (On Tour tMakeAnimObjectData)
+ * @return @p self
+ */
 // Animated float constructor: range and start value (frames -> seconds), optional random start and speed.
 extern "C" void* func_00341AA0(sSphFloat_1AA0* self, int a1, int a2, char* obj, sSphFloatDef_1AA0* def)
 {
@@ -5985,6 +6148,14 @@ extern "C" void func_0034DBA8(void* p, int flags);
 void operator_delete(int* ptr);
 extern void* D_00490B10[];
 
+/**
+ * Destroys an animated object node: restores its vtable and runs the animation-node destructor.
+ *
+ * Stores D_00490B10 at +0x3C, calls func_0034DBA8 on the base at +0x1C (with flags 0) and frees the object with
+ * operator_delete when bit 0 of @p flags is set. Slot 1 of D_00490B10.
+ *
+ * @param flags  destructor flags; bit 0 frees the memory
+ */
 extern "C" void func_00341CF0(void* self, int flags)
 {
     *(void***)((char*)self + 0x3C) = D_00490B10;
@@ -6012,6 +6183,19 @@ struct sVEntry_00341D48 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Advances an animated object node by one step and expires it once a play-once animation has reached its end.
+ *
+ * Resets +0x24 and +0x28 (the stepped-from and stepped-to frames) to 1e10. When atLimit (+0x8) is already set it
+ * returns 1 at once. While active (+0x4) and the start delay (+0xC) is not negative, it counts the delay down, or once
+ * it is 0 records the frame (+0x1C) in +0x24 and steps it by the play type (+0x0): 2 func_00341EC0 (bounce), 1
+ * func_00341E48 (wrap), otherwise func_00341F38 (clamp), returning 0 if func_0034EBA0 on the animation part fails.
+ *
+ * It then sets the dirty flag (bit 0 of +0x42) and copies the frame to +0x20. When the step set atLimit it calls the
+ * node's slot 34 (cAnimObjectNode_expire) with 1 and returns 0; otherwise it returns 1. Slot 15 of D_00490B10.
+ *
+ * @return 0 after a failed frame update or once the node expired, else 1
+ */
 extern "C" int func_00341D48(void* self)
 {
     *(float*)((char*)self + 0x24) = 10000000000.0f;
@@ -6065,6 +6249,14 @@ struct sWrapFloat_1E48 {
     float last;     // 0x28
 };
 
+/**
+ * Steps an animated value by its speed, wrapping it around the range (the cycling play type).
+ *
+ * Adds speed (+0x10) to the value (+0x1C) and stores the unwrapped result in +0x28; past max (+0x18) it continues from
+ * min (+0x14) by the overshoot, below min (for a negative speed) from max.
+ *
+ * @param wrapValue  the animated object node
+ */
 extern "C" void func_00341E48(sWrapFloat_1E48* wrapValue)
 {
     if (wrapValue->speed >= 0.0f) {
@@ -6096,6 +6288,14 @@ struct sBounceFloat_1EC0 {
     float last;     // 0x28
 };
 
+/**
+ * Steps an animated value by its speed, bouncing it back at the ends of the range (the oscillating play type).
+ *
+ * Adds speed (+0x10) to the value (+0x1C) and stores the result in +0x28; past max (+0x18) or below min (+0x14) it
+ * reverses the speed and reflects the value back into the range by the overshoot.
+ *
+ * @param bounceValue  the animated object node
+ */
 extern "C" void func_00341EC0(sBounceFloat_1EC0* bounceValue)
 {
     if (bounceValue->speed >= 0.0f) {
@@ -6131,6 +6331,14 @@ struct sClampFloat_1F38 {
     float last;     // 0x28
 };
 
+/**
+ * Steps an animated value by its speed, clamping it at the end of the range (the play-once type).
+ *
+ * If the value (+0x1C) already sits at the end it is moving to (max +0x18 for a non-negative speed, else min +0x14) it
+ * sets atLimit (+0x8). It then adds speed (+0x10), stores the result in +0x28 and clamps the value to that end.
+ *
+ * @param clampValue  the animated object node
+ */
 extern "C" void func_00341F38(sClampFloat_1F38* clampValue)
 {
     if (clampValue->speed >= 0.0f) {
@@ -6182,6 +6390,19 @@ INCLUDE_ASM("intersect/worldsphtree", func_00341FE8);
 extern char* cAppMan_TheAppMan;
 extern "C" void cMoveNode_signal(void* p);
 
+/**
+ * Handles a signal sent to an animated object node: delay, frame, speed, range and play-type changes.
+ *
+ * Values are in 30 fps frames unless noted. Signal 100 sets the start delay (+0xC) to @p msgValue seconds times the
+ * frame rate; 101 sets the frame (+0x1C) when the new value lies within [min, max]; 102 sets the per-frame speed
+ * (+0x10, divided by the frame rate); 103 sets max (+0x18) and 104 min (+0x14), each limited to [0, the animation
+ * length] (the instance at +0x48, its info at +0x80, +0x14) and pulling the frame inside; 105 sets the play type (+0x0)
+ * to 0 (play once). Any other signal goes to cMoveNode_signal on the move-node part (+0x30). Slot 36 of D_00490B10,
+ * where the teeter vtable has cMoveNode_signal.
+ *
+ * @param msg  the signal number
+ * @param msgValue  its argument
+ */
 extern "C" void func_00341FE8(sClampFloat_1F38* self, int msg, float msgValue)
 {
     if (msg == 100) {
@@ -6238,6 +6459,14 @@ struct sVEntry_func_00342150 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Writes an animated object node to a replay frame.
+ *
+ * Writes the animation-node part (+0x1C) with func_0034E3D8, then the 0x1C-byte object state at +0x0 (play type, flags,
+ * delay, speed, range, frame) with the frame's write virtual (slot 1). Slot 12 of D_00490B10.
+ *
+ * @param stream  the replay frame to write to (On Tour cBxReplayFrame* data)
+ */
 extern "C" void func_00342150(void* self, void* stream)
 {
     func_0034E3D8((char*)self + 0x1C, stream);
@@ -6301,6 +6530,25 @@ static inline void setRateMax_003421A0(sFloat_003421A0* dst, float v, char* info
     dst->v = r;
 }
 
+/**
+ * Constructs an animated teeter node from its script data (the record counterpart of the replay constructor
+ * cAnimTeeterNode_cAnimTeeterNode).
+ *
+ * Builds the animation-node base at +0x30 with func_0034D9B0(base, @p a1, 4, @p obj, 0) and stores the vtable
+ * D_004908F8 at +0x50. From @p def (On Tour tMakeAnimTeeterData) it sets min (+0x10) from FromTime (+0x20, a 30 fps
+ * frame; negative means the animation's start time) and max (+0x14) from ToTime (+0x24; negative means the animation
+ * length, the instance's info +0x80, +0x14); BounceFactor (+0x8) to +0xC; TorqueScale (+0x4) times 1e-6 to +0x8;
+ * MaxSpeed (+0xC) / 30 / the frame rate to +0x18; AnimSign (+0x1C) to +0x2C; PivotTime (+0x14) / 30 to +0x24; Damp
+ * (+0x18) to +0x1C; and Spring (+0x10) to +0x20. It sets the dirty flag (bit 0 of +0x56) and clears the torque (+0x0),
+ * step (+0x4) and velocity (+0x28).
+ *
+ * func_002FB498 (a world-script maker) allocates it as 0x80 bytes tagged "AnimTeeter" and passes bucket 1.
+ *
+ * @param a1  the bucket list the node joins
+ * @param obj  the instance record
+ * @param def  the script's teeter data (On Tour tMakeAnimTeeterData)
+ * @return @p self
+ */
 extern "C" void* func_003421A0(sSphCtl_003421A0* self, int a1, char* obj, char* def)
 {
     func_0034D9B0((char*)self + 0x30, a1, 4, obj, 0);
@@ -6395,6 +6643,21 @@ static inline float absf_00342358(float x)
     return r;
 }
 
+/**
+ * Advances a teeter by one step: a damped spring that turns the accumulated torque into animation-frame motion.
+ *
+ * Saves the frame (+0x30) in +0x38 and, with dt = cObjectInterface_getUpdateTime(), computes the acceleration -Spring *
+ * (frame - PivotTime) + |TorqueScale| * torque - Damp * velocity (+0x20, +0x24, +0x8, +0x0, +0x1C, +0x28). The step
+ * (+0x4) is velocity * dt limited to +-MaxSpeed (+0x18); the frame advances by it (also copied to +0x3C) and the
+ * velocity by acceleration * dt. Past min (+0x10) or max (+0x14) the frame is clamped and the velocity multiplied by
+ * BounceFactor (+0xC), or step and velocity zeroed when |velocity| <= 0.1.
+ *
+ * It then clears the torque, copies the frame to +0x34 and runs func_0034EBA0 on the animation part; on success it sets
+ * the dirty flag (bit 0 of +0x56). Slot 15 of D_004908F8.
+ *
+ * @param spring  the teeter node
+ * @return func_0034EBA0's result: 1 after a successful frame update, else 0
+ */
 extern "C" int func_00342358(sSphCtl_00342358* spring)
 {
     spring->prev = spring->pos;
@@ -6452,6 +6715,14 @@ extern "C" int func_00342358(sSphCtl_00342358* spring)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_003424D0);
 #ifdef SKIP_ASM
+/**
+ * Returns the teeter's animation speed: its current step, or 0 while it rests against an end of its range.
+ *
+ * Returns 0 when the frame (+0x30) is at or below min (+0x10) with a negative step (+0x4), or at or above max (+0x14)
+ * with a positive one. Last slot of D_004908F8, where D_00490B10 has func_00361158.
+ *
+ * @return the step per update, or 0
+ */
 extern "C" float func_003424D0(void* self)
 {
     if (*(float*)((char*)self + 0x30) <= *(float*)((char*)self + 0x10) && *(float*)((char*)self + 0x4) < 0.0f) {
@@ -6603,6 +6874,21 @@ static inline float vu0Dot_342538(const sVec4_342538& a, const sVec4_342538& b)
     return r;
 }
 
+/**
+ * Adds the torque a force applied at a hit point exerts about the teeter's pivot axis.
+ *
+ * Only for a hit on a mesh (@p o +0x5C >= 0) whose entry in the instance's mesh table (instance info +0x80, table +0x8,
+ * 16-byte entries, word +0x8) is non-zero, and only when |@p p| > 100. It fetches the mesh's animation matrix (slot 29
+ * of the move-node part at +0x44, cAnimNode_getAnimMat), takes the lever arm from the matrix's translation (+0x30) to
+ * the hit position (@p o +0x0), negates it when TorqueScale (+0x8) is negative and again when the mesh's bit in
+ * AnimSign (+0x2C) is set, and adds dot(matrix * Y axis, cross(arm, force)) to the torque (+0x0).
+ *
+ * cAnimTeeterNode's update (func_00342358) consumes the torque. Slot of D_004908F8 where D_00490B10 has
+ * cMoveNode_applyForce.
+ *
+ * @param o  the hit (On Tour tIntersectInfo: position at +0x0, mesh index at +0x5C)
+ * @param p  the force vector
+ */
 extern "C" void func_00342538(sSelf_342538* self, sObj_342538* o, sVec4_342538* p)
 {
     int idx = o->idx;
@@ -6652,6 +6938,14 @@ struct sVEntry_func_00342718 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Writes an animated teeter node to a replay frame.
+ *
+ * Writes the animation-node part (+0x30) with func_0034E3D8, then the 0x30-byte teeter state at +0x0 with the frame's
+ * write virtual (slot 1). Slot 12 of D_004908F8.
+ *
+ * @param stream  the replay frame to write to (On Tour cBxReplayFrame* data)
+ */
 extern "C" void func_00342718(void* self, void* stream)
 {
     func_0034E3D8((char*)self + 0x30, stream);
@@ -6678,6 +6972,20 @@ struct sSphDef_342768 {
 extern void* cBoostModifier_vtbl[];
 extern char* cAppMan_TheAppMan;
 
+/**
+ * Constructs a boost modifier from its script data and instance.
+ *
+ * Sets Active, stores cBoostModifier_vtbl and Instance (@p a2), and from @p def (On Tour tAddBoostData) takes Type
+ * (+0x4, read as a short), BoostTime (+0x8 seconds times the frame rate at cAppMan_TheAppMan +0x10, in frames), Boost
+ * (BoostX/Y/Z at +0x14, w = 0, not normalised), MaxSpeed (+0x10 times 100) and Drag (+0xC). Time starts at BoostTime
+ * for type 1, else 0. Unlike the boost node (func_00341388), which converts MaxSpeed from km/h, it scales by 100.
+ *
+ * Called by cMoveNode_addBoost.
+ *
+ * @param def  the script's boost data (On Tour tAddBoostData)
+ * @param a2  the instance record the modifier belongs to
+ * @return @p self
+ */
 extern "C" void* func_00342768(cBoostModifier* self, sSphDef_342768* def, int a2)
 {
     self->Active = 1;
@@ -6714,6 +7022,15 @@ typedef int (*ReadIntFn00342808)(void*);
 
 extern void* cBoostModifier_vtbl[];
 
+/**
+ * Constructs a boost modifier from a replay frame.
+ *
+ * Sets Active, stores cBoostModifier_vtbl, reads the 0x30-byte boost state (Boost .. Type, +0x10) with the frame's read
+ * virtual (slot 2) and Instance with its int-read virtual (slot 3). Called by tModifierBlock_readFromReplayFrame.
+ *
+ * @param stream  the replay frame to read from (On Tour cBxReplayFrame* data)
+ * @return @p self
+ */
 extern "C" void* func_00342808(cBoostModifier* self, sVEntry00342808** stream)
 {
     self->Active = 1;
@@ -7004,6 +7321,24 @@ struct sSelf_342C08 {
     int t30;
 };
 
+/**
+ * Constructs a debounce node that takes over from an instance's old node, and sets the instance's visibility.
+ *
+ * Runs the base constructor func_00355280(self, @p a1, 0, @p a2), stores cDebounceNode_vtbl at +0xC, sets the debounce
+ * time (+0x2C) to Time (+0x4) seconds times the frame rate (cAppMan_TheAppMan +0x10) and +0x30 to Type (+0x8), and
+ * hands over from @p a4 with cMoveNode_transferFromOld. Visible (+0xC) then edits the instance's flags (instance record
+ * at +0x18, flags at +0x8): 0 clears the low four bits; 1 sets bit 0, clears bit 1 and sets bit 2; otherwise bit 1
+ * becomes bit 2 only when bits 0 and 1 are both set.
+ *
+ * Callers allocate 52 bytes and pass bucket 1: MakeDebounceFunc (tag "Debounce", no old node) and checkActiveNode (tag
+ * "cDebounce", passing the node being replaced).
+ *
+ * @param a1  the bucket list the node joins
+ * @param a2  the instance record
+ * @param def  the script's debounce data (On Tour tMakeDebounceData)
+ * @param a4  the node it replaces (On Tour pOldNode)
+ * @return @p self
+ */
 extern "C" void* func_00342C08(sSelf_342C08* self, void* a1, void* a2, sDef_342C08* def, void* a4)
 {
     func_00355280(self, a1, 0, a2);

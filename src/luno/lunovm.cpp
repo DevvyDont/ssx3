@@ -788,6 +788,16 @@ struct sVEntry00224C00 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Writes a Luno function value (type 5) to a replay frame: its code-chunk pointer relative to @p base, then its index.
+ *
+ * Writes the first word (On Tour cLunoFunc Chunk) minus @p base and the second word (FuncNum), 4 bytes each, through
+ * the frame's write virtual (slot 1). Called by luno_cLunoVar_writeToReplayFrame for type 5; func_00224C78 is the
+ * inverse.
+ *
+ * @param stream  the replay frame to write to
+ * @param base  the address the chunk pointer is stored relative to
+ */
 extern "C" void func_00224C00(void* self, sVEntry00224C00** stream, int base)
 {
     int off;
@@ -808,6 +818,16 @@ struct sVEntry00224C78 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Reads a Luno function value (type 5) back from a replay frame, turning the stored offset into a pointer again.
+ *
+ * Reads two 4-byte words through the frame's read virtual (slot 2): the first plus @p base becomes the code-chunk
+ * pointer (+0x0), the second the function index (+0x4). Called by luno_cLunoVar_readFromReplayFrame; inverse of
+ * func_00224C00.
+ *
+ * @param stream  the replay frame to read from
+ * @param base  the address the chunk pointer was stored relative to
+ */
 extern "C" void func_00224C78(void* self, sVEntry00224C78** stream, int base)
 {
     int buf[2];
@@ -821,6 +841,16 @@ extern "C" void func_00224C78(void* self, sVEntry00224C78** stream, int base)
 //100%
 INCLUDE_ASM("luno/lunovm", func_00224D00);
 #ifdef SKIP_ASM
+/**
+ * Destroys a Luno table's shared data: every entry of its entry array, the array, and optionally the object.
+ *
+ * When the entry array (+0x10, On Tour Entries) exists it runs each entry's virtual destructor (slot 1, flags 0) from
+ * the last to the first (the count sits in the array's 0x10-byte allocation header) and frees the block with
+ * cMemMan_free. It frees the object itself with operator_delete when bit 0 of @p flags is set. func_00224F30 calls it
+ * with 3 once the last reference goes.
+ *
+ * @param flags  destructor flags; bit 0 frees the object
+ */
 extern "C" void func_00224D00(cLunoTable* self, int flags)
 {
     cLunoTableEntry* nodes = self->nodes;
@@ -863,6 +893,15 @@ extern "C" cLunoTableRef* luno_cLunoTable_cLunoTable(cLunoTableRef* self)
 //100%
 INCLUDE_ASM("luno/lunovm", func_00224DD0);
 #ifdef SKIP_ASM
+/**
+ * Copies a Luno table handle: shares the source's table data and adds a reference to it.
+ *
+ * Stores *@p src in *@p dest and increments the data's reference count (+0x8).
+ *
+ * @param dest  the new handle
+ * @param src  the handle to copy
+ * @return @p dest
+ */
 extern "C" void **func_00224DD0(void **dest, void **src) {
     void *temp_6;
 
@@ -952,6 +991,14 @@ INCLUDE_ASM("luno/lunovm", func_00224F30);
 #ifdef SKIP_ASM
 extern "C" void func_00224D00(cLunoTable* table, int flags);
 
+/**
+ * Destroys the table data a Luno table handle points at and clears the handle.
+ *
+ * Runs func_00224D00 on the data with flags 3 (destroy and free) when there is one, then sets the handle to null.
+ * func_00225068 and luno_cLunoTable__cLunoTable call it when the reference count drops to 0.
+ *
+ * @param ref  the table handle
+ */
 extern "C" void func_00224F30(cLunoTableRef* ref)
 {
     cLunoTable* ownedTable = ref->table;
@@ -987,6 +1034,16 @@ struct cLunoNode_224F68 {
     ~cLunoNode_224F68() {}
 };
 
+/**
+ * Empties a Luno table: destroys every entry of its array and allocates a fresh array of empty entries.
+ *
+ * The old entries (0x20 bytes: key, value, chain link +0x18, vtable D_00479890 at +0x1C) are destroyed through their
+ * virtual destructor (slot 1) from the last to the first and the block (count in its 0x10-byte header) is freed. The
+ * new array has modulus (+0xC) + 1 nil entries, allocated with operator_new__FUi tagged "TableData", flags 0xA0000000.
+ * Called by cWScriptMan_readFromReplayFrame.
+ *
+ * @param ref  the table handle
+ */
 extern "C" void func_00224F68(cLunoTableRef* ref)
 {
     if (ref->table->nodes != 0) {
@@ -1005,6 +1062,17 @@ extern "C" void func_00224F68(cLunoTableRef* ref)
 //100%
 INCLUDE_ASM("luno/lunovm", func_00225068);
 #ifdef SKIP_ASM
+/**
+ * Assigns one Luno table handle to another: shares the other's table data, releasing the old data on its last
+ * reference.
+ *
+ * Does nothing when both already share the data. Otherwise it decrements the old data's reference count (+0x8) and
+ * destroys it with func_00224F30 at 0, then takes @p other's data and increments its count. Used by
+ * luno_cLunoTable_set, luno_cLunoVM_execute and luno_cLunoVar_readFromReplayFrame.
+ *
+ * @param other  the handle to copy from
+ * @return @p self
+ */
 extern "C" cLunoTableRef* func_00225068(cLunoTableRef* self, cLunoTableRef* other)
 {
     if (self->table != other->table) {
@@ -1102,6 +1170,19 @@ static inline int lunoKeyEquals(cLunoValue* a, cLunoValue* b)
     return 0;
 }
 
+/**
+ * Looks a key value up in a Luno table and returns a reference to its value, or to luno_gLunoNil when absent.
+ *
+ * Hashes the key's first word modulo the modulus (+0xC) into the entry array (+0x10). An empty bucket head (value type
+ * 0) means absent; otherwise it walks the chain (+0x18) comparing keys: equal types compare the first word, a stored
+ * float key matches an int key by value, a stored int key matches a float key truncated, and a stored index key (type
+ * 3) matches an int key with the same word. Quirk: the hash uses the raw word, so an int and a float key of the same
+ * number usually land in different buckets and the cross-type matches rarely apply. Used by cWScriptMan_isFunc,
+ * cWScriptMan_runFunc and luno_cLunoVM_execute.
+ *
+ * @param key  the key value
+ * @return the stored value, or luno_gLunoNil
+ */
 // Table lookup: returns the value stored under key, or the nil value.
 extern "C" cLunoValue* func_00225248(cLunoTableRef* self, cLunoValue* key)
 {
@@ -1256,6 +1337,19 @@ INCLUDE_ASM("luno/lunovm", func_002257E0);
 #ifdef SKIP_ASM
 extern "C" void luno_cLunoVar_writeToReplayFrame(cLunoValue* self, sVEntry00224C00** stream, int base);
 
+/**
+ * Writes a Luno table to a replay frame: the data's first 8 bytes, the number of used entries, then each one's key and
+ * value.
+ *
+ * Counts the entries whose value type is non-zero over all modulus + 1 array slots and their chains (+0x18), writes the
+ * count (4 bytes, write virtual slot 1), then writes key and value of each used entry with
+ * luno_cLunoVar_writeToReplayFrame (pointers relative to @p base). luno_cLunoTable_readFromReplayFrame reads it back.
+ * Called by luno_cLunoVar_writeToReplayFrame for type 4, func_00308038 and func_0030BB10.
+ *
+ * @param vself  the table handle (this)
+ * @param stream  the replay frame to write to
+ * @param base  the address pointers are stored relative to
+ */
 extern "C" void func_002257E0(void* vself, sVEntry00224C00** stream, int base)
 {
     cLunoTableRef* self = (cLunoTableRef*)vself;
@@ -1398,8 +1492,8 @@ extern "C" void func_002257E0(void* self, sVEntry00224C00** stream, int base);
 /**
  * Saves a Luno value into a replay frame.
  *
- * Writes the 4-byte type through the stream's slot 1, then the payload: type 5 (string) with func_00224C00, type 4
- * (table) with func_002257E0, anything else as one 4-byte word. luno_cLunoVar_readFromReplayFrame() is the inverse.
+ * Writes the 4-byte type through the stream's slot 1, then the payload: type 5 (eLunoVar_Func, a function value)
+ * with func_00224C00, type 4 (table) with func_002257E0, anything else as one 4-byte word. luno_cLunoVar_readFromReplayFrame() is the inverse.
  *
  * @param stream  the replay frame
  * @param base  the base address string pointers are stored relative to
@@ -1445,7 +1539,7 @@ static inline int lunoReadInt_225CA0(sVEntry00224C00** stream)
 /**
  * Restores a Luno value from a replay frame.
  *
- * Reads the type word. Type 5 reads a string pair (func_00224C78); type 4 reads a whole table into a temporary
+ * Reads the type word. Type 5 (eLunoVar_Func) reads the function value (func_00224C78); type 4 reads a whole table into a temporary
  * (luno_cLunoTable_cLunoTable_sz + luno_cLunoTable_readFromReplayFrame) and copies it in (func_00225068); otherwise it
  * reads one 4-byte word. A table this value held before is released first (luno_cLunoTable__cLunoTable with flags 2).
  *
@@ -1501,6 +1595,17 @@ extern "C" void luno_cLunoVar__cLunoVar(cLunoValue* self, int flags);
 
 // PORT: the unit declares func_00225DE8 as void*(int, int); it returns nothing.
 extern "C" void func_00225DE8_impl(int initialize, int priority) __asm__("func_00225DE8");
+/**
+ * Constructs or destroys the unit's static objects: 56 colours and the Luno nil value luno_gLunoNil.
+ *
+ * Only for @p priority 0xFFFF. With @p initialize set it builds the colour table D_004C8D18..D_004C9088 (four floats
+ * each, the table other units build too) and sets luno_gLunoNil to nil (type 0, word 0); otherwise it destroys
+ * luno_gLunoNil with luno_cLunoVar__cLunoVar(.., 2). func_002267F0 and func_00226810 call it as the unit's constructor
+ * and destructor (g++ __static_initialization_and_destruction_0).
+ *
+ * @param initialize  non-zero to construct, 0 to destroy
+ * @param priority  the init priority; only 0xFFFF does anything
+ */
 extern "C" void func_00225DE8_impl(int initialize, int priority)
 {
     if (priority == 0xFFFF) {
@@ -1573,6 +1678,12 @@ extern "C" void func_00225DE8_impl(int initialize, int priority)
 //100%
 INCLUDE_ASM("luno/lunovm", func_00226600__FPvii);
 #ifdef SKIP_ASM
+/**
+ * Sets a Luno function value's code chunk and function index.
+ *
+ * @param firstWord  the code chunk (On Tour data, stored as Chunk)
+ * @param secondWord  the function index (FuncNum)
+ */
 void func_00226600(void* self, int firstWord, int secondWord)
 {
     *(int*)self = firstWord;
@@ -1583,6 +1694,11 @@ void func_00226600(void* self, int firstWord, int secondWord)
 //100%
 INCLUDE_ASM("luno/lunovm", func_00226610__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns a Luno value's data as an int reference: the value's own address, since the data is its first word.
+ *
+ * @return @p self
+ */
 void* func_00226610(void* self)
 {
     return self;
@@ -1592,6 +1708,11 @@ void* func_00226610(void* self)
 //100%
 INCLUDE_ASM("luno/lunovm", func_00226618__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns a Luno value's data as a float reference: the value's own address.
+ *
+ * @return @p self
+ */
 void* func_00226618(void* self)
 {
     return self;
@@ -1601,6 +1722,11 @@ void* func_00226618(void* self)
 //100%
 INCLUDE_ASM("luno/lunovm", func_00226620__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns a Luno value's data as an index reference: the value's own address.
+ *
+ * @return @p self
+ */
 void* func_00226620(void* self)
 {
     return self;
@@ -1612,6 +1738,17 @@ extern cLunoValue luno_gLunoNil;
 //100%
 INCLUDE_ASM("luno/lunovm", func_00226628);
 #ifdef SKIP_ASM
+/**
+ * Adds two Luno values (cLunoVar operator+), returning the sum by value in @p self.
+ *
+ * Same types: floats and ints add, index values (type 3) add as ints; any other same-type pair gives nil. A float plus
+ * an int gives a float; an int plus a float gives an int (the float truncated). Mixed types otherwise give nil
+ * (luno_gLunoNil). Used by luno_cLunoVM_execute.
+ *
+ * @param lhs  the left operand (this)
+ * @param rhs  the right operand
+ * @return @p self
+ */
 // Value add (for-loop step): same-type int/float/symbol add, float+int
 // gives float, int+float gives int; anything else gives nil.
 extern "C" cLunoValue* func_00226628(cLunoValue* self, const cLunoValue& lhs, const cLunoValue& rhs)
@@ -1657,6 +1794,15 @@ struct sVEntry00226768 {
 };
 extern char D_00479890[];
 
+/**
+ * Destroys a Luno table entry: its chained successor, its value and its key.
+ *
+ * Restores the entry vtable D_00479890 (+0x1C), destroys the next entry in the chain (+0x18) through its virtual
+ * destructor with flags 3 (so a whole chain is freed recursively), runs luno_cLunoVar__cLunoVar on the value (+0xC) and
+ * the key (+0x0) with flags 2, and frees the entry when bit 0 of @p flags is set. Slot 1 of D_00479890.
+ *
+ * @param flags  destructor flags; bit 0 frees the entry
+ */
 extern "C" void func_00226768(void* self, int flags)
 {
     *(void**)((char*)self + 0x1C) = D_00479890;
@@ -1678,6 +1824,11 @@ extern "C" void* func_00225DE8(int, int);
 //99.38%
 INCLUDE_ASM("luno/lunovm", func_002267F0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the unit's static constructor: func_00225DE8(1, 0xFFFF).
+ *
+ * @return func_00225DE8's result register (that function returns nothing)
+ */
 void* func_002267F0(void* self)
 {
     return func_00225DE8(1, 0xffff);
@@ -1689,6 +1840,11 @@ extern "C" void* func_00225DE8(int, int);
 //99.38%
 INCLUDE_ASM("luno/lunovm", func_00226810__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the unit's static destructor: func_00225DE8(0, 0xFFFF), which destroys luno_gLunoNil.
+ *
+ * @return func_00225DE8's result register (that function returns nothing)
+ */
 void* func_00226810(void* self)
 {
     return func_00225DE8(0, 0xffff);

@@ -6054,7 +6054,10 @@ extern "C" void func_001635C0(void) {
 INCLUDE_ASM("camera/camera", func_001635C8);
 #ifdef SKIP_ASM
 /**
- * Returns 0.0f.
+ * Returns 0.0f; nothing in the code or data refers to it.
+ *
+ * One of a run of unreferenced stubs (func_001635C0 .. func_001635E0) before the camera's air-spline getters
+ * func_001635E8 and func_001635F0.
  *
  * @return 0.0f
  */
@@ -6066,7 +6069,9 @@ extern "C" float func_001635C8(void) {
 INCLUDE_ASM("camera/camera", func_001635D8);
 #ifdef SKIP_ASM
 /**
- * Returns 0.
+ * Returns 0; nothing in the code or data refers to it.
+ *
+ * One of the unreferenced stubs func_001635C0 .. func_001635E0.
  *
  * @return 0
  */
@@ -6078,7 +6083,9 @@ extern "C" int func_001635D8(void) {
 INCLUDE_ASM("camera/camera", func_001635E0);
 #ifdef SKIP_ASM
 /**
- * Returns 0.
+ * Returns 0; nothing in the code or data refers to it.
+ *
+ * The last of the unreferenced stubs func_001635C0 .. func_001635E0.
  *
  * @return 0
  */
@@ -7035,7 +7042,9 @@ extern "C" void cLookAtChaseAlgorithm_updateRailCam_def(char* self, char* src, f
 INCLUDE_ASM("camera/camera", func_00164868);
 #ifdef SKIP_ASM
 /**
- * Returns 0.
+ * Returns 0; nothing in the code or data refers to it.
+ *
+ * An unreferenced stub between cLookAtChaseAlgorithm_updateRailCam and func_00164870.
  *
  * @return 0
  */

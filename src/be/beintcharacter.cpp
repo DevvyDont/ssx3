@@ -135,7 +135,9 @@ extern "C" float cBECharacterInterface_getScale(void* self, int riderIndex)
 INCLUDE_ASM("be/beintcharacter", func_0014F100);
 #ifdef SKIP_ASM
 /**
- * Does nothing.
+ * Does nothing; nothing in the code or data refers to it.
+ *
+ * An empty function between cBECharacterInterface_getScale and cBECharacterInterface_getBloodType.
  */
 extern "C" void func_0014F100(void) {
 

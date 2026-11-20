@@ -107,6 +107,16 @@ struct sWSPool {
     sWSNode* base;
 };
 
+/**
+ * Takes an instance record off the instance manager's free list (+0x8) and stamps it.
+ *
+ * The record's type byte (+0x78) becomes the manager's section ID (low byte of +0x0) and its 24-bit index the record's
+ * position in the record array (+0xC, 0xB0 bytes each); flag 0x2000 is set in its flags word (+0x8).
+ *
+ * Likely bug: an empty free list is not handled; the null record is written to.
+ *
+ * @return the record
+ */
 extern "C" sWSNode* func_00351170(sWSPool* self)
 {
     sWSNode* node = self->free;
@@ -155,6 +165,13 @@ extern "C" sWSNode* cInstanceMan_allocInstance(sWSPool* self, unsigned int id)
 //100%
 INCLUDE_ASM("wscript/wscriptcompile", func_00351260__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Puts an instance record back on the instance manager's free list (+0x8): the record's first word links to the old
+ * head.
+ *
+ * @param node  the instance record
+ * @return the previous list head
+ */
 int func_00351260(void* self, void* node)
 {
     int oldHead = *(int*)((char*)self + 0x8);

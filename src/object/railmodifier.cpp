@@ -10747,6 +10747,23 @@ INCLUDE_ASM("object/railmodifier", func_003669F0);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_003663D8(void* selfp, int idx);
 
+/**
+ * Frees the cheapest run of neighbouring blocks (in address order) that together hold at least @p size bytes.
+ *
+ * Despite the unit, this is part of the GS memory block heap that cTextureMan keeps at +0x1F60 and +0x4350. It slides a
+ * window along the address-ordered block list (headed at headsB[17].next): a used block that is locked (flag bit 1) or
+ * owned by @p skipA or @p skipB breaks the window. A used block whose owner's entry in the 2000-pair table D_0053AB80
+ * has a > @p level adds size * b to the window's cost; free blocks cost nothing. The search stops early at cost 0.
+ * Every used block in the winning window is then freed with func_003663D8 (which also merges free neighbours).
+ * func_00366CE0 calls it when freeing a single block (func_003668F8) was not enough.
+ *
+ * Likely bug: when no window qualifies, bestIdx stays -1 and the freeing loop still reads nodes[-1].
+ *
+ * @param size  the number of bytes the freed run must hold
+ * @param skipA  an owner (texture index) whose blocks must be kept
+ * @param skipB  a second owner whose blocks must be kept
+ * @param level  the threshold compared with each owner's D_0053AB80 a value to decide whether its block costs anything
+ */
 // Frees the cheapest run of neighbouring blocks (in address order) that together hold at least 'size' bytes;
 // locked blocks and blocks of the two given owners break a run, owners above 'level' cost size*weight.
 // The two 'skip kept blocks' loops are test-first (if + do/while): the plain while form compiles to an
@@ -10839,6 +10856,26 @@ extern "C" void func_003662D0(sRailNodeMan* self, int idx, int size);
 extern "C" int func_003668F8(sRailNodeMan* self, int size, int skipA, int skipB, int level);
 extern "C" void func_003669F0(sRailNodeMan* self, int size, int skipA, int skipB, int level);
 
+/**
+ * Allocates a block of at least @p size bytes from a GS memory block heap for @p owner and returns its node index.
+ *
+ * When @p align is set the size is rounded up to a multiple of 0x2000 (one GS page); sizes below 0x100 become 0x100. It
+ * loops until a block is found: func_003667F8 looks for a free block of that size in the size-class lists, and on
+ * success func_003662D0 splits it and marks it used and the node's owner field (+0x8) is set to @p owner. Otherwise it
+ * evicts other textures' blocks, first the cheapest single block (func_003668F8), then, if that freed nothing, the
+ * cheapest run of neighbours (func_003669F0); blocks of @p owner and @p skipB are never evicted. There is no failure
+ * path: if nothing can be evicted the loop never ends.
+ *
+ * The callers in render/ps2graphicsman pass the cTextureMan heap at +0x1F60 (or +0x4350) and read the node's VRAM
+ * address from its flags word (bits 8 up).
+ *
+ * @param size  the number of bytes wanted
+ * @param owner  the texture index that will own the block (stored at node +0x8); its blocks are not evicted
+ * @param skipB  a second texture index whose blocks are not evicted (-1 for none)
+ * @param level  passed to the eviction helpers as their cost threshold
+ * @param align  non-zero to round @p size up to a 0x2000-byte page
+ * @return the index of the allocated node
+ */
 extern "C" int func_00366CE0(sRailNodeMan* self, int size, int owner, int skipB, int level, int align)
 {
     int idx;
@@ -10868,21 +10905,30 @@ INCLUDE_ASM("object/railmodifier", func_00366DD8);
 struct sRailLinkDD8 {
     int flags;      // 0x0
     int f4;
-    int prev;       // 0x8
+    int owner;      // 0x8 (the owning texture index, func_00366CE0 stores it)
     int fC;
     int next;       // 0x10
     int f14;
     int f18;
 };
 
-// Finds the enabled link whose prev field equals `key`; returns its index or -1.
+/**
+ * Returns the index of the first used block owned by @p key in a GS memory block heap, or -1 if there is none.
+ *
+ * Walks the address-ordered block list (head at +0x23C0, nodes at +0x1FF0, link at +0x10) and matches a block whose
+ * flags (bit 0, used) are set and whose owner word (+0x8, where func_00366CE0 stores the owning texture index)
+ * equals @p key.
+ *
+ * @param key  the owner (texture index) to look for
+ * @return the node index of that owner's first block in address order, or -1
+ */
 extern "C" int func_00366DD8(void* self, int key)
 {
     char* heap = (char*)self;
     int i = *(int*)(heap + 0x23C0);
     while (i >= 0) {
         sRailLinkDD8* links = *(sRailLinkDD8**)(heap + 0x1FF0);
-        if ((links[i].flags & 1) && links[i].prev == key) {
+        if ((links[i].flags & 1) && links[i].owner == key) {
             return i;
         }
         i = links[i].next;
@@ -10896,6 +10942,15 @@ INCLUDE_ASM("object/railmodifier", func_00366E30);
 #ifdef SKIP_ASM
 extern "C" void func_003663D8(void* self, int id);
 
+/**
+ * Frees the GS memory blocks of texture @p i: its data block (node index at record +0x30) and its CLUT block (+0x34).
+ *
+ * The texture record is entry @p i of the record table whose pointer the heap keeps at +0x23E8. Each index that is not
+ * negative is passed to func_003663D8, which releases the block and resets the record's address and node fields to -1.
+ * func_00369098 calls it on the cTextureMan heap at +0x1F60 or, for format 9, the one at +0x4350.
+ *
+ * @param i  the texture index (slot in the texture record table)
+ */
 extern "C" void func_00366E30(void* self, int i)
 {
     char* entry = (*(char***)((char*)self + 0x23E8))[i];
@@ -10931,6 +10986,17 @@ struct sRmTex_366E90 {
     unsigned long tex0; // 0x38
 };
 
+/**
+ * Converts the pixel data of every mip level of @p tex in place with func_00390198, then sets its format code to 10.
+ *
+ * Allocates a temporary buffer of the texture's size (+0x10) with tag "TempTex" and the manager's memory type (+0x1F58)
+ * XOR 0x100. For each level 0 to mipCount (+0x24) it takes the width and height from the TEX0 register value at +0x38
+ * (TW, TH), copies w * h * bpp / 8 bytes (at least 0x100) of the level to the buffer and lets func_00390198 write the
+ * re-laid-out level back over the source, then halves both sizes. Frees the buffer and stores 10 in the format code at
+ * +0xC (the caller only converts format 9 textures).
+ *
+ * @param tex  the texture record to convert
+ */
 extern "C" void func_00366E90(char* self, sRmTex_366E90* tex)
 {
     int n = 0;
@@ -10965,6 +11031,11 @@ extern "C" void func_00366E90(char* self, sRmTex_366E90* tex)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00366FE0__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Sets the memory type (+0x1F58) the texture manager uses for its temporary allocations.
+ *
+ * @param val  the new memory type (cPS2GraphicsMan_InitTextures passes its memtype)
+ */
 void func_00366FE0(void* self, int val)
 {
     *(int*)((char*)self + 0x1F58) = val;
@@ -10977,6 +11048,14 @@ INCLUDE_ASM("object/railmodifier", func_00366FE8);
 extern "C" void func_003670E0(void* self);
 extern "C" void func_00365E40(void* list, int a, int size, void* pool);
 
+/**
+ * Initialises the texture manager: clears its tables and sets up both GS memory block heaps.
+ *
+ * Zeroes the memory type (+0x1F58), resets the texture record table and free id list with func_003670E0, marks no
+ * texture bound to either context (+0x1F4C, +0x1F50) and no CLUT loaded (+0x1F54) with -1, then func_00365E40 sets up
+ * the heap at +0x1F60 over 0x400000 bytes (the 4 MB of GS memory) and the one at +0x4350 over 0x1000 bytes, both
+ * pointing at the record table at +0x8. cPS2GraphicsMan_Init calls it right after allocating the manager.
+ */
 extern "C" void func_00366FE8(void* self)
 {
     *(int*)((char*)self + 0x1F58) = 0;
@@ -10996,6 +11075,13 @@ INCLUDE_ASM("object/railmodifier", func_00367078);
 #ifdef SKIP_ASM
 extern "C" void func_00366618(void* list);
 
+/**
+ * Frees every block in both GS memory block heaps of the texture manager and forgets the bound textures.
+ *
+ * Calls func_00366618 (which clears each block's locked bit and frees it) on the heap at +0x4350 and then on the one at
+ * +0x1F60, then sets the bound texture of both contexts (+0x1F4C, +0x1F50) and the loaded CLUT texture (+0x1F54) to -1.
+ * func_0037BD98 calls it before reserving the frame and depth buffers.
+ */
 extern "C" void func_00367078(void* self)
 {
     func_00366618((char*)self + 0x4350);
@@ -11013,6 +11099,13 @@ INCLUDE_ASM("object/railmodifier", func_003670E0);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int c, int n);
 
+/**
+ * Resets the texture manager's record table and its free list of non-bound texture ids.
+ *
+ * Zeroes the two words at +0x0 and +0x4 (the latter counts allocated ids) and the 2000-entry record table at +0x8 (8000
+ * bytes), then points the free list head (+0x1F48) at slot 1500 (+0x1778) and makes each of slots 1500 to 1998 point at
+ * the next one; slot 1999 stays 0 and ends the list. cPSPGraphicsMan_NewNonBindTexID pops ids from this list.
+ */
 extern "C" void func_003670E0(void* self)
 {
     int i;

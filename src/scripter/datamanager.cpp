@@ -225,6 +225,12 @@ extern "C" void cDataManager_DetachAll(sDmTable275B08* self)
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00275B78);
 #ifdef SKIP_ASM
+/**
+ * Returns the data of an attached-data handle: its pData word (+0x8 of the instance record).
+ *
+ * @param dataHandle  the handle cDataManager_AttachData returned
+ * @return the attached data
+ */
 extern "C" int func_00275B78(void* self, char* dataHandle)
 {
     return *(int*)(dataHandle + 8);
@@ -233,6 +239,13 @@ extern "C" int func_00275B78(void* self, char* dataHandle)
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00275B80);
 #ifdef SKIP_ASM
+/**
+ * Reads the two user-data words of an attached-data handle (+0x0 and +0x4 of the instance record).
+ *
+ * @param dataHandle  the handle cDataManager_AttachData returned
+ * @param out0  receives the first user-data word
+ * @param out1  receives the second user-data word
+ */
 extern "C" void func_00275B80(void* self, char* dataHandle, int* out0, int* out1)
 {
     *out0 = *(int*)dataHandle;
@@ -335,6 +348,14 @@ void cDataManager_AddToEmptyInstanceList(void* self, void* node)
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00275CF8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Takes the first instance record off the manager's empty list (+0x8) and returns it with its next link (+0x14)
+ * cleared.
+ *
+ * Quirk: the list is not checked for being empty.
+ *
+ * @return the instance record
+ */
 void* func_00275CF8(void* self)
 {
     void* head = *(void**)((char*)self + 0x8);
@@ -350,6 +371,15 @@ INCLUDE_ASM("scripter/datamanager", func_00275D10);
 extern "C" void func_00283C30(void* self);
 void func_00283C20(void* self);
 
+/**
+ * Constructs an empty NIS list.
+ *
+ * Initialises the entry buffer at +0xC (func_00283C30, func_00283C20), sets the next pending index (+0xBC) to -1 and
+ * the cut-scene flag (+0x4) to 1, and zeroes the engine pointer (+0x0), view index (+0x8), state (+0xA4) and the flag
+ * and counter words at +0xA8-+0xC8.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00275D10(void* self)
 {
     void* list = (char*)self + 0xC;
@@ -378,6 +408,12 @@ INCLUDE_ASM("scripter/datamanager", func_00275D90);
 extern "C" void func_00276868(void* self, int a1);
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a NIS list: resets it (func_00276868 with resetTransition 1), clears its engine pointer (+0x0), and frees it
+ * with operator_delete when bit 0 of @p flags is set.
+ *
+ * @param flags  destructor flags; bit 0 frees the memory
+ */
 extern "C" void func_00275D90(int* self, int flags)
 {
     func_00276868(self, 1);
@@ -411,7 +447,22 @@ struct sDmCmd5DD8 {
     int a6;         // 0x18
 };
 
-// Queues a plain command (no lookup) and starts it when the queue was idle.
+/**
+ * Appends a video entry of category @p a1 to the NIS list, then sets up the next script if the list is running.
+ *
+ * Returns 0 when the five-entry buffer is full (func_00283C58). The entry (category, script index -1, control bits
+ * @p a2, no handle, AI rider indexes -1) is pushed with func_00283C80. When the list is active (state +0xA4 nonzero)
+ * and nothing is pending yet (+0xBC < 0), the new entry is set up as the pending one (tNISList_SetupNextScript), and if
+ * the list is playing (3) while the head's script player (cBXScriptEngine_GetRequestPlayerByReqHandle) is ending
+ * (mPlayState 4), func_002776E0 checks whether to wait for it.
+ *
+ * Quirk: unlike func_00275ED0 and func_00276048 it does not test whether the head entry is a video before asking for
+ * its script player.
+ *
+ * @param a1  the video category
+ * @param a2  the entry's control bits
+ * @return 1 when queued, 0 when the list is full
+ */
 extern "C" int func_00275DD8(char* self, int a1, int a2)
 {
     if (func_00283C58(self + 0xC) != 0) {
@@ -471,6 +522,23 @@ struct sDmCmd5ED0 {
     int a6;         // 0x18
 };
 
+/**
+ * Appends a script entry of category @p a1 to the NIS list, then sets up the next script if the list is running.
+ *
+ * Returns 0 when the buffer is full (func_00283C58). With @p lookup set, the script is chosen now
+ * (cSSXScriptEngine_SelectScriptFromCategory with the three AI rider indexes) and a failed choice returns 0; otherwise
+ * the entry keeps script index -1 for tNISList_SetupNextScript to resolve. After the push (func_00283C80), an active
+ * list with nothing pending sets the new entry up as pending; while playing, if the head (a video: func_00283BB8 on the
+ * video engine; a script: its player in mPlayState 4) is ending, func_002776E0 checks whether to wait for it.
+ *
+ * @param a1  the script category
+ * @param a2  the entry's control bits
+ * @param lookup  nonzero to choose the script now
+ * @param a4  the main AI rider index
+ * @param a5  the first supporting AI rider index
+ * @param a6  the second supporting AI rider index
+ * @return 1 when queued, 0 when full or no script was found
+ */
 extern "C" int func_00275ED0(char* self, int a1, int a2, int lookup, int a4, int a5, int a6)
 {
     if (func_00283C58(self + 0xC) != 0) {
@@ -540,6 +608,21 @@ struct sDmCmd6048 {
     int a5;         // 0x18
 };
 
+/**
+ * Appends the script with master-table index @p a1 to the NIS list, then sets up the next script if the list is
+ * running.
+ *
+ * Returns 0 when the buffer is full (func_00283C58). The entry has category 0x1C (no category), script index @p a1, no
+ * handle and the given control bits and AI rider indexes. After the push the follow-up matches func_00275ED0: an active
+ * list with nothing pending sets the new entry up, and an ending head while playing triggers func_002776E0.
+ *
+ * @param a1  the script's master-table index
+ * @param a2  the entry's control bits
+ * @param a3  the main AI rider index
+ * @param a4  the first supporting AI rider index
+ * @param a5  the second supporting AI rider index
+ * @return 1 when queued, 0 when the list is full
+ */
 extern "C" int func_00276048(char* self, int a1, int a2, int a3, int a4, int a5)
 {
     if (func_00283C58(self + 0xC) == 0) {
@@ -584,6 +667,16 @@ extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
 // The unit declares func_00283D28 as returning void*, but it returns the list's count.
 int func_00283D28_count(void* list) __asm__("func_00283D28");
 
+/**
+ * Moves all entries of NIS list @p other to the end of this list and resets @p other.
+ *
+ * Refuses (returns 0) while @p other is playing (state 3). Entries are popped from @p other (func_00283DC0) and pushed
+ * here (func_00283C80); @p other is then reset (func_00276868 with resetTransition 1). When this list is active with
+ * nothing pending, the first moved entry is set up as pending (tNISList_SetupNextScript from the old length).
+ *
+ * @param other  the source NIS list
+ * @return 1, or 0 when @p other is playing
+ */
 extern "C" int func_00276198(void* self, void* other)
 {
     int cmd[8];
@@ -616,6 +709,21 @@ extern "C" int func_00282798(void* self, int a1);
 extern "C" void* func_00283D28(void*);
 extern "C" void* func_00283D70(void* list, int i);
 
+/**
+ * Readies an idle NIS list for playing and returns its state.
+ *
+ * A loading list (state 1) is polled first (func_00277778); a list that is not idle returns its state. Otherwise stores
+ * @p playOnReady (+0xB4), returns 0 for an empty list, and finds the first entry that can play
+ * (tNISList_SetupNextScript from 0); with none the list is reset (func_00276868). Entries before it are dropped
+ * (func_00277598), and the state becomes 1 (loading) while the head's script request waits for data or its video has no
+ * handle, else 2 (ready). The following entry is set up as the pending one (+0xBC).
+ *
+ * Likely bug: the pending search starts at the old index + 1 although that many head entries were just removed, so it
+ * skips entries whenever the first playable one was not at index 0.
+ *
+ * @param playOnReady  0 = no, 1 = play with transition in, 2 = play without (On Tour ePlayOnReady)
+ * @return the list state (+0xA4)
+ */
 extern "C" int func_00276270(char* self, int playOnReady)
 {
     if (*(int*)(self + 0xA4) == 1) {
@@ -832,6 +940,12 @@ extern "C" void* func_00277C08(void*, int, int);
 //100%
 INCLUDE_ASM("scripter/datamanager", func_002766B0__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Pauses or resumes a NIS list: func_00277C08(self, @p a1, 0).
+ *
+ * @param a1  nonzero to pause, 0 to resume
+ * @return func_00277C08's return register (it returns nothing)
+ */
 void* func_002766B0(void* self, int a1)
 {
     return func_00277C08(self, a1, 0);
@@ -875,6 +989,24 @@ struct sSeq_66D0 {
     int pos;            // 0xC0
 };
 
+/**
+ * Skips @p delta scripts of a NIS list and returns its state.
+ *
+ * The target is @p delta past the skip position (+0xC0), at least the pending index (+0xBC); an unchanged target
+ * returns at once. A list that is not playing drops the skipped entries (func_00277598), goes idle and, if it was
+ * active, is readied again (func_00276270 with its play-on-ready mode, +0xB4); skipping past the end resets it
+ * (func_00276868). A playing list stores the target; a pending entry before the target is released (script:
+ * func_00282540; video: cVidEngine_ResetVideoEngine) and pausing on loading is undone (func_00277C08(self, 0, 1))
+ * before the entry at the target is set up as pending. Unless it is paused on loading (+0xA8), the next script starts
+ * (func_00277800) when @p force is 0 or tNISList_DoTransitionToNext declines; with nothing pending the list is reset.
+ *
+ * Likely bug: a pending video is reset only when its handle is nonzero, but a readied video has handle 0
+ * (tNISList_SetupNextScript), so the readied one is left running; func_00276F48 and func_00277598 test for >= 0.
+ *
+ * @param delta  the number of scripts to skip
+ * @param force  nonzero to try a transition to the next script (On Tour doTransition)
+ * @return the list state (+0xA4)
+ */
 extern "C" int func_002766D0(sSeq_66D0* self, int delta, int force)
 {
     int pos = delta + self->pos;
@@ -947,6 +1079,19 @@ struct sDmVEntry6868 {
     int (*fn)(void*, int, int);
 };
 
+/**
+ * Empties a NIS list and returns it to idle, undoing its pauses and, on the cut-scene list, its cut-scene mode.
+ *
+ * Undoes a pause on loading (func_00277C08(self, 0, 1)) and any counted pauses (+0xC4 forced to 1, then
+ * func_00277C08(self, 0, 0)). When the cut-scene list (+0x4) is playing: with @p resetTransition, puts the game's
+ * cut-scene transition manager back in regular mode (cCutSceneTransitionMan_ForceToRegularMode) and ends a running
+ * script transition (+0xB0) with func_002E4578; then calls virtual slot 24 of the "hud" UI state
+ * (cUIStateStack_findState) with (1, 0). Last it drops all five entries (func_00277598) and clears the pending index
+ * (-1), state and the flag and counter words at +0xAC-+0xC8.
+ *
+ * @param nisList  the NIS list
+ * @param resetTransition  nonzero to also leave cut-scene mode and end the running transition
+ */
 extern "C" void func_00276868(void* nisList, int resetTransition)
 {
     char* self = (char*)nisList;
@@ -993,6 +1138,13 @@ extern "C" void* func_00283D70(void* list, int i);
 // The unit declares func_00283D28 as returning void*, but it returns the list's count.
 int func_00283D28_count(void* list) __asm__("func_00283D28");
 
+/**
+ * Returns the script category of entry @p i of a NIS list, or 0x1C (no script category) when @p i is past the end or
+ * the entry is a video (category 29 and up).
+ *
+ * @param i  the entry index
+ * @return the script category
+ */
 extern "C" int func_00276998(void* self, int i)
 {
     void* list = (char*)self + 0xC;
@@ -1011,6 +1163,13 @@ extern "C" void* func_00283D70(void* list, int i);
 // The unit declares func_00283D28 as returning void*, but it returns the list's count.
 int func_00283D28_count(void* list) __asm__("func_00283D28");
 
+/**
+ * Returns the video category of entry @p i of a NIS list, or 0x20 (no video category) when @p i is past the end or the
+ * entry is a script (category below 29).
+ *
+ * @param i  the entry index
+ * @return the video category
+ */
 extern "C" int func_00276A08(void* self, int i)
 {
     void* list = (char*)self + 0xC;
@@ -1028,6 +1187,15 @@ extern "C" void* func_00283D70(void* list, int i);
 extern "C" int func_002827F8(void* self, int id);
 int func_00283D28_count(void* list) __asm__("func_00283D28");
 
+/**
+ * Returns the master-table script index of entry @p i of a NIS list.
+ *
+ * Past the end or for a video entry: -1. Otherwise the entry's own index (+0x4), or, when that is unset, the index of
+ * its script request (func_002827F8 on its handle, +0xC), or -1 without a request.
+ *
+ * @param i  the entry index
+ * @return the script index, or -1
+ */
 extern "C" int func_00276A78(void* self, int i)
 {
     void* list = (char*)self + 0xC;
@@ -1057,6 +1225,13 @@ extern "C" void* func_00283D70(void* list, int i);
 // The unit declares func_00283D28 as returning void*, but it returns the list's count.
 int func_00283D28_count(void* list) __asm__("func_00283D28");
 
+/**
+ * Returns the InSeq script player of entry @p i of a NIS list (cBXScriptEngine_GetRequestPlayerByReqHandle on the
+ * entry's request handle, +0xC), or 0 past the end, for a video entry or when no request exists.
+ *
+ * @param i  the entry index
+ * @return the player, or 0
+ */
 extern "C" void* func_00276B08(void* self, int i)
 {
     void* list = (char*)self + 0xC;
@@ -1134,6 +1309,11 @@ extern "C" void* func_00283D28(void*);
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00276CA8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of entries in a NIS list (func_00283D28 on the buffer at +0xC).
+ *
+ * @return the entry count
+ */
 void* func_00276CA8(void* self)
 {
     return func_00283D28((char*)self + 0xc);
@@ -1158,6 +1338,20 @@ extern "C" int func_00283BB8(void* self);
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" void func_002E4578(void* p);
 
+/**
+ * Advances a NIS list by one frame.
+ *
+ * A loading list (state 1) only polls (func_00277778). A ready list (2) with a play-on-ready mode (+0xB4) starts
+ * (tNISList_Play, with the transition in for mode 1) and clears the mode. The rest runs only while playing (3) and not
+ * pause-counted (+0xC4): - During a script transition (+0xB0) the transition wait (+0xB8) counts down; at 0 the next
+ * script starts (func_00277800) unless the start-transition flag (+0xAC) is set, in which case the head resumes
+ * (func_00282720 or cVidEngine_PlayVideo). Once the game's transition manager (cGame_getTransitionMan, +0x44) is idle
+ * and the wait is over, both flags clear. - While paused on loading (+0xA8), once the pending entry (+0xBC) is ready
+ * the pause is undone (func_00277C08(self, 0, 1)) and func_00277838 plays it. - A skip in progress (+0xC8) counts down;
+ * at 0 it ends a running transition (func_002E4578) and starts the next script. - Otherwise the next script starts once
+ * the head script's request is back to ready (2) or ending (func_00282838), or the head video reports done
+ * (func_00283BB8), after tNISList_DoTransitionToNext.
+ */
 extern "C" void func_00276CC8(char* self)
 {
     if (*(int*)(self + 0xA4) == 1) {
@@ -1251,6 +1445,17 @@ extern "C" int func_00282540(void* self, int id);
 extern "C" void cVidEngine_ResetVideoEngine(void* p);
 extern "C" void* func_00283D70(void* list, int i);
 
+/**
+ * Skips the playing script of a NIS list if its entry allows it.
+ *
+ * Only while playing (3), with no skip in progress (+0xC8) and bit 0 of the head entry's control bits (+0x8) set. Marks
+ * the skip (+0xC8 = 1) and finds the next entry that is not flagged to inherit the skip (tNISList_SetupNextScript with
+ * skipFlagged). When that differs from the pending one (+0xBC), the old pending entry is released (script:
+ * func_00282540; video: cVidEngine_ResetVideoEngine) and replaced; when one is found the next script starts
+ * (func_00277800).
+ *
+ * Quirk: with nothing pending, the search from entry 1 runs but its result is not stored.
+ */
 extern "C" void func_00276F48(char* self)
 {
     if (*(int*)(self + 0xA4) != 3) {
@@ -1319,6 +1524,12 @@ INCLUDE_ASM("scripter/datamanager", func_002770C0);
 #ifdef SKIP_ASM
 extern "C" void* func_00283D70(void* list, int i);
 
+/**
+ * Returns whether the pause menu may open: always when the list is not playing, else bit 2 of the head entry's control
+ * bits (+0x8).
+ *
+ * @return 1 when allowed, else 0
+ */
 extern "C" int func_002770C0(void* self)
 {
     if (*(int*)((char*)self + 0xA4) != 3) {
@@ -1332,6 +1543,14 @@ extern "C" int func_002770C0(void* self)
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00277100);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the NIS list's pending entry (+0xBC) is ready to play.
+ *
+ * 0 while loading (state 1); 1 when nothing is pending; for a pending video whether it has a handle (+0xC >= 0); for a
+ * pending script whether its request is ready (func_00282798 returns 2).
+ *
+ * @return 1 when ready, else 0
+ */
 extern "C" int func_00277100(void* self)
 {
     if (*(int*)((char*)self + 0xA4) == 1) {
@@ -1354,6 +1573,13 @@ INCLUDE_ASM("scripter/datamanager", func_002771A8);
 #ifdef SKIP_ASM
 extern "C" void func_00283C58__FPv(int);
 
+/**
+ * Asks the NIS list's entry buffer (+0xC) whether it is full: func_00283C58__FPv.
+ *
+ * The C declares no return value; the answer is left in the return register.
+ *
+ * @param nisList  the NIS list
+ */
 extern "C" void func_002771A8(int nisList) {
     func_00283C58__FPv(nisList + 0xC);
 }
@@ -1366,6 +1592,15 @@ extern "C" void* func_00283D70(void* list, int i);
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" void* cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1);
 
+/**
+ * Returns whether @p obj is the script player of the NIS list's playing head entry.
+ *
+ * Requires the list to be playing (3) and the head to be a script (func_00277DD8); compares @p obj with
+ * cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, head handle).
+ *
+ * @param obj  the InSeq script player (cScriptPlayerMain)
+ * @return 1 when it is, else 0
+ */
 extern "C" int func_002771C8(void* self, void* obj)
 {
     if (*(int*)((char*)self + 0xA4) != 3) {
@@ -1385,6 +1620,11 @@ INCLUDE_ASM("scripter/datamanager", func_00277248);
 extern "C" void* func_00283D70(void* list, int i);
 extern "C" int func_00277DD8(void* self, void* a1);
 
+/**
+ * Returns whether the NIS list is playing (state 3) a video entry at its head (func_00277DD8).
+ *
+ * @return 1 when playing a video, else 0
+ */
 extern "C" int func_00277248(char* self)
 {
     if (*(int*)(self + 0xA4) != 3) {
@@ -1497,6 +1737,15 @@ extern "C" int func_002771C8(void* self, void* obj);
 extern "C" void func_002776E0(void* self);
 extern "C" void func_002826D8(void* self, int a1);
 
+/**
+ * Handles the NIS list's playing script starting to stop.
+ *
+ * Only for the list's own player (func_002771C8): while a transition wait is pending (+0xB8) the request is paused
+ * (func_002826D8), then func_002776E0 checks whether the next script must be waited for.
+ *
+ * @param requestHandle  the stopping script's request handle
+ * @param obj  the stopping InSeq player
+ */
 extern "C" void func_002773A0(void* self, int requestHandle, void* obj)
 {
     if (func_002771C8(self, obj) != 0) {
@@ -1632,6 +1881,18 @@ struct sDmSndVEntry7598 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Removes up to @p n entries from the head of a NIS list, releasing what each one holds.
+ *
+ * Stops early when the buffer is empty (func_00283DA0). An entry with a handle (+0xC >= 0) releases its script request
+ * (func_00282540) or, for a video, sends the video record's music event when the video engine is playing (+0x504): the
+ * end event (+0x18 of the func_00277DE8 record) once func_00283BB8 reports the video done, else the skip event (+0x14),
+ * through virtual slot 4 of the bxAudio sound system (cAudioInterface_bxAudio, +0x118); then resets the video engine
+ * (cVidEngine_ResetVideoEngine). Each entry is then popped (func_00283DC0).
+ *
+ * @param selfp  the NIS list
+ * @param n  the number of entries to remove
+ */
 extern "C" void func_00277598(void* selfp, int n)
 {
     char* self = (char*)selfp;
@@ -1675,6 +1936,12 @@ extern "C" void* func_00283D70(void* list, int i);
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" int func_00282798(void* self, int a1);
 
+/**
+ * Pauses the NIS list on loading while its pending entry (+0xBC) is still loading.
+ *
+ * The pending entry is still loading when its script request waits for data (func_00282798 returns 1) or, for a video,
+ * it has no handle (+0xC < 0); then func_00277C08(self, 1, 1) pauses the list. Nothing happens with nothing pending.
+ */
 extern "C" void func_002776E0(void* self)
 {
     int idx = *(int*)((char*)self + 0xBC);
@@ -1702,6 +1969,11 @@ extern "C" void* func_00283D70(void* list, int i);
 extern "C" int func_00277DD8(void* self, void* a1);
 extern "C" int func_00282798(void* self, int a1);
 
+/**
+ * Moves a loading NIS list (state 1) to ready (2) once its head is ready.
+ *
+ * A head video counts as ready at once; a head script when its request state (func_00282798) is 2.
+ */
 extern "C" void func_00277778(void* self)
 {
     if (*(int*)((char*)self + 0xA4) == 1) {
@@ -1724,6 +1996,10 @@ INCLUDE_ASM("scripter/datamanager", func_00277800);
 extern "C" void func_002776E0(void* self);
 extern "C" void func_00277838(void* self);
 
+/**
+ * Plays the NIS list's next script when it is available: func_002776E0 first, then func_00277838 unless the list is now
+ * paused on loading (+0xA8).
+ */
 extern "C" void func_00277800(void* self)
 {
     func_002776E0(self);
@@ -1760,6 +2036,19 @@ struct sDmEngVEntry7838 {
     int (*fn)(void*, int);
 };
 
+/**
+ * Moves a NIS list on to its pending entry, or ends the list when nothing is pending.
+ *
+ * With a pending entry (+0xBC > 0): clears the skip (+0xC8), drops the entries before it (func_00277598), clears the
+ * skip position (+0xC0) and pending index, and starts the new head: a script with cSSXScriptEngine_PlayRequestScript
+ * (view index +0x8, bit 3 of its control bits) and the engine's virtual slot 6 (cSSXScriptEngine_ForcePlayUpdate), a
+ * video with cVidEngine_PlayVideo. A running script transition (+0xB0) sets the start-transition flag (+0xAC); the next
+ * entry is set up as pending. Otherwise the list is reset without transitions (func_00276868) and, on the cut-scene
+ * list (+0x4), the game's fade (+0x64 of the game) gets func_002EA780 with the transition manager's remaining time
+ * (func_002E4678) when a script transition was running and the manager is busy, else 0.5.
+ *
+ * @param selfp  the NIS list
+ */
 extern "C" void func_00277838(void* selfp)
 {
     char* self = (char*)selfp;
@@ -1939,6 +2228,19 @@ struct sSeq_7C08 {
 // The unit declares func_00277C08 as returning void*; the body returns nothing. Bind by asm label.
 extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard) __asm__("func_00277C08");
 
+/**
+ * Pauses or resumes a playing NIS list, through either the pause count or the pause-on-loading flag.
+ *
+ * Does nothing unless playing (3). With @p hard 0 the pause count (+0xC4) goes up or down and only the 0-to-1 or 1-to-0
+ * step acts, and not while paused on loading (+0xA8). With @p hard set the pause-on-loading flag is set to @p on and
+ * acts only when it changed and no counted pause is held. Acting pauses the head (a script request in states 3-5 with
+ * func_002826D8; a video with func_00283B78) or resumes it (a paused request, state 5, with func_00282720; a video with
+ * func_00283B78), and on the cut-scene list (+0x4) passes the same flag to the game's cut-scene transition manager
+ * (func_002EA8B8) and, when busy (+0x44), to the transition manager (func_002E4638).
+ *
+ * @param on  nonzero to pause, 0 to resume
+ * @param hard  nonzero for the pause-on-loading flag, 0 for the pause count
+ */
 extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard)
 {
     if (self->state != 3) {
@@ -2013,6 +2315,12 @@ extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard)
 //100%
 INCLUDE_ASM("scripter/datamanager", func_00277DD8);
 #ifdef SKIP_ASM
+/**
+ * Returns whether a NIS list entry is a video: its category (+0x0) is 29 or more.
+ *
+ * @param entry  the list entry
+ * @return 1 for a video, 0 for a script
+ */
 extern "C" int func_00277DD8(void* self, void* entry)
 {
     return *(int*)entry >= 29;
@@ -2039,6 +2347,18 @@ extern sDmCfg7DE8 cBEOptionInterface_mOption;
 extern sDmEnt7DE8 D_004823DC[];
 extern sDmEnt7DE8 D_0048247C[];
 
+/**
+ * Returns the video record (0x1C bytes: file name, transition out, colour, out time, music events) for a NIS list video
+ * entry.
+ *
+ * Calls cBE_getInterface_Fv(cBE_getBE(), 4), copies the whole cBEOptionInterface_mOption block to the stack to test its
+ * flags, and picks the table at 0x00482708 when (flags & 0x300000) == 0x200000, else the one at 0x004827A8. The symbols
+ * D_004823DC and D_0048247C are those tables less 29 records, so the entry's category (+0x0, 29-31) indexes them
+ * directly.
+ *
+ * @param key  the list entry (its first word is the video category)
+ * @return the video record
+ */
 extern "C" sDmEnt7DE8* func_00277DE8(void* self, int* key)
 {
     cBE_getInterface_Fv(cBE_getBE(), 4);

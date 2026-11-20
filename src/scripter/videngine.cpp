@@ -147,6 +147,13 @@ extern "C" void func_00253890(void* p, int a1);
 extern "C" void func_002539E0(void* self);
 extern "C" void func_00253A40(void* self);
 
+/**
+ * Renders the video for this frame, holding the movie paused on frames the engine did not update.
+ *
+ * Only with a movie player (mpPlayer) that is playing (mIsPlaying): when mFrameUpdated is set the player is resumed if
+ * paused (func_00253A40), otherwise it is paused if running (func_002539E0); then func_00253890(mpPlayer,
+ * !mFrameUpdated) and mFrameUpdated is cleared.
+ */
 extern "C" void func_00283AF8(void* self)
 {
     void* videoPlayer = *(void**)((char*)self + 0x0);
@@ -169,6 +176,12 @@ extern "C" void func_00283AF8(void* self)
 //100%
 INCLUDE_ASM("scripter/videngine", func_00283B78);
 #ifdef SKIP_ASM
+/**
+ * Pauses or resumes the video: while a movie player (mpPlayer) is playing (mIsPlaying), @p inc counts mNumPause up and
+ * 0 counts it down (not below 0).
+ *
+ * @param inc  non-zero to pause, 0 to resume
+ */
 extern "C" void func_00283B78(void* self, int inc)
 {
     if (*(int*)((char*)self + 0x0) != 0 && *(int*)((char*)self + 0x4) != 0) {
@@ -184,6 +197,12 @@ extern "C" void func_00283B78(void* self, int inc)
 //100%
 INCLUDE_ASM("scripter/videngine", func_00283BB8);
 #ifdef SKIP_ASM
+/**
+ * Returns the movie player's first word (its end status) while a video plays: 0 without a player (mpPlayer) or when not
+ * playing (mIsPlaying).
+ *
+ * @return the player's word +0x0, or 0
+ */
 extern "C" int func_00283BB8(void* self)
 {
     int* videoPlayer = *(int**)((char*)self + 0x0);
@@ -197,6 +216,13 @@ extern "C" int func_00283BB8(void* self)
 //100%
 INCLUDE_ASM("scripter/videngine", func_00283BE0);
 #ifdef SKIP_ASM
+/**
+ * Returns its first argument and does nothing else; the variable arguments are only spilled to the stack.
+ *
+ * It has no callers in the build (a variadic stub, probably a compiled-out print).
+ *
+ * @return the first argument
+ */
 extern "C" void* func_00283BE0(void* self, ...)
 {
     return self;
@@ -206,6 +232,10 @@ extern "C" void* func_00283BE0(void* self, ...)
 //100%
 INCLUDE_ASM("scripter/videngine", func_00283C20__FPv);
 #ifdef SKIP_ASM
+/**
+ * Empties a circular buffer of NIS list entries: head (+0x8C, On Tour mHeadIndex), tail (+0x90, mTailIndex) and full
+ * flag (+0x94, mIsFull) become 0.
+ */
 void func_00283C20(void* self)
 {
     *(int*)((char*)self + 0x8c) = 0;
@@ -219,6 +249,11 @@ INCLUDE_ASM("scripter/videngine", func_00283C30);
 #ifdef SKIP_ASM
 void func_00283C20(void*);
 
+/**
+ * Constructs a circular buffer of NIS list entries: resets it (func_00283C20).
+ *
+ * @return @p self
+ */
 extern "C" void* func_00283C30(void* self)
 {
     func_00283C20(self);
@@ -229,6 +264,11 @@ extern "C" void* func_00283C30(void* self)
 //100%
 INCLUDE_ASM("scripter/videngine", func_00283C58__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns whether a circular buffer of NIS list entries is full: its full flag (+0x94, On Tour mIsFull).
+ *
+ * @return the flag
+ */
 int func_00283C58(void* self)
 {
     return *(int*)((char*)self + 0x94);
@@ -238,6 +278,12 @@ int func_00283C58(void* self)
 //100%
 INCLUDE_ASM("scripter/videngine", func_00283C60);
 #ifdef SKIP_ASM
+/**
+ * Returns the buffer index after @p index in a 5-entry circular buffer: @p index + 1, wrapping 4 to 0.
+ *
+ * @param index  the index (0-4)
+ * @return the next index
+ */
 extern "C" int func_00283C60(void* self, int index)
 {
     if (index == 4) {
@@ -257,6 +303,13 @@ struct sVidCmd3C80 {
     int v[7];
 };
 
+/**
+ * Appends a NIS list entry to a circular buffer: copies the 0x1C-byte @p cmd to the tail slot (+0x90), advances the
+ * tail (func_00283C60) and sets the full flag (+0x94) when the tail reaches the head (+0x8C).
+ *
+ * @param cmd  the entry to copy
+ * @return 1, or 0 when the buffer was full
+ */
 extern "C" int func_00283C80(void* self, sVidCmd3C80* cmd)
 {
     if (func_00283C58(self) != 0) return 0;
@@ -274,6 +327,12 @@ INCLUDE_ASM("scripter/videngine", func_00283D28);
 #ifdef SKIP_ASM
 int func_00283C58(void*);
 
+/**
+ * Returns the number of entries in a circular buffer of NIS list entries: 5 when full, else tail (+0x90) minus head
+ * (+0x8C), modulo 5.
+ *
+ * @return the entry count (0-5)
+ */
 extern "C" int func_00283D28(void* self)
 {
     int n;
@@ -291,6 +350,13 @@ extern "C" int func_00283D28(void* self)
 //100%
 INCLUDE_ASM("scripter/videngine", func_00283D70);
 #ifdef SKIP_ASM
+/**
+ * Returns entry @p index of a circular buffer, counted from the head: slot (head + @p index) mod 5 (0x1C bytes each).
+ * The index is not range-checked against the entry count.
+ *
+ * @param index  the position from the head
+ * @return the entry
+ */
 extern "C" void* func_00283D70(void* self, int index)
 {
     return (char*)self + ((*(int*)((char*)self + 0x8c) + index) % 5) * 0x1c;
@@ -300,6 +366,12 @@ extern "C" void* func_00283D70(void* self, int index)
 //100%
 INCLUDE_ASM("scripter/videngine", func_00283DA0);
 #ifdef SKIP_ASM
+/**
+ * Returns whether a circular buffer of NIS list entries is empty: head (+0x8C) equals tail (+0x90) and the full flag
+ * (+0x94) is clear.
+ *
+ * @return 1 when empty, else 0
+ */
 extern "C" int func_00283DA0(void* self)
 {
     int isEmpty = 0;
@@ -318,6 +390,13 @@ extern "C" int func_00283C60(void* self, int a1);
 
 struct sVidEntry1C { int v[7]; };
 
+/**
+ * Removes the head entry of a circular buffer of NIS list entries: clears the full flag (+0x94), copies the entry to
+ * @p out when given, and advances the head (+0x8C, func_00283C60).
+ *
+ * @param out  receives the 0x1C-byte entry, or 0
+ * @return 1, or 0 when the buffer was empty
+ */
 extern "C" int func_00283DC0(void* self, sVidEntry1C* out)
 {
     if (func_00283DA0(self) != 0) {
