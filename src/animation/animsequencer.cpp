@@ -576,7 +576,7 @@ extern "C" void* cAnimSequence_cAnimSequence(void* mem, int arg);
  * @param sequenceID  the new sequence's id (On Tour sequenceID)
  * @return the new sequence
  */
-extern "C" void* cAnimSequencer_newSequence(void* seq, int sequenceID)
+extern "C" void* cAnimSequencer_newSequence(cAnimSequencer* seq, int sequenceID)
 {
     sSequencer_003142F8* self = (sSequencer_003142F8*)seq;
     sSeqNode_003142F8* node = (sSeqNode_003142F8*)cAnimSequence_cAnimSequence(cMemMan_alloc(208, str_AnimSequence, 0x20000000, 0), sequenceID);
@@ -609,11 +609,11 @@ struct sSequencer_00314368 {
  *
  * @param node  the sequence to append
  */
-extern "C" void cAnimSequencer_appendSequence(sSequencer_00314368* self, sSeqNode_00314368* node)
+extern "C" void cAnimSequencer_appendSequence(cAnimSequencer* self, sSeqNode_00314368* node)
 {
-    if (self->mFirstSequence != 0)
+    if ((sSeqNode_00314368*)self->PlayList != 0)
     {
-        sSeqNode_00314368* tail = self->mFirstSequence;
+        sSeqNode_00314368* tail = (sSeqNode_00314368*)self->PlayList;
         while (tail->next != 0)
         {
             tail = tail->next;
@@ -622,10 +622,10 @@ extern "C" void cAnimSequencer_appendSequence(sSequencer_00314368* self, sSeqNod
     }
     else
     {
-        self->mFirstSequence = node;
+        self->PlayList = (cAnimSequence*)node;
     }
     node->next = 0;
-    self->mCount++;
+    self->NumPlaying++;
 }
 #endif
 
@@ -651,12 +651,12 @@ struct sSequencer_003143C8 {
  *
  * @param node  the sequence to unlink
  */
-extern "C" void cAnimSequencer_removeSequence(sSequencer_003143C8* self, sSeqNode_003143C8* node)
+extern "C" void cAnimSequencer_removeSequence(cAnimSequencer* self, sSeqNode_003143C8* node)
 {
-    if (self->mFirstSequence == node) {
-        self->mFirstSequence = node->next;
+    if ((sSeqNode_003143C8*)self->PlayList == node) {
+        self->PlayList = (cAnimSequence*)node->next;
     } else {
-        sSeqNode_003143C8* cur = self->mFirstSequence;
+        sSeqNode_003143C8* cur = (sSeqNode_003143C8*)self->PlayList;
         while (cur != 0) {
             if (cur->next == node) {
                 break;
@@ -666,7 +666,7 @@ extern "C" void cAnimSequencer_removeSequence(sSequencer_003143C8* self, sSeqNod
         cur->next = node->next;
     }
     node->next = 0;
-    self->mCount--;
+    self->NumPlaying--;
 }
 #endif
 
@@ -728,10 +728,10 @@ struct sSeqState_314418
  * @return the number of frames written
  */
 // PORT: `long` field is 64-bit (ld/sd).
-extern "C" int cAnimSequencer_getAnimBlendFrames(void* self, sSeqState_314418* out)
+extern "C" int cAnimSequencer_getAnimBlendFrames(cAnimSequencer* self, sSeqState_314418* out)
 {
     int count = 0;
-    sSeq_00314418* n = *(sSeq_00314418**)((char*)self + 0x4);
+    sSeq_00314418* n = (sSeq_00314418*)self->PlayList;
     while (n != 0)
     {
         for (int j = 0; j < 3; j++)
@@ -759,7 +759,7 @@ extern "C" int cAnimSequencer_getAnimBlendFrames(void* self, sSeqState_314418* o
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/animsequencer", cAnimSequencer_playAndHold);
 #ifdef SKIP_ASM
-extern "C" void* cAnimSequencer_newSequence(void* seq, int arg);
+extern "C" void* cAnimSequencer_newSequence(cAnimSequencer* seq, int arg);
 extern "C" void cAnimSequence_setSubAnim(cAnimSequence* self, int i, int anim);
 
 /**
@@ -773,7 +773,7 @@ extern "C" void cAnimSequence_setSubAnim(cAnimSequence* self, int i, int anim);
  * @param val  the start time in seconds (On Tour starttime)
  * @return the new sequence
  */
-extern "C" void* cAnimSequencer_playAndHold(void* self, int sequenceID, int anim, float val)
+extern "C" void* cAnimSequencer_playAndHold(cAnimSequencer* self, int sequenceID, int anim, float val)
 {
     void* node = cAnimSequencer_newSequence(self, sequenceID);
     cAnimSequence_setSubAnim((cAnimSequence*)node, 0, anim);
@@ -786,7 +786,7 @@ extern "C" void* cAnimSequencer_playAndHold(void* self, int sequenceID, int anim
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/animsequencer", cAnimSequencer_playAndLoop);
 #ifdef SKIP_ASM
-extern "C" void* cAnimSequencer_newSequence(void* seq, int arg);
+extern "C" void* cAnimSequencer_newSequence(cAnimSequencer* seq, int arg);
 extern "C" void cAnimSequence_setSubAnim(cAnimSequence* self, int i, int anim);
 
 /**
@@ -800,7 +800,7 @@ extern "C" void cAnimSequence_setSubAnim(cAnimSequence* self, int i, int anim);
  * @param val  the start time in seconds (On Tour starttime)
  * @return the new sequence
  */
-extern "C" void* cAnimSequencer_playAndLoop(void* self, int sequenceID, int anim, float val)
+extern "C" void* cAnimSequencer_playAndLoop(cAnimSequencer* self, int sequenceID, int anim, float val)
 {
     void* node = cAnimSequencer_newSequence(self, sequenceID);
     cAnimSequence_setSubAnim((cAnimSequence*)node, 0, anim);
@@ -831,10 +831,10 @@ struct sSequencer_003145F8 {
  *
  * @param node  the sequence to remove (On Tour seq)
  */
-extern "C" void cAnimSequencer_expire(sSequencer_003145F8* self, sSeqNode_003145F8* node)
+extern "C" void cAnimSequencer_expire(cAnimSequencer* self, sSeqNode_003145F8* node)
 {
     sSeqNode_003145F8** pp;
-    for (pp = &self->mFirstSequence; *pp != 0; pp = &(*pp)->next)
+    for (pp = (sSeqNode_003145F8**)&self->PlayList; *pp != 0; pp = &(*pp)->next)
     {
         sSeqNode_003145F8* n = *pp;
         if (n == node)
@@ -845,7 +845,7 @@ extern "C" void cAnimSequencer_expire(sSequencer_003145F8* self, sSeqNode_003145
                 cAnimSequence_removeAllTriggers((cAnimSequence*)((char*)n));
                 operator_delete((int*)n);
             }
-            self->mCount--;
+            self->NumPlaying--;
             return;
         }
     }
@@ -871,18 +871,18 @@ struct sSequencer_00314668 {
  * Each sequence is unlinked from the list head, has its triggers removed (cAnimSequence_removeAllTriggers, On Tour
  * cAnimSequence::removeAllTriggers) and is freed with operator delete; the count drops by one for each.
  */
-extern "C" void cAnimSequencer_expireAll(sSequencer_00314668* self)
+extern "C" void cAnimSequencer_expireAll(cAnimSequencer* self)
 {
-    while (self->mFirstSequence != 0)
+    while ((sSeqNode_00314668*)self->PlayList != 0)
     {
-        sSeqNode_00314668* n = self->mFirstSequence;
-        self->mFirstSequence = n->next;
+        sSeqNode_00314668* n = (sSeqNode_00314668*)self->PlayList;
+        self->PlayList = (cAnimSequence*)n->next;
         if (n != 0)
         {
             cAnimSequence_removeAllTriggers((cAnimSequence*)((char*)n));
             operator_delete((int*)n);
         }
-        self->mCount--;
+        self->NumPlaying--;
     }
 }
 #endif
@@ -897,9 +897,9 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_fadeOutAndExpireAll);
  *
  * @param time  the fade-out time in seconds (On Tour time)
  */
-extern "C" void cAnimSequencer_fadeOutAndExpireAll(void* self, float time)
+extern "C" void cAnimSequencer_fadeOutAndExpireAll(cAnimSequencer* self, float time)
 {
-    for (char* node = *(char**)((char*)self + 0x4); node != 0; node = *(char**)(node + 0xC8))
+    for (char* node = (char*)self->PlayList; node != 0; node = *(char**)(node + 0xC8))
     {
         cAnimSequence_fadeOutAndExpire((cAnimSequence*)node, time);
     }
@@ -918,9 +918,9 @@ extern "C" void cAnimSequence_removeEndTrigger(cAnimSequence* self, int v);
  *
  * @param trig  the end trigger's event id (On Tour trig)
  */
-extern "C" void cAnimSequencer_removeAllEndTriggers(void* self, int trig)
+extern "C" void cAnimSequencer_removeAllEndTriggers(cAnimSequencer* self, int trig)
 {
-    for (char* node = *(char**)((char*)self + 0x4); node != 0; node = *(char**)(node + 0xC8))
+    for (char* node = (char*)self->PlayList; node != 0; node = *(char**)(node + 0xC8))
     {
         cAnimSequence_removeEndTrigger((cAnimSequence*)node, trig);
     }
@@ -932,10 +932,6 @@ struct cAnimSequenceNode {
     cAnimSequenceNode* next; // 0xC8
 };
 
-struct cAnimSequencer {
-    char pad_0x00[0x4];
-    cAnimSequenceNode* mFirstSequence; // 0x4
-};
 
 //100%
 INCLUDE_ASM("animation/animsequencer", cAnimSequencer_getSequence__FP14cAnimSequenceri);
@@ -950,7 +946,7 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_getSequence__FP14cAnimSequ
  */
 cAnimSequenceNode* cAnimSequencer_getSequence(cAnimSequencer* self, int index)
 {
-    cAnimSequenceNode* cur = self->mFirstSequence;
+    cAnimSequenceNode* cur = ((cAnimSequenceNode*)self->PlayList);
     while (cur != 0 && index-- > 0) {
         cur = cur->next;
     }
@@ -967,8 +963,8 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_isPlaying);
  * @param id  the sequence id (the node's first word)
  * @return 1 when found, else 0
  */
-extern "C" int cAnimSequencer_isPlaying(cAnimSequencer *self, int id) {
-    for (cAnimSequenceNode *n = self->mFirstSequence; n != 0; n = n->next) {
+extern "C" int cAnimSequencer_isPlaying(cAnimSequencer* self, int id) {
+    for (cAnimSequenceNode *n = ((cAnimSequenceNode*)self->PlayList); n != 0; n = n->next) {
         if (*(int *)n == id) {
             return 1;
         }
@@ -985,9 +981,9 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_getPosition);
  * @param id  the sequence id (the node's first word; On Tour sequenceID)
  * @return the sequence's zero-based position from mFirstSequence, or -1 when it is not queued
  */
-extern "C" int cAnimSequencer_getPosition(cAnimSequencer *self, int id) {
+extern "C" int cAnimSequencer_getPosition(cAnimSequencer* self, int id) {
     int index = 0;
-    for (cAnimSequenceNode *n = self->mFirstSequence; n != 0; n = n->next) {
+    for (cAnimSequenceNode *n = ((cAnimSequenceNode*)self->PlayList); n != 0; n = n->next) {
         if (*(int *)n == id) {
             return index;
         }
@@ -1025,11 +1021,11 @@ extern "C" void cAnimSequence_writeToReplayFrame(void* node, cAsStream* s);
  *
  * @param stream  the output stream
  */
-extern "C" void cAnimSequencer_writeToReplayFrame(sSequencer_003147F0* self, cAsStream* stream)
+extern "C" void cAnimSequencer_writeToReplayFrame(cAnimSequencer* self, cAsStream* stream)
 {
-    stream->serialize(self, 4);
-    sSeqNode_003147F0* n = self->mFirstSequence;
-    for (int i = 0; i < self->mCount; i++)
+    stream->serialize(((sSequencer_003147F0*)self), 4);
+    sSeqNode_003147F0* n = (sSeqNode_003147F0*)self->PlayList;
+    for (int i = 0; i < self->NumPlaying; i++)
     {
         cAnimSequence_writeToReplayFrame(n, stream);
         n = n->next;
@@ -1071,7 +1067,7 @@ struct sSeqNode_314880
  *
  * @param stream  the input stream
  */
-extern "C" void cAnimSequencer_readFromReplayFrame(void* self, void* stream)
+extern "C" void cAnimSequencer_readFromReplayFrame(cAnimSequencer* self, void* stream)
 {
     int n;
     sStreamVE_314880* vt = *(sStreamVE_314880**)stream;
@@ -1082,7 +1078,7 @@ extern "C" void cAnimSequencer_readFromReplayFrame(void* self, void* stream)
         sSeqNode_314880* node = new (str_AnimSequence, 0x20000000, 0) sSeqNode_314880;
         MEM_fill(node, 0, 208);
         cAnimSequence_readFromReplayFrame(node, stream);
-        cAnimSequencer_appendSequence((sSequencer_00314368*)self, (sSeqNode_00314368*)node);
+        cAnimSequencer_appendSequence(self, (sSeqNode_00314368*)node);
     }
 }
 #endif

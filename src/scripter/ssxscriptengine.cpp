@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/scriptobjrider.h"
 #include "scripter/scriptobjcammgr.h"
 #include "scripter/nislist.h"
 #include "inseq/scriptplayerentity.h"
@@ -5737,7 +5738,7 @@ extern char t4mat_Identity[];
  */
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of t4mat_Identity, likely identity);
 // the PC port needs a plain 64-byte copy.
-extern "C" void cScriptObjRider_OnEndObjectUse(void* self)
+extern "C" void cScriptObjRider_OnEndObjectUse(cScriptObjRider* self)
 {
     cScriptObject_OnEndObjectUse((char*)self + 0xC);
     __asm__ __volatile__(
@@ -5754,11 +5755,11 @@ extern "C" void cScriptObjRider_OnEndObjectUse(void* self)
         :
         : "r"((char*)self + 0x30), "r"(t4mat_Identity)
         : "memory");
-    *(int*)((char*)self + 0x70) = 0;
-    *(int*)((char*)self + 0x74) = 0;
-    *(int*)((char*)self + 0x78) = 0;
-    *(int*)((char*)self + 0x1C) = 0;
-    *(int*)((char*)self + 0x20) = 0;
+    *(int*)&self->mBaseRotX = 0;
+    *(int*)&self->mBaseRotY = 0;
+    *(int*)&self->mBaseRotZ = 0;
+    self->mpAnimBankInfo = 0;
+    self->mpSoundBankInfo = 0;
 }
 #endif
 
@@ -5767,7 +5768,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjRider_IsMatchingEntity);
 #ifdef SKIP_ASM
 extern "C" int cRider_isLoaded(void* self);
 extern "C" int cRider_getIdentity(void* self);
-extern "C" int cScriptObjRider_IsSuitableRole(void* self, cRider* rider, int id, int a3);
+extern "C" int cScriptObjRider_IsSuitableRole(cScriptObjRider* self, cRider* rider, int id, int a3);
 extern int D_00481BB0[];
 
 class cScriptCtx0458 {
@@ -5793,10 +5794,10 @@ public:
  * @param type  the entity type asked for; only 5 can match
  * @return nonzero when the entity matches this rider
  */
-extern "C" int cScriptObjRider_IsMatchingEntity(cScriptCtx0458* self, cScriptPlayerEntity* msg, int type)
+extern "C" int cScriptObjRider_IsMatchingEntity(cScriptObjRider* self, cScriptPlayerEntity* msg, int type)
 {
     if (type != 5) return 0;
-    void* rider = self->v06();
+    void* rider = ((cScriptCtx0458*)self)->v06();
     if (cRider_isLoaded(rider) == 0) return 0;
     int team = cRider_getIdentity(rider);
     int mask = D_00481BB0[team];
@@ -5862,7 +5863,7 @@ extern "C" void* cSSXScriptEngine_GetSubjectRider(cSSXScriptEngine* self, int i,
  * @param playerMain  the script player (cScriptPlayerMain)
  * @return 1 when the rider suits the role, else 0 (also for negative or larger roles)
  */
-extern "C" int cScriptObjRider_IsSuitableRole(void* self, cRider* rider, int id, int playerMain)
+extern "C" int cScriptObjRider_IsSuitableRole(cScriptObjRider* self, cRider* rider, int id, int playerMain)
 {
     if (id != 0) {
         if (id >= 0) {

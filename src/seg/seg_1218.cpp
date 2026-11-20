@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/dangerman.h"
 #include "ai/rideranim.h"
 #include "camera/trigger/cameratriggerman.h"
 #include "sound/ssxaudio.h"
@@ -1067,7 +1068,7 @@ extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* cmd)
 //100%
 INCLUDE_ASM("seg/seg_1218", cDangerMan_cDangerMan);
 #ifdef SKIP_ASM
-extern "C" void cDangerMan_Reset(void* self);
+extern "C" void cDangerMan_Reset(cDangerMan* self);
 
 struct sSlotA_101310 {
     char pad[0x18];
@@ -1101,7 +1102,7 @@ public:
 cTable_101310::cTable_101310(void* o)
 {
     owner = o;
-    cDangerMan_Reset(this);
+    cDangerMan_Reset((cDangerMan*)(this));
 }
 // PORT: the compiler names this ctor __13cTable_101310Pv; expose it under the address-derived name.
 __asm__(".globl cDangerMan_cDangerMan\n.type cDangerMan_cDangerMan,@function\ncDangerMan_cDangerMan = __13cTable_101310Pv\n.size cDangerMan_cDangerMan,0x94\n");
@@ -1358,7 +1359,7 @@ struct sTable_101688 {
  *
  * @param vself  the danger manager (cDangerMan)
  */
-extern "C" void cDangerMan_Reset(void* vself)
+extern "C" void cDangerMan_Reset(cDangerMan* vself)
 {
     sTable_101688* self = (sTable_101688*)vself;
     int i;
@@ -1452,7 +1453,7 @@ struct sMgr_1728 {
     int count;
 };
 
-extern "C" void cDangerMan_RemoveDangerElem(sMgr_1728*, unsigned int*);
+extern "C" void cDangerMan_RemoveDangerElem(cDangerMan*, unsigned int*);
 
 static inline sObj_1728* lookup_1728(unsigned int id)
 {
@@ -1477,7 +1478,7 @@ static inline sObj_1728* lookup_1728(unsigned int id)
  * @param x  stored in the element's first word
  * @param y  how long, in seconds, the element stays after its instance is gone (cDangerMan_Update counts it down)
  */
-extern "C" void cDangerMan_AddDangerElem(sMgr_1728* self, unsigned int* idp, float x, float y)
+extern "C" void cDangerMan_AddDangerElem(cDangerMan* self, unsigned int* idp, float x, float y)
 {
     cComp_1728* instNode = lookup_1728(*idp)->comp;
     if (instNode == 0)
@@ -1486,7 +1487,7 @@ extern "C" void cDangerMan_AddDangerElem(sMgr_1728* self, unsigned int* idp, flo
         return;
     cDangerMan_RemoveDangerElem(self, idp);
     for (int i = 0; i < 64; i++) {
-        sEnt_1728* elemInfo = &self->ents[i];
+        sEnt_1728* elemInfo = &((sEnt_1728*)&self->mTrackedDangerElems[0])[i];
         if (elemInfo->state == 2) {
             elemInfo->state = 0;
             elemInfo->id = *idp;
@@ -1496,7 +1497,7 @@ extern "C" void cDangerMan_AddDangerElem(sMgr_1728* self, unsigned int* idp, flo
             elemInfo->px = instPos.x;
             elemInfo->py = instPos.y;
             elemInfo->pz = instPos.z;
-            self->count++;
+            self->mTrackedDangerElemNum++;
             return;
         }
     }
@@ -1516,17 +1517,17 @@ void cDangerMan_DeleteTrackedDangerElemRecord(void*, void*);
  *
  * @param idp  the instance id
  */
-extern "C" void cDangerMan_RemoveDangerElem(sMgr_1728* self, unsigned int* idp)
+extern "C" void cDangerMan_RemoveDangerElem(cDangerMan* self, unsigned int* idp)
 {
-    int n = self->count;
+    int n = self->mTrackedDangerElemNum;
     if (n != 0) {
         int remaining = n;
         for (int i = 0; i < 64 && remaining != 0; i++) {
-            sEnt_1728* elemInfo = &self->ents[i];
+            sEnt_1728* elemInfo = &((sEnt_1728*)&self->mTrackedDangerElems[0])[i];
             if (elemInfo->state != 2) {
                 remaining--;
                 if (elemInfo->id == *idp) {
-                    cDangerMan_DeleteTrackedDangerElemRecord(self, elemInfo);
+                    cDangerMan_DeleteTrackedDangerElemRecord(((sMgr_1728*)self), elemInfo);
                     return;
                 }
             }
@@ -1552,23 +1553,23 @@ struct P_1900 { char pad[0xB54]; N_1900 *freelist; N_1900 *used; };
  * @param instId  the zone's instance id
  * @param level  the zone's danger level
  */
-extern "C" void cDangerMan_AddDangerVolume(P_1900 *dangerMan, int *instId, int level) {
+extern "C" void cDangerMan_AddDangerVolume(cDangerMan* dangerMan, int *instId, int level) {
     N_1900 *currActiveZone;
     N_1900 *n;
 
-    for (currActiveZone = dangerMan->used; currActiveZone != 0; currActiveZone = currActiveZone->next) {
+    for (currActiveZone = (N_1900*)dangerMan->mpActiveList; currActiveZone != 0; currActiveZone = currActiveZone->next) {
         if (currActiveZone->key == *instId) {
             currActiveZone->refs++;
             return;
         }
     }
-    n = dangerMan->freelist;
-    dangerMan->freelist = n->next;
+    n = (N_1900*)dangerMan->mpInactiveList;
+    dangerMan->mpInactiveList = (tDangerZoneTrack*)n->next;
     n->key = *instId;
     n->val = level;
     n->refs = 1;
-    n->next = dangerMan->used;
-    dangerMan->used = n;
+    n->next = (N_1900*)dangerMan->mpActiveList;
+    dangerMan->mpActiveList = (tDangerZoneTrack*)n;
 }
 #endif
 

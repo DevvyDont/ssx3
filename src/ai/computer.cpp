@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/airpredictor.h"
 #include "replay/frameptr.h"
 #include "ai/riderhandler.h"
 #include "sound/ssxaudio.h"
@@ -4509,11 +4510,11 @@ extern "C" void cAirPredictor_reset(char* self);
  *
  * @return this
  */
-extern "C" void* cAirPredictor_cAirPredictor(void* self)
+extern "C" void* cAirPredictor_cAirPredictor(cAirPredictor* self)
 {
-    *(unsigned int*)((char*)self + 0x30) = 0xFFFFFFFF;
+    self->GuessLandPatchRID = 0xFFFFFFFF;
     cAirPredictor_reset((char*)self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -4527,7 +4528,7 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ in-charge flags: bit 0 set means delete the object (operator_delete)
  */
-extern "C" void cAirPredictor__cAirPredictor(void* self, int flags)
+extern "C" void cAirPredictor__cAirPredictor(cAirPredictor* self, int flags)
 {
     if (flags & 1)
     {

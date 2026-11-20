@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/cameracontroller.h"
 #include "camera/cameraalgolist.h"
 #include "ai/rider.h"
 #include "camera/race/racealgorithms.h"
@@ -9927,8 +9928,8 @@ INCLUDE_ASM("camera/camera", cManualCameraController_getManualAlgo);
  * @param manualController  the controller
  * @return the algorithm (a cManualCameraAlgorithm*)
  */
-extern "C" int cManualCameraController_getManualAlgo(void *manualController) {
-    return (*(int *)((char*)(manualController) + (0x18)));
+extern "C" int cManualCameraController_getManualAlgo(cManualCameraController* manualController) {
+    return ((int)manualController->ManualAlgo);
 }
 #endif
 //100%
@@ -9940,8 +9941,8 @@ INCLUDE_ASM("camera/camera", cManualCameraController_getEditorAlgo);
  * @param manualController  the controller
  * @return the algorithm (a cEditorCameraAlgorithm*)
  */
-extern "C" int cManualCameraController_getEditorAlgo(void *manualController) {
-    return (*(int *)((char*)(manualController) + (0x1C)));
+extern "C" int cManualCameraController_getEditorAlgo(cManualCameraController* manualController) {
+    return ((int)manualController->EditorAlgo);
 }
 #endif
 

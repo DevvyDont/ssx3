@@ -1,6 +1,9 @@
 #ifndef ANIMATION_ANIMSEQUENCER_H
 #define ANIMATION_ANIMSEQUENCER_H
 
+// cAnimSequencer (at the end of this file): one animation channel of a rider's cRiderAnimBase, a counted singly linked
+// list of the cAnimSequences playing on it (newest first; newSequence pushes at the head, appendSequence at the tail).
+//
 // cAnimSequence: one playing animation sequence of a cAnimSequencer: up to three blended sub-animations, an
 // orientation offset, flip / priority / bone mask, weight fading, time triggers and the event flags they raise.
 // cAnimSequencer (8 bytes: NumPlaying, PlayList) keeps its sequences in a list linked through Next;
@@ -127,5 +130,23 @@ CHECK_OFFSET(cAnimSequence, CheckTriggersAtCurrentFrame, 0x0C4);
 CHECK_OFFSET(cAnimSequence, Next, 0x0C8);
 CHECK_OFFSET(cAnimSequence, unk_0CC, 0x0CC);
 CHECK_SIZE(cAnimSequence, 0xD0);
+
+// cAnimSequencer (On Tour: 0x8, NumPlaying + PlayList, no base, no virtuals). cRiderAnimBase owns 6 of them in one
+// block: [R] its ctor allocates 0x30 bytes tagged "Sequencers" (6 x 8) and runs cAnimSequencer_init__FPv on each
+// (animation/rideranimbase.h: cRiderAnimBase::Sequencer, +0x50). Size 0x8 [R]: that allocation; init writes 0x0 and 0x4.
+// Retail methods: unit animation/animsequencer 0x003142E8 (init) .. 0x00314880 (readFromReplayFrame).
+// [P]: no preview evidence (tools/layout_xlate.py pairs no cAnimSequencer method).
+struct cAnimSequencer {
+    int NumPlaying;                 // 0x0 [O]; [R] cAnimSequencer_init__FPv 0; [U] newSequence / appendSequence +1,
+                                    //       removeSequence / expire / expireAll -1; writeToReplayFrame serializes it (4 bytes)
+                                    //       and walks that many sequences; readFromReplayFrame zeroes it and appends
+    cAnimSequence* PlayList;        // 0x4 [O]; [R] init 0; [U] newSequence pushes at the head, appendSequence links at the
+                                    //       tail through cAnimSequence::Next; getSequence / isPlaying / getPosition /
+                                    //       getAnimBlendFrames / fadeOutAndExpireAll / removeAllEndTriggers walk it
+};
+
+CHECK_OFFSET(cAnimSequencer, NumPlaying, 0x0);
+CHECK_OFFSET(cAnimSequencer, PlayList, 0x4);
+CHECK_SIZE(cAnimSequencer, 0x8);
 
 #endif /* ANIMATION_ANIMSEQUENCER_H */

@@ -31,7 +31,7 @@
 #include "animation/animmodel.h"
 
 class cRiderAnim;
-class cAirPredictor;
+struct cAirPredictor;
 class cRiderMetrix;
 class cRiderHandler;
 

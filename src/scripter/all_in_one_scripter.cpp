@@ -1,4 +1,6 @@
 #include "common.h"
+#include "scripter/scriptobjrider.h"
+#include "scripter/scriptentity.h"
 #include "scripter/videngine.h"
 #include "scripter/scriptobjcammgr.h"
 #include "scripter/bxscriptengine.h"
@@ -320,8 +322,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntity_GetPlayer);
  * @param entity  the script entity
  * @return its player entity
  */
-extern "C" int cScriptEntity_GetPlayer(void *entity) {
-    return (*(int *)((char*)(entity) + (8)));
+extern "C" int cScriptEntity_GetPlayer(cScriptEntity* entity) {
+    return ((int)entity->mpEntity);
 }
 #endif
 
@@ -334,8 +336,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntity_GetDatabaseID);
  * @param entity  the script entity
  * @return its database ID
  */
-extern "C" int cScriptEntity_GetDatabaseID(void *entity) {
-    return (*(int *)((char*)(entity) + (4)));
+extern "C" int cScriptEntity_GetDatabaseID(cScriptEntity* entity) {
+    return (entity->mDBID);
 }
 #endif
 
@@ -348,8 +350,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntity_SetDatabaseID);
  * @param entity  the script entity
  * @param databaseId  the new database ID
  */
-extern "C" void cScriptEntity_SetDatabaseID(void *entity, int databaseId) {
-    (*(int *)((char*)(entity) + (4))) = databaseId;
+extern "C" void cScriptEntity_SetDatabaseID(cScriptEntity* entity, int databaseId) {
+    (entity->mDBID) = databaseId;
 }
 #endif
 
@@ -361,8 +363,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntity_ClearDatabaseID);
  *
  * @param entity  the script entity
  */
-extern "C" void cScriptEntity_ClearDatabaseID(void *entity) {
-    (*(int *)((char*)(entity) + (4))) = -1;
+extern "C" void cScriptEntity_ClearDatabaseID(cScriptEntity* entity) {
+    (entity->mDBID) = -1;
 }
 #endif
 
@@ -956,9 +958,9 @@ extern char D_00482018[];
  * @param riderObject  the object
  * @param deleteFlags  destructor flags; bit 0 frees the memory
  */
-extern "C" void cScriptObjRider__cScriptObjRider(void *riderObject, int deleteFlags) {
-    *(char **)((char*)riderObject + 0x18) = D_00482018;
-    *(char **)((char*)riderObject + 0x0) = cScriptObjRider_vtbl;
+extern "C" void cScriptObjRider__cScriptObjRider(cScriptObjRider* riderObject, int deleteFlags) {
+    riderObject->mScriptObjectVtbl = (void**)D_00482018;
+    riderObject->mVtbl = (void**)cScriptObjRider_vtbl;
     cScriptObject__cScriptObject_4AE8((char*)riderObject + 0xC, 0);
     if (deleteFlags & 1) {
         operator_delete((int *)riderObject);
@@ -1020,8 +1022,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjRider_GetBaseRotX);
  * @param riderObject  the rider script object
  * @return its base X rotation
  */
-extern "C" float cScriptObjRider_GetBaseRotX(void *riderObject) {
-    return (*(float *)((char*)(riderObject) + (0x70)));
+extern "C" float cScriptObjRider_GetBaseRotX(cScriptObjRider* riderObject) {
+    return (riderObject->mBaseRotX);
 }
 #endif
 
@@ -1034,8 +1036,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjRider_GetBaseRotY);
  * @param riderObject  the rider script object
  * @return its base Y rotation
  */
-extern "C" float cScriptObjRider_GetBaseRotY(void *riderObject) {
-    return (*(float *)((char*)(riderObject) + (0x74)));
+extern "C" float cScriptObjRider_GetBaseRotY(cScriptObjRider* riderObject) {
+    return (riderObject->mBaseRotY);
 }
 #endif
 
@@ -1048,8 +1050,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjRider_GetBaseRotZ);
  * @param riderObject  the rider script object
  * @return its base Z rotation
  */
-extern "C" float cScriptObjRider_GetBaseRotZ(void *riderObject) {
-    return (*(float *)((char*)(riderObject) + (0x78)));
+extern "C" float cScriptObjRider_GetBaseRotZ(cScriptObjRider* riderObject) {
+    return (riderObject->mBaseRotZ);
 }
 #endif
 

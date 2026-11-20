@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/airpredictor.h"
 #include "replay/frameptr.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -22,18 +23,18 @@ extern sPair8 D_004A5960[];
  * Clears the air predictor's flight: no landing found yet (patch -1), zero times, zero vectors and default
  * landing data.
  */
-extern "C" void cAirPredictor_reset(char* self)
+extern "C" void cAirPredictor_reset(cAirPredictor* self)
 {
-    *(int*)(self + 0xAC) = 0;
-    *(int*)(self + 0xA0) = 0;
-    *(int*)(self + 0x98) = 0;
-    *(int*)(self + 0x9C) = 0;
-    *(int*)(self + 0xA4) = 0;
-    *(sQuadR*)(self + 0x20) = t4vect_ZAxis;
-    *(sQuadR*)(self + 0x10) = t4vect_Zero;
-    *(int*)(self + 0x90) = -1;
-    *(unsigned int*)(self + 0x30) = 0xFFFFFFFF;
-    *(sPair8*)(self + 0x34) = D_004A5960[0];
+    self->SimState = 0;
+    *(int*)&self->CurAirTime = 0;
+    *(int*)&self->TotalAirTime = 0;
+    *(int*)&self->ApexTime = 0;
+    *(int*)&self->PrevTickTime = 0;
+    *(sQuadR*)&self->GuessLandNormal = t4vect_ZAxis;
+    *(sQuadR*)&self->GuessLandVelocity = t4vect_Zero;
+    self->GuessLandSurface = -1;
+    self->GuessLandPatchRID = 0xFFFFFFFF;
+    *(sPair8*)&self->GuessLandPatchUV[0] = D_004A5960[0];
 }
 #endif
 
@@ -238,7 +239,7 @@ static inline void vu0AddEq_3200(sVec4_3200& a, const sVec4_3200& b)
  * @param vself  the cAirPredictor (this)
  */
 // cAirPredictor::simStep (On Tour names; the loop is a do-while in SSX 3).
-extern "C" void cAirPredictor_simStep(char* vself)
+extern "C" void cAirPredictor_simStep(cAirPredictor* vself)
 {
     sAirP_3200* self = (sAirP_3200*)vself;
     sVec4_3200 prevPos = self->pos;
@@ -318,11 +319,11 @@ void cAirPredictor_initLaunch(char* self, sQuad* a, sQuad* b);
  * @param launchVel  launch velocity (On Tour const t4Vector&)
  * @param terminalVel  maximum falling speed
  */
-extern "C" void cAirPredictor_startLaunchIntoAir(char* self, sQuad* launchPos, sQuad* launchVel, float terminalVel)
+extern "C" void cAirPredictor_startLaunchIntoAir(cAirPredictor* self, sQuad* launchPos, sQuad* launchVel, float terminalVel)
 {
     cAirPredictor_reset(self);
-    *(float*)(self + 0xA8) = terminalVel;
-    cAirPredictor_initLaunch(self, launchPos, launchVel);
+    self->TerminalVel = terminalVel;
+    cAirPredictor_initLaunch(((char*)self), launchPos, launchVel);
 }
 #endif
 
@@ -359,7 +360,7 @@ INCLUDE_ASM("ai/airpredictor", cAirPredictor_updateFlightPath);
 extern sQuadR t4vect_Origin;
 extern sQuadR t4vect_XAxis;
 extern sQuadR t4vect_ZAxis;
-extern "C" void cAirPredictor_simStep(char* self);
+extern "C" void cAirPredictor_simStep(cAirPredictor* self);
 
 struct sVec4_3648
 {
@@ -418,55 +419,55 @@ static inline sVec4_3648 vu0Add_3648(const sVec4_3648& a, const sVec4_3648& b)
  * @param airVel  receives the predicted air velocity (On Tour airVel); also the launch velocity on a re-launch
  * @param dt  seconds to advance
  */
-extern "C" void cAirPredictor_updateFlightPath(char* self, sQuad* airPos, sQuad* airVel, float dt)
+extern "C" void cAirPredictor_updateFlightPath(cAirPredictor* self, sQuad* airPos, sQuad* airVel, float dt)
 {
-    if (*(float*)(self + 0x98) > 60.0f) {
-        if (*(int*)(self + 0xAC) == 2) {
-            *(int*)(self + 0xAC) = 3;
-            *(sQuadR*)(self + 0x0) = t4vect_Origin;
-            *(sQuadR*)(self + 0x10) = t4vect_XAxis;
-            *(sQuadR*)(self + 0x20) = t4vect_ZAxis;
-            *(int*)(self + 0x90) = 13;
+    if (self->TotalAirTime > 60.0f) {
+        if (self->SimState == 2) {
+            self->SimState = 3;
+            *(sQuadR*)&self->GuessLandPosition = t4vect_Origin;
+            *(sQuadR*)&self->GuessLandVelocity = t4vect_XAxis;
+            *(sQuadR*)&self->GuessLandNormal = t4vect_ZAxis;
+            self->GuessLandSurface = 13;
         } else {
-            cAirPredictor_initLaunch(self, airPos, airVel);
-            *(int*)(self + 0xAC) = 2;
+            cAirPredictor_initLaunch(((char*)self), airPos, airVel);
+            self->SimState = 2;
         }
     } else {
-        if (*(int*)(self + 0xAC) == 1 && *(float*)(self + 0x98) - *(float*)(self + 0xA0) < -0.2f) {
-            cAirPredictor_initLaunch(self, airPos, airVel);
+        if (self->SimState == 1 && self->TotalAirTime - self->CurAirTime < -0.2f) {
+            cAirPredictor_initLaunch(((char*)self), airPos, airVel);
         }
-        int st = *(int*)(self + 0xAC);
+        int st = self->SimState;
         if (st == 0) {
             cAirPredictor_simStep(self);
-            while (*(int*)(self + 0xAC) == 0 && *(float*)(self + 0x98) < *(float*)(self + 0xA0) + dt) {
+            while (self->SimState == 0 && self->TotalAirTime < self->CurAirTime + dt) {
                 cAirPredictor_simStep(self);
             }
         } else if (st == 2) {
             cAirPredictor_simStep(self);
-            while (*(int*)(self + 0xAC) == 2 && *(float*)(self + 0x98) < *(float*)(self + 0xA0) + dt) {
+            while (self->SimState == 2 && self->TotalAirTime < self->CurAirTime + dt) {
                 cAirPredictor_simStep(self);
             }
         }
     }
-    float sinceLastTick = *(float*)(self + 0xA0) - *(float*)(self + 0xA4) + dt;
+    float sinceLastTick = self->CurAirTime - self->PrevTickTime + dt;
     while (sinceLastTick >= 0.01666666753590107f) {
         sinceLastTick -= 0.01666666753590107f;
-        cAirPredictor_simOneTick_3648(self, (sVec4_3648*)(self + 0x70), (sVec4_3648*)(self + 0x80), (sVec4_3648*)(self + 0x70), (sVec4_3648*)(self + 0x80));
-        *(float*)(self + 0xA4) += 0.01666666753590107f;
+        cAirPredictor_simOneTick_3648(((char*)self), (sVec4_3648*)(((char*)self) + 0x70), (sVec4_3648*)(((char*)self) + 0x80), (sVec4_3648*)(((char*)self) + 0x70), (sVec4_3648*)(((char*)self) + 0x80));
+        self->PrevTickTime += 0.01666666753590107f;
     }
     if (sinceLastTick > 0.009999999776482582f) {
         sVec4_3648 nextSimPos;
         sVec4_3648 nextSimVel;
-        cAirPredictor_simOneTick_3648(self, (sVec4_3648*)(self + 0x70), (sVec4_3648*)(self + 0x80), &nextSimPos, &nextSimVel);
+        cAirPredictor_simOneTick_3648(((char*)self), (sVec4_3648*)(((char*)self) + 0x70), (sVec4_3648*)(((char*)self) + 0x80), &nextSimPos, &nextSimVel);
         float k = sinceLastTick * 59.999996185302734f;
-        *(sVec4_3648*)airPos = vu0Add_3648(vu0Scale_3648(nextSimPos, k), vu0Scale_3648(*(sVec4_3648*)(self + 0x70), 1.0f - k));
-        *(sVec4_3648*)airVel = vu0Add_3648(vu0Scale_3648(nextSimVel, k), vu0Scale_3648(*(sVec4_3648*)(self + 0x80), 1.0f - k));
+        *(sVec4_3648*)airPos = vu0Add_3648(vu0Scale_3648(nextSimPos, k), vu0Scale_3648(*(sVec4_3648*)&self->PrevTickPos, 1.0f - k));
+        *(sVec4_3648*)airVel = vu0Add_3648(vu0Scale_3648(nextSimVel, k), vu0Scale_3648(*(sVec4_3648*)&self->PrevTickVel, 1.0f - k));
         ((float*)airPos)[3] = 1.0f;
     } else {
-        *(sQuad*)airPos = *(sQuad*)(self + 0x70);
-        *(sQuad*)airVel = *(sQuad*)(self + 0x80);
+        *(sQuad*)airPos = *(sQuad*)&self->PrevTickPos;
+        *(sQuad*)airVel = *(sQuad*)&self->PrevTickVel;
     }
-    *(float*)(self + 0xA0) += dt;
+    self->CurAirTime += dt;
 }
 #endif
 
@@ -573,7 +574,7 @@ static inline float vu0Length_1139A0(const sVec4_1139A0& v)
  * @param outVel  receives the next velocity
  * @return the length of the new velocity, at most TerminalVel
  */
-extern "C" float cAirPredictor_simOneTick(void* self, sVec4_1139A0* pos, sVec4_1139A0* vel, sVec4_1139A0* outPos, sVec4_1139A0* outVel)
+extern "C" float cAirPredictor_simOneTick(cAirPredictor* self, sVec4_1139A0* pos, sVec4_1139A0* vel, sVec4_1139A0* outPos, sVec4_1139A0* outVel)
 {
     *outPos = vu0Add_1139A0(*pos, vu0Scale_1139A0(*vel, 0.01666666753590107f));
     float dx = vel->x * -0.0033333336468786f;
@@ -582,10 +583,10 @@ extern "C" float cAirPredictor_simOneTick(void* self, sVec4_1139A0* pos, sVec4_1
     if (vel->z > 0.0f) gravity = -14.166666984558105f;
     *outVel = vu0Add_1139A0(*vel, sVec4_1139A0(dx, dy, gravity, 0.0f));
     float len = vu0Length_1139A0(*outVel);
-    if (*(float*)((char*)self + 0xA8) < len)
+    if (self->TerminalVel < len)
     {
-        vu0ScaleEq_1139A0(*outVel, *(float*)((char*)self + 0xA8) / len);
-        len = *(float*)((char*)self + 0xA8);
+        vu0ScaleEq_1139A0(*outVel, self->TerminalVel / len);
+        len = self->TerminalVel;
     }
     return len;
 }
@@ -616,7 +617,7 @@ struct sVEntry00113AA0 {
  *
  * @param obj  the replay frame (cReplayFramePtr)
  */
-extern "C" void cAirPredictor_writeToReplayFrame(void* self, cReplayFramePtr* obj)
+extern "C" void cAirPredictor_writeToReplayFrame(cAirPredictor* self, cReplayFramePtr* obj)
 {
     sVEntry00113AA0* vt = *(sVEntry00113AA0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 176);
@@ -637,7 +638,7 @@ struct sVEntry00113AD8 {
  *
  * @param obj  the replay frame (cReplayFramePtr)
  */
-extern "C" void cAirPredictor_readFromReplayFrame(void* self, cReplayFramePtr* obj)
+extern "C" void cAirPredictor_readFromReplayFrame(cAirPredictor* self, cReplayFramePtr* obj)
 {
     sVEntry00113AD8* vt = *(sVEntry00113AD8**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 176);

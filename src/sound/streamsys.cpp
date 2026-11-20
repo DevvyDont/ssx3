@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/controller.h"
 #include "sound/bankmonitor.h"
 #include "sound/streaminstance.h"
 #include "sound/streamsys.h"
@@ -1491,45 +1492,45 @@ extern const sSsVtblCB200 D_004837A0_B200 __asm__("D_004837A0");
  * @return this
  */
 // PORT: g++ 2.95 virtual-base construction with stack vtable this-adjust fix-ups, written out by hand.
-extern "C" char* cController_cController(char* self, int embedded, int maxBanks, int maxStreams, int heap)
+extern "C" char* cController_cController(cController* self, int embedded, int maxBanks, int maxStreams, int heap)
 {
     if (embedded != 0) {
-        *(char**)(self + 0x5560) = self + 0x6200;
-        *(char**)(self + 0x6200) = self + 0x5730;
-        *(char**)(self + 0x0) = self + 0x5730;
-        *(char**)(self + 0x5908) = self + 0x5728;
-        *(char**)(self + 0x118) = self + 0x6200;
-        cSoundSys_cSoundSys(self + 0x5728, heap);
-        cBankManager_cBankManager(*(void**)(self + 0x6200), 0, maxBanks, heap);
-        cStreamSys_cStreamSys(*(sStreamSysA490**)(self + 0x5560), 0, maxBanks, maxStreams, heap);
+        *(char**)&self->SpeechSys = ((char*)self) + 0x6200;
+        *(char**)(((char*)self) + 0x6200) = ((char*)self) + 0x5730;
+        self->mpVBankManager = (cBankManager*)(((char*)self) + 0x5730);
+        *(char**)(((char*)self) + 0x5908) = ((char*)self) + 0x5728;
+        *(char**)&self->MusicSys = ((char*)self) + 0x6200;
+        cSoundSys_cSoundSys(((char*)self) + 0x5728, heap);
+        cBankManager_cBankManager(*(void**)(((char*)self) + 0x6200), 0, maxBanks, heap);
+        cStreamSys_cStreamSys(*(sStreamSysA490**)&self->SpeechSys, 0, maxBanks, maxStreams, heap);
     }
-    cCrowdSys_cCrowdSys(self, 0, maxBanks, maxStreams, heap);
-    func_002B28C0(self + 0x118, 0, maxBanks, maxStreams, heap);
-    cSpeechSys_cSpeechSys(self + 0x5560, 0, maxBanks, maxStreams, heap);
-    *(const sSsVtblAB200**)(*(char**)(**(char***)(self + 0x118) + 0x1D8) + 4) = &D_004837D8_B200;
-    *(const sSsVtblBB200**)(**(char***)(self + 0x118) + 0xAB0) = &D_00483760_B200;
-    *(const sSsVtblCB200**)(**(char***)(self + 0x118) + 0x1D4) = &D_004837A0_B200;
+    cCrowdSys_cCrowdSys(((char*)self), 0, maxBanks, maxStreams, heap);
+    func_002B28C0(((char*)self) + 0x118, 0, maxBanks, maxStreams, heap);
+    cSpeechSys_cSpeechSys(((char*)self) + 0x5560, 0, maxBanks, maxStreams, heap);
+    *(const sSsVtblAB200**)(*(char**)(**(char***)&self->MusicSys + 0x1D8) + 4) = &D_004837D8_B200;
+    *(const sSsVtblBB200**)(**(char***)&self->MusicSys + 0xAB0) = &D_00483760_B200;
+    *(const sSsVtblCB200**)(**(char***)&self->MusicSys + 0x1D4) = &D_004837A0_B200;
     if (embedded == 0) {
         sSsVtblAB200 soundSysVtbl = D_004837D8_B200;
-        *(sSsVtblAB200**)(*(char**)(**(char***)(self + 0x118) + 0x1D8) + 4) = &soundSysVtbl;
-        char* base1 = *(char**)(**(char***)(self + 0x118) + 0x1D8) - 0x5728;
-        int soundSysDelta = self - base1;
+        *(sSsVtblAB200**)(*(char**)(**(char***)&self->MusicSys + 0x1D8) + 4) = &soundSysVtbl;
+        char* base1 = *(char**)(**(char***)&self->MusicSys + 0x1D8) - 0x5728;
+        int soundSysDelta = ((char*)self) - base1;
         soundSysVtbl.e[1].delta = D_004837D8_B200.e[1].delta + soundSysDelta;
         sSsVtblBB200 monitorVtbl = D_00483760_B200;
-        *(sSsVtblBB200**)(**(char***)(self + 0x118) + 0xAB0) = &monitorVtbl;
-        char* base2 = **(char***)(self + 0x118) - 0x5730;
-        int bankMgrDelta = self - base2;
+        *(sSsVtblBB200**)(**(char***)&self->MusicSys + 0xAB0) = &monitorVtbl;
+        char* base2 = **(char***)&self->MusicSys - 0x5730;
+        int bankMgrDelta = ((char*)self) - base2;
         monitorVtbl.e[1].delta = D_00483760_B200.e[1].delta + bankMgrDelta;
         monitorVtbl.e[5].delta = D_00483760_B200.e[5].delta + bankMgrDelta;
         sSsVtblCB200 bankMgrVtbl = D_004837A0_B200;
-        *(sSsVtblCB200**)(**(char***)(self + 0x118) + 0x1D4) = &bankMgrVtbl;
+        *(sSsVtblCB200**)(**(char***)&self->MusicSys + 0x1D4) = &bankMgrVtbl;
         bankMgrVtbl.e[1].delta = D_004837A0_B200.e[1].delta + bankMgrDelta;
     }
-    *(void***)(self + 0x5558) = D_004838F8;
-    *(void***)(self + 0x571C) = cSpeechSys_vtbl;
-    *(void***)(self + 0xC) = D_004837F8;
-    *(int*)(self + 0x5720) = 0;
-    return self;
+    self->MusicSys.mVtbl = D_004838F8;
+    self->SpeechSys.mVtbl = cSpeechSys_vtbl;
+    self->mVtbl = D_004837F8;
+    self->execFlag = 0;
+    return ((char*)self);
 }
 #endif
 
@@ -1576,39 +1577,39 @@ extern const sSsVtblCB478 D_004837A0;
  * @param flags  g++ 2.95 in-charge flags; bit 0 deletes the object
  */
 // PORT: g++ 2.95 virtual-base destruction with stack vtable this-adjust fix-ups, written out by hand.
-extern "C" void cController__cController(char* self, int flags)
+extern "C" void cController__cController(cController* self, int flags)
 {
-    char* mon = self + 0x118;
-    char* bank = self + 0x5560;
-    *(void***)(self + 0x5558) = D_004838F8;
-    *(void***)(self + 0x571C) = cSpeechSys_vtbl;
-    *(void***)(self + 0xC) = D_004837F8;
-    *(const sSsVtblAB478**)(*(char**)(**(char***)(self + 0x118) + 0x1D8) + 4) = &D_004837D8;
-    *(const sSsVtblBB478**)(**(char***)(self + 0x118) + 0xAB0) = &D_00483760;
-    *(const sSsVtblCB478**)(**(char***)(self + 0x118) + 0x1D4) = &D_004837A0;
+    char* mon = ((char*)self) + 0x118;
+    char* bank = ((char*)self) + 0x5560;
+    self->MusicSys.mVtbl = D_004838F8;
+    self->SpeechSys.mVtbl = cSpeechSys_vtbl;
+    self->mVtbl = D_004837F8;
+    *(const sSsVtblAB478**)(*(char**)(**(char***)&self->MusicSys + 0x1D8) + 4) = &D_004837D8;
+    *(const sSsVtblBB478**)(**(char***)&self->MusicSys + 0xAB0) = &D_00483760;
+    *(const sSsVtblCB478**)(**(char***)&self->MusicSys + 0x1D4) = &D_004837A0;
     if (flags == 0) {
         sSsVtblAB478 soundSysVtbl = D_004837D8;
-        *(sSsVtblAB478**)(*(char**)(**(char***)(self + 0x118) + 0x1D8) + 4) = &soundSysVtbl;
-        char* base1 = *(char**)(**(char***)(self + 0x118) + 0x1D8) - 0x5728;
-        int soundSysAdjust = self - base1;
+        *(sSsVtblAB478**)(*(char**)(**(char***)&self->MusicSys + 0x1D8) + 4) = &soundSysVtbl;
+        char* base1 = *(char**)(**(char***)&self->MusicSys + 0x1D8) - 0x5728;
+        int soundSysAdjust = ((char*)self) - base1;
         soundSysVtbl.e[1].delta = D_004837D8.e[1].delta + soundSysAdjust;
         sSsVtblBB478 bankMonitorVtbl = D_00483760;
-        *(sSsVtblBB478**)(**(char***)(self + 0x118) + 0xAB0) = &bankMonitorVtbl;
-        char* base2 = **(char***)(self + 0x118) - 0x5730;
-        int bankMgrAdjust = self - base2;
+        *(sSsVtblBB478**)(**(char***)&self->MusicSys + 0xAB0) = &bankMonitorVtbl;
+        char* base2 = **(char***)&self->MusicSys - 0x5730;
+        int bankMgrAdjust = ((char*)self) - base2;
         bankMonitorVtbl.e[1].delta = D_00483760.e[1].delta + bankMgrAdjust;
         bankMonitorVtbl.e[5].delta = D_00483760.e[5].delta + bankMgrAdjust;
         sSsVtblCB478 bankMgrVtbl = D_004837A0;
-        *(sSsVtblCB478**)(**(char***)(self + 0x118) + 0x1D4) = &bankMgrVtbl;
+        *(sSsVtblCB478**)(**(char***)&self->MusicSys + 0x1D4) = &bankMgrVtbl;
         bankMgrVtbl.e[1].delta = D_004837A0.e[1].delta + bankMgrAdjust;
     }
     cSpeechSys__cSpeechSys(bank, 0);
     func_002B3398(mon, 0);
-    cCrowdSys__cCrowdSys(self, 0);
+    cCrowdSys__cCrowdSys(((char*)self), 0);
     if (flags & 2) {
-        cStreamSys__cStreamSys((cStreamSys*)(*(void**)(self + 0x118)), 0);
-        cBankManager__cBankManager(**(void***)(self + 0x118), 0);
-        cSoundSys__cSoundSys(*(void**)(**(char***)(self + 0x118) + 0x1D8), 0);
+        cStreamSys__cStreamSys((cStreamSys*)(*(void**)&self->MusicSys), 0);
+        cBankManager__cBankManager(**(void***)&self->MusicSys, 0);
+        cSoundSys__cSoundSys(*(void**)(**(char***)&self->MusicSys + 0x1D8), 0);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1676,13 +1677,13 @@ extern "C" void cBankMonitorInstance_Update(void* voice, void* self, float v);
  *
  * @param time  elapsed time (On Tour Time)
  */
-extern "C" void cController_BANKMONITOR_Update(void* self, float time)
+extern "C" void cController_BANKMONITOR_Update(cController* self, float time)
 {
-    if (*(int*)(**(char***)((char*)self + 0x118) + 0xAC0) != 0) {
+    if (*(int*)(**(char***)&self->MusicSys + 0xAC0) != 0) {
         time = 0.0f;
     }
     for (int i = 0; i < 64; i++) {
-        cBankMonitorInstance_Update(*(char**)(**(char***)((char*)self + 0x118) + 0xAC4) + i * 0xC0, self, time);
+        cBankMonitorInstance_Update(*(char**)(**(char***)&self->MusicSys + 0xAC4) + i * 0xC0, self, time);
     }
 }
 #endif
@@ -1738,14 +1739,14 @@ extern "C" void cMonitorInstance_Update(void* e, void* self);
  *
  * It fills slot 1 of cSSXAudio's cBankMonitor vtable (D_00483640), where cBankMonitor has cMonitor_MONITOR_Update.
  */
-extern "C" void cController_MONITOR_Update(void* self)
+extern "C" void cController_MONITOR_Update(cController* self)
 {
-    char* snd = **(char***)((char*)self + 0x118);
+    char* snd = **(char***)&self->MusicSys;
     char* bm = snd + 0x1D8;
     if (*(int*)(snd + 0x26C) == 0) {
         cMonitor_MONITOR_Update(bm);
         for (int i = 0; i < 48; i++) {
-            cMonitorInstance_Update(**(char***)((char*)self + 0x118) + 0x270 + i * 44, self);
+            cMonitorInstance_Update(**(char***)&self->MusicSys + 0x270 + i * 44, self);
         }
     }
 }
@@ -1770,7 +1771,7 @@ struct sStrmVtEntF { short delta; short index; void (*fn)(void*, float); };
  *
  * @param frameTime  the frame time
  */
-extern "C" void cController_Update(void* self, float frameTime)
+extern "C" void cController_Update(cController* self, float frameTime)
 {
     char** sys = (char**)((char*)self + 0x118);
     cAsyncSys_ASYNCSYS_Update(*(void**)*sys);

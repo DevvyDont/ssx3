@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/scriptentity.h"
 #include "inseq/scriptplayerentity.h"
 #include "inseq/scriptplayermain.h"
 #include "scripter/bxscriptengine.h"
@@ -1498,9 +1499,9 @@ extern "C" void cScriptPlayerEntity_SetEntityComm(void* p, int a1);
  *
  * Does nothing when no entity is bound.
  */
-extern "C" void cScriptEntity_DetachEntity(void* self)
+extern "C" void cScriptEntity_DetachEntity(cScriptEntity* self)
 {
-    void* entity = *(void**)((char*)self + 0x8);
+    void* entity = self->mpEntity;
     if (entity != 0) {
         cScriptPlayerEntity_SetEntityComm(entity, 0);
     }
@@ -1521,9 +1522,9 @@ extern "C" void cScriptDatabaseObject_MarkEntityAsUsed(void* mgr, void* self, in
  *
  * @param entity  the InSeq player entity (cScriptPlayerEntity)
  */
-extern "C" void cScriptEntity_OnInSeqLock(void* self, void* entity)
+extern "C" void cScriptEntity_OnInSeqLock(cScriptEntity* self, void* entity)
 {
-    *(void**)((char*)self + 0x8) = entity;
+    self->mpEntity = (cScriptPlayerEntity*)entity;
     cScriptDatabaseObject_MarkEntityAsUsed(cScriptDatabaseObject_GetDatabaseObject(), self, **(int**)((char*)entity + 0x8));
 }
 #endif
@@ -1538,10 +1539,10 @@ extern "C" void cScriptDatabaseObject_MarkEntityAsFree(void* mgr, void* obj);
  * Releases this script entity's InSeq lock: unregisters it from the script database object (cScriptDatabaseObject_MarkEntityAsFree on
  * cScriptDatabaseObject_GetDatabaseObject()) and clears the bound entity (+0x8).
  */
-extern "C" void cScriptEntity_OnInSeqRelease(void* self)
+extern "C" void cScriptEntity_OnInSeqRelease(cScriptEntity* self)
 {
     cScriptDatabaseObject_MarkEntityAsFree(cScriptDatabaseObject_GetDatabaseObject(), self);
-    *(int*)((char*)self + 0x8) = 0;
+    self->mpEntity = 0;
 }
 #endif
 
@@ -1555,9 +1556,9 @@ extern "C" void cScriptPlayerMain_Pause(void* self);
  *
  * Does nothing when no entity is bound (+0x8).
  */
-extern "C" void cScriptEntity_PauseEntityScript(void* self)
+extern "C" void cScriptEntity_PauseEntityScript(cScriptEntity* self)
 {
-    void* entity = *(void**)((char*)self + 0x8);
+    void* entity = self->mpEntity;
     if (entity != 0) {
         cScriptPlayerMain_Pause(*(void**)((char*)entity + 0x8));
     }
@@ -1574,9 +1575,9 @@ extern "C" void cScriptPlayerMain_Resume(void* self);
  *
  * Does nothing when no entity is bound (+0x8).
  */
-extern "C" void cScriptEntity_ResumeEntityScript(void* self)
+extern "C" void cScriptEntity_ResumeEntityScript(cScriptEntity* self)
 {
-    void* entity = *(void**)((char*)self + 0x8);
+    void* entity = self->mpEntity;
     if (entity != 0) {
         cScriptPlayerMain_Resume(*(void**)((char*)entity + 0x8));
     }
@@ -1608,7 +1609,7 @@ extern "C" void* cScriptEntityCamera_cScriptEntityCamera(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/bxscriptengine", cScriptEntityCamera_OnInSeqLock);
 #ifdef SKIP_ASM
-extern "C" void cScriptEntity_OnInSeqLock(void* self, void* a1);
+extern "C" void cScriptEntity_OnInSeqLock(cScriptEntity* self, void* a1);
 int cScriptPlayerEntity_GetType(void* self);
 char* GetSSXCameraManualHeader(void* self);
 char* GetSSXCameraTargetHeader(void* self);
@@ -1626,7 +1627,7 @@ char* GetSSXCameraAlgorithmicHeader(void* self);
  */
 extern "C" void cScriptEntityCamera_OnInSeqLock(void* self, void* obj)
 {
-    cScriptEntity_OnInSeqLock(self, obj);
+    cScriptEntity_OnInSeqLock((cScriptEntity*)self, obj);
     switch (cScriptPlayerEntity_GetType(obj)) {
     case 0:
         *(int*)((char*)self + 0xC) = *(signed char*)(GetSSXCameraManualHeader(obj) + 0x21);
@@ -1647,14 +1648,14 @@ extern "C" void cScriptEntityCamera_OnInSeqLock(void* self, void* obj)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/bxscriptengine", cScriptEntityCamera_OnInSeqRelease);
 #ifdef SKIP_ASM
-extern "C" void cScriptEntity_OnInSeqRelease(void* self);
+extern "C" void cScriptEntity_OnInSeqRelease(cScriptEntity* self);
 
 /**
  * Releases this camera script entity's InSeq lock (cScriptEntity_OnInSeqRelease) and resets its sub-type (+0xC) to 9.
  */
 extern "C" void cScriptEntityCamera_OnInSeqRelease(void* self)
 {
-    cScriptEntity_OnInSeqRelease(self);
+    cScriptEntity_OnInSeqRelease((cScriptEntity*)self);
     *(int*)((char*)self + 0xC) = 9;
 }
 #endif
@@ -1817,7 +1818,7 @@ extern "C" void cScriptObject_PauseObjScript(cScriptOwner3320* self)
     int i = 0;
     int n = self->GetNumScriptEntities();
     for (; i < n; i++) {
-        cScriptEntity_PauseEntityScript(self->GetScriptEntity(i));
+        cScriptEntity_PauseEntityScript((cScriptEntity*)self->GetScriptEntity(i));
     }
 }
 #endif
@@ -1852,7 +1853,7 @@ extern "C" void cScriptObject_ResumeObjScript(cScriptOwner33A8* self)
     int i = 0;
     int n = self->GetNumScriptEntities();
     for (; i < n; i++) {
-        cScriptEntity_ResumeEntityScript(self->GetScriptEntity(i));
+        cScriptEntity_ResumeEntityScript((cScriptEntity*)self->GetScriptEntity(i));
     }
 }
 #endif

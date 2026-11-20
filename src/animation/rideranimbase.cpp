@@ -188,10 +188,6 @@ INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_getCurrentAnimSequence);
 #ifdef SKIP_ASM
 struct cAnimSequenceNode;
 
-struct cAnimSequencer {
-    int mCount;                        // 0x0
-    cAnimSequenceNode* mFirstSequence; // 0x4
-};
 
 cAnimSequenceNode* cAnimSequencer_getSequence(cAnimSequencer* self, int index);
 
@@ -358,13 +354,13 @@ extern "C" void cRiderAnimBase_changeOrientationOffset(cRiderAnimBase* self, sRa
 {
     for (int i = 0; i < 6; i++) {
         int j = 0;
-        if (j < (self->Sequencer)[i].mCount) {
+        if (j < (self->Sequencer)[i].NumPlaying) {
             do {
             sRabXform_00311B48* src = (sRabXform_00311B48*)((char*)cAnimSequencer_getSequence(&(self->Sequencer)[i], j) + 0x60);
             sRabXform_00311B48* dst = (sRabXform_00311B48*)((char*)cAnimSequencer_getSequence(&(self->Sequencer)[i], j) + 0x60);
             *dst = Combine_00311BF0(*xf, *src);
                 j++;
-            } while (j < (self->Sequencer)[i].mCount);
+            } while (j < (self->Sequencer)[i].NumPlaying);
         }
     }
 }
@@ -386,12 +382,12 @@ extern "C" void cRiderAnimBase_changeIsFlipped(cRiderAnimBase* self, int value)
     for (int i = 0; i < 6; i++)
     {
         int j = 0;
-        if (j < ((cAnimSequencer*)(char*)self->Sequencer)[i].mCount)
+        if (j < ((cAnimSequencer*)(char*)self->Sequencer)[i].NumPlaying)
         {
             do
             {
                 *(int*)((char*)cAnimSequencer_getSequence(&((cAnimSequencer*)(char*)self->Sequencer)[i], j++) + 0x80) = value;
-            } while (j < ((cAnimSequencer*)(char*)self->Sequencer)[i].mCount);
+            } while (j < ((cAnimSequencer*)(char*)self->Sequencer)[i].NumPlaying);
         }
     }
 }
@@ -555,7 +551,7 @@ extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* vself, void* vseq, int ani
         unsigned short* keys = *(unsigned short**)(bank + 0x10);
         cAnimSequence_addTrigger(node, i, keys[(*(unsigned short*)(clip + 0x10) + i) * 2] * 0.03333333507180214f);
     }
-    if (seq->mCount == 1)
+    if (seq->NumPlaying == 1)
     {
         float fadeTime = ((float*)cAIAnimEventMap_getAnimPlayAttr(anim))[5];
         if (fadeTime != 0.0f)
@@ -567,7 +563,7 @@ extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* vself, void* vseq, int ani
     else if (blend != 0.0f)
     {
         sSeqNode_1F00* match = 0;
-        for (int i = 1; i < seq->mCount; i++)
+        for (int i = 1; i < seq->NumPlaying; i++)
         {
             sSeqNode_1F00* other = (sSeqNode_1F00*)cAnimSequencer_getSequence(seq, i);
             cAnimSequence_removeEndTrigger(other, 0x3F);

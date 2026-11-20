@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/trigger/triggeralgorithms.h"
 #include "camera/trigger/cameratriggerman.h"
 #include "camera/camera.h"
 #include "fe/backgroundman.h"
@@ -1591,24 +1592,24 @@ extern sQuad_00173208 D_004FF130_00173208 __asm__("t4vect_Origin");
  *
  * @return @p self
  */
-extern "C" void* cTriggerAlgorithm_cTriggerAlgorithm(void* self)
+extern "C" void* cTriggerAlgorithm_cTriggerAlgorithm(cTriggerAlgorithm* self)
 {
     cChaseAlgorithm_cChaseAlgorithm(self);
-    *(void***)((char*)self + 0x10) = cTriggerAlgorithm_vtbl;
-    *(float*)((char*)self + 0x58) = 0.800000011920929f;
-    *(float*)((char*)self + 0x5C) = 10.300000190734863f;
-    *(float*)((char*)self + 0x60) = 1.100000023841858f;
-    *(float*)((char*)self + 0x64) = 5.0f;
-    *(float*)((char*)self + 0x68) = 10.0f;
-    *(float*)((char*)self + 0x6C) = 70.0f;
-    *(float*)((char*)self + 0x70) = 400.0f;
-    *(int*)((char*)self + 0x74) = 0;
-    *(float*)((char*)self + 0x78) = 20.0f;
-    *(sQuad_00173208*)((char*)self + 0x40) = D_004FF130_00173208;
-    *(int*)((char*)self + 0xC) = 90;
-    *(int*)((char*)self + 0x54) = 0;
-    *(int*)((char*)self + 0x50) = 0;
-    return self;
+    self->mVtbl = cTriggerAlgorithm_vtbl;
+    self->PitchMultiplier = 0.800000011920929f;
+    self->HeadingAdjustRate = 10.300000190734863f;
+    self->PitchAdjustRate = 1.100000023841858f;
+    self->HeadingLookRate = 5.0f;
+    self->PitchLookRate = 10.0f;
+    self->HeightOffset = 70.0f;
+    self->IdealDist = 400.0f;
+    *(int*)&self->LeadDistance = 0;
+    self->PitchOffset = 20.0f;
+    *(sQuad_00173208*)&self->Position = D_004FF130_00173208;
+    self->AlgorithmType = 90;
+    *(int*)&self->Pitch = 0;
+    *(int*)&self->Heading = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1823,10 +1824,10 @@ struct sVE173678b {
  * Calls its own virtual snap (slot 3) with that rider's AI index (slot 7 of the rider's +0x6C0 part, reached through
  * Target +0x30 and its Rider +0x4).
  */
-extern "C" void* cTriggerAlgorithm_snapCurrent(void* self)
+extern "C" void* cTriggerAlgorithm_snapCurrent(cTriggerAlgorithm* self)
 {
-    sVE173678b* vt = *(sVE173678b**)((char*)self + 0x10);
-    char* riderIface = *(char**)(*(char**)((char*)self + 0x30) + 0x4) + 0x6C0;
+    sVE173678b* vt = (sVE173678b*)self->mVtbl;
+    char* riderIface = *(char**)((char*)self->Target + 0x4) + 0x6C0;
     sVE173678a* vt2 = *(sVE173678a**)riderIface;
     return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(riderIface + vt2[7].delta));
 }
@@ -1999,34 +2000,34 @@ static inline float Wrap_1736E0(float v)
  * Position (+0x40) is set from those, then Heading (+0x50) and Pitch (+0x54) turn toward the new camera-to-focus
  * direction by HeadingLookRate (+0x64) / 60 and PitchLookRate (+0x68) / 60 (the pitch step is not wrapped).
  */
-extern "C" void cTriggerAlgorithm_update(char* self)
+extern "C" void cTriggerAlgorithm_update(cTriggerAlgorithm* self)
 {
     t4Vector focusPos, riderVel, riderFront;
-    char* riderTarget = *(char**)(self + 0x30);
+    char* riderTarget = (char*)self->Target;
     sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)riderTarget)[1];
     ((void (*)(void*, void*))vEntry->fn)(&focusPos, riderTarget + vEntry->delta);
-    riderTarget = *(char**)(self + 0x30);
+    riderTarget = (char*)self->Target;
     vEntry = &(*(sVEntry<t4Vector(void*)>**)riderTarget)[3];
     ((void (*)(void*, void*))vEntry->fn)(&riderVel, riderTarget + vEntry->delta);
-    riderTarget = *(char**)(self + 0x30);
+    riderTarget = (char*)self->Target;
     vEntry = &(*(sVEntry<t4Vector(void*)>**)riderTarget)[4];
     ((void (*)(void*, void*))vEntry->fn)(&riderFront, riderTarget + vEntry->delta);
     {
         t4Vector scaledVec;
-        ScaleTo_1736E0(scaledVec, D_004FF160_36E0, *(float*)(self + 0x6C));
+        ScaleTo_1736E0(scaledVec, D_004FF160_36E0, self->HeightOffset);
         AddEq_1736E0(focusPos, scaledVec);
-        ScaleTo_1736E0(scaledVec, riderFront, *(float*)(self + 0x74));
+        ScaleTo_1736E0(scaledVec, riderFront, self->LeadDistance);
         AddEq_1736E0(focusPos, scaledVec);
     }
-    *(t4Vector*)(self + 0x20) = focusPos;
-    t4Vector toFocus = Sub_1736E0(focusPos, *(t4Vector*)(self + 0x40));
+    self->CamTargetPos = focusPos;
+    t4Vector toFocus = Sub_1736E0(focusPos, self->Position);
     float yawD = Atan2_1736E0(toFocus.y, toFocus.x);
     float yawC = Atan2_1736E0(riderFront.y, riderFront.x);
     float diff = Wrap_1736E0(yawC) - yawD;
     float wd = Wrap_1736E0(diff);
     float len3 = Length_1736E0(toFocus);
-    float dd = *(float*)(self + 0x70) - len3;
-    float yawN = yawD + wd * *(float*)(self + 0x5C) * 0.01666666753590107f;
+    float dd = self->IdealDist - len3;
+    float yawN = yawD + wd * self->HeadingAdjustRate * 0.01666666753590107f;
     float dist;
     if (Abs_1736E0(dd) > 5000.0f) {
         dist = len3 + dd;
@@ -2042,8 +2043,8 @@ extern "C" void cTriggerAlgorithm_update(char* self)
     }
     float pitchD = Atan2_1736E0(-toFocus.z, Len2_1736E0(sVec2(toFocus.x, toFocus.y)));
     float pitchC = Atan2_1736E0(riderFront.z, Len2_1736E0(sVec2(riderFront.x, riderFront.y)));
-    float tp = pitchC * -*(float*)(self + 0x58) + *(float*)(self + 0x78) * 0.01745329424738884f;
-    float pitchN = pitchD + (Wrap_1736E0(tp) - pitchD) * *(float*)(self + 0x60) * 0.01666666753590107f;
+    float tp = pitchC * -self->PitchMultiplier + self->PitchOffset * 0.01745329424738884f;
+    float pitchN = pitchD + (Wrap_1736E0(tp) - pitchD) * self->PitchAdjustRate * 0.01666666753590107f;
     t4Vector dir;
     t4Vector n;
     float sc0, sc1, sc2, sc3;
@@ -2058,14 +2059,14 @@ extern "C" void cTriggerAlgorithm_update(char* self)
         ScaleTo_1736E0(scaledVec, dir, dist);
         n = SubN_1736E0(focusPos, scaledVec);
     }
-    *(t4Vector*)(self + 0x40) = n;
-    n = SubN_1736E0(focusPos, *(t4Vector*)(self + 0x40));
+    self->Position = n;
+    n = SubN_1736E0(focusPos, self->Position);
     float yawE = Atan2_1736E0(n.y, n.x);
-    float oy = *(float*)(self + 0x50);
-    *(float*)(self + 0x50) = oy + Wrap_1736E0(yawE - oy) * *(float*)(self + 0x64) * 0.01666666753590107f;
+    float oy = self->Heading;
+    self->Heading = oy + Wrap_1736E0(yawE - oy) * self->HeadingLookRate * 0.01666666753590107f;
     float pitchE = Atan2_1736E0(n.z, Len2_1736E0(sVec2(n.x, n.y)));
-    float op = *(float*)(self + 0x54);
-    *(float*)(self + 0x54) = op + (pitchE - op) * *(float*)(self + 0x68) * 0.01666666753590107f;
+    float op = self->Pitch;
+    self->Pitch = op + (pitchE - op) * self->PitchLookRate * 0.01666666753590107f;
 }
 #endif
 
@@ -2236,7 +2237,7 @@ extern "C" sPair_173E40 cTriggerAlgorithm_getPose(char* src)
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_cBoundedAlgorithm);
 #ifdef SKIP_ASM
 extern void* cBoundedAlgorithm_vtbl[];
-extern "C" void* cTriggerAlgorithm_cTriggerAlgorithm(void* self);
+extern "C" void* cTriggerAlgorithm_cTriggerAlgorithm(cTriggerAlgorithm* self);
 
 /**
  * Constructs a bounded trigger camera: a trigger camera whose position is kept inside a bound object.
@@ -2248,14 +2249,14 @@ extern "C" void* cTriggerAlgorithm_cTriggerAlgorithm(void* self);
  *
  * @return @p self
  */
-extern "C" void* cBoundedAlgorithm_cBoundedAlgorithm(void* self)
+extern "C" void* cBoundedAlgorithm_cBoundedAlgorithm(cBoundedAlgorithm* self)
 {
-    cTriggerAlgorithm_cTriggerAlgorithm(self);
-    *(int*)((char*)self + 0xC) = 91;
-    *(void***)((char*)self + 0x10) = cBoundedAlgorithm_vtbl;
-    *(int*)((char*)self + 0x80) = 0;
-    *(int*)((char*)self + 0x74) = 0;
-    return self;
+    cTriggerAlgorithm_cTriggerAlgorithm((cTriggerAlgorithm*)self);
+    self->AlgorithmType = 91;
+    self->mVtbl = cBoundedAlgorithm_vtbl;
+    self->BoundAction = 0;
+    *(int*)&self->LeadDistance = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -2419,14 +2420,14 @@ static inline float Atan2_174200(float y, float x)
  * CamTargetPos (+0x20). The action's BoundObj (+0x8) then limits Position (+0x40) through its virtual slot 6
  * (limitPoint), and Heading (+0x50) and Pitch (+0x54) are set to look straight from Position at the target.
  */
-extern "C" void cBoundedAlgorithm_update(char* self)
+extern "C" void cBoundedAlgorithm_update(cBoundedAlgorithm* self)
 {
-    char* act = *(char**)(self + 0x80);
-    *(float*)(self + 0x70) = *(float*)(act + 0x10);
-    *(float*)(self + 0x6C) = *(float*)(act + 0x18);
-    *(float*)(self + 0x78) = *(float*)(act + 0x1C);
-    *(float*)(self + 0x00) = *(float*)(act + 0x14);
-    *(float*)(self + 0x74) = *(float*)(act + 0x20);
+    char* act = (char*)self->BoundAction;
+    self->IdealDist = *(float*)(act + 0x10);
+    self->HeightOffset = *(float*)(act + 0x18);
+    self->PitchOffset = *(float*)(act + 0x1C);
+    self->View = *(float*)(act + 0x14);
+    self->LeadDistance = *(float*)(act + 0x20);
     t4Vector lookTarget;
     if (*(int*)(act + 0x24) == 1) {
         lookTarget.x = *(float*)(act + 0x28);
@@ -2435,28 +2436,28 @@ extern "C" void cBoundedAlgorithm_update(char* self)
         lookTarget.w = 1.0f;
     } else {
         t4Vector leadPos, riderPos, leadOffset, riderFront;
-        char* calleeObj = *(char**)(self + 0x30);
+        char* calleeObj = (char*)self->Target;
         sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)calleeObj)[1];
         ((void (*)(void*, void*))vEntry->fn)(&riderPos, calleeObj + vEntry->delta);
-        float k = *(float*)(self + 0x74);
-        calleeObj = *(char**)(self + 0x30);
+        float k = self->LeadDistance;
+        calleeObj = (char*)self->Target;
         vEntry = &(*(sVEntry<t4Vector(void*)>**)calleeObj)[4];
         ((void (*)(void*, void*))vEntry->fn)(&riderFront, calleeObj + vEntry->delta);
         ScaleTo_174200(leadOffset, riderFront, k);
         AddTo_174200(leadPos, riderPos, leadOffset);
         t4Vector heightLift;
-        ScaleTo_174200(heightLift, D_004FF160_4200, *(float*)(self + 0x6C));
+        ScaleTo_174200(heightLift, D_004FF160_4200, self->HeightOffset);
         AddTo_174200(lookTarget, leadPos, heightLift);
     }
-    *(t4Vector*)(self + 0x20) = lookTarget;
+    self->CamTargetPos = lookTarget;
     {
-        char* calleeObj = *(char**)(*(char**)(self + 0x80) + 8);
+        char* calleeObj = *(char**)((char*)self->BoundAction + 8);
         sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)(calleeObj + 0x24))[6];
-        ((void (*)(void*, void*))vEntry->fn)(calleeObj + vEntry->delta, self + 0x40);
+        ((void (*)(void*, void*))vEntry->fn)(calleeObj + vEntry->delta, ((char*)self) + 0x40);
     }
-    t4Vector toTarget = Sub_174200(lookTarget, *(t4Vector*)(self + 0x40));
-    *(float*)(self + 0x50) = Atan2_174200(toTarget.y, toTarget.x);
-    *(float*)(self + 0x54) = Atan2_174200(toTarget.z, Len2_174200(sVec2(toTarget.x, toTarget.y)));
+    t4Vector toTarget = Sub_174200(lookTarget, self->Position);
+    self->Heading = Atan2_174200(toTarget.y, toTarget.x);
+    self->Pitch = Atan2_174200(toTarget.z, Len2_174200(sVec2(toTarget.x, toTarget.y)));
 }
 #endif
 
@@ -2605,15 +2606,15 @@ extern "C" void cTriggerAlgorithm_snap(void* self, long a1);
  *
  * @param subjectId  the subject to snap for: the rider's AI index (On Tour subjectID)
  */
-extern "C" void cBoundedAlgorithm_snap(char* self, long subjectId)
+extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
 {
     {
-        char* calleeObj = *(char**)(*(char**)(self + 0x30) + 4) + 0x6C0;
+        char* calleeObj = *(char**)((char*)self->Target + 4) + 0x6C0;
         sVEntry<long(void*)>* vEntry = &(*(sVEntry<long(void*)>**)calleeObj)[7];
         if (vEntry->fn(calleeObj + vEntry->delta) != subjectId)
             return;
     }
-    char* act = *(char**)(self + 0x80);
+    char* act = (char*)self->BoundAction;
     t4Vector lookTarget;
     if (*(int*)(act + 0x24) == 1) {
         lookTarget.x = *(float*)(act + 0x28);
@@ -2622,34 +2623,34 @@ extern "C" void cBoundedAlgorithm_snap(char* self, long subjectId)
         lookTarget.w = 1.0f;
     } else {
         t4Vector leadPos, riderPos, leadOffset, riderFront;
-        char* calleeObj = *(char**)(self + 0x30);
+        char* calleeObj = (char*)self->Target;
         sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)calleeObj)[1];
         ((void (*)(void*, void*))vEntry->fn)(&riderPos, calleeObj + vEntry->delta);
-        float k = *(float*)(self + 0x74);
-        calleeObj = *(char**)(self + 0x30);
+        float k = self->LeadDistance;
+        calleeObj = (char*)self->Target;
         vEntry = &(*(sVEntry<t4Vector(void*)>**)calleeObj)[4];
         ((void (*)(void*, void*))vEntry->fn)(&riderFront, calleeObj + vEntry->delta);
         ScaleTo_1744B0(leadOffset, riderFront, k);
         AddTo_1744B0(leadPos, riderPos, leadOffset);
         t4Vector heightLift;
-        ScaleTo_1744B0(heightLift, D_004FF160_44B0, *(float*)(self + 0x6C));
+        ScaleTo_1744B0(heightLift, D_004FF160_44B0, self->HeightOffset);
         AddTo_1744B0(lookTarget, leadPos, heightLift);
     }
-    char* act2 = *(char**)(self + 0x80);
-    *(float*)(self + 0x70) = *(float*)(act2 + 0x10);
-    *(float*)(self + 0x6C) = *(float*)(act2 + 0x18);
-    *(float*)(self + 0x78) = *(float*)(act2 + 0x1C);
-    *(float*)(self + 0x00) = *(float*)(act2 + 0x14);
-    *(float*)(self + 0x74) = *(float*)(act2 + 0x20);
-    cTriggerAlgorithm_snap(self, subjectId);
+    char* act2 = (char*)self->BoundAction;
+    self->IdealDist = *(float*)(act2 + 0x10);
+    self->HeightOffset = *(float*)(act2 + 0x18);
+    self->PitchOffset = *(float*)(act2 + 0x1C);
+    self->View = *(float*)(act2 + 0x14);
+    self->LeadDistance = *(float*)(act2 + 0x20);
+    cTriggerAlgorithm_snap(((char*)self), subjectId);
     {
-        char* calleeObj = *(char**)(*(char**)(self + 0x80) + 8);
+        char* calleeObj = *(char**)((char*)self->BoundAction + 8);
         sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)(calleeObj + 0x24))[6];
-        ((void (*)(void*, void*))vEntry->fn)(calleeObj + vEntry->delta, self + 0x40);
+        ((void (*)(void*, void*))vEntry->fn)(calleeObj + vEntry->delta, ((char*)self) + 0x40);
     }
-    t4Vector toTarget = Sub_1744B0(lookTarget, *(t4Vector*)(self + 0x40));
-    *(float*)(self + 0x50) = Atan2_1744B0(toTarget.y, toTarget.x);
-    *(float*)(self + 0x54) = Atan2_1744B0(toTarget.z, Len2_1744B0(sVec2(toTarget.x, toTarget.y)));
+    t4Vector toTarget = Sub_1744B0(lookTarget, self->Position);
+    self->Heading = Atan2_1744B0(toTarget.y, toTarget.x);
+    self->Pitch = Atan2_1744B0(toTarget.z, Len2_1744B0(sVec2(toTarget.x, toTarget.y)));
 }
 #endif
 
@@ -2674,10 +2675,10 @@ struct sVE1747A0b {
  * Calls its own virtual snap (slot 3, cBoundedAlgorithm_snap) with that rider's AI index (slot 7 of the rider's +0x6C0 part,
  * through Target +0x30 and its Rider +0x4).
  */
-extern "C" void* cBoundedAlgorithm_snapCurrent(void* self)
+extern "C" void* cBoundedAlgorithm_snapCurrent(cBoundedAlgorithm* self)
 {
-    sVE1747A0b* vt = *(sVE1747A0b**)((char*)self + 0x10);
-    char* riderIface = *(char**)(*(char**)((char*)self + 0x30) + 0x4) + 0x6C0;
+    sVE1747A0b* vt = (sVE1747A0b*)self->mVtbl;
+    char* riderIface = *(char**)((char*)self->Target + 0x4) + 0x6C0;
     sVE1747A0a* vt2 = *(sVE1747A0a**)riderIface;
     return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(riderIface + vt2[7].delta));
 }
@@ -3565,8 +3566,8 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_getBoundAct
  * @param boundedAlgo  the bounded camera algorithm (this)
  * @return the cCTActionBoundedCam pointer at +0x80
  */
-extern "C" int cBoundedAlgorithm_getBoundAction(void *boundedAlgo) {
-    return (*(int *)((char*)(boundedAlgo) + (0x80)));
+extern "C" int cBoundedAlgorithm_getBoundAction(cBoundedAlgorithm* boundedAlgo) {
+    return ((int)boundedAlgo->BoundAction);
 }
 #endif
 //100%
