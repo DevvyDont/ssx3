@@ -1,12 +1,6 @@
 #include "common.h"
 
-struct cCameraTriggerList {
-    int field_0x0;
-    int field_0x4;
-    int field_0x8;
-    int field_0xC;
-    int field_0x10;
-};
+#include "camera/trigger/cameratriggerlist.h"
 
 void cCameraTriggerList_initHeader(cCameraTriggerList* self);
 
@@ -20,7 +14,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_init__FP18cCa
  */
 void cCameraTriggerList_init(cCameraTriggerList* self)
 {
-    self->field_0x0 = 0;
+    self->Triggers = 0;
     cCameraTriggerList_initHeader(self);
 }
 #endif
@@ -62,7 +56,7 @@ struct sTrigList_16BF40
  *
  * @param self_  the cCameraTriggerList
  */
-extern "C" void cCameraTriggerList_reset(void* self_)
+extern "C" void cCameraTriggerList_reset(cCameraTriggerList* self_)
 {
     sTrigList_16BF40* self = (sTrigList_16BF40*)self_;
     for (int i = 0; i < self->count; i++)
@@ -97,7 +91,7 @@ extern "C" void cCameraTriggerList_reset(void* self_)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_purge);
 #ifdef SKIP_ASM
-extern "C" void cCameraTriggerList_reset(void*);
+extern "C" void cCameraTriggerList_reset(cCameraTriggerList*);
 void cMemMan_free(void*);
 
 /**
@@ -108,7 +102,7 @@ void cMemMan_free(void*);
  */
 extern "C" void cCameraTriggerList_purge(void** self)
 {
-    cCameraTriggerList_reset(self);
+    cCameraTriggerList_reset((cCameraTriggerList*)self);
     if (*self != 0) {
         cMemMan_free(*self);
         *self = 0;
@@ -133,10 +127,10 @@ INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_findTrigger);
  * @param key  the trigger ID to look for
  * @return the matching trigger, or 0
  */
-extern "C" int* cCameraTriggerList_findTrigger(cCameraTriggerList2* self, int key)
+extern "C" int* cCameraTriggerList_findTrigger(cCameraTriggerList* self, int key)
 {
-    for (int i = 0; i < self->count; i++) {
-        int* entry = (int*)self->arr[i];
+    for (int i = 0; i < self->NumTriggers; i++) {
+        int* entry = (int*)(void**)self->Triggers[i];
         if (*entry == key)
             return entry;
     }
@@ -179,7 +173,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_loadFromFile)
 extern "C" int BXFILE_exists(const char* name);
 extern "C" int BXFILE_size(const char* name);
 extern "C" void FILE_loadpackat(const char* name, void* buf, int size);
-extern "C" int cCameraTriggerList_loadFromBuffer(void* self, void* buf);
+extern "C" int cCameraTriggerList_loadFromBuffer(cCameraTriggerList* self, void* buf);
 // PORT: operator_new__FUi takes (size, tag, flags, align) here.
 void* operator_new_K2(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_Read_Buffer[];
@@ -196,7 +190,7 @@ extern char str_Read_Buffer[];
  * @return 0 on success, 1 if the file is missing, 2 if the buffer could not be allocated, otherwise the
  *         error from cCameraTriggerList_loadFromBuffer()
  */
-extern "C" int cCameraTriggerList_loadFromFile(void* self, const char* name)
+extern "C" int cCameraTriggerList_loadFromFile(cCameraTriggerList* self, const char* name)
 {
     if (!BXFILE_exists(name))
         return 1;
@@ -251,23 +245,23 @@ struct tCameraTrigger_K3 {
  * @param buf    start of the file image
  * @return 0 on success, 3 for a wrong version, otherwise readTrigger's error
  */
-extern "C" int cCameraTriggerList_loadFromBuffer(void* self_, void* buf)
+extern "C" int cCameraTriggerList_loadFromBuffer(cCameraTriggerList* self_, void* buf)
 {
     cCameraTriggerList* self = (cCameraTriggerList*)self_;
     void* cur = buf;
     cCameraTriggerList_initHeader(self);
     cCameraTriggerList_readCookie(self, &cur);
-    if (self->field_0xC != 7) {
-        self->field_0xC = 7;
+    if (self->Cookie != 7) {
+        self->Cookie = 7;
         return 3;
     }
     int status = cCameraTriggerList_readHeader_K3(self, &cur, 7);
     if (status != 0)
         return status;
-    self->field_0x0 = (int)operator_new_K3(self->field_0x4 * 4, str_Camera_Trigger_Array, 0, 0);
-    for (int i = 0; i < self->field_0x4; i++) {
+    self->Triggers = (tCameraTrigger**)operator_new_K3(self->NumTriggers * 4, str_Camera_Trigger_Array, 0, 0);
+    for (int i = 0; i < self->NumTriggers; i++) {
         tCameraTrigger_K3* newTrig = new (str_Camera_Trigger, 0, 0) tCameraTrigger_K3;
-        status = readTrigger(&cur, &newTrig, self->field_0xC);
+        status = readTrigger(&cur, &newTrig, self->Cookie);
         if (status != 0) {
             if (newTrig != 0)
                 tCameraTrigger__tCameraTrigger(newTrig, 3);
@@ -275,7 +269,7 @@ extern "C" int cCameraTriggerList_loadFromBuffer(void* self_, void* buf)
         }
         cCameraTriggerList_insert((cCameraTriggerList2*)self, newTrig, i);
     }
-    self->field_0xC = 7;
+    self->Cookie = 7;
     return 0;
 }
 #endif
@@ -307,10 +301,10 @@ INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_initHeader__F
  */
 void cCameraTriggerList_initHeader(cCameraTriggerList* self)
 {
-    self->field_0x4 = 0;
-    self->field_0xC = 7;
-    self->field_0x8 = 0;
-    self->field_0x10 = 0;
+    self->NumTriggers = 0;
+    self->Cookie = 7;
+    self->NextID = 0;
+    self->Time = 0;
 }
 #endif
 
@@ -322,14 +316,14 @@ INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_readCookie__F
 /**
  * Reads a trigger file's version cookie into the list.
  *
- * Stores the next uint from the stream in the version field (+0x0C); cCameraTriggerList_loadFromBuffer()
+ * Stores the next uint from the stream in Cookie (the format version); cCameraTriggerList_loadFromBuffer()
  * requires 7.
  *
  * @param buffer  pointer to the stream's read cursor
  */
 void cCameraTriggerList_readCookie(cCameraTriggerList* self, void* buffer)
 {
-    get_uint(buffer, (char*)self + 0xC);
+    get_uint(buffer, &self->Cookie);
 }
 #endif
 
@@ -350,9 +344,9 @@ int get_uint_c(void* buffer, void* dest) __asm__("get_uint");
  */
 extern "C" int cCameraTriggerList_readHeader(cCameraTriggerList* self, void* buffer)
 {
-    get_uint_c(buffer, &self->field_0x10);
-    get_uint_c(buffer, &self->field_0x4);
-    get_uint_c(buffer, &self->field_0x8);
+    get_uint_c(buffer, &self->Time);
+    get_uint_c(buffer, &self->NumTriggers);
+    get_uint_c(buffer, &self->NextID);
     return 0;
 }
 #endif

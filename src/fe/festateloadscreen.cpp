@@ -138,10 +138,7 @@ INCLUDE_ASM("fe/festateloadscreen", func_00233640);
 int cBENewPlayerInterface_getPlayerCharID(void* self, int idx);
 int cBENewPlayerInterface_getRiderCharID(void* self, int idx);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* player, int idx);
-struct cBigFile {
-    int field_0x0;
-    int field_0x4;
-};
+#include "bx/bigfile.h"
 // PORT: cBigFile_cBigFile1 really takes (self, path, flags); bound by asm label.
 cBigFile* cBigFile_cBigFile1_3640(cBigFile* self, const char* path, int flags) __asm__("cBigFile_cBigFile1__FP8cBigFile");
 void cBigFile__cBigFile(cBigFile* self, int flags);

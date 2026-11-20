@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/trigger/cameratriggerlist.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -2583,7 +2584,7 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cCameraTriggerList__cCameraTriggerList(void* self, int flags)
+extern "C" void cCameraTriggerList__cCameraTriggerList(cCameraTriggerList* self, int flags)
 {
     if (flags & 1) {
         operator_delete((int*)self);

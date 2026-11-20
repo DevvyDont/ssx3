@@ -1,10 +1,7 @@
 #include "common.h"
 #include "bx/blockman.h"
 
-struct cBigFile {
-    int field_0x0;
-    int field_0x4;
-};
+#include "bx/bigfile.h"
 
 //100%
 INCLUDE_ASM("bx/bigfile", cBigFile_cBigFile__FP8cBigFile);
@@ -16,8 +13,8 @@ INCLUDE_ASM("bx/bigfile", cBigFile_cBigFile__FP8cBigFile);
  */
 cBigFile* cBigFile_cBigFile(cBigFile* self)
 {
-    self->field_0x4 = 0;
-    self->field_0x0 = -1;
+    self->Mounted = 0;
+    self->Handle = -1;
     return self;
 }
 #endif
@@ -37,8 +34,8 @@ INCLUDE_ASM("bx/bigfile", cBigFile_cBigFile1__FP8cBigFile);
  */
 cBigFile* cBigFile_cBigFile1(cBigFile* self)
 {
-    self->field_0x4 = 0;
-    self->field_0x0 = -1;
+    self->Mounted = 0;
+    self->Handle = -1;
     cBigFile_open(self);
     return self;
 }
@@ -81,10 +78,10 @@ int FILESYS_delbigsync_ret(int handle, int arg) __asm__("FILESYS_delbigsync");
 int cBigFile_close(cBigFile* self)
 {
     int result = 1;
-    if (self->field_0x4 != 0) {
-        result = FILESYS_delbigsync_ret(self->field_0x0, 100) != 0;
+    if (self->Mounted != 0) {
+        result = FILESYS_delbigsync_ret(self->Handle, 100) != 0;
     }
-    self->field_0x4 = 0;
+    self->Mounted = 0;
     return result;
 }
 #endif
@@ -117,10 +114,10 @@ int cBigFile_open_impl(cBigFile* self, const char* name, int memclass)
     int saved = D_004A2E78;
     D_004A2E78 = memclass;
     if (FILESYS_addbigsync(name, memclass, 100, self) != 0) {
-        self->field_0x4 = 1;
+        self->Mounted = 1;
     }
     D_004A2E78 = saved;
-    return self->field_0x4;
+    return self->Mounted;
 }
 #endif
 

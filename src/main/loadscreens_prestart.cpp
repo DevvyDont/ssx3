@@ -1181,10 +1181,7 @@ INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_loadTexture);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getPlayerCharID(void* self, int idx);
-struct cBigFile {
-    int field_0x0;
-    int field_0x4;
-};
+#include "bx/bigfile.h"
 // PORT: cBigFile_cBigFile1 really takes (self, path, flags); bound by asm label.
 cBigFile* cBigFile_cBigFile1_3048(cBigFile* self, const char* path, int flags) __asm__("cBigFile_cBigFile1__FP8cBigFile");
 void cBigFile__cBigFile(cBigFile* self, int flags);
