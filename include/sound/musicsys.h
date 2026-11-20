@@ -51,7 +51,7 @@ struct cMusicSys {
     char mTitle[64][100];                     // 0x0934 [R] ini TITLE; [U] func_002B40F0 returns mTitle[i or mCurrentSongNum]
     char mArtist[64][100];                    // 0x2234 [R] ini ARTIST; [U] func_002B4120
     char mAlbum[64][100];                     // 0x3B34 [R] ini ALBUM; [U] func_002B4150
-    char* mMPFFile;                           // 0x5434 [R] operator new[](0x6400, "MPF data file"), freed by the dtor; preview assert "gMusicSys->GetMPFFile() != NULL"; [U] func_002B4AE8__FPv returns it, func_002B4A20 loads into it
+    char* mMPFFile;                           // 0x5434 [R] operator new[](0x6400, "MPF data file"), freed by the dtor; preview assert "gMusicSys->GetMPFFile() != NULL"; [U] cMusicSys_GetMPFFile__FPv returns it, func_002B4A20 loads into it
     void* unk_5438;                           // 0x5438 [R] ctor 0; [U] func_002B4A20: async file handle of the MPF load (ASYNCFILE_cancel/release), func_002B4AA0 polls it
     int mShortcut;                            // 0x543C [R] ctor 0; [P] SetShortcut / GetOnShortcut (preview 0x5540, bracketed 0x5434..0x5440)
     void** mVtbl;                             // 0x5440 [R] cMusicSys vptr: D_004838F8 (cMusicSys ctor/dtor), D_00483688 in cSSXAudio; [U] func_002B3BC0/func_002B4540/func_002B4978 call through it
