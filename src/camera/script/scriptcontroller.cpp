@@ -151,6 +151,15 @@ struct sScrAlgoList {
 
 extern "C" void func_0015CA50(sScrAlgoList* list, sScrAlgoNode* node);
 
+/**
+ * Removes a script camera's algorithm from the controller.
+ *
+ * Only when the flag at +0x18 is set (cScriptCameraController_addCamera sets it): finds the node of AlgorithmList whose
+ * algorithm is the one stored at +0x1C of @p algo, removes it with func_0015CA50, and clears the flag when the list
+ * is then empty.
+ *
+ * @param algo  the script camera object (On Tour's cScriptObjCamera)
+ */
 extern "C" void func_001692D8(void* self, void* algo)
 {
     if (*(int*)((char*)self + 0x18) != 0) {
@@ -310,6 +319,11 @@ void cScriptAlgorithm_setScriptObj(void* self, int val)
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_001694B0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns a script camera algorithm's script object (+0x14, set by cScriptAlgorithm_setScriptObj__FPvi).
+ *
+ * @return the script object (On Tour's cScriptObjCamera*); cScriptCameraController_update reads its time at +0x18
+ */
 int func_001694B0(void* self)
 {
     return *(int*)((char*)self + 0x14);
@@ -2320,6 +2334,11 @@ static inline float Clamp_0016BC88(float v, float lo, float hi)
     return lo;
 }
 
+/**
+ * Clamps a field of view to [5, 80] (degrees) in place.
+ *
+ * @param fov  the value to clamp
+ */
 extern "C" void func_0016BC88(float* fov)
 {
     *fov = Clamp_0016BC88(*fov, 5.0f, 80.0f);
@@ -2337,6 +2356,11 @@ static inline float Clamp_0016BCB8(float v, float lo, float hi)
     return lo;
 }
 
+/**
+ * Clamps a lead value to [-3000, 3000] in place.
+ *
+ * @param lead  the value to clamp
+ */
 extern "C" void func_0016BCB8(float* lead)
 {
     *lead = Clamp_0016BCB8(*lead, -3000.0f, 3000.0f);
@@ -2356,6 +2380,11 @@ static inline float ffloor_BCE0(float x)
     return t;
 }
 
+/**
+ * Wraps an angle in radians into [-pi, pi) in place (subtracts the nearest multiple of 2 pi, rounding halves up).
+ *
+ * @param angle  the angle to wrap
+ */
 extern "C" void func_0016BCE0(float* angle)
 {
     float radians = *angle;
@@ -2392,6 +2421,11 @@ static inline float Wrap_BD30(float a)
     return a - n * 6.2831854820251465f;
 }
 
+/**
+ * Wraps an angle in radians into [-pi, pi) and then clamps it to [-pi / 2, pi / 2], in place.
+ *
+ * @param angle  the angle to limit
+ */
 extern "C" void func_0016BD30(float* angle)
 {
     float w = Wrap_BD30(*angle);
@@ -2404,6 +2438,11 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_0016BDA0);
 #ifdef SKIP_ASM
 extern "C" void func_0016BCE0(float* p);
 
+/**
+ * Wraps an angle in degrees into [-180, 180) in place (converts to radians, func_0016BCE0, converts back).
+ *
+ * @param angle  the angle to wrap
+ */
 extern "C" void func_0016BDA0(float* angle)
 {
     float radians = *angle * 0.01745329424738884f;
@@ -2416,6 +2455,12 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_0016BDE8);
 #ifdef SKIP_ASM
 extern "C" void func_0016BD30(float* p);
 
+/**
+ * Wraps an angle in degrees into [-180, 180) and clamps it to [-90, 90], in place (through radians and
+ * func_0016BD30).
+ *
+ * @param angle  the angle to limit
+ */
 extern "C" void func_0016BDE8(float* angle)
 {
     float radians = *angle * 0.01745329424738884f;
@@ -2435,6 +2480,11 @@ static inline float Clamp_0016BE30(float v, float lo, float hi)
     return lo;
 }
 
+/**
+ * Clamps an angle in degrees to [-180, 180] in place.
+ *
+ * @param angle  the value to clamp
+ */
 extern "C" void func_0016BE30(float* angle)
 {
     *angle = Clamp_0016BE30(*angle, -180.0f, 180.0f);
@@ -2452,6 +2502,11 @@ static inline float Clamp_0016BE60(float v, float lo, float hi)
     return lo;
 }
 
+/**
+ * Clamps a jitter value to [0, 10] in place.
+ *
+ * @param jitter  the value to clamp
+ */
 extern "C" void func_0016BE60(float* jitter)
 {
     *jitter = Clamp_0016BE60(*jitter, 0.0f, 10.0f);
@@ -2469,6 +2524,11 @@ static inline float Clamp_0016BE90(float v, float lo, float hi)
     return lo;
 }
 
+/**
+ * Clamps a jitter value to [0, 30] in place.
+ *
+ * @param jitter  the value to clamp
+ */
 extern "C" void func_0016BE90(float* jitter)
 {
     *jitter = Clamp_0016BE90(*jitter, 0.0f, 30.0f);
@@ -2486,6 +2546,11 @@ static inline float Clamp_0016BEC0(float v, float lo, float hi)
     return lo;
 }
 
+/**
+ * Clamps a distance to [-10000, 10000] in place.
+ *
+ * @param dist  the value to clamp
+ */
 extern "C" void func_0016BEC0(float* dist)
 {
     *dist = Clamp_0016BEC0(*dist, -10000.0f, 10000.0f);
@@ -2495,6 +2560,11 @@ extern "C" void func_0016BEC0(float* dist)
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", func_0016BEE8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs a camera trigger list: clears its first word (the trigger array pointer).
+ *
+ * @return @p self
+ */
 void* func_0016BEE8(void* self)
 {
     *(int*)self = 0;
@@ -2507,6 +2577,11 @@ INCLUDE_ASM("camera/script/scriptcontroller", func_0016BEF8);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a camera trigger list: frees its memory with operator_delete when @p flags bit 0 is set; nothing else.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
+ */
 extern "C" void func_0016BEF8(void* self, int flags)
 {
     if (flags & 1) {

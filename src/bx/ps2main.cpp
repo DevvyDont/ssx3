@@ -151,6 +151,18 @@ extern "C" void func_00401718(int);
 extern "C" void func_00425FB8(void);
 extern "C" void func_0042C6A0(int, int, int);
 
+/**
+ * Shuts the game's systems down and loads another executable with func_0042C6A0.
+ *
+ * Calls virtual slot 2 of cAppMan_TheAppMan (cAppMan_loadexecpurge in cAppMan_vtbl, which purges the execution
+ * manager), then func_00402450(2), func_00401718(0) and func_00401718(5) (func_00401718 has the shape of libcdvd's
+ * sceCdInit; mode 5 shuts the CD client down), func_00425FB8 (removes the DMAC 5 handler), and finally passes the
+ * arguments to func_0042C6A0, which packs them with func_0042C510 and calls _LoadExecPS2.
+ *
+ * @param a0  path of the executable to load
+ * @param a1  argument count
+ * @param a2  argument strings
+ */
 extern "C" void func_0031B008(int a0, int a1, int a2)
 {
     D_004A5B64_B008->v02();
@@ -165,6 +177,15 @@ extern "C" void func_0031B008(int a0, int a1, int a2)
 //100%
 INCLUDE_ASM("bx/ps2main", func_0031B088);
 #ifdef SKIP_ASM
+/**
+ * Returns the determinant of a 2x2 matrix passed row by row: first * fourth - second * third.
+ *
+ * @param a  row 0, column 0
+ * @param b  row 0, column 1
+ * @param c  row 1, column 0
+ * @param d  row 1, column 1
+ * @return the determinant
+ */
 extern "C" float func_0031B088(float a, float b, float c, float d)
 {
     return a * d - b * c;
@@ -176,6 +197,23 @@ INCLUDE_ASM("bx/ps2main", func_0031B098);
 #ifdef SKIP_ASM
 extern "C" float func_0031B088(float a, float b, float c, float d);
 
+/**
+ * Returns the determinant of a 3x3 matrix passed row by row, by cofactor expansion along the first column.
+ *
+ * The three 2x2 minors come from func_0031B088. func_0031B178 and func_0031B310 pass 3x3 minors of a 4x4 matrix
+ * column by column; the determinant is the same either way.
+ *
+ * @param a  row 0, column 0
+ * @param b  row 0, column 1
+ * @param c  row 0, column 2
+ * @param d  row 1, column 0
+ * @param e  row 1, column 1
+ * @param f  row 1, column 2
+ * @param g  row 2, column 0
+ * @param h  row 2, column 1
+ * @param i  row 2, column 2
+ * @return the determinant
+ */
 // 3x3 determinant by cofactor expansion along the first column.
 extern "C" float func_0031B098(float a, float b, float c, float d, float e, float f, float g, float h, float i)
 {
@@ -188,6 +226,14 @@ INCLUDE_ASM("bx/ps2main", func_0031B178);
 #ifdef SKIP_ASM
 extern "C" float func_0031B098(float a, float b, float c, float d, float e, float f, float g, float h, float i);
 
+/**
+ * Returns the determinant of a 4x4 matrix by cofactor expansion along the first row.
+ *
+ * Each cofactor is a 3x3 minor from func_0031B098. func_0031B6C8 divides the adjugate by it to invert the matrix.
+ *
+ * @param vm  the 4x4 float matrix (row-major, 16 floats)
+ * @return the determinant
+ */
 // 4x4 determinant by cofactor expansion along the first row.
 extern "C" float func_0031B178(void* vm)
 {
@@ -221,6 +267,14 @@ INCLUDE_ASM("bx/ps2main", func_0031B310);
 #ifdef SKIP_ASM
 extern "C" float func_0031B098(float a, float b, float c, float d, float e, float f, float g, float h, float i);
 
+/**
+ * Replaces a 4x4 matrix with its adjugate (the transposed matrix of cofactors), in place.
+ *
+ * Copies all 16 elements first, then writes each element [r][c] as the signed 3x3 minor (func_0031B098) of element
+ * [c][r]. func_0031B6C8 scales the result by 1/determinant to get the inverse.
+ *
+ * @param vm  the 4x4 float matrix (row-major, 16 floats)
+ */
 // 4x4 adjoint (transposed cofactor matrix), in place.
 extern "C" void func_0031B310(void* vm)
 {
@@ -268,6 +322,14 @@ INCLUDE_ASM("bx/ps2main", func_0031B6C8);
 extern "C" float func_0031B178(void* m);
 extern "C" void func_0031B310(void* m);
 
+/**
+ * Inverts a 4x4 matrix in place: its adjugate (func_0031B310) scaled by 1 / determinant (func_0031B178).
+ *
+ * The determinant is taken before the adjugate overwrites the matrix; the scale runs on VU0 (vmulx on the four rows).
+ * No check for a zero determinant.
+ *
+ * @param mat  the 4x4 float matrix (16-byte aligned)
+ */
 // Matrix inverse: adjoint (func_0031B310) scaled by 1/determinant (func_0031B178).
 // PORT: PS2-only VU0 inline asm (4x4 matrix times scalar, in place).
 extern "C" void func_0031B6C8(void* mat)
@@ -319,6 +381,16 @@ struct sXform_B748 {
 // PORT: func_0031B7A8 returns the quaternion by value (hidden result pointer).
 extern "C" sVec4_B748 func_0031B7A8_v(sMtx_B748* mat) __asm__("func_0031B7A8");
 
+/**
+ * Splits a rigid transform matrix into a pose: its translation row and its rotation quaternion.
+ *
+ * Copies row 3 (x, y, z, w) to @p out's position (+0x0) and stores the quaternion of the matrix's rotation
+ * (func_0031B7A8) at +0x10.
+ *
+ * @param out  the pose to fill
+ * @param mat  the 4x4 transform matrix
+ * @return @p out
+ */
 // Splits a rigid transform matrix into its translation row and rotation quaternion.
 extern "C" sXform_B748* func_0031B748(sXform_B748* out, sMtx_B748* mat)
 {
@@ -347,6 +419,19 @@ static inline float sqrtB7A8(float v)
     return r;
 }
 
+/**
+ * Converts the rotation part of a 4x4 matrix to a quaternion (x, y, z, w).
+ *
+ * With a positive trace m00 + m11 + m22: s = sqrt(trace + 1), w = s / 2, and x, y, z are the differences
+ * (m12 - m21), (m20 - m02), (m01 - m10) times 0.5 / s. Otherwise picks the largest diagonal element i (with j, k the
+ * next two axes mod 3), s = sqrt(m[i][i] - m[j][j] - m[k][k] + 1), component i = s / 2, w = (m[j][k] - m[k][j])
+ * times 0.5 / s, and components j and k from the sums (m[i][j] + m[j][i]) and (m[i][k] + m[k][i]); the 0.5 / s
+ * scale is skipped when s is 0.
+ *
+ * @param qu  the quaternion to fill
+ * @param mat  the matrix
+ * @return @p qu
+ */
 // Rotation matrix to quaternion (Shoemake): from the trace when positive, else from the largest diagonal term.
 extern "C" sQuat_B7A8* func_0031B7A8(sQuat_B7A8* qu, sMtx_B7A8* mat)
 {
@@ -521,6 +606,19 @@ static inline sQuat_B9B0 AxisAngle_B9B0(const t4Vector& axis, float angle)
     return sQuat_B9B0(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
+/**
+ * Post-multiplies a quaternion by the rotation that turns one direction onto another.
+ *
+ * The axis is the cross product @p fromVec x @p toVec; when its length is 0 nothing changes. Otherwise the axis is
+ * normalised, the length is clamped to 0.99999, and the angle is func_0031C128 (an arcsine) of it, or pi minus that
+ * when the dot product of the two vectors is negative. The axis-angle quaternion (half-angle sine and cosine from
+ * func_0031BE50) is multiplied on the right: *quat = *quat * rotation. func_0031BB30 is the same with the rotation
+ * on the left. The two directions are expected to be unit length.
+ *
+ * @param quat  the quaternion to rotate, in place
+ * @param fromVec  the starting direction
+ * @param toVec  the target direction
+ */
 // Rotates the quaternion *q by the shortest-arc rotation taking direction a onto b.
 extern "C" void func_0031B9B0(t4Vector* quat, t4Vector* fromVec, t4Vector* toVec)
 {
@@ -659,6 +757,17 @@ static inline sVec4_31BB30 AxisAngle_31BB30(const sVec4_31BB30& axis, float angl
     return sVec4_31BB30(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
+/**
+ * Pre-multiplies a quaternion by the rotation that turns one direction onto another.
+ *
+ * Same as func_0031B9B0 (axis = @p fromVec x @p toVec, nothing when it is zero length, angle from func_0031C128 of
+ * the clamped length, pi minus it for a negative dot product, half-angle sine and cosine from func_0031BE50), but the
+ * rotation goes on the left: *quat = rotation * *quat. cRider_alignRiderAxis uses it.
+ *
+ * @param quat  the quaternion to rotate, in place
+ * @param fromVec  the starting direction
+ * @param toVec  the target direction
+ */
 extern "C" void func_0031BB30(sVec4_31BB30* quat, const sVec4_31BB30* fromVec, const sVec4_31BB30* toVec)
 {
     sVec4_31BB30 axis;
@@ -692,6 +801,19 @@ struct sQuat_31BCB0 {
     sQuat_31BCB0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
+/**
+ * Returns the spherical linear interpolation between two quaternions.
+ *
+ * The cosine is the 4D dot product; when negative, the target and the cosine are negated so the shorter arc is
+ * taken. When 1 - cosine > 0.001, omega = pi/2 - func_0031C128(cosine) (an arccosine through the arcsine) and the
+ * weights are sin((1 - @p blend) * omega) / sin(omega) and sin(@p blend * omega) / sin(omega) (func_0031BF60);
+ * otherwise the weights are the linear 1 - @p blend and @p blend. The result is not renormalised.
+ *
+ * @param fromQuat  the quaternion at blend 0
+ * @param toQuat  the quaternion at blend 1
+ * @param blend  the interpolation fraction, 0 to 1
+ * @return the interpolated quaternion
+ */
 // Quaternion slerp.
 extern "C" sQuat_31BCB0 func_0031BCB0(const sQuat_31BCB0* fromQuat, const sQuat_31BCB0* toQuat, float blend)
 {
@@ -727,6 +849,17 @@ extern "C" sQuat_31BCB0 func_0031BCB0(const sQuat_31BCB0* fromQuat, const sQuat_
 //100%
 INCLUDE_ASM("bx/ps2main", func_0031BE50);
 #ifdef SKIP_ASM
+/**
+ * Computes the sine and cosine of an angle.
+ *
+ * Reduces @p x by the nearest multiple of pi/2 (the quadrant, rounded half away from zero), takes the sine of the
+ * remainder from a degree-9 odd polynomial and the cosine as sqrt(1 - sine^2), then swaps and negates them by
+ * quadrant & 3.
+ *
+ * @param sout  receives sin(@p x)
+ * @param cout  receives cos(@p x)
+ * @param x  the angle in radians
+ */
 // sincos(x): quadrant reduction by pi/2, sin polynomial, cos = sqrt(1 - sin^2).
 extern "C" void func_0031BE50(float* sout, float* cout, float x)
 {
@@ -777,6 +910,15 @@ extern "C" void func_0031BE50(float* sout, float* cout, float x)
 //100%
 INCLUDE_ASM("bx/ps2main", func_0031BF60);
 #ifdef SKIP_ASM
+/**
+ * Returns the sine of an angle.
+ *
+ * Reduces @p x by the nearest multiple of pi/2 (rounded half away from zero), evaluates the cosine polynomial for an
+ * odd quadrant or the sine polynomial for an even one, and negates the result when quadrant bit 1 is set.
+ *
+ * @param x  the angle in radians
+ * @return sin(@p x)
+ */
 // sin(x): quadrant reduction by pi/2, then a cos or sin polynomial (Horner form).
 extern "C" float func_0031BF60(float x)
 {
@@ -818,6 +960,15 @@ extern "C" float func_0031BF60(float x)
 //100%
 INCLUDE_ASM("bx/ps2main", func_0031C040);
 #ifdef SKIP_ASM
+/**
+ * Returns the cosine of an angle.
+ *
+ * Same reduction as func_0031BF60, with the polynomials swapped: the sine polynomial for an odd quadrant and the cosine
+ * polynomial for an even one; negated when (quadrant + 1) & 2.
+ *
+ * @param x  the angle in radians
+ * @return cos(@p x)
+ */
 // cos(x): quadrant reduction by pi/2, then a sin or cos polynomial (Horner form).
 extern "C" float func_0031C040(float x)
 {

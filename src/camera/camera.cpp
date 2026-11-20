@@ -458,6 +458,18 @@ static inline void vu0TransMtx_E050(t4Matrix* m, const t4Vector& v)
 }
 
 extern "C" void func_0015E050_impl(char* self, char* a1, char* a2) __asm__("func_0015E050");
+/**
+ * Points a camera from a position at a target point.
+ *
+ * Constructs a temporary cDEFAULT_3ChaseAlgorithm on the stack, sets its Position to @p a1 and its CamTargetPos to
+ * @p a2 (both with w = 1), computes its pitch and heading (func_00166640 with 1) and pose (func_00166F90), and stores
+ * cLookAtChaseAlgorithm_getPose's result in Pose. CamMat becomes the axis-flip matrix D_004C53A0 times the rotation of
+ * Pose's quaternion, translated by minus Pose's position; Direction becomes the z column of its rotation rows (w = 0).
+ * The temporary is destroyed with cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm.
+ *
+ * @param a1  the camera position
+ * @param a2  the point to look at
+ */
 extern "C" void func_0015E050_impl(char* self, char* a1, char* a2)
 {
     sObj_E050 o;
@@ -511,7 +523,16 @@ struct sCamLag_15E2A8 {
 extern sCamLag_15E2A8 D_004C53E0;
 extern int D_004C5430[5];
 
-// Resets the chase camera's tuning constants.
+/**
+ * Fills the camera-shake table: five 16-byte entries at D_004C53E0, one per shake type, and their flags D_004C5430.
+ *
+ * An entry holds the minimum time step and the time variance (passed to cLookAtChaseAlgorithm_setupCameraShake and
+ * cLookAtChaseAlgorithm_updateCameraShake), the weight cCamera_shakeCamera scales a request by, and the distance at
+ * which a shake fades out (-1: no fade). Type 0: (0.05, 0.01, 0.4, 20000), flag 0; types 1-3 (the boost shakes
+ * cCamera_applyCameraShake requests): (0.02, 0.01366, 0.07 / 0.08 / 0.09, -1), flag 1; type 4: (0.1, 0.03, 1.4, -1),
+ * flag 1. The flag is cLookAtChaseAlgorithm_updateCameraShake's second argument. Called only by the unit's static
+ * initializer func_001673F8.
+ */
 extern "C" void func_0015E2A8(void)
 {
     D_004C53E0.f0 = 0.05f;
@@ -952,6 +973,24 @@ static inline float bracket_E668(float lo, float v, float hi)
 }
 
 extern "C" void func_0015E668_E668(cCamera_E668* self) __asm__("func_0015E668");
+/**
+ * Computes the camera's pose, matrix, direction and lens from its current Controller's algorithm list.
+ *
+ * With one algorithm in the list, or a first algorithm of AlgorithmType 74, Pose is that algorithm's pose (virtual slot
+ * 2, e.g. cLookAtChaseAlgorithm_getPose); when Controller is the ChaseController, ResultAlgorithm's Position and
+ * CamTargetPos also take that position and the algorithm's target (slot 6). Otherwise every algorithm whose blend
+ * weight (list node +0xC) is over 0.0001 is blended by running weight into ResultAlgorithm's Position and CamTargetPos,
+ * and ResultAlgorithm's pitch and heading (func_00166640 with 1) and pose (func_00166F90,
+ * cLookAtChaseAlgorithm_getPose) become Pose.
+ *
+ * For the chase controller it then keeps the eye out of the ground (func_0015EE00), applies the camera shake
+ * (cCamera_applyCameraShake) and recomputes Pose from ResultAlgorithm (func_00166640 with 0). CamMat becomes the axis
+ * flip D_004C53A0 times the rotation of Pose's quaternion, translated by minus Pose's position; Direction its z column.
+ * View, Near and Far are blended from the algorithms by lens weight (list node +0x4). Last, cRenderStateMan_update runs
+ * for view ViewIndex + 6 at the camera's x/y, Far is capped by that view's draw distance (func_002EE3B8) with MinNear
+ * as the floor and stored in D_004A3B68 (the render far plane), and View is clamped to [0, MaxView] and Near and Far to
+ * [MinNear, MaxFar].
+ */
 extern "C" void func_0015E668_E668(cCamera_E668* self)
 {
     cCameraAlgoListNode_E668* algoNode;
@@ -1292,10 +1331,27 @@ static inline float Abs_EE00(float x)
 }
 
 // Third-person follow camera: probes beside the look-at line to raise/lower the camera height
-// (self+0x460), keeps the eye-target distance, then probes eye->target and repositions the target
-// above/behind the eye when it would end up inside geometry.
+// (self+0x460), keeps the eye-target distance, then probes eye->target and moves the eye (ResultAlgorithm's Position,
+// +0x100) relative to the target (+0xE0) when it would end up inside geometry.
 // cCamera::avoidGround(void) (SSX On Tour symbols). PORT: g++ `>?` (max) operator.
 extern "C" void func_0015EE00_impl(char* self) __asm__("func_0015EE00");
+/**
+ * Keeps the chase camera's eye (ResultAlgorithm's Position, +0x100) out of the ground and walls.
+ *
+ * Ground test: a vertical line through the eye raised by LastGroundMove, 300 / s above and below it (s = the sine of
+ * the look direction's slope, at least 0.05) and moved 50 to the side away from LastGroundNormal, is tested against
+ * the world SSXApp->Game->BXNash (func_0032E100 builds the line, func_00336850 tests it with IntersectionHint). On a
+ * hit, LastGroundMove is raised for an upward-facing hit normal and lowered for a downward one: by 50 / s minus the
+ * hit's distance from the eye when the eye is on the side the normal faces, else by that distance plus 50 / s
+ * (nothing when that is over 150); LastGroundNormal takes the normal. The eye is then raised by LastGroundMove, put
+ * back at its old distance from the target (CamTargetPos, +0xE0), and LastGroundMove decays by 0.97.
+ *
+ * Extra test, when func_0015D020 on ChaseController is nonzero: a line from 100 above the target to the eye. On a hit
+ * the eye moves to LastSafePosition (to target + 180 up + 180 along x when LastSafePositionInvalid), is pushed 50
+ * along the hit normal on the first such frame (UsingSafePositionLastFrame), and goes to target + 150 up + 100 along x
+ * if it is then within 2 of the target (or within 1 in both x and y); LastSafePosition takes the eye. Finally
+ * LastSafePositionInvalid is cleared.
+ */
 extern "C" void func_0015EE00_impl(char* self)
 {
     sHit_EE00 info;
@@ -2099,6 +2155,13 @@ static inline void RotAxis_15F9B8(sM_15F9B8* m, const sV_15F9B8& axis, float ang
     vu0MulMtx_15F9B8(m, m, &r);
 }
 
+/**
+ * Returns the free camera's pose: t4mat_Identity translated to Position, turned by -Pitch about the y axis and by
+ * Heading about the z axis, converted with func_0031B748.
+ *
+ * @param src  the algorithm (a cBasicCameraAlgorithm)
+ * @return the pose (position and rotation quaternion), through the hidden return slot
+ */
 extern "C" sPair_15F9B8 func_0015F9B8(char* src)
 {
     sM_15F9B8 m;
@@ -2504,6 +2567,19 @@ static inline sVec_00160228 Cross_00160228(const sVec_00160228& a, const sVec_00
     return r;
 }
 
+/**
+ * Returns the current positional jitter as an offset across the view.
+ *
+ * Returns t4vect_Zero when FocusJitterFactor is 0. Otherwise builds the view's forward vector from the angles @p a and
+ * @p b (cosines and sines from func_0031C040 and func_0031BF60), the side vector (sin a, -cos a, 0) and up = forward x
+ * side, and returns (side * sx + up * sy) * FocusJitterFactor * 10, where k = CurrFocusJitterTime / FocusJitterTime,
+ * sx = k * (RandomSideJitter - OldRandomSideJitter) and sy = k * (RandomUpJitter - OldRandomUpJitter).
+ *
+ * @param p  the jitterer
+ * @param a  the view heading (radians)
+ * @param b  the view pitch (radians)
+ * @return the offset (w = 0)
+ */
 extern "C" sVec_00160228 func_00160228(char* p, float a, float b)
 {
     float zero = 0.0f;
@@ -4047,6 +4123,12 @@ extern "C" void cChaseCameraController_setTarget(cChaseCameraController* self, i
 //100%
 INCLUDE_ASM("camera/camera", func_00161AA0);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider the chase camera follows: Target's Rider (Target is not checked for 0).
+ *
+ * @param chaseCameraController  the controller
+ * @return the rider (a cRider*)
+ */
 extern "C" int func_00161AA0(cChaseCameraController* chaseCameraController) {
     return (*(int *)((char*)((chaseCameraController->Target)) + (4)));
 }
@@ -4554,6 +4636,13 @@ extern "C" void* cChaseCameraController_createChaseAlgorithmCut(void*, int, int)
 //100%
 INCLUDE_ASM("camera/camera", func_00162290__FPv);
 #ifdef SKIP_ASM
+/**
+ * Switches the chase camera back to the player's chosen algorithm with a cut.
+ *
+ * Calls cChaseCameraController_createChaseAlgorithmCut with CamSwitchRecord.PlayerChoiceType and no trigger action.
+ *
+ * @return cChaseCameraController_createChaseAlgorithmCut's result (declared void*)
+ */
 void* func_00162290(void* self)
 {
     return cChaseCameraController_createChaseAlgorithmCut(self, *(int*)((char*)self + 0x24), 0);
@@ -4738,6 +4827,9 @@ extern "C" void cLookAtChaseAlgorithm_updateAlgorithm(cLookAtChaseAlgorithm* sel
 //100%
 INCLUDE_ASM("camera/camera", func_00162560);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (nothing in the code or data refers to it).
+ */
 extern "C" void func_00162560(void) {
 
 }
@@ -4854,6 +4946,32 @@ static inline void SetFrame_162568(char* out, const sVec_001607E0& pos, sVec_001
 
 extern "C" void func_00162568_impl(char* self, char* out, float a, float b, float c, float d, float e, float f,
                                    float g, float h) __asm__("func_00162568");
+/**
+ * Fills a chase setup with this frame's target data and the smoothed target velocity.
+ *
+ * The target's velocity (Target virtual slot 3, cRiderCameraTarget_getVelocity) is replaced by LastOriginalVel when
+ * slower than 27.78 and stored back there. Its horizontal part is smoothed into LastHorizontalVel with a lerp factor
+ * between the min and max smoothness, picked by the steepness of the velocity (|z| of its direction, mapped from the
+ * start slope to the end slope): the powder parameters (@p e .. @p h) when the target's surface type (slot 20) is 2, 3
+ * or 13, else the normal ones (@p a .. @p d). While airborne (motion state 1) with a horizontal speed under 27.78,
+ * LastHorizontalVel is the target of the lerp instead.
+ *
+ * The setup gets: +0x0 (SavedPos) = Position, +0x10 (TPos) = the target's position (slot 1), +0x20 (TVel) = smoothed
+ * horizontal velocity + the vertical part, +0x40 the motion state (cRider_getMotionState of Target's Rider), +0x44 the
+ * length of TVel, +0x4C the boost (slot 17), +0x50 (boost + 1) / 2 when the boost is over 0 else 0, +0x54 the crouch
+ * (slot 18), and the words +0x58 (state 2), +0x5C (state 5), +0x60 (state 1) and +0x64 (state 4). Setup_Boost,
+ * Setup_VisualBoost and Setup_IsTargetHandplanting copy +0x4C, +0x50 and +0x5C.
+ *
+ * @param out  the setup to fill (On Tour's cChaseSetup)
+ * @param a  minimum smoothness on normal snow
+ * @param b  maximum smoothness on normal snow
+ * @param c  slope at which normal smoothing starts rising from the minimum
+ * @param d  slope at which normal smoothing reaches the maximum
+ * @param e  minimum smoothness on powder
+ * @param f  maximum smoothness on powder
+ * @param g  slope at which powder smoothing starts rising
+ * @param h  slope at which powder smoothing reaches the maximum
+ */
 extern "C" void func_00162568_impl(char* self, char* out, float a, float b, float c, float d, float e, float f,
                                    float g, float h)
 {
@@ -5917,6 +6035,9 @@ extern "C" void cLookAtChaseAlgorithm_updateHandplant(cLookAtChaseAlgorithm* sel
 //100%
 INCLUDE_ASM("camera/camera", func_001635C0);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (nothing in the code or data refers to it).
+ */
 extern "C" void func_001635C0(void) {
 
 }
@@ -5924,6 +6045,11 @@ extern "C" void func_001635C0(void) {
 //100%
 INCLUDE_ASM("camera/camera", func_001635C8);
 #ifdef SKIP_ASM
+/**
+ * Returns 0.0f.
+ *
+ * @return 0.0f
+ */
 extern "C" float func_001635C8(void) {
     return 0.0f;
 }
@@ -5931,6 +6057,11 @@ extern "C" float func_001635C8(void) {
 //100%
 INCLUDE_ASM("camera/camera", func_001635D8);
 #ifdef SKIP_ASM
+/**
+ * Returns 0.
+ *
+ * @return 0
+ */
 extern "C" int func_001635D8(void) {
     return 0;
 }
@@ -5938,6 +6069,11 @@ extern "C" int func_001635D8(void) {
 //100%
 INCLUDE_ASM("camera/camera", func_001635E0);
 #ifdef SKIP_ASM
+/**
+ * Returns 0.
+ *
+ * @return 0
+ */
 extern "C" int func_001635E0(void) {
     return 0;
 }
@@ -5947,6 +6083,11 @@ INCLUDE_ASM("camera/camera", func_001635E8);
 #ifdef SKIP_ASM
 extern int D_004A4DD8;
 
+/**
+ * Returns D_004A4DD8: the AirPositionSpline that cLookAtChaseAlgorithm_updateAirCam evaluated this frame, or 0.
+ *
+ * @return the spline's address (0 when no air curve is running; D_004A1288 is the matching flag)
+ */
 extern "C" int func_001635E8(void) {
     return D_004A4DD8;
 }
@@ -5956,6 +6097,11 @@ INCLUDE_ASM("camera/camera", func_001635F0);
 #ifdef SKIP_ASM
 extern int D_004A4DDC;
 
+/**
+ * Returns D_004A4DDC: the AirTargetSpline that cLookAtChaseAlgorithm_updateAirCam evaluated this frame, or 0.
+ *
+ * @return the spline's address (0 when no air curve is running)
+ */
 extern "C" int func_001635F0(void) {
     return D_004A4DDC;
 }
@@ -6880,6 +7026,11 @@ extern "C" void cLookAtChaseAlgorithm_updateRailCam_def(char* self, char* src, f
 //100%
 INCLUDE_ASM("camera/camera", func_00164868);
 #ifdef SKIP_ASM
+/**
+ * Returns 0.
+ *
+ * @return 0
+ */
 extern "C" int func_00164868(void) {
     return 0;
 }
@@ -6889,6 +7040,11 @@ INCLUDE_ASM("camera/camera", func_00164870);
 #ifdef SKIP_ASM
 extern int D_004A4DE0;
 
+/**
+ * Returns D_004A4DE0: the HalfPipeAngleSpline that cLookAtChaseAlgorithm_updateHalfPipeCam last evaluated.
+ *
+ * @return the spline's address (0 until one is evaluated; never cleared afterwards, D_004A128C is the activity flag)
+ */
 extern "C" int func_00164870(void) {
     return D_004A4DE0;
 }
@@ -8233,6 +8389,13 @@ static inline float Angle_166640(const t4Vector& a, const t4Vector& b)
 }
 
 extern "C" void func_00166640_def(char* self) __asm__("func_00166640");
+/**
+ * Computes Heading and Pitch for looking from the eye (Position) at CamTargetPos.
+ *
+ * Pitch = -func_0031C228(dz / horizontal distance) (an arctangent). Heading is the angle between the horizontal look
+ * direction and the x axis (an arccosine through func_0031C128), or 2 pi minus it when the direction's y is not
+ * positive, and 0 when the horizontal distance is 0. Callers pass a second argument (1 or 0) that is not read.
+ */
 extern "C" void func_00166640_def(char* self)
 {
     const t4Vector& off0 = Sub_166640(*(t4Vector*)(self + 0x20), *(t4Vector*)(self + 0x40));
@@ -8443,6 +8606,12 @@ static inline sV_1668B8 Row_1668B8(const sM_1668B8& m, int i)
 }
 
 extern "C" void func_001668B8_impl(char* self, sV_1668B8* out) __asm__("func_001668B8");
+/**
+ * Computes the look vector for the current Pitch and Heading: row 0 of t4mat_Identity turned by -Pitch about the y
+ * axis and then by -Heading about the z axis.
+ *
+ * @param out  receives the look vector
+ */
 extern "C" void func_001668B8_impl(char* self, sV_1668B8* out)
 {
     sM_1668B8 m;
@@ -8868,6 +9037,13 @@ static inline sV_166F90 ConjF_166F90(float x, float y, float z, float w)
 }
 
 extern "C" void func_00166F90_impl(char* self) __asm__("func_00166F90");
+/**
+ * Builds CalculatedPose from Position, Pitch and Heading.
+ *
+ * Sets Position.w to 1, translates t4mat_Identity to Position, turns it by -Pitch about the y axis and by -Heading
+ * about the z axis, converts the matrix with func_0031B748 into CalculatedPose, and then negates the quaternion's x,
+ * y and z (its conjugate).
+ */
 extern "C" void func_00166F90_impl(char* self)
 {
     *(float*)(self + 0x4C) = 1.0f;
@@ -8908,6 +9084,11 @@ extern "C" void* cLookAtChaseAlgorithm_getPose(void* self, void* algorithm)
 //100%
 INCLUDE_ASM("camera/camera", func_001673B8);
 #ifdef SKIP_ASM
+/**
+ * Returns its first argument and ignores the rest (a varargs stub, like a compiled-out debug print).
+ *
+ * @return @p self
+ */
 extern "C" void* func_001673B8(void* self, ...)
 {
     return self;
@@ -9026,6 +9207,19 @@ extern "C" void func_0015E2A8(void);
 // The unit declares func_001673F8 later as returning void*; bind this body by asm label.
 extern "C" void func_001673F8_impl(int initialize, int priority) __asm__("func_001673F8");
 
+/**
+ * Constructs camera/camera.cpp's static constants (its static initializer).
+ *
+ * Runs only when @p initialize is set and @p priority is 0xFFFF. Zeroes the 8-byte name field D_004A4D40, builds the
+ * fourteen region-type keys D_004A4D48..D_004A4DB0 with ids 0-13 and 56 float4 colour constants D_004C5020..D_004C5390
+ * (the same per-unit copies the world-painter unit's func_002BBC38 builds), sets the axis-flip matrix D_004C53A0 (rows
+ * (0, 0, 1, 0), (-1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 0, 1)) that CamMat is built from, fills the camera-shake table
+ * (func_0015E2A8), builds the key D_004A4DC0 with id -1, and sets both views' persistentPlayerChoiceType to 61 (0x3D,
+ * no choice). func_00168298 calls it from the constructor table.
+ *
+ * @param initialize  nonzero to construct (nothing is done for 0)
+ * @param priority  the init priority; only 0xFFFF does anything
+ */
 extern "C" void func_001673F8_impl(int initialize, int priority)
 {
     if (priority == 0xFFFF && initialize != 0) {
@@ -9116,6 +9310,12 @@ extern "C" void func_001673F8_impl(int initialize, int priority)
 //100%
 INCLUDE_ASM("camera/camera", func_00167D88);
 #ifdef SKIP_ASM
+/**
+ * Returns 0.1f, the value cLookAtChaseAlgorithm_cLookAtChaseAlgorithm first stores in TurningPIDFilter's
+ * ProportionFactor.
+ *
+ * @return 0.1f
+ */
 extern "C" float func_00167D88(void)
 {
     return 0.1f;
@@ -9125,6 +9325,12 @@ extern "C" float func_00167D88(void)
 //100%
 INCLUDE_ASM("camera/camera", func_00167D98);
 #ifdef SKIP_ASM
+/**
+ * Returns 0.1f, the value cLookAtChaseAlgorithm_cLookAtChaseAlgorithm first stores in TurningPIDFilter's
+ * ErrorHistoryFactor.
+ *
+ * @return 0.1f
+ */
 extern "C" float func_00167D98(cPIDFilter* self)
 {
     return 0.10000000149011612f;
@@ -9134,6 +9340,12 @@ extern "C" float func_00167D98(cPIDFilter* self)
 //100%
 INCLUDE_ASM("camera/camera", func_00167DA8);
 #ifdef SKIP_ASM
+/**
+ * Returns 0.1f, the value cLookAtChaseAlgorithm_cLookAtChaseAlgorithm first stores in TurningPIDFilter's
+ * DerrivativeFactor.
+ *
+ * @return 0.1f
+ */
 extern "C" float func_00167DA8(cPIDFilter* self)
 {
     return 0.10000000149011612f;
@@ -9192,6 +9404,9 @@ extern "C" void cCameraAlgorithm__cCameraAlgorithm(cCameraAlgorithm* self, int f
 //100%
 INCLUDE_ASM("camera/camera", func_00167E18__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cCameraAlgorithm's default for vtable slot 3, which cLookAtChaseAlgorithm_snap overrides.
+ */
 void func_00167E18(void* self)
 {
 }
@@ -9200,6 +9415,9 @@ void func_00167E18(void* self)
 //100%
 INCLUDE_ASM("camera/camera", func_00167E20__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cCameraAlgorithm's default for vtable slot 4, which cLookAtChaseAlgorithm_snapCurrent overrides.
+ */
 void func_00167E20(void* self)
 {
 }
@@ -9208,6 +9426,10 @@ void func_00167E20(void* self)
 //100%
 INCLUDE_ASM("camera/camera", func_00167E28__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cCameraAlgorithm's default for vtable slot 5, which the chase algorithms' update functions (e.g.
+ * cIdleChaseAlgorithm_update) override.
+ */
 void func_00167E28(void* self)
 {
 }
@@ -9232,6 +9454,11 @@ extern cQuad128 t4vect_Zero;
 //100%
 INCLUDE_ASM("camera/camera", func_00167E40);
 #ifdef SKIP_ASM
+/**
+ * Returns t4vect_Zero: cCameraAlgorithm's default for vtable slot 6, which cChaseAlgorithm_getTargetPos overrides.
+ *
+ * @return @p self, the hidden return slot, holding t4vect_Zero
+ */
 extern "C" void* func_00167E40(void* self)
 {
     *(cQuad128*)self = t4vect_Zero;
@@ -9242,6 +9469,9 @@ extern "C" void* func_00167E40(void* self)
 //100%
 INCLUDE_ASM("camera/camera", func_00167E58__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cCameraAlgorithm's default for vtable slot 7 (no class in the camera unit overrides it).
+ */
 void func_00167E58(void* self)
 {
 }
@@ -9250,6 +9480,10 @@ void func_00167E58(void* self)
 //100%
 INCLUDE_ASM("camera/camera", func_00167E60__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cCameraAlgorithm's default for vtable slot 8, which cLookAtChaseAlgorithm_doRaceCamFinalPhase
+ * overrides.
+ */
 void func_00167E60(void* self)
 {
 }
@@ -9295,6 +9529,12 @@ void cCameraAlgorithm_notifyMoveZ(void* self)
 //100%
 INCLUDE_ASM("camera/camera", func_00167E98__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0 (false): cCameraAlgorithm's default for vtable slot 11, which cLookAtChaseAlgorithm_shouldSnapOnUpdate__FPv
+ * overrides.
+ *
+ * @return 0
+ */
 int func_00167E98(void* self)
 {
     return 0;
@@ -9325,6 +9565,12 @@ extern "C" void cBasicCameraAlgorithm__cBasicCameraAlgorithm(cBasicCameraAlgorit
 //100%
 INCLUDE_ASM("camera/camera", func_00167ED0);
 #ifdef SKIP_ASM
+/**
+ * Sets Position: a 16-byte copy of *@p position.
+ *
+ * @param basicCameraAlgorithm  the algorithm
+ * @param position  the new position
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void func_00167ED0(cBasicCameraAlgorithm* basicCameraAlgorithm, long long *position) {
     (*(long long*)&basicCameraAlgorithm->Position) = (long long) *position;
@@ -9333,6 +9579,12 @@ extern "C" void func_00167ED0(cBasicCameraAlgorithm* basicCameraAlgorithm, long 
 //100%
 INCLUDE_ASM("camera/camera", func_00167EE0);
 #ifdef SKIP_ASM
+/**
+ * Sets Pitch.
+ *
+ * @param basicCameraAlgorithm  the algorithm
+ * @param fparg0  the new pitch (radians)
+ */
 extern "C" void func_00167EE0(cBasicCameraAlgorithm* basicCameraAlgorithm, float fparg0) {
     (basicCameraAlgorithm->Pitch) = fparg0;
 }
@@ -9340,6 +9592,12 @@ extern "C" void func_00167EE0(cBasicCameraAlgorithm* basicCameraAlgorithm, float
 //100%
 INCLUDE_ASM("camera/camera", func_00167EE8);
 #ifdef SKIP_ASM
+/**
+ * Sets Heading.
+ *
+ * @param basicCameraAlgorithm  the algorithm
+ * @param fparg0  the new heading (radians)
+ */
 extern "C" void func_00167EE8(cBasicCameraAlgorithm* basicCameraAlgorithm, float fparg0) {
     (basicCameraAlgorithm->Heading) = fparg0;
 }
@@ -9347,6 +9605,13 @@ extern "C" void func_00167EE8(cBasicCameraAlgorithm* basicCameraAlgorithm, float
 //100%
 INCLUDE_ASM("camera/camera", func_00167EF0);
 #ifdef SKIP_ASM
+/**
+ * Returns Position by value: copies it into @p outPosition.
+ *
+ * @param outPosition  the hidden return slot
+ * @param algorithm  the algorithm (a cBasicCameraAlgorithm)
+ * @return @p outPosition
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" long long *func_00167EF0(long long *outPosition, void *algorithm) {
     *outPosition = (*(long long *)((char*)(algorithm) + (0x20)));
@@ -9356,6 +9621,12 @@ extern "C" long long *func_00167EF0(long long *outPosition, void *algorithm) {
 //100%
 INCLUDE_ASM("camera/camera", func_00167F00);
 #ifdef SKIP_ASM
+/**
+ * Returns Pitch.
+ *
+ * @param basicCameraAlgorithm  the algorithm
+ * @return the pitch (radians)
+ */
 extern "C" float func_00167F00(cBasicCameraAlgorithm* basicCameraAlgorithm) {
     return (basicCameraAlgorithm->Pitch);
 }
@@ -9363,6 +9634,12 @@ extern "C" float func_00167F00(cBasicCameraAlgorithm* basicCameraAlgorithm) {
 //100%
 INCLUDE_ASM("camera/camera", func_00167F08);
 #ifdef SKIP_ASM
+/**
+ * Returns Heading.
+ *
+ * @param basicCameraAlgorithm  the algorithm
+ * @return the heading (radians)
+ */
 extern "C" float func_00167F08(cBasicCameraAlgorithm* basicCameraAlgorithm) {
     return (basicCameraAlgorithm->Heading);
 }
@@ -9477,6 +9754,12 @@ void cCameraController_update(void* self)
 //100%
 INCLUDE_ASM("camera/camera", func_00167FC0);
 #ifdef SKIP_ASM
+/**
+ * Sets AlgorithmType.
+ *
+ * @param cameraAlgorithm  the algorithm
+ * @param algoType  the new type (an eCamAlgoType)
+ */
 extern "C" void func_00167FC0(cCameraAlgorithm* cameraAlgorithm, int algoType) {
     (cameraAlgorithm->AlgorithmType) = algoType;
 }
@@ -9484,6 +9767,12 @@ extern "C" void func_00167FC0(cCameraAlgorithm* cameraAlgorithm, int algoType) {
 //100%
 INCLUDE_ASM("camera/camera", func_00167FC8);
 #ifdef SKIP_ASM
+/**
+ * Returns AlgorithmType.
+ *
+ * @param cameraAlgorithm  the algorithm
+ * @return the type (an eCamAlgoType)
+ */
 extern "C" int func_00167FC8(cCameraAlgorithm* cameraAlgorithm) {
     return (cameraAlgorithm->AlgorithmType);
 }
@@ -9491,6 +9780,12 @@ extern "C" int func_00167FC8(cCameraAlgorithm* cameraAlgorithm) {
 //100%
 INCLUDE_ASM("camera/camera", func_00167FD0);
 #ifdef SKIP_ASM
+/**
+ * Returns a camera controller's Type (its first word).
+ *
+ * @param controller  the controller
+ * @return the type (an eCamControllerType)
+ */
 extern "C" int func_00167FD0(int *controller) {
     return *controller;
 }
@@ -9498,6 +9793,12 @@ extern "C" int func_00167FD0(int *controller) {
 //100%
 INCLUDE_ASM("camera/camera", func_00167FD8);
 #ifdef SKIP_ASM
+/**
+ * Returns BlendType.
+ *
+ * @param chaseCameraController  the controller (any cCameraController)
+ * @return the blend type (an eCamBlendType)
+ */
 extern "C" int func_00167FD8(cChaseCameraController* chaseCameraController) {
     return (chaseCameraController->BlendType);
 }
@@ -9505,6 +9806,12 @@ extern "C" int func_00167FD8(cChaseCameraController* chaseCameraController) {
 //100%
 INCLUDE_ASM("camera/camera", func_00167FE0);
 #ifdef SKIP_ASM
+/**
+ * Returns AlgorithmList.
+ *
+ * @param chaseCameraController  the controller (any cCameraController)
+ * @return the algorithm list (a cCameraAlgoList*)
+ */
 extern "C" int func_00167FE0(cChaseCameraController* chaseCameraController) {
     return ((int)chaseCameraController->AlgorithmList);
 }
@@ -9512,6 +9819,12 @@ extern "C" int func_00167FE0(cChaseCameraController* chaseCameraController) {
 //100%
 INCLUDE_ASM("camera/camera", func_00167FE8);
 #ifdef SKIP_ASM
+/**
+ * Returns LatestAlgoType, the type of the algorithm cChaseCameraController_addAlgorithm added last.
+ *
+ * @param chaseCameraController  the controller
+ * @return the algorithm type (an eCamAlgoType)
+ */
 extern "C" int func_00167FE8(cChaseCameraController* chaseCameraController) {
     return (chaseCameraController->LatestAlgoType);
 }
@@ -9519,6 +9832,12 @@ extern "C" int func_00167FE8(cChaseCameraController* chaseCameraController) {
 //100%
 INCLUDE_ASM("camera/camera", func_00167FF0);
 #ifdef SKIP_ASM
+/**
+ * Returns Target, the camera target the chase controller follows.
+ *
+ * @param chaseCameraController  the controller
+ * @return the target (a cRiderCameraTarget*)
+ */
 extern "C" int func_00167FF0(cChaseCameraController* chaseCameraController) {
     return ((int)chaseCameraController->Target);
 }
@@ -9526,6 +9845,9 @@ extern "C" int func_00167FF0(cChaseCameraController* chaseCameraController) {
 //100%
 INCLUDE_ASM("camera/camera", func_00167FF8);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (nothing in the code or data refers to it).
+ */
 extern "C" void func_00167FF8(void) {
 
 }
@@ -9533,6 +9855,9 @@ extern "C" void func_00167FF8(void) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168000);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (nothing in the code or data refers to it).
+ */
 extern "C" void func_00168000(void) {
 
 }
@@ -9540,6 +9865,9 @@ extern "C" void func_00168000(void) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168008);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (nothing in the code or data refers to it).
+ */
 extern "C" void func_00168008(void) {
 
 }
@@ -9547,6 +9875,9 @@ extern "C" void func_00168008(void) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168010);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (nothing in the code or data refers to it).
+ */
 extern "C" void func_00168010(void) {
 
 }
@@ -9554,6 +9885,11 @@ extern "C" void func_00168010(void) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168018);
 #ifdef SKIP_ASM
+/**
+ * Returns 61 (0x3D, the "no algorithm" eCamAlgoType that cChaseCameraController_switchCamera_HardReset stores).
+ *
+ * @return 61
+ */
 extern "C" int func_00168018(void) {
     return 61;
 }
@@ -9561,6 +9897,12 @@ extern "C" int func_00168018(void) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168020);
 #ifdef SKIP_ASM
+/**
+ * Returns the manual camera controller's manual algorithm (+0x18, the "Manual Cam Algo" its constructor creates).
+ *
+ * @param manualController  the controller
+ * @return the algorithm (a cManualCameraAlgorithm*)
+ */
 extern "C" int func_00168020(void *manualController) {
     return (*(int *)((char*)(manualController) + (0x18)));
 }
@@ -9568,6 +9910,12 @@ extern "C" int func_00168020(void *manualController) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168028);
 #ifdef SKIP_ASM
+/**
+ * Returns the manual camera controller's editor algorithm (+0x1C, the "Editor Cam Algo" its constructor creates).
+ *
+ * @param manualController  the controller
+ * @return the algorithm (a cEditorCameraAlgorithm*)
+ */
 extern "C" int func_00168028(void *manualController) {
     return (*(int *)((char*)(manualController) + (0x1C)));
 }
@@ -9599,6 +9947,11 @@ extern "C" void* func_0015D928(void* self);
 //100%
 INCLUDE_ASM("camera/camera", func_00168060__FPv);
 #ifdef SKIP_ASM
+/**
+ * Rebuilds the camera matrix from the pose: calls func_0015D928 (slot 3 of cSimpleCamera_vtbl).
+ *
+ * @return func_0015D928's result (declared void*)
+ */
 void* func_00168060(void* self)
 {
     return func_0015D928(self);
@@ -9608,6 +9961,12 @@ void* func_00168060(void* self)
 //100%
 INCLUDE_ASM("camera/camera", func_00168080);
 #ifdef SKIP_ASM
+/**
+ * Returns the camera's field of view (View, its first float).
+ *
+ * @param camera  the camera (a cSimpleCamera)
+ * @return the field of view (radians)
+ */
 extern "C" float func_00168080(float *camera) {
     return *camera;
 }
@@ -9615,6 +9974,12 @@ extern "C" float func_00168080(float *camera) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168088);
 #ifdef SKIP_ASM
+/**
+ * Returns Near, the near plane distance.
+ *
+ * @param simpleCamera  the camera
+ * @return the near distance
+ */
 extern "C" float func_00168088(cSimpleCamera* simpleCamera) {
     return (simpleCamera->Near);
 }
@@ -9622,6 +9987,12 @@ extern "C" float func_00168088(cSimpleCamera* simpleCamera) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168090);
 #ifdef SKIP_ASM
+/**
+ * Returns Far, the far plane distance.
+ *
+ * @param simpleCamera  the camera
+ * @return the far distance
+ */
 extern "C" float func_00168090(cSimpleCamera* simpleCamera) {
     return (simpleCamera->Far);
 }
@@ -9629,6 +10000,12 @@ extern "C" float func_00168090(cSimpleCamera* simpleCamera) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168098);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of CamMat (camera + 0x40).
+ *
+ * @param camera  the camera's address (a cSimpleCamera)
+ * @return the matrix's address
+ */
 extern "C" int func_00168098(int camera) {
     return camera + 0x40;
 }
@@ -9636,6 +10013,12 @@ extern "C" int func_00168098(int camera) {
 //100%
 INCLUDE_ASM("camera/camera", func_001680A0);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of Pose (camera + 0x20), whose position comes first.
+ *
+ * @param camera  the camera's address (a cSimpleCamera)
+ * @return the pose's address
+ */
 extern "C" int func_001680A0(int camera) {
     return camera + 0x20;
 }
@@ -9643,6 +10026,12 @@ extern "C" int func_001680A0(int camera) {
 //100%
 INCLUDE_ASM("camera/camera", func_001680A8);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of Pose (camera + 0x20).
+ *
+ * @param camera  the camera's address (a cSimpleCamera)
+ * @return the pose's address
+ */
 extern "C" int func_001680A8(int camera) {
     return camera + 0x20;
 }
@@ -9650,6 +10039,12 @@ extern "C" int func_001680A8(int camera) {
 //100%
 INCLUDE_ASM("camera/camera", func_001680B0);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of Direction (camera + 0x80).
+ *
+ * @param camera  the camera's address (a cSimpleCamera)
+ * @return the direction's address
+ */
 extern "C" int func_001680B0(int camera) {
     return camera + 0x80;
 }
@@ -9657,6 +10052,12 @@ extern "C" int func_001680B0(int camera) {
 //100%
 INCLUDE_ASM("camera/camera", func_001680B8);
 #ifdef SKIP_ASM
+/**
+ * Sets Pose's position: a 16-byte copy of *@p position.
+ *
+ * @param simpleCamera  the camera
+ * @param position  the new position
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void func_001680B8(cSimpleCamera* simpleCamera, long long *position) {
     (*(long long*)&simpleCamera->Pose) = (long long) *position;
@@ -9665,6 +10066,12 @@ extern "C" void func_001680B8(cSimpleCamera* simpleCamera, long long *position) 
 //100%
 INCLUDE_ASM("camera/camera", func_001680C8);
 #ifdef SKIP_ASM
+/**
+ * Sets Pose's rotation quaternion (Pose.Q): a 16-byte copy of *@p orientation.
+ *
+ * @param simpleCamera  the camera
+ * @param orientation  the new quaternion
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void func_001680C8(cSimpleCamera* simpleCamera, long long *orientation) {
     (*(long long*)&simpleCamera->Pose.Q) = (long long) *orientation;
@@ -9673,6 +10080,12 @@ extern "C" void func_001680C8(cSimpleCamera* simpleCamera, long long *orientatio
 //100%
 INCLUDE_ASM("camera/camera", func_001680D8);
 #ifdef SKIP_ASM
+/**
+ * Sets Pose: copies the position (+0x0) and the quaternion (+0x10) of @p pose.
+ *
+ * @param simpleCamera  the camera
+ * @param pose  the new pose (a tPose)
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void func_001680D8(cSimpleCamera* simpleCamera, void *pose) {
     (*(long long*)&simpleCamera->Pose) = (long long) (*(long long *)((char*)(pose) + (0)));
@@ -9682,6 +10095,12 @@ extern "C" void func_001680D8(cSimpleCamera* simpleCamera, void *pose) {
 //100%
 INCLUDE_ASM("camera/camera", func_001680F0);
 #ifdef SKIP_ASM
+/**
+ * Sets the field of view (View, the camera's first float).
+ *
+ * @param camera  the camera (a cSimpleCamera)
+ * @param fparg0  the new field of view (radians)
+ */
 extern "C" void func_001680F0(float *camera, float fparg0) {
     *camera = fparg0;
 }
@@ -9689,6 +10108,12 @@ extern "C" void func_001680F0(float *camera, float fparg0) {
 //100%
 INCLUDE_ASM("camera/camera", func_001680F8);
 #ifdef SKIP_ASM
+/**
+ * Sets MaxFar, the upper limit for Near and Far.
+ *
+ * @param simpleCamera  the camera
+ * @param fparg0  the new limit
+ */
 extern "C" void func_001680F8(cSimpleCamera* simpleCamera, float fparg0) {
     (simpleCamera->MaxFar) = fparg0;
 }
@@ -9696,6 +10121,12 @@ extern "C" void func_001680F8(cSimpleCamera* simpleCamera, float fparg0) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168100);
 #ifdef SKIP_ASM
+/**
+ * Sets MinNear, the lower limit for Near and Far.
+ *
+ * @param simpleCamera  the camera
+ * @param fparg0  the new limit
+ */
 extern "C" void func_00168100(cSimpleCamera* simpleCamera, float fparg0) {
     (simpleCamera->MinNear) = fparg0;
 }
@@ -9703,6 +10134,12 @@ extern "C" void func_00168100(cSimpleCamera* simpleCamera, float fparg0) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168108);
 #ifdef SKIP_ASM
+/**
+ * Sets MaxView, the upper limit for the field of view.
+ *
+ * @param simpleCamera  the camera
+ * @param fparg0  the new limit (radians)
+ */
 extern "C" void func_00168108(cSimpleCamera* simpleCamera, float fparg0) {
     (simpleCamera->MaxView) = fparg0;
 }
@@ -9710,6 +10147,12 @@ extern "C" void func_00168108(cSimpleCamera* simpleCamera, float fparg0) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168110);
 #ifdef SKIP_ASM
+/**
+ * Returns Controller, the controller currently driving the camera.
+ *
+ * @param camera  the camera
+ * @return the controller (a cCameraController*)
+ */
 extern "C" int func_00168110(cCamera* camera) {
     return ((int)camera->Controller);
 }
@@ -9717,6 +10160,12 @@ extern "C" int func_00168110(cCamera* camera) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168118);
 #ifdef SKIP_ASM
+/**
+ * Returns ManualController.
+ *
+ * @param camera  the camera
+ * @return the manual controller
+ */
 extern "C" int func_00168118(cCamera* camera) {
     return ((int)camera->ManualController);
 }
@@ -9724,6 +10173,12 @@ extern "C" int func_00168118(cCamera* camera) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168120);
 #ifdef SKIP_ASM
+/**
+ * Returns ChaseController.
+ *
+ * @param camera  the camera
+ * @return the chase controller
+ */
 extern "C" int func_00168120(cCamera* camera) {
     return ((int)camera->ChaseController);
 }
@@ -9731,6 +10186,12 @@ extern "C" int func_00168120(cCamera* camera) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168128);
 #ifdef SKIP_ASM
+/**
+ * Returns ScriptController.
+ *
+ * @param camera  the camera
+ * @return the script controller
+ */
 extern "C" int func_00168128(cCamera* camera) {
     return ((int)camera->ScriptController);
 }
@@ -9738,6 +10199,12 @@ extern "C" int func_00168128(cCamera* camera) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168130);
 #ifdef SKIP_ASM
+/**
+ * Returns bStreamIsReady, which cCamera_updateStreamFocus sets.
+ *
+ * @param camera  the camera
+ * @return nonzero when the camera's stream is ready
+ */
 extern "C" int func_00168130(cCamera* camera) {
     return (camera->bStreamIsReady);
 }
@@ -9745,6 +10212,12 @@ extern "C" int func_00168130(cCamera* camera) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168138);
 #ifdef SKIP_ASM
+/**
+ * Returns StreamFocusID (0 for view 0, 1 for view 1, -1 before cCamera_init).
+ *
+ * @param camera  the camera
+ * @return the stream focus id (an eStreamFocusID)
+ */
 extern "C" int func_00168138(cCamera* camera) {
     return (camera->StreamFocusID);
 }
@@ -9752,6 +10225,12 @@ extern "C" int func_00168138(cCamera* camera) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168140);
 #ifdef SKIP_ASM
+/**
+ * Sets the camera target's Rider (+0x4).
+ *
+ * @param cameraTarget  the target (a cRiderCameraTarget)
+ * @param rider  the rider (a cRider*)
+ */
 extern "C" void func_00168140(void *cameraTarget, int rider) {
     (*(int *)((char*)(cameraTarget) + (4))) = rider;
 }
@@ -9759,6 +10238,12 @@ extern "C" void func_00168140(void *cameraTarget, int rider) {
 //100%
 INCLUDE_ASM("camera/camera", func_00168148);
 #ifdef SKIP_ASM
+/**
+ * Returns the camera target's Rider.
+ *
+ * @param riderCameraTarget  the target
+ * @return the rider (a cRider*)
+ */
 extern "C" int func_00168148(cRiderCameraTarget* riderCameraTarget) {
     return ((int)riderCameraTarget->Rider);
 }
@@ -9879,6 +10364,13 @@ static inline float cmLength_168150b(const t4Vector& v)
     return r;
 }
 
+/**
+ * Puts the eye back behind the target when it is too close to or too far from it.
+ *
+ * When the distance from Position to CamTargetPos is under 20 or over 1e20, CamTargetPos becomes the target's position
+ * (Target virtual slot 1, cRiderCameraTarget_getPosition), Position becomes that position minus 200 times the vector at
+ * +0x1B0 of Target's Rider, plus 50 up (t4vect_ZAxis), and DoSnap is set.
+ */
 // cLookAtChaseAlgorithm::verify(void): if the camera is closer to / farther from its target than the
 // allowed range, snap it back behind the target.
 extern "C" void func_00168150_def(char* self)
@@ -9905,6 +10397,11 @@ extern "C" void* func_001673F8(int, int);
 //99.38%
 INCLUDE_ASM("camera/camera", func_00168298__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the camera unit's static initializer func_001673F8(1, 0xFFFF): a global constructor entry.
+ *
+ * @return func_001673F8's return value (declared void*; that function returns nothing)
+ */
 void* func_00168298(void* self)
 {
     return func_001673F8(1, 0xffff);

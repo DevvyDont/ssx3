@@ -94,7 +94,7 @@ struct cCamera {
     int ViewIndex;                  // 0x018 [O]; [U] cCamera_init stores the view index
     char unk_01C[0x4];              // 0x01C alignment gap
     tPose Pose;                     // 0x020 [O]; [U] func_0015E050, func_0015E668 (sq, .x/.y/.z by lwc1)
-    t4Matrix CamMat;                // 0x040 [O]; [U] func_0015E050 (updateCamMat: sqc2 rows)
+    t4Matrix CamMat;                // 0x040 [O]; [U] func_0015E050 (setupCamWithPosAndTarget, which inlines the CamMat rebuild: sqc2 rows)
     t4Vector Direction;             // 0x080 [O]; [U] func_0015E050, func_0015E668 (sq)
     void** mVtbl;                   // 0x090 [R] cCamera_vtbl (D_0045B888); the dtor restores cSimpleCamera_vtbl
     char unk_094[0xC];              // 0x094 padding

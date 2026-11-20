@@ -332,6 +332,12 @@ extern "C" void cManualCameraController_setCurrentAlgorithmType(void* self, int 
 //100%
 INCLUDE_ASM("camera/cameracontroller", func_0015CFD0);
 #ifdef SKIP_ASM
+/**
+ * Returns the AlgorithmType of the first algorithm in the controller's AlgorithmList.
+ *
+ * @param manualController  the controller (a cManualCameraController)
+ * @return the algorithm type (an eCamAlgoType)
+ */
 extern "C" int func_0015CFD0(void *manualController) {
     return (*(int *)((char*)(**(*(void ****)((char*)(manualController) + (8)))) + (0xC)));
 }
@@ -354,6 +360,13 @@ extern "C" void cManualCameraController_update(void* self)
 //100%
 INCLUDE_ASM("camera/cameracontroller", func_0015D020);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the chase camera is in a replay camera other than types 93 (0x5D) and 60 (0x3C).
+ *
+ * True when CamSwitchRecord.IsInReplay is set and CamSwitchRecord.LatestReplayType is neither 93 nor 60.
+ *
+ * @return 1 or 0
+ */
 extern "C" int func_0015D020(void* self)
 {
     int replayCamActive = 0;

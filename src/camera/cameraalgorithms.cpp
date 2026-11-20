@@ -235,6 +235,17 @@ INCLUDE_ASM("camera/cameraalgorithms", func_0015D700);
 #ifdef SKIP_ASM
 extern "C" void* func_0015D928(void* self);
 
+/**
+ * Sets up a camera's lens and resets its pose.
+ *
+ * View, Near and Far and their limits MaxView, MinNear and MaxFar take @p x, @p y and @p z. Pose's position becomes
+ * (0, 0, 0, 0) and its quaternion (0, 1, 0, 1), as in cSimpleCamera_cSimpleCamera (not a unit quaternion; the identity
+ * is (0, 0, 0, 1)), Direction becomes t4vect_XAxis, and CamMat is rebuilt (func_0015D928).
+ *
+ * @param x  the field of view, also its maximum
+ * @param y  the near distance, also its minimum
+ * @param z  the far distance, also its maximum
+ */
 extern "C" void func_0015D700(void* self, float x, float y, float z)
 {
     cSimpleCamera_cSimpleCamera_sVec4 poseVec;
@@ -280,6 +291,12 @@ static inline float atan2_15D780(float y, float x, float zero)
     return r;
 }
 
+/**
+ * Returns the camera's heading: atan2 (built on func_0031C228) of the y and x of the axis Pose's quaternion turns y
+ * onto.
+ *
+ * @return the heading (radians)
+ */
 extern "C" float func_0015D780(void* self)
 {
     func_0015D780_V look;
@@ -322,6 +339,12 @@ static inline float func_0015D880_Length(const func_0015D880_V& v)
     return r;
 }
 
+/**
+ * Returns the camera's pitch: the arcsine (func_0031C128) of z over the length of the axis Pose's quaternion turns y
+ * onto.
+ *
+ * @return the pitch (radians)
+ */
 extern "C" float func_0015D880(void* self)
 {
     func_0015D880_V look;
@@ -469,6 +492,10 @@ static inline void vu0TransMtx_D928(void* m, const sV_D928& v)
 }
 
 extern "C" void func_0015D928_impl(void* self) __asm__("func_0015D928");
+/**
+ * Rebuilds CamMat from Pose: the axis-flip matrix D_004C53A0 times the rotation of Pose's quaternion, translated by
+ * minus Pose's position (w = 1). Direction is not updated.
+ */
 extern "C" void func_0015D928_impl(void* self)
 {
     char* view = (char*)self + 0x40;
@@ -517,6 +544,12 @@ INCLUDE_ASM("camera/cameraalgorithms", func_0015DAE0);
 #ifdef SKIP_ASM
 struct func_0015DAE0_VE { short delta; short index; void (*fn)(void*); };
 
+/**
+ * Snaps the chase controller of each view's camera.
+ *
+ * For the first camera of SSXApp->Game->ViewMan, and for the second when the view count (its first word) is at least 2,
+ * calls the ChaseController's virtual slot 4 (cCameraController_snapCurrent in cChaseCameraController_vtbl).
+ */
 extern "C" void func_0015DAE0(void)
 {
     void* cam = SSXApp->Game;

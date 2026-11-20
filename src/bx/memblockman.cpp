@@ -432,6 +432,18 @@ static inline int func_0031A130_in(void* p, void* base, unsigned int size)
     return (unsigned int)((char*)p - (char*)base) <= size - 1;
 }
 
+/**
+ * Returns the block size of the cMemBlockMan pool that holds an address, or 0 when no pool does.
+ *
+ * Checks the pools in turn: cMemBlockMan_m_container8 (0x800 bytes, 8-byte blocks), cMemBlockMan_m_container16
+ * (0x2000, 16), cMemBlockMan_m_container32 (0x6000, 32), cMemBlockMan_m_container64 (0x32000, 64),
+ * cMemBlockMan_m_container128 (0x25800, 128), cMemBlockMan_m_container256 (0x20000, 256) and
+ * cMemBlockMan_m_container512 (0x20000, 512). The same range test as cMemBlockMan_isMemBlock, but it returns the size.
+ * func_00319B98 uses it to tell pool blocks from heap blocks.
+ *
+ * @param addr  the address to look up
+ * @return 8, 16, 32, 64, 128, 256 or 512 for a pool address, else 0
+ */
 extern "C" int func_0031A130(void* addr)
 {
     if (func_0031A130_in(addr, cMemBlockMan_m_container8, 0x800))
@@ -495,6 +507,11 @@ extern "C" void cMemBlockMan_validate(void)
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031A258);
 #ifdef SKIP_ASM
+/**
+ * Returns 0.
+ *
+ * @return 0
+ */
 extern "C" int func_0031A258(void) {
     return 0;
 }
@@ -502,6 +519,9 @@ extern "C" int func_0031A258(void) {
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031A260);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ */
 extern "C" void func_0031A260(void) {
 
 }
@@ -510,6 +530,18 @@ extern "C" void func_0031A260(void) {
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031A268);
 #ifdef SKIP_ASM
+/**
+ * Recreates a saved VU0 MAC flag value by running a VU0 multiply whose result raises the same flags.
+ *
+ * For each of the four components, from the low flag bits upwards (@p flags is shifted left once per component), picks
+ * a value: when neither the overflow nor the underflow bit (mask 0x8800) is set, 0.0 if the zero bit (8) is set, else
+ * 1.0; otherwise 1e-30 if the zero bit is set (underflow) or 1e30 if not (overflow). The second vector gets the same
+ * value, negated when the sign bit (0x80) is set. Then multiplies the two vectors in VF1/VF2 (vmul), keeping the old
+ * VF1 and VF2 in $8/$9 and putting them back afterwards. func_0031A3C0 calls it with the MAC flags saved at +0x200 of
+ * a func_0031A308 buffer.
+ *
+ * @param flags  the MAC flag word to reproduce
+ */
 // PORT: PS2-only VU0 FPU-flag probe: builds two float4s from flag bits and multiplies them on VU0.
 extern "C" void func_0031A268(int flags)
 {
@@ -551,6 +583,16 @@ extern "C" void func_0031A268(int flags)
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031A308);
 #ifdef SKIP_ASM
+/**
+ * Saves the VU0 register state to a 0x210-byte buffer.
+ *
+ * Stores VF1-VF31 at +0x0..+0x1E0, the accumulator at +0x1F0 (read out through VF1 with vmaddx after VF1 is saved),
+ * the MAC flags ($vi17) at +0x200, the status flags ($vi16) at +0x204, Q ($vi22, after vwaitq) at +0x208 and the clip
+ * flags ($vi18) at +0x20C. func_0031A3C0 restores it. func_0031A6D8 and func_0031AA18 save into the PS2 execution
+ * manager's buffer at +0x14080.
+ *
+ * @param buf  the 0x210-byte, 16-byte aligned save buffer
+ */
 // PORT: PS2-only VU0 state save (VF1-VF31, MAC/status/Q/clip flags, ACC) to a 0x210-byte buffer.
 extern "C" void func_0031A308(void* buf)
 {
@@ -612,6 +654,14 @@ INCLUDE_ASM("bx/memblockman", func_0031A3C0);
 #ifdef SKIP_ASM
 extern "C" void func_0031A268(int status);
 
+/**
+ * Restores the VU0 register state that func_0031A308 saved.
+ *
+ * Loads Q (+0x208) and the clip flags (+0x20C), the accumulator (+0x1F0, through VF1 and vaddax), VF1-VF6, then
+ * recreates the MAC flags from +0x200 with func_0031A268, and finally loads VF7-VF31 and the status flags (+0x204).
+ *
+ * @param buf  the 0x210-byte save buffer
+ */
 // PORT: PS2-only VU0 state restore (inverse of func_0031A308): VF1-VF31, flags, ACC.
 extern "C" void func_0031A3C0(void* buf)
 {
@@ -677,6 +727,16 @@ extern "C" void func_0031A3C0(void* buf)
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031A490);
 #ifdef SKIP_ASM
+/**
+ * Calls an interrupt callback with all 32 FPU registers preserved, then re-enables interrupts.
+ *
+ * func_0031A6D8 installs it as the INTC 3 handler (func_00423A90) with func_0031ABD0 as its argument. Saves $f0-$f31
+ * on the stack, calls @p handler with @p handlerArg, restores the registers and runs `sync; ei`.
+ *
+ * @param handlerArg  the value passed to @p handler
+ * @param handler  the callback to run
+ * @return 1
+ */
 // PORT: PS2-only handler trampoline: saves/restores all 32 FPU registers around the
 // handler call and re-enables interrupts (sync; ei). Needs a native replacement off-PS2.
 extern "C" int func_0031A490(int handlerArg, void (*handler)(int))
@@ -790,6 +850,12 @@ INCLUDE_ASM("bx/memblockman", func_0031A6B8);
 extern int D_004A3ECC;
 extern "C" void ChangeThreadPriority(int, int);
 
+/**
+ * Sets the PS2 execution manager's loader thread (D_004A3ECC) to priority 101 with ChangeThreadPriority.
+ *
+ * func_0031A6D8 creates that thread at the main thread's priority + 1 and stores its id in D_004A3ECC;
+ * cSSXApp_initload calls this afterwards.
+ */
 extern "C" void func_0031A6B8(void)
 {
     ChangeThreadPriority(D_004A3ECC, 101);
@@ -865,6 +931,19 @@ struct sSemaParam_31A6D8 {
     unsigned int option;
 };
 
+/**
+ * Starts the PS2 execution manager: its semaphores, its loader and timer threads and its INTC 3 interrupt handler.
+ *
+ * Clears the quit flag (+0x20), saves the current VU0 state into the buffer at +0x14080 (func_0031A308), records the
+ * calling (main) thread's id (+0x10) and its current priority (+0x14, from ReferThreadStatus). Creates the halt
+ * semaphore (+0xC) and the sync semaphore (+0x18, its waiting flag +0x1C cleared), and a counting semaphore (max
+ * 0x400) for loader jobs (+0x14044, pending job +0x14048 cleared). Creates and starts the loader thread
+ * (func_0031AC60, 0x10000-byte stack at +0x4040, priority main + 1; id at +0x14040 and in D_004A3ECC), clears the
+ * halt-request flag (+0x4038), creates the timer counting semaphore (+0x4034, max 0x400) and starts the timer thread
+ * (func_0031AC08, 0x4000-byte stack at +0x30, priority main - 1; id at +0x4030). Both threads get @p self as their
+ * argument and _gp as their $gp. Finally, between func_00424880(3) and func_004248E8(3), installs func_0031A490 as
+ * the INTC 3 handler with func_00423A90, passing func_0031ABD0 as its argument; the handler id goes to +0x14290.
+ */
 extern "C" void func_0031A6D8(sMgr_31A6D8* self)
 {
     sThreadParam_31A6D8 st;
@@ -934,6 +1013,15 @@ extern "C" void TerminateThread(int);
 extern "C" void DeleteThread(int);
 extern "C" void DeleteSema(int);
 
+/**
+ * Shuts the PS2 execution manager down, undoing func_0031A6D8.
+ *
+ * Between func_00424880(3) and func_004248E8(3) removes the INTC 3 handler (id at +0x14290). Sets the quit flag
+ * (+0x20) and signals the loader semaphore (+0x14044) and the timer semaphore (+0x4034) so both threads see it, then
+ * sleeps twice (each thread wakes this one, the main thread, on its way out). Terminates and deletes the timer
+ * thread (+0x4030) and the loader thread (+0x14040), then deletes the timer, loader, sync (+0x18) and halt (+0xC)
+ * semaphores.
+ */
 extern "C" void func_0031A920(void* self)
 {
     func_00424880(3);
@@ -960,6 +1048,12 @@ INCLUDE_ASM("bx/memblockman", func_0031A9D8);
 #ifdef SKIP_ASM
 extern "C" void func_0031A3C0(void* buf);
 
+/**
+ * Restores the VU0 state saved at +0x14080 (func_0031A3C0) when a loader job is pending (+0x14048).
+ *
+ * Slot 11 of the PS2 execution manager vtable D_0048DB68 (cExecutionMan_prepause in the base vtable); func_0031AA58
+ * calls it before it blocks on the sync semaphore.
+ */
 extern "C" void func_0031A9D8(void* self)
 {
     if (*(int*)((char*)self + 0x14048) != 0) {
@@ -971,6 +1065,12 @@ extern "C" void func_0031A9D8(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("bx/memblockman", func_0031AA18);
 #ifdef SKIP_ASM
+/**
+ * Saves the VU0 state into the buffer at +0x14080 (func_0031A308) when a loader job is pending (+0x14048).
+ *
+ * Slot 12 of the PS2 execution manager vtable D_0048DB68 (cExecutionMan_postpause in the base vtable); func_0031AA58
+ * calls it after its wait on the sync semaphore ends.
+ */
 extern "C" void func_0031AA18(void* self)
 {
     if (*(int*)((char*)self + 0x14048) != 0) {
@@ -996,6 +1096,13 @@ struct sMemBlkVEntryB {
     void (*fn)(void*);
 };
 
+/**
+ * Blocks the calling thread until func_0031AAC8 signals the sync semaphore, wrapped in the pause hooks.
+ *
+ * Sets the waiting flag (+0x1C), calls vtable slot 11 (func_0031A9D8 in this class), waits on the sync semaphore
+ * (+0x18), clears the waiting flag, drains any extra signals with PollSema (it loops while PollSema returns the
+ * semaphore id), and calls vtable slot 12 (func_0031AA18).
+ */
 extern "C" void func_0031AA58(void* self)
 {
     *(int*)((char*)self + 0x1C) = 1;
@@ -1016,6 +1123,9 @@ INCLUDE_ASM("bx/memblockman", func_0031AAC8);
 #ifdef SKIP_ASM
 extern "C" void SignalSema(int);
 
+/**
+ * Wakes a thread blocked in func_0031AA58: signals the sync semaphore (+0x18) when the waiting flag (+0x1C) is set.
+ */
 extern "C" void func_0031AAC8(void* self)
 {
     if (*(int*)((char*)self + 0x1C) != 0) {
@@ -1029,6 +1139,11 @@ extern "C" void* WaitSema(int);
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031AAF0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Waits on the PS2 execution manager's halt semaphore (+0xC), which func_0031AB10 signals.
+ *
+ * @return WaitSema's result
+ */
 void* func_0031AAF0(void* self)
 {
     return WaitSema(*(int*)((char*)self + 0xc));
@@ -1038,8 +1153,13 @@ void* func_0031AAF0(void* self)
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031AB10);
 #ifdef SKIP_ASM
+/**
+ * Signals the halt semaphore (+0xC), releasing a thread blocked in func_0031AAF0, then sleeps forever.
+ *
+ * Slot 14 of the PS2 execution manager vtable D_0048DB68; cExecutionMan_checkHalt calls it after running the halt
+ * callback when its flag is set (cAppMan_checkHalt passes 1). Never returns.
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
-// Wakes the thread at 0xC, then idles forever.
 extern "C" void func_0031AB10(void* self)
 {
     SignalSema(*(int*)((char*)self + 0xC));
@@ -1068,6 +1188,15 @@ struct sMbOwner_AB30 {
     sMbVE_AB30 vt5;     // 0x28
 };
 
+/**
+ * Halts the PS2 execution manager: stops the timer wake-ups and the loader thread, then runs or waits for the halt.
+ *
+ * Slot 13 of the PS2 execution manager vtable D_0048DB68, called by cExecutionMan_halt once it has stored the halt
+ * callback. Sets the halt-request flag (+0x4038, which stops func_0031ABD0 waking the timer thread) and, unless it
+ * runs on the loader thread (+0x14040), suspends that thread. On the main thread (+0x10) it runs
+ * cExecutionMan_checkHalt(self, 0) directly; on any other thread it calls vtable slot 5 (func_0031AAC8, which wakes
+ * the main thread if it is waiting in func_0031AA58) and then waits on the halt semaphore (func_0031AAF0).
+ */
 // Halt request: on the execution thread checks the halt directly; otherwise forwards it and wakes the worker.
 extern "C" void func_0031AB30(void* self)
 {
@@ -1090,6 +1219,9 @@ extern "C" void func_0031AB30(void* self)
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031ABC0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (slot 7 of the PS2 execution manager vtable D_0048DB68).
+ */
 void func_0031ABC0(void* self)
 {
 }
@@ -1098,6 +1230,11 @@ void func_0031ABC0(void* self)
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031ABC8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 60 (slot 8 of the PS2 execution manager vtable D_0048DB68).
+ *
+ * @return 60
+ */
 int func_0031ABC8(void* self)
 {
     return 0x3C;
@@ -1110,6 +1247,13 @@ INCLUDE_ASM("bx/memblockman", func_0031ABD0);
 void* func_00317520();
 extern "C" void iSignalSema(int);
 
+/**
+ * Wakes the timer thread from the INTC 3 interrupt unless a halt has been requested.
+ *
+ * Runs inside func_0031A490 (the handler func_0031A6D8 installs). Gets the execution manager with func_00317520 and,
+ * while its halt-request flag (+0x4038) is clear, signals the timer semaphore (+0x4034) with iSignalSema, releasing
+ * one pass of func_0031AC08.
+ */
 extern "C" void func_0031ABD0(void)
 {
     char* app = (char*)func_00317520();
@@ -1128,6 +1272,13 @@ extern "C" void SleepThread();
 // PORT: func_00317500__Fv is called with self here; bind the 1-arg form to that symbol.
 int func_00317500_1(void* self) __asm__("func_00317500__Fv");
 
+/**
+ * Runs the PS2 execution manager's timer thread (its entry point).
+ *
+ * Each time the timer semaphore (+0x4034, signalled from the interrupt by func_0031ABD0) is released and the quit flag
+ * (+0x20) is still clear, calls func_00317500 (which runs func_00317348 on cAppMan_TheAppMan, the per-tick update).
+ * Once the quit flag is set, wakes the main thread (+0x10) and sleeps.
+ */
 extern "C" void func_0031AC08(void* self)
 {
     while (WaitSema(*(int*)((char*)self + 0x4034)), *(volatile int*)((char*)self + 0x20) == 0)
@@ -1148,6 +1299,13 @@ struct sMemJobVEntry {
     void (*fn)(void*);
 };
 
+/**
+ * Runs the PS2 execution manager's loader thread (its entry point).
+ *
+ * Each time the loader semaphore (+0x14044, signalled by func_0031ACD8) is released and the quit flag (+0x20) is
+ * still clear, calls virtual slot 2 of the pending job object (+0x14048) and then clears the job pointer, which
+ * func_0031AD00 reports as done. Once the quit flag is set, wakes the main thread (+0x10) and sleeps.
+ */
 extern "C" void func_0031AC60(void* self)
 {
     while (WaitSema(*(int*)((char*)self + 0x14044)), *(volatile int*)((char*)self + 0x20) == 0)
@@ -1167,6 +1325,13 @@ INCLUDE_ASM("bx/memblockman", func_0031ACD8);
 #ifdef SKIP_ASM
 extern "C" void SignalSema(int);
 
+/**
+ * Hands an object to the loader thread: stores it as the pending job (+0x14048) and signals the loader semaphore.
+ *
+ * func_0031AC60 then calls the object's virtual slot 2 and clears the job; func_0031AD00 reports when it has.
+ *
+ * @param a1  the job object
+ */
 extern "C" void func_0031ACD8(void* self, int a1)
 {
     *(int*)((char*)self + 0x14048) = a1;
@@ -1177,6 +1342,11 @@ extern "C" void func_0031ACD8(void* self, int a1)
 //100%
 INCLUDE_ASM("bx/memblockman", func_0031AD00);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the loader thread has finished its job (the pending job at +0x14048 is null).
+ *
+ * @return 1 when no job is pending, else 0
+ */
 extern "C" int func_0031AD00(void* self)
 {
     return *(int*)((char*)self + 0x14048) == 0;
@@ -1190,6 +1360,11 @@ extern "C" unsigned int D_004A3ED0;
 // raw disassembly has the offset already baked in as a literal immediate.
 INCLUDE_ASM("bx/memblockman", func_0031AD18);
 #ifdef SKIP_ASM
+/**
+ * Clears the flag D_004A3ED0, which func_0031AD20 sets when it finds the disc tray has been opened.
+ *
+ * cGameComm_setState calls it on entering the GameActive state.
+ */
 extern "C" void func_0031AD18()
 {
     D_004A3ED0 = 0;
@@ -1204,6 +1379,16 @@ extern int D_004A3ED4;
 extern "C" int func_00402618(int cmd, int* out);
 extern "C" void func_003E3D78(void);
 
+/**
+ * Recovers from a failed disc read and notes whether the disc tray was opened (a sync task).
+ *
+ * systemInit installs it with SYNCTASK_add in place of the CD file system's func_003E4000, which does the same
+ * recovery. When D_004A3ED4 is set, clears it and calls func_00402618(2, ...) (command 2, the result is discarded).
+ * When both bits 2 and 4 (mask 6) of the CD file system flags (D_00519C40) are set, calls func_00402618(2, ...) again
+ * and sets D_004A3ED0 when it reports a nonzero count, clears the two bits and re-runs the read with func_003E3D78.
+ *
+ * @return 0
+ */
 extern "C" int func_0031AD20(void)
 {
     int flags = D_00519C40[0];

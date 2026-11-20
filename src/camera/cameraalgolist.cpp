@@ -104,6 +104,17 @@ static inline void sAlgoNodeK2b_delete(sAlgoNodeK2b* n)
     }
 }
 
+/**
+ * Removes a node from a camera algorithm list and returns the node after it.
+ *
+ * Unlinks @p n (the head moves on when it has no previous node), deletes it: its algorithm too, through the algorithm's
+ * virtual destructor (slot 1, flags 3), when the node owns it (+0x18), then frees the node with operator_delete, and
+ * decrements the list's count.
+ *
+ * @param list  the list
+ * @param n  the node to remove
+ * @return the node that followed @p n (0 at the end)
+ */
 extern "C" sAlgoNodeK2b* func_0015CA50(sAlgoListK2b* list, sAlgoNodeK2b* n)
 {
     sAlgoNodeK2b* next = n->next;
