@@ -33,7 +33,7 @@ extern char str_WakeLines_cBoardWakeFX[];
 extern char str_WakeVerts_cBoardWakeFX[];
 extern "C" void cRider_cRider(void* self);
 struct sWakeDCF28;
-extern "C" void cBoardWakeFX_readFromReplayFrame(sWakeDCF28* self);
+extern "C" void cBoardWakeFX_reset(sWakeDCF28* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 
@@ -60,7 +60,7 @@ struct sWakeElemBW {
  * (the g++ 2.95 this-adjust fix-ups when not in charge).
  *
  * The arrays are "WakeLines_cBoardWakeFX" (+0xC) and "WakeVerts_cBoardWakeFX" (one block of 160, split into
- * the five rows at +0x10). +0xB4 starts at -1 and the reset (cBoardWakeFX_readFromReplayFrame) sets the
+ * the five rows at +0x10). +0xB4 starts at -1 and the reset (cBoardWakeFX_reset) sets the
  * sizes.
  *
  * @param inChrg  nonzero when this object is complete and must construct its virtual base
@@ -100,7 +100,7 @@ extern "C" void* cBoardWakeFX_cBoardWakeFX(cBoardWakeFX* self, int inChrg)
         rows[i] = *(sWakeElemBW**)((char*)self + 0x10) + i * 32;
     }
     *(int*)((char*)self + 0xB4) = -1;
-    cBoardWakeFX_readFromReplayFrame((sWakeDCF28*)self);
+    cBoardWakeFX_reset((sWakeDCF28*)self);
     return ((void*)self);
 }
 #endif
@@ -131,7 +131,7 @@ __asm__("_vt$15cVbDtor002DCDA0$13cRiderVbC_bwf = D_00488DA8\n"
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX_readFromReplayFrame);
+INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX_reset);
 #ifdef SKIP_ASM
 struct sWakeElemDCF28 {
     int a;
@@ -174,7 +174,7 @@ extern "C" void func_002DE368(void* self);
  * and 0.8 s. It sets the colour to white and clears the state. When the row count changed, each row's points
  * get a height factor and the rows' sink speeds (0 down to -25) are recomputed.
  */
-extern "C" void cBoardWakeFX_readFromReplayFrame(sWakeDCF28* self)
+extern "C" void cBoardWakeFX_reset(sWakeDCF28* self)
 {
     int old = self->count;
     float one;
@@ -1049,7 +1049,7 @@ extern sVec4 t4vect_Zero;
  * Clears a board wake's parameter block: zeroes its three vectors (+0x0, +0x10, +0x20) and the words at +0x30 and
  * +0x34.
  *
- * cBoardWakeFX_readFromReplayFrame (the wake reset) calls it on cBoardWakeFX + 0x60.
+ * cBoardWakeFX_reset (the wake reset) calls it on cBoardWakeFX + 0x60.
  */
 extern "C" void func_002DE368(void* self)
 {
@@ -4687,7 +4687,7 @@ extern char D_00459B90[];
 
 struct sWakeFade_3930;
 extern "C" void cRider_cRider(void* self);
-extern "C" void cPlayerIndicatorFX_readFromReplayFrame(sWakeFade_3930* self);
+extern "C" void cPlayerIndicatorFX_reset(sWakeFade_3930* self);
 
 /**
  * Constructs a rider's player indicator (the light beam above another player) and resets its colours.
@@ -4724,7 +4724,7 @@ extern "C" void* cPlayerIndicatorFX_cPlayerIndicatorFX(cPlayerIndicatorFX* self,
         *(void**)(*(char**)self + 0x6C0) = &vtbl2;
         vtbl2.e[1].delta = D_00488A10.e[1].delta + vc;
     }
-    cPlayerIndicatorFX_readFromReplayFrame((sWakeFade_3930*)self);
+    cPlayerIndicatorFX_reset((sWakeFade_3930*)self);
     return ((void*)self);
 }
 #endif
@@ -4753,7 +4753,7 @@ __asm__("_vt$15cVbDtor002E37D0$13cRiderVbC_bwf = D_004889C8\n"
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", cPlayerIndicatorFX_readFromReplayFrame);
+INCLUDE_ASM("visualfx/boardwakefx", cPlayerIndicatorFX_reset);
 #ifdef SKIP_ASM
 struct sWakeVec4_3930 {
     float x;
@@ -4783,7 +4783,7 @@ struct sWakeFade_3930 {
  *
  * The pulse runs between (0.5, 1, 0, 0) and (0.7, 1, 0.7, 0.7), starting at the first; +0x4 is cleared.
  */
-extern "C" void cPlayerIndicatorFX_readFromReplayFrame(sWakeFade_3930* self)
+extern "C" void cPlayerIndicatorFX_reset(sWakeFade_3930* self)
 {
     self->a = sWakeVec4_3930(0.5f, 1.0f, 0.0f, 0.0f);
     self->b = sWakeVec4_3930(0.699999988079071f, 1.0f, 0.699999988079071f, 0.699999988079071f);
@@ -6958,7 +6958,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX_cSpeedBoostFX);
 extern const sVt9_3680 D_00488550;
 extern const sVt22_3680 D_00488598;
 extern char str_cSpeedBoostStreamerFX[];
-extern "C" void cSpeedBoostFX_readFromReplayFrame(cSpeedBoostFX* self);
+extern "C" void cSpeedBoostFX_reset(cSpeedBoostFX* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 inline void* operator new[](unsigned int, void* p) { return p; }
@@ -7013,7 +7013,7 @@ extern "C" void* cSpeedBoostFX_cSpeedBoostFX(cSpeedBoostFX* self, int inChrg)
     new ((char*)self + 0x50) sWakeSeg_6320[30];
     sWakePt_6320*& pts = *(sWakePt_6320**)((char*)self + 0x3AC);
     pts = new (str_cSpeedBoostStreamerFX, 0, 0) sWakePt_6320[20];
-    cSpeedBoostFX_readFromReplayFrame(self);
+    cSpeedBoostFX_reset(self);
     return ((void*)self);
 }
 #endif
@@ -7045,7 +7045,7 @@ __asm__("_vt$15cVbDtor002E64C0$13cRiderVbC_bwf = D_00488550\n"
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX_readFromReplayFrame);
+INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX_reset);
 #ifdef SKIP_ASM
 struct sWakeVec4 {
     float x;
@@ -7060,7 +7060,7 @@ struct sWakeVec4 {
  * Sets the colour to red, the ribbon texture to 57 and clears the trail. +0x3A4 is 20 for a rider with a view
  * (a player) and 18 for others.
  */
-extern "C" void cSpeedBoostFX_readFromReplayFrame(cSpeedBoostFX* self)
+extern "C" void cSpeedBoostFX_reset(cSpeedBoostFX* self)
 {
     sWakeVec4 defaultSide;
     defaultSide.x = 1.0f;

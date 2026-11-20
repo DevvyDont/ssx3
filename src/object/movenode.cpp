@@ -2604,13 +2604,13 @@ struct sMnVEntryI7660 {
     int (*fn)(void*);
 };
 
-extern "C" void* cObjectInterface_getNumBeings(int id);
+extern "C" void* cObjectInterface_getBeing(int id);
 
 /**
  * Decides whether the magnet object collides with a rider, catching the first human rider that touches it.
  *
  * With a rider attached only that rider may collide, once AllowCollide is set. Otherwise the rider
- * (cObjectInterface_getNumBeings(id), which returns the being, not a count) is attached when its slot 8 (On Tour
+ * (cObjectInterface_getBeing(id), which returns the being, not a count) is attached when its slot 8 (On Tour
  * cBeing::isHuman) is set.
  *
  * @param id  the rider's being index (On Tour being)
@@ -2625,7 +2625,7 @@ extern "C" int cMagnetModifier_runCollide(cMagnetModifier* self, int id)
         }
         return 0;
     }
-    void* obj = cObjectInterface_getNumBeings(id);
+    void* obj = cObjectInterface_getBeing(id);
     sMnVEntryI7660* vt = *(sMnVEntryI7660**)obj;
     if (vt[8].fn((char*)obj + vt[8].delta) != 0) {
         self->Being = id;

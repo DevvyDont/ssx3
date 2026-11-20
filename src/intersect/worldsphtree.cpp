@@ -5675,7 +5675,7 @@ void* cBoostNode__cBoostNode(void* self)
 INCLUDE_ASM("intersect/worldsphtree", cBoostNode_update);
 #ifdef SKIP_ASM
 extern "C" int func_002D1AF0();
-extern "C" void** cObjectInterface_getNumBeings(int i);
+extern "C" void** cObjectInterface_getBeing(int i);
 
 struct sVEnt_003415D0 { short delta; short index; void* fn; };
 typedef void (*Fn0_003415D0)(void*);
@@ -5724,7 +5724,7 @@ extern "C" void cBoostNode_update(sNode_003415D0* self)
     ((Fn0_003415D0)vt[49].fn)((char*)self + vt[49].delta);
     if (self->type == 1 || self->t3C <= 0) {
         for (int i = 0; i < func_002D1AF0(); i++) {
-            void** obj = cObjectInterface_getNumBeings(i);
+            void** obj = cObjectInterface_getBeing(i);
             if (self->type == 2) {
                 sVEnt_003415D0* ovt = (sVEnt_003415D0*)*obj;
                 if (((Test0_003415D0)ovt[9].fn)((char*)obj + ovt[9].delta) != 0) continue;
@@ -7045,7 +7045,7 @@ extern "C" void* cBoostModifier_cBoostModifier1(cBoostModifier* self, sVEntry003
 INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_update);
 #ifdef SKIP_ASM
 extern "C" int func_002D1AF0();
-extern "C" void** cObjectInterface_getNumBeings(int i);
+extern "C" void** cObjectInterface_getBeing(int i);
 
 struct sVEnt_00342880 { short delta; short index; void* fn; };
 typedef void (*Fn0_00342880)(void*);
@@ -7078,7 +7078,7 @@ extern "C" void cBoostModifier_update(cBoostModifier* self)
     ((Fn0_00342880)vt[9].fn)((char*)self + vt[9].delta);
     if (self->Type == 1 || self->Time <= 0) {
         for (int i = 0; i < func_002D1AF0(); i++) {
-            void** obj = cObjectInterface_getNumBeings(i);
+            void** obj = cObjectInterface_getBeing(i);
             sVEnt_00342880* ovt = (sVEnt_00342880*)*obj;
             if (((Test_00342880)ovt[3].fn)((char*)obj + ovt[3].delta, (int)self->Instance) != 0) {
                 self->Active = 1;

@@ -2005,7 +2005,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7AB0);
 /**
  * Does nothing.
  *
- * It is paired with func_002F7AB8, which forwards to the cBoardWakeFX function cBoardWakeFX_readFromReplayFrame.
+ * It is paired with func_002F7AB8, which forwards to the cBoardWakeFX function cBoardWakeFX_reset.
  * Nothing in the retail code references it.
  */
 extern "C" void func_002F7AB0(void) {
@@ -2015,16 +2015,16 @@ extern "C" void func_002F7AB0(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7AB8);
 #ifdef SKIP_ASM
-extern "C" void cBoardWakeFX_readFromReplayFrame();
+extern "C" void cBoardWakeFX_reset();
 
 /**
- * Calls cBoardWakeFX_readFromReplayFrame, passing its argument registers through untouched.
+ * Calls cBoardWakeFX_reset, passing its argument registers through untouched.
  *
- * Despite its name, cBoardWakeFX_readFromReplayFrame sits between the cBoardWakeFX destructor and update, where On Tour
+ * cBoardWakeFX_reset sits between the cBoardWakeFX destructor and update, where On Tour
  * declares reset. Nothing in the retail code references it.
  */
 extern "C" void func_002F7AB8(void) {
-    cBoardWakeFX_readFromReplayFrame();
+    cBoardWakeFX_reset();
 }
 #endif
 //100%
@@ -2033,7 +2033,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7AD8);
 /**
  * Does nothing.
  *
- * It is paired with func_002F7AE0, which forwards to the cBoardSparkFX function cBoardSparkFX_readFromReplayFrame.
+ * It is paired with func_002F7AE0, which forwards to the cBoardSparkFX function cBoardSparkFX_reset.
  * Nothing in the retail code references it.
  */
 extern "C" void func_002F7AD8(void) {
@@ -2043,16 +2043,16 @@ extern "C" void func_002F7AD8(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7AE0);
 #ifdef SKIP_ASM
-extern "C" void cBoardSparkFX_readFromReplayFrame();
+extern "C" void cBoardSparkFX_reset();
 
 /**
- * Calls cBoardSparkFX_readFromReplayFrame, passing its argument registers through untouched.
+ * Calls cBoardSparkFX_reset, passing its argument registers through untouched.
  *
- * Despite its name, cBoardSparkFX_readFromReplayFrame sits between the cBoardSparkFX destructor and update, where On
+ * cBoardSparkFX_reset sits between the cBoardSparkFX destructor and update, where On
  * Tour declares reset. Nothing in the retail code references it.
  */
 extern "C" void func_002F7AE0(void) {
-    cBoardSparkFX_readFromReplayFrame();
+    cBoardSparkFX_reset();
 }
 #endif
 //100%
@@ -2117,7 +2117,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7B50);
  * Does nothing.
  *
  * It is paired with func_002F7B58, which forwards to the cPlayerIndicatorFX function
- * cPlayerIndicatorFX_readFromReplayFrame. Nothing in the retail code references it.
+ * cPlayerIndicatorFX_reset. Nothing in the retail code references it.
  */
 extern "C" void func_002F7B50(void) {
 
@@ -2126,16 +2126,16 @@ extern "C" void func_002F7B50(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7B58);
 #ifdef SKIP_ASM
-extern "C" void cPlayerIndicatorFX_readFromReplayFrame();
+extern "C" void cPlayerIndicatorFX_reset();
 
 /**
- * Calls cPlayerIndicatorFX_readFromReplayFrame, passing its argument registers through untouched.
+ * Calls cPlayerIndicatorFX_reset, passing its argument registers through untouched.
  *
- * Despite its name, cPlayerIndicatorFX_readFromReplayFrame sits between the cPlayerIndicatorFX destructor and update,
+ * cPlayerIndicatorFX_reset sits between the cPlayerIndicatorFX destructor and update,
  * where On Tour declares reset. Nothing in the retail code references it.
  */
 extern "C" void func_002F7B58(void) {
-    cPlayerIndicatorFX_readFromReplayFrame();
+    cPlayerIndicatorFX_reset();
 }
 #endif
 //100%
@@ -2144,7 +2144,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7B78);
 /**
  * Does nothing.
  *
- * It is paired with func_002F7B80, which forwards to the cAirStreamerFX function cAirStreamerFX_readFromReplayFrame.
+ * It is paired with func_002F7B80, which forwards to the cAirStreamerFX function cAirStreamerFX_reset.
  * Nothing in the retail code references it.
  */
 extern "C" void func_002F7B78(void) {
@@ -2154,16 +2154,16 @@ extern "C" void func_002F7B78(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7B80);
 #ifdef SKIP_ASM
-extern "C" void cAirStreamerFX_readFromReplayFrame();
+extern "C" void cAirStreamerFX_reset();
 
 /**
- * Calls cAirStreamerFX_readFromReplayFrame, passing its argument registers through untouched.
+ * Calls cAirStreamerFX_reset, passing its argument registers through untouched.
  *
- * Despite its name, cAirStreamerFX_readFromReplayFrame sits between the cAirStreamerFX destructor and update, where On
+ * cAirStreamerFX_reset sits between the cAirStreamerFX destructor and update, where On
  * Tour declares reset. Nothing in the retail code references it.
  */
 extern "C" void func_002F7B80(void) {
-    cAirStreamerFX_readFromReplayFrame();
+    cAirStreamerFX_reset();
 }
 #endif
 //100%
@@ -2172,7 +2172,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7BA0);
 /**
  * Does nothing.
  *
- * It is paired with func_002F7BA8, which forwards to the cPunchFX function cPunchFX_readFromReplayFrame. Nothing in the
+ * It is paired with func_002F7BA8, which forwards to the cPunchFX function cPunchFX_reset. Nothing in the
  * retail code references it.
  */
 extern "C" void func_002F7BA0(void) {
@@ -2182,16 +2182,16 @@ extern "C" void func_002F7BA0(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7BA8);
 #ifdef SKIP_ASM
-extern "C" void cPunchFX_readFromReplayFrame();
+extern "C" void cPunchFX_reset();
 
 /**
- * Calls cPunchFX_readFromReplayFrame, passing its argument registers through untouched.
+ * Calls cPunchFX_reset, passing its argument registers through untouched.
  *
- * Despite its name, cPunchFX_readFromReplayFrame sits between the cPunchFX destructor and update, where On Tour
+ * cPunchFX_reset sits between the cPunchFX destructor and update, where On Tour
  * declares reset. Nothing in the retail code references it.
  */
 extern "C" void func_002F7BA8(void) {
-    cPunchFX_readFromReplayFrame();
+    cPunchFX_reset();
 }
 #endif
 //100%
@@ -2935,7 +2935,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7EA0);
 /**
  * Does nothing.
  *
- * It is paired with func_002F7EA8, which forwards to the cSpeedBoostFX function cSpeedBoostFX_readFromReplayFrame.
+ * It is paired with func_002F7EA8, which forwards to the cSpeedBoostFX function cSpeedBoostFX_reset.
  * Nothing in the retail code references it.
  */
 extern "C" void func_002F7EA0(void) {
@@ -2945,16 +2945,16 @@ extern "C" void func_002F7EA0(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7EA8);
 #ifdef SKIP_ASM
-extern "C" void cSpeedBoostFX_readFromReplayFrame();
+extern "C" void cSpeedBoostFX_reset();
 
 /**
- * Calls cSpeedBoostFX_readFromReplayFrame, passing its argument registers through untouched.
+ * Calls cSpeedBoostFX_reset, passing its argument registers through untouched.
  *
- * Despite its name, cSpeedBoostFX_readFromReplayFrame sits between the cSpeedBoostFX destructor and update, where On
+ * cSpeedBoostFX_reset sits between the cSpeedBoostFX destructor and update, where On
  * Tour declares reset. Nothing in the retail code references it.
  */
 extern "C" void func_002F7EA8(void) {
-    cSpeedBoostFX_readFromReplayFrame();
+    cSpeedBoostFX_reset();
 }
 #endif
 //100%
@@ -2963,7 +2963,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7EC8);
 /**
  * Does nothing.
  *
- * It is paired with func_002F7ED0, which forwards to the cTrickBoostFX function cTrickBoostFX_readFromReplayFrame__FPv.
+ * It is paired with func_002F7ED0, which forwards to the cTrickBoostFX function cTrickBoostFX_reset__FPv.
  * Nothing in the retail code references it.
  */
 extern "C" void func_002F7EC8(void) {
@@ -2973,16 +2973,16 @@ extern "C" void func_002F7EC8(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7ED0);
 #ifdef SKIP_ASM
-extern "C" void cTrickBoostFX_readFromReplayFrame__FPv();
+extern "C" void cTrickBoostFX_reset__FPv();
 
 /**
- * Calls cTrickBoostFX_readFromReplayFrame__FPv, passing its argument registers through untouched.
+ * Calls cTrickBoostFX_reset__FPv, passing its argument registers through untouched.
  *
- * Despite its name, cTrickBoostFX_readFromReplayFrame__FPv sits between the cTrickBoostFX destructor and update, where
+ * cTrickBoostFX_reset__FPv sits between the cTrickBoostFX destructor and update, where
  * On Tour declares reset. Nothing in the retail code references it.
  */
 extern "C" void func_002F7ED0(void) {
-    cTrickBoostFX_readFromReplayFrame__FPv();
+    cTrickBoostFX_reset__FPv();
 }
 #endif
 //100%

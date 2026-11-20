@@ -43,7 +43,7 @@ public:
     virtual ~cRiderVb_s1f();
 };
 
-extern "C" void cPunchFX_readFromReplayFrame_0E88(void* self) __asm__("cPunchFX_readFromReplayFrame");
+extern "C" void cPunchFX_readFromReplayFrame_0E88(void* self) __asm__("cPunchFX_reset");
 
 struct cSegItem_2F0E88 {
     char data[0x10];

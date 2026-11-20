@@ -7222,7 +7222,7 @@ INCLUDE_ASM("util/menu", func_002D1AF0);
 /**
  * Returns how many riders the AI has allocated: cAI::NumberOfRidersAllocated (+0x78) of SSXApp->Game->AI.
  *
- * The world-sphere tree loops over the riders with it. (The neighbouring cObjectInterface_getNumBeings returns a
+ * The world-sphere tree loops over the riders with it. (The neighbouring cObjectInterface_getBeing returns a
  * rider's being instead.)
  *
  * @return the number of riders
@@ -7234,20 +7234,20 @@ extern "C" void* func_002D1AF0()
 #endif
 
 //100%
-INCLUDE_ASM("util/menu", cObjectInterface_getNumBeings);
+INCLUDE_ASM("util/menu", cObjectInterface_getBeing);
 #ifdef SKIP_ASM
 
 /**
- * Despite the name, returns a rider's being interface rather than a count: Riders[@p i] + 0x6C0, or 0.
+ * Returns rider @p i's being interface: Riders[@p i] + 0x6C0, or 0.
  *
  * Reads cAI::Riders[i] of SSXApp->Game->AI; +0x6C0 is a base-class subobject of cRider whose virtuals the
- * boost nodes call. The count is func_002D1AF0 (cAI::NumberOfRidersAllocated), so On Tour's getNumBeings
- * probably belongs there and this one is a getBeing(i).
+ * boost nodes call. The count of beings is func_002D1AF0 (cAI::NumberOfRidersAllocated), just before it, as
+ * On Tour's getNumBeings comes just before its getBeing(int).
  *
  * @param i  rider index, 0 to 5
  * @return that rider's +0x6C0 subobject, or 0 when the slot is empty
  */
-extern "C" void* cObjectInterface_getNumBeings(int i)
+extern "C" void* cObjectInterface_getBeing(int i)
 {
     char* base = (char*)SSXApp->Game->AI;
     char* rider = *(char**)(base + (i << 2) + 0x28);
@@ -7275,7 +7275,7 @@ public:
  * cMoveNode_onCollide passes the colliding being's result to its root transform modifier's slot-9 test. Declared void
  * here; the caller uses the value.
  *
- * @param obj  the being interface (a rider's +0x6C0 subobject, as cObjectInterface_getNumBeings returns)
+ * @param obj  the being interface (a rider's +0x6C0 subobject, as cObjectInterface_getBeing returns)
  */
 extern "C" void func_002D1B30(func_002D1B30_cObj* obj)
 {
@@ -7301,7 +7301,7 @@ public:
  * SSXApp->Game->AI).
  *
  * Declared void here; cMoveNode reads the result as a pointer to a 4-float position. Unlike
- * cObjectInterface_getNumBeings it does not check for an empty rider slot.
+ * cObjectInterface_getBeing it does not check for an empty rider slot.
  *
  * @param i  rider index
  */

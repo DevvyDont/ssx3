@@ -1377,12 +1377,12 @@ INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX_cTrickBoostFX);
 /**
  * Constructs a trick boost effect and clears its ring of boost quads.
  *
- * Calls cTrickBoostFX_readFromReplayFrame__FPv, which zeroes the count and cursor; g++ adds the cRider
+ * Calls cTrickBoostFX_reset__FPv, which zeroes the count and cursor; g++ adds the cRider
  * virtual-base set-up.
  */
 cBtf_2EAAE0::cBtf_2EAAE0()
 {
-    cTrickBoostFX_readFromReplayFrame_AAE0(this);
+    cTrickBoostFX_reset_AAE0(this);
 }
 
 // PORT: cRiderVb_btf stands in for cRider; its constructor is the retail cRider_cRider.
@@ -1423,7 +1423,7 @@ __asm__("_vt$15cVbDtor002EAC60$13cRiderVbC_btf = D_00488458\n"
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX_readFromReplayFrame__FPv);
+INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX_reset__FPv);
 #ifdef SKIP_ASM
 /**
  * Clears the trick boost effect's quad count (+0xC) and ring cursor (+0x10).
@@ -1432,7 +1432,7 @@ INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX_readFromReplayFrame__FPv);
  * readFromReplayFrame). Called by the constructor, cRiderHandler_resetRiderFX,
  * cRiderHandler_readFromReplayFrame and func_002F7ED0.
  */
-void cTrickBoostFX_readFromReplayFrame(void* self)
+void cTrickBoostFX_reset(void* self)
 {
     *(int*)((char*)self + 0xc) = 0;
     *(int*)((char*)self + 0x10) = 0;

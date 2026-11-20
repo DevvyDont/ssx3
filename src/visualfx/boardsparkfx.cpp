@@ -39,7 +39,7 @@ extern "C" void tParticleEmitter_setLife(void* self, float a, float b);
 extern "C" void tParticleEmitter_stopMotion(void* self);
 extern "C" void tParticleEmitter_setTime(void* self, float val);
 extern "C" void func_00416210(void* dst, int c, int n);
-extern "C" void cBoardSparkFX_readFromReplayFrame(cBoardSparkFX* self);
+extern "C" void cBoardSparkFX_reset(cBoardSparkFX* self);
 
 struct sBsVec4 {
     float x, y, z, w;
@@ -143,7 +143,7 @@ struct sBoardSparkFXView {  // this unit's view of cBoardSparkFX (ai/riderhandle
  *
  * It creates the emitter (0x210 bytes), its particle settings (0xD8 bytes: brown grit, probably with gravity
  * -800) and the glow object (0x150 bytes, set up through tParticleEmitter_init and related calls). It hands the
- * settings to the emitter, then resets the render states (cBoardSparkFX_readFromReplayFrame).
+ * settings to the emitter, then resets the render states (cBoardSparkFX_reset).
  *
  * @param inChrg  nonzero when this object is complete and must construct its virtual base
  * @return self
@@ -251,7 +251,7 @@ extern "C" void* cBoardSparkFX_cBoardSparkFX(sBoardSparkFXView* self, int inChrg
     sBsEmitter* em = self->emitter;
     em->vt[3].fn((char*)em + em->vt[3].delta, self->params, em->rate);
     self->active = 0;
-    cBoardSparkFX_readFromReplayFrame((cBoardSparkFX*)self);
+    cBoardSparkFX_reset((cBoardSparkFX*)self);
     return self;
 }
 #endif
@@ -284,7 +284,7 @@ __asm__("_vt$15cVbDtor002DA8E8$13cRiderVbC_bsf = D_00488CB0\n"
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardsparkfx", cBoardSparkFX_readFromReplayFrame);
+INCLUDE_ASM("visualfx/boardsparkfx", cBoardSparkFX_reset);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sV4_AA78 { float x, y, z, w; } __attribute__((aligned(16)));
@@ -321,7 +321,7 @@ struct sSparkFx_AA78 {
  * @param vself  the spark effect
  */
 // Spark FX init: two render states copied from the defaults with their mode bits set (the second also sets f0 bits 2-3).
-extern "C" void cBoardSparkFX_readFromReplayFrame(cBoardSparkFX* vself)
+extern "C" void cBoardSparkFX_reset(cBoardSparkFX* vself)
 {
     sSparkFx_AA78* self = (sSparkFx_AA78*)vself;
     self->pos = t4vect_Origin;

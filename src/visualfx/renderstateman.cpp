@@ -1167,7 +1167,7 @@ __asm__("_vt$15cVbDtor002EF530$13cRiderVbC_rsm = D_004888D0\n"
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_readFromReplayFrame);
+INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_reset);
 #ifdef SKIP_ASM
 /**
  * Resets the air streamer: empties the trail and picks its maximum length.
@@ -1176,7 +1176,7 @@ INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_readFromReplayFrame);
  * for a rider with a view (mViewIndex >= 0), otherwise 18. Despite the name it reads nothing from a replay
  * frame.
  */
-extern "C" void cAirStreamerFX_readFromReplayFrame(cAirStreamerFX* self)
+extern "C" void cAirStreamerFX_reset(cAirStreamerFX* self)
 {
     int mode = (*(int*)(*(char**)self + 0x870) >= 0) ? 25 : 18;
     *(int*)((char*)self + 0x10) = 0;

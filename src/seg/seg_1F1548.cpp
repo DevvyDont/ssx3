@@ -404,7 +404,7 @@ __asm__("_vt$15cVbDtor002F0FE8$13cRiderVbC_s1f = D_004887D8\n"
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", cPunchFX_readFromReplayFrame);
+INCLUDE_ASM("seg/seg_1F1548", cPunchFX_reset);
 #ifdef SKIP_ASM
 /**
  * Resets the punch effect by clearing its active flag (+0xA0).
@@ -412,7 +412,7 @@ INCLUDE_ASM("seg/seg_1F1548", cPunchFX_readFromReplayFrame);
  * Despite the name it reads nothing from a replay frame (On Tour's version takes a cReplayFramePtr*); the
  * constructor calls it as a reset.
  */
-extern "C" void cPunchFX_readFromReplayFrame(cPunchFX* self) {
+extern "C" void cPunchFX_reset(cPunchFX* self) {
     (*(int *)((char*)(self) + (0xA0))) = 0;
 }
 #endif
