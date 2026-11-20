@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatetrophyroom.h"
 #include "ui/uithing.h"
 #include "ui/uitext.h"
 #include "fe/fememcard.h"
@@ -21,11 +22,11 @@ extern char str_127trophyroom[];
 /**
  * Opens the trophy-room screen ("127trophyroom"), keeps it at 0x40 and plays its frame 0.
  */
-extern "C" void cFEStateTrophyRoom_onCreateScreen(void* self)
+extern "C" void cFEStateTrophyRoom_onCreateScreen(cFEStateTrophyRoom* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_127trophyroom), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -60,7 +61,7 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" char* cBERewardInterface_getTrophy(void* self, int a1, int a2);
 extern "C" int func_001CE6F0(int a, int b);
-extern "C" void cFEStateTrophyRoom_updateBigArt(void* self, int index);
+extern "C" void cFEStateTrophyRoom_updateBigArt(cFEStateTrophyRoom* self, int index);
 extern "C" void setChallengeName(void* text, int a1, int a2, int idx);
 extern char str_bitmap[];
 extern char str_stats[];
@@ -106,22 +107,22 @@ static inline void vcall_43F0(void* o, int slot, int arg)
  *
  * @param w  the widget just created (its hash name is at +0x38)
  */
-extern "C" void cFEStateTrophyRoom_onWidgetCreate(sTrophy_43F0* self, cUIThing* w)
+extern "C" void cFEStateTrophyRoom_onWidgetCreate(cFEStateTrophyRoom* self, cUIThing* w)
 {
     int hashName = w->mHashName;
     if (hashName == GetHashValue32(str_bitmap)) {
-        self->f48 = ((void*)w);
-        cFEStateTrophyRoom_updateBigArt(self, self->f9C);
+        self->mpBigIcon = (cUIIcon*)((void*)w);
+        cFEStateTrophyRoom_updateBigArt(self, self->mCurSelection);
         return;
     }
     if (hashName == GetHashValue32(str_stats)) {
-        self->f4C = ((void*)w);
+        self->mpStats = (cUIText*)((void*)w);
         vcall_43F0(w, 9, 0);
         return;
     }
     if (hashName == GetHashValue32(str_screentitle)) {
         int id = 0;
-        switch (self->f58) {
+        switch (self->mTrophyType) {
         case 3:
             id = GetHashValue32(str_kT_TITLEEarningsTrophy);
             break;
@@ -140,18 +141,18 @@ extern "C" void cFEStateTrophyRoom_onWidgetCreate(sTrophy_43F0* self, cUIThing* 
     }
     for (int i = 0; i < 6; i++) {
         if (hashName == GetHashValue32(D_00441600[i])) {
-            int n = func_001CE6F0(self->f54, self->f58);
+            int n = func_001CE6F0(self->mPeakNum, self->mTrophyType);
             w->mMiscData = i;
             if (n < i) {
                 vcall_43F0(w, 9, 0);
                 vcall_43F0(w, 8, 1);
             } else if (i == 0) {
-                cUIText_setAsciiString((cUIText*)w, *(char**)cBERewardInterface_getTrophy(cBE_getInterface_Fv(cBE_getBE(), 13), self->f54, self->f58));
+                cUIText_setAsciiString((cUIText*)w, *(char**)cBERewardInterface_getTrophy(cBE_getInterface_Fv(cBE_getBE(), 13), self->mPeakNum, self->mTrophyType));
             } else {
-                setChallengeName(w, self->f54, self->f58, i - 1);
+                setChallengeName(w, self->mPeakNum, self->mTrophyType, i - 1);
             }
         } else if (hashName == GetHashValue32(D_00441618[i])) {
-            if (func_001CE6F0(self->f54, self->f58) < i) {
+            if (func_001CE6F0(self->mPeakNum, self->mTrophyType) < i) {
                 vcall_43F0(w, 9, 0);
                 vcall_43F0(w, 8, 1);
             }
@@ -174,7 +175,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onWidgetMenu);
  * @param Event  the menu event
  * @return 0x100 for events 6, 8 and 9, otherwise 0x101
  */
-extern "C" int cFEStateTrophyRoom_onWidgetMenu(void* self, int pMenu, unsigned int Event)
+extern "C" int cFEStateTrophyRoom_onWidgetMenu(cFEStateTrophyRoom* self, int pMenu, unsigned int Event)
 {
     switch (Event) {
     case 6:
@@ -195,8 +196,8 @@ struct sVEntry001D4698 {
     void* (*fn)(void*, void*, int);
 };
 extern "C" void cUIStateStack_push(void* list, void* item);
-extern "C" void cFEStateTrophyRoom_updateBigArt(void* self, int index);
-extern "C" void cFEStateTrophyRoom_updateStats(void* self, int index);
+extern "C" void cFEStateTrophyRoom_updateBigArt(cFEStateTrophyRoom* self, int index);
+extern "C" void cFEStateTrophyRoom_updateStats(cFEStateTrophyRoom* self, int index);
 
 class cTrophyWidget_4698 {
 public:
@@ -222,27 +223,27 @@ public:
  * @param item  the widget that sent the event; nothing happens when null
  * @param msg  the widget event (1 focused, 6 back)
  */
-extern "C" void cFEStateTrophyRoom_onWidgetEvent(void* self, cUIThing* item, int msg)
+extern "C" void cFEStateTrophyRoom_onWidgetEvent(cFEStateTrophyRoom* self, cUIThing* item, int msg)
 {
     if (((void*)item) == 0) {
         return;
     }
     switch (msg) {
     case 6: {
-        cTrophyWidget_4698* w = *(cTrophyWidget_4698**)((char*)self + 0x48);
+        cTrophyWidget_4698* w = (cTrophyWidget_4698*)self->mpBigIcon;
         if (w != 0) {
             w->show(0);
         }
-        void* obj = **(void***)((char*)self + 0x10);
+        void* obj = *(void**)self->mpEngine;
         sVEntry001D4698* vt = *(sVEntry001D4698**)((char*)obj + 4);
-        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)self + 0x54));
+        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, self->mPeakNum);
         if (nextState != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }
         break;
     }
     case 1:
-        *(int*)((char*)self + 0x9C) = item->mMiscData;
+        self->mCurSelection = item->mMiscData;
         cFEStateTrophyRoom_updateBigArt(self, item->mMiscData);
         cFEStateTrophyRoom_updateStats(self, item->mMiscData);
         break;
@@ -253,7 +254,7 @@ extern "C" void cFEStateTrophyRoom_onWidgetEvent(void* self, cUIThing* item, int
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onUpdate);
 #ifdef SKIP_ASM
-extern "C" void cFEStateTrophyRoom_updateTexturesLoad(void* self);
+extern "C" void cFEStateTrophyRoom_updateTexturesLoad(cFEStateTrophyRoom* self);
 extern "C" void* cUIState_onUpdate(void* self);
 
 /**
@@ -263,9 +264,9 @@ extern "C" void* cUIState_onUpdate(void* self);
  * loading to GrMan under the name "trph", releases it and decrements the count. Then runs the base UI-state
  * update cUIState_onUpdate().
  */
-extern "C" void cFEStateTrophyRoom_onUpdate(void* self)
+extern "C" void cFEStateTrophyRoom_onUpdate(cFEStateTrophyRoom* self)
 {
-    if (*(int*)((char*)self + 0x5C) > 0) {
+    if (self->mNumLoadingFiles > 0) {
         cFEStateTrophyRoom_updateTexturesLoad(self);
     }
     cUIState_onUpdate(self);
@@ -306,7 +307,7 @@ public:
  *
  * @param index  the selected row (0 trophy, 1-4 challenges), or negative to hide
  */
-extern "C" void cFEStateTrophyRoom_updateBigArt(void* self, int index)
+extern "C" void cFEStateTrophyRoom_updateBigArt(cFEStateTrophyRoom* self, int index)
 {
     int textureId;
     if (index < 0) {
@@ -315,15 +316,15 @@ extern "C" void cFEStateTrophyRoom_updateBigArt(void* self, int index)
     textureId = -1;
     {
         if (index == 0) {
-            if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44),
-                              *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x54),
-                              *(int*)((char*)self + 0x58)) != 0) {
-                textureId = *(int*)((char*)self + 0x60);
+            if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum,
+                              self->mCharID, self->mPeakNum,
+                              self->mTrophyType) != 0) {
+                textureId = self->mTextureIDs[0];
             }
         } else {
-            int medal = getChallengeMedal(*(signed char*)((char*)self + 0x44),
-                                  *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x54),
-                                  *(int*)((char*)self + 0x58), index - 1);
+            int medal = getChallengeMedal(self->mUserNum,
+                                  self->mCharID, self->mPeakNum,
+                                  self->mTrophyType, index - 1);
             if (medal != -1) {
                 textureId = *(int*)((char*)self + ((medal + 1) << 2) + 0x60);
             }
@@ -331,10 +332,10 @@ extern "C" void cFEStateTrophyRoom_updateBigArt(void* self, int index)
     }
     if (textureId < 0) {
     hide:
-        (*(cTrophyWidget_47A0**)((char*)self + 0x48))->show(0);
+        ((cTrophyWidget_47A0*)self->mpBigIcon)->show(0);
     } else {
-        (*(cTrophyWidget_47A0**)((char*)self + 0x48))->show(1);
-        char* w = *(char**)((char*)self + 0x48);
+        ((cTrophyWidget_47A0*)self->mpBigIcon)->show(1);
+        char* w = (char*)self->mpBigIcon;
         *(int*)(w + 0x78) = textureId;
         *(int*)(w + 0x7C) = 0;
     }
@@ -369,17 +370,17 @@ public:
  *
  * @param index  the selected row
  */
-extern "C" void cFEStateTrophyRoom_updateStats(void* self, int index)
+extern "C" void cFEStateTrophyRoom_updateStats(cFEStateTrophyRoom* self, int index)
 {
-    cTrophyWidget_4890* widget = *(cTrophyWidget_4890**)((char*)self + 0x4C);
+    cTrophyWidget_4890* widget = (cTrophyWidget_4890*)self->mpStats;
     if (widget != 0) {
         if (index == 0) {
             widget->show(0);
         } else {
             widget->show(1);
-            setChallengeStats(*(void**)((char*)self + 0x4C), *(signed char*)((char*)self + 0x44),
-                              *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x54),
-                              *(int*)((char*)self + 0x58), index - 1);
+            setChallengeStats(self->mpStats, self->mUserNum,
+                              self->mCharID, self->mPeakNum,
+                              self->mTrophyType, index - 1);
         }
     }
 }
@@ -413,17 +414,17 @@ struct sTrophyRoom_4918 {
  * image of each of the trophy's four medals that has a name (cBERewardInterface_getMedal) into +0x74[1-4]. +0x5C counts
  * the requests. Called by the trophy room's constructor cFEStateTrophyRoom_cFEStateTrophyRoom.
  */
-extern "C" void cFEStateTrophyRoom_loadTextures(sTrophyRoom_4918* self)
+extern "C" void cFEStateTrophyRoom_loadTextures(cFEStateTrophyRoom* self)
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 13);
     void* snd = (char*)SSXApp->RealFE + 0x1A70;
-    self->ids[0] = func_0019DA10(snd, self->bank, *(int*)(cBERewardInterface_getTrophy(pi, self->f54, self->f58) + 4), 10, 1, 0);
-    self->count = 1;
+    self->mTextureFileIndex[0] = func_0019DA10(snd, self->mCharID, *(int*)(cBERewardInterface_getTrophy(pi, self->mPeakNum, self->mTrophyType) + 4), 10, 1, 0);
+    self->mNumLoadingFiles = 1;
     for (int i = 0; i < 4; i++) {
-        int id = *(int*)(cBERewardInterface_getMedal(pi, self->f58, i) + 4);
+        int id = *(int*)(cBERewardInterface_getMedal(pi, self->mTrophyType, i) + 4);
         if (id != 0) {
-            self->ids[i + 1] = func_0019DA10(snd, self->bank, id, 10, 1, 0);
-            self->count++;
+            self->mTextureFileIndex[i + 1] = func_0019DA10(snd, self->mCharID, id, 10, 1, 0);
+            self->mNumLoadingFiles++;
         }
     }
 }
@@ -435,7 +436,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_updateTexturesLoad);
 extern "C" int func_0019E238(void* self, int bank, int i);
 extern "C" char* func_0019E2B0(void* self, int bank, int i);
 extern "C" void func_0019DC20(void* self, int bank, int i);
-extern "C" void cFEStateTrophyRoom_updateBigArt(void* self, int index);
+extern "C" void cFEStateTrophyRoom_updateBigArt(cFEStateTrophyRoom* self, int index);
 extern char str_trph[];
 
 struct cGraphicsMan_4A20 {
@@ -510,7 +511,7 @@ struct sSelf_4A20 {
  *
  * @param trophyRoom  the trophy room state
  */
-extern "C" void cFEStateTrophyRoom_updateTexturesLoad(void* trophyRoom)
+extern "C" void cFEStateTrophyRoom_updateTexturesLoad(cFEStateTrophyRoom* trophyRoom)
 {
     sSelf_4A20* self = (sSelf_4A20*)trophyRoom;
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
@@ -522,7 +523,7 @@ extern "C" void cFEStateTrophyRoom_updateTexturesLoad(void* trophyRoom)
             func_0019DC20(mgr, self->bank, self->fileSlot[i]);
             self->fileSlot[i] = -1;
             self->count--;
-            cFEStateTrophyRoom_updateBigArt(self, self->f9C);
+            cFEStateTrophyRoom_updateBigArt((cFEStateTrophyRoom*)self, self->f9C);
         }
     }
 }
@@ -601,19 +602,19 @@ struct sSelf001D4B20 {
  * (+0x74) released with func_0019DC20 (RealFE + 0x1A70, bank +0x50); both are set to -1. Called by
  * cFEStateTrophyRoom__cFEStateTrophyRoom.
  */
-extern "C" void cFEStateTrophyRoom_purgeTextures(sSelf001D4B20* self)
+extern "C" void cFEStateTrophyRoom_purgeTextures(cFEStateTrophyRoom* self)
 {
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
     int i;
     for (i = 0; i < 5; i++) {
-        if (self->textureId[i] >= 0) {
-            ((cGraphicsMan001D4B20*)GrMan)->RemoveTexture(self->textureId[i]);
+        if (self->mTextureIDs[i] >= 0) {
+            ((cGraphicsMan001D4B20*)GrMan)->RemoveTexture(self->mTextureIDs[i]);
         }
-        self->textureId[i] = -1;
-        if (self->fileSlot[i] >= 0) {
-            func_0019DC20(mgr, self->bank, self->fileSlot[i]);
+        self->mTextureIDs[i] = -1;
+        if (self->mTextureFileIndex[i] >= 0) {
+            func_0019DC20(mgr, self->mCharID, self->mTextureFileIndex[i]);
         }
-        self->fileSlot[i] = -1;
+        self->mTextureFileIndex[i] = -1;
     }
 }
 #endif

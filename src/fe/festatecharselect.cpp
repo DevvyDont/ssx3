@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatecharsetup.h"
 #include "ui/uistate.h"
 #include "ui/uiinput.h"
 #include "ui/uithing.h"
@@ -1142,15 +1143,15 @@ extern void* cFEStateCharSetup_vtbl[];
  * @param idx  the user (controller) index
  * @return @p self
  */
-extern "C" void* cFEStateCharSetup_cFEStateCharSetup(void* self, cUIEngine* engine, signed char idx)
+extern "C" void* cFEStateCharSetup_cFEStateCharSetup(cFEStateCharSetup* self, cUIEngine* engine, signed char idx)
 {
     cUIState_cUIState(self, engine);
-    *(int*)((char*)self + 0xC) = 0xC;
-    *(void***)((char*)self + 0x8) = cFEStateCharSetup_vtbl;
-    *(signed char*)((char*)self + 0x44) = idx;
-    *(unsigned char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), idx);
-    *(int*)((char*)self + 0x4C) = 0;
-    return self;
+    self->mHashName = 0xC;
+    self->mVtbl = cFEStateCharSetup_vtbl;
+    self->mUserNum = idx;
+    self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
+    self->mbDraw3D = 0;
+    return ((void*)self);
 }
 #endif
 

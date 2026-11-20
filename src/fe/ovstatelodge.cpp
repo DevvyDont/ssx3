@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatetrophyroom.h"
 #include "ui/uigroup.h"
 #include "ui/uimenu.h"
 #include "ui/uiinput.h"
@@ -1442,18 +1443,18 @@ struct sTrophy_4268 {
  * @param trophyType  the trophy within the peak (On Tour trophyType)
  * @return @p self
  */
-extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom(void* self, int engine, int userNum, int peakNum, int trophyType)
+extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom(cFEStateTrophyRoom* self, int engine, int userNum, int peakNum, int trophyType)
 {
     signed char idx = userNum;
     cUIState_cUIState(self);
-    *(int*)((char*)self + 0xC) = 45;
-    *(void***)((char*)self + 0x8) = cFEStateTrophyRoom_vtbl;
-    *(signed char*)((char*)self + 0x44) = idx;
-    *(char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), idx);
+    self->mHashName = 45;
+    self->mVtbl = cFEStateTrophyRoom_vtbl;
+    self->mUserNum = idx;
+    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
     sTrophy_4268* trophyRoom = (sTrophy_4268*)self;
     trophyRoom->f48 = 0;
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
-    trophyRoom->charID = cBENewPlayerInterface_getPlayerCharID(pi, *(signed char*)((char*)self + 0x44));
+    trophyRoom->charID = cBENewPlayerInterface_getPlayerCharID(pi, self->mUserNum);
     sVE_4268* vt = *(sVE_4268**)((char*)pi + 0xC);
     vt[2].fn((char*)pi + vt[2].delta);
     trophyRoom->f54 = peakNum;
@@ -1465,7 +1466,7 @@ extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom(void* self, int engine, i
     }
     trophyRoom->f9C = -1;
     cFEStateTrophyRoom_loadTextures(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 

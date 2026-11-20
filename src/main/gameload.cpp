@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/fadescreen.h"
 #include "util/menusys.h"
 #include "main/sectionman.h"
 #include "ai/ai.h"
@@ -1641,7 +1642,7 @@ extern "C" void func_00230E90(void) {
 //100%
 INCLUDE_ASM("main/gameload", cGame_loseFocus);
 #ifdef SKIP_ASM
-extern "C" int cFadeScreen_loseFocus(void* self);
+extern "C" int cFadeScreen_loseFocus(cFadeScreen* self);
 void cSSXScriptEngine_DeInit(void* self);
 void cBXLoadIndicator_DeInit(void* self);
 
@@ -1690,7 +1691,7 @@ extern "C" int cGame_loseFocus(cGame* self)
     if (vt[3].fn((char*)obj + vt[3].delta) == 0) {
         return 0;
     }
-    if (cFadeScreen_loseFocus(self) == 0) {
+    if (cFadeScreen_loseFocus((cFadeScreen*)self) == 0) {
         return 0;
     }
     cPS2GraphicsMan* mgr = GrMan;
@@ -2484,7 +2485,7 @@ extern "C" void cLoadScreen_drawSplash(cLoadScreen* self, int value) {
 //100%
 INCLUDE_ASM("main/gameload", cLoadScreen_loseFocus);
 #ifdef SKIP_ASM
-extern "C" int cFadeScreen_loseFocus(void* self);
+extern "C" int cFadeScreen_loseFocus(cFadeScreen* self);
 extern char* cAppMan_TheAppMan;
 
 /**
@@ -2498,13 +2499,13 @@ extern char* cAppMan_TheAppMan;
 extern "C" int cLoadScreen_loseFocus(cLoadScreen* self)
 {
     if (*(float*)(cAppMan_TheAppMan + 0x38) == 100.0f) {
-        return cFadeScreen_loseFocus(self);
+        return cFadeScreen_loseFocus((cFadeScreen*)self);
     }
     return 0;
 }
 #endif
 
-extern "C" void* cFadeScreen_update(void* self);
+extern "C" void* cFadeScreen_update(cFadeScreen* self);
 
 //100%
 INCLUDE_ASM("main/gameload", cLoadScreen_update__FPv);
@@ -2519,7 +2520,7 @@ INCLUDE_ASM("main/gameload", cLoadScreen_update__FPv);
  */
 void* cLoadScreen_update(void* self)
 {
-    return cFadeScreen_update(self);
+    return cFadeScreen_update((cFadeScreen*)self);
 }
 #endif
 
@@ -2535,12 +2536,12 @@ extern char cFadeScreen_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFadeScreen_cFadeScreen(void* self)
+extern "C" void* cFadeScreen_cFadeScreen(cFadeScreen* self)
 {
-    *(void**)((char*)self + 0) = cFadeScreen_vtbl;
-    *(float*)((char*)self + 4) = 0.20000000298023224f;
-    *(int*)((char*)self + 8) = 0;
-    return self;
+    self->mVtbl = (void**)cFadeScreen_vtbl;
+    self->FadeTimer = 0.20000000298023224f;
+    self->IsEnding = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -2555,10 +2556,10 @@ INCLUDE_ASM("main/gameload", cFadeScreen_loseFocus);
  *
  * @return 1 once the fade level (offset 4) is at least 0.2, otherwise 0
  */
-extern "C" int cFadeScreen_loseFocus(void* self)
+extern "C" int cFadeScreen_loseFocus(cFadeScreen* self)
 {
-    *(int*)((char*)self + 8) = 1;
-    return *(float*)((char*)self + 4) >= 0.20000000298023224f;
+    self->IsEnding = 1;
+    return self->FadeTimer >= 0.20000000298023224f;
 }
 #endif
 
@@ -2574,14 +2575,14 @@ INCLUDE_ASM("main/gameload", cFadeScreen_update);
  * @return no meaningful value (the body returns nothing)
  */
 // PORT: the unit declares this void*-returning; the body returns nothing meaningful.
-extern "C" void* cFadeScreen_update(void* self)
+extern "C" void* cFadeScreen_update(cFadeScreen* self)
 {
-    if (*(int*)((char*)self + 8) != 0) {
-        *(float*)((char*)self + 4) += 0.01666666753590107f;
+    if (self->IsEnding != 0) {
+        self->FadeTimer += 0.01666666753590107f;
     } else {
-        *(float*)((char*)self + 4) -= 0.01666666753590107f;
-        if (*(float*)((char*)self + 4) < 0.0f) {
-            *(float*)((char*)self + 4) = 0.0f;
+        self->FadeTimer -= 0.01666666753590107f;
+        if (self->FadeTimer < 0.0f) {
+            self->FadeTimer = 0.0f;
         }
     }
 }
@@ -2675,9 +2676,9 @@ static inline float Clamp231D60(float v, float lo, float hi)
  *
  * @return 1 once the fade is fully opaque (alpha >= 1), otherwise 0
  */
-extern "C" int cFadeScreen_drawFade(void* self)
+extern "C" int cFadeScreen_drawFade(cFadeScreen* self)
 {
-    if (*(float*)((char*)self + 4) > 0.0f) {
+    if (self->FadeTimer > 0.0f) {
     cPS2GraphicsMan* ctx = GrMan;
     ((cCtx231D60*)ctx)->top[1] = ((cCtx231D60*)ctx)->top[0];
     ((cCtx231D60*)ctx)->top++;
@@ -2688,7 +2689,7 @@ extern "C" int cFadeScreen_drawFade(void* self)
     ((cCtx231D60*)GrMan)->top->f4_23 = 2;
     ((cCtx231D60*)GrMan)->top->f4_20 = 0;
     ((cCtx231D60*)GrMan)->top->f4_12 = 0;
-    float alpha = Clamp231D60(*(float*)((char*)self + 4) * 5.0f, 0.0f, 1.0f);
+    float alpha = Clamp231D60(self->FadeTimer * 5.0f, 0.0f, 1.0f);
     float minCorner[2];
     float maxCorner[2];
     float col[4];

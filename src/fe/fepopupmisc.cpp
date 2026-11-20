@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/festatetrophyroom.h"
+#include "fe/festatenethelppopup.h"
 #include "fe/festatevideoplayer.h"
 #include "fe/festatebigradio.h"
 #include "fe/festatecharequip.h"
@@ -1029,12 +1031,12 @@ struct sSlot_F900 {
  *
  * @return @p self
  */
-extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup1(void* self)
+extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup1(cFEStateNetHelpPopup* self)
 {
     cUIState_cUIState(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStateNetHelpPopup_vtbl;
+    self->mVtbl = cFEStateNetHelpPopup_vtbl;
     new ((char*)self + 0x20) sSlot_F900[7];
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1084,8 +1086,8 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF990);
  * @param helpPopup   the help popup
  * @param value  the title's text id
  */
-extern "C" void func_001DF990(void *helpPopup, int value) {
-    (*(int *)((char*)(helpPopup) + (0x54))) = value;
+extern "C" void func_001DF990(cFEStateNetHelpPopup* helpPopup, int value) {
+    ((int)helpPopup->muiScreenName) = value;
 }
 #endif
 //100%
@@ -1100,8 +1102,8 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF998);
  * @param helpPopup   the help popup
  * @param value  the bottom note's text id
  */
-extern "C" void func_001DF998(void *helpPopup, int value) {
-    (*(int *)((char*)(helpPopup) + (0x64))) = value;
+extern "C" void func_001DF998(cFEStateNetHelpPopup* helpPopup, int value) {
+    ((int)helpPopup->muiBottomText) = value;
 }
 #endif
 //100%
@@ -1116,8 +1118,8 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF9A0);
  * @param helpPopup   the help popup
  * @param value  nonzero to forward events to the parent
  */
-extern "C" void func_001DF9A0(void *helpPopup, int value) {
-    (*(int *)((char*)(helpPopup) + (0x50))) = value;
+extern "C" void func_001DF9A0(cFEStateNetHelpPopup* helpPopup, int value) {
+    (helpPopup->mbReferEventsToParent) = value;
 }
 #endif
 //100%
@@ -1131,8 +1133,8 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF9A8);
  * @param helpPopup  the help popup
  * @return the forwarding flag
  */
-extern "C" int func_001DF9A8(void *helpPopup) {
-    return (*(int *)((char*)(helpPopup) + (0x50)));
+extern "C" int func_001DF9A8(cFEStateNetHelpPopup* helpPopup) {
+    return (helpPopup->mbReferEventsToParent);
 }
 #endif
 //100%
@@ -2510,11 +2512,11 @@ extern void* cFEStateTrophyRoom_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom1(void* self)
+extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom1(cFEStateTrophyRoom* self)
 {
     cUIState_cUIState(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStateTrophyRoom_vtbl;
-    return self;
+    self->mVtbl = cFEStateTrophyRoom_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -2533,11 +2535,11 @@ extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cFEStateTrophyRoom__cFEStateTrophyRoom(void* self, int flags)
+extern "C" void cFEStateTrophyRoom__cFEStateTrophyRoom(cFEStateTrophyRoom* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cFEStateTrophyRoom_vtbl;
+    self->mVtbl = cFEStateTrophyRoom_vtbl;
     cFEStateTrophyRoom_purgeTextures(self);
-    *(void***)((char*)self + 0x8) = cFEState_vtbl;
+    self->mVtbl = cFEState_vtbl;
     cUIState__cUIState_dtor(self, flags);
 }
 #endif

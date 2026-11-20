@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/feridermanager.h"
 #include "fe/ferider.h"
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
@@ -1741,21 +1742,21 @@ extern "C" void* cFERider_cFERider(void* self);
  *
  * @return @p self
  */
-extern "C" void* cFERiderManager_cFERiderManager(void* self)
+extern "C" void* cFERiderManager_cFERiderManager(cFERiderManager* self)
 {
     char* slot = (char*)self;
     int i;
     for (i = 1; i != -1; i--, slot += 0xCE0) {
         cFERider_cFERider(slot);
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/feridermanager", cFERiderManager__cFERiderManager);
 #ifdef SKIP_ASM
-extern "C" void cFERiderManager_purge(void* self);
+extern "C" void cFERiderManager_purge(cFERiderManager* self);
 extern "C" void cFERider__cFERider(void* self, int flags);
 void operator_delete(int* p);
 
@@ -1767,13 +1768,12 @@ void operator_delete(int* p);
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cFERiderManager__cFERiderManager(void* self, int flags)
+extern "C" void cFERiderManager__cFERiderManager(cFERiderManager* self, int flags)
 {
     cFERiderManager_purge(self);
-    char* base = (char*)self;
-    if (base != 0) {
-        char* slot = base + 0x19C0;
-        while (base != slot) {
+    if (((char*)self) != 0) {
+        char* slot = ((char*)self) + 0x19C0;
+        while (((char*)self) != slot) {
             slot -= 0xCE0;
             cFERider__cFERider(slot, 0);
         }
@@ -1798,10 +1798,10 @@ struct sRiderSlot_001A0498 {
  *
  * cRealFE_load calls it on the rider manager.
  */
-extern "C" void cFERiderManager_init(sRiderSlot_001A0498* self)
+extern "C" void cFERiderManager_init(cFERiderManager* self)
 {
     int i;
-    sRiderSlot_001A0498* slot = self;
+    sRiderSlot_001A0498* slot = ((sRiderSlot_001A0498*)self);
     for (i = 0; i < 2; i++) {
         slot->index = i;
         slot++;
@@ -1819,7 +1819,7 @@ extern "C" void cFERider_purge(cFERider* slot);
  *
  * cRealFE_purge calls it on the rider manager.
  */
-extern "C" void cFERiderManager_purge(void* self)
+extern "C" void cFERiderManager_purge(cFERiderManager* self)
 {
     int i;
     for (i = 0; i < 2; i++) {
@@ -1840,7 +1840,7 @@ extern "C" void cFERider_setCharID(void* slot, int a1, int a2);
  * @param charId   the character id
  * @param loadAll   nonzero to load everything
  */
-extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int charId, int loadAll)
+extern "C" void cFERiderManager_setHumanCharacter(cFERiderManager* self, int idx, int charId, int loadAll)
 {
     cFERider_setCharID((char*)self + idx * 0xce0, charId, loadAll);
 }
@@ -1855,7 +1855,7 @@ INCLUDE_ASM("fe/feridermanager", cFERiderManager_getHuman);
  * @param index  the rider
  * @return the rider
  */
-extern "C" void* cFERiderManager_getHuman(void* self, int index)
+extern "C" void* cFERiderManager_getHuman(cFERiderManager* self, int index)
 {
     return (char*)self + index * 0xce0;
 }
@@ -1870,7 +1870,7 @@ INCLUDE_ASM("fe/feridermanager", cFERiderManager_getHuman1);
  * @param index  the rider
  * @return the rider
  */
-extern "C" void* cFERiderManager_getHuman1(void* self, int index)
+extern "C" void* cFERiderManager_getHuman1(cFERiderManager* self, int index)
 {
     return (char*)self + index * 0xce0;
 }
@@ -1902,7 +1902,7 @@ extern "C" void cFERider_setVisible(void* slot, int v);
  * @param i  the rider
  * @param visible  nonzero to show it
  */
-extern "C" void cFERiderManager_setHumanVisible(void* self, int i, int visible)
+extern "C" void cFERiderManager_setHumanVisible(cFERiderManager* self, int i, int visible)
 {
     cFERider_setVisible((char*)self + i * 0xce0, visible);
 }
@@ -1919,14 +1919,14 @@ extern "C" void cFERider_render(cFERider* rider);
  * Sets the graphics manager's words +0x24 to 46, +0x84 to 47 and +0x10A8 to its +0x1008, then renders each rider whose
  * shown flag (+0xCC8) is set (cFERider_render).
  */
-extern "C" void cFERiderManager_render(char* self)
+extern "C" void cFERiderManager_render(cFERiderManager* self)
 {
     char* riderBase = (char*)GrMan;
     *(int*)(riderBase + 0x24) = 46;
     *(int*)(riderBase + 0x84) = 47;
     *(int*)(riderBase + 0x10A8) = *(int*)(riderBase + 0x1008);
     for (int i = 0; i < 2; i++) {
-        riderBase = self + i * 3296;
+        riderBase = ((char*)self) + i * 3296;
         if (*(int*)(riderBase + 0xCC8) != 0)
             cFERider_render((cFERider*)riderBase);
     }
@@ -1941,7 +1941,7 @@ extern "C" void cFERider_update(cFERider* slot);
 /**
  * Updates both front-end riders (cFERider_update).
  */
-extern "C" void cFERiderManager_update(void* self)
+extern "C" void cFERiderManager_update(cFERiderManager* self)
 {
     int i;
     for (i = 0; i < 2; i++) {

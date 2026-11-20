@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatecharsetup.h"
 #include "ui/uiengine.h"
 #include "ui/uithing.h"
 #include "be/beintnewrace.h"
@@ -17,7 +18,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
-extern "C" void cFEStateCharSetup_updateWidget(void* self);
+extern "C" void cFEStateCharSetup_updateWidget(cFEStateCharSetup* self);
 extern "C" void cFERiderManager_setHumanVisible(void* self, int i, int v);
 extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int a2, int a3);
 extern "C" void* cAudioInterface_bxAudio();
@@ -80,27 +81,27 @@ static inline void showIdx_182928(sCharSetup_182928* self, char* name, int idx)
  * "Option_Continue", "Option_Equip", "Option_Rider" and "Option_Radio" are shown with misc data 0 to 3;
  * "Option_GBA" is hidden and gets vtable slot 8 (cUIThing_setStatic) with 1.
  */
-extern "C" void cFEStateCharSetup_onCreateScreen(sCharSetup_182928* self)
+extern "C" void cFEStateCharSetup_onCreateScreen(cFEStateCharSetup* self)
 {
-    void* engine = self->engine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_09set_char), 0);
-    self->screen = screen;
+    void* engine = self->mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, ((sCharSetup_182928*)self), GetHashValue32(str_09set_char), 0);
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     cFEStateCharSetup_updateWidget(self);
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
-    int charId = cBENewPlayerInterface_getPlayerCharID(iface, self->player);
+    int charId = cBENewPlayerInterface_getPlayerCharID(iface, self->mUserNum);
     sVEntry_182928* vt = *(sVEntry_182928**)(iface + 0xC);
     vt[2].fn(iface + vt[2].delta);
-    cFERiderManager_setHumanVisible((char*)SSXApp->RealFE + 0xB0, self->player, 0);
-    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, self->player, charId, 0);
+    cFERiderManager_setHumanVisible((char*)SSXApp->RealFE + 0xB0, self->mUserNum, 0);
+    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, self->mUserNum, charId, 0);
     func_0028F140(cAudioInterface_bxAudio(), 1);
-    cUIText* txt = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_title));
+    cUIText* txt = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title));
     if (txt != 0) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if (cBENewRaceInterface_newRace.cGamePath == 2) {
-            switch (self->player) {
+            switch (self->mUserNum) {
             case 0:
                 cUIText_setUnicodeStringByID(txt, GetHashValue32(str_kT_TITLEPlayer1SetupCharacter));
                 break;
@@ -110,11 +111,11 @@ extern "C" void cFEStateCharSetup_onCreateScreen(sCharSetup_182928* self)
             }
         }
     }
-    showIdx_182928(self, str_Option_Continue, 0);
-    showIdx_182928(self, str_Option_Equip, 1);
-    showIdx_182928(self, str_Option_Rider, 2);
-    showIdx_182928(self, str_Option_Radio, 3);
-    cWidget_182928* gbaOption = (cWidget_182928*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Option_GBA));
+    showIdx_182928(((sCharSetup_182928*)self), str_Option_Continue, 0);
+    showIdx_182928(((sCharSetup_182928*)self), str_Option_Equip, 1);
+    showIdx_182928(((sCharSetup_182928*)self), str_Option_Rider, 2);
+    showIdx_182928(((sCharSetup_182928*)self), str_Option_Radio, 3);
+    cWidget_182928* gbaOption = (cWidget_182928*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Option_GBA));
     if (gbaOption != 0) {
         gbaOption->show(0);
         gbaOption->enable(1);
@@ -125,7 +126,7 @@ extern "C" void cFEStateCharSetup_onCreateScreen(sCharSetup_182928* self)
 //100%
 INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_onDestroyScreen);
 #ifdef SKIP_ASM
-extern "C" void cFEStateCharSetup_show3DCharacter(void* self, int a1);
+extern "C" void cFEStateCharSetup_show3DCharacter(cFEStateCharSetup* self, int a1);
 void* cUIState_onDestroyScreen(void* self);
 
 /**
@@ -133,7 +134,7 @@ void* cUIState_onDestroyScreen(void* self);
  *
  * It fills the onDestroyScreen slot (+0x2C) of cFEStateCharSetup_vtbl and cFEStateRiderDetail_vtbl.
  */
-extern "C" void cFEStateCharSetup_onDestroyScreen(void* self)
+extern "C" void cFEStateCharSetup_onDestroyScreen(cFEStateCharSetup* self)
 {
     cFEStateCharSetup_show3DCharacter(self, 0);
     cUIState_onDestroyScreen(self);
@@ -144,7 +145,7 @@ extern "C" void cFEStateCharSetup_onDestroyScreen(void* self)
 INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_onUpdate(void* self);
-extern "C" void cFEStateCharSetup_updateCharacter3DPos(void* self);
+extern "C" void cFEStateCharSetup_updateCharacter3DPos(cFEStateCharSetup* self);
 
 /**
  * Updates the character-setup state: runs the base UI-state update, then poses the front-end rider model.
@@ -152,7 +153,7 @@ extern "C" void cFEStateCharSetup_updateCharacter3DPos(void* self);
  * cUIState_onUpdate() is the base UI-state update, which dispatches controller input to the state and its screens.
  * cFEStateCharSetup_updateCharacter3DPos() places the loaded rider model and, when the state asks for it, restarts its animation.
  */
-extern "C" void cFEStateCharSetup_onUpdate(void* self)
+extern "C" void cFEStateCharSetup_onUpdate(cFEStateCharSetup* self)
 {
     cUIState_onUpdate(self);
     cFEStateCharSetup_updateCharacter3DPos(self);
@@ -171,7 +172,7 @@ INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_onWidgetMenu);
  * @param event  the menu event
  * @return 0x100 for event 9, else 0x101
  */
-extern "C" int cFEStateCharSetup_onWidgetMenu(void* self, int menu, int event)
+extern "C" int cFEStateCharSetup_onWidgetMenu(cFEStateCharSetup* self, int menu, int event)
 {
     return event != 9 ? 257 : 0x100;
 }
@@ -184,7 +185,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_001887A0(void* self, void* engine, int reset);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* st, int a2, int a3);
 extern "C" void cUIStateStack_push(void* list, void* item);
-extern "C" void cFEStateCharSetup_show3DCharacter(void* self, int a1);
+extern "C" void cFEStateCharSetup_show3DCharacter(cFEStateCharSetup* self, int a1);
 extern char str_FEOptions[];
 
 struct sVEntryK182C80 {
@@ -211,35 +212,35 @@ struct sStateK182C80 {
  * @param item  the widget (On Tour pWidget)
  * @param event  the event (On Tour Event)
  */
-extern "C" void cFEStateCharSetup_onWidgetEvent(void* self, cUIThing* item, unsigned int event)
+extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThing* item, unsigned int event)
 {
     if (((void*)item) == 0)
         return;
     switch (event) {
     case 5: {
-        char* factory = **(char***)((char*)self + 0x10);
+        char* factory = *(char**)self->mpEngine;
         sVEntryK182C80* vt = *(sVEntryK182C80**)(factory + 4);
         void* nextState = vt[4].fn(factory + vt[4].delta, self, item->mMiscData);
         if (nextState != 0)
-            cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         cFEStateCharSetup_show3DCharacter(self, 0);
         break;
     }
     case 6: {
-        char* factory = **(char***)((char*)self + 0x10);
+        char* factory = *(char**)self->mpEngine;
         sVEntryK182C80* vt = *(sVEntryK182C80**)(factory + 4);
         void* nextState = vt[5].fn(factory + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
             cFEStateCharSetup_show3DCharacter(self, 0);
         }
         break;
     }
     case 7: {
         sStateK182C80* st = (sStateK182C80*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0),
-                                                          *(void**)((char*)self + 0x10), 1);
+                                                          self->mpEngine, 1);
         st->mode = 1;
-        cUIStateStack_pushSpecial(*(char**)((char*)self + 0x10) + 0x18, st, 0, 0);
+        cUIStateStack_pushSpecial((char*)self->mpEngine + 0x18, st, 0, 0);
         break;
     }
     }
@@ -261,8 +262,8 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index);
 extern "C" void cSimpleCamera_setupCamWithPosAndTarget(void* cam, sVec4_182DB8* a, sVec4_182DB8* b);
-extern "C" void cFEStateCharSetup_show3DCharacter(void* self, int a1);
-extern "C" void cFEStateCharSetup_updateCharacter3DPos(void* self);
+extern "C" void cFEStateCharSetup_show3DCharacter(cFEStateCharSetup* self, int a1);
+extern "C" void cFEStateCharSetup_updateCharacter3DPos(cFEStateCharSetup* self);
 extern char str_rider_name[];
 
 /**
@@ -274,10 +275,10 @@ extern char str_rider_name[];
  * and places the rider (cFEStateCharSetup_updateCharacter3DPos). Called by cFEStateCharSetup_onCreateScreen and
  * cFEStateRiderDetail_onCreateScreen.
  */
-extern "C" void cFEStateCharSetup_updateWidget(void* self)
+extern "C" void cFEStateCharSetup_updateWidget(cFEStateCharSetup* self)
 {
-    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_rider_name));
-    signed char cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_rider_name));
+    signed char cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
     cUIText_setAsciiString(text, (const char*)cBECharacterInterface_getShortNameByCharacter(cBE_getInterface_Fv(cBE_getBE(), 2), cid, 0));
     sCam_182DB8* cam = (sCam_182DB8*)SSXApp->RealFE;
     sVec4_182DB8 pos;
@@ -293,7 +294,7 @@ extern "C" void cFEStateCharSetup_updateWidget(void* self)
     cSimpleCamera_setupCamWithPosAndTarget((char*)cam + 0x10, &pos, &lookAt);
     cam->fov = 0.4363323450088501f;
     cFEStateCharSetup_show3DCharacter(self, 1);
-    *(int*)((char*)self + 0x48) = 1;
+    self->mbIsFirst = 1;
     cFEStateCharSetup_updateCharacter3DPos(self);
 }
 #endif
@@ -368,15 +369,14 @@ static inline sQuat_182EC0 AxisAngle_182EC0(const sQuat_182EC0& axis, float angl
  *
  * @param self_  the character-setup (or rider-detail) state
  */
-extern "C" void cFEStateCharSetup_updateCharacter3DPos(void* self_)
+extern "C" void cFEStateCharSetup_updateCharacter3DPos(cFEStateCharSetup* self_)
 {
-    char* self = (char*)self_;
-    char* rider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
+    char* rider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self_->mUserNum);
     int ok = 0;
     if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
         ok = *(int*)(rider + 0xCB4) != 0;
     }
-    if (ok && *(int*)(self + 0x4C) != 0) {
+    if (ok && self_->mbDraw3D != 0) {
         sQuat_182EC0 pos;
         sXform_182EC0 xf;
         {
@@ -405,14 +405,14 @@ extern "C" void cFEStateCharSetup_updateCharacter3DPos(void* self_)
             xf.pos = position;
         }
         cFERider_setBoardPose(rider, &xf);
-        if (*(int*)(self + 0x48) != 0) {
+        if (self_->mbIsFirst != 0) {
             void* anim = *(void**)(rider + 0xC);
             if (anim != 0) {
                 cRiderAnimBase_reset(anim);
                 cRiderAnimBase_play(anim, 435, 0, -1.0f);
             }
             *(int*)(rider + 0xCCC) = 0;
-            *(int*)(self + 0x48) = 0;
+            self_->mbIsFirst = 0;
             cFERider_speak(rider);
         }
         cFERider_setVisible(rider, 1);
@@ -435,17 +435,17 @@ extern "C" void cFERider_setVisible(void* self, int a1);
  *
  * @param on  nonzero to show the rider
  */
-extern "C" void cFEStateCharSetup_show3DCharacter(void* self, int on)
+extern "C" void cFEStateCharSetup_show3DCharacter(cFEStateCharSetup* self, int on)
 {
     char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0) {
-        void* rider = cFERiderManager_getHuman1(mgr + 0xB0, *(signed char*)((char*)self + 0x44));
+        void* rider = cFERiderManager_getHuman1(mgr + 0xB0, self->mUserNum);
         if (on == 0) {
             cFERider_setVisible(rider, 0);
         }
-        *(int*)((char*)self + 0x4C) = on;
+        self->mbDraw3D = on;
         if (on == 0) {
-            *(int*)((char*)self + 0x48) = 1;
+            self->mbIsFirst = 1;
         }
     }
 }

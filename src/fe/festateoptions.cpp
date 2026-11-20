@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateoptions.h"
 #include "ui/uimenu.h"
 #include "ui/uiinput.h"
 #include "ui/uistate.h"
@@ -2046,14 +2047,14 @@ extern int D_004A14DC;
  *
  * @return @p self
  */
-extern "C" void* func_0018C658(void* self)
+extern "C" void* func_0018C658(cFEStateOptionsController* self)
 {
     cUIState_cUIState(self);
-    *(void***)((char*)self + 8) = cFEStateOptionsController_vtbl;
-    *(int*)((char*)self + 0xC) = 0x1F;
-    *(char*)((char*)self + 0x50) = 0;
+    self->mVtbl = cFEStateOptionsController_vtbl;
+    self->mHashName = 0x1F;
+    self->mVibrateOn = 0;
     D_004A14DC = 0;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2061,8 +2062,8 @@ extern "C" void* func_0018C658(void* self)
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void cUIListBox_addEntryByStringID(void* box, int id, int idx);
-extern "C" void cFEStateOptionsController_vibratePad(void* self, int idx, float x, float y);
-extern "C" void cFEStateOptionsController_updateWidget(void* self);
+extern "C" void cFEStateOptionsController_vibratePad(cFEStateOptionsController* self, int idx, float x, float y);
+extern "C" void cFEStateOptionsController_updateWidget(cFEStateOptionsController* self);
 extern char str_22control[];
 extern char str_1lb[];
 extern char str_2lb[];
@@ -2080,32 +2081,32 @@ extern char str_kT_OVRCMNPro[];
  * calls cFEStateOptionsController_vibratePad(self, pad, 0, 0) for pads 0 and 1 (probably vibratePad, stopping vibration) and then
  * cFEStateOptionsController_updateWidget (probably updateWidget).
  */
-extern "C" void cFEStateOptionsController_onCreateScreen(void* self)
+extern "C" void cFEStateOptionsController_onCreateScreen(cFEStateOptionsController* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_22control), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    *(int*)((char*)self + 0x4C) = 0;
-    *(int*)((char*)self + 0x48) = 0;
-    void* listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_1lb));
+    self->mTimer[1] = 0;
+    self->mTimer[0] = 0;
+    void* listBox = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_1lb));
     if (listBox != 0) {
         cUIListBox_addEntryByStringID(listBox, GetHashValue32(str_kT_CMNOff), 0);
         cUIListBox_addEntryByStringID(listBox, GetHashValue32(str_kT_CMNOn), 1);
     }
-    listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_2lb));
+    listBox = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_2lb));
     if (listBox != 0) {
         cUIListBox_addEntryByStringID(listBox, GetHashValue32(str_kT_CMNOff), 0);
         cUIListBox_addEntryByStringID(listBox, GetHashValue32(str_kT_CMNOn), 1);
     }
-    listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_3lb));
+    listBox = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_3lb));
     if (listBox != 0) {
         cUIListBox_addEntryByStringID(listBox, GetHashValue32(str_kT_20PresetDefault), 0);
         cUIListBox_addEntryByStringID(listBox, GetHashValue32(str_kT_OVRCMNPro), 1);
     }
-    listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_4lb));
+    listBox = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_4lb));
     if (listBox != 0) {
         cUIListBox_addEntryByStringID(listBox, GetHashValue32(str_kT_20PresetDefault), 0);
         cUIListBox_addEntryByStringID(listBox, GetHashValue32(str_kT_OVRCMNPro), 1);
@@ -2120,7 +2121,7 @@ extern "C" void cFEStateOptionsController_onCreateScreen(void* self)
 //100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onDestroyScreen);
 #ifdef SKIP_ASM
-extern "C" void cFEStateOptionsController_vibratePad(void* self, int idx, float x, float y);
+extern "C" void cFEStateOptionsController_vibratePad(cFEStateOptionsController* self, int idx, float x, float y);
 void* cUIState_onDestroyScreen(void* self);
 
 /**
@@ -2132,7 +2133,7 @@ void* cUIState_onDestroyScreen(void* self);
  *
  * @return no meaningful value (cUIState_onDestroyScreen() returns nothing)
  */
-extern "C" void* cFEStateOptionsController_onDestroyScreen(void* self)
+extern "C" void* cFEStateOptionsController_onDestroyScreen(cFEStateOptionsController* self)
 {
     cFEStateOptionsController_vibratePad(self, 0, 0.0f, 0.0f);
     cFEStateOptionsController_vibratePad(self, 1, 0.0f, 0.0f);
@@ -2148,8 +2149,8 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_defaultCtrl(void* self);
-extern "C" void cFEStateOptionsController_updateWidget(void* self);
-extern "C" void cFEStateOptionsController_vibratePad(void* self, int idx, float x, float y);
+extern "C" void cFEStateOptionsController_updateWidget(cFEStateOptionsController* self);
+extern "C" void cFEStateOptionsController_vibratePad(cFEStateOptionsController* self, int idx, float x, float y);
 extern char str_111resetopts[];
 extern int D_004A14DC;
 
@@ -2195,7 +2196,7 @@ public:
  * @param obj  the popup state; its mHashName (+0xC) is checked
  * @param msg  popup event code (21 and 22 are handled)
  */
-extern "C" void cFEStateOptionsController_onPopupEvent(void* self, cUIObj_18C910* obj, int msg)
+extern "C" void cFEStateOptionsController_onPopupEvent(cFEStateOptionsController* self, cUIObj_18C910* obj, int msg)
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     switch (msg) {
@@ -2234,8 +2235,8 @@ extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void cBENewPlayerInterface_setUseDualShock(void* self, int index, int value);
 extern "C" void cBENewPlayerInterface_setControllerMapping(void* self, int index, int value);
 extern "C" int cBENewPlayerInterface_getUseDualShock(void* iface, int a1);
-extern "C" void cFEStateOptionsController_displayPadConfig(void* self, int on);
-extern "C" void cFEStateOptionsController_vibratePad(void* self, int idx, float x, float y);
+extern "C" void cFEStateOptionsController_displayPadConfig(cFEStateOptionsController* self, int on);
+extern "C" void cFEStateOptionsController_vibratePad(cFEStateOptionsController* self, int idx, float x, float y);
 extern char str_cFEPopupOptionReset[];
 extern void* cFEPopupOptionReset_vtbl[];
 extern char str_1lb[];
@@ -2274,7 +2275,7 @@ static inline int Is_0018CA10(int id, char* s) { return id == GetHashValue32(s);
  * @param widget  the widget the event is for (null: nothing happens)
  * @param event  UI event code (6, 7 and 9 are handled)
  */
-extern "C" void cFEStateOptionsController_onWidgetEvent(char* self, cUIThing* widget, unsigned int event)
+extern "C" void cFEStateOptionsController_onWidgetEvent(cFEStateOptionsController* self, cUIThing* widget, unsigned int event)
 {
     if (((char*)widget) == 0) {
         return;
@@ -2283,20 +2284,20 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(char* self, cUIThing* wi
     switch (event) {
     case 7: {
         char* resetPopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
-        cUIState_cUIState1(resetPopup, *(void**)(self + 0x10), self);
+        cUIState_cUIState1(resetPopup, self->mpEngine, ((char*)self));
         *(void***)(resetPopup + 8) = cFEPopupOptionReset_vtbl;
         *(char*)(resetPopup + 0x48) = 0;
-        cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, resetPopup);
+        cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, resetPopup);
         break;
     }
     case 6: {
         sVE_18CA10n* vt = *(sVE_18CA10n**)(iface + 0xC);
         vt[1].fn(iface + vt[1].delta);
-        char* obj = **(char***)(self + 0x10);
+        char* obj = *(char**)self->mpEngine;
         sVE_18CA10p* vt2 = *(sVE_18CA10p**)(obj + 4);
-        void* nextState = vt2[5].fn(obj + vt2[5].delta, self, widget->mMiscData);
+        void* nextState = vt2[5].fn(obj + vt2[5].delta, ((char*)self), widget->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }
         break;
     }
@@ -2305,8 +2306,8 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(char* self, cUIThing* wi
             cBENewPlayerInterface_setUseDualShock(iface, 0, cUIListBox_getCurrentEntryData(((char*)widget)) != 0);
             if (cBENewPlayerInterface_getUseDualShock(iface, 0)) {
                 cFEStateOptionsController_vibratePad(self, 0, 10.0f, 10.0f);
-                *(int*)(self + 0x48) = 0x3C;
-                *(unsigned char*)(self + 0x50) |= 1;
+                self->mTimer[0] = 0x3C;
+                *(unsigned char*)&self->mVibrateOn |= 1;
             } else {
                 cFEStateOptionsController_vibratePad(self, 0, 0.0f, 0.0f);
             }
@@ -2314,8 +2315,8 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(char* self, cUIThing* wi
             cBENewPlayerInterface_setUseDualShock(iface, 1, cUIListBox_getCurrentEntryData(((char*)widget)) != 0);
             if (cBENewPlayerInterface_getUseDualShock(iface, 1)) {
                 cFEStateOptionsController_vibratePad(self, 1, 10.0f, 10.0f);
-                *(int*)(self + 0x4C) = 0x3C;
-                *(unsigned char*)(self + 0x50) |= 2;
+                self->mTimer[1] = 0x3C;
+                *(unsigned char*)&self->mVibrateOn |= 2;
             } else {
                 cFEStateOptionsController_vibratePad(self, 1, 0.0f, 0.0f);
             }
@@ -2353,7 +2354,7 @@ extern "C" int cFEStateOptionsController_displayPadConfig_CCE0(void* self, int o
  * @param key  menu event code
  * @return 0x100, 0 or 0x101 (cUIMenu reply codes)
  */
-extern "C" int cFEStateOptionsController_onWidgetMenu(void* self, char* menu, unsigned int key)
+extern "C" int cFEStateOptionsController_onWidgetMenu(cFEStateOptionsController* self, char* menu, unsigned int key)
 {
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     switch (key) {
@@ -2391,7 +2392,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onWidgetPair);
  * @param event  pair event code
  * @return 0x100 when @p event is nonzero, else 0
  */
-extern "C" int cFEStateOptionsController_onWidgetPair(void* self, int pair, int event)
+extern "C" int cFEStateOptionsController_onWidgetPair(cFEStateOptionsController* self, int pair, int event)
 {
     return event ? 0x100 : 0;
 }
@@ -2409,7 +2410,7 @@ extern "C" int cBENewPlayerInterface_getUseDualShock(void* iface, int a1);
 extern "C" int cBENewPlayerInterface_getControllerMapping(void* iface, int a1);
 extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
-extern "C" void cFEStateOptionsController_displayPadConfig(void* self, int on);
+extern "C" void cFEStateOptionsController_displayPadConfig(cFEStateOptionsController* self, int on);
 extern char str_1lb[];
 extern char str_2lb[];
 extern char str_3lb[];
@@ -2426,27 +2427,27 @@ extern char str_4lb[];
  * Likely bug: the result of cUIListBox_getEntryByData is not checked, so a value no entry matches selects an
  * uninitialised index.
  */
-extern "C" void cFEStateOptionsController_updateWidget(void* self)
+extern "C" void cFEStateOptionsController_updateWidget(cFEStateOptionsController* self)
 {
     void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
     unsigned char vals[4];
-    void* listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_1lb));
+    void* listBox = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_1lb));
     if (listBox != 0) {
         cUIListBox_getEntryByData(listBox, cBENewPlayerInterface_getUseDualShock(np, 0), &vals[0]);
         cUIListBox_setCurrentEntryByIndex(listBox, vals[0]);
     }
-    listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_2lb));
+    listBox = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_2lb));
     if (listBox != 0) {
         cUIListBox_getEntryByData(listBox, cBENewPlayerInterface_getUseDualShock(np, 1), &vals[1]);
         cUIListBox_setCurrentEntryByIndex(listBox, vals[1]);
     }
-    listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_3lb));
+    listBox = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_3lb));
     if (listBox != 0) {
         cUIListBox_getEntryByData(listBox, cBENewPlayerInterface_getControllerMapping(np, 0), &vals[2]);
         cUIListBox_setCurrentEntryByIndex(listBox, vals[2]);
         cFEStateOptionsController_displayPadConfig(self, cBENewPlayerInterface_getControllerMapping(np, 0) == 0);
     }
-    listBox = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_4lb));
+    listBox = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_4lb));
     if (listBox != 0) {
         cUIListBox_getEntryByData(listBox, cBENewPlayerInterface_getControllerMapping(np, 1), &vals[3]);
         cUIListBox_setCurrentEntryByIndex(listBox, vals[3]);
@@ -2487,21 +2488,21 @@ public:
  *
  * @param on  nonzero for the default layout, zero for the pro layout
  */
-extern "C" void cFEStateOptionsController_displayPadConfig(void* self, int on)
+extern "C" void cFEStateOptionsController_displayPadConfig(cFEStateOptionsController* self, int on)
 {
-    cUIObj_18CF50* defaultPicture = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15BC));
+    cUIObj_18CF50* defaultPicture = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A15BC));
     if (defaultPicture != 0) {
         defaultPicture->setVisible(on);
     }
-    cUIObj_18CF50* proPicture = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A15C0));
+    cUIObj_18CF50* proPicture = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A15C0));
     if (proPicture != 0) {
         proPicture->setVisible(on ^ 1);
     }
-    cUIObj_18CF50* defaultText = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_default_text));
+    cUIObj_18CF50* defaultText = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_default_text));
     if (defaultText != 0) {
         defaultText->setVisible(on);
     }
-    cUIObj_18CF50* proText = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pro_text));
+    cUIObj_18CF50* proText = (cUIObj_18CF50*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pro_text));
     if (proText != 0) {
         proText->setVisible(on ^ 1);
     }
@@ -2512,7 +2513,7 @@ extern "C" void cFEStateOptionsController_displayPadConfig(void* self, int on)
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_onUpdate(void* self);
-extern "C" void cFEStateOptionsController_vibratePad(void* self, int idx, float x, float y);
+extern "C" void cFEStateOptionsController_vibratePad(cFEStateOptionsController* self, int idx, float x, float y);
 
 /**
  * Runs the base cUIState_onUpdate() and counts down each pad's test vibration, stopping it when its timer runs out.
@@ -2521,24 +2522,24 @@ extern "C" void cFEStateOptionsController_vibratePad(void* self, int idx, float 
  * per update; once it reaches 0 the bit is cleared and cFEStateOptionsController_vibratePad(self, pad, 0, 0) sets the pad's motor levels to 0.
  * cFEStateOptionsController_onWidgetEvent starts the timers at 60.
  */
-extern "C" void cFEStateOptionsController_onUpdate(void* self)
+extern "C" void cFEStateOptionsController_onUpdate(cFEStateOptionsController* self)
 {
     cUIState_onUpdate(self);
-    if (*(unsigned char*)((char*)self + 0x50) & 1) {
-        if (*(int*)((char*)self + 0x48) > 0) {
-            *(int*)((char*)self + 0x48) -= 1;
+    if (*(unsigned char*)&self->mVibrateOn & 1) {
+        if (self->mTimer[0] > 0) {
+            self->mTimer[0] -= 1;
         } else {
-            *(int*)((char*)self + 0x48) = 0;
-            *(unsigned char*)((char*)self + 0x50) &= ~1;
+            self->mTimer[0] = 0;
+            *(unsigned char*)&self->mVibrateOn &= ~1;
             cFEStateOptionsController_vibratePad(self, 0, 0.0f, 0.0f);
         }
     }
-    if (*(unsigned char*)((char*)self + 0x50) & 2) {
-        if (*(int*)((char*)self + 0x4C) > 0) {
-            *(int*)((char*)self + 0x4C) -= 1;
+    if (*(unsigned char*)&self->mVibrateOn & 2) {
+        if (self->mTimer[1] > 0) {
+            self->mTimer[1] -= 1;
         } else {
-            *(int*)((char*)self + 0x4C) = 0;
-            *(unsigned char*)((char*)self + 0x50) &= ~2;
+            self->mTimer[1] = 0;
+            *(unsigned char*)&self->mVibrateOn &= ~2;
             cFEStateOptionsController_vibratePad(self, 1, 0.0f, 0.0f);
         }
     }
@@ -2575,7 +2576,7 @@ public:
  * @param y  second strength input (feeds both motors' first terms)
  */
 // PORT: uses g++'s >? (max) operator.
-extern "C" void cFEStateOptionsController_vibratePad(void* self, int idx, float x, float y)
+extern "C" void cFEStateOptionsController_vibratePad(cFEStateOptionsController* self, int idx, float x, float y)
 {
     signed char i = idx;
     float scaledX = x * 0.9133333563804626f - 18.518518447875977f;

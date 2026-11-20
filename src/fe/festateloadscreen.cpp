@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/gamestate.h"
 #include "replay/frameptr.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
@@ -421,11 +422,11 @@ extern "C" void cGame_setState(void* self, int a, int b, int refresh);
 /**
  * Switches the game to the state's next state (mNextState) with its startup flag, when one is set.
  */
-extern "C" void cGameState_gotoNextState(void* self)
+extern "C" void cGameState_gotoNextState(cGameState* self)
 {
     int nextState = *(int*)self;
     if (nextState != 0) {
-        cGame_setState(cGameState_mpGame, nextState, *(int*)((char*)self + 4), 0);
+        cGame_setState(cGameState_mpGame, nextState, self->mStartupFlag, 0);
     }
 }
 #endif
@@ -678,7 +679,7 @@ void* cBEAggressionInterface_getThis();
 extern "C" void cBEAggressionInterface_regressAggression(void* p);
 extern "C" void cBXLoadIndicator_Hide(void* hud, int a);
 extern "C" void cOVStateManager_triggerFinishOverlay();
-extern "C" void cGameState_gotoNextState(void* self);
+extern "C" void cGameState_gotoNextState(cGameState* self);
 extern "C" int cSSXScriptEngine_ReadyNISList(void* self, int i);
 extern "C" void cSSXScriptEngine_ResetNISList(void* self, int i);
 extern "C" int cSSXScriptEngine_GetNISListState(void* self, int i);
@@ -857,7 +858,7 @@ extern "C" void cGFFinishlineState_update(void* self)
     case 2: {
         sRace_233CD8* rc = &(*(sRace_233CD8*)&cBENewRaceInterface_newRace);
         if (rc->flag49 == 0 && rc->mode48 == 4) {
-            cGameState_gotoNextState(self);
+            cGameState_gotoNextState((cGameState*)self);
         }
         break;
     }
@@ -1098,7 +1099,7 @@ extern "C" int cSSXScriptEngine_GetNISListState(void* snd, int a1);
 extern "C" int cSSXScriptEngine_PlayNISList(void* snd, int a1, int a2, int a3);
 extern "C" int cSSXScriptEngine_GetNISListScriptCategory(void* snd, int a1, int a2);
 extern "C" void cGFEventStartState_ReadyEvent(void* self);
-extern "C" void cGameState_gotoNextState(void* self);
+extern "C" void cGameState_gotoNextState(cGameState* self);
 extern "C" void cAI_prepareToPurgeComputerRiders(void* o);
 extern "C" void cAI_prepareToPurgeComputerActors(void* o);
 extern "C" void cAI_initAIRiders(void* o);
@@ -1237,7 +1238,7 @@ extern "C" void cGFEventStartState_update(sLoadScreen_43B0* self)
             self->pending = 0;
         }
         self->state = 4;
-        cGameState_gotoNextState(self);
+        cGameState_gotoNextState((cGameState*)self);
         break;
     }
     case 4:

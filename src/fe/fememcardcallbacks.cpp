@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatenethelppopup.h"
 #include "movie/mcoverlaymanager.h"
 #include "ui/uistate.h"
 #include "ui/uiinput.h"
@@ -2708,16 +2709,16 @@ struct sMcSlot9D48 {
  * @param owner   the parent state (mpParentState)
  * @return @p self
  */
-extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup(void* self, cUIEngine* engine, cUIState* owner)
+extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup(cFEStateNetHelpPopup* self, cUIEngine* engine, cUIState* owner)
 {
     cUIState_cUIState1(self, engine, owner);
-    *(void**)((char*)self + 0x8) = cFEStateNetHelpPopup_vtbl;
+    self->mVtbl = (void**)cFEStateNetHelpPopup_vtbl;
     new ((char*)self + 0x54) sMcSlot9D48[7];
-    *(int*)((char*)self + 0x4C) = 0;
-    *(int*)((char*)self + 0x50) = 0;
-    *(int*)((char*)self + 0xC) = 76;
+    self->miReleasedCount = 0;
+    self->mbReferEventsToParent = 0;
+    self->mHashName = 76;
     cFEStateNetHelpPopup_clear(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatenethelppopup.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -12,11 +13,11 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 /**
  * Creates the online help popup's screen ("help_popup") and plays its first frame.
  */
-extern "C" void cFEStateNetHelpPopup_onCreateScreen(void* self)
+extern "C" void cFEStateNetHelpPopup_onCreateScreen(cFEStateNetHelpPopup* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_help_popup), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -42,10 +43,10 @@ struct sVEntry001D9E20 {
  * @param msgParam  the event data (On Tour: void *pParam)
  * @return the parent's result, or 0
  */
-extern "C" int cFEStateNetHelpPopup_handleEvent(void* self, int msg, int msgParam)
+extern "C" int cFEStateNetHelpPopup_handleEvent(cFEStateNetHelpPopup* self, int msg, int msgParam)
 {
-    if (*(int*)((char*)self + 0x50) != 0) {
-        void* obj = *(void**)((char*)self + 0x20);
+    if (self->mbReferEventsToParent != 0) {
+        void* obj = self->mpParentState;
         if (obj != 0) {
             sVEntry001D9E20* vt = *(sVEntry001D9E20**)((char*)obj + 8);
             return vt[24].fn((char*)obj + vt[24].delta, msg, msgParam);
@@ -64,7 +65,7 @@ extern "C" void cUIStateStack_pop(void*, int);
 /**
  * Closes the help popup once neither controller holds input 0x99, probably the help button that opened it.
  */
-extern "C" void cFEStateNetHelpPopup_onUpdate(void* self)
+extern "C" void cFEStateNetHelpPopup_onUpdate(cFEStateNetHelpPopup* self)
 {
     int i;
     int found = 0;
@@ -76,7 +77,7 @@ extern "C" void cFEStateNetHelpPopup_onUpdate(void* self)
         }
     }
     if (found == 0) {
-        cUIStateStack_pop((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
+        cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
     }
 }
 #endif
@@ -149,42 +150,42 @@ static inline int IsHash_1D9F38(int id, char* s) { return id == GetHashValue32(s
  *
  * @param w  the widget being created
  */
-extern "C" void cFEStateNetHelpPopup_onWidgetCreate(sNetHelp_1D9F38* self, sWidget_1D9F38* w)
+extern "C" void cFEStateNetHelpPopup_onWidgetCreate(cFEStateNetHelpPopup* self, sWidget_1D9F38* w)
 {
     int hashName = w->hash;
     if (hashName == GetHashValue32(str_OnlineAccSetup)) {
-        self->wA8 = w;
+        self->mpScreenName = (cUIText*)w;
         w->flags |= 0x80;
     } else if (hashName == GetHashValue32(str_TopText)) {
-        self->wAC = w;
+        self->mpDescription = (cUIText*)w;
         w->flags |= 0x80;
     } else if (hashName == GetHashValue32(str_BottomNote)) {
-        self->wB0 = w;
+        self->mpBottom = (cUIText*)w;
         w->flags |= 0x80;
     } else if (IsHash_1D9F38(w->hash, str_xselect)) {
-        self->wD0 = w;
+        self->mpObject[0] = (cUIIcon*)w;
     } else if (IsHash_1D9F38(w->hash, str_ps2triangle)) {
-        self->wD4 = w;
+        self->mpObject[1] = (cUIIcon*)w;
     } else if (IsHash_1D9F38(w->hash, str_ps2circle)) {
-        self->wD8 = w;
+        self->mpObject[2] = (cUIIcon*)w;
     } else if (IsHash_1D9F38(w->hash, str_updownarrows)) {
-        self->wDC = w;
+        self->mpObject[3] = (cUIIcon*)w;
     } else if (IsHash_1D9F38(w->hash, str_leftrightarrows)) {
-        self->wE0 = w;
+        self->mpObject[4] = (cUIIcon*)w;
     } else if (IsHash_1D9F38(w->hash, str_ps2l1)) {
-        self->wE8 = w;
+        self->mpObject[6] = (cUIIcon*)w;
     } else if (IsHash_1D9F38(w->hash, str_ps2r1)) {
-        self->wE4 = w;
+        self->mpObject[5] = (cUIIcon*)w;
     } else if (IsHash_1D9F38(w->hash, str_actrl)) {
-        self->wF0 = w;
+        self->mpObject[8] = (cUIIcon*)w;
     } else if (IsHash_1D9F38(w->hash, str_ps2sel)) {
-        self->wEC = w;
+        self->mpObject[7] = (cUIIcon*)w;
     } else {
         char buf[16];
         for (int i = 0; i < 7; i++) {
             sprintf(buf, str_TextOptionpct_d, i);
             if (hashName == GetHashValue32(buf)) {
-                self->rows[i] = w;
+                ((sWidget_1D9F38**)&self->mpOptions[0])[i] = w;
                 break;
             }
         }
@@ -225,14 +226,13 @@ struct sStrings_A110 {
  *
  * @param helpPopup  the help popup state
  */
-extern "C" void cFEStateNetHelpPopup_createAndSetDescriptionString(void* helpPopup)
+extern "C" void cFEStateNetHelpPopup_createAndSetDescriptionString(cFEStateNetHelpPopup* helpPopup)
 {
-    char* self = (char*)helpPopup;
     unsigned short* strs[3];
     unsigned short* buf = 0;
     int total = 0;
     int count = 0;
-    int* ids = (int*)(self + 0x58);
+    int* ids = (int*)(((char*)helpPopup) + 0x58);
     int i = 0;
     do {
         if (ids[i] == 0) {
@@ -251,7 +251,7 @@ extern "C" void cFEStateNetHelpPopup_createAndSetDescriptionString(void* helpPop
             func_002C2688(buf, strs[i]);
         }
     }
-    cUIText_setUnicodeStringWrap(*(void**)(self + 0xAC), buf);
+    cUIText_setUnicodeStringWrap(helpPopup->mpDescription, buf);
     if (buf != 0) {
         cMemMan_free__FPv(buf);
     }
@@ -264,7 +264,7 @@ INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_onGainTransition);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern "C" void cFEStateNetHelpPopup_createAndSetDescriptionString(void* self);
+extern "C" void cFEStateNetHelpPopup_createAndSetDescriptionString(cFEStateNetHelpPopup* self);
 extern char D_004A1408[];
 
 struct sVEnt_1DA238 { short delta; short index; void (*fn)(void*, int); };
@@ -319,7 +319,7 @@ extern "C" int cFEStateNetHelpPopup_onGainTransition(sNetHelp_1DA238* self, int 
             cUIText_setAsciiString((cUIText*)self->wA8, D_004A1408);
         }
         if (self->c[0]) {
-            cFEStateNetHelpPopup_createAndSetDescriptionString(self);
+            cFEStateNetHelpPopup_createAndSetDescriptionString((cFEStateNetHelpPopup*)self);
         } else {
             cUIText_setAsciiString((cUIText*)self->wAC, D_004A1408);
         }
@@ -363,10 +363,10 @@ extern "C" void cUIStateStack_pop(void*, int);
  * @param pWidget  the widget, unused
  * @param msg  widget event number
  */
-extern "C" void cFEStateNetHelpPopup_onWidgetEvent(void* self, int pWidget, int msg)
+extern "C" void cFEStateNetHelpPopup_onWidgetEvent(cFEStateNetHelpPopup* self, int pWidget, int msg)
 {
     if (msg == 6) {
-        cUIStateStack_pop((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
+        cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
     }
 }
 #endif
@@ -392,7 +392,7 @@ struct sNetHelpPopup_DA4A8 {
  * and +0x64 to 0, and the seven option text ids (+0x68) to 0 and icons (+0x84) to -1 (see
  * cFEStateNetHelpPopup_setOption()). The help popup's constructor cFEStateNetHelpPopup_cFEStateNetHelpPopup() calls it.
  */
-extern "C" void cFEStateNetHelpPopup_clear(void* self)
+extern "C" void cFEStateNetHelpPopup_clear(cFEStateNetHelpPopup* self)
 {
     sNetHelpPopup_DA4A8* helpPopup = (sNetHelpPopup_DA4A8*)self;
     int i;

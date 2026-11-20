@@ -1,4 +1,7 @@
 #include "common.h"
+#include "fe/fecustom.h"
+#include "fe/festatecharsetup.h"
+#include "fe/festateoptions.h"
 #include "fe/festateload.h"
 #include "fe/festateprofile.h"
 #include "ui/uithing.h"
@@ -1792,8 +1795,8 @@ extern void* cUICustomInterface_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cFECustom__cFECustom(void *self, int flags) {
-    *(void***)((char*)self + 4) = cUICustomInterface_vtbl;
+extern "C" void cFECustom__cFECustom(cFECustom* self, int flags) {
+    self->mVtbl = cUICustomInterface_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1817,8 +1820,8 @@ INCLUDE_ASM("main/all_in_one_main", cFECustom_setProfileLaunchScreen);
  * @param self  the object
  * @param launchScreen  the value to store
  */
-extern "C" void cFECustom_setProfileLaunchScreen(void *self, int launchScreen) {
-    (*(int *)((char*)(self) + (0xC))) = launchScreen;
+extern "C" void cFECustom_setProfileLaunchScreen(cFECustom* self, int launchScreen) {
+    ((int)self->mProfileLaunchScreen) = launchScreen;
 }
 #endif
 
@@ -2836,8 +2839,8 @@ extern void* cFEState_vtbl[];
  * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  */
-extern "C" void cFEStateCharSetup__cFEStateCharSetup(void *self) {
-    *(void***)((char*)self + 8) = cFEState_vtbl;
+extern "C" void cFEStateCharSetup__cFEStateCharSetup(cFEStateCharSetup* self) {
+    self->mVtbl = cFEState_vtbl;
     cUIState__cUIState_DD8A0(self);
 }
 #endif
@@ -4423,11 +4426,11 @@ extern int cFEStateOptionsController_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *cFEStateOptionsController_cFEStateOptionsController(void *self) {
+extern "C" void *cFEStateOptionsController_cFEStateOptionsController(cFEStateOptionsController* self) {
     cUIState_cUIState_E080(self, 0);
-    *(int **)((char *)self + 8) = cFEStateOptionsController_vtbl;
+    self->mVtbl = (void**)cFEStateOptionsController_vtbl;
     *((char *)self + 0x50) = 0;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -4445,8 +4448,8 @@ extern void* cFEState_vtbl[];
  * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  */
-extern "C" void cFEStateOptionsController__cFEStateOptionsController(void *self) {
-    *(void***)((char*)self + 8) = cFEState_vtbl;
+extern "C" void cFEStateOptionsController__cFEStateOptionsController(cFEStateOptionsController* self) {
+    self->mVtbl = cFEState_vtbl;
     cUIState__cUIState_DE0C0(self);
 }
 #endif

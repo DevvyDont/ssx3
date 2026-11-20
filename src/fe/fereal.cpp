@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fecustom.h"
 #include "ui/uistate.h"
 #include "ui/uiengine.h"
 #include "online/lobbyman.h"
@@ -33,22 +34,22 @@ extern sVE0720 cFEStateTransition_vtbl[];
  * @param owner  the UI engine
  * @return @p self
  */
-extern "C" void* cFECustom_cFECustom(void* self, cUIEngine* owner)
+extern "C" void* cFECustom_cFECustom(cFECustom* self, cUIEngine* owner)
 {
-    *(void**)((char*)self + 0x0) = ((void*)owner);
-    *(void**)((char*)self + 0x10) = 0;
-    *(void***)((char*)self + 0x4) = cFECustom_vtbl;
+    self->mpEngine = (cUIEngine*)((void*)owner);
+    self->mpTransitionState = 0;
+    self->mVtbl = cFECustom_vtbl;
     char* transition = (char*)cMemMan_alloc(80, str_cFEStateTransition, 0, 0);
-    cUIState_cUIState(transition, *(void**)((char*)self + 0x0));
+    cUIState_cUIState(transition, self->mpEngine);
     *(int*)(transition + 0x48) = 0;
     *(int*)(transition + 0x4C) = 0;
     *(sVE0720**)(transition + 0x8) = cFEStateTransition_vtbl;
-    *(void**)((char*)self + 0x10) = transition;
+    self->mpTransitionState = (cFEStateTransition*)transition;
     if (transition != 0) {
         cFEStateTransition_vtbl[4].fn(transition + cFEStateTransition_vtbl[4].delta);
-        cUIStateStack_pushExplicit((char*)*(void**)((char*)self + 0x0) + 0x18, *(void**)((char*)self + 0x10));
+        cUIStateStack_pushExplicit((char*)self->mpEngine + 0x18, self->mpTransitionState);
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -73,10 +74,10 @@ struct sVEntry001A07C8 {
  * @param hash  the event (a name hash)
  * @return 1 for "whitefade", else 0
  */
-extern "C" int cFECustom_onScreenEvent(void* self, int screen, int hash)
+extern "C" int cFECustom_onScreenEvent(cFECustom* self, int screen, int hash)
 {
     if (hash == GetHashValue32(str_whitefade)) {
-        void* obj = *(void**)((char*)self + 0x10);
+        void* obj = self->mpTransitionState;
         if (obj != 0) {
             sVEntry001A07C8* vt = *(sVEntry001A07C8**)((char*)obj + 8);
             vt[24].fn((char*)obj + vt[24].delta, 1, 0);
@@ -712,7 +713,7 @@ INCLUDE_ASM("fe/fereal", cFECustom_setPlayerCtrlMask);
  * @param index  the player (a signed char)
  * @param val    the mask
  */
-extern "C" void cFECustom_setPlayerCtrlMask(void* self, int index, int val)
+extern "C" void cFECustom_setPlayerCtrlMask(cFECustom* self, int index, int val)
 {
     char* entry = (char*)self + (signed char)index;
     *(char*)(entry + 0x8) = val;
@@ -730,7 +731,7 @@ INCLUDE_ASM("fe/fereal", cFECustom_getPlayerCtrlMask);
  * @param index  the player (a signed char)
  * @return the mask
  */
-extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int index)
+extern "C" unsigned char cFECustom_getPlayerCtrlMask(cFECustom* self, int index)
 {
     char* entry = (char*)self + (signed char)index;
     return *(unsigned char*)(entry + 0x8);
@@ -869,7 +870,7 @@ extern "C" void cRealFE_loadCharAnimations_1(void* self) __asm__("cRealFE_loadCh
 extern "C" void func_0019CE68(void* self);
 extern "C" void cFERiderManager_init(void* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cFECustom_cFECustom(void* self, cUIEngine* owner);
+extern "C" void* cFECustom_cFECustom(cFECustom* self, cUIEngine* owner);
 extern "C" void* cFESound_cFESound(void* self);
 extern "C" void cIrradianceDataBase_Load(void* db);
 extern "C" void* cAudioInterface_bxAudio();
@@ -984,7 +985,7 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
     *(int*)(in + 0x10) = 0;
     *(int*)(in + 0x14) = 0;
     ui2->input = in;
-    self->ui->custom = cFECustom_cFECustom(cMemMan_alloc(20, str_FEUICustom, 0, 0), (cUIEngine*)self->ui);
+    self->ui->custom = cFECustom_cFECustom((cFECustom*)cMemMan_alloc(20, str_FEUICustom, 0, 0), (cUIEngine*)self->ui);
     self->ui->sound = cFESound_cFESound(cMemMan_alloc(8, str_FEUISound, 0, 0));
     char* g = (char*)SSXApp;
     void* feLocale = *(void**)(g + 0x8C);
