@@ -1,4 +1,5 @@
 #include "common.h"
+#include "intersect/worldrider.h"
 #include "intersect/worldsphere.h"
 #include "intersect/spheretree.h"
 #include "ui/uithing.h"
@@ -4207,18 +4208,18 @@ extern void* cWorldRider_vtbl[];
  * @param flag  On Tour isLow
  * @return @p self
  */
-extern "C" sRiderSphere_2F650* cWorldRider_cWorldRider(sRiderSphere_2F650* self, cRiderSphereTree* tree, int flag)
+extern "C" sRiderSphere_2F650* cWorldRider_cWorldRider(cWorldRider* self, cRiderSphereTree* tree, int flag)
 {
-    self->f8 = 0;
-    self->f4 = 0;
-    self->vtbl = cWorldRider_vtbl;
-    cRiderSphereTree_cRiderSphereTree(&self->node);
-    self->tree2 = ((void*)tree);
-    self->tree = ((void*)tree);
-    self->state = flag == 0;
-    cRiderSphereTree_GetMaskBoundBox(tree, &self->min, &self->max);
-    self->center = vecScale_2F650(vecAdd_2F650(&self->min, &self->max), 0.5f);
-    return self;
+    self->useRejectNormal = 0;
+    self->isTransformed = 0;
+    self->mVtbl = cWorldRider_vtbl;
+    cRiderSphereTree_cRiderSphereTree(&self->localTree);
+    self->origSt = (cRiderSphereTree*)((void*)tree);
+    self->st = (cRiderSphereTree*)((void*)tree);
+    self->mPrecision = flag == 0;
+    cRiderSphereTree_GetMaskBoundBox(tree, &(*(sVec4_2F650*)&self->boxMin), &(*(sVec4_2F650*)&self->boxMax));
+    (*(sVec4_2F650*)&self->boxCenter) = vecScale_2F650(vecAdd_2F650(&(*(sVec4_2F650*)&self->boxMin), &(*(sVec4_2F650*)&self->boxMax)), 0.5f);
+    return ((sRiderSphere_2F650*)self);
 }
 #endif
 
@@ -4235,9 +4236,9 @@ extern void* cWorldRider_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cWorldRider__cWorldRider(void* self, int flags)
+extern "C" void cWorldRider__cWorldRider(cWorldRider* self, int flags)
 {
-    *(void***)((char*)self + 0x50) = cWorldRider_vtbl;
+    self->mVtbl = cWorldRider_vtbl;
     cRiderSphereTree__cRiderSphereTree((char*)self + 0x70, 2);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -4294,17 +4295,17 @@ static inline sSphereVec4 sphereVecAddR(sSphereVec4* a, sSphereVec4* b)
  * @return 1 when the boxes overlap, otherwise 0
  */
 // sphere (self+0x60) overlaps the box [mn, mx]?
-extern "C" int cWorldRider_IsInBoxTransformed(void* self, sSphereVec4* mn, sSphereVec4* mx)
+extern "C" int cWorldRider_IsInBoxTransformed(cWorldRider* self, sSphereVec4* mn, sSphereVec4* mx)
 {
     sSphereVec4 rv;
     int inside = 0;
-    float rad = (*(sSphereTreeNode**)((char*)self + 0x60))->radius;
+    float rad = ((sSphereTreeNode*)self->st)->radius;
     rv.x = rad;
     rv.y = rad;
     rv.z = rad;
     rv.w = 0;
-    sSphereVec4 lo = sphereVecSub(&(*(sSphereTreeNode**)((char*)self + 0x60))->center, &rv);
-    sSphereVec4 hi = sphereVecAddR(&(*(sSphereTreeNode**)((char*)self + 0x60))->center, &rv);
+    sSphereVec4 lo = sphereVecSub(&((sSphereTreeNode*)self->st)->center, &rv);
+    sSphereVec4 hi = sphereVecAddR(&((sSphereTreeNode*)self->st)->center, &rv);
     if (mx->x >= lo.x && mn->x <= hi.x && mx->y >= lo.y && mn->y <= hi.y &&
         lo.z <= mx->z && mn->z <= hi.z) {
         inside = 1;
@@ -4331,13 +4332,13 @@ extern "C" void cRiderSphereTree_ApplyTransform(sSphereTreeNode* s, sSphereMtx* 
  * @param mat  the transform (On Tour const t4Matrix& mat)
  * @param scale  the uniform scale
  */
-extern "C" void cWorldRider_Transform(void* self, sSphereMtx* mat, float scale)
+extern "C" void cWorldRider_Transform(cWorldRider* self, sSphereMtx* mat, float scale)
 {
     sSphereTreeNode* node = (sSphereTreeNode*)((char*)self + 0x70);
-    cRiderSphereTree_operatorE((sSphereNode_9A28*)node, *(sSphereNode_9A28**)((char*)self + 0x60));
-    *(sSphereTreeNode**)((char*)self + 0x60) = node;
+    cRiderSphereTree_operatorE((sSphereNode_9A28*)node, (sSphereNode_9A28*)self->st);
+    self->st = (cRiderSphereTree*)node;
     cRiderSphereTree_ApplyTransform(node, mat, scale);
-    *(int*)((char*)self + 0x4) = 1;
+    self->isTransformed = 1;
 }
 #endif
 
@@ -4370,12 +4371,12 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldRider_GetIdealParam);
  *
  * @return 2 * the root sphere's radius, or -1.0 if the first word is 0
  */
-extern "C" float cWorldRider_GetIdealParam(void* self)
+extern "C" float cWorldRider_GetIdealParam(cWorldRider* self)
 {
     if (*(int*)self == 0) {
         return -1.0f;
     }
-    void* sphere = *(void**)((char*)self + 0x60);
+    void* sphere = self->st;
     return *(float*)((char*)sphere + 0x20) * 2.0f;
 }
 #endif
@@ -4419,10 +4420,10 @@ extern "C" int cRiderSphereTree_IsTriCollision(void* tree, int a1, int a2, int a
  * @param outLen  receives the penetration depth (On Tour param)
  * @return nonzero on a collision, otherwise 0
  */
-extern "C" int cWorldRider_IsTriInt(void* self, int vertA, int vertB, int vertC, int n, int ipos, sSphereVec4* outDir, float* outLen)
+extern "C" int cWorldRider_IsTriInt(cWorldRider* self, int vertA, int vertB, int vertC, int n, int ipos, sSphereVec4* outDir, float* outLen)
 {
     sSphereVec4 overlap;
-    int result = cRiderSphereTree_IsTriCollision(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &overlap, ipos);
+    int result = cRiderSphereTree_IsTriCollision(self->st, vertA, vertB, vertC, n, &overlap, ipos);
     if (result != 0) {
         float len = sphereLength_32F8F0(overlap);
         *outLen = len;
@@ -4470,10 +4471,10 @@ extern "C" int cRiderSphereTree_Is2SidedTriCollision(void* tree, int a1, int a2,
  * @param outLen  receives the penetration depth (On Tour param)
  * @return nonzero on a collision, otherwise 0
  */
-extern "C" int cWorldRider_Is2SidedTriInt(void* self, int vertA, int vertB, int vertC, int n, int ipos, sSphereVec4* outDir, float* outLen)
+extern "C" int cWorldRider_Is2SidedTriInt(cWorldRider* self, int vertA, int vertB, int vertC, int n, int ipos, sSphereVec4* outDir, float* outLen)
 {
     sSphereVec4 overlap;
-    int result = cRiderSphereTree_Is2SidedTriCollision(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &overlap, ipos);
+    int result = cRiderSphereTree_Is2SidedTriCollision(self->st, vertA, vertB, vertC, n, &overlap, ipos);
     if (result != 0) {
         float len = sphereLength_32F990(overlap);
         *outLen = len;
@@ -4542,9 +4543,9 @@ extern "C" int bxSphereTree_IsRiderTreeCollision(void* a, void* tree, sSphereVec
  * @param hit  receives the intersection (On Tour tIntersectInfo* ti)
  * @return 1 on a hit, otherwise 0
  */
-extern "C" int cWorldRider_IsSphTreeInt(void* self, void* tree, sSphereHit_32FA30* hit)
+extern "C" int cWorldRider_IsSphTreeInt(cWorldRider* self, void* tree, sSphereHit_32FA30* hit)
 {
-    if (bxSphereTree_IsRiderTreeCollision(tree, *(void**)((char*)self + 0x60), &hit->dir, hit) != 0) {
+    if (bxSphereTree_IsRiderTreeCollision(tree, self->st, &hit->dir, hit) != 0) {
         float len = sphereLength_32FA30(hit->dir);
         hit->len = len;
         sphereDivEq_32FA30(hit->dir, len);
@@ -4612,9 +4613,9 @@ extern "C" int cRiderSphereTree_IsBoxCollision(void* tree, t3Vector* a1, t3Vecto
  * @param hit  receives the intersection (On Tour tIntersectInfo* ti); direction normalised, length stored
  * @return 1 on a hit (cRiderSphereTree_IsBoxCollision), otherwise 0
  */
-extern "C" int cWorldRider_IsBoxInt(void* self, void* bMin, void* bMax, sSphereHit_32FAC0* hit)
+extern "C" int cWorldRider_IsBoxInt(cWorldRider* self, void* bMin, void* bMax, sSphereHit_32FAC0* hit)
 {
-    if (cRiderSphereTree_IsBoxCollision(*(void**)((char*)self + 0x60), (t3Vector*)bMin, (t3Vector*)bMax, &hit->dir, hit) != 0) {
+    if (cRiderSphereTree_IsBoxCollision(self->st, (t3Vector*)bMin, (t3Vector*)bMax, &hit->dir, hit) != 0) {
         float len = sphereLength_32FAC0(hit->dir);
         hit->len = len;
         sphereDivEq_32FAC0(hit->dir, len);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/splashfx.h"
 #include "ai/riderhandler.h"
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
@@ -1892,9 +1893,9 @@ INCLUDE_ASM("seg/seg_1F1548", tCrystal_tCrystal);
  * @param crystal  the crystal (0x4C bytes)
  * @return the crystal
  */
-extern "C" void *tCrystal_tCrystal(void *crystal) {
-    (*(int *)((char*)(crystal) + (4))) = 0;
-    return crystal;
+extern "C" void *tCrystal_tCrystal(tCrystal* crystal) {
+    (crystal->mActive) = 0;
+    return ((void*)crystal);
 }
 #endif
 
@@ -2248,7 +2249,7 @@ extern int D_004A5528_3418 __asm__("D_004A5528");
  *
  * @param off  the screen offset added to the crystal position
  */
-extern "C" void tCrystal_render(sEm_3418* self, const sV2_3418* off)
+extern "C" void tCrystal_render(tCrystal* self, const sV2_3418* off)
 {
     if (D_004A5518_3418 == 0) {
         D_004A5510_3418 = 0.0f;
@@ -2260,12 +2261,12 @@ extern "C" void tCrystal_render(sEm_3418* self, const sV2_3418* off)
         D_004A5520_3418 = 1.0f;
         D_004A5524_3418 = 1.0f;
     }
-    float fade = self->f20 / self->f24;
-    sV4_3418 col = self->col;
+    float fade = self->mAge / self->mDeath;
+    sV4_3418 col = (*(sV4_3418*)&self->mColour[0]);
     fade = 1.0f - fade * fade;
     col.x *= fade;
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = ((sWorld_3418*)GrMan)->GetFB();
-    ((cGfx_3418*)cGraphicsMan_TheGraphicsMan)->DrawX((self->f38 + self->f20 / self->f24 * self->f3C) * 0.01745329424738884f, sPos_3418(self->f8 + off->x, self->fC + off->y), self->f10, *(sV2_3418*)&D_004A5510_3418, *(sV2_3418*)&D_004A5520_3418, col, 1);
+    ((cGfx_3418*)cGraphicsMan_TheGraphicsMan)->DrawX((self->mRotation + self->mAge / self->mDeath * self->mRotationChangeOverLifetime) * 0.01745329424738884f, sPos_3418(self->mPosition[0] + off->x, self->mPosition[1] + off->y), (*(sV3_3418*)&self->mSize[0]), *(sV2_3418*)&D_004A5510_3418, *(sV2_3418*)&D_004A5520_3418, col, 1);
 }
 #endif
 
@@ -2274,8 +2275,8 @@ INCLUDE_ASM("seg/seg_1F1548", cSplashManager_cSplashManager);
 #ifdef SKIP_ASM
 extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
 extern "C" int* tDrop_tDrop(int* arg0);
-extern "C" void* tCrystal_tCrystal(void* arg0);
-extern "C" void cSplashManager_reset(void* arg0);
+extern "C" void* tCrystal_tCrystal(tCrystal* arg0);
+extern "C" void cSplashManager_reset(cSplashManager* arg0);
 extern char cSplashManager_vtbl[];
 
 /**
@@ -2291,16 +2292,15 @@ extern char cSplashManager_vtbl[];
  * @return the constructed object (@p splashManager)
  */
 // Particle emitter constructor: builds the two 30-entry element pools and resets the emitter state.
-extern "C" void* cSplashManager_cSplashManager(void* splashManager, void* bucket, int viewIndex)
+extern "C" void* cSplashManager_cSplashManager(cSplashManager* splashManager, void* bucket, int viewIndex)
 {
-    char* self = (char*)splashManager;
-    cObjNode_cObjNode1(self, bucket);
-    *(int*)(self + 0x10) = viewIndex;
-    *(int*)(self + 0x14) = 0;
-    *(char**)(self + 0xC) = cSplashManager_vtbl;
-    *(int*)(self + 0x18) = 0;
+    cObjNode_cObjNode1(((char*)splashManager), bucket);
+    splashManager->mViewIndex = (unsigned int)viewIndex;
+    splashManager->mNumActiveDrops = 0;
+    splashManager->mVtbl = (void**)cSplashManager_vtbl;
+    splashManager->mNumActiveCrystals = 0;
     {
-        char* entry = self + 0x1C;
+        char* entry = ((char*)splashManager) + 0x1C;
         int i = 29;
         do {
             tDrop_tDrop((int*)entry);
@@ -2309,23 +2309,23 @@ extern "C" void* cSplashManager_cSplashManager(void* splashManager, void* bucket
         } while (i != -1);
     }
     {
-        char* entry = self + 0x724;
+        char* entry = ((char*)splashManager) + 0x724;
         int i = 29;
         do {
-            tCrystal_tCrystal(entry);
+            tCrystal_tCrystal((tCrystal*)entry);
             i--;
             entry += 0x4C;
         } while (i != -1);
     }
-    *(int*)(self + 0x100C) = 0;
-    *(int*)(self + 0x1010) = 0;
-    *(int*)(self + 0x1014) = 0;
-    *(int*)(self + 0x1018) = 0;
-    *(float*)(self + 0x101C) = 1.0f;
-    *(int*)(self + 0x1020) = 0;
-    *(int*)(self + 0x1024) = 0;
-    cSplashManager_reset(self);
-    return self;
+    splashManager->mLastCameraPositionValid = 0;
+    *(int*)&splashManager->mLastCameraPosition = 0;
+    *(int*)&splashManager->mLastCameraPosition.y = 0;
+    *(int*)&splashManager->mLastCameraPosition.z = 0;
+    splashManager->mLastCameraPosition.w = 1.0f;
+    *(int*)&splashManager->mLastCameraSpeed = 0;
+    *(int*)&splashManager->mNumSplashesToAdd = 0;
+    cSplashManager_reset(splashManager);
+    return ((char*)splashManager);
 }
 #endif
 
@@ -2341,8 +2341,8 @@ extern char cSplashManager_vtbl[];
  * The g++ delete flags arrive in the second argument register, which this body leaves untouched, so
  * cObjNode__cObjNode() receives them and frees the object when bit 0 is set.
  */
-extern "C" void cSplashManager__cSplashManager(void *self) {
-    *(char **)((char*)self + 0xC) = cSplashManager_vtbl;
+extern "C" void cSplashManager__cSplashManager(cSplashManager* self) {
+    self->mVtbl = (void**)cSplashManager_vtbl;
     cObjNode__cObjNode(self);
 }
 #endif
@@ -2393,18 +2393,18 @@ static inline float randRange_3640(float lo, float hi)
  * @param basePos  the group position
  * @param n  how many crystals to add
  */
-extern "C" void cSplashManager_AddCrystal(sEmit_3640* self, sVec2_3640* basePos, int n)
+extern "C" void cSplashManager_AddCrystal(cSplashManager* self, sVec2_3640* basePos, int n)
 {
     for (int i = 0; i < n; i++) {
-        if (self->count < D_004A4258) {
+        if (self->mNumActiveCrystals < D_004A4258) {
             sVec2_3640 off;
             off.x = randRange_3640(-D_004A42D0, D_004A42D0);
             off.y = randRange_3640(-D_004A42D4, D_004A42D4);
             sVec2_3640 pos;
             pos.x = basePos->x + off.x;
             pos.y = basePos->y + off.y;
-            tCrystal_init(&self->parts[self->count], &pos, i);
-            self->count++;
+            tCrystal_init(&((sPart_3640*)&self->mCrystalList[0])[self->mNumActiveCrystals], &pos, i);
+            self->mNumActiveCrystals++;
         }
     }
 }
@@ -2476,11 +2476,11 @@ static inline float randScaled_3810(float s)
  * size is BXrand() % (maximum - minimum), a division by zero when the two settings are equal. cSplashManager_update
  * calls it.
  */
-extern "C" void cSplashManager_AddSplashes(char* self)
+extern "C" void cSplashManager_AddSplashes(cSplashManager* self)
 {
-    float acc = *(float*)(self + 0x1024);
+    float acc = self->mNumSplashesToAdd;
     int n = (int)acc;
-    *(float*)(self + 0x1024) = acc - (float)n;
+    self->mNumSplashesToAdd = acc - (float)n;
     while (n > 0) {
         sVec2_3810 pos;
         pos.x = randScaled_3810(640.0f);
@@ -2490,12 +2490,12 @@ extern "C" void cSplashManager_AddSplashes(char* self)
             if (k <= 0)
                 k = 1;
             n -= k;
-            cSplashManager_AddCrystal_3810(self, &pos, k);
+            cSplashManager_AddCrystal_3810(((char*)self), &pos, k);
         } else {
             sVec2_3810 dropSize;
             dropSize.x = D_004A4298;
             dropSize.y = D_004A4298;
-            cSplashManager_AddDrop(self, &pos, &dropSize);
+            cSplashManager_AddDrop(((char*)self), &pos, &dropSize);
             n--;
         }
     }
@@ -2514,12 +2514,12 @@ INCLUDE_ASM("seg/seg_1F1548", cSplashManager_reset);
  *
  * @param splashManager  the splash manager (this)
  */
-extern "C" void cSplashManager_reset(void *splashManager) {
-    *(int *)((char*)splashManager + 0x100C) = 0;
-    *(int *)((char*)splashManager + 0x1024) = 0;
-    *(int *)((char*)splashManager + 0x14) = 0;
-    *(int *)((char*)splashManager + 0x18) = 0;
-    *(int *)((char*)splashManager + 0x1028) = 0;
+extern "C" void cSplashManager_reset(cSplashManager* splashManager) {
+    splashManager->mLastCameraPositionValid = 0;
+    *(int*)&splashManager->mNumSplashesToAdd = 0;
+    splashManager->mNumActiveDrops = 0;
+    splashManager->mNumActiveCrystals = 0;
+    *(int*)&splashManager->mLastSnowfallIntensity = 0;
 }
 #endif
 
@@ -2585,7 +2585,7 @@ struct sEmitter_39E0 : sVBase_39E0 {
     float speed;
 };
 
-extern "C" void cSplashManager_AddSplashes(char* self);
+extern "C" void cSplashManager_AddSplashes(cSplashManager* self);
 extern "C" void tDrop_update_39E0(sSmoke_39E0*, float) __asm__("tDrop_update");
 extern "C" void tCrystal_update_39E0(sPart_39E0*, float) __asm__("tCrystal_update");
 extern "C" void cSplashManager_AddDrop_39E0(void*, sV2_39E0*, sV2_39E0*) __asm__("cSplashManager_AddDrop");
@@ -2656,7 +2656,7 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
         self->speed = 0.0f;
     }
     self->prevPos = pos;
-    cSplashManager_AddSplashes((char*)self);
+    cSplashManager_AddSplashes((cSplashManager*)((char*)self));
 
     int i = 0;
     while (i < self->nSmoke) {
@@ -2965,14 +2965,14 @@ extern float D_004A427C;
  * @param impactPos  the impact position
  * @param speed  the impact strength (times 0.036, km/h)
  */
-extern "C" void cSplashManager_ReportImpactLocal(char* self, sV4_4260* impactPos, float speed)
+extern "C" void cSplashManager_ReportImpactLocal(cSplashManager* self, sV4_4260* impactPos, float speed)
 {
-    float k = 1.0f - Length_4260(Sub_4260(*(sV4_4260*)(self + 0x1010), *impactPos)) / D_004A4270;
-    if (k > 0.0f && *(float*)(self + 0x1028) > D_004A4278) {
+    float k = 1.0f - Length_4260(Sub_4260(*(sV4_4260*)&self->mLastCameraPosition, *impactPos)) / D_004A4270;
+    if (k > 0.0f && self->mLastSnowfallIntensity > D_004A4278) {
         float lo = D_004A4274;
         float impactRamp = (speed * 0.036f - lo) / (120.0f - lo);
         float impactWeight = (impactRamp >= 0.0f) ? (impactRamp <? 1.0f) : 0.0f;
-        *(float*)(self + 0x1024) += k * impactWeight * D_004A427C;
+        self->mNumSplashesToAdd += k * impactWeight * D_004A427C;
     }
 }
 #endif

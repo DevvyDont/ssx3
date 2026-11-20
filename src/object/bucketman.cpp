@@ -1,9 +1,6 @@
 #include "common.h"
+#include "object/bucketman.h"
 
-struct cBucketMan {
-    char pad_0x00[0x4];
-    char* mBuckets; // 0x4, element size 0x44
-};
 
 //100%
 INCLUDE_ASM("object/bucketman", cBucketMan_init);
@@ -55,19 +52,19 @@ struct sBucket_3549E0 {
  */
 extern "C" void cBucketMan_init(cBucketMan* self, int n)
 {
-    char** slot = &self->mBuckets;
+    char** slot = &(*(char**)&self->Buckets);
     *slot = (char*)new (str_Buckets, 0, 0) sBucket_3549E0[n];
     *(int*)self = n;
     for (int i = 0; i < *(int*)self; i++) {
-        ((sBucket_3549E0*)self->mBuckets)[i].l0.prev = &((sBucket_3549E0*)self->mBuckets)[i].l1;
-        ((sBucket_3549E0*)self->mBuckets)[i].l0.next = 0;
-        ((sBucket_3549E0*)self->mBuckets)[i].l1.prev = 0;
-        ((sBucket_3549E0*)self->mBuckets)[i].l1.next = &((sBucket_3549E0*)self->mBuckets)[i].l0;
-        ((sBucket_3549E0*)self->mBuckets)[i].l2.prev = &((sBucket_3549E0*)self->mBuckets)[i].l3;
-        ((sBucket_3549E0*)self->mBuckets)[i].l2.next = 0;
-        ((sBucket_3549E0*)self->mBuckets)[i].l3.prev = 0;
-        ((sBucket_3549E0*)self->mBuckets)[i].l3.next = &((sBucket_3549E0*)self->mBuckets)[i].l2;
-        ((sBucket_3549E0*)self->mBuckets)[i].flags = 0;
+        ((sBucket_3549E0*)((char*)self->Buckets))[i].l0.prev = &((sBucket_3549E0*)((char*)self->Buckets))[i].l1;
+        ((sBucket_3549E0*)((char*)self->Buckets))[i].l0.next = 0;
+        ((sBucket_3549E0*)((char*)self->Buckets))[i].l1.prev = 0;
+        ((sBucket_3549E0*)((char*)self->Buckets))[i].l1.next = &((sBucket_3549E0*)((char*)self->Buckets))[i].l0;
+        ((sBucket_3549E0*)((char*)self->Buckets))[i].l2.prev = &((sBucket_3549E0*)((char*)self->Buckets))[i].l3;
+        ((sBucket_3549E0*)((char*)self->Buckets))[i].l2.next = 0;
+        ((sBucket_3549E0*)((char*)self->Buckets))[i].l3.prev = 0;
+        ((sBucket_3549E0*)((char*)self->Buckets))[i].l3.next = &((sBucket_3549E0*)((char*)self->Buckets))[i].l2;
+        ((sBucket_3549E0*)((char*)self->Buckets))[i].flags = 0;
     }
 }
 #endif
@@ -91,19 +88,19 @@ extern "C" void cBucketMan_purge(cBucketMan* self)
     for (i = 0; i < *(int*)self; i++) {
         cBucketMan_purgeBucket(self, i);
     }
-    char* buckets = self->mBuckets;
+    char* buckets = ((char*)self->Buckets);
     if (buckets != 0) {
         char* bucket = buckets + ((int*)buckets)[-4] * 68;
-        while (self->mBuckets != bucket) {
+        while (((char*)self->Buckets) != bucket) {
             bucket -= 0x44;
             cObjNode__cObjNode(bucket + 0x34, 2);
             cObjNode__cObjNode(bucket + 0x24, 2);
             cObjNode__cObjNode(bucket + 0x14, 2);
             cObjNode__cObjNode(bucket + 0x4, 2);
         }
-        cMemMan_free(self->mBuckets - 0x10);
+        cMemMan_free(((char*)self->Buckets) - 0x10);
     }
-    self->mBuckets = 0;
+    (*(char**)&self->Buckets) = 0;
     *(int*)self = 0;
 }
 #endif
@@ -136,16 +133,16 @@ struct sBucketLists {
  */
 extern "C" void cBucketMan_add(cBucketMan* self, sBucketLink* node, int index)
 {
-    if (((sBucketLists*)self->mBuckets)[index].flags & 1) {
-        node->prev = ((sBucketLists*)self->mBuckets)[index].head1.prev;
-        ((sBucketLists*)self->mBuckets)[index].head1.prev->next = node;
-        node->next = (sBucketLink*)(self->mBuckets + index * 0x44 + 0x24);
-        ((sBucketLists*)self->mBuckets)[index].head1.prev = node;
+    if (((sBucketLists*)((char*)self->Buckets))[index].flags & 1) {
+        node->prev = ((sBucketLists*)((char*)self->Buckets))[index].head1.prev;
+        ((sBucketLists*)((char*)self->Buckets))[index].head1.prev->next = node;
+        node->next = (sBucketLink*)(((char*)self->Buckets) + index * 0x44 + 0x24);
+        ((sBucketLists*)((char*)self->Buckets))[index].head1.prev = node;
     } else {
-        node->prev = ((sBucketLists*)self->mBuckets)[index].head0.prev;
-        ((sBucketLists*)self->mBuckets)[index].head0.prev->next = node;
-        node->next = (sBucketLink*)(self->mBuckets + index * 0x44 + 0x4);
-        ((sBucketLists*)self->mBuckets)[index].head0.prev = node;
+        node->prev = ((sBucketLists*)((char*)self->Buckets))[index].head0.prev;
+        ((sBucketLists*)((char*)self->Buckets))[index].head0.prev->next = node;
+        node->next = (sBucketLink*)(((char*)self->Buckets) + index * 0x44 + 0x4);
+        ((sBucketLists*)((char*)self->Buckets))[index].head0.prev = node;
     }
 }
 #endif
@@ -233,10 +230,10 @@ extern "C" void cBucketMan_mergeBucket(cBucketMan* self, int index)
             }
         }
         if (other == 0) {
-            n->prev = ((sSortLists_4C98*)self->mBuckets)[index].head0.prev;
-            ((sSortLists_4C98*)self->mBuckets)[index].head0.prev->next = n;
-            n->next = (sSortNode_4C98*)(self->mBuckets + index * 0x44 + 0x4);
-            ((sSortLists_4C98*)self->mBuckets)[index].head0.prev = n;
+            n->prev = ((sSortLists_4C98*)((char*)self->Buckets))[index].head0.prev;
+            ((sSortLists_4C98*)((char*)self->Buckets))[index].head0.prev->next = n;
+            n->next = (sSortNode_4C98*)(((char*)self->Buckets) + index * 0x44 + 0x4);
+            ((sSortLists_4C98*)((char*)self->Buckets))[index].head0.prev = n;
         }
         n = nextN;
     }
@@ -300,7 +297,7 @@ INCLUDE_ASM("object/bucketman", cBucketMan_first__FP10cBucketMani);
 void* cBucketMan_first(cBucketMan* self, int index)
 {
     index *= 68;
-    index += (int)self->mBuckets;
+    index += (int)((char*)self->Buckets);
     void* head = *(void**)(index + 0x8);
     return (head == (void*)(index + 0x14)) ? 0 : head;
 }
@@ -322,7 +319,7 @@ INCLUDE_ASM("object/bucketman", cBucketMan_last);
 extern "C" void* cBucketMan_last(cBucketMan* self, int index)
 {
     index *= 68;
-    index += (int)self->mBuckets;
+    index += (int)((char*)self->Buckets);
     void* tail = *(void**)(index + 0x1C);
     return (tail == (void*)(index + 0x4)) ? 0 : tail;
 }
@@ -342,7 +339,7 @@ INCLUDE_ASM("object/bucketman", cBucketMan_next__FP10cBucketManPvi);
  */
 void* cBucketMan_next(cBucketMan* self, void* node, int index)
 {
-    char* bucket = self->mBuckets + index * 68;
+    char* bucket = ((char*)self->Buckets) + index * 68;
     void* next = *(void**)((char*)node + 0x4);
     return (next == (void*)(bucket + 0x14)) ? 0 : next;
 }
@@ -361,7 +358,7 @@ INCLUDE_ASM("object/bucketman", cBucketMan_prev);
 extern "C" void* cBucketMan_prev(cBucketMan* self, void* node, int index)
 {
     void* next = *(void**)((char*)node + 0x8);
-    return (next == (void*)(self->mBuckets + index * 0x44 + 0x4)) ? 0 : next;
+    return (next == (void*)(((char*)self->Buckets) + index * 0x44 + 0x4)) ? 0 : next;
 }
 #endif
 
@@ -380,7 +377,7 @@ INCLUDE_ASM("object/bucketman", cBucketMan_addfirst__FP10cBucketMani);
 void* cBucketMan_addfirst(cBucketMan* self, int index)
 {
     index *= 68;
-    index += (int)self->mBuckets;
+    index += (int)((char*)self->Buckets);
     void* head = *(void**)(index + 0x28);
     return (head == (void*)(index + 0x34)) ? 0 : head;
 }
@@ -399,7 +396,7 @@ INCLUDE_ASM("object/bucketman", cBucketMan_addnext);
 extern "C" void* cBucketMan_addnext(cBucketMan* self, void* node, int index)
 {
     void* next = *(void**)((char*)node + 0x4);
-    return (next == (void*)(self->mBuckets + index * 0x44 + 0x34)) ? 0 : next;
+    return (next == (void*)(((char*)self->Buckets) + index * 0x44 + 0x34)) ? 0 : next;
 }
 #endif
 
@@ -574,9 +571,9 @@ INCLUDE_ASM("object/bucketman", cBucketMan_setsortflag);
  *
  * @param bucket  the bucket index
  */
-extern "C" void cBucketMan_setsortflag(void* self, int bucket)
+extern "C" void cBucketMan_setsortflag(cBucketMan* self, int bucket)
 {
-    sBucketEntry* buckets = *(sBucketEntry**)((char*)self + 0x4);
+    sBucketEntry* buckets = (sBucketEntry*)self->Buckets;
     buckets[bucket].flags |= 1;
 }
 #endif

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/avalanche.h"
 #include "visualfx/transitionman.h"
 #include "bx/math3d.h"
 #include "visualfx/fog.h"
@@ -2334,11 +2335,11 @@ extern "C" void* cAvalanche_init(void* self);
  *
  * @return @p self
  */
-extern "C" void* cAvalanche_cAvalanche(void* self)
+extern "C" void* cAvalanche_cAvalanche(cAvalanche* self)
 {
     *(void***)self = cAvalanche_vtbl;
     cAvalanche_init(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 //100%

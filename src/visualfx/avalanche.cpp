@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/avalanche.h"
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -592,7 +593,7 @@ static inline int isBad_64D8(const float* f)
  *
  * @param velocity  the velocity, changed in place
  */
-extern "C" void tAvalancheNode_fixVelocity(void* self, sVec4_64D8* velocity)
+extern "C" void tAvalancheNode_fixVelocity(tAvalancheNode* self, sVec4_64D8* velocity)
 {
     if (D_004A3A94 < vLen_64D8(*velocity))
         *velocity = vScale_64D8(vNorm_64D8(*velocity), D_004A3A94);
@@ -625,28 +626,28 @@ struct sAvalancheData {
  *
  * @param currTime  time since the avalanche started, in seconds
  */
-extern "C" void tActiveAvalancheNode_calculateScale(void* self, float currTime)
+extern "C" void tActiveAvalancheNode_calculateScale(tActiveAvalancheNode* self, float currTime)
 {
-    sAvalancheData* avData = *(sAvalancheData**)((char*)self + 0x2E0);
+    sAvalancheData* avData = (sAvalancheData*)self->m_node;
     float x = currTime * 30.0f;
     if (x < avData->f104) {
-        *(float*)((char*)self + 0xB0) = 1.0f;
-        *(float*)((char*)self + 0xB4) = x / avData->f104;
+        self->m_objectScale = 1.0f;
+        self->m_emitterAlphaScale = x / avData->f104;
         return;
     }
     if (x < avData->f100 - avData->f108) {
-        *(float*)((char*)self + 0xB4) = 1.0f;
-        *(float*)((char*)self + 0xB0) = 1.0f;
+        self->m_emitterAlphaScale = 1.0f;
+        self->m_objectScale = 1.0f;
         return;
     }
     if (avData->type != 2) {
         float fadeOut = (avData->f100 - x) / avData->f108;
-        *(float*)((char*)self + 0xB4) = fadeOut;
-        *(float*)((char*)self + 0xB0) = fadeOut;
+        self->m_emitterAlphaScale = fadeOut;
+        self->m_objectScale = fadeOut;
         if (fadeOut > 0.0f) {
             // PORT: sqrt.s (sqrtf without errno check)
             __asm__("sqrt.s %0, %1" : "=f"(fadeOut) : "f"(fadeOut));
-            *(float*)((char*)self + 0xB0) = fadeOut;
+            self->m_objectScale = fadeOut;
         }
     }
 }
@@ -690,7 +691,7 @@ struct sAvNodeCA8 {
     sAvDataCA8* data;           // 0x2E0
 };
 
-extern "C" void tActiveAvalancheNode_end(void* self, int force);
+extern "C" void tActiveAvalancheNode_end(tActiveAvalancheNode* self, int force);
 extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
 extern sAvVec4CA8 D_004FF120_7CA8 __asm__("t4vect_Zero");
 
@@ -745,7 +746,7 @@ extern "C" int tActiveAvalancheNode_update(sAvNodeCA8* self, float currTime)
         return 1;
     }
     if (self->data->type == 2) return 1;
-    tActiveAvalancheNode_end(self, 0);
+    tActiveAvalancheNode_end((tActiveAvalancheNode*)self, 0);
     return 0;
 }
 #endif
@@ -770,9 +771,9 @@ struct sVEntry2D7DD8 {
  *
  * @param force  end even base type 2 nodes
  */
-extern "C" void tActiveAvalancheNode_end(void* self, int force)
+extern "C" void tActiveAvalancheNode_end(tActiveAvalancheNode* self, int force)
 {
-    char* avData = *(char**)((char*)self + 0x2E0);
+    char* avData = (char*)self->m_node;
     if (avData != 0 && (force != 0 || *(unsigned short*)(avData + 0xF0) != 2)) {
         char* inst = *(char**)(avData + 0xF8);
         if (inst != 0) {
@@ -782,8 +783,8 @@ extern "C" void tActiveAvalancheNode_end(void* self, int force)
                 vt[1].fn(obj + vt[1].delta, 3);
             }
         }
-        *(int*)(*(char**)((char*)self + 0x2E0) + 0x114) = 0;
-        *(char**)((char*)self + 0x2E0) = 0;
+        *(int*)((char*)self->m_node + 0x114) = 0;
+        self->m_node = 0;
         cDynamicColourEmitter_reset((char*)self + 0xD0);
     }
 }
@@ -801,11 +802,6 @@ struct tActiveAvalanche_node {
     tActiveAvalanche_node* next; // 0x2E4
 };
 
-struct tActiveAvalanche {
-    int unk0;
-    tActiveAvalanche_node* head;   // 0x4
-    tActiveAvalanche_node** array; // 0x8
-};
 
 /**
  * Builds an array of pointers to the active avalanche's nodes, in list order.
@@ -817,13 +813,13 @@ extern "C" void tActiveAvalanche_buildArray(tActiveAvalanche* self)
 {
     tActiveAvalanche_node* node;
     int n = 0;
-    for (node = self->head; node != 0; node = node->next) {
+    for (node = ((tActiveAvalanche_node*)self->m_activeNodeList); node != 0; node = node->next) {
         n++;
     }
-    self->array = (tActiveAvalanche_node**)operator_new_tag(n * 4, str_ActiveNodeArray, 0, 0);
+    (*(tActiveAvalanche_node***)&self->m_activeNodeArray) = (tActiveAvalanche_node**)operator_new_tag(n * 4, str_ActiveNodeArray, 0, 0);
     int i = 0;
-    for (node = self->head; node != 0; node = node->next) {
-        self->array[i++] = node;
+    for (node = ((tActiveAvalanche_node*)self->m_activeNodeList); node != 0; node = node->next) {
+        ((tActiveAvalanche_node**)self->m_activeNodeArray)[i++] = node;
     }
 }
 #endif
@@ -989,16 +985,16 @@ extern "C" void cSSXAudio_Avalanche(void* self, int a1);
  * tActiveAvalancheNode_end(node, 1), the running flag is cleared, the audio interface's avalanche sound is switched off
  * (cSSXAudio_Avalanche with 0) and the counter at +0x708 of the AI's +0xA8 object is decremented if non-zero.
  */
-extern "C" void tActiveAvalanche_end(void* self)
+extern "C" void tActiveAvalanche_end(tActiveAvalanche* self)
 {
-    if (*(void**)((char*)self + 0x8) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x8));
-        *(void**)((char*)self + 0x8) = 0;
+    if (self->m_activeNodeArray != 0) {
+        cMemMan_free(self->m_activeNodeArray);
+        self->m_activeNodeArray = 0;
     }
     if (*(int*)self != 0) {
-        char* n = *(char**)((char*)self + 0x4);
+        char* n = (char*)self->m_activeNodeList;
         while (n != 0) {
-            tActiveAvalancheNode_end(n, 1);
+            tActiveAvalancheNode_end((tActiveAvalancheNode*)n, 1);
             n = *(char**)(n + 0x2E4);
         }
         *(int*)self = 0;
@@ -1542,7 +1538,7 @@ static inline void SetBits_8A00(int& w, int mask, int shift, int v)
  *
  * @param nodep  the tActiveAvalancheNode; nothing happens without an avalanche node
  */
-extern "C" void tActiveAvalancheNode_renderLines(void* nodep)
+extern "C" void tActiveAvalancheNode_renderLines(tActiveAvalancheNode* nodep)
 {
     sNode_8A00* node = (sNode_8A00*)nodep;
     if (node->obj == 0) {
@@ -1580,7 +1576,7 @@ extern "C" void tActiveAvalancheNode_renderLines(void* nodep)
 INCLUDE_ASM("visualfx/avalanche", tActiveAvalanche_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void tActiveAvalancheNode_renderLines(void* node);
+extern "C" void tActiveAvalancheNode_renderLines(tActiveAvalancheNode* node);
 extern "C" void cDynamicColourEmitter_render(void* p, int a);
 extern int D_004A3A54;
 extern int D_004A3A58;
@@ -1724,7 +1720,7 @@ public:
  *
  * @param slotv  the tActiveAvalanche slot; nothing happens when it has no avalanche
  */
-extern "C" void tActiveAvalanche_render(void* slotv)
+extern "C" void tActiveAvalanche_render(tActiveAvalanche* slotv)
 {
     sAvSlot_D8EA8* slot = (sAvSlot_D8EA8*)slotv;
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
@@ -1734,7 +1730,7 @@ extern "C" void tActiveAvalanche_render(void* slotv)
     for (sAvActive_D8EA8* n = slot->active; n != 0; n = n->next, i++) {
         if (n->data) {
             if (i < D_004A3A58)
-                tActiveAvalancheNode_renderLines(n);
+                tActiveAvalancheNode_renderLines((tActiveAvalancheNode*)n);
             if (D_004A3A54 && ((unsigned char*)n->data)[0xF2])
                 cDynamicColourEmitter_render(n->fx, 7);
         }
@@ -1820,7 +1816,7 @@ struct sCam_9130 {
 };
 extern int D_004A41EC;
 extern sRState_9130 sDrawState_s_defaultDrawState;
-extern "C" void tActiveAvalanche_render(void* slot);
+extern "C" void tActiveAvalanche_render(tActiveAvalanche* slot);
 
 static inline sCam_9130* getCam_9130() { return (sCam_9130*)SSXApp->Game->ViewMan; }
 
@@ -1849,7 +1845,7 @@ extern "C" void cAvalanche_render(void)
         if (cAvalanche_m_Enable != 0)
         {
             for (int i = 0; i < 16; i++)
-                tActiveAvalanche_render(&cAvalanche_m_activeAvalanches[i]);
+                tActiveAvalanche_render((tActiveAvalanche*)(&cAvalanche_m_activeAvalanches[i]));
         }
         ((sRCtx_9130*)ctx)->top--;
     }
@@ -2030,9 +2026,9 @@ extern "C" void tAvalancheNode_calculate(void* node, void* self);
 /**
  * Runs tAvalancheNode_calculate() on every node of the avalanche, following each node's next link (+0xF4).
  */
-extern "C" void tAvalanche_calculate(void* self)
+extern "C" void tAvalanche_calculate(tAvalanche* self)
 {
-    void* n = *(void**)((char*)self + 0x4);
+    void* n = self->m_nodeList;
     while (n != 0) {
         tAvalancheNode_calculate(n, self);
         n = *(void**)((char*)n + 0xF4);
@@ -2052,9 +2048,9 @@ INCLUDE_ASM("visualfx/avalanche", tAvalanche_getNode);
  * @param id  the instance record to look for
  * @return the matching node, or 0
  */
-extern "C" void* tAvalanche_getNode(void* self, int id)
+extern "C" void* tAvalanche_getNode(tAvalanche* self, int id)
 {
-    for (void* n = *(void**)((char*)self + 0x4); n != 0; n = *(void**)((char*)n + 0xF4)) {
+    for (void* n = self->m_nodeList; n != 0; n = *(void**)((char*)n + 0xF4)) {
         if (*(int*)((char*)n + 0xF8) == id) {
             return n;
         }
@@ -2081,7 +2077,7 @@ extern "C" void cAvalanche_calculate(void)
 {
     cAvalanche_end();
     for (void* avalanche = cAvalanche_m_avalancheList; avalanche != 0; avalanche = *(void**)((char*)avalanche + 0x8)) {
-        tAvalanche_calculate(avalanche);
+        tAvalanche_calculate((tAvalanche*)avalanche);
     }
     cAvalanche_SaveData();
     cAvalanche_LoadData();
@@ -2134,7 +2130,7 @@ extern "C" float cRenderStateMan_SnowFlakeColourR(int a);
 extern "C" float cRenderStateMan_SnowFlakeColourG(int a);
 extern "C" float cRenderStateMan_SnowFlakeColourB(int a);
 extern "C" void cBaseClass_DynamicEmitter_setupEmitter(void* self, void* node, float k);
-extern "C" void tActiveAvalancheNode_calculateScale(void* self, float t);
+extern "C" void tActiveAvalancheNode_calculateScale(tActiveAvalancheNode* self, float t);
 
 extern "C" void cSSXAudio_Avalanche(void* self, int a1);
 extern void* cAvalanche_m_avalancheList;
@@ -2267,7 +2263,7 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
                         }
                         CopyMatrix_D97A8(&act->m70, &D_004FF1A0_D97A8);
                         act->scale = sVec_D97A8(1.0f, 1.0f, 1.0f, 1.0f);
-                        tActiveAvalancheNode_calculateScale(act, 0.0f);
+                        tActiveAvalancheNode_calculateScale((tActiveAvalancheNode*)act, 0.0f);
                         if (n->emit) {
                             cDynamicColourEmitter_reset(act->emitter);
                             cBaseClass_DynamicEmitter_setupEmitter(act->emitter, n, 2.0f);
@@ -2312,12 +2308,12 @@ struct cAvalanche_end_sSlot {
 extern cAvalanche_end_sSlot D_slots_9A80[] __asm__("cAvalanche_m_activeAvalanches");
 extern int cAvalanche_m_fileDataDeleteable;
 void cMemMan_free(void*);
-extern "C" void tActiveAvalanche_end(void* self);
+extern "C" void tActiveAvalanche_end(tActiveAvalanche* self);
 
 static inline void freeSlot_9A80(cAvalanche_end_sSlot* s)
 {
     if (s->active != 0) {
-        tActiveAvalanche_end(s);
+        tActiveAvalanche_end((tActiveAvalanche*)s);
     }
 }
 
@@ -2562,8 +2558,8 @@ struct sSlotRR {
 };
 extern sSlotRR D_slots_RR[] __asm__("cAvalanche_m_activeAvalanches");
 extern "C" int cAvalanche_triggerAvalanche(int id);
-extern "C" void tActiveAvalanche_end(void* slot);
-extern "C" void tActiveAvalancheNode_calculateScale(void* self, float t);
+extern "C" void tActiveAvalanche_end(tActiveAvalanche* slot);
+extern "C" void tActiveAvalancheNode_calculateScale(tActiveAvalancheNode* self, float t);
 sFrame_RR getFrameData_RR(void* self, float t) __asm__("tActiveAvalancheNode_getFrameData");
 
 static inline sSlotRR* slots_RR()
@@ -2574,7 +2570,7 @@ static inline sSlotRR* slots_RR()
 static inline void clearSlot_RR(sSlotRR* s)
 {
     if (s->group != 0) {
-        tActiveAvalanche_end(s);
+        tActiveAvalanche_end((tActiveAvalanche*)s);
     }
 }
 
@@ -2612,7 +2608,7 @@ extern "C" void cAvalanche_readFromReplayFrame(int* self)
                         if (*(unsigned char*)(activeNode->data + 0xF2) != 0) {
                             activeNode->f2EC = 1;
                         }
-                        tActiveAvalancheNode_calculateScale(activeNode, buf.times[i]);
+                        tActiveAvalancheNode_calculateScale((tActiveAvalancheNode*)activeNode, buf.times[i]);
                         getFrameData_RR(activeNode, slot->time);
                         activeNode = activeNode->next;
                     }

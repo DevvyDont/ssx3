@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2gridmesh.h"
 #include "render/irradiance.h"
 #include "render/playershadow.h"
 #include "render/particle.h"
@@ -11698,11 +11699,11 @@ extern void* cPS2GridMesh_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cPS2GridMesh__cPS2GridMesh(void* self, int flags)
+extern "C" void cPS2GridMesh__cPS2GridMesh(cPS2GridMesh* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = cPS2GridMesh_vtbl;
-    if (*(void**)((char*)self + 0x19C) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x19C));
+    self->mVtbl = cPS2GridMesh_vtbl;
+    if (self->m_pMem != 0) {
+        cMemMan_free(self->m_pMem);
     }
     cGridMesh__cGridMesh((int*)self, flags);
 }
@@ -11735,7 +11736,7 @@ struct sPtSurf52E8 {
 };
 
 struct sPartVec3;
-extern "C" void func_00385A38(void* self, short* out, int i, sPartVec3* v);
+extern "C" void func_00385A38(cPS2GridMesh* self, short* out, int i, sPartVec3* v);
 
 /**
  * Updates the mesh's vertex positions: writes them into the strips of the buffer not in use and marks the mesh updated.
@@ -11760,8 +11761,8 @@ extern "C" void cPS2GridMesh_Update(sPtSurf52E8* self, sPtVtx52E8* verts)
             sPtVtx52E8* lowerVert = &verts[next];
             sPtVtx52E8* upperVert = &verts[base];
             do {
-                func_00385A38(self, row->out, k, (sPartVec3*)upperVert);
-                func_00385A38(self, row->out, k + 1, (sPartVec3*)lowerVert);
+                func_00385A38((cPS2GridMesh*)self, row->out, k, (sPartVec3*)upperVert);
+                func_00385A38((cPS2GridMesh*)self, row->out, k + 1, (sPartVec3*)lowerVert);
                 k += 2;
                 upperVert++;
                 lowerVert++;
@@ -11801,7 +11802,7 @@ struct sPtSurf5410 {
     int rows;                   // 0x1BC
 };
 
-extern "C" void func_00385BA0(void* self, sShortUV* dst, int idx, float* src);
+extern "C" void func_00385BA0(cPS2GridMesh* self, sShortUV* dst, int idx, float* src);
 
 /**
  * Updates the mesh's texture coordinates: writes them into the strips of the buffer not in use and marks the mesh
@@ -11826,8 +11827,8 @@ extern "C" void cPS2GridMesh_Update1(sPtSurf5410* self, sPtUV5410* uvs)
             sPtUV5410* lowerUv = (sPtUV5410*)((next << 3) + (int)uvs);  // PORT: pointer in int
             sPtUV5410* upperUv = (sPtUV5410*)((base << 3) + (int)uvs);  // PORT: pointer in int
             do {
-                func_00385BA0(self, row->uv, k, (float*)upperUv);
-                func_00385BA0(self, row->uv, k + 1, (float*)lowerUv);
+                func_00385BA0((cPS2GridMesh*)self, row->uv, k, (float*)upperUv);
+                func_00385BA0((cPS2GridMesh*)self, row->uv, k + 1, (float*)lowerUv);
                 k += 2;
                 upperUv++;
                 lowerUv++;
@@ -11843,8 +11844,8 @@ extern "C" void cPS2GridMesh_Update1(sPtSurf5410* self, sPtUV5410* uvs)
 INCLUDE_ASM("render/particle", cPS2GridMesh_Update2);
 #ifdef SKIP_ASM
 struct sPartVec3;
-extern "C" void func_00385A38(void* self, short* out, int i, sPartVec3* v);
-extern "C" void func_00385AA0(void* self, unsigned short* buf, int idx, const float* c);
+extern "C" void func_00385A38(cPS2GridMesh* self, short* out, int i, sPartVec3* v);
+extern "C" void func_00385AA0(cPS2GridMesh* self, unsigned short* buf, int idx, const float* c);
 
 struct sPartPos5530 {
     float x, y, z;
@@ -11898,10 +11899,10 @@ extern "C" void cPS2GridMesh_Update2(sPartGrid5530* self, sPartPos5530* pos, sPa
             sPartCol5530* nextCol = (sPartCol5530*)((nextRowStart << 4) + (int)col);  // PORT: pointer in int
             sPartCol5530* curCol = (sPartCol5530*)((rowStart << 4) + (int)col);  // PORT: pointer in int
             do {
-                func_00385AA0(self, strip->col, k, curCol->c);
-                func_00385A38(self, strip->pos, k, (sPartVec3*)curPos);
-                func_00385AA0(self, strip->col, k + 1, nextCol->c);
-                func_00385A38(self, strip->pos, k + 1, (sPartVec3*)nextPos);
+                func_00385AA0((cPS2GridMesh*)self, strip->col, k, curCol->c);
+                func_00385A38((cPS2GridMesh*)self, strip->pos, k, (sPartVec3*)curPos);
+                func_00385AA0((cPS2GridMesh*)self, strip->col, k + 1, nextCol->c);
+                func_00385A38((cPS2GridMesh*)self, strip->pos, k + 1, (sPartVec3*)nextPos);
                 k += 2;
                 curPos++;
                 curCol++;
@@ -12025,9 +12026,9 @@ struct sPartVec3 {
  * @param i  the vertex index within the strip
  * @param src  the position
  */
-extern "C" void func_00385A38(void* self, short* out, int i, sPartVec3* src)
+extern "C" void func_00385A38(cPS2GridMesh* self, short* out, int i, sPartVec3* src)
 {
-    float scale = *(float*)((char*)self + 0x198);
+    float scale = self->unk_198;
     sPartVec3 scaled;
     scaled.x = src->x * scale;
     scaled.y = src->y * scale;
@@ -12061,7 +12062,7 @@ static inline float partClampf(float x, float lo, float hi)
  * @param idx  the vertex index within the strip
  * @param colour  the colour as a, r, g, b floats
  */
-extern "C" void func_00385AA0(void* self, unsigned short* buf, int idx, const float* colour)
+extern "C" void func_00385AA0(cPS2GridMesh* self, unsigned short* buf, int idx, const float* colour)
 {
     unsigned char red = (int)(partClampf(colour[1], 0.0f, 1.0f) * 32.0f);
     unsigned char green = (int)(partClampf(colour[2], 0.0f, 1.0f) * 32.0f);
@@ -12092,7 +12093,7 @@ struct sShortUV {
  * @param idx  the vertex index within the strip
  * @param src  the u, v floats
  */
-extern "C" void func_00385BA0(void* self, sShortUV* dst, int idx, float* src)
+extern "C" void func_00385BA0(cPS2GridMesh* self, sShortUV* dst, int idx, float* src)
 {
     dst[idx].u = (short)(src[0] * 4096.0f);
     dst[idx].v = (short)(src[1] * 4096.0f);
@@ -12125,9 +12126,9 @@ public:
  * @param materialBlock  the material record
  * @param texMatrix  passed on as cPS2GridMesh_Render1's last argument (a texture matrix, or 0)
  */
-extern "C" void cPS2GridMesh_Render(cPartVirt* self, int meshMatrix, void* materialBlock, int texMatrix)
+extern "C" void cPS2GridMesh_Render(cPS2GridMesh* self, int meshMatrix, void* materialBlock, int texMatrix)
 {
-    self->Render1(meshMatrix, **(short**)((char*)materialBlock + 4), texMatrix);
+    ((cPartVirt*)self)->Render1(meshMatrix, **(short**)((char*)materialBlock + 4), texMatrix);
 }
 #endif
 

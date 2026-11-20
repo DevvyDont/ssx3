@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/renderstateman.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
 #include "main/game.h"
@@ -592,7 +593,7 @@ struct sLensLerp_D1D0 {
  * @param targetB  the target for the colour at +0x38
  * @param full  nonzero to jump straight to the targets
  */
-extern "C" void tRenderState_blendToColour(sLensLerp_D1D0* self, const sLerpV4_D1D0* targetA, const sLerpV4_D1D0* targetB, int full)
+extern "C" void tRenderState_blendToColour(tRenderState* self, const sLerpV4_D1D0* targetA, const sLerpV4_D1D0* targetB, int full)
 {
     float weight = 0.8999999761581421f;
     float keep;
@@ -600,8 +601,8 @@ extern "C" void tRenderState_blendToColour(sLensLerp_D1D0* self, const sLerpV4_D
         weight = 1.0f;
     }
     keep = 1.0f - weight;
-    self->a = sLerpV4_D1D0(self->a.x * keep, self->a.y * keep, self->a.z * keep, self->a.w * keep) + *targetA * weight;
-    self->b = sLerpV4_D1D0(self->b.x * keep, self->b.y * keep, self->b.z * keep, self->b.w * keep) + *targetB * weight;
+    (*(sLerpV4_D1D0*)&self->m_colour[0]) = sLerpV4_D1D0(self->m_colour[0] * keep, self->m_colour[1] * keep, self->m_colour[2] * keep, self->m_colour[3] * keep) + *targetA * weight;
+    (*(sLerpV4_D1D0*)&self->m_lightMapColour[0]) = sLerpV4_D1D0(self->m_lightMapColour[0] * keep, self->m_lightMapColour[1] * keep, self->m_lightMapColour[2] * keep, self->m_lightMapColour[3] * keep) + *targetB * weight;
 }
 #endif
 
@@ -639,11 +640,11 @@ struct sLensLerp {
  * @param targetB  the target for the colour at +0x38
  * @param weight  the blend weight, 0..1
  */
-extern "C" void tRenderState_blendToColour1(sLensLerp* self, const sLerpV4* targetA, const sLerpV4* targetB, float weight)
+extern "C" void tRenderState_blendToColour1(tRenderState* self, const sLerpV4* targetA, const sLerpV4* targetB, float weight)
 {
     float keep = 1.0f - weight;
-    self->a = sLerpV4(self->a.x * keep, self->a.y * keep, self->a.z * keep, self->a.w * keep) + *targetA * weight;
-    self->b = sLerpV4(self->b.x * keep, self->b.y * keep, self->b.z * keep, self->b.w * keep) + *targetB * weight;
+    (*(sLerpV4*)&self->m_colour[0]) = sLerpV4(self->m_colour[0] * keep, self->m_colour[1] * keep, self->m_colour[2] * keep, self->m_colour[3] * keep) + *targetA * weight;
+    (*(sLerpV4*)&self->m_lightMapColour[0]) = sLerpV4(self->m_lightMapColour[0] * keep, self->m_lightMapColour[1] * keep, self->m_lightMapColour[2] * keep, self->m_lightMapColour[3] * keep) + *targetB * weight;
 }
 #endif
 

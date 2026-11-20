@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/flagset.h"
 #include "object/animnode.h"
 #include "object/fencenode.h"
 #include "ui/uithing.h"
@@ -11,7 +12,7 @@ INCLUDE_ASM("object/flagset", cFlagSet_CreateMesh);
 extern char* cGraphicsMan_TheGraphicsMan;
 extern char str_Flag_Verts[];
 unsigned int BXrand();
-extern "C" void cFlagSet_updateGrid(void* self, t3Vector* verts);
+extern "C" void cFlagSet_updateGrid(cFlagSet* self, t3Vector* verts);
 
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
@@ -98,7 +99,7 @@ struct sFlagElem_CM {
  * @param flagSet  the flag set
  * @param item  the flag's instance record (On Tour tInstanceRecord* pInst)
  */
-extern "C" void cFlagSet_CreateMesh(void* flagSet, void* item)
+extern "C" void cFlagSet_CreateMesh(cFlagSet* flagSet, void* item)
 {
     sFlagElem_CM* self = (sFlagElem_CM*)flagSet;
     int i;
@@ -147,7 +148,7 @@ extern "C" void cFlagSet_CreateMesh(void* flagSet, void* item)
         }
     }
     sFsV3_CM verts[50];
-    cFlagSet_updateGrid(self, (t3Vector*)verts);
+    cFlagSet_updateGrid((cFlagSet*)self, (t3Vector*)verts);
     sFsMesh_CM* flagMesh = self->mesh;
     flagMesh->vt[6].fn((char*)flagMesh + flagMesh->vt[6].delta, verts, col, uv);
 }
@@ -171,20 +172,19 @@ struct sFlagSetVEntryB7B8 {
  * Releases the grid mesh (+0x60) through graphics-manager slot 77 and frees the vertex array (+0x74) with cMemMan_free,
  * nulling each pointer.
  */
-extern "C" void cFlagSet_PurgeMesh(void* self)
+extern "C" void cFlagSet_PurgeMesh(cFlagSet* self)
 {
-    char* flagSet = (char*)self;
-    void* mesh = *(void**)(flagSet + 0x60);
+    void* mesh = self->mGridMesh;
     if (mesh != 0) {
         char* mgr = cGraphicsMan_TheGraphicsMan;
         sFlagSetVEntryB7B8* vt = *(sFlagSetVEntryB7B8**)(mgr + 0x10D8);
         vt[77].fn(mgr + vt[77].delta, mesh);
-        *(void**)(flagSet + 0x60) = 0;
+        self->mGridMesh = 0;
     }
-    void* verts = *(void**)(flagSet + 0x74);
+    void* verts = self->mVerts;
     if (verts != 0) {
         cMemMan_free(verts);
-        *(void**)(flagSet + 0x74) = 0;
+        self->mVerts = 0;
     }
 }
 #endif
@@ -195,7 +195,7 @@ INCLUDE_ASM("object/flagset", cFlagSet_update);
 extern int D_004A4240;
 extern "C" void* cObjectInterface_getFlagManager();
 extern "C" int cObjectInterface_getAITick();
-extern "C" void cFlagSet_updateGrid(void* self, t3Vector* verts);
+extern "C" void cFlagSet_updateGrid(cFlagSet* self, t3Vector* verts);
 
 struct sFlagVert_B818 {
     float x, y, z;
@@ -242,7 +242,7 @@ struct sFlagElem_B818 {
  *
  * @param elem  the flag set
  */
-extern "C" void cFlagSet_update(void* elem)
+extern "C" void cFlagSet_update(cFlagSet* elem)
 {
     sFlagElem_B818* self = (sFlagElem_B818*)elem;
     if (D_004A4240 == 0) {
@@ -266,7 +266,7 @@ extern "C" void cFlagSet_update(void* elem)
     }
     if (cObjectInterface_getAITick() % 2 == self->parity) {
         sFlagVert_B818 verts[50];
-        cFlagSet_updateGrid(self, (t3Vector*)verts);
+        cFlagSet_updateGrid((cFlagSet*)self, (t3Vector*)verts);
         sFlagMesh_B818* gridMesh = self->mesh;
         sFlagVEntry_B818* setVertsSlot = &gridMesh->vt[3];
         setVertsSlot->fn((char*)gridMesh + setVertsSlot->delta, verts);
@@ -382,24 +382,23 @@ struct sFSE_34B9B0 {
  *
  * @param flagSet  the flag set
  */
-extern "C" void cFlagSet_render(sFlagSetEntry* flagSet)
+extern "C" void cFlagSet_render(cFlagSet* flagSet)
 {
-    char* self = (char*)flagSet;
     if (D_004A4244 == 0) {
         return;
     }
     char* ctx = cGraphicsMan_TheGraphicsMan;
     TOP_34B9B0(ctx)[1] = TOP_34B9B0(ctx)[0];
     *++TOP_34B9B0(ctx) = sDrawState_s_defaultDrawState;
-    if (*(signed char*)(self + 3) != 0) {
+    if (*(signed char*)&flagSet->mFlagData.mOverSaturate != 0) {
         SetF0_12_34B9B0(TOP_34B9B0(cGraphicsMan_TheGraphicsMan), 0xFF);
         SetF4_2_34B9B0(TOP_34B9B0(cGraphicsMan_TheGraphicsMan), 11);
     } else {
         SetF4_2_34B9B0(TOP_34B9B0(ctx), 5);
     }
     float one = 1.0f;
-    for (int i = 0; i < *(int*)(self + 0x5C); i++) {
-        sModel_34B9B0* instRecord = ((sFSE_34B9B0*)self)->models[i];
+    for (int i = 0; i < flagSet->mCurrentNumInstances; i++) {
+        sModel_34B9B0* instRecord = ((sFSE_34B9B0*)flagSet)->models[i];
         if (!IsLoaded_34B9B0(instRecord)) {
             continue;
         }
@@ -419,9 +418,9 @@ extern "C" void cFlagSet_render(sFlagSetEntry* flagSet)
             char* pos = (char*)instRecord + 0x10;
             sMat_34B9B0 mat;
             MatCopy_34B9B0(&mat, (sMat_34B9B0*)t4mat_Identity);
-            mat.r[3].x = *(float*)(self + 0x88);
-            mat.r[3].y = *(float*)(self + 0x8C);
-            char* gridMesh = *(char**)(self + 0x60);
+            mat.r[3].x = flagSet->mScrollU;
+            mat.r[3].y = flagSet->mScrollV;
+            char* gridMesh = (char*)flagSet->mGridMesh;
             if (gridMesh != 0) {
                 sVE7_34B9B0* hv = *(sVE7_34B9B0**)(gridMesh + 4);
                 hv[7].fn(gridMesh + hv[7].delta, pos, *(void**)((char*)instRecord + 0x94), &mat);
@@ -492,7 +491,7 @@ struct sFlagElem_BCA0 {
  * @param vout  output vertex array (cols * rows t3Vectors)
  */
 // cFlagSet::updateGrid(t3Vector* verts) (SSX On Tour symbols). Animates the flag mesh: waves along the columns, then per-vertex ripples, into out[cols * rows].
-extern "C" void cFlagSet_updateGrid(void* vself, t3Vector* vout)
+extern "C" void cFlagSet_updateGrid(cFlagSet* vself, t3Vector* vout)
 {
     sFlagElem_BCA0* self = (sFlagElem_BCA0*)vself;
     sFsV3_CM* out = (sFsV3_CM*)vout;
@@ -622,7 +621,7 @@ struct sFlagSet_C2E0 {
  * @param elem  the flag set
  * @param stream  replay stream to write to
  */
-extern "C" void cFlagSet_writeToReplayFrame(void* elem, void* stream)
+extern "C" void cFlagSet_writeToReplayFrame(cFlagSet* elem, void* stream)
 {
     int i;
     sFlagSet_C2E0* self = (sFlagSet_C2E0*)elem;
@@ -650,7 +649,7 @@ struct sFlagSetVEntryC378b {
     void* (*fn)(void*);
 };
 
-extern "C" void cFlagSet_CreateMesh(void* self, void* item);
+extern "C" void cFlagSet_CreateMesh(cFlagSet* self, void* item);
 
 /**
  * Reads a flag set back from a replay frame.
@@ -662,7 +661,7 @@ extern "C" void cFlagSet_CreateMesh(void* self, void* item);
  * @param elem  the flag set
  * @param stream  replay stream to read from
  */
-extern "C" void cFlagSet_readFromReplayFrame(void* elem, void* stream)
+extern "C" void cFlagSet_readFromReplayFrame(cFlagSet* elem, void* stream)
 {
     int i;
     sFlagSet_C2E0* self = (sFlagSet_C2E0*)elem;
@@ -673,7 +672,7 @@ extern "C" void cFlagSet_readFromReplayFrame(void* elem, void* stream)
         self->items[i] = readItemFn->fn((char*)stream + readItemFn->delta);
     }
     if (self->count > 0) {
-        cFlagSet_CreateMesh(self, self->items[0]);
+        cFlagSet_CreateMesh((cFlagSet*)self, self->items[0]);
     }
 }
 #endif
@@ -866,7 +865,7 @@ struct sFlagSet_C668 {
 };
 
 extern "C" int cObjectInterface_getPeakNumber();
-extern "C" void cFlagSet_update(void* elem);
+extern "C" void cFlagSet_update(cFlagSet* elem);
 unsigned int BXrand();
 extern char* cAppMan_TheAppMan;
 
@@ -919,7 +918,7 @@ extern "C" void cFlagManager_update(sFlagSet_C668* self)
     for (i = 0; i < 15; i++) {
         sFlagSetElem_C668* entry = &self->elems[i];
         if (entry->active != 0) {
-            cFlagSet_update(entry);
+            cFlagSet_update((cFlagSet*)entry);
         }
     }
 }
@@ -939,7 +938,7 @@ struct sFlagSetOwner {
     sFlagSetEntry entries[15]; // 0x20
 };
 
-extern "C" void cFlagSet_render(sFlagSetEntry* e);
+extern "C" void cFlagSet_render(cFlagSet* e);
 
 /**
  * Renders every active flag set held by the flag manager.
@@ -952,7 +951,7 @@ extern "C" void cFlagManager_render(sFlagSetOwner* self)
     for (i = 0; i < 15; i++) {
         sFlagSetEntry* entry = &self->entries[i];
         if (entry->active != 0) {
-            cFlagSet_render(entry);
+            cFlagSet_render((cFlagSet*)entry);
         }
     }
 }
@@ -970,7 +969,7 @@ struct sFlagSet_C848 {
     sFlagSetElem_C848 elems[15]; // 0x20
 };
 
-extern "C" void cFlagSet_writeToReplayFrame(void* elem, void* arg);
+extern "C" void cFlagSet_writeToReplayFrame(cFlagSet* elem, void* arg);
 
 /**
  * Saves the flag manager's flags into a replay frame.
@@ -984,7 +983,7 @@ extern "C" void cFlagManager_writeToReplayFrame(sFlagSet_C848* self, void* strea
 {
     int i;
     for (i = 0; i < 15; i++) {
-        cFlagSet_writeToReplayFrame(&self->elems[i], stream);
+        cFlagSet_writeToReplayFrame((cFlagSet*)(&self->elems[i]), stream);
     }
 }
 #endif
@@ -1001,7 +1000,7 @@ struct sFlagSet_C898 {
     sFlagSetElem_C898 elems[15]; // 0x20
 };
 
-extern "C" void cFlagSet_readFromReplayFrame(void* elem, void* arg);
+extern "C" void cFlagSet_readFromReplayFrame(cFlagSet* elem, void* arg);
 
 /**
  * Restores the flag manager's flags from a replay frame.
@@ -1014,7 +1013,7 @@ extern "C" void cFlagManager_readFromReplayFrame(sFlagSet_C898* self, void* stre
 {
     int i;
     for (i = 0; i < 15; i++) {
-        cFlagSet_readFromReplayFrame(&self->elems[i], stream);
+        cFlagSet_readFromReplayFrame((cFlagSet*)(&self->elems[i]), stream);
     }
 }
 #endif

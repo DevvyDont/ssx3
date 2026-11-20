@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/ps2gridmesh.h"
 #include "render/particle.h"
 #include "render/graphicsman.h"
 #include "render/ps2bezierman.h"
@@ -5337,10 +5338,10 @@ INCLUDE_ASM("render/font", cPS2GridMesh_SetScale);
  *
  * @param range  the scale / range value
  */
-extern "C" void cPS2GridMesh_SetScale(void* self, float range)
+extern "C" void cPS2GridMesh_SetScale(cPS2GridMesh* self, float range)
 {
-    *(float*)((char*)self + 0x194) = range;
-    *(float*)((char*)self + 0x198) = 32767.0f / range;
+    self->unk_194 = range;
+    self->unk_198 = 32767.0f / range;
 }
 #endif
 

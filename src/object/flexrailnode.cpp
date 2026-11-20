@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/flagset.h"
 #include "object/flagnode.h"
 #include "object/springrailnode.h"
 #include "object/floatrailnode.h"
@@ -1914,7 +1915,7 @@ struct sFlexRail_AF38 {
  *
  * @return self
  */
-extern "C" void* cFlagSet_cFlagSet(void* self)
+extern "C" void* cFlagSet_cFlagSet(cFlagSet* self)
 {
     sFlexRail_AF38* flagSet = (sFlexRail_AF38*)self;
     int i;
@@ -1931,7 +1932,7 @@ extern "C" void* cFlagSet_cFlagSet(void* self)
     if (D_004A4010 >= 2) {
         D_004A4010 = 0;
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1946,9 +1947,9 @@ void operator_delete(int*);
  *
  * @param flags  destructor flags
  */
-extern "C" void cFlagSet__cFlagSet(void* self, int flags)
+extern "C" void cFlagSet__cFlagSet(cFlagSet* self, int flags)
 {
-    *(void***)((char*)self + 0x184) = cFlagSet_vtbl;
+    self->mVtbl = cFlagSet_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1970,12 +1971,12 @@ extern "C" int func_00415FC8(const void* a, const void* b, int n);
  * @param ctx  instance record of the new flag
  * @return 1 if the flag can join this set, else 0
  */
-extern "C" int cFlagSet_SameKind(void* self, void* data, void* ctx)
+extern "C" int cFlagSet_SameKind(cFlagSet* self, void* data, void* ctx)
 {
-    if (*(int*)((char*)self + 0x5C) == 0) {
+    if (self->mCurrentNumInstances == 0) {
         return 0;
     }
-    if (**(int**)((char*)ctx + 0x80) != *(int*)((char*)self + 0x58)) {
+    if (**(int**)((char*)ctx + 0x80) != self->mModelID) {
         return 0;
     }
     return func_00415FC8(data, self, 88) == 0;

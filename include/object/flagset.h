@@ -1,0 +1,109 @@
+#ifndef OBJECT_FLAGSET_H
+#define OBJECT_FLAGSET_H
+
+// cFlagSet: one set of cloth flags that share a model and wind parameters: up to 60 instances (tInstanceRecord) drawn
+// with one grid mesh whose vertices updateGrid animates from the set's sine-wave parameters (tFlagState) and the
+// manager's wind. cFlagManager (a cObjNode; cGame_getFlagManager) holds 15 of them at +0x20 (stride 0x188) and routes
+// cFlagNode's AddFlag / RemoveFlag to a set of the same kind. EA's source: d:/ssx/code/source/object/flagnode.cpp
+// (the preview's asserts "A flag set has to be empty before you can destroy it", "mGridMesh==NULL", "mVerts==NULL",
+// "SameKind(tData,pInst)", "mFlagVertsHorizontal < kMaxVerticiesHorizontal",
+// "mInstances[i]->m_Model.m_pModel->m_RID == mModelID" follow that path); EA's header is likely flagnode.h - this one
+// is named after the splat unit (the cFlagNode staging already uses object/flagnode.h; merge if wanted).
+// Retail: splat units object/flexrailnode (tFlagState_tFlagState 0x0034AC88 .. cFlagSet_RemoveFlag 0x0034B168),
+// object/flagset (CreateMesh 0x0034B228 .. readFromReplayFrame 0x0034C378, then cFlagManager) and the inline
+// cFlagSet_Empty in object/railmodifier (0x00361750).
+//
+// Size 0x188: [R] cFlagManager_cFlagManager constructs 15 cFlagSet from +0x20 with stride 0x188; [O] On Tour's
+// cFlagSet is 0x188 with the same member offsets (no bools; t3Vector is 12 bytes in both).
+// Base: tFlagSetState (0x60, On Tour struct; the ctor runs tFlagSetState_tFlagSetState(this) first), written out
+// inline; it holds the set's tFlagState (0x58) and model id. cFlagSet declares the first virtual (~cFlagSet), so its
+// vptr follows its own data: mVtbl at 0x184 = cFlagSet_vtbl (D_0048FBF8, 1 slot: the dtor).
+// tFlagState (0x58) is also built on the stack by cFlagNode's ctor and copied into a set by AddFlag.
+//
+// A FLAT layout, like main/game.h. Tags: [R] retail ctors (cFlagSet_cFlagSet, tFlagSetState_tFlagSetState,
+// tFlagState_tFlagState), the dtor, the allocations; [P] member names in the preview's assert strings (above) and the
+// out-of-line inline Empty__8cFlagSet; [U] how retail code uses the field; [O] SSX On Tour's DWARF (tFlagState,
+// tFlagSetState, cFlagSet, cFlagManager: member names, order and the same offsets). t3Vector members are float[3].
+
+#include "layout.h"
+
+struct cGridMesh;          // render/ps2gridmesh.h (the mesh is a cPS2GridMesh)
+struct tInstanceRecord;
+
+// A flag set's animation parameters (On Tour struct tFlagState, 0x58).
+struct tFlagState {
+    char mBaseSideHeld;             // 0x000 [O]; [R] tFlagState_tFlagState (sb); [U] updateGrid (lb; also one lhu over
+                                    //       0x0-0x1 testing both flags at once)
+    char mOppositeSideHeld;         // 0x001 [O]; [R] (sb); [U] updateGrid
+    char mPerpSideHeld;             // 0x002 [O]; [R] (sb); [U] updateGrid
+    char mOverSaturate;             // 0x003 [O]; [R] (sb); [U] render (lb)
+    float mSpeed[4];                // 0x004 [O]; [R] (swc1 x4); [U] updateGrid
+    float mMagnitude[4];            // 0x014 [O]; [R]; [U] updateGrid; CreateMesh sizes the grid from [2], [3]
+    float mFrequency[4];            // 0x024 [O]; [R]; [U] updateGrid
+    float mLowWindMovement[3];      // 0x034 [O] t3Vector; [R]; [U] updateGrid
+    float mHighWindMovement[3];     // 0x040 [O] t3Vector; [R]; [U] updateGrid
+    float mMinWindFactor;           // 0x04C [O]; [R]; [U] updateGrid
+    float mUScrollRate;             // 0x050 [O]; [R]; [U] update
+    float mVScrollRate;             // 0x054 [O]; [R]; [U] update
+};
+
+CHECK_OFFSET(tFlagState, mBaseSideHeld, 0x000);
+CHECK_OFFSET(tFlagState, mOppositeSideHeld, 0x001);
+CHECK_OFFSET(tFlagState, mPerpSideHeld, 0x002);
+CHECK_OFFSET(tFlagState, mOverSaturate, 0x003);
+CHECK_OFFSET(tFlagState, mSpeed, 0x004);
+CHECK_OFFSET(tFlagState, mMagnitude, 0x014);
+CHECK_OFFSET(tFlagState, mFrequency, 0x024);
+CHECK_OFFSET(tFlagState, mLowWindMovement, 0x034);
+CHECK_OFFSET(tFlagState, mHighWindMovement, 0x040);
+CHECK_OFFSET(tFlagState, mMinWindFactor, 0x04C);
+CHECK_OFFSET(tFlagState, mUScrollRate, 0x050);
+CHECK_OFFSET(tFlagState, mVScrollRate, 0x054);
+CHECK_SIZE(tFlagState, 0x058);
+
+struct cFlagSet {
+    // --- tFlagSetState (On Tour struct, 0x60)
+    tFlagState mFlagData;           // 0x000 [O]; [U] AddFlag copies the caller's tFlagState into it (ldl/ldr, 0x58
+                                    //       bytes); SameKind compares it; update / render / updateGrid / CreateMesh read it
+    int mModelID;                   // 0x058 [O] tResourceID; [P] assert "...m_RID == mModelID"; [R] tFlagSetState
+                                    //       ctor: -1; [U] SameKind, AddFlag, RemoveFlag
+    int mCurrentNumInstances;       // 0x05C [O]; [R] tFlagSetState ctor: 0; [P] Empty__8cFlagSet; [U] Empty, AddFlag,
+                                    //       RemoveFlag, update, render, write/readFromReplayFrame
+    // --- cFlagSet
+    cGridMesh* mGridMesh;           // 0x060 [O]; [P] assert "mGridMesh==NULL"; [R] ctor: 0; [U] CreateMesh:
+                                    //       GrMan->CreateGridMesh(horizontal, vertical, ...); PurgeMesh; render
+    int mFlagVertsHorizontal;       // 0x064 [O]; [P] assert "mFlagVertsHorizontal < kMaxVerticiesHorizontal"; [U]
+                                    //       CreateMesh, updateGrid
+    int mFlagVertsVertical;         // 0x068 [O]; [P] assert; [U] CreateMesh, updateGrid
+    float mfFlagVertsHorizontalMinusOne; // 0x06C [O]; [U] CreateMesh (swc1), updateGrid
+    float mfFlagVertsVerticalMinusOne;   // 0x070 [O]; [U] CreateMesh, updateGrid
+    float* mVerts;                  // 0x074 [O] t3Vector*; [P] assert "mVerts==NULL"; [R] ctor: 0; [U] CreateMesh:
+                                    //       operator new[](h * v * 0xC, "Flag Verts"); PurgeMesh frees it; updateGrid
+    float mFlagTime[4];             // 0x078 [O]; [U] CreateMesh randomizes (BXrand), updateGrid
+    float mScrollU;                 // 0x088 [O]; [U] CreateMesh zeroes; update advances; render (lwc1)
+    float mScrollV;                 // 0x08C [O]; [U] ditto
+    int mFrameToUpdateGrid;         // 0x090 [O]; [R] ctor: the static counter mgFrameToUpdateGridCounter (D_004A4010,
+                                    //       cycles 0..1)
+    tInstanceRecord* mInstances[60]; // 0x094 [O]; [P] assert "mInstances[i]->m_Model..."; [R] ctor zeroes 60 words
+                                    //       (0x180 down to 0x94); [U] AddFlag / RemoveFlag / render / replay
+    void** mVtbl;                   // 0x184 [R] cFlagSet_cFlagSet and __cFlagSet store cFlagSet_vtbl (D_0048FBF8)
+};
+
+CHECK_OFFSET(cFlagSet, mFlagData, 0x000);
+CHECK_OFFSET(cFlagSet, mModelID, 0x058);
+CHECK_OFFSET(cFlagSet, mCurrentNumInstances, 0x05C);
+CHECK_OFFSET(cFlagSet, mGridMesh, 0x060);
+CHECK_OFFSET(cFlagSet, mFlagVertsHorizontal, 0x064);
+CHECK_OFFSET(cFlagSet, mFlagVertsVertical, 0x068);
+CHECK_OFFSET(cFlagSet, mfFlagVertsHorizontalMinusOne, 0x06C);
+CHECK_OFFSET(cFlagSet, mfFlagVertsVerticalMinusOne, 0x070);
+CHECK_OFFSET(cFlagSet, mVerts, 0x074);
+CHECK_OFFSET(cFlagSet, mFlagTime, 0x078);
+CHECK_OFFSET(cFlagSet, mScrollU, 0x088);
+CHECK_OFFSET(cFlagSet, mScrollV, 0x08C);
+CHECK_OFFSET(cFlagSet, mFrameToUpdateGrid, 0x090);
+CHECK_OFFSET(cFlagSet, mInstances, 0x094);
+CHECK_OFFSET(cFlagSet, mVtbl, 0x184);
+CHECK_SIZE(cFlagSet, 0x188);
+
+#endif /* OBJECT_FLAGSET_H */

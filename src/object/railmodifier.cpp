@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/flagset.h"
 #include "object/animteeternode.h"
 #include "object/springrailnode.h"
 #include "object/floatrailnode.h"
@@ -6432,8 +6433,8 @@ INCLUDE_ASM("object/railmodifier", cFlagSet_Empty);
  * @param flagSet  the flag set
  * @return 1 if empty, else 0
  */
-extern "C" int cFlagSet_Empty(void *flagSet) {
-    return (*(int *)((char*)(flagSet) + (0x5C))) == 0;
+extern "C" int cFlagSet_Empty(cFlagSet* flagSet) {
+    return (flagSet->mCurrentNumInstances) == 0;
 }
 #endif
 //100%

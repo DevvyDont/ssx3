@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/avalanche.h"
 #include "ai/riderhandler.h"
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
@@ -493,11 +494,11 @@ INCLUDE_ASM("visualfx/angerfx", tAvalanchePackedFrameData_setPositionOffset);
  * @param green  value for byte 1
  * @param blue  value for byte 2
  */
-extern "C" void tAvalanchePackedFrameData_setPositionOffset(unsigned char* rgb, float red, float green, float blue)
+extern "C" void tAvalanchePackedFrameData_setPositionOffset(tAvalanchePackedFrameData* rgb, float red, float green, float blue)
 {
-    rgb[0] = (int)red;
-    rgb[1] = (int)green;
-    rgb[2] = (int)blue;
+    ((char*)rgb)[0] = (int)red;
+    ((char*)rgb)[1] = (int)green;
+    ((char*)rgb)[2] = (int)blue;
 }
 #endif
 
@@ -518,7 +519,7 @@ extern float D_004A3A38;
  * @param blue  blue
  */
 // PORT: <? (g++ min operator)
-extern "C" void tAvalanchePackedFrameData_setColour(unsigned char* record, float red, float green, float blue)
+extern "C" void tAvalanchePackedFrameData_setColour(tAvalanchePackedFrameData* record, float red, float green, float blue)
 {
     float zero = 0.0f;
     float one = 1.0f;
@@ -529,9 +530,9 @@ extern "C" void tAvalanchePackedFrameData_setColour(unsigned char* record, float
     if (red >= zero) cr = red <? one; else cr = zero;
     if (green >= zero) cg = green <? one; else cg = zero;
     if (blue >= zero) cb = blue <? one; else cb = zero;
-    record[3] = (int)(cr * 255.0f);
-    record[4] = (int)(cg * 255.0f);
-    record[5] = (int)(cb * 255.0f);
+    ((char*)record)[3] = (int)(cr * 255.0f);
+    ((char*)record)[4] = (int)(cg * 255.0f);
+    ((char*)record)[5] = (int)(cb * 255.0f);
 }
 #endif
 
