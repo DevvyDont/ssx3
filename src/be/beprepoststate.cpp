@@ -434,17 +434,17 @@ extern "C" void func_00156858(char* dst, char* src)
 {
     int i;
     for (i = 0; i < 10; i++) {
-        char* d = dst + i * 3976;
-        short* index = ((sProfile_156858*)d)->index;
-        MEM_copy(d, src + i * 3976, 3976);
-        ((sProfile_156858*)d)->index = index;
+        char* charRecord = dst + i * 3976;
+        short* index = ((sProfile_156858*)charRecord)->index;
+        MEM_copy(charRecord, src + i * 3976, 3976);
+        ((sProfile_156858*)charRecord)->index = index;
         int j;
         for (j = 0; j < D_004A11E8; j++)
             index[j] = -1;
-        sEnt_156858* e = (sEnt_156858*)(dst + i * 0xF88 + 0x290);
+        sEnt_156858* boltEntry = (sEnt_156858*)(dst + i * 0xF88 + 0x290);
         int n;
-        for (n = 0; n < 525; n++, e++) {
-            short k = e->id;
+        for (n = 0; n < 525; n++, boltEntry++) {
+            short k = boltEntry->id;
             if (k >= 0)
                 index[k] = n;
         }

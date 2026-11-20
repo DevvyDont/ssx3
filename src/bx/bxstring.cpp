@@ -465,16 +465,16 @@ extern "C" void cBXString__cBXString(cBXString* self, int flags);
 // cBXString(a + str). PORT: pointer held in int for the negative header offsets.
 extern "C" cBXString* func_00318630(cBXString* self, cBXString* bxString, const char* str)
 {
-    char* tmp = cBXString_EmptyString;
+    char* joined = cBXString_EmptyString;
     int* lenp = (int*)((int)bxString->Str - 8);
     int len;
     if (str != 0)
         len = strlen(str);
     else
         len = 0;
-    cBXString_concatCopy((cBXString*)&tmp, *lenp, bxString->Str, len, str);
-    cBXString_cBXString1(self, (cBXString*)&tmp);
-    cBXString__cBXString((cBXString*)&tmp, 2);
+    cBXString_concatCopy((cBXString*)&joined, *lenp, bxString->Str, len, str);
+    cBXString_cBXString1(self, (cBXString*)&joined);
+    cBXString__cBXString((cBXString*)&joined, 2);
     return self;
 }
 #endif
@@ -502,16 +502,16 @@ extern "C" void cBXString__cBXString(cBXString* self, int flags);
 // cBXString(str + b). PORT: pointer held in int for the negative header offset.
 extern "C" cBXString* func_003186D0(cBXString* self, const char* str, cBXString* bxString)
 {
-    char* tmp = cBXString_EmptyString;
+    char* joined = cBXString_EmptyString;
     int len;
     if (str != 0)
         len = strlen(str);
     else
         len = 0;
     int sb = (int)bxString->Str;
-    cBXString_concatCopy((cBXString*)&tmp, len, str, *(int*)(sb - 8), (char*)sb);
-    cBXString_cBXString1(self, (cBXString*)&tmp);
-    cBXString__cBXString((cBXString*)&tmp, 2);
+    cBXString_concatCopy((cBXString*)&joined, len, str, *(int*)(sb - 8), (char*)sb);
+    cBXString_cBXString1(self, (cBXString*)&joined);
+    cBXString__cBXString((cBXString*)&joined, 2);
     return self;
 }
 #endif
@@ -828,12 +828,12 @@ INCLUDE_ASM("bx/bxstring", func_00318BF8);
  * Undoes cBXString_lockBuffer, which sets it to -1. The shared empty string's text (D_0048DCD4) is left alone. Nothing
  * in the C calls it.
  *
- * @param arg0  the string
+ * @param bxString  the string
  */
-extern "C" void func_00318BF8(void **arg0) {
+extern "C" void func_00318BF8(void **bxString) {
     void *temp_4;
 
-    temp_4 = *arg0;
+    temp_4 = *bxString;
     if (temp_4 != &D_0048DCD4) {
         (*(int *)((char*)(temp_4) + (-0xC))) = 1;
     }
@@ -920,14 +920,14 @@ extern "C" char* func_0041AD80(char* str);
 /**
  * Returns the offset of the first occurrence of a substring at or after @p start, or -1 when there is none.
  *
- * func_0041AD80 behaves like strstr. The substring is the second argument, declared as int @p unused; it reaches
+ * func_0041AD80 behaves like strstr. The substring is the second argument, declared as int @p subString; it reaches
  * func_0041AD80 untouched in its register. Nothing in the C calls it.
  *
- * @param unused  the substring to find (declared int; it is a const char*)
+ * @param subString  the substring to find (declared int; it is a const char*)
  * @param start  offset to start searching at
  * @return the offset from the start of the text, or -1
  */
-extern "C" int func_00318CE8(cBXString* self, int unused, int start)
+extern "C" int func_00318CE8(cBXString* self, int subString, int start)
 {
     char* result = func_0041AD80(self->Str + start);
     if (result == 0) {

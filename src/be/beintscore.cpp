@@ -138,19 +138,19 @@ extern signed char D_005305F9[];
 /**
  * Records a rider's race statistics in its character's best records, for the two human profiles only.
  *
- * Unless raceDB byte +0x49 (D_005305F9) is set, calls func_00155420(@p rider, @p a, -1, -1) when the rider's profile
+ * Unless raceDB byte +0x49 (D_005305F9) is set, calls func_00155420(@p rider, @p riderStats, -1, -1) when the rider's profile
  * (cBELibrary_getProfileIndex) is 0 or 1. The AI code passes each rider's metrix stats block (metrix + 0xFC);
  * func_00154AB8 passes the event stats.
  *
  * @param rider  race rider slot
- * @param a  the rider stats block, passed as an int
+ * @param riderStats  the rider stats block, passed as an int
  */
-extern "C" void func_00154A58(int rider, int a)
+extern "C" void func_00154A58(int rider, int riderStats)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     if (D_005305F9[0] == 0 && profile < 2)
     {
-        func_00155420(rider, a, -1, -1);
+        func_00155420(rider, riderStats, -1, -1);
     }
 }
 #endif
@@ -256,20 +256,20 @@ extern "C" void func_00154AB8(sScore_154AB8* self, int rider, sRaceStats_154AB8*
         score = (int)(score * (1.0f / 60.0f));
     }
     if (func_001557E0(self, profile)) {
-        sHighScore_154AB8* t = func_0014AB20_154AB8(event, mode);
-        if (t != 0) {
+        sHighScore_154AB8* highScores = func_0014AB20_154AB8(event, mode);
+        if (highScores != 0) {
             for (int i = 0; i < 5; i++) {
                 int better;
                 if (timed)
-                    better = t[i].value < score;
+                    better = highScores[i].value < score;
                 else
-                    better = score < t[i].value;
+                    better = score < highScores[i].value;
                 if (!better) {
                     for (int j = 4; j > i; j--)
-                        t[j] = t[j - 1];
-                    t[i].charID = charID;
-                    t[i].value = score;
-                    strcpy(t[i].name, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), rider));
+                        highScores[j] = highScores[j - 1];
+                    highScores[i].charID = charID;
+                    highScores[i].value = score;
+                    strcpy(highScores[i].name, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), rider));
                     self->rank[profile] = i;
                     if (cBENewRaceInterface_newRace.iNumberHumans >= 2) {
                         if (self->rank[1 - profile] >= i) {
@@ -433,10 +433,10 @@ extern signed char D_00535C12[];
 extern "C" int func_00155130(void* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    sScoreEntry_001550E8* t = func_0014AB20(D_005305F0[0], D_00535C12[0]);
-    if (t != 0)
+    sScoreEntry_001550E8* highScores = func_0014AB20(D_005305F0[0], D_00535C12[0]);
+    if (highScores != 0)
     {
-        return t[i].value;
+        return highScores[i].value;
     }
     return 0;
 }
@@ -471,10 +471,10 @@ extern void* D_004A1244;
 extern "C" void* func_00155190(void* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    sScoreEntryB_00155190* t = (sScoreEntryB_00155190*)func_0014AB20(D_005305F0[0], D_00535C12[0]);
-    if (t == 0)
+    sScoreEntryB_00155190* highScores = (sScoreEntryB_00155190*)func_0014AB20(D_005305F0[0], D_00535C12[0]);
+    if (highScores == 0)
         return D_004A1244;
-    return &D_00530990[t[i].idx];
+    return &D_00530990[highScores[i].idx];
 }
 #endif
 
@@ -500,9 +500,9 @@ extern void* D_004A1244;
 extern "C" void* func_00155208(void* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    sScoreEntryB_00155208* t = (sScoreEntryB_00155208*)func_0014AB20(D_005305F0[0], D_00535C12[0]);
-    if (t != 0)
-        return t[i].f8;
+    sScoreEntryB_00155208* highScores = (sScoreEntryB_00155208*)func_0014AB20(D_005305F0[0], D_00535C12[0]);
+    if (highScores != 0)
+        return highScores[i].f8;
     return D_004A1244;
 }
 #endif
@@ -708,17 +708,17 @@ struct sRecord_155420 {
  * NumUberGrindTricks, LongestCombo, BiggestHandplantTime, BiggestRailDist, BiggestAirTime there), each also raising a
  * highlight with func_00155390 (pair 1 excepted).
  *
- * Pair 8 keeps the shortest positive @p a3 in race event 0 (raceDB +0x4A); pair 9 keeps the largest positive @p a2 in
- * events 1-3 or race kind 6 (raceDB +0x48) and raises highlight 6 with @p a2 / 100. Without @p statsArg, or in event
+ * Pair 8 keeps the shortest positive @p eventTime in race event 0 (raceDB +0x4A); pair 9 keeps the largest positive @p eventPoints in
+ * events 1-3 or race kind 6 (raceDB +0x48) and raises highlight 6 with @p eventPoints / 100. Without @p statsArg, or in event
  * 12, only pairs 8 and 9 are looked at. Finally the word after the ten pairs keeps the largest stats +0x88.
  *
  * @param rider  race rider slot
  * @param statsArg  the rider stats block, passed as an int; 0 for none
- * @param a2  the event points, or -1
- * @param a3  the event time in seconds, or -1
+ * @param eventPoints  the event points, or -1
+ * @param eventTime  the event time in seconds, or -1
  */
 // PORT: the unit declares this as (int, int, int, int) (func_00154A58 passes the stats pointer as int).
-extern "C" void func_00155420(int rider, int statsArg, int a2, int a3)
+extern "C" void func_00155420(int rider, int statsArg, int eventPoints, int eventTime)
 {
     sRaceStats_155420* stats = (sRaceStats_155420*)statsArg;
     sRaceSettings_155420* rs = &D_005305B0_r155420;
@@ -740,86 +740,86 @@ extern "C" void func_00155420(int rider, int statsArg, int a2, int a3)
         start = 8;
     for (int i = start; i < 10; i++) {
         sRecord_155420* slot = &best[i];
-        int v;
+        int statValue;
         switch (i) {
         case 0:
-            v = stats->f2C;
-            if (v >= slot->score) {
-                slot->score = v;
+            statValue = stats->f2C;
+            if (statValue >= slot->score) {
+                slot->score = statValue;
                 slot->event = event;
-                func_00155390(rec, 3, v);
+                func_00155390(rec, 3, statValue);
             }
             break;
         case 1:
-            v = stats->f18;
-            if (v >= slot->score) {
-                slot->score = v;
+            statValue = stats->f18;
+            if (statValue >= slot->score) {
+                slot->score = statValue;
                 slot->event = event;
             }
             break;
         case 2:
-            v = stats->f1C;
-            if (v >= slot->score) {
-                slot->score = v;
+            statValue = stats->f1C;
+            if (statValue >= slot->score) {
+                slot->score = statValue;
                 slot->event = event;
-                func_00155390(rec, 5, v);
+                func_00155390(rec, 5, statValue);
             }
             break;
         case 3:
-            v = stats->f20;
-            if (v >= slot->score) {
-                slot->score = v;
+            statValue = stats->f20;
+            if (statValue >= slot->score) {
+                slot->score = statValue;
                 slot->event = event;
-                func_00155390(rec, 4, v);
+                func_00155390(rec, 4, statValue);
             }
             break;
         case 4:
-            v = stats->f88;
-            if (v >= slot->score) {
-                slot->score = v;
+            statValue = stats->f88;
+            if (statValue >= slot->score) {
+                slot->score = statValue;
                 slot->event = event;
-                func_00155390(rec, 7, v);
+                func_00155390(rec, 7, statValue);
             }
             break;
         case 5:
-            v = (int)(stats->f5C + 0.5f);
-            if (v >= slot->score) {
-                slot->score = v;
+            statValue = (int)(stats->f5C + 0.5f);
+            if (statValue >= slot->score) {
+                slot->score = statValue;
                 slot->event = event;
-                func_00155390(rec, 1, v);
+                func_00155390(rec, 1, statValue);
             }
             break;
         case 6:
-            v = (int)(stats->f58 + 0.5f);
-            if (v >= slot->score) {
-                slot->score = v;
+            statValue = (int)(stats->f58 + 0.5f);
+            if (statValue >= slot->score) {
+                slot->score = statValue;
                 slot->event = event;
-                func_00155390(rec, 0, v);
+                func_00155390(rec, 0, statValue);
             }
             break;
         case 7:
-            v = (int)(stats->f50 + 0.5f);
-            if (v >= slot->score) {
-                slot->score = v;
+            statValue = (int)(stats->f50 + 0.5f);
+            if (statValue >= slot->score) {
+                slot->score = statValue;
                 slot->event = event;
-                func_00155390(rec, 2, v);
+                func_00155390(rec, 2, statValue);
             }
             break;
         case 8:
-            if (a3 > 0 && mode == 0) {
-                if (slot->score == 0 || a3 <= slot->score) {
-                    slot->score = a3;
+            if (eventTime > 0 && mode == 0) {
+                if (slot->score == 0 || eventTime <= slot->score) {
+                    slot->score = eventTime;
                     slot->event = event;
                 }
             }
             break;
         case 9:
-            if (a2 > 0) {
+            if (eventPoints > 0) {
                 if ((mode >= 1 && mode <= 3) || kind == 6) {
-                    if (a2 >= slot->score) {
-                        slot->score = a2;
+                    if (eventPoints >= slot->score) {
+                        slot->score = eventPoints;
                         slot->event = event;
-                        func_00155390(rec, 6, a2 / 100);
+                        func_00155390(rec, 6, eventPoints / 100);
                     }
                 }
             }
@@ -875,22 +875,22 @@ extern signed char D_005305F9[];
  * record.
  *
  * Returns 0 when raceDB +0x49 (D_005305F9) is set, the rider's profile is 3 or more, or there is no record. The record
- * is cBECharProfileDB_getScoreStats(character record, @p a, @p b). Nothing calls it.
+ * is cBECharProfileDB_getScoreStats(character record, @p locationID, @p eventID). Nothing calls it.
  *
  * @param rider  race rider slot (On Tour iRider)
- * @param a  the location (On Tour iLocation)
- * @param b  the game event (On Tour iEvent)
+ * @param locationID  the location (On Tour iLocation)
+ * @param eventID  the game event (On Tour iEvent)
  * @return the win count
  */
-extern "C" int func_00155848(void* self, int rider, int a, int b)
+extern "C" int func_00155848(void* self, int rider, int locationID, int eventID)
 {
     if (D_005305F9[0] != 0)
         return 0;
     int profile = cBELibrary_getProfileIndex(rider);
     if ((unsigned int)profile >= 3)
         return 0;
-    int c = cBELibrary_getCharacterID(rider);
-    unsigned short* stats = (unsigned short*)cBECharProfileDB_getScoreStats(cBELibrary_profileLib + profile * 39760 + c * 3976, a, b);
+    int charID = cBELibrary_getCharacterID(rider);
+    unsigned short* stats = (unsigned short*)cBECharProfileDB_getScoreStats(cBELibrary_profileLib + profile * 39760 + charID * 3976, locationID, eventID);
     if (stats == 0)
         return 0;
     return stats[1];
@@ -910,22 +910,22 @@ extern char cBELibrary_profileLib[];
  * Returns the best medal a race rider's character has for an event at a location: byte 1 of its score record.
  *
  * Returns -1 when raceDB +0x49 (D_005305F9) is set, the rider's profile is 3 or more, or there is no record. The record
- * is cBECharProfileDB_getScoreStats(character record, @p a, @p b).
+ * is cBECharProfileDB_getScoreStats(character record, @p locationID, @p eventID).
  *
  * @param rider  race rider slot (On Tour iRider)
- * @param a  the location (On Tour iLocation)
- * @param b  the game event (On Tour iEvent)
+ * @param locationID  the location (On Tour iLocation)
+ * @param eventID  the game event (On Tour iEvent)
  * @return the medal, 0 best to 3, or -1
  */
-extern "C" int func_001558F8(void* self, int rider, int a, int b)
+extern "C" int func_001558F8(void* self, int rider, int locationID, int eventID)
 {
     if (D_005305F9[0] != 0)
         return -1;
     int profile = cBELibrary_getProfileIndex(rider);
     if ((unsigned int)profile >= 3)
         return -1;
-    int c = cBELibrary_getCharacterID(rider);
-    signed char* stats = (signed char*)cBECharProfileDB_getScoreStats(cBELibrary_profileLib + profile * 39760 + c * 3976, a, b);
+    int charID = cBELibrary_getCharacterID(rider);
+    signed char* stats = (signed char*)cBECharProfileDB_getScoreStats(cBELibrary_profileLib + profile * 39760 + charID * 3976, locationID, eventID);
     if (stats == 0)
         return -1;
     return stats[1];
@@ -946,11 +946,11 @@ extern signed char D_005305F9[];
  * Does nothing when raceDB +0x49 (D_005305F9) is set or the rider's profile is 3 or more. Nothing calls it.
  *
  * @param rider  race rider slot (On Tour iRider)
- * @param a  the location (On Tour iLocation)
- * @param b  the game event (On Tour iEvent)
- * @param c  the medal (On Tour iMedal)
+ * @param locationID  the location (On Tour iLocation)
+ * @param eventID  the game event (On Tour iEvent)
+ * @param medal  the medal (On Tour iMedal)
  */
-extern "C" void func_001559A8(void* self, int rider, int a, int b, int c)
+extern "C" void func_001559A8(void* self, int rider, int locationID, int eventID, int medal)
 {
     if (D_005305F9[0] != 0)
         return;
@@ -958,6 +958,6 @@ extern "C" void func_001559A8(void* self, int rider, int a, int b, int c)
     if ((unsigned int)profile >= 3)
         return;
     int ch = cBELibrary_getCharacterID(rider);
-    func_00152528(cBELibrary_profileLib + profile * 39760 + ch * 3976, a, b, c);
+    func_00152528(cBELibrary_profileLib + profile * 39760 + ch * 3976, locationID, eventID, medal);
 }
 #endif

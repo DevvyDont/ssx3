@@ -170,77 +170,77 @@ INCLUDE_ASM("bx/cubicspline", func_0031D8B0);
 extern "C" void func_0031D8B0(sCubicSpline* self)
 {
     float x[256];
-    float a[256];
-    float h[256];
+    float yValues[256];
+    float spans[256];
     float alpha[256];
-    float l[256];
+    float diagonal[256];
     float mu[256];
     float z[256];
-    float b[256];
-    float c[256];
-    float d[256];
+    float linCoefs[256];
+    float quadCoefs[256];
+    float cubicCoefs[256];
     int n = self->flags.count;
     int i;
     for (i = 0; i < n; i++) {
         x[i] = ((float*)self->data)[i * 5 + 0];
-        a[i] = ((float*)self->data)[i * 5 + 1];
+        yValues[i] = ((float*)self->data)[i * 5 + 1];
     }
     x[n] = ((float*)self->data)[(n - 1) * 5 + 2];
-    a[n] = ((float*)self->data)[(n - 1) * 5 + 3];
+    yValues[n] = ((float*)self->data)[(n - 1) * 5 + 3];
     for (i = 0; i < n; i++) {
-        h[i] = x[i + 1] - x[i];
+        spans[i] = x[i + 1] - x[i];
     }
     switch (self->flags.b0) {
     case 0:
         for (i = 1; i < n; i++) {
-            alpha[i] = 3.0f / h[i] * (a[i + 1] - a[i]) - 3.0f / h[i - 1] * (a[i] - a[i - 1]);
+            alpha[i] = 3.0f / spans[i] * (yValues[i + 1] - yValues[i]) - 3.0f / spans[i - 1] * (yValues[i] - yValues[i - 1]);
         }
-        l[0] = 1.0f;
+        diagonal[0] = 1.0f;
         mu[0] = 0.0f;
         z[0] = 0.0f;
         for (i = 1; i < n; i++) {
-            l[i] = 2.0f * (x[i + 1] - x[i - 1]) - h[i - 1] * mu[i - 1];
-            mu[i] = h[i] / l[i];
-            z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l[i];
+            diagonal[i] = 2.0f * (x[i + 1] - x[i - 1]) - spans[i - 1] * mu[i - 1];
+            mu[i] = spans[i] / diagonal[i];
+            z[i] = (alpha[i] - spans[i - 1] * z[i - 1]) / diagonal[i];
         }
-        l[n] = 1.0f;
+        diagonal[n] = 1.0f;
         z[n] = 0.0f;
-        c[n] = 0.0f;
+        quadCoefs[n] = 0.0f;
         for (i = n - 1; i >= 0; i--) {
-            c[i] = z[i] - mu[i] * c[i + 1];
-            b[i] = (a[i + 1] - a[i]) / h[i] - h[i] * (c[i + 1] + 2.0f * c[i]) * 0.33333334f;
-            d[i] = (c[i + 1] - c[i]) / (3.0f * h[i]);
+            quadCoefs[i] = z[i] - mu[i] * quadCoefs[i + 1];
+            linCoefs[i] = (yValues[i + 1] - yValues[i]) / spans[i] - spans[i] * (quadCoefs[i + 1] + 2.0f * quadCoefs[i]) * 0.33333334f;
+            cubicCoefs[i] = (quadCoefs[i + 1] - quadCoefs[i]) / (3.0f * spans[i]);
         }
         break;
     case 1:
-        alpha[0] = 3.0f * (a[1] - a[0]) / h[0] - 3.0f * ((float*)self->data)[4];
-        alpha[n] = 3.0f * self->f4 - 3.0f * (a[n] - a[n - 1]) / h[n - 1];
+        alpha[0] = 3.0f * (yValues[1] - yValues[0]) / spans[0] - 3.0f * ((float*)self->data)[4];
+        alpha[n] = 3.0f * self->f4 - 3.0f * (yValues[n] - yValues[n - 1]) / spans[n - 1];
         for (i = 1; i < n; i++) {
-            alpha[i] = 3.0f / h[i] * (a[i + 1] - a[i]) - 3.0f / h[i - 1] * (a[i] - a[i - 1]);
+            alpha[i] = 3.0f / spans[i] * (yValues[i + 1] - yValues[i]) - 3.0f / spans[i - 1] * (yValues[i] - yValues[i - 1]);
         }
-        l[0] = 2.0f * h[0];
+        diagonal[0] = 2.0f * spans[0];
         mu[0] = 0.5f;
-        z[0] = alpha[0] / l[0];
+        z[0] = alpha[0] / diagonal[0];
         for (i = 1; i < n; i++) {
-            l[i] = 2.0f * (x[i + 1] - x[i - 1]) - h[i - 1] * mu[i - 1];
-            mu[i] = h[i] / l[i];
-            z[i] = (alpha[i] - h[i - 1] * z[i - 1]) / l[i];
+            diagonal[i] = 2.0f * (x[i + 1] - x[i - 1]) - spans[i - 1] * mu[i - 1];
+            mu[i] = spans[i] / diagonal[i];
+            z[i] = (alpha[i] - spans[i - 1] * z[i - 1]) / diagonal[i];
         }
-        l[n] = h[n - 1] * (2.0f - mu[n - 1]);
-        z[n] = (alpha[n] - h[n - 1] * z[n - 1]) / l[n];
-        c[n] = z[n];
+        diagonal[n] = spans[n - 1] * (2.0f - mu[n - 1]);
+        z[n] = (alpha[n] - spans[n - 1] * z[n - 1]) / diagonal[n];
+        quadCoefs[n] = z[n];
         for (i = n - 1; i >= 0; i--) {
-            c[i] = z[i] - mu[i] * c[i + 1];
-            b[i] = (a[i + 1] - a[i]) / h[i] - h[i] * (c[i + 1] + 2.0f * c[i]) * 0.33333334f;
-            d[i] = (c[i + 1] - c[i]) / (3.0f * h[i]);
+            quadCoefs[i] = z[i] - mu[i] * quadCoefs[i + 1];
+            linCoefs[i] = (yValues[i + 1] - yValues[i]) / spans[i] - spans[i] * (quadCoefs[i + 1] + 2.0f * quadCoefs[i]) * 0.33333334f;
+            cubicCoefs[i] = (quadCoefs[i + 1] - quadCoefs[i]) / (3.0f * spans[i]);
         }
         break;
     }
     for (i = 0; i < n; i++) {
-        ((float*)self->data)[i * 5 + 0] = d[i];
-        ((float*)self->data)[i * 5 + 1] = c[i];
-        ((float*)self->data)[i * 5 + 2] = b[i];
-        ((float*)self->data)[i * 5 + 3] = a[i];
+        ((float*)self->data)[i * 5 + 0] = cubicCoefs[i];
+        ((float*)self->data)[i * 5 + 1] = quadCoefs[i];
+        ((float*)self->data)[i * 5 + 2] = linCoefs[i];
+        ((float*)self->data)[i * 5 + 3] = yValues[i];
         ((float*)self->data)[i * 5 + 4] = x[i];
     }
     self->f4 = x[n];
@@ -1333,8 +1333,8 @@ extern "C" void* func_0031F2C8_memalign(void* ms, unsigned int alignment, unsign
 extern "C" void* func_0031F2C8_memalign(void* ms, unsigned int alignment, unsigned int bytes)
 {
     unsigned int nb;
-    char* m;
-    sMChunk_31F2C8* p;
+    char* rawMem;
+    sMChunk_31F2C8* memChunk;
     char* brk;
     sMChunk_31F2C8* newp;
     unsigned int newsize;
@@ -1348,50 +1348,50 @@ extern "C" void* func_0031F2C8_memalign(void* ms, unsigned int alignment, unsign
     if (alignment < 16)
         alignment = 16;
     if ((alignment & (alignment - 1)) != 0) {
-        unsigned int a = 16 * 2;
-        while (a < alignment)
-            a <<= 1;
-        alignment = a;
+        unsigned int alignPow2 = 16 * 2;
+        while (alignPow2 < alignment)
+            alignPow2 <<= 1;
+        alignment = alignPow2;
     }
     if (bytes >= (unsigned int)-32) {
         *func_00415FB8() = 12;
         return 0;
     }
     nb = (bytes + 4 + 15 < 16) ? 16 : (bytes + 4 + 15) & ~15;
-    m = (char*)func_0031E818(ms, nb + alignment + 16);
-    if (m == 0)
+    rawMem = (char*)func_0031E818(ms, nb + alignment + 16);
+    if (rawMem == 0)
         return 0;
-    p = (sMChunk_31F2C8*)(m - 8);
+    memChunk = (sMChunk_31F2C8*)(rawMem - 8);
     // PORT: chunk header reads go through (int)m - 8 (pointer in int) to match gcc 2.95 offset folding
-    if ((unsigned int)m % alignment != 0) {
-        brk = (char*)(((unsigned int)(m + alignment - 1) & -(int)alignment) - 8);
-        if ((unsigned int)(brk - (char*)p) < 16)
+    if ((unsigned int)rawMem % alignment != 0) {
+        brk = (char*)(((unsigned int)(rawMem + alignment - 1) & -(int)alignment) - 8);
+        if ((unsigned int)(brk - (char*)memChunk) < 16)
             brk += alignment;
         newp = (sMChunk_31F2C8*)brk;
-        leadsize = brk - (char*)p;
-        newsize = (((sMChunk_31F2C8*)((int)m - 8))->size & ~3) - leadsize;
-        if (((sMChunk_31F2C8*)((int)m - 8))->size & 2) {
-            newp->prev_size = ((sMChunk_31F2C8*)((int)m - 8))->prev_size + leadsize;
+        leadsize = brk - (char*)memChunk;
+        newsize = (((sMChunk_31F2C8*)((int)rawMem - 8))->size & ~3) - leadsize;
+        if (((sMChunk_31F2C8*)((int)rawMem - 8))->size & 2) {
+            newp->prev_size = ((sMChunk_31F2C8*)((int)rawMem - 8))->prev_size + leadsize;
             newp->size = newsize | 2;
             return (char*)newp + 8;
         }
         newp->size = newsize | 1;
         ((sMChunk_31F2C8*)((char*)newp + newsize))->size |= 1;
-        ((sMChunk_31F2C8*)((int)m - 8))->size = (((sMChunk_31F2C8*)((int)m - 8))->size & 1) | leadsize;
-        cDynamicMemMan_dlfree_F2C8(ms, (char*)p + 8);
-        p = newp;
+        ((sMChunk_31F2C8*)((int)rawMem - 8))->size = (((sMChunk_31F2C8*)((int)rawMem - 8))->size & 1) | leadsize;
+        cDynamicMemMan_dlfree_F2C8(ms, (char*)memChunk + 8);
+        memChunk = newp;
     }
-    if (!(p->size & 2)) {
-        size = p->size & ~3;
+    if (!(memChunk->size & 2)) {
+        size = memChunk->size & ~3;
         if (size > nb + 16) {
             remainder_size = size - nb;
-            remainder = (sMChunk_31F2C8*)((char*)p + nb);
+            remainder = (sMChunk_31F2C8*)((char*)memChunk + nb);
             remainder->size = remainder_size | 1;
-            p->size = (p->size & 1) | nb;
+            memChunk->size = (memChunk->size & 1) | nb;
             cDynamicMemMan_dlfree_F2C8(ms, (char*)remainder + 8);
         }
     }
-    return (char*)p + 8;
+    return (char*)memChunk + 8;
 }
 #endif
 
@@ -1428,8 +1428,8 @@ extern "C" void* func_0031F4E8_memalign(void* ms, unsigned int alignment, unsign
 extern "C" void* func_0031F4E8_memalign(void* ms, unsigned int alignment, unsigned int bytes, unsigned int offset)
 {
     unsigned int nb;
-    char* m;
-    sMChunk_31F4E8* p;
+    char* rawMem;
+    sMChunk_31F4E8* memChunk;
     char* brk;
     sMChunk_31F4E8* newp;
     unsigned int newsize;
@@ -1443,10 +1443,10 @@ extern "C" void* func_0031F4E8_memalign(void* ms, unsigned int alignment, unsign
     if (alignment < 16)
         alignment = 16;
     if ((alignment & (alignment - 1)) != 0) {
-        unsigned int a = 16 * 2;
-        while (a < alignment)
-            a <<= 1;
-        alignment = a;
+        unsigned int alignPow2 = 16 * 2;
+        while (alignPow2 < alignment)
+            alignPow2 <<= 1;
+        alignment = alignPow2;
     }
     bytes += offset;
     if (bytes >= (unsigned int)-32) {
@@ -1454,40 +1454,40 @@ extern "C" void* func_0031F4E8_memalign(void* ms, unsigned int alignment, unsign
         return 0;
     }
     nb = (bytes + 4 + 15 < 16) ? 16 : (bytes + 4 + 15) & ~15;
-    m = (char*)func_0031E818(ms, nb + alignment + 16);
-    if (m == 0)
+    rawMem = (char*)func_0031E818(ms, nb + alignment + 16);
+    if (rawMem == 0)
         return 0;
-    p = (sMChunk_31F4E8*)(m - 8);
+    memChunk = (sMChunk_31F4E8*)(rawMem - 8);
     // PORT: chunk header reads go through (int)m - 8 (pointer in int) to match gcc 2.95 offset folding
-    if ((unsigned int)(m + offset) % alignment != 0) {
-        brk = (char*)(((unsigned int)(m + offset + alignment - 1) & -(int)alignment) - offset - 8);
-        if ((unsigned int)(brk - (char*)p) < 16)
+    if ((unsigned int)(rawMem + offset) % alignment != 0) {
+        brk = (char*)(((unsigned int)(rawMem + offset + alignment - 1) & -(int)alignment) - offset - 8);
+        if ((unsigned int)(brk - (char*)memChunk) < 16)
             brk += alignment;
         newp = (sMChunk_31F4E8*)brk;
-        leadsize = brk - (char*)p;
-        newsize = (((sMChunk_31F4E8*)((int)m - 8))->size & ~3) - leadsize;
-        if (((sMChunk_31F4E8*)((int)m - 8))->size & 2) {
-            newp->prev_size = ((sMChunk_31F4E8*)((int)m - 8))->prev_size + leadsize;
+        leadsize = brk - (char*)memChunk;
+        newsize = (((sMChunk_31F4E8*)((int)rawMem - 8))->size & ~3) - leadsize;
+        if (((sMChunk_31F4E8*)((int)rawMem - 8))->size & 2) {
+            newp->prev_size = ((sMChunk_31F4E8*)((int)rawMem - 8))->prev_size + leadsize;
             newp->size = newsize | 2;
             return (char*)newp + 8;
         }
         newp->size = newsize | 1;
         ((sMChunk_31F4E8*)((char*)newp + newsize))->size |= 1;
-        ((sMChunk_31F4E8*)((int)m - 8))->size = (((sMChunk_31F4E8*)((int)m - 8))->size & 1) | leadsize;
-        cDynamicMemMan_dlfree_F4E8(ms, (char*)p + 8);
-        p = newp;
+        ((sMChunk_31F4E8*)((int)rawMem - 8))->size = (((sMChunk_31F4E8*)((int)rawMem - 8))->size & 1) | leadsize;
+        cDynamicMemMan_dlfree_F4E8(ms, (char*)memChunk + 8);
+        memChunk = newp;
     }
-    if (!(p->size & 2)) {
-        size = p->size & ~3;
+    if (!(memChunk->size & 2)) {
+        size = memChunk->size & ~3;
         if (size > nb + 16) {
             remainder_size = size - nb;
-            remainder = (sMChunk_31F4E8*)((char*)p + nb);
+            remainder = (sMChunk_31F4E8*)((char*)memChunk + nb);
             remainder->size = remainder_size | 1;
-            p->size = (p->size & 1) | nb;
+            memChunk->size = (memChunk->size & 1) | nb;
             cDynamicMemMan_dlfree_F4E8(ms, (char*)remainder + 8);
         }
     }
-    return (char*)p + 8;
+    return (char*)memChunk + 8;
 }
 #endif
 
@@ -2214,11 +2214,11 @@ INCLUDE_ASM("bx/cubicspline", func_003200E8__FPv);
 void* func_003200E8(void* self)
 {
     *(void**)((char*)self + 0x800) = self;
-    char* p = (char*)self;
+    char* cursor = (char*)self;
     char* next = (char*)self + 8;
     for (unsigned int i = 0; i < 0xFF; i++) {
-        *(void**)p = next;
-        p += 8;
+        *(void**)cursor = next;
+        cursor += 8;
         next += 8;
     }
     *(int*)((char*)self + 0x7F8) = 0;
@@ -2240,11 +2240,11 @@ INCLUDE_ASM("bx/cubicspline", func_00320120__FPv);
 void* func_00320120(void* self)
 {
     *(void**)((char*)self + 0x2000) = self;
-    char* p = (char*)self;
+    char* cursor = (char*)self;
     char* next = (char*)self + 0x10;
     for (unsigned int i = 0; i < 0x1FF; i++) {
-        *(void**)p = next;
-        p += 0x10;
+        *(void**)cursor = next;
+        cursor += 0x10;
         next += 0x10;
     }
     *(int*)((char*)self + 0x1FF0) = 0;
@@ -2266,11 +2266,11 @@ INCLUDE_ASM("bx/cubicspline", func_00320158__FPv);
 void* func_00320158(void* self)
 {
     *(void**)((char*)self + 0x6000) = self;
-    char* p = (char*)self;
+    char* cursor = (char*)self;
     char* next = (char*)self + 0x20;
     for (unsigned int i = 0; i < 767; i++) {
-        *(void**)p = next;
-        p += 0x20;
+        *(void**)cursor = next;
+        cursor += 0x20;
         next += 0x20;
     }
     *(int*)((char*)self + 0x5FE0) = 0;
@@ -2293,11 +2293,11 @@ void* func_00320190(void* self)
 {
     unsigned int i = 0;
     *(void**)((char*)self + 0x32000) = self;
-    char* p = (char*)self;
+    char* cursor = (char*)self;
     char* next = (char*)self + 0x40;
     for (; i < 3199; i++) {
-        *(void**)p = next;
-        p += 0x40;
+        *(void**)cursor = next;
+        cursor += 0x40;
         next += 0x40;
     }
     *(int*)((char*)self + 0x31FC0) = 0;
@@ -2320,11 +2320,11 @@ void* func_003201D8(void* self)
 {
     unsigned int i = 0;
     *(void**)((char*)self + 0x25800) = self;
-    char* p = (char*)self;
+    char* cursor = (char*)self;
     char* next = (char*)self + 0x80;
     for (; i < 1199; i++) {
-        *(void**)p = next;
-        p += 0x80;
+        *(void**)cursor = next;
+        cursor += 0x80;
         next += 0x80;
     }
     *(int*)((char*)self + 0x25780) = 0;
@@ -2347,11 +2347,11 @@ void* func_00320220(void* self)
 {
     unsigned int i = 0;
     *(void**)((char*)self + 0x20000) = self;
-    char* p = (char*)self;
+    char* cursor = (char*)self;
     char* next = (char*)self + 0x100;
     for (; i < 0x1FF; i++) {
-        *(void**)p = next;
-        p += 0x100;
+        *(void**)cursor = next;
+        cursor += 0x100;
         next += 0x100;
     }
     *(int*)((char*)self + 0x1FF00) = 0;
@@ -2374,11 +2374,11 @@ void* func_00320270(void* self)
 {
     unsigned int i = 0;
     *(void**)((char*)self + 0x20000) = self;
-    char* p = (char*)self;
+    char* cursor = (char*)self;
     char* next = (char*)self + 0x200;
     for (; i < 0xFF; i++) {
-        *(void**)p = next;
-        p += 0x200;
+        *(void**)cursor = next;
+        cursor += 0x200;
         next += 0x200;
     }
     *(int*)((char*)self + 0x1FE00) = 0;

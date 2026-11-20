@@ -166,30 +166,30 @@ extern "C" void LobbyMan_onroomlistupdate(int);
 INCLUDE_ASM("bx/bxstringctor", func_00268A80);
 #ifdef SKIP_ASM
 /**
- * Returns the first word at @p arg0.
+ * Returns the first word at @p wordPtr.
  *
  * Nothing references it.
  *
- * @param arg0  the pointer to read
- * @return the word at @p arg0
+ * @param wordPtr  the pointer to read
+ * @return the word at @p wordPtr
  */
-extern "C" int func_00268A80(int *arg0) {
-    return *arg0;
+extern "C" int func_00268A80(int *wordPtr) {
+    return *wordPtr;
 }
 #endif
 //100%
 INCLUDE_ASM("bx/bxstringctor", func_00268A88);
 #ifdef SKIP_ASM
 /**
- * Returns the first word at @p arg0.
+ * Returns the first word at @p wordPtr.
  *
  * Nothing references it. Same body as func_00268A80.
  *
- * @param arg0  the pointer to read
- * @return the word at @p arg0
+ * @param wordPtr  the pointer to read
+ * @return the word at @p wordPtr
  */
-extern "C" int func_00268A88(int *arg0) {
-    return *arg0;
+extern "C" int func_00268A88(int *wordPtr) {
+    return *wordPtr;
 }
 #endif
 
@@ -203,12 +203,12 @@ INCLUDE_ASM("bx/bxstringctor", func_00268A90);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. func_0025A778 registers it as the callback of list 0 (rooms).
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268A90(void* self, void* a1, int a2)
+extern "C" void func_00268A90(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onroomlistupdate(a2 + D_004A2FB0.v);
+    LobbyMan_onroomlistupdate(lobbyMan + D_004A2FB0.v);
 }
 #endif
 
@@ -225,12 +225,12 @@ INCLUDE_ASM("bx/bxstringctor", func_00268AB8);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. func_0025A778 registers it as the callback of list 1 (users).
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268AB8(void* self, void* a1, int a2)
+extern "C" void func_00268AB8(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onuserlistupdate(a2 + D_004A2FB8.v);
+    LobbyMan_onuserlistupdate(lobbyMan + D_004A2FB8.v);
 }
 #endif
 
@@ -247,12 +247,12 @@ extern "C" void LobbyMan_onranklistupdate(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. func_0025A778 (list 2, ranks) and func_0025E348 register it.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268AE0(void* self, void* a1, int a2)
+extern "C" void func_00268AE0(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onranklistupdate(a2 + D_004A2FC0.v);
+    LobbyMan_onranklistupdate(lobbyMan + D_004A2FC0.v);
 }
 #endif
 
@@ -269,12 +269,12 @@ void* LobbyMan_onincomingmsg(void* self);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. func_0025A948 registers it as LobbyApi message callback 0.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268B08(void* self, void* a1, char* a2)
+extern "C" void func_00268B08(void* self, void* message, char* lobbyMan)
 {
-    LobbyMan_onincomingmsg(a2 + D_004A2FF0.v);
+    LobbyMan_onincomingmsg(lobbyMan + D_004A2FF0.v);
 }
 #endif
 
@@ -291,12 +291,12 @@ extern "C" void LobbyMan_onchatmsg(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. func_0025A948 registers it as LobbyApi message callback 1.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268B30(void* self, void* a1, int a2)
+extern "C" void func_00268B30(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onchatmsg(a2 + D_004A2FF8.v);
+    LobbyMan_onchatmsg(lobbyMan + D_004A2FF8.v);
 }
 #endif
 
@@ -313,12 +313,12 @@ extern "C" void LobbyMan_onconnectionmsg(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. func_0025A948 registers it as LobbyApi message callback 3.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268B58(void* self, void* a1, int a2)
+extern "C" void func_00268B58(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onconnectionmsg(a2 + D_004A3000.v);
+    LobbyMan_onconnectionmsg(lobbyMan + D_004A3000.v);
 }
 #endif
 
@@ -335,12 +335,12 @@ extern "C" void LobbyMan_onplaymsg(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. func_0025A948 registers it as LobbyApi message callback 4.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268B80(void* self, void* a1, int a2)
+extern "C" void func_00268B80(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onplaymsg(a2 + D_004A3008.v);
+    LobbyMan_onplaymsg(lobbyMan + D_004A3008.v);
 }
 #endif
 
@@ -358,12 +358,12 @@ extern "C" void LobbyMan_onlobbyconnect(int);
  * argument, and the first is not used. The lobby connect code passes it as the reply callback of func_003E8260 (port
  * 11000).
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268BA8(void* self, void* a1, int a2)
+extern "C" void func_00268BA8(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onlobbyconnect(a2 + D_004A3020.v);
+    LobbyMan_onlobbyconnect(lobbyMan + D_004A3020.v);
 }
 #endif
 
@@ -380,12 +380,12 @@ extern "C" void LobbyMan_onaccountcreated(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. The account-create request passes it to func_0025B608 as its reply callback.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268BD0(void* self, void* a1, int a2)
+extern "C" void func_00268BD0(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onaccountcreated(a2 + D_004A3088.v);
+    LobbyMan_onaccountcreated(lobbyMan + D_004A3088.v);
 }
 #endif
 
@@ -402,12 +402,12 @@ extern "C" void LobbyMan_onaccountedited(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. The account-edit request passes it to func_0025B608 as its reply callback.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268BF8(void* self, void* a1, int a2)
+extern "C" void func_00268BF8(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onaccountedited(a2 + D_004A30A8.v);
+    LobbyMan_onaccountedited(lobbyMan + D_004A30A8.v);
 }
 #endif
 
@@ -424,12 +424,12 @@ extern "C" void LobbyMan_onlostaccountrequestsent(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. The lost-account request passes it to func_0025B608 as its reply callback.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268C20(void* self, void* a1, int a2)
+extern "C" void func_00268C20(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onlostaccountrequestsent(a2 + D_004A30B0.v);
+    LobbyMan_onlostaccountrequestsent(lobbyMan + D_004A30B0.v);
 }
 #endif
 
@@ -446,12 +446,12 @@ extern "C" void LobbyMan_onlostpasswordrequestsent(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268C48(void* self, void* a1, int a2)
+extern "C" void func_00268C48(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onlostpasswordrequestsent(a2 + D_004A30B8.v);
+    LobbyMan_onlostpasswordrequestsent(lobbyMan + D_004A30B8.v);
 }
 #endif
 
@@ -468,12 +468,12 @@ extern "C" void LobbyMan_onauthentication(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. The login request passes it to func_0025B608 as its reply callback.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268C70(void* self, void* a1, int a2)
+extern "C" void func_00268C70(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onauthentication(a2 + D_004A30E8.v);
+    LobbyMan_onauthentication(lobbyMan + D_004A30E8.v);
 }
 #endif
 
@@ -490,12 +490,12 @@ extern "C" void LobbyMan_onpersonaselected(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268C98(void* self, void* a1, int a2)
+extern "C" void func_00268C98(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onpersonaselected(a2 + D_004A3118.v);
+    LobbyMan_onpersonaselected(lobbyMan + D_004A3118.v);
 }
 #endif
 
@@ -512,12 +512,12 @@ extern "C" void func_0025D048(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. func_0025D048 handles the reply to the persona's 'onln' stats request.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268CC0(void* self, void* a1, int a2)
+extern "C" void func_00268CC0(void* self, void* message, int lobbyMan)
 {
-    func_0025D048(a2 + D_004A3120.v);
+    func_0025D048(lobbyMan + D_004A3120.v);
 }
 #endif
 
@@ -534,12 +534,12 @@ extern "C" void LobbyMan_onpersonacreated(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268CE8(void* self, void* a1, int a2)
+extern "C" void func_00268CE8(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onpersonacreated(a2 + D_004A3138.v);
+    LobbyMan_onpersonacreated(lobbyMan + D_004A3138.v);
 }
 #endif
 
@@ -556,12 +556,12 @@ extern "C" void LobbyMan_onpersonadeleted(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268D10(void* self, void* a1, int a2)
+extern "C" void func_00268D10(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onpersonadeleted(a2 + D_004A3140.v);
+    LobbyMan_onpersonadeleted(lobbyMan + D_004A3140.v);
 }
 #endif
 
@@ -578,12 +578,12 @@ extern "C" void LobbyMan_onroomselected(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268D38(void* self, void* a1, int a2)
+extern "C" void func_00268D38(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onroomselected(a2 + D_004A3148.v);
+    LobbyMan_onroomselected(lobbyMan + D_004A3148.v);
 }
 #endif
 
@@ -600,12 +600,12 @@ extern "C" void LobbyMan_onRoomCreated(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268D60(void* self, void* a1, int a2)
+extern "C" void func_00268D60(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onRoomCreated(a2 + D_004A3158.v);
+    LobbyMan_onRoomCreated(lobbyMan + D_004A3158.v);
 }
 #endif
 
@@ -622,12 +622,12 @@ extern "C" void LobbyMan_onPingReceived(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268D88(void* self, void* a1, int a2)
+extern "C" void func_00268D88(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onPingReceived(a2 + D_004A3160.v);
+    LobbyMan_onPingReceived(lobbyMan + D_004A3160.v);
 }
 #endif
 
@@ -644,12 +644,12 @@ extern "C" void LobbyMan_onAbuseReportReceived(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268DB0(void* self, void* a1, int a2)
+extern "C" void func_00268DB0(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onAbuseReportReceived(a2 + D_004A3170.v);
+    LobbyMan_onAbuseReportReceived(lobbyMan + D_004A3170.v);
 }
 #endif
 
@@ -666,12 +666,12 @@ extern "C" void LobbyMan_onNewsRetrieved(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. The news request passes it to func_0025B608 as its reply callback.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268DD8(void* self, void* a1, int a2)
+extern "C" void func_00268DD8(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onNewsRetrieved(a2 + D_004A3178.v);
+    LobbyMan_onNewsRetrieved(lobbyMan + D_004A3178.v);
 }
 #endif
 
@@ -688,12 +688,12 @@ extern "C" void LobbyMan_onRanklistRetrieved(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268E00(void* self, void* a1, int a2)
+extern "C" void func_00268E00(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onRanklistRetrieved(a2 + D_004A31B0.v);
+    LobbyMan_onRanklistRetrieved(lobbyMan + D_004A31B0.v);
 }
 #endif
 
@@ -710,12 +710,12 @@ extern "C" void LobbyMan_onPlayerFound(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268E28(void* self, void* a1, int a2)
+extern "C" void func_00268E28(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onPlayerFound(a2 + D_004A31B8.v);
+    LobbyMan_onPlayerFound(lobbyMan + D_004A31B8.v);
 }
 #endif
 
@@ -732,12 +732,12 @@ extern "C" void func_0025EB00(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. func_0025EB00 handles the reply to another player's 'onln' info request.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268E50(void* self, void* a1, int a2)
+extern "C" void func_00268E50(void* self, void* message, int lobbyMan)
 {
-    func_0025EB00(a2 + D_004A31D0.v);
+    func_0025EB00(lobbyMan + D_004A31D0.v);
 }
 #endif
 
@@ -754,12 +754,12 @@ extern "C" void LobbyMan_onQuickMatchResponse(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268E78(void* self, void* a1, int a2)
+extern "C" void func_00268E78(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onQuickMatchResponse(a2 + D_004A3210.v);
+    LobbyMan_onQuickMatchResponse(lobbyMan + D_004A3210.v);
 }
 #endif
 
@@ -776,12 +776,12 @@ extern "C" void LobbyMan_onchallengeresponse(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268EA0(void* self, void* a1, int a2)
+extern "C" void func_00268EA0(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onchallengeresponse(a2 + D_004A3248.v);
+    LobbyMan_onchallengeresponse(lobbyMan + D_004A3248.v);
 }
 #endif
 
@@ -799,12 +799,12 @@ void func_0025FC20(void* self);
  * argument, and the first is not used. The private 'mesg' request passes it to func_003E8B10 as its reply callback;
  * func_0025FC20 is empty.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268EC8(void* self, void* a1, char* a2)
+extern "C" void func_00268EC8(void* self, void* message, char* lobbyMan)
 {
-    func_0025FC20(a2 + D_004A3268.v);
+    func_0025FC20(lobbyMan + D_004A3268.v);
 }
 #endif
 
@@ -821,12 +821,12 @@ extern "C" void LobbyMan_onresultsreportresponse(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the lobby manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param lobbyMan  the lobby manager the callback was registered with
  */
-extern "C" void func_00268EF0(void* self, void* a1, int a2)
+extern "C" void func_00268EF0(void* self, void* message, int lobbyMan)
 {
-    LobbyMan_onresultsreportresponse(a2 + D_004A3318.v);
+    LobbyMan_onresultsreportresponse(lobbyMan + D_004A3318.v);
 }
 #endif
 
@@ -843,12 +843,12 @@ extern "C" void BuddyMan_onconnect(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. func_00261248 (the buddy connect) registers it.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the buddy manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void func_00268F18(void* self, void* a1, int a2)
+extern "C" void func_00268F18(void* self, void* message, int buddyMan)
 {
-    BuddyMan_onconnect(a2 + D_004A3340.v);
+    BuddyMan_onconnect(buddyMan + D_004A3340.v);
 }
 #endif
 
@@ -865,12 +865,12 @@ extern "C" void BuddyMan_onReceiveMessage(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. Registered when the BuddyApi handle is created (mpBuddyApi).
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the buddy manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void func_00268F40(void* self, void* a1, int a2)
+extern "C" void func_00268F40(void* self, void* message, int buddyMan)
 {
-    BuddyMan_onReceiveMessage(a2 + D_004A3348.v);
+    BuddyMan_onReceiveMessage(buddyMan + D_004A3348.v);
 }
 #endif
 
@@ -887,12 +887,12 @@ extern "C" void BuddyMan_onrosterupdate(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. BuddyMan_onconnect registers it on the roster it creates.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the buddy manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void func_00268F68(void* self, void* a1, int a2)
+extern "C" void func_00268F68(void* self, void* message, int buddyMan)
 {
-    BuddyMan_onrosterupdate(a2 + D_004A3350.v);
+    BuddyMan_onrosterupdate(buddyMan + D_004A3350.v);
 }
 #endif
 
@@ -909,12 +909,12 @@ extern "C" void BuddyMan_onBuddyDelete(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. func_00261EF8 and two other BuddyMan functions register it with the delete call.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the buddy manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void func_00268F90(void* self, void* a1, int a2)
+extern "C" void func_00268F90(void* self, void* message, int buddyMan)
 {
-    BuddyMan_onBuddyDelete(a2 + D_004A3380.v);
+    BuddyMan_onBuddyDelete(buddyMan + D_004A3380.v);
 }
 #endif
 
@@ -931,12 +931,12 @@ extern "C" void BuddyMan_onBuddyAdd(int);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used. func_002620D8 registers it with the add call func_003F0E38.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the buddy manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void func_00268FB8(void* self, void* a1, int a2)
+extern "C" void func_00268FB8(void* self, void* message, int buddyMan)
 {
-    BuddyMan_onBuddyAdd(a2 + D_004A3388.v);
+    BuddyMan_onBuddyAdd(buddyMan + D_004A3388.v);
 }
 #endif
 
@@ -953,12 +953,12 @@ void BuddyMan_onBuddySend(void* self);
  * this-adjustment added to it. The second argument passes through untouched in its register as the handler's second
  * argument, and the first is not used.
  *
- * @param a1  the callback's message, passed through to the handler
- * @param a2  the buddy manager the callback was registered with
+ * @param message  the callback's message, passed through to the handler
+ * @param buddyMan  the buddy manager the callback was registered with
  */
-extern "C" void func_00268FE0(void* self, void* a1, char* a2)
+extern "C" void func_00268FE0(void* self, void* message, char* buddyMan)
 {
-    BuddyMan_onBuddySend(a2 + D_004A33A0.v);
+    BuddyMan_onBuddySend(buddyMan + D_004A33A0.v);
 }
 #endif
 
@@ -1003,23 +1003,23 @@ static inline sMsgListIter_00269008 sMsgList_00269008_insert(sMsgListIter_002690
  * Handles the host echoing the client's character pick: takes the host's state, applies the character and posts an
  * event.
  *
- * Stores @p a2 as the setup state (+0x0), applies @p a1 as this player's character (func_00264CF0) and pushes an 8-byte
+ * Stores @p hostState as the setup state (+0x0), applies @p riderId as this player's character (func_00264CF0) and pushes an 8-byte
  * online event of kind 243 (vtable online_Event_vtbl, tag "NetEvent") onto LobbyMan's mEventList. func_002642B8 calls
  * it on the client's setup manager (D_004A33CC) for a type-1 message while the state is below 7.
  *
- * @param a1  the character id from the message
- * @param a2  the host's setup state from the message
+ * @param riderId  the character id from the message
+ * @param hostState  the host's setup state from the message
  */
-extern "C" void func_00269008(void* self, int a1, int a2)
+extern "C" void func_00269008(void* self, int riderId, int hostState)
 {
     int kind = 243;
-    *(int*)self = a2;
-    func_00264CF0(self, a1);
+    *(int*)self = hostState;
+    func_00264CF0(self, riderId);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    m[0] = kind;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    void* mp = m;
+    int* netEvent = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+    netEvent[0] = kind;
+    *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+    void* mp = netEvent;
     sMsgList_00269008_insert((*(sMsgListNode_00269008**)((char*)lobbyMan + 0xF0)), mp);
 }
 #endif
@@ -1065,23 +1065,23 @@ static inline sMsgListIter_002690C8 sMsgList_002690C8_insert(sMsgListIter_002690
  * Handles the host echoing the client's character confirmation: takes the host's state, applies the character and posts
  * an event.
  *
- * Stores @p a2 as the setup state (+0x0), applies @p a1 as this player's character (func_00264CF0) and pushes an 8-byte
+ * Stores @p hostState as the setup state (+0x0), applies @p riderId as this player's character (func_00264CF0) and pushes an 8-byte
  * online event of kind 244 (vtable online_Event_vtbl, tag "NetEvent") onto LobbyMan's mEventList. func_002642B8 calls
  * it on the client's setup manager (D_004A33CC) for a type-3 message while the state is below 7.
  *
- * @param a1  the character id from the message
- * @param a2  the host's setup state from the message
+ * @param riderId  the character id from the message
+ * @param hostState  the host's setup state from the message
  */
-extern "C" void func_002690C8(void* self, int a1, int a2)
+extern "C" void func_002690C8(void* self, int riderId, int hostState)
 {
     int kind = 244;
-    *(int*)self = a2;
-    func_00264CF0(self, a1);
+    *(int*)self = hostState;
+    func_00264CF0(self, riderId);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    m[0] = kind;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    void* mp = m;
+    int* netEvent = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+    netEvent[0] = kind;
+    *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+    void* mp = netEvent;
     sMsgList_002690C8_insert((*(sMsgListNode_002690C8**)((char*)lobbyMan + 0xF0)), mp);
 }
 #endif
@@ -1130,21 +1130,21 @@ struct sMsgSelf_00269188 {
 /**
  * Handles the host echoing the client's withdrawn confirmation: takes the host's state and posts an event.
  *
- * Stores @p a1 as the setup state (+0x0) and pushes an 8-byte online event of kind 247 (vtable online_Event_vtbl, tag
+ * Stores @p hostState as the setup state (+0x0) and pushes an 8-byte online event of kind 247 (vtable online_Event_vtbl, tag
  * "NetEvent") onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (D_004A33CC) for a
  * type-5 message while the state is below 7.
  *
- * @param a1  the host's setup state (the message's second word)
+ * @param hostState  the host's setup state (the message's second word)
  */
-extern "C" void func_00269188(void* self, int a1)
+extern "C" void func_00269188(void* self, int hostState)
 {
     int kind = 247;
-    ((sMsgSelf_00269188*)self)->f0 = a1;
+    ((sMsgSelf_00269188*)self)->f0 = hostState;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    m[0] = kind;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    void* mp = m;
+    int* netEvent = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+    netEvent[0] = kind;
+    *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+    void* mp = netEvent;
     sMsgList_00269188_insert((*(sMsgListNode_00269188**)((char*)lobbyMan + 0xF0)), mp);
 }
 #endif
@@ -1190,25 +1190,25 @@ static inline sMsgListIter_00269240 sMsgList_00269240_insert(sMsgListIter_002692
  * Handles the host's character pick on the client: takes the host's state, records the opponent's character and posts
  * an event.
  *
- * Stores @p a2 as the setup state (+0x0), applies @p a1 and the attribute bytes @p a3 as the opponent's character
+ * Stores @p hostState as the setup state (+0x0), applies @p riderId and the attribute bytes @p riderStats as the opponent's character
  * (func_00264D80) and pushes an 8-byte online event of kind 243 (vtable online_Event_vtbl, tag "NetEvent") onto
  * LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (D_004A33CC) for a type-0 message while
  * the state is below 7.
  *
- * @param a1  the host's character id
- * @param a2  the host's setup state
- * @param a3  the host rider's 7 attribute bytes from the message
+ * @param riderId  the host's character id
+ * @param hostState  the host's setup state
+ * @param riderStats  the host rider's 7 attribute bytes from the message
  */
-extern "C" void func_00269240(void* self, int a1, int a2, void* a3)
+extern "C" void func_00269240(void* self, int riderId, int hostState, void* riderStats)
 {
     int kind = 243;
-    *(int*)self = a2;
-    func_00264D80(self, a1, a3);
+    *(int*)self = hostState;
+    func_00264D80(self, riderId, riderStats);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    m[0] = kind;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    void* mp = m;
+    int* netEvent = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+    netEvent[0] = kind;
+    *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+    void* mp = netEvent;
     sMsgList_00269240_insert((*(sMsgListNode_00269240**)((char*)lobbyMan + 0xF0)), mp);
 }
 #endif
@@ -1254,24 +1254,24 @@ static inline sMsgListIter_00269300 sMsgList_00269300_insert(sMsgListIter_002693
  * Handles the host's character confirmation on the client: takes the host's state, records the opponent's character and
  * posts an event.
  *
- * Stores @p a2 as the setup state (+0x0), applies @p a1 as the opponent's character without attribute bytes
+ * Stores @p hostState as the setup state (+0x0), applies @p riderId as the opponent's character without attribute bytes
  * (func_00264D80) and pushes an 8-byte online event of kind 245 (vtable online_Event_vtbl, tag "NetEvent") onto
  * LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (D_004A33CC) for a type-2 message while
  * the state is below 7.
  *
- * @param a1  the host's character id
- * @param a2  the host's setup state
+ * @param riderId  the host's character id
+ * @param hostState  the host's setup state
  */
-extern "C" void func_00269300(void* self, int a1, int a2)
+extern "C" void func_00269300(void* self, int riderId, int hostState)
 {
     int kind = 245;
-    *(int*)self = a2;
-    func_00264D80(self, a1, 0);
+    *(int*)self = hostState;
+    func_00264D80(self, riderId, 0);
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    m[0] = kind;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    void* mp = m;
+    int* netEvent = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+    netEvent[0] = kind;
+    *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+    void* mp = netEvent;
     sMsgList_00269300_insert((*(sMsgListNode_00269300**)((char*)lobbyMan + 0xF0)), mp);
 }
 #endif
@@ -1320,21 +1320,21 @@ struct sMsgSelf_002693C0 {
 /**
  * Handles the host withdrawing its confirmation on the client: takes the host's state and posts an event.
  *
- * Stores @p a1 as the setup state (+0x0) and pushes an 8-byte online event of kind 247 (vtable online_Event_vtbl, tag
+ * Stores @p hostState as the setup state (+0x0) and pushes an 8-byte online event of kind 247 (vtable online_Event_vtbl, tag
  * "NetEvent") onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup manager (D_004A33CC) for a
  * type-4 message while the state is below 7.
  *
- * @param a1  the host's setup state (the message's second word)
+ * @param hostState  the host's setup state (the message's second word)
  */
-extern "C" void func_002693C0(void* self, int a1)
+extern "C" void func_002693C0(void* self, int hostState)
 {
     int kind = 247;
-    ((sMsgSelf_002693C0*)self)->f0 = a1;
+    ((sMsgSelf_002693C0*)self)->f0 = hostState;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    int* m = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    m[0] = kind;
-    *(void***)((char*)m + 0x4) = online_Event_vtbl;
-    void* mp = m;
+    int* netEvent = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+    netEvent[0] = kind;
+    *(void***)((char*)netEvent + 0x4) = online_Event_vtbl;
+    void* mp = netEvent;
     sMsgList_002693C0_insert((*(sMsgListNode_002693C0**)((char*)lobbyMan + 0xF0)), mp);
 }
 #endif
@@ -1390,16 +1390,16 @@ struct sMsg_00269478 {
  * func_002642B8 calls it on the host's setup manager (D_004A33CC) for a type-7 message in the bragging-rights phase
  * (state 7 or more).
  *
- * @param a1  the highlighted row from the message
+ * @param rowIndex  the highlighted row from the message
  */
-extern "C" void func_00269478(void* self, int a1)
+extern "C" void func_00269478(void* self, int rowIndex)
 {
-    sMsg_00269478* m = (sMsg_00269478*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
-    m->kind = 251;
-    m->vt = D_00481150;
-    m->f8 = 1;
-    m->fC = a1;
-    void* mp = m;
+    sMsg_00269478* netEvent = (sMsg_00269478*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->kind = 251;
+    netEvent->vt = D_00481150;
+    netEvent->f8 = 1;
+    netEvent->fC = rowIndex;
+    void* mp = netEvent;
     sMsgList_00269478_insert((*(sMsgListNode_00269478**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
@@ -1456,18 +1456,18 @@ struct sMsg_00269538 {
  * the same event with flag 0. func_002642B8 calls it on the host's setup manager (D_004A33CC) for a type-9 message in
  * the bragging-rights phase (state 7 or more).
  *
- * @param a1  the rule slot
- * @param a2  the new value
+ * @param ruleSlot  the rule slot
+ * @param ruleValue  the new value
  */
-extern "C" void func_00269538(void* self, int a1, int a2)
+extern "C" void func_00269538(void* self, int ruleSlot, int ruleValue)
 {
-    sMsg_00269538* m = (sMsg_00269538*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
-    m->kind = 0xFC;
-    m->vt = D_00481130;
-    m->f8 = 1;
-    m->fC = a1;
-    m->f10 = a2;
-    void* mp = m;
+    sMsg_00269538* netEvent = (sMsg_00269538*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->kind = 0xFC;
+    netEvent->vt = D_00481130;
+    netEvent->f8 = 1;
+    netEvent->fC = ruleSlot;
+    netEvent->f10 = ruleValue;
+    void* mp = netEvent;
     sMsgList_00269538_insert((*(sMsgListNode_00269538**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
@@ -1536,11 +1536,11 @@ extern "C" void func_00269608(void* self)
         break;
     }
     func_00264E50(self, 11, *(int*)self, 0);
-    sMsg_00269608* m = (sMsg_00269608*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
-    m->kind = 253;
-    m->vt = D_004813E0;
-    m->f8 = 1;
-    void* mp = m;
+    sMsg_00269608* netEvent = (sMsg_00269608*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->kind = 253;
+    netEvent->vt = D_004813E0;
+    netEvent->f8 = 1;
+    void* mp = netEvent;
     sMsgList_00269608_insert((*(sMsgListNode_00269608**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
@@ -1601,11 +1601,11 @@ extern "C" void func_002696F8(void* self)
     if (*(int*)self == 8)
         *(int*)self = 7;
     func_00264E50(self, 0xC, *(int*)self, 0);
-    sMsg_002696F8* m = (sMsg_002696F8*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
-    m->kind = 0xFE;
-    m->vt = D_004813C0;
-    m->f8 = 1;
-    void* mp = m;
+    sMsg_002696F8* netEvent = (sMsg_002696F8*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->kind = 0xFE;
+    netEvent->vt = D_004813C0;
+    netEvent->f8 = 1;
+    void* mp = netEvent;
     sMsgList_002696F8_insert((*(sMsgListNode_002696F8**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
@@ -1661,16 +1661,16 @@ struct sMsg_002697D0 {
  * func_002642B8 calls it on the client's setup manager (D_004A33CC) for a type-6 message in the bragging-rights phase
  * (state 7 or more).
  *
- * @param a1  the highlighted row from the message
+ * @param rowIndex  the highlighted row from the message
  */
-extern "C" void func_002697D0(void* self, int a1)
+extern "C" void func_002697D0(void* self, int rowIndex)
 {
-    sMsg_002697D0* m = (sMsg_002697D0*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
-    m->kind = 251;
-    m->vt = D_00481150;
-    m->f8 = 1;
-    m->fC = a1;
-    void* mp = m;
+    sMsg_002697D0* netEvent = (sMsg_002697D0*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->kind = 251;
+    netEvent->vt = D_00481150;
+    netEvent->f8 = 1;
+    netEvent->fC = rowIndex;
+    void* mp = netEvent;
     sMsgList_002697D0_insert((*(sMsgListNode_002697D0**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
@@ -1725,16 +1725,16 @@ struct sMsg_00269890 {
  * 0 onto LobbyMan's mEventList, like the local sender func_00265458. func_002642B8 calls it on the client's setup
  * manager (D_004A33CC) for a type-7 message in the bragging-rights phase (state 7 or more).
  *
- * @param a1  the highlighted row from the message
+ * @param rowIndex  the highlighted row from the message
  */
-extern "C" void func_00269890(void* self, int a1)
+extern "C" void func_00269890(void* self, int rowIndex)
 {
-    sMsg_00269890* m = (sMsg_00269890*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
-    m->kind = 251;
-    m->vt = D_00481150;
-    m->f8 = 0;
-    m->fC = a1;
-    void* mp = m;
+    sMsg_00269890* netEvent = (sMsg_00269890*)cMemMan_alloc(0x10, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->kind = 251;
+    netEvent->vt = D_00481150;
+    netEvent->f8 = 0;
+    netEvent->fC = rowIndex;
+    void* mp = netEvent;
     sMsgList_00269890_insert((*(sMsgListNode_00269890**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
@@ -1791,18 +1791,18 @@ struct sMsg_00269948 {
  * the same event with flag 0. func_002642B8 calls it on the client's setup manager (D_004A33CC) for a type-8 message in
  * the bragging-rights phase (state 7 or more).
  *
- * @param a1  the rule slot
- * @param a2  the new value
+ * @param ruleSlot  the rule slot
+ * @param ruleValue  the new value
  */
-extern "C" void func_00269948(void* self, int a1, int a2)
+extern "C" void func_00269948(void* self, int ruleSlot, int ruleValue)
 {
-    sMsg_00269948* m = (sMsg_00269948*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
-    m->kind = 0xFC;
-    m->vt = D_00481130;
-    m->f8 = 1;
-    m->fC = a1;
-    m->f10 = a2;
-    void* mp = m;
+    sMsg_00269948* netEvent = (sMsg_00269948*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->kind = 0xFC;
+    netEvent->vt = D_00481130;
+    netEvent->f8 = 1;
+    netEvent->fC = ruleSlot;
+    netEvent->f10 = ruleValue;
+    void* mp = netEvent;
     sMsgList_00269948_insert((*(sMsgListNode_00269948**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
@@ -1859,18 +1859,18 @@ struct sMsg_00269A18 {
  * calls it on the client's setup manager (D_004A33CC) for a type-9 message in the bragging-rights phase (state 7 or
  * more).
  *
- * @param a1  the rule slot
- * @param a2  the new value
+ * @param ruleSlot  the rule slot
+ * @param ruleValue  the new value
  */
-extern "C" void func_00269A18(void* self, int a1, int a2)
+extern "C" void func_00269A18(void* self, int ruleSlot, int ruleValue)
 {
-    sMsg_00269A18* m = (sMsg_00269A18*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
-    m->kind = 0xFC;
-    m->vt = D_00481130;
-    m->f8 = 0;
-    m->fC = a1;
-    m->f10 = a2;
-    void* mp = m;
+    sMsg_00269A18* netEvent = (sMsg_00269A18*)cMemMan_alloc(20, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->kind = 0xFC;
+    netEvent->vt = D_00481130;
+    netEvent->f8 = 0;
+    netEvent->fC = ruleSlot;
+    netEvent->f10 = ruleValue;
+    void* mp = netEvent;
     sMsgList_00269A18_insert((*(sMsgListNode_00269A18**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
@@ -1920,20 +1920,20 @@ struct sMsg_00269AE0 {
 /**
  * Handles the host locking its bragging-rights panel on the client: takes the host's state and posts an event.
  *
- * Stores @p a1 as the setup state (+0x0) and pushes a 0xC-byte event of kind 253 (vtable D_004813E0, tag
+ * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 253 (vtable D_004813E0, tag
  * "cSetupMan::Update") with flag +0x8 = 1 onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup
  * manager (D_004A33CC) for a type-10 message in the bragging-rights phase (state 7 or more).
  *
- * @param a1  the host's setup state from the message
+ * @param hostState  the host's setup state from the message
  */
-extern "C" void func_00269AE0(void* self, int a1)
+extern "C" void func_00269AE0(void* self, int hostState)
 {
-    *(int*)self = a1;
-    sMsg_00269AE0* m = (sMsg_00269AE0*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
-    m->kind = 253;
-    m->vt = D_004813E0;
-    m->f8 = 1;
-    void* mp = m;
+    *(int*)self = hostState;
+    sMsg_00269AE0* netEvent = (sMsg_00269AE0*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->kind = 253;
+    netEvent->vt = D_004813E0;
+    netEvent->f8 = 1;
+    void* mp = netEvent;
     sMsgList_00269AE0_insert((*(sMsgListNode_00269AE0**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
@@ -1984,20 +1984,20 @@ struct sMsg_00269B90 {
  * Handles the host's answer to the client's lock (type 11, sent by func_00269608): takes the host's state and posts an
  * event.
  *
- * Stores @p a1 as the setup state (+0x0) and pushes a 0xC-byte event of kind 253 (vtable D_004813E0, tag
+ * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 253 (vtable D_004813E0, tag
  * "cSetupMan::Update") with flag +0x8 = 0 onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup
  * manager (D_004A33CC) for a type-11 message in the bragging-rights phase (state 7 or more).
  *
- * @param a1  the host's setup state from the message
+ * @param hostState  the host's setup state from the message
  */
-extern "C" void func_00269B90(void* self, int a1)
+extern "C" void func_00269B90(void* self, int hostState)
 {
-    *(int*)self = a1;
-    sMsg_00269B90* m = (sMsg_00269B90*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
-    m->kind = 253;
-    m->vt = D_004813E0;
-    m->f8 = 0;
-    void* mp = m;
+    *(int*)self = hostState;
+    sMsg_00269B90* netEvent = (sMsg_00269B90*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->kind = 253;
+    netEvent->vt = D_004813E0;
+    netEvent->f8 = 0;
+    void* mp = netEvent;
     sMsgList_00269B90_insert((*(sMsgListNode_00269B90**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
@@ -2048,20 +2048,20 @@ struct sMsg_00269C40 {
  * Handles a type-12 unlock message from the host on the client: takes the host's state and posts an event.
  *
  * Type 12 comes from the host unlocking its own panel (func_00265700) or answering the client's unlock (func_002696F8).
- * Stores @p a1 as the setup state (+0x0) and pushes a 0xC-byte event of kind 254 (vtable D_004813C0, tag
+ * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 254 (vtable D_004813C0, tag
  * "cSetupMan::Update") with flag +0x8 = 1 onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup
  * manager (D_004A33CC) for a type-12 message in the bragging-rights phase (state 7 or more).
  *
- * @param a1  the host's setup state from the message
+ * @param hostState  the host's setup state from the message
  */
-extern "C" void func_00269C40(void* self, int a1)
+extern "C" void func_00269C40(void* self, int hostState)
 {
-    *(int*)self = a1;
-    sMsg_00269C40* m = (sMsg_00269C40*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
-    m->kind = 0xFE;
-    m->vt = D_004813C0;
-    m->f8 = 1;
-    void* mp = m;
+    *(int*)self = hostState;
+    sMsg_00269C40* netEvent = (sMsg_00269C40*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->kind = 0xFE;
+    netEvent->vt = D_004813C0;
+    netEvent->f8 = 1;
+    void* mp = netEvent;
     sMsgList_00269C40_insert((*(sMsgListNode_00269C40**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
@@ -2111,20 +2111,20 @@ struct sMsg_00269CF0 {
 /**
  * Handles a type-13 unlock message on the client: takes the state from it and posts an event with flag 0.
  *
- * Stores @p a1 as the setup state (+0x0) and pushes a 0xC-byte event of kind 254 (vtable D_004813C0, tag
+ * Stores @p hostState as the setup state (+0x0) and pushes a 0xC-byte event of kind 254 (vtable D_004813C0, tag
  * "cSetupMan::Update") with flag +0x8 = 0 onto LobbyMan's mEventList. func_002642B8 calls it on the client's setup
  * manager (D_004A33CC) for a type-13 message in the bragging-rights phase (state 7 or more).
  *
- * @param a1  the setup state from the message
+ * @param hostState  the setup state from the message
  */
-extern "C" void func_00269CF0(void* self, int a1)
+extern "C" void func_00269CF0(void* self, int hostState)
 {
-    *(int*)self = a1;
-    sMsg_00269CF0* m = (sMsg_00269CF0*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
-    m->kind = 0xFE;
-    m->vt = D_004813C0;
-    m->f8 = 0;
-    void* mp = m;
+    *(int*)self = hostState;
+    sMsg_00269CF0* netEvent = (sMsg_00269CF0*)cMemMan_alloc(0xC, str_cSetupMan_Update, 0x20000000, 0);
+    netEvent->kind = 0xFE;
+    netEvent->vt = D_004813C0;
+    netEvent->f8 = 0;
+    void* mp = netEvent;
     sMsgList_00269CF0_insert((*(sMsgListNode_00269CF0**)((char*)LobbyMan_mLobbyMan + 0xF0)), mp);
 }
 #endif
@@ -2170,10 +2170,10 @@ struct sNode00269DC0 {
 extern "C" sNode00269DC0* func_00269DC0(void* self)
 {
     sNode00269DC0* n = (sNode00269DC0*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
-    int v = *(int*)((char*)self + 8);
+    int flagWord = *(int*)((char*)self + 8);
     n->kind = 253;
     n->vtbl = D_004813E0;
-    n->value = v;
+    n->value = flagWord;
     return n;
 }
 #endif
@@ -2217,10 +2217,10 @@ struct sNode00269E40 {
 extern "C" sNode00269E40* func_00269E40(void* self)
 {
     sNode00269E40* n = (sNode00269E40*)cMemMan_alloc(0xC, str_NetEvent, 0x20000000, 0);
-    int v = *(int*)((char*)self + 8);
+    int flagWord = *(int*)((char*)self + 8);
     n->kind = 0xFE;
     n->vtbl = D_004813C0;
-    n->value = v;
+    n->value = flagWord;
     return n;
 }
 #endif
@@ -2567,7 +2567,7 @@ extern "C" int func_0026A180(sBXStr_26A180* self, char* src)
 {
     char* start = src;
     int n;
-    int a;
+    int chunkId;
     int itemSize;
     int itemCount;
     sVE0_26A180* vt0 = (sVE0_26A180*)self->vt;
@@ -2576,12 +2576,12 @@ extern "C" int func_0026A180(sBXStr_26A180* self, char* src)
     src += 4;
     for (int i = 0; i < n; i++)
     {
-        pathREAD_tInt32_A180(&a, src);
+        pathREAD_tInt32_A180(&chunkId, src);
         src += 4;
         pathREAD_tInt32_A180(&itemSize, src);
         src += 4;
         sVE1_26A180* vt1 = (sVE1_26A180*)self->vt;
-        vt1[4].fn((char*)self + vt1[4].delta, src, a, itemSize);
+        vt1[4].fn((char*)self + vt1[4].delta, src, chunkId, itemSize);
         src += itemSize;
     }
     pathREAD_tInt32_A180(&itemCount, src);
@@ -2786,21 +2786,21 @@ static inline float bxClamp_A428(float v, float lo, float hi)
 }
 
 /**
- * Finds the point of a path nearest to @p p and returns its position along the path.
+ * Finds the point of a path nearest to @p cursor and returns its position along the path.
  *
- * Walks the path's segments from its start (+0xC): for each node (+0x18, count +0x8) it projects @p p onto the segment,
+ * Walks the path's segments from its start (+0xC): for each node (+0x18, count +0x8) it projects @p cursor onto the segment,
  * clamped to its length, and keeps the closest point. With @p flat only X and Y count. The best point goes to @p outPos
  * and the horizontal (XY) distance to it, square-rooted, to @p outDist, even when the comparison was in 3D.
  *
  * The AI (ai/computer) uses it on track and AI paths, for example when the rider is in a pipe jump.
  *
- * @param p  the point to project
+ * @param cursor  the point to project
  * @param outPos  receives the nearest point on the path
  * @param outDist  receives the XY distance to it
  * @param flat  non-zero to measure in X and Y only
  * @return the position along the path of the nearest point
  */
-extern "C" float func_0026A428(sBXPath_A428* self, const sBXVec4_A428& p, sBXVec4_A428* outPos,
+extern "C" float func_0026A428(sBXPath_A428* self, const sBXVec4_A428& cursor, sBXVec4_A428* outPos,
                                float* outDist, int flat)
 {
     float bestT = 0.0f;
@@ -2815,28 +2815,28 @@ extern "C" float func_0026A428(sBXPath_A428* self, const sBXVec4_A428& p, sBXVec
         dir.z = self->segs[i].z;
         dir.w = 0.0f;
         float len = self->segs[i].len;
-        sBXVec4_A428 d = bxVu0Sub_A428(p, pos);
-        float t;
+        sBXVec4_A428 delta = bxVu0Sub_A428(cursor, pos);
+        float projLen;
         if (flat)
-            t = d.x * dir.x + d.y * dir.y;
+            projLen = delta.x * dir.x + delta.y * dir.y;
         else
-            t = bxVu0Dot_A428(d, dir);
-        float tc = bxClamp_A428(t, 0.0f, len);
-        sBXVec4_A428 q = bxVu0Add_A428(pos, bxVu0Scale_A428(dir, tc));
-        d = bxVu0Sub_A428(p, q);
-        float d2;
+            projLen = bxVu0Dot_A428(delta, dir);
+        float tc = bxClamp_A428(projLen, 0.0f, len);
+        sBXVec4_A428 nearPoint = bxVu0Add_A428(pos, bxVu0Scale_A428(dir, tc));
+        delta = bxVu0Sub_A428(cursor, nearPoint);
+        float distSq;
         if (flat)
-            d2 = d.x * d.x + d.y * d.y;
+            distSq = delta.x * delta.x + delta.y * delta.y;
         else
-            d2 = bxVu0Dot_A428(d, d);
-        if (d2 < best) {
-            best = d2;
+            distSq = bxVu0Dot_A428(delta, delta);
+        if (distSq < best) {
+            best = distSq;
             if (flat)
-                bestDist = d2;
+                bestDist = distSq;
             else
-                bestDist = d.x * d.x + d.y * d.y;
+                bestDist = delta.x * delta.x + delta.y * delta.y;
             bestT = along + tc;
-            *outPos = q;
+            *outPos = nearPoint;
         }
         along += len;
         bxVu0AddEq_A428(pos, bxVu0Scale_A428(dir, len));
@@ -2967,9 +2967,9 @@ struct sBXPathCache_A638 {
 };
 
 /**
- * Finds the point of a path nearest to @p p, starting from a cached segment, and returns its position along the path.
+ * Finds the point of a path nearest to @p cursor, starting from a cached segment, and returns its position along the path.
  *
- * Walks the path's segments from its start (+0xC): for each node (+0x18, count +0x8) it projects @p p onto the segment,
+ * Walks the path's segments from its start (+0xC): for each node (+0x18, count +0x8) it projects @p cursor onto the segment,
  * clamped to its length, and keeps the closest point. With @p flat only X and Y count. The best point goes to @p outPos
  * and the horizontal (XY) distance to it, square-rooted, to @p outDist, even when the comparison was in 3D.
  *
@@ -2977,14 +2977,14 @@ struct sBXPathCache_A638 {
  * (+0x10), gives up 3000 units further on, and stops at the first improvement whose projection did not need clamping.
  * Each improvement is written back to @p cache. The AI calls it every update with the rider's path hint.
  *
- * @param p  the point to project
+ * @param cursor  the point to project
  * @param outPos  receives the nearest point on the path
  * @param outDist  receives the XY distance to it
  * @param cache  the search hint: start point, distance and segment index of the last result
  * @param flat  non-zero to measure in X and Y only
  * @return the position along the path of the nearest point
  */
-extern "C" float func_0026A638(sBXPath_A638* self, const sBXVec4_A638& p, sBXVec4_A638* outPos,
+extern "C" float func_0026A638(sBXPath_A638* self, const sBXVec4_A638& cursor, sBXVec4_A638* outPos,
                                float* outDist, sBXPathCache_A638* cache, int flat)
 {
     float bestT = 0.0f;
@@ -3013,32 +3013,32 @@ extern "C" float func_0026A638(sBXPath_A638* self, const sBXVec4_A638& p, sBXVec
         dir.z = self->segs[i].z;
         dir.w = 0.0f;
         float len = self->segs[i].len;
-        sBXVec4_A638 d = bxVu0Sub_A638(p, pos);
-        float t;
+        sBXVec4_A638 delta = bxVu0Sub_A638(cursor, pos);
+        float projLen;
         if (flat)
-            t = d.x * dir.x + d.y * dir.y;
+            projLen = delta.x * dir.x + delta.y * dir.y;
         else
-            t = bxVu0Dot_A638(d, dir);
-        float tc = bxClamp_A638(t, 0.0f, len);
-        sBXVec4_A638 q = bxVu0Add_A638(pos, bxVu0Scale_A638(dir, tc));
-        d = bxVu0Sub_A638(p, q);
-        float d2;
+            projLen = bxVu0Dot_A638(delta, dir);
+        float tc = bxClamp_A638(projLen, 0.0f, len);
+        sBXVec4_A638 nearPoint = bxVu0Add_A638(pos, bxVu0Scale_A638(dir, tc));
+        delta = bxVu0Sub_A638(cursor, nearPoint);
+        float distSq;
         if (flat)
-            d2 = d.x * d.x + d.y * d.y;
+            distSq = delta.x * delta.x + delta.y * delta.y;
         else
-            d2 = bxVu0Dot_A638(d, d);
-        if (d2 < best) {
-            best = d2;
+            distSq = bxVu0Dot_A638(delta, delta);
+        if (distSq < best) {
+            best = distSq;
             if (flat)
-                bestDist = d2;
+                bestDist = distSq;
             else
-                bestDist = d.x * d.x + d.y * d.y;
+                bestDist = delta.x * delta.x + delta.y * delta.y;
             bestT = along + tc;
-            *outPos = q;
+            *outPos = nearPoint;
             cache->pos = pos;
             cache->along = along;
             cache->idx = i;
-            if (cached && tc == t)
+            if (cached && tc == projLen)
                 break;
         }
         if (limit < along)

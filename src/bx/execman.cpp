@@ -490,10 +490,10 @@ extern "C" void cInputMap_getValue1(int, int, int, int);
  *
  * @param input  the input (pad +0x0, map +0x4)
  * @param state  the input state id
- * @param arg2  the button modifier
+ * @param modifier  the button modifier
  */
-extern "C" void func_00320C18(void *input, int state, int arg2) {
-    cInputMap_getValue1((*(int *)((char*)(input) + (4))), (*(int *)((char*)(input) + (0))), state, arg2);
+extern "C" void func_00320C18(void *input, int state, int modifier) {
+    cInputMap_getValue1((*(int *)((char*)(input) + (4))), (*(int *)((char*)(input) + (0))), state, modifier);
 }
 #endif
 
@@ -530,9 +530,9 @@ extern "C" void cInputMap_getState1(int, int, int, int);
  *
  * @param input  the input (pad +0x0, map +0x4)
  * @param state  the input state id
- * @param arg2  the button modifier
+ * @param modifier  the button modifier
  */
-extern "C" void func_00320C70(void *input, int state, int arg2) {
-    cInputMap_getState1((*(int *)((char*)(input) + (4))), (*(int *)((char*)(input) + (0))), state, arg2);
+extern "C" void func_00320C70(void *input, int state, int modifier) {
+    cInputMap_getState1((*(int *)((char*)(input) + (4))), (*(int *)((char*)(input) + (0))), state, modifier);
 }
 #endif

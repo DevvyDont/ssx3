@@ -146,26 +146,26 @@ extern sBlk20_A188 D_005308B8_A188 __asm__("D_005308B8");
  * when player 1 has a character (mCharID >= 0), the 0x9B50-byte profile D_004BA348 (profile 2) and the 0x20 bytes at
  * D_005308B8. func_0014E050 calls it and appends the CRC.
  *
- * @param p  the save buffer to fill
+ * @param data  the save buffer to fill
  */
-extern "C" void func_0014A188(char* p)
+extern "C" void func_0014A188(char* data)
 {
     int rider;
-    *(sBlk4C_A188*)p = *(sBlk4C_A188*)cBELibrary_raceDB;
-    p += sizeof(sBlk4C_A188);
-    *(sProfileBlk_A188*)p = *PROFILE_A188;
-    p += sizeof(sProfileBlk_A188);
+    *(sBlk4C_A188*)data = *(sBlk4C_A188*)cBELibrary_raceDB;
+    data += sizeof(sBlk4C_A188);
+    *(sProfileBlk_A188*)data = *PROFILE_A188;
+    data += sizeof(sProfileBlk_A188);
     rider = PROFILE_A188->rider[0].mCharID;
-    *(sBlkF88_A188*)p = ((sBlkF88_A188*)cBELibrary_profileLib)[rider];
-    p += sizeof(sBlkF88_A188);
+    *(sBlkF88_A188*)data = ((sBlkF88_A188*)cBELibrary_profileLib)[rider];
+    data += sizeof(sBlkF88_A188);
     rider = PROFILE_A188->rider[1].mCharID;
     if (rider >= 0) {
-        *(sBlkF88_A188*)p = D_004B07F8_A188[rider];
-        p += sizeof(sBlkF88_A188);
+        *(sBlkF88_A188*)data = D_004B07F8_A188[rider];
+        data += sizeof(sBlkF88_A188);
     }
-    *(sBlk9B50_A188*)p = D_004BA348_A188;
-    p += sizeof(sBlk9B50_A188);
-    *(sBlk20_A188*)p = D_005308B8_A188;
+    *(sBlk9B50_A188*)data = D_004BA348_A188;
+    data += sizeof(sBlk9B50_A188);
+    *(sBlk20_A188*)data = D_005308B8_A188;
 }
 #endif
 
@@ -252,16 +252,16 @@ extern "C" int cBELibrary_getScoreType(int a, int b);
 /**
  * Returns the 5-entry high-score table for a location and event, or null when the pair has none.
  *
- * The index is cBELibrary_getScoreType(@p a, @p b); 26 means none. The tables are D_00535C18, 0x64 bytes each (five
+ * The index is cBELibrary_getScoreType(@p locationId, @p gameEvent); 26 means none. The tables are D_00535C18, 0x64 bytes each (five
  * 0x14-byte entries: score, character ID, 12-byte name).
  *
- * @param a  the location (On Tour eBELocationID)
- * @param b  the game event or stat kind
+ * @param locationId  the location (On Tour eBELocationID)
+ * @param gameEvent  the game event or stat kind
  * @return the table, or null
  */
-extern "C" void* func_0014AB20(int a, int b)
+extern "C" void* func_0014AB20(int locationId, int gameEvent)
 {
-    int type = cBELibrary_getScoreType(a, b);
+    int type = cBELibrary_getScoreType(locationId, gameEvent);
     if (type == 26) {
         return 0;
     }
@@ -541,15 +541,15 @@ extern sBEProfileChar D_004A6CA8_pc[][10] __asm__("cBELibrary_profileLib");
  * Returns a character's bolt entries (+0x290 of the character record (cBELibrary_profileLib + profile * 0x9B50 +
  * character * 0xF88)) and stores their count (+0x28C) through @p out.
  *
- * @param a1  profile index
- * @param a2  character ID
+ * @param profileIndex  profile index
+ * @param characterId  character ID
  * @param out  receives the number of entries
  * @return the first entry
  */
-extern "C" void* func_0014AE28(void* self, int a1, int a2, int* out)
+extern "C" void* func_0014AE28(void* self, int profileIndex, int characterId, int* out)
 {
-    *out = D_004A6CA8_pc[a1][a2].getCount();
-    return D_004A6CA8_pc[a1][a2].getEntries();
+    *out = D_004A6CA8_pc[profileIndex][characterId].getCount();
+    return D_004A6CA8_pc[profileIndex][characterId].getEntries();
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -741,19 +741,19 @@ extern "C" void func_00152368(void*, int, int);
 
 /**
  * Tests flags of one bolt of a character: func_00152368(the character record (cBELibrary_profileLib + profile * 0x9B50
- * + character * 0xF88), @p a3, @p a4).
+ * + character * 0xF88), @p boltId, @p flagMask).
  *
  * func_00152368 is true when every bit of the mask is set in the bolt's entry flags. Nothing calls it; the result is
  * dropped.
  *
  * @param profileIndex  profile index
  * @param characterId  character ID
- * @param a3  the bolt id
- * @param a4  the flag mask
+ * @param boltId  the bolt id
+ * @param flagMask  the flag mask
  */
-extern "C" void func_0014B170(void* self, int profileIndex, int characterId, int a3, int a4)
+extern "C" void func_0014B170(void* self, int profileIndex, int characterId, int boltId, int flagMask)
 {
-    func_00152368((char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976, a3, a4);
+    func_00152368((char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976, boltId, flagMask);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -769,14 +769,14 @@ extern "C" void func_00152368(void*, int, int);
  * Nothing calls it; the result is dropped.
  *
  * @param rider  race rider slot
- * @param b  the bolt id
- * @param c  the flag mask
+ * @param boltId  the bolt id
+ * @param flagMask  the flag mask
  */
-extern "C" void func_0014B1B0(void* self, int rider, int b, int c)
+extern "C" void func_0014B1B0(void* self, int rider, int boltId, int flagMask)
 {
     int ch = 0;
     int profile = func_0014AC70(self, rider, &ch);
-    func_00152368((char*)cBELibrary_profileLib + profile * 0x9b50 + ch * 3976, b, c);
+    func_00152368((char*)cBELibrary_profileLib + profile * 0x9b50 + ch * 3976, boltId, flagMask);
 }
 #endif
 //100%
@@ -792,23 +792,23 @@ extern sBEProfileChar D_004A6CA8_pc[][10] __asm__("cBELibrary_profileLib");
  * Copies every bolt entry of a character whose flags contain all of @p mask to @p out and returns how many.
  *
  * Walks the character record's bolt entries (+0x290, 4 bytes each: id, flags; count at +0x28C) of
- * cBELibrary_profileLib[@p a1][@p a2]. Nothing calls it.
+ * cBELibrary_profileLib[@p profileIndex][@p characterId]. Nothing calls it.
  *
- * @param a1  profile index
- * @param a2  character ID
+ * @param profileIndex  profile index
+ * @param characterId  character ID
  * @param mask  flags an entry must have
  * @param out  receives the matching 4-byte entries
  * @return the number of entries copied
  */
-extern "C" int func_0014B218(void* self, int a1, int a2, unsigned int mask, sBEFlagEntryPC* out)
+extern "C" int func_0014B218(void* self, int profileIndex, int characterId, unsigned int mask, sBEFlagEntryPC* out)
 {
-    int count = D_004A6CA8_pc[a1][a2].getCount();
-    sBEFlagEntryPC* e = D_004A6CA8_pc[a1][a2].getEntries();
+    int count = D_004A6CA8_pc[profileIndex][characterId].getCount();
+    sBEFlagEntryPC* flagEntry = D_004A6CA8_pc[profileIndex][characterId].getEntries();
     int n = 0;
     int i;
-    for (i = 0; i < count; i++, e++) {
-        if ((e->flags & mask) == mask) {
-            *out++ = *e;
+    for (i = 0; i < count; i++, flagEntry++) {
+        if ((flagEntry->flags & mask) == mask) {
+            *out++ = *flagEntry;
             n++;
         }
     }
@@ -828,21 +828,21 @@ extern sBEProfileChar D_004A6CA8_pc[][10] __asm__("cBELibrary_profileLib");
  * Counts the bolt entries of a character whose flags contain all of @p mask.
  *
  * Walks the character record's bolt entries (+0x290, 4 bytes each: id, flags; count at +0x28C) of
- * cBELibrary_profileLib[@p a1][@p a2]. Nothing calls it.
+ * cBELibrary_profileLib[@p profileIndex][@p characterId]. Nothing calls it.
  *
- * @param a1  profile index
- * @param a2  character ID
+ * @param profileIndex  profile index
+ * @param characterId  character ID
  * @param mask  flags an entry must have
  * @return the number of matching entries
  */
-extern "C" int func_0014B290(void* self, int a1, int a2, unsigned int mask)
+extern "C" int func_0014B290(void* self, int profileIndex, int characterId, unsigned int mask)
 {
-    int count = D_004A6CA8_pc[a1][a2].getCount();
-    sBEFlagEntryPC* e = D_004A6CA8_pc[a1][a2].getEntries();
+    int count = D_004A6CA8_pc[profileIndex][characterId].getCount();
+    sBEFlagEntryPC* flagEntry = D_004A6CA8_pc[profileIndex][characterId].getEntries();
     int n = 0;
     int i;
-    for (i = 0; i < count; i++, e++) {
-        if ((e->flags & mask) == mask) {
+    for (i = 0; i < count; i++, flagEntry++) {
+        if ((flagEntry->flags & mask) == mask) {
             n++;
         }
     }
@@ -869,17 +869,17 @@ struct sBEEntry38_B2F8 {
  * Walks the character's 0x38-byte definitions in the bolt database D_004A6750 (func_0014D998, count func_0014D988).
  * Nothing calls it.
  *
- * @param a  character ID (the bolt database group)
+ * @param characterId  character ID (the bolt database group)
  * @return the number of definitions with byte +0x1 == 0
  */
-extern "C" int func_0014B2F8(void* self, int a)
+extern "C" int func_0014B2F8(void* self, int characterId)
 {
-    int count = func_0014D988(D_004A6750, a);
-    sBEEntry38_B2F8* e = (sBEEntry38_B2F8*)func_0014D998((sBELibTables*)D_004A6750, a);
+    int count = func_0014D988(D_004A6750, characterId);
+    sBEEntry38_B2F8* boltDef = (sBEEntry38_B2F8*)func_0014D998((sBELibTables*)D_004A6750, characterId);
     int n = 0;
     int i;
-    for (i = 0; i < count; i++, e++) {
-        if (e->used == 0)
+    for (i = 0; i < count; i++, boltDef++) {
+        if (boltDef->used == 0)
             n++;
     }
     return n;
@@ -905,19 +905,19 @@ struct sBEEntry38_B378 {
  * Walks the character's 0x38-byte definitions in the bolt database D_004A6750 (func_0014D998, count func_0014D988).
  * Nothing calls it.
  *
- * @param a  character ID (the bolt database group)
+ * @param characterId  character ID (the bolt database group)
  * @param out  receives the 0x38-byte definitions
  * @return the number of definitions copied
  */
-extern "C" int func_0014B378(void* self, int a, sBEEntry38_B378* out)
+extern "C" int func_0014B378(void* self, int characterId, sBEEntry38_B378* out)
 {
-    int count = func_0014D988(D_004A6750, a);
-    sBEEntry38_B378* e = (sBEEntry38_B378*)func_0014D998((sBELibTables*)D_004A6750, a);
+    int count = func_0014D988(D_004A6750, characterId);
+    sBEEntry38_B378* boltDef = (sBEEntry38_B378*)func_0014D998((sBELibTables*)D_004A6750, characterId);
     int n = 0;
     int i;
-    for (i = 0; i < count; i++, e++) {
-        if (e->used == 0) {
-            *out++ = *e;
+    for (i = 0; i < count; i++, boltDef++) {
+        if (boltDef->used == 0) {
+            *out++ = *boltDef;
             n++;
         }
     }
@@ -957,26 +957,26 @@ struct sBEEntry38B {
  * at +0x288 of the character record (cBELibrary_profileLib + profile * 0x9B50 + character * 0xF88) (no null check). The
  * equip screen shows it as the points spent.
  *
- * @param a1  profile index
- * @param a2  character ID
+ * @param profileIndex  profile index
+ * @param characterId  character ID
  * @return the total equip points
  */
-extern "C" int func_0014B478(void* self, int a1, int a2)
+extern "C" int func_0014B478(void* self, int profileIndex, int characterId)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 3976;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
     int sum = 0;
-    int count = func_0014D988(D_004A6750, a2);
-    sBEEntry38B* e = (sBEEntry38B*)func_0014D998((sBELibTables*)D_004A6750, a2);
+    int count = func_0014D988(D_004A6750, characterId);
+    sBEEntry38B* boltDef = (sBEEntry38B*)func_0014D998((sBELibTables*)D_004A6750, characterId);
     int i;
-    for (i = 0; i < count; i++, e++) {
-        short s = (*(short**)(p + 0x288))[e->field_0x4];
-        sBEFlagEntryB* f;
-        if (s >= 0)
-            f = (sBEFlagEntryB*)(p + 0x290) + s;
+    for (i = 0; i < count; i++, boltDef++) {
+        short entryIndex = (*(short**)(charRecord + 0x288))[boltDef->field_0x4];
+        sBEFlagEntryB* flagEntry;
+        if (entryIndex >= 0)
+            flagEntry = (sBEFlagEntryB*)(charRecord + 0x290) + entryIndex;
         else
-            f = 0;
-        if (f->flags & 0x10)
-            sum += e->field_0xC;
+            flagEntry = 0;
+        if (flagEntry->flags & 0x10)
+            sum += boltDef->field_0xC;
     }
     return sum;
 }
@@ -1032,29 +1032,29 @@ static inline int scale10_14B560(int v)
  * money (func_00150B48 on the economy interface); otherwise just calls cBEEconInterface_getMoney. The store's buy
  * action and cBERewardInterface_awardUser (unpaid, for item awards) call it.
  *
- * @param a1  profile index
- * @param a2  character ID
+ * @param profileIndex  profile index
+ * @param characterId  character ID
  * @param key  the bolt id
  * @param flag  non-zero to charge the price
  */
-extern "C" void func_0014B560(void* self, int a1, int a2, int key, int flag)
+extern "C" void func_0014B560(void* self, int profileIndex, int characterId, int key, int flag)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 11);
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 3976;
-    func_00151C48(p, key, 1);
-    sBEEntry38_14B560* e = (sBEEntry38_14B560*)func_0014D998((sBELibTables*)func_0014BDB8_0(), a2);
-    int n = func_0014D988(func_0014BDB8_0(), a2);
-    for (int j = 0; j < n; j++, e++) {
-        if (scale10_14B560(e->field_0xE) == -key) {
-            func_00151C48(p, e->field_0x4, 1);
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    func_00151C48(charRecord, key, 1);
+    sBEEntry38_14B560* boltDef = (sBEEntry38_14B560*)func_0014D998((sBELibTables*)func_0014BDB8_0(), characterId);
+    int n = func_0014D988(func_0014BDB8_0(), characterId);
+    for (int j = 0; j < n; j++, boltDef++) {
+        if (scale10_14B560(boltDef->field_0xE) == -key) {
+            func_00151C48(charRecord, boltDef->field_0x4, 1);
         }
     }
     sBETbl_14B560* tbl = (sBETbl_14B560*)func_0014BDB8_0();
-    e = entry_14B560(tbl, func_0014D448((sBEGroupTable*)tbl, a2, key));
+    boltDef = entry_14B560(tbl, func_0014D448((sBEGroupTable*)tbl, characterId, key));
     if (flag) {
-        func_00150B48(iface, a1, a2, scale10_14B560(e->field_0xE));
+        func_00150B48(iface, profileIndex, characterId, scale10_14B560(boltDef->field_0xE));
     } else {
-        cBEEconInterface_getMoney(iface, a1, a2);
+        cBEEconInterface_getMoney(iface, profileIndex, characterId);
     }
 }
 #endif
@@ -1205,41 +1205,41 @@ struct sBEEntry38_14B988 {
  * copies each one's characters into the '$' positions before the '.' until none is left. The rider loader and the AI
  * rider code use it to queue model files.
  *
- * @param a  profile index
- * @param b  character ID
- * @param e0  the bolt definition (0x38 bytes)
+ * @param profileIndex  profile index
+ * @param characterId  character ID
+ * @param boltDef  the bolt definition (0x38 bytes)
  * @param out  receives the file name
  * @return 1 when a name was written, 0 for none
  */
-extern "C" int func_0014B988(void* self, int a, int b, sBEEntry38_14B988* e0, char* out)
+extern "C" int func_0014B988(void* self, int profileIndex, int characterId, sBEEntry38_14B988* boltDef, char* out)
 {
-    signed char grp = e0->group;
-    if (grp == -1 || e0->name == 0) {
+    signed char grp = boltDef->group;
+    if (grp == -1 || boltDef->name == 0) {
         *out = 0;
         return 0;
     }
     sBELibTables* tbl = (sBELibTables*)D_004A6750;
-    sProfile_14AFB0* prof = (sProfile_14AFB0*)func_0014AD28(cBE_getInterface_Fv(cBE_getBE(), 9), a, b);
-    strcpy(out, e0->name);
-    char* d = strchr(out, '$');
-    if (d == 0) return 1;
-    int n = func_0014D988(tbl, b);
-    sBEEntry38_14B988* e = (sBEEntry38_14B988*)func_0014D998(tbl, b);
-    for (int i = 0; i < n; i++, e++) {
-        if (e->group != grp) continue;
-        char* s = e->name;
-        if (s == 0) continue;
-        if (e->key == e0->key) continue;
-        if (!(getEntry_14AFB0(prof, e->key)->flags & 0x10)) continue;
-        char* p = d;
-        int k = d - out;
-        while (*p != 0 && *p != '.') {
-            if (s[k] != '$' && *p == '$') *p = s[k];
-            p++;
+    sProfile_14AFB0* prof = (sProfile_14AFB0*)func_0014AD28(cBE_getInterface_Fv(cBE_getBE(), 9), profileIndex, characterId);
+    strcpy(out, boltDef->name);
+    char* wildcard = strchr(out, '$');
+    if (wildcard == 0) return 1;
+    int n = func_0014D988(tbl, characterId);
+    sBEEntry38_14B988* otherDef = (sBEEntry38_14B988*)func_0014D998(tbl, characterId);
+    for (int i = 0; i < n; i++, otherDef++) {
+        if (otherDef->group != grp) continue;
+        char* otherName = otherDef->name;
+        if (otherName == 0) continue;
+        if (otherDef->key == boltDef->key) continue;
+        if (!(getEntry_14AFB0(prof, otherDef->key)->flags & 0x10)) continue;
+        char* cursor = wildcard;
+        int k = wildcard - out;
+        while (*cursor != 0 && *cursor != '.') {
+            if (otherName[k] != '$' && *cursor == '$') *cursor = otherName[k];
+            cursor++;
             k++;
         }
-        while (*d != 0 && *d != '$' && *d != '.') d++;
-        if (*d != '$') return 1;
+        while (*wildcard != 0 && *wildcard != '$' && *wildcard != '.') wildcard++;
+        if (*wildcard != '$') return 1;
     }
     return 1;
 }
@@ -1383,12 +1383,12 @@ extern "C" void func_0014C548(void **, int, int, int);
  *
  * Nothing calls it.
  *
- * @param arg0  the group (a character ID)
- * @param arg1  the bolt id
- * @param arg2  the new value
+ * @param groupId  the group (a character ID)
+ * @param boltId  the bolt id
+ * @param value  the new value
  */
-extern "C" void func_0014BDC8(int arg0, int arg1, int arg2) {
-    func_0014C548(D_004A6750, arg0, arg1, arg2);
+extern "C" void func_0014BDC8(int groupId, int boltId, int value) {
+    func_0014C548(D_004A6750, groupId, boltId, value);
 }
 #endif
 //100%
@@ -1401,12 +1401,12 @@ extern "C" void func_0014C590(void **, int, int, int);
  *
  * Nothing calls it.
  *
- * @param arg0  the group (a character ID)
- * @param arg1  the bolt id
- * @param arg2  the new value
+ * @param groupId  the group (a character ID)
+ * @param boltId  the bolt id
+ * @param value  the new value
  */
-extern "C" void func_0014BE00(int arg0, int arg1, int arg2) {
-    func_0014C590(D_004A6750, arg0, arg1, arg2);
+extern "C" void func_0014BE00(int groupId, int boltId, int value) {
+    func_0014C590(D_004A6750, groupId, boltId, value);
 }
 #endif
 //100%
@@ -1419,12 +1419,12 @@ extern "C" void func_0014C5D8(void **, int, int, int);
  *
  * Nothing calls it.
  *
- * @param arg0  the group (a character ID)
- * @param arg1  the bolt id
- * @param arg2  the new value
+ * @param groupId  the group (a character ID)
+ * @param boltId  the bolt id
+ * @param value  the new value
  */
-extern "C" void func_0014BE38(int arg0, int arg1, int arg2) {
-    func_0014C5D8(D_004A6750, arg0, arg1, arg2);
+extern "C" void func_0014BE38(int groupId, int boltId, int value) {
+    func_0014C5D8(D_004A6750, groupId, boltId, value);
 }
 #endif
 
@@ -1483,29 +1483,29 @@ extern "C" void func_0014BE70(void* vself)
     char* buf = new (str_BoltsFile, 0, 0) char[size];
     self->buf = buf;
     FILE_loadatz(D_004A11CC, buf, size);
-    char* d = self->buf;
-    D_004A11E8 = *(int*)d;
-    int n0 = *(int*)(d + 4);
-    self->entries = (sBEEnt_14BE70*)(d + 8);
-    self->n0 = n0;
-    int off = 8 + n0 * 0x38;
-    int n1 = *(int*)(d + off);
+    char* fileData = self->buf;
+    D_004A11E8 = *(int*)fileData;
+    int numBolts = *(int*)(fileData + 4);
+    self->entries = (sBEEnt_14BE70*)(fileData + 8);
+    self->n0 = numBolts;
+    int off = 8 + numBolts * 0x38;
+    int numLinks = *(int*)(fileData + off);
     off += 4;
-    self->t8 = d + off;
-    self->n1 = n1;
-    off += n1 * 0xC;
-    int n2 = *(int*)(d + off);
+    self->t8 = fileData + off;
+    self->n1 = numLinks;
+    off += numLinks * 0xC;
+    int numPairs = *(int*)(fileData + off);
     off += 4;
-    self->tC = d + off;
-    self->n2 = n2;
-    off += n2 * 8;
-    int n3 = *(int*)(d + off);
+    self->tC = fileData + off;
+    self->n2 = numPairs;
+    off += numPairs * 8;
+    int numGroups = *(int*)(fileData + off);
     off += 4;
-    self->t10 = d + off;
-    self->n3 = n3;
-    off += n3 * 8;
+    self->t10 = fileData + off;
+    self->n3 = numGroups;
+    off += numGroups * 8;
     off += 4;
-    self->strings = d + off;
+    self->strings = fileData + off;
     if (D_004A11E8 & 1) D_004A11E8++;
     for (int i = 0; i < self->n0; i++) {
         if (self->entries[i].name) self->entries[i].name = self->strings + ((int)self->entries[i].name - 1);
@@ -1559,21 +1559,21 @@ struct sBELib_14C068 {
 extern "C" void func_0014C068(sBELib_14C068* self)
 {
     int last = D_004A11E8;
-    unsigned short* p;
+    unsigned short* cursor;
 
     self->table = new (str_child_bolts_data, 0, 0) unsigned short[last * 90];
-    p = self->table;
+    cursor = self->table;
     for (int i = 0; i < 30; i++) {
-        self->count[i] = p;
-        p += D_004A11E8;
+        self->count[i] = cursor;
+        cursor += D_004A11E8;
     }
     for (int i = 0; i < 30; i++) {
-        self->first[i] = p;
-        p += D_004A11E8;
+        self->first[i] = cursor;
+        cursor += D_004A11E8;
     }
     for (int i = 0; i < 30; i++) {
-        self->index[i] = p;
-        p += D_004A11E8;
+        self->index[i] = cursor;
+        cursor += D_004A11E8;
         MEM_fill(self->index[i], 0, D_004A11E8 * 2);
     }
     for (int i = 0; i < self->n0; i++) {
@@ -1584,13 +1584,13 @@ extern "C" void func_0014C068(sBELib_14C068* self)
         MEM_fill(self->count[i], 0, D_004A11E8 * 2);
     }
     for (int i = 0; i < self->n0; i++) {
-        int g = self->entries[i].group;
-        int t = self->entries[i].type;
-        if (g != -1) {
-            self->count[t][g]++;
-            if (last != g) {
-                last = g;
-                self->first[t][g] = i;
+        int parentId = self->entries[i].group;
+        int charGroup = self->entries[i].type;
+        if (parentId != -1) {
+            self->count[charGroup][parentId]++;
+            if (last != parentId) {
+                last = parentId;
+                self->first[charGroup][parentId] = i;
             }
         }
     }
@@ -2019,33 +2019,33 @@ struct sBELibData_14D240
  */
 extern "C" void func_0014D240(void* self)
 {
-    sBELibData_14D240* p = (sBELibData_14D240*)self;
-    if (p->buf)
-        cMemMan_free(p->buf);
-    p->buf = 0;
-    p->f4 = 0;
-    p->f8 = 0;
-    p->fC = 0;
-    p->f10 = 0;
-    p->f14 = 0;
-    p->f1C = 0;
-    p->f20 = 0;
-    p->f24 = 0;
-    p->f28 = 0;
-    MEM_fill(p->tab[0], 0, sizeof(p->tab[0]));
-    MEM_fill(p->tab[1], 0, sizeof(p->tab[1]));
-    MEM_fill(p->tab[2], 0, sizeof(p->tab[2]));
-    MEM_fill(p->tab[3], 0, sizeof(p->tab[3]));
-    MEM_fill(p->tab[4], 0, sizeof(p->tab[4]));
-    MEM_fill(p->tab[5], 0, sizeof(p->tab[5]));
-    MEM_fill(p->tab[6], 0, sizeof(p->tab[6]));
-    MEM_fill(p->tab[7], 0, sizeof(p->tab[7]));
-    MEM_fill(p->tab[8], 0, sizeof(p->tab[8]));
-    MEM_fill(p->tab[9], 0, sizeof(p->tab[9]));
-    MEM_fill(p->tab[10], 0, sizeof(p->tab[10]));
-    if (p->buf2)
-        cMemMan_free(p->buf2);
-    p->buf2 = 0;
+    sBELibData_14D240* boltDB = (sBELibData_14D240*)self;
+    if (boltDB->buf)
+        cMemMan_free(boltDB->buf);
+    boltDB->buf = 0;
+    boltDB->f4 = 0;
+    boltDB->f8 = 0;
+    boltDB->fC = 0;
+    boltDB->f10 = 0;
+    boltDB->f14 = 0;
+    boltDB->f1C = 0;
+    boltDB->f20 = 0;
+    boltDB->f24 = 0;
+    boltDB->f28 = 0;
+    MEM_fill(boltDB->tab[0], 0, sizeof(boltDB->tab[0]));
+    MEM_fill(boltDB->tab[1], 0, sizeof(boltDB->tab[1]));
+    MEM_fill(boltDB->tab[2], 0, sizeof(boltDB->tab[2]));
+    MEM_fill(boltDB->tab[3], 0, sizeof(boltDB->tab[3]));
+    MEM_fill(boltDB->tab[4], 0, sizeof(boltDB->tab[4]));
+    MEM_fill(boltDB->tab[5], 0, sizeof(boltDB->tab[5]));
+    MEM_fill(boltDB->tab[6], 0, sizeof(boltDB->tab[6]));
+    MEM_fill(boltDB->tab[7], 0, sizeof(boltDB->tab[7]));
+    MEM_fill(boltDB->tab[8], 0, sizeof(boltDB->tab[8]));
+    MEM_fill(boltDB->tab[9], 0, sizeof(boltDB->tab[9]));
+    MEM_fill(boltDB->tab[10], 0, sizeof(boltDB->tab[10]));
+    if (boltDB->buf2)
+        cMemMan_free(boltDB->buf2);
+    boltDB->buf2 = 0;
 }
 #endif
 
@@ -2116,24 +2116,24 @@ done:
 INCLUDE_ASM("be/belibrary", func_0014D448);
 #ifdef SKIP_ASM
 /**
- * Returns the index of the bolt definition with id @p key in group @p g.
+ * Returns the index of the bolt definition with id @p key in group @p groupId.
  *
  * Uses the group's id-to-index table (+0x4DC, built by func_0014C068) when it exists, else searches the group (+0x2C
  * count, +0xA4 first) for a matching id (+0x4).
  *
- * @param g  the group (a character ID)
+ * @param groupId  the group (a character ID)
  * @param key  the bolt id
  * @return the index, or -1 when the search finds none
  */
-extern "C" int func_0014D448(sBEGroupTable* self, int g, int key)
+extern "C" int func_0014D448(sBEGroupTable* self, int groupId, int key)
 {
-    short* lookup = self->lookup_0x4DC[g];
+    short* lookup = self->lookup_0x4DC[groupId];
     if (lookup == 0) {
-        int i = self->groupFirst[g];
-        int end = i + self->groupCount[g];
-        sBEEntry38* e = &self->entries[i];
-        for (; i < end; i++, e++) {
-            if (e->field_0x4 == key) {
+        int i = self->groupFirst[groupId];
+        int end = i + self->groupCount[groupId];
+        sBEEntry38* boltDef = &self->entries[i];
+        for (; i < end; i++, boltDef++) {
+            if (boltDef->field_0x4 == key) {
                 return i;
             }
         }
@@ -2147,27 +2147,27 @@ extern "C" int func_0014D448(sBEGroupTable* self, int g, int key)
 INCLUDE_ASM("be/belibrary", func_0014D4C8);
 #ifdef SKIP_ASM
 /**
- * Returns how many bolt definitions in group @p g have bolt @p key as their parent (short +0x6).
+ * Returns how many bolt definitions in group @p groupId have bolt @p key as their parent (short +0x6).
  *
  * Uses the group's child count table (+0x11C) when it exists, else counts in the group, stopping at the first larger
  * parent id (the definitions are sorted by parent).
  *
- * @param g  the group (a character ID)
+ * @param groupId  the group (a character ID)
  * @param key  the parent bolt id
  * @return the number of children
  */
-extern "C" int func_0014D4C8(sBEGroupTable* self, int g, int key)
+extern "C" int func_0014D4C8(sBEGroupTable* self, int groupId, int key)
 {
-    short* lookup = self->lookup_0x11C[g];
+    short* lookup = self->lookup_0x11C[groupId];
     if (lookup == 0) {
         int n = 0;
-        int i = self->groupFirst[g];
-        int end = i + self->groupCount[g];
-        sBEEntry38* e = &self->entries[i];
-        for (; i < end; e++, i++) {
-            if (e->field_0x6 == key) {
+        int i = self->groupFirst[groupId];
+        int end = i + self->groupCount[groupId];
+        sBEEntry38* boltDef = &self->entries[i];
+        for (; i < end; boltDef++, i++) {
+            if (boltDef->field_0x6 == key) {
                 n++;
-            } else if (e->field_0x6 > key) {
+            } else if (boltDef->field_0x6 > key) {
                 break;
             }
         }
@@ -2181,30 +2181,30 @@ extern "C" int func_0014D4C8(sBEGroupTable* self, int g, int key)
 INCLUDE_ASM("be/belibrary", func_0014D558);
 #ifdef SKIP_ASM
 /**
- * Returns the first bolt definition in group @p g whose parent (short +0x6) is @p key.
+ * Returns the first bolt definition in group @p groupId whose parent (short +0x6) is @p key.
  *
  * For @p key -1, or without the group's first-child table (+0x194), searches the group. Otherwise returns null when the
  * child count (+0x11C) is 0 or less, else the definition the first-child table names.
  *
- * @param g  the group (a character ID)
+ * @param groupId  the group (a character ID)
  * @param key  the parent bolt id, or -1
  * @return the definition, or null
  */
-extern "C" sBEEntry38* func_0014D558(sBEGroupTable* self, int g, int key)
+extern "C" sBEEntry38* func_0014D558(sBEGroupTable* self, int groupId, int key)
 {
     short* lookup;
-    if (key == -1 || (lookup = *(short**)((char*)self + (g << 2) + 0x194)) == 0) {
-        int i = self->groupFirst[g];
-        int end = i + self->groupCount[g];
-        sBEEntry38* e = &self->entries[i];
-        for (; i < end; i++, e++) {
-            if (e->field_0x6 == key) {
-                return e;
+    if (key == -1 || (lookup = *(short**)((char*)self + (groupId << 2) + 0x194)) == 0) {
+        int i = self->groupFirst[groupId];
+        int end = i + self->groupCount[groupId];
+        sBEEntry38* boltDef = &self->entries[i];
+        for (; i < end; i++, boltDef++) {
+            if (boltDef->field_0x6 == key) {
+                return boltDef;
             }
         }
         return 0;
     }
-    if (self->lookup_0x11C[g][key] <= 0) {
+    if (self->lookup_0x11C[groupId][key] <= 0) {
         return 0;
     }
     return &self->entries[lookup[key]];
@@ -2215,53 +2215,53 @@ extern "C" sBEEntry38* func_0014D558(sBEGroupTable* self, int g, int key)
 INCLUDE_ASM("be/belibrary", func_0014D608);
 #ifdef SKIP_ASM
 /**
- * Collects the bolt definitions under bolt @p key in group @p g into @p out and returns how many.
+ * Collects the bolt definitions under bolt @p key in group @p groupId into @p out and returns how many.
  *
  * Takes every definition whose parent (short +0x6) is @p key and, while @p depth is not 0, recurses into its children
  * (by its id, +0x4) with depth - 1; a definition with flag 0x20 (+0x34) is only descended into when @p all is set. Uses
  * the child tables (func_0014D558, +0x11C) when present and @p key is not -1, else searches the group, stopping at a
  * larger parent id. beintecon passes depth -1 (no limit) and all 1.
  *
- * @param g  the group (a character ID)
+ * @param groupId  the group (a character ID)
  * @param key  the parent bolt id, or -1 for the top level
  * @param out  receives the definition pointers
  * @param depth  levels to descend; negative for no limit
  * @param all  non-zero to descend into flag-0x20 definitions too
  * @return the number of pointers written
  */
-extern "C" int func_0014D608(sBEGroupTable* self, int g, int key, sBEEntry38** out, int depth, int all)
+extern "C" int func_0014D608(sBEGroupTable* self, int groupId, int key, sBEEntry38** out, int depth, int all)
 {
     int count = 0;
-    if (key == -1 || self->lookup_0x11C[g] == 0) {
-        int i = self->groupFirst[g];
-        int end = i + self->groupCount[g];
-        sBEEntry38* e = &self->entries[i];
-        for (; i < end; i++, e++) {
-            if (e->field_0x6 == key) {
-                *out++ = e;
+    if (key == -1 || self->lookup_0x11C[groupId] == 0) {
+        int i = self->groupFirst[groupId];
+        int end = i + self->groupCount[groupId];
+        sBEEntry38* boltDef = &self->entries[i];
+        for (; i < end; i++, boltDef++) {
+            if (boltDef->field_0x6 == key) {
+                *out++ = boltDef;
                 count++;
                 if (depth != 0) {
-                    if (!(*(int*)((char*)e + 0x34) & 0x20) || all) {
-                        int r = func_0014D608(self, g, e->field_0x4, out, depth - 1, all);
-                        count += r;
-                        out += r;
+                    if (!(*(int*)((char*)boltDef + 0x34) & 0x20) || all) {
+                        int childCount = func_0014D608(self, groupId, boltDef->field_0x4, out, depth - 1, all);
+                        count += childCount;
+                        out += childCount;
                     }
                 }
-            } else if (key < e->field_0x6) {
+            } else if (key < boltDef->field_0x6) {
                 return count;
             }
         }
     } else {
-        sBEEntry38* e = func_0014D558(self, g, key);
-        int n = self->lookup_0x11C[g][key];
-        for (int j = 0; j < n; j++, e++) {
-            *out++ = e;
+        sBEEntry38* boltDef = func_0014D558(self, groupId, key);
+        int n = self->lookup_0x11C[groupId][key];
+        for (int j = 0; j < n; j++, boltDef++) {
+            *out++ = boltDef;
             count++;
             if (depth != 0) {
-                if (!(*(int*)((char*)e + 0x34) & 0x20) || all) {
-                    int r = func_0014D608(self, g, e->field_0x4, out, depth - 1, all);
-                    count += r;
-                    out += r;
+                if (!(*(int*)((char*)boltDef + 0x34) & 0x20) || all) {
+                    int childCount = func_0014D608(self, groupId, boltDef->field_0x4, out, depth - 1, all);
+                    count += childCount;
+                    out += childCount;
                 }
             }
         }
@@ -2334,22 +2334,22 @@ INCLUDE_ASM("be/belibrary", func_0014D908);
 /**
  * Returns whether bolt @p key is an ancestor of a bolt definition by the parent links (short +0x6).
  *
- * Walks up from @p e: its parent is found with func_0014D448 in the definition's group (byte +0x0); the walk stops at
+ * Walks up from @p boltDef: its parent is found with func_0014D448 in the definition's group (byte +0x0); the walk stops at
  * parent -1 or a missing definition. The cheat codes use it to find the items under D_004A11E0.
  *
- * @param e  the bolt definition to start from, or null
+ * @param boltDef  the bolt definition to start from, or null
  * @param key  the bolt id to look for
  * @return 1 when found, else 0
  */
-extern "C" int func_0014D908(sBEGroupTable* self, sBEEntry38* e, int key)
+extern "C" int func_0014D908(sBEGroupTable* self, sBEEntry38* boltDef, int key)
 {
-    if (e == 0)
+    if (boltDef == 0)
         return 0;
-    if (e->field_0x6 == key)
+    if (boltDef->field_0x6 == key)
         return 1;
-    if (e->field_0x6 == -1)
+    if (boltDef->field_0x6 == -1)
         return 0;
-    int i = func_0014D448(self, e->group, e->field_0x6);
+    int i = func_0014D448(self, boltDef->group, boltDef->field_0x6);
     sBEEntry38* parent;
     if (i < 0)
         parent = 0;

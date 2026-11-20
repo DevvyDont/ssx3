@@ -155,20 +155,20 @@ extern "C" void* func_00152758(void* self)
     int size = cBESaveInterface_getSaveGameSize(self);
     cBESaveInterface_releaseBuffer_s(self);
     cBESaveInterface_buffer = operator_new_tag(size, str_save_file_buffer, 0x100, 0);
-    char* p = (char*)cBESaveInterface_buffer;
-    *(sSaveHdr_2758*)p = D_00535898;
-    p += sizeof(sSaveHdr_2758);
-    func_0041605C(p, D_00535C18, 2600);
-    p += 0xA28;
+    char* cursor = (char*)cBESaveInterface_buffer;
+    *(sSaveHdr_2758*)cursor = D_00535898;
+    cursor += sizeof(sSaveHdr_2758);
+    func_0041605C(cursor, D_00535C18, 2600);
+    cursor += 0xA28;
     sSaveBits6_2758 bits;
     for (int i = 0; i < 6; i++) {
         bits.e[i].a = cBELibrary_playerDB[i].b1;
         bits.e[i].b = cBELibrary_playerDB[i].f13;
     }
-    *(sSaveBits6_2758*)p = bits;
-    p += sizeof(sSaveBits6_2758);
+    *(sSaveBits6_2758*)cursor = bits;
+    cursor += sizeof(sSaveBits6_2758);
     int crc = func_003E62D0(cBESaveInterface_buffer, size - 4, 64490);
-    __builtin_memcpy(p, &crc, 4);
+    __builtin_memcpy(cursor, &crc, 4);
     return cBESaveInterface_buffer;
 }
 #endif
@@ -316,23 +316,23 @@ extern "C" int func_00152BB0(void* self, char* buf)
     if (crc != stored) {
         return 0;
     }
-    char* p = buf;
-    cBEIface_2BB0* o;
-    D_00535898 = *(sSaveHdr_2758*)p;
-    o = cBEOptionInterface_getThis();
-    p += sizeof(sSaveHdr_2758);
-    o->onLoad();
-    func_0041605C(D_00535C18, p, 2600);
-    p += 0xA28;
-    o = cBEScoreInterface_getThis();
-    o->onLoad();
-    sSaveBits6_2758 bits = *(sSaveBits6_2758*)p;
+    char* cursor = buf;
+    cBEIface_2BB0* iface;
+    D_00535898 = *(sSaveHdr_2758*)cursor;
+    iface = cBEOptionInterface_getThis();
+    cursor += sizeof(sSaveHdr_2758);
+    iface->onLoad();
+    func_0041605C(D_00535C18, cursor, 2600);
+    cursor += 0xA28;
+    iface = cBEScoreInterface_getThis();
+    iface->onLoad();
+    sSaveBits6_2758 bits = *(sSaveBits6_2758*)cursor;
     for (int i = 0; i < 6; i++) {
         cBELibrary_playerDB[i].b1 = bits.e[i].a;
         cBELibrary_playerDB[i].f13 = bits.e[i].b;
     }
-    o = cBENewPlayerInterface_getThis();
-    o->onLoad();
+    iface = cBENewPlayerInterface_getThis();
+    iface->onLoad();
     cSSXApp_initLocale(SSXApp);
     cSSXApp_activateBEOptions(SSXApp);
     return 1;
@@ -380,12 +380,12 @@ extern "C" int func_00152DE0(void* self, char* buf, int idx)
     for (int i = 0; i < 10; i++) {
         keep[i] = D_004A6CA8_2DE0[idx].sub[i].keep;
     }
-    char* p = buf;
-    strncpy((char*)&cBELibrary_playerDB[idx], p, 0xC);
-    p += 0xC;
-    D_004A6CA8_2DE0[idx] = *(sProfile_2DE0*)p;
-    p += sizeof(sProfile_2DE0);
-    D_00535B31[idx].f = *p;
+    char* cursor = buf;
+    strncpy((char*)&cBELibrary_playerDB[idx], cursor, 0xC);
+    cursor += 0xC;
+    D_004A6CA8_2DE0[idx] = *(sProfile_2DE0*)cursor;
+    cursor += sizeof(sProfile_2DE0);
+    D_00535B31[idx].f = *cursor;
     cBENewPlayerInterface_getThis()->onLoad();
     cBEStatInterface_getThis_2DE0()->onLoad();
     cBEBAGTInterface_getThis_2DE0()->onLoad();

@@ -1845,14 +1845,14 @@ extern int cBELibrary_profileLib[];
  * Sets the character's radio mode: the word at +0xF80 of the character record (cBELibrary_profileLib + profile * 0x9B50
  * + character * 0xF88).
  *
- * @param a1  profile index (On Tour iProfileIndex)
- * @param a2  character ID (On Tour iCharacterID)
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
  * @param value  the radio mode (On Tour radioMode)
  */
-extern "C" void func_001587F8(void* self, int a1, int a2, int value)
+extern "C" void func_001587F8(void* self, int profileIndex, int characterId, int value)
 {
-    char* p = (char*)cBELibrary_profileLib + a1 * 0x9b50 + a2 * 3976;
-    *(int*)(p + 0xf80) = value;
+    char* charRecord = (char*)cBELibrary_profileLib + profileIndex * 0x9b50 + characterId * 3976;
+    *(int*)(charRecord + 0xf80) = value;
 }
 #endif
 
@@ -1960,18 +1960,18 @@ INCLUDE_ASM("be/beintreward", func_001588C8);
 /**
  * Returns the best collectibles medal a count reaches on a peak.
  *
- * Compares @p v with the peak's four targets in D_0045AFE8 (the table cBERewardInterface_getCollectibleMedalTarget
+ * Compares @p numCollected with the peak's four targets in D_0045AFE8 (the table cBERewardInterface_getCollectibleMedalTarget
  * reads), best medal first.
  *
  * @param idx  the peak (On Tour peakID)
- * @param v  number of collectibles found (On Tour numCollected)
- * @return the first medal (0 best to 3) whose target @p v reaches, or -1
+ * @param numCollected  number of collectibles found (On Tour numCollected)
+ * @return the first medal (0 best to 3) whose target @p numCollected reaches, or -1
  */
-extern "C" int func_001588C8(void* self, int idx, int v)
+extern "C" int func_001588C8(void* self, int idx, int numCollected)
 {
     int* row = D_0045AFE8 + idx * 4;
     for (int i = 0; i < 4; i++) {
-        if (v >= row[i]) return i;
+        if (numCollected >= row[i]) return i;
     }
     return -1;
 }
@@ -2125,18 +2125,18 @@ INCLUDE_ASM("be/beintreward", func_00158B70);
 /**
  * Returns the best big-challenges medal a completed-challenge count reaches on a peak.
  *
- * Compares @p v with the peak's four targets in D_0045B018 (the table cBERewardInterface_getChallengesMedalTarget
+ * Compares @p numCompleted with the peak's four targets in D_0045B018 (the table cBERewardInterface_getChallengesMedalTarget
  * reads), best medal first.
  *
  * @param idx  the peak (On Tour peakID)
- * @param v  number of completed big challenges (On Tour numCompletedChallenges)
- * @return the first medal (0 best to 3) whose target @p v reaches, or -1
+ * @param numCompleted  number of completed big challenges (On Tour numCompletedChallenges)
+ * @return the first medal (0 best to 3) whose target @p numCompleted reaches, or -1
  */
-extern "C" int func_00158B70(void* self, int idx, int v)
+extern "C" int func_00158B70(void* self, int idx, int numCompleted)
 {
     int* row = D_0045B018 + idx * 4;
     for (int i = 0; i < 4; i++) {
-        if (v >= row[i]) return i;
+        if (numCompleted >= row[i]) return i;
     }
     return -1;
 }
@@ -2150,12 +2150,12 @@ INCLUDE_ASM("be/beintreward", func_00158BB8);
  * The target is D_0045B048[@p idx] (what cBERewardInterface_getEarningsTarget returns), compared unsigned.
  *
  * @param idx  the peak (On Tour peakID)
- * @param v  total cash earned (On Tour totalCashEarned)
- * @return 1 when @p v reaches the target, else -1
+ * @param totalCash  total cash earned (On Tour totalCashEarned)
+ * @return 1 when @p totalCash reaches the target, else -1
  */
-extern "C" int func_00158BB8(void* self, int idx, unsigned int v)
+extern "C" int func_00158BB8(void* self, int idx, unsigned int totalCash)
 {
-    return (v < (unsigned int)D_0045B048[idx]) ? -1 : 1;
+    return (totalCash < (unsigned int)D_0045B048[idx]) ? -1 : 1;
 }
 #endif
 
@@ -2545,14 +2545,14 @@ extern signed char D_005305F9[];
  * the category at -1, which would still reach cBERewardInterface_awardUser (possible bug).
  *
  * @param profile  profile index (On Tour iProfileIndex)
- * @param c  character ID (On Tour iCharacterID)
+ * @param charID  character ID (On Tour iCharacterID)
  * @param mode  the game event, 0 to 13 (On Tour eventID)
  * @param event  the location (On Tour locationID)
  * @param medal  the medal earned, 0 best to 3, -1 none (On Tour medalID)
  */
-extern "C" void func_001591E8(void* self, int profile, int c, int mode, int event, int medal)
+extern "C" void func_001591E8(void* self, int profile, int charID, int mode, int event, int medal)
 {
-    sProfileChar_1591E8* pc = &D_004A6CA8_1591E8[profile][c];
+    sProfileChar_1591E8* pc = &D_004A6CA8_1591E8[profile][charID];
     int bit = -1;
     void* score = cBE_getInterface_Fv(cBE_getBE(), 11);
     sScoreStat_1591E8* stats = cBECharProfileDB_getScoreStats_1591E8(pc, event, mode);
@@ -2596,7 +2596,7 @@ extern "C" void func_001591E8(void* self, int profile, int c, int mode, int even
     }
     if ((unsigned int)medal < 2) {
         if (stats->count == 0)
-            cBERewardInterface_awardUser((cBERewardInterface*)self, profile, c, bit);
+            cBERewardInterface_awardUser((cBERewardInterface*)self, profile, charID, bit);
     } else if ((unsigned int)(mode - 6) < 6 && D_005305F9[0] == 0) {
         if (medal == 3)
             func_001E1DD0(group, mode, 0);
@@ -2604,18 +2604,18 @@ extern "C" void func_001591E8(void* self, int profile, int c, int mode, int even
             func_001E1DD0(group, mode, 1);
     }
     if (cBERewardInterface_isBetterMedal(self, oldMedal, medal)) {
-        int had = cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, profile, c, group, tier);
-        func_00159818(self, profile, c, money);
+        int had = cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, profile, charID, group, tier);
+        func_00159818(self, profile, charID, money);
         func_00152528(pc, event, mode, medal);
-        if (cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, profile, c, group, tier) && !had)
-            cBERewardInterface_awardUserTrophy((cBERewardInterface*)self, profile, c, group, tier);
+        if (cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, profile, charID, group, tier) && !had)
+            cBERewardInterface_awardUserTrophy((cBERewardInterface*)self, profile, charID, group, tier);
     } else {
         func_00152528(pc, event, mode, medal);
         money >>= 1;
-        func_00159818(self, profile, c, money);
+        func_00159818(self, profile, charID, money);
     }
-    if (cBERewardInterface_isMountainConquered((cBERewardInterface*)self, profile, c) && cBERewardInterface_isAwardReceived(self, profile, c, 0) == 0)
-        cBERewardInterface_awardUser((cBERewardInterface*)self, profile, c, 0);
+    if (cBERewardInterface_isMountainConquered((cBERewardInterface*)self, profile, charID) && cBERewardInterface_isAwardReceived(self, profile, charID, 0) == 0)
+        cBERewardInterface_awardUser((cBERewardInterface*)self, profile, charID, 0);
     (cBERewardInterface_instance)->mLastEventMedal = medal;
     (cBERewardInterface_instance)->mLastEventCashReward = money;
     if (!cBERewardInterface_isBetterMedal(self, -1, medal))
@@ -2633,12 +2633,12 @@ extern "C" void func_001591E8(void* self, int profile, int c, int mode, int even
         }
         if ((unsigned int)(track - 4) < 2) {
             any = 1;
-            if (!cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getTrackMedal(self, profile, c, track, kind))) {
+            if (!cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getTrackMedal(self, profile, charID, track, kind))) {
                 okB = 0;
                 break;
             }
         } else {
-            if (!cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getTrackMedal(self, profile, c, track, kind))) {
+            if (!cBERewardInterface_isBetterMedal(self, -1, cBERewardInterface_getTrackMedal(self, profile, charID, track, kind))) {
                 if (!any) {
                     if (D_005305B0_1591E8.b49 == 0)
                         func_001E1C10(group);
@@ -2732,31 +2732,31 @@ extern void* cBELibrary_userAwards[];
  * cBERewardInterface_calculateNextEarningsLevel, and awards each trophy 3 that became owned
  * (cBERewardInterface_awardUserTrophy).
  *
- * @param a  profile index (On Tour iProfileIndex)
- * @param b  character ID (On Tour iCharacterID)
+ * @param profileIndex  profile index (On Tour iProfileIndex)
+ * @param characterId  character ID (On Tour iCharacterID)
  * @param amount  the cash (On Tour cash)
  */
-extern "C" void func_00159818(void* self, int a, int b, int amount)
+extern "C" void func_00159818(void* self, int profileIndex, int characterId, int amount)
 {
     void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
     *(int*)cBELibrary_userAwards += amount;
-    if (gNextEarningsLimit != 0 && (unsigned int)(cBEEconInterface_getTotalMoneyEarned(econ, a, b) + amount) >= (unsigned int)gNextEarningsLimit)
+    if (gNextEarningsLimit != 0 && (unsigned int)(cBEEconInterface_getTotalMoneyEarned(econ, profileIndex, characterId) + amount) >= (unsigned int)gNextEarningsLimit)
     {
         int before[3];
         int i;
         for (i = 0; i < 3; i++)
-            before[i] = cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, a, b, i, 3);
-        func_00150A90(econ, a, b, amount);
-        gNextEarningsLimit = cBERewardInterface_calculateNextEarningsLevel((cBERewardInterface*)self, a, b);
+            before[i] = cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, profileIndex, characterId, i, 3);
+        func_00150A90(econ, profileIndex, characterId, amount);
+        gNextEarningsLimit = cBERewardInterface_calculateNextEarningsLevel((cBERewardInterface*)self, profileIndex, characterId);
         for (i = 0; i < 3; i++)
         {
-            if (before[i] == 0 && cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, a, b, i, 3))
-                cBERewardInterface_awardUserTrophy((cBERewardInterface*)self, a, b, i, 3);
+            if (before[i] == 0 && cBERewardInterface_isTrophyOwned((cBERewardInterface*)self, profileIndex, characterId, i, 3))
+                cBERewardInterface_awardUserTrophy((cBERewardInterface*)self, profileIndex, characterId, i, 3);
         }
     }
     else
     {
-        func_00150A90(econ, a, b, amount);
+        func_00150A90(econ, profileIndex, characterId, amount);
     }
 }
 #endif
@@ -3140,12 +3140,12 @@ INCLUDE_ASM("be/beintreward", func_0015A398);
 /**
  * Returns the peak a location belongs to: the word at +0x54 of its 0x64-byte cBELibrary_locationDB entry.
  *
- * @param a1  the location (On Tour locationID)
+ * @param locationID  the location (On Tour locationID)
  * @return the peak ID
  */
-extern "C" int func_0015A398(void* self, int a1)
+extern "C" int func_0015A398(void* self, int locationID)
 {
-    return cBELibrary_locationDB[a1].field_0x54;
+    return cBELibrary_locationDB[locationID].field_0x54;
 }
 #endif
 
@@ -3164,13 +3164,13 @@ extern sRewardPair_0015A3B8 D_0045AAD8[3][4][5];
  * Returns which trophy of its peak an event at a location counts toward.
  *
  * Searches the requirement table D_0045AAD8[3 peaks][4 trophies][5] (event byte, location byte) for an entry with event
- * @p a and location @p b; for events 6 to 11 the event alone matches. Returns the trophy index of the first hit.
+ * @p eventID and location @p locationID; for events 6 to 11 the event alone matches. Returns the trophy index of the first hit.
  *
- * @param a  the game event (On Tour eventID)
- * @param b  the location (On Tour locationID)
+ * @param eventID  the game event (On Tour eventID)
+ * @param locationID  the location (On Tour locationID)
  * @return the trophy index, 0 to 3, or -1 when no entry matches
  */
-extern "C" int func_0015A3B8(void* self, int a, int b)
+extern "C" int func_0015A3B8(void* self, int eventID, int locationID)
 {
     for (int i = 0; i < 3; i++)
     {
@@ -3178,9 +3178,9 @@ extern "C" int func_0015A3B8(void* self, int a, int b)
         {
             for (int k = 0; k < 5; k++)
             {
-                if (D_0045AAD8[i][j][k].a == a)
+                if (D_0045AAD8[i][j][k].a == eventID)
                 {
-                    if (D_0045AAD8[i][j][k].b == b || a == 6 || a == 7 || a == 8 || a == 9 || a == 10 || a == 11)
+                    if (D_0045AAD8[i][j][k].b == locationID || eventID == 6 || eventID == 7 || eventID == 8 || eventID == 9 || eventID == 10 || eventID == 11)
                         return j;
                 }
             }
@@ -3561,63 +3561,63 @@ struct sRewardData {
 extern "C" void func_0015A818(sRewardData* self, int* data)
 {
     int n;
-    int* p = data;
+    int* cursor = data;
     self->base = data;
     for (n = 0; n < 9; n++) {
-        unsigned int type = *p++;
-        int count = *p++;
+        unsigned int type = *cursor++;
+        int count = *cursor++;
         if (count != 0) {
             switch (type) {
             case 0:
-                self->t0 = (sRewardStr3*)p;
+                self->t0 = (sRewardStr3*)cursor;
                 self->n0 = count;
-                p = (int*)((sRewardStr3*)p + count);
+                cursor = (int*)((sRewardStr3*)cursor + count);
                 break;
             case 1:
-                self->t1 = (sRewardStr3*)p;
+                self->t1 = (sRewardStr3*)cursor;
                 self->n1 = count;
-                p = (int*)((sRewardStr3*)p + count);
+                cursor = (int*)((sRewardStr3*)cursor + count);
                 break;
             case 2:
-                self->t2 = (sRewardStr2*)p;
+                self->t2 = (sRewardStr2*)cursor;
                 self->n2 = count;
-                p = (int*)((sRewardStr2*)p + count);
+                cursor = (int*)((sRewardStr2*)cursor + count);
                 break;
             case 3:
-                self->t3 = (sRewardStr4*)p;
+                self->t3 = (sRewardStr4*)cursor;
                 self->n3 = count;
-                p = (int*)((sRewardStr4*)p + count);
+                cursor = (int*)((sRewardStr4*)cursor + count);
                 break;
             case 4:
-                self->t4 = (sRewardStr4*)p;
+                self->t4 = (sRewardStr4*)cursor;
                 self->n4 = count;
-                p = (int*)((sRewardStr4*)p + count);
+                cursor = (int*)((sRewardStr4*)cursor + count);
                 break;
             case 5:
-                self->t5 = (sRewardStr4*)p;
+                self->t5 = (sRewardStr4*)cursor;
                 self->n5 = count;
-                p = (int*)((sRewardStr4*)p + count);
+                cursor = (int*)((sRewardStr4*)cursor + count);
                 break;
             case 6:
-                self->t6 = (sRewardStr4*)p;
+                self->t6 = (sRewardStr4*)cursor;
                 self->n6 = count;
-                p = (int*)((sRewardStr4*)p + count);
+                cursor = (int*)((sRewardStr4*)cursor + count);
                 break;
             case 7:
-                self->t7 = (sRewardStr4*)p;
+                self->t7 = (sRewardStr4*)cursor;
                 self->n7 = count;
-                p = (int*)((sRewardStr4*)p + count);
+                cursor = (int*)((sRewardStr4*)cursor + count);
                 break;
             case 8:
-                self->t8 = (sRewardStr4*)p;
+                self->t8 = (sRewardStr4*)cursor;
                 self->n8 = count;
-                p = (int*)((sRewardStr4*)p + count);
+                cursor = (int*)((sRewardStr4*)cursor + count);
                 break;
             }
         }
     }
-    p++;
-    self->strings = (char*)p;
+    cursor++;
+    self->strings = (char*)cursor;
     for (int i = 0; i < self->n0; i++) {
         sRewardStr3* e = &self->t0[i];
         FIXUP(e->s[0]);

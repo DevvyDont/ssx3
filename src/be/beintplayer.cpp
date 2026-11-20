@@ -2191,9 +2191,9 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  */
 extern "C" void func_00148880(void* self, int rider, int value)
 {
-    int a = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    D_00535538_view[a].e[c].v[6] = value;
+    int profileIndex = cBELibrary_getProfileIndex(rider);
+    int charID = cBELibrary_getCharacterID(rider);
+    D_00535538_view[profileIndex].e[charID].v[6] = value;
 }
 #endif
 
@@ -2217,9 +2217,9 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  */
 extern "C" signed char func_001488F0(void* self, int rider)
 {
-    int a = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    return D_00535538_view[a].e[c].v[6];
+    int profileIndex = cBELibrary_getProfileIndex(rider);
+    int charID = cBELibrary_getCharacterID(rider);
+    return D_00535538_view[profileIndex].e[charID].v[6];
 }
 #endif
 
@@ -2311,16 +2311,16 @@ extern sPlayerStatRowView_00148B50 D_00535538_view00148B50[] __asm__("D_00535538
 /**
  * Stores a profile's speed stat for one character (byte 0 of the character's stat record) in the current-stat table.
  *
- * Writes @p value to D_00535538[@p a1][@p a2][0] (On Tour tBEStatDB.cSpeed). Unlike the rider-slot setters, it takes
+ * Writes @p value to D_00535538[@p humanIndex][@p charType][0] (On Tour tBEStatDB.cSpeed). Unlike the rider-slot setters, it takes
  * the profile and the character directly.
  *
- * @param a1  profile index (On Tour iHuman)
+ * @param humanIndex  profile index (On Tour iHuman)
  * @param value  new stat value (On Tour var)
- * @param a2  character ID (On Tour charType)
+ * @param charType  character ID (On Tour charType)
  */
-extern "C" void func_00148B50(void* self, int a1, int value, int a2)
+extern "C" void func_00148B50(void* self, int humanIndex, int value, int charType)
 {
-    D_00535538_view00148B50[a1].e[a2].v[0] = value;
+    D_00535538_view00148B50[humanIndex].e[charType].v[0] = value;
 }
 #endif
 
@@ -2338,15 +2338,15 @@ extern sPlayerStatRow D_00535538[];
 /**
  * Returns a profile's speed stat for one character (byte 0 of the character's stat record) from the current-stat table.
  *
- * Reads D_00535538[@p a1][@p a2][0] (On Tour tBEStatDB.cSpeed).
+ * Reads D_00535538[@p humanIndex][@p charType][0] (On Tour tBEStatDB.cSpeed).
  *
- * @param a1  profile index (On Tour iHuman)
- * @param a2  character ID (On Tour charType)
+ * @param humanIndex  profile index (On Tour iHuman)
+ * @param charType  character ID (On Tour charType)
  * @return the speed stat (5 per level)
  */
-extern "C" signed char func_00148B78(void* self, int a1, int a2)
+extern "C" signed char func_00148B78(void* self, int humanIndex, int charType)
 {
-    return D_00535538[a1].e[a2].v[0];
+    return D_00535538[humanIndex].e[charType].v[0];
 }
 #endif
 
@@ -2357,16 +2357,16 @@ INCLUDE_ASM("be/beintplayer", func_00148BA0);
  * Stores a profile's acceleration stat for one character (byte 1 of the character's stat record) in the current-stat
  * table.
  *
- * Writes @p value to D_00535538[@p a1][@p a2][1] (On Tour tBEStatDB.cAccel). Unlike the rider-slot setters, it takes
+ * Writes @p value to D_00535538[@p humanIndex][@p charType][1] (On Tour tBEStatDB.cAccel). Unlike the rider-slot setters, it takes
  * the profile and the character directly.
  *
- * @param a1  profile index (On Tour iHuman)
+ * @param humanIndex  profile index (On Tour iHuman)
  * @param value  new stat value (On Tour var)
- * @param a2  character ID (On Tour charType)
+ * @param charType  character ID (On Tour charType)
  */
-extern "C" void func_00148BA0(void* self, int a1, int value, int a2)
+extern "C" void func_00148BA0(void* self, int humanIndex, int value, int charType)
 {
-    D_00535538[a1].e[a2].v[1] = value;
+    D_00535538[humanIndex].e[charType].v[1] = value;
 }
 #endif
 
@@ -2377,15 +2377,15 @@ INCLUDE_ASM("be/beintplayer", func_00148BC8);
  * Returns a profile's acceleration stat for one character (byte 1 of the character's stat record) from the current-stat
  * table.
  *
- * Reads D_00535538[@p a1][@p a2][1] (On Tour tBEStatDB.cAccel).
+ * Reads D_00535538[@p humanIndex][@p charType][1] (On Tour tBEStatDB.cAccel).
  *
- * @param a1  profile index (On Tour iHuman)
- * @param a2  character ID (On Tour charType)
+ * @param humanIndex  profile index (On Tour iHuman)
+ * @param charType  character ID (On Tour charType)
  * @return the acceleration stat (5 per level)
  */
-extern "C" signed char func_00148BC8(void* self, int a1, int a2)
+extern "C" signed char func_00148BC8(void* self, int humanIndex, int charType)
 {
-    return D_00535538[a1].e[a2].v[1];
+    return D_00535538[humanIndex].e[charType].v[1];
 }
 #endif
 
@@ -2395,16 +2395,16 @@ INCLUDE_ASM("be/beintplayer", func_00148BF0);
 /**
  * Stores a profile's trick stat for one character (byte 2 of the character's stat record) in the current-stat table.
  *
- * Writes @p value to D_00535538[@p a1][@p a2][2] (On Tour tBEStatDB.cTrick). Unlike the rider-slot setters, it takes
+ * Writes @p value to D_00535538[@p humanIndex][@p charType][2] (On Tour tBEStatDB.cTrick). Unlike the rider-slot setters, it takes
  * the profile and the character directly.
  *
- * @param a1  profile index (On Tour iHuman)
+ * @param humanIndex  profile index (On Tour iHuman)
  * @param value  new stat value (On Tour var)
- * @param a2  character ID (On Tour charType)
+ * @param charType  character ID (On Tour charType)
  */
-extern "C" void func_00148BF0(void* self, int a1, int value, int a2)
+extern "C" void func_00148BF0(void* self, int humanIndex, int value, int charType)
 {
-    D_00535538[a1].e[a2].v[2] = value;
+    D_00535538[humanIndex].e[charType].v[2] = value;
 }
 #endif
 
@@ -2414,15 +2414,15 @@ INCLUDE_ASM("be/beintplayer", func_00148C18);
 /**
  * Returns a profile's trick stat for one character (byte 2 of the character's stat record) from the current-stat table.
  *
- * Reads D_00535538[@p a1][@p a2][2] (On Tour tBEStatDB.cTrick).
+ * Reads D_00535538[@p humanIndex][@p charType][2] (On Tour tBEStatDB.cTrick).
  *
- * @param a1  profile index (On Tour iHuman)
- * @param a2  character ID (On Tour charType)
+ * @param humanIndex  profile index (On Tour iHuman)
+ * @param charType  character ID (On Tour charType)
  * @return the trick stat (5 per level)
  */
-extern "C" signed char func_00148C18(void* self, int a1, int a2)
+extern "C" signed char func_00148C18(void* self, int humanIndex, int charType)
 {
-    return D_00535538[a1].e[a2].v[2];
+    return D_00535538[humanIndex].e[charType].v[2];
 }
 #endif
 
@@ -2432,16 +2432,16 @@ INCLUDE_ASM("be/beintplayer", func_00148C40);
 /**
  * Stores a profile's edging stat for one character (byte 3 of the character's stat record) in the current-stat table.
  *
- * Writes @p value to D_00535538[@p a1][@p a2][3] (On Tour tBEStatDB.cEdging). Unlike the rider-slot setters, it takes
+ * Writes @p value to D_00535538[@p humanIndex][@p charType][3] (On Tour tBEStatDB.cEdging). Unlike the rider-slot setters, it takes
  * the profile and the character directly.
  *
- * @param a1  profile index (On Tour iHuman)
+ * @param humanIndex  profile index (On Tour iHuman)
  * @param value  new stat value (On Tour var)
- * @param a2  character ID (On Tour charType)
+ * @param charType  character ID (On Tour charType)
  */
-extern "C" void func_00148C40(void* self, int a1, int value, int a2)
+extern "C" void func_00148C40(void* self, int humanIndex, int value, int charType)
 {
-    D_00535538[a1].e[a2].v[3] = value;
+    D_00535538[humanIndex].e[charType].v[3] = value;
 }
 #endif
 
@@ -2452,15 +2452,15 @@ INCLUDE_ASM("be/beintplayer", func_00148C68);
  * Returns a profile's edging stat for one character (byte 3 of the character's stat record) from the current-stat
  * table.
  *
- * Reads D_00535538[@p a1][@p a2][3] (On Tour tBEStatDB.cEdging).
+ * Reads D_00535538[@p humanIndex][@p charType][3] (On Tour tBEStatDB.cEdging).
  *
- * @param a1  profile index (On Tour iHuman)
- * @param a2  character ID (On Tour charType)
+ * @param humanIndex  profile index (On Tour iHuman)
+ * @param charType  character ID (On Tour charType)
  * @return the edging stat (5 per level)
  */
-extern "C" signed char func_00148C68(void* self, int a1, int a2)
+extern "C" signed char func_00148C68(void* self, int humanIndex, int charType)
 {
-    return D_00535538[a1].e[a2].v[3];
+    return D_00535538[humanIndex].e[charType].v[3];
 }
 #endif
 
@@ -2470,16 +2470,16 @@ INCLUDE_ASM("be/beintplayer", func_00148C90);
 /**
  * Stores a profile's spin stat for one character (byte 4 of the character's stat record) in the current-stat table.
  *
- * Writes @p value to D_00535538[@p a1][@p a2][4] (On Tour tBEStatDB.cSpin). Unlike the rider-slot setters, it takes the
+ * Writes @p value to D_00535538[@p humanIndex][@p charType][4] (On Tour tBEStatDB.cSpin). Unlike the rider-slot setters, it takes the
  * profile and the character directly.
  *
- * @param a1  profile index (On Tour iHuman)
+ * @param humanIndex  profile index (On Tour iHuman)
  * @param value  new stat value (On Tour var)
- * @param a2  character ID (On Tour charType)
+ * @param charType  character ID (On Tour charType)
  */
-extern "C" void func_00148C90(void* self, int a1, int value, int a2)
+extern "C" void func_00148C90(void* self, int humanIndex, int value, int charType)
 {
-    D_00535538[a1].e[a2].v[4] = value;
+    D_00535538[humanIndex].e[charType].v[4] = value;
 }
 #endif
 
@@ -2489,15 +2489,15 @@ INCLUDE_ASM("be/beintplayer", func_00148CB8);
 /**
  * Returns a profile's spin stat for one character (byte 4 of the character's stat record) from the current-stat table.
  *
- * Reads D_00535538[@p a1][@p a2][4] (On Tour tBEStatDB.cSpin).
+ * Reads D_00535538[@p humanIndex][@p charType][4] (On Tour tBEStatDB.cSpin).
  *
- * @param a1  profile index (On Tour iHuman)
- * @param a2  character ID (On Tour charType)
+ * @param humanIndex  profile index (On Tour iHuman)
+ * @param charType  character ID (On Tour charType)
  * @return the spin stat (5 per level)
  */
-extern "C" signed char func_00148CB8(void* self, int a1, int a2)
+extern "C" signed char func_00148CB8(void* self, int humanIndex, int charType)
 {
-    return D_00535538[a1].e[a2].v[4];
+    return D_00535538[humanIndex].e[charType].v[4];
 }
 #endif
 
@@ -2508,16 +2508,16 @@ INCLUDE_ASM("be/beintplayer", func_00148CE0);
  * Stores a profile's toughness stat for one character (byte 5 of the character's stat record) in the current-stat
  * table.
  *
- * Writes @p value to D_00535538[@p a1][@p a2][5] (On Tour tBEStatDB.cToughness). Unlike the rider-slot setters, it
+ * Writes @p value to D_00535538[@p humanIndex][@p charType][5] (On Tour tBEStatDB.cToughness). Unlike the rider-slot setters, it
  * takes the profile and the character directly.
  *
- * @param a1  profile index (On Tour iHuman)
+ * @param humanIndex  profile index (On Tour iHuman)
  * @param value  new stat value (On Tour var)
- * @param a2  character ID (On Tour charType)
+ * @param charType  character ID (On Tour charType)
  */
-extern "C" void func_00148CE0(void* self, int a1, int value, int a2)
+extern "C" void func_00148CE0(void* self, int humanIndex, int value, int charType)
 {
-    D_00535538[a1].e[a2].v[5] = value;
+    D_00535538[humanIndex].e[charType].v[5] = value;
 }
 #endif
 
@@ -2528,15 +2528,15 @@ INCLUDE_ASM("be/beintplayer", func_00148D08);
  * Returns a profile's toughness stat for one character (byte 5 of the character's stat record) from the current-stat
  * table.
  *
- * Reads D_00535538[@p a1][@p a2][5] (On Tour tBEStatDB.cToughness).
+ * Reads D_00535538[@p humanIndex][@p charType][5] (On Tour tBEStatDB.cToughness).
  *
- * @param a1  profile index (On Tour iHuman)
- * @param a2  character ID (On Tour charType)
+ * @param humanIndex  profile index (On Tour iHuman)
+ * @param charType  character ID (On Tour charType)
  * @return the toughness stat (5 per level)
  */
-extern "C" signed char func_00148D08(void* self, int a1, int a2)
+extern "C" signed char func_00148D08(void* self, int humanIndex, int charType)
 {
-    return D_00535538[a1].e[a2].v[5];
+    return D_00535538[humanIndex].e[charType].v[5];
 }
 #endif
 
@@ -2547,16 +2547,16 @@ INCLUDE_ASM("be/beintplayer", func_00148D30);
  * Stores a profile's stability stat for one character (byte 6 of the character's stat record) in the current-stat
  * table.
  *
- * Writes @p value to D_00535538[@p a1][@p a2][6] (On Tour tBEStatDB.cStability). Unlike the rider-slot setters, it
+ * Writes @p value to D_00535538[@p humanIndex][@p charType][6] (On Tour tBEStatDB.cStability). Unlike the rider-slot setters, it
  * takes the profile and the character directly.
  *
- * @param a1  profile index (On Tour iHuman)
+ * @param humanIndex  profile index (On Tour iHuman)
  * @param value  new stat value (On Tour var)
- * @param a2  character ID (On Tour charType)
+ * @param charType  character ID (On Tour charType)
  */
-extern "C" void func_00148D30(void* self, int a1, int value, int a2)
+extern "C" void func_00148D30(void* self, int humanIndex, int value, int charType)
 {
-    D_00535538[a1].e[a2].v[6] = value;
+    D_00535538[humanIndex].e[charType].v[6] = value;
 }
 #endif
 
@@ -2567,15 +2567,15 @@ INCLUDE_ASM("be/beintplayer", func_00148D58);
  * Returns a profile's stability stat for one character (byte 6 of the character's stat record) from the current-stat
  * table.
  *
- * Reads D_00535538[@p a1][@p a2][6] (On Tour tBEStatDB.cStability).
+ * Reads D_00535538[@p humanIndex][@p charType][6] (On Tour tBEStatDB.cStability).
  *
- * @param a1  profile index (On Tour iHuman)
- * @param a2  character ID (On Tour charType)
+ * @param humanIndex  profile index (On Tour iHuman)
+ * @param charType  character ID (On Tour charType)
  * @return the stability stat (5 per level)
  */
-extern "C" signed char func_00148D58(void* self, int a1, int a2)
+extern "C" signed char func_00148D58(void* self, int humanIndex, int charType)
 {
-    return D_00535538[a1].e[a2].v[6];
+    return D_00535538[humanIndex].e[charType].v[6];
 }
 #endif
 
@@ -2605,15 +2605,15 @@ extern sCharStat_005308D8 D_005308D8[];
 extern "C" float func_00148D80(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
+    int charID = cBELibrary_getCharacterID(rider);
     if (cBENewPlayerInterface_isMissionMan(rider))
         return 0.5f;
-    int v;
+    int attribLevel;
     if (value > 0)
-        v = value;
+        attribLevel = value;
     else
-        v = D_00535538[profile].e[c].v[3] / 5;
-    return (float)v / (float)D_005308D8[c].v[0xB];
+        attribLevel = D_00535538[profile].e[charID].v[3] / 5;
+    return (float)attribLevel / (float)D_005308D8[charID].v[0xB];
 }
 #endif
 
@@ -2644,15 +2644,15 @@ extern sCharStat_00148E68 D_005308D8_00148E68[] __asm__("D_005308D8");
 extern "C" float func_00148E68(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
+    int charID = cBELibrary_getCharacterID(rider);
     if (cBENewPlayerInterface_isMissionMan(rider))
         return 0.5f;
-    int v;
+    int attribLevel;
     if (value > 0)
-        v = value;
+        attribLevel = value;
     else
-        v = D_00535538[profile].e[c].v[3] / 5;
-    return (float)v / (float)D_005308D8_00148E68[c].v[0xB];
+        attribLevel = D_00535538[profile].e[charID].v[3] / 5;
+    return (float)attribLevel / (float)D_005308D8_00148E68[charID].v[0xB];
 }
 #endif
 

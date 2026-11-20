@@ -352,18 +352,18 @@ public:
  * virtual slot 7 once per whole tick crossed and keeps the remainder, then calls the execution manager's (+0x8) virtual
  * slot 5. func_00317500 calls it on cAppMan_TheAppMan.
  *
- * @param p  the application manager
+ * @param appMan  the application manager
  * @return no meaningful value; the body sets no return value
  */
-int func_00317348(void* p)
+int func_00317348(void* appMan)
 {
-    cAppTickK2* self = (cAppTickK2*)p;
-    float f28 = self->accum;
-    float f24 = self->step;
-    int i28 = (int)f28;
+    cAppTickK2* self = (cAppTickK2*)appMan;
+    float fracTick = self->accum;
+    float gameRate = self->step;
+    int wholeTicks = (int)fracTick;
     self->ticks++;
-    float sum = f28 + f24;
-    int n = (int)sum - i28;
+    float sum = fracTick + gameRate;
+    int n = (int)sum - wholeTicks;
     self->accum = sum - (float)n;
     while (n--) {
         self->v07();

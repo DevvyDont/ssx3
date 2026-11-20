@@ -171,15 +171,15 @@ extern sCharStat_func_00149208 D_005308D8_func_00149208[] __asm__("D_005308D8");
 extern "C" float func_00149208(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
+    int charID = cBELibrary_getCharacterID(rider);
     if (cBENewPlayerInterface_isMissionMan(rider))
         return 0.5f;
-    int v;
+    int attribLevel;
     if (value > 0)
-        v = value;
+        attribLevel = value;
     else
-        v = D_00535538_func_00149208[profile].e[c][6] / 5;
-    return (float)v / (float)D_005308D8_func_00149208[c].v[0xE];
+        attribLevel = D_00535538_func_00149208[profile].e[charID][6] / 5;
+    return (float)attribLevel / (float)D_005308D8_func_00149208[charID].v[0xE];
 }
 #endif
 
@@ -201,15 +201,15 @@ INCLUDE_ASM("be/beintstat", func_001492F0);
 extern "C" float func_001492F0(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
+    int charID = cBELibrary_getCharacterID(rider);
     if (cBENewPlayerInterface_isMissionMan(rider))
         return 0.5f;
-    int v;
+    int attribLevel;
     if (value > 0)
-        v = value;
+        attribLevel = value;
     else
-        v = D_00535538_cBEStatInterface_getStrikingAttrib[profile].e[c][6] / 5;
-    return (float)v / (float)D_005308D8_cBEStatInterface_getStrikingAttrib[c].v[0xE];
+        attribLevel = D_00535538_cBEStatInterface_getStrikingAttrib[profile].e[charID][6] / 5;
+    return (float)attribLevel / (float)D_005308D8_cBEStatInterface_getStrikingAttrib[charID].v[0xE];
 }
 #endif
 
@@ -246,15 +246,15 @@ extern sCharStat_func_001493D8 D_005308D8_func_001493D8[] __asm__("D_005308D8");
 extern "C" float func_001493D8(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
+    int charID = cBELibrary_getCharacterID(rider);
     if (cBENewPlayerInterface_isMissionMan(rider))
         return 0.5f;
-    int v;
+    int attribLevel;
     if (value > 0)
-        v = value;
+        attribLevel = value;
     else
-        v = D_00535538_func_001493D8[profile].e[c][1] / 5;
-    return (float)v / (float)D_005308D8_func_001493D8[c].v[0x9];
+        attribLevel = D_00535538_func_001493D8[profile].e[charID][1] / 5;
+    return (float)attribLevel / (float)D_005308D8_func_001493D8[charID].v[0x9];
 }
 #endif
 
@@ -291,15 +291,15 @@ extern sCharStat_func_001494C0 D_005308D8_func_001494C0[] __asm__("D_005308D8");
 extern "C" float func_001494C0(void* self, int rider, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
+    int charID = cBELibrary_getCharacterID(rider);
     if (cBENewPlayerInterface_isMissionMan(rider))
         return 0.5f;
-    int v;
+    int attribLevel;
     if (value > 0)
-        v = value;
+        attribLevel = value;
     else
-        v = D_00535538_func_001494C0[profile].e[c][0] / 5;
-    return (float)v / (float)D_005308D8_func_001494C0[c].v[0x8];
+        attribLevel = D_00535538_func_001494C0[profile].e[charID][0] / 5;
+    return (float)attribLevel / (float)D_005308D8_func_001494C0[charID].v[0x8];
 }
 #endif
 
@@ -604,14 +604,14 @@ static inline void vreset_149A88(char* o)
 extern "C" void func_00149A88(void* self, signed char idx)
 {
     char buf[64];
-    sRiderEntry_149A88* e = (sRiderEntry_149A88*)(cBELibrary_playerDB + idx * 0x1C);
-    func_00416210(e, 0, 0x1C);
-    e->f1 = 1;
-    e->c11 = 4;
-    char* o = (char*)SSXApp->FELocale;
-    sVEntry_149A88* vt = *(sVEntry_149A88**)(o + 4);
-    strcpy2(buf, vt[4].fn(o + vt[4].delta, GetHashValue32(str_kT_MEMPlayerName)));
-    sprintf((char*)e, buf, idx + 1);
+    sRiderEntry_149A88* playerEntry = (sRiderEntry_149A88*)(cBELibrary_playerDB + idx * 0x1C);
+    func_00416210(playerEntry, 0, 0x1C);
+    playerEntry->f1 = 1;
+    playerEntry->c11 = 4;
+    char* locale = (char*)SSXApp->FELocale;
+    sVEntry_149A88* vt = *(sVEntry_149A88**)(locale + 4);
+    strcpy2(buf, vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_MEMPlayerName)));
+    sprintf((char*)playerEntry, buf, idx + 1);
     cBEProfileLib_init(cBELibrary_profileLib + idx * 39760, 1);
     vreset_149A88((char*)cBENewPlayerInterface_getThis());
     vreset_149A88((char*)cBEStatInterface_getThis());
