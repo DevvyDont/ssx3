@@ -538,10 +538,10 @@ extern "C" void* func_00416210(void* dst, int c, int n);
  *
  * @return the new node
  */
-extern "C" void* cInputMapParser_newParseNode(void* self)
+extern "C" void* cInputMapParser_newParseNode(cInputMapParser* self)
 {
-    void* freeNode = *(void**)((char*)self + 0xE0);
-    *(void**)((char*)self + 0xE0) = *(void**)((char*)freeNode + 4);
+    void* freeNode = self->FreeParseNodes;
+    self->FreeParseNodes = (tParseNode*)(*(void**)((char*)freeNode + 4));
     func_00416210(freeNode, 0, 0x10);
     return freeNode;
 }

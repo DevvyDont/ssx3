@@ -2874,7 +2874,7 @@ extern "C" void* cUIScreen_cUIScreen(cUIScreen* self, int pState)
     self->mpObjectBlock = 0;
     self->mppObjectList = 0;
     cUIThing_cUIThing(((char*)self) + 0x40, 0, 0);
-    *(void***)(((char*)self) + 0x48) = cUIGroup_vtbl;
+    self->mRootGroup.mVtbl = cUIGroup_vtbl;
     cList_cList(((char*)self) + 0xB4);
     self->mpState = (cUIState*)pState;
     return ((char*)self);

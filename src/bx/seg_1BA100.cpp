@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/bankmonitor.h"
 #include "sound/ssxaudio.h"
 #include "sound/crowdsys.h"
 #include "sound/banksys.h"
@@ -983,8 +984,8 @@ INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_GetInstance);
  * @param instance  the instance index (64 records)
  * @return the cBankMonitorInstance
  */
-extern "C" int cBankMonitor_BANKMONITOR_GetInstance(void *bankMonitor, int instance) {
-    return (*(int *)((char*)(bankMonitor) + (0x8EC))) + (instance * 0xC0);
+extern "C" int cBankMonitor_BANKMONITOR_GetInstance(cBankMonitor* bankMonitor, int instance) {
+    return ((int)bankMonitor->mBankMonitorInstance) + (instance * 0xC0);
 }
 #endif
 
@@ -997,8 +998,8 @@ INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_Paused);
  * @param bankMonitor  the cBankMonitor
  * @return mBankMonitorPaused
  */
-extern "C" int cBankMonitor_BANKMONITOR_Paused(void *bankMonitor) {
-    return (*(int *)((char*)(bankMonitor) + (0x8E8)));
+extern "C" int cBankMonitor_BANKMONITOR_Paused(cBankMonitor* bankMonitor) {
+    return (bankMonitor->mBankMonitorPaused);
 }
 #endif
 
@@ -1011,8 +1012,8 @@ INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_SetDoppler);
  * @param bankMonitor  the cBankMonitor
  * @param enable  nonzero to enable Doppler
  */
-extern "C" void cBankMonitor_BANKMONITOR_SetDoppler(void *bankMonitor, int enable) {
-    (*(int *)((char*)(bankMonitor) + (0x8E0))) = enable;
+extern "C" void cBankMonitor_BANKMONITOR_SetDoppler(cBankMonitor* bankMonitor, int enable) {
+    (bankMonitor->mDopplerEnable) = enable;
 }
 #endif
 
@@ -1025,8 +1026,8 @@ INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_SetPositional);
  * @param bankMonitor  the cBankMonitor
  * @param enable  nonzero to enable positional sound
  */
-extern "C" void cBankMonitor_BANKMONITOR_SetPositional(void *bankMonitor, int enable) {
-    (*(int *)((char*)(bankMonitor) + (0x8E4))) = enable;
+extern "C" void cBankMonitor_BANKMONITOR_SetPositional(cBankMonitor* bankMonitor, int enable) {
+    (bankMonitor->mPositionalEnable) = enable;
 }
 #endif
 
@@ -1039,8 +1040,8 @@ INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_DopplerEnabled);
  * @param bankMonitor  the cBankMonitor
  * @return mDopplerEnable
  */
-extern "C" int cBankMonitor_BANKMONITOR_DopplerEnabled(void *bankMonitor) {
-    return (*(int *)((char*)(bankMonitor) + (0x8E0)));
+extern "C" int cBankMonitor_BANKMONITOR_DopplerEnabled(cBankMonitor* bankMonitor) {
+    return (bankMonitor->mDopplerEnable);
 }
 #endif
 
@@ -1053,8 +1054,8 @@ INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_PositionalEnabled);
  * @param bankMonitor  the cBankMonitor
  * @return mPositionalEnable
  */
-extern "C" int cBankMonitor_BANKMONITOR_PositionalEnabled(void *bankMonitor) {
-    return (*(int *)((char*)(bankMonitor) + (0x8E4)));
+extern "C" int cBankMonitor_BANKMONITOR_PositionalEnabled(cBankMonitor* bankMonitor) {
+    return (bankMonitor->mPositionalEnable);
 }
 #endif
 

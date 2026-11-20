@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/race/racecontroller.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -61,11 +62,11 @@ static inline int camNetActive_D0A0(int n) { return n != 0 && n < 10; }
  * @param blend  blend rate; bit 1 of the controller's flags (+0x30) forces an instant switch (1.0)
  */
 // Creates the chase-camera algorithm for the given kind and blends it in.
-extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int kind, char* ctx, float blend)
+extern "C" void cChaseCameraController_createChaseAlgorithmBlend(cChaseCameraController* self, int kind, char* ctx, float blend)
 {
     cCamAlgo_D0A0* algo = 0;
     float blendRate = blend;
-    if (*(int*)(self + 0x30) & 2) {
+    if (*(int*)(((char*)self) + 0x30) & 2) {
         blendRate = 1.0f;
     }
     switch (kind) {
@@ -173,7 +174,7 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
         algo = 0;
         break;
     case 68:
-        algo = cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cMemMan_alloc(944, str_POST_RACE_1_Chase_Camera_Algorithm, 0x20000000, 0), *(void**)(self + 0x20));
+        algo = cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cMemMan_alloc(944, str_POST_RACE_1_Chase_Camera_Algorithm, 0x20000000, 0), self->Target);
         break;
     case 94:
         algo = cRelativeChaseAlgorithm_cRelativeChaseAlgorithm(cMemMan_alloc(0x3C0, D_0045B558, 0x20000000, 0), -0.3926991f);
@@ -192,8 +193,8 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
         *(int*)((char*)algo + 0xC) = kind;
         break;
     }
-    algo->setTarget(*(void**)(self + 0x20));
-    cChaseCameraController_addAlgorithm(self, algo, blendRate);
+    algo->setTarget(self->Target);
+    cChaseCameraController_addAlgorithm(((char*)self), algo, blendRate);
     algo->activate();
 }
 #endif

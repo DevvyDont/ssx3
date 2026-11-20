@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/race/racecontroller.h"
 
 //100%
 INCLUDE_ASM("camera/cameracontroller", cCameraController_cCameraController);
@@ -367,11 +368,11 @@ INCLUDE_ASM("camera/cameracontroller", cChaseCameraController_shouldDoExtraGroun
  *
  * @return 1 or 0
  */
-extern "C" int cChaseCameraController_shouldDoExtraGroundTest(void* self)
+extern "C" int cChaseCameraController_shouldDoExtraGroundTest(cChaseCameraController* self)
 {
     int replayCamActive = 0;
     if (*(int*)((char*)self + 0x30) & 2) {
-        int replayType = *(int*)((char*)self + 0x2C);
+        int replayType = self->CamSwitchRecord.LatestReplayType;
         if (replayType != 93) {
             replayCamActive = replayType != 0x3C;
         }
@@ -395,7 +396,7 @@ extern "C" void* cChaseCameraController_createChaseAlgorithmBlend(void*, int, in
  * @param action  the camera-trigger action that asked for the switch, if any (On Tour cCTAction*)
  * @return no meaningful value (cChaseCameraController_createChaseAlgorithmBlend returns nothing)
  */
-extern "C" void* cChaseCameraController_createChaseAlgorithmCut(void* self, int type, int action)
+extern "C" void* cChaseCameraController_createChaseAlgorithmCut(cChaseCameraController* self, int type, int action)
 {
     return cChaseCameraController_createChaseAlgorithmBlend(self, type, action, 1.0f);
 }

@@ -59,20 +59,20 @@ extern "C" void cUIScreen__cUIScreen(cUIScreen* self, int flags)
     if ((void*)self->mpBuffer != 0 && (self->mAttrScreen & 2)) {
         cMemMan_free__FPv(self->mpBuffer);
     }
-    *(void***)(((char*)self) + 0xCC) = cList_vtbl;
-    *(void***)(((char*)self) + 0x48) = cUIGroup_vtbl;
+    self->mRootGroup.mList.mVtbl = cList_vtbl;
+    self->mRootGroup.mVtbl = cUIGroup_vtbl;
     cList_destroyList_C558(((char*)self) + 0xB4);
     char* rootGroup = ((char*)self) + 0x40;
-    *(void***)(((char*)self) + 0xC8) = cListNode_vtbl;
+    self->mRootGroup.mList.mEnd.mVtbl = cListNode_vtbl;
     cListNode_destroyListNode(((char*)self) + 0xC0);
-    *(void***)(((char*)self) + 0xBC) = cListNode_vtbl;
+    self->mRootGroup.mList.mStart.mVtbl = cListNode_vtbl;
     cListNode_destroyListNode(((char*)self) + 0xB4);
     cUIThing__cUIThing(rootGroup, 2);
-    *(void***)(((char*)self) + 0x30) = cList_vtbl;
+    self->mThreads.mVtbl = cList_vtbl;
     cList_destroyList_C558(((char*)self) + 0x18);
-    *(void***)(((char*)self) + 0x2C) = cListNode_vtbl;
+    self->mThreads.mEnd.mVtbl = cListNode_vtbl;
     cListNode_destroyListNode(((char*)self) + 0x24);
-    *(void***)(((char*)self) + 0x20) = cListNode_vtbl;
+    self->mThreads.mStart.mVtbl = cListNode_vtbl;
     cListNode_destroyListNode(((char*)self) + 0x18);
     self->mVtbl = cListNode_vtbl;
     cListNode_destroyListNode(((char*)self));
@@ -130,9 +130,9 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_getFrameByIndex);
  * @param frame  the frame number to find (On Tour index)
  * @return the frame header (On Tour tUIFrameHeader), or 0
  */
-extern "C" void* cUIScreen_getFrameByIndex(void* self, unsigned short frame)
+extern "C" void* cUIScreen_getFrameByIndex(cUIScreen* self, unsigned short frame)
 {
-    int* list = *(int**)((char*)self + 0x34);
+    int* list = (int*)self->mpKeyframeBlock;
     char* frameHeader = (char*)list + 4;
     unsigned int i;
     for (i = 0; i < (unsigned int)*list; i++) {
@@ -437,7 +437,7 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseKeyframePause);
  * @param pKCP  the command (On Tour pKCP)
  * @param pThread  the animation thread being played (On Tour pThread)
  */
-extern "C" void cUIScreen_parseKeyframePause(void* self, void* pFrame, void* pKCP, void* pThread)
+extern "C" void cUIScreen_parseKeyframePause(cUIScreen* self, void* pFrame, void* pKCP, void* pThread)
 {
     *(unsigned int*)((char*)pThread + 0x10) &= 0xFEFFFFFFU;
 }
@@ -507,12 +507,12 @@ extern "C" void cUIThing_playAnimation(void* self, void* anim, unsigned char mod
  * @param pFrame  the frame header holding the command (On Tour pFrame)
  * @param msg  the command (On Tour pKCP)
  */
-extern "C" void cUIScreen_parseObjectAnim(void* self, void* pFrame, void* msg)
+extern "C" void cUIScreen_parseObjectAnim(cUIScreen* self, void* pFrame, void* msg)
 {
     void* obj = cUIScreen_getObjectByHashName((cUIScreen*)self, *(int*)((char*)msg + 8));
     if (obj != 0) {
         void* anim = cUIAnimationBank_getAnimationByHashName(
-            (char*)*(void**)((char*)*(void**)((char*)self + 0xD0) + 0x10) + 0x50,
+            (char*)*(void**)((char*)self->mpState + 0x10) + 0x50,
             *(int*)((char*)msg + 4));
         if (anim != 0) {
             cUIThing_playAnimation(obj, anim, *(unsigned char*)((char*)msg + 0xC), *(unsigned short*)((char*)pFrame + 8), 0);
@@ -555,7 +555,7 @@ public:
  * @param pFrame  the frame header holding the command (On Tour pFrame)
  * @param msg  the command words (On Tour pKCP)
  */
-extern "C" void cUIScreen_parseObjectSetPos(void* self, int pFrame, int* msg)
+extern "C" void cUIScreen_parseObjectSetPos(cUIScreen* self, int pFrame, int* msg)
 {
     cUIScreen_parseObjectSetPos_cVirt* obj = (cUIScreen_parseObjectSetPos_cVirt*)cUIScreen_getObjectByHashName((cUIScreen*)self, msg[1]);
     if (obj != 0) {
@@ -628,11 +628,11 @@ public:
  * @param pFrame  the frame header holding the command (On Tour pFrame)
  * @param msg  the command words; word 1 is the event hash (On Tour pKCP)
  */
-extern "C" void cUIScreen_parseEventTrigger(void* self, void* pFrame, int* msg)
+extern "C" void cUIScreen_parseEventTrigger(cUIScreen* self, void* pFrame, int* msg)
 {
-    cUIScreen_parseEventTrigger_cVirtA* state = *(cUIScreen_parseEventTrigger_cVirtA**)((char*)self + 0xD0);
+    cUIScreen_parseEventTrigger_cVirtA* state = (cUIScreen_parseEventTrigger_cVirtA*)self->mpState;
     if (state->v16(self, msg[1]) == 0) {
-        cUIScreen_parseEventTrigger_cVirtB* customInterface = **(cUIScreen_parseEventTrigger_cVirtB***)((char*)*(void**)((char*)self + 0xD0) + 0x10);
+        cUIScreen_parseEventTrigger_cVirtB* customInterface = **(cUIScreen_parseEventTrigger_cVirtB***)((char*)self->mpState + 0x10);
         if (customInterface != 0) {
             customInterface->v03(self, msg[1]);
         }
@@ -653,9 +653,9 @@ struct sUIFlags1C {
  *
  * If the screen has an owning state (+0xD0), sets the mode bits of its flags at +0x1C to 3.
  */
-extern "C" void cUIScreen_parseScreenFocusGain(void* self)
+extern "C" void cUIScreen_parseScreenFocusGain(cUIScreen* self)
 {
-    void* state = *(void**)((char*)self + 0xd0);
+    void* state = self->mpState;
     if (state != 0) {
         ((sUIFlags1C*)((char*)state + 0x1c))->mode = 3;
     }
@@ -704,10 +704,10 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseScreenEnd);
  * @param pKCP  the command (On Tour pKCP)
  * @param pThread  the animation thread being played (On Tour pThread)
  */
-extern "C" void cUIScreen_parseScreenEnd(void* self, void* pFrame, void* pKCP, void* pThread)
+extern "C" void cUIScreen_parseScreenEnd(cUIScreen* self, void* pFrame, void* pKCP, void* pThread)
 {
     *(unsigned int*)((char*)pThread + 0x10) &= 0xFEFFFFFFU;
-    void* state = *(void**)((char*)self + 0xd0);
+    void* state = self->mpState;
     if (state != 0) {
         ((sUIFlags1C*)((char*)state + 0x1c))->mode = 7;
     }
@@ -1839,19 +1839,19 @@ static inline int cUIState_onUpdate_padTest(char* pad, int slot)
  * with its enabled bit set gets it through its virtual slot 4 until one returns non-zero. Virtual slot 9
  * (cUIState_onInputAlways) is then called and the loop stops.
  */
-extern "C" void cUIState_onUpdate(char* self)
+extern "C" void cUIState_onUpdate(cUIState* self)
 {
-    int mask = *(signed char*)(self + 0x15);
-    char* input = *(char**)(*(char**)(self + 0x10) + 0xC);
-    *(signed char*)(self + 0x14) = 0;
+    int mask = *(signed char*)&self->mCtrlBits;
+    char* input = *(char**)((char*)self->mpEngine + 0xC);
+    self->mCurrentCtrl = 0;
     do {
         cUIState_onUpdate_sVEntryC* vc = *(cUIState_onUpdate_sVEntryC**)(input + 8);
-        vc[44].fn(input + vc[44].delta, *(unsigned char*)(self + 0x14));
+        vc[44].fn(input + vc[44].delta, *(unsigned char*)&self->mCurrentCtrl);
         if (cUIState_onUpdate_padTest(input, 45)) {
             if (cUIState_onUpdate_padTest(input, 41) || (cUIState_onUpdate_padTest(input, 40) && (mask & 1))) {
-                cUIState_onUpdate_sVEntryP* vs = *(cUIState_onUpdate_sVEntryP**)(self + 8);
-                if (!vs[8].fn(self + vs[8].delta, input)) {
-                    char* n = (char*)cList_first((cList*)(self + 0x24));
+                cUIState_onUpdate_sVEntryP* vs = (cUIState_onUpdate_sVEntryP*)self->mVtbl;
+                if (!vs[8].fn(((char*)self) + vs[8].delta, input)) {
+                    char* n = (char*)cList_first((cList*)(((char*)self) + 0x24));
                     if (n != 0) {
                         do {
                             if (*(int*)(n + 0x14) & 1) {
@@ -1862,14 +1862,14 @@ extern "C" void cUIState_onUpdate(char* self)
                         } while (!cListNode_isSentinel((cListNode*)n));
                     }
                 }
-                cUIState_onUpdate_sVEntryV* vs2 = *(cUIState_onUpdate_sVEntryV**)(self + 8);
-                vs2[9].fn(self + vs2[9].delta, input);
+                cUIState_onUpdate_sVEntryV* vs2 = (cUIState_onUpdate_sVEntryV*)self->mVtbl;
+                vs2[9].fn(((char*)self) + vs2[9].delta, input);
                 break;
             }
         }
         mask >>= 1;
-    } while (++*(signed char*)(self + 0x14) < 2);
-    *(signed char*)(self + 0x14) = -1;
+    } while (++self->mCurrentCtrl < 2);
+    self->mCurrentCtrl = -1;
 }
 #endif
 
@@ -1896,7 +1896,7 @@ public:
  *
  * @param obj  the menu group gaining focus (On Tour pRootGroup)
  */
-extern "C" void cUIState_onMenuGainFocus(void* self, cUIState_onMenuGainFocus_cVirt* obj)
+extern "C" void cUIState_onMenuGainFocus(cUIState* self, cUIState_onMenuGainFocus_cVirt* obj)
 {
     obj->v07(1);
 }
@@ -1927,11 +1927,11 @@ struct sVEntry39E6B8b {
  * If the screen list at +0x24 is not empty, calls virtual slot 14 (cUIState_onPreRender2D) and then each screen whose
  * visible bit (bit 6 of +0x54) is set is drawn through the virtual slot 17 of its object at +0x40 with (0.0f, 0.0f).
  */
-extern "C" void cUIState_onRender2D(void* self)
+extern "C" void cUIState_onRender2D(cUIState* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x24));
     if (n != 0) {
-        sVEntry39E6B8a* vt = *(sVEntry39E6B8a**)((char*)self + 8);
+        sVEntry39E6B8a* vt = (sVEntry39E6B8a*)self->mVtbl;
         vt[0xE].fn((char*)self + vt[0xE].delta);
         do {
             char* obj = (char*)n + 0x40;

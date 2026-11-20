@@ -1188,7 +1188,7 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setIsNetworkGame);
  *
  * @param isNetworkGame  nonzero for an online game
  */
-extern "C" void cBENetworkInterface_setIsNetworkGame(void* self, int isNetworkGame) {
+extern "C" void cBENetworkInterface_setIsNetworkGame(cBENetworkInterface* self, int isNetworkGame) {
     cBENetworkInterface_networkOpt.bIsNetworkGame = isNetworkGame;
 }
 #endif
@@ -1215,7 +1215,7 @@ extern char D_00534B34[];
  *
  * @param isRanked  nonzero for a ranked game
  */
-extern "C" void cBENetworkInterface_setIsRankedGame(void* self, int isRanked) {
+extern "C" void cBENetworkInterface_setIsRankedGame(cBENetworkInterface* self, int isRanked) {
     *(int*)D_00534B34 = isRanked;
 }
 #endif
@@ -1244,7 +1244,7 @@ extern char D_00534B38[];
  *
  * @param isHost  nonzero when hosting
  */
-extern "C" void cBENetworkInterface_setIsHost(void* self, int isHost) {
+extern "C" void cBENetworkInterface_setIsHost(cBENetworkInterface* self, int isHost) {
     *(int*)D_00534B38 = isHost;
 }
 #endif
@@ -1272,7 +1272,7 @@ extern char D_00534B3C[];
  *
  * @param port  the port
  */
-extern "C" void cBENetworkInterface_setPort(void* self, int port) {
+extern "C" void cBENetworkInterface_setPort(cBENetworkInterface* self, int port) {
     *(int*)D_00534B3C = port;
 }
 #endif
@@ -1328,7 +1328,7 @@ extern char D_00534D44[];
  *
  * @param clientID  the client id
  */
-extern "C" void cBENetworkInterface_setClientID(void* self, int clientID) {
+extern "C" void cBENetworkInterface_setClientID(cBENetworkInterface* self, int clientID) {
     *(int*)D_00534D44 = clientID;
 }
 #endif
@@ -1358,7 +1358,7 @@ extern char D_00534D48[];
  * @param name  the host name
  */
 // Copies the caller's name string (a1) into a static buffer; the receiver (a0) is unused.
-extern "C" void cBENetworkInterface_setHostName(void* self, const char* name)
+extern "C" void cBENetworkInterface_setHostName(cBENetworkInterface* self, const char* name)
 {
     strcpy(D_00534D48, name);
 }
@@ -1389,7 +1389,7 @@ extern char D_00534DC0[];
  * @param name  the online game's name
  */
 // Copies the caller's name string (a1) into a static buffer; the receiver (a0) is unused.
-extern "C" void cBENetworkInterface_setGameName(void* self, const char* name)
+extern "C" void cBENetworkInterface_setGameName(cBENetworkInterface* self, const char* name)
 {
     strcpy(D_00534DC0, name);
 }
@@ -1420,7 +1420,7 @@ extern char D_00534E38[];
  * @param name  the game password
  */
 // Copies the caller's name string (a1) into a static buffer; the receiver (a0) is unused.
-extern "C" void cBENetworkInterface_setPassword(void* self, const char* name)
+extern "C" void cBENetworkInterface_setPassword(cBENetworkInterface* self, const char* name)
 {
     strcpy(D_00534E38, name);
 }
@@ -1463,7 +1463,7 @@ extern char D_00534E58[];
  *
  * @param characterID  the character id
  */
-extern "C" void cBENetworkInterface_setMyCharacterID(void* self, int characterID) {
+extern "C" void cBENetworkInterface_setMyCharacterID(cBENetworkInterface* self, int characterID) {
     *(int*)D_00534E58 = characterID;
 }
 #endif
@@ -1492,7 +1492,7 @@ extern char D_00534E5C[];
  *
  * @param characterID  the character id
  */
-extern "C" void cBENetworkInterface_setOpponentCharacterID(void* self, int characterID) {
+extern "C" void cBENetworkInterface_setOpponentCharacterID(cBENetworkInterface* self, int characterID) {
     *(int*)D_00534E5C = characterID;
 }
 #endif
@@ -1522,7 +1522,7 @@ extern sBEBlk_C418 D_00534E60;
  *
  * @param src  this player's rider stats (tRiderStats)
  */
-extern "C" void cBENetworkInterface_setMyStats(void* self, sBEBlk_C418* src)
+extern "C" void cBENetworkInterface_setMyStats(cBENetworkInterface* self, sBEBlk_C418* src)
 {
     D_00534E60 = *src;
 }
@@ -1552,7 +1552,7 @@ extern sBEBlk_C418 D_00534F0C;
  *
  * @param src  the remote player's rider stats (tRiderStats)
  */
-extern "C" void cBENetworkInterface_setOpponentStats(void* self, sBEBlk_C418* src)
+extern "C" void cBENetworkInterface_setOpponentStats(cBENetworkInterface* self, sBEBlk_C418* src)
 {
     D_00534F0C = *src;
 }
@@ -1613,7 +1613,7 @@ extern unsigned char D_00534FD8[];
  *
  * @param src  the remote rider's seven attribute levels
  */
-extern "C" void cBENetworkInterface_setOpponentAttributes(void* self, sBEBlk7_C5C8* src)
+extern "C" void cBENetworkInterface_setOpponentAttributes(cBENetworkInterface* self, sBEBlk7_C5C8* src)
 {
     *(sBEBlk7_C5C8*)D_00534FD8 = *src;
 }
@@ -1675,10 +1675,10 @@ extern char D_0045AD98[];
  *
  * @return @p self
  */
-extern "C" void* cBENetworkInterface_cBENetworkInterface(void* self)
+extern "C" void* cBENetworkInterface_cBENetworkInterface(cBENetworkInterface* self)
 {
-    *(char**)((char*)self + 0xC) = D_0045AD98;
-    return self;
+    self->mVtbl = (void**)D_0045AD98;
+    return ((void*)self);
 }
 #endif
 //100%

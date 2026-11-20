@@ -149,7 +149,7 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_configToRegister);
  * @param varIndex  the config index (On Tour config)
  * @return the register number
  */
-extern "C" void* cInputMapParser_configToRegister(void* self, void* varIndex)
+extern "C" void* cInputMapParser_configToRegister(cInputMapParser* self, void* varIndex)
 {
     return (char*)varIndex + 0x40;
 }
@@ -168,7 +168,7 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_buttonToRegister);
  * @param modifier  the button modifier, 0..5 (On Tour eButtonModifiers)
  * @return the register number
  */
-extern "C" int cInputMapParser_buttonToRegister(void* self, int inputIndex, int modifier)
+extern "C" int cInputMapParser_buttonToRegister(cInputMapParser* self, int inputIndex, int modifier)
 {
     return inputIndex * 6 + modifier + 0x60;
 }
@@ -1638,7 +1638,7 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_compileParseNode);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
 extern "C" int cInputMapParser_configToRegister_i(void* self, void* var) __asm__("cInputMapParser_configToRegister");
-extern "C" int cInputMapParser_buttonToRegister(void* self, int a1, int a2);
+extern "C" int cInputMapParser_buttonToRegister(cInputMapParser* self, int a1, int a2);
 extern "C" int cInputMapParser_compileBinaryNode_K(cInputMapParser* self, void* node, int* dst, void* code, int cap, int op, int a6) __asm__("cInputMapParser_compileBinaryNode");
 extern "C" int cInputMapParser_compileUnaryNode_K(cInputMapParser* self, void* node, int* dst, void* code, int cap, int op, int a6) __asm__("cInputMapParser_compileUnaryNode");
 extern char str_opcode_buffer_overflow[];

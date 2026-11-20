@@ -2745,7 +2745,7 @@ extern "C" void* cScriptPlayerChannelBlock_cScriptPlayerChannelBlock(cScriptPlay
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock__cScriptPlayerChannelBlock);
 #ifdef SKIP_ASM
-extern "C" void cScriptPlayerChannelBlock_Stop(void* self);
+extern "C" void cScriptPlayerChannelBlock_Stop(cScriptPlayerChannelBlock* self);
 extern "C" void* func_002724E8(void* self);
 extern void* cScriptPlayerChannelBlock_vtbl[];
 
@@ -2755,9 +2755,9 @@ extern void* cScriptPlayerChannelBlock_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cScriptPlayerChannelBlock__cScriptPlayerChannelBlock(void* self, int flags)
+extern "C" void cScriptPlayerChannelBlock__cScriptPlayerChannelBlock(cScriptPlayerChannelBlock* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = cScriptPlayerChannelBlock_vtbl;
+    self->mVtbl = cScriptPlayerChannelBlock_vtbl;
     cScriptPlayerChannelBlock_Stop(self);
     if (flags & 1) {
         func_002724E8(self);
@@ -2787,25 +2787,25 @@ extern "C" void cScriptPlayerChannelBlock_LoadNextScriptKey(cScriptPlayerChannel
  * @param flags  the sequence's event bits (On Tour int& events)
  * @return 1 when the channel has keys, otherwise 0
  */
-extern "C" int cScriptPlayerChannelBlock_Play(void* self, unsigned short* data, void* owner, int* flags)
+extern "C" int cScriptPlayerChannelBlock_Play(cScriptPlayerChannelBlock* self, unsigned short* data, void* owner, int* flags)
 {
-    *(unsigned short**)((char*)self + 0x8) = data;
-    *(void**)((char*)self + 0xC) = owner;
-    *(unsigned short**)((char*)self + 0x10) = data;
+    self->mpData = (const char*)data;
+    self->mpOwner = (cScriptPlayerEntity*)owner;
+    self->mpHeader = (tInSeqBlockChannelHeader*)data;
     if (data[0] != 0) {
         char* heap = *(char**)(*(char**)((char*)owner + 0x8) + 0x8);
-        *(void**)((char*)self + 0x20) = cScriptHeap_AllocMem(heap + 8, data[1] * 0x1C);
-        *(int*)((char*)self + 0x18) = 0;
-        char* base = *(char**)((char*)self + 0x10);
-        *(char**)((char*)self + 0x14) = base + 4;
+        self->mpBlockArray = (tBlockEntry*)cScriptHeap_AllocMem(heap + 8, data[1] * 0x1C);
+        self->mNextKeyIndex = 0;
+        char* base = (char*)self->mpHeader;
+        self->mpNextKey = (tInSeqBlockChannelKey*)(base + 4);
         if (base + 4 != 0 && *(unsigned short*)(base + 8) == 0) do {
             *flags |= 4;
-            cScriptPlayerChannelBlock_AddActiveKey((cScriptPlayerChannelBlock*)self, *(sCacheRecord**)((char*)self + 0x14));
+            cScriptPlayerChannelBlock_AddActiveKey((cScriptPlayerChannelBlock*)self, (sCacheRecord*)self->mpNextKey);
             cScriptPlayerChannelBlock_LoadNextScriptKey((cScriptPlayerChannelBlock*)self);
-        } while (*(char**)((char*)self + 0x14) != 0 &&
-               *(unsigned short*)(*(char**)((char*)self + 0x14) + 4) == 0);
+        } while ((char*)self->mpNextKey != 0 &&
+               *(unsigned short*)((char*)self->mpNextKey + 4) == 0);
     }
-    return **(unsigned short**)((char*)self + 0x10) != 0;
+    return *(unsigned short*)self->mpHeader != 0;
 }
 #endif
 
@@ -2816,22 +2816,22 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_Stop);
  * Stops a block channel: frees its active-key buffer to the owner's script heap and clears its state (only when it
  * has an owner).
  */
-extern "C" void cScriptPlayerChannelBlock_Stop(void* self)
+extern "C" void cScriptPlayerChannelBlock_Stop(cScriptPlayerChannelBlock* self)
 {
-    char* owner = *(char**)((char*)self + 0xC);
+    char* owner = (char*)self->mpOwner;
     if (owner != 0) {
-        void* heapBlock = *(void**)((char*)self + 0x20);
+        void* heapBlock = self->mpBlockArray;
         if (heapBlock != 0) {
             cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(*(char**)(*(char**)(owner + 0x8) + 0x8) + 0x8)), heapBlock);
         }
-        *(int*)((char*)self + 0x8) = 0;
-        *(int*)((char*)self + 0xC) = 0;
-        *(int*)((char*)self + 0x10) = 0;
-        *(int*)((char*)self + 0x14) = 0;
-        *(int*)((char*)self + 0x18) = 0;
-        *(int*)((char*)self + 0x20) = 0;
-        *(int*)((char*)self + 0x24) = 0;
-        *(int*)((char*)self + 0x28) = 0;
+        self->mpData = 0;
+        self->mpOwner = 0;
+        self->mpHeader = 0;
+        self->mpNextKey = 0;
+        self->mNextKeyIndex = 0;
+        self->mpBlockArray = 0;
+        self->mpActiveBlockList = 0;
+        self->mNumActiveBlocks = 0;
     }
 }
 #endif
@@ -2922,17 +2922,17 @@ struct sCacheTimeNode {
  *
  * @return that frame, or -1 when the channel is not playing, has no keys or nothing is left
  */
-extern "C" int cScriptPlayerChannelBlock_GetNextKeyFrame(void* self)
+extern "C" int cScriptPlayerChannelBlock_GetNextKeyFrame(cScriptPlayerChannelBlock* self)
 {
-    if (*(int*)((char*)self + 0x8) == 0) {
+    if ((int)self->mpData == 0) {
         return -1;
     }
-    if (**(unsigned short**)((char*)self + 0x10) == 0) {
+    if (*(unsigned short*)self->mpHeader == 0) {
         return -1;
     }
     int best = -1;
-    sCacheTimeNode* n = *(sCacheTimeNode**)((char*)self + 0x24);
-    unsigned short* cur = *(unsigned short**)((char*)self + 0x14);
+    sCacheTimeNode* n = (sCacheTimeNode*)self->mpActiveBlockList;
+    unsigned short* cur = (unsigned short*)self->mpNextKey;
     for (; n != 0; n = n->next) {
         int keyTime = n->time;
         if (best < 0 || keyTime < best) {
@@ -3047,7 +3047,7 @@ extern "C" void* cScriptPlayerChannelEvent_cScriptPlayerChannelEvent(cScriptPlay
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent__cScriptPlayerChannelEvent);
 #ifdef SKIP_ASM
-extern "C" void cScriptPlayerChannelEvent_Stop(void* self);
+extern "C" void cScriptPlayerChannelEvent_Stop(cScriptPlayerChannelEvent* self);
 extern "C" void* func_002724E8(void* self);
 extern void* cScriptPlayerChannelEvent_vtbl[];
 
@@ -3057,9 +3057,9 @@ extern void* cScriptPlayerChannelEvent_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cScriptPlayerChannelEvent__cScriptPlayerChannelEvent(void* self, int flags)
+extern "C" void cScriptPlayerChannelEvent__cScriptPlayerChannelEvent(cScriptPlayerChannelEvent* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = cScriptPlayerChannelEvent_vtbl;
+    self->mVtbl = cScriptPlayerChannelEvent_vtbl;
     cScriptPlayerChannelEvent_Stop(self);
     if (flags & 1) {
         func_002724E8(self);
@@ -3089,26 +3089,26 @@ extern "C" void cScriptPlayerChannelEvent_LoadNextScriptKey(cScriptPlayerChannel
  * @param flags  the sequence's event bits (On Tour int& events)
  * @return 1 while a key is still pending, otherwise 0
  */
-extern "C" int cScriptPlayerChannelEvent_Play(void* self, unsigned short* data, void* owner, int* flags)
+extern "C" int cScriptPlayerChannelEvent_Play(cScriptPlayerChannelEvent* self, unsigned short* data, void* owner, int* flags)
 {
-    *(unsigned short**)((char*)self + 0x8) = data;
-    *(void**)((char*)self + 0xC) = owner;
-    *(unsigned short**)((char*)self + 0x10) = data;
+    self->mpData = (const char*)data;
+    self->mpOwner = (cScriptPlayerEntity*)owner;
+    self->mpHeader = (tInSeqEventChannelHeader*)data;
     if (data[0] != 0) {
         char* heap = *(char**)(*(char**)((char*)owner + 0x8) + 0x8);
-        *(void**)((char*)self + 0x1C) = cScriptHeap_AllocMem(heap + 8, data[1] * 8);
-        *(int*)((char*)self + 0x18) = 0;
-        char* base = *(char**)((char*)self + 0x10);
-        *(char**)((char*)self + 0x14) = base + 4;
+        self->mpEventArray = (tEventEntry*)cScriptHeap_AllocMem(heap + 8, data[1] * 8);
+        self->mNextKeyIndex = 0;
+        char* base = (char*)self->mpHeader;
+        self->mpNextKey = (tInSeqEventChannelKey*)(base + 4);
         if (base + 4 != 0 && *(unsigned short*)(base + 6) == 0) do {
             *flags |= 0x10;
-            cScriptPlayerChannelEvent_AddActiveKey((cScriptPlayerChannelEvent*)self, *(sCacheRec**)((char*)self + 0x14));
+            cScriptPlayerChannelEvent_AddActiveKey((cScriptPlayerChannelEvent*)self, (sCacheRec*)self->mpNextKey);
             cScriptPlayerChannelEvent_LoadNextScriptKey((cScriptPlayerChannelEvent*)self);
-            *(int*)((char*)self + 0x24) = 0;
-        } while (*(char**)((char*)self + 0x14) != 0 &&
-               *(unsigned short*)(*(char**)((char*)self + 0x14) + 2) == 0);
+            *(int*)&self->mEventFrame = 0;
+        } while ((char*)self->mpNextKey != 0 &&
+               *(unsigned short*)((char*)self->mpNextKey + 2) == 0);
     }
-    return *(char**)((char*)self + 0x14) != 0;
+    return (char*)self->mpNextKey != 0;
 }
 #endif
 
@@ -3119,22 +3119,22 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_Stop);
  * Stops an event channel: frees its key buffer to the owner's script heap and clears its state (only when it has an
  * owner).
  */
-extern "C" void cScriptPlayerChannelEvent_Stop(void* self)
+extern "C" void cScriptPlayerChannelEvent_Stop(cScriptPlayerChannelEvent* self)
 {
-    char* owner = *(char**)((char*)self + 0xC);
+    char* owner = (char*)self->mpOwner;
     if (owner != 0) {
-        void* heapBlock = *(void**)((char*)self + 0x1C);
+        void* heapBlock = self->mpEventArray;
         if (heapBlock != 0) {
             cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(*(char**)(*(char**)(owner + 0x8) + 0x8) + 0x8)), heapBlock);
         }
-        *(int*)((char*)self + 0x8) = 0;
-        *(int*)((char*)self + 0xC) = 0;
-        *(int*)((char*)self + 0x10) = 0;
-        *(int*)((char*)self + 0x14) = 0;
-        *(int*)((char*)self + 0x18) = 0;
-        *(int*)((char*)self + 0x1C) = 0;
-        *(int*)((char*)self + 0x20) = 0;
-        *(int*)((char*)self + 0x24) = 0;
+        self->mpData = 0;
+        self->mpOwner = 0;
+        self->mpHeader = 0;
+        self->mpNextKey = 0;
+        self->mNextKeyIndex = 0;
+        self->mpEventArray = 0;
+        self->mNumActiveEvents = 0;
+        *(int*)&self->mEventFrame = 0;
     }
 }
 #endif
@@ -3157,20 +3157,20 @@ extern "C" void cScriptPlayerChannelEvent_LoadNextScriptKey(cScriptPlayerChannel
  * @param currFrameNum  the sequence's current frame (On Tour currFrameNum)
  * @return 1 while a key is still pending, otherwise 0
  */
-extern "C" int cScriptPlayerChannelEvent_Update(void* self, int* flags, float currFrameNum)
+extern "C" int cScriptPlayerChannelEvent_Update(cScriptPlayerChannelEvent* self, int* flags, float currFrameNum)
 {
-    if (*(float*)((char*)self + 0x24) != currFrameNum) {
-        *(int*)((char*)self + 0x20) = 0;
+    if (self->mEventFrame != currFrameNum) {
+        self->mNumActiveEvents = 0;
     }
-    while (*(char**)((char*)self + 0x14) != 0) {
-        float keyFrameNum = (float)*(unsigned short*)(*(char**)((char*)self + 0x14) + 2);
+    while ((char*)self->mpNextKey != 0) {
+        float keyFrameNum = (float)*(unsigned short*)((char*)self->mpNextKey + 2);
         if (currFrameNum < keyFrameNum) break;
         *flags |= 0x10;
-        cScriptPlayerChannelEvent_AddActiveKey((cScriptPlayerChannelEvent*)self, *(sCacheRec**)((char*)self + 0x14));
-        *(float*)((char*)self + 0x24) = keyFrameNum;
+        cScriptPlayerChannelEvent_AddActiveKey((cScriptPlayerChannelEvent*)self, (sCacheRec*)self->mpNextKey);
+        self->mEventFrame = keyFrameNum;
         cScriptPlayerChannelEvent_LoadNextScriptKey((cScriptPlayerChannelEvent*)self);
     }
-    return *(char**)((char*)self + 0x14) != 0;
+    return (char*)self->mpNextKey != 0;
 }
 #endif
 
@@ -3182,15 +3182,15 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_GetNextKeyFrame);
  *
  * @return that frame, or -1 when the channel is not playing, has no keys or none is pending
  */
-extern "C" int cScriptPlayerChannelEvent_GetNextKeyFrame(void* self)
+extern "C" int cScriptPlayerChannelEvent_GetNextKeyFrame(cScriptPlayerChannelEvent* self)
 {
-    if (*(int*)((char*)self + 0x8) == 0) {
+    if ((int)self->mpData == 0) {
         return -1;
     }
-    if (**(unsigned short**)((char*)self + 0x10) == 0) {
+    if (*(unsigned short*)self->mpHeader == 0) {
         return -1;
     }
-    unsigned short* cur = *(unsigned short**)((char*)self + 0x14);
+    unsigned short* cur = (unsigned short*)self->mpNextKey;
     int nextKeyFrame = -1;
     if (cur) {
         nextKeyFrame = cur[1];
@@ -3281,7 +3281,7 @@ extern "C" void* cScriptPlayerChannelObject_cScriptPlayerChannelObject(cScriptPl
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject__cScriptPlayerChannelObject);
 #ifdef SKIP_ASM
-extern "C" void cScriptPlayerChannelObject_Stop(void* self);
+extern "C" void cScriptPlayerChannelObject_Stop(cScriptPlayerChannelObject* self);
 extern "C" void* func_002724E8(void* self);
 extern void* cScriptPlayerChannelObject_vtbl[];
 
@@ -3291,9 +3291,9 @@ extern void* cScriptPlayerChannelObject_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cScriptPlayerChannelObject__cScriptPlayerChannelObject(void* self, int flags)
+extern "C" void cScriptPlayerChannelObject__cScriptPlayerChannelObject(cScriptPlayerChannelObject* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = cScriptPlayerChannelObject_vtbl;
+    self->mVtbl = cScriptPlayerChannelObject_vtbl;
     cScriptPlayerChannelObject_Stop(self);
     if (flags & 1) {
         func_002724E8(self);
@@ -3323,27 +3323,27 @@ extern "C" void cScriptPlayerChannelObject_LoadNextScriptKey(cScriptPlayerChanne
  * @param flags  the sequence's event bits (On Tour int& events)
  * @return 1 when the channel has keys, otherwise 0
  */
-extern "C" int cScriptPlayerChannelObject_Play(void* self, unsigned short* data, void* owner, int* flags)
+extern "C" int cScriptPlayerChannelObject_Play(cScriptPlayerChannelObject* self, unsigned short* data, void* owner, int* flags)
 {
-    *(unsigned short**)((char*)self + 0x8) = data;
-    *(void**)((char*)self + 0xC) = owner;
-    *(unsigned short**)((char*)self + 0x10) = data;
+    self->mpData = (const char*)data;
+    self->mpOwner = (cScriptPlayerEntity*)owner;
+    self->mpHeader = (tInSeqObjectChannelHeader*)data;
     if (data[0] != 0) {
         char* heap = *(char**)(*(char**)((char*)owner + 0x8) + 0x8);
-        *(void**)((char*)self + 0x1C) = cScriptHeap_AllocMem(heap + 8, data[1] * 36);
-        for (int i = 0; i < (*(unsigned short**)((char*)self + 0x10))[1]; i++) {
+        self->mpObjectArray = (tObjectEntry*)cScriptHeap_AllocMem(heap + 8, data[1] * 36);
+        for (int i = 0; i < ((unsigned short*)self->mpHeader)[1]; i++) {
         }
-        *(int*)((char*)self + 0x18) = 0;
-        char* base = *(char**)((char*)self + 0x10);
-        *(char**)((char*)self + 0x14) = base + 4;
+        self->mNextKeyIndex = 0;
+        char* base = (char*)self->mpHeader;
+        self->mpNextKey = (tInSeqObjectChannelKey*)(base + 4);
         if (base + 4 != 0 && *(unsigned short*)(base + 8) == 0) do {
             *flags |= 1;
-            cScriptPlayerChannelObject_AddActiveKey((cScriptPlayerChannelObject*)self, *(sCacheRecord2**)((char*)self + 0x14));
+            cScriptPlayerChannelObject_AddActiveKey((cScriptPlayerChannelObject*)self, (sCacheRecord2*)self->mpNextKey);
             cScriptPlayerChannelObject_LoadNextScriptKey((cScriptPlayerChannelObject*)self);
-        } while (*(char**)((char*)self + 0x14) != 0 &&
-               *(unsigned short*)(*(char**)((char*)self + 0x14) + 4) == 0);
+        } while ((char*)self->mpNextKey != 0 &&
+               *(unsigned short*)((char*)self->mpNextKey + 4) == 0);
     }
-    return **(unsigned short**)((char*)self + 0x10) != 0;
+    return *(unsigned short*)self->mpHeader != 0;
 }
 #endif
 
@@ -3354,22 +3354,22 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_Stop);
  * Stops an object channel: frees its active-key buffer to the owner's script heap and clears its state (only when
  * it has an owner).
  */
-extern "C" void cScriptPlayerChannelObject_Stop(void* self)
+extern "C" void cScriptPlayerChannelObject_Stop(cScriptPlayerChannelObject* self)
 {
-    char* owner = *(char**)((char*)self + 0xC);
+    char* owner = (char*)self->mpOwner;
     if (owner != 0) {
-        void* heapBlock = *(void**)((char*)self + 0x1C);
+        void* heapBlock = self->mpObjectArray;
         if (heapBlock != 0) {
             cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(*(char**)(*(char**)(owner + 0x8) + 0x8) + 0x8)), heapBlock);
         }
-        *(int*)((char*)self + 0x8) = 0;
-        *(int*)((char*)self + 0xC) = 0;
-        *(int*)((char*)self + 0x10) = 0;
-        *(int*)((char*)self + 0x14) = 0;
-        *(int*)((char*)self + 0x18) = 0;
-        *(int*)((char*)self + 0x1C) = 0;
-        *(int*)((char*)self + 0x20) = 0;
-        *(int*)((char*)self + 0x24) = 0;
+        self->mpData = 0;
+        self->mpOwner = 0;
+        self->mpHeader = 0;
+        self->mpNextKey = 0;
+        self->mNextKeyIndex = 0;
+        self->mpObjectArray = 0;
+        self->mpActiveObjectList = 0;
+        self->mNumActiveObjects = 0;
     }
 }
 #endif
@@ -3471,17 +3471,17 @@ struct sCacheTimeNode2 {
  *
  * @return that frame, or -1 when the channel is not playing, has no keys or nothing is left
  */
-extern "C" int cScriptPlayerChannelObject_GetNextKeyFrame(void* self)
+extern "C" int cScriptPlayerChannelObject_GetNextKeyFrame(cScriptPlayerChannelObject* self)
 {
-    if (*(int*)((char*)self + 0x8) == 0) {
+    if ((int)self->mpData == 0) {
         return -1;
     }
-    if (**(unsigned short**)((char*)self + 0x10) == 0) {
+    if (*(unsigned short*)self->mpHeader == 0) {
         return -1;
     }
     int best = -1;
-    sCacheTimeNode2* n = *(sCacheTimeNode2**)((char*)self + 0x20);
-    unsigned short* cur = *(unsigned short**)((char*)self + 0x14);
+    sCacheTimeNode2* n = (sCacheTimeNode2*)self->mpActiveObjectList;
+    unsigned short* cur = (unsigned short*)self->mpNextKey;
     for (; n != 0; n = n->next) {
         int keyTime = n->time;
         if (best < 0 || keyTime < best) {

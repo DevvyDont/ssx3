@@ -667,41 +667,41 @@ struct cUIThing_cUIThing_sUIObj {
  * @param pParent  the parent widget, or 0 (On Tour pParent)
  * @return this
  */
-extern "C" cUIThing_cUIThing_sUIObj* cUIThing_cUIThing(cUIThing_cUIThing_sUIObj* self, int pScreen, int pParent)
+extern "C" cUIThing_cUIThing_sUIObj* cUIThing_cUIThing(cUIThing* self, int pScreen, int pParent)
 {
-    self->vtbl = cUIThing_vtbl;
-    self->flags.b0 = 1;
-    self->flags.b7 = 0;
-    self->flags.b8 = 0;
-    self->flags.b5 = 0;
-    self->flags.b4 = 0;
-    self->flags.b2 = 0;
-    self->flags.b1 = 1;
-    self->flags.b3 = 1;
-    self->flags.b6 = 1;
-    self->flags.align = 9;
-    self->next = self;
-    self->prev = self;
-    self->unkC = 0;
-    self->unk10 = 0;
-    self->unk18 = 0;
-    self->color[0] = 1.0f;
-    self->color[1] = 1.0f;
-    self->color[2] = 1.0f;
-    self->color[3] = 1.0f;
-    self->pos = t3vect_Zero;
-    self->unk40 = pParent;
-    self->unk38 = 0;
-    self->unk3C = 0;
-    self->rot = t3vect_Zero;
-    self->scale.x = 1.0f;
-    self->scale.y = 1.0f;
-    self->scale.z = 1.0f;
-    self->unk5C = pScreen;
-    self->offs = t3vect_Zero;
-    self->unk6C = 4;
-    self->unk70 = 6;
-    return self;
+    self->mVtbl = (void**)cUIThing_vtbl;
+    (*(cUIThing_cUIThing_sFlags*)&self->mAttr).b0 = 1;
+    (*(cUIThing_cUIThing_sFlags*)&self->mAttr).b7 = 0;
+    (*(cUIThing_cUIThing_sFlags*)&self->mAttr).b8 = 0;
+    (*(cUIThing_cUIThing_sFlags*)&self->mAttr).b5 = 0;
+    (*(cUIThing_cUIThing_sFlags*)&self->mAttr).b4 = 0;
+    (*(cUIThing_cUIThing_sFlags*)&self->mAttr).b2 = 0;
+    (*(cUIThing_cUIThing_sFlags*)&self->mAttr).b1 = 1;
+    (*(cUIThing_cUIThing_sFlags*)&self->mAttr).b3 = 1;
+    (*(cUIThing_cUIThing_sFlags*)&self->mAttr).b6 = 1;
+    (*(cUIThing_cUIThing_sFlags*)&self->mAttr).align = 9;
+    self->mpNext = (cListNode*)((cUIThing_cUIThing_sUIObj*)self);
+    self->mpPrev = (cListNode*)((cUIThing_cUIThing_sUIObj*)self);
+    self->mpAnim = 0;
+    *(char*)&self->mAnimPlaybackStatus = 0;
+    self->mMiscData = 0;
+    ((float*)&self->mColour)[0] = 1.0f;
+    ((float*)&self->mColour)[1] = 1.0f;
+    ((float*)&self->mColour)[2] = 1.0f;
+    ((float*)&self->mColour)[3] = 1.0f;
+    (*(cUIThing_cUIThing_sVec3*)&self->mAngle) = t3vect_Zero;
+    self->mpParent = (cUIThing*)pParent;
+    self->mHashName = 0;
+    self->mpEvents = 0;
+    (*(cUIThing_cUIThing_sVec3*)&self->mPosition) = t3vect_Zero;
+    self->mScale.x = 1.0f;
+    self->mScale.y = 1.0f;
+    self->mScale.z = 1.0f;
+    self->mpScreen = (cUIScreen*)pScreen;
+    (*(cUIThing_cUIThing_sVec3*)&self->mSize) = t3vect_Zero;
+    self->mSound[0] = 4;
+    self->mSound[1] = 6;
+    return ((cUIThing_cUIThing_sUIObj*)self);
 }
 #endif
 
@@ -799,12 +799,12 @@ INCLUDE_ASM("ui/uistatestack", cUIThing_setFrameByPercent);
 #ifdef SKIP_ASM
 extern "C" int cUIAnimation_getNumFrames(void* obj);
 
-extern "C" void cUIThing_setFrameByPercent(void* self, float fraction)
+extern "C" void cUIThing_setFrameByPercent(cUIThing* self, float fraction)
 {
-    void* obj = *(void**)((char*)self + 0xC);
+    void* obj = self->mpAnim;
     if (obj != 0) {
         float frame = (float)cUIAnimation_getNumFrames(obj) * fraction;
-        *(short*)((char*)*(void**)((char*)self + 0xC) + 0xA) = (short)frame;
+        *(short*)((char*)self->mpAnim + 0xA) = (short)frame;
     }
 }
 #endif
@@ -813,11 +813,11 @@ INCLUDE_ASM("ui/uistatestack", cUIThing_isLastAnimFrame);
 #ifdef SKIP_ASM
 extern "C" int cUIAnimation_isLastFrame(int);
 
-extern "C" int cUIThing_isLastAnimFrame(void *uiThing) {
+extern "C" int cUIThing_isLastAnimFrame(cUIThing* uiThing) {
     int temp_4;
     int var_2;
 
-    temp_4 = (*(int *)((char*)(uiThing) + (0xC)));
+    temp_4 = ((int)uiThing->mpAnim);
     var_2 = 0;
     if (temp_4 != 0) {
         var_2 = cUIAnimation_isLastFrame(temp_4);
@@ -907,7 +907,7 @@ static inline unsigned int getUIAlign(void* self)
  * @param pos  the position to adjust in place (On Tour pNewPosition)
  * @param size  the widget's size
  */
-extern "C" void cUIThing_applyPivot(void* self, sUIVec2* pos, sUIVec2* size)
+extern "C" void cUIThing_applyPivot(cUIThing* self, sUIVec2* pos, sUIVec2* size)
 {
     unsigned int align = getUIAlign(self);
     if ((align & 1) == 0) {
