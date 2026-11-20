@@ -4365,14 +4365,14 @@ class cCC00 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param rhs  the region's tWPData_MusicTrigger (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_MusicTrigger_blend(tWPInGameData_MusicTrigger* self, void *rhs, float blendFactor) {
+extern "C" void tWPInGameData_MusicTrigger_blend(tWPInGameData_MusicTrigger* self, tWPData_MusicTrigger* rhs, float blendFactor) {
     cCC00 *selfView = (cCC00*)self;
     selfView->vt();
     blendFactor = blendFactor * blendFactor;
-    self->m_Type = (int)(blendFactor * (float)*(int*)((char*)rhs + 4) + (1.0f - blendFactor) * (float)self->m_Type);
-    self->m_lastType = *(int*)((char*)rhs + 4);
-    self->m_Value = (int)(blendFactor * (float)*(int*)((char*)rhs + 8) + (1.0f - blendFactor) * (float)self->m_Value);
-    self->m_lastValue = *(int*)((char*)rhs + 8);
+    self->m_Type = (int)(blendFactor * (float)rhs->m_Type + (1.0f - blendFactor) * (float)self->m_Type);
+    self->m_lastType = rhs->m_Type;
+    self->m_Value = (int)(blendFactor * (float)rhs->m_Value + (1.0f - blendFactor) * (float)self->m_Value);
+    self->m_lastValue = rhs->m_Value;
     selfView->vt();
 }
 #endif
@@ -4391,12 +4391,12 @@ class cCCC8 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param rhs  the region's tWPData_Mix (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Mix_blend(tWPInGameData_Mix* self, void *rhs, float blendFactor) {
+extern "C" void tWPInGameData_Mix_blend(tWPInGameData_Mix* self, tWPData_Mix* rhs, float blendFactor) {
     cCCC8 *selfView = (cCCC8*)self;
     selfView->vt();
     blendFactor = blendFactor * blendFactor;
-    self->m_MixPreset = (int)(blendFactor * (float)*(int*)((char*)rhs + 4) + (1.0f - blendFactor) * (float)self->m_MixPreset);
-    self->m_lastMixPreset = *(int*)((char*)rhs + 4);
+    self->m_MixPreset = (int)(blendFactor * (float)rhs->m_MixPreset + (1.0f - blendFactor) * (float)self->m_MixPreset);
+    self->m_lastMixPreset = rhs->m_MixPreset;
     selfView->vt();
 }
 #endif
@@ -4414,12 +4414,12 @@ class cCD68 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param rhs  the region's tWPData_Ambience (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Ambience_blend(tWPInGameData_Ambience* self, void *rhs, float blendFactor) {
+extern "C" void tWPInGameData_Ambience_blend(tWPInGameData_Ambience* self, tWPData_Ambience* rhs, float blendFactor) {
     cCD68 *selfView = (cCD68*)self;
     selfView->vt();
     blendFactor = blendFactor * blendFactor;
-    self->m_BankID = (int)(blendFactor * (float)*(int*)((char*)rhs + 4) + (1.0f - blendFactor) * (float)self->m_BankID);
-    self->m_lastBankID = *(int*)((char*)rhs + 4);
+    self->m_BankID = (int)(blendFactor * (float)rhs->m_BankID + (1.0f - blendFactor) * (float)self->m_BankID);
+    self->m_lastBankID = rhs->m_BankID;
     selfView->vt();
 }
 #endif
@@ -4437,12 +4437,12 @@ class cCE08 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param rhs  the region's tWPData_Speech (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Speech_blend(tWPInGameData_Speech* self, void *rhs, float blendFactor) {
+extern "C" void tWPInGameData_Speech_blend(tWPInGameData_Speech* self, tWPData_Speech* rhs, float blendFactor) {
     cCE08 *selfView = (cCE08*)self;
     selfView->vt();
     blendFactor = blendFactor * blendFactor;
-    self->m_SpeechID = (int)(blendFactor * (float)*(int*)((char*)rhs + 4) + (1.0f - blendFactor) * (float)self->m_SpeechID);
-    self->m_lastSpeechID = *(int*)((char*)rhs + 4);
+    self->m_SpeechID = (int)(blendFactor * (float)rhs->m_SpeechID + (1.0f - blendFactor) * (float)self->m_SpeechID);
+    self->m_lastSpeechID = rhs->m_SpeechID;
     selfView->vt();
 }
 #endif
@@ -4459,12 +4459,12 @@ class cCEA8 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param rhs  the region's tWPData_Camera (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Camera_blend(tWPInGameData_Camera* self, void *rhs, float blendFactor) {
+extern "C" void tWPInGameData_Camera_blend(tWPInGameData_Camera* self, tWPData_Camera* rhs, float blendFactor) {
     cCEA8 *selfView = (cCEA8*)self;
     selfView->vt();
     blendFactor = blendFactor * blendFactor;
-    self->m_DrawDistance = blendFactor * *(float*)((char*)rhs + 4) + (1.0f - blendFactor) * self->m_DrawDistance;
-    self->m_lastDrawDistance = *(float*)((char*)rhs + 4);
+    self->m_DrawDistance = blendFactor * rhs->m_DrawDistance + (1.0f - blendFactor) * self->m_DrawDistance;
+    self->m_lastDrawDistance = rhs->m_DrawDistance;
     selfView->vt();
 }
 #endif
@@ -4486,25 +4486,25 @@ struct Src_CF38 { int pad0; float v[6]; };
  * @param src  the region's tWPData_Fog values (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Fog_blend(tWPInGameData_Fog* self, Src_CF38* src, float blendFactor) {
+extern "C" void tWPInGameData_Fog_blend(tWPInGameData_Fog* self, tWPData_Fog* src, float blendFactor) {
     VEnt_CF38* vtEntry;
     float inv;
     vtEntry = (VEnt_CF38*)((char*)self->mVtbl + 0x218);
     vtEntry->fn((char*)self + vtEntry->delta);
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
-    ((Pair_CF38*)&self->m_FogDensity)[0].cur = blendFactor * src->v[0] + inv * ((Pair_CF38*)&self->m_FogDensity)[0].cur;
-    ((Pair_CF38*)&self->m_FogDensity)[0].tgt = src->v[0];
-    ((Pair_CF38*)&self->m_FogDensity)[1].cur = blendFactor * src->v[1] + inv * ((Pair_CF38*)&self->m_FogDensity)[1].cur;
-    ((Pair_CF38*)&self->m_FogDensity)[1].tgt = src->v[1];
-    ((Pair_CF38*)&self->m_FogDensity)[2].cur = blendFactor * src->v[2] + inv * ((Pair_CF38*)&self->m_FogDensity)[2].cur;
-    ((Pair_CF38*)&self->m_FogDensity)[2].tgt = src->v[2];
-    ((Pair_CF38*)&self->m_FogDensity)[3].cur = blendFactor * src->v[3] + inv * ((Pair_CF38*)&self->m_FogDensity)[3].cur;
-    ((Pair_CF38*)&self->m_FogDensity)[3].tgt = src->v[3];
-    ((Pair_CF38*)&self->m_FogDensity)[4].cur = blendFactor * src->v[4] + inv * ((Pair_CF38*)&self->m_FogDensity)[4].cur;
-    ((Pair_CF38*)&self->m_FogDensity)[4].tgt = src->v[4];
-    ((Pair_CF38*)&self->m_FogDensity)[5].cur = blendFactor * src->v[5] + inv * ((Pair_CF38*)&self->m_FogDensity)[5].cur;
-    ((Pair_CF38*)&self->m_FogDensity)[5].tgt = src->v[5];
+    ((Pair_CF38*)&self->m_FogDensity)[0].cur = blendFactor * ((float*)&src->m_FogDensity)[0] + inv * ((Pair_CF38*)&self->m_FogDensity)[0].cur;
+    ((Pair_CF38*)&self->m_FogDensity)[0].tgt = ((float*)&src->m_FogDensity)[0];
+    ((Pair_CF38*)&self->m_FogDensity)[1].cur = blendFactor * ((float*)&src->m_FogDensity)[1] + inv * ((Pair_CF38*)&self->m_FogDensity)[1].cur;
+    ((Pair_CF38*)&self->m_FogDensity)[1].tgt = ((float*)&src->m_FogDensity)[1];
+    ((Pair_CF38*)&self->m_FogDensity)[2].cur = blendFactor * ((float*)&src->m_FogDensity)[2] + inv * ((Pair_CF38*)&self->m_FogDensity)[2].cur;
+    ((Pair_CF38*)&self->m_FogDensity)[2].tgt = ((float*)&src->m_FogDensity)[2];
+    ((Pair_CF38*)&self->m_FogDensity)[3].cur = blendFactor * ((float*)&src->m_FogDensity)[3] + inv * ((Pair_CF38*)&self->m_FogDensity)[3].cur;
+    ((Pair_CF38*)&self->m_FogDensity)[3].tgt = ((float*)&src->m_FogDensity)[3];
+    ((Pair_CF38*)&self->m_FogDensity)[4].cur = blendFactor * ((float*)&src->m_FogDensity)[4] + inv * ((Pair_CF38*)&self->m_FogDensity)[4].cur;
+    ((Pair_CF38*)&self->m_FogDensity)[4].tgt = ((float*)&src->m_FogDensity)[4];
+    ((Pair_CF38*)&self->m_FogDensity)[5].cur = blendFactor * ((float*)&src->m_FogDensity)[5] + inv * ((Pair_CF38*)&self->m_FogDensity)[5].cur;
+    ((Pair_CF38*)&self->m_FogDensity)[5].tgt = ((float*)&src->m_FogDensity)[5];
     vtEntry = (VEnt_CF38*)((char*)self->mVtbl + 0x218);
     vtEntry->fn((char*)self + vtEntry->delta);
 }
@@ -4529,27 +4529,27 @@ struct Src_D068 { int pad0; float v[7]; };
  * @param src  the region's light-glow values (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_LightGlow_blend(tWPInGameData_LightGlow* self, Src_D068* src, float blendFactor) {
+extern "C" void tWPInGameData_LightGlow_blend(tWPInGameData_LightGlow* self, tWPData_LightGlow* src, float blendFactor) {
     VEnt_D068* vtEntry;
     float inv;
     vtEntry = (VEnt_D068*)((char*)self->mVtbl + 0x218);
     vtEntry->fn((char*)self + vtEntry->delta);
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
-    ((Pair_D068*)&self->m_LightGlowCutoff)[0].cur = blendFactor * src->v[0] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[0].cur;
-    ((Pair_D068*)&self->m_LightGlowCutoff)[0].tgt = src->v[0];
-    ((Pair_D068*)&self->m_LightGlowCutoff)[1].cur = blendFactor * src->v[1] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[1].cur;
-    ((Pair_D068*)&self->m_LightGlowCutoff)[1].tgt = src->v[1];
-    ((Pair_D068*)&self->m_LightGlowCutoff)[2].cur = blendFactor * src->v[2] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[2].cur;
-    ((Pair_D068*)&self->m_LightGlowCutoff)[2].tgt = src->v[2];
-    ((Pair_D068*)&self->m_LightGlowCutoff)[3].cur = blendFactor * src->v[3] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[3].cur;
-    ((Pair_D068*)&self->m_LightGlowCutoff)[3].tgt = src->v[3];
-    ((Pair_D068*)&self->m_LightGlowCutoff)[4].cur = blendFactor * src->v[4] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[4].cur;
-    ((Pair_D068*)&self->m_LightGlowCutoff)[4].tgt = src->v[4];
-    ((Pair_D068*)&self->m_LightGlowCutoff)[5].cur = blendFactor * src->v[5] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[5].cur;
-    ((Pair_D068*)&self->m_LightGlowCutoff)[5].tgt = src->v[5];
-    ((Pair_D068*)&self->m_LightGlowCutoff)[6].cur = blendFactor * src->v[6] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[6].cur;
-    ((Pair_D068*)&self->m_LightGlowCutoff)[6].tgt = src->v[6];
+    ((Pair_D068*)&self->m_LightGlowCutoff)[0].cur = blendFactor * ((float*)&src->m_LightGlowCutoff)[0] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[0].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[0].tgt = ((float*)&src->m_LightGlowCutoff)[0];
+    ((Pair_D068*)&self->m_LightGlowCutoff)[1].cur = blendFactor * ((float*)&src->m_LightGlowCutoff)[1] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[1].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[1].tgt = ((float*)&src->m_LightGlowCutoff)[1];
+    ((Pair_D068*)&self->m_LightGlowCutoff)[2].cur = blendFactor * ((float*)&src->m_LightGlowCutoff)[2] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[2].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[2].tgt = ((float*)&src->m_LightGlowCutoff)[2];
+    ((Pair_D068*)&self->m_LightGlowCutoff)[3].cur = blendFactor * ((float*)&src->m_LightGlowCutoff)[3] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[3].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[3].tgt = ((float*)&src->m_LightGlowCutoff)[3];
+    ((Pair_D068*)&self->m_LightGlowCutoff)[4].cur = blendFactor * ((float*)&src->m_LightGlowCutoff)[4] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[4].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[4].tgt = ((float*)&src->m_LightGlowCutoff)[4];
+    ((Pair_D068*)&self->m_LightGlowCutoff)[5].cur = blendFactor * ((float*)&src->m_LightGlowCutoff)[5] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[5].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[5].tgt = ((float*)&src->m_LightGlowCutoff)[5];
+    ((Pair_D068*)&self->m_LightGlowCutoff)[6].cur = blendFactor * ((float*)&src->m_LightGlowCutoff)[6] + inv * ((Pair_D068*)&self->m_LightGlowCutoff)[6].cur;
+    ((Pair_D068*)&self->m_LightGlowCutoff)[6].tgt = ((float*)&src->m_LightGlowCutoff)[6];
     {
         VEntV_D068* vtEntryV = (VEntV_D068*)((char*)self->mVtbl + 0x218);
         vtEntryV->fn((char*)self + vtEntryV->delta);
@@ -4574,25 +4574,25 @@ struct Src_D1B8 { int pad0; float v[6]; };
  * @param src  the region's tWPData_ScreenTint values (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_ScreenTint_blend(tWPInGameData_ScreenTint* self, Src_D1B8* src, float blendFactor) {
+extern "C" void tWPInGameData_ScreenTint_blend(tWPInGameData_ScreenTint* self, tWPData_ScreenTint* src, float blendFactor) {
     VEnt_D1B8* vtEntry;
     float inv;
     vtEntry = (VEnt_D1B8*)((char*)self->mVtbl + 0x218);
     vtEntry->fn((char*)self + vtEntry->delta);
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].cur = blendFactor * src->v[0] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].cur;
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].tgt = src->v[0];
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[1].cur = blendFactor * src->v[1] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[1].cur;
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[1].tgt = src->v[1];
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[2].cur = blendFactor * src->v[2] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[2].cur;
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[2].tgt = src->v[2];
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[3].cur = blendFactor * src->v[3] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[3].cur;
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[3].tgt = src->v[3];
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].cur = blendFactor * src->v[4] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].cur;
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].tgt = src->v[4];
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur = blendFactor * src->v[5] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur;
-    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].tgt = src->v[5];
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].cur = blendFactor * ((float*)&src->m_ScreenTintScaleR)[0] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].cur;
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[0].tgt = ((float*)&src->m_ScreenTintScaleR)[0];
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[1].cur = blendFactor * ((float*)&src->m_ScreenTintScaleR)[1] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[1].cur;
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[1].tgt = ((float*)&src->m_ScreenTintScaleR)[1];
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[2].cur = blendFactor * ((float*)&src->m_ScreenTintScaleR)[2] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[2].cur;
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[2].tgt = ((float*)&src->m_ScreenTintScaleR)[2];
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[3].cur = blendFactor * ((float*)&src->m_ScreenTintScaleR)[3] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[3].cur;
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[3].tgt = ((float*)&src->m_ScreenTintScaleR)[3];
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].cur = blendFactor * ((float*)&src->m_ScreenTintScaleR)[4] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].cur;
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[4].tgt = ((float*)&src->m_ScreenTintScaleR)[4];
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur = blendFactor * ((float*)&src->m_ScreenTintScaleR)[5] + inv * ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].cur;
+    ((Pair_D1B8*)&self->m_ScreenTintScaleR)[5].tgt = ((float*)&src->m_ScreenTintScaleR)[5];
     vtEntry = (VEnt_D1B8*)((char*)self->mVtbl + 0x218);
     vtEntry->fn((char*)self + vtEntry->delta);
 }
@@ -4610,12 +4610,12 @@ class cD2E8 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param rhs  the region's tWPData_SkyBox (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_SkyBox_blend(tWPInGameData_SkyBox* self, void *rhs, float blendFactor) {
+extern "C" void tWPInGameData_SkyBox_blend(tWPInGameData_SkyBox* self, tWPData_SkyBox* rhs, float blendFactor) {
     cD2E8 *selfView = (cD2E8*)self;
     selfView->vt();
     blendFactor = blendFactor * blendFactor;
-    self->m_SkyBoxRotation = blendFactor * *(float*)((char*)rhs + 4) + (1.0f - blendFactor) * self->m_SkyBoxRotation;
-    self->m_lastSkyBoxRotation = *(float*)((char*)rhs + 4);
+    self->m_SkyBoxRotation = blendFactor * rhs->m_SkyBoxRotation + (1.0f - blendFactor) * self->m_SkyBoxRotation;
+    self->m_lastSkyBoxRotation = rhs->m_SkyBoxRotation;
     selfView->vt();
 }
 #endif
@@ -4639,31 +4639,31 @@ struct Src_D378 { int pad0; float v[6]; int i6; float w[2]; };
  * @param src  the region's tWPData_Sun values (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Sun_blend(tWPInGameData_Sun* self, Src_D378* src, float blendFactor) {
+extern "C" void tWPInGameData_Sun_blend(tWPInGameData_Sun* self, tWPData_Sun* src, float blendFactor) {
     VEnt_D378* vtEntry;
     float inv;
     vtEntry = (VEnt_D378*)((char*)self->mVtbl + 0x218);
     vtEntry->fn((char*)self + vtEntry->delta);
     blendFactor = blendFactor * blendFactor;
     inv = 1.0f - blendFactor;
-    ((Pair_D378*)&self->m_SunPitchOffset)[0].cur = blendFactor * src->v[0] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[0].cur;
-    ((Pair_D378*)&self->m_SunPitchOffset)[0].tgt = src->v[0];
-    ((Pair_D378*)&self->m_SunPitchOffset)[1].cur = blendFactor * src->v[1] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[1].cur;
-    ((Pair_D378*)&self->m_SunPitchOffset)[1].tgt = src->v[1];
-    ((Pair_D378*)&self->m_SunPitchOffset)[2].cur = blendFactor * src->v[2] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[2].cur;
-    ((Pair_D378*)&self->m_SunPitchOffset)[2].tgt = src->v[2];
-    ((Pair_D378*)&self->m_SunPitchOffset)[3].cur = blendFactor * src->v[3] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[3].cur;
-    ((Pair_D378*)&self->m_SunPitchOffset)[3].tgt = src->v[3];
-    ((Pair_D378*)&self->m_SunPitchOffset)[4].cur = blendFactor * src->v[4] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[4].cur;
-    ((Pair_D378*)&self->m_SunPitchOffset)[4].tgt = src->v[4];
-    ((Pair_D378*)&self->m_SunPitchOffset)[5].cur = blendFactor * src->v[5] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[5].cur;
-    ((Pair_D378*)&self->m_SunPitchOffset)[5].tgt = src->v[5];
-    self->m_SunType = (int)(blendFactor * src->i6 + inv * self->m_SunType);
-    self->m_lastSunType = src->i6;
-    ((Pair_D378*)&self->m_LensIntensity)[0].cur = blendFactor * src->w[0] + inv * ((Pair_D378*)&self->m_LensIntensity)[0].cur;
-    ((Pair_D378*)&self->m_LensIntensity)[0].tgt = src->w[0];
-    ((Pair_D378*)&self->m_LensIntensity)[1].cur = blendFactor * src->w[1] + inv * ((Pair_D378*)&self->m_LensIntensity)[1].cur;
-    ((Pair_D378*)&self->m_LensIntensity)[1].tgt = src->w[1];
+    ((Pair_D378*)&self->m_SunPitchOffset)[0].cur = blendFactor * ((float*)&src->m_SunPitchOffset)[0] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[0].cur;
+    ((Pair_D378*)&self->m_SunPitchOffset)[0].tgt = ((float*)&src->m_SunPitchOffset)[0];
+    ((Pair_D378*)&self->m_SunPitchOffset)[1].cur = blendFactor * ((float*)&src->m_SunPitchOffset)[1] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[1].cur;
+    ((Pair_D378*)&self->m_SunPitchOffset)[1].tgt = ((float*)&src->m_SunPitchOffset)[1];
+    ((Pair_D378*)&self->m_SunPitchOffset)[2].cur = blendFactor * ((float*)&src->m_SunPitchOffset)[2] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[2].cur;
+    ((Pair_D378*)&self->m_SunPitchOffset)[2].tgt = ((float*)&src->m_SunPitchOffset)[2];
+    ((Pair_D378*)&self->m_SunPitchOffset)[3].cur = blendFactor * ((float*)&src->m_SunPitchOffset)[3] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[3].cur;
+    ((Pair_D378*)&self->m_SunPitchOffset)[3].tgt = ((float*)&src->m_SunPitchOffset)[3];
+    ((Pair_D378*)&self->m_SunPitchOffset)[4].cur = blendFactor * ((float*)&src->m_SunPitchOffset)[4] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[4].cur;
+    ((Pair_D378*)&self->m_SunPitchOffset)[4].tgt = ((float*)&src->m_SunPitchOffset)[4];
+    ((Pair_D378*)&self->m_SunPitchOffset)[5].cur = blendFactor * ((float*)&src->m_SunPitchOffset)[5] + inv * ((Pair_D378*)&self->m_SunPitchOffset)[5].cur;
+    ((Pair_D378*)&self->m_SunPitchOffset)[5].tgt = ((float*)&src->m_SunPitchOffset)[5];
+    self->m_SunType = (int)(blendFactor * src->m_SunType + inv * self->m_SunType);
+    self->m_lastSunType = src->m_SunType;
+    ((Pair_D378*)&self->m_LensIntensity)[0].cur = blendFactor * ((float*)&src->m_LensIntensity)[0] + inv * ((Pair_D378*)&self->m_LensIntensity)[0].cur;
+    ((Pair_D378*)&self->m_LensIntensity)[0].tgt = ((float*)&src->m_LensIntensity)[0];
+    ((Pair_D378*)&self->m_LensIntensity)[1].cur = blendFactor * ((float*)&src->m_LensIntensity)[1] + inv * ((Pair_D378*)&self->m_LensIntensity)[1].cur;
+    ((Pair_D378*)&self->m_LensIntensity)[1].tgt = ((float*)&src->m_LensIntensity)[1];
     vtEntry = (VEnt_D378*)((char*)self->mVtbl + 0x218);
     vtEntry->fn((char*)self + vtEntry->delta);
 }
@@ -4681,12 +4681,12 @@ class cD518 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param rhs  the region's tWPData_Surface (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Surface_blend(tWPInGameData_Surface* self, void *rhs, float blendFactor) {
+extern "C" void tWPInGameData_Surface_blend(tWPInGameData_Surface* self, tWPData_Surface* rhs, float blendFactor) {
     cD518 *selfView = (cD518*)self;
     selfView->vt();
     blendFactor = blendFactor * blendFactor;
-    self->m_SnowSparkleDensity = blendFactor * *(float*)((char*)rhs + 4) + (1.0f - blendFactor) * self->m_SnowSparkleDensity;
-    self->m_lastSnowSparkleDensity = *(float*)((char*)rhs + 4);
+    self->m_SnowSparkleDensity = blendFactor * rhs->m_SnowSparkleDensity + (1.0f - blendFactor) * self->m_SnowSparkleDensity;
+    self->m_lastSnowSparkleDensity = rhs->m_SnowSparkleDensity;
     selfView->vt();
 }
 #endif
@@ -4707,18 +4707,18 @@ class cD5A8 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param rhs  the region's tWPData_Lighting (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Lighting_blend(tWPInGameData_Lighting* self, void *rhs, float blendFactor) {
+extern "C" void tWPInGameData_Lighting_blend(tWPInGameData_Lighting* self, tWPData_Lighting* rhs, float blendFactor) {
     cD5A8 *selfView = (cD5A8*)self;
     selfView->vt();
     blendFactor = blendFactor * blendFactor;
-    *(sP_D5A8*)&self->m_LightIrradianceName = *(sP_D5A8*)((char*)rhs + 4);
-    *(sP_D5A8*)&self->m_ShadowIrradianceName = *(sP_D5A8*)((char*)rhs + 0xC);
-    *(sP_D5A8*)&self->m_TunnelIrradianceName = *(sP_D5A8*)((char*)rhs + 0x14);
-    *(sP_D5A8*)&self->m_ObjectIrradianceName = *(sP_D5A8*)((char*)rhs + 0x1C);
-    self->m_AmbientLightIntensityOffset = blendFactor * *(float*)((char*)rhs + 0x24) + (1.0f - blendFactor) * self->m_AmbientLightIntensityOffset;
-    self->m_lastAmbientLightIntensityOffset = *(float*)((char*)rhs + 0x24);
-    self->m_RimLightIntensityOffset = blendFactor * *(float*)((char*)rhs + 0x28) + (1.0f - blendFactor) * self->m_RimLightIntensityOffset;
-    self->m_lastRimLightIntensityOffset = *(float*)((char*)rhs + 0x28);
+    *(sP_D5A8*)&self->m_LightIrradianceName = *(sP_D5A8*)&rhs->m_LightIrradianceName;
+    *(sP_D5A8*)&self->m_ShadowIrradianceName = *(sP_D5A8*)&rhs->m_ShadowIrradianceName;
+    *(sP_D5A8*)&self->m_TunnelIrradianceName = *(sP_D5A8*)&rhs->m_TunnelIrradianceName;
+    *(sP_D5A8*)&self->m_ObjectIrradianceName = *(sP_D5A8*)&rhs->m_ObjectIrradianceName;
+    self->m_AmbientLightIntensityOffset = blendFactor * rhs->m_AmbientLightIntensityOffset + (1.0f - blendFactor) * self->m_AmbientLightIntensityOffset;
+    self->m_lastAmbientLightIntensityOffset = rhs->m_AmbientLightIntensityOffset;
+    self->m_RimLightIntensityOffset = blendFactor * rhs->m_RimLightIntensityOffset + (1.0f - blendFactor) * self->m_RimLightIntensityOffset;
+    self->m_lastRimLightIntensityOffset = rhs->m_RimLightIntensityOffset;
     selfView->vt();
 }
 #endif
@@ -4740,48 +4740,48 @@ class cD698 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param rhs  the region's tWPData_Weather (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Weather_blend(tWPInGameData_Weather* self, void *rhs, float blendFactor) {
+extern "C" void tWPInGameData_Weather_blend(tWPInGameData_Weather* self, tWPData_Weather* rhs, float blendFactor) {
     cD698 *selfView = (cD698*)self;
     selfView->vt();
     blendFactor = blendFactor * blendFactor;
-    self->m_SnowIntensity = blendFactor * *(float*)((char*)rhs + 0x4) + (1.0f - blendFactor) * self->m_SnowIntensity;
-    self->m_lastSnowIntensity = *(float*)((char*)rhs + 0x4);
-    self->m_FlakeSize = blendFactor * *(float*)((char*)rhs + 0x8) + (1.0f - blendFactor) * self->m_FlakeSize;
-    self->m_lastFlakeSize = *(float*)((char*)rhs + 0x8);
-    self->m_WindIntensity = blendFactor * *(float*)((char*)rhs + 0xC) + (1.0f - blendFactor) * self->m_WindIntensity;
-    self->m_lastWindIntensity = *(float*)((char*)rhs + 0xC);
-    self->m_WindRotation = blendFactor * *(float*)((char*)rhs + 0x10) + (1.0f - blendFactor) * self->m_WindRotation;
-    self->m_lastWindRotation = *(float*)((char*)rhs + 0x10);
-    self->m_PlayerWindIntensity = blendFactor * *(float*)((char*)rhs + 0x14) + (1.0f - blendFactor) * self->m_PlayerWindIntensity;
-    self->m_lastPlayerWindIntensity = *(float*)((char*)rhs + 0x14);
-    self->m_Temperature = blendFactor * *(float*)((char*)rhs + 0x18) + (1.0f - blendFactor) * self->m_Temperature;
-    self->m_lastTemperature = *(float*)((char*)rhs + 0x18);
-    self->m_SnowFlurries = blendFactor * *(float*)((char*)rhs + 0x1C) + (1.0f - blendFactor) * self->m_SnowFlurries;
-    self->m_lastSnowFlurries = *(float*)((char*)rhs + 0x1C);
-    self->m_SnowGravityMultiplier = blendFactor * *(float*)((char*)rhs + 0x20) + (1.0f - blendFactor) * self->m_SnowGravityMultiplier;
-    self->m_lastSnowGravityMultiplier = *(float*)((char*)rhs + 0x20);
-    self->m_SnowFluffItensity = blendFactor * *(float*)((char*)rhs + 0x24) + (1.0f - blendFactor) * self->m_SnowFluffItensity;
-    self->m_lastSnowFluffItensity = *(float*)((char*)rhs + 0x24);
-    self->m_SnowFluffWindIntensity = blendFactor * *(float*)((char*)rhs + 0x28) + (1.0f - blendFactor) * self->m_SnowFluffWindIntensity;
-    self->m_lastSnowFluffWindIntensity = *(float*)((char*)rhs + 0x28);
-    self->m_LightningChance = blendFactor * *(float*)((char*)rhs + 0x2C) + (1.0f - blendFactor) * self->m_LightningChance;
-    self->m_lastLightningChance = *(float*)((char*)rhs + 0x2C);
-    self->m_SnowFlakeColourA = blendFactor * *(float*)((char*)rhs + 0x30) + (1.0f - blendFactor) * self->m_SnowFlakeColourA;
-    self->m_lastSnowFlakeColourA = *(float*)((char*)rhs + 0x30);
-    self->m_SnowFlakeColourR = blendFactor * *(float*)((char*)rhs + 0x34) + (1.0f - blendFactor) * self->m_SnowFlakeColourR;
-    self->m_lastSnowFlakeColourR = *(float*)((char*)rhs + 0x34);
-    self->m_SnowFlakeColourG = blendFactor * *(float*)((char*)rhs + 0x38) + (1.0f - blendFactor) * self->m_SnowFlakeColourG;
-    self->m_lastSnowFlakeColourG = *(float*)((char*)rhs + 0x38);
-    self->m_SnowFlakeColourB = blendFactor * *(float*)((char*)rhs + 0x3C) + (1.0f - blendFactor) * self->m_SnowFlakeColourB;
-    self->m_lastSnowFlakeColourB = *(float*)((char*)rhs + 0x3C);
-    self->m_SnowFluffColourA = blendFactor * *(float*)((char*)rhs + 0x40) + (1.0f - blendFactor) * self->m_SnowFluffColourA;
-    self->m_lastSnowFluffColourA = *(float*)((char*)rhs + 0x40);
-    self->m_SnowFluffColourR = blendFactor * *(float*)((char*)rhs + 0x44) + (1.0f - blendFactor) * self->m_SnowFluffColourR;
-    self->m_lastSnowFluffColourR = *(float*)((char*)rhs + 0x44);
-    self->m_SnowFluffColourG = blendFactor * *(float*)((char*)rhs + 0x48) + (1.0f - blendFactor) * self->m_SnowFluffColourG;
-    self->m_lastSnowFluffColourG = *(float*)((char*)rhs + 0x48);
-    self->m_SnowFluffColourB = blendFactor * *(float*)((char*)rhs + 0x4C) + (1.0f - blendFactor) * self->m_SnowFluffColourB;
-    self->m_lastSnowFluffColourB = *(float*)((char*)rhs + 0x4C);
+    self->m_SnowIntensity = blendFactor * rhs->m_SnowIntensity + (1.0f - blendFactor) * self->m_SnowIntensity;
+    self->m_lastSnowIntensity = rhs->m_SnowIntensity;
+    self->m_FlakeSize = blendFactor * rhs->m_FlakeSize + (1.0f - blendFactor) * self->m_FlakeSize;
+    self->m_lastFlakeSize = rhs->m_FlakeSize;
+    self->m_WindIntensity = blendFactor * rhs->m_WindIntensity + (1.0f - blendFactor) * self->m_WindIntensity;
+    self->m_lastWindIntensity = rhs->m_WindIntensity;
+    self->m_WindRotation = blendFactor * rhs->m_WindRotation + (1.0f - blendFactor) * self->m_WindRotation;
+    self->m_lastWindRotation = rhs->m_WindRotation;
+    self->m_PlayerWindIntensity = blendFactor * rhs->m_PlayerWindIntensity + (1.0f - blendFactor) * self->m_PlayerWindIntensity;
+    self->m_lastPlayerWindIntensity = rhs->m_PlayerWindIntensity;
+    self->m_Temperature = blendFactor * rhs->m_Temperature + (1.0f - blendFactor) * self->m_Temperature;
+    self->m_lastTemperature = rhs->m_Temperature;
+    self->m_SnowFlurries = blendFactor * rhs->m_SnowFlurries + (1.0f - blendFactor) * self->m_SnowFlurries;
+    self->m_lastSnowFlurries = rhs->m_SnowFlurries;
+    self->m_SnowGravityMultiplier = blendFactor * rhs->m_SnowGravityMultiplier + (1.0f - blendFactor) * self->m_SnowGravityMultiplier;
+    self->m_lastSnowGravityMultiplier = rhs->m_SnowGravityMultiplier;
+    self->m_SnowFluffItensity = blendFactor * rhs->m_SnowFluffItensity + (1.0f - blendFactor) * self->m_SnowFluffItensity;
+    self->m_lastSnowFluffItensity = rhs->m_SnowFluffItensity;
+    self->m_SnowFluffWindIntensity = blendFactor * rhs->m_SnowFluffWindIntensity + (1.0f - blendFactor) * self->m_SnowFluffWindIntensity;
+    self->m_lastSnowFluffWindIntensity = rhs->m_SnowFluffWindIntensity;
+    self->m_LightningChance = blendFactor * rhs->m_LightningChance + (1.0f - blendFactor) * self->m_LightningChance;
+    self->m_lastLightningChance = rhs->m_LightningChance;
+    self->m_SnowFlakeColourA = blendFactor * rhs->m_SnowFlakeColourA + (1.0f - blendFactor) * self->m_SnowFlakeColourA;
+    self->m_lastSnowFlakeColourA = rhs->m_SnowFlakeColourA;
+    self->m_SnowFlakeColourR = blendFactor * rhs->m_SnowFlakeColourR + (1.0f - blendFactor) * self->m_SnowFlakeColourR;
+    self->m_lastSnowFlakeColourR = rhs->m_SnowFlakeColourR;
+    self->m_SnowFlakeColourG = blendFactor * rhs->m_SnowFlakeColourG + (1.0f - blendFactor) * self->m_SnowFlakeColourG;
+    self->m_lastSnowFlakeColourG = rhs->m_SnowFlakeColourG;
+    self->m_SnowFlakeColourB = blendFactor * rhs->m_SnowFlakeColourB + (1.0f - blendFactor) * self->m_SnowFlakeColourB;
+    self->m_lastSnowFlakeColourB = rhs->m_SnowFlakeColourB;
+    self->m_SnowFluffColourA = blendFactor * rhs->m_SnowFluffColourA + (1.0f - blendFactor) * self->m_SnowFluffColourA;
+    self->m_lastSnowFluffColourA = rhs->m_SnowFluffColourA;
+    self->m_SnowFluffColourR = blendFactor * rhs->m_SnowFluffColourR + (1.0f - blendFactor) * self->m_SnowFluffColourR;
+    self->m_lastSnowFluffColourR = rhs->m_SnowFluffColourR;
+    self->m_SnowFluffColourG = blendFactor * rhs->m_SnowFluffColourG + (1.0f - blendFactor) * self->m_SnowFluffColourG;
+    self->m_lastSnowFluffColourG = rhs->m_SnowFluffColourG;
+    self->m_SnowFluffColourB = blendFactor * rhs->m_SnowFluffColourB + (1.0f - blendFactor) * self->m_SnowFluffColourB;
+    self->m_lastSnowFluffColourB = rhs->m_SnowFluffColourB;
     selfView->vt();
 }
 #endif
@@ -4800,14 +4800,14 @@ class cD968 { public: int f0; virtual void v0();virtual void v1();virtual void v
  * @param rhs  the region's tWPData_Danger (On Tour const tWPData* rhs)
  * @param blendFactor  the blend factor, squared before use (On Tour blend)
  */
-extern "C" void tWPInGameData_Danger_blend(tWPInGameData_Danger* self, void *rhs, float blendFactor) {
+extern "C" void tWPInGameData_Danger_blend(tWPInGameData_Danger* self, tWPData_Danger* rhs, float blendFactor) {
     cD968 *selfView = (cD968*)self;
     selfView->vt();
     blendFactor = blendFactor * blendFactor;
-    self->m_Level = (int)(blendFactor * (float)*(int*)((char*)rhs + 4) + (1.0f - blendFactor) * (float)self->m_Level);
-    self->m_lastLevel = *(int*)((char*)rhs + 4);
-    self->m_PointRate = blendFactor * *(float*)((char*)rhs + 8) + (1.0f - blendFactor) * self->m_PointRate;
-    self->m_lastPointRate = *(float*)((char*)rhs + 8);
+    self->m_Level = (int)(blendFactor * (float)rhs->m_Level + (1.0f - blendFactor) * (float)self->m_Level);
+    self->m_lastLevel = rhs->m_Level;
+    self->m_PointRate = blendFactor * rhs->m_PointRate + (1.0f - blendFactor) * self->m_PointRate;
+    self->m_lastPointRate = rhs->m_PointRate;
     selfView->vt();
 }
 #endif
