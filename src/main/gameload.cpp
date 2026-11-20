@@ -1,4 +1,6 @@
 #include "common.h"
+#include "sound/icepick/worldtriggermanager.h"
+#include "camera/trigger/cameratriggerman.h"
 #include "main/fadescreen.h"
 #include "util/menusys.h"
 #include "main/sectionman.h"
@@ -103,7 +105,6 @@ extern int cBESaveInterface_bDoReplay;
 extern int D_004A3484;
 extern void* cGameState_mpGame;
 extern char D_004A5988_gl __asm__("gBucketMan");
-extern char gCamTriggerMan[];
 extern char D_005047F8[];
 extern char str_Nash[];
 extern char str_DebugFont_b[];
@@ -245,7 +246,7 @@ extern "C" void cGame_load(cGame* self)
     func_0014BD98(cBE_getInterface_Fv(cBE_getBE(), 9));
     cBucketMan_init(bm, 9);
     cBucketMan_setsortflag(bm, 1);
-    cCameraTriggerMan_init(gCamTriggerMan);
+    cCameraTriggerMan_init(((char*)&gCamTriggerMan));
     self->StreamPause = (cStreamPause*)cStreamPause_construct();
     self->OcclusionMan = (cOcclusionMan*)cOcclusionMan_cOcclusionMan(operator new(276, str_OcclusionMan, 0x20000000, 0));
     self->World = (cWorld*)cWorld_cWorld(operator new(0x18, str_World, 0, 0));
@@ -433,7 +434,6 @@ extern char str_cWorldSound[];
 extern char str_cPS2FogParticleMan[];
 extern char str_bar_b[];
 extern char str_cam[];
-extern char gCamTriggerMan[];
 extern void* D_004882E0[];
 
 extern "C" void* cBXString_cBXString2(sBXStr_F6B0* self, const char* s);
@@ -553,7 +553,7 @@ extern "C" void cGame_loadTrack(cGame* self)
     {
         sBXStr_F6B0 worldPath;
         sBXStr_F6B0 camBasePath;
-        cCameraTriggerMan_loadTriggersIfNotStreaming_F6B0(gCamTriggerMan, (func_003186D0(&camBasePath, str_bar_b, &dir), func_00318630(&worldPath, &camBasePath, str_cam), worldPath.p));
+        cCameraTriggerMan_loadTriggersIfNotStreaming_F6B0(((char*)&gCamTriggerMan), (func_003186D0(&camBasePath, str_bar_b, &dir), func_00318630(&worldPath, &camBasePath, str_cam), worldPath.p));
         cBXString__cBXString(&worldPath, 2);
         cBXString__cBXString(&camBasePath, 2);
     }
@@ -613,7 +613,6 @@ extern "C" void cSSXAudio_InGamePurge(void* p);
 extern "C" void cSSXScriptEngine_Purge(void* p);
 extern "C" void cGarbageMan_Purge(void);
 
-extern void* gWorldTriggerManager;
 extern int D_004A2A54;
 extern char* cAppMan_TheAppMan;
 extern char gPaths[];
@@ -712,7 +711,7 @@ extern "C" void cGame_purge(char* self)
         sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)(*(char**)(iface + 0xC) + 8);
         vtEntry->fn(iface + vtEntry->delta);
     }
-    cCameraTriggerMan_cleanupOnExit(gCamTriggerMan);
+    cCameraTriggerMan_cleanupOnExit(((char*)&gCamTriggerMan));
     {
         cPS2GraphicsMan* be = GrMan;
         sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)((char*)be->mVtbl + 0x98);
@@ -740,7 +739,7 @@ extern "C" void cGame_purge(char* self)
     if (*(void**)(self + 0x40) != 0) cMultiParticleMan__cMultiParticleMan(*(void**)(self + 0x40), 3);
     if (*(void**)(self + 0x34) != 0) cPlaybackMan__cPlaybackMan(*(void**)(self + 0x34), 3);
     if (*(void**)(self + 0x88) != 0) cInstanceMan__cInstanceMan(*(void**)(self + 0x88), 3);
-    cCameraTriggerMan_purge(gCamTriggerMan);
+    cCameraTriggerMan_purge(((char*)&gCamTriggerMan));
     cRenderStateMan_purge();
     if (*(void**)(self + 0x84) != 0) cGameViewMan__cGameViewMan(*(void**)(self + 0x84), 3);
     VDelete_FA98(*(char**)(self + 0xC), 204, 8);
@@ -816,7 +815,6 @@ extern "C" void cGraphicsMan_UploadTextures(void* a);
 extern "C" void cWorld_init(void* a);
 extern "C" void cWorldTriggerManager_Reset(void* a);
 extern "C" void cSSXAudio_InGameInit(void* a);
-extern void* gWorldTriggerManager;
 extern void* cOVStateManager_mpPDATemplate;
 extern cMgr230050* cBezierMan_TheBezierMan;
 extern int cLightGlow_m_Enable;

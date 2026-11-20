@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/videngine.h"
 #include "scripter/scriptobjcammgr.h"
 #include "scripter/bxscriptengine.h"
 #include "scripter/scriptobjcamera.h"
@@ -607,8 +608,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cVidEngine_IsVideoEnginePlaying);
  * @param vidEngine  the cVidEngine part of the script engine
  * @return mIsPlaying
  */
-extern "C" int cVidEngine_IsVideoEnginePlaying(void *vidEngine) {
-    return (*(int *)((char*)(vidEngine) + (4)));
+extern "C" int cVidEngine_IsVideoEnginePlaying(cVidEngine* vidEngine) {
+    return (vidEngine->mIsPlaying);
 }
 #endif
 

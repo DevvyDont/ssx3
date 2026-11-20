@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/trigger/cameratriggerman.h"
 #include "camera/camera.h"
 #include "camera/race/racecontroller.h"
 #include "main/game.h"
@@ -574,7 +575,6 @@ INCLUDE_ASM("camera/cameraalgorithms", cCamera_onRestart);
 extern "C" void cCameraTriggerMan_initOnRestart(void* self);
 void cCameraTriggerMan_setInGameTriggers(void* self);
 extern "C" void cChaseCameraController_switchCamera_Restart(void* cam);
-extern char gCamTriggerMan[];
 
 struct sCamVE_0015DB58 {
     short delta;
@@ -592,8 +592,8 @@ struct sCamVE_0015DB58 {
  */
 extern "C" void cCamera_onRestart(void)
 {
-    cCameraTriggerMan_initOnRestart(gCamTriggerMan);
-    cCameraTriggerMan_setInGameTriggers(gCamTriggerMan);
+    cCameraTriggerMan_initOnRestart(((char*)&gCamTriggerMan));
+    cCameraTriggerMan_setInGameTriggers(((char*)&gCamTriggerMan));
     char* riders = (char*)SSXApp->Game->ViewMan;
     int n = *(int*)riders;
     cChaseCameraController_switchCamera_Restart(*(void**)(*(char**)(riders + 4) + 0xA8));

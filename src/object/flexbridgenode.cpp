@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/flexrailnode.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
 
@@ -1357,22 +1358,22 @@ struct sFlexDef_347D90 {
  * @param def  rail make-data
  * @return self
  */
-extern "C" void* cFlexRailNode_cFlexRailNode(char* self, void* nodeType, void* instRecord, sFlexDef_347D90* def)
+extern "C" void* cFlexRailNode_cFlexRailNode(cFlexRailNode* self, void* nodeType, void* instRecord, sFlexDef_347D90* def)
 {
-    cInstanceNode_cInstanceNode1(self, 1, nodeType, instRecord);
-    *(char**)(self + 0xC) = cFlexRailNode_vtbl;
+    cInstanceNode_cInstanceNode1(((char*)self), 1, nodeType, instRecord);
+    self->mVtbl = (void**)cFlexRailNode_vtbl;
     int len = def->f44;
-    *(int*)(self + 0x20) = 0;
-    *(int*)(self + 0x24) = len;
+    self->NumNodes = 0;
+    self->RailFlags = len;
     for (int i = 0; i < 8; i++) {
         if (def->links[i] != 0xFFFFFFFF) {
-            *(int*)(self + 0x20) += 1;
+            self->NumNodes += 1;
         }
     }
-    sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(self + 0x50);
-    *segs = new (str_FlexNodeMats, 0x20000000, 0) sFlexSeg_347D90[*(int*)(self + 0x20) - 1];
-    *(void**)(self + 0x58) = cSimpleTube_cSimpleTube(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), *(int*)(self + 0x20) * 8 - 9);
-    return self;
+    sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(((char*)self) + 0x50);
+    *segs = new (str_FlexNodeMats, 0x20000000, 0) sFlexSeg_347D90[self->NumNodes - 1];
+    self->Tube = (cSimpleTube*)cSimpleTube_cSimpleTube(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), self->NumNodes * 8 - 9);
+    return ((char*)self);
 }
 #endif
 
@@ -1398,16 +1399,16 @@ extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a, void* stream);
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cFlexRailNode_cFlexRailNode1(char* self, void* bucket, void* stream)
+extern "C" void* cFlexRailNode_cFlexRailNode1(cFlexRailNode* self, void* bucket, void* stream)
 {
-    sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(self + 0x50);
-    cInstanceNode_cInstanceNode(self, bucket, stream);
-    *(char**)(self + 0xC) = cFlexRailNode_vtbl;
+    sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(((char*)self) + 0x50);
+    cInstanceNode_cInstanceNode(((char*)self), bucket, stream);
+    self->mVtbl = (void**)cFlexRailNode_vtbl;
     sSerVEntry_00347EA8* readSlot = &(*(sSerVEntry_00347EA8**)stream)[2];
-    readSlot->fn((char*)stream + readSlot->delta, self + 0x20, 0x30);
-    *segs = new (str_FlexNodeMats, 0x20000000, 0) sFlexSeg_347D90[*(int*)(self + 0x20) - 1];
-    *(void**)(self + 0x58) = cSimpleTube_cSimpleTube(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), *(int*)(self + 0x20) * 8 - 9);
-    return self;
+    readSlot->fn((char*)stream + readSlot->delta, ((char*)self) + 0x20, 0x30);
+    *segs = new (str_FlexNodeMats, 0x20000000, 0) sFlexSeg_347D90[self->NumNodes - 1];
+    self->Tube = (cSimpleTube*)cSimpleTube_cSimpleTube(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), self->NumNodes * 8 - 9);
+    return ((char*)self);
 }
 #endif
 
@@ -1432,14 +1433,14 @@ extern char cFlexRailNode_vtbl[];
  *
  * @param flags  destructor flags passed on to cInstanceNode__cInstanceNode
  */
-extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags)
+extern "C" void cFlexRailNode__cFlexRailNode(cFlexRailNode* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cFlexRailNode_vtbl;
-    void* buf = *(void**)((char*)self + 0x50);
+    self->mVtbl = (void**)cFlexRailNode_vtbl;
+    void* buf = self->Mats;
     if (buf != 0) {
         cMemMan_free(buf);
     }
-    void* obj = *(void**)((char*)self + 0x58);
+    void* obj = self->Tube;
     if (obj != 0) {
         sFlexBridgeVEntry7F90* vt = *(sFlexBridgeVEntry7F90**)obj;
         vt[1].fn((char*)obj + vt[1].delta, 3);
@@ -1457,7 +1458,7 @@ struct sFlexBridgeVEntry8008 {
     void (*fn)(void*);
 };
 
-extern "C" void cFlexRailNode_updateSpaceHash(void* self);
+extern "C" void cFlexRailNode_updateSpaceHash(cFlexRailNode* self);
 
 /**
  * Updates a flexible rail for one frame: calls its virtual slots 47 and 48, then updates its space hash.
@@ -1465,11 +1466,11 @@ extern "C" void cFlexRailNode_updateSpaceHash(void* self);
  * Slots 47 and 48 differ between the three vtables that use this update, and are empty in one of them; they are
  * probably per-type hooks that move the rail's points and matrices.
  */
-extern "C" void cFlexRailNode_update(void* self)
+extern "C" void cFlexRailNode_update(cFlexRailNode* self)
 {
-    sFlexBridgeVEntry8008* vt1 = *(sFlexBridgeVEntry8008**)((char*)self + 0xC);
+    sFlexBridgeVEntry8008* vt1 = (sFlexBridgeVEntry8008*)self->mVtbl;
     vt1[47].fn((char*)self + vt1[47].delta);
-    sFlexBridgeVEntry8008* vt2 = *(sFlexBridgeVEntry8008**)((char*)self + 0xC);
+    sFlexBridgeVEntry8008* vt2 = (sFlexBridgeVEntry8008*)self->mVtbl;
     vt2[48].fn((char*)self + vt2[48].delta);
     cFlexRailNode_updateSpaceHash(self);
 }
@@ -1509,7 +1510,7 @@ extern "C" void nash_Nash_movenode(void* world, int type, int id, sBox00348058* 
  *
  * @param node  the flexible rail node
  */
-extern "C" void cFlexRailNode_updateSpaceHash(void* node)
+extern "C" void cFlexRailNode_updateSpaceHash(cFlexRailNode* node)
 {
     sObj00348058* self = (sObj00348058*)node;
     sBox00348058* box = &self->box;
@@ -1559,11 +1560,11 @@ struct sFlex_3480C8 {
  * Quirks: the loops have no body, so nothing is drawn; and rows 4 to 7 of the table repeat t = 3/7 instead of
  * continuing to 1.
  */
-extern "C" void cFlexRailNode_render(sFlex_3480C8* self)
+extern "C" void cFlexRailNode_render(cFlexRailNode* self)
 {
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     sVE_3480C8* vt = (sVE_3480C8*)ctx->mVtbl;
-    if (((tCull_3480C8)vt[93].fn)((char*)ctx + vt[93].delta, self->boxMin, self->boxMax,
+    if (((tCull_3480C8)vt[93].fn)((char*)ctx + vt[93].delta, ((char*)&self->BoundBox), ((char*)&self->BoundBox.MaxPoint),
                                   ((tGetMat_3480C8)vt[43].fn)((char*)ctx + vt[43].delta)) == 1) return;
     if (D_004A5980 == 0) {
         D_004FF6C0[0][0] = 0.0f;
@@ -1602,7 +1603,7 @@ extern "C" void cFlexRailNode_render(sFlex_3480C8* self)
     }
     (ctx->m_pCurrentDrawState)->m_textureState.m_texid[0] = -1;
     (ctx->m_pCurrentDrawState)->unk_00[1] = (((int)(ctx->m_pCurrentDrawState)->unk_00[1]) & ~0x7C) | 4;
-    int n = self->count - 1;
+    int n = self->NumNodes - 1;
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < 8; j++) {
         }
@@ -1872,13 +1873,13 @@ extern float D_0048E7F0[5];
  * @param dist  best distance so far; updated on a hit
  * @param intInfo  intersect info filled on a hit
  */
-extern "C" void cFlexRailNode_splineIntersect(char* self, const sFbV_8290* minBpos, const sFbV_8290* maxBpos, const sFbV_8290* bpos,
+extern "C" void cFlexRailNode_splineIntersect(cFlexRailNode* self, const sFbV_8290* minBpos, const sFbV_8290* maxBpos, const sFbV_8290* bpos,
                               unsigned int splineFilterMask, int* hit, float* dist, sFbHit_8290* intInfo)
 {
-    if ((*(unsigned int*)(self + 0x24) & splineFilterMask) == 0) {
+    if (((unsigned int)self->RailFlags & splineFilterMask) == 0) {
         return;
     }
-    for (int seg = 0; seg < *(int*)(self + 0x20) - 1; seg++) {
+    for (int seg = 0; seg < self->NumNodes - 1; seg++) {
         int i;
         sFbV_8290 lastp;
         const float kTopSplit = 0.6180340051651001f;
@@ -1888,7 +1889,7 @@ extern "C" void cFlexRailNode_splineIntersect(char* self, const sFbV_8290* minBp
         float x3 = 1.0f;
         sFbV_8290 nextp;
         sFbV_8290 tmp;
-        const sFbM_8290& mat = (*(sFbM_8290**)(self + 0x50))[seg];
+        const sFbM_8290& mat = ((sFbM_8290*)self->Mats)[seg];
         lastp = splineEval_8290(mat, x0);
         float cd = fbLength_8290(fbSub_8290(*bpos, lastp));
         int ci = 0;
@@ -1958,9 +1959,9 @@ extern "C" void cFlexRailNode_splineIntersect(char* self, const sFbV_8290* minBp
             Init_8290(intInfo);
             intInfo->pos = lastp;
             intInfo->dir = fbNormalize_8290(splineSlope_8290(mat, lastt));
-            intInfo->obj = *(void**)(self + 0x18);
-            sFbVE_8290* vt = *(sFbVE_8290**)(self + 0xC);
-            intInfo->f5C = vt[49].fn(self + vt[49].delta, seg);
+            intInfo->obj = (void*)self->Instance;
+            sFbVE_8290* vt = (sFbVE_8290*)self->mVtbl;
+            intInfo->f5C = vt[49].fn(((char*)self) + vt[49].delta, seg);
             intInfo->seg = seg;
             intInfo->f58 = 0;
             intInfo->t = lastt;
@@ -1968,7 +1969,7 @@ extern "C" void cFlexRailNode_splineIntersect(char* self, const sFbV_8290* minBp
             if (mesh <= 0) {
                 mesh = 0;
             }
-            short* surf = (short*)(*(char**)(*(char**)(self + 0x18) + 0x88) + 0x1A + mesh * 12);
+            short* surf = (short*)(*(char**)((char*)self->Instance + 0x88) + 0x1A + mesh * 12);
             if (*surf == -1) {
                 intInfo->surf = 0;
             } else {
@@ -1998,7 +1999,7 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cFlexRailNode_writeToReplayFrame(void* self, void* stream)
+extern "C" void cFlexRailNode_writeToReplayFrame(cFlexRailNode* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_00348B40* vt = *(sSerVEntry_00348B40**)stream;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/rideranim.h"
 #include "replay/playbackman.h"
 #include "replay/frameptr.h"
 #include "ai/ai.h"
@@ -8617,13 +8618,13 @@ extern void* cRiderAnim_vtbl[];
  *
  * @return the object
  */
-extern "C" void* cRiderAnim_cRiderAnim(char* self)
+extern "C" void* cRiderAnim_cRiderAnim(cRiderAnim* self)
 {
-    cRiderAnimBase_cRiderAnimBase(self);
-    *(int*)(self + 0x60) = 0;
-    *(void***)(self + 0x58) = cRiderAnim_vtbl;
-    *(int*)(self + 0x64) = 0;
-    return self;
+    cRiderAnimBase_cRiderAnimBase(((char*)self));
+    self->Rider = 0;
+    self->mVtbl = cRiderAnim_vtbl;
+    self->FERider = 0;
+    return ((char*)self);
 }
 #endif
 

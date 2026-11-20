@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/icepick/worldtriggermanager.h"
 #include "sound/ps2soundman.h"
 #include "sound/crowdsys.h"
 #include "sound/midisys.h"
@@ -3354,7 +3355,6 @@ extern "C" int cSSXAudio_CameraInRange(void* self, int which, float f);
 int cSSXAudio_PlayHistoryExists_p(void* self, void* evt, int idx) __asm__("cSSXAudio_PlayHistoryExists");
 extern "C" int cWorldTriggerManager_HandleCollision(void* mgr, void* evt, int id, void* rider, int vol);
 extern "C" void cSSXAudio_PlayHistoryAdd(cSSXAudio* self, void* evt, int h, int t, int a, int idx);
-extern void* gWorldTriggerManager;
 
 struct sSsVt6088 { short delta; short index; int (*fn)(void*); };
 
@@ -7337,7 +7337,6 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_ResumeSFX);
 extern "C" void cBankMonitor_BANKMONITOR_Resume(void* self);
 extern "C" void cBankMonitor_BANKMONITOR_CameraChange(void* self);
 extern "C" void cWorldTriggerManager_TouchAllUsed(void* self);
-extern void* gWorldTriggerManager;
 
 /**
  * Resumes the paused sound effects and lets the bank monitor and world triggers catch up with the camera.

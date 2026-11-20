@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/videngine.h"
 #include "scripter/circularbuffer.h"
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
@@ -88,26 +89,26 @@ struct sVtEnt { short delta; short index; void* fn; };
  *
  * @return 1 if the video is (now) playing, 0 without a movie player
  */
-extern "C" int cVidEngine_PlayVideo(sVidPlayer* self)
+extern "C" int cVidEngine_PlayVideo(cVidEngine* self)
 {
-    void* player = self->p;
+    void* player = self->mpPlayer;
     if (player == 0) return 0;
-    if (self->active != 0) return 1;
+    if (self->mIsPlaying != 0) return 1;
     cMoviePlayer_asyncPlay(player);
     int n = D_004A2A54 + 1;
-    self->active = 1;
+    self->mIsPlaying = 1;
     D_005366E8[n] = 10;
     cPauseState_Flags = D_00442918[0];
     D_004A2A54 = n;
     sVidObj* cutSceneMan = ((sVidOwner*)SSXApp->Game)->obj;
-    self->f14 = 0;
+    self->mRestoreCutSceneMode = 0;
     int cutSceneState = cutSceneMan->state;
-    if (cutSceneState != 0 && cutSceneState != 2) self->f14 = 1;
+    if (cutSceneState != 0 && cutSceneState != 2) self->mRestoreCutSceneMode = 1;
     cCutSceneTransitionMan_ForceToRegularMode(cutSceneMan);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVtEnt* vt = (sVtEnt*)ps2GraphicsMan->mVtbl;
-        self->f10 = *((int*(*)(void*))vt[42].fn)((char*)ps2GraphicsMan + vt[42].delta);
+        self->mSavedDisplayFormat = *((int*(*)(void*))vt[42].fn)((char*)ps2GraphicsMan + vt[42].delta);
     }
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -131,12 +132,12 @@ extern "C" void cMoviePlayer_asyncUpdate(void* self);
  * (On Tour cMoviePlayer::asyncUpdate) and sets the frame-updated flag (+0x8, On Tour mFrameUpdated).
  * cSSXScriptEngine_Update calls it every frame on the engine's video engine (+0x500).
  */
-extern "C" void cVidEngine_UpdateVideo(void* self)
+extern "C" void cVidEngine_UpdateVideo(cVidEngine* self)
 {
     void* player = *(void**)self;
-    if (player != 0 && *(int*)((char*)self + 0x4) != 0 && *(int*)((char*)self + 0xC) == 0) {
+    if (player != 0 && self->mIsPlaying != 0 && self->mNumPause == 0) {
         cMoviePlayer_asyncUpdate(player);
-        *(int*)((char*)self + 0x8) = 1;
+        self->mFrameUpdated = 1;
     }
 }
 #endif
@@ -155,11 +156,11 @@ extern "C" void cMoviePlayer_asyncResume(void* self);
  * paused (cMoviePlayer_asyncResume), otherwise it is paused if running (cMoviePlayer_asyncPause); then cMoviePlayer_asyncRender(mpPlayer,
  * !mFrameUpdated) and mFrameUpdated is cleared.
  */
-extern "C" void cVidEngine_RenderVideo(void* self)
+extern "C" void cVidEngine_RenderVideo(cVidEngine* self)
 {
-    void* videoPlayer = *(void**)((char*)self + 0x0);
-    if (videoPlayer != 0 && *(int*)((char*)self + 0x4) != 0) {
-        if (*(int*)((char*)self + 0x8) != 0) {
+    void* videoPlayer = self->mpPlayer;
+    if (videoPlayer != 0 && self->mIsPlaying != 0) {
+        if (self->mFrameUpdated != 0) {
             if (*(int*)((char*)videoPlayer + 0x8) != 0) {
                 cMoviePlayer_asyncResume(videoPlayer);
             }
@@ -168,8 +169,8 @@ extern "C" void cVidEngine_RenderVideo(void* self)
                 cMoviePlayer_asyncPause(videoPlayer);
             }
         }
-        cMoviePlayer_asyncRender(*(void**)((char*)self + 0x0), *(int*)((char*)self + 0x8) ^ 1);
-        *(int*)((char*)self + 0x8) = 0;
+        cMoviePlayer_asyncRender(self->mpPlayer, self->mFrameUpdated ^ 1);
+        self->mFrameUpdated = 0;
     }
 }
 #endif
@@ -183,13 +184,13 @@ INCLUDE_ASM("scripter/videngine", cVidEngine_PauseVideo);
  *
  * @param inc  non-zero to pause, 0 to resume
  */
-extern "C" void cVidEngine_PauseVideo(void* self, int inc)
+extern "C" void cVidEngine_PauseVideo(cVidEngine* self, int inc)
 {
-    if (*(int*)((char*)self + 0x0) != 0 && *(int*)((char*)self + 0x4) != 0) {
+    if ((int)self->mpPlayer != 0 && self->mIsPlaying != 0) {
         if (inc != 0) {
-            *(int*)((char*)self + 0xc) += 1;
-        } else if (*(int*)((char*)self + 0xc) != 0) {
-            *(int*)((char*)self + 0xc) -= 1;
+            self->mNumPause += 1;
+        } else if (self->mNumPause != 0) {
+            self->mNumPause -= 1;
         }
     }
 }
@@ -204,10 +205,10 @@ INCLUDE_ASM("scripter/videngine", cVidEngine_IsVideoOnLastFrame);
  *
  * @return the player's word +0x0, or 0
  */
-extern "C" int cVidEngine_IsVideoOnLastFrame(void* self)
+extern "C" int cVidEngine_IsVideoOnLastFrame(cVidEngine* self)
 {
-    int* videoPlayer = *(int**)((char*)self + 0x0);
-    if (videoPlayer == 0 || *(int*)((char*)self + 0x4) == 0) {
+    int* videoPlayer = (int*)self->mpPlayer;
+    if (videoPlayer == 0 || self->mIsPlaying == 0) {
         return 0;
     }
     return *videoPlayer;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/flexrailnode.h"
 
 //100%
 INCLUDE_ASM("object/flexrailnode", cFlexRailNode_addSpaceHash);
@@ -33,14 +34,14 @@ extern const char str_FlexRailSpaceNode[];
  * Allocates a 0x10-byte cFlexRailSpaceNode ("FlexRailSpaceNode") with type 3 (+0x8) and this node as its
  * owner (+0xC), keeps it in Node (+0x54) and inserts it into octree list 2 under the bound box at +0x30.
  */
-extern "C" void cFlexRailNode_addSpaceHash(void* self)
+extern "C" void cFlexRailNode_addSpaceHash(cFlexRailNode* self)
 {
     sHashNode_8B90* n = (sHashNode_8B90*)cMemMan_alloc(0x10, str_FlexRailSpaceNode, 0x20000000, 0);
-    n->owner = self;
+    n->owner = ((void*)self);
     n->type = 3;
-    *(sHashNode_8B90**)((char*)self + 0x54) = n;
+    self->Node = (cFlexRailSpaceNode*)n;
     sHashCell_8B90* cell = (sHashCell_8B90*)cObjectInterface_getNash();
-    sHashNode_8B90* node = *(sHashNode_8B90**)((char*)self + 0x54);
+    sHashNode_8B90* node = (sHashNode_8B90*)self->Node;
     sHashKey_8B90 key;
     nash_Nash_findkey(&key, (char*)self + 0x30);
     sHashCell_8B90* cellX = key.x < 0 ? cell + 4 : cell;
@@ -88,10 +89,10 @@ static inline int octEmpty_8C48(sOctCell_8C48* o)
  * cell's list 2 (nash_Cell_remnode). An octant left with no children and no lists is deleted. Finally deletes the hash
  * node and nulls +0x54.
  */
-extern "C" void cFlexRailNode_remSpaceHash(void* self)
+extern "C" void cFlexRailNode_remSpaceHash(cFlexRailNode* self)
 {
     sHashCellR_8C48* cell = (sHashCellR_8C48*)cObjectInterface_getNash();
-    sHashNode_8B90* node = *(sHashNode_8B90**)((char*)self + 0x54);
+    sHashNode_8B90* node = (sHashNode_8B90*)self->Node;
     (*(int*)((char*)cell + 0xA0))++;
     sHashKey_8B90 key;
     nash_Nash_findkey(&key, (char*)self + 0x30);
@@ -104,8 +105,8 @@ extern "C" void cFlexRailNode_remSpaceHash(void* self)
         operator_delete((int*)octant->oct);
         octant->oct = 0;
     }
-    operator_delete(*(int**)((char*)self + 0x54));
-    *(void**)((char*)self + 0x54) = 0;
+    operator_delete((int*)self->Node);
+    self->Node = 0;
 }
 #endif
 
@@ -116,7 +117,7 @@ extern "C" void cFlexRailNode_cFlexRailNode(void* self, int type, void* a1, void
 extern "C" void cFloatRailNode_updateMats(void* self);
 struct sFrBoxRail;
 extern "C" void cFloatRailNode_updateBoundBox(sFrBoxRail* self);
-extern "C" void cFlexRailNode_addSpaceHash(void* self);
+extern "C" void cFlexRailNode_addSpaceHash(cFlexRailNode* self);
 struct sFrNode9220;
 extern "C" void cFloatRailNode_getPosition(void* self, sFrNode9220* node);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
@@ -187,7 +188,7 @@ extern "C" void* cFloatRailNode_cFloatRailNode(char* self, void* instRecord, cha
     }
     cFloatRailNode_updateMats(self);
     cFloatRailNode_updateBoundBox((sFrBoxRail*)self);
-    cFlexRailNode_addSpaceHash(self);
+    cFlexRailNode_addSpaceHash((cFlexRailNode*)self);
     return self;
 }
 #endif
@@ -199,7 +200,7 @@ extern "C" void* cFlexRailNode_cFlexRailNode1(void* self, void* a1, void* stream
 extern "C" void cFloatRailNode_updateMats(void* self);
 struct sFrBoxRail;
 extern "C" void cFloatRailNode_updateBoundBox(sFrBoxRail* self);
-extern "C" void cFlexRailNode_addSpaceHash(void* self);
+extern "C" void cFlexRailNode_addSpaceHash(cFlexRailNode* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern char cFloatRailNode_vtbl[];
@@ -245,7 +246,7 @@ extern "C" void* cFloatRailNode_cFloatRailNode1(char* self, void* bucket, void* 
     vt2[2].fn((char*)stream + vt2[2].delta, *(void**)(self + 0x70), *(int*)(self + 0x20) * 80);
     cFloatRailNode_updateMats(self);
     cFloatRailNode_updateBoundBox((sFrBoxRail*)self);
-    cFlexRailNode_addSpaceHash(self);
+    cFlexRailNode_addSpaceHash((cFlexRailNode*)self);
     return self;
 }
 #endif
@@ -255,7 +256,7 @@ INCLUDE_ASM("object/flexrailnode", cFloatRailNode__cFloatRailNode);
 #ifdef SKIP_ASM
 extern char cFloatRailNode_vtbl[];
 void cMemMan_free(void*);
-extern "C" void cFlexRailNode_remSpaceHash(void* self);
+extern "C" void cFlexRailNode_remSpaceHash(cFlexRailNode* self);
 extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags);
 
 /**
@@ -269,7 +270,7 @@ extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags);
 extern "C" void cFloatRailNode__cFloatRailNode(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = cFloatRailNode_vtbl;
-    cFlexRailNode_remSpaceHash(self);
+    cFlexRailNode_remSpaceHash((cFlexRailNode*)self);
     void* railNodes = *(void**)((char*)self + 0x70);
     if (railNodes != 0) {
         cMemMan_free(railNodes);
@@ -883,7 +884,7 @@ extern "C" void* cSpringRailNode_cSpringRailNode(char* self, void* instRecord, c
     }
     cSpringRailNode_updateMats(self);
     cSpringRailNode_updateBoundBox((sFrBoxRail60*)self);
-    cFlexRailNode_addSpaceHash(self);
+    cFlexRailNode_addSpaceHash((cFlexRailNode*)self);
     return self;
 }
 #endif
@@ -893,7 +894,7 @@ INCLUDE_ASM("object/flexrailnode", cSpringRailNode_cSpringRailNode1);
 #ifdef SKIP_ASM
 extern "C" void* cFlexRailNode_cFlexRailNode1(void* self, void* a1, void* stream);
 extern "C" void cSpringRailNode_updateMats(void* self);
-extern "C" void cFlexRailNode_addSpaceHash(void* self);
+extern "C" void cFlexRailNode_addSpaceHash(cFlexRailNode* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern char cSpringRailNode_vtbl[];
@@ -934,7 +935,7 @@ extern "C" void* cSpringRailNode_cSpringRailNode1(char* self, void* bucket, void
     sFrStreamVEntry_349DB0* vt2 = *(sFrStreamVEntry_349DB0**)stream;
     vt2[2].fn((char*)stream + vt2[2].delta, *(void**)(self + 0x70), *(int*)(self + 0x20) * 0x60);
     cSpringRailNode_updateMats(self);
-    cFlexRailNode_addSpaceHash(self);
+    cFlexRailNode_addSpaceHash((cFlexRailNode*)self);
     return self;
 }
 #endif
@@ -944,7 +945,7 @@ INCLUDE_ASM("object/flexrailnode", cSpringRailNode__cSpringRailNode);
 #ifdef SKIP_ASM
 extern char cSpringRailNode_vtbl[];
 void cMemMan_free(void*);
-extern "C" void cFlexRailNode_remSpaceHash(void* self);
+extern "C" void cFlexRailNode_remSpaceHash(cFlexRailNode* self);
 extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags);
 
 /**
@@ -958,7 +959,7 @@ extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags);
 extern "C" void cSpringRailNode__cSpringRailNode(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = cSpringRailNode_vtbl;
-    cFlexRailNode_remSpaceHash(self);
+    cFlexRailNode_remSpaceHash((cFlexRailNode*)self);
     void* railNodes = *(void**)((char*)self + 0x70);
     if (railNodes != 0) {
         cMemMan_free(railNodes);

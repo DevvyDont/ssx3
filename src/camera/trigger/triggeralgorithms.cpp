@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/trigger/cameratriggerman.h"
 
 void operator_delete(int* ptr);
 
@@ -7,9 +8,6 @@ struct sTriggerNode {
     sTriggerNode* next;
 };
 
-struct cActiveTriggerList {
-    sTriggerNode* head;
-};
 
 //100%
 INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_purge__FP18cActiveTriggerList);
@@ -19,7 +17,7 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_purge__FP18cA
  */
 void cActiveTriggerList_purge(cActiveTriggerList* self)
 {
-    sTriggerNode* node = self->head;
+    sTriggerNode* node = ((sTriggerNode*)self->Head);
     if (node != 0) {
         do {
             sTriggerNode* next = node->next;
@@ -27,7 +25,7 @@ void cActiveTriggerList_purge(cActiveTriggerList* self)
             node = next;
         } while (node != 0);
     }
-    self->head = 0;
+    (*(sTriggerNode**)&self->Head) = 0;
 }
 #endif
 
@@ -39,7 +37,7 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_clearFlags);
  */
 extern "C" void cActiveTriggerList_clearFlags(cActiveTriggerList* self)
 {
-    sTriggerNode* node = self->head;
+    sTriggerNode* node = ((sTriggerNode*)self->Head);
     if (node != 0) {
         do {
             *(int*)((char*)node + 0xC) = 0;
@@ -63,7 +61,7 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_find);
  */
 extern "C" sTriggerNode* cActiveTriggerList_find(cActiveTriggerList* self, void* key)
 {
-    sTriggerNode* node = self->head;
+    sTriggerNode* node = ((sTriggerNode*)self->Head);
     if (node != 0) {
         do {
             if (node->pad == key) {
@@ -89,7 +87,7 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_find1);
  */
 extern "C" void* cActiveTriggerList_find1(cActiveTriggerList* self, void* key)
 {
-    sTriggerNode* node = self->head;
+    sTriggerNode* node = ((sTriggerNode*)self->Head);
     if (node != 0) {
         do {
             void* item = node->pad;
@@ -120,8 +118,8 @@ extern char str_Active_Camera_Trigger[];
 extern "C" void cActiveTriggerList_add(cActiveTriggerList* self, void* item)
 {
     sTriggerNode* n = (sTriggerNode*)cMemMan_alloc(0x10, str_Active_Camera_Trigger, 0x20000000, 0);
-    sTriggerNode* old = self->head;
-    self->head = n;
+    sTriggerNode* old = ((sTriggerNode*)self->Head);
+    (*(sTriggerNode**)&self->Head) = n;
     n->pad = item;
     n->next = old;
     *(int*)((char*)n + 0xC) = 1;
@@ -140,11 +138,11 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_remove);
  */
 extern "C" sTriggerNode* cActiveTriggerList_remove(cActiveTriggerList* self, sTriggerNode* target)
 {
-    sTriggerNode* head = self->head;
+    sTriggerNode* head = ((sTriggerNode*)self->Head);
     if (target == head) {
         sTriggerNode* next = target->next;
         operator_delete((int*)target);
-        self->head = next;
+        (*(sTriggerNode**)&self->Head) = next;
         return next;
     }
     sTriggerNode* prev = head;
@@ -176,7 +174,7 @@ extern "C" void* cCameraTriggerStack_cCameraTriggerStack(void* self);
  *
  * @return @p self
  */
-extern "C" void* cCameraTriggerMan_cCameraTriggerMan(void* self)
+extern "C" void* cCameraTriggerMan_cCameraTriggerMan(cCameraTriggerMan* self)
 {
     char* cursor;
     int i;
@@ -189,7 +187,7 @@ extern "C" void* cCameraTriggerMan_cCameraTriggerMan(void* self)
     for (i = 1; i != -1; i--, cursor += 0x20) {
         cCameraTriggerStack_cCameraTriggerStack(cursor);
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -209,7 +207,7 @@ extern "C" void cCameraTriggerList__cCameraTriggerList(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cCameraTriggerMan__cCameraTriggerMan(void* self, int flags)
+extern "C" void cCameraTriggerMan__cCameraTriggerMan(cCameraTriggerMan* self, int flags)
 {
     cCameraTriggerMan_purge(self);
     if ((char*)self + 0x14 != 0) {
@@ -241,7 +239,7 @@ extern "C" void cCamera_resetChaseControllerSwitches(void);
  * Initialises the trigger list (cCameraTriggerList_init), purges both active trigger lists (+0x14, +0x18), resets
  * both trigger stacks (+0x1C, +0x3C) with cCameraTriggerStack_init and calls cCamera_resetChaseControllerSwitches.
  */
-extern "C" void cCameraTriggerMan_init(void* self)
+extern "C" void cCameraTriggerMan_init(cCameraTriggerMan* self)
 {
     cCameraTriggerList_init((cCameraTriggerList*)self);
     cActiveTriggerList_purge((cActiveTriggerList*)((char*)self + 0x14));
@@ -265,7 +263,7 @@ extern "C" void cCamera_resetChaseControllerSwitches(void);
  * Purges both active trigger lists (+0x14, +0x18), resets both trigger stacks (+0x1C, +0x3C) and calls
  * cCamera_resetChaseControllerSwitches.
  */
-extern "C" void cCameraTriggerMan_initOnRestart(void* self)
+extern "C" void cCameraTriggerMan_initOnRestart(cCameraTriggerMan* self)
 {
     cActiveTriggerList_purge((cActiveTriggerList*)((char*)self + 0x14));
     cActiveTriggerList_purge((cActiveTriggerList*)((char*)self + 0x18));

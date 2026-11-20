@@ -2403,13 +2403,13 @@ struct sParseBuf_5F48 {
  * @param outSize  receives the text's size in bytes
  * @return the preprocessed text (not null-terminated)
  */
-extern "C" void* cInputPreProcessor_loadFileSize(sParseBuf_5F48* self, char* path, int* outSize)
+extern "C" void* cInputPreProcessor_loadFileSize(cInputPreProcessor* self, char* path, int* outSize)
 {
     char dir[128];
     char file[32];
-    self->size = 0;
-    self->cap = 0x800;
-    self->data = (char*)operator_new_tag(0x800, str_PreProcBuf, 0, 0);
+    self->OutputTop = 0;
+    self->OutputLen = 0x800;
+    self->OutputBuf = (char*)operator_new_tag(0x800, str_PreProcBuf, 0, 0);
     char* lastSlash = strrchr(path, '/');
     if (lastSlash != 0) {
         lastSlash++;
@@ -2421,13 +2421,13 @@ extern "C" void* cInputPreProcessor_loadFileSize(sParseBuf_5F48* self, char* pat
         dir[0] = 0;
         strcpy(file, path);
     }
-    cInputPreProcessor_readFile_s(self, dir, file);
-    void* out = operator_new_tag(self->size, path, 0x100, 0);
-    func_0041605C(out, self->data, self->size);
-    if (self->data != 0) {
-        cMemMan_free(self->data);
+    cInputPreProcessor_readFile_s(((sParseBuf_5F48*)self), dir, file);
+    void* out = operator_new_tag(self->OutputTop, path, 0x100, 0);
+    func_0041605C(out, self->OutputBuf, self->OutputTop);
+    if (self->OutputBuf != 0) {
+        cMemMan_free(self->OutputBuf);
     }
-    *outSize = self->size;
+    *outSize = self->OutputTop;
     return out;
 }
 #endif
@@ -2438,9 +2438,9 @@ INCLUDE_ASM("input/inputparse", cInputPreProcessor_readFile);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 void cMemMan_free(void* ptr);
 struct sParseStream;
-extern "C" void cInputPreProcessor_readChar(void* self, sParseStream* s);
-extern "C" void cInputPreProcessor_writeTagLine(void* self, int a1, int a2);
-extern "C" int cInputPreProcessor_copyLine(void* self, sParseStream* s, int a2, int a3);
+extern "C" void cInputPreProcessor_readChar(cInputPreProcessor* self, sParseStream* s);
+extern "C" void cInputPreProcessor_writeTagLine(cInputPreProcessor* self, int a1, int a2);
+extern "C" int cInputPreProcessor_copyLine(cInputPreProcessor* self, sParseStream* s, int a2, int a3);
 extern "C" unsigned char* FILE_loadsize(const char* name, int* size, int flags);
 extern char D_004A3FA0[];
 
@@ -2457,7 +2457,7 @@ struct sParseStream_326078 {
  * @param path  directory of the file, also used for its includes
  * @param fn  file name within @p path
  */
-extern "C" void cInputPreProcessor_readFile(void* self, int path, int fn)
+extern "C" void cInputPreProcessor_readFile(cInputPreProcessor* self, int path, int fn)
 {
     char name[160];
     sParseStream_326078 st;
@@ -2480,11 +2480,11 @@ extern "C" void cInputPreProcessor_readFile(void* self, int path, int fn)
 INCLUDE_ASM("input/inputparse", cInputPreProcessor_copyLine);
 #ifdef SKIP_ASM
 struct sParseStream;
-extern "C" void cInputPreProcessor_writeChar(void* self, char c);
-extern "C" void cInputPreProcessor_readChar(void* self, sParseStream* s);
-extern "C" void cInputPreProcessor_readCmdLine(void* self, sParseStream* s, int a2, int a3);
-extern "C" void cInputPreProcessor_skipCComment(void* self, sParseStream* s, int a2, int a3);
-extern "C" void cInputPreProcessor_skipCppComment(void* self, sParseStream* s, int a2, int a3);
+extern "C" void cInputPreProcessor_writeChar(cInputPreProcessor* self, char c);
+extern "C" void cInputPreProcessor_readChar(cInputPreProcessor* self, sParseStream* s);
+extern "C" void cInputPreProcessor_readCmdLine(cInputPreProcessor* self, sParseStream* s, int a2, int a3);
+extern "C" void cInputPreProcessor_skipCComment(cInputPreProcessor* self, sParseStream* s, int a2, int a3);
+extern "C" void cInputPreProcessor_skipCppComment(cInputPreProcessor* self, sParseStream* s, int a2, int a3);
 
 static inline int isWS_326150(int c)
 {
@@ -2501,61 +2501,61 @@ static inline int isWS_326150(int c)
  * @param fn  file name, for messages
  * @return nonzero while the source has more characters
  */
-extern "C" int cInputPreProcessor_copyLine(void* self, sParseStream* isrc, int path, int fn)
+extern "C" int cInputPreProcessor_copyLine(cInputPreProcessor* self, sParseStream* isrc, int path, int fn)
 {
     int ch;
     for (;;) {
-        ch = *(int*)((char*)self + 0xC);
+        ch = self->CurrentChar;
         if (!isWS_326150(ch))
             break;
-        cInputPreProcessor_writeChar(self, (char)*(int*)((char*)self + 0xC));
+        cInputPreProcessor_writeChar(self, (char)self->CurrentChar);
         cInputPreProcessor_readChar(self, isrc);
-        if (*(int*)((char*)self + 0xC) < 0)
+        if (self->CurrentChar < 0)
             return 0;
     }
     if (ch == '#') {
         cInputPreProcessor_readChar(self, isrc);
         cInputPreProcessor_readCmdLine(self, isrc, path, fn);
-        return *(int*)((char*)self + 0xC) >= 0;
+        return self->CurrentChar >= 0;
     }
     if (ch == '/') {
         cInputPreProcessor_readChar(self, isrc);
-        int nextChar = *(int*)((char*)self + 0xC);
+        int nextChar = self->CurrentChar;
         if (nextChar == '/') {
             cInputPreProcessor_skipCppComment(self, isrc, path, fn);
-            return *(int*)((char*)self + 0xC) >= 0;
+            return self->CurrentChar >= 0;
         }
         if (nextChar == '*') {
             cInputPreProcessor_readChar(self, isrc);
             cInputPreProcessor_skipCComment(self, isrc, path, fn);
-            return *(int*)((char*)self + 0xC) >= 0;
+            return self->CurrentChar >= 0;
         }
         cInputPreProcessor_writeChar(self, '/');
     }
-    while (*(int*)((char*)self + 0xC) >= 0) {
-        cInputPreProcessor_writeChar(self, (char)*(int*)((char*)self + 0xC));
-        if (*(int*)((char*)self + 0xC) == '\n') {
+    while (self->CurrentChar >= 0) {
+        cInputPreProcessor_writeChar(self, (char)self->CurrentChar);
+        if (self->CurrentChar == '\n') {
             *(int*)((char*)isrc + 0xC) += 1;
             cInputPreProcessor_readChar(self, isrc);
             break;
         }
         cInputPreProcessor_readChar(self, isrc);
     }
-    return *(int*)((char*)self + 0xC) >= 0;
+    return self->CurrentChar >= 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("input/inputparse", cInputPreProcessor_writeString);
 #ifdef SKIP_ASM
-extern "C" void cInputPreProcessor_writeChar(void* self, char c);
+extern "C" void cInputPreProcessor_writeChar(cInputPreProcessor* self, char c);
 
 /**
  * Writes a null-terminated string to the preprocessor output, one cInputPreProcessor_writeChar() per character.
  *
  * @param str  the string to write
  */
-extern "C" void cInputPreProcessor_writeString(void* self, char* str)
+extern "C" void cInputPreProcessor_writeString(cInputPreProcessor* self, char* str)
 {
     while (*str != 0) {
         cInputPreProcessor_writeChar(self, *str++);
@@ -2583,7 +2583,7 @@ struct sCharBuf_326360 {
  *
  * @param ch  the character
  */
-extern "C" void cInputPreProcessor_writeChar(void* self, char ch)
+extern "C" void cInputPreProcessor_writeChar(cInputPreProcessor* self, char ch)
 {
     sCharBuf_326360* outBuf = (sCharBuf_326360*)self;
     if (outBuf->count == outBuf->cap) {
@@ -2608,7 +2608,7 @@ extern "C" void cInputPreProcessor_writeChar(void* self, char ch)
 INCLUDE_ASM("input/inputparse", cInputPreProcessor_writeTagLine);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void cInputPreProcessor_writeString(void* self, char* msg);
+extern "C" void cInputPreProcessor_writeString(cInputPreProcessor* self, char* msg);
 extern char D_0048E3C8[];
 
 /**
@@ -2617,7 +2617,7 @@ extern char D_0048E3C8[];
  * @param line  line number in the source
  * @param name  file name (passed as an int in this unit)
  */
-extern "C" void cInputPreProcessor_writeTagLine(void* self, int line, int name)
+extern "C" void cInputPreProcessor_writeTagLine(cInputPreProcessor* self, int line, int name)
 {
     char buf[176];
     sprintf(buf, D_0048E3C8, line, name);
@@ -2639,12 +2639,12 @@ struct sParseStream {
  *
  * @param isrc  the input source (On Tour tInputSource&)
  */
-extern "C" void cInputPreProcessor_readChar(void* self, sParseStream* isrc)
+extern "C" void cInputPreProcessor_readChar(cInputPreProcessor* self, sParseStream* isrc)
 {
     if (isrc->cur == isrc->base + isrc->size) {
-        *(int*)((char*)self + 0xc) = -1;
+        self->CurrentChar = -1;
     } else {
-        *(int*)((char*)self + 0xc) = *isrc->cur++;
+        self->CurrentChar = *isrc->cur++;
     }
 }
 #endif
@@ -2669,19 +2669,19 @@ extern char str_unexpected_EOF_in_comment[];
  * @param fileName  file name, for the error message
  */
 // Skips a /* */ comment; newlines inside it are kept, otherwise it becomes one space.
-extern "C" void cInputPreProcessor_skipCComment(void* self, sParseStream* isrc, int path, int fileName)
+extern "C" void cInputPreProcessor_skipCComment(cInputPreProcessor* self, sParseStream* isrc, int path, int fileName)
 {
     int single = 1;
     int run = 1;
     while (run) {
-        int ch = *(int*)((char*)self + 0xC);
+        int ch = self->CurrentChar;
         if (ch == '\n') {
             single = 0;
             *(int*)((char*)isrc + 0xC) += 1;
-            cInputPreProcessor_writeChar(self, (char)*(int*)((char*)self + 0xC));
+            cInputPreProcessor_writeChar(self, (char)self->CurrentChar);
         } else if (ch == '*') {
             cInputPreProcessor_readChar(self, isrc);
-            if (*(int*)((char*)self + 0xC) != '/')
+            if (self->CurrentChar != '/')
                 continue;
             cInputPreProcessor_readChar(self, isrc);
             if (single) {
@@ -2702,7 +2702,7 @@ error:
 INCLUDE_ASM("input/inputparse", cInputPreProcessor_skipCppComment);
 #ifdef SKIP_ASM
 struct sParseStream;
-extern "C" void cInputPreProcessor_readChar(void* self, sParseStream* s);
+extern "C" void cInputPreProcessor_readChar(cInputPreProcessor* self, sParseStream* s);
 // PORT: cInputPreProcessor_error__FPv is called with (self, s, a2, a3, msg) here; bind the 5-arg form to that symbol.
 void cInputPreProcessor_error_5(void* self, sParseStream* s, int a2, int a3, const char* msg) __asm__("cInputPreProcessor_error__FPv");
 extern char str_unexpected_EOF_in_comment[];
@@ -2717,13 +2717,13 @@ extern char str_unexpected_EOF_in_comment[];
  * @param path  the file path, for the error message
  * @param fileName  the file name, for the error message
  */
-extern "C" void cInputPreProcessor_skipCppComment(void* self, sParseStream* isrc, int path, int fileName)
+extern "C" void cInputPreProcessor_skipCppComment(cInputPreProcessor* self, sParseStream* isrc, int path, int fileName)
 {
     for (;;) {
-        int ch = *(int*)((char*)self + 0xC);
+        int ch = self->CurrentChar;
         if (ch == '\n') {
             *(int*)((char*)isrc + 0xC) += 1;
-            cInputPreProcessor_writeChar(self, (char)*(int*)((char*)self + 0xC));
+            cInputPreProcessor_writeChar(self, (char)self->CurrentChar);
             cInputPreProcessor_readChar(self, isrc);
             return;
         }
@@ -2745,11 +2745,11 @@ INCLUDE_ASM("input/inputparse", cInputPreProcessor_skipToEOL);
  *
  * @param isrc  the input source (On Tour tInputSource&)
  */
-extern "C" void cInputPreProcessor_skipToEOL(void* self, sParseStream* isrc)
+extern "C" void cInputPreProcessor_skipToEOL(cInputPreProcessor* self, sParseStream* isrc)
 {
-    while (*(int*)((char*)self + 0xC) >= 0) {
+    while (self->CurrentChar >= 0) {
         cInputPreProcessor_readChar(self, isrc);
-        if (*(int*)((char*)self + 0xC) == 10) {
+        if (self->CurrentChar == 10) {
             cInputPreProcessor_readChar(self, isrc);
             *(int*)((char*)isrc + 0xC) += 1;
             break;
@@ -2763,10 +2763,10 @@ INCLUDE_ASM("input/inputparse", cInputPreProcessor_readCmdLine);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 struct sParseStream;
-extern "C" void cInputPreProcessor_readChar(void* self, sParseStream* s);
-extern "C" void cInputPreProcessor_writeTagLine(void* self, int a1, int a2);
-extern "C" void cInputPreProcessor_readFile(void* self, int a1, int a2);
-extern "C" void cInputPreProcessor_skipToEOL(void* self, sParseStream* s);
+extern "C" void cInputPreProcessor_readChar(cInputPreProcessor* self, sParseStream* s);
+extern "C" void cInputPreProcessor_writeTagLine(cInputPreProcessor* self, int a1, int a2);
+extern "C" void cInputPreProcessor_readFile(cInputPreProcessor* self, int a1, int a2);
+extern "C" void cInputPreProcessor_skipToEOL(cInputPreProcessor* self, sParseStream* s);
 extern "C" int func_004165A8(const char* a, const char* b);
 // PORT: cInputPreProcessor_error__FPv is called with (self, s, a2, a3, msg) here; bind the 5-arg form to that symbol.
 void cInputPreProcessor_error_5(void* self, sParseStream* s, int a2, int a3, const char* msg) __asm__("cInputPreProcessor_error__FPv");
@@ -2793,13 +2793,13 @@ static inline int isAlpha_3266E8(int c)
  * @param path  directory of the current file
  * @param fn  name of the current file
  */
-extern "C" void cInputPreProcessor_readCmdLine(void* self, sParseStream* isrc, int path, int fn)
+extern "C" void cInputPreProcessor_readCmdLine(cInputPreProcessor* self, sParseStream* isrc, int path, int fn)
 {
     char word[16];
     char name[160];
     char buf[160];
     int ch;
-    while (isWS_3266E8(ch = *(int*)((char*)self + 0xC)))
+    while (isWS_3266E8(ch = self->CurrentChar))
         cInputPreProcessor_readChar(self, isrc);
     if (ch <= 0) {
         cInputPreProcessor_error_5(self, isrc, path, fn, "unexpected EOF in pre-processor command");
@@ -2807,15 +2807,15 @@ extern "C" void cInputPreProcessor_readCmdLine(void* self, sParseStream* isrc, i
     }
     char* wordPtr = word;
     do {
-        if (!isAlpha_3266E8(*(int*)((char*)self + 0xC)))
+        if (!isAlpha_3266E8(self->CurrentChar))
             break;
-        *wordPtr = *(int*)((char*)self + 0xC);
+        *wordPtr = self->CurrentChar;
         cInputPreProcessor_readChar(self, isrc);
         wordPtr++;
     } while (wordPtr - word < 15);
     *wordPtr = 0;
     if (func_004165A8(word, "include") == 0) {
-        while (isWS_3266E8(ch = *(int*)((char*)self + 0xC)))
+        while (isWS_3266E8(ch = self->CurrentChar))
             cInputPreProcessor_readChar(self, isrc);
         if (ch != '"') {
             cInputPreProcessor_error_5(self, isrc, path, fn, "illegal 'include' directive");
@@ -2824,19 +2824,19 @@ extern "C" void cInputPreProcessor_readCmdLine(void* self, sParseStream* isrc, i
         }
         cInputPreProcessor_readChar(self, isrc);
         int n = 0;
-        while (*(int*)((char*)self + 0xC) != '"') {
-            int nameChar = *(int*)((char*)self + 0xC);
+        while (self->CurrentChar != '"') {
+            int nameChar = self->CurrentChar;
             if (nameChar < 0 || nameChar == '\n') {
                 cInputPreProcessor_error_5(self, isrc, path, fn, "illegal 'include' directive");
                 cInputPreProcessor_skipToEOL(self, isrc);
                 return;
             }
-            name[n++] = *(int*)((char*)self + 0xC);
+            name[n++] = self->CurrentChar;
             cInputPreProcessor_readChar(self, isrc);
         }
         name[n] = 0;
         cInputPreProcessor_readChar(self, isrc);
-        while (isWS_3266E8(ch = *(int*)((char*)self + 0xC)))
+        while (isWS_3266E8(ch = self->CurrentChar))
             cInputPreProcessor_readChar(self, isrc);
         if (ch >= 0 && ch != '\n') {
             cInputPreProcessor_error_5(self, isrc, path, fn, "illegal 'include' directive");

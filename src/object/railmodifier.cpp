@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/flexrailnode.h"
 #include "object/animcombonode.h"
 #include "world/worldview.h"
 #include "object/uvscrollmodifier.h"
@@ -6398,7 +6399,7 @@ typedef int tMmiQuad __attribute__((mode(TI)));
 // PORT: hand-written MMI 4x4 transpose (MMI_TRANSPOSE4: lq/pextlw/pextuw/pcpyld/pcpyud/sq, no gcc 2.95 pattern;
 // retail's registers differ per call site, so an operand asm) plus VU0 macro asm; a port replaces them with a
 // plain C transpose and a C vector-matrix product.
-extern "C" void cFlexRailNode_updateMat(void* self, t4Matrix* out, const float* ctrlPoint0, const float* ctrlPoint1, const float* ctrlPoint2, const float* ctrlPoint3)
+extern "C" void cFlexRailNode_updateMat(cFlexRailNode* self, t4Matrix* out, const float* ctrlPoint0, const float* ctrlPoint1, const float* ctrlPoint2, const float* ctrlPoint3)
 {
     t4Matrix coeffMat;
     t4Vector zCoeffs;

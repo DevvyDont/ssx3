@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/trigger/cameratriggerman.h"
 #include "ai/rider.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -12,7 +13,7 @@ struct cCameraTriggerStack;
 void cCameraTriggerStack_init(cCameraTriggerStack* self);
 void cActiveTriggerList_purge(cActiveTriggerList* self);
 void cCameraTriggerList_init(cCameraTriggerList* self);
-extern "C" void cCameraTriggerMan_purge(void* self);
+extern "C" void cCameraTriggerMan_purge(cCameraTriggerMan* self);
 extern "C" void cCamera_resetChaseControllerSwitches();
 
 /**
@@ -21,7 +22,7 @@ extern "C" void cCamera_resetChaseControllerSwitches();
  * Purges both active trigger lists (+0x14, +0x18), resets both trigger stacks (+0x1C, +0x3C), purges the
  * manager, re-initialises its trigger list and resets the chase camera controller switches.
  */
-extern "C" void cCameraTriggerMan_cleanupOnExit(void* self)
+extern "C" void cCameraTriggerMan_cleanupOnExit(cCameraTriggerMan* self)
 {
     cActiveTriggerList_purge((cActiveTriggerList*)((char*)self + 0x14));
     cActiveTriggerList_purge((cActiveTriggerList*)((char*)self + 0x18));
@@ -269,7 +270,7 @@ static inline void remove_P(char* w, void* item, const sCtBox_P* box)
  * @param vself  the camera trigger manager (this)
  */
 // Takes every registered trigger out of the world's space hash and clears the trigger stacks and active lists.
-extern "C" void cCameraTriggerMan_purge(void* vself)
+extern "C" void cCameraTriggerMan_purge(cCameraTriggerMan* vself)
 {
     sCtMan_P* self = (sCtMan_P*)vself;
     for (int i = 0; i < self->count; i++) {
@@ -336,7 +337,7 @@ void cCameraTriggerMan_setInGameTriggers(void* self);
  *
  * @param stream  the trigger file's data in memory (On Tour fileBuffer)
  */
-extern "C" void cCameraTriggerMan_streamIn(void* self, void* stream)
+extern "C" void cCameraTriggerMan_streamIn(cCameraTriggerMan* self, void* stream)
 {
     cCameraTriggerMan_cleanupOnExit(self);
     cCameraTriggerList_loadFromBuffer(self, stream);
@@ -347,7 +348,6 @@ extern "C" void cCameraTriggerMan_streamIn(void* self, void* stream)
 }
 #endif
 
-extern void* gCamTriggerMan[];
 extern "C" void* cCameraTriggerMan_resolve(void*, void*, int);
 
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -381,14 +381,14 @@ void cCameraTriggerMan_resolve_CEC8(void*, void*, int) __asm__("cCameraTriggerMa
  */
 void gCamTriggerMan_resolve(void* self, int pFileBuffer)
 {
-    cCameraTriggerMan_resolve_CEC8((void*)gCamTriggerMan, self, pFileBuffer);
+    cCameraTriggerMan_resolve_CEC8((void*)((void**)&gCamTriggerMan), self, pFileBuffer);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_resolve);
 #ifdef SKIP_ASM
-extern "C" void cCameraTriggerMan_streamIn(void* self, void* stream);
+extern "C" void cCameraTriggerMan_streamIn(cCameraTriggerMan* self, void* stream);
 
 // PORT: the unit declares cCameraTriggerMan_resolve as returning void*, but the body returns nothing.
 void cCameraTriggerMan_resolve_impl(void* self, void* unused, void* stream) __asm__("cCameraTriggerMan_resolve");
@@ -403,7 +403,7 @@ void cCameraTriggerMan_resolve_impl(void* self, void* unused, void* stream) __as
 void cCameraTriggerMan_resolve_impl(void* self, void* rid, void* stream)
 {
     if (stream != 0) {
-        cCameraTriggerMan_streamIn(self, stream);
+        cCameraTriggerMan_streamIn((cCameraTriggerMan*)self, stream);
     }
 }
 #endif
@@ -423,7 +423,7 @@ void cCameraTriggerMan_unresolve_2(void* mgr, void* self) __asm__("cCameraTrigge
  */
 extern "C" void func_0016CF18(void* self)
 {
-    cCameraTriggerMan_unresolve_2((void*)gCamTriggerMan, self);
+    cCameraTriggerMan_unresolve_2((void*)((void**)&gCamTriggerMan), self);
 }
 #endif
 
@@ -604,10 +604,6 @@ void* cCameraTriggerMan_setReplayTriggers(void* self)
 }
 #endif
 
-struct cCameraTriggerStack {
-    int field_0x0;
-    int field_0x4;
-};
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerMan_getTriggerList);
@@ -633,8 +629,8 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", cCameraTriggerStack_init__FP19cCa
  */
 void cCameraTriggerStack_init(cCameraTriggerStack* self)
 {
-    self->field_0x0 = 0;
-    self->field_0x4 = 0;
+    self->NumTriggers = 0;
+    self->LastEnterPlayed = 0;
 }
 #endif
 
@@ -840,11 +836,11 @@ static inline int active_D320(char* rider)
  *
  * @param rider  the rider (On Tour cRider&)
  */
-extern "C" void cCameraTriggerMan_checkCollisions(char* self, cRider* rider)
+extern "C" void cCameraTriggerMan_checkCollisions(cCameraTriggerMan* self, cRider* rider)
 {
     if (active_D320(((char*)rider))) {
         int idx = rider->mViewIndex;
-        cActiveTriggerList_clearFlags(self + 0x14 + idx * 4);
+        cActiveTriggerList_clearFlags(((char*)self) + 0x14 + idx * 4);
         sCtx_D320 ctx;
         sRoot_D320* w = (sRoot_D320*)SSXApp->Game->BXNash;
         ctx.list = (char*)(idx * 4 + (int)self) + 0x14;
@@ -881,22 +877,22 @@ extern "C" void cCameraTriggerMan_checkCollisions(char* self, cRider* rider)
         while (n != 0) {
             if (*(int*)(n + 0xC) == 0) {
                 char* trigger = *(char**)n;
-                if (cCameraTriggerStack_recordExitGetNext((sCamTrigStack*)(self + (idx * 32 + 0x1C)), *(int*)trigger, &changed, &top)) {
+                if (cCameraTriggerStack_recordExitGetNext((sCamTrigStack*)(((char*)self) + (idx * 32 + 0x1C)), *(int*)trigger, &changed, &top)) {
                     doTriggerAction_D320(*(void**)(trigger + 0x10), ((char*)rider));
                 } else if (changed) {
-                    char* topActive = (char*)cActiveTriggerList_find1(self + (idx * 4 + 20), top);
+                    char* topActive = (char*)cActiveTriggerList_find1(((char*)self) + (idx * 4 + 20), top);
                     if (topActive) {
                         doTriggerAction_D320(*(void**)(topActive + 0xC), ((char*)rider));
                     }
                 }
-                n = (char*)cActiveTriggerList_remove(self + (idx * 4 + 20), n);
+                n = (char*)cActiveTriggerList_remove(((char*)self) + (idx * 4 + 20), n);
             } else {
                 n = *(char**)(n + 4);
             }
         }
         for (char* listNode = *(char**)((char*)(idx * 4 + (int)self) + 0x14); listNode != 0; listNode = *(char**)(listNode + 4)) {
             if (*(int*)(listNode + 8)) {
-                cCameraTriggerStack_recordEnter(self + (idx * 32 + 0x1C), **(int**)listNode);
+                cCameraTriggerStack_recordEnter(((char*)self) + (idx * 32 + 0x1C), **(int**)listNode);
                 doTriggerAction_D320(*(void**)(*(char**)listNode + 0xC), ((char*)rider));
             }
         }

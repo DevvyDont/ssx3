@@ -11,7 +11,8 @@
 // no vtable). Member names are EA's, from SSX On Tour's PSP DWARF (class cInputMapParser, size 0x109E8), placed at
 // retail offsets by:
 //   [R] retail's own initialisation: cInputMapParser_cInputMapParser (stores, the free-list and register-stack loops)
-//       and the allocation size 0x109EC (the July 2003 preview allocates 0x109EC too, with the same constructor stores);
+//       and the allocation size 0x109EC (the July 2003 preview allocates 0x109EC too, with the same constructor
+//       stores);
 //   [U] how matched retail code uses the field;
 //   [O] On Tour's member order/name, where the fields on both sides are placed by [R]/[U].
 // Retail differs from On Tour only in IsLineStart/ErrorFlag: On Tour packs them as two 1-byte bools at 0x90/0x91,
@@ -32,17 +33,22 @@ struct tParseNode {
                                     //      (1 Reference, 2 Button, 3 Config, 4 Constant, 5 Selection, 6.. operators)
     union {
         tParseNode* unk_04;         // 0x04 [U] first operand (operators, Selection's condition); the free-list link
-                                    //      (cInputMapParser_cInputMapParser, cInputMapParser_newParseNode, freeParseNode)
-        tIdentifier* unk_04_id;     // 0x04 [U] Reference node (Type 1): the identifier (compileParseNode reads ->Expression)
-        int unk_04_i;               // 0x04 [U] Button/Config node (Type 2/3): the button or config index (compileParseNode)
-        float unk_04_f;             // 0x04 [U] Constant node (Type 4): the value (parseOr/parseAnd/parseExpression fold it)
+                                    //       (cInputMapParser_cInputMapParser, cInputMapParser_newParseNode,
+                                    //       freeParseNode)
+        tIdentifier* unk_04_id;     // 0x04 [U] Reference node (Type 1): the identifier (compileParseNode reads
+                                    //       ->Expression)
+        int unk_04_i;               // 0x04 [U] Button/Config node (Type 2/3): the button or config index
+                                    //       (compileParseNode)
+        float unk_04_f;             // 0x04 [U] Constant node (Type 4): the value (parseOr/parseAnd/parseExpression fold
+                                    //       it)
     };
     union {
         tParseNode* unk_08;         // 0x08 [U] second operand (binary operators), Selection's then-branch
         int unk_08_i;               // 0x08 [U] Reference/Button node: the button modifier (compileParseNode compares
                                     //      it with 5 = On Tour kButtonModifier_Default)
     };
-    tParseNode* unk_0C;             // 0x0C [U] Selection node (Type 5): the else-branch (freeParseNode, compileParseNode)
+    tParseNode* unk_0C;             // 0x0C [U] Selection node (Type 5): the else-branch (freeParseNode,
+                                    //       compileParseNode)
 };
 
 CHECK_OFFSET(tParseNode, Type, 0x00);
@@ -79,21 +85,22 @@ struct cInputMapParser {
     int CurrentToken;               // 0x00098 [O] eToken; [P] preview assert "CurrentToken == kTokenIdent";
                                     //         [U] readToken stores On Tour's eToken numbers; parse* compare (0 EOF,
                                     //         2 Ident, 3 Assign, 5 Semicolon, 6 Question, 7 Colon, 9/10 brackets, ...)
-    char TokenText[64];             // 0x0009C [O]; [U] readToken's token text (63 chars max); parseStatement / parseTerm
-                                    //         use it as the identifier name
+    char TokenText[64];             // 0x0009C [O]; [U] readToken's token text (63 chars max); parseStatement /
+                                    //       parseTerm use it as the identifier name
     float TokenValue;               // 0x000DC [O]; [U] readToken scans a constant into it; parseTerm copies it into a
                                     //         Constant node
-    tParseNode* FreeParseNodes;     // 0x000E0 [O]; [R] = ParseNodes; [U] cInputMapParser_newParseNode pops, freeParseNode
-                                    //         pushes
+    tParseNode* FreeParseNodes;     // 0x000E0 [O]; [R] = ParseNodes; [U] cInputMapParser_newParseNode pops,
+                                    //       freeParseNode pushes
     tParseNode ParseNodes[2048];    // 0x000E4 [O]; [R] the constructor links all 0x800 into the free list
     int NumIdentifiers;             // 0x080E4 [O]; [R] = 0; [U] lookupIdentifierName's loop bound, parseStatement's ++
     tIdentifier Identifiers[512];   // 0x080E8 [O]; [U] lookupIdentifierName scans them (0x44 stride), parseStatement
                                     //         fills Identifiers[NumIdentifiers]
-    tIdentifier* CurrentIdentifier; // 0x108E8 [O]; [U] parseStatement points it at the statement being parsed; parseTerm
-                                    //         compares a referenced identifier with it (self-reference error)
+    tIdentifier* CurrentIdentifier; // 0x108E8 [O]; [U] parseStatement points it at the statement being parsed;
+                                    //       parseTerm compares a referenced identifier with it (self-reference error)
     int FreeRegisters[63];          // 0x108EC [O]; [P] preview assert "NumFreeRegisters < arraysize(FreeRegisters)";
-                                    //         [R] filled with 63..1; [U] compileParseNode / cInputMapParser_compileBinaryNode / cInputMapParser_compileUnaryNode
-                                    //         pop and push output registers
+                                    //       [R] filled with 63..1; [U] compileParseNode /
+                                    //       cInputMapParser_compileBinaryNode / cInputMapParser_compileUnaryNode pop
+                                    //       and push output registers
     int NumFreeRegisters;           // 0x109E8 [O]; [P] same assert; [R] = 0, then counts the 63 pushes; [U] as above
 };
 
@@ -115,5 +122,53 @@ CHECK_OFFSET(cInputMapParser, CurrentIdentifier, 0x108E8);
 CHECK_OFFSET(cInputMapParser, FreeRegisters, 0x108EC);
 CHECK_OFFSET(cInputMapParser, NumFreeRegisters, 0x109E8);
 CHECK_SIZE(cInputMapParser, 0x109EC);
+
+// cInputPreProcessor: expands an input-map file's #include lines into one text buffer before cInputMapParser sees it
+// (cSSXApp_loadInputMap: `cInputPreProcessor_loadFileSize(&pp, "data/config/input.map", &size)`). It writes
+// "# <line> "<file>"" tag lines (writeTagLine) that cInputMapParser's readToken turns into FileName / LineNumber, and
+// strips C and C++ comments. Its methods live in input/inputparse.cpp (EA's d:/ssx/code/source/input/inputparse.cpp,
+// 0x00325F48 loadFileSize ... 0x00326A20 error).
+//
+// Size 0x10: [R] cSSXApp_loadInputMap builds the only instance on its stack at sp+0x00 and the next local (the size
+// out-parameter) at sp+0x10; [O] On Tour's cInputPreProcessor is 0x10 with the same four members. No constructor,
+// destructor, bases or vtable (loadFileSize initialises the buffer words itself).
+// Tags: [R] cInputPreProcessor_loadFileSize's initialisation; [U] how retail code uses the field; [O] On Tour's DWARF.
+
+// The file being read (On Tour struct tInputSource, 0x10): readFile builds one on its stack per (included) file and
+// passes it by reference to every reader method.
+struct tInputSource {
+    const unsigned char* Data;      // 0x0 [O] (const char* in On Tour; retail reads it with lbu); [U] readFile sets it
+                                    //       to FILE_loadsize's buffer and frees it at the end; readChar's end test Data
+                                    //       + DataLen
+    int DataLen;                    // 0x4 [O]; [U] FILE_loadsize's size out-parameter (readFile); readChar's end test
+    const unsigned char* ReadPtr;   // 0x8 [O]; [U] readChar: CurrentChar = *ReadPtr++ (lbu)
+    int LineNumber;                 // 0xC [O]; [U] readFile sets 1 and passes it to writeTagLine; skipCComment /
+                                    //       copyLine count '\n'
+};
+
+CHECK_OFFSET(tInputSource, Data, 0x0);
+CHECK_OFFSET(tInputSource, DataLen, 0x4);
+CHECK_OFFSET(tInputSource, ReadPtr, 0x8);
+CHECK_OFFSET(tInputSource, LineNumber, 0xC);
+CHECK_SIZE(tInputSource, 0x10);
+
+struct cInputPreProcessor {
+    int OutputTop;                  // 0x0 [O]; [R] loadFileSize sets 0; [U] writeChar appends at
+                                    //       OutputBuf[OutputTop++]; loadFileSize copies OutputTop bytes out and returns
+                                    //       it as the size
+    int OutputLen;                  // 0x4 [O]; [R] loadFileSize sets 0x800; [U] writeChar grows the buffer when
+                                    //      OutputTop reaches it (max(OutputTop + 0x400, OutputTop * 3 / 2))
+    char* OutputBuf;                // 0x8 [O]; [R] loadFileSize: new (0x800, "PreProcBuf"); [U] writeChar reallocates
+                                    //      it; loadFileSize frees it after copying the text out
+    int CurrentChar;                // 0xC [O]; [U] readChar stores the next byte or -1 at the end of the source; every
+                                    //      reader compares it ('\n', '/', '*', '#'); copyLine / skipCComment /
+                                    //      skipCppComment / readCmdLine pass its low byte to writeChar (lb 0xC)
+};
+
+CHECK_OFFSET(cInputPreProcessor, OutputTop, 0x0);
+CHECK_OFFSET(cInputPreProcessor, OutputLen, 0x4);
+CHECK_OFFSET(cInputPreProcessor, OutputBuf, 0x8);
+CHECK_OFFSET(cInputPreProcessor, CurrentChar, 0xC);
+CHECK_SIZE(cInputPreProcessor, 0x10);
 
 #endif /* INPUT_INPUTPARSE_H */

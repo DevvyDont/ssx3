@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ai/rideranim.h"
+#include "camera/trigger/cameratriggerman.h"
 #include "sound/ssxaudio.h"
 #include "ai/computer.h"
 #include "world/world.h"
@@ -2276,68 +2278,68 @@ extern "C" void cRiderAnim_checkForSoundEvents_36A0(void* self, void* anim) __as
  * @param anim  the sequence (cAnimSequence); its first word is the tAIAnimID
  * @param dt  the time step in seconds
  */
-extern "C" void cRiderAnim_updateRule(char* self, void* x, int* anim, float dt)
+extern "C" void cRiderAnim_updateRule(cRiderAnim* self, void* x, int* anim, float dt)
 {
     int done = 0;
     switch (*(int*)(cAIAnimEventMap_getAnimPlayAttr(*anim) + 4)) {
     case 0:
-        done = f_001048C0_36A0(self, x, anim, dt);
+        done = f_001048C0_36A0(((char*)self), x, anim, dt);
         break;
     case 1:
-        done = f_00104940_36A0(self, x, anim, dt);
+        done = f_00104940_36A0(((char*)self), x, anim, dt);
         break;
     case 2:
-        done = f_001049C0_36A0(self, x, anim, dt);
+        done = f_001049C0_36A0(((char*)self), x, anim, dt);
         break;
     case 3:
-        done = f_00104110_36A0(self, x, anim, dt);
+        done = f_00104110_36A0(((char*)self), x, anim, dt);
         break;
     case 4:
-        done = f_00104178_36A0(self, x, anim, dt);
+        done = f_00104178_36A0(((char*)self), x, anim, dt);
         break;
     case 5:
-        done = f_00104238_36A0(self, x, anim, dt);
+        done = f_00104238_36A0(((char*)self), x, anim, dt);
         break;
     case 6:
-        done = f_001042A8_36A0(self, x, anim, dt);
+        done = f_001042A8_36A0(((char*)self), x, anim, dt);
         break;
     case 7:
-        done = f_00104358_36A0(self, x, anim, dt);
+        done = f_00104358_36A0(((char*)self), x, anim, dt);
         break;
     case 8:
-        done = f_001045D8_36A0(self, x, anim, dt);
+        done = f_001045D8_36A0(((char*)self), x, anim, dt);
         break;
     case 9:
-        done = f_00104660_36A0(self, x, anim, dt);
+        done = f_00104660_36A0(((char*)self), x, anim, dt);
         break;
     case 10:
-        done = f_001042E0_36A0(self, x, anim, dt);
+        done = f_001042E0_36A0(((char*)self), x, anim, dt);
         break;
     case 11:
-        done = f_001043F8_36A0(self, x, anim, dt);
+        done = f_001043F8_36A0(((char*)self), x, anim, dt);
         break;
     case 12:
-        done = f_001045B8_36A0(self, x, anim, dt);
+        done = f_001045B8_36A0(((char*)self), x, anim, dt);
         break;
     case 13:
-        done = f_001047F0_36A0(self, x, anim, dt);
+        done = f_001047F0_36A0(((char*)self), x, anim, dt);
         break;
     case 14:
-        done = f_00104728_36A0(self, x, anim, dt);
+        done = f_00104728_36A0(((char*)self), x, anim, dt);
         break;
     case 15:
-        done = f_001046B0_36A0(self, x, anim, dt);
+        done = f_001046B0_36A0(((char*)self), x, anim, dt);
         break;
     }
     if (done == 0) {
-        char* rider = *(char**)(self + 0x60);
+        char* rider = (char*)self->Rider;
         if (rider != 0) {
             int ok = 0;
             if (*(int*)(rider + 0x874) != 0) {
                 ok = *(int*)(rider + 0x87C) != 0;
             }
             if (ok) {
-                cRiderAnim_checkForSoundEvents_36A0(self, anim);
+                cRiderAnim_checkForSoundEvents_36A0(((char*)self), anim);
             }
         }
     }
@@ -2382,43 +2384,43 @@ struct sEventOwner3918 {
  * @param data  the expiring sequence; its first word is the tAIAnimID
  */
 // Runs the handler for an animation event's type and stores its result in the per-event slot.
-extern "C" void cRiderAnim_expireRule(sEventOwner3918* self, sEvent3918* ev, int* data)
+extern "C" void cRiderAnim_expireRule(cRiderAnim* self, sEvent3918* ev, int* data)
 {
-    int idx = ev - self->events;
+    int idx = ev - (sEvent3918*)self->Sequencer;
     char* info = cAIAnimEventMap_getAnimPlayAttr(*data);
     switch (*(int*)(info + 8)) {
     case 0:
-        self->results[idx] = cRiderAnim_onExpireNOP_3918(self, ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireNOP_3918(((sEventOwner3918*)self), ev, data);
         break;
     case 1:
-        self->results[idx] = cRiderAnim_onExpireINTO_AIR_3918(self, ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireINTO_AIR_3918(((sEventOwner3918*)self), ev, data);
         break;
     case 2:
-        self->results[idx] = cRiderAnim_onExpireINTO_SPIN_CYC_3918(self, ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireINTO_SPIN_CYC_3918(((sEventOwner3918*)self), ev, data);
         break;
     case 3:
-        self->results[idx] = cRiderAnim_onExpireINTO_CRUISE_3918(self, ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireINTO_CRUISE_3918(((sEventOwner3918*)self), ev, data);
         break;
     case 4:
-        self->results[idx] = cRiderAnim_onExpireBLENDTO_CRUISE_3918(self, ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireBLENDTO_CRUISE_3918(((sEventOwner3918*)self), ev, data);
         break;
     case 5:
-        self->results[idx] = cRiderAnim_onExpireBLENDTO_AIR_3918(self, ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireBLENDTO_AIR_3918(((sEventOwner3918*)self), ev, data);
         break;
     case 6:
-        self->results[idx] = cRiderAnim_onExpireBLENDTO_RAIL_3918(self, ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireBLENDTO_RAIL_3918(((sEventOwner3918*)self), ev, data);
         break;
     case 7:
-        self->results[idx] = cRiderAnim_onExpireINTO_FL_STAND_3918(self, ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireINTO_FL_STAND_3918(((sEventOwner3918*)self), ev, data);
         break;
     case 8:
-        self->results[idx] = cRiderAnim_onExpireINTO_RSFS_3918(self, ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireINTO_RSFS_3918(((sEventOwner3918*)self), ev, data);
         break;
     case 9:
-        self->results[idx] = cRiderAnim_onExpireINTO_PRESS_3918(self, ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireINTO_PRESS_3918(((sEventOwner3918*)self), ev, data);
         break;
     case 10:
-        self->results[idx] = cRiderAnim_onExpireBLENDTO_GEAR_CYC_3918(self, ev, data);
+        self->CurrentAnimID[idx] = cRiderAnim_onExpireBLENDTO_GEAR_CYC_3918(((sEventOwner3918*)self), ev, data);
         break;
     }
 }
@@ -2460,7 +2462,7 @@ extern sBankTab_3AA0* cAnimDataBase_TheAnimDataBase;
 extern "C" int func_001446A0(void*, int);
 extern "C" int func_001446B8(void*, int);
 extern "C" void func_00144670(void*, int);
-extern "C" void cRiderAnim_triggerAnimSound(void*, int);
+extern "C" void cRiderAnim_triggerAnimSound(cRiderAnim*, int);
 
 /**
  * Plays the sounds tagged on the frames a rider animation just passed.
@@ -2472,7 +2474,7 @@ extern "C" void cRiderAnim_triggerAnimSound(void*, int);
  *
  * @param sequence  the animation sequence
  */
-extern "C" void cRiderAnim_checkForSoundEvents(void* self, sObj_3AA0* sequence)
+extern "C" void cRiderAnim_checkForSoundEvents(cRiderAnim* self, sObj_3AA0* sequence)
 {
     int n = cAnimDataBase_TheAnimDataBase->banks[sequence->id & 0xFF]->ents[sequence->id >> 8].count;
     for (int i = 0; i < n; i++) {
@@ -2515,7 +2517,7 @@ extern "C" void cAnimSequencer_expire(void*, void*);
  * @param weight  the slider position, -1 to 1
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int cRiderAnim_updatePosNegSlider(void* self, void* x, char* anim, int posAnim, int negAnim, float dt, float weight)
+extern "C" int cRiderAnim_updatePosNegSlider(cRiderAnim* self, void* x, char* anim, int posAnim, int negAnim, float dt, float weight)
 {
     if (weight < 0.0f) {
         cAnimSequence_setSubAnim(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + negAnim * 4 + 0x1030));
@@ -2561,7 +2563,7 @@ extern "C" void cAnimSequencer_expire(void*, void*);
  * @param posAnim  the game animation for positive weights
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int cRiderAnim_update3Cycle(void* self, void* x, char* anim, int negAnim, int cenAnim, float dt, float w, int posAnim)
+extern "C" int cRiderAnim_update3Cycle(cRiderAnim* self, void* x, char* anim, int negAnim, int cenAnim, float dt, float w, int posAnim)
 {
     cAnimSequence_setSubAnim(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + cenAnim * 4 + 0x1030));
     if (0.0f < w) {
@@ -2617,7 +2619,7 @@ extern "C" void cAnimSequencer_expire(void*, void*);
  * @param weight  the weight, -1 to 1
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int cRiderAnim_update5Cycle(void* self, void* x, char* anim, int negEndAnim, int negMidAnim, int cenAnim, int posMidAnim, int posEndAnim, float dt, float weight)
+extern "C" int cRiderAnim_update5Cycle(cRiderAnim* self, void* x, char* anim, int negEndAnim, int negMidAnim, int cenAnim, int posMidAnim, int posEndAnim, float dt, float weight)
 {
     int from, to;
     float w;
@@ -2683,7 +2685,7 @@ extern "C" void cAnimSequencer_expire(void*, void*);
  * @param cycleAnim  the looping game animation that follows
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int cRiderAnim_updateIntoCycle(void* self, void* x, char* anim, int intoAnim, float dt, int cycleAnim)
+extern "C" int cRiderAnim_updateIntoCycle(cRiderAnim* self, void* x, char* anim, int intoAnim, float dt, int cycleAnim)
 {
     if (*(int*)(anim + 4) == *(int*)(cGameAnimMap_TheGameAnimMap + intoAnim * 4 + 0x1030)) {
         cAnimSequence_setSubAnimType(anim, 0, 0);
@@ -2722,11 +2724,11 @@ extern "C" int cRiderAnim_update3Cycle_4110(void*, void*, int*, int, int, int, f
  * @param deltaTime  the time step
  * @return cRiderAnim_update3Cycle's result: 1 when the sequence was expired
  */
-extern "C" int cRiderAnim_onUpdateASYNC_CRUISE3(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
+extern "C" int cRiderAnim_onUpdateASYNC_CRUISE3(cRiderAnim* riderAnim, void *sequencer, int *sequence, float deltaTime) {
     float var_f13;
     void *temp_3;
 
-    temp_3 = (*(void **)((char*)(riderAnim) + (0x60)));
+    temp_3 = ((void*)riderAnim->Rider);
     var_f13 = (*(float *)((char*)(temp_3) + (0x1FC)));
     if ((*(int *)((char*)(temp_3) + (0x320))) != 0) {
         var_f13 = -var_f13;
@@ -2744,7 +2746,7 @@ extern "C" int cRiderAnim_onUpdateASYNC_CRUISE3(void *riderAnim, void *sequencer
 //100%
 INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_CRUISE5);
 #ifdef SKIP_ASM
-extern "C" int cRiderAnim_update5Cycle(void* self, void* x, char* anim, int i0, int i1, int i2, int i3, int i4, float dt, float v);
+extern "C" int cRiderAnim_update5Cycle(cRiderAnim* self, void* x, char* anim, int i0, int i1, int i2, int i3, int i4, float dt, float v);
 /**
  * Update rule 4 of cRiderAnim_updateRule: a five-way cruise blend.
  *
@@ -2757,9 +2759,9 @@ extern "C" int cRiderAnim_update5Cycle(void* self, void* x, char* anim, int i0, 
  * @param dt  the time step
  * @return cRiderAnim_update5Cycle's result: 1 when the sequence was expired
  */
-extern "C" int cRiderAnim_onUpdateASYNC_CRUISE5(char* self, void* x, int* anim, float dt)
+extern "C" int cRiderAnim_onUpdateASYNC_CRUISE5(cRiderAnim* self, void* x, int* anim, float dt)
 {
-    char* rider = *(char**)(self + 0x60);
+    char* rider = (char*)self->Rider;
     float weight = *(float*)(rider + 0x1FC);
     if (*(int*)(rider + 0x320) != 0)
         weight = -weight;
@@ -2798,14 +2800,14 @@ extern "C" int cRiderAnim_update3Cycle_4238(void*, void*, int*, int, int, int, f
  * @param sequence  the sequence (first word: its animation id)
  * @param deltaTime  the time step
  */
-extern "C" void cRiderAnim_onUpdateASYNC_RAIL(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
+extern "C" void cRiderAnim_onUpdateASYNC_RAIL(cRiderAnim* riderAnim, void *sequencer, int *sequence, float deltaTime) {
     int var_7;
     int var_8;
     int var_9;
     float var_f13;
     void *temp_3;
 
-    temp_3 = (*(void **)((char*)(riderAnim) + (0x60)));
+    temp_3 = ((void*)riderAnim->Rider);
     var_f13 = (*(float *)((char*)(temp_3) + (0x238)));
     if ((*(int *)((char*)(temp_3) + (0x320))) != 0) {
         var_f13 = -var_f13;
@@ -2849,11 +2851,11 @@ extern "C" int cRiderAnim_update3Cycle_42A8(void*, void*, char*, int, int, int, 
  * @param sequence  the sequence
  * @param dt  the time step
  */
-extern "C" void cRiderAnim_onUpdateASYNC_BRAKE(void *riderAnim, void *sequencer, char *sequence, float dt) {
+extern "C" void cRiderAnim_onUpdateASYNC_BRAKE(cRiderAnim* riderAnim, void *sequencer, char *sequence, float dt) {
     float var_f13;
     void *temp_3;
 
-    temp_3 = (*(void **)((char*)(riderAnim) + (0x60)));
+    temp_3 = ((void*)riderAnim->Rider);
     var_f13 = (*(float *)((char*)(temp_3) + (0x214)));
     if ((*(int *)((char*)(temp_3) + (0x320))) == 0) {
         var_f13 = -var_f13;
@@ -2880,18 +2882,18 @@ extern "C" int cRiderAnim_updatePosNegSlider_42E0(void *, void *, int *, int, in
  * @param deltaTime  the time step
  * @return cRiderAnim_updatePosNegSlider's result: 1 when the sequence was expired
  */
-extern "C" int cRiderAnim_onUpdateASYNC_UBERGRIND(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
+extern "C" int cRiderAnim_onUpdateASYNC_UBERGRIND(cRiderAnim* riderAnim, void *sequencer, int *sequence, float deltaTime) {
     int x = *sequence;
     if (x == 218) {
-        return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 362, 363, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
+        return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 362, 363, deltaTime, (*(float *)((char*)((riderAnim->Rider)) + (0x238))));
     }
     if (x == 226) {
-        return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 371, 372, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
+        return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 371, 372, deltaTime, (*(float *)((char*)((riderAnim->Rider)) + (0x238))));
     }
     if (x == 234) {
-        return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 380, 381, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
+        return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 380, 381, deltaTime, (*(float *)((char*)((riderAnim->Rider)) + (0x238))));
     }
-    return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 389, 390, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
+    return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 389, 390, deltaTime, (*(float *)((char*)((riderAnim->Rider)) + (0x238))));
 }
 #endif
 
@@ -2916,8 +2918,8 @@ static inline float vAbs_4358(float x)
  * @param dt  the time step
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int cRiderAnim_onUpdateASYNC_PREWIND(char* self, void* x, char* anim, float dt) {
-    char* rider = *(char**)(self + 0x60);
+extern "C" int cRiderAnim_onUpdateASYNC_PREWIND(cRiderAnim* self, void* x, char* anim, float dt) {
+    char* rider = (char*)self->Rider;
     float absSlew15 = vAbs_4358(*(float*)(rider + 0x2A4));
     float absSlew16 = vAbs_4358(*(float*)(rider + 0x2B0));
     float framePercent = (absSlew16 < absSlew15) ? absSlew15 : absSlew16;
@@ -2960,7 +2962,7 @@ static inline float clamp_43F8(float v, float lo, float hi)
  * @param dt  the time step
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int cRiderAnim_onUpdateASYNC_AIR_ADJ(char* self, void* x, char* anim, float dt)
+extern "C" int cRiderAnim_onUpdateASYNC_AIR_ADJ(cRiderAnim* self, void* x, char* anim, float dt)
 {
     int slot = 165;
     switch (*(int*)anim) {
@@ -2975,7 +2977,7 @@ extern "C" int cRiderAnim_onUpdateASYNC_AIR_ADJ(char* self, void* x, char* anim,
     }
     cAnimSequence_setSubAnim(anim, 1, *(int*)(cGameAnimMap_TheGameAnimMap + slot * 4 + 0x1030));
     cAnimSequence_setSubAnimType(anim, 1, 1);
-    char* rider = *(char**)(self + 0x60);
+    char* rider = (char*)self->Rider;
     float absSlew14 = vAbs_43F8(*(float*)(rider + 0x298));
     float absSlew13 = vAbs_43F8(*(float*)(rider + 0x28C));
     float framePercent = (absSlew13 < absSlew14) ? absSlew14 : absSlew13;
@@ -3029,8 +3031,8 @@ INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_GATEROCK);
  * @param dt  the time step
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int cRiderAnim_onUpdateASYNC_GATEROCK(char* self, void* x, char* anim, float dt) {
-    cAnimSequence_setSubAnimTime(anim, 0, *(float*)(anim + 0x10) * *(float*)(*(char**)(*(char**)(self + 0x60) + 0x77C) + 0x2A0));
+extern "C" int cRiderAnim_onUpdateASYNC_GATEROCK(cRiderAnim* self, void* x, char* anim, float dt) {
+    cAnimSequence_setSubAnimTime(anim, 0, *(float*)(anim + 0x10) * *(float*)(*(char**)((char*)self->Rider + 0x77C) + 0x2A0));
     if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
         cAnimSequencer_expire(x, anim);
         return 1;
@@ -3057,8 +3059,8 @@ extern "C" int cRiderAnim_updatePosNegSlider_4660(void *, void *, int *, int, in
  * @param deltaTime  the time step
  * @return cRiderAnim_updatePosNegSlider's result: 1 when the sequence was expired
  */
-extern "C" int cRiderAnim_onUpdateASYNC_HANDPLANT(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
-    float w = (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x244)));
+extern "C" int cRiderAnim_onUpdateASYNC_HANDPLANT(cRiderAnim* riderAnim, void *sequencer, int *sequence, float deltaTime) {
+    float w = (*(float *)((char*)((riderAnim->Rider)) + (0x244)));
 
     if (*sequence == 45) {
         return cRiderAnim_updatePosNegSlider_4660(riderAnim, sequencer, sequence, 353, 352, deltaTime, w);
@@ -3071,7 +3073,7 @@ extern "C" int cRiderAnim_onUpdateASYNC_HANDPLANT(void *riderAnim, void *sequenc
 INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_BP_BAL);
 #ifdef SKIP_ASM
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
-extern "C" int cRiderAnim_update3Cycle(void* self, void* x, char* anim, int a, int b, float dt, float w, int c);
+extern "C" int cRiderAnim_update3Cycle(cRiderAnim* self, void* x, char* anim, int a, int b, float dt, float w, int c);
 /**
  * Update rule 15 of cRiderAnim_updateRule: a three-way board-press balance blend.
  *
@@ -3083,9 +3085,9 @@ extern "C" int cRiderAnim_update3Cycle(void* self, void* x, char* anim, int a, i
  * @param dt  the time step
  * @return cRiderAnim_update3Cycle's result: 1 when the sequence was expired
  */
-extern "C" int cRiderAnim_onUpdateASYNC_BP_BAL(char* self, void* x, int* anim, float dt)
+extern "C" int cRiderAnim_onUpdateASYNC_BP_BAL(cRiderAnim* self, void* x, int* anim, float dt)
 {
-    float centeredSlew = *(float*)(*(char**)(self + 0x60) + 0x274);
+    float centeredSlew = *(float*)((char*)self->Rider + 0x274);
     centeredSlew = centeredSlew + centeredSlew - 1.0f;
     float w;
     if (centeredSlew >= -1.0f) {
@@ -3123,13 +3125,13 @@ static inline float clamp_4728(float v, float lo, float hi)
  * @param dt  the time step
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int cRiderAnim_onUpdateASYNC_BP_INTO(char* self, void* x, char* anim, float dt) {
+extern "C" int cRiderAnim_onUpdateASYNC_BP_INTO(cRiderAnim* self, void* x, char* anim, float dt) {
     float framePercent;
     int animId = *(int*)anim;
     if (animId == 25 || animId == 33) {
-        framePercent = clamp_4728(1.0f - *(float*)(*(char**)(self + 0x60) + 0x268), 0.0f, 1.0f);
+        framePercent = clamp_4728(1.0f - *(float*)((char*)self->Rider + 0x268), 0.0f, 1.0f);
     } else {
-        framePercent = *(float*)(*(char**)(self + 0x60) + 0x268);
+        framePercent = *(float*)((char*)self->Rider + 0x268);
     }
     cAnimSequence_setSubAnimTime(anim, 0, framePercent * *(float*)(anim + 0x10));
     if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
@@ -3166,15 +3168,15 @@ static inline float clamp_47F0(float v, float lo, float hi)
  * @param dt  the time step
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int cRiderAnim_onUpdateASYNC_BP_PIVOT(char* self, void* x, char* anim, float dt) {
+extern "C" int cRiderAnim_onUpdateASYNC_BP_PIVOT(cRiderAnim* self, void* x, char* anim, float dt) {
     float framePercent;
     int animId = *(int*)anim;
     if (animId == 37) {
-        framePercent = 1.0f - vAbs_47F0(*(float*)(*(char**)(self + 0x60) + 0x280));
+        framePercent = 1.0f - vAbs_47F0(*(float*)((char*)self->Rider + 0x280));
     } else if (animId == 38) {
-        framePercent = 1.0f - vAbs_47F0(*(float*)(*(char**)(self + 0x60) + 0x280));
+        framePercent = 1.0f - vAbs_47F0(*(float*)((char*)self->Rider + 0x280));
     } else {
-        framePercent = vAbs_47F0(*(float*)(*(char**)(self + 0x60) + 0x280));
+        framePercent = vAbs_47F0(*(float*)((char*)self->Rider + 0x280));
     }
     cAnimSequence_setSubAnimTime(anim, 0, clamp_47F0(framePercent, 0.0f, 1.0f) * *(float*)(anim + 0x10));
     if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
@@ -3202,7 +3204,7 @@ extern "C" int cAnimSequence_updateSubAnim_48C0(void*, int, float) __asm__("cAni
  * @param dt  the time step
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int cRiderAnim_onUpdateFWD(void* self, void* x, void* anim, float dt) {
+extern "C" int cRiderAnim_onUpdateFWD(cRiderAnim* self, void* x, void* anim, float dt) {
     float stepTime = dt * 0.01666666753590107f;
     int done;
     if (cAnimSequence_updateSubAnim_48C0(anim, 0, stepTime) != 0) {
@@ -3234,7 +3236,7 @@ extern "C" int cAnimSequence_updateSubAnim_4940(void*, int, float) __asm__("cAni
  * @param dt  the time step
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int cRiderAnim_onUpdateHOLD_LAST(void* self, void* x, void* anim, float dt) {
+extern "C" int cRiderAnim_onUpdateHOLD_LAST(cRiderAnim* self, void* x, void* anim, float dt) {
     float stepTime = dt * 0.01666666753590107f;
     int done;
     if (cAnimSequence_updateSubAnim_4940(anim, 0, stepTime) != 0) {
@@ -3266,7 +3268,7 @@ extern "C" int cAnimSequence_updateSubAnim_49C0(void*, int, float) __asm__("cAni
  * @param dt  the time step
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int cRiderAnim_onUpdateCYCLE(void* self, void* x, void* anim, float dt) {
+extern "C" int cRiderAnim_onUpdateCYCLE(cRiderAnim* self, void* x, void* anim, float dt) {
     float stepTime = dt * 0.01666666753590107f;
     int done;
     if (cAnimSequence_updateSubAnim_49C0(anim, 0, stepTime) != 0) {
@@ -3322,7 +3324,7 @@ extern "C" int cRiderAnimBase_playInto_4A60(void*, void*, int*, int) __asm__("cR
  * @return cRiderAnimBase_playInto's result, or 438
  */
 // Plays the landing animation that matches the current trick state.
-extern "C" int cRiderAnim_onExpireINTO_SPIN_CYC(void* riderAnim, void* sequencer, int* sequence)
+extern "C" int cRiderAnim_onExpireINTO_SPIN_CYC(cRiderAnim* riderAnim, void* sequencer, int* sequence)
 {
     switch (*sequence) {
     case 271: case 285:
@@ -3363,8 +3365,8 @@ extern "C" int cRiderAnimBase_playBlendIn_4B48(void*, int, int, int) __asm__("cR
  * @param sequence  the expired sequence
  * @return cRiderAnimBase_playBlendIn's result
  */
-extern "C" int cRiderAnim_onExpireBLENDTO_AIR(void *riderAnim, int sequencer, int sequence) {
-    if (*(int *)((char*)riderAnim + 0x64) != 0) {
+extern "C" int cRiderAnim_onExpireBLENDTO_AIR(cRiderAnim* riderAnim, int sequencer, int sequence) {
+    if ((int)riderAnim->FERider != 0) {
         return cRiderAnimBase_playBlendIn_4B48(riderAnim, sequencer, sequence, 436);
     }
     return cRiderAnimBase_playBlendIn_4B48(riderAnim, sequencer, sequence, 287);
@@ -3450,8 +3452,8 @@ extern "C" int cRiderAnimBase_playBlendIn_4BD8(void *, int, int, int) __asm__("c
  * @param sequence  the expired sequence
  * @return cRiderAnimBase_playBlendIn's result
  */
-extern "C" int cRiderAnim_onExpireINTO_PRESS(void *riderAnim, int sequencer, int sequence) {
-    if ((*(int *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x330))) == 1) {
+extern "C" int cRiderAnim_onExpireINTO_PRESS(cRiderAnim* riderAnim, int sequencer, int sequence) {
+    if ((*(int *)((char*)((riderAnim->Rider)) + (0x330))) == 1) {
         return cRiderAnimBase_playBlendIn_4BD8(riderAnim, sequencer, sequence, 0x1C);
     }
     return cRiderAnimBase_playBlendIn_4BD8(riderAnim, sequencer, sequence, 36);
@@ -3566,8 +3568,8 @@ extern int gSSXAudio_seg_1218 __asm__("gSSXAudio");
  * @param riderAnim  the rider animation object
  * @param soundId  the sound tag
  */
-extern "C" void cRiderAnim_triggerAnimSound(void *riderAnim, int soundId) {
-    int temp_2 = (*(int *)((char*)(riderAnim) + (0x60)));
+extern "C" void cRiderAnim_triggerAnimSound(cRiderAnim* riderAnim, int soundId) {
+    int temp_2 = ((int)riderAnim->Rider);
     int maskedSoundId = soundId & 0xFFFF;
     if (temp_2 != 0) {
         cSSXAudio_PlayAniTag_4CC8(gSSXAudio_seg_1218, temp_2, maskedSoundId);
@@ -3593,17 +3595,17 @@ extern int cRiderAnimBase_AIAnimEventMap;
  * @param riderAnim  the rider animation object (this)
  * @param aid  the AI animation id (tAIAnimID)
  */
-extern "C" void cRiderAnim_mapAIDToGAD(void *riderAnim, int aid) {
+extern "C" void cRiderAnim_mapAIDToGAD(cRiderAnim* riderAnim, int aid) {
     int var_6;
     void *temp_2;
     void *temp_4;
 
-    temp_2 = (*(void **)((char*)(riderAnim) + (0x64)));
+    temp_2 = ((void*)riderAnim->FERider);
     var_6 = 0;
     if (temp_2 != 0) {
         var_6 = (*(int *)((char*)(temp_2) + (0xCD8)));
     } else {
-        temp_4 = (*(void **)((char*)(riderAnim) + (0x60)));
+        temp_4 = ((void*)riderAnim->Rider);
         if (temp_4 != 0) {
             var_6 = (*(int *)((char*)(temp_4) + (0x364)));
         }
@@ -3666,10 +3668,10 @@ extern "C" void cAnimSequencer_writeToReplayFrame(void*, cStream_4D68*);
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cRiderAnim_writeToReplayFrame(char* self, cStream_4D68* stream) {
-    stream->write(self, 80);
+extern "C" void cRiderAnim_writeToReplayFrame(cRiderAnim* self, cStream_4D68* stream) {
+    stream->write(((char*)self), 80);
     for (int i = 0; i < 6; i++) {
-        cAnimSequencer_writeToReplayFrame(*(char**)(self + 0x50) + i * 8, stream);
+        cAnimSequencer_writeToReplayFrame((char*)self->Sequencer + i * 8, stream);
     }
 }
 #endif
@@ -3693,11 +3695,11 @@ extern "C" void cAnimSequencer_readFromReplayFrame(void*, cStream_4DE0*);
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cRiderAnim_readFromReplayFrame(char* self, cStream_4DE0* stream) {
-    stream->Read(self, 80);
+extern "C" void cRiderAnim_readFromReplayFrame(cRiderAnim* self, cStream_4DE0* stream) {
+    stream->Read(((char*)self), 80);
     for (int i = 0; i < 6; i++) {
-        cAnimSequencer_expireAll(*(char**)(self + 0x50) + i * 8);
-        cAnimSequencer_readFromReplayFrame(*(char**)(self + 0x50) + i * 8, stream);
+        cAnimSequencer_expireAll((char*)self->Sequencer + i * 8);
+        cAnimSequencer_readFromReplayFrame((char*)self->Sequencer + i * 8, stream);
     }
 }
 #endif
@@ -4085,7 +4087,6 @@ extern "C" void cSSXAudio_CollisionSound_5398(void*, char*, sSurf_5398*, int) __
 extern "C" void cCameraTriggerMan_checkCollisions(void*, void*);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern char* D_004A3500_5398 __asm__("gSSXAudio");
-extern char D_004C5830_5398[] __asm__("gCamTriggerMan");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float Dot_5398(const sV4_5398& a, const sV4_5398& b)
@@ -4258,7 +4259,7 @@ extern "C" void cRider_checkObjectCollisions(cRider* self, sV4_5398* norm)
         if (!(contact.surf->flags & 0x2000))
             cSSXAudio_CollisionSound_5398(D_004A3500_5398, ((char*)self), contact.surf, contact.idx);
     }
-    cCameraTriggerMan_checkCollisions(D_004C5830_5398, ((char*)self));
+    cCameraTriggerMan_checkCollisions(((char*)&gCamTriggerMan), ((char*)self));
     cWorldRider__cWorldRider(&sc, 2);
 }
 #endif

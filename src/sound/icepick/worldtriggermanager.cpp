@@ -1,10 +1,11 @@
 #include "common.h"
+#include "sound/icepick/worldsound.h"
+#include "sound/icepick/worldtriggermanager.h"
 #include "ai/rider.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cWorldTriggerManager_cWorldTriggerManager(void* self);
+extern "C" void* cWorldTriggerManager_cWorldTriggerManager(cWorldTriggerManager* self);
 extern const char str_WorldTriggerManager[];
-extern void* gWorldTriggerManager;
 
 //99.88%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", WORLDTRIGGERMANAGER_Init__Fv);
@@ -17,7 +18,7 @@ void WORLDTRIGGERMANAGER_Init()
 {
     if (gWorldTriggerManager == 0) {
         void* mem = cMemMan_alloc(836, str_WorldTriggerManager, 0, 0);
-        gWorldTriggerManager = cWorldTriggerManager_cWorldTriggerManager(mem);
+        gWorldTriggerManager = (cWorldTriggerManager*)(cWorldTriggerManager_cWorldTriggerManager((cWorldTriggerManager*)mem));
     }
 }
 #endif
@@ -147,10 +148,10 @@ extern "C" int cWorldTriggerInstance_SwapTriggerToString(void* self, int idx, ch
 extern "C" void cWorldTriggerInstance_Reset(void* self);
 extern "C" int cWorldTriggerManager_PlayingTriggerInstance(sWorldTrigger70** self, int a1, int a2, sWorldTrigger70* except);
 extern "C" int cWorldTriggerManager_SwapTriggerPlaying(sWorldTrigger70** self, int id);
-extern "C" int cWorldTriggerManager_AfterCollisionTrigger(void* self, unsigned int i);
-extern "C" int cWorldTriggerManager_ObjectHit(sTriggerIdCache* self, int id);
-extern "C" int cWorldTriggerManager_SyncToAnimationTrigger(void* self, unsigned int i);
-extern "C" int cWorldTriggerManager_ObjectRefFirstFrame(void* self, void* src, void* state);
+extern "C" int cWorldTriggerManager_AfterCollisionTrigger(cWorldTriggerManager* self, unsigned int i);
+extern "C" int cWorldTriggerManager_ObjectHit(cWorldTriggerManager* self, int id);
+extern "C" int cWorldTriggerManager_SyncToAnimationTrigger(cWorldTriggerManager* self, unsigned int i);
+extern "C" int cWorldTriggerManager_ObjectRefFirstFrame(cWorldTriggerManager* self, void* src, void* state);
 extern unsigned char D_004A35A8[];
 
 struct sSnd4C38Ch {
@@ -336,7 +337,7 @@ extern "C" void cWorldTriggerInstance_Update(sWorldTrigger70* tt)
             }
             swapResult = func_0029B818(cAudioInterface_bxAudio(), instance->f40, rec);
         }
-        if (cWorldTriggerManager_AfterCollisionTrigger(gWorldTriggerManager, instance->fC) == 0 || cWorldTriggerManager_ObjectHit((sTriggerIdCache*)gWorldTriggerManager, instance->f4) != 0) {
+        if (cWorldTriggerManager_AfterCollisionTrigger(gWorldTriggerManager, instance->fC) == 0 || cWorldTriggerManager_ObjectHit((cWorldTriggerManager*)((sTriggerIdCache*)gWorldTriggerManager), instance->f4) != 0) {
             if (rec[0] == 3 && swapResult != 1)
                 return;
             if (cWorldTriggerManager_SyncToAnimationTrigger(gWorldTriggerManager, instance->fC) != 0) {
@@ -426,7 +427,7 @@ extern "C" void cWorldTriggerInstance_Stop(sWorldTrigger70* instance)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerInstance_TriggerToPatch);
 #ifdef SKIP_ASM
-extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int idx, int* type, int* a, int* b, int c, int d);
+extern "C" int cWorldTriggerManager_TriggerToPatch(cWorldTriggerManager* self, int idx, int* type, int* a, int* b, int c, int d);
 
 /**
  * Looks up a world trigger's bank and patch through the manager (cWorldTriggerManager_TriggerToPatch).
@@ -450,7 +451,7 @@ extern "C" int cWorldTriggerInstance_TriggerToPatch(void* self, int trigger, int
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerInstance_CrowdTrigger);
 #ifdef SKIP_ASM
-extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int idx, int* type, int* a, int* b, int c, int d);
+extern "C" int cWorldTriggerManager_TriggerToPatch(cWorldTriggerManager* self, int idx, int* type, int* a, int* b, int c, int d);
 
 /**
  * Returns whether a world trigger plays from the crowd bank (bank 5 from a check-1 TriggerToPatch lookup).
@@ -474,7 +475,7 @@ extern "C" int cWorldTriggerInstance_CrowdTrigger(void* self, int trigger)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerInstance_SwapTriggerToString);
 #ifdef SKIP_ASM
-extern "C" int cWorldTriggerManager_SwapTriggerToString(void* self, int idx, char* dst);
+extern "C" int cWorldTriggerManager_SwapTriggerToString(cWorldTriggerManager* self, int idx, char* dst);
 
 /**
  * Copies a swap trigger's string into dst through the manager (cWorldTriggerManager_SwapTriggerToString on gWorldTriggerManager).
@@ -533,13 +534,13 @@ struct sWorldTrigger58D0 {
  *
  * @return @p self
  */
-extern "C" void* cWorldTriggerManager_cWorldTriggerManager(void* self)
+extern "C" void* cWorldTriggerManager_cWorldTriggerManager(cWorldTriggerManager* self)
 {
-    *(int*)((char*)self + 0x324) = 0;
-    *(int*)((char*)self + 0x330) = 0;
-    *(int*)((char*)self + 0x328) = -1;
-    *(int*)((char*)self + 0x32C) = -1;
-    *(int*)((char*)self + 0x334) = 1;
+    self->mNumHitObjects = 0;
+    self->mLastHitObjectResult = 0;
+    self->mLastHitObject = -1;
+    self->mLastHitObjectChecked = -1;
+    self->mMonitorTriggers = 1;
     int* mem = (int*)operator_new_tag(4496, str_m_aWorldTriggerInstances, 0, 0);
     mem[0] = 40;
     sWorldTrigger58D0* arr = (sWorldTrigger58D0*)((char*)mem + 0x10);
@@ -548,9 +549,9 @@ extern "C" void* cWorldTriggerManager_cWorldTriggerManager(void* self)
         cWorldTriggerInstance_cWorldTriggerInstance(trigger);
     }
     *(sWorldTrigger58D0**)self = arr;
-    *(int*)((char*)self + 0x338) = 0;
+    self->m_pcTriggerInfoFile = 0;
     cWorldTriggerManager_LoadTriggerInfo(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -822,7 +823,7 @@ extern "C" void cWorldTriggerInstance_Stop(sWorldTrigger70* t);
  * Walks the 40 instances in the array at this+0; each whose active flag is 1 is marked inactive and stopped with
  * cWorldTriggerInstance_Stop.
  */
-extern "C" void cWorldTriggerManager_StopAllTriggers(void* self)
+extern "C" void cWorldTriggerManager_StopAllTriggers(cWorldTriggerManager* self)
 {
     for (int i = 0; i < 40; i++) {
         if ((*(sWorldTrigger70**)self)[i].active == 1) {
@@ -858,10 +859,10 @@ extern "C" void cWorldTriggerManager_StopTrigger(sWorldTrigger70** self, int id)
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_HandleCollision);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_bxAudio();
-extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int idx, int* type, int* a, int* b, int c, int d);
-extern "C" int cWorldTriggerManager_HasAfterCollisionTrigger(void* self, void* obj);
+extern "C" int cWorldTriggerManager_TriggerToPatch(cWorldTriggerManager* self, int idx, int* type, int* a, int* b, int c, int d);
+extern "C" int cWorldTriggerManager_HasAfterCollisionTrigger(cWorldTriggerManager* self, void* obj);
 struct sTriggerIdCache;
-extern "C" void cWorldTriggerManager_AddHitObject(sTriggerIdCache* self, int id);
+extern "C" void cWorldTriggerManager_AddHitObject(cWorldTriggerManager* self, int id);
 extern "C" int cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* rider);
 extern "C" int cBankSys_SFX_End(void* self);
@@ -938,18 +939,18 @@ struct sWtSnd5F60 {
  * @param vol  the volume (0..127)
  * @return the sound handle, or -1
  */
-extern "C" int cWorldTriggerManager_HandleCollision(char* self, void* evt, int id, cRider* rider, int vol)
+extern "C" int cWorldTriggerManager_HandleCollision(cWorldTriggerManager* self, void* evt, int id, cRider* rider, int vol)
 {
-    if (*(int*)(*(char**)(self + 0x33C) + id * 8) == 3)
+    if (*(int*)((char*)self->m_aTriggerInfo + id * 8) == 3)
         return -1;
     if (evt != 0)
     {
-        if (evt != *(void**)(self + 0x328))
+        if (evt != (void*)self->mLastHitObject)
         {
             if (cWorldTriggerManager_HasAfterCollisionTrigger(self, evt))
-                cWorldTriggerManager_AddHitObject((sTriggerIdCache*)self, (int)evt);
+                cWorldTriggerManager_AddHitObject(self, (int)evt);
         }
-        *(void**)(self + 0x328) = evt;
+        self->mLastHitObject = (int)evt;
     }
     int type, patch, noAudio;
     if (cWorldTriggerManager_TriggerToPatch(self, id, &type, &patch, &noAudio, 1, 0) != 0 && noAudio == 0)
@@ -1013,7 +1014,7 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_TriggerToP
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" int cSoundSys_SndRand(int a);
-extern "C" int cWorldTriggerManager_AdvancedTriggerToPatch(void* self, int type, int* a, int* b, int* c, int arg);
+extern "C" int cWorldTriggerManager_AdvancedTriggerToPatch(cWorldTriggerManager* self, int type, int* a, int* b, int* c, int arg);
 
 struct sWTMObj {
     char pad0[0x10];
@@ -1052,27 +1053,27 @@ struct sWTMEntry {
  * @param check     which lookup is wanted (On Tour eTriggerToPatchCheck: 0 general, 1 crowd, 2 swap)
  * @return 1 when the trigger was resolved, 0 for a trigger number out of range (or the advanced path's result)
  */
-extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int trigger, int* bank, int* patch, int* noAudio, int viewPort, int check)
+extern "C" int cWorldTriggerManager_TriggerToPatch(cWorldTriggerManager* self, int trigger, int* bank, int* patch, int* noAudio, int viewPort, int check)
 {
     *noAudio = 0;
-    if (trigger >= *(int*)((char*)self + 0x340)) {
+    if (trigger >= self->m_iNumTriggers) {
         *bank = 0;
         *patch = 0;
         return 0;
     }
     int result = 1;
-    int triggerType = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].type;
+    int triggerType = ((sWTMEntry*)self->m_aTriggerInfo)[trigger].type;
     if (triggerType == 3) {
         *bank = triggerType;
         *patch = 0;
     } else if (triggerType == 1) {
-        *bank = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].obj->f10;
-        *patch = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].obj->f14;
+        *bank = ((sWTMEntry*)self->m_aTriggerInfo)[trigger].obj->f10;
+        *patch = ((sWTMEntry*)self->m_aTriggerInfo)[trigger].obj->f14;
     } else if (triggerType == 2) {
-        *bank = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].obj->f10;
+        *bank = ((sWTMEntry*)self->m_aTriggerInfo)[trigger].obj->f10;
         void* audio = cAudioInterface_bxAudio();
         int rnd = cSoundSys_SndRand(*(int*)(*(char**)*(void**)((char*)audio + 0x118) + 0x1D8));
-        sWTMObj* randomData = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].obj;
+        sWTMObj* randomData = ((sWTMEntry*)self->m_aTriggerInfo)[trigger].obj;
         int pick = (unsigned)((rnd & 0x7FFF) * randomData->f34) / 0x7FFF;
         if (pick < randomData->f24) *patch = randomData->f14;
         else if (pick < randomData->f28 + randomData->f24) *patch = randomData->f18;
@@ -1104,7 +1105,7 @@ extern "C" int func_002A34D0(void* mgr, int a1, int a2, int a3);
  * @param viewPort  the viewport the trigger fired in
  * @return 0, or func_002A34D0's result for trigger 77
  */
-extern "C" int cWorldTriggerManager_AdvancedTriggerToPatch(void* self, int trigger, int* bank, int* patch, int* noAudio, int viewPort)
+extern "C" int cWorldTriggerManager_AdvancedTriggerToPatch(cWorldTriggerManager* self, int trigger, int* bank, int* patch, int* noAudio, int viewPort)
 {
     int found = 0;
     *bank = 0;
@@ -1141,10 +1142,10 @@ struct sWorldTriggerInfo8 {
  * @param out  receives the string
  * @return 1 when copied, else 0 (or cWorldTriggerManager_AdvancedTriggerToString's 0)
  */
-extern "C" int cWorldTriggerManager_SwapTriggerToString(void* self, int idx, char* out)
+extern "C" int cWorldTriggerManager_SwapTriggerToString(cWorldTriggerManager* self, int idx, char* out)
 {
-    if (idx < *(int*)((char*)self + 0x340)) {
-        sWorldTriggerInfo8* list = *(sWorldTriggerInfo8**)((char*)self + 0x33C);
+    if (idx < self->m_iNumTriggers) {
+        sWorldTriggerInfo8* list = (sWorldTriggerInfo8*)self->m_aTriggerInfo;
         if (list[idx].type == 3) {
             strcpy(out, list[idx].data + 0x10);
             return 1;
@@ -1228,8 +1229,8 @@ extern "C" int cWorldTriggerManager_PlayingTriggerInstance(sWorldTrigger70** sel
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_HasAfterCollisionTrigger);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_getGame(void);
-extern "C" void cWorldSound_GetAudioVolumeTriggers(void* self, void* obj, int* o0, int* o1, int* o2, int* o3);
-extern "C" int cWorldTriggerManager_AfterCollisionTrigger(void* self, unsigned int i);
+extern "C" void cWorldSound_GetAudioVolumeTriggers(cWorldSound* self, void* obj, int* o0, int* o1, int* o2, int* o3);
+extern "C" int cWorldTriggerManager_AfterCollisionTrigger(cWorldTriggerManager* self, unsigned int i);
 
 /**
  * Returns whether any of an object's four audio volumes uses an after-collision trigger (cWorldTriggerManager_AfterCollisionTrigger).
@@ -1239,10 +1240,10 @@ extern "C" int cWorldTriggerManager_AfterCollisionTrigger(void* self, unsigned i
  * @param obj  the instance record
  * @return 1 or 0
  */
-extern "C" int cWorldTriggerManager_HasAfterCollisionTrigger(void* self, void* obj)
+extern "C" int cWorldTriggerManager_HasAfterCollisionTrigger(cWorldTriggerManager* self, void* obj)
 {
     int ids[4];
-    cWorldSound_GetAudioVolumeTriggers(*(void**)((char*)cAudioInterface_getGame() + 0x4C), obj, &ids[0], &ids[1], &ids[2], &ids[3]);
+    cWorldSound_GetAudioVolumeTriggers((cWorldSound*)(*(void**)((char*)cAudioInterface_getGame() + 0x4C)), obj, &ids[0], &ids[1], &ids[2], &ids[3]);
     if (cWorldTriggerManager_AfterCollisionTrigger(self, ids[0])) {
         return 1;
     }
@@ -1270,12 +1271,12 @@ struct sTriggerRef {
  * @param i  the trigger number
  * @return 1 or 0
  */
-extern "C" int cWorldTriggerManager_AfterCollisionTrigger(void* self, unsigned int i)
+extern "C" int cWorldTriggerManager_AfterCollisionTrigger(cWorldTriggerManager* self, unsigned int i)
 {
     if (i < 2) {
         return 0;
     }
-    sTriggerRef* refs = *(sTriggerRef**)((char*)self + 0x33c);
+    sTriggerRef* refs = (sTriggerRef*)self->m_aTriggerInfo;
     return *(int*)((char*)refs[i].obj + 0x4) == 1;
 }
 #endif
@@ -1300,20 +1301,20 @@ struct sTriggerIdCache {
  * @param id  the object
  * @return 1 when it was hit, else 0
  */
-extern "C" int cWorldTriggerManager_ObjectHit(sTriggerIdCache* self, int id)
+extern "C" int cWorldTriggerManager_ObjectHit(cWorldTriggerManager* self, int id)
 {
-    if (id == self->lastId) {
-        return self->lastResult;
+    if (id == self->mLastHitObjectChecked) {
+        return self->mLastHitObjectResult;
     }
-    int i = self->count - 1;
-    self->lastId = id;
+    int i = self->mNumHitObjects - 1;
+    self->mLastHitObjectChecked = id;
     for (; i >= 0; i--) {
-        if (self->ids[i] == id) {
-            self->lastResult = 1;
+        if (self->mHitObjects[i] == id) {
+            self->mLastHitObjectResult = 1;
             return 1;
         }
     }
-    self->lastResult = 0;
+    self->mLastHitObjectResult = 0;
     return 0;
 }
 #endif
@@ -1326,14 +1327,14 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_AddHitObje
  *
  * @param id  the object
  */
-extern "C" void cWorldTriggerManager_AddHitObject(sTriggerIdCache* self, int id)
+extern "C" void cWorldTriggerManager_AddHitObject(cWorldTriggerManager* self, int id)
 {
     if (cWorldTriggerManager_ObjectHit(self, id) == 0) {
-        if (self->count < 200) {
-            self->ids[self->count] = id;
-            self->count++;
+        if (self->mNumHitObjects < 200) {
+            self->mHitObjects[self->mNumHitObjects] = id;
+            self->mNumHitObjects++;
         }
-        self->lastId = -1;
+        self->mLastHitObjectChecked = -1;
     }
 }
 #endif
@@ -1341,7 +1342,7 @@ extern "C" void cWorldTriggerManager_AddHitObject(sTriggerIdCache* self, int id)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_Reset);
 #ifdef SKIP_ASM
-extern "C" void cWorldTriggerManager_StopAllTriggers(void* self);
+extern "C" void cWorldTriggerManager_StopAllTriggers(cWorldTriggerManager* self);
 void cWorldTriggerManager_ResetStates(void* self);
 
 /**
@@ -1349,7 +1350,7 @@ void cWorldTriggerManager_ResetStates(void* self);
  *
  * Calls cWorldTriggerManager_StopAllTriggers then cWorldTriggerManager_ResetStates__FPv.
  */
-extern "C" void cWorldTriggerManager_Reset(void* self)
+extern "C" void cWorldTriggerManager_Reset(cWorldTriggerManager* self)
 {
     cWorldTriggerManager_StopAllTriggers(self);
     cWorldTriggerManager_ResetStates(self);
@@ -1376,7 +1377,7 @@ void cWorldTriggerManager_ResetStates(void* self)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_SwapTrigger);
 #ifdef SKIP_ASM
-extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int idx, int* type, int* a, int* b, int c, int d);
+extern "C" int cWorldTriggerManager_TriggerToPatch(cWorldTriggerManager* self, int idx, int* type, int* a, int* b, int c, int d);
 
 /**
  * Returns whether a world trigger is a swap trigger (bank 3 from a check-2 TriggerToPatch lookup).
@@ -1386,7 +1387,7 @@ extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int idx, int* typ
  * @param trigger  the trigger number
  * @return 1 or 0
  */
-extern "C" int cWorldTriggerManager_SwapTrigger(void* self, int trigger)
+extern "C" int cWorldTriggerManager_SwapTrigger(cWorldTriggerManager* self, int trigger)
 {
     int bank;
     int patch;
@@ -1409,10 +1410,10 @@ extern "C" void cSSXAudio_DelayMonitorTriggers(void* self);
  * @param enable  nonzero to monitor triggers
  * @param delay  nonzero to enable after a delay
  */
-extern "C" void cWorldTriggerManager_MonitorTriggers(char* self, int enable, int delay)
+extern "C" void cWorldTriggerManager_MonitorTriggers(cWorldTriggerManager* self, int enable, int delay)
 {
     if (enable == 0 || delay == 0) {
-        *(int*)(self + 0x334) = enable;
+        self->mMonitorTriggers = enable;
         return;
     }
     cSSXAudio_DelayMonitorTriggers(cAudioInterface_bxAudio());
@@ -1428,12 +1429,12 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_SyncToAnim
  * @param i  the trigger number
  * @return 1 or 0
  */
-extern "C" int cWorldTriggerManager_SyncToAnimationTrigger(void* self, unsigned int i)
+extern "C" int cWorldTriggerManager_SyncToAnimationTrigger(cWorldTriggerManager* self, unsigned int i)
 {
     if (i < 2) {
         return 0;
     }
-    sTriggerRef* refs = *(sTriggerRef**)((char*)self + 0x33c);
+    sTriggerRef* refs = (sTriggerRef*)self->m_aTriggerInfo;
     return *(int*)((char*)refs[i].obj + 0x8) == 1;
 }
 #endif
@@ -1458,7 +1459,7 @@ struct sWtmVEntryF {
  * @param state  the world trigger instance holding the last frame
  * @return 1 on the first frame, else 0
  */
-extern "C" int cWorldTriggerManager_ObjectRefFirstFrame(void* self, void* src, void* state)
+extern "C" int cWorldTriggerManager_ObjectRefFirstFrame(cWorldTriggerManager* self, void* src, void* state)
 {
     void* obj = *(void**)((char*)src + 0xC);
     if (obj == 0) {
@@ -1489,12 +1490,12 @@ struct sTrigEnt_6A38 { int a; sTrigObj_6A38* obj; };
  * @param idx  the trigger number
  * @return 1 or 0
  */
-extern "C" int cWorldTriggerManager_DuckAmbientAudioTrigger(char* self, unsigned int idx)
+extern "C" int cWorldTriggerManager_DuckAmbientAudioTrigger(cWorldTriggerManager* self, unsigned int idx)
 {
     if (idx < 2U) {
         return 0;
     }
-    return (*(sTrigEnt_6A38**)(self + 0x33C))[idx].obj->state == 1;
+    return ((sTrigEnt_6A38*)self->m_aTriggerInfo)[idx].obj->state == 1;
 }
 #endif
 
@@ -1543,14 +1544,14 @@ struct sTriggerSlots {
  *
  * @return self
  */
-extern "C" sTriggerSlots* cWorldSound_cWorldSound(sTriggerSlots* self)
+extern "C" sTriggerSlots* cWorldSound_cWorldSound(cWorldSound* self)
 {
-    sTriggerSlot120* overlapList = self->slots;
+    sTriggerSlot120* overlapList = ((sTriggerSlot120*)&self->m_OverlapLists[0]);
     for (int i = 1; i != -1; i--, overlapList++) {
         overlapList->unk0 = 0;
         overlapList->q = t4vect_Zero;
     }
-    return self;
+    return ((sTriggerSlots*)self);
 }
 #endif
 
@@ -1587,7 +1588,7 @@ extern "C" void func_002B6B50(void*);
  * @param icePickData  the world audio file data, or 0
  * @return 1
  */
-extern "C" int cWorldSound_InitWorldAudioFile(void* self, int icePickData)
+extern "C" int cWorldSound_InitWorldAudioFile(cWorldSound* self, int icePickData)
 {
     if (icePickData != 0) {
         func_002B6B50(self);
@@ -1608,7 +1609,7 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldSound_PurgeWorldAudioFile
  *
  * @param icePickData  the world audio file data, or 0
  */
-extern "C" void cWorldSound_PurgeWorldAudioFile(void* self, int icePickData)
+extern "C" void cWorldSound_PurgeWorldAudioFile(cWorldSound* self, int icePickData)
 {
     if (icePickData != 0) {
         cWorldSound_DesolveAudioFile(self);
@@ -1631,7 +1632,7 @@ struct sWtmEntList {
     int count;
     sWtmEnt18 entries[1];
 };
-extern "C" void cWorldSound_RemoveInstanceFromGrid(void* self, sWtmEnt18* e);
+extern "C" void cWorldSound_RemoveInstanceFromGrid(cWorldSound* self, sWtmEnt18* e);
 
 // PORT: the unit declares cWorldSound_DesolveAudioFile as void(void*); its callers pass a1 through.
 int cWorldSound_DesolveAudioFile_impl(void* self, sWtmEntList* list) __asm__("cWorldSound_DesolveAudioFile");
@@ -1651,7 +1652,7 @@ int cWorldSound_DesolveAudioFile_impl(void* self, sWtmEntList* list)
     for (int i = 0; i < n; i++) {
         sWtmEnt18* entry = &entries[i];
         if (entry->active != 0) {
-            cWorldSound_RemoveInstanceFromGrid(self, entry);
+            cWorldSound_RemoveInstanceFromGrid((cWorldSound*)self, entry);
         }
     }
     return 1;
@@ -1670,7 +1671,7 @@ struct sTriggerEntry18 {
     int unk14;
 };
 
-extern "C" void cWorldSound_AddInstanceToGrid(void* self, sTriggerEntry18* e);
+extern "C" void cWorldSound_AddInstanceToGrid(cWorldSound* self, sTriggerEntry18* e);
 
 /**
  * Adds every active audio instance in a list to the audio grid (cWorldSound_AddInstanceToGrid); returns 1.
@@ -1680,7 +1681,7 @@ extern "C" void cWorldSound_AddInstanceToGrid(void* self, sTriggerEntry18* e);
  * @param n  their count
  * @return 1
  */
-extern "C" int cWorldSound_CreateAudioGrid(void* self, int icePickData, sTriggerEntry18* entries, int n)
+extern "C" int cWorldSound_CreateAudioGrid(cWorldSound* self, int icePickData, sTriggerEntry18* entries, int n)
 {
     for (int i = 0; i < n; i++) {
         if (entries[i].active != 0) {
@@ -1702,7 +1703,7 @@ struct sVec3_2B6CF8 {
     sVec3_2B6CF8(float ax, float ay, float az) : x(ax), y(ay), z(az) {}
 };
 
-extern "C" void cWorldSound_CalcAudioVolumeBox(void* self, int* shape, sVec3_2B6CF8* lo, sVec3_2B6CF8* hi);
+extern "C" void cWorldSound_CalcAudioVolumeBox(cWorldSound* self, int* shape, sVec3_2B6CF8* lo, sVec3_2B6CF8* hi);
 
 /**
  * Computes an audio instance's world bounding box from its audio volumes (cWorldSound_CalcAudioVolumeBox) and its object position.
@@ -1714,7 +1715,7 @@ extern "C" void cWorldSound_CalcAudioVolumeBox(void* self, int* shape, sVec3_2B6
  * @param lo  receives the minimum corner
  * @param hi  receives the maximum corner
  */
-extern "C" void cWorldSound_CalcInstAudioBoundingBox(void* self, sWtmEnt18* entry, sVec3_2B6CF8* lo, sVec3_2B6CF8* hi)
+extern "C" void cWorldSound_CalcInstAudioBoundingBox(cWorldSound* self, sWtmEnt18* entry, sVec3_2B6CF8* lo, sVec3_2B6CF8* hi)
 {
     *lo = sVec3_2B6CF8(10000.0f, 10000.0f, 10000.0f);
     *hi = sVec3_2B6CF8(-10000.0f, -10000.0f, -10000.0f);
@@ -1814,7 +1815,7 @@ struct sShape_2B6F40 {
  * @param lo  receives the minimum corner
  * @param hi  receives the maximum corner
  */
-extern "C" void cWorldSound_CalcAudioVolumeBox(void* self, int* shape, sVec3_2B6CF8* lo, sVec3_2B6CF8* hi)
+extern "C" void cWorldSound_CalcAudioVolumeBox(cWorldSound* self, int* shape, sVec3_2B6CF8* lo, sVec3_2B6CF8* hi)
 {
     sShape_2B6F40* shapeRec = (sShape_2B6F40*)shape;
     switch (shapeRec->type)
@@ -1906,7 +1907,7 @@ static inline void insert_7318(char* w, void* item, const sWtBox_7318* box)
  *
  * @param entry  the audio instance
  */
-extern "C" void cWorldSound_AddInstanceToGrid(void* self, sTriggerEntry18* entry)
+extern "C" void cWorldSound_AddInstanceToGrid(cWorldSound* self, sTriggerEntry18* entry)
 {
     char* trig = (char*)entry;
     if (trig == 0 || *(int*)(trig + 0xC) == 0 || *(int*)(*(char**)(trig + 0x10) + 4) == 0) {
@@ -1978,7 +1979,7 @@ static inline bool QEmpty_2B7410(int* c)
  *
  * @param instAudio  the audio instance
  */
-extern "C" void cWorldSound_RemoveInstanceFromGrid(void* self, sWtmEnt18* instAudio)
+extern "C" void cWorldSound_RemoveInstanceFromGrid(cWorldSound* self, sWtmEnt18* instAudio)
 {
     if (instAudio == 0) return;
     if (instAudio->active == 0) return;
@@ -2085,13 +2086,13 @@ static inline float Length_75D0(const sV4_75D0& v)
  *
  * @param pos  the listener position
  */
-extern "C" void cAudioOverlapList_update(sWtm_75D0* self, const sV4_75D0* pos)
+extern "C" void cAudioOverlapList_update(cWorldSound* self, const sV4_75D0* pos)
 {
-    if (self->last.w == 0.0f || Length_75D0(Sub_75D0(*pos, self->last)) > 10.0f) {
-        self->count = 0;
+    if (self->m_OverlapLists[0].lastposition.w == 0.0f || Length_75D0(Sub_75D0(*pos, (*(sV4_75D0*)&self->m_OverlapLists[0].lastposition))) > 10.0f) {
+        self->m_OverlapLists[0].numoverlaps = 0;
         sOctRoot_75D0* root = *(sOctRoot_75D0**)((char*)cAudioInterface_getGame() + 0x20);
         sWtm_75D0* selfList[1];
-        selfList[0] = self;
+        selfList[0] = ((sWtm_75D0*)self);
         const sV4_75D0* posPtr = pos;
         sWtm_75D0** pl = selfList;
         const sV4_75D0** pp = &posPtr;
@@ -2112,7 +2113,7 @@ extern "C" void cAudioOverlapList_update(sWtm_75D0* self, const sV4_75D0* pos)
         if (root[6].node) wtq_75D0(&octantQuery6, pl, pl, pp, k->node, k);
         k = &root[7];
         if (root[7].node) wtq_75D0(&octantQuery7, pl, pl, pp, k->node, k);
-        self->last = *pos;
+        (*(sV4_75D0*)&self->m_OverlapLists[0].lastposition) = *pos;
     }
 }
 #endif
@@ -2140,12 +2141,12 @@ static inline void clearTriggerId(sTriggerIdSlot120* s, int j)
  *
  * @param id  the audio instance
  */
-extern "C" void cWorldSound_RemoveInstanceFromOverlapList(sTriggerIdSlot120* self, int id)
+extern "C" void cWorldSound_RemoveInstanceFromOverlapList(cWorldSound* self, int id)
 {
     for (int i = 0; i < 2; i++) {
-        for (int j = 0; j < self[i].count; j++) {
-            if (getTriggerId(&self[i], j) == id) {
-                clearTriggerId(&self[i], j);
+        for (int j = 0; j < ((sTriggerIdSlot120*)self)[i].count; j++) {
+            if (getTriggerId(&((sTriggerIdSlot120*)self)[i], j) == id) {
+                clearTriggerId(&((sTriggerIdSlot120*)self)[i], j);
             }
         }
     }
@@ -2166,12 +2167,12 @@ extern "C" void cWorldSound_TriggerGridAudioNode(void* self, const sV4_75D0* pos
  * @param pos  world position to trigger around (On Tour wpos)
  * @param k  viewport index (On Tour ViewPort)
  */
-extern "C" void cWorldSound_TriggerWorldAudio(sTriggerIdSlot120* self, const sV4_75D0* pos, int k)
+extern "C" void cWorldSound_TriggerWorldAudio(cWorldSound* self, const sV4_75D0* pos, int k)
 {
-    cAudioOverlapList_update((sWtm_75D0*)&self[k], pos);
-    for (int i = 0; i < self[k].count; i++) {
-        if (getTriggerId(&self[k], i) != 0) {
-            cWorldSound_TriggerGridAudioNode(self, pos, k, getTriggerId(&self[k], i));
+    cAudioOverlapList_update((cWorldSound*)((sWtm_75D0*)&((sTriggerIdSlot120*)self)[k]), pos);
+    for (int i = 0; i < ((sTriggerIdSlot120*)self)[k].count; i++) {
+        if (getTriggerId(&((sTriggerIdSlot120*)self)[k], i) != 0) {
+            cWorldSound_TriggerGridAudioNode(((sTriggerIdSlot120*)self), pos, k, getTriggerId(&((sTriggerIdSlot120*)self)[k], i));
         }
     }
 }
@@ -2375,7 +2376,7 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldSound_GetAudioVolumeTrigg
  * @param id2  receives the third
  * @param id3  receives the fourth
  */
-extern "C" void cWorldSound_GetAudioVolumeTriggers(void* self, void* obj, int* id0, int* id1, int* id2, int* id3)
+extern "C" void cWorldSound_GetAudioVolumeTriggers(cWorldSound* self, void* obj, int* id0, int* id1, int* id2, int* id3)
 {
     int* hdr = *(int**)(*(char**)((char*)obj + 0x8C) + 0x10);
     char* base = (char*)hdr + 8;

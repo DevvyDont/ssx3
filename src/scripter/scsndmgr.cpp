@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/videngine.h"
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -274,16 +275,16 @@ extern char cVidEngine_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cVidEngine_cVidEngine(void* self)
+extern "C" void* cVidEngine_cVidEngine(cVidEngine* self)
 {
-    *(int*)((char*)self + 0x0) = 0;
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0xc) = 0;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x14) = 0;
-    *(void**)((char*)self + 0x18) = cVidEngine_vtbl;
-    return self;
+    self->mpPlayer = 0;
+    self->mIsPlaying = 0;
+    self->mFrameUpdated = 0;
+    self->mNumPause = 0;
+    self->mSavedDisplayFormat = 0;
+    self->mRestoreCutSceneMode = 0;
+    self->mVtbl = (void**)cVidEngine_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -291,7 +292,7 @@ extern "C" void* cVidEngine_cVidEngine(void* self)
 INCLUDE_ASM("scripter/scsndmgr", cVidEngine__cVidEngine);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern "C" void cVidEngine_ResetVideoEngine(void* self);
+extern "C" void cVidEngine_ResetVideoEngine(cVidEngine* self);
 extern char cVidEngine_vtbl[];
 
 /**
@@ -300,9 +301,9 @@ extern char cVidEngine_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cVidEngine__cVidEngine(void* self, int flags)
+extern "C" void cVidEngine__cVidEngine(cVidEngine* self, int flags)
 {
-    *(void**)((char*)self + 0x18) = cVidEngine_vtbl;
+    self->mVtbl = (void**)cVidEngine_vtbl;
     cVidEngine_ResetVideoEngine(self);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -376,25 +377,24 @@ public:
  * the graphics manager's virtual slot 40 gets the value saved at +0x10, and when +0x14 is set it is cleared
  * and cCutSceneTransitionMan_ForceToCutSceneMode() is called on the cutscene transition manager. The first four words are then cleared.
  */
-extern "C" void cVidEngine_ResetVideoEngine(void* self)
+extern "C" void cVidEngine_ResetVideoEngine(cVidEngine* self)
 {
-    char* vidEngine = (char*)self;
-    if (*(void**)(vidEngine + 0x0) != 0) {
-        cMoviePlayer__cMoviePlayer(*(void**)(vidEngine + 0x0), 3);
-        if (*(int*)(vidEngine + 0x4) != 0) {
+    if (self->mpPlayer != 0) {
+        cMoviePlayer__cMoviePlayer(self->mpPlayer, 3);
+        if (self->mIsPlaying != 0) {
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             cSSXAudio_ResumeSFX(cAudioInterface_bxAudio());
-            ((cWorld_3818*)GrMan)->SetTVDisplayFormat(*(int*)(vidEngine + 0x10));
-            if (*(int*)(vidEngine + 0x14) != 0) {
-                *(int*)(vidEngine + 0x14) = 0;
+            ((cWorld_3818*)GrMan)->SetTVDisplayFormat(self->mSavedDisplayFormat);
+            if (self->mRestoreCutSceneMode != 0) {
+                self->mRestoreCutSceneMode = 0;
                 cCutSceneTransitionMan_ForceToCutSceneMode(SSXApp->Game->CutSceneTransitionMan);
             }
         }
     }
-    *(int*)(vidEngine + 0x0) = 0;
-    *(int*)(vidEngine + 0x4) = 0;
-    *(int*)(vidEngine + 0x8) = 0;
-    *(int*)(vidEngine + 0xC) = 0;
+    self->mpPlayer = 0;
+    self->mIsPlaying = 0;
+    self->mFrameUpdated = 0;
+    self->mNumPause = 0;
 }
 #endif
 

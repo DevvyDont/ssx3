@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/icepick/worldtriggermanager.h"
 #include "sound/asyncsys.h"
 #include "sound/bankmonitor.h"
 #include "worldpainter/worldpainterquery.h"
@@ -1445,7 +1446,6 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_002A39E0(void* self);
-extern void* gWorldTriggerManager;
 
 /**
  * Starts the in-game audio of an event: update state 6, world triggers reset, all rider sounds, and the grunt timer.

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/trigger/cameratriggerman.h"
 #include "camera/camera.h"
 #include "fe/backgroundman.h"
 #include "camera/race/allspinchasealgo.h"
@@ -2989,7 +2990,6 @@ extern float D_004C5810[4];
 extern float D_004C5820[4];
 extern "C" void* cCameraTriggerMan_cCameraTriggerMan(void*);
 extern "C" void cCameraTriggerMan__cCameraTriggerMan(void*, int);
-extern char gCamTriggerMan[];
 extern int D_004A4DF0;
 void sti_00175A20(int init, int prio) __asm__("func_00175A20");
 /**
@@ -3235,9 +3235,9 @@ void sti_00175A20(int init, int prio)
             D_004C5820[3] = 0.0f;
             *(char*)&D_004A4DF0 = -1;
             D_004A4DF0 = (D_004A4DF0 & 0xFF) | 0xFFFFFF00u;
-            cCameraTriggerMan_cCameraTriggerMan(gCamTriggerMan);
+            cCameraTriggerMan_cCameraTriggerMan(((char*)&gCamTriggerMan));
         } else {
-            cCameraTriggerMan__cCameraTriggerMan(gCamTriggerMan, 2);
+            cCameraTriggerMan__cCameraTriggerMan(((char*)&gCamTriggerMan), 2);
         }
     }
 }

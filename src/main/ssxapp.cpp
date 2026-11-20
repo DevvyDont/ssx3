@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/icepick/worldtriggermanager.h"
 #include "sound/ssxaudio.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
@@ -3731,7 +3732,6 @@ void cSSXScriptEngine_Render(void* p);
 extern "C" void cBXLoadIndicator_Render(void* p);
 extern "C" void cSSXAudio_Update(void* snd, float dt, int a2);
 extern "C" void cWorldTriggerManager_Update(void* p);
-extern void* gWorldTriggerManager;
 
 struct sV4_22B008 {
     float x, y, z, w;

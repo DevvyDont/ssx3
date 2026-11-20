@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/trigger/cameratriggerman.h"
 #include "replay/frameptr.h"
 #include "replay/replay.h"
 #include "world/world.h"
@@ -495,7 +496,6 @@ extern "C" void cReplay_setCurrentReplayCamera(cReplay* self)
 INCLUDE_ASM("replay/frameptr", cReplay_setupReplayCameras);
 #ifdef SKIP_ASM
 void* cCameraTriggerMan_setReplayTriggers(void* p);
-extern void* gCamTriggerMan[];
 extern "C" void cReplay_setCurrentReplayCamera(cReplay* self);
 
 /**
@@ -504,7 +504,7 @@ extern "C" void cReplay_setCurrentReplayCamera(cReplay* self);
  */
 extern "C" void cReplay_setupReplayCameras(cReplay* self)
 {
-    cCameraTriggerMan_setReplayTriggers(gCamTriggerMan);
+    cCameraTriggerMan_setReplayTriggers(((void**)&gCamTriggerMan));
     cReplay_setCurrentReplayCamera(self);
 }
 #endif
@@ -512,7 +512,6 @@ extern "C" void cReplay_setupReplayCameras(cReplay* self)
 //100%
 INCLUDE_ASM("replay/frameptr", cReplay_setupGameCamerasOnExitReplay);
 #ifdef SKIP_ASM
-extern void* gCamTriggerMan[];
 void cCameraTriggerMan_setInGameTriggers(void* self);
 extern "C" void cCamera_setCurrentController(void* self, int mode);
 extern "C" void cChaseCameraController_switchCamera_EndReplay(void* cam);
@@ -530,7 +529,7 @@ struct sRiderList_EEA0 {
  */
 extern "C" void cReplay_setupGameCamerasOnExitReplay(cReplay* self)
 {
-    cCameraTriggerMan_setInGameTriggers(gCamTriggerMan);
+    cCameraTriggerMan_setInGameTriggers(((void**)&gCamTriggerMan));
     sRiderList_EEA0* list = (sRiderList_EEA0*)SSXApp->Game->ViewMan;
     int n = list->count;
     int i;
@@ -553,7 +552,7 @@ INCLUDE_ASM("replay/frameptr", cReplay_setupInstantReplayCameras);
  */
 extern "C" void cReplay_setupInstantReplayCameras(cReplay* self)
 {
-    cCameraTriggerMan_setReplayTriggers(gCamTriggerMan);
+    cCameraTriggerMan_setReplayTriggers(((void**)&gCamTriggerMan));
     self->CurrentInstantReplayCamIndex = (self->CurrentInstantReplayCamIndex + 1) % 9;
 }
 #endif
@@ -561,7 +560,6 @@ extern "C" void cReplay_setupInstantReplayCameras(cReplay* self)
 //100%
 INCLUDE_ASM("replay/frameptr", cReplay_setupGameCamerasOnExitInstantReplay);
 #ifdef SKIP_ASM
-extern void* gCamTriggerMan[];
 void cCameraTriggerMan_setInGameTriggers(void* self);
 extern "C" void cCamera_setCurrentController(void* self, int mode);
 
@@ -574,7 +572,7 @@ extern "C" void cCamera_setCurrentController(void* self, int mode);
  */
 extern "C" void cReplay_setupGameCamerasOnExitInstantReplay()
 {
-    cCameraTriggerMan_setInGameTriggers(gCamTriggerMan);
+    cCameraTriggerMan_setInGameTriggers(((void**)&gCamTriggerMan));
     cCamera_setCurrentController(*(void**)((char*)SSXApp->Game->ViewMan + 0x4), 2);
 }
 #endif

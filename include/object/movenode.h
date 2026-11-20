@@ -2,8 +2,9 @@
 #define OBJECT_MOVENODE_H
 
 // cMoveNode: the scene node of a placed instance that can move or carry modifiers (tModifierBlock: root-transform,
-// UV-scroll, tex-flip, physics, effect and rail modifiers); base of cFloatingNode, cAnimNode, cFlexBridgeNode,
-// cFlexRailNode, cParticleNode, cObjectNode, cDebounceNode, ... EA's source: d:/ssx/code/source/object/movenode.cpp.
+// UV-scroll, tex-flip, physics, effect and rail modifiers); base of cFloatingNode, cAnimNode, cParticleNode,
+// cObjectNode, cDebounceNode, ... (not of cFlexRailNode / cFlexBridgeNode: their ctors call
+// cInstanceNode_cInstanceNode1 directly). EA's source: d:/ssx/code/source/object/movenode.cpp.
 // Size 0x2C: subclasses that add no members are allocated 0x2C in retail - cMemMan_alloc(0x2C, "ParticleNode") and
 // (0x2C, "cParticleNode") for cParticleNode (cParticleNode_cParticleNode1), (0x2C, "Object") for cObjectNode (cObjectNode_cObjectNode); On Tour has
 // cParticleNode/cObjectNode == cMoveNode == 0x28 (its cObjNode is 4 bytes smaller, see object/instancenode.h).

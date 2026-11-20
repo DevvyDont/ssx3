@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/icepick/worldtriggermanager.h"
 #include "visualfx/fog.h"
 #include "sound/ssxaudio.h"
 #include "render/ps2graphicsman.h"
@@ -564,7 +565,6 @@ struct sGame_C830 {
 };
 
 extern char gBucketMan[4];
-extern void* gWorldTriggerManager;
 extern char t4mat_Identity[];
 extern int cDepthFog_m_Enable;
 extern "C" void cBucketMan_renderBucket(void* self, int index);

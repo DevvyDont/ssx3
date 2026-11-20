@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/datamanager.h"
 #include "scripter/nislist.h"
 #include "inseq/scriptplayermain.h"
 #include "scripter/ssxscriptengine.h"
@@ -60,10 +61,10 @@ extern char cDataManager_vtbl[];
  *
  * @param flags  the destructor flags (bit 0: free the memory)
  */
-extern "C" void cDataManager__cDataManager(void* self, int flags)
+extern "C" void cDataManager__cDataManager(cDataManager* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cDataManager_vtbl;
-    void* instanceHeap = *(void**)((char*)self + 0x4);
+    self->mVtbl = (void**)cDataManager_vtbl;
+    void* instanceHeap = self->mpDataInstanceHeap;
     if (instanceHeap != 0) {
         cMemMan_free(instanceHeap);
     }
@@ -79,7 +80,7 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_AttachData);
 void* cDataManager_GetEmptyInstance(void* self);
 extern "C" int BIG_sizeofheader(void* data);
 struct sDmNode5B98;
-extern "C" sDmNode5B98* cDataManager_AttachDataFromBigfile(void* self, char* big, sDmNode5B98* prev);
+extern "C" sDmNode5B98* cDataManager_AttachDataFromBigfile(cDataManager* self, char* big, sDmNode5B98* prev);
 extern int REALabortflag[];
 
 struct sDmVEntry5920 {
@@ -111,7 +112,7 @@ struct sDmNode5920 {
  * @param size  its size in bytes
  * @return the instance record (the data handle)
  */
-extern "C" sDmNode5920* cDataManager_AttachData(void* self, int pName, void* data, int size)
+extern "C" sDmNode5920* cDataManager_AttachData(cDataManager* self, int pName, void* data, int size)
 {
     sDmNode5920* n = (sDmNode5920*)cDataManager_GetEmptyInstance(self);
     int saved = REALabortflag[0];
@@ -122,11 +123,11 @@ extern "C" sDmNode5920* cDataManager_AttachData(void* self, int pName, void* dat
     int big = BIG_sizeofheader(data);
     REALabortflag[0] = saved;
     if (big != 0) {
-        sDmVEntry5920* vt = *(sDmVEntry5920**)((char*)self + 0xC);
+        sDmVEntry5920* vt = (sDmVEntry5920*)self->mVtbl;
         vt[4].fn((char*)self + vt[4].delta, pName, data, size, n, &n->field_0x4);
         cDataManager_AttachDataFromBigfile(self, (char*)data, (sDmNode5B98*)n);
     } else {
-        sDmVEntry5920* vt = *(sDmVEntry5920**)((char*)self + 0xC);
+        sDmVEntry5920* vt = (sDmVEntry5920*)self->mVtbl;
         vt[2].fn((char*)self + vt[2].delta, pName, data, size, n, &n->field_0x4);
     }
     return n;
@@ -233,7 +234,7 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_GetData);
  * @param dataHandle  the handle cDataManager_AttachData returned
  * @return the attached data
  */
-extern "C" int cDataManager_GetData(void* self, char* dataHandle)
+extern "C" int cDataManager_GetData(cDataManager* self, char* dataHandle)
 {
     return *(int*)(dataHandle + 8);
 }
@@ -248,7 +249,7 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_GetDataUserData);
  * @param out0  receives the first user-data word
  * @param out1  receives the second user-data word
  */
-extern "C" void cDataManager_GetDataUserData(void* self, char* dataHandle, int* out0, int* out1)
+extern "C" void cDataManager_GetDataUserData(cDataManager* self, char* dataHandle, int* out0, int* out1)
 {
     *out0 = *(int*)dataHandle;
     *out1 = *(int*)(dataHandle + 4);
@@ -294,7 +295,7 @@ struct sDmNode5B98 {
  * @param prev  the record to chain the new records after
  * @return the last record of the chain
  */
-extern "C" sDmNode5B98* cDataManager_AttachDataFromBigfile(void* self, char* big, sDmNode5B98* prev)
+extern "C" sDmNode5B98* cDataManager_AttachDataFromBigfile(cDataManager* self, char* big, sDmNode5B98* prev)
 {
     int ent[2];
     ent[0] = 0;
@@ -315,7 +316,7 @@ extern "C" sDmNode5B98* cDataManager_AttachDataFromBigfile(void* self, char* big
             n->size = ent[1];
             prev->next = n;
             prev = n;
-            sDmVEntry5B98* vt = *(sDmVEntry5B98**)((char*)self + 0xC);
+            sDmVEntry5B98* vt = (sDmVEntry5B98*)self->mVtbl;
             vt[2].fn((char*)self + vt[2].delta, name, sub, ent[1], prev, &prev->field_0x4);
         }
         name = BIG_locateentryz(big, 0, i++, &ent[0], 0);
@@ -2498,7 +2499,7 @@ extern "C" void cSSXScriptEngine_DeInitOnce(cSSXScriptEngine* self);
 extern "C" void cScriptSoundBankManager__cScriptSoundBankManager(void* self, int flags);
 extern "C" void cScriptAnimBankManager__cScriptAnimBankManager(void* self, int flags);
 extern "C" void cScriptObject__cScriptObject(void* self, int flags);
-extern "C" void cDataManager__cDataManager(void* self, int flags);
+extern "C" void cDataManager__cDataManager(cDataManager* self, int flags);
 extern "C" void cVidEngine__cVidEngine(void* self, int flags);
 extern "C" void cBXScriptEngine__cBXScriptEngine(void* self, int flags);
 
@@ -2549,7 +2550,7 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
             }
         } while (0);
     }
-    cDataManager__cDataManager(((char*)self) + 0x51C, 0);
+    cDataManager__cDataManager((cDataManager*)(((char*)self) + 0x51C), 0);
     cVidEngine__cVidEngine(((char*)self) + 0x500, 0);
     cBXScriptEngine__cBXScriptEngine(((char*)self), flags);
 }
