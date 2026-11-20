@@ -4,6 +4,7 @@
 #include "fe/ovstate.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
 
 //100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onCreateScreen);
@@ -1014,7 +1015,7 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(void* selfp)
     void* ifMap = cBE_getInterface_Fv(cBE_getBE(), 10);
     void* ifGame = cBE_getInterface_Fv(cBE_getBE(), 0);
     sV3_96A8 mapPos = ((sFEObjData_96A8*)self->img)->pos;
-    char* rider = *(char**)((char*)SSXApp->Game->AI + 0x28);
+    char* rider = (char*)SSXApp->Game->AI->Riders[0];
     sV4_96A8 pp = *((cRiderSub_96A8*)(rider + 0x6C0))->v05();
     sBounds_96A8 bounds;
     cBEMissionInterface_getPictureDBRecord(&bounds, ifMap, *cBENewRaceInterface_getLocation(ifGame));

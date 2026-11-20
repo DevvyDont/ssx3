@@ -2,6 +2,7 @@
 #include "world/world.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
 
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_cWScriptProcess);
@@ -1605,7 +1606,7 @@ extern "C" void cWScriptMan_setupMissions(void* self)
     void* iface;
     cPlaybackMan_purgeLocation(wsPlayback8C60());
     iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C10[0] == 4 && *(int*)((char*)SSXApp->Game->AI + 0x7C) == 1) {
+    if (D_00535C10[0] == 4 && SSXApp->Game->AI->NumberOfPlayersAllocated == 1) {
         int i = 0;
         int n = cWorldView_getNumSections((cWorldView*)(**(char***)((char*)self + 0x28C) + 0x10));
         for (; i < n; i++) {

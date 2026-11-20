@@ -6,6 +6,8 @@
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
+#include "ai/player.h"
 
 //100%
 INCLUDE_ASM("main/gamestate", cGFGateState_gainFocus);
@@ -1090,7 +1092,7 @@ extern "C" void cGFNextHeatState_update(void* self)
             cAI_resolveRace(SSXApp->Game->AI);
             (*(sRaceMan_235CC8**)(cGameState_mpGame + 0xC))->f14 = 1;
             ((sCacheTbl_235CC8*)*cache)->slot[idx].f0 = 1;
-            char* player = *(char**)((char*)SSXApp->Game->AI + 0x40);
+            char* player = (char*)SSXApp->Game->AI->Players[0];
             sVec4_235CC8 pos = cRider_getEventStartPos(*(void**)(player + 0x18));
             cWorldView_setFocus(*cache + 0x10, idx, (const sVec4_236960*)&pos, 45000.0f);
             *(int*)((char*)self + 0x10) = 2;
@@ -1238,8 +1240,8 @@ extern "C" void cGFSessionTeleportState_gainFocus(void* self)
     cGameModeMan_initGameMode(gm, 0xC);
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 10);
     cGame_partialRestart(SSXApp->Game);
-    cRider_putAtStartpoint(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), *(int*)(iface + 0x10), 2);
-    cRider_cleanupAfterPutAt(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), 1);
+    cRider_putAtStartpoint(SSXApp->Game->AI->Players[0]->mRider, *(int*)(iface + 0x10), 2);
+    cRider_cleanupAfterPutAt(SSXApp->Game->AI->Players[0]->mRider, 1);
     void* transitionMan = cGame_getTransitionMan(SSXApp->Game, 0);
     char* fade = (char*)cTransitionObj_operator_new_sz(20);
     sColor_236058 colour;
@@ -1396,7 +1398,7 @@ extern "C" void cGFUserSelectState_gainFocus(void* self, int mode)
             if (!isOne_6250(curMode))
                 cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 11, 3, 0, -1, -1, -1);
             cSSXScriptEngine_ReadyNISList(ScriptEngine, 1);
-            cRider_initAlways(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18));
+            cRider_initAlways(SSXApp->Game->AI->Players[0]->mRider);
             cSSXScriptEngine_PlayNISList(ScriptEngine, 1, *(int*)((char*)self + 0x14) == 2, 0);
         }
     }
@@ -1752,7 +1754,7 @@ extern "C" void cGFSectionLoadState_update(void* self)
     switch (state) {
     case 0:
         if (cSectionMan_isLoaded(sectionMan, *(int*)(sectionMan + 0x1BC)) != 0) {
-            char* aiPlayer = *(char**)((char*)SSXApp->Game->AI + 0x40);
+            char* aiPlayer = (char*)SSXApp->Game->AI->Players[0];
             sVec4_236960 pos = cRider_GetNISEndPosition(*(void**)(aiPlayer + 0x18));
             char* viewEntry = *cache + idx * 80;
             *(int*)(viewEntry + 0x250) = 1;
@@ -2191,7 +2193,7 @@ extern "C" void func_0028CDF8(void* mgr);
 extern "C" void cGFPodiumState_gainFocus(void)
 {
     func_0028CDF8(cAudioInterface_bxAudio());
-    *(int*)((char*)SSXApp->Game->AI + 0x8C) = 1;
+    SSXApp->Game->AI->ComputerActorsActive = 1;
 }
 #endif
 
@@ -2225,7 +2227,7 @@ INCLUDE_ASM("main/gamestate", cGFPodiumState_loseFocus);
  */
 extern "C" void cGFPodiumState_loseFocus(void)
 {
-    *(int*)((char*)SSXApp->Game->AI + 0x8C) = 0;
+    SSXApp->Game->AI->ComputerActorsActive = 0;
 }
 #endif
 

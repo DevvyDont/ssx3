@@ -7,6 +7,7 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
+#include "ai/ai.h"
 
 //100%
 INCLUDE_ASM("ai/computer", cComputer_setIndividualRiderDifficulty);
@@ -1265,7 +1266,7 @@ extern "C" int cComputer_getRival(void* self)
     int i = cComputer_myOpponentIndex((cComputer*)self);
     if (i < 0)
         return 0;
-    return *(int*)((char*)SSXApp->Game->AI + (i << 2) + 0x28);
+    return (int)SSXApp->Game->AI->Riders[i];
 }
 #endif
 
@@ -3790,7 +3791,7 @@ extern "C" void cRider_updateTrackPath(char* self)
     if (0.0f < *(float*)(self + 0x4D4))
     {
         void* old = *(void**)(self + 0xAB4);
-        if (500.0f < pathDistXY && *(int*)((char*)SSXApp->Game->AI + 0x8) % 60 == 0)
+        if (500.0f < pathDistXY && SSXApp->Game->AI->AITick % 60 == 0)
             cRider_checkTrackPathSwitch(self, 0);
         else if (cPath_getLength(*(void**)(self + 0xAB4)) - 200.0f < pathParam)
             cRider_checkTrackPathSwitch(self, 1);
@@ -3953,7 +3954,7 @@ extern "C" void cRider_updateAIPath(char* self)
     cRider_setAimTarget_2(self, nf);
     if (0.0f < *(float*)(self + 0x4D4))
     {
-        if (500.0f < *(float*)(self + 0x4C8) && *(int*)((char*)SSXApp->Game->AI + 0x8) % 60 == 0)
+        if (500.0f < *(float*)(self + 0x4C8) && SSXApp->Game->AI->AITick % 60 == 0)
             cRider_checkAIPathSwitch(self, 0);
         else if (cPath_getLength(*(void**)(self + 0xAB8)) - 200.0f < *(float*)(self + 0x4C4))
             cRider_checkAIPathSwitch(self, 1);

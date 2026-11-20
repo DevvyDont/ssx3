@@ -5289,8 +5289,8 @@ extern "C" void cSSXAudio_ChangePosition(cSSXAudio* self, void* obj, void* pPrev
     if (!ok && cSSXAudio_GetFocusRider_p(self, -1) != obj) {
         return;
     }
-    int cnt = *(int*)((char*)cAudioInterface_getAI() + 0x7C);
-    if (cnt + *(int*)((char*)cAudioInterface_getAI() + 0x80) < 2) {
+    int cnt = ((cAI*)cAudioInterface_getAI())->NumberOfPlayersAllocated;
+    if (cnt + ((cAI*)cAudioInterface_getAI())->NumberOfComputersAllocated < 2) {
         return;
     }
     if (n == 0 && cSSXAudio_PlayHistoryExists(self, 1, 0) == 0 && cSSXAudio_ReplayMode(self) == 0) {
@@ -5803,10 +5803,10 @@ extern "C" void func_0029AB40(cSSXAudio* vself)
     int n = 1;
     if (D_00535C11[0] == 2) n = 2;
     for (int i = 0; i < n; i++) {
-        sRider_AB40* r0 = *(sRider_AB40**)((char*)cAudioInterface_getAI() + (i << 2) + 0x28);
+        sRider_AB40* r0 = (sRider_AB40*)((cAI*)cAudioInterface_getAI())->Riders[i];
         bool ok = r0->f874 && r0->f87C;
         if (!ok) continue;
-        sRider_AB40* rider = *(sRider_AB40**)((char*)cAudioInterface_getAI() + (i << 2) + 0x28);
+        sRider_AB40* rider = (sRider_AB40*)((cAI*)cAudioInterface_getAI())->Riders[i];
         sMon1B0_AB40* mon = rider->p790->p1B0;
         sMon_AB40* mp = mon ? &mon->m : 0;
         int v = (int)ffloor_AB40(mp->f8 / mp->f4 * 10.0f);
@@ -6812,7 +6812,7 @@ extern "C" void cSSXAudio_UpdateTimedEvent(cSSXAudio* self)
     if (!ok) {
         return;
     }
-    int elapsedSec = (int)((float)*(int*)((char*)cAudioInterface_getAI() + 0xC) * 0.01666666753590107f);
+    int elapsedSec = (int)((float)((cAI*)cAudioInterface_getAI())->EventTimerTick * 0.01666666753590107f);
     int secsLeft = (func_004139F8((float)*(unsigned int*)(gameModeMan + 0x78) * 0.01666666753590107f) - elapsedSec) % 3600;
     if (secsLeft <= 0) {
         return;
@@ -7018,7 +7018,7 @@ static inline int sndIsOn(char* t)
  */
 extern "C" void cSSXAudio_UpdateTrackBanks(cSSXAudio* self)
 {
-    char* rider = *(char**)((char*)cAudioInterface_getAI() + 0x28);
+    char* rider = (char*)((cAI*)cAudioInterface_getAI())->Riders[0];
     int patchRID = *(int*)(rider + 0x430);
     int ok = patchRID != -1;
     if (ok) {
@@ -7244,8 +7244,8 @@ extern "C" void func_0029D6E0(char* self, int mission)
 {
     char* bank = self + 0x118;
     *(int*)(self + 0x5FD8) = 0;
-    func_00296E20(self, *(void**)((char*)cAudioInterface_getAI() + 0x28));
-    func_00297438(self, *(void**)((char*)cAudioInterface_getAI() + 0x28));
+    func_00296E20(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
+    func_00297438(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
     cSSXAudio_EndUberSpin_D6E0(self, 0);
     if (func_002B46E8(bank) != 0) {
         if (func_0028D960(self) != 0) {
@@ -7386,7 +7386,7 @@ extern "C" void func_0029D8E0(void* self)
         *(int*)((char*)self + 0x5FD4) = 0;
     }
     sndD8E0AddVoice(self, 0, 109, 9);
-    func_002A3C00((cSSXAudio*)self, *(void**)((char*)cAudioInterface_getAI() + 0x28), 1);
+    func_002A3C00((cSSXAudio*)self, ((cAI*)cAudioInterface_getAI())->Riders[0], 1);
 }
 #endif
 
@@ -7415,8 +7415,8 @@ extern "C" void cSSXAudio_BigChallengeFailed(void* self, int keep)
         if (keep == 0) {
             cSSXAudio_MenuSound(self, 0xE);
         }
-        func_00296E20(self, *(void**)((char*)cAudioInterface_getAI() + 0x28));
-        func_00297438(self, *(void**)((char*)cAudioInterface_getAI() + 0x28));
+        func_00296E20(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
+        func_00297438(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
         cSSXAudio_EndUberSpin((cSSXAudio*)self, 0);
         char* musicSys = (char*)self + 0x118;
         sSndVtEnt* vtblEntry = &(*(sSndVtEnt**)((char*)self + 0x5558))[4];
@@ -7684,11 +7684,11 @@ extern "C" void func_002DA1C0(void *, float *);
 struct sVEntryP_29E4A0 { short delta; short index; float* (*fn)(void*); };
 
 extern "C" void func_0029E4A0(cSSXAudio* ssxAudio, void *voice) {
-    if (ssxAudio->mpAvalancheRiderIndex < *(int *)((char*)cAudioInterface_getAI() + 0x78)) {
+    if (ssxAudio->mpAvalancheRiderIndex < ((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated) {
         tAvalanchePositionalData positional;
         float riderPos[3];
         tAvalanchePositionalData* dst = &(*(&ssxAudio->mAvalancheData));
-        cRider* rider = *(cRider**)((char*)cAudioInterface_getAI() + (ssxAudio->mpAvalancheRiderIndex << 2) + 0x28);
+        cRider* rider = ((cAI*)cAudioInterface_getAI())->Riders[ssxAudio->mpAvalancheRiderIndex];
         char* obj = (char*)&rider->mVtbl;
         sVEntryP_29E4A0* vt = *(sVEntryP_29E4A0**)obj;
         float* pos = vt[kRiderVt_getPosition].fn(obj + vt[kRiderVt_getPosition].delta);
@@ -7994,8 +7994,8 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
 
 extern "C" void func_0029ED18(void* self)
 {
-    func_00296E20(self, *(void**)((char*)cAudioInterface_getAI() + 0x28));
-    func_00297438(self, *(void**)((char*)cAudioInterface_getAI() + 0x28));
+    func_00296E20(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
+    func_00297438(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
     cSSXAudio_EndUberSpin((cSSXAudio*)self, 0);
     if (*(int*)((char*)self + 0x59E4) > 0) {
         cBankMonitor_BANKMONITOR_StopHandle(**(char***)((char*)self + 0x118) + 0x1D8, *(int*)((char*)self + 0x59E0), 1, 0.0f);
@@ -8292,7 +8292,7 @@ extern char str_GRNT_AI_bnk[];
 extern "C" void func_0029F3F8(cSSXAudio* self)
 {
     char buf[64];
-    switch (func_0029F378(((char*)self), *(void**)((char*)cAudioInterface_getAI() + 0x28))) {
+    switch (func_0029F378(((char*)self), ((cAI*)cAudioInterface_getAI())->Riders[0])) {
     case 6: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_eli_bnk); break;
     case 3: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_mac_bnk); break;
     case 0: sprintf(buf, str_pct_spct_s_c, str_data_audio, str_GRNT_mob_bnk); break;
@@ -9088,8 +9088,8 @@ void func_002A1138_impl(void* self, char* rider, void* obj)
     if (func_0029F0A0(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (rider == 0) rider = *(char**)((char*)cAudioInterface_getAI() + 0x2C);
-    if (obj == 0) obj = *(void**)((char*)cAudioInterface_getAI() + 0x28);
+    if (rider == 0) rider = (char*)((cAI*)cAudioInterface_getAI())->Riders[1];
+    if (obj == 0) obj = ((cAI*)cAudioInterface_getAI())->Riders[0];
     char* o = rider + 0x6C0;
     sSsVt1138* e = &(*(sSsVt1138**)o)[5];
     if (cSSXAudio_CameraInRange(self, e->fn(o + e->delta), D_004A36D8) < 0) return;
@@ -9142,10 +9142,10 @@ extern "C" int func_002A1388(cSSXAudio* self, void* obj)
 {
     int i = *(int*)((char*)obj + 0x1C);
     int id;
-    if (i >= 0 && i < *(int*)((char*)cAudioInterface_getAI() + 0x78)) {
-        id = *(int*)((char*)cAudioInterface_getAI() + (i << 2) + 0x28);
+    if (i >= 0 && i < ((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated) {
+        id = (int)((cAI*)cAudioInterface_getAI())->Riders[i];
     } else {
-        id = *(int*)((char*)cAudioInterface_getAI() + 0x28);
+        id = (int)((cAI*)cAudioInterface_getAI())->Riders[0];
     }
     func_002A1400(self, id);
     return 1;
@@ -9304,7 +9304,7 @@ struct sSs1820Rider : public sSs1820RiderA, public cSs1820Obj {
 
 extern "C" int func_002A1820(void* self, sSs1820Rider* a, sSs1820Rider* b)
 {
-    if (*(int*)((char*)cAudioInterface_getAI() + 0x78) == 2) return 2;
+    if (((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated == 2) return 2;
     int oka = a->f874 != 0 && a->f87C != 0;
     if (oka) {
         int okb = b->f874 != 0 && b->f87C != 0;
@@ -9367,7 +9367,7 @@ extern "C" int func_002A19D8(cSSXAudio* self, int ev)
     } else if (ev == 15) {
         func_002A39E0(self);
     } else if (ev == 5) {
-        func_002A3708(self, *(char**)((char*)cAudioInterface_getAI() + 0x28));
+        func_002A3708(self, (char*)((cAI*)cAudioInterface_getAI())->Riders[0]);
     } else {
         return 0;
     }
@@ -9707,7 +9707,7 @@ extern "C" void func_002A2188(cSSXAudio* self)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8394, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int a = func_002A1D48_r(self, *(void**)((char*)cAudioInterface_getAI() + 0x28));
+            int a = func_002A1D48_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
             int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             D_004A482C_5(func_003D8008(1, 0, 8394), 3, r, a, m);
         }
@@ -9986,7 +9986,7 @@ extern "C" void func_002A2938(cSSXAudio* self)
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8450, 0, 10, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int a = func_002A1D48_r(self, *(void**)((char*)cAudioInterface_getAI() + 0x28));
+            int a = func_002A1D48_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
             int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             D_004A482C_5(func_003D8008(1, 0, 8450), 3, r, a, m);
         }
@@ -10319,7 +10319,7 @@ extern "C" void func_002A32B0(cSSXAudio* self)
     if (func_0029F128(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8385, 0, 11, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int a = func_002A1D48_r(self, *(void**)((char*)cAudioInterface_getAI() + 0x28));
+            int a = func_002A1D48_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
             D_004A482C_4(func_003D8008(1, 0, 8385), 2, r, a);
         }
     }
@@ -10345,7 +10345,7 @@ extern "C" void func_002A3358(cSSXAudio* self)
     if (func_0029F128(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8386, 0, 11, 0, 0, 0.0f) != 0) {
             int r = func_0029F198(self);
-            int a = func_002A1D48_r(self, *(void**)((char*)cAudioInterface_getAI() + 0x28));
+            int a = func_002A1D48_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
             D_004A482C_4(func_003D8008(1, 0, 8386), 2, r, a);
         }
     }
@@ -11138,7 +11138,7 @@ extern "C" void func_002A45C0(cSSXAudio* self)
         func_002A4590(self, 0);
     }
     int id = D_00536730[0];
-    char* rider = *(char**)((char*)cAudioInterface_getAI() + 0x28);
+    char* rider = (char*)((cAI*)cAudioInterface_getAI())->Riders[0];
     int a;
     if (func_002A4078(self) != 0) {
         a = *(int*)(*(char**)(rider + 0x790) + 0x128);

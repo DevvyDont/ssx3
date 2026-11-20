@@ -2,6 +2,7 @@
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
 
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController_cScriptCameraController);
@@ -1375,7 +1376,7 @@ extern "C" void cScriptTargetAlgorithm_update(char* algorithm)
     char* baseTransform = *(char**)(algorithm + 0x14) + 0x30;
     char* rider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, ((signed char*)header)[0x22], *(int*)(cam + 8));
     if (rider == 0) {
-        rider = *(char**)((char*)SSXApp->Game->AI + 0x28);
+        rider = (char*)SSXApp->Game->AI->Riders[0];
     }
     self->Near = header[0];
     self->Far = header[1];
@@ -1807,7 +1808,7 @@ extern "C" void cScriptRelativeAlgorithm_snap(char* algorithm)
     self->Roll = self->FrameInfo.roll * 0.01745329424738884f + *(float*)(*(char**)(algorithm + 0x14) + 0x70);
     char* rider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, ((signed char*)header)[0x1D], *(int*)(cam + 8));
     if (rider == 0) {
-        rider = *(char**)((char*)SSXApp->Game->AI + 0x28);
+        rider = (char*)SSXApp->Game->AI->Riders[0];
     }
     char* obj = rider + 0x6C0;
     sVec4_16AD98 rot = *(sVec4_16AD98*)(*(char**)(rider + 0x780) + 0x140);
@@ -2082,7 +2083,7 @@ extern "C" void cScriptRelativeAlgorithm_update(char* algorithm)
     float* header = func_0027C6A0(cam);
     char* rider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, ((signed char*)header)[0x1D], *(int*)(cam + 8));
     if (rider == 0) {
-        rider = *(char**)((char*)SSXApp->Game->AI + 0x28);
+        rider = (char*)SSXApp->Game->AI->Riders[0];
     }
     self->Near = header[0];
     self->Far = header[1];

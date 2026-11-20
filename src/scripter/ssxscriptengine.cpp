@@ -6,6 +6,7 @@
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Load);
@@ -1210,7 +1211,7 @@ extern "C" int func_002821A0(void* self, int key, void* node);
  */
 extern "C" int cSSXScriptEngine_RequestScriptByIndex(cSSXScriptEngine* self, int key, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
 {
-    int n = *(int*)((char*)SSXApp->Game->AI + 0x78);
+    int n = SSXApp->Game->AI->NumberOfRidersAllocated;
     if (mainCharAIIndex < 0 || mainCharAIIndex >= n) {
         mainCharAIIndex = -1;
     }
@@ -2222,7 +2223,7 @@ struct sSseGame_A860 {
 
 static inline int sseWorldMode_A860()
 {
-    return *(int*)((char*)SSXApp->Game->AI + 0x7C);
+    return SSXApp->Game->AI->NumberOfPlayersAllocated;
 }
 
 /**
@@ -6071,7 +6072,7 @@ extern "C" void cScriptObjCameraManager_OnStartObjectUse(void* self, int val)
     cScriptObjCameraManager_ResetScriptManagementVars(self);
     // PORT: pointer passed as int
     if (cSSXScriptEngine_IsPlayingNISListPlayer(ScriptEngine, (int)cBXScriptEngine_GetRequestPlayerByPlayerID_2(ScriptEngine, val)) != 0) {
-        cFocusMan_addbox(*(void**)((char*)SSXApp->Game->AI + 0xA4), (char*)self + 0x100);
+        cFocusMan_addbox(SSXApp->Game->AI->FocusMan, (char*)self + 0x100);
         *(int*)((char*)self + 0x110) = 1;
     }
     cScriptObject_OnStartObjectUse_2(self, val);

@@ -3,6 +3,8 @@
 #include "online/gamecomm.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
+#include "ai/player.h"
 
 //100%
 INCLUDE_ASM("fe/ovtemplatedialog", cPDATemplate_onCreateScreen);
@@ -2078,8 +2080,8 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                 ((sI10_D5A8*)missionIface)->f10 = 1;
                 cGame_setState(SSXApp->Game, 1, 1, 0);
                 cGame_partialRestart(SSXApp->Game);
-                cRider_putAtStartpoint(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), 1, 2);
-                cRider_cleanupAfterPutAt(*(void**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18), 1);
+                cRider_putAtStartpoint(SSXApp->Game->AI->Players[0]->mRider, 1, 2);
+                cRider_cleanupAfterPutAt(SSXApp->Game->AI->Players[0]->mRider, 1);
                 break;
             }
             case 5:

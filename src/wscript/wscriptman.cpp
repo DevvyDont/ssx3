@@ -4,6 +4,7 @@
 #include "world/world.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_addProcess);
@@ -1245,7 +1246,7 @@ extern "C" int cWScriptMan_doMissionCmd(char* self, unsigned int id, unsigned in
         if (D_00535C10[0] != 4) {
             return 0;
         }
-        if (*(int*)((char*)SSXApp->Game->AI + 0x7C) != 1) {
+        if (SSXApp->Game->AI->NumberOfPlayersAllocated != 1) {
             return 0;
         }
     }
@@ -2318,7 +2319,7 @@ extern "C" void cWScriptMan_collect(void* self, int rider, int id, int instId)
             void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
             int lvl = cBENewRaceInterface_getLocationPeak1(newRace);
             int cash = cBEEconInterface_getCollectableCash(econ, lvl);
-            cRider_flagEventAddCollectible(*(void**)((char*)SSXApp->Game->AI + (rider << 2) + 0x28), lvl, cash);
+            cRider_flagEventAddCollectible(SSXApp->Game->AI->Riders[rider], lvl, cash);
             return;
         }
     }

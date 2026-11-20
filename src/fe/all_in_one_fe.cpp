@@ -5,6 +5,7 @@
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
 
 INCLUDE_ASM("fe/all_in_one_fe", __sti__all_in_one_fe_cpp);
 
@@ -1869,7 +1870,7 @@ extern "C" void cOVStateHUD1P_renderRank(char* self, char* obj, int* rider, int 
     scale.x = 1.0f;
     scale.y = 1.0f;
     float k = 1.0f;
-    char* panelRider = *(char**)((char*)SSXApp->Game->AI + (rider[0] << 2) + 0x28);
+    char* panelRider = (char*)SSXApp->Game->AI->Riders[rider[0]];
     tHUDDef_getColour(D_00477F30 + *(int*)(panelRider + 0xEC) * 36, &col);
     float rankAnimFrame = ((float*)rider)[0x12];
     if (rankAnimFrame >= 0.0f) {
@@ -2450,7 +2451,7 @@ extern "C" void cOVStateHUD1P_renderFinishMessage(char* self, int elems, int* ri
     char buf[64];
     V4_F660 col;
     int idx = 66;
-    char* panelRider = *(char**)((char*)SSXApp->Game->AI + (*rider << 2) + 0x28);
+    char* panelRider = (char*)SSXApp->Game->AI->Riders[*rider];
     int sz = *(int*)(self + 0x4B4);
     if (flag) {
         sz = *(int*)(self + 0x49C);

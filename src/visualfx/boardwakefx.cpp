@@ -6,6 +6,7 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
+#include "ai/ai.h"
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX_cBoardWakeFX);
@@ -4707,7 +4708,7 @@ static inline int IsHuman_3AF8(cRider* rider)
 static inline int ShouldDraw_3AF8(sWake_3AF8* self)
 {
     int vis = 0;
-    if (*(int*)((char*)SSXApp->Game->AI + 0x7C) >= 2) {
+    if (SSXApp->Game->AI->NumberOfPlayersAllocated >= 2) {
         if (IsHuman_3AF8(self->rider)) {
             char* views = (char*)SSXApp->Game->ViewMan;
             if (*(unsigned int*)(views + 0x10) >= 2) {
@@ -6218,7 +6219,7 @@ extern "C" void* cSnowFall_cSnowFall(sWake5920* self, void* bucket)
     self->fx[3] = cSnowBox_cSnowBox((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 0, 3000.0f, 3.0f, 1.0f, -200.0f);
     self->fx[4] = cSnowBox_cSnowBox((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
     self->fx[5] = cSnowBox_cSnowBox((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 0, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
-    if (*(int*)((char*)SSXApp->Game->AI + 0x7C) >= 2) {
+    if (SSXApp->Game->AI->NumberOfPlayersAllocated >= 2) {
         self->fx[6] = cSnowBox_cSnowBox((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
         self->fx[7] = cSnowBox_cSnowBox((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 1500.0f, 3.0f, 1.0f, -200.0f);
         self->fx[8] = cSnowBox_cSnowBox((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0), 1, 0, 2000.0f, 3.0f, 1.0f, -200.0f);

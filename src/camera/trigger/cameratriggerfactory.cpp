@@ -4,6 +4,7 @@
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
 
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", get_camaction);
@@ -6283,7 +6284,7 @@ extern "C" void cPOST_RACE_1ChaseAlgorithm_update(cPOST_RACE_1ChaseAlgorithm* se
     sVec_00178BB0 rotation = AxisAngle_00178BB0(t4vect_ZAxis, angle);
     sVec_00178BB0 look = ctRot_00178BB0(rotation, *(sVec_00178BB0*)&self->StartDir);
     *(sVec_00178BB0*)&self->CamTargetPos = ctAdd_00178BB0(getPos_00178BB0(((char*)self)), ctScale_00178BB0(t4vect_ZAxis, -3.0f));
-    int multi = *(int*)((char*)SSXApp->Game->AI + 0x78) >= 2;
+    int multi = SSXApp->Game->AI->NumberOfRidersAllocated >= 2;
     float multiplayerHeight = 0.0f;
     if (multi) {
         multiplayerHeight = 150.0f;

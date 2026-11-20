@@ -8,6 +8,8 @@
 #include "replay/replay.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
+#include "ai/player.h"
 
 //100%
 INCLUDE_ASM("replay/replaycache", cReplay_addCache);
@@ -417,7 +419,7 @@ extern "C" void cReplay_endMarkInstantReplay(cReplay* self, int obj, int alt)
     if ((int)self->InstantReplayFrame == 0) {
         return;
     }
-    if (*(int*)((char*)SSXApp->Game->AI + 0x7C) != 1) {
+    if (SSXApp->Game->AI->NumberOfPlayersAllocated != 1) {
         return;
     }
     int now;
@@ -454,7 +456,7 @@ extern "C" void cReplay_cancelMarkInstantReplay(cReplay* self)
     int* on = (int*)((char*)self + 0x3D4);
     int markFrame = *on;
     if (markFrame != 0) {
-        int x = *(int*)((char*)SSXApp->Game->AI + 0x7C);
+        int x = SSXApp->Game->AI->NumberOfPlayersAllocated;
         if (x == 1) {
             if (markFrame > 0) {
                 *on = 0;
@@ -497,7 +499,7 @@ extern "C" void cReplay_stopInstantReplay(cReplay* self)
 {
     if (self->InstantReplay != 0) {
         cReplay_stopReplay(self);
-        cRiderMetrix_resetHUDfx(*(void**)(*(char**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18) + 0x790));
+        cRiderMetrix_resetHUDfx(*(void**)((char*)SSXApp->Game->AI->Players[0]->mRider + 0x790));
     }
 }
 #endif

@@ -7,6 +7,7 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
+#include "ai/ai.h"
 
 // R5900 128-bit GPR quadword, for functions that copy a 16-byte block via a
 // single lq/sq pair instead of word-by-word.
@@ -223,7 +224,7 @@ extern "C" void cRider__cRider(cRider* self, int flags)
         cAirPredictor__cAirPredictor(member, 3);
     void* box = self->mFocusBox;
     if (box != 0)
-        cFocusMan_removebox(*(void**)((char*)SSXApp->Game->AI + 0xA4), box);
+        cFocusMan_removebox(SSXApp->Game->AI->FocusMan, box);
     operator_delete((int*)self->mFocusBox);
     member = self->mMetrix;
     if (member != 0)
@@ -267,7 +268,7 @@ extern "C" void cRider_addFocusBox(cRider* self)
 {
     void* box = cMemMan_alloc(0x10, str_FocusBox, 0, 0);
     self->mFocusBox = box;
-    cFocusMan_addbox(*(void**)((char*)SSXApp->Game->AI + 0xA4), box);
+    cFocusMan_addbox(SSXApp->Game->AI->FocusMan, box);
 }
 #endif
 
@@ -768,7 +769,7 @@ void cRider_initAlways_impl(cRider* self)
         self->mUberTimer = 0;
         self->mUberLevel = 0;
         self->mDidNotFinish = 0;
-        self->mStartTick = *(int*)((char*)SSXApp->Game->AI + 8);
+        self->mStartTick = SSXApp->Game->AI->AITick;
         self->mFinishTick = 0;
         self->mPenaltyTicks = 0;
         self->mOverlapCount = 0;
@@ -4695,7 +4696,7 @@ float cRiderMetrix_evDangerLevelChange_2(void* self, int state) __asm__("cRiderM
 extern "C" void cRider_updateDangerLevel(cRider* self)
 {
     int old = self->unk_5B0;
-    int dangerLevel = func_00101A10(*(void**)((char*)SSXApp->Game->AI + 0xA8), self->mAIIndex);
+    int dangerLevel = func_00101A10(SSXApp->Game->AI->DangerMan, self->mAIIndex);
     self->unk_5B0 = dangerLevel;
     if (dangerLevel == 0)
     {
@@ -4729,7 +4730,7 @@ struct sVEntry00122D78 { short delta; short index; int (*fn)(void*); };
 extern "C" int cRider_estimateFinishTick(cRider* self)
 {
     char* sub = (char*)&self->mVtbl;
-    int n = *(int*)((char*)SSXApp->Game->AI + 0xC);
+    int n = SSXApp->Game->AI->EventTimerTick;
     float rate = (cRider_getTotalPathDistance(self) - self->mDistToFinish) / (float)n;
     sVEntry00122D78* vt = *(sVEntry00122D78**)sub;
     if (rate < 30.0f - (float)vt[kRiderVt_getAIIndex].fn(sub + vt[kRiderVt_getAIIndex].delta))
@@ -6596,7 +6597,7 @@ extern "C" void cRider_doFinishEvent(cRider* self)
             gameComm->mRemoteFinishedRace = 1;
     }
     cRiderMetrix_evFinishRace(self->mMetrix);
-    self->mFinishTick = *(int*)((char*)SSXApp->Game->AI + 0xC) + self->mPenaltyTicks;
+    self->mFinishTick = SSXApp->Game->AI->EventTimerTick + self->mPenaltyTicks;
     if (self->mFinishTime < 0.0f) self->mFinishTime = 0.0f;
     char* obj = (char*)&self->mVtbl;
     sVEntry125108* vt = *(sVEntry125108**)obj;

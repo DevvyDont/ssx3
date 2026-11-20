@@ -9,6 +9,8 @@
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
+#include "ai/player.h"
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", bxLogPrint);
@@ -2857,7 +2859,7 @@ extern "C" void cWorldPainterMan_render1(cWorldPainterMan* ctx, sQtTree_B928* tr
         cWorldPainterMan_render1(ctx, tree, tree->nodes + (node->child[3] >> 1), verts, &mid, hi);
     } else {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-        char* rider = *(char**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18);
+        char* rider = (char*)SSXApp->Game->AI->Players[0]->mRider;
         sQtVec4_B928 cam = *((cQtCam_B928*)(rider + 0x6C0))->v05();
         sQtVec4_B928 corner;
         corner.x = lo->x;

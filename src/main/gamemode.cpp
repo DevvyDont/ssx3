@@ -5,6 +5,7 @@
 #include "main/game.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
+#include "ai/ai.h"
 
 //100%
 INCLUDE_ASM("main/gamemode", cGameModeMan_getGM);
@@ -1116,7 +1117,7 @@ extern "C" int func_002398E8(void* self, int player, int secs)
 {
     cGameModeMan* gameModeMan = cGameModeHandler_pManager;
     if (gameModeMan->iCurrentGameEvent == 1) {
-        unsigned int limit = *(unsigned int*)((char*)SSXApp->Game->AI + 8);
+        unsigned int limit = (unsigned int)SSXApp->Game->AI->AITick;
         unsigned int newTimeLimit = gameModeMan->uiTimeLimit + secs * 60;
         gameModeMan->uiTimeLimit = newTimeLimit;
         if (newTimeLimit < limit) {
@@ -1476,7 +1477,7 @@ extern "C" int func_0023A070(char* self, int player, int secs)
     cGameModeMan* gameModeMan = cGameModeHandler_pManager;
     if (gameModeMan->iCurrentGameEvent == 1) {
         unsigned int timeLimit = gameModeMan->uiTimeLimit;
-        if (timeLimit < *(unsigned int*)((char*)SSXApp->Game->AI + 8)) {
+        if (timeLimit < (unsigned int)SSXApp->Game->AI->AITick) {
             return 0;
         }
         gameModeMan->uiTimeLimit = secs * 60 + timeLimit;
@@ -3225,7 +3226,7 @@ extern "C" int func_0023C560(void* self)
     }
     if (ok) {
         int bonusPoints = cBENewRaceInterface_getPeakSplitTimePoints(iface, D_00535C12[0], *(short*)((char*)self + 0xA), *(unsigned short*)((char*)self + 8)) * 100;
-        void* riderMetrix = *(void**)(*(char**)((char*)SSXApp->Game->AI + 0x28) + 0x790);
+        void* riderMetrix = *(void**)((char*)SSXApp->Game->AI->Riders[0] + 0x790);
         int curScore = *(int*)((char*)riderMetrix + 0x198);
         if (bonusPoints != 0) {
             cRiderMetrix_evSplitPoints(riderMetrix, curScore - bonusPoints);

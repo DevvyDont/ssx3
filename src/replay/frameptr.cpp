@@ -4,6 +4,7 @@
 #include "world/world.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
 
 //100%
 INCLUDE_ASM("replay/frameptr", cReplayFramePtr_initBlock);
@@ -760,7 +761,7 @@ extern "C" void cReplay_reset(cReplay* self)
     int three = 3;
     self->CurrentReplayCamIndex = 0;
     self->CurrentInstantReplayCamIndex = 0;
-    if (*(int*)((char*)SSXApp->Game->AI + 0x7C) == 1) {
+    if (SSXApp->Game->AI->NumberOfPlayersAllocated == 1) {
         self->MaxPlayerHighlights = three;
         self->MaxChapters = three;
     } else {

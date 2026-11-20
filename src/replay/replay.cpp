@@ -3,6 +3,7 @@
 #include "world/world.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
 
 //100%
 INCLUDE_ASM("replay/replay", cReplay_restoreFrame);
@@ -86,7 +87,7 @@ extern "C" void cReplay_restoreFrame(cReplay* self, cStreamRF* stream)
     cMultiParticleMan_readFromReplayFrame(cMultiParticleMan_TheMultiParticleMan, stream);
     cReplay_restoreBucket(self, (void*)1, (cStreamRB*)stream);
     cReplay_restoreDeadBucket(self, (cStreamRDB*)stream);
-    cFocusMan_readFromReplayFrame(*(void**)((char*)SSXApp->Game->AI + 0xA4), stream);
+    cFocusMan_readFromReplayFrame(SSXApp->Game->AI->FocusMan, stream);
     cReplay_applyBucket(self, 1);
     cAI_updateOverlapList(SSXApp->Game->AI);
     cGameViewMan_updateAll(SSXApp->Game->ViewMan);

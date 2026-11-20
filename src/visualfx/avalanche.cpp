@@ -2,6 +2,7 @@
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
 
 //100%
 INCLUDE_ASM("visualfx/avalanche", tActiveAvalancheNode_getFrameData);
@@ -985,7 +986,7 @@ extern "C" void tActiveAvalanche_end(void* self)
         }
         *(int*)self = 0;
         func_0029DEF0(cAudioInterface_bxAudio(), 0);
-        char* dangerMan = *(char**)((char*)SSXApp->Game->AI + 0xA8);
+        char* dangerMan = (char*)SSXApp->Game->AI->DangerMan;
         if (*(int*)(dangerMan + 0x708) != 0) {
             *(int*)(dangerMan + 0x708) = *(int*)(dangerMan + 0x708) - 1;
         }
@@ -1714,7 +1715,7 @@ extern "C" void tActiveAvalanche_render(void* slotv)
         D_vtx_D8EA8[2 * j].pos = nodePos;
         D_vtx_D8EA8[2 * j].r = slot->group->pairs[j].v < slot->limit ? 0xFF : 0;
         D_vtx_D8EA8[2 * j].g = slot->group->pairs[j].v >= slot->limit ? 0xFF : 0;
-        char* rider = *(char**)((char*)SSXApp->Game->AI + 0x28);
+        char* rider = (char*)SSXApp->Game->AI->Riders[0];
         D_vtx_D8EA8[2 * j + 1].pos = *((cRiderPos_D8EA8*)(rider + 0x6C0))->getPos();
         D_vtx_D8EA8[2 * j + 1].r = slot->group->pairs[j].v < slot->limit ? 0xFF : 0;
         D_vtx_D8EA8[2 * j + 1].g = slot->group->pairs[j].v >= slot->limit ? 0xFF : 0;
@@ -2231,7 +2232,7 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
             }
             tActiveAvalanche_buildArray((tActiveAvalanche*)slot);
             func_0029DEF0(cAudioInterface_bxAudio(), 1);
-            (*(int*)(*(char**)((char*)SSXApp->Game->AI + 0xA8) + 0x708))++;
+            (*(int*)((char*)SSXApp->Game->AI->DangerMan + 0x708))++;
             return slot - D_slots_D97A8;
         }
     }

@@ -4,6 +4,7 @@
 #include "util/menu.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
 
 struct cMenuItem {
     char pad_0x00[0x4];
@@ -6489,7 +6490,7 @@ extern "C" int func_001032C0(void* self, int a);
 
 extern "C" int func_002D1BF0(int a)
 {
-    return func_001032C0(*(void**)((char*)SSXApp->Game->AI + 0xA4), a);
+    return func_001032C0(SSXApp->Game->AI->FocusMan, a);
 }
 #endif
 

@@ -20,6 +20,7 @@
 #include "online/gamecomm.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEPopupVideoCalibration_onCreateScreen);
@@ -9562,7 +9563,7 @@ extern "C" int func_001E6718(void* self)
         if (track == 5 || track == 6) {
             count = 2;
         } else if (track == 0) {
-            count = *(int*)((char*)SSXApp->Game->AI + 0x78);
+            count = SSXApp->Game->AI->NumberOfRidersAllocated;
         } else if (players == 2) {
             count = 2;
         }
@@ -9659,7 +9660,7 @@ extern "C" int func_001E6718(void* self)
             }
         } else {
             ids.v[0] = 3;
-            if (*(int*)((char*)SSXApp->Game->AI + 0x78) != players || same) {
+            if (SSXApp->Game->AI->NumberOfRidersAllocated != players || same) {
                 ((cUIThing*)uiText)->setVisible(0);
             } else {
                 if (D_00536730[pl0] < D_00536730[pl1]) {
