@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatecredits.h"
 #include "render/ps2graphicsman.h"
 
 //100%
@@ -25,25 +26,25 @@ struct sVEntryK185A98 {
  * Sets bit 3 of "Menu0000"'s menu attributes (tAttrMenu mDisableDirSound). "Bitmap0000" and then "Bitmap0001"
  * are stored at 0x58 (On Tour mpDolbyIcon) and hidden, so 0x58 ends up holding "Bitmap0001".
  */
-extern "C" void cFEStateCredits_onCreateScreen(void* self)
+extern "C" void cFEStateCredits_onCreateScreen(cFEStateCredits* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_26credits), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    char* menu = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu0000));
+    char* menu = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000));
     if (menu != 0)
         *(int*)(menu + 0x90) |= 8;
-    char* bitmap = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Bitmap0000));
-    *(void**)((char*)self + 0x58) = bitmap;
+    char* bitmap = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Bitmap0000));
+    self->mpDolbyIcon = (cUIIcon*)bitmap;
     if (bitmap != 0) {
         sVEntryK185A98* vt = *(sVEntryK185A98**)(bitmap + 8);
         vt[9].fn(bitmap + vt[9].delta, 0);
     }
-    bitmap = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Bitmap0001));
-    *(void**)((char*)self + 0x58) = bitmap;
+    bitmap = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Bitmap0001));
+    self->mpDolbyIcon = (cUIIcon*)bitmap;
     if (bitmap != 0) {
         sVEntryK185A98* vt = *(sVEntryK185A98**)(bitmap + 8);
         vt[9].fn(bitmap + vt[9].delta, 0);
@@ -104,10 +105,10 @@ public:
  *
  * @param pPrevState  the state that had focus before, passed on to cFEState_onGainFocus()
  */
-extern "C" void cFEStateCredits_onGainFocus(void* self, void* pPrevState)
+extern "C" void cFEStateCredits_onGainFocus(cFEStateCredits* self, void* pPrevState)
 {
-    cUIObjK185BA0* textScroll = (cUIObjK185BA0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_TextScroll));
-    *(cUIObjK185BA0**)((char*)self + 0x5C) = textScroll;
+    cUIObjK185BA0* textScroll = (cUIObjK185BA0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextScroll));
+    self->mpTextScroll = (cUITextScroll*)textScroll;
     if (textScroll != 0)
     {
         float pos[4];
@@ -115,52 +116,52 @@ extern "C" void cFEStateCredits_onGainFocus(void* self, void* pPrevState)
         int i;
         textScroll->v20(pos);
         pos[0] = 600.0f;
-        (*(cUIObjK185BA0**)((char*)self + 0x5C))->v21(pos);
-        (*(cUIObjK185BA0**)((char*)self + 0x5C))->v09(0);
+        ((cUIObjK185BA0*)self->mpTextScroll)->v21(pos);
+        ((cUIObjK185BA0*)self->mpTextScroll)->v09(0);
         for (i = 0; i < 7; i++)
         {
             sprintf(buf, str_kT_CREDITSpct_03d, i);
-            cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
+            cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
         }
-        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS006a));
-        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS006b));
+        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(str_kT_CREDITS006a));
+        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(str_kT_CREDITS006b));
         for (i = 7; i < 47; i++)
         {
             sprintf(buf, str_kT_CREDITSpct_03d, i);
-            cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
+            cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
         }
         for (i = 49; i < 75; i++)
         {
             sprintf(buf, str_kT_CREDITSpct_03d, i);
-            cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
+            cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
         }
-        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS074a));
+        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(str_kT_CREDITS074a));
         for (i = 75; i < 81; i++)
         {
             sprintf(buf, str_kT_CREDITSpct_03d, i);
-            cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
+            cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
         }
-        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS087));
-        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS088));
+        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(str_kT_CREDITS087));
+        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(str_kT_CREDITS088));
         for (i = 90; i < 146; i++)
         {
             sprintf(buf, str_kT_CREDITSpct_03d, i);
-            cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
+            cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
         }
-        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS147));
-        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(str_kT_CREDITS148));
+        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(str_kT_CREDITS147));
+        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(str_kT_CREDITS148));
         sprintf(buf, str_kT_CREDITSpct_03d, 150);
-        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
+        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
         sprintf(buf, str_kT_CREDITSpct_03d, 151);
-        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
+        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
         sprintf(buf, str_kT_CREDITSpct_03d, 152);
-        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
+        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
         sprintf(buf, str_kT_CREDITSpct_03d, 153);
-        cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
+        cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
         for (i = 154; i < 168; i++)
         {
             sprintf(buf, str_kT_CREDITSpct_03d, i);
-            cUITextScroll_addUnicodeStringByID(*(void**)((char*)self + 0x5C), GetHashValue32(buf));
+            cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
         }
     }
     cFEState_onGainFocus(self, pPrevState);
@@ -240,16 +241,16 @@ static inline void DrawText_185F40(char* font, unsigned short* s, float x, float
  * white at the scroll's scale, other lines in its colour at a scale 0.1 smaller. The position wraps from one
  * end to the other in the scroll direction (0x64). Ends with the base state render cUIState_onRender2D().
  */
-extern "C" void cFEStateCredits_onRender2D(char* self)
+extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
 {
-    char* textScroll = *(char**)(self + 0x5C);
+    char* textScroll = (char*)self->mpTextScroll;
     if (textScroll != 0)
     {
         sV3_185F40 pos = *(sV3_185F40*)(textScroll + 0x44);
         sV3_185F40 size = *(sV3_185F40*)(textScroll + 0x50);
         sV4_185F40 box;
         ((cUIObj185F40*)textScroll)->v20(&box);
-        char* font = cUITextScroll_getFont(*(void**)(self + 0x5C));
+        char* font = cUITextScroll_getFont(self->mpTextScroll);
         if (font != 0)
         {
             float lineH = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
@@ -261,10 +262,10 @@ extern "C" void cFEStateCredits_onRender2D(char* self)
             white.w = 1.0f;
             float scaledHeight = size.y * lineH;
             float bh = box.y;
-            sV4_185F40 save = *(sV4_185F40*)(*(char**)(self + 0x5C) + 0x1C);
+            sV4_185F40 save = *(sV4_185F40*)((char*)self->mpTextScroll + 0x1C);
             ((sRS_185F40*)GrMan->m_pCurrentDrawState)->mode = 21;
             signed char rows = (int)scaledHeight + 3;
-            int scroll = *(int*)(self + 0x60);
+            int scroll = self->mPixelOffset;
             int first = scroll / rows;
             int rem = scroll % rows;
             signed char count = (int)(bh / (float)rows);
@@ -272,7 +273,7 @@ extern "C" void cFEStateCredits_onRender2D(char* self)
                 rem = -scroll % rows;
             for (int i = 0; i < count; i++)
             {
-                unsigned short* line = func_003A2068(*(void**)(self + 0x5C), i + first);
+                unsigned short* line = func_003A2068(self->mpTextScroll, i + first);
                 float frows = (float)rows;
                 if (line != 0)
                 {
@@ -280,18 +281,18 @@ extern "C" void cFEStateCredits_onRender2D(char* self)
                     while (*line == ' ')
                         line++;
                     sV3_185F40 newPos = pos;
-                    if (*(int*)(self + 0x60) > 0)
+                    if (self->mPixelOffset > 0)
                         newPos.y -= frem;
                     else
                         newPos.y += frem;
-                    if (*line == '~' && *(void**)(self + 0x58) != 0)
+                    if (*line == '~' && self->mpDolbyIcon != 0)
                     {
                         sV4_185F40 iconSize;
                         any = 1;
-                        (*(cUIObj185F40**)(self + 0x58))->v20(&iconSize);
+                        ((cUIObj185F40*)self->mpDolbyIcon)->v20(&iconSize);
                         newPos.x = (640.0f - iconSize.x) * 0.5f;
-                        *(sV3_185F40*)(*(char**)(self + 0x58) + 0x44) = newPos;
-                        (*(cUIObj185F40**)(self + 0x58))->v09(1);
+                        *(sV3_185F40*)((char*)self->mpDolbyIcon + 0x44) = newPos;
+                        ((cUIObj185F40*)self->mpDolbyIcon)->v09(1);
                     }
                     else
                     {
@@ -319,18 +320,18 @@ extern "C" void cFEStateCredits_onRender2D(char* self)
             }
             if (!any)
             {
-                if (*(void**)(self + 0x58) != 0)
-                    (*(cUIObj185F40**)(self + 0x58))->v09(0);
+                if (self->mpDolbyIcon != 0)
+                    ((cUIObj185F40*)self->mpDolbyIcon)->v09(0);
             }
             int total = count * rows;
-            int lim = *(unsigned short*)(*(char**)(self + 0x5C) + 0xC8) * rows + total;
-            if (*(int*)(self + 0x60) < -total && *(int*)(self + 0x64) < 0)
-                *(int*)(self + 0x60) = lim;
-            if (lim < *(int*)(self + 0x60) && *(int*)(self + 0x64) > 0)
-                *(int*)(self + 0x60) = -total;
+            int lim = *(unsigned short*)((char*)self->mpTextScroll + 0xC8) * rows + total;
+            if (self->mPixelOffset < -total && self->mPixelDelta < 0)
+                self->mPixelOffset = lim;
+            if (lim < self->mPixelOffset && self->mPixelDelta > 0)
+                self->mPixelOffset = -total;
         }
     }
-    cUIState_onRender2D(self);
+    cUIState_onRender2D(((char*)self));
 }
 #endif
 
@@ -345,9 +346,9 @@ extern "C" void* cUIState_onUpdate(void* self);
  * Adds the scroll speed (+0x64, which input moves between -8 and 8) to the scroll position (+0x60), then calls
  * cUIState_onUpdate().
  */
-extern "C" void cFEStateCredits_onUpdate(void* self)
+extern "C" void cFEStateCredits_onUpdate(cFEStateCredits* self)
 {
-    *(int*)((char*)self + 0x60) += *(int*)((char*)self + 0x64);
+    self->mPixelOffset += self->mPixelDelta;
     cUIState_onUpdate(self);
 }
 #endif
@@ -370,19 +371,19 @@ struct sVEntry001863E8 {
  * @param pInput  the controller input (cUIInput)
  * @return 1 when up or down was pressed, otherwise 0
  */
-extern "C" int cFEStateCredits_onInputBegin(void* self, void* pInput)
+extern "C" int cFEStateCredits_onInputBegin(cFEStateCredits* self, void* pInput)
 {
     sVEntry001863E8* vtEntry = &(*(sVEntry001863E8**)((char*)pInput + 8))[17];
     if (vtEntry->fn((char*)pInput + vtEntry->delta)) {
-        if (*(int*)((char*)self + 0x64) >= -7) {
-            *(int*)((char*)self + 0x64) -= 1;
+        if (self->mPixelDelta >= -7) {
+            self->mPixelDelta -= 1;
         }
         return 1;
     }
     vtEntry = &(*(sVEntry001863E8**)((char*)pInput + 8))[18];
     if (vtEntry->fn((char*)pInput + vtEntry->delta)) {
-        if (*(int*)((char*)self + 0x64) < 8) {
-            *(int*)((char*)self + 0x64) += 1;
+        if (self->mPixelDelta < 8) {
+            self->mPixelDelta += 1;
         }
         return 1;
     }
@@ -404,7 +405,7 @@ INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onWidgetMenu);
  * @param Event  the menu event
  * @return 0x100 for events 6, 8 and 9, otherwise 0x101
  */
-extern "C" int cFEStateCredits_onWidgetMenu(void* self, int pMenu, unsigned int Event)
+extern "C" int cFEStateCredits_onWidgetMenu(cFEStateCredits* self, int pMenu, unsigned int Event)
 {
     switch (Event) {
     case 6:
@@ -432,14 +433,14 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * @param item  the widget that sent the event; nothing happens when null
  * @param msg  the widget event (only 6, back, is handled)
  */
-extern "C" void cFEStateCredits_onWidgetEvent(void* self, void* item, int msg)
+extern "C" void cFEStateCredits_onWidgetEvent(cFEStateCredits* self, void* item, int msg)
 {
     if (item != 0 && msg == 6) {
-        void* obj = **(void***)((char*)self + 0x10);
+        void* obj = *(void**)self->mpEngine;
         sVEntry001864B0* vt = *(sVEntry001864B0**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, 36);
         if (nextState != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }
     }
 }

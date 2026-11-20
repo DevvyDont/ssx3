@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatecredits.h"
 #include "fe/festatetransition.h"
 #include "fe/festatetitle.h"
 #include "fe/festateoptionssound.h"
@@ -5079,10 +5080,10 @@ extern int cFEStateCredits_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *cFEStateCredits_cFEStateCredits(void *self) {
+extern "C" void *cFEStateCredits_cFEStateCredits(cFEStateCredits* self) {
     cUIState_cUIState_E4B0(self, 0);
-    *(int **)((char *)self + 8) = cFEStateCredits_vtbl;
-    return self;
+    self->mVtbl = (void**)cFEStateCredits_vtbl;
+    return ((void*)self);
 }
 #endif
 

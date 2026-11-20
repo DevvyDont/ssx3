@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uianimation.h"
 
 //100%
 INCLUDE_ASM("ui/uianimation", cUIAnimationBank_getAnimationByHashName);
@@ -189,16 +190,16 @@ extern void* cUIAnimation_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cUIAnimation__cUIAnimation(void* self, int flags)
+extern "C" void cUIAnimation__cUIAnimation(cUIAnimation* self, int flags)
 {
-    *(void***)((char*)self + 0x10) = cUIAnimation_vtbl;
-    char* base = *(char**)((char*)self + 0x4);
+    self->mVtbl = cUIAnimation_vtbl;
+    char* base = (char*)self->mpAnimChannels;
     if (base != 0) {
         char* elemPtr = base + *(int*)(base - 0x10) * 4;
-        while (*(char**)((char*)self + 0x4) != elemPtr) {
+        while ((char*)self->mpAnimChannels != elemPtr) {
             elemPtr -= 4;
         }
-        cMemMan_free(*(char**)((char*)self + 0x4) - 0x10);
+        cMemMan_free((char*)self->mpAnimChannels - 0x10);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -217,8 +218,8 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_isLastFrame);
  * @param anim  the animation
  * @return 1 at or past the last frame, else 0
  */
-extern "C" int cUIAnimation_isLastFrame(void *anim) {
-    return (*(short *)((char*)(anim) + (0xA))) >= (int) (*(unsigned short *)((char*)((*(void **)((char*)(anim) + (0)))) + (2)));
+extern "C" int cUIAnimation_isLastFrame(cUIAnimation* anim) {
+    return (anim->mFrameNum) >= (int) (*(unsigned short *)((char*)((anim->mpAnimHeader)) + (2)));
 }
 #endif
 //100%
@@ -250,18 +251,18 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_start);
  * @param mode      playback mode (On Tour playback): 0 external clock, 1 forward, 2 backward, 3 ping-pong
  * @param FrameNum  the current clock frame, kept as the start frame in mode 0
  */
-extern "C" void cUIAnimation_start(void* self, int mode, unsigned short FrameNum)
+extern "C" void cUIAnimation_start(cUIAnimation* self, int mode, unsigned short FrameNum)
 {
     mode &= 7;
     if (mode == 0) {
-        *(unsigned short*)((char*)self + 0xc) = FrameNum;
+        self->mScreenStartFrame = FrameNum;
     }
     if (mode == 2) {
-        *(unsigned char*)((char*)self + 0xe) = 1;
-        *(unsigned short*)((char*)self + 0xa) = *(unsigned short*)((char*)*(void**)self + 0x2) - 1;
+        *(unsigned char*)&self->mFrameDirection = 1;
+        *(unsigned short*)&self->mFrameNum = *(unsigned short*)((char*)*(void**)self + 0x2) - 1;
     } else {
-        *(unsigned char*)((char*)self + 0xe) = 0;
-        *(unsigned short*)((char*)self + 0xa) = 0;
+        *(unsigned char*)&self->mFrameDirection = 0;
+        *(unsigned short*)&self->mFrameNum = 0;
     }
 }
 #endif

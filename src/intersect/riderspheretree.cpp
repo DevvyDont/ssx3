@@ -1,14 +1,10 @@
 #include "common.h"
+#include "intersect/riderspheretree.h"
 
 // R5900 128-bit GPR quadword, for functions that copy a 16-byte block via a
 // single lq/sq pair instead of word-by-word.
 typedef int cQuad128 __attribute__((mode(TI)));
 
-struct cRiderSphereTree {
-    char pad_0x00[0x24];
-    int field_0x24;
-    int field_0x28;
-};
 
 //100%
 INCLUDE_ASM("intersect/riderspheretree", cRiderSphereTree_cRiderSphereTree__FP16cRiderSphereTree);
@@ -28,8 +24,8 @@ struct sRiderSphere_329910 {
 cRiderSphereTree* cRiderSphereTree_cRiderSphereTree(cRiderSphereTree* self)
 {
     new ((char*)self + 0x2C) sRiderSphere_329910[20];
-    self->field_0x24 = -1;
-    *(unsigned int*)&self->field_0x28 = 0xFFFFFFFF;
+    self->boundBone = -1;
+    self->sphMask = 0xFFFFFFFF;
     return self;
 }
 #endif

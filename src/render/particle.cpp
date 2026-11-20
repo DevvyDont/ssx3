@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/playershadow.h"
 #include "render/particle.h"
 #include "render/ps2bezierman.h"
 #include "render/ps2graphicsman.h"
@@ -2705,14 +2706,14 @@ INCLUDE_ASM("render/particle", cPlayerShadow_InitBones);
  * @param rFoot  the right foot bone
  * @param hips  the hips bone
  */
-extern "C" void cPlayerShadow_InitBones(void* self, int head, int lHand, int rHand, int lFoot, int rFoot, int hips)
+extern "C" void cPlayerShadow_InitBones(cPlayerShadow* self, int head, int lHand, int rHand, int lFoot, int rFoot, int hips)
 {
-    *(int*)((char*)self + 0x17c) = head;
-    *(int*)((char*)self + 0x180) = lHand;
-    *(int*)((char*)self + 0x184) = rHand;
-    *(int*)((char*)self + 0x188) = lFoot;
-    *(int*)((char*)self + 0x18c) = rFoot;
-    *(int*)((char*)self + 0x190) = hips;
+    self->ShadowBone[0] = head;
+    self->ShadowBone[1] = lHand;
+    self->ShadowBone[2] = rHand;
+    self->ShadowBone[3] = lFoot;
+    self->ShadowBone[4] = rFoot;
+    self->ShadowBone[5] = hips;
 }
 #endif
 
@@ -2851,16 +2852,15 @@ struct sPtVEntry_5918 {
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cPlayerShadow__cPlayerShadow(void* self, int flags)
+extern "C" void cPlayerShadow__cPlayerShadow(cPlayerShadow* self, int flags)
 {
-    char* shadow = (char*)self;
-    int tex = *(int*)(shadow + 0x170);
+    int tex = self->mLockTexture;
     if (tex >= 0) {
         func_00367B60(*(void**)(cGraphicsMan_TheGraphicsMan_particle + 0x18F4), tex);
         char* mgr = cGraphicsMan_TheGraphicsMan_particle;
         sPtVEntry_5918* vt = *(sPtVEntry_5918**)(mgr + 0x10D8);
-        vt[50].fn(mgr + vt[50].delta, *(int*)(shadow + 0x170));
-        *(int*)(shadow + 0x170) = -1;
+        vt[50].fn(mgr + vt[50].delta, self->mLockTexture);
+        self->mLockTexture = -1;
     }
     if (flags & 1) {
         operator_delete((int*)self);

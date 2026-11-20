@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uianimation.h"
 #include "ui/uitextscroll.h"
 #include "ui/uistate.h"
 #include "ui/uislider.h"
@@ -679,9 +680,9 @@ extern void* cUIAnimation_vtbl[];
  *
  * @return the object
  */
-extern "C" void* cUIAnimation_cUIAnimation1(void* self) {
-    *(void***)((char*)self + 0x10) = cUIAnimation_vtbl;
-    return self;
+extern "C" void* cUIAnimation_cUIAnimation1(cUIAnimation* self) {
+    self->mVtbl = cUIAnimation_vtbl;
+    return ((void*)self);
 }
 #endif
 //100%
@@ -706,8 +707,8 @@ INCLUDE_ASM("ui/uivector", cUIAnimation_setFrameNumber);
  * @param anim  the cUIAnimation
  * @param frame  the frame number
  */
-extern "C" void cUIAnimation_setFrameNumber(void *anim, short frame) {
-    (*(short *)((char*)(anim) + (0xA))) = frame;
+extern "C" void cUIAnimation_setFrameNumber(cUIAnimation* anim, short frame) {
+    (anim->mFrameNum) = frame;
 }
 #endif
 

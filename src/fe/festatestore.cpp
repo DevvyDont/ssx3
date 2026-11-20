@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatecredits.h"
 #include "ui/uiengine.h"
 #include "fe/festateubertrick.h"
 #include "main/ssxapp.h"
@@ -924,17 +925,17 @@ extern void* cFEStateCredits_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateCredits_cFEStateCredits1(void* self)
+extern "C" void* cFEStateCredits_cFEStateCredits1(cFEStateCredits* self)
 {
     cUIState_cUIState(self);
-    *(void***)((char*)self + 0x8) = cFEStateCredits_vtbl;
-    *(int*)((char*)self + 0x60) = -100;
-    *(int*)((char*)self + 0x64) = 1;
-    *(int*)((char*)self + 0xC) = 36;
-    *(int*)((char*)self + 0x58) = 0;
-    *(int*)((char*)self + 0x5C) = 0;
-    *(int*)((char*)self + 0x48) = 0;
-    return self;
+    self->mVtbl = cFEStateCredits_vtbl;
+    self->mPixelOffset = -100;
+    self->mPixelDelta = 1;
+    self->mHashName = 36;
+    self->mpDolbyIcon = 0;
+    self->mpTextScroll = 0;
+    self->mpWidget = 0;
+    return ((void*)self);
 }
 #endif
 
