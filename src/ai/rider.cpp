@@ -1247,7 +1247,7 @@ INCLUDE_ASM("ai/rider", cRider_putAtDropOffBC);
 #ifdef SKIP_ASM
 extern "C" void* cPathSys_getStartpoint(void*, int, int);
 extern char gPaths[];
-extern "C" float func_00115B08(void* self);
+extern "C" float cRider_getStartGateHorizOffset(void* self);
 
 struct sVec4_0011DD98
 {
@@ -1292,7 +1292,7 @@ static inline void vu0AddEq_11DD98(sVec4_0011DD98& dst, sVec4_0011DD98 b)
  * Places the rider at its backcountry drop-off point.
  *
  * Gets startpoint type 2 for the rider's mAIIndex from PathSys (cPathSys_getStartpoint, On Tour cPathSys::getStartpoint),
- * moves the point forward along its direction (floats 5-7) by func_00115B08(self), and calls cRider::putAt
+ * moves the point forward along its direction (floats 5-7) by cRider_getStartGateHorizOffset(self), and calls cRider::putAt
  * (cRider_putAt) with that position and direction, anim id 0x11F and 2999.94.
  */
 extern "C" void cRider_putAtDropOffBC(cRider* self)
@@ -1308,7 +1308,7 @@ extern "C" void cRider_putAtDropOffBC(cRider* self)
     pos.y = startPoint[3];
     pos.z = startPoint[4];
     pos.w = 1.0f;
-    vu0AddEq_11DD98(pos, vu0Scale_11DD98(dir, func_00115B08(self)));
+    vu0AddEq_11DD98(pos, vu0Scale_11DD98(dir, cRider_getStartGateHorizOffset(self)));
     cRider_putAt_11DD98(self, &pos, &dir, 287, 2999.942626953125f);
 }
 #endif
@@ -4683,20 +4683,20 @@ void* cRider_isVertZoneApplicable(void* self)
 INCLUDE_ASM("ai/rider", cRider_updateDangerLevel);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_00101A10(void* self, int character);
+extern "C" int cDangerMan_GetRiderDangerLevel(void* self, int character);
 extern "C" int cRider_isInVertZone(cRider* self);
 float cRiderMetrix_evDangerLevelChange_2(void* self, int state) __asm__("cRiderMetrix_evDangerLevelChange__FPv");
 
 /**
  * Updates the rider's danger level (unk_5B0) from the AI's danger manager.
  *
- * Takes the manager's level for mAIIndex (func_00101A10); level 0 becomes 1 when the rider is on the ground
+ * Takes the manager's level for mAIIndex (cDangerMan_GetRiderDangerLevel); level 0 becomes 1 when the rider is on the ground
  * in a vert zone. A change goes to cRiderMetrix_evDangerLevelChange on mMetrix, an empty stub in retail.
  */
 extern "C" void cRider_updateDangerLevel(cRider* self)
 {
     int old = self->unk_5B0;
-    int dangerLevel = func_00101A10(SSXApp->Game->AI->DangerMan, self->mAIIndex);
+    int dangerLevel = cDangerMan_GetRiderDangerLevel(SSXApp->Game->AI->DangerMan, self->mAIIndex);
     self->unk_5B0 = dangerLevel;
     if (dangerLevel == 0)
     {
@@ -6143,7 +6143,7 @@ extern "C" void cRiderAnimBase_changeHeadingOffset(void* self, float heading);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" void cRider_updateOrientationImplicit(cRider* self);
 extern "C" float cRider_getStartGateKneeOffset(cRider* self);
-extern "C" float func_00115B08(void* self);
+extern "C" float cRider_getStartGateHorizOffset(void* self);
 extern "C" void cRiderAnimBase_playFromAnimID(void* anim, int id, tAnimID animId, float t);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" void cAnimSequence_setSubAnimTime(void* p, int a1, float t);
@@ -6426,7 +6426,7 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* 
             self->mSlewed[18].target = kneeOffset;
             self->mSlewed[18].rate = 0;
             self->mSlewed[18].cur = kneeOffset;
-            AddEq_124788(*(sQ_124788*)&self->mPosition, Scale_124788(GetFront_124788(self), func_00115B08(self)));
+            AddEq_124788(*(sQ_124788*)&self->mPosition, Scale_124788(GetFront_124788(self), cRider_getStartGateHorizOffset(self)));
             cRider_updateOrientationImplicit(self);
         }
         int isFlipped = pCurrMainAnimCustom->heading != 0;

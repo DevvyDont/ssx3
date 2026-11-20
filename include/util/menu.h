@@ -25,7 +25,7 @@ struct cMenu {
     int NumItems;                    // 0x000 [P] getNumItems (lw 0x0); [R] zeroed by cMenu_cMenu; [U] item count in cMenu_addItem, cMenu_nextFocus (modulus)
     int FocusItem;                   // 0x004 [O]; [U] returned by cMenu_getFocus, stepped by cMenu_nextFocus/cMenu_prevFocus, set by cMenu_setFocus
     int TopItem;                     // 0x008 [O]; [U] first visible row: cMenu_render (cMenu::render) scrolls it towards FocusItem or resets it to 0
-    cMenuItem* Items[70];            // 0x00C [P] getItem (lw 0xC(this + 4i), retail func_002D3A28); [U] cMenu_addItem shifts and inserts here
+    cMenuItem* Items[70];            // 0x00C [P] getItem (lw 0xC(this + 4i), retail cMenu_getItem); [U] cMenu_addItem shifts and inserts here
     cMenuSys* MenuSys;               // 0x124 [P] getMenuSys (lw 0x124); [U] cMenu_onGainFocus(cMenuSys*) stores its argument,
                                      //       cMenu_onLoseFocus clears it; cMenu_render reads the display size through it
     int DrawLayer;                   // 0x128 [O] (On Tour: int, between MenuSys and the vptr); no retail access seen

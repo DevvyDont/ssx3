@@ -387,8 +387,8 @@ extern "C" void STREAM_setpriority(int h, int a, int b);
 extern "C" int STREAM_queuemem(int h, int a, int b, int c);
 extern "C" void ASYNCFILE_release(int h, void* data, int* size);
 extern "C" int RCMP_DECODER_GetFrame(void* p, int a1);
-extern "C" unsigned int func_003E4E98();
-extern "C" unsigned int func_003E5008();
+extern "C" unsigned int TIMER_gettick();
+extern "C" unsigned int TIMER_getfrequency();
 extern "C" void func_0042E508(void* timer);
 extern "C" void* func_003AE888(void*, int);
 
@@ -457,11 +457,11 @@ extern "C" int func_003AE450(char* self, int framesToBuffer, int timeOffsetMs)
     *(int*)(self + 0x74) = RCMP_DECODER_GetFrame(*(void**)(self + 0x64), 0);
     sTimer_AE450* msTimer = (sTimer_AE450*)wsAlloc_AE450(&D_00509430_AE450, 0x18);
     msTimer->ticks = 0;
-    msTimer->start = func_003E4E98();
+    msTimer->start = TIMER_gettick();
     msTimer->period = 0x1000;
     *(sTimer_AE450**)(self + 0x5C) = msTimer;
     func_0042E508(msTimer);
-    unsigned int ms = (unsigned int)(msTimer->ticks * 1000) / func_003E5008();
+    unsigned int ms = (unsigned int)(msTimer->ticks * 1000) / TIMER_getfrequency();
     *(int*)(self + 0x40) = timeOffsetMs;
     *(int*)(self + 0x50) = 0;
     *(int*)(self + 0x58) = 0;
@@ -584,13 +584,13 @@ struct func_003AE888_sTimer {
 };
 
 extern "C" int func_003AEE98(void* self, int v);
-extern "C" unsigned int func_003E4E98();
+extern "C" unsigned int TIMER_gettick();
 
 /**
  * Sets the movie player's playback speed (0x1000 is normal, 0 pauses).
  *
  * Clamps the speed to 0x4000, passes it to the audio object (func_003AEE98), then updates the timer (+0x5C): it adds
- * the ticks since the last update (func_003E4E98) to the 64-bit accumulator, scaled by the old rate / 0x1000, and
+ * the ticks since the last update (TIMER_gettick) to the 64-bit accumulator, scaled by the old rate / 0x1000, and
  * stores the new rate and time.
  *
  * @param speed  the new speed in 1/0x1000 units
@@ -607,7 +607,7 @@ extern "C" void* func_003AE888(void* self, int speed)
         func_003AEE98(*(void**)self, newRate);
     }
     func_003AE888_sTimer* timer = *(func_003AE888_sTimer**)((char*)self + 0x5C);
-    unsigned int now = func_003E4E98();
+    unsigned int now = TIMER_gettick();
     if (timer->rate == 0x1000) {
         timer->accum += (ulong)(now - timer->last);
     } else {
@@ -690,7 +690,7 @@ extern "C" void SNDSYS_leavecritical();
 extern "C" int SNDPROFILE_outputlatency();
 extern "C" int SNDSTRM_status(int id, void* out);
 extern "C" int SNDSTRM_requeststatus(int id, void* out);
-extern "C" unsigned int func_003E5008();
+extern "C" unsigned int TIMER_getfrequency();
 extern "C" void func_0042E508(void* timer);
 
 // PORT: accum is a 64-bit ulong
@@ -726,7 +726,7 @@ struct func_003AE9A0_sSync {
 /**
  * Returns the movie player's playback time in ms, kept in step with the audio.
  *
- * Updates the timer (+0x5C, func_0042E508) and converts its tick count to ms (ticks * 1000 / func_003E5008), minus the
+ * Updates the timer (+0x5C, func_0042E508) and converts its tick count to ms (ticks * 1000 / TIMER_getfrequency), minus the
  * start time at +0x4C. With audio (+0x54) it reads the audio stream's current request (SNDSTRM_status on the audio
  * object's handle), its play position in ms (SNDSTRM_requeststatus) minus SNDPROFILE_outputlatency, all between SNDSYS_entercritical and
  * SNDSYS_leavecritical. When that position is newer than the last one (+0x50) it feeds the difference into a filtered drift
@@ -742,7 +742,7 @@ extern "C" int func_003AE9A0(func_003AE9A0_sSync* self)
     func_003AE9A0_sInfo streamStatus;
     func_003AE9A0_sTimer* msTimer = self->timer;
     func_0042E508(msTimer);
-    unsigned int ms = (unsigned int)(msTimer->accum * 1000) / func_003E5008();
+    unsigned int ms = (unsigned int)(msTimer->accum * 1000) / TIMER_getfrequency();
     int res = ms - self->offset;
     if (self->enabled != 0) {
         SNDSYS_entercritical();

@@ -178,12 +178,12 @@ extern "C" short cReplayFramePtr_peekObjNodeType(cReplayFramePtr* self)
 //100%
 INCLUDE_ASM("replay/frameptr", cReplayFramePtr_loadBlock);
 #ifdef SKIP_ASM
-extern "C" int func_002C85A0(void* src, int a, int dst);
+extern "C" int HUFF_decode(void* src, int a, int dst);
 
 /**
  * Loads a saved replay frame block: unpacks the saved bytes into Block and rewinds the read cursor.
  *
- * Reads the 4-byte size at *@p pp and steps over it, unpacks the data that follows into Block (func_002C85A0, which
+ * Reads the 4-byte size at *@p pp and steps over it, unpacks the data that follows into Block (HUFF_decode, which
  * returns the unpacked size), steps *@p pp past the saved size, sets WriteData to Block + the unpacked size and
  * calls cReplayFramePtr_readRewind. The 4-byte tag copied from @p src is not used.
  *
@@ -200,7 +200,7 @@ extern "C" int cReplayFramePtr_loadBlock(cReplayFramePtr* self, char** pp, void*
     MEM_copy(&hdr.tag, src, 4);
     MEM_copy(&hdr.size, *pp, 4);
     *pp += 4;
-    int n = func_002C85A0(*pp, 0, ((int)self->Block));
+    int n = HUFF_decode(*pp, 0, ((int)self->Block));
     *pp += hdr.size;
     self->WriteData = (char*)(((int)self->Block) + n);
     cReplayFramePtr_readRewind(self);

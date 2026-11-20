@@ -797,14 +797,14 @@ extern "C" void func_002C2868(char* str)
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C28A0);
 #ifdef SKIP_ASM
-extern "C" void func_003E4E98();
+extern "C" void TIMER_gettick();
 
 /**
- * Calls func_003E4E98, which reads the counter D_00450DCC; the GameLink platform table set up by func_002C2BD8 holds it
+ * Calls TIMER_gettick, which reads the counter D_00450DCC; the GameLink platform table set up by func_002C2BD8 holds it
  * at +0x58.
  */
 extern "C" void func_002C28A0(void) {
-    func_003E4E98();
+    TIMER_gettick();
 }
 #endif
 //100%
@@ -911,7 +911,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C29D0);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int func_002C28C0_29D0(int, int, int) __asm__("func_002C28C0");
 extern "C" int func_002C28F8_29D0(int) __asm__("func_002C28F8");
-extern "C" int func_003E50C8(int* self, int a1, int a2, int a3, int a4, int a5);
+extern "C" int THREAD_createparam(int* self, int a1, int a2, int a3, int a4, int a5);
 extern char str_threadstack[];
 
 // Predicate helper; keeps p[0] in one register for both tests.
@@ -926,7 +926,7 @@ int* func_002C29D0_impl(int a0, int a1, int size) __asm__("func_002C29D0");
 /**
  * Creates and starts a thread for GameLink and returns its 0xC-byte handle, or 0 on failure.
  *
- * The handle comes from func_002C28C0; its first word is a @p size byte stack ("threadstack"), and func_003E50C8
+ * The handle comes from func_002C28C0; its first word is a @p size byte stack ("threadstack"), and THREAD_createparam
  * creates and starts the thread (CreateThread / StartThread, priority 99) with its id in the rest of the handle. When
  * the stack or the thread cannot be made, everything allocated is freed again.
  *
@@ -941,7 +941,7 @@ int* func_002C29D0_impl(int threadEntry, int threadArg, int size)
     thread[0] = 0;
     thread[0] = func_002C28C0_29D0((int)str_threadstack, size, 0);
     if (thread[0] != 0) {
-        if (func_003E50C8(thread + 1, threadEntry, threadArg, thread[0], size, 99) == 0) {
+        if (THREAD_createparam(thread + 1, threadEntry, threadArg, thread[0], size, 99) == 0) {
             func_002C28F8_29D0(thread[0]);
             thread[0] = 0;
         }
@@ -983,13 +983,13 @@ extern "C" void func_002C2AA8(int *self) {
 //100%
 INCLUDE_ASM("worldpainter/quadtree", func_002C2B08);
 #ifdef SKIP_ASM
-extern "C" void func_003E5398();
+extern "C" void THREAD_yield();
 
 /**
- * Calls func_003E5398, which yields the current thread (GameLink's yield).
+ * Calls THREAD_yield, which yields the current thread (GameLink's yield).
  */
 extern "C" void func_002C2B08(void) {
-    func_003E5398();
+    THREAD_yield();
 }
 #endif
 //100%
@@ -1020,15 +1020,15 @@ extern "C" int func_002C2B28_impl(void)
 INCLUDE_ASM("worldpainter/quadtree", func_002C2B68);
 #ifdef SKIP_ASM
 extern "C" void func_002C28F8(int);
-extern "C" void func_003E56E0();
+extern "C" void MUTEX_destroy();
 
 /**
- * Destroys a mutex made by func_002C2B28: calls func_003E56E0 (DeleteSema), then frees the block with func_002C28F8.
+ * Destroys a mutex made by func_002C2B28: calls MUTEX_destroy (DeleteSema), then frees the block with func_002C28F8.
  *
  * @param mutexBlock  the mutex block
  */
 extern "C" void func_002C2B68(int mutexBlock) {
-    func_003E56E0();
+    MUTEX_destroy();
     func_002C28F8(mutexBlock);
 }
 #endif
@@ -3531,8 +3531,8 @@ static inline unsigned short* qtLoc6128(char* key)
 /**
  * Builds the text the save menus show for a file slot.
  *
- * Picks a localized message when the slot cannot be shown: kT_MEMEmpty when slot 53 (func_002D3810) fails,
- * kT_MEMUnavailable when slot 55 (func_002D38F0) fails, kT_MEMFileCorruptPS2 when the slot's unk_00 or unk_04 flag is
+ * Picks a localized message when the slot cannot be shown: kT_MEMEmpty when slot 53 (cPS2MemCard_IsAvailable1) fails,
+ * kT_MEMUnavailable when slot 55 (cPS2MemCard_IsFormatted1) fails, kT_MEMFileCorruptPS2 when the slot's unk_00 or unk_04 flag is
  * set, kT_MEMNoFreeSpace when unk_08 is set, kT_MEMEmpty again when the slot has no name (slot 67, cPS2MemCard_HasFileName).
  * Otherwise widens the save title (unk_1A4[i].unk_4C from byte 6 on) with func_002C2540. The text is cut to 32
  * characters and copied to @p dst.
@@ -3901,7 +3901,7 @@ struct sSaveMgr_2C64F8 : sSaveMgrBase_2C64F8 {
 /**
  * Finds the most recently saved file slot.
  *
- * Returns -1 unless slot 55 (func_002D38F0) passes. Among the six slots that are not flagged (unk_00, unk_04, unk_08
+ * Returns -1 unless slot 55 (cPS2MemCard_IsFormatted1) passes. Among the six slots that are not flagged (unk_00, unk_04, unk_08
  * all 0) and have a name (slot 67, cPS2MemCard_HasFileName) it keeps the one with the latest modify time (unk_6E), compared by
  * year, month, day and then time of day. Likely bug: the candidate's time of day adds the current best slot's seconds
  * instead of its own.

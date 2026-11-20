@@ -264,7 +264,7 @@ extern "C" int cBENewRaceInterface_setGameEvent(void* self, int ev);
 extern "C" void func_00266CD8();
 extern "C" void func_00261008();
 extern "C" void func_0025B688();
-extern "C" void func_00255898();
+extern "C" void cCommSystem_destroy();
 extern "C" void cCommSystem_construct();
 extern "C" void func_00255F20_ls(int a, const char* b) __asm__("func_00255F20");
 extern "C" void func_0025B650();
@@ -376,7 +376,7 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
         func_00266CD8();
         func_00261008();
         func_0025B688();
-        func_00255898();
+        cCommSystem_destroy();
         cCommSystem_construct();
         func_00255F20_ls((int)cCommSystem_mCommSystem, str_mc0);
         func_0025B650();
@@ -471,9 +471,9 @@ extern "C" void cBENewPlayerInterface_setControllerMapping(void* self, int a1, i
 extern "C" void cBackgroundMan_setActiveImage(void* bg, int idx);
 extern "C" void func_00256088();
 extern "C" void func_002560B0();
-extern "C" void func_00255FA0(void* comm);
-extern "C" void func_00255F50(void* comm, int a1);
-extern "C" void func_00255A20(void* comm);
+extern "C" void cCommSystem_netConnDisconnect(void* comm);
+extern "C" void cCommSystem_netConnConnect(void* comm, int a1);
+extern "C" void cCommSystem_update(void* comm);
 extern "C" int SYNCTASK_run(int);
 extern "C" void THREAD_yieldticks(int);
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
@@ -935,9 +935,9 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         if (self->f8C44 != 0) {
             if (self->f8C44 != 3) {
                 if (commIdle_B4E0(cCommSystem_mCommSystem)) {
-                    func_00255F50(cCommSystem_mCommSystem, 0);
+                    cCommSystem_netConnConnect(cCommSystem_mCommSystem, 0);
                     while (commBusy_B4E0(cCommSystem_mCommSystem)) {
-                        func_00255A20(cCommSystem_mCommSystem);
+                        cCommSystem_update(cCommSystem_mCommSystem);
                         SYNCTASK_run(0);
                         THREAD_yieldticks(1);
                     }
@@ -945,7 +945,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
             }
         } else {
             if (!commIdle_B4E0(cCommSystem_mCommSystem)) {
-                func_00255FA0(cCommSystem_mCommSystem);
+                cCommSystem_netConnDisconnect(cCommSystem_mCommSystem);
             }
         }
         break;

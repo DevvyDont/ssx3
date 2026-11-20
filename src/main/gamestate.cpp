@@ -2539,7 +2539,7 @@ extern "C" void cInputSync_decompressinput(void* self, sPackSrc_7B28* src, char*
 extern "C" void cInputSync_sendClientInput(void* self, sPackSrc_7B28* src);
 extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" int cGameComm_readPacket(void* self, int ch, void* dst, int size);
-extern "C" float func_00258360(void* self);
+extern "C" float cGameComm_getLatency(void* self);
 
 // cInputSync::preupdate (On Tour name and member names; the SSX 3 version differs in structure).
 // cGameComm::mGameComm through On Tour's GameComm() accessor.
@@ -2596,7 +2596,7 @@ struct cInputSync_2373B8 {
  * Does nothing until cGameComm_mGameComm's state is 14 or more. A remote pad (no source pad) takes compressed samples
  * from cGameComm_readPacket while its ring has room, or, offline, neutral samples; each is decompressed (cInputSync_decompressinput)
  * and written numsamples times. A local pad, while under the send limit, samples its buttons every numsamples ticks,
- * sends them (cInputSync_sendClientInput), queues them, and recomputes the send limit from the connection's latency (func_00258360)
+ * sends them (cInputSync_sendClientInput), queues them, and recomputes the send limit from the connection's latency (cGameComm_getLatency)
  * divided by the frame time (SSXApp + 0x14), at least 2 samples, capped at the ring size. cGame_update calls it.
  */
 extern "C" void cInputSync_preupdate(cInputSync_2373B8* self)
@@ -2645,7 +2645,7 @@ extern "C" void cInputSync_preupdate(cInputSync_2373B8* self)
                     sp.samples[sp.writepos % self->latency] = localsample;
                     sp.writepos++;
                 }
-                int n = (int)(func_00258360(GameComm()) / *(float*)((char*)SSXApp + 0x14));
+                int n = (int)(cGameComm_getLatency(GameComm()) / *(float*)((char*)SSXApp + 0x14));
                 if (!(1 < n)) {
                     n = 2;
                 }
@@ -2774,13 +2774,13 @@ struct sPackSrc_7B28;
 struct sPackDst_7B28;
 extern "C" int cInputSync_compressinput(void* self, sPackSrc_7B28* src, sPackDst_7B28* dst);
 extern "C" void cInputSync_decompressinput(void* self, sPackSrc_7B28* src, char* buf);
-extern "C" void func_00257E98(void* mgr, int a, char* buf, int len);
+extern "C" void cGameComm_writePacket(void* mgr, int a, char* buf, int len);
 
 /**
  * Sends one local pad sample: compresses it, decompresses it back into @p src, and posts it on the network when the
  * session is synced, error-free and connected.
  *
- * Uses cInputSync_compressinput and cInputSync_decompressinput, then func_00257E98(cGameComm_mGameComm, 0, buffer, length). Decompressing back
+ * Uses cInputSync_compressinput and cInputSync_decompressinput, then cGameComm_writePacket(cGameComm_mGameComm, 0, buffer, length). Decompressing back
  * makes the local copy match what the peer receives.
  *
  * @param src  the pad sample (button count and values)
@@ -2793,7 +2793,7 @@ extern "C" void cInputSync_sendClientInput(void* self, sPackSrc_7B28* src)
     cGameComm* gameComm = cGameComm_mGameComm;
     int ok = gameComm->mSyncInput != 0 && gameComm->mError == 0 && gameComm->mConnected != 0;
     if (ok) {
-        func_00257E98((char*)cGameComm_mGameComm, 0, buf, len);
+        cGameComm_writePacket((char*)cGameComm_mGameComm, 0, buf, len);
     }
 }
 #endif

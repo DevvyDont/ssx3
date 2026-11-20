@@ -166,7 +166,7 @@ struct LobbyMan {
                                     //       node pointer at 0xF0 (ctor allocates the 0xC-byte head node "StlBlock",
                                     //       dtor func_001DB718 + delete); [U] every reply pushes an Event before
                                     //       the head node (*(node**)(this + 0xF0)); 37 readers outside the class
-    void* mpConfig;                 // 0x0F4 [R] ctor 0; [U] func_0025A650 creates it (func_003E6E08) from the
+    void* mpConfig;                 // 0x0F4 [R] ctor 0; [U] func_0025A650 creates it (NetGameUtilCreate) from the
                                     //       logged-in "pers" config; func_0025A730 looks keys up; func_0025A6F8 frees
     int mRankSlot;                  // 0x0F8 [R] ctor 0; [U] func_0025E348 selects the rank-list slot (0..28)
     int unk_0FC;                    // 0x0FC [R] ctor 0 (no other access)

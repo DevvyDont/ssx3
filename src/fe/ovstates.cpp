@@ -268,8 +268,8 @@ extern "C" void MEM_fill(void* p, int v, int n);
 extern "C" void func_00266CD8();
 extern "C" void func_00261008();
 extern "C" void func_0025B688();
-extern "C" void func_00256C50();
-extern "C" void func_00255898();
+extern "C" void cGameComm_destroy();
+extern "C" void cCommSystem_destroy();
 extern char str_07main_men[];
 extern char D_005308B8[];
 
@@ -282,7 +282,7 @@ struct sVEnt2_00194AA8 { short delta; short index; int (*fn)(void*); };
  *
  * Clears the option block D_005308B8, the choice flag (+0x48) and the Circle counter (+0x54); destroys the
  * voice object, BuddyMan, LobbyMan, cGameComm and cCommSystem (func_00266CD8, func_00261008, func_0025B688,
- * func_00256C50, func_00255898); clears bIsNetworkGame and calls the network interface's slot 1; sets the FE
+ * cGameComm_destroy, cCommSystem_destroy); clears bIsNetworkGame and calls the network interface's slot 1; sets the FE
  * music state 1; stores the number of active pads (UI input slots 44 / 45) in +0x55.
  */
 extern "C" void cFEStateMainMenu_onCreateScreen(cFEStateMainMenu* self)
@@ -299,8 +299,8 @@ extern "C" void cFEStateMainMenu_onCreateScreen(cFEStateMainMenu* self)
     func_00266CD8();
     func_00261008();
     func_0025B688();
-    func_00256C50();
-    func_00255898();
+    cGameComm_destroy();
+    cCommSystem_destroy();
     void* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
     cBENetworkInterface_networkOpt.bIsNetworkGame = 0;
     sVEnt0_00194AA8* vt0 = *(sVEnt0_00194AA8**)((char*)iface + 0xC);

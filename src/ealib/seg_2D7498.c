@@ -162,7 +162,7 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D6768);
 extern int D_0044FFA8_6768[4] __asm__("D_0044FFA8");
 
 /**
- * Returns the speech driver's callback block D_0044FFA8 (+0x8 is the time source; SPCH_Init stores func_003E4E98
+ * Returns the speech driver's callback block D_0044FFA8 (+0x8 is the time source; SPCH_Init stores TIMER_gettick
  * there).
  *
  * @return D_0044FFA8
@@ -4253,7 +4253,7 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DB9A0);
 extern int (*D_0044FFB0[])();
 
 /**
- * Returns the speech clock: the time source D_0044FFB0 (D_0044FFA8 +0x8, func_003E4E98 from SPCH_Init), or 0 when none
+ * Returns the speech clock: the time source D_0044FFB0 (D_0044FFA8 +0x8, TIMER_gettick from SPCH_Init), or 0 when none
  * is set.
  *
  * @return the time

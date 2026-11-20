@@ -897,7 +897,7 @@ extern "C" float cWipeoutMotion_intersectGround(void* self, char* hit, sVec4WG* 
 // PORT: the project names these __FPv (one void* param); this caller passes more.
 void cAirPredictor_land_137860(void* ap, void* pos, void* vel) __asm__("cAirPredictor_land__FPv");
 void func_00111AA0_137860(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
-extern "C" void func_00106538(void* rider, const t4Vector& v);
+extern "C" void cRider_moveFromCollision(void* rider, const t4Vector& v);
 extern "C" void cRider_updateBoundBox(void* rider, int a1);
 extern "C" void cRider_checkObjectCollisions(void* rider, int a1);
 extern "C" void cRider_checkOpponentCollisions(void* rider);
@@ -997,7 +997,7 @@ static inline bool isHuman_137860(cRider* rider)
  * rider lands: cAirPredictor_land (On Tour cAirPredictor::land), the impact effect (func_00111AA0), the handler's landed
  * flag and velocity (+0x314/+0x320), the ground normal, surface, contact point and height, the velocity loses its
  * into-ground part (passed to a hit object's vtable slot 43 scaled by the frame rate), any penetration is pushed out
- * (func_00106538) and the wipeout state (+0x0) becomes 0 (ground).
+ * (cRider_moveFromCollision) and the wipeout state (+0x0) becomes 0 (ground).
  *
  * Otherwise the rider is pushed out by 1.1 x the depth along the hit normal, loses its into-wall velocity when the wall
  * is not ground-like (normals differ by more than ~25 degrees), and cAirPredictor_startLaunchIntoAir relaunches it with
@@ -1052,14 +1052,14 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
             float pen = vu0Dot_137860(vu0Sub_137860(RIDER->mPosition, hitB.pos), hitB.normal);
             if (pen < 0.0f)
             {
-                func_00106538(RIDER, vu0Scale_137860(hitB.normal, -pen));
+                cRider_moveFromCollision(RIDER, vu0Scale_137860(hitB.normal, -pen));
             }
             *(int*)self = 0;
         }
         else
         {
             t4Vector push = vu0Scale_137860(vu0Scale_137860(hitA.normal, 1.100000023841858f), depth);
-            func_00106538(RIDER, push);
+            cRider_moveFromCollision(RIDER, push);
             if (groundParam < 0.0f || vu0Dot_137860(hitB.normal, hitA.normal) < 0.8999999761581421f)
             {
                 float normSpeed = vu0Dot_137860(hitA.normal, RIDER->mVelocity);
@@ -1463,7 +1463,7 @@ struct sVEntH_138640 { short delta; short index; void (*fn)(void*, void*); };
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
-extern "C" void func_00106538(void* rider, const t4Vector& v);
+extern "C" void cRider_moveFromCollision(void* rider, const t4Vector& v);
 extern "C" void cRider_checkObjectCollisions(void* rider, int a1);
 extern "C" void cRider_checkOpponentCollisions(void* rider);
 extern t4Vector D_004FF120_138640 __asm__("t4vect_Zero");
@@ -1587,7 +1587,7 @@ static inline float clamp_138640(float v, float lo, float hi)
  *
  * Intersects the rider's sphere tree with its overlap list, rejecting along mGroundNormal. A hit that is not straight
  * into the ground (normal dot > -0.9999) has its normal flattened against the ground when facing down, notifies the hit
- * object (vtable slot 42), pushes the rider out by 1.1 x the depth (func_00106538) and, when moving into the wall
+ * object (vtable slot 42), pushes the rider out by 1.1 x the depth (cRider_moveFromCollision) and, when moving into the wall
  * relative to the object's own velocity, bounces it back by that speed plus half of it clamped to 27.8..555.6 (1..20
  * kph).
  *
@@ -1618,7 +1618,7 @@ extern "C" void cWipeoutMotion_resolveGroundMotion(void* vself)
                 }
             }
             t4Vector push = vu0Scale_138640(vu0Scale_138640(hit.normal, 1.100000023841858f), depth);
-            func_00106538(RIDER, push);
+            cRider_moveFromCollision(RIDER, push);
             t4Vector netVelocity = vu0Sub_138640(RIDER->mVelocity, hit.v20);
             float dot2 = vu0Dot_138640(vu0Scale_138640(hit.normal, -1.0f), netVelocity);
             if (0.0f <= dot2) {

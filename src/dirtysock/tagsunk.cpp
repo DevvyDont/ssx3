@@ -985,7 +985,7 @@ extern "C" void LobbyMan_onplaymsg(LobbyMan* self, char* msg)
 INCLUDE_ASM("dirtysock/tagsunk", func_0025A650);
 #ifdef SKIP_ASM
 extern "C" char* func_003E8A70(void* p, int tag);
-extern "C" void* func_003E6E08();
+extern "C" void* NetGameUtilCreate();
 extern "C" void func_003E7120(void* h, char* fmt, char* arg);
 extern char str_SSX_PS2_2004[];
 
@@ -993,7 +993,7 @@ extern char str_SSX_PS2_2004[];
  * Creates the lobby config handle mpConfig from the logged-in persona's 'pers' data, once.
  *
  * Does nothing unless mLoggedIn is set, mpConfig is still 0 and the LobbyApi's 'pers' value (func_003E8A70) is a
- * non-empty string. Then it creates the handle with func_003E6E08() and loads that text into it under the section
+ * non-empty string. Then it creates the handle with NetGameUtilCreate() and loads that text into it under the section
  * "SSX-PS2-2004" (func_003E7120). func_0025A730() reads keys from it and func_0025A6F8() frees it.
  */
 extern "C" void func_0025A650(LobbyMan* self)
@@ -1006,7 +1006,7 @@ extern "C" void func_0025A650(LobbyMan* self)
         return;
     if (*func_003E8A70(self->mpLobbyApi, 0x70657273) == 0)
         return;
-    self->mpConfig = func_003E6E08();
+    self->mpConfig = NetGameUtilCreate();
     if (self->mpConfig == 0)
         return;
     func_003E7120(self->mpConfig, str_SSX_PS2_2004, func_003E8A70(self->mpLobbyApi, 0x70657273));
@@ -1363,8 +1363,8 @@ extern "C" void func_0025F628(LobbyMan* selfp, int notify, int flag);
 extern "C" void func_0025EED8(LobbyMan* self);
 extern "C" int* func_002591D0();
 extern "C" void func_00263BA8(void* p, int arg);
-extern "C" int func_00255D38(void* comm, int chan);
-extern "C" void func_00255CC8(void* comm, int chan);
+extern "C" int cCommSystem_isChannelOpen(void* comm, int chan);
+extern "C" void cCommSystem_closeChannel(void* comm, int chan);
 extern "C" void func_003EE620(void* p);
 extern "C" void func_00261490(BuddyMan* p);
 extern "C" void func_0017D260(void* self, void* msg);
@@ -1613,8 +1613,8 @@ extern "C" void func_0025AC50(LobbyMan* self)
         if (notJoined) {
             if (*func_002591D0() != 0)
                 func_00263BA8(func_002591D0(), 0);
-            else if (func_00255D38(cCommSystem_mCommSystem, 0) != 0)
-                func_00255CC8(cCommSystem_mCommSystem, 0);
+            else if (cCommSystem_isChannelOpen(cCommSystem_mCommSystem, 0) != 0)
+                cCommSystem_closeChannel(cCommSystem_mCommSystem, 0);
         }
         if (self->mLoggedIn != 0) {
             func_003EE620(self->mpRoomList);
@@ -1686,13 +1686,13 @@ INCLUDE_ASM("dirtysock/tagsunk", func_0025B688);
 #ifdef SKIP_ASM
 extern "C" void func_0025B800(LobbyMan* self);
 extern "C" void LobbyMan__LobbyMan(LobbyMan* self, int flags);
-extern "C" void func_00256C50(void);
+extern "C" void cGameComm_destroy(void);
 
 /**
  * Destroys the lobby manager singleton and the in-race comm object.
  *
  * When LobbyMan_mLobbyMan exists it disconnects it (func_0025B800), runs the destructor LobbyMan__LobbyMan() with flags 3
- * (free) and clears the pointer; then destroys cGameComm_mGameComm with func_00256C50() if there is one.
+ * (free) and clears the pointer; then destroys cGameComm_mGameComm with cGameComm_destroy() if there is one.
  */
 extern "C" void func_0025B688(void)
 {
@@ -1704,7 +1704,7 @@ extern "C" void func_0025B688(void)
         LobbyMan_mLobbyMan = 0;
     }
     if (cGameComm_mGameComm != 0) {
-        func_00256C50();
+        cGameComm_destroy();
     }
 }
 #endif
@@ -8701,19 +8701,19 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002636A8);
 #ifdef SKIP_ASM
 extern float D_004A2F0C;
 extern float D_004A2F10;
-extern "C" void func_00255F50(void* p);
+extern "C" void cCommSystem_netConnConnect(void* p);
 
 /**
- * Starts connecting to the network: calls func_00255F50 (cCommSystem's netConnConnect) and arms a timeout.
+ * Starts connecting to the network: calls cCommSystem_netConnConnect (cCommSystem's netConnConnect) and arms a timeout.
  *
  * The connection manager is cRealFE + 0xB5AB0 (func_002591B8 returns it). The caller's second argument (the network
- * configuration func_001B45E8 chose) is not in the C declaration and reaches func_00255F50 untouched in the second
+ * configuration func_001B45E8 chose) is not in the C declaration and reaches cCommSystem_netConnConnect untouched in the second
  * argument register. Sets the timeout at +0x4 to 60.0 seconds on broadband (mBroadBand set) or 180.0 otherwise, and the
  * state at +0x0 to 1; func_00263828() then watches mNetConnState.
  */
 extern "C" void func_002636A8(void* self)
 {
-    func_00255F50(cCommSystem_mCommSystem);
+    cCommSystem_netConnConnect(cCommSystem_mCommSystem);
     float timeout;
     if (cCommSystem_mCommSystem->mBroadBand != 0) {
         timeout = D_004A2F0C;
@@ -8736,7 +8736,7 @@ extern "C" int func_00261460(void* p);
 extern "C" void func_002613C8(BuddyMan* p);
 extern "C" void func_0025B800(LobbyMan* self);
 extern "C" void func_00261408(BuddyMan* p);
-extern "C" void func_00255FA0(void* p);
+extern "C" void cCommSystem_netConnDisconnect(void* p);
 struct sMsgListNode36F0 {
     sMsgListNode36F0* next;
     sMsgListNode36F0* prev;
@@ -8772,7 +8772,7 @@ static inline bool isState_36F0(int st)
  *
  * Makes sure BuddyMan_mBuddyMan exists and is connected (func_00260F80 / func_002613C8, func_0025B800 if it still does
  * not exist), then disconnects it (func_00261408()) and the lobby (func_0025B800). Unless mNetConnState is 1 (idle) it
- * also calls func_00255FA0 (netConnDisconnect), posts an online::Event of type 278 (tag "NetErrorEvent", vtable
+ * also calls cCommSystem_netConnDisconnect (netConnDisconnect), posts an online::Event of type 278 (tag "NetErrorEvent", vtable
  * online_NetErrorEvent_vtbl, @p val at +0x8) to LobbyMan's mEventList when @p val is non-zero, and sets the connection manager's state
  * to 0. Quirk: it may create and reconnect BuddyMan only to disconnect it.
  *
@@ -8790,7 +8790,7 @@ extern "C" void func_002636F0(int* out, int val)
     func_00261408(BuddyMan_mBuddyMan);
     func_0025B800(LobbyMan_mLobbyMan);
     if (!isState_36F0(1)) {
-        func_00255FA0(cCommSystem_mCommSystem);
+        cCommSystem_netConnDisconnect(cCommSystem_mCommSystem);
         if (val != 0) {
             LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
             int* errorEvent = (int*)operator new(0xC, str_NetErrorEvent, 0x20000000, 0);
@@ -9040,8 +9040,8 @@ extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* D_004A33CC;
 extern void* D_004A33F4;
-extern "C" int func_00255D38(void* comm, int chan);
-extern "C" void func_00255CC8(void* comm, int chan);
+extern "C" int cCommSystem_isChannelOpen(void* comm, int chan);
+extern "C" void cCommSystem_closeChannel(void* comm, int chan);
 extern "C" void func_00264098(void);
 extern "C" void func_00266DF8(void* self);
 extern "C" void func_00266E88(void* self);
@@ -9083,7 +9083,7 @@ static inline void post_3BA8(char* self, void* msg)
 /**
  * Shuts the game-connection manager down and tells the front end why.
  *
- * When it is active and its channel is open (func_00255D38) it closes the channel (func_00255CC8) and calls
+ * When it is active and its channel is open (cCommSystem_isChannelOpen) it closes the channel (cCommSystem_closeChannel) and calls
  * func_00266E88 and func_00266DF8 on the voice manager D_004A33F4. It destroys the setup manager if there is one
  * (func_00264098()), calls func_0025F740(LobbyMan, 0), clears the state and posts an online::Event to LobbyMan's
  * mEventList: type 268 for @p reason 1, type 274 for @p reason 0, none otherwise (callers pass 2).
@@ -9094,9 +9094,9 @@ static inline void post_3BA8(char* self, void* msg)
 extern "C" void func_00263BA8(void* gameConn, int reason)
 {
     int* self = (int*)gameConn;
-    if (self[0] != 0 && func_00255D38(cCommSystem_mCommSystem, self[1]) != 0)
+    if (self[0] != 0 && cCommSystem_isChannelOpen(cCommSystem_mCommSystem, self[1]) != 0)
     {
-        func_00255CC8(cCommSystem_mCommSystem, self[1]);
+        cCommSystem_closeChannel(cCommSystem_mCommSystem, self[1]);
         func_00266E88(D_004A33F4);
         func_00266DF8(D_004A33F4);
     }
@@ -9130,9 +9130,9 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_setRiderCharID(void* iface, int rider, int ch);
 extern "C" void cGameComm_construct(int a, int b);
 extern "C" void cBENetworkInterface_backupCharProfile(void* self, int a);
-extern "C" int func_00255D50(void* comm, int chan);
-extern "C" int func_00255E40(void* comm, int chan);
-extern "C" void func_00256C50(void);
+extern "C" int cCommSystem_isChannelConnected(void* comm, int chan);
+extern "C" int cCommSystem_getError(void* comm, int chan);
+extern "C" void cGameComm_destroy(void);
 extern "C" void func_0025B800(LobbyMan* self);
 extern "C" void func_00260F80(void);
 extern "C" void func_002613C8(BuddyMan* p);
@@ -9178,15 +9178,15 @@ static inline void* Mgr_263CF0()
  * Updates the game-connection manager once per front-end frame (cRealFE_update) and starts the race when both sides are
  * set up.
  *
- * State 1 (connecting): once the channel is connected (func_00255D50) it either shuts down with reason 1 (cancel flag
+ * State 1 (connecting): once the channel is connected (cCommSystem_isChannelConnected) it either shuts down with reason 1 (cancel flag
  * +0xC set) or creates the setup manager (func_00264030() with the channel, host flag and bIsRankedGame), sends our
- * rank to the peer (func_00264CB8()) and moves to state 2; a channel error (func_00255E40) or an expired timeout
+ * rank to the peer (func_00264CB8()) and moves to state 2; a channel error (cCommSystem_getError) or an expired timeout
  * (+0x10, counted down by the frame time) shuts down with reason 0. State 2: a channel error posts event 275 (unless
  * the setup manager is in state 11) and shuts down with reason 2; otherwise it updates the setup manager
  * (func_002642B8()). Setup state 11 shuts down with reason 2; state 13 starts the race: destroys the setup manager,
  * disconnects the lobby (func_0025B800), sets cRealFE_mStartState to 52, publishes buddy presence (state 1, location 9,
  * the opponent's name), applies MyCharacterID to rider 0, backs up the character profile, replaces any old cGameComm
- * (func_00256C50, cGameComm_construct with the channel and host flag), queues a cPreGameLoadScreen as the next module
+ * (cGameComm_destroy, cGameComm_construct with the channel and host flag), queues a cPreGameLoadScreen as the next module
  * and returns to state 0.
  */
 extern "C" void func_00263CF0(int* self)
@@ -9196,7 +9196,7 @@ extern "C" void func_00263CF0(int* self)
     case 0:
         break;
     case 1:
-        if (func_00255D50(cCommSystem_mCommSystem, self[1]))
+        if (cCommSystem_isChannelConnected(cCommSystem_mCommSystem, self[1]))
         {
             if (self[3] != 0)
             {
@@ -9209,7 +9209,7 @@ extern "C" void func_00263CF0(int* self)
             self[0] = 2;
             return;
         }
-        if (func_00255E40(cCommSystem_mCommSystem, self[1]) || tsTimedOut_263CF0(self))
+        if (cCommSystem_getError(cCommSystem_mCommSystem, self[1]) || tsTimedOut_263CF0(self))
         {
             func_00263BA8(self, 0);
             return;
@@ -9217,7 +9217,7 @@ extern "C" void func_00263CF0(int* self)
         *(float*)(self + 4) = *(float*)(self + 4) - *(float*)((char*)SSXApp + 0x14);
         return;
     case 2:
-        if (func_00255E40(cCommSystem_mCommSystem, self[1]))
+        if (cCommSystem_getError(cCommSystem_mCommSystem, self[1]))
         {
             if (!tsIsState_263CF0(11))
             {
@@ -9251,7 +9251,7 @@ extern "C" void func_00263CF0(int* self)
             vt[1].fn(bi1 + vt[1].delta);
             cBENetworkInterface_backupCharProfile(bi7, 0);
             if (cGameComm_mGameComm != 0)
-                func_00256C50();
+                cGameComm_destroy();
             cGameComm_construct(self[1], self[2]);
             cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen_c, 0x100, 0)));
             self[0] = 0;
@@ -9729,7 +9729,7 @@ extern "C" int func_002649B0(sDsPacketQueueK2* self, void* dst)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00264A58);
 #ifdef SKIP_ASM
-extern "C" int func_00255DC0(void* mgr, int idx, void* buf, int len);
+extern "C" int cCommSystem_readPacket(void* mgr, int idx, void* buf, int len);
 // PORT: func_00264960 is defined as f(void); this caller passes self in $a0.
 void* func_00264960_self(void* self) __asm__("func_00264960");
 
@@ -9746,7 +9746,7 @@ struct sDsRecvQueue_00264A58 {
 /**
  * Reads every pending packet from the setup manager's comm channel into its 32-slot receive queue.
  *
- * Allocates a 0xF0-byte buffer (func_00264960()) as the pending one at +0x4 and fills it with func_00255DC0 on the
+ * Allocates a 0xF0-byte buffer (func_00264960()) as the pending one at +0x4 and fills it with cCommSystem_readPacket on the
  * channel (+0x120); each packet read is queued. It stops when the read returns nothing (freeing the unused buffer) or
  * when 31 packets are queued (keeping the filled buffer pending for the next call).
  *
@@ -9759,7 +9759,7 @@ extern "C" void func_00264A58(void* setupMan)
     void* buf;
     while (self->cur != 0
            || (buf = func_00264960_self(self), self->cur = buf,
-               func_00255DC0(cCommSystem_mCommSystem, self->chan, buf, 0xF0) != 0))
+               cCommSystem_readPacket(cCommSystem_mCommSystem, self->chan, buf, 0xF0) != 0))
     {
         bool full = self->tail - self->head >= 0x1F;
         if (full)
@@ -9775,7 +9775,7 @@ extern "C" void func_00264A58(void* setupMan)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00264B20);
 #ifdef SKIP_ASM
-extern "C" int func_00255E00(void* mgr, int idx, void* buf, int len);
+extern "C" int cCommSystem_writePacket(void* mgr, int idx, void* buf, int len);
 
 struct sDsPacket_00264B20 {
     unsigned short kind;   // 0x0
@@ -9794,7 +9794,7 @@ struct sDsSendQueue_00264B20 {
 /**
  * Sends the setup manager's queued outgoing packets until the queue is empty or the channel refuses one.
  *
- * Each packet goes to func_00255E00 on the channel (+0x120) with its size (u16 at +0x2); a sent packet is freed with
+ * Each packet goes to cCommSystem_writePacket on the channel (+0x120) with its size (u16 at +0x2); a sent packet is freed with
  * func_00264990().
  *
  * @param setupMan  the setup manager (send queue: tail +0x90, head +0x94, slots +0x98)
@@ -9811,7 +9811,7 @@ extern "C" void func_00264B20(void* setupMan)
             pkt = self->slots[head % 32];
         else
             pkt = 0;
-        if (func_00255E00(cCommSystem_mCommSystem, self->chan, pkt, pkt->size) == 0)
+        if (cCommSystem_writePacket(cCommSystem_mCommSystem, self->chan, pkt, pkt->size) == 0)
             return;
         self->head++;
         func_00264990(self, (int*)pkt);
@@ -9822,7 +9822,7 @@ extern "C" void func_00264B20(void* setupMan)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_00264BE8);
 #ifdef SKIP_ASM
-extern "C" int func_00255E00(void* mgr, int idx, void* buf, int len);
+extern "C" int cCommSystem_writePacket(void* mgr, int idx, void* buf, int len);
 extern "C" void func_00264B20(void* p);
 // PORT: func_00264960 is defined as f(void); this caller passes self in $a0.
 void* func_00264960_self(void* self) __asm__("func_00264960");
@@ -9851,7 +9851,7 @@ int func_00264BE8_impl(void* p, const void* src, int len) __asm__("func_00264BE8
  * Sends a message to the peer through the setup manager's channel, queueing it when the channel is busy.
  *
  * Flushes the send queue first (func_00264B20()), then wraps @p src in a packet with a 4-byte header (kind 0, flags 0,
- * u16 size = @p len + 4) and offers it to func_00255E00; when that refuses, a copy goes into a new 0xF0-byte buffer at
+ * u16 size = @p len + 4) and offers it to cCommSystem_writePacket; when that refuses, a copy goes into a new 0xF0-byte buffer at
  * the tail of the send queue. Quirks: there is no check that the queue has room or that @p len fits 0xEC bytes, and a
  * new message can go out ahead of older ones still queued.
  *
@@ -9870,7 +9870,7 @@ int func_00264BE8_impl(void* setupMan, const void* src, int len)
     pkt.flags = 0;
     pkt.size = len + 4;
     MEM_copy(pkt.data, src, len);
-    if (func_00255E00(cCommSystem_mCommSystem, self->chan, &pkt, pkt.size) != 0)
+    if (cCommSystem_writePacket(cCommSystem_mCommSystem, self->chan, &pkt, pkt.size) != 0)
         return 1;
     void* buf = func_00264960_self(self);
     MEM_copy(buf, &pkt, pkt.size);
@@ -11090,7 +11090,7 @@ extern void* D_004A33D8;
 /**
  * Tells whether the memory card is present but unformatted.
  *
- * Uses the card's virtual slots 53 (func_002D3810, cPS2MemCard_IsAvailable for the current port) and 55 (func_002D38F0,
+ * Uses the card's virtual slots 53 (cPS2MemCard_IsAvailable1, cPS2MemCard_IsAvailable for the current port) and 55 (cPS2MemCard_IsFormatted1,
  * cPS2MemCard_IsFormatted for it).
  *
  * @return 1 when the card is available and not formatted, otherwise 0
@@ -11242,7 +11242,7 @@ struct cDsObj265D38 {
 extern void* D_004A33D8;
 
 /**
- * Tells whether the memory card in the current port was changed, through the card's virtual slot 63 (func_002D3930,
+ * Tells whether the memory card in the current port was changed, through the card's virtual slot 63 (cPS2MemCard_CardChanged1,
  * cPS2MemCard_CardChanged).
  *
  * @return non-zero when the card was changed
@@ -11315,7 +11315,7 @@ struct cDsObj265D68 {
 extern void* D_004A33D8;
 
 /**
- * Tells whether there is no usable memory card, by negating the card's virtual slot 53 (func_002D3810,
+ * Tells whether there is no usable memory card, by negating the card's virtual slot 53 (cPS2MemCard_IsAvailable1,
  * cPS2MemCard_IsAvailable for the current port).
  *
  * @return 1 when the card is not available, otherwise 0

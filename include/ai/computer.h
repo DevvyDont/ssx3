@@ -37,14 +37,14 @@
 struct cInput;
 
 // g++ 2.95 pointer to member function (8 bytes): {delta, index, pfn | delta2}. The static cComputer::mCruiseLogic[4]
-// ([O]; retail D_0043CF20) holds four non-virtual ones (index -1): cComputer_jumpSetupCruise, func_00100680, cComputer_avoidTargetCruise
+// ([O]; retail D_0043CF20) holds four non-virtual ones (index -1): cComputer_jumpSetupCruise, cComputer_followPathCruise, cComputer_avoidTargetCruise
 // ([O] avoidTargetCruise) and cComputer_attackTargetCruise, each of which also switches the logic (writes cruiseLogic/mCruiseLogicID).
 struct tComputerCruiseLogic {
-    short delta;      // 0x0 [U] func_0010A960 (the call through it)
-    short index;      // 0x2 [U] func_0010A960 tests it (-1 in every D_0043CF20 entry: non-virtual)
+    short delta;      // 0x0 [U] cComputer_getCruiseCmd (the call through it)
+    short index;      // 0x2 [U] cComputer_getCruiseCmd tests it (-1 in every D_0043CF20 entry: non-virtual)
     union {
-        void* pfn;    // 0x4 [U] func_0010A960 (non-virtual)
-        short delta2; // 0x4 [U] func_0010A960 (virtual: offset of the vptr)
+        void* pfn;    // 0x4 [U] cComputer_getCruiseCmd (non-virtual)
+        short delta2; // 0x4 [U] cComputer_getCruiseCmd (virtual: offset of the vptr)
     } u;
 };
 
@@ -58,7 +58,7 @@ struct cComputer {
     char unk_000[0x18];        // 0x000 the first part's own data
     cRider* mRider;            // 0x018 [R] the first part's virtual-base pointer: cComputer_cComputer stores
                                //       &this->Rider here (and in 30 other part pointers); [U] every user reads the
-                               //       rider through it (cAI_initComputerRiders, func_00100680 ...)
+                               //       rider through it (cAI_initComputerRiders, cComputer_followPathCruise ...)
     char unk_01C[0xDC4];       // 0x01C the other parts of cRiderHandler (virtual-base pointers at the same offsets
                                //       as in cPlayer: 0x024, 0x070, 0x0A0, 0x100 ... 0xC70, 0xD20)
     int MotionState;           // 0xDE0 [P] cRiderHandler::_getMotionState; [R] cRiderHandler__getMotionState; [O]
@@ -105,7 +105,7 @@ struct cComputer {
     // ---- cComputer ----
     cInput* Input;             // 0xF40 [P] setInput (preview 0xEF0); [R] cComputer_setInput; [O]
     tComputerCruiseLogic cruiseLogic; // 0xF44 [P] setCruiseLogic (preview 0xEF4); [R] Init = mCruiseLogic[1],
-                               //       cComputer_setCruiseLogic; [U] func_0010A960 calls through it; [O] "void ::* cruiseLogic"
+                               //       cComputer_setCruiseLogic; [U] cComputer_getCruiseCmd calls through it; [O] "void ::* cruiseLogic"
     char pad_F4C[0x4];         // 0xF4C the cRider virtual base is 16-byte aligned
     // ---- virtual base cRider (0xF50-0x1A90) ----
     cRider Rider;              // 0xF50 [R] cComputer_cComputer: cRider_cRider(this + 0xF50) when in charge

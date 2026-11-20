@@ -1526,7 +1526,7 @@ extern "C" void cUIStateStack_push(void* stack, void* state);
 extern "C" void* cFEStateTitle_cFEStateTitle1(void* self, void* owner);
 extern "C" void* cFEStateLodge_cFEStateLodge(void* self, void* owner);
 extern "C" void* cFEStateRelogin_cFEStateRelogin(void* self, void* owner);
-extern "C" void func_00255CC8(void* a, int b);
+extern "C" void cCommSystem_closeChannel(void* a, int b);
 extern "C" void func_00266E88(void* a);
 extern "C" void func_00266DF8(void* a);
 extern "C" void func_0025B6D8(void* a, int b);
@@ -1595,7 +1595,7 @@ extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
         D_004A19D8 = 0;
         void* st = cFEStateRelogin_cFEStateRelogin(cMemMan_alloc(1748, str_cFEStateRelogin, 0, 0), self->ui);
         cUIStateStack_push(self->ui + 0x18, st);
-        func_00255CC8(cCommSystem_mCommSystem, cGameComm_mGameComm->unk_06C);
+        cCommSystem_closeChannel(cCommSystem_mCommSystem, cGameComm_mGameComm->unk_06C);
         func_00266E88(D_004A33F4);
         func_00266DF8(D_004A33F4);
         func_0025B6D8(LobbyMan_mLobbyMan, 1);

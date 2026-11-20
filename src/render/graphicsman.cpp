@@ -157,7 +157,7 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_FlushRenderer);
 #ifdef SKIP_ASM
 extern char* cAppMan_TheAppMan;
 extern "C" void SYNCTASK_run(int a);
-extern "C" void func_003E5398(int a);
+extern "C" void THREAD_yield(int a);
 
 struct sGmVEntryI_9C28 {
     short delta;
@@ -185,7 +185,7 @@ public:
 
 /**
  * Spins until the renderer is idle: while virtual slot 18 returns 0, runs the app object's (cAppMan_TheAppMan + 8) slot 11,
- * SYNCTASK_run(0), func_003E5398(0) and the app's slot 12.
+ * SYNCTASK_run(0), THREAD_yield(0) and the app's slot 12.
  */
 extern "C" void cGraphicsMan_FlushRenderer(cGraphicsMan* self)
 {
@@ -194,7 +194,7 @@ extern "C" void cGraphicsMan_FlushRenderer(cGraphicsMan* self)
         if (vt[18].fn((char*)self + vt[18].delta) != 0) break;
         (*(cGmApp_9C28**)(cAppMan_TheAppMan + 0x8))->v11();
         SYNCTASK_run(0);
-        func_003E5398(0);
+        THREAD_yield(0);
         (*(cGmApp_9C28**)(cAppMan_TheAppMan + 0x8))->v12();
     }
 }

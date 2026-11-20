@@ -795,13 +795,13 @@ extern "C" int cPlaybackMan_findFileById(void *self, int id)
 //100%
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_setupFile);
 #ifdef SKIP_ASM
-extern "C" int func_002C85A0(void* src, int a, int dst);
+extern "C" int HUFF_decode(void* src, int a, int dst);
 extern "C" void MEM_fill(void* dst, int c, int n);
 
 /**
  * Unpacks playback file entry @p idx into the current frame (+0x4), or clears that frame when the file has no data.
  *
- * With data (entry +0x4) it is decoded into the frame with func_002C85A0 and the result is 1. Otherwise the
+ * With data (entry +0x4) it is decoded into the frame with HUFF_decode and the result is 1. Otherwise the
  * 0x1C22C-byte frame is zeroed, its version word set to 0xDBAC0101 and its input buffer size (+0x4) to 0x1C200, and the
  * result is 0.
  *
@@ -813,7 +813,7 @@ extern "C" int cPlaybackMan_setupFile(void* self, int idx)
     char* entry = (char*)(idx * 0xC + *(int*)((char*)self + 0x58)); // PORT: pointer held as int
     int data = *(int*)(entry + 4);
     if (data != 0) {
-        func_002C85A0((void*)data, 0, (int)*(void**)((char*)self + 4));
+        HUFF_decode((void*)data, 0, (int)*(void**)((char*)self + 4));
         return 1;
     }
     char* buf = *(char**)((char*)self + 4);
@@ -1189,13 +1189,13 @@ extern "C" int cReplayCache_moveTo(sPlaybackStream* self, unsigned int pos)
 INCLUDE_ASM("replay/playbackman", cReplayCache_load);
 #ifdef SKIP_ASM
 extern "C" void MEM_copy(void* dst, void* src, int size);
-extern "C" int func_002C85A0(void* src, int a, int dst);
+extern "C" int HUFF_decode(void* src, int a, int dst);
 
 /**
  * Loads a replay input cache from saved replay data.
  *
  * Reads the 8-byte save header from *@p pp (its second word goes to +0x0), then a 4-byte size, and decodes the
- * compressed commands into the cache buffer (+0xC) with func_002C85A0 (On Tour HUFF_decode); advances *@p pp past all
+ * compressed commands into the cache buffer (+0xC) with HUFF_decode (On Tour HUFF_decode); advances *@p pp past all
  * of it. On Tour asserts the save type and size; retail does not check. Called by cReplay_load.
  *
  * @param pp  in/out: the read cursor in the save data
@@ -1213,7 +1213,7 @@ extern "C" int cReplayCache_load(void* self, char** pp)
     *(int*)self = hdr.value;
     MEM_copy(&size, *pp, 4);
     *pp += 4;
-    func_002C85A0(*pp, 0, *(int*)((char*)self + 0xC));
+    HUFF_decode(*pp, 0, *(int*)((char*)self + 0xC));
     *pp += size;
     return 1;
 }

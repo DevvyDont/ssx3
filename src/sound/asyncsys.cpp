@@ -41,20 +41,20 @@ void cAsyncSys_ASYNCSYS_Init(cAsyncSys* self, unsigned int x, int flags)
 INCLUDE_ASM("sound/asyncsys", cAsyncSys_ASYNCSYS_DeInit);
 #ifdef SKIP_ASM
 extern "C" void cAsyncSys_DoCancel(void* self, int a);
-extern "C" void func_003E4FB0(int a);
+extern "C" void TIMER_waitticks(int a);
 void cMemMan_free(void* p);
 
 /**
  * Shuts the async system down: services it until no request is pending, then frees its buffer.
  *
- * Calls cAsyncSys_DoCancel(self, 1) and, while the pending count (+0x4) is nonzero, sleeps (func_003E4FB0(2)) and calls
+ * Calls cAsyncSys_DoCancel(self, 1) and, while the pending count (+0x4) is nonzero, sleeps (TIMER_waitticks(2)) and calls
  * it again. Frees the "AsyncSysBuffer" (+0x1CC) and clears it and its size (+0x1D0).
  */
 extern "C" void cAsyncSys_ASYNCSYS_DeInit(cAsyncSys* self)
 {
     cAsyncSys_DoCancel(self, 1);
     while (*(int*)((char*)self + 4) != 0) {
-        func_003E4FB0(2);
+        TIMER_waitticks(2);
         cAsyncSys_DoCancel(self, 1);
     }
     if (self->field_0x1CC != 0) {

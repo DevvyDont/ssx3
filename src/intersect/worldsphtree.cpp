@@ -1493,7 +1493,7 @@ static inline int overlapBox_334458(const sQuery_334458* q, const sBox_334458* o
  * +0x6C max), a flag 0x40 one asks its object (+0xC) through virtual slots 44 (takes part) and 45 (box). Each one that
  * overlaps the query's box (max +0x20, min +0x30) goes to intersect_instanceIntersect with the room left, in mode 2
  * when @p full is set and 1 otherwise. Unlike cOverlapList_terrainIntersect it neither skips instances whose +0x88 word is 0 nor checks
- * the object for null. Called by func_00104E70.
+ * the object for null. Called by cRider_objectIntersect.
  *
  * @param query  the query (On Tour cWorldIntersectType)
  * @param buf  out: the hit records, 0x80 bytes each

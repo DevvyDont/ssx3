@@ -1866,7 +1866,7 @@ extern "C" void cRiderAnimBase_changeHeadingOffset(void* self, float a);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" void cRider_updateOrientationImplicit(cRider* self);
 extern "C" void cRider_doLeanPoseAdjust(cRider* self, t4Vector* pos);
-extern "C" void func_00116930(cRider* self);
+extern "C" void cRider_verifyRailslideModeDEBUG(cRider* self);
 extern "C" void cRider_rotateOrientation(cRider* self, const t4Vector& axis, float angle);
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" float cRiderMetrix_evWipeout(cRiderMetrix* m, int a);
@@ -2078,7 +2078,7 @@ extern "C" void cRider_flagEventWipeout(cRider* rider, int anim, int isPunch, in
         ResetAnimOrientation_EB30((char*)rider->mRiderAnim, 0.0f);
     }
     rider->RailslideMode = 0;
-    func_00116930(rider);
+    cRider_verifyRailslideModeDEBUG(rider);
     cRider_doLeanPoseAdjust(rider, &rider->mPosition);
     cRider_updateOrientationImplicit(rider);
     rider->mSlewed[0].target = 0.0f;
@@ -2535,7 +2535,7 @@ struct sAI_0010F998 { char pad[0x28]; cRider* riders[19]; int mode; int count; }
 extern "C" int cAI_isAILoadedAndReady(void* self);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_ChangePosition(void* mgr, void* rider, void* next, void* prev, int oldPos, int newPos);
-extern "C" void func_003E6328(int n, int* keys, int* idx);
+extern "C" void SORT_shell(int n, int* keys, int* idx);
 float cRider_getDistanceLeft(void* self);
 
 /**
@@ -2543,7 +2543,7 @@ float cRider_getDistanceLeft(void* self);
  *
  * Does nothing for rank type 0 or before cAI_isAILoadedAndReady. Type 1 ranks racers by -(distance left + 20 x their
  * current place unk_0EC), so a rider must gain 20 units to pass; type 2 ranks by the metrix's +0x198 points. Keys are
- * sorted largest first (func_003E6328). For each new place that differs from unk_0EC, cSSXAudio_ChangePosition gets the
+ * sorted largest first (SORT_shell). For each new place that differs from unk_0EC, cSSXAudio_ChangePosition gets the
  * rider, the riders after and before it and the old and new place; the place is stored in unk_0EC. Actors get key
  * 0xFFFF in type 1, which sorts them ahead of every racer, but -0xFFFF in type 2. The two branches on mFinishTime >= 10
  * compute the same key.
@@ -2589,7 +2589,7 @@ extern "C" void cAI_UpdateRankingPlacement(cAI* aiObj)
     // Re-read count into a local: GCSE makes this load redundant with the loop-test
     // loads and leaves a copy (a0 = v0) after each of them.
     int n = self->count;
-    func_003E6328(n, keys, idx);
+    SORT_shell(n, keys, idx);
     int j;
     for (j = 0; j < self->count; j++)
     {
@@ -3407,7 +3407,7 @@ public:
 };
 
 extern char gPaths[];
-extern "C" void func_00104D68(void* self, void* s);
+extern "C" void cRiderAnim_writeToReplayFrame(void* self, void* s);
 extern "C" void cAnimModel_writeToReplayFrame(void* self, void* s);
 extern "C" void cAirPredictor_writeToReplayFrame(void* self, void* s);
 extern "C" void cRiderMetrix_writeToReplayFrame(void* self, void* s);
@@ -3444,7 +3444,7 @@ extern "C" void cRiderHandler_writeToReplayFrame(cRiderHandler* self, char* data
 {
     cStream_00111AC0* st = (cStream_00111AC0*)data;
     st->Write(self->GroundMotion.mRider, 1728);
-    func_00104D68(*(void**)((char*)self->GroundMotion.mRider + 0x784), data);
+    cRiderAnim_writeToReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x784), data);
     cAnimModel_writeToReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x780), data);
     cAirPredictor_writeToReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x788), data);
     cRiderMetrix_writeToReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x790), data);
@@ -3510,7 +3510,7 @@ struct sRefWorld_00111D98 {
 };
 
 extern char gPaths[];
-extern "C" void func_00104DE0(void* self, void* s);
+extern "C" void cRiderAnim_readFromReplayFrame(void* self, void* s);
 extern "C" void cAnimModel_readFromReplayFrame(void* self, void* s);
 extern "C" void cAirPredictor_readFromReplayFrame(void* self, void* s);
 extern "C" void cRiderMetrix_readFromReplayFrame(void* self, void* s);
@@ -3591,7 +3591,7 @@ extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, char* dat
 {
     cStream_00111D98* st = (cStream_00111D98*)data;
     st->Read(self->GroundMotion.mRider, 1728);
-    func_00104DE0(self->GroundMotion.mRider->mRiderAnim, data);
+    cRiderAnim_readFromReplayFrame(self->GroundMotion.mRider->mRiderAnim, data);
     cAnimModel_readFromReplayFrame(self->GroundMotion.mRider->mAnimModel, data);
     cAirPredictor_readFromReplayFrame(self->GroundMotion.mRider->mAirPredictor, data);
     cRiderMetrix_readFromReplayFrame(self->GroundMotion.mRider->mMetrix, data);
@@ -3655,7 +3655,7 @@ INCLUDE_ASM("ai/computer", cRider_initPath);
 #ifdef SKIP_ASM
 extern "C" void* cPathSys_getStartpoint(void*, int, int);
 extern char gPaths[];
-extern "C" float func_00115B08(void* self);
+extern "C" float cRider_getStartGateHorizOffset(void* self);
 
 struct sVec4_00112180
 {
@@ -3701,7 +3701,7 @@ static inline void vu0AddEq_112180(sVec4_00112180& dst, sVec4_00112180 b)
  * Attaches the rider to its start point's track and AI paths, optionally placing it at the start gate first.
  *
  * Gets start point mAIIndex of type 1 from gPaths (cPathSys_getStartpoint, On Tour cPathSys::getStartpoint). With @p flag the
- * rider is put at the start position moved along the start direction by func_00115B08 (On Tour
+ * rider is put at the start position moved along the start direction by cRider_getStartGateHorizOffset (On Tour
  * getStartGateHorizOffset), facing that direction, with AI anim 5 (cRider_putAt, putAt).
  *
  * Then the path hints (mAIPathHint, mTrackPathHint) are reset (+0x14 = -1), the start point's track and AI paths are
@@ -3726,7 +3726,7 @@ extern "C" void cRider_initPath(cRider* self, int flag)
         pos.y = startPoint[3];
         pos.z = startPoint[4];
         pos.w = 1.0f;
-        vu0AddEq_112180(pos, vu0Scale_112180(dir, func_00115B08((char*)self)));
+        vu0AddEq_112180(pos, vu0Scale_112180(dir, cRider_getStartGateHorizOffset((char*)self)));
         cRider_putAt_112180(((char*)self), &pos, &dir, 5, 0.0f);
     }
     *(int*)((char*)self->mAIPathHint + 0x14) = -1;

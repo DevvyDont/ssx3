@@ -1800,7 +1800,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B5478);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void SNDREAL_exithandler(void);
 extern void SYNCTASK_add_5478(void *, int, int) __asm__("SYNCTASK_add");
-extern void func_003E4A30_5478(void *) __asm__("func_003E4A30");
+extern void REAL_addexit_5478(void *) __asm__("REAL_addexit");
 extern int D_0044C464_C464[] __asm__("D_0044C464");
 extern void (*D_0050A9B0_A9B0[])() __asm__("D_0050A9B0");
 
@@ -1808,7 +1808,7 @@ extern void (*D_0050A9B0_A9B0[])() __asm__("D_0050A9B0");
  * Hooks the EA sound system into the game's frame and timer services.
  *
  * Stores func_003B5470 in the options-tail hook D_0050A9B0, registers func_003B5450 once as a SYNCTASK (SYNCTASK_add
- * with 0, 1; D_0044C464 remembers it) and passes SNDREAL_exithandler to func_003E4A30. Called by cPS2SoundManager_Init.
+ * with 0, 1; D_0044C464 remembers it) and passes SNDREAL_exithandler to REAL_addexit. Called by cPS2SoundManager_Init.
  *
  * @return 0
  */
@@ -1818,7 +1818,7 @@ int func_003B5478(void) {
         SYNCTASK_add_5478(func_003B5450, 0, 1);
         D_0044C464_C464[0] = 1;
     }
-    func_003E4A30_5478(SNDREAL_exithandler);
+    REAL_addexit_5478(SNDREAL_exithandler);
     return 0;
 }
 #endif
@@ -7983,7 +7983,7 @@ extern void func_003C5E08();
 /**
  * Shuts the sound system down at program exit (calls func_003C5E08).
  *
- * func_003B5478 registers it with func_003E4A30 in the exit-handler table that REAL_restore runs; func_003C5E08 calls
+ * func_003B5478 registers it with REAL_addexit in the exit-handler table that REAL_restore runs; func_003C5E08 calls
  * the sound shutdown SNDSYS_restore.
  */
 void SNDREAL_exithandler(void) {

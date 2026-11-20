@@ -51,7 +51,7 @@ CHECK_SIZE(cAIStateHandler, 0x4);
 // cPreRaceHandler: a cAIStateHandler with one int (On Tour size 0x8).
 struct cPreRaceHandler {
     void** mVtbl; // 0x0 [R] _vt$15cPreRaceHandler (D_00458550), stored by cAI_cAI
-    int unk_04;   // 0x4 [U] written by its OnGainState (func_00113D18)
+    int unk_04;   // 0x4 [U] written by its OnGainState (cPreRaceHandler_OnGainState)
 };
 
 CHECK_OFFSET(cPreRaceHandler, mVtbl, 0x0);

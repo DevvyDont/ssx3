@@ -3738,7 +3738,7 @@ struct cState_18E510 : cStateBase_18E510 {
 /**
  * Refreshes the device select screen's memory-card panel: the device label, the slot entries and the device arrows.
  *
- * When this state's vtable slot 42 (cFEMemCard_displayFileOK) passes: with no card found (mpMemCard slot 53, func_002D3810) it
+ * When this state's vtable slot 42 (cFEMemCard_displayFileOK) passes: with no card found (mpMemCard slot 53, cPS2MemCard_IsAvailable1) it
  * shows the no-cards message (cFEMemCard_callbackDisplayNoCards), otherwise it switches the display state to 3 (slot 35,
  * cFEMemCard_triggerDisplayState) unless f214 is 3 already. If slot 42 still passes it highlights a menu entry (slot
  * 43, cFEMemCard_setMenuHighlight), puts the label of the card manager's mSelectedDevice

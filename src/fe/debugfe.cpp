@@ -59,7 +59,7 @@ extern "C" void cFont_textf(void* self, float x, float y, const char* fmt, ...);
 extern "C" void cFont_textf1(void* self, float x, float y, float sx, float sy, const char* str, int n);
 extern "C" void cFont_centertextf(void* self, float x, float y, const char* fmt, ...);
 extern "C" void cFont_righttextf(void* self, float x, float y, const char* fmt, ...);
-extern "C" void func_00256038(void* comm, int* info);
+extern "C" void cCommSystem_netConnLocalAddr(void* comm, int* info);
 extern "C" char* cAudioInterface_bxAudio();
 extern "C" void cFont_text(void* self, float x, float y, const char* str);
 extern "C" void cFont_centertext(void* self, float x, float y, const char* str);
@@ -200,7 +200,7 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     y += lineheight;
     unsigned int ip = 0;
     if (cCommSystem_mCommSystem != 0)
-        func_00256038(cCommSystem_mCommSystem, (int*)&ip);
+        cCommSystem_netConnLocalAddr(cCommSystem_mCommSystem, (int*)&ip);
     char ipbuf[0x20];
     sprintf(ipbuf, str_pct_d_pct_d_pct_d_pct_d, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
     sModeNamesDbg modes = D_0045CFB8;
@@ -282,9 +282,9 @@ INCLUDE_ASM("fe/debugfe", func_0017D0A8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, int port, int host);
-extern "C" void func_00256038(void* comm, int* info);
-extern "C" int func_00255D50(void* comm, int ch);
-extern "C" void func_00255A20(void* comm);
+extern "C" void cCommSystem_netConnLocalAddr(void* comm, int* info);
+extern "C" int cCommSystem_isChannelConnected(void* comm, int ch);
+extern "C" void cCommSystem_update(void* comm);
 extern "C" void SYNCTASK_run(int a);
 extern "C" void THREAD_yieldticks(int n);
 extern "C" void cGameComm_construct(int ch, int host);
@@ -306,15 +306,15 @@ extern sNetCfg_D0A8 D_00534B30_D0A8 __asm__("cBENetworkInterface_networkOpt");
  * Opens the debug direct link to a fixed partner console when a network game is set, then starts the game comm on it.
  *
  * Fetches the network interface (cBE_getInterface__Fv kind 7; the result is unused) and returns at once unless
- * cBENetworkInterface_networkOpt.bIsNetworkGame is set. Reads this console's address with func_00256038: a console at
+ * cBENetworkInterface_networkOpt.bIsNetworkGame is set. Reads this console's address with cCommSystem_netConnLocalAddr: a console at
  * 10.10.53.25 (0x0A0A3519) dials "10.10.53.35" (D_0045D018), any other dials "10.10.53.25" (D_0045D028). Opens a
  * DirtySock channel with cCommSystem_openDSockChannel on networkOpt.iPort, as host or client by bIsHost, and spins
- * until the channel reports connected (func_00255D50), running the comm update func_00255A20, SYNCTASK_run(0) and
+ * until the channel reports connected (cCommSystem_isChannelConnected), running the comm update cCommSystem_update, SYNCTASK_run(0) and
  * THREAD_yieldticks(1) on each pass. Then creates the game comm (cGameComm_construct with the channel and bIsHost) and
  * connects and enables voice chat on D_004A33F4 (func_00266D58, func_00266E30). cDebugMenuScreen_update calls it when
  * the debug start menu starts a game.
  *
- * Likely bug: voice chat is given this console's own address (from func_00256038), not the partner's; func_002639E0
+ * Likely bug: voice chat is given this console's own address (from cCommSystem_netConnLocalAddr), not the partner's; func_002639E0
  * passes the opponent's. The wait loop has no timeout.
  */
 extern "C" void func_0017D0A8(void)
@@ -325,7 +325,7 @@ extern "C" void func_0017D0A8(void)
     }
     char addr[32];
     int info[4];
-    func_00256038(cCommSystem_mCommSystem, info);
+    cCommSystem_netConnLocalAddr(cCommSystem_mCommSystem, info);
     if (info[0] == 0x0A0A3519) {
         __builtin_memcpy(addr, D_0045D018, 12);
     } else {
@@ -337,8 +337,8 @@ extern "C" void func_0017D0A8(void)
     } else {
         ch = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, addr, D_00534B30_D0A8.port, 0);
     }
-    while (func_00255D50(cCommSystem_mCommSystem, ch) == 0) {
-        func_00255A20(cCommSystem_mCommSystem);
+    while (cCommSystem_isChannelConnected(cCommSystem_mCommSystem, ch) == 0) {
+        cCommSystem_update(cCommSystem_mCommSystem);
         SYNCTASK_run(0);
         THREAD_yieldticks(1);
     }
@@ -634,7 +634,7 @@ extern "C" void cDebugLobbyScreen__cDebugLobbyScreen(char* self, int flags)
 //100%
 INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_update);
 #ifdef SKIP_ASM
-extern "C" void func_00255A20(void*);
+extern "C" void cCommSystem_update(void*);
 extern "C" void func_0025AC50(void*);
 extern "C" void cMenuSys_input(void* stack);
 extern "C" void func_0017DB18(void* self);
@@ -659,14 +659,14 @@ static inline void* sMenuStack17D688_top(sMenuStack17D688* self)
 /**
  * Runs one frame of the debug lobby screen: the network and lobby updates, menu input and the screen's state machine.
  *
- * Calls the comm system update func_00255A20 (cCommSystem_mCommSystem) and the lobby manager update func_0025AC50
+ * Calls the comm system update cCommSystem_update (cCommSystem_mCommSystem) and the lobby manager update func_0025AC50
  * (LobbyMan_mLobbyMan), which delivers queued lobby events to func_0017D6F0 through func_0017D260. When the menu system
  * at +0x8 has a menu open it runs its input (cMenuSys_input), then func_0017DB18 advances the state. cDebugFE_update
  * calls it through the active screen's virtual slot 2.
  */
 extern "C" void cDebugLobbyScreen_update(sDebugFE17D688* self)
 {
-    func_00255A20(cCommSystem_mCommSystem);
+    cCommSystem_update(cCommSystem_mCommSystem);
     func_0025AC50(LobbyMan_mLobbyMan);
     if (sMenuStack17D688_top(&self->stack) != 0)
         cMenuSys_input(&self->stack);
@@ -937,18 +937,18 @@ extern char str_cPreGameLoadScreen[];
 struct cAppMan;
 extern "C" void cMenuSys_pushMenu(void* menu, void* items);
 extern "C" int cMenuSys_isActive(void* menu);
-extern "C" void func_00255F50(void* comm, int a1);
+extern "C" void cCommSystem_netConnConnect(void* comm, int a1);
 extern "C" void func_0025B6D8(void* net, int a1);
 extern "C" void func_001DB418(void* items, void* net);
 extern "C" void func_001DB528(void* items, void* net);
 extern "C" void func_001DB620(void* items, void* net);
 extern "C" void func_0025D800(void* a, int b, int c);
-extern "C" int func_00255D50(void* comm, int ch);
+extern "C" int cCommSystem_isChannelConnected(void* comm, int ch);
 extern "C" void cGameComm_construct(int ch, int host);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 void* cPreGameLoadScreen_cPreGameLoadScreen(void* mem);
 void cAppMan_setNextModule(cAppMan* app, unsigned int module);
-extern "C" void func_00256038(void* comm, int* info);
+extern "C" void cCommSystem_netConnLocalAddr(void* comm, int* info);
 extern "C" void func_00266D58(void* p, int ip);
 extern "C" void func_00266E30(void* p);
 
@@ -968,7 +968,7 @@ struct sDebugFE17DB18 {
 /**
  * Advances the debug lobby screen's state machine, re-running it until the state (+0x4) stops changing.
  *
- * - 0: starts the network connection with config 0 (func_00255F50) when the comm system is idle (mNetConnState 1), then
+ * - 0: starts the network connection with config 0 (cCommSystem_netConnConnect) when the comm system is idle (mNetConnState 1), then
  *   state 1.
  * - 1: once mNetConnState is neither 3 nor 4, starts connecting to the lobby server (func_0025B6D8) and sets state 2.
  * - 3, 6, 10, 15: reopens Login Method (+0x70), Select Persona (+0x74C), Select Room (+0xD2C) or the challenge menu
@@ -979,13 +979,13 @@ struct sDebugFE17DB18 {
  * - 14: with no menu open, state 12 and Room Occupants (+0x1044).
  * - After the Continue menu closes: 17 and 24 return to Room Occupants (state 12), 20 and 21 to Login Method (state 3),
  *   22 to a refilled Select Persona (state 6), 23 to Select Room (state 10), 18 and 19 to state 0.
- * - 16: once the game channel (+0x1C10) reports connected (func_00255D50) it creates the game comm (cGameComm_construct
+ * - 16: once the game channel (+0x1C10) reports connected (cCommSystem_isChannelConnected) it creates the game comm (cGameComm_construct
  *   with LobbyMan's mIsHost), queues a new cPreGameLoadScreen as the next module and connects voice chat
  *   (func_00266D58, func_00266E30 on D_004A33F4).
  *
  * Likely bugs: in state 1 the loop runs again at once after state 0, when mNetConnState is still 2 (connect requested),
  * so the lobby connect starts before the network is up (a failed connection, 6, does not stop it either); voice chat in
- * state 16 gets this console's own address (func_00256038), not the opponent's.
+ * state 16 gets this console's own address (cCommSystem_netConnLocalAddr), not the opponent's.
  *
  * @param vself  the debug lobby screen
  */
@@ -1000,7 +1000,7 @@ extern "C" void func_0017DB18(void* vself)
             cCommSystem* comm = cCommSystem_mCommSystem;
             bool busy = comm->mNetConnState != 1;
             if (!busy) {
-                func_00255F50((char*)comm, 0);
+                cCommSystem_netConnConnect((char*)comm, 0);
             }
             self->state = 1;
             break;
@@ -1106,11 +1106,11 @@ extern "C" void func_0017DB18(void* vself)
             break;
         }
         case 16:
-            if (func_00255D50(cCommSystem_mCommSystem, self->channel) != 0) {
+            if (cCommSystem_isChannelConnected(cCommSystem_mCommSystem, self->channel) != 0) {
                 int info[4];
                 cGameComm_construct(self->channel, LobbyMan_mLobbyMan->mIsHost);
                 cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
-                func_00256038(cCommSystem_mCommSystem, info);
+                cCommSystem_netConnLocalAddr(cCommSystem_mCommSystem, info);
                 func_00266D58(D_004A33F4, info[0]);
                 func_00266E30(D_004A33F4);
             }
@@ -1632,7 +1632,7 @@ extern "C" void cFont_text(void* self, float x, float y, const char* str);
 extern "C" void cFont_righttextf(void* self, float x, float y, const char* fmt, ...);
 extern "C" void cFont_centertextf(void* self, float x, float y, const char* fmt, ...);
 extern "C" void cMenuSys_render(void* self);
-extern "C" void func_00256038(void* comm, int* out);
+extern "C" void cCommSystem_netConnLocalAddr(void* comm, int* out);
 extern "C" void cBXString__cBXString(void* self, int flags);
 
 struct sColor17E5C8 {
@@ -1701,7 +1701,7 @@ static inline int isEq17E5C8(int a, int b) { return a == b; }
  * rows 20 apart from y 200 with labels at x 110 and values right-aligned at x 530: Game (LobbyMan mGameName), Opponent
  * (mOpponent), Host/Client ("Host" or "Client" by mIsHost), Host Address (mHostAddr) and Client Address (mOppoAddr) in
  * dotted form, and Seed (mSeed). Then, at scale 0.9, the menu system renders its top menu (cMenuSys_render) when one is
- * open, and while the comm system is connected (mNetConnState 5) this console's address (func_00256038) is centred in
+ * open, and while the comm system is connected (mNetConnState 5) this console's address (cCommSystem_netConnLocalAddr) is centred in
  * yellow at (320, 420), scale 0.8. cDebugFE_render calls it through the active screen's virtual slot 3.
  */
 extern "C" void cDebugLobbyScreen_draw(sDebugFE17E5C8* self)
@@ -1856,7 +1856,7 @@ extern "C" void cDebugLobbyScreen_draw(sDebugFE17E5C8* self)
         cMenuSys_render(&self->count);
     if (isEq17E5C8(cCommSystem_mCommSystem->mNetConnState, 5)) {
         unsigned int ip;
-        func_00256038(cCommSystem_mCommSystem, (int*)&ip);
+        cCommSystem_netConnLocalAddr(cCommSystem_mCommSystem, (int*)&ip);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.2f);
         unsigned int localAddr = ip;

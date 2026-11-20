@@ -69,7 +69,7 @@ extern "C" int get_t3Vector(void *src, t3Vector_25A0 *out) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1D3510", func_002D2628);
+INCLUDE_ASM("seg/seg_1D3510", get_t4Vector);
 #ifdef SKIP_ASM
 extern "C" int get_float(int, int);
 
@@ -80,7 +80,7 @@ extern "C" int get_float(int, int);
  * @param out  receives the four floats
  * @return the bytes read (16)
  */
-extern "C" int func_002D2628(int src, int out) {
+extern "C" int get_t4Vector(int src, int out) {
     int temp_2;
     int outCursor;
     int remaining;
@@ -100,7 +100,7 @@ extern "C" int func_002D2628(int src, int out) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1D3510", func_002D2690);
+INCLUDE_ASM("seg/seg_1D3510", get_t4Matrix);
 #ifdef SKIP_ASM
 extern "C" int get_float(int, int);
 
@@ -111,7 +111,7 @@ extern "C" int get_float(int, int);
  * @param out  receives the floats
  * @return the bytes read (64)
  */
-extern "C" int func_002D2690(int src, int out) {
+extern "C" int get_t4Matrix(int src, int out) {
     int temp_2;
     int outCursor;
     int remaining;
@@ -131,7 +131,7 @@ extern "C" int func_002D2690(int src, int out) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D26F8);
+INCLUDE_ASM("seg/seg_1D3510", get_tQuaternion);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct V4_26F8 { float x, y, z, w; } __attribute__((aligned(16)));
@@ -145,7 +145,7 @@ extern "C" int get_float_26F8(void*, void*) __asm__("get_float");
  * @param out  receives the vector
  * @return the bytes read (16)
  */
-extern "C" int func_002D26F8(void *src, V4_26F8 *out) {
+extern "C" int get_tQuaternion(void *src, V4_26F8 *out) {
     float readW, readX, readY, readZ;
     V4_26F8 result;
     int total;
@@ -163,7 +163,7 @@ extern "C" int func_002D26F8(void *src, V4_26F8 *out) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D2790);
+INCLUDE_ASM("seg/seg_1D3510", get_char);
 #ifdef SKIP_ASM
 /**
  * Reads one byte from a byte stream and advances the cursor.
@@ -174,7 +174,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D2790);
  * @param out  receives the byte
  * @return 1, the bytes read
  */
-extern "C" int func_002D2790(unsigned char **cursor, unsigned char *out) {
+extern "C" int get_char(unsigned char **cursor, unsigned char *out) {
     *out = **cursor;
     *cursor += 1;
     return 1;
@@ -186,7 +186,7 @@ INCLUDE_ASM("seg/seg_1D3510", get_string);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag_27B0(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" int func_002D2790_27B0(unsigned char **, unsigned char *) __asm__("func_002D2790");
+extern "C" int get_char_27B0(unsigned char **, unsigned char *) __asm__("get_char");
 extern "C" char *strcpy(char *, const char *);
 extern char D_004D49B8[];
 extern char str_Comm_String[];
@@ -204,7 +204,7 @@ extern "C" int get_string(unsigned char **src, char **out) {
     int n = 0;
     char curChar = 1;
     do {
-        n += func_002D2790_27B0(src, (unsigned char*)&curChar);
+        n += get_char_27B0(src, (unsigned char*)&curChar);
         D_004D49B8[n - 1] = curChar;
     } while (curChar != 0 && n < 1000);
     if (n == 1000) D_004D49B8[999] = 0;
@@ -221,7 +221,7 @@ INCLUDE_ASM("seg/seg_1D3510", get_data);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag_2868(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* cMemMan_alloc_2868(int, const char*, int, int) __asm__("cMemMan_alloc");
-extern "C" int func_002D2790_2868(unsigned char **, unsigned char *) __asm__("func_002D2790");
+extern "C" int get_char_2868(unsigned char **, unsigned char *) __asm__("get_char");
 extern "C" int get_uint_2868(unsigned char **, void *) __asm__("get_uint");
 extern char str_Comm_Data_Block[];
 extern char str_Comm_Data[];
@@ -244,7 +244,7 @@ extern "C" int get_data(unsigned char **src, Data_2868 **out) {
     reloaded->data = (unsigned char*)operator_new_tag_2868(reloaded->n, str_Comm_Data, 0x100, 0);
     Data_2868 *current = *out;
     for (i = 0; i < current->n; i++) {
-        total += func_002D2790_2868(src, current->data + i);
+        total += get_char_2868(src, current->data + i);
         current = *out;
     }
     return total;
@@ -270,7 +270,7 @@ extern "C" int func_002D2948(int self, ...) {
 INCLUDE_ASM("seg/seg_1D3510", func_002D2988);
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3788);
+INCLUDE_ASM("seg/seg_1D3510", cMemCard__cMemCard);
 #ifdef SKIP_ASM
 void operator_delete(int *);
 extern void* D_004871E8[];
@@ -280,14 +280,14 @@ extern void* D_004871E8[];
  *
  * @param flags  bit 0: free the memory
  */
-extern "C" void func_002D3788(void ***self, int flags) {
+extern "C" void cMemCard__cMemCard(void ***self, int flags) {
     *self = D_004871E8;
     if (flags & 1) operator_delete((int*)self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D37B8);
+INCLUDE_ASM("seg/seg_1D3510", cMemCard_IsDeviceChanged);
 #ifdef SKIP_ASM
 /**
  * Returns 1.
@@ -297,7 +297,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D37B8);
  *
  * @return 1
  */
-extern "C" int func_002D37B8(void) {
+extern "C" int cMemCard_IsDeviceChanged(void) {
     return 1;
 }
 #endif
@@ -307,7 +307,7 @@ extern "C" int func_002D37B8(void) {
  *
  * It is word 55 (slot 27) of both D_004871E8 (the base memory-card vtable) and cPS2MemCard_vtbl.
  */
-extern "C" void func_002D37C0(void) {
+extern "C" void cMemCard_ClearDeviceChanges(void) {
 }
 
 /**
@@ -315,11 +315,11 @@ extern "C" void func_002D37C0(void) {
  *
  * It is word 57 (slot 28) of both D_004871E8 (the base memory-card vtable) and cPS2MemCard_vtbl.
  */
-extern "C" void func_002D37C8(void) {
+extern "C" void cMemCard_SetAllDevicesChanged(void) {
 }
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D37D0);
+INCLUDE_ASM("seg/seg_1D3510", cMemCard_FileExistsError);
 #ifdef SKIP_ASM
 /**
  * Returns 0.
@@ -329,7 +329,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D37D0);
  *
  * @return 0
  */
-extern "C" int func_002D37D0(void) {
+extern "C" int cMemCard_FileExistsError(void) {
     return 0;
 }
 #endif
@@ -351,7 +351,7 @@ extern "C" int cPS2MemCard_GetDevice(cPS2MemCard* pS2MemCard) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D37E0);
+INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_IsInvalid1);
 #ifdef SKIP_ASM
 struct VEnt_37E0 { short delta; short idx; int (*fn)(void*, int); };
 /**
@@ -363,14 +363,14 @@ struct VEnt_37E0 { short delta; short idx; int (*fn)(void*, int); };
  *
  * @param pS2MemCard  the memory card
  */
-extern "C" void func_002D37E0(cPS2MemCard* pS2MemCard) {
+extern "C" void cPS2MemCard_IsInvalid1(cPS2MemCard* pS2MemCard) {
     VEnt_37E0 *vtEntry = (VEnt_37E0*)(*(char **)pS2MemCard + 0x180);
     vtEntry->fn((char*)pS2MemCard + vtEntry->delta, pS2MemCard->mDevice);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3810);
+INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_IsAvailable1);
 #ifdef SKIP_ASM
 struct VEnt_3810 { short delta; short idx; int (*fn)(void*, int); };
 /**
@@ -382,7 +382,7 @@ struct VEnt_3810 { short delta; short idx; int (*fn)(void*, int); };
  *
  * @param pS2MemCard  the memory card
  */
-extern "C" void func_002D3810(cPS2MemCard* pS2MemCard) {
+extern "C" void cPS2MemCard_IsAvailable1(cPS2MemCard* pS2MemCard) {
     VEnt_3810 *vtEntry = (VEnt_3810*)(*(char **)pS2MemCard + 0x1A0);
     vtEntry->fn((char*)pS2MemCard + vtEntry->delta, pS2MemCard->mDevice);
 }
@@ -471,7 +471,7 @@ extern "C" int func_002D3840(cPS2MemCard* pS2MemCard, int x) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D38F0);
+INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_IsFormatted1);
 #ifdef SKIP_ASM
 struct VEnt_38F0 { short delta; short idx; int (*fn)(void*, int); };
 /**
@@ -483,7 +483,7 @@ struct VEnt_38F0 { short delta; short idx; int (*fn)(void*, int); };
  *
  * @param pS2MemCard  the memory card
  */
-extern "C" void func_002D38F0(cPS2MemCard* pS2MemCard) {
+extern "C" void cPS2MemCard_IsFormatted1(cPS2MemCard* pS2MemCard) {
     VEnt_38F0 *vtEntry = (VEnt_38F0*)(*(char **)pS2MemCard + 0x1C0);
     vtEntry->fn((char*)pS2MemCard + vtEntry->delta, pS2MemCard->mDevice);
 }
@@ -516,7 +516,7 @@ extern "C" int func_002D3928(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3930);
+INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_CardChanged1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cPS2MemCard_CardChanged_3930(void*, int) __asm__("cPS2MemCard_CardChanged");
@@ -528,13 +528,13 @@ extern "C" void cPS2MemCard_CardChanged_3930(void*, int) __asm__("cPS2MemCard_Ca
  *
  * @param pS2MemCard  the memory card
  */
-extern "C" void func_002D3930(cPS2MemCard* pS2MemCard) {
+extern "C" void cPS2MemCard_CardChanged1(cPS2MemCard* pS2MemCard) {
     cPS2MemCard_CardChanged_3930(pS2MemCard, (pS2MemCard->mDevice));
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3950);
+INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_GetStatus1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cPS2MemCard_GetStatus_3950(void*, int, int) __asm__("cPS2MemCard_GetStatus");
@@ -546,13 +546,13 @@ extern "C" void cPS2MemCard_GetStatus_3950(void*, int, int) __asm__("cPS2MemCard
  * @param pS2MemCard  the memory card
  * @param outText  the 16-bit text buffer
  */
-extern "C" void func_002D3950(cPS2MemCard* pS2MemCard, int outText) {
+extern "C" void cPS2MemCard_GetStatus1(cPS2MemCard* pS2MemCard, int outText) {
     cPS2MemCard_GetStatus_3950(pS2MemCard, (pS2MemCard->mDevice), outText);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3970);
+INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_GetMaxFiles);
 #ifdef SKIP_ASM
 /**
  * Returns the number of save-file slots, mMaxFiles (6 after a reset).
@@ -562,13 +562,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3970);
  * @param pS2MemCard  the memory card
  * @return mMaxFiles
  */
-extern "C" int func_002D3970(cPS2MemCard* pS2MemCard) {
+extern "C" int cPS2MemCard_GetMaxFiles(cPS2MemCard* pS2MemCard) {
     return (pS2MemCard->mMaxFiles);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3978);
+INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_GetMaxDevices);
 #ifdef SKIP_ASM
 /**
  * Returns 2, the number of memory-card ports.
@@ -577,7 +577,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3978);
  *
  * @return 2
  */
-extern "C" int func_002D3978(void) {
+extern "C" int cPS2MemCard_GetMaxDevices(void) {
     return 2;
 }
 #endif
@@ -632,7 +632,7 @@ extern "C" int func_002D39B0(cPS2MemCard* pS2MemCard) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D39B8);
+INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_GetLastError1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cPS2MemCard_GetLastError_39B8(void*, int) __asm__("cPS2MemCard_GetLastError");
@@ -643,13 +643,13 @@ extern "C" void cPS2MemCard_GetLastError_39B8(void*, int) __asm__("cPS2MemCard_G
  *
  * @param memCard  the memory card
  */
-extern "C" void func_002D39B8(void *memCard) {
+extern "C" void cPS2MemCard_GetLastError1(void *memCard) {
     cPS2MemCard_GetLastError_39B8(memCard, (*(int *)((char*)(memCard) + (0xC))));
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D39D8);
+INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_GetState);
 #ifdef SKIP_ASM
 /**
  * Returns the memory card's state word mState (+4).
@@ -659,7 +659,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D39D8);
  * @param memCard  the memory card
  * @return mState
  */
-extern "C" int func_002D39D8(void *memCard) {
+extern "C" int cPS2MemCard_GetState(void *memCard) {
     return (*(int *)((char*)(memCard) + (4)));
 }
 #endif
@@ -671,7 +671,7 @@ extern "C" void func_002D39E0(void) {
 }
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D39E8);
+INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_GetNumDirTable);
 #ifdef SKIP_ASM
 /**
  * Returns the number of directory entries read from the card, mNumDirTable (+0x54).
@@ -681,13 +681,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D39E8);
  * @param memCard  the memory card
  * @return mNumDirTable
  */
-extern "C" int func_002D39E8(void *memCard) {
+extern "C" int cPS2MemCard_GetNumDirTable(void *memCard) {
     return (*(int *)((char*)(memCard) + (0x54)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D39F0);
+INCLUDE_ASM("seg/seg_1D3510", cPS2MemCard_GetResult);
 #ifdef SKIP_ASM
 extern int D_004A3940;
 
@@ -698,7 +698,7 @@ extern int D_004A3940;
  *
  * @return D_004A3940
  */
-extern "C" int func_002D39F0(void) {
+extern "C" int cPS2MemCard_GetResult(void) {
     return D_004A3940;
 }
 #endif
@@ -708,11 +708,11 @@ extern "C" int func_002D39F0(void) {
  *
  * cIntMenuItem_vtbl, cFloatMenuItem_vtbl and cCharMenuItem_vtbl put their own functions in that slot.
  */
-extern "C" void func_002D39F8(void) {
+extern "C" void cMenuItem_zeroValue(void) {
 }
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3A00);
+INCLUDE_ASM("seg/seg_1D3510", cMenuItem_setID);
 #ifdef SKIP_ASM
 /**
  * Sets a menu item's ID (+8).
@@ -720,13 +720,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A00);
  * @param menuItem  the menu item
  * @param itemId  the new ID
  */
-extern "C" void func_002D3A00(void *menuItem, int itemId) {
+extern "C" void cMenuItem_setID(void *menuItem, int itemId) {
     (*(int *)((char*)(menuItem) + (8))) = itemId;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3A08);
+INCLUDE_ASM("seg/seg_1D3510", cMenuItem_getID);
 #ifdef SKIP_ASM
 /**
  * Returns a menu item's ID (+8).
@@ -734,13 +734,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A08);
  * @param menuItem  the menu item
  * @return the ID
  */
-extern "C" int func_002D3A08(void *menuItem) {
+extern "C" int cMenuItem_getID(void *menuItem) {
     return (*(int *)((char*)(menuItem) + (8)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3A10);
+INCLUDE_ASM("seg/seg_1D3510", cMenuItem_setArg);
 #ifdef SKIP_ASM
 /**
  * Sets a menu item's Arg word (+0xC).
@@ -748,13 +748,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A10);
  * @param menuItem  the menu item
  * @param itemArg  the new value
  */
-extern "C" void func_002D3A10(void *menuItem, int itemArg) {
+extern "C" void cMenuItem_setArg(void *menuItem, int itemArg) {
     (*(int *)((char*)(menuItem) + (0xC))) = itemArg;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3A18);
+INCLUDE_ASM("seg/seg_1D3510", cMenuItem_getArg);
 #ifdef SKIP_ASM
 /**
  * Returns a menu item's Arg word (+0xC).
@@ -762,13 +762,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A18);
  * @param menuItem  the menu item
  * @return Arg
  */
-extern "C" int func_002D3A18(void *menuItem) {
+extern "C" int cMenuItem_getArg(void *menuItem) {
     return (*(int *)((char*)(menuItem) + (0xC)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3A20);
+INCLUDE_ASM("seg/seg_1D3510", cMenuItem_getMenu);
 #ifdef SKIP_ASM
 /**
  * Returns the menu a menu item belongs to (Menu, +0; cMenu_addItem fills it).
@@ -776,13 +776,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A20);
  * @param menuItem  the menu item
  * @return the menu
  */
-extern "C" int func_002D3A20(int *menuItem) {
+extern "C" int cMenuItem_getMenu(int *menuItem) {
     return *menuItem;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3A28);
+INCLUDE_ASM("seg/seg_1D3510", cMenu_getItem);
 #ifdef SKIP_ASM
 /**
  * Returns one of a menu's items: Items[@p itemIndex] (+0xC + 4 * index). The index is not checked.
@@ -791,13 +791,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A28);
  * @param itemIndex  the item index
  * @return the item
  */
-extern "C" int func_002D3A28(char *menu, int itemIndex) {
+extern "C" int cMenu_getItem(char *menu, int itemIndex) {
     return *(int *)(menu + (itemIndex << 2) + 0xC);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3A38);
+INCLUDE_ASM("seg/seg_1D3510", cMenu_getNumItems);
 #ifdef SKIP_ASM
 /**
  * Returns the number of items in a menu (NumItems, +0).
@@ -805,13 +805,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A38);
  * @param menu  the menu
  * @return NumItems
  */
-extern "C" int func_002D3A38(int *menu) {
+extern "C" int cMenu_getNumItems(int *menu) {
     return *menu;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3A40);
+INCLUDE_ASM("seg/seg_1D3510", cMenu_getMenuSys);
 #ifdef SKIP_ASM
 /**
  * Returns the menu system that shows a menu (MenuSys, +0x124; cMenu_onGainFocus sets it).
@@ -819,13 +819,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A40);
  * @param menu  the menu
  * @return MenuSys
  */
-extern "C" int func_002D3A40(void *menu) {
+extern "C" int cMenu_getMenuSys(void *menu) {
     return (*(int *)((char*)(menu) + (0x124)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3A48);
+INCLUDE_ASM("seg/seg_1D3510", cMenu_getFont);
 #ifdef SKIP_ASM
 /**
  * Returns the font of a menu's menu system: the word at +0x58 of MenuSys (+0x124).
@@ -833,13 +833,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A48);
  * @param menu  the menu
  * @return the font
  */
-extern "C" int func_002D3A48(void *menu) {
+extern "C" int cMenu_getFont(void *menu) {
     return (*(int *)((char*)((*(void **)((char*)(menu) + (0x124)))) + (0x58)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3A58);
+INCLUDE_ASM("seg/seg_1D3510", cMenuItem_getFont);
 #ifdef SKIP_ASM
 /**
  * Returns the font of the menu system that shows a menu item: the word at +0x58 of the MenuSys (+0x124) of the item's
@@ -848,7 +848,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A58);
  * @param menuItem  the menu item
  * @return the font
  */
-extern "C" int func_002D3A58(void **menuItem) {
+extern "C" int cMenuItem_getFont(void **menuItem) {
     return (*(int *)((char*)((*(void **)((char*)(*menuItem) + (0x124)))) + (0x58)));
 }
 #endif
@@ -870,7 +870,7 @@ extern "C" void cBoolMenuItem__cBoolMenuItem(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3A88);
+INCLUDE_ASM("seg/seg_1D3510", cBoolMenuItem_setValue);
 #ifdef SKIP_ASM
 /**
  * Sets the flag an on/off menu item toggles (the flag pointer, +0x20).
@@ -878,13 +878,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A88);
  * @param menuItem  the on/off item
  * @param value  the flag's address
  */
-extern "C" void func_002D3A88(void *menuItem, int value) {
+extern "C" void cBoolMenuItem_setValue(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x20))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3A90);
+INCLUDE_ASM("seg/seg_1D3510", cBoolMenuItem_setCaption);
 #ifdef SKIP_ASM
 /**
  * Sets an on/off menu item's caption (+0x14).
@@ -892,7 +892,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3A90);
  * @param menuItem  the on/off item
  * @param value  the caption text
  */
-extern "C" void func_002D3A90(void *menuItem, int value) {
+extern "C" void cBoolMenuItem_setCaption(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
@@ -914,7 +914,7 @@ extern "C" void cEnumMenuItem__cEnumMenuItem(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3AB8);
+INCLUDE_ASM("seg/seg_1D3510", cEnumMenuItem_setEnumTags);
 #ifdef SKIP_ASM
 /**
  * Sets the entries a list-choice menu item offers: the entry count (+0x18) and the table of {name, value} entries
@@ -924,14 +924,14 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3AB8);
  * @param numTags  the number of entries
  * @param tagTable  the entries, 8 bytes each
  */
-extern "C" void func_002D3AB8(void *menuItem, int numTags, int tagTable) {
+extern "C" void cEnumMenuItem_setEnumTags(void *menuItem, int numTags, int tagTable) {
     (*(int *)((char*)(menuItem) + (0x18))) = numTags;
     (*(int *)((char*)(menuItem) + (0x1C))) = tagTable;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3AC8);
+INCLUDE_ASM("seg/seg_1D3510", cEnumMenuItem_setEnum);
 #ifdef SKIP_ASM
 /**
  * Sets the int a list-choice menu item sets (the value pointer, +0x20).
@@ -939,13 +939,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3AC8);
  * @param menuItem  the list-choice item
  * @param value  the int's address
  */
-extern "C" void func_002D3AC8(void *menuItem, int value) {
+extern "C" void cEnumMenuItem_setEnum(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x20))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3AD0);
+INCLUDE_ASM("seg/seg_1D3510", cEnumMenuItem_setCaption);
 #ifdef SKIP_ASM
 /**
  * Sets a list-choice menu item's caption (+0x14).
@@ -953,13 +953,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3AD0);
  * @param menuItem  the list-choice item
  * @param value  the caption text
  */
-extern "C" void func_002D3AD0(void *menuItem, int value) {
+extern "C" void cEnumMenuItem_setCaption(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3AD8);
+INCLUDE_ASM("seg/seg_1D3510", cEnumMenuItem_getCaption);
 #ifdef SKIP_ASM
 /**
  * Returns a list-choice menu item's caption (+0x14).
@@ -967,7 +967,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3AD8);
  * @param menuItem  the list-choice item
  * @return the caption
  */
-extern "C" int func_002D3AD8(void *menuItem) {
+extern "C" int cEnumMenuItem_getCaption(void *menuItem) {
     return (*(int *)((char*)(menuItem) + (0x14)));
 }
 #endif
@@ -989,7 +989,7 @@ extern "C" void cSubMenuItem__cSubMenuItem(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3B00);
+INCLUDE_ASM("seg/seg_1D3510", cSubMenuItem_setMenu);
 #ifdef SKIP_ASM
 /**
  * Sets the sub-menu a sub-menu item opens (+0x18).
@@ -997,13 +997,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3B00);
  * @param menuItem  the sub-menu item
  * @param value  the sub-menu
  */
-extern "C" void func_002D3B00(void *menuItem, int value) {
+extern "C" void cSubMenuItem_setMenu(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3B08);
+INCLUDE_ASM("seg/seg_1D3510", cSubMenuItem_getSubMenu);
 #ifdef SKIP_ASM
 /**
  * Returns the sub-menu a sub-menu item opens (+0x18).
@@ -1011,7 +1011,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3B08);
  * @param menuItem  the sub-menu item
  * @return the sub-menu
  */
-extern "C" int func_002D3B08(void *menuItem) {
+extern "C" int cSubMenuItem_getSubMenu(void *menuItem) {
     return (*(int *)((char*)(menuItem) + (0x18)));
 }
 #endif
@@ -1033,7 +1033,7 @@ extern "C" void cPopMenuItem__cPopMenuItem(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3B30);
+INCLUDE_ASM("seg/seg_1D3510", cPopMenuItem_setCaption);
 #ifdef SKIP_ASM
 /**
  * Sets a "back" menu item's caption (+0x14).
@@ -1041,7 +1041,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3B30);
  * @param menuItem  the "back" item
  * @param value  the caption text
  */
-extern "C" void func_002D3B30(void *menuItem, int value) {
+extern "C" void cPopMenuItem_setCaption(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
@@ -1063,7 +1063,7 @@ extern "C" void cCommandMenuItem__cCommandMenuItem(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3B58);
+INCLUDE_ASM("seg/seg_1D3510", cCommandMenuItem_setStateText);
 #ifdef SKIP_ASM
 /**
  * Sets a command menu item's state text (+0x18), shown next to its caption.
@@ -1071,13 +1071,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3B58);
  * @param menuItem  the command item
  * @param value  the text
  */
-extern "C" void func_002D3B58(void *menuItem, int value) {
+extern "C" void cCommandMenuItem_setStateText(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3B60);
+INCLUDE_ASM("seg/seg_1D3510", cCommandMenuItem_setCaption);
 #ifdef SKIP_ASM
 /**
  * Sets a command menu item's caption (+0x14).
@@ -1085,13 +1085,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3B60);
  * @param menuItem  the command item
  * @param value  the caption text
  */
-extern "C" void func_002D3B60(void *menuItem, int value) {
+extern "C" void cCommandMenuItem_setCaption(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3B68);
+INCLUDE_ASM("seg/seg_1D3510", cCommandMenuItem_getCaption);
 #ifdef SKIP_ASM
 /**
  * Returns a command menu item's caption (+0x14).
@@ -1099,13 +1099,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3B68);
  * @param menuItem  the command item
  * @return the caption
  */
-extern "C" int func_002D3B68(void *menuItem) {
+extern "C" int cCommandMenuItem_getCaption(void *menuItem) {
     return (*(int *)((char*)(menuItem) + (0x14)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3B70);
+INCLUDE_ASM("seg/seg_1D3510", cCommandMenuItem_setData);
 #ifdef SKIP_ASM
 /**
  * Sets a command menu item's data word (+0x20).
@@ -1113,13 +1113,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3B70);
  * @param menuItem  the command item
  * @param value  the data
  */
-extern "C" void func_002D3B70(void *menuItem, int value) {
+extern "C" void cCommandMenuItem_setData(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x20))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3B78);
+INCLUDE_ASM("seg/seg_1D3510", cCommandMenuItem_getData);
 #ifdef SKIP_ASM
 /**
  * Returns a command menu item's data word (+0x20).
@@ -1127,7 +1127,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3B78);
  * @param menuItem  the command item
  * @return the data
  */
-extern "C" int func_002D3B78(void *menuItem) {
+extern "C" int cCommandMenuItem_getData(void *menuItem) {
     return (*(int *)((char*)(menuItem) + (0x20)));
 }
 #endif
@@ -1149,7 +1149,7 @@ extern "C" void cCallbackMenuItem__cCallbackMenuItem(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3BA0);
+INCLUDE_ASM("seg/seg_1D3510", cCallbackMenuItem_setCaption);
 #ifdef SKIP_ASM
 /**
  * Sets a callback menu item's caption (+0x14).
@@ -1157,13 +1157,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3BA0);
  * @param menuItem  the callback item
  * @param value  the caption text
  */
-extern "C" void func_002D3BA0(void *menuItem, int value) {
+extern "C" void cCallbackMenuItem_setCaption(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3BA8);
+INCLUDE_ASM("seg/seg_1D3510", cCallbackMenuItem_getCaption);
 #ifdef SKIP_ASM
 /**
  * Returns a callback menu item's caption (+0x14).
@@ -1171,7 +1171,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3BA8);
  * @param menuItem  the callback item
  * @return the caption
  */
-extern "C" int func_002D3BA8(void *menuItem) {
+extern "C" int cCallbackMenuItem_getCaption(void *menuItem) {
     return (*(int *)((char*)(menuItem) + (0x14)));
 }
 #endif
@@ -1191,7 +1191,7 @@ extern "C" void cNullMenuItem__cNullMenuItem(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3BD0);
+INCLUDE_ASM("seg/seg_1D3510", cNullMenuItem_setCaption);
 #ifdef SKIP_ASM
 /**
  * Sets a text-only menu item's text (+0x14).
@@ -1199,13 +1199,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3BD0);
  * @param menuItem  the text-only item
  * @param value  the text
  */
-extern "C" void func_002D3BD0(void *menuItem, int value) {
+extern "C" void cNullMenuItem_setCaption(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3BD8);
+INCLUDE_ASM("seg/seg_1D3510", cNullMenuItem_setStateText);
 #ifdef SKIP_ASM
 /**
  * Stores a text pointer at +0x18 of a text-only menu item (cNullMenuItem_cNullMenuItem does not set this word).
@@ -1213,7 +1213,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3BD8);
  * @param menuItem  the text-only item
  * @param value  the text
  */
-extern "C" void func_002D3BD8(void *menuItem, int value) {
+extern "C" void cNullMenuItem_setStateText(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
 #endif
@@ -1249,7 +1249,7 @@ extern "C" void cCharMenuItem__cCharMenuItem(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3C20);
+INCLUDE_ASM("seg/seg_1D3510", cCharMenuItem_setValue);
 #ifdef SKIP_ASM
 /**
  * Sets the signed byte a signed-byte menu item edits (the value pointer, +0x18).
@@ -1257,13 +1257,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3C20);
  * @param menuItem  the signed-byte item
  * @param value  the byte's address
  */
-extern "C" void func_002D3C20(void *menuItem, int value) {
+extern "C" void cCharMenuItem_setValue(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3C28);
+INCLUDE_ASM("seg/seg_1D3510", cCharMenuItem_setCaption);
 #ifdef SKIP_ASM
 /**
  * Sets a signed-byte menu item's caption (+0x14).
@@ -1271,7 +1271,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3C28);
  * @param menuItem  the signed-byte item
  * @param value  the caption text
  */
-extern "C" void func_002D3C28(void *menuItem, int value) {
+extern "C" void cCharMenuItem_setCaption(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
@@ -1293,7 +1293,7 @@ extern "C" void cIntMenuItem__cIntMenuItem(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3C50);
+INCLUDE_ASM("seg/seg_1D3510", cIntMenuItem_setValue);
 #ifdef SKIP_ASM
 /**
  * Sets the int an int menu item edits (the variable's address, +0x18).
@@ -1301,13 +1301,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3C50);
  * @param menuItem  the int item
  * @param value  the int's address
  */
-extern "C" void func_002D3C50(void *menuItem, int value) {
+extern "C" void cIntMenuItem_setValue(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3C58);
+INCLUDE_ASM("seg/seg_1D3510", cIntMenuItem_setCaption);
 #ifdef SKIP_ASM
 /**
  * Sets an int menu item's caption (+0x14).
@@ -1315,7 +1315,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3C58);
  * @param menuItem  the int item
  * @param value  the caption text
  */
-extern "C" void func_002D3C58(void *menuItem, int value) {
+extern "C" void cIntMenuItem_setCaption(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
@@ -1337,7 +1337,7 @@ extern "C" void cFloatMenuItem__cFloatMenuItem(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3C80);
+INCLUDE_ASM("seg/seg_1D3510", cFloatMenuItem_setValue);
 #ifdef SKIP_ASM
 /**
  * Sets the float a float menu item edits (the variable's address, +0x18).
@@ -1345,13 +1345,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3C80);
  * @param menuItem  the float item
  * @param value  the float's address
  */
-extern "C" void func_002D3C80(void *menuItem, int value) {
+extern "C" void cFloatMenuItem_setValue(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3C88);
+INCLUDE_ASM("seg/seg_1D3510", cFloatMenuItem_setMinMax);
 #ifdef SKIP_ASM
 /**
  * Sets a float menu item's range: minimum (+0x1C) and maximum (+0x20).
@@ -1360,14 +1360,14 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3C88);
  * @param fparg0  the minimum
  * @param fparg1  the maximum
  */
-extern "C" void func_002D3C88(void *menuItem, float fparg0, float fparg1) {
+extern "C" void cFloatMenuItem_setMinMax(void *menuItem, float fparg0, float fparg1) {
     (*(float *)((char*)(menuItem) + (0x1C))) = fparg0;
     (*(float *)((char*)(menuItem) + (0x20))) = fparg1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3C98);
+INCLUDE_ASM("seg/seg_1D3510", cFloatMenuItem_setCaption);
 #ifdef SKIP_ASM
 /**
  * Sets a float menu item's caption (+0x14).
@@ -1375,13 +1375,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3C98);
  * @param menuItem  the float item
  * @param value  the caption text
  */
-extern "C" void func_002D3C98(void *menuItem, int value) {
+extern "C" void cFloatMenuItem_setCaption(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3CA0);
+INCLUDE_ASM("seg/seg_1D3510", cFloatMenuItem_setValueScale);
 #ifdef SKIP_ASM
 /**
  * Sets how a float menu item shows its value: the display scale (+0x24) and offset (+0x28); the item shows scale *
@@ -1391,14 +1391,14 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3CA0);
  * @param fparg0  the scale
  * @param fparg1  the offset
  */
-extern "C" void func_002D3CA0(void *menuItem, float fparg0, float fparg1) {
+extern "C" void cFloatMenuItem_setValueScale(void *menuItem, float fparg0, float fparg1) {
     (*(float *)((char*)(menuItem) + (0x24))) = fparg0;
     (*(float *)((char*)(menuItem) + (0x28))) = fparg1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3CB0);
+INCLUDE_ASM("seg/seg_1D3510", cFloatMenuItem_setValue1);
 #ifdef SKIP_ASM
 /**
  * Writes a new value into the float a float menu item edits (through the value pointer, +0x18).
@@ -1408,13 +1408,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3CB0);
  * @param menuItem  the float item
  * @param fparg0  the new value
  */
-extern "C" void func_002D3CB0(void *menuItem, float fparg0) {
+extern "C" void cFloatMenuItem_setValue1(void *menuItem, float fparg0) {
     *(*(float **)((char*)(menuItem) + (0x18))) = fparg0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3CC0);
+INCLUDE_ASM("seg/seg_1D3510", cFloatMenuItem_getValue);
 #ifdef SKIP_ASM
 /**
  * Returns a float menu item's value as displayed: scale (+0x24) * the edited float (through +0x18) + offset (+0x28).
@@ -1422,7 +1422,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3CC0);
  * @param menuItem  the float item
  * @return the displayed value
  */
-extern "C" float func_002D3CC0(void *menuItem) {
+extern "C" float cFloatMenuItem_getValue(void *menuItem) {
     return ((*(float *)((char*)(menuItem) + (0x24))) * *(*(float **)((char*)(menuItem) + (0x18)))) + (*(float *)((char*)(menuItem) + (0x28)));
 }
 #endif
@@ -1444,7 +1444,7 @@ extern "C" void cAngleMenuItem__cAngleMenuItem(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3D00);
+INCLUDE_ASM("seg/seg_1D3510", cAngleMenuItem_setValue);
 #ifdef SKIP_ASM
 /**
  * Sets the float an angle menu item edits (the value pointer, +0x18).
@@ -1452,13 +1452,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3D00);
  * @param menuItem  the angle item
  * @param value  the float's address
  */
-extern "C" void func_002D3D00(void *menuItem, int value) {
+extern "C" void cAngleMenuItem_setValue(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3D08);
+INCLUDE_ASM("seg/seg_1D3510", cAngleMenuItem_setMinMax);
 #ifdef SKIP_ASM
 /**
  * Sets an angle menu item's range: minimum (+0x1C) and maximum (+0x20).
@@ -1467,14 +1467,14 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3D08);
  * @param fparg0  the minimum
  * @param fparg1  the maximum
  */
-extern "C" void func_002D3D08(void *menuItem, float fparg0, float fparg1) {
+extern "C" void cAngleMenuItem_setMinMax(void *menuItem, float fparg0, float fparg1) {
     (*(float *)((char*)(menuItem) + (0x1C))) = fparg0;
     (*(float *)((char*)(menuItem) + (0x20))) = fparg1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3D18);
+INCLUDE_ASM("seg/seg_1D3510", cAngleMenuItem_setCaption);
 #ifdef SKIP_ASM
 /**
  * Sets an angle menu item's caption (+0x14).
@@ -1482,7 +1482,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3D18);
  * @param menuItem  the angle item
  * @param value  the caption text
  */
-extern "C" void func_002D3D18(void *menuItem, int value) {
+extern "C" void cAngleMenuItem_setCaption(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
@@ -1504,7 +1504,7 @@ extern "C" void cTextMenuItem__cTextMenuItem(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3D40);
+INCLUDE_ASM("seg/seg_1D3510", cTextMenuItem_gettext);
 #ifdef SKIP_ASM
 /**
  * Returns a text-entry menu item's text: the address of its 16-byte buffer (+0x18).
@@ -1512,13 +1512,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3D40);
  * @param menuItem  the text-entry item
  * @return the buffer address
  */
-extern "C" int func_002D3D40(int menuItem) {
+extern "C" int cTextMenuItem_gettext(int menuItem) {
     return menuItem + 0x18;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3D48);
+INCLUDE_ASM("seg/seg_1D3510", cTextMenuItem_settext);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00416958_3D48(char*, int, int) __asm__("func_00416958");
@@ -1530,7 +1530,7 @@ extern "C" int func_00416958_3D48(char*, int, int) __asm__("func_00416958");
  * @param text  the new text
  * @return what func_00416958 returns
  */
-extern "C" int func_002D3D48(char *menuItem, int text) {
+extern "C" int cTextMenuItem_settext(char *menuItem, int text) {
     char *textBuf = menuItem + 0x18;
     *textBuf = 0;
     return func_00416958_3D48(textBuf, text, 0xF);
@@ -1603,7 +1603,7 @@ extern "C" void cRGBTitleMenuItem__cRGBTitleMenuItem(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3E18);
+INCLUDE_ASM("seg/seg_1D3510", cRGBTitleMenuItem_setCaption);
 #ifdef SKIP_ASM
 /**
  * Sets the title text of a colour editor's title row (+0x18).
@@ -1611,7 +1611,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3E18);
  * @param menuItem  the title row
  * @param value  the title text
  */
-extern "C" void func_002D3E18(void *menuItem, int value) {
+extern "C" void cRGBTitleMenuItem_setCaption(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
 #endif
@@ -1642,7 +1642,7 @@ extern "C" void cARGBMenuItem__cARGBMenuItem(int menuItem, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3EA0);
+INCLUDE_ASM("seg/seg_1D3510", cARGBMenuItem_setCaption);
 #ifdef SKIP_ASM
 /**
  * Sets a colour editor menu item's caption: the title text (+0x18) of its embedded title row (+0x640), i.e. +0x658.
@@ -1650,7 +1650,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3EA0);
  * @param menuItem  the colour editor item
  * @param value  the caption text
  */
-extern "C" void func_002D3EA0(void *menuItem, int value) {
+extern "C" void cARGBMenuItem_setCaption(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x658))) = value;
 }
 #endif
@@ -1672,7 +1672,7 @@ extern "C" void cVectorTitleMenuItem__cVectorTitleMenuItem(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3EC8);
+INCLUDE_ASM("seg/seg_1D3510", cVectorTitleMenuItem_setCaption);
 #ifdef SKIP_ASM
 /**
  * Sets a vector title menu item's caption (+0x18).
@@ -1680,7 +1680,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3EC8);
  * @param menuItem  the vector title item
  * @param value  the caption text
  */
-extern "C" void func_002D3EC8(void *menuItem, int value) {
+extern "C" void cVectorTitleMenuItem_setCaption(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
 #endif
@@ -1709,7 +1709,7 @@ extern "C" void cVectorMenuItem__cVectorMenuItem(int menuItem, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3F48);
+INCLUDE_ASM("seg/seg_1D3510", cVectorMenuItem_setCaption);
 #ifdef SKIP_ASM
 /**
  * Sets a vector editor menu item's caption: the caption (+0x18) of its embedded title row (+0x654), i.e. +0x66C.
@@ -1717,7 +1717,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3F48);
  * @param menuItem  the vector editor item
  * @param value  the caption text
  */
-extern "C" void func_002D3F48(void *menuItem, int value) {
+extern "C" void cVectorMenuItem_setCaption(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x66C))) = value;
 }
 #endif
@@ -1739,7 +1739,7 @@ extern "C" void cGraphMenuItem__cGraphMenuItem(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3F70);
+INCLUDE_ASM("seg/seg_1D3510", cGraphMenuItem_setCaption);
 #ifdef SKIP_ASM
 /**
  * Sets a graph menu item's caption (+0x14).
@@ -1747,7 +1747,7 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3F70);
  * @param menuItem  the graph item
  * @param value  the caption text
  */
-extern "C" void func_002D3F70(void *menuItem, int value) {
+extern "C" void cGraphMenuItem_setCaption(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
 #endif
@@ -1815,7 +1815,7 @@ extern "C" void func_002D4008(int *lhsItem, int *rhsItem) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D4030);
+INCLUDE_ASM("seg/seg_1D3510", cConsoleConfig__cConsoleConfig);
 #ifdef SKIP_ASM
 void operator_delete(int *);
 extern void* D_00487480[];
@@ -1827,7 +1827,7 @@ extern void* D_00487480[];
  *
  * @param flags  bit 0: free the memory
  */
-extern "C" void func_002D4030(char *self, int flags) {
+extern "C" void cConsoleConfig__cConsoleConfig(char *self, int flags) {
     *(void***)(self + 0x34) = D_00487480;
     if (flags & 1) operator_delete((int*)self);
 }

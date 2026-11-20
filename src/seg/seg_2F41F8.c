@@ -1403,7 +1403,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4EA0);
  *
  * Reads the 16-byte header through the uncached mapping: +0x0 link, +0x8 tag, +0xC payload size. Returns -1 when the
  * link is 0 or the size is outside 0..0x8000; -2 when the link does not point just past the 16-byte-rounded payload or
- * the linked block's own link does not point back; -3 when the linked block's tag differs. func_003E6B10 uses it.
+ * the linked block's own link does not point back; -3 when the linked block's tag differs. NetGameLinkRecv uses it.
  *
  * @param blockAddr  address of the block header
  * @param out  receives the payload size (may be 0)

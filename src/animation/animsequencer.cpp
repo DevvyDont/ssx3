@@ -1025,7 +1025,7 @@ extern "C" void cAnimSequence_writeToReplayFrame(void* node, cAsStream* s);
 /**
  * Writes the sequencer to @p stream: its 4-byte count, then each of its sequences (cAnimSequence_writeToReplayFrame) in list order.
  *
- * The count goes through the stream's first virtual (vtable slot 1). func_00104D68 writes a rider's six sequencers
+ * The count goes through the stream's first virtual (vtable slot 1). cRiderAnim_writeToReplayFrame writes a rider's six sequencers
  * with it; cAnimSequencer_readFromReplayFrame reads the format back.
  *
  * @param stream  the output stream
@@ -1071,7 +1071,7 @@ struct sSeqNode_314880
  *
  * Reads the count through the stream's second virtual (vtable slot 2) and zeroes the sequencer's count (+0x0), then for
  * each sequence allocates 0xD0 bytes tagged "AnimSequence" (flags 0x20000000), zero-fills them (MEM_fill), reads the
- * sequence (cAnimSequence_readFromReplayFrame) and appends it (cAnimSequencer_appendSequence). The list head (+0x4) is not cleared here: func_00104DE0
+ * sequence (cAnimSequence_readFromReplayFrame) and appends it (cAnimSequencer_appendSequence). The list head (+0x4) is not cleared here: cRiderAnim_readFromReplayFrame
  * empties the sequencer with cAnimSequencer_expireAll first.
  *
  * @param stream  the input stream

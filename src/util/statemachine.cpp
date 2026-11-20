@@ -502,7 +502,7 @@ INCLUDE_ASM("util/statemachine", HUFF_decompress);
  * 0x100: skip a stored length), the 24-bit unpacked length and the clue byte, the per-bit-length code counts and the
  * leapfrog-coded symbol table, builds 8-bit fast lookup tables, then decodes with an 8-bit fast path and a 16-bit
  * compare path. The clue introduces a run of the previous byte, the end of the stream, or an explicit byte. Type 13051
- * then undoes a byte delta and 13563 a double delta. A null @p packbuf returns 0. func_002C85A0 calls it.
+ * then undoes a byte delta and 13563 a double delta. A null @p packbuf returns 0. HUFF_decode calls it.
  *
  * @param packbuf  compressed data
  * @param unpackbuf  output buffer, large enough for the unpacked length

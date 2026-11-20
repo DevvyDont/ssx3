@@ -137,7 +137,7 @@ struct cPS2MemCard {
     int unk_010;                    // 0x0010 [R] Reset 0; [U] slot 5 cPS2MemCard_CheckDevice and func_002C67E8 store the device
                                     //       before SetState(3)
     int mMaxFiles;                  // 0x0014 [P] GetMaxFiles, "(file >= 0) && (file < mMaxFiles)"; [R] Reset 6 (the
-                                    //       unk_1A4 count); retail slot 68 func_002D3970
+                                    //       unk_1A4 count); retail slot 68 cPS2MemCard_GetMaxFiles
     int mFileDescriptor;            // 0x0018 [P] "mFileDescriptor >= 0"; [R] Reset -1; [U] sceMcOpen's result, passed
                                     //       to sceMcClose/Read/Write/Seek/Flush, -1 after close
     int unk_01C;                    // 0x001C [R] Reset -1; [U] the current file slot (slots 10/76 store it; indexes

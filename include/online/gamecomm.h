@@ -8,12 +8,12 @@
 // EA's source: d:/ssx/code/source/online/gamecomm.cpp and online/gamecomm.h (the preview build's assert strings).
 //
 // One instance: cGameComm_construct(channel, server) does `cMemMan_alloc(0x5F0, "cGameComm", ...)` + the constructor
-// cGameComm_cGameComm into cGameComm::mGameComm (retail cGameComm_mGameComm); func_00256C50 (destroy) runs the destructor
-// func_00256EE0. Size 0x5F0 [R]. No base class and no virtuals (the constructor stores no vtable; On Tour has none).
+// cGameComm_cGameComm into cGameComm::mGameComm (retail cGameComm_mGameComm); cGameComm_destroy (destroy) runs the destructor
+// cGameComm__cGameComm. Size 0x5F0 [R]. No base class and no virtuals (the constructor stores no vtable; On Tour has none).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Evidence tags:
 //   [R] retail's constructor cGameComm_cGameComm (initial values below) and the allocation size;
-//   [U] how retail code uses the field: the class's own methods (cGameComm_cGameComm..func_00258F20 in seg_156860) and the
+//   [U] how retail code uses the field: the class's own methods (cGameComm_cGameComm..cGameComm_updateSyncPacket in seg_156860) and the
 //       ~50 users of cGameComm_mGameComm (ovstatepause, ovtemplatepausemenu, gamestate's cInputSync, ai, gameload, ...). The
 //       results reporter func_0025FD50 (tagsunk) sends many fields under DirtySock tags, quoted as "TAG";
 //   [O] SSX On Tour's DWARF (class cGameComm, size 0x101C): same member order where both games have the member. On
@@ -45,22 +45,22 @@ enum tGameComm {
     kGameComm_GameOver = 15        // gameEnded (cGameComm_gameEnded)
 };
 
-// tGameCommPacket: one queued packet, 0xF0 bytes ([R] func_00258188: cMemMan_alloc(0xF0, "tGameCommPacket")).
+// tGameCommPacket: one queued packet, 0xF0 bytes ([R] cGameComm_allocPacket: cMemMan_alloc(0xF0, "tGameCommPacket")).
 // On Tour: tGameCommPacket (0xF0) = its 4-byte base tGameCommHeader {mType, mPlayerID, mSize} + mData[236]; written
 // flat here.
 struct tGameCommPacket {
     unsigned char mType;         // 0x00 [O] tGameCommHeader::mType; [U] the queue it goes to (mReadQueue[mType]):
                                  //      0 input samples (cInputSync), 1 chat (sendChat func_00258C50, getQueuedChat
                                  //      func_00258160), 2 BE sync data (asyncRead/asyncWrite), 3 commands (tGameCmdPacket)
-    unsigned char mPlayerID;     // 0x01 [O]; [U] writePacket (func_00257E98) stores 0
+    unsigned char mPlayerID;     // 0x01 [O]; [U] writePacket (cGameComm_writePacket) stores 0
     unsigned short mSize;        // 0x02 [O]; [U] the packet size including this header (writePacket: len + 4)
     unsigned char mData[236];    // 0x04 [O]; [U] payload (writePacket copies len bytes)
 };
 
 // tGameCmdPacket: the 0xC-byte payload of a type-3 (command) packet (On Tour tGameCmdPacket, same layout). Retail
 // commands: 0 pause and 1 unpause (sendPauseCmd cGameComm_sendPauseCmd), 2 controller unplugged (sendUnplugCmd func_00258C00),
-// 3 sync-wait done (syncWait cGameComm_syncWait), 4 checksum (updateSyncPacket func_00258F20), 5 exit game (sendExitGame
-// func_00258BC8); handled by updateCmdQueue func_00257F98.
+// 3 sync-wait done (syncWait cGameComm_syncWait), 4 checksum (updateSyncPacket cGameComm_updateSyncPacket), 5 exit game (sendExitGame
+// cGameComm_sendExitGame); handled by updateCmdQueue cGameComm_updateCmdQueue.
 struct tGameCmdPacket {
     unsigned char Cmd;           // 0x0 [O]; [U] the command number above
     unsigned char FromPlayerID;  // 0x1 [O]; never set in retail
@@ -99,10 +99,10 @@ struct cGameComm {
     int mStateOnCommError;       // 0x01C [O] tGameComm; [U] setCommError copies mState; "CERRSTAT"
     unsigned int mFlagsOnCommError; // 0x020 [O]; [U] setCommError packs 11 flags (mLocalFinishedRace = bit 0 ...
                                  //       mLoading = bit 10); "CERRFLGS"
-    int mCheating[2];            // 0x024 [O] (On Tour [4]); [U] checkErrors (func_002577C8) sets 2 (6+ pauses) or 3
+    int mCheating[2];            // 0x024 [O] (On Tour [4]); [U] checkErrors (cGameComm_checkErrors) sets 2 (6+ pauses) or 3
                                  //       (3+ unplugs) for this machine / the peer; "CHEAT0/1"
     int unk_02C;                 // 0x02C [R] 0; [U] set to 1 when the link times out (unk_094 runs out in checkErrors,
-                                 //       unk_05C reaches 1800 in func_00257A80); never read in retail
+                                 //       unk_05C reaches 1800 in cGameComm_checkActive); never read in retail
     int mCommError;              // 0x030 [O]; [U] setCommError sets 1 (once: it guards the other fields); "COMMERR"
     int unk_034;                 // 0x034 [R] the time at construction; [U] gameStartRace (cGameComm_gameStartRace) stores the race
                                  //       start time (SSXApp +0x18 / +0x10); the reporter subtracts it from unk_038/unk_03C
@@ -115,18 +115,18 @@ struct cGameComm {
     int mServer;                 // 0x044 [O]; [R] the constructor's second argument; [U] update/syncGame take the
                                  //       server side of the handshake when set
     int mAlone;                  // 0x048 [O] (On Tour's next member after mServer that retail has); [U] setFinishRaceAlone
-                                 //       (func_00258950, from ai cAI_finishRemotePlayer) sets 1; ai cAI_onlineAICheck and the timeouts test it
+                                 //       (cGameComm_setFinishRaceAlone, from ai cAI_finishRemotePlayer) sets 1; ai cAI_onlineAICheck and the timeouts test it
     int mPauseCount[2];          // 0x04C [O] (On Tour [4]); [U] [0] counted by sendPauseCmd(true), [1] by the pause
                                  //       command; 6+ means cheating 2
     int unk_054;                 // 0x054 [U] this machine's controller-unplug count (sendUnplugCmd); 3+ means cheating 3
     int unk_058;                 // 0x058 [U] the peer's unplug count (command 2)
-    int unk_05C;                 // 0x05C [U] frames without a packet while the peer isn't paused (func_00257A80); 1800 ends
+    int unk_05C;                 // 0x05C [U] frames without a packet while the peer isn't paused (cGameComm_checkActive); 1800 ends
                                  //       the link; cleared when an input packet arrives (readPacket channel 0)
-    int unk_060;                 // 0x060 [R] 30; [U] frames without a packet (func_00257A80); at 60 mWaitingMessage is set
+    int unk_060;                 // 0x060 [R] 30; [U] frames without a packet (cGameComm_checkActive); at 60 mWaitingMessage is set
                                  //       (On Tour has mWaitingTimer[4] in this area)
     int mOverlayTimeout;         // 0x064 [O]; [R] -1; [U] the pause overlays start it (0x4B0, func_001FD0D8; 0x8CA0 in
-                                 //       ovtemplatedialog), stop it (-1) and test == 0; counted down by func_00257750
-    int mPauseTimeout;           // 0x068 [O]; [R] -1; [U] counted down by func_00257750, tested and reset to -1 by the pause
+                                 //       ovtemplatedialog), stop it (-1) and test == 0; counted down by cGameComm_updateTimeout
+    int mPauseTimeout;           // 0x068 [O]; [R] -1; [U] counted down by cGameComm_updateTimeout, tested and reset to -1 by the pause
                                  //       menu; never armed in retail
     int unk_06C;                 // 0x06C [R] the constructor's first argument: the cCommSystem channel index passed to
                                  //       its readPacket/writePacket/getLatency/getError (On Tour has no channel member)
@@ -163,15 +163,15 @@ struct cGameComm {
     char unk_104[0x10];          // 0x104 [U] the client's build signature "NA_R_F004"
     float mNetLatency[2];        // 0x114 [O] (On Tour [4]); [R] the default frame time (SSXApp +0x14); [U] the latency
                                  //       measured on the server [0] and on the client [1] (states 9/11)
-    float mLatency;              // 0x11C [O]; [U] calcLatency (func_00258330): max of mNetLatency, at least one frame;
+    float mLatency;              // 0x11C [O]; [U] calcLatency (cGameComm_calcLatency): max of mNetLatency, at least one frame;
                                  //       syncGame copies it into tBENetworkDB::fLatency
     int mNumSamples;             // 0x120 [O]; [R] 3; [U] syncGame: 2 when both sides are broadband; cGame_load passes it
-                                 //       to cInputSync as its samples per packet; getLatency (func_00258360) adds frames
-    char* mAsyncReadData;        // 0x124 [O] (On Tour [4]); [U] asyncRead (func_002581E8); asyncReadComplete tests 0
-    int mAsyncReadSize;          // 0x128 [O]; [U] asyncReadUpdate (func_002581F8) reads in 0xEC-byte pieces
-    char* mAsyncWriteData;       // 0x12C [O]; [U] asyncWrite (func_00258290); asyncWriteComplete tests 0
-    int mAsyncWriteSize;         // 0x130 [O]; [U] asyncWriteUpdate (func_002582A0)
-    tGameCommPacket* mPacketCache; // 0x134 [O]; [U] the packet being received (updateReadQueue func_00257CD8); the
+                                 //       to cInputSync as its samples per packet; getLatency (cGameComm_getLatency) adds frames
+    char* mAsyncReadData;        // 0x124 [O] (On Tour [4]); [U] asyncRead (cGameComm_asyncRead); asyncReadComplete tests 0
+    int mAsyncReadSize;          // 0x128 [O]; [U] asyncReadUpdate (cGameComm_asyncReadUpdate) reads in 0xEC-byte pieces
+    char* mAsyncWriteData;       // 0x12C [O]; [U] asyncWrite (cGameComm_asyncWrite); asyncWriteComplete tests 0
+    int mAsyncWriteSize;         // 0x130 [O]; [U] asyncWriteUpdate (cGameComm_asyncWriteUpdate)
+    tGameCommPacket* mPacketCache; // 0x134 [O]; [U] the packet being received (updateReadQueue cGameComm_updateReadQueue); the
                                  //       destructor frees it
     int unk_138;                 // 0x138 [U] ping: frames left (func_002583A8 sets seconds * 60); the online-error overlay
                                  //       tests it

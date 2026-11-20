@@ -208,7 +208,7 @@ extern "C" void cFXLoader__cFXLoader(int *self, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1DCD10", func_002DBF80);
+INCLUDE_ASM("seg/seg_1DCD10", cFogParticleMan_cFogParticleMan);
 #ifdef SKIP_ASM
 extern char cFogParticleMan_vtbl[];
 /**
@@ -219,7 +219,7 @@ extern char cFogParticleMan_vtbl[];
  *
  * @return the object
  */
-extern "C" void *func_002DBF80(int *self) {
+extern "C" void *cFogParticleMan_cFogParticleMan(int *self) {
     self[0] = 0;
     *(char**)((char*)self + 4) = cFogParticleMan_vtbl;
     return self;
@@ -231,7 +231,7 @@ INCLUDE_ASM("seg/seg_1DCD10", cFogParticleMan_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00418EF8_BF98(void* base, int n, int size, int (*cmp)(void*, void*)) __asm__("func_00418EF8");
-extern "C" int func_002DC168(void* arg0, void* arg1);
+extern "C" int cFogParticleMan__FogSortFuc(void* arg0, void* arg1);
 struct RS_BF98 {
     unsigned int w0_lo : 2;
     unsigned int a : 2;
@@ -278,13 +278,13 @@ static inline void G3_BF98(int c, int f, int g, int e, int d) {
  * Renders the frame's fog particles and empties the list.
  *
  * Does nothing while miNumSphere is 0. Otherwise sorts the first miNumSphere 8-byte sort keys at D_00537AC0 (On Tour
- * cFogParticleMan::mSortKey) with func_00418EF8 and the comparator func_002DC168, pushes a copy of the graphics
+ * cFogParticleMan::mSortKey) with func_00418EF8 and the comparator cFogParticleMan__FogSortFuc, pushes a copy of the graphics
  * manager's top render-state record (GrMan +0xE84) and sets several of its fields, calls virtual slot 3
  * (platformrender, cPS2FogParticleMan_platformrender in cPS2FogParticleMan), pops the state and resets miNumSphere to 0.
  */
 extern "C" void cFogParticleMan_render(cFogParticleMan* self) {
     if (self->miNumSphere) {
-        func_00418EF8_BF98(D_00537AC0, self->miNumSphere, 8, func_002DC168);
+        func_00418EF8_BF98(D_00537AC0, self->miNumSphere, 8, cFogParticleMan__FogSortFuc);
         Push_BF98();
         {
             Ctx_BF98* ctx = GrMan_seg_1DCD10;
@@ -311,7 +311,7 @@ extern "C" void cFogParticleMan_render(cFogParticleMan* self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1DCD10", func_002DC168);
+INCLUDE_ASM("seg/seg_1DCD10", cFogParticleMan__FogSortFuc);
 #ifdef SKIP_ASM
 /**
  * Compares two fog sort keys by their view depth (miZ, +4), for the qsort in cFogParticleMan_render: the deeper key
@@ -321,7 +321,7 @@ INCLUDE_ASM("seg/seg_1DCD10", func_002DC168);
  * @param rhs  the second key
  * @return 1 when @p lhs is nearer, -1 when it is farther, 0 when equal
  */
-extern "C" int func_002DC168(void *lhs, void *rhs) {
+extern "C" int cFogParticleMan__FogSortFuc(void *lhs, void *rhs) {
     int temp_3;
     int temp_4;
 
@@ -335,7 +335,7 @@ extern "C" int func_002DC168(void *lhs, void *rhs) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1DCD10", func_002DC190);
+INCLUDE_ASM("seg/seg_1DCD10", cPS2FogParticleMan_addFogInstance);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sV3_C190 {
@@ -580,7 +580,7 @@ static inline int outcode_C190(const sCtx_C190* g, const sV4_C190& v)
  * @param n  how many
  * @param clip  nonzero to drop sprites outside the clip rectangle
  */
-extern "C" void func_002DC190(cPS2FogParticleMan* out, sObj_C190** objs, int n, int clip)
+extern "C" void cPS2FogParticleMan_addFogInstance(cPS2FogParticleMan* out, sObj_C190** objs, int n, int clip)
 {
     sCtx_C190* graphicsMan = D_C190;
     if (graphicsMan->ready == 0)

@@ -129,7 +129,7 @@ int cBESaveInterface_getSaveGameSize(void* self);
 // PORT: the unit defines cBESaveInterface_releaseBuffer(void); this caller passes self in $a0.
 void cBESaveInterface_releaseBuffer_s(void* self) __asm__("cBESaveInterface_releaseBuffer");
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
-extern "C" int func_003E62D0(void* buf, int n, int seed);
+extern "C" int MEM_crc16(void* buf, int n, int seed);
 extern void* cBESaveInterface_buffer;
 struct sSaveHdr_2758 { int w[0x288 / 4]; };
 extern sSaveHdr_2758 D_00535898;
@@ -146,7 +146,7 @@ struct sSaveBits6_2758 { sSaveBits_2758 e[6]; };
  * tagged "save file buffer" into cBESaveInterface_buffer. Writes the 0x288-byte block D_00535898, the 26 high-score
  * tables D_00535C18 (2600 bytes, the ones func_0014AB20 returns), then two bits per player of cBELibrary_playerDB (bit
  * 1 of the word at +0x10 and the byte at +0x13, six players), and ends with a CRC of everything before it
- * (func_003E62D0, seed 64490). cBESaveInterface_loadSaveGame reads this layout back.
+ * (MEM_crc16, seed 64490). cBESaveInterface_loadSaveGame reads this layout back.
  *
  * @return the save buffer (cBESaveInterface_buffer)
  */
@@ -167,7 +167,7 @@ extern "C" void* cBESaveInterface_generateSaveGame(void* self)
     }
     *(sSaveBits6_2758*)cursor = bits;
     cursor += sizeof(sSaveBits6_2758);
-    int crc = func_003E62D0(cBESaveInterface_buffer, size - 4, 64490);
+    int crc = MEM_crc16(cBESaveInterface_buffer, size - 4, 64490);
     __builtin_memcpy(cursor, &crc, 4);
     return cBESaveInterface_buffer;
 }
@@ -198,7 +198,7 @@ extern const char str_save_file_buffer[];
 // PORT: the unit defines cBESaveInterface_releaseBuffer_2950(void); this caller passes self in $a0.
 void cBESaveInterface_releaseBuffer_2950(void* self) __asm__("cBESaveInterface_releaseBuffer");
 
-extern "C" int func_003E62D0(void* buf, int n, int seed);
+extern "C" int MEM_crc16(void* buf, int n, int seed);
 
 extern void* cBESaveInterface_buffer;
 
@@ -230,7 +230,7 @@ void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm
  * Frees the old buffer (cBESaveInterface_releaseBuffer) and allocates cBESaveInterface_getSaveProfileSize bytes ('save file buffer'). It holds the 12-byte
  * player name from cBELibrary_playerDB[@p idx], the whole profile from cBELibrary_profileLib[@p idx] (10 characters x
  * 0xF88), the profile's flag byte from D_00535B31, then lets the player, BAGT, mission, score and stat interfaces write
- * their parts (virtual slot 2 of each getThis()), and ends with a CRC of the rest (func_003E62D0, seed 0xFBEA).
+ * their parts (virtual slot 2 of each getThis()), and ends with a CRC of the rest (MEM_crc16, seed 0xFBEA).
  *
  * @param idx  the profile to save (On Tour iProfile)
  * @return the new buffer (cBESaveInterface_buffer)
@@ -258,7 +258,7 @@ extern "C" void* cBESaveInterface_generateSaveProfile(void* self, int idx)
     iface->v2();
     iface = cBEStatInterface_getThis_2950();
     iface->v2();
-    int crc = func_003E62D0(cBESaveInterface_buffer, size - 4, 64490);
+    int crc = MEM_crc16(cBESaveInterface_buffer, size - 4, 64490);
     __builtin_memcpy(dataPtr, &crc, 4);
     return cBESaveInterface_buffer;
 }
@@ -298,7 +298,7 @@ extern "C" void cSSXApp_activateBEOptions(void* app);
 /**
  * Loads a game save written by cBESaveInterface_generateSaveGame, after checking its CRC.
  *
- * Compares the CRC of the first cBESaveInterface_getSaveGameSize() - 4 bytes (func_003E62D0, seed 64490) with the
+ * Compares the CRC of the first cBESaveInterface_getSaveGameSize() - 4 bytes (MEM_crc16, seed 64490) with the
  * stored one and returns 0 on a mismatch. Otherwise restores D_00535898 and calls the option interface's onLoad,
  * restores the high-score tables D_00535C18 (2600 bytes) and calls the score interface's onLoad, restores the two
  * player bits of cBELibrary_playerDB and calls the player interface's onLoad, then re-applies the locale and options
@@ -310,7 +310,7 @@ extern "C" void cSSXApp_activateBEOptions(void* app);
 extern "C" int cBESaveInterface_loadSaveGame(void* self, char* buf)
 {
     int size = cBESaveInterface_getSaveGameSize(self) - 4;
-    int crc = func_003E62D0(buf, size, 64490);
+    int crc = MEM_crc16(buf, size, 64490);
     int stored = 0;
     __builtin_memcpy(&stored, buf + size, 4);
     if (crc != stored) {
@@ -357,7 +357,7 @@ extern sCharFlag_2DE0 D_00535B31[];
 /**
  * Loads one rider profile from a profile save, after checking its CRC.
  *
- * Compares the CRC of the first cBESaveInterface_getSaveProfileSize() - 4 bytes (func_003E62D0, seed 64490) with the
+ * Compares the CRC of the first cBESaveInterface_getSaveProfileSize() - 4 bytes (MEM_crc16, seed 64490) with the
  * stored one and returns 0 on a mismatch. Otherwise copies the 12-byte name into cBELibrary_playerDB[@p idx], the ten
  * character records into cBELibrary_profileLib[@p idx] and one byte into playerDB +0x11, then calls the onLoad of the
  * player, stat and BAGT interfaces. The word at +0x288 of each character record (the item index table pointer that
@@ -370,7 +370,7 @@ extern sCharFlag_2DE0 D_00535B31[];
 extern "C" int cBESaveInterface_loadSaveProfile(void* self, char* buf, int idx)
 {
     int size = cBESaveInterface_getSaveProfileSize() - 4;
-    int crc = func_003E62D0(buf, size, 64490);
+    int crc = MEM_crc16(buf, size, 64490);
     int stored = 0;
     __builtin_memcpy(&stored, buf + size, 4);
     if (crc != stored) {

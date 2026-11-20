@@ -7362,20 +7362,20 @@ extern "C" void* cObjectInterface_getNash()
 //100%
 INCLUDE_ASM("util/menu", cObjectInterface_addToFocusBox);
 #ifdef SKIP_ASM
-extern "C" int func_001032C0(void* self, int a);
+extern "C" int cFocusMan_addfocusinstance(void* self, int a);
 
 /**
- * Hands instance record @p instanceRecord to the AI's focus manager (func_001032C0 on SSXApp->Game->AI->FocusMan), which marks it
+ * Hands instance record @p instanceRecord to the AI's focus manager (cFocusMan_addfocusinstance on SSXApp->Game->AI->FocusMan), which marks it
  * (record flags bit 0x100) and adds it to the focus boxes.
  *
  * cInstanceNode's constructor calls it for records without that bit, except types 6, 0x10 and 22.
  *
  * @param instanceRecord  the instance record
- * @return func_001032C0's result
+ * @return cFocusMan_addfocusinstance's result
  */
 extern "C" int cObjectInterface_addToFocusBox(int instanceRecord)
 {
-    return func_001032C0(SSXApp->Game->AI->FocusMan, instanceRecord);
+    return cFocusMan_addfocusinstance(SSXApp->Game->AI->FocusMan, instanceRecord);
 }
 #endif
 

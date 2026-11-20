@@ -6,7 +6,7 @@
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_linkToRider);
 #ifdef SKIP_ASM
-extern "C" void func_00116FA8(void* p);
+extern "C" void cHUDFX_cHUDFX(void* p);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_cHUDFX[];
@@ -17,7 +17,7 @@ struct sMetrixEntry_001172E0
 {
     char pad_0x00[0x98];
     int index;
-    sMetrixEntry_001172E0() { func_00116FA8(this); }
+    sMetrixEntry_001172E0() { cHUDFX_cHUDFX(this); }
 };
 
 /**
@@ -271,7 +271,7 @@ extern "C" void cRiderMetrix_resetComboChain(cRiderMetrix* self)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_addToComboChain);
 #ifdef SKIP_ASM
-extern "C" void func_001171A8(void* self, int type, int value, int arg, float f);
+extern "C" void cHUDFX_setAsync(void* self, int type, int value, int arg, float f);
 
 // PORT: g++ <? (min) operator, removed in GCC 4.3.
 static inline float rmClamp_117638(float v, float lo, float hi)
@@ -291,7 +291,7 @@ static inline bool rmIsState_117638(char* p, int st)
  *
  * For @p points above 0: increments the combo count (+0x9C), adds points x clamp((count + 10) x 0.05, 0.5, 2) to the
  * combo points (+0xA0), sets the reset delay (+0xA4) to -1 and, with a HUD bank (+0x1B0), updates HUD effect 3
- * (func_001171A8 on bank + 0x1D4) with its current value (0 when that slot's type is 52) and the new count.
+ * (cHUDFX_setAsync on bank + 0x1D4) with its current value (0 when that slot's type is 52) and the new count.
  *
  * @param points  the points earned
  */
@@ -313,7 +313,7 @@ extern "C" void cRiderMetrix_addToComboChain(cRiderMetrix* self, int points)
             char* hudSlot = hudBank + 0x1D4;
             if (!rmIsState_117638(hudSlot, 52))
                 curValue = *(int*)(hudBank + 0x1E8);
-            func_001171A8(hudSlot, 3, curValue, n, 0.0f);
+            cHUDFX_setAsync(hudSlot, 3, curValue, n, 0.0f);
         }
     }
 }
@@ -998,9 +998,9 @@ static inline float abs_117FE0(float x)
     return r;
 }
 
-// Same function as func_001171A8(slot, type, value, arg, f): the float travels in $f12 either way.
-extern "C" void func_001171A8(void* self, int type, int value, int arg, float f);
-extern "C" void func_001171A8_f(void* slot, int type, int value, float f, int arg) __asm__("func_001171A8");
+// Same function as cHUDFX_setAsync(slot, type, value, arg, f): the float travels in $f12 either way.
+extern "C" void cHUDFX_setAsync(void* self, int type, int value, int arg, float f);
+extern "C" void cHUDFX_setAsync_f(void* slot, int type, int value, float f, int arg) __asm__("cHUDFX_setAsync");
 
 // PORT: float to int to float in FPU registers.
 static inline float trunc_117FE0(float x)
@@ -1034,7 +1034,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
         cSSXAudio_PointsEvent(cAudioInterface_bxAudio(), self->rider, pts);
     }
     if (cRider_getControlState(self->rider) == 8 && !subStateIs_117FE0(self->rider->sub, 3))
-        func_001171A8_f(&self->slots[11], 11, 0, self->rider->sub->f330 <? 1.0f, 0);
+        cHUDFX_setAsync_f(&self->slots[11], 11, 0, self->rider->sub->f330 <? 1.0f, 0);
     else
         cRiderMetrix_removeHUDfx((cRiderMetrix*)self, 11);
     cRiderMetrix_removeHUDfx((cRiderMetrix*)self, 0x10);
@@ -1078,7 +1078,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
                     dialPct = approach_117FE0(dialPct, cur, 0.03333333507180214f);
                 }
             }
-            func_001171A8_f(&self->slots[13], 13, 0, dialPct, 0);
+            cHUDFX_setAsync_f(&self->slots[13], 13, 0, dialPct, 0);
         }
         if (cRider_getControlState(self->rider) == 2) {
             if (fail != 0)
@@ -1135,15 +1135,15 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
                 }
                 float w1 = cSpinControl_getInvertScale((char*)self->rider->sub + 0x230);
                 float w2 = cSpinControl_getOffAxisScale((char*)self->rider->sub + 0x230);
-                func_001171A8_f(&self->slots[main], main, 0, 1.0f, 0);
+                cHUDFX_setAsync_f(&self->slots[main], main, 0, 1.0f, 0);
                 if (invertZone1 != 52)
-                    func_001171A8_f(&self->slots[invertZone1], invertZone1, 0, w1, 1);
+                    cHUDFX_setAsync_f(&self->slots[invertZone1], invertZone1, 0, w1, 1);
                 if (s2 != 52)
-                    func_001171A8_f(&self->slots[s2], s2, 0, w1, 1);
+                    cHUDFX_setAsync_f(&self->slots[s2], s2, 0, w1, 1);
                 if (offAxisZone1 != 52)
-                    func_001171A8_f(&self->slots[offAxisZone1], offAxisZone1, 0, w2, 2);
+                    cHUDFX_setAsync_f(&self->slots[offAxisZone1], offAxisZone1, 0, w2, 2);
                 if (offAxisZone2 != 52)
-                    func_001171A8_f(&self->slots[offAxisZone2], offAxisZone2, 0, w2, 2);
+                    cHUDFX_setAsync_f(&self->slots[offAxisZone2], offAxisZone2, 0, w2, 2);
                 int prev = 0;
                 if (!slotFree_117FE0(&self->slots[14]))
                     prev = self->slots[14].fC;
@@ -1201,7 +1201,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
                         if (kind != prev) {
                             int x = cRiderMetrix_getCurTrickStyleSubPoints((cRiderMetrix*)self);
                             int dispPoints = self->f84 + x;
-                            func_001171A8_f(&self->slots[2], 2, dispPoints, 0.0f, x);
+                            cHUDFX_setAsync_f(&self->slots[2], 2, dispPoints, 0.0f, x);
                         }
                     }
                 }
@@ -1225,20 +1225,20 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
         actualPct = self->rider->f2F8;
     else
         actualPct = approach_117FE0(self->rider->f2F8, self->slots[6].value / self->slots[6].total, 0.01666666753590107f);
-    func_001171A8_f(&self->slots[5], 5, 0, potentialPct, 0);
-    func_001171A8_f(&self->slots[6], 6, 0, actualPct, 0);
+    cHUDFX_setAsync_f(&self->slots[5], 5, 0, potentialPct, 0);
+    cHUDFX_setAsync_f(&self->slots[6], 6, 0, actualPct, 0);
     if (self->rider->f2F4 == 0) {
         cRiderMetrix_removeHUDfx((cRiderMetrix*)self, 8);
     } else {
         if (slotFree_117FE0(&self->slots[8]))
-            func_001171A8_f(&self->slots[8], 8, 0, 0.0f, 0);
+            cHUDFX_setAsync_f(&self->slots[8], 8, 0, 0.0f, 0);
         int n = self->rider->f2F4;
         if (n >= 11)
             n = 10;
         int lvl = n - 1;
         float cur = self->slots[8].value / self->slots[8].total;
         float curPct = approach_117FE0((float)lvl * 0.1111111119389534f <? 1.0f, cur, 0.0066666672937572f);
-        func_001171A8(&self->slots[8], 8, 0, lvl, curPct);
+        cHUDFX_setAsync(&self->slots[8], 8, 0, lvl, curPct);
     }
     int uberCount = self->rider->f2F4;
     if (uberCount >= 11)
@@ -1251,12 +1251,12 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
         if (left < k)
             k = left;
         if (slotFree_117FE0(&self->slots[10])) {
-            func_001171A8_f(&self->slots[10], 10, 0, 0.0f, 0);
+            cHUDFX_setAsync_f(&self->slots[10], 10, 0, 0.0f, 0);
             cSSXAudio_StartUberSpin(cAudioInterface_bxAudio(), self->rider);
         }
         float cur = self->slots[10].value / self->slots[10].total;
         float curPct = approach_117FE0((float)k * 0.1111111119389534f <? 1.0f, cur, 0.01666666753590107f);
-        func_001171A8_f(&self->slots[10], 10, 0, curPct, k);
+        cHUDFX_setAsync_f(&self->slots[10], 10, 0, curPct, k);
     } else {
         if (!slotFree_117FE0(&self->slots[10]))
             cSSXAudio_EndUberSpin(cAudioInterface_bxAudio(), self->rider);
@@ -1264,7 +1264,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
     }
     if (slotFree_117FE0(&self->slots[9])) {
         if (self->rider->f2F0 > 0.0f) {
-            func_001171A8_f(&self->slots[9], 9, 0, 0.0f, 0);
+            cHUDFX_setAsync_f(&self->slots[9], 9, 0, 0.0f, 0);
             cSSXAudio_MaxPowerEvent(cAudioInterface_bxAudio(), self->rider);
         }
     } else {
@@ -1273,10 +1273,10 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
             cRiderMetrix_removeHUDfx((cRiderMetrix*)self, 9);
             cSSXAudio_LoseMaxPowerEvent(cAudioInterface_bxAudio(), self->rider);
         } else {
-            func_001171A8_f(&self->slots[9], 9, 0, approach_117FE0(1.0f - self->rider->f2F0 * 0.05000000074505806f, cur, 0.01666666753590107f), self->rider->f2F4 > 11 ? 11 : self->rider->f2F4);
+            cHUDFX_setAsync_f(&self->slots[9], 9, 0, approach_117FE0(1.0f - self->rider->f2F0 * 0.05000000074505806f, cur, 0.01666666753590107f), self->rider->f2F4 > 11 ? 11 : self->rider->f2F4);
         }
     }
-    func_001171A8_f(&self->slots[7], 7, self->f198, 0.0f, 0);
+    cHUDFX_setAsync_f(&self->slots[7], 7, self->f198, 0.0f, 0);
     sSlot_117FE0* comboSlot = &self->slots[3];
     if (!slotFree_117FE0(comboSlot)) {
         int want = self->fA0;
@@ -1289,7 +1289,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
             dispPoints = have + 70;
         else
             dispPoints = want;
-        func_001171A8_f(comboSlot, 3, dispPoints, approach_117FE0(1.0f, cur, 0.01666666753590107f), self->f9C);
+        cHUDFX_setAsync_f(comboSlot, 3, dispPoints, approach_117FE0(1.0f, cur, 0.01666666753590107f), self->f9C);
         if (self->fA4 < 0.0f)
             self->slots[3].f10 = 4;
         else
@@ -1304,19 +1304,19 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
             curPct = approach_117FE0(1.0f, self->slots[2].value / self->slots[2].total, 0.01666666753590107f);
         else
             curPct = 0.0f;
-        func_001171A8_f(s2, 2, val, curPct, x);
+        cHUDFX_setAsync_f(s2, 2, val, curPct, x);
     } else if (val > 0) {
-        func_001171A8_f(s2, 2, val, 0.0f, x);
+        cHUDFX_setAsync_f(s2, 2, val, 0.0f, x);
     }
     void* stats = cBE_getInterface_Fv(cBE_getBE(), 11);
     char* obj = (char*)self->rider + 0x6C0;
     sVE_117FE0* vt = *(sVE_117FE0**)obj;
     int moneyTotal = cBEEconInterface_getMoney1(stats, vt[7].fn(obj + vt[7].delta));
-    func_001171A8_f(&self->slots[25], 25, moneyTotal, 0.0f, 0);
+    cHUDFX_setAsync_f(&self->slots[25], 25, moneyTotal, 0.0f, 0);
     if (!slotFree_117FE0(&self->slots[4])) {
         int have = self->slots[4].f14;
         float cur = self->slots[4].value / self->slots[4].total;
-        func_001171A8_f(&self->slots[4], 4, have, approach_117FE0(1.0f, cur, 0.01666666753590107f), 0);
+        cHUDFX_setAsync_f(&self->slots[4], 4, have, approach_117FE0(1.0f, cur, 0.01666666753590107f), 0);
     }
 }
 #endif
@@ -1611,13 +1611,13 @@ extern "C" float cRiderMetrix_evFrag(cRiderMetrix* self)
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evCollectMultiplier);
 #ifdef SKIP_ASM
-extern "C" void func_001171A8(void* self, int type, int value, int arg, float f);
+extern "C" void cHUDFX_setAsync(void* self, int type, int value, int arg, float f);
 
 /**
  * Records a collected multiplier and shows it when it beats the best so far.
  *
  * Increments the multiplier count (+0x130); with a HUD bank (+0x1B0) and @p value above the stored best (+0x18) it
- * shows HUD effect 4 with (int) @p value (func_001171A8 on bank + 0x270) and stores the new best.
+ * shows HUD effect 4 with (int) @p value (cHUDFX_setAsync on bank + 0x270) and stores the new best.
  *
  * @param value  the multiplier
  * @return 0.0 (no boost)
@@ -1630,7 +1630,7 @@ extern "C" float cRiderMetrix_evCollectMultiplier(cRiderMetrix* self, float valu
     {
         if (self->CurTrickPointMult < value)
         {
-            func_001171A8(hudBank + 0x270, 4, (int)value, 0, 0.0f);
+            cHUDFX_setAsync(hudBank + 0x270, 4, (int)value, 0, 0.0f);
             self->CurTrickPointMult = value;
         }
     }

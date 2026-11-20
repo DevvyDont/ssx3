@@ -135,11 +135,11 @@ extern "C" void cAI_AIStateUpdate(cAI* self) {
  *
  * cAI_AIStateUpdate calls it with the handler and the AI when the AI enters the game-init state.
  */
-extern "C" void func_00113CB8(void) {
+extern "C" void cGameInitHandler_OnGainState(void) {
 }
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00113CC0);
+INCLUDE_ASM("seg/seg_14B10", cGameInitHandler_OnUpdate);
 #ifdef SKIP_ASM
 extern "C" void cAI_setAIState(cAI*, int);
 
@@ -151,7 +151,7 @@ extern "C" void cAI_setAIState(cAI*, int);
  * @param stateHandler  the handler (unused)
  * @param aiObj  the AI
  */
-extern "C" void func_00113CC0(void *stateHandler, void *aiObj) {
+extern "C" void cGameInitHandler_OnUpdate(void *stateHandler, void *aiObj) {
     cAI_setAIState((cAI*)aiObj, 2);
 }
 #endif
@@ -161,11 +161,11 @@ extern "C" void func_00113CC0(void *stateHandler, void *aiObj) {
  *
  * cAI_AIStateUpdate calls it with the handler and the AI when the AI leaves the game-init state.
  */
-extern "C" void func_00113CE0(void) {
+extern "C" void cGameInitHandler_OnLoseState(void) {
 }
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00113CE8);
+INCLUDE_ASM("seg/seg_14B10", cFreerideHandler_OnGainState);
 #ifdef SKIP_ASM
 /**
  * The freeride state handler's enter step: clears the AI's ComputerRidersActive (+0x14).
@@ -175,13 +175,13 @@ INCLUDE_ASM("seg/seg_14B10", func_00113CE8);
  * @param stateHandler  the handler (unused)
  * @param aiObj  the AI
  */
-extern "C" void func_00113CE8(void *stateHandler, void *aiObj) {
+extern "C" void cFreerideHandler_OnGainState(void *stateHandler, void *aiObj) {
     (*(int *)((char*)(aiObj) + (0x14))) = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00113CF0);
+INCLUDE_ASM("seg/seg_14B10", cFreerideHandler_OnUpdate);
 #ifdef SKIP_ASM
 extern "C" void cAI_setAIState(cAI*, int);
 
@@ -193,7 +193,7 @@ extern "C" void cAI_setAIState(cAI*, int);
  * @param stateHandler  the handler (unused)
  * @param aiObj  the AI
  */
-extern "C" void func_00113CF0(void *stateHandler, void *aiObj) {
+extern "C" void cFreerideHandler_OnUpdate(void *stateHandler, void *aiObj) {
     cAI_setAIState((cAI*)aiObj, 5);
 }
 #endif
@@ -203,11 +203,11 @@ extern "C" void func_00113CF0(void *stateHandler, void *aiObj) {
  *
  * cAI_AIStateUpdate calls it with the handler and the AI when the AI leaves the freeride state.
  */
-extern "C" void func_00113D10(void) {
+extern "C" void cFreerideHandler_OnLoseState(void) {
 }
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00113D18);
+INCLUDE_ASM("seg/seg_14B10", cPreRaceHandler_OnGainState);
 #ifdef SKIP_ASM
 /**
  * The pre-race state handler's enter step: clears the AI's EventTimerTick (+0xC) and the handler's word +4.
@@ -217,7 +217,7 @@ INCLUDE_ASM("seg/seg_14B10", func_00113D18);
  * @param stateHandler  the handler
  * @param aiObj  the AI
  */
-extern "C" void func_00113D18(void *stateHandler, void *aiObj) {
+extern "C" void cPreRaceHandler_OnGainState(void *stateHandler, void *aiObj) {
     (*(int *)((char*)(aiObj) + (0xC))) = 0;
     (*(int *)((char*)(stateHandler) + (4))) = 0;
 }
@@ -228,7 +228,7 @@ extern "C" void func_00113D18(void *stateHandler, void *aiObj) {
  *
  * cAI_AIStateUpdate runs it every AI tick in the pre-race state.
  */
-extern "C" void func_00113D28(void) {
+extern "C" void cPreRaceHandler_OnUpdate(void) {
 }
 
 /**
@@ -236,7 +236,7 @@ extern "C" void func_00113D28(void) {
  *
  * cAI_AIStateUpdate calls it when the AI leaves the pre-race state.
  */
-extern "C" void func_00113D30(void) {
+extern "C" void cPreRaceHandler_OnLoseState(void) {
 }
 
 //100%
@@ -345,7 +345,7 @@ extern "C" void cRaceHandler_OnUpdate(void *handler, void *aiManager) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00113E18);
+INCLUDE_ASM("seg/seg_14B10", cEndRaceHandler_OnGainState);
 #ifdef SKIP_ASM
 extern "C" void cGameComm_gameEnded(int);
 
@@ -355,7 +355,7 @@ extern "C" void cGameComm_gameEnded(int);
  * Calls cGameComm_gameEnded on cGameComm_mGameComm when an online game comm exists. Slot 1 (word 3) of the handler's
  * vtable D_00458500; it is called with the handler and the AI but uses neither, so the C view takes no parameters.
  */
-extern "C" void func_00113E18(void) {
+extern "C" void cEndRaceHandler_OnGainState(void) {
     if (cGameComm_mGameComm != 0) {
         cGameComm_gameEnded((int)cGameComm_mGameComm);
     }
@@ -367,7 +367,7 @@ extern "C" void func_00113E18(void) {
  *
  * cAI_AIStateUpdate runs it every AI tick in the end-race state.
  */
-extern "C" void func_00113E40(void) {
+extern "C" void cEndRaceHandler_OnUpdate(void) {
 }
 
 /**
@@ -375,7 +375,7 @@ extern "C" void func_00113E40(void) {
  *
  * cAI_AIStateUpdate calls it when the AI leaves the end-race state.
  */
-extern "C" void func_00113E48(void) {
+extern "C" void cEndRaceHandler_OnLoseState(void) {
 }
 
 //100%
@@ -401,7 +401,7 @@ extern "C" void cShutdownHandler_OnGainState(int self, int ai) {
  *
  * cAI_AIStateUpdate runs it every AI tick in the shutdown state.
  */
-extern "C" void func_00113E70(void) {
+extern "C" void cShutdownHandler_OnUpdate(void) {
 }
 
 /**
@@ -409,7 +409,7 @@ extern "C" void func_00113E70(void) {
  *
  * cAI_AIStateUpdate calls it when the AI leaves the shutdown state.
  */
-extern "C" void func_00113E78(void) {
+extern "C" void cShutdownHandler_OnLoseState(void) {
 }
 
 //100%
@@ -656,7 +656,7 @@ extern "C" void cRider_setupBoostWarp(cRider* rider, int isHeld, int isPressed)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00114298);
+INCLUDE_ASM("seg/seg_14B10", cRider_applyJumpPop);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" float fCos(float x);
@@ -908,7 +908,7 @@ static inline int Flags_4298(char* r) { return *(short*)(r + 0x2D4); }
  * @param speedFactor  the jump strength, 0 to 1, or negative for a fixed small pop
  */
 // Applies the rider's push (speedFactor in [0, 1]; negative = no push) and the slope/heading corrections.
-extern "C" void func_00114298(char* self, float speedFactor)
+extern "C" void cRider_applyJumpPop(char* self, float speedFactor)
 {
     int steered = 0;
     float speed = Len_4298(VEL_4298);
@@ -1427,8 +1427,8 @@ struct Q_5358 {
 
 extern "C" void cRider_updateOrientationImplicit(cRider* self);
 extern "C" void cRider_rotateOrientation_5358(void* self, Q_5168 dir, float angle) __asm__("cRider_rotateOrientation");
-// PORT: the unit defines func_00116930 with no parameters; this caller passes the rider.
-extern "C" void func_00116930_5358(void* self) __asm__("func_00116930");
+// PORT: the unit defines cRider_verifyRailslideModeDEBUG with no parameters; this caller passes the rider.
+extern "C" void cRider_verifyRailslideModeDEBUG_5358(void* self) __asm__("cRider_verifyRailslideModeDEBUG");
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
 static inline t4Vector QuatMul_5358(const Q_5358& a, const t4Vector& b)
@@ -1492,7 +1492,7 @@ extern "C" void cRider_doRailslideModeOrientation(cRider* self)
             SetHeading_5168((char*)self->mRiderAnim, -1.5707964f);
         }
     }
-    func_00116930_5358(self);
+    cRider_verifyRailslideModeDEBUG_5358(self);
 }
 #endif
 
@@ -1509,8 +1509,8 @@ extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cRiderAnimBase_changeHeadingOffset(void* self, float angle);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" void cRider_rotateOrientation(void* self, Q_5640 dir, float angle);
-// PORT: the unit defines func_00116930 with no parameters; this caller passes the rider.
-extern "C" void func_00116930_p(void* self) __asm__("func_00116930");
+// PORT: the unit defines cRider_verifyRailslideModeDEBUG with no parameters; this caller passes the rider.
+extern "C" void cRider_verifyRailslideModeDEBUG_p(void* self) __asm__("cRider_verifyRailslideModeDEBUG");
 int cRider_getMotionState(void* self);
 extern Q_5640 D_004FF130_5640 __asm__("t4vect_Origin");
 extern Q_5640 D_004FF160_5640 __asm__("t4vect_ZAxis");
@@ -1535,7 +1535,7 @@ static inline void SetHeading_5640(char* a, float angle)
  * modes 3 and 4 reset the animation heading, and it plays 0x11A (mode 3), 0x115 (mode 4) or 0x10C (other modes). On the
  * ground (motion state 0) modes 3 and 4 turn the rider back by +-90 degrees about the up axis (cRider_rotateOrientation
  * and cRiderAnimBase_changeHeadingOffset) and reset the heading, then it plays 5. Finally the mode is cleared and
- * func_00116930 runs (an empty stub: On Tour verifyRailslideModeDEBUG).
+ * cRider_verifyRailslideModeDEBUG runs (an empty stub: On Tour verifyRailslideModeDEBUG).
  */
 // Finishes a pending turn-around request (state 3 = left, 4 = right) of the rider.
 extern "C" void cRider_undoRailslideModeOrientation(cRider* self)
@@ -1564,7 +1564,7 @@ extern "C" void cRider_undoRailslideModeOrientation(cRider* self)
         cRiderAnimBase_play(self->mRiderAnim, 5, 0, -1.0f);
     }
     self->RailslideMode = 0;
-    func_00116930_p((char*)self);
+    cRider_verifyRailslideModeDEBUG_p((char*)self);
 }
 #endif
 
@@ -1671,7 +1671,7 @@ extern "C" float cRider_getStartGateKneeOffset(cRider* self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00115B08);
+INCLUDE_ASM("seg/seg_14B10", cRider_getStartGateHorizOffset);
 #ifdef SKIP_ASM
 extern "C" int cBE_getBE();
 extern "C" int cBE_getInterface__Fv(int, int);
@@ -1686,7 +1686,7 @@ extern "C" float cBECharacterInterface_getScale(int, int);
  * @param rider  the rider
  * @return the offset (0 at scale 1)
  */
-extern "C" float func_00115B08(void *rider) {
+extern "C" float cRider_getStartGateHorizOffset(void *rider) {
     return (cBECharacterInterface_getScale(cBE_getInterface__Fv(cBE_getBE(), 2), (*(int *)((char*)(rider) + (0x86C)))) * 90.0f) - 90.0f;
 }
 #endif
@@ -2017,7 +2017,7 @@ extern "C" int cRider_checkForPrewind(cRider* self, int isJumpHeld, int isJumpPr
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00116378);
+INCLUDE_ASM("seg/seg_14B10", cRider_checkForFinishLine);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRider_setControlState_6378(void *, int) __asm__("cRider_setControlState__FPv");
@@ -2031,7 +2031,7 @@ extern "C" void cRider_setControlState_6378(void *, int) __asm__("cRider_setCont
  * @param rider  the rider
  * @return 1 when the state was set, else 0
  */
-extern "C" int func_00116378(void *rider) {
+extern "C" int cRider_checkForFinishLine(void *rider) {
     if (*(float *)((char*)rider + 0x470) >= 0.0f) {
         cRider_setControlState_6378(rider, 10);
         return 1;
@@ -2187,7 +2187,7 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
  *
  * cRider_doRailslideModeOrientation calls it with the rider as its last step; the C declares no parameters.
  */
-extern "C" void func_00116930(void) {
+extern "C" void cRider_verifyRailslideModeDEBUG(void) {
 }
 
 //100%
@@ -2382,7 +2382,7 @@ extern "C" void gGenMonsterTrickReqName(char* buf, int trick, int size)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_00116FA8);
+INCLUDE_ASM("seg/seg_14B10", cHUDFX_cHUDFX);
 #ifdef SKIP_ASM
 /**
  * Sets up a HUD effect slot as empty: its ID (+0) becomes 52, the value cHUDFX_update stores when an effect expires.
@@ -2392,7 +2392,7 @@ INCLUDE_ASM("seg/seg_14B10", func_00116FA8);
  * @param hudFx  the effect slot
  * @return @p hudFx
  */
-extern "C" int* func_00116FA8(int *hudFx) {
+extern "C" int* cHUDFX_cHUDFX(int *hudFx) {
     *hudFx = 52;
     return hudFx;
 }
@@ -2508,7 +2508,7 @@ extern "C" void cHUDFX_copyDispStr(cHUDFX*, signed char *);
  *
  * Copies @p displayStr (cHUDFX_copyDispStr) and sets the ID (+0) to @p fxId, the data (+0xC) to @p data, the current
  * decay (+8) to -@p fparg0, the decay limit (+4) to -1 (no limit, so cHUDFX_update leaves it) and the number (+0x14) to
- * 0. The text counterpart of func_001171A8; nothing in the build references it.
+ * 0. The text counterpart of cHUDFX_setAsync; nothing in the build references it.
  *
  * @param hudFx  the effect slot
  * @param fxId  the effect
@@ -2527,7 +2527,7 @@ extern "C" void func_00117138(char *hudFx, int fxId, signed char *displayStr, in
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_14B10", func_001171A8);
+INCLUDE_ASM("seg/seg_14B10", cHUDFX_setAsync);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cHUDFX_copyDispStr(cHUDFX*, signed char *);
@@ -2549,7 +2549,7 @@ extern char str_pct_d[];
  * @param fxData  the effect's data
  */
 // Variant of func_00117138 that names the entry from a number (formatted into a shared buffer).
-extern "C" void func_001171A8(char *hudFx, int fxId, int displayInt, float fparg0, int fxData) {
+extern "C" void cHUDFX_setAsync(char *hudFx, int fxId, int displayInt, float fparg0, int fxData) {
     sprintf((char*)D_004A5E20, str_pct_d, displayInt);
     cHUDFX_copyDispStr((cHUDFX*)hudFx, D_004A5E20);
     *(int *)(hudFx + 0x14) = displayInt;

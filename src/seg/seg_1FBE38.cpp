@@ -5130,7 +5130,7 @@ struct Ent_1D78 { int idx; int val; int pad; int type; };
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. When the instance is found, the script's rider
- * (SSXApp->Game->AI->Riders[cWScriptMan_TheWScriptMan->Being]) is asked through its virtual slot 3 (func_00108C28: is
+ * (SSXApp->Game->AI->Riders[cWScriptMan_TheWScriptMan->Being]) is asked through its virtual slot 3 (cRider_isIntersecting: is
  * the instance's id, +0x78, among the rider's 64 mVisitedIds); the int result in the hidden result slot self is 1 when
  * it is, else 0.
  *
@@ -8767,7 +8767,7 @@ INCLUDE_ASM("seg/seg_1FBE38", DangerStartFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_6438 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_6438 __asm__("SSXApp");
-extern "C" void func_00101728_6438(void*, void*, float, float) __asm__("func_00101728");
+extern "C" void cDangerMan_AddDangerElem_6438(void*, void*, float, float) __asm__("cDangerMan_AddDangerElem");
 struct V3_6438 { float x, y, z; };
 extern V3_6438 D_004C9098_6438 __asm__("luno_gLunoNil");
 struct Tag_6438 { char c; Tag_6438() {} Tag_6438(const Tag_6438 &o) : c(o.c) {} };
@@ -8784,7 +8784,7 @@ struct Ent_6438 { int idx; int val; int pad; int type; };
  * the field type table D_00446880 says 2. Defaults: InstId -1, Radius 1000, Delay 0.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
- * world-cache section and the rest an instance in it. When the instance is found, func_00101728 on the AI's danger
+ * world-cache section and the rest an instance in it. When the instance is found, cDangerMan_AddDangerElem on the AI's danger
  * manager (SSXApp->Game->AI +0xA8) records its id (+0x78), Radius, Delay and position, replacing any earlier record for
  * it (a dead instance is skipped).
  *
@@ -8831,7 +8831,7 @@ extern "C" V3_6438 DangerStartFunc(int n, Ent_6438 *params) {
         float delay = *(float*)&buf[2];
         int instIdBuf[1];
         instIdBuf[0] = *(int*)(obj + 0x78);
-        func_00101728_6438(*(void**)(*(char**)(*(char**)(D_004A28A8_6438 + 0x84) + 0xC) + 0xA8), instIdBuf, radius, delay);
+        cDangerMan_AddDangerElem_6438(*(void**)(*(char**)(*(char**)(D_004A28A8_6438 + 0x84) + 0xC) + 0xA8), instIdBuf, radius, delay);
     }
     return D_004C9098_6438;
 }
@@ -8853,7 +8853,7 @@ static inline char *look_65E8(unsigned id) {
     return (char*)(i << 2);
 }
 
-extern "C" void func_00101888_65E8(void*, void*) __asm__("func_00101888");
+extern "C" void cDangerMan_RemoveDangerElem_65E8(void*, void*) __asm__("cDangerMan_RemoveDangerElem");
 struct V3_65E8 { float x, y, z; };
 extern V3_65E8 D_004C9098_65E8 __asm__("luno_gLunoNil");
 struct Tag_65E8 { char c; Tag_65E8() {} Tag_65E8(const Tag_65E8 &o) : c(o.c) {} };
@@ -8871,7 +8871,7 @@ struct Ent_65E8 { int idx; int val; int pad; int type; };
  * D_004A3DB8 says 2. Defaults: InstId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
- * world-cache section and the rest an instance in it. When the instance is found, func_00101888 on the AI's danger
+ * world-cache section and the rest an instance in it. When the instance is found, cDangerMan_RemoveDangerElem on the AI's danger
  * manager (SSXApp->Game->AI +0xA8) deletes its tracked danger record (cDangerMan_DeleteTrackedDangerElemRecord).
  *
  * @param n  the number of script arguments
@@ -8901,7 +8901,7 @@ extern "C" V3_65E8 DangerEndFunc(int n, Ent_65E8 *params) {
     char *obj = look_65E8(buf[0]);
     if (obj) {
         int instIdBuf[1]; instIdBuf[0] = *(int*)(obj + 0x78);
-        func_00101888_65E8(*(void**)(*(char**)(*(char**)(D_004A28A8_65E8 + 0x84) + 0xC) + 0xA8), instIdBuf);
+        cDangerMan_RemoveDangerElem_65E8(*(void**)(*(char**)(*(char**)(D_004A28A8_65E8 + 0x84) + 0xC) + 0xA8), instIdBuf);
     }
     return D_004C9098_65E8;
 }
@@ -8923,7 +8923,7 @@ static inline char *look_6770(unsigned id) {
     return (char*)(i << 2);
 }
 
-extern "C" void func_00101900_6770(void*, void*, int) __asm__("func_00101900");
+extern "C" void cDangerMan_AddDangerVolume_6770(void*, void*, int) __asm__("cDangerMan_AddDangerVolume");
 struct V3_6770 { float x, y, z; };
 extern V3_6770 D_004C9098_6770 __asm__("luno_gLunoNil");
 struct Tag_6770 { char c; Tag_6770() {} Tag_6770(const Tag_6770 &o) : c(o.c) {} };
@@ -8940,7 +8940,7 @@ struct Ent_6770 { int idx; int val; int pad; int type; };
  * type table D_004A3DC0 says 2. Defaults: InstId -1, Level 0.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
- * world-cache section and the rest an instance in it. When the instance is found, func_00101900 on the AI's danger
+ * world-cache section and the rest an instance in it. When the instance is found, cDangerMan_AddDangerVolume on the AI's danger
  * manager (SSXApp->Game->AI +0xA8) adds a zone for its id (+0x78) with Level, or counts one more reference when the
  * zone is already active.
  *
@@ -8986,7 +8986,7 @@ extern "C" V3_6770 EnableDangerZoneFunc(int n, Ent_6770 *params) {
 
     if (obj) {
         int zoneLevel = buf[1];
-        func_00101900_6770(*(void**)(*(char**)(*(char**)(D_004A28A8_6770 + 0x84) + 0xC) + 0xA8), obj + 0x78, zoneLevel);
+        cDangerMan_AddDangerVolume_6770(*(void**)(*(char**)(*(char**)(D_004A28A8_6770 + 0x84) + 0xC) + 0xA8), obj + 0x78, zoneLevel);
     }
     return D_004C9098_6770;
 }
@@ -8998,7 +8998,7 @@ INCLUDE_ASM("seg/seg_1FBE38", DisableDangerZoneFunc);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_6908 __asm__("cWScriptMan_TheWScriptMan");
 extern char *D_004A28A8_6908 __asm__("SSXApp");
-extern "C" void func_00101970_6908(void*, void*) __asm__("func_00101970");
+extern "C" void cDangerMan_RemoveDangerVolume_6908(void*, void*) __asm__("cDangerMan_RemoveDangerVolume");
 struct V3_6908 { float x, y, z; };
 extern V3_6908 D_004C9098_6908 __asm__("luno_gLunoNil");
 struct Tag_6908 { char c; Tag_6908() {} Tag_6908(const Tag_6908 &o) : c(o.c) {} };
@@ -9016,7 +9016,7 @@ struct Ent_6908 { int idx; int val; int pad; int type; };
  * table D_004A3DC8 says 2. Defaults: InstId -1.
  *
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan->Inst); otherwise its low byte picks a
- * world-cache section and the rest an instance in it. When the instance is found, func_00101970 on the AI's danger
+ * world-cache section and the rest an instance in it. When the instance is found, cDangerMan_RemoveDangerVolume on the AI's danger
  * manager (SSXApp->Game->AI +0xA8) drops one reference to its zone and frees the zone at zero.
  *
  * @param n  the number of script arguments
@@ -9058,7 +9058,7 @@ extern "C" V3_6908 DisableDangerZoneFunc(int n, Ent_6908 *params) {
         obj = inst;
     }
     if (obj)
-        func_00101970_6908(*(void**)(*(char**)(*(char**)(D_004A28A8_6908 + 0x84) + 0xC) + 0xA8), obj + 0x78);
+        cDangerMan_RemoveDangerVolume_6908(*(void**)(*(char**)(*(char**)(D_004A28A8_6908 + 0x84) + 0xC) + 0xA8), obj + 0x78);
     return D_004C9098_6908;
 }
 #endif

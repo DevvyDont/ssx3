@@ -5581,7 +5581,7 @@ extern "C" void* cBXString_cBXString1(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
 int cBXString_find(cBXString* self, char ch, int len);
 extern "C" void cBXString_setAt(cBXString* self, int idx, char ch);
-extern "C" void func_00255FA0(void* self);
+extern "C" void cCommSystem_netConnDisconnect(void* self);
 extern "C" void func_00260F80();
 extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
@@ -5724,7 +5724,7 @@ static inline void* GetSession_1A9CC0()
  * 'full', 'cdev' cheat device, ...; unknown codes "kT_POPUPCMNUnknownServerError"). 'lock' builds "kT_POPUPCMNLocked"
  * with the event's two strings into a new unk_6B8 buffer (tag "EC_LOCKED"); 'down' shows the server's text (newlines
  * turned into spaces, double ones into "\r\r") titled "kT_POPUP200Maintenance2". 'maut' only changes the id to 2109.
- * Unknown codes and 'dnsf' also reset cCommSystem (func_00255FA0) and get id 2110, 'cdev' id 2109; for these three
+ * Unknown codes and 'dnsf' also reset cCommSystem (cCommSystem_netConnDisconnect) and get id 2110, 'cdev' id 2109; for these three
  * cases it then disconnects BuddyMan (func_00261408) and the lobby (func_0025B800, LobbyMan_mLobbyMan) and shuts the
  * online session down (func_002636F0(func_002591B8(), 0)). Quirk: 'ipas' (invalid password) and 'inam' both show
  * "kT_POPUP210AccountNameLength".
@@ -6051,7 +6051,7 @@ extern "C" void func_001A9CC0(cFEStateNet* self, void** popup, void* owner, void
         }
         *(int*)(sub + 0x94) = 2109;
     } else {
-        func_00255FA0(cCommSystem_mCommSystem);
+        cCommSystem_netConnDisconnect(cCommSystem_mCommSystem);
         *(int*)(sub + 0x94) = 2110;
     }
     func_00261408(GetSession_1A9CC0());
@@ -13554,7 +13554,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_00256C50();
+extern "C" void cGameComm_destroy();
 extern "C" void func_001B5268(cFEStateNetConfig* self, int a1);
 extern "C" void* cAudioInterface_bxAudio();
 void func_0028FC38(void* self);
@@ -13563,7 +13563,7 @@ extern char str_200net_config[];
 /**
  * Opens the "200net_config" screen, shuts down any game comm session and resets the configuration menu.
  *
- * Adds the screen by hash (cUIEngine_addScreenByHashName) into mpScreen and plays its frame 0; calls func_00256C50
+ * Adds the screen by hash (cUIEngine_addScreenByHashName) into mpScreen and plays its frame 0; calls cGameComm_destroy
  * (cGameComm destroy) when cGameComm_mGameComm is set; func_001B5268 selects menu row 0, clears D_004A1B80 and
  * calls func_0028FC58(gSSXAudio); finally func_0028FC38(gSSXAudio).
  */
@@ -13576,7 +13576,7 @@ extern "C" void cFEStateNetConfig_onCreateScreen(cFEStateNetConfig* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     if (cGameComm_mGameComm != 0) {
-        func_00256C50();
+        cGameComm_destroy();
     }
     func_001B5268(self, 0);
     func_0028FC38(cAudioInterface_bxAudio());
@@ -23789,7 +23789,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void func_001A9930(cFEStateNet* self);
-extern "C" void func_00256C50();
+extern "C" void cGameComm_destroy();
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* p, int a1);
 extern char str_230online_main_menu[];
@@ -23798,7 +23798,7 @@ extern char str_230online_main_menu[];
  * Creates the "230online_main_menu" screen and tidies up any previous online session.
  *
  * Adds and plays the screen, opens the disconnected popup (func_001A9930) when LobbyMan's mState is 0, calls
- * func_00256C50 when a cGameComm exists, and calls func_0028F140(cAudioInterface_bxAudio(), 1).
+ * cGameComm_destroy when a cGameComm exists, and calls func_0028F140(cAudioInterface_bxAudio(), 1).
  */
 extern "C" void cFEStateOnlineMainMenu_onCreateScreen(cFEStateNet* self)
 {
@@ -23812,7 +23812,7 @@ extern "C" void cFEStateOnlineMainMenu_onCreateScreen(cFEStateNet* self)
         func_001A9930(self);
     }
     if (cGameComm_mGameComm != 0) {
-        func_00256C50();
+        cGameComm_destroy();
     }
     func_0028F140(cAudioInterface_bxAudio(), 1);
 }

@@ -108,7 +108,7 @@ extern "C" float func_00100250(void* self, const sVec4_0250* direction)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00100348);
+INCLUDE_ASM("seg/seg_1218", cComputer_calcTurn);
 #ifdef SKIP_ASM
 struct sV4_0348
 {
@@ -246,7 +246,7 @@ static inline float Atan2_0348(float y, float x)
 
 static inline cObj_0348* Obj_0348(char* self) { return (cObj_0348*)(*(char**)(self + 0x18) + 0x6C0); }
 
-extern "C" float func_00100348_0348(char* self, sV4_0348* target) __asm__("func_00100348");
+extern "C" float cComputer_calcTurn_0348(char* self, sV4_0348* target) __asm__("cComputer_calcTurn");
 /**
  * Returns the steering amount that turns the computer rider towards a point.
  *
@@ -260,7 +260,7 @@ extern "C" float func_00100348_0348(char* self, sV4_0348* target) __asm__("func_
  * @param target  the point to steer towards
  * @return the turn amount, -0.98 to 0.98
  */
-extern "C" float func_00100348_0348(char* self, sV4_0348* target)
+extern "C" float cComputer_calcTurn_0348(char* self, sV4_0348* target)
 {
     sV4_0348 up = *(sV4_0348*)(*(char**)(self + 0x18) + 0x1C0);
     if (up.z <= 0.0f)
@@ -288,7 +288,7 @@ extern "C" float func_00100348_0348(char* self, sV4_0348* target)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00100610);
+INCLUDE_ASM("seg/seg_1218", cComputer_calculateTargetPos);
 #ifdef SKIP_ASM
 struct sV4_0610 {
     float x, y, z, w;
@@ -348,18 +348,18 @@ struct sCam_0610 {
     sV4_0610 base;      // 0x4B0
 };
 
-// PORT: the unit later declares func_00100610 with the out-pointer spelled out; same symbol, by-value return here
-sV4_0610 func_00100610_0610(char* self) __asm__("func_00100610");
+// PORT: the unit later declares cComputer_calculateTargetPos with the out-pointer spelled out; same symbol, by-value return here
+sV4_0610 cComputer_calculateTargetPos_0610(char* self) __asm__("cComputer_calculateTargetPos");
 
 /**
  * Returns the point the computer rider steers towards.
  *
  * Takes the rider (pointer at +0x18) and returns its +0x4B0 point plus a tenth of the vector from +0x110 to +0x490. The
- * cruise routines hand it to func_00100348 for the turn amount.
+ * cruise routines hand it to cComputer_calcTurn for the turn amount.
  *
  * @return the target point
  */
-sV4_0610 func_00100610_0610(char* self)
+sV4_0610 cComputer_calculateTargetPos_0610(char* self)
 {
     sV4_0610 toTarget = Sub_0610((*(sCam_0610**)(self + 0x18))->target, (*(sCam_0610**)(self + 0x18))->pos);
     toTarget = Scale_0610(toTarget, 0.1f);
@@ -368,7 +368,7 @@ sV4_0610 func_00100610_0610(char* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1218", func_00100680);
+INCLUDE_ASM("seg/seg_1218", cComputer_followPathCruise);
 #ifdef SKIP_ASM
 struct sV4_0680 {
     float x, y, z, w;
@@ -417,15 +417,15 @@ struct sWorld_0680 {
 
 extern sWorld_0680* D_004A28A8_0680 __asm__("SSXApp");
 
-extern "C" void func_00100610_0680(sV4_0680*, void*) __asm__("func_00100610");
-extern "C" float func_00100348_0680(void*, sV4_0680*) __asm__("func_00100348");
-extern "C" int func_0010BB18_0680(void*, float*, int*) __asm__("func_0010BB18");
-extern "C" int func_0010BBF8_0680(void*, int*) __asm__("func_0010BBF8");
+extern "C" void cComputer_calculateTargetPos_0680(sV4_0680*, void*) __asm__("cComputer_calculateTargetPos");
+extern "C" float cComputer_calcTurn_0680(void*, sV4_0680*) __asm__("cComputer_calcTurn");
+extern "C" int cComputer_checkForSpeedZone_0680(void*, float*, int*) __asm__("cComputer_checkForSpeedZone");
+extern "C" int cComputer_checkForBoardPress_0680(void*, int*) __asm__("cComputer_checkForBoardPress");
 extern "C" void cComputer_setupRecklessCrouch_0680(void*, void*) __asm__("cComputer_setupRecklessCrouch");
 extern "C" void cComputer_setupCrouch_0680(void*, void*) __asm__("cComputer_setupCrouch");
 extern "C" int cComputer_checkForJumpEvent_0680(char* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6) __asm__("cComputer_checkForJumpEvent");
 extern "C" int cComputer_checkForTargets_0680(char* self, int* out) __asm__("cComputer_checkForTargets");
-extern "C" void func_00100680_0680(char* self, sPad_0680* pad) __asm__("func_00100680");
+extern "C" void cComputer_followPathCruise_0680(char* self, sPad_0680* pad) __asm__("cComputer_followPathCruise");
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float Len_0680(const sV4_0680& v)
@@ -451,10 +451,10 @@ static inline float Len_0680(const sV4_0680& v)
 /**
  * Fills a cruise command that follows the path, and switches the computer rider's cruise logic when needed.
  *
- * Sets the command's turn field from func_00100348 towards func_00100610's point (times 31). Then, in order: -
- * func_0010BB18 (speed in +0xDF0, zone flag): more than 138.9 over that speed sets the brake field to 31 when in the
+ * Sets the command's turn field from cComputer_calcTurn towards cComputer_calculateTargetPos's point (times 31). Then, in order: -
+ * cComputer_checkForSpeedZone (speed in +0xDF0, zone flag): more than 138.9 over that speed sets the brake field to 31 when in the
  * zone; more than 138.9 under it crouches (cComputer_setupRecklessCrouch in the zone, else cComputer_setupCrouch). -
- * otherwise func_0010BBF8 (direction flag): fills the board-press field, the opposite way for the first 60 ticks
+ * otherwise cComputer_checkForBoardPress (direction flag): fills the board-press field, the opposite way for the first 60 ticks
  * (counter +0xE40, then -1) and the given way after that. - otherwise clears +0xE40, sets bit 17 when the rider's
  * +0x2F8 is at least 0.9, its +0x2F0 is positive and +0xDF8 is over 50, and crouches. Last, a jump event
  * (cComputer_checkForJumpEvent) clears the target index +0xE70 and selects cruise entry 0; a target found by
@@ -464,16 +464,16 @@ static inline float Len_0680(const sV4_0680& v)
  *
  * @param cruiseCmd  the cruise command to fill
  */
-extern "C" void func_00100680_0680(char* self, sPad_0680* cruiseCmd)
+extern "C" void cComputer_followPathCruise_0680(char* self, sPad_0680* cruiseCmd)
 {
     sV4_0680 targetPos;
     int x;
     int y;
     int below, toPipe, toRail, isSpin, isFlip;
     int z;
-    func_00100610_0680(&targetPos, self);
-    cruiseCmd->b20 = (int)(func_00100348_0680(self, &targetPos) * 31.0f);
-    if (func_0010BB18_0680(self, (float*)(self + 0xDF0), &x)) {
+    cComputer_calculateTargetPos_0680(&targetPos, self);
+    cruiseCmd->b20 = (int)(cComputer_calcTurn_0680(self, &targetPos) * 31.0f);
+    if (cComputer_checkForSpeedZone_0680(self, (float*)(self + 0xDF0), &x)) {
         float sp = *(float*)(self + 0xDF0);
         float len = Len_0680(*(sV4_0680*)(*(char**)(self + 0x18) + 0x1E0));
         if (sp + 138.88890075683594f < len) {
@@ -485,7 +485,7 @@ extern "C" void func_00100680_0680(char* self, sPad_0680* cruiseCmd)
             else
                 cComputer_setupCrouch_0680(self, cruiseCmd);
         }
-    } else if (func_0010BBF8_0680(self, &y)) {
+    } else if (cComputer_checkForBoardPress_0680(self, &y)) {
         float turnSign = 1.0f;
         if (y)
             turnSign = -1.0f;
@@ -548,9 +548,9 @@ extern "C" Fn_8E88 D_0043CF20[4];
 
 extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6);
 extern "C" void cComputer_setupPrewindState_09E0(char*, int, int, int, int) __asm__("cComputer_setupPrewindState");
-extern "C" void func_00100610_09E0(sVec4_09E0*, void*) __asm__("func_00100610");
-extern "C" float func_00100348_09E0(void*, sVec4_09E0*) __asm__("func_00100348");
-extern "C" void func_00100680(void*, void*);
+extern "C" void cComputer_calculateTargetPos_09E0(sVec4_09E0*, void*) __asm__("cComputer_calculateTargetPos");
+extern "C" float cComputer_calcTurn_09E0(void*, sVec4_09E0*) __asm__("cComputer_calcTurn");
+extern "C" void cComputer_followPathCruise(void*, void*);
 extern "C" void cComputer_setupRecklessCrouch(cComputer*, void*);
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
@@ -586,7 +586,7 @@ static inline float vAbs_09E0(float x)
  * Cruise logic 0: lines the computer rider up for the jump ahead and starts the prewind once it gets there.
  *
  * Without a jump event ahead (checkForJumpEvent(), which also sets mDesiredSpeed to the approach speed) it
- * switches to followPathCruise (logic 1, func_00100680) and runs it. Otherwise it steers at the path target
+ * switches to followPathCruise (logic 1, cComputer_followPathCruise) and runs it. Otherwise it steers at the path target
  * (bits 20-25). At the jump start, within 10000 of its path (+0x4C8) and with the turn under 1 (always:
  * calcTurn caps it at 0.98) it calls setupPrewindState() and sets the 2-bit field at bit 14 to 3; else it
  * crouches recklessly when 5 km/h too slow, or sets the low field of word 1 (probably brake) to 31 when 5
@@ -600,12 +600,12 @@ extern "C" void cComputer_jumpSetupCruise(cComputer* self, sPad_09E0* cmd)
     if (!cComputer_checkForJumpEvent(self, (float*)(((char*)self) + 0xDF0), &below, &toPipe, &toRail, &isSpin, &isFlip)) {
         *(Fn_8E88*)&self->cruiseLogic = D_0043CF20[1];
         self->mCruiseLogicID = 1;
-        func_00100680(((char*)self), cmd);
+        cComputer_followPathCruise(((char*)self), cmd);
         return;
     }
     sVec4_09E0 targetPos;
-    func_00100610_09E0(&targetPos, ((char*)self));
-    float steer = func_00100348_09E0(((char*)self), &targetPos);
+    cComputer_calculateTargetPos_09E0(&targetPos, ((char*)self));
+    float steer = cComputer_calcTurn_09E0(((char*)self), &targetPos);
     cmd->b20 = (int)(steer * 31.0f);
     char* rider = (char*)self->mRider;
     float len = vLen_09E0(*(sVec4_09E0*)(rider + 0x1E0));
@@ -693,8 +693,8 @@ struct sCtl_0B90 {
 
 extern sWorld_0B90* D_004A28A8_0B90 __asm__("SSXApp");
 
-extern "C" void func_00100610_0B90(sV4_0B90*, void*) __asm__("func_00100610");
-extern "C" float func_00100348_0B90(void*, sV4_0B90*) __asm__("func_00100348");
+extern "C" void cComputer_calculateTargetPos_0B90(sV4_0B90*, void*) __asm__("cComputer_calculateTargetPos");
+extern "C" float cComputer_calcTurn_0B90(void*, sV4_0B90*) __asm__("cComputer_calcTurn");
 extern "C" void cComputer_setupRecklessCrouch_0B90(void*, void*) __asm__("cComputer_setupRecklessCrouch");
 extern "C" void cComputer_setupCrouch_0B90(void*, void*) __asm__("cComputer_setupCrouch");
 extern "C" int cComputer_checkForJumpEvent_0B90(char* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6) __asm__("cComputer_checkForJumpEvent");
@@ -831,8 +831,8 @@ extern "C" void cComputer_attackTargetCruise(cComputer* self, sPad_0B90* cmd)
     float steer;
     if (absAng > behindAng) {
         sV4_0B90 v;
-        func_00100610_0B90(&v, ((char*)self));
-        steer = func_00100348_0B90(((char*)self), &v);
+        cComputer_calculateTargetPos_0B90(&v, ((char*)self));
+        steer = cComputer_calcTurn_0B90(((char*)self), &v);
         if (Rec_0B90((char*)self)->dist > 200.0f && hisSpd < mySpd)
             cmd->w0 = 0x1F;
     } else {
@@ -848,7 +848,7 @@ extern "C" void cComputer_attackTargetCruise(cComputer* self, sPad_0B90* cmd)
         } else if (hisSpd < mySpd) {
             cmd->w0 = 0x1F;
         }
-        steer = func_00100348_0B90(((char*)self), &w);
+        steer = cComputer_calcTurn_0B90(((char*)self), &w);
     }
     cmd->b20 = (int)(steer * 31.0f);
     z = 1;
@@ -935,8 +935,8 @@ struct sCtl_0F88 {
 
 extern sWorld_0F88* D_004A28A8_0F88 __asm__("SSXApp");
 
-extern "C" void func_00100610_0F88(sV4_0F88*, void*) __asm__("func_00100610");
-extern "C" float func_00100348_0F88(void*, sV4_0F88*) __asm__("func_00100348");
+extern "C" void cComputer_calculateTargetPos_0F88(sV4_0F88*, void*) __asm__("cComputer_calculateTargetPos");
+extern "C" float cComputer_calcTurn_0F88(void*, sV4_0F88*) __asm__("cComputer_calcTurn");
 extern "C" void cComputer_setupRecklessCrouch_0F88(void*, void*) __asm__("cComputer_setupRecklessCrouch");
 extern "C" void cComputer_setupCrouch_0F88(void*, void*) __asm__("cComputer_setupCrouch");
 extern "C" int cComputer_checkForJumpEvent_0F88(char* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6) __asm__("cComputer_checkForJumpEvent");
@@ -1018,8 +1018,8 @@ extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* cmd)
     float hisSpd = Len_0F88(*tgt->GetVel());
     float steer = 0.0f;
     if (Abs_0F88(ang) > 1.5707964897155762f) {
-        func_00100610_0F88(&targetPos, ((char*)self));
-        steer = func_00100348_0F88(((char*)self), &targetPos);
+        cComputer_calculateTargetPos_0F88(&targetPos, ((char*)self));
+        steer = cComputer_calcTurn_0F88(((char*)self), &targetPos);
         if (mySpd < hisSpd)
             cComputer_setupRecklessCrouch_0F88(((char*)self), cmd);
         else
@@ -1035,14 +1035,14 @@ extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* cmd)
                 lim += 3.1415927410125732f;
         }
         if (Abs_0F88(ang) > lim || mySpd <= hisSpd) {
-            func_00100610_0F88(&targetPos, ((char*)self));
-            steer = func_00100348_0F88(((char*)self), &targetPos);
+            cComputer_calculateTargetPos_0F88(&targetPos, ((char*)self));
+            steer = cComputer_calcTurn_0F88(((char*)self), &targetPos);
             cComputer_setupCrouch_0F88(((char*)self), cmd);
         } else if (tgt->Ready()) {
             if (*(int*)((char*)tgt + 0xAB8) == *(int*)((char*)self->mRider + 0xAB8))
                 cRider_checkAIPathSwitch((char*)self->mRider, 0);
-            func_00100610_0F88(&targetPos, ((char*)self));
-            steer = func_00100348_0F88(((char*)self), &targetPos);
+            cComputer_calculateTargetPos_0F88(&targetPos, ((char*)self));
+            steer = cComputer_calcTurn_0F88(((char*)self), &targetPos);
             cComputer_setupCrouch_0F88(((char*)self), cmd);
         }
     }
@@ -1094,7 +1094,7 @@ public:
  * The member constructors set the instance ID of each of the 64 tracked elements (+0x18 of each) and of the
  * 64 danger-zone nodes to -1 before cDangerMan_Reset() runs.
  *
- * @param o  the owning cAI (On Tour pAI), whose riders func_001013A8 (On Tour Update) checks
+ * @param o  the owning cAI (On Tour pAI), whose riders cDangerMan_Update (On Tour Update) checks
  */
 cTable_101310::cTable_101310(void* o)
 {
@@ -1106,7 +1106,7 @@ __asm__(".globl cDangerMan_cDangerMan\n.type cDangerMan_cDangerMan,@function\ncD
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_001013A8);
+INCLUDE_ASM("seg/seg_1218", cDangerMan_Update);
 #ifdef SKIP_ASM
 // FAKEMATCH: `do { ... } while (0)` around the recs loop (its loop notes weight self's ref, so global-alloc takes self before zoneCheckAIIndex); plain form 99.31%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
@@ -1242,7 +1242,7 @@ static inline sObj_13A8* lookup_13A8(unsigned int id)
  */
 // cDangerMan::Update(void) (SSX On Tour symbols; riders are cAI::getRider/getNumRiders, the zone lookup is
 // cWorld::getTheWorld()->getInstanceResource(id)).
-extern "C" void func_001013A8(sMgr_13A8* self)
+extern "C" void cDangerMan_Update(sMgr_13A8* self)
 {
     if (self->list) {
         int zoneCheckAIIndex = self->cur;
@@ -1379,7 +1379,7 @@ extern "C" void cDangerMan_Reset(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00101728);
+INCLUDE_ASM("seg/seg_1218", cDangerMan_AddDangerElem);
 #ifdef SKIP_ASM
 struct sVec4_1728 {
     float x, y, z, w;
@@ -1450,7 +1450,7 @@ struct sMgr_1728 {
     int count;
 };
 
-extern "C" void func_00101888(sMgr_1728*, unsigned int*);
+extern "C" void cDangerMan_RemoveDangerElem(sMgr_1728*, unsigned int*);
 
 static inline sObj_1728* lookup_1728(unsigned int id)
 {
@@ -1467,22 +1467,22 @@ static inline sObj_1728* lookup_1728(unsigned int id)
  * Starts tracking a world instance as a danger element.
  *
  * Does nothing when the instance (looked up by id in the world cache) is missing or dead. Otherwise drops any element
- * with the same id (func_00101888), takes the first free element (state 2) of the 64 and fills it: state 0, the id,
+ * with the same id (cDangerMan_RemoveDangerElem), takes the first free element (state 2) of the 64 and fills it: state 0, the id,
  * @p x and @p y, and the instance's position; the element count +0x704 goes up. Nothing happens when all are in use.
  * DangerStartFunc calls it.
  *
  * @param idp  the instance id
  * @param x  stored in the element's first word
- * @param y  how long, in seconds, the element stays after its instance is gone (func_001013A8 counts it down)
+ * @param y  how long, in seconds, the element stays after its instance is gone (cDangerMan_Update counts it down)
  */
-extern "C" void func_00101728(sMgr_1728* self, unsigned int* idp, float x, float y)
+extern "C" void cDangerMan_AddDangerElem(sMgr_1728* self, unsigned int* idp, float x, float y)
 {
     cComp_1728* instNode = lookup_1728(*idp)->comp;
     if (instNode == 0)
         return;
     if (instNode->IsDead())
         return;
-    func_00101888(self, idp);
+    cDangerMan_RemoveDangerElem(self, idp);
     for (int i = 0; i < 64; i++) {
         sEnt_1728* elemInfo = &self->ents[i];
         if (elemInfo->state == 2) {
@@ -1502,7 +1502,7 @@ extern "C" void func_00101728(sMgr_1728* self, unsigned int* idp, float x, float
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00101888);
+INCLUDE_ASM("seg/seg_1218", cDangerMan_RemoveDangerElem);
 #ifdef SKIP_ASM
 void cDangerMan_DeleteTrackedDangerElemRecord(void*, void*);
 
@@ -1510,11 +1510,11 @@ void cDangerMan_DeleteTrackedDangerElemRecord(void*, void*);
  * Stops tracking the danger element of an instance.
  *
  * Walks the used elements of the 64 and deletes the first one with the id (cDangerMan_DeleteTrackedDangerElemRecord).
- * func_00101728 and DangerEndFunc call it.
+ * cDangerMan_AddDangerElem and DangerEndFunc call it.
  *
  * @param idp  the instance id
  */
-extern "C" void func_00101888(sMgr_1728* self, unsigned int* idp)
+extern "C" void cDangerMan_RemoveDangerElem(sMgr_1728* self, unsigned int* idp)
 {
     int n = self->count;
     if (n != 0) {
@@ -1534,7 +1534,7 @@ extern "C" void func_00101888(sMgr_1728* self, unsigned int* idp)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00101900);
+INCLUDE_ASM("seg/seg_1218", cDangerMan_AddDangerVolume);
 #ifdef SKIP_ASM
 struct N_1900 { int key; int val; int refs; N_1900 *next; };
 struct P_1900 { char pad[0xB54]; N_1900 *freelist; N_1900 *used; };
@@ -1544,13 +1544,13 @@ struct P_1900 { char pad[0xB54]; N_1900 *freelist; N_1900 *used; };
  *
  * When the zone list (+0xB58) already holds the id, its reference count goes up. Otherwise a node is taken from the
  * free list (+0xB54; there is no check for an empty list) and put at the front of the zone list with the id, @p level
- * and one reference. func_001013A8 tests riders against these zones. EnableDangerZoneFunc calls it.
+ * and one reference. cDangerMan_Update tests riders against these zones. EnableDangerZoneFunc calls it.
  *
  * @param dangerMan  the danger manager
  * @param instId  the zone's instance id
  * @param level  the zone's danger level
  */
-extern "C" void func_00101900(P_1900 *dangerMan, int *instId, int level) {
+extern "C" void cDangerMan_AddDangerVolume(P_1900 *dangerMan, int *instId, int level) {
     N_1900 *currActiveZone;
     N_1900 *n;
 
@@ -1571,7 +1571,7 @@ extern "C" void func_00101900(P_1900 *dangerMan, int *instId, int level) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00101970);
+INCLUDE_ASM("seg/seg_1218", cDangerMan_RemoveDangerVolume);
 #ifdef SKIP_ASM
 struct sNode_1970 { int key; int pad; int ref; sNode_1970* next; };
 struct sC_1970 { int x, a, b; };
@@ -1591,7 +1591,7 @@ struct sSelf_1970 {
  *
  * @param key  the zone's instance id
  */
-extern "C" void func_00101970(sSelf_1970* self, int* key) {
+extern "C" void cDangerMan_RemoveDangerVolume(sSelf_1970* self, int* key) {
     sNode_1970* prev = 0;
     sNode_1970* n = self->used;
     while (n) {
@@ -1614,10 +1614,10 @@ extern "C" void func_00101970(sSelf_1970* self, int* key) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00101A10);
+INCLUDE_ASM("seg/seg_1218", cDangerMan_GetRiderDangerLevel);
 #ifdef SKIP_ASM
 /**
- * Returns a rider's applied danger level (the second word of its 12-byte record at +0x70C, set by func_001013A8).
+ * Returns a rider's applied danger level (the second word of its 12-byte record at +0x70C, set by cDangerMan_Update).
  *
  * cRider_updateDangerLevel calls it with the rider's mAIIndex.
  *
@@ -1625,13 +1625,13 @@ INCLUDE_ASM("seg/seg_1218", func_00101A10);
  * @param aiIndex  the rider's index
  * @return the applied danger level
  */
-extern "C" int func_00101A10(int dangerMan, int aiIndex) {
+extern "C" int cDangerMan_GetRiderDangerLevel(int dangerMan, int aiIndex) {
     return (*(int *)((char*)(((aiIndex * 0xC) + dangerMan)) + (0x710)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00101A28);
+INCLUDE_ASM("seg/seg_1218", FocusQuery_addcell);
 #ifdef SKIP_ASM
 struct sLink_1A28 {
     sLink_1A28* next;
@@ -1655,13 +1655,13 @@ extern "C" int cWScriptMan_isFocusInstance(int, sLink_1A28*);
  *
  * Each instance in the cell's list (+0x20) that cWScriptMan_isFocusInstance accepts is appended to @p list (count at
  * +0, then the pointers; no bound check). With @p recurse the same is done for each of the eight children, recursively.
- * The cell visitor func_00144368 and func_00101B60 call it.
+ * The cell visitor func_00144368 and cFocusMan_update call it.
  *
  * @param list  the instance list to append to
  * @param node  the cell (eight child pointers, then the instance list)
  * @param recurse  nonzero to take the instances of all cells below too
  */
-extern "C" void func_00101A28(sList_1A28* list, sNode_1A28* node, int recurse)
+extern "C" void FocusQuery_addcell(sList_1A28* list, sNode_1A28* node, int recurse)
 {
     sLink_1A28* item;
     for (item = node->items; item; item = item->next) {
@@ -1669,20 +1669,20 @@ extern "C" void func_00101A28(sList_1A28* list, sNode_1A28* node, int recurse)
             list->items[list->n++] = item;
     }
     if (recurse) {
-        if (node->kids[0]) func_00101A28(list, node->kids[0], 1);
-        if (node->kids[1]) func_00101A28(list, node->kids[1], 1);
-        if (node->kids[2]) func_00101A28(list, node->kids[2], 1);
-        if (node->kids[3]) func_00101A28(list, node->kids[3], 1);
-        if (node->kids[4]) func_00101A28(list, node->kids[4], 1);
-        if (node->kids[5]) func_00101A28(list, node->kids[5], 1);
-        if (node->kids[6]) func_00101A28(list, node->kids[6], 1);
-        if (node->kids[7]) func_00101A28(list, node->kids[7], 1);
+        if (node->kids[0]) FocusQuery_addcell(list, node->kids[0], 1);
+        if (node->kids[1]) FocusQuery_addcell(list, node->kids[1], 1);
+        if (node->kids[2]) FocusQuery_addcell(list, node->kids[2], 1);
+        if (node->kids[3]) FocusQuery_addcell(list, node->kids[3], 1);
+        if (node->kids[4]) FocusQuery_addcell(list, node->kids[4], 1);
+        if (node->kids[5]) FocusQuery_addcell(list, node->kids[5], 1);
+        if (node->kids[6]) FocusQuery_addcell(list, node->kids[6], 1);
+        if (node->kids[7]) FocusQuery_addcell(list, node->kids[7], 1);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00101B60);
+INCLUDE_ASM("seg/seg_1218", cFocusMan_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: PS2-only VU0 inline asm (vector subtract).
@@ -1780,7 +1780,7 @@ struct tFocusRec {
     unsigned int flags;
 };
 
-// The instances func_00101A28 collects.
+// The instances FocusQuery_addcell collects.
 struct sFocusList {
     int n;
     tFocusRec* items[512];
@@ -1807,7 +1807,7 @@ struct InstanceCompare {
 };
 
 extern t4Vector D_004A61E0;
-extern "C" void func_00101A28_1B60(sFocusList* list, const sNode_1A28* node, int recurse) __asm__("func_00101A28");
+extern "C" void FocusQuery_addcell_1B60(sFocusList* list, const sNode_1A28* node, int recurse) __asm__("FocusQuery_addcell");
 extern "C" void MEM_copy(void* dst, void* src, int size);
 extern "C" void func_0013FAD8(tFocusRec** first, tFocusRec** last, tFocusRec** out, const InstanceCompare& cmp);
 extern "C" void cWScriptMan_downFocusScript(int, tFocusRec*);
@@ -1846,7 +1846,7 @@ struct FocusCallback {
         }
     found:
         int leaf = key.level < 14;
-        func_00101A28_1B60(list, &cell, leaf);
+        FocusQuery_addcell_1B60(list, &cell, leaf);
         if (leaf) {
             return;
         }
@@ -1892,13 +1892,13 @@ static inline void Visit(const FocusCallback& cb, const sNashTree* tree, int k)
  * Builds a box of plus and minus D_004A61E0 around each focus position (count +0, entries of 0x20 bytes at +0x10). It
  * returns early unless a position moved 2000 or more since the last pass, 20 AI ticks (AITick) have passed, or there
  * was no pass yet (+0xD0 negative). Then it walks the eight roots of the game's nash cell tree (game +0x20): cells
- * crossing a box add their instances (func_00101A28), whole subtrees once below level 14. It stores the tick and the
+ * crossing a box add their instances (FocusQuery_addcell), whole subtrees once below level 14. It stores the tick and the
  * positions. Instances newly in focus get flag 0x100; flag 0x200 follows the pass parity (+0xD4), and instances of the
  * previous pass (+0xD8 count, +0xDC list) not seen again lose 0x100. The new list replaces the old one (MEM_copy). The
  * instances that left focus are sorted (func_0013FAD8) and get cWScriptMan_downFocusScript, then those that entered get
  * cWScriptMan_upFocusScript. cAI_update calls it.
  */
-extern "C" void func_00101B60(sFocusBoxes* self)
+extern "C" void cFocusMan_update(sFocusBoxes* self)
 {
     sFocusList list;
     list.n = 0;
@@ -1978,7 +1978,7 @@ extern "C" void func_00101B60(sFocusBoxes* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_001032C0);
+INCLUDE_ASM("seg/seg_1218", cFocusMan_addfocusinstance);
 #ifdef SKIP_ASM
 struct S_32C0 {
     char pad[0xD4];
@@ -1991,13 +1991,13 @@ struct S_32C0 {
  * Puts an instance into the focus manager's in-focus list.
  *
  * Sets the in-focus flag 0x100 in the instance's flags (+8) and sets its parity flag 0x200 to match the manager's pass
- * parity (+0xD4: cleared when that is nonzero, set when it is 0), as func_00101B60 does, then appends it to the list
+ * parity (+0xD4: cleared when that is nonzero, set when it is 0), as cFocusMan_update does, then appends it to the list
  * (+0xD8 count, +0xDC entries; no bound check). cObjectInterface_addToFocusBox uses it.
  *
  * @param focusMan  the focus manager
  * @param instance  the instance record
  */
-extern "C" void func_001032C0(S_32C0 *focusMan, void *instance) {
+extern "C" void cFocusMan_addfocusinstance(S_32C0 *focusMan, void *instance) {
     int temp_3;
     int temp_6;
     int var_2;
@@ -2054,7 +2054,7 @@ struct S_3358 { char pad[0xD0]; int f_d0; int pad2; int cnt; void *arr[8]; };
 /**
  * Empties the focus manager's list of up to 8 objects and sets its +0xD0 word to -1.
  *
- * Clears bit 0x100 in each listed object's +0x8 flags, the mark that func_001032C0 sets when it adds one.
+ * Clears bit 0x100 in each listed object's +0x8 flags, the mark that cFocusMan_addfocusinstance sets when it adds one.
  */
 extern "C" void cFocusMan_reset(S_3358 *self) {
     int i;
@@ -2245,31 +2245,31 @@ INCLUDE_ASM("seg/seg_1218", cRiderAnim_updateRule);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" char* cAIAnimEventMap_getAnimPlayAttr(int id);
 // PORT: the handlers are defined later in the unit with mixed parameter/return types; bind uniform views by asm label
-extern "C" int f_001048C0_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001048C0");
-extern "C" int f_00104940_36A0(void* self, void* x, void* anim, float dt) __asm__("func_00104940");
-extern "C" int f_001049C0_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001049C0");
-extern "C" int f_00104110_36A0(void* self, void* x, void* anim, float dt) __asm__("func_00104110");
-extern "C" int f_00104178_36A0(void* self, void* x, void* anim, float dt) __asm__("func_00104178");
-extern "C" int f_00104238_36A0(void* self, void* x, void* anim, float dt) __asm__("func_00104238");
-extern "C" int f_001042A8_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001042A8");
-extern "C" int f_00104358_36A0(void* self, void* x, void* anim, float dt) __asm__("func_00104358");
-extern "C" int f_001045D8_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001045D8");
-extern "C" int f_00104660_36A0(void* self, void* x, void* anim, float dt) __asm__("func_00104660");
-extern "C" int f_001042E0_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001042E0");
-extern "C" int f_001043F8_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001043F8");
-extern "C" int f_001045B8_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001045B8");
-extern "C" int f_001047F0_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001047F0");
-extern "C" int f_00104728_36A0(void* self, void* x, void* anim, float dt) __asm__("func_00104728");
-extern "C" int f_001046B0_36A0(void* self, void* x, void* anim, float dt) __asm__("func_001046B0");
-extern "C" void func_00103AA0_36A0(void* self, void* anim) __asm__("func_00103AA0");
+extern "C" int f_001048C0_36A0(void* self, void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateFWD");
+extern "C" int f_00104940_36A0(void* self, void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateHOLD_LAST");
+extern "C" int f_001049C0_36A0(void* self, void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateCYCLE");
+extern "C" int f_00104110_36A0(void* self, void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_CRUISE3");
+extern "C" int f_00104178_36A0(void* self, void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_CRUISE5");
+extern "C" int f_00104238_36A0(void* self, void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_RAIL");
+extern "C" int f_001042A8_36A0(void* self, void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_BRAKE");
+extern "C" int f_00104358_36A0(void* self, void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_PREWIND");
+extern "C" int f_001045D8_36A0(void* self, void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_GATEROCK");
+extern "C" int f_00104660_36A0(void* self, void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_HANDPLANT");
+extern "C" int f_001042E0_36A0(void* self, void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_UBERGRIND");
+extern "C" int f_001043F8_36A0(void* self, void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_AIR_ADJ");
+extern "C" int f_001045B8_36A0(void* self, void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_AIR_CYC");
+extern "C" int f_001047F0_36A0(void* self, void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_BP_PIVOT");
+extern "C" int f_00104728_36A0(void* self, void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_BP_INTO");
+extern "C" int f_001046B0_36A0(void* self, void* x, void* anim, float dt) __asm__("cRiderAnim_onUpdateASYNC_BP_BAL");
+extern "C" void cRiderAnim_checkForSoundEvents_36A0(void* self, void* anim) __asm__("cRiderAnim_checkForSoundEvents");
 
 /**
  * Runs the per-frame update rule of the animation playing in one of the rider's sequencers.
  *
  * Looks up the animation's play attributes (cAIAnimEventMap_getAnimPlayAttr(*anim): a 0x1C-byte record of D_00446990; On
- * Tour calls this lookup getAnimPlayAttr) and dispatches on its update rule (+0x4) to one of 16 handlers, func_001048C0
- * .. func_001046B0 (On Tour onUpdateFWD .. onUpdateASYNC_BP_BAL). When the handler returns 0 and Rider (+0x60) is a
- * human (mIsHuman) local (mIsLocal) rider, it then runs func_00103AA0 (On Tour checkForSoundEvents). Virtual: slot 2 of
+ * Tour calls this lookup getAnimPlayAttr) and dispatches on its update rule (+0x4) to one of 16 handlers, cRiderAnim_onUpdateFWD
+ * .. cRiderAnim_onUpdateASYNC_BP_BAL (On Tour onUpdateFWD .. onUpdateASYNC_BP_BAL). When the handler returns 0 and Rider (+0x60) is a
+ * human (mIsHuman) local (mIsLocal) rider, it then runs cRiderAnim_checkForSoundEvents (On Tour checkForSoundEvents). Virtual: slot 2 of
  * cRiderAnim_vtbl.
  *
  * @param x  the animation sequencer (cAnimSequencer) being updated
@@ -2337,7 +2337,7 @@ extern "C" void cRiderAnim_updateRule(char* self, void* x, int* anim, float dt)
                 ok = *(int*)(rider + 0x87C) != 0;
             }
             if (ok) {
-                func_00103AA0_36A0(self, anim);
+                cRiderAnim_checkForSoundEvents_36A0(self, anim);
             }
         }
     }
@@ -2350,17 +2350,17 @@ INCLUDE_ASM("seg/seg_1218", cRiderAnim_expireRule);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" char* cAIAnimEventMap_getAnimPlayAttr(int id);
-extern "C" int func_00104CA0_3918(void* self, void* ev, void* data) __asm__("func_00104CA0");
-extern "C" int func_00104A40_3918(void* self, void* ev, void* data) __asm__("func_00104A40");
-extern "C" int func_00104A60_3918(void* self, void* ev, void* data) __asm__("func_00104A60");
-extern "C" int func_00104B78_3918(void* self, void* ev, void* data) __asm__("func_00104B78");
-extern "C" int func_00104C18_3918(void* self, void* ev, void* data) __asm__("func_00104C18");
-extern "C" int func_00104B48_3918(void* self, void* ev, void* data) __asm__("func_00104B48");
-extern "C" int func_00104C38_3918(void* self, void* ev, void* data) __asm__("func_00104C38");
-extern "C" int func_00104B98_3918(void* self, void* ev, void* data) __asm__("func_00104B98");
-extern "C" int func_00104BB8_3918(void* self, void* ev, void* data) __asm__("func_00104BB8");
-extern "C" int func_00104BD8_3918(void* self, void* ev, void* data) __asm__("func_00104BD8");
-extern "C" int func_00104C80_3918(void* self, void* ev, void* data) __asm__("func_00104C80");
+extern "C" int cRiderAnim_onExpireNOP_3918(void* self, void* ev, void* data) __asm__("cRiderAnim_onExpireNOP");
+extern "C" int cRiderAnim_onExpireINTO_AIR_3918(void* self, void* ev, void* data) __asm__("cRiderAnim_onExpireINTO_AIR");
+extern "C" int cRiderAnim_onExpireINTO_SPIN_CYC_3918(void* self, void* ev, void* data) __asm__("cRiderAnim_onExpireINTO_SPIN_CYC");
+extern "C" int cRiderAnim_onExpireINTO_CRUISE_3918(void* self, void* ev, void* data) __asm__("cRiderAnim_onExpireINTO_CRUISE");
+extern "C" int cRiderAnim_onExpireBLENDTO_CRUISE_3918(void* self, void* ev, void* data) __asm__("cRiderAnim_onExpireBLENDTO_CRUISE");
+extern "C" int cRiderAnim_onExpireBLENDTO_AIR_3918(void* self, void* ev, void* data) __asm__("cRiderAnim_onExpireBLENDTO_AIR");
+extern "C" int cRiderAnim_onExpireBLENDTO_RAIL_3918(void* self, void* ev, void* data) __asm__("cRiderAnim_onExpireBLENDTO_RAIL");
+extern "C" int cRiderAnim_onExpireINTO_FL_STAND_3918(void* self, void* ev, void* data) __asm__("cRiderAnim_onExpireINTO_FL_STAND");
+extern "C" int cRiderAnim_onExpireINTO_RSFS_3918(void* self, void* ev, void* data) __asm__("cRiderAnim_onExpireINTO_RSFS");
+extern "C" int cRiderAnim_onExpireINTO_PRESS_3918(void* self, void* ev, void* data) __asm__("cRiderAnim_onExpireINTO_PRESS");
+extern "C" int cRiderAnim_onExpireBLENDTO_GEAR_CYC_3918(void* self, void* ev, void* data) __asm__("cRiderAnim_onExpireBLENDTO_GEAR_CYC");
 
 struct sEvent3918 { int a; int b; };
 
@@ -2374,7 +2374,7 @@ struct sEventOwner3918 {
  *
  * The sequencer index is @p ev's position in the 8-byte sequencer array at +0x50. It looks up the play attributes of
  * the sequence's animation (cAIAnimEventMap_getAnimPlayAttr(*data); On Tour getAnimPlayAttr) and dispatches on the
- * expire rule (+0x8) to one of 11 handlers, func_00104CA0 .. func_00104C80 (On Tour onExpireNOP, onExpireINTO_AIR, ...;
+ * expire rule (+0x8) to one of 11 handlers, cRiderAnim_onExpireNOP .. cRiderAnim_onExpireBLENDTO_GEAR_CYC (On Tour onExpireNOP, onExpireINTO_AIR, ...;
  * On Tour adds SK_ skier variants). The handler's result, the next tAIAnimID, goes into the word at +index*4; a rule
  * outside 0..10 stores nothing. Virtual: slot 3 of cRiderAnim_vtbl.
  *
@@ -2388,44 +2388,44 @@ extern "C" void cRiderAnim_expireRule(sEventOwner3918* self, sEvent3918* ev, int
     char* info = cAIAnimEventMap_getAnimPlayAttr(*data);
     switch (*(int*)(info + 8)) {
     case 0:
-        self->results[idx] = func_00104CA0_3918(self, ev, data);
+        self->results[idx] = cRiderAnim_onExpireNOP_3918(self, ev, data);
         break;
     case 1:
-        self->results[idx] = func_00104A40_3918(self, ev, data);
+        self->results[idx] = cRiderAnim_onExpireINTO_AIR_3918(self, ev, data);
         break;
     case 2:
-        self->results[idx] = func_00104A60_3918(self, ev, data);
+        self->results[idx] = cRiderAnim_onExpireINTO_SPIN_CYC_3918(self, ev, data);
         break;
     case 3:
-        self->results[idx] = func_00104B78_3918(self, ev, data);
+        self->results[idx] = cRiderAnim_onExpireINTO_CRUISE_3918(self, ev, data);
         break;
     case 4:
-        self->results[idx] = func_00104C18_3918(self, ev, data);
+        self->results[idx] = cRiderAnim_onExpireBLENDTO_CRUISE_3918(self, ev, data);
         break;
     case 5:
-        self->results[idx] = func_00104B48_3918(self, ev, data);
+        self->results[idx] = cRiderAnim_onExpireBLENDTO_AIR_3918(self, ev, data);
         break;
     case 6:
-        self->results[idx] = func_00104C38_3918(self, ev, data);
+        self->results[idx] = cRiderAnim_onExpireBLENDTO_RAIL_3918(self, ev, data);
         break;
     case 7:
-        self->results[idx] = func_00104B98_3918(self, ev, data);
+        self->results[idx] = cRiderAnim_onExpireINTO_FL_STAND_3918(self, ev, data);
         break;
     case 8:
-        self->results[idx] = func_00104BB8_3918(self, ev, data);
+        self->results[idx] = cRiderAnim_onExpireINTO_RSFS_3918(self, ev, data);
         break;
     case 9:
-        self->results[idx] = func_00104BD8_3918(self, ev, data);
+        self->results[idx] = cRiderAnim_onExpireINTO_PRESS_3918(self, ev, data);
         break;
     case 10:
-        self->results[idx] = func_00104C80_3918(self, ev, data);
+        self->results[idx] = cRiderAnim_onExpireBLENDTO_GEAR_CYC_3918(self, ev, data);
         break;
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00103AA0);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_checkForSoundEvents);
 #ifdef SKIP_ASM
 struct sEnt_3AA0 {
     char pad[0x10];
@@ -2460,7 +2460,7 @@ extern sBankTab_3AA0* cAnimDataBase_TheAnimDataBase;
 extern "C" int func_001446A0(void*, int);
 extern "C" int func_001446B8(void*, int);
 extern "C" void func_00144670(void*, int);
-extern "C" void func_00104CC8(void*, int);
+extern "C" void cRiderAnim_triggerAnimSound(void*, int);
 
 /**
  * Plays the sounds tagged on the frames a rider animation just passed.
@@ -2468,11 +2468,11 @@ extern "C" void func_00104CC8(void*, int);
  * The tag count and tag words come from cAnimDataBase_TheAnimDataBase (bank = id & 0xFF, entry = id >> 8 of the
  * sequence's animation id at +4). For each tag whose event the sequence's +0xB0 object reports through func_001446A0
  * and func_001446B8, and whose tag word has bit 15 set, it clears the event (func_00144670) and plays the sound
- * (func_00104CC8 with the low 15 bits). cRiderAnim_updateRule calls it for local human riders.
+ * (cRiderAnim_triggerAnimSound with the low 15 bits). cRiderAnim_updateRule calls it for local human riders.
  *
  * @param sequence  the animation sequence
  */
-extern "C" void func_00103AA0(void* self, sObj_3AA0* sequence)
+extern "C" void cRiderAnim_checkForSoundEvents(void* self, sObj_3AA0* sequence)
 {
     int n = cAnimDataBase_TheAnimDataBase->banks[sequence->id & 0xFF]->ents[sequence->id >> 8].count;
     for (int i = 0; i < n; i++) {
@@ -2484,7 +2484,7 @@ extern "C" void func_00103AA0(void* self, sObj_3AA0* sequence)
             unsigned short soundEvent = animBank->recs[animBank->ents[sequence->id >> 8].first + i].b;
             if (soundEvent & 0x8000) {
                 func_00144670(sequence->sub, i);
-                func_00104CC8(self, soundEvent & 0x7FFF);
+                cRiderAnim_triggerAnimSound(self, soundEvent & 0x7FFF);
             }
         }
     }
@@ -2492,7 +2492,7 @@ extern "C" void func_00103AA0(void* self, sObj_3AA0* sequence)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00103BE0);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_updatePosNegSlider);
 #ifdef SKIP_ASM
 extern char* cGameAnimMap_TheGameAnimMap;
 extern "C" void cAnimSequence_setSubAnim(void*, int, int);
@@ -2515,7 +2515,7 @@ extern "C" void cAnimSequencer_expire(void*, void*);
  * @param weight  the slider position, -1 to 1
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int func_00103BE0(void* self, void* x, char* anim, int posAnim, int negAnim, float dt, float weight)
+extern "C" int cRiderAnim_updatePosNegSlider(void* self, void* x, char* anim, int posAnim, int negAnim, float dt, float weight)
 {
     if (weight < 0.0f) {
         cAnimSequence_setSubAnim(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + negAnim * 4 + 0x1030));
@@ -2533,7 +2533,7 @@ extern "C" int func_00103BE0(void* self, void* x, char* anim, int posAnim, int n
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00103CC8);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_update3Cycle);
 #ifdef SKIP_ASM
 extern char* cGameAnimMap_TheGameAnimMap;
 extern "C" void cAnimSequence_setSubAnimType(void*, int, int);
@@ -2561,7 +2561,7 @@ extern "C" void cAnimSequencer_expire(void*, void*);
  * @param posAnim  the game animation for positive weights
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int func_00103CC8(void* self, void* x, char* anim, int negAnim, int cenAnim, float dt, float w, int posAnim)
+extern "C" int cRiderAnim_update3Cycle(void* self, void* x, char* anim, int negAnim, int cenAnim, float dt, float w, int posAnim)
 {
     cAnimSequence_setSubAnim(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + cenAnim * 4 + 0x1030));
     if (0.0f < w) {
@@ -2585,7 +2585,7 @@ extern "C" int func_00103CC8(void* self, void* x, char* anim, int negAnim, int c
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00103E28);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_update5Cycle);
 #ifdef SKIP_ASM
 extern char* cGameAnimMap_TheGameAnimMap;
 extern "C" void cAnimSequence_setSubAnimType(void*, int, int);
@@ -2617,7 +2617,7 @@ extern "C" void cAnimSequencer_expire(void*, void*);
  * @param weight  the weight, -1 to 1
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int func_00103E28(void* self, void* x, char* anim, int negEndAnim, int negMidAnim, int cenAnim, int posMidAnim, int posEndAnim, float dt, float weight)
+extern "C" int cRiderAnim_update5Cycle(void* self, void* x, char* anim, int negEndAnim, int negMidAnim, int cenAnim, int posMidAnim, int posEndAnim, float dt, float weight)
 {
     int from, to;
     float w;
@@ -2659,7 +2659,7 @@ extern "C" int func_00103E28(void* self, void* x, char* anim, int negEndAnim, in
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00103FF8);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_updateIntoCycle);
 #ifdef SKIP_ASM
 extern char* cGameAnimMap_TheGameAnimMap;
 extern "C" void cAnimSequence_setSubAnimType(void*, int, int);
@@ -2683,7 +2683,7 @@ extern "C" void cAnimSequencer_expire(void*, void*);
  * @param cycleAnim  the looping game animation that follows
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int func_00103FF8(void* self, void* x, char* anim, int intoAnim, float dt, int cycleAnim)
+extern "C" int cRiderAnim_updateIntoCycle(void* self, void* x, char* anim, int intoAnim, float dt, int cycleAnim)
 {
     if (*(int*)(anim + 4) == *(int*)(cGameAnimMap_TheGameAnimMap + intoAnim * 4 + 0x1030)) {
         cAnimSequence_setSubAnimType(anim, 0, 0);
@@ -2705,24 +2705,24 @@ extern "C" int func_00103FF8(void* self, void* x, char* anim, int intoAnim, floa
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104110);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_CRUISE3);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_00103CC8_4110(void*, void*, int*, int, int, int, float, float) __asm__("func_00103CC8");
+extern "C" int cRiderAnim_update3Cycle_4110(void*, void*, int*, int, int, int, float, float) __asm__("cRiderAnim_update3Cycle");
 
 /**
  * Update rule 3 of cRiderAnim_updateRule: a three-way cruise blend.
  *
  * The weight is the rider's (+0x60) +0x1FC, negated when the rider's +0x320 is set. Sequence 7 blends game animations
- * 17 / 15 / 16, sequence 10 26 / 23 / 25, any other 26 / 24 / 25 (negative / centre / positive) with func_00103CC8.
+ * 17 / 15 / 16, sequence 10 26 / 23 / 25, any other 26 / 24 / 25 (negative / centre / positive) with cRiderAnim_update3Cycle.
  *
  * @param riderAnim  the rider animation object
  * @param sequencer  the sequencer
  * @param sequence  the sequence (first word: its animation id)
  * @param deltaTime  the time step
- * @return func_00103CC8's result: 1 when the sequence was expired
+ * @return cRiderAnim_update3Cycle's result: 1 when the sequence was expired
  */
-extern "C" int func_00104110(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
+extern "C" int cRiderAnim_onUpdateASYNC_CRUISE3(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
     float var_f13;
     void *temp_3;
 
@@ -2732,32 +2732,32 @@ extern "C" int func_00104110(void *riderAnim, void *sequencer, int *sequence, fl
         var_f13 = -var_f13;
     }
     if (*sequence == 7) {
-        return func_00103CC8_4110(riderAnim, sequencer, sequence, 17, 0xF, 0x10, deltaTime, var_f13);
+        return cRiderAnim_update3Cycle_4110(riderAnim, sequencer, sequence, 17, 0xF, 0x10, deltaTime, var_f13);
     }
     if (*sequence == 10) {
-        return func_00103CC8_4110(riderAnim, sequencer, sequence, 26, 23, 25, deltaTime, var_f13);
+        return cRiderAnim_update3Cycle_4110(riderAnim, sequencer, sequence, 26, 23, 25, deltaTime, var_f13);
     }
-    return func_00103CC8_4110(riderAnim, sequencer, sequence, 26, 0x18, 25, deltaTime, var_f13);
+    return cRiderAnim_update3Cycle_4110(riderAnim, sequencer, sequence, 26, 0x18, 25, deltaTime, var_f13);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104178);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_CRUISE5);
 #ifdef SKIP_ASM
-extern "C" int func_00103E28(void* self, void* x, char* anim, int i0, int i1, int i2, int i3, int i4, float dt, float v);
+extern "C" int cRiderAnim_update5Cycle(void* self, void* x, char* anim, int i0, int i1, int i2, int i3, int i4, float dt, float v);
 /**
  * Update rule 4 of cRiderAnim_updateRule: a five-way cruise blend.
  *
  * The weight is the rider's (+0x60) +0x1FC, negated when the rider's +0x320 is set. The sequence picks the five game
  * animations (negative end, negative middle, centre, positive middle, positive end): 6 gives 14 13 10 11 12, 8 gives 22
- * 21 18 19 20, 14 gives 32 31 27 29 30, 15 gives 32 31 28 29 30, any other 9 8 5 6 7. They go to func_00103E28.
+ * 21 18 19 20, 14 gives 32 31 27 29 30, 15 gives 32 31 28 29 30, any other 9 8 5 6 7. They go to cRiderAnim_update5Cycle.
  *
  * @param x  the sequencer
  * @param anim  the sequence (first word: its animation id)
  * @param dt  the time step
- * @return func_00103E28's result: 1 when the sequence was expired
+ * @return cRiderAnim_update5Cycle's result: 1 when the sequence was expired
  */
-extern "C" int func_00104178(char* self, void* x, int* anim, float dt)
+extern "C" int cRiderAnim_onUpdateASYNC_CRUISE5(char* self, void* x, int* anim, float dt)
 {
     char* rider = *(char**)(self + 0x60);
     float weight = *(float*)(rider + 0x1FC);
@@ -2776,29 +2776,29 @@ extern "C" int func_00104178(char* self, void* x, int* anim, float dt)
     } else {
         negEndAnim = 0x20; negMidAnim = 0x1F; cenAnim = 0x1C; posMidAnim = 29; posEndAnim = 0x1E;
     }
-    return func_00103E28(self, x, (char*)anim, negEndAnim, negMidAnim, cenAnim, posMidAnim, posEndAnim, dt, weight);
+    return cRiderAnim_update5Cycle(self, x, (char*)anim, negEndAnim, negMidAnim, cenAnim, posMidAnim, posEndAnim, dt, weight);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104238);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_RAIL);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_00103CC8_4238(void*, void*, int*, int, int, int, float, float) __asm__("func_00103CC8");
+extern "C" int cRiderAnim_update3Cycle_4238(void*, void*, int*, int, int, int, float, float) __asm__("cRiderAnim_update3Cycle");
 
 /**
  * Update rule 5 of cRiderAnim_updateRule: a three-way rail blend.
  *
  * The weight is the rider's (+0x60) +0x238, negated when the rider's +0x320 is set. Sequence 18 blends game animations
- * 65 / 63 / 64, sequence 19 68 / 66 / 67, any other 71 / 69 / 70 (negative / centre / positive) with func_00103CC8. The
- * C declares no result, but func_00103CC8's is left in the return register.
+ * 65 / 63 / 64, sequence 19 68 / 66 / 67, any other 71 / 69 / 70 (negative / centre / positive) with cRiderAnim_update3Cycle. The
+ * C declares no result, but cRiderAnim_update3Cycle's is left in the return register.
  *
  * @param riderAnim  the rider animation object
  * @param sequencer  the sequencer
  * @param sequence  the sequence (first word: its animation id)
  * @param deltaTime  the time step
  */
-extern "C" void func_00104238(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
+extern "C" void cRiderAnim_onUpdateASYNC_RAIL(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
     int var_7;
     int var_8;
     int var_9;
@@ -2827,29 +2827,29 @@ extern "C" void func_00104238(void *riderAnim, void *sequencer, int *sequence, f
         var_9 = 67;
         break;
     }
-    func_00103CC8_4238(riderAnim, sequencer, sequence, var_7, var_8, var_9, deltaTime, var_f13);
+    cRiderAnim_update3Cycle_4238(riderAnim, sequencer, sequence, var_7, var_8, var_9, deltaTime, var_f13);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_001042A8);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_BRAKE);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_00103CC8_42A8(void*, void*, char*, int, int, int, float, float) __asm__("func_00103CC8");
+extern "C" int cRiderAnim_update3Cycle_42A8(void*, void*, char*, int, int, int, float, float) __asm__("cRiderAnim_update3Cycle");
 
 /**
  * Update rule 6 of cRiderAnim_updateRule: a three-way brake blend.
  *
  * The weight is the rider's (+0x60) +0x214, negated when the rider's +0x320 is 0 (the other rules negate when it is
- * set). It blends game animations 36 / 33 / 34 (negative / centre / positive) with func_00103CC8. The C declares no
- * result, but func_00103CC8's is left in the return register.
+ * set). It blends game animations 36 / 33 / 34 (negative / centre / positive) with cRiderAnim_update3Cycle. The C declares no
+ * result, but cRiderAnim_update3Cycle's is left in the return register.
  *
  * @param riderAnim  the rider animation object
  * @param sequencer  the sequencer
  * @param sequence  the sequence
  * @param dt  the time step
  */
-extern "C" void func_001042A8(void *riderAnim, void *sequencer, char *sequence, float dt) {
+extern "C" void cRiderAnim_onUpdateASYNC_BRAKE(void *riderAnim, void *sequencer, char *sequence, float dt) {
     float var_f13;
     void *temp_3;
 
@@ -2858,45 +2858,45 @@ extern "C" void func_001042A8(void *riderAnim, void *sequencer, char *sequence, 
     if ((*(int *)((char*)(temp_3) + (0x320))) == 0) {
         var_f13 = -var_f13;
     }
-    func_00103CC8_42A8(riderAnim, sequencer, sequence, 36, 33, 34, dt, var_f13);
+    cRiderAnim_update3Cycle_42A8(riderAnim, sequencer, sequence, 36, 33, 34, dt, var_f13);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_001042E0);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_UBERGRIND);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_00103BE0_42E0(void *, void *, int *, int, int, float, float) __asm__("func_00103BE0");
+extern "C" int cRiderAnim_updatePosNegSlider_42E0(void *, void *, int *, int, int, float, float) __asm__("cRiderAnim_updatePosNegSlider");
 
 /**
  * Update rule 10 of cRiderAnim_updateRule: a positive / negative slider.
  *
  * Sequence 218 uses game animations 362 / 363, 226 371 / 372, 234 380 / 381, any other 389 / 390 (positive / negative),
- * with the rider's (+0x60) +0x238 as the weight, through func_00103BE0.
+ * with the rider's (+0x60) +0x238 as the weight, through cRiderAnim_updatePosNegSlider.
  *
  * @param riderAnim  the rider animation object
  * @param sequencer  the sequencer
  * @param sequence  the sequence (first word: its animation id)
  * @param deltaTime  the time step
- * @return func_00103BE0's result: 1 when the sequence was expired
+ * @return cRiderAnim_updatePosNegSlider's result: 1 when the sequence was expired
  */
-extern "C" int func_001042E0(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
+extern "C" int cRiderAnim_onUpdateASYNC_UBERGRIND(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
     int x = *sequence;
     if (x == 218) {
-        return func_00103BE0_42E0(riderAnim, sequencer, sequence, 362, 363, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
+        return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 362, 363, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
     }
     if (x == 226) {
-        return func_00103BE0_42E0(riderAnim, sequencer, sequence, 371, 372, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
+        return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 371, 372, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
     }
     if (x == 234) {
-        return func_00103BE0_42E0(riderAnim, sequencer, sequence, 380, 381, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
+        return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 380, 381, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
     }
-    return func_00103BE0_42E0(riderAnim, sequencer, sequence, 389, 390, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
+    return cRiderAnim_updatePosNegSlider_42E0(riderAnim, sequencer, sequence, 389, 390, deltaTime, (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x238))));
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104358);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_PREWIND);
 #ifdef SKIP_ASM
 // PORT: PS2 abs.s helper (stands in for fabsf).
 static inline float vAbs_4358(float x)
@@ -2916,7 +2916,7 @@ static inline float vAbs_4358(float x)
  * @param dt  the time step
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int func_00104358(char* self, void* x, char* anim, float dt) {
+extern "C" int cRiderAnim_onUpdateASYNC_PREWIND(char* self, void* x, char* anim, float dt) {
     char* rider = *(char**)(self + 0x60);
     float absSlew15 = vAbs_4358(*(float*)(rider + 0x2A4));
     float absSlew16 = vAbs_4358(*(float*)(rider + 0x2B0));
@@ -2931,7 +2931,7 @@ extern "C" int func_00104358(char* self, void* x, char* anim, float dt) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_001043F8);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_AIR_ADJ);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: PS2 abs.s helper (stands in for fabsf).
@@ -2960,7 +2960,7 @@ static inline float clamp_43F8(float v, float lo, float hi)
  * @param dt  the time step
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int func_001043F8(char* self, void* x, char* anim, float dt)
+extern "C" int cRiderAnim_onUpdateASYNC_AIR_ADJ(char* self, void* x, char* anim, float dt)
 {
     int slot = 165;
     switch (*(int*)anim) {
@@ -2995,28 +2995,28 @@ extern "C" int func_001043F8(char* self, void* x, char* anim, float dt)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_001045B8);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_AIR_CYC);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00103FF8_45B8(int, int, int, int, int) __asm__("func_00103FF8");
+extern "C" void cRiderAnim_updateIntoCycle_45B8(int, int, int, int, int) __asm__("cRiderAnim_updateIntoCycle");
 
 /**
- * Update rule 12 of cRiderAnim_updateRule: plays game animation 137 once, then loops 138 (func_00103FF8).
+ * Update rule 12 of cRiderAnim_updateRule: plays game animation 137 once, then loops 138 (cRiderAnim_updateIntoCycle).
  *
- * The time step is passed on untouched in its register, and func_00103FF8's result is left in the return register
+ * The time step is passed on untouched in its register, and cRiderAnim_updateIntoCycle's result is left in the return register
  * although the C declares none.
  *
  * @param riderAnim  the rider animation object
  * @param sequencer  the sequencer
  * @param sequence  the sequence
  */
-extern "C" void func_001045B8(int riderAnim, int sequencer, int sequence) {
-    func_00103FF8_45B8(riderAnim, sequencer, sequence, 137, 138);
+extern "C" void cRiderAnim_onUpdateASYNC_AIR_CYC(int riderAnim, int sequencer, int sequence) {
+    cRiderAnim_updateIntoCycle_45B8(riderAnim, sequencer, sequence, 137, 138);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_001045D8);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_GATEROCK);
 #ifdef SKIP_ASM
 /**
  * Update rule 8 of cRiderAnim_updateRule: sets the animation's frame from the rider's gate state.
@@ -3029,7 +3029,7 @@ INCLUDE_ASM("seg/seg_1218", func_001045D8);
  * @param dt  the time step
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int func_001045D8(char* self, void* x, char* anim, float dt) {
+extern "C" int cRiderAnim_onUpdateASYNC_GATEROCK(char* self, void* x, char* anim, float dt) {
     cAnimSequence_setSubAnimTime(anim, 0, *(float*)(anim + 0x10) * *(float*)(*(char**)(*(char**)(self + 0x60) + 0x77C) + 0x2A0));
     if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
         cAnimSequencer_expire(x, anim);
@@ -3040,50 +3040,50 @@ extern "C" int func_001045D8(char* self, void* x, char* anim, float dt) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104660);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_HANDPLANT);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_00103BE0_4660(void *, void *, int *, int, int, float, float) __asm__("func_00103BE0");
+extern "C" int cRiderAnim_updatePosNegSlider_4660(void *, void *, int *, int, int, float, float) __asm__("cRiderAnim_updatePosNegSlider");
 
 /**
  * Update rule 9 of cRiderAnim_updateRule: a positive / negative slider for handplants.
  *
  * Sequence 45 uses game animations 353 / 352, any other 347 / 346 (positive / negative), with the rider's (+0x60)
- * +0x244 as the weight, through func_00103BE0.
+ * +0x244 as the weight, through cRiderAnim_updatePosNegSlider.
  *
  * @param riderAnim  the rider animation object
  * @param sequencer  the sequencer
  * @param sequence  the sequence (first word: its animation id)
  * @param deltaTime  the time step
- * @return func_00103BE0's result: 1 when the sequence was expired
+ * @return cRiderAnim_updatePosNegSlider's result: 1 when the sequence was expired
  */
-extern "C" int func_00104660(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
+extern "C" int cRiderAnim_onUpdateASYNC_HANDPLANT(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
     float w = (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x244)));
 
     if (*sequence == 45) {
-        return func_00103BE0_4660(riderAnim, sequencer, sequence, 353, 352, deltaTime, w);
+        return cRiderAnim_updatePosNegSlider_4660(riderAnim, sequencer, sequence, 353, 352, deltaTime, w);
     }
-    return func_00103BE0_4660(riderAnim, sequencer, sequence, 347, 346, deltaTime, w);
+    return cRiderAnim_updatePosNegSlider_4660(riderAnim, sequencer, sequence, 347, 346, deltaTime, w);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_001046B0);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_BP_BAL);
 #ifdef SKIP_ASM
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
-extern "C" int func_00103CC8(void* self, void* x, char* anim, int a, int b, float dt, float w, int c);
+extern "C" int cRiderAnim_update3Cycle(void* self, void* x, char* anim, int a, int b, float dt, float w, int c);
 /**
  * Update rule 15 of cRiderAnim_updateRule: a three-way board-press balance blend.
  *
  * The weight is 2 * (rider +0x274) - 1 (rider at +0x60), clamped to -1..1. Sequence 28 blends game animations 49 / 48 /
- * 50, any other 60 / 58 / 59 (negative / centre / positive) with func_00103CC8.
+ * 50, any other 60 / 58 / 59 (negative / centre / positive) with cRiderAnim_update3Cycle.
  *
  * @param x  the sequencer
  * @param anim  the sequence (first word: its animation id)
  * @param dt  the time step
- * @return func_00103CC8's result: 1 when the sequence was expired
+ * @return cRiderAnim_update3Cycle's result: 1 when the sequence was expired
  */
-extern "C" int func_001046B0(char* self, void* x, int* anim, float dt)
+extern "C" int cRiderAnim_onUpdateASYNC_BP_BAL(char* self, void* x, int* anim, float dt)
 {
     float centeredSlew = *(float*)(*(char**)(self + 0x60) + 0x274);
     centeredSlew = centeredSlew + centeredSlew - 1.0f;
@@ -3100,12 +3100,12 @@ extern "C" int func_001046B0(char* self, void* x, int* anim, float dt)
     } else {
         negAnim = 49; cenAnim = 0x30; posAnim = 50;
     }
-    return func_00103CC8(self, x, (char*)anim, negAnim, cenAnim, dt, w, posAnim);
+    return cRiderAnim_update3Cycle(self, x, (char*)anim, negAnim, cenAnim, dt, w, posAnim);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104728);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_BP_INTO);
 #ifdef SKIP_ASM
 // PORT: `<?` is the g++ minimum operator (EE min.s).
 static inline float clamp_4728(float v, float lo, float hi)
@@ -3123,7 +3123,7 @@ static inline float clamp_4728(float v, float lo, float hi)
  * @param dt  the time step
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int func_00104728(char* self, void* x, char* anim, float dt) {
+extern "C" int cRiderAnim_onUpdateASYNC_BP_INTO(char* self, void* x, char* anim, float dt) {
     float framePercent;
     int animId = *(int*)anim;
     if (animId == 25 || animId == 33) {
@@ -3141,7 +3141,7 @@ extern "C" int func_00104728(char* self, void* x, char* anim, float dt) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_001047F0);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_BP_PIVOT);
 #ifdef SKIP_ASM
 // PORT: PS2 abs.s helper (stands in for fabsf).
 static inline float vAbs_47F0(float x)
@@ -3166,7 +3166,7 @@ static inline float clamp_47F0(float v, float lo, float hi)
  * @param dt  the time step
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int func_001047F0(char* self, void* x, char* anim, float dt) {
+extern "C" int cRiderAnim_onUpdateASYNC_BP_PIVOT(char* self, void* x, char* anim, float dt) {
     float framePercent;
     int animId = *(int*)anim;
     if (animId == 37) {
@@ -3186,7 +3186,7 @@ extern "C" int func_001047F0(char* self, void* x, char* anim, float dt) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_001048C0);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateFWD);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cAnimSequence_updateSubAnim_48C0(void*, int, float) __asm__("cAnimSequence_updateSubAnim");
@@ -3194,15 +3194,15 @@ extern "C" int cAnimSequence_updateSubAnim_48C0(void*, int, float) __asm__("cAni
  * Update rule 0 of cRiderAnim_updateRule: advances the animation.
  *
  * Sub-animation 0 advances by @p dt / 60 (cAnimSequence_updateSubAnim); unless that reports the end, the blend weight
- * advances too. When either reports the end the sequence is expired (cAnimSequencer_expire). func_00104940 and
- * func_001049C0 have the same code.
+ * advances too. When either reports the end the sequence is expired (cAnimSequencer_expire). cRiderAnim_onUpdateHOLD_LAST and
+ * cRiderAnim_onUpdateCYCLE have the same code.
  *
  * @param x  the sequencer
  * @param anim  the sequence
  * @param dt  the time step
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int func_001048C0(void* self, void* x, void* anim, float dt) {
+extern "C" int cRiderAnim_onUpdateFWD(void* self, void* x, void* anim, float dt) {
     float stepTime = dt * 0.01666666753590107f;
     int done;
     if (cAnimSequence_updateSubAnim_48C0(anim, 0, stepTime) != 0) {
@@ -3219,12 +3219,12 @@ extern "C" int func_001048C0(void* self, void* x, void* anim, float dt) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104940);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateHOLD_LAST);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cAnimSequence_updateSubAnim_4940(void*, int, float) __asm__("cAnimSequence_updateSubAnim");
 /**
- * Update rule 1 of cRiderAnim_updateRule: advances the animation (the same code as func_001048C0).
+ * Update rule 1 of cRiderAnim_updateRule: advances the animation (the same code as cRiderAnim_onUpdateFWD).
  *
  * Sub-animation 0 advances by @p dt / 60; unless that reports the end, the blend weight advances too. When either
  * reports the end the sequence is expired.
@@ -3234,7 +3234,7 @@ extern "C" int cAnimSequence_updateSubAnim_4940(void*, int, float) __asm__("cAni
  * @param dt  the time step
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int func_00104940(void* self, void* x, void* anim, float dt) {
+extern "C" int cRiderAnim_onUpdateHOLD_LAST(void* self, void* x, void* anim, float dt) {
     float stepTime = dt * 0.01666666753590107f;
     int done;
     if (cAnimSequence_updateSubAnim_4940(anim, 0, stepTime) != 0) {
@@ -3251,12 +3251,12 @@ extern "C" int func_00104940(void* self, void* x, void* anim, float dt) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_001049C0);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateCYCLE);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cAnimSequence_updateSubAnim_49C0(void*, int, float) __asm__("cAnimSequence_updateSubAnim");
 /**
- * Update rule 2 of cRiderAnim_updateRule: advances the animation (the same code as func_001048C0).
+ * Update rule 2 of cRiderAnim_updateRule: advances the animation (the same code as cRiderAnim_onUpdateFWD).
  *
  * Sub-animation 0 advances by @p dt / 60; unless that reports the end, the blend weight advances too. When either
  * reports the end the sequence is expired.
@@ -3266,7 +3266,7 @@ extern "C" int cAnimSequence_updateSubAnim_49C0(void*, int, float) __asm__("cAni
  * @param dt  the time step
  * @return 1 when the sequence was expired, else 0
  */
-extern "C" int func_001049C0(void* self, void* x, void* anim, float dt) {
+extern "C" int cRiderAnim_onUpdateCYCLE(void* self, void* x, void* anim, float dt) {
     float stepTime = dt * 0.01666666753590107f;
     int done;
     if (cAnimSequence_updateSubAnim_49C0(anim, 0, stepTime) != 0) {
@@ -3283,7 +3283,7 @@ extern "C" int func_001049C0(void* self, void* x, void* anim, float dt) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104A40);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onExpireINTO_AIR);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRiderAnimBase_playInto_4A40(int, int, int, int) __asm__("cRiderAnimBase_playInto");
@@ -3298,13 +3298,13 @@ extern "C" void cRiderAnimBase_playInto_4A40(int, int, int, int) __asm__("cRider
  * @param sequencer  the sequencer
  * @param sequence  the expired sequence
  */
-extern "C" void func_00104A40(int riderAnim, int sequencer, int sequence) {
+extern "C" void cRiderAnim_onExpireINTO_AIR(int riderAnim, int sequencer, int sequence) {
     cRiderAnimBase_playInto_4A40(riderAnim, sequencer, sequence, 287);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104A60);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onExpireINTO_SPIN_CYC);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -3322,7 +3322,7 @@ extern "C" int cRiderAnimBase_playInto_4A60(void*, void*, int*, int) __asm__("cR
  * @return cRiderAnimBase_playInto's result, or 438
  */
 // Plays the landing animation that matches the current trick state.
-extern "C" int func_00104A60(void* riderAnim, void* sequencer, int* sequence)
+extern "C" int cRiderAnim_onExpireINTO_SPIN_CYC(void* riderAnim, void* sequencer, int* sequence)
 {
     switch (*sequence) {
     case 271: case 285:
@@ -3347,7 +3347,7 @@ extern "C" int func_00104A60(void* riderAnim, void* sequencer, int* sequence)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104B48);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onExpireBLENDTO_AIR);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cRiderAnimBase_playBlendIn_4B48(void*, int, int, int) __asm__("cRiderAnimBase_playBlendIn");
@@ -3363,7 +3363,7 @@ extern "C" int cRiderAnimBase_playBlendIn_4B48(void*, int, int, int) __asm__("cR
  * @param sequence  the expired sequence
  * @return cRiderAnimBase_playBlendIn's result
  */
-extern "C" int func_00104B48(void *riderAnim, int sequencer, int sequence) {
+extern "C" int cRiderAnim_onExpireBLENDTO_AIR(void *riderAnim, int sequencer, int sequence) {
     if (*(int *)((char*)riderAnim + 0x64) != 0) {
         return cRiderAnimBase_playBlendIn_4B48(riderAnim, sequencer, sequence, 436);
     }
@@ -3372,7 +3372,7 @@ extern "C" int func_00104B48(void *riderAnim, int sequencer, int sequence) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104B78);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onExpireINTO_CRUISE);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRiderAnimBase_playInto_4B78(int, int, int, int) __asm__("cRiderAnimBase_playInto");
@@ -3387,13 +3387,13 @@ extern "C" void cRiderAnimBase_playInto_4B78(int, int, int, int) __asm__("cRider
  * @param sequencer  the sequencer
  * @param sequence  the expired sequence
  */
-extern "C" void func_00104B78(int riderAnim, int sequencer, int sequence) {
+extern "C" void cRiderAnim_onExpireINTO_CRUISE(int riderAnim, int sequencer, int sequence) {
     cRiderAnimBase_playInto_4B78(riderAnim, sequencer, sequence, 5);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104B98);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onExpireINTO_FL_STAND);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRiderAnimBase_playInto_4B98(int, int, int, int) __asm__("cRiderAnimBase_playInto");
@@ -3408,13 +3408,13 @@ extern "C" void cRiderAnimBase_playInto_4B98(int, int, int, int) __asm__("cRider
  * @param sequencer  the sequencer
  * @param sequence  the expired sequence
  */
-extern "C" void func_00104B98(int riderAnim, int sequencer, int sequence) {
+extern "C" void cRiderAnim_onExpireINTO_FL_STAND(int riderAnim, int sequencer, int sequence) {
     cRiderAnimBase_playInto_4B98(riderAnim, sequencer, sequence, 3);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104BB8);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onExpireINTO_RSFS);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRiderAnimBase_playInto_4BB8(int, int, int, int) __asm__("cRiderAnimBase_playInto");
@@ -3429,13 +3429,13 @@ extern "C" void cRiderAnimBase_playInto_4BB8(int, int, int, int) __asm__("cRider
  * @param sequencer  the sequencer
  * @param sequence  the expired sequence
  */
-extern "C" void func_00104BB8(int riderAnim, int sequencer, int sequence) {
+extern "C" void cRiderAnim_onExpireINTO_RSFS(int riderAnim, int sequencer, int sequence) {
     cRiderAnimBase_playInto_4BB8(riderAnim, sequencer, sequence, 19);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104BD8);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onExpireINTO_PRESS);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cRiderAnimBase_playBlendIn_4BD8(void *, int, int, int) __asm__("cRiderAnimBase_playBlendIn");
@@ -3450,7 +3450,7 @@ extern "C" int cRiderAnimBase_playBlendIn_4BD8(void *, int, int, int) __asm__("c
  * @param sequence  the expired sequence
  * @return cRiderAnimBase_playBlendIn's result
  */
-extern "C" int func_00104BD8(void *riderAnim, int sequencer, int sequence) {
+extern "C" int cRiderAnim_onExpireINTO_PRESS(void *riderAnim, int sequencer, int sequence) {
     if ((*(int *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x330))) == 1) {
         return cRiderAnimBase_playBlendIn_4BD8(riderAnim, sequencer, sequence, 0x1C);
     }
@@ -3459,7 +3459,7 @@ extern "C" int func_00104BD8(void *riderAnim, int sequencer, int sequence) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104C18);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onExpireBLENDTO_CRUISE);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRiderAnimBase_playBlendIn_4C18(int, int, int, int) __asm__("cRiderAnimBase_playBlendIn");
@@ -3474,13 +3474,13 @@ extern "C" void cRiderAnimBase_playBlendIn_4C18(int, int, int, int) __asm__("cRi
  * @param sequencer  the sequencer
  * @param sequence  the expired sequence
  */
-extern "C" void func_00104C18(int riderAnim, int sequencer, int sequence) {
+extern "C" void cRiderAnim_onExpireBLENDTO_CRUISE(int riderAnim, int sequencer, int sequence) {
     cRiderAnimBase_playBlendIn_4C18(riderAnim, sequencer, sequence, 5);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104C38);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onExpireBLENDTO_RAIL);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRiderAnimBase_playBlendIn_4C38(int, int, int*, int) __asm__("cRiderAnimBase_playBlendIn");
@@ -3495,7 +3495,7 @@ extern "C" void cRiderAnimBase_playBlendIn_4C38(int, int, int*, int) __asm__("cR
  * @param sequencer  the sequencer
  * @param sequence  the expired sequence (first word: its animation id)
  */
-extern "C" void func_00104C38(int riderAnim, int sequencer, int *sequence) {
+extern "C" void cRiderAnim_onExpireBLENDTO_RAIL(int riderAnim, int sequencer, int *sequence) {
     int var_7;
     switch (*sequence) {
     case 69:
@@ -3513,7 +3513,7 @@ extern "C" void func_00104C38(int riderAnim, int sequencer, int *sequence) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104C80);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onExpireBLENDTO_GEAR_CYC);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRiderAnimBase_playBlendIn_4C80(int, int, int, int) __asm__("cRiderAnimBase_playBlendIn");
@@ -3528,13 +3528,13 @@ extern "C" void cRiderAnimBase_playBlendIn_4C80(int, int, int, int) __asm__("cRi
  * @param sequencer  the sequencer
  * @param sequence  the expired sequence
  */
-extern "C" void func_00104C80(int riderAnim, int sequencer, int sequence) {
+extern "C" void cRiderAnim_onExpireBLENDTO_GEAR_CYC(int riderAnim, int sequencer, int sequence) {
     cRiderAnimBase_playBlendIn_4C80(riderAnim, sequencer, sequence, 434);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104CA0);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_onExpireNOP);
 #ifdef SKIP_ASM
 /**
  * Expire rule 0 of cRiderAnim_expireRule: expires the sequence (cAnimSequencer_expire) and plays nothing.
@@ -3542,16 +3542,16 @@ INCLUDE_ASM("seg/seg_1218", func_00104CA0);
  * @param riderAnim  the rider animation object
  * @param sequencer  the sequencer
  * @param sequence  the expired sequence
- * @return 438, the value func_00104A60 also returns when it plays nothing
+ * @return 438, the value cRiderAnim_onExpireINTO_SPIN_CYC also returns when it plays nothing
  */
-extern "C" int func_00104CA0(int riderAnim, void* sequencer, void* sequence) {
+extern "C" int cRiderAnim_onExpireNOP(int riderAnim, void* sequencer, void* sequence) {
     cAnimSequencer_expire(sequencer, sequence);
     return 438;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104CC8);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_triggerAnimSound);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cSSXAudio_PlayAniTag_4CC8(int, int, int) __asm__("cSSXAudio_PlayAniTag");
@@ -3561,12 +3561,12 @@ extern int gSSXAudio_seg_1218 __asm__("gSSXAudio");
  * Plays an animation sound tag for the rider: cSSXAudio_PlayAniTag(gSSXAudio, rider, id & 0xFFFF) when the rider
  * (+0x60) is set.
  *
- * func_00103AA0 calls it.
+ * cRiderAnim_checkForSoundEvents calls it.
  *
  * @param riderAnim  the rider animation object
  * @param soundId  the sound tag
  */
-extern "C" void func_00104CC8(void *riderAnim, int soundId) {
+extern "C" void cRiderAnim_triggerAnimSound(void *riderAnim, int soundId) {
     int temp_2 = (*(int *)((char*)(riderAnim) + (0x60)));
     int maskedSoundId = soundId & 0xFFFF;
     if (temp_2 != 0) {
@@ -3638,7 +3638,7 @@ INCLUDE_ASM("seg/seg_1218", func_00104D50);
  * Links the rider animation object to a front-end rider instead of a game rider.
  *
  * Stores @p feRider at +0x64, clears the rider pointer +0x60 and copies the word at +8 of @p feRider into +0x54.
- * cFERider_compileModel calls it; func_00104B48 tests +0x64.
+ * cFERider_compileModel calls it; cRiderAnim_onExpireBLENDTO_AIR tests +0x64.
  *
  * @param riderAnim  the rider animation object
  * @param feRider  the front-end rider
@@ -3651,7 +3651,7 @@ extern "C" void func_00104D50(void *riderAnim, void *feRider) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104D68);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_writeToReplayFrame);
 #ifdef SKIP_ASM
 class cStream_4D68 {
 public:
@@ -3666,7 +3666,7 @@ extern "C" void cAnimSequencer_writeToReplayFrame(void*, cStream_4D68*);
  *
  * @param stream  the replay frame stream
  */
-extern "C" void func_00104D68(char* self, cStream_4D68* stream) {
+extern "C" void cRiderAnim_writeToReplayFrame(char* self, cStream_4D68* stream) {
     stream->write(self, 80);
     for (int i = 0; i < 6; i++) {
         cAnimSequencer_writeToReplayFrame(*(char**)(self + 0x50) + i * 8, stream);
@@ -3675,7 +3675,7 @@ extern "C" void func_00104D68(char* self, cStream_4D68* stream) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104DE0);
+INCLUDE_ASM("seg/seg_1218", cRiderAnim_readFromReplayFrame);
 #ifdef SKIP_ASM
 class cStream_4DE0 {
 public:
@@ -3693,7 +3693,7 @@ extern "C" void cAnimSequencer_readFromReplayFrame(void*, cStream_4DE0*);
  *
  * @param stream  the replay frame stream
  */
-extern "C" void func_00104DE0(char* self, cStream_4DE0* stream) {
+extern "C" void cRiderAnim_readFromReplayFrame(char* self, cStream_4DE0* stream) {
     stream->Read(self, 80);
     for (int i = 0; i < 6; i++) {
         cAnimSequencer_expireAll(*(char**)(self + 0x50) + i * 8);
@@ -3703,7 +3703,7 @@ extern "C" void func_00104DE0(char* self, cStream_4DE0* stream) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00104E70);
+INCLUDE_ASM("seg/seg_1218", cRider_objectIntersect);
 #ifdef SKIP_ASM
 struct sV4_4E70 {
     float x, y, z, w;
@@ -3925,7 +3925,7 @@ static inline int Facing_4E70(char* self, const sHit_4E70& h)
  * Tests the rider against static objects and returns the distance of the contact it picks.
  *
  * Gets up to 64 hits from cOverlapList_staticObjectIntersect (overlap list +0x860); returns -1.0 when there are none.
- * The distinct surface ids of the hits are kept at +0x5B8, ended by 0xFFFFFFFF (func_00108C28 reads them). The pick
+ * The distinct surface ids of the hits are kept at +0x5B8, ended by 0xFFFFFFFF (cRider_isIntersecting reads them). The pick
  * prefers wall hits (triangle flag 1 with a nonzero first value), then hits whose normal points back towards the
  * rider's sphere-tree centre (+0xAA0, +0x10), then the smallest |distance - height| (the query's virtual Height); ties
  * go to the lower surface id, or the lower owner order (+0x150) when neither has a surface. The pick is copied to
@@ -3936,7 +3936,7 @@ static inline int Facing_4E70(char* self, const sHit_4E70& h)
  * @param out  receives the chosen hit
  * @return the chosen hit's distance, or -1.0 when nothing was hit
  */
-extern "C" float func_00104E70(char* self, cScope_4E70* sc, sHit_4E70* out)
+extern "C" float cRider_objectIntersect(char* self, cScope_4E70* sc, sHit_4E70* out)
 {
     int nIds = 0;
     sHit_4E70 hits[64];
@@ -4078,7 +4078,7 @@ struct cScope_5398 {
 int cRider_getControlState_5398(void*) __asm__("cRider_getControlState__FPv");
 int cRider_getMotionState(void*);
 extern "C" void cRider_checkRailBodyCollisions(void*);
-extern "C" float func_00104E70_5398(char*, cScope_5398*, sContact_5398*) __asm__("func_00104E70");
+extern "C" float cRider_objectIntersect_5398(char*, cScope_5398*, sContact_5398*) __asm__("cRider_objectIntersect");
 extern "C" int cRider_isGroundNormalValid(void*);
 extern "C" void cRider_doObjectCollision_5398(char*, sSurf_5398*, sInfo_5398*, sContact_5398*, float) __asm__("cRider_doObjectCollision");
 extern "C" void cSSXAudio_CollisionSound_5398(void*, char*, sSurf_5398*, int) __asm__("cSSXAudio_CollisionSound");
@@ -4205,7 +4205,7 @@ static inline unsigned short TriFlags_5398(sSurf_5398* s, int i)
  * Tests the rider against world objects and resolves the deepest contact.
  *
  * Skipped in control state 9. Runs cRider_checkRailBodyCollisions (rail body collisions) first, then queries a cWorldRider
- * (cWorldRider_cWorldRider) built on mSphereTree (+0xAA0) for the deepest hit (func_00104E70, On Tour objectIntersect). With a
+ * (cWorldRider_cWorldRider) built on mSphereTree (+0xAA0) for the deepest hit (cRider_objectIntersect, On Tour objectIntersect). With a
  * hit, the contact normal is flattened against mGroundNormal (when cRider_isGroundNormalValid) or @p norm, or in motion
  * state 4 snapped to the handler's up vector (+0xB0); the impact speed is the closing speed along it. A triangle with
  * flag 2 on an object without flag 0x2000 caches the contact at +0x9E0 and +0xA60; flag 1 runs cRider_doObjectCollision
@@ -4224,7 +4224,7 @@ extern "C" void cRider_checkObjectCollisions(cRider* self, sV4_5398* norm)
     cRider_checkRailBodyCollisions((char*)self);
     cScope_5398 sc(self->mSphereTree, 1);
     cScope_5398* ps = &sc;
-    float overlap = func_00104E70_5398(((char*)self), ps, &contact);
+    float overlap = cRider_objectIntersect_5398(((char*)self), ps, &contact);
     if (overlap >= zero) {
         if (cRider_isGroundNormalValid((char*)self))
             norm = (sV4_5398*)(((char*)self) + 0x370);
@@ -4280,8 +4280,8 @@ extern "C" void cRider_updateOrientationImplicit(cRider* self);
 extern "C" void cAirPredictor_startLaunchIntoAir_57B8(void*, t4Vector*, t4Vector*, float) __asm__("cAirPredictor_startLaunchIntoAir");
 extern "C" void cRider_doBump(cRider* self, char* info, int flag);
 extern "C" void cRider_reactToCollision(void* rider, void* info, int id);
-extern "C" void func_00106538(void* rider, const t4Vector& v);
-extern "C" void func_001065B0(void* rider, void* hit);
+extern "C" void cRider_moveFromCollision(void* rider, const t4Vector& v);
+extern "C" void cRider_turnFromCollision(void* rider, void* hit);
 extern "C" void cRider_flagEventLand(void* rider, int a, int b, int c, void* hit, float speed);
 extern "C" void cRiderMetrix_evTakeoff(void* metrix, int a, int b);
 
@@ -4448,8 +4448,8 @@ static inline float Sqrt_57B8(float x)
  *
  * Skipped in control state 9. The hit surface's bounce and grip come from the object's surface table (+0x88, 12 bytes
  * per surface); with no bounce it only bumps (cRider_doBump). A solid object (no handler at +0xC, or one whose virtual
- * slot 14 is nonzero) moves the rider out by 1.1 x @p depth (func_00106538), rebounds by the closing speed plus
- * clamp(grip x speed, 55.6, 1388.9) and, on the ground, turns the rider along it (func_001065B0,
+ * slot 14 is nonzero) moves the rider out by 1.1 x @p depth (cRider_moveFromCollision), rebounds by the closing speed plus
+ * clamp(grip x speed, 55.6, 1388.9) and, on the ground, turns the rider along it (cRider_turnFromCollision,
  * cRider_updateOrientationImplicit); other objects get a softer rebound. Airborne below 833.3 the hit adds to
  * mImpactAccum2.
  *
@@ -4480,12 +4480,12 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
                    ? Dot_57B8(hit->n, Sub_57B8(hit->vel, rider->mVelocity)) : 0.0f;
     char* handler = *(char**)(obj + 0xC);
     if (handler == 0 || (*(sVE_57B8**)(handler + 0xC))[14].fn(handler + (*(sVE_57B8**)(handler + 0xC))[14].delta) != 0) {
-        func_00106538(rider, Scale_57B8(hit->n, depth * 1.100000023841858f));
+        cRider_moveFromCollision(rider, Scale_57B8(hit->n, depth * 1.100000023841858f));
         if (vn < 0.0f)
             vn = 0.0f;
         bounce = vn + Clamp_57B8(grip * vn, 55.55555725097656f, 1388.888916015625f);
         if (cRider_getMotionState(rider) == 0)
-            func_001065B0(rider, hit);
+            cRider_turnFromCollision(rider, hit);
         cRider_updateOrientationImplicit(rider);
     } else {
         float inv = 1.0f / (100.0f / bounce + 1.0f);
@@ -4811,7 +4811,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00106538);
+INCLUDE_ASM("seg/seg_1218", cRider_moveFromCollision);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: PS2-only VU0 inline asm (a += b).
@@ -4830,8 +4830,8 @@ static inline void AddEq_6538(t4Vector& a, const t4Vector& b)
         : "memory");
 }
 extern "C" void cRiderSphereTree_ApplyOffset(void* p, const t4Vector* d);
-// PORT: the unit declares func_00106538(void*, const t4Vector&) for its callers; same symbol.
-extern "C" void func_00106538_6538(char* self, const t4Vector* d) __asm__("func_00106538");
+// PORT: the unit declares cRider_moveFromCollision(void*, const t4Vector&) for its callers; same symbol.
+extern "C" void cRider_moveFromCollision_6538(char* self, const t4Vector* d) __asm__("cRider_moveFromCollision");
 
 /**
  * Moves the rider by an offset out of a collision.
@@ -4841,7 +4841,7 @@ extern "C" void func_00106538_6538(char* self, const t4Vector* d) __asm__("func_
  *
  * @param offset  the offset
  */
-extern "C" void func_00106538_6538(char* self, const t4Vector* offset)
+extern "C" void cRider_moveFromCollision_6538(char* self, const t4Vector* offset)
 {
     AddEq_6538(*(t4Vector*)(self + 0x110), *offset);
     AddEq_6538(*(t4Vector*)(self + 0x9D0), *offset);
@@ -4852,7 +4852,7 @@ extern "C" void func_00106538_6538(char* self, const t4Vector* offset)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_001065B0);
+INCLUDE_ASM("seg/seg_1218", cRider_turnFromCollision);
 #ifdef SKIP_ASM
 struct sV4_65B0
 {
@@ -4984,7 +4984,7 @@ static inline void Rotate_65B0(char* self, const sV4_65B0& axis, float angle)
     *(sV4_65B0*)(self + 0x120) = QuatMul_65B0(*(sV4_65B0*)(self + 0x120), AxisAngle_65B0(axis, angle));
 }
 
-extern "C" void func_001065B0_impl(char* self, char* arg) __asm__("func_001065B0");
+extern "C" void cRider_turnFromCollision_impl(char* self, char* arg) __asm__("cRider_turnFromCollision");
 /**
  * Turns the rider away from a surface it hit.
  *
@@ -4995,7 +4995,7 @@ extern "C" void func_001065B0_impl(char* self, char* arg) __asm__("func_001065B0
  *
  * @param hitInfo  the hit (normal at +0x10)
  */
-extern "C" void func_001065B0_impl(char* self, char* hitInfo)
+extern "C" void cRider_turnFromCollision_impl(char* self, char* hitInfo)
 {
     sV4_65B0 n = Norm_65B0(Cross_65B0(Up_65B0(self), *(sV4_65B0*)(hitInfo + 0x10)));
     sV4_65B0 inPlaneDir = Cross_65B0(Up_65B0(self), n);
@@ -5608,8 +5608,8 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self) __asm__("cRider
  * Not in motion state 4. Looks for a rail spline within 300 of the hip bone (cOverlapList_splineIntersect on mOverlapList); rails
  * behind the motion, more than 50 off the hips' forward line, or that the board can land on (cRider_isRailLandSuccess,
  * isRailLandSuccess) are ignored. For a body hit it notifies the rail's handler (virtual 42), moves the rider out to 50
- * from the rail (func_00106538), pushes mVelocity away along the contact normal by the closing speed + 55.6, reports
- * the impulse (virtual 43), on the ground turns the rider (func_001065B0, cRider_updateOrientationImplicit) and runs
+ * from the rail (cRider_moveFromCollision), pushes mVelocity away along the contact normal by the closing speed + 55.6, reports
+ * the impulse (virtual 43), on the ground turns the rider (cRider_turnFromCollision, cRider_updateOrientationImplicit) and runs
  * cRider_reactToCollision.
  *
  * The // note above the definition says it snaps the rider onto the rail, but a landable rail returns 0 here; landing
@@ -5674,7 +5674,7 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
     info.off = off;
     float clearance = Dot_6F78(delta, off);
     if (clearance < 50.0f) {
-        func_00106538(self, Scale_6F78(off, 50.0f - clearance));
+        cRider_moveFromCollision(self, Scale_6F78(off, 50.0f - clearance));
     }
     t4Vector oldVel = self->mVelocity;
     float push = (Dot_6F78(off, Sub_6F78(hit.vel, self->mVelocity)) >? 0.0f) + 55.55555725097656f; // PORT: g++ maximum operator
@@ -5689,7 +5689,7 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
     }
     if (cRider_getMotionState(self) == 0) {
         hit.n = off;
-        func_001065B0(self, &hit);
+        cRider_turnFromCollision(self, &hit);
         cRider_updateOrientationImplicit(self);
     }
     cRider_reactToCollision(self, &info, hit.mat);
@@ -6040,7 +6040,7 @@ extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" int AITick();
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_C258(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_00106538_m2537(void* rider, const t4Vector& v) __asm__("func_00106538");
+extern "C" void cRider_moveFromCollision_m2537(void* rider, const t4Vector& v) __asm__("cRider_moveFromCollision");
 // The race (seg/seg_1FBE38 layout): riders by being index at 0x28.
 struct cRider_1218;
 struct sRace_7888 {
@@ -6152,8 +6152,8 @@ extern "C" void cRider_checkOpponentCollisions(cRider* self)
                     SubEq_7888(selfPush, Scale_7888(self->mGroundNormal, Dot_7888(selfPush, self->mGroundNormal)));
                 if (cRider_isGroundNormalValid(other))
                     SubEq_7888(otherPush, Scale_7888(other->mGroundNormal, Dot_7888(otherPush, other->mGroundNormal)));
-                func_00106538_m2537(self, selfPush);
-                func_00106538_m2537(other, otherPush);
+                cRider_moveFromCollision_m2537(self, selfPush);
+                cRider_moveFromCollision_m2537(other, otherPush);
                 if (srec->lastExchange < AITick() - 3) {
                     t4Vector n = Norm_7888(dir);
                     float impulse = (Dot_7888(other->mVelocity, n) - Dot_7888(self->mVelocity, n)) / (mass + omass);
@@ -6599,7 +6599,7 @@ extern "C" void cRider_doBump(cRider* self, char* info, int flag)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_001086B8);
+INCLUDE_ASM("seg/seg_1218", cRider_isRailBoardIntersect);
 #ifdef SKIP_ASM
 struct sV4_86B8
 {
@@ -6748,7 +6748,7 @@ static inline sV4_86B8 Fwd_86B8(const sNode_86B8* n)
                     0.0f);
 }
 
-extern "C" int func_001086B8_86B8(char* self, sV4_86B8* tgt, sV4_86B8* dir) __asm__("func_001086B8");
+extern "C" int cRider_isRailBoardIntersect_86B8(char* self, sV4_86B8* tgt, sV4_86B8* dir) __asm__("cRider_isRailBoardIntersect");
 /**
  * Tells whether the rider's board reaches a rail.
  *
@@ -6763,7 +6763,7 @@ extern "C" int func_001086B8_86B8(char* self, sV4_86B8* tgt, sV4_86B8* dir) __as
  * @param dir  the rail direction
  * @return 1 when the board reaches the rail, else 0
  */
-extern "C" int func_001086B8_86B8(char* self, sV4_86B8* tgt, sV4_86B8* dir)
+extern "C" int cRider_isRailBoardIntersect_86B8(char* self, sV4_86B8* tgt, sV4_86B8* dir)
 {
     sNode_86B8* n = &(*(sPath_86B8**)(self + 0x780))->nodes[*(int*)(self + 0x8A0)];
     const sV4_86B8& fwd = Fwd_86B8(n);
@@ -6888,7 +6888,7 @@ extern "C" int cOverlapList_splineIntersect(void*, sVec4_8A48*, sVec4_8A48*, int
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" int func_001446A0(void*, int);
-extern "C" int func_001086B8(void*, sVec4_8A48*, sVec4_8A48*);
+extern "C" int cRider_isRailBoardIntersect(void*, sVec4_8A48*, sVec4_8A48*);
 
 /**
  * Tests whether the rider's board can land on a nearby rail.
@@ -6896,7 +6896,7 @@ extern "C" int func_001086B8(void*, sVec4_8A48*, sVec4_8A48*);
  * Only on the ground or in the air (motion states 0 and 1). It probes for a rail (cOverlapList_splineIntersect, type 1, radius 300)
  * from the board root bone (mAnimModel bone mBoneBoardRoot + mModelOffset) and rejects rails behind the motion. In
  * channel 2 animation categories 0x12 .. 0x14 the current sequence's flags (func_001446A0 on cRiderAnimBase_getCurrentAnimSequence + 0xB0) must
- * allow it. The answer is func_001086B8 (On Tour isRailBoardIntersect) on the hit. Callers:
+ * allow it. The answer is cRider_isRailBoardIntersect (On Tour isRailBoardIntersect) on the hit. Callers:
  * cRider_checkRailBoardCollisions and cRider_checkRailBodyCollisions.
  *
  * @param tgt  receives the rail intersection (tIntersectInfo)
@@ -6925,25 +6925,25 @@ extern "C" int cRider_isRailLandSuccess(cRider* self, sVec4_8A48* tgt)
         if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2) + 0xB0, 2))
             return 0;
     }
-    return func_001086B8(((char*)self), tgt, tgt + 1);
+    return cRider_isRailBoardIntersect(((char*)self), tgt, tgt + 1);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00108C28);
+INCLUDE_ASM("seg/seg_1218", cRider_isIntersecting);
 #ifdef SKIP_ASM
 struct S_8C28 { char pad[0x5B8]; unsigned arr[64]; };
 /**
  * Tells whether the rider's last static-object test hit an instance.
  *
- * Compares the instance's id (+0x78) with the ids at +0x5B8 that func_00104E70 records (at most 64, ended by
+ * Compares the instance's id (+0x78) with the ids at +0x5B8 that cRider_objectIntersect records (at most 64, ended by
  * 0xFFFFFFFF). Virtual slot 3 (word 7) of the rider vtables.
  *
  * @param rider  the rider
  * @param instance  the instance
  * @return 1 when the id is listed, else 0
  */
-extern "C" int func_00108C28(S_8C28 *rider, void *instance) {
+extern "C" int cRider_isIntersecting(S_8C28 *rider, void *instance) {
     int i = 0;
     if (~rider->arr[0]) {
         do {
@@ -7130,7 +7130,7 @@ extern "C" void func_00108F88(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00108FA8);
+INCLUDE_ASM("seg/seg_1218", cComputer__cComputer);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "seg/seg_1218_classes.h"
@@ -7152,7 +7152,7 @@ cRiderE_108C80::~cRiderE_108C80()
 }
 
 // PORT: the compiler names these dtors _$_<len><Class>; map them to the address-derived names.
-__asm__(".globl func_00108FA8\n.type func_00108FA8,@function\nfunc_00108FA8 = _$_14cRiderE_108C80\n.size func_00108FA8,0x17C0\n");
+__asm__(".globl cComputer__cComputer\n.type cComputer__cComputer,@function\ncComputer__cComputer = _$_14cRiderE_108C80\n.size cComputer__cComputer,0x17C0\n");
 
 __asm__("_$_12cRiderVb_s12 = cRider__cRider\n"
         "_$_15cCompPart02_s12 = cWipeoutMotion__cWipeoutMotion\n"
@@ -7225,21 +7225,21 @@ extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" float cComputer_setupWarp(void* self);
 extern "C" void cRider_updateTimeWarp(void* self, float v);
 int cRider_getControlState_A768(void*) __asm__("cRider_getControlState__FPv");
-extern "C" void func_0010A960_A768(void* self, void* pad) __asm__("func_0010A960");
+extern "C" void cComputer_getCruiseCmd_A768(void* self, void* pad) __asm__("cComputer_getCruiseCmd");
 extern "C" void cComputer_getPrewindCmd_A768(void* self, void* pad) __asm__("cComputer_getPrewindCmd");
 extern "C" void cComputer_getGateCmd_A768(void* self, void* pad) __asm__("cComputer_getGateCmd");
 extern "C" void cComputer_getNaturalAirCmd_A768(void* self, void* pad) __asm__("cComputer_getNaturalAirCmd");
 extern "C" void cComputer_getRailslideCmd_A768(void* self, void* pad) __asm__("cComputer_getRailslideCmd");
 extern "C" void cComputer_getSpinCmd_A768(void* self, void* pad) __asm__("cComputer_getSpinCmd");
-extern "C" void func_0010B750_A768(void* self, void* pad) __asm__("func_0010B750");
+extern "C" void cComputer_getWipeoutCmd_A768(void* self, void* pad) __asm__("cComputer_getWipeoutCmd");
 extern "C" void cComputer_getBoardPressCmd_A768(void* self, void* pad) __asm__("cComputer_getBoardPressCmd");
 
 /**
  * Builds this computer rider's control command for the frame, the AI's stand-in for reading a pad.
  *
  * Zeroes the 8-byte command, applies the rubber-band time warp (cRider_updateTimeWarp() with cComputer_setupWarp's
- * factor), then fills it with the get*Cmd for the rider's control state: cruise (func_0010A960), board press,
- * prewind, natural air, spin, gate, railslide or wipeout (func_0010B750); other states leave it empty.
+ * factor), then fills it with the get*Cmd for the rider's control state: cruise (cComputer_getCruiseCmd), board press,
+ * prewind, natural air, spin, gate, railslide or wipeout (cComputer_getWipeoutCmd); other states leave it empty.
  * Outside the spin state it clears mGrabEndTime.
  *
  * @param _cmd  the command to fill (On Tour tControlCmd&)
@@ -7252,7 +7252,7 @@ extern "C" void cComputer_getControlCmd(cComputer* self, void* _cmd)
     int state = cRider_getControlState_A768(self->mRider);
     switch (state) {
     case 0:
-        func_0010A960_A768(((char*)self), _cmd);
+        cComputer_getCruiseCmd_A768(((char*)self), _cmd);
         break;
     case 2:
         cComputer_getPrewindCmd_A768(((char*)self), _cmd);
@@ -7270,7 +7270,7 @@ extern "C" void cComputer_getControlCmd(cComputer* self, void* _cmd)
         cComputer_getSpinCmd_A768(((char*)self), _cmd);
         break;
     case 8:
-        func_0010B750_A768(((char*)self), _cmd);
+        cComputer_getWipeoutCmd_A768(((char*)self), _cmd);
         break;
     case 1:
         cComputer_getBoardPressCmd_A768(((char*)self), _cmd);
@@ -7345,7 +7345,7 @@ extern "C" void cComputer_readFromReplayFrame(cComputer* self, cStream_A8E8* dat
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010A960);
+INCLUDE_ASM("seg/seg_1218", cComputer_getCruiseCmd);
 #ifdef SKIP_ASM
 struct sFlags_A960 {
     unsigned int pad0 : 12;
@@ -7381,7 +7381,7 @@ extern "C" int cComputer_checkForPunching(void*, int*);
  *
  * @param cruiseCmd  the cruise command
  */
-extern "C" void func_0010A960(cObj_A960* self, sFlags_A960* cruiseCmd)
+extern "C" void cComputer_getCruiseCmd(cObj_A960* self, sFlags_A960* cruiseCmd)
 {
     int punchRight;
     cruiseCmd->b12 = cComputer_checkForReset(self);
@@ -7431,7 +7431,7 @@ struct sPad_AA70 {
 };
 
 extern "C" sV4_AA70 cPath_getPathPos_AA70(cTrack_AA70*, int, float) __asm__("cPath_getPathPos");
-extern "C" float func_00100348_AA70(void*, sV4_AA70*) __asm__("func_00100348");
+extern "C" float cComputer_calcTurn_AA70(void*, sV4_AA70*) __asm__("cComputer_calcTurn");
 
 // PORT: PS2-only VU0 inline asm (vector length via vsqrt).
 static inline float Len_AA70(const sV4_AA70& v)
@@ -7524,7 +7524,7 @@ extern "C" void cComputer_getPrewindCmd(cComputer* self, sPad_AA70* cmd)
         half = Scale_AA70(half, 0.5f);
         sV4_AA70 pos = cPath_getPathPos_AA70(trk, 0, buf[sel].b);
         sV4_AA70 toTarget = Sub_AA70(pos, half);
-        cmd->w0 = (int)(func_00100348_AA70(((char*)self), &toTarget) * 31.0f);
+        cmd->w0 = (int)(cComputer_calcTurn_AA70(((char*)self), &toTarget) * 31.0f);
     }
     cmd->b15 = (int)(ctl[18] * 31.0f);
     cmd->b21 = (int)(ctl[19] * 31.0f);
@@ -7546,9 +7546,9 @@ struct sPad_AD78 {
     int w0 : 6;
 };
 
-extern "C" int func_0010BBF8(cComputer*, int*);
-extern "C" void func_00100610(sVec4_AD78*, void*);
-extern "C" float func_00100348(void*, sVec4_AD78*);
+extern "C" int cComputer_checkForBoardPress(cComputer*, int*);
+extern "C" void cComputer_calculateTargetPos(sVec4_AD78*, void*);
+extern "C" float cComputer_calcTurn(void*, sVec4_AD78*);
 
 // PORT: PS2 abs.s helper (stands in for fabsf).
 static inline float vAbs_AD78(float x)
@@ -7568,7 +7568,7 @@ static inline float clamp_AD78(float v, float lo, float hi)
  * Builds the board-press command: steering at the path target and, at a press event, the press and balance.
  *
  * The field at bits 18-23 gets the turn toward the path target (calcTurn). When checkForBoardPress
- * (func_0010BBF8) finds a press event ahead, the low field of word 1 gets -31 for a positive event value and
+ * (cComputer_checkForBoardPress) finds a press event ahead, the low field of word 1 gets -31 for a positive event value and
  * +31 otherwise, and the field at bits 24-29 gets twice the side vector's z, clamped to 1 (when over 0.1 in
  * size); with no event the word-1 field is 0.
  *
@@ -7577,14 +7577,14 @@ static inline float clamp_AD78(float v, float lo, float hi)
 extern "C" void cComputer_getBoardPressCmd(cComputer* self, sPad_AD78* cmd)
 {
     int flag;
-    int pressMarkerFound = func_0010BBF8(self, &flag);
+    int pressMarkerFound = cComputer_checkForBoardPress(self, &flag);
     float pressDir = 1.0f;
     if (flag)
         pressDir = -1.0f;
     {
         sVec4_AD78 targetPos;
-        func_00100610(&targetPos, ((char*)self));
-        cmd->b18 = (int)(func_00100348(((char*)self), &targetPos) * 31.0f);
+        cComputer_calculateTargetPos(&targetPos, ((char*)self));
+        cmd->b18 = (int)(cComputer_calcTurn(((char*)self), &targetPos) * 31.0f);
     }
     if (pressMarkerFound) {
         cmd->w0 = (int)(pressDir * 31.0f);
@@ -7616,7 +7616,7 @@ struct sPad_AED8 {
 extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* speed, int* below, int* o3, int* o4, int* o5, int* o6);
 extern "C" void cComputer_setupPrewindState_AED8(char*, int, int, int, int) __asm__("cComputer_setupPrewindState");
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
-extern "C" int func_0010BB18(cComputer*, float*, int*);
+extern "C" int cComputer_checkForSpeedZone(cComputer*, float*, int*);
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
 static inline float vLen_AED8(const sVec4_AED8& v)
@@ -7660,7 +7660,7 @@ static inline float clamp_AED8(float v, float lo, float hi)
  * always sets bits 17-24. At a jump the rider has reached it sets bits 13-14 and calls setupPrewindState().
  * Otherwise the field at bits 25-30 gets twice the side vector's z (clamped, when over 0.1), the low field of
  * word 1 gets +31 for a negative mSpinAxis and -31 otherwise (not for RailslideMode 3 or 4, or channel-2
- * animation class 14), and bit 16 is set in a reached speed zone (func_0010BB18) when 5 km/h too slow.
+ * animation class 14), and bit 16 is set in a reached speed zone (cComputer_checkForSpeedZone) when 5 km/h too slow.
  *
  * @param cmd  the railslide command (On Tour tRailslideCmd)
  */
@@ -7686,7 +7686,7 @@ extern "C" void cComputer_getRailslideCmd(cComputer* self, sPad_AED8* cmd)
         float spinSign = (self->mSpinAxis < 0.0f) ? 1.0f : -1.0f;
         cmd->w0 = (int)(spinSign * 31.0f);
     }
-    int speedMarkerFound = func_0010BB18(self, (float*)(((char*)self) + 0xDF0), &ok);
+    int speedMarkerFound = cComputer_checkForSpeedZone(self, (float*)(((char*)self) + 0xDF0), &ok);
     float len = vLen_AED8(*(sVec4_AED8*)&self->mRider->mVelocity);
     if (speedMarkerFound && ok && len < self->mDesiredSpeed - 138.88890075683594f)
         *(unsigned int*)cmd |= 0x10000;
@@ -7878,8 +7878,8 @@ struct sPadBits_B590 {
 };
 
 int AIrand();
-extern "C" void func_00100610_B590(sVec4_B590*, void*) __asm__("func_00100610");
-extern "C" float func_00100348_B590(void*, sVec4_B590*) __asm__("func_00100348");
+extern "C" void cComputer_calculateTargetPos_B590(sVec4_B590*, void*) __asm__("cComputer_calculateTargetPos");
+extern "C" float cComputer_calcTurn_B590(void*, sVec4_B590*) __asm__("cComputer_calcTurn");
 
 /**
  * Builds the command for natural (unplanned) air: random spins and flips sized to the air time.
@@ -7926,8 +7926,8 @@ extern "C" void cComputer_getNaturalAirCmd(cComputer* self, sPad_B590* cmd)
     }
     if (airTimeLeft < 0.5f && self->mFlipAxis == 0.0f && self->mSpinAxis == 0.0f) {
         sVec4_B590 targetPos;
-        func_00100610_B590(&targetPos, ((char*)self));
-        ((sPadBits_B590*)cmd)->b24 = (int)(-func_00100348_B590(((char*)self), &targetPos) * 31.0f);
+        cComputer_calculateTargetPos_B590(&targetPos, ((char*)self));
+        ((sPadBits_B590*)cmd)->b24 = (int)(-cComputer_calcTurn_B590(((char*)self), &targetPos) * 31.0f);
         self->mGrabID = -1;
     }
     cmd->b2 = self->mGrabID;
@@ -7935,7 +7935,7 @@ extern "C" void cComputer_getNaturalAirCmd(cComputer* self, sPad_B590* cmd)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010B750);
+INCLUDE_ASM("seg/seg_1218", cComputer_getWipeoutCmd);
 #ifdef SKIP_ASM
 /**
  * Fills the computer rider's wipeout command: bit 12 is set from cComputer_checkForReset, the rest is kept.
@@ -7945,7 +7945,7 @@ INCLUDE_ASM("seg/seg_1218", func_0010B750);
  * @param computer  the computer rider
  * @param controlCmd  the command word
  */
-extern "C" void func_0010B750(cComputer* computer, int *controlCmd) {
+extern "C" void cComputer_getWipeoutCmd(cComputer* computer, int *controlCmd) {
     *controlCmd = (*controlCmd & ~0x1000) | ((cComputer_checkForReset(computer) & 1) << 0xC);
 }
 #endif
@@ -8070,7 +8070,7 @@ extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* approachSpeed
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010BB18);
+INCLUDE_ASM("seg/seg_1218", cComputer_checkForSpeedZone);
 #ifdef SKIP_ASM
 struct sHit_BB18 { int type; int val; float lim; int d; };
 /**
@@ -8085,7 +8085,7 @@ struct sHit_BB18 { int type; int val; float lim; int d; };
  * @param ok  receives 1 when the rider is inside the zone
  * @return 1 when a speed marker was found, else 0
  */
-extern "C" int func_0010BB18(cComputer* self_, float* out, int* ok) {
+extern "C" int cComputer_checkForSpeedZone(cComputer* self_, float* out, int* ok) {
     sHit_BB18 buf[12];
     char* rider = (char*)self_->mRider;
     char* track = *(char**)(rider + 0xAB8);
@@ -8103,7 +8103,7 @@ extern "C" int func_0010BB18(cComputer* self_, float* out, int* ok) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_0010BBF8);
+INCLUDE_ASM("seg/seg_1218", cComputer_checkForBoardPress);
 #ifdef SKIP_ASM
 struct sHit_BBF8 { int type; int val; int d[2]; };
 /**
@@ -8116,7 +8116,7 @@ struct sHit_BBF8 { int type; int val; int d[2]; };
  * @param out  receives 1 for a positive marker value
  * @return 1 when a marker was found, else 0
  */
-extern "C" int func_0010BBF8(cComputer* self_, int* out) {
+extern "C" int cComputer_checkForBoardPress(cComputer* self_, int* out) {
     sHit_BBF8 buf[12];
     char* rider = (char*)self_->mRider;
     char* track = *(char**)(rider + 0xAB8);

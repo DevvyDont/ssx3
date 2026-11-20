@@ -8,7 +8,7 @@
 // commsystem.cpp and online/commsystem.h (the preview build's assert strings).
 //
 // One instance: cCommSystem_construct does `cMemMan_alloc(0x34, "cCommSystem", ...)` + cCommSystem_cCommSystem into
-// cCommSystem::mCommSystem (retail cCommSystem_mCommSystem); func_00255898 (destroy) runs cCommSystem__cCommSystem. Size 0x34 [R].
+// cCommSystem::mCommSystem (retail cCommSystem_mCommSystem); cCommSystem_destroy (destroy) runs cCommSystem__cCommSystem. Size 0x34 [R].
 // No base class and no virtuals (the constructor stores no vtable; On Tour has none).
 // Statics (retail addresses): mCommSystem cCommSystem_mCommSystem, mNumNetConn cCommSystem_mNumNetConn (func_00255F20 stores the count),
 // mNetConns cCommSystem_mNetConns (NetConfigRecT[10], 0x100 each: the 'netw'/'list' reply buffer; retail reads strings at
@@ -33,27 +33,27 @@ struct cCommChannel;
 struct tCommMsgElem {
     tCommMsgElem* unk_00;        // 0x00 [R] the free-list link (the constructor stores the next element; alloc/free
                                  //      pop and push through it)
-    int mSize;                   // 0x04 [O]; [U] freeCommMsgElem (func_00255EC0) clears it
+    int mSize;                   // 0x04 [O]; [U] freeCommMsgElem (cCommSystem_freeCommMsgElem) clears it
     int mOffset;                 // 0x08 [O]; [U] freeCommMsgElem clears it
     char mData[240];             // 0x0C [O]
 };
 
 struct cCommSystem {
     cCommChannel* mChannels[1];  // 0x00 [O] (On Tour [4]); [R] cleared; [U] openDSockChannel (0x255BF8) stores the new
-                                 //      cDSockChannel; closeChannel (func_00255CC8), isChannelOpen (func_00255D38) and the
-                                 //      channel calls (func_00255D50..func_00255E00) index it with the channel argument
+                                 //      cDSockChannel; closeChannel (cCommSystem_closeChannel), isChannelOpen (cCommSystem_isChannelOpen) and the
+                                 //      channel calls (cCommSystem_isChannelConnected..cCommSystem_writePacket) index it with the channel argument
     int mCommMsgAllocMutex[4];   // 0x04 [O] MUTEX (On Tour: int reserved[4]); [R] MUTEX_create(self + 4), destroyed by
-                                 //      func_003E56E0 in the destructor; [U] allocCommMsgElem/freeCommMsgElem lock it
+                                 //      MUTEX_destroy in the destructor; [U] allocCommMsgElem/freeCommMsgElem lock it
     tCommMsgElem* mPool;         // 0x14 [O]; [R] operator new(0xFC00, "Comm pool"); the destructor frees it
-    tCommMsgElem* mFree;         // 0x18 [O]; [R] = mPool; [U] the free-list head (func_00255E68 pops, func_00255EC0 pushes)
-    int mActiveNetConn;          // 0x1C [O]; [R] -1; [U] netConnConnect (func_00255F50) stores the mNetConns index;
-                                 //      netConnDisconnect (func_00255FA0) / netConnFailed (func_00255FE8) reset it to -1
-    int mNetConnState;           // 0x20 [O]; [R] 1; [U] update (func_00255A20): 1 idle, 2 connect requested, 3 starting,
+    tCommMsgElem* mFree;         // 0x18 [O]; [R] = mPool; [U] the free-list head (cCommSystem_allocCommMsgElem pops, cCommSystem_freeCommMsgElem pushes)
+    int mActiveNetConn;          // 0x1C [O]; [R] -1; [U] netConnConnect (cCommSystem_netConnConnect) stores the mNetConns index;
+                                 //      netConnDisconnect (cCommSystem_netConnDisconnect) / netConnFailed (cCommSystem_netConnFailed) reset it to -1
+    int mNetConnState;           // 0x20 [O]; [R] 1; [U] update (cCommSystem_update): 1 idle, 2 connect requested, 3 starting,
                                  //      4 waiting for the local address, 5 connected (channels updated), 6 failed;
                                  //      debugfe/tagsunk test it inline (netConnIsConnected etc.)
     int mNetConnTimeOut;         // 0x24 [O]; [R] 0; [U] netConnConnect sets 9000 frames, update 1800; 0 = timed out ('time')
     int mNetConnError;           // 0x28 [O]; [R] 0; [U] netConnFailed stores the error ('conn' status or 'time');
-                                 //      getError(channel) (func_00255E40) reports it first
+                                 //      getError(channel) (cCommSystem_getError) reports it first
     int mBroadBand;              // 0x2C [O] (On Tour: bool); [R] 0; [U] update sets 1 when 'bbnd' answers 1; read by
                                  //      cGameComm_syncGame (tServerSettings), the ping (func_002583A8), tagsunk
     int mInterfaceType;          // 0x30 [O]; [R] 1; [U] netConnConnect sets 1, update stores the 'type' status; read by

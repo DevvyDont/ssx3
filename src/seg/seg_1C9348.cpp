@@ -145,7 +145,7 @@ extern "C" void func_002C8550(unsigned char *compressed) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1C9348", func_002C85A0);
+INCLUDE_ASM("seg/seg_1C9348", HUFF_decode);
 #ifdef SKIP_ASM
 extern "C" int HUFF_decompress(int, int);
 
@@ -160,7 +160,7 @@ extern "C" int HUFF_decompress(int, int);
  * @param unpackBuf  the output buffer
  * @return what HUFF_decompress returns
  */
-extern "C" int func_002C85A0(int packBuf, int packedSizePtr, int unpackBuf) {
+extern "C" int HUFF_decode(int packBuf, int packedSizePtr, int unpackBuf) {
     return HUFF_decompress(packBuf, unpackBuf);
 }
 #endif

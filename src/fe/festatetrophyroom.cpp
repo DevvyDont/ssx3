@@ -1511,7 +1511,7 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int cBE_getDataSize(void* be);
 void* cBE_readFromData(void* self, int a1);
 extern "C" void cMCOverlayManager_ReadData(void* self, char* a, int n);
-extern "C" int func_003E62D0(void* buf, int size, int seed);
+extern "C" int MEM_crc16(void* buf, int size, int seed);
 extern "C" void* memcpy(void*, const void*, unsigned int);
 
 struct sTrophyRoom_001D5C28 {
@@ -1549,7 +1549,7 @@ extern "C" int cFEMemCard_callbackReadUpdate(int size)
     if (memCard->pending != 0) {
         memCard->pending = 0;
         char* base = memCard->cur;
-        int crc = func_003E62D0(memCard->cur, cBE_getDataSize(cBE_getBE()) - 4, 64490);
+        int crc = MEM_crc16(memCard->cur, cBE_getDataSize(cBE_getBE()) - 4, 64490);
         D_004A2028_tr->cur += cBE_getDataSize(cBE_getBE()) - 4;
         int stored = 0;
         memcpy(&stored, D_004A2028_tr->cur, 4);

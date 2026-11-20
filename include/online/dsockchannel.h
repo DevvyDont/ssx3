@@ -3,16 +3,16 @@
 
 // cDSockChannel: the DirtySock implementation of cCommChannel: one peer-to-peer game link (NetGameUtil to connect or
 // listen on "addr:port:port", then a NetGameLink to send and receive packets). Created by
-// cCommSystem_openDSockChannel: `cMemMan_alloc(0x20, "cDSockChannel", ...)` + the constructor func_00256698, then
+// cCommSystem_openDSockChannel: `cMemMan_alloc(0x20, "cDSockChannel", ...)` + the constructor cDSockChannel_cDSockChannel, then
 // cDSockChannel_connect (mode 0x102) when the host flag isListener is set, else cDSockChannel_listen (0x101). Size 0x20 [R]. Base class cCommChannel (online/commchannel.h,
 // 0xC bytes), written out inline. Retail vtable D_004812D0 (slots: see kCommChannelVt_* in online/commchannel.h).
 // EA's source: d:/ssx/code/source/online/dsockchannel.cpp (the preview build's assert string).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset. Evidence tags:
-//   [R] retail's constructor func_00256698 / destructor cDSockChannel__cDSockChannel and the allocation;
+//   [R] retail's constructor cDSockChannel_cDSockChannel / destructor cDSockChannel__cDSockChannel and the allocation;
 //   [P] the July 2003 preview's inline accessors (cCommChannel's and isConnected__C13cDSockChannel = lw 0xC == 2;
 //       same offsets as retail);
-//   [U] how retail code uses the field (the methods func_00256698..cDSockChannel_getLatency in seg_156860 and the two inline
+//   [U] how retail code uses the field (the methods cDSockChannel_cDSockChannel..cDSockChannel_getLatency in seg_156860 and the two inline
 //       virtuals cDSockChannel_isConnected / cDSockChannel_getChannelType in tagsunk);
 //   [O] SSX On Tour's DWARF (class cDSockChannel, size 0x1C): the same five members in the same order, 4 bytes
 //       earlier (its base is 8 bytes: 1-byte bools); its mPacketError is a 1-byte bool.
@@ -37,9 +37,9 @@ struct cDSockChannel {
                                     //      ((4 * old + new) / 5, capped at 1 s); getLatency (cDSockChannel_getLatency) returns it
     int mPacketError;               // 0x14 [O] (On Tour: bool); [R] 0; [U] readPacket (cDSockChannel_readPacket) sets 1 on a
                                     //      packet of the wrong kind; updateConnected turns it into state 4
-    NetGameUtilRefT* mGameUtil;     // 0x18 [O]; [R] 0; [U] connect/listen store the NetGameUtil (func_003E6E08) and
-                                    //      start it (func_003E6F40, 0x101 listen / 0x102 connect); disconnect destroys it
-    NetGameLinkRefT* mGameLink;     // 0x1C [O]; [R] 0; [U] updateConnecting creates it (func_003E66F0) once the util
+    NetGameUtilRefT* mGameUtil;     // 0x18 [O]; [R] 0; [U] connect/listen store the NetGameUtil (NetGameUtilCreate) and
+                                    //      start it (NetGameUtilConnect, 0x101 listen / 0x102 connect); disconnect destroys it
+    NetGameLinkRefT* mGameLink;     // 0x1C [O]; [R] 0; [U] updateConnecting creates it (NetGameLinkCreate) once the util
                                     //      completes; read/writePacket and updateConnected use it; disconnect destroys it
 };
 

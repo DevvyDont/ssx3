@@ -810,7 +810,7 @@ struct cUIObj_F9D8 {
  * Resets the profile rows when no card is ready, or hands over to cFEStateProfileLoad_displayOn when one is.
  *
  * When this state's vtable slot 42 (cFEMemCard_displayFileOK) passes and the memory card (the card manager's mpMemCard) passes its
- * slot-53 check (func_002D3810), it switches the display state to 3 (slot 35, cFEMemCard_triggerDisplayState) and runs
+ * slot-53 check (cPS2MemCard_IsAvailable1), it switches the display state to 3 (slot 35, cFEMemCard_triggerDisplayState) and runs
  * cFEStateProfileLoad_displayOn. Otherwise it resets the six rows "player1" to "player6": slot 25
  * (cUIText_setUseStaticColour for a text) with 0 and setStatic(1). Called by cFEStateProfileLoad_displayStatus and by
  * cFEStateProfileLoad_displayOn when no card is found.

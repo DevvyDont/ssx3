@@ -968,7 +968,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_restore);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003E44B0_CDE0(void) __asm__("func_003E44B0");
 extern void FILESYS_closesync_CDE0(int, int) __asm__("FILESYS_closesync");
-extern void func_003E56E0_CDE0(char *) __asm__("func_003E56E0");
+extern void MUTEX_destroy_CDE0(char *) __asm__("MUTEX_destroy");
 extern void MEM_clear_CDE0(char *, int) __asm__("MEM_clear");
 extern void (*D_00450C10_CDE0[])(int) __asm__("gFileSysOpts");
 extern void (*D_00450C18_CDE0[])(int) __asm__("D_00450C18");
@@ -978,7 +978,7 @@ extern int D_00519AE8_CDE0[] __asm__("D_00519AE8");
 
 /**
  * Shuts the file system down: calls func_003E44B0, frees and closes every added archive (FILESYS_closesync on its
- * file), releases the mutex (func_003E56E0), clears the command manager's state and frees its memory block (D_00519AE8)
+ * file), releases the mutex (MUTEX_destroy), clears the command manager's state and frees its memory block (D_00519AE8)
  * through the free callback.
  */
 void FILESYS_restore(void) {
@@ -988,7 +988,7 @@ void FILESYS_restore(void) {
         D_00450C10_CDE0[2](n[0]);
         FILESYS_closesync_CDE0(*(int *)n[3], 0);
     }
-    func_003E56E0_CDE0(D_00519AC4_CDE0);
+    MUTEX_destroy_CDE0(D_00519AC4_CDE0);
     MEM_clear_CDE0(D_00519AC4_CDE0 - 0x14, 0x38);
     if (D_00519AE8_CDE0[0] != 0) {
         D_00450C18_CDE0[0](D_00519AE8_CDE0[0]);
@@ -1268,8 +1268,8 @@ extern struct sFsNode *D_00519AE4;              /* D_00519AB0.f34 */
 INCLUDE_ASM("ealib/seg_2DCAE8", FILESYS_waitop);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003E5440(char *);
-extern void func_003E5398(int);
+extern int THREAD_iscurrent(char *);
+extern void THREAD_yield(int);
 extern int SYNCTASK_run(int);
 
 static inline int hValid_D1D8(int h) {
@@ -1279,8 +1279,8 @@ static inline int hValid_D1D8(int h) {
 /**
  * Blocks until a file operation completes and returns its result.
  *
- * While the operation's result (+0x8) is 0, runs SYNCTASK_run when func_003E5440 allows it, else sleeps with
- * func_003E5398(1). Returns -3 as soon as the handle stops being valid.
+ * While the operation's result (+0x8) is 0, runs SYNCTASK_run when THREAD_iscurrent allows it, else sleeps with
+ * THREAD_yield(1). Returns -3 as soon as the handle stops being valid.
  *
  * @param ophandle  the operation handle
  * @return the operation's result, or -3 for an invalid handle
@@ -1291,10 +1291,10 @@ int FILESYS_waitop(int ophandle) {
         return -3;
     }
     while (fop->f08 == 0) {
-        if (func_003E5440(0) != 0) {
+        if (THREAD_iscurrent(0) != 0) {
             SYNCTASK_run(0);
         } else {
-            func_003E5398(1);
+            THREAD_yield(1);
         }
         if (!hValid_D1D8(ophandle)) {
             return -3;
@@ -3289,10 +3289,10 @@ INCLUDE_ASM("ealib/seg_2DCAE8", ASYNCFILE_restore);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int numrequests;
 extern int ASYNCFILE_cancel(int);
-extern int func_003E5440(char *);
-extern void func_003E5398(int);
+extern int THREAD_iscurrent(char *);
+extern void THREAD_yield(int);
 extern int SYNCTASK_run(int);
-extern void func_003E56E0_F570(char *) __asm__("func_003E56E0");
+extern void MUTEX_destroy_F570(char *) __asm__("MUTEX_destroy");
 
 /**
  * Shuts the async-file layer down: cancels all requests, waits for them, frees the request table.
@@ -3312,11 +3312,11 @@ void ASYNCFILE_restore(void) {
                 if (hlafile_request[i].f1C != 0) busy = 1;
             }
             if (!busy) break;
-            if (func_003E5440(0) != 0) SYNCTASK_run(0);
-            func_003E5398(0);
+            if (THREAD_iscurrent(0) != 0) SYNCTASK_run(0);
+            THREAD_yield(0);
         }
         gFileSysOpts.f08(hlafile_request);
-        func_003E56E0_F570(hlafile_mutex);
+        MUTEX_destroy_F570(hlafile_mutex);
         hlafile_request = 0;
     }
 }
@@ -4458,10 +4458,10 @@ INCLUDE_ASM("ealib/seg_2DCAE8", STREAM_destroy);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int f_FBD0_0A28(int, void *, void *) __asm__("validatehandle");
 extern void f_1110_0A28(int) __asm__("STREAM_kill");
-extern int f_5440_0A28(int) __asm__("func_003E5440");
+extern int f_5440_0A28(int) __asm__("THREAD_iscurrent");
 extern void f_SYNC_0A28(int) __asm__("SYNCTASK_run");
-extern void f_5398_0A28(int) __asm__("func_003E5398");
-extern void f_56E0_0A28(void *) __asm__("func_003E56E0");
+extern void f_5398_0A28(int) __asm__("THREAD_yield");
+extern void f_56E0_0A28(void *) __asm__("MUTEX_destroy");
 extern void f_ECA0_0A28(int, int) __asm__("FILESYS_closesync");
 struct S_0A28 { int w0; char pad[0x34]; volatile int w38; char pad2[0x130]; int w16C; };
 
@@ -7799,7 +7799,7 @@ extern void (*D_00450C78_0C78[])(void) __asm__("D_00450C78");
 /**
  * Runs and clears every registered exit handler.
  *
- * Walks the 64-slot handler table (D_00450C78, filled by func_003E4A30) from the last slot to the first,
+ * Walks the 64-slot handler table (D_00450C78, filled by REAL_addexit) from the last slot to the first,
  * calling each non-null entry and then clearing its slot. REAL_exit() calls it before trapping.
  */
 void REAL_restore(void) {
@@ -7829,7 +7829,7 @@ void REAL_exit(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4A30);
+INCLUDE_ASM("ealib/seg_2DCAE8", REAL_addexit);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450C78_4A30[] __asm__("D_00450C78");
@@ -7838,12 +7838,12 @@ extern int D_00450C78_4A30[] __asm__("D_00450C78");
  * Registers a routine to run at exit, once.
  *
  * Does nothing when @p exitFunc is already in the 64-entry exit table D_00450C78 (the routines REAL_restore runs); otherwise
- * stores it in the first empty slot, and drops it silently when the table is full. The timer setup func_003E4AF0
- * registers its teardown func_003E4D68 here; the sound library (func_003B5478) registers one too.
+ * stores it in the first empty slot, and drops it silently when the table is full. The timer setup TIMER_init
+ * registers its teardown TIMER_restore here; the sound library (func_003B5478) registers one too.
  *
  * @param exitFunc  the routine to call at exit
  */
-void func_003E4A30(int exitFunc) {
+void REAL_addexit(int exitFunc) {
     int i;
     for (i = 0; i < 0x40; i++) {
         if (D_00450C78_4A30[i] == exitFunc) return;
@@ -7868,7 +7868,7 @@ extern void (*D_00450C78[64])(void);     /* exit handlers (REAL_restore runs the
  * Removes a routine from the exit table.
  *
  * Clears the first slot of the 64-entry table D_00450C78 (the routines REAL_restore runs) that holds @p exitFunc; does nothing
- * when it isn't there. The counterpart of func_003E4A30. Nothing in the build calls it.
+ * when it isn't there. The counterpart of REAL_addexit. Nothing in the build calls it.
  *
  * @param exitFunc  the routine to remove
  */
@@ -7884,19 +7884,19 @@ void func_003E4AA0(void (*exitFunc)(void)) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4AF0);
+INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_init);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003E6690_4AF0(int) __asm__("func_003E6690");
 extern int func_00423A80_4AF0(int, void (*)(void), int) __asm__("func_00423A80");
 extern int func_004248E8_4AF0(int) __asm__("func_004248E8");
-extern void func_003E4A30_4AF0(void (*)(void)) __asm__("func_003E4A30");
-extern void func_003E4DB8_4AF0(void) __asm__("func_003E4DB8");
-extern void func_003E4D68_4AF0(void) __asm__("func_003E4D68");
+extern void REAL_addexit_4AF0(void (*)(void)) __asm__("REAL_addexit");
+extern void tmrint_4AF0(void) __asm__("tmrint");
+extern void TIMER_restore_4AF0(void) __asm__("TIMER_restore");
 
 extern int D_00450DA0;
 extern int D_00450DC8;
-/* tick counter, incremented by the timer interrupt handler (func_003E4DB8) */
+/* tick counter, incremented by the timer interrupt handler (tmrint) */
 extern volatile int D_00450DCC;
 extern int D_00450DDC;
 extern unsigned short D_00450DE0;
@@ -7913,11 +7913,11 @@ extern unsigned short D_00450DE0;
  * When the interrupt handler is already installed (D_00450DDC) it only returns D_00450DC8. A @p hz of 0 means 100. It
  * picks EE timer 1's clock for the rate (bus clock / 256 below 196 Hz, / 16 below 3150 Hz, / 1 above: 0x8CA00, 0x8CA000
  * or 0x8CA0000 counts a second), stores the compare period in D_00450DE0 and the resulting rate in D_00450DC8, programs
- * T1 (count 0, the compare value, the clock mode | 0x180: compare interrupt and count enable), installs func_003E4DB8
+ * T1 (count 0, the compare value, the clock mode | 0x180: compare interrupt and count enable), installs tmrint
  * as the INTC 10 (timer 1) handler (func_00423A80) and enables it (func_004248E8). While the H-blank rate D_00450DA0 is
  * still 0 it calibrates the video mode: it counts H-blanks on timer 0 (mode 0x83) over one second of ticks and passes 1
  * (15701-15799, NTSC), 2 (15576-15674, PAL) or 3 (28801-31999) to func_003E6690. Finally it registers the teardown
- * func_003E4D68 with func_003E4A30. systemInit calls it with 60.
+ * TIMER_restore with REAL_addexit. systemInit calls it with 60.
  *
  * Likely bug: after the calibration both saved timer-0 values (the count and the mode) are written back to T0_COUNT
  * (0x10000000), so timer 0's mode stays 0x83.
@@ -7925,7 +7925,7 @@ extern unsigned short D_00450DE0;
  * @param hz  the wanted tick rate in Hz (0 means 100)
  * @return the tick rate in effect (D_00450DC8)
  */
-int func_003E4AF0(int hz) {
+int TIMER_init(int hz) {
     int mode;
     int count;
     int tmode;
@@ -7956,7 +7956,7 @@ int func_003E4AF0(int hz) {
     T1_COUNT_4AF0 = 0;
     T1_COMP_4AF0 = D_00450DE0;
     T1_MODE_4AF0 = mode | 0x180;
-    D_00450DDC = func_00423A80_4AF0(10, func_003E4DB8_4AF0, 0);
+    D_00450DDC = func_00423A80_4AF0(10, tmrint_4AF0, 0);
     func_004248E8_4AF0(10);
     if (D_00450DA0 == 0) {
         count = T0_COUNT_4AF0;
@@ -7981,13 +7981,13 @@ int func_003E4AF0(int hz) {
             func_003E6690_4AF0(3);
         }
     }
-    func_003E4A30_4AF0(func_003E4D68_4AF0);
+    REAL_addexit_4AF0(TIMER_restore_4AF0);
     return D_00450DC8;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4D68);
+INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_restore);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void RemoveIntcHandler(int, int);
@@ -7998,9 +7998,9 @@ extern int D_00450DDC_0DDC[] __asm__("D_00450DDC");
  * Stops the library tick timer.
  *
  * When a handler is installed (D_00450DDC) it clears T1_MODE (0x10000810), disables INTC 10 with func_00424880, removes
- * the handler with RemoveIntcHandler and clears D_00450DDC. func_003E4AF0 registers it as an exit routine.
+ * the handler with RemoveIntcHandler and clears D_00450DDC. TIMER_init registers it as an exit routine.
  */
-void func_003E4D68(void) {
+void TIMER_restore(void) {
     volatile int *reg;
 
     if (D_00450DDC_0DDC[0] != 0) {
@@ -8014,7 +8014,7 @@ void func_003E4D68(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4DB8);
+INCLUDE_ASM("ealib/seg_2DCAE8", tmrint);
 #ifdef SKIP_ASM
 // PORT: PS2-only (EE timer 1 registers, inline asm).
 /* tmrint: the EE timer 1 compare interrupt (inittmr.c; On Tour's PSP tmrint has the same tick/callback body). */
@@ -8035,11 +8035,11 @@ extern void (*D_00450DA8[8])(void);             /* tmrsub */
  * the interrupt (T1_MODE | 0x400), increments the tick counters D_00450DCC and D_00450DD0, then calls each of the 8
  * timer routines in D_00450DA8 that is set, with D_00450DE4 set to 1 around the call (the thread and mutex code checks
  * it to pick the interrupt-safe kernel calls). Re-enables interrupts (sync.l, ei) before returning. Installed by
- * func_003E4AF0.
+ * TIMER_init.
  *
  * @return 0
  */
-int func_003E4DB8(void) {
+int tmrint(void) {
     int i;
 
     T1_COMP = D_00450DE0 + T1_COMP - T1_COUNT;
@@ -8060,7 +8060,7 @@ int func_003E4DB8(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4E98);
+INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_gettick);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern volatile int D_00450DCC;
@@ -8068,12 +8068,12 @@ extern volatile int D_00450DCC;
 /**
  * Returns the library tick counter.
  *
- * D_00450DCC, incremented by the timer interrupt func_003E4DB8 at the rate func_003E4AF0 set (func_003E5008 returns
+ * D_00450DCC, incremented by the timer interrupt tmrint at the rate TIMER_init set (TIMER_getfrequency returns
  * it). Used for timeouts throughout the library, the sound code and the quadtree loader.
  *
  * @return the current tick count
  */
-int func_003E4E98(void)
+int TIMER_gettick(void)
 {
     return D_00450DCC;
 }
@@ -8088,13 +8088,13 @@ extern int D_00450DEC_4EA8[] __asm__("D_00450DEC");
 /**
  * Returns the ticks elapsed since the previous call.
  *
- * Stores the current tick count (func_003E4E98) in D_00450DEC and returns it minus the value stored last time.
+ * Stores the current tick count (TIMER_gettick) in D_00450DEC and returns it minus the value stored last time.
  *
  * @return ticks since the last call (since the reset in func_003E4EE8 on the first call)
  */
 int func_003E4EA8(void) {
     int old = D_00450DEC_4EA8[0];
-    int now = func_003E4E98();
+    int now = TIMER_gettick();
     D_00450DEC_4EA8[0] = now;
     return now - old;
 }
@@ -8127,20 +8127,20 @@ void func_003E4EE8(void) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4F08);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int func_003E4E98_4F08(void) __asm__("func_003E4E98");
+int TIMER_gettick_4F08(void) __asm__("TIMER_gettick");
 extern int D_00450DE8_4F08[] __asm__("D_00450DE8");
 
 /**
  * Sets the tick deadline a number of ticks from now.
  *
- * Stores the current tick count (func_003E4E98) plus @p delayTicks in D_00450DE8; func_003E4F80 tests it and func_003E4F40
+ * Stores the current tick count (TIMER_gettick) plus @p delayTicks in D_00450DE8; func_003E4F80 tests it and func_003E4F40
  * waits for it.
  *
  * @param delayTicks  ticks from now
  */
 void func_003E4F08(int delayTicks) {
     int *deadlinePtr = D_00450DE8_4F08;
-    *deadlinePtr = func_003E4E98_4F08() + delayTicks;
+    *deadlinePtr = TIMER_gettick_4F08() + delayTicks;
 }
 #endif
 
@@ -8150,18 +8150,18 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4F40);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003E4F80();
 extern void SYNCTASK_run_4F40(int) __asm__("SYNCTASK_run");
-extern void func_003E5398_4F40(int) __asm__("func_003E5398");
+extern void THREAD_yield_4F40(int) __asm__("THREAD_yield");
 
 /**
  * Waits for the tick deadline set by func_003E4F08.
  *
  * Until func_003E4F80 reports it reached, runs the sync tasks (SYNCTASK_run(0)) and yields the thread
- * (func_003E5398(0)) on each pass.
+ * (THREAD_yield(0)) on each pass.
  */
 void func_003E4F40(void) {
     while (func_003E4F80() == 0) {
         SYNCTASK_run_4F40(0);
-        func_003E5398_4F40(0);
+        THREAD_yield_4F40(0);
     }
 }
 #endif
@@ -8170,47 +8170,47 @@ void func_003E4F40(void) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4F80);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003E4E98();
+extern int TIMER_gettick();
 extern int D_00450DE8_4F80[] __asm__("D_00450DE8");
 
 /**
  * Tells whether the tick deadline has been reached.
  *
- * Compares the current tick count (func_003E4E98) with the deadline D_00450DE8 set by func_003E4F08.
+ * Compares the current tick count (TIMER_gettick) with the deadline D_00450DE8 set by func_003E4F08.
  *
  * @return 1 when the deadline is now or past, 0 before it
  */
 int func_003E4F80(void) {
-    int sinceDeadline = func_003E4E98() - D_00450DE8_4F80[0]; if (sinceDeadline > -1) return 1; return 0;
+    int sinceDeadline = TIMER_gettick() - D_00450DE8_4F80[0]; if (sinceDeadline > -1) return 1; return 0;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4FB0);
+INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_waitticks);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void SYNCTASK_run_4FB0(int) __asm__("SYNCTASK_run");
-void func_003E5398_4FB0(int) __asm__("func_003E5398");
+void THREAD_yield_4FB0(int) __asm__("THREAD_yield");
 
 /**
  * Waits a number of library ticks, running the sync tasks meanwhile.
  *
- * Until the tick counter (func_003E4E98) reaches the start plus @p ticks it calls SYNCTASK_run(0) and yields the thread
- * with func_003E5398(0). cAsyncSys_ASYNCSYS_DeInit waits 2 ticks this way.
+ * Until the tick counter (TIMER_gettick) reaches the start plus @p ticks it calls SYNCTASK_run(0) and yields the thread
+ * with THREAD_yield(0). cAsyncSys_ASYNCSYS_DeInit waits 2 ticks this way.
  *
  * @param ticks  the number of ticks to wait
  */
-void func_003E4FB0(int ticks) {
-    int end = func_003E4E98() + ticks;
-    while (func_003E4E98() - end < 0) {
+void TIMER_waitticks(int ticks) {
+    int end = TIMER_gettick() + ticks;
+    while (TIMER_gettick() - end < 0) {
         SYNCTASK_run_4FB0(0);
-        func_003E5398_4FB0(0);
+        THREAD_yield_4FB0(0);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5008);
+INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_getfrequency);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450DC8_5008[4] __asm__("D_00450DC8");
@@ -8218,18 +8218,18 @@ extern int D_00450DC8_5008[4] __asm__("D_00450DC8");
 /**
  * Returns the library tick rate in ticks per second.
  *
- * D_00450DC8, as set by func_003E4AF0. THREAD_yieldticks and the millisecond timers in seg_2AEDC0 divide by it to
+ * D_00450DC8, as set by TIMER_init. THREAD_yieldticks and the millisecond timers in seg_2AEDC0 divide by it to
  * convert ticks.
  *
  * @return ticks per second
  */
-int func_003E5008(void) {
+int TIMER_getfrequency(void) {
     return D_00450DC8_5008[0];
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5018);
+INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_init);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int GetThreadId_5018(void) __asm__("GetThreadId");
@@ -8245,7 +8245,7 @@ extern int D_0051ED88_5018[] __asm__("D_0051ED88");
  * GetThreadId), sets that thread's priority to 100 and creates the library mutex D_0051ED88 with MUTEX_create. Called
  * by systemInit.
  */
-void func_003E5018(void) {
+void THREAD_init(void) {
     int mainThreadId = GetThreadId_5018();
     D_00450DF8_5018[0] = 0x50533254;
     D_00450DF8_5018[1] = mainThreadId;
@@ -8258,7 +8258,7 @@ void func_003E5018(void) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5068);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003E56E0(void *);
+extern void MUTEX_destroy(void *);
 extern void MEM_clear_5068(int *, int) __asm__("MEM_clear");
 extern int D_00450DF8_5068[] __asm__("D_00450DF8");
 extern int D_0051ED88_5068[] __asm__("D_0051ED88");
@@ -8266,11 +8266,11 @@ extern int D_0051ED88_5068[] __asm__("D_0051ED88");
 /**
  * Shuts the thread layer down.
  *
- * Destroys the library mutex D_0051ED88 (func_003E56E0) and clears the 8-byte main-thread record D_00450DF8 that
- * func_003E5018 filled. Nothing in the build calls it.
+ * Destroys the library mutex D_0051ED88 (MUTEX_destroy) and clears the 8-byte main-thread record D_00450DF8 that
+ * THREAD_init filled. Nothing in the build calls it.
  */
 void func_003E5068(void) {
-    func_003E56E0(D_0051ED88_5068);
+    MUTEX_destroy(D_0051ED88_5068);
     MEM_clear_5068(D_00450DF8_5068, 8);
 }
 #endif
@@ -8278,12 +8278,12 @@ void func_003E5068(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5098);
 #ifdef SKIP_ASM
-extern void func_003E50C8(int, int, int, int, int, int);
+extern void THREAD_createparam(int, int, int, int, int, int);
 
 /**
  * Creates and starts a thread without a start parameter.
  *
- * Calls func_003E50C8 with the same arguments and a start parameter of 0.
+ * Calls THREAD_createparam with the same arguments and a start parameter of 0.
  *
  * @param thread  the thread record to fill
  * @param entryProc  the thread's entry routine
@@ -8292,12 +8292,12 @@ extern void func_003E50C8(int, int, int, int, int, int);
  * @param priority  the priority code (97-103, anything else means 100)
  */
 void func_003E5098(int thread, int entryProc, int stackAddr, int stackSize, int priority) {
-    func_003E50C8(thread, entryProc, 0, stackAddr, stackSize, priority);
+    THREAD_createparam(thread, entryProc, 0, stackAddr, stackSize, priority);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E50C8);
+INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_createparam);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int CreateThread(void *);
@@ -8314,7 +8314,7 @@ struct sReq_50C8 {
     int more[4];
 };
 
-int func_003E50C8_a(int *self, int arg1, int arg2, int arg3, int arg4, int arg5) __asm__("func_003E50C8");
+int THREAD_createparam_a(int *self, int arg1, int arg2, int arg3, int arg4, int arg5) __asm__("THREAD_createparam");
 /**
  * Creates a kernel thread and starts it with a parameter.
  *
@@ -8331,7 +8331,7 @@ int func_003E50C8_a(int *self, int arg1, int arg2, int arg3, int arg4, int arg5)
  * @param priority  the priority code (97-103; anything else means 100)
  * @return 1 when the thread was created and started, 0 otherwise
  */
-int func_003E50C8_a(int *self, int entryProc, int startParam, int stackAddr, int stackSize, int priority) {
+int THREAD_createparam_a(int *self, int entryProc, int startParam, int stackAddr, int stackSize, int priority) {
     struct sReq_50C8 req;
     int threadId;
     int kind;
@@ -8376,13 +8376,13 @@ int func_003E50C8_a(int *self, int entryProc, int startParam, int stackAddr, int
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E51A0);
+INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_destroy);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void iTerminateThread_51A0(int) __asm__("iTerminateThread");
 extern int D_00450DE4_51A0[] __asm__("D_00450DE4");
 
-void func_003E51A0_51A0(char *arg0) __asm__("func_003E51A0");
+void THREAD_destroy_51A0(char *arg0) __asm__("THREAD_destroy");
 /**
  * Ends and deletes a thread.
  *
@@ -8393,7 +8393,7 @@ void func_003E51A0_51A0(char *arg0) __asm__("func_003E51A0");
  *
  * @param thread  the thread record, or -1 for the calling thread
  */
-void func_003E51A0_51A0(char *thread) {
+void THREAD_destroy_51A0(char *thread) {
     int threadId;
     int st[12];
 
@@ -8425,16 +8425,16 @@ void func_003E51A0_51A0(char *thread) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5268);
 #ifdef SKIP_ASM
-extern void func_003E51A0();
+extern void THREAD_destroy();
 
 /**
- * Destroys a thread through func_003E51A0.
+ * Destroys a thread through THREAD_destroy.
  *
- * Calls func_003E51A0 without loading an argument, so whatever the caller left in the first argument register is passed
+ * Calls THREAD_destroy without loading an argument, so whatever the caller left in the first argument register is passed
  * through (the C declares no parameter). Nothing in the build calls it.
  */
 void func_003E5268(void) {
-    func_003E51A0();
+    THREAD_destroy();
 }
 #endif
 
@@ -8469,7 +8469,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_yieldticks);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void abm_YT(char *) __asm__("REAL_abortmessage");
-extern int f5008_YT(void) __asm__("func_003E5008");
+extern int f5008_YT(void) __asm__("TIMER_getfrequency");
 extern int f3B20_YT(int, char *, int) __asm__("SetAlarm");
 extern void f3C50_YT(int) __asm__("RotateThreadReadyQueue");
 extern int f3C90_YT(void) __asm__("GetThreadId");
@@ -8514,7 +8514,7 @@ void THREAD_yieldticks(int numTicks) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5398);
+INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_yield);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450DC8_5398 __asm__("D_00450DC8");
@@ -8526,7 +8526,7 @@ extern void func_00424CE8_5398(int) __asm__("func_00424CE8");
 extern void ReferThreadStatus_5398(int, void *) __asm__("ReferThreadStatus");
 extern void RotateThreadReadyQueue_5398(int) __asm__("RotateThreadReadyQueue");
 
-void func_003E5398_impl(int ms) __asm__("func_003E5398");
+void THREAD_yield_impl(int ms) __asm__("THREAD_yield");
 /**
  * Yields the calling thread, for a number of milliseconds or just once.
  *
@@ -8537,7 +8537,7 @@ void func_003E5398_impl(int ms) __asm__("func_003E5398");
  *
  * @param ms  milliseconds to sleep, or 0 to yield once
  */
-void func_003E5398_impl(int ms) {
+void THREAD_yield_impl(int ms) {
     int info[12];
     if (ms != 0) {
         int yieldTicks = ms * D_00450DC8_5398 / 1000;
@@ -8556,7 +8556,7 @@ void func_003E5398_impl(int ms) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5440);
+INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_iscurrent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450DFC_0DFC[] __asm__("D_00450DFC");
@@ -8564,14 +8564,14 @@ extern int D_00450DFC_0DFC[] __asm__("D_00450DFC");
 /**
  * Tells whether a thread is the calling thread.
  *
- * For a null @p thread it compares GetThreadId with the main thread's id (D_00450DFC, set by func_003E5018); -1 always
+ * For a null @p thread it compares GetThreadId with the main thread's id (D_00450DFC, set by THREAD_init); -1 always
  * matches; otherwise it compares with the record's +4. The file and stream code uses it with 0 to run the sync tasks
  * only on the main thread.
  *
  * @param thread  the thread record, 0 for the main thread, or -1 for the calling thread
  * @return 1 when it is the calling thread, 0 otherwise
  */
-int func_003E5440(char *thread) {
+int THREAD_iscurrent(char *thread) {
     int cur = GetThreadId();
     if (thread == 0) {
         return cur == D_00450DFC_0DFC[0];
@@ -8596,7 +8596,7 @@ extern int D_00450DFC_5498[] __asm__("D_00450DFC");
 /**
  * Returns a thread's current priority.
  *
- * Picks the id like func_003E5508 (0: main thread D_00450DFC, -1: calling thread, else the record's +4) and reads the
+ * Picks the id like THREAD_setpriority (0: main thread D_00450DFC, -1: calling thread, else the record's +4) and reads the
  * current-priority word (6) of its status (iReferThreadStatus inside the timer interrupt, else ReferThreadStatus).
  * Nothing in the build calls it.
  *
@@ -8623,7 +8623,7 @@ int func_003E5498(int *thread) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5508);
+INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_setpriority);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void ChangeThreadPriority_5508(int, int) __asm__("ChangeThreadPriority");
@@ -8642,7 +8642,7 @@ extern int D_00450DFC_5508[] __asm__("D_00450DFC");
  * @param priority  the new kernel priority
  * @return 1
  */
-int func_003E5508(void *thread, int priority) {
+int THREAD_setpriority(void *thread, int priority) {
     int var_4;
 
     if (thread == 0) {
@@ -8697,11 +8697,11 @@ int func_003E5580(A_5580 *thread) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E55E0);
+INCLUDE_ASM("ealib/seg_2DCAE8", THREAD_waitexit);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void THREAD_yieldticks_55E0(int) __asm__("THREAD_yieldticks");
-extern int func_003E4E98_55E0() __asm__("func_003E4E98");
+extern int TIMER_gettick_55E0() __asm__("TIMER_gettick");
 extern void ReferThreadStatus_55E0(int, int *) __asm__("ReferThreadStatus");
 
 /**
@@ -8717,18 +8717,18 @@ extern void ReferThreadStatus_55E0(int, int *) __asm__("ReferThreadStatus");
  * @param timeout  ticks to wait, or 0 for no limit
  * @return 1 when the thread ended up dormant, 0 otherwise
  */
-int func_003E55E0(int *task, int timeout) {
+int THREAD_waitexit(int *task, int timeout) {
     int sp[12];
     int threadId;
     int deadline;
 
-    deadline = func_003E4E98_55E0() + timeout;
+    deadline = TIMER_gettick_55E0() + timeout;
     threadId = task[1];
     do {
         ReferThreadStatus_55E0(threadId, sp);
         if ((sp[0] & 0x10) || sp[0] == 0) break;
         THREAD_yieldticks_55E0(0);
-    } while (timeout == 0 || deadline < func_003E4E98_55E0());
+    } while (timeout == 0 || deadline < TIMER_gettick_55E0());
     return sp[0] == 0x10;
 }
 #endif
@@ -8769,7 +8769,7 @@ int MUTEX_create(int *self) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E56E0);
+INCLUDE_ASM("ealib/seg_2DCAE8", MUTEX_destroy);
 #ifdef SKIP_ASM
 extern void DeleteSema(int);
 
@@ -8781,7 +8781,7 @@ extern void DeleteSema(int);
  *
  * @param mutex  the mutex
  */
-void func_003E56E0(void *mutex) {
+void MUTEX_destroy(void *mutex) {
     DeleteSema((*(int *)((char*)(mutex) + (0xC))));
 }
 #endif
@@ -8983,7 +8983,7 @@ extern int SYNCTASK_run_5A10(int) __asm__("SYNCTASK_run");
 /**
  * Runs the sync tasks for up to a number of ticks or until one reports something.
  *
- * Calls SYNCTASK_run(0) repeatedly while the tick counter (func_003E4E98) is below the start plus @p ticks and the last
+ * Calls SYNCTASK_run(0) repeatedly while the tick counter (TIMER_gettick) is below the start plus @p ticks and the last
  * result was 0. Nothing in the build calls it.
  *
  * @param ticks  the time limit in ticks
@@ -8994,8 +8994,8 @@ int func_003E5A10(int ticks) {
     int result;
 
     result = 0;
-    deadline = func_003E4E98() + ticks;
-    while (func_003E4E98() < deadline && result == 0) {
+    deadline = TIMER_gettick() + ticks;
+    while (TIMER_gettick() < deadline && result == 0) {
         result = SYNCTASK_run_5A10(0);
     }
     return result;
@@ -9281,7 +9281,7 @@ extern int D_00451008_5E88[] __asm__("PRINTinitialized");
  * Installs a debug print device: its name and its output routine.
  *
  * Runs PRINT_init first when printing is not set up, then stores @p deviceName and @p outputFunc in the device's PRINTdevicelist entry
- * (+0 and +4; device 2 is preset to "debugger" with func_003E6428). The device's enable flag is left as it was. Nothing
+ * (+0 and +4; device 2 is preset to "debugger" with PRINT_debuggerfunc). The device's enable flag is left as it was. Nothing
  * in the build calls it.
  *
  * @param device  the device index (0-7)
@@ -9538,7 +9538,7 @@ void MEM_clear(int dest, int count) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6240);
+INCLUDE_ASM("ealib/seg_2DCAE8", MEMSYS_validaddress);
 #ifdef SKIP_ASM
 /**
  * Tells whether an address lies in a region the EE can use.
@@ -9550,7 +9550,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6240);
  * @param addr  the address
  * @return 1 when valid, 0 otherwise
  */
-int func_003E6240(unsigned int addr) {
+int MEMSYS_validaddress(unsigned int addr) {
     int valid = 0;
     if (addr - 0x100000 <= 0x7EFFFFF || addr - 0x10000000 <= 0x4000000 ||
         addr - 0x20100000 <= 0x7EFFFFF || addr - 0x30100000 <= 0x7EFFFFF ||
@@ -9579,7 +9579,7 @@ void func_003E62B0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E62D0);
+INCLUDE_ASM("ealib/seg_2DCAE8", MEM_crc16);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned short D_00451018_1018[] __asm__("D_00451018");
@@ -9596,7 +9596,7 @@ extern unsigned short D_00451018_1018[] __asm__("D_00451018");
  * @param seed  the starting value
  * @return the CRC (16 bits)
  */
-int func_003E62D0(unsigned char *data, int byteCount, int seed) {
+int MEM_crc16(unsigned char *data, int byteCount, int seed) {
     unsigned char *cursor;
     unsigned int crc;
     unsigned char *end;
@@ -9615,7 +9615,7 @@ int func_003E62D0(unsigned char *data, int byteCount, int seed) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6328);
+INCLUDE_ASM("ealib/seg_2DCAE8", SORT_shell);
 #ifdef SKIP_ASM
 extern int D_00451218[];
 
@@ -9630,7 +9630,7 @@ extern int D_00451218[];
  * @param keys  the keys, sorted in place (largest first)
  * @param vals  the values moved with their keys
  */
-void func_003E6328(int n, int *keys, int *vals) {
+void SORT_shell(int n, int *keys, int *vals) {
     int k = 1;
     int gap;
     int i;
@@ -9662,7 +9662,7 @@ void func_003E6328(int n, int *keys, int *vals) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6428);
+INCLUDE_ASM("ealib/seg_2DCAE8", PRINT_debuggerfunc);
 #ifdef SKIP_ASM
 extern void func_004175C8(int);
 
@@ -9675,7 +9675,7 @@ extern void func_004175C8(int);
  * @param channel  the print channel (unused)
  * @param text  the text
  */
-void func_003E6428(int channel, int text) {
+void PRINT_debuggerfunc(int channel, int text) {
     func_004175C8(text);
 }
 #endif
@@ -9885,7 +9885,7 @@ extern int D_00450DA0_0DA0[] __asm__("D_00450DA0");
  *
  * Stores the line rate in D_00450DA0: 15750 for mode 1 (NTSC), 15625 for 2 (PAL), 28800 for 3 (the 31 kHz modes); any
  * other value leaves it. THREAD_yieldticks converts ticks to H-blank counts with it. Called by the timer calibration in
- * func_003E4AF0, by systemInit with 1 and by func_0037BD98 (3 or 1).
+ * TIMER_init, by systemInit with 1 and by func_0037BD98 (3 or 1).
  *
  * @param videoMode  the video mode (1 NTSC, 2 PAL, 3 31 kHz)
  */
@@ -9905,7 +9905,7 @@ void func_003E6690(int videoMode) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E66F0);
+INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkCreate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *RpcAlloc_66F0(int) __asm__("RpcAlloc");
@@ -9925,13 +9925,13 @@ extern void func_00416210_66F0(char *, int, int) __asm__("func_00416210");
  * +0x17C word, waiting for the IOP's link reference, which lands in the block's +0. The channel (cDSockChannel) keeps
  * the block as mGameLink; @p owner is not sent.
  *
- * @param commRef  the connection (comm ref) from func_003E6FC8
+ * @param commRef  the connection (comm ref) from NetGameUtilComplete
  * @param owner  owner value (unused)
  * @param n  the receive buffer size in bytes (the channel passes 9084)
  * @return the link block
  */
 // `buf` is advanced in place, so the 0x158 store is not forwarded to the first call (it reloads the field).
-char *func_003E66F0(int commRef, int owner, int n) {
+char *NetGameLinkCreate(int commRef, int owner, int n) {
     int msg[4];
     int size;
     int buf;
@@ -9991,7 +9991,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6878);
 struct S_6878 { int f0; int f4; char pad[0x158 - 8]; int f158; };
 
 /**
- * Completion routine of the asynchronous game-link status request (func_003E6958).
+ * Completion routine of the asynchronous game-link status request (NetGameLinkStatus).
  *
  * Copies the 336-byte status the IOP wrote into the block's status area (+0x158, read through the uncached mirror
  * 0x20000000) to the block's +8 and clears the busy flag +4. The SIF reply dispatcher passes it the request key, its
@@ -10016,7 +10016,7 @@ int func_003E6878(int requestKey, int a1, int a2, int result, int replyData, int
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6958);
+INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkStatus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
@@ -10036,7 +10036,7 @@ extern int D_0051EEA8_6958[] __asm__("D_0051EEA8");
  *
  * @return the link's status copy (block +8)
  */
-char *func_003E6958(G_6958 *self) {
+char *NetGameLinkStatus(G_6958 *self) {
     int was = 0;
     if (self->f4 == -1) {
         self->f4 = 0;
@@ -10057,7 +10057,7 @@ char *func_003E6958(G_6958 *self) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6A70);
+INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkPeek);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { char b[4]; } U4_6A70;
@@ -10069,13 +10069,13 @@ extern void func_0041605C_6A70(short *, int, int) __asm__("func_0041605C");
  * When @p outPacket is not null: if the read position (+0x160) is before the end of the received data (+0x164) it
  * copies the packet's 4-byte header from the uncached receive buffer (+0x16C) into the buffer *@p outPacket points to,
  * then the whole packet (its length is the header's first halfword) with func_0041605C; otherwise it sets *@p outPacket
- * to 0. func_003E6B10 uses it for single-packet reads.
+ * to 0. NetGameLinkRecv uses it for single-packet reads.
  *
  * @param block  the link block
  * @param outPacket  points to the destination packet buffer pointer, or 0 to only ask for the count
  * @return the number of received bytes not yet read
  */
-int func_003E6A70(char *block, short **outPacket) {
+int NetGameLinkPeek(char *block, short **outPacket) {
     if (outPacket != 0) {
         int readPos = *(int *)(block + 0x160);
         if (readPos < *(int *)(block + 0x164)) {
@@ -10090,7 +10090,7 @@ int func_003E6A70(char *block, short **outPacket) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6B10);
+INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkRecv);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -10101,13 +10101,13 @@ extern int func_003F4C68_6B10(int *, int, int, int, int, int, int, int, int, int
 extern void *func_0041605C_6B10(short *, int, int) __asm__("func_0041605C");
 extern int D_0051EEB8_6B10[] __asm__("D_0051EEB8");
 
-int func_003E6B10_impl(char *self, short *out, int n) __asm__("func_003E6B10");
+int NetGameLinkRecv_impl(char *self, short *out, int n) __asm__("NetGameLinkRecv");
 /**
  * Reads packets from the game link's receive buffer, asking the IOP for more once it is drained.
  *
  * When nothing is buffered (end +0x164 negative) it asks func_003F4EA0 whether the IOP filled the receive buffer
  * (+0x16C); a fill with a new id (compared with +0x15C) sets the read position +0x160 to 0x10 (past the fill header)
- * and the end to the fill length + 0x10. With data waiting, @p n of 1 copies one packet into @p out (func_003E6A70) and
+ * and the end to the fill length + 0x10. With data waiting, @p n of 1 copies one packet into @p out (NetGameLinkPeek) and
  * advances by its length; any other @p n copies all the waiting bytes when they fit in @p n (nothing otherwise). Once
  * the buffer is consumed it resets the positions (0, -1), stamps +0x170 with func_003F4DE8 and sends 'gmlk'/'recv'
  * (into D_0051EEB8) for the next fill.
@@ -10116,7 +10116,7 @@ int func_003E6B10_impl(char *self, short *out, int n) __asm__("func_003E6B10");
  * @param n  1 to read one packet, otherwise the buffer size in bytes
  * @return the number of bytes copied (0 when nothing was read)
  */
-int func_003E6B10_impl(char *self, short *out, int n) {
+int NetGameLinkRecv_impl(char *self, short *out, int n) {
     int loc;
     int ret = 0;
     int fillId;
@@ -10133,7 +10133,7 @@ int func_003E6B10_impl(char *self, short *out, int n) {
     }
     if (*(int *)(self + 0x160) < *(int *)(self + 0x164)) {
         if (n == 1) {
-            func_003E6A70(self, &out);
+            NetGameLinkPeek(self, &out);
             ret = *out;
             *(int *)(self + 0x160) += ret;
         } else {
@@ -10195,14 +10195,14 @@ int NetGameLinkSend(S_6C80 *self, unsigned char *msg, int len) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6D78);
+INCLUDE_ASM("ealib/seg_2DCAE8", NetGameLinkControl);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003F4C68_6D78(int *, int, int, int, int *, int, int, int, int, int *) __asm__("func_003F4C68");
 extern void func_003F4C98_6D78(int *, int, int) __asm__("func_003F4C98");
 extern int D_0051EED8_6D78[] __asm__("D_0051EED8");
 
-int func_003E6D78_impl(int *p, int b, int c) __asm__("func_003E6D78");
+int NetGameLinkControl_impl(int *p, int b, int c) __asm__("NetGameLinkControl");
 /**
  * Sends a control request to the game link on the IOP and returns its answer.
  *
@@ -10214,7 +10214,7 @@ int func_003E6D78_impl(int *p, int b, int c) __asm__("func_003E6D78");
  * @param value  the value
  * @return the IOP's result
  */
-int func_003E6D78_impl(int *link, int selector, int value) {
+int NetGameLinkControl_impl(int *link, int selector, int value) {
     int out;
 
     func_003F4C98_6D78(D_0051EED8_6D78, 0x676D6C6B, 0x6374726C);
@@ -10224,7 +10224,7 @@ int func_003E6D78_impl(int *link, int selector, int value) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6E08);
+INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtilCreate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003F4C68_6E08(int *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
@@ -10238,7 +10238,7 @@ extern void func_003F4C98_6E08(int *, int, int) __asm__("func_003F4C98");
  *
  * @return the IOP game-util reference
  */
-int func_003E6E08(void) {
+int NetGameUtilCreate(void) {
     int msg[4];
     int result;
 
@@ -10272,7 +10272,7 @@ void NetGameUtilDestroy(int utilRef) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6ED8);
+INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtilReset);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003F4C68_6ED8(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
@@ -10283,7 +10283,7 @@ extern int func_003F4C98_6ED8(int *, int, int) __asm__("func_003F4C98");
  *
  * @param handle  the IOP game-util reference
  */
-void func_003E6ED8(int handle) {
+void NetGameUtilReset(int handle) {
     int msg[4];
 
     func_003F4C98_6ED8(msg, 0x676D7574, 0x72736574);
@@ -10292,25 +10292,25 @@ void func_003E6ED8(int handle) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6F40);
+INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtilConnect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003F4C68_6F40(int *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
 extern void func_003F4C98_6F40(int *, int, int) __asm__("func_003F4C98");
 
-int func_003E6F40_impl(int a, int b, int c) __asm__("func_003E6F40");
+int NetGameUtilConnect_impl(int a, int b, int c) __asm__("NetGameUtilConnect");
 /**
  * Starts a game-util connection (listen or connect) on the IOP.
  *
  * Sends 'gmut'/'conn' with @p handle, @p connectKind and the string @p address (length -1: up to its terminator) and waits for the
- * result. The connection is picked up later with func_003E6FC8.
+ * result. The connection is picked up later with NetGameUtilComplete.
  *
  * @param handle  the IOP game-util reference
  * @param connectKind  the connection kind (listen or connect, as the channel passes it)
  * @param address  the address string the channel formats
  * @return the IOP's result
  */
-int func_003E6F40_impl(int handle, int connectKind, int address) {
+int NetGameUtilConnect_impl(int handle, int connectKind, int address) {
     int msg[4];
     int result;
 
@@ -10321,7 +10321,7 @@ int func_003E6F40_impl(int handle, int connectKind, int address) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6FC8);
+INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtilComplete);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003F4C68_6FC8(void *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
@@ -10331,13 +10331,13 @@ struct S_6FC8 { int a[4]; int out; };
 /**
  * Asks the IOP whether a game-util connection has completed.
  *
- * Sends 'gmut'/'comp' and waits for the answer: the connection (comm reference) once it is up, which func_00256A58
- * passes to func_003E66F0 to create the game link.
+ * Sends 'gmut'/'comp' and waits for the answer: the connection (comm reference) once it is up, which cDSockChannel_updateConnecting
+ * passes to NetGameLinkCreate to create the game link.
  *
  * @param handle  the IOP game-util reference
  * @return the comm reference, or 0 while still connecting
  */
-int func_003E6FC8(int handle) {
+int NetGameUtilComplete(int handle) {
     struct S_6FC8 msg;
 
     func_003F4C98_6FC8(&msg, 0x676D7574, 0x636F6D70);
@@ -10426,7 +10426,7 @@ void func_003E7120(int util, int kind, int name) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E71B0);
+INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtilWithdraw);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003F4C68_71B0(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
@@ -10437,7 +10437,7 @@ extern int func_003F4C98_71B0(int *, int, int) __asm__("func_003F4C98");
  *
  * @param handle  the IOP game-util reference
  */
-void func_003E71B0(int handle) {
+void NetGameUtilWithdraw(int handle) {
     int msg[4];
 
     func_003F4C98_71B0(msg, 0x676D7574, 0x77697468);
@@ -10479,14 +10479,14 @@ int func_003E7218_impl(int util, int kind, char *name) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2DCAE8", func_003E72A0);
+INCLUDE_ASM("ealib/seg_2DCAE8", NetGameUtilQuery);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003F4C68_72A0(int *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
 extern void func_003F4C98_72A0(int *, int, int) __asm__("func_003F4C98");
 extern char D_004A4868_72A0[] __asm__("D_004A4868");
 
-int func_003E72A0_impl(int a, char *b, int c, int d) __asm__("func_003E72A0");
+int NetGameUtilQuery_impl(int a, char *b, int c, int d) __asm__("NetGameUtilQuery");
 /**
  * Queries the network adverts of a kind through the IOP game util.
  *
@@ -10499,7 +10499,7 @@ int func_003E72A0_impl(int a, char *b, int c, int d) __asm__("func_003E72A0");
  * @param bufferSize  the size of @p buffer in bytes
  * @return the number of adverts found
  */
-int func_003E72A0_impl(int util, char *kind, int buffer, int bufferSize) {
+int NetGameUtilQuery_impl(int util, char *kind, int buffer, int bufferSize) {
     int request[4];
     int count;
 

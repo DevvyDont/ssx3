@@ -313,9 +313,9 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E508);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 typedef struct { unsigned last; unsigned pad; unsigned long acc; unsigned rate; } sClk;
-extern unsigned func_003E4E98(void);
+extern unsigned TIMER_gettick(void);
 void func_0042E508(sClk *clock) {
-    unsigned now = func_003E4E98();
+    unsigned now = TIMER_gettick();
     if (clock->rate == 0x1000) {
         clock->acc += now - clock->last;
     } else {

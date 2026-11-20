@@ -303,14 +303,14 @@ INCLUDE_ASM("be/be", cBE_writeToData);
 extern "C" void func_0014A188(void* buf);
 // PORT: cBE_getDataSize is declared () in this unit but called with the BE object here.
 int cBE_getDataSize_self(void* be) __asm__("cBE_getDataSize");
-extern "C" int func_003E62D0(void* buf, int size, int seed);
+extern "C" int MEM_crc16(void* buf, int size, int seed);
 extern "C" void* memcpy(void*, const void*, unsigned int);
 
 /**
  * Fills the save buffer @p buf with the back-end state and stores a checksum in its last 4 bytes.
  *
  * func_0014A188 copies the race database, player entries, profiles and other state blocks into @p buf; then
- * func_003E62D0 checksums the first cBE_getDataSize() - 4 bytes with seed 64490 and the result is copied to the end.
+ * MEM_crc16 checksums the first cBE_getDataSize() - 4 bytes with seed 64490 and the result is copied to the end.
  * fe/festatetrophyroom saves the memory card buffer this way.
  *
  * @param buf  the save buffer, cBE_getDataSize() bytes
@@ -318,7 +318,7 @@ extern "C" void* memcpy(void*, const void*, unsigned int);
 extern "C" void cBE_writeToData(void* self, char* buf)
 {
     func_0014A188(buf);
-    int crc = func_003E62D0(buf, cBE_getDataSize_self(self) - 4, 64490);
+    int crc = MEM_crc16(buf, cBE_getDataSize_self(self) - 4, 64490);
     char* crcSlot = buf + (cBE_getDataSize_self(self) - 4);
     memcpy(crcSlot, &crc, 4);
 }

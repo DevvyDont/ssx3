@@ -129,10 +129,10 @@ extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int size
 //100%
 INCLUDE_ASM("mem/memstd", MEMCLASS_remove);
 #ifdef SKIP_ASM
-extern "C" void func_003E56E0(void*);
+extern "C" void MUTEX_destroy(void*);
 
 /**
- * Removes memory class @p id from the class table: deletes its mutex (func_003E56E0) when the class is locked, zeroes
+ * Removes memory class @p id from the class table: deletes its mutex (MUTEX_destroy) when the class is locked, zeroes
  * the 80-byte class record and clears its slot in D_004D2438 (id & 63).
  *
  * The blocks inside the class are not freed.
@@ -147,7 +147,7 @@ extern "C" int MEMCLASS_remove(int id)
     int removed = 0;
     if (cls != 0) {
         if (cls->locked != 0) {
-            func_003E56E0(cls->sema);
+            MUTEX_destroy(cls->sema);
         }
         MEM_fill(cls, 0, 80);
         *slot = 0;
@@ -596,7 +596,7 @@ int MEM_name(void* self);
 extern "C" int MEM_comment(void* p);
 struct sMemBlock002522B0;
 extern "C" int checksentinel(sMemBlock002522B0* blk);
-extern "C" int func_003E62D0(void* p, int size, int seed);
+extern "C" int MEM_crc16(void* p, int size, int seed);
 extern char D_004800E0[];
 extern char D_00480140[];
 extern char D_00480198[];
@@ -628,7 +628,7 @@ extern void* D_004D2438[];
  *
  * Prints a header, then one row per block: free blocks as "FREE" with "   SPACE " as the name, others as
  * "unknown" with the names from MEM_name/MEM_comment; each row has the address, size, span, flags, a
- * CRC (func_003E62D0, seed 0xFBEA; 0 for sentinels) and the block check's status text. Ends with the total
+ * CRC (MEM_crc16, seed 0xFBEA; 0 for sentinels) and the block check's status text. Ends with the total
  * free memory, or prints "Not initialized" if the class does not exist.
  *
  * @param thing  memory class id (masked with 63), passed as a pointer
@@ -658,7 +658,7 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
         if (blk->flags & 0x4000) {
             int sz = blk->size;
             if (sz > 0x10 && !(blk->flags & 0x8000))
-                crc = func_003E62D0((char*)blk + 0x18, sz - 0x18, 64490);
+                crc = MEM_crc16((char*)blk + 0x18, sz - 0x18, 64490);
             total += sz;
             int st = checksentinel((sMemBlock002522B0*)blk);
             cb(fmt, str_FREE, str_SPACE, data, sz, blk->next - (char*)blk, blk->flags, crc, D_004801E8[st], D_004A2E58);
@@ -666,7 +666,7 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
             int sz = blk->size;
             crc = 0;
             if (sz != 0 && !(blk->flags & 0x8000))
-                crc = func_003E62D0(data, sz, 64490);
+                crc = MEM_crc16(data, sz, 64490);
             int st = checksentinel((sMemBlock002522B0*)blk);
             cb(fmt, str_unknown, blockName, data, blk->size, blk->next - (char*)blk, blk->flags, crc, D_004801E8[st], comment);
         }
@@ -681,10 +681,10 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
 INCLUDE_ASM("mem/memstd", checkfree);
 #ifdef SKIP_ASM
 extern int D_004A2E74;
-extern "C" int func_003E6240(void* p, int size, int flags);
+extern "C" int MEMSYS_validaddress(void* p, int size, int flags);
 
 /**
- * Checks a free-list link: it must point at a readable 0x18-byte block (func_003E6240) tagged as free (0x4246) or as a
+ * Checks a free-list link: it must point at a readable 0x18-byte block (MEMSYS_validaddress) tagged as free (0x4246) or as a
  * sentinel (0x4253).
  *
  * On failure sets the memory error code D_004A2E74 to 1.
@@ -694,7 +694,7 @@ extern "C" int func_003E6240(void* p, int size, int flags);
 extern "C" int checkfree(void* self)
 {
     int ok = 0;
-    if (func_003E6240(self, 0x18, 0) != 0) {
+    if (MEMSYS_validaddress(self, 0x18, 0) != 0) {
         unsigned short blockTag = *(unsigned short*)self;
         if (blockTag == 16966 || blockTag == 16979) {
             ok = 1;
@@ -2127,7 +2127,7 @@ extern "C" int func_003AE6C8(void* p, float f);
 extern "C" int func_003AE780(void* p);
 extern "C" int func_003AE860(void* p);
 extern "C" void SYNCTASK_run(int);
-extern "C" void func_003E5398(int);
+extern "C" void THREAD_yield(int);
 
 struct sVE0_253748 {
     short delta;
@@ -2151,7 +2151,7 @@ struct sWorld_253748 {
  *
  * Starts playback (cMoviePlayer_startPlay), then until finished (+0x0): draws the frame (driver slot 5 when redraw +0x4 is set,
  * else slot 4 with the frame +0xC), shows it (graphics manager slot 20, cPS2GraphicsMan_DrawFrame), runs
- * SYNCTASK_run(0) and func_003E5398(0), and when the decoder is due (func_003AE780) completes the draw (driver slot 6)
+ * SYNCTASK_run(0) and THREAD_yield(0), and when the decoder is due (func_003AE780) completes the draw (driver slot 6)
  * and fetches the next frame for the decoder's time (+0x48, func_003AE6C8). Without a frame it asks func_003AE860
  * whether the movie has finished. Clears the new-frame flag (+0x40) at the end.
  */
@@ -2173,7 +2173,7 @@ extern "C" void cMoviePlayer_syncPlay(void* self)
             sVE0_253748* w = &((sVE0_253748*)cGraphicsMan_TheGraphicsMan->mVtbl)[20];
             w->fn((char*)cGraphicsMan_TheGraphicsMan + w->delta);
             SYNCTASK_run(0);
-            func_003E5398(0);
+            THREAD_yield(0);
             if (func_003AE780(moviePlayer->f38) != 0) {
                 char* videoDriver = (char*)moviePlayer->f3C;
                 sVE0_253748* slotEntry = &(*(sVE0_253748**)(videoDriver + 4))[6];

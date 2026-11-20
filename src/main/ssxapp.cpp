@@ -751,7 +751,7 @@ int cSSXApp_flush()
 INCLUDE_ASM("main/ssxapp", cSSXApp_preUpdate);
 #ifdef SKIP_ASM
 extern "C" int cPadCache_nextInput(void* pad);
-extern "C" void func_00255A20(void* p);
+extern "C" void cCommSystem_update(void* p);
 extern "C" void func_002668E8(void* p);
 extern "C" int cPadCache_numButtons(void* self, int i);
 extern "C" void* cPadCache_buttonValues(void* self, int i);
@@ -773,7 +773,7 @@ extern "C" int cSSXApp_preUpdate(cSSXApp* self)
 {
     if (PadCache != 0 && cPadCache_nextInput(PadCache) != 0) {
         if (cCommSystem_mCommSystem != 0) {
-            func_00255A20(cCommSystem_mCommSystem);
+            cCommSystem_update(cCommSystem_mCommSystem);
         }
         if (D_004A33F0 != 0) {
             func_002668E8(D_004A33F0);

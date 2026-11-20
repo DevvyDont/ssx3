@@ -2587,19 +2587,19 @@ extern "C" int func_002AF2F0(int idx, int* elapsedOut, int* remainingOut)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AF370);
 #ifdef SKIP_ASM
-extern "C" int func_003E4E98();
+extern "C" int TIMER_gettick();
 extern "C" void func_004139F8(float);
 extern int D_00450DC8[];
 
 /**
- * Returns the current time in ms: func_003E4E98() / D_00450DC8[0] * 1000, converted to unsigned int.
+ * Returns the current time in ms: TIMER_gettick() / D_00450DC8[0] * 1000, converted to unsigned int.
  *
  * Declared void, but the __fixunssfsi result (func_004139F8) is returned in v0; callers use it (func_002AE7A8 stamps
  * bank play times with it, and the Pathfinder library).
  */
 extern "C" void func_002AF370(void)
 {
-    func_004139F8((float)func_003E4E98() / (float)D_00450DC8[0] * 1000.0f);
+    func_004139F8((float)TIMER_gettick() / (float)D_00450DC8[0] * 1000.0f);
 }
 #endif
 
@@ -3974,7 +3974,7 @@ extern "C" void* MEM_alloc(void* a0, int a1, int a2);
 extern "C" void func_003D6C60(int n, void* p);
 extern "C" void* func_003D6768();
 extern "C" void func_002AF8A8();
-extern "C" int func_003E4E98();
+extern "C" int TIMER_gettick();
 extern char D_00483390[];
 extern char str_bank_mem[];
 
@@ -3995,7 +3995,7 @@ extern "C" void SPCH_Init(cSpeechSys* self)
     void* workMem = MEM_alloc(str_bank_mem, n, 0);
     self->unk_008 = workMem;
     func_003D6C60(500, workMem);
-    *(void**)((char*)func_003D6768() + 0x8) = (void*)func_003E4E98;
+    *(void**)((char*)func_003D6768() + 0x8) = (void*)TIMER_gettick;
 }
 #endif
 

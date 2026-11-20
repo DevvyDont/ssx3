@@ -1088,7 +1088,7 @@ extern void* cWScriptMan_TheWScriptMan;
 extern "C" float cAirMotion_intersectBoard_9C88(void* self, sHit_139C88* hit) __asm__("cAirMotion_intersectBoard");
 extern "C" void cRider_updateBoundBox_9C88(void* rider, int a) __asm__("cRider_updateBoundBox");
 extern "C" void cRider_checkForReset(void* rider, int a, int b);
-extern "C" void func_00106538(void* rider, void* v);
+extern "C" void cRider_moveFromCollision(void* rider, void* v);
 extern "C" void cRider_checkObjectCollisions(void* rider, int a1);
 extern "C" void cRider_checkObjectCollisions_p(void* rider, void* v) __asm__("cRider_checkObjectCollisions");
 extern "C" void cRider_checkOpponentCollisions(void* rider);
@@ -1319,7 +1319,7 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
         float pen = vu0Dot_139C88(vu0Sub_139C88(hit.pos, V4_139C88(RIDER_139C88, 272)), hit.normal) - *(float*)(surf + 0x18);
         if (0.0f < pen) {
             sVec4HP push = vu0Scale_139C88(hit.normal, pen);
-            func_00106538(RIDER_139C88, &push);
+            cRider_moveFromCollision(RIDER_139C88, &push);
         }
         V4_139C88(RIDER_139C88, 880) = hit.normal;
         V4_139C88(RIDER_139C88, 976) = hit.vel;
@@ -1619,7 +1619,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_checkTerrainCollisions);
 extern "C" void cRider_updateOrientationImplicit(void*);
 int cRider_getControlState(void* rider);
 extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
-extern "C" void func_00106538(void* rider, void* v);
+extern "C" void cRider_moveFromCollision(void* rider, void* v);
 extern "C" void cRider_reactToCollision(void* rider, void* info, int id);
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
@@ -1770,7 +1770,7 @@ extern "C" int cAirMotion_checkTerrainCollisions(cAirMotion* self, void* outp)
         { cWorldRider__cWorldRider(&sph, 2); return 0; }
     {
         t4Vector push = vu0Scale_AA48(vu0Scale_AA48(hit.normal, 1.100000023841858f), penetration);
-        func_00106538(RIDER_AA48, &push);
+        cRider_moveFromCollision(RIDER_AA48, &push);
         float dot2 = vu0Dot_AA48(vu0Scale_AA48(hit.normal, -1.0f), RV_AA48(0x1E0));
         if (dot2 < 0.0f)
             { cWorldRider__cWorldRider(&sph, 2); return 0; }
@@ -1982,7 +1982,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_step);
 #include "bx/math3d.h"
 #include "vtable.h"
 extern "C" int cOverlapList_splineIntersect(void* world, t4Vector* from, void* hit, int flags, float radius);
-extern "C" int func_001086B8(void* rider, t4Vector* tgt, t4Vector* dir);
+extern "C" int cRider_isRailBoardIntersect(void* rider, t4Vector* tgt, t4Vector* dir);
 extern "C" void* cBE_getBE();
 extern "C" void* cBE_getInterface__Fv(void* be, int kind);
 extern "C" float cBEStatInterface_getBalanceAttrib(void* self, int rider, int value);
@@ -2256,7 +2256,7 @@ static inline float ScaleAtLeast_AF28(float v, float k, float lo)
  *
  * Caps the speed at rider +0x2E4, sets ForceNaturalAir (cleared while the rail holds) and looks for the rail
  * near the board-root bone (cOverlapList_splineIntersect, radius 300), recording SplineID, the contact data and the rail
- * object's answer to handler slot 46 (rider +0x5AC). While func_001086B8() accepts the contact, RailNorm
+ * object's answer to handler slot 46 (rider +0x5AC). While cRider_isRailBoardIntersect() accepts the contact, RailNorm
  * becomes the rail direction of travel, the height snaps toward the rail, the velocity turns onto the rail
  * and gains gravity (0, 0, -980) along it plus a boost push (mBoostStrength * 2450). The sideways offset gets
  * the lean input plus a drift: a pull back to the rail for the first 0.6 s or on steep rails, otherwise a
@@ -2307,7 +2307,7 @@ extern "C" void cRailslideMotion_step(char* self)
         float speedSq = spd * spd;
         if (*(float*)(self + 0x14) < 0.6000000238418579f)
             *(float*)(rider3 + 0x25C) = 2.0f;
-        if (func_001086B8(RIDER_AF28, &hit.pos, &hit.nrm)) {
+        if (cRider_isRailBoardIntersect(RIDER_AF28, &hit.pos, &hit.nrm)) {
             *(int*)(self + 0x20) = 0;
             *(float*)(self + 0x14) += dt;
             t4Vector relVel = Sub_AF28(*(t4Vector*)(RIDER_AF28 + 0x1E0), *(t4Vector*)(RIDER_AF28 + 0x3D0));
@@ -2601,7 +2601,7 @@ extern "C" t4Vector cRailslideMotion_getRailUpNorm_BD80(char* railslide, const t
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_resolve);
 #ifdef SKIP_ASM
-extern "C" void func_00114298(void* rider, float v);
+extern "C" void cRider_applyJumpPop(void* rider, float v);
 // PORT: cRider_updateBoundBox is declared void* in this unit; this caller ignores the result (void call).
 extern "C" void cRider_updateBoundBox_v(void* rider, int a1) __asm__("cRider_updateBoundBox");
 extern "C" void cRider_checkObjectCollisions(void* rider, int a1);
@@ -2662,7 +2662,7 @@ static inline void vu0ScaleEq_BFA8(sVec4_BFA8& v, float s)
 /**
  * Resolves the rail motion: pops the rider off a lost rail, runs the collision checks and caps the speed.
  *
- * With ForceNaturalAir set it eases slewed channel 5 to 0 and pops the rider with func_00114298(rider, -1).
+ * With ForceNaturalAir set it eases slewed channel 5 to 0 and pops the rider with cRider_applyJumpPop(rider, -1).
  * cRider_checkObjectCollisions() runs with the sphere tree's filter word (+0x28) set to the current uber grind's entry of
  * D_00458230 in CS_UberGrind (0x16 otherwise), cRailslideMotion_checkTerrainCollisions() with 3, then the
  * filter is reset to -1 and opponents are checked. A rider that lost the rail switches to MS_Air with the
@@ -2675,7 +2675,7 @@ extern "C" void cRailslideMotion_resolve(cRailslideMotion* self)
         char* rider = RIDER_BFA8;
         *(int*)(rider + 0x234) = 0;
         *(float*)(rider + 0x230) = 0.03333333507180214f;
-        func_00114298(RIDER_BFA8, -1.0f);
+        cRider_applyJumpPop(RIDER_BFA8, -1.0f);
     }
     sTbl_BFA8 tbl = D_00458230;
     if (cRider_getControlState(RIDER_BFA8) == 0xC) {
@@ -2706,7 +2706,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_checkTerrainCollisio
 extern "C" void cRider_updateOrientationImplicit(void*);
 int cRider_getControlState(void* rider);
 extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
-extern "C" void func_00106538(void* rider, void* v);
+extern "C" void cRider_moveFromCollision(void* rider, void* v);
 extern "C" void cRider_reactToCollision(void* rider, void* info, int id);
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
@@ -2892,7 +2892,7 @@ extern "C" void cRailslideMotion_checkTerrainCollisions(cRailslideMotion* self)
     }
     {
         sVec4HP push = vu0Scale_13C140(vu0Scale_13C140(hit.normal, 1.100000023841858f), penetration);
-        func_00106538(RIDER, &push);
+        cRider_moveFromCollision(RIDER, &push);
         cRider_updateOrientationImplicit(RIDER);
         sVec4HP posDelta = vu0Sub_13C140(SV(0x30), RV(272));
         float len = vu0Length_13C140(posDelta);
@@ -4469,7 +4469,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_resolve);
 #ifdef SKIP_ASM
-extern "C" void func_00114298(void* rider, float v);
+extern "C" void cRider_applyJumpPop(void* rider, float v);
 // PORT: cRider_updateBoundBox is declared void* in this unit; this caller ignores the result (void call).
 extern "C" void cRider_updateBoundBox_v13F178(void* rider, int a1) __asm__("cRider_updateBoundBox");
 extern "C" void cRider_checkObjectCollisions(void* rider, int a1);
@@ -4592,7 +4592,7 @@ static inline float absf_13F178(float x)
 /**
  * Resolves the ground motion: natural-air pop or fatal surfaces, collisions, and the audio values.
  *
- * With ForceNaturalAir set it pops the rider with func_00114298(rider, -1) and, while still in MS_Ground
+ * With ForceNaturalAir set it pops the rider with cRider_applyJumpPop(rider, -1) and, while still in MS_Ground
  * after the checks, switches to MS_Air with the lift sound. Otherwise surface type 0x12 starts a wipeout
  * (anim 0x168) and reset surfaces (+0x44) or triangles with flag 0x2 force an auto reset. Walls
  * (cGroundMotion_checkWallCollisions, sphere-tree filter kOnGroundSphereMask), cRider_checkObjectCollisions() and opponents are
@@ -4602,7 +4602,7 @@ static inline float absf_13F178(float x)
 extern "C" void cGroundMotion_resolve(cGroundMotion* self)
 {
     if (self->ForceNaturalAir != 0) {
-        func_00114298(RIDER_13F178, -1.0f);
+        cRider_applyJumpPop(RIDER_13F178, -1.0f);
     } else {
         char* rider = RIDER_13F178;
         int idx = *(int*)(rider + 0x438);
@@ -4688,8 +4688,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_checkWallCollisions);
 extern "C" void cRider_updateOrientationImplicit(void*);
 int cRider_getControlState(void* rider);
 extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
-extern "C" void func_00106538(void* rider, void* v);
-extern "C" void func_001065B0(void* rider, void* hit);
+extern "C" void cRider_moveFromCollision(void* rider, void* v);
+extern "C" void cRider_turnFromCollision(void* rider, void* hit);
 extern "C" void cRider_reactToCollision(void* rider, void* info, int id);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_WallCollision(void* snd, void* rider);
@@ -4842,7 +4842,7 @@ static inline bool riderFlag_13F488(char* r)
  * hit object (handler slot 42); hits straight against mGroundNormal are ignored and downward ones lose their
  * mGroundNormal part. The rider moves out by 1.1 times the depth; when moving into the wall (relative to the
  * wall's velocity) the inward velocity is removed plus a bounce of max(5% of it, 27.78), then
- * func_001065B0(), cRider_reactToCollision() and the wall sound (cSSXAudio_WallCollision) follow.
+ * cRider_turnFromCollision(), cRider_reactToCollision() and the wall sound (cSSXAudio_WallCollision) follow.
  */
 extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
 {
@@ -4878,7 +4878,7 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
     }
     {
         sVec4HP push = vu0Scale_13F488(vu0Scale_13F488(hit.normal, 1.100000023841858f), penetration);
-        func_00106538(RIDER, &push);
+        cRider_moveFromCollision(RIDER, &push);
         sVec4HP netVelocity = vu0Sub_13F488(RV(0x1E0), hit.v20);
         float dot2 = vu0Dot_13F488(vu0Scale_13F488(hit.normal, -1.0f), netVelocity);
         if (dot2 < 0.0f)
@@ -4888,7 +4888,7 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
         if (k < 27.77777862548828f)
             k = 27.77777862548828f;
         vu0AddEq_13F488(RV(0x1E0), vu0Scale_13F488(hit.normal, dot2 + k));
-        func_001065B0(RIDER, &hit);
+        cRider_turnFromCollision(RIDER, &hit);
         cRider_updateOrientationImplicit(RIDER);
         sInfo_13F488 info;
         info.pos = hit.pos;
@@ -5039,7 +5039,7 @@ extern "C" void func_0013F8F8_FAD8(sSortObj_FAD8**, sSortObj_FAD8**, sSortObj_FA
  * Merge-sorts the pointers from @p first to @p last into @p buf by each object's unsigned key at +0x78.
  *
  * A range of two or more goes to func_0013F8F8; a single pointer is copied; an empty range does nothing. Called twice
- * by func_00101B60 (focus and unfocus instance lists).
+ * by cFocusMan_update (focus and unfocus instance lists).
  *
  * @param first  the first pointer
  * @param last  one past the last pointer
@@ -8522,13 +8522,13 @@ struct sNode_144368 {
     sNode_144368* child[8];
 };
 
-extern "C" void func_00101A28(void* a, sNode_144368* node, int leaf);
+extern "C" void FocusQuery_addcell(void* a, sNode_144368* node, int leaf);
 
 /**
- * Walks a focus octree node and its children, calling func_00101A28 for every cell that overlaps one of the boxes.
+ * Walks a focus octree node and its children, calling FocusQuery_addcell for every cell that overlaps one of the boxes.
  *
  * @p key gives the cell's level and integer x/y/z; the cell spans [x, x + 1] x 2^level on each axis, widened by 0.2.
- * When the cell overlaps none of @p self's boxes it returns. Otherwise it calls func_00101A28 with @p self's first
+ * When the cell overlaps none of @p self's boxes it returns. Otherwise it calls FocusQuery_addcell with @p self's first
  * word, @p node and level < 14 and, unless that was a leaf (level below 14) or the level is 11, recurses into the eight
  * non-null children with the halved cell keys.
  *
@@ -8557,7 +8557,7 @@ extern "C" void func_00144368(sTree_144368* self, sNode_144368* node, sKey_14436
         i++;
     } while (!ok);
     int leaf = key->level < 14;
-    func_00101A28(self->f0, node, leaf);
+    FocusQuery_addcell(self->f0, node, leaf);
     if (leaf) {
         return;
     }

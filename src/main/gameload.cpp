@@ -84,7 +84,7 @@ extern "C" void cUIStateStack_pushExplicit(void* stack, void* state);
 void cReplay_setReplayPadNum(void* p, int a);
 void cGame_setPreloadState(void* self, int val);
 extern "C" void cGame_updateState(cGame* self);
-extern "C" void func_003E5398(int a);
+extern "C" void THREAD_yield(int a);
 extern "C" int cGame_isPreloadedStateReady(cGame* self);
 extern "C" void cGameComm_syncWait(void* comm);
 extern "C" void cGame_setState(cGame* self, int a, int b, int refresh);
@@ -374,7 +374,7 @@ extern "C" void cGame_load(cGame* self)
         cGame_setPreloadState((self), 10);
         do {
             cGame_updateState((self));
-            func_003E5398(0);
+            THREAD_yield(0);
         } while (!cGame_isPreloadedStateReady((self)));
         if (cGameComm_mGameComm != 0)
             cGameComm_syncWait(cGameComm_mGameComm);
@@ -449,10 +449,10 @@ extern "C" void cSectionMan_activate(void* p, int id, int a);
 extern "C" int cSectionMan_isLoaded(void* p, int id);
 extern "C" void cSectionMan_update(void* p);
 void cWorld_update(void* p);
-extern "C" void func_003E5398(int a);
+extern "C" void THREAD_yield(int a);
 // PORT: cCameraTriggerMan_loadTriggersIfNotStreaming__FPv also receives the path string (passed through in $5)
 void cCameraTriggerMan_loadTriggersIfNotStreaming_F6B0(void* p, const char* s) __asm__("cCameraTriggerMan_loadTriggersIfNotStreaming__FPv");
-extern "C" void func_002DBF80(void* p);
+extern "C" void cFogParticleMan_cFogParticleMan(void* p);
 void* cLensFxMan_construct();
 extern "C" void cRenderStateMan_init();
 
@@ -543,7 +543,7 @@ extern "C" void cGame_loadTrack(cGame* self)
     while (!cSectionMan_isLoaded(self->SectionMan, id)) {
         cSectionMan_update(self->SectionMan);
         cWorld_update(self->World);
-        func_003E5398(0);
+        THREAD_yield(0);
     }
     *(int*)(*(char**)self->World + 0x3D4) = 1;
     {
@@ -554,7 +554,7 @@ extern "C" void cGame_loadTrack(cGame* self)
         cBXString__cBXString(&camBasePath, 2);
     }
     char* obj = (char*)cMemMan_alloc(12304, str_cPS2FogParticleMan, 0, 0);
-    func_002DBF80(obj);
+    cFogParticleMan_cFogParticleMan(obj);
     *(void***)(obj + 4) = D_004882E0;
     new (obj + 0x10) sElemFF_F6B0[256];
     ent = obj;
