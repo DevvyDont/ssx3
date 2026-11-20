@@ -3169,18 +3169,18 @@ extern void* D_0048E488[];
 /**
  * Constructs a PS2 pad device for a controller port and slot.
  *
- * Installs the vtable D_0048E488, stores @p a1 (+0x4) and @p a2 (+0x8), zeroes 36 bytes at +0xC and the sampling state
+ * Installs the vtable D_0048E488, stores @p port (+0x4) and @p slot (+0x8), zeroes 36 bytes at +0xC and the sampling state
  * words +0x48..+0x5C (state 0: the port is opened on the next sample). Called by func_00326D60.
  *
- * @param a1  the controller port
- * @param a2  the multitap slot
+ * @param port  the controller port
+ * @param slot  the multitap slot
  * @return @p self
  */
-extern "C" void* func_00326DF0(void* self, int a1, int a2)
+extern "C" void* func_00326DF0(void* self, int port, int slot)
 {
     *(void***)self = D_0048E488;
-    *(int*)((char*)self + 0x4) = a1;
-    *(int*)((char*)self + 0x8) = a2;
+    *(int*)((char*)self + 0x4) = port;
+    *(int*)((char*)self + 0x8) = slot;
     func_00416210((char*)self + 0xC, 0, 36);
     *(int*)((char*)self + 0x54) = 0;
     *(int*)((char*)self + 0x58) = 0;

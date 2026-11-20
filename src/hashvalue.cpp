@@ -138,12 +138,12 @@ sHash128_17710 func_00317710_impl(sHash128_17710* out, char* str) __asm__("func_
 sHash128_17710 func_00317710_impl(sHash128_17710* out, char* str)
 {
     md5_ctx ctx;
-    sHash128_17710 h;
+    sHash128_17710 digest;
 
     md5_init(&ctx);
     md5_append(&ctx, str, strlen(str));
-    md5_finish(&ctx, (ulong*)&h);
-    *out = h;
+    md5_finish(&ctx, (ulong*)&digest);
+    *out = digest;
     return *out;
 }
 #endif

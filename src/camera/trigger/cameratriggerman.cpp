@@ -616,11 +616,11 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016D1F8);
  *
  * Nothing calls it.
  *
- * @param arg0  the camera trigger manager (this)
- * @return @p arg0, the address of the trigger list
+ * @param triggerMan  the camera trigger manager (this)
+ * @return @p triggerMan, the address of the trigger list
  */
-extern "C" int func_0016D1F8(int arg0) {
-    return arg0;
+extern "C" int func_0016D1F8(int triggerMan) {
+    return triggerMan;
 }
 #endif
 
@@ -1292,34 +1292,34 @@ static inline sCtmV_E560 ctmNormalize_E560(const sCtmV_E560& v)
  * ellipse bound-object vtable D_0045C2A8.
  *
  * @param src  the ellipse bound object (this)
- * @param p  the world point to limit; overwritten when outside
+ * @param point  the world point to limit; overwritten when outside
  */
 // Pushes *p out to the surface of the trigger's ellipsoid when it lies inside: into trigger space
 // (inverse of func_00170240's transform), normalize, and back to world space.
-extern "C" void func_0016E560(char* src, sCtmV_E560* p)
+extern "C" void func_0016E560(char* src, sCtmV_E560* point)
 {
-    sCtmM_E560 m(D_004FF1A0_E560);
+    sCtmM_E560 xform(D_004FF1A0_E560);
     float one = 1.0f;
-    m = ctmScaleMtx_E560(&m, sCtmV_E560(one / *(float*)(src + 0x18), one / *(float*)(src + 0x1C), one / *(float*)(src + 0x20), one));
-    ctmRotAxis_E560(&m, D_004FF160_E560, -*(float*)(src + 0xC));
-    ctmRotAxis_E560(&m, D_004FF150_E560, -*(float*)(src + 0x14));
-    ctmRotAxis_E560(&m, D_004FF140_E560, -*(float*)(src + 0x10));
-    ctmTransMtx_E560(&m, sCtmV_E560(-*(sCtmV3_E560*)(src + 0x0), one));
-    sCtmV_E560 v = ctmApplyMtx_E560(&m, *p);
-    v.w = 0.0f;
-    if (v.x * v.x + v.y * v.y + v.z * v.z < one) {
+    xform = ctmScaleMtx_E560(&xform, sCtmV_E560(one / *(float*)(src + 0x18), one / *(float*)(src + 0x1C), one / *(float*)(src + 0x20), one));
+    ctmRotAxis_E560(&xform, D_004FF160_E560, -*(float*)(src + 0xC));
+    ctmRotAxis_E560(&xform, D_004FF150_E560, -*(float*)(src + 0x14));
+    ctmRotAxis_E560(&xform, D_004FF140_E560, -*(float*)(src + 0x10));
+    ctmTransMtx_E560(&xform, sCtmV_E560(-*(sCtmV3_E560*)(src + 0x0), one));
+    sCtmV_E560 localPt = ctmApplyMtx_E560(&xform, *point);
+    localPt.w = 0.0f;
+    if (localPt.x * localPt.x + localPt.y * localPt.y + localPt.z * localPt.z < one) {
         return;
     }
-    v = ctmNormalize_E560(v);
-    v.w = one;
-    m = D_004FF1A0_E560;
-    ctmTransMtx_E560(&m, sCtmV_E560(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
-    ctmRotAxis_E560(&m, D_004FF140_E560, *(float*)(src + 0x10));
-    ctmRotAxis_E560(&m, D_004FF150_E560, *(float*)(src + 0x14));
-    ctmRotAxis_E560(&m, D_004FF160_E560, *(float*)(src + 0xC));
-    m = ctmScaleMtx_E560(&m, sCtmV_E560(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
-    *p = ctmApplyMtx_E560(&m, v);
-    p->w = one;
+    localPt = ctmNormalize_E560(localPt);
+    localPt.w = one;
+    xform = D_004FF1A0_E560;
+    ctmTransMtx_E560(&xform, sCtmV_E560(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
+    ctmRotAxis_E560(&xform, D_004FF140_E560, *(float*)(src + 0x10));
+    ctmRotAxis_E560(&xform, D_004FF150_E560, *(float*)(src + 0x14));
+    ctmRotAxis_E560(&xform, D_004FF160_E560, *(float*)(src + 0xC));
+    xform = ctmScaleMtx_E560(&xform, sCtmV_E560(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
+    *point = ctmApplyMtx_E560(&xform, localPt);
+    point->w = one;
 }
 #endif
 
@@ -1572,41 +1572,41 @@ extern t4Vector D_004C5450[3];      // static local: the three box axes
  * Keeps a point inside a box camera bound object: a point outside is moved to the nearest point of the box.
  *
  * Starts from t4mat_Identity, multiplies in rotations about Z by -heading (rot[0]), about Y by -roll (rot[2]) and about
- * X by -pitch (rot[1]) and a translation by -position, and maps @p p into box space (w = 1). On each axis of the static
+ * X by -pitch (rot[1]) and a translation by -position, and maps @p point into box space (w = 1). On each axis of the static
  * table D_004C5450 (X, Y and Z axes, filled once under the guard D_004A4DE8) the coordinate is clamped to [-size,
  * +size] (the scale at +0x18 is a half-extent). The result is mapped back (translate, pitch, roll, heading) and stored
- * in @p p with w = 1. Slot 6 (limitPoint) of the box bound-object vtable D_0045C268.
+ * in @p point with w = 1. Slot 6 (limitPoint) of the box bound-object vtable D_0045C268.
  *
  * @param t  the box bound object (this): position, heading/pitch/roll and half-extents
- * @param p  the world point to limit; overwritten
+ * @param point  the world point to limit; overwritten
  */
 // cCTBoundObjBox: move p to the closest point of the (rotated) box.
-extern "C" void func_0016F068(const sXform_F068* t, t4Vector* p)
+extern "C" void func_0016F068(const sXform_F068* t, t4Vector* point)
 {
-    sMtx_F068 M = (const sMtx_F068&)D_004FF1A0_F068;
+    sMtx_F068 xform = (const sMtx_F068&)D_004FF1A0_F068;
     {
-        sMtx_F068* m = &M;
+        sMtx_F068* xformPtr = &xform;
         sMtx_F068 R;
         ROT_F068(R, &D_004FF160_F068.x, -t->rot[0]);
-        *m *= R;
+        *xformPtr *= R;
     }
     {
-        sMtx_F068* m = &M;
+        sMtx_F068* xformPtr = &xform;
         sMtx_F068 R;
         ROT_F068(R, &D_004FF150_F068.x, -t->rot[2]);
-        *m *= R;
+        *xformPtr *= R;
     }
     {
-        sMtx_F068* m = &M;
+        sMtx_F068* xformPtr = &xform;
         sMtx_F068 R;
         ROT_F068(R, &D_004FF140_F068.x, -t->rot[1]);
-        *m *= R;
+        *xformPtr *= R;
     }
-    vu0MulVecRow3_F068(&M, sVec4_F068(sVec3_F068(-t->pos.x, -t->pos.y, -t->pos.z), 1.0f));
-    t4Vector q = vu0MulVec2_F068(&M, *p);
-    q.w = 1.0f;
-    t4Vector dmin = Sub_F068(q, sVec4_F068(sVec3_F068(-t->size.x, -t->size.y, -t->size.z), 1.0f));
-    t4Vector dmax = Sub_F068(q, sVec4_F068(t->size.x, t->size.y, t->size.z, 1.0f));
+    vu0MulVecRow3_F068(&xform, sVec4_F068(sVec3_F068(-t->pos.x, -t->pos.y, -t->pos.z), 1.0f));
+    t4Vector localPt = vu0MulVec2_F068(&xform, *point);
+    localPt.w = 1.0f;
+    t4Vector dmin = Sub_F068(localPt, sVec4_F068(sVec3_F068(-t->size.x, -t->size.y, -t->size.z), 1.0f));
+    t4Vector dmax = Sub_F068(localPt, sVec4_F068(t->size.x, t->size.y, t->size.z, 1.0f));
     if (D_004A4DE8 == 0) {
         D_004C5450[0] = D_004FF140_F068;
         D_004C5450[1] = D_004FF150_F068;
@@ -1615,37 +1615,37 @@ extern "C" void func_0016F068(const sXform_F068* t, t4Vector* p)
     }
     for (int i = 0; i < 3; i++) {
         t4Vector n = Scale_F068(D_004C5450[i], -1.0f);
-        float d = Dot_F068(n, dmin);
-        if (d > 0.0f) {
-            SubEq_F068(q, Scale_F068(n, d));
+        float planeDist = Dot_F068(n, dmin);
+        if (planeDist > 0.0f) {
+            SubEq_F068(localPt, Scale_F068(n, planeDist));
         }
-        d = Dot_F068(D_004C5450[i], dmax);
-        if (d > 0.0f) {
-            SubEq_F068(q, Scale_F068(D_004C5450[i], d));
+        planeDist = Dot_F068(D_004C5450[i], dmax);
+        if (planeDist > 0.0f) {
+            SubEq_F068(localPt, Scale_F068(D_004C5450[i], planeDist));
         }
     }
-    M = (const sMtx_F068&)D_004FF1A0_F068;
-    vu0MulVecRow3_F068(&M, sVec4_F068(t->pos, 1.0f));
+    xform = (const sMtx_F068&)D_004FF1A0_F068;
+    vu0MulVecRow3_F068(&xform, sVec4_F068(t->pos, 1.0f));
     {
-        sMtx_F068* m = &M;
+        sMtx_F068* xformPtr = &xform;
         sMtx_F068 R;
         ROT_F068(R, &D_004FF140_F068.x, t->rot[1]);
-        *m *= R;
+        *xformPtr *= R;
     }
     {
-        sMtx_F068* m = &M;
+        sMtx_F068* xformPtr = &xform;
         sMtx_F068 R;
         ROT_F068(R, &D_004FF150_F068.x, t->rot[2]);
-        *m *= R;
+        *xformPtr *= R;
     }
     {
-        sMtx_F068* m = &M;
+        sMtx_F068* xformPtr = &xform;
         sMtx_F068 R;
         ROT_F068(R, &D_004FF160_F068.x, t->rot[0]);
-        *m *= R;
+        *xformPtr *= R;
     }
-    *p = vu0MulVec2_F068(&M, q);
-    p->w = 1.0f;
+    *point = vu0MulVec2_F068(&xform, localPt);
+    point->w = 1.0f;
 }
 #endif
 
@@ -1924,31 +1924,31 @@ static inline sCtmV_FBB8 ctmScale_FBB8(const sCtmV_FBB8& v, float s)
  * Keeps a point on a line camera bound object: moves it to its perpendicular projection onto the line.
  *
  * Transforms both end points (+0x2C, +0x38) to world space (translate by position, rotate by pitch about X, roll about
- * Y and heading about Z, scale), then sets @p p = end1 + d x t with d = end2 - end1 and t = dot(@p p - end1, d) /
+ * Y and heading about Z, scale), then sets @p point = end1 + d x t with d = end2 - end1 and t = dot(@p point - end1, d) /
  * dot(d, d). t is not clamped, so the point can land beyond either end (and a zero-length line divides by zero). Slot 6
  * (limitPoint) of the line bound-object vtable D_0045C228.
  *
  * @param src  the line bound object (this)
- * @param p  the world point to limit; overwritten
+ * @param point  the world point to limit; overwritten
  */
 // Projects *p onto the line through the transformed points src+0x2C and src+0x38
 // (transform as in func_00170240).
-extern "C" void func_0016FBB8(char* src, sCtmV_FBB8* p)
+extern "C" void func_0016FBB8(char* src, sCtmV_FBB8* point)
 {
-    sCtmM_FBB8 m(D_004FF1A0_FBB8);
+    sCtmM_FBB8 xform(D_004FF1A0_FBB8);
     float one = 1.0f;
-    ctmTransMtx_FBB8(&m, sCtmV_FBB8(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
-    ctmRotAxis_FBB8(&m, D_004FF140_FBB8, *(float*)(src + 0x10));
-    ctmRotAxis_FBB8(&m, D_004FF150_FBB8, *(float*)(src + 0x14));
-    ctmRotAxis_FBB8(&m, D_004FF160_FBB8, *(float*)(src + 0xC));
-    m = ctmScaleMtx_FBB8(&m, sCtmV_FBB8(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
+    ctmTransMtx_FBB8(&xform, sCtmV_FBB8(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
+    ctmRotAxis_FBB8(&xform, D_004FF140_FBB8, *(float*)(src + 0x10));
+    ctmRotAxis_FBB8(&xform, D_004FF150_FBB8, *(float*)(src + 0x14));
+    ctmRotAxis_FBB8(&xform, D_004FF160_FBB8, *(float*)(src + 0xC));
+    xform = ctmScaleMtx_FBB8(&xform, sCtmV_FBB8(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
     sCtmV_FBB8 pts[2];
     float w1 = 1.0f;
-    pts[0] = ctmApplyMtx_FBB8(&m, sCtmV_FBB8(*(float*)(src + 0x2C), *(float*)(src + 0x30), *(float*)(src + 0x34), w1));
-    pts[1] = ctmApplyMtx_FBB8(&m, sCtmV_FBB8(*(float*)(src + 0x38), *(float*)(src + 0x3C), *(float*)(src + 0x40), w1));
-    sCtmV_FBB8 d = ctmSub_FBB8(pts[1], pts[0]);
-    float t = ctmDot_FBB8(ctmSub_FBB8(*p, pts[0]), d) / ctmDot_FBB8(d, d);
-    *p = ctmAdd_FBB8(pts[0], ctmScale_FBB8(d, t));
+    pts[0] = ctmApplyMtx_FBB8(&xform, sCtmV_FBB8(*(float*)(src + 0x2C), *(float*)(src + 0x30), *(float*)(src + 0x34), w1));
+    pts[1] = ctmApplyMtx_FBB8(&xform, sCtmV_FBB8(*(float*)(src + 0x38), *(float*)(src + 0x3C), *(float*)(src + 0x40), w1));
+    sCtmV_FBB8 lineDir = ctmSub_FBB8(pts[1], pts[0]);
+    float lineParam = ctmDot_FBB8(ctmSub_FBB8(*point, pts[0]), lineDir) / ctmDot_FBB8(lineDir, lineDir);
+    *point = ctmAdd_FBB8(pts[0], ctmScale_FBB8(lineDir, lineParam));
 }
 #endif
 
@@ -2443,14 +2443,14 @@ struct sCtmSrc_0D20 {
 // World position of corner `corner` (the 3-float points at src+0x28): translate(src+0x0) * rotations(0x10, 0x14, 0xC) * scale(src+0x18).
 extern "C" sCtmV_0D20 func_00170D20(char* src, int corner)
 {
-    sCtmM_0D20 m(D_004FF1A0_0D20);
+    sCtmM_0D20 xform(D_004FF1A0_0D20);
     float one = 1.0f;
-    ctmTransMtx_0D20(&m, sCtmV_0D20(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
-    ctmRotAxis_0D20(&m, D_004FF140_0D20, *(float*)(src + 0x10));
-    ctmRotAxis_0D20(&m, D_004FF150_0D20, *(float*)(src + 0x14));
-    ctmRotAxis_0D20(&m, D_004FF160_0D20, *(float*)(src + 0xC));
-    m = ctmScaleMtx_0D20(&m, sCtmV_0D20(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
-    return ctmApplyMtx_0D20(&m, sCtmV_0D20(((sCtmSrc_0D20*)src)->corners[corner], one));
+    ctmTransMtx_0D20(&xform, sCtmV_0D20(*(float*)(src + 0x0), *(float*)(src + 0x4), *(float*)(src + 0x8), one));
+    ctmRotAxis_0D20(&xform, D_004FF140_0D20, *(float*)(src + 0x10));
+    ctmRotAxis_0D20(&xform, D_004FF150_0D20, *(float*)(src + 0x14));
+    ctmRotAxis_0D20(&xform, D_004FF160_0D20, *(float*)(src + 0xC));
+    xform = ctmScaleMtx_0D20(&xform, sCtmV_0D20(*(float*)(src + 0x18), *(float*)(src + 0x1C), *(float*)(src + 0x20), one));
+    return ctmApplyMtx_0D20(&xform, sCtmV_0D20(((sCtmSrc_0D20*)src)->corners[corner], one));
 }
 #endif
 

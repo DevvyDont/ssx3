@@ -220,37 +220,37 @@ struct sParser_1010 {
 /**
  * Evaluates one compiled map statement against a controller pad with a default button modifier and eight config values.
  *
- * Like cInputMap_getValue, but before running the statement through func_00325450 it stores @p a3 as the evaluator's
- * default button modifier (+0x0) and @p f0..@p f7 as its config values 1..8 (+0x10C..+0x128; config 0 always reads 0).
+ * Like cInputMap_getValue, but before running the statement through func_00325450 it stores @p modifier as the evaluator's
+ * default button modifier (+0x0) and @p config0..@p config7 as its config values 1..8 (+0x10C..+0x128; config 0 always reads 0).
  * Called by func_00320C18, the cInput wrapper beside cInput_getValue.
  *
- * @param a1  the controller pad to read (On Tour cInputPad*)
- * @param a2  statement slot (input state id) to evaluate
- * @param a3  the button modifier used for buttons the script leaves unqualified (On Tour eButtonModifiers)
- * @param f0  config value 1 (On Tour c0)
- * @param f1  config value 2
- * @param f2  config value 3
- * @param f3  config value 4
- * @param f4  config value 5
- * @param f5  config value 6
- * @param f6  config value 7
- * @param f7  config value 8 (On Tour c7)
+ * @param inputPad  the controller pad to read (On Tour cInputPad*)
+ * @param stateId  statement slot (input state id) to evaluate
+ * @param modifier  the button modifier used for buttons the script leaves unqualified (On Tour eButtonModifiers)
+ * @param config0  config value 1 (On Tour c0)
+ * @param config1  config value 2
+ * @param config2  config value 3
+ * @param config3  config value 4
+ * @param config4  config value 5
+ * @param config5  config value 6
+ * @param config6  config value 7
+ * @param config7  config value 8 (On Tour c7)
  * @return the statement's value
  */
-extern "C" float func_00321010(void* self, void* a1, int a2, int a3, float f0, float f1, float f2, float f3, float f4, float f5, float f6, float f7)
+extern "C" float func_00321010(void* self, void* inputPad, int stateId, int modifier, float config0, float config1, float config2, float config3, float config4, float config5, float config6, float config7)
 {
     sParser_1010 parser;
     func_00325250(&parser);
-    parser.f0 = a3;
-    parser.v[0] = f0;
-    parser.v[1] = f1;
-    parser.v[2] = f2;
-    parser.v[3] = f3;
-    parser.v[4] = f4;
-    parser.v[5] = f5;
-    parser.v[6] = f6;
-    parser.v[7] = f7;
-    return func_00325450(&parser, a1, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[a2] << 2));
+    parser.f0 = modifier;
+    parser.v[0] = config0;
+    parser.v[1] = config1;
+    parser.v[2] = config2;
+    parser.v[3] = config3;
+    parser.v[4] = config4;
+    parser.v[5] = config5;
+    parser.v[6] = config6;
+    parser.v[7] = config7;
+    return func_00325450(&parser, inputPad, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[stateId] << 2));
 }
 #endif
 
@@ -297,33 +297,33 @@ struct sParser_1188 {
  * Same evaluation as func_00321010 (modifier into +0x0, config values 1..8 into +0x10C..), compared with 0.0 like
  * cInputMap_getState. Called by func_00320C70, the cInput wrapper beside cInput_getState.
  *
- * @param a1  the controller pad to read (On Tour cInputPad*)
- * @param a2  statement slot (input state id) to evaluate
- * @param a3  the button modifier used for buttons the script leaves unqualified (On Tour eButtonModifiers)
- * @param f0  config value 1 (On Tour c0)
- * @param f1  config value 2
- * @param f2  config value 3
- * @param f3  config value 4
- * @param f4  config value 5
- * @param f5  config value 6
- * @param f6  config value 7
- * @param f7  config value 8 (On Tour c7)
+ * @param inputPad  the controller pad to read (On Tour cInputPad*)
+ * @param stateId  statement slot (input state id) to evaluate
+ * @param modifier  the button modifier used for buttons the script leaves unqualified (On Tour eButtonModifiers)
+ * @param config0  config value 1 (On Tour c0)
+ * @param config1  config value 2
+ * @param config2  config value 3
+ * @param config3  config value 4
+ * @param config4  config value 5
+ * @param config5  config value 6
+ * @param config6  config value 7
+ * @param config7  config value 8 (On Tour c7)
  * @return 1 when the statement's value is not 0.0, otherwise 0
  */
-extern "C" int func_00321188(void* self, void* a1, int a2, int a3, float f0, float f1, float f2, float f3, float f4, float f5, float f6, float f7)
+extern "C" int func_00321188(void* self, void* inputPad, int stateId, int modifier, float config0, float config1, float config2, float config3, float config4, float config5, float config6, float config7)
 {
     sParser_1188 parser;
     func_00325250(&parser);
-    parser.f0 = a3;
-    parser.v[0] = f0;
-    parser.v[1] = f1;
-    parser.v[2] = f2;
-    parser.v[3] = f3;
-    parser.v[4] = f4;
-    parser.v[5] = f5;
-    parser.v[6] = f6;
-    parser.v[7] = f7;
-    return func_00325450(&parser, a1, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[a2] << 2)) != 0.0f;
+    parser.f0 = modifier;
+    parser.v[0] = config0;
+    parser.v[1] = config1;
+    parser.v[2] = config2;
+    parser.v[3] = config3;
+    parser.v[4] = config4;
+    parser.v[5] = config5;
+    parser.v[6] = config6;
+    parser.v[7] = config7;
+    return func_00325450(&parser, inputPad, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[stateId] << 2)) != 0.0f;
 }
 #endif
 

@@ -261,16 +261,16 @@ extern sGp2930 D_004A5A20; // placeholder: target is a raw $gp+0x2930 reference
  * vertices from VU0 memory into the node (+0x10, func_00391480). The object at $gp+0x2930 passed to the VU0 helpers is
  * not used by them. Called by func_003279D0 on a cache miss.
  *
- * @param a1  the terrain patch record (On Tour const tPatchRecord&)
- * @param a2  the cache node to fill (On Tour node)
+ * @param patch  the terrain patch record (On Tour const tPatchRecord&)
+ * @param fwdDiff  the cache node to fill (On Tour node)
  */
-extern "C" void func_00327C00(void* self, void* a1, void* a2)
+extern "C" void func_00327C00(void* self, void* patch, void* fwdDiff)
 {
-    sGp2930* t = &D_004A5A20;
-    func_00391418(t, (char*)a1 + 0x40);
-    func_00327C68(self, a2);
-    func_003914F8(t);
-    func_00391480(t, (char*)a2 + 0x10);
+    sGp2930* patchEval = &D_004A5A20;
+    func_00391418(patchEval, (char*)patch + 0x40);
+    func_00327C68(self, fwdDiff);
+    func_003914F8(patchEval);
+    func_00391480(patchEval, (char*)fwdDiff + 0x10);
 }
 #endif
 

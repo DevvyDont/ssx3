@@ -248,15 +248,15 @@ struct sSphereSrc_9AE0 {
  * 0x20 bytes per bone, position first), and the bounding centre (+0x10) that of the bound bone (+0x24). The sphere mask
  * is ignored. Called by cRider_updateCollideInfo.
  *
- * @param s  the rider sphere tree (this)
+ * @param riderTree  the rider sphere tree (this)
  */
-extern "C" void func_00329AE0(sSphereTreeNode* s)
+extern "C" void func_00329AE0(sSphereTreeNode* riderTree)
 {
-    sSphereSrc_9AE0** table = (sSphereSrc_9AE0**)s;
-    for (int i = 0; i < s->count; i++) {
-        s->children[i].pos = (*table)[s->children[i].pad[0]].pos;
+    sSphereSrc_9AE0** table = (sSphereSrc_9AE0**)riderTree;
+    for (int i = 0; i < riderTree->count; i++) {
+        riderTree->children[i].pos = (*table)[riderTree->children[i].pad[0]].pos;
     }
-    s->center = (*table)[s->pad_0x24].pos;
+    riderTree->center = (*table)[riderTree->pad_0x24].pos;
 }
 #endif
 
@@ -1280,17 +1280,17 @@ extern char D_6E0[];
  * tests (cRiderSphereTree_IsTriCollision and its 2-sided form, cWorldLine_IsTriInt, cWorldSphere_IsTriInt and its
  * 2-sided form) and func_0032D440.
  *
- * @param a  first corner (On Tour p1)
- * @param b  second corner (On Tour p2)
- * @param c  third corner (On Tour p3)
- * @param d  the point to test (On Tour cen)
+ * @param corner1  first corner (On Tour p1)
+ * @param corner2  second corner (On Tour p2)
+ * @param corner3  third corner (On Tour p3)
+ * @param testPoint  the point to test (On Tour cen)
  * @return 1 when the point is inside, else 0
  */
 // Loads four vectors into vf10-vf13, runs the VU0 microprogram at D_6E0 and
 // returns whether it left a nonzero result in vi2.
 // PORT: PS2-only VU0 microprogram call (ctc2/vcallmsr/cfc2); the PC port needs a C version
 // of the microprogram.
-extern "C" int func_0032B6A8(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d)
+extern "C" int func_0032B6A8(sSphereVec4* corner1, sSphereVec4* corner2, sSphereVec4* corner3, sSphereVec4* testPoint)
 {
     int hit;
     __asm__ __volatile__(
@@ -1307,7 +1307,7 @@ extern "C" int func_0032B6A8(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSp
         "cfc2.i    %0, $vi2\n"
         ".set pop\n"
         : "=r"(hit)
-        : "r"(a), "r"(b), "r"(c), "r"(d), "0"((int)D_6E0 >> 3));
+        : "r"(corner1), "r"(corner2), "r"(corner3), "r"(testPoint), "0"((int)D_6E0 >> 3));
     return hit != 0;
 }
 #endif
@@ -1449,15 +1449,15 @@ extern "C" int func_0032B6E0_typed(sQuery_B6E0* q, void* obj, sPatch_B6E0* patch
  * @param query  the world intersection query (this)
  * @param obj  the terrain patch record (On Tour pPatch)
  * @param patch  its tessellation (On Tour pFwdDiff)
- * @param a3  out: the hit position (On Tour ipos)
- * @param a4  out: the hit normal (On Tour inorm)
- * @param a5  out: the hit parameter (On Tour param)
+ * @param hitPos  out: the hit position (On Tour ipos)
+ * @param hitNormal  out: the hit normal (On Tour inorm)
+ * @param hitParam  out: the hit parameter (On Tour param)
  * @param uvOut  out: the hit's patch u, v (On Tour uv)
  * @param cache  the hint, or 0 (On Tour tIntHint* hint)
  * @return 1 on a hit, else 0
  */
-extern "C" int func_0032B6E0_typed(sQuery_B6E0* query, void* obj, sPatch_B6E0* patch, void* a3, void* a4,
-                                   void* a5, float* uvOut, sHitCache_B6E0* cache)
+extern "C" int func_0032B6E0_typed(sQuery_B6E0* query, void* obj, sPatch_B6E0* patch, void* hitPos, void* hitNormal,
+                                   void* hitParam, float* uvOut, sHitCache_B6E0* cache)
 {
     // the cached cell's row is scaled by its own step variable: the binary keeps it in a
     // second register next to step and multiplies only the row index by it
@@ -1501,12 +1501,12 @@ extern "C" int func_0032B6E0_typed(sQuery_B6E0* query, void* obj, sPatch_B6E0* p
             sSphereVec4& triNormal0 = CellNormal_B6E0(cachedCell, 0, *corner11, *corner10, *corner01);
             if (triNormal0.x != 99999997952.0f && (!query->facing || Dot_A1C0(triNormal0, query->dir) <= 0.8f)) {
                 sVE_B6E0* vt = query->vt;
-                if (vt[4].test((char*)query + vt[4].delta, corner11, corner10, corner01, &triNormal0, a3, a4, a5)) {
+                if (vt[4].test((char*)query + vt[4].delta, corner11, corner10, corner01, &triNormal0, hitPos, hitNormal, hitParam)) {
                     float hitU = cache->u * scale + half;
                     float hitV = cache->v * scale + half;
                     if (query->type == 2) {
                         sVE_B6E0* vt = query->vt;
-                        vt[8].uv((char*)query + vt[8].delta, obj, &hitU, &hitV, a3, a4, a5);
+                        vt[8].uv((char*)query + vt[8].delta, obj, &hitU, &hitV, hitPos, hitNormal, hitParam);
                     }
                     uvOut[0] = hitU;
                     uvOut[1] = hitV;
@@ -1517,12 +1517,12 @@ extern "C" int func_0032B6E0_typed(sQuery_B6E0* query, void* obj, sPatch_B6E0* p
             sSphereVec4& triNormal1 = CellNormal_B6E0(cachedCell, 1, *corner01, *corner10, *corner00);
             if (triNormal1.x != 99999997952.0f && (!query->facing || Dot_A1C0(triNormal1, query->dir) <= 0.8f)) {
                 sVE_B6E0* vt = query->vt;
-                if (vt[4].test((char*)query + vt[4].delta, corner01, corner10, corner00, &triNormal1, a3, a4, a5)) {
+                if (vt[4].test((char*)query + vt[4].delta, corner01, corner10, corner00, &triNormal1, hitPos, hitNormal, hitParam)) {
                     float hitU = cache->u * scale + half;
                     float hitV = cache->v * scale + half;
                     if (query->type == 2) {
                         sVE_B6E0* vt = query->vt;
-                        vt[8].uv((char*)query + vt[8].delta, obj, &hitU, &hitV, a3, a4, a5);
+                        vt[8].uv((char*)query + vt[8].delta, obj, &hitU, &hitV, hitPos, hitNormal, hitParam);
                     }
                     uvOut[0] = hitU;
                     uvOut[1] = hitV;
@@ -1548,12 +1548,12 @@ extern "C" int func_0032B6E0_typed(sQuery_B6E0* query, void* obj, sPatch_B6E0* p
                 sSphereVec4& triNormal0 = CellNormal_B6E0(cell, 0, *corner11, *corner10, *corner01);
                 if (triNormal0.x != 99999997952.0f && (!query->facing || Dot_A1C0(triNormal0, query->dir) <= 0.8f)) {
                     sVE_B6E0* vt = query->vt;
-                    if (vt[4].test((char*)query + vt[4].delta, corner11, corner10, corner01, &triNormal0, a3, a4, a5)) {
+                    if (vt[4].test((char*)query + vt[4].delta, corner11, corner10, corner01, &triNormal0, hitPos, hitNormal, hitParam)) {
                         float hitU = cellU * scale + half;
                         float hitV = cellV * scale + half;
                         if (query->type == 2) {
                             sVE_B6E0* vt = query->vt;
-                            vt[8].uv((char*)query + vt[8].delta, obj, &hitU, &hitV, a3, a4, a5);
+                            vt[8].uv((char*)query + vt[8].delta, obj, &hitU, &hitV, hitPos, hitNormal, hitParam);
                         }
                         uvOut[0] = hitU;
                         uvOut[1] = hitV;
@@ -1570,12 +1570,12 @@ extern "C" int func_0032B6E0_typed(sQuery_B6E0* query, void* obj, sPatch_B6E0* p
                 sSphereVec4& triNormal1 = CellNormal_B6E0(cell, 1, *corner01, *corner10, *corner00);
                 if (triNormal1.x != 99999997952.0f && (!query->facing || Dot_A1C0(triNormal1, query->dir) <= 0.8f)) {
                     sVE_B6E0* vt = query->vt;
-                    if (vt[4].test((char*)query + vt[4].delta, corner01, corner10, corner00, &triNormal1, a3, a4, a5)) {
+                    if (vt[4].test((char*)query + vt[4].delta, corner01, corner10, corner00, &triNormal1, hitPos, hitNormal, hitParam)) {
                         float hitU = cellU * scale + half;
                         float hitV = cellV * scale + half;
                         if (query->type == 2) {
                             sVE_B6E0* vt = query->vt;
-                            vt[8].uv((char*)query + vt[8].delta, obj, &hitU, &hitV, a3, a4, a5);
+                            vt[8].uv((char*)query + vt[8].delta, obj, &hitU, &hitV, hitPos, hitNormal, hitParam);
                         }
                         uvOut[0] = hitU;
                         uvOut[1] = hitV;
@@ -2498,13 +2498,13 @@ extern "C" int func_0032CDB0(void* selfp, void* spherePos, float sphereRadius, v
     float dd = Dot_CDB0(delta, delta);
     if (!(dd < sum * sum))
         return 0;
-    float f;
+    float distance;
     unsigned char mask = self->tree->masks[base];
     if (depth < self->tree->depth && mask != 0) {
-        f = self->tree->levels[depth + 1].offset;
+        distance = self->tree->levels[depth + 1].offset;
         for (int i = 0; i < 8; i++) {
             if ((mask >> i) & 1) {
-                sSphereVec4 childPos = Add_CDB0(*(sSphereVec4*)pos, Scale_CDB0(self->dirs[i], f));
+                sSphereVec4 childPos = Add_CDB0(*(sSphereVec4*)pos, Scale_CDB0(self->dirs[i], distance));
                 if (func_0032CDB0(self, spherePos, sphereRadius, &childPos, depth + 1, (i + 1) * self->tree->levels[depth].stride + base, outA, outB))
                     return 1;
             }
@@ -2512,9 +2512,9 @@ extern "C" int func_0032CDB0(void* selfp, void* spherePos, float sphereRadius, v
         return 0;
     }
     sSphereVec4 n = Normalize_CDB0(delta);
-    f = sum - Sqrt_CDB0(dd);
-    *(sSphereVec4*)outA = Scale_CDB0(n, f);
-    *(sSphereVec4*)outB = Sub_CDB0(*(sSphereVec4*)spherePos, Scale_CDB0(n, sphereRadius - f));
+    distance = sum - Sqrt_CDB0(dd);
+    *(sSphereVec4*)outA = Scale_CDB0(n, distance);
+    *(sSphereVec4*)outB = Sub_CDB0(*(sSphereVec4*)spherePos, Scale_CDB0(n, sphereRadius - distance));
     return 1;
 }
 #endif
@@ -2750,25 +2750,25 @@ extern "C" void func_0032D208(void* selfp, void* plane, void* pos, int depth, in
     float nodeRadius = self->tree->levels[depth].radius * self->scale;
     if (!(planeDist < nodeRadius + self->best))
         return;
-    float f;
+    float distance;
     unsigned char mask = self->tree->masks[base];
     if (depth < self->tree->depth && mask != 0) {
-        f = self->tree->levels[depth + 1].offset;
+        distance = self->tree->levels[depth + 1].offset;
         for (int i = 0; i < 8; i++) {
             int k = self->order[i];
             if ((mask >> k) & 1) {
-                sSphereVec4 childPos = Add_D208(*(sSphereVec4*)pos, Scale_D208(self->dirs[k], f));
+                sSphereVec4 childPos = Add_D208(*(sSphereVec4*)pos, Scale_D208(self->dirs[k], distance));
                 func_0032D208(self, plane, &childPos, depth + 1, (k + 1) * self->tree->levels[depth].stride + base, outA, outB);
             }
         }
         return;
     }
-    f = planeDist - nodeRadius;
-    if (f < self->best) {
+    distance = planeDist - nodeRadius;
+    if (distance < self->best) {
         sSphereVec4 n = ZeroW_D208(*(sSphereVec4*)plane);
-        *(sSphereVec4*)outA = Scale_D208(n, f);
+        *(sSphereVec4*)outA = Scale_D208(n, distance);
         *(sSphereVec4*)outB = Sub_D208(*(sSphereVec4*)pos, Scale_D208(n, planeDist));
-        self->best = f;
+        self->best = distance;
     }
 }
 #endif
@@ -2785,15 +2785,15 @@ extern "C" int func_0032B6A8_tol(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c,
  *
  * A radius the caller may pass in $f12 is replaced by the tolerance. Called by SphereTree_checkTriCollision.
  *
- * @param a  first corner (On Tour p1)
- * @param b  second corner (On Tour p2)
- * @param c  third corner (On Tour p3)
- * @param d  the sphere's centre (On Tour center)
+ * @param corner1  first corner (On Tour p1)
+ * @param corner2  second corner (On Tour p2)
+ * @param corner3  third corner (On Tour p3)
+ * @param sphereCenter  the sphere's centre (On Tour center)
  * @return 1 when the centre is inside, else 0
  */
-extern "C" int func_0032D440(void* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d)
+extern "C" int func_0032D440(void* self, sSphereVec4* corner1, sSphereVec4* corner2, sSphereVec4* corner3, sSphereVec4* sphereCenter)
 {
-    return func_0032B6A8_tol(a, b, c, d, 9.999999747378752e-05f);
+    return func_0032B6A8_tol(corner1, corner2, corner3, sphereCenter, 9.999999747378752e-05f);
 }
 #endif
 
@@ -3454,34 +3454,34 @@ struct sRiderCapsule_E100 {
  * Constructs a world line query from two end points.
  *
  * Installs cWorldLine_vtbl (+0x50), stores @p state as the precision (+0x0), clears the flag words (+0x4, +0x8), sets
- * the start (+0x60 and +0x80) to @p p0 and the direction (+0x70 and +0x90) to @p p1 - @p p0, stores @p r at +0xA0 and
+ * the start (+0x60 and +0x80) to @p startPoint and the direction (+0x70 and +0x90) to @p endPoint - @p startPoint, stores @p idealParam at +0xA0 and
  * builds the bounding box (+0x20 max, +0x30 min, w = 1) and its centre (+0x40). Called by the rider ground and air code
  * (cGroundMotion_setupGroundVectors, cAirPredictor_simStep, cRider_putAt and others).
  *
- * @param p0  the start point (On Tour ap0)
- * @param p1  the end point (On Tour ap1)
+ * @param startPoint  the start point (On Tour ap0)
+ * @param endPoint  the end point (On Tour ap1)
  * @param state  the precision, 0..2 (On Tour tIntPrecision)
- * @param r  the preferred hit parameter (On Tour aIdealParam)
+ * @param idealParam  the preferred hit parameter (On Tour aIdealParam)
  * @return @p self
  */
-extern "C" sRiderCapsule_E100* func_0032E100(sRiderCapsule_E100* self, sSphereVec4* p0, sSphereVec4* p1,
-                                             int state, float r)
+extern "C" sRiderCapsule_E100* func_0032E100(sRiderCapsule_E100* self, sSphereVec4* startPoint, sSphereVec4* endPoint,
+                                             int state, float idealParam)
 {
     self->state = state;
     self->vtbl = cWorldLine_vtbl;
     self->f8 = 0;
     self->f4 = 0;
-    self->p0b = *p0;
+    self->p0b = *startPoint;
     self->p0 = self->p0b;
-    self->dirb = sphereCapsuleSub(p1, p0);
+    self->dirb = sphereCapsuleSub(endPoint, startPoint);
     self->dir = self->dirb;
-    self->radius = r;
-    self->max = sSphereV4_E100(p0->x > p1->x ? p0->x : p1->x,
-                               p0->y > p1->y ? p0->y : p1->y,
-                               p0->z > p1->z ? p0->z : p1->z, 1.0f);
-    self->min = sSphereV4_E100(p0->x < p1->x ? p0->x : p1->x,
-                               p0->y < p1->y ? p0->y : p1->y,
-                               p0->z < p1->z ? p0->z : p1->z, 1.0f);
+    self->radius = idealParam;
+    self->max = sSphereV4_E100(startPoint->x > endPoint->x ? startPoint->x : endPoint->x,
+                               startPoint->y > endPoint->y ? startPoint->y : endPoint->y,
+                               startPoint->z > endPoint->z ? startPoint->z : endPoint->z, 1.0f);
+    self->min = sSphereV4_E100(startPoint->x < endPoint->x ? startPoint->x : endPoint->x,
+                               startPoint->y < endPoint->y ? startPoint->y : endPoint->y,
+                               startPoint->z < endPoint->z ? startPoint->z : endPoint->z, 1.0f);
     self->center = sphereCapsuleDiv(sphereCapsuleAdd(&self->min, &self->max), 2.0f);
     return self;
 }
@@ -4653,14 +4653,14 @@ struct sRiderSphere_FB48 {
  * flag is set, else 1, stores the centre (+0x60, +0x80) and radius (+0x70, +0x90), and builds the bounding box (centre
  * +/- radius, w = 1) with the centre as its centre (+0x40). Called by tAvalancheNode_calculate.
  *
- * @param p  the centre (On Tour acen)
+ * @param sphereCenter  the centre (On Tour acen)
  * @param flag  nonzero for low precision (On Tour isLow)
- * @param r  the radius (On Tour arad)
+ * @param sphereRadius  the radius (On Tour arad)
  * @return @p self
  */
-extern "C" sRiderSphere_FB48* func_0032FB48(sRiderSphere_FB48* self, sSphereVec4* p, int flag, float r)
+extern "C" sRiderSphere_FB48* func_0032FB48(sRiderSphere_FB48* self, sSphereVec4* sphereCenter, int flag, float sphereRadius)
 {
-    sSphereVec4 t;
+    sSphereVec4 boxCorner;
     self->vtbl = cWorldSphere_vtbl;
     self->f8 = 0;
     self->f4 = 0;
@@ -4669,20 +4669,20 @@ extern "C" sRiderSphere_FB48* func_0032FB48(sRiderSphere_FB48* self, sSphereVec4
     } else {
         self->state = 1;
     }
-    self->pos0 = *p;
+    self->pos0 = *sphereCenter;
     self->pos = self->pos0;
-    self->radius = r;
-    self->radius0 = r;
-    t.x = p->x + r;
-    t.y = p->y + r;
-    t.z = p->z + r;
-    t.w = 1.0f;
-    self->max = t;
-    t.x = p->x - r;
-    t.y = p->y - r;
-    t.z = p->z - r;
-    self->min = t;
-    self->center = *p;
+    self->radius = sphereRadius;
+    self->radius0 = sphereRadius;
+    boxCorner.x = sphereCenter->x + sphereRadius;
+    boxCorner.y = sphereCenter->y + sphereRadius;
+    boxCorner.z = sphereCenter->z + sphereRadius;
+    boxCorner.w = 1.0f;
+    self->max = boxCorner;
+    boxCorner.x = sphereCenter->x - sphereRadius;
+    boxCorner.y = sphereCenter->y - sphereRadius;
+    boxCorner.z = sphereCenter->z - sphereRadius;
+    self->min = boxCorner;
+    self->center = *sphereCenter;
     return self;
 }
 #endif
@@ -5078,28 +5078,28 @@ sSphereVec4 func_00330128_def(sSphereVec4* a, sSphereVec4* b, sSphereVec4* p) __
 /**
  * Returns the point of a line segment closest to a test point.
  *
- * Projects @p p - @p a onto the unit direction of @p b - @p a: at or before 0 gives @p a, at or beyond the segment's
- * length gives @p b, otherwise the projected point. Returned by value; called by func_00330250.
+ * Projects @p testPoint - @p lineStart onto the unit direction of @p lineEnd - @p lineStart: at or before 0 gives @p lineStart, at or beyond the segment's
+ * length gives @p lineEnd, otherwise the projected point. Returned by value; called by func_00330250.
  *
- * @param a  the segment's first end (On Tour lPoint1)
- * @param b  its second end (On Tour lPoint2)
- * @param p  the test point (On Tour testPoint)
+ * @param lineStart  the segment's first end (On Tour lPoint1)
+ * @param lineEnd  its second end (On Tour lPoint2)
+ * @param testPoint  the test point (On Tour testPoint)
  * @return the closest point
  */
-sSphereVec4 func_00330128_def(sSphereVec4* a, sSphereVec4* b, sSphereVec4* p)
+sSphereVec4 func_00330128_def(sSphereVec4* lineStart, sSphereVec4* lineEnd, sSphereVec4* testPoint)
 {
-    sSphereVec4 d = Sub_CDB0(*p, *a);
-    sSphereVec4 e = Sub_CDB0(*b, *a);
-    sSphereVec4 n = Normalize_CDB0(e);
-    float t = Dot_CDB0(n, d);
-    float len = sphereLength_32FDB0(e);
-    if (t <= 0.0f) {
-        return *a;
-    } else if (len <= t) {
-        return *b;
+    sSphereVec4 toPoint = Sub_CDB0(*testPoint, *lineStart);
+    sSphereVec4 segment = Sub_CDB0(*lineEnd, *lineStart);
+    sSphereVec4 n = Normalize_CDB0(segment);
+    float projLength = Dot_CDB0(n, toPoint);
+    float len = sphereLength_32FDB0(segment);
+    if (projLength <= 0.0f) {
+        return *lineStart;
+    } else if (len <= projLength) {
+        return *lineEnd;
     } else {
-        sSphereVec4 r = Add_CDB0(*a, Scale_CDB0(n, t));
-        return r;
+        sSphereVec4 projPoint = Add_CDB0(*lineStart, Scale_CDB0(n, projLength));
+        return projPoint;
     }
 }
 #endif

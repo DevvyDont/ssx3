@@ -1029,21 +1029,21 @@ static inline void RotAxis_172278(sM_172278* m, const sV_172278& axis, float ang
  * translated by -position (+0x0). The point mapped into that unit-sphere space is inside when x*x + y*y + z*z <= 1.
  * Slot 7 of the ellipse volume vtable D_0045C350.
  *
- * @param p  the world point to test
+ * @param point  the world point to test
  * @return 1 when the point is inside (or on) the ellipsoid, else 0
  */
 // Ellipsoid volume test: is p inside the unit sphere after the inverse transform?
-extern "C" int func_00172278(char* self, sV_172278* p)
+extern "C" int func_00172278(char* self, sV_172278* point)
 {
-    sM_172278 m(D_004FF1A0_v172278);
+    sM_172278 toLocal(D_004FF1A0_v172278);
     float one = 1.0f;
-    m = vu0ScaleMtx_172278(m, sV_172278(one / *(float*)(self + 0x18), one / *(float*)(self + 0x1C), one / *(float*)(self + 0x20), one));
-    RotAxis_172278(&m, D_004FF160_v172278, -*(float*)(self + 0xC));
-    RotAxis_172278(&m, D_004FF150_v172278, -*(float*)(self + 0x14));
-    RotAxis_172278(&m, D_004FF140_v172278, -*(float*)(self + 0x10));
-    vu0TransMtx_172278(&m, sV_172278(-*(sV3_172278*)self, one));
-    sV_172278 q = vu0MulVec_172278(m, *p);
-    return q.x * q.x + q.y * q.y + q.z * q.z <= one;
+    toLocal = vu0ScaleMtx_172278(toLocal, sV_172278(one / *(float*)(self + 0x18), one / *(float*)(self + 0x1C), one / *(float*)(self + 0x20), one));
+    RotAxis_172278(&toLocal, D_004FF160_v172278, -*(float*)(self + 0xC));
+    RotAxis_172278(&toLocal, D_004FF150_v172278, -*(float*)(self + 0x14));
+    RotAxis_172278(&toLocal, D_004FF140_v172278, -*(float*)(self + 0x10));
+    vu0TransMtx_172278(&toLocal, sV_172278(-*(sV3_172278*)self, one));
+    sV_172278 localPt = vu0MulVec_172278(toLocal, *point);
+    return localPt.x * localPt.x + localPt.y * localPt.y + localPt.z * localPt.z <= one;
 }
 #endif
 
@@ -1355,24 +1355,24 @@ extern t4Vector D_004C5480[3];      // static local: the three box axes
 // cCTVolumeBox: is pt inside the (rotated) box?
 extern "C" int func_001728F8(const sXform_28F8* t, const t4Vector* pt)
 {
-    sMtx_28F8 M = (const sMtx_28F8&)D_004FF1A0_28F8;
+    sMtx_28F8 toLocal = (const sMtx_28F8&)D_004FF1A0_28F8;
     {
-        sMtx_28F8* m = &M;
+        sMtx_28F8* toLocalPtr = &toLocal;
         sMtx_28F8 R;
         ROT_28F8(R, &t4vect_XAxis.x, -t->rot[1]);
-        *m *= R;
+        *toLocalPtr *= R;
     }
     {
-        sMtx_28F8* m = &M;
+        sMtx_28F8* toLocalPtr = &toLocal;
         sMtx_28F8 R;
         ROT_28F8(R, &D_004FF160_28F8.x, -t->rot[0]);
-        *m *= R;
+        *toLocalPtr *= R;
     }
-    vu0MulVecRow3_28F8(&M, sVec4_28F8(sVec3_28F8(-t->pos.x, -t->pos.y, -t->pos.z), 1.0f));
-    t4Vector q = vu0MulVec2_28F8(&M, *pt);
-    q.w = 1.0f;
-    t4Vector dmin = Sub_28F8(q, sVec4_28F8(sVec3_28F8(-t->size.x, -t->size.y, -t->size.z), 1.0f));
-    t4Vector dmax = Sub_28F8(q, sVec4_28F8(t->size.x, t->size.y, t->size.z, 1.0f));
+    vu0MulVecRow3_28F8(&toLocal, sVec4_28F8(sVec3_28F8(-t->pos.x, -t->pos.y, -t->pos.z), 1.0f));
+    t4Vector localPt = vu0MulVec2_28F8(&toLocal, *pt);
+    localPt.w = 1.0f;
+    t4Vector dmin = Sub_28F8(localPt, sVec4_28F8(sVec3_28F8(-t->size.x, -t->size.y, -t->size.z), 1.0f));
+    t4Vector dmax = Sub_28F8(localPt, sVec4_28F8(t->size.x, t->size.y, t->size.z, 1.0f));
     if (D_004A4DEC == 0) {
         D_004C5480[0] = t4vect_XAxis;
         D_004C5480[1] = D_004FF150_28F8;
@@ -1381,12 +1381,12 @@ extern "C" int func_001728F8(const sXform_28F8* t, const t4Vector* pt)
     }
     for (int i = 0; i < 3; i++) {
         t4Vector n = Scale_28F8(D_004C5480[i], -1.0f);
-        float d = Dot_28F8(n, dmin);
-        if (d > 0.0f) {
+        float planeDist = Dot_28F8(n, dmin);
+        if (planeDist > 0.0f) {
             return 0;
         }
-        d = Dot_28F8(D_004C5480[i], dmax);
-        if (d > 0.0f) {
+        planeDist = Dot_28F8(D_004C5480[i], dmax);
+        if (planeDist > 0.0f) {
             return 0;
         }
     }
@@ -1763,38 +1763,38 @@ extern "C" void func_001732E8_x(char* self, long key) __asm__("func_001732E8");
  */
 extern "C" void func_001732E8_x(char* self, long key)
 {
-    char* o = *(char**)(self + 0x30);
-    char* r = *(char**)(o + 4) + 0x6C0;
-    sVEntry<long(void*)>* vEntry = &(*(sVEntry<long(void*)>**)r)[7];
-    if (key != vEntry->fn(r + vEntry->delta))
+    char* riderTarget = *(char**)(self + 0x30);
+    char* riderPart = *(char**)(riderTarget + 4) + 0x6C0;
+    sVEntry<long(void*)>* vEntry = &(*(sVEntry<long(void*)>**)riderPart)[7];
+    if (key != vEntry->fn(riderPart + vEntry->delta))
         return;
-    t4Vector a, b, dir;
+    t4Vector focusPos, riderFront, dir;
     {
-        char* o1 = *(char**)(self + 0x30);
-        sVEntry<t4Vector(void*)>* e1 = &(*(sVEntry<t4Vector(void*)>**)o1)[1];
-        a = e1->fn(o1 + e1->delta);
+        char* posTarget = *(char**)(self + 0x30);
+        sVEntry<t4Vector(void*)>* posSlot = &(*(sVEntry<t4Vector(void*)>**)posTarget)[1];
+        focusPos = posSlot->fn(posTarget + posSlot->delta);
     }
     {
-        char* o2 = *(char**)(self + 0x30);
-        sVEntry<t4Vector(void*)>* e2 = &(*(sVEntry<t4Vector(void*)>**)o2)[4];
-        b = e2->fn(o2 + e2->delta);
+        char* frontTarget = *(char**)(self + 0x30);
+        sVEntry<t4Vector(void*)>* frontSlot = &(*(sVEntry<t4Vector(void*)>**)frontTarget)[4];
+        riderFront = frontSlot->fn(frontTarget + frontSlot->delta);
     }
-    AddEq_1732E8(a, Scale_1732E8(D_004FF160_32E8, *(float*)(self + 0x6C)));
-    AddEq_1732E8(a, Scale_1732E8(b, *(float*)(self + 0x74)));
-    *(float*)(self + 0x50) = wrap_1732E8(Atan2_1732E8(b.y, b.x));
-    float p = Atan2_1732E8(b.z, Len2_1732E8(sVec2(b.x, b.y)));
+    AddEq_1732E8(focusPos, Scale_1732E8(D_004FF160_32E8, *(float*)(self + 0x6C)));
+    AddEq_1732E8(focusPos, Scale_1732E8(riderFront, *(float*)(self + 0x74)));
+    *(float*)(self + 0x50) = wrap_1732E8(Atan2_1732E8(riderFront.y, riderFront.x));
+    float frontPitch = Atan2_1732E8(riderFront.z, Len2_1732E8(sVec2(riderFront.x, riderFront.y)));
     float mm = -*(float*)(self + 0x78) * 0.01745329424738884f;
-    *(float*)(self + 0x54) = wrap_1732E8(p * -*(float*)(self + 0x58) + mm);
-    float s0, c0, s1, c1;
-    func_0031BE50(&s0, &c0, *(float*)(self + 0x50));
-    func_0031BE50(&s1, &c1, -*(float*)(self + 0x54));
-    dir.x = c1 * c0;
-    dir.y = c1 * s0;
-    dir.z = -s1;
+    *(float*)(self + 0x54) = wrap_1732E8(frontPitch * -*(float*)(self + 0x58) + mm);
+    float sinHeading, cosHeading, sinPitch, cosPitch;
+    func_0031BE50(&sinHeading, &cosHeading, *(float*)(self + 0x50));
+    func_0031BE50(&sinPitch, &cosPitch, -*(float*)(self + 0x54));
+    dir.x = cosPitch * cosHeading;
+    dir.y = cosPitch * sinHeading;
+    dir.z = -sinPitch;
     dir.w = 0.0f;
-    *(t4Vector*)(self + 0x40) = Sub_1732E8(a, Scale_1732E8(dir, *(float*)(self + 0x70)));
-    sVEntry<void(void*)>* v = &(*(sVEntry<void(void*)>**)(self + 0x10))[5];
-    v->fn(self + v->delta);
+    *(t4Vector*)(self + 0x40) = Sub_1732E8(focusPos, Scale_1732E8(dir, *(float*)(self + 0x70)));
+    sVEntry<void(void*)>* updateSlot = &(*(sVEntry<void(void*)>**)(self + 0x10))[5];
+    updateSlot->fn(self + updateSlot->delta);
 }
 #endif
 
@@ -1997,37 +1997,37 @@ static inline float Wrap_1736E0(float v)
  */
 extern "C" void func_001736E0(char* self)
 {
-    t4Vector a, b, c;
-    char* o = *(char**)(self + 0x30);
-    sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[1];
-    ((void (*)(void*, void*))vEntry->fn)(&a, o + vEntry->delta);
-    o = *(char**)(self + 0x30);
-    vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[3];
-    ((void (*)(void*, void*))vEntry->fn)(&b, o + vEntry->delta);
-    o = *(char**)(self + 0x30);
-    vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[4];
-    ((void (*)(void*, void*))vEntry->fn)(&c, o + vEntry->delta);
+    t4Vector focusPos, riderVel, riderFront;
+    char* riderTarget = *(char**)(self + 0x30);
+    sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)riderTarget)[1];
+    ((void (*)(void*, void*))vEntry->fn)(&focusPos, riderTarget + vEntry->delta);
+    riderTarget = *(char**)(self + 0x30);
+    vEntry = &(*(sVEntry<t4Vector(void*)>**)riderTarget)[3];
+    ((void (*)(void*, void*))vEntry->fn)(&riderVel, riderTarget + vEntry->delta);
+    riderTarget = *(char**)(self + 0x30);
+    vEntry = &(*(sVEntry<t4Vector(void*)>**)riderTarget)[4];
+    ((void (*)(void*, void*))vEntry->fn)(&riderFront, riderTarget + vEntry->delta);
     {
-        t4Vector t;
-        ScaleTo_1736E0(t, D_004FF160_36E0, *(float*)(self + 0x6C));
-        AddEq_1736E0(a, t);
-        ScaleTo_1736E0(t, c, *(float*)(self + 0x74));
-        AddEq_1736E0(a, t);
+        t4Vector scaledVec;
+        ScaleTo_1736E0(scaledVec, D_004FF160_36E0, *(float*)(self + 0x6C));
+        AddEq_1736E0(focusPos, scaledVec);
+        ScaleTo_1736E0(scaledVec, riderFront, *(float*)(self + 0x74));
+        AddEq_1736E0(focusPos, scaledVec);
     }
-    *(t4Vector*)(self + 0x20) = a;
-    t4Vector d = Sub_1736E0(a, *(t4Vector*)(self + 0x40));
-    float yawD = Atan2_1736E0(d.y, d.x);
-    float yawC = Atan2_1736E0(c.y, c.x);
+    *(t4Vector*)(self + 0x20) = focusPos;
+    t4Vector toFocus = Sub_1736E0(focusPos, *(t4Vector*)(self + 0x40));
+    float yawD = Atan2_1736E0(toFocus.y, toFocus.x);
+    float yawC = Atan2_1736E0(riderFront.y, riderFront.x);
     float diff = Wrap_1736E0(yawC) - yawD;
     float wd = Wrap_1736E0(diff);
-    float len3 = Length_1736E0(d);
+    float len3 = Length_1736E0(toFocus);
     float dd = *(float*)(self + 0x70) - len3;
     float yawN = yawD + wd * *(float*)(self + 0x5C) * 0.01666666753590107f;
     float dist;
     if (Abs_1736E0(dd) > 5000.0f) {
         dist = len3 + dd;
     } else {
-        float k = Length_1736E0(b) * 0.007199999410659075f + 8.0f;
+        float k = Length_1736E0(riderVel) * 0.007199999410659075f + 8.0f;
         float x;
         if (k >= 20.0f) {
             x = dd * k * 0.01666666753590107f;
@@ -2036,8 +2036,8 @@ extern "C" void func_001736E0(char* self)
         }
         dist = len3 + x;
     }
-    float pitchD = Atan2_1736E0(-d.z, Len2_1736E0(sVec2(d.x, d.y)));
-    float pitchC = Atan2_1736E0(c.z, Len2_1736E0(sVec2(c.x, c.y)));
+    float pitchD = Atan2_1736E0(-toFocus.z, Len2_1736E0(sVec2(toFocus.x, toFocus.y)));
+    float pitchC = Atan2_1736E0(riderFront.z, Len2_1736E0(sVec2(riderFront.x, riderFront.y)));
     float tp = pitchC * -*(float*)(self + 0x58) + *(float*)(self + 0x78) * 0.01745329424738884f;
     float pitchN = pitchD + (Wrap_1736E0(tp) - pitchD) * *(float*)(self + 0x60) * 0.01666666753590107f;
     t4Vector dir;
@@ -2050,12 +2050,12 @@ extern "C" void func_001736E0(char* self)
     dir.z = -sc2;
     dir.w = 0.0f;
     {
-        t4Vector t;
-        ScaleTo_1736E0(t, dir, dist);
-        n = SubN_1736E0(a, t);
+        t4Vector scaledVec;
+        ScaleTo_1736E0(scaledVec, dir, dist);
+        n = SubN_1736E0(focusPos, scaledVec);
     }
     *(t4Vector*)(self + 0x40) = n;
-    n = SubN_1736E0(a, *(t4Vector*)(self + 0x40));
+    n = SubN_1736E0(focusPos, *(t4Vector*)(self + 0x40));
     float yawE = Atan2_1736E0(n.y, n.x);
     float oy = *(float*)(self + 0x50);
     *(float*)(self + 0x50) = oy + Wrap_1736E0(yawE - oy) * *(float*)(self + 0x64) * 0.01666666753590107f;
@@ -2219,12 +2219,12 @@ static inline void RotAxis_173E40(sM_173E40* m, const sV_173E40& axis, float ang
  */
 extern "C" sPair_173E40 func_00173E40(char* src)
 {
-    sM_173E40 m;
-    vu0CopyMtx_173E40(&m, &t4mat_Identity);
-    vu0TransMtx_173E40(&m, *(sV_173E40*)(src + 0x40));
-    RotAxis_173E40(&m, t4vect_YAxis, -*(float*)(src + 0x54));
-    RotAxis_173E40(&m, D_004FF160_v173E40, *(float*)(src + 0x50));
-    return func_0031B748(&m);
+    sM_173E40 poseMtx;
+    vu0CopyMtx_173E40(&poseMtx, &t4mat_Identity);
+    vu0TransMtx_173E40(&poseMtx, *(sV_173E40*)(src + 0x40));
+    RotAxis_173E40(&poseMtx, t4vect_YAxis, -*(float*)(src + 0x54));
+    RotAxis_173E40(&poseMtx, D_004FF160_v173E40, *(float*)(src + 0x50));
+    return func_0031B748(&poseMtx);
 }
 #endif
 
@@ -2423,36 +2423,36 @@ extern "C" void func_00174200(char* self)
     *(float*)(self + 0x78) = *(float*)(act + 0x1C);
     *(float*)(self + 0x00) = *(float*)(act + 0x14);
     *(float*)(self + 0x74) = *(float*)(act + 0x20);
-    t4Vector p;
+    t4Vector lookTarget;
     if (*(int*)(act + 0x24) == 1) {
-        p.x = *(float*)(act + 0x28);
-        p.y = *(float*)(act + 0x2C);
-        p.z = *(float*)(act + 0x30);
-        p.w = 1.0f;
+        lookTarget.x = *(float*)(act + 0x28);
+        lookTarget.y = *(float*)(act + 0x2C);
+        lookTarget.z = *(float*)(act + 0x30);
+        lookTarget.w = 1.0f;
     } else {
-        t4Vector c, a, t, b;
-        char* o = *(char**)(self + 0x30);
-        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[1];
-        ((void (*)(void*, void*))vEntry->fn)(&a, o + vEntry->delta);
+        t4Vector leadPos, riderPos, leadOffset, riderFront;
+        char* calleeObj = *(char**)(self + 0x30);
+        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)calleeObj)[1];
+        ((void (*)(void*, void*))vEntry->fn)(&riderPos, calleeObj + vEntry->delta);
         float k = *(float*)(self + 0x74);
-        o = *(char**)(self + 0x30);
-        vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[4];
-        ((void (*)(void*, void*))vEntry->fn)(&b, o + vEntry->delta);
-        ScaleTo_174200(t, b, k);
-        AddTo_174200(c, a, t);
-        t4Vector t2;
-        ScaleTo_174200(t2, D_004FF160_4200, *(float*)(self + 0x6C));
-        AddTo_174200(p, c, t2);
+        calleeObj = *(char**)(self + 0x30);
+        vEntry = &(*(sVEntry<t4Vector(void*)>**)calleeObj)[4];
+        ((void (*)(void*, void*))vEntry->fn)(&riderFront, calleeObj + vEntry->delta);
+        ScaleTo_174200(leadOffset, riderFront, k);
+        AddTo_174200(leadPos, riderPos, leadOffset);
+        t4Vector heightLift;
+        ScaleTo_174200(heightLift, D_004FF160_4200, *(float*)(self + 0x6C));
+        AddTo_174200(lookTarget, leadPos, heightLift);
     }
-    *(t4Vector*)(self + 0x20) = p;
+    *(t4Vector*)(self + 0x20) = lookTarget;
     {
-        char* o = *(char**)(*(char**)(self + 0x80) + 8);
-        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)(o + 0x24))[6];
-        ((void (*)(void*, void*))vEntry->fn)(o + vEntry->delta, self + 0x40);
+        char* calleeObj = *(char**)(*(char**)(self + 0x80) + 8);
+        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)(calleeObj + 0x24))[6];
+        ((void (*)(void*, void*))vEntry->fn)(calleeObj + vEntry->delta, self + 0x40);
     }
-    t4Vector d = Sub_174200(p, *(t4Vector*)(self + 0x40));
-    *(float*)(self + 0x50) = Atan2_174200(d.y, d.x);
-    *(float*)(self + 0x54) = Atan2_174200(d.z, Len2_174200(sVec2(d.x, d.y)));
+    t4Vector toTarget = Sub_174200(lookTarget, *(t4Vector*)(self + 0x40));
+    *(float*)(self + 0x50) = Atan2_174200(toTarget.y, toTarget.x);
+    *(float*)(self + 0x54) = Atan2_174200(toTarget.z, Len2_174200(sVec2(toTarget.x, toTarget.y)));
 }
 #endif
 
@@ -2587,10 +2587,10 @@ static inline float Atan2_1744B0(float y, float x)
 extern "C" void func_001732E8(void* self, long a1);
 
 /**
- * Snaps a bounded trigger camera into place for the rider @p a1 names: the trigger camera snap, then the bound object
+ * Snaps a bounded trigger camera into place for the rider @p subjectId names: the trigger camera snap, then the bound object
  * limit.
  *
- * Does nothing unless @p a1 equals slot 7 (getAIIndex) of the target rider's +0x6C0 part. Computes the look target like
+ * Does nothing unless @p subjectId equals slot 7 (getAIIndex) of the target rider's +0x6C0 part. Computes the look target like
  * func_00174200 (the action's TargetPoint for TargetType 1, else rider position + lead + height), but with the
  * LeadDistance (+0x74) and HeightOffset (+0x6C) the algorithm held before; only then copies IdealDist, HeightOffset,
  * PitchOffset, FieldOfView and LeadDistance from BoundAction (+0x80). Runs the trigger algorithm snap func_001732E8,
@@ -2599,37 +2599,37 @@ extern "C" void func_001732E8(void* self, long a1);
  *
  * Quirk: on the first snap after a new action the look target uses the previous action's lead and height.
  *
- * @param a1  the subject to snap for: the rider's AI index (On Tour subjectID)
+ * @param subjectId  the subject to snap for: the rider's AI index (On Tour subjectID)
  */
-extern "C" void func_001744B0(char* self, long a1)
+extern "C" void func_001744B0(char* self, long subjectId)
 {
     {
-        char* o = *(char**)(*(char**)(self + 0x30) + 4) + 0x6C0;
-        sVEntry<long(void*)>* vEntry = &(*(sVEntry<long(void*)>**)o)[7];
-        if (vEntry->fn(o + vEntry->delta) != a1)
+        char* calleeObj = *(char**)(*(char**)(self + 0x30) + 4) + 0x6C0;
+        sVEntry<long(void*)>* vEntry = &(*(sVEntry<long(void*)>**)calleeObj)[7];
+        if (vEntry->fn(calleeObj + vEntry->delta) != subjectId)
             return;
     }
     char* act = *(char**)(self + 0x80);
-    t4Vector p;
+    t4Vector lookTarget;
     if (*(int*)(act + 0x24) == 1) {
-        p.x = *(float*)(act + 0x28);
-        p.y = *(float*)(act + 0x2C);
-        p.z = *(float*)(act + 0x30);
-        p.w = 1.0f;
+        lookTarget.x = *(float*)(act + 0x28);
+        lookTarget.y = *(float*)(act + 0x2C);
+        lookTarget.z = *(float*)(act + 0x30);
+        lookTarget.w = 1.0f;
     } else {
-        t4Vector c, a, t, b;
-        char* o = *(char**)(self + 0x30);
-        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[1];
-        ((void (*)(void*, void*))vEntry->fn)(&a, o + vEntry->delta);
+        t4Vector leadPos, riderPos, leadOffset, riderFront;
+        char* calleeObj = *(char**)(self + 0x30);
+        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)calleeObj)[1];
+        ((void (*)(void*, void*))vEntry->fn)(&riderPos, calleeObj + vEntry->delta);
         float k = *(float*)(self + 0x74);
-        o = *(char**)(self + 0x30);
-        vEntry = &(*(sVEntry<t4Vector(void*)>**)o)[4];
-        ((void (*)(void*, void*))vEntry->fn)(&b, o + vEntry->delta);
-        ScaleTo_1744B0(t, b, k);
-        AddTo_1744B0(c, a, t);
-        t4Vector t2;
-        ScaleTo_1744B0(t2, D_004FF160_44B0, *(float*)(self + 0x6C));
-        AddTo_1744B0(p, c, t2);
+        calleeObj = *(char**)(self + 0x30);
+        vEntry = &(*(sVEntry<t4Vector(void*)>**)calleeObj)[4];
+        ((void (*)(void*, void*))vEntry->fn)(&riderFront, calleeObj + vEntry->delta);
+        ScaleTo_1744B0(leadOffset, riderFront, k);
+        AddTo_1744B0(leadPos, riderPos, leadOffset);
+        t4Vector heightLift;
+        ScaleTo_1744B0(heightLift, D_004FF160_44B0, *(float*)(self + 0x6C));
+        AddTo_1744B0(lookTarget, leadPos, heightLift);
     }
     char* act2 = *(char**)(self + 0x80);
     *(float*)(self + 0x70) = *(float*)(act2 + 0x10);
@@ -2637,15 +2637,15 @@ extern "C" void func_001744B0(char* self, long a1)
     *(float*)(self + 0x78) = *(float*)(act2 + 0x1C);
     *(float*)(self + 0x00) = *(float*)(act2 + 0x14);
     *(float*)(self + 0x74) = *(float*)(act2 + 0x20);
-    func_001732E8(self, a1);
+    func_001732E8(self, subjectId);
     {
-        char* o = *(char**)(*(char**)(self + 0x80) + 8);
-        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)(o + 0x24))[6];
-        ((void (*)(void*, void*))vEntry->fn)(o + vEntry->delta, self + 0x40);
+        char* calleeObj = *(char**)(*(char**)(self + 0x80) + 8);
+        sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)(calleeObj + 0x24))[6];
+        ((void (*)(void*, void*))vEntry->fn)(calleeObj + vEntry->delta, self + 0x40);
     }
-    t4Vector d = Sub_1744B0(p, *(t4Vector*)(self + 0x40));
-    *(float*)(self + 0x50) = Atan2_1744B0(d.y, d.x);
-    *(float*)(self + 0x54) = Atan2_1744B0(d.z, Len2_1744B0(sVec2(d.x, d.y)));
+    t4Vector toTarget = Sub_1744B0(lookTarget, *(t4Vector*)(self + 0x40));
+    *(float*)(self + 0x50) = Atan2_1744B0(toTarget.y, toTarget.x);
+    *(float*)(self + 0x54) = Atan2_1744B0(toTarget.z, Len2_1744B0(sVec2(toTarget.x, toTarget.y)));
 }
 #endif
 
@@ -6966,50 +6966,50 @@ extern "C" void func_0017A378(void* selfp, const char* file)
     char* buf = (char*)FILE_loadsizez(file, &size, 0x100);
     if (buf == 0)
         return;
-    char* p = buf;
+    char* cursor = buf;
     for (;;) {
-        while (p < buf + size) {
+        while (cursor < buf + size) {
             int ws = 0;
-            char c = *p;
-            if (c == ' ' || c == '\t' || c == '\n' || c == '\r')
+            char curChar = *cursor;
+            if (curChar == ' ' || curChar == '\t' || curChar == '\n' || curChar == '\r')
                 ws = 1;
             if (!ws)
                 break;
-            p++;
+            cursor++;
         }
-        if (!(p < buf + size))
+        if (!(cursor < buf + size))
             break;
-        if (*p == '"' || *p == '\'')
-            p++;
-        if (!(p < buf + size))
+        if (*cursor == '"' || *cursor == '\'')
+            cursor++;
+        if (!(cursor < buf + size))
             break;
-        char* start = p;
+        char* start = cursor;
         char* stop = 0;
         for (;;) {
-            while (p < buf + size) {
+            while (cursor < buf + size) {
                 int ok = 0;
-                char c = *p;
-                if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') ||
-                    c == '_' || c == '.' || c == '-' || c == '/')
+                char curChar = *cursor;
+                if ((curChar >= 'a' && curChar <= 'z') || (curChar >= 'A' && curChar <= 'Z') || (curChar >= '0' && curChar <= '9') ||
+                    curChar == '_' || curChar == '.' || curChar == '-' || curChar == '/')
                     ok = 1;
                 if (!ok)
                     break;
-                if (stop == 0 && *p == '.')
-                    stop = p;
-                p++;
+                if (stop == 0 && *cursor == '.')
+                    stop = cursor;
+                cursor++;
             }
-            if ((p < buf + size && *p == '\\') || *p == ':') {
-                start = p + 1;
+            if ((cursor < buf + size && *cursor == '\\') || *cursor == ':') {
+                start = cursor + 1;
                 stop = 0;
-                p = start;
+                cursor = start;
                 continue;
             }
             break;
         }
         if (stop == 0)
-            stop = p;
-        if (p < buf + size && (*p == '"' || *p == '\''))
-            p++;
+            stop = cursor;
+        if (cursor < buf + size && (*cursor == '"' || *cursor == '\''))
+            cursor++;
         if (stop == start)
             continue;
         sStr_17A378 str;
