@@ -1,4 +1,5 @@
 #include "common.h"
+#include "input/input.h"
 #include "bx/appman.h"
 
 struct cExecutionMan {
@@ -457,44 +458,44 @@ extern "C" int memlog2(int x)
 //100%
 INCLUDE_ASM("bx/execman", cInput_getValue);
 #ifdef SKIP_ASM
-extern "C" void* cInputMap_getValue(int, int, int);
+extern "C" void* cInputMap_getValue(cInputMap* map, cInputPad* pad, int state);
 
 /**
  * Reads the analogue value of one input state from the input's map and pad.
  *
- * Calls cInputMap_getValue(map (+0x4), pad (+0x0), state). On Tour's getValue returns a float; this
+ * Calls cInputMap_getValue(Map, Pad, state). On Tour's getValue returns a float; this
  * declaration returns void*, so the value really comes back in the float return register.
  *
  * @param state  input state id (On Tour eInputStates), the index of the compiled map statement to evaluate
  * @return the state's value (a float in practice; meaningless as a pointer)
  */
-extern "C" void* cInput_getValue(void* self, int state)
+extern "C" void* cInput_getValue(cInput* self, int state)
 {
-    return cInputMap_getValue(*(int*)((char*)self + 0x4), *(int*)self, state);
+    return cInputMap_getValue(self->Map, self->Pad, state);
 }
 #endif
 
-extern "C" void* cInputMap_getState(int, int, int);
+extern "C" void* cInputMap_getState(cInputMap* map, cInputPad* pad, int state);
 
 //100%
 INCLUDE_ASM("bx/execman", cInput_getValue1);
 #ifdef SKIP_ASM
-extern "C" void cInputMap_getValue1(int, int, int, int);
+extern "C" void cInputMap_getValue1(cInputMap* map, cInputPad* pad, int state, int modifier);
 
 /**
  * Reads an input state's analogue value with a button modifier and eight float arguments, through the input's map and
  * pad.
  *
- * Calls cInputMap_getValue1(map (+0x4), pad (+0x0), @p state, modifier); the eight floats reach it untouched in the float
+ * Calls cInputMap_getValue1(Map, Pad, @p state, modifier); the eight floats reach it untouched in the float
  * argument registers, which the C does not declare. The value comes back in the float return register although the C
  * returns void. Nothing in the C calls it.
  *
- * @param input  the input (pad +0x0, map +0x4)
+ * @param input  the input
  * @param state  the input state id
  * @param modifier  the button modifier
  */
-extern "C" void cInput_getValue1(void *input, int state, int modifier) {
-    cInputMap_getValue1((*(int *)((char*)(input) + (4))), (*(int *)((char*)(input) + (0))), state, modifier);
+extern "C" void cInput_getValue1(cInput* input, int state, int modifier) {
+    cInputMap_getValue1(input->Map, input->Pad, state, modifier);
 }
 #endif
 
@@ -504,14 +505,15 @@ INCLUDE_ASM("bx/execman", cInput_getState__FPvi);
 /**
  * Tells whether one input state is active, using the input's map and pad.
  *
- * Calls cInputMap_getState(map (+0x4), pad (+0x0), state), which is true when the state's value is nonzero.
+ * Calls cInputMap_getState(Map, Pad, state), which is true when the state's value is nonzero.
  *
  * @param state  input state id (On Tour eInputStates)
  * @return nonzero when the state is active (On Tour returns bool)
  */
 void* cInput_getState(void* self, int state)
 {
-    return cInputMap_getState(*(int*)((char*)self + 0x4), *(int*)self, state);
+    cInput* input = (cInput*)self;
+    return cInputMap_getState(input->Map, input->Pad, state);
 }
 #endif
 
@@ -519,21 +521,21 @@ void* cInput_getState(void* self, int state)
 //100%
 INCLUDE_ASM("bx/execman", cInput_getState1);
 #ifdef SKIP_ASM
-extern "C" void cInputMap_getState1(int, int, int, int);
+extern "C" void cInputMap_getState1(cInputMap* map, cInputPad* pad, int state, int modifier);
 
 /**
  * Tells whether an input state is active with a button modifier and eight float arguments, through the input's map and
  * pad.
  *
- * Calls cInputMap_getState1(map (+0x4), pad (+0x0), @p state, modifier); the eight floats reach it untouched in the float
+ * Calls cInputMap_getState1(Map, Pad, @p state, modifier); the eight floats reach it untouched in the float
  * argument registers, which the C does not declare. The result is left in the return register although the C returns
  * void. Nothing in the C calls it.
  *
- * @param input  the input (pad +0x0, map +0x4)
+ * @param input  the input
  * @param state  the input state id
  * @param modifier  the button modifier
  */
-extern "C" void cInput_getState1(void *input, int state, int modifier) {
-    cInputMap_getState1((*(int *)((char*)(input) + (4))), (*(int *)((char*)(input) + (0))), state, modifier);
+extern "C" void cInput_getState1(cInput* input, int state, int modifier) {
+    cInputMap_getState1(input->Map, input->Pad, state, modifier);
 }
 #endif
