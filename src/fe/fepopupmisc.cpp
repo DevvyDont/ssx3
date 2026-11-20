@@ -7338,7 +7338,7 @@ extern "C" void func_001E3A78(int a, int b);
 int GetHashValue32(char* str);
 extern void* cOVState_vtbl[];
 extern void* cOVState_MESSAGECENTER_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 extern char str_folder[];
 extern char str_minus_folder[];
 extern char str_questmark_b[];
@@ -7380,7 +7380,7 @@ extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGEC
     self->mDoneTransition = 0;
     self->mAllowPauseMenu = 0;
     self->mRemovePDA = 0;
-    *(unsigned short*)((char*)self + 0x58) = D_004A2088[0];
+    *(unsigned short*)((char*)self + 0x58) = str_sp_b[0];
     self->mVtbl = cOVState_MESSAGECENTER_vtbl;
     int i;
     for (i = 0; i < 8; i++) {
@@ -8265,9 +8265,9 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" int func_001E2EA0(int id);
 extern "C" void func_001E4F70(cOVState_MESSAGECENTER* self, int slot, int id, unsigned char sub);
-extern char D_004A2100[];
-extern char D_004A2108[];
-extern char D_004A2110[];
+extern char str_plus[];
+extern char str_dash[];
+extern char str_sp_gt[];
 extern char str_pct_d_d[];
 
 struct sEnt18_4C78 {
@@ -8382,11 +8382,11 @@ extern "C" void func_001E4C78(cOVState_MESSAGECENTER* self_, int idx, int slot, 
         if (groupEntry->f10 != 0) {
             if (id == groupEntry->f4) {
                 if (func_001E3A30((void*)messageEntry->f4) == 0)
-                    sprintf(buf, D_004A2100);
+                    sprintf(buf, str_plus);
                 else
-                    sprintf(buf, D_004A2108);
+                    sprintf(buf, str_dash);
             } else {
-                sprintf(buf, D_004A2110);
+                sprintf(buf, str_sp_gt);
             }
         } else {
             sprintf(buf, str_pct_d_d, self->f174 + slot + 1);
@@ -9125,7 +9125,7 @@ extern char str_run_1_pct_d[];
 extern char str_DNF[];
 extern char str_run_2_pct_d[];
 extern char str_total_pct_d[];
-extern char D_004A2168[];
+extern char str_dash_sp_dash_sp_dash[];
 extern char str_help_current0pct_d[];
 extern char str_kT_CMNHELPEarnedEnoughPoints[];
 extern char str_help_advance[];
@@ -9282,11 +9282,11 @@ extern "C" void func_001E5B80(void* self)
                     sprintf(num2, "%d", total);
                     cUIText_setAsciiString((cUIText*)totalText, num2);
                     if (i - 1 == D_00536730[pl0] && flag) {
-                        cUIText_setAsciiString(uiText, D_004A2168);
+                        cUIText_setAsciiString(uiText, str_dash_sp_dash_sp_dash);
                     }
                 }
             } else {
-                cUIText_setAsciiString(uiText, D_004A2168);
+                cUIText_setAsciiString(uiText, str_dash_sp_dash_sp_dash);
                 totalText->setVisible(0);
             }
         }

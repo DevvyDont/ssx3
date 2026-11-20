@@ -366,7 +366,7 @@ extern "C" int cPlaybackMan_findFileById_C9F0(sPbMan_26CFE8* self, int key) __as
 
 extern "C" int ASYNCFILE_load(char* path, int flags);
 extern char* D_004A3414;
-extern char D_004A3430[];
+extern char str_bar_c[];
 
 struct sPbEntry_26C9F0 { int id; int used; int pad; };
 struct sPb_26C9F0 {
@@ -383,7 +383,7 @@ struct sPb_26C9F0 {
  *
  * Looks the id up with cPlaybackMan_findFileById. A listed file whose data pointer (entry +0x4) is set needs nothing. Otherwise the
  * entry index becomes the current async file (+0x74), the path is built with sprintf from the format at D_004A3414,
- * D_004A3430, D_004A3410, the location name (+0x8) and the file id, and ASYNCFILE_load(path, 0x100) is started; its
+ * str_bar_c, D_004A3410, the location name (+0x8) and the file id, and ASYNCFILE_load(path, 0x100) is started; its
  * handle is kept at +0x78 (-1 on failure). cPlaybackMan_update copies the finished file into the entry.
  *
  * @param self_  the playback manager
@@ -402,7 +402,7 @@ extern "C" int cPlaybackMan_load(void* self_, int key)
         self->cur = idx;
         self->handle = -1;
         int num = D_004A3410;
-        sprintf(path, D_004A3414, D_004A3430, num, self->name, entry->id);
+        sprintf(path, D_004A3414, str_bar_c, num, self->name, entry->id);
         int asyncHandle = ASYNCFILE_load(path, 0x100);
         self->handle = asyncHandle;
         if (asyncHandle >= 0)

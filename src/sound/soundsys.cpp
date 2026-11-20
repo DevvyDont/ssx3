@@ -14907,7 +14907,7 @@ INCLUDE_ASM("sound/soundsys", FileParser_FindNextSection);
 signed char FileParser_GetChar(void* self);
 extern "C" int FileParser_SkipComment(FileParser* self);
 extern "C" int FileParser_ExpectToken(FileParser* self, const char* s);
-extern const char D_004A3720[];
+extern const char str_rbracket[];
 
 /**
  * Advances to the next section header "[name]" and returns its name (On Tour FindNextSection).
@@ -14931,7 +14931,7 @@ extern "C" char* FileParser_FindNextSection(FileParser* self)
                     n++;
                 } while (*(signed char*)self->mPtr != ']');
             }
-            if (FileParser_ExpectToken(self, D_004A3720) == 0) {
+            if (FileParser_ExpectToken(self, str_rbracket) == 0) {
                 char* buf = (char*)&self->mTempStr;
                 buf[n] = 0;
                 return buf;
@@ -14998,7 +14998,7 @@ INCLUDE_ASM("sound/soundsys", FileParser_GetString);
 signed char FileParser_GetChar(void* self);
 extern "C" void FileParser_SkipSpace(void*);
 extern "C" int FileParser_ExpectToken(FileParser* self, const char* s);
-extern const char D_004A3728[];
+extern const char str_dquote[];
 
 /**
  * Reads a quoted string: skips whitespace, consumes the opening '"', copies characters into mTempStr up to the
@@ -15011,7 +15011,7 @@ extern "C" char* FileParser_GetString(FileParser* self)
 {
     int n = 0;
     FileParser_SkipSpace(self);
-    FileParser_ExpectToken(self, D_004A3728);
+    FileParser_ExpectToken(self, str_dquote);
     if (*(signed char*)self->mPtr != '"') {
         char* dst = (char*)&self->mTempStr;
         do {
@@ -15019,7 +15019,7 @@ extern "C" char* FileParser_GetString(FileParser* self)
             n++;
         } while (*(signed char*)self->mPtr != '"');
     }
-    FileParser_ExpectToken(self, D_004A3728);
+    FileParser_ExpectToken(self, str_dquote);
     char* buf = (char*)&self->mTempStr;
     buf[n] = 0;
     return buf;
@@ -15164,7 +15164,7 @@ extern "C" int strcasecmp(const char* a, const char* b);
 extern "C" int FileParser_ExpectToken(FileParser* self, const char* s);
 extern "C" char* FileParser_GetString(FileParser* self);
 extern "C" char* strcpy(char* dst, const char* src);
-extern char D_004A3740[];
+extern char str_eq[];
 
 /**
  * Reads "= \"value\"" into @p out when the key last read (mTempStr) equals @p name, ignoring case.
@@ -15178,7 +15178,7 @@ extern "C" int FileParser_AssignString(FileParser* self, const char* name, char*
     if (strcasecmp((char*)&self->mTempStr, name) != 0) {
         return 0;
     }
-    if (FileParser_ExpectToken(self, D_004A3740) != 0) {
+    if (FileParser_ExpectToken(self, str_eq) != 0) {
         return 0;
     }
     char* str = FileParser_GetString(self);
@@ -15196,7 +15196,7 @@ INCLUDE_ASM("sound/soundsys", FileParser_AssignFloat);
 extern "C" int strcasecmp(const char* a, const char* b);
 extern "C" int FileParser_ExpectToken(FileParser* self, const char* s);
 extern "C" float FileParser_GetFloat(FileParser* self);
-extern char D_004A3740[];
+extern char str_eq[];
 
 /**
  * Reads "= value" as a float into @p out when the key last read (mTempStr) equals @p name, ignoring case.
@@ -15210,7 +15210,7 @@ extern "C" int FileParser_AssignFloat(FileParser* self, const char* name, float*
     if (strcasecmp((char*)&self->mTempStr, name) != 0) {
         return 0;
     }
-    if (FileParser_ExpectToken(self, D_004A3740) != 0) {
+    if (FileParser_ExpectToken(self, str_eq) != 0) {
         return 0;
     }
     *out = FileParser_GetFloat(self);
@@ -15224,7 +15224,7 @@ INCLUDE_ASM("sound/soundsys", FileParser_AssignInt);
 extern "C" int strcasecmp(const char* a, const char* b);
 extern "C" int FileParser_ExpectToken(FileParser* self, const char* s);
 extern "C" int FileParser_GetInt(FileParser* self);
-extern char D_004A3740[];
+extern char str_eq[];
 
 /**
  * Reads "= value" as an int into @p out when the key last read (mTempStr) equals @p name, ignoring case.
@@ -15238,7 +15238,7 @@ extern "C" int FileParser_AssignInt(FileParser* self, const char* name, int* out
     if (strcasecmp((char*)&self->mTempStr, name) != 0) {
         return 0;
     }
-    if (FileParser_ExpectToken(self, D_004A3740) != 0) {
+    if (FileParser_ExpectToken(self, str_eq) != 0) {
         return 0;
     }
     *out = FileParser_GetInt(self);

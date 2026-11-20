@@ -1041,7 +1041,7 @@ extern "C" void* cUIState_cUIState(void* self);
 extern "C" void cFEMemCard_initFEMemCard(cFEMemCard* self, int a1);
 extern void* cOVState_vtbl[];
 extern void* cFEMemCard_vtbl[];
-extern unsigned short D_004A1390[];
+extern unsigned short str_sp[];
 
 /**
  * Constructs a memory-card overlay state with an overlay id: cFEMemCard_cFEMemCard2's work, but with mOVID (+0x98) = @p
@@ -1049,7 +1049,7 @@ extern unsigned short D_004A1390[];
  *
  * Runs cUIState's constructor (cUIState_cUIState; @p engine reaches it untouched in the second argument register as the
  * engine), the inlined cOVState part (vtable cOVState_vtbl; mDoneTransition, mAllowPauseMenu and mRemovePDA 0; mszChatBuff
- * " " from D_004A1390), stores cFEMemCard's vtable cFEMemCard_vtbl and runs cFEMemCard_initFEMemCard with @p memCardType. cOVState_SAVEREPLAY_cOVState_SAVEREPLAY and
+ * " " from str_sp), stores cFEMemCard's vtable cFEMemCard_vtbl and runs cFEMemCard_initFEMemCard with @p memCardType. cOVState_SAVEREPLAY_cOVState_SAVEREPLAY and
  * cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS (fe/ovstatepause) call it with types 1 and 2.
  *
  * @param engine  the UI engine (only passed on to cUIState's constructor)
@@ -1065,7 +1065,7 @@ extern "C" void* cFEMemCard_cFEMemCard(cFEMemCard* self, int engine, int memCard
     self->mDoneTransition = 0;
     self->mAllowPauseMenu = 0;
     self->mRemovePDA = 0;
-    *(unsigned short*)((char*)self + 0x58) = D_004A1390[0];
+    *(unsigned short*)((char*)self + 0x58) = str_sp[0];
     self->mVtbl = cFEMemCard_vtbl;
     cFEMemCard_initFEMemCard(self, memCardType);
     return ((void*)self);
@@ -1079,13 +1079,13 @@ extern "C" void* cUIState_cUIState(void* self);
 extern "C" void cFEMemCard_initFEMemCard(cFEMemCard* self, int a1);
 extern void* cOVState_vtbl[];
 extern void* cFEMemCard_vtbl[];
-extern unsigned short D_004A1390[];
+extern unsigned short str_sp[];
 
 /**
  * Constructs the memory card screen base used by the profile, autosave and save screens.
  *
  * Runs the cUIState constructor, installs the cOVState vtable (cOVState_vtbl) and then this class's (cFEMemCard_vtbl),
- * clears +0x48, +0x4C, +0x54 and +0x98, copies the empty string D_004A1390 into +0x58, and runs cFEMemCard_initFEMemCard
+ * clears +0x48, +0x4C, +0x54 and +0x98, copies the empty string str_sp into +0x58, and runs cFEMemCard_initFEMemCard
  * (On Tour initFEMemCard) with @p iType. The engine argument is not used.
  *
  * @param pEngine  the UI engine (unused)
@@ -1100,7 +1100,7 @@ extern "C" void* cFEMemCard_cFEMemCard2(cFEMemCard* self, int pEngine, int iType
     self->mDoneTransition = 0;
     self->mAllowPauseMenu = 0;
     self->mRemovePDA = 0;
-    *(unsigned short*)((char*)self + 0x58) = D_004A1390[0];
+    *(unsigned short*)((char*)self + 0x58) = str_sp[0];
     self->mVtbl = cFEMemCard_vtbl;
     cFEMemCard_initFEMemCard(self, iType);
     return ((void*)self);

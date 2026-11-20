@@ -700,7 +700,7 @@ extern "C" void cWorldCache_initPageMap(cWorldCache_initPageMap_sCache* self);
 extern char str_WORLD_MEMMAN[];
 extern char str_SharedTable[];
 extern char str_SectionTables[];
-extern char D_004A47C0[];
+extern char str_bar_e[];
 extern char str_sdb[];
 
 struct sBXStr_7FC0
@@ -731,7 +731,7 @@ extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int pNash)
     sBXStr_7FC0 path;
     sBXStr_7FC0 full;
     sBXStr_7FC0 base;
-    func_003186D0(&full, D_004A47C0, (cBXString_cBXString2(&base, name), &base));
+    func_003186D0(&full, str_bar_e, (cBXString_cBXString2(&base, name), &base));
     func_00318630(&path, &full, str_sdb);
     *(void**)self = FILE_load(path.p, 0x2000000);
     cBXString__cBXString(&path, 2);

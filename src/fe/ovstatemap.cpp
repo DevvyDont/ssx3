@@ -1479,7 +1479,7 @@ extern "C" int cGameComm_getQueuedChat(int a, char* name, int len);
 extern char str_helptext_b[];
 extern char str_helptexts[];
 extern char str_textScrollChat_b[];
-extern char D_004A2710[];
+extern char str_colon_sp_b[];
 
 struct sBXString_A4E0 {
     char* str;
@@ -1535,7 +1535,7 @@ extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
                 int none = origNumLines == 0;
                 sBXString_A4E0 chatLine;
                 cBXString_cBXString2(&chatLine, net + 0x498);
-                cBXString_Concat(&chatLine, D_004A2710);
+                cBXString_Concat(&chatLine, str_colon_sp_b);
                 cBXString_Concat(&chatLine, name);
                 cUITextScroll_addAsciiString(obj, chatLine.str);
                 func_001A83D8(obj, 40, 4, origNumLines, selectedIndex, linesOffset, none, 1);

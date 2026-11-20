@@ -65,7 +65,7 @@ struct cOVState_MESSAGECENTER {
     int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
     int mRestoreCutSceneMode;       // 0x050 [O]; [U] cOVState_onCreateScreen / onDestroyScreen
     int mRemovePDA;                 // 0x054 [O]; [R] zeroed
-    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (D_004A2088, sh)
+    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (str_sp_b, sh)
     int mOVID;                      // 0x098 [O] tOVStateEnum; [R] cOVState_MESSAGECENTER_cOVState_MESSAGECENTER stores its third argument (0x22)
     // --- cOVState_MESSAGECENTER
     cUIThing* mpUnreadMail[8];      // 0x09C [R] ctor zeroes 8; [U] onWidgetCreate (cOVState_MESSAGECENTER_onWidgetCreate): widgets "UnreadMail%d";

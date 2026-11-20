@@ -2807,7 +2807,7 @@ extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src);
 extern "C" int sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 // PORT: the unit defines cPS2MemCard_GetFreeSpace1 as returning void*; it returns an int count here.
 extern "C" int cPS2MemCard_GetFreeSpace1_i(void* self, int idx) __asm__("cPS2MemCard_GetFreeSpace1");
-extern char D_004A3968[];
+extern char str_sp_d[];
 extern char str_kT_MEMFreePS2[];
 
 struct sQTEntry_53E0 {
@@ -2833,7 +2833,7 @@ struct cPS2MemCard_GetStatus_sVEntry {
  * Writes a status line for a port into a 16-bit buffer.
  *
  * When the port's format word (unk_0C of unk_17C[@p idx]) is 0 or its last result (unk_08) is not 0, the line is a
- * single space (D_004A3968, widened by func_002C2540). For a result of 0 it is the front-end locale's "kT_MEMFreePS2"
+ * single space (str_sp_d, widened by func_002C2540). For a result of 0 it is the front-end locale's "kT_MEMFreePS2"
  * string (looked up through slot 4 of SSXApp->FELocale's vtable) formatted by sprintf1 with the free clusters
  * (cPS2MemCard_GetFreeSpace1, at least 0).
  *
@@ -2843,12 +2843,12 @@ struct cPS2MemCard_GetStatus_sVEntry {
 extern "C" void cPS2MemCard_GetStatus(sQT_53E0* self, int idx, unsigned short* dst)
 {
     if (self->entries[idx].data == 0) {
-        func_002C2540(dst, D_004A3968);
+        func_002C2540(dst, str_sp_d);
         return;
     }
     switch (self->entries[idx].status) {
     case -2:
-        func_002C2540(dst, D_004A3968);
+        func_002C2540(dst, str_sp_d);
         break;
     case 0: {
         // PORT: g++ `>?` (max) operator, removed in GCC 4.3.
@@ -2860,7 +2860,7 @@ extern "C" void cPS2MemCard_GetStatus(sQT_53E0* self, int idx, unsigned short* d
         break;
     }
     default:
-        func_002C2540(dst, D_004A3968);
+        func_002C2540(dst, str_sp_d);
         break;
     }
 }
@@ -3773,38 +3773,38 @@ extern "C" void cPS2MemCard_GetDeviceName(cPS2MemCard* self, int device, unsigne
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetFileDate);
 #ifdef SKIP_ASM
-extern char D_004A3968[];
+extern char str_sp_d[];
 
 /**
  * Writes a file slot's save date as text; the PS2 version has none and writes a single space.
  *
- * Widens D_004A3968 (" ") into @p dst with func_002C2540; the slot is ignored.
+ * Widens str_sp_d (" ") into @p dst with func_002C2540; the slot is ignored.
  *
  * @param fileSlot  the file slot (unused)
  * @param dst  the wide-character buffer that receives the text
  */
 extern "C" void cPS2MemCard_GetFileDate(cPS2MemCard* self, int fileSlot, unsigned short* dst)
 {
-    func_002C2540(dst, D_004A3968);
+    func_002C2540(dst, str_sp_d);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetFileTime);
 #ifdef SKIP_ASM
-extern char D_004A3968[];
+extern char str_sp_d[];
 
 /**
  * Writes a file slot's save time as text; the PS2 version has none and writes a single space.
  *
- * Widens D_004A3968 (" ") into @p dst with func_002C2540; the slot is ignored.
+ * Widens str_sp_d (" ") into @p dst with func_002C2540; the slot is ignored.
  *
  * @param fileSlot  the file slot (unused)
  * @param dst  the wide-character buffer that receives the text
  */
 extern "C" void cPS2MemCard_GetFileTime(cPS2MemCard* self, int fileSlot, unsigned short* dst)
 {
-    func_002C2540(dst, D_004A3968);
+    func_002C2540(dst, str_sp_d);
 }
 #endif
 

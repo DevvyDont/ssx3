@@ -270,11 +270,11 @@ extern "C" void func_003186D0_CBB8(sBXStr_CBB8*, const char*, int) __asm__("func
 extern "C" void func_00318630_CBB8(sBXStr_CBB8*, sBXStr_CBB8*, const char*) __asm__("func_00318630");
 extern "C" int ASYNCFILE_load_CBB8(const char*, int) __asm__("ASYNCFILE_load");
 extern "C" void cBXString_dt_CBB8(sBXStr_CBB8*, int) __asm__("cBXString__cBXString");
-extern char D_004A47C0[];
+extern char str_bar_e[];
 extern char str_ssf[];
 extern "C" void func_003ACBB8_impl(void *self, int arg) __asm__("func_003ACBB8");
 /**
- * Starts loading an entry's script file asynchronously from D_004A47C0 + @p fileName + str_ssf.
+ * Starts loading an entry's script file asynchronously from str_bar_e + @p fileName + str_ssf.
  *
  * Clears mStreamed and stores the ASYNCFILE_load handle (flags 0x100); the state becomes 1 (loading), or 2 when the
  * handle is 0 or negative.
@@ -285,7 +285,7 @@ extern "C" void func_003ACBB8_impl(void *self, int fileName) {
     sBXStr_CBB8 fullPath;
     sBXStr_CBB8 prefixed;
     *(short*)((char*)self + 2) = 0;
-    func_003186D0_CBB8(&prefixed, D_004A47C0, fileName);
+    func_003186D0_CBB8(&prefixed, str_bar_e, fileName);
     func_00318630_CBB8(&fullPath, &prefixed, str_ssf);
     *(int*)((char*)self + 4) = ASYNCFILE_load_CBB8(fullPath.p, 0x100);
     cBXString_dt_CBB8(&fullPath, 2);

@@ -3564,7 +3564,7 @@ extern "C" void func_00245418(void* self)
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_002454F8);
 #ifdef SKIP_ASM
-extern char D_004A2BC8[];
+extern char str_pct[];
 extern char str_pct_3dpct_pct[];
 extern char* cAppMan_TheAppMan;
 extern "C" void sprintf2(char* dst, const char* fmt, ...);
@@ -3574,7 +3574,7 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
  * Shows the loading percentage on the match / event loading screen and optionally refreshes the player panels.
  *
  * Formats cAppMan_TheAppMan's float at +0x38 as an int with str_pct_3dpct_pct into the text widget hashed from
- * D_004A2BC8 on the screen at +0x40; with @p refresh set it also runs func_00246CF8 for players 0 and 1. Slot +0x3C
+ * str_pct on the screen at +0x40; with @p refresh set it also runs func_00246CF8 for players 0 and 1. Slot +0x3C
  * (onGainTransition) of D_0047C948.
  *
  * @param refresh  non-zero to refresh both player panels
@@ -3582,7 +3582,7 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
  */
 extern "C" int func_002454F8(void* self, int refresh)
 {
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pct));
     if (obj != 0) {
         char buf[208];
         sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(cAppMan_TheAppMan + 0x38));
@@ -3684,7 +3684,7 @@ void func_00245690(void* self)
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00245698);
 #ifdef SKIP_ASM
-extern char D_004A2BC8[];
+extern char str_pct[];
 extern char str_pct_3dpct_pct[];
 extern char* cAppMan_TheAppMan;
 extern "C" void sprintf2(char* dst, const char* fmt, ...);
@@ -3694,13 +3694,13 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
  * Shows the loading percentage on the leaving-the-lodge loading screen.
  *
  * Formats cAppMan_TheAppMan's float at +0x38 as an int with str_pct_3dpct_pct into the text widget hashed from
- * D_004A2BC8 on the screen at +0x40. Slot +0x3C (onGainTransition) of D_0047C878.
+ * str_pct on the screen at +0x40. Slot +0x3C (onGainTransition) of D_0047C878.
  *
  * @return 0
  */
 extern "C" int func_00245698(void* self)
 {
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pct));
     if (obj != 0) {
         char buf[208];
         sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(cAppMan_TheAppMan + 0x38));
@@ -3813,7 +3813,7 @@ void func_002458B0(void* self)
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_002458B8);
 #ifdef SKIP_ASM
-extern char D_004A2BC8[];
+extern char str_pct[];
 extern char str_pct_3dpct_pct[];
 extern char* cAppMan_TheAppMan;
 extern "C" void sprintf2(char* dst, const char* fmt, ...);
@@ -3823,13 +3823,13 @@ extern "C" void cUIText_setUnicodeString(void* text, void* p);
  * Shows the loading percentage on the controller-layout loading screen.
  *
  * Formats cAppMan_TheAppMan's float at +0x38 as an int with str_pct_3dpct_pct into the text widget hashed from
- * D_004A2BC8 on the screen at +0x40. Slot +0x3C (onGainTransition) of D_0047C7A8.
+ * str_pct on the screen at +0x40. Slot +0x3C (onGainTransition) of D_0047C7A8.
  *
  * @return 0
  */
 extern "C" int func_002458B8(void* self)
 {
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pct));
     if (obj != 0) {
         char buf[208];
         sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(cAppMan_TheAppMan + 0x38));

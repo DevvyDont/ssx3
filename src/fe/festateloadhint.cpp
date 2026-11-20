@@ -73,7 +73,7 @@ extern "C" void cFELoadHintState_onCreateScreen(void* self)
 INCLUDE_ASM("fe/festateloadhint", cFELoadHintState_onGainTransition);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_004A2BC8[];
+extern char str_pct[];
 extern char str_pct_3dpct_pct[];
 extern void* cAppMan_TheAppMan;
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -90,7 +90,7 @@ extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 extern "C" int cFELoadHintState_onGainTransition(void* self)
 {
     char buf[200];
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pct));
     if (obj != 0) {
         sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)((char*)cAppMan_TheAppMan + 0x38));
         cUIText_setUnicodeString(obj, buf);
@@ -178,7 +178,7 @@ extern "C" void cFELoadState_onCreateScreen(void* self)
 INCLUDE_ASM("fe/festateloadhint", cFELoadState_onGainTransition);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_004A2BC8[];
+extern char str_pct[];
 extern char str_pct_3dpct_pct[];
 extern void* cAppMan_TheAppMan;
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -195,7 +195,7 @@ extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 extern "C" int cFELoadState_onGainTransition(void* self)
 {
     char buf[200];
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pct));
     if (obj != 0) {
         sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)((char*)cAppMan_TheAppMan + 0x38));
         cUIText_setUnicodeString(obj, buf);
@@ -288,7 +288,7 @@ void cFELoadStateInLodge_onWidgetCreate(void* self)
 INCLUDE_ASM("fe/festateloadhint", cFELoadStateInLodge_onGainTransition);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern char D_004A2BC8[];
+extern char str_pct[];
 extern char str_pct_3dpct_pct[];
 extern void* cAppMan_TheAppMan;
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -305,7 +305,7 @@ extern "C" void cUIText_setUnicodeString(void* obj, char* text);
 extern "C" int cFELoadStateInLodge_onGainTransition(void* self)
 {
     char buf[200];
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A2BC8));
+    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pct));
     if (obj != 0) {
         sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)((char*)cAppMan_TheAppMan + 0x38));
         cUIText_setUnicodeString(obj, buf);

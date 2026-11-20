@@ -348,7 +348,7 @@ extern char str_orange_select_bar[];
 extern char str_max_rewards[];
 extern char str_num_rewards[];
 extern char str_slash[];
-extern char D_004A1EF0[];
+extern char str_slash_d[];
 extern char str_Menu0000[];
 extern char str_Poster_icon[];
 extern char str_poster_icon[];
@@ -472,7 +472,7 @@ extern "C" void cFEStateRewardGalleryBase_onWidgetCreate(sGallery_F820* self, sW
         sprintf(buf, str_pct_d_b, self->count6C);
         cUIText_setAsciiString((cUIText*)self->w914, buf);
     } else if (hash == GetHashValue32(str_slash)) {
-        cUIText_setAsciiString((cUIText*)w, D_004A1EF0);
+        cUIText_setAsciiString((cUIText*)w, str_slash_d);
     } else if (hash == GetHashValue32(str_Menu0000)) {
         self->w8F4 = w;
     } else if (hash == GetHashValue32(str_Poster_icon)) {

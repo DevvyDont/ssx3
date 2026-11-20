@@ -986,7 +986,7 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 int cFEStateRequestLine_getSongCost_UBT(void* self, int idx) __asm__("cFEStateRequestLine_getSongCost__FPv");
-extern char D_004A1390[];
+extern char str_sp[];
 extern char str_kT_BTNRemSong[];
 extern char str_kT_BTNAddSong[];
 extern char str_kT_16BuyMusicTracks[];
@@ -1048,7 +1048,7 @@ extern "C" void cFEStateRequestLine_updateButtonsText(void* requestLine, int idx
     sReqLine_UBT* self = (sReqLine_UBT*)requestLine;
     if (self->text != 0) {
         int shown = 0;
-        cUIText_setAsciiString((cUIText*)self->text, D_004A1390);
+        cUIText_setAsciiString((cUIText*)self->text, str_sp);
         self->text->setVisible(0);
         self->back->setVisible(0);
         int on = (self->sel >> idx) & 1;

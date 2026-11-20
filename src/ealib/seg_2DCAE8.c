@@ -7490,7 +7490,7 @@ extern struct IsoEntry_4040 *D_00450C68;
 extern unsigned int D_00450C6C;
 extern int D_00450C70;
 extern char str_Named_Dir[];
-extern char D_00495DF0[];
+extern char str_slash_c[];
 extern char D_00519C80[];
 extern char D_0051A480[];
 extern char D_0051AC80[];
@@ -7580,7 +7580,7 @@ unsigned int func_003E4040(unsigned int n, void *files) {
             for (rec = func_003E3618_4040(); (char *)rec <= D_00519C80 + 0x800; rec = (struct IsoDirRec_4040 *)((char *)rec + rec->len)) {
                 if (func_00416B18_4040(rec->name, D_00450C58_4040.root, rec->name_len) == 0) {
                     strcat_4040(D_0051EC80, D_00450C58_4040.root);
-                    strcat_4040(D_0051EC80, D_00495DF0);
+                    strcat_4040(D_0051EC80, str_slash_c);
                     func_003E3758_4040(rec->lba, (rec->size + 0x7FF) >> 11);
                     break;
                 }

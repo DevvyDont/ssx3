@@ -1742,7 +1742,7 @@ extern "C" void func_001A83D8(void* list, int keep, unsigned int sel, int a3, in
 extern char str_textScrollChat_b[];
 extern char D_00534FB8[];
 extern char D_00534FC8[];
-extern char D_004A2710[];
+extern char str_colon_sp_b[];
 
 struct sBXString_00210BD8 {
     char* str;
@@ -1755,7 +1755,7 @@ struct sBXString_00210BD8 {
  *
  * Finds "textScrollChat" and does nothing without it. It saves the scroller's mLineSize, mSelectedIndex and
  * mLinesOffset, builds the line in a cBXString from our name (D_00534FB8) when @p ownMessage is set or the opponent's
- * (D_00534FC8) otherwise, ": " (D_004A2710) and @p name, adds it with cUITextScroll_addAsciiString, then func_001A83D8
+ * (D_00534FC8) otherwise, ": " (str_colon_sp_b) and @p name, adds it with cUITextScroll_addAsciiString, then func_001A83D8
  * trims the scroller to 30 lines and restores its scroll state from the saved values.
  *
  * @param name  the message text
@@ -1774,14 +1774,14 @@ extern "C" void func_00210BD8(void* self, char* name, int ownMessage)
     if (ownMessage != 0) {
         sBXString_00210BD8 lineText;
         cBXString_cBXString2(&lineText, D_00534FB8);
-        cBXString_Concat(&lineText, D_004A2710);
+        cBXString_Concat(&lineText, str_colon_sp_b);
         cBXString_Concat(&lineText, name);
         cUITextScroll_addAsciiString(obj, lineText.str);
         cBXString__cBXString(&lineText, 2);
     } else {
         sBXString_00210BD8 lineText;
         cBXString_cBXString2(&lineText, D_00534FC8);
-        cBXString_Concat(&lineText, D_004A2710);
+        cBXString_Concat(&lineText, str_colon_sp_b);
         cBXString_Concat(&lineText, name);
         cUITextScroll_addAsciiString(obj, lineText.str);
         cBXString__cBXString(&lineText, 2);

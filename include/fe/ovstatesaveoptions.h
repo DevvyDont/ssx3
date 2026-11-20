@@ -60,7 +60,7 @@ struct cOVState_SAVEOPTIONS {
     int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
     int mRestoreCutSceneMode;       // 0x050 [O] (bool); [U] cOVState_onCreateScreen / onDestroyScreen
     int mRemovePDA;                 // 0x054 [O] (bool); [R] zeroed
-    char mszChatBuff[0x40];         // 0x058 [O] (char[63] in On Tour); [R] the ctors copy " " (D_004A2088) into it
+    char mszChatBuff[0x40];         // 0x058 [O] (char[63] in On Tour); [R] the ctors copy " " (str_sp_b) into it
                                     //       (one sh)
     int mOVID;                      // 0x098 [O] tOVStateEnum; [R] func_001D5330's eOVState (19 from
                                     //       cOVStateManager_triggerOverlay)

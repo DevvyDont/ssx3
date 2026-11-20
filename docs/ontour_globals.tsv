@@ -4878,3 +4878,32 @@ ps2_addr	name	previous	source	evidence
 004946C8	cUIState_vtbl	D_004946C8	vtables.py	[D] slot 1 cUIState__cUIState; [C] stored by cUIState__cUIState, cUIState_cUIState, cUIState_cUIState1, cUIState_cUIState2; [M] own slot(s) cUIState_getData__FPv, cUIState_handleEvent__FPv, cUIState_onCreateScreen__FPv +18
 004871E8	cMemCard_vtbl	D_004871E8	vtables.py	[D] slot 1 cMemCard__cMemCard (preview build _$_8cMemCard); [M] own slots cMemCard_IsDeviceChanged / ClearDeviceChanges / SetAllDevicesChanged (preview linkonce names)
 00493938	D_00493938	cGarbageMan_vtbl	vtables.py	held: one-slot vtable, only [D] (round 9 overcounted the destructor's own store as [C])
+00495DF0	str_slash_c	D_00495DF0	string contents (retail ELF)	[R] NUL-terminated string "/" at 0x00495DF0
+004A1370	str_lt_dash	D_004A1370	string contents (retail ELF)	[R] NUL-terminated string "<-" at 0x004A1370
+004A1378	str_dash_gt	D_004A1378	string contents (retail ELF)	[R] NUL-terminated string "->" at 0x004A1378
+004A1390	str_sp	D_004A1390	string contents (retail ELF)	[R] NUL-terminated string " " at 0x004A1390
+004A1A10	str_bar	D_004A1A10	string contents (retail ELF)	[R] NUL-terminated string "|" at 0x004A1A10
+004A1A50	str_colon_sp	D_004A1A50	string contents (retail ELF)	[R] NUL-terminated string ": " at 0x004A1A50
+004A1BD0	str_dot_dot_dot	D_004A1BD0	string contents (retail ELF)	[R] NUL-terminated string "..." at 0x004A1BD0
+004A1EF0	str_slash_d	D_004A1EF0	string contents (retail ELF)	[R] NUL-terminated string "/" at 0x004A1EF0
+004A2088	str_sp_b	D_004A2088	string contents (retail ELF)	[R] NUL-terminated string " " at 0x004A2088
+004A2100	str_plus	D_004A2100	string contents (retail ELF)	[R] NUL-terminated string "+" at 0x004A2100
+004A2108	str_dash	D_004A2108	string contents (retail ELF)	[R] NUL-terminated string "-" at 0x004A2108
+004A2110	str_sp_gt	D_004A2110	string contents (retail ELF)	[R] NUL-terminated string " >" at 0x004A2110
+004A2168	str_dash_sp_dash_sp_dash	D_004A2168	string contents (retail ELF)	[R] NUL-terminated string "- - -" at 0x004A2168
+004A2710	str_colon_sp_b	D_004A2710	string contents (retail ELF)	[R] NUL-terminated string ": " at 0x004A2710
+004A2AA0	str_bar_b	D_004A2AA0	string contents (retail ELF)	[R] NUL-terminated string "|" at 0x004A2AA0
+004A2BC8	str_pct	D_004A2BC8	string contents (retail ELF)	[R] NUL-terminated string "%" at 0x004A2BC8
+004A2ED0	str_sp_c	D_004A2ED0	string contents (retail ELF)	[R] NUL-terminated string " " at 0x004A2ED0
+004A3218	str_star	D_004A3218	string contents (retail ELF)	[R] NUL-terminated string "*" at 0x004A3218
+004A3330	str_colon	D_004A3330	string contents (retail ELF)	[R] NUL-terminated string ":" at 0x004A3330
+004A3430	str_bar_c	D_004A3430	string contents (retail ELF)	[R] NUL-terminated string "|" at 0x004A3430
+004A3720	str_rbracket	D_004A3720	string contents (retail ELF)	[R] NUL-terminated string "]" at 0x004A3720
+004A3728	str_dquote	D_004A3728	string contents (retail ELF)	[R] NUL-terminated string """ at 0x004A3728
+004A3740	str_eq	D_004A3740	string contents (retail ELF)	[R] NUL-terminated string "=" at 0x004A3740
+004A3870	str_bar_d	D_004A3870	string contents (retail ELF)	[R] NUL-terminated string "|" at 0x004A3870
+004A3968	str_sp_d	D_004A3968	string contents (retail ELF)	[R] NUL-terminated string " " at 0x004A3968
+004A39D0	str_underscore	D_004A39D0	string contents (retail ELF)	[R] NUL-terminated string "_" at 0x004A39D0
+004A39F0	str_comma	D_004A39F0	string contents (retail ELF)	[R] NUL-terminated string "," at 0x004A39F0
+004A47C0	str_bar_e	D_004A47C0	string contents (retail ELF)	[R] NUL-terminated string "|" at 0x004A47C0
+004A4A78	str_tilde_tilde	D_004A4A78	string contents (retail ELF)	[R] NUL-terminated string "~~" at 0x004A4A78

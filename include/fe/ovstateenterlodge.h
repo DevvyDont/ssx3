@@ -53,7 +53,7 @@ struct cOVState_ENTERLODGE {
     int mRestoreCutSceneMode;       // 0x050 [O]; [U] cOVState_onCreateScreen; onDestroyScreen clears it before
                                     //       cOVState_onDestroyScreen
     int mRemovePDA;                 // 0x054 [O]; [R] zeroed; [U] onWidgetEvent sets it on No / Triangle
-    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (D_004A2088, one halfword)
+    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (str_sp_b, one halfword)
     int mOVID;                      // 0x098 [O] tOVStateEnum; [R] the ctor's overlay-id argument (31)
 };
 

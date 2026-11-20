@@ -4601,7 +4601,7 @@ extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
 extern "C" char* strcat(char* dst, const char* src);
-extern char D_004A39D0[];
+extern char str_underscore[];
 
 struct cTextMenuItem_preRender_sResult {
     int a;
@@ -4618,7 +4618,7 @@ static inline cTextMenuItem_preRender_sResult cTextMenuItem_preRender_make(void*
 }
 
 /**
- * Measures a text-entry item: its caption on the left and its text on the right, with a trailing "_" (D_004A39D0) when
+ * Measures a text-entry item: its caption on the left and its text on the right, with a trailing "_" (str_underscore) when
  * the item has the focus and the cursor (+0x28) is at the end of the text and below 15 (cMenuItem_textPreRender).
  *
  * @param item  the text-entry item
@@ -4632,7 +4632,7 @@ extern "C" cTextMenuItem_preRender_sResult cTextMenuItem_preRender(void* item)
     strcpy(buf, name);
     int len = strlen(name);
     if (focused && *(int*)((char*)item + 0x28) == len && *(int*)((char*)item + 0x28) < 15) {
-        strcat(buf, D_004A39D0);
+        strcat(buf, str_underscore);
     }
     cTextMenuItem_preRender_sResult rowRect = cTextMenuItem_preRender_make(item, *(int*)((char*)item + 0x14), buf);
     return rowRect;
@@ -4772,7 +4772,7 @@ extern "C" void cTextMenuItem_render(void* self, float* rect)
     strcpy(buf, name);
     int len = strlen(name);
     if (focused && *(int*)((char*)self + 0x28) == len && *(int*)((char*)self + 0x28) < 15) {
-        strcat(buf, D_004A39D0);
+        strcat(buf, str_underscore);
     }
     {
         char* menu = *(char**)self;
@@ -6780,7 +6780,7 @@ struct cBXStr_D0EF8 {
 cBXStr_D0EF8 FormatValue_D0EF8(float v) __asm__("prettyFloat");
 cBXStr_D0EF8 operator+(const cBXStr_D0EF8& a, const char* b) __asm__("func_00318630");
 cBXStr_D0EF8 operator+(const cBXStr_D0EF8& a, const cBXStr_D0EF8& b) __asm__("func_003185C8");
-extern char D_004A39F0[];
+extern char str_comma[];
 extern sColor D_004D53C0;
 extern sColor D_004D53D0;
 extern sColor D_004D53E0;
@@ -6853,7 +6853,7 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem_D0EF8* self, float* rect)
     *(sVec2r_D0EF8*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x28) = sVec2r_D0EF8(2.0f, 2.0f);
     cFont_text(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 16.0f, rect[1] + 6.0f - 1.0f, self->label);
     if (self->showCur && focused) {
-        cBXStr_D0EF8 str = FormatValue_D0EF8(self->pts[self->cur].x) + D_004A39F0 + FormatValue_D0EF8(self->pts[self->cur].y);
+        cBXStr_D0EF8 str = FormatValue_D0EF8(self->pts[self->cur].x) + str_comma + FormatValue_D0EF8(self->pts[self->cur].y);
         cFont_text(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58), rect[0] + 32.0f, rect[1] + 12.0f - 1.0f + lineH, str.str);
     }
     float graphHeight;

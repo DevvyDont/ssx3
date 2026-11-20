@@ -312,12 +312,12 @@ extern "C" char* func_003EB840(char* record, char* prefix, char* name)
 INCLUDE_ASM("dirtysock/tags", func_003EB8B8);
 #ifdef SKIP_ASM
 extern "C" unsigned char* cDirtysock_tag_TagFieldFind(char* record, char* name);
-extern char D_004A4A78[];
+extern char str_tilde_tilde[];
 
 /**
  * Returns the text block that follows the "~~" field of a tag record.
  *
- * Finds the field named "~~" (D_004A4A78; func_003EBD70() appends it as "~~=\n") and skips the characters 1..0x20
+ * Finds the field named "~~" (str_tilde_tilde; func_003EBD70() appends it as "~~=\n") and skips the characters 1..0x20
  * (control characters and spaces) after it.
  *
  * @param record  the tag record to search
@@ -325,7 +325,7 @@ extern char D_004A4A78[];
  */
 extern "C" unsigned char* func_003EB8B8(char* record)
 {
-    unsigned char* cursor = cDirtysock_tag_TagFieldFind(record, D_004A4A78);
+    unsigned char* cursor = cDirtysock_tag_TagFieldFind(record, str_tilde_tilde);
     if (cursor != 0) {
         while ((unsigned int)(*cursor - 1) < 0x20U) {
             cursor++;

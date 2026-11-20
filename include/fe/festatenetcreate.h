@@ -110,7 +110,7 @@ struct cFEStateCreateStep1 {
                                     //       points the popup's message at it; the destructor frees it
     int unk_6BC;                    // 0x6BC [R] 2; [U] func_001A92D8 (popup events): 2 on event 21, 0 on event 15;
                                     //       on event 22 it tells the parent state (slot 17, event 0xF) when 0
-    char* unk_6C0;                  // 0x6C0 [R] cBXString built from D_004A1390 (cBXString_cBXString2), destroyed by the
+    char* unk_6C0;                  // 0x6C0 [R] cBXString built from str_sp (cBXString_cBXString2), destroyed by the
                                     //       dtor; [U] func_001A9890 assigns it (cBXString_operatorE1), func_001A98B0
                                     //       returns the text: the user name passed to the session calls (func_00262690);
                                     //       the messenger sets it to the selected buddy (func_001A4928)
@@ -250,7 +250,7 @@ struct cFEStateCreateStep2 {
                                     //       points the popup's message at it; the destructor frees it
     int unk_6BC;                    // 0x6BC [R] 2; [U] func_001A92D8 (popup events): 2 on event 21, 0 on event 15;
                                     //       on event 22 it tells the parent state (slot 17, event 0xF) when 0
-    char* unk_6C0;                  // 0x6C0 [R] cBXString built from D_004A1390 (cBXString_cBXString2), destroyed by the
+    char* unk_6C0;                  // 0x6C0 [R] cBXString built from str_sp (cBXString_cBXString2), destroyed by the
                                     //       dtor; [U] func_001A9890 assigns it (cBXString_operatorE1), func_001A98B0
                                     //       returns the text: the user name passed to the session calls (func_00262690);
                                     //       the messenger sets it to the selected buddy (func_001A4928)

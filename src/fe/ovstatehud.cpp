@@ -691,7 +691,7 @@ extern "C" void func_0020EB50(void* self, void* screen, void* rect);
 extern "C" void USTR_strcpyA(unsigned short* dst, const char* src);
 extern "C" void USTR_sprintf(unsigned short* dst, const unsigned short* fmt, ...);
 unsigned int BXrand();
-extern char D_004A2108[];
+extern char str_dash[];
 extern char str_fefont[];
 extern char str_hud_b[];
 extern char str_hudfont[];
@@ -1150,7 +1150,7 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
     }
     self->w16C = cFont_textExtent(self->font, self->fontName, 0, 0, 1.0f, 1.0f);
     self->w170 = cFont_textExtent(self->font, str_00, 0, 0, 1.0f, 1.0f);
-    self->w174 = cFont_textExtent(self->font, D_004A2108, 0, 0, 1.0f, 1.0f);
+    self->w174 = cFont_textExtent(self->font, str_dash, 0, 0, 1.0f, 1.0f);
     self->w178 = (self->w170 - cFont_textExtent(self->font, str_11_b, 0, 0, 1.0f, 1.0f)) * 0.25f;
     self->f17C = 0;
     self->f180 = 0;
@@ -1636,8 +1636,8 @@ INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderTime);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cFont_textf(void* font, float x, float y, const char* fmt, ...);
-extern char D_004A2100[];
-extern char D_004A2108[];
+extern char str_plus[];
+extern char str_dash[];
 extern char str_pct_02d[];
 extern char str_pct_02d_b[];
 
@@ -1714,9 +1714,9 @@ extern "C" void cOVStateHUD1P_renderTime(void* self_, int hour, int minute, int 
     float oneW = self->oneW * scale[0];
     if (timeRenderFlags & 6) {
         if (timeRenderFlags & 2)
-            cFont_text(self->font, out[0], out[1], D_004A2108);
+            cFont_text(self->font, out[0], out[1], str_dash);
         else
-            cFont_text(self->font, out[0], out[1], D_004A2100);
+            cFont_text(self->font, out[0], out[1], str_plus);
         out[0] += self->f174;
     }
     sprintf(bufs[0], str_pct_02d, hour);

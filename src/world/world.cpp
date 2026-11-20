@@ -220,7 +220,7 @@ extern "C" void cBXString_makeUpper(cBXString* self);
 extern "C" void* FILE_loadz(const char* name, int flags);
 extern "C" int func_004165A8(const void* a, const void* b);
 void cMemMan_free(void*);
-extern char D_004A47C0[];
+extern char str_bar_e[];
 extern char str_sdb[];
 
 struct sName_3A6948 {
@@ -249,7 +249,7 @@ struct sStr_3A6948 {
 /**
  * Checks which of @p n section names exist in a track's .sdb section table.
  *
- * Loads the file named D_004A47C0 + @p path + str_sdb with FILE_loadz. When it loaded and its first halfword is 0x3800,
+ * Loads the file named str_bar_e + @p path + str_sdb with FILE_loadz. When it loaded and its first halfword is 0x3800,
  * each name is upper-cased and compared (func_004165A8) with the 0x58-byte section records after the 0x50-byte header
  * (count at +0x8); a found name gets its flag set (names[i].ok = 1, else 0). The file is freed afterwards. When the
  * file is missing or has the wrong cookie the flags are left untouched. Called by cTrackFileMan_scanLocations' helpers
@@ -268,7 +268,7 @@ extern "C" int func_003A6948(const char* path, int n, sName_3A6948* names)
         sStr_3A6948 full;
         sStr_3A6948 prefixedBuf;
         sStr_3A6948 str;
-        char* pre = D_004A47C0;
+        char* pre = str_bar_e;
         cBXString* prefixed = (cBXString*)&prefixedBuf;
         cBXString_cBXString2(&str, path);
         func_003186D0(prefixed, pre, (cBXString*)&str);

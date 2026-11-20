@@ -4145,13 +4145,13 @@ INCLUDE_ASM("main/all_in_one_main", cFEMemCard_cFEMemCard1);
 extern "C" void *cUIState_cUIState_DE18(void *, int) __asm__("cUIState_cUIState");
 extern int cFEMemCard_vtbl[];
 extern int cOVState_vtbl[];
-extern unsigned short D_004A1390[];
+extern unsigned short str_sp[];
 
 /**
  * Constructs a memory-card screen base with no engine (the default constructor).
  *
  * Runs cUIState's constructor (cUIState_cUIState) with a null engine, stores the cOVState vtable cOVState_vtbl and then
- * cFEMemCard_vtbl at +0x8, clears +0x48, +0x4C, +0x54 and +0x98 and copies the empty string D_004A1390 into +0x58. Unlike
+ * cFEMemCard_vtbl at +0x8, clears +0x48, +0x4C, +0x54 and +0x98 and copies the empty string str_sp into +0x58. Unlike
  * the constructor that takes an engine and a type, it does not run cFEMemCard_initFEMemCard, so cFEMemCard_mInstance is left
  * alone.
  *
@@ -4164,7 +4164,7 @@ extern "C" void *cFEMemCard_cFEMemCard1(cFEMemCard* self) {
     self->mVtbl = (void**)cOVState_vtbl;
     self->mAllowPauseMenu = 0;
     self->mRemovePDA = 0;
-    unsigned short emptyChar = D_004A1390[0];
+    unsigned short emptyChar = str_sp[0];
     self->mVtbl = (void**)cFEMemCard_vtbl;
     *(unsigned short *)((char *)self + 0x58) = emptyChar;
     return ((void*)self);
@@ -5404,7 +5404,7 @@ extern "C" void* cUIState_cUIState1_E7B0(void* self, int a1, int a2) __asm__("cU
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern void* cFEStateNet_vtbl[];
-extern char D_004A1390_E7B0[] __asm__("D_004A1390");
+extern char D_004A1390_E7B0[] __asm__("str_sp");
 extern char str_StlBlock[];
 
 struct sListNode_E7B0 {
@@ -5423,7 +5423,7 @@ struct sList_E7B0 {
  *
  * Runs cUIState's two-argument constructor (cUIState_cUIState1) with null engine and parent, clears unk_048, unk_058,
  * mpKeyboard, mpKeyboardText, unk_6AC, unk_6B0 and unk_6B8, sets unk_6BC to 2, stores the cFEStateNet vtable
- * cFEStateNet_vtbl, builds the string at +0x6C0 from the empty string D_004A1390 (cBXString_cBXString2) and allocates the
+ * cFEStateNet_vtbl, builds the string at +0x6C0 from the empty string str_sp (cBXString_cBXString2) and allocates the
  * pending-message list's sentinel node (cMemMan_alloc(0xC, "StlBlock")), linking it to itself.
  *
  * @return @p self

@@ -107,7 +107,7 @@ extern "C" void cFEAsyncManager_Load1PeakPic(cFEAsyncManager* self, int pic, int
 INCLUDE_ASM("fe/feasyncfile", cFEAsyncManager_LoadLocationPic);
 #ifdef SKIP_ASM
 extern char str_pct_spct_spct_s[];
-extern char D_004A1A10[];
+extern char str_bar[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -127,7 +127,7 @@ extern "C" void cFEAsyncManager_LoadLocationPic(cFEAsyncManager* self, int id, i
     if (id >= 0) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 10);
         sFEPeakPicFiles* files = (sFEPeakPicFiles*)self;
-        sprintf(files->mFiles[slot].mName, str_pct_spct_spct_s, D_004A1A10, cBEMissionInterface_getPictureFileName(iface, id), str_ssh);
+        sprintf(files->mFiles[slot].mName, str_pct_spct_spct_s, str_bar, cBEMissionInterface_getPictureFileName(iface, id), str_ssh);
         files->mFiles[slot].mParam = useAsync;
         cFEAsyncManager_SetFileStatus(self, slot, 1);
     }
@@ -2111,7 +2111,7 @@ extern "C" const char* func_002625C8(void* self, int idx);
 extern "C" int func_00263338(void* self, int a1);
 extern "C" int func_002633F8(void* self, int a1);
 extern "C" void func_001A7390(cFEStateNet* self, const char* str, int a2);
-extern char D_004A1390[];
+extern char str_sp[];
 extern char str_TextBuddyLocation[];
 extern char str_TextBuddyName[];
 extern char str_kT_279NoBuddies[];
@@ -2169,7 +2169,7 @@ extern "C" int func_001A6070(cFEStateNetMessenger* self, int idx)
     }
     int n = (int*)self->mNames.mpFinish - (int*)self->mNames.mpStart;
     if (n == 0) {
-        cUIText_setAsciiString((cUIText*)name, D_004A1390);
+        cUIText_setAsciiString((cUIText*)name, str_sp);
         if (*(int*)((char*)GetSession_001A6070() + 0xE8) != 0) {
             cUIText_setUnicodeStringByID((cUIText*)status, GetHashValue32(str_kT_279NoBuddies));
         } else {
@@ -2748,7 +2748,7 @@ extern "C" int func_00262A38(void* self, int a1);
 extern "C" void func_001A63C8(cFEStateNetMessenger* self, unsigned int index, int state);
 extern "C" void func_001A6618(cFEStateNetMessenger* self, unsigned int index, const char* str, int a3);
 extern "C" void func_001A66A8(cFEStateNetMessenger* self, unsigned int index, int flag);
-extern char D_004A1390[];
+extern char str_sp[];
 
 static inline void* GetSession_001A71B0()
 {
@@ -2781,7 +2781,7 @@ extern "C" void func_001A71B0(cFEStateNetMessenger* self, unsigned int index, co
     }
     if (name == 0) {
         func_001A63C8(self, index, 3);
-        func_001A6618(self, index, D_004A1390, rosterIndex);
+        func_001A6618(self, index, str_sp, rosterIndex);
         func_001A66A8(self, index, 1);
         return;
     }
@@ -2821,7 +2821,7 @@ extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 extern "C" void func_003EFA48(unsigned short* dst, int n, const char* src);
 extern "C" char* strcat(char*, const char*);
 extern "C" char* strcpy(char* dst, const char* src);
-extern char D_004A1390[];
+extern char str_sp[];
 extern char D_004A1408[];
 extern char str_LOCID[];
 extern char str_SSX3ID[];
@@ -2907,7 +2907,7 @@ extern "C" void func_001A7390(cFEStateNet* self, const char* name, int mode)
         unsigned short wrapped[0x60];
         float size[4];
         strcpy(buf, name);
-        strcat(buf, D_004A1390);
+        strcat(buf, str_sp);
         strcat(buf, tags);
         func_003EFA48(wide, 0x60, buf);
         sVEntryP_001A7390* vt = *(sVEntryP_001A7390**)((char*)uiText + 8);
@@ -2918,7 +2918,7 @@ extern "C" void func_001A7390(cFEStateNet* self, const char* name, int mode)
         if (rest != 0) {
             cUIText_setUnicodeString(locationText, (char*)rest);
         } else {
-            cUIText_setAsciiString(locationText, D_004A1390);
+            cUIText_setAsciiString(locationText, str_sp);
         }
         return;
     }
@@ -2947,7 +2947,7 @@ extern "C" void func_001A7390(cFEStateNet* self, const char* name, int mode)
     case 3: {
         unsigned short w1[0x40];
         int str = Loc1A7390(str_kT_279PresenceRoom);
-        sChar2_001A7390 sp = *(sChar2_001A7390*)D_004A1390;
+        sChar2_001A7390 sp = *(sChar2_001A7390*)str_sp;
         unsigned short wsp[8];
         UIAsciiToUnicode_i(wsp, sp.c);
         func_001B25E0(detail1, w1);
@@ -3637,7 +3637,7 @@ extern char str_TextFromX[];
 extern char str_kT_POPUP242PlayerID[];
 extern char str_textScrollChat[];
 extern char D_004A1408[];
-extern char D_004A1A50[];
+extern char str_colon_sp[];
 
 struct sVEntry_001A81F0 {
     short delta;
@@ -3708,7 +3708,7 @@ extern "C" void func_001A81F0(cFEStateReadMessagePopup* self)
     for (i = 0; i < Count1A81F0(self); i++) {
         sEntry1A81F0* msgEntry = *(sEntry1A81F0**)((char*)((sEntry1A81F0**)(self)->mMessages.mpStart) + (i << 2));
         strcpy(buf, msgEntry->name);
-        strcat(buf, D_004A1A50);
+        strcat(buf, str_colon_sp);
         strcat(buf, msgEntry->ext);
         cUITextScroll_addAsciiString(list, buf);
     }
@@ -3794,7 +3794,7 @@ extern "C" void* cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern void* cFEStateNet_vtbl[];
-extern char D_004A1390[];
+extern char str_sp[];
 extern char str_StlBlock[];
 
 struct sListNode_8500 {
@@ -3845,7 +3845,7 @@ extern "C" void* cFEStateNet_cFEStateNet_impl(void* self, void* engine, void* ow
     *(int*)(selfBytes + 0x6A8) = 1;
     *(int*)(selfBytes + 0x6BC) = 2;
     *(void***)(selfBytes + 0x8) = cFEStateNet_vtbl;
-    cBXString_cBXString2(selfBytes + 0x6C0, D_004A1390);
+    cBXString_cBXString2(selfBytes + 0x6C0, str_sp);
     *(int*)(selfBytes + 0x6C4) = 0;
     *(sListNode_8500**)(selfBytes + 0x6CC) = (sListNode_8500*)cMemMan_alloc(0xC, str_StlBlock, 0x20000000, 0);
     msgList->head->next = *(sListNode_8500**)(selfBytes + 0x6CC);
@@ -6140,7 +6140,7 @@ extern "C" int func_00262938(void* self);
 extern void* cAppMan_TheAppMan;
 extern char str_TextMessageCount[];
 extern char str_pct_d_b[];
-extern char D_004A1390[];
+extern char str_sp[];
 
 struct sSession1AAB68 {
     char pad[0xBC];
@@ -6253,7 +6253,7 @@ extern "C" void func_001AAB68(cFEStateNet* self)
         cUIText_setAsciiString((cUIText*)text, buf);
     } else {
         text->v09(0);
-        cUIText_setAsciiString((cUIText*)text, D_004A1390);
+        cUIText_setAsciiString((cUIText*)text, str_sp);
     }
 }
 #endif
@@ -9806,7 +9806,7 @@ extern signed char D_00535C12[];
 extern char str_TextPeak[];
 extern char str_TextEvent[];
 extern char str_TextCourse[];
-extern char D_004A1390[];
+extern char str_sp[];
 extern char D_004A14F8[];
 extern char D_004A1500[];
 extern char D_004A1508[];
@@ -9853,7 +9853,7 @@ extern "C" void func_001AF728(cFEStateChallengePopup* self, void* track, void* s
     }
     cUIText* uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextPeak));
     if (track == 0) {
-        cUIText_setAsciiString(uiText, D_004A1390);
+        cUIText_setAsciiString(uiText, str_sp);
     } else {
         switch (cBENewRaceInterface_getLocationPeak1(track)) {
         case 0:
@@ -9869,7 +9869,7 @@ extern "C" void func_001AF728(cFEStateChallengePopup* self, void* track, void* s
     }
     uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextEvent));
     if (track == 0) {
-        cUIText_setAsciiString(uiText, D_004A1390);
+        cUIText_setAsciiString(uiText, str_sp);
     } else {
         if (D_00535C12[0] != 0) {
             cRaceIface_001AF728* iface = (cRaceIface_001AF728*)cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -9882,7 +9882,7 @@ extern "C" void func_001AF728(cFEStateChallengePopup* self, void* track, void* s
     }
     uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextCourse));
     if (track == 0) {
-        cUIText_setAsciiString(uiText, D_004A1390);
+        cUIText_setAsciiString(uiText, str_sp);
     } else {
         cUIText_setAsciiString(uiText, cBENewRaceInterface_getLocationName1(track));
     }
@@ -9896,7 +9896,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern char D_004A1390[];
+extern char str_sp[];
 extern char str_TextPlayerName[];
 extern char str_TextPlayerRank[];
 extern char str_TextNumGames[];
@@ -9908,7 +9908,7 @@ static inline void Clear1AF930(void* screen, char* name)
 {
     cUIText* uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
     if (uiText != 0) {
-        cUIText_setAsciiString(uiText, D_004A1390);
+        cUIText_setAsciiString(uiText, str_sp);
     }
 }
 
@@ -10734,7 +10734,7 @@ extern "C" const char* cBENewRaceInterface_getLocationName1(void* track);
 extern int D_00534B34[];
 extern int D_005308D0[];
 extern int D_00535C04[];
-extern char D_004A1390[];
+extern char str_sp[];
 extern char str_pct_d_b[];
 extern char str_TextEventResult[];
 extern char str_TextCourseResult[];
@@ -10767,7 +10767,7 @@ extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface,
     cUIText* uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextEventResult));
     if (uiText != 0) {
         if (iface == 0) {
-            cUIText_setAsciiString(uiText, D_004A1390);
+            cUIText_setAsciiString(uiText, str_sp);
         } else {
             cUIText_setAsciiString(uiText, cBENewRaceInterface_getEventName(iface));
         }
@@ -10775,7 +10775,7 @@ extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface,
     uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextCourseResult));
     if (uiText != 0) {
         if (iface == 0) {
-            cUIText_setAsciiString(uiText, D_004A1390);
+            cUIText_setAsciiString(uiText, str_sp);
         } else {
             cUIText_setAsciiString(uiText, cBENewRaceInterface_getLocationName1(iface));
         }
@@ -10783,7 +10783,7 @@ extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface,
     uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextRankedGameResult));
     if (uiText != 0) {
         if (iface == 0) {
-            cUIText_setAsciiString(uiText, D_004A1390);
+            cUIText_setAsciiString(uiText, str_sp);
         } else {
             cBE_getInterface_Fv(SSXApp->BE, 7);
             if (D_00534B34[0] != 0) {
@@ -10796,7 +10796,7 @@ extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface,
     uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextPowerupsResult));
     if (uiText != 0) {
         if (iface == 0) {
-            cUIText_setAsciiString(uiText, D_004A1390);
+            cUIText_setAsciiString(uiText, str_sp);
         } else {
             if ((D_005308D0[0] >> 8) & 1) {
                 cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_CMNNo));
@@ -10808,7 +10808,7 @@ extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface,
     uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextMultipliersResult));
     if (uiText != 0) {
         if (iface == 0) {
-            cUIText_setAsciiString(uiText, D_004A1390);
+            cUIText_setAsciiString(uiText, str_sp);
         } else {
             if ((D_005308D0[0] >> 6) & 1) {
                 cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_CMNNo));
@@ -10820,7 +10820,7 @@ extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface,
     uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextPointiconsResult));
     if (uiText != 0) {
         if (iface == 0) {
-            cUIText_setAsciiString(uiText, D_004A1390);
+            cUIText_setAsciiString(uiText, str_sp);
         } else {
             int pointIconsBits = D_005308D0[0] >> 7;
             if (pointIconsBits & 1) {
@@ -10833,7 +10833,7 @@ extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface,
     uiText = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_TextCPURidersResult));
     if (uiText != 0) {
         if (iface == 0) {
-            cUIText_setAsciiString(uiText, D_004A1390);
+            cUIText_setAsciiString(uiText, str_sp);
         } else {
             cBE_getInterface_Fv(cBE_getBE(), 0);
             int n = D_00535C04[0];
@@ -11146,7 +11146,7 @@ extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern signed char D_00440F68[];
 extern char str_LBChallengerSelect[];
 extern char str_TextOpponentSelect[];
-extern char D_004A1390[];
+extern char str_sp[];
 
 struct sVec4_001B10F8 {
     float x, y, z, w;
@@ -11190,7 +11190,7 @@ static inline int IsHash_001B10F8(int id, char* name) { return id == GetHashValu
  *
  * "LBChallengerSelect" loses attribute bit 0, gets the ten riders' names (cBECharacterInterface_getShortNameByCharacter on the character interface
  * for each id in D_00440F68), becomes visible, is preset to the player's current rider (stored in miCharID) and is
- * kept in mpLBChallengerSelect (then slot 24 with 1). "TextOpponentSelect" gets the D_004A1390 text and colour (1, 0,
+ * kept in mpLBChallengerSelect (then slot 24 with 1). "TextOpponentSelect" gets the str_sp text and colour (1, 0,
  * 0, 0).
  *
  * @param text  the widget being created (On Tour pWidget)
@@ -11212,7 +11212,7 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetCreate(cFEStateOnlineChara
         self->mpLBChallengerSelect = (cUIListBox*)text;
         box->v24(1);
     } else if (IsHash_001B10F8(text->mHashName, str_TextOpponentSelect)) {
-        cUIText_setAsciiString(text, D_004A1390);
+        cUIText_setAsciiString(text, str_sp);
         box->v11(sVec4_001B10F8(1.0f, 0.0f, 0.0f, 0.0f));
     }
 }
@@ -12155,7 +12155,7 @@ extern char* D_004A3E90_p __asm__("cBXString_EmptyString");
 extern char str_PlayerListMenu[];
 extern char str_PlayerListItempct_02d[];
 extern char str_cFEStateLobbyMenu[];
-extern char D_004A1390[];
+extern char str_sp[];
 struct sName_001B2378 { char c[17]; };
 extern sName_001B2378 D_00463A48;
 
@@ -12235,7 +12235,7 @@ extern "C" void func_001B2378(cFEStateChatRoom* vself, int reselect)
                 cUIText_setUnicodeString(vself->mpTextRoomName, buf);
             }
         } else {
-            cBXString_operatorE1(&rowText, D_004A1390);
+            cBXString_operatorE1(&rowText, str_sp);
         }
         cUIText_setAsciiString((cUIText*)rowItem, rowText.p);
         *(int*)((char*)rowItem + 0x18) = idx;
@@ -12347,7 +12347,7 @@ extern const char* D_004A1B34;
 extern const char* D_004A1B38;
 extern const char* D_004A1B3C;
 extern const char* D_004A1B40;
-extern char D_004A1390[];
+extern char str_sp[];
 extern char D_004A1408[];
 extern char str_ps2X[];
 extern char str_TextPlayerName[];
@@ -12422,7 +12422,7 @@ extern "C" void func_001B27B0(cFEStateChatRoom* vself, int idx)
         if (valid && *(int*)(playerName.str - 8) > 0) {
             cUIText_setAsciiString(title, playerName.str);
         } else {
-            cUIText_setAsciiString(title, D_004A1390);
+            cUIText_setAsciiString(title, str_sp);
         }
     }
     func_0025F288(LobbyMan_mLobbyMan, idx, &info);
@@ -12490,7 +12490,7 @@ struct cUIText;
 struct sList1A83D8;
 extern "C" void func_001A83D8(sList1A83D8* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
 extern "C" void cUITextScroll_addAsciiString(cUIText* text, char* str);
-extern char D_004A1A50[];
+extern char str_colon_sp[];
 extern "C" void* cBXString_cBXString1(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
 struct cBXString;
@@ -12535,7 +12535,7 @@ extern "C" void func_001B2CD0(cFEStateChatRoom* self, int infov)
     int lineOffset = list->a5;
     sBXString1B2CD0 text;
     cBXString_cBXString1(&text, info + 0x8);
-    cBXString_Concat(&text, D_004A1A50);
+    cBXString_Concat(&text, str_colon_sp);
     func_003189A0((cBXString*)&text, (char**)(info + 0xC));
     cUITextScroll_addAsciiString(self->mpTextScrollChat, text.str);
     func_001A83D8((sList1A83D8*)self->mpTextScrollChat, 0x40, 6, lineCount, pos, lineOffset, first, 1);
@@ -18475,7 +18475,7 @@ extern "C" int strlen(const char* s);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" char* cUIText_getFont(void* text);
 extern "C" char* strcat(char*, const char*);
-extern char D_004A1BD0[];
+extern char str_dot_dot_dot[];
 
 struct sVec3_1B9950 {
     float x, y, z;
@@ -18546,7 +18546,7 @@ extern "C" void func_001B9950(cFEStateCreateStep1* self, cUIText* text, char* st
     int i = strlen(str) - 1;
     char buf[80];
     strcpy(buf, str);
-    const char* ell = D_004A1BD0;
+    const char* ell = str_dot_dot_dot;
     sRect1B9950 sz;
     sRect1B9950 dots;
     Measure1B9950(text, ell, &dots);
@@ -25710,7 +25710,7 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 extern char str_username[];
 extern char str_Menu[];
 extern char str_messagepct_02d[];
-extern char D_004A1390[];
+extern char str_sp[];
 
 class cFEVObj_001C2298 {
 public:
@@ -25738,7 +25738,7 @@ struct sOwner1C2298 {
 /**
  * Binds the quick-messages widgets as the screen creates them.
  *
- * "username" gets the placeholder " " (D_004A1390) and is made visible; "Menu" gets attribute bit 0; each of
+ * "username" gets the placeholder " " (str_sp) and is made visible; "Menu" gets attribute bit 0; each of
  * "message00".."message09" gets " ", is made visible, gets id i and is kept in mpMessage[i].
  *
  * @param text  the widget being created (On Tour pWidget)
@@ -25747,7 +25747,7 @@ extern "C" void cFEStateNetQuickMessages_onWidgetCreate(cFEStateNetQuickMessages
 {
     char buf[32];
     if (IsHash1C2298(text->mHashName, str_username)) {
-        cUIText_setAsciiString(text, D_004A1390);
+        cUIText_setAsciiString(text, str_sp);
         ((cFEVObj_001C2298*)text)->v09(1);
     } else if (IsHash1C2298(text->mHashName, str_Menu)) {
         text->mAttr |= 1;
@@ -25756,7 +25756,7 @@ extern "C" void cFEStateNetQuickMessages_onWidgetCreate(cFEStateNetQuickMessages
         for (i = 0; i < 10; i++) {
             sprintf(buf, str_messagepct_02d, i);
             if (IsHash1C2298(text->mHashName, buf)) {
-                cUIText_setAsciiString(text, D_004A1390);
+                cUIText_setAsciiString(text, str_sp);
                 ((cFEVObj_001C2298*)text)->v09(1);
                 text->mMiscData = i;
                 self->mpMessage[i] = text;
@@ -25916,7 +25916,7 @@ extern "C" int strlen(const char* s);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" char* cUIText_getFont(void* text);
 extern "C" char* strcat(char*, const char*);
-extern char D_004A1BD0[];
+extern char str_dot_dot_dot[];
 
 struct sVec3_1C2578 {
     float x, y, z;
@@ -25968,8 +25968,8 @@ static inline void Measure1C2578(cUIText* text, const char* s, sRect1C2578* out)
  *
  * Takes the widget's bounds from its virtual slot 20, scales its font's current size (font + 0x38/0x3C) by the widget's
  * scale (+0x50), copies @p str into an 80-byte buffer and, while the measured width (cFont_textExtent) exceeds the
- * available width minus the width of D_004A1BD0 (the ellipsis), drops the last character. A shortened string gets
- * D_004A1BD0 appended; an unshortened one is set unchanged (cUIText_setAsciiString). The buffer copy has no length
+ * available width minus the width of str_dot_dot_dot (the ellipsis), drops the last character. A shortened string gets
+ * str_dot_dot_dot appended; an unshortened one is set unchanged (cUIText_setAsciiString). The buffer copy has no length
  * check.
  *
  * @param vtext  the cUIText to set
@@ -25990,7 +25990,7 @@ extern "C" void func_001C2578(cFEStateNetQuickMessages* self, void* vtext, char*
     int i = strlen(str) - 1;
     char buf[80];
     strcpy(buf, str);
-    const char* ell = D_004A1BD0;
+    const char* ell = str_dot_dot_dot;
     sRect1C2578 sz;
     sRect1C2578 dots;
     Measure1C2578(text, ell, &dots);
@@ -26629,7 +26629,7 @@ extern "C" void func_001C4F58(cFEStateStats* self, char* buf, int v);
 extern char str_personaItem0pct_i[];
 extern char str_resultsItem0pct_i[];
 extern char str_pointsItem0pct_i[];
-extern char D_004A1390_s __asm__("D_004A1390");
+extern char D_004A1390_s __asm__("str_sp");
 extern char str_pct_3d[];
 
 /**
@@ -26640,7 +26640,7 @@ extern char str_pct_3d[];
  * is full when there are more than 10. For each row it fills "personaItem0%i" with the name (entry + 8),
  * "resultsItem0%i" with entry + 4 printed by "%3d" and "pointsItem0%i" with the score printed as a time by
  * func_001C4F58 when mbShowTime is set, else by "%d" (entry and score from func_0025F388). Rows past the end get
- * D_004A1390 in all three texts, which are then set without the null checks used for filled rows.
+ * str_sp in all three texts, which are then set without the null checks used for filled rows.
  *
  * @param self_  the cFEStateStats screen (this)
  */

@@ -427,7 +427,7 @@ extern char str_SectionMan[];
 extern char str_SurfPropCache[];
 extern char str_cWorldSound[];
 extern char str_cPS2FogParticleMan[];
-extern char D_004A2AA0[];
+extern char str_bar_b[];
 extern char str_cam[];
 extern char gCamTriggerMan[];
 extern void* D_004882E0[];
@@ -549,7 +549,7 @@ extern "C" void cGame_loadTrack(cGame* self)
     {
         sBXStr_F6B0 worldPath;
         sBXStr_F6B0 camBasePath;
-        cCameraTriggerMan_loadTriggersIfNotStreaming_F6B0(gCamTriggerMan, (func_003186D0(&camBasePath, D_004A2AA0, &dir), func_00318630(&worldPath, &camBasePath, str_cam), worldPath.p));
+        cCameraTriggerMan_loadTriggersIfNotStreaming_F6B0(gCamTriggerMan, (func_003186D0(&camBasePath, str_bar_b, &dir), func_00318630(&worldPath, &camBasePath, str_cam), worldPath.p));
         cBXString__cBXString(&worldPath, 2);
         cBXString__cBXString(&camBasePath, 2);
     }

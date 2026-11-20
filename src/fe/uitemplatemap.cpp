@@ -2674,7 +2674,7 @@ extern char str_kT_MAPMedal[];
 extern char str_kT_CMNNoMedal[];
 extern char str_kT_CMNTopTime[];
 extern char str_kT_CMNTopScore[];
-extern char D_004A2108[];
+extern char str_dash[];
 extern char D_004A2138[];
 
 static inline void* getObj_207430(sMapTmpl_207430* self, char* name)
@@ -2708,7 +2708,7 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(sMapTmpl_207430* self) __asm
  * For freeride the two data rows show collectibles found / total (cBEMissionInterface_getCurrentCollectForSection, cBEMissionInterface_getTotalCollectForSection) and big challenges done
  * / total (cBEMissionInterface_getNumberCompletedMissionsOnTrack, cBEMissionInterface_getNumberMissionsOnTrack, "N/A" when there are none); otherwise the medal
  * (cBERewardInterface_getTrackMedal through cUITemplate_MAP_getMedalStr, or kT_CMNNoMedal) and the top time (races,
- * formatted by func_0020A1A8) or top score (func_001550E8), with D_004A2108 for no result.
+ * formatted by func_0020A1A8) or top score (func_001550E8), with str_dash for no result.
  */
 extern "C" void cUITemplate_MAP_setupLocationInfo_r(sMapTmpl_207430* self)
 {
@@ -2934,7 +2934,7 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(sMapTmpl_207430* self)
             int best = func_001550E8(score, 0, desc.w[0], desc.w[2]);
             cUIText_setAsciiString(value, func_0020A1A8(best));
             if (best == 0)
-                cUIText_setAsciiString(value, D_004A2108);
+                cUIText_setAsciiString(value, str_dash);
         } else {
             cUIText_setUnicodeStringByID(label, GetHashValue32(str_kT_CMNTopScore));
             int best = func_001550E8(score, 0, desc.w[0], desc.w[2]);
@@ -2942,7 +2942,7 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(sMapTmpl_207430* self)
             sprintf(num, D_004A2138, best);
             cUIText_setAsciiString(value, num);
             if (best == 0)
-                cUIText_setAsciiString(value, D_004A2108);
+                cUIText_setAsciiString(value, str_dash);
         }
     }
 }

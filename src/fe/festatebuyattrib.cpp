@@ -1572,9 +1572,9 @@ void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" char* cBENewRaceInterface_getLocationName(void* race, int track);
 extern "C" char* fptodp(float v);
-extern char D_004A2108[] __attribute__((aligned(8)));
+extern char str_dash[] __attribute__((aligned(8)));
 extern char D_004A2138[];
-extern char D_004A2168[];
+extern char str_dash_sp_dash_sp_dash[];
 extern char str_ko[];
 extern char D_004A23C0[];
 extern char str_pct_d_sec[];
@@ -1644,8 +1644,8 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
             cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ko_event, buf);
         } else {
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ko, D_004A2108);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ko_event, D_004A2168);
+            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ko, str_dash);
+            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ko_event, str_dash_sp_dash_sp_dash);
         }
     }
     {
@@ -1657,8 +1657,8 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
             cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_handplants_event, buf);
         } else {
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_handplants, D_004A2108);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_handplants_event, D_004A2168);
+            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_handplants, str_dash);
+            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_handplants_event, str_dash_sp_dash_sp_dash);
         }
     }
     {
@@ -1670,8 +1670,8 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
             cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubers_event, buf);
         } else {
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubers, D_004A2108);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubers_event, D_004A2168);
+            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubers, str_dash);
+            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubers_event, str_dash_sp_dash_sp_dash);
         }
     }
     {
@@ -1683,8 +1683,8 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
             cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_superubers_event, buf);
         } else {
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_superubers, D_004A2108);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_superubers_event, D_004A2168);
+            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_superubers, str_dash);
+            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_superubers_event, str_dash_sp_dash_sp_dash);
         }
     }
     {
@@ -1696,8 +1696,8 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
             cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubergrinds_event, buf);
         } else {
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubergrinds, D_004A2108);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubergrinds_event, D_004A2168);
+            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubergrinds, str_dash);
+            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_ubergrinds_event, str_dash_sp_dash_sp_dash);
         }
     }
     {
@@ -1709,8 +1709,8 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
             cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_longrail_event, buf);
         } else {
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_longrail, D_004A2108);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_longrail_event, D_004A2168);
+            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_longrail, str_dash);
+            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_longrail_event, str_dash_sp_dash_sp_dash);
         }
     }
     {
@@ -1722,8 +1722,8 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
             sprintf(buf, D_004A23C0, cBENewRaceInterface_getLocationName(race, track));
             cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_airtime_event, buf);
         } else {
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_airtime, D_004A2108);
-            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_airtime_event, D_004A2168);
+            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_airtime, str_dash);
+            cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_airtime_event, str_dash_sp_dash_sp_dash);
         }
     }
     cUIText* title = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_favoriteEvent_label));
@@ -1732,7 +1732,7 @@ extern "C" void cFEStateCareerStats_setupRidersBest(cFEStateCareerStats* vself)
         sprintf(buf, D_004A2138, best.entry[4].value);
     } else {
         // strcpy(buf, "-"): gcc's inline strcpy of a literal is a 2-byte aligned copy
-        __builtin_memcpy(buf, D_004A2108, 2);
+        __builtin_memcpy(buf, str_dash, 2);
     }
     cFEStateCareerStats_setTextSafe((cFEStateCareerStats*)self, str_favoriteEvent, buf);
 }

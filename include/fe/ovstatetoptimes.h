@@ -53,7 +53,7 @@ struct cOVState_TOPTIMES {
     int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
     int mRestoreCutSceneMode;       // 0x050 [O]; [U] cOVState_onCreateScreen / onDestroyScreen
     int mRemovePDA;                 // 0x054 [O]; [R] zeroed
-    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (D_004A2088, one halfword)
+    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (str_sp_b, one halfword)
     int mOVID;                      // 0x098 [O] tOVStateEnum; [R] the ctor's overlay-id argument (15)
     // --- cOVState_TOPTIMES (On Tour: size 0x98)
     int mTopTimesFlow;              // 0x09C [O]; [R] placed by the allocation size (0xA4) and On Tour's order only:

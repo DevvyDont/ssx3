@@ -2504,13 +2504,13 @@ extern "C" void func_003186D0_B4D8(sBXStr_B4D8*, const char*, int) __asm__("func
 extern "C" void func_00318630_B4D8(sBXStr_B4D8*, sBXStr_B4D8*, const char*) __asm__("func_00318630");
 extern "C" int ASYNCFILE_load_B4D8(const char*, int) __asm__("ASYNCFILE_load");
 extern "C" void cBXString_dt_B4D8(sBXStr_B4D8*, int) __asm__("cBXString__cBXString");
-extern char D_004A3870[];
+extern char str_bar_d[];
 extern char str_swp[];
 extern "C" void cWorldPainterSection_load_B4D8(void *self, int arg) __asm__("cWorldPainterSection_load");
 /**
  * Starts an asynchronous load of a section's world-painter file.
  *
- * Clears m_iStreamed, builds the path D_004A3870 + the name (func_003186D0), appends str_swp (".swp", func_00318630)
+ * Clears m_iStreamed, builds the path str_bar_d + the name (func_003186D0), appends str_swp (".swp", func_00318630)
  * and opens it with ASYNCFILE_load; the handle goes to m_iAsyncHandle. m_iState becomes 1 (loading, finished by
  * cWorldPainterSection_update) for a positive handle, else 2 (kWPSection_Loaded, with no data).
  *
@@ -2520,7 +2520,7 @@ extern "C" void cWorldPainterSection_load_B4D8(void *self, int fileName) {
     sBXStr_B4D8 swpPath;
     sBXStr_B4D8 basePath;
     *(short*)((char*)self + 2) = 0;
-    func_003186D0_B4D8(&basePath, D_004A3870, fileName);
+    func_003186D0_B4D8(&basePath, str_bar_d, fileName);
     func_00318630_B4D8(&swpPath, &basePath, str_swp);
     *(int*)((char*)self + 4) = ASYNCFILE_load_B4D8(swpPath.p, 0);
     cBXString_dt_B4D8(&swpPath, 2);

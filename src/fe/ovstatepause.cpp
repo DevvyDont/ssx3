@@ -1457,7 +1457,7 @@ extern char str_rider_pct_d[];
 extern char str_run_1_pct_d[];
 extern char str_run_2_pct_d[];
 extern char str_total_pct_d[];
-extern char D_004A2168[];
+extern char str_dash_sp_dash_sp_dash[];
 extern char str_p0rider[];
 extern char str_p0run1[];
 extern char str_p1rider[];
@@ -1645,7 +1645,7 @@ extern "C" void func_001FBD20(void* self)
                 sprintf(total, D_004A2138_n, run1Score + run2Score);
                 cUIText_setAsciiString((cUIText*)cell, total);
             } else {
-                cUIText_setAsciiString((cUIText*)cell, D_004A2168);
+                cUIText_setAsciiString((cUIText*)cell, str_dash_sp_dash_sp_dash);
             }
         }
     }
@@ -1659,7 +1659,7 @@ extern "C" void func_001FBD20(void* self)
         sprintf(buf, D_004A2138, score);
         cUIText_setAsciiString((cUIText*)textObj, buf);
     } else {
-        cUIText_setAsciiString((cUIText*)textObj, D_004A2168);
+        cUIText_setAsciiString((cUIText*)textObj, str_dash_sp_dash_sp_dash);
     }
     textObj = getObj_1FBD20(self, str_p1rider);
     if (cBENewRaceInterface_newRace[0x49] == 2) {

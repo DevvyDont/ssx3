@@ -19,8 +19,8 @@ extern char str_cursor_arrRight[];
 extern char str_cursor_end[];
 extern char str_cursor_A[];
 extern char str_profilename[];
-extern char D_004A1370[];
-extern char D_004A1378[];
+extern char str_lt_dash[];
+extern char str_dash_gt[];
 extern char str_END[];
 extern char str_mypro1[];
 
@@ -54,13 +54,13 @@ extern "C" void cScreenKeyboard_initScreenKeyboard(char* self, void* screen)
     if (textObj != 0)
     {
         textObj->setVisible(1);
-        cUIText_setAsciiString((cUIText*)textObj, D_004A1370);
+        cUIText_setAsciiString((cUIText*)textObj, str_lt_dash);
     }
     textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_keyboard_arrRight));
     if (textObj != 0)
     {
         textObj->setVisible(1);
-        cUIText_setAsciiString((cUIText*)textObj, D_004A1378);
+        cUIText_setAsciiString((cUIText*)textObj, str_dash_gt);
     }
     textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_keyboard_end));
     if (textObj != 0)

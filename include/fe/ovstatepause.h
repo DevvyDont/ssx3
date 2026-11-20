@@ -72,7 +72,7 @@ struct cOVTemplate_PauseMenu {
     int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
     int mRestoreCutSceneMode;       // 0x050 [O]; [U] cOVState_onCreateScreen / onDestroyScreen
     int mRemovePDA;                 // 0x054 [O]; [R] zeroed
-    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (D_004A2088, one halfword)
+    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (str_sp_b, one halfword)
     int mOVID;                      // 0x098 [O] tOVStateEnum; [R] the ctor's overlay-id argument (1-6)
     // --- cOVTemplate_PauseMenu (On Tour: size 0xD8)
     int mPauseMenuOptions[8];       // 0x09C [O]; [U] the subclasses' onCreateScreen copy the option ids here;
@@ -162,7 +162,7 @@ struct cOVState_PAUSE_OPTIONS {
     int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
     int mRestoreCutSceneMode;       // 0x050 [O]; [U] cOVState_onCreateScreen / onDestroyScreen
     int mRemovePDA;                 // 0x054 [O]; [R] zeroed
-    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (D_004A2088, one halfword)
+    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (str_sp_b, one halfword)
     int mOVID;                      // 0x098 [O] tOVStateEnum; [R] the ctor's overlay-id argument (7)
 };
 
@@ -216,7 +216,7 @@ struct cOVState_PAUSE_ONLINE_ERROR {
     int mAllowPauseMenu;            // 0x04C [P] cOVState::allowPauseMenu (preview 0x48); [R] zeroed
     int mRestoreCutSceneMode;       // 0x050 [O]; [U] cOVState_onCreateScreen / onDestroyScreen
     int mRemovePDA;                 // 0x054 [O]; [R] zeroed
-    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (D_004A2088, one halfword)
+    char mszChatBuff[0x40];         // 0x058 [O]; [R] the ctor copies " " (str_sp_b, one halfword)
     int mOVID;                      // 0x098 [O] tOVStateEnum; [R] the ctor's overlay-id argument (39)
     // --- cOVState_PAUSE_ONLINE_ERROR (On Tour: size 0x98)
     unsigned int miStartPingTick;   // 0x09C [O]; [R] the constructor zeroes it; [U] onCreateScreen stores the app

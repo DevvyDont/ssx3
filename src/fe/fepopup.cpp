@@ -3219,7 +3219,7 @@ void cUIText_setAsciiString(cUIText* self, const char* str);
 void cMemMan_free(void* ptr);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_checkAndFixTextEntry[];
-extern char D_004A1BD0[];
+extern char str_dot_dot_dot[];
 
 static inline void measure_A6A0(cUIText* text, const char* s, float* out)
 {
@@ -3254,7 +3254,7 @@ extern "C" void cScreenPopup_checkAndFixTextEntry(cScreenPopup* self, cUIText* t
     char* buf = new (str_checkAndFixTextEntry, 0x100, 0) char[self->miMaxChars + 4];
     int len = strlen(str) - 1;
     strcpy(buf, str);
-    const char* dotstr = D_004A1BD0;
+    const char* dotstr = str_dot_dot_dot;
     measure_A6A0(text, dotstr, dots);
     measure_A6A0(text, buf, ext);
     while (size.x - dots[2] - 1.0f < ext[2]) {

@@ -4581,7 +4581,7 @@ extern "C" int func_003E8B10(void* p, int tag, void* cb, int a3, void* user);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern char str_KIND[];
-extern char D_004A3218[];
+extern char str_star[];
 extern "C" int* func_002591D0();
 extern "C" void func_00263BA8(void* p, int arg);
 extern "C" void func_00268E78(void* self, void* a1, int a2);
@@ -4638,7 +4638,7 @@ extern "C" void func_0025EED8(LobbyMan* self)
     } else if (st != 1) {
         char buf[0x100];
         buf[0] = 0;
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_KIND, D_004A3218);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_KIND, str_star);
         self->mTimeout = 20.0f;
         // PORT: function pointer passed through func_003E8B10's int parameter.
         self->mRequestId = func_003E8B10(self->mpLobbyApi, 0x7175696B, buf, (int)func_00268E78, ((char*)self));
@@ -4808,7 +4808,7 @@ extern "C" int func_0025F1B0(LobbyMan* self)
 //100%
 INCLUDE_ASM("dirtysock/tagsunk", func_0025F1E0);
 #ifdef SKIP_ASM
-extern char D_004A2ED0[];
+extern char str_sp_c[];
 // PORT: the unit declares func_003EE560 with one parameter; this caller passes (list, index).
 void* func_003EE560_2(void* list, int idx) __asm__("func_003EE560");
 
@@ -4817,7 +4817,7 @@ void* func_003EE560_2(void* list, int idx) __asm__("func_003EE560");
  *
  * @param idx      index into mpUserList
  * @param outFlag  receives bit 21 of the entry's word +0x4, or 0 to skip it (written only when the entry exists)
- * @return the entry's name (entry + 0x8), " " (D_004A2ED0) when there is no such entry, or 0 when mState is 0
+ * @return the entry's name (entry + 0x8), " " (str_sp_c) when there is no such entry, or 0 when mState is 0
  */
 extern "C" char* func_0025F1E0(LobbyMan* self, int idx, int* outFlag)
 {
@@ -4831,7 +4831,7 @@ extern "C" char* func_0025F1E0(LobbyMan* self, int idx, int* outFlag)
         }
         return userEntry + 8;
     }
-    return D_004A2ED0;
+    return str_sp_c;
 }
 #endif
 
@@ -5215,7 +5215,7 @@ extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
 extern char str_PERS[];
-extern char D_004A3218[];
+extern char str_star[];
 
 struct sMsgListNodeF740 {
     sMsgListNodeF740* next;
@@ -5246,7 +5246,7 @@ static inline sMsgListIterF740 sMsgListF740_insert(sMsgListIterF740 pos, void* c
  * Leaves the lobby game in progress and optionally posts an event of the given type.
  *
  * Does nothing when mState is 0. In state 25 (in game) it sets mTimeout to 20.0, sends a "chal" request (func_003E8B10,
- * no callback) whose record holds PERS="*" (D_004A3218), and sets mState to 1. When @p type is nonzero it then posts an
+ * no callback) whose record holds PERS="*" (str_star), and sets mState to 1. When @p type is nonzero it then posts an
  * online::Event of that type (vtable online_Event_vtbl) on mEventList. The challenge-received popup calls it to back out of an
  * accepted game.
  *
@@ -5260,7 +5260,7 @@ extern "C" void func_0025F740(LobbyMan* selfp, int type)
             char buf[0x100];
             selfp->mTimeout = 20.0f;
             buf[0] = 0;
-            cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PERS, D_004A3218);
+            cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PERS, str_star);
             func_003E8B10(selfp->mpLobbyApi, 0x6368616C, buf, 0, 0);
             *(int*)selfp = 1;
         }
@@ -6420,7 +6420,7 @@ extern "C" void func_003F0818(void* p, const char* a1, int tag, const char* a3, 
 extern "C" void func_003F08E8(void* p, const char* name, int a2, int a3, const char* s1, const char* s2, void* cb, void* user);
 extern "C" void func_00268F18(void* self, void* a1, int a2);
 extern void* cBXString_EmptyString;
-extern char D_004A3330[];
+extern char str_colon[];
 extern char str_cso[];
 
 
@@ -6471,7 +6471,7 @@ extern "C" void func_00261248(BuddyMan* self_, void* name_, int port, void* a3_,
     buddyMan->mbLoggedIn = 0;
     sBXStr_261248 loginString;
     cBXString_operatorE1(&loginString, userName);
-    cBXString_Concat(&loginString, D_004A3330);
+    cBXString_Concat(&loginString, str_colon);
     cBXString_Concat(&loginString, password);
     sBXStr_261248 resourceString;
     cBXString_operatorE1(&resourceString, str_cso);
@@ -6987,7 +6987,7 @@ extern char str_BODY[];
 extern char str_TIME[];
 extern char str_Not_Present[];
 extern char str_pct_02d_pct_02d_pct_02d_pct_02d_pct_02d[];
-extern char D_004A2ED0[];
+extern char str_sp_c[];
 
 struct sMsgListNode_00261A28 {
     sMsgListNode_00261A28* next;
@@ -7058,7 +7058,7 @@ extern "C" void BuddyMan_onReceiveMessage(BuddyMan* self, char* msg)
     cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_USER), name, 0x40, str_Not_Present);
     if (func_002623B0(self, (int)name))
         return;
-    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_SUBJ), text, 2255, D_004A2ED0);
+    cDirtysock_tag_TagFieldGetString4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_SUBJ), text, 2255, str_sp_c);
     cDirtysock_tag_TagFieldGetUnk4(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_BODY), raw, 0x800, str_Not_Present);
     strcat(text, raw);
     func_003EDD70(cDirtysock_tag_TagFieldFind(*(char**)(msg + 0xC), str_TIME), &year, &month, &day, &hour, &minute, &second, 0);

@@ -16409,3 +16409,34 @@ cUIState_vtbl = 0x004946C8;
 
 // SSX On Tour (PSP, ULKS-46038) dev-build global names, round data_vtables_round10 (docs/ontour_globals.tsv)
 cMemCard_vtbl = 0x004871E8;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round str_punct (docs/ontour_globals.tsv)
+str_slash_c = 0x00495DF0;
+str_lt_dash = 0x004A1370;
+str_dash_gt = 0x004A1378;
+str_sp = 0x004A1390;
+str_bar = 0x004A1A10;
+str_colon_sp = 0x004A1A50;
+str_dot_dot_dot = 0x004A1BD0;
+str_slash_d = 0x004A1EF0;
+str_sp_b = 0x004A2088;
+str_plus = 0x004A2100;
+str_dash = 0x004A2108;
+str_sp_gt = 0x004A2110;
+str_dash_sp_dash_sp_dash = 0x004A2168;
+str_colon_sp_b = 0x004A2710;
+str_bar_b = 0x004A2AA0;
+str_pct = 0x004A2BC8;
+str_sp_c = 0x004A2ED0;
+str_star = 0x004A3218;
+str_colon = 0x004A3330;
+str_bar_c = 0x004A3430;
+str_rbracket = 0x004A3720;
+str_dquote = 0x004A3728;
+str_eq = 0x004A3740;
+str_bar_d = 0x004A3870;
+str_sp_d = 0x004A3968;
+str_underscore = 0x004A39D0;
+str_comma = 0x004A39F0;
+str_bar_e = 0x004A47C0;
+str_tilde_tilde = 0x004A4A78;

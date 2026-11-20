@@ -54,14 +54,14 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_cOVState);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVState for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it), then sets mOVID (0x98) to @p overlayId, clears mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54),
- * stores the cOVState vtable cOVState_vtbl and copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088.
+ * stores the cOVState vtable cOVState_vtbl and copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b.
  * Every overlay-state constructor in this unit and cOVStateManager_triggerOverlay inline the same steps.
  *
  * @param ovState  the object to construct
@@ -76,7 +76,7 @@ extern "C" void *cOVState_cOVState(cOVState* ovState, int engine, int overlayId)
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
 }
@@ -148,7 +148,7 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVTemplate_Simple_cOVTemplate_Simple);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char D_00474D30[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the one-option overlay menu (onCreateScreen cOVTemplate_Simple_onCreateScreen) for engine @p engine and overlay id @p overlayId;
@@ -156,7 +156,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. Out-of-line copy with no callers.
  *
  * @param ovState  the object to construct
@@ -171,7 +171,7 @@ extern "C" void *cOVTemplate_Simple_cOVTemplate_Simple(cOVState* ovState, int en
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = D_00474D30;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
@@ -207,14 +207,14 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVTemplate_Dialog_cOVTemplate_Dialog);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char D_00474C58[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the dialog-template overlay for engine @p engine and overlay id @p overlayId; installs D_00474C58.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. Out-of-line copy with no callers. Its vtable carries
  * cOVTemplate_Dialog_onCreateScreen / cOVTemplate_Dialog_onWidgetEvent, and the dialog overlays (ids 23-28 and 38)
  * reuse every slot but the destructor.
@@ -231,7 +231,7 @@ extern "C" void *cOVTemplate_Dialog_cOVTemplate_Dialog(cOVTemplate_Dialog* ovSta
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = D_00474C58;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
@@ -304,14 +304,14 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_REPLAY_cOVState_REPLAY);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_REPLAY_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVState_REPLAY for engine @p engine and overlay id @p overlayId; installs cOVState_REPLAY_vtbl.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 17 inline with
  * the same steps; this out-of-line copy has no callers.
  *
@@ -327,7 +327,7 @@ extern "C" void *cOVState_REPLAY_cOVState_REPLAY(cOVState_REPLAY* ovState, int e
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = cOVState_REPLAY_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
@@ -385,7 +385,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021C950);
 extern void *cUIState_cUIState_C950(void*) __asm__("cUIState_cUIState");
 extern char D_004748F8[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the dialog overlay with vtable D_004748F8 for engine @p engine and overlay id @p overlayId and sets its dialog
@@ -393,7 +393,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 24 inline with
  * the same steps; this out-of-line copy has no callers. Its slots are those of the dialog template D_00474C58 except
  * the destructor; the dialog kind picks the text.
@@ -410,7 +410,7 @@ extern "C" void *func_0021C950(cOVTemplate_Dialog* ovState, int engine, int over
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = D_004748F8;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     (ovState->mDialogType) = 1;
@@ -815,14 +815,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021CD08);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char D_00474088[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the overlay with vtable D_00474088 for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 10 inline with
  * the same steps; this out-of-line copy has no callers.
  *
@@ -838,7 +838,7 @@ extern "C" void *func_0021CD08(void *ovState, int engine, int overlayId) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = D_00474088;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ovState;
@@ -873,14 +873,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021CD98);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char D_00473FB0[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the overlay with vtable D_00473FB0 for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 11 inline with
  * the same steps; this out-of-line copy has no callers.
  *
@@ -896,7 +896,7 @@ extern "C" void *func_0021CD98(void *ovState, int engine, int overlayId) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = D_00473FB0;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ovState;
@@ -932,14 +932,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021CE28);
 extern void *cUIState_cUIState_CE28(void*) __asm__("cUIState_cUIState");
 extern char D_00473ED8[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the overlay with vtable D_00473ED8 for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 22 inline with
  * the same steps; this out-of-line copy has no callers.
  *
@@ -955,7 +955,7 @@ extern "C" void *func_0021CE28(void *ovState, int engine, int overlayId) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = D_00473ED8;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ovState;
@@ -993,7 +993,7 @@ int GetHashValue32(char*);
 extern char D_00473E00[];
 extern char cOVState_vtbl[];
 extern char str_finishov[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the finish overlay with vtable D_00473E00 for engine @p engine and overlay id @p overlayId, sets the word at 0xA0
@@ -1001,7 +1001,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 12 inline with
  * the same steps; this out-of-line copy has no callers.
  *
@@ -1017,7 +1017,7 @@ extern "C" void *func_0021CEB8(void *ovState, int engine, int overlayId) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xA0))) = 1;
     (*(char **)((char*)(ovState) + (8))) = D_00473E00;
@@ -1057,7 +1057,7 @@ int GetHashValue32(char*);
 extern char D_00473D28[];
 extern char cOVState_vtbl[];
 extern char str_finishov[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the finish overlay with vtable D_00473D28 for engine @p engine and overlay id @p overlayId, sets the word at 0xA0
@@ -1065,7 +1065,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 13 inline with
  * the same steps; this out-of-line copy has no callers.
  *
@@ -1081,7 +1081,7 @@ extern "C" void *func_0021CF60(void *ovState, int engine, int overlayId) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xA0))) = 1;
     (*(char **)((char*)(ovState) + (8))) = D_00473D28;
@@ -1119,14 +1119,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021D008);
 extern void *cUIState_cUIState_D008(void*) __asm__("cUIState_cUIState");
 extern char D_00473C50[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the overlay with vtable D_00473C50 for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 35 inline with
  * the same steps; this out-of-line copy has no callers.
  *
@@ -1142,7 +1142,7 @@ extern "C" void *func_0021D008(void *ovState, int engine, int overlayId) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = D_00473C50;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ovState;
@@ -1155,14 +1155,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021D070);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVStateHiScoreList_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVStateHiScoreList without an engine; installs cOVStateHiScoreList_vtbl.
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
- * halfword from D_004A2088) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
+ * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
  * no callers.
  *
  * @param ovState  the object to construct
@@ -1175,7 +1175,7 @@ extern "C" void *func_0021D070(void *ovState) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVStateHiScoreList_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ovState;
@@ -1189,14 +1189,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021D0D0);
 extern void *cUIState_cUIState_D0D0(void*) __asm__("cUIState_cUIState");
 extern char cOVStateHiScoreList_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVStateHiScoreList for engine @p engine and overlay id @p overlayId; installs cOVStateHiScoreList_vtbl.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. Out-of-line copy with no callers.
  *
  * @param ovState  the object to construct
@@ -1211,7 +1211,7 @@ extern "C" void *func_0021D0D0(void *ovState, int engine, int overlayId) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVStateHiScoreList_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ovState;
@@ -3172,14 +3172,14 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_ENTERLODGE_cOVState_ENTERLODGE);
 extern void *cUIState_cUIState_0EE0(void*) __asm__("cUIState_cUIState");
 extern char cOVState_ENTERLODGE_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVState_ENTERLODGE for engine @p engine and overlay id @p overlayId; installs cOVState_ENTERLODGE_vtbl.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 31 inline with
  * the same steps; this out-of-line copy has no callers.
  *
@@ -3195,7 +3195,7 @@ extern "C" void *cOVState_ENTERLODGE_cOVState_ENTERLODGE(cOVState_ENTERLODGE* ov
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = cOVState_ENTERLODGE_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
@@ -3208,14 +3208,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00220F48);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_BIGCHALLENGE_START_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVState_BIGCHALLENGE_START without an engine; installs cOVState_BIGCHALLENGE_START_vtbl.
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
- * halfword from D_004A2088) and the cOVState vtable cOVState_vtbl is stored before the class's own. Unlike cOVState_BIGCHALLENGE_START_cOVState_BIGCHALLENGE_START
+ * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Unlike cOVState_BIGCHALLENGE_START_cOVState_BIGCHALLENGE_START
  * it does not call cOVState_BIGCHALLENGE_START_getChallengeData. Out-of-line copy with no callers.
  *
  * @param ovState  the object to construct
@@ -3228,7 +3228,7 @@ extern "C" void *func_00220F48(cOVState_BIGCHALLENGE_START* ovState) {
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = cOVState_BIGCHALLENGE_START_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
@@ -3243,7 +3243,7 @@ extern "C" void *cOVState_BIGCHALLENGE_START_getChallengeData(void*);
 extern void *cUIState_cUIState_0FA8(void*) __asm__("cUIState_cUIState");
 extern char cOVState_BIGCHALLENGE_START_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVState_BIGCHALLENGE_START for engine @p engine and overlay id @p overlayId; installs
@@ -3251,7 +3251,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 29 inline with
  * the same steps; this out-of-line copy has no callers.
  *
@@ -3267,7 +3267,7 @@ extern "C" void *cOVState_BIGCHALLENGE_START_cOVState_BIGCHALLENGE_START(cOVStat
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = cOVState_BIGCHALLENGE_START_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     cOVState_BIGCHALLENGE_START_getChallengeData(ovState);
@@ -3301,14 +3301,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00221040);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char D_004735B0[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the big-challenge overlay with vtable D_004735B0 (overlay id 30) without an engine.
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
- * halfword from D_004A2088) and the cOVState vtable cOVState_vtbl is stored before the class's own. Unlike func_002210A0
+ * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Unlike func_002210A0
  * it does not call cOVState_BIGCHALLENGE_FAIL_getChallengeData. Out-of-line copy with no callers.
  *
  * @param ovState  the object to construct
@@ -3321,7 +3321,7 @@ extern "C" void *func_00221040(cOVState_BIGCHALLENGE_FAIL* ovState) {
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = D_004735B0;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
@@ -3336,7 +3336,7 @@ extern "C" void *cOVState_BIGCHALLENGE_FAIL_getChallengeData(void*);
 extern void *cUIState_cUIState_10A0(void*) __asm__("cUIState_cUIState");
 extern char D_004735B0[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the big-challenge overlay with vtable D_004735B0 for engine @p engine and overlay id @p overlayId, then runs
@@ -3344,7 +3344,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 30 inline with
  * the same steps; this out-of-line copy has no callers. cOVState_BIGCHALLENGE_FAIL_getChallengeData lives next to cOVState_BIGCHALLENGE_START_getChallengeData, which the
  * cOVState_BIGCHALLENGE_START constructor calls the same way.
@@ -3361,7 +3361,7 @@ extern "C" void *func_002210A0(cOVState_BIGCHALLENGE_FAIL* ovState, int engine, 
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = D_004735B0;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     cOVState_BIGCHALLENGE_FAIL_getChallengeData(ovState);
@@ -3420,14 +3420,14 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_TOPTIMES_cOVState_TOPTIMES);
 extern void *cUIState_cUIState_1160(void*) __asm__("cUIState_cUIState");
 extern char cOVState_TOPTIMES_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVState_TOPTIMES for engine @p engine and overlay id @p overlayId; installs cOVState_TOPTIMES_vtbl.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 15 inline with
  * the same steps; this out-of-line copy has no callers.
  *
@@ -3443,7 +3443,7 @@ extern "C" void *cOVState_TOPTIMES_cOVState_TOPTIMES(cOVState_TOPTIMES* ovState,
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = cOVState_TOPTIMES_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
@@ -3456,14 +3456,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_002211C8);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char D_004733F8[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the overlay with vtable D_004733F8 (overlay id 33) without an engine.
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
- * halfword from D_004A2088) and the cOVState vtable cOVState_vtbl is stored before the class's own. Unlike func_00221228
+ * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Unlike func_00221228
  * it does not run cUITemplate_MAP_init on the member at 0x9C. Out-of-line copy with no callers.
  *
  * @param ovState  the object to construct
@@ -3476,7 +3476,7 @@ extern "C" void *func_002211C8(cOVState_TRANSPORT* ovState) {
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = D_004733F8;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
@@ -3491,7 +3491,7 @@ extern "C" void *cUITemplate_MAP_init(void*);
 extern void *cUIState_cUIState_1228(void*) __asm__("cUIState_cUIState");
 extern char D_004733F8[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the overlay with vtable D_004733F8 for engine @p engine and overlay id @p overlayId, then runs cUITemplate_MAP_init on
@@ -3499,7 +3499,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 33 inline with
  * the same steps; this out-of-line copy has no callers. cUITemplate_MAP_init (declared without arguments) refreshes
  * cUITemplate_MAP_mPeak from the race location when cUITemplate_MAP_mMapStyle is 2 or more.
@@ -3516,7 +3516,7 @@ extern "C" void *func_00221228(cOVState_TRANSPORT* ovState, int engine, int over
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = D_004733F8;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     cUITemplate_MAP_init((char*)ovState + 0x9C);
@@ -3558,7 +3558,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_002212C8);
 extern void *cUIState_cUIState_12C8(void*, int) __asm__("cUIState_cUIState");
 extern char cOVState_MAP_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 inline void* operator new[](unsigned int, void* p) { return p; }
 struct Elem { Elem() {} };
 
@@ -3568,7 +3568,7 @@ struct Elem { Elem() {} };
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
- * halfword from D_004A2088) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
+ * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
  * no callers.
  *
  * @param ovState  the object to construct
@@ -3581,7 +3581,7 @@ extern "C" void *func_002212C8(cOVState_MAP* ovState) {
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = cOVState_MAP_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     new ((char*)ovState + 0x9C) Elem[8];
@@ -3596,7 +3596,7 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_MAP_cOVState_MAP);
 extern void *cUIState_cUIState_1350(void*, int) __asm__("cUIState_cUIState");
 extern char cOVState_MAP_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVState_MAP for engine @p engine and overlay id @p overlayId; installs cOVState_MAP_vtbl and runs the (empty)
@@ -3604,7 +3604,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 32 inline with
  * the same steps; this out-of-line copy has no callers.
  *
@@ -3620,7 +3620,7 @@ extern "C" void *cOVState_MAP_cOVState_MAP(cOVState_MAP* ovState, int engine, in
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = cOVState_MAP_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     new ((char*)ovState + 0x9C) Elem[8];
@@ -3662,14 +3662,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00221408);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char D_00473248[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the overlay with vtable D_00473248 (overlay id 40) without an engine.
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
- * halfword from D_004A2088) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
+ * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
  * no callers.
  *
  * @param ovState  the object to construct
@@ -3682,7 +3682,7 @@ extern "C" void *func_00221408(void *ovState) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = D_00473248;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ovState;
@@ -3696,14 +3696,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00221468);
 extern void *cUIState_cUIState_1468(void*) __asm__("cUIState_cUIState");
 extern char D_00473248[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the overlay with vtable D_00473248 for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 40 inline with
  * the same steps; this out-of-line copy has no callers.
  *
@@ -3719,7 +3719,7 @@ extern "C" void *func_00221468(void *ovState, int engine, int overlayId) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = D_00473248;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ovState;
@@ -3753,14 +3753,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_002214F8);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVTemplate_PauseMenu_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVTemplate_PauseMenu without an engine; installs cOVTemplate_PauseMenu_vtbl.
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
- * halfword from D_004A2088) and the cOVState vtable cOVState_vtbl is stored before the class's own. Unlike cOVTemplate_PauseMenu_cOVTemplate_PauseMenu
+ * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Unlike cOVTemplate_PauseMenu_cOVTemplate_PauseMenu
  * and the pause-menu subclasses' constructors, it leaves the word at 0xC4 alone. Out-of-line copy with no callers.
  *
  * @param ovState  the object to construct
@@ -3773,7 +3773,7 @@ extern "C" void *func_002214F8(cOVTemplate_PauseMenu* ovState) {
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = cOVTemplate_PauseMenu_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
@@ -3787,7 +3787,7 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVTemplate_PauseMenu_cOVTemplate_PauseMenu);
 extern void *cUIState_cUIState_1558(void*) __asm__("cUIState_cUIState");
 extern char cOVTemplate_PauseMenu_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVTemplate_PauseMenu for engine @p engine and overlay id @p overlayId; installs cOVTemplate_PauseMenu_vtbl and
@@ -3795,7 +3795,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. Out-of-line copy with no callers.
  *
  * @param ovState  the object to construct
@@ -3810,7 +3810,7 @@ extern "C" void *cOVTemplate_PauseMenu_cOVTemplate_PauseMenu(void *ovState, int 
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVTemplate_PauseMenu_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
@@ -3845,7 +3845,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_002215F0);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_PAUSE_COMPETE_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the pause menu with vtable cOVState_PAUSE_COMPETE_vtbl (overlay id 1, a cOVTemplate_PauseMenu subclass) without an engine
@@ -3853,7 +3853,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
- * halfword from D_004A2088) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
+ * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
  * no callers.
  *
  * @param ovState  the object to construct
@@ -3866,7 +3866,7 @@ extern "C" void *func_002215F0(void *ovState) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVState_PAUSE_COMPETE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
@@ -3881,7 +3881,7 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_COMPETE_cOVState_PAUSE_COMPETE);
 extern void *cUIState_cUIState_1658(void*) __asm__("cUIState_cUIState");
 extern char cOVState_PAUSE_COMPETE_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the pause menu with vtable cOVState_PAUSE_COMPETE_vtbl for engine @p engine and overlay id @p overlayId and clears the word at
@@ -3889,7 +3889,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 1 inline with the
  * same steps; this out-of-line copy has no callers.
  *
@@ -3905,7 +3905,7 @@ extern "C" void *cOVState_PAUSE_COMPETE_cOVState_PAUSE_COMPETE(void *ovState, in
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVState_PAUSE_COMPETE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
@@ -3940,7 +3940,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_002216F0);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_PAUSE_BIGCHAL_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the pause menu with vtable cOVState_PAUSE_BIGCHAL_vtbl (overlay id 2, a cOVTemplate_PauseMenu subclass) without an engine
@@ -3948,7 +3948,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
- * halfword from D_004A2088) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
+ * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
  * no callers.
  *
  * @param ovState  the object to construct
@@ -3961,7 +3961,7 @@ extern "C" void *func_002216F0(void *ovState) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVState_PAUSE_BIGCHAL_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
@@ -3976,7 +3976,7 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_BIGCHAL_cOVState_PAUSE_BIGCHAL);
 extern void *cUIState_cUIState_1758(void*) __asm__("cUIState_cUIState");
 extern char cOVState_PAUSE_BIGCHAL_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the pause menu with vtable cOVState_PAUSE_BIGCHAL_vtbl for engine @p engine and overlay id @p overlayId and clears the word at
@@ -3984,7 +3984,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 2 inline with the
  * same steps; this out-of-line copy has no callers.
  *
@@ -4000,7 +4000,7 @@ extern "C" void *cOVState_PAUSE_BIGCHAL_cOVState_PAUSE_BIGCHAL(void *ovState, in
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVState_PAUSE_BIGCHAL_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
@@ -4035,7 +4035,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_002217F0);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_PAUSE_FREERIDE_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the pause menu with vtable cOVState_PAUSE_FREERIDE_vtbl (overlay id 3, a cOVTemplate_PauseMenu subclass) without an engine
@@ -4043,7 +4043,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
- * halfword from D_004A2088) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
+ * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
  * no callers.
  *
  * @param ovState  the object to construct
@@ -4056,7 +4056,7 @@ extern "C" void *func_002217F0(void *ovState) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVState_PAUSE_FREERIDE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
@@ -4071,7 +4071,7 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_FREERIDE_cOVState_PAUSE_FREERIDE)
 extern void *cUIState_cUIState_1858(void*) __asm__("cUIState_cUIState");
 extern char cOVState_PAUSE_FREERIDE_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the pause menu with vtable cOVState_PAUSE_FREERIDE_vtbl for engine @p engine and overlay id @p overlayId and clears the word at
@@ -4079,7 +4079,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 3 inline with the
  * same steps; this out-of-line copy has no callers.
  *
@@ -4095,7 +4095,7 @@ extern "C" void *cOVState_PAUSE_FREERIDE_cOVState_PAUSE_FREERIDE(void *ovState, 
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVState_PAUSE_FREERIDE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
@@ -4130,7 +4130,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_002218F0);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_PAUSE_SPOKE_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the pause menu with vtable cOVState_PAUSE_SPOKE_vtbl (overlay id 4, a cOVTemplate_PauseMenu subclass) without an engine
@@ -4138,7 +4138,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
- * halfword from D_004A2088) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
+ * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
  * no callers.
  *
  * @param ovState  the object to construct
@@ -4151,7 +4151,7 @@ extern "C" void *func_002218F0(void *ovState) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVState_PAUSE_SPOKE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
@@ -4166,7 +4166,7 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_SPOKE_cOVState_PAUSE_SPOKE);
 extern void *cUIState_cUIState_1958(void*) __asm__("cUIState_cUIState");
 extern char cOVState_PAUSE_SPOKE_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the pause menu with vtable cOVState_PAUSE_SPOKE_vtbl for engine @p engine and overlay id @p overlayId and clears the word at
@@ -4174,7 +4174,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 4 inline with the
  * same steps; this out-of-line copy has no callers.
  *
@@ -4190,7 +4190,7 @@ extern "C" void *cOVState_PAUSE_SPOKE_cOVState_PAUSE_SPOKE(void *ovState, int en
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVState_PAUSE_SPOKE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
@@ -4225,7 +4225,7 @@ INCLUDE_ASM("fe/all_in_one_fe", func_002219F0);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_PAUSE_QUICKPLAY_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the pause menu with vtable cOVState_PAUSE_QUICKPLAY_vtbl (overlay id 5, a cOVTemplate_PauseMenu subclass) without an engine
@@ -4233,7 +4233,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
- * halfword from D_004A2088) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
+ * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
  * no callers.
  *
  * @param ovState  the object to construct
@@ -4246,7 +4246,7 @@ extern "C" void *func_002219F0(void *ovState) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVState_PAUSE_QUICKPLAY_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
@@ -4261,7 +4261,7 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_QUICKPLAY_cOVState_PAUSE_QUICKPLA
 extern void *cUIState_cUIState_1A58(void*) __asm__("cUIState_cUIState");
 extern char cOVState_PAUSE_QUICKPLAY_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the pause menu with vtable cOVState_PAUSE_QUICKPLAY_vtbl for engine @p engine and overlay id @p overlayId and clears the word at
@@ -4269,7 +4269,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 5 inline with the
  * same steps; this out-of-line copy has no callers.
  *
@@ -4285,7 +4285,7 @@ extern "C" void *cOVState_PAUSE_QUICKPLAY_cOVState_PAUSE_QUICKPLAY(void *ovState
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVState_PAUSE_QUICKPLAY_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
@@ -4320,14 +4320,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00221AF0);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_PAUSE_ONLINE_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVState_PAUSE_ONLINE without an engine; installs cOVState_PAUSE_ONLINE_vtbl and clears the word at 0xC4.
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
- * halfword from D_004A2088) and the cOVState vtable cOVState_vtbl is stored before the class's own. cOVState_PAUSE_ONLINE_vtbl's
+ * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. cOVState_PAUSE_ONLINE_vtbl's
  * destructor slot is cOVState_PAUSE_ONLINE__cOVState_PAUSE_ONLINE. Out-of-line copy with no callers.
  *
  * @param ovState  the object to construct
@@ -4340,7 +4340,7 @@ extern "C" void *func_00221AF0(void *ovState) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVState_PAUSE_ONLINE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
@@ -4355,7 +4355,7 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_ONLINE_cOVState_PAUSE_ONLINE);
 extern void *cUIState_cUIState_1B58(void*) __asm__("cUIState_cUIState");
 extern char cOVState_PAUSE_ONLINE_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVState_PAUSE_ONLINE for engine @p engine and overlay id @p overlayId; installs cOVState_PAUSE_ONLINE_vtbl and clears the word
@@ -4363,7 +4363,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 6 inline with the
  * same steps; this out-of-line copy has no callers.
  *
@@ -4379,7 +4379,7 @@ extern "C" void *cOVState_PAUSE_ONLINE_cOVState_PAUSE_ONLINE(void *ovState, int 
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVState_PAUSE_ONLINE_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     (*(int *)((char*)(ovState) + (0xC4))) = 0;
@@ -4436,14 +4436,14 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_OPTIONS_cOVState_PAUSE_OPTIONS);
 extern void *cUIState_cUIState_1C18(void*) __asm__("cUIState_cUIState");
 extern char cOVState_PAUSE_OPTIONS_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVState_PAUSE_OPTIONS for engine @p engine and overlay id @p overlayId; installs cOVState_PAUSE_OPTIONS_vtbl.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 7 inline with the
  * same steps; this out-of-line copy has no callers.
  *
@@ -4459,7 +4459,7 @@ extern "C" void *cOVState_PAUSE_OPTIONS_cOVState_PAUSE_OPTIONS(cOVState_PAUSE_OP
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = cOVState_PAUSE_OPTIONS_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
@@ -4472,14 +4472,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00221C80);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_PAUSE_ONLINE_ERROR_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVState_PAUSE_ONLINE_ERROR without an engine; installs cOVState_PAUSE_ONLINE_ERROR_vtbl.
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
- * halfword from D_004A2088) and the cOVState vtable cOVState_vtbl is stored before the class's own. Unlike cOVState_PAUSE_ONLINE_ERROR_cOVState_PAUSE_ONLINE_ERROR
+ * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Unlike cOVState_PAUSE_ONLINE_ERROR_cOVState_PAUSE_ONLINE_ERROR
  * it leaves the words at 0x9C and 0xA0 alone. Out-of-line copy with no callers.
  *
  * @param ovState  the object to construct
@@ -4492,7 +4492,7 @@ extern "C" void *func_00221C80(cOVState_PAUSE_ONLINE_ERROR* ovState) {
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = cOVState_PAUSE_ONLINE_ERROR_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
@@ -4506,7 +4506,7 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_PAUSE_ONLINE_ERROR_cOVState_PAUSE_ONLIN
 extern void *cUIState_cUIState_1CE0(void*) __asm__("cUIState_cUIState");
 extern char cOVState_PAUSE_ONLINE_ERROR_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVState_PAUSE_ONLINE_ERROR for engine @p engine and overlay id @p overlayId; installs
@@ -4514,7 +4514,7 @@ extern unsigned short D_004A2088[];
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 39 inline with
  * the same steps; this out-of-line copy has no callers.
  *
@@ -4530,7 +4530,7 @@ extern "C" void *cOVState_PAUSE_ONLINE_ERROR_cOVState_PAUSE_ONLINE_ERROR(cOVStat
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = cOVState_PAUSE_ONLINE_ERROR_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     (ovState->mbShouldDisplayAuxInfo) = 1;
@@ -4637,14 +4637,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00221E18);
 extern void *cUIState_cUIState_1E18(void*) __asm__("cUIState_cUIState");
 extern char D_00472850[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the overlay with vtable D_00472850 for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 8 inline with the
  * same steps; this out-of-line copy has no callers.
  *
@@ -4660,7 +4660,7 @@ extern "C" void *func_00221E18(cOVState_HEAT_PREEVENT* ovState, int engine, int 
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = D_00472850;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
@@ -4695,14 +4695,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00221EA8);
 extern void *cUIState_cUIState_1EA8(void*) __asm__("cUIState_cUIState");
 extern char D_00472778[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the overlay with vtable D_00472778 for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 9 inline with the
  * same steps; this out-of-line copy has no callers.
  *
@@ -4718,7 +4718,7 @@ extern "C" void *func_00221EA8(void *ovState, int engine, int overlayId) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = D_00472778;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ovState;
@@ -4753,14 +4753,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00221F38);
 extern void *cUIState_cUIState_1F38(void*) __asm__("cUIState_cUIState");
 extern char D_004726A0[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the overlay with vtable D_004726A0 for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 21 inline with
  * the same steps; this out-of-line copy has no callers.
  *
@@ -4776,7 +4776,7 @@ extern "C" void *func_00221F38(void *ovState, int engine, int overlayId) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = D_004726A0;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ovState;
@@ -4811,14 +4811,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00221FC8);
 extern void *cUIState_cUIState_1FC8(void*) __asm__("cUIState_cUIState");
 extern char D_004725C8[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs the overlay with vtable D_004725C8 for engine @p engine and overlay id @p overlayId.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 20 inline with
  * the same steps; this out-of-line copy has no callers.
  *
@@ -4834,7 +4834,7 @@ extern "C" void *func_00221FC8(void *ovState, int engine, int overlayId) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = D_004725C8;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ovState;
@@ -4933,14 +4933,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00222100);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVStateRewardsList_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVStateRewardsList without an engine; installs cOVStateRewardsList_vtbl.
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
- * halfword from D_004A2088) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
+ * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
  * no callers.
  *
  * @param ovState  the object to construct
@@ -4953,7 +4953,7 @@ extern "C" void *func_00222100(void *ovState) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVStateRewardsList_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ovState;
@@ -4967,14 +4967,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00222160);
 extern void *cUIState_cUIState_2160(void*) __asm__("cUIState_cUIState");
 extern char cOVStateRewardsList_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVStateRewardsList for engine @p engine and overlay id @p overlayId; installs cOVStateRewardsList_vtbl.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. Out-of-line copy with no callers.
  *
  * @param ovState  the object to construct
@@ -4989,7 +4989,7 @@ extern "C" void *func_00222160(void *ovState, int engine, int overlayId) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVStateRewardsList_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ovState;
@@ -5045,14 +5045,14 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVState_REWARDS_cOVState_REWARDS);
 extern void *cUIState_cUIState_2218(void*) __asm__("cUIState_cUIState");
 extern char cOVState_REWARDS_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVState_REWARDS for engine @p engine and overlay id @p overlayId; installs cOVState_REWARDS_vtbl.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. cOVStateManager_triggerOverlay builds overlay id 16 inline with
  * the same steps; this out-of-line copy has no callers.
  *
@@ -5068,7 +5068,7 @@ extern "C" void *cOVState_REWARDS_cOVState_REWARDS(cOVState_REWARDS* ovState, in
     ((char*)ovState->mVtbl) = cOVState_vtbl;
     (ovState->mAllowPauseMenu) = 0;
     (ovState->mRemovePDA) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = cOVState_REWARDS_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
     return ((void*)ovState);
@@ -5138,14 +5138,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_002222F8);
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVStateTrophy_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVStateTrophy without an engine; installs cOVStateTrophy_vtbl.
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
- * halfword from D_004A2088) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
+ * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Out-of-line copy with
  * no callers.
  *
  * @param ovState  the object to construct
@@ -5158,7 +5158,7 @@ extern "C" void *func_002222F8(void *ovState) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVStateTrophy_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ovState;
@@ -5172,14 +5172,14 @@ INCLUDE_ASM("fe/all_in_one_fe", func_00222358);
 extern void *cUIState_cUIState_2358(void*) __asm__("cUIState_cUIState");
 extern char cOVStateTrophy_vtbl[];
 extern char cOVState_vtbl[];
-extern unsigned short D_004A2088[];
+extern unsigned short str_sp_b[];
 
 /**
  * Constructs a cOVStateTrophy for engine @p engine and overlay id @p overlayId; installs cOVStateTrophy_vtbl.
  *
  * Runs the cUIState constructor cUIState_cUIState with the engine still in the second argument register (the C never names
  * it). The inlined cOVState part sets mOVID (0x98) to the overlay id, clears mDoneTransition (0x48), mAllowPauseMenu
- * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from D_004A2088, and stores the
+ * (0x4C) and mRemovePDA (0x54), copies " " into mszChatBuff (0x58) as one halfword read from str_sp_b, and stores the
  * cOVState vtable cOVState_vtbl before the class's own. Out-of-line copy with no callers.
  *
  * @param ovState  the object to construct
@@ -5194,7 +5194,7 @@ extern "C" void *func_00222358(void *ovState, int engine, int overlayId) {
     (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
     (*(int *)((char*)(ovState) + (0x4C))) = 0;
     (*(int *)((char*)(ovState) + (0x54))) = 0;
-    unsigned short chatInit = D_004A2088[0];
+    unsigned short chatInit = str_sp_b[0];
     (*(char **)((char*)(ovState) + (8))) = cOVStateTrophy_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
     return ovState;

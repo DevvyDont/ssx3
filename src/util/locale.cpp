@@ -318,7 +318,7 @@ INCLUDE_ASM("util/locale", cFELocale_getStringByHash);
 #ifdef SKIP_ASM
 extern "C" const char* cLocaleFile_getStringByHash(void* file, int key);
 extern "C" void sprintf2(char* dst, const char* src);
-extern char D_004A1390[];
+extern char str_sp[];
 
 struct cFELocale_getStringByHash_sLocale {
     signed char useDefault;
@@ -332,7 +332,7 @@ struct cFELocale_getStringByHash_sLocale {
  *
  * When the display mode (+0x0) is 0, searches the 20 file entries (+0x8) for loaded files whose language byte equals
  * the current language (+0x1) and returns the first cLocaleFile_getStringByHash hit. Otherwise, or when no file has it, it writes
- * D_004A1390 (a single space) into the 16-bit buffer at +0x5A with sprintf2 and returns that buffer. Locale vtable slot
+ * str_sp (a single space) into the 16-bit buffer at +0x5A with sprintf2 and returns that buffer. Locale vtable slot
  * 4.
  *
  * @param key  the string's hash (GetHashValue32 of its id)
@@ -352,7 +352,7 @@ extern "C" const char* cFELocale_getStringByHash(cFELocale_getStringByHash_sLoca
         }
     }
     char* buf = (char*)self + 0x5A;
-    sprintf2(buf, D_004A1390);
+    sprintf2(buf, str_sp);
     return buf;
 }
 #endif
