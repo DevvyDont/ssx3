@@ -5581,7 +5581,7 @@ static inline sVec4_341388 vu0Xform_341388(const sVec4_341388& v, const char* m)
  * non-zero type, else 0. For type 2 the direction is negated and transformed by the instance's matrix (instance record
  * at +0x18, matrix at its +0x10) and the speed is negated.
  *
- * func_002FBEC8 (a world-script maker) allocates it as 0x50 bytes tagged "Boost" and passes bucket 1, type 8.
+ * MakeBoostFunc (a world-script maker) allocates it as 0x50 bytes tagged "Boost" and passes bucket 1, type 8.
  *
  * @param bucket  the bucket list the node joins
  * @param nodeType  the object-node type (8)
@@ -6542,7 +6542,7 @@ static inline void setRateMax_003421A0(sFloat_003421A0* dst, float v, char* info
  * (+0x18) to +0x1C; and Spring (+0x10) to +0x20. It sets the dirty flag (bit 0 of +0x56) and clears the torque (+0x0),
  * step (+0x4) and velocity (+0x28).
  *
- * func_002FB498 (a world-script maker) allocates it as 0x80 bytes tagged "AnimTeeter" and passes bucket 1.
+ * MakeAnimTeeterFunc (a world-script maker) allocates it as 0x80 bytes tagged "AnimTeeter" and passes bucket 1.
  *
  * @param bucket  the bucket list the node joins
  * @param obj  the instance record

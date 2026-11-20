@@ -325,7 +325,7 @@ void* func_002D1CC0_2(void*, void*) __asm__("func_002D1CC0__FPv");
  * Applies the dead fade node's stored instance event (+0x1C) to its instance record (+0x18) when it loses
  * focus.
  *
- * func_002D1CC0() passes both to func_002FC2C0(), which by event kind deletes the record's node (1), replaces
+ * func_002D1CC0() passes both to makeDead(), which by event kind deletes the record's node (1), replaces
  * it with a new "DeadNode" (0) or with a "RestoreNode" (3); the update does the same once the fade timer runs
  * out.
  */

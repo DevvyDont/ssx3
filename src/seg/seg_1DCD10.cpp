@@ -272,7 +272,7 @@ static inline void G3_BF98(int c, int f, int g, int e, int d) {
  * Does nothing while miNumSphere is 0. Otherwise sorts the first miNumSphere 8-byte sort keys at D_00537AC0 (On Tour
  * cFogParticleMan::mSortKey) with func_00418EF8 and the comparator func_002DC168, pushes a copy of the graphics
  * manager's top render-state record (GrMan +0xE84) and sets several of its fields, calls virtual slot 3
- * (platformrender, func_002DC7B0 in cPS2FogParticleMan), pops the state and resets miNumSphere to 0.
+ * (platformrender, cPS2FogParticleMan_platformrender in cPS2FogParticleMan), pops the state and resets miNumSphere to 0.
  */
 extern "C" void cFogParticleMan_render(cFogParticleMan* self) {
     if (self->miNumSphere) {
@@ -614,7 +614,7 @@ extern "C" void func_002DC190(cPS2FogParticleMan* out, sObj_C190** objs, int n, 
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1DCD10", func_002DC7B0);
+INCLUDE_ASM("seg/seg_1DCD10", cPS2FogParticleMan_platformrender);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct sDma_C7B0 {
@@ -685,7 +685,7 @@ static inline int FBits_C7B0(float f) { return *(int*)&f; }
  *
  * @param list  the fog particle manager whose miNumSphere sprites are drawn
  */
-extern "C" void func_002DC7B0(cPS2FogParticleMan* list)
+extern "C" void cPS2FogParticleMan_platformrender(cPS2FogParticleMan* list)
 {
     int left = list->miNumSphere;
     int start = 0;

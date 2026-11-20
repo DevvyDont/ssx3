@@ -1902,7 +1902,7 @@ extern "C" void func_00229910(void* self, int slot, int a1);
 /**
  * Takes the first free quad slot among the first 64 and places it on the model of @p resourceId (func_00229910).
  *
- * Does nothing when those 64 are all used. func_00303BA0 (a script command) calls it for its command 2.
+ * Does nothing when those 64 are all used. Crowd2dFunc (a script command) calls it for its command 2.
  *
  * @param resourceId  the world resource id of the crowd model
  */
@@ -1926,7 +1926,7 @@ extern "C" void func_00229B90(void* self, int a1);
 /**
  * Releases the first quad slot among the first 64 whose resource id equals @p val (func_00229B90).
  *
- * func_00303BA0 (a script command) calls it for its command 3.
+ * Crowd2dFunc (a script command) calls it for its command 3.
  *
  * @param val  the world resource id
  */
@@ -2016,7 +2016,7 @@ static inline sModel_229820* HandleToModel_229820(unsigned int h)
  *
  * Finds the model behind @p handle in the world cache (cObjectInterface_getWorld: table by the low byte, entry by the
  * rest); when part @p partIndex exists in its skeleton (+0x80) and has a bone @p boneIndex, stores D_00536690 in the pose (+0x94) entry
- * of that bone. @p self is not used. func_00303BA0 (a script command) calls it for its command 0.
+ * of that bone. @p self is not used. Crowd2dFunc (a script command) calls it for its command 0.
  *
  * @param handle  the model's resource handle
  * @param partIndex  the skeleton part index

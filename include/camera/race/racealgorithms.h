@@ -159,7 +159,7 @@ struct cMatrixChaseAlgorithm {
     int Setup_IsTargetHandplanting; // 0x2FC [O] bool; [U] cLookAtChaseAlgorithm_setupChaseData (sw)
     int SlowCamState;               // 0x300 [O] eCamAttributeBlendState; [U] cLookAtChaseAlgorithm_updateSlowSpeedCam (lw/sw)
     char AirTargetSpline[0xC];      // 0x304 [O] cCubicSplineInterpolant (bx/cubicspline.h: bitfield word, MaxX,
-                                    //       CubicSplines); [R] constructed by func_0031D5E8, destroyed by func_0031D618
+                                    //       CubicSplines); [R] constructed by cCubicSplineInterpolant_cCubicSplineInterpolant, destroyed by cCubicSplineInterpolant__cCubicSplineInterpolant
     char AirPositionSpline[0xC];    // 0x310 [O] cCubicSplineInterpolant; [R] ditto
     char FullAirTargetSpline[0xC];  // 0x31C [O] cCubicSplineInterpolant; [R] ditto
     char FullAirPositionSpline[0xC]; // 0x328 [O] cCubicSplineInterpolant; [R] ditto
@@ -421,7 +421,7 @@ struct cRelativeChaseAlgorithm {
     int Setup_IsTargetHandplanting; // 0x2FC [O] bool; [U] cLookAtChaseAlgorithm_setupChaseData (sw)
     int SlowCamState;               // 0x300 [O] eCamAttributeBlendState; [U] cLookAtChaseAlgorithm_updateSlowSpeedCam (lw/sw)
     char AirTargetSpline[0xC];      // 0x304 [O] cCubicSplineInterpolant (bx/cubicspline.h: bitfield word, MaxX,
-                                    //       CubicSplines); [R] constructed by func_0031D5E8, destroyed by func_0031D618
+                                    //       CubicSplines); [R] constructed by cCubicSplineInterpolant_cCubicSplineInterpolant, destroyed by cCubicSplineInterpolant__cCubicSplineInterpolant
     char AirPositionSpline[0xC];    // 0x310 [O] cCubicSplineInterpolant; [R] ditto
     char FullAirTargetSpline[0xC];  // 0x31C [O] cCubicSplineInterpolant; [R] ditto
     char FullAirPositionSpline[0xC]; // 0x328 [O] cCubicSplineInterpolant; [R] ditto
@@ -565,8 +565,8 @@ CHECK_OFFSET(cRelativeChaseAlgorithm, LastCamTargetPos, 0x3B0);
 CHECK_SIZE(cRelativeChaseAlgorithm, 0x3C0);
 
 // cSplineCamAlgorithm (0x3D0; On Tour 0x3C0). Ctor cSplineCamAlgorithm_cSplineCamAlgorithm(this, point1..point4, time, leadDistance,
-// heightOffset, fov) (vtable cSplineCamAlgorithm_vtbl; builds the three interpolants with func_0031D5E8 / cCubicSplineInterpolant_initAsNatural /
-// cCubicSplineInterpolant_addPoint / cCubicSplineInterpolant_evaluate), dtor cSplineCamAlgorithm__cSplineCamAlgorithm (func_0031D618 on each interpolant), snap cSplineCamAlgorithm_snap,
+// heightOffset, fov) (vtable cSplineCamAlgorithm_vtbl; builds the three interpolants with cCubicSplineInterpolant_cCubicSplineInterpolant / cCubicSplineInterpolant_initAsNatural /
+// cCubicSplineInterpolant_addPoint / cCubicSplineInterpolant_evaluate), dtor cSplineCamAlgorithm__cSplineCamAlgorithm (cCubicSplineInterpolant__cCubicSplineInterpolant on each interpolant), snap cSplineCamAlgorithm_snap,
 // update cSplineCamAlgorithm_update, getRaceCamFinalPhaseData cSplineCamAlgorithm_getRaceCamFinalPhaseData, getRestDrop cSplineCamAlgorithm_getRestDrop.
 struct cSplineCamAlgorithm {
     // --- cLookAtChaseAlgorithm (camera/cameraalgorithms.h, 0x390; its own bases cChaseAlgorithm <- cCameraAlgorithm
@@ -690,7 +690,7 @@ struct cSplineCamAlgorithm {
     int Setup_IsTargetHandplanting; // 0x2FC [O] bool; [U] cLookAtChaseAlgorithm_setupChaseData (sw)
     int SlowCamState;               // 0x300 [O] eCamAttributeBlendState; [U] cLookAtChaseAlgorithm_updateSlowSpeedCam (lw/sw)
     char AirTargetSpline[0xC];      // 0x304 [O] cCubicSplineInterpolant (bx/cubicspline.h: bitfield word, MaxX,
-                                    //       CubicSplines); [R] constructed by func_0031D5E8, destroyed by func_0031D618
+                                    //       CubicSplines); [R] constructed by cCubicSplineInterpolant_cCubicSplineInterpolant, destroyed by cCubicSplineInterpolant__cCubicSplineInterpolant
     char AirPositionSpline[0xC];    // 0x310 [O] cCubicSplineInterpolant; [R] ditto
     char FullAirTargetSpline[0xC];  // 0x31C [O] cCubicSplineInterpolant; [R] ditto
     char FullAirPositionSpline[0xC]; // 0x328 [O] cCubicSplineInterpolant; [R] ditto
@@ -700,7 +700,7 @@ struct cSplineCamAlgorithm {
     char unk_38C[0x4];              // 0x38C padding to the 16-byte class alignment
     // --- cSplineCamAlgorithm
     char XOfT[0xC];                 // 0x390 [O] cCubicSplineInterpolant (On Tour 0x380); [R] ctor passes this+0x390
-                                    //       to func_0031D5E8/cCubicSplineInterpolant_evaluate, dtor to func_0031D618
+                                    //       to cCubicSplineInterpolant_cCubicSplineInterpolant/cCubicSplineInterpolant_evaluate, dtor to cCubicSplineInterpolant__cCubicSplineInterpolant
     char YOfT[0xC];                 // 0x39C [O] cCubicSplineInterpolant; [R] ditto (this+0x39C)
     char ZOfT[0xC];                 // 0x3A8 [O] cCubicSplineInterpolant; [R] ditto (this+0x3A8)
     float TotalTime;                // 0x3B4 [O]; [R] swc1; [U] cSplineCamAlgorithm_update (lwc1)

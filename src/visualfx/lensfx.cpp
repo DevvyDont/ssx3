@@ -916,7 +916,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * Returns the sun's pitch offset for render state @p i.
  *
  * Calls virtual slot 27 of the state's world-painter query object m_query[5] (+0x14) (cRenderStateMan_m_state[@p i],
- * 0xF0-byte rows) and returns the value it points to. The sun processing func_002F4DB8 uses it.
+ * 0xF0-byte rows) and returns the value it points to. The sun processing cSunHalo_Process uses it.
  *
  * @param i  the render state (view) index
  * @return the value
@@ -938,7 +938,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * Returns the sun's yaw offset for render state @p i.
  *
  * Calls virtual slot 28 of the state's world-painter query object m_query[5] (+0x14) (cRenderStateMan_m_state[@p i],
- * 0xF0-byte rows) and returns the value it points to. The sun processing func_002F4DB8 uses it.
+ * 0xF0-byte rows) and returns the value it points to. The sun processing cSunHalo_Process uses it.
  *
  * @param i  the render state (view) index
  * @return the value
@@ -960,7 +960,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * Returns the sun colour's red for render state @p i.
  *
  * Calls virtual slot 29 of the state's world-painter query object m_query[5] (+0x14) (cRenderStateMan_m_state[@p i],
- * 0xF0-byte rows) and returns the value it points to. The sun draw func_002F4A08 uses it.
+ * 0xF0-byte rows) and returns the value it points to. The sun draw cSunHalo_Render uses it.
  *
  * @param i  the render state (view) index
  * @return the value
@@ -982,7 +982,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * Returns the sun colour's green for render state @p i.
  *
  * Calls virtual slot 30 of the state's world-painter query object m_query[5] (+0x14) (cRenderStateMan_m_state[@p i],
- * 0xF0-byte rows) and returns the value it points to. The sun draw func_002F4A08 uses it.
+ * 0xF0-byte rows) and returns the value it points to. The sun draw cSunHalo_Render uses it.
  *
  * @param i  the render state (view) index
  * @return the value
@@ -1004,7 +1004,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * Returns the sun colour's blue for render state @p i.
  *
  * Calls virtual slot 31 of the state's world-painter query object m_query[5] (+0x14) (cRenderStateMan_m_state[@p i],
- * 0xF0-byte rows) and returns the value it points to. The sun draw func_002F4A08 uses it.
+ * 0xF0-byte rows) and returns the value it points to. The sun draw cSunHalo_Render uses it.
  *
  * @param i  the render state (view) index
  * @return the value
@@ -1026,7 +1026,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * Returns the sun's intensity for render state @p i.
  *
  * Calls virtual slot 32 of the state's world-painter query object m_query[5] (+0x14) (cRenderStateMan_m_state[@p i],
- * 0xF0-byte rows) and returns the value it points to. The sun draw func_002F4A08 uses it.
+ * 0xF0-byte rows) and returns the value it points to. The sun draw cSunHalo_Render uses it.
  *
  * @param i  the render state (view) index
  * @return the value
@@ -1048,8 +1048,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * Returns the sun type for render state @p i (an integer; -1 for no sun).
  *
  * Calls virtual slot 33 of the state's world-painter query object m_query[5] (+0x14) (cRenderStateMan_m_state[@p i],
- * 0xF0-byte rows) and returns the value it points to. The sun draw func_002F4A08 uses it as a texture choice; the sun
- * processing func_002F4DB8 treats -1 for state 6 as no sun.
+ * 0xF0-byte rows) and returns the value it points to. The sun draw cSunHalo_Render uses it as a texture choice; the sun
+ * processing cSunHalo_Process treats -1 for state 6 as no sun.
  *
  * @param i  the render state (view) index
  * @return the sun type
@@ -1071,7 +1071,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * Returns the lens-flare intensity for render state @p i.
  *
  * Calls virtual slot 34 of the state's world-painter query object m_query[5] (+0x14) (cRenderStateMan_m_state[@p i],
- * 0xF0-byte rows) and returns the value it points to. func_002F4690 uses it.
+ * 0xF0-byte rows) and returns the value it points to. cSunHalo_RenderLens uses it.
  *
  * @param i  the render state (view) index
  * @return the value
@@ -1093,7 +1093,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * Returns the sun's radius for render state @p i.
  *
  * Calls virtual slot 35 of the state's world-painter query object m_query[5] (+0x14) (cRenderStateMan_m_state[@p i],
- * 0xF0-byte rows) and returns the value it points to. The sun draw func_002F4A08 uses it as the sprite size.
+ * 0xF0-byte rows) and returns the value it points to. The sun draw cSunHalo_Render uses it as the sprite size.
  *
  * @param i  the render state (view) index
  * @return the value

@@ -2002,7 +2002,7 @@ extern void* cAvalanche_m_avalancheList;
  * Searches every avalanche in cAvalanche_m_avalancheList (linked through +0x8) and each one's node list (+0x4, linked
  * through +0xF4) for the node whose instance (+0xF8) is @p id. Nodes of type 2 (+0xF0) are left alone; otherwise it
  * sets the emitter flag (+0xF2) to 1 and copies the 0xD8 bytes of @p params over the node's start. Stops at the first
- * match. The world script function func_00305F40 calls it.
+ * match. The world script function SetAvalancheEmitterDataFunc calls it.
  *
  * @param id  the instance record the node belongs to
  * @param params  the 0xD8-byte emitter parameters to copy

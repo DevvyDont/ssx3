@@ -874,7 +874,7 @@ extern "C" void cFont_centertext1(cFont* self, const unsigned short* str, float 
 INCLUDE_ASM("render/font", cFont_vcentertextf);
 #ifdef SKIP_ASM
 extern void* cBXString_EmptyString;
-extern "C" void func_003191C0(void* str, const char* fmt, void* ap);
+extern "C" void cBXString_vprintf(void* str, const char* fmt, void* ap);
 extern "C" void cBXString__cBXString(void* self, int flags);
 
 struct sBXStr_29F8 {
@@ -893,7 +893,7 @@ extern "C" void cFont_vcentertextf(cFont* self, const char* fmt, void* ap, float
 {
     sBXStr_29F8 txt;
     txt.p = (char*)cBXString_EmptyString;
-    func_003191C0(&txt, fmt, ap);
+    cBXString_vprintf(&txt, fmt, ap);
     cFont_centertext(self, x, y, txt.p);
     cBXString__cBXString(&txt, 2);
 }
@@ -941,7 +941,7 @@ extern "C" void cFont_righttext1(cFont* self, const unsigned short* str, float x
 INCLUDE_ASM("render/font", cFont_vrighttextf);
 #ifdef SKIP_ASM
 extern void* cBXString_EmptyString;
-extern "C" void func_003191C0(void* str, const char* fmt, void* ap);
+extern "C" void cBXString_vprintf(void* str, const char* fmt, void* ap);
 extern "C" void cBXString__cBXString(void* self, int flags);
 
 struct sBXStr_2B40 {
@@ -960,7 +960,7 @@ extern "C" void cFont_vrighttextf(cFont* self, const char* fmt, void* ap, float 
 {
     sBXStr_2B40 txt;
     txt.p = (char*)cBXString_EmptyString;
-    func_003191C0(&txt, fmt, ap);
+    cBXString_vprintf(&txt, fmt, ap);
     cFont_righttext(self, txt.p, x, y);
     cBXString__cBXString(&txt, 2);
 }

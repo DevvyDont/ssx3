@@ -1,7 +1,7 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("seg/seg_21A1C0", func_003191C0);
+INCLUDE_ASM("seg/seg_21A1C0", cBXString_vprintf);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -33,7 +33,7 @@ extern "C" void cBXString_releaseBuffer(cBXString_91C0* self, int len);
  */
 // vsprintf into a cBXString: estimates the formatted length first (the MFC CString::FormatV
 // scheme), reserves it, then formats in place.
-extern "C" void func_003191C0(void* self_, const char* fmt, char* args)
+extern "C" void cBXString_vprintf(void* self_, const char* fmt, char* args)
 {
     cBXString_91C0* self = (cBXString_91C0*)self_;
     char* ap = args;
@@ -142,31 +142,31 @@ extern "C" void func_003191C0(void* self_, const char* fmt, char* args)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_21A1C0", func_003194A8);
+INCLUDE_ASM("seg/seg_21A1C0", cBXString_printf);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_003191C0(void* str, const char* fmt, char* ap);
+extern "C" void cBXString_vprintf(void* str, const char* fmt, char* ap);
 
 /**
  * Formats text into a string, printf style (sprintf into a cBXString).
  *
- * Builds the argument list from its variadic arguments and calls func_003191C0.
+ * Builds the argument list from its variadic arguments and calls cBXString_vprintf.
  *
  * @param str  the string (cBXString)
  * @param fmt  the printf format, followed by its arguments
  */
 // sprintf into a cBXString.
 // PORT: SN-specific va_start (gcc 2.95 EE EABI form); use <stdarg.h> off-PS2.
-extern "C" void func_003194A8(void* str, const char* fmt, ...)
+extern "C" void cBXString_printf(void* str, const char* fmt, ...)
 {
     char* ap;
     ap = (char*)__builtin_next_arg() - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0);
-    func_003191C0(str, fmt, ap);
+    cBXString_vprintf(str, fmt, ap);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_21A1C0", func_003194F0);
+INCLUDE_ASM("seg/seg_21A1C0", cBXString_trimRight);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct cBXString_94F0 {
@@ -182,7 +182,7 @@ extern unsigned char D_00499C81[];
  * table D_00499C81) starts, cuts the text there and sets the header's DataLength (text - 8). No retail code calls it.
  */
 // Strips trailing white space (D_00499C81 is the ctype table + 1, bit 8 = space).
-extern "C" void func_003194F0(cBXString_94F0* self)
+extern "C" void cBXString_trimRight(cBXString_94F0* self)
 {
     cBXString_copyBeforeWrite(self);
     char* end = 0;
@@ -201,7 +201,7 @@ extern "C" void func_003194F0(cBXString_94F0* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_21A1C0", func_00319578);
+INCLUDE_ASM("seg/seg_21A1C0", cBXString_trimLeft);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct cBXString_9578 {
@@ -219,7 +219,7 @@ extern unsigned char D_00499C81[];
  * - 8). No retail code calls it.
  */
 // Strips leading white space.
-extern "C" void func_00319578(cBXString_9578* self)
+extern "C" void cBXString_trimLeft(cBXString_9578* self)
 {
     cBXString_copyBeforeWrite(self);
     char* textStart = self->str;

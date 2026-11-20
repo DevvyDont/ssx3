@@ -6163,7 +6163,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00260E50);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void* cBXString_cBXString1(void* self, void* other);
 extern "C" void* cBXString_cBXString2(void* self, const char* s);
-extern "C" void func_003194A8(void* str, const char* fmt, ...);
+extern "C" void cBXString_printf(void* str, const char* fmt, ...);
 extern void* cBXString_EmptyString;
 extern char str_Duplicate[];
 extern char str_Timeout[];
@@ -6176,7 +6176,7 @@ struct sBXStr_00260E50 {
 /**
  * Builds the display text for a lobby error code given as a four-character tag.
  *
- * 'dupl' gives "Duplicate", 'time' gives "Timeout"; any other code is formatted with func_003194A8 as "Unknown Error
+ * 'dupl' gives "Duplicate", 'time' gives "Timeout"; any other code is formatted with cBXString_printf as "Unknown Error
  * Code %08x '%c%c%c%c'\n" (D_00480E20) from the code and its four bytes. Used by the debug front end (cDebugLobbyScreen_draw).
  *
  * @param ret   the cBXString to construct (the g++ return slot)
@@ -6198,7 +6198,7 @@ extern "C" void* func_00260E50(void* ret, void* self, unsigned int tag)
     {
         sBXStr_00260E50 tagText;
         tagText.p = (char*)cBXString_EmptyString;
-        func_003194A8(&tagText, D_00480E20, tag, tag >> 24, (tag >> 16) & 0xFF, (tag >> 8) & 0xFF, tag & 0xFF);
+        cBXString_printf(&tagText, D_00480E20, tag, tag >> 24, (tag >> 16) & 0xFF, (tag >> 8) & 0xFF, tag & 0xFF);
         cBXString_cBXString1(ret, &tagText);
         cBXString__cBXString(&tagText, 2);
         break;

@@ -4457,7 +4457,7 @@ extern "C" void cLensFxMan_SampleLens(void* selfp)
 INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_ProcessLens);
 #ifdef SKIP_ASM
 extern "C" void cLightHalo_Process(void* part, void* owner);
-extern "C" void func_002F4DB8(void* emit, void* owner, int idx);
+extern "C" void cSunHalo_Process(void* emit, void* owner, int idx);
 
 struct sWkRect3338 { float x, y, w, h; };
 struct sWkVec3338 { float x, y, z, w; } __attribute__((aligned(16)));
@@ -4502,7 +4502,7 @@ static inline void vu0CopyMatrix3338(sWkMtx3338* dst, sWkMtx3338* src)
  *
  * Fills +0x0..+0xC from GrMan virtual slot 28 (the view rectangle), copies the matrix from slot 35 to +0x10 and gets
  * three floats into +0x50, +0x54, +0x58 from slot 30. Then processes view @p idx's sun (+0x6070 + @p idx * 0x210) with
- * func_002F4DB8 and each of its halos with cLightHalo_Process. cLensFxMan_render calls it.
+ * cSunHalo_Process and each of its halos with cLightHalo_Process. cLensFxMan_render calls it.
  *
  * @param vself  the lens manager (this)
  * @param idx  the view index
@@ -4527,7 +4527,7 @@ extern "C" void cLensFxMan_ProcessLens(void* vself, int idx)
         vt[30].fn(ctx + vt[30].delta, &self->f50, &self->f54, &self->f58);
     }
     sWkEmit3338* em = self->emit;
-    func_002F4DB8(&em[idx], self, idx);
+    cSunHalo_Process(&em[idx], self, idx);
     if (i < self->count[idx]) {
         sWkPart3338(*pp)[0x100] = self->parts;
         sWkPart3338* halo = pp[idx];
@@ -4564,13 +4564,13 @@ struct sBW3478Fx : sBW3478Data {
 };
 
 extern int cLensFxMan_mbDrawSun;
-extern "C" void func_002F4A08(void* dst, void* src, int i);
+extern "C" void cSunHalo_Render(void* dst, void* src, int i);
 
 /**
  * Draws one view's lens effects: the sun when enabled, then every on-screen light halo, between the manager's begin and
  * end draw calls.
  *
- * Calls func_002F4A08 for the view's sun (+0x6070 + @p i * 0x210) when cLensFxMan_mbDrawSun is set, the manager's
+ * Calls cSunHalo_Render for the view's sun (+0x6070 + @p i * 0x210) when cLensFxMan_mbDrawSun is set, the manager's
  * virtual slot 2, cLightHalo_Render for each halo of view @p i with +0x2C set, then virtual slot 3. cLensFxMan_render calls it
  * after cLensFxMan_ProcessLens.
  *
@@ -4584,7 +4584,7 @@ extern "C" void cLensFxMan_DrawLens(void* selfv, int i)
     // cLensFxMan_SampleLens keeps it as a zeroed register multiplied by 0x6000 at run time.
     int bank = 0;
     if (cLensFxMan_mbDrawSun != 0) {
-        func_002F4A08(&self->blk[bank][i], self, i);
+        cSunHalo_Render(&self->blk[bank][i], self, i);
     }
     self->vf10();
     for (int n = 0; n < self->cnt[bank][i]; n++) {
@@ -6705,7 +6705,7 @@ extern "C" float cRenderStateMan_SnowFluffColourR(int i);
 extern "C" float cRenderStateMan_SnowFluffColourG(int i);
 extern "C" float cRenderStateMan_SnowFluffColourB(int i);
 void* cGame_getSplashManager(void* self, int i);
-extern "C" void func_002F4330(void* obj, float v);
+extern "C" void cSplashManager_ReportSnowfall(void* obj, float v);
 
 struct sWakeRec_5DA0 {
     float f[8];
@@ -6720,7 +6720,7 @@ extern "C" void cSnowBox_update(int* elem, sWakeRec_5DA0* rec);
  *
  * The settings (snow and wind intensity, fluff, flake size, wind rotation, flurries, gravity and two colours)
  * come from the debug snowfall toggles when cSnowfallToggles_m_EnableTest is set. Otherwise they come from
- * the render-state manager (entries 6 and 7). The snow intensity also goes to func_002F4330 with the view's
+ * the render-state manager (entries 6 and 7). The snow intensity also goes to cSplashManager_ReportSnowfall with the view's
  * cGame_getSplashManager object.
  *
  * @param self  the snowfall node
@@ -6760,7 +6760,7 @@ extern "C" void cSnowFall_update(void* self)
             recs[i].c1.z = cRenderStateMan_SnowFluffColourG(k);
             recs[i].c1.w = cRenderStateMan_SnowFluffColourB(k);
         }
-        func_002F4330(cGame_getSplashManager(SSXApp->Game, i), recs[i].f[0]);
+        cSplashManager_ReportSnowfall(cGame_getSplashManager(SSXApp->Game, i), recs[i].f[0]);
     }
     int j;
     for (j = 0; j < 12; j++) {

@@ -273,14 +273,14 @@ struct sSpline_31DEE0 {
     sSplSeg_31DEE0* seg;
 };
 
-extern "C" float func_0031D5A8(sSplSeg_31DEE0* seg, float t);
+extern "C" float cCSICubicSpline_evaluate(sSplSeg_31DEE0* seg, float t);
 
 extern "C" float cCubicSplineInterpolant_evaluate_impl(sSpline_31DEE0* s, float t) __asm__("cCubicSplineInterpolant_evaluate");
 /**
  * Evaluates a spline interpolant at @p time.
  *
  * Uses the cached segment (bits 19-26) when @p time lies in it, else its neighbour, else a bisection over the segments,
- * caches the one found and evaluates its cubic with func_0031D5A8. Times before the first segment use segment 0; when
+ * caches the one found and evaluates its cubic with cCSICubicSpline_evaluate. Times before the first segment use segment 0; when
  * the cached segment is the second-to-last, times past the end use the last.
  *
  * Likely bug: a time past the end (+0x4) while the cached segment is any other one reads past the segment array
@@ -301,21 +301,21 @@ extern "C" float cCubicSplineInterpolant_evaluate_impl(sSpline_31DEE0* spline, f
     }
     sSplSeg_31DEE0* seg = &spline->seg[spline->flags.cur];
     if (seg->t <= time && time <= *pend) {
-        return func_0031D5A8(seg, time);
+        return cCSICubicSpline_evaluate(seg, time);
     }
     if (time < seg->t) {
         if (time < spline->seg[1].t) {
             spline->flags.cur = 0;
-            return func_0031D5A8(spline->seg, time);
+            return cCSICubicSpline_evaluate(spline->seg, time);
         }
     } else {
         if ((int)spline->flags.cur == last - 1) {
             spline->flags.cur = last;
-            return func_0031D5A8(&spline->seg[last], time);
+            return cCSICubicSpline_evaluate(&spline->seg[last], time);
         }
         if (time < spline->seg[spline->flags.cur + 2].t) {
             spline->flags.cur = spline->flags.cur + 1;
-            return func_0031D5A8(&spline->seg[spline->flags.cur], time);
+            return cCSICubicSpline_evaluate(&spline->seg[spline->flags.cur], time);
         }
     }
     int hi = last;
@@ -333,7 +333,7 @@ extern "C" float cCubicSplineInterpolant_evaluate_impl(sSpline_31DEE0* spline, f
         if (segStart <= time) {
             if (time <= segEnd) {
                 spline->flags.cur = mid;
-                return func_0031D5A8(midSeg, time);
+                return cCSICubicSpline_evaluate(midSeg, time);
             } else {
                 lo = mid + 1;
             }

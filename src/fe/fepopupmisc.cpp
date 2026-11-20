@@ -6980,7 +6980,7 @@ extern int D_004A20CC;
 extern signed char D_00535C11[];
 
 /**
- * Asks for the message center to open, from a world script (func_00306300, when not in a network game).
+ * Asks for the message center to open, from a world script (MessageCenterFunc, when not in a network game).
  *
  * When the new race's cGamePath (D_00535C11) is 0, sets D_004A20CC to 0, so the game update triggers overlay 0x22 (the
  * message center) on its next pass, and sets player 0's flag through cBENewPlayerInterface_setHelpDone(player interface, 0, 1); otherwise
@@ -7005,7 +7005,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHelpDone(void* iface, int a1);
 
 /**
- * Reports whether a world script may open the message center (func_00307020 returns it to the script).
+ * Reports whether a world script may open the message center (ShowMessageIconFunc returns it to the script).
  *
  * Returns 0 when the new race's cGamePath is not 0 or its cGameEvent is 6 or 9; otherwise 1 while player 0's flag read
  * by cBENewPlayerInterface_getHelpDone is still clear (func_001E3510 sets it).

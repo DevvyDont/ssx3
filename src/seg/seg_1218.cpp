@@ -3059,14 +3059,14 @@ extern "C" void func_00104CC8(void *riderAnim, int soundId) {
 INCLUDE_ASM("seg/seg_1218", cRiderAnim_mapAIDToGAD);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00311710_4CF8(int, int, int) __asm__("func_00311710");
+extern "C" void cAIAnimEventMap_mapAIDToGAD_4CF8(int, int, int) __asm__("cAIAnimEventMap_mapAIDToGAD");
 extern int cRiderAnimBase_AIAnimEventMap;
 
 /**
  * Maps an AI animation id to the game animation data id for this rider's animation set.
  *
  * The animation filter comes from FERider (+0x64, word +0xCD8) when linked to a front-end rider, else from Rider
- * (+0x60, word +0x364), else 0. The result is func_00311710(cRiderAnimBase_AIAnimEventMap, aid, filter) (On Tour
+ * (+0x60, word +0x364), else 0. The result is cAIAnimEventMap_mapAIDToGAD(cRiderAnimBase_AIAnimEventMap, aid, filter) (On Tour
  * cAIAnimEventMap::mapAIDToGAD); the C view is void and the id passes through in v0. Virtual: slot 4 of
  * cRiderAnim_vtbl.
  *
@@ -3088,7 +3088,7 @@ extern "C" void cRiderAnim_mapAIDToGAD(void *riderAnim, int aid) {
             var_6 = (*(int *)((char*)(temp_4) + (0x364)));
         }
     }
-    func_00311710_4CF8(cRiderAnimBase_AIAnimEventMap, aid, var_6);
+    cAIAnimEventMap_mapAIDToGAD_4CF8(cRiderAnimBase_AIAnimEventMap, aid, var_6);
 }
 #endif
 

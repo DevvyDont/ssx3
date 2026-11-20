@@ -69,7 +69,7 @@ extern "C" void cAIAnimEventMap_initMaps_impl(RangeTable_15E0* rangeTable)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2125C8", func_00311710);
+INCLUDE_ASM("seg/seg_2125C8", cAIAnimEventMap_mapAIDToGAD);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct sWeighted_1710 {
@@ -98,7 +98,7 @@ unsigned int AIrand();
  * @param mask  the filter bits a variant must have
  * @return the chosen variant's value (a game animation data id)
  */
-extern "C" int func_00311710(RangeTable_15E0* eventMap, int idx, int mask)
+extern "C" int cAIAnimEventMap_mapAIDToGAD(RangeTable_15E0* eventMap, int idx, int mask)
 {
     int start = eventMap->r[idx].start;
     int i, end, total;
@@ -161,7 +161,7 @@ extern "C" void cRiderAnimBase_initAIAnimEventMap(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2125C8", func_003118A8);
+INCLUDE_ASM("seg/seg_2125C8", cRiderAnimBase_purgeAIAnimEventMap);
 #ifdef SKIP_ASM
 extern "C" void operator_delete__FPi(int);
 extern int cRiderAnimBase_AIAnimEventMap;
@@ -172,7 +172,7 @@ extern int cRiderAnimBase_AIAnimEventMap;
  * Deletes cRiderAnimBase_AIAnimEventMap (operator delete) and sets it to 0; the undo of
  * cRiderAnimBase_initAIAnimEventMap.
  */
-extern "C" void func_003118A8(void) {
+extern "C" void cRiderAnimBase_purgeAIAnimEventMap(void) {
     operator_delete__FPi(cRiderAnimBase_AIAnimEventMap);
     cRiderAnimBase_AIAnimEventMap = 0;
 }

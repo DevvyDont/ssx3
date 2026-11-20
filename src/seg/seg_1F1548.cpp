@@ -1475,7 +1475,7 @@ extern "C" void func_002F22C8(sObj_22C8* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2588);
+INCLUDE_ASM("seg/seg_1F1548", tDrop_tDrop);
 #ifdef SKIP_ASM
 /**
  * Constructs a screen-splash drop: clears its active flag and returns it.
@@ -1483,14 +1483,14 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F2588);
  * @param drop  the drop (0x3C bytes)
  * @return the drop
  */
-extern "C" int *func_002F2588(int *drop) {
+extern "C" int *tDrop_tDrop(int *drop) {
     *drop = 0;
     return drop;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2598);
+INCLUDE_ASM("seg/seg_1F1548", tDrop_init);
 #ifdef SKIP_ASM
 extern int D_004A3AFC;
 // NOTE: tunables are float members of global records; splat names each field separately.
@@ -1553,7 +1553,7 @@ static inline sV4_2598 operator+(const sV4_2598& a, const sV4_2598& b)
     return sV4_2598(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
 }
 
-extern "C" void func_002F2598_2598(sPart_2598* p, const sV2_2598& pos, sV2_2598* range) __asm__("func_002F2598");
+extern "C" void tDrop_init_2598(sPart_2598* p, const sV2_2598& pos, sV2_2598* range) __asm__("tDrop_init");
 /**
  * Starts a screen-splash drop at a position with a random size, life, spin and tint.
  *
@@ -1568,7 +1568,7 @@ extern "C" void func_002F2598_2598(sPart_2598* p, const sV2_2598& pos, sV2_2598*
  * @param pos  the screen position
  * @param range  the largest width (x) and height (y)
  */
-extern "C" void func_002F2598_2598(sPart_2598* drop, const sV2_2598& pos, sV2_2598* range)
+extern "C" void tDrop_init_2598(sPart_2598* drop, const sV2_2598& pos, sV2_2598* range)
 {
     float maxY = range->y;
     float maxX = range->x;
@@ -1589,7 +1589,7 @@ extern "C" void func_002F2598_2598(sPart_2598* drop, const sV2_2598& pos, sV2_25
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2810);
+INCLUDE_ASM("seg/seg_1F1548", tDrop_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A3AFC;
@@ -1682,7 +1682,7 @@ static inline void addRand_2810(float& v, float lo, float hi)
     v += randRange_2810(lo, hi);
 }
 
-extern "C" void func_002F2810_2810(sPart_2810* p, float t) __asm__("func_002F2810");
+extern "C" void tDrop_update_2810(sPart_2810* p, float t) __asm__("tDrop_update");
 /**
  * Moves a screen-splash drop one frame and deactivates it when it expires or leaves the 640x480 screen.
  *
@@ -1695,7 +1695,7 @@ extern "C" void func_002F2810_2810(sPart_2810* p, float t) __asm__("func_002F281
  * @param drop  the drop
  * @param cameraSpeed  the camera speed (km/h) from cSplashManager_update
  */
-extern "C" void func_002F2810_2810(sPart_2810* drop, float cameraSpeed)
+extern "C" void tDrop_update_2810(sPart_2810* drop, float cameraSpeed)
 {
     drop->age += 0.016666667f;
     addRand_2810(drop->vel.x, D_004A42A0_2810.v, D_004A42A4_2810.v);
@@ -1728,7 +1728,7 @@ extern "C" void func_002F2810_2810(sPart_2810* drop, float cameraSpeed)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2C30);
+INCLUDE_ASM("seg/seg_1F1548", tDrop_render);
 #ifdef SKIP_ASM
 struct sVec2_2C30 {
     float x, y;
@@ -1845,8 +1845,8 @@ static inline float lerp_2C30(float a, float d, float t)
     return a + t;
 }
 
-// PORT: the unit declares func_002F2C30 later as (void*, sV2_3E28*); typed body bound by asm label.
-extern "C" void func_002F2C30_impl(char* obj, sVec2_2C30* off) __asm__("func_002F2C30");
+// PORT: the unit declares tDrop_render later as (void*, sV2_3E28*); typed body bound by asm label.
+extern "C" void tDrop_render_impl(char* obj, sVec2_2C30* off) __asm__("tDrop_render");
 /**
  * Draws a screen-splash drop as a rotated sprite offset by @p off.
  *
@@ -1858,7 +1858,7 @@ extern "C" void func_002F2C30_impl(char* obj, sVec2_2C30* off) __asm__("func_002
  * @param obj  the drop
  * @param off  the screen offset added to the drop position
  */
-extern "C" void func_002F2C30_impl(char* obj, sVec2_2C30* off)
+extern "C" void tDrop_render_impl(char* obj, sVec2_2C30* off)
 {
     if (!D_004A54F8) {
         D_004A54F0 = 0;
@@ -1884,7 +1884,7 @@ extern "C" void func_002F2C30_impl(char* obj, sVec2_2C30* off)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2D60);
+INCLUDE_ASM("seg/seg_1F1548", tCrystal_tCrystal);
 #ifdef SKIP_ASM
 /**
  * Constructs a screen-splash ice crystal: clears its active flag (+0x4) and returns it.
@@ -1892,14 +1892,14 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F2D60);
  * @param crystal  the crystal (0x4C bytes)
  * @return the crystal
  */
-extern "C" void *func_002F2D60(void *crystal) {
+extern "C" void *tCrystal_tCrystal(void *crystal) {
     (*(int *)((char*)(crystal) + (4))) = 0;
     return crystal;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F2D70);
+INCLUDE_ASM("seg/seg_1F1548", tCrystal_init);
 #ifdef SKIP_ASM
 extern int D_004A3AFC;
 // NOTE: tunables are float members of global records; splat names each field separately.
@@ -1977,7 +1977,7 @@ static inline sV4_2D70 operator+(const sV4_2D70& a, const sV4_2D70& b)
     return sV4_2D70(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
 }
 
-extern "C" void func_002F2D70_2D70(sPart_2D70* p, const sV2_2D70& pos, int n) __asm__("func_002F2D70");
+extern "C" void tCrystal_init_2D70(sPart_2D70* p, const sV2_2D70& pos, int n) __asm__("tCrystal_init");
 /**
  * Starts a screen-splash ice crystal at a position with a random size, life, tint and spin.
  *
@@ -1992,7 +1992,7 @@ extern "C" void func_002F2D70_2D70(sPart_2D70* p, const sV2_2D70& pos, int n) __
  * @param pos  the screen position
  * @param n  its number within the group (0 for the first)
  */
-extern "C" void func_002F2D70_2D70(sPart_2D70* crystal, const sV2_2D70& pos, int n)
+extern "C" void tCrystal_init_2D70(sPart_2D70* crystal, const sV2_2D70& pos, int n)
 {
     float x = randRange_2D70(D_004A42E0_2D70.v, D_004A42E4_2D70.v);
     float rawHeight = x + randSym_2D70(D_004A42E8_2D70.v);
@@ -2019,7 +2019,7 @@ extern "C" void func_002F2D70_2D70(sPart_2D70* crystal, const sV2_2D70& pos, int
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F3030);
+INCLUDE_ASM("seg/seg_1F1548", tCrystal_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A3AFC;
@@ -2112,7 +2112,7 @@ static inline void addRand_3030(float& v, float lo, float hi)
     v += randRange_3030(lo, hi);
 }
 
-extern "C" void func_002F3030_3030(sPart_3030* p, float t) __asm__("func_002F3030");
+extern "C" void tCrystal_update_3030(sPart_3030* p, float t) __asm__("tCrystal_update");
 /**
  * Moves a screen-splash ice crystal one frame and deactivates it when it expires or leaves the 640x480 screen.
  *
@@ -2125,7 +2125,7 @@ extern "C" void func_002F3030_3030(sPart_3030* p, float t) __asm__("func_002F303
  * @param crystal  the crystal
  * @param cameraSpeed  the camera speed (km/h) from cSplashManager_update
  */
-extern "C" void func_002F3030_3030(sPart_3030* crystal, float cameraSpeed)
+extern "C" void tCrystal_update_3030(sPart_3030* crystal, float cameraSpeed)
 {
     crystal->f40 -= 0.016666667f;
     crystal->age += 0.016666667f;
@@ -2161,7 +2161,7 @@ extern "C" void func_002F3030_3030(sPart_3030* crystal, float cameraSpeed)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F3418);
+INCLUDE_ASM("seg/seg_1F1548", tCrystal_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -2248,7 +2248,7 @@ extern int D_004A5528_3418 __asm__("D_004A5528");
  *
  * @param off  the screen offset added to the crystal position
  */
-extern "C" void func_002F3418(sEm_3418* self, const sV2_3418* off)
+extern "C" void tCrystal_render(sEm_3418* self, const sV2_3418* off)
 {
     if (D_004A5518_3418 == 0) {
         D_004A5510_3418 = 0.0f;
@@ -2273,8 +2273,8 @@ extern "C" void func_002F3418(sEm_3418* self, const sV2_3418* off)
 INCLUDE_ASM("seg/seg_1F1548", cSplashManager_cSplashManager);
 #ifdef SKIP_ASM
 extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
-extern "C" int* func_002F2588(int* arg0);
-extern "C" void* func_002F2D60(void* arg0);
+extern "C" int* tDrop_tDrop(int* arg0);
+extern "C" void* tCrystal_tCrystal(void* arg0);
 extern "C" void cSplashManager_reset(void* arg0);
 extern char cSplashManager_vtbl[];
 
@@ -2303,7 +2303,7 @@ extern "C" void* cSplashManager_cSplashManager(void* splashManager, void* bucket
         char* entry = self + 0x1C;
         int i = 29;
         do {
-            func_002F2588((int*)entry);
+            tDrop_tDrop((int*)entry);
             i--;
             entry += 0x3C;
         } while (i != -1);
@@ -2312,7 +2312,7 @@ extern "C" void* cSplashManager_cSplashManager(void* splashManager, void* bucket
         char* entry = self + 0x724;
         int i = 29;
         do {
-            func_002F2D60(entry);
+            tCrystal_tCrystal(entry);
             i--;
             entry += 0x4C;
         } while (i != -1);
@@ -2348,7 +2348,7 @@ extern "C" void cSplashManager__cSplashManager(void *self) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1F1548", func_002F3640);
+INCLUDE_ASM("seg/seg_1F1548", cSplashManager_AddCrystal);
 #ifdef SKIP_ASM
 struct sVec2_3640 {
     float x, y;
@@ -2369,7 +2369,7 @@ extern int D_004A3AFC;
 extern int D_004A4258;
 extern float D_004A42D0;
 extern float D_004A42D4;
-extern "C" void func_002F2D70(sPart_3640*, sVec2_3640*, int);
+extern "C" void tCrystal_init(sPart_3640*, sVec2_3640*, int);
 
 // PORT: float bit-pattern random number in [0,1) (seed reused as float storage).
 static inline float randf_3640()
@@ -2387,13 +2387,13 @@ static inline float randRange_3640(float lo, float hi)
  * Adds a group of @p n ice crystals around a screen position to the splash manager.
  *
  * Each crystal, while fewer than "Max Crystals" (D_004A4258) are active (+0x18), goes to @p basePos plus a random offset
- * within +/- "Crystal Group Spacing X/Y" (D_004A42D0, D_004A42D4) and is started by func_002F2D70 with its number in
+ * within +/- "Crystal Group Spacing X/Y" (D_004A42D0, D_004A42D4) and is started by tCrystal_init with its number in
  * the group; the active count then grows.
  *
  * @param basePos  the group position
  * @param n  how many crystals to add
  */
-extern "C" void func_002F3640(sEmit_3640* self, sVec2_3640* basePos, int n)
+extern "C" void cSplashManager_AddCrystal(sEmit_3640* self, sVec2_3640* basePos, int n)
 {
     for (int i = 0; i < n; i++) {
         if (self->count < D_004A4258) {
@@ -2403,7 +2403,7 @@ extern "C" void func_002F3640(sEmit_3640* self, sVec2_3640* basePos, int n)
             sVec2_3640 pos;
             pos.x = basePos->x + off.x;
             pos.y = basePos->y + off.y;
-            func_002F2D70(&self->parts[self->count], &pos, i);
+            tCrystal_init(&self->parts[self->count], &pos, i);
             self->count++;
         }
     }
@@ -2411,35 +2411,35 @@ extern "C" void func_002F3640(sEmit_3640* self, sVec2_3640* basePos, int n)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1F1548", func_002F37A8);
+INCLUDE_ASM("seg/seg_1F1548", cSplashManager_AddDrop);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S37A8 { int a, b; S37A8() {} S37A8(const S37A8 &o) { *this = o; } };
-extern "C" void func_002F2598(void *, S37A8, void *);
+extern "C" void tDrop_init(void *, S37A8, void *);
 extern int D_004A4254;
 
-extern "C" void func_002F37A8_37A8(void *arg0, S37A8 *arg1, void *arg2) __asm__("func_002F37A8");
+extern "C" void cSplashManager_AddDrop_37A8(void *arg0, S37A8 *arg1, void *arg2) __asm__("cSplashManager_AddDrop");
 /**
  * Adds one drop to the splash manager when fewer than "Max Drops" (D_004A4254) are active.
  *
- * Starts the next free drop (0x3C bytes from +0x1C) with func_002F2598 and bumps the active drop count (+0x14).
- * cSplashManager_update (a crystal shedding a drop) and func_002F3810 call it.
+ * Starts the next free drop (0x3C bytes from +0x1C) with tDrop_init and bumps the active drop count (+0x14).
+ * cSplashManager_update (a crystal shedding a drop) and cSplashManager_AddSplashes call it.
  *
  * @param splashManager  the splash manager
  * @param basePos  the drop position (copied)
  * @param maxSize  the largest drop size
  */
-extern "C" void func_002F37A8_37A8(void *splashManager, S37A8 *basePos, void *maxSize) {
+extern "C" void cSplashManager_AddDrop_37A8(void *splashManager, S37A8 *basePos, void *maxSize) {
     int n = *(int *)((char*)splashManager + 0x14);
     if (n < D_004A4254) {
-        func_002F2598((char*)splashManager + (n * 0x3C + 0x1C), *basePos, maxSize);
+        tDrop_init((char*)splashManager + (n * 0x3C + 0x1C), *basePos, maxSize);
         *(int *)((char*)splashManager + 0x14) = *(int *)((char*)splashManager + 0x14) + 1;
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1F1548", func_002F3810);
+INCLUDE_ASM("seg/seg_1F1548", cSplashManager_AddSplashes);
 #ifdef SKIP_ASM
 struct sVec2_3810 {
     float x, y;
@@ -2451,8 +2451,8 @@ extern int D_004A4264;
 extern int D_004A4268;
 extern float D_004A4298;
 unsigned int BXrand();
-extern "C" void func_002F3640_3810(void*, sVec2_3810*, int) __asm__("func_002F3640");
-extern "C" void func_002F37A8(void*, sVec2_3810*, sVec2_3810*);
+extern "C" void cSplashManager_AddCrystal_3810(void*, sVec2_3810*, int) __asm__("cSplashManager_AddCrystal");
+extern "C" void cSplashManager_AddDrop(void*, sVec2_3810*, sVec2_3810*);
 
 // PORT: float bit-pattern random number in [0,1) (seed reused as float storage).
 static inline float randf_3810()
@@ -2472,11 +2472,11 @@ static inline float randScaled_3810(float s)
  * Takes the whole part of the splash counter (+0x1024, On Tour mNumSplashesToAdd) and keeps the fraction. Each splash
  * goes to a random point of the 640x480 screen; with the chance "Percentage Ice Crystals" (D_004A425C) it is a group of
  * "Ice Crystal Minimum in Group" to "Maximum in Group" crystals (BXrand, at least 1, all counted) added by
- * func_002F3640, otherwise one drop of "Drop Max Size" (D_004A4298) square added by func_002F37A8. Quirk: the group
+ * cSplashManager_AddCrystal, otherwise one drop of "Drop Max Size" (D_004A4298) square added by cSplashManager_AddDrop. Quirk: the group
  * size is BXrand() % (maximum - minimum), a division by zero when the two settings are equal. cSplashManager_update
  * calls it.
  */
-extern "C" void func_002F3810(char* self)
+extern "C" void cSplashManager_AddSplashes(char* self)
 {
     float acc = *(float*)(self + 0x1024);
     int n = (int)acc;
@@ -2490,12 +2490,12 @@ extern "C" void func_002F3810(char* self)
             if (k <= 0)
                 k = 1;
             n -= k;
-            func_002F3640_3810(self, &pos, k);
+            cSplashManager_AddCrystal_3810(self, &pos, k);
         } else {
             sVec2_3810 dropSize;
             dropSize.x = D_004A4298;
             dropSize.y = D_004A4298;
-            func_002F37A8(self, &pos, &dropSize);
+            cSplashManager_AddDrop(self, &pos, &dropSize);
             n--;
         }
     }
@@ -2585,10 +2585,10 @@ struct sEmitter_39E0 : sVBase_39E0 {
     float speed;
 };
 
-extern "C" void func_002F3810(char* self);
-extern "C" void func_002F2810_39E0(sSmoke_39E0*, float) __asm__("func_002F2810");
-extern "C" void func_002F3030_39E0(sPart_39E0*, float) __asm__("func_002F3030");
-extern "C" void func_002F37A8_39E0(void*, sV2_39E0*, sV2_39E0*) __asm__("func_002F37A8");
+extern "C" void cSplashManager_AddSplashes(char* self);
+extern "C" void tDrop_update_39E0(sSmoke_39E0*, float) __asm__("tDrop_update");
+extern "C" void tCrystal_update_39E0(sPart_39E0*, float) __asm__("tCrystal_update");
+extern "C" void cSplashManager_AddDrop_39E0(void*, sV2_39E0*, sV2_39E0*) __asm__("cSplashManager_AddDrop");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline void Sub_39E0(sV4_39E0* out, const sV4_39E0& a, const sV4_39E0& b)
@@ -2630,7 +2630,7 @@ static inline float Length_39E0(const sV4_39E0& v)
  * Updates this view's screen splashes: tracks the camera speed, spawns ice crystals and lets them shed drops.
  *
  * Needs SplashToggles "Enable" (D_004A424C) and an existing view. The speed is the view position's change per
- * frame times 60 * 0.036 (probably km/h); above 1000 (a camera cut) everything resets. func_002F3810 spawns
+ * frame times 60 * 0.036 (probably km/h); above 1000 (a camera cut) everything resets. cSplashManager_AddSplashes spawns
  * crystals, every drop and crystal is updated with the speed and dead ones are replaced by the last. With a
  * chance set by "Percentage Ice Crystal Spawn", one random crystal sheds a drop of 0.6 x its size, at most
  * "Max Spawn Per Crystal" times and only above "Drop Min Size".
@@ -2656,12 +2656,12 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
         self->speed = 0.0f;
     }
     self->prevPos = pos;
-    func_002F3810((char*)self);
+    cSplashManager_AddSplashes((char*)self);
 
     int i = 0;
     while (i < self->nSmoke) {
         sSmoke_39E0* sm = &self->smoke[i];
-        func_002F2810_39E0(sm, self->speed);
+        tDrop_update_39E0(sm, self->speed);
         if (sm->active) {
             i++;
         } else {
@@ -2682,13 +2682,13 @@ extern "C" void cSplashManager_update(sEmitter_39E0* self)
     i = 0;
     while (i < self->nParts) {
         sPart_39E0* part = &self->parts[i];
-        func_002F3030_39E0(part, self->speed);
+        tCrystal_update_39E0(part, self->speed);
         if (part->active) {
             if (pick == i && self->parts[i].bursts < D_004A426C) {
                 self->parts[i].bursts++;
                 sV2_39E0 sz = part->size * 0.6000000238418579f;
                 if (sz.X() > D_004A4294_39E0.v && sz.Y() > D_004A4294_39E0.v)
-                    func_002F37A8_39E0(self, &self->parts[i].pos, &sz);
+                    cSplashManager_AddDrop_39E0(self, &self->parts[i].pos, &sz);
             }
             i++;
         } else {
@@ -2787,8 +2787,8 @@ struct sEmitter_3E28 : sVBase_3E28 {
     char parts[30][0x4C];
 };
 
-extern "C" void func_002F2C30(void*, sV2_3E28*);
-extern void func_002F3418_3E28(void*, sV2_3E28*) __asm__("func_002F3418");
+extern "C" void tDrop_render(void*, sV2_3E28*);
+extern void tCrystal_render_3E28(void*, sV2_3E28*) __asm__("tCrystal_render");
 
 /**
  * Draws this view's splash drops and ice crystals as 2D sprites over the 640x480 screen.
@@ -2828,9 +2828,9 @@ extern "C" void cSplashManager_render(sEmitter_3E28* self)
     ((cGfx_3E28*)ps2GraphicsMan)->stateTop->f8_10 = 0;
     SetF22_3E28(((cGfx_3E28*)ps2GraphicsMan)->stateTop, 1);
     for (i = 0; i < self->nSmoke; i++)
-        func_002F2C30(self->smoke[i], &scr);
+        tDrop_render(self->smoke[i], &scr);
     for (i = 0; i < self->nParts; i++)
-        func_002F3418_3E28(self->parts[i], &scr);
+        tCrystal_render_3E28(self->parts[i], &scr);
     ((cGfx_3E28*)ps2GraphicsMan)->stateTop--;
     ((cGfx_3E28*)ps2GraphicsMan)->PopView();
     ((cGfx_3E28*)ps2GraphicsMan)->PopViewport();
@@ -2842,14 +2842,14 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F4118);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void *cGame_getSplashManager(void *, int);
-extern "C" void func_002F4260_4118(void *, float, void *) __asm__("func_002F4260");
+extern "C" void cSplashManager_ReportImpactLocal_4118(void *, float, void *) __asm__("cSplashManager_ReportImpactLocal");
 struct N4118 { char pad[0x84]; N4118 *c; };
 struct M4118 { char pad[0x10]; unsigned int cnt; };
 
 /**
  * Reports a snow impact at a world position to the splash manager of every view.
  *
- * For each view of the game's view manager (count at its +0x10) it calls func_002F4260 on cGame_getSplashManager's
+ * For each view of the game's view manager (count at its +0x10) it calls cSplashManager_ReportImpactLocal on cGame_getSplashManager's
  * result. The board-wake effect calls it with its burst point and strength.
  *
  * @param position  the impact position in the world
@@ -2859,7 +2859,7 @@ extern "C" void func_002F4118(void *position, float speed) {
     unsigned int i = 0;
     if (((M4118 *)((N4118 *)((N4118 *)SSXApp)->c)->c)->cnt != 0) {
         do {
-            func_002F4260_4118(cGame_getSplashManager(((N4118 *)SSXApp)->c, i++), speed, position);
+            cSplashManager_ReportImpactLocal_4118(cGame_getSplashManager(((N4118 *)SSXApp)->c, i++), speed, position);
         } while (i < ((M4118 *)((N4118 *)((N4118 *)SSXApp)->c)->c)->cnt);
     }
 }
@@ -2907,7 +2907,7 @@ extern "C" void cSplashManager_CameraSnapped(int camera) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F4260);
+INCLUDE_ASM("seg/seg_1F1548", cSplashManager_ReportImpactLocal);
 #ifdef SKIP_ASM
 struct sV4_4260 {
     float x, y, z, w;
@@ -2965,7 +2965,7 @@ extern float D_004A427C;
  * @param impactPos  the impact position
  * @param speed  the impact strength (times 0.036, km/h)
  */
-extern "C" void func_002F4260(char* self, sV4_4260* impactPos, float speed)
+extern "C" void cSplashManager_ReportImpactLocal(char* self, sV4_4260* impactPos, float speed)
 {
     float k = 1.0f - Length_4260(Sub_4260(*(sV4_4260*)(self + 0x1010), *impactPos)) / D_004A4270;
     if (k > 0.0f && *(float*)(self + 0x1028) > D_004A4278) {
@@ -2978,7 +2978,7 @@ extern "C" void func_002F4260(char* self, sV4_4260* impactPos, float speed)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F4330);
+INCLUDE_ASM("seg/seg_1F1548", cSplashManager_ReportSnowfall);
 #ifdef SKIP_ASM
 extern float D_004A4280;
 extern float D_004A4284;
@@ -2993,7 +2993,7 @@ extern float D_004A4284;
  * @param splashManager  the splash manager
  * @param intensity  the snowfall intensity
  */
-extern "C" void func_002F4330(void *splashManager, float intensity) {
+extern "C" void cSplashManager_ReportSnowfall(void *splashManager, float intensity) {
     *(float *)((char*)splashManager + 0x1028) = intensity;
     if (D_004A4280 < intensity) {
         *(float *)((char*)splashManager + 0x1024) += intensity * (*(float *)((char*)splashManager + 0x1020) + 10.0f) * (D_004A4284 * 0.007692307699471712f);
@@ -3122,7 +3122,7 @@ extern "C" void cSunHalo_InitLens_43E0(sLightSet_43E0* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F4690);
+INCLUDE_ASM("seg/seg_1F1548", cSunHalo_RenderLens);
 #ifdef SKIP_ASM
 extern "C" float cRenderStateMan_LensIntensity(int);
 
@@ -3221,9 +3221,9 @@ public:
  * (+0x200) entries of the lens table (+0x30, 0x1C each: kind, distance, size, colour) sits at centre + (sun - centre) *
  * distance, where the sun is mScreenPosition (+0x1F0); its alpha is scaled by mfOcclude (+0x204) *
  * cRenderStateMan_LensIntensity(6), its UVs pick a quarter of the texture by kind (0-3; others the left half) and it is
- * drawn as a size * 300 square with cPS2GraphicsMan_DrawSprite (virtual slot 78). func_002F4A08 calls it.
+ * drawn as a size * 300 square with cPS2GraphicsMan_DrawSprite (virtual slot 78). cSunHalo_Render calls it.
  */
-extern "C" void func_002F4690(sFlare_4690* self)
+extern "C" void cSunHalo_RenderLens(sFlare_4690* self)
 {
     float cx = (float)((cWorld_4690*)GrMan)->GetScreenWidth() * 0.5f;
     float cy = (float)((cWorld_4690*)GrMan)->GetScreenHeight() * 0.5f;
@@ -3268,7 +3268,7 @@ extern "C" void func_002F4690(sFlare_4690* self)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F4A08);
+INCLUDE_ASM("seg/seg_1F1548", cSunHalo_Render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" float cRenderStateMan_SunColorR(int);
@@ -3277,7 +3277,7 @@ extern "C" float cRenderStateMan_SunColorB(int);
 extern "C" float cRenderStateMan_SunIntensity(int);
 extern "C" int cRenderStateMan_SunType(int);
 extern "C" float cRenderStateMan_SunRadius(int);
-extern "C" void func_002F4690_4A08(void*, void*) __asm__("func_002F4690");
+extern "C" void cSunHalo_RenderLens_4A08(void*, void*) __asm__("cSunHalo_RenderLens");
 extern char t4mat_Identity[];
 
 struct sV2_4A08 {
@@ -3366,12 +3366,12 @@ struct sSun_4A08 {
  * colour is (1, SunColorR/G/B) with its alpha scaled by mfOcclude (+0x204) * SunIntensity, the size is SunRadius (1
  * means 320) and the texture is _EffectTexMap[51 + SunType]; nothing is drawn when the alpha is not positive. Pushes a
  * default draw state (blend and texture fields set), the viewport @p vp and an identity view, draws a size-square
- * sprite at mScreenPosition (+0x1F0) with cPS2GraphicsMan_DrawSprite, calls func_002F4690 and pops everything again.
+ * sprite at mScreenPosition (+0x1F0) with cPS2GraphicsMan_DrawSprite, calls cSunHalo_RenderLens and pops everything again.
  *
  * @param vp  the viewport rectangle (x, y, width, height)
  * @param flag  nonzero picks render-state set 7 instead of 6
  */
-extern "C" void func_002F4A08(sSun_4A08* self, sV4_4A08* vp, int flag)
+extern "C" void cSunHalo_Render(sSun_4A08* self, sV4_4A08* vp, int flag)
 {
     if (self->visible == 0)
         return;
@@ -3408,7 +3408,7 @@ extern "C" void func_002F4A08(sSun_4A08* self, sV4_4A08* vp, int flag)
     sV4_4A08 pos(self->sunX, self->sunY, 0.0f, 1.0f);
     ((cGfx_4A08*)gfx)->DrawSprite(pos, sV2_4A08(size, size),
                     sV2_4A08(0.0f, 0.0f), sV2_4A08(1.0f, 1.0f), col);
-    func_002F4690_4A08(self, vp);
+    cSunHalo_RenderLens_4A08(self, vp);
     ((cGfx_4A08*)gfx)->stateTop--;
     ((cGfx_4A08*)gfx)->PopView();
     ((cGfx_4A08*)gfx)->PopViewport();
@@ -3416,7 +3416,7 @@ extern "C" void func_002F4A08(sSun_4A08* self, sV4_4A08* vp, int flag)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1F1548", func_002F4DB8);
+INCLUDE_ASM("seg/seg_1F1548", cSunHalo_Process);
 #ifdef SKIP_ASM
 extern "C" int cRenderStateMan_SunType(int);
 extern "C" float cRenderStateMan_SunPitchOffset(int);
@@ -3541,7 +3541,7 @@ static inline float clamp_4DB8(float v, float lo, float hi)
  * @param cam  the view info: viewport rectangle, view matrix (+0x10) and far clip (+0x58)
  * @param flag  nonzero picks render-state set 7 instead of 6
  */
-extern "C" void func_002F4DB8(sSun_4DB8* self, sCam_4DB8* cam, int flag)
+extern "C" void cSunHalo_Process(sSun_4DB8* self, sCam_4DB8* cam, int flag)
 {
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     if (cRenderStateMan_SunType(6) == -1) {

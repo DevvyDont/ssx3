@@ -4153,9 +4153,6 @@ func_0031C128 = 0x0031C128; //type:func
 func_0031C228 = 0x0031C228; //type:func
 
 // --- gap 0x0031D5A8-0x0031D660 (no owning cpp segment) ---
-func_0031D5A8 = 0x0031D5A8; //type:func
-func_0031D5E8 = 0x0031D5E8; //type:func
-func_0031D618 = 0x0031D618; //type:func
 
 // --- src/bx/cubicspline.cpp ---
 lbl_0031FE80 = 0x0031FE80; //type:label

@@ -3364,7 +3364,7 @@ extern "C" void cRelativeChaseAlgorithm_snap(cRelativeChaseAlgorithm* self, int 
 INCLUDE_ASM("camera/camera", cSplineCamAlgorithm_cSplineCamAlgorithm);
 #ifdef SKIP_ASM
 extern void* cSplineCamAlgorithm_vtbl[];
-extern "C" void func_0031D5E8(void* spline);
+extern "C" void cCubicSplineInterpolant_cCubicSplineInterpolant(void* spline);
 // PORT: cCubicSplineInterpolant_initAsNatural is declared (void*) but forwards a second argument (the key count) in $a1.
 void cCubicSplineInterpolant_initAsNatural_2(void* spline, int n) __asm__("cCubicSplineInterpolant_initAsNatural__FPv");
 extern "C" void cCubicSplineInterpolant_addPoint(void* spline, float x, float y);
@@ -3416,7 +3416,7 @@ static inline float Length_161060(const sVec_161060& v)
  * Constructs a spline camera that flies through four points in @p dur seconds.
  *
  * Runs the look-at chase constructor, stores cSplineCamAlgorithm_vtbl and constructs the X/Y/Z interpolants XOfT,
- * YOfT and ZOfT (+0x390, +0x39C, +0x3A8; func_0031D5E8). Sets LeadDistance, HeightOffset, View = @p fov and
+ * YOfT and ZOfT (+0x390, +0x39C, +0x3A8; cCubicSplineInterpolant_cCubicSplineInterpolant). Sets LeadDistance, HeightOffset, View = @p fov and
  * AlgorithmType 0x4B (On Tour CAMERA_ALGORITHM_SPLINE = 75). Each interpolant gets four keys (cCubicSplineInterpolant_initAsNatural,
  * cCubicSplineInterpolant_addPoint) at times 0, dur/3, 2dur/3 and dur from the points' x, y and z. TotalTime = dur and LastEvaluatedTime
  * = 0; the path length is then summed over 100 samples (cCubicSplineInterpolant_evaluate, cCubicSplineInterpolant::evaluate) and Speed =
@@ -3440,9 +3440,9 @@ extern "C" void* cSplineCamAlgorithm_cSplineCamAlgorithm(cSplineCamAlgorithm* se
     char* sx = ((char*)self) + 0x390;
     char* sy = ((char*)self) + 0x39C;
     char* sz = ((char*)self) + 0x3A8;
-    func_0031D5E8(sx);
-    func_0031D5E8(sy);
-    func_0031D5E8(sz);
+    cCubicSplineInterpolant_cCubicSplineInterpolant(sx);
+    cCubicSplineInterpolant_cCubicSplineInterpolant(sy);
+    cCubicSplineInterpolant_cCubicSplineInterpolant(sz);
     self->LeadDistance = leadDistance;
     self->HeightOffset = heightOffset;
     self->View = fov;
@@ -3484,14 +3484,14 @@ extern "C" void* cSplineCamAlgorithm_cSplineCamAlgorithm(cSplineCamAlgorithm* se
 INCLUDE_ASM("camera/camera", cSplineCamAlgorithm__cSplineCamAlgorithm);
 #ifdef SKIP_ASM
 extern void* cSplineCamAlgorithm_vtbl[];
-extern "C" void func_0031D618(void* p, int flags);
+extern "C" void cCubicSplineInterpolant__cCubicSplineInterpolant(void* p, int flags);
 // PORT: cLookAtChaseAlgorithm__cLookAtChaseAlgorithm is the base deleting dtor (self, flags); the unit declares it with one arg.
 void cLookAtChaseAlgorithm__cLookAtChaseAlgorithm_dtor(void* self, int flags) __asm__("cLookAtChaseAlgorithm__cLookAtChaseAlgorithm");
 
 /**
  * Destroys a spline camera algorithm: its three coordinate splines (+0x390, +0x39C, +0x3A8), then the chase base.
  *
- * Restores the vtable cSplineCamAlgorithm_vtbl, runs func_0031D618 (the spline destructor, flags 2) on the z, y and x splines and
+ * Restores the vtable cSplineCamAlgorithm_vtbl, runs cCubicSplineInterpolant__cCubicSplineInterpolant (the spline destructor, flags 2) on the z, y and x splines and
  * chains to the cLookAtChaseAlgorithm destructor with @p flags.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object (handled by the base destructor)
@@ -3499,9 +3499,9 @@ void cLookAtChaseAlgorithm__cLookAtChaseAlgorithm_dtor(void* self, int flags) __
 extern "C" void cSplineCamAlgorithm__cSplineCamAlgorithm(cSplineCamAlgorithm* self, int flags)
 {
     self->mVtbl = cSplineCamAlgorithm_vtbl;
-    func_0031D618((char*)self + 0x3A8, 2);
-    func_0031D618((char*)self + 0x39C, 2);
-    func_0031D618((char*)self + 0x390, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x3A8, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x39C, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x390, 2);
     cLookAtChaseAlgorithm__cLookAtChaseAlgorithm_dtor(self, flags);
 }
 #endif
@@ -4718,7 +4718,7 @@ extern "C" void cPIDFilter_reset(cPIDFilter* self, float value);
  * Constructs the race chase camera algorithm with its default tuning.
  *
  * Runs the cChaseAlgorithm constructor, stores cLookAtChaseAlgorithm_vtbl, constructs the five splines at
- * +0x304..+0x334 (func_0031D5E8) and resets TurningPIDFilter (cPIDFilter_reset with 0). Then sets Position to
+ * +0x304..+0x334 (cCubicSplineInterpolant_cCubicSplineInterpolant) and resets TurningPIDFilter (cPIDFilter_reset with 0). Then sets Position to
  * t4vect_Origin, pitch, heading and roll 0, AlgorithmType 0x54, the zero vectors (LastVelLookahead, LastRailMove and the
  * half-pipe moves), LastDist 200, LastDrop 0, LastViewScalar 1, SecondsSinceLastHandplant 10, FramesSinceHandplant
  * 5000, half-pipe flags 0, View pi/4 and the PID factors (P 0.0114, history 0, D 0.00128).
@@ -4731,11 +4731,11 @@ extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(cLookAtChaseAlgorit
     cChaseAlgorithm_cChaseAlgorithm((cChaseAlgorithm*)self);
     sCamFilter* filter = (sCamFilter*)(((char*)self) + 0x340);
     self->mVtbl = cLookAtChaseAlgorithm_vtbl;
-    func_0031D5E8(((char*)self) + 0x304);
-    func_0031D5E8(((char*)self) + 0x310);
-    func_0031D5E8(((char*)self) + 0x31C);
-    func_0031D5E8(((char*)self) + 0x328);
-    func_0031D5E8(((char*)self) + 0x334);
+    cCubicSplineInterpolant_cCubicSplineInterpolant(((char*)self) + 0x304);
+    cCubicSplineInterpolant_cCubicSplineInterpolant(((char*)self) + 0x310);
+    cCubicSplineInterpolant_cCubicSplineInterpolant(((char*)self) + 0x31C);
+    cCubicSplineInterpolant_cCubicSplineInterpolant(((char*)self) + 0x328);
+    cCubicSplineInterpolant_cCubicSplineInterpolant(((char*)self) + 0x334);
     self->TurningPIDFilter.ProportionFactor = cPIDFilter_getDefaultProportionFactor();
     self->TurningPIDFilter.ErrorHistoryFactor = cPIDFilter_getDefaultErrorHistoryFactor_0();
     self->TurningPIDFilter.DerrivativeFactor = cPIDFilter_getDefaultDerrivativeFactor_0();
@@ -4775,7 +4775,7 @@ extern void* D_0045BDE0[];
 /**
  * Destroys a chase camera algorithm: its five splines, then the base camera algorithm part.
  *
- * Restores cLookAtChaseAlgorithm_vtbl, runs func_0031D618 (flags 2) on the splines at +0x334 down to +0x304 and
+ * Restores cLookAtChaseAlgorithm_vtbl, runs cCubicSplineInterpolant__cCubicSplineInterpolant (flags 2) on the splines at +0x334 down to +0x304 and
  * restores the base vtable D_0045BDE0.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object (operator delete)
@@ -4785,11 +4785,11 @@ extern void* D_0045BDE0[];
 void cLookAtChaseAlgorithm__cLookAtChaseAlgorithm_dtor(void* self, int flags)
 {
     *(void***)((char*)self + 0x10) = cLookAtChaseAlgorithm_vtbl;
-    func_0031D618((char*)self + 0x334, 2);
-    func_0031D618((char*)self + 0x328, 2);
-    func_0031D618((char*)self + 0x31C, 2);
-    func_0031D618((char*)self + 0x310, 2);
-    func_0031D618((char*)self + 0x304, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x334, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x328, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x31C, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x310, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x304, 2);
     *(void***)((char*)self + 0x10) = D_0045BDE0;
     if (flags & 1) {
         operator_delete((int*)self);

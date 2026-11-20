@@ -1,7 +1,7 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("seg/seg_218AE8", func_00317AE8);
+INCLUDE_ASM("seg/seg_218AE8", cStatsCalc_add);
 #ifdef SKIP_ASM
 /**
  * Adds a sample to running statistics: sum, sum of squares, minimum, maximum and count.
@@ -12,7 +12,7 @@ INCLUDE_ASM("seg/seg_218AE8", func_00317AE8);
  *
  * @param x  the sample
  */
-extern "C" void func_00317AE8(char *self, float x) {
+extern "C" void cStatsCalc_add(char *self, float x) {
     if (*(int*)(self + 0x10) == 0) {
         *(float*)(self + 8) = *(float*)(self + 0xC) = x;
     } else {
@@ -26,7 +26,7 @@ extern "C" void func_00317AE8(char *self, float x) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_218AE8", func_00317B50);
+INCLUDE_ASM("seg/seg_218AE8", tSemiSpace_set);
 #ifdef SKIP_ASM
 struct sVec4_7B50 { float x, y, z, w; } __attribute__((aligned(16)));
 
@@ -87,7 +87,7 @@ static inline void setPlane_7B50(sVec4_7B50* out, const sVec4_7B50& n, const sVe
  * @param point  a point on the plane
  * @param frontPoint  a point that must end up on the positive side
  */
-extern "C" void func_00317B50(sVec4_7B50* out, sVec4_7B50* n, sVec4_7B50* point, sVec4_7B50* frontPoint)
+extern "C" void tSemiSpace_set(sVec4_7B50* out, sVec4_7B50* n, sVec4_7B50* point, sVec4_7B50* frontPoint)
 {
     setPlane_7B50(out, *n, *point);
     if (vu0Dot_7B50(*out, *frontPoint) < 0.0f) {
@@ -97,7 +97,7 @@ extern "C" void func_00317B50(sVec4_7B50* out, sVec4_7B50* n, sVec4_7B50* point,
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_218AE8", func_00317C48);
+INCLUDE_ASM("seg/seg_218AE8", tSemiSpace_isSimilar);
 #ifdef SKIP_ASM
 struct sVec4_7C48 { float x, y, z, w; } __attribute__((aligned(16)));
 
@@ -147,7 +147,7 @@ static inline float fabs_7C48(float x)
  * @param planeB  the second plane
  * @return 1 when similar, else 0
  */
-extern "C" int func_00317C48(char *planeA, char *planeB) {
+extern "C" int tSemiSpace_isSimilar(char *planeA, char *planeB) {
     float distA = *(float*)(planeA + 0xC);
     if (distA == 0.0f) {
         if (fabs_7C48(*(float*)(planeB + 0xC)) > 0.1f) return 0;
@@ -162,35 +162,35 @@ extern "C" int func_00317C48(char *planeA, char *planeB) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_218AE8", func_00317D10);
+INCLUDE_ASM("seg/seg_218AE8", bxSetOutputChannels);
 #ifdef SKIP_ASM
 extern int D_004A3E80;
 
 /**
  * Stores the bx output-channel mask D_004A3E80 (initially 1).
  *
- * func_00317D18 reads it back; no retail code calls either.
+ * bxGetOutputChannels reads it back; no retail code calls either.
  *
  * @param mask  the new mask
  */
-extern "C" void func_00317D10(int mask) {
+extern "C" void bxSetOutputChannels(int mask) {
     D_004A3E80 = mask;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_218AE8", func_00317D18);
+INCLUDE_ASM("seg/seg_218AE8", bxGetOutputChannels);
 #ifdef SKIP_ASM
 extern int D_004A3E80;
 
 /**
  * Returns the bx output-channel mask D_004A3E80 (initially 1).
  *
- * func_00317D10 sets it; no retail code calls either.
+ * bxSetOutputChannels sets it; no retail code calls either.
  *
  * @return the mask
  */
-extern "C" int func_00317D18(void) {
+extern "C" int bxGetOutputChannels(void) {
     return D_004A3E80;
 }
 #endif

@@ -66,7 +66,7 @@ extern "C" int checkActiveNode(void *node, int type, void *buf) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FB060);
+INCLUDE_ASM("seg/seg_1FBE38", MakeAnimDeltaFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_B060 __asm__("cWScriptMan_TheWScriptMan");
@@ -103,7 +103,7 @@ struct Ent_B060 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_B060 func_002FB060(int n, Ent_B060 *params) {
+extern "C" V3_B060 MakeAnimDeltaFunc(int n, Ent_B060 *params) {
     if (D_004A55C0 == 0) {
         D_B060[0] = 0xFFFFFFFF;
         ((int*)D_B060)[1] = 1;
@@ -161,7 +161,7 @@ extern "C" V3_B060 func_002FB060(int n, Ent_B060 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FB270);
+INCLUDE_ASM("seg/seg_1FBE38", MakeAnimComboFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_B270 __asm__("cWScriptMan_TheWScriptMan");
@@ -199,7 +199,7 @@ struct Ent_B270 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_B270 func_002FB270(int n, Ent_B270 *params) {
+extern "C" V3_B270 MakeAnimComboFunc(int n, Ent_B270 *params) {
     if (D_004A55C4 == 0) {
         D_B270[0] = 0xFFFFFFFF;
         ((int*)D_B270)[1] = 1;
@@ -261,7 +261,7 @@ extern "C" V3_B270 func_002FB270(int n, Ent_B270 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FB498);
+INCLUDE_ASM("seg/seg_1FBE38", MakeAnimTeeterFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_B498 __asm__("cWScriptMan_TheWScriptMan");
@@ -298,7 +298,7 @@ struct Ent_B498 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_B498 func_002FB498(int n, Ent_B498 *params) {
+extern "C" V3_B498 MakeAnimTeeterFunc(int n, Ent_B498 *params) {
     if (D_004A55C8 == 0) {
         D_B498[0] = 0xFFFFFFFF;
         *(float*)&D_B498[1] = 0.6000000238418579f;
@@ -356,7 +356,7 @@ extern "C" V3_B498 func_002FB498(int n, Ent_B498 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FB6B8);
+INCLUDE_ASM("seg/seg_1FBE38", MakeConveyorFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_B6B8 __asm__("cWScriptMan_TheWScriptMan");
@@ -393,7 +393,7 @@ struct Ent_B6B8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_B6B8 func_002FB6B8(int n, Ent_B6B8 *params) {
+extern "C" V3_B6B8 MakeConveyorFunc(int n, Ent_B6B8 *params) {
     if (D_004A55CC == 0) {
         D_B6B8[0] = 0xFFFFFFFF;
         *(float*)&D_B6B8[1] = 100.0f;
@@ -454,7 +454,7 @@ extern "C" V3_B6B8 func_002FB6B8(int n, Ent_B6B8 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FB8D0);
+INCLUDE_ASM("seg/seg_1FBE38", MakeCounterFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_B8D0 __asm__("cWScriptMan_TheWScriptMan");
@@ -490,7 +490,7 @@ struct Ent_B8D0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_B8D0 func_002FB8D0(int n, Ent_B8D0 *params) {
+extern "C" V3_B8D0 MakeCounterFunc(int n, Ent_B8D0 *params) {
     if (D_004A55D0 == 0) {
         D_B8D0[0] = 0xFFFFFFFF;
         ((int*)D_B8D0)[1] = 3;
@@ -540,7 +540,7 @@ extern "C" V3_B8D0 func_002FB8D0(int n, Ent_B8D0 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FBAB0);
+INCLUDE_ASM("seg/seg_1FBE38", MakeFloatingFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_BAB0 __asm__("cWScriptMan_TheWScriptMan");
@@ -577,7 +577,7 @@ struct Ent_BAB0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_BAB0 func_002FBAB0(int n, Ent_BAB0 *params) {
+extern "C" V3_BAB0 MakeFloatingFunc(int n, Ent_BAB0 *params) {
     if (D_004A55D4 == 0) {
         D_BAB0[0] = 0xFFFFFFFF;
         *(float*)&D_BAB0[1] = 10.0f;
@@ -632,7 +632,7 @@ extern "C" V3_BAB0 func_002FBAB0(int n, Ent_BAB0 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FBCB8);
+INCLUDE_ASM("seg/seg_1FBE38", MakeAnimObjectFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_BCB8 __asm__("cWScriptMan_TheWScriptMan");
@@ -669,7 +669,7 @@ struct Ent_BCB8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_BCB8 func_002FBCB8(int n, Ent_BCB8 *params) {
+extern "C" V3_BCB8 MakeAnimObjectFunc(int n, Ent_BCB8 *params) {
     if (D_004A55D8 == 0) {
         D_BCB8[0] = 0xFFFFFFFF;
         ((int*)D_BCB8)[1] = 1;
@@ -727,7 +727,7 @@ extern "C" V3_BCB8 func_002FBCB8(int n, Ent_BCB8 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FBEC8);
+INCLUDE_ASM("seg/seg_1FBE38", MakeBoostFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_BEC8 __asm__("cWScriptMan_TheWScriptMan");
@@ -764,7 +764,7 @@ struct Ent_BEC8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_BEC8 func_002FBEC8(int n, Ent_BEC8 *params) {
+extern "C" V3_BEC8 MakeBoostFunc(int n, Ent_BEC8 *params) {
     if (D_004A55DC == 0) {
         D_BEC8[0] = 0xFFFFFFFF;
         ((int*)D_BEC8)[1] = 0;
@@ -821,7 +821,7 @@ extern "C" V3_BEC8 func_002FBEC8(int n, Ent_BEC8 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FC0D0);
+INCLUDE_ASM("seg/seg_1FBE38", MakeObjectFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_C0D0 __asm__("cWScriptMan_TheWScriptMan");
@@ -857,7 +857,7 @@ struct Ent_C0D0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_C0D0 func_002FC0D0(int n, Ent_C0D0 *params) {
+extern "C" V3_C0D0 MakeObjectFunc(int n, Ent_C0D0 *params) {
     if (D_004A55E0 == 0) {
         D_C0D0[0] = 0xFFFFFFFF;
         ((int*)D_C0D0)[1] = 0;
@@ -908,7 +908,7 @@ extern "C" V3_C0D0 func_002FC0D0(int n, Ent_C0D0 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FC2C0);
+INCLUDE_ASM("seg/seg_1FBE38", makeDead);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int, void*, int, int);
 extern "C" void cDeadNode_cDeadNode(void*, void*);
@@ -933,11 +933,11 @@ static inline void del_obj(char* o) {
  * existing node is deleted through its virtual destructor first, except that a dead node (node type 6 at +0x10) is
  * never touched (and a restore node, type 19, is kept for type 3), which ends the request. Other types do nothing.
  *
- * func_002FC420 calls it for the script, func_002D1CC0 for cDeadFadeNode when its fade ends.
+ * MakeDeadFunc calls it for the script, func_002D1CC0 for cDeadFadeNode when its fade ends.
  *
  * @param ev  the request block: InstId at +0x0, Type at +0x4
  */
-extern "C" void func_002FC2C0(char* self, char* ev) {
+extern "C" void makeDead(char* self, char* ev) {
     switch (*(int*)(ev + 4)) {
     case 1: {
         char* curNode = *(char**)(self + 0xC);
@@ -976,7 +976,7 @@ extern "C" void func_002FC2C0(char* self, char* ev) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_1FBE38", func_002FC420);
+INCLUDE_ASM("seg/seg_1FBE38", MakeDeadFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_C420 __asm__("cWScriptMan_TheWScriptMan");
@@ -984,7 +984,7 @@ extern char *D_004A28A8_C420 __asm__("SSXApp");
 static inline char *refToPtr_C420(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_C420(unsigned i) { if (i == 0) return 0; return refToPtr_C420(i); }
 extern "C" int checkActiveNode(void*, int, void*);
-extern "C" void func_002FC2C0_C420(void*, void*) __asm__("func_002FC2C0");
+extern "C" void makeDead_C420(void*, void*) __asm__("makeDead");
 struct V3_C420 { float x, y, z; };
 extern V3_C420 D_004C9098_C420 __asm__("luno_gLunoNil");
 struct Tag_C420 { char c; Tag_C420() {} Tag_C420(const Tag_C420 &o) : c(o.c) {} };
@@ -1003,13 +1003,13 @@ struct Ent_C420 { int idx; int val; int pad; int type; };
  * InstId -1 means the script's current instance (cWScriptMan_TheWScriptMan +0x290); otherwise its low byte picks a
  * world-cache section and the rest an instance in it. Nothing happens when the instance is not found. When it has no
  * active node (+0xC), or checkActiveNode(node, 6 = ATYPE_DEAD, block) lets the node go, the instance and block go to
- * func_002FC2C0, which acts by Type (0 dead node, 1 delete the node and flag the instance, 3 restore node).
+ * makeDead, which acts by Type (0 dead node, 1 delete the node and flag the instance, 3 restore node).
  *
  * @param n  the number of script arguments
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_C420 func_002FC420(int n, Ent_C420 *params) {
+extern "C" V3_C420 MakeDeadFunc(int n, Ent_C420 *params) {
     if (D_004A55E4 == 0) {
         D_C420[0] = 0xFFFFFFFF;
         ((int*)D_C420)[1] = 0;
@@ -1051,7 +1051,7 @@ extern "C" V3_C420 func_002FC420(int n, Ent_C420 *params) {
         return D_004C9098_C420;
     void *activeNode = *(void**)(obj + 0xC);
     if (!activeNode || !checkActiveNode(activeNode, 6, buf))
-        func_002FC2C0_C420(obj, buf);
+        makeDead_C420(obj, buf);
     return D_004C9098_C420;
 }
 #endif
@@ -1223,7 +1223,7 @@ extern "C" V3_C7D0 MakeDebounceFunc(int n, Ent_C7D0 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FC9C8);
+INCLUDE_ASM("seg/seg_1FBE38", MakeFlagFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_C9C8 __asm__("cWScriptMan_TheWScriptMan");
@@ -1262,7 +1262,7 @@ struct Ent_C9C8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_C9C8 func_002FC9C8(int n, Ent_C9C8 *params) {
+extern "C" V3_C9C8 MakeFlagFunc(int n, Ent_C9C8 *params) {
     if (D_004A55F0 == 0) {
         D_C9C8[0] = 0xFFFFFFFF;
         ((int*)D_C9C8)[1] = 1;
@@ -1337,7 +1337,7 @@ extern "C" V3_C9C8 func_002FC9C8(int n, Ent_C9C8 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FCC20);
+INCLUDE_ASM("seg/seg_1FBE38", MakeFenceFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_CC20 __asm__("cWScriptMan_TheWScriptMan");
@@ -1371,7 +1371,7 @@ extern "C" int checkActiveNode(void*, int, void*);
  * @return @p ret
  */
 // PORT: struct return written with the hidden return pointer explicit.
-extern "C" V3_CC20* func_002FCC20(V3_CC20* ret, int n, Ent_CC20 *params) {
+extern "C" V3_CC20* MakeFenceFunc(V3_CC20* ret, int n, Ent_CC20 *params) {
     if (D_004A55F4 == 0) {
         D_CC20[0] = 0xFFFFFFFF;
         *(float*)&D_CC20[2] = 0.5f;
@@ -1675,7 +1675,7 @@ extern "C" V3_D250 AddRollerFunc(int n, Ent_D250 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FD420);
+INCLUDE_ASM("seg/seg_1FBE38", MakeParticleFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_D420 __asm__("cWScriptMan_TheWScriptMan");
@@ -1719,7 +1719,7 @@ struct Ent_D420 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_D420 func_002FD420(int n, Ent_D420 *params) {
+extern "C" V3_D420 MakeParticleFunc(int n, Ent_D420 *params) {
     if (D_004A5604 == 0) {
         ((int*)D_D420)[0] = 1;
         ((int*)D_D420)[1] = 0;
@@ -1832,7 +1832,7 @@ extern "C" V3_D420 func_002FD420(int n, Ent_D420 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FD758);
+INCLUDE_ASM("seg/seg_1FBE38", AddRiderPositionFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_D758 __asm__("cWScriptMan_TheWScriptMan");
@@ -1913,7 +1913,7 @@ struct Ent_D758 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_D758 func_002FD758(int n, Ent_D758 *params) {
+extern "C" V3_D758 AddRiderPositionFunc(int n, Ent_D758 *params) {
     if (D_004A5608 == 0) {
         D_D758[0] = 0xFFFFFFFF;
         ((int*)D_D758)[1] = -1;
@@ -1968,7 +1968,7 @@ extern "C" V3_D758 func_002FD758(int n, Ent_D758 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FD9F8);
+INCLUDE_ASM("seg/seg_1FBE38", AddParentFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_D9F8 __asm__("cWScriptMan_TheWScriptMan");
@@ -2005,7 +2005,7 @@ struct Ent_D9F8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_D9F8 func_002FD9F8(int n, Ent_D9F8 *params) {
+extern "C" V3_D9F8 AddParentFunc(int n, Ent_D9F8 *params) {
     if (D_004A560C == 0) {
         D_D9F8[0] = 0xFFFFFFFF;
         D_D9F8[1] = 0xFFFFFFFF;
@@ -2074,7 +2074,7 @@ extern "C" V3_D9F8 func_002FD9F8(int n, Ent_D9F8 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FDC60);
+INCLUDE_ASM("seg/seg_1FBE38", AddChildFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_DC60 __asm__("cWScriptMan_TheWScriptMan");
@@ -2112,7 +2112,7 @@ struct Ent_DC60 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_DC60 func_002FDC60(int n, Ent_DC60 *params) {
+extern "C" V3_DC60 AddChildFunc(int n, Ent_DC60 *params) {
     if (D_004A5610 == 0) {
         D_DC60[0] = 0xFFFFFFFF;
         D_DC60[1] = 0xFFFFFFFF;
@@ -2362,7 +2362,7 @@ extern "C" V3_E0C0 AddMultiSplineFunc(int n, Ent_E0C0 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FE2C0);
+INCLUDE_ASM("seg/seg_1FBE38", AddUVScrollFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_E2C0 __asm__("cWScriptMan_TheWScriptMan");
@@ -2395,7 +2395,7 @@ struct Ent_E2C0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_E2C0 func_002FE2C0(int n, Ent_E2C0 *params) {
+extern "C" V3_E2C0 AddUVScrollFunc(int n, Ent_E2C0 *params) {
     if (D_004A561C == 0) {
         D_E2C0[0] = 0xFFFFFFFF;
         ((int*)D_E2C0)[1] = 5;
@@ -2450,7 +2450,7 @@ extern "C" V3_E2C0 func_002FE2C0(int n, Ent_E2C0 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FE4A8);
+INCLUDE_ASM("seg/seg_1FBE38", AddTexFlipFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_E4A8 __asm__("cWScriptMan_TheWScriptMan");
@@ -2482,7 +2482,7 @@ struct Ent_E4A8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_E4A8 func_002FE4A8(int n, Ent_E4A8 *params) {
+extern "C" V3_E4A8 AddTexFlipFunc(int n, Ent_E4A8 *params) {
     if (D_004A5620 == 0) {
         D_E4A8[0] = 0xFFFFFFFF;
         ((int*)D_E4A8)[1] = 0;
@@ -2528,7 +2528,7 @@ extern "C" V3_E4A8 func_002FE4A8(int n, Ent_E4A8 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FE668);
+INCLUDE_ASM("seg/seg_1FBE38", AddBoostFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_E668 __asm__("cWScriptMan_TheWScriptMan");
@@ -2561,7 +2561,7 @@ struct Ent_E668 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_E668 func_002FE668(int n, Ent_E668 *params) {
+extern "C" V3_E668 AddBoostFunc(int n, Ent_E668 *params) {
     if (D_004A5624 == 0) {
         D_E668[0] = 0xFFFFFFFF;
         ((int*)D_E668)[1] = 1;
@@ -2612,7 +2612,7 @@ extern "C" V3_E668 func_002FE668(int n, Ent_E668 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", cViewer_addParticle);
+INCLUDE_ASM("seg/seg_1FBE38", AddParticleFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_E840 __asm__("cWScriptMan_TheWScriptMan");
@@ -2691,19 +2691,18 @@ extern const int D_004462A0[];
 extern "C" void* MEM_copy_E840(void*, void*, int) __asm__("MEM_copy");
 struct Ent_E840 { int idx; int val; int pad; int type; };
 /**
- * Script function (despite the name, not a cViewer method): adds a particle emitter to a world instance near
- * the viewer.
+ * Script function AddParticle (gLunoCFunctions, between AddBoost and AddDynamicParticle): adds a particle emitter
+ * to a world instance near the viewer.
  *
  * Builds a heap "AddParticleData" block from defaults and the arguments; a moving instance gets a particle
  * modifier, a static one a new "ParticleNode". Far from the viewer the block is freed. An instance ID of -1
- * means
- * the script's current instance; one that is not found is not checked.
+ * means the script's current instance; one that is not found is not checked.
  *
  * @param n  number of arguments (On Tour numArgs)
  * @param params  the arguments (cLunoCArg*)
  * @return a void script value
  */
-extern "C" V3_E840 cViewer_addParticle(int n, Ent_E840 *params) {
+extern "C" V3_E840 AddParticleFunc(int n, Ent_E840 *params) {
     if (D_004A5628 == 0) {
         ((int*)D_E840)[0] = 1;
         ((int*)D_E840)[1] = 0;
@@ -2819,7 +2818,7 @@ extern "C" V3_E840 cViewer_addParticle(int n, Ent_E840 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FEE98);
+INCLUDE_ASM("seg/seg_1FBE38", AddDynamicParticleFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_EE98 __asm__("cWScriptMan_TheWScriptMan");
@@ -2864,7 +2863,7 @@ struct Ent_EE98 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_EE98 func_002FEE98(int n, Ent_EE98 *params) {
+extern "C" V3_EE98 AddDynamicParticleFunc(int n, Ent_EE98 *params) {
     if (D_004A562C == 0) {
         ((int*)D_EE98)[0] = 1;
         ((int*)D_EE98)[1] = 0;
@@ -3045,7 +3044,7 @@ extern "C" V3_F1C8 AddRailFunc(int n, Ent_F1C8 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FF390);
+INCLUDE_ASM("seg/seg_1FBE38", MakeFloatRailFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_F390 __asm__("cWScriptMan_TheWScriptMan");
@@ -3084,7 +3083,7 @@ struct Ent_F390 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_F390 func_002FF390(int n, Ent_F390 *params) {
+extern "C" V3_F390 MakeFloatRailFunc(int n, Ent_F390 *params) {
     if (D_004A5634 == 0) {
         D_F390[0] = 0xFFFFFFFF;
         D_F390[1] = 0xFFFFFFFF;
@@ -3161,7 +3160,7 @@ extern "C" V3_F390 func_002FF390(int n, Ent_F390 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FF5E8);
+INCLUDE_ASM("seg/seg_1FBE38", MakeSpringRailFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_F5E8 __asm__("cWScriptMan_TheWScriptMan");
@@ -3200,7 +3199,7 @@ struct Ent_F5E8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_F5E8 func_002FF5E8(int n, Ent_F5E8 *params) {
+extern "C" V3_F5E8 MakeSpringRailFunc(int n, Ent_F5E8 *params) {
     if (D_004A5638 == 0) {
         D_F5E8[0] = 0xFFFFFFFF;
         D_F5E8[1] = 0xFFFFFFFF;
@@ -3278,7 +3277,7 @@ extern "C" V3_F5E8 func_002FF5E8(int n, Ent_F5E8 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FF850);
+INCLUDE_ASM("seg/seg_1FBE38", AIEventFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -3309,7 +3308,7 @@ extern T12_F850 D_004FBAE8_F850 __asm__("D_004FBAE8");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_F850 func_002FF850(int n, Ent_F850* params) {
+extern "C" R12_F850 AIEventFunc(int n, Ent_F850* params) {
     if (D_004A563C_F850 == 0) {
         D_004FBAE8_F850.a = -1;
         D_004A563C_F850 = 1;
@@ -3340,7 +3339,7 @@ extern "C" R12_F850 func_002FF850(int n, Ent_F850* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FF9A8);
+INCLUDE_ASM("seg/seg_1FBE38", SignalFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_F9A8 __asm__("cWScriptMan_TheWScriptMan");
@@ -3381,7 +3380,7 @@ struct Ent_F9A8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_F9A8 func_002FF9A8(int n, Ent_F9A8 *params) {
+extern "C" V3_F9A8 SignalFunc(int n, Ent_F9A8 *params) {
     if (D_004A5640 == 0) {
         D_F9A8[0] = 0xFFFFFFFF;
         ((int*)D_F9A8)[1] = -1;
@@ -3412,7 +3411,7 @@ extern "C" V3_F9A8 func_002FF9A8(int n, Ent_F9A8 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FFB50);
+INCLUDE_ASM("seg/seg_1FBE38", HideInstanceFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Flag_FB50 { char c; Flag_FB50() {} Flag_FB50(const Flag_FB50& o) : c(o.c) {} };
@@ -3447,7 +3446,7 @@ struct Ent_FB50 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_FB50 func_002FFB50(int n, Ent_FB50 *params) {
+extern "C" V3_FB50 HideInstanceFunc(int n, Ent_FB50 *params) {
     if (D_004A5650_FB50 == 0) {
         D_004A5648_FB50 = 0xFFFFFFFF;
         D_004A5650_FB50 = 1;
@@ -3499,7 +3498,7 @@ extern "C" V3_FB50 func_002FFB50(int n, Ent_FB50 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FFD58);
+INCLUDE_ASM("seg/seg_1FBE38", ShowInstanceFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_FD58 __asm__("cWScriptMan_TheWScriptMan");
@@ -3539,7 +3538,7 @@ struct Ent_FD58 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_FD58 func_002FFD58(int n, Ent_FD58 *params) {
+extern "C" V3_FD58 ShowInstanceFunc(int n, Ent_FD58 *params) {
     if (D_004A5660 == 0) {
         D_FD58 = 0xFFFFFFFF;
         D_004A5660 = 1;
@@ -3572,7 +3571,7 @@ extern "C" V3_FD58 func_002FFD58(int n, Ent_FD58 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_002FFF00);
+INCLUDE_ASM("seg/seg_1FBE38", PlayAudioFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_FF00 __asm__("cWScriptMan_TheWScriptMan");
@@ -3604,7 +3603,7 @@ struct Ent_FF00 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_FF00 func_002FFF00(int n, Ent_FF00 *params) {
+extern "C" V3_FF00 PlayAudioFunc(int n, Ent_FF00 *params) {
     if (D_004A5664 == 0) {
         D_FF00[0] = 0xFFFFFFFF;
         D_FF00[1] = 0xFFFFFFFF;
@@ -3651,7 +3650,7 @@ extern "C" V3_FF00 func_002FFF00(int n, Ent_FF00 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003000A8);
+INCLUDE_ASM("seg/seg_1FBE38", AttachAudioFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_00A8 __asm__("cWScriptMan_TheWScriptMan");
@@ -3683,7 +3682,7 @@ struct Ent_00A8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_00A8 func_003000A8(int n, Ent_00A8 *params) {
+extern "C" V3_00A8 AttachAudioFunc(int n, Ent_00A8 *params) {
     if (D_004A5668 == 0) {
         D_00A8[0] = 0xFFFFFFFF;
         D_00A8[1] = 0xFFFFFFFF;
@@ -3732,7 +3731,7 @@ extern "C" V3_00A8 func_003000A8(int n, Ent_00A8 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00300260);
+INCLUDE_ASM("seg/seg_1FBE38", DetachAudioFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_0260 __asm__("cWScriptMan_TheWScriptMan");
@@ -3764,7 +3763,7 @@ struct Ent_0260 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_0260 func_00300260(int n, Ent_0260 *params) {
+extern "C" V3_0260 DetachAudioFunc(int n, Ent_0260 *params) {
     if (D_004A566C == 0) {
         D_0260[0] = 0xFFFFFFFF;
         D_0260[1] = 0xFFFFFFFF;
@@ -3813,7 +3812,7 @@ extern "C" V3_0260 func_00300260(int n, Ent_0260 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00300418);
+INCLUDE_ASM("seg/seg_1FBE38", ExpireFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_0418 __asm__("cWScriptMan_TheWScriptMan");
@@ -3844,7 +3843,7 @@ struct Ent_0418 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_0418 func_00300418(int n, Ent_0418 *params) {
+extern "C" V3_0418 ExpireFunc(int n, Ent_0418 *params) {
     if (D_004A5670 == 0) {
         D_0418[0] = 0xFFFFFFFF;
         ((int*)D_0418)[1] = 0;
@@ -3890,7 +3889,7 @@ extern "C" V3_0418 func_00300418(int n, Ent_0418 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003005E8);
+INCLUDE_ASM("seg/seg_1FBE38", LoseFocusFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A3DD8_05E8 __asm__("cWScriptMan_TheWScriptMan");
@@ -3921,7 +3920,7 @@ struct Ent_05E8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_05E8 func_003005E8(int n, Ent_05E8 *params) {
+extern "C" V3_05E8 LoseFocusFunc(int n, Ent_05E8 *params) {
     if (D_004A5680 == 0) {
         D_05E8 = 0xFFFFFFFF;
         D_004A5680 = 1;
@@ -3962,7 +3961,7 @@ extern "C" V3_05E8 func_003005E8(int n, Ent_05E8 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00300770);
+INCLUDE_ASM("seg/seg_1FBE38", TransportFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Flag_0770 { char c; Flag_0770() {} Flag_0770(const Flag_0770& o) : c(o.c) {} };
@@ -3998,7 +3997,7 @@ struct Ent_0770 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_0770 func_00300770(int n, Ent_0770 *params) {
+extern "C" V3_0770 TransportFunc(int n, Ent_0770 *params) {
     if (D_004A5690_0770 == 0) {
         D_004A5688_0770 = 0xFFFFFFFF;
         D_004A5690_0770 = 1;
@@ -4050,7 +4049,7 @@ extern "C" V3_0770 func_00300770(int n, Ent_0770 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00300948);
+INCLUDE_ASM("seg/seg_1FBE38", SetupMissionRiderFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Flag_0948 { char c; Flag_0948() {} Flag_0948(const Flag_0948& o) : c(o.c) {} };
@@ -4086,7 +4085,7 @@ struct Ent_0948 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_0948 func_00300948(int n, Ent_0948 *params) {
+extern "C" V3_0948 SetupMissionRiderFunc(int n, Ent_0948 *params) {
     if (D_004A56A0_0948 == 0) {
         D_004A5698_0948 = 0xFFFFFFFF;
         D_004A56A0_0948 = 1;
@@ -4138,7 +4137,7 @@ extern "C" V3_0948 func_00300948(int n, Ent_0948 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00300B20);
+INCLUDE_ASM("seg/seg_1FBE38", RailFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -4167,7 +4166,7 @@ extern T12_0B20 D_004FBB48_0B20 __asm__("D_004FBB48");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_0B20 func_00300B20(int n, Ent_0B20* params) {
+extern "C" R12_0B20 RailFunc(int n, Ent_0B20* params) {
     if (D_004A56A4_0B20 == 0) {
         D_004FBB48_0B20.a = -1;
         D_004FBB48_0B20.b = 1;
@@ -4200,7 +4199,7 @@ extern "C" R12_0B20 func_00300B20(int n, Ent_0B20* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00300C78);
+INCLUDE_ASM("seg/seg_1FBE38", NISFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory_0C78(int, int, int, int, int, int, int, int) __asm__("cSSXScriptEngine_AddToNISListByScriptCategory");
@@ -4231,7 +4230,7 @@ struct Ent_0C78 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_0C78 func_00300C78(int n, Ent_0C78 *params) {
+extern "C" V3_0C78 NISFunc(int n, Ent_0C78 *params) {
     if (D_004A56A8 == 0) {
         D_0C78[0] = 0xFFFFFFFF;
         ((int*)D_0C78)[1] = 0;
@@ -4270,7 +4269,7 @@ extern "C" V3_0C78 func_00300C78(int n, Ent_0C78 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00300E28);
+INCLUDE_ASM("seg/seg_1FBE38", CollectPoolFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -4298,7 +4297,7 @@ extern T12u_0E28 D_004FBB68_0E28 __asm__("D_004FBB68");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_0E28 func_00300E28(int n, Ent_0E28* params) {
+extern "C" R12_0E28 CollectPoolFunc(int n, Ent_0E28* params) {
     if (D_004A56AC_0E28 == 0) {
         D_004FBB68_0E28.a = 0xFFFFFFFFu;
         D_004FBB68_0E28.b = 1;
@@ -4326,7 +4325,7 @@ extern "C" R12_0E28 func_00300E28(int n, Ent_0E28* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00300F50);
+INCLUDE_ASM("seg/seg_1FBE38", CollectInstFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_0F50 __asm__("cWScriptMan_TheWScriptMan");
@@ -4356,7 +4355,7 @@ struct Ent_0F50 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_0F50 func_00300F50(int n, Ent_0F50 *params) {
+extern "C" V3_0F50 CollectInstFunc(int n, Ent_0F50 *params) {
     if (D_56B0_0F50 == 0) {
         D_0F50[0] = 0xFFFFFFFF;
         D_0F50[1] = 0xFFFFFFFF;
@@ -4506,7 +4505,7 @@ extern "C" void* CollectFunc(void* self, int n, Ent_1120* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003012F0);
+INCLUDE_ASM("seg/seg_1FBE38", MissionFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -4536,7 +4535,7 @@ extern T12_12F0 D_004FBBE0_12F0 __asm__("D_004FBBE0");
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to an int script value, or nil
  */
-extern "C" void* func_003012F0(void* self, int n, Ent_12F0* params) {
+extern "C" void* MissionFunc(void* self, int n, Ent_12F0* params) {
     if (D_004A56B8_12F0 == 0) {
         D_004FBBE0_12F0.a = -1;
         D_004FBBE0_12F0.b = -1;
@@ -4569,7 +4568,7 @@ extern "C" void* func_003012F0(void* self, int n, Ent_12F0* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00301440);
+INCLUDE_ASM("seg/seg_1FBE38", MovieFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -4625,7 +4624,7 @@ extern int D_004A3C78_1440[2] __asm__("D_004A3C78");
 // `lw; nor` survive, the branch being removed after register allocation; the release build's user was debug code);
 // plain form 97.22%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-extern "C" cLunoValue_1440 func_00301440(int n, sBindArg_1FBE38_1440* params) {
+extern "C" cLunoValue_1440 MovieFunc(int n, sBindArg_1FBE38_1440* params) {
     if (D_004A56BC_1440 == 0) {
         D_004FBBF0_1440.a = 0xFFFFFFFF;
         // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp (lbu; sb 0(sp)).
@@ -4664,7 +4663,7 @@ extern "C" cLunoValue_1440 func_00301440(int n, sBindArg_1FBE38_1440* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00301560);
+INCLUDE_ASM("seg/seg_1FBE38", CollectCountFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -4695,7 +4694,7 @@ extern Flag_1560 D_004A56C4_1560 __asm__("D_004A56C4");
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to an int script value
  */
-extern "C" void* func_00301560(void* self, int n, Ent_1560* params) {
+extern "C" void* CollectCountFunc(void* self, int n, Ent_1560* params) {
     if (D_004A56C8_1560 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A56C4_1560 = Flag_1560(D_004A56C4_1560);
@@ -4728,7 +4727,7 @@ extern "C" void* func_00301560(void* self, int n, Ent_1560* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00301680);
+INCLUDE_ASM("seg/seg_1FBE38", AnimFrameFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_1680 __asm__("cWScriptMan_TheWScriptMan");
@@ -4770,7 +4769,7 @@ struct Ent_1680 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" V3_1680* func_00301680(V3_1680 *ret, int n, Ent_1680 *params) {
+extern "C" V3_1680* AnimFrameFunc(V3_1680 *ret, int n, Ent_1680 *params) {
     if (D_004A56D8 == 0) {
         D_1680 = 0xFFFFFFFF;
         D_004A56D8 = 1;
@@ -4810,7 +4809,7 @@ extern "C" V3_1680* func_00301680(V3_1680 *ret, int n, Ent_1680 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00301830);
+INCLUDE_ASM("seg/seg_1FBE38", AnimDirFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_1830 __asm__("cWScriptMan_TheWScriptMan");
@@ -4852,7 +4851,7 @@ struct Ent_1830 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" V3_1830* func_00301830(V3_1830 *ret, int n, Ent_1830 *params) {
+extern "C" V3_1830* AnimDirFunc(V3_1830 *ret, int n, Ent_1830 *params) {
     if (D_004A56E8 == 0) {
         D_1830 = 0xFFFFFFFF;
         D_004A56E8 = 1;
@@ -4904,7 +4903,7 @@ extern "C" V3_1830* func_00301830(V3_1830 *ret, int n, Ent_1830 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003019C8);
+INCLUDE_ASM("seg/seg_1FBE38", FrameUpdateEventFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_19C8 __asm__("cWScriptMan_TheWScriptMan");
@@ -4936,7 +4935,7 @@ struct Ent_19C8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" V3_19C8* func_003019C8(V3_19C8 *ret, int n, Ent_19C8 *params) {
+extern "C" V3_19C8* FrameUpdateEventFunc(V3_19C8 *ret, int n, Ent_19C8 *params) {
     if (D_004A56EC == 0) {
         D_19C8[0] = 0xFFFFFFFF;
         *(float*)&D_19C8[1] = -1.0f;
@@ -4988,7 +4987,7 @@ extern "C" V3_19C8* func_003019C8(V3_19C8 *ret, int n, Ent_19C8 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00301B88);
+INCLUDE_ASM("seg/seg_1FBE38", GotoTaskFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Flag_1B88 { char c; Flag_1B88() {} Flag_1B88(const Flag_1B88& o) : c(o.c) {} };
@@ -5017,7 +5016,7 @@ struct Ent_1B88 { int idx; int val; int pad; int kind; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to int 0
  */
-extern "C" void* func_00301B88(void* self, int n, Ent_1B88* params) {
+extern "C" void* GotoTaskFunc(void* self, int n, Ent_1B88* params) {
     if (D_004A56F8_1B88 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A56F4_1B88 = Flag_1B88(D_004A56F4_1B88);
@@ -5044,7 +5043,7 @@ extern "C" void* func_00301B88(void* self, int n, Ent_1B88* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00301C80);
+INCLUDE_ASM("seg/seg_1FBE38", AdvanceToTaskFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Flag_1C80 { char c; Flag_1C80() {} Flag_1C80(const Flag_1C80& o) : c(o.c) {} };
@@ -5073,7 +5072,7 @@ struct Ent_1C80 { int idx; int val; int pad; int kind; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to int 0
  */
-extern "C" void* func_00301C80(void* self, int n, Ent_1C80* params) {
+extern "C" void* AdvanceToTaskFunc(void* self, int n, Ent_1C80* params) {
     if (D_004A5708_1C80 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A5704_1C80 = Flag_1C80(D_004A5704_1C80);
@@ -5100,7 +5099,7 @@ extern "C" void* func_00301C80(void* self, int n, Ent_1C80* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00301D78);
+INCLUDE_ASM("seg/seg_1FBE38", RiderInVolumeFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Flag_1D78 { char c; Flag_1D78() {} Flag_1D78(const Flag_1D78& o) : c(o.c) {} };
@@ -5141,7 +5140,7 @@ struct Ent_1D78 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to int 1 or 0
  */
-extern "C" void* func_00301D78(void* self, int n, Ent_1D78 *params) {
+extern "C" void* RiderInVolumeFunc(void* self, int n, Ent_1D78 *params) {
     if (D_004A5718_1D78 == 0) {
         D_004A5710_1D78 = 0xFFFFFFFF;
         D_004A5718_1D78 = 1;
@@ -5200,7 +5199,7 @@ done:
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00301F48);
+INCLUDE_ASM("seg/seg_1FBE38", SetGamePathFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Flag_1F48 { char c; Flag_1F48() {} Flag_1F48(const Flag_1F48& o) : c(o.c) {} };
@@ -5209,26 +5208,26 @@ extern Flag_1F48 D_004A5724_1F48 __asm__("D_004A5724");
 extern int D_004A5728_1F48 __asm__("D_004A5728");
 extern int D_004A3CB8_1F48[2] __asm__("D_004A3CB8");
 extern "C" void MEM_copy(void*, void*, int);
-extern "C" void func_00303D88_1F48(int) __asm__("func_00303D88");
+extern "C" void setGamePath_1F48(int) __asm__("setGamePath");
 
 struct Ent_1F48 { int idx; int val; int pad; int kind; };
 struct R12_1F48 { int a; int b; int c; };
 extern R12_1F48 D_004C9098_1F48 __asm__("luno_gLunoNil");
 
 /**
- * Script function (gLunoCFunctions[66]): does nothing in effect: it hands Path to the empty stub func_00303D88.
+ * Script function (gLunoCFunctions[66]): does nothing in effect: it hands Path to the empty stub setGamePath.
  *
  * Copies the static defaults (set up on the first call) into an 8-byte parameter block (On Tour tSetGamePathData: Path)
  * and lets each argument override the field its index names, turning an int into a float where the field type table
  * D_004A3CB8 says 2. Defaults: Path -1.
  *
- * Calls func_00303D88(Path), which has an empty body in this build, so the game path is not changed.
+ * Calls setGamePath(Path), which has an empty body in this build, so the game path is not changed.
  *
  * @param n  the number of script arguments
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_1F48 func_00301F48(int n, Ent_1F48* params) {
+extern "C" R12_1F48 SetGamePathFunc(int n, Ent_1F48* params) {
     if (D_004A5728_1F48 == 0) {
         D_004A5720_1F48 = -1;
         D_004A5728_1F48 = 1;
@@ -5247,7 +5246,7 @@ extern "C" R12_1F48 func_00301F48(int n, Ent_1F48* params) {
         else
             *slot = curArg->val;
     }
-    func_00303D88_1F48(vp[0]);
+    setGamePath_1F48(vp[0]);
     return D_004C9098_1F48;
 }
 #endif
@@ -5452,7 +5451,7 @@ extern "C" V3_2210 SectionFunc(int n, Ent_2210* params)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00302490);
+INCLUDE_ASM("seg/seg_1FBE38", RemoveModifierFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_2490 __asm__("cWScriptMan_TheWScriptMan");
@@ -5484,7 +5483,7 @@ struct Ent_2490 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_2490 func_00302490(int n, Ent_2490 *params) {
+extern "C" V3_2490 RemoveModifierFunc(int n, Ent_2490 *params) {
     if (D_5734_2490 == 0) {
         D_4FBC30_2490.a = 0xFFFFFFFF;
         D_4FBC30_2490.b = -1;
@@ -5548,7 +5547,7 @@ extern "C" V3_2490 func_00302490(int n, Ent_2490 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00302680);
+INCLUDE_ASM("seg/seg_1FBE38", IsGamePathFunc);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct cLunoValue {
@@ -5583,7 +5582,7 @@ extern "C" void* cParticleNode_cParticleNode1(void*, int, void*, void*, void*);
 
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A3CD0_2680[2] __asm__("D_004A3CD0");
-extern "C" int func_00303D90(unsigned);
+extern "C" int isGamePath(unsigned);
 extern int D_004A5740_2680 __asm__("D_004A5740");
 extern int D_004A5738_2680 __asm__("D_004A5738");
 extern sBindEnd_1FBE38 D_004A573C_2680 __asm__("D_004A573C");
@@ -5594,14 +5593,14 @@ extern sBindEnd_1FBE38 D_004A573C_2680 __asm__("D_004A573C");
  * and lets each argument override the field its index names, turning an int into a float where the field type table
  * D_004A3CD0 says 2. Defaults: Path -1.
  *
- * Stores func_00303D90(Path) (1 when the race DB's cGamePath matches) in @p ret as an int script value.
+ * Stores isGamePath(Path) (1 when the race DB's cGamePath matches) in @p ret as an int script value.
  *
  * @param ret  the result slot
  * @param n  the number of script arguments
  * @param e  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" cLunoValue* func_00302680(cLunoValue* ret, int n, sBindArg_1FBE38* e) {
+extern "C" cLunoValue* IsGamePathFunc(cLunoValue* ret, int n, sBindArg_1FBE38* e) {
     if (D_004A5740_2680 == 0) {
         // NOTE: guarded static-local init (defaults record = { int, sBindEnd_1FBE38 }).
         D_004A5738_2680 = -1;
@@ -5611,13 +5610,13 @@ extern "C" cLunoValue* func_00302680(cLunoValue* ret, int n, sBindArg_1FBE38* e)
     int v[4];
     int* vp;
     BIND_UNPACK_ARGS_1FBE38(vp, v, &D_004A5738_2680, 8, D_004A3CD0_2680, n, e);
-    BIND_SET_RESULT_1FBE38(ret, func_00303D90(vp[0]));
+    BIND_SET_RESULT_1FBE38(ret, isGamePath(vp[0]));
     return ret;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00302778);
+INCLUDE_ASM("seg/seg_1FBE38", IsGameModeFunc);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern cLunoValue luno_gLunoNil;
@@ -5646,7 +5645,7 @@ extern "C" void* cParticleNode_cParticleNode1(void*, int, void*, void*, void*);
 
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A3CD8_2778[2] __asm__("D_004A3CD8");
-extern "C" int func_00303DF8(unsigned);
+extern "C" int isGameMode(unsigned);
 extern int D_004A5750_2778 __asm__("D_004A5750");
 extern int D_004A5748_2778 __asm__("D_004A5748");
 extern sBindEnd_1FBE38 D_004A574C_2778 __asm__("D_004A574C");
@@ -5657,14 +5656,14 @@ extern sBindEnd_1FBE38 D_004A574C_2778 __asm__("D_004A574C");
  * and lets each argument override the field its index names, turning an int into a float where the field type table
  * D_004A3CD8 says 2. Defaults: Mode -1.
  *
- * Stores func_00303DF8(Mode) (1 when the race DB's cGameMode matches) in @p ret as an int script value.
+ * Stores isGameMode(Mode) (1 when the race DB's cGameMode matches) in @p ret as an int script value.
  *
  * @param ret  the result slot
  * @param n  the number of script arguments
  * @param e  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" cLunoValue* func_00302778(cLunoValue* ret, int n, sBindArg_1FBE38* e) {
+extern "C" cLunoValue* IsGameModeFunc(cLunoValue* ret, int n, sBindArg_1FBE38* e) {
     if (D_004A5750_2778 == 0) {
         // NOTE: guarded static-local init (defaults record = { int, sBindEnd_1FBE38 }).
         D_004A5748_2778 = -1;
@@ -5674,13 +5673,13 @@ extern "C" cLunoValue* func_00302778(cLunoValue* ret, int n, sBindArg_1FBE38* e)
     int v[4];
     int* vp;
     BIND_UNPACK_ARGS_1FBE38(vp, v, &D_004A5748_2778, 8, D_004A3CD8_2778, n, e);
-    BIND_SET_RESULT_1FBE38(ret, func_00303DF8(vp[0]));
+    BIND_SET_RESULT_1FBE38(ret, isGameMode(vp[0]));
     return ret;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00302870);
+INCLUDE_ASM("seg/seg_1FBE38", IsGameEventFunc);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern cLunoValue luno_gLunoNil;
@@ -5709,7 +5708,7 @@ extern "C" void* cParticleNode_cParticleNode1(void*, int, void*, void*, void*);
 
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A3CE0_2870[2] __asm__("D_004A3CE0");
-extern "C" int func_00303E60(unsigned);
+extern "C" int isGameEvent(unsigned);
 extern int D_004A5760_2870 __asm__("D_004A5760");
 extern int D_004A5758_2870 __asm__("D_004A5758");
 extern sBindEnd_1FBE38 D_004A575C_2870 __asm__("D_004A575C");
@@ -5720,7 +5719,7 @@ extern sBindEnd_1FBE38 D_004A575C_2870 __asm__("D_004A575C");
  * Event) and lets each argument override the field its index names, turning an int into a float where the field type
  * table D_004A3CE0 says 2. Defaults: Event -1.
  *
- * Stores func_00303E60(Event) (1 when the race DB's cGameEvent matches) in @p ret as an int script value. It sits at
+ * Stores isGameEvent(Event) (1 when the race DB's cGameEvent matches) in @p ret as an int script value. It sits at
  * table index 108, after the On Tour-era entries.
  *
  * @param ret  the result slot
@@ -5728,7 +5727,7 @@ extern sBindEnd_1FBE38 D_004A575C_2870 __asm__("D_004A575C");
  * @param e  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" cLunoValue* func_00302870(cLunoValue* ret, int n, sBindArg_1FBE38* e) {
+extern "C" cLunoValue* IsGameEventFunc(cLunoValue* ret, int n, sBindArg_1FBE38* e) {
     if (D_004A5760_2870 == 0) {
         // NOTE: guarded static-local init (defaults record = { int, sBindEnd_1FBE38 }).
         D_004A5758_2870 = -1;
@@ -5738,13 +5737,13 @@ extern "C" cLunoValue* func_00302870(cLunoValue* ret, int n, sBindArg_1FBE38* e)
     int v[4];
     int* vp;
     BIND_UNPACK_ARGS_1FBE38(vp, v, &D_004A5758_2870, 8, D_004A3CE0_2870, n, e);
-    BIND_SET_RESULT_1FBE38(ret, func_00303E60(vp[0]));
+    BIND_SET_RESULT_1FBE38(ret, isGameEvent(vp[0]));
     return ret;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00302968);
+INCLUDE_ASM("seg/seg_1FBE38", SetCurrentInstanceFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -5773,7 +5772,7 @@ extern Flag_2968 D_004A576C_2968 __asm__("D_004A576C");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_2968 func_00302968(int n, Ent_2968* params) {
+extern "C" R12_2968 SetCurrentInstanceFunc(int n, Ent_2968* params) {
     if (D_004A5770_2968 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A576C_2968 = Flag_2968(D_004A576C_2968);
@@ -5809,7 +5808,7 @@ extern "C" R12_2968 func_00302968(int n, Ent_2968* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00302AC0);
+INCLUDE_ASM("seg/seg_1FBE38", ProcessFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -5839,7 +5838,7 @@ extern T12_2AC0 D_004FBC40_2AC0 __asm__("D_004FBC40");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_2AC0 func_00302AC0(int n, Ent_2AC0* params) {
+extern "C" R12_2AC0 ProcessFunc(int n, Ent_2AC0* params) {
     if (D_004A5774_2AC0 == 0) {
         D_004FBC40_2AC0.a = -1;
         D_004FBC40_2AC0.b = 0;
@@ -5865,7 +5864,7 @@ extern "C" R12_2AC0 func_00302AC0(int n, Ent_2AC0* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00302BD8);
+INCLUDE_ASM("seg/seg_1FBE38", EndMissionFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -5894,7 +5893,7 @@ extern Flag_2BD8 D_004A577C_2BD8 __asm__("D_004A577C");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_2BD8 func_00302BD8(int n, Ent_2BD8* params) {
+extern "C" R12_2BD8 EndMissionFunc(int n, Ent_2BD8* params) {
     if (D_004A5780_2BD8 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A577C_2BD8 = Flag_2BD8(D_004A577C_2BD8);
@@ -5919,7 +5918,7 @@ extern "C" R12_2BD8 func_00302BD8(int n, Ent_2BD8* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00302CE8);
+INCLUDE_ASM("seg/seg_1FBE38", EndProcessFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -5948,7 +5947,7 @@ extern Flag_2CE8 D_004A578C_2CE8 __asm__("D_004A578C");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_2CE8 func_00302CE8(int n, Ent_2CE8* params) {
+extern "C" R12_2CE8 EndProcessFunc(int n, Ent_2CE8* params) {
     if (D_004A5790_2CE8 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A578C_2CE8 = Flag_2CE8(D_004A578C_2CE8);
@@ -5973,7 +5972,7 @@ extern "C" R12_2CE8 func_00302CE8(int n, Ent_2CE8* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00302DF0);
+INCLUDE_ASM("seg/seg_1FBE38", EndTaskFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -6002,7 +6001,7 @@ extern Flag_2DF0 D_004A579C_2DF0 __asm__("D_004A579C");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_2DF0 func_00302DF0(int n, Ent_2DF0* params) {
+extern "C" R12_2DF0 EndTaskFunc(int n, Ent_2DF0* params) {
     if (D_004A57A0_2DF0 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A579C_2DF0 = Flag_2DF0(D_004A579C_2DF0);
@@ -6027,7 +6026,7 @@ extern "C" R12_2DF0 func_00302DF0(int n, Ent_2DF0* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00302EF8);
+INCLUDE_ASM("seg/seg_1FBE38", RiderActionFunc);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
@@ -6058,7 +6057,7 @@ extern "C" int cRider_getMissionInt_2EF8(D_2EF8*, int) __asm__("cRider_getMissio
  * grab/tweak/uber 5-7, 8 query 17, 9 points 8, 10 and 11 PressMode 9 and 10, 12 boosting 11, 13-17 queries 12-16, 18
  * query 18); any other value gives 0. The answer for the script's rider
  * (SSXApp->Game->AI->Riders[cWScriptMan_TheWScriptMan->Being]) is returned as an int in the hidden result slot self.
- * func_003037B0 does the same.
+ * RiderMetricFunc does the same.
  *
  * The rider slot is not checked for -1 or an empty entry.
  *
@@ -6067,7 +6066,7 @@ extern "C" int cRider_getMissionInt_2EF8(D_2EF8*, int) __asm__("cRider_getMissio
  * @return self, set to the int answer
  */
 // Script call: maps the script condition id to a rider condition and returns whether the current rider meets it.
-extern "C" void* func_00302EF8(void* self, int n, Ent_2EF8* params) {
+extern "C" void* RiderActionFunc(void* self, int n, Ent_2EF8* params) {
     if (D_004A57B0_2EF8 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A57B0_2EF8 = 1;
@@ -6119,7 +6118,7 @@ extern "C" void* func_00302EF8(void* self, int n, Ent_2EF8* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00303130);
+INCLUDE_ASM("seg/seg_1FBE38", HasActiveObjectFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_3130 __asm__("cWScriptMan_TheWScriptMan");
@@ -6158,7 +6157,7 @@ struct Ent_3130 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" V3_3130* func_00303130(V3_3130 *ret, int n, Ent_3130 *params) {
+extern "C" V3_3130* HasActiveObjectFunc(V3_3130 *ret, int n, Ent_3130 *params) {
     if (D_004A57B4 == 0) {
         D_3130[0] = 0xFFFFFFFF;
         D_3130[1] = 1;
@@ -6192,7 +6191,7 @@ extern "C" V3_3130* func_00303130(V3_3130 *ret, int n, Ent_3130 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003032C0);
+INCLUDE_ASM("seg/seg_1FBE38", RiderDistanceFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (vector length).
 void* luno_cLunoVar_castFloat(void*);
@@ -6232,7 +6231,7 @@ static inline float len_32C0(const Vec_32C0 &v) {
  *
  * @return self
  */
-extern "C" void* func_003032C0(void* self) {
+extern "C" void* RiderDistanceFunc(void* self) {
     D_32C0 *riderEntry = (*(Tab_32C0**)(*(char**)(D_004A28A8_32C0 + 0x84) + 0xC))->arr[*(int*)D_004A3DD8_32C0];
     B_32C0 *riderIface = riderEntry;
     D_32C0 *rider = (D_32C0*)riderIface;
@@ -6245,7 +6244,7 @@ extern "C" void* func_003032C0(void* self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00303380);
+INCLUDE_ASM("seg/seg_1FBE38", RiderSpeedFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm (vector length).
 void* luno_cLunoVar_castFloat(void*);
@@ -6284,7 +6283,7 @@ static inline float len_3380(const Vec_3380 &v) {
  *
  * @return self
  */
-extern "C" void* func_00303380(void* self) {
+extern "C" void* RiderSpeedFunc(void* self) {
     D_3380 *riderEntry = (*(Tab_3380**)(*(char**)(D_004A28A8_3380 + 0x84) + 0xC))->arr[*(int*)D_004A3DD8_3380];
     B_3380 *riderIface = riderEntry;
     D_3380 *rider = (D_3380*)riderIface;
@@ -6296,7 +6295,7 @@ extern "C" void* func_00303380(void* self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00303430);
+INCLUDE_ASM("seg/seg_1FBE38", CurrentInstanceFunc);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct cWScriptMan {
@@ -6326,7 +6325,7 @@ static inline void setInt_3430(cLunoValue* r, const unsigned& v) {
  * @param ret  the result slot
  * @return @p ret
  */
-extern "C" cLunoValue* func_00303430(cLunoValue* ret) {
+extern "C" cLunoValue* CurrentInstanceFunc(cLunoValue* ret) {
     char *curInst = cWScriptMan_TheWScriptMan->f290;
     unsigned instId;
     if (curInst)
@@ -6339,7 +6338,7 @@ extern "C" cLunoValue* func_00303430(cLunoValue* ret) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00303490);
+INCLUDE_ASM("seg/seg_1FBE38", CurrentTaskFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int* luno_cLunoVar_castIndex_3490(void*) __asm__("luno_cLunoVar_castIndex__FPv");
@@ -6354,7 +6353,7 @@ extern "C" unsigned cWScriptProcess_getRunningTaskId_3490(char*) __asm__("cWScri
  *
  * @return self
  */
-extern "C" void* func_00303490(void* self) {
+extern "C" void* CurrentTaskFunc(void* self) {
     char *curProcess = *(char**)(D_004A3DD8_3490 + 0x2A4);
     unsigned taskId;
     if (curProcess)
@@ -6368,7 +6367,7 @@ extern "C" void* func_00303490(void* self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003034F8);
+INCLUDE_ASM("seg/seg_1FBE38", CurrentRailFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int* luno_cLunoVar_castInt(void*);
@@ -6390,7 +6389,7 @@ extern "C" int cRider_getMissionInt_34F8(D_34F8*, int) __asm__("cRider_getMissio
  *
  * @return self
  */
-extern "C" void* func_003034F8(void* self) {
+extern "C" void* CurrentRailFunc(void* self) {
     D_34F8 *riderEntry = (*(Tab_34F8**)(*(char**)(D_004A28A8_34F8 + 0x84) + 0xC))->arr[*(int*)D_004A3DD8_34F8];
     B_34F8 *riderIface = riderEntry;
     D_34F8 *rider = (D_34F8*)riderIface;
@@ -6406,7 +6405,7 @@ extern "C" void* func_003034F8(void* self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00303598);
+INCLUDE_ASM("seg/seg_1FBE38", AIRandomFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -6435,7 +6434,7 @@ extern T12_3598 D_004FBC60_3598 __asm__("D_004FBC60");
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to the random float
  */
-extern "C" void* func_00303598(void* self, int n, Ent_3598* params) {
+extern "C" void* AIRandomFunc(void* self, int n, Ent_3598* params) {
     if (D_004A57B8_3598 == 0) {
         D_004FBC60_3598.a = 0;
         D_004FBC60_3598.b = 1.0f;
@@ -6463,7 +6462,7 @@ extern "C" void* func_00303598(void* self, int n, Ent_3598* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003036B0);
+INCLUDE_ASM("seg/seg_1FBE38", CurrentTrickFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Flag_36B0 { char c; Flag_36B0() {} Flag_36B0(const Flag_36B0& o) : c(o.c) {} };
@@ -6492,7 +6491,7 @@ struct Ent_36B0 { int idx; int val; int pad; int kind; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to the field value
  */
-extern "C" void* func_003036B0(void* self, int n, Ent_36B0* params) {
+extern "C" void* CurrentTrickFunc(void* self, int n, Ent_36B0* params) {
     if (D_004A57C8_36B0 == 0) {
         D_004A57C0_36B0 = -1;
         D_004A57C8_36B0 = 1;
@@ -6519,7 +6518,7 @@ extern "C" void* func_003036B0(void* self, int n, Ent_36B0* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003037B0);
+INCLUDE_ASM("seg/seg_1FBE38", RiderMetricFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -6548,7 +6547,7 @@ struct Ent_37B0 { int idx; int val; int pad; int kind; };
  * grab/tweak/uber 5-7, 8 query 17, 9 points 8, 10 and 11 PressMode 9 and 10, 12 boosting 11, 13-17 queries 12-16, 18
  * query 18); any other value gives 0. The answer for the script's rider
  * (SSXApp->Game->AI->Riders[cWScriptMan_TheWScriptMan->Being]) is returned as an int in the hidden result slot self.
- * Same body as func_00302EF8.
+ * Same body as RiderActionFunc.
  *
  * The rider slot is not checked for -1 or an empty entry.
  *
@@ -6556,7 +6555,7 @@ struct Ent_37B0 { int idx; int val; int pad; int kind; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to the int answer
  */
-extern "C" void* func_003037B0(void* self, int n, Ent_37B0* params)
+extern "C" void* RiderMetricFunc(void* self, int n, Ent_37B0* params)
 {
     if (D_004A57D8_37B0 == 0) {
         D_004A57D0_37B0 = -1;
@@ -6610,7 +6609,7 @@ extern "C" void* func_003037B0(void* self, int n, Ent_37B0* params)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003039F0);
+INCLUDE_ASM("seg/seg_1FBE38", Crowd3dFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_39F0 __asm__("cWScriptMan_TheWScriptMan");
@@ -6642,7 +6641,7 @@ struct Ent_39F0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_39F0 func_003039F0(int n, Ent_39F0 *params) {
+extern "C" V3_39F0 Crowd3dFunc(int n, Ent_39F0 *params) {
     if (D_004A57DC == 0) {
         D_39F0[0] = 0xFFFFFFFF;
         ((int*)D_39F0)[1] = -1;
@@ -6688,7 +6687,7 @@ extern "C" V3_39F0 func_003039F0(int n, Ent_39F0 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00303BA0);
+INCLUDE_ASM("seg/seg_1FBE38", Crowd2dFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_3BA0 __asm__("cWScriptMan_TheWScriptMan");
@@ -6722,7 +6721,7 @@ struct Ent_3BA0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_3BA0 func_00303BA0(int n, Ent_3BA0 *params) {
+extern "C" V3_3BA0 Crowd2dFunc(int n, Ent_3BA0 *params) {
     if (D_57E0_3BA0 == 0) {
         D_4FBC80_3BA0.a = 0xFFFFFFFF;
         D_4FBC80_3BA0.b = -1;
@@ -6778,14 +6777,14 @@ extern "C" V3_3BA0 func_00303BA0(int n, Ent_3BA0 *params) {
 /**
  * Does nothing (an empty function).
  *
- * func_00301F48, the script command that takes a game path, calls it with the path, so setting the game path from a
+ * SetGamePathFunc, the script command that takes a game path, calls it with the path, so setting the game path from a
  * script has no effect in this build.
  */
-extern "C" void func_00303D88(void) {
+extern "C" void setGamePath(void) {
 }
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00303D90);
+INCLUDE_ASM("seg/seg_1FBE38", isGamePath);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 extern "C" int cBE_getBE_3D90(void) __asm__("cBE_getBE");
@@ -6801,7 +6800,7 @@ extern signed char D_00535C11_3D90[] __asm__("D_00535C11");
  * @param i  the script game path (0-3)
  * @return 1 when it matches, else 0
  */
-extern "C" int func_00303D90(unsigned i) {
+extern "C" int isGamePath(unsigned i) {
     if (i < 4) {
         cBE_getInterface_Fv_3D90(cBE_getBE_3D90(), 0);
         return D_004465E8_3D90[i] == D_00535C11_3D90[0];
@@ -6811,7 +6810,7 @@ extern "C" int func_00303D90(unsigned i) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00303DF8);
+INCLUDE_ASM("seg/seg_1FBE38", isGameMode);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 extern "C" int cBE_getBE_3DF8(void) __asm__("cBE_getBE");
@@ -6827,7 +6826,7 @@ extern signed char D_00535C10_3DF8[] __asm__("D_00535C10");
  * @param i  the script game mode (0-7)
  * @return 1 when it matches, else 0
  */
-extern "C" int func_00303DF8(unsigned i) {
+extern "C" int isGameMode(unsigned i) {
     if (i < 8) {
         cBE_getInterface_Fv_3DF8(cBE_getBE_3DF8(), 0);
         return D_004465F8_3DF8[i] == D_00535C10_3DF8[0];
@@ -6837,7 +6836,7 @@ extern "C" int func_00303DF8(unsigned i) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00303E60);
+INCLUDE_ASM("seg/seg_1FBE38", isGameEvent);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 extern "C" int cBE_getBE_3E60(void) __asm__("cBE_getBE");
@@ -6853,7 +6852,7 @@ extern signed char D_00535C12_3E60[] __asm__("D_00535C12");
  * @param i  the script game event (0-14)
  * @return 1 when it matches, else 0
  */
-extern "C" int func_00303E60(unsigned i) {
+extern "C" int isGameEvent(unsigned i) {
     if (i < 0xF) {
         cBE_getInterface_Fv_3E60(cBE_getBE_3E60(), 0);
         return D_00446618_3E60[i] == D_00535C12_3E60[0];
@@ -6863,7 +6862,7 @@ extern "C" int func_00303E60(unsigned i) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00303EC8);
+INCLUDE_ASM("seg/seg_1FBE38", RiderIsHumanFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int* luno_cLunoVar_castInt(void*);
@@ -6891,7 +6890,7 @@ static inline bool isIdle_3EC8(int slot) {
  *
  * @return self
  */
-extern "C" void* func_00303EC8(void* self) {
+extern "C" void* RiderIsHumanFunc(void* self) {
     if (isIdle_3EC8(*(int*)D_004A3DD8_3EC8)) {
         *(int*)((char*)self + 8) = 1;
         *luno_cLunoVar_castInt(self) = 1;
@@ -6904,7 +6903,7 @@ extern "C" void* func_00303EC8(void* self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00303F80);
+INCLUDE_ASM("seg/seg_1FBE38", RiderInTunnelFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_3F80 __asm__("cWScriptMan_TheWScriptMan");
@@ -6923,7 +6922,7 @@ struct Tab_3F80 { char pad[0x28]; D_3F80 *arr[1]; };
  *
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_3F80 func_00303F80(void) {
+extern "C" V3_3F80 RiderInTunnelFunc(void) {
     int slot = *(int*)D_004A3DD8_3F80;
     if (slot != -1) {
         D_3F80 *riderEntry = (*(Tab_3F80**)(*(char**)(D_004A28A8_3F80 + 0x84) + 0xC))->arr[slot];
@@ -6936,7 +6935,7 @@ extern "C" V3_3F80 func_00303F80(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00303FF0);
+INCLUDE_ASM("seg/seg_1FBE38", UpdateDisplayPointsFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -6966,7 +6965,7 @@ extern T12_3FF0 D_004FBC98_3FF0 __asm__("D_004FBC98");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_3FF0 func_00303FF0(int n, Ent_3FF0* params) {
+extern "C" R12_3FF0 UpdateDisplayPointsFunc(int n, Ent_3FF0* params) {
     if (D_004A57E4_3FF0 == 0) {
         D_004FBC98_3FF0.a = 0;
         D_004FBC98_3FF0.b = -1;
@@ -6992,7 +6991,7 @@ extern "C" R12_3FF0 func_00303FF0(int n, Ent_3FF0* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00304100);
+INCLUDE_ASM("seg/seg_1FBE38", UpdateDisplayCountFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -7022,7 +7021,7 @@ extern T12_4100 D_004FBCA8_4100 __asm__("D_004FBCA8");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_4100 func_00304100(int n, Ent_4100* params) {
+extern "C" R12_4100 UpdateDisplayCountFunc(int n, Ent_4100* params) {
     if (D_004A57E8_4100 == 0) {
         D_004FBCA8_4100.a = 0;
         D_004A57E8_4100 = 1;
@@ -7048,7 +7047,7 @@ extern "C" R12_4100 func_00304100(int n, Ent_4100* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00304210);
+INCLUDE_ASM("seg/seg_1FBE38", UpdateDisplayTicksFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -7078,7 +7077,7 @@ extern T12_4210 D_004FBCB8_4210 __asm__("D_004FBCB8");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_4210 func_00304210(int n, Ent_4210* params) {
+extern "C" R12_4210 UpdateDisplayTicksFunc(int n, Ent_4210* params) {
     if (D_004A57EC_4210 == 0) {
         D_004FBCB8_4210.a = 0;
         D_004FBCB8_4210.b = -1;
@@ -7104,7 +7103,7 @@ extern "C" R12_4210 func_00304210(int n, Ent_4210* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00304320);
+INCLUDE_ASM("seg/seg_1FBE38", UpdateDisplayHeightFunc);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern cLunoValue luno_gLunoNil;
@@ -7170,7 +7169,7 @@ void cWScriptMan_updateMissionHeight(void*, int, void*);
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" cLunoValue func_00304320(int n, sBindArg_1FBE38* params) {
+extern "C" cLunoValue UpdateDisplayHeightFunc(int n, sBindArg_1FBE38* params) {
     if (D_004A57F8_4320 == 0) {
         D_004A57F0_4320 = 0xFFFFFFFF;
         D_004A57F8_4320 = 1;
@@ -7216,7 +7215,7 @@ extern "C" cLunoValue func_00304320(int n, sBindArg_1FBE38* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003044A8);
+INCLUDE_ASM("seg/seg_1FBE38", PassthroughGateFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -7247,7 +7246,7 @@ extern Flag_44A8 D_004A5804_44A8 __asm__("D_004A5804");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_44A8 func_003044A8(int n, Ent_44A8* params) {
+extern "C" R12_44A8 PassthroughGateFunc(int n, Ent_44A8* params) {
     if (D_004A5808_44A8 == 0) {
         D_004A5800_44A8 = -1;
         D_004A5808_44A8 = 1;
@@ -7273,7 +7272,7 @@ extern "C" R12_44A8 func_003044A8(int n, Ent_44A8* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003045B8);
+INCLUDE_ASM("seg/seg_1FBE38", UpdateDisplayTrickFunc);
 #ifdef SKIP_ASM
 // PORT: 64-bit bitfield container (unsigned long is 8 bytes on the EE).
 extern char *D_004A3DD8_45B8 __asm__("cWScriptMan_TheWScriptMan");
@@ -7315,7 +7314,7 @@ struct Ent_45B8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_45B8 func_003045B8(int n, Ent_45B8 *params) {
+extern "C" V3_45B8 UpdateDisplayTrickFunc(int n, Ent_45B8 *params) {
     if (D_580C_45B8 == 0) {
         D_4FBCC8_45B8.a0 = 0;
         D_4FBCC8_45B8.a1 = 0;
@@ -7374,7 +7373,7 @@ extern "C" V3_45B8 func_003045B8(int n, Ent_45B8 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00304980);
+INCLUDE_ASM("seg/seg_1FBE38", AddFadeFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_4980 __asm__("cWScriptMan_TheWScriptMan");
@@ -7406,7 +7405,7 @@ struct Ent_4980 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_4980 func_00304980(int n, Ent_4980 *params) {
+extern "C" V3_4980 AddFadeFunc(int n, Ent_4980 *params) {
     if (D_004A5810 == 0) {
         D_4980[0] = 0xFFFFFFFF;
         *(float*)&D_4980[1] = 1.0f;
@@ -7449,7 +7448,7 @@ extern "C" V3_4980 func_00304980(int n, Ent_4980 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00304B38);
+INCLUDE_ASM("seg/seg_1FBE38", ReplayFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -7479,7 +7478,7 @@ extern Flag_4B38 D_004A581C_4B38 __asm__("D_004A581C");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_4B38 func_00304B38(int n, Ent_4B38* params) {
+extern "C" R12_4B38 ReplayFunc(int n, Ent_4B38* params) {
     if (D_004A5820_4B38 == 0) {
         D_004A5818_4B38 = -1;
         D_004A5820_4B38 = 1;
@@ -7504,7 +7503,7 @@ extern "C" R12_4B38 func_00304B38(int n, Ent_4B38* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00304C50);
+INCLUDE_ASM("seg/seg_1FBE38", RiderHeightFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* luno_cLunoVar_castFloat(void*);
@@ -7539,7 +7538,7 @@ static inline Vec_4C50 pos_4C50(char *o) { return *(Vec_4C50*)(o + 0x40); }
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to the height difference
  */
-extern "C" void* func_00304C50(void* self, int n, Ent_4C50 *params) {
+extern "C" void* RiderHeightFunc(void* self, int n, Ent_4C50 *params) {
     if (D_5830_4C50 == 0) {
         D_5828_4C50 = 0xFFFFFFFF;
         D_5830_4C50 = 1;
@@ -7597,7 +7596,7 @@ extern "C" void* func_00304C50(void* self, int n, Ent_4C50 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00304E38);
+INCLUDE_ASM("seg/seg_1FBE38", AddDebounceFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_4E38 __asm__("cWScriptMan_TheWScriptMan");
@@ -7629,7 +7628,7 @@ struct Ent_4E38 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_4E38 func_00304E38(int n, Ent_4E38 *params) {
+extern "C" V3_4E38 AddDebounceFunc(int n, Ent_4E38 *params) {
     if (D_004A5834 == 0) {
         D_4E38[0] = 0xFFFFFFFF;
         *(float*)&D_4E38[1] = 1.0f;
@@ -7672,7 +7671,7 @@ extern "C" V3_4E38 func_00304E38(int n, Ent_4E38 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00304FF0);
+INCLUDE_ASM("seg/seg_1FBE38", CameraFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A5838_4FF0 __asm__("D_004A5838");
@@ -7699,7 +7698,7 @@ extern R12_4FF0 D_004C9098_4FF0 __asm__("luno_gLunoNil");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_4FF0 func_00304FF0(int n, Ent_4FF0* params) {
+extern "C" R12_4FF0 CameraFunc(int n, Ent_4FF0* params) {
     if (D_004A5838_4FF0 == 0) {
         D_004FBD30_4FF0.a = 0;
         D_004A5838_4FF0 = 1;
@@ -7724,7 +7723,7 @@ extern "C" R12_4FF0 func_00304FF0(int n, Ent_4FF0* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003050F0);
+INCLUDE_ASM("seg/seg_1FBE38", CameraShakeFunc);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -7933,7 +7932,7 @@ static inline t4Vector trans_50F0(const t4Matrix *m) { return m->row[3]; }
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *params) {
+extern "C" cLunoValue CameraShakeFunc(int n, sBindArg_1FBE38 *params) {
     if (D_004A583C == 0) {
         D_004FBD40_50F0.keyword = 0;
         D_004FBD40_50F0.useObj = 1;
@@ -8007,7 +8006,7 @@ extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00305478);
+INCLUDE_ASM("seg/seg_1FBE38", AddMagnetFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_5478 __asm__("cWScriptMan_TheWScriptMan");
@@ -8038,7 +8037,7 @@ struct Ent_5478 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_5478 func_00305478(int n, Ent_5478 *params) {
+extern "C" V3_5478 AddMagnetFunc(int n, Ent_5478 *params) {
     if (D_5840_5478 == 0) {
         D_4FBD58_5478.id = 0xFFFFFFFF;
         D_4FBD58_5478.a = 400.0f;
@@ -8085,7 +8084,7 @@ extern "C" V3_5478 func_00305478(int n, Ent_5478 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00305660);
+INCLUDE_ASM("seg/seg_1FBE38", LightningFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int *D_004A3DD8_5660 __asm__("cWScriptMan_TheWScriptMan");
@@ -8117,7 +8116,7 @@ struct Ent_5660 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_5660 func_00305660(int n, Ent_5660 *params) {
+extern "C" V3_5660 LightningFunc(int n, Ent_5660 *params) {
     if (D_004A5850 == 0) {
         D_5660 = 0xFFFFFFFF;
         D_004A5850 = 1;
@@ -8151,7 +8150,7 @@ extern "C" V3_5660 func_00305660(int n, Ent_5660 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003057C0);
+INCLUDE_ASM("seg/seg_1FBE38", AddHaloFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_57C0 __asm__("cWScriptMan_TheWScriptMan");
@@ -8182,7 +8181,7 @@ struct Ent_57C0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_57C0 func_003057C0(int n, Ent_57C0 *params) {
+extern "C" V3_57C0 AddHaloFunc(int n, Ent_57C0 *params) {
     if (D_5854_57C0 == 0) {
         D_4FBD68_57C0.id = 0xFFFFFFFF;
         D_4FBD68_57C0.a = 0;
@@ -8235,7 +8234,7 @@ extern "C" V3_57C0 func_003057C0(int n, Ent_57C0 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003059A0);
+INCLUDE_ASM("seg/seg_1FBE38", MiniAvalancheFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -8287,7 +8286,7 @@ extern "C" void cAvalanche_addAvalancheNode(int, void*, float, float, float, flo
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" cLunoValue func_003059A0(int n, sBindArg_1FBE38* params) {
+extern "C" cLunoValue MiniAvalancheFunc(int n, sBindArg_1FBE38* params) {
     if (D_004A5858_59A0 == 0) {
         D_004FBD90_59A0.head = 0;
         D_004FBD90_59A0.id[7] = D_004FBD90_59A0.id[6] = D_004FBD90_59A0.id[5] = D_004FBD90_59A0.id[4] = D_004FBD90_59A0.id[3] = D_004FBD90_59A0.id[2] = D_004FBD90_59A0.id[1] = D_004FBD90_59A0.id[0] = 0xFFFFFFFF;
@@ -8339,7 +8338,7 @@ extern "C" cLunoValue func_003059A0(int n, sBindArg_1FBE38* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00305C88);
+INCLUDE_ASM("seg/seg_1FBE38", TriggerMiniAvalancheFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -8368,7 +8367,7 @@ extern Flag_5C88 D_004A5864_5C88 __asm__("D_004A5864");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_5C88 func_00305C88(int n, Ent_5C88* params) {
+extern "C" R12_5C88 TriggerMiniAvalancheFunc(int n, Ent_5C88* params) {
     if (D_004A5868_5C88 == 0) {
         D_004A5868_5C88 = 1;
         D_004A5860_5C88 = 0;
@@ -8395,7 +8394,7 @@ extern "C" R12_5C88 func_00305C88(int n, Ent_5C88* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00305D90);
+INCLUDE_ASM("seg/seg_1FBE38", AddAvaSplineFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_5D90 __asm__("cWScriptMan_TheWScriptMan");
@@ -8428,7 +8427,7 @@ struct Ent_5D90 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_5D90 func_00305D90(int n, Ent_5D90 *params) {
+extern "C" V3_5D90 AddAvaSplineFunc(int n, Ent_5D90 *params) {
     if (D_004A5878 == 0) {
         D_5D90 = 0xFFFFFFFF;
         D_004A5878 = 1;
@@ -8477,7 +8476,7 @@ extern "C" V3_5D90 func_00305D90(int n, Ent_5D90 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00305F40);
+INCLUDE_ASM("seg/seg_1FBE38", SetAvalancheEmitterDataFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct V3_5F40 { float x, y, z; };
@@ -8514,7 +8513,7 @@ struct Ent_5F40 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_5F40 func_00305F40(int n, Ent_5F40 *params) {
+extern "C" V3_5F40 SetAvalancheEmitterDataFunc(int n, Ent_5F40 *params) {
     if (D_587C_5F40 == 0) {
         Rec_5F40 &defaultBlock = D_4FBE58_5F40;
         float zero = 0.0f;
@@ -8607,7 +8606,7 @@ extern "C" V3_5F40 func_00305F40(int n, Ent_5F40 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003061B0);
+INCLUDE_ASM("seg/seg_1FBE38", IsIconEnabledFunc);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern cLunoValue luno_gLunoNil;
@@ -8659,7 +8658,7 @@ extern sBindEnd_1FBE38 D_004A5884_61B0 __asm__("D_004A5884");
  * @param e  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" cLunoValue* func_003061B0(cLunoValue* ret, int n, sBindArg_1FBE38 *e) {
+extern "C" cLunoValue* IsIconEnabledFunc(cLunoValue* ret, int n, sBindArg_1FBE38 *e) {
     if (D_004A5888_61B0 == 0) {
         // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp (lbu; sb 0(sp)).
         D_004A5880_61B0 = 0;
@@ -8702,7 +8701,7 @@ extern "C" cLunoValue* func_003061B0(cLunoValue* ret, int n, sBindArg_1FBE38 *e)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00306300);
+INCLUDE_ASM("seg/seg_1FBE38", MessageCenterFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -8733,7 +8732,7 @@ extern T12_6300 D_004FBF38_6300 __asm__("D_004FBF38");
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_6300 func_00306300(int n, Ent_6300* params) {
+extern "C" R12_6300 MessageCenterFunc(int n, Ent_6300* params) {
     if (D_004A588C_6300 == 0) {
         D_004FBF38_6300.a = 0;
         D_004A588C_6300 = 1;
@@ -8763,7 +8762,7 @@ extern "C" R12_6300 func_00306300(int n, Ent_6300* params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00306438);
+INCLUDE_ASM("seg/seg_1FBE38", DangerStartFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_6438 __asm__("cWScriptMan_TheWScriptMan");
@@ -8793,7 +8792,7 @@ struct Ent_6438 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_6438 func_00306438(int n, Ent_6438 *params) {
+extern "C" V3_6438 DangerStartFunc(int n, Ent_6438 *params) {
     if (D_004A5890 == 0) {
         D_6438[0] = 0xFFFFFFFF;
         *(float*)&D_6438[1] = 1000.0f;
@@ -8839,7 +8838,7 @@ extern "C" V3_6438 func_00306438(int n, Ent_6438 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_003065E8);
+INCLUDE_ASM("seg/seg_1FBE38", DangerEndFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_65E8 __asm__("cWScriptMan_TheWScriptMan");
@@ -8879,7 +8878,7 @@ struct Ent_65E8 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_65E8 func_003065E8(int n, Ent_65E8 *params) {
+extern "C" V3_65E8 DangerEndFunc(int n, Ent_65E8 *params) {
     if (D_004A58A0 == 0) {
         D_65E8 = 0xFFFFFFFF;
         D_004A58A0 = 1;
@@ -8909,7 +8908,7 @@ extern "C" V3_65E8 func_003065E8(int n, Ent_65E8 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00306770);
+INCLUDE_ASM("seg/seg_1FBE38", EnableDangerZoneFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_6770 __asm__("cWScriptMan_TheWScriptMan");
@@ -8949,7 +8948,7 @@ struct Ent_6770 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_6770 func_00306770(int n, Ent_6770 *params) {
+extern "C" V3_6770 EnableDangerZoneFunc(int n, Ent_6770 *params) {
     if (D_004A58A4 == 0) {
         D_6770[0] = 0xFFFFFFFF;
         D_6770[1] = 0;
@@ -8994,7 +8993,7 @@ extern "C" V3_6770 func_00306770(int n, Ent_6770 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00306908);
+INCLUDE_ASM("seg/seg_1FBE38", DisableDangerZoneFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_6908 __asm__("cWScriptMan_TheWScriptMan");
@@ -9024,7 +9023,7 @@ struct Ent_6908 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_6908 func_00306908(int n, Ent_6908 *params) {
+extern "C" V3_6908 DisableDangerZoneFunc(int n, Ent_6908 *params) {
     if (D_004A58B0 == 0) {
         D_6908 = 0xFFFFFFFF;
         D_004A58B0 = 1;
@@ -9180,7 +9179,7 @@ extern "C" V3_6A90 MultiParticleFunc(int n, Ent_6A90 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00306CB0);
+INCLUDE_ASM("seg/seg_1FBE38", MultiParticleInstFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_004A3DD8_6CB0 __asm__("cWScriptMan_TheWScriptMan");
@@ -9212,7 +9211,7 @@ struct Ent_6CB0 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_6CB0 func_00306CB0(int n, Ent_6CB0 *params) {
+extern "C" V3_6CB0 MultiParticleInstFunc(int n, Ent_6CB0 *params) {
     if (D_004A58B8 == 0) {
         ((int*)D_6CB0)[0] = 0;
         D_6CB0[1] = 0xFFFFFFFF;
@@ -9259,7 +9258,7 @@ extern "C" V3_6CB0 func_00306CB0(int n, Ent_6CB0 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00306E68);
+INCLUDE_ASM("seg/seg_1FBE38", CheckGateFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A3DD8_6E68 __asm__("cWScriptMan_TheWScriptMan");
@@ -9293,7 +9292,7 @@ struct Ent_6E68 { int idx; int val; int pad; int type; };
  * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" V3_6E68* func_00306E68(V3_6E68 *ret, int n, Ent_6E68 *params) {
+extern "C" V3_6E68* CheckGateFunc(V3_6E68 *ret, int n, Ent_6E68 *params) {
     if (D_004A58BC == 0) {
         D_6E68[0] = 0xFFFFFFFF;
         D_6E68[1] = 0xFFFFFFFF;
@@ -9341,7 +9340,7 @@ extern "C" V3_6E68* func_00306E68(V3_6E68 *ret, int n, Ent_6E68 *params) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1FBE38", func_00307020);
+INCLUDE_ASM("seg/seg_1FBE38", ShowMessageIconFunc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void MEM_copy(void*, void*, int);
@@ -9370,7 +9369,7 @@ extern T12_7020 D_004FC070_7020 __asm__("D_004FC070");
  * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to int 1 or 0
  */
-extern "C" void* func_00307020(void* self, int n, Ent_7020* params) {
+extern "C" void* ShowMessageIconFunc(void* self, int n, Ent_7020* params) {
     if (D_004A58C0_7020 == 0) {
         D_004FC070_7020.a = 0;
         D_004A58C0_7020 = 1;

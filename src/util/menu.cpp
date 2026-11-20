@@ -4211,7 +4211,7 @@ INCLUDE_ASM("util/menu", prettyFloat);
 extern void* cBXString_EmptyString;
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void cBXString_cBXString1(void* self, void* src);
-extern "C" int func_003194A8(void* str, const char* fmt, ...);
+extern "C" int cBXString_printf(void* str, const char* fmt, ...);
 extern "C" float func_0040DA10(float x);
 extern "C" int fptodp(float f);
 extern char str_pct_4f[];
@@ -4260,7 +4260,7 @@ void* prettyFloat_impl(void* out, float value)
     }
     sBXStrDFD8 formatted;
     formatted.p = (char*)cBXString_EmptyString;
-    func_003194A8(&formatted, fmt, fptodp(value));
+    cBXString_printf(&formatted, fmt, fptodp(value));
     cBXString_cBXString1(out, &formatted);
     cBXString__cBXString(&formatted, 2);
     return out;
@@ -7492,23 +7492,23 @@ extern "C" void* cObjectInterface_getFlagManager()
 }
 #endif
 
-extern "C" void* func_002FC2C0(void* self);
+extern "C" void* makeDead(void* self);
 
 //100%
 INCLUDE_ASM("util/menu", func_002D1CC0__FPv);
 #ifdef SKIP_ASM
 /**
- * Applies an instance event: forwards to func_002FC2C0 with @p self and, in the second register, the event.
+ * Applies an instance event: forwards to makeDead with @p self and, in the second register, the event.
  *
  * cDeadFadeNode calls it with its instance record (+0x18) and stored event (+0x1C) once the fade ends or the node loses
- * focus; func_002FC2C0 acts by the event's kind (e.g. 1 deletes the record's node). This definition declares only the
+ * focus; makeDead acts by the event's kind (e.g. 1 deletes the record's node). This definition declares only the
  * first argument.
  *
- * @return func_002FC2C0's result
+ * @return makeDead's result
  */
 void* func_002D1CC0(void* self)
 {
-    return func_002FC2C0(self);
+    return makeDead(self);
 }
 #endif
 

@@ -249,7 +249,7 @@ struct cLookAtChaseAlgorithm {
     int Setup_IsTargetHandplanting; // 0x2FC [O] bool; [U] cLookAtChaseAlgorithm_setupChaseData (sw)
     int SlowCamState;               // 0x300 [O] eCamAttributeBlendState; [U] cLookAtChaseAlgorithm_updateSlowSpeedCam (lw/sw)
     char AirTargetSpline[0xC];      // 0x304 [O] cCubicSplineInterpolant (bx/cubicspline.h: bitfield word, MaxX,
-                                    //       CubicSplines); [R] constructed by func_0031D5E8, destroyed by func_0031D618
+                                    //       CubicSplines); [R] constructed by cCubicSplineInterpolant_cCubicSplineInterpolant, destroyed by cCubicSplineInterpolant__cCubicSplineInterpolant
     char AirPositionSpline[0xC];    // 0x310 [O] cCubicSplineInterpolant; [R] ditto
     char FullAirTargetSpline[0xC];  // 0x31C [O] cCubicSplineInterpolant; [R] ditto
     char FullAirPositionSpline[0xC]; // 0x328 [O] cCubicSplineInterpolant; [R] ditto

@@ -2129,7 +2129,7 @@ extern int D_004A46B4;
  * Starts a lightning flash at distance @p flashDistance when lightning is enabled.
  *
  * Sets the flash frame D_004A4698 and brightness D_004A469C to 0, stores @p flashDistance in D_004A46B0 and sets the thunder
- * countdown D_004A46B4 to (int)(@p flashDistance * 0.0018072289). Callers: cScreenTint_update and func_00305660.
+ * countdown D_004A46B4 to (int)(@p flashDistance * 0.0018072289). Callers: cScreenTint_update and LightningFunc.
  *
  * @param flashDistance  the flash distance; larger values delay the thunder
  */

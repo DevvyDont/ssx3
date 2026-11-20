@@ -1,7 +1,7 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("seg/seg_21E5A8", func_0031D5A8);
+INCLUDE_ASM("seg/seg_21E5A8", cCSICubicSpline_evaluate);
 #ifdef SKIP_ASM
 // Evaluates the cubic a*t^3 + b*t^2 + c*t + d at t = x - x0.
 struct Cubic_D5A8 {
@@ -21,7 +21,7 @@ struct Cubic_D5A8 {
  * @param x  where to evaluate
  * @return the cubic's value
  */
-extern "C" float func_0031D5A8(Cubic_D5A8 *spline, float x) {
+extern "C" float cCSICubicSpline_evaluate(Cubic_D5A8 *spline, float x) {
     float relX = x - spline->x0;
     float coefA = spline->a;
     float coefB = spline->b;
@@ -35,7 +35,7 @@ extern "C" float func_0031D5A8(Cubic_D5A8 *spline, float x) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_21E5A8", func_0031D5E8);
+INCLUDE_ASM("seg/seg_21E5A8", cCubicSplineInterpolant_cCubicSplineInterpolant);
 #ifdef SKIP_ASM
 struct Flags_D5E8 {
     unsigned int a : 1;
@@ -55,7 +55,7 @@ struct Flags_D5E8 {
  *
  * @return @p self
  */
-extern "C" Flags_D5E8 *func_0031D5E8(Flags_D5E8 *self) {
+extern "C" Flags_D5E8 *cCubicSplineInterpolant_cCubicSplineInterpolant(Flags_D5E8 *self) {
     self->w8 = 0;
     self->b = 0;
     self->c = 0;
@@ -65,7 +65,7 @@ extern "C" Flags_D5E8 *func_0031D5E8(Flags_D5E8 *self) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_21E5A8", func_0031D618);
+INCLUDE_ASM("seg/seg_21E5A8", cCubicSplineInterpolant__cCubicSplineInterpolant);
 #ifdef SKIP_ASM
 void cCubicSplineInterpolant_purge(void *);
 void operator_delete(int *);
@@ -77,7 +77,7 @@ void operator_delete(int *);
  *
  * @param flags  bit 0 set: also free the object
  */
-extern "C" void func_0031D618(int *self, int flags) {
+extern "C" void cCubicSplineInterpolant__cCubicSplineInterpolant(int *self, int flags) {
     cCubicSplineInterpolant_purge(self);
     if (flags & 1) operator_delete(self);
 }

@@ -3,8 +3,8 @@
 
 // cParticleNode: the scene node of a placed instance that only carries particle effects. It is a cMoveNode that adds
 // no members and deletes itself once its last effect modifier has gone (update). Size 0x2C: cMemMan_alloc(0x2C,
-// "cParticleNode" / "ParticleNode") + cParticleNode_cParticleNode1 in src/seg/seg_1FBE38.cpp (checkActiveNode, func_002FD420,
-// cViewer_addParticle), and cMemMan_alloc(0x2C, "Particle") + cParticleNode_cParticleNode(bucket, stream) in the
+// "cParticleNode" / "ParticleNode") + cParticleNode_cParticleNode1 in src/seg/seg_1FBE38.cpp (checkActiveNode, MakeParticleFunc,
+// AddParticleFunc), and cMemMan_alloc(0x2C, "Particle") + cParticleNode_cParticleNode(bucket, stream) in the
 // replay rebuild (src/replay/replay.cpp, node type 13); On Tour 0x28 (its cObjNode is 4 bytes smaller).
 // Base: cMoveNode (object/movenode.h) -> cInstanceNode -> cSortObjNode -> cTypeObjNode -> cObjNode.
 // No EA path in the preview (its strings only name the class: "cParticleNode", vtable _vt$13cParticleNode), so the

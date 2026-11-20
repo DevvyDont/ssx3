@@ -2134,7 +2134,7 @@ static inline void computerV_0010F1C0(char* self, int i)
  *
  * @p kind 1-3 call the rider's virtual slots 13, 14 and 15; 4 adds @p amt to the boost meter
  * (cRider_flagEventBoostPowerUp, source mask 8); 5 forces an automatic reset of kind 4 (cRider_checkForReset with 0,
- * 4); 6 adds (int) @p amt points (cRider_flagEventAddPoints); 0 and 7 do nothing. Called by func_002FF850 with a rider from the
+ * 4); 6 adds (int) @p amt points (cRider_flagEventAddPoints); 0 and 7 do nothing. Called by AIEventFunc with a rider from the
  * AI's list.
  *
  * @param kind  the event id

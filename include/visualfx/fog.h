@@ -10,7 +10,7 @@
 //                       addFogInstance and 3 platformrender pure (func_00411530). render (cFogParticleMan_render) is
 //                       non-virtual. Static mSortKey = D_00537AC0 (0x800 bytes: 256 tFogSortKey; On Tour has 128).
 //   cPS2FogParticleMan  0x3010: + 256 tFogSprite. Vtable D_004882E0: 1 dtor cPS2FogParticleMan__cPS2FogParticleMan, 2 addFogInstance
-//                       func_002DC190, 3 platformrender func_002DC7B0.
+//                       func_002DC190, 3 platformrender cPS2FogParticleMan_platformrender.
 //
 // A FLAT layout, like main/game.h. Evidence tags: [R] ctor/dtors/allocation; [U] matched retail use; [O] SSX On Tour's
 // DWARF (cFogParticleMan, tFogSortKey; its cPSPFogParticleMan is a different platform class).
