@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "main/loadscreens.h"
 #include "main/game.h"
 #include "movie/mcoverlaymanager.h"
@@ -3526,12 +3527,11 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void func_00246CF8(void* self, int a1);
-extern signed char D_00535C11[];
 extern char str_102MPMatch[];
 extern char str_99QPEvent[];
 
 /**
- * Creates the match / event loading screen: "102MPMatch" when D_00535C11 is 2, else "99QPEvent".
+ * Creates the match / event loading screen: "102MPMatch" when newRace.cGamePath is 2, else "99QPEvent".
  *
  * Fetches the BE interface 0 first (result unused), adds the screen to the UI engine (+0x10) with this state as owner,
  * keeps it at +0x40 and plays its first frame, then fills both players' panels with func_00246CF8(self, 0) and (self,
@@ -3540,7 +3540,7 @@ extern char str_99QPEvent[];
 extern "C" void func_00245418(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C11[0] == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == 2) {
         void* engine = *(void**)((char*)self + 0x10);
         void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_102MPMatch), 0);
         *(void**)((char*)self + 0x40) = screen;
@@ -3603,10 +3603,9 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_002464E8(void* self, int a1);
 extern "C" void func_00246278(void* self, int a1);
-extern signed char D_00535C11[];
 
 /**
- * Creates a widget of the match / event loading screen: func_00246278 when D_00535C11 is 2, else func_002464E8.
+ * Creates a widget of the match / event loading screen: func_00246278 when newRace.cGamePath is 2, else func_002464E8.
  *
  * Fetches the BE interface 0 first (result unused). Slot +0x94 (onWidgetCreate) of D_0047C948.
  *
@@ -3615,7 +3614,7 @@ extern signed char D_00535C11[];
 extern "C" void func_00245598(void* self, int widget)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    bool ok = D_00535C11[0] != 2;
+    bool ok = cBENewRaceInterface_newRace.cGamePath != 2;
     if (ok) {
         func_002464E8(self, widget);
     } else {

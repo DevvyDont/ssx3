@@ -20,7 +20,6 @@ extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern "C" void func_00233640(void* self, int type);
 extern "C" void cUIStateStack_push(void* list, void* screen);
 extern int cRealFE_mStartState;
-extern signed char D_00535C11[];
 extern char str_UIEngine_b[];
 extern char str_data_ui_fl[];
 extern char str_FLUIInput[];
@@ -118,7 +117,7 @@ extern "C" void cFELoadScreen_load(void* self)
     char* screen;
     if (cRealFE_mStartState == 39) {
         screen = newScreenA_233438(self);
-    } else if (*(int*)(gm + 0x9C) == 0 || D_00535C11[0] == 0) {
+    } else if (*(int*)(gm + 0x9C) == 0 || cBENewRaceInterface_newRace.cGamePath == 0) {
         screen = newScreenB_233438(self);
         *(void**)(screen + 0x48) = self;
         func_00233640(self, 1);
@@ -172,7 +171,7 @@ static inline int loadTex_3640(char* data, const char* name)
  * Opens the big file (cBigFile_cBigFile1, flags 0x100) for the duration. Type 1 loads one portrait into +0x10: in a
  * network game (cBENetworkInterface_networkOpt.bIsNetworkGame) rider 0's character when hosting (bIsHost) and rider 1's
  * otherwise, else the first human rider's character (cBENewPlayerInterface_getRiderCharID()). Type 2, only when the
- * game path (cGamePath, D_00535C11) is 2 (online), loads players 0 and 1's characters
+ * game path (newRace.cGamePath) is 2 (online), loads players 0 and 1's characters
  * (cBENewPlayerInterface_getPlayerCharID()) into +0x10 and +0x14. Each file is "%s%s.ssh" of the character's name
  * D_00442928[id] and a suffix (D_004A2B38, "_flat", for type 1; D_004A2B3C for type 2), loaded with FILE_loadpackz()
  * and uploaded through the graphics manager's slot 46 (cPS2GraphicsMan_AddTexture) as "CharaPics"; the file buffer is then freed.
@@ -204,7 +203,7 @@ extern "C" void func_00233640(void* self, int type)
         *(int*)((char*)self + 0x10) = loadTex_3640(data, str_CharaPics);
         if (data != 0)
             cMemMan_free(data);
-    } else if (type == 2 && D_00535C11[0] == 2) {
+    } else if (type == 2 && cBENewRaceInterface_newRace.cGamePath == 2) {
         int* slot = (int*)((char*)self + 0x10);
         for (int i = 0; i < 2; i++) {
             sprintf(name, str_pct_spct_s_ssh, D_00442928[cBENewPlayerInterface_getPlayerCharID(plr, i)], D_004A2B3C);
@@ -1005,7 +1004,6 @@ extern "C" void cSSXScriptEngine_AppendStartSequence(void* a, int b);
 // PORT: cSSXScriptEngine_ReadyNISList returns tNISList_ReadyList's result (ssxscriptengine defines it void).
 extern "C" int cSSXScriptEngine_ReadyNISList(void* self, int i);
 extern void* cGameState_mpGame;
-extern signed char D_00535C10[];
 
 struct sVE_2341D0 {
     short delta;
@@ -1023,7 +1021,7 @@ struct sGM_2341D0 {
 
 static inline int isMode4_2341D0()
 {
-    return D_00535C10[0] == 4;
+    return cBENewRaceInterface_newRace.cGameMode == 4;
 }
 
 /**
@@ -1034,7 +1032,7 @@ static inline int isMode4_2341D0()
  * game mode manager's rider total minus its humans; each AI rider from the AI's first index (its word at 0x7C)
  * gets the mode's character id and a second per-rider value (cBENewPlayerInterface_setRiderCheatCharID, probably the board), and both
  * interfaces are submitted. Mode 2 queues start sequence 1, mode 1 sequence 0 (not when the race mode byte
- * D_00535C10 is 4), mode 0 none. Finally clears the word at 0x1C.
+ * newRace.cGameMode is 4), mode 0 none. Finally clears the word at 0x1C.
  *
  * @param mode  startup flag (On Tour: startupFlag): 0 no start sequence, 1 or 2 as above
  */
@@ -1113,7 +1111,6 @@ extern "C" int cAI_isReadyToPurgeComputerActors(void* o);
 extern "C" void cAI_cleanupAfterRace(void* o);
 extern "C" void cAI_cleanupActors(void* o);
 extern void* cGameState_mpGame;
-extern signed char D_00535C10[];
 
 struct sLoadObj_43B0 {
     char pad0[0x14];
@@ -1224,7 +1221,7 @@ extern "C" void cGFEventStartState_update(sLoadScreen_43B0* self)
         if (busy)
             break;
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        if (D_00535C10[0] != 4) {
+        if (cBENewRaceInterface_newRace.cGameMode != 4) {
             cAI_resolveRace(MGR_43B0->obj);
             if (MGR_43B0->obj->f80 > 0)
                 MGR_43B0->obj->f14 = 1;

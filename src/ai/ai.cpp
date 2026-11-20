@@ -214,12 +214,11 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cAI_initComputerActors(cAI*);
-extern signed char D_00535C11[];
 
 /**
  * Sets how many AI actors are needed and creates them, unless the race is on game path 1 or 2.
  *
- * Fetches the BE interface (result unused). Only when the new race's cGamePath (D_00535C11) is 0 does it store
+ * Fetches the BE interface (result unused). Only when the new race's cGamePath (newRace.cGamePath) is 0 does it store
  * @p n in NumberOfActorsRequired and call cAI_initComputerActors(); path 2 is online play.
  *
  * @param n  number of AI actors to create
@@ -227,7 +226,7 @@ extern signed char D_00535C11[];
 extern "C" void cAI_initAIActors(cAI* self, int n)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C11[0] == 0)
+    if (cBENewRaceInterface_newRace.cGamePath == 0)
     {
         self->NumberOfActorsRequired = n;
         cAI_initComputerActors(self);
@@ -1042,7 +1041,6 @@ extern "C" void cComputer_updateRiderDifficulty(void*);
 extern "C" void cAI_applyComputerRulesCustom(cAI* self, void* rider);
 void cBENewRaceInterface_assignPlayer(void*, int, int);
 extern char str_ComputerRider[];
-extern int D_00535C04[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
 struct sRiderCR { char pad[0x86C]; int mIndex; int mCtrl; };
@@ -1080,7 +1078,7 @@ extern "C" void cAI_initComputerRiders(cAI* aiManager)
     sAiObjCR* self = (sAiObjCR*)aiManager;
     char* rm = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
-    int n = D_00535C04[0] - self->mNumComputers;
+    int n = cBENewRaceInterface_newRace.iNumberAI - self->mNumComputers;
     int idx = self->mCount;
     for (int i = 0; i < n; i++)
     {
@@ -1456,7 +1454,8 @@ extern "C" void* cPathSys_getTrackPath(void* tree, int id);
 extern "C" float cTrackPath_getFinishLineParam(void* node);
 t4Vector cPath_getPathPos_A560(void* path, int* inRange, float t) __asm__("cPath_getPathPos");
 void cRider_putAt_A560(cRider* self, t4Vector* pos, t4Vector* dir, int n, float t) __asm__("cRider_putAt");
-// PORT: prototype mismatch. cRider_setControlState/cRider_setMotionState are defined with one param, but callers pass a mode in $a1.
+// PORT: prototype mismatch. cRider_setControlState/cRider_setMotionState are defined with one param, but callers pass a
+// mode in $a1.
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
@@ -1572,7 +1571,8 @@ extern "C" float cTrackPath_getFinishLineParam(void* node);
 // the (self, int*, float) definition; this caller's arg-load order needs it (every other landed user is order-neutral).
 t4Vector cPath_getPathPos_A768(void* path, float t, int* inRange) __asm__("cPath_getPathPos");
 void cRider_putAt_A768(cRider* self, t4Vector* pos, t4Vector* dir, int n, float t) __asm__("cRider_putAt");
-// PORT: prototype mismatch. cRider_setControlState/cRider_setMotionState are defined with one param, but callers pass a mode in $a1.
+// PORT: prototype mismatch. cRider_setControlState/cRider_setMotionState are defined with one param, but callers pass a
+// mode in $a1.
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
@@ -2646,7 +2646,6 @@ extern "C" void cAI_getPodiumActorList(cAI* self, int* dst)
 //100%
 INCLUDE_ASM("ai/ai", cAI_onlineAICheck);
 #ifdef SKIP_ASM
-extern signed char D_00535C12[];
 extern "C" void cGameComm_updateSyncPacket(void* self, int t, int seed);
 
 struct sAi_12BB20
@@ -2670,7 +2669,7 @@ static inline bool riderOk_12BB20(char* rider)
  * Keeps an online race in step: checksums the AI, ends the race on a timer and sends the periodic sync packet.
  *
  * Does nothing unless cBENetworkInterface_networkOpt.bIsNetworkGame. Every 60 AITicks it takes cAI_syncCheckSum. In the
- * race state (5), or state 3 while the game is in state 3, and only for game event 0 or 4 (D_00535C12,
+ * race state (5), or state 3 while the game is in state 3, and only for game event 0 or 4 (newRace.cGameEvent,
  * cBENewRaceInterface::cGameEvent): while EndOfRaceTimer (+0x18) is positive it counts down, and at 0 every player
  * whose rider has not passed the finish line (rider +0x470 < 0) is marked did-not-finish (+0x480 = 1) and finished with
  * cRider_doFinishEvent, the replay is ended and the timer goes back to -1.
@@ -2696,7 +2695,7 @@ extern "C" void cAI_onlineAICheck(sAi_12BB20* self)
             return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char gameEvent = D_00535C12[0];
+    signed char gameEvent = cBENewRaceInterface_newRace.cGameEvent;
     if (gameEvent == 0 || gameEvent == 4) {
         int endTimer = self->countdown;
         if (endTimer >= 0) {
@@ -2930,7 +2929,8 @@ extern "C" void cRider_setupCrouchBrake(void* rider, float a, float b);
 int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 extern "C" float cRiderAnimBase_getCurrentAnimFramePercent(void* self, int i);
 int cRider_getMotionState(void* self);
-// PORT: prototype mismatch. cRider_setControlState/cRider_setMotionState are defined with one param, but callers pass a mode in $a1.
+// PORT: prototype mismatch. cRider_setControlState/cRider_setMotionState are defined with one param, but callers pass a
+// mode in $a1.
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
@@ -5404,7 +5404,6 @@ extern "C" void cRider_switchToResetPath(void*);
 extern "C" void cRider_cleanupAfterPutAt(void* self, int notify);
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
-extern signed char D_00535C12[];
 
 struct sVec4_12F398
 {
@@ -5420,7 +5419,7 @@ extern "C" void cRider_putAt_12F398(void* self, void* a, sVec4_12F398* b, int n,
  *
  * FadePercent approaches 1 by mTimeScale * 0.025 per tick. On crossing 0.5 it picks a reset route
  * (cRider_switchToResetPath), places the rider along the path direction (cPath_getPathHeading, cRider_putAt with semantic
- * 0x11F and 200 cm clearance, 1000 when cGameEvent (D_00535C12) is 2), calls cRider_cleanupAfterPutAt() and
+ * 0x11F and 200 cm clearance, 1000 when cGameEvent (newRace.cGameEvent) is 2), calls cRider_cleanupAfterPutAt() and
  * takes boost through cRiderMetrix_evReset (which also counts the reset): 10% of the boost meter (rider + 0x2F8) for
  * an auto reset (IsAutoReset), 70% otherwise. At 1 it stops the view fade (when shouldTransition), starts a
  * new score takeoff (cRiderMetrix_evTakeoff), restores the main sequence rate to 1 and requests CS_NaturalAir and
@@ -5444,7 +5443,7 @@ extern "C" void cResetControl_update(cResetControl* self)
         cRider_switchToResetPath(self->mRider);
         char* rider = (char*)self->mRider;
         const sVec4_12F398& dir = cPath_getPathHeading(*(void**)(rider + 0xAB8), *(float*)(rider + 0x4C4));
-        if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && D_00535C12[0] == 2)
+        if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && cBENewRaceInterface_newRace.cGameEvent == 2)
             range = 1000.0f;
         cRider_putAt_12F398(self->mRider, (char*)self->mRider + 0x490, (sVec4_12F398*)&dir, 287, range);
         cRider_cleanupAfterPutAt(self->mRider, 1);
@@ -6416,7 +6415,8 @@ extern "C" void cBoardPressControl_blendOutOfPivot(cBoardPressControl*);
 extern "C" void cRider_verifyRailslideModeDEBUG(void* rider);
 extern "C" void cRider_applyJumpPop(void* rider, float v);
 extern "C" void cSSXAudio_Lift(void* self, void* rider);
-// PORT: prototype mismatch. cRider_setControlState/cRider_setMotionState are defined with one param, but callers pass a mode in $a1.
+// PORT: prototype mismatch. cRider_setControlState/cRider_setMotionState are defined with one param, but callers pass a
+// mode in $a1.
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 

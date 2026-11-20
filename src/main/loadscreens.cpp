@@ -479,7 +479,6 @@ extern "C" void THREAD_yieldticks(int);
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern char str_cPreFELoadScreen[];
 extern char str_cPreGameLoadScreen[];
-extern signed char D_00535C11[];
 extern int cCommSystem_mNumNetConn;
 
 
@@ -764,7 +763,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         cBE_getInterface_B1B0(D_004A28A8_b4->be, 0);
         void* player = cBE_getInterface_B1B0(D_004A28A8_b4->be, 1);
         int firstTimeOnTrack = cBENewPlayerInterface_isFirstTimeWC(player, 0);
-        if (D_00535C11[0] != 0) {
+        if (cBENewRaceInterface_newRace.cGamePath != 0) {
             break;
         }
         if (dir != 2 && dir != 3) {

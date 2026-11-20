@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "main/loadscreens.h"
 #include "sound/ssxaudio.h"
 #include "render/ps2graphicsman.h"
@@ -13,7 +14,8 @@
 //100%
 INCLUDE_ASM("main/gameload", cGame_load);
 #ifdef SKIP_ASM
-// FAKEMATCH: an unused 11-byte copy `name` of D_0047B6A8 (the call passes D_0047B6A8.c directly); plain form 99.21%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// FAKEMATCH: an unused 11-byte copy `name` of D_0047B6A8 (the call passes D_0047B6A8.c directly); plain form 99.21%.
+// Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
@@ -97,8 +99,6 @@ extern int cBESaveInterface_bDoReplay;
 extern int D_004A3484;
 extern void* cGameState_mpGame;
 extern char D_004A5988_gl __asm__("gBucketMan");
-extern char cBENewRaceInterface_newRace[];
-extern int D_00535BFC[];
 extern char gCamTriggerMan[];
 extern char D_005047F8[];
 extern char str_Nash[];
@@ -278,7 +278,7 @@ extern "C" void cGame_load(cGame* self)
     int replay = cBESaveInterface_bDoReplay;
     if (replay != 0) {
         cAI_initAIRiders((char*)self->AI);
-        signed char* gs = (signed char*)cBENewRaceInterface_newRace;
+        signed char* gs = (signed char*)&cBENewRaceInterface_newRace;
         cGameModeMan_initGameMode(SSXApp->GameModeMan, gs[0x4A]);
         cAI_setPodiumActorList((char*)self->AI, cBESaveInterface_getGameReplayBuffer(race) + 0x20);
         int mode = gs[0x48];
@@ -308,7 +308,7 @@ extern "C" void cGame_load(cGame* self)
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0)
         self->ViewMan = (cGameViewMan*)cGameViewMan_cGameViewMan(operator new(0x38, str_GameViewMan, 0x20000000, 0), 1);
     else
-        self->ViewMan = (cGameViewMan*)cGameViewMan_cGameViewMan(operator new(0x38, str_GameViewMan, 0x20000000, 0), D_00535BFC[0]);
+        self->ViewMan = (cGameViewMan*)cGameViewMan_cGameViewMan(operator new(0x38, str_GameViewMan, 0x20000000, 0), cBENewRaceInterface_newRace.iNumberHumans);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cBENetworkInterface_networkOpt.bIsHost == 0) {
         char* secondPlayer = *(char**)((char*)self->AI + 0x44);
         void* cam = secondPlayer != 0 ? *(void**)(secondPlayer + 0x18) : 0;
@@ -378,7 +378,7 @@ extern "C" void cGame_load(cGame* self)
         } while (!cGame_isPreloadedStateReady((self)));
         if (cGameComm_mGameComm != 0)
             cGameComm_syncWait(cGameComm_mGameComm);
-        if (cBENewRaceInterface_newRace[0x49] == 0)
+        if (cBENewRaceInterface_newRace.cGamePath == 0)
             cGame_setState((self), 10, 0, 0);
         else
             cGame_setState((self), 10, 0, 0);
@@ -1060,7 +1060,8 @@ extern "C" void cGame_sectionUnloading(cGame* self, int id)
 INCLUDE_ASM("main/gameload", cGame_loadWScriptManSection);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// PORT: cWScriptMan_loadSection is declared with one argument; it forwards the section id in $a1 to cWScriptMan_allocateGlobalTable
+// PORT: cWScriptMan_loadSection is declared with one argument; it forwards the section id in $a1 to
+// cWScriptMan_allocateGlobalTable
 void* cWScriptMan_loadSection_2(void* self, int sectionId) __asm__("cWScriptMan_loadSection__FPv");
 
 struct sScriptSection_0430 {

@@ -1151,7 +1151,6 @@ extern "C" void cSndPlayOpts_OPTS_Radius(void* self, float a, float b);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cSSXAudio_GetBoardBank(cSSXAudio* self, int a1);
-extern signed char D_00535C11[];
 
 struct sSnd17D0Ch {
     signed char vol;
@@ -1208,7 +1207,7 @@ void cSSXAudio_BeginChatter_17D0(void* vself, void* obj) __asm__("cSSXAudio_Begi
  * Only for a local human (+0x874 and +0x87C set). Opens a play-option level for bank cSSXAudio_GetBoardBank(0) and patch 0 (the
  * inlined SFX_Begin), sets volume 0 and volume control cSSXAudio_GetCurrAppliedVolumePtr(6, 0), follows the rider's position (+0x110), arms
  * callback key D_004A3688 (cSSXAudio_HandleChatter) with the rider as user data, sets the listening view (cSSXAudio_GetClosestCamera1) and a 3D
- * distance of 100 (cSndPlayOpts_OPTS_Radius), clears the +0x7C option and, when the byte at D_00535C11 is 2 and not replaying,
+ * distance of 100 (cSndPlayOpts_OPTS_Radius), clears the +0x7C option and, when newRace.cGamePath is 2 and not replaying,
  * gives the level the rider's own viewport (+0x870). cBankSys_SFX_End plays it; the handle is not kept. Called by
  * cSSXAudio_BeginRiderSound; cSSXAudio_StopAllRiderSounds cancels the callback key.
  *
@@ -1224,7 +1223,7 @@ void cSSXAudio_BeginChatter_17D0(void* vself, void* obj)
     }
     int flag = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C11[0] == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == 2) {
         flag = cSSXAudio_ReplayMode(self) == 0;
     }
     int boardBank = cSSXAudio_GetBoardBank((cSSXAudio*)self, 0);
@@ -1300,7 +1299,6 @@ extern "C" void cSndPlayOpts_OPTS_Radius(void* self, float a, float b);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cSSXAudio_GetBoardBank(cSSXAudio* self, int a1);
-extern signed char D_00535C11[];
 
 struct sSnd1C88Ch {
     signed char vol;
@@ -1386,7 +1384,7 @@ void cSSXAudio_BeginGlide_1C88(void* vself, void* obj, int n) __asm__("cSSXAudio
  * Both branches open a play-option level for bank cSSXAudio_GetBoardBank(@p n) with volume 0, volume control cSSXAudio_GetCurrAppliedVolumePtr(6,
  * 0), the rider's position (+0x110) to follow, the rider as user data, the +0x7C option cleared and a 3D distance of
  * 100 (cSndPlayOpts_OPTS_Radius). A local human (+0x874 and +0x87C set) gets callback key D_004A3690 (cSSXAudio_HandleGlide), the
- * listening view (cSSXAudio_GetClosestCamera1) and, when the byte at D_00535C11 is 2 and not replaying, its own viewport (+0x870);
+ * listening view (cSSXAudio_GetClosestCamera1) and, when newRace.cGamePath is 2 and not replaying, its own viewport (+0x870);
  * other riders get D_004A3698 (cSSXAudio_HandleAIGlide) and no listening view. cBankSys_SFX_End plays it; the handle is
  * not kept.
  *
@@ -1404,7 +1402,7 @@ void cSSXAudio_BeginGlide_1C88(void* vself, void* obj, int n)
     if (ok) {
         int flag = 0;
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        if (D_00535C11[0] == 2) {
+        if (cBENewRaceInterface_newRace.cGamePath == 2) {
             flag = cSSXAudio_ReplayMode(self) == 0;
         }
         int boardBank = cSSXAudio_GetBoardBank((cSSXAudio*)self, n);
@@ -1487,7 +1485,6 @@ extern "C" void cSndPlayOpts_OPTS_Radius(void* self, float a, float b);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cSSXAudio_GetBoardBank(cSSXAudio* self, int a1);
-extern signed char D_00535C11[];
 
 struct sSnd2508Ch {
     signed char vol;
@@ -1544,7 +1541,7 @@ void cSSXAudio_BeginCarve_2508(void* vself, void* obj, int n) __asm__("cSSXAudio
  * Only for a local human (+0x874 and +0x87C set). Opens a play-option level for bank cSSXAudio_GetBoardBank(@p n) and patch @p n
  * * 8 + 3 with volume 0, volume control cSSXAudio_GetCurrAppliedVolumePtr(6, 0), the rider's position (+0x110) to follow, callback key
  * D_004A36A0 (cSSXAudio_HandleCarve), the +0x7C option cleared, the rider as user data, the listening view
- * (cSSXAudio_GetClosestCamera1), a 3D distance of 100 (cSndPlayOpts_OPTS_Radius) and, when the byte at D_00535C11 is 2 and not replaying, its
+ * (cSSXAudio_GetClosestCamera1), a 3D distance of 100 (cSndPlayOpts_OPTS_Radius) and, when newRace.cGamePath is 2 and not replaying, its
  * own viewport (+0x870). cBankSys_SFX_End plays it; the handle is not kept. Called by cSSXAudio_BeginRiderSound, and by
  * cSSXAudio_HandleCarve on a surface change.
  *
@@ -1561,7 +1558,7 @@ void cSSXAudio_BeginCarve_2508(void* vself, void* obj, int n)
     }
     int flag = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C11[0] == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == 2) {
         flag = cSSXAudio_ReplayMode(self) == 0;
     }
     int boardBank = cSSXAudio_GetBoardBank((cSSXAudio*)self, n);
@@ -1850,7 +1847,8 @@ extern int cPauseState_Flags;
  *
  * @param obj  the bank-monitor instance (On Tour cBankMonitorInstance* Inst)
  */
-// PORT: the rider pointer is passed to cSSXAudio_Surface/cSSXAudio_BeginGlide as an int (the unit declares them that way).
+// PORT: the rider pointer is passed to cSSXAudio_Surface/cSSXAudio_BeginGlide as an int (the unit declares them that
+// way).
 extern "C" void cSSXAudio_HandleGlide(cSSXAudio* self, void* obj) {
     int volume;
     int bend;
@@ -1904,7 +1902,8 @@ extern int cPauseState_Flags;
  *
  * @param obj  the bank-monitor instance (On Tour cBankMonitorInstance* Inst)
  */
-// PORT: the rider pointer is passed to cSSXAudio_Surface/cSSXAudio_BeginGlide as an int (the unit declares them that way).
+// PORT: the rider pointer is passed to cSSXAudio_Surface/cSSXAudio_BeginGlide as an int (the unit declares them that
+// way).
 extern "C" void cSSXAudio_HandleAIGlide(cSSXAudio* self, void* obj) {
     int volume;
     int bend;
@@ -1953,7 +1952,8 @@ extern int cPauseState_Flags;
  *
  * @param obj  the bank-monitor instance (On Tour cBankMonitorInstance* Inst)
  */
-// PORT: the rider pointer is passed to cSSXAudio_Surface/cSSXAudio_BeginCarve as an int (the unit declares them that way).
+// PORT: the rider pointer is passed to cSSXAudio_Surface/cSSXAudio_BeginCarve as an int (the unit declares them that
+// way).
 extern "C" void cSSXAudio_HandleCarve(cSSXAudio* self, void* obj) {
     int volume;
     int bend;
@@ -2507,7 +2507,6 @@ extern "C" void SNDSYS_entercritical();
 extern "C" int SNDover(int id);
 extern "C" void SNDSYS_leavecritical();
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
-extern signed char D_00535C11[];
 
 struct sSnd4170Ch {
     signed char vol;
@@ -2651,7 +2650,7 @@ extern "C" void cSSXAudio_Lift(cSSXAudio* self, void* obj)
         bool ok2 = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
         if (ok2) {
             cBE_getInterface_Fv(cBE_getBE(), 0);
-            if (D_00535C11[0] == 2) {
+            if (cBENewRaceInterface_newRace.cGamePath == 2) {
                 flag = cSSXAudio_ReplayMode(self) == 0;
             }
         }
@@ -2844,7 +2843,7 @@ struct sSsVt48D0 { short delta; short index; int (*fn)(void*); };
  * (the inlined SFX_Begin) for bank 10 and patch cSSXAudio_Surface's surface class * 8 + 1 for a local human, + 5
  * otherwise; the level gets the volume, the volume-control pointer
  * cSSXAudio_GetCurrAppliedVolumePtr(this, 6, 0), a 3D distance of 30 (cSndPlayOpts_OPTS_Radius), the rider's mPosition to follow, the listening view
- * from cSSXAudio_GetClosestCamera1, and, for a local human when the byte at D_00535C11 is 2 and not replaying, its own viewport.
+ * from cSSXAudio_GetClosestCamera1, and, for a local human when newRace.cGamePath is 2 and not replaying, its own viewport.
  * cBankSys_SFX_End starts it and the new handle is stored at +0x5FB8.
  *
  * @param vself          the audio system (cSSXAudio, this)
@@ -2907,7 +2906,7 @@ extern "C" void cSSXAudio_Land(cSSXAudio* vself, cRider* rider, float powerupGai
     int ok3 = rider->mIsHuman != 0 && rider->mIsLocal != 0;
     if (ok3) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        if (D_00535C11[0] == 2) {
+        if (cBENewRaceInterface_newRace.cGamePath == 2) {
             flag = cSSXAudio_ReplayMode(self) == 0;
         }
     }
@@ -3701,7 +3700,7 @@ extern func_00290B58_sCurve D_00482DA0;
  * clamped to 0..127. When the rider's +0x438 is 2 or 3 the sound is bank 10, patch 9; otherwise bank 0, patch 48 +
  * (cSoundSys_SndRand & 0x7FFF) * 3 / 0x7FFF. Opens a play-option level (the inlined SFX_Begin) with that volume, volume
  * control cSSXAudio_GetCurrAppliedVolumePtr(5, 0), the rider's position (+0x110) to follow and the listening view (cSSXAudio_GetClosestCamera1), plus the
- * rider's viewport (+0x870) for a local human when the byte at D_00535C11 is 2 and not replaying. cBankSys_SFX_End
+ * rider's viewport (+0x870) for a local human when newRace.cGamePath is 2 and not replaying. cBankSys_SFX_End
  * plays it; the handle is not kept.
  *
  * Likely bug: a random value of 0x7FFF gives offset 3, patch 51, which is the wipeout-slide sound of cSSXAudio_WipeoutSlideStart.
@@ -3742,7 +3741,7 @@ state23:
     int ok = *(int*)(obj + 0x874) && *(int*)(obj + 0x87C);
     if (ok) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        if (D_00535C11[0] == 2) {
+        if (cBENewRaceInterface_newRace.cGamePath == 2) {
             flag = cSSXAudio_ReplayMode(self) == 0;
         }
     }
@@ -3806,7 +3805,7 @@ extern func_00290B58_sCurve D_00482DA0;
  * rider's +0x770, clamped to 0..127. The play-option level (the inlined SFX_Begin) gets that volume, volume control
  * cSSXAudio_GetCurrAppliedVolumePtr(5, 0), the rider's position (+0x110) to follow, the listening view (cSSXAudio_GetClosestCamera1), @p wipeoutControl as user data,
  * callback key D_004A36B0 (cSSXAudio_HandleWipeoutSlide, empty), the +0x7C option cleared and, for a local human when the byte at
- * D_00535C11 is 2 and not replaying, the rider's viewport (+0x870). cBankSys_SFX_End's handle goes to the rider's
+ * newRace.cGamePath is 2 and not replaying, the rider's viewport (+0x870). cBankSys_SFX_End's handle goes to the rider's
  * +0x774; cSSXAudio_WipeoutSlideEnd stops it.
  *
  * The wipeout control calls it when the rider's animation category is 29 or 25.
@@ -3838,7 +3837,7 @@ extern "C" void cSSXAudio_WipeoutSlideStart(cSSXAudio* vself, sSndOwner* wipeout
     bool ok = *(int*)(wipeoutControl->rider + 0x874) && *(int*)(wipeoutControl->rider + 0x87C);
     if (ok) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        if (D_00535C11[0] == 2) {
+        if (cBENewRaceInterface_newRace.cGamePath == 2) {
             flag = cSSXAudio_ReplayMode(self) == 0;
         }
     }
@@ -3972,7 +3971,7 @@ extern func_00290B58_sCurve D_00482DA0;
  * defaults (the inlined SFX_Begin) for bank 0, patch 52 and gets that volume, the volume control cSSXAudio_GetCurrAppliedVolumePtr(vself,
  * 5, 0), the rider's mPosition to follow, the view from cSSXAudio_GetClosestCamera1, @p wipeoutControl as its pointer, the empty callback
  * cSSXAudio_HandleWipeoutTumble (pointer to member D_004A36B8) and mCloseOnEnd 0. For a local human (mIsHuman and mIsLocal) when the
- * new-race game path (byte D_00535C11) is 2 (multiplayer) and not replaying, it also gets two-player pan on side
+ * new-race game path (newRace.cGamePath) is 2 (multiplayer) and not replaying, it also gets two-player pan on side
  * mViewIndex. cBankSys_SFX_End starts it and the handle is stored in mWipeoutTumbleHandle.
  *
  * @param vself  the audio system
@@ -4002,7 +4001,7 @@ extern "C" void cSSXAudio_WipeoutTumbleStart(cSSXAudio* vself, sSndOwner* wipeou
     bool ok = *(int*)(wipeoutControl->rider + 0x874) && *(int*)(wipeoutControl->rider + 0x87C);
     if (ok) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        if (D_00535C11[0] == 2) {
+        if (cBENewRaceInterface_newRace.cGamePath == 2) {
             flag = cSSXAudio_ReplayMode(self) == 0;
         }
     }
@@ -5663,7 +5662,6 @@ static inline int snd9E28AddVoice(void* vself, int a, int b, int type)
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern signed char D_00535C10[];
 extern "C" int func_002A4290(void* self);
 extern "C" void* cAudioInterface_getGame();
 extern "C" void* cAudioInterface_getAI();
@@ -5692,7 +5690,7 @@ extern "C" void func_002A0560(void* self, void* a, void* b);
 extern "C" void cSSXAudio_ChangePosition(cSSXAudio* self, void* obj, void* pPrevPosRider, void* pNextPosRider, int lim, int n)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C10[0] != 0 && func_002A4290(self) == 0) {
+    if (cBENewRaceInterface_newRace.cGameMode != 0 && func_002A4290(self) == 0) {
         return;
     }
     if (*(int*)((char*)cAudioInterface_getGame() + 0x214) != 4) {
@@ -6093,7 +6091,6 @@ extern "C" int cReplay_isPauseAI(void* p);
 extern "C" int cMonitor_MONITOR_Create_AB40(void*, int, long, int, int, int, int, int) __asm__("cMonitor_MONITOR_Create");
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern signed char D_00535C11[];
 extern int cPauseState_Flags;
 
 struct sSndKey8_AB40 {
@@ -6229,7 +6226,7 @@ static inline int sndAB40Add(void* vself, int a, int b, int type)
 /**
  * Plays the boost-bar sounds of each local view: a rising tick as the bar fills and a countdown beep as uber runs out.
  *
- * Does nothing while replaying. Handles riders 0..1 in the multiplayer game path (byte D_00535C11 == 2), else rider 0;
+ * Does nothing while replaying. Handles riders 0..1 in the multiplayer game path (newRace.cGamePath == 2), else rider 0;
  * riders that are not local humans are skipped. The bar fill in tenths is floor(10 * f8 / f4) of the rider's metrix HUD
  * fx (mMetrix + 0x1B0, + 0x3A8); when it rose above mBoostBarPreviousValue[i] (and is above 0) a 150 ms monitor
  * (cMonitor_MONITOR_Create, callback cBankSys_Play2DCallbackWithPitchMult through D_004A36C0) plays bank 0, patch 101 at volume
@@ -6247,7 +6244,7 @@ extern "C" void cSSXAudio_UpdateBoostBar(cSSXAudio* vself)
     if (cSSXAudio_ReplayMode(self) != 0) return;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int n = 1;
-    if (D_00535C11[0] == 2) n = 2;
+    if (cBENewRaceInterface_newRace.cGamePath == 2) n = 2;
     for (int i = 0; i < n; i++) {
         sRider_AB40* viewRider = (sRider_AB40*)((cAI*)cAudioInterface_getAI())->Riders[i];
         bool ok = viewRider->f874 && viewRider->f87C;
@@ -7100,7 +7097,6 @@ extern "C" void func_002A3400(cSSXAudio* self);
 extern "C" int func_002A4078(void* self);
 extern "C" int func_002A40E8(void* self);
 extern "C" void cSSXAudio_PlayHistoryUpdateTime(cSSXAudio* self, int a, int b, int c);
-extern signed char D_00535C11[];
 
 struct sSnd7B0Ch {
     signed char vol;
@@ -7201,7 +7197,7 @@ static inline int snd7B0Add(void* vself, int a, int b)
  * Calls func_002B3A98 on the music system and func_0028DF08 (unk_629C = -1), stores the cAI's AITick in mGruntCycle and
  * plays bank 0, patch 98 through this object's vtable slot 1; when not replaying also bank 0, patch 94 at volume 127
  * with the volume control cSSXAudio_GetCurrAppliedVolumePtr(vself, 9, 0). With unk_627C set the music system's vtable slot 4 gets 0. Unless
- * play-history event 0 is live: in game paths 1 and 2 (D_00535C11) func_002A3170; otherwise on the last heat
+ * play-history event 0 is live: in game paths 1 and 2 (newRace.cGamePath) func_002A3170; otherwise on the last heat
  * (cGameModeMan bIsLastHeat) func_002A3400, func_002B1758(SpeechSys, 0) and, when func_002A4078 or func_002A40E8 is
  * nonzero, unk_5774 = 1 and unk_5778 = the current song's value from func_002B4908; on heat 1 the latter
  * unconditionally, on heat 2 under the same test. When unk_627C is 0 it is set to 1 and music slot 4 gets 37 (not
@@ -7226,7 +7222,7 @@ extern "C" void cSSXAudio_CountdownGateDrop(void* vself)
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cSSXAudio_PlayHistoryExists((cSSXAudio*)vself, 0, 0) == 0) {
-        int gamePath = D_00535C11[0];
+        int gamePath = cBENewRaceInterface_newRace.cGamePath;
         if (gamePath == 1) {
             func_002A3170(vself);
         } else if (gamePath == 2) {
@@ -7705,7 +7701,9 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_BigChallengeBegin);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-// FAKEMATCH: a non-empty `do { ... } while (0)` around the final monitor block, and a second pointer local `mon` (self + 0x118, the same address as `bank`) for the vt[4] call; plain form 97.52% UNPOSITIONED (99.61% without the wrapper only, 96.72% UNPOSITIONED without `mon` only). Byte-identical and behaves like the plain form; landed marked under
+// FAKEMATCH: a non-empty `do { ... } while (0)` around the final monitor block, and a second pointer local `mon` (self
+// + 0x118, the same address as `bank`) for the vt[4] call; plain form 97.52% UNPOSITIONED (99.61% without the wrapper
+// only, 96.72% UNPOSITIONED without `mon` only). Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 // OPTS_Callback handlers handed to cSndPlayOpts: 8-byte pointer-to-member constants.
 extern sSndCallback D_004A3648[];
@@ -9110,7 +9108,7 @@ extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* vself, void* vrider, int length, 
     int ok2 = rider->mIsHuman != 0 && rider->mIsLocal != 0;
     if (ok2) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        if (D_00535C11[0] == 2) {
+        if (cBENewRaceInterface_newRace.cGamePath == 2) {
             flag = cSSXAudio_ReplayMode(self) == 0;
         }
     }
@@ -9989,7 +9987,6 @@ INCLUDE_ASM("sound/soundsys", func_002A1400);
 extern "C" int func_002A1E68(void* self, void* rider);
 // PORT: callers pass self to func_002A4248 (the unit's later definition takes no args).
 int func_002A4248_s(void* self) __asm__("func_002A4248");
-extern signed char D_00535C11[];
 
 // PORT: callers declare func_002A1400 as (void*, int); the body takes (self, rider).
 void func_002A1400_impl(void* self, char* rider) __asm__("func_002A1400");
@@ -9999,7 +9996,7 @@ void func_002A1400_impl(void* self, char* rider) __asm__("func_002A1400");
  *
  * Needs the Character volume on, no replay and the rider within 30 units of a camera. When the request is queued on
  * speech instance 0, the speech hook D_004A482C gets its packed id, the rider's speech bit and a mode: 1 when the place
- * bit is 1 (first), 2 when func_002A4248 is nonzero or in the multiplayer game path (D_00535C11 == 2), 4 for the bits 2
+ * bit is 1 (first), 2 when func_002A4248 is nonzero or in the multiplayer game path (newRace.cGamePath == 2), 4 for the bits 2
  * and 4, else 2. func_002A1388, func_002A1B58 and func_002A43B8 call it.
  *
  * @param rider  the rider (cRider)
@@ -10020,7 +10017,7 @@ void func_002A1400_impl(void* self, char* rider)
         placeMode = 1;
     } else if (func_002A4248_s(self) != 0) {
         placeMode = 2;
-    } else if (D_00535C11[0] == 2) {
+    } else if (cBENewRaceInterface_newRace.cGamePath == 2) {
         placeMode = 2;
     } else if (k == 2 || k == 4) {
         placeMode = 4;
@@ -10080,12 +10077,11 @@ extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int 
 int func_0029F2B0_r(int a, int b) __asm__("func_0029F2B0");
 extern "C" void* func_003D8008(int a, int b, int c);
 extern void (*D_004A482C)(void*, int, int);
-extern signed char D_00535C11[];
 
 /**
  * Requests the character-select speech line (8380) for a character identity, outside the world-circuit game path.
  *
- * Needs the Character volume on, speech instance 0 ready and a game path (D_00535C11) other than 0. The request has no
+ * Needs the Character volume on, speech instance 0 ready and a game path (newRace.cGamePath) other than 0. The request has no
  * rider, the identity and refresh 1; when queued, the speech hook D_004A482C gets its packed id and the identity's
  * speech bit (func_0029F2B0(identity, 0)). The front-end rider manager calls it.
  *
@@ -10097,7 +10093,7 @@ extern "C" void func_002A16B0(cSSXAudio* self, int identity)
         char* bm = (char*)&self->SpeechSys;
         if (func_002B0E28(bm, 0) != 0) {
             cBE_getInterface_Fv(cBE_getBE(), 0);
-            if (D_00535C11[0] != 0) {
+            if (cBENewRaceInterface_newRace.cGamePath != 0) {
                 if (func_002B1458(bm, 0, 8380, 0, identity, 0, 1, 0.0f) != 0) {
                     int speakerBit = func_0029F2B0_r(identity, 0);
                     D_004A482C(func_003D8008(1, 0, 8380), 1, speakerBit);
@@ -10486,7 +10482,7 @@ extern int D_00536730[];
 /**
  * Returns a rider's place in the race as a bit (1 first, 2 second, ...), for the place speech.
  *
- * In the multiplayer game path (D_00535C11 == 2): when func_002A4078 is nonzero, the rider's unk_0EC (its place) 0..4
+ * In the multiplayer game path (newRace.cGamePath == 2): when func_002A4078 is nonzero, the rider's unk_0EC (its place) 0..4
  * gives 1, 2, 4, 8, 0x10 and anything else 0x200; otherwise 1 for place 0 and 2 for the rest. In the other paths rider
  * 0's rank D_00536730[0] gives 0: 1, 1: 2, 2: 4, 3: 8, 4: 0x10, 5: 0x200, 6: 0x40, 7: 0x80, 8: 0x100, 9: 0x200, else 0
  * (the @p obj rider is not used there).
@@ -10500,7 +10496,7 @@ extern "C" int func_002A1E68(void *self, void *obj)
     int racePlace;
 
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C11[0] == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == 2) {
         if (func_002A4078(self) != 0) {
             racePlace = *(int *)((char *)obj + 0xEC);
             if (racePlace == 0) {
@@ -11413,7 +11409,6 @@ extern "C" int func_002A4040(void* self);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern signed char D_00535C11[];
 extern "C" int cSSXAudio_PlayHistoryExists(cSSXAudio* self, int a, int b);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" int func_0029F198(void* self);
@@ -11424,7 +11419,7 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 /**
  * Requests PA speech line 8384 at the start of a single-player event's first heat.
  *
- * Needs PA speech audible (func_0029F128), a game mode other than 4 (func_002A4040), game path 0 (D_00535C11) and a
+ * Needs PA speech audible (func_0029F128), a game mode other than 4 (func_002A4040), game path 0 (newRace.cGamePath) and a
  * cGameModeMan iHeatNum below 2, with play-history event 0 not live. The request goes to speech instance 0 with
  * identity 11 (the PA); when queued, the speech hook D_004A482C gets its packed id, the language bit and 1.
  * func_002A19D8 (event 0) and two front-end functions call it.
@@ -11434,7 +11429,7 @@ extern "C" void func_002A31C0(cSSXAudio* self)
     if (func_0029F128(self) == 0) return;
     if (func_002A4040(self) != 0) return;
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C11[0] != 0) return;
+    if (cBENewRaceInterface_newRace.cGamePath != 0) return;
     if (*(int*)SSXApp->GameModeMan < 2) {
         if (cSSXAudio_PlayHistoryExists(self, 0, 0) != 0) return;
         if (func_002B1458((char*)&self->SpeechSys, 0, 8384, 0, 11, 0, 0, 0.0f) == 0) return;
@@ -12083,17 +12078,16 @@ INCLUDE_ASM("sound/soundsys", func_002A4040);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern signed char D_00535C10[];
 
 /**
- * Tells whether the race's game mode (cBENewRaceInterface_newRace.cGameMode, D_00535C10) is 4.
+ * Tells whether the race's game mode (cBENewRaceInterface_newRace.cGameMode) is 4.
  *
  * @return 1 or 0
  */
 extern "C" int func_002A4040(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    return D_00535C10[0] == 4;
+    return cBENewRaceInterface_newRace.cGameMode == 4;
 }
 #endif
 
@@ -12105,7 +12099,6 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A40E0(void* self, unsigned int a1);
-extern signed char D_00535C10[];
 
 /**
  * Tells whether the race is of the first kind: a location in 0..4 (func_002A40E0) or game mode 0 or 5.
@@ -12117,10 +12110,10 @@ extern "C" int func_002A4078(void* self)
     if (func_002A40E0(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
         return 1;
     }
-    if (D_00535C10[0] == 0) {
+    if (cBENewRaceInterface_newRace.cGameMode == 0) {
         return 1;
     }
-    return D_00535C10[0] == 5;
+    return cBENewRaceInterface_newRace.cGameMode == 5;
 }
 #endif
 
@@ -12147,7 +12140,6 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A4158(void* self, unsigned int a1);
-extern signed char D_00535C10[];
 
 /**
  * Tells whether the race is of the second kind: a location in 5..7 (func_002A4158) or game mode 1 or 6.
@@ -12159,11 +12151,11 @@ extern "C" int func_002A40E8(void* self)
     if (func_002A4158(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
         return 1;
     }
-    if (D_00535C10[0] == 1) {
+    if (cBENewRaceInterface_newRace.cGameMode == 1) {
         return 1;
     }
     int isMode6 = 0;
-    if (D_00535C10[0] == 6) {
+    if (cBENewRaceInterface_newRace.cGameMode == 6) {
         isMode6 = 1;
     }
     return isMode6;
@@ -12193,7 +12185,6 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A41C8(void* self, unsigned int a1);
-extern signed char D_00535C10[];
 
 /**
  * Tells whether the race is of the third kind: a location in 8..10 (func_002A41C8) or game mode 2.
@@ -12205,7 +12196,7 @@ extern "C" int func_002A4168(void* self)
     if (func_002A41C8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
         return 1;
     }
-    return D_00535C10[0] == 2;
+    return cBENewRaceInterface_newRace.cGameMode == 2;
 }
 #endif
 
@@ -12232,7 +12223,6 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int* cBENewRaceInterface_getLocation(void*);
 extern "C" int func_002A4238(void* self, unsigned int a1);
-extern signed char D_00535C10[];
 
 /**
  * Tells whether the race is of the fourth kind: a location in 11..13 (func_002A4238) or game mode 3.
@@ -12244,7 +12234,7 @@ extern "C" int func_002A41D8(void* self)
     if (func_002A4238(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))) != 0) {
         return 1;
     }
-    return D_00535C10[0] == 3;
+    return cBENewRaceInterface_newRace.cGameMode == 3;
 }
 #endif
 
@@ -12269,10 +12259,9 @@ INCLUDE_ASM("sound/soundsys", func_002A4248);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern signed char D_00535C12[];
 
 /**
- * Tells whether the race's game event (cBENewRaceInterface_newRace.cGameEvent, D_00535C12) is 4 or 5.
+ * Tells whether the race's game event (cBENewRaceInterface_newRace.cGameEvent) is 4 or 5.
  *
  * In those events the place lines are deferred through a monitor (func_002A34D0, func_002A3708) and func_002A1400 uses
  * place mode 2.
@@ -12282,7 +12271,7 @@ extern signed char D_00535C12[];
 extern "C" int func_002A4248(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    switch (D_00535C12[0]) {
+    switch (cBENewRaceInterface_newRace.cGameEvent) {
     case 4:
         return 1;
     case 5:
@@ -12299,17 +12288,16 @@ INCLUDE_ASM("sound/soundsys", func_002A4290);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern signed char D_00535C12[];
 
 /**
- * Tells whether the race's game event (D_00535C12) is 4; cSSXAudio_ChangePosition uses it outside game mode 0.
+ * Tells whether the race's game event (newRace.cGameEvent) is 4; cSSXAudio_ChangePosition uses it outside game mode 0.
  *
  * @return 1 or 0
  */
 extern "C" int func_002A4290(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    return D_00535C12[0] == 4;
+    return cBENewRaceInterface_newRace.cGameEvent == 4;
 }
 #endif
 
@@ -12319,10 +12307,9 @@ INCLUDE_ASM("sound/soundsys", func_002A42C8);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern signed char D_00535C12[];
 
 /**
- * Tells whether the race's game event (D_00535C12) is one of 6..11 (func_002A4318 and func_002A4368 split them).
+ * Tells whether the race's game event (newRace.cGameEvent) is one of 6..11 (func_002A4318 and func_002A4368 split them).
  *
  * In these events func_002A34D0 makes no place announcement; the music code checks it too.
  *
@@ -12331,8 +12318,8 @@ extern signed char D_00535C12[];
 extern "C" int func_002A42C8(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C12[0] >= 6) {
-        if (D_00535C12[0] <= 11) {
+    if (cBENewRaceInterface_newRace.cGameEvent >= 6) {
+        if (cBENewRaceInterface_newRace.cGameEvent <= 11) {
             return 1;
         }
     }
@@ -12346,18 +12333,17 @@ INCLUDE_ASM("sound/soundsys", func_002A4318);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern signed char D_00535C12[];
 
 /**
- * Tells whether the race's game event (D_00535C12) is one of 6..8; func_0028D8A0 uses it.
+ * Tells whether the race's game event (newRace.cGameEvent) is one of 6..8; func_0028D8A0 uses it.
  *
  * @return 1 or 0
  */
 extern "C" int func_002A4318(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C12[0] >= 6) {
-        if (D_00535C12[0] <= 8) {
+    if (cBENewRaceInterface_newRace.cGameEvent >= 6) {
+        if (cBENewRaceInterface_newRace.cGameEvent <= 8) {
             return 1;
         }
     }
@@ -12371,18 +12357,17 @@ INCLUDE_ASM("sound/soundsys", func_002A4368);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern signed char D_00535C12[];
 
 /**
- * Tells whether the race's game event (D_00535C12) is one of 9..11; func_0028D8A0 uses it.
+ * Tells whether the race's game event (newRace.cGameEvent) is one of 9..11; func_0028D8A0 uses it.
  *
  * @return 1 or 0
  */
 extern "C" int func_002A4368(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C12[0] >= 9) {
-        if (D_00535C12[0] <= 11) {
+    if (cBENewRaceInterface_newRace.cGameEvent >= 9) {
+        if (cBENewRaceInterface_newRace.cGameEvent <= 11) {
             return 1;
         }
     }
@@ -12802,7 +12787,7 @@ extern "C" int func_0028DEF0(void* self, int a1);
 /**
  * Schedules the DJ's opening for the event in the world-circuit path, 2 ms later through func_0028E548.
  *
- * Only when unk_578C is 0 and the game path (D_00535C11) is 0. At the locations 17..21 (func_002A3F90) it sets unk_629C
+ * Only when unk_578C is 0 and the game path (newRace.cGamePath) is 0. At the locations 17..21 (func_002A3F90) it sets unk_629C
  * to 13 (func_0028DEF0) and creates a monitor (cMonitor_MONITOR_Create) with the callback D_004A3650 (func_0028E548) and kind 2;
  * elsewhere the kind is 4 with the current song value (func_002B4908) as its argument. cSSXAudio_InGameInit calls it.
  */
@@ -12810,7 +12795,7 @@ extern "C" int func_0028DEF0(void* self, int a1);
 extern "C" void func_002A4A78(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (*(int*)((char*)self + 0x578C) == 0 && D_00535C11[0] == 0) {
+    if (*(int*)((char*)self + 0x578C) == 0 && cBENewRaceInterface_newRace.cGamePath == 0) {
         if (func_002A3F90(self) != 0) {
             func_0028DEF0(self, 13);
             cMonitor_MONITOR_Create(**(char***)((char*)self + 0x118) + 0x1D8, 2, D_004A3650->v, 0, 2, 0, 0, 0);

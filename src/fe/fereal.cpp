@@ -141,8 +141,6 @@ extern "C" void* cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos(void* s
 extern "C" void* cFEStateRewardGalleryToys_cFEStateRewardGalleryToys(void* self, void* owner, int a, int b);
 extern "C" void* cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars(void* self, void* owner, int a, int b);
 extern char D_004A4E80;
-extern signed char D_00535C11[];
-extern int D_00535C08[];
 extern int D_004A19D8;
 extern int D_004A19D4;
 extern int D_004A19DC;
@@ -322,7 +320,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
             if (D_004A19D4 != 0 && st->x44 == 1)
                 return cFEStateMPCircuit_cFEStateMPCircuit(cMemMan_alloc(72, str_cFEStateMPCircuit, 0, 0), *self);
             cBE_getInterface_Fv(cBE_getBE(), 0);
-            switch (D_00535C11[0]) {
+            switch (cBENewRaceInterface_newRace.cGamePath) {
             case 0:
             case 1: {
                 cUITemplate_MAP_mPeak = 1;
@@ -365,7 +363,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
         return cFEStateRequestLine_cFEStateRequestLine(cMemMan_alloc(528, str_cFEStateRequestLine, 0, 0), *self, st->x44, D_004A19D8);
     case 19:
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        switch (D_00535C11[0]) {
+        switch (cBENewRaceInterface_newRace.cGamePath) {
         case 0:
         case 1:
             return cFEStateRuleSelect_cFEStateRuleSelect(cMemMan_alloc(156, str_cFEStateRuleSelect, 0, 0), *self);
@@ -411,7 +409,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
         }
     case 8:
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        switch (D_00535C11[0]) {
+        switch (cBENewRaceInterface_newRace.cGamePath) {
         case 0:
             return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, 0);
         case 1:
@@ -431,7 +429,7 @@ extern "C" void* cFECustom_getNextState(void** self, sFEStateGNS* st, int pData)
             void* pl = cBE_getInterface_Fv(cBE_getBE(), 1);
             cBENewRaceInterface_setGameMode(nr, 4);
             cBENewRaceInterface_setGameEvent(nr, 12);
-            D_00535C08[0] = cBENewPlayerInterface_getLastHub(pl, 0);
+            cBENewRaceInterface_newRace.iLocationIdx = cBENewPlayerInterface_getLastHub(pl, 0);
             D_004A11B8 = 1;
             sVEntry0GNS* vt = *(sVEntry0GNS**)((char*)nr + 0xC);
             vt[1].fn((char*)nr + vt[1].delta);
@@ -524,7 +522,6 @@ extern int D_004A19D8;
 extern int D_004A1A70;
 extern int cUITemplate_MAP_mMapStyle;
 extern int D_004A2598;
-extern signed char D_00535C11[];
 extern char str_cPreGameLoadScreen[];
 extern char str_cFEStateTitle[];
 extern char str_cFEStateOnlineMainMenu[];
@@ -552,7 +549,7 @@ static inline bool IsMode1_1A16C0()
  * Builds the state to go back to from the current front-end state (cFECustom_vtbl entry 5, getPrevState).
  *
  * Switches on the current state's id (+0xC) and returns a newly allocated (cMemMan_alloc) and constructed state: the
- * main menu, character select or character setup by the new race's cGamePath (D_00535C11) and the user number (+0x44);
+ * main menu, character select or character setup by the new race's cGamePath (newRace.cGamePath) and the user number (+0x44);
  * the lodge or lodge rider detail instead of character setup / rider detail while D_004A19D8 is set; audio options;
  * event select (clearing cUITemplate_MAP_mMapStyle, setting D_004A2598); options; options save/load; title; mountain,
  * peak and rewards rooms; the online main menu or SSX world when D_004A1A70 is 1. For state 35 and out-of-range paths
@@ -571,7 +568,7 @@ extern "C" void* cFECustom_getPrevState(void** self, char* desc, int stateData)
             return cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(1744, str_cFEStateOnlineMainMenu, 0, 0), *self);
         }
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        switch (D_00535C11[0]) {
+        switch (cBENewRaceInterface_newRace.cGamePath) {
         case 1:
             return cFEStateMainMenu_cFEStateMainMenu1(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), *self);
         case 0:
@@ -602,7 +599,7 @@ extern "C" void* cFECustom_getPrevState(void** self, char* desc, int stateData)
         return cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, str_cFEStateAudioOptions, 0, 0), *self, desc[0x44], D_004A19D8);
     case 19:
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        switch (D_00535C11[0]) {
+        switch (cBENewRaceInterface_newRace.cGamePath) {
         case 0:
         case 1:
             return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, 0);
@@ -625,7 +622,7 @@ extern "C" void* cFECustom_getPrevState(void** self, char* desc, int stateData)
         return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, desc[0x44]);
     case 8: {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        int gamePath = D_00535C11[0];
+        int gamePath = cBENewRaceInterface_newRace.cGamePath;
         if (gamePath >= 3) {
             goto other;
         }

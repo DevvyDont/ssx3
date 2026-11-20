@@ -11858,7 +11858,7 @@ cCommSystem_mCommSystem = 0x004A2EB8;
 cCommSystem_mNumNetConn = 0x004A2EBC;
 cGameComm_mGameComm = 0x004A2EEC;
 cBENetworkInterface_networkOpt = 0x00534B30;
-cBENewRaceInterface_newRace = 0x00535BC8;
+cBENewRaceInterface_newRace = 0x00535BC8; // size:0x4C
 
 // SSX On Tour (PSP, ULKS-46038) dev-build global names, round data_graphics (docs/ontour_globals.tsv)
 GrMan = 0x004A289C;

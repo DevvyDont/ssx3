@@ -15,11 +15,6 @@ struct cBENewRaceInterface {
 
 // padded past the 8-byte gp-relative threshold so the compiler emits
 // absolute lui/lo addressing like the target, instead of assuming small data
-struct sD_00535C08 { int value; int pad[2]; };
-extern sD_00535C08 D_00535C08;
-
-// padded past the 8-byte gp-relative threshold so the compiler emits
-// absolute lui/lo addressing like the target, instead of assuming small data
 struct sPad16 { char x; int pad[3]; };
 extern sPad16 D_0043D984;
 
@@ -181,7 +176,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocation);
  */
 extern "C" void* cBENewRaceInterface_getLocation()
 {
-    return (char*)&cBELibrary_locationDB[0] + D_00535C08.value * 0x64;
+    return (char*)&cBELibrary_locationDB[0] + cBENewRaceInterface_newRace.iLocationIdx * 0x64;
 }
 #endif
 
@@ -194,11 +189,11 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationID);
  * The id selects the 0x64-byte location record that cBENewRaceInterface_getLocation() returns; the profile
  * screen sets it from the player's last hub.
  *
- * @return the location id stored in D_00535C08
+ * @return the location id stored in newRace.iLocationIdx
  */
 extern "C" int cBENewRaceInterface_getLocationID()
 {
-    return D_00535C08.value;
+    return cBENewRaceInterface_newRace.iLocationIdx;
 }
 #endif
 
@@ -213,7 +208,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationName1);
  */
 extern "C" void* cBENewRaceInterface_getLocationName1()
 {
-    return (char*)&D_0043D954 + D_00535C08.value * 0x64;
+    return (char*)&D_0043D954 + cBENewRaceInterface_newRace.iLocationIdx * 0x64;
 }
 #endif
 
@@ -229,7 +224,7 @@ extern char str_Snow_Jam[];
  */
 extern "C" void* cBENewRaceInterface_getLocationShortName(void* self)
 {
-    return str_Snow_Jam + D_00535C08.value * 100;
+    return str_Snow_Jam + cBENewRaceInterface_newRace.iLocationIdx * 100;
 }
 #endif
 //100%
@@ -305,7 +300,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getLocationPeak1);
  */
 extern "C" int cBENewRaceInterface_getLocationPeak1()
 {
-    return cBELibrary_locationDB[D_00535C08.value].field_0x54;
+    return cBELibrary_locationDB[cBENewRaceInterface_newRace.iLocationIdx].field_0x54;
 }
 #endif
 
@@ -625,7 +620,6 @@ extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event)
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getEventName);
 #ifdef SKIP_ASM
-extern signed char D_00535C12[];
 extern sPad16 D_0043E97C;
 
 /**
@@ -636,7 +630,7 @@ extern sPad16 D_0043E97C;
  */
 extern "C" void* cBENewRaceInterface_getEventName()
 {
-    return (char*)&D_0043E97C + D_00535C12[0] * 0x54;
+    return (char*)&D_0043E97C + cBENewRaceInterface_newRace.cGameEvent * 0x54;
 }
 #endif
 
@@ -658,7 +652,6 @@ extern "C" void* cBENewRaceInterface_getEventName1(void* self, int i)
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getPathName);
 #ifdef SKIP_ASM
-extern signed char D_00535C11[];
 extern char str_World_Circuit[]; // 0x43-byte records at an odd address
 
 /**
@@ -668,14 +661,13 @@ extern char str_World_Circuit[]; // 0x43-byte records at an odd address
  */
 extern "C" void* cBENewRaceInterface_getPathName()
 {
-    return str_World_Circuit + D_00535C11[0] * 67;
+    return str_World_Circuit + cBENewRaceInterface_newRace.cGamePath * 67;
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getModeName);
 #ifdef SKIP_ASM
-extern signed char D_00535C10[];
 
 /**
  * Returns the record (name first) of the race's game mode: D_0043E7D0 + newRace.cGameMode * 0x3C.
@@ -684,7 +676,7 @@ extern signed char D_00535C10[];
  */
 extern "C" void* cBENewRaceInterface_getModeName()
 {
-    return (char*)&D_0043E7D0 + D_00535C10[0] * 0x3c;
+    return (char*)&D_0043E7D0 + cBENewRaceInterface_newRace.cGameMode * 0x3c;
 }
 #endif
 
@@ -738,7 +730,7 @@ extern "C" int cBENewRaceInterface_getSimThreshold(void* self, int kind, int pla
         difficultyScale = 0.8999999761581421f;
     else if (mode == 2 && place != 0)
         difficultyScale = 1.2000000476837158f;
-    int key = D_00535C08.value;
+    int key = cBENewRaceInterface_newRace.iLocationIdx;
     for (int i = 0; i < 30; i++)
     {
         if (D_00440B38_1453D0[i].key == key && D_00440B38_1453D0[i].kind == k)
@@ -950,7 +942,7 @@ extern "C" int cBENewRaceInterface_getRival(void* self)
 {
     void* players = cBENewPlayerInterface_getThis();
     int humanChar = cBENewPlayerInterface_getRiderCharID(players, cBENewPlayerInterface_getHumanRider(cBENewPlayerInterface_getThis(), 0));
-    switch (cBENewRaceInterface_getLocationPeak(self, D_00535C08.value))
+    switch (cBENewRaceInterface_getLocationPeak(self, cBENewRaceInterface_newRace.iLocationIdx))
     {
     case 0:
         return humanChar == 3 ? 5 : 3;

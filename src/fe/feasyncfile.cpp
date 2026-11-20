@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "ui/uitext.h"
 #include "fe/festatelogin.h"
 #include "fe/festatenetcreateroompopup.h"
@@ -2728,7 +2729,8 @@ extern "C" void func_001A6F70(void)
             int hasEntry = func_00263128(GetSession_001A6F70(), name);
             int hasMessages = func_00262A38(GetSession_001A6F70(), (int)name);
             if (hasEntry == 0 && hasMessages == 0)
-                func_00261EF8(GetSession_001A6F70(), (int)name, 2, (int)buf); // PORT: pointer passed as int (unit prototype)
+                func_00261EF8(GetSession_001A6F70(), (int)name, 2, (int)buf); // PORT: pointer passed as int (unit
+                                                                              //       prototype)
         }
     }
 }
@@ -8596,7 +8598,6 @@ extern "C" int cBENewRaceInterface_setGameMode_DDD0(void* iface, int mode) __asm
 extern "C" int cBENewRaceInterface_setGameEvent_DDD0(void* iface, int ev) __asm__("cBENewRaceInterface_setGameEvent");
 extern int D_004A4E88;
 extern int D_004A11B8;
-extern int D_00535C08[];
 extern char D_00441268[];
 extern void* cFEStateChallengePopup_vtbl[];
 
@@ -8611,7 +8612,7 @@ public:
  *
  * Runs the cFEStateNet constructor (cFEStateNet_cFEStateNet) with @p engine and @p owner, stores cFEStateChallengePopup_vtbl,
  * points mpEventOptions at D_00441268, sets mHashName 0x3F, clears mbChallengeSent, mpLBRankedGame and D_004A4E88. On
- * the new-race interface (cBE interface 0) it sets D_004A11B8 to 1, clears D_00535C08[0], sets game mode 0 and event
+ * the new-race interface (cBE interface 0) it sets D_004A11B8 to 1, clears cBENewRaceInterface_newRace.iLocationIdx, sets game mode 0 and event
  * 0 and resets it; finally sets mbFirstCreate.
  *
  * @param engine  the UI engine (On Tour cUIState's pEngine)
@@ -8629,7 +8630,7 @@ extern "C" void* cFEStateChallengePopup_cFEStateChallengePopup(cFEStateChallenge
     D_004A4E88 = 0;
     cRace_DDD0* race = (cRace_DDD0*)cBE_getInterface_Fv(cBE_getBE(), 0);
     D_004A11B8 = 1;
-    D_00535C08[0] = 0;
+    cBENewRaceInterface_newRace.iLocationIdx = 0;
     cBENewRaceInterface_setGameMode_DDD0(race, 0);
     cBENewRaceInterface_setGameEvent_DDD0(race, 0);
     race->reset();
@@ -8774,7 +8775,6 @@ extern "C" void cFEStateNet_onGainFocus(cFEStateNet* self, int a1);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern "C" void func_001AF098(cFEStateChallengePopup* self, int a1);
 extern "C" void func_001AEC60(cFEStateChallengePopup* self, int a1);
-extern signed char D_00535C12[];
 extern char D_00441268[];
 extern char D_00441278[];
 extern char D_00441288[];
@@ -8787,7 +8787,7 @@ extern char D_004412B8[];
  *
  * Runs the cFEStateNet onGainFocus (cFEStateNet_onGainFocus), shows the network interface's bIsRankedGame in
  * "ListBoxRankedGame" (row ranked ^ 1), picks the event's allowed-options table for mpEventOptions by the event kind
- * D_00535C12 (1 D_00441278, 2 D_00441298, 3 D_00441288, 4 D_004412B8, 5 D_004412A8, else D_00441268), then updates
+ * newRace.cGameEvent (1 D_00441278, 2 D_00441298, 3 D_00441288, 4 D_004412B8, 5 D_004412A8, else D_00441268), then updates
  * the option widgets for ranked play (func_001AF098) and locks them while mbChallengeSent (func_001AEC60). The
  * comment above it ("picks the mode title") does not match the code.
  *
@@ -8799,7 +8799,7 @@ extern "C" void cFEStateChallengePopup_onGainFocus(cFEStateChallengePopup* self,
     cBE_getInterface_Fv(SSXApp->BE, 7);
     cUIListBox_setCurrentEntryByIndex(self->mpLBRankedGame, cBENetworkInterface_networkOpt.bIsRankedGame ^ 1);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    switch (D_00535C12[0]) {
+    switch (cBENewRaceInterface_newRace.cGameEvent) {
     case 3:
         self->mpEventOptions = (int*)D_00441288;
         break;
@@ -9406,7 +9406,6 @@ INCLUDE_ASM("fe/feasyncfile", func_001AF098);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern int D_005308D0[];
-extern signed char D_00535C12[];
 // D_004A4E88 is 8 bytes; the byte read is its second word's low byte (+4).
 extern unsigned char D_004A4E88_AF098[8] __asm__("D_004A4E88");
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
@@ -9416,7 +9415,7 @@ extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
  *
  * With @p all: power-ups, multipliers and point icons to entry 1 and CPU riders to entry 0. Otherwise each of
  * power-ups, multipliers and point icons shows its bit (8, 6, 7) of the race-option word D_005308D0 when mpEventOptions
- * allows it ([1], [3], [2]), else entry 1. CPU riders: when an event is set (cGameEvent, D_00535C12) the new-race AI
+ * allows it ([1], [3], [2]), else entry 1. CPU riders: when an event is set (newRace.cGameEvent) the new-race AI
  * count is set to 0 (then the interface's vtable entry 1) and the list shows 0; otherwise it shows the count saved in
  * D_004A4E88's second word (its low byte).
  *
@@ -9448,7 +9447,7 @@ extern "C" void func_001AF098(cFEStateChallengePopup* self, int all)
     } else {
         cUIListBox_setCurrentEntryByIndex(self->mpLBPointIcons, 1);
     }
-    if (D_00535C12[0] != 0) {
+    if (cBENewRaceInterface_newRace.cGameEvent != 0) {
         cBENewRaceInterface_setNumberAI(iface, 0);
         sVE1ADE88i* ivt = *(sVE1ADE88i**)(iface + 0xC);
         ivt[1].fn(iface + ivt[1].delta);
@@ -9802,7 +9801,6 @@ extern "C" int cBENewRaceInterface_getLocationPeak1(void* track);
 extern "C" const char* cBENewRaceInterface_getEventName(void* track);
 extern "C" const char* cBENewRaceInterface_getLocationName1(void* track);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
-extern signed char D_00535C12[];
 extern char str_TextPeak[];
 extern char str_TextEvent[];
 extern char str_TextCourse[];
@@ -9871,7 +9869,7 @@ extern "C" void func_001AF728(cFEStateChallengePopup* self, void* track, void* s
     if (track == 0) {
         cUIText_setAsciiString(uiText, str_sp);
     } else {
-        if (D_00535C12[0] != 0) {
+        if (cBENewRaceInterface_newRace.cGameEvent != 0) {
             cRaceIface_001AF728* iface = (cRaceIface_001AF728*)cBE_getInterface_Fv(cBE_getBE(), 0);
             cBENewRaceInterface_setNumberAI(iface, 0);
             iface->v01();
@@ -10133,7 +10131,6 @@ extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface,
 extern "C" void func_0025E6D0(void* self, const char* str);
 extern "C" void func_001AF930(void* screen);
 extern int D_004A11B8;
-extern int D_00535C08[];
 extern int D_00534B34[];
 extern char str_241challenge_received_popup[];
 
@@ -10185,7 +10182,7 @@ static inline void vcall_FE68(void* p)
  * looks the challenge up by mszChallenger (func_00263270). Copies the name to LobbyMan (+0x98) and the record's stats
  * to LobbyMan's mOpponentStats before checking the record for null, so a missing challenge is read through a null
  * pointer. Then copies the record's name to LobbyMan (+0x8C), rebuilds the race-option bits (D_005308B8, cleared
- * first), the race flag D_00535C08[0], game mode, event and AI count on the new-race interface and the ranked flag on
+ * first), the race flag cBENewRaceInterface_newRace.iLocationIdx, game mode, event and AI count on the new-race interface and the ranked flag on
  * the network interface (committing both), and fills the screen (func_001B0850, func_0025E6D0, func_001AF930). The
  * comment above it ("race-setup screen") is loose.
  */
@@ -10217,7 +10214,7 @@ extern "C" void cFEStateChallengeReceivedPopup_onCreateScreen(cFEStateChallengeR
     D_005308B8_FE68.b7 = challenge->f24;
     D_005308B8_FE68.b8 = challenge->f1C;
     void* be = cBE_getInterface_Fv_FE68(cBE_getBE(), 0);
-    D_00535C08[0] = challenge->f8;
+    cBENewRaceInterface_newRace.iLocationIdx = challenge->f8;
     D_004A11B8 = 1;
     cBENewRaceInterface_setGameMode_FE68(be, challenge->mode);
     cBENewRaceInterface_setGameEvent_FE68(be, challenge->event);
@@ -10287,7 +10284,6 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern int D_00535C04[];
 extern int D_005308D0[];
 extern char str_pct_d_b[];
 extern char str_True[];
@@ -10338,7 +10334,7 @@ static inline int IsHash_001B0150(int id, char* name) { return id == GetHashValu
  *
  * "TextAccept" ("kT_BTNAccept") gets id 0xB, "TextDecline" id 0xC, "TextSelectPeakEvent" id 7; "TextPlayerName" shows
  * mOpponent; the peak, course and event labels get their texts. The result texts: "TextRankedGameResult" always shows
- * "True"; "TextCPURidersResult" the AI count (D_00535C04, "%d" or "kT_CMNHUDNone"); "TextMultipliers Result" and
+ * "True"; "TextCPURidersResult" the AI count (newRace.iNumberAI, "%d" or "kT_CMNHUDNone"); "TextMultipliers Result" and
  * "TextPointiconsResult" No / Yes from bits 6 / 7 of D_005308D0. "TextPowerUpsResult" gets No / Yes from bit 8 and is
  * then overwritten with "True". The last branches for "TextRankedGameResult" and "TextCPURidersResult" can never run
  * (they are matched earlier). "MenuChallenge" gets attribute bit 7.
@@ -10381,7 +10377,7 @@ extern "C" void cFEStateChallengeReceivedPopup_onWidgetCreate(cFEStateChallengeR
         obj->v09(1);
     } else if (IsHash_001B0150(*(int*)(widget + 0x38), str_TextCPURidersResult)) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        int n = D_00535C04[0];
+        int n = cBENewRaceInterface_newRace.iNumberAI;
         if (n == 0) {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_CMNHUDNone));
         } else {
@@ -10733,7 +10729,6 @@ extern "C" const char* cBENewRaceInterface_getEventName(void* track);
 extern "C" const char* cBENewRaceInterface_getLocationName1(void* track);
 extern int D_00534B34[];
 extern int D_005308D0[];
-extern int D_00535C04[];
 extern char str_sp[];
 extern char str_pct_d_b[];
 extern char str_TextEventResult[];
@@ -10753,7 +10748,7 @@ extern char str_kT_CMNNo[];
  * Each is " " when @p iface is null. "TextEventResult" cBENewRaceInterface_getEventName, "TextCourseResult" cBENewRaceInterface_getLocationName1,
  * "TextRankedGameResult" Yes/No from D_00534B34; "TextPowerupsResult", "TextMultipliersResult" and
  * "TextPointiconsResult" show "kT_CMNNo" when bit 8, 6 or 7 of D_005308D0 is set, else "kT_CMNYes";
- * "TextCPURidersResult" shows the AI count (D_00535C04) or "kT_CMNHUDNone" when it is 0 or less.
+ * "TextCPURidersResult" shows the AI count (newRace.iNumberAI) or "kT_CMNHUDNone" when it is 0 or less.
  *
  * @param iface  the new-race interface (only tested for null)
  * @param screen  the screen (null: nothing)
@@ -10836,7 +10831,7 @@ extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface,
             cUIText_setAsciiString(uiText, str_sp);
         } else {
             cBE_getInterface_Fv(cBE_getBE(), 0);
-            int n = D_00535C04[0];
+            int n = cBENewRaceInterface_newRace.iNumberAI;
             if (n <= 0) {
                 cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_CMNHUDNone));
             } else {
@@ -22009,7 +22004,9 @@ struct sState_BDCA0 {
  * @param msg  the pair event (On Tour Event)
  * @return always 0x101
  */
-// FAKEMATCH: do-while(0) wrapper around the if/else, per-function volatile view of the dead boxes[i]->f318 read, and FM_BARRIER() after it (the wrapper keeps loop.c from moving the found arm out of the loop, so jump2 cross-jumps the msg==1 return into it); plain form 42.05%.
+// FAKEMATCH: do-while(0) wrapper around the if/else, per-function volatile view of the dead boxes[i]->f318 read, and
+// FM_BARRIER() after it (the wrapper keeps loop.c from moving the found arm out of the loop, so jump2 cross-jumps the
+// msg==1 return into it); plain form 42.05%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
 extern "C" int cFEStateLobbyMenu_onWidgetPair(void* self_, int id, int msg)
 {

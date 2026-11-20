@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "fe/festatecredits.h"
 #include "ui/uiengine.h"
 #include "fe/festateubertrick.h"
@@ -628,7 +629,6 @@ extern "C" void* cFERiderManager_getHuman1(void* self, int idx);
 extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* mem, void* owner, void* state, int a3);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
-extern signed char D_00535C11[];
 extern char str_done[];
 extern char str_helptext_choose[];
 extern char str_helptext_custom[];
@@ -718,7 +718,7 @@ static inline void Back_185268(char* self)
  *   vtable slot 7), runs cFEStateUberTrick_activateTrickMenu and shows the cost display (cFEStateUberTrick_costVisible) and cFEStateUberTrick_previewVisible's
  *   objects. On the trick menu: an unlocked trick (func_00150048) that is not for sale (func_0014FFB8) becomes the
  *   category's trick (func_0014FD80), interface 6's vtable slot 1 runs and the list is refilled
- *   (cFEStateUberTrick_updateTrickMenu). Otherwise, outside game path 0 (D_00535C11) UI sound 4 plays; a trick for sale opens a
+ *   (cFEStateUberTrick_updateTrickMenu). Otherwise, outside game path 0 (newRace.cGamePath) UI sound 4 plays; a trick for sale opens a
  *   "UITRICKBUY" cUIStateBuyPopup (cUIStateBuyPopup_initBuyTrick with the trick's name, cost and the character's money)
  *   when the money covers the cost, else sound 4 plays.
  * - 6 (back) on the trick menu: gives the category menu focus, colours the trick menu's selected item opaque black
@@ -765,7 +765,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, char* i
                     sVE_185268* vt = *(sVE_185268**)(pi + 0xC);
                     ((int (*)(void*))vt[1].fn)(pi + vt[1].delta);
                     cFEStateUberTrick_updateTrickMenu(((char*)self));
-                } else if (D_00535C11[0] != 0) {
+                } else if (cBENewRaceInterface_newRace.cGamePath != 0) {
                     PlaySound_185268(((char*)self), 4);
                 } else if (func_0014FFB8(pi, self->mUserNum, ai, bi)) {
                     char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -849,7 +849,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, char* i
                 cBE_getInterface_Fv(cBE_getBE(), 0);
                 if (func_00150048(pi, self->mUserNum, ai, bi) && !func_0014FFB8(pi, self->mUserNum, ai, bi)) {
                     cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_66HELPCustomUber));
-                } else if (D_00535C11[0] == 0) {
+                } else if (cBENewRaceInterface_newRace.cGamePath == 0) {
                     if (func_0014FFB8(pi, self->mUserNum, ai, bi)) {
                         char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
                         signed char charID = cBENewPlayerInterface_getPlayerCharID(player, self->mUserNum);

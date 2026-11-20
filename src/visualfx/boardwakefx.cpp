@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "visualfx/snowbox.h"
 #include "ai/riderhandler.h"
 #include "render/ps2graphicsman.h"
@@ -973,7 +974,8 @@ struct sWake_E058 {
     int cap;                    // 0xB8
 };
 
-// cRenderStateMan_m_state: the lens/surface table, 8 rows of 0xF0 bytes (config size 0x780); sEnt_E058 views a row from its +0x28 field
+// cRenderStateMan_m_state: the lens/surface table, 8 rows of 0xF0 bytes (config size 0x780); sEnt_E058 views a row from
+// its +0x28 field
 extern char cRenderStateMan_m_state[];
 
 // PORT: g++ minimum operator (<?).
@@ -1143,7 +1145,9 @@ extern "C" void func_002DE398(char* self, sWakeVecE398* out)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cDynamicSprayFX_cDynamicSprayFX);
 #ifdef SKIP_ASM
-// FAKEMATCH: statements 1-32 store through self->p2C[0] and the other 548 through the inline getter, which moves cse's 1000-insn flush points; one spelling throughout scores 94.71%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// FAKEMATCH: statements 1-32 store through self->p2C[0] and the other 548 through the inline getter, which moves cse's
+// 1000-insn flush points; one spelling throughout scores 94.71%. Byte-identical and behaves like the plain form; landed
+// marked under the 2026-11-14
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 struct sEmitterE4A8 {
     char data[0x210];
@@ -2324,8 +2328,10 @@ extern "C" void func_002DF920(sWakeFxF920* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002DFE88);
 #ifdef SKIP_ASM
-// FAKEMATCH: identical if/else arms `if (self) { m = k; } else { m = k; }` inside the `k < 1.0f` arm of the m clamp (the extra branch changes
-// cse1's path, so the clamps' 1.0 keeps its own copy instead of being folded into fs0); plain form 99.53%. Byte-identical and behaves like the plain form; landed marked under
+// FAKEMATCH: identical if/else arms `if (self) { m = k; } else { m = k; }` inside the `k < 1.0f` arm of the m clamp
+// (the extra branch changes
+// cse1's path, so the clamps' 1.0 keeps its own copy instead of being folded into fs0); plain form 99.53%.
+// Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
 
@@ -4412,7 +4418,8 @@ struct sLensSunBanks3130 {
  *
  * @param selfp  the lens manager (this)
  */
-// FAKEMATCH: the invented zero-valued bank index `int bufferId = 0;` (as landed cLensFxMan_DrawLens's `bank`), so retail's
+// FAKEMATCH: the invented zero-valued bank index `int bufferId = 0;` (as landed cLensFxMan_DrawLens's `bank`), so
+// retail's
 // zeroed register times 0x6000 is kept; plain form (constant bank 0, prev bank 1 through the same views) 79.77%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
 extern "C" void cLensFxMan_SampleLens(void* selfp)
@@ -4544,7 +4551,9 @@ extern "C" void cLensFxMan_ProcessLens(void* vself, int idx)
 INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_DrawLens);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// FAKEMATCH: the invented zero-valued index `bank` over size-1 leading array dimensions (cnt / strip / blk[1][...]), so retail's zero register times 0x6000 is kept; plain form (no bank dimension) 94.97%. Byte-identical and behaves like the plain form; landed marked under
+// FAKEMATCH: the invented zero-valued index `bank` over size-1 leading array dimensions (cnt / strip / blk[1][...]), so
+// retail's zero register times 0x6000 is kept; plain form (no bank dimension) 94.97%. Byte-identical and behaves like
+// the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 struct sBW3478Blk { char d[0x210]; };
 
@@ -4842,7 +4851,6 @@ INCLUDE_ASM("visualfx/boardwakefx", cPlayerIndicatorFX_render);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern signed char D_00535C12[];
 
 struct sVtx_3AF8 {
     float s, t, q, pad;
@@ -5038,7 +5046,7 @@ static inline int ShouldDraw_3AF8(sWake_3AF8* self)
         }
     } else if (!IsHuman_3AF8(self->rider)) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        if ((unsigned int)(D_00535C12[0] - 4) < 2) {
+        if ((unsigned int)(cBENewRaceInterface_newRace.cGameEvent - 4) < 2) {
             int mode = *(int*)((char*)SSXApp->Game->SectionMan + 0x1BC);
             if ((unsigned int)(mode - 14) < 3) vis = 1;
         }

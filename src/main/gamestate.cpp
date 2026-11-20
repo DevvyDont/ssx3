@@ -29,7 +29,6 @@ extern "C" void cSSXAudio_CountdownBeep(void* p, int a1);
 extern "C" void cGFGateState_runScript(void* self, int a1);
 int GetHashValue32(char* s);
 extern char* cGameState_mpGame;
-extern signed char D_00535C10[];
 extern char str_StartlightBegin[];
 
 struct sRace_234AD0 {
@@ -57,7 +56,7 @@ extern "C" void cGFGateState_gainFocus(void* self)
     cReplay_reset(*(void**)(cGameState_mpGame + 0x28));
     cReplay_startRace(*(void**)(cGameState_mpGame + 0x28));
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    int mode = D_00535C10[0];
+    int mode = cBENewRaceInterface_newRace.cGameMode;
     if (mode >= 4 && mode <= 6) {
         cGameState_gotoNextState(self);
         return;
@@ -117,7 +116,6 @@ void func_0028C8C0(void* self, int val);
 extern "C" void cGameState_gotoNextState(void* self);
 extern "C" void cSSXAudio_CountdownBeep(void* p, int secs);
 extern char* cGameState_mpGame;
-extern signed char D_00535C10[];
 extern char str_StartgateOpen[];
 extern char str_hud_c[];
 
@@ -152,7 +150,7 @@ extern "C" void cGFGateState_update(void* self)
         return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C10[0] == 4) {
+    if (cBENewRaceInterface_newRace.cGameMode == 4) {
         return;
     }
     if (*(int*)(*(char**)(cGameState_mpGame + 0xC) + 0x1C) <= 0) {
@@ -222,12 +220,11 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBE_setState(int state);
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern char* cGameState_mpGame;
-extern signed char D_00535C10[];
 
 /**
  * Starts the riding game state: lets the AI riders go and hands the game to the back end's racing state.
  *
- * Calls cAI_setAIState on the game's AI (mpGame + 0xC) with 5; unless the race's game mode (cGameMode, D_00535C10) is
+ * Calls cAI_setAIState on the game's AI (mpGame + 0xC) with 5; unless the race's game mode (newRace.cGameMode) is
  * 4, sets the AI's +0x14 to 1 and +0x8C to 0. Then cBE_setState(1) and, when no replay is playing (Replay state outside
  * 1-9), purges the UI's normal states (cUIStateStack_purgeNormalStates). Slot +0x2C (gainFocus) of cGFRidingState_vtbl.
  */
@@ -235,7 +232,7 @@ extern "C" void cGFRidingState_gainFocus(void)
 {
     cAI_setAIState(*(void**)(cGameState_mpGame + 0xC), 5);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C10[0] != 4) {
+    if (cBENewRaceInterface_newRace.cGameMode != 4) {
         char* game = cGameState_mpGame;
         *(int*)(*(char**)(game + 0xC) + 0x14) = 1;
         *(int*)(*(char**)(game + 0xC) + 0x8C) = 0;
@@ -332,7 +329,6 @@ extern "C" int cBENewPlayerInterface_isFirstTimeOnTrack(void* self, int index, i
 extern "C" void cSSXScriptEngine_AppendStartSequence(void* a, int b);
 extern "C" void* cAudioInterface_bxAudio(void);
 extern char* cGameState_mpGame;
-extern signed char D_00535C11[];
 
 struct sVEntry_234F40 {
     short delta;
@@ -364,7 +360,7 @@ extern "C" void cGFTrackStartState_preloadInit(sState_234F40* self)
     cSSXScriptEngine_AsyncLoadTrack(ScriptEngine);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     self->f14 = 0;
-    int gamePath = D_00535C11[0];
+    int gamePath = cBENewRaceInterface_newRace.cGamePath;
     cAI_prepareToPurgeComputerRiders(*(void**)(cGameState_mpGame + 0xC));
     cAI_prepareToPurgeComputerActors(*(void**)(cGameState_mpGame + 0xC));
     if (gamePath == 0) {
@@ -392,7 +388,8 @@ extern "C" void cGFTrackStartState_preloadInit(sState_234F40* self)
 INCLUDE_ASM("main/gamestate", cGFTrackStartState_preloadUpdate);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// FAKEMATCH: the range bounds 6 / 11 as locals `first` / `last` (li + slt instead of slti); plain literals 98.25%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// FAKEMATCH: the range bounds 6 / 11 as locals `first` / `last` (li + slt instead of slti); plain literals 98.25%.
+// Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 // g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type).
 // Virtual calls in this unit go through these by hand.
@@ -1060,7 +1057,6 @@ extern "C" void cSSXScriptEngine_EndTransportSequence(void* p);
 extern "C" void cGameState_gotoNextState(void* self);
 void* cGame_getTransitionMan(void* self, int id);
 extern char* cGameState_mpGame;
-extern int D_00535C04[];
 
 /**
  * Steps the next-heat setup: rebuild the AI riders, place the world-cache focus at the first rider, end the
@@ -1081,7 +1077,7 @@ extern "C" void cGFNextHeatState_update(void* self)
     case 0:
         if (cAI_isReadyToPurgeComputerRiders(*(void**)(game + 0xC))) {
             cAI_cleanupAfterRace(SSXApp->Game->AI);
-            if (D_00535C04[0] >= 2)
+            if (cBENewRaceInterface_newRace.iNumberAI >= 2)
                 cAI_cleanupActors(SSXApp->Game->AI);
             cAI_initAIRiders(SSXApp->Game->AI);
             *(int*)((char*)self + 0x10) = 1;
@@ -1427,8 +1423,6 @@ extern int cPauseState_Flags;
 extern int D_005366E8[];
 extern int D_004428F0[];
 extern int D_004428F8[];
-extern signed char D_00535C10[];
-extern signed char D_00535C11[];
 
 struct sIface_6418 {
     char pad0[0x10];
@@ -1481,8 +1475,10 @@ static inline void pop_6418()
  */
 extern "C" void cGFUserSelectState_update(void* self)
 {
-    // Retail builds `flag` as a copy of a register holding 1, then `movn flag, zero, (D != 4)`: a condition the compiler
-    // folded to the constant 1 (a local flag, e.g. a feature toggle). A literal 1 gives a run-time sltiu instead (96.81).
+    // Retail builds `flag` as a copy of a register holding 1, then `movn flag, zero, (D != 4)`: a condition the
+    //       compiler
+    // folded to the constant 1 (a local flag, e.g. a feature toggle). A literal 1 gives a run-time sltiu instead
+    //       (96.81).
     int one = 1;
     int ns;
     switch (*(int*)((char*)self + 0x10)) {
@@ -1498,7 +1494,7 @@ extern "C" void cGFUserSelectState_update(void* self)
         } else if (curMode == 2) {
             int flag = 0;
             if (atLeast_6418(*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0))))
-                flag = one && D_00535C10[0] == 4;
+                flag = one && cBENewRaceInterface_newRace.cGameMode == 4;
             if (flag)
                 cUITemplate_MAP_mMapStyle = 3;
             else
@@ -1531,7 +1527,7 @@ extern "C" void cGFUserSelectState_update(void* self)
                 cGame_setState(SSXApp->Game, 0xF, 0, 0);
                 return;
             }
-            if (destInBackcountry && D_00535C11[0] == 0)
+            if (destInBackcountry && cBENewRaceInterface_newRace.cGamePath == 0)
                 *(int*)((char*)self + 0x8) = 0;
             cSSXScriptEngine_PlayTransportSequence(ScriptEngine, !destInBackcountry && !curInBackcountry, 1);
             ns = 2;
@@ -2007,17 +2003,16 @@ extern "C" void cSSXScriptEngine_ResetNISList(void* a, int b);
 extern "C" void* cAudioInterface_bxAudio(void);
 extern "C" void cSSXAudio_ResetAudioVariables(void* mgr);
 extern char* cGameState_mpGame;
-extern signed char D_00535C10[];
 
 static inline int isMode4_236CD8()
 {
-    return D_00535C10[0] == 4;
+    return cBENewRaceInterface_newRace.cGameMode == 4;
 }
 
 /**
  * Resets the race for the event: clears the NIS list, sets the AI back, and resets the audio.
  *
- * Calls cSSXScriptEngine_ResetNISList(ScriptEngine, 0); unless the race's game mode (cGameMode, D_00535C10) is 4, calls
+ * Calls cSSXScriptEngine_ResetNISList(ScriptEngine, 0); unless the race's game mode (newRace.cGameMode) is 4, calls
  * virtual slot 5 of the game's AI with 3 and sets the AI's +0x14 to 1; then cSSXAudio_ResetAudioVariables on the audio (cAudioInterface_bxAudio).
  */
 extern "C" void cGFPreEventState_ResetGameState(void* self)
@@ -2530,8 +2525,10 @@ extern "C" void* cInputSync_createremoteinput(sOwner_237280* self, int realinput
 //100%
 INCLUDE_ASM("main/gamestate", cInputSync_preupdate);
 #ifdef SKIP_ASM
-// FAKEMATCH: redundant pointer local `psp` (`SyncedPad* psp = &syncedpads[i]; SyncedPad& sp = *psp;`) adds the one RTL insn
-// that puts the outer loop over loop.c's 257-insn hoist threshold, so the constant 24 is not hoisted into s5; plain form 97.12%
+// FAKEMATCH: redundant pointer local `psp` (`SyncedPad* psp = &syncedpads[i]; SyncedPad& sp = *psp;`) adds the one RTL
+// insn
+// that puts the outer loop over loop.c's 257-insn hoist threshold, so the constant 24 is not hoisted into s5; plain
+// form 97.12%
 // (99.69% with a ternary clamp). Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 struct sPackSrc_7B28;

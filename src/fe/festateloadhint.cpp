@@ -141,20 +141,19 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cFELoadState_InitwidgetMultiP(void* self, int idx);
-extern signed char D_00535C11[];
 extern char str_103MPStat[];
 extern char str_100QPStat[];
 
 /**
  * Creates the loading screen with rider stats: "103MPStat" for both players online, else "100QPStat".
  *
- * The online check is the new-race game path (D_00535C11 == 2); the two-player screen is filled with
+ * The online check is the new-race game path (newRace.cGamePath == 2); the two-player screen is filled with
  * InitwidgetMultiP() for players 0 and 1.
  */
 extern "C" void cFELoadState_onCreateScreen(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C11[0] == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == 2) {
         void* engine = *(void**)((char*)self + 0x10);
         void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_103MPStat), 0);
         *(void**)((char*)self + 0x40) = screen;
@@ -211,20 +210,19 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget);
-extern signed char D_00535C11[];
 
 /**
  * Creates the load screen's quick-play widget, except on the online game path.
  *
  * Fetches back-end interface 0 (the result is unused), then calls cFELoadState_widgetCreateQP() unless the
- * race's game path (cGamePath, D_00535C11) is 2, online.
+ * race's game path (newRace.cGamePath) is 2, online.
  *
  * @param widget  the widget being created
  */
 extern "C" void cFELoadState_onWidgetCreate(void* self, void* widget)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C11[0] != 2) {
+    if (cBENewRaceInterface_newRace.cGamePath != 2) {
         cFELoadState_widgetCreateQP(self, widget);
     }
 }
@@ -615,7 +613,6 @@ INCLUDE_ASM("fe/festateloadhint", func_00246278);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" int cBENewRaceInterface_getLocationPeak1(void* iface);
 extern "C" int cBENewRaceInterface_getLocationName1(void* iface);
-extern signed char D_00535C10[];
 extern char str_pct_s_pct_S_b[];
 extern char str_Location_Text[];
 extern char str_kT_Peak1name_b[];
@@ -667,10 +664,10 @@ static inline bool IsId_246278(char* obj, char* key)
 /**
  * Fills in one widget of the online load screen as it is created: the location text or the game-mode title.
  *
- * func_00245598() calls it when the game path (cBENewRaceInterface_newRace.cGamePath, D_00535C11) is 2 (online).
+ * func_00245598() calls it when the game path (cBENewRaceInterface_newRace.cGamePath) is 2 (online).
  * "Location Text" gets "%s-%S" of the localised peak name ("kT_Peak1name".."kT_Peak3name" by cBENewRaceInterface_getLocationPeak1(), the
  * location's peak) and the location name (cBENewRaceInterface_getLocationName1()). Otherwise the title widget matching the game mode
- * (cGameMode, D_00535C10) is shown (setVisible, slot 9, with 1): "Title_Multi_Race" for modes 0 and 4, "_SS" 1, "_BA"
+ * (newRace.cGameMode) is shown (setVisible, slot 9, with 1): "Title_Multi_Race" for modes 0 and 4, "_SS" 1, "_BA"
  * 2, "_SP" 3, "_BC" 5 and 6.
  *
  * @param obj  the widget being created (its hash name is at +0x38)
@@ -696,7 +693,7 @@ extern "C" void func_00246278(void* self, char* obj)
         cUIText_setUnicodeString(obj, buf);
         return;
     }
-    switch (D_00535C10[0]) {
+    switch (cBENewRaceInterface_newRace.cGameMode) {
     case 0:
         if (IsId_246278(obj, str_Title_Multi_Race)) Activate_246278(obj);
         break;
@@ -811,7 +808,7 @@ static inline void Fmt_2464E8(char* buf, char* fmt, char* key, void* iface)
  * Fills in one widget of the offline load screen as it is created: location, titles, course stats, rider name and
  * level, and the map image.
  *
- * func_00245598() calls it when the game path (cGamePath, D_00535C11) is not 2. "Location" gets the peak and location
+ * func_00245598() calls it when the game path (newRace.cGamePath) is not 2. "Location" gets the peak and location
  * name as in func_00246278(). The widgets matching the game mode (cBENewRaceInterface_newRace.cGameMode) are shown
  * (setVisible, slot 9, with 1): "Title_Quick_Race/SS/BA/SP/BC" (modes 0/4, 1, 2, 3, 5/6) and "et_race/SS/BA/SP/TChal/
  * PChal" (modes 0, 1, 2, 3, 5, 6), and "ec_beg/inter/expert" by the location's cBENewRaceInterface_getLocationDifficulty() value (0-2).
@@ -963,7 +960,6 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
-extern signed char D_00535C11[];
 
 void cUIText_setAsciiString(cUIText* text, const char* str);
 
@@ -991,7 +987,8 @@ extern char D_004A2C28_6CF8[] __asm__("str_pct_d_g");
 extern char str_ranking00[];
 extern char str_ranking01[];
 extern char str_kT_CMNLvNum[];
-// The network game state (dirtysock/tagsunk sNetState); the unit declares cBENetworkInterface_networkOpt as int[] below.
+// The network game state (dirtysock/tagsunk sNetState); the unit declares cBENetworkInterface_networkOpt as int[]
+// below.
 struct sNetState_6CF8 {
     int active;                     // 0x000
     int f4;                         // 0x004
@@ -1013,7 +1010,7 @@ struct sName5_6CF8 { char c[5]; };
 /**
  * Shows one player's level and seven attribute bars on the online load screen.
  *
- * Does nothing unless the game path (cGamePath, D_00535C11) is 2 (online). The level is cBEStatInterface_getStatLevel() for the
+ * Does nothing unless the game path (newRace.cGamePath) is 2 (online). The level is cBEStatInterface_getStatLevel() for the
  * player's human rider (1 when bit 1 of the rule record D_005308B8[rider] is set) and the stats are the rider's seven
  * attributes (cBEStatInterface_getAccel, cBEStatInterface_getEdging, cBEStatInterface_getSpeed, cBEStatInterface_getSpin, cBEStatInterface_getStability, cBEStatInterface_getToughness, cBEStatInterface_getTrick).
  * With a comm system (cCommSystem_mCommSystem) and either player 1 or a ranked game
@@ -1029,7 +1026,7 @@ struct sName5_6CF8 { char c[5]; };
 extern "C" void func_00246CF8(void* self, char player)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C11[0] == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == 2) {
         sName4_6CF8 statName = *(sName4_6CF8*)str_100;
         sName2_6CF8 picName = *(sName2_6CF8*)D_004A2C18;
         sName5_6CF8 barName = *(sName5_6CF8*)str_00pb;
@@ -1164,7 +1161,6 @@ extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
 
 extern char str_kT_OVRCMNLevelNum[];
 
-extern signed char D_00535C10[];
 
 // PORT: the widget name templates are splat-named literals; copied from the symbols as char-array structs.
 struct sName19_72C0 { char c[19]; };
@@ -1280,7 +1276,7 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
     }
     obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(timeName.c));
     if (obj != 0) {
-        if (D_00535C10[0] == 0 || D_00535C10[0] == 5) {
+        if (cBENewRaceInterface_newRace.cGameMode == 0 || cBENewRaceInterface_newRace.cGameMode == 5) {
             int i = cBENewPlayerInterface_getHumanRider(iface1, player != 0);
             unsigned int seconds = fptoui((float)D_00536640[i] * (1.0f / 60.0f));
             char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Time));

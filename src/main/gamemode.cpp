@@ -179,7 +179,6 @@ INCLUDE_ASM("main/gamemode", cGameModeMan_initGameMode);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern signed char D_00535C11[];
 extern "C" void cGameModeMan_restartHeat(cGameModeMan* self);
 
 struct sVE_initGameMode { short delta; short index; void (*fn)(void*); };
@@ -210,7 +209,7 @@ extern "C" void cGameModeMan_initGameMode(cGameModeMan* self, unsigned int type)
     sVE_initGameMode* vt = *(sVE_initGameMode**)gm;
     vt[3].fn(gm + vt[3].delta);
     self->iCurrentGameEvent = (int)type;
-    int net = D_00535C11[0];
+    int net = cBENewRaceInterface_newRace.cGamePath;
     self->iCurrentGamePath = net;
     if (net == 2) {
         switch (type) {
@@ -766,7 +765,6 @@ extern "C" void func_00239938_self(void* self) __asm__("func_00239938");
 struct sScore_239AA0;
 extern "C" void func_00239AA0(sScore_239AA0* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern signed char D_00535C11[];
 extern unsigned int D_00536640[];
 extern int D_00536708[];
 
@@ -824,7 +822,7 @@ static inline sRace_238E20* race_238E20()
  * riders and, when the event was done, clears the score table (+0x4, 3 heats x 10 riders), runs slot +0x24, picks the
  * line-up (func_00239938) and the AI scores (func_00239AA0); it then ranks twice with sortScores (cGameModeMan_sortScores) and
  * puts the two leaders' characters in the race (AI + 0x20, + 0x24). Heat 2 ranks on heats 1 + 2; heat 3 is the last
- * heat and ranks on heat 3. When the game path (D_00535C11) is not 0 it first sets up a single heat-3 event with fresh
+ * heat and ranks on heat 3. When the game path (newRace.cGamePath) is not 0 it first sets up a single heat-3 event with fresh
  * line-up. It fills the init slot (+0x14), which cGameModeMan_restartHeat calls.
  */
 extern "C" void func_00238E20(sScore_238E20* self)
@@ -832,7 +830,7 @@ extern "C" void func_00238E20(sScore_238E20* self)
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     int i;
     cGameModeMan* gm = cGameModeHandler_pManager;
-    int quick = D_00535C11[0];
+    int quick = cBENewRaceInterface_newRace.cGamePath;
     gm->bHasPointTarget = 0;
     gm->uiPointTarget = 0;
     if (quick != 0) {
@@ -954,7 +952,6 @@ extern "C" void cGameModeMan_sortScores(void* self, int n);
 extern unsigned int D_00536640[];
 extern int D_005366A8[];
 extern int D_00536730[];
-extern signed char D_00535C11[];
 
 
 struct sScore_239230 {
@@ -1002,7 +999,7 @@ extern "C" void func_00239230(sScore_239230* self, int idx)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
-    int quick = D_00535C11[0];
+    int quick = cBENewRaceInterface_newRace.cGamePath;
     int n = cBENewPlayerInterface_getHumanRider(player, 0);
     sStats_239230 st = *(sStats_239230*)((char*)Rider_239230(idx)->mMetrix + 0xFC);
     if (Rider_239230(idx)->mDidNotFinish != 0) {
@@ -1499,7 +1496,6 @@ extern "C" int cBENewRaceInterface_getRival(void* iface);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void func_0023A4F0(void* self);
 extern "C" void func_0023A668(void* self);
-extern signed char D_00535C11[];
 extern unsigned int D_00536640[];
 extern int D_00536730[];
 extern int D_00536708[];
@@ -1590,7 +1586,7 @@ extern "C" void func_0023A108(sMode_23A108* self)
     gameModeMan->iHeatNum = gameModeMan->iNextHeat;
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
-    int quick = D_00535C11[0];
+    int quick = cBENewRaceInterface_newRace.cGamePath;
     if (quick != 0 && cGameModeHandler_pManager->iHeatNum != 3) {
         cGameModeHandler_pManager->iHeatNum = 3;
         self->fC = 0;
@@ -1874,8 +1870,8 @@ struct sApp {
 
 extern sApp* D_004A28A8_A760 __asm__("SSXApp");
 
-// Race settings (D_00535BC8_A760; ai/ai's sRaceSettings). D_00535C04 / D_00535C11 / D_00535C12 are splat
-// symbols for its fields at 0x3C / 0x49 / 0x4A.
+// Race settings (D_00535BC8_A760: cBENewRaceInterface_newRace, be/beintnewrace.h; ai/ai's sRaceSettings); 0x49 / 0x4A
+// are its cGamePath / cGameEvent.
 struct sRaceSettings {
     char pad[0x49];
     signed char f49;            // 0x49
@@ -2068,7 +2064,6 @@ extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getPlayerCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getPlayerCheatCharID(void* iface, int player);
 extern "C" void func_0023B0A8(void* self);
-extern int D_00535C04[];
 
 struct sGM_23AC88 {
     int f0;
@@ -2104,7 +2099,7 @@ struct sVEntry_23AC88 {
 /**
  * Starts the online race of handler 8 (vtable D_0047CED0; online event 0 and the online default).
  *
- * Sets path 2 and event 0, a single last heat (3) with four AI riders (D_00535C04 when cBENetworkInterface_networkOpt
+ * Sets path 2 and event 0, a single last heat (3) with four AI riders (newRace.iNumberAI when cBENetworkInterface_networkOpt
  * says it is a network game), no time limit, fills the time table (+0x4) with 9s, runs slot +0x2C and stores both
  * players' characters. When the event was done it also runs func_0023B0A8.
  */
@@ -2128,7 +2123,7 @@ extern "C" void func_0023AC88(void* self)
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        cGameModeHandler_pManager->iNumberAI = D_00535C04[0];
+        cGameModeHandler_pManager->iNumberAI = cBENewRaceInterface_newRace.iNumberAI;
     }
     cGameModeMan* gm2 = cGameModeHandler_pManager;
     gm2->iSimAI = 0;
@@ -2365,7 +2360,6 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" int cBENewRaceInterface_getPeakGoal(void* iface, int mode, int a2);
 extern "C" int cBEScoreInterface_getBestMedalOnTrack(void* iface, int a1, int a2, int a3);
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern signed char D_00535C12[];
 
 struct sGM_23B268 {
     int f0;
@@ -2420,7 +2414,7 @@ extern "C" void func_0023B268(void* self)
     void* score = cBE_getInterface_Fv(cBE_getBE(), 8);
     cGameModeMan* gm = cGameModeHandler_pManager;
     gm->iHeatNum = 1;
-    int mode = D_00535C12[0];
+    int mode = cBENewRaceInterface_newRace.cGameEvent;
     gm->iNumberAI = 0;
     gm->iCurrentGameEvent = mode;
     gm->iSimAI = 0;
@@ -2565,7 +2559,6 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
 extern "C" int cBENewRaceInterface_getPeakSplitTimePoints(void* iface, int a1, int a2, int a3);
 extern "C" float cRiderMetrix_evSplitTime(void* self, int value);
-extern signed char D_00535C12[];
 
 /**
  * Handles a checkpoint in the timed event of handler 4: at locations 17-21 subtracts that checkpoint's bonus from the
@@ -2588,7 +2581,7 @@ extern "C" int func_0023B5F8(void* self)
         ok = ok < 22;
     }
     if (ok) {
-        int bonus = cBENewRaceInterface_getPeakSplitTimePoints(iface, D_00535C12[0], *(short*)((char*)self + 0xA), *(unsigned short*)((char*)self + 8));
+        int bonus = cBENewRaceInterface_getPeakSplitTimePoints(iface, cBENewRaceInterface_newRace.cGameEvent, *(short*)((char*)self + 0xA), *(unsigned short*)((char*)self + 8));
         void* clk = SSXApp->Game->AI;
         int secs = (int)((float)*(int*)((char*)clk + 0xC) * 0.01666666753590107f);
         if (bonus != 0) {
@@ -2611,7 +2604,6 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" int cBENewRaceInterface_getRival(void* iface);
 extern "C" int cBENewPlayerInterface_getRiderCheatCharID(void* iface, int player);
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern signed char D_00535C11[];
 
 struct sGM_23B6C0 {
     int f0;
@@ -2675,7 +2667,7 @@ extern "C" void func_0023B6C0(void* self)
     gm->bAreResultsLocked = 0;
     sVEntry_23B6C0* vt = *(sVEntry_23B6C0**)self;
     vt[5].fn((char*)self + vt[5].delta);
-    if (D_00535C11[0] == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == 2) {
         cGameModeHandler_pManager->iNumberAI = 0;
         int firstHuman = cBENewPlayerInterface_getHumanRider(player, 0);
         int secondHuman = cBENewPlayerInterface_getHumanRider(player, 1);
@@ -2706,7 +2698,6 @@ extern "C" void cGameModeMan_sortTimes(void* self, int n);
 extern unsigned int D_00536640[];
 extern int D_005366A8[];
 extern int D_00536730[];
-extern signed char D_00535C11[];
 
 
 class cRiderState_23B8C8 {
@@ -2761,7 +2752,7 @@ extern "C" void func_0023B8C8(void* self, int idx)
         return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C11[0] == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == 2) {
         cGameModeMan_sortTimes((char*)cGameModeHandler_pManager, 10);
         cGameModeHandler_pManager->bAreResultsLocked = 1;
         int w = 1;
@@ -2809,7 +2800,6 @@ extern "C" int cBENewRaceInterface_getRival(void* iface);
 extern "C" int cBENewPlayerInterface_getRiderCheatCharID(void* iface, int player);
 extern "C" int cBENewRaceInterface_getTimeLimit(void* iface, int a1);
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern signed char D_00535C11[];
 
 struct sGM_23BB98 {
     int f0;
@@ -2876,7 +2866,7 @@ extern "C" void func_0023BB98(void* self)
     gm2->bIsLastHeat = one;
     sVEntry_23BB98* vt = *(sVEntry_23BB98**)self;
     vt[4].fn((char*)self + vt[4].delta);
-    if (D_00535C11[0] == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == 2) {
         cGameModeHandler_pManager->iNumberAI = 0;
         int firstHuman = cBENewPlayerInterface_getHumanRider(player, 0);
         int secondHuman = cBENewPlayerInterface_getHumanRider(player, 1);
@@ -2907,7 +2897,6 @@ extern "C" void cGameModeMan_sortScores(void* self, int n);
 extern unsigned int D_00536640[];
 extern int D_005366A8[];
 extern int D_00536730[];
-extern signed char D_00535C11[];
 
 
 struct sStats_23BDB8 {
@@ -2950,7 +2939,7 @@ extern "C" void func_0023BDB8(void* self, int idx)
         return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C11[0] == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == 2) {
         cGameModeMan_sortScores((char*)cGameModeHandler_pManager, 2);
         cGameModeHandler_pManager->bAreResultsLocked = 1;
         int w = 1;
@@ -2999,7 +2988,6 @@ extern "C" int cBENewRaceInterface_getPeakGoal(void* iface, int mode, int a2);
 extern "C" int cBENewRaceInterface_getPeakTimeLimit(void* iface, int mode, int a2);
 extern "C" int cBEScoreInterface_getBestMedalOnTrack(void* iface, int a1, int a2, int a3);
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern signed char D_00535C12[];
 
 struct sGM_23C0D0 {
     int f0;
@@ -3047,7 +3035,7 @@ extern "C" void func_0023C0D0(void* self)
     void* score = cBE_getInterface_Fv(cBE_getBE(), 8);
     cGameModeMan* gm = cGameModeHandler_pManager;
     gm->iHeatNum = 1;
-    int mode = D_00535C12[0];
+    int mode = cBENewRaceInterface_newRace.cGameEvent;
     gm->iNumberAI = 0;
     gm->iCurrentGameEvent = mode;
     gm->iSimAI = 0;
@@ -3202,7 +3190,6 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
 extern "C" int cBENewRaceInterface_getPeakSplitTimePoints(void* iface, int a1, int a2, int a3);
 extern "C" float cRiderMetrix_evSplitPoints(void* self, int value);
-extern signed char D_00535C12[];
 
 /**
  * Handles a checkpoint in the point-target event of handler 7: at locations 17-21 subtracts that checkpoint's bonus
@@ -3225,7 +3212,7 @@ extern "C" int func_0023C560(void* self)
         ok = ok < 22;
     }
     if (ok) {
-        int bonusPoints = cBENewRaceInterface_getPeakSplitTimePoints(iface, D_00535C12[0], *(short*)((char*)self + 0xA), *(unsigned short*)((char*)self + 8)) * 100;
+        int bonusPoints = cBENewRaceInterface_getPeakSplitTimePoints(iface, cBENewRaceInterface_newRace.cGameEvent, *(short*)((char*)self + 0xA), *(unsigned short*)((char*)self + 8)) * 100;
         void* riderMetrix = SSXApp->Game->AI->Riders[0]->mMetrix;
         int curScore = *(int*)((char*)riderMetrix + 0x198);
         if (bonusPoints != 0) {
@@ -3246,7 +3233,6 @@ extern "C" void* cBE_getBE();
 int cBENewPlayerInterface_getRiderCharID(void* iface, int player);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void func_0023C770(int* arr, unsigned int n);
-extern int D_00535C04[];
 
 struct sGM_23C618 {
     int f0;
@@ -3280,7 +3266,7 @@ struct sVEntry_23C618 {
 };
 
 /**
- * Starts a single-heat event with D_00535C04 AI riders in a random line-up.
+ * Starts a single-heat event with newRace.iNumberAI AI riders in a random line-up.
  *
  * Puts the human rider's character in its slot and fills the others from a shuffled 0-9 list (func_0023C770) without
  * repeating the player's character, runs slot +0x24 and clears the time limit, point target and flags. Slot +0x14 of
@@ -3293,7 +3279,7 @@ extern "C" void func_0023C618(void* self)
     cGameModeMan* gm = cGameModeHandler_pManager;
     gm->iHeatNum = 1;
     gm->bIsLastHeat = 1;
-    gm->iNumberAI = D_00535C04[0];
+    gm->iNumberAI = cBENewRaceInterface_newRace.iNumberAI;
     gm->iSimAI = 0;
     int humanRider = cBENewPlayerInterface_getHumanRider(player, 0);
     int ch = cBENewPlayerInterface_getRiderCharID(player, humanRider);

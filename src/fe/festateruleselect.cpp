@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "ui/uiengine.h"
 #include "fe/festateruleselect.h"
 
@@ -215,7 +216,6 @@ extern char str_11my_rules[];
 extern char str_rule_help[];
 extern char str_Menu[];
 extern char D_005308B8[];
-extern signed char D_00535C12[];
 extern signed char D_00441098[11];
 extern signed char D_004410A8[10];
 extern signed char D_004410B8[11];
@@ -262,7 +262,7 @@ static inline void* find_19188(sRuleSel_19188* self, char* name)
 /**
  * Builds the custom rules screen ("11my_rules"): picks the rule list for the game event and fills the rows.
  *
- * The list and its length (8-11 rules) depend on the new-race game event (cGameEvent, D_00535C12). Clears the
+ * The list and its length (8-11 rules) depend on the new-race game event (newRace.cGameEvent). Clears the
  * per-rule disable counters and the rule settings (D_005308B8), makes the menu scrollable, shows rule 0's
  * help
  * and hides the rows past the list.
@@ -278,7 +278,7 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
     self->rules = 0;
     int count = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    switch (D_00535C12[0]) {
+    switch (cBENewRaceInterface_newRace.cGameEvent) {
     case 0:
         self->rules = D_00441098;
         count = 11;

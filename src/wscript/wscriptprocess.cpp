@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "wscript/wscriptprocess.h"
 #include "wscript/wscriptman.h"
 #include "world/world.h"
@@ -1683,7 +1684,6 @@ struct sWSPDef8C60 {
     char pad[0x54];
 };
 
-extern signed char D_00535C10[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1704,7 +1704,7 @@ static inline void* wsPlayback8C60()
  * Sets up the world's missions: in game mode 4 with one player, creates a mission process for every mission
  * script of every world section.
  *
- * First releases the playback manager's loaded data (cPlaybackMan_purgeLocation). When cGameMode (D_00535C10) is 4 and the
+ * First releases the playback manager's loaded data (cPlaybackMan_purgeLocation). When cGameMode (newRace.cGameMode) is 4 and the
  * AI's NumberOfPlayersAllocated is 1, it adds a cWScriptMission (cWScriptMan_addProcess1) per 0x54-byte
  * mission script, keyed (section << 16) + section, and calls cPlaybackMan_initLocation() for the race
  * location's data (+0x34). cWScriptMan_updateWorld() always runs last: it runs each mission script's code at +0x4C and
@@ -1715,7 +1715,7 @@ extern "C" void cWScriptMan_setupMissions(cWScriptMan* self)
     void* iface;
     cPlaybackMan_purgeLocation(wsPlayback8C60());
     iface = cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C10[0] == 4 && SSXApp->Game->AI->NumberOfPlayersAllocated == 1) {
+    if (cBENewRaceInterface_newRace.cGameMode == 4 && SSXApp->Game->AI->NumberOfPlayersAllocated == 1) {
         int i = 0;
         int n = cWorldView_getNumSections((cWorldView*)(*(char**)self->World + 0x10));
         for (; i < n; i++) {

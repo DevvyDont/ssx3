@@ -856,7 +856,6 @@ extern "C" void cUIStateStack_push(void* self, void* state);
 extern "C" void cUIStateStack_pushCheck(void* self, void* state);
 extern int D_004A11B8;
 extern int D_004A19D8;
-extern int D_00535C08[];
 extern char str_cPreGameLoadScreen[];
 extern char str_cFEStateTitle[];
 
@@ -877,7 +876,7 @@ struct sVEK18FAF0b {
  * Runs once: unless +0x1AC is already set it switches on +0x27C (On Tour mTypeOfQuit). 0 asks the engine owner (the
  * first word of the engine at +0x10) for the next state through its vtable slot 5 (cFECustom_getPrevState in cFECustom_vtbl)
  * with this state and the mode (+0x1BC), and pushes it with cUIStateStack_pushCheck. 1 sets up a race on the new-race
- * interface (game mode 4, event 0xC), sets D_004A11B8 to 1 and the location (D_00535C08[0]) to the player's last hub
+ * interface (game mode 4, event 0xC), sets D_004A11B8 to 1 and the location (cBENewRaceInterface_newRace.iLocationIdx) to the player's last hub
  * (cBENewPlayerInterface_getLastHub), submits it (the interface's vtable slot 1, cBENewRaceInterface_submit) and makes a new
  * cPreGameLoadScreen the next app module. 2 clears D_004A19D8 and pushes a new title state (cFEStateTitle_cFEStateTitle1,
  * "cFEStateTitle"). Sets +0x1AC afterwards. Fills slot +0x10C of cFEStateProfileLoad_vtbl (cFEMemCard_updateDone's
@@ -900,7 +899,7 @@ extern "C" void cFEStateProfileLoad_updateDone(void* self)
             cBENewRaceInterface_setGameEvent(race, 0xC);
             int x = cBENewPlayerInterface_getLastHub(pl, 0);
             D_004A11B8 = 1;
-            D_00535C08[0] = x;
+            cBENewRaceInterface_newRace.iLocationIdx = x;
             sVEK18FAF0b* vt = *(sVEK18FAF0b**)(race + 0xC);
             vt[1].fn(race + vt[1].delta);
             cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));

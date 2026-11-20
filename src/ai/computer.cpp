@@ -1276,13 +1276,12 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 float cRider_getDistanceLeft(void* self);
-extern signed char D_00535C11[];
 
 /**
  * Returns the rubber-band time warp for the computer rider: above 1 when it is too far behind its opponent, below 1
  * when too far ahead.
  *
- * Returns 1.0 without an opponent (cComputer_getRival), when the rider's +0xE4 mode is 0, in an online race (D_00535C11 ==
+ * Returns 1.0 without an opponent (cComputer_getRival), when the rider's +0xE4 mode is 0, in an online race (newRace.cGamePath ==
  * 2) or within 50000 of the finish (mDistToFinish). Otherwise d = the opponent's distance left minus the rider's. When
  * d < mRubberBandBehind (modes 2 and 3) it returns (d - k) / k + 1 times 1.1, with k = mRubberBandBehind; when d >
  * mRubberBandAhead (modes 1 and 3) it returns 0.909 / ((d - k2) / k2 + 1), with k2 = mRubberBandAhead; else 1.0. The
@@ -1298,7 +1297,7 @@ extern "C" float cComputer_setupWarp(cComputer* self)
     if (rival == 0) return 1.0f;
     char* rider = (char*)self->mRider;
     if (*(int*)(rider + 0xE4) == 0) return 1.0f;
-    if (D_00535C11[0] == 2) return 1.0f;
+    if (cBENewRaceInterface_newRace.cGamePath == 2) return 1.0f;
     if (*(float*)(rider + 0x4D0) < 50000.0f) return 1.0f;
     float warpVal;
     float relDist = cRider_getDistanceLeft((void*)rival) - self->mRider->mDistToFinish;
@@ -1590,7 +1589,6 @@ extern "C" void cRider_flagEventPunchKnockdown(cRider* self, void* attacker)
 INCLUDE_ASM("ai/computer", cRider_flagEventPathCheckpoint);
 #ifdef SKIP_ASM
 extern int D_005308D0[];
-extern signed char D_00535C12[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1600,7 +1598,7 @@ extern "C" void cRiderMetrix_evCheckpoint(void*, int);
  * Handles the rider passing a path checkpoint: scores it in checkpoint events.
  *
  * Copies +0xEC into +0xE8 first. Then, unless the rules word D_005308D0 has bit 9 set (On Tour
- * cBERules::getNoCheckPoints) and only while the new-race game event (D_00535C12, cGameEvent) is 1, calls cRiderMetrix_evCheckpoint
+ * cBERules::getNoCheckPoints) and only while the new-race game event (newRace.cGameEvent) is 1, calls cRiderMetrix_evCheckpoint
  * (On Tour cRiderMetrix::evCheckpoint) on the rider's metrix (+0x790) with the checkpoint's first word (On Tour
  * tPathCheckpoint::TimeBonusSec).
  *
@@ -1612,7 +1610,7 @@ extern "C" void cRider_flagEventPathCheckpoint(cRider* self, int* checkpoint)
     if (((D_005308D0[0] >> 9) & 1) == 0)
     {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        if (D_00535C12[0] == 1)
+        if (cBENewRaceInterface_newRace.cGameEvent == 1)
         {
             cRiderMetrix_evCheckpoint(self->mMetrix, *checkpoint);
         }
@@ -4407,7 +4405,8 @@ extern "C" void cRider_switchToResetPath(cRider* self)
 INCLUDE_ASM("ai/computer", cRider_checkTrackPathEvents);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// FAKEMATCH: an extra `dist` read and the `cp` pointer (cp->DistanceLeft re-read) keep jump.c under its duplicate-insn limit; plain form 97.81%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// FAKEMATCH: an extra `dist` read and the `cp` pointer (cp->DistanceLeft re-read) keep jump.c under its duplicate-insn
+// limit; plain form 97.81%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern float cPath_intersectPath1_2FB0(void* track, void* pos, void* iPos, float* iDistXY, int* pi, int is2D) __asm__("cPath_intersectPath1");
 extern char gPaths[];

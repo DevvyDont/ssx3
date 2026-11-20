@@ -1515,7 +1515,8 @@ int cScriptPlayerEntity_GetNumVariations(void* self);
 int GetSSXActorHeader(void* self);
 // PORT: GetSSXActorHeader1 forwards (self, index) to cScriptPlayerEntity_GetHeader; the unit declares it with one arg.
 void* GetSSXActorHeader1_9A70(void* self, int i) __asm__("GetSSXActorHeader1__FPv");
-// PORT: callers elsewhere declare cSSXScriptEngine_BuildCharacterBitRoleArray with two args; it takes the three player slots too.
+// PORT: callers elsewhere declare cSSXScriptEngine_BuildCharacterBitRoleArray with two args; it takes the three player
+// slots too.
 extern "C" void cSSXScriptEngine_BuildCharacterBitRoleArray_9A70(void* self, int* flags, int p0, int p1, int p2) __asm__("cSSXScriptEngine_BuildCharacterBitRoleArray");
 extern "C" void* cScriptPlayerMain_GetEntity(void* self, int i);
 extern "C" void cScriptPlayerEntity_SetEntityVariation(void* self, int idx);
@@ -2421,7 +2422,6 @@ extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory(cSSXScriptEngine* 
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern signed char D_00535C11[];
 extern int* D_00445488[];
 extern int D_00481E80[];
 
@@ -2438,7 +2438,7 @@ extern "C" void cSSXScriptEngine_AppendStartSequence(cSSXScriptEngine* self, int
     switch (state) {
     case 0: {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        int* tbl = D_00445488[D_00535C11[0]];
+        int* tbl = D_00445488[cBENewRaceInterface_newRace.cGamePath];
         cBE_getInterface_Fv(SSXApp->BE, 7);
         if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
             tbl = D_00481E80;
@@ -4498,7 +4498,8 @@ public:
     virtual int* v07(int i);
 };
 
-// PORT: cSSXScriptEngine_IsObjInUseByPlayer declares cScriptDatabaseObject_IsObjInUseByPlayer as void; it really returns 0/1.
+// PORT: cSSXScriptEngine_IsObjInUseByPlayer declares cScriptDatabaseObject_IsObjInUseByPlayer as void; it really
+// returns 0/1.
 int cScriptDatabaseObject_IsObjInUseByPlayer_impl(void* self, int idx, int val) __asm__("cScriptDatabaseObject_IsObjInUseByPlayer");
 
 /**
@@ -5118,7 +5119,8 @@ extern "C" void cScriptObjCamera_OnEndObjectUse(cScriptObjCamera* self)
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_CalculateBaseTransform);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// Matrix helpers and the camera script object shared by cScriptObjCamera_CalculateBaseTransform and cScriptObjRider_OnStartObjectUse.
+// Matrix helpers and the camera script object shared by cScriptObjCamera_CalculateBaseTransform and
+// cScriptObjRider_OnStartObjectUse.
 
 struct sRotMat_SE {
     float m[4][4];
@@ -5302,7 +5304,8 @@ static inline void Translate_SE(sRotMat_SE* top, sVec4_SE* v)
         : "memory");
 }
 
-// The camera script object (cScriptObjCamera_CalculateBaseTransform and cScriptObjRider_OnStartObjectUse set up its matrix).
+// The camera script object (cScriptObjCamera_CalculateBaseTransform and cScriptObjRider_OnStartObjectUse set up its
+// matrix).
 struct sScrCam_SE {
     char pad0[0x8];
     char* owner;            // 0x8
@@ -6116,7 +6119,8 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void GetSSXGameEventFrame(void* self, void* out);
 int GetSSXScriptHeader(void* self);
-// PORT: the unit declares cSSXScriptEngine_GetTransportWorldSectionID with no parameters; this caller passes the engine in $a0.
+// PORT: the unit declares cSSXScriptEngine_GetTransportWorldSectionID with no parameters; this caller passes the engine
+// in $a0.
 int cSSXScriptEngine_GetTransportWorldSectionID_08E8(void* engine) __asm__("cSSXScriptEngine_GetTransportWorldSectionID");
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" int cSectionMan_getWorldSectionIDFromBELocationID(void* mgr, int id);
@@ -6132,7 +6136,8 @@ extern "C" void* func_00416210(void* dst, int c, int n);
 extern void* cWScriptMan_TheWScriptMan;
 extern int D_004A3B60;
 // The "no link" hash: a const global with a dynamic initializer (set by the scripter's static init).
-extern const int D_004A525C; // const with a dynamic initializer: set once by __sti__all_in_one_scripter_cpp (= GetHashValue32(str_NoScript))
+extern const int D_004A525C; // const with a dynamic initializer: set once by __sti__all_in_one_scripter_cpp (=
+                             //       GetHashValue32(str_NoScript))
 
 struct sWtEnt_08E8 {
     signed char b0;
@@ -6571,7 +6576,8 @@ struct sSeEng11E8 {
     int slots[2];           // 0xDC
 };
 
-// PORT: the unit declares cScriptObjCameraManager_RemoveCameraObject(void*, void*) returning void; it returns found/not found.
+// PORT: the unit declares cScriptObjCameraManager_RemoveCameraObject(void*, void*) returning void; it returns found/not
+// found.
 extern "C" int cScriptObjCameraManager_RemoveCameraObject_impl(sSeEng11E8* self, char* key) __asm__("cScriptObjCameraManager_RemoveCameraObject");
 /**
  * Detaches a script camera object from the camera manager.
@@ -6693,7 +6699,8 @@ extern "C" void cScriptDatabaseObject_MarkObjectAsUnreserved(cScriptDatabaseObje
 extern "C" void cScriptObjCamera_SetCameraEntity(cScriptObjCamera* self, void* anim);
 extern "C" void cScriptObjCameraManager_ResetScriptManagementVars(void* self);
 extern "C" void cFocusMan_removebox(void* a, void* b, void* c);
-// PORT: cScriptObjTransition_SetTransition's mangled signature is (void*, int, int); it also takes four floats (same alias as cScriptObjCameraManager_SetTransitionObject).
+// PORT: cScriptObjTransition_SetTransition's mangled signature is (void*, int, int); it also takes four floats (same
+// alias as cScriptObjCameraManager_SetTransitionObject).
 void* cScriptObjTransition_SetTransition_f(void* self, int a1, int a2, float f0, float f1, float f2, float f3)
     __asm__("cScriptObjTransition_SetTransition__FPvii");
 // PORT: the unit declares cScriptObject_OnEndObjectUse(void*); this caller passes a second argument.
@@ -6754,7 +6761,8 @@ extern "C" void GetSSXCameraManagerFrame(void* self, int* out);
 signed char* GetSSXCameraManagerHeader_p(void* self) __asm__("GetSSXCameraManagerHeader__FPv");
 extern "C" void cScriptObjCameraManager_SetupCameraObject(void* self, int a1, int a2);
 extern "C" void cScriptObjCameraManager_DoCameraTransition(void* self, int* info, float t);
-// PORT: cScriptObjTransition_SetTransition's mangled signature is (void*, int, int); it also takes four floats (same alias as cScriptObjCameraManager_SetTransitionObject).
+// PORT: cScriptObjTransition_SetTransition's mangled signature is (void*, int, int); it also takes four floats (same
+// alias as cScriptObjCameraManager_SetTransitionObject).
 void* cScriptObjTransition_SetTransition_f(void* self, int a1, int a2, float f0, float f1, float f2, float f3)
     __asm__("cScriptObjTransition_SetTransition__FPvii");
 
@@ -7131,9 +7139,11 @@ extern "C" cScriptDatabaseObject* cScriptDatabaseObject_GetDatabaseObject(void);
 extern "C" int cScriptDatabaseObject_GetPlayerIDByEntity(cScriptDatabaseObject* self, void* a1);
 void cScriptObjCamera_SetCameraWeight(void* self, float val);
 extern "C" void cScriptObjCameraManager_SetupCameraObject(void* self, int a1, int a2);
-// PORT: cScriptObjCameraManager_GetCameraObjectByTrack is defined returning int, but it returns a pointer here; bound by asm label.
+// PORT: cScriptObjCameraManager_GetCameraObjectByTrack is defined returning int, but it returns a pointer here; bound
+// by asm label.
 extern "C" void* cScriptObjCameraManager_GetCameraObjectByTrack_p(void* self, int i) __asm__("cScriptObjCameraManager_GetCameraObjectByTrack");
-// PORT: cScriptObjTransition_SetTransition's mangled signature is (void*, int, int); it also takes four floats (same alias as cScriptObjCameraManager_SetTransitionObject).
+// PORT: cScriptObjTransition_SetTransition's mangled signature is (void*, int, int); it also takes four floats (same
+// alias as cScriptObjCameraManager_SetTransitionObject).
 void* cScriptObjTransition_SetTransition_f(void* self, int a1, int a2, float f0, float f1, float f2, float f3)
     __asm__("cScriptObjTransition_SetTransition__FPvii");
 extern "C" void cScriptObjTransition_SetTransition1(void* self, int id, int a, int b, float f0, float f1, float f2, float f3);

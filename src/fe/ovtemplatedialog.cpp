@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "fe/ovtemplatedialog.h"
 #include "fe/ovstatereplay.h"
 #include "be/beintnetwork.h"
@@ -106,7 +107,6 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cOVStateManager_triggerOverlay(int state);
 int cBERewardInterface_getTotalNumUserAwards(void* self);
 extern "C" void cReplay_startAutoReplay(void* p);
-extern char cBENewRaceInterface_newRace[];
 extern int cOVStateManager_mStatus;
 extern int D_004A2704;
 extern int cOVStateManager_mMiscData;
@@ -135,7 +135,7 @@ extern "C" void cOVStateManager_gotoOverlay(int mode)
     if (busy) return;
     int state = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char* newRace = (signed char*)cBENewRaceInterface_newRace;
+    signed char* newRace = (signed char*)&cBENewRaceInterface_newRace;
     int type = *(int*)SSXApp->GameModeMan;
     int sub = newRace[0x48];
     int team = newRace[0x49];
@@ -1231,7 +1231,6 @@ extern "C" void cGameComm_sendPauseCmd(void* net, int a1);
 extern "C" int cWScriptMan_isLocalMissionActive(void* self);
 extern void* cWScriptMan_TheWScriptMan;
 extern char D_004A2468;
-extern char cBENewRaceInterface_newRace[];
 
 static inline bool notMode4_0020CA10(signed char* g)
 {
@@ -1272,13 +1271,13 @@ extern "C" void func_0020CA10(void)
     } else if (cWScriptMan_isLocalMissionActive(cWScriptMan_TheWScriptMan) != 0) {
         cOVStateManager_triggerOverlay(2);
     } else {
-        signed char* raceDb = (signed char*)cBENewRaceInterface_newRace;
+        signed char* raceDb = (signed char*)&cBENewRaceInterface_newRace;
         if (raceDb[0x49] == 0 && notMode4_0020CA10(raceDb)) {
             cOVStateManager_triggerOverlay(1);
         } else if (SSXApp->Game->mCurrentStateID == 11) {
             cOVStateManager_triggerOverlay(4);
         } else {
-            signed char* modeRaceDb = (signed char*)cBENewRaceInterface_newRace;
+            signed char* modeRaceDb = (signed char*)&cBENewRaceInterface_newRace;
             if (modeRaceDb[0x48] == 4) {
                 cOVStateManager_triggerOverlay(3);
             } else {
@@ -1399,7 +1398,6 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cOVStateManager_triggerOverlay(int state);
-extern char cBENewRaceInterface_newRace[];
 extern int cOVStateManager_mStatus;
 
 /**
@@ -1413,7 +1411,7 @@ extern int cOVStateManager_mStatus;
 extern "C" void cOVStateManager_triggerFinishOverlay(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char* newRace = (signed char*)cBENewRaceInterface_newRace;
+    signed char* newRace = (signed char*)&cBENewRaceInterface_newRace;
     int mode = newRace[0x48];
     int players = newRace[0x49];
     if (mode == 0 || players == 2) {
@@ -1437,7 +1435,6 @@ extern "C" void cGame_setState(void* self, int a, int b, int refresh);
 extern "C" void cGameComm_localDisconnected(void* self, int a1);
 extern "C" void cGame_exit(void* game, int a);
 extern "C" void cReplay_startReplay(void* self, void* a1, int a2, int a3);
-extern signed char D_00535C12[];
 extern unsigned int cUITemplate_MAP_mMapStyle;
 extern int D_004A2708;
 
@@ -1457,7 +1454,7 @@ extern "C" void cOVStateManager_gotoNextOverlay(void)
     cOVStateManager_mStatus = 0;
     char* st = (char*)cUIStateStack_getCurrentState(((char*)((SSXApp)->Game)->UI) + 0x18);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    int kind = D_00535C12[0];
+    int kind = cBENewRaceInterface_newRace.cGameEvent;
     int type = *(int*)SSXApp->GameModeMan;
     switch (*(int*)(st + 0x98)) {
     case 10:
@@ -1905,7 +1902,6 @@ extern "C" int cOVTemplate_Dialog_onWidgetMenu(cOVTemplate_Dialog* self, int men
 INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Dialog_onWidgetEvent);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern signed char D_00535C11[];
 struct cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -1993,7 +1989,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, char*
             self->mRemovePDA = 1;
             switch (self->mDialogType) {
             case 0: {
-                int kind = cBENewRaceInterface_newRace[0x4A];
+                int kind = cBENewRaceInterface_newRace.cGameEvent;
                 if (kind >= 6 && kind <= 11) {
                     if (D_004A2708) {
                         Pop_20D5A8();
@@ -2010,14 +2006,14 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, char*
                     char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 0);
                     void* gm = SSXApp->GameModeMan;
                     cBE_setState(0);
-                    cBENewRaceInterface_setGameMode(iface, cBENewRaceInterface_newRace[0x48]);
+                    cBENewRaceInterface_setGameMode(iface, cBENewRaceInterface_newRace.cGameMode);
                     cBENewRaceInterface_setGameEvent(iface, kind);
                     cBENewRaceInterface_mNextLocation = mode;
-                    *(int*)(cBENewRaceInterface_newRace + 0x40) = mode;
+                    cBENewRaceInterface_newRace.iLocationIdx = mode;
                     sVV_D5A8* vt = *(sVV_D5A8**)(iface + 0xC);
                     D_004A11B8 = 1;
                     vt[1].fn(iface + vt[1].delta);
-                    cGameModeMan_initGameMode(gm, cBENewRaceInterface_newRace[0x4A]);
+                    cGameModeMan_initGameMode(gm, cBENewRaceInterface_newRace.cGameEvent);
                     cGame_exit(SSXApp->Game, 1);
                 } else if (D_004A2708) {
                     Pop_20D5A8();
@@ -2041,7 +2037,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, char*
                 int z = 0;
                 cBE_getInterface_Fv(SSXApp->BE, 7);
                 cBE_getInterface_Fv(cBE_getBE(), 0);
-                if (D_00535C11[0] != 0) {
+                if (cBENewRaceInterface_newRace.cGamePath != 0) {
                     cGame_exit(SSXApp->Game, 0);
                 } else
                 chk:

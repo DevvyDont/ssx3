@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "ui/uiengine.h"
 #include "fe/festatecharselect.h"
 #include "main/ssxapp.h"
@@ -55,7 +56,6 @@ extern "C" void cFEStateCharSelect_onCreateScreen(cFEStateCharSelect* self)
 //100%
 INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onDestroyScreen);
 #ifdef SKIP_ASM
-extern signed char D_00535C11[];
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -73,7 +73,7 @@ extern "C" void cFEStateCharSelect_onDestroyScreen(cFEStateCharSelect* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     char* mgr = (char*)SSXApp->RealFE;
-    if (mgr != 0 && D_00535C11[0] != 0) {
+    if (mgr != 0 && cBENewRaceInterface_newRace.cGamePath != 0) {
         cFERider_setVisible(cFERiderManager_getHuman1(mgr + 0xB0, self->mUserNum), 0);
     }
     cUIState_onDestroyScreen(self);
@@ -285,7 +285,6 @@ struct cUIText;
 void cUIText_setAsciiString(cUIText* text, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index);
-extern signed char D_00535C11[];
 extern signed char D_00440F68[];
 extern char str_names_menu[];
 extern char str_titlesel_character[];
@@ -334,12 +333,12 @@ extern "C" void cFEStateCharSelect_onWidgetCreate(cFEStateCharSelect* self, sWid
         return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (hashName == GetHashValue32(str_titlesel_character) && D_00535C11[0] == 2) {
+    if (hashName == GetHashValue32(str_titlesel_character) && cBENewRaceInterface_newRace.cGamePath == 2) {
         refresh_1620(w);
         return;
     }
     if (hashName == GetHashValue32(str_titlesel_character_multi)) {
-        if (D_00535C11[0] == 2) {
+        if (cBENewRaceInterface_newRace.cGamePath == 2) {
             switch (self->mUserNum) {
             case 0:
                 cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_TITLEPlayer1SelectCharacter));

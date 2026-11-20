@@ -711,7 +711,8 @@ void cRider_initAlways_impl(cRider* self)
         self->IsGoofyStance = cBECharacterInterface_getIsGoofyFoot(cBE_getInterface_11D390(cBE_getBE(), 2), self->mAIIndex);
         cRider_initPath(self, 1);
         void* iface = cBE_getInterface_11D390(cBE_getBE(), 0);
-        // PORT: the gotos reproduce the shared compare chain (mode 4, 5, 6) that two different entry conditions fall into.
+        // PORT: the gotos reproduce the shared compare chain (mode 4, 5, 6) that two different entry conditions fall
+        //       into.
         if (cBENewPlayerInterface_isFirstTimeWC(cBE_getInterface_11D390(cBE_getBE(), 1), self->mAIIndex) != 0
             && cBENewRaceInterface_newRace.cGamePath == 0 && *cBENewRaceInterface_getLocation(iface) == 0xE)
         {
@@ -1108,7 +1109,8 @@ static inline void InitChannel_D660(cRider* self, int i, float v, float z)
     self->mSlewed[i].rate = z;
 }
 
-// PORT: the unit declares cRider_putAt(void*, sVec4_0011DE60*, ..., int, float) later; bind the cRider* view by asm label.
+// PORT: the unit declares cRider_putAt(void*, sVec4_0011DE60*, ..., int, float) later; bind the cRider* view by asm
+// label.
 // drop is declared before anim: the order of the parameter copies follows it (ABI-identical: f12 and a3 either way).
 extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float* dir, float drop, int anim) __asm__("cRider_putAt");
 /**
@@ -3697,7 +3699,8 @@ static inline sVec4W AxisAngle_1AA0(const t4Vector& axis, float angle)
 
 // q = rotation(axis, angle) * q. Declared to return the quaternion by value but has no return statement (the classic
 // forgotten return); the caller ignores the result, and that ignored by-value result is the unwritten 16-byte temp the
-// retail frame keeps during the heading rotation. The final rotation below is written out instead (99.19 with this helper).
+// retail frame keeps during the heading rotation. The final rotation below is written out instead (99.19 with this
+// helper).
 static inline sVec4W Rotate_1AA0(sVec4W& q, const sVec4& axis, float angle)
 {
     q = QuatMul_1AA0(AxisAngle_1AA0(axis, angle), q);
@@ -4299,7 +4302,10 @@ extern "C" void cRider_flushActiveLights(cRider* self)
 INCLUDE_ASM("ai/rider", func_00122680);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// FAKEMATCH: an empty ASSERT macro (`ASSERT_2680(SSXApp != 0)`, `do { } while (0)`) at entry, an unused `int unused[4]` (frame +0x10), and the (0, 0) store to o->f28 through the layout-identical sV2v_2680 whose by-value ctor stores y before x; plain form 99.17% (99.25% / 99.94% / 99.98% without each alone). Byte-identical and behaves like the plain form; landed marked under
+// FAKEMATCH: an empty ASSERT macro (`ASSERT_2680(SSXApp != 0)`, `do { } while (0)`) at entry, an unused `int unused[4]`
+// (frame +0x10), and the (0, 0) store to o->f28 through the layout-identical sV2v_2680 whose by-value ctor stores y
+// before x; plain form 99.17% (99.25% / 99.94% / 99.98% without each alone). Byte-identical and behaves like the plain
+// form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 struct sGsState_2680 {
     unsigned int w0;
@@ -6036,7 +6042,8 @@ static inline sV_42B0 SubV_42B0(sVecP_42B0 a, const sV_42B0& b)
     return Sub_42B0(*(sV_42B0*)&a, b);
 }
 
-// PORT: the unit declares cRider_SetNISGroundVectors(void*, void*); this definition binds the cRider* view by asm label.
+// PORT: the unit declares cRider_SetNISGroundVectors(void*, void*); this definition binds the cRider* view by asm
+// label.
 extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* p) __asm__("cRider_SetNISGroundVectors");
 /**
  * Probes the ground under a position during an NIS (in-game cutscene) and sets the rider's ground vectors.
@@ -6629,7 +6636,6 @@ extern "C" void cRider_doFinishEvent(cRider* self);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_002A3C00(void* a, void* self, int n);
 extern "C" unsigned int fptoui(float f);
-extern signed char D_00535C10[];
 extern int D_005308D0[];
 
 /**
@@ -6652,7 +6658,7 @@ extern "C" int cRider_updateFinishTest(cRider* self)
         int done = finishTime >= zeroF;
         if (!done) {
             cBE_getInterface(cBE_getBE(), 0);
-            if (D_00535C10[0] == 4)
+            if (cBENewRaceInterface_newRace.cGameMode == 4)
                 return self->mFinishTime >= zeroF;
             char* app = (char*)SSXApp;
             char* gameModeMan = *(char**)(app + 0xC0);

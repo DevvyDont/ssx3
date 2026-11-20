@@ -1189,7 +1189,6 @@ void cMemMan_free(void*);
 extern "C" int cBENewRaceInterface_getLocationID(void* self);
 extern "C" char* FILE_loadpackz(const char* name, int flags);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern signed char D_00535C11[];
 extern char str_data_ui_charpic_big[];
 extern char str_pct_spct_s_ssh[];
 extern char str_CharaPics[];
@@ -1217,7 +1216,7 @@ static inline int loadTex_3048(char* data, const char* name)
  * Loads the game load screen's picture: both players' character pictures online, the course picture
  * otherwise.
  *
- * On the online game path (D_00535C11 == 2) it loads "|<character>_small_flat.ssh" for each player from
+ * On the online game path (newRace.cGamePath == 2) it loads "|<character>_small_flat.ssh" for each player from
  * data/ui/charpic.big as "CharaPics" into +0x10 and +0x14; otherwise "|<location>.ssh" for the race's
  * location (0 when above 16) from data/ui/courspic.big as "coursePics" into +0x10.
  *
@@ -1230,7 +1229,7 @@ extern "C" void cGameLoadScreen_loadTexture(cGameLoadScreen* self)
     cBigFile bf;
     void* plr = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* fe = cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C11[0] == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == 2) {
         cBigFile_cBigFile1_3048(&bf, str_data_ui_charpic_big, 0x100);
         int* slot = (int*)(((char*)self) + 0x10);
         for (int i = 0; i < 2; i++) {

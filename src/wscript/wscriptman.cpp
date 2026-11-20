@@ -1323,7 +1323,6 @@ extern "C" int cBEMissionInterface_getNextMissionID(void* iface, unsigned int id
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_BigChallengeBegin(void* p, unsigned int id);
 extern "C" void cSSXAudio_BigChallengeFailed(void* p, int a1);
-extern signed char D_00535C10[];
 
 class cWSObj_30A868 {
 public:
@@ -1359,7 +1358,7 @@ extern "C" cWSObj_30A868* cProcessList_findMission_a(void* self, unsigned int id
 /**
  * Carries out a mission command from a world script, or answers a question about a mission.
  *
- * Except for commands 15 and 19, nothing happens unless D_00535C10 is 4 and the AI's +0x7C is 1. The rider is
+ * Except for commands 15 and 19, nothing happens unless newRace.cGameMode is 4 and the AI's +0x7C is 1. The rider is
  * temporarily set to @p ctx. Commands 0-2, 18 and 8/9/11 are forwarded to helpers; 3, 4, 5 and 17 call
  * virtuals of the running (or waiting) mission. Queries use the mission interface: 14 available, 15
  * completed, 19 last in its chain, 12, 13 and 16 other states. An id of -1 means the current mission.
@@ -1377,7 +1376,7 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (force == 0) {
-        if (D_00535C10[0] != 4) {
+        if (cBENewRaceInterface_newRace.cGameMode != 4) {
             return 0;
         }
         if (SSXApp->Game->AI->NumberOfPlayersAllocated != 1) {

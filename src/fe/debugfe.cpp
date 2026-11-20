@@ -10,12 +10,14 @@
 //100%
 INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_draw);
 #ifdef SKIP_ASM
-// FAKEMATCH: the first row reads self->cursor through an integer temp, `__SIZE_TYPE__ hi = (__SIZE_TYPE__)self + 0x8000;
-// ... *(int*)(hi + 0xc1c)` (same address, same single load; the unflagged non-pointer base makes sched1's alias check keep the
-// load after the 12 colour stores); plain form 97.65%. Byte-identical and behaves like the plain form; landed marked under
+// FAKEMATCH: the first row reads self->cursor through an integer temp, `__SIZE_TYPE__ hi = (__SIZE_TYPE__)self +
+// 0x8000;
+// ... *(int*)(hi + 0xc1c)` (same address, same single load; the unflagged non-pointer base makes sched1's alias check
+// keep the
+// load after the 12 colour stores); plain form 97.65%. Byte-identical and behaves like the plain form; landed marked
+// under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern int D_004A11B8;
-extern int D_00535C04[];
 extern char str_pct_d_b[];
 extern char str_pct_s_pct_s_b[];
 extern char str_Track[];
@@ -180,7 +182,7 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     y += lineheight;
     font->setColor(self->cursor == 8 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Number_of_AI_riders);
-    cFont_righttextf(font, 580.0f, y, str_pct_d_b, D_00535C04[0]);
+    cFont_righttextf(font, 580.0f, y, str_pct_d_b, cBENewRaceInterface_newRace.iNumberAI);
     y += lineheight;
     font->setColor(self->cursor == 9 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Screen_Calibration);
@@ -1135,7 +1137,6 @@ extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* iface, int a1, int a
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int cCommSystem_openDSockChannel(void* comm, const char* addr, int port, int host);
 extern int D_004A11B8;
-extern int D_00535C08[];
 extern char str_pct_d_pct_d_pct_d_pct_d[];
 
 struct sNetCfg_17DE70 {
@@ -1158,7 +1159,7 @@ static inline void vcall1_17DE70(void* obj)
  * Sets up the debug lobby's two-player online race and opens the game channel to the opponent.
  *
  * The new-race interface (cBE_getInterface__Fv kind 0) gets game path 1, game mode 4 and no AI riders, sets
- * cBENewRaceInterface_newRace.iLocationIdx (D_00535C08) to 0 and D_004A11B8 to 1, then applies them through the
+ * cBENewRaceInterface_newRace.iLocationIdx (newRace.iLocationIdx) to 0 and D_004A11B8 to 1, then applies them through the
  * interface's virtual slot 1. The player interface (kind 1) gets controller -1 and character 0 for riders 2..5,
  * controller 0 for player 0 and -1 for player 1, and is applied the same way. cBENetworkInterface_networkOpt gets
  * bIsNetworkGame 1 and bIsHost from LobbyMan's mIsHost (network interface, kind 7, applied). The address to dial is
@@ -1172,7 +1173,7 @@ extern "C" void func_0017DE70(char* self)
     cBENewRaceInterface_setGamePath(race, 1);
     cBENewRaceInterface_setGameMode(race, 4);
     cBENewRaceInterface_setNumberAI(race, 0);
-    D_00535C08[0] = 0;
+    cBENewRaceInterface_newRace.iLocationIdx = 0;
     D_004A11B8 = 1;
     vcall1_17DE70(race);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);

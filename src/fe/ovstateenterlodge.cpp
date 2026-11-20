@@ -753,7 +753,6 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cUIState_onGainFocus(void* self, void* a1);
 extern "C" void cOVState_triggerTextFade(void* self, const char* name, const char* ext);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern signed char D_00535C11[];
 extern char str_name0pct_d[];
 extern char str_with0pct_d[];
 extern char str_time0pct_d[];
@@ -791,7 +790,7 @@ extern "C" void cOVState_TOPTIMES_onGainFocus(cOVState_TOPTIMES* self, void* pPr
     if (id >= 0) {
         LoadRider1F7F08(self, id + 1);
     }
-    if (D_00535C11[0] == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == 2) {
         int id2 = *(int*)(prof + 0x1C);
         if (id2 >= 0) {
             LoadRider1F7F08(self, id2 + 1);

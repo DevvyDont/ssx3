@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -912,7 +913,6 @@ extern char str_kT_HELPAUDIOAvailBuy[];
 extern char str_kT_16SaveMoreCarsh[];
 extern char str_kT_FAQRADIOBA[];
 extern char str_kT_CMNHELPBuySongCTM[];
-extern signed char D_00535C11[];
 
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 struct sReqLine_001981F8 {
@@ -939,7 +939,7 @@ static inline int countSel_001981F8(sReqLine_001981F8* self)
  *
  * Owned: kT_HELPAudio1SongMin if it is the only playlist song, else kT_HELPAUDIOAddRem. In the store:
  * kT_HELPAUDIOAvailBuy when affordable or free, else kT_16SaveMoreCarsh. Otherwise kT_FAQRADIOBA or
- * kT_CMNHELPBuySongCTM by D_00535C11[0].
+ * kT_CMNHELPBuySongCTM by cBENewRaceInterface_newRace.cGamePath.
  *
  * @param requestLine  the cFEStateRequestLine (raw pointer)
  * @param idx  song index
@@ -967,7 +967,7 @@ extern "C" void cFEStateRequestLine_updateHelpText(void* requestLine, int idx)
         }
     } else {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        if (D_00535C11[0] == 0) {
+        if (cBENewRaceInterface_newRace.cGamePath == 0) {
             cUIText_setUnicodeStringByID(self->text, GetHashValue32(str_kT_FAQRADIOBA));
         } else {
             cUIText_setUnicodeStringByID(self->text, GetHashValue32(str_kT_CMNHELPBuySongCTM));

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
 #include "world/world.h"
 #include "scripter/ssxscriptengine.h"
@@ -116,7 +117,8 @@ extern "C" V3_B060 MakeAnimDeltaFunc(int n, Ent_B060 *params) {
         ((int*)D_B060)[8] = 0;
         ((int*)D_B060)[9] = 0;
         D_004A55C0 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_B060*)((char*)D_B060 + 40)) = Tag_B060((*(Tag_B060*)((char*)D_B060 + 40)));
     }
     unsigned buf64[11];
@@ -216,7 +218,8 @@ extern "C" V3_B270 MakeAnimComboFunc(int n, Ent_B270 *params) {
         *(float*)&D_B270[12] = 30.0f;
         ((int*)D_B270)[13] = 0;
         D_004A55C4 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_B270*)((char*)D_B270 + 56)) = Tag_B270((*(Tag_B270*)((char*)D_B270 + 56)));
     }
     unsigned buf64[15];
@@ -311,7 +314,8 @@ extern "C" V3_B498 MakeAnimTeeterFunc(int n, Ent_B498 *params) {
         *(float*)&D_B498[8] = -1.0f;
         *(float*)&D_B498[9] = -1.0f;
         D_004A55C8 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_B498*)((char*)D_B498 + 40)) = Tag_B498((*(Tag_B498*)((char*)D_B498 + 40)));
     }
     unsigned buf64[11];
@@ -409,7 +413,8 @@ extern "C" V3_B6B8 MakeConveyorFunc(int n, Ent_B6B8 *params) {
         ((int*)D_B6B8)[10] = 0;
         ((int*)D_B6B8)[11] = 0;
         D_004A55CC = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_B6B8*)((char*)D_B6B8 + 48)) = Tag_B6B8((*(Tag_B6B8*)((char*)D_B6B8 + 48)));
     }
     unsigned buf64[13];
@@ -495,7 +500,8 @@ extern "C" V3_B8D0 MakeCounterFunc(int n, Ent_B8D0 *params) {
         D_B8D0[0] = 0xFFFFFFFF;
         ((int*)D_B8D0)[1] = 3;
         D_004A55D0 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_B8D0*)((char*)D_B8D0 + 8)) = Tag_B8D0((*(Tag_B8D0*)((char*)D_B8D0 + 8)));
     }
     unsigned buf64[3];
@@ -587,7 +593,8 @@ extern "C" V3_BAB0 MakeFloatingFunc(int n, Ent_BAB0 *params) {
         *(float*)&D_BAB0[5] = 0.20000000298023224f;
         *(float*)&D_BAB0[6] = 10.0f;
         D_004A55D4 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_BAB0*)((char*)D_BAB0 + 28)) = Tag_BAB0((*(Tag_BAB0*)((char*)D_BAB0 + 28)));
     }
     unsigned buf64[8];
@@ -682,7 +689,8 @@ extern "C" V3_BCB8 MakeAnimObjectFunc(int n, Ent_BCB8 *params) {
         ((int*)D_BCB8)[8] = 0;
         ((int*)D_BCB8)[9] = 0;
         D_004A55D8 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_BCB8*)((char*)D_BCB8 + 40)) = Tag_BCB8((*(Tag_BCB8*)((char*)D_BCB8 + 40)));
     }
     unsigned buf64[11];
@@ -776,7 +784,8 @@ extern "C" V3_BEC8 MakeBoostFunc(int n, Ent_BEC8 *params) {
         *(float*)&D_BEC8[6] = 1.0f;
         *(float*)&D_BEC8[7] = z;
         D_004A55DC = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_BEC8*)((char*)D_BEC8 + 32)) = Tag_BEC8((*(Tag_BEC8*)((char*)D_BEC8 + 32)));
     }
     unsigned buf64[9];
@@ -863,7 +872,8 @@ extern "C" V3_C0D0 MakeObjectFunc(int n, Ent_C0D0 *params) {
         ((int*)D_C0D0)[1] = 0;
         ((int*)D_C0D0)[2] = 0;
         D_004A55E0 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_C0D0*)((char*)D_C0D0 + 12)) = Tag_C0D0((*(Tag_C0D0*)((char*)D_C0D0 + 12)));
     }
     unsigned buf64[4];
@@ -1094,7 +1104,8 @@ extern "C" V3_C5D8 MakeDeadFadeFunc(int n, Ent_C5D8 *params) {
         *(float*)&D_C5D8[2] = 2.0f;
         *(float*)&D_C5D8[3] = 25.0f;
         D_004A55E8 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_C5D8*)((char*)D_C5D8 + 16)) = Tag_C5D8((*(Tag_C5D8*)((char*)D_C5D8 + 16)));
     }
     unsigned buf64[5];
@@ -1178,7 +1189,8 @@ extern "C" V3_C7D0 MakeDebounceFunc(int n, Ent_C7D0 *params) {
         ((int*)D_C7D0)[2] = 1;
         ((int*)D_C7D0)[3] = -1;
         D_004A55EC = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_C7D0*)((char*)D_C7D0 + 16)) = Tag_C7D0((*(Tag_C7D0*)((char*)D_C7D0 + 16)));
     }
     unsigned buf64[5];
@@ -1292,7 +1304,8 @@ extern "C" V3_C9C8 MakeFlagFunc(int n, Ent_C9C8 *params) {
         *(float*)&D_C9C8[24] = z;
         ((int*)D_C9C8)[25] = 0;
         D_004A55F0 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_C9C8*)((char*)D_C9C8 + 104)) = Tag_C9C8((*(Tag_C9C8*)((char*)D_C9C8 + 104)));
     }
     unsigned buf64[27];
@@ -1462,7 +1475,8 @@ extern "C" V3_CDC8 MakeFlexBridgeFunc(int n, Ent_CDC8 *params) {
         ((int*)D_CDC8)[7] = 16;
         D_CDC8[8] = 0xFFFFFFFF;
         D_004A55F8 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_CDC8*)((char*)D_CDC8 + 36)) = Tag_CDC8((*(Tag_CDC8*)((char*)D_CDC8 + 36)));
     }
     unsigned buf64[10];
@@ -1557,7 +1571,8 @@ extern "C" V3_CFF0 MakeMeshAnimFunc(int n, Ent_CFF0 *params) {
         D_CFF0[13] = 0xFFFFFFFF;
         ((int*)D_CFF0)[14] = -1;
         D_004A55FC = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_CFF0*)((char*)D_CFF0 + 60)) = Tag_CFF0((*(Tag_CFF0*)((char*)D_CFF0 + 60)));
     }
     unsigned buf64[16];
@@ -1636,7 +1651,8 @@ extern "C" V3_D250 AddRollerFunc(int n, Ent_D250 *params) {
         *(float*)&D_D250[2] = 0.699999988079071f;
         *(float*)&D_D250[3] = 0.5f;
         D_004A5600 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_D250*)((char*)D_D250 + 16)) = Tag_D250((*(Tag_D250*)((char*)D_D250 + 16)));
     }
     unsigned buf64[5];
@@ -1778,7 +1794,8 @@ extern "C" V3_D420 MakeParticleFunc(int n, Ent_D420 *params) {
         *(float*)&D_D420[53] = 20.0f;
         D_D420[54] = 0xFFFFFFFF;
         D_004A5604 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_D420*)((char*)D_D420 + 0xDC)) = Tag_D420((*(Tag_D420*)((char*)D_D420 + 0xDC)));
     }
     unsigned *buf = (unsigned*)cMemMan_alloc(0xE0, D_00489718_D420, 0x20000000, 0);
@@ -1922,7 +1939,8 @@ extern "C" V3_D758 AddRiderPositionFunc(int n, Ent_D758 *params) {
         *(float*)&D_D758[3] = z;
         *(float*)&D_D758[4] = z;
         D_004A5608 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_D758*)((char*)D_D758 + 20)) = Tag_D758((*(Tag_D758*)((char*)D_D758 + 20)));
     }
     unsigned buf64[6];
@@ -2015,7 +2033,8 @@ extern "C" V3_D9F8 AddParentFunc(int n, Ent_D9F8 *params) {
         *(float*)&D_D9F8[4] = z;
         *(float*)&D_D9F8[5] = z;
         D_004A560C = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_D9F8*)((char*)D_D9F8 + 24)) = Tag_D9F8((*(Tag_D9F8*)((char*)D_D9F8 + 24)));
     }
     unsigned buf64[7];
@@ -2122,7 +2141,8 @@ extern "C" V3_DC60 AddChildFunc(int n, Ent_DC60 *params) {
         *(float*)&D_DC60[4] = z;
         *(float*)&D_DC60[5] = z;
         D_004A5610 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_DC60*)((char*)D_DC60 + 24)) = Tag_DC60((*(Tag_DC60*)((char*)D_DC60 + 24)));
     }
     unsigned buf64[7];
@@ -2224,7 +2244,8 @@ extern "C" V3_DED0 AddSplineFunc(int n, Ent_DED0 *params) {
         *(float*)&D_DED0[9] = z;
         *(float*)&D_DED0[10] = z;
         D_004A5614 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_DED0*)((char*)D_DED0 + 44)) = Tag_DED0((*(Tag_DED0*)((char*)D_DED0 + 44)));
     }
     unsigned buf64[12];
@@ -2315,7 +2336,8 @@ extern "C" V3_E0C0 AddMultiSplineFunc(int n, Ent_E0C0 *params) {
         ((int*)D_E0C0)[10] = 1;
         ((int*)D_E0C0)[11] = 2;
         D_004A5618 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_E0C0*)((char*)D_E0C0 + 48)) = Tag_E0C0((*(Tag_E0C0*)((char*)D_E0C0 + 48)));
     }
     unsigned buf64[13];
@@ -2411,7 +2433,8 @@ extern "C" V3_E2C0 AddUVScrollFunc(int n, Ent_E2C0 *params) {
         *(float*)&D_E2C0[10] = z;
         *(float*)&D_E2C0[11] = 1.0f;
         D_004A561C = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_E2C0*)((char*)D_E2C0 + 48)) = Tag_E2C0((*(Tag_E2C0*)((char*)D_E2C0 + 48)));
     }
     unsigned buf64[13];
@@ -2573,7 +2596,8 @@ extern "C" V3_E668 AddBoostFunc(int n, Ent_E668 *params) {
         *(float*)&D_E668[6] = z;
         *(float*)&D_E668[7] = 1.0f;
         D_004A5624 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_E668*)((char*)D_E668 + 32)) = Tag_E668((*(Tag_E668*)((char*)D_E668 + 32)));
     }
     unsigned buf64[9];
@@ -2761,7 +2785,8 @@ extern "C" V3_E840 AddParticleFunc(int n, Ent_E840 *params) {
         *(float*)&D_E840[53] = 20.0f;
         D_E840[54] = 0xFFFFFFFF;
         D_004A5628 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_E840*)((char*)D_E840 + 0xDC)) = Tag_E840((*(Tag_E840*)((char*)D_E840 + 0xDC)));
     }
     unsigned *buf = (unsigned*)cMemMan_alloc(0xE0, D_00489740_E840, 0x20000000, 0);
@@ -2926,7 +2951,8 @@ extern "C" V3_EE98 AddDynamicParticleFunc(int n, Ent_EE98 *params) {
         *(float*)&D_EE98[57] = z;
         *(float*)&D_EE98[58] = z;
         D_004A562C = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_EE98*)((char*)D_EE98 + 0xEC)) = Tag_EE98((*(Tag_EE98*)((char*)D_EE98 + 0xEC)));
     }
     unsigned *buf = (unsigned*)cMemMan_alloc(0xF0, D_00489750_EE98, 0x20000000, 0);
@@ -3107,7 +3133,8 @@ extern "C" V3_F390 MakeFloatRailFunc(int n, Ent_F390 *params) {
         *(float*)&D_F390[19] = 0.5f;
         *(float*)&D_F390[20] = 1.0f;
         D_004A5634 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_F390*)((char*)D_F390 + 84)) = Tag_F390((*(Tag_F390*)((char*)D_F390 + 84)));
     }
     unsigned buf64[22];
@@ -3223,7 +3250,8 @@ extern "C" V3_F5E8 MakeSpringRailFunc(int n, Ent_F5E8 *params) {
         *(float*)&D_F5E8[19] = 0.5f;
         *(float*)&D_F5E8[20] = 1.0f;
         D_004A5638 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_F5E8*)((char*)D_F5E8 + 84)) = Tag_F5E8((*(Tag_F5E8*)((char*)D_F5E8 + 84)));
     }
     unsigned buf64[22];
@@ -3314,7 +3342,8 @@ extern "C" R12_F850 AIEventFunc(int n, Ent_F850* params) {
         D_004A563C_F850 = 1;
         D_004FBAE8_F850.b = 0;
         D_004FBAE8_F850.e = 0;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004FBAE8_F850.f = Flag_F850(D_004FBAE8_F850.f);
     }
     int block[4] __attribute__((aligned(16)));
@@ -4171,7 +4200,8 @@ extern "C" R12_0B20 RailFunc(int n, Ent_0B20* params) {
         D_004FBB48_0B20.a = -1;
         D_004FBB48_0B20.b = 1;
         D_004A56A4_0B20 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004FBB48_0B20.f = Flag_0B20(D_004FBB48_0B20.f);
     }
     unsigned block[4] __attribute__((aligned(16)));
@@ -4302,7 +4332,8 @@ extern "C" R12_0E28 CollectPoolFunc(int n, Ent_0E28* params) {
         D_004FBB68_0E28.a = 0xFFFFFFFFu;
         D_004FBB68_0E28.b = 1;
         D_004A56AC_0E28 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004FBB68_0E28.f = Flag_0E28(D_004FBB68_0E28.f);
     }
     int block[4] __attribute__((aligned(16)));
@@ -4379,7 +4410,8 @@ extern "C" V3_0F50 CollectInstFunc(int n, Ent_0F50 *params) {
         D_0F50[19] = 0xFFFFFFFF;
         D_0F50[20] = 0xFFFFFFFF;
         D_56B0_0F50 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         (*(Tag_0F50*)((char*)D_0F50 + 0x54)) = Tag_0F50((*(Tag_0F50*)((char*)D_0F50 + 0x54)));
     }
     unsigned buf64[22];
@@ -4470,7 +4502,8 @@ extern "C" void* CollectFunc(void* self, int n, Ent_1120* params) {
             D_004FBBD0_1120.a = 0xFFFFFFFF;
             D_004FBBD0_1120.b = 0xFFFFFFFF;
             D_004A56B4_1120 = 1;
-            // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+            // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back;
+            //       sb 0(sp)).
             D_004FBBD0_1120.f = Flag_1120(D_004FBBD0_1120.f);
         }
         unsigned argBlock[4] __attribute__((aligned(16)));
@@ -4540,7 +4573,8 @@ extern "C" void* MissionFunc(void* self, int n, Ent_12F0* params) {
         D_004FBBE0_12F0.a = -1;
         D_004FBBE0_12F0.b = -1;
         D_004A56B8_12F0 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004FBBE0_12F0.f = Flag_12F0(D_004FBBE0_12F0.f);
     }
     int block[4] __attribute__((aligned(16)));
@@ -4588,7 +4622,8 @@ struct sRefWorld_1440 {
     char pad_0x0[0x8];
     sRefSet_1440** sets;         // 0x8
 };
-// The script manager (cWScriptMan_1440 in the prototype, whose setBeing stores at 0x0); D_004A3DD8_1440 points at the instance.
+// The script manager (cWScriptMan_1440 in the prototype, whose setBeing stores at 0x0); D_004A3DD8_1440 points at the
+// instance.
 struct cWScriptMan_1440 {
     int being;              // 0x0: index of the current being (rider)
     char pad_0x4[0x28C];
@@ -4600,7 +4635,8 @@ struct cWScriptMan_1440 {
 };
 extern cWScriptMan_1440* D_004A3DD8_1440 __asm__("cWScriptMan_TheWScriptMan");
 struct sBindArg_1FBE38_1440 { int idx; int val; int pad; int type; };
-struct sBindEnd_1FBE38_1440 {};  // empty trailing member of a defaults record; value-init copies its byte through a stack temp
+struct sBindEnd_1FBE38_1440 {};  // empty trailing member of a defaults record; value-init copies its byte through a
+                                 //       stack temp
 extern "C" void MEM_copy(void*, void*, int);
 struct T12_1440 { unsigned a; int b; sBindEnd_1FBE38_1440 f; };
 extern T12_1440 D_004FBBF0_1440 __asm__("D_004FBBF0");
@@ -4627,7 +4663,8 @@ extern int D_004A3C78_1440[2] __asm__("D_004A3C78");
 extern "C" cLunoValue_1440 MovieFunc(int n, sBindArg_1FBE38_1440* params) {
     if (D_004A56BC_1440 == 0) {
         D_004FBBF0_1440.a = 0xFFFFFFFF;
-        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp (lbu; sb 0(sp)).
+        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp
+        //       (lbu; sb 0(sp)).
         D_004FBBF0_1440.b = 1;
         D_004FBBF0_1440.f = sBindEnd_1FBE38_1440();
         D_004A56BC_1440 = 1;
@@ -4696,7 +4733,8 @@ extern Flag_1560 D_004A56C4_1560 __asm__("D_004A56C4");
  */
 extern "C" void* CollectCountFunc(void* self, int n, Ent_1560* params) {
     if (D_004A56C8_1560 == 0) {
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004A56C4_1560 = Flag_1560(D_004A56C4_1560);
         D_004A56C0_1560 = -1;
         D_004A56C8_1560 = 1;
@@ -5018,7 +5056,8 @@ struct Ent_1B88 { int idx; int val; int pad; int kind; };
  */
 extern "C" void* GotoTaskFunc(void* self, int n, Ent_1B88* params) {
     if (D_004A56F8_1B88 == 0) {
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004A56F4_1B88 = Flag_1B88(D_004A56F4_1B88);
         D_004A56F0_1B88 = -1;
         D_004A56F8_1B88 = 1;
@@ -5074,7 +5113,8 @@ struct Ent_1C80 { int idx; int val; int pad; int kind; };
  */
 extern "C" void* AdvanceToTaskFunc(void* self, int n, Ent_1C80* params) {
     if (D_004A5708_1C80 == 0) {
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004A5704_1C80 = Flag_1C80(D_004A5704_1C80);
         D_004A5700_1C80 = -1;
         D_004A5708_1C80 = 1;
@@ -5231,7 +5271,8 @@ extern "C" R12_1F48 SetGamePathFunc(int n, Ent_1F48* params) {
     if (D_004A5728_1F48 == 0) {
         D_004A5720_1F48 = -1;
         D_004A5728_1F48 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004A5724_1F48 = Flag_1F48(D_004A5724_1F48);
     }
     int block[4] __attribute__((aligned(16)));
@@ -5388,7 +5429,8 @@ extern "C" V3_2210 SectionFunc(int n, Ent_2210* params)
         D_004FBC20_2210.v[1] = -1;
         D_004FBC20_2210.v[2] = -1;
         D_004A5730_2210 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004FBC20_2210.flag = Flag_2210(D_004FBC20_2210.flag);
     }
     int argBlock[4] __attribute__((aligned(16)));
@@ -5488,7 +5530,8 @@ extern "C" V3_2490 RemoveModifierFunc(int n, Ent_2490 *params) {
         D_4FBC30_2490.a = 0xFFFFFFFF;
         D_4FBC30_2490.b = -1;
         D_5734_2490 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_4FBC30_2490.f = Tag_2490(D_4FBC30_2490.f);
     }
     unsigned buf64[3];
@@ -5557,7 +5600,8 @@ struct cLunoValue {
 };
 extern cLunoValue luno_gLunoNil;
 struct sBindArg_1FBE38 { int idx; int val; int pad; int type; };
-struct sBindEnd_1FBE38 {};  // empty trailing member of a defaults record; value-init copies its byte through a stack temp
+struct sBindEnd_1FBE38 {};  // empty trailing member of a defaults record; value-init copies its byte through a stack
+                            //       temp
 extern "C" void MEM_copy(void*, void*, int);
 int* luno_cLunoVar_castInt(void*);
 extern "C" void* cParticleNode_cParticleNode1(void*, int, void*, void*, void*);
@@ -5774,7 +5818,8 @@ extern Flag_2968 D_004A576C_2968 __asm__("D_004A576C");
  */
 extern "C" R12_2968 SetCurrentInstanceFunc(int n, Ent_2968* params) {
     if (D_004A5770_2968 == 0) {
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004A576C_2968 = Flag_2968(D_004A576C_2968);
         D_004A5768_2968 = -1;
         D_004A5770_2968 = 1;
@@ -5842,7 +5887,8 @@ extern "C" R12_2AC0 ProcessFunc(int n, Ent_2AC0* params) {
     if (D_004A5774_2AC0 == 0) {
         D_004FBC40_2AC0.a = -1;
         D_004FBC40_2AC0.b = 0;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004FBC40_2AC0.f = Flag_2AC0(D_004FBC40_2AC0.f);
         D_004A5774_2AC0 = 1;
     }
@@ -5895,7 +5941,8 @@ extern Flag_2BD8 D_004A577C_2BD8 __asm__("D_004A577C");
  */
 extern "C" R12_2BD8 EndMissionFunc(int n, Ent_2BD8* params) {
     if (D_004A5780_2BD8 == 0) {
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004A577C_2BD8 = Flag_2BD8(D_004A577C_2BD8);
         D_004A5778_2BD8 = -1;
         D_004A5780_2BD8 = 1;
@@ -5949,7 +5996,8 @@ extern Flag_2CE8 D_004A578C_2CE8 __asm__("D_004A578C");
  */
 extern "C" R12_2CE8 EndProcessFunc(int n, Ent_2CE8* params) {
     if (D_004A5790_2CE8 == 0) {
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004A578C_2CE8 = Flag_2CE8(D_004A578C_2CE8);
         D_004A5788_2CE8 = -1;
         D_004A5790_2CE8 = 1;
@@ -6003,7 +6051,8 @@ extern Flag_2DF0 D_004A579C_2DF0 __asm__("D_004A579C");
  */
 extern "C" R12_2DF0 EndTaskFunc(int n, Ent_2DF0* params) {
     if (D_004A57A0_2DF0 == 0) {
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004A579C_2DF0 = Flag_2DF0(D_004A579C_2DF0);
         D_004A5798_2DF0 = -1;
         D_004A57A0_2DF0 = 1;
@@ -6068,7 +6117,8 @@ extern "C" int cRider_getMissionInt_2EF8(D_2EF8*, int) __asm__("cRider_getMissio
 // Script call: maps the script condition id to a rider condition and returns whether the current rider meets it.
 extern "C" void* RiderActionFunc(void* self, int n, Ent_2EF8* params) {
     if (D_004A57B0_2EF8 == 0) {
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004A57B0_2EF8 = 1;
         D_004A57A8_2EF8 = 0;
         D_004A57AC_2EF8 = Flag_2EF8(D_004A57AC_2EF8);
@@ -6439,7 +6489,8 @@ extern "C" void* AIRandomFunc(void* self, int n, Ent_3598* params) {
         D_004FBC60_3598.a = 0;
         D_004FBC60_3598.b = 1.0f;
         D_004A57B8_3598 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004FBC60_3598.f = Flag_3598(D_004FBC60_3598.f);
     }
     float block[4] __attribute__((aligned(16)));
@@ -6495,7 +6546,8 @@ extern "C" void* CurrentTrickFunc(void* self, int n, Ent_36B0* params) {
     if (D_004A57C8_36B0 == 0) {
         D_004A57C0_36B0 = -1;
         D_004A57C8_36B0 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004A57C4_36B0 = Flag_36B0(D_004A57C4_36B0);
     }
     int block[4] __attribute__((aligned(16)));
@@ -6560,7 +6612,8 @@ extern "C" void* RiderMetricFunc(void* self, int n, Ent_37B0* params)
     if (D_004A57D8_37B0 == 0) {
         D_004A57D0_37B0 = -1;
         D_004A57D8_37B0 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004A57D4_37B0 = Flag_37B0(D_004A57D4_37B0);
     }
     int block[4] __attribute__((aligned(16)));
@@ -6728,7 +6781,8 @@ extern "C" V3_3BA0 Crowd2dFunc(int n, Ent_3BA0 *params) {
         D_4FBC80_3BA0.c = 0;
         D_4FBC80_3BA0.d = 0;
         D_57E0_3BA0 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_4FBC80_3BA0.f = Tag_3BA0(D_4FBC80_3BA0.f);
     }
     unsigned buf64[5];
@@ -6790,12 +6844,11 @@ INCLUDE_ASM("seg/seg_1FBE38", isGamePath);
 extern "C" int cBE_getBE_3D90(void) __asm__("cBE_getBE");
 void* cBE_getInterface_Fv_3D90(int be, int kind) __asm__("cBE_getInterface__Fv");
 extern const int D_004465E8_3D90[] __asm__("D_004465E8");
-extern signed char D_00535C11_3D90[] __asm__("D_00535C11");
 /**
  * Returns whether script game path @p i is the current game path.
  *
  * For @p i below 4 it maps @p i through D_004465E8 (0, 1, 2, 0) and compares it with the race DB's cGamePath
- * (D_00535C11); 4 and above give 0. The cBE_getInterface call before it has no effect on the result.
+ * (newRace.cGamePath); 4 and above give 0. The cBE_getInterface call before it has no effect on the result.
  *
  * @param i  the script game path (0-3)
  * @return 1 when it matches, else 0
@@ -6803,7 +6856,7 @@ extern signed char D_00535C11_3D90[] __asm__("D_00535C11");
 extern "C" int isGamePath(unsigned i) {
     if (i < 4) {
         cBE_getInterface_Fv_3D90(cBE_getBE_3D90(), 0);
-        return D_004465E8_3D90[i] == D_00535C11_3D90[0];
+        return D_004465E8_3D90[i] == cBENewRaceInterface_newRace.cGamePath;
     }
     return 0;
 }
@@ -6816,12 +6869,11 @@ INCLUDE_ASM("seg/seg_1FBE38", isGameMode);
 extern "C" int cBE_getBE_3DF8(void) __asm__("cBE_getBE");
 void* cBE_getInterface_Fv_3DF8(int be, int kind) __asm__("cBE_getInterface__Fv");
 extern const int D_004465F8_3DF8[] __asm__("D_004465F8");
-extern signed char D_00535C10_3DF8[] __asm__("D_00535C10");
 /**
  * Returns whether script game mode @p i is the current game mode.
  *
  * For @p i below 8 it maps @p i through D_004465F8 (0-6, then 0) and compares it with the race DB's cGameMode
- * (D_00535C10); 8 and above give 0. The cBE_getInterface call before it has no effect on the result.
+ * (newRace.cGameMode); 8 and above give 0. The cBE_getInterface call before it has no effect on the result.
  *
  * @param i  the script game mode (0-7)
  * @return 1 when it matches, else 0
@@ -6829,7 +6881,7 @@ extern signed char D_00535C10_3DF8[] __asm__("D_00535C10");
 extern "C" int isGameMode(unsigned i) {
     if (i < 8) {
         cBE_getInterface_Fv_3DF8(cBE_getBE_3DF8(), 0);
-        return D_004465F8_3DF8[i] == D_00535C10_3DF8[0];
+        return D_004465F8_3DF8[i] == cBENewRaceInterface_newRace.cGameMode;
     }
     return 0;
 }
@@ -6842,12 +6894,11 @@ INCLUDE_ASM("seg/seg_1FBE38", isGameEvent);
 extern "C" int cBE_getBE_3E60(void) __asm__("cBE_getBE");
 void* cBE_getInterface_Fv_3E60(int be, int kind) __asm__("cBE_getInterface__Fv");
 extern const int D_00446618_3E60[] __asm__("D_00446618");
-extern signed char D_00535C12_3E60[] __asm__("D_00535C12");
 /**
  * Returns whether script game event @p i is the current game event.
  *
  * For @p i below 15 it maps @p i through D_00446618 (0-13, then 0) and compares it with the race DB's cGameEvent
- * (D_00535C12); 15 and above give 0. The cBE_getInterface call before it has no effect on the result.
+ * (newRace.cGameEvent); 15 and above give 0. The cBE_getInterface call before it has no effect on the result.
  *
  * @param i  the script game event (0-14)
  * @return 1 when it matches, else 0
@@ -6855,7 +6906,7 @@ extern signed char D_00535C12_3E60[] __asm__("D_00535C12");
 extern "C" int isGameEvent(unsigned i) {
     if (i < 0xF) {
         cBE_getInterface_Fv_3E60(cBE_getBE_3E60(), 0);
-        return D_00446618_3E60[i] == D_00535C12_3E60[0];
+        return D_00446618_3E60[i] == cBENewRaceInterface_newRace.cGameEvent;
     }
     return 0;
 }
@@ -6970,7 +7021,8 @@ extern "C" R12_3FF0 UpdateDisplayPointsFunc(int n, Ent_3FF0* params) {
         D_004FBC98_3FF0.a = 0;
         D_004FBC98_3FF0.b = -1;
         D_004A57E4_3FF0 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004FBC98_3FF0.f = Flag_3FF0(D_004FBC98_3FF0.f);
     }
     int block[4] __attribute__((aligned(16)));
@@ -7026,7 +7078,8 @@ extern "C" R12_4100 UpdateDisplayCountFunc(int n, Ent_4100* params) {
         D_004FBCA8_4100.a = 0;
         D_004A57E8_4100 = 1;
         D_004FBCA8_4100.b = 0;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004FBCA8_4100.f = Flag_4100(D_004FBCA8_4100.f);
     }
     int block[4] __attribute__((aligned(16)));
@@ -7082,7 +7135,8 @@ extern "C" R12_4210 UpdateDisplayTicksFunc(int n, Ent_4210* params) {
         D_004FBCB8_4210.a = 0;
         D_004FBCB8_4210.b = -1;
         D_004A57EC_4210 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004FBCB8_4210.f = Flag_4210(D_004FBCB8_4210.f);
     }
     int block[4] __attribute__((aligned(16)));
@@ -7117,7 +7171,8 @@ struct sRefWorld {
     char pad_0x0[0x8];
     sRefSet** sets;         // 0x8
 };
-// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); cWScriptMan_TheWScriptMan points at the instance.
+// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); cWScriptMan_TheWScriptMan points at
+// the instance.
 extern cWScriptMan* cWScriptMan_TheWScriptMan;
 // empty trailing member of a defaults record; value-init copies its byte through a stack temp
 extern "C" void MEM_copy(void*, void*, int);
@@ -7148,8 +7203,10 @@ extern unsigned D_004A57F0_4320 __asm__("D_004A57F0");
 extern sBindEnd_1FBE38 D_004A57F4_4320 __asm__("D_004A57F4");
 extern int D_004A57F8_4320 __asm__("D_004A57F8");
 extern int D_004A3D58_4320[2] __asm__("D_004A3D58");
-// Inline accessor of the script manager, cWScriptMan_TheWScriptMan (wscript/wscriptman cWScriptMan_getTheWScriptMan is its
-// out-of-line copy). Calling it at each use gives the shared copy of the pointer the target keeps (lw; move) instead of one cached local.
+// Inline accessor of the script manager, cWScriptMan_TheWScriptMan (wscript/wscriptman cWScriptMan_getTheWScriptMan is
+// its
+// out-of-line copy). Calling it at each use gives the shared copy of the pointer the target keeps (lw; move) instead of
+// one cached local.
 static inline cWScriptMan *curProcess_4320() { return cWScriptMan_TheWScriptMan; }
 void cWScriptMan_updateMissionHeight(void*, int, void*);
 /**
@@ -7173,7 +7230,8 @@ extern "C" cLunoValue UpdateDisplayHeightFunc(int n, sBindArg_1FBE38* params) {
     if (D_004A57F8_4320 == 0) {
         D_004A57F0_4320 = 0xFFFFFFFF;
         D_004A57F8_4320 = 1;
-        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp (lbu; sb 0(sp)).
+        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp
+        //       (lbu; sb 0(sp)).
         D_004A57F4_4320 = sBindEnd_1FBE38();
     }
     unsigned buf64[2];
@@ -7250,7 +7308,8 @@ extern "C" R12_44A8 PassthroughGateFunc(int n, Ent_44A8* params) {
     if (D_004A5808_44A8 == 0) {
         D_004A5800_44A8 = -1;
         D_004A5808_44A8 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004A5804_44A8 = Flag_44A8(D_004A5804_44A8);
     }
     int block[4] __attribute__((aligned(16)));
@@ -7333,7 +7392,8 @@ extern "C" V3_45B8 UpdateDisplayTrickFunc(int n, Ent_45B8 *params) {
         D_4FBCC8_45B8.a14 = 0;
         D_4FBCC8_45B8.a15 = 0;
         D_580C_45B8 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_4FBCC8_45B8.f = Tag_45B8(D_4FBCC8_45B8.f);
     }
     Rec_45B8 rec;
@@ -7482,7 +7542,8 @@ extern "C" R12_4B38 ReplayFunc(int n, Ent_4B38* params) {
     if (D_004A5820_4B38 == 0) {
         D_004A5818_4B38 = -1;
         D_004A5820_4B38 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004A581C_4B38 = Flag_4B38(D_004A581C_4B38);
     }
     int block[4] __attribute__((aligned(16)));
@@ -7542,7 +7603,8 @@ extern "C" void* RiderHeightFunc(void* self, int n, Ent_4C50 *params) {
     if (D_5830_4C50 == 0) {
         D_5828_4C50 = 0xFFFFFFFF;
         D_5830_4C50 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_582C_4C50 = Tag_4C50(D_582C_4C50);
     }
     unsigned buf64[2];
@@ -7703,7 +7765,8 @@ extern "C" R12_4FF0 CameraFunc(int n, Ent_4FF0* params) {
         D_004FBD30_4FF0.a = 0;
         D_004A5838_4FF0 = 1;
         D_004FBD30_4FF0.b = 0;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004FBD30_4FF0.f = Flag_4FF0(D_004FBD30_4FF0.f);
     }
     int block[4] __attribute__((aligned(16)));
@@ -7730,7 +7793,8 @@ INCLUDE_ASM("seg/seg_1FBE38", CameraShakeFunc);
 extern cLunoValue luno_gLunoNil;
 // Reference sets of the current world (wscript/wscriptman.cpp layout). A reference id packs the set index (low 8 bits)
 // and the slot; refs[slot] >> 8 is the object address >> 2.
-// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); cWScriptMan_TheWScriptMan points at the instance.
+// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); cWScriptMan_TheWScriptMan points at
+// the instance.
 extern cWScriptMan* cWScriptMan_TheWScriptMan;
 struct tInstanceRecord;
 class cBeing {
@@ -7936,7 +8000,8 @@ extern "C" cLunoValue CameraShakeFunc(int n, sBindArg_1FBE38 *params) {
     if (D_004A583C == 0) {
         D_004FBD40_50F0.keyword = 0;
         D_004FBD40_50F0.useObj = 1;
-        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp (lbu; sb 0(sp)).
+        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp
+        //       (lbu; sb 0(sp)).
         D_004FBD40_50F0.f = sBindEnd_1FBE38();
         D_004FBD40_50F0.scale = 1.0f;
         D_004FBD40_50F0.id = 0xFFFFFFFF;
@@ -8043,7 +8108,8 @@ extern "C" V3_5478 AddMagnetFunc(int n, Ent_5478 *params) {
         D_4FBD58_5478.a = 400.0f;
         D_4FBD58_5478.b = 30.0f;
         D_5840_5478 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_4FBD58_5478.f = Tag_5478(D_4FBD58_5478.f);
     }
     Rec_5478 rec;
@@ -8193,7 +8259,8 @@ extern "C" V3_57C0 AddHaloFunc(int n, Ent_57C0 *params) {
         D_4FBD68_57C0.h = 100.0f;
         D_4FBD68_57C0.k = 0;
         D_5854_57C0 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_4FBD68_57C0.f = Tag_57C0(D_4FBD68_57C0.f);
     }
     Rec_57C0 rec;
@@ -8241,7 +8308,8 @@ INCLUDE_ASM("seg/seg_1FBE38", MiniAvalancheFunc);
 extern cLunoValue luno_gLunoNil;
 // Reference sets of the current world (wscript/wscriptman.cpp layout). A reference id packs the set index (low 8 bits)
 // and the slot; refs[slot] >> 8 is the object address >> 2.
-// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); cWScriptMan_TheWScriptMan points at the instance.
+// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); cWScriptMan_TheWScriptMan points at
+// the instance.
 extern cWScriptMan* cWScriptMan_TheWScriptMan;
 // empty trailing member of a defaults record; value-init copies its byte through a stack temp
 extern "C" void MEM_copy(void*, void*, int);
@@ -8296,7 +8364,8 @@ extern "C" cLunoValue MiniAvalancheFunc(int n, sBindArg_1FBE38* params) {
         D_004FBD90_59A0.f2[7] = D_004FBD90_59A0.f2[6] = D_004FBD90_59A0.f2[5] = D_004FBD90_59A0.f2[4] = D_004FBD90_59A0.f2[3] = D_004FBD90_59A0.f2[2] = D_004FBD90_59A0.f2[1] = D_004FBD90_59A0.f2[0] = 3.0f;
         D_004FBD90_59A0.f3[7] = D_004FBD90_59A0.f3[6] = D_004FBD90_59A0.f3[5] = D_004FBD90_59A0.f3[4] = D_004FBD90_59A0.f3[3] = D_004FBD90_59A0.f3[2] = D_004FBD90_59A0.f3[1] = D_004FBD90_59A0.f3[0] = 1.0f;
         D_004A5858_59A0 = 1;
-        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp (lbu; sb 0(sp)).
+        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp
+        //       (lbu; sb 0(sp)).
         D_004FBD90_59A0.f = sBindEnd_1FBE38();
     }
     Rec_59A0 rec;
@@ -8371,7 +8440,8 @@ extern "C" R12_5C88 TriggerMiniAvalancheFunc(int n, Ent_5C88* params) {
     if (D_004A5868_5C88 == 0) {
         D_004A5868_5C88 = 1;
         D_004A5860_5C88 = 0;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004A5864_5C88 = Flag_5C88(D_004A5864_5C88);
     }
     int block[4] __attribute__((aligned(16)));
@@ -8574,7 +8644,8 @@ extern "C" V3_5F40 SetAvalancheEmitterDataFunc(int n, Ent_5F40 *params) {
         defaultBlock.p = 20.0f;
         defaultBlock.id = 0xFFFFFFFF;
         D_587C_5F40 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         defaultBlock.f = Tag_5F40(defaultBlock.f);
     }
     Rec_5F40 rec;
@@ -8612,7 +8683,8 @@ INCLUDE_ASM("seg/seg_1FBE38", IsIconEnabledFunc);
 extern cLunoValue luno_gLunoNil;
 // Reference sets of the current world (wscript/wscriptman.cpp layout). A reference id packs the set index (low 8 bits)
 // and the slot; refs[slot] >> 8 is the object address >> 2.
-// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); cWScriptMan_TheWScriptMan points at the instance.
+// The script manager (cWScriptMan in the prototype, whose setBeing stores at 0x0); cWScriptMan_TheWScriptMan points at
+// the instance.
 extern cWScriptMan* cWScriptMan_TheWScriptMan;
 // empty trailing member of a defaults record; value-init copies its byte through a stack temp
 extern "C" void MEM_copy(void*, void*, int);
@@ -8660,7 +8732,8 @@ extern sBindEnd_1FBE38 D_004A5884_61B0 __asm__("D_004A5884");
  */
 extern "C" cLunoValue* IsIconEnabledFunc(cLunoValue* ret, int n, sBindArg_1FBE38 *e) {
     if (D_004A5888_61B0 == 0) {
-        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp (lbu; sb 0(sp)).
+        // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp
+        //       (lbu; sb 0(sp)).
         D_004A5880_61B0 = 0;
         D_004A5884_61B0 = sBindEnd_1FBE38();
         D_004A5888_61B0 = 1;
@@ -8737,7 +8810,8 @@ extern "C" R12_6300 MessageCenterFunc(int n, Ent_6300* params) {
         D_004FBF38_6300.a = 0;
         D_004A588C_6300 = 1;
         D_004FBF38_6300.b = 0;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004FBF38_6300.f = Flag_6300(D_004FBF38_6300.f);
     }
     int block[4] __attribute__((aligned(16)));
@@ -9157,7 +9231,8 @@ extern "C" V3_6A90 MultiParticleFunc(int n, Ent_6A90 *params) {
         defaults.q = 0;
         defaults.w = 0x80;
         D_58B4_6A90 = 1;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         defaults.f = Tag_6A90(defaults.f);
     }
     Rec_6A90 rec;
@@ -9374,7 +9449,8 @@ extern "C" void* ShowMessageIconFunc(void* self, int n, Ent_7020* params) {
         D_004FC070_7020.a = 0;
         D_004A58C0_7020 = 1;
         D_004FC070_7020.b = 0;
-        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
+        // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb
+        //       0(sp)).
         D_004FC070_7020.f = Flag_7020(D_004FC070_7020.f);
     }
     int block[4] __attribute__((aligned(16)));

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 
 signed char cBELibrary_getCharacterID(int index);
 
@@ -67,7 +68,6 @@ extern "C" int cBELibrary_getCheatCharacterID(int riderIndex);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_EFA8(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_isMissionMan(int riderIndex);
-extern signed char D_00535C11[];
 
 struct sCharScaleEntry_EFA8 {
     char pad_0x00[0x48];
@@ -79,7 +79,7 @@ extern sCharScaleEntry_EFA8 D_00530970_EFA8[] __asm__("D_00530970");
 /**
  * Returns the size a rider's model is drawn at.
  *
- * A cheat character (cBELibrary_getCheatCharacterID, used for rider 0 only when D_00535C11 is set) gets a fixed scale
+ * A cheat character (cBELibrary_getCheatCharacterID, used for rider 0 only when newRace.cGamePath is set) gets a fixed scale
  * from 0.7 to 2.0 by id (default 0.9); a mission man (cBENewPlayerInterface_isMissionMan) 0.8; otherwise the character
  * entry's +0x48 percentage / 100 from D_00530970.
  *
@@ -93,7 +93,7 @@ extern "C" float cBECharacterInterface_getScale(void* self, int riderIndex)
     int charID = cBELibrary_getCharacterID(riderIndex);
     int cheat = cBELibrary_getCheatCharacterID(riderIndex);
     cBE_getInterface_EFA8(cBE_getBE(), 0);
-    if (cheat != 0 && (D_00535C11[0] != 0 || riderIndex != 0)) {
+    if (cheat != 0 && (cBENewRaceInterface_newRace.cGamePath != 0 || riderIndex != 0)) {
         switch (cheat) {
         case 10:
             return 0.98f;

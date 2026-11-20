@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "sound/ssxaudio.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -433,7 +434,6 @@ extern "C" int cStreamSys_STREAM_Queue(void* self, int i, int a, int b, int c);
 int cStreamSys_STREAM_GetInstance(void* self, int a1);
 extern "C" void cBankMonitorInstance_SetStream(void* self, int a, const char* name, int b);
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern signed char D_00535C11[];
 
 struct sSnd54F8Ch {
     signed char vol;
@@ -541,7 +541,7 @@ extern "C" int cSSXAudio_PlayPositional(cSSXAudio* vself, int streamIndex, const
         int closestView = cSSXAudio_GetClosestCamera(self, position);
         (*pp)->sub.p64[(*pp)->sub.cur] = closestView;
     }
-    if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && D_00535C11[0] == 2 && isHuman != 0 && cSSXAudio_ReplayMode(self) == 0) {
+    if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && cBENewRaceInterface_newRace.cGamePath == 2 && isHuman != 0 && cSSXAudio_ReplayMode(self) == 0) {
         (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.p80[(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur] = 1;
         (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.p84[(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur] = viewport;
     }
@@ -863,7 +863,8 @@ extern "C" void cSSXAudio_BANKMONITOR_DestroyAll(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_BANKMONITOR_DestroyAll1);
 #ifdef SKIP_ASM
-// PORT: callee declared variadic to reproduce the original by-value struct passing; real signature takes an 8-byte struct.
+// PORT: callee declared variadic to reproduce the original by-value struct passing; real signature takes an 8-byte
+// struct.
 struct cSSXAudio_BANKMONITOR_DestroyAll1_sPair {
     int a;
     int b;
@@ -1047,7 +1048,6 @@ extern char str_LAND[];
 extern char str_SPUBOARD[];
 extern char str_MOUNTAIN[];
 extern char str_TRANSPORT[];
-extern char cBENewRaceInterface_newRace[];
 
 /**
  * Sets up the in-game audio: the mountain sound levels and the world's sound banks from
@@ -1134,7 +1134,7 @@ extern "C" void cSSXAudio_InGameLoad(char* self)
     cBankManager_BANK_AllocMem(**(void***)(self + 0x118), 3, 0x19000, 0, 0);
     cBankManager_BANK_AllocMem(**(void***)(self + 0x118), 12, 0x6A400, 0, 0);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if ((signed char)cBENewRaceInterface_newRace[0x49] == 2) {
+    if (cBENewRaceInterface_newRace.cGamePath == 2) {
         func_002A6D78(self, str_H, ext, 2, 5);
     } else {
         func_002A6D78(self, str_H, ext, 1, 5);
@@ -1172,11 +1172,10 @@ void* cWorldPainterMan_getQuery(void*, cWorldPainterManArg*);
 extern char D_004A5268;
 extern char D_004A5270;
 extern char D_004A5278;
-extern char cBENewRaceInterface_newRace[];
 
 static inline int sa_state_867E8()
 {
-    signed char* g = (signed char*)cBENewRaceInterface_newRace;
+    signed char* g = (signed char*)&cBENewRaceInterface_newRace;
     return g[0x49];
 }
 
@@ -1443,14 +1442,13 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_002A39E0(void* self);
-extern signed char D_00535C11[];
 extern void* gWorldTriggerManager;
 
 /**
  * Starts the in-game audio of an event: update state 6, world triggers reset, all rider sounds, and the grunt timer.
  *
  * Sets the update state 6 (cSSXAudio_SetAudioUpdateState), resets the world triggers, begins every rider's sounds
- * (cSSXAudio_BeginAllRiderSound) and stores the cAI's AITick in mGruntCycle. In game paths 1 and 2 (D_00535C11) it also
+ * (cSSXAudio_BeginAllRiderSound) and stores the cAI's AITick in mGruntCycle. In game paths 1 and 2 (newRace.cGamePath) it also
  * requests the PA's location line func_002A39E0. cSSXAudio_InGameInit calls it.
  */
 extern "C" void cSSXAudio_StartEvent(void* self)
@@ -1460,7 +1458,7 @@ extern "C" void cSSXAudio_StartEvent(void* self)
     cSSXAudio_BeginAllRiderSound(self);
     *(int*)((char*)self + 0x582C) = *(int*)(*(char**)((char*)cAudioInterface_getGame() + 0xC) + 0x8);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    int mode = D_00535C11[0];
+    int mode = cBENewRaceInterface_newRace.cGamePath;
     if (mode == 1) {
         goto load;
     }
@@ -1489,11 +1487,10 @@ extern "C" char* cAudioInterface_getAI();
 extern "C" void func_002A3708(void* self, void* rider);
 extern "C" void func_002A34D0(void* self, void* rider, int a2, int a3);
 extern "C" void func_002A45C0(void* self);
-extern char cBENewRaceInterface_newRace[];
 
 static inline int sa_state6EA0()
 {
-    signed char* g = (signed char*)cBENewRaceInterface_newRace;
+    signed char* g = (signed char*)&cBENewRaceInterface_newRace;
     return g[0x49];
 }
 
@@ -1526,7 +1523,7 @@ extern "C" void cSSXAudio_OnFinishEvent(char* self, char* rider)
     int nextHeat = *(int*)(cfg + 0x70);
     int heatNum = *(int*)(cfg + 0x0);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char* raceDb = (signed char*)cBENewRaceInterface_newRace;
+    signed char* raceDb = (signed char*)&cBENewRaceInterface_newRace;
     int mode = raceDb[0x48];
     if ((mode == 2 || mode == 3) && heatNum < nextHeat) {
         if (func_0028D960(self)) {
@@ -1666,7 +1663,6 @@ extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
 extern "C" void func_002A26F0(void* self, int a1, int a2);
 void func_002B1758(void* self, int a1);
 int func_002B4908(void* mon);
-extern char cBENewRaceInterface_newRace[];
 
 struct sSaVt72A8 { short delta; short index; int (*fn)(void*, int); };
 
@@ -1683,7 +1679,7 @@ extern "C" void func_002872A8(void* self)
 {
     *(int*)((char*)self + 0x582C) = *(int*)(*(char**)((char*)cAudioInterface_getGame() + 0xC) + 0x8);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char* raceDb = (signed char*)cBENewRaceInterface_newRace;
+    signed char* raceDb = (signed char*)&cBENewRaceInterface_newRace;
     int mode = raceDb[0x48];
     if (mode != 5 && mode != 6) return;
     char* mon = (char*)self + 0x118;
@@ -1695,7 +1691,7 @@ extern "C" void func_002872A8(void* self)
         func_0028CF98(self, 0, 0, -1, 0);
     }
     if (cSSXAudio_PlayHistoryExists(self, 0, 0) != 0) return;
-    signed char* newRace = (signed char*)cBENewRaceInterface_newRace;
+    signed char* newRace = (signed char*)&cBENewRaceInterface_newRace;
     int gameEvent = newRace[0x4A];
     if (gameEvent == 4 || gameEvent == 5) {
         if (newRace[0x49] != 2) {

@@ -6977,19 +6977,18 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_setHelpDone(void* iface, int a1, int a2);
 extern int D_004A20CC;
-extern signed char D_00535C11[];
 
 /**
  * Asks for the message center to open, from a world script (MessageCenterFunc, when not in a network game).
  *
- * When the new race's cGamePath (D_00535C11) is 0, sets D_004A20CC to 0, so the game update triggers overlay 0x22 (the
+ * When the new race's cGamePath (newRace.cGamePath) is 0, sets D_004A20CC to 0, so the game update triggers overlay 0x22 (the
  * message center) on its next pass, and sets player 0's flag through cBENewPlayerInterface_setHelpDone(player interface, 0, 1); otherwise
  * does nothing.
  */
 extern "C" void func_001E3510(void)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C11[0] == 0) {
+    if (cBENewRaceInterface_newRace.cGamePath == 0) {
         D_004A20CC = 0;
         cBENewPlayerInterface_setHelpDone(cBE_getInterface_Fv(cBE_getBE(), 1), 0, 1);
     }
@@ -9932,7 +9931,6 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
-extern signed char D_00535C11[];
 
 /**
  * Preselects the second button of the final standings menu on the quick-play path (vtable entry 18, onWidgetCreate).
@@ -9946,7 +9944,7 @@ extern "C" void func_001E7558(void* self, void* menu)
     int hash = *(int*)((char*)menu + 0x38);
     if (hash == GetHashValue32(str_overlayMenu)) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        if (D_00535C11[0] == 1) {
+        if (cBENewRaceInterface_newRace.cGamePath == 1) {
             cUIMenu_setSelectedByIndex(menu, 1);
         }
     }
@@ -10720,7 +10718,6 @@ extern "C" char* func_0020A1A8(int v);
 extern "C" void* func_001FD190(int v);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern signed char D_00535C12[];
 extern int D_005366A8[];
 extern int D_00536730[];
 extern int cGameModeMan_bGiveUp[];
@@ -10792,7 +10789,7 @@ extern "C" void func_001E8920(void* self)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     char* modeData = (char*)SSXApp->GameModeMan;
-    int trk = D_00535C12[0];
+    int trk = cBENewRaceInterface_newRace.cGameEvent;
     int pl = cBENewPlayerInterface_getHumanRider(iface1, 0);
     cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_title1));
     cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_TITLERivalChallenge));

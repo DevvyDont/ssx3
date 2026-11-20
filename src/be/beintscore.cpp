@@ -306,7 +306,6 @@ extern "C" void func_001E1EB8(void);
 extern "C" void func_001E1550(void);
 extern "C" int cBENewRaceInterface_getPlatinumGoal(void* self, int idx, int mode);
 extern "C" void cBERewardInterface_calculateUserTrackMedalRewards(void* iface, int profile, int charID, int mode, int event, int medal);
-extern signed char D_00535C12[];
 
 struct sRaceSettings_154EE8 {
     char pad_0x00[0x40];
@@ -328,7 +327,7 @@ extern sEvent_154EE8 cBELibrary_locationDB[];
  * interface.
  *
  * Only profiles 0 and 1. Stores @p result at +0xCC + profile * 0xB0 (the last-event slot's rank). The medal is
- * cBEScoreInterface_convertRankToMedal(@p result); events 4 and 5 (D_00535C12) give 1 for first place, else none.
+ * cBEScoreInterface_convertRankToMedal(@p result); events 4 and 5 (newRace.cGameEvent) give 1 for first place, else none.
  * Unless raceDB +0x49 is set it updates the event popups (func_001E25D8, then func_001E1EB8 and, outside events 4 and
  * 5, func_001E1550).
  *
@@ -348,7 +347,7 @@ extern "C" void cBEScoreInterface_processRiderRanking(char* self, int rider, int
     *(int*)(self + profile * 0xB0 + 0xCC) = result;
     void* be = cBE_getInterface_Fv(cBE_getBE(), 0);
     int charID = cBELibrary_getCharacterID(rider);
-    int mode = D_00535C12[0];
+    int mode = cBENewRaceInterface_newRace.cGameEvent;
     int event = cBELibrary_locationDB[cBELibrary_raceDB.event].id;
     if (event == 22)
         event = 0;
@@ -419,12 +418,11 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern int D_005305F0[];
-extern signed char D_00535C12[];
 
 /**
  * Returns the score of one entry in the current race's high-score table.
  *
- * The table is func_0014AB20(raceDB +0x40, D_00535C12), the race's location index and game event. The pause and lodge
+ * The table is func_0014AB20(raceDB +0x40, newRace.cGameEvent), the race's location index and game event. The pause and lodge
  * screens show entry 0 as the record.
  *
  * @param i  entry index, 0 (best) to 4
@@ -433,7 +431,7 @@ extern signed char D_00535C12[];
 extern "C" int func_00155130(void* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    sScoreEntry_001550E8* highScores = func_0014AB20(D_005305F0[0], D_00535C12[0]);
+    sScoreEntry_001550E8* highScores = func_0014AB20(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
     if (highScores != 0)
     {
         return highScores[i].value;
@@ -462,7 +460,7 @@ extern void* D_004A1244;
  * Returns the character record (D_00530990, 0x88 bytes each) of the rider who set one entry of the current race's
  * high-score table.
  *
- * The table is func_0014AB20(raceDB +0x40, D_00535C12); the entry's second word is the character ID. The lodge shows
+ * The table is func_0014AB20(raceDB +0x40, newRace.cGameEvent); the entry's second word is the character ID. The lodge shows
  * the result as text next to the entry.
  *
  * @param i  entry index, 0 (best) to 4
@@ -471,7 +469,7 @@ extern void* D_004A1244;
 extern "C" void* func_00155190(void* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    sScoreEntryB_00155190* highScores = (sScoreEntryB_00155190*)func_0014AB20(D_005305F0[0], D_00535C12[0]);
+    sScoreEntryB_00155190* highScores = (sScoreEntryB_00155190*)func_0014AB20(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
     if (highScores == 0)
         return D_004A1244;
     return &D_00530990[highScores[i].idx];
@@ -492,7 +490,7 @@ extern void* D_004A1244;
 /**
  * Returns the player name stored in one entry of the current race's high-score table.
  *
- * The table is func_0014AB20(raceDB +0x40, D_00535C12); the 12-byte name is at +0x8 of the entry.
+ * The table is func_0014AB20(raceDB +0x40, newRace.cGameEvent); the 12-byte name is at +0x8 of the entry.
  *
  * @param i  entry index, 0 (best) to 4
  * @return the name, or D_004A1244 when the event has no table
@@ -500,7 +498,7 @@ extern void* D_004A1244;
 extern "C" void* func_00155208(void* self, int i)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    sScoreEntryB_00155208* highScores = (sScoreEntryB_00155208*)func_0014AB20(D_005305F0[0], D_00535C12[0]);
+    sScoreEntryB_00155208* highScores = (sScoreEntryB_00155208*)func_0014AB20(D_005305F0[0], cBENewRaceInterface_newRace.cGameEvent);
     if (highScores != 0)
         return highScores[i].f8;
     return D_004A1244;
@@ -855,7 +853,6 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" bool cBERules_hasModifiedRules(int i);
-extern int D_00535BFC[];
 
 /**
  * Returns whether a profile may enter the high-score tables.
@@ -872,7 +869,7 @@ extern "C" bool cBEScoreInterface_isEligibleForHighScore(void* self, int rider)
     if (rider >= 2 || cBERules_hasModifiedRules(0))
         return false;
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535BFC[0] >= 2)
+    if (cBENewRaceInterface_newRace.iNumberHumans >= 2)
         return !cBERules_hasModifiedRules(0);
     return true;
 }

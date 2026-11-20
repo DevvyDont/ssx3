@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -19,7 +20,6 @@ extern "C" void cFERiderManager_setHumanVisible(void* self, int i, int v);
 extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int a2, int a3);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* snd, int a);
-extern signed char D_00535C11[];
 extern char str_09set_char[];
 extern char str_title[];
 extern char str_kT_TITLEPlayer1SetupCharacter[];
@@ -72,7 +72,7 @@ static inline void showIdx_182928(sCharSetup_182928* self, char* name, int idx)
  *
  * Fills "rider name" and sets up the camera and rider pose (cFEStateCharSetup_updateWidget), hides player mUserNum's front-end
  * rider and probably gives it the player's character (rider manager, RealFE + 0xB0), and sets the audio bank
- * mode to 1. In multiplayer (game path D_00535C11 == 2) "title" says "kT_TITLEPlayer1SetupCharacter" or
+ * mode to 1. In multiplayer (game path newRace.cGamePath == 2) "title" says "kT_TITLEPlayer1SetupCharacter" or
  * "kT_TITLEPlayer2SetupCharacter".
  *
  * "Option_Continue", "Option_Equip", "Option_Rider" and "Option_Radio" are shown with misc data 0 to 3;
@@ -97,7 +97,7 @@ extern "C" void cFEStateCharSetup_onCreateScreen(sCharSetup_182928* self)
     cUIText* txt = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_title));
     if (txt != 0) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        if (D_00535C11[0] == 2) {
+        if (cBENewRaceInterface_newRace.cGamePath == 2) {
             switch (self->player) {
             case 0:
                 cUIText_setUnicodeStringByID(txt, GetHashValue32(str_kT_TITLEPlayer1SetupCharacter));

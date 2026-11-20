@@ -11,7 +11,8 @@
 //
 // Size 0xA0: [R] the allocation in getGM. No vtable, no base class.
 // Statics (not in the object; [O] names, retail sizes): aHandler[10] = D_00536668 (the cGameModeHandler subclass
-// instances getGM creates; iCurrModeHandler indexes it; purgeGM deletes 10), bGiveUp[6] = cGameModeMan_bGiveUp (restartHeat
+// instances getGM creates; iCurrModeHandler indexes it; purgeGM deletes 10), bGiveUp[6] = cGameModeMan_bGiveUp
+// (restartHeat
 // clears 6 words), and the 10-entry score / rank tables D_00536640, D_00536708, D_00536730 that sortScores /
 // sortTimes (cGameModeMan_sortScores / cGameModeMan_sortTimes) fill and writeToReplayFrame saves.
 //
@@ -19,10 +20,12 @@
 // 62-entry character tables, byte bools), placed at retail offsets by:
 //   [R] retail code whose On Tour counterpart stores the same values in the same order: getGM's inlined
 //       constructor (iHeatNum = 0, iCurrModeHandler = 0, iCurrentGameEvent = -1), cGameModeHandler::purge
-//       (cGameModeHandler_purge: iCurrModeHandler/iLocation/iNextLocation/iCurrentGameEvent = -1, bIsEventDone = 1, the rest 0,
+//       (cGameModeHandler_purge: iCurrModeHandler/iLocation/iNextLocation/iCurrentGameEvent = -1, bIsEventDone = 1, the
+//       rest 0,
 //       memset of both character tables), cGMFreerideHandler::init (func_0023B170: iHeatNum = 1, bIsLastHeat = 1,
 //       iCharacters[] = -1, iNextHeat = iRestoreHeat = 1, bAreResultsLocked = 1, iNextLocation = -1),
-//       restorePreviousHeat (cGameModeMan_restorePreviousHeat: iNextHeat = iRestoreHeat), initGameMode (iCurrentGameEvent = argument,
+//       restorePreviousHeat (cGameModeMan_restorePreviousHeat: iNextHeat = iRestoreHeat), initGameMode
+//       (iCurrentGameEvent = argument,
 //       iCurrentGamePath = cBENewRaceInterface::newRace.cGamePath, then iCurrModeHandler by event);
 //   [U] how retail code uses the field;
 //   [O] On Tour's member order alone, where the fields on both sides of it are placed by [R].
@@ -39,13 +42,15 @@ struct cGameModeMan {
     int iCurrModeHandler;       // 0x04 [R] indexes aHandler (initGameMode, restartHeat, riderCheckpointHit ...);
                                 //      purge = -1; [O]
     int iCurrentGameEvent;      // 0x08 [R] initGameMode(iBEGameEvent) stores its argument; getGM/purge = -1; [O]
-    int iCurrentGamePath;       // 0x0C [R] initGameMode stores newRace.cGamePath (D_00535C11; 2 = multiplayer, online included); [O]
+    int iCurrentGamePath;       // 0x0C [R] initGameMode stores newRace.cGamePath (newRace.cGamePath; 2 = multiplayer,
+                                //       online included); [O]
     int iNumberAI;              // 0x10 [O]; [U] preview assert `iRider < (pManager->iNumberAI+1)`; big air = 5
     int iSimAI;                 // 0x14 [O]; [U] big air = 4 or 5, race = 0; gamestate sets newRace's AI count to
                                 //      iNumberAI - iSimAI (the AI riders that really ride; On Tour getNumberAIToSim)
     int iCharacters[10];        // 0x18 [O] (On Tour [62]); [R] purge clears 0x28 bytes, freeride fills -1;
                                 //      [U] the AI riders' character IDs (cBENewPlayerInterface_setRiderCharID)
-    int iCheatCharacters[10];   // 0x40 [O]; [R] purge clears 0x28 bytes; [U] gamestate passes them to cBENewPlayerInterface_setRiderCheatCharID
+    int iCheatCharacters[10];   // 0x40 [O]; [R] purge clears 0x28 bytes; [U] gamestate passes them to
+                                //       cBENewPlayerInterface_setRiderCheatCharID
     int iLocation;              // 0x68 [R] purge = -1 (On Tour purge: iLocation = -1); [U] handlers read/write it
     int iNextLocation;          // 0x6C [R] purge = -1, freeride init = -1 (On Tour: iNextLocation = -1)
     int iNextHeat;              // 0x70 [R] restorePreviousHeat: iNextHeat = iRestoreHeat; freeride = 1

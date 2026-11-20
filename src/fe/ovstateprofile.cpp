@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "fe/ovstateprofile.h"
 #include "fe/ovstateautosave.h"
 #include "main/ssxapp.h"
@@ -1244,7 +1245,6 @@ extern "C" void cOVState_AUTOSAVE_updateDone(cOVState_AUTOSAVE* self)
 INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_onDestroyScreen);
 #ifdef SKIP_ASM
 extern int D_004A11B8;
-extern int D_00535C08[];
 extern char str_cFEStateTitle_b[];
 extern char str_cFEStateLodge_b[];
 extern char str_cPreGameLoadScreen_b[];
@@ -1270,7 +1270,7 @@ struct sVEnt_00212508 { short delta; short index; void (*fn)(void*); };
  *
  * After cFEMemCard_onDestroyScreen (the shared memory card teardown) it switches on +0x22C (the constructor's parent
  * code): 1 exits the game, 6 pushes cFEStateTitle, 7 pushes cFEStateLodge, 0 sets up a new race (game mode 4,
- * event 0xC, the last hub into D_00535C08, D_004A11B8 = 1) and makes cPreGameLoadScreen the next module.
+ * event 0xC, the last hub into newRace.iLocationIdx, D_004A11B8 = 1) and makes cPreGameLoadScreen the next module.
  */
 extern "C" void cOVState_AUTOSAVE_onDestroyScreen(cOVState_AUTOSAVE* self)
 {
@@ -1289,7 +1289,7 @@ extern "C" void cOVState_AUTOSAVE_onDestroyScreen(cOVState_AUTOSAVE* self)
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewRaceInterface_setGameMode(race, 4);
         cBENewRaceInterface_setGameEvent(race, 0xC);
-        D_00535C08[0] = cBENewPlayerInterface_getLastHub(player, 0);
+        cBENewRaceInterface_newRace.iLocationIdx = cBENewPlayerInterface_getLastHub(player, 0);
         D_004A11B8 = 1;
         sVEnt_00212508* vt = *(sVEnt_00212508**)((char*)race + 0xC);
         vt[1].fn((char*)race + vt[1].delta);

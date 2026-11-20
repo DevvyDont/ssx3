@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "online/lobbyman.h"
 
 //100%
@@ -23,7 +24,6 @@ extern "C" unsigned char cUIListBox_addEntryByAsciiString_2DB0(void* box, const 
 extern "C" int cUIListBox_getEntryByData_2DB0(void* item, int key, unsigned char* out) __asm__("cUIListBox_getEntryByData");
 extern "C" void cUIListBox_setCurrentEntryByIndex_2DB0(void* item, int v) __asm__("cUIListBox_setCurrentEntryByIndex");
 extern int D_004A1A70;
-extern signed char D_00535C12[];
 extern signed char D_004A1710[6];
 extern signed char D_004A1718[7];
 extern signed char D_004A1720[7];
@@ -119,7 +119,7 @@ extern "C" void cFEStateBraggingRights_onCreateScreen(sBragging_2DB0* self)
     int n = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     unsigned int mask = 0;
-    switch (D_00535C12[0]) {
+    switch (cBENewRaceInterface_newRace.cGameEvent) {
     case 0:
         self->rules = D_004A1710;
         n = 6;

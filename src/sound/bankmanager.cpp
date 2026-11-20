@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "main/ssxapp.h"
 #include "ai/ai.h"
 
@@ -2152,7 +2153,7 @@ struct sLocks_E548 {
  * The kind is mData1 and the argument mData2 (armed through D_004A3650 by func_0028E8C0, func_0028FAE0 and others).
  * Kinds 0, 1, 2, 3, 4 and 7 purge speech instance 0 (func_002B11B0), queue speech cue 8421 with func_002A26F0(self, a,
  * b) ((1, 0) for 0, 3 and 7; (1, 1) for 1; (0, 1) for 2; (0, 0) for 4) and restart speech (func_002B1758). Outside
- * D_00535C12 modes 6-11 (func_002A42C8): kind 0 sets unk_576C and, in a location of group 1 (func_002A1E20), unk_577C =
+ * newRace.cGameEvent modes 6-11 (func_002A42C8): kind 0 sets unk_576C and, in a location of group 1 (func_002A1E20), unk_577C =
  * 1, unk_5780 = 2 and +0x57D4 = 0; kinds 1 and 2 set unk_574C.
  *
  * Kinds 3, 4 and 5 act only when mData2 != -1: with the peak locked (cBENewPlayerInterface_isPeakLocked1) in a group-1
@@ -2260,7 +2261,6 @@ extern const sSndKey8_E8C0 D_004A3648_E8C0[] __asm__("D_004A3648");
 extern const sSndKey8_E8C0 D_004A3650_E8C0[] __asm__("D_004A3650");
 extern const sSndKey8_E8C0 D_004A3658_E8C0[] __asm__("D_004A3658");
 extern char str_pktrans[];
-extern signed char D_00535C10[];
 extern "C" void cMonitor_MONITOR_Create(void*, int, long, int, int, int, int, int);
 extern "C" void cMonitor_MONITOR_DestroyAll1(void* mon, long key);
 extern "C" int func_002A3F90(void* self);
@@ -2294,7 +2294,7 @@ typedef int (*tBmSetE8C0)(void*, int);
  * Handles a music event id: 19 and 20 end and start the transport sequence, 21-25 fade, others set the state.
  *
  * Id 19 with a2 set and unk_627C set: when the location qualifies (func_002A3FE8) and unk_578C is 0, in a music mode
- * accepted by func_0028D960 and a D_00535C10 mode other than 5 and 6, it arms the D_004A3650 event (func_0028E548) with
+ * accepted by func_0028D960 and a newRace.cGameMode mode other than 5 and 6, it arms the D_004A3650 event (func_0028E548) with
  * kind 4 (unk_6258 clear) or 5 and the song's mSedValue, and sets music state 0. With unk_578C set it fades the song
  * out over 2 s (unless unk_62B8), then in a group-1 location arms events 0 and 1 (3000 / 2500 ms) once
  * (func_0028DEF0(self, 11)), or else picks a new song (func_0028D488) and arms kinds 1 and 7. Otherwise, for locations
@@ -2324,7 +2324,7 @@ extern "C" void func_0028E8C0(void* vself, int id, int transportCall)
         if (func_002A3FE8(self) != 0 && *(int*)(self + 0x578C) == 0) {
             if (func_0028D960(self)) {
                 cBE_getInterface_Fv(cBE_getBE(), 0);
-                int mode = D_00535C10[0];
+                int mode = cBENewRaceInterface_newRace.cGameMode;
                 if (mode != 5 && mode != 6) {
                     if (*(int*)(self + 0x6258) == 0) {
                         char* monitor = **(char***)(self + 0x118) + 0x1D8;

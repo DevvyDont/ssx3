@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "fe/bxloadindicator.h"
 #include "fe/festatelodge.h"
 #include "render/ps2graphicsman.h"
@@ -31,7 +32,6 @@ extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
-extern signed char D_00535C10[];
 extern char str_hiscorelist[];
 extern char str_helptext02[];
 extern char str_helptext01[];
@@ -61,7 +61,7 @@ extern "C" void cOVStateHiScoreList_onCreateScreen(void* self)
     }
     cOVState_onCreateScreen(self);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    switch (D_00535C10[0]) {
+    switch (cBENewRaceInterface_newRace.cGameMode) {
     case 0: case 5:
         cUIState_showObjSafe(self, str_helptext02);
         break;
@@ -1841,8 +1841,10 @@ INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderText1);
 // NOTE w1 2026-10-21: cOVStateHUD1P_renderText1 best 99.94 (not committed). Only residual: 4 insns at the start of the
 // last block before the jal cFont_text: $f0..$f3 numbering of the font->f38/f3C = f30/f34 * resEsc[] loads
 // is swapped (local alloc; sx regs reports nothing). Tried operand order / statement order / locals (99.78-99.94).
-// Sibling func_001F25E0 is identical except: cFont_textExtent1 instead of cFont_textExtent (str is const unsigned short*),
-// cFont_text1 instead of cFont_text. Needs sColor_001F16C0, sHudElemDef_001F16C0 from cOVStateHUD1P_renderTime1's block.
+// Sibling func_001F25E0 is identical except: cFont_textExtent1 instead of cFont_textExtent (str is const unsigned
+// short*),
+// cFont_text1 instead of cFont_text. Needs sColor_001F16C0, sHudElemDef_001F16C0 from cOVStateHUD1P_renderTime1's
+// block.
 // Lessons: dead stores of dOutT/dOut land in the frame because arrays are written; col shares the slot of dOutT when
 // dOutT/dOut live in an inner block; nested by-value VU0 helper calls in ONE expression share one temp slot;
 // a 4-float ctor temp + struct copy gives the 'swc1 x4; ldl/ldr/sdl/sdr' colour build.

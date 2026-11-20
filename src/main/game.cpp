@@ -440,7 +440,9 @@ INCLUDE_ASM("main/game", func_0022C830);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-// FAKEMATCH: the save / zero / restore of cDepthFog_m_Enable through a pointer local `p` (keeps the store ahead of the GrMan reload), and `pfn`, a pointer to vtable slot 23's fn field taken before the arguments; plain form 97.19% (97.20% / 99.99% without each alone). Byte-identical and behaves like the plain form; landed marked under
+// FAKEMATCH: the save / zero / restore of cDepthFog_m_Enable through a pointer local `p` (keeps the store ahead of the
+// GrMan reload), and `pfn`, a pointer to vtable slot 23's fn field taken before the arguments; plain form 97.19%
+// (97.20% / 99.99% without each alone). Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 struct sV2_C830 {
     float x, y;
@@ -1516,7 +1518,6 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cGame_setState(void* gm, int state, int a, int b);
 void cGame_setPreloadState(void* gm, int state);
-extern int D_00535C08[];
 extern int D_004A11B8;
 
 /**
@@ -1527,7 +1528,7 @@ extern "C" void cSectionMan_preLoadMode(cSectionMan* self)
 {
     cGame_setState(self->mpGame, 11, 0, 1);
     cBEIface22DF50* iface = (cBEIface22DF50*)cBE_getInterface_Fv(cBE_getBE(), 0);
-    D_00535C08[0] = self->mBELocationID;
+    cBENewRaceInterface_newRace.iLocationIdx = self->mBELocationID;
     D_004A11B8 = 1;
     iface->v01();
     cGame_setPreloadState(self->mpGame, 10);
@@ -1672,12 +1673,11 @@ INCLUDE_ASM("main/game", cSectionMan_gotoLocation);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cSectionMan_activate(cSectionMan* self, int a1, int a2);
-extern signed char D_00535C11[];
 
 /**
  * Activates a location (cSectionMan_activate(.., 1)) and sets mModeReset, but only off the career path.
  *
- * Does nothing unless the new-race game path (D_00535C11, cBENewRaceInterface cGamePath) is 0. The new-race interface
+ * Does nothing unless the new-race game path (newRace.cGamePath) is 0. The new-race interface
  * is fetched but not used.
  *
  * @param location  the location id (On Tour eBELocationID location)
@@ -1685,7 +1685,7 @@ extern signed char D_00535C11[];
 extern "C" void cSectionMan_gotoLocation(cSectionMan* self, int location)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (D_00535C11[0] == 0) {
+    if (cBENewRaceInterface_newRace.cGamePath == 0) {
         cSectionMan_activate(self, location, 1);
         self->mModeReset = 1;
     }

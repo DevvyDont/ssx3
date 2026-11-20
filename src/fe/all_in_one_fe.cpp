@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "fe/ovtemplatedialog.h"
 #include "fe/ovstateheat.h"
 #include "fe/ovstateenterlodge.h"
@@ -1295,7 +1296,8 @@ struct sHudVertex {
     sVtxPos pos;
 };
 
-// The render context D_004A289C_D1A0 as these functions use it: GS state block pointer at 0xE84, vptr at 0x10D8 (slot 71
+// The render context D_004A289C_D1A0 as these functions use it: GS state block pointer at 0xE84, vptr at 0x10D8 (slot
+// 71
 // draws a vertex list).
 struct sRenderCtx {
     char pad[0xE84];
@@ -1571,7 +1573,8 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P_renderWipeoutMeter);
 
 
 
-// The render context D_004A289C_D9A0 as these functions use it: GS state block pointer at 0xE84, vptr at 0x10D8 (slot 71
+// The render context D_004A289C_D9A0 as these functions use it: GS state block pointer at 0xE84, vptr at 0x10D8 (slot
+// 71
 // draws a vertex list).
 
 
@@ -1811,7 +1814,8 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P_renderRank);
 #include "bx/math3d.h"
 
 // EA's 2-float vector (prototype name, e.g. setTileUV__7cUIIconG8t2Vector).
-// The render context D_004A289C_E1B0 as these functions use it: GS state block pointer at 0xE84, vptr at 0x10D8 (slot 71
+// The render context D_004A289C_E1B0 as these functions use it: GS state block pointer at 0xE84, vptr at 0x10D8 (slot
+// 71
 // draws a vertex list).
 
 // Four floats, 4-byte aligned (not a t4Vector, which is 16-aligned): the 4-float slots some callers give the element
@@ -1840,7 +1844,6 @@ void tHUDDef_getColour(void*, void*);
 extern "C" void cOVStateHUD1P_renderBitmap(void*, int, void*, void*, void*, void*);
 
 extern char D_00477F30[];
-extern int D_00535BF8[];
 extern "C" void func_0021E7E0_E1B0(char* self, sColour* colp, t2Vector* pos, t2Vector* size,
                                    float t, float sx, float sy, float amin, float amax) __asm__("func_0021E7E0");
 
@@ -1922,7 +1925,7 @@ extern "C" void cOVStateHUD1P_renderRank(char* self, char* obj, int* rider, int 
     tHUDDef_getColour(D_00477F30 + 0x120, &totalColour);
     tHUDDef_getSize(D_00477F30 + 0x120, &size3, 0);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    int off3 = (D_00535BF8[0] - 1) << 2;
+    int off3 = (cBENewRaceInterface_newRace.iNumberRiders - 1) << 2;
     cOVStateHUD1P_renderBitmap(self, *(int*)((char*)tex + off3), &drawPos, &size3, &sc, &totalColour);
     if (k != 1.0f) {
         size2.x *= k;
@@ -2091,7 +2094,8 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021EA00);
 
 
 
-// The render context D_004A289C_EA00 as these functions use it: GS state block pointer at 0xE84, vptr at 0x10D8 (slot 71
+// The render context D_004A289C_EA00 as these functions use it: GS state block pointer at 0xE84, vptr at 0x10D8 (slot
+// 71
 // draws a vertex list).
 
 
@@ -2204,7 +2208,8 @@ extern "C" void cOVStateHUD1P_calcElemPos(void*, void*, void*, void*, void*, int
 extern "C" void cOVStateHUD1P_renderBitmap(void*, int, void*, void*, void*, void*);
 extern "C" void cFont_text(void*, float, float, char*);
 
-// Inline copy of func_0021E7E0's body (the original helper was inlined here): colour/position/size by pointer, copied locally.
+// Inline copy of func_0021E7E0's body (the original helper was inlined here): colour/position/size by pointer, copied
+// locally.
 static inline void draw_ED48(char* self, const Col_E7E0* colp, const V2_ED48* posp, const V2_ED48* sizep,
                              float t, float sx, float sy, float amin, float amax) {
     Col_E7E0 col = *colp;
@@ -2419,7 +2424,6 @@ struct Obj_F660 {
     virtual void v06();
     virtual int v07();
 };
-extern signed char D_00535C10[];
 extern int D_00536640[];
 extern char str_pct_02d_pct_02d_pct_02d_b[];
 extern char D_004A2138[];
@@ -2485,7 +2489,7 @@ extern "C" void cOVStateHUD1P_renderFinishMessage(char* self, int elems, int* ri
     cOVStateHUD1P_renderBitmap(self, sz, &drawPos, &size, &scale, &spriteColour);
     if (flag == 0) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        signed char mode = D_00535C10[0];
+        signed char mode = cBENewRaceInterface_newRace.cGameMode;
         Obj_F660* being = (Obj_F660*)(panelRider + 0x6C0);
         int k = being->v07();
         int val = D_00536640[k];
@@ -2624,11 +2628,15 @@ extern "C" void func_0021F9B0(char* self, char* obj, char* rider, int x, float a
 INCLUDE_ASM("fe/all_in_one_fe", func_0021FD38);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// FAKEMATCH: the inline `scaleP()` returning &D_004A5B38 (a return-value pseudo keeps the address in $20 across 3 calls), and the PrintAt_FD38 helper (by-value position + reference offset, so q.x loads before half.x); plain form 94.30% (94.35% / 99.95% without each alone). Byte-identical and behaves like the plain form; landed marked under
+// FAKEMATCH: the inline `scaleP()` returning &D_004A5B38 (a return-value pseudo keeps the address in $20 across 3
+// calls), and the PrintAt_FD38 helper (by-value position + reference offset, so q.x loads before half.x); plain form
+// 94.30% (94.35% / 99.95% without each alone). Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-// scaleP(): returns &D_004A5B38 (the static scale vec); the target keeps that address in $20 across 3 calls, a pointer local
+// scaleP(): returns &D_004A5B38 (the static scale vec); the target keeps that address in $20 across 3 calls, a pointer
+// local
 //   or a direct &D_004A5B38 does not; only an inline returning the address (a return-value pseudo) matches.
-// PrintAt_FD38(font, float x, float y, const t2Vector& off, f, n): the target loads q.x before half.x but adds half.x + q.x;
+// PrintAt_FD38(font, float x, float y, const t2Vector& off, f, n): the target loads q.x before half.x but adds half.x +
+// q.x;
 //   by-value position args + a reference offset reproduce it.
 // Scale2(out, const float&, const float&, float s): the by-value 0.5 param fixes the block-6 FPR order.
 static inline void Scale2(t2Vector& out, const float& x, const float& y, float s) { out.x = x * s; out.y = y * s; }
@@ -2735,7 +2743,9 @@ extern "C" void func_0021FD38(char* self, char* obj) {
 INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P_renderSpeed);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// FAKEMATCH: both unit labels copied into locals `kmh` / `mph` up front (keeps "MPH" in $30 across the getVelocity call); plain form (`units = str_MPH` in the branch) 91.11%. Byte-identical and behaves like the plain form; landed marked under
+// FAKEMATCH: both unit labels copied into locals `kmh` / `mph` up front (keeps "MPH" in $30 across the getVelocity
+// call); plain form (`units = str_MPH` in the branch) 91.11%. Byte-identical and behaves like the plain form; landed
+// marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 // The rider's cBeing interface (rider + 0x6C0), slots in the prototype's order (as in seg/seg_1FBE38).
 struct t4Vector;

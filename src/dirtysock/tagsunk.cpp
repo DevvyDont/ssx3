@@ -835,7 +835,6 @@ extern char str_P2[];
 extern char str_FROM[];
 extern char str_ADDR[];
 extern char str_SEED[];
-extern int D_00535C08[];
 extern int D_004A11B8;
 extern int D_00534B34[];
 extern char D_005308B8[];
@@ -886,7 +885,7 @@ struct sVEntryA1D0 { short delta; short index; int (*fn)(void*); };
  * that is not us). Unless mState is 24 or 20 (waits that expect this message) it just sets mState 25 and shuts the game
  * connection down (func_00263BA8(..., 0)). Otherwise it sets mState 25 and, when P1 is present, configures
  * cBENewRaceInterface: P2 0 or 1 selects game mode 0 or 1 (5 or 6, with event 4 or 5, when P1 is 14..16), 2 selects
- * mode 3 and 3 mode 2; sets D_00535C08[0] = P1 and D_004A11B8 = 1, and when D_00534B34[0] is set ORs 0x1C0 into the
+ * mode 3 and 3 mode 2; sets cBENewRaceInterface_newRace.iLocationIdx = P1 and D_004A11B8 = 1, and when D_00534B34[0] is set ORs 0x1C0 into the
  * word at D_005308B8 + 0x18, sets no AI riders and calls the interface's virtual slot 1. Finally it starts the game
  * connection with func_00259098(..., mMatchType, 0) and posts a type-239 event. Called through the functor thunk
  * func_00268B80 (LobbyApi callback 4).
@@ -960,7 +959,7 @@ extern "C" void LobbyMan_onplaymsg(LobbyMan* self, char* msg)
         }
         cBENewRaceInterface_setGameMode(ri, mode);
         cBENewRaceInterface_setGameEvent(ri, kind);
-        D_00535C08[0] = ev;
+        cBENewRaceInterface_newRace.iLocationIdx = ev;
         D_004A11B8 = 1;
         cBE_getInterface_Fv(((void*)(SSXApp)->BE), 7);
         if (D_00534B34[0] != 0)
@@ -2629,7 +2628,8 @@ extern "C" void func_0025C878(LobbyMan* self)
 INCLUDE_ASM("dirtysock/tagsunk", LobbyMan_onauthentication);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// FAKEMATCH: identical if/else arms around the b3 GetString block change GCSE's table size and so the spill order (permuter); plain form 99.98%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
+// FAKEMATCH: identical if/else arms around the b3 GetString block change GCSE's table size and so the spill order
+// (permuter); plain form 99.98%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 
 extern "C" const char* cDirtysock_tag_TagFieldFind(const char* record, const char* name);
@@ -5626,7 +5626,8 @@ struct sName7 {
     char c[7];
 };
 
-// The network game state cBENetworkInterface_networkOpt (D_00534B34 = +0x4 and D_00534E58 = +0x328 are their own symbols).
+// The network game state cBENetworkInterface_networkOpt (D_00534B34 = +0x4 and D_00534E58 = +0x328 are their own
+// symbols).
 struct sNetState {
     int active;                     // 0x000
     int f4;                         // 0x004
@@ -5717,7 +5718,6 @@ extern "C" int cBENewRaceInterface_getLocationID(void* iface);
 // PORT: fptoui is libgcc's __fixunssfsi (float -> unsigned); called by its address name.
 extern "C" unsigned int fptoui(float f);
 extern "C" void func_00268EF0(void* self, void* a1, int a2);
-extern signed char D_00535C12[];
 extern int D_005366A8[];
 extern int D_00536640[];
 extern char str_WHEN[];
@@ -5851,7 +5851,7 @@ static inline int RaceTime(int end)
  * mCheating[0], @p statsA, @p idxA) or the peer's side B (the remote flags, unk_03C, mCheating[1], @p statsB, @p idxB).
  * Fields: WHEN (mWhen), REPT (the reporter: mHostName on the host, else mOppoName), AUTH (mAuth, only with @p
  * sendName), COMMERR, SCOMERR, PINGRSLT, STALLCNT, CERRSTAT, CERRFLGS, DIDQUIT0/1, FINISH0/1, DNF0/1 (D_005366A8),
- * RSLTSLCK (game-mode manager +0x9C), RACETRA0 (the location id), RACEEVE0 (D_00535C12[0]; for locations 14..16 it
+ * RSLTSLCK (game-mode manager +0x9C), RACETRA0 (the location id), RACEEVE0 (cBENewRaceInterface_newRace.cGameEvent; for locations 14..16 it
  * becomes 0 when that is 4, else 1), DESYNC, then per rider NAME (mHostName / mOppoName), QUIT (race time from unk_034
  * to the end time when the rider did not finish), CHEAT (mCheating), DISC (the same time when a significant comm error
  * is put on that side), CHARACTER, RACETIM or SCORE (D_00536640; SCORE when RACEEVE0 is nonzero) and the trick and
@@ -5976,7 +5976,7 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_RSLTSLCK, IsSet(*(int*)(prof + 0x9C)));
     int mode = cBENewRaceInterface_getLocationID(iface);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_RACETRA0, mode);
-    int ranked = D_00535C12[0];
+    int ranked = cBENewRaceInterface_newRace.cGameEvent;
     if (mode >= 0xE && mode <= 0x10) {
         if (ranked == 4)
             ranked = 0;

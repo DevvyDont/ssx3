@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnewrace.h"
 #include "be/berewarddb.h"
 #include "be/beintnetwork.h"
 #include "main/ssxapp.h"
@@ -271,7 +272,6 @@ extern "C" void cBENewRaceInterface_purgeInterface(void)
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_getNumberRiders);
 #ifdef SKIP_ASM
-extern char D_00535BF8[];
 
 /**
  * Returns the number of riders in the race being set up: cBENewRaceInterface_newRace.iNumberRiders.
@@ -279,13 +279,12 @@ extern char D_00535BF8[];
  * @return humans + mission riders + AI riders
  */
 extern "C" int cBENewRaceInterface_getNumberRiders(void) {
-    return *(int*)D_00535BF8;
+    return cBENewRaceInterface_newRace.iNumberRiders;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_getNumberHumans);
 #ifdef SKIP_ASM
-extern char D_00535BFC[];
 
 /**
  * Returns the number of human riders in the race being set up: cBENewRaceInterface_newRace.iNumberHumans.
@@ -293,13 +292,12 @@ extern char D_00535BFC[];
  * @return iNumberHumans
  */
 extern "C" int cBENewRaceInterface_getNumberHumans(void) {
-    return *(int*)D_00535BFC;
+    return cBENewRaceInterface_newRace.iNumberHumans;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_getAIRiders_Num);
 #ifdef SKIP_ASM
-extern char D_00535C04[];
 
 /**
  * Returns the number of AI riders in the race being set up: cBENewRaceInterface_newRace.iNumberAI.
@@ -307,13 +305,12 @@ extern char D_00535C04[];
  * @return iNumberAI
  */
 extern "C" int cBENewRaceInterface_getAIRiders_Num(void) {
-    return *(int*)D_00535C04;
+    return cBENewRaceInterface_newRace.iNumberAI;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_getNumberMission);
 #ifdef SKIP_ASM
-extern char D_00535C00[];
 
 /**
  * Returns the number of mission riders in the race being set up: cBENewRaceInterface_newRace.iNumberMissionRiders.
@@ -321,13 +318,12 @@ extern char D_00535C00[];
  * @return iNumberMissionRiders
  */
 extern "C" int cBENewRaceInterface_getNumberMission(void) {
-    return *(int*)D_00535C00;
+    return cBENewRaceInterface_newRace.iNumberMissionRiders;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_setRaceTime);
 #ifdef SKIP_ASM
-extern char D_00535C0C[];
 
 /**
  * Sets cBENewRaceInterface_newRace.iRaceTime to @p raceTime (@p self is unused).
@@ -335,13 +331,12 @@ extern char D_00535C0C[];
  * @param raceTime  the race time
  */
 extern "C" void cBENewRaceInterface_setRaceTime(void* self, int raceTime) {
-    *(int*)D_00535C0C = raceTime;
+    cBENewRaceInterface_newRace.iRaceTime = raceTime;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_getRaceTime);
 #ifdef SKIP_ASM
-extern char D_00535C0C[];
 
 /**
  * Returns cBENewRaceInterface_newRace.iRaceTime (set by cBENewRaceInterface_setRaceTime).
@@ -349,13 +344,12 @@ extern char D_00535C0C[];
  * @return the race time
  */
 extern "C" int cBENewRaceInterface_getRaceTime(void) {
-    return *(int*)D_00535C0C;
+    return cBENewRaceInterface_newRace.iRaceTime;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_getGameMode);
 #ifdef SKIP_ASM
-extern char D_00535C10[];
 
 /**
  * Returns the race's game mode: the signed byte cBENewRaceInterface_newRace.cGameMode (set by
@@ -364,13 +358,12 @@ extern char D_00535C10[];
  * @return cGameMode, sign-extended
  */
 extern "C" int cBENewRaceInterface_getGameMode(void) {
-    return *(signed char*)D_00535C10;
+    return cBENewRaceInterface_newRace.cGameMode;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_getGameEvent);
 #ifdef SKIP_ASM
-extern char D_00535C12[];
 
 /**
  * Returns the race's game event: the signed byte cBENewRaceInterface_newRace.cGameEvent (set by
@@ -379,13 +372,12 @@ extern char D_00535C12[];
  * @return cGameEvent, sign-extended
  */
 extern "C" int cBENewRaceInterface_getGameEvent(void) {
-    return *(signed char*)D_00535C12;
+    return cBENewRaceInterface_newRace.cGameEvent;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_getGamePath);
 #ifdef SKIP_ASM
-extern char D_00535C11[];
 
 /**
  * Returns the race's game path: the signed byte cBENewRaceInterface_newRace.cGamePath (0, 1, 2 = online; set by
@@ -394,13 +386,12 @@ extern char D_00535C11[];
  * @return cGamePath, sign-extended
  */
 extern "C" int cBENewRaceInterface_getGamePath(void) {
-    return *(signed char*)D_00535C11;
+    return cBENewRaceInterface_newRace.cGamePath;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_setLocationID);
 #ifdef SKIP_ASM
-extern char D_00535C08[];
 extern int D_004A11B8;
 
 /**
@@ -413,7 +404,7 @@ extern int D_004A11B8;
  */
 extern "C" void cBENewRaceInterface_setLocationID(void* self, int locationIndex)
 {
-    *(int*)D_00535C08 = locationIndex;
+    cBENewRaceInterface_newRace.iLocationIdx = locationIndex;
     D_004A11B8 = 1;
 }
 #endif
