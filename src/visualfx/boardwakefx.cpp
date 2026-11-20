@@ -4873,7 +4873,7 @@ extern "C" void cPlayerIndicatorFX_render(sWake_3AF8* self)
 INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_cTransitionMan);
 #ifdef SKIP_ASM
 extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
-extern "C" void* func_00282CD0(void* self);
+extern "C" void* cScriptObjTransition_cScriptObjTransition(void* self);
 extern "C" void cScriptObject_InitScriptObject(void* self);
 extern "C" void cTransitionObj_InitializeBuffers(void);
 extern void* D_00488100[];
@@ -4882,7 +4882,7 @@ extern void* cTransitionMan_vtbl[];
 /**
  * Constructs the screen transition manager for one view.
  *
- * Runs cObjNode_cObjNode1 with the bucket and the script-object constructor (func_00282CD0) on +0x10, stores the view
+ * Runs cObjNode_cObjNode1 with the bucket and the script-object constructor (cScriptObjTransition_cScriptObjTransition) on +0x10, stores the view
  * index at +0x74, zeroes the transition fields, sets the vtables (D_00488100 at +0x1C, cTransitionMan_vtbl at +0xC) and
  * the screen-grab handle at +0x6C to -1, then calls cTransitionObj_InitializeBuffers and cScriptObject_InitScriptObject on the script object.
  *
@@ -4893,7 +4893,7 @@ extern void* cTransitionMan_vtbl[];
 extern "C" void* cTransitionMan_cTransitionMan(void* self, void* bucket, int viewIndex)
 {
     cObjNode_cObjNode1(self, bucket);
-    func_00282CD0((char*)self + 0x10);
+    cScriptObjTransition_cScriptObjTransition((char*)self + 0x10);
     *(int*)((char*)self + 0x74) = viewIndex;
     *(int*)((char*)self + 0x40) = 0;
     *(int*)((char*)self + 0x44) = 0;
@@ -5430,12 +5430,12 @@ extern "C" void cTransitionMan_OnStartObjectUse(void* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4C60);
 #ifdef SKIP_ASM
-void func_00283440(void*);
+void cScriptObject_OnEndObjectUse(void*);
 extern "C" void func_002E4578(void* self);
 
 extern "C" void func_002E4C60(void* self)
 {
-    func_00283440((char*)self + 0x10);
+    cScriptObject_OnEndObjectUse((char*)self + 0x10);
     func_002E4578(self);
 }
 #endif

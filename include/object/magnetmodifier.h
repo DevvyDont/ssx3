@@ -4,7 +4,7 @@
 // cMagnetModifier: the transform modifier that pulls an object towards a being (rider) inside a radius (cMoveNode::addMagnet).
 // Unnamed in retail: vtable cMagnetModifier_vtbl (27 slots), identified by the "MagnetModifier" tag and On Tour's layout.
 // Size 0xB0: retail cMemMan_alloc(0xB0, "MagnetModifier") in cMoveNode's addMagnet and the replay loader (type 6); On Tour 0xB0.
-// Constructors func_003572E0 (matrix, radius, speed; src/object/movenode.cpp) and func_00357358 (replay frame);
+// Constructors cMagnetModifier_cMagnetModifier (matrix, radius, speed; src/object/movenode.cpp) and cMagnetModifier_cMagnetModifier1 (replay frame);
 // destructor cMagnetModifier__cMagnetModifier. EA's source file is unknown.
 // A FLAT layout: cTransformModifier (0x0: vptr) + cMagnetModifierState (0x10-0x58) + own fields; On Tour's state order,
 // with 4-byte bools (RootTransformDirty 0x50, AllowCollide 0x54 instead of 0x50/0x51).

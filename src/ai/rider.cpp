@@ -825,7 +825,7 @@ extern "C" void cRider_updateAnimation(cRider* self, float value);
 extern "C" void cRider_updateSkeleton(void* self);
 extern "C" void* cAnimModel_buildSkelMatrices(void* obj);
 extern "C" void cRider_updateBoundBox(cRider* self, int a1);
-extern "C" void func_00332DB8(void*, void*);
+extern "C" void cOverlapList_geteverything(void*, void*);
 extern "C" void cRider_updateActiveLights(cRider*);
 extern "C" void func_002105B0(int);
 
@@ -845,7 +845,7 @@ struct sHit_D660 {
 } __attribute__((aligned(16)));
 
 void cWorldLine_cWorldLine_D660(sRay_D660* ray, const t4Vector& a, const t4Vector& b, int n, float t) __asm__("cWorldLine_cWorldLine");
-extern float func_00336850_D660(void* coll, sRay_D660* ray, sHit_D660* hit, int flags) __asm__("func_00336850");
+extern float cBXNash_terrainIntersect1_D660(void* coll, sRay_D660* ray, sHit_D660* hit, int flags) __asm__("cBXNash_terrainIntersect1");
 
 struct sVE_D660 { short delta; short index; void (*fn)(void*); };
 
@@ -1116,7 +1116,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
  * animation.
  *
  * Clears the line/wall hints, faces the rider along atan2(@p dir) and, when @p drop >= 0, casts a terrain ray from 200
- * above to 7000 below @p pos (cWorldLine_cWorldLine/func_00336850) and stands the rider @p drop above the hit, tilted to the
+ * above to 7000 below @p pos (cWorldLine_cWorldLine/cBXNash_terrainIntersect1) and stands the rider @p drop above the hit, tilted to the
  * hit normal. Then resets the ground frame, velocity, impulse, the 19 smoothed channels (channel 9 to 1), spin/flip
  * rates, boost, rail/press state, attack and HUD message, sets the stance from IsGoofyStance (anim heading turned half
  * a turn when switched), plays @p anim, sets up and runs the animation and skeleton (cRiderAnimBase_setupAnimation,
@@ -1145,7 +1145,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
         sHit_D660 hit;
         sRay_D660 ray;
         cWorldLine_cWorldLine_D660(&ray, lo, hi, 2, 0.9791666865348816f);
-        if (func_00336850_D660(SSXApp->Game->BXNash, &ray, &hit, 0) >= 0.0f)
+        if (cBXNash_terrainIntersect1_D660(SSXApp->Game->BXNash, &ray, &hit, 0) >= 0.0f)
         {
             placePos = hit.pos;
             n = hit.normal;
@@ -1224,7 +1224,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
     cRider_updateSkeleton(self);
     cAnimModel_buildSkelMatrices(self->mAnimModel);
     cRider_updateBoundBox(self, 0);
-    func_00332DB8(self->mOverlapList, &self->mBoundsMin);
+    cOverlapList_geteverything(self->mOverlapList, &self->mBoundsMin);
     cRider_updateActiveLights(self);
     func_002105B0(self->mAIIndex);
     sVE_D660* vt = *(sVE_D660**)&self->mVtbl;
@@ -1373,7 +1373,7 @@ INCLUDE_ASM("ai/rider", cRider_cleanupAfterPutAt);
 #ifdef SKIP_ASM
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" void cRiderHandler_resetRiderFX(void* self);
-extern "C" void func_003099F8(void* self);
+extern "C" void cWScriptMan_eventReset(void* self);
 extern void* cWScriptMan_TheWScriptMan;
 
 struct sVec4_0011DF18
@@ -1406,7 +1406,7 @@ static inline sVec4_0011DF18 vu0Scale_11DF18(const sVec4_0011DF18& v, float s)
  * Clears word +0x90 of the rider animation's sequence 2, sets mVelocity to the front axis times 833.33 with
  * no z part and resets the handler's FX. With @p notify set it then calls virtual slot 3 of view 0's current
  * camera controller with the rider's AI index, probably to reset the camera. Last, it queues world-script op
- * 0x70005 (func_003099F8).
+ * 0x70005 (cWScriptMan_eventReset).
  *
  * @param notify  nonzero to notify view 0's camera controller (On Tour: resetCamera)
  */
@@ -1427,7 +1427,7 @@ extern "C" void cRider_cleanupAfterPutAt(cRider* self, int notify)
         char* objB = obj + vtB[3].delta;
         vtB[3].fn(objB, vtA[kRiderVt_getAIIndex].fn(sub + vtA[kRiderVt_getAIIndex].delta));
     }
-    func_003099F8(cWScriptMan_TheWScriptMan);
+    cWScriptMan_eventReset(cWScriptMan_TheWScriptMan);
 }
 #endif
 
@@ -3056,17 +3056,17 @@ extern "C" void cRider_updateFocus(cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", cRider_updateOverlapList);
 #ifdef SKIP_ASM
-extern "C" void func_00332DB8(void*, void*);
+extern "C" void cOverlapList_geteverything(void*, void*);
 extern "C" void cRider_updateActiveLights(cRider*);
 
 /**
  * Refreshes the rider's overlap list for its bounding box, then picks its active lights.
  *
- * Calls func_00332DB8(mOverlapList, &mBoundsMin) (a world sphere-tree query) and cRider_updateActiveLights().
+ * Calls cOverlapList_geteverything(mOverlapList, &mBoundsMin) (a world sphere-tree query) and cRider_updateActiveLights().
  */
 extern "C" void cRider_updateOverlapList(cRider* self)
 {
-    func_00332DB8(self->mOverlapList, &self->mBoundsMin);
+    cOverlapList_geteverything(self->mOverlapList, &self->mBoundsMin);
     cRider_updateActiveLights(self);
 }
 #endif
@@ -3130,7 +3130,7 @@ INCLUDE_ASM("ai/rider", cRider_updateSplit1);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int AITick();
 extern "C" int cPlaybackMan_isRecord(void* obj);
-extern "C" void func_00332DB8(void*, void*);
+extern "C" void cOverlapList_geteverything(void*, void*);
 extern "C" void cRider_updateActiveLights(cRider*);
 extern "C" void cRider_SetNISGroundVectors(void* self, void* p);
 extern "C" void cRider_updateTerminalVelocity(void* self);
@@ -3177,7 +3177,7 @@ extern "C" void cRider_updateSplit1(cRider* self)
                 goto skip;
         }
     }
-    func_00332DB8(self->mOverlapList, &self->mBoundsMin);
+    cOverlapList_geteverything(self->mOverlapList, &self->mBoundsMin);
     cRider_updateActiveLights(self);
 skip:
     if (self->mIsInNIS)
@@ -5173,7 +5173,7 @@ void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlSt
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
 extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
-int func_0027C958(void* self);
+int GetSSXActorHeader(void* self);
 extern "C" void GetSSXActorFrame(int, void*);
 struct sQuat_001241C0;
 extern "C" void cRider_EulerToQuat(cRider* self, sQuat_001241C0* out, float rx, float ry, float rz);
@@ -5297,7 +5297,7 @@ static inline sItem_3640* lookup_3640(sDb_3640* d, int i)
  * Starts a scripted sequence (NIS) for the rider: leaves normal control and poses the rider from the script.
  *
  * Sets CS_Void and MS_Static, plays anim 5, sets mIsInNIS and clears the event flag and sound ids. Byte 7 of
- * the script record (func_0027C958) sets unk_AFC (probe the ground at the board root), byte 4 sets unk_AD0
+ * the script record (GetSSXActorHeader) sets unk_AFC (probe the ground at the board root), byte 4 sets unk_AD0
  * (rider not drawn). The entity's channels give the start position, put through mScriptMatrix into mPosition,
  * and three angles in degrees that set mRotation.
  *
@@ -5321,8 +5321,8 @@ extern "C" void cRider_OnStartObjectUse(cRider* self)
         self->unk_B08[j] = -1;
     float zeroF;
     float one = 1.0f;
-    // PORT: func_0027C958 returns a record pointer as int
-    char* rec = (char*)func_0027C958(self->unk_6D8);
+    // PORT: GetSSXActorHeader returns a record pointer as int
+    char* rec = (char*)GetSSXActorHeader(self->unk_6D8);
     zeroF = 0.0f;
     self->unk_AFC = rec[7] != 0;
     self->unk_B00 = 1;
@@ -5410,7 +5410,7 @@ extern "C" void* cAudioInterface_bxAudio();
 void func_002A1BD0(void* p);
 extern "C" void func_0030EA80(void* model, int i, int channel);
 extern "C" void func_0030E9E0(void* model, int i, int channel);
-int func_0027C958(void* self);
+int GetSSXActorHeader(void* self);
 // PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
 void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
 extern "C" void* func_0014AD50(void* iface, int id);
@@ -5506,8 +5506,8 @@ extern "C" void cRider_OnEndObjectUse(cRider* self)
     func_0030EA80(self->mAnimModel, 11, 0);
     func_0030E9E0(self->mAnimModel, 4, 0);
     func_0030E9E0(self->mAnimModel, 7, 0);
-    // PORT: func_0027C958 returns a record pointer as int
-    if (*(signed char*)((char*)func_0027C958(self->unk_6D8) + 6) != 0) {
+    // PORT: GetSSXActorHeader returns a record pointer as int
+    if (*(signed char*)((char*)GetSSXActorHeader(self->unk_6D8) + 6) != 0) {
         void* iface = cBE_getInterface(cBE_getBE(), 9);
         void* tbl = func_0014BDB8_noarg();
         sDb_123B48* db = (sDb_123B48*)func_0014AD50(iface, self->mAIIndex);
@@ -5642,7 +5642,7 @@ INCLUDE_ASM("ai/rider", cRider_GetNISEndPosition);
 #ifdef SKIP_ASM
 extern "C" void* cPathSys_getStartpoint(void*, int, int);
 extern char gPaths[];
-int func_0027C958(void* self);
+int GetSSXActorHeader(void* self);
 
 struct sV_3F38 {
     float x, y, z, w;
@@ -5660,7 +5660,7 @@ struct sHit_3F38 {
 } __attribute__((aligned(16)));
 
 extern "C" void cWorldLine_cWorldLine_3F38(sRay_3F38* ray, const sV_3F38& a, const sV_3F38& b, int n, float t) __asm__("cWorldLine_cWorldLine");
-extern "C" float func_00336850(void* self, sRay_3F38* ray, sHit_3F38* out, int a3);
+extern "C" float cBXNash_terrainIntersect1(void* self, sRay_3F38* ray, sHit_3F38* out, int a3);
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
 static inline sV_3F38 Scale_3F38(const sV_3F38& v, float s)
@@ -5723,8 +5723,8 @@ extern "C" sV_3F38 cRider_GetNISEndPosition(cRider* self)
     if (self->unk_6E4 <= 0)
         return *(sV_3F38*)&self->mPosition;
     float lift = 0.0f;
-    // PORT: func_0027C958 returns a record pointer as int
-    char* rec = (char*)func_0027C958(self->unk_6D8);
+    // PORT: GetSSXActorHeader returns a record pointer as int
+    char* rec = (char*)GetSSXActorHeader(self->unk_6D8);
     sV_3F38 pos = *(sV_3F38*)&self->mPosition;
     switch (*(signed char*)(rec + 5)) {
     case 0:
@@ -5812,7 +5812,7 @@ extern "C" sV_3F38 cRider_GetNISEndPosition(cRider* self)
     sHit_3F38 hit;
     sRay_3F38 ray;
     cWorldLine_cWorldLine_3F38(&ray, lo, hi, 2, 0.9791666865348816f);
-    if (func_00336850(SSXApp->Game->BXNash, &ray, &hit, 0) >= 0.0f)
+    if (cBXNash_terrainIntersect1(SSXApp->Game->BXNash, &ray, &hit, 0) >= 0.0f)
         pos = hit.pos;
     AddTo_3F38(pos, Scale_3F38(D_004FF160_3F38, lift));
     return pos;
@@ -5888,7 +5888,7 @@ struct sHit_42B0 {
 struct sVE_42B0 { short delta; short index; sV_42B0* (*fn)(void*); };
 
 extern "C" void cWorldLine_cWorldLine(sRay_42B0* ray, const sV_42B0& a, const sV_42B0& b, int n, float t);
-extern "C" float func_003342D0(void* coll, sRay_42B0* ray, sHit_42B0* hit, int flags);
+extern "C" float cOverlapList_terrainIntersect1(void* coll, sRay_42B0* ray, sHit_42B0* hit, int flags);
 void func_00111AA0_42B0(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
 
 // PORT: PS2-only VU0 inline asm (vector length).
@@ -6042,7 +6042,7 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* p) __asm__("
  *
  * The probe base is @p pRiderPos moved along mGroundSide by mAnimModel->unk_140.x * mSlewed[0].cur * 45; a line from 100 below
  * to 200 above it (along mGroundNormal) is built with cWorldLine_cWorldLine and intersected with the terrain through
- * mOverlapList (func_003342D0). The speed is the length of the virtual getVelocity, and unk_380 keeps the previous
+ * mOverlapList (cOverlapList_terrainIntersect1). The speed is the length of the virtual getVelocity, and unk_380 keeps the previous
  * mGroundNormal. A hit object sets mGroundPolyId (object +0x150), unk_AAC / unk_AB0 (the hit's +0x6C / +0x70) and
  * unk_2D4 (the object's half-word +0xA); otherwise mGroundPolyId becomes -1.
  *
@@ -6069,7 +6069,7 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
     sHit_42B0 hit;
     sRay_42B0 ray;
     cWorldLine_cWorldLine(&ray, lo, hi, 2, 0.5f);
-    float hitDist = func_003342D0(self->mOverlapList, &ray, &hit, 0);
+    float hitDist = cOverlapList_terrainIntersect1(self->mOverlapList, &ray, &hit, 0);
     *(sV_42B0*)&self->unk_380 = *(sV_42B0*)&self->mGroundNormal;
     if (hitDist > 0.0f && hit.obj != 0) {
         self->mGroundPolyId = *(int*)(hit.obj + 0x150);
@@ -6134,7 +6134,7 @@ struct tAnimID {
     tAnimID(int s, int i) { AnimID = i; SourceID = s; }
 };
 
-void func_00280520(void* self, int id, void* outA, void* outB);
+void cScriptObjRider_ScriptAnimIDToGameAnimInfo(void* self, int id, void* outA, void* outB);
 extern "C" void cRiderAnimBase_getAIAnimFrame(void* buf, void* anim, int id, tAnimID a3, float t);
 extern "C" void func_0030ECD8(void* xf, void* model, void* buf, int a3);
 extern "C" void cRiderAnimBase_changeOrientationOffset(void* self, void* xf);
@@ -6369,7 +6369,7 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* 
  * position and angles.
  *
  * On a key event (@p eventBits bit 0) whose main anim starts at @p currFrame: maps the script anim to a game anim
- * (func_00280520), re-bases the rider so the anim's root starts at the hips (custom flag root), applies the start-gate
+ * (cScriptObjRider_ScriptAnimIDToGameAnimInfo), re-bases the rider so the anim's root starts at the hips (custom flag root), applies the start-gate
  * knee/horizontal offsets (drift), flips the heading offset when the anim's heading flag changes, and plays it from its
  * start frame at its speed (cRiderAnimBase_playFromAnimID, sequence 2). On bit 1 with no active anim it plays anim 5.
  *
@@ -6400,7 +6400,7 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* 
         float startTime = pCurrMainAnim->rate * 0.01666666753590107f;
         int animID;
         int sourceID;
-        func_00280520(&self->mScriptObjRiderVtbl, pCurrMainAnim->name, &animID, &sourceID);
+        cScriptObjRider_ScriptAnimIDToGameAnimInfo(&self->mScriptObjRiderVtbl, pCurrMainAnim->name, &animID, &sourceID);
         tAnimID animInfo(sourceID, animID);
         if (pCurrMainAnimCustom->root != 0) {
             char buf[80];
@@ -6715,7 +6715,7 @@ INCLUDE_ASM("ai/rider", cRider_DoInSeqSoundUpdate);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" int cBankMonitor_BANKMONITOR_GetHandle(void* bank, int id, int a);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
-void func_00280548(void* self, int a1, void* a2, void* a3);
+void cScriptObjRider_ScriptSoundIDToGameSoundInfo(void* self, int a1, void* a2, void* a3);
 extern "C" int func_00287968(void* self, int a1, int a2);
 extern "C" int func_00288A20(void* self, void* rider);
 extern "C" int cBankSys_SFX_End(void* self);
@@ -6793,7 +6793,7 @@ struct sSfxEnt_5448 {
  *
  * First forgets any of the rider's 4 sequence sound handles (+0xB08) the bank monitor no longer has. On a key event
  * (bit 0 of @p flags) it walks the frame's sound list (+0xC of @p vobj) while each entry's frame equals @p when, maps
- * the script sound id (func_00280548), fills a new sound-play slot in the audio system with defaults, the entry's
+ * the script sound id (cScriptObjRider_ScriptSoundIDToGameSoundInfo), fills a new sound-play slot in the audio system with defaults, the entry's
  * volume (clamped 0..127), the volume control (func_00287968) and the rider's position and closest camera
  * (func_00288A20), starts it (cBankSys_SFX_End) and keeps the handle in the entry's slot. At the end of the sequence
  * (bit 1) every slot no longer in the list is stopped.
@@ -6825,7 +6825,7 @@ extern "C" void cRider_DoInSeqSoundUpdate(cRider* vself, void* vobj, float when,
             if ((float)curSound->when != when)
                 return;
             int gameSoundIndex, type;
-            func_00280548(&self->mScriptObjRiderVtbl, curSound->id, &gameSoundIndex, &type);
+            cScriptObjRider_ScriptSoundIDToGameSoundInfo(&self->mScriptObjRiderVtbl, curSound->id, &gameSoundIndex, &type);
             int tp = type;
             int ar = gameSoundIndex;
             sWtTrack_5448* curTrack = snd->track;
@@ -7434,7 +7434,7 @@ INCLUDE_ASM("ai/rider", cPlayer_getControlCmd);
 #ifdef SKIP_ASM
 int cRider_getControlState(void*);
 extern "C" float cInput_getValue(void* pad, int axis);
-extern "C" void func_0026D178(void* cache, void* input);
+extern "C" void cReplayCache_updateControlCmd(void* cache, void* input);
 
 // One frame of pad input packed for the rider's current state (cRider_getControlState); each state has its own layout.
 // Buttons are 1 bit, analog values are 0..31 in 6 bits.
@@ -7504,7 +7504,7 @@ union sRiderInput_127998 {
  * +0xDF0, 1 bit each) and analog values (cInput_getValue * 31, 6 bits each). States 4 and 5 also pack cPlayer_getGrabHeld's
  * value and states 7 and 12 cPlayer_getUberGrindHeld's (8 bits each); state 5 adds a three-way value from axis 3 (-1 below -0.5, 1
  * above 0.5, else 0); state 11 packs two buttons and an analog value, state 8 two buttons, states 6 and 10 one analog
- * value and state 13 nothing. When a replay recorder is attached (+0xDF8) the command is passed to func_0026D178.
+ * value and state 13 nothing. When a replay recorder is attached (+0xDF8) the command is passed to cReplayCache_updateControlCmd.
  *
  * @param cmd  receives the packed command (On Tour tControlCmd)
  */
@@ -7634,7 +7634,7 @@ extern "C" void cPlayer_getControlCmd(char* self, sRiderInput_127998* cmd)
         break;
     }
     if (*(void**)(self + 0xDF8)) {
-        func_0026D178(*(void**)(self + 0xDF8), cmd);
+        cReplayCache_updateControlCmd(*(void**)(self + 0xDF8), cmd);
     }
 }
 #endif

@@ -22,7 +22,7 @@ extern void memcpy_3578(void *, void *, int) __asm__("MEM_copy");
 // unpack returns unpackz's decoded length (int).
 extern int f_47F8_3578(void *, void *) __asm__("unpack");
 extern SHAPE_3578 *f_4690_3578(SHAPE_3578 *) __asm__("SHAPE_clone");
-extern char *f_4010_3578(SHAPE_3578 *, int, int, int) __asm__("func_003B4010");
+extern char *f_4010_3578(SHAPE_3578 *, int, int, int) __asm__("SHAPE_getpixeladr");
 extern void f_33B0_3578(char *, char *, int, int, int) __asm__("undxtpack");
 extern void SHAPE_cloneat_3578(void *, SHAPE_3578 *) __asm__("SHAPE_cloneat");
 
@@ -272,7 +272,7 @@ unsigned char *SHAPE_longname(unsigned char *shp) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B3A50);
+INCLUDE_ASM("ealib/seg_2B4578", SHAPE_size1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // SHAPE_size (On Tour realgraph shpsize.cpp; this build has no swizzlesize helpers): byte size of a
@@ -300,7 +300,7 @@ extern int SHAPE_depth_3A50(SHAPE_3A50 *) __asm__("SHAPE_depth");
  * @param swizzled  nonzero for PS2-swizzled palette data
  * @return the size plus the 16-byte header, or 0 when the image is empty
  */
-int func_003B3A50(int shptype, int width, int height, unsigned int mipmaps, int swizzled) {
+int SHAPE_size1(int shptype, int width, int height, unsigned int mipmaps, int swizzled) {
     unsigned int i;
     int shpsize;
     SHAPE_3A50 shp;
@@ -351,7 +351,7 @@ int func_003B3A50(int shptype, int width, int height, unsigned int mipmaps, int 
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_size);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003B3A50_3BB0(unsigned char, short, short, unsigned int, int) __asm__("func_003B3A50");
+extern int SHAPE_size1_3BB0(unsigned char, short, short, unsigned int, int) __asm__("SHAPE_size1");
 extern int func_003B4D00_3BB0(char *, int *) __asm__("func_003B4D00");
 extern int strlen_3BB0(char *) __asm__("strlen");
 
@@ -399,7 +399,7 @@ int SHAPE_size(char *shp) {
             }
         } else {
             w = *(int *)(shp + 0xC);
-            shapeSize = func_003B3A50_3BB0(*(unsigned char *)shp, *(short *)(shp + 4), *(short *)(shp + 6), (unsigned int)w >> 28, (w >> 13) & 1);
+            shapeSize = SHAPE_size1_3BB0(*(unsigned char *)shp, *(short *)(shp + 4), *(short *)(shp + 6), (unsigned int)w >> 28, (w >> 13) & 1);
         }
         return shapeSize;
     }
@@ -556,7 +556,7 @@ int SHAPE_type(int bpp) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B3E40);
+INCLUDE_ASM("ealib/seg_2B4578", SHAPE_getpixeloffset);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { unsigned int fmt : 8; unsigned int size : 24; short w; short h; char pad8[4]; int flags; } SH_3E40;
@@ -569,7 +569,7 @@ extern int func_003B4218_3E40(int, int, int, int, int) __asm__("func_003B4218");
  * Adds up the earlier levels (DXT type 0x60 counts 4x4 blocks of 64 bits), then: palette types 0x20/0x21 with the
  * swizzle flag (0x2000) swap entries 8..23 of each 32 for the PS2 CLUT order and return without the level offset; other
  * swizzled shapes use func_003B4218; linear ones use y * (row bits rounded to 16) + x * bpp. Quirk: earlier levels are
- * aligned to 16 bits here but to 16 bytes in func_003B3A50. Nothing in the code or data calls it.
+ * aligned to 16 bits here but to 16 bytes in SHAPE_size1. Nothing in the code or data calls it.
  *
  * @param shp  the shape
  * @param x  pixel column
@@ -577,7 +577,7 @@ extern int func_003B4218_3E40(int, int, int, int, int) __asm__("func_003B4218");
  * @param level  mip level
  * @return the offset in bits from the start of the image data
  */
-int func_003B3E40(SH_3E40 *shp, int x, int y, int level) {
+int SHAPE_getpixeloffset(SH_3E40 *shp, int x, int y, int level) {
     int w, height, bpp, off, i, bitOffset, px, py;
 
     px = x;
@@ -631,7 +631,7 @@ int func_003B3E40(SH_3E40 *shp, int x, int y, int level) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B4010);
+INCLUDE_ASM("ealib/seg_2B4578", SHAPE_getpixeladr);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Img_4010 {
@@ -650,7 +650,7 @@ extern int func_003B4218_4010(int x, int y, int w, int h, int bpp) __asm__("func
  * Returns the address of a pixel in a shape's image data at a mip level.
  *
  * The image data starts after the 16-byte header, or at the header's offset word (+0x10) when flag 0x1000 is set. The
- * bit offset is worked out as in func_003B3E40 (same quirks) and divided by 8. Called by SHAPE_unpack.
+ * bit offset is worked out as in SHAPE_getpixeloffset (same quirks) and divided by 8. Called by SHAPE_unpack.
  *
  * @param img  the shape
  * @param x  pixel column
@@ -658,7 +658,7 @@ extern int func_003B4218_4010(int x, int y, int w, int h, int bpp) __asm__("func
  * @param mip  mip level
  * @return the address of the byte holding the pixel
  */
-char *func_003B4010(struct Img_4010 *img, int x, int y, int mip) {
+char *SHAPE_getpixeladr(struct Img_4010 *img, int x, int y, int mip) {
     char *data;
     int w;
     int height;
@@ -740,7 +740,7 @@ extern int func_003B4448(int, int, int);
  * Returns the bit offset of a texel in PS2-swizzled image data, by bits per pixel.
  *
  * 4 bpp uses func_003B42B0, 8 bpp func_003B4338, 15/16 bpp func_003B43C0, 32 bpp func_003B4448; other depths give 0.
- * The height is unused. Called by func_003B3E40 and func_003B4010.
+ * The height is unused. Called by SHAPE_getpixeloffset and SHAPE_getpixeladr.
  *
  * @param texelX  texel column
  * @param texelY  texel row
@@ -852,7 +852,7 @@ int func_003B4448(int texelX, int texelY, int width) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B4458);
+INCLUDE_ASM("ealib/seg_2B4578", SHAPE_setmemcallbacks);
 #ifdef SKIP_ASM
 extern int D_0044C450[];
 extern int SHAPE_memallocalign[];
@@ -861,14 +861,14 @@ extern int D_0044C458[];
 /**
  * Sets the SHAPE library's memory callbacks: allocate, aligned allocate and free.
  *
- * Stores them in D_0044C450, SHAPE_memallocalign and D_0044C458; SHAPE_destroy-like func_003B2B68 frees through the
+ * Stores them in D_0044C450, SHAPE_memallocalign and D_0044C458; SHAPE_destroy-like SHAPE_destroy frees through the
  * last. Nothing in the code or data calls it.
  *
  * @param memAlloc  the allocate function
  * @param memAllocAlign  the aligned allocate function
  * @param memFree  the free function
  */
-void func_003B4458(int memAlloc, int memAllocAlign, int memFree) {
+void SHAPE_setmemcallbacks(int memAlloc, int memAllocAlign, int memFree) {
     D_0044C450[0] = memAlloc;
     SHAPE_memallocalign[0] = memAllocAlign;
     D_0044C458[0] = memFree;
@@ -1134,7 +1134,7 @@ int f_4818(unsigned char *src) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B49B0);
+INCLUDE_ASM("ealib/seg_2B4578", unpacksize);
 #ifdef SKIP_ASM
 extern void unpacksizez();
 
@@ -1143,7 +1143,7 @@ extern void unpacksizez();
  *
  * The source pointer passes through in $a0 although the declaration takes none. Nothing in the code or data calls it.
  */
-void func_003B49B0(void) {
+void unpacksize(void) {
     unpacksizez();
 }
 #endif
@@ -1308,7 +1308,7 @@ int func_003B4D00(unsigned char *packed, int *outlen) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B4DD8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_getopts);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Sub_4DD8 {
@@ -1336,7 +1336,7 @@ extern int D_0044C45C;
 extern int D_0044C460;
 extern int func_003C0C90_4DD8() __asm__("func_003C0C90");
 
-int func_003B4DD8_4DD8(struct Cfg_4DD8 *out) __asm__("func_003B4DD8");
+int SNDSYS_getopts_4DD8(struct Cfg_4DD8 *out) __asm__("SNDSYS_getopts");
 
 /**
  * Copies the sound system's options into a caller's buffer, setting the defaults on first use.
@@ -1344,12 +1344,12 @@ int func_003B4DD8_4DD8(struct Cfg_4DD8 *out) __asm__("func_003B4DD8");
  * The first call stores func_003C0C90's result (D_0044C460) and sets 16 bank slots (+0x08 of the options at
  * D_0050A908), +0x2B to 90, +0x1C to 1, +0x14 to -1.0f, and saves a copy (D_0050A8E8 +0xD4). Every call copies the
  * 0xD4-byte block at D_0050A8E8 out. Called by func_003B5158 and the game's sound setup (func_003C53D8 ...
- * func_003C5C30), which change fields and pass them to func_003B4FC0.
+ * func_003C5C30), which change fields and pass them to SNDSYS_setopts.
  *
  * @param out  receives the 0xD4-byte options
  * @return func_003C0C90's result from the first call
  */
-int func_003B4DD8_4DD8(struct Cfg_4DD8 *out) {
+int SNDSYS_getopts_4DD8(struct Cfg_4DD8 *out) {
     if (D_0044C45C == 0) {
         D_0044C460 = func_003C0C90_4DD8();
         D_0044C45C = 1;
@@ -1365,7 +1365,7 @@ int func_003B4DD8_4DD8(struct Cfg_4DD8 *out) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B4FC0);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_setopts);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -1417,7 +1417,7 @@ struct sA8E8Tail {                  /* +0xC0 (D_0050A9A8) */
     int f0C;
     int f10;
 };
-struct sA8E8Setup {                 /* 0xD4: what func_003B4DD8 hands out */
+struct sA8E8Setup {                 /* 0xD4: what SNDSYS_getopts hands out */
     unsigned short f00;
     unsigned short f02;
     unsigned char f04;
@@ -1571,7 +1571,7 @@ extern struct sA8E8 D_0050A8E8;
 extern struct sA8E8Cfg D_0050A908;      /* D_0050A8E8.setup.cfg */
 extern struct sA8E8Tail D_0050A9A8;     /* D_0050A8E8.setup.tail */
 extern int func_003C0E28(void);
-int func_003B4FC0_impl(struct sA8E8Setup *p) __asm__("func_003B4FC0");
+int SNDSYS_setopts_impl(struct sA8E8Setup *p) __asm__("SNDSYS_setopts");
 /**
  * Applies sound system options: copies them in, updates the driver and saves a copy.
  *
@@ -1579,10 +1579,10 @@ int func_003B4FC0_impl(struct sA8E8Setup *p) __asm__("func_003B4FC0");
  * func_003C0E28, then copies the configuration into the saved block (D_0050A8E8 +0xD4). The first 0x20 bytes of the
  * options are not applied.
  *
- * @param sysOpts  the options (as filled by func_003B4DD8)
+ * @param sysOpts  the options (as filled by SNDSYS_getopts)
  * @return 0
  */
-int func_003B4FC0_impl(struct sA8E8Setup *sysOpts) {
+int SNDSYS_setopts_impl(struct sA8E8Setup *sysOpts) {
     __builtin_memcpy(&D_0050A908, &sysOpts->cfg, sizeof(struct sA8E8Cfg));
     D_0050A9A8 = sysOpts->tail;
     func_003C0E28();
@@ -1601,13 +1601,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B5158);
 extern struct sA8E8 D_0050A8E8;
 extern char str_SNDAUTHOR_Rgerhards_Thursday_10_51AM_Aug;
 extern void func_00416210_5158(void *, int, int) __asm__("func_00416210");
-void func_003B5BD0_5158(struct sA8E8Heap *a0, int a1) __asm__("func_003B5BD0");
-int func_003B4DD8_5158(struct sA8E8Setup *out) __asm__("func_003B4DD8");
-int func_003B4FC0_impl(struct sA8E8Setup *p) __asm__("func_003B4FC0");
-void func_003BC588(int arg0);
+void SNDMEMI_init_5158(struct sA8E8Heap *a0, int a1) __asm__("SNDMEMI_init");
+int SNDSYS_getopts_5158(struct sA8E8Setup *out) __asm__("SNDSYS_getopts");
+int SNDSYS_setopts_impl(struct sA8E8Setup *p) __asm__("SNDSYS_setopts");
+void SNDI_randomseed(int arg0);
 void func_003C3300(void);
-void func_003B58A0(void);
-void func_003B58D8(void);
+void SNDSYS_entercritical(void);
+void SNDSYS_leavecritical(void);
 extern void *func_003B5C60_5158(int) __asm__("func_003B5C60");
 extern int func_003C1B80(void);
 extern void func_003C2268_5320() __asm__("func_003C2268");
@@ -1620,9 +1620,9 @@ int func_003B5158_impl(void *buf, int size, int arg2) __asm__("func_003B5158");
  * Starts the EA sound system in a heap: memory, options, channel and bank tables, platform.
  *
  * Touches the "SNDAUTHOR" string, returns 0 at once when already started (D_0050A8E8 +0x174). Clears the heap
- * (func_00416210) and hands it to func_003B5BD0; without channels configured it applies the default options
- * (func_003B4DD8, func_003B4FC0). Then func_003BC588, func_003C3300, marks itself started and, in a critical section
- * (func_003B58A0/func_003B58D8), allocates 0x8C bytes per channel (+0x1F0) and 16 per bank slot (+0x1F4). On a
+ * (func_00416210) and hands it to SNDMEMI_init; without channels configured it applies the default options
+ * (SNDSYS_getopts, SNDSYS_setopts). Then SNDI_randomseed, func_003C3300, marks itself started and, in a critical section
+ * (SNDSYS_entercritical/SNDSYS_leavecritical), allocates 0x8C bytes per channel (+0x1F0) and 16 per bank slot (+0x1F4). On a
  * func_003C1B80 failure it undoes the platform (func_003C2268, func_003C3358) and returns the error. Finally it fills
  * the speaker angle table (+0x2E0) for 2..6 outputs and calls func_003BC0B0.
  *
@@ -1638,19 +1638,19 @@ int func_003B5158_impl(void *buf, int size, int arg2) {
     str_SNDAUTHOR_Rgerhards_Thursday_10_51AM_Aug = 'S';
     if (D_0050A8E8.f174 != 0) return 0;
     func_00416210_5158(buf, 0, size);
-    func_003B5BD0_5158(buf, size);
+    SNDMEMI_init_5158(buf, size);
     if (D_0050A8E8.f17E == 0) {
-        result = func_003B4DD8_5158(&D_0050A8E8.setup);
+        result = SNDSYS_getopts_5158(&D_0050A8E8.setup);
         if (result < 0) return result;
-        func_003B4FC0_impl(&D_0050A8E8.setup);
+        SNDSYS_setopts_impl(&D_0050A8E8.setup);
     }
-    func_003BC588(D_0050A8E8.setup.cfg.f04);
+    SNDI_randomseed(D_0050A8E8.setup.cfg.f04);
     func_003C3300();
     D_0050A8E8.f174 = 1;
-    func_003B58A0();
+    SNDSYS_entercritical();
     D_0050A8E8.f1F0 = func_003B5C60_5158(D_0050A8E8.f17E * 140);
     D_0050A8E8.f1F4 = func_003B5C60_5158(D_0050A8E8.setup.cfg.f08 << 4);
-    func_003B58D8();
+    SNDSYS_leavecritical();
     D_0050A8E8.f330 = 0;
     D_0050A8E8.f175 = 0x7F;
     D_0050A8E8.f180 = 0;
@@ -1695,18 +1695,18 @@ int func_003B5158_impl(void *buf, int size, int arg2) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5320);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_restore);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003B5440_5320() __asm__("func_003B5440");
 extern int func_003B82B8_5320(int, int, int, int, int) __asm__("func_003B82B8");
-extern void func_003BC530_5320() __asm__("func_003BC530");
+extern void SNDI_freespkrtable_5320() __asm__("SNDI_freespkrtable");
 extern void func_003B8A38_5320() __asm__("func_003B8A38");
 extern void func_003C2268_5320() __asm__("func_003C2268");
-extern void func_003B58A0_5320() __asm__("func_003B58A0");
-extern void func_003B5E98_5320(int) __asm__("func_003B5E98");
-extern void func_003B58D8_5320() __asm__("func_003B58D8");
-extern int func_003B5C40_5320() __asm__("func_003B5C40");
+extern void SNDSYS_entercritical_5320() __asm__("SNDSYS_entercritical");
+extern void SNDMEMI_free_5320(int) __asm__("SNDMEMI_free");
+extern void SNDSYS_leavecritical_5320() __asm__("SNDSYS_leavecritical");
+extern int SNDMEMI_restore_5320() __asm__("SNDMEMI_restore");
 extern void func_003C3358_5320() __asm__("func_003C3358");
 struct G_5320 {
     char pad0[0x174]; char f174; char pad1[0x1D8 - 0x175];
@@ -1719,13 +1719,13 @@ extern struct G_5320 D_0050A8E8_5320 __asm__("D_0050A8E8");
  * Shuts the EA sound system down and releases its tables.
  *
  * Returns -14 when it is not started. Stops everything (func_003B82B8(0, 0, 0, -1, -1)), runs the shutdown hooks
- * (+0x1D8, +0x1DC, +0x1E0, +0x1EC, +0x1E8), func_003BC530, func_003B8A38, hook +0x1E4 with -1, func_003C2268, frees the
- * channel and bank-slot tables with func_003B5E98 in a critical section, restores memory (func_003B5C40), clears the
+ * (+0x1D8, +0x1DC, +0x1E0, +0x1EC, +0x1E8), SNDI_freespkrtable, func_003B8A38, hook +0x1E4 with -1, func_003C2268, frees the
+ * channel and bank-slot tables with SNDMEMI_free in a critical section, restores memory (SNDMEMI_restore), clears the
  * started flag and calls func_003C3358. Called by cPS2SoundManager_Shutdown and func_003C5E08.
  *
- * @return func_003B5C40's result, or -14 when not started
+ * @return SNDMEMI_restore's result, or -14 when not started
  */
-int func_003B5320(void) {
+int SNDSYS_restore(void) {
     int memResult;
     if (func_003B5440_5320() == 0) return -14;
     func_003B82B8_5320(0, 0, 0, -1, -1);
@@ -1734,15 +1734,15 @@ int func_003B5320(void) {
     if (D_0050A8E8_5320.f1E0) D_0050A8E8_5320.f1E0();
     if (D_0050A8E8_5320.f1EC) D_0050A8E8_5320.f1EC();
     if (D_0050A8E8_5320.f1E8) D_0050A8E8_5320.f1E8();
-    func_003BC530_5320();
+    SNDI_freespkrtable_5320();
     func_003B8A38_5320();
     if (D_0050A8E8_5320.f1E4) D_0050A8E8_5320.f1E4(-1);
     func_003C2268_5320();
-    func_003B58A0_5320();
-    func_003B5E98_5320(D_0050A8E8_5320.f1F0);
-    func_003B5E98_5320(D_0050A8E8_5320.f1F4);
-    func_003B58D8_5320();
-    memResult = func_003B5C40_5320();
+    SNDSYS_entercritical_5320();
+    SNDMEMI_free_5320(D_0050A8E8_5320.f1F0);
+    SNDMEMI_free_5320(D_0050A8E8_5320.f1F4);
+    SNDSYS_leavecritical_5320();
+    memResult = SNDMEMI_restore_5320();
     D_0050A8E8_5320.f174 = 0;
     func_003C3358_5320();
     return memResult;
@@ -1758,7 +1758,7 @@ extern signed char D_0050AA5C_5440[16] __asm__("D_0050AA5C");
 /**
  * Returns whether the EA sound system is started (D_0050AA5C).
  *
- * Called by func_003B5320 and, before using sound, the movie player (func_003ADEC8, func_003AED40).
+ * Called by SNDSYS_restore and, before using sound, the movie player (func_003ADEC8, func_003AED40).
  *
  * @return nonzero when started
  */
@@ -1798,7 +1798,7 @@ void func_003B5470(void) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5478);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003BC910(void);
+extern void SNDREAL_exithandler(void);
 extern void SYNCTASK_add_5478(void *, int, int) __asm__("SYNCTASK_add");
 extern void func_003E4A30_5478(void *) __asm__("func_003E4A30");
 extern int D_0044C464_C464[] __asm__("D_0044C464");
@@ -1808,7 +1808,7 @@ extern void (*D_0050A9B0_A9B0[])() __asm__("D_0050A9B0");
  * Hooks the EA sound system into the game's frame and timer services.
  *
  * Stores func_003B5470 in the options-tail hook D_0050A9B0, registers func_003B5450 once as a SYNCTASK (SYNCTASK_add
- * with 0, 1; D_0044C464 remembers it) and passes func_003BC910 to func_003E4A30. Called by cPS2SoundManager_Init.
+ * with 0, 1; D_0044C464 remembers it) and passes SNDREAL_exithandler to func_003E4A30. Called by cPS2SoundManager_Init.
  *
  * @return 0
  */
@@ -1818,7 +1818,7 @@ int func_003B5478(void) {
         SYNCTASK_add_5478(func_003B5450, 0, 1);
         D_0044C464_C464[0] = 1;
     }
-    func_003E4A30_5478(func_003BC910);
+    func_003E4A30_5478(SNDREAL_exithandler);
     return 0;
 }
 #endif
@@ -1856,23 +1856,23 @@ void func_003B54E0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5540);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSYSI_timerservice);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 
 extern struct sA8E8 D_0050A8E8;
-extern void func_003B55F0_5540(void) __asm__("func_003B55F0");
+extern void SNDSYSI_100hzserver_5540(void) __asm__("SNDSYSI_100hzserver");
 
 /**
  * Catches the 100 Hz sound server up with a timer that runs at the given rate.
  *
  * While started: a new rate resets the call count (+0x330) and the tick (+0x180); each call adds one and runs
- * func_003B55F0 until the tick passes calls * 100 / rate. Called by func_003C19A8.
+ * SNDSYSI_100hzserver until the tick passes calls * 100 / rate. Called by func_003C19A8.
  *
  * @param timerHertz  the calling timer's rate in Hz
  */
-void func_003B5540(unsigned timerHertz) {
+void SNDSYSI_timerservice(unsigned timerHertz) {
     unsigned lim;
     if (D_0050A8E8.f174 != 0) {
         if ((int)timerHertz != (short)D_0050A8E8.f334) {
@@ -1883,21 +1883,21 @@ void func_003B5540(unsigned timerHertz) {
         D_0050A8E8.f330++;
         lim = D_0050A8E8.f330 * 100 / timerHertz;
         while (lim >= D_0050A8E8.f180) {
-            func_003B55F0_5540();
+            SNDSYSI_100hzserver_5540();
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B55F0);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSYSI_100hzserver);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 
 extern struct sA8E8 D_0050A8E8;
 extern void func_003C2438(void);
-extern void f_89E0_55F0(int) __asm__("func_003B89E0");
+extern void f_89E0_55F0(int) __asm__("SNDstop");
 extern void f_A7B0_55F0(int) __asm__("func_003BA7B0");
 extern void f_25E0_55F0(int) __asm__("func_003C25E0");
 extern void f_2A50_55F0(int) __asm__("func_003C2A50");
@@ -1906,12 +1906,12 @@ extern void f_2A50_55F0(int) __asm__("func_003C2A50");
  * Runs one 100 Hz sound tick: clients, then per-channel modulation, fades and envelopes.
  *
  * Increments the tick (+0x180), calls func_003C2438 and each 100 Hz client (+0x184, count +0x177). For every active
- * channel (+0x1F0, 0x8C bytes each, state +0x69 == 1): steps the +0x7C/+0x78 tables (func_003BA938, func_003C25E0),
- * moves the volume fade (+0x38 toward +0x34 by +0x30; a fade below 0 stops the voice with func_003B89E0), the pitch
+ * channel (+0x1F0, 0x8C bytes each, state +0x69 == 1): steps the +0x7C/+0x78 tables (iSNDcalcpitch, func_003C25E0),
+ * moves the volume fade (+0x38 toward +0x34 by +0x30; a fade below 0 stops the voice with SNDstop), the pitch
  * slide (+0x40 by +0x3C), and when the envelope step count (+0x44) runs out advances to the next envelope step (+0x6C,
  * count +0x5C; past the end stops the voice). Changed channels are recomputed with func_003BA7B0 and func_003C2A50.
  */
-void func_003B55F0(void) {
+void SNDSYSI_100hzserver(void) {
     int i;
     int dirty;
     struct sA8E8Chan *channel;
@@ -1932,7 +1932,7 @@ void func_003B55F0(void) {
                 channel->f68 = 0;
             }
             channel->f86 = 0;
-            func_003BA938(i);
+            iSNDcalcpitch(i);
             f_25E0_55F0(i);
         }
         dirty = 0;
@@ -1987,37 +1987,37 @@ void func_003B55F0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5860);
+INCLUDE_ASM("ealib/seg_2B4578", DefaultMutexLockFn);
 #ifdef SKIP_ASM
 extern void func_003C3380();
 
 /**
  * Locks the sound system's mutex (default lock function).
  *
- * Calls func_003C3380. D_0044C46C holds it as the lock function that func_003B58A0 calls.
+ * Calls func_003C3380. D_0044C46C holds it as the lock function that SNDSYS_entercritical calls.
  */
-void func_003B5860(void) {
+void DefaultMutexLockFn(void) {
     func_003C3380();
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5880);
+INCLUDE_ASM("ealib/seg_2B4578", DefaultMutexUnlockFn);
 #ifdef SKIP_ASM
 extern void func_003C33E0();
 
 /**
  * Unlocks the sound system's mutex (default unlock function).
  *
- * Calls func_003C33E0. D_0044C470 holds it as the unlock function that func_003B58D8 calls.
+ * Calls func_003C33E0. D_0044C470 holds it as the unlock function that SNDSYS_leavecritical calls.
  */
-void func_003B5880(void) {
+void DefaultMutexUnlockFn(void) {
     func_003C33E0();
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B58A0);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_entercritical);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void (*D_0044C46C[])(void);
@@ -2026,18 +2026,18 @@ extern volatile char D_0050A8E8_58A0[] __asm__("D_0050A8E8");
 /**
  * Enters the sound system's critical section.
  *
- * Calls the lock function in D_0044C46C (func_003B5860 by default) and increments the lock depth (the sound driver
- * state D_0050A8E8 +0x176). Paired with func_003B58D8 around every access to shared sound state, including the movie
+ * Calls the lock function in D_0044C46C (DefaultMutexLockFn by default) and increments the lock depth (the sound driver
+ * state D_0050A8E8 +0x176). Paired with SNDSYS_leavecritical around every access to shared sound state, including the movie
  * player's audio calls.
  */
-void func_003B58A0(void) {
+void SNDSYS_entercritical(void) {
     D_0044C46C[0]();
     D_0050A8E8_58A0[0x176]++;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B58D8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_leavecritical);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 
@@ -2049,16 +2049,16 @@ extern void (*D_0044C470_58D8[])(void) __asm__("D_0044C470");
  * Leaves the sound system's critical section.
  *
  * Decrements the lock depth (the sound driver state D_0050A8E8 +0x176) and calls the unlock function in D_0044C470
- * (func_003B5880 by default).
+ * (DefaultMutexUnlockFn by default).
  */
-void func_003B58D8(void) {
+void SNDSYS_leavecritical(void) {
     D_0050A8E8.f176--;
     D_0044C470_58D8[0]();
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5910);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_add100hzclient);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_5910 {
@@ -2075,12 +2075,12 @@ extern struct S_5910 D_0050A8E8_5910 __asm__("D_0050A8E8");
  * Adds a client to the sound system's 100 Hz client list.
  *
  * Only while started; appends to the sound driver state D_0050A8E8 +0x184 and increments the count (+0x177) without a
- * bound check. func_003B55F0 calls each client every tick. Used by cMonitor_MONITOR_BeginMonitoring__FPv, func_003B97D8
+ * bound check. SNDSYSI_100hzserver calls each client every tick. Used by cMonitor_MONITOR_BeginMonitoring__FPv, SNDmidiinit
  * and func_002AE048.
  *
  * @param client  the client function
  */
-void func_003B5910(int client) {
+void SNDSYS_add100hzclient(int client) {
     if (D_0050A8E8_5910.f174 != 0) {
         D_0050A8E8_5910.q[D_0050A8E8_5910.f177] = client;
         D_0050A8E8_5910.f177++;
@@ -2089,26 +2089,26 @@ void func_003B5910(int client) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5948);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_remove100hzclient);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_5948 { char pad[0x174]; char on; char p1; char p2; signed char n; char pad2[12]; int arr[8]; };
 extern struct S_5948 D_a8e8_5948 __asm__("D_0050A8E8");
-extern void func_003B58A0();
-extern void func_003B58D8();
+extern void SNDSYS_entercritical();
+extern void SNDSYS_leavecritical();
 
 /**
  * Removes a client from the sound system's 100 Hz client list.
  *
  * Only while started, inside the critical section; shifts the later entries down. Used by cMonitor__cMonitor,
- * func_003B9880 and func_002AE100.
+ * SNDmidirestore and func_002AE100.
  *
  * @param client  the client function
  */
-void func_003B5948(int client) {
+void SNDSYS_remove100hzclient(int client) {
     int i;
     if (D_a8e8_5948.on) {
-        func_003B58A0();
+        SNDSYS_entercritical();
         for (i = 0; i < D_a8e8_5948.n; i++) {
             if (D_a8e8_5948.arr[i] == client) {
                 D_a8e8_5948.n--;
@@ -2116,13 +2116,13 @@ void func_003B5948(int client) {
                 break;
             }
         }
-        func_003B58D8();
+        SNDSYS_leavecritical();
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5A28);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_adduserdataclient);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_5A28 {
@@ -2139,12 +2139,12 @@ extern struct S_5A28 D_0050A8E8_5A28 __asm__("D_0050A8E8");
  * Adds a callback to the sound system's user-data client list.
  *
  * Only while started; appends to the sound driver state D_0050A8E8 +0x1C8 (count +0x179, room for 4) without a bound
- * check. The clients get user-data event records from func_003B5F98 and the stream parser func_003B6BD0.
+ * check. The clients get user-data event records from func_003B5F98 and the stream parser SNDSTRMI_parseheader.
  * cSSXAudio_cSSXAudio registers func_00289650 with it.
  *
  * @param client  the callback, called with an event record
  */
-void func_003B5A28(int client) {
+void SNDSYS_adduserdataclient(int client) {
     if (D_0050A8E8_5A28.f174 != 0) {
         D_0050A8E8_5A28.q[D_0050A8E8_5A28.f179] = client;
         D_0050A8E8_5A28.f179++;
@@ -2153,7 +2153,7 @@ void func_003B5A28(int client) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5A60);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSYS_removeuserdataclient);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct G_5A60 { char pad[0x179]; signed char cnt; char pad2[0x4E]; int list[1]; };
@@ -2166,9 +2166,9 @@ extern struct G_5A60 D_0050A8E8_5A60[] __asm__("D_0050A8E8");
  *
  * @param client  the callback
  */
-void func_003B5A60(int client) {
+void SNDSYS_removeuserdataclient(int client) {
     int i;
-    func_003B58A0();
+    SNDSYS_entercritical();
     for (i = 0; i < D_0050A8E8_5A60[0].cnt; i++) {
         if (D_0050A8E8_5A60[0].list[i] == client) {
             D_0050A8E8_5A60[0].cnt--;
@@ -2181,15 +2181,15 @@ void func_003B5A60(int client) {
             break;
         }
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
 }
 #endif
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5B20);
 #ifdef SKIP_ASM
-extern void func_003B58A0();
-extern void func_003B58D8();
+extern void SNDSYS_entercritical();
+extern void SNDSYS_leavecritical();
 extern int func_003C4E50(int, int);
 
 /**
@@ -2206,9 +2206,9 @@ extern int func_003C4E50(int, int);
 int func_003B5B20(int startAddr, int endAddr) {
     int result;
 
-    func_003B58A0();
+    SNDSYS_entercritical();
     result = func_003C4E50(startAddr, endAddr);
-    func_003B58D8();
+    SNDSYS_leavecritical();
     return result;
 }
 #endif
@@ -2216,8 +2216,8 @@ int func_003B5B20(int startAddr, int endAddr) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003B5B68);
 #ifdef SKIP_ASM
-extern void func_003B58A0();
-extern void func_003B58D8();
+extern void SNDSYS_entercritical();
+extern void SNDSYS_leavecritical();
 extern int func_003C4EC8(int);
 
 /**
@@ -2231,15 +2231,15 @@ extern int func_003C4EC8(int);
 int func_003B5B68(int outAddr) {
     int largest;
 
-    func_003B58A0();
+    SNDSYS_entercritical();
     largest = func_003C4EC8(outAddr);
-    func_003B58D8();
+    SNDSYS_leavecritical();
     return largest;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5BA0);
+INCLUDE_ASM("ealib/seg_2B4578", SNDMEMI_constrain);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct G_5BA0 { char pad[0xC]; unsigned int lim; };
@@ -2253,7 +2253,7 @@ extern struct G_5BA0 *D_0050AB1C_5BA0[] __asm__("D_0050AB1C");
  * @param freeAddr  in: the span's heap offset
  * @param freeSpace  in/out: the span's size
  */
-void func_003B5BA0(int *freeAddr, int *freeSpace) {
+void SNDMEMI_constrain(int *freeAddr, int *freeSpace) {
     int x = *freeAddr;
     unsigned int lim = D_0050AB1C_5BA0[0]->lim;
     if (lim < (unsigned int)(x + *freeSpace))
@@ -2262,7 +2262,7 @@ void func_003B5BA0(int *freeAddr, int *freeSpace) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5BD0);
+INCLUDE_ASM("ealib/seg_2B4578", SNDMEMI_init);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct H_5BD0 { int f0; int f4; int f8; int fC; int f10; };
@@ -2279,7 +2279,7 @@ extern struct G_5BD0 D_0050A8E8_5BD0 __asm__("D_0050A8E8");
  * @param heap  the buffer
  * @param heapSize  its size in bytes
  */
-void func_003B5BD0(struct H_5BD0 *heap, int heapSize) {
+void SNDMEMI_init(struct H_5BD0 *heap, int heapSize) {
     D_0050A8E8_5BD0.cur = heap;
     heap->f8 = heapSize;
     D_0050A8E8_5BD0.cur->f4 = (int)heap + heapSize - 8;
@@ -2293,16 +2293,16 @@ void func_003B5BD0(struct H_5BD0 *heap, int heapSize) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5C40);
+INCLUDE_ASM("ealib/seg_2B4578", SNDMEMI_restore);
 #ifdef SKIP_ASM
 extern void func_003C6240();
 
 /**
  * Releases the sound system's memory (forwards to func_003C6240).
  *
- * Called by func_003B5320 during shutdown; the result passes through in $v0 although it is declared void.
+ * Called by SNDSYS_restore during shutdown; the result passes through in $v0 although it is declared void.
  */
-void func_003B5C40(void) {
+void SNDMEMI_restore(void) {
     func_003C6240();
 }
 #endif
@@ -2323,14 +2323,14 @@ struct SNDMEMSTATE_5C60 {
 };
 struct sndgs_5C60 { char pad[0x234]; struct SNDMEMSTATE_5C60 *pmem; };
 extern struct sndgs_5C60 sndgs_5C60 __asm__("D_0050A8E8");
-extern void SNDMEMI_constrain_5C60(unsigned int *pfreeaddr, int *pfreespace) __asm__("func_003B5BA0");
+extern void SNDMEMI_constrain_5C60(unsigned int *pfreeaddr, int *pfreespace) __asm__("SNDMEMI_constrain");
 
 void *SNDMEMI_alloc_5C60(int size) __asm__("func_003B5C60");
 /**
  * Allocates a 16-byte-aligned block from the sound heap.
  *
  * First fit over the gaps between the allocation records (sorted, stored downward from the end of the heap), each gap
- * clamped with func_003B5BA0; the new record is inserted in order, the free end shrinks by 8 for it and the low-water
+ * clamped with SNDMEMI_constrain; the new record is inserted in order, the free end shrinks by 8 for it and the low-water
  * mark (+0x10) is updated. Used by func_003B5158 and the driver's table and voice setup.
  *
  * @param size  bytes wanted (rounded up to 16)
@@ -2399,10 +2399,10 @@ fail:
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5E98);
+INCLUDE_ASM("ealib/seg_2B4578", SNDMEMI_free);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-void func_003B5E98_5E98(int) __asm__("func_003B5E98");
+void SNDMEMI_free_5E98(int) __asm__("SNDMEMI_free");
 struct E_5E98 { int key; int val; };
 struct S_5E98 { int base; struct E_5E98 *arr; int p2; int x; int p4; int cnt; };
 struct G_5E98 { char pad[0x234]; struct S_5E98 *s; };
@@ -2416,7 +2416,7 @@ extern struct G_5E98 D_0050A8E8_5E98[] __asm__("D_0050A8E8");
  *
  * @param address  the block's address
  */
-void func_003B5E98_5E98(int address) {
+void SNDMEMI_free_5E98(int address) {
     int i = 0;
     int heapOffset = address - D_0050A8E8_5E98[0].s->base;
     if (D_0050A8E8_5E98[0].s->cnt >= 0) return;
@@ -2439,7 +2439,7 @@ void func_003B5E98_5E98(int address) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B5F60);
+INCLUDE_ASM("ealib/seg_2B4578", SNDPROFILE_outputlatency);
 #ifdef SKIP_ASM
 int func_003C51E0(void);
 extern char D_0050AA5C[];
@@ -2451,7 +2451,7 @@ extern char D_0050AA5C[];
  *
  * @return the latency (in ms, as func_003AE9A0 uses it)
  */
-int func_003B5F60(void) {
+int SNDPROFILE_outputlatency(void) {
     int latencyMs;
     if (D_0050AA5C[0] != 0) {
         latencyMs = func_003C51E0();
@@ -2498,14 +2498,14 @@ void func_003B5F98(struct S_5F98 *source, int eventArg) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6098);
+INCLUDE_ASM("ealib/seg_2B4578", SNDbankadd);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Hdr_6098 { int pad0; short pad4; unsigned short n; int off; int size2; int size1; int tbl[1]; };
 struct Ent_6098 { struct Hdr_6098 *hdr; char *buf1; char *buf2; char busy; };
 struct G_6098 { char pad[0x1E4]; void (*cb)(); char pad2[0x1F4 - 0x1E8]; struct Ent_6098 *ents; };
 extern struct G_6098 D_0050A8E8_6098 __asm__("D_0050A8E8");
-extern void func_003B6300_6098() __asm__("func_003B6300");
+extern void SNDbankremove_6098() __asm__("SNDbankremove");
 extern int f_6500_6098(void) __asm__("func_003C6500");
 extern char *f_4B70_6098(int, int) __asm__("func_003C4B70");
 extern int f_42D8_6098(int, char *, char *, int) __asm__("func_003C42D8");
@@ -2515,7 +2515,7 @@ extern int f_6788_6098(int, char *, char *, int *) __asm__("func_003B6788");
 /**
  * Adds a sound bank: takes a bank slot and uploads its sample data to sound memory.
  *
- * Installs func_003B6300 as the bank-removal hook (+0x1E4), takes a slot with func_003C6500 and records the header.
+ * Installs SNDbankremove as the bank-removal hook (+0x1E4), takes a slot with func_003C6500 and records the header.
  * Each of the two sample sections (sizes at +0x10 for memory kind 0x100 and +0x0C for kind 8, data at the header's
  * offset +0x08) gets memory from func_003C4B70 (plus 0x40 / 0x30 bytes) and is copied in 4 KB pieces with
  * func_003C42D8, polling func_003C42F8 until each piece is done; then every patch (self-relative offsets at +0x14,
@@ -2525,12 +2525,12 @@ extern int f_6788_6098(int, char *, char *, int *) __asm__("func_003B6788");
  * @param hdr  the bank in main memory
  * @return 7 when sample data was uploaded, 8 for a bank without any, -6 when memory runs out
  */
-int func_003B6098(int *out, struct Hdr_6098 *hdr) {
+int SNDbankadd(int *out, struct Hdr_6098 *hdr) {
     struct Ent_6098 *ent;
     int i, n, xferHandle;
     int firstOffset;
 
-    D_0050A8E8_6098.cb = func_003B6300_6098;
+    D_0050A8E8_6098.cb = SNDbankremove_6098;
     *out = f_6500_6098();
     ent = &D_0050A8E8_6098.ents[*out];
     ent->busy = 1;
@@ -2585,7 +2585,7 @@ fail:
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6300);
+INCLUDE_ASM("ealib/seg_2B4578", SNDbankremove);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_6300 {
@@ -2610,26 +2610,26 @@ struct G_6300 {
     struct R_6300 *f1F4;
 };
 extern struct G_6300 D_0050A8E8_6300 __asm__("D_0050A8E8");
-extern void func_003B58A0_6300() __asm__("func_003B58A0");
-extern void func_003B58D8_6300() __asm__("func_003B58D8");
+extern void SNDSYS_entercritical_6300() __asm__("SNDSYS_entercritical");
+extern void SNDSYS_leavecritical_6300() __asm__("SNDSYS_leavecritical");
 extern void func_003B5F98_6300(void *buf, int n) __asm__("func_003B5F98");
-extern int func_003B64D8_6300(int i) __asm__("func_003B64D8");
-extern void func_003B89E0_6300(void *p) __asm__("func_003B89E0");
-extern int func_003BAAC0_6300(char **pp, void *buf) __asm__("func_003BAAC0");
+extern int SNDBANKI_valid_6300(int i) __asm__("SNDBANKI_valid");
+extern void SNDstop_6300(void *p) __asm__("SNDstop");
+extern int SNDI_parsetimbre_6300(char **pp, void *buf) __asm__("SNDI_parsetimbre");
 extern void func_003C4D78_6300(int a, int p) __asm__("func_003C4D78");
 extern char *func_003C6540_6300(void *p, int i) __asm__("func_003C6540");
 
 /**
  * Removes a sound bank (or all banks for -1): stops its voices and frees its sample memory.
  *
- * Fails with -8 when func_003B64D8 rejects the handle. In the critical section it stops every channel playing from the
- * bank (func_003B89E0), sends each patch's user data with type 2 (func_003BAAC0, func_003B5F98), frees the two sample
+ * Fails with -8 when SNDBANKI_valid rejects the handle. In the critical section it stops every channel playing from the
+ * bank (SNDstop), sends each patch's user data with type 2 (SNDI_parsetimbre, func_003B5F98), frees the two sample
  * areas with func_003C4D78 (kinds 0x100 and 8) and clears the slot.
  *
  * @param bankHandle  the bank handle, or -1 for every slot
  * @return 0, or -8 for an invalid or busy bank
  */
-int func_003B6300(int bankHandle) {
+int SNDbankremove(int bankHandle) {
     char buf[208];
     char *patchData;
     void *obj;
@@ -2638,19 +2638,19 @@ int func_003B6300(int bankHandle) {
 
     if (bankHandle == -1) {
         for (i = 0; i < D_0050A8E8_6300.f28; i++) {
-            func_003B6300(i);
+            SNDbankremove(i);
         }
         return 0;
     }
-    if (func_003B64D8_6300(bankHandle) != 0) {
+    if (SNDBANKI_valid_6300(bankHandle) != 0) {
         return -8;
     }
-    func_003B58A0_6300();
+    SNDSYS_entercritical_6300();
     obj = D_0050A8E8_6300.f1F4[bankHandle].p0;
     for (i = 0; i < D_0050A8E8_6300.f17E; i++) {
         struct E_6300 *channel = &D_0050A8E8_6300.f1F0[i];
         if (channel->f12 == bankHandle) {
-            func_003B89E0_6300(channel->p);
+            SNDstop_6300(channel->p);
         }
     }
     for (i = 0; i < *(unsigned short *)((char *)obj + 6); i++) {
@@ -2658,7 +2658,7 @@ int func_003B6300(int bankHandle) {
         if (patchData != 0) {
             patchData += 4;
             do {
-                moreTags = func_003BAAC0_6300(&patchData, buf);
+                moreTags = SNDI_parsetimbre_6300(&patchData, buf);
                 func_003B5F98_6300(buf, 2);
             } while (moreTags != 0);
         }
@@ -2671,13 +2671,13 @@ int func_003B6300(int bankHandle) {
     }
     D_0050A8E8_6300.f1F4[bankHandle].p0 = 0;
     D_0050A8E8_6300.f1F4[bankHandle].fC = 0;
-    func_003B58D8_6300();
+    SNDSYS_leavecritical_6300();
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B64D8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDBANKI_valid);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 
@@ -2693,7 +2693,7 @@ extern struct sA8E8 D_0050A8E8;
  * @param bankHandle  the bank handle
  * @return 0 when usable, -18 when the slot is busy, -8 otherwise
  */
-int func_003B64D8(int bankHandle) {
+int SNDBANKI_valid(int bankHandle) {
     struct sA8E8Slot *slot;
     if (bankHandle < 0 || bankHandle >= D_0050A8E8.setup.cfg.f08) {
         return -8;
@@ -2707,7 +2707,7 @@ int func_003B64D8(int bankHandle) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6528);
+INCLUDE_ASM("ealib/seg_2B4578", SNDbankheadersize);
 #ifdef SKIP_ASM
 typedef struct { int a; int b; int c; } B6528_inner;
 typedef struct { B6528_inner *p; int pad[3]; } B6528_ent;
@@ -2716,23 +2716,23 @@ extern B6528_ent *D_0050AADC[];
 /**
  * Returns the header size of a loaded bank.
  *
- * Reads +0x08 of the bank header in slot arg0 (no validation). Called by func_003B6548.
+ * Reads +0x08 of the bank header in slot arg0 (no validation). Called by SNDbankheadercopy.
  *
  * @param bankHandle  the bank handle
  * @return the header size in bytes
  */
-int func_003B6528(int bankHandle) {
+int SNDbankheadersize(int bankHandle) {
     return D_0050AADC[0][bankHandle].p->c;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6548);
+INCLUDE_ASM("ealib/seg_2B4578", SNDbankheadercopy);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Passes a and slot n's old data to func_0041610C, then stores a in the slot.
-extern int func_003B6528_6548(int) __asm__("func_003B6528");
+extern int SNDbankheadersize_6548(int) __asm__("SNDbankheadersize");
 extern int func_0041610C_6548(int, int, int) __asm__("func_0041610C");
 struct E_6548 { int data; int p[3]; };
 struct G_6548 { char p[0x1F4]; struct E_6548 *slots; };
@@ -2740,16 +2740,16 @@ extern struct G_6548 D_0050A8E8_6548 __asm__("D_0050A8E8");
 /**
  * Copies a bank's header to new memory and makes the bank use the copy.
  *
- * Gets the size with func_003B6528, copies with func_0041610C(dest, old header, size) and stores the destination in the
+ * Gets the size with SNDbankheadersize, copies with func_0041610C(dest, old header, size) and stores the destination in the
  * slot.
  *
  * @param destMem  where to copy the header
  * @param n  the bank handle
- * @return 0, or func_003B6528's negative result
+ * @return 0, or SNDbankheadersize's negative result
  */
-int func_003B6548(int destMem, int n) {
+int SNDbankheadercopy(int destMem, int n) {
     int result = 0;
-    int x = func_003B6528_6548(n);
+    int x = SNDbankheadersize_6548(n);
     if (x < 0) {
         result = x;
     } else {
@@ -2761,38 +2761,38 @@ int func_003B6548(int destMem, int n) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B65D0);
+INCLUDE_ASM("ealib/seg_2B4578", SNDbankinuse);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-// Returns 1 if an entry with this id is found for which func_003B8AB8 returns 0, under the func_003B58A0/58D8 lock.
+// Returns 1 if an entry with this id is found for which SNDover returns 0, under the SNDSYS_entercritical/58D8 lock.
 struct E_65D0 { int f0; char p[0xE]; short id; char p2[0x8C - 0x14]; };
 struct G_65D0 { char p[0x17E]; short n; char p2[0x1F0 - 0x180]; struct E_65D0 *tab; };
 extern struct G_65D0 D_0050A8E8_65D0 __asm__("D_0050A8E8");
-extern int func_003B64D8_65D0(int) __asm__("func_003B64D8");
-extern int func_003B8AB8_65D0(int) __asm__("func_003B8AB8");
+extern int SNDBANKI_valid_65D0(int) __asm__("SNDBANKI_valid");
+extern int SNDover_65D0(int) __asm__("SNDover");
 /**
  * Tells whether any channel is still playing from a bank.
  *
- * Validates with func_003B64D8, then in the critical section looks for a channel of the bank (+0x12) whose voice
- * func_003B8AB8 reports active (0). Used by the game's bank manager (bankmonitor.cpp) before reusing a slot.
+ * Validates with SNDBANKI_valid, then in the critical section looks for a channel of the bank (+0x12) whose voice
+ * SNDover reports active (0). Used by the game's bank manager (bankmonitor.cpp) before reusing a slot.
  *
  * @param id  the bank handle
  * @return 1 when in use, 0 when not, -8 for an invalid bank
  */
-int func_003B65D0(int id) {
+int SNDbankinuse(int id) {
     int found = 0;
     int i;
-    if (func_003B64D8_65D0(id) != 0) return -8;
-    func_003B58A0();
+    if (SNDBANKI_valid_65D0(id) != 0) return -8;
+    SNDSYS_entercritical();
     for (i = 0; i < D_0050A8E8_65D0.n; i++) {
         struct E_65D0 *channel = &D_0050A8E8_65D0.tab[i];
-        if (channel->id == id && func_003B8AB8_65D0(channel->f0) == 0) {
+        if (channel->id == id && SNDover_65D0(channel->f0) == 0) {
             found = 1;
             break;
         }
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
     return found;
 }
 #endif
@@ -2801,8 +2801,8 @@ int func_003B65D0(int id) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003B6670);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003B64D8_6670() __asm__("func_003B64D8");
-extern void func_003BB820_6670(int, int, char *, int, int, int) __asm__("func_003BB820");
+extern int SNDBANKI_valid_6670() __asm__("SNDBANKI_valid");
+extern void SNDI_patchtohdr_6670(int, int, char *, int, int, int) __asm__("SNDI_patchtohdr");
 extern int func_003C6540_6670(int, int) __asm__("func_003C6540");
 struct G_6670 { char pad[0x1F4]; int f1F4; };
 extern struct G_6670 D_0050A8E8_6670 __asm__("D_0050A8E8");
@@ -2811,8 +2811,8 @@ extern struct G_6670 D_0050A8E8_6670 __asm__("D_0050A8E8");
  * Reads a bank patch's sample format, attributes and description without keeping its data.
  *
  * Validates the bank, finds the patch with func_003C6540 (-8 when missing), and in the critical section has
- * func_003BB820 fill the three records; then frees the time-stretch data copies func_003BB820 made (+0x18 + 4n of the
- * attributes, one per channel) with func_003B5E98 and clears them and their sizes (+0x30 + 4n). Used by the game's bank
+ * SNDI_patchtohdr fill the three records; then frees the time-stretch data copies SNDI_patchtohdr made (+0x18 + 4n of the
+ * attributes, one per channel) with SNDMEMI_free and clears them and their sizes (+0x30 + 4n). Used by the game's bank
  * monitor.
  *
  * @param bankHandle  the bank handle
@@ -2825,18 +2825,18 @@ extern struct G_6670 D_0050A8E8_6670 __asm__("D_0050A8E8");
 int func_003B6670(int bankHandle, int patchNum, char *formatOut, int attrOut, int descOut) {
     int off, patch, i;
     int *chanBuf;
-    if (func_003B64D8_6670() < 0) return -8;
+    if (SNDBANKI_valid_6670() < 0) return -8;
     off = bankHandle * 0x10;
     patch = func_003C6540_6670(*(int *)(off + D_0050A8E8_6670.f1F4), patchNum);
     if (patch == 0) return -8;
     i = 0;
-    func_003B58A0();
-    func_003BB820_6670(*(int *)(off + D_0050A8E8_6670.f1F4), patch, formatOut, attrOut, descOut, 0);
+    SNDSYS_entercritical();
+    SNDI_patchtohdr_6670(*(int *)(off + D_0050A8E8_6670.f1F4), patch, formatOut, attrOut, descOut, 0);
     if (*(unsigned char *)(formatOut + 2) != 0) {
         chanBuf = (int *)(attrOut + 0x18);
         do {
             if (*chanBuf != 0) {
-                func_003B5E98(*chanBuf);
+                SNDMEMI_free(*chanBuf);
                 *chanBuf = 0;
                 chanBuf[6] = 0;
             }
@@ -2844,7 +2844,7 @@ int func_003B6670(int bankHandle, int patchNum, char *formatOut, int attrOut, in
             chanBuf++;
         } while (i < *(unsigned char *)(formatOut + 2));
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
     return 0;
 }
 #endif
@@ -2854,15 +2854,15 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B6788);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003B5F98_6788(void *, int) __asm__("func_003B5F98");
-extern int func_003BAAC0_6788(char **, void *) __asm__("func_003BAAC0");
+extern int SNDI_parsetimbre_6788(char **, void *) __asm__("SNDI_parsetimbre");
 extern void func_003C3EA8_6788(void *, int, int) __asm__("func_003C3EA8");
 
 /**
  * Resolves a patch's sample addresses against uploaded sample data and sends its user data.
  *
- * Walks the patch's tags (func_003BAAC0 into a 208-byte header); for each whose render bits (+0x18) match the mask it
+ * Walks the patch's tags (SNDI_parsetimbre into a 208-byte header); for each whose render bits (+0x18) match the mask it
  * resolves the sample with func_003C3EA8 and dispatches its user data with type 0 (func_003B5F98). Called by
- * func_003B6098.
+ * SNDbankadd.
  *
  * @param renderMask  which render kinds to resolve (0x100 or 8)
  * @param taggedPatch  the patch
@@ -2877,7 +2877,7 @@ int func_003B6788(int renderMask, char *taggedPatch, int sampleData, int firstOf
 
     cursor = taggedPatch + 4;
     do {
-        moreTags = func_003BAAC0_6788(&cursor, sp);
+        moreTags = SNDI_parsetimbre_6788(&cursor, sp);
         if (*(unsigned short *)(sp + 0x18) & renderMask) {
             func_003C3EA8_6788(sp, sampleData, firstOffset);
             func_003B5F98_6788(sp, 0);
@@ -2888,39 +2888,39 @@ int func_003B6788(int renderMask, char *taggedPatch, int sampleData, int firstOf
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6820);
+INCLUDE_ASM("ealib/seg_2B4578", SNDBANK_play);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-// Checks slot a, then forwards channel entry b of its object to func_003BB588.
+// Checks slot a, then forwards channel entry b of its object to SNDBANKI_playpatch.
 struct Ch_6820 { char p[6]; unsigned short n; };
 typedef struct { struct Ch_6820 *p; int pad[3]; } Ent_6820;
 extern Ent_6820 *D_0050AADC_6820[] __asm__("D_0050AADC");
-extern int func_003B64D8_6820(int) __asm__("func_003B64D8");
+extern int SNDBANKI_valid_6820(int) __asm__("SNDBANKI_valid");
 extern int func_003C6540_6820(void *, int) __asm__("func_003C6540");
-extern int func_003BB588_6820(void *, int, int, int, int) __asm__("func_003BB588");
+extern int SNDBANKI_playpatch_6820(void *, int, int, int, int) __asm__("SNDBANKI_playpatch");
 /**
  * Plays a patch from a bank.
  *
- * Validates the bank (-8) and the patch number against the bank's count (+0x06), then calls func_003BB588 with the
+ * Validates the bank (-8) and the patch number against the bank's count (+0x06), then calls SNDBANKI_playpatch with the
  * bank, the patch (func_003C6540) and the arguments. Used by the game's stream system and bank monitor.
  *
  * @param bankHandle  the bank handle
  * @param patchNum  the patch number
  * @param playOpts  the play options
- * @return the sound handle from func_003BB588, or -8
+ * @return the sound handle from SNDBANKI_playpatch, or -8
  */
-int func_003B6820(int bankHandle, int patchNum, int playOpts) {
+int SNDBANK_play(int bankHandle, int patchNum, int playOpts) {
     struct Ch_6820 *ch;
-    if (func_003B64D8_6820(bankHandle) < 0) return -8;
+    if (SNDBANKI_valid_6820(bankHandle) < 0) return -8;
     ch = D_0050AADC_6820[0][bankHandle].p;
     if (patchNum < 0 || patchNum >= ch->n) return -8;
-    return func_003BB588_6820(ch, func_003C6540_6820(ch, patchNum), bankHandle, patchNum, playOpts);
+    return SNDBANKI_playpatch_6820(ch, func_003C6540_6820(ch, patchNum), bankHandle, patchNum, playOpts);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B68B8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_startstream);
 #ifdef SKIP_ASM
 extern int func_003B8CC8(int, int);
 extern int func_003C6760(int, int, int, int);
@@ -2934,7 +2934,7 @@ extern int func_003C6760(int, int, int, int);
  *
  * @param stream  the stream (0x138 bytes)
  */
-void func_003B68B8(char *stream) {
+void SNDSTRMI_startstream(char *stream) {
     int i = 0;
     char *trackEntry = stream + 0x104;
     int *trackFlag = (int*)(stream + 0x114);
@@ -2952,7 +2952,7 @@ void func_003B68B8(char *stream) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6948);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_calcdatarate);
 #ifdef SKIP_ASM
 /**
  * Returns a sample format's data rate in bytes per second.
@@ -2963,7 +2963,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B6948);
  * @param sampleFormat  rate (u16), channels, codec
  * @return bytes per second
  */
-int func_003B6948(unsigned char *sampleFormat) {
+int SNDSTRMI_calcdatarate(unsigned char *sampleFormat) {
     int ratio = 0;
     int w = *(unsigned short *)sampleFormat;
     int numChannels = sampleFormat[2];
@@ -2981,27 +2981,27 @@ int func_003B6948(unsigned char *sampleFormat) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B69D8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_destroyall);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { char pad[0x46]; unsigned char cnt; } G_69D8;
-extern void func_003B7838(int);
+extern void SNDSTRM_destroy(int);
 extern G_69D8 D_0050A8E8_A8E8_69D8 __asm__("D_0050A8E8");
 
 /**
- * Destroys every stream (func_003B7838 on each).
+ * Destroys every stream (SNDSTRM_destroy on each).
  *
  * The stream count is the byte at +0x46 of the sound driver state D_0050A8E8.
  *
  * @return 0
  */
-int func_003B69D8(void) {
+int SNDSTRMI_destroyall(void) {
     int i;
 
     i = 0;
     if (D_0050A8E8_A8E8_69D8.cnt != 0) {
         do {
-            func_003B7838(i);
+            SNDSTRM_destroy(i);
             i += 1;
         } while (i < (int)D_0050A8E8_A8E8_69D8.cnt);
     }
@@ -3010,7 +3010,7 @@ int func_003B69D8(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6A38);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_getstreamptr);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0050A0A0[];
@@ -3024,7 +3024,7 @@ extern unsigned char D_0050A92E_6A38[] __asm__("D_0050A92E");
  * @param slotNum  the slot number (low byte of a stream handle)
  * @return the stream, or 0 when out of range
  */
-int func_003B6A38(int slotNum) {
+int SNDSTRMI_getstreamptr(int slotNum) {
     if (slotNum >= D_0050A92E_6A38[0] || slotNum < 0) {
         return 0;
     }
@@ -3033,25 +3033,25 @@ int func_003B6A38(int slotNum) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6A70);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_removerequest);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern char *D_0050A0A0_6A70[] __asm__("D_0050A0A0");
-extern int func_003B7A70_6A70(int) __asm__("func_003B7A70");
+extern int SNDSTRMI_getrequestptr_6A70(int) __asm__("SNDSTRMI_getrequestptr");
 extern void func_003C6320_6A70(void *, int) __asm__("func_003C6320");
 extern void func_003C6288_6A70(void *, int) __asm__("func_003C6288");
 /**
  * Retires a stream request: unlinks it from the queue and returns it to the free list.
  *
- * The stream is chosen by the handle's low byte; the request comes from func_003B7A70. It is removed from the queued
+ * The stream is chosen by the handle's low byte; the request comes from SNDSTRMI_getrequestptr. It is removed from the queued
  * list (+0x11C, func_003C6320), added to the free list (+0x128, func_003C6288) and cleared as current (+0x134).
  *
  * @param requestHandle  the request handle
  */
-void func_003B6A70(int requestHandle) {
+void SNDSTRMI_removerequest(int requestHandle) {
     char *stream = D_0050A0A0_6A70[requestHandle & 0xFF];
-    int request = func_003B7A70_6A70(requestHandle);
+    int request = SNDSTRMI_getrequestptr_6A70(requestHandle);
     func_003C6320_6A70(stream + 0x11C, request);
     func_003C6288_6A70(stream + 0x128, request);
     if (*(int *)(stream + 0x134) == request) *(int *)(stream + 0x134) = 0;
@@ -3059,7 +3059,7 @@ void func_003B6A70(int requestHandle) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6AD8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_releasecallback);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003E13E8_6AD8(int, unsigned char *) __asm__("func_003E13E8");
@@ -3073,14 +3073,14 @@ extern int *D_0050A0A0_6AD8[] __asm__("D_0050A0A0");
  *
  * @param samples  the sample data pointer
  */
-void func_003B6AD8(void *samples) {
+void SNDSTRMI_releasecallback(void *samples) {
     unsigned char *chunkHdr = ((unsigned char **)samples)[-1];
     func_003E13E8_6AD8(*D_0050A0A0_6AD8[*chunkHdr], chunkHdr);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6B10);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_framescallback);
 #ifdef SKIP_ASM
 struct Q_6B10 { int p0; int p1; int p2; volatile int owner; int p4; volatile unsigned int pos; volatile unsigned int end; volatile unsigned int left; };
 struct C_6B10 { char pad[0x11C]; struct Q_6B10 *q; };
@@ -3089,14 +3089,14 @@ struct C_6B10 { char pad[0x11C]; struct Q_6B10 *q; };
  * Advances a stream's requests by the amount just played and retires finished ones.
  *
  * Adds the amount to the current request's position and takes it off its remainder; a request whose position reaches
- * its end is retired with func_003B6A70, and any overflow carries on to the next request. After 200 passes it retires
+ * its end is retired with SNDSTRMI_removerequest, and any overflow carries on to the next request. After 200 passes it retires
  * the current request and stops.
  *
  * @param packetChan  unused
  * @param n  the amount played
  * @param stream  the stream
  */
-void func_003B6B10(int packetChan, unsigned int n, struct C_6B10 *stream) {
+void SNDSTRMI_framescallback(int packetChan, unsigned int n, struct C_6B10 *stream) {
     unsigned int rem = 0;
     int i = 0;
     while (1) {
@@ -3104,7 +3104,7 @@ void func_003B6B10(int packetChan, unsigned int n, struct C_6B10 *stream) {
         i++;
         request = stream->q;
         if (i >= 201) {
-            func_003B6A70(request->owner);
+            SNDSTRMI_removerequest(request->owner);
             return;
         }
         if (request->left < n) {
@@ -3114,7 +3114,7 @@ void func_003B6B10(int packetChan, unsigned int n, struct C_6B10 *stream) {
         request->pos += n;
         request->left -= n;
         if (request->pos >= request->end) {
-            func_003B6A70(request->owner);
+            SNDSTRMI_removerequest(request->owner);
         }
         if (rem == 0) return;
         n = rem;
@@ -3124,8 +3124,8 @@ void func_003B6B10(int packetChan, unsigned int n, struct C_6B10 *stream) {
 #endif
 
 #ifdef SKIP_ASM
-/* D_0050A0A0: the streams (one per stream slot, func_003B6A38 looks one up). Layout from every use in this unit;
-   field names are their offsets. Shared by func_003B6BD0 .. func_003B8050. */
+/* D_0050A0A0: the streams (one per stream slot, SNDSTRMI_getstreamptr looks one up). Layout from every use in this unit;
+   field names are their offsets. Shared by SNDSTRMI_parseheader .. func_003B8050. */
 struct sA0A0Node {                  /* 0x28: a queued stream request */
     struct sA0A0Node *f00;          /* next */
     int f04;
@@ -3144,7 +3144,7 @@ struct sA0A0List {                  /* 0xC */
     struct sA0A0Node *f04;
     int f08;                        /* count */
 };
-struct sA0A0Fmt {                   /* 4 bytes, copied as a whole: rate (u16), channels, codec (func_003B6948) */
+struct sA0A0Fmt {                   /* 4 bytes, copied as a whole: rate (u16), channels, codec (SNDSTRMI_calcdatarate) */
     unsigned char b[4];
 };
 struct sA0A0Hdr {                   /* 0x68 */
@@ -3195,26 +3195,26 @@ struct sA0A0Strm {                  /* 0x138 */
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6BD0);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_parseheader);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern struct sA8E8 D_0050A8E8;
 
-/* D_0050A0A0_6BD0: the streams (one per stream slot, func_003B6A38 looks one up). Layout from every use in this unit;
+/* D_0050A0A0_6BD0: the streams (one per stream slot, SNDSTRMI_getstreamptr looks one up). Layout from every use in this unit;
    field names are their offsets. */
 
 extern struct sA0A0Strm *D_0050A0A0_6BD0[32] __asm__("D_0050A0A0");
 
 // (prototype from their definition at line 2237)
-void func_003B68B8_6BD0(struct sA0A0Strm *p) __asm__("func_003B68B8");
+void SNDSTRMI_startstream_6BD0(struct sA0A0Strm *p) __asm__("SNDSTRMI_startstream");
 
 // (prototype from their definition at line 2257)
-int func_003B6948_6BD0(unsigned char *p) __asm__("func_003B6948");
+int SNDSTRMI_calcdatarate_6BD0(unsigned char *p) __asm__("SNDSTRMI_calcdatarate");
 
 struct Ext_6BD0 { int f00; int pos[6]; };
 struct Ev_6BD0 { int a; int b; int c; int d; int e; int rest[3]; };
-extern void func_003BB820_6BD0(int, int *, struct sA0A0Fmt *, struct sA0A0Hdr *, struct Ext_6BD0 *, char *) __asm__("func_003BB820");
+extern void SNDI_patchtohdr_6BD0(int, int *, struct sA0A0Fmt *, struct sA0A0Hdr *, struct Ext_6BD0 *, char *) __asm__("SNDI_patchtohdr");
 extern void func_003E13E8_6BD0(int, int *) __asm__("func_003E13E8");
 extern int func_00415FC8(void *, void *, int);
 
@@ -3222,10 +3222,10 @@ extern int func_00415FC8(void *, void *, int);
  * Parses a stream header chunk ("SCHl") for the next queued request and starts or switches the stream.
  *
  * Moves the current request (+0x134) to the next queued one, parses the chunk into the next format and header with
- * func_003BB820, sends pending user-data markers (type 3, with the request handle) to the user-data clients, gives the
- * chunk back to the file queue (func_003E13E8) and stores the request's data rate (func_003B6948). When the new format
+ * SNDI_patchtohdr, sends pending user-data markers (type 3, with the request handle) to the user-data clients, gives the
+ * chunk back to the file queue (func_003E13E8) and stores the request's data rate (SNDSTRMI_calcdatarate). When the new format
  * or header differs (func_00415FC8) and a stream is already running it sets state 2 (switch pending) and returns;
- * otherwise the next format becomes current and, unless it is playing, the stream starts (func_003B68B8).
+ * otherwise the next format becomes current and, unless it is playing, the stream starts (SNDSTRMI_startstream).
  *
  * Streams live in D_0050A0A0 (0x138 bytes each): +0x0 file STREAM, +0x4 voice, +0x8 packet player, +0x10 state,
  * +0x14/+0x18 current/next format, +0x1C/+0x84 current/next header, +0x11C queued requests, +0x128 free requests,
@@ -3235,7 +3235,7 @@ extern int func_00415FC8(void *, void *, int);
  * @param chunk  the header chunk
  * @return 0
  */
-int func_003B6BD0(int streamSlot, int *chunk) {
+int SNDSTRMI_parseheader(int streamSlot, int *chunk) {
     struct sA0A0Strm *stream = D_0050A0A0_6BD0[streamSlot];
     struct sA0A0Node *n;
     struct Ext_6BD0 ext;
@@ -3249,7 +3249,7 @@ int func_003B6BD0(int streamSlot, int *chunk) {
         stream->f134 = stream->f134->f00;
     }
     n = (struct sA0A0Node *)stream->f134;
-    func_003BB820_6BD0(0, chunk + 2, &stream->f18, &stream->f84, &ext, n->f25);
+    SNDI_patchtohdr_6BD0(0, chunk + 2, &stream->f18, &stream->f84, &ext, n->f25);
     n->f18 = ext.f00;
     n->f24 = 0;
     while (stream->f84.f48[i] != 0) {
@@ -3264,7 +3264,7 @@ int func_003B6BD0(int streamSlot, int *chunk) {
         }
     }
     func_003E13E8_6BD0(stream->f00, chunk);
-    n->f10 = func_003B6948_6BD0((unsigned char *)&stream->f18);
+    n->f10 = SNDSTRMI_calcdatarate_6BD0((unsigned char *)&stream->f18);
     if (func_00415FC8(&stream->f14, &stream->f18, 4) != 0 || func_00415FC8(&stream->f1C, &stream->f84, 104) != 0 || stream->f84.f18[0] != 0) {
         if (*(unsigned short *)&stream->f14 != 0) {
             stream->f10 = 2;
@@ -3275,7 +3275,7 @@ int func_003B6BD0(int streamSlot, int *chunk) {
         stream->f84.f18[0] = 0;
     }
     if (stream->f10 != 1) {
-        func_003B68B8_6BD0(stream);
+        SNDSTRMI_startstream_6BD0(stream);
         stream->f10 = 1;
     }
     return 0;
@@ -3283,7 +3283,7 @@ int func_003B6BD0(int streamSlot, int *chunk) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B6EA8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_parsedata);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 #include "fakematch.h"
@@ -3317,7 +3317,7 @@ static inline unsigned int reqsize_6EA8(REQ_6EA8 *r) {
  *
  * Reads the sample count (+0x8) and per-channel data offsets, byte-swapped when the current request is big-endian (its
  * +0x25 byte). An empty chunk goes straight back to the file queue. Otherwise it stores the chunk pointer just before
- * the first channel's data (func_003B6AD8 finds it there), tags the chunk with the request handle, adds the count to
+ * the first channel's data (SNDSTRMI_releasecallback finds it there), tags the chunk with the request handle, adds the count to
  * the request's total (+0x1C) and submits {count, continuation flag, channel pointers} with func_003C6AB8 on the packet
  * player (+0x8).
  *
@@ -3325,11 +3325,11 @@ static inline unsigned int reqsize_6EA8(REQ_6EA8 *r) {
  * @param dataChunk  the data chunk
  */
 // FAKEMATCH: per-function volatile view of the stream's current-request pointer, `hdr = *(struct sA0A0Node *volatile *)&own->f134;`
-// (evidence: func_003B6BD0 stores f134 and immediately reloads it), plus the register pin
+// (evidence: SNDSTRMI_parseheader stores f134 and immediately reloads it), plus the register pin
 // `register FILE_6EA8 **p0 FM_REG("$4") = (FILE_6EA8 **)req.ptrs[0];` (fakematch.h; retail loads ptrs[0] into a0 in the bnez slot
 // and keeps the 0x7FFFFFFF size mask in a2, ours swaps them); plain form 97.43% (volatile view alone 99.70%).
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-void func_003B6EA8(struct sA0A0Strm *own, FILE_6EA8 *dataChunk) {
+void SNDSTRMI_parsedata(struct sA0A0Strm *own, FILE_6EA8 *dataChunk) {
     REQ_6EA8 req;
     unsigned int swapped;
     struct sA0A0Node *hdr;
@@ -3371,36 +3371,36 @@ void func_003B6EA8(struct sA0A0Strm *own, FILE_6EA8 *dataChunk) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7080);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_parsechunk);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-/* D_0050A0A0_7080: the streams (one per stream slot, func_003B6A38 looks one up). Layout from every use in this unit;
+/* D_0050A0A0_7080: the streams (one per stream slot, SNDSTRMI_getstreamptr looks one up). Layout from every use in this unit;
    field names are their offsets. */
 extern struct sA0A0Strm *D_0050A0A0_7080[32] __asm__("D_0050A0A0");
-extern void func_003B6EA8_7080(struct sA0A0Strm *, int *) __asm__("func_003B6EA8");
-extern void func_003B6BD0_7080(int) __asm__("func_003B6BD0");
+extern void SNDSTRMI_parsedata_7080(struct sA0A0Strm *, int *) __asm__("SNDSTRMI_parsedata");
+extern void SNDSTRMI_parseheader_7080(int) __asm__("SNDSTRMI_parseheader");
 extern void func_003E13E8_7080(int, int *) __asm__("func_003E13E8");
 
 /**
  * Dispatches one stream chunk by its tag.
  *
- * "SCDl" goes to func_003B6EA8, "SCHl" to func_003B6BD0 (the chunk passes through in $a1); anything else goes back to
- * the file queue. Called by func_003B71D8.
+ * "SCDl" goes to SNDSTRMI_parsedata, "SCHl" to SNDSTRMI_parseheader (the chunk passes through in $a1); anything else goes back to
+ * the file queue. Called by SNDSTRMI_service.
  *
  * @param streamSlot  the stream slot
  * @param chunk  the chunk
  * @return 0 after a header (stop reading this pass), else 1
  */
-int func_003B7080(int streamSlot, int *chunk) {
+int SNDSTRMI_parsechunk(int streamSlot, int *chunk) {
     struct sA0A0Strm *stream = D_0050A0A0_7080[streamSlot];
     int readMore;
     if (*chunk == 0x6C444353) {
-        func_003B6EA8_7080(stream, chunk);
+        SNDSTRMI_parsedata_7080(stream, chunk);
         readMore = 1;
     } else if (*chunk == 0x6C484353) {
-        func_003B6BD0_7080(streamSlot);
+        SNDSTRMI_parseheader_7080(streamSlot);
         readMore = 0;
     } else {
         func_003E13E8_7080(stream->f00, chunk);
@@ -3411,7 +3411,7 @@ int func_003B7080(int streamSlot, int *chunk) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B70F8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_isheld);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -3421,13 +3421,13 @@ extern int f_14F8_70F8(int) __asm__("func_003E14F8");
 /**
  * Tells whether a stream's current request is still held (not yet to be parsed).
  *
- * A hold (+0x20 of the request) below 0 holds until changed (func_003B7D80); a positive hold ends once the file queue
+ * A hold (+0x20 of the request) below 0 holds until changed (SNDSTRM_modifyhold); a positive hold ends once the file queue
  * has that many ms buffered (func_003E14C8 bytes, capped at 4000000, * 1000 / data rate), when func_003E14F8 reports
  * state 2 or 0, and otherwise holds while free requests remain. An ended hold is cleared.
  *
  * @return 1 while held, else 0
  */
-int func_003B70F8(struct sA0A0Strm *self) {
+int SNDSTRMI_isheld(struct sA0A0Strm *self) {
     struct sA0A0Node *request = self->f134;
     if (request == 0) {
         return 0;
@@ -3461,7 +3461,7 @@ int func_003B70F8(struct sA0A0Strm *self) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B71D8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_service);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -3479,17 +3479,17 @@ extern int *func_003E12E0(int);
  *
  * In the critical section, for each stream with queued requests: a pending switch (state 2) waits until the packet
  * player has no frames left (func_003C6C98), then takes the next format and header, stops (func_003C6CE8) and restarts
- * the voice (func_003B68B8). Unless held (func_003B70F8) it reads up to the packet player's free space (func_003C6C28;
- * 8 when not playing) of chunks from the file queue (func_003E12E0) through func_003B7080, stopping after a header.
- * func_003B7450 registers it with func_003C6018 for the first stream.
+ * the voice (SNDSTRMI_startstream). Unless held (SNDSTRMI_isheld) it reads up to the packet player's free space (func_003C6C28;
+ * 8 when not playing) of chunks from the file queue (func_003E12E0) through SNDSTRMI_parsechunk, stopping after a header.
+ * SNDSTRMI_create registers it with func_003C6018 for the first stream.
  */
-void func_003B71D8(void) {
+void SNDSTRMI_service(void) {
     int i = 0;
     struct sA0A0Strm *stream;
     int n;
     int readMore;
     int *chunk;
-    func_003B58A0();
+    SNDSYS_entercritical();
     for (; i < D_0050A8E8.setup.cfg.f26; i++) {
         stream = D_0050A0A0_71D8[i];
         if (stream == 0 || stream->f11C.f08 == 0) continue;
@@ -3499,9 +3499,9 @@ void func_003B71D8(void) {
             __builtin_memcpy(&stream->f1C, &stream->f84, sizeof(stream->f1C));
             stream->f84.f18[0] = 0;
             func_003C6CE8(stream->f08);
-            func_003B68B8(stream);
+            SNDSTRMI_startstream(stream);
         }
-        if (func_003B70F8(stream) == 0) {
+        if (SNDSTRMI_isheld(stream) == 0) {
             if (stream->f10 == 1) {
                 n = func_003C6C28(stream->f08);
                 if (n <= 0) continue;
@@ -3512,16 +3512,16 @@ void func_003B71D8(void) {
             do {
                 n--;
                 chunk = func_003E12E0(stream->f00);
-                if (chunk != 0) readMore = func_003B7080(i, chunk);
+                if (chunk != 0) readMore = SNDSTRMI_parsechunk(i, chunk);
             } while (readMore != 0 && n > 0);
         }
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7410);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_numcreated);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0050A0A0_7410[] __asm__("D_0050A0A0");
@@ -3534,7 +3534,7 @@ extern unsigned char D_0050A92E_7410[] __asm__("D_0050A92E");
  *
  * @return the number of streams
  */
-int func_003B7410(void) {
+int SNDSTRMI_numcreated(void) {
     int n = 0;
     int i;
 
@@ -3548,13 +3548,13 @@ int func_003B7410(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7450);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_create);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern struct sA8E8 D_0050A8E8;
 
-/* D_0050A0A0_7450: the streams (one per stream slot, func_003B6A38 looks one up). Layout from every use in this unit;
+/* D_0050A0A0_7450: the streams (one per stream slot, SNDSTRMI_getstreamptr looks one up). Layout from every use in this unit;
    field names are their offsets. */
 
 
@@ -3564,19 +3564,19 @@ extern struct sA0A0Strm *D_0050A0A0_7450[32] __asm__("D_0050A0A0");
 extern void func_003C6288_7450(void *, void *) __asm__("func_003C6288");
 
 // (prototype from their definition at line 2527)
-int func_003B7410_7450(void) __asm__("func_003B7410");
+int SNDSTRMI_numcreated_7450(void) __asm__("SNDSTRMI_numcreated");
 
 // (prototype from their definition at line 2333)
-void func_003B6B10_7450(struct sA0A0Node *node, unsigned n, struct sA0A0Strm *s) __asm__("func_003B6B10");
+void SNDSTRMI_framescallback_7450(struct sA0A0Node *node, unsigned n, struct sA0A0Strm *s) __asm__("SNDSTRMI_framescallback");
 
 // (prototype from their definition at line 2280)
-int func_003B69D8_7450(void) __asm__("func_003B69D8");
+int SNDSTRMI_destroyall_7450(void) __asm__("SNDSTRMI_destroyall");
 
 // (prototype from their definition at line 2324)
-void func_003B6AD8_7450(void *arg0) __asm__("func_003B6AD8");
+void SNDSTRMI_releasecallback_7450(void *arg0) __asm__("SNDSTRMI_releasecallback");
 
 // (prototype from their definition at line 2487)
-void func_003B71D8_7450(void) __asm__("func_003B71D8");
+void SNDSTRMI_service_7450(void) __asm__("SNDSTRMI_service");
 
 extern void f_6210_7450(void *, int, int) __asm__("func_00416210");
 extern int f_6620_7450(void (*)(void *), void (*)(struct sA0A0Node *, unsigned, struct sA0A0Strm *), struct sA0A0Strm *, void *, int) __asm__("func_003C6620");
@@ -3586,20 +3586,20 @@ extern int func_003C65F0_7450(int) __asm__("func_003C65F0");
 extern void func_003C6278_7450(void *) __asm__("func_003C6278");
 extern int func_003C6DA0_7450(int) __asm__("func_003C6DA0");
 extern void func_003C6018_7450(void (*)(void)) __asm__("func_003C6018");
-extern int func_003B8120_7450(int, int) __asm__("func_003B8120");
-extern int func_003B78F8_7450(int) __asm__("func_003B78F8");
+extern int SNDSTRM_setgreedylevel_7450(int, int) __asm__("SNDSTRM_setgreedylevel");
+extern int SNDSTRM_purge_7450(int) __asm__("SNDSTRM_purge");
 
-int f_7450(struct sA0A0Parm *src, int n, int a2, char *buf, int size, int h, int ext) __asm__("func_003B7450");
+int f_7450(struct sA0A0Parm *src, int n, int a2, char *buf, int size, int h, int ext) __asm__("SNDSTRMI_create");
 /**
  * Creates a stream in caller memory: request nodes, packet player and file queue.
  *
  * Takes the first free slot (count at byte +0x46 of the sound driver state D_0050A8E8; -9 when full), clears the
  * 0x138-byte stream at the start of the memory, puts n 40-byte request nodes on the free list, creates the packet
- * player with func_003C6620 (release func_003B6AD8, frames func_003B6B10, the stream as client data, func_003C65F0
+ * player with func_003C6620 (release SNDSTRMI_releasecallback, frames SNDSTRMI_framescallback, the stream as client data, func_003C65F0
  * bytes) and either uses the given file STREAM (from tap: +0x11 set) or creates one with STREAM_create in the rest of
- * the memory. It copies the play options to +0xEC; the first stream registers the service func_003B71D8 (func_003C6018)
- * and the shutdown hook func_003B69D8 (+0x1EC). A created file queue gets a third of its size as greedy level
- * (func_003B8120). Ends with func_003B78F8.
+ * the memory. It copies the play options to +0xEC; the first stream registers the service SNDSTRMI_service (func_003C6018)
+ * and the shutdown hook SNDSTRMI_destroyall (+0x1EC). A created file queue gets a third of its size as greedy level
+ * (SNDSTRM_setgreedylevel). Ends with SNDSTRM_purge.
  *
  * @param src  the play options (0x18 bytes)
  * @param n  maximum queued requests
@@ -3640,7 +3640,7 @@ found:
     for (i = 0; i < n; i++) {
         func_003C6288_7450(&stream->f128, &ents[i]);
     }
-    stream->f08 = f_6620_7450(func_003B6AD8_7450, func_003B6B10_7450, stream, packetMem, func_003C65F0_7450(maxChunks));
+    stream->f08 = f_6620_7450(SNDSTRMI_releasecallback_7450, SNDSTRMI_framescallback_7450, stream, packetMem, func_003C65F0_7450(maxChunks));
     if (stream->f08 < 0) return stream->f08;
     if (ext) {
         stream->f11 = 1;
@@ -3657,22 +3657,22 @@ found:
     stream->f0C = 0;
     stream->f04 = -1;
     stream->fEC = *src;
-    if (func_003B7410_7450() == 0) {
-        func_003C6018_7450(func_003B71D8_7450);
-        D_0050A8E8.f1EC = (void (*)(void))func_003B69D8_7450;
+    if (SNDSTRMI_numcreated_7450() == 0) {
+        func_003C6018_7450(SNDSTRMI_service_7450);
+        D_0050A8E8.f1EC = (void (*)(void))SNDSTRMI_destroyall_7450;
     }
     D_0050A0A0_7450[slot] = stream;
     if (ext == 0) {
-        func_003B8120_7450(slot, func_003E1580(stream->f00) / 3);
+        SNDSTRM_setgreedylevel_7450(slot, func_003E1580(stream->f00) / 3);
     }
     stream->f84.f18[0] = 0;
-    func_003B78F8_7450(slot);
+    SNDSTRM_purge_7450(slot);
     return slot;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B76E8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_queue);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -3683,8 +3683,8 @@ extern struct sA0A0Node *f_62E8_76E8(struct sA0A0List *) __asm__("func_003C62E8"
 extern void f_6210_76E8(void *, int, int) __asm__("func_00416210");
 extern void f_62B8_76E8(struct sA0A0List *, struct sA0A0Node *) __asm__("func_003C62B8");
 
-int func_003B76E8_76E8(int, int, int, int, int) __asm__("func_003B76E8");
-extern struct sA0A0Strm *func_003B6A38_76E8(int) __asm__("func_003B6A38");
+int SNDSTRMI_queue_76E8(int, int, int, int, int) __asm__("SNDSTRMI_queue");
+extern struct sA0A0Strm *SNDSTRMI_getstreamptr_76E8(int) __asm__("SNDSTRMI_getstreamptr");
 /**
  * Queues a request on a stream: a file, a block in memory, or an existing file-queue request.
  *
@@ -3693,7 +3693,7 @@ extern struct sA0A0Strm *func_003B6A38_76E8(int) __asm__("func_003B6A38");
  * any other type takes a3 as the file-queue request; a 0 result fails with -1. In the critical section it takes a free
  * node, clears it, appends it to the queued list (+0x11C), stores the file-queue request (+0x08), bumps the stream's
  * sequence (+0x0C, by 0x100, back to 0 on overflow) and gives the node the handle sequence | stream and the hold time
- * (+0x20). Called by func_003B78D8 (type 0) and func_003B7DE8 (type 2).
+ * (+0x20). Called by SNDSTRM_queuefile (type 0) and func_003B7DE8 (type 2).
  *
  * @param streamHandle  the stream handle
  * @param holdTime  the hold time (ms; -1 holds until changed)
@@ -3702,8 +3702,8 @@ extern struct sA0A0Strm *func_003B6A38_76E8(int) __asm__("func_003B6A38");
  * @param queueType  the queue type
  * @return the request handle, or a negative error
  */
-int func_003B76E8_76E8(int streamHandle, int holdTime, int source, int offsetOrRequest, int queueType) {
-    struct sA0A0Strm *stream = func_003B6A38_76E8(streamHandle);
+int SNDSTRMI_queue_76E8(int streamHandle, int holdTime, int source, int offsetOrRequest, int queueType) {
+    struct sA0A0Strm *stream = SNDSTRMI_getstreamptr_76E8(streamHandle);
     struct sA0A0Node *request;
     int fileRequest;
     if (stream == 0) return -8;
@@ -3716,7 +3716,7 @@ int func_003B76E8_76E8(int streamHandle, int holdTime, int source, int offsetOrR
         fileRequest = offsetOrRequest;
     }
     if (fileRequest == 0) return -1;
-    func_003B58A0();
+    SNDSYS_entercritical();
     queueType = (int)f_62E8_76E8(&stream->f128);
     request = (struct sA0A0Node *)queueType;
     f_6210_76E8(request, 0, 40);
@@ -3727,16 +3727,16 @@ int func_003B76E8_76E8(int streamHandle, int holdTime, int source, int offsetOrR
     request->f0C = stream->f0C | streamHandle;
     request->f20 = holdTime;
     stream = (struct sA0A0Strm *)request->f0C;
-    func_003B58D8();
+    SNDSYS_leavecritical();
     return (int)stream;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7818);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRM_create);
 #ifdef SKIP_ASM
 /**
- * Creates a stream that reads its own file queue (func_003B7450 with no tap stream).
+ * Creates a stream that reads its own file queue (SNDSTRMI_create with no tap stream).
  *
  * The handle passes through in $v0 although the declaration is void. Nothing in the code calls it.
  *
@@ -3746,13 +3746,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B7818);
  * @param mem  the stream's memory
  * @param memSize  its size
  */
-void func_003B7818(int playOpts, int maxRequests, int maxChunks, int mem, int memSize) {
-    func_003B7450(playOpts, maxRequests, maxChunks, mem, memSize, 0, 0);
+void SNDSTRM_create(int playOpts, int maxRequests, int maxChunks, int mem, int memSize) {
+    SNDSTRMI_create(playOpts, maxRequests, maxChunks, mem, memSize, 0, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7838);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRM_destroy);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -3760,33 +3760,33 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B7838);
 extern void (*D_0050AAD4)(void);        /* D_0050A8E8.f1EC */
 
 extern struct sA0A0Strm *D_0050A0A0_7838[32] __asm__("D_0050A0A0");
-extern int func_003B7410(void);
-extern int func_003B78F8(int);
+extern int SNDSTRMI_numcreated(void);
+extern int SNDSTRM_purge(int);
 extern void func_003C6040_7838(void (*)(void)) __asm__("func_003C6040");
 extern int func_003C6DA0(int);
 extern void STREAM_destroy(int);
 
-extern void func_003B71D8_7838(void) __asm__("func_003B71D8");
-extern struct sA0A0Strm *func_003B6A38_7838(int) __asm__("func_003B6A38");
-int func_003B7838_7838(int) __asm__("func_003B7838");
+extern void SNDSTRMI_service_7838(void) __asm__("SNDSTRMI_service");
+extern struct sA0A0Strm *SNDSTRMI_getstreamptr_7838(int) __asm__("SNDSTRMI_getstreamptr");
+int SNDSTRM_destroy_7838(int) __asm__("SNDSTRM_destroy");
 /**
  * Destroys a stream: purges it, frees its packet player and file queue.
  *
- * Purges with func_003B78F8; the last stream unregisters the service (func_003C6040) and clears the shutdown hook
+ * Purges with SNDSTRM_purge; the last stream unregisters the service (func_003C6040) and clears the shutdown hook
  * D_0050AAD4. Destroys the packet player (func_003C6DA0), frees the slot and destroys the file STREAM unless it was
- * borrowed (+0x11). Used by func_003B69D8 and the movie player's audio object (func_003AEE30).
+ * borrowed (+0x11). Used by SNDSTRMI_destroyall and the movie player's audio object (func_003AEE30).
  *
  * @param streamHandle  the stream handle
  * @return 0, or -8 for an unknown stream
  */
-int func_003B7838_7838(int streamHandle) {
-    struct sA0A0Strm *stream = func_003B6A38_7838(streamHandle);
+int SNDSTRM_destroy_7838(int streamHandle) {
+    struct sA0A0Strm *stream = SNDSTRMI_getstreamptr_7838(streamHandle);
     int w;
     signed char borrowed;
     if (stream == 0) return -8;
-    func_003B78F8(streamHandle);
-    if (func_003B7410() == 1) {
-        func_003C6040_7838(func_003B71D8_7838);
+    SNDSTRM_purge(streamHandle);
+    if (SNDSTRMI_numcreated() == 1) {
+        func_003C6040_7838(SNDSTRMI_service_7838);
         D_0050AAD4 = 0;
     }
     func_003C6DA0(stream->f08);
@@ -3800,12 +3800,12 @@ int func_003B7838_7838(int streamHandle) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B78D8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRM_queuefile);
 #ifdef SKIP_ASM
-extern void func_003B76E8(int, int, int, int, int);
+extern void SNDSTRMI_queue(int, int, int, int, int);
 
 /**
- * Queues a file on a stream (func_003B76E8 with queue type 0).
+ * Queues a file on a stream (SNDSTRMI_queue with queue type 0).
  *
  * The request handle passes through in $v0 although the declaration is void. Nothing in the code calls it.
  *
@@ -3814,20 +3814,20 @@ extern void func_003B76E8(int, int, int, int, int);
  * @param fileName  the file name
  * @param offset  the start offset in the file
  */
-void func_003B78D8(int streamHandle, int holdTime, int fileName, int offset) {
-    func_003B76E8(streamHandle, holdTime, fileName, offset, 0);
+void SNDSTRM_queuefile(int streamHandle, int holdTime, int fileName, int offset) {
+    SNDSTRMI_queue(streamHandle, holdTime, fileName, offset, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B78F8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRM_purge);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 
 extern int func_003C6CE8(int);
 extern void f_1110_78F8(int) __asm__("func_003E1110");
-extern void f_5E98_78F8(int) __asm__("func_003B5E98");
+extern void f_5E98_78F8(int) __asm__("SNDMEMI_free");
 extern struct sA0A0Node *f_62E8_78F8(struct sA0A0List *) __asm__("func_003C62E8");
 extern void func_003C6288(void *, void *);
 extern void f_6210_78F8(void *, int, int) __asm__("func_00416210");
@@ -3836,21 +3836,21 @@ extern void f_6210_78F8(void *, int, int) __asm__("func_00416210");
  * Purges a stream: stops its voice, cancels its reads and drops every queued request.
  *
  * In the critical section: stops the packet player (func_003C6CE8) when a voice is set, clears the voice, cancels the
- * own file queue (func_003E1110), frees the next header's time-stretch data copies (func_003B5E98), moves all queued
+ * own file queue (func_003E1110), frees the next header's time-stretch data copies (SNDMEMI_free), moves all queued
  * requests to the free list, clears the current request and state and zeroes both formats and headers. Called by
- * func_003B7450 and func_003B7838.
+ * SNDSTRMI_create and SNDSTRM_destroy.
  *
  * @param streamHandle  the stream handle
  * @return 0, or -8 for an unknown stream
  */
-int func_003B78F8(int streamHandle) {
+int SNDSTRM_purge(int streamHandle) {
     struct sA0A0Strm *stream;
     struct sA0A0Node *request;
     int i;
-    func_003B58A0();
-    stream = func_003B6A38(streamHandle);
+    SNDSYS_entercritical();
+    stream = SNDSTRMI_getstreamptr(streamHandle);
     if (stream == 0) {
-        func_003B58D8();
+        SNDSYS_leavecritical();
         return -8;
     }
     if (stream->f04 >= 0) {
@@ -3881,16 +3881,16 @@ int func_003B78F8(int streamHandle) {
     f_6210_78F8(&stream->f18, 0, 4);
     f_6210_78F8(&stream->f1C, 0, 104);
     f_6210_78F8(&stream->f84, 0, 104);
-    func_003B58D8();
+    SNDSYS_leavecritical();
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7A70);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_getrequestptr);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-char *func_003B6A38_7A70(int) __asm__("func_003B6A38");
+char *SNDSTRMI_getstreamptr_7A70(int) __asm__("SNDSTRMI_getstreamptr");
 
 /**
  * Finds a queued stream request by its handle.
@@ -3900,11 +3900,11 @@ char *func_003B6A38_7A70(int) __asm__("func_003B6A38");
  * @param requestHandle  the request handle
  * @return the request, or 0
  */
-char *func_003B7A70(int requestHandle) {
+char *SNDSTRMI_getrequestptr(int requestHandle) {
     char *stream;
     char *request;
     if (requestHandle < 0) return 0;
-    stream = func_003B6A38_7A70(requestHandle & 0xFF);
+    stream = SNDSTRMI_getstreamptr_7A70(requestHandle & 0xFF);
     if (stream == 0) return 0;
     for (request = *(char **)(stream + 0x11C); request != 0; request = *(char **)request) {
         if (*(volatile int *)(request + 0xC) == requestHandle) break;
@@ -3914,62 +3914,62 @@ char *func_003B7A70(int requestHandle) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7AC8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRM_overheadtap);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003C65F0(int);
-int func_003B7AC8_7AC8(int arg0, int arg1) __asm__("func_003B7AC8");
+int SNDSTRM_overheadtap_7AC8(int arg0, int arg1) __asm__("SNDSTRM_overheadtap");
 
 /**
  * Returns the memory a stream needs when it reads from an existing file STREAM.
  *
  * 312 bytes for the stream, 40 per request and func_003C65F0(maxChunks) for the packet player. The movie player's audio
- * object sizes its buffer with func_003B7AC8(1, 0x1E).
+ * object sizes its buffer with SNDSTRM_overheadtap(1, 0x1E).
  *
  * @param maxRequests  maximum queued requests
  * @param maxChunks  maximum packet-player chunks
  * @return bytes needed
  */
-int func_003B7AC8_7AC8(int maxRequests, int maxChunks) {
+int SNDSTRM_overheadtap_7AC8(int maxRequests, int maxChunks) {
     int overhead = maxRequests * 40 + 312;
     return overhead + func_003C65F0(maxChunks);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7B00);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRM_overhead);
 #ifdef SKIP_ASM
-extern int func_003B7AC8();
+extern int SNDSTRM_overheadtap();
 extern int STREAM_overhead(int, int, int);
 
 /**
  * Returns the memory a stream with its own file queue needs.
  *
- * func_003B7AC8 (arguments passed through in registers) plus STREAM_overhead(maxRequests + 2, 1, 1).
+ * SNDSTRM_overheadtap (arguments passed through in registers) plus STREAM_overhead(maxRequests + 2, 1, 1).
  *
  * @param maxRequests  maximum queued requests
  * @return bytes needed
  */
-int func_003B7B00(int maxRequests) {
+int SNDSTRM_overhead(int maxRequests) {
     int overhead;
 
-    overhead = func_003B7AC8();
+    overhead = SNDSTRM_overheadtap();
     return overhead + STREAM_overhead(maxRequests + 2, 1, 1);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7B48);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRM_status);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-/* D_0050A0A0: the streams (one per stream slot, func_003B6A38 looks one up). Layout from every use in this unit;
+/* D_0050A0A0: the streams (one per stream slot, SNDSTRMI_getstreamptr looks one up). Layout from every use in this unit;
    field names are their offsets. */
 extern unsigned int f_6C98_7B48(int) __asm__("func_003C6C98");
 extern int func_003E14C8(int);
 
-int func_003B7B48_impl(int, int *) __asm__("func_003B7B48");
+int SNDSTRM_status_impl(int, int *) __asm__("SNDSTRM_status");
 /**
  * Fills a stream's status: queued requests, current request and buffered time.
  *
@@ -3982,7 +3982,7 @@ int func_003B7B48_impl(int, int *) __asm__("func_003B7B48");
  * @param out  receives the three status words
  * @return 0, or -8 for an unknown stream
  */
-int func_003B7B48_impl(int streamHandle, int *out) {
+int SNDSTRM_status_impl(int streamHandle, int *out) {
     struct sA0A0Strm *stream;
     struct sA0A0Node *n;
     unsigned int bufferedBytes;
@@ -3991,7 +3991,7 @@ int func_003B7B48_impl(int streamHandle, int *out) {
     out[2] = 0;
     out[1] = 0;
     out[0] = 0;
-    stream = func_003B6A38(streamHandle);
+    stream = SNDSTRMI_getstreamptr(streamHandle);
     if (stream == 0) return -8;
     requestCount = stream->f11C.f08;
     out[0] = requestCount;
@@ -4002,7 +4002,7 @@ int func_003B7B48_impl(int streamHandle, int *out) {
         do {
             out[2] = f_6C98_7B48(stream->f08) * 1000 / *(unsigned short *)stream->f14.b;
             if (out[2] != 0) return 0;
-            n = func_003B7A70(out[1]);
+            n = SNDSTRMI_getrequestptr(out[1]);
             if (n->f10 == 0) return 0;
         } while (0);
         bufferedBytes = func_003E14C8(stream->f00);
@@ -4013,12 +4013,12 @@ int func_003B7B48_impl(int streamHandle, int *out) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7C40);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRM_requeststatus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-/* D_0050A0A0: the streams (one per stream slot, func_003B6A38 looks one up). Layout from every use in this unit;
+/* D_0050A0A0: the streams (one per stream slot, SNDSTRMI_getstreamptr looks one up). Layout from every use in this unit;
    field names are their offsets. */
 typedef struct { unsigned int lo, hi; } L64_7C40;
 extern L64_7C40 f6380_7C40(int, int) __asm__("func_003C6380");
@@ -4038,7 +4038,7 @@ extern int f64A8_7C40(L64_7C40, int) __asm__("func_003C64A8");
  * @param out  receives the four status words
  * @return 0, or -8 for an invalid handle
  */
-int func_003B7C40(int requestHandle, int *out) {
+int SNDSTRM_requeststatus(int requestHandle, int *out) {
     struct sA0A0Strm *stream;
     struct sA0A0Node *request;
     unsigned int sampleRate;
@@ -4046,10 +4046,10 @@ int func_003B7C40(int requestHandle, int *out) {
     out[1] = 0;
     out[2] = 0;
     out[3] = 0;
-    if (requestHandle < 0 || (stream = func_003B6A38(requestHandle & 0xFF)) == 0) {
+    if (requestHandle < 0 || (stream = SNDSTRMI_getstreamptr(requestHandle & 0xFF)) == 0) {
         return -8;
     }
-    request = func_003B7A70(requestHandle);
+    request = SNDSTRMI_getrequestptr(requestHandle);
     if (request != 0) {
         if (request->f24 == 0) {
             out[0] = 0;
@@ -4073,10 +4073,10 @@ int func_003B7C40(int requestHandle, int *out) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7D80);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRM_modifyhold);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void *func_003B7A70_7D80(int) __asm__("func_003B7A70");
+extern void *SNDSTRMI_getrequestptr_7D80(int) __asm__("SNDSTRMI_getrequestptr");
 
 /**
  * Changes a queued stream request's hold time.
@@ -4089,18 +4089,18 @@ extern void *func_003B7A70_7D80(int) __asm__("func_003B7A70");
  * @param holdTime  the new hold (ms; -1 holds until changed)
  * @return 0, or -8 for an unknown request
  */
-int func_003B7D80(int requestHandle, int holdTime) {
+int SNDSTRM_modifyhold(int requestHandle, int holdTime) {
     int result;
     char *temp_2;
 
     result = -8;
-    func_003B58A0();
-    temp_2 = func_003B7A70_7D80(requestHandle);
+    SNDSYS_entercritical();
+    temp_2 = SNDSTRMI_getrequestptr_7D80(requestHandle);
     if (temp_2 != 0) {
         result = 0;
         *(volatile int *)(temp_2 + 0x20) = (short)holdTime;
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
     return result;
 }
 #endif
@@ -4108,10 +4108,10 @@ int func_003B7D80(int requestHandle, int holdTime) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7DE8);
 #ifdef SKIP_ASM
-extern void func_003B76E8(int, int, int, int, int);
+extern void SNDSTRMI_queue(int, int, int, int, int);
 
 /**
- * Queues an existing file-queue request on a stream (func_003B76E8 with queue type 2).
+ * Queues an existing file-queue request on a stream (SNDSTRMI_queue with queue type 2).
  *
  * The request handle passes through in $v0 although the declaration is void. The movie player's audio object uses it
  * with a hold time of -1.
@@ -4121,17 +4121,17 @@ extern void func_003B76E8(int, int, int, int, int);
  * @param fileRequest  the file STREAM request to play
  */
 void func_003B7DE8(int streamHandle, int holdTime, int fileRequest) {
-    func_003B76E8(streamHandle, holdTime, 0, fileRequest, 2);
+    SNDSTRMI_queue(streamHandle, holdTime, 0, fileRequest, 2);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7E10);
 #ifdef SKIP_ASM
-extern void func_003B76E8(int, int, int, int, int);
+extern void SNDSTRMI_queue(int, int, int, int, int);
 
 /**
- * Queues a block of memory on a stream (func_003B76E8 with queue type 1).
+ * Queues a block of memory on a stream (SNDSTRMI_queue with queue type 1).
  *
  * Passes buffer + offset as the block. The request handle passes through in $v0 although the declaration is void. Used
  * by the game's bank monitor.
@@ -4142,17 +4142,17 @@ extern void func_003B76E8(int, int, int, int, int);
  * @param offset  byte offset into it
  */
 void func_003B7E10(int streamHandle, int holdTime, int buffer, int offset) {
-    func_003B76E8(streamHandle, holdTime, buffer + offset, 0, 1);
+    SNDSTRMI_queue(streamHandle, holdTime, buffer + offset, 0, 1);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7E38);
 #ifdef SKIP_ASM
-extern void func_003B7450(int, int, int, int, int, int, int);
+extern void SNDSTRMI_create(int, int, int, int, int, int, int);
 
 /**
- * Creates a stream that reads from an existing file STREAM (func_003B7450 with fromtap set).
+ * Creates a stream that reads from an existing file STREAM (SNDSTRMI_create with fromtap set).
  *
  * The handle passes through in $v0 although the declaration is void. The movie player's audio object creates its stream
  * with it (1 request, 0x1E chunks).
@@ -4165,7 +4165,7 @@ extern void func_003B7450(int, int, int, int, int, int, int);
  * @param memSize  its size
  */
 void func_003B7E38(int streamHandle, int playOpts, int maxRequests, int maxChunks, int mem, int memSize) {
-    func_003B7450(playOpts, maxRequests, maxChunks, mem, memSize, streamHandle, 1);
+    SNDSTRMI_create(playOpts, maxRequests, maxChunks, mem, memSize, streamHandle, 1);
 }
 #endif
 
@@ -4173,13 +4173,13 @@ void func_003B7E38(int streamHandle, int playOpts, int maxRequests, int maxChunk
 INCLUDE_ASM("ealib/seg_2B4578", func_003B7E70);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int *func_003B6A38_func_003B7E70(void) __asm__("func_003B6A38");
-void func_003B85F0_func_003B7E70(int, int) __asm__("func_003B85F0");
+int *SNDSTRMI_getstreamptr_func_003B7E70(void) __asm__("SNDSTRMI_getstreamptr");
+void SNDvol_func_003B7E70(int, int) __asm__("SNDvol");
 
 /**
  * Sets a stream's volume.
  *
- * Stores it in the stream's play options (+0xEC) and passes it to the voice with func_003B85F0. Used by the movie
+ * Stores it in the stream's play options (+0xEC) and passes it to the voice with SNDvol. Used by the movie
  * player and the game's bank monitor.
  *
  * @param streamHandle  the stream
@@ -4189,13 +4189,13 @@ void func_003B85F0_func_003B7E70(int, int) __asm__("func_003B85F0");
 int func_003B7E70(int streamHandle, int volume) {
     volatile int *stream;
 
-    stream = func_003B6A38_func_003B7E70();
+    stream = SNDSTRMI_getstreamptr_func_003B7E70();
     if (stream == 0) {
         return -8;
         do { } while (0);
     }
     *(char *)((char *)stream + 0xEC) = volume;
-    func_003B85F0_func_003B7E70(stream[1], volume);
+    SNDvol_func_003B7E70(stream[1], volume);
     return 0;
 }
 #endif
@@ -4205,21 +4205,21 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B7EB0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern void func_003B7450(int, int, int, int, int, int, int);
+extern void SNDSTRMI_create(int, int, int, int, int, int, int);
 
 
 
 // Looks up a handle and sets its byte option at 0xEC.
-extern char *func_003B6A38_7E70(int) __asm__("func_003B6A38");
-extern void func_003B85F0_7E70(int, int) __asm__("func_003B85F0");
+extern char *SNDSTRMI_getstreamptr_7E70(int) __asm__("SNDSTRMI_getstreamptr");
+extern void SNDvol_7E70(int, int) __asm__("SNDvol");
 
 
 // Looks up a handle, stores the byte option at 0xEC and forwards a/10 with it.
-extern void func_003B8530_7EB0(int, int, int) __asm__("func_003B8530");
+extern void SNDautovol_7EB0(int, int, int) __asm__("SNDautovol");
 /**
  * Fades a stream's volume to a target over a time.
  *
- * Stores the target in the stream's play options (+0xEC) and starts the fade on the voice with func_003B8530,
+ * Stores the target in the stream's play options (+0xEC) and starts the fade on the voice with SNDautovol,
  * converting the time to 100 Hz ticks (/10). The game's bank monitor uses its result although the unit declares it int.
  *
  * @param streamHandle  the stream
@@ -4228,10 +4228,10 @@ extern void func_003B8530_7EB0(int, int, int) __asm__("func_003B8530");
  * @return 0, or -8 for an unknown stream
  */
 int func_003B7EB0(int streamHandle, int fadeTime, int targetVol) {
-    char *stream = func_003B6A38_7E70(streamHandle);
+    char *stream = SNDSTRMI_getstreamptr_7E70(streamHandle);
     if (stream == 0) return -8;
     stream[0xEC] = targetVol;
-    func_003B8530_7EB0(*(volatile int *)(stream + 4), fadeTime / 10, targetVol);
+    SNDautovol_7EB0(*(volatile int *)(stream + 4), fadeTime / 10, targetVol);
     return 0;
 }
 #endif
@@ -4257,7 +4257,7 @@ int func_003B7F18(int streamHandle) {
     struct sA0A0Strm *stream;
     int volume;
 
-    stream = func_003B6A38(streamHandle);
+    stream = SNDSTRMI_getstreamptr(streamHandle);
     if (stream == 0) {
         return -8;
     }
@@ -4274,12 +4274,12 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B7F60);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-int func_003B8C00(int, int, int);
+int SND3dpos(int, int, int);
 
 /**
  * Sets a stream's 3D position (azimuth and elevation).
  *
- * Stores both in the stream's play options (+0xEC) (+0x08, +0x0A) and passes them to the voice with func_003B8C00. Used
+ * Stores both in the stream's play options (+0xEC) (+0x08, +0x0A) and passes them to the voice with SND3dpos. Used
  * by the game's stream system.
  *
  * @param streamHandle  the stream handle
@@ -4290,39 +4290,39 @@ int func_003B8C00(int, int, int);
 int func_003B7F60(int streamHandle, int azimuth, int elevation) {
     struct sA0A0Strm *stream;
 
-    stream = func_003B6A38(streamHandle);
+    stream = SNDSTRMI_getstreamptr(streamHandle);
     if (stream == 0) {
         return -8;
     }
     stream->fEC.f08 = azimuth;
     stream->fEC.f0A = elevation;
-    func_003B8C00(stream->f04, azimuth, elevation);
+    SND3dpos(stream->f04, azimuth, elevation);
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B7FB8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRM_pitchmult);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-/* D_0050A0A0: the streams (one per stream slot, func_003B6A38 looks one up). Layout from every use in this unit;
+/* D_0050A0A0: the streams (one per stream slot, SNDSTRMI_getstreamptr looks one up). Layout from every use in this unit;
    field names are their offsets. */
-int func_003B8790(int, int);
+int SNDpitchmult(int, int);
 
 /**
  * Sets a stream's pitch multiplier.
  *
  * Caps it at 0x4000 (4.0 in 4.12 fixed point), stores it in the stream's play options (+0xEC) (+0x0C) and passes it to
- * the voice with func_003B8790. The movie player sets its playback speed with it.
+ * the voice with SNDpitchmult. The movie player sets its playback speed with it.
  *
  * @param streamHandle  the stream handle
  * @param pitchMult  the pitch multiplier (0x1000 = 1.0)
  * @return 0, or -8 for an unknown stream
  */
-int func_003B7FB8(int streamHandle, int pitchMult) {
+int SNDSTRM_pitchmult(int streamHandle, int pitchMult) {
     struct sA0A0Strm *stream;
-    stream = func_003B6A38(streamHandle);
+    stream = SNDSTRMI_getstreamptr(streamHandle);
     if (stream == 0) {
         return -8;
     }
@@ -4330,7 +4330,7 @@ int func_003B7FB8(int streamHandle, int pitchMult) {
         pitchMult = 0x4000;
     }
     stream->fEC.f0C = pitchMult;
-    func_003B8790(stream->f04, pitchMult);
+    SNDpitchmult(stream->f04, pitchMult);
     return 0;
 }
 #endif
@@ -4339,7 +4339,7 @@ int func_003B7FB8(int streamHandle, int pitchMult) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003B8010);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int *func_003B6A38_func_003B8010(void) __asm__("func_003B6A38");
+int *SNDSTRMI_getstreamptr_func_003B8010(void) __asm__("SNDSTRMI_getstreamptr");
 void func_003B8700_func_003B8010(int, int) __asm__("func_003B8700");
 
 /**
@@ -4354,7 +4354,7 @@ void func_003B8700_func_003B8010(int, int) __asm__("func_003B8700");
 int func_003B8010(int streamHandle, int dryLevel) {
     volatile int *stream;
 
-    stream = func_003B6A38_func_003B8010();
+    stream = SNDSTRMI_getstreamptr_func_003B8010();
     if (stream == 0) {
         return -8;
         do { } while (0);
@@ -4386,7 +4386,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B8050);
 int func_003B8050(int streamHandle, int busIndex, int fxLevel) {
     struct sA0A0Strm *stream;
 
-    stream = func_003B6A38(streamHandle);
+    stream = SNDSTRMI_getstreamptr(streamHandle);
     if (stream == 0) {
         return -8;
     }
@@ -4400,13 +4400,13 @@ int func_003B8050(int streamHandle, int busIndex, int fxLevel) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003B80A0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int *func_003B6A38_func_003B80A0(void) __asm__("func_003B6A38");
+int *SNDSTRMI_getstreamptr_func_003B80A0(void) __asm__("SNDSTRMI_getstreamptr");
 void func_003B8978_func_003B80A0(int, int) __asm__("func_003B8978");
 
 /**
  * Sets a stream's low-pass cutoff.
  *
- * Stores it in the stream's play options (+0xEC) (+0x14, default 0xFFFF from func_003BA020) and passes it to the voice
+ * Stores it in the stream's play options (+0xEC) (+0x14, default 0xFFFF from SNDplaysetdef) and passes it to the voice
  * with func_003B8978.
  *
  * @param streamHandle  the stream
@@ -4416,7 +4416,7 @@ void func_003B8978_func_003B80A0(int, int) __asm__("func_003B8978");
 int func_003B80A0(int streamHandle, int lowPassCutoff) {
     volatile int *stream;
 
-    stream = func_003B6A38_func_003B80A0();
+    stream = SNDSTRMI_getstreamptr_func_003B80A0();
     if (stream == 0) {
         return -8;
         do { } while (0);
@@ -4428,56 +4428,56 @@ int func_003B80A0(int streamHandle, int lowPassCutoff) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B80E0);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRM_timemult);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int *func_003B6A38_func_003B80E0(void) __asm__("func_003B6A38");
-void func_003B8838_func_003B80E0(int, int) __asm__("func_003B8838");
+int *SNDSTRMI_getstreamptr_SNDSTRM_timemult(void) __asm__("SNDSTRMI_getstreamptr");
+void func_003B8838_SNDSTRM_timemult(int, int) __asm__("func_003B8838");
 
 /**
  * Sets a stream's time multiplier.
  *
- * Stores it in the stream's play options (+0xEC) (+0x0E, default 0x1000 from func_003BA020) and passes it to the voice
+ * Stores it in the stream's play options (+0xEC) (+0x0E, default 0x1000 from SNDplaysetdef) and passes it to the voice
  * with func_003B8838.
  *
  * @param streamHandle  the stream
  * @param timeMult  the time multiplier (0x1000 = 1.0)
  * @return 0, or -8 for an unknown stream
  */
-int func_003B80E0(int streamHandle, int timeMult) {
+int SNDSTRM_timemult(int streamHandle, int timeMult) {
     volatile int *stream;
 
-    stream = func_003B6A38_func_003B80E0();
+    stream = SNDSTRMI_getstreamptr_SNDSTRM_timemult();
     if (stream == 0) {
         return -8;
         do { } while (0);
     }
     *(short *)((char *)stream + 0xFA) = timeMult;
-    func_003B8838_func_003B80E0(stream[1], timeMult);
+    func_003B8838_SNDSTRM_timemult(stream[1], timeMult);
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8120);
+INCLUDE_ASM("ealib/seg_2B4578", SNDSTRM_setgreedylevel);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int *func_003B6A38_8120(void) __asm__("func_003B6A38");
+int *SNDSTRMI_getstreamptr_8120(void) __asm__("SNDSTRMI_getstreamptr");
 void func_003E0B28_8120(int, int) __asm__("func_003E0B28");
 
 /**
  * Sets how much a stream's file queue reads ahead (forwards to func_003E0B28).
  *
- * func_003B7450 sets it to a third of the file queue's size for every stream it creates its own queue for.
+ * SNDSTRMI_create sets it to a third of the file queue's size for every stream it creates its own queue for.
  *
  * @param streamHandle  the stream
  * @param greedyLevel  the read-ahead threshold
  * @return 0, or -8 for an unknown stream
  */
-int func_003B8120(int streamHandle, int greedyLevel) {
+int SNDSTRM_setgreedylevel(int streamHandle, int greedyLevel) {
     int *temp_2;
 
-    temp_2 = func_003B6A38_8120();
+    temp_2 = SNDSTRMI_getstreamptr_8120();
     if (temp_2 == 0) {
         return -8;
     }
@@ -4487,7 +4487,7 @@ int func_003B8120(int streamHandle, int greedyLevel) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8160);
+INCLUDE_ASM("ealib/seg_2B4578", SNDmastervol);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void f_A7B0_8160(int) __asm__("func_003BA7B0");
@@ -4505,10 +4505,10 @@ extern struct G_8160 D_0050A8E8_8160[] __asm__("D_0050A8E8");
  * @param masterVol  the master volume (0..127)
  * @return 0
  */
-int func_003B8160(int masterVol) {
+int SNDmastervol(int masterVol) {
     int i;
     struct T_8160 *channel;
-    func_003B58A0();
+    SNDSYS_entercritical();
     D_0050A8E8_8160[0].c = masterVol;
     for (i = 0; i < D_0050A8E8_8160[0].n; i++) {
         channel = (struct T_8160 *)((char *)D_0050A8E8_8160[0].tab + i * 0x8C);
@@ -4517,7 +4517,7 @@ int func_003B8160(int masterVol) {
             f_2A50_8160(i);
         }
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
     return 0;
 }
 #endif
@@ -4663,7 +4663,7 @@ int func_003B83A0(int busFlags, int busLevel) {
     if (selectsKind8) {
         D_0050A8E8.f220[id].f02 = busLevel;
     }
-    func_003B58A0();
+    SNDSYS_entercritical();
     if (selectsKind8) {
         struct sA8E8Pan panPair;
         panPair.r = panPair.l = (float)busLevel * 0.007874016f;
@@ -4673,7 +4673,7 @@ int func_003B83A0(int busFlags, int busLevel) {
         struct sA8E8Chan *channel = &D_0050A8E8.f1F0[i];
         func_003B88C8(channel->f00, id, channel->f61[id]);
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
     return 0;
 }
 #endif
@@ -4708,34 +4708,34 @@ int func_003B84E0(int busIndex, int flags, int arg2, struct V_84E0 *panPair) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8530);
+INCLUDE_ASM("ealib/seg_2B4578", SNDautovol);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003BAA00_8530(int, int *) __asm__("func_003BAA00");
-extern int func_003BA6E8_8530(void) __asm__("func_003BA6E8");
+extern int iSNDpatchkey_8530(int, int *) __asm__("iSNDpatchkey");
+extern int SNDVOICEI_get_8530(void) __asm__("SNDVOICEI_get");
 struct G_8530 { char pad[0x1F0]; char *tab; };
 extern struct G_8530 D_0050A8E8_8530[] __asm__("D_0050A8E8");
 
 /**
  * Fades a sound's volume to a target over a number of 100 Hz ticks.
  *
- * Resolves the handle (passed through in $a0) with func_003BA6E8 and, for every channel of its patch-key group
- * (func_003BAA00), sets the fade target (+0x34) and the per-tick step (+0x30) from the current volume (+0x38); the 100
- * Hz server func_003B55F0 then moves the volume. A time of 0 or less counts as 1.
+ * Resolves the handle (passed through in $a0) with SNDVOICEI_get and, for every channel of its patch-key group
+ * (iSNDpatchkey), sets the fade target (+0x34) and the per-tick step (+0x30) from the current volume (+0x38); the 100
+ * Hz server SNDSYSI_100hzserver then moves the volume. A time of 0 or less counts as 1.
  *
  * @param soundHandle  the sound handle
  * @param n  the fade time in 100 Hz ticks
  * @param targetVol  the target volume (0..127)
  * @return the channel index, or -8 for a dead handle
  */
-int func_003B8530(int soundHandle, int n, int targetVol) {
-    int chanIndex = func_003BA6E8_8530();
+int SNDautovol(int soundHandle, int n, int targetVol) {
+    int chanIndex = SNDVOICEI_get_8530();
     int setChan;
     if (chanIndex >= 0) {
         if (n <= 0) n = 1;
         setChan = -1;
         targetVol <<= 16;
-        while (func_003BAA00_8530(chanIndex, &setChan)) {
+        while (iSNDpatchkey_8530(chanIndex, &setChan)) {
             char *channel = D_0050A8E8_8530[0].tab + setChan * 140;
             *(int *)(channel + 0x34) = targetVol;
             *(int *)(channel + 0x30) = (targetVol - *(int *)(channel + 0x38)) / n;
@@ -4746,12 +4746,12 @@ int func_003B8530(int soundHandle, int n, int targetVol) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B85F0);
+INCLUDE_ASM("ealib/seg_2B4578", SNDvol);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern int func_003BA6E8_85F0(void) __asm__("func_003BA6E8");
-extern int func_003BAA00_85F0(int, int *) __asm__("func_003BAA00");
+extern int SNDVOICEI_get_85F0(void) __asm__("SNDVOICEI_get");
+extern int iSNDpatchkey_85F0(int, int *) __asm__("iSNDpatchkey");
 extern void func_003BA7B0_85F0(int) __asm__("func_003BA7B0");
 extern void func_003C2A50_85F0(int) __asm__("func_003C2A50");
 extern void func_003C27E0_85F0(int, int) __asm__("func_003C27E0");
@@ -4759,9 +4759,9 @@ struct E_85F0 { int w0; short s4; char pad[0x2A]; int f30; int f34; int f38; cha
 struct G_85F0 { char pad[0x1F0]; struct E_85F0 *tab; };
 extern struct G_85F0 D_0050A8E8_85F0 __asm__("D_0050A8E8");
 
-int func_003B85F0_85F0(int a, int v) __asm__("func_003B85F0");
+int SNDvol_85F0(int a, int v) __asm__("SNDvol");
 
-int func_003B85F0_impl(int a, int v) __asm__("func_003B85F0");
+int SNDvol_impl(int a, int v) __asm__("SNDvol");
 /**
  * Sets a sound's volume immediately, cancelling any fade.
  *
@@ -4773,15 +4773,15 @@ int func_003B85F0_impl(int a, int v) __asm__("func_003B85F0");
  * @param volume  the volume (0..127)
  * @return the channel index, -8 for a dead handle, or 0 when unchanged
  */
-int func_003B85F0_impl(int soundHandle, int volume) {
+int SNDvol_impl(int soundHandle, int volume) {
     int setChan;
     int chanIndex;
     struct E_85F0 *channel;
 
-    chanIndex = func_003BA6E8_85F0();
+    chanIndex = SNDVOICEI_get_85F0();
     if (chanIndex >= 0) {
         setChan = -1;
-        while (func_003BAA00_85F0(chanIndex, &setChan) != 0) {
+        while (iSNDpatchkey_85F0(chanIndex, &setChan) != 0) {
             channel = &D_0050A8E8_85F0.tab[setChan];
             channel->f30 = 0;
             if (channel->f38 == volume << 16) return 0;
@@ -4804,13 +4804,13 @@ extern char *D_0050AAD8_86C0[] __asm__("D_0050AAD8");
 /**
  * Returns a sound's current volume.
  *
- * The handle passes through in $a0 to func_003BA6E8; the result is the integer part of the channel's 16.16 volume
+ * The handle passes through in $a0 to SNDVOICEI_get; the result is the integer part of the channel's 16.16 volume
  * (+0x3A). Used by func_003B7F18 and the game's bank monitor.
  *
  * @return the volume, or -8 for a dead handle
  */
 short func_003B86C0(void) {
-    int i = (int)func_003BA6E8();
+    int i = (int)SNDVOICEI_get();
     if (i < 0) {
         return -8;
     }
@@ -4822,7 +4822,7 @@ short func_003B86C0(void) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003B8700);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003BAA00_8700(int, int *) __asm__("func_003BAA00");
+extern int iSNDpatchkey_8700(int, int *) __asm__("iSNDpatchkey");
 extern void func_003C2EC8_8700(int) __asm__("func_003C2EC8");
 struct G_8700 { char pad[0x1F0]; char *tbl; };
 extern struct G_8700 D_0050A8E8_8700 __asm__("D_0050A8E8");
@@ -4840,10 +4840,10 @@ int func_003B8700(int soundHandle, int dryLevel) {
     int setChan;
     int chanIndex;
 
-    chanIndex = func_003BA6E8();
+    chanIndex = SNDVOICEI_get();
     if (chanIndex >= 0) {
         setChan = -1;
-        while (func_003BAA00_8700(chanIndex, &setChan) != 0) {
+        while (iSNDpatchkey_8700(chanIndex, &setChan) != 0) {
             
             *(char *)(D_0050A8E8_8700.tbl + setChan * 0x8C + 0x5F) = dryLevel;
             func_003C2EC8_8700(setChan);
@@ -4854,44 +4854,44 @@ int func_003B8700(int soundHandle, int dryLevel) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8790);
+INCLUDE_ASM("ealib/seg_2B4578", SNDpitchmult);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003BA6E8_8790(void) __asm__("func_003BA6E8");
-extern void func_003BA938_8790(int, int) __asm__("func_003BA938");
-extern int func_003BAA00_8790(int, int *) __asm__("func_003BAA00");
+extern int SNDVOICEI_get_8790(void) __asm__("SNDVOICEI_get");
+extern void iSNDcalcpitch_8790(int, int) __asm__("iSNDcalcpitch");
+extern int iSNDpatchkey_8790(int, int *) __asm__("iSNDpatchkey");
 extern void func_003C25E0_8790(int) __asm__("func_003C25E0");
 extern char D_0050A8E8_8790[] __asm__("D_0050A8E8");
-int func_003B8790_8790(int a0, int arg1) __asm__("func_003B8790");
+int SNDpitchmult_8790(int a0, int arg1) __asm__("SNDpitchmult");
 
 /**
  * Sets a sound's pitch multiplier and recomputes its pitch.
  *
- * Stores it in each grouped channel's +0x88 and recomputes with func_003BA938 and func_003C25E0. Quirk: a channel
+ * Stores it in each grouped channel's +0x88 and recomputes with iSNDcalcpitch and func_003C25E0. Quirk: a channel
  * already at that value makes it return 0 at once, skipping the rest of the group.
  *
  * @param soundHandle  the sound handle
  * @param pitchMult  the pitch multiplier (0x1000 = 1.0)
  * @return the channel index, -8 for a dead handle, or 0 when unchanged
  */
-int func_003B8790_8790(int soundHandle, int pitchMult) {
+int SNDpitchmult_8790(int soundHandle, int pitchMult) {
     int setChan;
     int chanIndex;
     char *channel;
     char *sndState;
     int i;
-    chanIndex = func_003BA6E8_8790();
+    chanIndex = SNDVOICEI_get_8790();
     if (chanIndex >= 0) {
         setChan = -1;
         sndState = D_0050A8E8_8790;
-        while (func_003BAA00_8790(chanIndex, &setChan) != 0) {
+        while (iSNDpatchkey_8790(chanIndex, &setChan) != 0) {
             i = setChan;
             channel = *(char **)(sndState + 0x1F0) + i * 140;
             if (*(unsigned short *)(channel + 0x88) == pitchMult) {
                 return 0;
             }
             *(unsigned short *)(channel + 0x88) = pitchMult;
-            func_003BA938_8790(i, i);
+            iSNDcalcpitch_8790(i, i);
             func_003C25E0_8790(setChan);
         }
     }
@@ -4903,7 +4903,7 @@ int func_003B8790_8790(int soundHandle, int pitchMult) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003B8838);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003BAA00_8838(int, int *) __asm__("func_003BAA00");
+extern int iSNDpatchkey_8838(int, int *) __asm__("iSNDpatchkey");
 extern void func_003C3010_8838(int, int) __asm__("func_003C3010");
 struct G_8838 { char pad[0x1F0]; char *tbl; };
 extern struct G_8838 D_0050A8E8_8838 __asm__("D_0050A8E8");
@@ -4911,7 +4911,7 @@ extern struct G_8838 D_0050A8E8_8838 __asm__("D_0050A8E8");
 /**
  * Sets a sound's time multiplier.
  *
- * Stores it in each grouped channel's +0x6A (func_003B8AD8 divides the remaining time by it) and applies it with
+ * Stores it in each grouped channel's +0x6A (SNDtimeremaining divides the remaining time by it) and applies it with
  * func_003C3010. Always returns 0, even for a dead handle.
  *
  * @param soundHandle  the sound handle
@@ -4922,10 +4922,10 @@ int func_003B8838(int soundHandle, int timeMult) {
     int setChan;
     int chanIndex;
 
-    chanIndex = func_003BA6E8();
+    chanIndex = SNDVOICEI_get();
     if (chanIndex >= 0) {
         setChan = -1;
-        while (func_003BAA00_8838(chanIndex, &setChan) != 0) {
+        while (iSNDpatchkey_8838(chanIndex, &setChan) != 0) {
             int i = setChan;
             *(short *)(D_0050A8E8_8838.tbl + i * 0x8C + 0x6A) = timeMult;
             func_003C3010_8838(i, timeMult);
@@ -4939,9 +4939,9 @@ int func_003B8838(int soundHandle, int timeMult) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003B88C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003BA6E8_88C8() __asm__("func_003BA6E8");
+extern int SNDVOICEI_get_88C8() __asm__("SNDVOICEI_get");
 extern void func_003BA740_88C8(int, int) __asm__("func_003BA740");
-extern int func_003BAA00_88C8(int, int *) __asm__("func_003BAA00");
+extern int iSNDpatchkey_88C8(int, int *) __asm__("iSNDpatchkey");
 extern void func_003C27E0_88C8(int, int) __asm__("func_003C27E0");
 extern char D_0050A8E8_88C8[] __asm__("D_0050A8E8");
 
@@ -4960,11 +4960,11 @@ int func_003B88C8(int soundHandle, int busIndex, int fxLevel) {
     int setChan;
     int chanIndex;
     char *sndState;
-    chanIndex = func_003BA6E8_88C8();
+    chanIndex = SNDVOICEI_get_88C8();
     if (chanIndex >= 0) {
         setChan = -1;
         sndState = D_0050A8E8_88C8;
-        while (func_003BAA00_88C8(chanIndex, &setChan) != 0) {
+        while (iSNDpatchkey_88C8(chanIndex, &setChan) != 0) {
             *(char *)(setChan * 0x8C + *(int *)(sndState + 0x1F0) + busIndex + 0x61) = fxLevel;
             func_003BA740_88C8(busIndex, setChan);
             func_003C27E0_88C8(setChan, busIndex);
@@ -4978,7 +4978,7 @@ int func_003B88C8(int soundHandle, int busIndex, int fxLevel) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003B8978);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003BAA00_8978(int, int *) __asm__("func_003BAA00");
+extern int iSNDpatchkey_8978(int, int *) __asm__("iSNDpatchkey");
 extern void func_003C3178_8978(int, int) __asm__("func_003C3178");
 
 /**
@@ -4992,10 +4992,10 @@ int func_003B8978(int soundHandle, int lowPassCutoff) {
     int setVoice;
     int voice;
 
-    voice = func_003BA6E8();
+    voice = SNDVOICEI_get();
     if (voice >= 0) {
         setVoice = -1;
-        while (func_003BAA00_8978(voice, &setVoice) != 0) {
+        while (iSNDpatchkey_8978(voice, &setVoice) != 0) {
             func_003C3178_8978(setVoice, lowPassCutoff);
         }
     }
@@ -5004,30 +5004,30 @@ int func_003B8978(int soundHandle, int lowPassCutoff) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B89E0);
+INCLUDE_ASM("ealib/seg_2B4578", SNDstop);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int func_003BA6E8_89E0(void) __asm__("func_003BA6E8");
-int func_003BAA00_89E0(int, int *) __asm__("func_003BAA00");
+int SNDVOICEI_get_89E0(void) __asm__("SNDVOICEI_get");
+int iSNDpatchkey_89E0(int, int *) __asm__("iSNDpatchkey");
 void func_003C2440_89E0(int) __asm__("func_003C2440");
 
 /**
  * Stops a sound: every voice of its patch-key group.
  *
- * The handle passes through in $a0 to func_003BA6E8; each grouped channel (func_003BAA00) is stopped with
+ * The handle passes through in $a0 to SNDVOICEI_get; each grouped channel (iSNDpatchkey) is stopped with
  * func_003C2440. Used by the 100 Hz server when a fade drops below 0, by the bank remover, the voice allocator when
  * stealing, and the MIDI code.
  *
  * @return the channel index, or -8 for a dead handle
  */
-int func_003B89E0(void) {
+int SNDstop(void) {
     int setVoice;
     int temp_2;
 
-    temp_2 = func_003BA6E8_89E0();
+    temp_2 = SNDVOICEI_get_89E0();
     if (temp_2 >= 0) {
         setVoice = -1;
-        while (func_003BAA00_89E0(temp_2, &setVoice) != 0) {
+        while (iSNDpatchkey_89E0(temp_2, &setVoice) != 0) {
             func_003C2440_89E0(setVoice);
         }
     }
@@ -5040,43 +5040,43 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B8A38);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-// Between func_003B58A0 and func_003B58D8, calls func_003B89E0 on each entry's handle.
+// Between SNDSYS_entercritical and SNDSYS_leavecritical, calls SNDstop on each entry's handle.
 struct E_8A38 { int h; char p[0x88]; };
 struct G_8A38 { char p[0x17E]; short n; char p2[0x1F0 - 0x180]; struct E_8A38 *ents; };
 extern struct G_8A38 D_0050A8E8_8A38 __asm__("D_0050A8E8");
-extern int func_003B89E0_8A38(int) __asm__("func_003B89E0");
-extern void func_003B58A0_8A38(void) __asm__("func_003B58A0");
-extern void func_003B58D8_8A38(void) __asm__("func_003B58D8");
+extern int SNDstop_8A38(int) __asm__("SNDstop");
+extern void SNDSYS_entercritical_8A38(void) __asm__("SNDSYS_entercritical");
+extern void SNDSYS_leavecritical_8A38(void) __asm__("SNDSYS_leavecritical");
 /**
- * Stops every sound (func_003B89E0 on each channel's handle) inside the critical section.
+ * Stops every sound (SNDstop on each channel's handle) inside the critical section.
  */
 void func_003B8A38(void) {
     int i = 0;
-    func_003B58A0_8A38();
-    for (; i < D_0050A8E8_8A38.n; i++) func_003B89E0_8A38(D_0050A8E8_8A38.ents[i].h);
-    func_003B58D8_8A38();
+    SNDSYS_entercritical_8A38();
+    for (; i < D_0050A8E8_8A38.n; i++) SNDstop_8A38(D_0050A8E8_8A38.ents[i].h);
+    SNDSYS_leavecritical_8A38();
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8AB8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDover);
 #ifdef SKIP_ASM
-extern unsigned int func_003BA6E8();
+extern unsigned int SNDVOICEI_get();
 
 /**
  * Tells whether a sound has ended (its handle no longer names a live channel).
  *
- * The handle passes through in $a0 to func_003BA6E8.
+ * The handle passes through in $a0 to SNDVOICEI_get.
  *
  * @return 1 when ended, 0 while playing
  */
-unsigned int func_003B8AB8(void) {
-    return func_003BA6E8() >> 0x1F;
+unsigned int SNDover(void) {
+    return SNDVOICEI_get() >> 0x1F;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8AD8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDtimeremaining);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -5085,8 +5085,8 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003B8AD8);
    their offsets). Some fields are also reached through their own splat symbols (declared below), which the
    functions that address them directly must keep using. */
 extern struct sA8E8 D_0050A8E8;
-extern int func_003BAA00_8AD8(int, int *) __asm__("func_003BAA00");
-extern int func_003BA6E8_8AD8(void) __asm__("func_003BA6E8");
+extern int iSNDpatchkey_8AD8(int, int *) __asm__("iSNDpatchkey");
+extern int SNDVOICEI_get_8AD8(void) __asm__("SNDVOICEI_get");
 extern int func_003C4318_8AD8(int) __asm__("func_003C4318");
 /**
  * Returns how long a sound still plays, in 1/100 s.
@@ -5098,13 +5098,13 @@ extern int func_003C4318_8AD8(int) __asm__("func_003C4318");
  *
  * @return the remaining time, -7 when looping or unknown, or -8 for a dead handle
  */
-int func_003B8AD8(void) {
+int SNDtimeremaining(void) {
     int best = -7;
-    int chanIndex = func_003BA6E8_8AD8();
+    int chanIndex = SNDVOICEI_get_8AD8();
     int setChan;
     if (chanIndex >= 0) {
         setChan = -1;
-        while (func_003BAA00_8AD8(chanIndex, &setChan) != 0) {
+        while (iSNDpatchkey_8AD8(chanIndex, &setChan) != 0) {
             struct sA8E8Chan *channel = &D_0050A8E8.f1F0[setChan];
             int curFrame;
             if (channel->f18 > 0) {
@@ -5130,7 +5130,7 @@ int func_003B8AD8(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8C00);
+INCLUDE_ASM("ealib/seg_2B4578", SND3dpos);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_8C00 { char p0[0x1C]; unsigned short s1c; unsigned short s1e; char p1[0x2C]; unsigned short s4c; char p2[0x8C - 0x4E]; };
@@ -5148,7 +5148,7 @@ extern struct G_8C00 D_0050A8E8_8C00[] __asm__("D_0050A8E8");
  * @param elevation  the elevation
  * @return the channel index, or -8 for a dead handle
  */
-int func_003B8C00(int soundHandle, int azimuth, int elevation) {
+int SND3dpos(int soundHandle, int azimuth, int elevation) {
     int chanIndex;
     int setChan;
     if (elevation >= 0x4000) {
@@ -5156,10 +5156,10 @@ int func_003B8C00(int soundHandle, int azimuth, int elevation) {
     } else if (elevation < -0x4000) {
         elevation = -0x4000;
     }
-    chanIndex = func_003BA6E8();
+    chanIndex = SNDVOICEI_get();
     if (chanIndex >= 0) {
         setChan = -1;
-        while (func_003BAA00(chanIndex, &setChan)) {
+        while (iSNDpatchkey(chanIndex, &setChan)) {
             struct E_8C00 *channel = &D_0050A8E8_8C00[0].tab[setChan];
             channel->s1c = channel->s4c + azimuth;
             channel->s1e = elevation;
@@ -5174,13 +5174,13 @@ int func_003B8C00(int soundHandle, int azimuth, int elevation) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003B8CC8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003BAA00_8CC8(int, int *) __asm__("func_003BAA00");
+extern int iSNDpatchkey_8CC8(int, int *) __asm__("iSNDpatchkey");
 extern void func_003C5068_8CC8(int, int) __asm__("func_003C5068");
 
 /**
  * Applies a setting to each voice of a sound through func_003C5068.
  *
- * func_003C5068 acts only on render kind 4 channels. func_003B68B8 passes the stream's first track record.
+ * func_003C5068 acts only on render kind 4 channels. SNDSTRMI_startstream passes the stream's first track record.
  *
  * @param soundHandle  the sound handle
  * @param arg1  passed to func_003C5068
@@ -5190,10 +5190,10 @@ int func_003B8CC8(int soundHandle, int arg1) {
     int setVoice;
     int voice;
 
-    voice = func_003BA6E8();
+    voice = SNDVOICEI_get();
     if (voice >= 0) {
         setVoice = -1;
-        while (func_003BAA00_8CC8(voice, &setVoice) != 0) {
+        while (iSNDpatchkey_8CC8(voice, &setVoice) != 0) {
             func_003C5068_8CC8(setVoice, arg1);
         }
     }
@@ -5205,7 +5205,7 @@ int func_003B8CC8(int soundHandle, int arg1) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003B8D30);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003BAA00_8D30(int, int *) __asm__("func_003BAA00");
+extern int iSNDpatchkey_8D30(int, int *) __asm__("iSNDpatchkey");
 extern void func_003C5128_8D30(int, int) __asm__("func_003C5128");
 
 /**
@@ -5219,10 +5219,10 @@ int func_003B8D30(int soundHandle, int arg1) {
     int setVoice;
     int voice;
 
-    voice = func_003BA6E8();
+    voice = SNDVOICEI_get();
     if (voice >= 0) {
         setVoice = -1;
-        while (func_003BAA00_8D30(voice, &setVoice) != 0) {
+        while (iSNDpatchkey_8D30(voice, &setVoice) != 0) {
             func_003C5128_8D30(setVoice, arg1);
         }
     }
@@ -5231,7 +5231,7 @@ int func_003B8D30(int soundHandle, int arg1) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8D98);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_midigetseqindex);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { char pad[0x10]; int key; char pad2[0x5C]; } E_8D98;
@@ -5245,7 +5245,7 @@ extern E_8D98 D_0050A120_8D98[] __asm__("D_0050A120");
  * @param seqHandle  the sequence handle
  * @return the slot, or -8
  */
-int func_003B8D98(int seqHandle) {
+int SNDI_midigetseqindex(int seqHandle) {
     int idx;
     int handleValue = seqHandle;
     if (handleValue < 0)
@@ -5258,7 +5258,7 @@ int func_003B8D98(int seqHandle) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8DE8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_midiupdatefade);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -5304,16 +5304,16 @@ struct sA120 {
 };
 extern struct sA120 D_0050A120;
 extern struct sA120Voice D_0050A820[];  /* D_0050A120.f700 */
-extern int func_003B9920_8DE8(int) __asm__("func_003B9920");
-extern int f_85F0_8DE8(int, int) __asm__("func_003B85F0");
+extern int SNDseqstop_8DE8(int) __asm__("SNDseqstop");
+extern int f_85F0_8DE8(int, int) __asm__("SNDvol");
 
-int func_003B8DE8_impl(int) __asm__("func_003B8DE8");
+int SNDI_midiupdatefade_impl(int) __asm__("SNDI_midiupdatefade");
 /**
  * Steps a sequence's volume fade and applies it to its playing notes.
  *
  * Adds the step (+0x18) to the volume (+0x14) and stops at the target (+0x1C). Below 0 the sequence is stopped
- * (func_003B9920) and it returns 1; otherwise every note voice of the sequence gets channel volume * sequence volume /
- * 128 through func_003B85F0.
+ * (SNDseqstop) and it returns 1; otherwise every note voice of the sequence gets channel volume * sequence volume /
+ * 128 through SNDvol.
  *
  * Sequences live in D_0050A120 (16 records of 0x70 bytes: +0x08 read position, +0x0C loop start, +0x10 handle, +0x14
  * volume 16.16, +0x18 fade step, +0x1C fade target, +0x20 base azimuth, +0x22 pitch multiplier, +0x24 tempo percent,
@@ -5323,7 +5323,7 @@ int func_003B8DE8_impl(int) __asm__("func_003B8DE8");
  * @param id  the sequence slot
  * @return 1 when the fade stopped the sequence, else 0
  */
-int func_003B8DE8_impl(int id) {
+int SNDI_midiupdatefade_impl(int id) {
     struct sA120Song *seqInst = &D_0050A120.f000[id];
     struct sA120Voice *voiceSlot;
     int i;
@@ -5340,7 +5340,7 @@ int func_003B8DE8_impl(int id) {
         }
     }
     if (seqInst->f14 < 0) {
-        func_003B9920_8DE8(seqInst->f10);
+        SNDseqstop_8DE8(seqInst->f10);
         return 1;
     }
     i = 23;
@@ -5357,26 +5357,26 @@ int func_003B8DE8_impl(int id) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8EE8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_midiseqover);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_8EE8 { int id; signed char owner; char pad[3]; };
 extern struct E_8EE8 D_0050A820_8EE8[] __asm__("D_0050A820");
-extern int func_003BA6E8_8EE8(int) __asm__("func_003BA6E8");
+extern int SNDVOICEI_get_8EE8(int) __asm__("SNDVOICEI_get");
 
 /**
  * Tells whether all of a sequence's notes have finished.
  *
- * Looks for a note voice of the slot whose handle is still live (func_003BA6E8).
+ * Looks for a note voice of the slot whose handle is still live (SNDVOICEI_get).
  *
  * @param seqIndex  the sequence slot
  * @return 1 when none is playing, else 0
  */
-int func_003B8EE8(int seqIndex) {
+int SNDI_midiseqover(int seqIndex) {
     int i;
     int isOver = 1;
     for (i = 0; i < 0x18; i++) {
-        if (D_0050A820_8EE8[i].owner == seqIndex && D_0050A820_8EE8[i].id >= 0 && func_003BA6E8_8EE8(D_0050A820_8EE8[i].id) >= 0) {
+        if (D_0050A820_8EE8[i].owner == seqIndex && D_0050A820_8EE8[i].id >= 0 && SNDVOICEI_get_8EE8(D_0050A820_8EE8[i].id) >= 0) {
             isOver = 0;
             break;
         }
@@ -5386,14 +5386,14 @@ int func_003B8EE8(int seqIndex) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B8F78);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_midiparsenoteon);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // FAKEMATCH: cc.b17 read into a temp `t17` between the two azimuth statements (stored to parm.bend at its original
 // place), so its extraction precedes azimuth's zero-extension in insn order and wins sched's tie; plain form 99.81%.
 // Byte-identical and behaves like the plain form; landed marked under the 2026-11-14 ruling (portable,
 // behaviour-preserving steering only); replace it when an honest spelling matches.
-struct sNoteParm_8F78 {             /* 0x20: note parameters for func_003B6820 (func_003BA020 sets defaults) */
+struct sNoteParm_8F78 {             /* 0x20: note parameters for SNDBANK_play (SNDplaysetdef sets defaults) */
     unsigned char vol;              /* field names from On Tour's SNDPLAYOPTS, which starts the same way */
     unsigned char bend;
     unsigned char keynum;
@@ -5406,17 +5406,17 @@ struct sNoteParm_8F78 {             /* 0x20: note parameters for func_003B6820 (
 };
 struct sSongHandle_8F78 { int id; };
 extern int D_0044C474;              /* last voice slot handed out */
-extern int func_003BA6E8_8F78(int) __asm__("func_003BA6E8");
-extern void func_003BA020_8F78(struct sNoteParm_8F78 *) __asm__("func_003BA020");
-extern int func_003B6820_8F78(int, int, struct sNoteParm_8F78 *) __asm__("func_003B6820");
+extern int SNDVOICEI_get_8F78(int) __asm__("SNDVOICEI_get");
+extern void SNDplaysetdef_8F78(struct sNoteParm_8F78 *) __asm__("SNDplaysetdef");
+extern int SNDBANK_play_8F78(int, int, struct sNoteParm_8F78 *) __asm__("SNDBANK_play");
 
 /**
  * Plays a MIDI note-on: picks a free note voice and plays the channel's patch.
  *
  * Searches the 24 note voices round-robin from D_0044C474 for one whose sound has ended; with none it only skips the
- * velocity byte. Otherwise it fills play options from func_003BA020 defaults: volume = channel volume * sequence volume
+ * velocity byte. Otherwise it fills play options from SNDplaysetdef defaults: volume = channel volume * sequence volume
  * / 128, velocity from the stream, azimuth = channel pan + the sequence's base azimuth, pitch multiplier and bend from
- * the sequence and channel, and plays through func_003B6820 from the drum bank (+0x2E, key as patch, key 0x3C) on
+ * the sequence and channel, and plays through SNDBANK_play from the drum bank (+0x2E, key as patch, key 0x3C) on
  * channel 9 or the channel's program from the main bank (+0x2C). The voice remembers sequence, channel, key and
  * velocity.
  *
@@ -5430,7 +5430,7 @@ extern int func_003B6820_8F78(int, int, struct sNoteParm_8F78 *) __asm__("func_0
  * @param ch  the MIDI channel
  * @param key  the key
  */
-void func_003B8F78(struct sSongHandle_8F78 seqSlot, struct sA120Chan *midiChan, int ch, int key) {
+void SNDI_midiparsenoteon(struct sSongHandle_8F78 seqSlot, struct sA120Chan *midiChan, int ch, int key) {
     struct sNoteParm_8F78 parm;
     struct sA120Song *seqInst = &D_0050A120.f000[seqSlot.id];
     struct sA120Voice *voiceSlot = 0;
@@ -5446,13 +5446,13 @@ void func_003B8F78(struct sSongHandle_8F78 seqSlot, struct sA120Chan *midiChan, 
     for (; i < end; i++) {
         D_0044C474 = i % 24;
         voiceSlot = &D_0050A820[D_0044C474];
-        if (func_003BA6E8_8F78(voiceSlot->f00) < 0) {
+        if (SNDVOICEI_get_8F78(voiceSlot->f00) < 0) {
             found = 1;
             break;
         }
     }
     if (found) {
-        func_003BA020_8F78(&parm);
+        SNDplaysetdef_8F78(&parm);
         cc = *midiChan;
         parm.vol = (unsigned int)(cc.b10 * (seqInst->f14 >> 16)) >> 7;
         parm.velocity = *seqInst->f08;
@@ -5471,7 +5471,7 @@ void func_003B8F78(struct sSongHandle_8F78 seqSlot, struct sA120Chan *midiChan, 
             bankHandle = seqInst->f2C;
             parm.keynum = key;
         }
-        voiceSlot->f00 = func_003B6820_8F78(bankHandle, patchNum, &parm);
+        voiceSlot->f00 = SNDBANK_play_8F78(bankHandle, patchNum, &parm);
         voiceSlot->f07 = *seqInst->f08++;
         if (voiceSlot->f00 >= 0) {
             voiceSlot->f04 = seqSlot.id;
@@ -5485,7 +5485,7 @@ void func_003B8F78(struct sSongHandle_8F78 seqSlot, struct sA120Chan *midiChan, 
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B9140);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_midiparsenoteoff);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
@@ -5504,7 +5504,7 @@ extern void func_003C7138_9140(int) __asm__("func_003C7138");
  * @param midiChannel  the MIDI channel
  * @param keyNum  the key
  */
-void func_003B9140(int ch, int midiChannel, int keyNum) {
+void SNDI_midiparsenoteoff(int ch, int midiChannel, int keyNum) {
     struct V_9140 *voiceSlot;
     int i;
 
@@ -5521,7 +5521,7 @@ void func_003B9140(int ch, int midiChannel, int keyNum) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B91E0);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_midiparsecontrol);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Ch_91E0 {
@@ -5551,23 +5551,23 @@ struct Bits_91E0 {
     unsigned int b : 7;
 };
 extern struct G_91E0 D_0050A120_91E0 __asm__("D_0050A120");
-extern void func_003B85F0(int, unsigned int);
-extern int func_003BC570_91E0(int v) __asm__("func_003BC570");
+extern void SNDvol(int, unsigned int);
+extern int SNDI_pantoazimuth_91E0(int v) __asm__("SNDI_pantoazimuth");
 
 /**
  * Handles a MIDI control change for a sequence channel.
  *
  * Controller 20 marks the loop start (+0x0C) after the value byte; 30 loops back to it, the value byte giving the
  * repeat count (0x7F or more means forever); 7 sets the channel volume and reapplies it to the channel's notes (channel
- * volume * sequence volume / 128 through func_003B85F0); 10 sets the channel pan (func_003BC570) and repositions the
- * channel's notes with func_003B8C00 (pan + base azimuth, elevation 0). Other controllers skip their value byte.
+ * volume * sequence volume / 128 through SNDvol); 10 sets the channel pan (SNDI_pantoazimuth) and repositions the
+ * channel's notes with SND3dpos (pan + base azimuth, elevation 0). Other controllers skip their value byte.
  *
  * @param seqIndex  the sequence slot
  * @param bits  the MIDI channel state
  * @param x  the MIDI channel
  * @param cmd  the controller number
  */
-void func_003B91E0(int seqIndex, struct Bits_91E0 *bits, int x, int cmd) {
+void SNDI_midiparsecontrol(int seqIndex, struct Bits_91E0 *bits, int x, int cmd) {
     struct V_91E0 *voiceSlot = (struct V_91E0 *)&D_0050A120_91E0;
     struct Ch_91E0 *seqInst = (struct Ch_91E0 *)((char *)voiceSlot + seqIndex * 0x70);
     unsigned char *readPos;
@@ -5595,7 +5595,7 @@ void func_003B91E0(int seqIndex, struct Bits_91E0 *bits, int x, int cmd) {
         seqInst->p8 = readPos + 1;
         do {
             if (voiceSlot->ch == seqIndex && voiceSlot->x == x) {
-                func_003B85F0(voiceSlot->h, (unsigned int)(bits->b * seqInst->f16) >> 7);
+                SNDvol(voiceSlot->h, (unsigned int)(bits->b * seqInst->f16) >> 7);
             }
             i--;
             voiceSlot++;
@@ -5604,11 +5604,11 @@ void func_003B91E0(int seqIndex, struct Bits_91E0 *bits, int x, int cmd) {
     } else if (cmd == 10) {
         voiceSlot = (struct V_91E0 *)((char *)voiceSlot + 0x700);
         i = 23;
-        bits->a = func_003BC570_91E0(*seqInst->p8++) >> 6;
+        bits->a = SNDI_pantoazimuth_91E0(*seqInst->p8++) >> 6;
         do {
             if (voiceSlot->ch == seqIndex && voiceSlot->x == x) {
                 int azimuthValue = ((*(unsigned int *)bits & 0x3FF) << 6) + seqInst->f20;
-                func_003B8C00(voiceSlot->h, (unsigned short)azimuthValue, 0);
+                SND3dpos(voiceSlot->h, (unsigned short)azimuthValue, 0);
             }
             i--;
             voiceSlot++;
@@ -5620,7 +5620,7 @@ void func_003B91E0(int seqIndex, struct Bits_91E0 *bits, int x, int cmd) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B93C8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_midiparsepitchbend);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct B_93C8 { unsigned int lo : 17; unsigned int f : 7; unsigned int hi : 8; };
@@ -5628,20 +5628,20 @@ struct E_93C8 { int id; signed char owner; signed char sub; short pad; };
 struct R_93C8 { char pad0[8]; unsigned char *cur; char pad1[0x70 - 12]; };
 struct G_93C8 { struct R_93C8 r[16]; struct E_93C8 e[24]; };
 extern struct G_93C8 D_a120_93C8 __asm__("D_0050A120");
-extern void fC6B8_93C8(int, int) __asm__("func_003BC6B8");
+extern void fC6B8_93C8(int, int) __asm__("SNDpitchbend");
 
 /**
  * Handles a MIDI pitch bend for a sequence channel.
  *
  * Combines the next stream byte (high) with the data byte (low) and stores value / 128 (so only the high byte) as the
- * channel bend, then bends each of the channel's notes with func_003BC6B8.
+ * channel bend, then bends each of the channel's notes with SNDpitchbend.
  *
  * @param seqIndex  the sequence slot
  * @param midiChan  the MIDI channel state
  * @param channel  the MIDI channel
  * @param data  the low data byte
  */
-void func_003B93C8(int seqIndex, struct B_93C8 *midiChan, int channel, int data) {
+void SNDI_midiparsepitchbend(int seqIndex, struct B_93C8 *midiChan, int channel, int data) {
     struct R_93C8 *seqInst = &D_a120_93C8.r[seqIndex];
     int value, i;
     struct E_93C8 *partial = &D_a120_93C8.e[0];
@@ -5659,31 +5659,31 @@ void func_003B93C8(int seqIndex, struct B_93C8 *midiChan, int channel, int data)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B94B0);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_midiprocesstick);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_0050A120: the MIDI sequence player (16 songs, then 24 voices, also D_0050A820). Layout from every use in this
    unit; field names are their offsets. */
 extern struct sA120 D_0050A120;
-extern int f8EE8_94B0(int) __asm__("func_003B8EE8");
-extern void f9920_94B0(int) __asm__("func_003B9920");
-extern void f8F78_94B0(int, struct sA120Chan *, int, int) __asm__("func_003B8F78");
-extern void f9140_94B0(int, int, int) __asm__("func_003B9140");
-extern void f91E0_94B0(int, struct sA120Chan *, int, int) __asm__("func_003B91E0");
-extern void f93C8_94B0(int, struct sA120Chan *, int, int) __asm__("func_003B93C8");
+extern int f8EE8_94B0(int) __asm__("SNDI_midiseqover");
+extern void f9920_94B0(int) __asm__("SNDseqstop");
+extern void f8F78_94B0(int, struct sA120Chan *, int, int) __asm__("SNDI_midiparsenoteon");
+extern void f9140_94B0(int, int, int) __asm__("SNDI_midiparsenoteoff");
+extern void f91E0_94B0(int, struct sA120Chan *, int, int) __asm__("SNDI_midiparsecontrol");
+extern void f93C8_94B0(int, struct sA120Chan *, int, int) __asm__("SNDI_midiparsepitchbend");
 
 /**
  * Runs one tick of a sequence: waits out the delay, then parses events until the next delay.
  *
  * Events are three bytes (ticks to wait after it, status, first data byte). An end of track (status 0xF0-0xFF, data 47)
- * stops the sequence (func_003B9920) once all notes are over (func_003B8EE8), otherwise it waits on it. Status 0x90
- * goes to func_003B8F78, 0x80 to func_003B9140, 0xB0 to func_003B91E0, 0xE0 to func_003B93C8 and 0xC0 sets the channel
+ * stops the sequence (SNDseqstop) once all notes are over (SNDI_midiseqover), otherwise it waits on it. Status 0x90
+ * goes to SNDI_midiparsenoteon, 0x80 to SNDI_midiparsenoteoff, 0xB0 to SNDI_midiparsecontrol, 0xE0 to SNDI_midiparsepitchbend and 0xC0 sets the channel
  * program; parsing stops at a nonzero delay or when the sequence leaves state 3.
  *
  * @param seqIndex  the sequence slot
  */
-void func_003B94B0(int seqIndex) {
+void SNDI_midiprocesstick(int seqIndex) {
     struct sA120Song *seqInst = &D_0050A120.f000[seqIndex];
     unsigned char ev, statusByte, dataByte;
     unsigned char *readPos;
@@ -5746,21 +5746,21 @@ void func_003B94B0(int seqIndex) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B96B8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_midiserver);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003B8DE8_96B8(int) __asm__("func_003B8DE8");
-extern void func_003B94B0_96B8(int) __asm__("func_003B94B0");
+extern int SNDI_midiupdatefade_96B8(int) __asm__("SNDI_midiupdatefade");
+extern void SNDI_midiprocesstick_96B8(int) __asm__("SNDI_midiprocesstick");
 struct E_96B8 { int f0; unsigned int f4; char pad[0x18 - 8]; int f18; char pad2[0x24 - 0x1C]; unsigned short u24; char pad4[2]; signed char st; char pad3[0x70 - 0x29]; };
 extern struct E_96B8 D_0050A120_96B8[] __asm__("D_0050A120");
 
 /**
  * Runs the sequencer at 100 Hz: fades and ticks every playing sequence.
  *
- * For each sequence in state 3 whose fade (func_003B8DE8, only while a step is set) did not stop it, advances its tick
- * counter and runs func_003B94B0 until the processed ticks catch up with counter * tempo percent (+0x24) / 100.
+ * For each sequence in state 3 whose fade (SNDI_midiupdatefade, only while a step is set) did not stop it, advances its tick
+ * counter and runs SNDI_midiprocesstick until the processed ticks catch up with counter * tempo percent (+0x24) / 100.
  */
-void func_003B96B8(void) {
+void SNDI_midiserver(void) {
     int i;
     struct E_96B8 *seqInst;
     signed char st;
@@ -5769,13 +5769,13 @@ void func_003B96B8(void) {
     for (i = 0; i < 16; i++) {
         seqInst = &D_0050A120_96B8[i];
         st = seqInst->st;
-        if (st == 3 && (seqInst->f18 == 0 || func_003B8DE8_96B8(i) == 0)) {
+        if (st == 3 && (seqInst->f18 == 0 || SNDI_midiupdatefade_96B8(i) == 0)) {
             tickCount = seqInst->f0;
             lim = (unsigned int)(tickCount * seqInst->u24) / 100u;
             seqInst->f0 = tickCount + 1;
             if (lim >= seqInst->f4 && seqInst->st == st) {
                 do {
-                    func_003B94B0_96B8(i);
+                    SNDI_midiprocesstick_96B8(i);
                     seqInst->f4++;
                 } while (lim >= seqInst->f4 && seqInst->st == 3);
             }
@@ -5785,7 +5785,7 @@ void func_003B96B8(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B97D8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDmidiinit);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
@@ -5795,23 +5795,23 @@ struct G_97D8 { char pad[0x1E8]; int (*f1E8)(void); };
 extern struct E_97D8 D_0050A820_97D8[] __asm__("D_0050A820");
 extern struct C_97D8 D_0050A120_97D8[] __asm__("D_0050A120");
 extern struct G_97D8 D_0050A8E8_97D8 __asm__("D_0050A8E8");
-extern void func_003B5910_97D8(void *) __asm__("func_003B5910");
-extern void func_003B96B8_97D8(void) __asm__("func_003B96B8");
-extern int func_003B9880_97D8(void) __asm__("func_003B9880");
+extern void SNDSYS_add100hzclient_97D8(void *) __asm__("SNDSYS_add100hzclient");
+extern void SNDI_midiserver_97D8(void) __asm__("SNDI_midiserver");
+extern int SNDmidirestore_97D8(void) __asm__("SNDmidirestore");
 
 /**
  * Starts the MIDI sequencer: clears all sequences and note voices and adds its 100 Hz client.
  *
- * In the critical section: frees the 24 note voices and the 16 sequence slots, adds func_003B96B8 as a 100 Hz client
- * and installs func_003B9880 as the sequencer shutdown hook (the sound driver state D_0050A8E8 +0x1E8).
+ * In the critical section: frees the 24 note voices and the 16 sequence slots, adds SNDI_midiserver as a 100 Hz client
+ * and installs SNDmidirestore as the sequencer shutdown hook (the sound driver state D_0050A8E8 +0x1E8).
  *
  * @return 0
  */
-int func_003B97D8(void) {
+int SNDmidiinit(void) {
     int i;
     struct C_97D8 *seqInst;
 
-    func_003B58A0();
+    SNDSYS_entercritical();
     for (i = 0; i < 24; i++) {
         D_0050A820_97D8[i].b5 = -1;
         D_0050A820_97D8[i].b6 = 0;
@@ -5824,97 +5824,97 @@ int func_003B97D8(void) {
         seqInst->f28 = 0;
         seqInst++;
     } while ((int)seqInst < (int)(D_0050A120_97D8 + 16));
-    func_003B5910_97D8(func_003B96B8_97D8);
-    D_0050A8E8_97D8.f1E8 = func_003B9880_97D8;
-    func_003B58D8();
+    SNDSYS_add100hzclient_97D8(SNDI_midiserver_97D8);
+    D_0050A8E8_97D8.f1E8 = SNDmidirestore_97D8;
+    SNDSYS_leavecritical();
     return 0;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003B9880);
+INCLUDE_ASM("ealib/seg_2B4578", SNDmidirestore);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003B5948_9880(void (*)(void)) __asm__("func_003B5948");
-extern void func_003B96B8_9880(void) __asm__("func_003B96B8");
-extern void func_003B98C0_9880(void) __asm__("func_003B98C0");
+extern void SNDSYS_remove100hzclient_9880(void (*)(void)) __asm__("SNDSYS_remove100hzclient");
+extern void SNDI_midiserver_9880(void) __asm__("SNDI_midiserver");
+extern void SNDmidistopall_9880(void) __asm__("SNDmidistopall");
 extern int D_0050AAD0_9880[] __asm__("D_0050AAD0");
 
 /**
  * Shuts the MIDI sequencer down: stops all sequences and removes its 100 Hz client.
  *
- * In the critical section: func_003B98C0, then func_003B5948(func_003B96B8), and clears the shutdown hook D_0050AAD0.
+ * In the critical section: SNDmidistopall, then SNDSYS_remove100hzclient(SNDI_midiserver), and clears the shutdown hook D_0050AAD0.
  *
  * @return 0
  */
-int func_003B9880(void) {
-    func_003B58A0();
-    func_003B98C0_9880();
-    func_003B5948_9880(func_003B96B8_9880);
+int SNDmidirestore(void) {
+    SNDSYS_entercritical();
+    SNDmidistopall_9880();
+    SNDSYS_remove100hzclient_9880(SNDI_midiserver_9880);
     D_0050AAD0_9880[0] = 0;
-    func_003B58D8();
+    SNDSYS_leavecritical();
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B98C0);
+INCLUDE_ASM("ealib/seg_2B4578", SNDmidistopall);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct { int a[4]; int v; int pad[0x17]; } E_98C0;
-extern void func_003B58A0();
-extern void func_003B58D8();
-extern void func_003B9920(int);
+extern void SNDSYS_entercritical();
+extern void SNDSYS_leavecritical();
+extern void SNDseqstop(int);
 extern E_98C0 D_0050A120_A120_98C0[] __asm__("D_0050A120");
 
 /**
- * Stops all 16 sequences (func_003B9920 on each slot's handle) inside the critical section.
+ * Stops all 16 sequences (SNDseqstop on each slot's handle) inside the critical section.
  *
  * @return 0
  */
-int func_003B98C0(void) {
+int SNDmidistopall(void) {
     E_98C0 *tbl;
     int *seqHandlePtr;
     int i;
 
     i = 0xF;
-    func_003B58A0();
+    SNDSYS_entercritical();
     tbl = D_0050A120_A120_98C0;
     seqHandlePtr = &tbl->v;
     do {
         i -= 1;
-        func_003B9920(*seqHandlePtr);
+        SNDseqstop(*seqHandlePtr);
         seqHandlePtr += 0x1C;
     } while (i >= 0);
-    func_003B58D8();
+    SNDSYS_leavecritical();
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B9920);
+INCLUDE_ASM("ealib/seg_2B4578", SNDseqstop);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct C_9920 { char pad[0x10]; int f10; char pad2[0x14]; signed char f28; char pad3[0x47]; };
 struct V_9920 { int h; signed char ch; signed char b5; char b6; char b7; };
 extern struct C_9920 D_0050A120_9920[] __asm__("D_0050A120");
-extern void func_003B89E0_9920(int) __asm__("func_003B89E0");
+extern void SNDstop_9920(int) __asm__("SNDstop");
 
-int func_003B9920_9920(int h) __asm__("func_003B9920");
+int SNDseqstop_9920(int h) __asm__("SNDseqstop");
 
-int func_003B9920_impl(int h) __asm__("func_003B9920");
+int SNDseqstop_impl(int h) __asm__("SNDseqstop");
 /**
  * Stops a sequence and its notes.
  *
- * Fails with -1 when the slot is free (state 0). Otherwise stops every note voice of the sequence (func_003B89E0),
+ * Fails with -1 when the slot is free (state 0). Otherwise stops every note voice of the sequence (SNDstop),
  * frees them, clears the slot handle and sets state 2.
  *
  * @param seqHandle  the sequence handle
  * @return 0, -1 when not active, or -8 for an invalid handle
  */
-int func_003B9920_impl(int seqHandle) {
-    int ch = func_003B8D98(seqHandle);
+int SNDseqstop_impl(int seqHandle) {
+    int ch = SNDI_midigetseqindex(seqHandle);
     struct C_9920 *seqInst;
     struct V_9920 *voiceSlot;
     int i;
@@ -5925,7 +5925,7 @@ int func_003B9920_impl(int seqHandle) {
         voiceSlot = (struct V_9920 *)((char *)D_0050A120_9920 + 0x700);
         for (i = 0; i < 24; i++, voiceSlot++) {
             if (voiceSlot->ch == ch) {
-                if (voiceSlot->h >= 0) func_003B89E0_9920(voiceSlot->h);
+                if (voiceSlot->h >= 0) SNDstop_9920(voiceSlot->h);
                 voiceSlot->b5 = -1;
                 voiceSlot->b6 = 0;
                 voiceSlot->b7 = 0;
@@ -5941,7 +5941,7 @@ int func_003B9920_impl(int seqHandle) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B9A00);
+INCLUDE_ASM("ealib/seg_2B4578", SNDMIDI_play);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_0050A120: the MIDI sequence player (16 songs, then 24 voices, also D_0050A820). Layout from every use in this
@@ -5967,7 +5967,7 @@ struct H_9A00 { signed char f00; char pad01[7]; unsigned short f08; char pad0A[2
  * @param drumBankHandle  the bank for channel 9 (drums)
  * @return the sequence handle, or -9 when all slots are busy
  */
-int func_003B9A00(struct H_9A00 *hdr, unsigned char *data, int bankHandle, int drumBankHandle) {
+int SNDMIDI_play(struct H_9A00 *hdr, unsigned char *data, int bankHandle, int drumBankHandle) {
     int ret = -9;
     struct sA120Song *seqInst;
     int i;
@@ -6013,28 +6013,28 @@ int func_003B9A00(struct H_9A00 *hdr, unsigned char *data, int bankHandle, int d
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B9B68);
+INCLUDE_ASM("ealib/seg_2B4578", SNDMIDI_pitchmult);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct C_9B68 { char pad[0x22]; unsigned short f22; char pad2[4]; signed char f28; char pad3[0x47]; };
 struct V_9B68 { int h; signed char ch; char pad[3]; };
 extern struct C_9B68 D_0050A120_9B68[] __asm__("D_0050A120");
-extern int func_003B8790_9B68(int, int) __asm__("func_003B8790");
+extern int SNDpitchmult_9B68(int, int) __asm__("SNDpitchmult");
 
 /**
  * Sets a playing sequence's pitch multiplier.
  *
- * Stores it (+0x22; new notes copy it) and passes it to every playing note voice with func_003B8790. Fails with -1 when
+ * Stores it (+0x22; new notes copy it) and passes it to every playing note voice with SNDpitchmult. Fails with -1 when
  * the value changes and the sequence is not playing.
  *
  * @param seqHandle  the sequence handle
  * @param pitchMult  the pitch multiplier (0x1000 = 1.0)
  * @return 0, -1, or -8 for an invalid handle
  */
-int func_003B9B68(int seqHandle, int pitchMult) {
+int SNDMIDI_pitchmult(int seqHandle, int pitchMult) {
     int result = -1;
-    int ch = func_003B8D98(seqHandle);
+    int ch = SNDI_midigetseqindex(seqHandle);
     struct C_9B68 *seqInst;
     struct V_9B68 *voiceSlot;
     int i;
@@ -6046,7 +6046,7 @@ int func_003B9B68(int seqHandle, int pitchMult) {
         seqInst->f22 = pitchMult;
         voiceSlot = (struct V_9B68 *)((char *)D_0050A120_9B68 + 0x700);
         for (i = 23; i >= 0; i--, voiceSlot++) {
-            if (voiceSlot->ch == ch && voiceSlot->h >= 0) func_003B8790_9B68(voiceSlot->h, pitchMult);
+            if (voiceSlot->ch == ch && voiceSlot->h >= 0) SNDpitchmult_9B68(voiceSlot->h, pitchMult);
         }
     }
     result = 0;
@@ -6056,30 +6056,30 @@ out:
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B9C20);
+INCLUDE_ASM("ealib/seg_2B4578", SNDMIDI_azimuth);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct C_9C20 { char pad[0x20]; unsigned short f20; char pad2[6]; signed char f28; char pad3[7]; int w30[16]; };
 struct V_9C20 { int h; signed char ch; signed char b5; char pad[2]; };
 extern struct C_9C20 D_0050A120_9C20[] __asm__("D_0050A120");
-extern void func_003B8C00_9C20(int, unsigned short, int) __asm__("func_003B8C00");
+extern void SND3dpos_9C20(int, unsigned short, int) __asm__("SND3dpos");
 
-int func_003B9C20(int h, int v) __asm__("func_003B9C20");
+int SNDMIDI_azimuth(int h, int v) __asm__("SNDMIDI_azimuth");
 
 /**
  * Sets a playing sequence's base azimuth.
  *
- * Stores it (+0x20) and repositions every playing note with func_003B8C00 at base + the note channel's pan (elevation
+ * Stores it (+0x20) and repositions every playing note with SND3dpos at base + the note channel's pan (elevation
  * 0). Fails with -1 when the value changes and the sequence is not playing.
  *
  * @param seqHandle  the sequence handle
  * @param azimuth  the azimuth
  * @return 0, -1, or -8 for an invalid handle
  */
-int func_003B9C20(int seqHandle, int azimuth) {
+int SNDMIDI_azimuth(int seqHandle, int azimuth) {
     int result = -1;
-    int ch = func_003B8D98(seqHandle);
+    int ch = SNDI_midigetseqindex(seqHandle);
     struct C_9C20 *seqInst;
     struct V_9C20 *voiceSlot;
     int i;
@@ -6093,7 +6093,7 @@ int func_003B9C20(int seqHandle, int azimuth) {
         for (i = 23; i >= 0; i--, voiceSlot++) {
             if (voiceSlot->ch == ch && voiceSlot->h >= 0) {
                 azimuth = seqInst->f20 + ((*(int *)((char *)seqInst + (voiceSlot->b5 << 2) + 0x30) & 0x3FF) << 6);
-                func_003B8C00_9C20(voiceSlot->h, azimuth, 0);
+                SND3dpos_9C20(voiceSlot->h, azimuth, 0);
             }
         }
     }
@@ -6104,10 +6104,10 @@ out:
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B9D00);
+INCLUDE_ASM("ealib/seg_2B4578", SNDseqpause);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003B89E0_9D00(int) __asm__("func_003B89E0");
+extern void SNDstop_9D00(int) __asm__("SNDstop");
 extern int D_0050A120_9D00[] __asm__("D_0050A120");
 typedef struct { int a; signed char b; char pad[3]; } E_9D00;
 
@@ -6117,18 +6117,18 @@ typedef struct { int a; signed char b; char pad[3]; } E_9D00;
  * Only a playing sequence (state 3) changes. Runs in the critical section.
  *
  * @param seqHandle  the sequence handle
- * @return the new status from func_003B9FC8, or -8 for an invalid handle
+ * @return the new status from SNDseqstatus, or -8 for an invalid handle
  */
-int func_003B9D00(int seqHandle) {
+int SNDseqpause(int seqHandle) {
     int status, seqIndex, i;
 
     E_9D00 *voiceSlot;
     char *seqInst;
 
-    func_003B58A0();
-    seqIndex = func_003B8D98(seqHandle);
+    SNDSYS_entercritical();
+    seqIndex = SNDI_midigetseqindex(seqHandle);
     if (seqIndex < 0) {
-        func_003B58D8();
+        SNDSYS_leavecritical();
         return seqIndex;
     }
     seqInst = (char*)D_0050A120_9D00 + seqIndex * 0x70;
@@ -6139,25 +6139,25 @@ int func_003B9D00(int seqHandle) {
         do {
             i--;
             if (voiceSlot->b == seqIndex) {
-                if (voiceSlot->a >= 0) func_003B89E0_9D00(voiceSlot->a);
+                if (voiceSlot->a >= 0) SNDstop_9D00(voiceSlot->a);
             }
             voiceSlot++;
         } while (i >= 0);
     }
-    status = func_003B9FC8(seqHandle);
-    func_003B58D8();
+    status = SNDseqstatus(seqHandle);
+    SNDSYS_leavecritical();
     return status;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B9DC8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDseqresume);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003B58A0();
-extern void func_003B58D8();
-extern int func_003B8D98(int);
-extern int func_003B9FC8_9DC8(int) __asm__("func_003B9FC8");
+extern void SNDSYS_entercritical();
+extern void SNDSYS_leavecritical();
+extern int SNDI_midigetseqindex(int);
+extern int SNDseqstatus_9DC8(int) __asm__("SNDseqstatus");
 extern char D_0050A120_9DC8[] __asm__("D_0050A120");
 
 /**
@@ -6166,50 +6166,50 @@ extern char D_0050A120_9DC8[] __asm__("D_0050A120");
  * Runs in the critical section. Notes stopped by the pause are not restarted.
  *
  * @param seqHandle  the sequence handle
- * @return the new status from func_003B9FC8, or -8 for an invalid handle
+ * @return the new status from SNDseqstatus, or -8 for an invalid handle
  */
-int func_003B9DC8(int seqHandle) {
+int SNDseqresume(int seqHandle) {
     int var_16;
     char *temp_4;
 
-    func_003B58A0();
-    var_16 = func_003B8D98(seqHandle);
+    SNDSYS_entercritical();
+    var_16 = SNDI_midigetseqindex(seqHandle);
     if (var_16 < 0) {
-        func_003B58D8();
+        SNDSYS_leavecritical();
         return var_16;
     }
     temp_4 = D_0050A120_9DC8 + var_16 * 0x70;
     if (*(signed char *)(temp_4 + 0x28) == 5) {
         *(signed char *)(temp_4 + 0x28) = 3;
     }
-    var_16 = func_003B9FC8_9DC8(seqHandle);
-    func_003B58D8();
+    var_16 = SNDseqstatus_9DC8(seqHandle);
+    SNDSYS_leavecritical();
     return var_16;
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B9E48);
+INCLUDE_ASM("ealib/seg_2B4578", SNDseqvol);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_0050A120_9E48[] __asm__("D_0050A120");
-extern int func_003B8D98_9E48() __asm__("func_003B8D98");
-extern void func_003B85F0(int, unsigned int);
+extern int SNDI_midigetseqindex_9E48() __asm__("SNDI_midigetseqindex");
+extern void SNDvol(int, unsigned int);
 
 /**
  * Sets a playing sequence's volume immediately, cancelling its fade.
  *
- * The handle passes through in $a0 to func_003B8D98. Clears the fade step and, when the volume changes, stores it
- * (16.16) and updates every note (channel volume * volume / 128 through func_003B85F0); a change on a sequence that is
+ * The handle passes through in $a0 to SNDI_midigetseqindex. Clears the fade step and, when the volume changes, stores it
+ * (16.16) and updates every note (channel volume * volume / 128 through SNDvol); a change on a sequence that is
  * not playing fails with -1.
  *
  * @param seqHandle  the sequence handle
  * @param vol  the volume (0..127)
  * @return 0, -1, or -8 for an invalid handle
  */
-int func_003B9E48(int seqHandle, int vol) {
+int SNDseqvol(int seqHandle, int vol) {
     int ret = 0;
-    int idx = func_003B8D98_9E48();
+    int idx = SNDI_midigetseqindex_9E48();
     if (idx < 0) {
         return idx;
     }
@@ -6229,7 +6229,7 @@ int func_003B9E48(int seqHandle, int vol) {
                         int voiceHandle = *(int *)voiceSlot;
                         if (voiceHandle >= 0) {
                             unsigned x = *(unsigned *)(seqInst + (*(signed char *)(voiceSlot + 5) << 2) + 0x30);
-                            func_003B85F0(voiceHandle, ((x >> 10 & 0x7F) * vol) >> 7);
+                            SNDvol(voiceHandle, ((x >> 10 & 0x7F) * vol) >> 7);
                         }
                     }
                     i -= 1;
@@ -6245,7 +6245,7 @@ int func_003B9E48(int seqHandle, int vol) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B9F38);
+INCLUDE_ASM("ealib/seg_2B4578", SNDseqautovol);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_0050A120_9F38[] __asm__("D_0050A120");
@@ -6253,7 +6253,7 @@ extern char D_0050A120_9F38[] __asm__("D_0050A120");
 /**
  * Fades a playing sequence's volume to a target over a number of 100 Hz ticks.
  *
- * Sets the target (+0x1C) and the per-tick step (+0x18) from the current volume; func_003B8DE8 applies it. A time of 0
+ * Sets the target (+0x1C) and the per-tick step (+0x18) from the current volume; SNDI_midiupdatefade applies it. A time of 0
  * or less counts as 1; a sequence that is not playing is left alone.
  *
  * @param seqHandle  the sequence handle
@@ -6261,11 +6261,11 @@ extern char D_0050A120_9F38[] __asm__("D_0050A120");
  * @param targetVol  the target volume (0..127)
  * @return 0, or -8 for an invalid handle
  */
-int func_003B9F38(int seqHandle, int fadeTicks, int targetVol) {
+int SNDseqautovol(int seqHandle, int fadeTicks, int targetVol) {
     int seqIndex;
     char *seqInst;
     int targetFixed;
-    seqIndex = func_003B8D98(seqHandle);
+    seqIndex = SNDI_midigetseqindex(seqHandle);
     if (seqIndex < 0) return seqIndex;
     seqInst = D_0050A120_9F38 + seqIndex * 0x70;
     if (*(signed char *)(seqInst + 0x28) == 3) {
@@ -6279,25 +6279,25 @@ int func_003B9F38(int seqHandle, int fadeTicks, int targetVol) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003B9FC8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDseqstatus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-signed char func_003B8D98_9FC8(void) __asm__("func_003B8D98");
+signed char SNDI_midigetseqindex_9FC8(void) __asm__("SNDI_midigetseqindex");
 extern char D_0050A120_A120[] __asm__("D_0050A120");
 
 /**
  * Returns a sequence's status.
  *
- * The handle passes through in $a0 to func_003B8D98. The state byte (+0x28): 3 playing, 5 paused, 2 stopped; a playing
+ * The handle passes through in $a0 to SNDI_midigetseqindex. The state byte (+0x28): 3 playing, 5 paused, 2 stopped; a playing
  * sequence with a fade step set reports 6.
  *
  * @return the status, or -8 for an invalid handle
  */
-signed char func_003B9FC8(void) {
+signed char SNDseqstatus(void) {
     signed char var_5;
     char *temp_2;
 
-    var_5 = func_003B8D98_9FC8();
+    var_5 = SNDI_midigetseqindex_9FC8();
     if (var_5 >= 0) {
         temp_2 = D_0050A120_A120 + var_5 * 0x70;
         var_5 = *(signed char *)(temp_2 + 0x28);
@@ -6310,7 +6310,7 @@ signed char func_003B9FC8(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BA020);
+INCLUDE_ASM("ealib/seg_2B4578", SNDplaysetdef);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct S_A020 {
@@ -6328,7 +6328,7 @@ struct S_A020 {
  * @param playOpts  the play options (0x18 bytes)
  * @return 0
  */
-int func_003BA020(struct S_A020 *playOpts) {
+int SNDplaysetdef(struct S_A020 *playOpts) {
     playOpts->hC = 0x1000;
     playOpts->b2 = 0x3C;
     playOpts->hE = 0x1000;
@@ -6348,7 +6348,7 @@ int func_003BA020(struct S_A020 *playOpts) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BA078);
+INCLUDE_ASM("ealib/seg_2B4578", SNDVOICEI_isreserved);
 #ifdef SKIP_ASM
 extern short D_0050AC20[];
 
@@ -6361,7 +6361,7 @@ extern short D_0050AC20[];
  * @param voicesAllocated  how many entries are filled
  * @return 1 when listed, else 0
  */
-int func_003BA078(int voice, int voicesAllocated) {
+int SNDVOICEI_isreserved(int voice, int voicesAllocated) {
     int i;
     for (i = 0; i < voicesAllocated; i++) {
         if (D_0050AC20[i] == voice) {
@@ -6373,7 +6373,7 @@ int func_003BA078(int voice, int voicesAllocated) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BA0B0);
+INCLUDE_ASM("ealib/seg_2B4578", SNDVOICEI_alloc);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -6384,8 +6384,8 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003BA0B0);
 extern struct sA8E8 D_0050A8E8;
 extern short D_0050AC20_A0B0[] __asm__("D_0050AC20");
 extern int D_0044C478;
-extern int f_A078_A0B0(int, int) __asm__("func_003BA078");
-extern void f_89E0_A0B0(int) __asm__("func_003B89E0");
+extern int f_A078_A0B0(int, int) __asm__("SNDVOICEI_isreserved");
+extern void f_89E0_A0B0(int) __asm__("SNDstop");
 
 /**
  * Allocates channels for a sound, stealing lower-priority ones when needed, and makes its handle.
@@ -6393,7 +6393,7 @@ extern void f_89E0_A0B0(int) __asm__("func_003B89E0");
  * Within the channel range, takes free channels oldest first (timestamp +0x2C); the rest are stolen from busy channels
  * with a lower priority (+0x2A, at most 100), equal priority only when the steal option (options +0x1C) is set. With
  * enough channels it sorts them, builds the handle from a counter (D_0044C478, steps of 0x100) and the first channel,
- * stops stolen sounds (func_003B89E0), marks each busy (state 1, tick, priority) and makes the first the master (voice
+ * stops stolen sounds (SNDstop), marks each busy (state 1, tick, priority) and makes the first the master (voice
  * list, handle) with the others pointing to it.
  *
  * @param n  channels needed
@@ -6403,7 +6403,7 @@ extern void f_89E0_A0B0(int) __asm__("func_003B89E0");
  * @param hi  end of the range
  * @return the master channel, or -9 when not enough could be had
  */
-short func_003BA0B0(int n, int tag, unsigned int *out, int lo, int hi) {
+short SNDVOICEI_alloc(int n, int tag, unsigned int *out, int lo, int hi) {
     int result = -9;
     int sel = 0;
     int i;
@@ -6504,7 +6504,7 @@ short func_003BA0B0(int n, int tag, unsigned int *out, int lo, int hi) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BA550);
+INCLUDE_ASM("ealib/seg_2B4578", SNDVOICEI_free);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_A550 { int f0; char pad[0x22]; unsigned char f26; unsigned char f27; char pad2[4]; int f2C; char pad3[0x69 - 0x30]; signed char f69; char pad4[0x8C - 0x6A]; };
@@ -6516,12 +6516,12 @@ extern struct G_A550 D_0050A8E8_A550 __asm__("D_0050A8E8");
  * Clears the state, patch key and master flag and stamps the tick, except: when the channel is the group's master
  * (+0x27) and still playing (state 1) it only moves to state 2; when the other remaining member is a master in state 2,
  * both are freed. Likely bug: a group without a master leaves the master index at -1, so the state check reads the
- * entry before the channel table. Called by func_003BB140 and func_003C0BE8.
+ * entry before the channel table. Called by SNDBANKI_playtimbre and func_003C0BE8.
  *
  * @param i  the channel
  * @param u  unused
  */
-void func_003BA550(int i, unsigned char u) {
+void SNDVOICEI_free(int i, unsigned char u) {
     struct E_A550 *channel = &D_0050A8E8_A550.tab[i];
     unsigned char k = channel->f26;
     int n = 0;
@@ -6572,12 +6572,12 @@ void func_003BA550(int i, unsigned char u) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BA6E8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDVOICEI_get);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_0050A8E8_A8E8[] __asm__("D_0050A8E8");
 
-int func_003BA6E8_A6E8(int arg0) __asm__("func_003BA6E8");
+int SNDVOICEI_get_A6E8(int arg0) __asm__("SNDVOICEI_get");
 /**
  * Resolves a sound handle to its channel.
  *
@@ -6586,7 +6586,7 @@ int func_003BA6E8_A6E8(int arg0) __asm__("func_003BA6E8");
  * @param soundHandle  the sound handle
  * @return the channel index, or -8
  */
-int func_003BA6E8_A6E8(int soundHandle) {
+int SNDVOICEI_get_A6E8(int soundHandle) {
     int var_5;
     char *temp_2;
     char *sndState;
@@ -6621,7 +6621,7 @@ void func_003BA740(int busIndex, int i) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003BA7B0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BA888);
+INCLUDE_ASM("ealib/seg_2B4578", iSNDdetunetolinear);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned char D_0044C480_A888[] __asm__("D_0044C480");
@@ -6634,7 +6634,7 @@ extern unsigned char D_0044C480_A888[] __asm__("D_0044C480");
  * @param x  the detune in cents
  * @return the multiplier (0x1000 = 1.0)
  */
-int func_003BA888(int x) {
+int iSNDdetunetolinear(int x) {
     int scale = 0x1000;
     int tableIndex;
     while (x >= 1200) {
@@ -6657,7 +6657,7 @@ int func_003BA888(int x) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BA938);
+INCLUDE_ASM("ealib/seg_2B4578", iSNDcalcpitch);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -6666,18 +6666,18 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003BA938);
    their offsets). Some fields are also reached through their own splat symbols (declared below), which the
    functions that address them directly must keep using. */
 extern struct sA8E8Chan *D_0050AAD8;    /* D_0050A8E8.f1F0 */
-extern short f_A888_A938(int) __asm__("func_003BA888");
+extern short f_A888_A938(int) __asm__("iSNDdetunetolinear");
 
 /**
  * Recomputes a channel's pitch from detune, bend, pitch LFO and pitch multiplier.
  *
  * When the cached linear pitch (+0x86) is 0 it rebuilds it from the detune (+0x84), the bend (+0x64, through the bend
- * table +0x74 when set) times the bend range (+0x82) and the pitch LFO (+0x7C table, depth +0x80) with func_003BA888;
+ * table +0x74 when set) times the bend range (+0x82) and the pitch LFO (+0x7C table, depth +0x80) with iSNDdetunetolinear;
  * the final pitch (+0x8A) is that times the pitch multiplier (+0x88) >> 12.
  *
  * @param idx  the channel
  */
-void func_003BA938(int idx) {
+void iSNDcalcpitch(int idx) {
     struct sA8E8Chan *e = &D_0050AAD8[idx];
     int v;
     if (e->f86 == 0) {
@@ -6697,7 +6697,7 @@ void func_003BA938(int idx) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BAA00);
+INCLUDE_ASM("ealib/seg_2B4578", iSNDpatchkey);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct E_AA00 { int w; char p0[0x22]; unsigned char type; char p1[0x42]; signed char b; char p2[0x22]; };
@@ -6714,7 +6714,7 @@ extern struct G_AA00 D_0050A8E8_AA00[] __asm__("D_0050A8E8");
  * @param pos  in/out: the last channel returned
  * @return 1 while there is another channel, else 0
  */
-int func_003BAA00(int chanIndex, int *pos) {
+int iSNDpatchkey(int chanIndex, int *pos) {
     struct E_AA00 *chanEntry = &D_0050A8E8_AA00[0].tab[chanIndex];
     unsigned char patchKey = chanEntry->type;
     if (patchKey != 0) {
@@ -6733,7 +6733,7 @@ int func_003BAA00(int chanIndex, int *pos) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BAAC0);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_parsetimbre);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 /* SNDI_parsetimbre (EA snd library, stpparse.c): PATS tag stream into stc/pstc (0x00-0x2A) and stp/pstp (0x80-0xAD) */
@@ -6797,7 +6797,7 @@ extern char snddefaultenvelope_AAC0[] __asm__("D_0044C580");
 extern void memset_AAC0(void *, int, int) __asm__("func_00416210");
 extern int SNDI_gettag_AAC0(struct SNDTAGINFO_AAC0 *psti) __asm__("func_003C7388");
 
-int SNDI_parsetimbre_AAC0(void **pptp, struct SNDIPATCHHEADER_AAC0 *pph) __asm__("func_003BAAC0");
+int SNDI_parsetimbre_AAC0(void **pptp, struct SNDIPATCHHEADER_AAC0 *pph) __asm__("SNDI_parsetimbre");
 /**
  * Parses one timbre of a tagged patch into a patch header.
  *
@@ -6997,7 +6997,7 @@ int SNDI_parsetimbre_AAC0(void **pptp, struct SNDIPATCHHEADER_AAC0 *pph) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BB0C8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDBANKI_findfreekey);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
@@ -7013,7 +7013,7 @@ extern struct G_B0C8 D_0050A8E8_B0C8 __asm__("D_0050A8E8");
  *
  * @return the key (1..255)
  */
-unsigned char func_003BB0C8(void) {
+unsigned char SNDBANKI_findfreekey(void) {
     int i;
 again:
     D_0044C588_B0C8++;
@@ -7026,7 +7026,7 @@ again:
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BB140);
+INCLUDE_ASM("ealib/seg_2B4578", SNDBANKI_playtimbre);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct P_B140 {
@@ -7143,28 +7143,28 @@ struct G_B140 {
 extern struct G_B140 D_0050A8E8_B140[] __asm__("D_0050A8E8");
 extern int f6158_B140(int *, struct D_B140 *) __asm__("func_003C6158");
 extern void f0C18_B140(int, int *, int *) __asm__("func_003C0C18");
-extern int fA0B0_B140(int, int, int *, int, int) __asm__("func_003BA0B0");
+extern int fA0B0_B140(int, int, int *, int, int) __asm__("SNDVOICEI_alloc");
 extern int f72A0_B140(int) __asm__("func_003C72A0");
-extern int fC570_B140(int) __asm__("func_003BC570");
-extern unsigned int fC5C8_B140(void) __asm__("func_003BC5C8");
-extern void fA938_B140(int) __asm__("func_003BA938");
+extern int fC570_B140(int) __asm__("SNDI_pantoazimuth");
+extern unsigned int fC5C8_B140(void) __asm__("iSNDrandom");
+extern void fA938_B140(int) __asm__("iSNDcalcpitch");
 extern void fA740_B140(int, int) __asm__("func_003BA740");
 extern void fA7B0_B140(int) __asm__("func_003BA7B0");
 extern int f3EE0_B140(struct D_B140 *, int, int, int, int, int, int) __asm__("func_003C3EE0");
-extern void fA550_B140(int) __asm__("func_003BA550");
+extern void fA550_B140(int) __asm__("SNDVOICEI_free");
 
 // Locals and statement order from On Tour's PSP debug build (SNDBANKI_playtimbre, stagpat.c).
 /**
  * Starts one timbre of a patch on newly allocated channels.
  *
  * For each render mode the header allows (func_003C6158) it gets a channel range (func_003C0C18) and allocates channels
- * (func_003BA0B0). The master channel gets: built-in azimuth from the pan (random pan added, func_003BC570), detune
+ * (SNDVOICEI_alloc). The master channel gets: built-in azimuth from the pan (random pan added, SNDI_pantoazimuth), detune
  * from base key vs key (100 cents a key) plus master and random detune, volume and bend tables, the options' volume
  * (16.16, no fade), built-in volume (patch volume + random) * velocity / 127, bend range, envelope start and first
  * step, LFO tables with random start, time and pitch multipliers, bank and patch numbers, azimuth (built-in + options)
  * and elevation, frames, sustain, sample rate, codec, channel count, render mode, per-channel azimuth offsets, dry and
- * effect levels. It then computes pitch (func_003BA938), send (func_003BA740) and volume (func_003BA7B0) and starts the
- * voices with func_003C3EE0; when that fails it frees the channels (func_003BA550) and tries the next render mode.
+ * effect levels. It then computes pitch (iSNDcalcpitch), send (func_003BA740) and volume (func_003BA7B0) and starts the
+ * voices with func_003C3EE0; when that fails it frees the channels (SNDVOICEI_free) and tries the next render mode.
  *
  * @param bhandle  the bank handle
  * @param patnum  the patch number
@@ -7176,7 +7176,7 @@ extern void fA550_B140(int) __asm__("func_003BA550");
  * @param masterranddetune  a detune shared by all timbres of the note (cents)
  * @return the sound handle, or -9
  */
-int func_003BB140(int bhandle, int patnum, void *psampledata, struct P_B140 *pspo, struct D_B140 *pph, int keynum, int velocity, int masterranddetune) {
+int SNDBANKI_playtimbre(int bhandle, int patnum, void *psampledata, struct P_B140 *pspo, struct D_B140 *pph, int keynum, int velocity, int masterranddetune) {
     struct Ch_B140 *pv;
     int rendermodeindex;
     int rendermode;
@@ -7305,7 +7305,7 @@ int func_003BB140(int bhandle, int patnum, void *psampledata, struct P_B140 *psp
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ealib/seg_2B4578", func_003BB588);
+INCLUDE_ASM("ealib/seg_2B4578", SNDBANKI_playpatch);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct Rec_B588 {
@@ -7320,24 +7320,24 @@ struct Rec_B588 {
 struct G_B588 { char pad[0x1F0]; char *ents; };
 extern struct G_B588 D_0050A8E8_B588 __asm__("D_0050A8E8");
 extern char *D_0050AAD8_B588 __asm__("D_0050AAD8");
-extern int f_B0C8_B588(void) __asm__("func_003BB0C8");
-extern int f_AAC0_B588(int **, struct Rec_B588 *) __asm__("func_003BAAC0");
+extern int f_B0C8_B588(void) __asm__("SNDBANKI_findfreekey");
+extern int f_AAC0_B588(int **, struct Rec_B588 *) __asm__("SNDI_parsetimbre");
 extern int f_72A0_B588(int) __asm__("func_003C72A0");
-extern int f_B140_B588(int, int, int *, signed char *, struct Rec_B588 *, int, int, int) __asm__("func_003BB140");
+extern int f_B140_B588(int, int, int *, signed char *, struct Rec_B588 *, int, int, int) __asm__("SNDBANKI_playtimbre");
 extern void f_5F98_B588(struct Rec_B588 *, int) __asm__("func_003B5F98");
-extern int f_8AB8_B588(int) __asm__("func_003B8AB8");
-extern int f_A6E8_B588(int) __asm__("func_003BA6E8");
-extern void f_89E0_B588(int) __asm__("func_003B89E0");
+extern int f_8AB8_B588(int) __asm__("SNDover");
+extern int f_A6E8_B588(int) __asm__("SNDVOICEI_get");
+extern void f_89E0_B588(int) __asm__("SNDstop");
 
-int func_003BB588_impl(int *self, int *cur, int a2, int a3, signed char *pos) __asm__("func_003BB588");
+int SNDBANKI_playpatch_impl(int *self, int *cur, int a2, int a3, signed char *pos) __asm__("SNDBANKI_playpatch");
 /**
  * Plays a patch: starts every timbre that matches the note's key and velocity.
  *
  * Fails with -8 for a null patch; null sample data (self) defaults to the patch. Takes the key (options +2) and
- * velocity (+3) and a fresh patch key (func_003BB0C8), then parses the timbres (func_003BAAC0); the first one's master
+ * velocity (+3) and a fresh patch key (SNDBANKI_findfreekey), then parses the timbres (SNDI_parsetimbre); the first one's master
  * random detune is rolled once (func_003C72A0). Each timbre whose velocity and key ranges contain the note is started
- * with func_003BB140 and its user data sent with type 1 (func_003B5F98); a failure stops the voices already started
- * (func_003B89E0). Voices that already ended (func_003B8AB8) are dropped; one remaining voice gets no patch key,
+ * with SNDBANKI_playtimbre and its user data sent with type 1 (func_003B5F98); a failure stops the voices already started
+ * (SNDstop). Voices that already ended (SNDover) are dropped; one remaining voice gets no patch key,
  * several share the new key with the last as master (+0x27).
  *
  * @param cur  the patch
@@ -7346,7 +7346,7 @@ int func_003BB588_impl(int *self, int *cur, int a2, int a3, signed char *pos) __
  * @param pos  the play options
  * @return the last sound handle, -9 when nothing played, or -8
  */
-int func_003BB588_impl(int *self, int *cur, int bankHandle, int patchNum, signed char *pos) {
+int SNDBANKI_playpatch_impl(int *self, int *cur, int bankHandle, int patchNum, signed char *pos) {
     struct Rec_B588 rec;
     int ids[12];
     int n;
@@ -7433,7 +7433,7 @@ fail:
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BB820);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_patchtohdr);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 /* PT / GSTR sound header parser */
@@ -7467,19 +7467,19 @@ extern int f_7218_B820(struct Out_B820 *) __asm__("func_003C7218");
 extern int f_7388_B820(struct Rec_B820 *) __asm__("func_003C7388");
 extern void *f_5C60_B820(int) __asm__("func_003B5C60");
 extern void f_51E8_B820(void *, void *, int) __asm__("func_003C51E8");
-extern void f_BDA0_B820(int, unsigned char *, struct Hdr_B820 *, struct Out_B820 *, struct Extra_B820 *) __asm__("func_003BBDA0");
+extern void f_BDA0_B820(int, unsigned char *, struct Hdr_B820 *, struct Out_B820 *, struct Extra_B820 *) __asm__("SNDI_patchtohdrgen");
 
 /**
  * Reads a patch's sample format, attributes and description.
  *
- * A "GSTR" patch goes to func_003BBDA0 and sets *isGstr. Otherwise it clears the outputs, sets attribute defaults
+ * A "GSTR" patch goes to SNDI_patchtohdrgen and sets *isGstr. Otherwise it clears the outputs, sets attribute defaults
  * (func_003C7218) and format defaults (22050 Hz, 1 channel, codec 5) and reads the tags (func_003C7388): codec (160),
  * channels (130), rate (132), frames (133), azimuth offsets (156-159, 166, 167), time-stretch data copied into new
  * sound memory (152-155, 164, 165; func_003B5C60, func_003C51E8), sample-data reference (138), render mode (140,
  * default 8), per-channel sample offsets (136, 137, 148, 149, 162, 163), user data (20), platform version (0x80),
  * effect level (19), bend range (10) and priority (6). Each channel gets azimuth = angle table + offset (offsets
  * ignored for stereo with 2 speakers); sample offsets become base-relative for render modes 0x14 / 0 and relative to
- * the referenced sample address for 0x308. Used by func_003B6670 and the stream header parser func_003B6BD0.
+ * the referenced sample address for 0x308. Used by func_003B6670 and the stream header parser SNDSTRMI_parseheader.
  *
  * @param base  the bank (0 for streams)
  * @param src  the patch tags
@@ -7488,7 +7488,7 @@ extern void f_BDA0_B820(int, unsigned char *, struct Hdr_B820 *, struct Out_B820
  * @param extra  receives the sample description (frames, offsets)
  * @param isGstr  if not null, receives 1 for a GSTR patch, else 0
  */
-void func_003BB820(int base, unsigned char *src, struct Hdr_B820 *hdr, struct Out_B820 *out,
+void SNDI_patchtohdr(int base, unsigned char *src, struct Hdr_B820 *hdr, struct Out_B820 *out,
                    struct Extra_B820 *extra, char *isGstr) {
     struct Rec_B820 rec;
     int vals[6];
@@ -7616,7 +7616,7 @@ void func_003BB820(int base, unsigned char *src, struct Hdr_B820 *hdr, struct Ou
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BBDA0);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_patchtohdrgen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct O_BDA0 { char pad[0x48]; int a[4]; int b[4]; };
@@ -7634,13 +7634,13 @@ extern unsigned short D_0050ABC8_BDA0[][6] __asm__("D_0050ABC8");
  * 48000) and frames. Render mode is 4, platform version 3, and the azimuths come from the angle table D_0050ABC8.
  * Quirk: the common-tag values and the platform-tag pointers are collected but never used.
  *
- * @param unused  unused (func_003BB820 passes 0)
+ * @param unused  unused (SNDI_patchtohdr passes 0)
  * @param src  the patch
  * @param hdr  receives the sample format
  * @param out  receives the sample attributes
  * @param extra  receives the sample description (frames first)
  */
-void func_003BBDA0(int unused, int src, unsigned char *hdr, char *out, int *extra) {
+void SNDI_patchtohdrgen(int unused, int src, unsigned char *hdr, char *out, int *extra) {
     int commonVals[43];
     int commonPtrs[43];
     int platformVals[46];
@@ -7697,38 +7697,38 @@ void func_003BBDA0(int unused, int src, unsigned char *hdr, char *out, int *extr
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BC000);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_equalpower);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern float func_003BC770_C000(float) __asm__("func_003BC770");
-extern float func_003BC840_C000(float) __asm__("func_003BC840");
+extern float SNDI_sin_C000(float) __asm__("SNDI_sin");
+extern float SNDI_cos_C000(float) __asm__("SNDI_cos");
 
 /**
  * Computes an equal-power gain pair for an angle between two speaker angles.
  *
  * Angles are in 1/65535 of a turn. t = (angle - fromAngle) / (toAngle - fromAngle) * pi / 2; out[0] = sine(t)
- * (func_003BC770), out[1] = cosine(t) (func_003BC840). Called three times by func_003BC0B0.
+ * (SNDI_sin), out[1] = cosine(t) (SNDI_cos). Called three times by func_003BC0B0.
  *
  * @param out  receives the two gains
  * @param toAngle  the second speaker's angle
  * @param fromAngle  the first speaker's angle
  * @param angle  the source angle
  */
-void func_003BC000(float *out, int toAngle, int fromAngle, int angle) {
+void SNDI_equalpower(float *out, int toAngle, int fromAngle, int angle) {
     float fa = (float)toAngle / 65535.0f * 2.0f * 3.1415927f;
     float fb = (float)fromAngle / 65535.0f * 2.0f * 3.1415927f;
     float fc = (float)angle / 65535.0f * 2.0f * 3.1415927f;
     float blendAngle = (fc - fb) / (fa - fb) * 1.5707964f;
-    out[0] = func_003BC770_C000(blendAngle);
-    out[1] = func_003BC840_C000(blendAngle);
+    out[0] = SNDI_sin_C000(blendAngle);
+    out[1] = SNDI_cos_C000(blendAngle);
 }
 #endif
 
 INCLUDE_ASM("ealib/seg_2B4578", func_003BC0B0);
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BC4C0);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_aztospkrvol);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 
@@ -7746,7 +7746,7 @@ extern unsigned char* D_0050AC38[];
  * @param azimuth  the azimuth (16 bits a turn)
  * @param out  receives one gain per speaker
  */
-void func_003BC4C0(int azimuth, float* out)
+void SNDI_aztospkrvol(int azimuth, float* out)
 {
     int idx = (azimuth & 0xFFFF) >> 8;
     int i;
@@ -7757,10 +7757,10 @@ void func_003BC4C0(int azimuth, float* out)
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BC530);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_freespkrtable);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-void func_003B5E98_C530(int) __asm__("func_003B5E98");
+void SNDMEMI_free_C530(int) __asm__("SNDMEMI_free");
 extern int D_0050AC30_C530[] __asm__("D_0050AC30");
 extern char D_0050AC38_C530[] __asm__("D_0050AC38");
 
@@ -7768,20 +7768,20 @@ extern char D_0050AC38_C530[] __asm__("D_0050AC38");
  * Frees the speaker gain tables (D_0050AC30) inside the critical section.
  *
  * Likely bug: the guard tests the address of D_0050AC38 instead of its contents, so it is always true and the free
- * (func_003B5E98) runs even when no table was allocated (the free ignores unknown addresses). Called by the shutdown
- * func_003B5320.
+ * (SNDMEMI_free) runs even when no table was allocated (the free ignores unknown addresses). Called by the shutdown
+ * SNDSYS_restore.
  */
-void func_003BC530(void) {
-    func_003B58A0();
+void SNDI_freespkrtable(void) {
+    SNDSYS_entercritical();
     if (D_0050AC38_C530 != 0) {
-        func_003B5E98_C530(D_0050AC30_C530[0]);
+        SNDMEMI_free_C530(D_0050AC30_C530[0]);
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BC570);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_pantoazimuth);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned short D_0044C590_C570[128] __asm__("D_0044C590");
@@ -7792,13 +7792,13 @@ extern unsigned short D_0044C590_C570[128] __asm__("D_0044C590");
  * @param pan  the pan
  * @return the azimuth
  */
-unsigned short func_003BC570(int pan) {
+unsigned short SNDI_pantoazimuth(int pan) {
     return D_0044C590_C570[pan];
 }
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BC588);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_randomseed);
 #ifdef SKIP_ASM
 extern int D_0044C690[];
 extern int D_0050AC50[];
@@ -7811,7 +7811,7 @@ extern int D_0050AC50[];
  *
  * @param seed  the seed
  */
-void func_003BC588(int seed) {
+void SNDI_randomseed(int seed) {
     int i;
     for (i = 0; i < 6; i++) {
         D_0050AC50[i] = D_0044C690[i] + seed;
@@ -7820,7 +7820,7 @@ void func_003BC588(int seed) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BC5C8);
+INCLUDE_ASM("ealib/seg_2B4578", iSNDrandom);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned int D_0050AC50_C5C8[6] __asm__("D_0050AC50");
@@ -7834,7 +7834,7 @@ extern unsigned int D_0050AC50_C5C8[6] __asm__("D_0050AC50");
  *
  * @return the new first state word
  */
-unsigned int func_003BC5C8(void) {
+unsigned int iSNDrandom(void) {
     unsigned int runningSum, carryBit, n;
 
     runningSum = D_0050AC50_C5C8[5] + D_0050AC50_C5C8[4];
@@ -7871,12 +7871,12 @@ unsigned int func_003BC5C8(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BC6B8);
+INCLUDE_ASM("ealib/seg_2B4578", SNDpitchbend);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int f_A6E8_C6B8() __asm__("func_003BA6E8");
-extern void f_A938_C6B8(int) __asm__("func_003BA938");
-extern int f_AA00_C6B8(int, int *) __asm__("func_003BAA00");
+extern int f_A6E8_C6B8() __asm__("SNDVOICEI_get");
+extern void f_A938_C6B8(int) __asm__("iSNDcalcpitch");
+extern int f_AA00_C6B8(int, int *) __asm__("iSNDpatchkey");
 extern void f_25E0_C6B8(int) __asm__("func_003C25E0");
 struct G_C6B8 { char pad[0x1F0]; char *tab; };
 extern struct G_C6B8 D_0050A8E8_C6B8[] __asm__("D_0050A8E8");
@@ -7885,14 +7885,14 @@ extern struct G_C6B8 D_0050A8E8_C6B8[] __asm__("D_0050A8E8");
  * Sets a sound's pitch bend and recomputes its pitch.
  *
  * For each grouped channel with a bend range (+0x82): stores the bend (+0x64), clears the cached pitch (+0x86) and
- * recomputes it (func_003BA938, func_003C25E0). Quirk: a channel already at that bend, or one without a bend range,
+ * recomputes it (iSNDcalcpitch, func_003C25E0). Quirk: a channel already at that bend, or one without a bend range,
  * makes it return 0 at once, skipping the rest of the group.
  *
  * @param soundHandle  the sound handle
  * @param bend  the bend (0x40 = centre)
  * @return the channel index, -8 for a dead handle, or 0
  */
-int func_003BC6B8(int soundHandle, int bend) {
+int SNDpitchbend(int soundHandle, int bend) {
     int setChan;
     int chanIndex = f_A6E8_C6B8();
     char *channel;
@@ -7916,19 +7916,19 @@ int func_003BC6B8(int soundHandle, int bend) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BC770);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_sin);
 #ifdef SKIP_ASM
 /**
  * Returns the sine of an angle in radians from a 13th-order Taylor series.
  *
  * Only angles above 2 pi are wrapped; negative ones go into the series unchanged, and accuracy falls off far from 0.
- * func_003BC000 uses it for equal-power gains (angles 0..pi/2).
+ * SNDI_equalpower uses it for equal-power gains (angles 0..pi/2).
  *
  * @param x  the angle
  * @return the sine
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-float func_003BC770(float x) {
+float SNDI_sin(float x) {
     float x2, x3, x5, x7, x9, x11, x13;
 
     while (x > 6.28318548f) {
@@ -7946,19 +7946,19 @@ float func_003BC770(float x) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BC840);
+INCLUDE_ASM("ealib/seg_2B4578", SNDI_cos);
 #ifdef SKIP_ASM
 /**
  * Returns the cosine of an angle in radians from a 12th-order Taylor series.
  *
- * Only angles above 2 pi are wrapped; negative ones go into the series unchanged. func_003BC000 uses it for equal-power
+ * Only angles above 2 pi are wrapped; negative ones go into the series unchanged. SNDI_equalpower uses it for equal-power
  * gains.
  *
  * @param x  the angle
  * @return the cosine
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-float func_003BC840(float x) {
+float SNDI_cos(float x) {
     float x2, x4, x6, x8, x10, x12;
 
     while (x > 6.28318548f) {
@@ -7975,7 +7975,7 @@ float func_003BC840(float x) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2B4578", func_003BC910);
+INCLUDE_ASM("ealib/seg_2B4578", SNDREAL_exithandler);
 #ifdef SKIP_ASM
 extern void func_003C5E08();
 
@@ -7983,9 +7983,9 @@ extern void func_003C5E08();
  * Shuts the sound system down at program exit (calls func_003C5E08).
  *
  * func_003B5478 registers it with func_003E4A30 in the exit-handler table that REAL_restore runs; func_003C5E08 calls
- * the sound shutdown func_003B5320.
+ * the sound shutdown SNDSYS_restore.
  */
-void func_003BC910(void) {
+void SNDREAL_exithandler(void) {
     func_003C5E08();
 }
 #endif
@@ -11311,12 +11311,12 @@ void func_003C0B10(int a0, void *a1, int a2) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C0BE8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003BA550(int, unsigned char);
+extern void SNDVOICEI_free(int, unsigned char);
 struct S_0BE8 { char pad[0x2F]; unsigned char a; unsigned char b; };
 extern struct S_0BE8 D_0050A8E8_0BE8 __asm__("D_0050A8E8");
 
 void func_003C0BE8(int arg0) {
-    func_003BA550(arg0 + D_0050A8E8_0BE8.b + D_0050A8E8_0BE8.a, D_0050A8E8_0BE8.a);
+    SNDVOICEI_free(arg0 + D_0050A8E8_0BE8.b + D_0050A8E8_0BE8.a, D_0050A8E8_0BE8.a);
 }
 #endif
 
@@ -11651,7 +11651,7 @@ struct G_1298 {
 };
 extern struct G_1298 D_0050A8E8_1298 __asm__("D_0050A8E8");
 extern struct H_1298 D_0050AD00_1298 __asm__("D_0050AD00");
-extern void f_A550_1298(int) __asm__("func_003BA550");
+extern void f_A550_1298(int) __asm__("SNDVOICEI_free");
 
 void func_003C1298(void) {
     int i;
@@ -11991,7 +11991,7 @@ void func_003C0A60_19A8(void) __asm__("func_003C0A60");
 void func_003C0858_19A8(void* buf) __asm__("func_003C0858");
 
 // (prototype from their definition at line 1578)
-void func_003B5540_19A8(unsigned arg0) __asm__("func_003B5540");
+void SNDSYSI_timerservice_19A8(unsigned arg0) __asm__("SNDSYSI_timerservice");
 
 // (prototype from their definition at line 8040)
 /* PORT: PS2-only VU0 state restore; same as func_0031A3C0 without the
@@ -12019,7 +12019,7 @@ void func_003C19A8(void) {
         if (D_0050AD00_19A8.f1AAD == 0) continue;
         D_0044C46C_19A8();
         if (D_0050A8E8.f328 != 0) D_0050A8E8.f328();
-        func_003B5540_19A8(94);
+        SNDSYSI_timerservice_19A8(94);
         if (D_0050AD00_19A8.f1AA8 < 0) D_0050A8E8.f1C0++;
         func_003B54E0_19A8();
         func_003C51E8(D_0050AD00_19A8.f000 + 0x800, (char *)&D_0050AD00_19A8 + 0xA40, 576);
@@ -12169,8 +12169,8 @@ extern char D_0050CB20_1B80[] __asm__("D_0050CB20");
 extern char D_0050C880_1B80[] __asm__("D_0050C880");
 extern char D_0050C900_1B80[] __asm__("D_0050C900");
 
-extern void func_003B58A0_1B80(void) __asm__("func_003B58A0");
-extern void func_003B58D8_1B80(void) __asm__("func_003B58D8");
+extern void SNDSYS_entercritical_1B80(void) __asm__("SNDSYS_entercritical");
+extern void SNDSYS_leavecritical_1B80(void) __asm__("SNDSYS_leavecritical");
 extern int func_003B5C60_1B80(int) __asm__("func_003B5C60");
 extern void func_003C0B10_1B80(int, void *, int) __asm__("func_003C0B10");
 extern void func_003C15D8_1B80(char *, char *) __asm__("func_003C15D8");
@@ -12214,7 +12214,7 @@ int func_003C1B80(void) {
     int stat;
 
     D_0050AD00_1B80.f1AAE = 0;
-    func_003B58A0_1B80();
+    SNDSYS_entercritical_1B80();
     D_0050AD00_1B80.f1AA0 = func_003B5C60_1B80(D_0050A8E8_1B80.f28 * 4);
     hz = D_0050A8E8_1B80.f2A;
     if (hz == 24000) {
@@ -12269,7 +12269,7 @@ int func_003C1B80(void) {
     D_0050AD00_1B80.fCB0->f13 = D_0050A8E8_1B80.f41;
     D_0050AD00_1B80.f1A9A = 321;
     D_0050AD00_1B80.f1A9C = 0x8000;
-    func_003B58D8_1B80();
+    SNDSYS_leavecritical_1B80();
     D_0050ACB0_1B80.f4 = 1;
     D_0050ACB0_1B80.f8 = 0;
     D_0050AD00_1B80.f1AA4 = CreateSema_1B80(&D_0050ACB0_1B80);
@@ -12321,9 +12321,9 @@ int func_003C1B80(void) {
         D_0050AD00_1B80.f1AAE = D_0050A8E8_1B80.f68 - D_00515D24_1B80;
     }
     if (D_0050AD00_1B80.f1AAE != 0) {
-        func_003B58A0_1B80();
+        SNDSYS_entercritical_1B80();
         D_0050AD00_1B80.f1B38 = func_003B5C60_1B80(D_0050AD00_1B80.f1AAE + 0x10);
-        func_003B58D8_1B80();
+        SNDSYS_leavecritical_1B80();
     }
     if (D_0044DD40_1B80 == 0) {
         do {
@@ -12398,9 +12398,9 @@ typedef struct {
 extern volatile G_2268 D_0050A8E8_2268 __asm__("D_0050A8E8");
 extern H_2268 D_0050AD00_2268 __asm__("D_0050AD00");
 extern int D_00512B20_2268[] __asm__("D_00512B20");
-extern void func_003B58D8_2268(void) __asm__("func_003B58D8");
-extern void func_003B58A0_2268(void) __asm__("func_003B58A0");
-extern void func_003B5E98_2268(int) __asm__("func_003B5E98");
+extern void SNDSYS_leavecritical_2268(void) __asm__("SNDSYS_leavecritical");
+extern void SNDSYS_entercritical_2268(void) __asm__("SNDSYS_entercritical");
+extern void SNDMEMI_free_2268(int) __asm__("SNDMEMI_free");
 extern void func_003C0B10_2268(int, int, int) __asm__("func_003C0B10");
 extern void func_003C60E0_2268(void) __asm__("func_003C60E0");
 extern void func_003C8018_2268(void) __asm__("func_003C8018");
@@ -12420,7 +12420,7 @@ int func_003C2268(void) {
     int i;
 
     while (D_0050A8E8_2268.f176 != 0) {
-        func_003B58D8_2268();
+        SNDSYS_leavecritical_2268();
     }
     t = D_0050A8E8_2268.f180 + 10;
     while (D_0050A8E8_2268.f180 < t) {
@@ -12446,23 +12446,23 @@ int func_003C2268(void) {
     }
     func_003CBC00_2268(0);
     D_0050AD00_2268.f1AAD = 0;
-    func_003B58A0_2268();
+    SNDSYS_entercritical_2268();
     if (D_0050AD00_2268.f1AD4 != 0) {
-        func_003B5E98_2268(D_0050AD00_2268.f1AD4);
+        SNDMEMI_free_2268(D_0050AD00_2268.f1AD4);
         D_0050AD00_2268.f1AD4 = 0;
         D_0050AD00_2268.f1AD8 = 0;
     }
     if (D_0050AD00_2268.f1AF8 != 0) {
-        func_003B5E98_2268(D_0050AD00_2268.f1AF8);
+        SNDMEMI_free_2268(D_0050AD00_2268.f1AF8);
         D_0050AD00_2268.f1AF8 = 0;
     }
     if (D_0050AD00_2268.f1B38 != 0) {
-        func_003B5E98_2268(D_0050AD00_2268.f1B38);
+        SNDMEMI_free_2268(D_0050AD00_2268.f1B38);
         D_0050AD00_2268.f1B38 = 0;
     }
     func_003C8018_2268();
-    func_003B5E98_2268(D_0050AD00_2268.f1AA0);
-    func_003B58D8_2268();
+    SNDMEMI_free_2268(D_0050AD00_2268.f1AA0);
+    SNDSYS_leavecritical_2268();
     return 0;
 }
 #endif
@@ -12485,7 +12485,7 @@ struct V2_2440 { char pad[0x1A0]; struct Q_2440 a[0x30]; };
 
 struct H_2440 { char pad[0xCB0]; struct V_2440 *m; };
 extern struct H_2440 D_0050AD00_2440 __asm__("D_0050AD00");
-extern void f_A550_2440(int) __asm__("func_003BA550");
+extern void f_A550_2440(int) __asm__("SNDVOICEI_free");
 extern void f_8468_2440(int) __asm__("func_003C8468");
 
 int func_003C2440(int idx) {
@@ -13171,7 +13171,7 @@ extern void func_003CC630(int, unsigned char *);
 extern void func_003CC848_35F8(void) __asm__("func_003CC848");
 
 void func_003C35F8(int a) {
-    func_003B58A0();
+    SNDSYS_entercritical();
     if (a == 8) {
         func_003C3500(D_0050AB08_35F8);
     } else if (a == 0x100) {
@@ -13184,7 +13184,7 @@ void func_003C35F8(int a) {
             func_003CC630(D_0050A8E8_35F8.u2A, (unsigned char *)D_0050A8E8_35F8.w1FC);
         }
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
 }
 #endif
 
@@ -14144,14 +14144,14 @@ __asm__(
 INCLUDE_ASM("ealib/seg_2B4578", func_003C52F8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003B4DD8_52F8(void *) __asm__("func_003B4DD8");
-extern void func_003B4FC0_52F8(void *) __asm__("func_003B4FC0");
+extern void SNDSYS_getopts_52F8(void *) __asm__("SNDSYS_getopts");
+extern void SNDSYS_setopts_52F8(void *) __asm__("SNDSYS_setopts");
 
 int func_003C52F8(int value) {
     char sp[0xE0];
-    func_003B4DD8_52F8(sp);
+    SNDSYS_getopts_52F8(sp);
     *(short *)(sp + 0x28) = value;
-    func_003B4FC0_52F8(sp);
+    SNDSYS_setopts_52F8(sp);
     return 0;
 }
 #endif
@@ -14159,11 +14159,11 @@ int func_003C52F8(int value) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5330);
 #ifdef SKIP_ASM
-extern void func_003B4DD8(void *);
+extern void SNDSYS_getopts(void *);
 
 int func_003C5330(int *outValue) {
     char sp[0xE0];
-    func_003B4DD8(sp);
+    SNDSYS_getopts(sp);
     *outValue = *(unsigned short *)(sp + 0x28);
     return 0;
 }
@@ -14173,14 +14173,14 @@ int func_003C5330(int *outValue) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5368);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003B4DD8_5368(void *) __asm__("func_003B4DD8");
-extern void func_003B4FC0_5368(void *) __asm__("func_003B4FC0");
+extern void SNDSYS_getopts_5368(void *) __asm__("SNDSYS_getopts");
+extern void SNDSYS_setopts_5368(void *) __asm__("SNDSYS_setopts");
 
 int func_003C5368(int value) {
     char sp[0xE0];
-    func_003B4DD8_5368(sp);
+    SNDSYS_getopts_5368(sp);
     *(signed char *)(sp + 0x46) = value;
-    func_003B4FC0_5368(sp);
+    SNDSYS_setopts_5368(sp);
     return 0;
 }
 #endif
@@ -14189,14 +14189,14 @@ int func_003C5368(int value) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C53A0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003B4DD8_53A0(void *) __asm__("func_003B4DD8");
-extern void func_003B4FC0_53A0(void *) __asm__("func_003B4FC0");
+extern void SNDSYS_getopts_53A0(void *) __asm__("SNDSYS_getopts");
+extern void SNDSYS_setopts_53A0(void *) __asm__("SNDSYS_setopts");
 
 int func_003C53A0(int value) {
     char sp[0xE0];
-    func_003B4DD8_53A0(sp);
+    SNDSYS_getopts_53A0(sp);
     *(signed char *)(sp + 0x3C) = value;
-    func_003B4FC0_53A0(sp);
+    SNDSYS_setopts_53A0(sp);
     return 0;
 }
 #endif
@@ -14205,14 +14205,14 @@ int func_003C53A0(int value) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C53D8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003B4DD8_53D8(void *) __asm__("func_003B4DD8");
-extern void func_003B4FC0_53D8(void *) __asm__("func_003B4FC0");
+extern void SNDSYS_getopts_53D8(void *) __asm__("SNDSYS_getopts");
+extern void SNDSYS_setopts_53D8(void *) __asm__("SNDSYS_setopts");
 
 int func_003C53D8(int value) {
     char sp[0xE0];
-    func_003B4DD8_53D8(sp);
+    SNDSYS_getopts_53D8(sp);
     *(int *)(sp + 0x24) = value;
-    func_003B4FC0_53D8(sp);
+    SNDSYS_setopts_53D8(sp);
     return 0;
 }
 #endif
@@ -14220,7 +14220,7 @@ int func_003C53D8(int value) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5410);
 #ifdef SKIP_ASM
-extern void func_003B4FC0(void *);
+extern void SNDSYS_setopts(void *);
 
 int func_003C5410(float rate) {
     char buf[0xE0];
@@ -14228,9 +14228,9 @@ int func_003C5410(float rate) {
     if (rate >= 0.0f) {
         rate = 1000.0f / rate;
     }
-    func_003B4DD8(buf);
+    SNDSYS_getopts(buf);
     *(float *)(buf + 0x34) = rate;
-    func_003B4FC0(buf);
+    SNDSYS_setopts(buf);
     return 0;
 }
 #endif
@@ -14242,7 +14242,7 @@ int func_003C5468(float *outRate) {
     char buf[0xE0];
     float period;
 
-    func_003B4DD8(buf);
+    SNDSYS_getopts(buf);
     period = *(float *)(buf + 0x34);
     *outRate = period;
     if (period >= 0.0f) {
@@ -14256,11 +14256,11 @@ int func_003C5468(float *outRate) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C54C0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int func_003B4DD8_i(void *) __asm__("func_003B4DD8");
+int SNDSYS_getopts_i(void *) __asm__("SNDSYS_getopts");
 int func_003C54C0(unsigned int kind, int *out) {
     unsigned char info[0xE0];
     *out = 0;
-    func_003B4DD8_i(info);
+    SNDSYS_getopts_i(info);
     switch (kind) {
     case 1:
         if (info[5] >= 2U) {
@@ -14363,11 +14363,11 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C5660);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct Cfg_5660 { char pad[0xD4]; };
-extern int func_003B4DD8_5660(struct Cfg_5660 *) __asm__("func_003B4DD8");
+extern int SNDSYS_getopts_5660(struct Cfg_5660 *) __asm__("SNDSYS_getopts");
 
 int func_003C5660(int mode, int rate, int *out) {
     struct Cfg_5660 cfg;
-    func_003B4DD8_5660(&cfg);
+    SNDSYS_getopts_5660(&cfg);
     switch (mode) {
     case 0:
         if (rate <= 24000) *out = 24000;
@@ -14391,12 +14391,12 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C5710);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_003B4DD8_5710(void *) __asm__("func_003B4DD8");
+extern int SNDSYS_getopts_5710(void *) __asm__("SNDSYS_getopts");
 
 
 int func_003C5710(int index, int value) {
     char buf[0xE0];
-    func_003B4DD8_5710(buf);
+    SNDSYS_getopts_5710(buf);
     { int lim = 0xFFFF; value = value > lim ? lim : value; }
     *(short *)(buf + 0x2A) = value & 0xFF;
     switch (index) {
@@ -14409,7 +14409,7 @@ int func_003C5710(int index, int value) {
     default:
         return -5;
     }
-    func_003B4FC0(buf);
+    SNDSYS_setopts(buf);
     return 0;
 }
 #endif
@@ -14419,13 +14419,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C5788);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 typedef struct Buf_5788 { char pad[0x2A]; unsigned short a; unsigned short b; char rest[0xE0 - 0x2E]; } Buf_5788;
-extern void func_003B4DD8_5788(Buf_5788 *) __asm__("func_003B4DD8");
+extern void SNDSYS_getopts_5788(Buf_5788 *) __asm__("SNDSYS_getopts");
 
 int func_003C5788(int index, int *outValue) {
     Buf_5788 sp;
 
     *outValue = 0;
-    func_003B4DD8_5788(&sp);
+    SNDSYS_getopts_5788(&sp);
     switch (index) {
     case 0:
         *outValue = sp.a;
@@ -14444,12 +14444,12 @@ int func_003C5788(int index, int *outValue) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C57F0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int func_003B4DD8_57F0(void *) __asm__("func_003B4DD8");
+extern int SNDSYS_getopts_57F0(void *) __asm__("SNDSYS_getopts");
 
 int func_003C57F0(int index, int *outValue) {
     unsigned char buf[0xE0];
     *outValue = 0;
-    func_003B4DD8_57F0(buf);
+    SNDSYS_getopts_57F0(buf);
     switch (index) {
     case 0: *outValue = buf[6]; break;
     case 1: *outValue = buf[7]; break;
@@ -14466,12 +14466,12 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C5880);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Stores v into config byte 0x2E/0x2F/0x30 (which 0..2) and writes the config back.
-extern int func_003B4DD8_5880(void *) __asm__("func_003B4DD8");
-extern void func_003B4FC0_5880(void *) __asm__("func_003B4FC0");
+extern int SNDSYS_getopts_5880(void *) __asm__("SNDSYS_getopts");
+extern void SNDSYS_setopts_5880(void *) __asm__("SNDSYS_setopts");
 
 int func_003C5880(int which, int value) {
     char sp[0xE0];
-    func_003B4DD8_5880(sp);
+    SNDSYS_getopts_5880(sp);
     switch (which) {
     case 0:
         sp[0x2E] = value;
@@ -14485,7 +14485,7 @@ int func_003C5880(int which, int value) {
     default:
         return -5;
     }
-    func_003B4FC0_5880(sp);
+    SNDSYS_setopts_5880(sp);
     return 0;
 }
 #endif
@@ -14495,7 +14495,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C5908);
 #ifdef SKIP_ASM
 int func_003C5908(int index, int *outValue) {
     unsigned char buf[0xE0];
-    func_003B4DD8_5880(buf);
+    SNDSYS_getopts_5880(buf);
     switch (index) {
     case 0: *outValue = buf[0x2E]; break;
     case 1: *outValue = buf[0x2F]; break;
@@ -14510,12 +14510,12 @@ int func_003C5908(int index, int *outValue) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5998);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003B4DD8_5998(void *) __asm__("func_003B4DD8");
-extern void func_003B4FC0_5998(void *) __asm__("func_003B4FC0");
+extern void SNDSYS_getopts_5998(void *) __asm__("SNDSYS_getopts");
+extern void SNDSYS_setopts_5998(void *) __asm__("SNDSYS_setopts");
 
 int func_003C5998(int index, float value) {
     char sp[0xE0];
-    func_003B4DD8_5998(sp);
+    SNDSYS_getopts_5998(sp);
     switch (index) {
     case 0:
         *(signed char *)(sp + 0x40) = (int)(value * 100.0f);
@@ -14526,7 +14526,7 @@ int func_003C5998(int index, float value) {
     default:
         return -5;
     }
-    func_003B4FC0_5998(sp);
+    SNDSYS_setopts_5998(sp);
     return 0;
 }
 #endif
@@ -14537,11 +14537,11 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C5A28);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Reads byte 0x40 (which 0) or 0x41 (which 1) of the current config as a 0..1 float.
-extern void func_003B4DD8_5A28(void *) __asm__("func_003B4DD8");
+extern void SNDSYS_getopts_5A28(void *) __asm__("SNDSYS_getopts");
 
 int func_003C5A28(int which, float *out) {
     unsigned char sp[0xE0];
-    func_003B4DD8_5A28(sp);
+    SNDSYS_getopts_5A28(sp);
     switch (which) {
     case 0:
         *out = sp[0x40] * 0.01f;
@@ -14592,14 +14592,14 @@ int func_003C5AB8(void) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5AC0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003B4DD8_5AC0(void *) __asm__("func_003B4DD8");
-extern void func_003B4FC0_5AC0(void *) __asm__("func_003B4FC0");
+extern void SNDSYS_getopts_5AC0(void *) __asm__("SNDSYS_getopts");
+extern void SNDSYS_setopts_5AC0(void *) __asm__("SNDSYS_setopts");
 
 int func_003C5AC0(int value) {
     char sp[0xE0];
-    func_003B4DD8_5AC0(sp);
+    SNDSYS_getopts_5AC0(sp);
     *(signed char *)(sp + 0x3F) = value;
-    func_003B4FC0_5AC0(sp);
+    SNDSYS_setopts_5AC0(sp);
     return 0;
 }
 #endif
@@ -14608,14 +14608,14 @@ int func_003C5AC0(int value) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5AF8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003B4DD8_5AF8(void *) __asm__("func_003B4DD8");
-extern void func_003B4FC0_5AF8(void *) __asm__("func_003B4FC0");
+extern void SNDSYS_getopts_5AF8(void *) __asm__("SNDSYS_getopts");
+extern void SNDSYS_setopts_5AF8(void *) __asm__("SNDSYS_setopts");
 
 int func_003C5AF8(int value) {
     char sp[0xE0];
-    func_003B4DD8_5AF8(sp);
+    SNDSYS_getopts_5AF8(sp);
     *(int *)(sp + 0x6C) = value;
-    func_003B4FC0_5AF8(sp);
+    SNDSYS_setopts_5AF8(sp);
     return 0;
 }
 #endif
@@ -14624,13 +14624,13 @@ int func_003C5AF8(int value) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5B30);
 #ifdef SKIP_ASM
 typedef struct { char pad[0x4A]; signed char v; char pad2[0xE0 - 0x4B]; } S_5B30;
-extern void func_003B4FC0(void *);
+extern void SNDSYS_setopts(void *);
 
 int func_003C5B30(float value) {
     S_5B30 sysOpts;
-    func_003B4DD8(&sysOpts);
+    SNDSYS_getopts(&sysOpts);
     sysOpts.v = (int)(value * 100.0f);
-    func_003B4FC0(&sysOpts);
+    SNDSYS_setopts(&sysOpts);
     return 0;
 }
 #endif
@@ -14639,14 +14639,14 @@ int func_003C5B30(float value) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5B80);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003B4DD8_5B80(void *) __asm__("func_003B4DD8");
-extern void func_003B4FC0_5B80(void *) __asm__("func_003B4FC0");
+extern void SNDSYS_getopts_5B80(void *) __asm__("SNDSYS_getopts");
+extern void SNDSYS_setopts_5B80(void *) __asm__("SNDSYS_setopts");
 
 int func_003C5B80(int value) {
     char sp[0xE0];
-    func_003B4DD8_5B80(sp);
+    SNDSYS_getopts_5B80(sp);
     *(signed char *)(sp + 0x42) = value;
-    func_003B4FC0_5B80(sp);
+    SNDSYS_setopts_5B80(sp);
     return 0;
 }
 #endif
@@ -14655,14 +14655,14 @@ int func_003C5B80(int value) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5BB8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003B4DD8_5BB8(void *) __asm__("func_003B4DD8");
-extern void func_003B4FC0_5BB8(void *) __asm__("func_003B4FC0");
+extern void SNDSYS_getopts_5BB8(void *) __asm__("SNDSYS_getopts");
+extern void SNDSYS_setopts_5BB8(void *) __asm__("SNDSYS_setopts");
 
 int func_003C5BB8(int value) {
     char sp[0xE0];
-    func_003B4DD8_5BB8(sp);
+    SNDSYS_getopts_5BB8(sp);
     *(signed char *)(sp + 0x43) = value;
-    func_003B4FC0_5BB8(sp);
+    SNDSYS_setopts_5BB8(sp);
     return 0;
 }
 #endif
@@ -14679,14 +14679,14 @@ int func_003C5BF0(void) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5BF8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_003B4DD8_5BF8(void *) __asm__("func_003B4DD8");
-extern void func_003B4FC0_5BF8(void *) __asm__("func_003B4FC0");
+extern void SNDSYS_getopts_5BF8(void *) __asm__("SNDSYS_getopts");
+extern void SNDSYS_setopts_5BF8(void *) __asm__("SNDSYS_setopts");
 
 int func_003C5BF8(int value) {
     char sp[0xE0];
-    func_003B4DD8_5BF8(sp);
+    SNDSYS_getopts_5BF8(sp);
     *(int *)(sp + 0xC8) = value;
-    func_003B4FC0_5BF8(sp);
+    SNDSYS_setopts_5BF8(sp);
     return 0;
 }
 #endif
@@ -14695,7 +14695,7 @@ int func_003C5BF8(int value) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5C30);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int func_003B4FC0_i(void *) __asm__("func_003B4FC0");
+int SNDSYS_setopts_i(void *) __asm__("SNDSYS_setopts");
 extern int func_003B5158(int, int, int);
 extern int D_0044E1C0;
 extern unsigned int D_0044E1C4;
@@ -14723,7 +14723,7 @@ int func_003C5C30(int arg0) {
     int t;
     int ia;
 
-    func_003B4DD8(&info);
+    SNDSYS_getopts(&info);
     info.n = 0;
     if (D_0044E1C4 == 8) {
         info.list[0] = 68;
@@ -14769,7 +14769,7 @@ int func_003C5C30(int arg0) {
     if (t != info.w2C && (t != 36000 || info.w2C != 24000)) {
         info.w2C = ia;
     }
-    func_003B4FC0_i(&info);
+    SNDSYS_setopts_i(&info);
     func_003B5158(D_0044E1C0, D_005157B0, arg0);
     return 0;
 }
@@ -14791,10 +14791,10 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C5E08);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044E1C0_5E08[] __asm__("D_0044E1C0");
-void func_003B5320_5E08(void) __asm__("func_003B5320");
+void SNDSYS_restore_5E08(void) __asm__("SNDSYS_restore");
 int func_003C5E08_5E08(void) __asm__("func_003C5E08");
 int func_003C5E08_5E08(void) {
-    func_003B5320_5E08();
+    SNDSYS_restore_5E08();
     D_0044E1C0_5E08[0] = 0;
     return 0;
 }
@@ -14844,14 +14844,14 @@ int func_003C5E58(int arg0, int *arg1, int *arg2) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5ED0);
 #ifdef SKIP_ASM
 typedef struct { char pad0[0x64]; int a; int b; char pad1[0xE0 - 0x6C]; } S_5ED0;
-extern void func_003B4FC0(void *);
+extern void SNDSYS_setopts(void *);
 
 int func_003C5ED0(int firstValue, int secondValue) {
     S_5ED0 sysOpts;
-    func_003B4DD8(&sysOpts);
+    SNDSYS_getopts(&sysOpts);
     sysOpts.a = firstValue;
     sysOpts.b = secondValue;
-    func_003B4FC0(&sysOpts);
+    SNDSYS_setopts(&sysOpts);
     return 0;
 }
 #endif
@@ -14860,14 +14860,14 @@ int func_003C5ED0(int firstValue, int secondValue) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5F18);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-void func_003B4FC0_5F18(char *) __asm__("func_003B4FC0");
+void SNDSYS_setopts_5F18(char *) __asm__("SNDSYS_setopts");
 
 int func_003C5F18(int index, float value) {
     char buf[0xE0];
     if (index == 0) {
-        func_003B4DD8(buf);
+        SNDSYS_getopts(buf);
         buf[0x4B] = (int)(value * 100.0f);
-        func_003B4FC0_5F18(buf);
+        SNDSYS_setopts_5F18(buf);
         return 0;
     }
     return -5;
@@ -14877,14 +14877,14 @@ int func_003C5F18(int index, float value) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5F70);
 #ifdef SKIP_ASM
-extern void func_003B4DD8(void *);
+extern void SNDSYS_getopts(void *);
 
 int func_003C5F70(int index, float *outValue) {
     unsigned char buf[0xE0];
 
     *outValue = 0.0f;
     if (index == 0) {
-        func_003B4DD8(buf);
+        SNDSYS_getopts(buf);
         *outValue = (float)buf[0x4B] * 0.01f;
         return 0;
     }
@@ -14896,14 +14896,14 @@ int func_003C5F70(int index, float *outValue) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C5FD0);
 #ifdef SKIP_ASM
 typedef struct { char pad0[0xCC]; int a; int b; char pad1[0xE0 - 0xD4]; } S_5FD0;
-extern void func_003B4FC0(void *);
+extern void SNDSYS_setopts(void *);
 
 int func_003C5FD0(int firstValue, int secondValue) {
     S_5FD0 sysOpts;
-    func_003B4DD8(&sysOpts);
+    SNDSYS_getopts(&sysOpts);
     sysOpts.a = firstValue;
     sysOpts.b = secondValue;
-    func_003B4FC0(&sysOpts);
+    SNDSYS_setopts(&sysOpts);
     return 0;
 }
 #endif
@@ -15310,18 +15310,18 @@ int func_003C6620(void (*preleasefunc)(int, int), void (*pframesfunc)(int, int, 
     char *pplatformmem;
     int i;
 
-    func_003B58A0();
+    SNDSYS_entercritical();
     for (i = 0; i < D_0050A92E; i++) {
         if (D_005157B8.f304[i] == 0) {
             packetinstancehandle = i;
             goto found;
         }
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
     return -9;
 found:
     if (func_003CE1A0_6620(packetinstancehandle, pmem) < 0) {
-        func_003B58D8();
+        SNDSYS_leavecritical();
         return -6;
     }
     pplatformmem = pmem;
@@ -15335,7 +15335,7 @@ found:
     ppchan->f5C = pclientdata;
     ppchan->f00 = -1;
     D_005157B8.f304[packetinstancehandle] = (struct s7B8Queue *)pmem;
-    func_003B58D8();
+    SNDSYS_leavecritical();
     return packetinstancehandle;
 }
 #endif
@@ -15380,13 +15380,13 @@ typedef struct SNDIPATCHHEADER_6760 SNDIPATCHHEADER_6760;
 struct SNDIPATCHHEADER_6760 { char pad0[3]; unsigned char n; char pad4[0x14]; unsigned short h18; char pad1A[0xD0 - 0x1A]; };
 extern int f_6158_6760(int *, SNDIPATCHHEADER_6760 *) __asm__("func_003C6158");
 extern void f_0C18_6760(int, int *, int *) __asm__("func_003C0C18");
-extern int f_A0B0_6760(int, int, int *, int, int) __asm__("func_003BA0B0");
+extern int f_A0B0_6760(int, int, int *, int, int) __asm__("SNDVOICEI_alloc");
 extern unsigned char f_6580_6760(int, int) __asm__("func_003C6580");
-extern void f_A938_6760(int) __asm__("func_003BA938");
+extern void f_A938_6760(int) __asm__("iSNDcalcpitch");
 extern void f_A7B0_6760(int) __asm__("func_003BA7B0");
 extern void f_A740_6760(int, int) __asm__("func_003BA740");
 extern int f_E1B0_6760(int, int, int, int, int, int, SNDSAMPLEFORMAT *, SNDSAMPLEATTR_6760 *) __asm__("func_003CE1B0");
-extern void f_A550_6760(int) __asm__("func_003BA550");
+extern void f_A550_6760(int) __asm__("SNDVOICEI_free");
 
 int func_003C6760_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSAMPLEATTR_6760 *pssa, SNDPLAYOPTS_6760 *pspo) __asm__("func_003C6760");
 int func_003C6760_impl(int packetinstancehandle, SNDSAMPLEFORMAT *pssf, SNDSAMPLEATTR_6760 *pssa, SNDPLAYOPTS_6760 *pspo) {
@@ -15599,9 +15599,9 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C6CE8);
    this unit; field names are their offsets. */
 extern struct s7B8 D_005157B8;
 
-extern void func_003B5E98();
+extern void SNDMEMI_free();
 
-extern void f_89E0_6CE8(int) __asm__("func_003B89E0");
+extern void f_89E0_6CE8(int) __asm__("SNDstop");
 extern void func_003C7080(void);
 extern int f_6CE0_6CE8(int, int, int) __asm__("func_003C6CE0");
 
@@ -15615,7 +15615,7 @@ int func_003C6CE8(int arg0) {
     e->f00 = -1;
 
     for (; i < e->f60.n; i++) {
-        if (e->f64[i]) func_003B5E98(e->f64[i]);
+        if (e->f64[i]) SNDMEMI_free(e->f64[i]);
 
     }
     return 0;
@@ -15779,8 +15779,8 @@ void func_003C7080(void) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7138);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern int fA6E8_7138(void) __asm__("func_003BA6E8");
-extern int fAA00_7138(int, int *) __asm__("func_003BAA00");
+extern int fA6E8_7138(void) __asm__("SNDVOICEI_get");
+extern int fAA00_7138(int, int *) __asm__("iSNDpatchkey");
 extern void f2440_7138(int) __asm__("func_003C2440");
 extern char D_A8E8_7138[] __asm__("D_0050A8E8");
 
@@ -15847,7 +15847,7 @@ int func_003C72A0(int range) {
     } else {
         range = (range <= -1) ? 0 : range;
     }
-    return (int)(((func_003BC5C8() & 0x7FFF) - 0x4000) * range) >> 0xE;
+    return (int)(((iSNDrandom() & 0x7FFF) - 0x4000) * range) >> 0xE;
 }
 #endif
 
@@ -16091,10 +16091,10 @@ void func_003C7CC0(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003C7CE0);
 #ifdef SKIP_ASM
-extern void func_003B5E98();
+extern void SNDMEMI_free();
 
 void func_003C7CE0(void) {
-    func_003B5E98();
+    SNDMEMI_free();
 }
 #endif
 
@@ -16130,8 +16130,8 @@ extern void func_003C7CC0_7D00() __asm__("func_003C7CC0");
 extern void func_003C7CE0_7D00() __asm__("func_003C7CE0");
 extern void f_C918_7D00(void (*)()) __asm__("func_003CC918");
 extern void f_C928_7D00(void (*)()) __asm__("func_003CC928");
-extern void f_58A0_7D00(void) __asm__("func_003B58A0");
-extern void f_58D8_7D00(void) __asm__("func_003B58D8");
+extern void f_58A0_7D00(void) __asm__("SNDSYS_entercritical");
+extern void f_58D8_7D00(void) __asm__("SNDSYS_leavecritical");
 extern char *f_5C60_7D00(int) __asm__("func_003B5C60");
 extern void *memset_7D00(void *, int, int) __asm__("func_00416210");
 extern void f_9268_7D00(void) __asm__("func_003C9268");
@@ -16209,9 +16209,9 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C8018);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct G_8018 { char p0[5]; unsigned char f5; char p6[0xA8-6]; int fA8[4]; int fB8[8]; char pc[0x1DC-0xD8]; int f1DC; };
 extern struct G_8018 D_00515B40_8018 __asm__("D_00515B40");
-extern void f_58A0_8018(void) __asm__("func_003B58A0");
-extern void f_58D8_8018(void) __asm__("func_003B58D8");
-extern void f_5E98_8018(int) __asm__("func_003B5E98");
+extern void f_58A0_8018(void) __asm__("SNDSYS_entercritical");
+extern void f_58D8_8018(void) __asm__("SNDSYS_leavecritical");
+extern void f_5E98_8018(int) __asm__("SNDMEMI_free");
 extern void f_7AA8_8018(float) __asm__("func_003C7AA8");
 void func_003C8018(void) {
     int i;
@@ -16449,7 +16449,7 @@ struct G_8468 {
     char *tab;
 };
 extern struct G_8468 D_00515B40_8468 __asm__("D_00515B40");
-extern void func_003B5E98_8468(struct Node_8468 *) __asm__("func_003B5E98");
+extern void SNDMEMI_free_8468(struct Node_8468 *) __asm__("SNDMEMI_free");
 
 void func_003C8468(int idx) {
     struct Ent_8468 *e = (struct Ent_8468 *)(D_00515B40_8468.tab + idx * 0x60);
@@ -16468,7 +16468,7 @@ void func_003C8468(int idx) {
         }
         nd = e->node;
         next = nd->next;
-        func_003B5E98_8468(nd);
+        SNDMEMI_free_8468(nd);
         e->node = next;
     } while (next != 0);
     e->c0 = 0;
@@ -16802,7 +16802,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C8B80);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *f_5C60_8B80(int) __asm__("func_003B5C60");
-extern void f_5E98_8B80(void *) __asm__("func_003B5E98");
+extern void f_5E98_8B80(void *) __asm__("SNDMEMI_free");
 extern void f_8F48_8B80(void *, void *) __asm__("func_003C8F48");
 extern void f_8FB0_8B80(void *, void *) __asm__("func_003C8FB0");
 extern void f_B4A8_8B80(void *, int) __asm__("func_003CB4A8");
@@ -16840,7 +16840,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C8C30);
 extern char *D_00515D1C_8C30[] __asm__("D_00515D1C");
 extern unsigned short D_0050A912_8C30[] __asm__("D_0050A912");
 extern void *func_003B5C60_8C30(int) __asm__("func_003B5C60");
-extern void func_003B5E98_8C30(void *) __asm__("func_003B5E98");
+extern void SNDMEMI_free_8C30(void *) __asm__("SNDMEMI_free");
 extern void func_003CA990_8C30(void *) __asm__("func_003CA990");
 extern void func_003C8F48_8C30(void *, void *) __asm__("func_003C8F48");
 extern void func_003C8FB0_8C30(void *, void *) __asm__("func_003C8FB0");
@@ -16870,7 +16870,7 @@ void func_003C8C30(int arg0, int arg1) {
     buf = *(char**)(e + 0x5C);
     if (buf != 0) {
         func_003C8FB0_8C30(e + 0x40, buf);
-        func_003B5E98_8C30(*(char**)(e + 0x5C));
+        SNDMEMI_free_8C30(*(char**)(e + 0x5C));
         *(char**)(e + 0x5C) = 0;
     }
 }
@@ -16909,7 +16909,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C8EC0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_00515D1C_8EC0[] __asm__("D_00515D1C");
 extern void func_003C8FB0_8EC0(char *, char *) __asm__("func_003C8FB0");
-extern void func_003B5E98_8EC0(char *) __asm__("func_003B5E98");
+extern void SNDMEMI_free_8EC0(char *) __asm__("SNDMEMI_free");
 
 void func_003C8EC0(int arg0, int arg1) {
     char *rec = D_00515D1C_8EC0[0] + arg0 * 0x60;
@@ -16922,7 +16922,7 @@ void func_003C8EC0(int arg0, int arg1) {
                 fn(node);
             }
             func_003C8FB0_8EC0(rec + 0x40, node);
-            func_003B5E98_8EC0(node);
+            SNDMEMI_free_8EC0(node);
             return;
         }
         node = *(char **)(node + 8);
@@ -20269,13 +20269,13 @@ extern struct sA8E8 D_0050A8E8;
 extern struct s7B8 D_005157B8;
 
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-int func_003BA6E8_E378(int arg0) __asm__("func_003BA6E8");
+int SNDVOICEI_get_E378(int arg0) __asm__("SNDVOICEI_get");
 
 int func_003CE378(int key) {
     int i;
     for (i = 0; i < D_0050A8E8.setup.cfg.f26; i++) {
         struct s7B8Queue *q = D_005157B8.f304[i];
-        if (q != 0 && func_003BA6E8_E378(q->f00) == key) return i;
+        if (q != 0 && SNDVOICEI_get_E378(q->f00) == key) return i;
     }
     return -1;
 }
@@ -20557,14 +20557,14 @@ void func_003CE7C0(sFir_E7C0 *p, int type) {
         p->c[order] = p->f2;
         for (i = 1; i <= order; i++) {
             angle = (float)i * 3.1415927f;
-            p->c[order - i] = func_003BC770(p->f2 * angle) / angle;
+            p->c[order - i] = SNDI_sin(p->f2 * angle) / angle;
         }
         break;
     case 3:
         p->c[order] = p->f1;
         for (i = 1; i <= order; i++) {
             angle = (float)i * 3.1415927f;
-            p->c[order - i] = func_003BC770(p->f1 * angle) / angle;
+            p->c[order - i] = SNDI_sin(p->f1 * angle) / angle;
         }
         break;
     case 4:
@@ -20572,8 +20572,8 @@ void func_003CE7C0(sFir_E7C0 *p, int type) {
         for (i = 1; i <= order; i++) {
             float s;
             angle = (float)i * 3.1415927f;
-            s = func_003BC770((p->f2 - p->f1) * 0.5f * angle);
-            p->c[order - i] = (s + s) * func_003BC840((p->f2 + p->f1) * 0.5f * angle) / angle;
+            s = SNDI_sin((p->f2 - p->f1) * 0.5f * angle);
+            p->c[order - i] = (s + s) * SNDI_cos((p->f2 + p->f1) * 0.5f * angle) / angle;
         }
         break;
     }
@@ -20582,11 +20582,11 @@ void func_003CE7C0(sFir_E7C0 *p, int type) {
     sum = 0.0f;
     for (i = 0; i <= order; i++) {
         if (type == 2 || type == 4) {
-            float v = p->c[i] * (0.54f - func_003BC840(angle * (float)i) * 0.46f);
+            float v = p->c[i] * (0.54f - SNDI_cos(angle * (float)i) * 0.46f);
             p->c[i] = v;
             sum += v;
         } else if (type == 3) {
-            float v = p->c[i] * -(0.54f - func_003BC840(angle * (float)i) * 0.46f);
+            float v = p->c[i] * -(0.54f - SNDI_cos(angle * (float)i) * 0.46f);
             p->c[i] = v;
             if ((i & 1) == 0) {
                 sum += v;
@@ -20974,7 +20974,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CF178);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct S3CF178 { char p0[8]; int *f8; int *fC; char p1[0xC]; void *f1C; int f20; };
-extern void ff_F178(void *) __asm__("func_003B5E98");
+extern void ff_F178(void *) __asm__("SNDMEMI_free");
 extern void *fa_F178(int) __asm__("func_003B5C60");
 int func_003CF178_C(struct S3CF178 *self, int n, int a2, float *a3) __asm__("func_003CF178");
 // PORT: hand-written VU0 loop (trapping add/addi have no gcc 2.95 pattern; the block moves its operands into fixed
@@ -21032,14 +21032,14 @@ int func_003CF178_C(struct S3CF178 *self, int n, int a2, float *a3) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF298);
 #ifdef SKIP_ASM
-extern void func_003B5E98(int);
+extern void SNDMEMI_free(int);
 
 void func_003CF298(void *node) {
     int temp_4;
 
     temp_4 = (*(int *)((char*)(node) + (0x1C)));
     if (temp_4 != 0) {
-        func_003B5E98(temp_4);
+        SNDMEMI_free(temp_4);
     }
 }
 #endif
@@ -21148,7 +21148,7 @@ int func_003CF498(char *effect) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF4D0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern float f_C840_F4D0(float) __asm__("func_003BC840");
+extern float f_C840_F4D0(float) __asm__("SNDI_cos");
 extern float f_FA98_F4D0(float) __asm__("func_003CFA98");
 void func_003CF4D0(void *effect, void *params) {
     float fa, fb, fc, fd, radiusSq, radius, cosCoef;
@@ -21177,7 +21177,7 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CF5D0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003B5C60_F5D0(int) __asm__("func_003B5C60");
-extern void func_003B5E98_F5D0(int) __asm__("func_003B5E98");
+extern void SNDMEMI_free_F5D0(int) __asm__("SNDMEMI_free");
 extern void func_003C51E8_F5D0(char *, char *, int) __asm__("func_003C51E8");
 
 int func_003CF5D0(char *self, int n, char *workBuf, char *dst) {
@@ -21191,7 +21191,7 @@ int func_003CF5D0(char *self, int n, char *workBuf, char *dst) {
     if (*(int *)(self + 0x20) < n) {
         oldBuf = *(int *)(self + 0x1C);
         if (oldBuf != 0) {
-            func_003B5E98_F5D0(oldBuf);
+            SNDMEMI_free_F5D0(oldBuf);
         }
         *(int *)(self + 0x1C) = func_003B5C60_F5D0(bytes);
         *(int *)(self + 0x20) = n;
@@ -21216,14 +21216,14 @@ int func_003CF5D0(char *self, int n, char *workBuf, char *dst) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF6D0);
 #ifdef SKIP_ASM
-extern void func_003B5E98(int);
+extern void SNDMEMI_free(int);
 
 void func_003CF6D0(void *effect) {
     int temp_4;
 
     temp_4 = (*(int *)((char*)(effect) + (0x1C)));
     if (temp_4 != 0) {
-        func_003B5E98(temp_4);
+        SNDMEMI_free(temp_4);
     }
 }
 #endif
@@ -21387,14 +21387,14 @@ int func_003CF7D0_C(struct S3CF7D0 *self, int n, float *a2, float *a3) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF958);
 #ifdef SKIP_ASM
-void func_003B5E98(int);
+void SNDMEMI_free(int);
 
 void func_003CF958(char *effect) {
     int temp_4;
 
     temp_4 = *(int *)(effect + 0x20);
     if (temp_4 != 0) {
-        func_003B5E98(temp_4);
+        SNDMEMI_free(temp_4);
         *(int *)(effect + 0x20) = 0;
         *(int *)(effect + 0x1C) = 0;
     }

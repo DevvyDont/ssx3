@@ -51,7 +51,7 @@ extern "C" void cFlexRailNode_addSpaceHash(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00348C48);
+INCLUDE_ASM("object/flexrailnode", cFlexRailNode_remSpaceHash);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 struct sOctCell_8C48 {
@@ -88,7 +88,7 @@ static inline int octEmpty_8C48(sOctCell_8C48* o)
  * cell's list 2 (nash_Cell_remnode). An octant left with no children and no lists is deleted. Finally deletes the hash
  * node and nulls +0x54.
  */
-extern "C" void func_00348C48(void* self)
+extern "C" void cFlexRailNode_remSpaceHash(void* self)
 {
     sHashCellR_8C48* cell = (sHashCellR_8C48*)cObjectInterface_getNash();
     sHashNode_8B90* node = *(sHashNode_8B90**)((char*)self + 0x54);
@@ -110,15 +110,15 @@ extern "C" void func_00348C48(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00348D98);
+INCLUDE_ASM("object/flexrailnode", cFloatRailNode_cFloatRailNode);
 #ifdef SKIP_ASM
-extern "C" void func_00347D90(void* self, int type, void* a1, void* desc);
-extern "C" void func_003492A8(void* self);
+extern "C" void cFlexRailNode_cFlexRailNode(void* self, int type, void* a1, void* desc);
+extern "C" void cFloatRailNode_updateMats(void* self);
 struct sFrBoxRail;
-extern "C" void func_00349110(sFrBoxRail* self);
+extern "C" void cFloatRailNode_updateBoundBox(sFrBoxRail* self);
 extern "C" void cFlexRailNode_addSpaceHash(void* self);
 struct sFrNode9220;
-extern "C" void func_00349220(void* self, sFrNode9220* node);
+extern "C" void cFloatRailNode_getPosition(void* self, sFrNode9220* node);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern char D_0048FF30[];
@@ -145,19 +145,19 @@ struct sFlexRailElem_348D98 {
 /**
  * Constructs a float rail (node type 20) for a placed rail instance.
  *
- * Runs the flex-rail constructor func_00347D90, installs D_0048FF30 and copies LSpring, LDamp and ForceScale (desc
+ * Runs the flex-rail constructor cFlexRailNode_cFlexRailNode, installs D_0048FF30 and copies LSpring, LDamp and ForceScale (desc
  * +0x48..+0x50) to +0x60..+0x68. Allocates NumNodes 0x50-byte nodes ("FloatRailNodes", +0x70); each gets the next valid
  * instance id (desc +0x4) and mesh (desc +0x24), zero Vel and Force, and its Pos and OPos from the mesh position
- * (func_00349220). Then builds the segment matrices (func_003492A8), BoundBox (func_00349110) and the space hash entry
+ * (cFloatRailNode_getPosition). Then builds the segment matrices (cFloatRailNode_updateMats), BoundBox (cFloatRailNode_updateBoundBox) and the space hash entry
  * (cFlexRailNode_addSpaceHash).
  *
  * @param instRecord  rail instance record
  * @param desc  float rail make-data
  * @return self
  */
-extern "C" void* func_00348D98(char* self, void* instRecord, char* desc)
+extern "C" void* cFloatRailNode_cFloatRailNode(char* self, void* instRecord, char* desc)
 {
-    func_00347D90(self, 20, instRecord, desc);
+    cFlexRailNode_cFlexRailNode(self, 20, instRecord, desc);
     *(void**)(self + 0xC) = D_0048FF30;
     *(float*)(self + 0x60) = *(float*)(desc + 0x48);
     *(float*)(self + 0x64) = *(float*)(desc + 0x4C);
@@ -182,23 +182,23 @@ extern "C" void* func_00348D98(char* self, void* instRecord, char* desc)
         (*(sFlexRailElem_348D98**)(self + 0x70))[j].bone = bones[j];
         (*(sFlexRailElem_348D98**)(self + 0x70))[j].vel = t4vect_Zero;
         (*(sFlexRailElem_348D98**)(self + 0x70))[j].force = t4vect_Zero;
-        func_00349220(self, (sFrNode9220*)&(*(sFlexRailElem_348D98**)(self + 0x70))[j]);
+        cFloatRailNode_getPosition(self, (sFrNode9220*)&(*(sFlexRailElem_348D98**)(self + 0x70))[j]);
         (*(sFlexRailElem_348D98**)(self + 0x70))[j].posB = (*(sFlexRailElem_348D98**)(self + 0x70))[j].posA;
     }
-    func_003492A8(self);
-    func_00349110((sFrBoxRail*)self);
+    cFloatRailNode_updateMats(self);
+    cFloatRailNode_updateBoundBox((sFrBoxRail*)self);
     cFlexRailNode_addSpaceHash(self);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00348FA0);
+INCLUDE_ASM("object/flexrailnode", cFloatRailNode_cFloatRailNode1);
 #ifdef SKIP_ASM
-extern "C" void* func_00347EA8(void* self, void* a1, void* stream);
-extern "C" void func_003492A8(void* self);
+extern "C" void* cFlexRailNode_cFlexRailNode1(void* self, void* a1, void* stream);
+extern "C" void cFloatRailNode_updateMats(void* self);
 struct sFrBoxRail;
-extern "C" void func_00349110(sFrBoxRail* self);
+extern "C" void cFloatRailNode_updateBoundBox(sFrBoxRail* self);
 extern "C" void cFlexRailNode_addSpaceHash(void* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
@@ -225,17 +225,17 @@ struct sFrStreamVEntry_348FA0 {
 /**
  * Constructs a float rail from a replay frame.
  *
- * Runs func_00347EA8, installs D_0048FF30, reads LSpring/LDamp/ForceScale (+0x60, 0xC bytes) and the NumNodes * 0x50
- * node array (allocated as "FloatRailNodes" at +0x70), then rebuilds the matrices (func_003492A8), BoundBox
- * (func_00349110) and space hash entry (cFlexRailNode_addSpaceHash).
+ * Runs cFlexRailNode_cFlexRailNode1, installs D_0048FF30, reads LSpring/LDamp/ForceScale (+0x60, 0xC bytes) and the NumNodes * 0x50
+ * node array (allocated as "FloatRailNodes" at +0x70), then rebuilds the matrices (cFloatRailNode_updateMats), BoundBox
+ * (cFloatRailNode_updateBoundBox) and space hash entry (cFlexRailNode_addSpaceHash).
  *
  * @param bucket  update bucket
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* func_00348FA0(char* self, void* bucket, void* stream)
+extern "C" void* cFloatRailNode_cFloatRailNode1(char* self, void* bucket, void* stream)
 {
-    func_00347EA8(self, bucket, stream);
+    cFlexRailNode_cFlexRailNode1(self, bucket, stream);
     *(void**)(self + 0xC) = D_0048FF30;
     sFrStreamVEntry_348FA0* vt = *(sFrStreamVEntry_348FA0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self + 0x60, 0xC);
@@ -243,43 +243,43 @@ extern "C" void* func_00348FA0(char* self, void* bucket, void* stream)
     *elems = new (str_FloatRailNodes, 0x20000000, 0) sFlexRailElem_348FA0[*(int*)(self + 0x20)];
     sFrStreamVEntry_348FA0* vt2 = *(sFrStreamVEntry_348FA0**)stream;
     vt2[2].fn((char*)stream + vt2[2].delta, *(void**)(self + 0x70), *(int*)(self + 0x20) * 80);
-    func_003492A8(self);
-    func_00349110((sFrBoxRail*)self);
+    cFloatRailNode_updateMats(self);
+    cFloatRailNode_updateBoundBox((sFrBoxRail*)self);
     cFlexRailNode_addSpaceHash(self);
     return self;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flexrailnode", func_003490B0);
+INCLUDE_ASM("object/flexrailnode", cFloatRailNode__cFloatRailNode);
 #ifdef SKIP_ASM
 extern char D_0048FF30[];
 void cMemMan_free(void*);
-extern "C" void func_00348C48(void* self);
-extern "C" void func_00347F90(void* self, int flags);
+extern "C" void cFlexRailNode_remSpaceHash(void* self);
+extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags);
 
 /**
  * Destroys a float rail.
  *
- * Reinstalls D_0048FF30, removes the rail from the space hash (func_00348C48), frees the node array (+0x70) and runs
- * the flex-rail destructor func_00347F90 with flags.
+ * Reinstalls D_0048FF30, removes the rail from the space hash (cFlexRailNode_remSpaceHash), frees the node array (+0x70) and runs
+ * the flex-rail destructor cFlexRailNode__cFlexRailNode with flags.
  *
  * @param flags  destructor flags
  */
-extern "C" void func_003490B0(void* self, int flags)
+extern "C" void cFloatRailNode__cFloatRailNode(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0048FF30;
-    func_00348C48(self);
+    cFlexRailNode_remSpaceHash(self);
     void* railNodes = *(void**)((char*)self + 0x70);
     if (railNodes != 0) {
         cMemMan_free(railNodes);
     }
-    func_00347F90(self, flags);
+    cFlexRailNode__cFlexRailNode(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00349110);
+INCLUDE_ASM("object/flexrailnode", cFloatRailNode_updateBoundBox);
 #ifdef SKIP_ASM
 struct sFrBoxVec4 {
     float x, y, z, w;
@@ -329,7 +329,7 @@ static inline void vu0AddFRBox(sFrBoxVec4& dst, sFrBoxVec4& b)
  * Recomputes a float rail's BoundBox from its node positions, padded by 200 on each axis.
  */
 // bounding box of the rail elements, padded by 200 on x/y/z
-extern "C" void func_00349110(sFrBoxRail* self)
+extern "C" void cFloatRailNode_updateBoundBox(sFrBoxRail* self)
 {
     sFrBoxElem* points = self->elems;
     int n = self->count;
@@ -366,7 +366,7 @@ extern "C" void func_00349110(sFrBoxRail* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00349220);
+INCLUDE_ASM("object/flexrailnode", cFloatRailNode_getPosition);
 #ifdef SKIP_ASM
 struct sFrNodeVec4 {
     float x, y, z, w;
@@ -426,7 +426,7 @@ struct sFrNode9220 {
  *
  * @param node  rail node to update
  */
-extern "C" void func_00349220(void* self, sFrNode9220* node)
+extern "C" void cFloatRailNode_getPosition(void* self, sFrNode9220* node)
 {
     sFrNodeMtx boneMat;
     cInstanceNode_buildMeshMat(node->model.get(), node->bone, &boneMat);
@@ -437,7 +437,7 @@ extern "C" void func_00349220(void* self, sFrNode9220* node)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_003492A8);
+INCLUDE_ASM("object/flexrailnode", cFloatRailNode_updateMats);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sFrV4_92A8 {
@@ -550,7 +550,7 @@ static inline void updateMat_92A8(sFrM4_92A8& out, const sFrV4_92A8& a, const sF
 // PORT: hand-written MMI 4x4 transpose (MMI_TRANSPOSE4: lq/pextlw/pextuw/pcpyld/pcpyud/sq, no gcc 2.95 pattern;
 // retail's registers differ per call site, so an operand asm) plus VU0 macro asm; a port replaces them with a
 // plain C transpose and a C vector-matrix product.
-extern "C" void func_003492A8(void* selfv)
+extern "C" void cFloatRailNode_updateMats(void* selfv)
 {
     sFrNode_92A8* self = (sFrNode_92A8*)selfv;
     int i = 1;
@@ -563,7 +563,7 @@ extern "C" void func_003492A8(void* selfv)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00349798);
+INCLUDE_ASM("object/flexrailnode", cFloatRailNode_applyForce);
 #ifdef SKIP_ASM
 struct sFrVec4 {
     float x, y, z, w;
@@ -613,7 +613,7 @@ static inline void vu0AddFR(sFrVec4& dst, sFrVec4 b)
  * @param node  intersect info of the hit (segment +0x64, t +0x68)
  * @param offset  force to apply
  */
-extern "C" void func_00349798(void* self, void* node, sFrVec4* offset)
+extern "C" void cFloatRailNode_applyForce(void* self, void* node, sFrVec4* offset)
 {
     if (*(int*)((char*)node + 0x64) >= 0) {
         vu0AddFR((*(sFrElem**)((char*)self + 0x70))[*(int*)((char*)node + 0x64)].pos,
@@ -625,7 +625,7 @@ extern "C" void func_00349798(void* self, void* node, sFrVec4* offset)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00349840);
+INCLUDE_ASM("object/flexrailnode", cFloatRailNode_updateIntersectInfo);
 #ifdef SKIP_ASM
 /**
  * Adds the float rail's velocity at the hit point to an intersect info.
@@ -633,13 +633,13 @@ INCLUDE_ASM("object/flexrailnode", func_00349840);
  * Does nothing when the hit segment (+0x64) is negative. Otherwise adds Vel[seg] * t + Vel[seg + 1] * (1 - t) to the
  * info's +0x20 vector (t at +0x68).
  *
- * Likely bug: the weights are the reverse of func_00349798 (applyForce), which gives node seg the (1 - t) share.
+ * Likely bug: the weights are the reverse of cFloatRailNode_applyForce (applyForce), which gives node seg the (1 - t) share.
  *
  * @param node  intersect info of the hit
  */
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-extern "C" void func_00349840(void* self, void* node)
+extern "C" void cFloatRailNode_updateIntersectInfo(void* self, void* node)
 {
     if (*(int*)((char*)node + 0x64) >= 0) {
         vu0AddFR(*(sFrVec4*)((char*)node + 0x20),
@@ -653,7 +653,7 @@ extern "C" void func_00349840(void* self, void* node)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_003498E8);
+INCLUDE_ASM("object/flexrailnode", cFloatRailNode_updateNodes);
 #ifdef SKIP_ASM
 struct sFrV_98E8 {
     float x, y, z, w;
@@ -670,8 +670,8 @@ struct sFrN_98E8 {
 };
 
 extern "C" float cObjectInterface_getUpdateTime();
-extern "C" void func_00349220(void* self, sFrNode9220* node);
-// View (func_00348D98 earlier in this unit declares it with its own type).
+extern "C" void cFloatRailNode_getPosition(void* self, sFrNode9220* node);
+// View (cFloatRailNode_cFloatRailNode earlier in this unit declares it with its own type).
 extern sFrV_98E8 D_004FF120_98E8 __asm__("t4vect_Zero");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
@@ -736,17 +736,17 @@ static inline void vu0AddEq_98E8(sFrV_98E8& dst, sFrV_98E8 b)
 /**
  * Steps the float rail's spring simulation by one update.
  *
- * For each node: snaps Pos and OPos back to the mesh (func_00349220) while the instance has an active node (+0xC);
+ * For each node: snaps Pos and OPos back to the mesh (cFloatRailNode_getPosition) while the instance has an active node (+0xC);
  * accel = -(Pos - OPos) * LSpring (+0x60) + Force * ForceScale (+0x68) - Vel * LDamp (+0x64); Pos += Vel * dt; Vel +=
  * accel * dt (dt from cObjectInterface_getUpdateTime); Force is cleared.
  */
-extern "C" void func_003498E8(char* self)
+extern "C" void cFloatRailNode_updateNodes(char* self)
 {
     float dt = cObjectInterface_getUpdateTime();
     sFrN_98E8* n = *(sFrN_98E8**)(self + 0x70);
     for (int i = 0; i < *(int*)(self + 0x20); i++, n++) {
         if (*(int*)((char*)n->model.get() + 0xC))
-            func_00349220(self, (sFrNode9220*)n);
+            cFloatRailNode_getPosition(self, (sFrNode9220*)n);
         float* k = (float*)(self + 0x60);
         float ks = -*(float*)(self + 0x60);
         sFrV_98E8 acc = vu0Add_98E8(vu0Scale_98E8(vu0Sub_98E8(n->posA, n->posB), ks),
@@ -760,7 +760,7 @@ extern "C" void func_003498E8(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00349AD0);
+INCLUDE_ASM("object/flexrailnode", cFloatRailNode_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sFlexRailVEntry9AD0 {
     short delta;
@@ -768,19 +768,19 @@ struct sFlexRailVEntry9AD0 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00348B40(void* self, void* stream);
+extern "C" void cFlexRailNode_writeToReplayFrame(void* self, void* stream);
 
 /**
  * Writes a float rail to a replay frame.
  *
- * Writes the flex-rail base (func_00348B40), LSpring/LDamp/ForceScale (+0x60, 0xC bytes) and the NumNodes * 0x50 node
+ * Writes the flex-rail base (cFlexRailNode_writeToReplayFrame), LSpring/LDamp/ForceScale (+0x60, 0xC bytes) and the NumNodes * 0x50 node
  * array (+0x70).
  *
  * @param stream  replay stream to write to
  */
-extern "C" void func_00349AD0(void* self, void* stream)
+extern "C" void cFloatRailNode_writeToReplayFrame(void* self, void* stream)
 {
-    func_00348B40(self, stream);
+    cFlexRailNode_writeToReplayFrame(self, stream);
     sFlexRailVEntry9AD0* writeFn = &(*(sFlexRailVEntry9AD0**)stream)[1];
     writeFn->fn((char*)stream + writeFn->delta, (char*)self + 0x60, 0xC);
     writeFn = &(*(sFlexRailVEntry9AD0**)stream)[1];
@@ -789,14 +789,14 @@ extern "C" void func_00349AD0(void* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00349B48);
+INCLUDE_ASM("object/flexrailnode", cSpringRailNode_cSpringRailNode);
 #ifdef SKIP_ASM
-extern "C" void func_00347D90(void* self, int type, void* a1, void* desc);
-extern "C" void func_0034A0B0(void* self);
+extern "C" void cFlexRailNode_cFlexRailNode(void* self, int type, void* a1, void* desc);
+extern "C" void cSpringRailNode_updateMats(void* self);
 struct sFrBoxRail60;
-extern "C" void func_00349F18(sFrBoxRail60* self);
+extern "C" void cSpringRailNode_updateBoundBox(sFrBoxRail60* self);
 struct sFrNodeA028;
-extern "C" void func_0034A028(void* self, sFrNodeA028* node);
+extern "C" void cSpringRailNode_getPosition(void* self, sFrNodeA028* node);
 extern char D_0048FD90[];
 extern char str_SpringRailNodes[];
 
@@ -836,19 +836,19 @@ struct sFlexElem_9B48 {
 /**
  * Constructs a spring rail (node type 21) for a placed rail instance.
  *
- * Runs the flex-rail constructor func_00347D90, installs D_0048FD90 and copies ASpring, ADamp and TorqueScale (desc
+ * Runs the flex-rail constructor cFlexRailNode_cFlexRailNode, installs D_0048FD90 and copies ASpring, ADamp and TorqueScale (desc
  * +0x48..+0x50) to +0x60..+0x68. Allocates NumNodes 0x60-byte nodes ("SpringRailNodes", +0x70); each gets the next
- * valid instance id and mesh, zero V/O/W/T and its P from the mesh position (func_0034A028). V of each node becomes the
- * vector to the next node's P. Then builds the segment matrices (func_0034A0B0), BoundBox (func_00349F18) and the space
+ * valid instance id and mesh, zero V/O/W/T and its P from the mesh position (cSpringRailNode_getPosition). V of each node becomes the
+ * vector to the next node's P. Then builds the segment matrices (cSpringRailNode_updateMats), BoundBox (cSpringRailNode_updateBoundBox) and the space
  * hash entry (cFlexRailNode_addSpaceHash).
  *
  * @param instRecord  rail instance record
  * @param desc  spring rail make-data
  * @return self
  */
-extern "C" void* func_00349B48(char* self, void* instRecord, char* desc)
+extern "C" void* cSpringRailNode_cSpringRailNode(char* self, void* instRecord, char* desc)
 {
-    func_00347D90(self, 21, instRecord, desc);
+    cFlexRailNode_cFlexRailNode(self, 21, instRecord, desc);
     *(void**)(self + 0xC) = D_0048FD90;
     *(float*)(self + 0x60) = *(float*)(desc + 0x48);
     *(float*)(self + 0x64) = *(float*)(desc + 0x4C);
@@ -875,24 +875,24 @@ extern "C" void* func_00349B48(char* self, void* instRecord, char* desc)
         (*(sFlexElem_9B48**)(self + 0x70))[j].v40 = D_004FF120_9B48;
         (*(sFlexElem_9B48**)(self + 0x70))[j].v20 = D_004FF120_9B48;
         (*(sFlexElem_9B48**)(self + 0x70))[j].dir = D_004FF120_9B48;
-        func_0034A028(self, (sFrNodeA028*)&(*(sFlexElem_9B48**)(self + 0x70))[j]);
+        cSpringRailNode_getPosition(self, (sFrNodeA028*)&(*(sFlexElem_9B48**)(self + 0x70))[j]);
     }
     for (int k = 0; k < *(int*)(self + 0x20) - 1; k++) {
         (*(sFlexElem_9B48**)(self + 0x70))[k].dir =
             Sub_9B48((*(sFlexElem_9B48**)(self + 0x70))[k + 1].pos, (*(sFlexElem_9B48**)(self + 0x70))[k].pos);
     }
-    func_0034A0B0(self);
-    func_00349F18((sFrBoxRail60*)self);
+    cSpringRailNode_updateMats(self);
+    cSpringRailNode_updateBoundBox((sFrBoxRail60*)self);
     cFlexRailNode_addSpaceHash(self);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00349DB0);
+INCLUDE_ASM("object/flexrailnode", cSpringRailNode_cSpringRailNode1);
 #ifdef SKIP_ASM
-extern "C" void* func_00347EA8(void* self, void* a1, void* stream);
-extern "C" void func_0034A0B0(void* self);
+extern "C" void* cFlexRailNode_cFlexRailNode1(void* self, void* a1, void* stream);
+extern "C" void cSpringRailNode_updateMats(void* self);
 extern "C" void cFlexRailNode_addSpaceHash(void* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
@@ -915,17 +915,17 @@ struct sFrStreamVEntry_349DB0 {
 /**
  * Constructs a spring rail from a replay frame.
  *
- * Runs func_00347EA8, installs D_0048FD90, reads ASpring/ADamp/TorqueScale (+0x60, 0xC bytes) and the NumNodes * 0x60
- * node array ("SpringRailNodes", +0x70), then rebuilds the matrices (func_0034A0B0) and the space hash entry. Unlike
+ * Runs cFlexRailNode_cFlexRailNode1, installs D_0048FD90, reads ASpring/ADamp/TorqueScale (+0x60, 0xC bytes) and the NumNodes * 0x60
+ * node array ("SpringRailNodes", +0x70), then rebuilds the matrices (cSpringRailNode_updateMats) and the space hash entry. Unlike
  * the float rail's replay ctor it does not recompute BoundBox (it comes back from the replay state).
  *
  * @param bucket  update bucket
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* func_00349DB0(char* self, void* bucket, void* stream)
+extern "C" void* cSpringRailNode_cSpringRailNode1(char* self, void* bucket, void* stream)
 {
-    func_00347EA8(self, bucket, stream);
+    cFlexRailNode_cFlexRailNode1(self, bucket, stream);
     *(void**)(self + 0xC) = D_0048FD90;
     sFrStreamVEntry_349DB0* vt = *(sFrStreamVEntry_349DB0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self + 0x60, 0xC);
@@ -933,42 +933,42 @@ extern "C" void* func_00349DB0(char* self, void* bucket, void* stream)
     *elems = new (str_SpringRailNodes, 0x20000000, 0) sFlexRailElem_349DB0[*(int*)(self + 0x20)];
     sFrStreamVEntry_349DB0* vt2 = *(sFrStreamVEntry_349DB0**)stream;
     vt2[2].fn((char*)stream + vt2[2].delta, *(void**)(self + 0x70), *(int*)(self + 0x20) * 0x60);
-    func_0034A0B0(self);
+    cSpringRailNode_updateMats(self);
     cFlexRailNode_addSpaceHash(self);
     return self;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flexrailnode", func_00349EB8);
+INCLUDE_ASM("object/flexrailnode", cSpringRailNode__cSpringRailNode);
 #ifdef SKIP_ASM
 extern char D_0048FD90[];
 void cMemMan_free(void*);
-extern "C" void func_00348C48(void* self);
-extern "C" void func_00347F90(void* self, int flags);
+extern "C" void cFlexRailNode_remSpaceHash(void* self);
+extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags);
 
 /**
  * Destroys a spring rail.
  *
- * Reinstalls D_0048FD90, removes the rail from the space hash (func_00348C48), frees the node array (+0x70) and runs
- * func_00347F90 with flags.
+ * Reinstalls D_0048FD90, removes the rail from the space hash (cFlexRailNode_remSpaceHash), frees the node array (+0x70) and runs
+ * cFlexRailNode__cFlexRailNode with flags.
  *
  * @param flags  destructor flags
  */
-extern "C" void func_00349EB8(void* self, int flags)
+extern "C" void cSpringRailNode__cSpringRailNode(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0048FD90;
-    func_00348C48(self);
+    cFlexRailNode_remSpaceHash(self);
     void* railNodes = *(void**)((char*)self + 0x70);
     if (railNodes != 0) {
         cMemMan_free(railNodes);
     }
-    func_00347F90(self, flags);
+    cFlexRailNode__cFlexRailNode(self, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_00349F18);
+INCLUDE_ASM("object/flexrailnode", cSpringRailNode_updateBoundBox);
 #ifdef SKIP_ASM
 struct sFrBoxElem60 {
     sFrBoxVec4 pos; // 0x00
@@ -991,7 +991,7 @@ struct sFrBoxRail60 {
 // PORT: PS2-only VU0 inline asm (vector sub-assign).
 // PORT: PS2-only VU0 inline asm (vector add-assign).
 // bounding box of the rail elements, padded by 200 on x/y/z
-extern "C" void func_00349F18(sFrBoxRail60* self)
+extern "C" void cSpringRailNode_updateBoundBox(sFrBoxRail60* self)
 {
     sFrBoxElem60* points = self->elems;
     int n = self->count;
@@ -1028,7 +1028,7 @@ extern "C" void func_00349F18(sFrBoxRail60* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034A028);
+INCLUDE_ASM("object/flexrailnode", cSpringRailNode_getPosition);
 #ifdef SKIP_ASM
 extern "C" sFrWorld9220** cObjectInterface_getWorld();
 extern "C" void cInstanceNode_buildMeshMat(void* model, int bone, sFrNodeMtx* out);
@@ -1045,7 +1045,7 @@ struct sFrNodeA028 {
  *
  * @param node  rail node to update
  */
-extern "C" void func_0034A028(void* self, sFrNodeA028* node)
+extern "C" void cSpringRailNode_getPosition(void* self, sFrNodeA028* node)
 {
     sFrNodeMtx boneMat;
     cInstanceNode_buildMeshMat(node->model.get(), node->bone, &boneMat);
@@ -1055,7 +1055,7 @@ extern "C" void func_0034A028(void* self, sFrNodeA028* node)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034A0B0);
+INCLUDE_ASM("object/flexrailnode", cSpringRailNode_updateMats);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sFrV4_A0B0 {
@@ -1178,7 +1178,7 @@ static inline void updateMatEnd_A0B0(sFrM4_A0B0& out, const sFrV4_A0B0& a, const
 /**
  * Rebuilds a spring rail's segment matrices from its node positions.
  *
- * Same scheme as func_003492A8: each segment cubic comes from the surrounding four P values with basis D_004FFAC0,
+ * Same scheme as cFloatRailNode_updateMats: each segment cubic comes from the surrounding four P values with basis D_004FFAC0,
  * repeating the end node for the first and last segments.
  *
  * @param selfv  the spring rail
@@ -1186,7 +1186,7 @@ static inline void updateMatEnd_A0B0(sFrM4_A0B0& out, const sFrV4_A0B0& a, const
 // PORT: hand-written MMI 4x4 transpose (MMI_TRANSPOSE4: lq/pextlw/pextuw/pcpyld/pcpyud/sq, no gcc 2.95 pattern;
 // retail's registers differ per call site, so an operand asm) plus VU0 macro asm; a port replaces them with a
 // plain C transpose and a C vector-matrix product.
-extern "C" void func_0034A0B0(void* selfv)
+extern "C" void cSpringRailNode_updateMats(void* selfv)
 {
     sFrNode_A0B0* self = (sFrNode_A0B0*)selfv;
     int i = 1;
@@ -1199,7 +1199,7 @@ extern "C" void func_0034A0B0(void* selfv)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034A568);
+INCLUDE_ASM("object/flexrailnode", cSpringRailNode_applyForce);
 #ifdef SKIP_ASM
 struct sV4_A568 {
     float x, y, z, w;
@@ -1336,7 +1336,7 @@ static inline void vu0AddEq_A568(sV4_A568& dst, sV4_A568 b)
  * @param node  intersect info of the hit (position, segment +0x64)
  * @param dir  force to apply
  */
-extern "C" void func_0034A568(sFrRailA568* self, sFrNodeA568* node, sV4_A568* dir)
+extern "C" void cSpringRailNode_applyForce(sFrRailA568* self, sFrNodeA568* node, sV4_A568* dir)
 {
     float len = vu0Len_A568(*dir);
     sV4_A568 clamped;
@@ -1365,7 +1365,7 @@ extern "C" void func_0034A568(sFrRailA568* self, sFrNodeA568* node, sV4_A568* di
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034A838);
+INCLUDE_ASM("object/flexrailnode", cSpringRailNode_updateIntersectInfo);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sFrV_A838 {
@@ -1445,7 +1445,7 @@ static inline void vu0AddEq_A838(sFrV_A838& dst, const sFrV_A838& b)
  *
  * @param node  intersect info of the hit
  */
-extern "C" void func_0034A838(sFrR_A838* self, sFrN_A838* node)
+extern "C" void cSpringRailNode_updateIntersectInfo(sFrR_A838* self, sFrN_A838* node)
 {
     if (node->idx < 0)
         return;
@@ -1459,7 +1459,7 @@ extern "C" void func_0034A838(sFrR_A838* self, sFrN_A838* node)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034A8C8);
+INCLUDE_ASM("object/flexrailnode", cSpringRailNode_updateNodes);
 #ifdef SKIP_ASM
 extern "C" float cObjectInterface_getUpdateTime();
 
@@ -1603,7 +1603,7 @@ static inline void vu0AddEq_A8C8(sV4_A8C8& dst, const sV4_A8C8& b)
  * the chain accumulating O and places P[i + 1] at P[i] + V[i] bent by the accumulated angle (normalised V + V cross
  * angle, scaled back to |V|). T of every node is cleared. dt comes from cObjectInterface_getUpdateTime.
  */
-extern "C" void func_0034A8C8(sFrRailA8C8* self)
+extern "C" void cSpringRailNode_updateNodes(sFrRailA8C8* self)
 {
     float dt = cObjectInterface_getUpdateTime();
     sV4Slot_A8C8 segTorque[8];
@@ -1634,7 +1634,7 @@ extern "C" void func_0034A8C8(sFrRailA8C8* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AC10);
+INCLUDE_ASM("object/flexrailnode", cSpringRailNode_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sFlexRailVEntryAC10 {
     short delta;
@@ -1642,19 +1642,19 @@ struct sFlexRailVEntryAC10 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void func_00348B40(void* self, void* stream);
+extern "C" void cFlexRailNode_writeToReplayFrame(void* self, void* stream);
 
 /**
  * Writes a spring rail to a replay frame.
  *
- * Writes the flex-rail base (func_00348B40), ASpring/ADamp/TorqueScale (+0x60, 0xC bytes) and the NumNodes * 0x60 node
+ * Writes the flex-rail base (cFlexRailNode_writeToReplayFrame), ASpring/ADamp/TorqueScale (+0x60, 0xC bytes) and the NumNodes * 0x60 node
  * array (+0x70).
  *
  * @param stream  replay stream to write to
  */
-extern "C" void func_0034AC10(void* self, void* stream)
+extern "C" void cSpringRailNode_writeToReplayFrame(void* self, void* stream)
 {
-    func_00348B40(self, stream);
+    cFlexRailNode_writeToReplayFrame(self, stream);
     sFlexRailVEntryAC10* writeFn = &(*(sFlexRailVEntryAC10**)stream)[1];
     writeFn->fn((char*)stream + writeFn->delta, (char*)self + 0x60, 0xC);
     writeFn = &(*(sFlexRailVEntryAC10**)stream)[1];
@@ -1663,7 +1663,7 @@ extern "C" void func_0034AC10(void* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AC88);
+INCLUDE_ASM("object/flexrailnode", tFlagState_tFlagState);
 #ifdef SKIP_ASM
 extern char* cAppMan_TheAppMan;
 
@@ -1711,7 +1711,7 @@ static inline float perSec_34AC88(float x)
  * @param src  tMakeFlagData to read
  * @return out
  */
-extern "C" sFrRailDesc* func_0034AC88(sFrRailDesc* out, void* src)
+extern "C" sFrRailDesc* tFlagState_tFlagState(sFrRailDesc* out, void* src)
 {
     sFrRailOut_AC88* flagState = (sFrRailOut_AC88*)out;
     sFrRailSrc_AC88* makeData = (sFrRailSrc_AC88*)src;
@@ -1755,9 +1755,9 @@ extern "C" sFrRailDesc* func_0034AC88(sFrRailDesc* out, void* src)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flexrailnode", func_0034ADD8);
+INCLUDE_ASM("object/flexrailnode", cFlagNode_cFlagNode1);
 #ifdef SKIP_ASM
-extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
+extern "C" void* cInstanceNode_cInstanceNode1(void* self, void* a1, int type, void* a3);
 extern "C" void* func_002D1CB0(void);
 extern char cFlagNode_vtbl[];
 
@@ -1765,28 +1765,28 @@ struct sFrRailDesc {
     int data[0x58 / 4];
 };
 
-extern "C" sFrRailDesc* func_0034AC88(sFrRailDesc* out, void* src);
-extern "C" void func_0034C548(void* mgr, void* node, sFrRailDesc* desc);
+extern "C" sFrRailDesc* tFlagState_tFlagState(sFrRailDesc* out, void* src);
+extern "C" void cFlagManager_AddFlag(void* mgr, void* node, sFrRailDesc* desc);
 
 /**
  * Constructs a flag node (node type 10) and registers the flag with the flag manager.
  *
- * Runs the record constructor func_0034FB00, installs cFlagNode_vtbl, sets the record flags to (flags & ~0x2) | 0x4,
- * converts src (func_0034AC88) and adds the instance to the flag manager (func_0034C548 on func_002D1CB0()).
+ * Runs the record constructor cInstanceNode_cInstanceNode1, installs cFlagNode_vtbl, sets the record flags to (flags & ~0x2) | 0x4,
+ * converts src (tFlagState_tFlagState) and adds the instance to the flag manager (cFlagManager_AddFlag on func_002D1CB0()).
  *
  * @param bucket  update bucket
  * @param node  flag instance record
  * @param src  flag make-data
  * @return self
  */
-extern "C" void* func_0034ADD8(void* self, void* bucket, void* node, void* src)
+extern "C" void* cFlagNode_cFlagNode1(void* self, void* bucket, void* node, void* src)
 {
     sFrRailDesc desc;
-    func_0034FB00(self, bucket, 10, node);
+    cInstanceNode_cInstanceNode1(self, bucket, 10, node);
     *(void**)((char*)self + 0xC) = cFlagNode_vtbl;
     *(unsigned int*)((char*)node + 0x8) = (*(unsigned int*)((char*)node + 0x8) & 0xFFFFFFFD) | 4;
-    func_0034AC88(&desc, src);
-    func_0034C548(func_002D1CB0(), node, &desc);
+    tFlagState_tFlagState(&desc, src);
+    cFlagManager_AddFlag(func_002D1CB0(), node, &desc);
     return self;
 }
 #endif
@@ -1818,13 +1818,13 @@ INCLUDE_ASM("object/flexrailnode", cFlagNode__cFlagNode);
 #ifdef SKIP_ASM
 extern char cFlagNode_vtbl[];
 extern "C" void* func_002D1CB0(void);
-extern "C" void func_0034C600(void* set, void* arg);
+extern "C" void cFlagManager_RemoveFlag(void* set, void* arg);
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
 /**
  * Destroys a flag node and removes its object from the game's flag manager.
  *
- * Restores cFlagNode's vtable, asks the flag manager (func_0034C600) to remove the object at offset 0x18 from
+ * Restores cFlagNode's vtable, asks the flag manager (cFlagManager_RemoveFlag) to remove the object at offset 0x18 from
  * the first active flag set holding it, then runs cInstanceNode__cInstanceNode().
  *
  * @param flags  g++ destructor flags, passed to cInstanceNode__cInstanceNode(); bit 0 set frees the object's memory
@@ -1832,7 +1832,7 @@ extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 extern "C" void cFlagNode__cFlagNode(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = cFlagNode_vtbl;
-    func_0034C600(func_002D1CB0(), *(void**)((char*)self + 0x18));
+    cFlagManager_RemoveFlag(func_002D1CB0(), *(void**)((char*)self + 0x18));
     cInstanceNode__cInstanceNode(self, flags);
 }
 #endif
@@ -1867,7 +1867,7 @@ void cFlagNode_render(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AF20);
+INCLUDE_ASM("object/flexrailnode", tFlagSetState_tFlagSetState);
 #ifdef SKIP_ASM
 /**
  * Constructs a flag-set state: no instances, model id -1.
@@ -1876,7 +1876,7 @@ INCLUDE_ASM("object/flexrailnode", func_0034AF20);
  *
  * @return self
  */
-extern "C" void* func_0034AF20(void* self)
+extern "C" void* tFlagSetState_tFlagSetState(void* self)
 {
     *(int*)((char*)self + 0x5c) = 0;
     *(unsigned int*)((char*)self + 0x58) = 0xFFFFFFFFU;
@@ -1885,7 +1885,7 @@ extern "C" void* func_0034AF20(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AF38);
+INCLUDE_ASM("object/flexrailnode", cFlagSet_cFlagSet);
 #ifdef SKIP_ASM
 extern int D_004A4010;
 extern void* D_0048FBF8[];
@@ -1904,17 +1904,17 @@ struct sFlexRail_AF38 {
 /**
  * Constructs an empty flag set.
  *
- * Runs func_0034AF20, nulls mGridMesh (+0x60) and mVerts (+0x74), installs D_0048FBF8 (vtable at +0x184), clears the 60
+ * Runs tFlagSetState_tFlagSetState, nulls mGridMesh (+0x60) and mVerts (+0x74), installs D_0048FBF8 (vtable at +0x184), clears the 60
  * mInstances (+0x94) and gives the set the current grid-update parity D_004A4010 (mFrameToUpdateGrid, +0x90), which
  * then alternates 0/1 for the next set.
  *
  * @return self
  */
-extern "C" void* func_0034AF38(void* self)
+extern "C" void* cFlagSet_cFlagSet(void* self)
 {
     sFlexRail_AF38* flagSet = (sFlexRail_AF38*)self;
     int i;
-    func_0034AF20(self);
+    tFlagSetState_tFlagSetState(self);
     flagSet->f60 = 0;
     flagSet->f74 = 0;
     flagSet->vt = D_0048FBF8;
@@ -1932,7 +1932,7 @@ extern "C" void* func_0034AF38(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AFB8);
+INCLUDE_ASM("object/flexrailnode", cFlagSet__cFlagSet);
 #ifdef SKIP_ASM
 extern void* D_0048FBF8[];
 void operator_delete(int*);
@@ -1942,7 +1942,7 @@ void operator_delete(int*);
  *
  * @param flags  destructor flags
  */
-extern "C" void func_0034AFB8(void* self, int flags)
+extern "C" void cFlagSet__cFlagSet(void* self, int flags)
 {
     *(void***)((char*)self + 0x184) = D_0048FBF8;
     if (flags & 1) {
@@ -1952,7 +1952,7 @@ extern "C" void func_0034AFB8(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034AFE8);
+INCLUDE_ASM("object/flexrailnode", cFlagSet_SameKind);
 #ifdef SKIP_ASM
 extern "C" int func_00415FC8(const void* a, const void* b, int n);
 
@@ -1966,7 +1966,7 @@ extern "C" int func_00415FC8(const void* a, const void* b, int n);
  * @param ctx  instance record of the new flag
  * @return 1 if the flag can join this set, else 0
  */
-extern "C" int func_0034AFE8(void* self, void* data, void* ctx)
+extern "C" int cFlagSet_SameKind(void* self, void* data, void* ctx)
 {
     if (*(int*)((char*)self + 0x5C) == 0) {
         return 0;
@@ -1979,7 +1979,7 @@ extern "C" int func_0034AFE8(void* self, void* data, void* ctx)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034B038);
+INCLUDE_ASM("object/flexrailnode", cFlagSet_AddFlag);
 #ifdef SKIP_ASM
 extern "C" void cFlagSet_CreateMesh(void* self, void* mesh);
 
@@ -2005,7 +2005,7 @@ struct sFlagSet_34B038 {
  * @param def  converted flag data
  * @param mesh  instance record of the flag
  */
-extern "C" void func_0034B038(sFlagSet_34B038* self, sFlagDef_34B038* def, char* mesh)
+extern "C" void cFlagSet_AddFlag(sFlagSet_34B038* self, sFlagDef_34B038* def, char* mesh)
 {
     if (self->count == 0) {
         self->def = *def;
@@ -2018,7 +2018,7 @@ extern "C" void func_0034B038(sFlagSet_34B038* self, sFlagDef_34B038* def, char*
 #endif
 
 //100%
-INCLUDE_ASM("object/flexrailnode", func_0034B168);
+INCLUDE_ASM("object/flexrailnode", cFlagSet_RemoveFlag);
 #ifdef SKIP_ASM
 struct sFrRider_B168 {
     char pad_0x0[0x78];
@@ -2035,19 +2035,19 @@ struct sFrRail_B168 {
     sFrRider_B168* riders[1]; // 0x94
 };
 
-extern "C" void func_0034B7B8(void* self);
+extern "C" void cFlagSet_PurgeMesh(void* self);
 
 /**
  * Removes a flag instance from a flag set, purging the mesh when the set empties.
  *
  * Fails when the set is empty or its model id (+0x58) differs from the instance's. Otherwise finds the instance by id
  * (+0x78), moves the last instance into its place, clears the last slot and decrements the count; an empty set frees
- * its mesh (func_0034B7B8).
+ * its mesh (cFlagSet_PurgeMesh).
  *
  * @param rider  instance record of the flag to remove
  * @return 1 if the instance was removed, else 0
  */
-extern "C" int func_0034B168(sFrRail_B168* self, sFrRider_B168* rider)
+extern "C" int cFlagSet_RemoveFlag(sFrRail_B168* self, sFrRider_B168* rider)
 {
     if (self->count == 0) {
         return 0;
@@ -2060,7 +2060,7 @@ extern "C" int func_0034B168(sFrRail_B168* self, sFrRider_B168* rider)
             self->riders[i] = self->riders[self->count - 1];
             self->riders[self->count - 1] = 0;
             if (--self->count == 0) {
-                func_0034B7B8(self);
+                cFlagSet_PurgeMesh(self);
             }
             return 1;
         }

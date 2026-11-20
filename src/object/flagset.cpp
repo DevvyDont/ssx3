@@ -7,7 +7,7 @@ INCLUDE_ASM("object/flagset", cFlagSet_CreateMesh);
 extern char* cGraphicsMan_TheGraphicsMan;
 extern char str_Flag_Verts[];
 unsigned int BXrand();
-extern "C" void func_0034BCA0(void* self, void* verts);
+extern "C" void cFlagSet_updateGrid(void* self, void* verts);
 
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
@@ -143,14 +143,14 @@ extern "C" void cFlagSet_CreateMesh(void* flagSet, void* item)
         }
     }
     sFsV3_CM verts[50];
-    func_0034BCA0(self, verts);
+    cFlagSet_updateGrid(self, verts);
     sFsMesh_CM* flagMesh = self->mesh;
     flagMesh->vt[6].fn((char*)flagMesh + flagMesh->vt[6].delta, verts, col, uv);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034B7B8);
+INCLUDE_ASM("object/flagset", cFlagSet_PurgeMesh);
 #ifdef SKIP_ASM
 extern char* cGraphicsMan_TheGraphicsMan;
 void cMemMan_free(void*);
@@ -167,7 +167,7 @@ struct sFlagSetVEntryB7B8 {
  * Releases the grid mesh (+0x60) through graphics-manager slot 77 and frees the vertex array (+0x74) with cMemMan_free,
  * nulling each pointer.
  */
-extern "C" void func_0034B7B8(void* self)
+extern "C" void cFlagSet_PurgeMesh(void* self)
 {
     char* flagSet = (char*)self;
     void* mesh = *(void**)(flagSet + 0x60);
@@ -186,12 +186,12 @@ extern "C" void func_0034B7B8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034B818);
+INCLUDE_ASM("object/flagset", cFlagSet_update);
 #ifdef SKIP_ASM
 extern int D_004A4240;
 extern "C" void* func_002D1CB0();
 extern "C" int func_002D1C98();
-extern "C" void func_0034BCA0(void* self, void* verts);
+extern "C" void cFlagSet_updateGrid(void* self, void* verts);
 
 struct sFlagVert_B818 {
     float x, y, z;
@@ -232,13 +232,13 @@ struct sFlagElem_B818 {
  * Returns when flag updates are off (D_004A4240), the set is empty (+0x5C) or has no grid mesh (+0x60). The wind blend
  * is mMinWindFactor (+0x4C) + the flag manager's wind factor (func_002D1CB0() +0x10) * (1 - mMinWindFactor); each of
  * the 4 clocks mFlagTime (+0x78) advances by mSpeed[i] (+0x4) times that and wraps at 1. On frames whose parity
- * (func_002D1C98() % 2) equals mFrameToUpdateGrid (+0x90) it builds up to 50 vertices with func_0034BCA0 and hands them
+ * (func_002D1C98() % 2) equals mFrameToUpdateGrid (+0x90) it builds up to 50 vertices with cFlagSet_updateGrid and hands them
  * to the mesh's vtable entry 3. When either scroll rate (+0x50, +0x54) exceeds 0.001 it adds them to mScrollU/V (+0x88,
  * +0x8C), wrapping at 1.
  *
  * @param elem  the flag set
  */
-extern "C" void func_0034B818(void* elem)
+extern "C" void cFlagSet_update(void* elem)
 {
     sFlagElem_B818* self = (sFlagElem_B818*)elem;
     if (D_004A4240 == 0) {
@@ -262,7 +262,7 @@ extern "C" void func_0034B818(void* elem)
     }
     if (func_002D1C98() % 2 == self->parity) {
         sFlagVert_B818 verts[50];
-        func_0034BCA0(self, verts);
+        cFlagSet_updateGrid(self, verts);
         sFlagMesh_B818* gridMesh = self->mesh;
         sFlagVEntry_B818* setVertsSlot = &gridMesh->vt[3];
         setVertsSlot->fn((char*)gridMesh + setVertsSlot->delta, verts);
@@ -281,7 +281,7 @@ extern "C" void func_0034B818(void* elem)
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034B9B0);
+INCLUDE_ASM("object/flagset", cFlagSet_render);
 #ifdef SKIP_ASM
 extern char* cGraphicsMan_TheGraphicsMan;
 extern int D_004A4244;
@@ -378,7 +378,7 @@ struct sFSE_34B9B0 {
  *
  * @param flagSet  the flag set
  */
-extern "C" void func_0034B9B0(sFlagSetEntry* flagSet)
+extern "C" void cFlagSet_render(sFlagSetEntry* flagSet)
 {
     char* self = (char*)flagSet;
     if (D_004A4244 == 0) {
@@ -432,7 +432,7 @@ extern "C" void func_0034B9B0(sFlagSetEntry* flagSet)
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034BCA0);
+INCLUDE_ASM("object/flagset", cFlagSet_updateGrid);
 #ifdef SKIP_ASM
 extern float D_00504FB8[];
 
@@ -488,7 +488,7 @@ struct sFlagElem_BCA0 {
  * @param vout  output vertex array (cols * rows t3Vectors)
  */
 // cFlagSet::updateGrid(t3Vector* verts) (SSX On Tour symbols). Animates the flag mesh: waves along the columns, then per-vertex ripples, into out[cols * rows].
-extern "C" void func_0034BCA0(void* vself, void* vout)
+extern "C" void cFlagSet_updateGrid(void* vself, void* vout)
 {
     sFlagElem_BCA0* self = (sFlagElem_BCA0*)vself;
     sFsV3_CM* out = (sFsV3_CM*)vout;
@@ -588,7 +588,7 @@ extern "C" void func_0034BCA0(void* vself, void* vout)
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034C2E0);
+INCLUDE_ASM("object/flagset", cFlagSet_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sFlagSetVEntryC2E0a {
     short delta;
@@ -618,7 +618,7 @@ struct sFlagSet_C2E0 {
  * @param elem  the flag set
  * @param stream  replay stream to write to
  */
-extern "C" void func_0034C2E0(void* elem, void* stream)
+extern "C" void cFlagSet_writeToReplayFrame(void* elem, void* stream)
 {
     int i;
     sFlagSet_C2E0* self = (sFlagSet_C2E0*)elem;
@@ -632,7 +632,7 @@ extern "C" void func_0034C2E0(void* elem, void* stream)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flagset", func_0034C378);
+INCLUDE_ASM("object/flagset", cFlagSet_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sFlagSetVEntryC378a {
     short delta;
@@ -658,7 +658,7 @@ extern "C" void cFlagSet_CreateMesh(void* self, void* item);
  * @param elem  the flag set
  * @param stream  replay stream to read from
  */
-extern "C" void func_0034C378(void* elem, void* stream)
+extern "C" void cFlagSet_readFromReplayFrame(void* elem, void* stream)
 {
     int i;
     sFlagSet_C2E0* self = (sFlagSet_C2E0*)elem;
@@ -678,7 +678,7 @@ extern "C" void func_0034C378(void* elem, void* stream)
 INCLUDE_ASM("object/flagset", cFlagManager_cFlagManager);
 #ifdef SKIP_ASM
 extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
-extern "C" void* func_0034AF38(void* self);
+extern "C" void* cFlagSet_cFlagSet(void* self);
 extern void* cFlagManager_vtbl[];
 
 struct sFlagSetElem_C428 {
@@ -708,7 +708,7 @@ extern "C" sFlagSet_C428* cFlagManager_cFlagManager(sFlagSet_C428* self, void* b
     cObjNode_cObjNode1(self, bucket);
     self->vtable = cFlagManager_vtbl;
     for (i = 14; i != -1; i--, elem++) {
-        func_0034AF38(elem);
+        cFlagSet_cFlagSet(elem);
     }
     self->field_0x14 = 0.5f;
     self->field_0x18 = 0.25f;
@@ -762,7 +762,7 @@ extern "C" void cFlagManager__cFlagManager(sFlagSet_C4B8* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034C548);
+INCLUDE_ASM("object/flagset", cFlagManager_AddFlag);
 #ifdef SKIP_ASM
 struct sFlagSetElem_C548 {
     char pad0[0x5C];
@@ -775,33 +775,33 @@ struct sFlagSet_C548 {
     sFlagSetElem_C548 elems[15]; // 0x20
 };
 
-extern "C" int func_0034AFE8(void* self, void* data, void* ctx);
-extern "C" void func_0034B038(void* self, void* data, void* ctx);
+extern "C" int cFlagSet_SameKind(void* self, void* data, void* ctx);
+extern "C" void cFlagSet_AddFlag(void* self, void* data, void* ctx);
 
 /**
  * Adds a flag instance to the flag manager, grouping it with flags of the same kind.
  *
- * First looks for a set in use (+0x5C) among the 15 sets at +0x20 (0x188 bytes each) whose func_0034AFE8 says it
- * matches, and adds the flag there (func_0034B038); otherwise adds it to the first unused set. Quirk: when all 15 sets
+ * First looks for a set in use (+0x5C) among the 15 sets at +0x20 (0x188 bytes each) whose cFlagSet_SameKind says it
+ * matches, and adds the flag there (cFlagSet_AddFlag); otherwise adds it to the first unused set. Quirk: when all 15 sets
  * are in use and none matches, the flag is silently dropped.
  *
  * @param node  instance record of the flag
  * @param desc  converted flag data (tFlagState, 0x58 bytes)
  */
-extern "C" void func_0034C548(sFlagSet_C548* self, void* node, void* desc)
+extern "C" void cFlagManager_AddFlag(sFlagSet_C548* self, void* node, void* desc)
 {
     int i;
     sFlagSetElem_C548* existing;
     for (i = 0, existing = self->elems; i < 15; i++, existing++) {
-        if (existing->active != 0 && func_0034AFE8(existing, desc, node) != 0) {
-            func_0034B038(existing, desc, node);
+        if (existing->active != 0 && cFlagSet_SameKind(existing, desc, node) != 0) {
+            cFlagSet_AddFlag(existing, desc, node);
             return;
         }
     }
     sFlagSetElem_C548* freeElem = self->elems;
     for (int j = 0; j < 15; j++, freeElem++) {
         if (freeElem->active == 0) {
-            func_0034B038(freeElem, desc, node);
+            cFlagSet_AddFlag(freeElem, desc, node);
             return;
         }
     }
@@ -809,7 +809,7 @@ extern "C" void func_0034C548(sFlagSet_C548* self, void* node, void* desc)
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034C600);
+INCLUDE_ASM("object/flagset", cFlagManager_RemoveFlag);
 #ifdef SKIP_ASM
 struct sFlagSetElem_C600 {
     char pad0[0x5C];
@@ -822,21 +822,21 @@ struct sFlagSet_C600 {
     sFlagSetElem_C600 elems[15]; // 0x20
 };
 
-extern "C" int func_0034B168(void* elem, void* arg);
+extern "C" int cFlagSet_RemoveFlag(void* elem, void* arg);
 
 /**
  * Removes a flag instance from whichever flag-manager set holds it.
  *
- * Walks the 15 sets at +0x20 and stops at the first set in use whose func_0034B168 removes the instance.
+ * Walks the 15 sets at +0x20 and stops at the first set in use whose cFlagSet_RemoveFlag removes the instance.
  *
  * @param instRecord  instance record of the flag
  */
-extern "C" void func_0034C600(sFlagSet_C600* self, void* instRecord)
+extern "C" void cFlagManager_RemoveFlag(sFlagSet_C600* self, void* instRecord)
 {
     int i;
     sFlagSetElem_C600* elem = self->elems;
     for (i = 0; i < 15; i++, elem++) {
-        if (elem->active != 0 && func_0034B168(elem, instRecord) != 0) {
+        if (elem->active != 0 && cFlagSet_RemoveFlag(elem, instRecord) != 0) {
             return;
         }
     }
@@ -862,7 +862,7 @@ struct sFlagSet_C668 {
 };
 
 extern "C" int func_002D1BA0();
-extern "C" void func_0034B818(void* elem);
+extern "C" void cFlagSet_update(void* elem);
 unsigned int BXrand();
 extern char* cAppMan_TheAppMan;
 
@@ -915,7 +915,7 @@ extern "C" void cFlagManager_update(sFlagSet_C668* self)
     for (i = 0; i < 15; i++) {
         sFlagSetElem_C668* entry = &self->elems[i];
         if (entry->active != 0) {
-            func_0034B818(entry);
+            cFlagSet_update(entry);
         }
     }
 }
@@ -935,12 +935,12 @@ struct sFlagSetOwner {
     sFlagSetEntry entries[15]; // 0x20
 };
 
-extern "C" void func_0034B9B0(sFlagSetEntry* e);
+extern "C" void cFlagSet_render(sFlagSetEntry* e);
 
 /**
  * Renders every active flag set held by the flag manager.
  *
- * Walks the 15 entries from offset 0x20 and calls func_0034B9B0() on each whose active word is set.
+ * Walks the 15 entries from offset 0x20 and calls cFlagSet_render() on each whose active word is set.
  */
 extern "C" void cFlagManager_render(sFlagSetOwner* self)
 {
@@ -948,7 +948,7 @@ extern "C" void cFlagManager_render(sFlagSetOwner* self)
     for (i = 0; i < 15; i++) {
         sFlagSetEntry* entry = &self->entries[i];
         if (entry->active != 0) {
-            func_0034B9B0(entry);
+            cFlagSet_render(entry);
         }
     }
 }
@@ -966,12 +966,12 @@ struct sFlagSet_C848 {
     sFlagSetElem_C848 elems[15]; // 0x20
 };
 
-extern "C" void func_0034C2E0(void* elem, void* arg);
+extern "C" void cFlagSet_writeToReplayFrame(void* elem, void* arg);
 
 /**
  * Saves the flag manager's flags into a replay frame.
  *
- * Calls func_0034C2E0 on each of its 15 flag records with @p stream; cFlagManager_readFromReplayFrame() reads them
+ * Calls cFlagSet_writeToReplayFrame on each of its 15 flag records with @p stream; cFlagManager_readFromReplayFrame() reads them
  * back.
  *
  * @param stream  the replay frame
@@ -980,7 +980,7 @@ extern "C" void cFlagManager_writeToReplayFrame(sFlagSet_C848* self, void* strea
 {
     int i;
     for (i = 0; i < 15; i++) {
-        func_0034C2E0(&self->elems[i], stream);
+        cFlagSet_writeToReplayFrame(&self->elems[i], stream);
     }
 }
 #endif
@@ -997,12 +997,12 @@ struct sFlagSet_C898 {
     sFlagSetElem_C898 elems[15]; // 0x20
 };
 
-extern "C" void func_0034C378(void* elem, void* arg);
+extern "C" void cFlagSet_readFromReplayFrame(void* elem, void* arg);
 
 /**
  * Restores the flag manager's flags from a replay frame.
  *
- * Calls func_0034C378 on each of its 15 flag records with @p stream, the inverse of cFlagManager_writeToReplayFrame().
+ * Calls cFlagSet_readFromReplayFrame on each of its 15 flag records with @p stream, the inverse of cFlagManager_writeToReplayFrame().
  *
  * @param stream  the replay frame
  */
@@ -1010,13 +1010,13 @@ extern "C" void cFlagManager_readFromReplayFrame(sFlagSet_C898* self, void* stre
 {
     int i;
     for (i = 0; i < 15; i++) {
-        func_0034C378(&self->elems[i], stream);
+        cFlagSet_readFromReplayFrame(&self->elems[i], stream);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034C8E8);
+INCLUDE_ASM("object/flagset", cFenceNode_cFenceNode1);
 #ifdef SKIP_ASM
 // cFenceNode::cFenceNode(int bucket, tInstanceRecord* pInst, tMakeFenceData* tdata, const tIntersectInfo* info)
 // (SSX On Tour symbols; On Tour passes the force in, retail computes it here like cFenceNode::onCollide).
@@ -1127,20 +1127,20 @@ static inline float fabs_C8E8(float x)
 
 extern void* cFenceNode_vtbl[];
 extern sVec4_C8E8 t4vect_XAxis;
-extern "C" void* func_0034FB00(void* self, int a1, int type, void* obj);
+extern "C" void* cInstanceNode_cInstanceNode1(void* self, int a1, int type, void* obj);
 extern "C" void cFenceNode_setupFence(void* self);
-extern "C" void func_0034D6F0(void* self, float dt);
-extern "C" void func_0034CC80(char* self, char* obj, int flag);
+extern "C" void cFenceNode_setForce(void* self, float dt);
+extern "C" void cFenceNode_makeNeighbour(char* self, char* obj, int flag);
 
 /**
  * Constructs a fence node (node type 9) for a fence instance that was hit, and sets it swinging.
  *
- * Runs the record constructor func_0034FB00, installs cFenceNode_vtbl, constructs the 16 Verts (+0x44), copies the
+ * Runs the record constructor cInstanceNode_cInstanceNode1, installs cFenceNode_vtbl, constructs the 16 Verts (+0x44), copies the
  * fence make-data into FenceData (+0x1C) with InstId set to -1, zeroes Force, ForceMax and ForceStep (+0x2C..+0x34),
  * builds the grid (cFenceNode_setupFence) and zeroes NextPropTime/PrevPropTime (+0x38, +0x3C). The starting force is
  * 0.001 * |info +0x30| * (direction info +0x10 dotted with the fence's normalised x axis when it has a grid mesh
- * (+0x40), or with info +0x20 otherwise); it is applied with func_0034D6F0 and passed on to the neighbour fences
- * (NextInstance +0x104, PrevInstance +0x108) through func_0034CC80.
+ * (+0x40), or with info +0x20 otherwise); it is applied with cFenceNode_setForce and passed on to the neighbour fences
+ * (NextInstance +0x104, PrevInstance +0x108) through cFenceNode_makeNeighbour.
  *
  * @param bucket  update bucket the node joins
  * @param pInst  fence instance record
@@ -1148,10 +1148,10 @@ extern "C" void func_0034CC80(char* self, char* obj, int flag);
  * @param info  intersect info of the hit
  * @return self
  */
-extern "C" cFenceNode_C8E8* func_0034C8E8(cFenceNode_C8E8* self, int bucket, void* pInst, tMakeFenceData_C8E8* tdata, char* info)
+extern "C" cFenceNode_C8E8* cFenceNode_cFenceNode1(cFenceNode_C8E8* self, int bucket, void* pInst, tMakeFenceData_C8E8* tdata, char* info)
 {
     float force;
-    func_0034FB00(self, bucket, 9, pInst);
+    cInstanceNode_cInstanceNode1(self, bucket, 9, pInst);
     self->State.w[0] = 0xFFFFFFFF;
     self->vtable = cFenceNode_vtbl;
     new (self->Verts) t3Vector_C8E8[16];
@@ -1172,17 +1172,17 @@ extern "C" cFenceNode_C8E8* func_0034C8E8(cFenceNode_C8E8* self, int bucket, voi
         force = Dot_C8E8(*(sVec4_C8E8*)(info + 0x20), *(sVec4_C8E8*)(info + 0x10));
         force = force * 0.0010000000474974513f * fabs_C8E8(*(float*)(info + 0x30));
     }
-    func_0034D6F0(self, force);
+    cFenceNode_setForce(self, force);
     if (self->NextInstance != 0)
-        func_0034CC80((char*)self, self->NextInstance, 1);
+        cFenceNode_makeNeighbour((char*)self, self->NextInstance, 1);
     if (self->PrevInstance != 0)
-        func_0034CC80((char*)self, self->PrevInstance, 0);
+        cFenceNode_makeNeighbour((char*)self, self->PrevInstance, 0);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034CAB8);
+INCLUDE_ASM("object/flagset", cFenceNode_cFenceNode2);
 #ifdef SKIP_ASM
 struct sFlagBlock_CAB8 {
     unsigned int w[4];
@@ -1206,19 +1206,19 @@ struct sFlagSet_CAB8 {
     int field_0x3c;             // 0x3C
 };
 
-extern "C" void* func_0034FB00(void* self, int a1, int type, void* obj);
+extern "C" void* cInstanceNode_cInstanceNode1(void* self, int a1, int type, void* obj);
 extern "C" void cFenceNode_setupFence(void* self);
-extern "C" void func_0034D6F0(void* self, float dt);
+extern "C" void cFenceNode_setForce(void* self, float dt);
 extern void* cFenceNode_vtbl[];
 
 // PORT: the unit declares this as void (callers ignore the result); bound by asm label.
-extern "C" sFlagSet_CAB8* func_0034CAB8_ctor(sFlagSet_CAB8* self, int a1, void* obj, sFlagBlock_CAB8* desc, int flag, float dt) __asm__("func_0034CAB8");
+extern "C" sFlagSet_CAB8* cFenceNode_cFenceNode2_ctor(sFlagSet_CAB8* self, int a1, void* obj, sFlagBlock_CAB8* desc, int flag, float dt) __asm__("cFenceNode_cFenceNode2");
 /**
  * Constructs a fence node for a neighbouring fence instance that a swinging fence pushes.
  *
- * Runs the record constructor func_0034FB00 (node type 9), installs cFenceNode_vtbl, constructs the Verts, copies desc
+ * Runs the record constructor cInstanceNode_cInstanceNode1 (node type 9), installs cFenceNode_vtbl, constructs the Verts, copies desc
  * into FenceData with InstId -1, zeroes Force/ForceMax/ForceStep, builds the grid (cFenceNode_setupFence), applies dt
- * (func_0034D6F0) and sets both NextPropTime and PrevPropTime (+0x38, +0x3C) to 4. flag is not used.
+ * (cFenceNode_setForce) and sets both NextPropTime and PrevPropTime (+0x38, +0x3C) to 4. flag is not used.
  *
  * @param bucket  update bucket the node joins
  * @param obj  fence instance record
@@ -1227,9 +1227,9 @@ extern "C" sFlagSet_CAB8* func_0034CAB8_ctor(sFlagSet_CAB8* self, int a1, void* 
  * @param dt  force to start with
  * @return self
  */
-extern "C" sFlagSet_CAB8* func_0034CAB8_ctor(sFlagSet_CAB8* self, int bucket, void* obj, sFlagBlock_CAB8* desc, int flag, float dt)
+extern "C" sFlagSet_CAB8* cFenceNode_cFenceNode2_ctor(sFlagSet_CAB8* self, int bucket, void* obj, sFlagBlock_CAB8* desc, int flag, float dt)
 {
-    func_0034FB00(self, bucket, 9, obj);
+    cInstanceNode_cInstanceNode1(self, bucket, 9, obj);
     self->block.w[0] = 0xFFFFFFFF;
     self->vtable = cFenceNode_vtbl;
     new ((char*)self + 0x40) sFlagElem_CAB8[16];
@@ -1239,7 +1239,7 @@ extern "C" sFlagSet_CAB8* func_0034CAB8_ctor(sFlagSet_CAB8* self, int bucket, vo
     self->field_0x34 = 0;
     self->block.w[0] = 0xFFFFFFFF;
     cFenceNode_setupFence(self);
-    func_0034D6F0(self, dt);
+    cFenceNode_setForce(self, dt);
     self->field_0x38 = 4;
     self->field_0x3c = 4;
     return self;
@@ -1319,7 +1319,7 @@ extern "C" void* cFenceNode_cFenceNode(void* self, void* bucket, void* stream)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/flagset", func_0034CC80);
+INCLUDE_ASM("object/flagset", cFenceNode_makeNeighbour);
 #ifdef SKIP_ASM
 class cFlagObj_CC80 {
 public:
@@ -1337,8 +1337,8 @@ public:
 };
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void func_0034CAB8(void* self, int a1, void* obj, void* pos, int flag, float force);
-extern "C" void func_0034CDE8(void* self, int flag, float force);
+extern "C" void cFenceNode_cFenceNode2(void* self, int a1, void* obj, void* pos, int flag, float force);
+extern "C" void cFenceNode_neighbourCollide(void* self, int flag, float force);
 extern char str_Fence_b[];
 
 // PORT: SN abs.s asm helper (PS2 FPU).
@@ -1354,14 +1354,14 @@ static inline float fabs_34CC80(float x)
  *
  * Does nothing without a grid mesh (+0x40) or neighbour. The force passed on is ForceMax (+0x30) * 0.4, with the sign
  * opposite to ForceStep (+0x34). If the neighbour already has a node (+0xC) that is a fence (isType(9)) and |force| is
- * at least 0.25, the node of NextInstance (+0x104) when flag is set, else of PrevInstance (+0x108), gets func_0034CDE8.
+ * at least 0.25, the node of NextInstance (+0x104) when flag is set, else of PrevInstance (+0x108), gets cFenceNode_neighbourCollide.
  * If the neighbour has no node and |force| is at least 0.25, a 268-byte "Fence" node is allocated and built with
- * func_0034CAB8 (bucket 1, this fence's FenceData).
+ * cFenceNode_cFenceNode2 (bucket 1, this fence's FenceData).
  *
  * @param obj  neighbour instance record (NextInstance or PrevInstance)
  * @param flag  1 for the next neighbour, 0 for the previous
  */
-extern "C" void func_0034CC80(char* self, char* obj, int flag)
+extern "C" void cFenceNode_makeNeighbour(char* self, char* obj, int flag)
 {
     if (*(int*)(self + 0x40) == 0) {
         return;
@@ -1392,7 +1392,7 @@ extern "C" void func_0034CC80(char* self, char* obj, int flag)
             if (neighborNode == 0) {
                 return;
             }
-            func_0034CDE8(neighborNode, flag, force);
+            cFenceNode_neighbourCollide(neighborNode, flag, force);
         } else {
             char* neighbor = *(char**)(self + 0x108);
             if (neighbor == 0) {
@@ -1402,32 +1402,32 @@ extern "C" void func_0034CC80(char* self, char* obj, int flag)
             if (neighborNode == 0) {
                 return;
             }
-            func_0034CDE8(neighborNode, 0, force);
+            cFenceNode_neighbourCollide(neighborNode, 0, force);
         }
     } else if (0.25f <= fabs_34CC80(force)) {
         void* fence = cMemMan_alloc(268, str_Fence_b, 0x20000000, 0);
-        func_0034CAB8(fence, 1, obj, self + 0x1C, flag, force);
+        cFenceNode_cFenceNode2(fence, 1, obj, self + 0x1C, flag, force);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034CDE8);
+INCLUDE_ASM("object/flagset", cFenceNode_neighbourCollide);
 #ifdef SKIP_ASM
-extern "C" void func_0034D6F0(void* self, float dt);
+extern "C" void cFenceNode_setForce(void* self, float dt);
 
 /**
  * Applies a force arriving from a neighbouring fence and arms the propagation timer for that side.
  *
- * Calls func_0034D6F0 with dt, then sets NextPropTime (+0x38) when on is set, else PrevPropTime (+0x3C), to 4 if it is
+ * Calls cFenceNode_setForce with dt, then sets NextPropTime (+0x38) when on is set, else PrevPropTime (+0x3C), to 4 if it is
  * 0.
  *
  * @param on  1 when the force came through the next neighbour, 0 for the previous
  * @param dt  force to apply
  */
-extern "C" void func_0034CDE8(void* self, int on, float dt)
+extern "C" void cFenceNode_neighbourCollide(void* self, int on, float dt)
 {
-    func_0034D6F0(self, dt);
+    cFenceNode_setForce(self, dt);
     if (on) {
         if (*(int*)((char*)self + 0x38) == 0) {
             *(int*)((char*)self + 0x38) = 4;
@@ -1443,8 +1443,8 @@ extern "C" void func_0034CDE8(void* self, int on, float dt)
 //100%
 INCLUDE_ASM("object/flagset", cFenceNode_update);
 #ifdef SKIP_ASM
-extern "C" void func_0034CC80(char* self, char* obj, int flag);
-extern "C" void func_0034CF98(void* self);
+extern "C" void cFenceNode_makeNeighbour(char* self, char* obj, int flag);
+extern "C" void cFenceNode_updateGrid(void* self);
 
 struct sFlagVE_34CE48 {
     short delta;
@@ -1464,7 +1464,7 @@ static inline float fabs_34CE48(float x)
  * Swings a hit fence section back and forth with a decaying amplitude and passes the swing on to its
  * neighbours.
  *
- * Each neighbour timer that runs out pushes the next or previous fence section (func_0034CC80). At each end
+ * Each neighbour timer that runs out pushes the next or previous fence section (cFenceNode_makeNeighbour). At each end
  * of a
  * swing the amplitude halves; once it and the angle are near 0 the node expires (slot 34).
  */
@@ -1472,12 +1472,12 @@ extern "C" void cFenceNode_update(char* self)
 {
     if (*(int*)(self + 0x38) > 0) {
         if (--*(int*)(self + 0x38) == 0) {
-            func_0034CC80(self, *(char**)(self + 0x104), 1);
+            cFenceNode_makeNeighbour(self, *(char**)(self + 0x104), 1);
         }
     }
     if (*(int*)(self + 0x3C) > 0) {
         if (--*(int*)(self + 0x3C) == 0) {
-            func_0034CC80(self, *(char**)(self + 0x108), 0);
+            cFenceNode_makeNeighbour(self, *(char**)(self + 0x108), 0);
         }
     }
     char* osc = self + 0x1C;
@@ -1505,12 +1505,12 @@ extern "C" void cFenceNode_update(char* self)
             *(float*)(self + 0x34) = halfAmp * 0.1f;
         }
     }
-    func_0034CF98(self);
+    cFenceNode_updateGrid(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034CF98);
+INCLUDE_ASM("object/flagset", cFenceNode_updateGrid);
 #ifdef SKIP_ASM
 extern float D_0044AFD0[];
 
@@ -1594,7 +1594,7 @@ struct sFlagSet_CF98 {
  *
  * @param fenceNode  the fence node
  */
-extern "C" void func_0034CF98(void* fenceNode)
+extern "C" void cFenceNode_updateGrid(void* fenceNode)
 {
     sFlagSet_CF98* self = (sFlagSet_CF98*)fenceNode;
     if (self->mesh == 0) {
@@ -1630,7 +1630,7 @@ extern "C" void func_0034CF98(void* fenceNode)
 INCLUDE_ASM("object/flagset", cFenceNode_setupFence);
 #ifdef SKIP_ASM
 extern char* cGraphicsMan_TheGraphicsMan;
-extern "C" void func_0034CF98(void* self);
+extern "C" void cFenceNode_updateGrid(void* self);
 
 struct sFsV3_D1E8 {
     float x, y, z;
@@ -1702,7 +1702,7 @@ struct sFlagSet_D1E8 {
  * bit 2). The graphics manager (cGraphicsMan_TheGraphicsMan, vtable +0x10D8) creates an 8x2 grid mesh (slot 76, flags
  * 0x60000000) into +0x40 and returns mesh 0's quad (slot 97: 4 corners, UVs, colours). The 8 top (+0x44) and bottom
  * (+0xA4) vertices, 16 UVs and 16 colours (alpha 1.0) are interpolated in sevenths between the quad's corners, handed
- * to the grid mesh (its slot 6), and func_0034CF98 updates the grid.
+ * to the grid mesh (its slot 6), and cFenceNode_updateGrid updates the grid.
  *
  * @param fenceNode  the fence node
  */
@@ -1739,14 +1739,14 @@ extern "C" void cFenceNode_setupFence(void* fenceNode)
     }
     sFsMesh_D1E8* gridMesh = self->mesh;
     gridMesh->vt[6].fn((char*)gridMesh + gridMesh->vt[6].delta, pos, col, uv);
-    func_0034CF98(self);
+    cFenceNode_updateGrid(self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/flagset", cFenceNode_onCollide);
 #ifdef SKIP_ASM
-extern "C" void func_0034D6F0(void* self, float dt);
+extern "C" void cFenceNode_setForce(void* self, float dt);
 
 struct sFsVec4_D650 {
     float x, y, z, w;
@@ -1786,14 +1786,14 @@ extern "C" void cFenceNode_onCollide(void* self, void* obj)
     char* hitInfo = (char*)obj;
     if (*(float*)(node + 0x30) >= 1.0f) return;
     float dot = fsDot_D650(*(sFsVec4_D650*)(hitInfo + 0x20), *(sFsVec4_D650*)(hitInfo + 0x10));
-    func_0034D6F0(self, dot * 0.0010000000474974513f * *(float*)(hitInfo + 0x30));
+    cFenceNode_setForce(self, dot * 0.0010000000474974513f * *(float*)(hitInfo + 0x30));
     if (*(int*)(node + 0x38) == 0) *(int*)(node + 0x38) = 4;
     if (*(int*)(node + 0x3C) == 0) *(int*)(node + 0x3C) = 4;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034D6F0);
+INCLUDE_ASM("object/flagset", cFenceNode_setForce);
 #ifdef SKIP_ASM
 struct sFlag34D6F0 {
     char pad0[0x30];
@@ -1818,7 +1818,7 @@ static inline float fabs_34D6F0(float x)
  * @param vself  the fence node
  * @param force  force to add (sign gives the direction when at rest)
  */
-extern "C" void func_0034D6F0(void* vself, float force)
+extern "C" void cFenceNode_setForce(void* vself, float force)
 {
     sFlag34D6F0* self = (sFlag34D6F0*)vself;
     self->wind += fabs_34D6F0(force);
@@ -1910,9 +1910,9 @@ extern "C" void cFenceNode_writeToReplayFrame(void* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034D9B0);
+INCLUDE_ASM("object/flagset", cAnimNode_cAnimNode);
 #ifdef SKIP_ASM
-extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
+extern "C" void* cMoveNode_cMoveNode1(void* self, void* a1, int type, void* a3);
 extern "C" void cAnimNode_setAnimMeshCache(void* self);
 extern "C" float cAnimFrame_getStartTime(void* p);
 struct sFlagOwner_E348;
@@ -1930,7 +1930,7 @@ struct sFlagSlot_34D9B0 {
 /**
  * Constructs the animation-node base of an animated object for a placed instance.
  *
- * Builds the cMoveNode part at +0x14 (func_00355280) and installs D_00490CC8 as its vtable. Allocates one 64-byte
+ * Builds the cMoveNode part at +0x14 (cMoveNode_cMoveNode1) and installs D_00490CC8 as its vtable. Allocates one 64-byte
  * matrix per mesh of the instance's model (model def +0x80, count +0x4) into AnimMats (+0x44, "AnimMats") and builds
  * the mesh cache (cAnimNode_setAnimMeshCache). The frame block at +0x0 starts at the first frame's start time
  * (cAnimFrame_getStartTime of +0x48, else 0) in +0x0 and +0x4, frame events at 1e10 (+0x8, +0xC) and +0x10 = 1. When
@@ -1943,10 +1943,10 @@ struct sFlagSlot_34D9B0 {
  * @param force  force the instance visible
  * @return self
  */
-extern "C" void* func_0034D9B0(char* self, void* bucket, int nodeType, void* instRecord, int force)
+extern "C" void* cAnimNode_cAnimNode(char* self, void* bucket, int nodeType, void* instRecord, int force)
 {
     char* node = self + 0x14;
-    func_00355280(node, bucket, nodeType, instRecord);
+    cMoveNode_cMoveNode1(node, bucket, nodeType, instRecord);
     *(void***)(self + 0x20) = D_00490CC8;
     sFlagSlot_34D9B0** slot = (sFlagSlot_34D9B0**)(self + 0x44);
     *slot = new (str_AnimMats, 0x20000000, 0) sFlagSlot_34D9B0[*(int*)(*(char**)(*(char**)(node + 0x18) + 0x80) + 4)];
@@ -1971,7 +1971,7 @@ extern "C" void* func_0034D9B0(char* self, void* bucket, int nodeType, void* ins
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034DAC8);
+INCLUDE_ASM("object/flagset", cAnimNode_cAnimNode1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cMoveNode_cMoveNode_3(void* self, void* a1, void* stream) __asm__("cMoveNode_cMoveNode");
@@ -1991,7 +1991,7 @@ struct sFlagSlot_34DAC8 {
 /**
  * Constructs the animation-node base of an animated object from a replay frame.
  *
- * Runs the cMoveNode replay constructor on +0x14, installs D_00490CC8, allocates AnimMats like func_0034D9B0, builds
+ * Runs the cMoveNode replay constructor on +0x14, installs D_00490CC8, allocates AnimMats like cAnimNode_cAnimNode, builds
  * the mesh cache, reads the 20-byte frame block at +0x0 and one more 4-byte word that it discards, then
  * cAnimNode_cacheFrame.
  *
@@ -1999,7 +1999,7 @@ struct sFlagSlot_34DAC8 {
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* func_0034DAC8(char* self, void* bucket, void* stream)
+extern "C" void* cAnimNode_cAnimNode1(char* self, void* bucket, void* stream)
 {
     int skippedWord;
     char* node = self + 0x14;
@@ -2018,7 +2018,7 @@ extern "C" void* func_0034DAC8(char* self, void* bucket, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034DBA8);
+INCLUDE_ASM("object/flagset", cAnimNode__cAnimNode);
 #ifdef SKIP_ASM
 struct sFlagVEntry_DBA8 {
     short delta;
@@ -2056,7 +2056,7 @@ extern void* D_00490CC8[];
  *
  * @param flags  destructor flags; bit 0 deletes the storage
  */
-extern "C" void func_0034DBA8(sFlagOwner_DBA8* self, int flags)
+extern "C" void cAnimNode__cAnimNode(sFlagOwner_DBA8* self, int flags)
 {
     self->vtable = D_00490CC8;
     if (self->cache != 0) {
@@ -2126,7 +2126,7 @@ extern "C" void cAnimNode_updateRootTransform(void* self)
 //100%
 INCLUDE_ASM("object/flagset", cAnimNode_makeAnimMats);
 #ifdef SKIP_ASM
-extern "C" void* func_0034E320(void* self, int i);
+extern "C" void* cAnimNode_getFrameMat(void* self, int i);
 
 struct sFsMat44_DD18 {
     float m[4][4];
@@ -2231,7 +2231,7 @@ static inline sFsMtx_DD18 mulScaledFS(const sFsMtx_DD18& parent, const sFsMtx_DD
 struct sFsBone_DD18 {
     int parent;             // 0x0
     char pad_0x4[0x4];
-    int animated;           // 0x8: matrix comes from func_0034E320
+    int animated;           // 0x8: matrix comes from cAnimNode_getFrameMat
     sFsMtx_DD18* mtx;       // 0xC
 };
 
@@ -2250,7 +2250,7 @@ struct sFsModel_DD18 {
 /**
  * Builds the world matrix of every bone of the node's model from the root or its parent bone.
  *
- * Animated bones take the current animation matrix (func_0034E320), others their rest matrix; translations
+ * Animated bones take the current animation matrix (cAnimNode_getFrameMat), others their rest matrix; translations
  * are
  * scaled by the model's scale.
  *
@@ -2270,9 +2270,9 @@ extern "C" void cAnimNode_makeAnimMats(void* self, void* vroot, sFsMtx_DD18* out
     for (int i = 0; i < skel->count; i++, bone++) {
         if (bone->animated) {
             if (bone->parent != -1) {
-                out[i] = mulScaledFS(out[bone->parent], *(sFsMtx_DD18*)func_0034E320(self, k++), scale);
+                out[i] = mulScaledFS(out[bone->parent], *(sFsMtx_DD18*)cAnimNode_getFrameMat(self, k++), scale);
             } else {
-                out[i] = mulScaledFS(*root, *(sFsMtx_DD18*)func_0034E320(self, k++), scale);
+                out[i] = mulScaledFS(*root, *(sFsMtx_DD18*)cAnimNode_getFrameMat(self, k++), scale);
             }
         } else {
             if (bone->parent != -1) {
@@ -2286,7 +2286,7 @@ extern "C" void cAnimNode_makeAnimMats(void* self, void* vroot, sFsMtx_DD18* out
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034E320);
+INCLUDE_ASM("object/flagset", cAnimNode_getFrameMat);
 #ifdef SKIP_ASM
 extern char t4mat_Identity[];
 
@@ -2296,7 +2296,7 @@ extern char t4mat_Identity[];
  * @param i  animated-mesh index
  * @return AnimFrames[i] +0x90 (0xD0-byte frames at +0x48), or t4mat_Identity
  */
-extern "C" void* func_0034E320(void* self, int i) {
+extern "C" void* cAnimNode_getFrameMat(void* self, int i) {
     char* base = *(char**)((char*)self + 0x48);
     if (base == 0) {
         return t4mat_Identity;
@@ -2353,7 +2353,7 @@ extern "C" void cAnimNode_cacheFrame(sFlagOwner_E348* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/flagset", func_0034E3D8);
+INCLUDE_ASM("object/flagset", cAnimNode_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sSerVEntry_0034E3D8 {
     short delta;
@@ -2371,7 +2371,7 @@ extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void func_0034E3D8(void* self, void* stream)
+extern "C" void cAnimNode_writeToReplayFrame(void* self, void* stream)
 {
     int dummy;
     cMoveNode_writeToReplayFrame((char*)self + 0x14, stream);

@@ -149,14 +149,14 @@ extern "C" void func_0028B730(sBankNode* self)
 INCLUDE_ASM("sound/bankmanager", func_0028B788);
 #ifdef SKIP_ASM
 extern "C" void func_0028B7E0(void*);
-extern "C" int func_003B6098(void* sema, int a1);
+extern "C" int SNDbankadd(void* sema, int a1);
 
 extern "C" void func_0028B788(void* self, int mainMemData, int mainMemSize)
 {
     func_0028B7E0(self);
     *(int*)((char*)self + 0x10) = mainMemData;
     *(int*)((char*)self + 0x14) = mainMemSize;
-    func_003B6098((char*)self + 0x4, mainMemData);
+    SNDbankadd((char*)self + 0x4, mainMemData);
     *(int*)self = 1;
 }
 #endif
@@ -164,13 +164,13 @@ extern "C" void func_0028B788(void* self, int mainMemData, int mainMemSize)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028B7E0);
 #ifdef SKIP_ASM
-extern "C" int func_003B6300(int id);
+extern "C" int SNDbankremove(int id);
 
 extern "C" void func_0028B7E0(void* self)
 {
     *(int*)self = 0;
     if (*(int*)((char*)self + 0x4) != -1) {
-        func_003B6300(*(int*)((char*)self + 0x4));
+        SNDbankremove(*(int*)((char*)self + 0x4));
         *(int*)((char*)self + 0x4) = -1;
     }
     *(int*)((char*)self + 0x10) = 0;

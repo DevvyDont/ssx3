@@ -153,7 +153,7 @@ struct cPlaybackMan_C5F8 {
  *
  * When the async request (+0x78) has completed (ASYNCFILE_getstatus() == 1), releases it, copies a non-empty
  * result into a new "PlaybackFile" buffer stored with its size in entries[cur], frees the loaded buffer and
- * sets the handle to -1. func_0026C9F0 starts these loads.
+ * sets the handle to -1. cPlaybackMan_load starts these loads.
  */
 extern "C" void cPlaybackMan_update(cPlaybackMan_C5F8* self)
 {
@@ -325,23 +325,23 @@ extern "C" void cPlaybackMan_purgeLocation(void* playbackMan)
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026C998);
+INCLUDE_ASM("replay/playbackman", cPlaybackMan_isLoaded);
 #ifdef SKIP_ASM
-extern "C" int func_0026CFE8();
+extern "C" int cPlaybackMan_findFileById();
 
 /**
  * Returns whether playback file @p fileId is ready to use: 1 when it is listed and its load has finished.
  *
- * Looks the id up with func_0026CFE8 (declared without arguments here: self and @p fileId pass through in registers). The
+ * Looks the id up with cPlaybackMan_findFileById (declared without arguments here: self and @p fileId pass through in registers). The
  * file counts as ready when its entry's data pointer (+0x4) is set, or when no async load is pending (handle +0x78
  * negative), so a failed load also reports ready. An unknown id gives 0.
  *
  * @param fileId  the playback file id
  * @return 1 when the file is loaded or no load is pending, 0 otherwise
  */
-extern "C" int func_0026C998(void* self, int fileId)
+extern "C" int cPlaybackMan_isLoaded(void* self, int fileId)
 {
-    int idx = func_0026CFE8();
+    int idx = cPlaybackMan_findFileById();
     if (idx >= 0) {
         if (*(int*)(*(char**)((char*)self + 0x58) + idx * 0xC + 4) != 0)
             return 1;
@@ -352,7 +352,7 @@ extern "C" int func_0026C998(void* self, int fileId)
 }
 #endif
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026C9F0);
+INCLUDE_ASM("replay/playbackman", cPlaybackMan_load);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -362,7 +362,7 @@ extern int D_004A3410;
 
 struct sPbMan_26CFE8;
 
-extern "C" int func_0026CFE8_C9F0(sPbMan_26CFE8* self, int key) __asm__("func_0026CFE8");
+extern "C" int cPlaybackMan_findFileById_C9F0(sPbMan_26CFE8* self, int key) __asm__("cPlaybackMan_findFileById");
 
 extern "C" int ASYNCFILE_load(char* path, int flags);
 extern char* D_004A3414;
@@ -381,7 +381,7 @@ struct sPb_26C9F0 {
 /**
  * Starts loading playback file @p key asynchronously; returns 1 when it is already loaded or the load has started.
  *
- * Looks the id up with func_0026CFE8. A listed file whose data pointer (entry +0x4) is set needs nothing. Otherwise the
+ * Looks the id up with cPlaybackMan_findFileById. A listed file whose data pointer (entry +0x4) is set needs nothing. Otherwise the
  * entry index becomes the current async file (+0x74), the path is built with sprintf from the format at D_004A3414,
  * D_004A3430, D_004A3410, the location name (+0x8) and the file id, and ASYNCFILE_load(path, 0x100) is started; its
  * handle is kept at +0x78 (-1 on failure). cPlaybackMan_update copies the finished file into the entry.
@@ -390,11 +390,11 @@ struct sPb_26C9F0 {
  * @param key  the playback file id
  * @return 1 when loaded or the load started, 0 for an unknown id or a failed start
  */
-extern "C" int func_0026C9F0(void* self_, int key)
+extern "C" int cPlaybackMan_load(void* self_, int key)
 {
     sPb_26C9F0* self = (sPb_26C9F0*)self_;
     char path[0x100];
-    int idx = func_0026CFE8_C9F0((sPbMan_26CFE8*)self, key);
+    int idx = cPlaybackMan_findFileById_C9F0((sPbMan_26CFE8*)self, key);
     if (idx >= 0) {
         sPbEntry_26C9F0* entry = (sPbEntry_26C9F0*)(idx * 0xC + self->entries);
         if (entry->used != 0)
@@ -441,36 +441,36 @@ extern "C" void cPlaybackMan_restart(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/playbackman", func_0026CAF8);
+INCLUDE_ASM("replay/playbackman", cPlaybackMan_setupPreview);
 #ifdef SKIP_ASM
 extern "C" void SYNCTASK_run(int);
 extern "C" void THREAD_yieldticks(int);
-extern "C" int func_0026C998(void* self, int a1);
-extern "C" int func_0026C9F0(void* self, int a1);
-extern "C" int func_0026CFE8();
-extern "C" int func_0026D020(void* self, int idx);
+extern "C" int cPlaybackMan_isLoaded(void* self, int a1);
+extern "C" int cPlaybackMan_load(void* self, int a1);
+extern "C" int cPlaybackMan_findFileById();
+extern "C" int cPlaybackMan_setupFile(void* self, int idx);
 
 /**
  * Loads playback file @p fileId and unpacks it into the current frame, waiting for the load; returns 1 if it holds input.
  *
- * Only while the manager is idle (mode +0x70 == 0) and the id is listed (func_0026CFE8): starts the load
- * (func_0026C9F0), then blocks until func_0026C998 reports it ready, running cPlaybackMan_update, SYNCTASK_run(0) and
- * THREAD_yieldticks(1) each pass. func_0026D020 then unpacks the file into the current frame (+0x4). func_0030B590
+ * Only while the manager is idle (mode +0x70 == 0) and the id is listed (cPlaybackMan_findFileById): starts the load
+ * (cPlaybackMan_load), then blocks until cPlaybackMan_isLoaded reports it ready, running cPlaybackMan_update, SYNCTASK_run(0) and
+ * THREAD_yieldticks(1) each pass. cPlaybackMan_setupFile then unpacks the file into the current frame (+0x4). cWScriptMan_previewLocalMission
  * (wscript) calls it before starting a preview.
  *
  * @param fileId  the playback file id
  * @return 1 when the file was unpacked and its recorded input end (current frame +0xC) is above 0, else 0
  */
-extern "C" int func_0026CAF8(void* self, int fileId)
+extern "C" int cPlaybackMan_setupPreview(void* self, int fileId)
 {
     int idx;
-    if (*(int*)((char*)self + 0x70) == 0 && (idx = func_0026CFE8()) >= 0 && func_0026C9F0(self, fileId) != 0) {
-        while (func_0026C998(self, fileId) == 0) {
+    if (*(int*)((char*)self + 0x70) == 0 && (idx = cPlaybackMan_findFileById()) >= 0 && cPlaybackMan_load(self, fileId) != 0) {
+        while (cPlaybackMan_isLoaded(self, fileId) == 0) {
             cPlaybackMan_update((cPlaybackMan_C5F8*)self);
             SYNCTASK_run(0);
             THREAD_yieldticks(1);
         }
-        if (func_0026D020(self, idx) != 0) {
+        if (cPlaybackMan_setupFile(self, idx) != 0) {
             if (*(int*)(*(char**)((char*)self + 4) + 0xC) > 0)
                 return 1;
         }
@@ -498,7 +498,7 @@ void cPlaybackMan_reset(void* self)
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_saveFrame);
 #ifdef SKIP_ASM
 struct sPbBytes4;
-extern "C" void func_0026D7D0(cReplay* self, void* out, sPbBytes4* src);
+extern "C" void cReplay_saveFrame1(cReplay* self, void* out, sPbBytes4* src);
 
 struct sFrameDesc26CBB8 {
     short type;
@@ -509,7 +509,7 @@ struct sFrameDesc26CBB8 {
 /**
  * Saves the replay's current state into the playback manager's frame, once.
  *
- * Unless the saved-frame flag (+0x10) is already set, calls func_0026D7D0 (On Tour cReplay::saveFrame(frame, type)) on
+ * Unless the saved-frame flag (+0x10) is already set, calls cReplay_saveFrame1 (On Tour cReplay::saveFrame(frame, type)) on
  * Game->Replay (+0x5C, +0x28) with the frame at +0x14 and a type-1 descriptor, then sets the flag.
  */
 extern "C" void cPlaybackMan_saveFrame(void* self)
@@ -520,7 +520,7 @@ extern "C" void cPlaybackMan_saveFrame(void* self)
         desc.type = one;
         desc.a = 0;
         desc.b = 0;
-        func_0026D7D0((cReplay*)(*(void**)(*(char**)((char*)self + 0x5C) + 0x28)), (char*)self + 0x14,
+        cReplay_saveFrame1((cReplay*)(*(void**)(*(char**)((char*)self + 0x5C) + 0x28)), (char*)self + 0x14,
                       (sPbBytes4*)&desc);
         *(int*)((char*)self + 0x10) = one;
     }
@@ -622,7 +622,7 @@ extern "C" void cPlaybackMan_stopPreview(void* self)
 extern "C" void* cPlaybackMan_restoreFrame(void*);
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026CD98);
+INCLUDE_ASM("replay/playbackman", cPlaybackMan_startPerform);
 #ifdef SKIP_ASM
 /**
  * Starts a performance: saves the replay frame, rewinds the recorded input and sets the playback mode to 2.
@@ -631,7 +631,7 @@ INCLUDE_ASM("replay/playbackman", func_0026CD98);
  * cPlaybackMan_stop ends with cPlaybackMan_stopPerform. Unlike cPlaybackMan_startPreview it checks no mode and does not
  * reseed the AI. No retail caller was found.
  */
-extern "C" void func_0026CD98(void *self)
+extern "C" void cPlaybackMan_startPerform(void *self)
 {
     cPlaybackMan_saveFrame(self);
     *(int *)(*(char **)((char *)self + 4) + 8) = 0;
@@ -763,7 +763,7 @@ extern "C" int cPlaybackMan_isPauseAI(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026CFE8);
+INCLUDE_ASM("replay/playbackman", cPlaybackMan_findFileById);
 #ifdef SKIP_ASM
 struct sPbEntry_0026CFE8 {
     int id;
@@ -780,7 +780,7 @@ struct sPbEntry_0026CFE8 {
  * @param id  the playback file id
  * @return the entry index, or -1 when no entry has that id
  */
-extern "C" int func_0026CFE8(void *self, int id)
+extern "C" int cPlaybackMan_findFileById(void *self, int id)
 {
     int count = *(int *)((char *)self + 0x50);
     for (int i = 0; i < count; i++) {
@@ -793,7 +793,7 @@ extern "C" int func_0026CFE8(void *self, int id)
 }
 #endif
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026D020);
+INCLUDE_ASM("replay/playbackman", cPlaybackMan_setupFile);
 #ifdef SKIP_ASM
 extern "C" int func_002C85A0(void* src, int a, int dst);
 extern "C" void MEM_fill(void* dst, int c, int n);
@@ -808,7 +808,7 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * @param idx  the index in the playback file table (+0x58)
  * @return 1 when the file's data was unpacked, 0 when the frame was reset instead
  */
-extern "C" int func_0026D020(void* self, int idx)
+extern "C" int cPlaybackMan_setupFile(void* self, int idx)
 {
     char* entry = (char*)(idx * 0xC + *(int*)((char*)self + 0x58)); // PORT: pointer held as int
     int data = *(int*)(entry + 4);
@@ -825,45 +825,45 @@ extern "C" int func_0026D020(void* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026D0A0);
+INCLUDE_ASM("replay/playbackman", cReplayCache_cReplayCache);
 #ifdef SKIP_ASM
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char str_CmdFrame[];
-void func_0026D168(void* self);
+void cReplayCache_reset(void* self);
 
 /**
  * Constructs a replay input cache: allocates its 0x8000-byte command buffer ("CmdFrame", +0xC) and resets it.
  *
- * The buffer holds up to 0x1000 8-byte command chunks. func_0026D168 then zeroes the chunk count and read position.
+ * The buffer holds up to 0x1000 8-byte command chunks. cReplayCache_reset then zeroes the chunk count and read position.
  * cReplay_addCache calls it on a new 0x10-byte "ReplayCache" block.
  *
  * @return @p self
  */
-extern "C" void* func_0026D0A0(void* self)
+extern "C" void* cReplayCache_cReplayCache(void* self)
 {
     *(void**)((char*)self + 0xC) = operator_new_tag(0x8000, str_CmdFrame, 0, 0);
-    func_0026D168(self);
+    cReplayCache_reset(self);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026D0E8);
+INCLUDE_ASM("replay/playbackman", cReplayCache__cReplayCache);
 #ifdef SKIP_ASM
-extern "C" void func_0026D130(void* self);
+extern "C" void cReplayCache_purge(void* self);
 void operator_delete(int* ptr);
 
 /**
- * Destroys a replay input cache: frees its command buffer (func_0026D130) and the object itself when asked.
+ * Destroys a replay input cache: frees its command buffer (cReplayCache_purge) and the object itself when asked.
  *
  * cReplay_removeCache calls it with flags 3.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void func_0026D0E8(int* self, int flags)
+extern "C" void cReplayCache__cReplayCache(int* self, int flags)
 {
-    func_0026D130(self);
+    cReplayCache_purge(self);
     if (flags & 1) {
         operator_delete(self);
     }
@@ -871,16 +871,16 @@ extern "C" void func_0026D0E8(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026D130);
+INCLUDE_ASM("replay/playbackman", cReplayCache_purge);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 
 /**
  * Frees the replay input cache's command buffer (+0xC), if any, and clears the pointer.
  *
- * func_0026D0E8 calls it when the cache is destroyed.
+ * cReplayCache__cReplayCache calls it when the cache is destroyed.
  */
-extern "C" void func_0026D130(void* self)
+extern "C" void cReplayCache_purge(void* self)
 {
     void* buffer = *(void**)((char*)self + 0xC);
     if (buffer != 0) {
@@ -891,7 +891,7 @@ extern "C" void func_0026D130(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026D168__FPv);
+INCLUDE_ASM("replay/playbackman", cReplayCache_reset__FPv);
 #ifdef SKIP_ASM
 /**
  * Empties a replay input cache: zeroes its chunk count (+0x0), read chunk index (+0x4) and ticks left in that chunk
@@ -899,7 +899,7 @@ INCLUDE_ASM("replay/playbackman", func_0026D168__FPv);
  *
  * The command buffer itself is kept. cReplay_init and cReplay_reset call it for each input cache.
  */
-void func_0026D168(void* self)
+void cReplayCache_reset(void* self)
 {
     *(int*)((char*)self + 0x0) = 0;
     *(int*)((char*)self + 0x4) = 0;
@@ -908,25 +908,25 @@ void func_0026D168(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026D178);
+INCLUDE_ASM("replay/playbackman", cReplayCache_updateControlCmd);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-void func_0026D2B0_D178(void* self, int a1) __asm__("func_0026D2B0");
-int func_0026D420_D178(void* self, int a1) __asm__("func_0026D420");
+void cReplayCache_addControlCmd_D178(void* self, int a1) __asm__("cReplayCache_addControlCmd");
+int cReplayCache_getControlCmd_D178(void* self, int a1) __asm__("cReplayCache_getControlCmd");
 /**
  * Records or plays back one frame's control command, depending on the replay state.
  *
  * Returns 0 at once when the cache has no command buffer (+0xC). In kGameRecording the command is appended with
- * func_0026D2B0, unless the replay has EndReplay, Loaded or ReplayError set; in states 10, 11, 12 and 14 nothing
+ * cReplayCache_addControlCmd, unless the replay has EndReplay, Loaded or ReplayError set; in states 10, 11, 12 and 14 nothing
  * happens and the result is 0. In kGamePlayback, kInstantPlayback and kPlaybackStep the command is replaced by the next
- * recorded one (func_0026D420). Every other state leaves it and returns 1. cPlayer_getControlCmd calls it each frame
+ * recorded one (cReplayCache_getControlCmd). Every other state leaves it and returns 1. cPlayer_getControlCmd calls it each frame
  * when a replay recorder is attached.
  *
  * @param controlCmd  the 8-byte control command: read when recording, overwritten during playback
- * @return 0 when recording or idle, func_0026D420's result during playback, 1 in the other states
+ * @return 0 when recording or idle, cReplayCache_getControlCmd's result during playback, 1 in the other states
  */
-extern "C" int func_0026D178(void* self, int controlCmd)
+extern "C" int cReplayCache_updateControlCmd(void* self, int controlCmd)
 {
     if (*(int*)((char*)self + 0xC) == 0) {
         return 0;
@@ -938,14 +938,14 @@ extern "C" int func_0026D178(void* self, int controlCmd)
         if (*(int*)(replay + 0x60C) != 0 || *(int*)(replay + 0x608) != 0 || *(int*)(replay + 0x610) != 0) {
             break;
         }
-        func_0026D2B0_D178(self, controlCmd);
+        cReplayCache_addControlCmd_D178(self, controlCmd);
     }
         /* fall through */
     case 10: case 11: case 12: case 14:
         result = 0;
         break;
     case 1: case 2: case 4:
-        result = func_0026D420_D178(self, controlCmd);
+        result = cReplayCache_getControlCmd_D178(self, controlCmd);
         break;
     case 3: case 5: case 6: case 7: case 8: case 9: case 13:
         break;
@@ -955,7 +955,7 @@ extern "C" int func_0026D178(void* self, int controlCmd)
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026D228);
+INCLUDE_ASM("replay/playbackman", cReplayCache_addCmdFrame);
 #ifdef SKIP_ASM
 struct sPbChunk_D2B0;
 struct sPbStream_D2B0;
@@ -983,7 +983,7 @@ struct sPbStream_D228 {
  * @param stream  the replay input cache
  * @param chunkp  the command to append
  */
-extern "C" void func_0026D228(sPbStream_D2B0* stream, sPbChunk_D2B0* chunkp)
+extern "C" void cReplayCache_addCmdFrame(sPbStream_D2B0* stream, sPbChunk_D2B0* chunkp)
 {
     sPbStream_D228* self = (sPbStream_D228*)stream;
     sPbChunk_D228* chunk = (sPbChunk_D228*)chunkp;
@@ -1000,7 +1000,7 @@ extern "C" void func_0026D228(sPbStream_D2B0* stream, sPbChunk_D2B0* chunkp)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/playbackman", func_0026D2B0);
+INCLUDE_ASM("replay/playbackman", cReplayCache_addControlCmd);
 #ifdef SKIP_ASM
 struct sPbChunk_D2B0 {
     unsigned int n : 12;
@@ -1016,19 +1016,19 @@ struct sPbStream_D2B0 {
 };
 
 extern "C" int func_00415FC8(const void* a, const void* b, int n);
-extern "C" void func_0026D228(sPbStream_D2B0* self, sPbChunk_D2B0* chunk);
+extern "C" void cReplayCache_addCmdFrame(sPbStream_D2B0* self, sPbChunk_D2B0* chunk);
 
 /**
  * Records one frame's control command, run-length encoded: repeats of the last command only bump its count.
  *
  * The last chunk is compared with @p chunk (8 bytes, with the last chunk's 12-bit count masked to 0 and the new
  * command's own low bits as given). When they match and the count is below 0xFFF it is incremented; otherwise
- * func_0026D228 appends the command as a new chunk.
+ * cReplayCache_addCmdFrame appends the command as a new chunk.
  *
  * @param chunk  the command to record
  * @return always 1
  */
-extern "C" int func_0026D2B0(sPbStream_D2B0* self, sPbChunk_D2B0* chunk)
+extern "C" int cReplayCache_addControlCmd(sPbStream_D2B0* self, sPbChunk_D2B0* chunk)
 {
     if (self->count > 0) {
         int i = self->count - 1;
@@ -1037,17 +1037,17 @@ extern "C" int func_0026D2B0(sPbStream_D2B0* self, sPbChunk_D2B0* chunk)
         if (func_00415FC8(&last, chunk, 8) == 0 && (int)self->chunks[i].n < 0xFFF) {
             self->chunks[i].n++;
         } else {
-            func_0026D228(self, chunk);
+            cReplayCache_addCmdFrame(self, chunk);
         }
     } else {
-        func_0026D228(self, chunk);
+        cReplayCache_addCmdFrame(self, chunk);
     }
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026D390);
+INCLUDE_ASM("replay/playbackman", cReplayCache_truncate);
 #ifdef SKIP_ASM
 struct sEntry_D390 {
     unsigned int len : 12;
@@ -1071,7 +1071,7 @@ struct sOwner_D390 {
  *
  * @param pos  the tick to cut at
  */
-extern "C" void func_0026D390(sOwner_D390* self, unsigned int pos)
+extern "C" void cReplayCache_truncate(sOwner_D390* self, unsigned int pos)
 {
     int n = self->count;
     unsigned int sum = 0;
@@ -1096,7 +1096,7 @@ extern "C" void func_0026D390(sOwner_D390* self, unsigned int pos)
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026D420);
+INCLUDE_ASM("replay/playbackman", cReplayCache_getControlCmd);
 #ifdef SKIP_ASM
 struct sPbChunk_D420 {
     unsigned int n : 12;
@@ -1123,7 +1123,7 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * @param out  receives the command
  * @return 1 when a command was read, 0 past the end
  */
-extern "C" int func_0026D420(sPbStream_D420* self, sPbChunk_D420* out)
+extern "C" int cReplayCache_getControlCmd(sPbStream_D420* self, sPbChunk_D420* out)
 {
     MEM_fill(out, 0, 8);
     if (self->index >= self->count) {
@@ -1322,8 +1322,8 @@ void cReplayFramePtr_putFrameBlock_2(void* self, int a) __asm__("cReplayFramePtr
  * Loads a replay frame from saved replay data.
  *
  * Copies the 0x28-byte frame header from *@p pp and advances past it; restores +0x10, the tick (+0x30, written by
- * func_0026D7D0 from RecordTick), +0x34, the 4-byte frame type descriptor (+0x1C, named colour in this unit), and the
- * four words +0x20..+0x2C (likely the rider rankings: func_0026D730 stores word i there). Then loads the data block
+ * cReplay_saveFrame1 from RecordTick), +0x34, the 4-byte frame type descriptor (+0x1C, named colour in this unit), and the
+ * four words +0x20..+0x2C (likely the rider rankings: cReplayFrame_setRanking stores word i there). Then loads the data block
  * (cReplayFramePtr_loadBlock, header + 0x24) and calls cReplayFramePtr_putFrameBlock(self, 1).
  *
  * @param pp  in/out: the read cursor in the save data
@@ -1350,17 +1350,17 @@ extern "C" int cReplayFrame_loadFrame(sPbFrame_D678* self, char** pp)
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026D730__FPvii);
+INCLUDE_ASM("replay/playbackman", cReplayFrame_setRanking__FPvii);
 #ifdef SKIP_ASM
 /**
  * Stores @p value as the frame's ranking word for player @p i (the array of words at +0x20; no bounds check).
  *
- * The highlight code in replay/replay (func_0026E838, func_0026E6E0) stores rider scores and 0 here.
+ * The highlight code in replay/replay (cReplayHighlight_setRanking, cReplayHighlight_begin) stores rider scores and 0 here.
  *
  * @param i  the player index
  * @param value  the value to store
  */
-void func_0026D730(void* self, int i, int value)
+void cReplayFrame_setRanking(void* self, int i, int value)
 {
     *(int*)((char*)self + (i << 2) + 0x20) = value;
 }
@@ -1419,7 +1419,7 @@ extern "C" void* cReplay_saveReplayFrame(cReplay* self, sPbBytes4D760* src)
 #endif
 
 //100%
-INCLUDE_ASM("replay/playbackman", func_0026D7D0);
+INCLUDE_ASM("replay/playbackman", cReplay_saveFrame1);
 #ifdef SKIP_ASM
 struct sPbBytes4 {
     char b[4];
@@ -1436,7 +1436,7 @@ extern "C" void cReplay_saveFrame(cReplay* self, void* out);
  * @param out  the replay frame to fill
  * @param src  the 4-byte frame type descriptor
  */
-extern "C" void func_0026D7D0(cReplay* self, void* out, sPbBytes4* src)
+extern "C" void cReplay_saveFrame1(cReplay* self, void* out, sPbBytes4* src)
 {
     *(sPbBytes4*)((char*)out + 0x1C) = *src;
     cReplay_saveFrame((cReplay*)self, out);
@@ -1486,12 +1486,12 @@ struct sPbTime {
     int v[6];
 };
 
-int func_0026E9C0(void* self);
+int cReplayFramePtr_writeRewind(void* self);
 void* AIgetseed(void* self);
 extern "C" void* cBE_getBE();
 extern "C" void cBE_writeToReplayFrame(void* self, cPbStream* s);
 extern "C" void func_002D9CB0(cPbStream* s);
-extern "C" void func_0030BB10(void* self, cPbStream* s);
+extern "C" void cWScriptMan_writeToReplayFrame(void* self, cPbStream* s);
 extern "C" void func_00229E20(void* self, cPbStream* s);
 extern "C" void func_003441A8(void* self, cPbStream* s);
 extern "C" void cMultiParticleMan_writeToReplayFrame(void* self, cPbStream* s);
@@ -1515,7 +1515,7 @@ static inline cPbWorld* pbWorld(cPbObjSys* o)
 /**
  * Writes one replay key frame: the state of every game system that a restore needs.
  *
- * In order: the frame start (func_0026E9C0), a 0x18-byte time block (AIgetseed), the object-id counters
+ * In order: the frame start (cReplayFramePtr_writeRewind), a 0x18-byte time block (AIgetseed), the object-id counters
  * cSortObjNode_ObjNodeSortIndex and cSortObjNode_ObjNodeNoSortIndex, the BE state, the game and its AI (their save virtuals), func_002D9CB0 (where
  * the restore reads the avalanche), the world-script manager, D_004A2A00, D_004A3FF0, the multi-particle
  * manager, the object buckets (cReplay_saveBucket with 1, cReplay_saveDeadBucket) and the AI's focus manager.
@@ -1528,7 +1528,7 @@ extern "C" void cReplay_saveFrame(cReplay* self, void* stream)
     cPbStream* out = (cPbStream*)stream;
     sPbTime timeStamp;
     int id;
-    func_0026E9C0(out);
+    cReplayFramePtr_writeRewind(out);
     AIgetseed(&timeStamp);
     out->write(&timeStamp, 0x18);
     id = cSortObjNode_ObjNodeSortIndex;
@@ -1539,7 +1539,7 @@ extern "C" void cReplay_saveFrame(cReplay* self, void* stream)
     D_004A28A8_D818->objs->save(out);
     pbWorld(D_004A28A8_D818->objs)->save(out);
     func_002D9CB0(out);
-    func_0030BB10(cWScriptMan_TheWScriptMan, out);
+    cWScriptMan_writeToReplayFrame(cWScriptMan_TheWScriptMan, out);
     func_00229E20(D_004A2A00_D818, out);
     func_003441A8(D_004A3FF0, out);
     cMultiParticleMan_writeToReplayFrame(cMultiParticleMan_TheMultiParticleMan, out);

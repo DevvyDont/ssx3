@@ -524,9 +524,9 @@ struct sSeg_137138 {
 
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
-extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
+extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
 extern "C" void cWipeoutMotion_updateBoardSphereTree(cWipeoutMotion* self);
-extern "C" float func_00336850_137138(void* self, void* q, void* out, int a3) __asm__("func_00336850");
+extern "C" float cBXNash_terrainIntersect1_137138(void* self, void* q, void* out, int a3) __asm__("cBXNash_terrainIntersect1");
 extern "C" void cRiderSphereTree_ApplyOffset_137138(void* tree, const t4Vector* d) __asm__("cRiderSphereTree_ApplyOffset");
 extern "C" void fSinCos(float* s, float* c, float angle);
 float AIrandf(float lo, float hi);
@@ -626,7 +626,7 @@ struct sVec4c_137138 : t4Vector {
  *
  * Only while mUseRootPoseOverride is set. Updates BoardSphereTree (cWipeoutMotion_updateBoardSphereTree), builds a
  * cWorldRider probe from it, stores its segment in BoardIntersectBox and tests it against SSXApp->Game->BXNash
- * (func_00336850). On a hit it pushes mRootPoseOverridePos, the sphere tree and the box out along the hit normal by 1.1
+ * (cBXNash_terrainIntersect1). On a hit it pushes mRootPoseOverridePos, the sphere tree and the box out along the hit normal by 1.1
  * x the depth. A fast impact (normal speed 555.6 or more) or a steep surface (normal.z below 0.8) bounces the board:
  * BoardVelocity gains (v + max(v / 2, 27.8)) along the normal, the hit object's owner (virtual slot 43) gets the
  * impulse scaled by -0.05 x SSXApp + 0x10, BoardAngVelocity is damped by 0.85 and, under 4 pi rad/s, gets a random
@@ -647,7 +647,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
     cWorldRider_cWorldRider(&sph, ((void*)self->BoardSphereTree), 1);
     sSeg_137138 seg(sph.v30, sph.v20);
     (*(sSeg_137138*)&self->BoardIntersectBox) = seg;
-    float d = func_00336850_137138(SSXApp->Game->BXNash, &sph, &hit, 0);
+    float d = cBXNash_terrainIntersect1_137138(SSXApp->Game->BXNash, &sph, &hit, 0);
     if (d < 0.0f) {
         cWorldRider__cWorldRider(&sph, 2);
         return;
@@ -892,7 +892,7 @@ struct sVEntH_137860 { short delta; short index; void (*fn)(void*, void*, const 
 
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
-extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
+extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
 extern "C" float cWipeoutMotion_intersectGround(void* self, char* hit, sVec4WG* dir);
 // PORT: the project names these __FPv (one void* param); this caller passes more.
 void cAirPredictor_land_137860(void* ap, void* pos, void* vel) __asm__("cAirPredictor_land__FPv");
@@ -992,7 +992,7 @@ static inline bool isHuman_137860(cRider* rider)
  * relaunches it.
  *
  * Builds a world query from the rider's sphere tree (cWorldRider_cWorldRider; terrain only for a computer rider) and intersects
- * it with the rider's overlap list (func_003342D0, mWallHint). On a hit, cWipeoutMotion_intersectGround (On Tour intersectGround) checks
+ * it with the rider's overlap list (cOverlapList_terrainIntersect1, mWallHint). On a hit, cWipeoutMotion_intersectGround (On Tour intersectGround) checks
  * the ground below; if that is solid enough (>= 0.4), the rider is not moving away from it and is within 10 of it, the
  * rider lands: cAirPredictor_land (On Tour cAirPredictor::land), the impact effect (func_00111AA0), the handler's landed
  * flag and velocity (+0x314/+0x320), the ground normal, surface, contact point and height, the velocity loses its
@@ -1013,7 +1013,7 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
     sHit_137860 hitB;
     cRider* rider = RIDER;
     cWorldRider_cWorldRider(&sph, rider->mSphereTree, !isHuman_137860(rider));
-    float depth = func_003342D0(RIDER->mOverlapList, &sph, &hitA, (int)RIDER->mWallHint);
+    float depth = cOverlapList_terrainIntersect1(RIDER->mOverlapList, &sph, &hitA, (int)RIDER->mWallHint);
     if (depth >= 0.0f)
     {
         float groundParam = cWipeoutMotion_intersectGround(self, (char*)&hitB, (sVec4WG*)&hitA.normal);
@@ -1462,7 +1462,7 @@ struct sVEntH_138640 { short delta; short index; void (*fn)(void*, void*); };
 
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
-extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
+extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
 extern "C" void func_00106538(void* rider, const t4Vector& v);
 extern "C" void cRider_checkObjectCollisions(void* rider, int a1);
 extern "C" void cRider_checkOpponentCollisions(void* rider);
@@ -1604,7 +1604,7 @@ extern "C" void cWipeoutMotion_resolveGroundMotion(void* vself)
     cWorldRider_cWorldRider(&sph, RIDER->mSphereTree, 1);
     sph.f8 = 1;
     sph.dir = RIDER->mGroundNormal;
-    float depth = func_003342D0(RIDER->mOverlapList, &sph, &hit, (int)RIDER->mWallHint);
+    float depth = cOverlapList_terrainIntersect1(RIDER->mOverlapList, &sph, &hit, (int)RIDER->mWallHint);
     if (0.0f <= depth) {
         float dot = vu0Dot_138640(RIDER->mGroundNormal, hit.normal);
         if (-0.9998999834060669f < dot) {
@@ -1646,7 +1646,7 @@ extern "C" void cWipeoutMotion_resolveGroundMotion(void* vself)
 INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_intersectGround);
 #ifdef SKIP_ASM
 extern "C" void* cWorldLine_cWorldLine(void* seg, const sVec4WG& a, const sVec4WG& b, int n, float r);
-extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
+extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline sVec4WG vu0Scale_138960(const sVec4WG& v, float s)
@@ -1699,7 +1699,7 @@ struct sVEntry_138960 { short delta; short index; void (*fn)(void*, void*); };
  * Probes the ground under the wiped-out rider along @p dir and records the patch it hits.
  *
  * Builds a capsule (cWorldLine_cWorldLine, radius 0.575) from mPosition - 200 x @p dir to mPosition + 200 x @p dir and tests it
- * against the rider's mOverlapList with mLineHint (func_003342D0). On a hit with a patch object it stores the patch's
+ * against the rider's mOverlapList with mLineHint (cOverlapList_terrainIntersect1). On a hit with a patch object it stores the patch's
  * resource id (+0x150) in mGroundPolyId, the hit's u/v in unk_AAC / unk_AB0 and the patch's flags (+0xA) in unk_2D4
  * (else mGroundPolyId = -1), and calls the hit object's owner's virtual slot 42 with the hit.
  *
@@ -1714,7 +1714,7 @@ extern "C" float cWipeoutMotion_intersectGround(void* self, char* hit, sVec4WG* 
     sVec4WG* pt = (sVec4WG*)(rider + 0x110);
     cWorldLine_cWorldLine(seg, vu0Sub_138960(*pt, vu0Scale_138960(*dir, 200.0f)), vu0Add_138960(*pt, vu0Scale_138960(*dir, 200.0f)), 2, 0.574999988079071f);
     char* probeRider = *(char**)((char*)self + 0x40);
-    float hitDist = func_003342D0(*(void**)(probeRider + 0x860), seg, hit, *(int*)(probeRider + 0x864));
+    float hitDist = cOverlapList_terrainIntersect1(*(void**)(probeRider + 0x860), seg, hit, *(int*)(probeRider + 0x864));
     if (hitDist >= 0.0f)
     {
         char* obj = *(char**)(hit + 0x54);

@@ -85,15 +85,15 @@ INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_LinkBank);
 #ifdef SKIP_ASM
 struct sSndEntry;
 struct sSndList;
-extern "C" sSndEntry* func_002836D8(sSndList* self, int id);
-extern "C" sSndEntry* func_00283760(sSndList* self);
+extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(sSndList* self, int id);
+extern "C" sSndEntry* cScriptSoundBankManager_GetEmptyBankInfo(sSndList* self);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028BE60(void* bank, int handle, void* data, int b);
 
 /**
  * Links a script sound bank: loads its data into a free bank slot unless the user ID is already linked.
  *
- * When no used slot has @p id (func_002836D8), it takes the first free slot (func_00283760), stores the ID
+ * When no used slot has @p id (cScriptSoundBankManager_GetBankInfo), it takes the first free slot (cScriptSoundBankManager_GetEmptyBankInfo), stores the ID
  * and data and loads the bank into the audio object's sound system under the slot's bank number
  * (func_0028BE60). There is no check for a full table: a null slot would be written through.
  *
@@ -104,9 +104,9 @@ extern "C" void func_0028BE60(void* bank, int handle, void* data, int b);
  */
 extern "C" int cScriptSoundBankManager_LinkBank(sSndList* self, int id, void* data, int dataSize)
 {
-    char* bankInfo = (char*)func_002836D8(self, id);
+    char* bankInfo = (char*)cScriptSoundBankManager_GetBankInfo(self, id);
     if (bankInfo == 0) {
-        bankInfo = (char*)func_00283760(self);
+        bankInfo = (char*)cScriptSoundBankManager_GetEmptyBankInfo(self);
         *(int*)(bankInfo + 0x0) = id;
         *(void**)(bankInfo + 0x8) = data;
         func_0028BE60(**(void***)((char*)cAudioInterface_bxAudio() + 0x118), *(int*)(bankInfo + 0x4), data, dataSize);
@@ -116,7 +116,7 @@ extern "C" int cScriptSoundBankManager_LinkBank(sSndList* self, int id, void* da
 #endif
 
 //100%
-INCLUDE_ASM("scripter/scsndmgr", func_00283610);
+INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_UnlinkBank1);
 #ifdef SKIP_ASM
 struct sScSndVEntry {
     short delta;
@@ -126,19 +126,19 @@ struct sScSndVEntry {
 
 struct sSndEntry;
 struct sSndList;
-extern "C" sSndEntry* func_002836D8(sSndList* self, int id);
+extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(sSndList* self, int id);
 
 /**
  * Unlinks the sound bank with user ID @p id, if linked.
  *
- * Looks the bank up with func_002836D8 and passes it to the manager's virtual slot 2 (vtable at +0xC;
+ * Looks the bank up with cScriptSoundBankManager_GetBankInfo and passes it to the manager's virtual slot 2 (vtable at +0xC;
  * cScriptSoundBankManager_UnlinkBank). cSSXScriptEngine_OnDetachData calls it on mSoundBankManager (+0xA38).
  *
  * @param id  the bank's user ID
  */
-extern "C" void func_00283610(sSndList* self, int id)
+extern "C" void cScriptSoundBankManager_UnlinkBank1(sSndList* self, int id)
 {
-    sSndEntry* bankInfo = func_002836D8(self, id);
+    sSndEntry* bankInfo = cScriptSoundBankManager_GetBankInfo(self, id);
     if (bankInfo != 0) {
         sScSndVEntry* vt = *(sScSndVEntry**)((char*)self + 0xC);
         vt[2].fn((char*)self + vt[2].delta, bankInfo);
@@ -189,7 +189,7 @@ extern "C" void cScriptSoundBankManager_UnlinkBanksAll(void* self_)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/scsndmgr", func_002836D8);
+INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_GetBankInfo);
 #ifdef SKIP_ASM
 struct sSndEntry {
     int id;
@@ -211,7 +211,7 @@ struct sSndList {
  * @param id  the bank's user ID
  * @return the record, or 0
  */
-extern "C" sSndEntry* func_002836D8(sSndList* self, int id)
+extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(sSndList* self, int id)
 {
     for (int i = 0; i < self->count; i++) {
         if (self->entries[i].data != 0 && self->entries[i].id == id) {
@@ -245,7 +245,7 @@ extern "C" void cScriptSoundBankManager_UnlinkBank(sSndList* self, sSndEntry* pB
 #endif
 
 //100%
-INCLUDE_ASM("scripter/scsndmgr", func_00283760);
+INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_GetEmptyBankInfo);
 #ifdef SKIP_ASM
 /**
  * Returns the first unused sound bank record (data pointer at +0x8 is 0) of the manager's records (+0x8, count at
@@ -253,7 +253,7 @@ INCLUDE_ASM("scripter/scsndmgr", func_00283760);
  *
  * @return the record, or 0 when all are in use
  */
-extern "C" sSndEntry* func_00283760(sSndList* self)
+extern "C" sSndEntry* cScriptSoundBankManager_GetEmptyBankInfo(sSndList* self)
 {
     for (int i = 0; i < self->count; i++) {
         if (self->entries[i].data == 0) {

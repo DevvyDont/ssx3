@@ -684,7 +684,7 @@ struct sSmQuad4_359F88 {
 };
 
 extern void* cMultiSplineModifier_vtbl[];
-extern "C" void func_003451C0(void* ref, int id);
+extern "C" void cSpline_init(void* ref, int id);
 extern "C" void cMultiSplineModifier_setSpeed(cMultiSplineModifier* self, float v);
 extern "C" void cMultiSplineModifier_allocInstances(cMultiSplineModifier* self);
 extern "C" void cMultiSplineModifier_allocNodes(cMultiSplineModifier* self);
@@ -719,7 +719,7 @@ extern "C" void* cMultiSplineModifier_cMultiSplineModifier(cMultiSplineModifier*
     self->NumModels = *(int*)(desc + 0x2C);
     self->OrientType = *(int*)(desc + 0x8);
     self->HeadTweak = *(float*)(desc + 0x10) * 0.01745329424738884f;
-    func_003451C0(((char*)self) + 0x48, *(int*)(desc + 0x4));
+    cSpline_init(((char*)self) + 0x48, *(int*)(desc + 0x4));
     cMultiSplineModifier_setSpeed(self, *(float*)(desc + 0xC));
     if (*(float*)(desc + 0xC) >= 0.0f) {
         self->OffsetDistance = 0.0f;
@@ -813,8 +813,8 @@ INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier__cMultiSplineModifier)
 void cMemMan_free(void*);
 void operator_delete(int*);
 void* cObjectInterface_getInstanceMan();
-void func_00351260(void* man, void* inst);
-extern "C" void func_0035A780(cMultiSplineModifier* self);
+void cInstanceMan_freeInstance(void* man, void* inst);
+extern "C" void cMultiSplineModifier_restoreOverlapSystem(cMultiSplineModifier* self);
 extern void* cMultiSplineModifier_vtbl[];
 extern void* cTransformModifier_vtbl[];
 
@@ -832,8 +832,8 @@ struct cMultiSplineModifier_A250 {
  * Destroys a multi-spline modifier: takes its copies out of the overlap octree and frees its arrays and
  * instance records.
  *
- * func_0035A780 removes copies 1 to n-1 from the Nash octree; AnimMats (+0x38) and Nodes (+0x3C) are freed,
- * each copy's record goes back on the instance manager's free list (func_00351260, probably On Tour
+ * cMultiSplineModifier_restoreOverlapSystem removes copies 1 to n-1 from the Nash octree; AnimMats (+0x38) and Nodes (+0x3C) are freed,
+ * each copy's record goes back on the instance manager's free list (cInstanceMan_freeInstance, probably On Tour
  * freeInstance), NodeInst (+0x44) is freed and the base cTransformModifier vtable (cTransformModifier_vtbl) is restored.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
@@ -841,7 +841,7 @@ struct cMultiSplineModifier_A250 {
 extern "C" void cMultiSplineModifier__cMultiSplineModifier(cMultiSplineModifier* self, int flags)
 {
     self->mVtbl = cMultiSplineModifier_vtbl;
-    func_0035A780(self);
+    cMultiSplineModifier_restoreOverlapSystem(self);
     if (self->AnimMats != 0) {
         cMemMan_free(self->AnimMats);
     }
@@ -849,7 +849,7 @@ extern "C" void cMultiSplineModifier__cMultiSplineModifier(cMultiSplineModifier*
         cMemMan_free(self->Nodes);
     }
     for (int i = 0; i < self->NumModels; i++) {
-        func_00351260(cObjectInterface_getInstanceMan(), (void**)self->NodeInst[i]);
+        cInstanceMan_freeInstance(cObjectInterface_getInstanceMan(), (void**)self->NodeInst[i]);
     }
     if ((void**)self->NodeInst != 0) {
         cMemMan_free((void**)self->NodeInst);
@@ -907,19 +907,19 @@ extern "C" void cMultiSplineModifier_allocNodes(cMultiSplineModifier* selfv)
 INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_allocInstances);
 #ifdef SKIP_ASM
 void* cObjectInterface_getInstanceMan();
-extern "C" void* func_00351170(void* man);
+extern "C" void* cInstanceMan_allocInstance1(void* man);
 
 /**
  * Allocates one instance record from the instance manager for each node of a multi-spline modifier.
  *
- * Fills the array at +0x44 (On Tour NodeInst) with func_00351170() (On Tour cInstanceMan::allocInstance)
+ * Fills the array at +0x44 (On Tour NodeInst) with cInstanceMan_allocInstance1() (On Tour cInstanceMan::allocInstance)
  * results, one for each of the +0x4 nodes.
  */
 extern "C" void cMultiSplineModifier_allocInstances(cMultiSplineModifier* self)
 {
     int i;
     for (i = 0; i < self->NumModels; i++) {
-        ((void**)self->NodeInst)[i] = func_00351170(cObjectInterface_getInstanceMan());
+        ((void**)self->NodeInst)[i] = cInstanceMan_allocInstance1(cObjectInterface_getInstanceMan());
     }
 }
 #endif
@@ -1179,7 +1179,7 @@ extern "C" void cMultiSplineModifier_setupOverlapSystem(cMultiSplineModifier* vs
 #endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035A780);
+INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_restoreOverlapSystem);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 extern "C" void* cObjectInterface_getNash();
@@ -1231,7 +1231,7 @@ static inline int octEmpty_A780(sOctCell_A780* o)
  * @param vself  the multi-spline modifier
  */
 // Removes every spline segment but the first from the space hash (freeing octree cells that become empty).
-extern "C" void func_0035A780(cMultiSplineModifier* vself)
+extern "C" void cMultiSplineModifier_restoreOverlapSystem(cMultiSplineModifier* vself)
 {
     for (int i = 1; i < vself->NumModels; i++) {
         void* node = ((void**)vself->NodeInst)[i];
@@ -1384,16 +1384,16 @@ extern "C" void cMultiSplineModifier_updateOverlapSystem(cMultiSpline_A918* self
 #endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035AAD0__FPv);
+INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_incFocusCount__FPv);
 #ifdef SKIP_ASM
 /**
  * Increments the modifier's FocusCount and returns the new count.
  *
- * cMoveNode_incFocusCount calls it (passing an instance record the body ignores); func_0035AAE0 is the reverse.
+ * cMoveNode_incFocusCount calls it (passing an instance record the body ignores); cMultiSplineModifier_decFocusCount is the reverse.
  *
  * @return the new FocusCount
  */
-void* func_0035AAD0(void* self)
+void* cMultiSplineModifier_incFocusCount(void* self)
 {
     void* focusCount = (char*)*(void**)((char*)self + 0x34) + 0x1;
     *(int*)((char*)self + 0x34) = (int)focusCount;
@@ -1402,16 +1402,16 @@ void* func_0035AAD0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/splinemodifier", func_0035AAE0__FPv);
+INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_decFocusCount__FPv);
 #ifdef SKIP_ASM
 /**
  * Decrements the modifier's FocusCount and returns the new count (no check against going below zero).
  *
- * cMoveNode_decFocusCount calls it (passing an instance record the body ignores); func_0035AAD0 is the reverse.
+ * cMoveNode_decFocusCount calls it (passing an instance record the body ignores); cMultiSplineModifier_incFocusCount is the reverse.
  *
  * @return the new FocusCount
  */
-void* func_0035AAE0(void* self)
+void* cMultiSplineModifier_decFocusCount(void* self)
 {
     void* focusCount = (char*)*(void**)((char*)self + 0x34) - 0x1;
     *(int*)((char*)self + 0x34) = (int)focusCount;
@@ -1923,7 +1923,7 @@ struct cMultiSpline_35B418 {
     char** insts;           // 0x44
 };
 
-extern "C" void func_00345430(void* a, void* b);
+extern "C" void cSpline_draw(void* a, void* b);
 
 /**
  * Draws every instance copy but the first that passes the view test, then the spline path when DrawPath is
@@ -1933,7 +1933,7 @@ extern "C" void func_00345430(void* a, void* b);
  * the graphics manager's box test (slot 93, with slot 43's matrix): 1 (culled) is skipped; otherwise the
  * model's node builds the copy's matrices (slot 33, into AnimMats +0x38) and draws them (slot 5) with flags
  * 0x420 when the box needs clipping (2) or 0x400 when inside (0). DrawPath (+0x1C) draws the spline in Colour
- * (+0x20) through func_00345430.
+ * (+0x20) through cSpline_draw.
  */
 extern "C" void cMultiSplineModifier_render(cMultiSpline_35B418* self)
 {
@@ -1961,7 +1961,7 @@ extern "C" void cMultiSplineModifier_render(cMultiSpline_35B418* self)
         }
     }
     if (self->follow != 0) {
-        func_00345430((char*)self + 0x48, (char*)self + 0x20);
+        cSpline_draw((char*)self + 0x48, (char*)self + 0x20);
     }
 }
 #endif

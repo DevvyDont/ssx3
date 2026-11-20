@@ -270,14 +270,14 @@ extern "C" void cBucketMan_remove(cBucketMan* self, sBucketNode* node)
 #endif
 
 //100%
-INCLUDE_ASM("object/bucketman", func_00354E78);
+INCLUDE_ASM("object/bucketman", cBucketMan_unlink);
 #ifdef SKIP_ASM
 /**
  * Removes @p node from its bucket with cBucketMan_remove and then clears the node's prev and next links.
  *
  * @param node  the scene node to unlink
  */
-extern "C" void func_00354E78(cBucketMan* self, sBucketNode* node)
+extern "C" void cBucketMan_unlink(cBucketMan* self, sBucketNode* node)
 {
     cBucketMan_remove(self, node);
     node->prev = 0;
@@ -512,7 +512,7 @@ extern "C" void cBucketMan_purgeBucket(cBucketMan* self, int index)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/bucketman", func_003551A8);
+INCLUDE_ASM("object/bucketman", cBucketMan_purgeBucket1);
 #ifdef SKIP_ASM
 struct sBucketVEntry51A8 {
     short delta;
@@ -540,7 +540,7 @@ void* cBucketMan_next(cBucketMan* self, void* node, int index);
  * @param index  the bucket number
  * @param key  the section id whose nodes are deleted
  */
-extern "C" void func_003551A8(cBucketMan* self, int index, int key)
+extern "C" void cBucketMan_purgeBucket1(cBucketMan* self, int index, int key)
 {
     void* node = cBucketMan_first(self, index);
     while (node != 0) {
@@ -582,15 +582,15 @@ extern "C" void cBucketMan_setsortflag(void* self, int bucket)
 #endif
 
 //100%
-INCLUDE_ASM("object/bucketman", func_00355280);
+INCLUDE_ASM("object/bucketman", cMoveNode_cMoveNode1);
 #ifdef SKIP_ASM
 extern void* cMoveNode_vtbl[];
-extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
+extern "C" void* cInstanceNode_cInstanceNode1(void* self, void* a1, int type, void* a3);
 
 /**
  * Constructs a cMoveNode for a placed instance.
  *
- * Runs the cInstanceNode constructor func_0034FB00, installs cMoveNode_vtbl, sets Fade to 1.0, sets the
+ * Runs the cInstanceNode constructor cInstanceNode_cInstanceNode1, installs cMoveNode_vtbl, sets Fade to 1.0, sets the
  * RootTransformDirty bit in Flags and zeroes ModifierBlock, Debounce and TransferHack. Subclass constructors call it as
  * their base with their node type: cFloatingNode (0xE), cParticleNode (0xD), the object node (17).
  *
@@ -599,9 +599,9 @@ extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
  * @param instRecord  the instance record the node belongs to
  * @return @p self
  */
-extern "C" void* func_00355280(void* self, void* bucket, int type, void* instRecord)
+extern "C" void* cMoveNode_cMoveNode1(void* self, void* bucket, int type, void* instRecord)
 {
-    func_0034FB00(self, bucket, type, instRecord);
+    cInstanceNode_cInstanceNode1(self, bucket, type, instRecord);
     *(void***)((char*)self + 0xC) = cMoveNode_vtbl;
     *(float*)((char*)self + 0x24) = 1.0f;
     *(unsigned short*)((char*)self + 0x12) |= 1;

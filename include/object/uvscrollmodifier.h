@@ -5,7 +5,7 @@
 // signs). No vtable (not virtual). Size 0x50: retail cMemMan_alloc(0x50, "UVScrollModifier") in cMoveNode's addUVScroll
 // (src/object/movenode.cpp) and the replay loader (src/object/modifierblock.cpp); On Tour 0x50 (all of it is
 // cUVScrollModifierState, which the replay frame stores whole).
-// Methods (src/object/railmodifier.cpp): ctor func_0035F6E8 (tAddUVScrollData), replay ctor func_0035F788, update
+// Methods (src/object/railmodifier.cpp): ctor cUVScrollModifier_cUVScrollModifier (tAddUVScrollData), replay ctor cUVScrollModifier_cUVScrollModifier1, update
 // cUVScrollModifier_update (tModifierBlock preUpdate), signal cUVScrollModifier_signal, getTextureMat cUVScrollModifier_getTextureMat (cMoveNode_render/
 // renderModel), writeToReplayFrame cUVScrollModifier_writeToReplayFrame. Every On Tour offset equals retail (On: 4-byte bool).
 

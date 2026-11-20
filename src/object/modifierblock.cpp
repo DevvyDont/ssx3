@@ -670,7 +670,7 @@ extern "C" void tModifierBlock_remEffectModifier(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353228);
+INCLUDE_ASM("object/modifierblock", tModifierBlock_fadeEffectModifier);
 #ifdef SKIP_ASM
 struct sModBlockVEntry3228 {
     short delta;
@@ -690,7 +690,7 @@ struct sModBlockLink3228 {
  * Walks the effect chain (+0x10, cEffectLink list) and calls each link's vtable entry 3 (fadeEffect), reading the next
  * link first.
  */
-extern "C" void func_00353228(void* self)
+extern "C" void tModifierBlock_fadeEffectModifier(void* self)
 {
     sModBlockLink3228* head = *(sModBlockLink3228**)((char*)self + 0x10);
     if (head != 0) {
@@ -705,7 +705,7 @@ extern "C" void func_00353228(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353278);
+INCLUDE_ASM("object/modifierblock", tModifierBlock_remHaloModifier);
 #ifdef SKIP_ASM
 struct sModBlockVEntry3278 {
     short delta;
@@ -725,7 +725,7 @@ struct sModBlockLink3278 {
  * Walks the effect chain (+0x10) and deletes (vtable entry 1, flags 3) each link whose getType (vtable entry 2) is 3,
  * the halo modifier's type.
  */
-extern "C" void func_00353278(void* self)
+extern "C" void tModifierBlock_remHaloModifier(void* self)
 {
     sModBlockLink3278* head = *(sModBlockLink3278**)((char*)self + 0x10);
     if (head != 0) {
@@ -996,16 +996,16 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cSplineModifier_cSplineModifier(void* self, sMbStream36D8* s);
 extern "C" void* cMultiSplineModifier_cMultiSplineModifier1(void* self, sMbStream36D8* s);
 extern "C" void* cParentModifier_cParentModifier(void* self, sMbStream36D8* s);
-extern "C" void* func_00356F68(void* self, sMbStream36D8* s);
-extern "C" void* func_0035DF70(void* self, sMbStream36D8* s);
-extern "C" void* func_00357358(void* self, sMbStream36D8* s);
-extern "C" void* func_00357798(void* self, sMbStream36D8* s);
-extern "C" void* func_0035F788(void* self, sMbStream36D8* s);
-extern "C" void* func_0035F1A8(void* self, sMbStream36D8* s);
-extern "C" void* func_00342808(void* self, sMbStream36D8* s);
-extern "C" void* func_003459A8(void* self, sMbStream36D8* s);
+extern "C" void* cPositionModifier_cPositionModifier2(void* self, sMbStream36D8* s);
+extern "C" void* cRollerModifier_cRollerModifier1(void* self, sMbStream36D8* s);
+extern "C" void* cMagnetModifier_cMagnetModifier1(void* self, sMbStream36D8* s);
+extern "C" void* cAvaSplineModifier_cAvaSplineModifier1(void* self, sMbStream36D8* s);
+extern "C" void* cUVScrollModifier_cUVScrollModifier1(void* self, sMbStream36D8* s);
+extern "C" void* cTexFlipModifier_cTexFlipModifier1(void* self, sMbStream36D8* s);
+extern "C" void* cBoostModifier_cBoostModifier1(void* self, sMbStream36D8* s);
+extern "C" void* cParticleModifier_cParticleModifier1(void* self, sMbStream36D8* s);
 extern "C" void* cDynamicParticleModifier_cDynamicParticleModifier(void* self, sMbStream36D8* s);
-extern "C" void* func_003461C0(void* self, sMbStream36D8* s);
+extern "C" void* cHaloModifier_cHaloModifier1(void* self, sMbStream36D8* s);
 extern "C" void* cRailModifier_cRailModifier1(void* self, sMbStream36D8* s);
 extern "C" void cEffectLink_append(void* pool, void* item);
 extern "C" void cRailLink_append(void* list, void* item);
@@ -1053,32 +1053,32 @@ extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, sMbStre
         } else if (hdr.type == 4) {
             *(void**)&self->node = cParentModifier_cParentModifier(cMemMan_alloc(176, str_ParentModifier, 0x20000000, 0), stream);
         } else if (hdr.type == 3) {
-            *(void**)&self->node = func_00356F68(cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), stream);
+            *(void**)&self->node = cPositionModifier_cPositionModifier2(cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), stream);
         } else if (hdr.type == 5) {
-            *(void**)&self->node = func_0035DF70(cMemMan_alloc(720, str_RollerModifier, 0x20000000, 0), stream);
+            *(void**)&self->node = cRollerModifier_cRollerModifier1(cMemMan_alloc(720, str_RollerModifier, 0x20000000, 0), stream);
         } else if (hdr.type == 6) {
-            *(void**)&self->node = func_00357358(cMemMan_alloc(176, str_MagnetModifier, 0x20000000, 0), stream);
+            *(void**)&self->node = cMagnetModifier_cMagnetModifier1(cMemMan_alloc(176, str_MagnetModifier, 0x20000000, 0), stream);
         } else if (hdr.type == 7) {
-            *(void**)&self->node = func_00357798(cMemMan_alloc(144, str_AvaSplineModifier, 0x20000000, 0), stream);
+            *(void**)&self->node = cAvaSplineModifier_cAvaSplineModifier1(cMemMan_alloc(144, str_AvaSplineModifier, 0x20000000, 0), stream);
         }
     }
     if (hdr.flags & 2) {
-        self->field_0x4 = (int)func_0035F788(cMemMan_alloc(80, str_UVScrollModifier, 0x20000000, 0), stream);
+        self->field_0x4 = (int)cUVScrollModifier_cUVScrollModifier1(cMemMan_alloc(80, str_UVScrollModifier, 0x20000000, 0), stream);
     }
     if (hdr.flags & 4) {
-        self->field_0x8 = (int)func_0035F1A8(cMemMan_alloc(232, str_TexFlipModifier, 0x20000000, 0), stream);
+        self->field_0x8 = (int)cTexFlipModifier_cTexFlipModifier1(cMemMan_alloc(232, str_TexFlipModifier, 0x20000000, 0), stream);
     }
     if ((hdr.flags & 8) && hdr.kind == 1) {
-        self->field_0xC = (int)func_00342808(cMemMan_alloc(80, str_BoostModifier, 0x20000000, 0), stream);
+        self->field_0xC = (int)cBoostModifier_cBoostModifier1(cMemMan_alloc(80, str_BoostModifier, 0x20000000, 0), stream);
     }
     for (i = 0; i < hdr.numA; i++) {
         void* effect;
         if (hdr.typesA[i] == 1) {
-            effect = func_003459A8(cMemMan_alloc(0x1F0, str_ParticleModifier, 0x20000000, 0), stream);
+            effect = cParticleModifier_cParticleModifier1(cMemMan_alloc(0x1F0, str_ParticleModifier, 0x20000000, 0), stream);
         } else if (hdr.typesA[i] == 2) {
             effect = cDynamicParticleModifier_cDynamicParticleModifier(cMemMan_alloc(624, str_DynamicParticleModifier, 0x20000000, 0), stream);
         } else if (hdr.typesA[i] == 3) {
-            effect = func_003461C0(cMemMan_alloc(0x40, str_HaloModifier, 0x20000000, 0), stream);
+            effect = cHaloModifier_cHaloModifier1(cMemMan_alloc(0x40, str_HaloModifier, 0x20000000, 0), stream);
         } else {
             effect = 0;
         }
@@ -1246,7 +1246,7 @@ extern "C" void cSkyBox_render(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353CF0);
+INCLUDE_ASM("object/modifierblock", cSkyBox_setSection);
 #ifdef SKIP_ASM
 struct sMbTrackEntry3CF0 {
     char pad_0x0[0x26];
@@ -1271,7 +1271,7 @@ struct sMbWorld3CF0 {
 };
 
 extern "C" sMbWorld3CF0** cObjectInterface_getWorld();
-int func_00353D98(void* self);
+int cSkyBox_reset(void* self);
 
 static inline void* refToPtr3CF0(unsigned int p)
 {
@@ -1304,16 +1304,16 @@ struct sMbTrackRef3CF0 {
 /**
  * Points the sky box at a world section's sky instance.
  *
- * Stores id as the section (+0x10). A negative id resets the sky box (func_00353D98); otherwise, when the world's
+ * Stores id as the section (+0x10). A negative id resets the sky box (cSkyBox_reset); otherwise, when the world's
  * section table has entries for it, the sky instance (+0x14) becomes record 0 of that section's resource set.
  *
  * @param id  world section id, or negative for none
  */
-extern "C" void func_00353CF0(sMbTrackRef3CF0* self, int id)
+extern "C" void cSkyBox_setSection(sMbTrackRef3CF0* self, int id)
 {
     self->id = id;
     if (id < 0) {
-        func_00353D98(self);
+        cSkyBox_reset(self);
         return;
     }
     sMbWorld3CF0* w = *cObjectInterface_getWorld();
@@ -1326,14 +1326,14 @@ extern "C" void func_00353CF0(sMbTrackRef3CF0* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353D98__FPv);
+INCLUDE_ASM("object/modifierblock", cSkyBox_reset__FPv);
 #ifdef SKIP_ASM
 /**
  * Resets the sky box: section -1 (+0x10) and no sky instance (+0x14).
  *
  * @return -1 (left over from the store; callers ignore it)
  */
-int func_00353D98(void* self)
+int cSkyBox_reset(void* self)
 {
     int invalid = -1;
     *(int*)((char*)self + 0x14) = 0;
@@ -1343,14 +1343,14 @@ int func_00353D98(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353DA8__FPv);
+INCLUDE_ASM("object/modifierblock", cSpring_cSpring__FPv);
 #ifdef SKIP_ASM
 /**
  * Constructs a spring with no node array (Nodes, +0x24, = 0).
  *
  * @return self
  */
-void* func_00353DA8(void* self)
+void* cSpring_cSpring(void* self)
 {
     *(int*)((char*)self + 0x24) = 0;
     return self;
@@ -1425,7 +1425,7 @@ extern "C" void cSpring_setupSpring(void* self, sSpringDesc_3E08* sdata, float l
 #endif
 
 //100%
-INCLUDE_ASM("object/modifierblock", func_00353E80);
+INCLUDE_ASM("object/modifierblock", cSpring_cSpring1);
 #ifdef SKIP_ASM
 struct sMbVEntrySer3E80 {
     short delta;
@@ -1444,7 +1444,7 @@ extern "C" void cSpring_setupNodes(void* self);
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* func_00353E80(void* self, void* stream)
+extern "C" void* cSpring_cSpring1(void* self, void* stream)
 {
     sMbVEntrySer3E80* readSlot = &(*(sMbVEntrySer3E80**)stream)[2];
     readSlot->fn((char*)stream + readSlot->delta, self, 36);

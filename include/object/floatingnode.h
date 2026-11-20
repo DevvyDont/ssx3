@@ -4,7 +4,7 @@
 // cFloatingNode: a cMoveNode that bobs and tilts on a spring (floating props on water: buoys, logs); its state is a
 // damped vertical spring (Z*) plus two tilt springs (O*/W*/T* about X and Y). EA's source:
 // d:/ssx/code/source/object/floatingnode.cpp. Size 0x7C: retail cMemMan_alloc(0x7C, "Floating") for both constructors
-// (func_0034EC58 from the world script loader src/seg/seg_1FBE38.cpp, func_0034ED88 from the replay loader
+// (cFloatingNode_cFloatingNode from the world script loader src/seg/seg_1FBE38.cpp, cFloatingNode_cFloatingNode1 from the replay loader
 // src/replay/replay.cpp); On Tour 0x78 (its cMoveNode is 4 bytes smaller). Destructor cFloatingNode__cFloatingNode;
 // vtable cFloatingNode_vtbl (0x0048F858, 51 slots). Methods: src/object/floatingnode.cpp, ctors/dtor in the
 // object/animnode splat unit, the one-liners in src/object/railmodifier.cpp (methods.txt).
@@ -33,32 +33,32 @@ struct cFloatingNode {
     tInstanceRecord* Instance;      // 0x18 [P] getInstance (lw 0x18); [O]; [U] the add* builders pass it to the modifier
                                     //      ctors, render, getRootTransform
     tModifierBlock* ModifierBlock;  // 0x1C [O]; [R] cMoveNode_addModifierBlock allocates it (cMemMan_alloc(0x28,
-                                    //      "ModifierBlock")); [U] every forwarder (func_00360DE8..func_00361010, add*/rem*,
+                                    //      "ModifierBlock")); [U] every forwarder (cMoveNode_getParentMesh..cMoveNode_fadeEffectModifier, add*/rem*,
                                     //      update, render)
     int Debounce;                   // 0x20 [O] int; [U] setDebounce stores (int)(seconds * fps) (cvt.w.s + swc1),
                                     //      update/onCollide count it down (lw/sw); [R] replay ctor reads 4 bytes
-    float Fade;                     // 0x24 [O]; [U] addFade func_00355878 stores data +0x4, render/renderModel read it
+    float Fade;                     // 0x24 [O]; [U] addFade cMoveNode_addFade stores data +0x4, render/renderModel read it
                                     //      (lwc1); [R] replay ctor
     int TransferHack;               // 0x28 [O] bool (4 bytes); [U] render tests it (lw); [R] replay ctor
     // --- cFloatingNodeState (0x48; getNodeState returns +0x2C)
-    float ZSpring;                  // 0x2C [O] cFloatingNodeState; [R] ctor func_0034EC58; [U] updateNode
-    float ZDamp;                    // 0x30 [O] cFloatingNodeState; [R] ctor func_0034EC58; [U] updateNode
-    float ForceScale;               // 0x34 [O] cFloatingNodeState; [R] ctor func_0034EC58; [U] updateNode
-    float ASpring;                  // 0x38 [O] cFloatingNodeState; [R] ctor func_0034EC58; [U] updateNode
-    float ADamp;                    // 0x3C [O] cFloatingNodeState; [R] ctor func_0034EC58; [U] updateNode
-    float TorqueScale;              // 0x40 [O] cFloatingNodeState; [R] ctor func_0034EC58; [U] updateNode
-    float Force;                    // 0x44 [O] cFloatingNodeState; [R] ctor func_0034EC58; [U] updateNode
-    float Vel;                      // 0x48 [O] cFloatingNodeState; [R] ctor func_0034EC58; [U] updateNode
-    float Zo;                       // 0x4C [O] cFloatingNodeState; [R] ctor func_0034EC58; [U] updateNode
-    float Z;                        // 0x50 [O] cFloatingNodeState; [R] ctor func_0034EC58; [U] updateNode
-    float OX;                       // 0x54 [O] cFloatingNodeState; [R] ctor func_0034EC58; [U] updateNode
-    float OoX;                      // 0x58 [O] cFloatingNodeState; [R] ctor func_0034EC58; [U] updateNode
-    float WX;                       // 0x5C [O] cFloatingNodeState; [R] ctor func_0034EC58; [U] updateNode
-    float TX;                       // 0x60 [O] cFloatingNodeState; [R] ctor func_0034EC58; [U] updateNode
-    float OY;                       // 0x64 [O] cFloatingNodeState; [R] ctor func_0034EC58; [U] updateNode
-    float OoY;                      // 0x68 [O] cFloatingNodeState; [R] ctor func_0034EC58; [U] updateNode
-    float WY;                       // 0x6C [O] cFloatingNodeState; [R] ctor func_0034EC58; [U] updateNode
-    float TY;                       // 0x70 [O] cFloatingNodeState; [R] ctor func_0034EC58; [U] updateNode
+    float ZSpring;                  // 0x2C [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
+    float ZDamp;                    // 0x30 [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
+    float ForceScale;               // 0x34 [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
+    float ASpring;                  // 0x38 [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
+    float ADamp;                    // 0x3C [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
+    float TorqueScale;              // 0x40 [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
+    float Force;                    // 0x44 [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
+    float Vel;                      // 0x48 [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
+    float Zo;                       // 0x4C [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
+    float Z;                        // 0x50 [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
+    float OX;                       // 0x54 [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
+    float OoX;                      // 0x58 [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
+    float WX;                       // 0x5C [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
+    float TX;                       // 0x60 [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
+    float OY;                       // 0x64 [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
+    float OoY;                      // 0x68 [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
+    float WY;                       // 0x6C [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
+    float TY;                       // 0x70 [O] cFloatingNodeState; [R] ctor cFloatingNode_cFloatingNode; [U] updateNode
     // --- cFloatingNode
     t4Matrix* AnimMats;             // 0x74 [O]; [U] getAnimMats/getAnimMat/updateRootTransform (railmodifier.cpp), the
                                     //      dtor

@@ -31,7 +31,7 @@ class cScriptSlot_1018 {
 public:
     char pad[0x10];
     void* owner;
-    cScriptSlot_1018() __asm__("func_00283088");
+    cScriptSlot_1018() __asm__("cScriptEntityCamera_cScriptEntityCamera");
     void setOwner(void* o) { owner = o; }
 };
 

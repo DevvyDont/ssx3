@@ -5294,7 +5294,7 @@ INCLUDE_ASM("fe/all_in_one_fe", luno_cLunoVM_cLunoVM);
 /**
  * Constructs a Luno VM handle: does nothing and returns @p value.
  *
- * lunovm.cpp binds it as cLunoVM's constructor; func_00309C88 and luno_cLunoVM_execute construct a VM on the stack with
+ * lunovm.cpp binds it as cLunoVM's constructor; cWScriptMan_runScript and luno_cLunoVM_execute construct a VM on the stack with
  * it before calling luno_cLunoVM_run / luno_cLunoVM_run1.
  *
  * @param value  the object to construct
@@ -5318,7 +5318,7 @@ INCLUDE_ASM("fe/all_in_one_fe", luno_cLunoVM_run);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 struct LV_24B8;
 extern "C" void luno_cLunoTable__cLunoTable_24B8(LV_24B8*, int) __asm__("luno_cLunoTable__cLunoTable");
-extern "C" void func_00225068_24B8(LV_24B8*, const LV_24B8*) __asm__("func_00225068");
+extern "C" void luno_cLunoTable_operatorE_24B8(LV_24B8*, const LV_24B8*) __asm__("luno_cLunoTable_operatorE");
 extern "C" void luno_cLunoVM_execute_24B8(LV_24B8**, char**, int) __asm__("luno_cLunoVM_execute");
 extern char str_LunoVMRegister[];
 
@@ -5333,14 +5333,14 @@ struct LV_24B8 {
     void SetTable(const LV_24B8* src) {
         Release();
         Clear();
-        func_00225068_24B8(this, src);
+        luno_cLunoTable_operatorE_24B8(this, src);
         type = 4;
     }
     void Assign(const LV_24B8* src) {
         Release();
         Clear();
         if (src->type == 4) {
-            func_00225068_24B8(this, src);
+            luno_cLunoTable_operatorE_24B8(this, src);
         } else if (src->type == 5) {
             u.pair = src->u.pair;
         } else {
@@ -5358,8 +5358,8 @@ extern LV_24B8 luno_gLunoNil;
  *
  * Reads the register count from the function's chunk (at chunk + chunk[1] + 8), allocates that many 8-byte values with
  * operator new[] ("LunoVMRegister"), stores the array in the VM's first word, makes register 0 a table reference
- * to @p table (func_00225068), copies luno_gLunoNil into register 1 (releasing a table it held with
- * luno_cLunoTable__cLunoTable) and calls luno_cLunoVM_execute(@p out, @p state, @p retVar). func_00309C88 (world scripts)
+ * to @p table (luno_cLunoTable_operatorE), copies luno_gLunoNil into register 1 (releasing a table it held with
+ * luno_cLunoTable__cLunoTable) and calls luno_cLunoVM_execute(@p out, @p state, @p retVar). cWScriptMan_runScript (world scripts)
  * uses it.
  *
  * @param out  the VM; its first word receives the register array
@@ -5380,7 +5380,7 @@ extern "C" void luno_cLunoVM_run(LV_24B8** out, char** state, LV_24B8* table, in
     secondReg->type = 0;
     regs[1].u.i = 0;
     if (nilVal->type == 4) {
-        func_00225068_24B8(secondReg, nilVal);
+        luno_cLunoTable_operatorE_24B8(secondReg, nilVal);
     } else if (nilVal->type == 5) {
         regs[1].u.pair = nilVal->u.pair;
     } else {
@@ -5398,7 +5398,7 @@ INCLUDE_ASM("fe/all_in_one_fe", luno_cLunoVM_run1);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 struct LV_2648;
 extern "C" void luno_cLunoTable__cLunoTable_2648(LV_2648*, int) __asm__("luno_cLunoTable__cLunoTable");
-extern "C" void func_00225068_2648(LV_2648*, const LV_2648*) __asm__("func_00225068");
+extern "C" void luno_cLunoTable_operatorE_2648(LV_2648*, const LV_2648*) __asm__("luno_cLunoTable_operatorE");
 extern "C" void luno_cLunoVM_execute_2648(LV_2648**, char**, int) __asm__("luno_cLunoVM_execute");
 extern char str_LunoVMRegister[];
 
@@ -5413,14 +5413,14 @@ struct LV_2648 {
     void SetTable(const LV_2648* src) {
         Release();
         Clear();
-        func_00225068_2648(this, src);
+        luno_cLunoTable_operatorE_2648(this, src);
         type = 4;
     }
     void Assign(const LV_2648* src) {
         Release();
         Clear();
         if (src->type == 4) {
-            func_00225068_2648(this, src);
+            luno_cLunoTable_operatorE_2648(this, src);
         } else if (src->type == 5) {
             u.pair = src->u.pair;
         } else {
@@ -5434,7 +5434,7 @@ struct LV_2648 {
  * Runs a Luno function with a global table and one argument: allocates the register file, puts the table in register 0
  * and @p value in register 1, then executes.
  *
- * Same as luno_cLunoVM_run except that register 1 is a copy of @p value (a table reference through func_00225068, a
+ * Same as luno_cLunoVM_run except that register 1 is a copy of @p value (a table reference through luno_cLunoTable_operatorE, a
  * two-word value copied whole, or a single word). luno_cLunoVM_execute uses it for its call opcode (27).
  *
  * @param out  the VM; its first word receives the register array
@@ -5455,7 +5455,7 @@ extern "C" void luno_cLunoVM_run1(LV_2648** out, char** state, LV_2648* table, L
     secondReg->type = 0;
     regs[1].u.i = 0;
     if (value->type == 4) {
-        func_00225068_2648(secondReg, value);
+        luno_cLunoTable_operatorE_2648(secondReg, value);
     } else if (value->type == 5) {
         regs[1].u.pair = value->u.pair;
     } else {

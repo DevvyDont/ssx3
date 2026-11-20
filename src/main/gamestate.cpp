@@ -465,7 +465,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cAudioInterface_bxAudio(void);
 
 
-// PORT: cSSXScriptEngine_ReadyNISList returns func_00276270's result (ssxscriptengine defines it void).
+// PORT: cSSXScriptEngine_ReadyNISList returns tNISList_ReadyList's result (ssxscriptengine defines it void).
 extern "C" int cSSXScriptEngine_ReadyNISList(void* self, int i);
 
 extern "C" int cBENewRaceInterface_setNumberAI(void* self, int count);
@@ -931,7 +931,7 @@ extern "C" void cAI_prepareToPurgeComputerRiders(void* self);
 extern "C" void cAI_prepareToPurgeComputerActors(void* self);
 extern "C" void cSSXScriptEngine_ResetNISList(void* a, int b);
 extern "C" void cSSXScriptEngine_AppendStartSequence(void* a, int b);
-// PORT: cSSXScriptEngine_ReadyNISList returns func_00276270's result (ssxscriptengine defines it void).
+// PORT: cSSXScriptEngine_ReadyNISList returns tNISList_ReadyList's result (ssxscriptengine defines it void).
 extern "C" int cSSXScriptEngine_ReadyNISList(void* self, int i);
 extern "C" void cSSXScriptEngine_PlayTransportSequence(void* a, int b, int c);
 extern "C" void cBXLoadIndicator_Show(void* a, int b);
@@ -1350,7 +1350,7 @@ extern "C" void cGame_partialRestart(void* self);
 extern "C" void cWScriptMan_failActiveLocalMission(void* self);
 extern "C" void cRider_initAlways(void* rider);
 extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory(void* self, int i, int a, int b, int c, int d, int f, int g);
-// PORT: cSSXScriptEngine_ReadyNISList returns func_00276270's result (ssxscriptengine defines it void).
+// PORT: cSSXScriptEngine_ReadyNISList returns tNISList_ReadyList's result (ssxscriptengine defines it void).
 extern "C" int cSSXScriptEngine_ReadyNISList(void* self, int i);
 extern "C" int cSSXScriptEngine_PlayNISList(void* self, int i, int a, int b);
 extern char* cGameState_mpGame;
@@ -1417,7 +1417,7 @@ extern "C" void cOVStateManager_triggerOverlay(int state);
 extern "C" void cSectionMan_load(void* self, int a, int b);
 extern "C" void cGame_setState(void* self, int a, int b, int refresh);
 extern "C" void cGameState_gotoNextState(void* self);
-void func_00278DE8(void* self, int a);
+void cSSXScriptEngine_DisallowNISListSkip(void* self, int a);
 extern "C" int cSSXScriptEngine_GetNISListScriptCategory(void* self, int a, int b);
 extern "C" int cSSXScriptEngine_GetNISListPlayState(void* a, int b);
 extern "C" void cSSXScriptEngine_PlayTransportSequence(void* a, int b, int c);
@@ -1513,7 +1513,7 @@ extern "C" void cGFUserSelectState_update(void* self)
     case 1:
         if (*(int*)((char*)self + 0x8) == 0)
             return;
-        func_00278DE8(ScriptEngine, 0x1E);
+        cSSXScriptEngine_DisallowNISListSkip(ScriptEngine, 0x1E);
         if (!isOne_6418(*(int*)((char*)self + 0x14)))
             pop_6418();
         if (*(int*)((char*)self + 0x14) == 0) {

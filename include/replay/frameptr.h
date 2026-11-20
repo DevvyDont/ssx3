@@ -4,9 +4,9 @@
 // cReplayFramePtr: a replay data block with a write cursor and a read cursor: the stream every replayable object
 // writes itself to and reads itself back from (writeToReplayFrame / readFromReplayFrame in On Tour). Derived from
 // the interface cBxReplayFrame (vptr only; On Tour size 4), whose virtuals it implements: vtable cReplayFramePtr_vtbl, slots
-// 1..7 = write (cReplayFramePtr_write), read (cReplayFramePtr_read), readReplayInstance() (func_0026EB48),
-// readReplayInstance(cInstanceNode*) (func_0026EC08), writeReplayInstance(const tInstanceRecord*) (func_0026ECD8),
-// writeReplayInstance(cInstanceNode*) (func_0026ED28), destructor (cReplayFramePtr__cReplayFramePtr); the order is On Tour
+// 1..7 = write (cReplayFramePtr_write), read (cReplayFramePtr_read), readReplayInstance() (cReplayFramePtr_readReplayInstance),
+// readReplayInstance(cInstanceNode*) (cReplayFramePtr_readReplayInstance1), writeReplayInstance(const tInstanceRecord*) (cReplayFramePtr_writeReplayInstance),
+// writeReplayInstance(cInstanceNode*) (cReplayFramePtr_writeReplayInstance1), destructor (cReplayFramePtr__cReplayFramePtr); the order is On Tour
 // cBxReplayFrame's. cReplayFrame (replay/frame.h, vtable cReplayFrame_vtbl, ctor cReplayFrame_cReplayFrame) derives from it;
 // cPlaybackMan embeds one at +0x14 (its destructor cPlaybackMan__cPlaybackMan stores cReplayFramePtr_vtbl there).
 // Size 0x14 [R]: the constructor cReplayFramePtr_cReplayFramePtr stores the vptr and zeroes 0x4..0x10, and cReplayFrame's first own
@@ -31,7 +31,7 @@ struct tFramePtrSave;       // On Tour: 0x4 (int Type); loadBlock's second argum
 // A saved read position (On Tour tFramePos, 0x4); getReadPos/setReadPos copy it to/from ReadData.
 struct tFramePos {
     char* Data;             // 0x0 [O]; [P] preview assert "Block && pos.Data" (replay/frameptr.h); [U]
-                            //     func_00272218 stores ReadData here, func_00272228 loads ReadData from it
+                            //     cReplayFramePtr_getReadPos stores ReadData here, cReplayFramePtr_setReadPos loads ReadData from it
 };
 
 struct cReplayFramePtr {
@@ -40,14 +40,14 @@ struct cReplayFramePtr {
                             //      ctor then stores cReplayFrame_vtbl); [U] peekObjNodeType and the readReplayInstance /
                             //      writeReplayInstance bodies call slots 1/2 (write/read) through it
     // --- cReplayFramePtr
-    char* Block;            // 0x04 [O]; [P] getBlock (func_00272210) lw 0x4; assert "Block && ReadData"; [R] ctor 0;
+    char* Block;            // 0x04 [O]; [P] getBlock (cReplayFramePtr_getBlock) lw 0x4; assert "Block && ReadData"; [R] ctor 0;
                             //      [U] initBlock stores the new "Frame Block" (operator new), setBlock stores data,
                             //      purgeBlock frees it; readRewind / writeRewind reset the cursors to it
     char* WriteData;        // 0x08 [O]; [R] ctor 0; [U] write (cReplayFramePtr_write) copies to it and advances it;
                             //      setBlock = data + size; loadBlock = Block + unpacked size; writeRewind = Block
     char* ReadData;         // 0x0C [O]; [P] assert "Block && ReadData"; [R] ctor 0; [U] read (cReplayFramePtr_read) copies
                             //      from it and advances it; peekObjNodeType restores it; readRewind = Block
-    int Size;               // 0x10 [O]; [P] GetSize / getBlockSaveSize (func_00272238 / func_00272240) lw 0x10; [R]
+    int Size;               // 0x10 [O]; [P] GetSize / getBlockSaveSize (cReplayFramePtr_getBlockSaveSize / cReplayFramePtr_GetSize) lw 0x10; [R]
                             //      ctor 0; [U] write adds len; setBlock stores size; writeRewind / purgeBlock 0
 };
 

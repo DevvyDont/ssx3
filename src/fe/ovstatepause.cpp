@@ -2513,14 +2513,14 @@ extern int D_004A2A54;
 extern int cPauseState_Flags;
 extern int D_005366E8[];
 extern int D_004428F0[];
-void func_00270ED8(void* self);
+void cReplay_purgeSave(void* self);
 extern "C" void* cFEMemCard_onDestroyScreen(void* self);
 extern "C" void cReplay_startReplay(void* self, void* a1, int a2, int a3);
 
 /**
  * Tears down the save-replay overlay and restarts the replay.
  *
- * When a replay save buffer is still held (+0x1C8, On Tour mIsReplayAlloc) it releases it (func_00270ED8 on
+ * When a replay save buffer is still held (+0x1C8, On Tour mIsReplayAlloc) it releases it (cReplay_purgeSave on
  * SSXApp->Game->Replay, On Tour cReplay::purgeSave) and clears the flag. Pops the pause state (cPauseState_Flags =
  * D_004428F0[D_005366E8[--D_004A2A54]]), runs cFEMemCard_onDestroyScreen and restarts playback with
  * cReplay_startReplay(Replay, 0, 0, 0).
@@ -2528,7 +2528,7 @@ extern "C" void cReplay_startReplay(void* self, void* a1, int a2, int a3);
 extern "C" void cOVState_SAVEREPLAY_onDestroyScreen(void* self)
 {
     if (*(int*)((char*)self + 0x1C8) == 1) {
-        func_00270ED8(SSXApp->Game->Replay);
+        cReplay_purgeSave(SSXApp->Game->Replay);
         *(int*)((char*)self + 0x1C8) = 0;
     }
     cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
@@ -2958,7 +2958,7 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* self);
 extern "C" void func_0023CAE8(void* self, int a, int b);
-void func_00270ED8(void* self);
+void cReplay_purgeSave(void* self);
 // PORT: the unit declares cMCOverlayManager_SetAction as returning void*; this caller ignores the result (void view by asm label).
 extern "C" void cMCOverlayManager_SetAction_v(void* self, int mode) __asm__("cMCOverlayManager_SetAction");
 
@@ -3044,7 +3044,7 @@ public:
  *
  * Ignores events without a widget or while busy (+0x1A8, mIsProcessing). Event 5 (select), when the screen is not
  * leaving (mState +0x1C0 != 6) and the display state (+0x214) is 3: stores the widget's slot (miMiscData) in +0x1C4
- * (mSlot) and the manager's mFileCursor, releases a held replay buffer (+0x1C8, func_00270ED8 on the replay), starts
+ * (mSlot) and the manager's mFileCursor, releases a held replay buffer (+0x1C8, cReplay_purgeSave on the replay), starts
  * the replay save with func_0023CAE8(manager, 0, -1) (On Tour writeSetFileType, file type 0 = replay), and sets
  * mIsProcessing, mIsSavePressed (+0x1DC) and mState 3. Event 6 (back) sets mIsCancelPressed (+0x1E4), resets the
  * manager to state 0 (vtable slot 1, cMCOverlayManager_SetState) when mState is 0-2, and sets mState 6. Event 7, on a
@@ -3077,7 +3077,7 @@ extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(void* self, void* msg, unsigne
         *(int*)((char*)self + 0x1A8) = one;
         if (*(int*)((char*)self + 0x1C8) == one)
         {
-            func_00270ED8(SSXApp->Game->Replay);
+            cReplay_purgeSave(SSXApp->Game->Replay);
             *(int*)((char*)self + 0x1C8) = 0;
         }
         func_0023CAE8(mp, 0, -1);
@@ -3129,14 +3129,14 @@ extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(void* self, void* msg, unsigne
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_onPopupEvent);
 #ifdef SKIP_ASM
-void func_00270ED8(void* self);
+void cReplay_purgeSave(void* self);
 extern "C" void cFEMemCard_onPopupEvent(void* self, void* a1, int key);
 
 /**
  * Handles the save-replay overlay's popup events: frees the replay buffer once the save-done popup closes.
  *
  * On event 22 while the popup type (+0x19C, mPopupType) is 5 (save done), releases the replay save buffer
- * (func_00270ED8 on SSXApp->Game->Replay) and clears +0x1C8 (mIsReplayAlloc); then hands every event to the memory-card
+ * (cReplay_purgeSave on SSXApp->Game->Replay) and clears +0x1C8 (mIsReplayAlloc); then hands every event to the memory-card
  * base handler cFEMemCard_onPopupEvent.
  *
  * @param popup  the popup state that sent the event
@@ -3146,7 +3146,7 @@ extern "C" void cOVState_SAVEREPLAY_onPopupEvent(void* self, void* popup, int ke
 {
     if (key == 22) {
         if (*(int*)((char*)self + 0x19C) == 5) {
-            func_00270ED8(SSXApp->Game->Replay);
+            cReplay_purgeSave(SSXApp->Game->Replay);
             *(int*)((char*)self + 0x1C8) = 0;
         }
     }

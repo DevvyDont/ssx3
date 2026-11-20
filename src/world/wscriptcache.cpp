@@ -158,7 +158,7 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCache_getScriptBase);
 /**
  * Returns section @p sectionId's script data (its cache entry's mpScriptHeader).
  *
- * The wscript code uses it as the section's script base (func_0030BB10, cWScriptMan_readFromReplayFrame).
+ * The wscript code uses it as the section's script base (cWScriptMan_writeToReplayFrame, cWScriptMan_readFromReplayFrame).
  *
  * @param sectionId  the section id
  * @return the script file header

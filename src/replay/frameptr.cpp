@@ -88,7 +88,7 @@ void cReplayFramePtr_readRewind(cReplayFramePtr* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026E9C0__FPv);
+INCLUDE_ASM("replay/frameptr", cReplayFramePtr_writeRewind__FPv);
 #ifdef SKIP_ASM
 /**
  * Rewinds the frame pointer's write position: sets WriteData to Block and Size to 0, so the block is rewritten.
@@ -97,7 +97,7 @@ INCLUDE_ASM("replay/frameptr", func_0026E9C0__FPv);
  *
  * @return the block start (Block)
  */
-int func_0026E9C0(void* self)
+int cReplayFramePtr_writeRewind(void* self)
 {
     int block = *(int*)((char*)self + 0x4);
     *(int*)((char*)self + 0x10) = 0;
@@ -209,7 +209,7 @@ extern "C" int cReplayFramePtr_loadBlock(cReplayFramePtr* self, char** pp, void*
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026EB48);
+INCLUDE_ASM("replay/frameptr", cReplayFramePtr_readReplayInstance);
 #ifdef SKIP_ASM
 
 struct sRefSet_EB48 {
@@ -261,12 +261,12 @@ struct sRefH_EB48 {
  * The id is read through the stream's read slot (virtual slot 2). An id of 0xFFFFFFFF gives 0. Otherwise the instance
  * manager is asked first (func_003512C0 on SSXApp->Game->InstanceMan); if it has no record, the world cache of
  * cWorld_m_pTheWorld is used: set (id & 0xFF), entry (id >> 8), whose upper 24 bits are the record address / 4.
- * func_0026ECD8 writes what this reads.
+ * cReplayFramePtr_writeReplayInstance writes what this reads.
  *
  * @param stream  the frame pointer to read from
  * @return the instance record, or 0 for no id or an unknown one
  */
-extern "C" void* func_0026EB48(cReplayFramePtr* stream)
+extern "C" void* cReplayFramePtr_readReplayInstance(cReplayFramePtr* stream)
 {
     void* instRecord = 0;
     sRefH_EB48 savedId;
@@ -283,7 +283,7 @@ extern "C" void* func_0026EB48(cReplayFramePtr* stream)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026EC08);
+INCLUDE_ASM("replay/frameptr", cReplayFramePtr_readReplayInstance1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sRefSet_EC08 {
@@ -296,7 +296,7 @@ struct sRefWorld_EC08 {
     sRefSet_EC08** sets;    // 0x8
 };
 
-// asm-label view: func_0026EB48 declares cWorld_m_pTheWorld with its own struct type in this unit
+// asm-label view: cReplayFramePtr_readReplayInstance declares cWorld_m_pTheWorld with its own struct type in this unit
 
 class cStream_EC08 {
 public:
@@ -341,13 +341,13 @@ static inline void* lookup_EC08(unsigned int id)
  * The id and a 16-bit type are read through the stream's read slot (virtual slot 2). An id of 0xFFFFFFFF gives 0;
  * otherwise the record comes from the world cache of cWorld_m_pTheWorld (set id & 0xFF, entry id >> 8, upper 24 bits =
  * address / 4), with no null check. The record's word at +0xC is set to @p owner and the low 16 bits of its flags
- * (+0x8) are replaced by the saved type, keeping bits 8 and 9. func_0026ED28 writes what this reads.
+ * (+0x8) are replaced by the saved type, keeping bits 8 and 9. cReplayFramePtr_writeReplayInstance1 writes what this reads.
  *
  * @param stream  the frame pointer to read from
  * @param owner  the node that becomes the record's owner (stored at +0xC)
  * @return the instance record, or 0 for no id
  */
-extern "C" void* func_0026EC08(cReplayFramePtr* stream, void* owner)
+extern "C" void* cReplayFramePtr_readReplayInstance1(cReplayFramePtr* stream, void* owner)
 {
     sNode_EC08* instRecord = 0;
     sRec_EC08 rec;
@@ -363,7 +363,7 @@ extern "C" void* func_0026EC08(cReplayFramePtr* stream, void* owner)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026ECD8);
+INCLUDE_ASM("replay/frameptr", cReplayFramePtr_writeReplayInstance);
 #ifdef SKIP_ASM
 struct sFpSerVEntry {
     short delta;
@@ -378,12 +378,12 @@ struct sFpSerObj {
 /**
  * Writes the 4-byte id of instance record @p obj (its word at +0x78) to the frame, or 0xFFFFFFFF when @p obj is null.
  *
- * The id goes through the stream's write slot (virtual slot 1); func_0026EB48 reads it back.
+ * The id goes through the stream's write slot (virtual slot 1); cReplayFramePtr_readReplayInstance reads it back.
  *
  * @param out  the frame pointer to write to
  * @param obj  the instance record, or null
  */
-extern "C" void func_0026ECD8(sFpSerObj* out, void* obj)
+extern "C" void cReplayFramePtr_writeReplayInstance(sFpSerObj* out, void* obj)
 {
     unsigned int id = 0xFFFFFFFF;
     if (obj != 0) {
@@ -394,19 +394,19 @@ extern "C" void func_0026ECD8(sFpSerObj* out, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026ED28);
+INCLUDE_ASM("replay/frameptr", cReplayFramePtr_writeReplayInstance1);
 #ifdef SKIP_ASM
 /**
  * Writes an 8-byte reference to the instance record of node @p obj (its pointer at +0x18) to the frame.
  *
  * The record holds the instance's id (+0x78) and the 16-bit type from its flags (+0x8); with no instance it is id
- * 0xFFFFFFFF and type 0. It goes through the stream's write slot (virtual slot 1); func_0026EC08 reads it back. @p obj
+ * 0xFFFFFFFF and type 0. It goes through the stream's write slot (virtual slot 1); cReplayFramePtr_readReplayInstance1 reads it back. @p obj
  * itself must not be null.
  *
  * @param out  the frame pointer to write to
  * @param obj  the node whose instance is written
  */
-extern "C" void func_0026ED28(sFpSerObj* out, void* obj)
+extern "C" void cReplayFramePtr_writeReplayInstance1(sFpSerObj* out, void* obj)
 {
     struct {
         unsigned int id;
@@ -559,7 +559,7 @@ extern "C" void cReplay_setupInstantReplayCameras(cReplay* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026EF80);
+INCLUDE_ASM("replay/frameptr", cReplay_setupGameCamerasOnExitInstantReplay);
 #ifdef SKIP_ASM
 extern void* gCamTriggerMan[];
 void cCameraTriggerMan_setInGameTriggers(void* self);
@@ -572,7 +572,7 @@ extern "C" void cCamera_setCurrentController(void* self, int mode);
  * controller of the view manager's first camera (+0x4) to 2. cReplay_stopReplay calls it instead of
  * cReplay_setupGameCamerasOnExitReplay when InstantReplay is set after the save frame is restored.
  */
-extern "C" void func_0026EF80()
+extern "C" void cReplay_setupGameCamerasOnExitInstantReplay()
 {
     cCameraTriggerMan_setInGameTriggers(gCamTriggerMan);
     cCamera_setCurrentController(*(void**)((char*)SSXApp->Game->ViewMan + 0x4), 2);
@@ -583,15 +583,15 @@ extern "C" void func_0026EF80()
 INCLUDE_ASM("replay/frameptr", cReplay_cReplay);
 #ifdef SKIP_ASM
 extern "C" void* cReplayFrame_cReplayFrame(void* self);
-void* func_0026E5A8(void* self);
-extern "C" void* func_00272288(void* self);
+void* cReplayFrameList_cReplayFrameList(void* self);
+extern "C" void* cReplayHighlight_reset(void* self);
 void cReplay_setReplayState(void* self, int state);
 
 /**
  * Constructs the replay manager.
  *
- * Constructs the 16 frames (cReplayFrame_cReplayFrame, cReplayFrame), FrameList and FreeFrameList (func_0026E5A8) and the two
- * Highlight records (func_00272288), sets the state to 15 (kReplayInit) and clears both InputCache pointers.
+ * Constructs the 16 frames (cReplayFrame_cReplayFrame, cReplayFrame), FrameList and FreeFrameList (cReplayFrameList_cReplayFrameList) and the two
+ * Highlight records (cReplayHighlight_reset), sets the state to 15 (kReplayInit) and clears both InputCache pointers.
  *
  * @return @p self
  */
@@ -602,10 +602,10 @@ extern "C" void* cReplay_cReplay(cReplay* self)
         cReplayFrame_cReplayFrame(frame);
     }
     char* highlight = (char*)self + 0x494;
-    func_0026E5A8((char*)self + 0x3B0);
-    func_0026E5A8((char*)self + 0x3BC);
+    cReplayFrameList_cReplayFrameList((char*)self + 0x3B0);
+    cReplayFrameList_cReplayFrameList((char*)self + 0x3BC);
     for (int i = 1; i != -1; i--, highlight += 0xB4) {
-        func_00272288(highlight);
+        cReplayHighlight_reset(highlight);
     }
     cReplay_setReplayState(self, 15);
     for (int i = 1; i >= 0; i--) {
@@ -724,7 +724,7 @@ extern "C" void cReplay_init(cReplay* self)
 INCLUDE_ASM("replay/frameptr", cReplay_reset);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-void func_0026D168(void* self);
+void cReplayCache_reset(void* self);
 void cReplayFrameList_reset(void* self);
 extern "C" void cReplayFrameList_addFrame(void* list, void* block);
 extern "C" void MEM_fill(void* dst, int c, int n);
@@ -740,7 +740,7 @@ struct sFpSlot_F228 {
  * list.
  *
  * Does nothing in kReplayPaused (14) or kReplayInit (15). Otherwise sets SaveState 15 and State kPreRace
- * (10), zeroes the playback, record and writer fields, resets both input caches (func_0026D168) and
+ * (10), zeroes the playback, record and writer fields, resets both input caches (cReplayCache_reset) and
  * highlights (PlayerId 0 / 1, no frame, stats cleared), empties FrameList and FreeFrameList and adds all
  * MaxFrames frames to the free list. With one human player (cAI NumberOfPlayersAllocated == 1) it keeps 3
  * highlights and 3 chapters, else 1 and 0.
@@ -798,7 +798,7 @@ extern "C" void cReplay_reset(cReplay* self)
     char* highlightData = ((char*)self) + 0x498;
     void** pp = (void**)(((char*)self) + 0x48C);
     do {
-        if (*pp) func_0026D168(*pp);
+        if (*pp) cReplayCache_reset(*pp);
         highlight->fB0 = 0;
         highlight->id = none;
         MEM_fill(highlightData, 0, 172);
@@ -1105,14 +1105,14 @@ extern "C" void cReplay_popReplaySaveFrame(cReplay* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/frameptr", func_0026F898__FPvi);
+INCLUDE_ASM("replay/frameptr", cReplay_setReplayPadNum__FPvi);
 #ifdef SKIP_ASM
 /**
  * Sets the replay's PadNum, the controller whose pad drives the replay controls.
  *
  * @param val  the pad number
  */
-void func_0026F898(void* self, int val)
+void cReplay_setReplayPadNum(void* self, int val)
 {
     *(int*)((char*)self + 0x28) = val;
 }
@@ -1173,7 +1173,7 @@ extern "C" void cReplay_startReplay(cReplay* self, void* frame, int instantRepla
 INCLUDE_ASM("replay/frameptr", cReplay_stopReplay);
 #ifdef SKIP_ASM
 extern "C" void cReplay_setupGameCamerasOnExitReplay(cReplay* self);
-extern "C" void func_0026EF80(void* self);
+extern "C" void cReplay_setupGameCamerasOnExitInstantReplay(void* self);
 void cReplay_setReplayState(void* self, int state);
 extern "C" void cReplay_popReplaySaveFrame(cReplay* self);
 extern "C" void cReplay_cancelMarkInstantReplay(void* self);
@@ -1197,7 +1197,7 @@ struct cReplayFramePtr_F980 {
  * Cancels a marked instant replay, calls the sound bank manager's func_0028F2C0 unless the replay was automatic or
  * instant, and clears AutoReplay, InstantReplay and StartInstantReplay. Unless a loaded replay is playing, restores
  * the live game (cReplay_popReplaySaveFrame), gives the cameras back and sets state 13 (kReplayEnd) when EndReplay is
- * set, else 0 (kGameRecording). InstantReplay is cleared before it is tested, so func_0026EF80 (the instant-replay
+ * set, else 0 (kGameRecording). InstantReplay is cleared before it is tested, so cReplay_setupGameCamerasOnExitInstantReplay (the instant-replay
  * camera exit) runs only if restoring the save frame sets InstantReplay again.
  */
 extern "C" void cReplay_stopReplay(cReplay* self)
@@ -1214,7 +1214,7 @@ extern "C" void cReplay_stopReplay(cReplay* self)
         if (self->Loaded == 0) {
             cReplay_popReplaySaveFrame(self);
             if (self->InstantReplay) {
-                func_0026EF80(((cReplayFramePtr_F980*)self));
+                cReplay_setupGameCamerasOnExitInstantReplay(((cReplayFramePtr_F980*)self));
             } else {
                 cReplay_setupGameCamerasOnExitReplay(self);
             }
@@ -1413,9 +1413,9 @@ INCLUDE_ASM("replay/frameptr", cReplay_processInput);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cGameViewMan_updateAll(void* list);
-// PORT: func_0026E448 is declared (void*) in replay.cpp but takes the frame index too
+// PORT: cReplay_findFrame is declared (void*) in replay.cpp but takes the frame index too
 extern "C" void cReplay_lastFrame(void* self);
-void* func_0026E448_2(void* self, int frame) __asm__("func_0026E448__FPv");
+void* cReplay_findFrame_2(void* self, int frame) __asm__("cReplay_findFrame__FPv");
 extern "C" void cReplay_prevFrame(void* self);
 extern "C" void cReplay_nextFrame(void* self);
 extern "C" void cChaseCameraController_switchCamera_Chapter(void* p);
@@ -1467,7 +1467,7 @@ extern "C" void cReplay_processInput(cReplay* self)
         break;
     case 3: {
         redraw = 1;
-        char* frame = (char*)func_0026E448_2(((char*)self), self->PlaybackTick);
+        char* frame = (char*)cReplay_findFrame_2(((char*)self), self->PlaybackTick);
         self->PlaybackFrame = (cReplayFrame*)frame;
         if (self->PlaybackTick == *(int*)(frame + 0x30)) {
             cReplay_prevFrame(((char*)self));

@@ -6,7 +6,7 @@ INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_Init);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void func_00340970(void* self);
+extern "C" void tAIFwdDiff_tAIFwdDiff(void* self);
 extern char str_AIFwdDiffCache[];
 extern char str_AIFwdDiffHash[];
 
@@ -34,7 +34,7 @@ extern "C" void cAIFwdDiffCache_Init(sCache_7890* self, int n)
     sCacheEntry_7890* mem = (sCacheEntry_7890*)operator_new_tag(n * sizeof(sCacheEntry_7890), str_AIFwdDiffCache, 0, 0);
     sCacheEntry_7890* entry = mem;
     for (int k = n - 1; k != -1; k--, entry++) {
-        func_00340970(entry);
+        tAIFwdDiff_tAIFwdDiff(entry);
     }
     self->entries = mem;
     for (int i = 0; i < n; i++) {
@@ -84,7 +84,7 @@ static inline int cAIFwdDiffCache_GetFwdDiff_less(unsigned int a, unsigned int b
  * Looks the patch's key (+0x150) up in its hash bucket (key modulo the bucket count +0xC; chains are sorted by key). On
  * a hit the node is moved to the tail of the age queue (cAIFwdDiffCache_MoveToAgeQueueTail). On a miss the oldest node (+0x4) is reused: it
  * is taken out of the hash (cAIFwdDiffCache_RemoveFromHash), given the key, hashed again (cAIFwdDiffCache_AddToHash), the age queue head moves on,
- * and the patch is tessellated into it (cAIFwdDiffCache_TesselatePatch). Called by func_00333EF8 and func_00335960.
+ * and the patch is tessellated into it (cAIFwdDiffCache_TesselatePatch). Called by cOverlapList_terrainIntersect and TerrainCallback_intersectpatch.
  *
  * @param src  the terrain patch record (On Tour const tPatchRecord&)
  * @param out  receives the cache node (On Tour ppFwdDiff)
@@ -331,7 +331,7 @@ struct sFwdDiff_27CC8 {
  *
  * Copies the eight axis vectors (+0x0..+0x7F), the centre (+0x80) and the 0x80-byte static info (+0xC0), then points
  * the info pointer (+0x98) at this tree's own copy. The scale (+0x90), worst case (+0x94) and sort axes (+0x9C) are not
- * copied. Called by cRollerModifier_cRollerModifier, cWorldSphTree_Transform and func_0035DF70.
+ * copied. Called by cRollerModifier_cRollerModifier, cWorldSphTree_Transform and cRollerModifier_cRollerModifier1.
  *
  * @param src  the tree to copy (On Tour aTree)
  * @return @p self
@@ -706,7 +706,7 @@ struct sBox_00328360 {
  * cell child by child (nash_privy_QueryHelper_helpX), so in practice every overlapping cell takes the crossing path.
  *
  * Called once per root cell by cCameraTriggerMan_checkCollisions (camera triggers) and the octree queries
- * func_00330BA8, func_00331450, func_00331E90, func_00332DB8, func_00335D78, func_00336F30 and func_00337A48.
+ * cOverlapList_getinstances, cOverlapList_gettyped, cOverlapList_getpatchesandinstances, cOverlapList_geteverything, cBXNash_terrainIntersect, cBXNash_staticObjectIntersect and cBXNash_splineIntersect.
  *
  * @param cell  the cell key: level, x, y, z (On Tour CellKey, this)
  * @param box  the query box: min at +0x0, max at +0x10

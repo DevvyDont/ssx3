@@ -3428,8 +3428,8 @@ extern "C" void cFinishLineControl_writeToReplayFrame(void* self, void* s);
 extern "C" void cHandplantControl_writeToReplayFrame(void* self, void* s);
 extern "C" void cUberGrindControl_writeToReplayFrame(void* self, void* s);
 extern "C" void cCheatFX_writeToReplayFrame(void* self, void* s);
-extern "C" int func_0026B508(void* tree, void* path);
-extern "C" int func_0026B550(void* tree, void* path);
+extern "C" int cPathSys_getTrackPathIndex(void* tree, void* path);
+extern "C" int cPathSys_getAIPathIndex(void* tree, void* path);
 
 /**
  * Writes the rider's state into one replay frame: the cRider, its helpers, every stateful part and its paths.
@@ -3484,8 +3484,8 @@ extern "C" void cRiderHandler_writeToReplayFrame(cRiderHandler* self, char* data
     st->Write(*(void**)((char*)self->GroundMotion.mRider + 0xABC), 0x20);
     st->Write(*(void**)((char*)self->GroundMotion.mRider + 0xAC0), 0x20);
     int ids[2];
-    ids[0] = func_0026B508(gPaths, *(void**)((char*)self->GroundMotion.mRider + 0xAB4));
-    ids[1] = func_0026B550(gPaths, *(void**)((char*)self->GroundMotion.mRider + 0xAB8));
+    ids[0] = cPathSys_getTrackPathIndex(gPaths, *(void**)((char*)self->GroundMotion.mRider + 0xAB4));
+    ids[1] = cPathSys_getAIPathIndex(gPaths, *(void**)((char*)self->GroundMotion.mRider + 0xAB8));
     st->Write(ids, 8);
 }
 #endif

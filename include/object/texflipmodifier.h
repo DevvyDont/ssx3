@@ -5,7 +5,7 @@
 // No vtable. Size 0xE8: retail cMemMan_alloc(0xE8, "TexFlipModifier") in cMoveNode's addTexFlip and the replay loader;
 // On Tour 0xA8 (its tTexFlipMaterialBlockRecord is smaller; the members before it keep On Tour's offsets).
 // EA's source: d:/ssx/code/source/object/texflipmodifier.cpp (preview assert).
-// Methods (src/object/railmodifier.cpp): ctor func_0035F0B8 (tAddTexFlipData, instance), replay ctor func_0035F1A8,
+// Methods (src/object/railmodifier.cpp): ctor cTexFlipModifier_cTexFlipModifier (tAddTexFlipData, instance), replay ctor cTexFlipModifier_cTexFlipModifier1,
 // setup cTexFlipModifier_setupTexFlip (counts materials, fills MaterialBlock), update cTexFlipModifier_update, signal cTexFlipModifier_signal,
 // writeToReplayFrame cTexFlipModifier_writeToReplayFrame.
 

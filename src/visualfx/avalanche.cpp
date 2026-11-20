@@ -865,7 +865,7 @@ struct sAvEnd_7EF8 {};  // empty trailing member of the defaults record; its val
 
 extern float cAvalanche_m_UpdateTimeStep;
 extern int D_004A54C8;
-// Defaults record of an animated-float spawn (read by func_00341AA0, sSphFloatDef_1AA0 in intersect/worldsphtree).
+// Defaults record of an animated-float spawn (read by cAnimObjectNode_cAnimObjectNode1, sSphFloatDef_1AA0 in intersect/worldsphtree).
 // The original keeps it as a function-local static; the ctor's float parameters are what lets loop.c hoist -1.0f/30.0f.
 struct sAvFloatDef_7EF8 {
     unsigned id;        // 0x00
@@ -888,7 +888,7 @@ inline void* operator new(unsigned int, void* p) { return p; }
 extern sAvFloatDef_7EF8 D_004D5770;
 extern char str_AnimObject_b[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_00341AA0(void* self, int a, int type, void* b, void* c);
+extern "C" void* cAnimObjectNode_cAnimObjectNode1(void* self, int a, int type, void* b, void* c);
 extern "C" bool tActiveAvalancheNode_update_7EF8(void* node, float t) __asm__("tActiveAvalancheNode_update");
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void tActiveAvalanche_end_7EF8(void* self) __asm__("tActiveAvalanche_end");
@@ -940,7 +940,7 @@ extern "C" void tActiveAvalanche_update_7EF8(sAvActive_7EF8* self)
                 new (&D_004D5770) sAvFloatDef_7EF8();
                 D_004A54C8 = 1;
             }
-            func_00341AA0(cMemMan_alloc(108, str_AnimObject_b, 0x20000000, 0), 1, 1, self->data->events[self->nextEvent].obj, &D_004D5770);
+            cAnimObjectNode_cAnimObjectNode1(cMemMan_alloc(108, str_AnimObject_b, 0x20000000, 0), 1, 1, self->data->events[self->nextEvent].obj, &D_004D5770);
         }
         func_0029E560_7EF8(cAudioInterface_bxAudio(), pos_7EF8(self->data->events[self->nextEvent].obj));
         self->nextEvent++;

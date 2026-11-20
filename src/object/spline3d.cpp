@@ -252,7 +252,7 @@ struct sVEnt_5638 {
  *
  * Builds the box corners (x, y, z, 1) from the floats at +0x6C..+0x74 and +0x78..+0x80, gets the current view matrix
  * from the graphics manager's virtual slot 43 and passes all three to its box test (virtual slot 93). The result is 1
- * unless that test returns 1 (the box is outside the view), the same test as func_00345320. func_00345430 draws only
+ * unless that test returns 1 (the box is outside the view), the same test as cSpline_isVisible. cSpline_draw draws only
  * the nodes for which this returns non-zero.
  *
  * @return 1 when the box is (at least partly) in view, 0 when the test culls it

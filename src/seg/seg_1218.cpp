@@ -1542,13 +1542,13 @@ struct sList_1A28 {
 };
 
 extern int cWScriptMan_TheWScriptMan;
-extern "C" int func_0030A310(int, sLink_1A28*);
+extern "C" int cWScriptMan_isFocusInstance(int, sLink_1A28*);
 
 extern "C" void func_00101A28(sList_1A28* list, sNode_1A28* node, int recurse)
 {
     sLink_1A28* item;
     for (item = node->items; item; item = item->next) {
-        if (func_0030A310(cWScriptMan_TheWScriptMan, item))
+        if (cWScriptMan_isFocusInstance(cWScriptMan_TheWScriptMan, item))
             list->items[list->n++] = item;
     }
     if (recurse) {
@@ -1694,7 +1694,7 @@ extern "C" void func_00101A28_1B60(sFocusList* list, const sNode_1A28* node, int
 extern "C" void MEM_copy(void* dst, void* src, int size);
 extern "C" void func_0013FAD8(tFocusRec** first, tFocusRec** last, tFocusRec** out, const InstanceCompare& cmp);
 extern "C" void cWScriptMan_downFocusScript(int, tFocusRec*);
-extern "C" void func_0030A3A0(int, tFocusRec*);
+extern "C" void cWScriptMan_upFocusScript(int, tFocusRec*);
 
 struct FocusCallback;
 // Retail's out-of-line copy of FocusCallback::operator() (matched in ai/control/handplantcontrol); the
@@ -1842,7 +1842,7 @@ extern "C" void func_00101B60(sFocusBoxes* self)
     if (numfocusinstances) {
         func_0013FAD8(focusinstances, focusinstances + numfocusinstances, sorted, InstanceCompare());
         for (int i = 0; i < numfocusinstances; i++) {
-            func_0030A3A0(cWScriptMan_TheWScriptMan, sorted[i]);
+            cWScriptMan_upFocusScript(cWScriptMan_TheWScriptMan, sorted[i]);
         }
     }
 }
@@ -3261,7 +3261,7 @@ public:
 };
 
 extern sV4_4E70 D_004FF120_4E70 __asm__("t4vect_Zero");
-extern "C" int func_00334458_4E70(void*, cScope_4E70*, sHit_4E70*, int, int) __asm__("func_00334458");
+extern "C" int cOverlapList_staticObjectIntersect_4E70(void*, cScope_4E70*, sHit_4E70*, int, int) __asm__("cOverlapList_staticObjectIntersect");
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float Dot_4E70(const sV4_4E70& a, const sV4_4E70& b)
@@ -3379,7 +3379,7 @@ extern "C" float func_00104E70(char* self, cScope_4E70* sc, sHit_4E70* out)
 {
     int nIds = 0;
     sHit_4E70 hits[64];
-    int n = func_00334458_4E70(*(void**)(self + 0x860), sc, hits, 64, 0);
+    int n = cOverlapList_staticObjectIntersect_4E70(*(void**)(self + 0x860), sc, hits, 64, 0);
     if (n == 0)
         return -1.0f;
     if (hits[0].surf)

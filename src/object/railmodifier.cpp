@@ -888,7 +888,7 @@ INCLUDE_ASM("object/railmodifier", cRigidBody_cRigidBody__FPv);
  * Constructs a rigid body: nothing to initialise, so it only returns the object.
  *
  * Run on a roller modifier's body (+0x30) by cRollerModifier_cRollerModifier and the replay constructor
- * func_0035DF70.
+ * cRollerModifier_cRollerModifier1.
  *
  * @return the body (self)
  */
@@ -899,7 +899,7 @@ void* cRigidBody_cRigidBody(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035CFF0);
+INCLUDE_ASM("object/railmodifier", cRigidBody_setW);
 #ifdef SKIP_ASM
 struct sVec4CFF0 {
     float x, y, z, w;
@@ -971,7 +971,7 @@ static inline sVec4CFF0 xformCFF0(const sMat33CFF0& m, sBodyCFF0* b)
  *
  * @param newPos  new angular velocity W
  */
-extern "C" void func_0035CFF0(sBodyCFF0* self, const sVec4CFF0* newPos)
+extern "C" void cRigidBody_setW(sBodyCFF0* self, const sVec4CFF0* newPos)
 {
     self->outPos = *newPos;
     sMat33CFF0 invRot = self->rot;
@@ -1047,7 +1047,7 @@ extern "C" void cRigidBody_updateImplicit(sRmBody* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035D340);
+INCLUDE_ASM("object/railmodifier", cRigidBody_stepMotion);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -1148,7 +1148,7 @@ static inline void NormalizeD340(t4Vector& v)
  * @param torque  torque applied over the step
  * @param dt  time step
  */
-extern "C" void func_0035D340(sRmBody_D340* body, const t4Vector* force, const t4Vector* torque, float dt)
+extern "C" void cRigidBody_stepMotion(sRmBody_D340* body, const t4Vector* force, const t4Vector* torque, float dt)
 {
     t4Vector step;
     ScaleD340(step, body->vel, dt);
@@ -1171,7 +1171,7 @@ extern "C" void func_0035D340(sRmBody_D340* body, const t4Vector* force, const t
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035D4A0);
+INCLUDE_ASM("object/railmodifier", cRigidBody_rigidImpact);
 #ifdef SKIP_ASM
 extern "C" void func_0035D908(sRmBody* b, const sRmVec4* r, const sRmVec4* imp);
 
@@ -1341,7 +1341,7 @@ static inline sRmVec4 PointVelD4A0(sRmRigid_D4A0* b, const sRmVec4& p)
  * @param restitution  elasticity
  * @param mu  friction coefficient
  */
-extern "C" void func_0035D4A0(sRmRigid_D4A0* body, sRmVec4* point, sRmVec4* n, float restitution, float mu)
+extern "C" void cRigidBody_rigidImpact(sRmRigid_D4A0* body, sRmVec4* point, sRmVec4* n, float restitution, float mu)
 {
     sRmVec4 arm = SubD4A0(*point, body->pos);
     sRmVec4 vp = PointVelD4A0(body, *point);
@@ -1727,7 +1727,7 @@ struct cRigidBody_DDE8 {
     sRmV4_35DDE8 V;         // 0x80
     sRmV4_35DDE8 W;         // 0x90
     float getInvM() const { return InvM; }
-    void setW(const sRmV4_35DDE8& w) __asm__("func_0035CFF0");
+    void setW(const sRmV4_35DDE8& w) __asm__("cRigidBody_setW");
 };
 
 struct cTransformModifier_DDE8 {
@@ -1784,7 +1784,7 @@ void cRollerModifier_DDE8::Collision(const sRmPath_35DDE8* tc)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035DF70);
+INCLUDE_ASM("object/railmodifier", cRollerModifier_cRollerModifier1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* cTransformModifier_vtbl[];
@@ -1849,7 +1849,7 @@ struct sRailDF70 {
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" sRailDF70* func_0035DF70(sRailDF70* self, cStreamDF70* stream)
+extern "C" sRailDF70* cRollerModifier_cRollerModifier1(sRailDF70* self, cStreamDF70* stream)
 {
     self->vt = cTransformModifier_vtbl;
     cRigidBody_cRigidBody(self->body);
@@ -2183,7 +2183,7 @@ extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* a1, int a2);
 extern "C" void cWorldSphTree__cWorldSphTree(void* self, int flags);
 extern "C" void* cObjectInterface_getNash();
 extern "C" float SphereTree_GetResolution(void* self);
-extern void func_0035D4A0_EDC8(void* self, void* hit, void* normal, float a, float b) __asm__("func_0035D4A0");
+extern void cRigidBody_rigidImpact_EDC8(void* self, void* hit, void* normal, float a, float b) __asm__("cRigidBody_rigidImpact");
 
 struct sHitEDC8 {
     sRmVec4 pos;        // 0x00
@@ -2197,7 +2197,7 @@ struct sHitEDC8 {
     sHitEDC8() {}
 } __attribute__((aligned(16)));
 
-extern "C" float func_00336850_EDC8(void* world, void* tree, sHitEDC8* out, void* a3) __asm__("func_00336850");
+extern "C" float cBXNash_terrainIntersect1_EDC8(void* world, void* tree, sHitEDC8* out, void* a3) __asm__("cBXNash_terrainIntersect1");
 
 // PORT: PS2-only VU0 inline asm (v * s).
 static inline sRmVec4 vu0ScaleEDC8(const sRmVec4& v, float s)
@@ -2364,7 +2364,7 @@ extern "C" void cRollerModifier_collide(cRollerModifier* self)
     char tree[0x70];
     cWorldSphTree_cWorldSphTree(tree, (char*)self + 0xE0, 1);
     float zeroF = 0.0f;
-    float overlap = func_00336850_EDC8(cObjectInterface_getNash(), tree, &hit, (char*)self + 0x2C0);
+    float overlap = cBXNash_terrainIntersect1_EDC8(cObjectInterface_getNash(), tree, &hit, (char*)self + 0x2C0);
     overlap -= SphereTree_GetResolution((char*)self + 0xE0);
     if (zeroF < overlap) {
         sRmVec4 push = vu0ScaleEDC8(hit.normal, overlap + 2.0f);
@@ -2380,7 +2380,7 @@ extern "C" void cRollerModifier_collide(cRollerModifier* self)
             float friction = self->ContactFriction;
             if (len < lim)
                 elastic = zeroF;
-            func_0035D4A0_EDC8(&(*(sRmBody*)&self->Pose), &hit, &hit.normal, elastic, friction);
+            cRigidBody_rigidImpact_EDC8(&(*(sRmBody*)&self->Pose), &hit, &hit.normal, elastic, friction);
             self->HitFrequency += 0.016666668f;
             if (5.0f < self->Life)
                 self->Life = 10.0f;
@@ -2391,7 +2391,7 @@ extern "C" void cRollerModifier_collide(cRollerModifier* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035F0B8);
+INCLUDE_ASM("object/railmodifier", cTexFlipModifier_cTexFlipModifier);
 #ifdef SKIP_ASM
 extern char* cAppMan_TheAppMan;
 int BXrand();
@@ -2417,7 +2417,7 @@ static inline float ftrunc_0035F0B8(float x)
  * @param owner  instance record
  * @return self
  */
-extern "C" cTexFlipModifier* func_0035F0B8(cTexFlipModifier* self, void* def, void* owner)
+extern "C" cTexFlipModifier* cTexFlipModifier_cTexFlipModifier(cTexFlipModifier* self, void* def, void* owner)
 {
     char* defData = (char*)def;
     float one = 1.0f;
@@ -2450,9 +2450,9 @@ extern "C" cTexFlipModifier* func_0035F0B8(cTexFlipModifier* self, void* def, vo
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035F1A8);
+INCLUDE_ASM("object/railmodifier", cTexFlipModifier_cTexFlipModifier1);
 #ifdef SKIP_ASM
-class func_0035F1A8_cObj {
+class cTexFlipModifier_cTexFlipModifier1_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
@@ -2469,7 +2469,7 @@ extern "C" void cTexFlipModifier_setupTexFlip(cTexFlipModifier* self);
  * @param obj  replay stream to read from
  * @return self
  */
-extern "C" void* func_0035F1A8(cTexFlipModifier* self, func_0035F1A8_cObj* obj)
+extern "C" void* cTexFlipModifier_cTexFlipModifier1(cTexFlipModifier* self, cTexFlipModifier_cTexFlipModifier1_cObj* obj)
 {
     obj->v02(self, 0x18);
     self->Instance = (tInstanceRecord*)obj->v03();
@@ -2562,13 +2562,13 @@ extern "C" void cTexFlipModifier_setupTexFlip(cTexFlipModifier* selfv)
 INCLUDE_ASM("object/railmodifier", cTexFlipModifier_setTexIndex);
 #ifdef SKIP_ASM
 struct sRailModSelect;
-extern "C" void func_0035F3A8(sRailModSelect* self);
+extern "C" void cTexFlipModifier_setupMaterialRecords(sRailModSelect* self);
 
 /**
  * Selects which texture a texture-flip modifier shows.
  *
  * Clamps @p i to the last texture (count at +0x20 minus 1; no lower bound), stores it in TexIndex (+0x14) and
- * updates every flipping material's record with func_0035F3A8.
+ * updates every flipping material's record with cTexFlipModifier_setupMaterialRecords.
  *
  * @param i  the texture index (On Tour texindex)
  */
@@ -2579,12 +2579,12 @@ extern "C" void cTexFlipModifier_setTexIndex(sRailModSelect* self, int i)
         i = n - 1;
     }
     *(int*)((char*)self + 0x14) = i;
-    func_0035F3A8(self);
+    cTexFlipModifier_setupMaterialRecords(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035F3A8);
+INCLUDE_ASM("object/railmodifier", cTexFlipModifier_setupMaterialRecords);
 #ifdef SKIP_ASM
 struct sRailOut14 {
     unsigned short value;   // 0x0
@@ -2606,7 +2606,7 @@ struct sRailModSelect {
  * For each of the materials (count +0x20) it reads the instance model's material list (+0x94) and, where an entry has a
  * texture table (+0x10), copies the u16 for TexIndex (+0x14) into that material's record in MaterialBlock.
  */
-extern "C" void func_0035F3A8(sRailModSelect* self)
+extern "C" void cTexFlipModifier_setupMaterialRecords(sRailModSelect* self)
 {
     int i;
     for (i = 0; i < self->count; i++) {
@@ -2763,7 +2763,7 @@ extern "C" void cTexFlipModifier_writeToReplayFrame(cTexFlipModifier* self, cStr
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035F6E8);
+INCLUDE_ASM("object/railmodifier", cUVScrollModifier_cUVScrollModifier);
 #ifdef SKIP_ASM
 extern char* cAppMan_TheAppMan;
 
@@ -2813,7 +2813,7 @@ struct sRmState_F6E8 {
  * @param scrollData  UV-scroll make-data (tAddUVScrollData)
  * @return self
  */
-extern "C" void* func_0035F6E8(sRmState_F6E8* self, sRmDesc_F6E8* scrollData)
+extern "C" void* cUVScrollModifier_cUVScrollModifier(sRmState_F6E8* self, sRmDesc_F6E8* scrollData)
 {
     self->f40 = 1;
     self->f0 = scrollData->f4;
@@ -2832,7 +2832,7 @@ extern "C" void* func_0035F6E8(sRmState_F6E8* self, sRmDesc_F6E8* scrollData)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_0035F788);
+INCLUDE_ASM("object/railmodifier", cUVScrollModifier_cUVScrollModifier1);
 #ifdef SKIP_ASM
 struct sRailSerVEntry {
     short delta;
@@ -2846,7 +2846,7 @@ struct sRailSerVEntry {
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* func_0035F788(cUVScrollModifier* self, void* stream)
+extern "C" void* cUVScrollModifier_cUVScrollModifier1(cUVScrollModifier* self, void* stream)
 {
     sRailSerVEntry* vt = *(sRailSerVEntry**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self, 80);
@@ -3169,7 +3169,7 @@ struct sList_FE10 {
     int a, b;
     void* operator new(unsigned int, void* p) { return p; }
 };
-void* func_003549D0(void* self);
+void* cBucketMan_cBucketMan(void* self);
 
 extern sV4_FE10 D_004FF740_v __asm__("D_004FF740");
 extern sV4_FE10 D_004FF750_v __asm__("D_004FF750");
@@ -3240,7 +3240,7 @@ extern "C" void func_0035FE10_init(int initialize, int priority) __asm__("func_0
  * Runs the railmodifier unit's static initialisation: builds its global vectors and matrices and the bucket manager.
  *
  * Only for priority 0xFFFF with initialize set. Constructs the colour/parameter vectors D_004FF740..D_004FFAB0, the
- * Catmull-Rom basis D_004FFAC0 used for rail segment matrices, D_004FFB00/D_004FFB10, and gBucketMan (func_003549D0).
+ * Catmull-Rom basis D_004FFAC0 used for rail segment matrices, D_004FFB00/D_004FFB10, and gBucketMan (cBucketMan_cBucketMan).
  *
  * @param initialize  nonzero for construction
  * @param priority  init priority; only 0xFFFF does anything
@@ -3310,13 +3310,13 @@ extern "C" void func_0035FE10_init(int initialize, int priority)
                                       0.0f, 1.0f, 0.0f, 0.0f);
         new (&D_004FFB00_v) sV4_FE10(1.0f, sV3_FE10(0.23000000417232513f, 0.2800000011920929f, 0.5f));
         new (&D_004FFB10_v) sV4_FE10(D_004FF7F0_v);
-        func_003549D0(&gBucketMan);
+        cBucketMan_cBucketMan(&gBucketMan);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360700);
+INCLUDE_ASM("object/railmodifier", cObjNode_cObjNode2);
 #ifdef SKIP_ASM
 extern void* cObjNode_vtbl[];
 
@@ -3325,7 +3325,7 @@ extern void* cObjNode_vtbl[];
  *
  * @return self
  */
-extern "C" void* func_00360700(void* self)
+extern "C" void* cObjNode_cObjNode2(void* self)
 {
     *(int*)((char*)self + 0x4) = 0;
     *(int*)((char*)self + 0xc) = (int)(void*)cObjNode_vtbl;
@@ -3379,42 +3379,42 @@ void cObjNode_renderModel(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360740__FPv);
+INCLUDE_ASM("object/railmodifier", cObjNode_compare__FPv);
 #ifdef SKIP_ASM
 /**
  * Reports that a plain object node never sorts before another one.
  *
  * @return 0 (false)
  */
-int func_00360740(void* self)
+int cObjNode_compare(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360748__FPv);
+INCLUDE_ASM("object/railmodifier", cObjNode_equal__FPv);
 #ifdef SKIP_ASM
 /**
  * Reports that a plain object node never equals another one in sort order.
  *
  * @return 0 (false)
  */
-int func_00360748(void* self)
+int cObjNode_equal(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360750__FPv);
+INCLUDE_ASM("object/railmodifier", cObjNode_getSortIndex__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns a plain object node's sort index, which is always 0.
  *
  * @return 0
  */
-int func_00360750(void* self)
+int cObjNode_getSortIndex(void* self)
 {
     return 0;
 }
@@ -3449,14 +3449,14 @@ int cObjNode_isType(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360768);
+INCLUDE_ASM("object/railmodifier", cObjNode_getSectionId);
 #ifdef SKIP_ASM
 /**
  * Returns the world section of a plain object node, which has none.
  *
  * @return 0xFFFFFFFF (no section)
  */
-extern "C" unsigned int func_00360768()
+extern "C" unsigned int cObjNode_getSectionId()
 {
     return 0xFFFFFFFFU;
 }
@@ -3536,7 +3536,7 @@ extern "C" int cTypeObjNode_isType(void* self, int type)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003607B0);
+INCLUDE_ASM("object/railmodifier", cTypeObjNode_getType);
 #ifdef SKIP_ASM
 /**
  * Returns a typed object node's ObjNodeType (+0x10, tObjNodeType).
@@ -3544,24 +3544,24 @@ INCLUDE_ASM("object/railmodifier", func_003607B0);
  * @param node  the typed object node
  * @return ObjNodeType
  */
-extern "C" short func_003607B0(void *node) {
+extern "C" short cTypeObjNode_getType(void *node) {
     return (*(short *)((char*)(node) + (0x10)));
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_003607B8);
+INCLUDE_ASM("object/railmodifier", cTypeObjNode_setRootTransformDirty);
 #ifdef SKIP_ASM
 /**
  * Sets the RootTransformDirty bit (bit 0 of Flags, +0x12) of a typed object node.
  *
  * @param node  the typed object node
  */
-extern "C" void func_003607B8(void *node) {
+extern "C" void cTypeObjNode_setRootTransformDirty(void *node) {
     (*(unsigned short *)((char*)(node) + (0x12))) = (unsigned short) ((*(unsigned short *)((char*)(node) + (0x12))) | 1);
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_003607C8);
+INCLUDE_ASM("object/railmodifier", cTypeObjNode_isRootTransformDirty);
 #ifdef SKIP_ASM
 /**
  * Tests the RootTransformDirty bit (bit 0 of Flags, +0x12) of a typed object node.
@@ -3569,24 +3569,24 @@ INCLUDE_ASM("object/railmodifier", func_003607C8);
  * @param node  the typed object node
  * @return that bit (0 or 1)
  */
-extern "C" int func_003607C8(void *node) {
+extern "C" int cTypeObjNode_isRootTransformDirty(void *node) {
     return (*(unsigned short *)((char*)(node) + (0x12))) & 1;
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_003607D8);
+INCLUDE_ASM("object/railmodifier", cTypeObjNode_resetRootTransformDirty);
 #ifdef SKIP_ASM
 /**
  * Clears the RootTransformDirty bit (bit 0 of Flags, +0x12) of a typed object node.
  *
  * @param node  the typed object node
  */
-extern "C" void func_003607D8(void *node) {
+extern "C" void cTypeObjNode_resetRootTransformDirty(void *node) {
     (*(unsigned short *)((char*)(node) + (0x12))) = (unsigned short) ((*(unsigned short *)((char*)(node) + (0x12))) & 0xFFFE);
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_003607E8);
+INCLUDE_ASM("object/railmodifier", cTypeObjNode_getObjNodeCount);
 #ifdef SKIP_ASM
 extern int D_0044AFF0[];
 
@@ -3599,7 +3599,7 @@ extern int D_0044AFF0[];
  * @param idx  node type (tObjNodeType)
  * @return the live count for that type
  */
-extern "C" int func_003607E8(int idx)
+extern "C" int cTypeObjNode_getObjNodeCount(int idx)
 {
     return D_0044AFF0[idx];
 }
@@ -3668,7 +3668,7 @@ int cSortObjNode_getSortIndex(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360888);
+INCLUDE_ASM("object/railmodifier", cSortObjNode_init);
 #ifdef SKIP_ASM
 extern int cSortObjNode_ObjNodeSortIndex;
 extern int cSortObjNode_ObjNodeNoSortIndex;
@@ -3676,14 +3676,14 @@ extern int cSortObjNode_ObjNodeNoSortIndex;
 /**
  * Resets both sort-index counters (cSortObjNode_ObjNodeSortIndex, cSortObjNode_ObjNodeNoSortIndex) to 1.
  */
-extern "C" void func_00360888(void)
+extern "C" void cSortObjNode_init(void)
 {
     cSortObjNode_ObjNodeSortIndex = 1;
     cSortObjNode_ObjNodeNoSortIndex = 1;
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360898);
+INCLUDE_ASM("object/railmodifier", cSortObjNode_nextSortIndex);
 #ifdef SKIP_ASM
 extern int cSortObjNode_ObjNodeSortIndex;
 
@@ -3692,13 +3692,13 @@ extern int cSortObjNode_ObjNodeSortIndex;
  *
  * @return the index before the increment
  */
-extern "C" int func_00360898(void)
+extern "C" int cSortObjNode_nextSortIndex(void)
 {
     return cSortObjNode_ObjNodeSortIndex++;
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_003608B0);
+INCLUDE_ASM("object/railmodifier", cSortObjNode_nextNoSortIndex);
 #ifdef SKIP_ASM
 extern int cSortObjNode_ObjNodeNoSortIndex;
 
@@ -3707,13 +3707,13 @@ extern int cSortObjNode_ObjNodeNoSortIndex;
  *
  * @return the index before the increment
  */
-extern "C" int func_003608B0(void)
+extern "C" int cSortObjNode_nextNoSortIndex(void)
 {
     return cSortObjNode_ObjNodeNoSortIndex++;
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_003608C8);
+INCLUDE_ASM("object/railmodifier", cSortObjNode_getStaticSortIndex);
 #ifdef SKIP_ASM
 extern int cSortObjNode_ObjNodeSortIndex;
 
@@ -3722,12 +3722,12 @@ extern int cSortObjNode_ObjNodeSortIndex;
  *
  * @return cSortObjNode_ObjNodeSortIndex
  */
-extern "C" int func_003608C8(void) {
+extern "C" int cSortObjNode_getStaticSortIndex(void) {
     return cSortObjNode_ObjNodeSortIndex;
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_003608D0);
+INCLUDE_ASM("object/railmodifier", cSortObjNode_getStaticNoSortIndex);
 #ifdef SKIP_ASM
 extern int cSortObjNode_ObjNodeNoSortIndex;
 
@@ -3736,12 +3736,12 @@ extern int cSortObjNode_ObjNodeNoSortIndex;
  *
  * @return cSortObjNode_ObjNodeNoSortIndex
  */
-extern "C" int func_003608D0(void) {
+extern "C" int cSortObjNode_getStaticNoSortIndex(void) {
     return cSortObjNode_ObjNodeNoSortIndex;
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_003608D8);
+INCLUDE_ASM("object/railmodifier", cSortObjNode_setStaticSortIndex);
 #ifdef SKIP_ASM
 extern int cSortObjNode_ObjNodeSortIndex;
 
@@ -3750,12 +3750,12 @@ extern int cSortObjNode_ObjNodeSortIndex;
  *
  * @param sortIndex  new counter value
  */
-extern "C" void func_003608D8(int sortIndex) {
+extern "C" void cSortObjNode_setStaticSortIndex(int sortIndex) {
     cSortObjNode_ObjNodeSortIndex = sortIndex;
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_003608E0);
+INCLUDE_ASM("object/railmodifier", cSortObjNode_setStaticNoSortIndex);
 #ifdef SKIP_ASM
 extern int cSortObjNode_ObjNodeNoSortIndex;
 
@@ -3764,7 +3764,7 @@ extern int cSortObjNode_ObjNodeNoSortIndex;
  *
  * @param noSortIndex  new counter value
  */
-extern "C" void func_003608E0(int noSortIndex) {
+extern "C" void cSortObjNode_setStaticNoSortIndex(int noSortIndex) {
     cSortObjNode_ObjNodeNoSortIndex = noSortIndex;
 }
 #endif
@@ -3871,14 +3871,14 @@ int cInstanceNode_isMoveNode(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360920__FPv);
+INCLUDE_ASM("object/railmodifier", cInstanceNode_getSectionId__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the world section of an instance node: the low byte of its instance's id (Instance +0x78).
  *
  * @return the section number
  */
-unsigned char func_00360920(void* self)
+unsigned char cInstanceNode_getSectionId(void* self)
 {
     return *(unsigned char*)((char*)*(void**)((char*)self + 0x18) + 0x78);
 }
@@ -3980,7 +3980,7 @@ int cInstanceNode_getFocusCount(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360968);
+INCLUDE_ASM("object/railmodifier", cInstanceNode_getInstance);
 #ifdef SKIP_ASM
 /**
  * Returns an instance node's Instance (+0x18).
@@ -3988,27 +3988,27 @@ INCLUDE_ASM("object/railmodifier", func_00360968);
  * @param instanceNode  the instance node
  * @return Instance
  */
-extern "C" int func_00360968(cInstanceNode* instanceNode) {
+extern "C" int cInstanceNode_getInstance(cInstanceNode* instanceNode) {
     return ((int)instanceNode->Instance);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360970__FPv);
+INCLUDE_ASM("object/railmodifier", cInstanceNode_getRootTransform__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns an instance node's root transform: the matrix at Instance +0x10.
  *
  * @return pointer to the instance's matrix
  */
-void* func_00360970(void* self)
+void* cInstanceNode_getRootTransform(void* self)
 {
     return (char*)*(void**)((char*)self + 0x18) + 0x10;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360980__FPv);
+INCLUDE_ASM("object/railmodifier", cInstanceNode_getRootTransform1__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns an instance node's root transform for an instance: always the matrix at its own Instance +0x10.
@@ -4017,7 +4017,7 @@ INCLUDE_ASM("object/railmodifier", func_00360980__FPv);
  *
  * @return pointer to the node's instance matrix
  */
-void* func_00360980(void* self)
+void* cInstanceNode_getRootTransform1(void* self)
 {
     return (char*)*(void**)((char*)self + 0x18) + 0x10;
 }
@@ -4038,42 +4038,42 @@ int cInstanceNode_hasAnimMats(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360998__FPv);
+INCLUDE_ASM("object/railmodifier", cInstanceNode_getAnimMats__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns an instance node's animation matrices: none.
  *
  * @return 0
  */
-int func_00360998(void* self)
+int cInstanceNode_getAnimMats(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003609A0__FPv);
+INCLUDE_ASM("object/railmodifier", cInstanceNode_getInstAnimMats__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns an instance node's animation matrices for an instance: none.
  *
  * @return 0
  */
-int func_003609A0(void* self)
+int cInstanceNode_getInstAnimMats(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003609A8__FPv);
+INCLUDE_ASM("object/railmodifier", cInstanceNode_getAnimMat__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns one animation matrix of an instance node: none.
  *
  * @return 0
  */
-int func_003609A8(void* self)
+int cInstanceNode_getAnimMat(void* self)
 {
     return 0;
 }
@@ -4230,14 +4230,14 @@ int cInstanceNode_hasBoundBox(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360A18__FPv);
+INCLUDE_ASM("object/railmodifier", cInstanceNode_getBoundBox__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns an instance node's bound box: none.
  *
  * @return 0
  */
-int func_00360A18(void* self)
+int cInstanceNode_getBoundBox(void* self)
 {
     return 0;
 }
@@ -4326,14 +4326,14 @@ extern void* D_00491800[];
 extern "C" void* cInstanceNode__cInstanceNode(void*);
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360A70__FPv);
+INCLUDE_ASM("object/railmodifier", cHideNode__cHideNode__FPv);
 #ifdef SKIP_ASM
 /**
  * Destroys a hide node: reinstalls D_00491800 and runs cInstanceNode__cInstanceNode (which forwards the delete flags).
  *
  * @return cInstanceNode__cInstanceNode's result
  */
-void* func_00360A70(void* self)
+void* cHideNode__cHideNode(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)D_00491800;
     return cInstanceNode__cInstanceNode(self);
@@ -4341,45 +4341,45 @@ void* func_00360A70(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360A98__FPv);
+INCLUDE_ASM("object/railmodifier", cHideNode_expire__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing when a hide node expires.
  */
-void func_00360A98(void* self)
+void cHideNode_expire(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360AA0__FPv);
+INCLUDE_ASM("object/railmodifier", cHideNode_loseFocus__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing when a hide node loses focus.
  */
-void func_00360AA0(void* self)
+void cHideNode_loseFocus(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360AA8__FPv);
+INCLUDE_ASM("object/railmodifier", cHideNode_signal__FPv);
 #ifdef SKIP_ASM
 /**
  * Ignores signals sent to a hide node.
  */
-void func_00360AA8(void* self)
+void cHideNode_signal(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360AB0__FPv);
+INCLUDE_ASM("object/railmodifier", cHideNode_onCollide__FPv);
 #ifdef SKIP_ASM
 /**
  * Ignores collisions with a hide node.
  */
-void func_00360AB0(void* self)
+void cHideNode_onCollide(void* self)
 {
 }
 #endif
@@ -4388,7 +4388,7 @@ extern void* D_00491680[];
 extern "C" void* cInstanceNode__cInstanceNode(void*);
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360AB8__FPv);
+INCLUDE_ASM("object/railmodifier", cRestoreNode__cRestoreNode__FPv);
 #ifdef SKIP_ASM
 /**
  * Destroys a restore node: reinstalls D_00491680 and runs cInstanceNode__cInstanceNode (which forwards the delete
@@ -4396,7 +4396,7 @@ INCLUDE_ASM("object/railmodifier", func_00360AB8__FPv);
  *
  * @return cInstanceNode__cInstanceNode's result
  */
-void* func_00360AB8(void* self)
+void* cRestoreNode__cRestoreNode(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)D_00491680;
     return cInstanceNode__cInstanceNode(self);
@@ -4404,23 +4404,23 @@ void* func_00360AB8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360AE0__FPv);
+INCLUDE_ASM("object/railmodifier", cRestoreNode_expire__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing when a restore node expires.
  */
-void func_00360AE0(void* self)
+void cRestoreNode_expire(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360AE8__FPv);
+INCLUDE_ASM("object/railmodifier", cRestoreNode_signal__FPv);
 #ifdef SKIP_ASM
 /**
  * Ignores signals sent to a restore node.
  */
-void func_00360AE8(void* self)
+void cRestoreNode_signal(void* self)
 {
 }
 #endif
@@ -4480,12 +4480,12 @@ void cTransformModifier_update(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360B38__FPv);
+INCLUDE_ASM("object/railmodifier", cTransformModifier_updateRootTransform__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: a transform modifier's root-transform update hook.
  */
-void func_00360B38(void* self)
+void cTransformModifier_updateRootTransform(void* self)
 {
 }
 #endif
@@ -4666,23 +4666,23 @@ int cTransformModifier_isRootTransformDirty(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", cTransformModifier_getRootTransform1__FPv);
+INCLUDE_ASM("object/railmodifier", cTransformModifier_getRootTransform__FPv);
 #ifdef SKIP_ASM
-int cTransformModifier_getRootTransform1(void* self)
+int cTransformModifier_getRootTransform(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", cTransformModifier_getRootTransform__FPv);
+INCLUDE_ASM("object/railmodifier", cTransformModifier_getRootTransform1__FPv);
 #ifdef SKIP_ASM
 /**
  * Reports that a transform modifier has no root transform.
  *
  * @return always 0
  */
-int cTransformModifier_getRootTransform(void* self)
+int cTransformModifier_getRootTransform1(void* self)
 {
     return 0;
 }
@@ -4796,7 +4796,7 @@ void cTransformModifier_writeToReplayFrame(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360C08);
+INCLUDE_ASM("object/railmodifier", cPhysicsModifier_cPhysicsModifier1);
 #ifdef SKIP_ASM
 extern void* cPhysicsModifier_vtbl[];
 
@@ -4806,7 +4806,7 @@ extern void* cPhysicsModifier_vtbl[];
  * @param physicsModifier  the physics modifier
  * @return physicsModifier
  */
-extern "C" void *func_00360C08(cPhysicsModifier* physicsModifier) {
+extern "C" void *cPhysicsModifier_cPhysicsModifier1(cPhysicsModifier* physicsModifier) {
     ((int*)physicsModifier->mVtbl) = &(*(int*)&cPhysicsModifier_vtbl);
     (physicsModifier->Active) = 1;
     return ((void*)physicsModifier);
@@ -4927,16 +4927,16 @@ extern "C" void cEffectLink__cEffectLink(cEffectLink* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360CE8__FPv);
+INCLUDE_ASM("object/railmodifier", cEffectLink_getType__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the type of a plain effect link, 1.
  *
- * func_00353278 compares this slot's result with 3 (the halo modifier) to find halo links.
+ * tModifierBlock_remHaloModifier compares this slot's result with 3 (the halo modifier) to find halo links.
  *
  * @return 1
  */
-int func_00360CE8(void* self)
+int cEffectLink_getType(void* self)
 {
     return 0x1;
 }
@@ -4998,7 +4998,7 @@ void cEffectModifier_signal(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360D18);
+INCLUDE_ASM("object/railmodifier", cEffectModifier_getEffectCount);
 #ifdef SKIP_ASM
 extern int D_004A3FF4;
 
@@ -5009,7 +5009,7 @@ extern int D_004A3FF4;
  *
  * @return D_004A3FF4
  */
-extern "C" int func_00360D18(void) {
+extern "C" int cEffectModifier_getEffectCount(void) {
     return D_004A3FF4;
 }
 #endif
@@ -5043,7 +5043,7 @@ int cDynamicParticleModifier_getType(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360D30);
+INCLUDE_ASM("object/railmodifier", cDynamicParticleModifier_getDynamicParticleCount);
 #ifdef SKIP_ASM
 extern int D_004A3FFC;
 
@@ -5054,7 +5054,7 @@ extern int D_004A3FFC;
  *
  * @return D_004A3FFC
  */
-extern "C" int func_00360D30(void) {
+extern "C" int cDynamicParticleModifier_getDynamicParticleCount(void) {
     return D_004A3FFC;
 }
 #endif
@@ -5109,7 +5109,7 @@ void cRailLink_writeToReplayFrame(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360D98);
+INCLUDE_ASM("object/railmodifier", cRailModifier_getSplineId);
 #ifdef SKIP_ASM
 /**
  * Returns a rail modifier's SplineId (+0x30).
@@ -5117,7 +5117,7 @@ INCLUDE_ASM("object/railmodifier", func_00360D98);
  * @param railModifier  the rail modifier
  * @return SplineId
  */
-extern "C" int func_00360D98(void *railModifier) {
+extern "C" int cRailModifier_getSplineId(void *railModifier) {
     return (*(int *)((char*)(railModifier) + (0x30)));
 }
 #endif
@@ -5176,7 +5176,7 @@ extern void* D_00490E80[];
 extern "C" void* cMoveNode__cMoveNode(void*);
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360DE8);
+INCLUDE_ASM("object/railmodifier", cMoveNode_getParentMesh);
 #ifdef SKIP_ASM
 class cVirt16 {
 public:
@@ -5206,7 +5206,7 @@ public:
  *
  * @return the modifier's mesh index, or 0
  */
-extern "C" int func_00360DE8(cMoveNode* self)
+extern "C" int cMoveNode_getParentMesh(cMoveNode* self)
 {
     cVirt16** holder = (cVirt16**)self->ModifierBlock;
     if (holder != 0) {
@@ -5236,7 +5236,7 @@ extern "C" int cMoveNode_getTransformModifier(cMoveNode* self)
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360E50);
+INCLUDE_ASM("object/railmodifier", cMoveNode_hasTextureMat);
 #ifdef SKIP_ASM
 /**
  * Tells whether a move node has a UV-scroll modifier (the source of its texture matrix).
@@ -5247,7 +5247,7 @@ INCLUDE_ASM("object/railmodifier", func_00360E50);
  * @param moveNode  the move node
  * @return 1 if it has one, else 0
  */
-extern "C" int func_00360E50(cMoveNode* moveNode) {
+extern "C" int cMoveNode_hasTextureMat(cMoveNode* moveNode) {
     int var_2;
     void *temp_3;
 
@@ -5260,7 +5260,7 @@ extern "C" int func_00360E50(cMoveNode* moveNode) {
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360E70);
+INCLUDE_ASM("object/railmodifier", cMoveNode_hasMaterialBlock);
 #ifdef SKIP_ASM
 /**
  * Tells whether a move node has a texture-flip modifier (the source of its material block).
@@ -5270,7 +5270,7 @@ INCLUDE_ASM("object/railmodifier", func_00360E70);
  * @param moveNode  the move node
  * @return 1 if it has one, else 0
  */
-extern "C" int func_00360E70(cMoveNode* moveNode) {
+extern "C" int cMoveNode_hasMaterialBlock(cMoveNode* moveNode) {
     int var_2;
     void *temp_3;
 
@@ -5340,7 +5340,7 @@ extern "C" void* cMoveNode_getTextureMat(cMoveNode* self)
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360F20);
+INCLUDE_ASM("object/railmodifier", cMoveNode_remTransformModifier);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remTransformModifier(int);
 
@@ -5349,7 +5349,7 @@ extern "C" void tModifierBlock_remTransformModifier(int);
  *
  * @param moveNode  the move node
  */
-extern "C" void func_00360F20(cMoveNode* moveNode) {
+extern "C" void cMoveNode_remTransformModifier(cMoveNode* moveNode) {
     int temp_4;
 
     temp_4 = ((int)moveNode->ModifierBlock);
@@ -5359,7 +5359,7 @@ extern "C" void func_00360F20(cMoveNode* moveNode) {
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360F48);
+INCLUDE_ASM("object/railmodifier", cMoveNode_remUVScrollModifier);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remUVScrollModifier(int);
 
@@ -5368,7 +5368,7 @@ extern "C" void tModifierBlock_remUVScrollModifier(int);
  *
  * @param moveNode  the move node
  */
-extern "C" void func_00360F48(cMoveNode* moveNode) {
+extern "C" void cMoveNode_remUVScrollModifier(cMoveNode* moveNode) {
     int temp_4;
 
     temp_4 = ((int)moveNode->ModifierBlock);
@@ -5378,7 +5378,7 @@ extern "C" void func_00360F48(cMoveNode* moveNode) {
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360F70);
+INCLUDE_ASM("object/railmodifier", cMoveNode_remTexFlipModifier);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remTexFlipModifier(int);
 
@@ -5387,7 +5387,7 @@ extern "C" void tModifierBlock_remTexFlipModifier(int);
  *
  * @param moveNode  the move node
  */
-extern "C" void func_00360F70(cMoveNode* moveNode) {
+extern "C" void cMoveNode_remTexFlipModifier(cMoveNode* moveNode) {
     int temp_4;
 
     temp_4 = ((int)moveNode->ModifierBlock);
@@ -5397,7 +5397,7 @@ extern "C" void func_00360F70(cMoveNode* moveNode) {
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360F98);
+INCLUDE_ASM("object/railmodifier", cMoveNode_remPhysicsModifier);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remPhysicsModifier(int);
 
@@ -5406,7 +5406,7 @@ extern "C" void tModifierBlock_remPhysicsModifier(int);
  *
  * @param moveNode  the move node
  */
-extern "C" void func_00360F98(cMoveNode* moveNode) {
+extern "C" void cMoveNode_remPhysicsModifier(cMoveNode* moveNode) {
     int temp_4;
 
     temp_4 = ((int)moveNode->ModifierBlock);
@@ -5416,26 +5416,26 @@ extern "C" void func_00360F98(cMoveNode* moveNode) {
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360FC0);
+INCLUDE_ASM("object/railmodifier", cMoveNode_remHaloModifier);
 #ifdef SKIP_ASM
-extern "C" void func_00353278(int);
+extern "C" void tModifierBlock_remHaloModifier(int);
 
 /**
- * Removes a move node's halo effects (func_00353278), if it has a modifier block.
+ * Removes a move node's halo effects (tModifierBlock_remHaloModifier), if it has a modifier block.
  *
  * @param moveNode  the move node
  */
-extern "C" void func_00360FC0(cMoveNode* moveNode) {
+extern "C" void cMoveNode_remHaloModifier(cMoveNode* moveNode) {
     int temp_4;
 
     temp_4 = ((int)moveNode->ModifierBlock);
     if (temp_4 != 0) {
-        func_00353278(temp_4);
+        tModifierBlock_remHaloModifier(temp_4);
     }
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_00360FE8);
+INCLUDE_ASM("object/railmodifier", cMoveNode_remEffectModifier);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remEffectModifier(int);
 
@@ -5444,7 +5444,7 @@ extern "C" void tModifierBlock_remEffectModifier(int);
  *
  * @param moveNode  the move node
  */
-extern "C" void func_00360FE8(cMoveNode* moveNode) {
+extern "C" void cMoveNode_remEffectModifier(cMoveNode* moveNode) {
     int temp_4;
 
     temp_4 = ((int)moveNode->ModifierBlock);
@@ -5454,34 +5454,34 @@ extern "C" void func_00360FE8(cMoveNode* moveNode) {
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361010);
+INCLUDE_ASM("object/railmodifier", cMoveNode_fadeEffectModifier);
 #ifdef SKIP_ASM
-extern "C" void func_00353228(int);
+extern "C" void tModifierBlock_fadeEffectModifier(int);
 
 /**
- * Fades out a move node's effects (func_00353228), if it has a modifier block.
+ * Fades out a move node's effects (tModifierBlock_fadeEffectModifier), if it has a modifier block.
  *
  * @param moveNode  the move node
  */
-extern "C" void func_00361010(cMoveNode* moveNode) {
+extern "C" void cMoveNode_fadeEffectModifier(cMoveNode* moveNode) {
     int temp_4;
 
     temp_4 = ((int)moveNode->ModifierBlock);
     if (temp_4 != 0) {
-        func_00353228(temp_4);
+        tModifierBlock_fadeEffectModifier(temp_4);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361038__FPv);
+INCLUDE_ASM("object/railmodifier", cObjectNode__cObjectNode__FPv);
 #ifdef SKIP_ASM
 /**
  * Destroys an object node: reinstalls D_00490E80 and runs cMoveNode__cMoveNode (which forwards the delete flags).
  *
  * @return cMoveNode__cMoveNode's result
  */
-void* func_00361038(void* self)
+void* cObjectNode__cObjectNode(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)D_00490E80;
     return cMoveNode__cMoveNode(self);
@@ -5489,14 +5489,14 @@ void* func_00361038(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361060__FPv);
+INCLUDE_ASM("object/railmodifier", cAnimNode_updateNode__FPv);
 #ifdef SKIP_ASM
 /**
  * Reports that an animated node's per-frame update keeps the node alive.
  *
  * @return 1
  */
-int func_00361060(void* self)
+int cAnimNode_updateNode(void* self)
 {
     return 0x1;
 }
@@ -5520,14 +5520,14 @@ extern "C" float cAnimNode_getAnimFrame(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361080__FPv);
+INCLUDE_ASM("object/railmodifier", cAnimNode_getAnimSpeed__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns an animated node's animation speed, which is 0 for the base class.
  *
  * @return 0.0f
  */
-float func_00361080(void* self)
+float cAnimNode_getAnimSpeed(void* self)
 {
     return 0.0f;
 }
@@ -5609,59 +5609,59 @@ extern "C" sElem003610E0* cAnimNode_getAnimMat(void* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361140);
+INCLUDE_ASM("object/railmodifier", cAnimNode_clearFrameEvent);
 #ifdef SKIP_ASM
 /**
  * Clears an animated node's two frame-event times (+0x8, +0xC) by setting them to 1e10.
  *
- * The animated-node update functions (func_00358EB8, func_003592D0) store the same 1e10 into these fields of their
+ * The animated-node update functions (cAnimComboNode_updateNode, cAnimDeltaNode_updateNode) store the same 1e10 into these fields of their
  * embedded animated node.
  *
  * @param animNode  the animated node
  */
-extern "C" void func_00361140(void *animNode) {
+extern "C" void cAnimNode_clearFrameEvent(void *animNode) {
     (*(float *)((char*)(animNode) + (8))) = 1e10f;
     (*(float *)((char*)(animNode) + (0xC))) = 1e10f;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361150__FPv);
+INCLUDE_ASM("object/railmodifier", cAnimObjectNode_getNodeState__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns an animated object node's state block, which is the node itself.
  *
  * @return self
  */
-void* func_00361150(void* self)
+void* cAnimObjectNode_getNodeState(void* self)
 {
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361158);
+INCLUDE_ASM("object/railmodifier", cAnimObjectNode_getAnimSpeed);
 #ifdef SKIP_ASM
 /**
  * Returns an animated object node's speed (+0x10), or 0 once it is complete (+0x8 set).
  *
  * @return the speed, or 0.0f
  */
-extern "C" float func_00361158(void* self)
+extern "C" float cAnimObjectNode_getAnimSpeed(void* self)
 {
     return *(int*)((char*)self + 0x8) == 0 ? *(float*)((char*)self + 0x10) : 0.0f;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361170);
+INCLUDE_ASM("object/railmodifier", cAnimObjectNode_getAnimDir);
 #ifdef SKIP_ASM
 /**
  * Returns an animated object node's play direction: 1 when its speed (+0x10) is >= 0, else -1.
  *
  * @return 1 or -1
  */
-extern "C" int func_00361170(void* self)
+extern "C" int cAnimObjectNode_getAnimDir(void* self)
 {
     int direction = -1;
     if (*(float*)((char*)self + 0x10) >= 0.0f) {
@@ -5686,20 +5686,20 @@ int cAnimObjectNode_isComplete(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003611A0);
+INCLUDE_ASM("object/railmodifier", cAnimFrame_cAnimFrame1);
 #ifdef SKIP_ASM
 extern void* cAnimFrame_vtbl[];
-extern "C" void func_003513D0(void*);
+extern "C" void cAnimFrame_init(void*);
 
 /**
- * Constructs an empty animation frame: installs cAnimFrame_vtbl (+0x84) and resets it with func_003513D0.
+ * Constructs an empty animation frame: installs cAnimFrame_vtbl (+0x84) and resets it with cAnimFrame_init.
  *
  * @return self
  */
-extern "C" void* func_003611A0(void* self)
+extern "C" void* cAnimFrame_cAnimFrame1(void* self)
 {
     *(int*)((char*)self + 0x84) = (int)(void*)cAnimFrame_vtbl;
-    func_003513D0(self);
+    cAnimFrame_init(self);
     return self;
 }
 #endif
@@ -5725,7 +5725,7 @@ extern "C" void cAnimFrame__cAnimFrame(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361208);
+INCLUDE_ASM("object/railmodifier", cAnimFrame_getAngles);
 #ifdef SKIP_ASM
 struct sVec4_361208 {
     float x, y, z, w;
@@ -5736,7 +5736,7 @@ struct sVec4_361208 {
  *
  * @param out  receives the angles
  */
-extern "C" void func_00361208(void* self, sVec4_361208* out)
+extern "C" void cAnimFrame_getAngles(void* self, sVec4_361208* out)
 {
     sVec4_361208 negated;
     negated.x = -*(float*)((char*)self + 0x50);
@@ -5747,27 +5747,27 @@ extern "C" void func_00361208(void* self, sVec4_361208* out)
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361248);
+INCLUDE_ASM("object/railmodifier", cMeshAnimFrame_cMeshAnimFrame1);
 #ifdef SKIP_ASM
 extern void* cAnimFrame_vtbl[];
 extern void* cMeshAnimFrame_vtbl[];
-extern "C" void func_003513D0(void*);
-extern "C" void func_003612C0(void*);
+extern "C" void cAnimFrame_init(void*);
+extern "C" void cMeshAnimFrame_init(void*);
 
 /**
  * Constructs an empty mesh animation frame.
  *
- * Builds the cAnimFrame part (cAnimFrame_vtbl, func_003513D0), installs cMeshAnimFrame_vtbl and sets FrameMatrix
- * (+0x90) to identity with func_003612C0.
+ * Builds the cAnimFrame part (cAnimFrame_vtbl, cAnimFrame_init), installs cMeshAnimFrame_vtbl and sets FrameMatrix
+ * (+0x90) to identity with cMeshAnimFrame_init.
  *
  * @return self
  */
-extern "C" void* func_00361248(void* self)
+extern "C" void* cMeshAnimFrame_cMeshAnimFrame1(void* self)
 {
     *(int*)((char*)self + 0x84) = (int)(void*)cAnimFrame_vtbl;
-    func_003513D0(self);
+    cAnimFrame_init(self);
     *(int*)((char*)self + 0x84) = (int)(void*)cMeshAnimFrame_vtbl;
-    func_003612C0(self);
+    cMeshAnimFrame_init(self);
     return self;
 }
 #endif
@@ -5796,7 +5796,7 @@ extern "C" void cMeshAnimFrame__cMeshAnimFrame(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003612C0);
+INCLUDE_ASM("object/railmodifier", cMeshAnimFrame_init);
 #ifdef SKIP_ASM
 extern char t4mat_Identity[];
 
@@ -5805,7 +5805,7 @@ extern char t4mat_Identity[];
  */
 // Copy the 4x4 matrix t4mat_Identity into self+0x90.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-extern "C" void func_003612C0(void* self)
+extern "C" void cMeshAnimFrame_init(void* self)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -5825,7 +5825,7 @@ extern "C" void func_003612C0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003612F8);
+INCLUDE_ASM("object/railmodifier", cMeshAnimFrame_getFrameMatrix);
 #ifdef SKIP_ASM
 /**
  * Returns a mesh animation frame's FrameMatrix (frame + 0x90).
@@ -5833,33 +5833,33 @@ INCLUDE_ASM("object/railmodifier", func_003612F8);
  * @param frame  the mesh animation frame
  * @return pointer to FrameMatrix
  */
-extern "C" int func_003612F8(int frame) {
+extern "C" int cMeshAnimFrame_getFrameMatrix(int frame) {
     return frame + 144;
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361300);
+INCLUDE_ASM("object/railmodifier", cCamAnimFrame_cCamAnimFrame1);
 #ifdef SKIP_ASM
 extern void* cAnimFrame_vtbl[];
 extern void* D_00490AB0[];
-extern "C" void func_003513D0(void*);
+extern "C" void cAnimFrame_init(void*);
 
 /**
- * Constructs an empty camera animation frame: the cAnimFrame part (cAnimFrame_vtbl, func_003513D0), then D_00490AB0.
+ * Constructs an empty camera animation frame: the cAnimFrame part (cAnimFrame_vtbl, cAnimFrame_init), then D_00490AB0.
  *
  * @return self
  */
-extern "C" void* func_00361300(void* self)
+extern "C" void* cCamAnimFrame_cCamAnimFrame1(void* self)
 {
     *(int*)((char*)self + 0x84) = (int)(void*)cAnimFrame_vtbl;
-    func_003513D0(self);
+    cAnimFrame_init(self);
     *(int*)((char*)self + 0x84) = (int)(void*)D_00490AB0;
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361340);
+INCLUDE_ASM("object/railmodifier", cCamAnimFrame__cCamAnimFrame);
 #ifdef SKIP_ASM
 extern void* cAnimFrame_vtbl[];
 void operator_delete(int*);
@@ -5869,7 +5869,7 @@ void operator_delete(int*);
  *
  * @param flags  destructor flags
  */
-extern "C" void func_00361340(void* self, int flags)
+extern "C" void cCamAnimFrame__cCamAnimFrame(void* self, int flags)
 {
     *(void***)((char*)self + 0x84) = cAnimFrame_vtbl;
     if (flags & 1) {
@@ -5879,7 +5879,7 @@ extern "C" void func_00361340(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361370);
+INCLUDE_ASM("object/railmodifier", cCamAnimFrame_setAnimRecord);
 #ifdef SKIP_ASM
 /**
  * Sets a camera animation frame's animation record (+0x40).
@@ -5887,12 +5887,12 @@ INCLUDE_ASM("object/railmodifier", func_00361370);
  * @param frame  the camera animation frame
  * @param source  the animation record
  */
-extern "C" void func_00361370(void *frame, int source) {
+extern "C" void cCamAnimFrame_setAnimRecord(void *frame, int source) {
     (*(int *)((char*)(frame) + (0x40))) = source;
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361378);
+INCLUDE_ASM("object/railmodifier", cCamAnimFrame_getPosition);
 #ifdef SKIP_ASM
 struct sVec4_361378 {
     float x, y, z, w;
@@ -5903,7 +5903,7 @@ struct sVec4_361378 {
  *
  * @param out  receives the position
  */
-extern "C" void func_00361378(void* self, sVec4_361378* out)
+extern "C" void cCamAnimFrame_getPosition(void* self, sVec4_361378* out)
 {
     sVec4_361378 result;
     result.x = *(float*)((char*)self + 0x44);
@@ -5914,7 +5914,7 @@ extern "C" void func_00361378(void* self, sVec4_361378* out)
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_003613B0);
+INCLUDE_ASM("object/railmodifier", cCamAnimFrame_getAngles);
 #ifdef SKIP_ASM
 struct sVec3_3613B0 {
     float x, y, z;
@@ -5925,7 +5925,7 @@ struct sVec3_3613B0 {
  *
  * @param out  receives the angles
  */
-extern "C" void func_003613B0(void* self, sVec3_3613B0* out)
+extern "C" void cCamAnimFrame_getAngles(void* self, sVec3_3613B0* out)
 {
     sVec3_3613B0 result;
     result.x = *(float*)((char*)self + 0x50);
@@ -5935,7 +5935,7 @@ extern "C" void func_003613B0(void* self, sVec3_3613B0* out)
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_003613F0);
+INCLUDE_ASM("object/railmodifier", cCamAnimFrame_getFocalLength);
 #ifdef SKIP_ASM
 /**
  * Returns a camera animation frame's focal length (+0x70) through out.
@@ -5943,30 +5943,30 @@ INCLUDE_ASM("object/railmodifier", func_003613F0);
  * @param frame  the camera animation frame
  * @param out  receives the focal length
  */
-extern "C" void func_003613F0(void *frame, float *out) {
+extern "C" void cCamAnimFrame_getFocalLength(void *frame, float *out) {
     *out = (*(float *)((char*)(frame) + (0x70)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361400);
+INCLUDE_ASM("object/railmodifier", cAnimTeeterNode__cAnimTeeterNode);
 #ifdef SKIP_ASM
-extern "C" void func_0034DBA8(void* self, int flags);
+extern "C" void cAnimNode__cAnimNode(void* self, int flags);
 void operator_delete(int*);
 extern void* D_004908F8[];
 
 /**
  * Destroys a teeter animation node.
  *
- * Reinstalls D_004908F8 (+0x50), destroys the animated-node part at +0x30 (func_0034DBA8, flags 0) and frees the node
+ * Reinstalls D_004908F8 (+0x50), destroys the animated-node part at +0x30 (cAnimNode__cAnimNode, flags 0) and frees the node
  * when bit 0 of flags is set.
  *
  * @param flags  destructor flags
  */
-extern "C" void func_00361400(void* self, int flags)
+extern "C" void cAnimTeeterNode__cAnimTeeterNode(void* self, int flags)
 {
     *(void***)((char*)self + 0x50) = D_004908F8;
-    func_0034DBA8((char*)self + 0x30, 0);
+    cAnimNode__cAnimNode((char*)self + 0x30, 0);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -5974,28 +5974,28 @@ extern "C" void func_00361400(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361458__FPv);
+INCLUDE_ASM("object/railmodifier", cAnimTeeterNode_getNodeState__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns a teeter animation node's state block, which is the node itself.
  *
  * @return self
  */
-void* func_00361458(void* self)
+void* cAnimTeeterNode_getNodeState(void* self)
 {
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361460);
+INCLUDE_ASM("object/railmodifier", cAnimTeeterNode_getAnimDir);
 #ifdef SKIP_ASM
 /**
  * Returns a teeter animation node's play direction: 1 when the value at +0x4 is >= 0, else -1.
  *
  * @return 1 or -1
  */
-extern "C" int func_00361460(void* self)
+extern "C" int cAnimTeeterNode_getAnimDir(void* self)
 {
     int direction = -1;
     if (*(float*)((char*)self + 0x4) >= 0.0f) {
@@ -6097,7 +6097,7 @@ extern void* D_00490570[];
 extern "C" void* cInstanceNode__cInstanceNode(void*);
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361500__FPv);
+INCLUDE_ASM("object/railmodifier", cConveyorNode__cConveyorNode__FPv);
 #ifdef SKIP_ASM
 /**
  * Destroys a conveyor node: reinstalls D_00490570 and runs cInstanceNode__cInstanceNode (which forwards the delete
@@ -6105,7 +6105,7 @@ INCLUDE_ASM("object/railmodifier", func_00361500__FPv);
  *
  * @return cInstanceNode__cInstanceNode's result
  */
-void* func_00361500(void* self)
+void* cConveyorNode__cConveyorNode(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)D_00490570;
     return cInstanceNode__cInstanceNode(self);
@@ -6113,14 +6113,14 @@ void* func_00361500(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361528__FPv);
+INCLUDE_ASM("object/railmodifier", cConveyorNode_getNodeState__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns a conveyor node's state block (self + 0x1C).
  *
  * @return pointer to the state
  */
-void* func_00361528(void* self)
+void* cConveyorNode_getNodeState(void* self)
 {
     return (char*)self + 0x1C;
 }
@@ -6204,72 +6204,72 @@ void* cFlexBridgeNode_getBoundBox(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361578__FPv);
+INCLUDE_ASM("object/railmodifier", cFlexRailNode_updateNodes__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: a flex rail's per-frame node update.
  */
-void func_00361578(void* self)
+void cFlexRailNode_updateNodes(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361580__FPv);
+INCLUDE_ASM("object/railmodifier", cFlexRailNode_updateMats__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: a flex rail's segment-matrix update.
  */
-void func_00361580(void* self)
+void cFlexRailNode_updateMats(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361588__FPv);
+INCLUDE_ASM("object/railmodifier", cFlexRailNode_applyForce__FPv);
 #ifdef SKIP_ASM
 /**
  * Ignores forces applied to a flex rail.
  */
-void func_00361588(void* self)
+void cFlexRailNode_applyForce(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361590__FPv);
+INCLUDE_ASM("object/railmodifier", cFlexRailNode_updateIntersectInfo__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: a flex rail's intersect-info update.
  */
-void func_00361590(void* self)
+void cFlexRailNode_updateIntersectInfo(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361598__FPv);
+INCLUDE_ASM("object/railmodifier", cFlexRailNode_getMesh__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the mesh of a flex rail segment: always 0.
  *
  * @return 0
  */
-int func_00361598(void* self)
+int cFlexRailNode_getMesh(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003615A0__FPv);
+INCLUDE_ASM("object/railmodifier", cFlexRailNode_isFlexRail__FPv);
 #ifdef SKIP_ASM
 /**
  * Reports that the node is a flex rail.
  *
  * @return 1
  */
-int func_003615A0(void* self)
+int cFlexRailNode_isFlexRail(void* self)
 {
     return 0x1;
 }
@@ -6284,7 +6284,7 @@ struct sRailEntry50 {
 };
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003615A8);
+INCLUDE_ASM("object/railmodifier", cFloatRailNode_getMesh);
 #ifdef SKIP_ASM
 /**
  * Returns the mesh of a float rail segment: the int at +0x44 of that segment's entry in the 0x50-byte node array
@@ -6293,7 +6293,7 @@ INCLUDE_ASM("object/railmodifier", func_003615A8);
  * @param segIndex  segment index
  * @return the segment mesh index
  */
-extern "C" int func_003615A8(void* self, int segIndex)
+extern "C" int cFloatRailNode_getMesh(void* self, int segIndex)
 {
     sRailEntry50* railNodes = *(sRailEntry50**)((char*)self + 0x70);
     return railNodes[segIndex].field_0x44;
@@ -6307,7 +6307,7 @@ struct sRailEntry60 {
 };
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003615C0);
+INCLUDE_ASM("object/railmodifier", cSpringRailNode_getMesh);
 #ifdef SKIP_ASM
 /**
  * Returns the mesh of a spring rail segment: the int at +0x54 of that segment's entry in the 0x60-byte node array
@@ -6316,7 +6316,7 @@ INCLUDE_ASM("object/railmodifier", func_003615C0);
  * @param segIndex  segment index
  * @return the segment mesh index
  */
-extern "C" int func_003615C0(void* self, int segIndex)
+extern "C" int cSpringRailNode_getMesh(void* self, int segIndex)
 {
     sRailEntry60* railNodes = *(sRailEntry60**)((char*)self + 0x70);
     return railNodes[segIndex].field_0x54;
@@ -6324,7 +6324,7 @@ extern "C" int func_003615C0(void* self, int segIndex)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003615D8);
+INCLUDE_ASM("object/railmodifier", cFlexRailNode_updateMat);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern float D_004FFAC0[16];
@@ -6395,7 +6395,7 @@ typedef int tMmiQuad __attribute__((mode(TI)));
 // PORT: hand-written MMI 4x4 transpose (MMI_TRANSPOSE4: lq/pextlw/pextuw/pcpyld/pcpyud/sq, no gcc 2.95 pattern;
 // retail's registers differ per call site, so an operand asm) plus VU0 macro asm; a port replaces them with a
 // plain C transpose and a C vector-matrix product.
-extern "C" void func_003615D8(void* self, t4Matrix* out, const float* ctrlPoint0, const float* ctrlPoint1, const float* ctrlPoint2, const float* ctrlPoint3)
+extern "C" void cFlexRailNode_updateMat(void* self, t4Matrix* out, const float* ctrlPoint0, const float* ctrlPoint1, const float* ctrlPoint2, const float* ctrlPoint3)
 {
     t4Matrix coeffMat;
     t4Vector zCoeffs;
@@ -6414,7 +6414,7 @@ extern "C" void func_003615D8(void* self, t4Matrix* out, const float* ctrlPoint0
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361750);
+INCLUDE_ASM("object/railmodifier", cFlagSet_Empty);
 #ifdef SKIP_ASM
 /**
  * Tells whether a flag set holds no flags: its flag count (+0x5C) is 0.
@@ -6422,12 +6422,12 @@ INCLUDE_ASM("object/railmodifier", func_00361750);
  * @param flagSet  the flag set
  * @return 1 if empty, else 0
  */
-extern "C" int func_00361750(void *flagSet) {
+extern "C" int cFlagSet_Empty(void *flagSet) {
     return (*(int *)((char*)(flagSet) + (0x5C))) == 0;
 }
 #endif
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361760);
+INCLUDE_ASM("object/railmodifier", cFlagManager_GetWindFactor);
 #ifdef SKIP_ASM
 /**
  * Returns a flag manager's current wind factor (+0x10).
@@ -6435,7 +6435,7 @@ INCLUDE_ASM("object/railmodifier", func_00361760);
  * @param flagManager  the flag manager
  * @return the wind factor
  */
-extern "C" float func_00361760(void *flagManager) {
+extern "C" float cFlagManager_GetWindFactor(void *flagManager) {
     return (*(float *)((char*)(flagManager) + (0x10)));
 }
 #endif
@@ -6629,14 +6629,14 @@ void cPositionModifier_update(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361900__FPv);
+INCLUDE_ASM("object/railmodifier", cPositionModifier_isRootTransformDirty__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns a position modifier's RootTransformDirty (+0x44).
  *
  * @return RootTransformDirty
  */
-int func_00361900(void* self)
+int cPositionModifier_isRootTransformDirty(void* self)
 {
     return *(int*)((char*)self + 0x44);
 }
@@ -6659,14 +6659,14 @@ int cPositionModifier_getTransformType(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361910__FPv);
+INCLUDE_ASM("object/railmodifier", cPositionModifier_getBoundBox__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns a position modifier's BoundBox (self + 0x10).
  *
  * @return pointer to BoundBox
  */
-void* func_00361910(void* self)
+void* cPositionModifier_getBoundBox(void* self)
 {
     return (char*)self + 0x10;
 }
@@ -6688,28 +6688,28 @@ extern "C" void cPositionModifier_setBoundBox(cPositionModifier* self, void* bou
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361930__FPv);
+INCLUDE_ASM("object/railmodifier", cPositionModifier_getRadius__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns a position modifier's Radius (+0x40).
  *
  * @return Radius
  */
-float func_00361930(void* self)
+float cPositionModifier_getRadius(void* self)
 {
     return *(float*)((char*)self + 0x40);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361938__FPvf);
+INCLUDE_ASM("object/railmodifier", cPositionModifier_setRadius__FPvf);
 #ifdef SKIP_ASM
 /**
  * Sets a position modifier's Radius (+0x40).
  *
  * @param val  new radius
  */
-void func_00361938(void* self, float val)
+void cPositionModifier_setRadius(void* self, float val)
 {
     *(float*)((char*)self + 0x40) = val;
 }
@@ -6805,7 +6805,7 @@ int cParentModifier_getTransformType(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_003619D8);
+INCLUDE_ASM("object/railmodifier", cParentModifier_setParent);
 #ifdef SKIP_ASM
 /**
  * Sets a parent modifier's ParentInst (+0xA0). Nothing in retail calls it.
@@ -6813,7 +6813,7 @@ INCLUDE_ASM("object/railmodifier", func_003619D8);
  * @param modifier  the parent modifier
  * @param parentInst  instance record to follow
  */
-extern "C" void func_003619D8(void *modifier, int parentInst) {
+extern "C" void cParentModifier_setParent(void *modifier, int parentInst) {
     (*(int *)((char*)(modifier) + (0xA0))) = parentInst;
 }
 #endif
@@ -7257,7 +7257,7 @@ extern "C" void cMultiSplineModifier_setBoundBox(cMultiSplineModifier* self, voi
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361C08);
+INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_getFocusCount);
 #ifdef SKIP_ASM
 /**
  * Returns a multi-spline modifier's FocusCount.
@@ -7265,7 +7265,7 @@ INCLUDE_ASM("object/railmodifier", func_00361C08);
  * @param multiSplineModifier  the multi-spline modifier
  * @return FocusCount
  */
-extern "C" int func_00361C08(cMultiSplineModifier* multiSplineModifier) {
+extern "C" int cMultiSplineModifier_getFocusCount(cMultiSplineModifier* multiSplineModifier) {
     return (multiSplineModifier->FocusCount);
 }
 #endif
@@ -7573,21 +7573,21 @@ extern "C" unsigned int cRailManNode_getSectionId()
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361D88__FPv);
+INCLUDE_ASM("object/railmodifier", cAnimComboNode_getNodeState__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns an anim combo node's state block, which is the node itself.
  *
  * @return self
  */
-void* func_00361D88(void* self)
+void* cAnimComboNode_getNodeState(void* self)
 {
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361D90);
+INCLUDE_ASM("object/railmodifier", cAnimComboNode_getAnimDir);
 #ifdef SKIP_ASM
 /**
  * Returns an anim combo node's play direction from its active speed.
@@ -7597,7 +7597,7 @@ INCLUDE_ASM("object/railmodifier", func_00361D90);
  *
  * @return 1 or -1
  */
-extern "C" int func_00361D90(void* self)
+extern "C" int cAnimComboNode_getAnimDir(void* self)
 {
     int direction;
     if (*(signed char*)((char*)self + 0x14) != 0) {
@@ -7616,32 +7616,32 @@ extern "C" int func_00361D90(void* self)
 #endif
 
 extern void* D_0048EA70[];
-extern "C" void* func_00341CF0(void*);
+extern "C" void* cAnimObjectNode__cAnimObjectNode(void*);
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361DE0__FPv);
+INCLUDE_ASM("object/railmodifier", cAnimDeltaNode__cAnimDeltaNode__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys an anim delta node: reinstalls D_0048EA70 (+0x3C) and runs the animated-object destructor func_00341CF0.
+ * Destroys an anim delta node: reinstalls D_0048EA70 (+0x3C) and runs the animated-object destructor cAnimObjectNode__cAnimObjectNode.
  *
- * @return func_00341CF0's result
+ * @return cAnimObjectNode__cAnimObjectNode's result
  */
-void* func_00361DE0(void* self)
+void* cAnimDeltaNode__cAnimDeltaNode(void* self)
 {
     *(int*)((char*)self + 0x3c) = (int)(void*)D_0048EA70;
-    return func_00341CF0(self);
+    return cAnimObjectNode__cAnimObjectNode(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/railmodifier", func_00361E08__FPv);
+INCLUDE_ASM("object/railmodifier", cAnimDeltaNode_getNodeState__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns an anim delta node's state block, which is the node itself.
  *
  * @return self
  */
-void* func_00361E08(void* self)
+void* cAnimDeltaNode_getNodeState(void* self)
 {
     return self;
 }

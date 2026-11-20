@@ -24,8 +24,8 @@ struct sStreamInst_99D8 {
     int heap;           // 0x7C
     int f80;            // 0x80
 };
-extern "C" int func_003B7818(void* desc, int n, int m, void* mem, int size);
-extern "C" int func_003B7B00(int n, int m);
+extern "C" int SNDSTRM_create(void* desc, int n, int m, void* mem, int size);
+extern "C" int SNDSTRM_overhead(int n, int m);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char str_Stream[];
@@ -59,10 +59,10 @@ extern "C" sStreamInst_99D8* cStreamInstance_cStreamInstance(sStreamInst_99D8* s
         p->vols[p->cur] = (int)MAX_99D8(MIN_99D8((float)p->vols[p->cur] * *self->scale, 127.0f), 0.0f);
         p->ents[p->cur].vol = MAX_99D8(MIN_99D8(p->vols[p->cur], 127), 0);
     }
-    int n = func_003B7B00(8, 300) + extra;
+    int n = SNDSTRM_overhead(8, 300) + extra;
     self->mem = new (str_Stream, heap, 0) char[n];
     self->f4 = 0;
-    self->handle = func_003B7818(&p->ents[p->cur], 8, 300, self->mem, n);
+    self->handle = SNDSTRM_create(&p->ents[p->cur], 8, 300, self->mem, n);
     return self;
 }
 #endif
@@ -80,7 +80,7 @@ extern "C" sStreamInst_99D8* func_002A9C00(sStreamInst_99D8* self, sSsPlayer_99D
     }
     self->mem = mem;
     self->f4 = 1;
-    self->handle = func_003B7818(&p->ents[p->cur], n, m, mem, size);
+    self->handle = SNDSTRM_create(&p->ents[p->cur], n, m, mem, size);
     return self;
 }
 #endif
@@ -101,13 +101,13 @@ INCLUDE_ASM("sound/streamsys", func_002A9DF0);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
-extern "C" int func_003B7838(int h);
+extern "C" int SNDSTRM_destroy(int h);
 extern "C" void* MEM_free(void* self);
 
 extern "C" void func_002A9DF0(void* self, int flags)
 {
     if (*(void**)self != 0) {
-        func_003B7838(*(int*)((char*)self + 0x8));
+        SNDSTRM_destroy(*(int*)((char*)self + 0x8));
         if (*(int*)((char*)self + 0x4) == 0 && *(void**)self != 0) {
             cMemMan_free(*(void**)self);
         }
@@ -140,15 +140,15 @@ extern "C" void func_002A9E78(void* self, int name)
 //100%
 INCLUDE_ASM("sound/streamsys", func_002A9ED8);
 #ifdef SKIP_ASM
-extern "C" void func_003B58A0();
-extern "C" void func_003B58D8();
+extern "C" void SNDSYS_entercritical();
+extern "C" void SNDSYS_leavecritical();
 extern "C" void func_003B7F60(int h, int a, int b);
 
 extern "C" void func_002A9ED8(void* self, int a, int b)
 {
-    func_003B58A0();
+    SNDSYS_entercritical();
     func_003B7F60(*(int*)((char*)self + 0x8), a, b);
-    func_003B58D8();
+    SNDSYS_leavecritical();
 }
 #endif
 
@@ -171,15 +171,15 @@ void cStreamInstance_SetBaseVolume(void* self, int val)
 //100%
 INCLUDE_ASM("sound/streamsys", func_002A9F38);
 #ifdef SKIP_ASM
-extern "C" void func_003B58A0();
-extern "C" void func_003B58D8();
-extern "C" void func_003B7FB8(int h, int v);
+extern "C" void SNDSYS_entercritical();
+extern "C" void SNDSYS_leavecritical();
+extern "C" void SNDSTRM_pitchmult(int h, int v);
 
 extern "C" void func_002A9F38(void* self, int pitch)
 {
-    func_003B58A0();
-    func_003B7FB8(*(int*)((char*)self + 0x8), pitch);
-    func_003B58D8();
+    SNDSYS_entercritical();
+    SNDSTRM_pitchmult(*(int*)((char*)self + 0x8), pitch);
+    SNDSYS_leavecritical();
 }
 #endif
 
@@ -188,8 +188,8 @@ INCLUDE_ASM("sound/streamsys", func_002A9F80);
 #ifdef SKIP_ASM
 int cAudioInterface_getTimerHz(void* self);
 void* cStreamInstance_Purge(void* self);
-extern "C" void func_003B58A0();
-extern "C" void func_003B58D8();
+extern "C" void SNDSYS_entercritical();
+extern "C" void SNDSYS_leavecritical();
 extern "C" void func_003B7E70(int h, int vol);
 
 extern "C" void func_002A9F80(void* self)
@@ -208,9 +208,9 @@ extern "C" void func_002A9F80(void* self)
         if (volume < 0) {
             volume = 0;
         }
-        func_003B58A0();
+        SNDSYS_entercritical();
         func_003B7E70(*(int*)((char*)self + 0x8), volume);
-        func_003B58D8();
+        SNDSYS_leavecritical();
     }
 }
 #endif
@@ -218,9 +218,9 @@ extern "C" void func_002A9F80(void* self)
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AA020);
 #ifdef SKIP_ASM
-extern "C" void func_003B58A0();
-extern "C" void func_003B58D8();
-extern "C" int func_003B7B48(int h, void* out);
+extern "C" void SNDSYS_entercritical();
+extern "C" void SNDSYS_leavecritical();
+extern "C" int SNDSTRM_status(int h, void* out);
 
 // PORT: returns int; the unit declares it void(void*, void*) further down
 int func_002AA020_impl(void* self, void* out) __asm__("func_002AA020");
@@ -228,9 +228,9 @@ int func_002AA020_impl(void* self, void* out) __asm__("func_002AA020");
 int func_002AA020_impl(void* self, void* out)
 {
     int result;
-    func_003B58A0();
-    result = func_003B7B48(*(int*)((char*)self + 0x8), out);
-    func_003B58D8();
+    SNDSYS_entercritical();
+    result = SNDSTRM_status(*(int*)((char*)self + 0x8), out);
+    SNDSYS_leavecritical();
     return result;
 }
 #endif
@@ -239,9 +239,9 @@ int func_002AA020_impl(void* self, void* out)
 INCLUDE_ASM("sound/streamsys", func_002AA068);
 #ifdef SKIP_ASM
 extern "C" void func_002AA020(void*, void*);
-extern "C" void func_003B58A0();
-extern "C" void func_003B58D8();
-extern "C" int func_003B7C40(int h, int a1);
+extern "C" void SNDSYS_entercritical();
+extern "C" void SNDSYS_leavecritical();
+extern "C" int SNDSTRM_requeststatus(int h, int a1);
 
 // PORT: returns int and takes (self, int, out); later callers in this unit declare it void(void*, sStatus*, int)
 int func_002AA068_impl(void* self, int a1, int* out) __asm__("func_002AA068");
@@ -252,9 +252,9 @@ int func_002AA068_impl(void* self, int a1, int* out)
     int* status = out ? out : buf;
     int result;
     func_002AA020(self, status);
-    func_003B58A0();
-    result = func_003B7C40(status[1], a1);
-    func_003B58D8();
+    SNDSYS_entercritical();
+    result = SNDSTRM_requeststatus(status[1], a1);
+    SNDSYS_leavecritical();
     return result;
 }
 #endif
@@ -366,13 +366,13 @@ extern "C" int func_002AA1B8(void* self)
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AA1E8);
 #ifdef SKIP_ASM
-extern "C" void func_003B7D80(int, int);
+extern "C" void SNDSTRM_modifyhold(int, int);
 
 extern "C" void func_002AA1E8(void* self)
 {
     int buf[2];
     func_002AA020(self, buf);
-    func_003B7D80(buf[1], 0);
+    SNDSTRM_modifyhold(buf[1], 0);
 }
 #endif
 
@@ -398,11 +398,11 @@ extern "C" int func_002AA210(void* self)
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AA240);
 #ifdef SKIP_ASM
-extern "C" void func_003B7D80(int, int);
+extern "C" void SNDSTRM_modifyhold(int, int);
 
 extern "C" void func_002AA240(void* self, int requestHandle)
 {
-    func_003B7D80(requestHandle, 0);
+    SNDSTRM_modifyhold(requestHandle, 0);
 }
 #endif
 //100%
@@ -432,25 +432,25 @@ extern "C" float func_002AA260(void* self)
 INCLUDE_ASM("sound/streamsys", func_002AA2B0);
 #ifdef SKIP_ASM
 extern "C" void func_002AA2B0(void *stream) {
-    func_003B58A0();
-    func_003B7FB8((*(int *)((char*)(stream) + (8))), 0);
-    func_003B58D8();
+    SNDSYS_entercritical();
+    SNDSTRM_pitchmult((*(int *)((char*)(stream) + (8))), 0);
+    SNDSYS_leavecritical();
 }
 #endif
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AA2E8);
 #ifdef SKIP_ASM
 extern "C" void func_002AA2E8(void *stream) {
-    func_003B58A0();
-    func_003B7FB8((*(int *)((char*)(stream) + (8))), 0x1000);
-    func_003B58D8();
+    SNDSYS_entercritical();
+    SNDSTRM_pitchmult((*(int *)((char*)(stream) + (8))), 0x1000);
+    SNDSYS_leavecritical();
 }
 #endif
 
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AA320);
 #ifdef SKIP_ASM
-extern "C" int func_003B78D8(int h, int a, int buf, int off);
+extern "C" int SNDSTRM_queuefile(int h, int a, int buf, int off);
 extern "C" void func_003E2CE0(void* dec, int src, int a, int* out, int b);
 
 // PORT: buf is a pointer carried in an int (the unit's caller declares this function with int params).
@@ -459,13 +459,13 @@ extern "C" int func_002AA320(void* self, int holdTime, int buf, int off)
     if (*(void**)((char*)self + 0x74) != 0) {
         int n;
         func_003E2CE0(*(void**)((char*)self + 0x74), buf, 0, &n, 0);
-        return func_003B78D8(*(int*)((char*)self + 0x8), holdTime, (int)((char*)self + 0x14), off + n);
+        return SNDSTRM_queuefile(*(int*)((char*)self + 0x8), holdTime, (int)((char*)self + 0x14), off + n);
     }
-    return func_003B78D8(*(int*)((char*)self + 0x8), holdTime, buf, off);
+    return SNDSTRM_queuefile(*(int*)((char*)self + 0x8), holdTime, buf, off);
 }
 #endif
 
-extern "C" void* func_003B78F8(int);
+extern "C" void* SNDSTRM_purge(int);
 
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AA398);
@@ -476,7 +476,7 @@ extern "C" int func_002AA398(void* self, int holdTime, int b, int off)
     if (dec != 0) {
         int n;
         func_003E2CE0(dec, 0, b, &n, 0);
-        return func_003B78D8(*(int*)((char*)self + 0x8), holdTime, (int)((char*)self + 0x14), off + n);
+        return SNDSTRM_queuefile(*(int*)((char*)self + 0x8), holdTime, (int)((char*)self + 0x14), off + n);
     }
     return 0;
 }
@@ -488,13 +488,13 @@ INCLUDE_ASM("sound/streamsys", cStreamInstance_Purge__FPv);
 /**
  * Purges (stops and releases) a stream instance's stream.
  *
- * Calls func_003B78F8 (On Tour SNDSTRM_purge) on the stream handle at +0x8.
+ * Calls SNDSTRM_purge (On Tour SNDSTRM_purge) on the stream handle at +0x8.
  *
  * @return SNDSTRM_purge's result
  */
 void* cStreamInstance_Purge(void* self)
 {
-    return func_003B78F8(*(int*)((char*)self + 0x8));
+    return SNDSTRM_purge(*(int*)((char*)self + 0x8));
 }
 #endif
 
@@ -515,14 +515,14 @@ extern "C" int func_002AA428(void* self)
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AA448);
 #ifdef SKIP_ASM
-extern "C" int func_003B80E0(int, int);
+extern "C" int SNDSTRM_timemult(int, int);
 
 extern "C" int func_002AA448(void *stream, int arg1) {
     int result;
 
-    func_003B58A0();
-    result = func_003B80E0((*(int *)((char*)(stream) + (8))), arg1);
-    func_003B58D8();
+    SNDSYS_entercritical();
+    result = SNDSTRM_timemult((*(int *)((char*)(stream) + (8))), arg1);
+    SNDSYS_leavecritical();
     return result;
 }
 #endif
@@ -956,32 +956,32 @@ extern "C" int func_002AAF40(void* self, int idx)
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AAF78);
 #ifdef SKIP_ASM
-// PORT: the unit declares func_003B7C40(int, int); this call passes an out buffer
-int func_003B7C40_pbuf(int h, int* out) __asm__("func_003B7C40");
+// PORT: the unit declares SNDSTRM_requeststatus(int, int); this call passes an out buffer
+int SNDSTRM_requeststatus_pbuf(int h, int* out) __asm__("SNDSTRM_requeststatus");
 
 extern "C" int func_002AAF78(void* self, int handle)
 {
     int st[4];
     int result;
-    func_003B58A0();
-    result = func_003B7C40_pbuf(handle, st);
-    func_003B58D8();
+    SNDSYS_entercritical();
+    result = SNDSTRM_requeststatus_pbuf(handle, st);
+    SNDSYS_leavecritical();
     return st[0] == 3 || result < 0;
 }
 #endif
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AAFD0);
 #ifdef SKIP_ASM
-// PORT: the unit declares func_003B7C40(int, int); this call passes an out buffer
-int func_003B7C40_pbuf(int h, int* out) __asm__("func_003B7C40");
+// PORT: the unit declares SNDSTRM_requeststatus(int, int); this call passes an out buffer
+int SNDSTRM_requeststatus_pbuf(int h, int* out) __asm__("SNDSTRM_requeststatus");
 
 extern "C" int func_002AAFD0(void* self, int handle)
 {
     int st[4];
     int result;
-    func_003B58A0();
-    result = func_003B7C40_pbuf(handle, st);
-    func_003B58D8();
+    SNDSYS_entercritical();
+    result = SNDSTRM_requeststatus_pbuf(handle, st);
+    SNDSYS_leavecritical();
     return st[0] == 2 && !(result < 0);
 }
 #endif
@@ -1091,11 +1091,11 @@ int func_002AB188(void* self, int index)
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AB1A0);
 #ifdef SKIP_ASM
-extern "C" void func_003B7D80(int, int);
+extern "C" void SNDSTRM_modifyhold(int, int);
 
 extern "C" int func_002AB1A0(void* self, void* arg1)
 {
-    func_003B7D80(*(int*)((char*)arg1 + 0x1C), 0);
+    SNDSTRM_modifyhold(*(int*)((char*)arg1 + 0x1C), 0);
     return 1;
 }
 #endif
@@ -1447,16 +1447,16 @@ extern "C" void func_002ABA18(int* self, int flags)
 //100%
 INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_DonePlaying);
 #ifdef SKIP_ASM
-extern "C" int func_003B8AB8(int h);
-extern "C" int func_003B9FC8(int h);
-// PORT: the unit declares func_003B7C40(int, int); its second argument is a status buffer here.
-int func_003B7C40_st(int h, int* st) __asm__("func_003B7C40");
+extern "C" int SNDover(int h);
+extern "C" int SNDseqstatus(int h);
+// PORT: the unit declares SNDSTRM_requeststatus(int, int); its second argument is a status buffer here.
+int SNDSTRM_requeststatus_st(int h, int* st) __asm__("SNDSTRM_requeststatus");
 
 /**
  * Returns whether the instance's sound has finished playing.
  *
- * By the type at +0: 1 (sample) asks func_003B8AB8 under the sound critical section; 2 (sequence) checks func_003B9FC8
- * for status 2 or an error; 3 (stream) reads the request status (func_003B7C40) and reports done when it is 3 or cannot
+ * By the type at +0: 1 (sample) asks SNDover under the sound critical section; 2 (sequence) checks SNDseqstatus
+ * for status 2 or an error; 3 (stream) reads the request status (SNDSTRM_requeststatus) and reports done when it is 3 or cannot
  * be read. Any other type counts as done.
  *
  * @return nonzero when done
@@ -1466,25 +1466,25 @@ extern "C" int cBankMonitorInstance_DonePlaying(void* self)
     int type = *(int*)self;
     switch (type) {
     case 1: {
-        func_003B58A0();
-        int result = func_003B8AB8(*(int*)((char*)self + 4)) != 0;
-        func_003B58D8();
+        SNDSYS_entercritical();
+        int result = SNDover(*(int*)((char*)self + 4)) != 0;
+        SNDSYS_leavecritical();
         return result;
     }
     case 2: {
-        func_003B58A0();
-        int result = func_003B9FC8(*(int*)((char*)self + 4));
-        func_003B58D8();
+        SNDSYS_entercritical();
+        int result = SNDseqstatus(*(int*)((char*)self + 4));
+        SNDSYS_leavecritical();
         return result == 2 || result < 0;
     }
     case 3: {
         int st[4];
-        func_003B58A0();
-        if (func_003B7C40_st(*(int*)((char*)self + 4), st) >= 0) {
-            func_003B58D8();
+        SNDSYS_entercritical();
+        if (SNDSTRM_requeststatus_st(*(int*)((char*)self + 4), st) >= 0) {
+            SNDSYS_leavecritical();
             return st[0] == 3;
         }
-        func_003B58D8();
+        SNDSYS_leavecritical();
         return 1;
     }
     }
@@ -1696,16 +1696,16 @@ extern "C" void func_002ABD48(void* self, func_002ABD48_cObj* obj)
 INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_PosUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_002A9ED8(void* s, int pos, int a2);
-extern "C" void func_003B58A0();
-extern "C" void func_003B58D8();
-extern "C" void func_003B8C00(int h, int pos, int a2);
-extern "C" void func_003B9C20(int h, int pos);
+extern "C" void SNDSYS_entercritical();
+extern "C" void SNDSYS_leavecritical();
+extern "C" void SND3dpos(int h, int pos, int a2);
+extern "C" void SNDMIDI_azimuth(int h, int pos);
 
 /**
  * Updates the 3D position (azimuth, elevation) of an instance's sound.
  *
  * Does nothing when the azimuth differs from the cached one (+0xB8) by less than 0x200; otherwise caches it and, by
- * type, calls func_003B8C00 (sample), func_003B9C20 (sequence) or func_002A9ED8 (stream at +0xC).
+ * type, calls SND3dpos (sample), SNDMIDI_azimuth (sequence) or func_002A9ED8 (stream at +0xC).
  *
  * @param pos  the azimuth (On Tour Azimuth)
  * @param elevation  the elevation (On Tour Elevation)
@@ -1719,14 +1719,14 @@ extern "C" void cBankMonitorInstance_PosUpdate(void* self, int pos, int elevatio
     *(int*)((char*)self + 0xB8) = pos;
     switch (*(int*)self) {
     case 1:
-        func_003B58A0();
-        func_003B8C00(*(int*)((char*)self + 0x4), pos, elevation);
-        func_003B58D8();
+        SNDSYS_entercritical();
+        SND3dpos(*(int*)((char*)self + 0x4), pos, elevation);
+        SNDSYS_leavecritical();
         break;
     case 2:
-        func_003B58A0();
-        func_003B9C20(*(int*)((char*)self + 0x4), pos);
-        func_003B58D8();
+        SNDSYS_entercritical();
+        SNDMIDI_azimuth(*(int*)((char*)self + 0x4), pos);
+        SNDSYS_leavecritical();
         break;
     case 3:
         func_002A9ED8(*(void**)((char*)self + 0xC), pos, elevation);
@@ -1739,16 +1739,16 @@ extern "C" void cBankMonitorInstance_PosUpdate(void* self, int pos, int elevatio
 INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_PitchUpdate);
 #ifdef SKIP_ASM
 extern "C" void func_002A9F38(void* s, int vol);
-extern "C" void func_003B58A0();
-extern "C" void func_003B58D8();
-extern "C" void func_003B8790(int h, int vol);
-extern "C" void func_003B9B68(int h, int vol);
+extern "C" void SNDSYS_entercritical();
+extern "C" void SNDSYS_leavecritical();
+extern "C" void SNDpitchmult(int h, int vol);
+extern "C" void SNDMIDI_pitchmult(int h, int vol);
 
 /**
  * Sets the pitch multiplier of an instance's sound.
  *
  * The value is clamped to 0..0x3FFF (0x1000 = normal pitch) and ignored when within 0xFF of the cached pitch at +0xB0;
- * otherwise it is cached and applied by type: func_003B8790 (sample), func_003B9B68 (sequence) or func_002A9F38 (stream
+ * otherwise it is cached and applied by type: SNDpitchmult (sample), SNDMIDI_pitchmult (sequence) or func_002A9F38 (stream
  * at +0xC). Note the parameter is named vol but is a pitch.
  *
  * @param vol  the pitch multiplier, 4.12 fixed point (On Tour Pitch)
@@ -1768,14 +1768,14 @@ extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int vol)
     *(int*)((char*)self + 0xB0) = vol;
     switch (*(int*)self) {
     case 1:
-        func_003B58A0();
-        func_003B8790(*(int*)((char*)self + 0x4), vol);
-        func_003B58D8();
+        SNDSYS_entercritical();
+        SNDpitchmult(*(int*)((char*)self + 0x4), vol);
+        SNDSYS_leavecritical();
         break;
     case 2:
-        func_003B58A0();
-        func_003B9B68(*(int*)((char*)self + 0x4), vol);
-        func_003B58D8();
+        SNDSYS_entercritical();
+        SNDMIDI_pitchmult(*(int*)((char*)self + 0x4), vol);
+        SNDSYS_leavecritical();
         break;
     case 3:
         func_002A9F38(*(void**)((char*)self + 0xC), vol);
@@ -1789,19 +1789,19 @@ INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_VolUpdate);
 #ifdef SKIP_ASM
 void cStreamInstance_SetBaseVolume(void* self, int val);
 void* cStreamInstance_Purge(void* self);
-extern "C" void func_003B58A0();
-extern "C" void func_003B58D8();
-extern "C" void func_003B85F0(int h, int a);
-extern "C" void func_003B89E0(int h);
-extern "C" void func_003B9920(int h);
-extern "C" void func_003B9E48(int h, int a);
+extern "C" void SNDSYS_entercritical();
+extern "C" void SNDSYS_leavecritical();
+extern "C" void SNDvol(int h, int a);
+extern "C" void SNDstop(int h);
+extern "C" void SNDseqstop(int h);
+extern "C" void SNDseqvol(int h, int a);
 
 /**
  * Sets the volume of an instance's sound, or stops it for -1.
  *
  * The volume is scaled by the factor at +0x90 when that is non-negative, clamped to 0..127 and ignored when within 4 of
- * the cached volume at +0xB4. A requested -1 stops the sound instead: func_003B89E0 (sample), func_003B9920 (sequence)
- * or cStreamInstance_Purge__FPv (stream); other values go to func_003B85F0, func_003B9E48 or cStreamInstance_SetBaseVolume__FPvi.
+ * the cached volume at +0xB4. A requested -1 stops the sound instead: SNDstop (sample), SNDseqstop (sequence)
+ * or cStreamInstance_Purge__FPv (stream); other values go to SNDvol, SNDseqvol or cStreamInstance_SetBaseVolume__FPvi.
  *
  * @param vol  the volume 0..127, or -1 to stop (On Tour Vol)
  */
@@ -1823,12 +1823,12 @@ extern "C" void cBankMonitorInstance_VolUpdate(void* self, int vol)
                 return;
         }
         *(int*)((char*)self + 0xB4) = vol;
-        func_003B58A0();
+        SNDSYS_entercritical();
         if (orig == none)
-            func_003B89E0(*(int*)((char*)self + 0x4));
+            SNDstop(*(int*)((char*)self + 0x4));
         else
-            func_003B85F0(*(int*)((char*)self + 0x4), vol);
-        func_003B58D8();
+            SNDvol(*(int*)((char*)self + 0x4), vol);
+        SNDSYS_leavecritical();
         break;
     }
     case 2: {
@@ -1845,12 +1845,12 @@ extern "C" void cBankMonitorInstance_VolUpdate(void* self, int vol)
                 return;
         }
         *(int*)((char*)self + 0xB4) = vol;
-        func_003B58A0();
+        SNDSYS_entercritical();
         if (orig == none)
-            func_003B9920(*(int*)((char*)self + 0x4));
+            SNDseqstop(*(int*)((char*)self + 0x4));
         else
-            func_003B9E48(*(int*)((char*)self + 0x4), vol);
-        func_003B58D8();
+            SNDseqvol(*(int*)((char*)self + 0x4), vol);
+        SNDSYS_leavecritical();
         break;
     }
     case 3: {
@@ -1880,16 +1880,16 @@ extern "C" void cBankMonitorInstance_VolUpdate(void* self, int vol)
 //100%
 INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_StopSound);
 #ifdef SKIP_ASM
-extern "C" void func_003B58A0();
-extern "C" void func_003B58D8();
-extern "C" void func_003B8530(int h, int a, int b);
-extern "C" void func_003B9F38(int h, int a, int b);
+extern "C" void SNDSYS_entercritical();
+extern "C" void SNDSYS_leavecritical();
+extern "C" void SNDautovol(int h, int a, int b);
+extern "C" void SNDseqautovol(int h, int a, int b);
 
 /**
  * Starts fading an instance's sound out.
  *
  * Does nothing when already stopping (+0x54). Otherwise clears +0x8, sets +0x54 and starts an automatic volume ramp
- * (0x19, -1) on the sample (func_003B8530) or sequence (func_003B9F38).
+ * (0x19, -1) on the sample (SNDautovol) or sequence (SNDseqautovol).
  */
 extern "C" void cBankMonitorInstance_StopSound(void* self)
 {
@@ -1900,14 +1900,14 @@ extern "C" void cBankMonitorInstance_StopSound(void* self)
     *(int*)((char*)self + 0x54) = 1;
     switch (*(int*)self) {
     case 1:
-        func_003B58A0();
-        func_003B8530(*(int*)((char*)self + 0x4), 25, -1);
-        func_003B58D8();
+        SNDSYS_entercritical();
+        SNDautovol(*(int*)((char*)self + 0x4), 25, -1);
+        SNDSYS_leavecritical();
         break;
     case 2:
-        func_003B58A0();
-        func_003B9F38(*(int*)((char*)self + 0x4), 25, -1);
-        func_003B58D8();
+        SNDSYS_entercritical();
+        SNDseqautovol(*(int*)((char*)self + 0x4), 25, -1);
+        SNDSYS_leavecritical();
         break;
     }
 }
@@ -1916,10 +1916,10 @@ extern "C" void cBankMonitorInstance_StopSound(void* self)
 //100%
 INCLUDE_ASM("sound/streamsys", func_002AC220);
 #ifdef SKIP_ASM
-extern "C" void func_003B58A0();
-extern "C" void func_003B58D8();
-extern "C" int func_003B6820(int a, int b, void* desc);
-extern "C" int func_003B9A00(void* desc, int a, int b, int c);
+extern "C" void SNDSYS_entercritical();
+extern "C" void SNDSYS_leavecritical();
+extern "C" int SNDBANK_play(int a, int b, void* desc);
+extern "C" int SNDMIDI_play(void* desc, int a, int b, int c);
 
 struct sSndDesc_C220 {
     char c[0x18];
@@ -1989,9 +1989,9 @@ extern "C" void func_002AC220_impl(void* self, sSndPlayOpts_C220* opts)
         opts->f3C[opts->depth] = *(int*)((char*)self + 0x60);
         opts->f38[opts->depth] = 0;
         opts->descs[opts->depth].c[0] = C220_MAX(C220_MIN(opts->f38[opts->depth], 127), 0);
-        func_003B58A0();
-        *(int*)((char*)self + 0x4) = func_003B6820(*(int*)((char*)self + 0xC), *(int*)((char*)self + 0x10), &opts->descs[opts->depth]);
-        func_003B58D8();
+        SNDSYS_entercritical();
+        *(int*)((char*)self + 0x4) = SNDBANK_play(*(int*)((char*)self + 0xC), *(int*)((char*)self + 0x10), &opts->descs[opts->depth]);
+        SNDSYS_leavecritical();
         opts->depth--;
         break;
     case 2:
@@ -2018,9 +2018,9 @@ extern "C" void func_002AC220_impl(void* self, sSndPlayOpts_C220* opts)
         opts->f3C[opts->depth] = *(int*)((char*)self + 0x60);
         opts->f38[opts->depth] = 0;
         opts->descs[opts->depth].c[0] = C220_MAX(C220_MIN(opts->f38[opts->depth], 127), 0);
-        func_003B58A0();
-        *(int*)((char*)self + 0x4) = func_003B9A00(&opts->descs[opts->depth], *(int*)((char*)self + 0xC), *(int*)((char*)self + 0x10), -1);
-        func_003B58D8();
+        SNDSYS_entercritical();
+        *(int*)((char*)self + 0x4) = SNDMIDI_play(&opts->descs[opts->depth], *(int*)((char*)self + 0xC), *(int*)((char*)self + 0x10), -1);
+        SNDSYS_leavecritical();
         opts->depth--;
         break;
     case 3:
@@ -2086,10 +2086,10 @@ struct sPos_C868 {
     short pos2;             // 0xA
     int c[5];
 };
-extern "C" void func_003B58A0();
-extern "C" void func_003B58D8();
-// PORT: the unit declares func_003B7C40(int, int); its second argument is a status buffer here.
-int func_003B7C40_st(int h, int* st) __asm__("func_003B7C40");
+extern "C" void SNDSYS_entercritical();
+extern "C" void SNDSYS_leavecritical();
+// PORT: the unit declares SNDSTRM_requeststatus(int, int); its second argument is a status buffer here.
+int SNDSTRM_requeststatus_st(int h, int* st) __asm__("SNDSTRM_requeststatus");
 extern "C" int cBankMonitorInstance_DonePlaying(void* self);
 extern "C" void cBankMonitorInstance_PosUpdate(void* self, int pos, int a2);
 extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int a1);
@@ -2110,7 +2110,7 @@ static inline float Sqrt_C868(float x)
 /**
  * Updates the 3D audio of an instance: Doppler pitch, position and distance volume.
  *
- * A free instance (type +0x0 is 0) is skipped, and so is a stream (type 3) when func_003B7C40 returns 0 or less and the
+ * A free instance (type +0x0 is 0) is skipped, and so is a stream (type 3) when SNDSTRM_requeststatus returns 0 or less and the
  * status word is not 2. For a positioned instance (+0x68) while the monitor has 3D on (+0x8E4), the distance is the
  * square root of the monitor's virtual slot 6. When the instance is held active (+0x94) or
  * cBankMonitorInstance_CheckActive says so, the Doppler factor (cBankMonitorInstance_Doppler, from the previous
@@ -2138,9 +2138,9 @@ extern "C" void cBankMonitorInstance_Update3D(void* voice, void* bm, float time)
     sPos_C868 pos;
     int vol = 0;
     if (*(int*)inst == 3) {
-        func_003B58A0();
-        int result = func_003B7C40_st(*(int*)(inst + 0x4), st);
-        func_003B58D8();
+        SNDSYS_entercritical();
+        int result = SNDSTRM_requeststatus_st(*(int*)(inst + 0x4), st);
+        SNDSYS_leavecritical();
         if (result <= 0 && st[0] != 2) {
             return;
         }
@@ -2209,13 +2209,13 @@ INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Pause);
 extern "C" int cBankMonitorInstance_IsFree(void* self);
 extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int a1);
 extern "C" void cBankMonitorInstance_VolUpdate(void* self, int a1);
-extern "C" void func_003B9D00(int h);
+extern "C" void SNDseqpause(int h);
 
 /**
  * Pauses an instance's sound.
  *
  * For a non-free instance that is not stopping: sets pitch and volume to 0 and, for a sequence (type 2), pauses it with
- * func_003B9D00.
+ * SNDseqpause.
  */
 extern "C" void cBankMonitorInstance_Pause(void* self)
 {
@@ -2223,7 +2223,7 @@ extern "C" void cBankMonitorInstance_Pause(void* self)
         cBankMonitorInstance_PitchUpdate(self, 0);
         cBankMonitorInstance_VolUpdate(self, 0);
         if (*(int*)((char*)self + 0x0) == 2) {
-            func_003B9D00(*(int*)((char*)self + 0x4));
+            SNDseqpause(*(int*)((char*)self + 0x4));
         }
     }
 }
@@ -2234,14 +2234,14 @@ INCLUDE_ASM("sound/streamsys", func_002ACB30);
 #ifdef SKIP_ASM
 extern "C" int cBankMonitorInstance_IsFree(void* self);
 extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int a1);
-extern "C" void func_003B9DC8(int h);
+extern "C" void SNDseqresume(int h);
 
 extern "C" void func_002ACB30(void* self)
 {
     if (cBankMonitorInstance_IsFree(self) == 0) {
         cBankMonitorInstance_PitchUpdate(self, 0x1000);
         if (*(int*)self == 2) {
-            func_003B9DC8(*(int*)((char*)self + 0x4));
+            SNDseqresume(*(int*)((char*)self + 0x4));
         }
     }
 }
@@ -2250,12 +2250,12 @@ extern "C" void func_002ACB30(void* self)
 //100%
 INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Fade);
 #ifdef SKIP_ASM
-extern "C" void func_003B58A0();
-extern "C" void func_003B58D8();
-extern "C" void func_003B8530(int h, int a, int b);
-extern "C" void func_003B85F0(int h, int a);
-extern "C" void func_003B9E48(int h, int a);
-extern "C" void func_003B9F38(int h, int a, int b);
+extern "C" void SNDSYS_entercritical();
+extern "C" void SNDSYS_leavecritical();
+extern "C" void SNDautovol(int h, int a, int b);
+extern "C" void SNDvol(int h, int a);
+extern "C" void SNDseqvol(int h, int a);
+extern "C" void SNDseqautovol(int h, int a, int b);
 void* cStreamInstance_Purge(void* self);
 void cStreamInstance_SetBaseVolume(void* self, int val);
 
@@ -2264,7 +2264,7 @@ void cStreamInstance_SetBaseVolume(void* self, int val);
  *
  * When @p resetMonitor is set the instance is flagged for release (+0x58, +0x9C). A stopping instance is left alone. Level -1
  * marks it stopping; other levels are clamped to 0..127. Samples and sequences ramp over duration * 100 ticks
- * (func_003B8530, func_003B9F38) or jump at once when the duration is 0 (func_003B85F0, func_003B9E48); streams are
+ * (SNDautovol, SNDseqautovol) or jump at once when the duration is 0 (SNDvol, SNDseqvol); streams are
  * purged when stopping or get the level as base volume.
  *
  * @param n  the target volume 0..127, or -1 to stop (On Tour Level)
@@ -2292,22 +2292,22 @@ extern "C" void cBankMonitorInstance_Fade(void* self, int n, int resetMonitor, f
     }
     switch (*(int*)self) {
     case 1:
-        func_003B58A0();
+        SNDSYS_entercritical();
         if (duration != 0.0f) {
-            func_003B8530(*(int*)((char*)self + 0x4), (int)(duration * 100.0f), n);
+            SNDautovol(*(int*)((char*)self + 0x4), (int)(duration * 100.0f), n);
         } else {
-            func_003B85F0(*(int*)((char*)self + 0x4), n);
+            SNDvol(*(int*)((char*)self + 0x4), n);
         }
-        func_003B58D8();
+        SNDSYS_leavecritical();
         break;
     case 2:
-        func_003B58A0();
+        SNDSYS_entercritical();
         if (duration != 0.0f) {
-            func_003B9F38(*(int*)((char*)self + 0x4), (int)(duration * 100.0f), n);
+            SNDseqautovol(*(int*)((char*)self + 0x4), (int)(duration * 100.0f), n);
         } else {
-            func_003B9E48(*(int*)((char*)self + 0x4), n);
+            SNDseqvol(*(int*)((char*)self + 0x4), n);
         }
-        func_003B58D8();
+        SNDSYS_leavecritical();
         break;
     case 3:
         if (*(int*)((char*)self + 0x54) != 0) {

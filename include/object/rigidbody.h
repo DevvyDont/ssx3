@@ -3,8 +3,8 @@
 
 // cRigidBody: a rigid body's integrator state (pose, linear/angular momentum, inverse mass and inertia, the derived
 // velocities). In SSX 3 its only user is cRollerModifier, which has it as a base at +0x30 (object/rollermodifier.h);
-// the methods are in src/object/railmodifier.cpp: cRigidBody_cRigidBody (ctor, empty), func_0035CFF0 (setW), cRigidBody_updateImplicit
-// (updateImplicit), func_0035D340 (stepMotion), func_0035D4A0 (rigidImpact), func_0035D908 (applyImpulse),
+// the methods are in src/object/railmodifier.cpp: cRigidBody_cRigidBody (ctor, empty), cRigidBody_setW (setW), cRigidBody_updateImplicit
+// (updateImplicit), cRigidBody_stepMotion (stepMotion), cRigidBody_rigidImpact (rigidImpact), func_0035D908 (applyImpulse),
 // cRigidBody_writeToReplayFrame, cRigidBody_readFromReplayFrame (readFromReplayFrame). Size 0xA0: On Tour's DWARF, and in retail
 // cRollerModifier's next field (m_pInstance) is at 0x30 + 0xA0. EA's header path is unknown (On Tour builds it in
 // all_in_one_object.cpp); the preview keeps the RTTI names cRigidBody and cRigidBodyState.
@@ -24,7 +24,7 @@
 
 struct cRigidBody {
     // --- cRigidBodyState (On Tour 0x50; the 0x50-byte replay-frame block)
-    tPose Pose;            // 0x00 [O] cRigidBodyState::Pose; [U] stepMotion (func_0035D340) integrates Pose.P/Pose.Q
+    tPose Pose;            // 0x00 [O] cRigidBodyState::Pose; [U] stepMotion (cRigidBody_stepMotion) integrates Pose.P/Pose.Q
                            //      (lqc2/sqc2 0x0, 0x10, lwc1/swc1 0x10-0x1C); rigidImpact reads Pose.P
     t4Vector P;            // 0x20 [O] linear momentum; [U] updateImplicit: V = P * InvM; applyImpulse adds the impulse
     t4Vector L;            // 0x30 [O] angular momentum; [U] updateImplicit: W = InvMOI * L; setW: L = InvMOI^-1 * W

@@ -1443,8 +1443,8 @@ extern "C" int cWorldIntersectType_IsPatchInt_typed(sQuery_B6E0* q, void* obj, s
  * points along the reject normal (+0x10, dot > 0.8) when the reject flag (+0x8) is set.
  *
  * On a hit the uv is the cell centre (refined by virtual slot 8 at high precision, 2), and the hint remembers patch,
- * cell and triangle. When the hinted cell misses, the hint is cleared and all cells are walked. Called by func_00333EF8
- * and func_00335960 once cAIFwdDiffCache_GetFwdDiff has fetched the tessellation.
+ * cell and triangle. When the hinted cell misses, the hint is cleared and all cells are walked. Called by cOverlapList_terrainIntersect
+ * and TerrainCallback_intersectpatch once cAIFwdDiffCache_GetFwdDiff has fetched the tessellation.
  *
  * @param query  the world intersection query (this)
  * @param obj  the terrain patch record (On Tour pPatch)

@@ -43,9 +43,9 @@ rom:0x99B40 reloc:MIPS_HI16 symbol:D_004C6310
 rom:0x99B44 reloc:MIPS_HI16 symbol:str_pct_d_b
 // object/splinemodifier cRailModifier__cRailModifier (tools/gen/reloc_from_diff.py)
 rom:0x25CE9C reloc:MIPS_HI16 symbol:cRailLink_vtbl
-// object/flexbridgenode func_003480C8 (tools/gen/reloc_from_diff.py)
+// object/flexbridgenode cFlexRailNode_render (tools/gen/reloc_from_diff.py)
 rom:0x24917C reloc:MIPS_LO16 symbol:D_004FF6C0
-// object/animnode func_0034EC58 (tools/gen/reloc_from_diff.py)
+// object/animnode cFloatingNode_cFloatingNode (tools/gen/reloc_from_diff.py)
 rom:0x24FC84 reloc:MIPS_HI16 symbol:cFloatingNode_vtbl
 rom:0x24FC8C reloc:MIPS_LO16 symbol:cFloatingNode_vtbl
 // camera/camera func_0015E2A8 (tools/gen/reloc_from_diff.py)
@@ -444,7 +444,7 @@ rom:0x14456C reloc:MIPS_LO16 symbol:D_004C93A8
 rom:0x1446B0 reloc:MIPS_LO16 symbol:D_004C9418
 
 // Unpaired %hi/%lo uses found by diffing near-miss candidates (same text, value-checked).
-// scripter/ssxscriptengine func_0027A0D8 (tools/gen/reloc_from_diff.py)
+// scripter/ssxscriptengine cSSXScriptEngine_GetAnchorOrientation (tools/gen/reloc_from_diff.py)
 rom:0x17B384 reloc:MIPS_LO16 symbol:D_004D3770
 
 // Unpaired %hi/%lo uses found by diffing near-miss candidates (same text, value-checked).

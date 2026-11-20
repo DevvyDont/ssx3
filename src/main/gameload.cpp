@@ -80,7 +80,7 @@ extern "C" void cUIEngine_loadFile(void* ui, char* name);
 extern "C" void* cOVSound_cOVSound(void* p);
 extern "C" void* cOVStateHUD1P_cOVStateHUD1P(void* p, void* ui, int a);
 extern "C" void cUIStateStack_pushExplicit(void* stack, void* state);
-void func_0026F898(void* p, int a);
+void cReplay_setReplayPadNum(void* p, int a);
 void cGame_setPreloadState(void* self, int val);
 extern "C" void cGame_updateState(cGame* self);
 extern "C" void func_003E5398(int a);
@@ -367,7 +367,7 @@ extern "C" void cGame_load(cGame* self)
     self->mPendingStateStartupFlag = 0;
     cGameState_mpGame = (self);
     if (replay != 0) {
-        func_0026F898(self->Replay, D_004A3484);
+        cReplay_setReplayPadNum(self->Replay, D_004A3484);
         cGame_setState((self), 0x10, 0, 0);
     } else {
         cGame_setPreloadState((self), 10);
@@ -807,7 +807,7 @@ public:
 };
 extern "C" void func_00195D50(void* a);
 extern "C" void cBXLoadIndicator_Init(void* a);
-void func_00278710(void* a);
+void cSSXScriptEngine_Init(void* a);
 extern "C" void cGraphicsMan_UploadTextures(void* a);
 extern "C" void cWorld_init(void* a);
 extern "C" void cWorldTriggerManager_Reset(void* a);
@@ -832,7 +832,7 @@ extern "C" void cGame_gainFocus(cGame* self)
     void* loadIndicator = self->LoadIndicator;
     cOVStateManager_mpPDATemplate = 0;
     cBXLoadIndicator_Init(loadIndicator);
-    func_00278710(ScriptEngine);
+    cSSXScriptEngine_Init(ScriptEngine);
     cBezierMan_TheBezierMan->v17();
     cBezierMan_TheBezierMan->v04();
     cGraphicsMan_UploadTextures(GrMan);
@@ -1017,8 +1017,8 @@ INCLUDE_ASM("main/gameload", cGame_sectionUnloading);
 extern "C" void func_00358700(int kind);
 extern "C" void func_00229408(void* self, int id);
 extern "C" void func_00343C08(void* self, int arg);
-extern "C" void func_00357B90(void* self, int arg);
-extern "C" void func_003551A8(void* self, int index, int key);
+extern "C" void cMultiParticleMan_unloadSection(void* self, int arg);
+extern "C" void cBucketMan_purgeBucket1(void* self, int index, int key);
 extern "C" void cFocusMan_purgesection(void* p, int arg);
 extern "C" void cWScriptMan_unloadSection(void* self, int i);
 extern void* D_004A2A00;
@@ -1039,10 +1039,10 @@ extern "C" void cGame_sectionUnloading(cGame* self, int id)
     func_00358700(id);
     func_00229408(D_004A2A00, id);
     func_00343C08(D_004A3FF0, id);
-    func_00357B90(cMultiParticleMan_TheMultiParticleMan, id);
+    cMultiParticleMan_unloadSection(cMultiParticleMan_TheMultiParticleMan, id);
     cBucketMan_mergeBucket(bm, 1);
-    func_003551A8(bm, 1, id);
-    func_003551A8(bm, 8, id);
+    cBucketMan_purgeBucket1(bm, 1, id);
+    cBucketMan_purgeBucket1(bm, 8, id);
     void* gameAI = self->AI;
     if (gameAI != 0) {
         void* focusMan = *(void**)((char*)gameAI + 0xA4);
@@ -1059,8 +1059,8 @@ extern "C" void cGame_sectionUnloading(cGame* self, int id)
 INCLUDE_ASM("main/gameload", cGame_loadWScriptManSection);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// PORT: func_00308B58 is declared with one argument; it forwards the section id in $a1 to func_00308B78
-void* func_00308B58_2(void* self, int sectionId) __asm__("func_00308B58__FPv");
+// PORT: cWScriptMan_loadSection is declared with one argument; it forwards the section id in $a1 to cWScriptMan_allocateGlobalTable
+void* cWScriptMan_loadSection_2(void* self, int sectionId) __asm__("cWScriptMan_loadSection__FPv");
 
 struct sScriptSection_0430 {
     short state;
@@ -1086,7 +1086,7 @@ static inline bool isSectionLoaded_0430(sScriptCache_0430* c, int sectionId)
 }
 
 /**
- * Runs a world section's scripts once they are loaded: calls func_00308B58 on cWScriptMan_TheWScriptMan with the
+ * Runs a world section's scripts once they are loaded: calls cWScriptMan_loadSection on cWScriptMan_TheWScriptMan with the
  * section id.
  *
  * Does nothing while the world's script cache (cWorld_m_pTheWorld->m_pWScriptCache) holds the section in a state below
@@ -1097,7 +1097,7 @@ static inline bool isSectionLoaded_0430(sScriptCache_0430* c, int sectionId)
 extern "C" void cGame_loadWScriptManSection(cGame* self, int sectionId)
 {
     if (isSectionLoaded_0430((sScriptCache_0430*)cWorld_m_pTheWorld->m_pWScriptCache, sectionId)) {
-        func_00308B58_2(cWScriptMan_TheWScriptMan, sectionId);
+        cWScriptMan_loadSection_2(cWScriptMan_TheWScriptMan, sectionId);
     }
 }
 #endif

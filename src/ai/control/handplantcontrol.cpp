@@ -1104,7 +1104,7 @@ extern "C" int cRider_isChangeFakieGround(void* rider);
 extern "C" void cAirMotion_chooseFakieLandAnim(cAirMotion* self, float v);
 extern "C" void cAirMotion_chooseLandAnim(cAirMotion* self, float v);
 extern "C" int cAirMotion_checkTerrainCollisions(cAirMotion* self, void* out);
-extern "C" void func_003098B0(void* p);
+extern "C" void cWScriptMan_eventLand(void* p);
 extern "C" void* cBE_getBE();
 extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1444,7 +1444,7 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
             char* r6 = RIDER_139C88;
             float k = clamp_139C88(absf_139C88(vu0Dot_139C88(row_139C88(r6, 1), vu0Normalize_139C88(V4_139C88(r6, 0x1E0)))), 1.0f, 1.0f);
             vu0ScaleEq_139C88(V4_139C88(RIDER_139C88, 0x1E0), k);
-            func_003098B0(cWScriptMan_TheWScriptMan);
+            cWScriptMan_eventLand(cWScriptMan_TheWScriptMan);
         }
     }
     cRider_updateBoundBox_9C88(RIDER_139C88, 0);
@@ -1465,7 +1465,7 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
 INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_intersectBoard);
 #ifdef SKIP_ASM
 extern "C" void* cWorldLine_cWorldLine(void* seg, const sVec4HP& a, const sVec4HP& b, int n, float r);
-extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
+extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline sVec4HP vu0Scale_13A7B0(const sVec4HP& v, float s)
@@ -1532,7 +1532,7 @@ extern "C" float cAirMotion_intersectBoard(cAirMotion* self, char* hit)
     char seg[176];
     cWorldLine_cWorldLine(seg, vu0Sub_13A7B0(*pt, vu0Scale_13A7B0(dir, 200.0f)), vu0Add_13A7B0(*pt, vu0Scale_13A7B0(dir, 200.0f)), 2, 0.574999988079071f);
     char* rider2 = (char*)self->mRider;
-    float hitParam = func_003342D0(*(void**)(rider2 + 0x860), seg, hit, *(int*)(rider2 + 0x864));
+    float hitParam = cOverlapList_terrainIntersect1(*(void**)(rider2 + 0x860), seg, hit, *(int*)(rider2 + 0x864));
     if (hitParam >= 0.0f)
     {
         char* hitObject = *(char**)(hit + 0x50);
@@ -1618,7 +1618,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_checkTerrainCollisions);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cRider_updateOrientationImplicit(void*);
 int cRider_getControlState(void* rider);
-extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
+extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
 extern "C" void func_00106538(void* rider, void* v);
 extern "C" void cRider_reactToCollision(void* rider, void* info, int id);
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
@@ -1765,7 +1765,7 @@ extern "C" int cAirMotion_checkTerrainCollisions(cAirMotion* self, void* outp)
     cWorldRider_cWorldRider(&sph, *(void**)(rider + 0xAA0), !riderFlag_AA48(rider));
     sph.dir = riderVec_AA48(RIDER_AA48, 0x180);
     sph.f8 = 1;
-    float penetration = func_003342D0(*(void**)(RIDER_AA48 + 0x860), &sph, &hit, *(int*)(RIDER_AA48 + 0x868));
+    float penetration = cOverlapList_terrainIntersect1(*(void**)(RIDER_AA48 + 0x860), &sph, &hit, *(int*)(RIDER_AA48 + 0x868));
     if (penetration < 0.0f)
         { cWorldRider__cWorldRider(&sph, 2); return 0; }
     {
@@ -2705,7 +2705,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_checkTerrainCollisio
 #ifdef SKIP_ASM
 extern "C" void cRider_updateOrientationImplicit(void*);
 int cRider_getControlState(void* rider);
-extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
+extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
 extern "C" void func_00106538(void* rider, void* v);
 extern "C" void cRider_reactToCollision(void* rider, void* info, int id);
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
@@ -2882,7 +2882,7 @@ extern "C" void cRailslideMotion_checkTerrainCollisions(cRailslideMotion* self)
     sSphere_13C140 sph;
     char* rider = RIDER;
     cWorldRider_cWorldRider(&sph, *(void**)(rider + 0xAA0), !riderFlag_13C140(rider));
-    float penetration = func_003342D0(*(void**)(RIDER + 0x860), &sph, &hit, *(int*)(RIDER + 0x868));
+    float penetration = cOverlapList_terrainIntersect1(*(void**)(RIDER + 0x860), &sph, &hit, *(int*)(RIDER + 0x868));
     if (penetration < 0.0f) { cWorldRider__cWorldRider(&sph, 2); return; }
     {
         float dot = vu0Dot_13C140(RV(880), hit.normal);
@@ -3537,7 +3537,7 @@ struct sHit_13D1B8 {
     sHit_13D1B8() {}
 } __attribute__((aligned(16)));
 
-extern "C" int func_00333EF8(void* world, void* seg, sHit_13D1B8* hits, int max, int flags);
+extern "C" int cOverlapList_terrainIntersect(void* world, void* seg, sHit_13D1B8* hits, int max, int flags);
 extern sVec4HP t4vect_ZAxis;
 extern sVec4HP D_004FF120_v __asm__("t4vect_Zero");
 
@@ -3751,7 +3751,7 @@ extern "C" int cGroundMotion_setupGroundVectors(cGroundMotion* self, sHit_13D1B8
     char seg[176];
     cWorldLine_cWorldLine(seg, lineBottom, lineTop, 2, 0.5f);
     sHit_13D1B8 hits[64];
-    int n = func_00333EF8(*(void**)(RIDER + 0x860), seg, hits, 0x40, *(int*)(RIDER + 0x864));
+    int n = cOverlapList_terrainIntersect(*(void**)(RIDER + 0x860), seg, hits, 0x40, *(int*)(RIDER + 0x864));
     if (n == 0) {
         RV(880) = t4vect_ZAxis;
         RV(976) = D_004FF120_v;
@@ -4687,7 +4687,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_checkWallCollisions);
 #ifdef SKIP_ASM
 extern "C" void cRider_updateOrientationImplicit(void*);
 int cRider_getControlState(void* rider);
-extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
+extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hit, int flags);
 extern "C" void func_00106538(void* rider, void* v);
 extern "C" void func_001065B0(void* rider, void* hit);
 extern "C" void cRider_reactToCollision(void* rider, void* info, int id);
@@ -4859,7 +4859,7 @@ extern "C" void cGroundMotion_checkWallCollisions(cGroundMotion* self)
     cWorldRider_cWorldRider(&sph, *(void**)(rider + 0xAA0), !riderFlag_13F488(rider));
     sph.f8 = 1;
     sph.dir = RV(880);
-    float penetration = func_003342D0(*(void**)(RIDER + 0x860), &sph, &hit, *(int*)(RIDER + 0x868));
+    float penetration = cOverlapList_terrainIntersect1(*(void**)(RIDER + 0x860), &sph, &hit, *(int*)(RIDER + 0x868));
     if (penetration < 0.0f)
         { cWorldRider__cWorldRider(&sph, 2); return; }
     if (hit.obj != 0) {

@@ -6,7 +6,7 @@
 // cScriptPlayerChannel per animated channel (inseq/scriptplayerchannel.h). No virtual functions, no base class.
 // Size 0x3C [R]: cScriptPlayerMain's Init (cScriptPlayerMain_Init) allocates numEntities x 0x3C (+ the 0x10 array cookie) from
 // the cInSeq heap with func_002724C8 and runs the constructor cScriptPlayerEntity_cScriptPlayerEntity on each 0x3C stride; the destructor loop
-// in func_002746F8 walks the same stride. On Tour's class is 0x38.
+// in cScriptPlayerMain_DeInit walks the same stride. On Tour's class is 0x38.
 // EA's source: z:/main/game/source/inseq/all_in_one_inseq.cpp in SSX On Tour's DWARF (the July 2003 preview has no
 // assert or out-of-line accessor for this class), hence inseq/. Retail code: unit replay/replaycache
 // 0x00273938-0x00274514.
@@ -30,7 +30,7 @@ struct cInSeqCommEntity;  // On Tour: interface, vptr only (OnInSeqLock, OnInSeq
 // The entity block at the start of an entity's script data (On Tour tInSeqScriptEntityBlockHeader, 0xC).
 struct tInSeqScriptEntityBlockHeader {
     unsigned int blockSize;           // 0x0 [O]; [U] Init returns it (the caller steps to the next block); GetDataSize
-    unsigned int numVariations;       // 0x4 [O]; [U] GetNumVariations (func_00274388)
+    unsigned int numVariations;       // 0x4 [O]; [U] GetNumVariations (cScriptPlayerEntity_GetNumVariations)
     unsigned int varOffsetTableStart; // 0x8 [O] first entry of the variation offset table (mpVariationTable)
 };
 
@@ -38,8 +38,8 @@ struct tInSeqScriptEntityBlockHeader {
 struct tInSeqEntityHeader {
     unsigned short headerSize;        // 0x0 [O]; [U] channel records start at this + headerSize; > 8 = has a custom header
     unsigned char numChannels;        // 0x2 [O]; [U] SetupPlay/Stop/Restart/DoFrameUpdate loop to it
-    unsigned char type;               // 0x3 [O]; [U] GetType (func_002743C8); passed to the cInSeqCommEntity calls
-    int numFrames;                    // 0x4 [O]; [U] GetScriptLength (func_00274348, func_00274358)
+    unsigned char type;               // 0x3 [O]; [U] GetType (cScriptPlayerEntity_GetType); passed to the cInSeqCommEntity calls
+    int numFrames;                    // 0x4 [O]; [U] GetScriptLength (cScriptPlayerEntity_GetScriptLength, func_00274358)
     char nextSectionStart;            // 0x8 [O] the custom header (mpHeader) when headerSize > 8
     char dummyPad[3];                 // 0x9 [O]
 };
@@ -50,14 +50,14 @@ struct cScriptPlayerEntity {
     const char* mpData;                           // 0x04 [O]; [R] ctor 0; [U] Init stores pScriptData; DeInit tests it;
                                                   //      GetHeader(int) = mpData + mpVariationTable[i]
     cScriptPlayerMain* mpOwner;                   // 0x08 [O]; [U] Init's 2nd argument; SetupPlay/Stop reach the cInSeq
-                                                  //      heap as mpOwner->mpManager + 8; GetProjectID (func_002743A0)
-    void* mpUserData;                             // 0x0C [O]; [R] ctor 0; [U] SetUserData (func_00274230) swaps it
+                                                  //      heap as mpOwner->mpManager + 8; GetProjectID (cScriptPlayerEntity_GetProjectID)
+    void* mpUserData;                             // 0x0C [O]; [R] ctor 0; [U] SetUserData (cScriptPlayerEntity_SetUserData) swaps it
     tInSeqScriptEntityBlockHeader* mpBlockHeader; // 0x10 [O]; [U] Init = pScriptData and returns ->blockSize;
-                                                  //      GetNumVariations, GetDataSize (func_002743B0)
+                                                  //      GetNumVariations, GetDataSize (cScriptPlayerEntity_GetDataSize)
     unsigned int* mpVariationTable;               // 0x14 [O]; [U] Init = pScriptData + 8; SetEntityVariation and
                                                   //      GetHeader(int) index it
     int mCurrVariation;                           // 0x18 [O]; [U] Init 0; SetEntityVariation stores varIndex;
-                                                  //      GetCurrVariation (func_00274380)
+                                                  //      GetCurrVariation (cScriptPlayerEntity_GetCurrVariation)
     tInSeqEntityHeader* mpSystemHeader;           // 0x1C [O]; [U] Init/SetEntityVariation: mpData +
                                                   //      mpVariationTable[var]; numChannels/type/numFrames readers
     const char* mpHeader;                         // 0x20 [O]; [U] &mpSystemHeader->nextSectionStart when headerSize > 8,

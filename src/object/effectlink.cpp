@@ -109,7 +109,7 @@ extern "C" void* cEffectModifier_cEffectModifier(cEffectModifier* self, int inst
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_003457C8);
+INCLUDE_ASM("object/effectlink", cEffectModifier_cEffectModifier1);
 #ifdef SKIP_ASM
 extern int D_004A3FF4;
 extern void* cEffectModifier_vtbl[];
@@ -130,14 +130,14 @@ struct sEffVEntry57C8 {
  * Constructs an effect modifier from a replay frame.
  *
  * Clears the effect-link Next/Prev, installs cEffectModifier_vtbl, reads Instance through the stream's vtable entry 3
- * (instance-pointer read) and increments the live effect count D_004A3FF4 (read by func_00360D18). The particle and
- * halo replay constructors (func_003459A8, func_003461C0) start with it.
+ * (instance-pointer read) and increments the live effect count D_004A3FF4 (read by cEffectModifier_getEffectCount). The particle and
+ * halo replay constructors (cParticleModifier_cParticleModifier1, cHaloModifier_cHaloModifier1) start with it.
  *
  * @param effectModifier  the modifier being constructed
  * @param obj  replay stream to read from
  * @return effectModifier
  */
-extern "C" void* func_003457C8(cEffectModifier* effectModifier, void* obj)
+extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* effectModifier, void* obj)
 {
     sEffectLinkObj_57C8* self = (sEffectLinkObj_57C8*)effectModifier;
     self->link.next = 0;
@@ -272,7 +272,7 @@ extern "C" void* cParticleModifier_cParticleModifier(cParticleModifier* self, in
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_003459A8);
+INCLUDE_ASM("object/effectlink", cParticleModifier_cParticleModifier1);
 #ifdef SKIP_ASM
 void* operator_new1(int size);
 extern "C" void cStaticEmitter_readFromReplayFrame(void* self, void* stream);
@@ -287,7 +287,7 @@ struct sEffectLinkVEntry_3459A8 {
 /**
  * Constructs a particle modifier from a replay frame.
  *
- * Runs the effect-modifier replay constructor func_003457C8, installs cParticleModifier_vtbl, constructs the Emitter
+ * Runs the effect-modifier replay constructor cEffectModifier_cEffectModifier1, installs cParticleModifier_vtbl, constructs the Emitter
  * (cStaticEmitter_cStaticEmitter) and reads Complete (+0x1E4). While not complete it allocates and reads the 0xD8-byte
  * ParticleData, reads Transform (0x40 bytes), sets the emitter up (cStaticEmitter_setupEmitter) and lets it read its
  * own state (cStaticEmitter_readFromReplayFrame); a completed modifier gets the identity Transform and no ParticleData.
@@ -296,9 +296,9 @@ struct sEffectLinkVEntry_3459A8 {
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* func_003459A8(cParticleModifier* self, void* stream)
+extern "C" void* cParticleModifier_cParticleModifier1(cParticleModifier* self, void* stream)
 {
-    func_003457C8((cEffectModifier*)self, stream);
+    cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
     self->mVtbl = cParticleModifier_vtbl;
     cStaticEmitter_cStaticEmitter(((char*)self) + 0x50);
     sEffectLinkVEntry_3459A8* readSlot = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
@@ -494,7 +494,7 @@ struct sEffectLinkVEntry_345D80 {
  * Rebuilds a dynamic (moving) particle effect from a replay frame (On Tour cDynamicParticleModifier(cBxReplayFrame*
  * data)).
  *
- * Runs the cEffectModifier replay constructor (func_003457C8), stores cDynamicParticleModifier_vtbl, constructs the
+ * Runs the cEffectModifier replay constructor (cEffectModifier_cEffectModifier1), stores cDynamicParticleModifier_vtbl, constructs the
  * embedded emitter (cBaseClass_DynamicEmitter constructor, then cDynamicEmitter_vtbl) and reads the 0x50-byte state
  * block starting at Mesh through the stream's read (slot 2). If the effect is not Complete it allocates a 0xD8-byte
  * tParticleData with operator_new1, reads it from the stream, sets the emitter up from it with a random seed
@@ -507,7 +507,7 @@ struct sEffectLinkVEntry_345D80 {
  */
 extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier(cDynamicParticleModifier* self, void* stream)
 {
-    func_003457C8((cEffectModifier*)self, stream);
+    cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
     self->mVtbl = cDynamicParticleModifier_vtbl;
     void* data = &self->Mesh;
     cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(((char*)&self->Emitter));
@@ -731,7 +731,7 @@ extern "C" void cDynamicParticleModifier_writeToReplayFrame(cDynamicParticleModi
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_00346120);
+INCLUDE_ASM("object/effectlink", cHaloModifier_cHaloModifier);
 #ifdef SKIP_ASM
 extern int D_004A4000;
 extern void* cHaloModifier_vtbl[];
@@ -777,7 +777,7 @@ struct sEffSrc_6120 {
  * @param instRecord  instance record the halo belongs to
  * @return self
  */
-extern "C" void* func_00346120(sEffObj_6120* self, sEffSrc_6120* src, int instRecord)
+extern "C" void* cHaloModifier_cHaloModifier(sEffObj_6120* self, sEffSrc_6120* src, int instRecord)
 {
     cEffectModifier_cEffectModifier((cEffectModifier*)self, instRecord);
     self->vt = cHaloModifier_vtbl;
@@ -793,11 +793,11 @@ extern "C" void* func_00346120(sEffObj_6120* self, sEffSrc_6120* src, int instRe
 #endif
 
 //100%
-INCLUDE_ASM("object/effectlink", func_003461C0);
+INCLUDE_ASM("object/effectlink", cHaloModifier_cHaloModifier1);
 #ifdef SKIP_ASM
 extern int D_004A4000;
 extern void* cHaloModifier_vtbl[];
-extern "C" void* func_003457C8(cEffectModifier* p, void* obj);
+extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* p, void* obj);
 
 struct sEffVEntry61C0 {
     short delta;
@@ -808,15 +808,15 @@ struct sEffVEntry61C0 {
 /**
  * Constructs a halo modifier from a replay frame.
  *
- * Runs the effect-modifier replay constructor func_003457C8, installs cHaloModifier_vtbl, reads the 0x30-byte halo
+ * Runs the effect-modifier replay constructor cEffectModifier_cEffectModifier1, installs cHaloModifier_vtbl, reads the 0x30-byte halo
  * state at +0x10 through the stream's read slot (vtable entry 2) and increments the halo count D_004A4000.
  *
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* func_003461C0(void* self, void* stream)
+extern "C" void* cHaloModifier_cHaloModifier1(void* self, void* stream)
 {
-    func_003457C8((cEffectModifier*)self, stream);
+    cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
     *(void***)((char*)self + 0x8) = cHaloModifier_vtbl;
     sEffVEntry61C0* vt = *(sEffVEntry61C0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x10, 0x30);
@@ -947,8 +947,8 @@ struct sEffVE_346350 {
     void (*fn)(void*, void*, int, sEffV3_346350*, sEffV2_346350*, sEffV4_346350*);
 };
 
-extern "C" void* func_0034FB00(void* self, int a1, int a2, int a3);
-void func_00353DA8(void* self);
+extern "C" void* cInstanceNode_cInstanceNode1(void* self, int a1, int a2, int a3);
+void cSpring_cSpring(void* self);
 extern "C" void cSpring_setupSpring(void* self, int a1, float len);
 extern "C" void cFlexBridgeNode_initSpringNodes(void* self);
 extern "C" void cFlexBridgeNode_setupGrid(void* self);
@@ -987,9 +987,9 @@ struct sEffFlags_346350 {
  */
 extern "C" void* cFlexBridgeNode_cFlexBridgeNode(void* self, int bucket, int pInst, int tdata)
 {
-    func_0034FB00(self, bucket, 5, pInst);
+    cInstanceNode_cInstanceNode1(self, bucket, 5, pInst);
     *(void***)((char*)self + 0xC) = cFlexBridgeNode_vtbl;
-    func_00353DA8((char*)self + 0x50);
+    cSpring_cSpring((char*)self + 0x50);
     *(int*)((char*)self + 0x44) = 12;
     *(float*)((char*)self + 0x40) = 100.0f;
     sEffV3_346350 pts[4];
@@ -1017,7 +1017,7 @@ extern "C" void* cFlexBridgeNode_cFlexBridgeNode(void* self, int bucket, int pIn
 INCLUDE_ASM("object/effectlink", cFlexBridgeNode_cFlexBridgeNode1);
 #ifdef SKIP_ASM
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream);
-extern "C" void* func_00353E80(void* self, void* stream);
+extern "C" void* cSpring_cSpring1(void* self, void* stream);
 extern "C" void cFlexBridgeNode_setupGrid(void* self);
 extern "C" void cFlexBridgeNode_updateGrid(void*);
 extern void* cFlexBridgeNode_vtbl[];
@@ -1031,7 +1031,7 @@ struct sEffectLinkVEntry64E0 {
 /**
  * Constructs a flexible bridge node from a replay frame.
  *
- * Runs the cInstanceNode replay constructor, reads the spring chain (func_00353E80), sets up the strip mesh,
+ * Runs the cInstanceNode replay constructor, reads the spring chain (cSpring_cSpring1), sets up the strip mesh,
  * reads 0x30 bytes at +0x20 and poses the strip.
  *
  * @param bucket  update bucket
@@ -1043,7 +1043,7 @@ extern "C" void* cFlexBridgeNode_cFlexBridgeNode1(void* self, void* bucket, void
     void* payload = (char*)self + 0x20;
     cInstanceNode_cInstanceNode(self, bucket, stream);
     *(void***)((char*)self + 0xC) = cFlexBridgeNode_vtbl;
-    func_00353E80((char*)self + 0x50, stream);
+    cSpring_cSpring1((char*)self + 0x50, stream);
     cFlexBridgeNode_setupGrid(self);
     sEffectLinkVEntry64E0* readEntry = &(*(sEffectLinkVEntry64E0**)stream)[2];
     readEntry->fn((char*)stream + readEntry->delta, payload, 0x30);

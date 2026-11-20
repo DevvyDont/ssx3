@@ -781,18 +781,18 @@ extern "C" void cFloatingNode_writeToReplayFrame(cFloatingNode* self, void* stre
 #endif
 
 //100%
-INCLUDE_ASM("object/floatingnode", func_0034FB00);
+INCLUDE_ASM("object/floatingnode", cInstanceNode_cInstanceNode1);
 #ifdef SKIP_ASM
-extern "C" void* func_00354850(void* self, void* a1, int type);
-extern "C" void func_0034FC78(void* self, void* node);
+extern "C" void* cSortObjNode_cSortObjNode1(void* self, void* a1, int type);
+extern "C" void cInstanceNode_setActiveNode(void* self, void* node);
 extern "C" void func_002D1BF0(void* node);
 extern char cInstanceNode_vtbl[];
 
 /**
  * Constructs the instance-node base of a node for a placed instance.
  *
- * Runs the sort-node constructor func_00354850, stores the record in Instance, installs cInstanceNode_vtbl and makes
- * this node the record's active node (func_0034FC78). Unless the record flags have bit 0x100 or the type is 6, 0x10 or
+ * Runs the sort-node constructor cSortObjNode_cSortObjNode1, stores the record in Instance, installs cInstanceNode_vtbl and makes
+ * this node the record's active node (cInstanceNode_setActiveNode). Unless the record flags have bit 0x100 or the type is 6, 0x10 or
  * 22, it also passes the record to func_002D1BF0.
  *
  * @param bucket  update bucket
@@ -800,12 +800,12 @@ extern char cInstanceNode_vtbl[];
  * @param node  instance record the node drives
  * @return self
  */
-extern "C" void* func_0034FB00(cInstanceNode* self, void* bucket, int type, void* node)
+extern "C" void* cInstanceNode_cInstanceNode1(cInstanceNode* self, void* bucket, int type, void* node)
 {
-    func_00354850(self, bucket, type);
+    cSortObjNode_cSortObjNode1(self, bucket, type);
     self->Instance = (tInstanceRecord*)node;
     self->mVtbl = (void**)cInstanceNode_vtbl;
-    func_0034FC78(self, node);
+    cInstanceNode_setActiveNode(self, node);
     if ((*(int*)((char*)node + 0x8) & 0x100) == 0) {
         if (type != 6 && type != 0x10 && type != 22) {
             func_002D1BF0(node);

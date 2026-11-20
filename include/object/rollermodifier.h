@@ -5,7 +5,7 @@
 // and props a rider knocks loose; transform type 5). Size 0x2D0: retail cMemMan_alloc(0x2D0, "RollerModifier")
 // (cMoveNode's add-roller path, src/object/movenode.cpp, and the replay loader, src/object/modifierblock.cpp
 // type 5), On Tour 0x2D0 too. EA's source path: d:/ssx/code/source/object/rollermodifier.cpp (preview assert).
-// Constructors: cRollerModifier_cRollerModifier (tAddRollerData, tIntersectInfo*, tCollideInfo*) and func_0035DF70
+// Constructors: cRollerModifier_cRollerModifier (tAddRollerData, tIntersectInfo*, tCollideInfo*) and cRollerModifier_cRollerModifier1
 // (from a replay frame); destructor cRollerModifier__cRollerModifier; vtable cRollerModifier_vtbl (0x0048F080, 27
 // slots; the cTransformModifier base vtable is cTransformModifier_vtbl). Methods are in src/object/railmodifier.cpp.
 //
@@ -16,7 +16,7 @@
 // +0x30 and then 0x28 bytes from +0x4, as retail's cRollerModifier_writeToReplayFrame does, so the 0x28-byte block at +0x4 is the
 // cRollerNodeState (On Tour: 0x28 bytes, the 10 floats below in this order).
 // Evidence tags:
-//   [R] retail constructors cRollerModifier_cRollerModifier / func_0035DF70, the destructor, the 0x2D0 allocation;
+//   [R] retail constructors cRollerModifier_cRollerModifier / cRollerModifier_cRollerModifier1, the destructor, the 0x2D0 allocation;
 //   [P] the July 2003 preview's inline accessors (getRadius/setRadius lwc1/swc1 0x24); tools/layout_xlate.py finds
 //       preview == retail for this class (0x4..0xD0, 0x220, 0x230 all shift 0);
 //   [U] how retail code uses the field (C bodies and the asm of cRollerModifier_update, _collide, _Collision);
@@ -91,7 +91,7 @@ struct cRollerModifier {
     t4Vector W;                   // 0x0C0 [O] angular velocity; [U] Collision/update/collide (lqc2/sq 0xC0)
     // --- cRollerModifier
     tInstanceRecord* m_pInstance; // 0x0D0 [O]; [R] ctor: the intersect info's instance (ii + 0x50), then sets flag bits
-                                  //       in its word +0x8; func_0035DF70 reads it from the frame; [U] writeToReplayFrame
+                                  //       in its word +0x8; cRollerModifier_cRollerModifier1 reads it from the frame; [U] writeToReplayFrame
     char unk_0D4[0xC];            // 0x0D4 padding (SphTree is 16-byte aligned)
     bxSphereTree SphTree;         // 0x0E0 [O]; [R] ctor SphereTree_SphereTree(self + 0xE0), then operator= (bxSphereTree_operatorE) from
                                   //       ii + 0x48; ctors read SphTree.treeInfo (lw 0x178); [U] collide, translateMe
@@ -103,7 +103,7 @@ struct cRollerModifier {
     char unk_2A4[0xC];            // 0x2A4 padding
     t4Vector COMOffset;           // 0x2B0 [O]; [R] ctors: tree info + 0x2C (x, y, z; w = 0); [U] getBodyPose
     char RollerHint[0x10];        // 0x2C0 [O] tIntHint RollerHint (not laid out); [U] collide passes its address to
-                                  //       the world intersect query (func_00336850)
+                                  //       the world intersect query (cBXNash_terrainIntersect1)
 };
 
 CHECK_OFFSET(cRollerModifier, mVtbl, 0x000);

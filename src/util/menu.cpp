@@ -6295,14 +6295,14 @@ extern "C" int cObjectInterface_runCollideScript(int collideInfo, int intersectI
 //100%
 INCLUDE_ASM("util/menu", func_002D19E8);
 #ifdef SKIP_ASM
-extern "C" int func_0030A598(void* self, int id);
-extern "C" void func_0030A5C0(void* self, int id);
+extern "C" int cWScriptMan_hasOnExpireScript(void* self, int id);
+extern "C" void cWScriptMan_doOnExpireScript(void* self, int id);
 extern void* cWScriptMan_TheWScriptMan;
 
 extern "C" int func_002D19E8(int id)
 {
-    if (func_0030A598(cWScriptMan_TheWScriptMan, id) != 0) {
-        func_0030A5C0(cWScriptMan_TheWScriptMan, id);
+    if (cWScriptMan_hasOnExpireScript(cWScriptMan_TheWScriptMan, id) != 0) {
+        cWScriptMan_doOnExpireScript(cWScriptMan_TheWScriptMan, id);
         return 1;
     }
     return 0;
@@ -6312,7 +6312,7 @@ extern "C" int func_002D19E8(int id)
 //100%
 INCLUDE_ASM("util/menu", cObjectInterface_runOnLoseFocusScript);
 #ifdef SKIP_ASM
-extern "C" int func_0030A2E8(void* self, int id);
+extern "C" int cWScriptMan_hasOnLoseFocusScript(void* self, int id);
 extern "C" void cWScriptMan_doOnLoseFocusScript(void* self, int id);
 extern void* cWScriptMan_TheWScriptMan;
 
@@ -6320,14 +6320,14 @@ extern void* cWScriptMan_TheWScriptMan;
  * Runs a world instance's on-lose-focus script, when it has one.
  *
  * Asks the world script manager (TheWScriptMan) whether the instance has an on-lose-focus script
- * (func_0030A2E8) and runs it (cWScriptMan_doOnLoseFocusScript).
+ * (cWScriptMan_hasOnLoseFocusScript) and runs it (cWScriptMan_doOnLoseFocusScript).
  *
  * @param id  the instance record (On Tour tInstanceRecord*)
  * @return 1 when a script was run, otherwise 0
  */
 extern "C" int cObjectInterface_runOnLoseFocusScript(int id)
 {
-    if (func_0030A2E8(cWScriptMan_TheWScriptMan, id) != 0) {
+    if (cWScriptMan_hasOnLoseFocusScript(cWScriptMan_TheWScriptMan, id) != 0) {
         cWScriptMan_doOnLoseFocusScript(cWScriptMan_TheWScriptMan, id);
         return 1;
     }
@@ -6338,31 +6338,31 @@ extern "C" int cObjectInterface_runOnLoseFocusScript(int id)
 //100%
 INCLUDE_ASM("util/menu", func_002D1A78);
 #ifdef SKIP_ASM
-extern "C" void func_0030A610(int, int);
+extern "C" void cWScriptMan_doOnInitScript(int, int);
 
 extern "C" void func_002D1A78(int inst) {
-    func_0030A610((*(int*)&cWScriptMan_TheWScriptMan), inst);
+    cWScriptMan_doOnInitScript((*(int*)&cWScriptMan_TheWScriptMan), inst);
 }
 #endif
 //100%
 INCLUDE_ASM("util/menu", func_002D1AA0);
 #ifdef SKIP_ASM
-extern "C" void func_00309D20(int, int, int);
+extern "C" void cWScriptMan_runScript1(int, int, int);
 
 extern "C" void func_002D1AA0(int scriptId, int inst) {
-    func_00309D20((*(int*)&cWScriptMan_TheWScriptMan), scriptId, inst);
+    cWScriptMan_runScript1((*(int*)&cWScriptMan_TheWScriptMan), scriptId, inst);
 }
 #endif
 
 //100%
 INCLUDE_ASM("util/menu", func_002D1AC8);
 #ifdef SKIP_ASM
-extern "C" int func_0030A688(void* self, int id);
+extern "C" int cWScriptMan_doOnFrameUpdateScript(void* self, int id);
 extern void* cWScriptMan_TheWScriptMan;
 
 extern "C" int func_002D1AC8(int id)
 {
-    return func_0030A688(cWScriptMan_TheWScriptMan, id);
+    return cWScriptMan_doOnFrameUpdateScript(cWScriptMan_TheWScriptMan, id);
 }
 #endif
 

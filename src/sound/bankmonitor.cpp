@@ -315,8 +315,8 @@ extern "C" void cBankMonitorInstance_Reset(void*);
 extern "C" void bxLogPrint(const char* fmt, ...);
 extern "C" int cBankMonitor_FindFreeInstance(cBankMonitor* self, int n);
 extern "C" void func_002ABD48(void* voice, void* mon);
-extern "C" void func_003B89E0(int h);
-extern "C" int func_003B9920(int h);
+extern "C" void SNDstop(int h);
+extern "C" int SNDseqstop(int h);
 extern char D_00483250[];
 
 // cSndPlayOpts::OPTS_GetCallback (prototype name; out-of-line copy in bx is cSndPlayOpts_OPTS_GetCallback)
@@ -335,8 +335,8 @@ static inline void setCallback_Create(sBmVoice* v, sSndCallback k)
  *
  * The voice is reset (cBankMonitorInstance_Reset) and gets the handle, kind and volume, plus the current option slot's
  * target position, callback and other settings; the target is copied into the voice when the options ask for
- * that. With no free voice it logs "Out of BankMonitor instances" and releases the handle with func_003B89E0()
- * (kind 1) or func_003B9920() (kind 2). The busy counter (+0x8DC) is raised for the duration.
+ * that. With no free voice it logs "Out of BankMonitor instances" and releases the handle with SNDstop()
+ * (kind 1) or SNDseqstop() (kind 2). The busy counter (+0x8DC) is raised for the duration.
  *
  * @param id    the sound handle; negative marks the voice invalid
  * @param vol   the volume to store
@@ -380,10 +380,10 @@ extern "C" sBmVoice* cBankMonitor_BANKMONITOR_Create(sBankMonitorView* self, int
         bxLogPrint(D_00483250);
         switch (kind) {
         case 1:
-            func_003B89E0(id);
+            SNDstop(id);
             break;
         case 2:
-            func_003B9920(id);
+            SNDseqstop(id);
             break;
         }
     }
@@ -921,7 +921,7 @@ extern "C" sSndPlayerD9C8* cMonitor_cMonitor(sSndPlayerD9C8* self, int inchrg, i
 INCLUDE_ASM("sound/bankmonitor", cMonitor__cMonitor);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern "C" void func_003B5948(int id);
+extern "C" void SNDSYS_remove100hzclient(int id);
 extern "C" void func_002A97C0(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(cSoundSys* self, int flags);
 extern void* cMonitor_vtbl[];
@@ -966,7 +966,7 @@ extern "C" void cMonitor__cMonitor(cMonitor* self, int flags)
         vt.e[1].delta = D_00483BC0_DAC8.e[1].delta + thisAdjust;
     }
     // PORT: function pointer passed as int
-    func_003B5948((int)func_002AD998);
+    SNDSYS_remove100hzclient((int)func_002AD998);
     gMonitor = 0;
     if (((&self->mMonitorInstance[0])) != 0) {
         cMonitorInstance* monitorInstance = end;
@@ -986,7 +986,7 @@ extern "C" void cMonitor__cMonitor(cMonitor* self, int flags)
 #endif
 
 extern "C" void func_002AD998();
-extern "C" void* func_003B5910(void*);
+extern "C" void* SNDSYS_add100hzclient(void*);
 
 //98.75%
 INCLUDE_ASM("sound/bankmonitor", cMonitor_MONITOR_BeginMonitoring__FPv);
@@ -994,14 +994,14 @@ INCLUDE_ASM("sound/bankmonitor", cMonitor_MONITOR_BeginMonitoring__FPv);
 /**
  * Starts the bank monitor's periodic update by registering func_002AD998 as a sound-system client.
  *
- * func_002AD998 forwards to gMonitor's first virtual method; func_003B5910 (On Tour SNDSYS_add100hzclient) adds it to
+ * func_002AD998 forwards to gMonitor's first virtual method; SNDSYS_add100hzclient (On Tour SNDSYS_add100hzclient) adds it to
  * the sound library's 100 Hz client list when the library's enable flag is set. The object pointer is not used.
  *
- * @return no meaningful value (func_003B5910 returns nothing)
+ * @return no meaningful value (SNDSYS_add100hzclient returns nothing)
  */
 void* cMonitor_MONITOR_BeginMonitoring(void* self)
 {
-    return func_003B5910((void*)func_002AD998);
+    return SNDSYS_add100hzclient((void*)func_002AD998);
 }
 #endif
 
@@ -1344,7 +1344,7 @@ extern "C" void func_002AE048(void (*cb)(), int id)
     }
     D_004A3798 = cb;
     D_004A379C = id;
-    func_003B5910((void*)id);
+    SNDSYS_add100hzclient((void*)id);
     SYNCTASK_add(func_002AE020, 5, 100);
     D_004A3780 = REAL_abortmessage;
     D_004A3784 = func_004175C8;
@@ -1359,14 +1359,14 @@ INCLUDE_ASM("sound/bankmonitor", func_002AE100);
 #ifdef SKIP_ASM
 extern "C" int func_002AE020();
 extern "C" void SYNCTASK_del(int (*fn)());
-extern "C" void func_003B5948(int id);
+extern "C" void SNDSYS_remove100hzclient(int id);
 extern void (*D_004A3798)();
 extern int D_004A379C;
 
 extern "C" void func_002AE100()
 {
     if (D_004A3798 != 0) {
-        func_003B5948(D_004A379C);
+        SNDSYS_remove100hzclient(D_004A379C);
         SYNCTASK_del(func_002AE020);
         D_004A3798 = 0;
         D_004A379C = 0;
@@ -1526,7 +1526,7 @@ struct sBankMonSlot28 {
 };
 extern sBankMonSlot28 D_004D3EF8[];
 extern "C" int func_002AE230(int a, int b);
-extern "C" int func_003B6300(int id);
+extern "C" int SNDbankremove(int id);
 
 extern "C" int func_002AE328(int a, int b)
 {
@@ -1537,7 +1537,7 @@ extern "C" int func_002AE328(int a, int b)
     }
     sBankMonSlot28* e = &D_004D3EF8[i];
     if (e->f4 >= 0) {
-        func_003B6300(-1);
+        SNDbankremove(-1);
         e->f14 = 0;
         e->f4 = none;
         e->f8 = none;
@@ -1581,13 +1581,13 @@ extern "C" int func_002AE3A8(int a)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE478);
 #ifdef SKIP_ASM
-extern "C" int func_003B7B00(int n, int m);
+extern "C" int SNDSTRM_overhead(int n, int m);
 
 extern "C" int func_002AE478(int n, int m)
 {
     int size = n * 0xC + 0x70;
     if (m > 0) {
-        size += func_003B7B00(n, m);
+        size += SNDSTRM_overhead(n, m);
     }
     return size + (0x10 - (size & 0xF));
 }
@@ -1600,8 +1600,8 @@ struct sBankDesc_2AE4C0 { char c[24]; };
 struct sBankEnt_2AE4C0 { int f0; int f4; int f8; };
 extern "C" int func_002AE1B8(void);
 extern "C" void func_002AE138(void* self);
-extern "C" int func_003B7818(void* desc, int n, int m, void* mem, int size);
-extern "C" int func_003BA020(void* desc);
+extern "C" int SNDSTRM_create(void* desc, int n, int m, void* mem, int size);
+extern "C" int SNDplaysetdef(void* desc);
 extern char str_pct_s_c[];
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
@@ -1625,11 +1625,11 @@ extern "C" int func_002AE4C0(char* name, sBankDesc_2AE4C0* desc, int count, int 
     if (desc)
         *(sBankDesc_2AE4C0*)(b + 0x30) = *desc;
     else
-        func_003BA020(b + 0x30);
+        SNDplaysetdef(b + 0x30);
     *(char*)(b + 0x35) = 0;
     sprintf(b + 0x1C, str_pct_s_c, 11, name);
     if (m > 0)
-        *(int*)(b + 0x0) = func_003B7818(b + 0x30, count, m, mem, size);
+        *(int*)(b + 0x0) = SNDSTRM_create(b + 0x30, count, m, mem, size);
     else
         *(char*)(b + 0x64) = 1;
     if (*(int*)(b + 0x0) < 0 && *(signed char*)(b + 0x64) == 0)
@@ -1645,7 +1645,7 @@ extern "C" int func_002AE4C0(char* name, sBankDesc_2AE4C0* desc, int count, int 
 INCLUDE_ASM("sound/bankmonitor", func_002AE690);
 #ifdef SKIP_ASM
 extern void* (*D_004A3794)(void*);
-extern "C" void func_003B7838(int id);
+extern "C" void SNDSTRM_destroy(int id);
 
 extern "C" void func_002AE690(int idx)
 {
@@ -1661,7 +1661,7 @@ extern "C" void func_002AE690(int idx)
             id = func_002AE230(idx, -1);
         }
     } else {
-        func_003B7838(*(int*)m);
+        SNDSTRM_destroy(*(int*)m);
     }
     func_002AE188(m);
 }
@@ -1690,12 +1690,12 @@ extern "C" int func_002AE230(int a, int b);
 // PORT: the unit defines func_002AF370 as void; its body returns __fixunssfsi's result.
 unsigned int func_002AF370_r(void) __asm__("func_002AF370");
 extern "C" int func_002AF6C0(int idx, int v);
-extern "C" void func_003B58A0(void);
-extern "C" void func_003B58D8(void);
-extern "C" int func_003B6820(int h, int id, void* desc);
-extern "C" int func_003B78D8(int h, int a, int b, unsigned int t);
-// PORT: the unit declares func_003B78F8 as void; the caller leaves $v0 live (int return).
-int func_003B78F8_r(int) __asm__("func_003B78F8");
+extern "C" void SNDSYS_entercritical(void);
+extern "C" void SNDSYS_leavecritical(void);
+extern "C" int SNDBANK_play(int h, int id, void* desc);
+extern "C" int SNDSTRM_queuefile(int h, int a, int b, unsigned int t);
+// PORT: the unit declares SNDSTRM_purge as void; the caller leaves $v0 live (int return).
+int SNDSTRM_purge_r(int) __asm__("SNDSTRM_purge");
 extern "C" int func_003B7E10(int h, int a, int b, unsigned int t);
 
 extern "C" int func_002AE7A8(int idx, int a1, int a2, unsigned int key, int a4, signed char vol, int a6, int a7)
@@ -1722,9 +1722,9 @@ extern "C" int func_002AE7A8(int idx, int a1, int a2, unsigned int key, int a4, 
         if (h < 0)
             return -1;
         *(int*)(m + 4) = (key & 0xFFFF) + a6 - 1;
-        func_003B58A0();
-        r = func_003B6820(h, *(int*)(m + 4), m + 0x30);
-        func_003B58D8();
+        SNDSYS_entercritical();
+        r = SNDBANK_play(h, *(int*)(m + 4), m + 0x30);
+        SNDSYS_leavecritical();
         D_004D3EF8[s].f24 = func_002AF370_r();
         *(int*)(m + 0) = h;
         (*(sBankEnt_2AE7A8**)(m + 0x6C))[0].f4 = r;
@@ -1737,7 +1737,7 @@ extern "C" int func_002AE7A8(int idx, int a1, int a2, unsigned int key, int a4, 
         int j;
         if (a7)
         {
-            func_003B78F8_r(*(int*)(m + 0));
+            SNDSTRM_purge_r(*(int*)(m + 0));
             for (j = *(signed char*)(m + 0x66) - 1; j > 0; j--)
             {
                 (*(sBankEnt_2AE7A8**)(m + 0x6C))[j - 1].f4 = -1;
@@ -1747,7 +1747,7 @@ extern "C" int func_002AE7A8(int idx, int a1, int a2, unsigned int key, int a4, 
         if (*(int*)(m + 0x28) && t < *(unsigned int*)(m + 0x2C))
             r = func_003B7E10(*(int*)(m + 0), a1, *(int*)(m + 0x28), t);
         else
-            r = func_003B78D8(*(int*)(m + 0), a1, a2, t);
+            r = SNDSTRM_queuefile(*(int*)(m + 0), a1, a2, t);
         if (r >= 0)
         {
             for (j = *(signed char*)(m + 0x66) - 1; j > 0; j--)
@@ -1764,13 +1764,13 @@ extern "C" int func_002AE7A8(int idx, int a1, int a2, unsigned int key, int a4, 
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AE9F8);
 #ifdef SKIP_ASM
-extern "C" void func_003B7D80(void*);
+extern "C" void SNDSTRM_modifyhold(void*);
 
 extern "C" void func_002AE9F8(int i)
 {
     void* p = D_004D3E98[i];
     if (*(signed char*)((char*)p + 0x64) == 0) {
-        func_003B7D80(*(void**)((char*)*(void**)((char*)p + 0x6C) + 0x4));
+        SNDSTRM_modifyhold(*(void**)((char*)*(void**)((char*)p + 0x6C) + 0x4));
     }
 }
 #endif
@@ -1876,14 +1876,14 @@ extern "C" int func_002AEC28(int idx)
 INCLUDE_ASM("sound/bankmonitor", func_002AEC58);
 #ifdef SKIP_ASM
 extern void* D_004D3E98[];
-extern "C" void func_003B58A0(void);
-extern "C" void func_003B58D8(void);
+extern "C" void SNDSYS_entercritical(void);
+extern "C" void SNDSYS_leavecritical(void);
 extern "C" int func_003B6670(int h, int sub, void* hdr, void* buf, unsigned int* pos);
-extern "C" int func_003B8AD8(int h);
+extern "C" int SNDtimeremaining(int h);
 extern "C" int func_003B86C0(int h);
-extern "C" int func_003B7B48(int h, void* out);
-// PORT: the unit declares func_003B7C40(int, int); the second argument is an out-pointer
-extern "C" void func_003B7C40(int h, int v);
+extern "C" int SNDSTRM_status(int h, void* out);
+// PORT: the unit declares SNDSTRM_requeststatus(int, int); the second argument is an out-pointer
+extern "C" void SNDSTRM_requeststatus(int h, int v);
 extern "C" int func_003B7F18(int h);
 
 struct sMonSub_EC58 {
@@ -1949,7 +1949,7 @@ extern "C" int func_002AEC58(int idx, int* outA, int* outB)
         return -2;
     }
     m->dirty = 1;
-    func_003B58A0();
+    SNDSYS_entercritical();
     sStrmInfo_EC58 info;
     sStrmState_EC58 st;
     sStrmHdr_EC58 hdr;
@@ -1959,7 +1959,7 @@ extern "C" int func_002AEC58(int idx, int* outA, int* outB)
         if (m->sub >= 0 && m->subs->id >= 0) {
             f60 = func_003B6670(m->h, m->sub, &hdr, buf, &pos.samples);
             if (f60 >= 0) {
-                *outB = func_003B8AD8(m->subs->id);
+                *outB = SNDtimeremaining(m->subs->id);
                 if (*outB < 0) {
                     *outB = 0;
                     m->subs->id = -1;
@@ -1974,7 +1974,7 @@ extern "C" int func_002AEC58(int idx, int* outA, int* outB)
             m->f5C = m->subs->id;
         }
     } else {
-        f60 = func_003B7B48(m->h, &info);
+        f60 = SNDSTRM_status(m->h, &info);
         m->f50 = 0;
         if (info.count >= m->count) {
             m->busy = 0;
@@ -1984,7 +1984,7 @@ extern "C" int func_002AEC58(int idx, int* outA, int* outB)
             if (m->subs[j].id < 0) {
                 continue;
             }
-            func_003B7C40(m->subs[j].id, (int)&st);
+            SNDSTRM_requeststatus(m->subs[j].id, (int)&st);
             switch (st.state) {
             case 1:
                 m->subs[j].pos = m->subs[j].size;
@@ -2021,7 +2021,7 @@ done:
     m->f4C = (int)outB;
     m->f60 = f60;
     m->dirty = 0;
-    func_003B58D8();
+    SNDSYS_leavecritical();
     return 0;
 }
 #endif
@@ -2030,14 +2030,14 @@ done:
 INCLUDE_ASM("sound/bankmonitor", func_002AEFA8);
 #ifdef SKIP_ASM
 extern void* D_004D3E98[];
-extern "C" void func_003B58A0(void);
-extern "C" void func_003B58D8(void);
+extern "C" void SNDSYS_entercritical(void);
+extern "C" void SNDSYS_leavecritical(void);
 extern "C" int func_003B6670(int h, int sub, void* hdr, void* buf, unsigned int* pos);
-extern "C" int func_003B8AD8(int h);
+extern "C" int SNDtimeremaining(int h);
 extern "C" int func_003B86C0(int h);
-extern "C" int func_003B7B48(int h, void* out);
-// PORT: the unit declares func_003B7C40(int, int); the second argument is an out-pointer
-extern "C" void func_003B7C40(int h, int v);
+extern "C" int SNDSTRM_status(int h, void* out);
+// PORT: the unit declares SNDSTRM_requeststatus(int, int); the second argument is an out-pointer
+extern "C" void SNDSTRM_requeststatus(int h, int v);
 extern "C" int func_003B7F18(int h);
 
 struct sMonSub_EFA8 {
@@ -2090,7 +2090,7 @@ struct sStrmHdr_EFA8 {
 
 extern "C" void func_002AEFA8(int reset)
 {
-    func_003B58A0();
+    SNDSYS_entercritical();
     for (int i = 0; i < 24; i++) {
         sMonSlot_EFA8* m = (sMonSlot_EFA8*)D_004D3E98[i];
         if (m == 0) {
@@ -2115,7 +2115,7 @@ extern "C" void func_002AEFA8(int reset)
                 if (m->sub >= 0 && m->subs->id >= 0) {
                     f60 = func_003B6670(m->h, m->sub, &hdr, buf, &pos.samples);
                     if (f60 >= 0) {
-                        f4C = func_003B8AD8(m->subs->id);
+                        f4C = SNDtimeremaining(m->subs->id);
                         if (f4C < 0) {
                             f4C = 0;
                             m->subs->id = -1;
@@ -2130,7 +2130,7 @@ extern "C" void func_002AEFA8(int reset)
                     m->f5C = m->subs->id;
                 }
             } else {
-                f60 = func_003B7B48(m->h, &info);
+                f60 = SNDSTRM_status(m->h, &info);
                 m->f50 = 0;
                 if (info.count >= m->count) {
                     m->busy = 0;
@@ -2140,7 +2140,7 @@ extern "C" void func_002AEFA8(int reset)
                     if (m->subs[j].id < 0) {
                         continue;
                     }
-                    func_003B7C40(m->subs[j].id, (int)&st);
+                    SNDSTRM_requeststatus(m->subs[j].id, (int)&st);
                     switch (st.state) {
                     case 1:
                         m->subs[j].pos = m->subs[j].size;
@@ -2179,7 +2179,7 @@ extern "C" void func_002AEFA8(int reset)
         m->f60 = f60;
         m->dirty = 0;
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
 }
 #endif
 
@@ -2292,8 +2292,8 @@ extern "C" int func_002AF4B0(int idx)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AF4E0);
 #ifdef SKIP_ASM
-extern "C" void func_003B58A0(void);
-extern "C" void func_003B58D8(void);
+extern "C" void SNDSYS_entercritical(void);
+extern "C" void SNDSYS_leavecritical(void);
 extern "C" int func_003B8050(void* h, int a, int b);
 extern "C" int func_003B88C8(void* h, int a, int b);
 
@@ -2302,13 +2302,13 @@ extern "C" int func_002AF4E0(int idx, int a, int b)
     void* m = D_004D3E98[idx];
     int r = -8;
     if (m != 0) {
-        func_003B58A0();
+        SNDSYS_entercritical();
         if (*(signed char*)((char*)m + 0x64) != 0) {
             r = func_003B88C8(*(void**)m, a, b);
         } else {
             r = func_003B8050(*(void**)m, a, b);
         }
-        func_003B58D8();
+        SNDSYS_leavecritical();
         *(int*)((char*)m + 0x10) = b;
     }
     return r;
@@ -2318,8 +2318,8 @@ extern "C" int func_002AF4E0(int idx, int a, int b)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AF580);
 #ifdef SKIP_ASM
-extern "C" void func_003B58A0(void);
-extern "C" void func_003B58D8(void);
+extern "C" void SNDSYS_entercritical(void);
+extern "C" void SNDSYS_leavecritical(void);
 extern "C" int func_003B8010(void* h, int a);
 extern "C" int func_003B8700(void* h, int a);
 
@@ -2328,13 +2328,13 @@ extern "C" int func_002AF580(int idx, int a)
     void* m = D_004D3E98[idx];
     int r = -8;
     if (m != 0) {
-        func_003B58A0();
+        SNDSYS_entercritical();
         if (*(signed char*)((char*)m + 0x64) != 0) {
             r = func_003B8700(*(void**)m, a);
         } else {
             r = func_003B8010(*(void**)m, a);
         }
-        func_003B58D8();
+        SNDSYS_leavecritical();
         *(int*)((char*)m + 0x14) = a;
     }
     return r;
@@ -2344,9 +2344,9 @@ extern "C" int func_002AF580(int idx, int a)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AF608);
 #ifdef SKIP_ASM
-extern "C" void func_003B58A0(void);
-extern "C" void func_003B58D8(void);
-extern "C" int func_003B8530(int h, int v, int c);
+extern "C" void SNDSYS_entercritical(void);
+extern "C" void SNDSYS_leavecritical(void);
+extern "C" int SNDautovol(int h, int v, int c);
 // PORT: the unit declares func_003B7EB0 as void; this caller uses its result.
 int func_003B7EB0_r(int h, int v, int c) __asm__("func_003B7EB0");
 
@@ -2355,14 +2355,14 @@ extern "C" int func_002AF608(int idx, int c, int v, char busy)
     void* m = D_004D3E98[idx];
     int r = 0;
     if (busy == 0) {
-        func_003B58A0();
+        SNDSYS_entercritical();
         *(int*)((char*)m + 0x8) = c;
         if (*(signed char*)((char*)m + 0x64) != 0) {
-            r = func_003B8530(*(int*)((char*)*(void**)((char*)m + 0x6C) + 0x4), v / 10, c);
+            r = SNDautovol(*(int*)((char*)*(void**)((char*)m + 0x6C) + 0x4), v / 10, c);
         } else {
             r = func_003B7EB0_r(*(int*)m, v, c);
         }
-        func_003B58D8();
+        SNDSYS_leavecritical();
     }
     return r;
 }
@@ -2373,9 +2373,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002AF6C0);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_002AEFA8(int a0);
-extern "C" void func_003B58A0(void);
-extern "C" void func_003B58D8(void);
-extern "C" void func_003B85F0(int h, int v);
+extern "C" void SNDSYS_entercritical(void);
+extern "C" void SNDSYS_leavecritical(void);
+extern "C" void SNDvol(int h, int v);
 extern "C" void func_003B7E70(int h, int v);
 
 extern "C" int func_002AF6C0(int idx, int v)
@@ -2390,13 +2390,13 @@ extern "C" int func_002AF6C0(int idx, int v)
     if (*(int*)((char*)m + 0x8) < 0 || *(int*)((char*)m + 0x8) == cur) {
         *(int*)((char*)m + 0x8) = -1;
         if (cur != v && v >= 0 && cur >= 0) {
-            func_003B58A0();
+            SNDSYS_entercritical();
             if (*(signed char*)((char*)m + 0x64) != 0) {
-                func_003B85F0(*(int*)((char*)*(void**)((char*)m + 0x6C) + 0x4), v);
+                SNDvol(*(int*)((char*)*(void**)((char*)m + 0x6C) + 0x4), v);
             } else {
                 func_003B7E70(*(int*)m, v);
             }
-            func_003B58D8();
+            SNDSYS_leavecritical();
             *(int*)((char*)m + 0xC) = v;
         }
     } else {
@@ -2409,10 +2409,10 @@ extern "C" int func_002AF6C0(int idx, int v)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AF7A0);
 #ifdef SKIP_ASM
-extern "C" void func_003B58A0(void);
-extern "C" void func_003B58D8(void);
-extern "C" void func_003B7FB8(int h, int v);
-extern "C" void func_003B8790(int h, int v);
+extern "C" void SNDSYS_entercritical(void);
+extern "C" void SNDSYS_leavecritical(void);
+extern "C" void SNDSTRM_pitchmult(int h, int v);
+extern "C" void SNDpitchmult(int h, int v);
 
 extern "C" int func_002AF7A0(int idx, int reset)
 {
@@ -2424,13 +2424,13 @@ extern "C" int func_002AF7A0(int idx, int reset)
     } else {
         v = *(int*)((char*)m + 0x18);
     }
-    func_003B58A0();
+    SNDSYS_entercritical();
     if (*(signed char*)((char*)m + 0x64) != 0) {
-        func_003B8790(*(int*)((char*)*(void**)((char*)m + 0x6C) + 4), v);
+        SNDpitchmult(*(int*)((char*)*(void**)((char*)m + 0x6C) + 4), v);
     } else {
-        func_003B7FB8(*(int*)m, v);
+        SNDSTRM_pitchmult(*(int*)m, v);
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
     *(char*)((char*)m + 0x65) = 1;
     return 0;
 }
@@ -2439,21 +2439,21 @@ extern "C" int func_002AF7A0(int idx, int reset)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AF838);
 #ifdef SKIP_ASM
-extern "C" void func_003B58A0(void);
-extern "C" void func_003B58D8(void);
-extern "C" void func_003B78F8(int);
-extern "C" void func_003B89E0(int);
+extern "C" void SNDSYS_entercritical(void);
+extern "C" void SNDSYS_leavecritical(void);
+extern "C" void SNDSTRM_purge(int);
+extern "C" void SNDstop(int);
 
 extern "C" int func_002AF838(int idx)
 {
     void* m = D_004D3E98[idx];
-    func_003B58A0();
+    SNDSYS_entercritical();
     if (*(signed char*)((char*)m + 0x64) != 0) {
-        func_003B89E0(*(int*)((char*)*(void**)((char*)m + 0x6C) + 0x4));
+        SNDstop(*(int*)((char*)*(void**)((char*)m + 0x6C) + 0x4));
     } else {
-        func_003B78F8(*(int*)((char*)m + 0x0));
+        SNDSTRM_purge(*(int*)((char*)m + 0x0));
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
     *(char*)((char*)m + 0x65) = 1;
     return 0;
 }
@@ -4096,19 +4096,19 @@ extern "C" void func_002B1F78(cSongInstance* self, int flags)
 INCLUDE_ASM("sound/bankmonitor", func_002B2018);
 #ifdef SKIP_ASM
 extern "C" int func_002B2488(cSongInstance* self);
-extern "C" void func_003B58A0(void);
-extern "C" void func_003B58D8(void);
-extern "C" void func_003B7FB8(int h, int v);
+extern "C" void SNDSYS_entercritical(void);
+extern "C" void SNDSYS_leavecritical(void);
+extern "C" void SNDSTRM_pitchmult(int h, int v);
 extern "C" void func_003D1038(int cmd, int v);
 
 extern "C" void func_002B2018(cSongInstance* self)
 {
-    func_003B58A0();
+    SNDSYS_entercritical();
     int handle = func_002B2488(self);
     if (handle >= 0) {
-        func_003B7FB8(handle, 0);
+        SNDSTRM_pitchmult(handle, 0);
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
     func_003D1038(0x11000002, 1);
 }
 #endif
@@ -4117,19 +4117,19 @@ extern "C" void func_002B2018(cSongInstance* self)
 INCLUDE_ASM("sound/bankmonitor", func_002B2070);
 #ifdef SKIP_ASM
 extern "C" int func_002B2488(cSongInstance* self);
-extern "C" void func_003B58A0(void);
-extern "C" void func_003B58D8(void);
-extern "C" void func_003B7FB8(int h, int v);
+extern "C" void SNDSYS_entercritical(void);
+extern "C" void SNDSYS_leavecritical(void);
+extern "C" void SNDSTRM_pitchmult(int h, int v);
 extern "C" void func_003D1038(int cmd, int v);
 
 extern "C" void func_002B2070(cSongInstance* self)
 {
-    func_003B58A0();
+    SNDSYS_entercritical();
     int handle = func_002B2488(self);
     if (handle >= 0) {
-        func_003B7FB8(handle, 0x1000);
+        SNDSTRM_pitchmult(handle, 0x1000);
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
     func_003D1038(0x11000002, 0);
 }
 #endif
@@ -4177,8 +4177,8 @@ extern "C" void func_002B2140(void) {
 INCLUDE_ASM("sound/bankmonitor", func_002B2160);
 #ifdef SKIP_ASM
 extern "C" int func_002B2488(cSongInstance* self);
-extern "C" void func_003B58A0(void);
-extern "C" void func_003B58D8(void);
+extern "C" void SNDSYS_entercritical(void);
+extern "C" void SNDSYS_leavecritical(void);
 extern "C" void func_003B80A0(int h, int v);
 
 extern "C" void func_002B2160(cSongInstance* self, int v)
@@ -4190,13 +4190,13 @@ extern "C" void func_002B2160(cSongInstance* self, int v)
         v = 0;
     }
     if (v != self->unk_44) {
-        func_003B58A0();
+        SNDSYS_entercritical();
         int h = func_002B2488(self);
         if (h >= 0) {
             self->unk_44 = v;
             func_003B80A0(h, v);
         }
-        func_003B58D8();
+        SNDSYS_leavecritical();
     }
 }
 #endif
@@ -4210,8 +4210,8 @@ extern "C" void func_002B2160(cSongInstance* self, int v);
 extern "C" int func_002B2488(cSongInstance* self);
 extern "C" int func_002B4AA0(void* self, int force);
 int func_002B4AE8(void* self);
-extern "C" void func_003B58A0(void);
-extern "C" void func_003B58D8(void);
+extern "C" void SNDSYS_entercritical(void);
+extern "C" void SNDSYS_leavecritical(void);
 extern "C" void func_003B7E70(int h, int v);
 extern "C" void func_003D2350(int a);
 extern "C" int func_003D25F0(int id, char* name, int a2, void* a3, int a4, int a5, void* buf, int size);
@@ -4255,14 +4255,14 @@ extern "C" void func_002B21E0(cSongInstance* mon, int force)
     else
         v = (float)mon->unk_40 * 0.009999999776482582f * (float)*(int*)(*(char**)mon + 0x88);
     v *= D_004A3508;
-    func_003B58A0();
+    SNDSYS_entercritical();
     int h = func_002B2488(mon);
     if (h >= 0)
     {
         signed char vol = (int)((v <? 127.0f) >? 0.0f);
         func_003B7E70(h, vol);
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
 }
 #endif
 
@@ -4283,18 +4283,18 @@ extern "C" void func_002B23E8(cSongInstance* self, signed char v)
 INCLUDE_ASM("sound/bankmonitor", func_002B2418);
 #ifdef SKIP_ASM
 extern "C" int func_002B2488(cSongInstance* self);
-extern "C" void func_003B58A0(void);
-extern "C" void func_003B58D8(void);
+extern "C" void SNDSYS_entercritical(void);
+extern "C" void SNDSYS_leavecritical(void);
 extern "C" void func_003B7EB0(int h, int v, int c);
 
 extern "C" void func_002B2418(cSongInstance* self, float t)
 {
-    func_003B58A0();
+    SNDSYS_entercritical();
     int h = func_002B2488(self);
     if (h >= 0) {
         func_003B7EB0(h, (int)(t * 1000.0f), 0);
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
     self->unk_48 = 1;
 }
 #endif
@@ -4355,14 +4355,14 @@ extern "C" int func_002B2550(void)
 INCLUDE_ASM("sound/bankmonitor", func_002B2578);
 #ifdef SKIP_ASM
 extern "C" int func_002B2488(cSongInstance* self);
-extern "C" int func_003B7B48(int h, void* out);
+extern "C" int SNDSTRM_status(int h, void* out);
 
 // PORT: returns int; a later caller in this unit declares it void(void*, void*)
 int func_002B2578_impl(void* self, void* out) __asm__("func_002B2578");
 
 int func_002B2578_impl(void* self, void* out)
 {
-    return func_002B2488((cSongInstance*)self) < 0 ? -1 : func_003B7B48(func_002B2488((cSongInstance*)self), out);
+    return func_002B2488((cSongInstance*)self) < 0 ? -1 : SNDSTRM_status(func_002B2488((cSongInstance*)self), out);
 }
 #endif
 
@@ -4370,7 +4370,7 @@ int func_002B2578_impl(void* self, void* out)
 INCLUDE_ASM("sound/bankmonitor", func_002B25C8);
 #ifdef SKIP_ASM
 extern "C" void func_002B2578(void* self, void* out);
-extern "C" void func_003B7C40(int h, int v);
+extern "C" void SNDSTRM_requeststatus(int h, int v);
 
 struct sBmInfo {
     int a;
@@ -4383,7 +4383,7 @@ extern "C" void func_002B25C8(cSongInstance* self, int v)
 {
     sBmInfo info;
     func_002B2578(self, &info);
-    func_003B7C40(info.handle, v);
+    SNDSTRM_requeststatus(info.handle, v);
 }
 #endif
 
@@ -4493,19 +4493,19 @@ extern "C" int func_002B2778(cSongInstance* self)
 INCLUDE_ASM("sound/bankmonitor", func_002B27C0);
 #ifdef SKIP_ASM
 extern "C" int cBankManager_BANK_Handle(void*, int);
-extern "C" int func_003B65D0(int);
+extern "C" int SNDbankinuse(int);
 
 extern "C" int func_002B27C0(cSongInstance* self, void* other)
 {
     if (self->unk_4C == 0) {
         int slot = self->unk_34;
         int ok = 0;
-        func_003B58A0();
+        SNDSYS_entercritical();
         bool notReady = *(int*)(slot * 0x60 + *(int*)((char*)other + 0xACC)) != 1;
         if (!notReady) {
-            ok = func_003B65D0(cBankManager_BANK_Handle(other, slot)) == 1;
+            ok = SNDbankinuse(cBankManager_BANK_Handle(other, slot)) == 1;
         }
-        func_003B58D8();
+        SNDSYS_leavecritical();
         if (ok == 0) {
             return 0;
         }
@@ -4602,8 +4602,8 @@ struct sSpeechMon {
     sBankEntry64_28C0 b[64];         // 0x2234
     sBankEntry64_28C0 c[64];         // 0x3B34
 };
-extern "C" void func_003B58D8(void);
-extern "C" void func_003B58A0(void);
+extern "C" void SNDSYS_leavecritical(void);
+extern "C" void SNDSYS_entercritical(void);
 extern void* D_004A37E8;
 extern char str_GLOBAL[];
 extern char str_TITLE[];
@@ -5012,8 +5012,8 @@ struct sBankEntry64_3838 {
 
 // The speech-bank monitor (func_002B3398 dtor): up to 64 named banks, the selection mask and per-kind counts.
 // PORT: 64-bit `long` mask (8 bytes on EE, 4 on Windows); use uint64_t off-PS2.
-extern "C" void func_003B58D8(void);
-extern "C" void func_003B58A0(void);
+extern "C" void SNDSYS_leavecritical(void);
+extern "C" void SNDSYS_entercritical(void);
 extern "C" int func_004165A8(void*, void*);
 extern "C" void func_002B3AC0(void* self);
 extern "C" void func_002B43D8(void* self);
@@ -5829,19 +5829,19 @@ extern "C" int func_002B4740(void* self)
 INCLUDE_ASM("sound/bankmonitor", func_002B47C0);
 #ifdef SKIP_ASM
 extern "C" int cBankManager_BANK_Handle(void*, int);
-extern "C" int func_003B65D0(int);
+extern "C" int SNDbankinuse(int);
 
 extern "C" int func_002B47C0(void* self)
 {
     int ok = 0;
     int slot = *(int*)((char*)*(void**)((char*)self + 0x408) + 0x34);
     void* other = **(void***)self;
-    func_003B58A0();
+    SNDSYS_entercritical();
     bool notReady = *(int*)(slot * 0x60 + *(int*)((char*)other + 0xACC)) != 1;
     if (!notReady) {
-        ok = func_003B65D0(cBankManager_BANK_Handle(other, slot)) == 1;
+        ok = SNDbankinuse(cBankManager_BANK_Handle(other, slot)) == 1;
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
     if (ok == 0) {
         *(int*)((char*)*(void**)((char*)self + 0x408) + 0x4C) = 0;
         return 1;
@@ -5909,8 +5909,8 @@ int func_002B4908(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002B4920);
 #ifdef SKIP_ASM
-extern "C" void func_003B58A0(void);
-extern "C" void func_003B58D8(void);
+extern "C" void SNDSYS_entercritical(void);
+extern "C" void SNDSYS_leavecritical(void);
 extern "C" float func_002B2718(cSongInstance* self);
 
 extern "C" float func_002B4920(void* self)
@@ -5918,9 +5918,9 @@ extern "C" float func_002B4920(void* self)
     if (*(int*)((char*)self + 0x418) == 0) {
         return 0.0f;
     }
-    func_003B58A0();
+    SNDSYS_entercritical();
     float r = func_002B2718((cSongInstance*)(*(void**)((char*)self + 0x408)));
-    func_003B58D8();
+    SNDSYS_leavecritical();
     return r;
 }
 #endif

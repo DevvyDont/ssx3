@@ -129,14 +129,14 @@ void* cDebounceNode_signal(void* self)
 //100%
 INCLUDE_ASM("object/debouncenode", cDebounceNode_expire);
 #ifdef SKIP_ASM
-int func_0034FCC0(void* self);
-extern "C" void* func_00350F60(void* self, void* parent);
+int cInstanceNode_runExpireScript(void* self);
+extern "C" void* cRestoreNode_cRestoreNode(void* self, void* parent);
 extern const char str_RestoreNode_b[];
 
 /**
  * Ends a debounce node and replaces it according to its expire mode.
  *
- * Does nothing when @p check is set and the instance's expire script runs instead (func_0034FCC0), or when
+ * Does nothing when @p check is set and the instance's expire script runs instead (cInstanceNode_runExpireScript), or when
  * the countdown is negative. Otherwise the node deletes itself and the instance gets a dead node (mode 0), a
  * restore node (mode 3, "RestoreNode") or no new node (other modes).
  *
@@ -144,7 +144,7 @@ extern const char str_RestoreNode_b[];
  */
 extern "C" void cDebounceNode_expire(void* self, int check)
 {
-    if (check != 0 && func_0034FCC0(self) != 0) {
+    if (check != 0 && cInstanceNode_runExpireScript(self) != 0) {
         return;
     }
     if (*(int*)((char*)self + 0x2C) >= 0) {
@@ -162,7 +162,7 @@ extern "C" void cDebounceNode_expire(void* self, int check)
                 sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
                 vt[1].fn((char*)self + vt[1].delta, 3);
             }
-            func_00350F60(cMemMan_alloc(0x1C, str_RestoreNode_b, 0x20000000, 0), parent);
+            cRestoreNode_cRestoreNode(cMemMan_alloc(0x1C, str_RestoreNode_b, 0x20000000, 0), parent);
         } else {
             if (self != 0) {
                 sDebounceVEntry2DD8* vt = *(sDebounceVEntry2DD8**)((char*)self + 0xC);
@@ -203,7 +203,7 @@ extern "C" void cDebounceNode_writeToReplayFrame(void* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343010);
+INCLUDE_ASM("object/debouncenode", cConveyorNode_cConveyorNode);
 #ifdef SKIP_ASM
 struct sVec2_3010 {
     float x;
@@ -237,12 +237,12 @@ struct sDebounce_3010 {
 };
 
 extern char D_00490570[];
-extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
+extern "C" void* cInstanceNode_cInstanceNode1(void* self, void* a1, int type, void* a3);
 
 /**
  * Constructs a conveyor node (node type 0xF) for a placed instance from its make-data.
  *
- * Runs the record constructor func_0034FB00, installs the conveyor vtable D_00490570, then fills the node state at
+ * Runs the record constructor cInstanceNode_cInstanceNode1, installs the conveyor vtable D_00490570, then fills the node state at
  * +0x1C: Vel (+0x1C) from desc +0x4, UVScroll (+0x38) from desc +0x8/+0xC, UV (+0x40/+0x44) zeroed, and the first 8
  * Rotate flags (+0x20) from desc +0x10..+0x17 (entries 8 and up are left as they are). Finally clears bit 0x2 and sets
  * bit 0x4 in the instance record's flags.
@@ -252,9 +252,9 @@ extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
  * @param desc  conveyor make-data (Vel, UScroll, VScroll, Rotate0..7)
  * @return self
  */
-extern "C" void* func_00343010(sDebounce_3010* self, void* bucket, void* instRecord, sDesc_3010* desc)
+extern "C" void* cConveyorNode_cConveyorNode(sDebounce_3010* self, void* bucket, void* instRecord, sDesc_3010* desc)
 {
-    func_0034FB00(self, bucket, 0xF, instRecord);
+    cInstanceNode_cInstanceNode1(self, bucket, 0xF, instRecord);
     self->vt = D_00490570;
     self->f1C = desc->f4;
     sVec2_3010 uvScroll;
@@ -272,7 +272,7 @@ extern "C" void* func_00343010(sDebounce_3010* self, void* bucket, void* instRec
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_003430D0);
+INCLUDE_ASM("object/debouncenode", cConveyorNode_cConveyorNode1);
 #ifdef SKIP_ASM
 struct sDebounceVEntry30D0 {
     short delta;
@@ -293,7 +293,7 @@ extern char D_00490570[];
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* func_003430D0(void* self, void* bucket, void* stream)
+extern "C" void* cConveyorNode_cConveyorNode1(void* self, void* bucket, void* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
     *(void**)((char*)self + 0xC) = D_00490570;
@@ -304,7 +304,7 @@ extern "C" void* func_003430D0(void* self, void* bucket, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343130);
+INCLUDE_ASM("object/debouncenode", cConveyorNode_updateIntersectInfo);
 #ifdef SKIP_ASM
 // PORT: 128-bit TImode quadword (the PC port needs a 16-byte struct).
 typedef int cQuad3130 __attribute__((mode(TI)));
@@ -569,7 +569,7 @@ struct sNode3130 {
  *
  * @param hit  intersect info of the collision (position, direction, accumulators, bone index)
  */
-extern "C" void func_00343130(sNode3130* self, sHit3130* hit)
+extern "C" void cConveyorNode_updateIntersectInfo(sNode3130* self, sHit3130* hit)
 {
     if (hit->bone < 0) {
         return;
@@ -598,7 +598,7 @@ extern "C" void func_00343130(sNode3130* self, sHit3130* hit)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_003434E8);
+INCLUDE_ASM("object/debouncenode", cConveyorNode_update);
 #ifdef SKIP_ASM
 struct sDebounceScroll {
     char pad_0x0[0x38];
@@ -613,7 +613,7 @@ struct sDebounceScroll {
  *
  * Adds UVScroll (+0x38/+0x3C) to UV (+0x40/+0x44) and wraps each component back into -1..1 by one step.
  */
-extern "C" void func_003434E8(sDebounceScroll* self)
+extern "C" void cConveyorNode_update(sDebounceScroll* self)
 {
     self->u += self->du;
     self->v += self->dv;
@@ -631,7 +631,7 @@ extern "C" void func_003434E8(sDebounceScroll* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343588);
+INCLUDE_ASM("object/debouncenode", cConveyorNode_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sDfVec_343588 {
@@ -727,7 +727,7 @@ static inline int Visible_343588(sDfCam_343588* cam, sDfObj_343588* obj)
  * puts UV (+0x40/+0x44) into its translation x/y and draws the instance through graphics-manager slot 96 with that
  * texture matrix and mode 2.
  */
-extern "C" void func_00343588(char* self)
+extern "C" void cConveyorNode_render(char* self)
 {
     sDfCam_343588* cam = (sDfCam_343588*)cWorld_m_pTheWorld->m_pWorldCache;
     if (!Visible_343588(cam, OBJ_343588(self))) {
@@ -760,7 +760,7 @@ extern "C" void func_00343588(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343718);
+INCLUDE_ASM("object/debouncenode", cConveyorNode_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sDebounceVEntry {
     short delta;
@@ -778,7 +778,7 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void func_00343718(void* self, void* stream)
+extern "C" void cConveyorNode_writeToReplayFrame(void* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sDebounceVEntry* vt = *(sDebounceVEntry**)stream;
@@ -787,15 +787,15 @@ extern "C" void func_00343718(void* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00343768);
+INCLUDE_ASM("object/debouncenode", cCounterNode_cCounterNode1);
 #ifdef SKIP_ASM
-extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
+extern "C" void* cInstanceNode_cInstanceNode1(void* self, void* a1, int type, void* a3);
 extern char cCounterNode_vtbl[];
 
 /**
  * Constructs a counter node (node type 7) for a placed instance.
  *
- * Runs the record constructor func_0034FB00, installs cCounterNode_vtbl, sets the count (+0x1C) to the short StartCount
+ * Runs the record constructor cInstanceNode_cInstanceNode1, installs cCounterNode_vtbl, sets the count (+0x1C) to the short StartCount
  * at counterData +0x4 and the counted value (+0x20) to 0.
  *
  * @param bucket  update bucket the node joins
@@ -803,9 +803,9 @@ extern char cCounterNode_vtbl[];
  * @param counterData  counter make-data (StartCount at +0x4)
  * @return self
  */
-extern "C" void* func_00343768(void* self, void* bucket, void* inst, void* counterData)
+extern "C" void* cCounterNode_cCounterNode1(void* self, void* bucket, void* inst, void* counterData)
 {
-    func_0034FB00(self, bucket, 7, inst);
+    cInstanceNode_cInstanceNode1(self, bucket, 7, inst);
     *(void**)((char*)self + 0xC) = cCounterNode_vtbl;
     *(int*)((char*)self + 0x1C) = *(short*)((char*)counterData + 0x4);
     *(int*)((char*)self + 0x20) = 0;
@@ -1493,9 +1493,9 @@ INCLUDE_ASM("object/debouncenode", func_003443A8);
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 struct sTrackWorld51C0;
 extern "C" sTrackWorld51C0** cObjectInterface_getWorld();
-extern "C" void func_003513D0(void* self);
-extern "C" void func_003612C0(void* self);
-extern "C" void func_00351398(void* self, void* src);
+extern "C" void cAnimFrame_init(void* self);
+extern "C" void cMeshAnimFrame_init(void* self);
+extern "C" void cAnimFrame_setAnimRecord(void* self, void* src);
 extern "C" void MEM_fill(void* p, int v, int n);
 extern char str_AnimMats[];
 extern char str_CrowdAnimMesh[];
@@ -1515,9 +1515,9 @@ struct sDbMesh_43A8 {
     sDbMesh_43A8()
     {
         vtable = cAnimFrame_vtbl;
-        func_003513D0(this);
+        cAnimFrame_init(this);
         vtable = cMeshAnimFrame_vtbl;
-        func_003612C0(this);
+        cMeshAnimFrame_init(this);
     }
     void operator delete[](void* p, unsigned int size);
 };
@@ -1633,7 +1633,7 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self) __asm__("func_003443A8")
  * Looks up the model record (id at +0x4) and takes its anim def (+0x80) and the period (def +0x14). Allocates one
  * 64-byte matrix per def entry ("AnimMats", +0x1E8), counts the entries with an animation source (+0x10C) and allocates
  * that many cMeshAnimFrame objects ("CrowdAnimMesh", 0xD0 bytes each, +0x1EC), initialising each from its source
- * (func_00351398) and updating it to the current time (vtable entry 2). Builds the part matrices (func_00344AA0), then
+ * (cAnimFrame_setAnimRecord) and updating it to the current time (vtable entry 2). Builds the part matrices (func_00344AA0), then
  * reads the model's item list (+0x94): +0x114 takes the first word of the first item with data, +0x110 the item count,
  * and for each item the slot pointer table (+0x11C) points at its own 20-byte slot (+0x13C, with the item's +0xC and
  * the u16 at data +0x4) or at the item itself when it has no data.
@@ -1665,7 +1665,7 @@ extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
     int k = 0;
     for (i = 0; i < self->def->count; i++, entry++) {
         if (entry->src != 0) {
-            func_00351398(&self->meshes[k++], entry->src);
+            cAnimFrame_setAnimRecord(&self->meshes[k++], entry->src);
         }
     }
     for (i = 0; i < self->nActive; i++) {
@@ -2346,7 +2346,7 @@ extern "C" void cSplineSegment_getPos(sDebCurve* self, float dist, sDebVec4* pos
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_003451C0);
+INCLUDE_ASM("object/debouncenode", cSpline_init);
 #ifdef SKIP_ASM
 struct cSpline;
 float cSpline_calcLength(cSpline* self);
@@ -2403,7 +2403,7 @@ struct sSplineFollow51C0 {
  *
  * @param id  resource id of the spline (low 8 bits: resource set, >> 8: index)
  */
-extern "C" void func_003451C0(sSplineFollow51C0* self, unsigned int id)
+extern "C" void cSpline_init(sSplineFollow51C0* self, unsigned int id)
 {
     self->ref.id = id;
     sTrackNode51C0* node = self->ref.get();
@@ -2487,7 +2487,7 @@ extern "C" void cSpline_getPos(sDebTrack5248* self, float distance, sDebVec4* po
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00345320);
+INCLUDE_ASM("object/debouncenode", cSpline_isVisible);
 #ifdef SKIP_ASM
 /**
  * Returns whether a spline's bounding box survives view culling.
@@ -2497,7 +2497,7 @@ INCLUDE_ASM("object/debouncenode", func_00345320);
  *
  * @return 1 unless the cull test returns 1 (fully outside)
  */
-extern "C" int func_00345320(sTrackRef51C0* self)
+extern "C" int cSpline_isVisible(sTrackRef51C0* self)
 {
     float* bounds = (float*)self->get();
     sDfVec_343588 box[2];
@@ -2518,7 +2518,7 @@ extern "C" int func_00345320(sTrackRef51C0* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/debouncenode", func_00345430);
+INCLUDE_ASM("object/debouncenode", cSpline_draw);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00345638(void* node);
@@ -2622,7 +2622,7 @@ struct sCtl00345430 {
  *
  * @param lineColour  address of the colour to draw with (cSplineModifier passes its +0x20)
  */
-extern "C" void func_00345430(void* self, int lineColour)
+extern "C" void cSpline_draw(void* self, int lineColour)
 {
     cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
     char* list = *(char**)(*(char**)((char*)self + 8) + 0x68);

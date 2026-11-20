@@ -36,14 +36,14 @@ extern "C" void* cInstanceNode_cInstanceNode(cInstanceNode* self, void* bucket, 
 INCLUDE_ASM("object/instancenode", cInstanceNode__cInstanceNode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0034FC80(void* self, void* a1);
+extern "C" void cInstanceNode_clearActiveNode(void* self, void* a1);
 extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSortObjNode__cSortObjNode__FPv");
 
 /**
  * Destroys an instance node: detaches it from its instance record, resets the record's flags and runs the
  * cSortObjNode destructor.
  *
- * func_0034FC80 (On Tour clearActiveNode) clears the record's node pointer (+0xC) if it points here. The
+ * cInstanceNode_clearActiveNode (On Tour clearActiveNode) clears the record's node pointer (+0xC) if it points here. The
  * record's flags (+0x8) keep the upper half and bits 8-9, get the upper half ORed into the lower half and get
  * bit 1 set.
  *
@@ -52,7 +52,7 @@ extern void* cSortObjNode__cSortObjNode_dtor(void* self, int flags) __asm__("cSo
 extern "C" void cInstanceNode__cInstanceNode(cInstanceNode* self, int flags)
 {
     self->mVtbl = (void**)cInstanceNode_vtbl;
-    func_0034FC80(self, self->Instance);
+    cInstanceNode_clearActiveNode(self, self->Instance);
     *(int*)((char*)self->Instance + 8) &= 0xFFFF0300;
     {
         char* instance = (char*)self->Instance;
@@ -65,7 +65,7 @@ extern "C" void cInstanceNode__cInstanceNode(cInstanceNode* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("object/instancenode", func_0034FC78);
+INCLUDE_ASM("object/instancenode", cInstanceNode_setActiveNode);
 #ifdef SKIP_ASM
 /**
  * Makes an instance node the active node of an instance record (record +0xC).
@@ -73,21 +73,21 @@ INCLUDE_ASM("object/instancenode", func_0034FC78);
  * @param node  the instance node
  * @param inst  instance record
  */
-extern "C" void func_0034FC78(int node, void* inst)
+extern "C" void cInstanceNode_setActiveNode(int node, void* inst)
 {
     *(int*)((char*)inst + 0xc) = node;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/instancenode", func_0034FC80);
+INCLUDE_ASM("object/instancenode", cInstanceNode_clearActiveNode);
 #ifdef SKIP_ASM
 /**
  * Clears an instance record's active node if it is this node.
  *
  * @param inst  instance record (may be 0)
  */
-extern "C" void func_0034FC80(void* self, void* inst)
+extern "C" void cInstanceNode_clearActiveNode(void* self, void* inst)
 {
     if (inst != 0) {
         if (*(int*)((char*)inst + 0xc) == (int)self) {
@@ -100,7 +100,7 @@ extern "C" void func_0034FC80(void* self, void* inst)
 extern "C" void* func_002D19E8(int);
 
 //100%
-INCLUDE_ASM("object/instancenode", func_0034FCA0);
+INCLUDE_ASM("object/instancenode", cInstanceNode_runInitScript);
 #ifdef SKIP_ASM
 extern "C" void func_002D1A78(int);
 
@@ -109,20 +109,20 @@ extern "C" void func_002D1A78(int);
  *
  * @param instanceNode  the instance node
  */
-extern "C" void func_0034FCA0(cInstanceNode* instanceNode) {
+extern "C" void cInstanceNode_runInitScript(cInstanceNode* instanceNode) {
     func_002D1A78(((int)instanceNode->Instance));
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/instancenode", func_0034FCC0__FPv);
+INCLUDE_ASM("object/instancenode", cInstanceNode_runExpireScript__FPv);
 #ifdef SKIP_ASM
 /**
  * Runs the expire world script (type 4) of the node's instance through func_002D19E8.
  *
  * @return func_002D19E8's result (nonzero when a script ran)
  */
-void* func_0034FCC0(void* self)
+void* cInstanceNode_runExpireScript(void* self)
 {
     return func_002D19E8(*(int*)((char*)self + 0x18));
 }
@@ -159,7 +159,7 @@ struct sInstNodeVEntryFD00 {
  * Expires an instance node: unless an expire script takes over, resets the record's flags and deletes the
  * node.
  *
- * With @p runscript set, func_0034FCC0 (On Tour runExpireScript) looks for the instance's expire script; when
+ * With @p runscript set, cInstanceNode_runExpireScript (On Tour runExpireScript) looks for the instance's expire script; when
  * one runs, the node is left alone. Otherwise the record's flags (+0x8) are reset as in the destructor and
  * the node deletes itself through its virtual destructor (slot 1, flags 3).
  *
@@ -168,7 +168,7 @@ struct sInstNodeVEntryFD00 {
 extern "C" void cInstanceNode_expire(cInstanceNode* self, int runscript)
 {
     if (runscript != 0) {
-        if (func_0034FCC0(self) != 0) return;
+        if (cInstanceNode_runExpireScript(self) != 0) return;
     }
     *(int*)((char*)self->Instance + 8) &= 0xFFFF0300;
     {
@@ -757,13 +757,13 @@ extern "C" int func_00350698(void* self)
 //100%
 INCLUDE_ASM("object/instancenode", cDeadNode_cDeadNode);
 #ifdef SKIP_ASM
-extern "C" void* func_0034FB00(void* self, int a1, int type, int a3);
+extern "C" void* cInstanceNode_cInstanceNode1(void* self, int a1, int type, int a3);
 extern char cDeadNode_vtbl[];
 
 /**
  * Constructs a dead node: the placeholder that keeps an expired or collected instance out of the world.
  *
- * Runs the cInstanceNode constructor (func_0034FB00) for bucket 8 with node type 6 and the record, stores
+ * Runs the cInstanceNode constructor (cInstanceNode_cInstanceNode1) for bucket 8 with node type 6 and the record, stores
  * cDeadNode_vtbl, then edits the record's flags (+0x8): clears bits 5-6, clears bit 1 and sets bit 2. Allocated as
  * 0x1C bytes ("DeadNode") by cInstanceNode_makeThisDead, the debounce node and the world scripts.
  *
@@ -772,7 +772,7 @@ extern char cDeadNode_vtbl[];
  */
 extern "C" void* cDeadNode_cDeadNode(void* self, int pInst)
 {
-    func_0034FB00(self, 8, 6, pInst);
+    cInstanceNode_cInstanceNode1(self, 8, 6, pInst);
     *(void**)((char*)self + 0xC) = cDeadNode_vtbl;
     unsigned int* recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
     *recordFlags &= 0xFFFFFF9F;

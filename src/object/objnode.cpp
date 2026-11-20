@@ -50,7 +50,7 @@ extern "C" void cObjNode__cObjNode(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("object/objnode", func_00354720);
+INCLUDE_ASM("object/objnode", cTypeObjNode_cTypeObjNode1);
 #ifdef SKIP_ASM
 extern void* cTypeObjNode_vtbl[];
 extern int D_0044AFF0[];
@@ -66,7 +66,7 @@ extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
  * @param type  node type (tObjNodeType)
  * @return self
  */
-extern "C" void* func_00354720(void* self, void* bucket, int type)
+extern "C" void* cTypeObjNode_cTypeObjNode1(void* self, void* bucket, int type)
 {
     cObjNode_cObjNode1(self, bucket);
     *(void***)((char*)self + 0xC) = cTypeObjNode_vtbl;
@@ -134,7 +134,7 @@ void cTypeObjNode__cTypeObjNode_impl(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("object/objnode", func_00354850);
+INCLUDE_ASM("object/objnode", cSortObjNode_cSortObjNode1);
 #ifdef SKIP_ASM
 extern int cSortObjNode_ObjNodeSortIndex;
 extern int cSortObjNode_ObjNodeNoSortIndex;
@@ -148,17 +148,17 @@ static inline int objNextId_4850(int* c)
 /**
  * Constructs the sorted object-node base of a node.
  *
- * Runs func_00354720, installs cSortObjNode_vtbl and takes SortIndex (+0x14) from cSortObjNode_ObjNodeNoSortIndex for
+ * Runs cTypeObjNode_cTypeObjNode1, installs cSortObjNode_vtbl and takes SortIndex (+0x14) from cSortObjNode_ObjNodeNoSortIndex for
  * type 6 or cSortObjNode_ObjNodeSortIndex otherwise, post-incrementing the counter.
  *
  * @param bucket  update bucket
  * @param type  node type
  * @return self
  */
-extern "C" void* func_00354850(void* self, void* bucket, int type)
+extern "C" void* cSortObjNode_cSortObjNode1(void* self, void* bucket, int type)
 {
     int id;
-    func_00354720(self, bucket, type);
+    cTypeObjNode_cTypeObjNode1(self, bucket, type);
     *(void***)((char*)self + 0xC) = cSortObjNode_vtbl;
     if (type == 6) {
         id = objNextId_4850(&cSortObjNode_ObjNodeNoSortIndex);
@@ -255,14 +255,14 @@ extern "C" void cSortObjNode_writeToReplayFrame(void* self, cTypeObjNode_writeTo
 #endif
 
 //100%
-INCLUDE_ASM("object/objnode", func_003549D0__FPv);
+INCLUDE_ASM("object/objnode", cBucketMan_cBucketMan__FPv);
 #ifdef SKIP_ASM
 /**
  * Constructs the bucket manager by zeroing its first two words.
  *
  * @return self
  */
-void* func_003549D0(void* self)
+void* cBucketMan_cBucketMan(void* self)
 {
     int zero = 0;
     *(int*)((char*)self + 0x4) = zero;

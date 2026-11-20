@@ -37,7 +37,7 @@ struct sRider_278358
     int f4;
     int f8;
     char pad[0xCC - 0xC];
-    sRider_278358() __asm__("func_00275D10");
+    sRider_278358() __asm__("tNISList_tNISList");
     // PORT: tagged array new (operator_new__FUi); the sized delete[] makes g++ keep the element-count cookie.
     void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
     void operator delete[](void* p, unsigned int size);
@@ -105,7 +105,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Purge);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern "C" void cDataManager_DetachAll(void* self);
-extern "C" void func_00275D90(int* self, int flags);
+extern "C" void tNISList__tNISList(int* self, int flags);
 extern "C" void cSSXScriptEngine_ForceEndScriptsAll(cSSXScriptEngine* self);
 extern "C" void cSSXScriptEngine_PurgeTrack(cSSXScriptEngine* self);
 extern "C" void cSSXScriptEngine_PurgeScriptBank(cSSXScriptEngine* self, int idx);
@@ -163,7 +163,7 @@ extern "C" void cSSXScriptEngine_Purge(sSseEngine8590* self)
         sSseObj8590* objPtr = self->objsA + ((int*)self->objsA)[-4];
         while (self->objsA != objPtr) {
             objPtr--;
-            func_00275D90((int*)objPtr, 0);
+            tNISList__tNISList((int*)objPtr, 0);
         }
         cMemMan_free((char*)self->objsA - 0x10);
     }
@@ -174,7 +174,7 @@ extern "C" void cSSXScriptEngine_Purge(sSseEngine8590* self)
         sSseObj8590* objPtr = self->objsB + ((int*)self->objsB)[-4];
         while (self->objsB != objPtr) {
             objPtr--;
-            func_00275D90((int*)objPtr, 0);
+            tNISList__tNISList((int*)objPtr, 0);
         }
         cMemMan_free((char*)self->objsB - 0x10);
     }
@@ -188,12 +188,12 @@ extern "C" void cSSXScriptEngine_Purge(sSseEngine8590* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00278710__FPv);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Init__FPv);
 #ifdef SKIP_ASM
 /**
  * Clears the engine's NIS skip lockout, mNumFramesNoSkip (+0x554). cGame_gainFocus calls it.
  */
-void func_00278710(void* self)
+void cSSXScriptEngine_Init(void* self)
 {
     *(int*)((char*)self + 0x554) = 0;
 }
@@ -205,7 +205,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_DeInit__FPv);
 /**
  * Leaves the script engine's per-game state: clears the NIS no-skip countdown.
  *
- * Stores 0 in mNumFramesNoSkip (+0x554), exactly what func_00278710 (On Tour Init, called from cGame_gainFocus) does
+ * Stores 0 in mNumFramesNoSkip (+0x554), exactly what cSSXScriptEngine_Init (On Tour Init, called from cGame_gainFocus) does
  * too. cGame_loseFocus calls it on ScriptEngine.
  */
 void cSSXScriptEngine_DeInit(void* self)
@@ -221,7 +221,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Update);
 extern char str_hud_e[];
 struct sSsxScriptRider;
 struct sScrObj05B8;
-extern "C" void func_00276CC8(void* r);
+extern "C" void tNISList_Update(void* r);
 extern "C" void cBXScriptEngine_Update(void* self);
 extern "C" void cVidEngine_UpdateVideo(void* snd);
 extern "C" void cScriptObjCameraManager_Update(void* slot);
@@ -229,7 +229,7 @@ extern "C" void cScriptObjEvent_Update(sScrObj05B8* self);
 extern "C" int tNISList_IsSkipAllowed(sSsxScriptRider* r);
 // The unit declares tNISList_GetState as void, but this caller tests its result: bind an int view by asm label.
 extern "C" int tNISList_GetState_i(void* r) __asm__("tNISList_GetState");
-extern "C" void func_00276F48(void* r);
+extern "C" void tNISList_DoSkip(void* r);
 extern "C" int tNISList_IsPausedPendingNextScript(void* r);
 extern "C" void cSSXScriptEngine_ClearNISPlayListState(cSSXScriptEngine* self);
 void* cInput_getState(void* self, int a1);
@@ -275,9 +275,9 @@ struct sSse8720 {
 extern "C" void cSSXScriptEngine_Update(sSse8720* self)
 {
     for (int i = 0; i < 2; i++)
-        func_00276CC8(&self->objsA[i]);
+        tNISList_Update(&self->objsA[i]);
     for (int i = 0; i < 2; i++)
-        func_00276CC8(&self->objsB[i]);
+        tNISList_Update(&self->objsB[i]);
     cBXScriptEngine_Update(self);
     cVidEngine_UpdateVideo(self->snd);
     for (int i = 0; i < 2; i++)
@@ -295,7 +295,7 @@ extern "C" void cSSXScriptEngine_Update(sSse8720* self)
                 void* obj = *(void**)(lvl->riders[j] + 0xDF0);
                 if (**(int**)obj != 0 && self->delay == 0 && cInput_getState(obj, 111))
                 {
-                    func_00276F48(nisList);
+                    tNISList_DoSkip(nisList);
                     goto done;
                 }
             }
@@ -352,20 +352,20 @@ extern "C" void cSSXScriptEngine_UpdateLoad(cSSXScriptEngine* self)
 }
 #endif
 
-extern "C" void* func_00283AF8(void*);
+extern "C" void* cVidEngine_RenderVideo(void*);
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_002789C0__FPv);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Render__FPv);
 #ifdef SKIP_ASM
 /**
- * Draws the script engine's video: calls func_00283AF8 on its cVidEngine part (+0x500). cGame_render calls it each
+ * Draws the script engine's video: calls cVidEngine_RenderVideo on its cVidEngine part (+0x500). cGame_render calls it each
  * frame.
  *
- * @return func_00283AF8's return register
+ * @return cVidEngine_RenderVideo's return register
  */
-void* func_002789C0(void* self)
+void* cSSXScriptEngine_Render(void* self)
 {
-    return func_00283AF8((char*)self + 0x500);
+    return cVidEngine_RenderVideo((char*)self + 0x500);
 }
 #endif
 
@@ -594,7 +594,7 @@ extern "C" int cSSXScriptEngine_IsLoadTrackComplete(cSSXScriptEngine* self)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsPauseMenuAllowed);
 #ifdef SKIP_ASM
-extern "C" int func_002770C0(void*);
+extern "C" int tNISList_IsPauseMenuAllowed(void*);
 
 /**
  * Tells whether the pause menu may open: always when no NIS list is playing, else as the playing list allows.
@@ -607,12 +607,12 @@ extern "C" int cSSXScriptEngine_IsPauseMenuAllowed(cSSXScriptEngine* self)
     if (i == 2) {
         return 1;
     }
-    return func_002770C0((char*)self->mpNISLists + i * 0xCC);
+    return tNISList_IsPauseMenuAllowed((char*)self->mpNISLists + i * 0xCC);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00278DE8__FPvi);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_DisallowNISListSkip__FPvi);
 #ifdef SKIP_ASM
 /**
  * Blocks NIS skipping for @p val frames: stores mNumFramesNoSkip (+0x554), which cSSXScriptEngine_Update counts down
@@ -620,14 +620,14 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_00278DE8__FPvi);
  *
  * @param val  the number of frames
  */
-void func_00278DE8(void* self, int val)
+void cSSXScriptEngine_DisallowNISListSkip(void* self, int val)
 {
     *(int*)((char*)self + 0x554) = val;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00278DF0);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_SetNISListViewIndex);
 #ifdef SKIP_ASM
 /**
  * Sets the view index (+0x8) of both NIS lists (mpNISLists, +0x54C, 0xCC each).
@@ -635,7 +635,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_00278DF0);
  * @param scriptEngine  the script engine
  * @param viewIndex  the view index
  */
-extern "C" void func_00278DF0(void *scriptEngine, int viewIndex) {
+extern "C" void cSSXScriptEngine_SetNISListViewIndex(void *scriptEngine, int viewIndex) {
     int var_3;
     int var_6;
 
@@ -656,10 +656,10 @@ struct sSsxScriptRider {
     char pad[0xCC];
 };
 
-extern "C" void func_00275DD8(sSsxScriptRider* r, int a, int b);
+extern "C" void tNISList_AddByVideoCategory(sSsxScriptRider* r, int a, int b);
 
 /**
- * Adds a video of the given category to a NIS list (the list's AddByVideoCategory, func_00275DD8).
+ * Adds a video of the given category to a NIS list (the list's AddByVideoCategory, tNISList_AddByVideoCategory).
  *
  * @param i  NIS list (eNISList)
  * @param category  video category (On Tour eNISVideoCategory)
@@ -667,17 +667,17 @@ extern "C" void func_00275DD8(sSsxScriptRider* r, int a, int b);
  */
 extern "C" void cSSXScriptEngine_AddToNISListByVideoCategory(cSSXScriptEngine* self, int i, int category, int scriptControlBits)
 {
-    func_00275DD8(&((sSsxScriptRider*)self->mpNISLists)[i], category, scriptControlBits);
+    tNISList_AddByVideoCategory(&((sSsxScriptRider*)self->mpNISLists)[i], category, scriptControlBits);
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AddToNISListByScriptCategory);
 #ifdef SKIP_ASM
-extern "C" void func_00275ED0(void* e, int a, int b, int c, int d, int f, int g);
+extern "C" void tNISList_AddByScriptCategory(void* e, int a, int b, int c, int d, int f, int g);
 
 /**
- * Adds a script chosen from a category to a NIS list (the list's AddByScriptCategory, func_00275ED0).
+ * Adds a script chosen from a category to a NIS list (the list's AddByScriptCategory, tNISList_AddByScriptCategory).
  *
  * @param i  NIS list (eNISList)
  * @param scriptCategory  script category to choose from
@@ -689,17 +689,17 @@ extern "C" void func_00275ED0(void* e, int a, int b, int c, int d, int f, int g)
  */
 extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory(cSSXScriptEngine* self, int i, int scriptCategory, int scriptControlBits, int selectScriptNow, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
 {
-    func_00275ED0((char*)self->mpNISLists + i * 0xCC, scriptCategory, scriptControlBits, selectScriptNow, mainCharAIIndex, supportChar0AIIndex, supportChar1AIIndex);
+    tNISList_AddByScriptCategory((char*)self->mpNISLists + i * 0xCC, scriptCategory, scriptControlBits, selectScriptNow, mainCharAIIndex, supportChar0AIIndex, supportChar1AIIndex);
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AddToNISListByScriptIndex);
 #ifdef SKIP_ASM
-extern "C" void func_00276048(void* e, int a, int b, int c, int d, int f);
+extern "C" void tNISList_AddByScriptIndex(void* e, int a, int b, int c, int d, int f);
 
 /**
- * Adds a script, given by its master-table index, to a NIS list (the list's AddByScriptIndex, func_00276048).
+ * Adds a script, given by its master-table index, to a NIS list (the list's AddByScriptIndex, tNISList_AddByScriptIndex).
  *
  * @param i  NIS list (eNISList)
  * @param scriptIndex  script index in the master table
@@ -710,7 +710,7 @@ extern "C" void func_00276048(void* e, int a, int b, int c, int d, int f);
  */
 extern "C" void cSSXScriptEngine_AddToNISListByScriptIndex(cSSXScriptEngine* self, int i, int scriptIndex, int scriptControlBits, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
 {
-    func_00276048((char*)self->mpNISLists + i * 0xCC, scriptIndex, scriptControlBits, mainCharAIIndex, supportChar0AIIndex, supportChar1AIIndex);
+    tNISList_AddByScriptIndex((char*)self->mpNISLists + i * 0xCC, scriptIndex, scriptControlBits, mainCharAIIndex, supportChar0AIIndex, supportChar1AIIndex);
 }
 #endif
 
@@ -747,10 +747,10 @@ extern "C" void cSSXScriptEngine_AddToNISListByScriptHashID(cSSXScriptEngine* se
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ReadyNISList);
 #ifdef SKIP_ASM
-extern "C" void func_00276270(sSsxScriptRider* r, int a);
+extern "C" void tNISList_ReadyList(sSsxScriptRider* r, int a);
 
 /**
- * Prepares a NIS list for playing (func_00276270(list, 0)).
+ * Prepares a NIS list for playing (tNISList_ReadyList(list, 0)).
  *
  * On Tour's ReadyNISList returns the list state; this declaration is void.
  *
@@ -758,7 +758,7 @@ extern "C" void func_00276270(sSsxScriptRider* r, int a);
  */
 extern "C" void cSSXScriptEngine_ReadyNISList(cSSXScriptEngine* self, int i)
 {
-    func_00276270(&((sSsxScriptRider*)self->mpNISLists)[i], 0);
+    tNISList_ReadyList(&((sSsxScriptRider*)self->mpNISLists)[i], 0);
 }
 #endif
 
@@ -796,14 +796,14 @@ extern "C" int cSSXScriptEngine_PlayNISList(cSSXScriptEngine* self, int i, int s
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_TransferNISList);
 #ifdef SKIP_ASM
 struct sSsxScriptRider;
-extern "C" int func_00276198(sSsxScriptRider* a, sSsxScriptRider* b);
+extern "C" int tNISList_TransferFromNISList(sSsxScriptRider* a, sSsxScriptRider* b);
 
 /**
- * Moves the contents of one NIS list into another (func_00276198).
+ * Moves the contents of one NIS list into another (tNISList_TransferFromNISList).
  *
  * @param destNISList  destination NIS list
  * @param sourceNISList  source NIS list
- * @return 1 when the lists are the same, otherwise func_00276198()'s result
+ * @return 1 when the lists are the same, otherwise tNISList_TransferFromNISList()'s result
  */
 extern "C" int cSSXScriptEngine_TransferNISList(cSSXScriptEngine* self, int destNISList, int sourceNISList)
 {
@@ -811,34 +811,34 @@ extern "C" int cSSXScriptEngine_TransferNISList(cSSXScriptEngine* self, int dest
         return 1;
     }
     char* base = (char*)self->mpNISLists;
-    return func_00276198((sSsxScriptRider*)(base + destNISList * 0xCC), (sSsxScriptRider*)(base + sourceNISList * 0xCC));
+    return tNISList_TransferFromNISList((sSsxScriptRider*)(base + destNISList * 0xCC), (sSsxScriptRider*)(base + sourceNISList * 0xCC));
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_PauseNISList);
 #ifdef SKIP_ASM
-void func_002766B0(void* r, int a);
+void tNISList_Pause(void* r, int a);
 
 /**
- * Pauses or resumes a NIS list (func_002766B0).
+ * Pauses or resumes a NIS list (tNISList_Pause).
  *
  * @param i  NIS list (eNISList)
  * @param isPaused  nonzero to pause, 0 to resume
  */
 extern "C" void cSSXScriptEngine_PauseNISList(cSSXScriptEngine* self, int i, int isPaused)
 {
-    func_002766B0(&((sSsxScriptRider*)self->mpNISLists)[i], isPaused);
+    tNISList_Pause(&((sSsxScriptRider*)self->mpNISLists)[i], isPaused);
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_SkipNISListScripts);
 #ifdef SKIP_ASM
-extern "C" void func_002766D0(sSsxScriptRider* r, int a, int b);
+extern "C" void tNISList_SkipForward(sSsxScriptRider* r, int a, int b);
 
 /**
- * Skips scripts in a NIS list (func_002766D0).
+ * Skips scripts in a NIS list (tNISList_SkipForward).
  *
  * On Tour's version returns the list state; this declaration is void.
  *
@@ -848,27 +848,27 @@ extern "C" void func_002766D0(sSsxScriptRider* r, int a, int b);
  */
 extern "C" void cSSXScriptEngine_SkipNISListScripts(cSSXScriptEngine* self, int i, int numScriptsToSkip, int doTransition)
 {
-    func_002766D0(&((sSsxScriptRider*)self->mpNISLists)[i], numScriptsToSkip, doTransition);
+    tNISList_SkipForward(&((sSsxScriptRider*)self->mpNISLists)[i], numScriptsToSkip, doTransition);
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ResetNISList);
 #ifdef SKIP_ASM
-extern "C" void func_00276868(void* self, int a1);
+extern "C" void tNISList_Reset(void* self, int a1);
 extern "C" void cSSXScriptEngine_ClearNISPlayListState(cSSXScriptEngine* self);
 
 /**
  * Resets one of the engine's two NIS lists, clearing the NIS play state if that list is playing.
  *
- * Calls the NIS list reset routine func_00276868(list, 1) on mpNISLists[@p i]; when @p i equals mPlayingNISList
+ * Calls the NIS list reset routine tNISList_Reset(list, 1) on mpNISLists[@p i]; when @p i equals mPlayingNISList
  * it then calls cSSXScriptEngine_ClearNISPlayListState().
  *
  * @param i  which NIS list to reset (On Tour's eNISList: 0 or 1)
  */
 extern "C" void cSSXScriptEngine_ResetNISList(cSSXScriptEngine* self, int i)
 {
-    func_00276868((char*)self->mpNISLists + i * 0xCC, 1);
+    tNISList_Reset((char*)self->mpNISLists + i * 0xCC, 1);
     if (self->mPlayingNISList == i) {
         cSSXScriptEngine_ClearNISPlayListState(self);
     }
@@ -895,10 +895,10 @@ extern "C" void cSSXScriptEngine_ResetNISListAll(cSSXScriptEngine* self)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetNISListScriptCategory);
 #ifdef SKIP_ASM
-extern "C" void func_00276998(sSsxScriptRider* r, int a);
+extern "C" void tNISList_GetScriptCategory(sSsxScriptRider* r, int a);
 
 /**
- * Looks up the script category of one entry of a NIS list (func_00276998).
+ * Looks up the script category of one entry of a NIS list (tNISList_GetScriptCategory).
  *
  * On Tour returns the category; this declaration is void, so the result is only left in the return register
  * (callers use the _r / _int aliases).
@@ -908,44 +908,44 @@ extern "C" void func_00276998(sSsxScriptRider* r, int a);
  */
 extern "C" void cSSXScriptEngine_GetNISListScriptCategory(cSSXScriptEngine* self, int i, int listIndex)
 {
-    func_00276998(&((sSsxScriptRider*)self->mpNISLists)[i], listIndex);
+    tNISList_GetScriptCategory(&((sSsxScriptRider*)self->mpNISLists)[i], listIndex);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00279178);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetNISListVideoCategory);
 #ifdef SKIP_ASM
-extern "C" void func_00276A08(int, int);
+extern "C" void tNISList_GetVideoCategory(int, int);
 
 /**
- * Looks up the video category of entry @p listIndex of NIS list @p nisList: func_00276A08 on mpNISLists[@p nisList].
+ * Looks up the video category of entry @p listIndex of NIS list @p nisList: tNISList_GetVideoCategory on mpNISLists[@p nisList].
  *
- * The C declares no return value; func_00276A08's answer is left in the return register.
+ * The C declares no return value; tNISList_GetVideoCategory's answer is left in the return register.
  *
  * @param scriptEngine  the script engine
  * @param nisList  the NIS list (0 main, 1 auxiliary transition)
  * @param listIndex  the entry index
  */
-extern "C" void func_00279178(void *scriptEngine, int nisList, int listIndex) {
-    func_00276A08((*(int *)((char*)(scriptEngine) + (0x54C))) + (nisList * 204), listIndex);
+extern "C" void cSSXScriptEngine_GetNISListVideoCategory(void *scriptEngine, int nisList, int listIndex) {
+    tNISList_GetVideoCategory((*(int *)((char*)(scriptEngine) + (0x54C))) + (nisList * 204), listIndex);
 }
 #endif
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_002791A8);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetNISListScriptIndex);
 #ifdef SKIP_ASM
-extern "C" void func_00276A78(int, int);
+extern "C" void tNISList_GetScriptIndex(int, int);
 
 /**
- * Looks up the script index of entry @p listIndex of NIS list @p nisList: func_00276A78 on mpNISLists[@p nisList].
+ * Looks up the script index of entry @p listIndex of NIS list @p nisList: tNISList_GetScriptIndex on mpNISLists[@p nisList].
  *
- * The C declares no return value; func_00276A78's answer is left in the return register.
+ * The C declares no return value; tNISList_GetScriptIndex's answer is left in the return register.
  *
  * @param scriptEngine  the script engine
  * @param nisList  the NIS list (0 main, 1 auxiliary transition)
  * @param listIndex  the entry index
  */
-extern "C" void func_002791A8(void *scriptEngine, int nisList, int listIndex) {
-    func_00276A78((*(int *)((char*)(scriptEngine) + (0x54C))) + (nisList * 204), listIndex);
+extern "C" void cSSXScriptEngine_GetNISListScriptIndex(void *scriptEngine, int nisList, int listIndex) {
+    tNISList_GetScriptIndex((*(int *)((char*)(scriptEngine) + (0x54C))) + (nisList * 204), listIndex);
 }
 #endif
 
@@ -988,26 +988,26 @@ extern "C" void cSSXScriptEngine_GetNISListPlayState(cSSXScriptEngine* self, int
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetNISListLength);
 #ifdef SKIP_ASM
-void func_00276CA8(void*);
+void tNISList_GetLength(void*);
 
 /**
- * Queries the number of entries in a NIS list (func_00276CA8); On Tour returns it, this declaration is void.
+ * Queries the number of entries in a NIS list (tNISList_GetLength); On Tour returns it, this declaration is void.
  *
  * @param i  NIS list (eNISList)
  */
 extern "C" void cSSXScriptEngine_GetNISListLength(cSSXScriptEngine* self, int i)
 {
-    func_00276CA8((char*)self->mpNISLists + i * 0xCC);
+    tNISList_GetLength((char*)self->mpNISLists + i * 0xCC);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00279270);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsNISListNextScriptReady);
 #ifdef SKIP_ASM
-extern "C" void func_00277100(int, int);
+extern "C" void tNISList_IsPendingScriptReady(int, int);
 
 /**
- * Asks whether the pending script of NIS list @p nisList is ready: func_00277100 on mpNISLists[@p nisList].
+ * Asks whether the pending script of NIS list @p nisList is ready: tNISList_IsPendingScriptReady on mpNISLists[@p nisList].
  *
  * The list's byte offset is passed as an extra argument the callee ignores. The C declares no return value; the answer
  * is left in the return register.
@@ -1015,11 +1015,11 @@ extern "C" void func_00277100(int, int);
  * @param scriptEngine  the script engine
  * @param nisList  the NIS list (0 main, 1 auxiliary transition)
  */
-extern "C" void func_00279270(void *scriptEngine, int nisList) {
+extern "C" void cSSXScriptEngine_IsNISListNextScriptReady(void *scriptEngine, int nisList) {
     int temp_5;
 
     temp_5 = nisList * 204;
-    func_00277100((*(int *)((char*)(scriptEngine) + (0x54C))) + temp_5, temp_5);
+    tNISList_IsPendingScriptReady((*(int *)((char*)(scriptEngine) + (0x54C))) + temp_5, temp_5);
 }
 #endif
 
@@ -1078,13 +1078,13 @@ extern "C" int cSSXScriptEngine_IsActiveNISSkippable(cSSXScriptEngine* self)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsPlayingNISListPlayer);
 #ifdef SKIP_ASM
-extern "C" int func_002771C8(void*, int);
+extern "C" int tNISList_IsPlayingScriptOwner(void*, int);
 
 /**
  * Tells whether a script player belongs to the NIS list that is playing.
  *
  * @param pScriptPlayerMain  the script player
- * @return 0 when no NIS list plays, otherwise func_002771C8()'s answer
+ * @return 0 when no NIS list plays, otherwise tNISList_IsPlayingScriptOwner()'s answer
  */
 extern "C" int cSSXScriptEngine_IsPlayingNISListPlayer(cSSXScriptEngine* self, int pScriptPlayerMain)
 {
@@ -1092,14 +1092,14 @@ extern "C" int cSSXScriptEngine_IsPlayingNISListPlayer(cSSXScriptEngine* self, i
     if (i == 2) {
         return 0;
     }
-    return func_002771C8((char*)self->mpNISLists + i * 0xCC, pScriptPlayerMain);
+    return tNISList_IsPlayingScriptOwner((char*)self->mpNISLists + i * 0xCC, pScriptPlayerMain);
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AddToIdleListByScriptCategory);
 #ifdef SKIP_ASM
-extern "C" void func_00275ED0(void* e, int a, int b, int c, int d, int f, int g);
+extern "C" void tNISList_AddByScriptCategory(void* e, int a, int b, int c, int d, int f, int g);
 
 /**
  * Adds a script chosen from a category to a viewport's idle list.
@@ -1113,14 +1113,14 @@ extern "C" void func_00275ED0(void* e, int a, int b, int c, int d, int f, int g)
  */
 extern "C" void cSSXScriptEngine_AddToIdleListByScriptCategory(cSSXScriptEngine* self, int i, int scriptCategory, int flag, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
 {
-    func_00275ED0((char*)self->mpIdleLists + i * 0xCC, scriptCategory, flag ? 8 : 0, 0, mainCharAIIndex, supportChar0AIIndex, supportChar1AIIndex);
+    tNISList_AddByScriptCategory((char*)self->mpIdleLists + i * 0xCC, scriptCategory, flag ? 8 : 0, 0, mainCharAIIndex, supportChar0AIIndex, supportChar1AIIndex);
 }
 #endif
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ReadyIdleList);
 #ifdef SKIP_ASM
 struct sSsxScriptRider;
-extern "C" void func_00276270(sSsxScriptRider* r, int a);
+extern "C" void tNISList_ReadyList(sSsxScriptRider* r, int a);
 
 /**
  * Prepares a viewport's idle list for playing.
@@ -1130,7 +1130,7 @@ extern "C" void func_00276270(sSsxScriptRider* r, int a);
  */
 extern "C" void cSSXScriptEngine_ReadyIdleList(cSSXScriptEngine* self, int i, int flag)
 {
-    func_00276270((sSsxScriptRider*)((char*)self->mpIdleLists + i * 0xCC), flag ? 2 : 0);
+    tNISList_ReadyList((sSsxScriptRider*)((char*)self->mpIdleLists + i * 0xCC), flag ? 2 : 0);
 }
 #endif
 //100%
@@ -1152,33 +1152,33 @@ extern "C" void cSSXScriptEngine_PlayIdleList(cSSXScriptEngine* self, int i)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ResetIdleList);
 #ifdef SKIP_ASM
-extern "C" void func_00276868(void* self, int a1);
+extern "C" void tNISList_Reset(void* self, int a1);
 
 /**
- * Resets a viewport's idle list (func_00276868(list, 1)).
+ * Resets a viewport's idle list (tNISList_Reset(list, 1)).
  *
  * @param i  viewport index
  */
 extern "C" void cSSXScriptEngine_ResetIdleList(cSSXScriptEngine* self, int i)
 {
-    func_00276868((char*)self->mpIdleLists + i * 0xCC, 1);
+    tNISList_Reset((char*)self->mpIdleLists + i * 0xCC, 1);
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ResetIdleListAll);
 #ifdef SKIP_ASM
-extern "C" void func_00276868(void* self, int a1);
+extern "C" void tNISList_Reset(void* self, int a1);
 
 /**
- * Resets both of the engine's idle lists with the NIS list reset routine func_00276868(list, 1).
+ * Resets both of the engine's idle lists with the NIS list reset routine tNISList_Reset(list, 1).
  *
  * Unlike cSSXScriptEngine_ResetNISList(), it leaves the NIS play state alone.
  */
 extern "C" void cSSXScriptEngine_ResetIdleListAll(cSSXScriptEngine* self)
 {
     for (int i = 0; i < 2; i++) {
-        func_00276868(&((sSsxScriptRider*)self->mpIdleLists)[i], 1);
+        tNISList_Reset(&((sSsxScriptRider*)self->mpIdleLists)[i], 1);
     }
 }
 #endif
@@ -1205,9 +1205,9 @@ extern "C" void cSSXScriptEngine_GetIdleListState(cSSXScriptEngine* self, int i)
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_RequestScriptByCategory);
 #ifdef SKIP_ASM
 extern "C" int* cSSXScriptEngine_GetScriptFromCategory(cSSXScriptEngine*, int);
-void* func_0027BD78(void* self);
-void func_0027BD90(void*, void*);
-extern "C" int func_002821A0(void* self, int key, void* node);
+void* cSSXScriptEngine_AllocScriptSetupInfo(void* self);
+void cSSXScriptEngine_ReleaseScriptSetupInfo(void*, void*);
+extern "C" int cBXScriptEngine_RequestAnimationScript(void* self, int key, void* node);
 
 /**
  * Requests a script chosen from a category, with up to three characters cast in it.
@@ -1227,13 +1227,13 @@ extern "C" int cSSXScriptEngine_RequestScriptByCategory(cSSXScriptEngine* self, 
     // PORT: one variable holds the script pointer and then the result
     int outcome = (int)cSSXScriptEngine_GetScriptFromCategory((cSSXScriptEngine*)self, category);
     if (outcome == 0) return -1;
-    int* node = (int*)func_0027BD78(self);
+    int* node = (int*)cSSXScriptEngine_AllocScriptSetupInfo(self);
     node[0] = mainCharAIIndex;
     node[1] = supportChar0AIIndex;
     node[2] = supportChar1AIIndex;
-    outcome = func_002821A0(self, *(int*)outcome, node);
+    outcome = cBXScriptEngine_RequestAnimationScript(self, *(int*)outcome, node);
     if (outcome < 0) {
-        func_0027BD90(self, node);
+        cSSXScriptEngine_ReleaseScriptSetupInfo(self, node);
     }
     return outcome;
 }
@@ -1242,9 +1242,9 @@ extern "C" int cSSXScriptEngine_RequestScriptByCategory(cSSXScriptEngine* self, 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_RequestScriptByIndex);
 #ifdef SKIP_ASM
-void* func_0027BD78(void* self);
-void func_0027BD90(void*, void*);
-extern "C" int func_002821A0(void* self, int key, void* node);
+void* cSSXScriptEngine_AllocScriptSetupInfo(void* self);
+void cSSXScriptEngine_ReleaseScriptSetupInfo(void*, void*);
+extern "C" int cBXScriptEngine_RequestAnimationScript(void* self, int key, void* node);
 
 /**
  * Requests a script by its master-table index, with up to three characters cast in it.
@@ -1269,13 +1269,13 @@ extern "C" int cSSXScriptEngine_RequestScriptByIndex(cSSXScriptEngine* self, int
     if (supportChar1AIIndex < 0 || supportChar1AIIndex >= n) {
         supportChar1AIIndex = -1;
     }
-    int* node = (int*)func_0027BD78(self);
+    int* node = (int*)cSSXScriptEngine_AllocScriptSetupInfo(self);
     node[0] = mainCharAIIndex;
     node[1] = supportChar0AIIndex;
     node[2] = supportChar1AIIndex;
-    int requestId = func_002821A0(self, key, node);
+    int requestId = cBXScriptEngine_RequestAnimationScript(self, key, node);
     if (requestId < 0) {
-        func_0027BD90(self, node);
+        cSSXScriptEngine_ReleaseScriptSetupInfo(self, node);
     }
     return requestId;
 }
@@ -1315,23 +1315,23 @@ extern "C" int cSSXScriptEngine_RequestScriptByHashID(cSSXScriptEngine* self, in
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_PlayRequestScript);
 #ifdef SKIP_ASM
 extern "C" int cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1);
-extern "C" void* func_002822A0(void* self, int key, int b, int c);
-// PORT: func_0027A668 is defined in this unit as (void*), but this caller passes
+extern "C" void* cBXScriptEngine_PlayScript(void* self, int key, int b, int c);
+// PORT: cSSXScriptEngine_GetScriptSetupInfo is defined in this unit as (void*), but this caller passes
 // (self, index); bind the 2-arg form to the symbol.
-void* func_0027A668_2(void* self, int idx) __asm__("func_0027A668__FPv");
+void* cSSXScriptEngine_GetScriptSetupInfo_2(void* self, int idx) __asm__("cSSXScriptEngine_GetScriptSetupInfo__FPv");
 
 /**
  * Plays a requested script in a given view: stores the view in the request's setup info, then plays it.
  *
  * @param val  view index (On Tour viewIndex)
  * @param key  request handle
- * @param autoRecycle  passed to func_002822A0(); On Tour calls it autoRecycle
- * @param loop  passed to func_002822A0(); On Tour calls it loop
+ * @param autoRecycle  passed to cBXScriptEngine_PlayScript(); On Tour calls it autoRecycle
+ * @param loop  passed to cBXScriptEngine_PlayScript(); On Tour calls it loop
  */
 extern "C" void cSSXScriptEngine_PlayRequestScript(cSSXScriptEngine* self, int val, int key, int autoRecycle, int loop)
 {
-    *(int*)((char*)func_0027A668_2(self, cBXScriptEngine_GetRequestPlayerByReqHandle(self, key)) + 0xC) = val;
-    func_002822A0(self, key, autoRecycle, loop);
+    *(int*)((char*)cSSXScriptEngine_GetScriptSetupInfo_2(self, cBXScriptEngine_GetRequestPlayerByReqHandle(self, key)) + 0xC) = val;
+    cBXScriptEngine_PlayScript(self, key, autoRecycle, loop);
 }
 #endif
 
@@ -1432,8 +1432,8 @@ extern "C" void cSSXScriptEngine_OnScriptDataReleased(cSSXScriptEngine* self, in
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnAttachData);
 #ifdef SKIP_ASM
 extern "C" int func_00416B18(const char* a, const char* b, int n);
-void* func_0027C078(void* self);
-extern "C" void func_00282150(void* self, void* data, int a2);
+void* GetSSXScriptHeader1(void* self);
+extern "C" void cBXScriptEngine_AttachScript(void* self, void* data, int a2);
 extern "C" void cScriptAnimBankManager_LinkBank(void* mgr, int bank, void* data);
 extern "C" void cScriptSoundBankManager_LinkBank(void* mgr, int bank, void* data, int a3);
 extern char str_scr[];
@@ -1455,10 +1455,10 @@ extern char str_snd[];
 extern "C" void cSSXScriptEngine_OnAttachData(cSSXScriptEngine* self, const char* ext, void* data, int dataSize, int* kind, int* bank)
 {
     if (func_00416B18(str_scr, ext, 3) == 0) {
-        char* bankHeader = (char*)func_0027C078(data);
+        char* bankHeader = (char*)GetSSXScriptHeader1(data);
         *(int*)(bankHeader + 0x1C) = self->mCurrAttachingBankNum;
         *kind = 0;
-        func_00282150(((char*)self), data, *(int*)(bankHeader + 0x18));
+        cBXScriptEngine_AttachScript(((char*)self), data, *(int*)(bankHeader + 0x18));
     } else if (func_00416B18(str_anm, ext, 3) == 0) {
         *kind = 1;
         *bank = self->mCurrAttachingBankNum;
@@ -1474,10 +1474,10 @@ extern "C" void cSSXScriptEngine_OnAttachData(cSSXScriptEngine* self, const char
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnDetachData);
 #ifdef SKIP_ASM
-void* func_0027C078(void* self);
-extern "C" void func_00282178(void* self, int a1);
-extern "C" void func_00275650(void* list, int id);
-extern "C" void func_00283610(void* list, int id);
+void* GetSSXScriptHeader1(void* self);
+extern "C" void cBXScriptEngine_DetachScript(void* self, int a1);
+extern "C" void cScriptAnimBankManager_UnlinkBank(void* list, int id);
+extern "C" void cScriptSoundBankManager_UnlinkBank1(void* list, int id);
 
 /**
  * Handles data detached from a script bank: unregisters the script or unlinks the animation or sound bank.
@@ -1491,13 +1491,13 @@ extern "C" void cSSXScriptEngine_OnDetachData(cSSXScriptEngine* self, void* obj,
 {
     switch (type) {
     case 0:
-        func_00282178(self, *(int*)((char*)func_0027C078(obj) + 0x18));
+        cBXScriptEngine_DetachScript(self, *(int*)((char*)GetSSXScriptHeader1(obj) + 0x18));
         break;
     case 1:
-        func_00275650((char*)self + 0xA28, id);
+        cScriptAnimBankManager_UnlinkBank((char*)self + 0xA28, id);
         break;
     case 2:
-        func_00283610((char*)self + 0xA38, id);
+        cScriptSoundBankManager_UnlinkBank1((char*)self + 0xA38, id);
         break;
     }
 }
@@ -1507,13 +1507,13 @@ extern "C" void cSSXScriptEngine_OnDetachData(cSSXScriptEngine* self, void* obj,
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnStartScript);
 #ifdef SKIP_ASM
 unsigned int BXrand();
-unsigned char func_002743C8(void* self);
-int func_00274388(void* self);
-int func_0027C958(void* self);
-// PORT: func_0027C960 forwards (self, index) to func_002742E0; the unit declares it with one arg.
-void* func_0027C960_9A70(void* self, int i) __asm__("func_0027C960__FPv");
-// PORT: callers elsewhere declare func_0027BDB8 with two args; it takes the three player slots too.
-extern "C" void func_0027BDB8_9A70(void* self, int* flags, int p0, int p1, int p2) __asm__("func_0027BDB8");
+unsigned char cScriptPlayerEntity_GetType(void* self);
+int cScriptPlayerEntity_GetNumVariations(void* self);
+int GetSSXActorHeader(void* self);
+// PORT: GetSSXActorHeader1 forwards (self, index) to cScriptPlayerEntity_GetHeader; the unit declares it with one arg.
+void* GetSSXActorHeader1_9A70(void* self, int i) __asm__("GetSSXActorHeader1__FPv");
+// PORT: callers elsewhere declare cSSXScriptEngine_BuildCharacterBitRoleArray with two args; it takes the three player slots too.
+extern "C" void cSSXScriptEngine_BuildCharacterBitRoleArray_9A70(void* self, int* flags, int p0, int p1, int p2) __asm__("cSSXScriptEngine_BuildCharacterBitRoleArray");
 extern "C" void* cScriptPlayerMain_GetEntity(void* self, int i);
 extern "C" void cScriptPlayerEntity_SetEntityVariation(void* self, int idx);
 extern int D_00482608[];
@@ -1558,7 +1558,7 @@ extern "C" void cSSXScriptEngine_OnStartScript(cSSXScriptEngine* self, sScript_9
     int cands[32];
     unsigned int all = 0;
     int i;
-    func_0027BDB8_9A70(self, flags, players[0], players[1], players[2]);
+    cSSXScriptEngine_BuildCharacterBitRoleArray_9A70(self, flags, players[0], players[1], players[2]);
     {
         int j;
         for (j = 0; j < 21; j++)
@@ -1566,13 +1566,13 @@ extern "C" void cSSXScriptEngine_OnStartScript(cSSXScriptEngine* self, sScript_9
     }
     for (i = 0; i < script->hdr->numEvents; i++) {
         void* ev = cScriptPlayerMain_GetEntity(script, i);
-        if (func_002743C8(ev) == 5) {
-            int cnt = func_00274388(ev);
+        if (cScriptPlayerEntity_GetType(ev) == 5) {
+            int cnt = cScriptPlayerEntity_GetNumVariations(ev);
             if (cnt >= 2) {
                 int numCands = 0;
                 int k;
                 for (k = 0; k < cnt; k++) {
-                    sScriptOpt_9A70* opt = (sScriptOpt_9A70*)func_0027C960_9A70(ev, k);
+                    sScriptOpt_9A70* opt = (sScriptOpt_9A70*)GetSSXActorHeader1_9A70(ev, k);
                     int slot = D_00482608[opt->slot];
                     if (slot >= 0) {
                         if (opt->mask == 0 || (opt->mask & flags[slot]) != 0)
@@ -1584,7 +1584,7 @@ extern "C" void cSSXScriptEngine_OnStartScript(cSSXScriptEngine* self, sScript_9
                 }
                 if (numCands > 0) {
                     cScriptPlayerEntity_SetEntityVariation(ev, cands[BXrand() % numCands]);
-                    sScriptOpt_9A70* opt = (sScriptOpt_9A70*)func_0027C958(ev);
+                    sScriptOpt_9A70* opt = (sScriptOpt_9A70*)GetSSXActorHeader(ev);
                     int slot = D_00482608[opt->slot];
                     if (slot >= 0) {
                         all &= ~flags[slot];
@@ -1593,7 +1593,7 @@ extern "C" void cSSXScriptEngine_OnStartScript(cSSXScriptEngine* self, sScript_9
                 }
             }
         } else {
-            int cnt = func_00274388(ev);
+            int cnt = cScriptPlayerEntity_GetNumVariations(ev);
             if (cnt >= 2)
                 cScriptPlayerEntity_SetEntityVariation(ev, BXrand() % cnt);
         }
@@ -1605,7 +1605,7 @@ extern "C" void cSSXScriptEngine_OnStartScript(cSSXScriptEngine* self, sScript_9
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnReleaseRequest);
 #ifdef SKIP_ASM
-void func_0027BD90(void*, void*);
+void cSSXScriptEngine_ReleaseScriptSetupInfo(void*, void*);
 
 /**
  * Returns a released request's setup-info node to the engine's pool.
@@ -1615,16 +1615,16 @@ void func_0027BD90(void*, void*);
  */
 extern "C" void cSSXScriptEngine_OnReleaseRequest(cSSXScriptEngine* self, int requestHandle, void* pUserData)
 {
-    func_0027BD90(self, pUserData);
+    cSSXScriptEngine_ReleaseScriptSetupInfo(self, pUserData);
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AddObject);
 #ifdef SKIP_ASM
-extern "C" int func_0027CEA8(void* self, void* obj);
-extern "C" int func_00281190(void* self, void* obj);
-extern "C" int func_002812E0(void* self, void* obj);
+extern "C" int cScriptDatabaseObject_AddObject(void* self, void* obj);
+extern "C" int cScriptObjCameraManager_AddCameraObject(void* self, void* obj);
+extern "C" int cScriptObjCameraManager_SetTransitionObject(void* self, void* obj);
 
 class cScriptOwner9D00 {
 public:
@@ -1659,11 +1659,11 @@ struct sScrSlot9D00 {
  */
 extern "C" int cSSXScriptEngine_AddObject(cSSXScriptEngine* self, cScriptOwner9D00* obj)
 {
-    int result = func_0027CEA8((self), obj);
+    int result = cScriptDatabaseObject_AddObject((self), obj);
     if (obj->state == 1) {
-        func_00281190(&((sScrSlot9D00*)&self->mObjectCameraManager[0])[*(int*)((char*)obj + 0x7C)], obj);
+        cScriptObjCameraManager_AddCameraObject(&((sScrSlot9D00*)&self->mObjectCameraManager[0])[*(int*)((char*)obj + 0x7C)], obj);
     } else if (obj->state == 2) {
-        func_002812E0(&((sScrSlot9D00*)&self->mObjectCameraManager[0])[obj->v09()], obj);
+        cScriptObjCameraManager_SetTransitionObject(&((sScrSlot9D00*)&self->mObjectCameraManager[0])[obj->v09()], obj);
     }
     return result;
 }
@@ -1672,10 +1672,10 @@ extern "C" int cSSXScriptEngine_AddObject(cSSXScriptEngine* self, cScriptOwner9D
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_RemoveObject);
 #ifdef SKIP_ASM
-int func_0027D320(void* self, int i);
-extern "C" void func_002811E8(void* slot, void* obj);
-extern "C" int func_002812E0(void* self, void* obj);
-extern "C" int func_0027CF88(void* self, int idx);
+int cScriptDatabaseObject_GetObject(void* self, int i);
+extern "C" void cScriptObjCameraManager_RemoveCameraObject(void* slot, void* obj);
+extern "C" int cScriptObjCameraManager_SetTransitionObject(void* self, void* obj);
+extern "C" int cScriptDatabaseObject_RemoveObject(void* self, int idx);
 
 class cScriptOwner9DA8 {
 public:
@@ -1708,24 +1708,24 @@ struct sScrSlot9DA8 {
  */
 extern "C" void cSSXScriptEngine_RemoveObject(cSSXScriptEngine* self, int idx)
 {
-    // PORT: func_0027D320 returns a table pointer as int
-    cScriptOwner9DA8* obj = (cScriptOwner9DA8*)func_0027D320((self), idx);
+    // PORT: cScriptDatabaseObject_GetObject returns a table pointer as int
+    cScriptOwner9DA8* obj = (cScriptOwner9DA8*)cScriptDatabaseObject_GetObject((self), idx);
     if (obj->state == 1) {
-        func_002811E8(&((sScrSlot9DA8*)&self->mObjectCameraManager[0])[*(int*)((char*)obj + 0x7C)], obj);
+        cScriptObjCameraManager_RemoveCameraObject(&((sScrSlot9DA8*)&self->mObjectCameraManager[0])[*(int*)((char*)obj + 0x7C)], obj);
     } else if (obj->state == 2) {
-        func_002812E0(&((sScrSlot9DA8*)&self->mObjectCameraManager[0])[obj->v09()], 0);
+        cScriptObjCameraManager_SetTransitionObject(&((sScrSlot9DA8*)&self->mObjectCameraManager[0])[obj->v09()], 0);
     }
-    func_0027CF88((self), idx);
+    cScriptDatabaseObject_RemoveObject((self), idx);
 }
 #endif
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsObjInUseByPlayer);
 #ifdef SKIP_ASM
-int func_0027D320(void* self, int i);
-extern "C" int func_0027D790(void* self, int val);
-extern "C" void func_0027D210(void* self, int i, int val);
-extern "C" void func_00282EF0(void* obj, int val);
+int cScriptDatabaseObject_GetObject(void* self, int i);
+extern "C" int cScriptObjCamera_IsInUseByPlayer(void* self, int val);
+extern "C" void cScriptDatabaseObject_IsObjInUseByPlayer(void* self, int i, int val);
+extern "C" void cScriptObjTransition_IsInUseByPlayer(void* obj, int val);
 
 /**
  * Asks whether a script object is in use by a player, through the check for the object's type.
@@ -1738,20 +1738,20 @@ extern "C" void func_00282EF0(void* obj, int val);
  */
 extern "C" void cSSXScriptEngine_IsObjInUseByPlayer(cSSXScriptEngine* self, int i, int val)
 {
-    // PORT: func_0027D320 returns a table pointer as int
-    int* obj = (int*)func_0027D320(self, i);
+    // PORT: cScriptDatabaseObject_GetObject returns a table pointer as int
+    int* obj = (int*)cScriptDatabaseObject_GetObject(self, i);
     int type = *obj;
     if (type == 1) {
-        func_0027D790(obj, val);
+        cScriptObjCamera_IsInUseByPlayer(obj, val);
     } else if (type != 2) {
-        func_0027D210(self, i, val);
+        cScriptDatabaseObject_IsObjInUseByPlayer(self, i, val);
     } else {
-        func_00282EF0(obj, val);
+        cScriptObjTransition_IsInUseByPlayer(obj, val);
     }
 }
 #endif
 
-extern "C" void* func_00275718(void*);
+extern "C" void* cScriptAnimBankManager_GetBankInfo(void*);
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetAnimationBankInfo__FPv);
@@ -1759,7 +1759,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetAnimationBankInfo__F
 /**
  * Returns the animation bank info of a script data bank.
  *
- * Forwards to func_00275718 (On Tour cScriptAnimBankManager::GetBankInfo) on mAnimationBankManager (+0xA28). The C
+ * Forwards to cScriptAnimBankManager_GetBankInfo (On Tour cScriptAnimBankManager::GetBankInfo) on mAnimationBankManager (+0xA28). The C
  * declares only the engine: the bank number arrives in $a1 and passes through (cScriptObjRider_OnStartObjectUse binds a two-argument
  * alias). On Tour asserts the bank number is in range; retail does not.
  *
@@ -1767,11 +1767,11 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetAnimationBankInfo__F
  */
 void* cSSXScriptEngine_GetAnimationBankInfo(void* self)
 {
-    return func_00275718((char*)self + 0xa28);
+    return cScriptAnimBankManager_GetBankInfo((char*)self + 0xa28);
 }
 #endif
 
-extern "C" void* func_002836D8(void*);
+extern "C" void* cScriptSoundBankManager_GetBankInfo(void*);
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetSoundBankInfo__FPv);
@@ -1779,14 +1779,14 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetSoundBankInfo__FPv);
 /**
  * Returns the sound bank info of a script data bank.
  *
- * Forwards to func_002836D8 (On Tour cScriptSoundBankManager::GetBankInfo) on mSoundBankManager (+0xA38). The C
+ * Forwards to cScriptSoundBankManager_GetBankInfo (On Tour cScriptSoundBankManager::GetBankInfo) on mSoundBankManager (+0xA38). The C
  * declares only the engine: the bank number arrives in $a1 and passes through (callers bind a two-argument alias).
  *
  * @return the bank's tScriptSoundBankInfo record
  */
 void* cSSXScriptEngine_GetSoundBankInfo(void* self)
 {
-    return func_002836D8((char*)self + 0xa38);
+    return cScriptSoundBankManager_GetBankInfo((char*)self + 0xa38);
 }
 #endif
 
@@ -1837,16 +1837,16 @@ extern "C" void* cSSXScriptEngine_GetSubjectRider(cSSXScriptEngine* self, int sl
     int riderIndex;
     switch (slot) {
     case 0: {
-        int* riderIds = (int*)func_0027A668_2(self, pPlayer);
+        int* riderIds = (int*)cSSXScriptEngine_GetScriptSetupInfo_2(self, pPlayer);
         if (riderIds[0] < 0) break;
         return Lvl_279F18()->riders[riderIds[0]];
     }
     case 1:
-        riderIndex = ((int*)func_0027A668_2(self, pPlayer))[1];
+        riderIndex = ((int*)cSSXScriptEngine_GetScriptSetupInfo_2(self, pPlayer))[1];
         if (riderIndex < 0) break;
         return Lvl_279F18()->riders[riderIndex];
     case 2:
-        riderIndex = ((int*)func_0027A668_2(self, pPlayer))[2];
+        riderIndex = ((int*)cSSXScriptEngine_GetScriptSetupInfo_2(self, pPlayer))[2];
         if (riderIndex < 0) break;
         return Lvl_279F18()->riders[riderIndex];
     case 3: case 4: {
@@ -1881,7 +1881,7 @@ extern "C" void* cSSXScriptEngine_GetSubjectRider(cSSXScriptEngine* self, int sl
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027A0D8);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetAnchorOrientation);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 struct sVec_27A0D8 {
@@ -1902,12 +1902,12 @@ extern "C" void cSSXScriptEngine_FillOrientationFromRiderOrientationInfo_v(void*
     __asm__("cSSXScriptEngine_FillOrientationFromRiderOrientationInfo");
 extern "C" void cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(char* self, int slot, sVec_27A0D8* pos, int* flag, float* pitch, float* yaw, int cat,
                                 const sVec_27A0D8* off) __asm__("cSSXScriptEngine_FillOrientationFromObjectOrientationInfo");
-// PORT: func_0027C070 is defined returning int, but it returns a pointer here; bound by asm label.
-signed char* func_0027C070_p(void* self) __asm__("func_0027C070__FPv");
-extern "C" int func_003369D8_v(void* cell, sVec_27A0D8* pos, sVec_27A0D8* outP, sVec_27A0D8* outN)
-    __asm__("func_003369D8");
+// PORT: GetSSXScriptHeader is defined returning int, but it returns a pointer here; bound by asm label.
+signed char* GetSSXScriptHeader_p(void* self) __asm__("GetSSXScriptHeader__FPv");
+extern "C" int cBXNash_getGroundHeight_v(void* cell, sVec_27A0D8* pos, sVec_27A0D8* outP, sVec_27A0D8* outN)
+    __asm__("cBXNash_getGroundHeight");
 
-extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* pos, int* baseRotX, float* baseRotY, float* baseRotZ) __asm__("func_0027A0D8");
+extern "C" void cSSXScriptEngine_GetAnchorOrientation_impl(char* self, int id, void* obj, sVec_27A0D8* pos, int* baseRotX, float* baseRotY, float* baseRotZ) __asm__("cSSXScriptEngine_GetAnchorOrientation");
 /**
  * Fills the base position and rotations of a script anchor.
  *
@@ -1916,9 +1916,9 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
  * of subject rider @p id - 40 (cSSXScriptEngine_FillOrientationFromRiderOrientationInfo). - Everything else uses
  * cSSXScriptEngine_FillOrientationFromObjectOrientationInfo with object type 0 (20-23), 1-4 (25-28), 5-6 (29-30), 7
  * (19), 8 (24), 9-11 (31-33) or 12-17 (34-39), category 50, or 43 for 29-30 when the player's script header
- * (func_0027C070) starts with a nonzero byte. - 20-22 add a fixed offset from D_004D3770, filled once (guard
+ * (GetSSXScriptHeader) starts with a nonzero byte. - 20-22 add a fixed offset from D_004D3770, filled once (guard
  * D_004A51D8): (-20, 0, 340), (-20, -275, 280), (-20, 275, 280). - 19, 23, 25-28, 31 and 34-36 drop the position onto
- * the ground: z becomes the hit point's z from func_003369D8 on the game's BXNash; 25 first lowers z by 1000. Other ids
+ * the ground: z becomes the hit point's z from cBXNash_getGroundHeight on the game's BXNash; 25 first lowers z by 1000. Other ids
  * leave the cleared values.
  *
  * @param id  the anchor type
@@ -1928,7 +1928,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
  * @param baseRotY  receives the base Y rotation
  * @param baseRotZ  receives the base Z rotation
  */
-extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* pos, int* baseRotX, float* baseRotY, float* baseRotZ)
+extern "C" void cSSXScriptEngine_GetAnchorOrientation_impl(char* self, int id, void* obj, sVec_27A0D8* pos, int* baseRotX, float* baseRotY, float* baseRotZ)
 {
     *baseRotX = 0;
     *baseRotY = 0;
@@ -1955,7 +1955,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         {
             sVec_27A0D8 n;
             sVec_27A0D8 groundHit;
-            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
+            if (cBXNash_getGroundHeight_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
                 pos->z = groundHit.z;
         }
         break;
@@ -1964,7 +1964,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         {
             sVec_27A0D8 n;
             sVec_27A0D8 groundHit;
-            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
+            if (cBXNash_getGroundHeight_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
                 pos->z = groundHit.z;
         }
         break;
@@ -1973,7 +1973,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         {
             sVec_27A0D8 n;
             sVec_27A0D8 groundHit;
-            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
+            if (cBXNash_getGroundHeight_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
                 pos->z = groundHit.z;
         }
         break;
@@ -1982,14 +1982,14 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         {
             sVec_27A0D8 n;
             sVec_27A0D8 groundHit;
-            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
+            if (cBXNash_getGroundHeight_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
                 pos->z = groundHit.z;
         }
         break;
     case 29:
     {
         int cat = 50;
-        if (*func_0027C070_p(obj) != 0)
+        if (*GetSSXScriptHeader_p(obj) != 0)
             cat = 43;
         cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 5, pos, baseRotX, baseRotY, baseRotZ, cat, 0);
     }
@@ -1997,7 +1997,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
     case 30:
     {
         int cat = 50;
-        if (*func_0027C070_p(obj) != 0)
+        if (*GetSSXScriptHeader_p(obj) != 0)
             cat = 43;
         cSSXScriptEngine_FillOrientationFromObjectOrientationInfo_v(self, 6, pos, baseRotX, baseRotY, baseRotZ, cat, 0);
     }
@@ -2007,7 +2007,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         {
             sVec_27A0D8 n;
             sVec_27A0D8 groundHit;
-            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
+            if (cBXNash_getGroundHeight_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
                 pos->z = groundHit.z;
         }
         break;
@@ -2022,7 +2022,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         {
             sVec_27A0D8 n;
             sVec_27A0D8 groundHit;
-            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
+            if (cBXNash_getGroundHeight_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
                 pos->z = groundHit.z;
         }
         break;
@@ -2034,7 +2034,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         {
             sVec_27A0D8 n;
             sVec_27A0D8 groundHit;
-            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
+            if (cBXNash_getGroundHeight_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
                 pos->z = groundHit.z;
         }
         break;
@@ -2061,7 +2061,7 @@ extern "C" void func_0027A0D8_impl(char* self, int id, void* obj, sVec_27A0D8* p
         {
             sVec_27A0D8 n;
             sVec_27A0D8 groundHit;
-            if (func_003369D8_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
+            if (cBXNash_getGroundHeight_v(SSXApp->Game->BXNash, pos, &groundHit, &n))
                 pos->z = groundHit.z;
         }
         break;
@@ -2166,27 +2166,27 @@ extern "C" void* cSSXScriptEngine_MakeTransitionObject(cSSXScriptEngine* self, i
 }
 #endif
 
-// PORT: the real function is func_00282BB0__FPvT0 (void*, void*); this caller passes only $a0.
-void* func_00282BB0(void* self) __asm__("func_00282BB0__FPvT0");
+// PORT: the real function is cBXScriptEngine_GetRequestUserData__FPvT0 (void*, void*); this caller passes only $a0.
+void* cBXScriptEngine_GetRequestUserData(void* self) __asm__("cBXScriptEngine_GetRequestUserData__FPvT0");
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027A668__FPv);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetScriptSetupInfo__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the script setup info of a script player: the user data of its request (func_00282BB0).
+ * Returns the script setup info of a script player: the user data of its request (cBXScriptEngine_GetRequestUserData).
  *
  * The C declares only the engine; the player arrives in the second argument register and passes through.
  *
  * @return the setup info
  */
-void* func_0027A668(void* self)
+void* cSSXScriptEngine_GetScriptSetupInfo(void* self)
 {
-    return func_00282BB0(self);
+    return cBXScriptEngine_GetRequestUserData(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027A688);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetTransportWorldSectionID);
 #ifdef SKIP_ASM
 extern "C" int cSectionMan_getWorldSectionIDFromBESectionID(void* self, int a1);
 
@@ -2195,7 +2195,7 @@ extern "C" int cSectionMan_getWorldSectionIDFromBESectionID(void* self, int a1);
  *
  * @return the world section ID
  */
-extern "C" int func_0027A688()
+extern "C" int cSSXScriptEngine_GetTransportWorldSectionID()
 {
     return cSectionMan_getWorldSectionIDFromBESectionID(SSXApp->Game->SectionMan, 43);
 }
@@ -2206,7 +2206,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnInSeqPlay);
 #ifdef SKIP_ASM
 extern "C" void cBXScriptEngine_OnInSeqPlay(void* self, void* a1);
 extern "C" void tNISList_OnScriptPlay(void* self, int a1, void* obj);
-int func_00282BE0(void* self, void* a1);
+int cBXScriptEngine_GetRequestHandleFromPlayer(void* self, void* a1);
 
 /**
  * Handles a script player starting: runs cBXScriptEngine_OnInSeqPlay() and tells the playing NIS list.
@@ -2218,7 +2218,7 @@ extern "C" void cSSXScriptEngine_OnInSeqPlay(cSSXScriptEngine* self, void* pPlay
     cBXScriptEngine_OnInSeqPlay(self, pPlayer);
     int listIndex = self->mPlayingNISList;
     if (listIndex != 2) {
-        tNISList_OnScriptPlay((char*)self->mpNISLists + listIndex * 0xCC, func_00282BE0(self, pPlayer), pPlayer);
+        tNISList_OnScriptPlay((char*)self->mpNISLists + listIndex * 0xCC, cBXScriptEngine_GetRequestHandleFromPlayer(self, pPlayer), pPlayer);
     }
 }
 #endif
@@ -2227,7 +2227,7 @@ extern "C" void cSSXScriptEngine_OnInSeqPlay(cSSXScriptEngine* self, void* pPlay
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnInSeqUpdate);
 #ifdef SKIP_ASM
 extern "C" void tNISList_OnScriptUpdate(void* self, int a1, void* obj, float x, float y);
-int func_00282BE0(void* self, void* a1);
+int cBXScriptEngine_GetRequestHandleFromPlayer(void* self, void* a1);
 
 /**
  * Passes a script player's frame update on to the playing NIS list, if any.
@@ -2240,7 +2240,7 @@ extern "C" void cSSXScriptEngine_OnInSeqUpdate(cSSXScriptEngine* self, void* pPl
 {
     int listIndex = self->mPlayingNISList;
     if (listIndex != 2) {
-        tNISList_OnScriptUpdate((char*)self->mpNISLists + listIndex * 0xCC, func_00282BE0(self, pPlayer), pPlayer, x, y);
+        tNISList_OnScriptUpdate((char*)self->mpNISLists + listIndex * 0xCC, cBXScriptEngine_GetRequestHandleFromPlayer(self, pPlayer), pPlayer, x, y);
     }
 }
 #endif
@@ -2248,8 +2248,8 @@ extern "C" void cSSXScriptEngine_OnInSeqUpdate(cSSXScriptEngine* self, void* pPl
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnInSeqPlayStopping);
 #ifdef SKIP_ASM
-extern "C" void func_002773A0(void* self, int a1, void* obj);
-int func_00282BE0(void* self, void* a1);
+extern "C" void tNISList_OnScriptStopping(void* self, int a1, void* obj);
+int cBXScriptEngine_GetRequestHandleFromPlayer(void* self, void* a1);
 
 /**
  * Tells the playing NIS list, if any, that a script player is stopping.
@@ -2260,7 +2260,7 @@ extern "C" void cSSXScriptEngine_OnInSeqPlayStopping(cSSXScriptEngine* self, voi
 {
     int listIndex = self->mPlayingNISList;
     if (listIndex != 2) {
-        func_002773A0((char*)self->mpNISLists + listIndex * 0xCC, func_00282BE0(self, pPlayer), pPlayer);
+        tNISList_OnScriptStopping((char*)self->mpNISLists + listIndex * 0xCC, cBXScriptEngine_GetRequestHandleFromPlayer(self, pPlayer), pPlayer);
     }
 }
 #endif
@@ -2270,7 +2270,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_OnInSeqStop);
 #ifdef SKIP_ASM
 extern "C" void tNISList_OnScriptStop(void* self, int a1, void* obj);
 extern "C" void cBXScriptEngine_OnInSeqStop(void* self, void* a1);
-int func_00282BE0(void* self, void* a1);
+int cBXScriptEngine_GetRequestHandleFromPlayer(void* self, void* a1);
 
 /**
  * Handles a script player stopping: tells the playing NIS list, then runs cBXScriptEngine_OnInSeqStop().
@@ -2281,7 +2281,7 @@ extern "C" void cSSXScriptEngine_OnInSeqStop(cSSXScriptEngine* self, void* pPlay
 {
     int listIndex = self->mPlayingNISList;
     if (listIndex != 2) {
-        tNISList_OnScriptStop((char*)self->mpNISLists + listIndex * 0xCC, func_00282BE0(self, pPlayer), pPlayer);
+        tNISList_OnScriptStop((char*)self->mpNISLists + listIndex * 0xCC, cBXScriptEngine_GetRequestHandleFromPlayer(self, pPlayer), pPlayer);
     }
     cBXScriptEngine_OnInSeqStop(self, pPlayer);
 }
@@ -2388,7 +2388,7 @@ extern "C" bool cSSXScriptEngine_EndTransportSequence(cSSXScriptEngine* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsInTransportSequence);
 #ifdef SKIP_ASM
-// PORT: the unit defines cSSXScriptEngine_GetNISListScriptCategory as void, but it returns func_00276998's
+// PORT: the unit defines cSSXScriptEngine_GetNISListScriptCategory as void, but it returns tNISList_GetScriptCategory's
 // int result (a tail call); bind an int-returning form to the symbol.
 int cSSXScriptEngine_GetNISListScriptCategory_int(void* self, int i, int a) __asm__("cSSXScriptEngine_GetNISListScriptCategory");
 
@@ -2625,7 +2625,7 @@ void cMemMan_free(void*);
 unsigned int BXrand();
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label as the tagged operator new[].
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void func_0027BDB8(void* self, int* flags);
+extern "C" void cSSXScriptEngine_BuildCharacterBitRoleArray(void* self, int* flags);
 extern char str_ScriptChoice[];
 
 struct sScript_27B0C0
@@ -2665,7 +2665,7 @@ extern "C" int* cSSXScriptEngine_GetScriptFromCategory(cSSXScriptEngine* engine,
     if (((int)self->mpFilterTableHeader) == 0 || ((sCategory_27B0C0*)self->mpCategoryFilterTable)[cat].count == 0)
         return 0;
     int flags[21];
-    func_0027BDB8(self, flags);
+    cSSXScriptEngine_BuildCharacterBitRoleArray(self, flags);
     int best = 0xFFFF;
     int n = 0;
     sScript_27B0C0** list = new (str_ScriptChoice, 0x100, 0) sScript_27B0C0*[100];
@@ -3325,7 +3325,7 @@ extern "C" void cSSXScriptEngine_FillOrientationFromObjectOrientationInfo(cSSXSc
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027BD78__FPv);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AllocScriptSetupInfo__FPv);
 #ifdef SKIP_ASM
 /**
  * Takes a script setup info record off the free list mpSetupInfoUnused (+0x548; next link at +0x10) and returns it with
@@ -3335,7 +3335,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027BD78__FPv);
  *
  * @return the record
  */
-void* func_0027BD78(void* self)
+void* cSSXScriptEngine_AllocScriptSetupInfo(void* self)
 {
     void* head = *(void**)((char*)self + 0x548);
     *(void**)((char*)self + 0x548) = *(void**)((char*)head + 0x10);
@@ -3345,14 +3345,14 @@ void* func_0027BD78(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027BD90__FPvT0);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ReleaseScriptSetupInfo__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Puts a script setup info record back on the free list mpSetupInfoUnused (+0x548), setting its first four words to -1.
  *
  * @param setupInfo  the record
  */
-void func_0027BD90(void* self, void* setupInfo)
+void cSSXScriptEngine_ReleaseScriptSetupInfo(void* self, void* setupInfo)
 {
     *(void**)((char*)setupInfo + 0x10) = *(void**)((char*)self + 0x548);
     *(int*)setupInfo = -1;
@@ -3364,7 +3364,7 @@ void func_0027BD90(void* self, void* setupInfo)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027BDB8);
+INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_BuildCharacterBitRoleArray);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int cRider_getIdentity(void* self);
@@ -3389,7 +3389,7 @@ struct sRiderSet_BDB8 {
 };
 
 // PORT: callers pass only (self, flags); the three player slots arrive in a2..a4.
-extern "C" void func_0027BDB8_def(void* self, int* flags, int p0, int p1, int p2) __asm__("func_0027BDB8");
+extern "C" void cSSXScriptEngine_BuildCharacterBitRoleArray_def(void* self, int* flags, int p0, int p1, int p2) __asm__("cSSXScriptEngine_BuildCharacterBitRoleArray");
 
 /**
  * Fills @p flags[0..20] with the character bit of the rider in each script role slot, 0 for an empty slot.
@@ -3405,7 +3405,7 @@ extern "C" void func_0027BDB8_def(void* self, int* flags, int p0, int p1, int p2
  * @param supportChar1AIIndex  the second supporting character's AI index
  */
 // Fills the 21 per-slot team flags of the script engine from the current rider set.
-extern "C" void func_0027BDB8_def(void* self, int* flags, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
+extern "C" void cSSXScriptEngine_BuildCharacterBitRoleArray_def(void* self, int* flags, int mainCharAIIndex, int supportChar0AIIndex, int supportChar1AIIndex)
 {
     sRiderSet_BDB8* set = (sRiderSet_BDB8*)SSXApp->Game->AI;
     int numA = set->numA;
@@ -3529,23 +3529,23 @@ extern "C" void* cScriptObjGS_cScriptObjGS(void* self)
 }
 #endif
 
-void func_00283440(void*);
+void cScriptObject_OnEndObjectUse(void*);
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C020);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjGS_OnEndObjectUse);
 #ifdef SKIP_ASM
 /**
- * Drops the game-state script object's use count: func_00283440 on its cScriptObject part (+0xC). The player ID
+ * Drops the game-state script object's use count: cScriptObject_OnEndObjectUse on its cScriptObject part (+0xC). The player ID
  * argument is not declared.
  */
-extern "C" void func_0027C020(void* self)
+extern "C" void cScriptObjGS_OnEndObjectUse(void* self)
 {
-    func_00283440((char*)self + 0xc);
+    cScriptObject_OnEndObjectUse((char*)self + 0xc);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C040);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjGS_IsMatchingEntity);
 #ifdef SKIP_ASM
 /**
  * Returns whether the game-state script object takes an InSeq entity: only entity type 6.
@@ -3554,13 +3554,13 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027C040);
  * @param type  the entity type
  * @return 1 for type 6, else 0
  */
-extern "C" int func_0027C040(void* self, void* entity, int type)
+extern "C" int cScriptObjGS_IsMatchingEntity(void* self, void* entity, int type)
 {
     return type == 6;
 }
 #endif
 
-extern "C" void func_0027CBB0(void*, void*);
+extern "C" void GetSSXGameStateManagerFrame(void*, void*);
 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjGS_OnInSeqKeyEvent);
@@ -3569,7 +3569,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjGS_OnInSeqKeyEvent);
  * Handles an in-sequence key event for the game-state script object: fetches the entity's game-state frame and ignores
  * it.
  *
- * Calls func_0027CBB0(@p entity, frame) with a 16-byte stack buffer and returns; nothing reads the result. On Tour's
+ * Calls GetSSXGameStateManagerFrame(@p entity, frame) with a 16-byte stack buffer and returns; nothing reads the result. On Tour's
  * version (GetSSXGameStateManagerFrame plus asserts on the event bits and frame count) does no more in a release build.
  * Virtual slot 3 of cScriptObjGS_vtbl (the cScriptEntity part); the event type, frame and event bits (On Tour type,
  * currFrame, eventBits) are not used.
@@ -3579,12 +3579,12 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjGS_OnInSeqKeyEvent);
 extern "C" void cScriptObjGS_OnInSeqKeyEvent(void* self, void* entity)
 {
     char buf[16];
-    func_0027CBB0(entity, buf);
+    GetSSXGameStateManagerFrame(entity, buf);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C070__FPv);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXScriptHeader__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the SSX script header of a script player: its mpDataHeader (+0x14).
@@ -3593,83 +3593,83 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027C070__FPv);
  *
  * @return the header
  */
-int func_0027C070(void* self)
+int GetSSXScriptHeader(void* self)
 {
     return *(int*)((char*)self + 0x14);
 }
 #endif
 
-extern "C" void* func_00274C38(void* self);
+extern "C" void* cScriptPlayerMain_GetHeader(void* self);
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C078__FPv);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXScriptHeader1__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the SSX script header of raw script data: func_00274C38.
+ * Returns the SSX script header of raw script data: cScriptPlayerMain_GetHeader.
  *
  * cSSXScriptEngine_OnAttachData and cSSXScriptEngine_OnDetachData read the bank's script index (+0x18) from it.
  *
  * @return the header, or 0 when the data has none
  */
-void* func_0027C078(void* self)
+void* GetSSXScriptHeader1(void* self)
 {
-    return func_00274C38(self);
+    return cScriptPlayerMain_GetHeader(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C098__FPv);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraManualHeader__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the custom header of a camera script entity: its mpHeader (+0x20).
  *
  * @return the header
  */
-int func_0027C098(void* self)
+int GetSSXCameraManualHeader(void* self)
 {
     return *(int*)((char*)self + 0x20);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C0A0);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraManualHeader1);
 #ifdef SKIP_ASM
-extern "C" void* func_002742E0(void* self);
+extern "C" void* cScriptPlayerEntity_GetHeader(void* self);
 
 /**
- * Returns the custom header of variation n of a camera script entity's script: func_002742E0, with the variation index
+ * Returns the custom header of variation n of a camera script entity's script: cScriptPlayerEntity_GetHeader, with the variation index
  * passing through in the second argument register (the C declares only the entity).
  *
  * @return the header, or 0 when the variation has none
  */
-extern "C" void* func_0027C0A0(void* self)
+extern "C" void* GetSSXCameraManualHeader1(void* self)
 {
-    return func_002742E0(self);
+    return cScriptPlayerEntity_GetHeader(self);
 }
 #endif
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C0C0);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraManualHeader2);
 #ifdef SKIP_ASM
-extern "C" void func_00274318(int, int);
-extern "C" int func_00274D90();
+extern "C" void cScriptPlayerEntity_GetHeader1(int, int);
+extern "C" int cScriptPlayerMain_GetEntityScriptData();
 
 /**
  * Returns the custom header of variation @p variationIndex of entity @p entityIndex in camera script data @p self: finds the entity's
- * block with func_00274D90 (the data and index pass through in the argument registers) and reads the header with
- * func_00274318.
+ * block with cScriptPlayerMain_GetEntityScriptData (the data and index pass through in the argument registers) and reads the header with
+ * cScriptPlayerEntity_GetHeader1.
  *
- * The C declares no return value; func_00274318's result is left in the return register.
+ * The C declares no return value; cScriptPlayerEntity_GetHeader1's result is left in the return register.
  *
  * @param entityIndex  the entity index
  * @param variationIndex  the variation index
  */
-extern "C" void func_0027C0C0(void* self, void* entityIndex, int variationIndex) {
-    func_00274318(func_00274D90(), variationIndex);
+extern "C" void GetSSXCameraManualHeader2(void* self, void* entityIndex, int variationIndex) {
+    cScriptPlayerEntity_GetHeader1(cScriptPlayerMain_GetEntityScriptData(), variationIndex);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C0F0);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraManualFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 class cScriptObjC0F0 {
@@ -3691,7 +3691,7 @@ cScriptObjC0F0* cScriptPlayerEntity_GetChannel_C0F0(void* self, int a1) __asm__(
  *
  * @param out  receives 10 floats
  */
-extern "C" void func_0027C0F0(void* self, float* out)
+extern "C" void GetSSXCameraManualFrame(void* self, float* out)
 {
     out[0] = *cScriptPlayerEntity_GetChannel_C0F0(self, 0)->v04();
     out[1] = *cScriptPlayerEntity_GetChannel_C0F0(self, 1)->v04();
@@ -3707,58 +3707,58 @@ extern "C" void func_0027C0F0(void* self, float* out)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C2A8__FPv);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraTargetHeader__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the custom header of a camera script entity: its mpHeader (+0x20).
  *
  * @return the header
  */
-int func_0027C2A8(void* self)
+int GetSSXCameraTargetHeader(void* self)
 {
     return *(int*)((char*)self + 0x20);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C2B0);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraTargetHeader1);
 #ifdef SKIP_ASM
-extern "C" void* func_002742E0(void* self);
+extern "C" void* cScriptPlayerEntity_GetHeader(void* self);
 
 /**
- * Returns the custom header of variation n of a camera script entity's script: func_002742E0, with the variation index
+ * Returns the custom header of variation n of a camera script entity's script: cScriptPlayerEntity_GetHeader, with the variation index
  * passing through in the second argument register (the C declares only the entity).
  *
  * @return the header, or 0 when the variation has none
  */
-extern "C" void* func_0027C2B0(void* self)
+extern "C" void* GetSSXCameraTargetHeader1(void* self)
 {
-    return func_002742E0(self);
+    return cScriptPlayerEntity_GetHeader(self);
 }
 #endif
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C2D0);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraTargetHeader2);
 #ifdef SKIP_ASM
-extern "C" void func_00274318(int, int);
-extern "C" int func_00274D90();
+extern "C" void cScriptPlayerEntity_GetHeader1(int, int);
+extern "C" int cScriptPlayerMain_GetEntityScriptData();
 
 /**
  * Returns the custom header of variation @p variationIndex of entity @p entityIndex in camera script data @p self: finds the entity's
- * block with func_00274D90 (the data and index pass through in the argument registers) and reads the header with
- * func_00274318.
+ * block with cScriptPlayerMain_GetEntityScriptData (the data and index pass through in the argument registers) and reads the header with
+ * cScriptPlayerEntity_GetHeader1.
  *
- * The C declares no return value; func_00274318's result is left in the return register.
+ * The C declares no return value; cScriptPlayerEntity_GetHeader1's result is left in the return register.
  *
  * @param entityIndex  the entity index
  * @param variationIndex  the variation index
  */
-extern "C" void func_0027C2D0(void* self, void* entityIndex, int variationIndex) {
-    func_00274318(func_00274D90(), variationIndex);
+extern "C" void GetSSXCameraTargetHeader2(void* self, void* entityIndex, int variationIndex) {
+    cScriptPlayerEntity_GetHeader1(cScriptPlayerMain_GetEntityScriptData(), variationIndex);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C300);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraTargetFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 class cScriptObjC300 {
@@ -3780,7 +3780,7 @@ cScriptObjC300* cScriptPlayerEntity_GetChannel_C300(void* self, int a1) __asm__(
  *
  * @param out  receives 10 floats
  */
-extern "C" void func_0027C300(void* self, float* out)
+extern "C" void GetSSXCameraTargetFrame(void* self, float* out)
 {
     out[0] = *cScriptPlayerEntity_GetChannel_C300(self, 0)->v04();
     out[1] = *cScriptPlayerEntity_GetChannel_C300(self, 1)->v04();
@@ -3796,58 +3796,58 @@ extern "C" void func_0027C300(void* self, float* out)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C4B8__FPv);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraSubjectHeader__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the custom header of a camera script entity: its mpHeader (+0x20).
  *
  * @return the header
  */
-int func_0027C4B8(void* self)
+int GetSSXCameraSubjectHeader(void* self)
 {
     return *(int*)((char*)self + 0x20);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C4C0);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraSubjectHeader1);
 #ifdef SKIP_ASM
-extern "C" void* func_002742E0(void* self);
+extern "C" void* cScriptPlayerEntity_GetHeader(void* self);
 
 /**
- * Returns the custom header of variation n of a camera script entity's script: func_002742E0, with the variation index
+ * Returns the custom header of variation n of a camera script entity's script: cScriptPlayerEntity_GetHeader, with the variation index
  * passing through in the second argument register (the C declares only the entity).
  *
  * @return the header, or 0 when the variation has none
  */
-extern "C" void* func_0027C4C0(void* self)
+extern "C" void* GetSSXCameraSubjectHeader1(void* self)
 {
-    return func_002742E0(self);
+    return cScriptPlayerEntity_GetHeader(self);
 }
 #endif
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C4E0);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraSubjectHeader2);
 #ifdef SKIP_ASM
-extern "C" void func_00274318(int, int);
-extern "C" int func_00274D90();
+extern "C" void cScriptPlayerEntity_GetHeader1(int, int);
+extern "C" int cScriptPlayerMain_GetEntityScriptData();
 
 /**
  * Returns the custom header of variation @p variationIndex of entity @p entityIndex in camera script data @p self: finds the entity's
- * block with func_00274D90 (the data and index pass through in the argument registers) and reads the header with
- * func_00274318.
+ * block with cScriptPlayerMain_GetEntityScriptData (the data and index pass through in the argument registers) and reads the header with
+ * cScriptPlayerEntity_GetHeader1.
  *
- * The C declares no return value; func_00274318's result is left in the return register.
+ * The C declares no return value; cScriptPlayerEntity_GetHeader1's result is left in the return register.
  *
  * @param entityIndex  the entity index
  * @param variationIndex  the variation index
  */
-extern "C" void func_0027C4E0(void* self, void* entityIndex, int variationIndex) {
-    func_00274318(func_00274D90(), variationIndex);
+extern "C" void GetSSXCameraSubjectHeader2(void* self, void* entityIndex, int variationIndex) {
+    cScriptPlayerEntity_GetHeader1(cScriptPlayerMain_GetEntityScriptData(), variationIndex);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C510);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraSubjectFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 class cScriptObjC510 {
@@ -3869,7 +3869,7 @@ cScriptObjC510* cScriptPlayerEntity_GetChannel_C510(void* self, int a1) __asm__(
  *
  * @param out  receives 9 floats
  */
-extern "C" void func_0027C510(void* self, float* out)
+extern "C" void GetSSXCameraSubjectFrame(void* self, float* out)
 {
     out[0] = *cScriptPlayerEntity_GetChannel_C510(self, 0)->v04();
     out[1] = *cScriptPlayerEntity_GetChannel_C510(self, 1)->v04();
@@ -3884,58 +3884,58 @@ extern "C" void func_0027C510(void* self, float* out)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C6A0__FPv);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraAlgorithmicHeader__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the custom header of a camera script entity: its mpHeader (+0x20).
  *
  * @return the header
  */
-int func_0027C6A0(void* self)
+int GetSSXCameraAlgorithmicHeader(void* self)
 {
     return *(int*)((char*)self + 0x20);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C6A8);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraAlgorithmicHeader1);
 #ifdef SKIP_ASM
-extern "C" void* func_002742E0(void* self);
+extern "C" void* cScriptPlayerEntity_GetHeader(void* self);
 
 /**
- * Returns the custom header of variation n of a camera script entity's script: func_002742E0, with the variation index
+ * Returns the custom header of variation n of a camera script entity's script: cScriptPlayerEntity_GetHeader, with the variation index
  * passing through in the second argument register (the C declares only the entity).
  *
  * @return the header, or 0 when the variation has none
  */
-extern "C" void* func_0027C6A8(void* self)
+extern "C" void* GetSSXCameraAlgorithmicHeader1(void* self)
 {
-    return func_002742E0(self);
+    return cScriptPlayerEntity_GetHeader(self);
 }
 #endif
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C6C8);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraAlgorithmicHeader2);
 #ifdef SKIP_ASM
-extern "C" void func_00274318(int, int);
-extern "C" int func_00274D90();
+extern "C" void cScriptPlayerEntity_GetHeader1(int, int);
+extern "C" int cScriptPlayerMain_GetEntityScriptData();
 
 /**
  * Returns the custom header of variation @p variationIndex of entity @p entityIndex in camera script data @p self: finds the entity's
- * block with func_00274D90 (the data and index pass through in the argument registers) and reads the header with
- * func_00274318.
+ * block with cScriptPlayerMain_GetEntityScriptData (the data and index pass through in the argument registers) and reads the header with
+ * cScriptPlayerEntity_GetHeader1.
  *
- * The C declares no return value; func_00274318's result is left in the return register.
+ * The C declares no return value; cScriptPlayerEntity_GetHeader1's result is left in the return register.
  *
  * @param entityIndex  the entity index
  * @param variationIndex  the variation index
  */
-extern "C" void func_0027C6C8(void* self, void* entityIndex, int variationIndex) {
-    func_00274318(func_00274D90(), variationIndex);
+extern "C" void GetSSXCameraAlgorithmicHeader2(void* self, void* entityIndex, int variationIndex) {
+    cScriptPlayerEntity_GetHeader1(cScriptPlayerMain_GetEntityScriptData(), variationIndex);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C6F8);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraAlgorithmicFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 class cScriptObjC6F8 {
@@ -3957,7 +3957,7 @@ cScriptObjC6F8* cScriptPlayerEntity_GetChannel_C6F8(void* self, int a1) __asm__(
  *
  * @param out  receives 9 floats
  */
-extern "C" void func_0027C6F8(void* self, float* out)
+extern "C" void GetSSXCameraAlgorithmicFrame(void* self, float* out)
 {
     out[0] = *cScriptPlayerEntity_GetChannel_C6F8(self, 0)->v04();
     out[1] = *cScriptPlayerEntity_GetChannel_C6F8(self, 1)->v04();
@@ -3972,58 +3972,58 @@ extern "C" void func_0027C6F8(void* self, float* out)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C888__FPv);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraManagerHeader__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the custom header of a camera script entity: its mpHeader (+0x20).
  *
  * @return the header
  */
-int func_0027C888(void* self)
+int GetSSXCameraManagerHeader(void* self)
 {
     return *(int*)((char*)self + 0x20);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C890);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraManagerHeader1);
 #ifdef SKIP_ASM
-extern "C" void* func_002742E0(void* self);
+extern "C" void* cScriptPlayerEntity_GetHeader(void* self);
 
 /**
- * Returns the custom header of variation n of a camera script entity's script: func_002742E0, with the variation index
+ * Returns the custom header of variation n of a camera script entity's script: cScriptPlayerEntity_GetHeader, with the variation index
  * passing through in the second argument register (the C declares only the entity).
  *
  * @return the header, or 0 when the variation has none
  */
-extern "C" void* func_0027C890(void* self)
+extern "C" void* GetSSXCameraManagerHeader1(void* self)
 {
-    return func_002742E0(self);
+    return cScriptPlayerEntity_GetHeader(self);
 }
 #endif
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C8B0);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraManagerHeader2);
 #ifdef SKIP_ASM
-extern "C" void func_00274318(int, int);
-extern "C" int func_00274D90();
+extern "C" void cScriptPlayerEntity_GetHeader1(int, int);
+extern "C" int cScriptPlayerMain_GetEntityScriptData();
 
 /**
  * Returns the custom header of variation @p variationIndex of entity @p entityIndex in camera script data @p self: finds the entity's
- * block with func_00274D90 (the data and index pass through in the argument registers) and reads the header with
- * func_00274318.
+ * block with cScriptPlayerMain_GetEntityScriptData (the data and index pass through in the argument registers) and reads the header with
+ * cScriptPlayerEntity_GetHeader1.
  *
- * The C declares no return value; func_00274318's result is left in the return register.
+ * The C declares no return value; cScriptPlayerEntity_GetHeader1's result is left in the return register.
  *
  * @param entityIndex  the entity index
  * @param variationIndex  the variation index
  */
-extern "C" void func_0027C8B0(void* self, void* entityIndex, int variationIndex) {
-    func_00274318(func_00274D90(), variationIndex);
+extern "C" void GetSSXCameraManagerHeader2(void* self, void* entityIndex, int variationIndex) {
+    cScriptPlayerEntity_GetHeader1(cScriptPlayerMain_GetEntityScriptData(), variationIndex);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C8E0);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXCameraManagerFrame);
 #ifdef SKIP_ASM
 class cScriptObj002742C8 {
 public:
@@ -4044,7 +4044,7 @@ cScriptObj002742C8* cScriptPlayerEntity_GetChannel(void* self, int a1);
  *
  * @param out  receives two words
  */
-extern "C" void func_0027C8E0(void* self, int* out)
+extern "C" void GetSSXCameraManagerFrame(void* self, int* out)
 {
     out[0] = *cScriptPlayerEntity_GetChannel(self, 0)->v04();
     out[1] = cScriptPlayerEntity_GetChannel(self, 0)->v05();
@@ -4052,7 +4052,7 @@ extern "C" void func_0027C8E0(void* self, int* out)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C958__FPv);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXActorHeader__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the actor header of an actor script entity: its mpHeader (+0x20).
@@ -4061,47 +4061,47 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027C958__FPv);
  *
  * @return the header
  */
-int func_0027C958(void* self)
+int GetSSXActorHeader(void* self)
 {
     return *(int*)((char*)self + 0x20);
 }
 #endif
 
-extern "C" void* func_002742E0(void* self);
+extern "C" void* cScriptPlayerEntity_GetHeader(void* self);
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C960__FPv);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXActorHeader1__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the custom header of variation n of an actor script entity's script: func_002742E0, with the variation index
+ * Returns the custom header of variation n of an actor script entity's script: cScriptPlayerEntity_GetHeader, with the variation index
  * passing through in the second argument register (the C declares only the entity).
  *
  * @return the header, or 0 when the variation has none
  */
-void* func_0027C960(void* self)
+void* GetSSXActorHeader1(void* self)
 {
-    return func_002742E0(self);
+    return cScriptPlayerEntity_GetHeader(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027C980);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXActorHeader2);
 #ifdef SKIP_ASM
-extern "C" void func_00274318(int, int);
-extern "C" int func_00274D90();
+extern "C" void cScriptPlayerEntity_GetHeader1(int, int);
+extern "C" int cScriptPlayerMain_GetEntityScriptData();
 
 /**
  * Returns the custom header of variation @p variationIndex of entity @p entityIndex in actor script data @p self: finds the entity's
- * block with func_00274D90 (the data and index pass through in the argument registers) and reads the header with
- * func_00274318.
+ * block with cScriptPlayerMain_GetEntityScriptData (the data and index pass through in the argument registers) and reads the header with
+ * cScriptPlayerEntity_GetHeader1.
  *
- * The C declares no return value; func_00274318's result is left in the return register.
+ * The C declares no return value; cScriptPlayerEntity_GetHeader1's result is left in the return register.
  *
  * @param entityIndex  the entity index
  * @param variationIndex  the variation index
  */
-extern "C" void func_0027C980(void* self, void* entityIndex, int variationIndex) {
-    func_00274318(func_00274D90(), variationIndex);
+extern "C" void GetSSXActorHeader2(void* self, void* entityIndex, int variationIndex) {
+    cScriptPlayerEntity_GetHeader1(cScriptPlayerMain_GetEntityScriptData(), variationIndex);
 }
 #endif
 
@@ -4151,7 +4151,7 @@ extern "C" void GetSSXActorFrame(void* self, void* out)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027CBB0);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXGameStateManagerFrame);
 #ifdef SKIP_ASM
 cScriptObj002742C8* cScriptPlayerEntity_GetChannel(void* self, int a1);
 
@@ -4161,7 +4161,7 @@ cScriptObj002742C8* cScriptPlayerEntity_GetChannel(void* self, int a1);
  *
  * @param out  receives two words
  */
-extern "C" void func_0027CBB0(void* self, void* out)
+extern "C" void GetSSXGameStateManagerFrame(void* self, void* out)
 {
     ((int*)out)[0] = *cScriptPlayerEntity_GetChannel(self, 0)->v04();
     ((int*)out)[1] = cScriptPlayerEntity_GetChannel(self, 0)->v05();
@@ -4169,7 +4169,7 @@ extern "C" void func_0027CBB0(void* self, void* out)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027CC28);
+INCLUDE_ASM("scripter/ssxscriptengine", GetSSXGameEventFrame);
 #ifdef SKIP_ASM
 cScriptObj002742C8* cScriptPlayerEntity_GetChannel(void* self, int a1);
 
@@ -4179,7 +4179,7 @@ cScriptObj002742C8* cScriptPlayerEntity_GetChannel(void* self, int a1);
  *
  * @param out  receives ten words
  */
-extern "C" void func_0027CC28(void* self, void* out)
+extern "C" void GetSSXGameEventFrame(void* self, void* out)
 {
     ((int*)out)[0] = *cScriptPlayerEntity_GetChannel(self, 0)->v04();
     ((int*)out)[1] = cScriptPlayerEntity_GetChannel(self, 0)->v05();
@@ -4195,7 +4195,7 @@ extern "C" void func_0027CC28(void* self, void* out)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027CDD0);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_cScriptDatabaseObject);
 #ifdef SKIP_ASM
 struct sScrSlot_CDD0 {
     int a;  // 0x0
@@ -4222,7 +4222,7 @@ extern void* D_004A34DC;
  * @param self_  the script database (the base of the script engine)
  * @return @p self_
  */
-extern "C" void* func_0027CDD0(void* self_)
+extern "C" void* cScriptDatabaseObject_cScriptDatabaseObject(void* self_)
 {
     sScrEngine_CDD0* self = (sScrEngine_CDD0*)self_;
     int i;
@@ -4254,7 +4254,7 @@ extern void* D_004A34DC;
  * Destroys the script database: removes every registered object and clears the global database pointer.
  *
  * Restores the cScriptDatabaseObject vtable (cScriptDatabaseObject_vtbl) at +0x2A8, calls cScriptDatabaseObject_RemoveObjectAll() and
- * zeroes D_004A34DC (On Tour cScriptDatabaseObject::mpDatabaseObject, the object func_0027D2E8 returns), then frees the
+ * zeroes D_004A34DC (On Tour cScriptDatabaseObject::mpDatabaseObject, the object cScriptDatabaseObject_GetDatabaseObject returns), then frees the
  * object when asked. cBXScriptEngine__cBXScriptEngine chains to it.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
@@ -4271,9 +4271,9 @@ extern "C" void cScriptDatabaseObject__cScriptDatabaseObject(void* self, int fla
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027CEA8);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_AddObject);
 #ifdef SKIP_ASM
-extern "C" int func_0027D330(void* self, int idx, void* item);
+extern "C" int cScriptDatabaseObject_AddEntity(void* self, int idx, void* item);
 
 class cScriptOwnerCEA8 {
 public:
@@ -4298,7 +4298,7 @@ struct sScrOwnersCEA8 {
  * Adds a script object to the database and registers its script entities; returns the object's ID.
  *
  * Stores @p scriptObject in the first free of the 20 mpObjectDatabase slots, then registers each of its script entities (its
- * virtual GetScriptEntity, slot 7, for 0 to its slot 6 count) with func_0027D330 under that ID.
+ * virtual GetScriptEntity, slot 7, for 0 to its slot 6 count) with cScriptDatabaseObject_AddEntity under that ID.
  *
  * Likely bug: with all 20 slots taken the object is not stored, yet its entities are registered under ID 20 and 20 is
  * returned.
@@ -4307,7 +4307,7 @@ struct sScrOwnersCEA8 {
  * @param scriptObject  the script object
  * @return the object ID (slot index)
  */
-extern "C" int func_0027CEA8(void* engine, void* scriptObject)
+extern "C" int cScriptDatabaseObject_AddObject(void* engine, void* scriptObject)
 {
     sScrOwnersCEA8* self = (sScrOwnersCEA8*)engine;
     cScriptOwnerCEA8* obj = (cScriptOwnerCEA8*)scriptObject;
@@ -4321,16 +4321,16 @@ extern "C" int func_0027CEA8(void* engine, void* scriptObject)
     int k = 0;
     int n = obj->v06();
     for (; k < n; k++) {
-        func_0027D330(self, i, obj->v07(k));
+        cScriptDatabaseObject_AddEntity(self, i, obj->v07(k));
     }
     return i;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027CF88);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_RemoveObject);
 #ifdef SKIP_ASM
-extern "C" int func_0027D390(void* self, void* msg);
+extern "C" int cScriptDatabaseObject_RemoveEntity(void* self, void* msg);
 
 class cScriptOwnerCF88 {
 public:
@@ -4351,19 +4351,19 @@ public:
  * Removes the script object with ID @p idx from the database, unregistering its script entities.
  *
  * Each of the object's entities (its virtual GetScriptEntity, slot 7, for 0 to its slot 6 count) is removed with
- * func_0027D390, then the mpObjectDatabase slot is cleared.
+ * cScriptDatabaseObject_RemoveEntity, then the mpObjectDatabase slot is cleared.
  *
  * @param idx  the object ID
  * @return 1, or 0 when the slot was empty
  */
-extern "C" int func_0027CF88(void* self, int idx)
+extern "C" int cScriptDatabaseObject_RemoveObject(void* self, int idx)
 {
     cScriptOwnerCF88* obj = *(cScriptOwnerCF88**)((char*)self + (idx << 2));
     if (obj == 0) return 0;
     int k = 0;
     int n = obj->v06();
     for (; k < n; k++) {
-        func_0027D390(self, obj->v07(k));
+        cScriptDatabaseObject_RemoveEntity(self, obj->v07(k));
     }
     *(cScriptOwnerCF88**)((char*)self + (idx << 2)) = 0;
     return 1;
@@ -4383,7 +4383,7 @@ struct sVEntry0027D050 {
  * Removes every object registered in the script object database.
  *
  * For each of the 20 mpObjectDatabase slots that holds an object it calls virtual slot 3 (vtable at +0x2A8) with
- * the slot index. cScriptDatabaseObject's own slot 3 (func_0027CF88) unregisters the object's script entities
+ * the slot index. cScriptDatabaseObject's own slot 3 (cScriptDatabaseObject_RemoveObject) unregisters the object's script entities
  * and clears the slot; cSSXScriptEngine overrides it with cSSXScriptEngine_RemoveObject.
  */
 extern "C" void cScriptDatabaseObject_RemoveObjectAll(void* self)
@@ -4399,9 +4399,9 @@ extern "C" void cScriptDatabaseObject_RemoveObjectAll(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D0C0);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_MarkObjectAsReserved);
 #ifdef SKIP_ASM
-extern "C" void func_0027D540(void* self, void* a1, int a2);
+extern "C" void cScriptDatabaseObject_MarkEntityAsReserved(void* self, void* a1, int a2);
 
 class cScriptOwnerD0C0 {
 public:
@@ -4419,7 +4419,7 @@ public:
 };
 
 /**
- * Reserves every script entity of object @p idx for player @p val (func_0027D540 on each of the object's virtual
+ * Reserves every script entity of object @p idx for player @p val (cScriptDatabaseObject_MarkEntityAsReserved on each of the object's virtual
  * GetScriptEntity results).
  *
  * Quirk: an empty object slot is dereferenced unchecked.
@@ -4427,19 +4427,19 @@ public:
  * @param idx  the object ID
  * @param val  the player ID
  */
-extern "C" void func_0027D0C0(void* self, int idx, int val)
+extern "C" void cScriptDatabaseObject_MarkObjectAsReserved(void* self, int idx, int val)
 {
     cScriptOwnerD0C0* obj = *(cScriptOwnerD0C0**)((char*)self + (idx << 2));
     int i = 0;
     int n = obj->v06();
     for (; i < n; i++) {
-        func_0027D540(self, obj->v07(i), val);
+        cScriptDatabaseObject_MarkEntityAsReserved(self, obj->v07(i), val);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D170);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_MarkObjectAsUnreserved);
 #ifdef SKIP_ASM
 class cScriptOwnerD170 {
 public:
@@ -4456,29 +4456,29 @@ public:
     virtual void* v07(int i);
 };
 
-extern "C" void func_0027D558(void* self, void* a1);
+extern "C" void cScriptDatabaseObject_MarkEntityAsUnreserved(void* self, void* a1);
 
 /**
- * Clears the reservation of every script entity of object @p idx (func_0027D558 on each of the object's virtual
+ * Clears the reservation of every script entity of object @p idx (cScriptDatabaseObject_MarkEntityAsUnreserved on each of the object's virtual
  * GetScriptEntity results).
  *
  * @param idx  the object ID
  */
-extern "C" void func_0027D170(void* self, int idx)
+extern "C" void cScriptDatabaseObject_MarkObjectAsUnreserved(void* self, int idx)
 {
     cScriptOwnerD170* obj = *(cScriptOwnerD170**)((char*)self + (idx << 2));
     int i = 0;
     int n = obj->v06();
     for (; i < n; i++) {
-        func_0027D558(self, obj->v07(i));
+        cScriptDatabaseObject_MarkEntityAsUnreserved(self, obj->v07(i));
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D210);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_IsObjInUseByPlayer);
 #ifdef SKIP_ASM
-extern "C" int func_0027D2C8(void* self, int i, int val);
+extern "C" int cScriptDatabaseObject_IsEntityInUseByPlayer(void* self, int i, int val);
 
 class cScriptOwnerD210 {
 public:
@@ -4495,24 +4495,24 @@ public:
     virtual int* v07(int i);
 };
 
-// PORT: cSSXScriptEngine_IsObjInUseByPlayer declares func_0027D210 as void; it really returns 0/1.
-int func_0027D210_impl(void* self, int idx, int val) __asm__("func_0027D210");
+// PORT: cSSXScriptEngine_IsObjInUseByPlayer declares cScriptDatabaseObject_IsObjInUseByPlayer as void; it really returns 0/1.
+int cScriptDatabaseObject_IsObjInUseByPlayer_impl(void* self, int idx, int val) __asm__("cScriptDatabaseObject_IsObjInUseByPlayer");
 
 /**
- * Returns whether any script entity of object @p idx is in use by player @p val (func_0027D2C8 on each entity's
+ * Returns whether any script entity of object @p idx is in use by player @p val (cScriptDatabaseObject_IsEntityInUseByPlayer on each entity's
  * database ID, +0x4).
  *
  * @param idx  the object ID
  * @param val  the player ID
  * @return 1 when one is, else 0
  */
-int func_0027D210_impl(void* self, int idx, int val)
+int cScriptDatabaseObject_IsObjInUseByPlayer_impl(void* self, int idx, int val)
 {
     cScriptOwnerD210* obj = *(cScriptOwnerD210**)((char*)self + (idx << 2));
     int i = 0;
     int n = obj->v06();
     for (; i < n; i++) {
-        if (func_0027D2C8(self, obj->v07(i)[1], val)) {
+        if (cScriptDatabaseObject_IsEntityInUseByPlayer(self, obj->v07(i)[1], val)) {
             return 1;
         }
     }
@@ -4521,7 +4521,7 @@ int func_0027D210_impl(void* self, int idx, int val)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D2C8);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_IsEntityInUseByPlayer);
 #ifdef SKIP_ASM
 /**
  * Returns whether entity record @p i of the database (mEntityDatabase, 0x14 each) is used by player @p val (its player
@@ -4531,7 +4531,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027D2C8);
  * @param val  the player ID
  * @return 1 when it is, else 0
  */
-extern "C" int func_0027D2C8(void* self, int i, int val)
+extern "C" int cScriptDatabaseObject_IsEntityInUseByPlayer(void* self, int i, int val)
 {
     char* record = (char*)self + i * 0x14;
     return *(int*)(record + 0x58) == val;
@@ -4539,23 +4539,23 @@ extern "C" int func_0027D2C8(void* self, int i, int val)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D2E8);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_GetDatabaseObject);
 #ifdef SKIP_ASM
 extern void* D_004A34DC;
 
 /**
- * Returns the current script database object, D_004A34DC (set by its constructor func_0027CDD0).
+ * Returns the current script database object, D_004A34DC (set by its constructor cScriptDatabaseObject_cScriptDatabaseObject).
  *
  * @return the database
  */
-extern "C" void* func_0027D2E8()
+extern "C" void* cScriptDatabaseObject_GetDatabaseObject()
 {
     return D_004A34DC;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D2F0);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_GetPlayerIDByEntity);
 #ifdef SKIP_ASM
 struct sVar0050 {
     int a;
@@ -4577,7 +4577,7 @@ struct sScriptEng0050 {
  * @param entity  the script entity
  * @return the player ID, or -1
  */
-extern "C" int func_0027D2F0(sScriptEng0050* self, void* entity)
+extern "C" int cScriptDatabaseObject_GetPlayerIDByEntity(sScriptEng0050* self, void* entity)
 {
     sVar0050* record = &self->vars[*(int*)((char*)entity + 0x4)];
     if (record->type != 1) {
@@ -4588,7 +4588,7 @@ extern "C" int func_0027D2F0(sScriptEng0050* self, void* entity)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D320__FPvi);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_GetObject__FPvi);
 #ifdef SKIP_ASM
 /**
  * Returns the script object with ID @p i: mpObjectDatabase[@p i].
@@ -4596,14 +4596,14 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027D320__FPvi);
  * @param i  the object ID
  * @return the object, or 0
  */
-int func_0027D320(void* self, int i)
+int cScriptDatabaseObject_GetObject(void* self, int i)
 {
     return *(int*)((char*)self + (i << 2));
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D330);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_AddEntity);
 #ifdef SKIP_ASM
 /**
  * Registers a script entity of object @p idx in the first free of the 30 entity records and gives the entity that
@@ -4616,7 +4616,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027D330);
  * @return the record index
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_0027D330(void* self, int idx, void* item)
+extern "C" int cScriptDatabaseObject_AddEntity(void* self, int idx, void* item)
 {
     int i;
     for (i = 0; i < 30; i++) {
@@ -4633,9 +4633,9 @@ extern "C" int func_0027D330(void* self, int idx, void* item)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D390);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_RemoveEntity);
 #ifdef SKIP_ASM
-extern "C" void func_00282F90(void* self);
+extern "C" void cScriptEntity_DetachEntity(void* self);
 
 struct sScrEnt27D390 {
     int* obj;
@@ -4648,17 +4648,17 @@ struct sScrEnt27D390 {
 /**
  * Unregisters a script entity: frees its record (mEntityDatabase[its database ID, +0x4]).
  *
- * An entity marked used (relation 1) is first cut off from its InSeq entity (func_00282F90). The entity's database ID
+ * An entity marked used (relation 1) is first cut off from its InSeq entity (cScriptEntity_DetachEntity). The entity's database ID
  * is set to -1 and the record cleared (no entity, object -1, player -1, relation 0, reserved -1).
  *
  * @param msg  the script entity
  * @return always 1
  */
-extern "C" int func_0027D390(void* self, void* msg)
+extern "C" int cScriptDatabaseObject_RemoveEntity(void* self, void* msg)
 {
     sScrEnt27D390* record = (sScrEnt27D390*)((char*)self + (*(int*)((char*)msg + 0x4) * 0x14 + 0x50));
     if (record->state == 1) {
-        func_00282F90(msg);
+        cScriptEntity_DetachEntity(msg);
     }
     record->obj[1] = -1;
     record->a = -1;
@@ -4671,7 +4671,7 @@ extern "C" int func_0027D390(void* self, void* msg)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D400);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_MarkEntityAsUsed);
 #ifdef SKIP_ASM
 struct sScrVEntryD400 {
     short delta;
@@ -4702,13 +4702,13 @@ struct sScrOwnerD400 {
  * Marks a script entity as used by player @p value.
  *
  * When the entity's object is not yet in use by that player (the database's virtual slot 4, IsObjInUseByPlayer-style,
- * func_0027D210 in the base), the object's own virtual slot 4 (OnStartObjectUse) is called with the player. Then the
+ * cScriptDatabaseObject_IsObjInUseByPlayer in the base), the object's own virtual slot 4 (OnStartObjectUse) is called with the player. Then the
  * record (mEntityDatabase[@p key's database ID, +0x4]) takes the player ID (+0x8) and relation 1 (+0xC).
  *
  * @param key  the script entity
  * @param value  the player ID
  */
-extern "C" void func_0027D400(sScrOwnerD400* self, int* key, int value)
+extern "C" void cScriptDatabaseObject_MarkEntityAsUsed(sScrOwnerD400* self, int* key, int value)
 {
     sScrVEntryD400* vt = *(sScrVEntryD400**)((char*)self + 0x2A8);
     sScrSlotD400* record = &self->slots[key[1]];
@@ -4723,7 +4723,7 @@ extern "C" void func_0027D400(sScrOwnerD400* self, int* key, int value)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D4A0);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_MarkEntityAsFree);
 #ifdef SKIP_ASM
 struct sScrVEntryD4A0 {
     short delta;
@@ -4754,12 +4754,12 @@ struct sScrOwnerD4A0 {
  * Marks a script entity as free again.
  *
  * Clears its record's player ID (-1) and relation (0); when the object is no longer in use by the old player (the
- * database's virtual slot 4, func_0027D210 in the base), the object's virtual slot 5 (OnEndObjectUse) is called with
+ * database's virtual slot 4, cScriptDatabaseObject_IsObjInUseByPlayer in the base), the object's virtual slot 5 (OnEndObjectUse) is called with
  * that player.
  *
  * @param key  the script entity
  */
-extern "C" void func_0027D4A0(sScrOwnerD4A0* self, int* key)
+extern "C" void cScriptDatabaseObject_MarkEntityAsFree(sScrOwnerD4A0* self, int* key)
 {
     sScrSlotD4A0* record = &self->slots[key[1]];
     int old = record->value;
@@ -4775,7 +4775,7 @@ extern "C" void func_0027D4A0(sScrOwnerD4A0* self, int* key)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D540);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_MarkEntityAsReserved);
 #ifdef SKIP_ASM
 /**
  * Reserves a script entity for player @p playerId: its record's reserved player ID (+0x10).
@@ -4783,7 +4783,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027D540);
  * @param entity  the script entity
  * @param playerId  the player ID
  */
-extern "C" void func_0027D540(void* self, void* entity, int playerId)
+extern "C" void cScriptDatabaseObject_MarkEntityAsReserved(void* self, void* entity, int playerId)
 {
     int i = *(int*)((char*)entity + 0x4);
     char* record = (char*)self + i * 0x14;
@@ -4792,14 +4792,14 @@ extern "C" void func_0027D540(void* self, void* entity, int playerId)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D558);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_MarkEntityAsUnreserved);
 #ifdef SKIP_ASM
 /**
  * Clears a script entity's reservation: its record's reserved player ID (+0x10) becomes -1.
  *
  * @param entity  the script entity
  */
-extern "C" void func_0027D558(void* self, void* entity)
+extern "C" void cScriptDatabaseObject_MarkEntityAsUnreserved(void* self, void* entity)
 {
     int i = *(int*)((char*)entity + 0x4);
     char* record = (char*)self + i * 0x14;
@@ -4808,7 +4808,7 @@ extern "C" void func_0027D558(void* self, void* entity)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D578);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_GetAvailableEntities);
 #ifdef SKIP_ASM
 /**
  * Lists up to @p max script entities available to player @p key: registered, not in use (relation not 1) and not
@@ -4819,7 +4819,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_0027D578);
  * @param max  the most to list
  * @return the number listed
  */
-extern "C" int func_0027D578(sScriptEng0050* self, int key, int* out, int max)
+extern "C" int cScriptDatabaseObject_GetAvailableEntities(sScriptEng0050* self, int key, int* out, int max)
 {
     int n = 0;
     int i = 0;
@@ -4887,21 +4887,21 @@ extern "C" void* cScriptObjCamera_cScriptObjCamera(void* self, int viewIndex)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D680__FPvi);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_SetCameraManager__FPvi);
 #ifdef SKIP_ASM
 /**
  * Sets a script camera object's camera manager (+0x10).
  *
  * @param val  the camera manager, or 0
  */
-void func_0027D680(void* self, int val)
+void cScriptObjCamera_SetCameraManager(void* self, int val)
 {
     *(int*)((char*)self + 0x10) = val;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D688);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_SetCameraEntity);
 #ifdef SKIP_ASM
 extern char t4mat_Identity[];
 
@@ -4914,7 +4914,7 @@ struct sSeVEntryD688 {
 /**
  * Binds a script camera object to camera entity @p anim, or unbinds it when @p anim is 0.
  *
- * Binding: the player using the entity (func_0027D2F0 on the database) becomes the object's player (+0x20); an entity
+ * Binding: the player using the entity (cScriptDatabaseObject_GetPlayerIDByEntity on the database) becomes the object's player (+0x20); an entity
  * already bound (+0x14) first ends its use with the object's virtual slot 5 (OnEndObjectUse) for the old player, and
  * the new use starts with slot 4 (OnStartObjectUse). Unbinding a bound object resets the base transform (+0x30) to
  * t4mat_Identity and the base rotations (+0x70-+0x78) to 0, ends the use (slot 5), and clears the entity and player
@@ -4924,10 +4924,10 @@ struct sSeVEntryD688 {
  */
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of t4mat_Identity, likely identity);
 // the PC port needs a plain 64-byte copy.
-extern "C" void func_0027D688(char* self, void* anim)
+extern "C" void cScriptObjCamera_SetCameraEntity(char* self, void* anim)
 {
     if (anim != 0) {
-        int id = func_0027D2F0((sScriptEng0050*)func_0027D2E8(), anim);
+        int id = cScriptDatabaseObject_GetPlayerIDByEntity((sScriptEng0050*)cScriptDatabaseObject_GetDatabaseObject(), anim);
         if (*(void**)(self + 0x14) != 0) {
             sSeVEntryD688* vt = *(sSeVEntryD688**)(self + 0xC);
             vt[5].fn(self + vt[5].delta, *(int*)(self + 0x20));
@@ -4963,38 +4963,38 @@ extern "C" void func_0027D688(char* self, void* anim)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D788__FPvf);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_SetCameraWeight__FPvf);
 #ifdef SKIP_ASM
 /**
  * Sets a script camera object's blend weight (float +0x18).
  *
  * @param val  the weight (0-1)
  */
-void func_0027D788(void* self, float val)
+void cScriptObjCamera_SetCameraWeight(void* self, float val)
 {
     *(float*)((char*)self + 0x18) = val;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D790);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_IsInUseByPlayer);
 #ifdef SKIP_ASM
-extern "C" void* func_0027D2E8(void);
-extern "C" int func_0027D2C8(void* self, int i, int val);
+extern "C" void* cScriptDatabaseObject_GetDatabaseObject(void);
+extern "C" int cScriptDatabaseObject_IsEntityInUseByPlayer(void* self, int i, int val);
 
 /**
- * Returns whether the camera entity bound to this object (+0x14) is in use by player @p val (func_0027D2C8 on the
+ * Returns whether the camera entity bound to this object (+0x14) is in use by player @p val (cScriptDatabaseObject_IsEntityInUseByPlayer on the
  * database with the entity's database ID).
  *
  * @param val  the player ID
  * @return 1 when it is, 0 otherwise or when no entity is bound
  */
-extern "C" int func_0027D790(void* self, int val)
+extern "C" int cScriptObjCamera_IsInUseByPlayer(void* self, int val)
 {
     if (*(void**)((char*)self + 0x14) == 0) {
         return 0;
     }
-    return func_0027D2C8(func_0027D2E8(), *(int*)(*(char**)((char*)self + 0x14) + 0x4), val);
+    return cScriptDatabaseObject_IsEntityInUseByPlayer(cScriptDatabaseObject_GetDatabaseObject(), *(int*)(*(char**)((char*)self + 0x14) + 0x4), val);
 }
 #endif
 
@@ -5038,7 +5038,7 @@ extern "C" void cScriptObjCamera_ResumeObjScript(void* self)
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_OnStartObjectUse);
 #ifdef SKIP_ASM
 void cScriptObject_OnStartObjectUse(void* self);
-extern "C" void func_0027D970(void* self, int a1);
+extern "C" void cScriptObjCamera_CalculateBaseTransform(void* self, int a1);
 extern "C" void cScriptCameraController_addCamera(void* ctrl, void* script);
 extern "C" void cCamera_setCurrentController(void* self, int mode);
 
@@ -5046,7 +5046,7 @@ extern "C" void cCamera_setCurrentController(void* self, int mode);
  * Starts using a script camera: hands it to the script camera controller of the camera it belongs to.
  *
  * First counts the use with the base handler cScriptObject_OnStartObjectUse (use count at +0x8). Only while a game exists: sets
- * the float at +0x18 to 1.0, builds the camera's matrix and angles from its script record (func_0027D970), adds
+ * the float at +0x18 to 1.0, builds the camera's matrix and angles from its script record (cScriptObjCamera_CalculateBaseTransform), adds
  * this object to the cScriptCameraController (+0xAC) of the view manager's camera whose index is in the word at
  * +0x7C, and makes controller 3 current on that camera when the controller's word at +0x18 is set.
  */
@@ -5055,7 +5055,7 @@ extern "C" void cScriptObjCamera_OnStartObjectUse(void* self)
     cScriptObject_OnStartObjectUse(self);
     if ((void*)SSXApp->Game != 0) {
         *(float*)((char*)self + 0x18) = 1.0f;
-        func_0027D970(self, *(int*)((char*)self + 0x14));
+        cScriptObjCamera_CalculateBaseTransform(self, *(int*)((char*)self + 0x14));
         char* riders = (char*)SSXApp->Game->ViewMan;
         char* rider = *(char**)(riders + (*(int*)((char*)self + 0x7C) << 2) + 4);
         cScriptCameraController_addCamera(*(void**)(rider + 0xAC), self);
@@ -5069,7 +5069,7 @@ extern "C" void cScriptObjCamera_OnStartObjectUse(void* self)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_OnEndObjectUse);
 #ifdef SKIP_ASM
-void func_00283440(void*);
+void cScriptObject_OnEndObjectUse(void*);
 extern "C" void cScriptCameraController_removeCamera(void* self, void* algo);
 extern "C" void cCamera_setCurrentController(void* self, int mode);
 extern "C" void* cChaseCameraController_switchCamera_Restart(void* self);
@@ -5087,7 +5087,7 @@ public:
  * Releases a script camera when its sequence stops using it, returning the view's camera to the chase camera when
  * no script camera is left.
  *
- * Drops the use count (func_00283440). During a game it clears mWeight (+0x18), takes the camera of view mViewIndex
+ * Drops the use count (cScriptObject_OnEndObjectUse). During a game it clears mWeight (+0x18), takes the camera of view mViewIndex
  * (+0x7C) from the game's ViewMan, removes this object from the camera's ScriptController (cScriptCameraController_removeCamera) and, when
  * that controller's count (+0x18) reaches 0, switches the camera to controller 2 (chase), restarts the chase camera
  * and calls the current Controller's slot 4. The local view calls the camera a rider. On Tour passes a playerID;
@@ -5095,7 +5095,7 @@ public:
  */
 extern "C" void cScriptObjCamera_OnEndObjectUse(void* self)
 {
-    func_00283440(self);
+    cScriptObject_OnEndObjectUse(self);
     char* app = (char*)SSXApp;
     if (*(void**)(app + 0x84) != 0) {
         *(int*)((char*)self + 0x18) = 0;
@@ -5112,10 +5112,10 @@ extern "C" void cScriptObjCamera_OnEndObjectUse(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_0027D970);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_CalculateBaseTransform);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-// Matrix helpers and the camera script object shared by func_0027D970 and cScriptObjRider_OnStartObjectUse.
+// Matrix helpers and the camera script object shared by cScriptObjCamera_CalculateBaseTransform and cScriptObjRider_OnStartObjectUse.
 
 struct sRotMat_SE {
     float m[4][4];
@@ -5299,7 +5299,7 @@ static inline void Translate_SE(sRotMat_SE* top, sVec4_SE* v)
         : "memory");
 }
 
-// The camera script object (func_0027D970 and cScriptObjRider_OnStartObjectUse set up its matrix).
+// The camera script object (cScriptObjCamera_CalculateBaseTransform and cScriptObjRider_OnStartObjectUse set up its matrix).
 struct sScrCam_SE {
     char pad0[0x8];
     char* owner;            // 0x8
@@ -5313,16 +5313,16 @@ struct sScrCam_SE {
     float rz;               // 0x78
 };
 
-unsigned char func_002743C8(void* self);
-char* func_0027C098_D970(void* self) __asm__("func_0027C098__FPv");
-char* func_0027C2A8_D970(void* self) __asm__("func_0027C2A8__FPv");
-char* func_0027C4B8_D970(void* self) __asm__("func_0027C4B8__FPv");
-char* func_0027C6A0_D970(void* self) __asm__("func_0027C6A0__FPv");
+unsigned char cScriptPlayerEntity_GetType(void* self);
+char* GetSSXCameraManualHeader_D970(void* self) __asm__("GetSSXCameraManualHeader__FPv");
+char* GetSSXCameraTargetHeader_D970(void* self) __asm__("GetSSXCameraTargetHeader__FPv");
+char* GetSSXCameraSubjectHeader_D970(void* self) __asm__("GetSSXCameraSubjectHeader__FPv");
+char* GetSSXCameraAlgorithmicHeader_D970(void* self) __asm__("GetSSXCameraAlgorithmicHeader__FPv");
 extern char t4mat_Identity[];
 extern float D_004FF140_D970[] __asm__("t4vect_XAxis");
 extern float D_004FF150_D970[] __asm__("t4vect_YAxis");
 extern float D_004FF160_D970[] __asm__("t4vect_ZAxis");
-extern "C" void func_0027A0D8_f(void* self, int type, void* a2, sVec4_SE* out, float* roll, float* pitch, float* yaw) __asm__("func_0027A0D8");
+extern "C" void cSSXScriptEngine_GetAnchorOrientation_f(void* self, int type, void* a2, sVec4_SE* out, float* roll, float* pitch, float* yaw) __asm__("cSSXScriptEngine_GetAnchorOrientation");
 
 // One camera case: offset + euler angles from the record, then the player's frame on top.
 #define CAMARM_SE(SELF, OWNER, REC) \
@@ -5343,7 +5343,7 @@ extern "C" void func_0027A0D8_f(void* self, int type, void* a2, sVec4_SE* out, f
         float roll; \
         float pitch; \
         float yaw; \
-        func_0027A0D8_f(ScriptEngine, *(char*)((REC) + 0x20), *(void**)((OWNER) + 8), &out, &roll, &pitch, &yaw); \
+        cSSXScriptEngine_GetAnchorOrientation_f(ScriptEngine, *(char*)((REC) + 0x20), *(void**)((OWNER) + 8), &out, &roll, &pitch, &yaw); \
         Translate_SE(&(SELF)->mat, &out); \
         ROTATE_SE(&(SELF)->mat, D_004FF160_D970, -yaw); \
         ROTATE_SE(&(SELF)->mat, D_004FF150_D970, pitch); \
@@ -5355,48 +5355,48 @@ extern "C" void func_0027A0D8_f(void* self, int type, void* a2, sVec4_SE* out, f
     }
 
 // Declared earlier in the unit as (void*, int).
-extern "C" void func_0027D970_SE(sScrCam_SE* self, sScrCam_SE* cam) __asm__("func_0027D970");
+extern "C" void cScriptObjCamera_CalculateBaseTransform_SE(sScrCam_SE* self, sScrCam_SE* cam) __asm__("cScriptObjCamera_CalculateBaseTransform");
 
 /**
  * Builds a script camera object's base transform (+0x30) and base rotations (+0x70, +0x74, +0x78) from the header of
  * camera entity @p cam.
  *
- * Starts from t4mat_Identity and zero angles, then by the type of the entity's InSeq entity (+0x8, func_002743C8): -
- * 0-2 (header from func_0027C098, func_0027C2A8 or func_0027C4B8): the header's X, Y and Z angles in degrees (+0x1C,
+ * Starts from t4mat_Identity and zero angles, then by the type of the entity's InSeq entity (+0x8, cScriptPlayerEntity_GetType): -
+ * 0-2 (header from GetSSXCameraManualHeader, GetSSXCameraTargetHeader or GetSSXCameraSubjectHeader): the header's X, Y and Z angles in degrees (+0x1C,
  * +0x18, +0x14) and offset (+0x8-+0x10) form a local matrix (translate, then about Z by -z, Y, X). The anchor of type
- * header byte +0x20 (func_0027A0D8 for the entity's owner player) gives a position and angles; the transform becomes
+ * header byte +0x20 (cSSXScriptEngine_GetAnchorOrientation for the entity's owner player) gives a position and angles; the transform becomes
  * the anchor's translate and rotations (Z by -angle, Y, X) times the local matrix, and the anchor angles are added. - 3
- * (header from func_0027C6A0): only the header's angles (+0x10, +0xC, +0x8) as rotations about Z (negated), Y, X. Other
+ * (header from GetSSXCameraAlgorithmicHeader): only the header's angles (+0x10, +0xC, +0x8) as rotations about Z (negated), Y, X. Other
  * types keep the identity.
  *
  * @param cam  the camera entity (cScriptEntityCamera)
  */
-extern "C" void func_0027D970_SE(sScrCam_SE* self, sScrCam_SE* cam)
+extern "C" void cScriptObjCamera_CalculateBaseTransform_SE(sScrCam_SE* self, sScrCam_SE* cam)
 {
     char* owner = cam->owner;
     CopyMat_SE(&self->mat, t4mat_Identity);
     self->rx = 0.0f;
     self->ry = 0.0f;
     self->rz = 0.0f;
-    switch (func_002743C8(owner)) {
+    switch (cScriptPlayerEntity_GetType(owner)) {
     case 0: {
-        char* rec = func_0027C098_D970(owner);
+        char* rec = GetSSXCameraManualHeader_D970(owner);
         CAMARM_SE(self, owner, rec);
         break;
     }
     case 1: {
-        char* rec = func_0027C2A8_D970(owner);
+        char* rec = GetSSXCameraTargetHeader_D970(owner);
         CAMARM_SE(self, owner, rec);
         break;
     }
     case 2: {
-        char* rec = func_0027C4B8_D970(owner);
+        char* rec = GetSSXCameraSubjectHeader_D970(owner);
         CAMARM_SE(self, owner, rec);
         break;
     }
     case 3: {
         sRotMat_SE* mat = &self->mat;
-        char* rec = func_0027C6A0_D970(owner);
+        char* rec = GetSSXCameraAlgorithmicHeader_D970(owner);
         self->rx = *(float*)(rec + 0x10) * 0.01745329424738884f;
         self->ry = *(float*)(rec + 0xC) * 0.01745329424738884f;
         self->rz = *(float*)(rec + 8) * 0.01745329424738884f;
@@ -5463,12 +5463,12 @@ extern "C" void* cScriptObjRider_cScriptObjRider(void* self)
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjRider_OnStartObjectUse);
 #ifdef SKIP_ASM
 void cScriptObject_OnStartObjectUse(void* self);
-int func_0027C958(void* self);
-int func_0027C070(void* self);
+int GetSSXActorHeader(void* self);
+int GetSSXScriptHeader(void* self);
 // PORT: the real functions take (engine, id); the unit declares them with one parameter.
 void* cSSXScriptEngine_GetAnimationBankInfo_2(void* engine, int id) __asm__("cSSXScriptEngine_GetAnimationBankInfo__FPv");
 void* cSSXScriptEngine_GetSoundBankInfo_2(void* engine, int id) __asm__("cSSXScriptEngine_GetSoundBankInfo__FPv");
-extern "C" void func_0027A0D8(void* engine, int id, void* obj, void* pos, float* a, float* b, float* c);
+extern "C" void cSSXScriptEngine_GetAnchorOrientation(void* engine, int id, void* obj, void* pos, float* a, float* b, float* c);
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern char t4mat_Identity[];
 extern float t4vect_XAxis[4];
@@ -5668,13 +5668,13 @@ static inline void Translate_F9F8(void* mat, const sVec_F9F8& v)
  * Takes the rider's script object into use: builds its base transform from the actor header and the script's anchor and
  * binds the script's animation and sound banks.
  *
- * Calls cScriptObject_OnStartObjectUse__FPv on the cScriptObject part (+0xC). The actor header (func_0027C958 of the bound player entity,
+ * Calls cScriptObject_OnStartObjectUse__FPv on the cScriptObject part (+0xC). The actor header (GetSSXActorHeader of the bound player entity,
  * +0x8) gives the base rotations in degrees (+0x1C/+0x18/+0x14, stored as radians in +0x70/+0x74/+0x78) and an offset
- * (+0x8..+0x10) that form a local matrix (translate, then Rz(-z), Ry, Rx). func_0027A0D8 (On Tour
+ * (+0x8..+0x10) that form a local matrix (translate, then Rz(-z), Ry, Rx). cSSXScriptEngine_GetAnchorOrientation (On Tour
  * cSSXScriptEngine::GetAnchorOrientation) gives the anchor position and angles for the header's anchor type (+0x1); the
  * base transform (+0x30) becomes the anchor's translate and rotations times the local matrix, and the anchor angles are
  * added to the base rotations. Finally it binds mpAnimBankInfo (+0x1C) and mpSoundBankInfo (+0x20) to the script's bank
- * (+0x1C of the func_0027C070 header) with cSSXScriptEngine_GetAnimationBankInfo__FPv and cSSXScriptEngine_GetSoundBankInfo__FPv. The player ID argument is not declared
+ * (+0x1C of the GetSSXScriptHeader header) with cSSXScriptEngine_GetAnimationBankInfo__FPv and cSSXScriptEngine_GetSoundBankInfo__FPv. The player ID argument is not declared
  * (unused).
  */
 extern "C" void cScriptObjRider_OnStartObjectUse(char* self)
@@ -5686,7 +5686,7 @@ extern "C" void cScriptObjRider_OnStartObjectUse(char* self)
     *(int*)(self + 0x70) = 0;
     *(int*)(self + 0x74) = 0;
     *(int*)(self + 0x78) = 0;
-    char* info = (char*)func_0027C958(obj);
+    char* info = (char*)GetSSXActorHeader(obj);
     *(float*)(self + 0x70) = *(float*)(info + 0x1C) * 0.01745329424738884f;
     *(float*)(self + 0x74) = *(float*)(info + 0x18) * 0.01745329424738884f;
     *(float*)(self + 0x78) = *(float*)(info + 0x14) * 0.01745329424738884f;
@@ -5699,7 +5699,7 @@ extern "C" void cScriptObjRider_OnStartObjectUse(char* self)
     ROTATE_F9F8(&m, t4vect_XAxis, *(float*)(self + 0x70));
     sVec_F9F8 pos;
     float rx, ry, rz;
-    func_0027A0D8(ScriptEngine, *(signed char*)(info + 1), *(void**)((char*)obj + 0x8), &pos, &rx, &ry, &rz);
+    cSSXScriptEngine_GetAnchorOrientation(ScriptEngine, *(signed char*)(info + 1), *(void**)((char*)obj + 0x8), &pos, &rx, &ry, &rz);
     Translate_F9F8(mat, pos);
     ROTATE2_F9F8(mat, t4vect_ZAxis, -rz);
     ROTATE2_F9F8(mat, t4vect_YAxis, ry);
@@ -5708,7 +5708,7 @@ extern "C" void cScriptObjRider_OnStartObjectUse(char* self)
     *(float*)(self + 0x70) += rx;
     *(float*)(self + 0x74) += ry;
     *(float*)(self + 0x78) += rz;
-    char* info2 = (char*)func_0027C070(*(void**)((char*)obj + 0x8));
+    char* info2 = (char*)GetSSXScriptHeader(*(void**)((char*)obj + 0x8));
     ((sScriptObj_F9F8*)self)->anim0 = cSSXScriptEngine_GetAnimationBankInfo_2(ScriptEngine, *(int*)(info2 + 0x1C));
     ((sScriptObj_F9F8*)self)->anim1 = cSSXScriptEngine_GetSoundBankInfo_2(ScriptEngine, *(int*)(info2 + 0x1C));
 }
@@ -5717,13 +5717,13 @@ extern "C" void cScriptObjRider_OnStartObjectUse(char* self)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjRider_OnEndObjectUse);
 #ifdef SKIP_ASM
-void func_00283440(void*);
+void cScriptObject_OnEndObjectUse(void*);
 extern char t4mat_Identity[];
 
 /**
  * Releases the rider's script object: drops one use and resets its base transform and bank bindings.
  *
- * Calls func_00283440 (On Tour cScriptObject::OnEndObjectUse) on the cScriptObject part (+0xC), copies t4mat_Identity
+ * Calls cScriptObject_OnEndObjectUse (On Tour cScriptObject::OnEndObjectUse) on the cScriptObject part (+0xC), copies t4mat_Identity
  * into the base transform (+0x30), zeroes the base rotations (+0x70..+0x78) and clears mpAnimBankInfo (+0x1C) and
  * mpSoundBankInfo (+0x20). The player ID argument is not declared (unused).
  */
@@ -5731,7 +5731,7 @@ extern char t4mat_Identity[];
 // the PC port needs a plain 64-byte copy.
 extern "C" void cScriptObjRider_OnEndObjectUse(void* self)
 {
-    func_00283440((char*)self + 0xC);
+    cScriptObject_OnEndObjectUse((char*)self + 0xC);
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2      $vf1, 0x0(%1)\n"
@@ -5759,7 +5759,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjRider_IsMatchingEntity);
 #ifdef SKIP_ASM
 extern "C" int cRider_isLoaded(void* self);
 extern "C" int cRider_getIdentity(void* self);
-extern "C" int func_00280560(void* self, void* rider, int id, int a3);
+extern "C" int cScriptObjRider_IsSuitableRole(void* self, void* rider, int id, int a3);
 extern int D_00481BB0[];
 
 class cScriptCtx0458 {
@@ -5777,9 +5777,9 @@ public:
  * Tests whether a script player entity can be played by this rider script object.
  *
  * Only entity type 5 matches. Gets the attached rider (virtual slot 6), which must be loaded (cRider_isLoaded), and its
- * identity bit from D_00481BB0[cRider_getIdentity(rider)]. The entity's actor header (func_0027C958) holds a role byte
+ * identity bit from D_00481BB0[cRider_getIdentity(rider)]. The entity's actor header (GetSSXActorHeader) holds a role byte
  * and a short character mask at +2: a zero mask or one containing the rider's bit passes, and the final answer comes
- * from func_00280560(self, rider, role, the entity's +0x8 word) (On Tour IsSuitableRole(pRider, role, pPlayerMain)).
+ * from cScriptObjRider_IsSuitableRole(self, rider, role, the entity's +0x8 word) (On Tour IsSuitableRole(pRider, role, pPlayerMain)).
  *
  * @param msg  the script player entity (On Tour cScriptPlayerEntity* pEntity)
  * @param type  the entity type asked for; only 5 can match
@@ -5792,18 +5792,18 @@ extern "C" int cScriptObjRider_IsMatchingEntity(cScriptCtx0458* self, void* msg,
     if (cRider_isLoaded(rider) == 0) return 0;
     int team = cRider_getIdentity(rider);
     int mask = D_00481BB0[team];
-    // PORT: func_0027C958 returns a record pointer as int
-    char* info = (char*)func_0027C958(msg);
+    // PORT: GetSSXActorHeader returns a record pointer as int
+    char* info = (char*)GetSSXActorHeader(msg);
     short charMask = *(short*)(info + 2);
     if (charMask == 0 || (charMask & mask) != 0) {
-        return func_00280560(self, rider, *(signed char*)info, *(int*)((char*)msg + 0x8));
+        return cScriptObjRider_IsSuitableRole(self, rider, *(signed char*)info, *(int*)((char*)msg + 0x8));
     }
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00280520__FPviT0T0);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjRider_ScriptAnimIDToGameAnimInfo__FPviT0T0);
 #ifdef SKIP_ASM
 /**
  * Maps a script animation ID to the game animation index and bank of the rider's script anim bank.
@@ -5815,7 +5815,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_00280520__FPviT0T0);
  * @param gameAnimIndex  receives the game animation index (int)
  * @param gameAnimBankId  receives the anim bank number (int)
  */
-void func_00280520(void* self, int scriptAnimId, void* gameAnimIndex, void* gameAnimBankId)
+void cScriptObjRider_ScriptAnimIDToGameAnimInfo(void* self, int scriptAnimId, void* gameAnimIndex, void* gameAnimBankId)
 {
     *(int*)gameAnimBankId = *(int*)((char*)*(void**)((char*)self + 0x1c) + 0x4);
     *(int*)gameAnimIndex = (*(int**)((char*)*(void**)((char*)self + 0x1c) + 0x10))[scriptAnimId];
@@ -5823,7 +5823,7 @@ void func_00280520(void* self, int scriptAnimId, void* gameAnimIndex, void* game
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00280548__FPviT0T0);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjRider_ScriptSoundIDToGameSoundInfo__FPviT0T0);
 #ifdef SKIP_ASM
 /**
  * Maps a script sound ID to the game sound index and bank of the rider's script sound bank: the index is the ID itself,
@@ -5833,7 +5833,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_00280548__FPviT0T0);
  * @param gameSoundIndex  receives the game sound index (int)
  * @param gameSoundBankId  receives the sound bank number (int)
  */
-void func_00280548(void* self, int scriptSoundId, void* gameSoundIndex, void* gameSoundBankId)
+void cScriptObjRider_ScriptSoundIDToGameSoundInfo(void* self, int scriptSoundId, void* gameSoundIndex, void* gameSoundBankId)
 {
     *(int*)gameSoundBankId = *(int*)((char*)*(void**)((char*)self + 0x20) + 0x4);
     *(int*)gameSoundIndex = scriptSoundId;
@@ -5841,7 +5841,7 @@ void func_00280548(void* self, int scriptSoundId, void* gameSoundIndex, void* ga
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/ssxscriptengine", func_00280560);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjRider_IsSuitableRole);
 #ifdef SKIP_ASM
 extern "C" void* cSSXScriptEngine_GetSubjectRider(cSSXScriptEngine* self, int i, int a2);
 
@@ -5854,7 +5854,7 @@ extern "C" void* cSSXScriptEngine_GetSubjectRider(cSSXScriptEngine* self, int i,
  * @param playerMain  the script player (cScriptPlayerMain)
  * @return 1 when the rider suits the role, else 0 (also for negative or larger roles)
  */
-extern "C" int func_00280560(void* self, void* rider, int id, int playerMain)
+extern "C" int cScriptObjRider_IsSuitableRole(void* self, void* rider, int id, int playerMain)
 {
     if (id != 0) {
         if (id >= 0) {
@@ -5982,7 +5982,7 @@ struct sScrTrig_0730 {
  *
  * Calls cScriptObject_OnStartObjectUse__FPv on the cScriptObject part (+0xC), clears +0xEC, +0xF0 and +0xF4 (On Tour mNumAbortWorldScripts,
  * mHasTriggeredSpeechEvents, mCheckForStopOnSpeechEnd), binds the sound bank info (+0xF8, On Tour mpSoundBankInfo) with
- * cSSXScriptEngine_GetSoundBankInfo__FPv for the bank of the playing script (+0x1C of the func_0027C070 header) and empties the 4 sound slots at
+ * cSSXScriptEngine_GetSoundBankInfo__FPv for the bank of the playing script (+0x1C of the GetSSXScriptHeader header) and empties the 4 sound slots at
  * +0xBC (ID -1, count 0, target -1). The player ID argument is not declared (unused).
  */
 extern "C" void cScriptObjEvent_OnStartObjectUse(void* self)
@@ -5992,8 +5992,8 @@ extern "C" void cScriptObjEvent_OnStartObjectUse(void* self)
     *(int*)((char*)self + 0xEC) = 0;
     *(int*)((char*)self + 0xF0) = 0;
     *(int*)((char*)self + 0xF4) = 0;
-    // PORT: func_0027C070 returns a pointer as int
-    char* info = (char*)func_0027C070(*(void**)(*(char**)((char*)self + 0x8) + 0x8));
+    // PORT: GetSSXScriptHeader returns a pointer as int
+    char* info = (char*)GetSSXScriptHeader(*(void**)(*(char**)((char*)self + 0x8) + 0x8));
     int key = *(int*)(info + 0x1C);
     *(void**)((char*)self + 0xF8) = cSSXScriptEngine_GetSoundBankInfo_2(ScriptEngine, key);
     sScrTrig_0730* soundSlot = (sScrTrig_0730*)((char*)self + 0xBC);
@@ -6007,14 +6007,14 @@ extern "C" void cScriptObjEvent_OnStartObjectUse(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/ssxscriptengine", func_002807B0);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjEvent_OnEndObjectUse);
 #ifdef SKIP_ASM
-void func_00283440(void*);
+void cScriptObject_OnEndObjectUse(void*);
 extern "C" void* cAudioInterface_bxAudio();
 void func_002A1BD0(void* p);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
 extern "C" void cWScriptMan_runFunc(void* mgr, int a, int b);
-extern "C" void func_0027CC28(void* self, void* out);
+extern "C" void GetSSXGameEventFrame(void* self, void* out);
 extern void* cWScriptMan_TheWScriptMan;
 extern int D_004A3B60;
 
@@ -6050,18 +6050,18 @@ struct sSeEngine07B0 {
 /**
  * Takes the script event object out of use: runs its abort world scripts, stops its sounds and clears its event state.
  *
- * After func_00283440 on the cScriptObject part (+0xC): runs each recorded abort world script (+0x1C, On Tour
+ * After cScriptObject_OnEndObjectUse on the cScriptObject part (+0xC): runs each recorded abort world script (+0x1C, On Tour
  * mAbortWorldScripts: hash, world section; count +0xEC, mNumAbortWorldScripts) with cWScriptMan_runFunc; when speech
  * was triggered (+0xF0, mHasTriggeredSpeechEvents) calls func_002A1BD0 on the audio interface; stops each of the 4
  * sound slots (+0xBC, mSounds) holding a handle (cBankMonitor_BANKMONITOR_StopHandle on the audio system's bank
- * monitor) and resets all four (handle -1, end flag 0, sound ID -1). When the entity's game-event frame (func_0027CC28)
+ * monitor) and resets all four (handle -1, end flag 0, sound ID -1). When the entity's game-event frame (GetSSXGameEventFrame)
  * has an enviro-state list (+0x24), the render-state flag D_004A3B60 is cleared. Finally clears +0xEC, +0xF0, +0xF4
  * (mCheckForStopOnSpeechEnd) and the sound bank info (+0xF8).
  */
-extern "C" void func_002807B0(sSeEngine07B0* self)
+extern "C" void cScriptObjEvent_OnEndObjectUse(sSeEngine07B0* self)
 {
     sSeInfo07B0 info;
-    func_00283440((char*)self + 0xC);
+    cScriptObject_OnEndObjectUse((char*)self + 0xC);
     for (int i = 0; i < self->pairCount; i++) {
         cWScriptMan_runFunc(cWScriptMan_TheWScriptMan, self->pairs[i].b, self->pairs[i].a);
     }
@@ -6078,7 +6078,7 @@ extern "C" void func_002807B0(sSeEngine07B0* self)
         soundSlot->id = -1;
         soundSlot->field_0x4 = 0;
     }
-    func_0027CC28(self->owner, &info);
+    GetSSXGameEventFrame(self->owner, &info);
     if (info.active != 0) {
         D_004A3B60 = 0;
     }
@@ -6090,7 +6090,7 @@ extern "C" void func_002807B0(sSeEngine07B0* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_002808D8);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjEvent_IsMatchingEntity);
 #ifdef SKIP_ASM
 /**
  * Returns whether the script event object takes an InSeq entity: only entity type 7.
@@ -6099,22 +6099,22 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_002808D8);
  * @param type  the entity type
  * @return 1 for type 7, else 0
  */
-extern "C" int func_002808D8(void* self, void* entity, int type)
+extern "C" int cScriptObjEvent_IsMatchingEntity(void* self, void* entity, int type)
 {
     return type == 7;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_002808E8);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjEvent_OnInSeqKeyEvent);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_0027CC28(void* self, void* out);
-int func_0027C070(void* self);
-// PORT: the unit declares func_0027A688 with no parameters; this caller passes the engine in $a0.
-int func_0027A688_08E8(void* engine) __asm__("func_0027A688");
+extern "C" void GetSSXGameEventFrame(void* self, void* out);
+int GetSSXScriptHeader(void* self);
+// PORT: the unit declares cSSXScriptEngine_GetTransportWorldSectionID with no parameters; this caller passes the engine in $a0.
+int cSSXScriptEngine_GetTransportWorldSectionID_08E8(void* engine) __asm__("cSSXScriptEngine_GetTransportWorldSectionID");
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" int cSectionMan_getWorldSectionIDFromBELocationID(void* mgr, int id);
 extern "C" void cWScriptMan_runFunc(void* mgr, int a, int b);
@@ -6122,7 +6122,7 @@ extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028E8C0(void* self, int id, int a2);
 extern "C" void func_002A19D8(void* self, int id);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
-void func_00281000(void* self, int a1, void* a2, void* a3);
+void cScriptObjEvent_ScriptSoundIDToGameSoundInfo(void* self, int a1, void* a2, void* a3);
 extern "C" int func_00287968(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(void* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
@@ -6204,7 +6204,7 @@ struct sSeCmd_08E8 {
     int pad;
 };
 
-// Filled by func_0027CC28.
+// Filled by GetSSXGameEventFrame.
 struct sSeInfo_08E8 {
     int nLinks;                 // 0x00
     sSeLink_08E8* links;        // 0x04
@@ -6246,8 +6246,8 @@ struct sSeEngine_08E8 {
  * Handles an in-sequence key event for the script event object: runs the frame's world script events, music and speech
  * events, and starts or marks its sounds.
  *
- * Reads the entity's game-event frame (func_0027CC28; On Tour tSSXFrameGameEvent). The world section is the transport
- * section (func_0027A688) when the script header's first byte (func_0027C070 on the entity's player) is set, else the
+ * Reads the entity's game-event frame (GetSSXGameEventFrame; On Tour tSSXFrameGameEvent). The world section is the transport
+ * section (cSSXScriptEngine_GetTransportWorldSectionID) when the script header's first byte (GetSSXScriptHeader on the entity's player) is set, else the
  * section of the BE new-race location (cSectionMan_getWorldSectionIDFromBELocationID). Then: - each world script event
  * runs with cWScriptMan_runFunc(section, event ID); its abort-script hash, unless D_004A525C (no script), is recorded
  * once per (hash, section) in the abort list (+0x1C, count +0xEC); - event bit 8 clears and bit 4 sets the render-state
@@ -6255,7 +6255,7 @@ struct sSeEngine_08E8 {
  * goes to func_002A19D8 and sets +0xF0, except ID 17 (skipped) and ID 16, which sets +0xF4 (stop on speech end); - bit
  * 2: every sound slot holding a handle gets its end flag set, then the slots of the frame's sounds clear it; - bit 1:
  * walks the frame's sound list until a sound whose start frame is before @p when; a sound whose slot (track index) is
- * free, or holds a different sound (stopped first), is started: bank and index from func_00281000, a new SFX record on
+ * free, or holds a different sound (stopped first), is started: bank and index from cScriptObjEvent_ScriptSoundIDToGameSoundInfo, a new SFX record on
  * the audio system's bank monitor with default settings, the sound's volume (clamped to 0-127), the volume setting
  * func_00287968(4, 0), then cBankSys_SFX_End, whose handle goes into the slot.
  *
@@ -6266,14 +6266,14 @@ struct sSeEngine_08E8 {
  * @param when  the current frame
  * @param flags  the event bits
  */
-extern "C" void func_002808E8(sSeEngine_08E8* self, void* obj, int entityType, float when, int flags)
+extern "C" void cScriptObjEvent_OnInSeqKeyEvent(sSeEngine_08E8* self, void* obj, int entityType, float when, int flags)
 {
     sSeInfo_08E8 info;
-    func_0027CC28(obj, &info);
+    GetSSXGameEventFrame(obj, &info);
     void* iface0 = cBE_getInterface_Fv(cBE_getBE(), 0);
     int owner;
-    if (*(signed char*)func_0027C070(*(void**)((char*)obj + 8)) != 0) {
-        owner = func_0027A688_08E8(ScriptEngine);
+    if (*(signed char*)GetSSXScriptHeader(*(void**)((char*)obj + 8)) != 0) {
+        owner = cSSXScriptEngine_GetTransportWorldSectionID_08E8(ScriptEngine);
     } else {
         void* mgr = SSXApp->Game->SectionMan;
         owner = cSectionMan_getWorldSectionIDFromBELocationID(mgr, *cBENewRaceInterface_getLocation(iface0));
@@ -6350,7 +6350,7 @@ extern "C" void func_002808E8(sSeEngine_08E8* self, void* obj, int entityType, f
             }
             if (play) {
                 int gameSoundIndex, type;
-                func_00281000(self, soundEntry->id, &gameSoundIndex, &type);
+                cScriptObjEvent_ScriptSoundIDToGameSoundInfo(self, soundEntry->id, &gameSoundIndex, &type);
                 int tp = type;
                 int ar = gameSoundIndex;
                 sWtTrack_08E8* pushSystem = snd->track;
@@ -6402,7 +6402,7 @@ extern "C" void func_002808E8(sSeEngine_08E8* self, void* obj, int entityType, f
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00281000__FPviT0T0);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjEvent_ScriptSoundIDToGameSoundInfo__FPviT0T0);
 #ifdef SKIP_ASM
 /**
  * Maps a script sound ID to the game sound index and bank of the event object's sound bank: the index is the ID itself,
@@ -6412,7 +6412,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_00281000__FPviT0T0);
  * @param gameSoundIndex  receives the game sound index (int)
  * @param gameSoundBankId  receives the sound bank number (int)
  */
-void func_00281000(void* self, int scriptSoundId, void* gameSoundIndex, void* gameSoundBankId)
+void cScriptObjEvent_ScriptSoundIDToGameSoundInfo(void* self, int scriptSoundId, void* gameSoundIndex, void* gameSoundBankId)
 {
     *(int*)gameSoundBankId = *(int*)((char*)*(void**)((char*)self + 0xf8) + 0x4);
     *(int*)gameSoundIndex = scriptSoundId;
@@ -6429,7 +6429,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_cScriptObjCamera
  * Constructs a script camera manager: a cScriptObject of type 0 plus a script entity with nine entity slots.
  *
  * Builds the cScriptObject base (type 0) and the cScriptEntity base (+0x10), constructs nine 0x14-byte slots at +0x1C
- * (func_00283088) and points each one's owner word (+0x10) at the manager, clears the two camera object pointers
+ * (cScriptEntityCamera_cScriptEntityCamera) and points each one's owner word (+0x10) at the manager, clears the two camera object pointers
  * (+0xD0) and the transition object (+0xD8), sets the view index (+0xF8) to -1 and resets the script state with
  * cScriptObjCameraManager_ResetScriptManagementVars (On Tour ResetScriptManagementVars). The C++ view class here is named cScriptEngine_1018.
  */
@@ -6454,7 +6454,7 @@ __asm__("_vt$18cScriptEngine_1018$18cScriptEntity_1018 = D_00482360\n"
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_Update);
 #ifdef SKIP_ASM
-extern "C" void func_00281AC8(void* self, int a1, int a2);
+extern "C" void cScriptObjCameraManager_SetupCameraObject(void* self, int a1, int a2);
 
 struct sVec4_1100 {
     float x, y, z, w;
@@ -6465,7 +6465,7 @@ struct sVec4_1100 {
  *
  * Only while in use (+0x8 > 0, On Tour mInUse): copies the position (+0x20) of the camera of view +0xF8
  * (SSXApp->Game->ViewMan, array at +0x4) into the focus box position (+0x100) and, while +0x18 is still 0, calls
- * func_00281AC8(self, 0, 0) (On Tour SetupCameraObject). cSSXScriptEngine_Update runs it on both managers every frame.
+ * cScriptObjCameraManager_SetupCameraObject(self, 0, 0) (On Tour SetupCameraObject). cSSXScriptEngine_Update runs it on both managers every frame.
  */
 extern "C" void cScriptObjCameraManager_Update(void* self)
 {
@@ -6474,42 +6474,42 @@ extern "C" void cScriptObjCameraManager_Update(void* self)
         char* rider = *(char**)(riders + (*(int*)((char*)self + 0xF8) << 2) + 4);
         *(sVec4_1100*)((char*)self + 0x100) = *(sVec4_1100*)(rider + 0x20);
         if (*(int*)((char*)self + 0x18) == 0) {
-            func_00281AC8(self, 0, 0);
+            cScriptObjCameraManager_SetupCameraObject(self, 0, 0);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00281160__FPvi);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_SetViewIndex__FPvi);
 #ifdef SKIP_ASM
 /**
  * Sets a script camera manager's view index (+0xF8).
  *
  * @param val  the view index
  */
-void func_00281160(void* self, int val)
+void cScriptObjCameraManager_SetViewIndex(void* self, int val)
 {
     *(int*)((char*)self + 0xF8) = val;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00281168__FPv);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_GetNumScriptEntities__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the number of script entities of a script camera manager: 10 (itself and its 9 entity cameras).
  *
  * @return 10
  */
-int func_00281168(void* self)
+int cScriptObjCameraManager_GetNumScriptEntities(void* self)
 {
     return 10;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00281170);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_GetScriptEntity);
 #ifdef SKIP_ASM
 /**
  * Returns script entity @p index of a script camera manager: 0 is its own cScriptEntity part (+0x10), 1-9 its entity
@@ -6518,7 +6518,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_00281170);
  * @param index  the entity index (0-9)
  * @return the entity
  */
-extern "C" void* func_00281170(void* self, int index)
+extern "C" void* cScriptObjCameraManager_GetScriptEntity(void* self, int index)
 {
     if (index == 0) {
         return (char*)self + 0x10;
@@ -6528,24 +6528,24 @@ extern "C" void* func_00281170(void* self, int index)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/ssxscriptengine", func_00281190);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_AddCameraObject);
 #ifdef SKIP_ASM
-void func_0027D680(void* self, int val);
+void cScriptObjCamera_SetCameraManager(void* self, int val);
 
 /**
  * Attaches a script camera object to the camera manager: stores it in the first free of the 2 camera slots (+0xD0) and
- * sets its camera manager (func_0027D680).
+ * sets its camera manager (cScriptObjCamera_SetCameraManager).
  *
  * @param obj  the script camera object
  * @return 1, or 0 when both slots are taken
  */
-extern "C" int func_00281190(void* self, void* obj)
+extern "C" int cScriptObjCameraManager_AddCameraObject(void* self, void* obj)
 {
     void** slots = (void**)((char*)self + 0xD0);
     for (int i = 0; i < 2; i++) {
         if (slots[i] == 0) {
             slots[i] = obj;
-            func_0027D680(obj, (int)self); // PORT: pointer passed as int (callee mangled __FPvi)
+            cScriptObjCamera_SetCameraManager(obj, (int)self); // PORT: pointer passed as int (callee mangled __FPvi)
             return 1;
         }
     }
@@ -6554,10 +6554,10 @@ extern "C" int func_00281190(void* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_002811E8);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_RemoveCameraObject);
 #ifdef SKIP_ASM
-void func_0027D680(void* self, int val);
-extern "C" void func_0027D688(char* self, void* anim);
+void cScriptObjCamera_SetCameraManager(void* self, int val);
+extern "C" void cScriptObjCamera_SetCameraEntity(char* self, void* anim);
 
 struct sSeEng11E8 {
     char pad_0x0[0x8];
@@ -6568,26 +6568,26 @@ struct sSeEng11E8 {
     int slots[2];           // 0xDC
 };
 
-// PORT: the unit declares func_002811E8(void*, void*) returning void; it returns found/not found.
-extern "C" int func_002811E8_impl(sSeEng11E8* self, char* key) __asm__("func_002811E8");
+// PORT: the unit declares cScriptObjCameraManager_RemoveCameraObject(void*, void*) returning void; it returns found/not found.
+extern "C" int cScriptObjCameraManager_RemoveCameraObject_impl(sSeEng11E8* self, char* key) __asm__("cScriptObjCameraManager_RemoveCameraObject");
 /**
  * Detaches a script camera object from the camera manager.
  *
  * Finds the camera slot (+0xD0) holding an object with the same object ID (+0x4) as @p key. If the manager is in use
- * (+0x8) and that camera has an entity bound (+0x14), unbinds it (func_0027D688 with 0) and frees the attachment
- * (+0xDC) that pointed at the slot. Then clears the camera's manager (func_0027D680 with 0) and the slot.
+ * (+0x8) and that camera has an entity bound (+0x14), unbinds it (cScriptObjCamera_SetCameraEntity with 0) and frees the attachment
+ * (+0xDC) that pointed at the slot. Then clears the camera's manager (cScriptObjCamera_SetCameraManager with 0) and the slot.
  *
  * @param key  the script camera object
  * @return 1, or 0 when it was not attached
  */
-extern "C" int func_002811E8_impl(sSeEng11E8* self, char* key)
+extern "C" int cScriptObjCameraManager_RemoveCameraObject_impl(sSeEng11E8* self, char* key)
 {
     int k = *(int*)(key + 4);
     for (int i = 0; i < 2; i++) {
         char* cameraObj = self->objs[i];
         if (cameraObj != 0 && *(int*)(cameraObj + 4) == k) {
             if (self->count > 0 && *(int*)(cameraObj + 0x14) != 0) {
-                func_0027D688(cameraObj, 0);
+                cScriptObjCamera_SetCameraEntity(cameraObj, 0);
                 for (int j = 0; j < 2; j++) {
                     if (self->slots[j] == i) {
                         self->slots[j] = -1;
@@ -6595,7 +6595,7 @@ extern "C" int func_002811E8_impl(sSeEng11E8* self, char* key)
                     }
                 }
             }
-            func_0027D680(self->objs[i], 0);
+            cScriptObjCamera_SetCameraManager(self->objs[i], 0);
             self->objs[i] = 0;
             return 1;
         }
@@ -6605,20 +6605,20 @@ extern "C" int func_002811E8_impl(sSeEng11E8* self, char* key)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_002812E0);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_SetTransitionObject);
 #ifdef SKIP_ASM
-// PORT: func_00282DB0 forwards four float args in $f12..$f15 (declared (void*, int, int)
-// in bxscriptengine); func_00282DA8 stores an owner pointer in an int field. Both bound
+// PORT: cScriptObjTransition_SetTransition forwards four float args in $f12..$f15 (declared (void*, int, int)
+// in bxscriptengine); cScriptObjTransition_SetCameraManager stores an owner pointer in an int field. Both bound
 // by asm label with the real argument types.
-void* func_00282DB0_f(void* self, int a1, int a2, float f0, float f1, float f2, float f3)
-    __asm__("func_00282DB0__FPvii");
-void func_00282DA8_p(void* self, void* owner) __asm__("func_00282DA8__FPvi");
+void* cScriptObjTransition_SetTransition_f(void* self, int a1, int a2, float f0, float f1, float f2, float f3)
+    __asm__("cScriptObjTransition_SetTransition__FPvii");
+void cScriptObjTransition_SetCameraManager_p(void* self, void* owner) __asm__("cScriptObjTransition_SetCameraManager__FPvi");
 
 /**
  * Sets or clears the camera manager's transition object (+0xD8).
  *
- * @p obj 0 clears it: a transition in use (+0x8) is stopped (func_00282DB0 with player -1 and transition 9, none) and
- * +0xE8 (in transition) cleared, then the object's camera manager is cleared (func_00282DA8) and the slot emptied.
+ * @p obj 0 clears it: a transition in use (+0x8) is stopped (cScriptObjTransition_SetTransition with player -1 and transition 9, none) and
+ * +0xE8 (in transition) cleared, then the object's camera manager is cleared (cScriptObjTransition_SetCameraManager) and the slot emptied.
  * Otherwise @p obj is stored, when no object is set yet, and given this manager.
  *
  * Likely bug: clearing when no transition object is set dereferences a null pointer.
@@ -6626,15 +6626,15 @@ void func_00282DA8_p(void* self, void* owner) __asm__("func_00282DA8__FPvi");
  * @param obj  the script transition object, or 0 to clear
  * @return 1, or 0 when another transition object is already set
  */
-extern "C" int func_002812E0(void* self, void* obj)
+extern "C" int cScriptObjCameraManager_SetTransitionObject(void* self, void* obj)
 {
     if (obj == 0) {
         char* cur = *(char**)((char*)self + 0xD8);
         if (*(int*)(cur + 0x8) > 0) {
-            func_00282DB0_f(cur, -1, 9, 0.0f, 0.0f, 0.0f, 0.0f);
+            cScriptObjTransition_SetTransition_f(cur, -1, 9, 0.0f, 0.0f, 0.0f, 0.0f);
             *(int*)((char*)self + 0xE8) = 0;
         }
-        func_00282DA8_p(*(void**)((char*)self + 0xD8), 0);
+        cScriptObjTransition_SetCameraManager_p(*(void**)((char*)self + 0xD8), 0);
         *(void**)((char*)self + 0xD8) = 0;
         return 1;
     }
@@ -6642,7 +6642,7 @@ extern "C" int func_002812E0(void* self, void* obj)
         return 0;
     }
     *(void**)((char*)self + 0xD8) = obj;
-    func_00282DA8_p(obj, self);
+    cScriptObjTransition_SetCameraManager_p(obj, self);
     return 1;
 }
 #endif
@@ -6650,7 +6650,7 @@ extern "C" int func_002812E0(void* self, void* obj)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_OnStartObjectUse);
 #ifdef SKIP_ASM
-extern "C" void* func_0027D2E8(void);
+extern "C" void* cScriptDatabaseObject_GetDatabaseObject(void);
 extern "C" void cScriptObjCameraManager_ResetScriptManagementVars(void* self);
 extern "C" void cFocusMan_addbox(void* self, void* pos);
 // PORT: these two are declared (void*) but called with a second argument.
@@ -6661,7 +6661,7 @@ void cScriptObject_OnStartObjectUse_2(void* self, int val) __asm__("cScriptObjec
  * Takes a script camera manager into use for a player: reserves it, resets its state and adds its focus box when that
  * player is playing the NIS.
  *
- * Marks the object reserved for the player in the script database (func_0027D0C0 on func_0027D2E8(), On Tour
+ * Marks the object reserved for the player in the script database (cScriptDatabaseObject_MarkObjectAsReserved on cScriptDatabaseObject_GetDatabaseObject(), On Tour
  * MarkObjectAsReserved) and resets the management state (cScriptObjCameraManager_ResetScriptManagementVars). When cSSXScriptEngine_IsPlayingNISListPlayer
  * accepts the player's script player (cBXScriptEngine_GetRequestPlayerByPlayerID__FPv) it adds the focus box (+0x100) to the AI's focus manager
  * (cFocusMan_addbox, On Tour cFocusMan::addbox, on AI +0xA4) and sets the focus-box flag (+0x110). Ends with cScriptObject_OnStartObjectUse__FPv
@@ -6671,7 +6671,7 @@ void cScriptObject_OnStartObjectUse_2(void* self, int val) __asm__("cScriptObjec
  */
 extern "C" void cScriptObjCameraManager_OnStartObjectUse(void* self, int val)
 {
-    func_0027D0C0(func_0027D2E8(), *(int*)((char*)self + 0x4), val);
+    cScriptDatabaseObject_MarkObjectAsReserved(cScriptDatabaseObject_GetDatabaseObject(), *(int*)((char*)self + 0x4), val);
     cScriptObjCameraManager_ResetScriptManagementVars(self);
     // PORT: pointer passed as int
     if (cSSXScriptEngine_IsPlayingNISListPlayer(ScriptEngine, (int)cBXScriptEngine_GetRequestPlayerByPlayerID_2(ScriptEngine, val)) != 0) {
@@ -6685,16 +6685,16 @@ extern "C" void cScriptObjCameraManager_OnStartObjectUse(void* self, int val)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_OnEndObjectUse);
 #ifdef SKIP_ASM
-extern "C" void* func_0027D2E8(void);
-extern "C" void func_0027D170(void* mgr, int id);
-extern "C" void func_0027D688(char* self, void* anim);
+extern "C" void* cScriptDatabaseObject_GetDatabaseObject(void);
+extern "C" void cScriptDatabaseObject_MarkObjectAsUnreserved(void* mgr, int id);
+extern "C" void cScriptObjCamera_SetCameraEntity(char* self, void* anim);
 extern "C" void cScriptObjCameraManager_ResetScriptManagementVars(void* self);
 extern "C" void cFocusMan_removebox(void* a, void* b, void* c);
-// PORT: func_00282DB0's mangled signature is (void*, int, int); it also takes four floats (same alias as func_002812E0).
-void* func_00282DB0_f(void* self, int a1, int a2, float f0, float f1, float f2, float f3)
-    __asm__("func_00282DB0__FPvii");
-// PORT: the unit declares func_00283440(void*); this caller passes a second argument.
-void func_00283440_2(void* self, int a1) __asm__("func_00283440__FPv");
+// PORT: cScriptObjTransition_SetTransition's mangled signature is (void*, int, int); it also takes four floats (same alias as cScriptObjCameraManager_SetTransitionObject).
+void* cScriptObjTransition_SetTransition_f(void* self, int a1, int a2, float f0, float f1, float f2, float f3)
+    __asm__("cScriptObjTransition_SetTransition__FPvii");
+// PORT: the unit declares cScriptObject_OnEndObjectUse(void*); this caller passes a second argument.
+void cScriptObject_OnEndObjectUse_2(void* self, int a1) __asm__("cScriptObject_OnEndObjectUse__FPv");
 
 struct sSeEng1400 {
     char pad_0x0[0x4];
@@ -6711,27 +6711,27 @@ struct sSeEng1400 {
 /**
  * Releases a script camera manager: unreserves it, detaches its cameras and transition and removes its focus box.
  *
- * Unreserves the object in the script database (func_0027D170 on func_0027D2E8(), On Tour MarkObjectAsUnreserved),
- * clears the camera entity (func_0027D688, On Tour cScriptObjCamera::SetCameraEntity) of each attached camera (indices
+ * Unreserves the object in the script database (cScriptDatabaseObject_MarkObjectAsUnreserved on cScriptDatabaseObject_GetDatabaseObject(), On Tour MarkObjectAsUnreserved),
+ * clears the camera entity (cScriptObjCamera_SetCameraEntity, On Tour cScriptObjCamera::SetCameraEntity) of each attached camera (indices
  * at +0xDC into the camera pointers at +0xD0) and sets its index to -1, resets the transition object (+0xD8) with
- * func_00282DB0(-1, 9, 0.0, 0.0, 0.0, 0.0) (On Tour cScriptObjTransition::SetTransition), removes the focus box
+ * cScriptObjTransition_SetTransition(-1, 9, 0.0, 0.0, 0.0, 0.0) (On Tour cScriptObjTransition::SetTransition), removes the focus box
  * (+0x100) from the AI's focus manager when it was added (+0x110; cFocusMan_removebox, On Tour cFocusMan::removebox), resets
- * the state (cScriptObjCameraManager_ResetScriptManagementVars) and drops one use (func_00283440).
+ * the state (cScriptObjCameraManager_ResetScriptManagementVars) and drops one use (cScriptObject_OnEndObjectUse).
  *
  * @param playerID  the player ID
  */
 extern "C" void cScriptObjCameraManager_OnEndObjectUse(sSeEng1400* self, int playerID)
 {
-    func_0027D170(func_0027D2E8(), self->id);
+    cScriptDatabaseObject_MarkObjectAsUnreserved(cScriptDatabaseObject_GetDatabaseObject(), self->id);
     for (int i = 0; i < 2; i++) {
         int cameraIndex = self->slots[i];
         if (cameraIndex >= 0) {
-            func_0027D688(self->objs[cameraIndex], 0);
+            cScriptObjCamera_SetCameraEntity(self->objs[cameraIndex], 0);
             self->slots[i] = -1;
         }
     }
     if (self->fade != 0) {
-        func_00282DB0_f(self->fade, -1, 9, 0.0f, 0.0f, 0.0f, 0.0f);
+        cScriptObjTransition_SetTransition_f(self->fade, -1, 9, 0.0f, 0.0f, 0.0f, 0.0f);
     }
     if (self->pending != 0) {
         char* lvl = (char*)SSXApp->Game->AI;
@@ -6739,21 +6739,21 @@ extern "C" void cScriptObjCameraManager_OnEndObjectUse(sSeEng1400* self, int pla
         self->pending = 0;
     }
     cScriptObjCameraManager_ResetScriptManagementVars(self);
-    func_00283440_2(self, playerID);
+    cScriptObject_OnEndObjectUse_2(self, playerID);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_002814F8);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_OnInSeqKeyEvent);
 #ifdef SKIP_ASM
-extern "C" void func_0027C8E0(void* self, int* out);
-// PORT: func_0027C888 is defined returning int, but it returns a pointer here; bound by asm label.
-signed char* func_0027C888_p(void* self) __asm__("func_0027C888__FPv");
-extern "C" void func_00281AC8(void* self, int a1, int a2);
-extern "C" void func_00281C68(void* self, int* info, float t);
-// PORT: func_00282DB0's mangled signature is (void*, int, int); it also takes four floats (same alias as func_002812E0).
-void* func_00282DB0_f(void* self, int a1, int a2, float f0, float f1, float f2, float f3)
-    __asm__("func_00282DB0__FPvii");
+extern "C" void GetSSXCameraManagerFrame(void* self, int* out);
+// PORT: GetSSXCameraManagerHeader is defined returning int, but it returns a pointer here; bound by asm label.
+signed char* GetSSXCameraManagerHeader_p(void* self) __asm__("GetSSXCameraManagerHeader__FPv");
+extern "C" void cScriptObjCameraManager_SetupCameraObject(void* self, int a1, int a2);
+extern "C" void cScriptObjCameraManager_DoCameraTransition(void* self, int* info, float t);
+// PORT: cScriptObjTransition_SetTransition's mangled signature is (void*, int, int); it also takes four floats (same alias as cScriptObjCameraManager_SetTransitionObject).
+void* cScriptObjTransition_SetTransition_f(void* self, int a1, int a2, float f0, float f1, float f2, float f3)
+    __asm__("cScriptObjTransition_SetTransition__FPvii");
 
 struct sNode_2814F8
 {
@@ -6767,11 +6767,11 @@ struct sNode_2814F8
 /**
  * Handles an in-sequence key event for the camera manager: starts camera transitions and releases unused tracks.
  *
- * Does nothing unless @p flags has bit 4 or 8. Reads the manager frame (func_0027C8E0: active camera count, list). -
- * Bit 4: starts the transition to the first active camera (func_00281C68), except that with music sync on (the header's
- * first byte, func_0027C888), 2 or more active cameras, no beat yet (+0xF0) and that camera's transition-in 8, it only
+ * Does nothing unless @p flags has bit 4 or 8. Reads the manager frame (GetSSXCameraManagerFrame: active camera count, list). -
+ * Bit 4: starts the transition to the first active camera (cScriptObjCameraManager_DoCameraTransition), except that with music sync on (the header's
+ * first byte, GetSSXCameraManagerHeader), 2 or more active cameras, no beat yet (+0xF0) and that camera's transition-in 8, it only
  * marks a cut as pending on the beat (+0xEC). - Bit 8: with no active cameras, stops the transition object (+0xD8;
- * func_00282DB0, transition 9) and releases both tracks (func_00281AC8 with 9). Otherwise runs a pending cut and clears
+ * cScriptObjTransition_SetTransition, transition 9) and releases both tracks (cScriptObjCameraManager_SetupCameraObject with 9). Otherwise runs a pending cut and clears
  * it, then releases each track no active camera uses.
  *
  * @param obj  the InSeq player entity
@@ -6779,16 +6779,16 @@ struct sNode_2814F8
  * @param flags  the event bits
  * @param currFrame  the current frame
  */
-extern "C" void func_002814F8(void* self, void* obj, int type, int flags, float currFrame)
+extern "C" void cScriptObjCameraManager_OnInSeqKeyEvent(void* self, void* obj, int type, int flags, float currFrame)
 {
     if ((flags & 0xC) == 0)
         return;
     int info[2];
-    func_0027C8E0(obj, info);
+    GetSSXCameraManagerFrame(obj, info);
     if (flags & 4)
     {
         int go = 1;
-        if (*func_0027C888_p(obj) != 0)
+        if (*GetSSXCameraManagerHeader_p(obj) != 0)
         {
             sNode_2814F8* head = (sNode_2814F8*)info[1];
             if (info[0] >= 2 && *(int*)((char*)self + 0xF0) == 0 && *head->kind == 8)
@@ -6798,7 +6798,7 @@ extern "C" void func_002814F8(void* self, void* obj, int type, int flags, float 
             }
         }
         if (go)
-            func_00281C68(self, info, currFrame);
+            cScriptObjCameraManager_DoCameraTransition(self, info, currFrame);
     }
     if (flags & 8)
     {
@@ -6806,14 +6806,14 @@ extern "C" void func_002814F8(void* self, void* obj, int type, int flags, float 
         {
             void* fade = *(void**)((char*)self + 0xD8);
             if (fade)
-                func_00282DB0_f(fade, -1, 9, 0.0f, 0.0f, 0.0f, 0.0f);
+                cScriptObjTransition_SetTransition_f(fade, -1, 9, 0.0f, 0.0f, 0.0f, 0.0f);
             for (int i = 0; i < 2; i++)
-                func_00281AC8(self, i, 9);
+                cScriptObjCameraManager_SetupCameraObject(self, i, 9);
             return;
         }
         if (*(int*)((char*)self + 0xEC))
         {
-            func_00281C68(self, info, currFrame);
+            cScriptObjCameraManager_DoCameraTransition(self, info, currFrame);
             *(int*)((char*)self + 0xEC) = 0;
         }
         int mask = 0;
@@ -6822,22 +6822,22 @@ extern "C" void func_002814F8(void* self, void* obj, int type, int flags, float 
         for (int i = 0; i < 2; i++)
         {
             if (((mask >> i) & 1) == 0)
-                func_00281AC8(self, i, 9);
+                cScriptObjCameraManager_SetupCameraObject(self, i, 9);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_002816A0);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_OnInSeqUpdate);
 #ifdef SKIP_ASM
-extern "C" void func_0027C8E0(void* self, int* out);
-// PORT: func_0027C888 is defined returning int, but it returns a pointer here; bound by asm label.
-signed char* func_0027C888_p(void* self) __asm__("func_0027C888__FPv");
-void func_0027D788(void* self, float val);
-extern "C" int func_00281C40(void* self, int i);
-extern "C" void func_00281C68(void* self, int* info, float t);
-extern "C" void func_00282D30(void* self, float dt);
+extern "C" void GetSSXCameraManagerFrame(void* self, int* out);
+// PORT: GetSSXCameraManagerHeader is defined returning int, but it returns a pointer here; bound by asm label.
+signed char* GetSSXCameraManagerHeader_p(void* self) __asm__("GetSSXCameraManagerHeader__FPv");
+void cScriptObjCamera_SetCameraWeight(void* self, float val);
+extern "C" int cScriptObjCameraManager_GetCameraObjectByTrack(void* self, int i);
+extern "C" void cScriptObjCameraManager_DoCameraTransition(void* self, int* info, float t);
+extern "C" void cScriptObjTransition_Update(void* self, float dt);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" float func_002B4920(void* p);
 
@@ -6854,15 +6854,15 @@ struct sNode_2816A0
 /**
  * Updates the camera manager for this frame: tracks the music beat and advances the running camera transition.
  *
- * With music sync on (the header's first byte, func_0027C888): clears the beat flag (+0xF0); when the audio's beat
+ * With music sync on (the header's first byte, GetSSXCameraManagerHeader): clears the beat flag (+0xF0); when the audio's beat
  * timer runs (+0x530 of the audio interface) the beat time left (func_002B4920) rising above the last value (+0xF4) is
- * a beat: the flag is set and a pending cut (+0xEC) runs now (func_00281C68). The value is stored in +0xF4. Without the
+ * a beat: the flag is set and a pending cut (+0xEC) runs now (cScriptObjCameraManager_DoCameraTransition). The value is stored in +0xF4. Without the
  * timer the beat flag is just set.
  *
  * Then, with active cameras and a transition running (+0xE8), by the first camera's transition-in: - 0 (blend): its
  * track's camera gets weight (frame - start) / overlap frames and the other track's camera the rest; the transition
  * ends after start + overlap, or at once when the other track has no camera. - 1-6: advances the transition object
- * (func_00282D30) by @p dt, ending when it is no longer in use (+0x8); until then, and before start + overlap, the
+ * (cScriptObjTransition_Update) by @p dt, ending when it is no longer in use (+0x8); until then, and before start + overlap, the
  * other camera keeps weight 1 and this one 0; after, this one gets 1. - 7: advances the transition object as above. 8:
  * nothing.
  *
@@ -6870,11 +6870,11 @@ struct sNode_2816A0
  * @param currFrame  the current frame
  * @param dt  the frame delta
  */
-extern "C" void func_002816A0(char* self, void* obj, float currFrame, float dt)
+extern "C" void cScriptObjCameraManager_OnInSeqUpdate(char* self, void* obj, float currFrame, float dt)
 {
     int info[2];
-    func_0027C8E0(obj, info);
-    if (*func_0027C888_p(obj) != 0) {
+    GetSSXCameraManagerFrame(obj, info);
+    if (*GetSSXCameraManagerHeader_p(obj) != 0) {
         *(int*)(self + 0xF0) = 0;
         char* soundMan = (char*)cAudioInterface_bxAudio();
         void* timer = soundMan + 0x118;
@@ -6883,7 +6883,7 @@ extern "C" void func_002816A0(char* self, void* obj, float currFrame, float dt)
             if (*(float*)(self + 0xF4) < now) {
                 *(int*)(self + 0xF0) = 1;
                 if (*(int*)(self + 0xEC) != 0) {
-                    func_00281C68(self, info, currFrame);
+                    cScriptObjCameraManager_DoCameraTransition(self, info, currFrame);
                     *(int*)(self + 0xEC) = 0;
                 }
             }
@@ -6905,8 +6905,8 @@ extern "C" void func_002816A0(char* self, void* obj, float currFrame, float dt)
         if ((float)(n->len + n->start) < currFrame) {
             *(int*)(self + 0xE8) = 0;
         }
-        int camera = func_00281C40(self, n->side);
-        int otherCamera = func_00281C40(self, 1 - n->side);
+        int camera = cScriptObjCameraManager_GetCameraObjectByTrack(self, n->side);
+        int otherCamera = cScriptObjCameraManager_GetCameraObjectByTrack(self, 1 - n->side);
         if (otherCamera == 0) {
             *(int*)(self + 0xE8) = 0;
             break;
@@ -6917,8 +6917,8 @@ extern "C" void func_002816A0(char* self, void* obj, float currFrame, float dt)
         } else {
             w = (currFrame - (float)n->start) / (float)n->len;
         }
-        func_0027D788((void*)camera, w);
-        func_0027D788((void*)otherCamera, 1.0f - w);
+        cScriptObjCamera_SetCameraWeight((void*)camera, w);
+        cScriptObjCamera_SetCameraWeight((void*)otherCamera, 1.0f - w);
         break;
     }
     case 1:
@@ -6927,25 +6927,25 @@ extern "C" void func_002816A0(char* self, void* obj, float currFrame, float dt)
     case 4:
     case 5:
     case 6: {
-        int camera = func_00281C40(self, n->side);
-        int otherCamera = func_00281C40(self, 1 - n->side);
-        func_00282D30(*(void**)(self + 0xD8), dt);
+        int camera = cScriptObjCameraManager_GetCameraObjectByTrack(self, n->side);
+        int otherCamera = cScriptObjCameraManager_GetCameraObjectByTrack(self, 1 - n->side);
+        cScriptObjTransition_Update(*(void**)(self + 0xD8), dt);
         if (*(int*)(*(char**)(self + 0xD8) + 8) <= 0) {
             *(int*)(self + 0xE8) = 0;
         }
         if (*(int*)(self + 0xE8) != 0 && otherCamera != 0 && currFrame < (float)(n->len + n->start)) {
-            func_0027D788((void*)otherCamera, 1.0f);
-            func_0027D788((void*)camera, 0.0f);
+            cScriptObjCamera_SetCameraWeight((void*)otherCamera, 1.0f);
+            cScriptObjCamera_SetCameraWeight((void*)camera, 0.0f);
         } else {
             if (otherCamera != 0) {
-                func_0027D788((void*)otherCamera, 0.0f);
+                cScriptObjCamera_SetCameraWeight((void*)otherCamera, 0.0f);
             }
-            func_0027D788((void*)camera, 1.0f);
+            cScriptObjCamera_SetCameraWeight((void*)camera, 1.0f);
         }
         break;
     }
     case 7:
-        func_00282D30(*(void**)(self + 0xD8), dt);
+        cScriptObjTransition_Update(*(void**)(self + 0xD8), dt);
         if (*(int*)(*(char**)(self + 0xD8) + 8) <= 0) {
             *(int*)(self + 0xE8) = 0;
         }
@@ -6957,25 +6957,25 @@ extern "C" void func_002816A0(char* self, void* obj, float currFrame, float dt)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00281A00);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_IsMatchingEntity);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-void* func_0027A668_2(void* self, int idx) __asm__("func_0027A668__FPv");
+void* cSSXScriptEngine_GetScriptSetupInfo_2(void* self, int idx) __asm__("cSSXScriptEngine_GetScriptSetupInfo__FPv");
 
 /**
- * Returns whether the camera manager takes an InSeq entity: entity type 4 whose script setup info (func_0027A668 for
+ * Returns whether the camera manager takes an InSeq entity: entity type 4 whose script setup info (cSSXScriptEngine_GetScriptSetupInfo for
  * the entity's player, +0x8) has this manager's view index (+0xF8) at +0xC.
  *
  * @param entity  the InSeq player entity
  * @param n  the entity type
  * @return 1 when it matches, else 0
  */
-extern "C" int func_00281A00(void* self, void* entity, int n)
+extern "C" int cScriptObjCameraManager_IsMatchingEntity(void* self, void* entity, int n)
 {
     if (n != 4) {
         return 0;
     }
-    return *(int*)((char*)func_0027A668_2(ScriptEngine, *(int*)((char*)entity + 0x8)) + 0xC) ==
+    return *(int*)((char*)cSSXScriptEngine_GetScriptSetupInfo_2(ScriptEngine, *(int*)((char*)entity + 0x8)) + 0xC) ==
            *(int*)((char*)self + 0xF8);
 }
 #endif
@@ -7022,10 +7022,10 @@ extern "C" void cScriptObjCameraManager_ResetScriptManagementVars(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00281AC8);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_SetupCameraObject);
 #ifdef SKIP_ASM
-extern "C" void func_0027D688(char* self, void* anim);
-int func_00282F80(void* self);
+extern "C" void cScriptObjCamera_SetCameraEntity(char* self, void* anim);
+int cScriptEntity_IsPlaying(void* self);
 
 struct sSseAnim1AC8 {
     char pad_0x0[0xC];
@@ -7053,15 +7053,15 @@ struct sSseEngine1AC8 {
  * Points the camera of track @p ch at the playing entity camera of subtype @p anim, or releases the track for 9.
  *
  * A track without a camera (+0xDC holds -1) takes the first camera object (+0xD0) not in use (+0x8); with none free, or
- * for 9, nothing happens. Subtype 9 unbinds the camera's entity (func_0027D688 with 0) and frees the track. Otherwise,
+ * for 9, nothing happens. Subtype 9 unbinds the camera's entity (cScriptObjCamera_SetCameraEntity with 0) and frees the track. Otherwise,
  * unless the camera already shows that subtype (its entity's +0xC), the first of the 9 entity cameras (+0x1C) that is
- * playing (func_00282F80) with subtype @p anim is bound (func_0027D688); when none is, the track stays as it was.
+ * playing (cScriptEntity_IsPlaying) with subtype @p anim is bound (cScriptObjCamera_SetCameraEntity); when none is, the track stays as it was.
  *
  * @param selfp  the script camera manager
  * @param ch  the track index (0 or 1)
  * @param anim  the camera subtype, or 9 for none
  */
-extern "C" void func_00281AC8(void* selfp, int ch, int anim)
+extern "C" void cScriptObjCameraManager_SetupCameraObject(void* selfp, int ch, int anim)
 {
     sSseEngine1AC8* self = (sSseEngine1AC8*)selfp;
     int slot = self->chans[ch];
@@ -7081,7 +7081,7 @@ extern "C" void func_00281AC8(void* selfp, int ch, int anim)
         }
     }
     if (anim == 9) {
-        func_0027D688((char*)self->rigs[slot], 0);
+        cScriptObjCamera_SetCameraEntity((char*)self->rigs[slot], 0);
         self->chans[ch] = -1;
         return;
     }
@@ -7092,8 +7092,8 @@ extern "C" void func_00281AC8(void* selfp, int ch, int anim)
             if (j >= 9) {
                 return;
             }
-            if (func_00282F80(cameraEntity) != 0 && cameraEntity->id == anim) {
-                func_0027D688((char*)self->rigs[slot], cameraEntity);
+            if (cScriptEntity_IsPlaying(cameraEntity) != 0 && cameraEntity->id == anim) {
+                cScriptObjCamera_SetCameraEntity((char*)self->rigs[slot], cameraEntity);
                 break;
             }
         }
@@ -7103,7 +7103,7 @@ extern "C" void func_00281AC8(void* selfp, int ch, int anim)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00281C40);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_GetCameraObjectByTrack);
 #ifdef SKIP_ASM
 /**
  * Returns the camera object attached to track @p i: the camera slot (+0xD0) named by the track's attachment (+0xDC).
@@ -7111,7 +7111,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", func_00281C40);
  * @param i  the track index
  * @return the script camera object, or 0 when none is attached
  */
-extern "C" int func_00281C40(void* self, int i)
+extern "C" int cScriptObjCameraManager_GetCameraObjectByTrack(void* self, int i)
 {
     int j = *(int*)((char*)self + (i << 2) + 0xdc);
     if (j < 0) {
@@ -7122,18 +7122,18 @@ extern "C" int func_00281C40(void* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/ssxscriptengine", func_00281C68);
+INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_DoCameraTransition);
 #ifdef SKIP_ASM
-extern "C" void* func_0027D2E8(void);
-extern "C" int func_0027D2F0(sScriptEng0050* self, void* a1);
-void func_0027D788(void* self, float val);
-extern "C" void func_00281AC8(void* self, int a1, int a2);
-// PORT: func_00281C40 is defined returning int, but it returns a pointer here; bound by asm label.
-extern "C" void* func_00281C40_p(void* self, int i) __asm__("func_00281C40");
-// PORT: func_00282DB0's mangled signature is (void*, int, int); it also takes four floats (same alias as func_002812E0).
-void* func_00282DB0_f(void* self, int a1, int a2, float f0, float f1, float f2, float f3)
-    __asm__("func_00282DB0__FPvii");
-extern "C" void func_00282DD0(void* self, int id, int a, int b, float f0, float f1, float f2, float f3);
+extern "C" void* cScriptDatabaseObject_GetDatabaseObject(void);
+extern "C" int cScriptDatabaseObject_GetPlayerIDByEntity(sScriptEng0050* self, void* a1);
+void cScriptObjCamera_SetCameraWeight(void* self, float val);
+extern "C" void cScriptObjCameraManager_SetupCameraObject(void* self, int a1, int a2);
+// PORT: cScriptObjCameraManager_GetCameraObjectByTrack is defined returning int, but it returns a pointer here; bound by asm label.
+extern "C" void* cScriptObjCameraManager_GetCameraObjectByTrack_p(void* self, int i) __asm__("cScriptObjCameraManager_GetCameraObjectByTrack");
+// PORT: cScriptObjTransition_SetTransition's mangled signature is (void*, int, int); it also takes four floats (same alias as cScriptObjCameraManager_SetTransitionObject).
+void* cScriptObjTransition_SetTransition_f(void* self, int a1, int a2, float f0, float f1, float f2, float f3)
+    __asm__("cScriptObjTransition_SetTransition__FPvii");
+extern "C" void cScriptObjTransition_SetTransition1(void* self, int id, int a, int b, float f0, float f1, float f2, float f3);
 
 struct sKind_281C68
 {
@@ -7156,17 +7156,17 @@ struct sNode_281C68
 /**
  * Starts the camera transition to the first active camera of a camera-manager frame.
  *
- * For the other track: with a transition-in of 7 or more its camera is released (func_00281AC8 with 9), else its
- * camera's weight is set to 0. The camera's own track is set up for its value (func_00281AC8). The in-transition flag
+ * For the other track: with a transition-in of 7 or more its camera is released (cScriptObjCameraManager_SetupCameraObject with 9), else its
+ * camera's weight is set to 0. The camera's own track is set up for its value (cScriptObjCameraManager_SetupCameraObject). The in-transition flag
  * (+0xE8) is then set unless the transition-in is 8 (cut) or the overlap is 0 frames. For 7 and 9 the transition object
- * (+0xD8) gets func_00282DB0, and for 1-6 func_00282DD0 (with colour, out and hold frames), with the player using the
- * manager's entity (func_0027D2F0) and the frames since start; with no transition object the flag is cleared. 0 (blend)
+ * (+0xD8) gets cScriptObjTransition_SetTransition, and for 1-6 cScriptObjTransition_SetTransition1 (with colour, out and hold frames), with the player using the
+ * manager's entity (cScriptDatabaseObject_GetPlayerIDByEntity) and the frames since start; with no transition object the flag is cleared. 0 (blend)
  * needs no object.
  *
  * @param info  the frame (active camera count, active camera list)
  * @param currFrame  the current frame
  */
-extern "C" void func_00281C68(void* self, int* info, float currFrame)
+extern "C" void cScriptObjCameraManager_DoCameraTransition(void* self, int* info, float currFrame)
 {
     sNode_281C68* node = (sNode_281C68*)info[1];
     int bit = node->bit;
@@ -7176,14 +7176,14 @@ extern "C" void func_00281C68(void* self, int* info, float currFrame)
             continue;
         if (node->kind->a >= 7)
         {
-            func_00281AC8(self, i, 9);
+            cScriptObjCameraManager_SetupCameraObject(self, i, 9);
             continue;
         }
-        void* camera = func_00281C40_p(self, i);
+        void* camera = cScriptObjCameraManager_GetCameraObjectByTrack_p(self, i);
         if (camera)
-            func_0027D788(camera, 0.0f);
+            cScriptObjCamera_SetCameraWeight(camera, 0.0f);
     }
-    func_00281AC8(self, bit, node->mode);
+    cScriptObjCameraManager_SetupCameraObject(self, bit, node->mode);
     *(int*)((char*)self + 0xE8) = 0;
     if (node->kind->a == 8)
         return;
@@ -7199,8 +7199,8 @@ extern "C" void func_00281C68(void* self, int* info, float currFrame)
             *(int*)((char*)self + 0xE8) = 0;
             return;
         }
-        int id = func_0027D2F0((sScriptEng0050*)func_0027D2E8(), (char*)self + 0x10);
-        func_00282DB0_f(*pf, id, node->kind->a, currFrame - (float)node->start, (float)node->len, 0.0f, 0.0f);
+        int id = cScriptDatabaseObject_GetPlayerIDByEntity((sScriptEng0050*)cScriptDatabaseObject_GetDatabaseObject(), (char*)self + 0x10);
+        cScriptObjTransition_SetTransition_f(*pf, id, node->kind->a, currFrame - (float)node->start, (float)node->len, 0.0f, 0.0f);
     }
     else if (k > 0)
     {
@@ -7210,8 +7210,8 @@ extern "C" void func_00281C68(void* self, int* info, float currFrame)
             *(int*)((char*)self + 0xE8) = 0;
             return;
         }
-        int id = func_0027D2F0((sScriptEng0050*)func_0027D2E8(), (char*)self + 0x10);
-        func_00282DD0(*pf, id, node->kind->a, node->kind->b, currFrame - (float)node->start, (float)node->kind->d, (float)node->len, (float)node->kind->c);
+        int id = cScriptDatabaseObject_GetPlayerIDByEntity((sScriptEng0050*)cScriptDatabaseObject_GetDatabaseObject(), (char*)self + 0x10);
+        cScriptObjTransition_SetTransition1(*pf, id, node->kind->a, node->kind->b, currFrame - (float)node->start, (float)node->kind->d, (float)node->len, (float)node->kind->c);
     }
 }
 #endif
@@ -7219,7 +7219,7 @@ extern "C" void func_00281C68(void* self, int* info, float currFrame)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cBXScriptEngine_cBXScriptEngine);
 #ifdef SKIP_ASM
-extern "C" void* func_0027CDD0(void* self);
+extern "C" void* cScriptDatabaseObject_cScriptDatabaseObject(void* self);
 extern "C" void cBXScriptEngine_ResetInstVars(void* self);
 extern char D_00482450[];
 extern char cBXScriptEngine_vtbl[];
@@ -7232,7 +7232,7 @@ extern void* D_004A34E8;
  */
 extern "C" void* cBXScriptEngine_cBXScriptEngine(void* self)
 {
-    func_0027CDD0(self);
+    cScriptDatabaseObject_cScriptDatabaseObject(self);
     *(void**)((char*)self + 0x2AC) = D_00482450;
     *(void**)((char*)self + 0x2A8) = cBXScriptEngine_vtbl;
     D_004A34E8 = self;

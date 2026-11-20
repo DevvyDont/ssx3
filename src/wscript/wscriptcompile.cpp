@@ -88,7 +88,7 @@ extern "C" void cInstanceMan__cInstanceMan(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptcompile", func_00351170);
+INCLUDE_ASM("wscript/wscriptcompile", cInstanceMan_allocInstance1);
 #ifdef SKIP_ASM
 struct sWSNode {
     sWSNode* next;
@@ -117,7 +117,7 @@ struct sWSPool {
  *
  * @return the record
  */
-extern "C" sWSNode* func_00351170(sWSPool* self)
+extern "C" sWSNode* cInstanceMan_allocInstance1(sWSPool* self)
 {
     sWSNode* node = self->free;
     if (node != 0) {
@@ -163,7 +163,7 @@ extern "C" sWSNode* cInstanceMan_allocInstance(sWSPool* self, unsigned int id)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptcompile", func_00351260__FPvT0);
+INCLUDE_ASM("wscript/wscriptcompile", cInstanceMan_freeInstance__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Puts an instance record back on the instance manager's free list (+0x8): the record's first word links to the old
@@ -172,7 +172,7 @@ INCLUDE_ASM("wscript/wscriptcompile", func_00351260__FPvT0);
  * @param node  the instance record
  * @return the previous list head
  */
-int func_00351260(void* self, void* node)
+int cInstanceMan_freeInstance(void* self, void* node)
 {
     int oldHead = *(int*)((char*)self + 0x8);
     *(int*)node = oldHead;

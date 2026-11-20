@@ -4,7 +4,7 @@
 // cAvaSplineModifier: the transform modifier that drives an avalanche prop from its instance's animation spline
 // (cMoveNode::addAvaSpline). Unnamed in retail: vtable cAvaSplineModifier_vtbl (27 slots), identified by the "AvaSplineModifier" tag
 // and On Tour's layout. Size 0x90: retail cMemMan_alloc(0x90, "AvaSplineModifier") in cMoveNode's addAvaSpline and the
-// replay loader (type 7); On Tour 0x90. Constructors func_00357750 (instance) and func_00357798 (replay frame);
+// replay loader (type 7); On Tour 0x90. Constructors cAvaSplineModifier_cAvaSplineModifier (instance) and cAvaSplineModifier_cAvaSplineModifier1 (replay frame);
 // destructor cAvaSplineModifier__cAvaSplineModifier. EA's source file is unknown.
 // A FLAT layout: cTransformModifier (0x0: vptr) + cAvaSplineModifierState (0x10-0x40) + own fields (On Tour offsets).
 

@@ -879,13 +879,13 @@ struct sLoadScreen00234008 {
 };
 void cChaseCameraController_switchCamera_EndPostRace_v(void* self) __asm__("cChaseCameraController_switchCamera_EndPostRace__FPv");
 extern "C" int cSSXScriptEngine_PlayNISList(void* self, int i, int a, int b);
-void func_00278DE8(void* self, int val);
+void cSSXScriptEngine_DisallowNISListSkip(void* self, int val);
 
 /**
  * Leaves the finish-line state: updates every game view's camera, starts NIS list 0 and sets the next state to 7.
  *
  * For each view of the game's ViewMan (count at +0x10) calls cChaseCameraController_switchCamera_EndPostRace() on the view's +0xA8 object, sets the
- * sub-state (+0x10) to 2, calls cSSXScriptEngine_PlayNISList(ScriptEngine, 0, 1, 0) and func_00278DE8(ScriptEngine, 1),
+ * sub-state (+0x10) to 2, calls cSSXScriptEngine_PlayNISList(ScriptEngine, 0, 1, 0) and cSSXScriptEngine_DisallowNISListSkip(ScriptEngine, 1),
  * and stores mNextState (+0x0) 7. loseFocus slot of vtable D_0047D5E0.
  */
 extern "C" void cGFFinishlineState_loseFocus(sLoadScreen00234008* self)
@@ -899,7 +899,7 @@ extern "C" void cGFFinishlineState_loseFocus(sLoadScreen00234008* self)
     }
     self->mode = 2;
     cSSXScriptEngine_PlayNISList(ScriptEngine, 0, 1, 0);
-    func_00278DE8(ScriptEngine, 1);
+    cSSXScriptEngine_DisallowNISListSkip(ScriptEngine, 1);
     self->state = 7;
 }
 #endif
@@ -1005,7 +1005,7 @@ extern "C" void cBENewPlayerInterface_setRiderCharID(void* player, int i, int id
 extern "C" void cBENewPlayerInterface_setRiderCheatCharID(void* player, int i, int v);
 extern "C" void cSSXScriptEngine_ResetNISList(void* self, int i);
 extern "C" void cSSXScriptEngine_AppendStartSequence(void* a, int b);
-// PORT: cSSXScriptEngine_ReadyNISList returns func_00276270's result (ssxscriptengine defines it void).
+// PORT: cSSXScriptEngine_ReadyNISList returns tNISList_ReadyList's result (ssxscriptengine defines it void).
 extern "C" int cSSXScriptEngine_ReadyNISList(void* self, int i);
 extern void* cGameState_mpGame;
 extern signed char D_00535C10[];

@@ -1660,7 +1660,7 @@ extern "C" int func_002534A8_impl(void* self, sMemCfg_2534A8* cfg)
 INCLUDE_ASM("mem/memstd", func_002535F8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003B0680(void*, void*);
+extern "C" void RCMP_DECODER_ReleaseFrame(void*, void*);
 extern "C" void func_003AE300(void* p, int flags);
 extern int D_004A2E9C;
 
@@ -1712,7 +1712,7 @@ extern "C" void func_002535F8(void* self)
         ((cWorld002535F8*)cGraphicsMan_TheGraphicsMan)->v19();
     }
     if (s->f40 != 0 && s->fC != 0) {
-        func_003B0680(*(void**)(s->f38 + 0x64), s->fC);
+        RCMP_DECODER_ReleaseFrame(*(void**)(s->f38 + 0x64), s->fC);
     }
     void* o = s->f3C;
     if (o != 0) {
@@ -2323,7 +2323,7 @@ extern "C" void func_002547B8(sTexCache_2547B8* self, int flags)
     }
     self->texs = 0;
     if (self->fC != 0) {
-        func_003B0680(self->owner, self->fC);
+        RCMP_DECODER_ReleaseFrame(self->owner, self->fC);
         self->fC = 0;
     }
     self->vt = D_004802B0;
@@ -2638,7 +2638,7 @@ struct sMemStdVEntry {
     int (*fn)(void*);
 };
 
-extern "C" void func_003B0680(void*, void*);
+extern "C" void RCMP_DECODER_ReleaseFrame(void*, void*);
 
 extern "C" void func_00254DC0(void* self)
 {
@@ -2650,7 +2650,7 @@ extern "C" void func_00254DC0(void* self)
     } while (vt[18].fn((char*)rend + vt[18].delta) == 0);
     void* resource = *(void**)((char*)self + 0xC);
     if (resource != 0) {
-        func_003B0680(*(void**)((char*)self + 0x0), resource);
+        RCMP_DECODER_ReleaseFrame(*(void**)((char*)self + 0x0), resource);
         *(void**)((char*)self + 0xC) = 0;
     }
 }

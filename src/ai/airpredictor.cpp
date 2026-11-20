@@ -90,8 +90,8 @@ extern sQuadR t4vect_ZAxis;
 float cAirPredictor_simOneTick_3200(void* self, sVec4_3200* pos, sVec4_3200* vel, sVec4_3200* outPos, sVec4_3200* outVel) __asm__("cAirPredictor_simOneTick");
 // cWorldLine_cWorldLine (intersect/riderspheretree) builds the capsule and returns it.
 extern "C" sRay_3200* cWorldLine_cWorldLine(sRay_3200* ray, sVec4_3200* a, sVec4_3200* b, int c, float d);
-extern "C" float func_00336850(void* world, sRay_3200* ray, sHit_3200* hit, int c);
-extern "C" float func_003378C0(void* world, sRay_3200* ray, sHit_3200* hit, int c);
+extern "C" float cBXNash_terrainIntersect1(void* world, sRay_3200* ray, sHit_3200* hit, int c);
+extern "C" float cBXNash_staticObjectIntersect1(void* world, sRay_3200* ray, sHit_3200* hit, int c);
 
 // PORT: PS2-only VU0 inline asm (normalize).
 static inline sVec4_3200 vu0Normalize_3200(const sVec4_3200& v)
@@ -228,7 +228,7 @@ static inline void vu0AddEq_3200(sVec4_3200& a, const sVec4_3200& b)
  * (cAirPredictor_simOneTick), recording ApexTime/GuessApexPos (+0x9C/+0x40) while the height keeps rising; it stops when the new
  * velocity's direction differs from the start (speed * 0.99 > dot of the old unit velocity and the new velocity) or
  * after 270000 / TerminalVel (+0xA8) ticks. It then casts a capsule (cWorldLine_cWorldLine) along the travelled segment,
- * lengthened by 2% at each end, against the world (func_00336850 in SimState 0, func_003378C0 otherwise). A hit facing
+ * lengthened by 2% at each end, against the world (cBXNash_terrainIntersect1 in SimState 0, cBXNash_staticObjectIntersect1 otherwise). A hit facing
  * the motion sets GuessLandPosition, rewinds TotalAirTime by the unused part of the step, blends GuessLandVelocity from
  * the old and new velocities, and sets SimState 1 with the hit's normal and surface (or 3 with the Z axis and surface
  * 13 when SimState was 2); the landing patch's flags, resource id and UV come from the hit object when SimState is 1,
@@ -268,9 +268,9 @@ extern "C" void cAirPredictor_simStep(char* vself)
     cWorldLine_cWorldLine(&w1, &segEnd, &segStart, 1, 1.0f);
     float hitParam;
     if (self->state == 0) {
-        hitParam = func_00336850(SSXApp->Game->BXNash, &w1, &ti, 0);
+        hitParam = cBXNash_terrainIntersect1(SSXApp->Game->BXNash, &w1, &ti, 0);
     } else {
-        hitParam = func_003378C0(SSXApp->Game->BXNash, &w1, &ti, 0);
+        hitParam = cBXNash_staticObjectIntersect1(SSXApp->Game->BXNash, &w1, &ti, 0);
     }
     if (hitParam >= 0.0f && vu0Dot_3200(ray, ti.normal) < 0.0f) {
         self->f00 = ti.pos;

@@ -346,15 +346,15 @@ extern "C" int cSndPlayOpts_OPTS_GetTwoPlayerSide(void *opts) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_LibDefault);
 #ifdef SKIP_ASM
-extern "C" void func_003BA020(int);
+extern "C" void SNDplaysetdef(int);
 
 /**
- * Fills the current level's SNDPLAYOPTS (mCurrent[mInst]) with the audio library's defaults via func_003BA020.
+ * Fills the current level's SNDPLAYOPTS (mCurrent[mInst]) with the audio library's defaults via SNDplaysetdef.
  *
  * @param opts  the play options
  */
 extern "C" void cSndPlayOpts_OPTS_LibDefault(void *opts) {
-    func_003BA020((*(int *)((char*)(opts) + (0x20))) + ((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18));
+    SNDplaysetdef((*(int *)((char*)(opts) + (0x20))) + ((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18));
 }
 #endif
 
@@ -1182,27 +1182,27 @@ extern "C" int cBankManager_BANK_Loading(void *bankManager, int bankId) {
 INCLUDE_ASM("bx/seg_1BA100", cBankManager_BANK_InUse);
 #ifdef SKIP_ASM
 extern "C" int cBankManager_BANK_Handle(void *, int);
-extern "C" void func_003B58A0();
-extern "C" void func_003B58D8();
-extern "C" int func_003B65D0(int);
+extern "C" void SNDSYS_entercritical();
+extern "C" void SNDSYS_leavecritical();
+extern "C" int SNDbankinuse(int);
 
 /**
  * Returns whether a loaded bank is in use by the audio library.
  *
- * Between func_003B58A0 and func_003B58D8 (the lock pair cBankSys_SFX_End also uses around library calls), checks that
- * the bank's status is 1 (used) and then whether func_003B65D0 returns 1 for its handle (cBankManager_BANK_Handle).
+ * Between SNDSYS_entercritical and SNDSYS_leavecritical (the lock pair cBankSys_SFX_End also uses around library calls), checks that
+ * the bank's status is 1 (used) and then whether SNDbankinuse returns 1 for its handle (cBankManager_BANK_Handle).
  *
  * @param idx  the bank index
- * @return 1 when the bank is loaded and func_003B65D0 reports 1, else 0
+ * @return 1 when the bank is loaded and SNDbankinuse reports 1, else 0
  */
 extern "C" int cBankManager_BANK_InUse(void *self, int idx) {
     int ready = 0;
-    func_003B58A0();
+    SNDSYS_entercritical();
     bool ok = *(int *)((char*)(*(int *)((char*)self + 0xACC)) + idx * 0x60) != 1;
     if (!ok) {
-        ready = func_003B65D0(cBankManager_BANK_Handle(self, idx)) == 1;
+        ready = SNDbankinuse(cBankManager_BANK_Handle(self, idx)) == 1;
     }
-    func_003B58D8();
+    SNDSYS_leavecritical();
     return ready;
 }
 #endif

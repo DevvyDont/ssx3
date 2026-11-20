@@ -1162,7 +1162,7 @@ struct sVec_EE00 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-// Probe hit record filled by func_00336850 (0x80 bytes).
+// Probe hit record filled by cBXNash_terrainIntersect1 (0x80 bytes).
 struct sHit_EE00 {
     sVec_EE00 pos;      // 0x0
     sVec_EE00 normal;   // 0x10
@@ -1173,7 +1173,7 @@ extern sVec_EE00 D_004FF160_vEE00 __asm__("t4vect_ZAxis");
 extern sVec_EE00 D_004FF140_vEE00 __asm__("t4vect_XAxis");
 // cWorldLine::cWorldLine(const t4Vector&, const t4Vector&, float, tIntPrecision)
 extern "C" void* cWorldLine_cWorldLine(void* seg, const sVec_EE00& a, const sVec_EE00& b, float r, int n);
-extern "C" float func_00336850(void* world, void* seg, sHit_EE00* out, int a3);
+extern "C" float cBXNash_terrainIntersect1(void* world, void* seg, sHit_EE00* out, int a3);
 extern "C" int cChaseCameraController_shouldDoExtraGroundTest(void* self);
 
 static inline const sVec_EE00& Forward_EE00()
@@ -1340,7 +1340,7 @@ extern "C" void cCamera_avoidGround_impl(char* self) __asm__("cCamera_avoidGroun
  *
  * Ground test: a vertical line through the eye raised by LastGroundMove, 300 / s above and below it (s = the sine of
  * the look direction's slope, at least 0.05) and moved 50 to the side away from LastGroundNormal, is tested against
- * the world SSXApp->Game->BXNash (cWorldLine_cWorldLine builds the line, func_00336850 tests it with IntersectionHint). On a
+ * the world SSXApp->Game->BXNash (cWorldLine_cWorldLine builds the line, cBXNash_terrainIntersect1 tests it with IntersectionHint). On a
  * hit, LastGroundMove is raised for an upward-facing hit normal and lowered for a downward one: by 50 / s minus the
  * hit's distance from the eye when the eye is on the side the normal faces, else by that distance plus 50 / s
  * (nothing when that is over 150); LastGroundNormal takes the normal. The eye is then raised by LastGroundMove, put
@@ -1378,7 +1378,7 @@ extern "C" void cCamera_avoidGround_impl(char* self)
     ScaleEq_EE00(screenLeft, dir * 50.0f / Length_EE00(screenLeft));
     char line[176];
     cWorldLine_cWorldLine(line, Add_EE00(testHigh, screenLeft), Add_EE00(testLow, screenLeft), 0.5f, 2);
-    float hitFraction = func_00336850(nash, line, &info, (int)(self + 0x480));
+    float hitFraction = cBXNash_terrainIntersect1(nash, line, &info, (int)(self + 0x480));
     if (hitFraction > 0.0f) {
         float normZ = info.normal.z;
         float move;
@@ -1422,7 +1422,7 @@ extern "C" void cCamera_avoidGround_impl(char* self)
         char line2[176];
         cWorldLine_cWorldLine(line2, riderPoint, viewPoint, 0.5f, 2);
         sHit_EE00 info2;
-        if (func_00336850(SSXApp->Game->BXNash, line2, &info2, 0) > 0.0f) {
+        if (cBXNash_terrainIntersect1(SSXApp->Game->BXNash, line2, &info2, 0) > 0.0f) {
             if (*(int*)(self + 0x4A4) != 0)
                 *(sVec_EE00*)(self + 0x100) = Add_EE00(Add_EE00(*(sVec_EE00*)(self + 0xE0), Scale_EE00(D_004FF160_vEE00, 180.0f)), Scale_EE00(Forward_EE00(), 180.0f));
             else

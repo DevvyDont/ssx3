@@ -9245,13 +9245,13 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E65B8);
 int GetHashValue32(char* str);
 extern char str_overlayMenu[];
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-void func_0026F898(void* self, int val);
+void cReplay_setReplayPadNum(void* self, int val);
 
 /**
  * Notes the input's pad in the replay while the standings menu has its third button highlighted (vtable entry 8).
  *
  * When the screen's "overlayMenu" has row 2 selected (+0x95; Replay in the default option list) passes the input's byte
- * +0x4 to the replay (func_0026F898).
+ * +0x4 to the replay (cReplay_setReplayPadNum).
  *
  * @param input  the input
  * @return 0
@@ -9261,7 +9261,7 @@ extern "C" int func_001E65B8(void* self, void* input)
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_overlayMenu));
     if (obj != 0) {
         if (*(unsigned char*)((char*)obj + 0x95) == 2) {
-            func_0026F898(SSXApp->Game->Replay, *(unsigned char*)((char*)input + 4));
+            cReplay_setReplayPadNum(SSXApp->Game->Replay, *(unsigned char*)((char*)input + 4));
         }
     }
     return 0;
@@ -9959,7 +9959,7 @@ struct sVEntry001E7AA8 {
 /**
  * Handles input on the final standings overlay (vtable entry 8, onInputBegin).
  *
- * Passes the input's pad byte (+0x4) to the replay (func_0026F898) while "overlayMenu" has row 2 selected; in a
+ * Passes the input's pad byte (+0x4) to the replay (cReplay_setReplayPadNum) while "overlayMenu" has row 2 selected; in a
  * connected network game triggers overlay 40 when the input's vtable entry 27 answers nonzero.
  *
  * @param input  the input
@@ -9970,7 +9970,7 @@ extern "C" int func_001E7AA8(void* self, void* input)
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_overlayMenu));
     if (obj != 0) {
         if (*(unsigned char*)((char*)obj + 0x95) == 2) {
-            func_0026F898(SSXApp->Game->Replay, *(unsigned char*)((char*)input + 4));
+            cReplay_setReplayPadNum(SSXApp->Game->Replay, *(unsigned char*)((char*)input + 4));
         }
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);

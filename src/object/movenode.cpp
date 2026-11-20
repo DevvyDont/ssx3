@@ -405,7 +405,7 @@ extern "C" void cMoveNode_setDebounce(cMoveNode* self, float secs)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355878__FPvT0);
+INCLUDE_ASM("object/movenode", cMoveNode_addFade__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Sets a move node's fade from add-fade data: Fade (+0x24) = fadeData +0x4.
@@ -413,7 +413,7 @@ INCLUDE_ASM("object/movenode", func_00355878__FPvT0);
  * @param fadeData  add-fade make-data
  * @return the new Fade (left in f0; callers ignore it)
  */
-float func_00355878(void* self, void* fadeData)
+float cMoveNode_addFade(void* self, void* fadeData)
 {
     float fade = *(float*)((char*)fadeData + 0x4);
     *(float*)((char*)self + 0x24) = fade;
@@ -443,45 +443,45 @@ extern "C" void cMoveNode_addDebounce(cMoveNode* self, void* data)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_003558B8);
+INCLUDE_ASM("object/movenode", cMoveNode_addPosition);
 #ifdef SKIP_ASM
 struct sMoveQuad;
 extern char str_PositionModifier[];
-extern "C" void* func_00356EB8(cPositionModifier* self, sMoveQuad* pos);
+extern "C" void* cPositionModifier_cPositionModifier(cPositionModifier* self, sMoveQuad* pos);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 /**
  * Gives a move node a fixed position offset.
  *
- * Allocates a 144-byte "PositionModifier", builds it from pos (func_00356EB8) and installs it with
+ * Allocates a 144-byte "PositionModifier", builds it from pos (cPositionModifier_cPositionModifier) and installs it with
  * cMoveNode_addTransformModifier.
  *
  * @param pos  offset to apply
  */
-extern "C" void func_003558B8(cMoveNode* self, sMoveQuad* pos)
+extern "C" void cMoveNode_addPosition(cMoveNode* self, sMoveQuad* pos)
 {
-    cMoveNode_addTransformModifier(self, func_00356EB8((cPositionModifier*)cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), pos));
+    cMoveNode_addTransformModifier(self, cPositionModifier_cPositionModifier((cPositionModifier*)cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), pos));
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00355918);
+INCLUDE_ASM("object/movenode", cMoveNode_addPosition1);
 #ifdef SKIP_ASM
 extern char str_PositionModifier[];
-extern "C" void* func_00356F10(cPositionModifier* mem, void* desc);
+extern "C" void* cPositionModifier_cPositionModifier1(cPositionModifier* mem, void* desc);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 /**
  * Gives a move node a fixed transform taken from a matrix.
  *
- * Allocates a 144-byte "PositionModifier", builds it from the matrix (func_00356F10) and installs it with
+ * Allocates a 144-byte "PositionModifier", builds it from the matrix (cPositionModifier_cPositionModifier1) and installs it with
  * cMoveNode_addTransformModifier.
  *
  * @param desc  matrix (t4Matrix) to use
  */
-extern "C" void func_00355918(cMoveNode* self, void* desc)
+extern "C" void cMoveNode_addPosition1(cMoveNode* self, void* desc)
 {
-    cMoveNode_addTransformModifier(self, func_00356F10((cPositionModifier*)cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), desc));
+    cMoveNode_addTransformModifier(self, cPositionModifier_cPositionModifier1((cPositionModifier*)cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), desc));
 }
 #endif
 
@@ -490,11 +490,11 @@ INCLUDE_ASM("object/movenode", cMoveNode_addParent);
 #ifdef SKIP_ASM
 struct sMoveQuad;
 extern char str_ParentModifier[];
-extern "C" void* func_00357038(cParentModifier* self, void* a1, void* a2, sMoveQuad* pos);
+extern "C" void* cParentModifier_cParentModifier1(cParentModifier* self, void* a1, void* a2, sMoveQuad* pos);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 /**
- * Attaches the node to a parent instance: a new cParentModifier ("ParentModifier", func_00357038) as its transform
+ * Attaches the node to a parent instance: a new cParentModifier ("ParentModifier", cParentModifier_cParentModifier1) as its transform
  * modifier.
  *
  * @param parentinst  the parent instance (On Tour tInstanceRecord* parentinst)
@@ -503,7 +503,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addParent(cMoveNode* self, void* parentinst, void* mesh, sMoveQuad* pos)
 {
-    cMoveNode_addTransformModifier(self, func_00357038((cParentModifier*)cMemMan_alloc(176, str_ParentModifier, 0x20000000, 0), parentinst, mesh, pos));
+    cMoveNode_addTransformModifier(self, cParentModifier_cParentModifier1((cParentModifier*)cMemMan_alloc(176, str_ParentModifier, 0x20000000, 0), parentinst, mesh, pos));
 }
 #endif
 
@@ -511,11 +511,11 @@ extern "C" void cMoveNode_addParent(cMoveNode* self, void* parentinst, void* mes
 INCLUDE_ASM("object/movenode", cMoveNode_addMagnet);
 #ifdef SKIP_ASM
 extern char str_MagnetModifier[];
-extern "C" void* func_003572E0(cMagnetModifier* self, void* owner, void* a2, float f0, float f1);
+extern "C" void* cMagnetModifier_cMagnetModifier(cMagnetModifier* self, void* owner, void* a2, float f0, float f1);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 /**
- * Makes the node a magnet: a new cMagnetModifier ("MagnetModifier", func_003572E0) on its instance as its transform
+ * Makes the node a magnet: a new cMagnetModifier ("MagnetModifier", cMagnetModifier_cMagnetModifier) on its instance as its transform
  * modifier.
  *
  * @param mat  the magnet's matrix (On Tour const t4Matrix& mat)
@@ -524,30 +524,30 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addMagnet(cMoveNode* self, void* mat, float radius, float magnetSpeed)
 {
-    cMoveNode_addTransformModifier(self, func_003572E0((cMagnetModifier*)cMemMan_alloc(176, str_MagnetModifier, 0x20000000, 0),
+    cMoveNode_addTransformModifier(self, cMagnetModifier_cMagnetModifier((cMagnetModifier*)cMemMan_alloc(176, str_MagnetModifier, 0x20000000, 0),
                                       self->Instance, mat, radius, magnetSpeed));
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00355A78);
+INCLUDE_ASM("object/movenode", cMoveNode_addAvaSpline);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_badCookie;
 extern char str_AvaSplineModifier[];
-extern "C" void* func_00357750(cAvaSplineModifier* self, void* src);
+extern "C" void* cAvaSplineModifier_cAvaSplineModifier(cAvaSplineModifier* self, void* src);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
 /**
  * Puts a move node on the avalanche spline, unless the avalanche cookie check failed.
  *
- * When cAvalanche_m_badCookie is 0, allocates a 144-byte "AvaSplineModifier" for Instance (func_00357750) and installs
+ * When cAvalanche_m_badCookie is 0, allocates a 144-byte "AvaSplineModifier" for Instance (cAvaSplineModifier_cAvaSplineModifier) and installs
  * it with cMoveNode_addTransformModifier. Its caller in seg_1FBE38 passes the instance record as a second argument,
  * which this body never reads.
  */
-extern "C" void func_00355A78(cMoveNode* self)
+extern "C" void cMoveNode_addAvaSpline(cMoveNode* self)
 {
     if (cAvalanche_m_badCookie == 0) {
-        cMoveNode_addTransformModifier(self, func_00357750((cAvaSplineModifier*)cMemMan_alloc(144, str_AvaSplineModifier, 0x20000000, 0), self->Instance));
+        cMoveNode_addTransformModifier(self, cAvaSplineModifier_cAvaSplineModifier((cAvaSplineModifier*)cMemMan_alloc(144, str_AvaSplineModifier, 0x20000000, 0), self->Instance));
     }
 }
 #endif
@@ -596,17 +596,17 @@ extern "C" void cMoveNode_addSpline(cMoveNode* self, void* desc)
 INCLUDE_ASM("object/movenode", cMoveNode_addUVScroll);
 #ifdef SKIP_ASM
 extern char str_UVScrollModifier[];
-extern "C" void* func_0035F6E8(void* mem, void* desc);
+extern "C" void* cUVScrollModifier_cUVScrollModifier(void* mem, void* desc);
 extern "C" void cMoveNode_addUVScrollModifier(cMoveNode* self, void* mod);
 
 /**
- * Adds a UV-scroll modifier built from a placement record: a new "UVScrollModifier" (func_0035F6E8) on the node.
+ * Adds a UV-scroll modifier built from a placement record: a new "UVScrollModifier" (cUVScrollModifier_cUVScrollModifier) on the node.
  *
  * @param desc  the UV-scroll data (On Tour const tAddUVScrollData& udata)
  */
 extern "C" void cMoveNode_addUVScroll(cMoveNode* self, void* desc)
 {
-    cMoveNode_addUVScrollModifier(self, func_0035F6E8(cMemMan_alloc(80, str_UVScrollModifier, 0x20000000, 0), desc));
+    cMoveNode_addUVScrollModifier(self, cUVScrollModifier_cUVScrollModifier(cMemMan_alloc(80, str_UVScrollModifier, 0x20000000, 0), desc));
 }
 #endif
 
@@ -614,18 +614,18 @@ extern "C" void cMoveNode_addUVScroll(cMoveNode* self, void* desc)
 INCLUDE_ASM("object/movenode", cMoveNode_addTexFlip);
 #ifdef SKIP_ASM
 extern char str_TexFlipModifier[];
-extern "C" void* func_0035F0B8(void* mem, void* desc, void* owner);
+extern "C" void* cTexFlipModifier_cTexFlipModifier(void* mem, void* desc, void* owner);
 extern "C" void cMoveNode_addTexFlipModifier(cMoveNode* self, void* mod);
 
 /**
- * Adds a texture-flip modifier built from a placement record: a new "TexFlipModifier" (func_0035F0B8, with the node's
+ * Adds a texture-flip modifier built from a placement record: a new "TexFlipModifier" (cTexFlipModifier_cTexFlipModifier, with the node's
  * instance) on the node.
  *
  * @param desc  the texture-flip data (On Tour const tAddTexFlipData& tdata)
  */
 extern "C" void cMoveNode_addTexFlip(cMoveNode* self, void* desc)
 {
-    cMoveNode_addTexFlipModifier(self, func_0035F0B8(cMemMan_alloc(232, str_TexFlipModifier, 0x20000000, 0), desc, self->Instance));
+    cMoveNode_addTexFlipModifier(self, cTexFlipModifier_cTexFlipModifier(cMemMan_alloc(232, str_TexFlipModifier, 0x20000000, 0), desc, self->Instance));
 }
 #endif
 
@@ -633,18 +633,18 @@ extern "C" void cMoveNode_addTexFlip(cMoveNode* self, void* desc)
 INCLUDE_ASM("object/movenode", cMoveNode_addBoost);
 #ifdef SKIP_ASM
 extern char str_BoostModifier[];
-extern "C" void* func_00342768(void* mem, void* desc, void* owner);
+extern "C" void* cBoostModifier_cBoostModifier(void* mem, void* desc, void* owner);
 extern "C" void cMoveNode_addPhysicsModifier(cMoveNode* self, void* mod);
 
 /**
- * Adds a boost modifier built from a placement record: a new "BoostModifier" (func_00342768, with the node's
+ * Adds a boost modifier built from a placement record: a new "BoostModifier" (cBoostModifier_cBoostModifier, with the node's
  * instance) as the node's physics modifier.
  *
  * @param desc  the boost data (On Tour const tAddBoostData& adata)
  */
 extern "C" void cMoveNode_addBoost(cMoveNode* self, void* desc)
 {
-    cMoveNode_addPhysicsModifier(self, func_00342768(cMemMan_alloc(80, str_BoostModifier, 0x20000000, 0), desc, self->Instance));
+    cMoveNode_addPhysicsModifier(self, cBoostModifier_cBoostModifier(cMemMan_alloc(80, str_BoostModifier, 0x20000000, 0), desc, self->Instance));
 }
 #endif
 
@@ -741,7 +741,7 @@ extern "C" void cMoveNode_addRail(cMoveNode* self, void* desc)
 INCLUDE_ASM("object/movenode", cMoveNode_addHalo);
 #ifdef SKIP_ASM
 extern char str_HaloModifier[];
-extern "C" void* func_00346120(void* mem, void* desc, void* owner);
+extern "C" void* cHaloModifier_cHaloModifier(void* mem, void* desc, void* owner);
 void cMoveNode_addEffectModifier(cMoveNode* self, void* mod);
 
 /**
@@ -751,7 +751,7 @@ void cMoveNode_addEffectModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addHalo(cMoveNode* self, void* desc)
 {
-    cMoveNode_addEffectModifier(self, func_00346120(cMemMan_alloc(0x40, str_HaloModifier, 0x20000000, 0), desc,
+    cMoveNode_addEffectModifier(self, cHaloModifier_cHaloModifier(cMemMan_alloc(0x40, str_HaloModifier, 0x20000000, 0), desc,
                                                     self->Instance));
 }
 #endif
@@ -808,7 +808,7 @@ struct sNodeVEntryV_355F10 {
  *
  * When the old node has effects (slot 16) they move over (cMoveNode_transferEffectModifier). If its transform (slot
  * 24) is this node's own instance matrix (Instance + 0x10) the old node is just deleted; otherwise the matrix is
- * copied, the old node deleted (keeping Instance's word +0x8), the copy applied with func_00355918, TransferHack
+ * copied, the old node deleted (keeping Instance's word +0x8), the copy applied with cMoveNode_addPosition1, TransferHack
  * set and virtual slot 50 called.
  *
  * @param srcv  the node being replaced (On Tour cInstanceNode* pOldNode); null is ignored
@@ -836,7 +836,7 @@ extern "C" void cMoveNode_transferFromOld(cMoveNode* self, void* srcv)
     sNodeVEntryD_355F10* vd = *(sNodeVEntryD_355F10**)(src + 0xC);
     vd[1].fn(src + vd[1].delta, 3);
     *(int*)((char*)self->Instance + 8) = keep;
-    func_00355918(self, &copy);
+    cMoveNode_addPosition1(self, &copy);
     self->TransferHack = 1;
     sNodeVEntryV_355F10* vv = (sNodeVEntryV_355F10*)self->mVtbl;
     vv[50].fn((char*)self + vv[50].delta);
@@ -1798,9 +1798,9 @@ struct sMnVEntryI6C48 {
     int (*fn)(void*);
 };
 
-// PORT: func_0035AAD0 takes one argument, but this caller passes a second ($5 = a1);
+// PORT: cMultiSplineModifier_incFocusCount takes one argument, but this caller passes a second ($5 = a1);
 // the original declaration it was compiled against must have had two parameters.
-int func_0035AAD0_2(void* self, void* a1) __asm__("func_0035AAD0__FPv");
+int cMultiSplineModifier_incFocusCount_2(void* self, void* a1) __asm__("cMultiSplineModifier_incFocusCount__FPv");
 
 /**
  * Increments the focus count of a type-2 root transform modifier.
@@ -1816,7 +1816,7 @@ extern "C" int cMoveNode_incFocusCount(cMoveNode* self, void* pInst)
         if (node != 0) {
             sMnVEntryI6C48* vt = *(sMnVEntryI6C48**)node;
             if (vt[26].fn((char*)node + vt[26].delta) == 2) {
-                return func_0035AAD0_2(*(void**)((void*)self->ModifierBlock), pInst);
+                return cMultiSplineModifier_incFocusCount_2(*(void**)((void*)self->ModifierBlock), pInst);
             }
         }
         return 0;
@@ -1834,9 +1834,9 @@ struct sMnVEntryI6CC8 {
     int (*fn)(void*);
 };
 
-// PORT: func_0035AAE0 takes one argument, but this caller passes a second ($5 = a1);
+// PORT: cMultiSplineModifier_decFocusCount takes one argument, but this caller passes a second ($5 = a1);
 // the original declaration it was compiled against must have had two parameters.
-int func_0035AAE0_2(void* self, void* a1) __asm__("func_0035AAE0__FPv");
+int cMultiSplineModifier_decFocusCount_2(void* self, void* a1) __asm__("cMultiSplineModifier_decFocusCount__FPv");
 
 /**
  * Decrements the focus count of a type-2 root transform modifier.
@@ -1852,7 +1852,7 @@ extern "C" int cMoveNode_decFocusCount(cMoveNode* self, void* pInst)
         if (node != 0) {
             sMnVEntryI6CC8* vt = *(sMnVEntryI6CC8**)node;
             if (vt[26].fn((char*)node + vt[26].delta) == 2) {
-                return func_0035AAE0_2(*(void**)((void*)self->ModifierBlock), pInst);
+                return cMultiSplineModifier_decFocusCount_2(*(void**)((void*)self->ModifierBlock), pInst);
             }
         }
         return 0;
@@ -1891,7 +1891,7 @@ extern "C" int cMoveNode_getFocusCount(cMoveNode* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356DB0);
+INCLUDE_ASM("object/movenode", cObjectNode_cObjectNode);
 #ifdef SKIP_ASM
 struct sMoveFlags_6DB0 {
     char pad_0x00[0x8];
@@ -1899,12 +1899,12 @@ struct sMoveFlags_6DB0 {
 };
 
 extern void* D_00490E80[];
-extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
+extern "C" void* cMoveNode_cMoveNode1(void* self, void* a1, int type, void* a3);
 
 /**
  * Constructs an object node (node type 17) for a placed instance.
  *
- * Runs the cMoveNode record constructor func_00355280 and installs D_00490E80. When the instance is forced visible or
+ * Runs the cMoveNode record constructor cMoveNode_cMoveNode1 and installs D_00490E80. When the instance is forced visible or
  * the record flags have both bits 0x1 and 0x2, the flags get 0x4 and lose 0x2; for a solid object they get 0x20 and
  * lose 0x40.
  *
@@ -1914,9 +1914,9 @@ extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
  * @param forceVisible  force the instance visible
  * @return self
  */
-extern "C" void* func_00356DB0(void* self, void* bucket, void* instRecord, int isSolid, int forceVisible)
+extern "C" void* cObjectNode_cObjectNode(void* self, void* bucket, void* instRecord, int isSolid, int forceVisible)
 {
-    func_00355280(self, bucket, 17, instRecord);
+    cMoveNode_cMoveNode1(self, bucket, 17, instRecord);
     *(void***)((char*)self + 0xC) = D_00490E80;
     if (forceVisible != 0 || ((*(sMoveFlags_6DB0**)((char*)self + 0x18))->w & 3) == 3) {
         sMoveFlags_6DB0* recordFlags = *(sMoveFlags_6DB0**)((char*)self + 0x18);
@@ -1931,7 +1931,7 @@ extern "C" void* func_00356DB0(void* self, void* bucket, void* instRecord, int i
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_00356E60);
+INCLUDE_ASM("object/movenode", cObjectNode_cObjectNode1);
 #ifdef SKIP_ASM
 extern "C" void* cMoveNode_cMoveNode(void* self);
 extern void* D_00490E80[];
@@ -1941,7 +1941,7 @@ extern void* D_00490E80[];
  *
  * @return self
  */
-extern "C" void* func_00356E60(void* self)
+extern "C" void* cObjectNode_cObjectNode1(void* self)
 {
     cMoveNode_cMoveNode(self);
     *(void***)((char*)self + 0xC) = D_00490E80;
@@ -1952,21 +1952,21 @@ extern "C" void* func_00356E60(void* self)
 extern "C" void* cMoveNode_writeToReplayFrame(void* self);
 
 //99.29%
-INCLUDE_ASM("object/movenode", func_00356E98__FPv);
+INCLUDE_ASM("object/movenode", cObjectNode_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
  * Writes an object node to a replay frame by forwarding to cMoveNode_writeToReplayFrame.
  *
  * @return cMoveNode_writeToReplayFrame's result (callers ignore it)
  */
-void* func_00356E98(void* self)
+void* cObjectNode_writeToReplayFrame(void* self)
 {
     return cMoveNode_writeToReplayFrame(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356EB8);
+INCLUDE_ASM("object/movenode", cPositionModifier_cPositionModifier);
 #ifdef SKIP_ASM
 struct sMoveQuad {
     float v[4];
@@ -1984,7 +1984,7 @@ extern sMoveQuad t4mat_Identity[];
  * @param pos  offset
  * @return self
  */
-extern "C" void* func_00356EB8(cPositionModifier* self, sMoveQuad* pos)
+extern "C" void* cPositionModifier_cPositionModifier(cPositionModifier* self, sMoveQuad* pos)
 {
     *(void***)self = cPositionModifier_vtbl;
     *(sMoveQuad*)&self->Offset = *pos;
@@ -2010,7 +2010,7 @@ extern "C" void* func_00356EB8(cPositionModifier* self, sMoveQuad* pos)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356F10);
+INCLUDE_ASM("object/movenode", cPositionModifier_cPositionModifier1);
 #ifdef SKIP_ASM
 struct sMoveQuad2 {
     float v[4];
@@ -2027,7 +2027,7 @@ extern void* cPositionModifier_vtbl[];
  * @param src  matrix (t4Matrix)
  * @return self
  */
-extern "C" void* func_00356F10(cPositionModifier* self, void* src)
+extern "C" void* cPositionModifier_cPositionModifier1(cPositionModifier* self, void* src)
 {
     *(void***)self = cPositionModifier_vtbl;
     sMoveQuad2 translation = *(sMoveQuad2*)((char*)src + 0x30);
@@ -2053,7 +2053,7 @@ extern "C" void* func_00356F10(cPositionModifier* self, void* src)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00356F68);
+INCLUDE_ASM("object/movenode", cPositionModifier_cPositionModifier2);
 #ifdef SKIP_ASM
 struct sMnVEntrySer6F68 {
     short delta;
@@ -2062,7 +2062,7 @@ struct sMnVEntrySer6F68 {
 };
 
 // PORT: callers declare this void; the body returns self, so bind it via an asm label.
-extern "C" void* func_00356F68_ret(void* self, void* stream) __asm__("func_00356F68");
+extern "C" void* cPositionModifier_cPositionModifier2_ret(void* self, void* stream) __asm__("cPositionModifier_cPositionModifier2");
 /**
  * Constructs a position modifier from a replay frame.
  *
@@ -2072,7 +2072,7 @@ extern "C" void* func_00356F68_ret(void* self, void* stream) __asm__("func_00356
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* func_00356F68_ret(void* self, void* stream)
+extern "C" void* cPositionModifier_cPositionModifier2_ret(void* self, void* stream)
 {
     *(void***)self = cPositionModifier_vtbl;
     sMnVEntrySer6F68* vt = *(sMnVEntrySer6F68**)stream;
@@ -2136,14 +2136,14 @@ extern "C" void cPositionModifier_writeToReplayFrame(cPositionModifier* self, cP
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357038);
+INCLUDE_ASM("object/movenode", cParentModifier_cParentModifier1);
 #ifdef SKIP_ASM
 extern char cParentModifier_vtbl[];
 
 /**
  * Constructs a parent modifier: an offset that follows a mesh of another instance.
  *
- * Builds the position-modifier base from pos (func_00356EB8), installs cParentModifier_vtbl and stores ParentInst and
+ * Builds the position-modifier base from pos (cPositionModifier_cPositionModifier), installs cParentModifier_vtbl and stores ParentInst and
  * Mesh.
  *
  * @param parentInstance  instance record to follow
@@ -2151,9 +2151,9 @@ extern char cParentModifier_vtbl[];
  * @param pos  offset from it
  * @return self
  */
-extern "C" void* func_00357038(cParentModifier* self, void* parentInstance, void* meshIndex, sMoveQuad* pos)
+extern "C" void* cParentModifier_cParentModifier1(cParentModifier* self, void* parentInstance, void* meshIndex, sMoveQuad* pos)
 {
-    func_00356EB8((cPositionModifier*)self, pos);
+    cPositionModifier_cPositionModifier((cPositionModifier*)self, pos);
     self->mVtbl = (void**)cParentModifier_vtbl;
     self->ParentInst = (tInstanceRecord*)parentInstance;
     self->Mesh = (int)meshIndex;
@@ -2176,13 +2176,13 @@ struct sMnVEntryRd7090 {
     void* (*fn)(void*);
 };
 
-extern "C" void func_00356F68(void* self, void* stream);
+extern "C" void cPositionModifier_cPositionModifier2(void* self, void* stream);
 extern char cParentModifier_vtbl[];
 
 /**
  * Constructs a parent modifier from a replay frame: the position-modifier part, then Mesh and ParentInst.
  *
- * Runs func_00356F68 (On Tour cPositionModifier(cBxReplayFrame*)), stores cParentModifier_vtbl, reads 4 bytes into
+ * Runs cPositionModifier_cPositionModifier2 (On Tour cPositionModifier(cBxReplayFrame*)), stores cParentModifier_vtbl, reads 4 bytes into
  * Mesh (+0x90, frame slot 2) and ParentInst (slot 3).
  *
  * @param stream  the replay frame to read from (On Tour cBxReplayFrame* data)
@@ -2190,7 +2190,7 @@ extern char cParentModifier_vtbl[];
  */
 extern "C" void* cParentModifier_cParentModifier(cParentModifier* self, void* stream)
 {
-    func_00356F68(self, stream);
+    cPositionModifier_cPositionModifier2(self, stream);
     self->mVtbl = (void**)cParentModifier_vtbl;
     sMnVEntrySer7090* readEntry = &(*(sMnVEntrySer7090**)stream)[2];
     readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x90, 4);
@@ -2378,7 +2378,7 @@ extern "C" void cParentModifier_writeToReplayFrame(cParentModifier* self, void* 
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_003572E0);
+INCLUDE_ASM("object/movenode", cMagnetModifier_cMagnetModifier);
 #ifdef SKIP_ASM
 extern char cMagnetModifier_vtbl[];
 
@@ -2394,7 +2394,7 @@ extern char cMagnetModifier_vtbl[];
  * @param speed  pull speed (scaled by 100/3.6)
  * @return self
  */
-extern "C" void* func_003572E0(cMagnetModifier* self, void* inst, void* mat, float radius, float speed)
+extern "C" void* cMagnetModifier_cMagnetModifier(cMagnetModifier* self, void* inst, void* mat, float radius, float speed)
 {
     *(void**)self = cMagnetModifier_vtbl;
     self->Instance = (tInstanceRecord*)inst;
@@ -2426,7 +2426,7 @@ extern "C" void* func_003572E0(cMagnetModifier* self, void* inst, void* mat, flo
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357358);
+INCLUDE_ASM("object/movenode", cMagnetModifier_cMagnetModifier1);
 #ifdef SKIP_ASM
 struct sMnVEntrySer7358 {
     short delta;
@@ -2451,7 +2451,7 @@ extern char cMagnetModifier_vtbl[];
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* func_00357358(cMagnetModifier* self, void* stream)
+extern "C" void* cMagnetModifier_cMagnetModifier1(cMagnetModifier* self, void* stream)
 {
     char* payload = (char*)self + 0x10;
     *(void**)self = cMagnetModifier_vtbl;
@@ -2667,7 +2667,7 @@ extern "C" void cMagnetModifier_writeToReplayFrame(cMagnetModifier* self, void* 
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357750);
+INCLUDE_ASM("object/movenode", cAvaSplineModifier_cAvaSplineModifier);
 #ifdef SKIP_ASM
 extern void* cAvaSplineModifier_vtbl[];
 
@@ -2681,7 +2681,7 @@ extern void* cAvaSplineModifier_vtbl[];
  */
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy, src+0x10 -> self+0x40); the PC
 // port needs a plain 64-byte copy.
-extern "C" void* func_00357750(cAvaSplineModifier* self, void* src)
+extern "C" void* cAvaSplineModifier_cAvaSplineModifier(cAvaSplineModifier* self, void* src)
 {
     *(void***)self = cAvaSplineModifier_vtbl;
     self->Instance = (tInstanceRecord*)src;
@@ -2705,7 +2705,7 @@ extern "C" void* func_00357750(cAvaSplineModifier* self, void* src)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357798);
+INCLUDE_ASM("object/movenode", cAvaSplineModifier_cAvaSplineModifier1);
 #ifdef SKIP_ASM
 struct sMnVEntrySer7798 {
     short delta;
@@ -2732,7 +2732,7 @@ void* func_002D1CF0_2(void*, void*) __asm__("func_002D1CF0__FPv");
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* func_00357798(cAvaSplineModifier* self, void* stream)
+extern "C" void* cAvaSplineModifier_cAvaSplineModifier1(cAvaSplineModifier* self, void* stream)
 {
     char* payload = (char*)self + 0x10;
     *(void***)self = cAvaSplineModifier_vtbl;
@@ -2793,16 +2793,16 @@ extern "C" void cAvaSplineModifier_writeToReplayFrame(cAvaSplineModifier* self, 
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/movenode", func_003578A8);
+INCLUDE_ASM("object/movenode", cParticleNode_cParticleNode1);
 #ifdef SKIP_ASM
-extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
+extern "C" void* cMoveNode_cMoveNode1(void* self, void* a1, int type, void* a3);
 extern "C" void cMoveNode_transferFromOld(cMoveNode* self, void* a1);
 extern void* cParticleNode_vtbl[];
 
 /**
  * Constructs a particle node (node type 13) for an instance that takes over from its old node.
  *
- * Runs the cMoveNode record constructor func_00355280, installs cParticleNode_vtbl, takes the old node's modifiers
+ * Runs the cMoveNode record constructor cMoveNode_cMoveNode1, installs cParticleNode_vtbl, takes the old node's modifiers
  * (cMoveNode_transferFromOld) and adds the particle effect (cMoveNode_addParticle).
  *
  * @param bucket  update bucket
@@ -2811,9 +2811,9 @@ extern void* cParticleNode_vtbl[];
  * @param oldNode  node the instance had before
  * @return self
  */
-extern "C" void* func_003578A8(cParticleNode* self, void* bucket, void* instRecord, void* particle, void* oldNode)
+extern "C" void* cParticleNode_cParticleNode1(cParticleNode* self, void* bucket, void* instRecord, void* particle, void* oldNode)
 {
-    func_00355280(((cMoveNode*)self), bucket, 13, instRecord);
+    cMoveNode_cMoveNode1(((cMoveNode*)self), bucket, 13, instRecord);
     self->mVtbl = cParticleNode_vtbl;
     cMoveNode_transferFromOld(((cMoveNode*)self), oldNode);
     cMoveNode_addParticle(((cMoveNode*)self), particle);
@@ -2944,13 +2944,13 @@ extern "C" void cMultiParticleMan__cMultiParticleMan(cMultiParticleMan* self, in
 INCLUDE_ASM("object/movenode", cMultiParticleMan_addParticle);
 #ifdef SKIP_ASM
 extern char str_MultiParticle[];
-extern "C" void* func_00357DD8(cMultiParticle* mem, void* a1, void* a2);
+extern "C" void* cMultiParticle_cMultiParticle(cMultiParticle* mem, void* a1, void* a2);
 
 /**
  * Creates the cMultiParticle for slot @p i if the slot is empty (On Tour addParticle(int id, tParticleData* pdata,
  * int numInst)).
  *
- * Allocates 0x50 bytes (tag str_MultiParticle, "MultiParticle") and runs the cMultiParticle constructor (func_00357DD8) with
+ * Allocates 0x50 bytes (tag str_MultiParticle, "MultiParticle") and runs the cMultiParticle constructor (cMultiParticle_cMultiParticle) with
  * @p pdata and @p numInst. An occupied slot is left alone; @p i is not range-checked against the 4 slots.
  *
  * @param i  the slot index (On Tour id)
@@ -2961,45 +2961,45 @@ extern "C" void cMultiParticleMan_addParticle(cMultiParticleMan* self, int i, vo
 {
     void** slot = (void**)((char*)self + (i << 2));
     if (*slot == 0) {
-        *slot = func_00357DD8((cMultiParticle*)cMemMan_alloc(80, str_MultiParticle, 0x20000000, 0), pdata, numInst);
+        *slot = cMultiParticle_cMultiParticle((cMultiParticle*)cMemMan_alloc(80, str_MultiParticle, 0x20000000, 0), pdata, numInst);
     }
 }
 #endif
 
-extern "C" void* func_003581B8(int, int);
+extern "C" void* cMultiParticle_addInst(int, int);
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357AE8__FPvii);
+INCLUDE_ASM("object/movenode", cMultiParticleMan_addInst__FPvii);
 #ifdef SKIP_ASM
 /**
- * Adds an instance to one of the multi-particle manager's four systems (func_003581B8 on Particles[particleIndex]).
+ * Adds an instance to one of the multi-particle manager's four systems (cMultiParticle_addInst on Particles[particleIndex]).
  *
  * @param particleIndex  system index (0-3)
  * @param instId  instance id to add
- * @return whatever func_003581B8 leaves (callers ignore it)
+ * @return whatever cMultiParticle_addInst leaves (callers ignore it)
  */
-void* func_00357AE8(void* self, int particleIndex, int instId)
+void* cMultiParticleMan_addInst(void* self, int particleIndex, int instId)
 {
-    return func_003581B8(*(int*)((char*)self + (particleIndex << 2)), instId);
+    return cMultiParticle_addInst(*(int*)((char*)self + (particleIndex << 2)), instId);
 }
 #endif
 
-extern "C" void* func_003581F0(int, int);
+extern "C" void* cMultiParticle_remInst(int, int);
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357B10__FPvii);
+INCLUDE_ASM("object/movenode", cMultiParticleMan_remInst__FPvii);
 #ifdef SKIP_ASM
 /**
- * Removes an instance from one of the multi-particle manager's four systems (func_003581F0 on
+ * Removes an instance from one of the multi-particle manager's four systems (cMultiParticle_remInst on
  * Particles[particleIndex]).
  *
  * @param particleIndex  system index (0-3)
  * @param instId  instance id to remove
- * @return whatever func_003581F0 leaves (callers ignore it)
+ * @return whatever cMultiParticle_remInst leaves (callers ignore it)
  */
-void* func_00357B10(void* self, int particleIndex, int instId)
+void* cMultiParticleMan_remInst(void* self, int particleIndex, int instId)
 {
-    return func_003581F0(*(int*)((char*)self + (particleIndex << 2)), instId);
+    return cMultiParticle_remInst(*(int*)((char*)self + (particleIndex << 2)), instId);
 }
 #endif
 
@@ -3028,23 +3028,23 @@ extern "C" void cMultiParticleMan_reset(void** self)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357B90);
+INCLUDE_ASM("object/movenode", cMultiParticleMan_unloadSection);
 #ifdef SKIP_ASM
-extern "C" void func_00358140(void* p, void* arg);
+extern "C" void cMultiParticle_unloadSection(void* p, void* arg);
 
 /**
  * Drops a world section's instances from all four multi-particle systems.
  *
- * Calls func_00358140 on each system in Particles that exists. cGame_sectionUnloading calls it.
+ * Calls cMultiParticle_unloadSection on each system in Particles that exists. cGame_sectionUnloading calls it.
  *
  * @param sectionId  world section being unloaded
  */
-extern "C" void func_00357B90(void** self, void* sectionId)
+extern "C" void cMultiParticleMan_unloadSection(void** self, void* sectionId)
 {
     int i;
     for (i = 0; i < 4; i++) {
         if (self[i] != 0) {
-            func_00358140(self[i], sectionId);
+            cMultiParticle_unloadSection(self[i], sectionId);
         }
     }
 }
@@ -3130,14 +3130,14 @@ struct sMnVEntrySer7D28 {
     void (*fn)(void*, void*, int);
 };
 
-extern "C" void* func_00357E80(cMultiParticle* mem, void* stream);
+extern "C" void* cMultiParticle_cMultiParticle1(cMultiParticle* mem, void* stream);
 
 /**
  * Restores the multi-particle systems from a replay frame.
  *
  * Deletes the current systems (cMultiParticleMan_reset), then for each of the 4 slots reads a 4-byte used flag through the
  * frame's virtual read (slot 2); a used slot gets a new cMultiParticle (0x50 bytes, "MultiParticle") built from the
- * frame by func_00357E80, an unused one is left null. The counterpart of cMultiParticleMan_writeToReplayFrame.
+ * frame by cMultiParticle_cMultiParticle1, an unused one is left null. The counterpart of cMultiParticleMan_writeToReplayFrame.
  *
  * @param stream  the replay frame to read from (On Tour data)
  */
@@ -3150,7 +3150,7 @@ extern "C" void cMultiParticleMan_readFromReplayFrame(void** self, void* stream)
         sMnVEntrySer7D28* readSlot = &(*(sMnVEntrySer7D28**)stream)[2];
         readSlot->fn((char*)stream + readSlot->delta, &has, 4);
         if (has) {
-            self[i] = func_00357E80((cMultiParticle*)cMemMan_alloc(80, str_MultiParticle, 0x20000000, 0), stream);
+            self[i] = cMultiParticle_cMultiParticle1((cMultiParticle*)cMemMan_alloc(80, str_MultiParticle, 0x20000000, 0), stream);
         } else {
             self[i] = 0;
         }
@@ -3159,7 +3159,7 @@ extern "C" void cMultiParticleMan_readFromReplayFrame(void** self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357DD8);
+INCLUDE_ASM("object/movenode", cMultiParticle_cMultiParticle);
 #ifdef SKIP_ASM
 struct sQuad_7DD8 {
     float v[4];
@@ -3199,7 +3199,7 @@ extern "C" void cMultiParticle_setupMultiParticle(void* self);
  * @param maxInst  maximum instance count
  * @return mem
  */
-extern "C" void* func_00357DD8(cMultiParticle* mem, void* particleData, void* maxInst)
+extern "C" void* cMultiParticle_cMultiParticle(cMultiParticle* mem, void* particleData, void* maxInst)
 {
     cMultiParticle* self = mem;
     (*(void**)&self->MaxInst) = maxInst;
@@ -3217,7 +3217,7 @@ extern "C" void* func_00357DD8(cMultiParticle* mem, void* particleData, void* ma
 #endif
 
 //100%
-INCLUDE_ASM("object/movenode", func_00357E80);
+INCLUDE_ASM("object/movenode", cMultiParticle_cMultiParticle1);
 #ifdef SKIP_ASM
 extern "C" void cStaticEmitter_readFromReplayFrame(void* self, void* stream);
 
@@ -3244,7 +3244,7 @@ static inline void read_357E80(void* stream, void* dst, int n)
  * @param stream  replay stream to read from
  * @return mem
  */
-extern "C" void* func_00357E80(cMultiParticle* mem, void* stream)
+extern "C" void* cMultiParticle_cMultiParticle1(cMultiParticle* mem, void* stream)
 {
     cMultiParticle* self = mem;
     sQuad_7DD8* ab = &(*(sQuad_7DD8*)&self->BoundBox);

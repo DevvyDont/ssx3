@@ -20,7 +20,7 @@ INCLUDE_ASM("replay/replay2", cReplay_stepFrame);
 
 INCLUDE_ASM("replay/replay2", cReplay_purgeIdleFrames);
 
-INCLUDE_ASM("replay/replay2", func_002705A8);
+INCLUDE_ASM("replay/replay2", cReplay_beginMarkInstantReplay);
 
 INCLUDE_ASM("replay/replay2", cReplay_endMarkInstantReplay);
 
@@ -48,7 +48,7 @@ INCLUDE_ASM("replay/replay2", cReplay_eventWScript);
 
 INCLUDE_ASM("replay/replay2", cReplay_eventChapter);
 
-INCLUDE_ASM("replay/replay2", func_00270B88);
+INCLUDE_ASM("replay/replay2", cReplay_beginMarkHighlight);
 
 INCLUDE_ASM("replay/replay2", cReplay_countHighlights);
 
@@ -56,7 +56,7 @@ INCLUDE_ASM("replay/replay2", cReplay_maxHighlights);
 
 INCLUDE_ASM("replay/replay2", cReplay_compareHighlights);
 
-INCLUDE_ASM("replay/replay2", func_00270CE8);
+INCLUDE_ASM("replay/replay2", cReplay_endMarkHighlight);
 
 INCLUDE_ASM("replay/replay2", cReplay_cancelMarkHighlight);
 
@@ -64,7 +64,7 @@ INCLUDE_ASM("replay/replay2", cReplay_cancelMarkHighlights);
 
 INCLUDE_ASM("replay/replay2", cReplay_initSave);
 
-INCLUDE_ASM("replay/replay2", func_00270ED8);
+INCLUDE_ASM("replay/replay2", cReplay_purgeSave);
 
 INCLUDE_ASM("replay/replay2", cReplay_initLoad);
 
@@ -88,11 +88,11 @@ INCLUDE_ASM("replay/replay2", cReplay_writeFrameCount);
 
 INCLUDE_ASM("replay/replay2", cReplay_writeFramesStart);
 
-INCLUDE_ASM("replay/replay2", func_00271380);
+INCLUDE_ASM("replay/replay2", cReplay_writeFrames);
 
 INCLUDE_ASM("replay/replay2", cReplay_writeInputStart);
 
-INCLUDE_ASM("replay/replay2", func_00271510);
+INCLUDE_ASM("replay/replay2", cReplay_writeInput);
 
 INCLUDE_ASM("replay/replay2", cReplay_writePadStart);
 
@@ -110,7 +110,7 @@ INCLUDE_ASM("replay/replay2", cReplayFramePtr__cReplayFramePtr);
 
 INCLUDE_ASM("replay/replay2", cReplayFrame__cReplayFrame);
 
-INCLUDE_ASM("replay/replay2", func_00272288);
+INCLUDE_ASM("replay/replay2", cReplayHighlight_reset);
 
 INCLUDE_ASM("replay/replay2", func_002722C0);
 
@@ -226,13 +226,13 @@ INCLUDE_ASM("replay/replay2", cScriptPlayerEntity_SetEntityComm);
 
 INCLUDE_ASM("replay/replay2", cScriptPlayerEntity_GetChannel);
 
-INCLUDE_ASM("replay/replay2", func_002742E0);
+INCLUDE_ASM("replay/replay2", cScriptPlayerEntity_GetHeader);
 
-INCLUDE_ASM("replay/replay2", func_00274348);
+INCLUDE_ASM("replay/replay2", cScriptPlayerEntity_GetScriptLength);
 
-INCLUDE_ASM("replay/replay2", func_00274388);
+INCLUDE_ASM("replay/replay2", cScriptPlayerEntity_GetNumVariations);
 
-INCLUDE_ASM("replay/replay2", func_002743C8);
+INCLUDE_ASM("replay/replay2", cScriptPlayerEntity_GetType);
 
 INCLUDE_ASM("replay/replay2", cScriptPlayerEntity_DoFrameUpdate);
 
@@ -240,13 +240,13 @@ INCLUDE_ASM("replay/replay2", cScriptPlayerMain_cScriptPlayerMain);
 
 INCLUDE_ASM("replay/replay2", cScriptPlayerMain_Init);
 
-INCLUDE_ASM("replay/replay2", func_002746F8);
+INCLUDE_ASM("replay/replay2", cScriptPlayerMain_DeInit);
 
-INCLUDE_ASM("replay/replay2", func_00274808);
+INCLUDE_ASM("replay/replay2", cScriptPlayerMain_SetPlaySpeed);
 
-INCLUDE_ASM("replay/replay2", func_00274810);
+INCLUDE_ASM("replay/replay2", cScriptPlayerMain_Play);
 
-INCLUDE_ASM("replay/replay2", func_00274830);
+INCLUDE_ASM("replay/replay2", cScriptPlayerMain_Play1);
 
 INCLUDE_ASM("replay/replay2", cScriptPlayerMain_Stop);
 
@@ -256,11 +256,11 @@ INCLUDE_ASM("replay/replay2", cScriptPlayerMain_Resume);
 
 INCLUDE_ASM("replay/replay2", cScriptPlayerMain_UpdateFrame);
 
-INCLUDE_ASM("replay/replay2", func_00274C10);
+INCLUDE_ASM("replay/replay2", cScriptPlayerMain_SetUserData);
 
 INCLUDE_ASM("replay/replay2", cScriptPlayerMain_GetEntity);
 
-INCLUDE_ASM("replay/replay2", func_00274C38);
+INCLUDE_ASM("replay/replay2", cScriptPlayerMain_GetHeader);
 
 INCLUDE_ASM("replay/replay2", cScriptPlayerMain_GetScriptLength);
 

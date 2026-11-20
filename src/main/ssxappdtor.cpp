@@ -3016,7 +3016,7 @@ extern "C" sMsg_4B48* tMissionMenuQueue_getEntry(sQueue_4B48* self);
 extern "C" sMsg_4B48* tMissionMenuQueue_getNextEntry(sQueue_4B48* self);
 
 // The script manager (cWScriptMan_TheWScriptMan); hasMessage / popMessage are inline here
-// (out-of-line copies: func_0030D330, func_0030D348).
+// (out-of-line copies: cWScriptMan_isMenuQueueReady, cWScriptMan_popMenuQueueEntry).
 struct sScript_4B48 {
     char pad0[0x1C4];
     sQueue_4B48 queue;              // 0x1C4

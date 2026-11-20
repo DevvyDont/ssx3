@@ -211,7 +211,7 @@ extern "C" sNode_5400* func_002F59D0_n(sMan_5400* self, int priority) __asm__("f
 extern "C" sBox_5400* func_002F5A70(sMan_5400* self, int priority);
 extern "C" void func_002F5AF0(void* self, void* a1, void* a2, void* a3, int count);
 extern "C" void cInstanceNode_buildMeshMat(void* obj, int a1, sMat_5400* out);
-extern "C" void func_00331450(void* cell, sAABox_5400* box);
+extern "C" void cOverlapList_gettyped(void* cell, sAABox_5400* box);
 extern "C" sLightSet_5400* func_002EE2F8(void);
 extern "C" int cIrradianceDataBase_GetIDByName(void*, void*);
 extern "C" sLightSet_5400* func_0038ABF8(void* self, int i);
@@ -374,7 +374,7 @@ extern "C" sLightSet_5400* func_002F5400(sMan_5400* self, char* obj, int force)
             float extent = 1000.0f;
             node->box->bounds = sAABox_5400(Sub_5400(node->pos, sVec_5400(extent, extent, extent, 0.0f)),
                                             Add_5400(node->pos, sVec_5400(extent, extent, extent, 0.0f)));
-            func_00331450(node->box->cell, &node->box->bounds);
+            cOverlapList_gettyped(node->box->cell, &node->box->bounds);
         }
         if (reload) {
             if (D_004A3B64 != 0) {

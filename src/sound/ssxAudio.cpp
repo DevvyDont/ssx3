@@ -71,7 +71,7 @@ extern "C" void func_00289470(void* self);
 extern "C" void func_00289520(cSSXAudio* self, const char* name);
 void cSSXAudio_LoadMixes_4C68(void* self) __asm__("cSSXAudio_LoadMixes");
 extern "C" void cSSXAudio_InitAttachedSounds(void* self);
-extern "C" void func_003B5A28(void (*cb)(void*));
+extern "C" void SNDSYS_adduserdataclient(void (*cb)(void*));
 extern "C" void func_00289650(void* msg);
 extern "C" void cSSXAudio_ResetLift(void* self);
 extern "C" void func_002A4590(void* self, int flag);
@@ -268,7 +268,7 @@ extern "C" char* cSSXAudio_cSSXAudio(void* self, int inchrg, int maxBanks, int m
     func_00289520((cSSXAudio*)self, A_4C68->m60A4);
     cSSXAudio_LoadMixes_4C68(self);
     cSSXAudio_InitAttachedSounds(self);
-    func_003B5A28(func_00289650);
+    SNDSYS_adduserdataclient(func_00289650);
     *(int*)(S_4C68 + 0x5FB0) = 0;
     *(int*)(S_4C68 + 0x5FB4) = 0;
     for (int i = 0; i < 2; i++) {
@@ -303,7 +303,7 @@ void cMemMan_free(void*);
 void operator_delete(int*);
 extern "C" void func_00289650(void* msg);
 extern "C" void func_0028F730(void* self);
-extern "C" void func_003B5A60(void (*cb)(void*));
+extern "C" void SNDSYS_removeuserdataclient(void (*cb)(void*));
 extern "C" void func_002B0DA0(void* p);
 extern "C" void func_003DEDC0(void* h, int a);
 extern "C" void cController__cController(void* self, int flags);
@@ -376,7 +376,7 @@ extern "C" void cSSXAudio__cSSXAudio(void* self, int flags)
         vtbl3.e[1].delta = D_00483728_285210.e[1].delta + delta2;
     }
     func_0028F730(self);
-    func_003B5A60(func_00289650);
+    SNDSYS_removeuserdataclient(func_00289650);
     func_002B0DA0(speechSys);
     if (*(void**)(S_285210 + 0x5728))
         func_003DEDC0(*(void**)(S_285210 + 0x5728), 100);
@@ -1754,7 +1754,7 @@ extern float D_004A3548;
 extern float D_004A354C;
 extern float D_004A3550;
 extern "C" void func_002B4388(void* mon);
-extern "C" void func_003B8160(signed char vol);
+extern "C" void SNDmastervol(signed char vol);
 
 struct sSaChan7700 {
     float user;     // +0x0
@@ -1780,7 +1780,7 @@ struct sSaMix7700 {
  * @p volume is clamped to 0..1 and stored as the control's user level; its base level is the level itself for control 0 and
  * the level times a per-control constant (D_004A3504 .. D_004A3528) for the others. The gain is base * the control's
  * volume (+0x6394) and the output gain * the current factor (+0x63E4). Control 0 then sets the library master volume
- * (func_003B8160, out * 127), control 1 updates the music monitor (func_002B4388) and control 4 rescales the ten mix
+ * (SNDmastervol, out * 127), control 1 updates the music monitor (func_002B4388) and control 4 rescales the ten mix
  * levels at +0x636C. Quirk: control 1 calls func_002B4388 twice, the first time before the new gain is computed.
  *
  * @param self_  the audio system (this)
@@ -1844,7 +1844,7 @@ extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio* self_, float volume, int ch)
     currVolume->out = currVolume->gain * self->cur[ch];
     switch (ch) {
     case 0:
-        func_003B8160((int)(currVolume->out * 127.0f));
+        SNDmastervol((int)(currVolume->out * 127.0f));
         break;
     case 1:
         func_002B4388((char*)self + 0x118);

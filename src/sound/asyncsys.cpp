@@ -499,10 +499,10 @@ extern "C" void cAsyncSys_ASYNCSYS_Cancel(void* self, int id)
 //100%
 INCLUDE_ASM("sound/asyncsys", cAsyncSys_ASYNCSYS_Update);
 #ifdef SKIP_ASM
-extern "C" int func_003B6098(void* sema, int a1);
-extern "C" int func_003B6300(int id);
-extern "C" int func_003B6528(int id);
-extern "C" int f_6548_AAF8(void* data, int id) __asm__("func_003B6548");
+extern "C" int SNDbankadd(void* sema, int a1);
+extern "C" int SNDbankremove(int id);
+extern "C" int SNDbankheadersize(int id);
+extern "C" int f_6548_AAF8(void* data, int id) __asm__("SNDbankheadercopy");
 extern "C" int ASYNCFILE_getstatus(int handle);
 extern "C" void MEM_copy(void* dst, void* src, int n);
 extern "C" int ASYNCFILE_release(int handle, int* buf, int* size);
@@ -544,11 +544,11 @@ struct sAsync_AAF8 {
  *
  * Only while busy (+0x4). By the front memory type (+0x1AC): for 0 and 2 (loaded into the shared buffer) and for 1
  * (main memory) it checks ASYNCFILE_getstatus on the file handle (+0x0): 0 is still loading; 1 is done:
- * ASYNCFILE_release gives the data and size. Shared buffer: func_003B6098 adds the bank and writes its handle to +0x0;
- * unless it returns 7 the bank is removed again (func_003B6300), the owner provides main memory of the full size
+ * ASYNCFILE_release gives the data and size. Shared buffer: SNDbankadd adds the bank and writes its handle to +0x0;
+ * unless it returns 7 the bank is removed again (SNDbankremove), the owner provides main memory of the full size
  * (virtual slot 3, cBankManager_ASYNCSYS_OnAsyncMainMemAlloc, with the front user handle and flags), the data is copied
- * there (MEM_copy) and added from there; on 7 only the header is kept: func_003B6528 gives its size, the owner provides
- * that much and func_003B6548 copies it. Main memory: the data is added where it is. The owner then gets virtual slot 5
+ * there (MEM_copy) and added from there; on 7 only the header is kept: SNDbankheadersize gives its size, the owner provides
+ * that much and SNDbankheadercopy copies it. Main memory: the data is added where it is. The owner then gets virtual slot 5
  * (cBankManager_ASYNCSYS_OnEndAsyncLoad) with the user handle, the bank handle, end state 0 (complete), the file name,
  * the memory and the size; an empty file reports handle -1 and end state 2 (error). Then mBusy is cleared, all four
  * queues are popped and cAsyncSys_ASYNCSYS_StartLoad starts the next load. Any status other than 0 or 1 cancels through
@@ -582,8 +582,8 @@ extern "C" void cAsyncSys_ASYNCSYS_Update(void* self)
             int size = 0;
             ASYNCFILE_release(asyncSys->result, &buf, &size);
             if (size > 0) {
-                if (func_003B6098(asyncSys, buf) != 7) {
-                    func_003B6300(asyncSys->result);
+                if (SNDbankadd(asyncSys, buf) != 7) {
+                    SNDbankremove(asyncSys->result);
                     sRing_AAF8* userHandleQueue = &asyncSys->q18C;
                     sVE_AAF8* vt = asyncSys->vt;
                     char* thisp = (char*)asyncSys + vt[3].delta;
@@ -606,7 +606,7 @@ extern "C" void cAsyncSys_ASYNCSYS_Update(void* self)
                     }
                     int allocBuffer = (*pf)(thisp, allocHandle, n, allocFlags);
                     MEM_copy((void*)allocBuffer, (void*)buf, size);
-                    func_003B6098(asyncSys, allocBuffer);
+                    SNDbankadd(asyncSys, allocBuffer);
                     sVE_AAF8* vt2 = asyncSys->vt;
                     char* thisp2 = (char*)asyncSys + vt2[5].delta;
                     tDone_AAF8* pf2 = (tDone_AAF8*)&vt2[5].fn;
@@ -627,7 +627,7 @@ extern "C" void cAsyncSys_ASYNCSYS_Update(void* self)
                     }
                     (*pf2)(thisp2, endHandle, asyncSys->result, 0, asyncSys->names[idx], allocBuffer, size);
                 } else {
-                    int id = func_003B6528(asyncSys->result);
+                    int id = SNDbankheadersize(asyncSys->result);
                     sRing_AAF8* userHandleQueue = &asyncSys->q18C;
                     // PORT: g++ 2.95 virtual calls (vptr at 0x1D4) written out by hand: delta + saved &pfn, args evaluated after.
                     sVE_AAF8* vt = asyncSys->vt;
@@ -731,7 +731,7 @@ extern "C" void cAsyncSys_ASYNCSYS_Update(void* self)
             int size = 0;
             ASYNCFILE_release(asyncSys->result, &buf, &size);
             if (size > 0) {
-                func_003B6098(asyncSys, buf);
+                SNDbankadd(asyncSys, buf);
                 sRing_AAF8* userHandleQueue = &asyncSys->q18C;
                 sVE_AAF8* vt2 = asyncSys->vt;
                 char* thisp2 = (char*)asyncSys + vt2[5].delta;
@@ -1128,9 +1128,9 @@ extern "C" void* MEM_free(void* self);
 extern "C" void* MEM_alloc(void* a0, int a1, int a2);
 extern "C" void cBankInstance_SharedUnload(void* self);
 extern "C" void cBankInstance_Unload(void* self);
-extern "C" int func_003B6098(void* sema, int a1);
-extern "C" int func_003B6528(int id);
-extern "C" void func_003B6548(void* data, int id);
+extern "C" int SNDbankadd(void* sema, int a1);
+extern "C" int SNDbankheadersize(int id);
+extern "C" void SNDbankheadercopy(void* data, int id);
 extern "C" int FILE_loadatz(const char* name, void* data, int size);
 extern char* gpBankManager;
 
@@ -1154,8 +1154,8 @@ public:
  * mMainMemDataSize bytes) with FILE_loadatz; a missing file returns at once. For sound memory, virtual slot 6 of the
  * sound system reached through gpBankManager + 0x1D8 gets +0xC (mSoundMemHandle) first.
  *
- * func_003B6098 adds the bank and writes its handle to +0x4 (mBankHandle). Result 7 keeps only the header
- * (func_003B6528 sizes it, func_003B6548 copies it): into mpMainMemData for sound memory, otherwise into a new
+ * SNDbankadd adds the bank and writes its handle to +0x4 (mBankHandle). Result 7 keeps only the header
+ * (SNDbankheadersize sizes it, SNDbankheadercopy copies it): into mpMainMemData for sound memory, otherwise into a new
  * MEM_alloc block tagged with the file name, which becomes mpMainMemData / mMainMemDataSize while the loaded file is
  * freed (MEM_free). Result 8 keeps the loaded data (recorded as mpMainMemData and its size for a dynamic bank). Both
  * set +0x0 (mBankStatus) to 1; any other result frees the loaded data (unless it is the instance's main memory) and
@@ -1197,15 +1197,15 @@ extern "C" void cBankInstance_SyncLoad(void* self, const char* file, int align)
     if (*(int*)((char*)self + 0x8) == 2) {
         (**(cSndStream_B320***)(gpBankManager + 0x1D8))->v6(*(int*)((char*)self + 0xC));
     }
-    switch (func_003B6098((char*)self + 0x4, (int)data)) {
+    switch (SNDbankadd((char*)self + 0x4, (int)data)) {
     case 7: {
-        int headerSize = func_003B6528(*(int*)((char*)self + 0x4));
+        int headerSize = SNDbankheadersize(*(int*)((char*)self + 0x4));
         if (*(int*)((char*)self + 0x8) == 2) {
-            func_003B6548(*(void**)((char*)self + 0x10), *(int*)((char*)self + 0x4));
+            SNDbankheadercopy(*(void**)((char*)self + 0x10), *(int*)((char*)self + 0x4));
         } else {
             void* headerMem = MEM_alloc((void*)file, headerSize, 0);
             *(void**)((char*)self + 0x10) = headerMem;
-            func_003B6548(headerMem, *(int*)((char*)self + 0x4));
+            SNDbankheadercopy(headerMem, *(int*)((char*)self + 0x4));
             MEM_free(data);
             *(int*)((char*)self + 0x14) = headerSize;
         }
@@ -1234,13 +1234,13 @@ extern "C" void cBankInstance_SyncLoad(void* self, const char* file, int align)
 //100%
 INCLUDE_ASM("sound/asyncsys", cBankInstance_Unload);
 #ifdef SKIP_ASM
-extern "C" int func_003B6300(int id);
+extern "C" int SNDbankremove(int id);
 extern "C" void* MEM_free(void* self);
 
 /**
  * Unloads this sound-bank instance when it holds a bank.
  *
- * When +0x0 (On Tour mBankStatus) is 1: sets it to 0, removes the bank from the sound library (func_003B6300 on +0x4,
+ * When +0x0 (On Tour mBankStatus) is 1: sets it to 0, removes the bank from the sound library (SNDbankremove on +0x4,
  * mBankHandle, which becomes -1) and, for a dynamic bank (+0x8 mAllocLocation 0), frees +0x10 (mpMainMemData) with
  * MEM_free and clears it and +0x14 (mMainMemDataSize).
  */
@@ -1248,7 +1248,7 @@ extern "C" void cBankInstance_Unload(void* self)
 {
     if (*(int*)self == 1) {
         *(int*)self = 0;
-        func_003B6300(*(int*)((char*)self + 0x4));
+        SNDbankremove(*(int*)((char*)self + 0x4));
         *(int*)((char*)self + 0x4) = -1;
         if (*(int*)((char*)self + 0x8) == 0) {
             MEM_free(*(void**)((char*)self + 0x10));

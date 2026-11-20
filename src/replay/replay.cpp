@@ -197,23 +197,23 @@ extern "C" void* cParticleNode_cParticleNode_RO(void* self, void* bucket, void* 
 extern char str_RailMan[];
 extern "C" void* cRailManNode_cRailManNode_RO(void* self, void* bucket, void* stream) __asm__("cRailManNode_cRailManNode");
 extern char str_Restore[];
-extern "C" void* func_00350FD8_RO(void* self, void* bucket, void* stream) __asm__("func_00350FD8");
+extern "C" void* cRestoreNode_cRestoreNode1_RO(void* self, void* bucket, void* stream) __asm__("cRestoreNode_cRestoreNode1");
 extern char str_Floating[];
-extern "C" void* func_0034ED88_RO(void* self, void* bucket, void* stream) __asm__("func_0034ED88");
+extern "C" void* cFloatingNode_cFloatingNode1_RO(void* self, void* bucket, void* stream) __asm__("cFloatingNode_cFloatingNode1");
 extern char str_Conveyor[];
-extern "C" void* func_003430D0_RO(void* self, void* bucket, void* stream) __asm__("func_003430D0");
+extern "C" void* cConveyorNode_cConveyorNode1_RO(void* self, void* bucket, void* stream) __asm__("cConveyorNode_cConveyorNode1");
 extern char str_Hide[];
-extern "C" void* func_00350F08_RO(void* self, void* bucket, void* stream) __asm__("func_00350F08");
+extern "C" void* cHideNode_cHideNode1_RO(void* self, void* bucket, void* stream) __asm__("cHideNode_cHideNode1");
 extern char str_Object[];
-extern "C" void* func_00356E60_RO(void* self, void* bucket, void* stream) __asm__("func_00356E60");
+extern "C" void* cObjectNode_cObjectNode1_RO(void* self, void* bucket, void* stream) __asm__("cObjectNode_cObjectNode1");
 extern char str_FloatRail[];
-extern "C" void* func_00348FA0_RO(void* self, void* bucket, void* stream) __asm__("func_00348FA0");
+extern "C" void* cFloatRailNode_cFloatRailNode1_RO(void* self, void* bucket, void* stream) __asm__("cFloatRailNode_cFloatRailNode1");
 extern char str_SpringRail[];
-extern "C" void* func_00349DB0_RO(void* self, void* bucket, void* stream) __asm__("func_00349DB0");
+extern "C" void* cSpringRailNode_cSpringRailNode1_RO(void* self, void* bucket, void* stream) __asm__("cSpringRailNode_cSpringRailNode1");
 extern char str_DeadFade[];
 struct sVE_RO { short delta; short index; void (*fn)(void*, int); };
 struct sObj_RO { int pad[3]; sVE_RO* vt; };
-extern "C" sObj_RO* func_00350B98_RO(void* self, void* bucket, void* stream) __asm__("func_00350B98");
+extern "C" sObj_RO* cDeadFadeNode_cDeadFadeNode1_RO(void* self, void* bucket, void* stream) __asm__("cDeadFadeNode_cDeadFadeNode1");
 
 /**
  * Recreates one recorded world object of the stream's next node type in a bucket.
@@ -269,28 +269,28 @@ extern "C" void cReplay_restoreObject(cReplay* self, void* bucket, cStreamRB* st
         cRailManNode_cRailManNode_RO(cMemMan_alloc(536, str_RailMan, 0x20000000, 0), bucket, stream);
         break;
     case 19:
-        func_00350FD8_RO(cMemMan_alloc(0x1C, str_Restore, 0x20000000, 0), bucket, stream);
+        cRestoreNode_cRestoreNode1_RO(cMemMan_alloc(0x1C, str_Restore, 0x20000000, 0), bucket, stream);
         break;
     case 14:
-        func_0034ED88_RO(cMemMan_alloc(0x7C, str_Floating, 0x20000000, 0), bucket, stream);
+        cFloatingNode_cFloatingNode1_RO(cMemMan_alloc(0x7C, str_Floating, 0x20000000, 0), bucket, stream);
         break;
     case 15:
-        func_003430D0_RO(cMemMan_alloc(72, str_Conveyor, 0x20000000, 0), bucket, stream);
+        cConveyorNode_cConveyorNode1_RO(cMemMan_alloc(72, str_Conveyor, 0x20000000, 0), bucket, stream);
         break;
     case 16:
-        func_00350F08_RO(cMemMan_alloc(0x1C, str_Hide, 0x20000000, 0), bucket, stream);
+        cHideNode_cHideNode1_RO(cMemMan_alloc(0x1C, str_Hide, 0x20000000, 0), bucket, stream);
         break;
     case 17:
-        func_00356E60_RO(cMemMan_alloc(44, str_Object, 0x20000000, 0), bucket, stream);
+        cObjectNode_cObjectNode1_RO(cMemMan_alloc(44, str_Object, 0x20000000, 0), bucket, stream);
         break;
     case 20:
-        func_00348FA0_RO(cMemMan_alloc(0x80, str_FloatRail, 0x20000000, 0), bucket, stream);
+        cFloatRailNode_cFloatRailNode1_RO(cMemMan_alloc(0x80, str_FloatRail, 0x20000000, 0), bucket, stream);
         break;
     case 21:
-        func_00349DB0_RO(cMemMan_alloc(0x80, str_SpringRail, 0x20000000, 0), bucket, stream);
+        cSpringRailNode_cSpringRailNode1_RO(cMemMan_alloc(0x80, str_SpringRail, 0x20000000, 0), bucket, stream);
         break;
     case 22: {
-        sObj_RO* deadFadeNode = func_00350B98_RO(cMemMan_alloc(0x3C, str_DeadFade, 0x20000000, 0), bucket, stream);
+        sObj_RO* deadFadeNode = cDeadFadeNode_cDeadFadeNode1_RO(cMemMan_alloc(0x3C, str_DeadFade, 0x20000000, 0), bucket, stream);
         if (deadFadeNode != 0) {
             deadFadeNode->vt[1].fn((char*)deadFadeNode + deadFadeNode->vt[1].delta, 3);
         }
@@ -372,22 +372,22 @@ extern "C" void cReplay_restoreDeadBucket(cReplay* self, cStreamRDB* stream)
 }
 #endif
 
-extern "C" void* func_0026E6A0(void*);
+extern "C" void* cReplayFrameList_findFrame(void*);
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E448__FPv);
+INCLUDE_ASM("replay/replay", cReplay_findFrame__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the recorded frame that holds a tick, by searching FrameList (+0x3B0) with func_0026E6A0.
+ * Returns the recorded frame that holds a tick, by searching FrameList (+0x3B0) with cReplayFrameList_findFrame.
  *
- * Declared with only self: the tick the caller passes stays in $a1 and reaches func_0026E6A0. cReplay_findNextFrame,
+ * Declared with only self: the tick the caller passes stays in $a1 and reaches cReplayFrameList_findFrame. cReplay_findNextFrame,
  * cReplay_findPrevFrame and cReplay_lastFrame use it.
  *
- * @return the frame containing the tick (see func_0026E6A0)
+ * @return the frame containing the tick (see cReplayFrameList_findFrame)
  */
-void* func_0026E448(void* self)
+void* cReplay_findFrame(void* self)
 {
-    return func_0026E6A0((char*)self + 0x3b0);
+    return cReplayFrameList_findFrame((char*)self + 0x3b0);
 }
 #endif
 
@@ -398,14 +398,14 @@ INCLUDE_ASM("replay/replay", cReplay_findNextFrame);
  * Returns the recorded frame after the one containing a tick, or that frame itself when it is the newest (On Tour
  * findNextFrame(int tick)).
  *
- * Declared with only self: the tick stays in $a1 and reaches func_0026E448 (findFrame), whose frame's Next (+0x14) is
+ * Declared with only self: the tick stays in $a1 and reaches cReplay_findFrame (findFrame), whose frame's Next (+0x14) is
  * taken when non-null.
  *
  * @return the next cReplayFrame
  */
 extern "C" void* cReplay_findNextFrame(cReplay* self)
 {
-    void* frame = func_0026E448(self);
+    void* frame = cReplay_findFrame(self);
     void* nextFrame = *(void**)((char*)frame + 0x14);
     if (nextFrame != 0) {
         frame = nextFrame;
@@ -421,14 +421,14 @@ INCLUDE_ASM("replay/replay", cReplay_findPrevFrame);
  * Returns the recorded frame before the one containing a tick, or that frame itself when it is the oldest (On Tour
  * findPrevFrame(int tick)).
  *
- * Declared with only self: the tick stays in $a1 and reaches func_0026E448 (findFrame), whose frame's Prev (+0x18) is
+ * Declared with only self: the tick stays in $a1 and reaches cReplay_findFrame (findFrame), whose frame's Prev (+0x18) is
  * taken when non-null.
  *
  * @return the previous cReplayFrame
  */
 extern "C" void* cReplay_findPrevFrame(cReplay* self)
 {
-    void* frame = func_0026E448(self);
+    void* frame = cReplay_findFrame(self);
     void* prevFrame = *(void**)((char*)frame + 0x18);
     if (prevFrame != 0) {
         frame = prevFrame;
@@ -440,9 +440,9 @@ extern "C" void* cReplay_findPrevFrame(cReplay* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/replay", cReplay_rewindFrame);
 #ifdef SKIP_ASM
-// PORT: func_0026E448 is declared in this unit with one parameter, but this caller
+// PORT: cReplay_findFrame is declared in this unit with one parameter, but this caller
 // passes (self, index); bind the 2-arg form to the symbol.
-void* func_0026E448_2(void* self, int idx) __asm__("func_0026E448__FPv");
+void* cReplay_findFrame_2(void* self, int idx) __asm__("cReplay_findFrame__FPv");
 extern "C" int cReplayCache_moveTo(void* stream, unsigned int pos);
 
 
@@ -457,7 +457,7 @@ extern "C" void cReplay_rewindFrame(cReplay* self_)
 {
     cReplay* self = self_;
     int i;
-    void* frame = func_0026E448_2(self, self->PlaybackTick);
+    void* frame = cReplay_findFrame_2(self, self->PlaybackTick);
     (*(void**)&self->PlaybackFrame) = frame;
     self->PlaybackTick = *(int*)((char*)frame + 0x30);
     for (i = 0; i < 2; i++) {
@@ -509,7 +509,7 @@ extern "C" void cReplay_prevFrame(cReplay* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E5A8__FPv);
+INCLUDE_ASM("replay/replay", cReplayFrameList_cReplayFrameList__FPv);
 #ifdef SKIP_ASM
 /**
  * Constructs an empty replay frame list: zeroes Tail (+0x0), Head (+0x4) and NumFrames (+0x8).
@@ -518,7 +518,7 @@ INCLUDE_ASM("replay/replay", func_0026E5A8__FPv);
  *
  * @return @p self
  */
-void* func_0026E5A8(void* self)
+void* cReplayFrameList_cReplayFrameList(void* self)
 {
     int zero = 0;
     *(int*)((char*)self + 0x4) = zero;
@@ -585,7 +585,7 @@ extern "C" void cReplayFrameList_addFrame(sReplayList* list, sReplayNode* node)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E608);
+INCLUDE_ASM("replay/replay", cReplayFrameList_remFrame);
 #ifdef SKIP_ASM
 /**
  * Unlinks frame @p node from the replay frame list and decrements its NumFrames.
@@ -597,7 +597,7 @@ INCLUDE_ASM("replay/replay", func_0026E608);
  * @param list  the frame list
  * @param node  the frame to remove
  */
-extern "C" void func_0026E608(sReplayList* list, sReplayNode* node)
+extern "C" void cReplayFrameList_remFrame(sReplayList* list, sReplayNode* node)
 {
     if (node == list->head) {
         list->head = node->next;
@@ -618,27 +618,27 @@ extern "C" void func_0026E608(sReplayList* list, sReplayNode* node)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("replay/replay", func_0026E670);
+INCLUDE_ASM("replay/replay", cReplayFrameList_remTail);
 #ifdef SKIP_ASM
 /**
  * Removes the oldest frame (Tail, +0x0) from the replay frame list and returns it.
  *
- * Unlinks it with func_0026E608. The list must not be empty: a null Tail is passed on unchecked.
+ * Unlinks it with cReplayFrameList_remFrame. The list must not be empty: a null Tail is passed on unchecked.
  * cReplay_allocReplayFrame takes free frames from FreeFrameList with it.
  *
  * @param list  the frame list
  * @return the removed frame
  */
-extern "C" sReplayNode* func_0026E670(sReplayList* list)
+extern "C" sReplayNode* cReplayFrameList_remTail(sReplayList* list)
 {
     sReplayNode* node = list->head;
-    func_0026E608(list, node);
+    cReplayFrameList_remFrame(list, node);
     return node;
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E6A0);
+INCLUDE_ASM("replay/replay", cReplayFrameList_findFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sReplayFrame {
@@ -655,7 +655,7 @@ struct sReplayFrameList {
 };
 
 // the unit declares this with one arg; bind the real 2-arg body to the symbol
-sReplayFrame* func_0026E6A0_impl(sReplayFrameList* list, int time) __asm__("func_0026E6A0");
+sReplayFrame* cReplayFrameList_findFrame_impl(sReplayFrameList* list, int time) __asm__("cReplayFrameList_findFrame");
 
 /**
  * Returns the frame of the list that holds tick @p time: the newest frame starting at or before it.
@@ -668,7 +668,7 @@ sReplayFrame* func_0026E6A0_impl(sReplayFrameList* list, int time) __asm__("func
  * @param time  the tick to look for
  * @return the frame containing the tick (the newest frame when none matches)
  */
-sReplayFrame* func_0026E6A0_impl(sReplayFrameList* list, int time)
+sReplayFrame* cReplayFrameList_findFrame_impl(sReplayFrameList* list, int time)
 {
     sReplayFrame* frame = list->head;
     while (frame->next) {
@@ -685,9 +685,9 @@ sReplayFrame* func_0026E6A0_impl(sReplayFrameList* list, int time)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E6E0);
+INCLUDE_ASM("replay/replay", cReplayHighlight_begin);
 #ifdef SKIP_ASM
-void func_0026D730(void*, int, int);
+void cReplayFrame_setRanking(void*, int, int);
 
 struct sReplayDataE6E0 {
     int v[0xAC / 4];
@@ -703,36 +703,36 @@ struct sReplayObjE6E0 {
  * Starts marking a highlight for this player on frame @p rider: flags the frame and keeps a copy of the rider stats.
  *
  * Sets bit PlayerId in the frame's highlight byte (+0x1E), resets the player's ranking on the frame to 0
- * (func_0026D730), stores the frame in Frame (+0xB0) and copies the 0xAC bytes of @p src into Stats (+0x4).
+ * (cReplayFrame_setRanking), stores the frame in Frame (+0xB0) and copies the 0xAC bytes of @p src into Stats (+0x4).
  *
  * @param rider  the replay frame the highlight starts on
  * @param src  the rider stats at the start of the highlight
  */
-extern "C" void func_0026E6E0(sReplayObjE6E0* self, char* rider, sReplayDataE6E0* src)
+extern "C" void cReplayHighlight_begin(sReplayObjE6E0* self, char* rider, sReplayDataE6E0* src)
 {
     *(unsigned char*)(rider + 0x1E) |= 1 << self->index;
-    func_0026D730(rider, self->index, 0);
+    cReplayFrame_setRanking(rider, self->index, 0);
     self->rider = rider;
     self->data = *src;
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E7F8__FPv);
+INCLUDE_ASM("replay/replay", cReplayHighlight_end__FPv);
 #ifdef SKIP_ASM
 /**
  * Ends this player's highlight mark: clears Frame (+0xB0) and leaves the frame's highlight flag and ranking in place.
  *
- * func_00270CE8 calls it on Highlight[playerId] once the highlight is kept.
+ * cReplay_endMarkHighlight calls it on Highlight[playerId] once the highlight is kept.
  */
-void func_0026E7F8(void* self)
+void cReplayHighlight_end(void* self)
 {
     *(int*)((char*)self + 0xB0) = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E800);
+INCLUDE_ASM("replay/replay", cReplayHighlight_cancel);
 #ifdef SKIP_ASM
 /**
  * Cancels this player's highlight mark: clears bit PlayerId in the marked frame's highlight byte (+0x1E) and clears
@@ -740,7 +740,7 @@ INCLUDE_ASM("replay/replay", func_0026E800);
  *
  * Does nothing when no frame is marked (Frame, +0xB0, is null).
  */
-extern "C" void func_0026E800(void* self)
+extern "C" void cReplayHighlight_cancel(void* self)
 {
     unsigned char* cache = *(unsigned char**)((char*)self + 0xb0);
     if (cache) {
@@ -751,9 +751,9 @@ extern "C" void func_0026E800(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("replay/replay", func_0026E838);
+INCLUDE_ASM("replay/replay", cReplayHighlight_setRanking);
 #ifdef SKIP_ASM
-void func_0026D730(void*, int, int);
+void cReplayFrame_setRanking(void*, int, int);
 
 /**
  * Ranks this player's highlight from the rider stats at its end and stores the ranking on the marked frame.
@@ -762,30 +762,30 @@ void func_0026D730(void*, int, int);
  * copy) give the ranking when they are at least 1000; otherwise an air time (float at +0x44) of at least 5.0 gives air
  * time * 1000. With no gain at all the result is 0. Without @p mode, or when neither rule applied, the ranking is minus
  * the increase of the word at +0xA4 (On Tour TotalPointsLostToWipeouts), and 0 is returned when it did not change. The
- * ranking is stored with func_0026D730 on Frame (+0xB0) for PlayerId.
+ * ranking is stored with cReplayFrame_setRanking on Frame (+0xB0) for PlayerId.
  *
  * @param stats  the rider stats now (On Tour tRiderStats)
  * @param mode  non-zero when the highlight ended with a landing
  * @return 1 when a ranking was stored, 0 when nothing changed
  */
-extern "C" int func_0026E838(void* self, void* stats, int mode)
+extern "C" int cReplayHighlight_setRanking(void* self, void* stats, int mode)
 {
     if (mode) {
         int pointsGained = *(int*)((char*)stats + 0x9C) - *(int*)((char*)self + 0xA0);
         if (pointsGained == 0) return 0;
         if (pointsGained >= 1000) {
-            func_0026D730(*(void**)((char*)self + 0xB0), *(int*)self, pointsGained);
+            cReplayFrame_setRanking(*(void**)((char*)self + 0xB0), *(int*)self, pointsGained);
             return 1;
         }
         float airTime = *(float*)((char*)stats + 0x44);
         if (airTime >= 5.0f) {
-            func_0026D730(*(void**)((char*)self + 0xB0), *(int*)self, (int)(airTime * 1000.0f));
+            cReplayFrame_setRanking(*(void**)((char*)self + 0xB0), *(int*)self, (int)(airTime * 1000.0f));
             return 1;
         }
     }
     int pointsLost = *(int*)((char*)stats + 0xA4) - *(int*)((char*)self + 0xA8);
     if (pointsLost == 0) return 0;
-    func_0026D730(*(void**)((char*)self + 0xB0), *(int*)self, -pointsLost);
+    cReplayFrame_setRanking(*(void**)((char*)self + 0xB0), *(int*)self, -pointsLost);
     return 1;
 }
 #endif

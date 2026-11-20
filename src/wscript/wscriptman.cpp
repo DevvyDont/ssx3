@@ -12,7 +12,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_addProcess);
 extern char str_WScriptProcess[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int a1, int a2);
-int func_0030B260(void* self, void* a1);
+int cProcessList_addProcess(void* self, void* a1);
 
 /**
  * Creates a world-script process for a section's process data and adds it to one of the manager's lists.
@@ -29,9 +29,9 @@ extern "C" void* cWScriptMan_addProcess(void* self, int sectionId, int data, int
 {
     void* process = cWScriptProcess_cWScriptProcess(cMemMan_alloc(0x60, str_WScriptProcess, 0x20000000, 0), self, sectionId, data);
     if (front != 0) {
-        func_0030B260((char*)self + 0x2BC, process);
+        cProcessList_addProcess((char*)self + 0x2BC, process);
     } else {
-        func_0030B260((char*)self + 0x2B4, process);
+        cProcessList_addProcess((char*)self + 0x2B4, process);
     }
     return process;
 }
@@ -42,7 +42,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_addProcess1);
 #ifdef SKIP_ASM
 extern char str_WScriptMission[];
 extern "C" void* cWScriptMission_cWScriptMission(void* self, void* man, int a1, int a2, int a3);
-int func_0030B2C0(void* self, void* a1);
+int cProcessList_addProcess1(void* self, void* a1);
 
 /**
  * Creates a world-script mission for a section's mission data and adds it to one of the manager's lists.
@@ -60,16 +60,16 @@ extern "C" void* cWScriptMan_addProcess1(void* self, int sectionId, int data, in
 {
     void* mission = cWScriptMission_cWScriptMission(cMemMan_alloc(0x78, str_WScriptMission, 0x20000000, 0), self, sectionId, data, key);
     if (front != 0) {
-        func_0030B2C0((char*)self + 0x2BC, mission);
+        cProcessList_addProcess1((char*)self + 0x2BC, mission);
     } else {
-        func_0030B2C0((char*)self + 0x2B4, mission);
+        cProcessList_addProcess1((char*)self + 0x2B4, mission);
     }
     return mission;
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_00309618);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_remProcess);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 class cWSObj_309618 {
@@ -79,31 +79,31 @@ public:
     virtual void v01();
 };
 
-extern "C" void* func_0030B320_a(void* self, int id) __asm__("func_0030B320");
+extern "C" void* cProcessList_findProcess1_a(void* self, int id) __asm__("cProcessList_findProcess1");
 extern "C" int cProcessList_removeProcess_a(void* self, void* node) __asm__("cProcessList_removeProcess");
 
 /**
  * Removes the world script process with ID @p id and deletes it.
  *
- * Looks it up (func_0030B320) in the active list (+0x2B8), then the start list (+0x2BC), then the idle list (+0x2B4);
+ * Looks it up (cProcessList_findProcess1) in the active list (+0x2B8), then the start list (+0x2BC), then the idle list (+0x2B4);
  * the first hit is unlinked (cProcessList_removeProcess) and destroyed through its virtual destructor (flag 3).
  *
  * @param id  the process ID
  */
-extern "C" void func_00309618(char* self, int id) {
-    cWSObj_309618* obj = (cWSObj_309618*)func_0030B320_a(self + 0x2B8, id);
+extern "C" void cWScriptMan_remProcess(char* self, int id) {
+    cWSObj_309618* obj = (cWSObj_309618*)cProcessList_findProcess1_a(self + 0x2B8, id);
     if (obj != 0) {
         cProcessList_removeProcess_a(self + 0x2B8, obj);
         obj->v00(3);
         return;
     }
-    obj = (cWSObj_309618*)func_0030B320_a(self + 0x2BC, id);
+    obj = (cWSObj_309618*)cProcessList_findProcess1_a(self + 0x2BC, id);
     if (obj != 0) {
         cProcessList_removeProcess_a(self + 0x2BC, obj);
         obj->v00(3);
         return;
     }
-    obj = (cWSObj_309618*)func_0030B320_a(self + 0x2B4, id);
+    obj = (cWSObj_309618*)cProcessList_findProcess1_a(self + 0x2B4, id);
     if (obj != 0) {
         cProcessList_removeProcess_a(self + 0x2B4, obj);
         obj->v00(3);
@@ -111,7 +111,7 @@ extern "C" void func_00309618(char* self, int id) {
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_003096F0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_removeProcess);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cProcessList_removeProcess_vv(void* self, void* node) __asm__("cProcessList_removeProcess");
@@ -121,7 +121,7 @@ extern "C" int cProcessList_removeProcess_vv(void* self, void* node) __asm__("cP
  *
  * @param node  the process
  */
-extern "C" void func_003096F0(char* self, void* node) {
+extern "C" void cWScriptMan_removeProcess(char* self, void* node) {
     if (cProcessList_removeProcess_vv(self + 0x2B8, node) == 0 &&
         cProcessList_removeProcess_vv(self + 0x2B4, node) == 0) {
         cProcessList_removeProcess_vv(self + 0x2BC, node);
@@ -184,7 +184,7 @@ extern "C" void cWScriptMan_stopProcess(void* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_003097E0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_eventCollide);
 #ifdef SKIP_ASM
 struct sWSOpData {
     int a;
@@ -212,7 +212,7 @@ static inline void sWSOpList_push(sWSOpList* self, sWSOp o)
  *
  * @param value  the instance's resource ID (+0x78 of its record)
  */
-extern "C" void func_003097E0(void* self, int value)
+extern "C" void cWScriptMan_eventCollide(void* self, int value)
 {
     sWSOp cmd;
     cmd.op = 0x70000;
@@ -222,12 +222,12 @@ extern "C" void func_003097E0(void* self, int value)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_00309848);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_eventJump);
 #ifdef SKIP_ASM
 /**
  * Tells the world scripts that the rider jumped: pushes event 0x70001 (no data) onto the event list (+0x40).
  */
-extern "C" void func_00309848(void* self)
+extern "C" void cWScriptMan_eventJump(void* self)
 {
     sWSOp cmd;
     cmd.op = 0x70001;
@@ -236,12 +236,12 @@ extern "C" void func_00309848(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_003098B0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_eventLand);
 #ifdef SKIP_ASM
 /**
  * Tells the world scripts that the rider landed: pushes event 0x70002 (no data) onto the event list (+0x40).
  */
-extern "C" void func_003098B0(void* self)
+extern "C" void cWScriptMan_eventLand(void* self)
 {
     sWSOp cmd;
     cmd.op = 0x70002;
@@ -269,12 +269,12 @@ extern "C" void cWScriptMan_eventTrick(void* self, sWSOpData* trickDef)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_00309990);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_eventWipeout);
 #ifdef SKIP_ASM
 /**
  * Tells the world scripts that the rider wiped out: pushes event 0x70004 (no data) onto the event list (+0x40).
  */
-extern "C" void func_00309990(void* self)
+extern "C" void cWScriptMan_eventWipeout(void* self)
 {
     sWSOp cmd;
     cmd.op = 0x70004;
@@ -283,12 +283,12 @@ extern "C" void func_00309990(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_003099F8);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_eventReset);
 #ifdef SKIP_ASM
 /**
  * Tells the world scripts that the rider was reset: pushes event 0x70005 (no data) onto the event list (+0x40).
  */
-extern "C" void func_003099F8(void* self)
+extern "C" void cWScriptMan_eventReset(void* self)
 {
     sWSOp cmd;
     cmd.op = 0x70005;
@@ -302,7 +302,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_processStart);
 struct cWScriptListHead;
 struct cWScriptListNode;
 extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNode* node);
-int func_0030B260(void* self, void* a1);
+int cProcessList_addProcess(void* self, void* a1);
 
 /**
  * Moves a world script process from the idle list (+0x2B4) to the active list (+0x2B8).
@@ -312,7 +312,7 @@ int func_0030B260(void* self, void* a1);
 extern "C" void cWScriptMan_processStart(void* self, cWScriptListNode* node)
 {
     cProcessList_removeProcess((cWScriptListHead*)((char*)self + 0x2B4), node);
-    func_0030B260((char*)self + 0x2B8, node);
+    cProcessList_addProcess((char*)self + 0x2B8, node);
 }
 #endif
 
@@ -323,7 +323,7 @@ struct cWScriptListHead;
 struct cWScriptListNode;
 extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNode* node);
 extern "C" int cProcessList_findProcess(cWScriptListHead* self, cWScriptListNode* node);
-int func_0030B260(void* self, void* a1);
+int cProcessList_addProcess(void* self, void* a1);
 
 /**
  * Moves a world script process back from the active list (+0x2B8) to the idle list (+0x2B4).
@@ -337,7 +337,7 @@ extern "C" void cWScriptMan_processEnd(void* self, cWScriptListNode* node)
     cWScriptListHead* list = (cWScriptListHead*)((char*)self + 0x2B8);
     if (cProcessList_findProcess(list, node) != 0) {
         cProcessList_removeProcess(list, node);
-        func_0030B260((char*)self + 0x2B4, node);
+        cProcessList_addProcess((char*)self + 0x2B4, node);
     }
 }
 #endif
@@ -345,14 +345,14 @@ extern "C" void cWScriptMan_processEnd(void* self, cWScriptListNode* node)
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_processPass);
 #ifdef SKIP_ASM
-int func_0030B260(void* self, void* a1);
+int cProcessList_addProcess(void* self, void* a1);
 extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNode* node);
 extern "C" int cProcessList_findProcess(cWScriptListHead* self, cWScriptListNode* node);
 
 /**
  * Retires a world script process whose mission was passed.
  *
- * If @p node is in the active list at +0x2B8 it is removed and added to the idle list at +0x2B4 (func_0030B260). +0x2A0
+ * If @p node is in the active list at +0x2B8 it is removed and added to the idle list at +0x2B4 (cProcessList_addProcess). +0x2A0
  * is set to -1 either way.
  *
  * @param node  the process (On Tour process)
@@ -362,7 +362,7 @@ extern "C" void cWScriptMan_processPass(void* self, cWScriptListNode* node)
     cWScriptListHead* list = (cWScriptListHead*)((char*)self + 0x2B8);
     if (cProcessList_findProcess(list, node) != 0) {
         cProcessList_removeProcess(list, node);
-        func_0030B260((char*)self + 0x2B4, node);
+        cProcessList_addProcess((char*)self + 0x2B4, node);
     }
     *(unsigned int*)((char*)self + 0x2A0) = 0xFFFFFFFF;
 }
@@ -393,48 +393,48 @@ extern "C" int cWScriptMan_getScriptCode(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_00309BA8);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getHeightCurr);
 #ifdef SKIP_ASM
-struct func_00309BA8_sVec {
+struct cWScriptMan_getHeightCurr_sVec {
     float x;
     float y;
     float z;
     float w;
 } __attribute__((aligned(16)));
 
-struct func_00309BA8_sPos {
+struct cWScriptMan_getHeightCurr_sPos {
     char pad[8];
     float z;
 };
 
-struct func_00309BA8_sVEntry {
+struct cWScriptMan_getHeightCurr_sVEntry {
     short delta;
     short index;
-    func_00309BA8_sPos* (*fn)(void*);
+    cWScriptMan_getHeightCurr_sPos* (*fn)(void*);
 };
 
 
-static inline char* func_00309BA8_toPtr(unsigned int i)
+static inline char* cWScriptMan_getHeightCurr_toPtr(unsigned int i)
 {
     return (char*)(i << 2);
 }
 
-static inline char* func_00309BA8_get(char* e, unsigned int h)
+static inline char* cWScriptMan_getHeightCurr_get(char* e, unsigned int h)
 {
     unsigned int i = ((unsigned int*)*(char**)(e + 0x1C))[h >> 8] >> 8;
     if (i == 0) {
         return 0;
     }
-    return func_00309BA8_toPtr(i);
+    return cWScriptMan_getHeightCurr_toPtr(i);
 }
 
-static inline char* func_00309BA8_resolve(char* tbl, unsigned int h)
+static inline char* cWScriptMan_getHeightCurr_resolve(char* tbl, unsigned int h)
 {
     char* e = ((char**)*(char**)(tbl + 0x8))[h & 0xFF];
     if (e == 0) {
         return 0;
     }
-    return func_00309BA8_get(e, h);
+    return cWScriptMan_getHeightCurr_get(e, h);
 }
 
 /**
@@ -447,19 +447,19 @@ static inline char* func_00309BA8_resolve(char* tbl, unsigned int h)
  *
  * @return the height above the instance, never negative
  */
-extern "C" float func_00309BA8(void* self)
+extern "C" float cWScriptMan_getHeightCurr(void* self)
 {
     if (*(int*)((char*)self + 0x28) == 0) {
         return 0.0f;
     }
-    char* node = func_00309BA8_resolve(**(char***)((char*)self + 0x28C), *(unsigned int*)((char*)self + 0x2C));
+    char* node = cWScriptMan_getHeightCurr_resolve(**(char***)((char*)self + 0x28C), *(unsigned int*)((char*)self + 0x2C));
     char* list = (char*)SSXApp->Game->AI;
     char* obj = *(char**)(list + (*(int*)((char*)self + 0x30) << 2) + 0x28);
     char* sub = obj + 0x6C0;
-    func_00309BA8_sVEntry* vt = *(func_00309BA8_sVEntry**)sub;
-    func_00309BA8_sPos* riderPos = vt[5].fn(sub + vt[5].delta);
+    cWScriptMan_getHeightCurr_sVEntry* vt = *(cWScriptMan_getHeightCurr_sVEntry**)sub;
+    cWScriptMan_getHeightCurr_sPos* riderPos = vt[5].fn(sub + vt[5].delta);
     float z = riderPos->z;
-    func_00309BA8_sVec pos = *(func_00309BA8_sVec*)(node + 0x40);
+    cWScriptMan_getHeightCurr_sVec pos = *(cWScriptMan_getHeightCurr_sVec*)(node + 0x40);
     float height = z - pos.z;
     if (height >= 0.0f) {
         return height;
@@ -469,7 +469,7 @@ extern "C" float func_00309BA8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_00309C88);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_runScript);
 #ifdef SKIP_ASM
 extern "C" int cWorld_getWScriptScript(void*, int*);
 struct cWScriptMan_isFunc_sValue;
@@ -481,25 +481,25 @@ struct sLunoValue_9C88 {
 struct sLunoCall_9C88 {
     int pad[4];
 };
-void func_00226600(void* self, int a1, int a2);
+void luno_cLunoFunc_init(void* self, int a1, int a2);
 extern "C" void* luno_cLunoVM_cLunoVM(void* self);
 extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
 extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
 /**
  * Runs a world script by resource ID, discarding its result.
  *
- * Builds a Luno value from the script's code (cWorld_getWScriptScript on the world, +0x28C; func_00226600) and runs it
+ * Builds a Luno value from the script's code (cWorld_getWScriptScript on the world, +0x28C; luno_cLunoFunc_init) and runs it
  * in a fresh Luno VM (luno_cLunoVM_run) against the global table of the script's section (+0x3CC, indexed by the ID's
  * low byte).
  *
  * @param handle  the script's resource ID (On Tour tResourceID)
  */
-extern "C" void func_00309C88(void* self, int* handle)
+extern "C" void cWScriptMan_runScript(void* self, int* handle)
 {
     sLunoValue_9C88 scriptVar;
     sLunoValue_9C88 ret;
     sLunoCall_9C88 call;
-    func_00226600(&scriptVar, cWorld_getWScriptScript(*(void**)((char*)self + 0x28C), handle), 0);
+    luno_cLunoFunc_init(&scriptVar, cWorld_getWScriptScript(*(void**)((char*)self + 0x28C), handle), 0);
     ret.type = 0;
     ret.word0 = 0;
     void* table = *(void**)((char*)self + (*(unsigned char*)handle << 2) + 0x3CC);
@@ -510,39 +510,39 @@ extern "C" void func_00309C88(void* self, int* handle)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_00309D20);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_runScript1);
 #ifdef SKIP_ASM
 struct cWScriptMan_isFunc_sValue;
 // cLunoValue: { word0, word1, type } (same layout as cWScriptMan_isFunc_sValue)
-struct func_00309D20_sValue {
+struct cWScriptMan_runScript1_sValue {
     int word0;
     int word1;
     int type;
 };
-struct func_00309D20_sCall {
+struct cWScriptMan_runScript1_sCall {
     int pad[4];
 };
 
-void func_00226600(void* self, int a1, int a2);
+void luno_cLunoFunc_init(void* self, int a1, int a2);
 extern "C" void* luno_cLunoVM_cLunoVM(void* self);
 extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
 extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
 
 /**
  * Runs a world script by resource ID with @p id as the current instance (+0x290) during the run; the previous current
- * instance is restored afterwards. Otherwise as func_00309C88.
+ * instance is restored afterwards. Otherwise as cWScriptMan_runScript.
  *
  * @param handle  the script's resource ID
  * @param id  the instance record to make current
  */
-extern "C" void func_00309D20(void* self, int* handle, int id)
+extern "C" void cWScriptMan_runScript1(void* self, int* handle, int id)
 {
-    func_00309D20_sValue scriptVar;
-    func_00309D20_sValue ret;
-    func_00309D20_sCall call;
+    cWScriptMan_runScript1_sValue scriptVar;
+    cWScriptMan_runScript1_sValue ret;
+    cWScriptMan_runScript1_sCall call;
     int saved = *(int*)((char*)self + 0x290);
     *(int*)((char*)self + 0x290) = id;
-    func_00226600(&scriptVar, cWorld_getWScriptScript(*(void**)((char*)self + 0x28C), handle), 0);
+    luno_cLunoFunc_init(&scriptVar, cWorld_getWScriptScript(*(void**)((char*)self + 0x28C), handle), 0);
     ret.type = 0;
     ret.word0 = 0;
     void* table = *(void**)((char*)self + (*(unsigned char*)handle << 2) + 0x3CC);
@@ -563,15 +563,15 @@ struct cWScriptMan_isFunc_sValue {
     int type;
 };
 
-void* func_00226620(void* self);
-extern "C" cWScriptMan_isFunc_sValue* func_00225248(void* table, cWScriptMan_isFunc_sValue* key);
+void* luno_cLunoVar_castIndex(void* self);
+extern "C" cWScriptMan_isFunc_sValue* luno_cLunoTable_get1(void* table, cWScriptMan_isFunc_sValue* key);
 extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
 
 /**
  * Tells whether a world section's script table defines a given function.
  *
  * Returns 0 when section @p idx has no table at +0x3CC. Otherwise makes an integer key from @p value, looks it up with
- * func_00225248 and checks the result's type is 5 (function).
+ * luno_cLunoTable_get1 and checks the result's type is 5 (function).
  *
  * @param idx  the world section (On Tour sectionId)
  * @param value  the function id (On Tour funcId)
@@ -585,8 +585,8 @@ extern "C" int cWScriptMan_isFunc(void* self, int idx, int value)
     if (*slot != 0) {
         cWScriptMan_isFunc_sValue key;
         key.type = 3;
-        *(int*)func_00226620(&key) = value;
-        int isFunction = func_00225248(*slot, &key)->type == 5;
+        *(int*)luno_cLunoVar_castIndex(&key) = value;
+        int isFunction = luno_cLunoTable_get1(*slot, &key)->type == 5;
         luno_cLunoVar__cLunoVar(&key, 2);
         return isFunction;
     }
@@ -621,11 +621,11 @@ extern "C" void cWScriptMan_runFunc(void* self, int idx, int value)
 {
     cWScriptMan_isFunc_sValue key;
     key.type = 3;
-    *(int*)func_00226620(&key) = value;
+    *(int*)luno_cLunoVar_castIndex(&key) = value;
     int off = idx << 2;
     char* base = (char*)self + 0x3CC;
     void** slot = (void**)(base + off);
-    cWScriptMan_runFunc_sArg scriptFunc = *(cWScriptMan_runFunc_sArg*)func_00225248(*slot, &key);
+    cWScriptMan_runFunc_sArg scriptFunc = *(cWScriptMan_runFunc_sArg*)luno_cLunoTable_get1(*slot, &key);
     cWScriptMan_isFunc_sValue ret;
     ret.type = 0;
     ret.word0 = 0;
@@ -674,7 +674,7 @@ struct sWSMan9F18 {
 
 struct cWScriptIdTable;
 extern "C" void cCollectPool_init(cWScriptIdTable* self);
-extern "C" void func_00309C88(void* self, int* idx);
+extern "C" void cWScriptMan_runScript(void* self, int* idx);
 extern "C" void cAvalanche_reset(void);
 extern "C" int cWorld_getNumGlobalScripts(void* world, int i);
 extern "C" int* cWorld_getGlobalScripts(void* world, int i);
@@ -717,7 +717,7 @@ extern "C" void cWScriptMan_runGlobalScripts(sWSMan9F18* self)
                 int cnt = cWorld_getNumGlobalScripts(self->world, i);
                 int j;
                 for (j = 0; j < cnt; j++, globalScript++) {
-                    func_00309C88(self, globalScript);
+                    cWScriptMan_runScript(self, globalScript);
                 }
             }
         }
@@ -755,17 +755,17 @@ struct sVEF_30A060 {
     void (*fn)(void*, float);
 };
 
-void func_00226600(void* self, int a1, int a2);
+void luno_cLunoFunc_init(void* self, int a1, int a2);
 extern "C" void* luno_cLunoVM_cLunoVM(void* self);
 extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
 extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
 extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void func_00309C88(void* self, int* idx);
+extern "C" void cWScriptMan_runScript(void* self, int* idx);
 extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
 extern "C" int cWorld_getWScriptScript(void*, int*);
-extern "C" void func_003097E0(void* self, int v);
+extern "C" void cWScriptMan_eventCollide(void* self, int v);
 extern char str_SetupLocalTable[];
 
 static inline bool valid_30A060(int* id) { return *id != -1; }
@@ -775,8 +775,8 @@ static inline bool valid_30A060(int* id) { return *id != -1; }
  *
  * Saves the current being and makes @p obj's (its virtual slot 7) current, remembering the instance (from the intersect
  * info's +0x50) and both infos. If the being's virtual slot 8 says so, a collide event for the instance is raised
- * (func_003097E0), unless a non-replay rider has its +0x480 flag set, which ends the call. The instance's collide
- * script id (header entry 2) is then run directly (func_00309C88) when no process or task is current, or otherwise in
+ * (cWScriptMan_eventCollide), unless a non-replay rider has its +0x480 flag set, which ends the call. The instance's collide
+ * script id (header entry 2) is then run directly (cWScriptMan_runScript) when no process or task is current, or otherwise in
  * the current task's or process's local table (a new 8-slot table named "SetupLocalTable" when there is none). Finally
  * the instance's +0xC object gets virtual slot 41 with 0.5, and the being and saved fields are restored.
  *
@@ -807,7 +807,7 @@ extern "C" void cWScriptMan_doOnCollideScript(void* self, void* collideInfo, voi
                 goto done;
             }
         }
-        func_003097E0(self, *(int*)(*(char**)((char*)self + 0x290) + 0x78));
+        cWScriptMan_eventCollide(self, *(int*)(*(char**)((char*)self + 0x290) + 0x78));
     }
     {
         sValue_30A060 scriptFunc;
@@ -816,9 +816,9 @@ extern "C" void cWScriptMan_doOnCollideScript(void* self, void* collideInfo, voi
         int id = cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), *(int*)((char*)self + 0x290), 2);
         if (valid_30A060(&id)) {
             if (*(int*)((char*)self + 0x2A4) == 0 && *(int*)((char*)self + 0x2A8) == 0) {
-                func_00309C88(self, &id);
+                cWScriptMan_runScript(self, &id);
             } else {
-                func_00226600(&scriptFunc, cWorld_getWScriptScript(*(void**)((char*)self + 0x28C), &id), 0);
+                luno_cLunoFunc_init(&scriptFunc, cWorld_getWScriptScript(*(void**)((char*)self + 0x28C), &id), 0);
                 ret.type = 0;
                 ret.word0 = 0;
                 luno_cLunoVM_cLunoVM(&call);
@@ -856,7 +856,7 @@ done:
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030A270);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_hasOnFocusScript);
 #ifdef SKIP_ASM
 extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
 
@@ -867,39 +867,39 @@ extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
  * @param id  the instance record (passed as an int)
  * @return 1 when it has one, else 0
  */
-extern "C" int func_0030A270(void* self, int id)
+extern "C" int cWScriptMan_hasOnFocusScript(void* self, int id)
 {
     return cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), id, 1) != -1;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("wscript/wscriptman", func_0030A298);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_doOnFocusScript);
 #ifdef SKIP_ASM
 extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
-extern "C" void func_00309C88(void* self, int* idx);
+extern "C" void cWScriptMan_runScript(void* self, int* idx);
 
 /**
  * Runs a world instance's on-focus script: makes it the current instance (+0x290), runs header entry 1
- * (cWorld_getWScriptHeaderId, func_00309C88) when it is not -1, then clears the current instance.
+ * (cWorld_getWScriptHeaderId, cWScriptMan_runScript) when it is not -1, then clears the current instance.
  *
  * @param id  the instance record (passed as an int)
  */
-extern "C" void func_0030A298(void* self, int id)
+extern "C" void cWScriptMan_doOnFocusScript(void* self, int id)
 {
     int idx;
     *(int*)((char*)self + 0x290) = id;
     idx = cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), id, 1);
     int ok = idx != -1;
     if (ok) {
-        func_00309C88(self, &idx);
+        cWScriptMan_runScript(self, &idx);
     }
     *(int*)((char*)self + 0x290) = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030A2E8);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_hasOnLoseFocusScript);
 #ifdef SKIP_ASM
 extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
 
@@ -909,14 +909,14 @@ extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
  * @param id  the instance record (passed as an int)
  * @return 1 when it has one, else 0
  */
-extern "C" int func_0030A2E8(void* self, int id)
+extern "C" int cWScriptMan_hasOnLoseFocusScript(void* self, int id)
 {
     return cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), id, 3) != -1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030A310);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isFocusInstance);
 #ifdef SKIP_ASM
 struct sEntry_A310 {
     short type;
@@ -925,13 +925,13 @@ struct sEntry_A310 {
 /**
  * Returns whether a world instance can take the player's focus: always when it has a script controller (+0xC);
  * otherwise only a script instance (its type in the world's instance type table, indexed by the record's byte +0x78, is
- * 3) with an on-focus or on-lose-focus script (func_0030A270, func_0030A2E8).
+ * 3) with an on-focus or on-lose-focus script (cWScriptMan_hasOnFocusScript, cWScriptMan_hasOnLoseFocusScript).
  *
  * @param obj  the instance record
  * @return 1 when it can, else 0
  */
 // PORT: the helpers take the object as int in this unit.
-extern "C" int func_0030A310(void* self, void* obj)
+extern "C" int cWScriptMan_isFocusInstance(void* self, void* obj)
 {
     char* inst = (char*)obj;
     if (*(int*)(inst + 0xC) != 0) {
@@ -940,7 +940,7 @@ extern "C" int func_0030A310(void* self, void* obj)
     sEntry_A310* tab = *(sEntry_A310**)(*(char**)(*(char**)((char*)self + 0x28C) + 0x4) + 0x4);
     bool isType3 = tab[*(unsigned char*)(inst + 0x78)].type == 3;
     if (isType3) {
-        if (func_0030A270(self, (int)obj) || func_0030A2E8(self, (int)obj)) {
+        if (cWScriptMan_hasOnFocusScript(self, (int)obj) || cWScriptMan_hasOnLoseFocusScript(self, (int)obj)) {
             return 1;
         }
     }
@@ -949,7 +949,7 @@ extern "C" int func_0030A310(void* self, void* obj)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("wscript/wscriptman", func_0030A3A0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_upFocusScript);
 #ifdef SKIP_ASM
 // script object controller: 0xC bytes of data, then the vptr
 class cWScriptCtl {
@@ -995,7 +995,7 @@ public:
     virtual void v35();
 };
 
-struct func_0030A3A0_sType {
+struct cWScriptMan_upFocusScript_sType {
     short type;
     short pad;
     int f4;
@@ -1007,12 +1007,12 @@ struct func_0030A3A0_sType {
  *
  * With a script controller (+0xC): when the controller's virtual slot 20 returns non-zero its slot 21 handles the
  * instance. Without one, a script instance (type 3 in the world's instance type table) runs its on-focus script when it
- * has one (func_0030A270, func_0030A298).
+ * has one (cWScriptMan_hasOnFocusScript, cWScriptMan_doOnFocusScript).
  *
  * @param obj  the instance gaining focus
  */
-// PORT: func_0030A270/func_0030A298 take the object pointer as an int id
-extern "C" void func_0030A3A0(void* self, void* obj)
+// PORT: cWScriptMan_hasOnFocusScript/cWScriptMan_doOnFocusScript take the object pointer as an int id
+extern "C" void cWScriptMan_upFocusScript(void* self, void* obj)
 {
     cWScriptCtl* ctl = *(cWScriptCtl**)((char*)obj + 0xC);
     if (ctl != 0) {
@@ -1020,11 +1020,11 @@ extern "C" void func_0030A3A0(void* self, void* obj)
             (*(cWScriptCtl**)((char*)obj + 0xC))->v21(obj);
         }
     } else {
-        func_0030A3A0_sType* instTypes = *(func_0030A3A0_sType**)(*(char**)(*(char**)((char*)self + 0x28C) + 0x4) + 0x4);
+        cWScriptMan_upFocusScript_sType* instTypes = *(cWScriptMan_upFocusScript_sType**)(*(char**)(*(char**)((char*)self + 0x28C) + 0x4) + 0x4);
         bool isScript = instTypes[*(unsigned char*)((char*)obj + 0x78)].type == 3;
         if (isScript) {
-            if (func_0030A270(self, (int)obj) != 0) {
-                func_0030A298(self, (int)obj);
+            if (cWScriptMan_hasOnFocusScript(self, (int)obj) != 0) {
+                cWScriptMan_doOnFocusScript(self, (int)obj);
             }
         }
     }
@@ -1042,12 +1042,12 @@ extern "C" void cWScriptMan_doOnLoseFocusScript(void* self, int id);
  *
  * If the instance has a script controller (+0xC): when the controller's virtual slot 20 says so, its slot 22 handles
  * the instance and nothing else happens; a type-6 controller does nothing; otherwise the controller's own instance
- * (+0x18) runs its lose-focus script when func_0030A2E8 finds one, or the controller's slot 35 is called. An instance
+ * (+0x18) runs its lose-focus script when cWScriptMan_hasOnLoseFocusScript finds one, or the controller's slot 35 is called. An instance
  * without a controller runs its lose-focus script when it has one.
  *
  * @param obj  the instance losing focus (On Tour inst)
  */
-// PORT: func_0030A2E8/cWScriptMan_doOnLoseFocusScript take the object pointer as an int id
+// PORT: cWScriptMan_hasOnLoseFocusScript/cWScriptMan_doOnLoseFocusScript take the object pointer as an int id
 extern "C" void cWScriptMan_downFocusScript(void* self, void* obj)
 {
     cWScriptCtl* ctl = *(cWScriptCtl**)((char*)obj + 0xC);
@@ -1061,14 +1061,14 @@ extern "C" void cWScriptMan_downFocusScript(void* self, void* obj)
             return;
         }
         obj = *(void**)((char*)ctl + 0x18);
-        if (func_0030A2E8(self, (int)obj) != 0) {
+        if (cWScriptMan_hasOnLoseFocusScript(self, (int)obj) != 0) {
             cWScriptMan_doOnLoseFocusScript(self, (int)obj);
             return;
         }
         (*(cWScriptCtl**)((char*)obj + 0xC))->v35();
         return;
     }
-    if (func_0030A2E8(self, (int)obj) != 0) {
+    if (cWScriptMan_hasOnLoseFocusScript(self, (int)obj) != 0) {
         cWScriptMan_doOnLoseFocusScript(self, (int)obj);
     }
 }
@@ -1078,13 +1078,13 @@ extern "C" void cWScriptMan_downFocusScript(void* self, void* obj)
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_doOnLoseFocusScript);
 #ifdef SKIP_ASM
 extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
-extern "C" void func_00309C88(void* self, int* idx);
+extern "C" void cWScriptMan_runScript(void* self, int* idx);
 
 /**
  * Runs a world instance's lose-focus script.
  *
  * Stores the instance as current (+0x290), gets its script id for entry 3 from the world with
- * cWorld_getWScriptHeaderId, runs it with func_00309C88 when it is not -1 and clears the current instance.
+ * cWorld_getWScriptHeaderId, runs it with cWScriptMan_runScript when it is not -1 and clears the current instance.
  *
  * @param id  the instance record, passed as an int (On Tour inst)
  */
@@ -1095,14 +1095,14 @@ extern "C" void cWScriptMan_doOnLoseFocusScript(void* self, int id)
     idx = cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), id, 3);
     int ok = idx != -1;
     if (ok) {
-        func_00309C88(self, &idx);
+        cWScriptMan_runScript(self, &idx);
     }
     *(int*)((char*)self + 0x290) = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030A598);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_hasOnExpireScript);
 #ifdef SKIP_ASM
 extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
 
@@ -1112,64 +1112,64 @@ extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
  * @param id  the instance record (passed as an int)
  * @return 1 when it has one, else 0
  */
-extern "C" int func_0030A598(void* self, int id)
+extern "C" int cWScriptMan_hasOnExpireScript(void* self, int id)
 {
     return cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), id, 4) != -1;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("wscript/wscriptman", func_0030A5C0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_doOnExpireScript);
 #ifdef SKIP_ASM
 extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
-extern "C" void func_00309C88(void* self, int* idx);
+extern "C" void cWScriptMan_runScript(void* self, int* idx);
 
 /**
  * Runs a world instance's on-expire script: makes it the current instance (+0x290), runs header entry 4
- * (cWorld_getWScriptHeaderId, func_00309C88) when it is not -1, then clears the current instance.
+ * (cWorld_getWScriptHeaderId, cWScriptMan_runScript) when it is not -1, then clears the current instance.
  *
  * @param id  the instance record (passed as an int)
  */
-extern "C" void func_0030A5C0(void* self, int id)
+extern "C" void cWScriptMan_doOnExpireScript(void* self, int id)
 {
     int idx;
     *(int*)((char*)self + 0x290) = id;
     idx = cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), id, 4);
     int ok = idx != -1;
     if (ok) {
-        func_00309C88(self, &idx);
+        cWScriptMan_runScript(self, &idx);
     }
     *(int*)((char*)self + 0x290) = 0;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("wscript/wscriptman", func_0030A610);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_doOnInitScript);
 #ifdef SKIP_ASM
 extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
-extern "C" void func_00309C88(void* self, int* idx);
+extern "C" void cWScriptMan_runScript(void* self, int* idx);
 
 /**
  * Runs a world instance's init script: makes it the current instance (+0x290), runs header entry 0
- * (cWorld_getWScriptHeaderId, func_00309C88) when it is not -1, then clears the current instance.
+ * (cWorld_getWScriptHeaderId, cWScriptMan_runScript) when it is not -1, then clears the current instance.
  *
  * @param id  the instance record (passed as an int)
  */
-extern "C" void func_0030A610(void* self, int id)
+extern "C" void cWScriptMan_doOnInitScript(void* self, int id)
 {
     int idx;
     *(int*)((char*)self + 0x290) = id;
     idx = cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), id, 0);
     int ok = idx != -1;
     if (ok) {
-        func_00309C88(self, &idx);
+        cWScriptMan_runScript(self, &idx);
     }
     *(int*)((char*)self + 0x290) = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030A660);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_hasOnFrameUpdateScript);
 #ifdef SKIP_ASM
 /**
  * Returns whether a world instance has a frame-update script: its world script header entry 5 is not -1.
@@ -1177,69 +1177,69 @@ INCLUDE_ASM("wscript/wscriptman", func_0030A660);
  * @param scriptId  the instance record (passed as an int)
  * @return 1 when it has one, else 0
  */
-extern "C" int func_0030A660(char* self, int scriptId)
+extern "C" int cWScriptMan_hasOnFrameUpdateScript(char* self, int scriptId)
 {
     return cWorld_getWScriptHeaderId(*(void**)(self + 0x28C), scriptId, 5) != -1;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("wscript/wscriptman", func_0030A688);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_doOnFrameUpdateScript);
 #ifdef SKIP_ASM
 extern "C" int cWorld_getWScriptHeaderId(void* world, int id, int flag);
-extern "C" void func_00309C88(void* self, int* idx);
+extern "C" void cWScriptMan_runScript(void* self, int* idx);
 
 /**
  * Runs a world instance's frame-update script: makes it the current instance (+0x290), runs header entry 5
- * (cWorld_getWScriptHeaderId, func_00309C88) when it is not -1, then clears the current instance.
+ * (cWorld_getWScriptHeaderId, cWScriptMan_runScript) when it is not -1, then clears the current instance.
  *
  * @param id  the instance record (passed as an int)
  */
-extern "C" void func_0030A688(void* self, int id)
+extern "C" void cWScriptMan_doOnFrameUpdateScript(void* self, int id)
 {
     int idx;
     *(int*)((char*)self + 0x290) = id;
     idx = cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), id, 5);
     int ok = idx != -1;
     if (ok) {
-        func_00309C88(self, &idx);
+        cWScriptMan_runScript(self, &idx);
     }
     *(int*)((char*)self + 0x290) = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030A6D8);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_gotoTask);
 #ifdef SKIP_ASM
-extern "C" void func_00307EC0(void* p);
+extern "C" void cWScriptProcess_gotoTask(void* p);
 
 /**
- * Jumps the current process (+0x2A4) to a task: func_00307EC0, with the task ID passing through in the second argument
+ * Jumps the current process (+0x2A4) to a task: cWScriptProcess_gotoTask, with the task ID passing through in the second argument
  * register (the C declares only the manager). Nothing happens without a current process.
  */
-extern "C" void func_0030A6D8(void* self)
+extern "C" void cWScriptMan_gotoTask(void* self)
 {
     void* process = *(void**)((char*)self + 0x2A4);
     if (process != 0) {
-        func_00307EC0(process);
+        cWScriptProcess_gotoTask(process);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030A700);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_advanceToTask);
 #ifdef SKIP_ASM
-extern "C" void func_00307F58(void* p);
+extern "C" void cWScriptProcess_advanceToTask(void* p);
 
 /**
- * Advances the current process (+0x2A4) to a task: func_00307F58, with the task ID passing through in the second
+ * Advances the current process (+0x2A4) to a task: cWScriptProcess_advanceToTask, with the task ID passing through in the second
  * argument register (the C declares only the manager). Nothing happens without a current process.
  */
-extern "C" void func_0030A700(void* self)
+extern "C" void cWScriptMan_advanceToTask(void* self)
 {
     void* process = *(void**)((char*)self + 0x2A4);
     if (process != 0) {
-        func_00307F58(process);
+        cWScriptProcess_advanceToTask(process);
     }
 }
 #endif
@@ -1247,14 +1247,14 @@ extern "C" void func_0030A700(void* self)
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_doProcessCmd);
 #ifdef SKIP_ASM
-extern "C" void* func_0030B320(void* self, int id);
+extern "C" void* cProcessList_findProcess1(void* self, int id);
 extern "C" void cWScriptProcess_end(void* obj);
 extern "C" void cWScriptProcess_endTask(void* obj);
 
 /**
  * Carries out a script command on a world script process.
  *
- * With @p id -1 the current process (+0x2A4) is used, otherwise the process is looked up with func_0030B320. Command 1
+ * With @p id -1 the current process (+0x2A4) is used, otherwise the process is looked up with cProcessList_findProcess1. Command 1
  * looks in the idle list (+0x2B4) and starts it (cWScriptMan_startProcess); 0 stops an active one (cWScriptMan_stopProcess); 2 ends its
  * current task (cWScriptProcess_endTask); 18 ends the process (cWScriptProcess_end). Other commands are ignored.
  *
@@ -1267,7 +1267,7 @@ extern "C" void cWScriptMan_doProcessCmd(void* self, unsigned int id, int kind)
     switch (kind) {
     case 1:
         if (id != 0xFFFFFFFF) {
-            obj = func_0030B320((char*)self + 0x2B4, id);
+            obj = cProcessList_findProcess1((char*)self + 0x2B4, id);
         }
         if (obj != 0) {
             cWScriptMan_startProcess(self, obj);
@@ -1275,7 +1275,7 @@ extern "C" void cWScriptMan_doProcessCmd(void* self, unsigned int id, int kind)
         break;
     case 0:
         if (id != 0xFFFFFFFF) {
-            obj = func_0030B320((char*)self + 0x2B8, id);
+            obj = cProcessList_findProcess1((char*)self + 0x2B8, id);
         }
         if (obj != 0) {
             cWScriptMan_stopProcess(self, obj);
@@ -1283,7 +1283,7 @@ extern "C" void cWScriptMan_doProcessCmd(void* self, unsigned int id, int kind)
         break;
     case 2:
         if (id != 0xFFFFFFFF) {
-            obj = func_0030B320((char*)self + 0x2B8, id);
+            obj = cProcessList_findProcess1((char*)self + 0x2B8, id);
         }
         if (obj != 0) {
             cWScriptProcess_endTask(obj);
@@ -1291,7 +1291,7 @@ extern "C" void cWScriptMan_doProcessCmd(void* self, unsigned int id, int kind)
         break;
     case 18:
         if (id != 0xFFFFFFFF) {
-            obj = func_0030B320((char*)self + 0x2B8, id);
+            obj = cProcessList_findProcess1((char*)self + 0x2B8, id);
         }
         if (obj != 0) {
             cWScriptProcess_end(obj);
@@ -1351,8 +1351,8 @@ public:
     virtual void v20();
 };
 
-// PORT: the unit defines func_0030B388 later with its own class type
-extern "C" cWSObj_30A868* func_0030B388_a(void* self, unsigned int id) __asm__("func_0030B388");
+// PORT: the unit defines cProcessList_findMission later with its own class type
+extern "C" cWSObj_30A868* cProcessList_findMission_a(void* self, unsigned int id) __asm__("cProcessList_findMission");
 
 /**
  * Carries out a mission command from a world script, or answers a question about a mission.
@@ -1412,9 +1412,9 @@ extern "C" int cWScriptMan_doMissionCmd(char* self, unsigned int id, unsigned in
         break;
     case 3:
         if (id != 0xFFFFFFFF) {
-            obj = func_0030B388_a(self + 0x2B8, id);
+            obj = cProcessList_findMission_a(self + 0x2B8, id);
             if (obj == 0) {
-                obj = func_0030B388_a(self + 0x2B4, id);
+                obj = cProcessList_findMission_a(self + 0x2B4, id);
             }
         }
         if (obj != 0) {
@@ -1424,7 +1424,7 @@ extern "C" int cWScriptMan_doMissionCmd(char* self, unsigned int id, unsigned in
         break;
     case 4:
         if (id != 0xFFFFFFFF) {
-            obj = func_0030B388_a(self + 0x2B8, id);
+            obj = cProcessList_findMission_a(self + 0x2B8, id);
         }
         if (obj != 0) {
             obj->v02();
@@ -1432,7 +1432,7 @@ extern "C" int cWScriptMan_doMissionCmd(char* self, unsigned int id, unsigned in
         break;
     case 5:
         if (id != 0xFFFFFFFF) {
-            obj = func_0030B388_a(self + 0x2B8, id);
+            obj = cProcessList_findMission_a(self + 0x2B8, id);
         }
         if (obj != 0) {
             obj->v19();
@@ -1441,9 +1441,9 @@ extern "C" int cWScriptMan_doMissionCmd(char* self, unsigned int id, unsigned in
         break;
     case 17:
         if (id != 0xFFFFFFFF) {
-            obj = func_0030B388_a(self + 0x2B8, id);
+            obj = cProcessList_findMission_a(self + 0x2B8, id);
             if (obj == 0) {
-                obj = func_0030B388_a(self + 0x2B4, id);
+                obj = cProcessList_findMission_a(self + 0x2B4, id);
             }
         }
         if (obj != 0) {
@@ -1536,7 +1536,7 @@ extern "C" int cWScriptMan_doMissionCmd(char* self, unsigned int id, unsigned in
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_runScriptCode);
 #ifdef SKIP_ASM
 struct cWScriptMan_isFunc_sValue;
-void func_00226600(void* self, int a1, int a2);
+void luno_cLunoFunc_init(void* self, int a1, int a2);
 extern "C" void* luno_cLunoVM_cLunoVM(void* self);
 extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
 extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
@@ -1572,7 +1572,7 @@ extern "C" void cWScriptMan_runScriptCode(void* self, void* obj, int data)
     void* savedObj = *(void**)((char*)self + 0x2A4);
     *(void**)((char*)self + 0x2A4) = obj;
     savedId = *(int*)((char*)self + 0x290);
-    func_00226600(&scriptFunc, data, 0);
+    luno_cLunoFunc_init(&scriptFunc, data, 0);
     ret.type = 0;
     ret.word0 = 0;
     luno_cLunoVM_cLunoVM(&call);
@@ -1593,10 +1593,10 @@ extern "C" void cWScriptMan_runScriptCode(void* self, void* obj, int data)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030ADA8);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_runScriptCode1);
 #ifdef SKIP_ASM
 struct cWScriptMan_isFunc_sValue;
-void func_00226600(void* self, int a1, int a2);
+void luno_cLunoFunc_init(void* self, int a1, int a2);
 extern "C" void* luno_cLunoVM_cLunoVM(void* self);
 extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
 extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int flags);
@@ -1605,35 +1605,35 @@ extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 extern char str_SetupLocalTable[];
 
 // cLunoValue: { word0, word1, type }
-struct func_0030ADA8_sValue {
+struct cWScriptMan_runScriptCode1_sValue {
     int word0;
     int word1;
     int type;
 };
-struct func_0030ADA8_sCall {
+struct cWScriptMan_runScriptCode1_sCall {
     int pad[4];
 };
 
 /**
  * Runs a piece of world script code for a script task, discarding its result.
  *
- * Makes @p obj the current task (+0x2A8) and runs a Luno value built from @p scriptCode (func_00226600) in a fresh Luno VM
+ * Makes @p obj the current task (+0x2A8) and runs a Luno value built from @p scriptCode (luno_cLunoFunc_init) in a fresh Luno VM
  * against the local table (+0x1C) of the task's process (+0x3C). Without a local table a temporary one is allocated
  * ("SetupLocalTable"), used and destroyed. The current task and the current instance (+0x290) are restored afterwards.
  *
  * @param obj  the script task
  * @param scriptCode  the script code
  */
-extern "C" void func_0030ADA8(void* self, void* obj, int scriptCode)
+extern "C" void cWScriptMan_runScriptCode1(void* self, void* obj, int scriptCode)
 {
-    func_0030ADA8_sValue codeVar;
-    func_0030ADA8_sValue ret;
-    func_0030ADA8_sCall call;
+    cWScriptMan_runScriptCode1_sValue codeVar;
+    cWScriptMan_runScriptCode1_sValue ret;
+    cWScriptMan_runScriptCode1_sCall call;
     int savedId;
     void* savedObj = *(void**)((char*)self + 0x2A8);
     *(void**)((char*)self + 0x2A8) = obj;
     savedId = *(int*)((char*)self + 0x290);
-    func_00226600(&codeVar, scriptCode, 0);
+    luno_cLunoFunc_init(&codeVar, scriptCode, 0);
     ret.type = 0;
     ret.word0 = 0;
     luno_cLunoVM_cLunoVM(&call);
@@ -1681,7 +1681,7 @@ extern "C" void* cWScriptMan_getCurrentMission(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030AF08);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getCurrentTrick);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sScriptFlags_AF08 {
@@ -1712,7 +1712,7 @@ struct sScriptFlags_AF08 {
  * @return the field value
  */
 // Reads one packed script setting; 0 when no settings block is loaded.
-extern "C" int func_0030AF08(void* self, int beingIndex, int which)
+extern "C" int cWScriptMan_getCurrentTrick(void* self, int beingIndex, int which)
 {
     sScriptFlags_AF08* fl = *(sScriptFlags_AF08**)((char*)self + 0x29C);
     if (fl != 0) {
@@ -1748,14 +1748,14 @@ struct cWScriptListHead {
 };
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B058__FPv);
+INCLUDE_ASM("wscript/wscriptman", cProcessList_cProcessList__FPv);
 #ifdef SKIP_ASM
 /**
  * Constructs an empty world script process list: its head (+0x0) is 0.
  *
  * @return @p self
  */
-void* func_0030B058(void* self)
+void* cProcessList_cProcessList(void* self)
 {
     ((cWScriptListHead*)self)->head = 0;
     return self;
@@ -1937,7 +1937,7 @@ extern "C" int cProcessList_getCount(cWScriptListHead* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B260__FPvT0);
+INCLUDE_ASM("wscript/wscriptman", cProcessList_addProcess__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Pushes a world script process onto the front of a process list: its next link (+0x18) takes the old head.
@@ -1945,7 +1945,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030B260__FPvT0);
  * @param node  the process
  * @return the previous head
  */
-int func_0030B260(void* self, void* node)
+int cProcessList_addProcess(void* self, void* node)
 {
     int oldHead = (int)((cWScriptListHead*)self)->head;
     ((cWScriptListNode*)node)->next = (void*)oldHead;
@@ -1980,7 +1980,7 @@ extern "C" void cProcessList_appendProcess(cWScriptListHead* self, cWScriptListN
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B2C0__FPvT0);
+INCLUDE_ASM("wscript/wscriptman", cProcessList_addProcess1__FPvT0);
 #ifdef SKIP_ASM
 /**
  * Pushes a world script mission onto the front of a process list: its next link (+0x18) takes the old head.
@@ -1988,7 +1988,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030B2C0__FPvT0);
  * @param node  the mission
  * @return the previous head
  */
-int func_0030B2C0(void* self, void* node)
+int cProcessList_addProcess1(void* self, void* node)
 {
     int oldHead = (int)((cWScriptListHead*)self)->head;
     ((cWScriptListNode*)node)->next = (void*)oldHead;
@@ -2029,7 +2029,7 @@ extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNo
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B320);
+INCLUDE_ASM("wscript/wscriptman", cProcessList_findProcess1);
 #ifdef SKIP_ASM
 /**
  * Returns the process with ID @p id (+0x20) in a process list, following the next links (+0x18).
@@ -2037,7 +2037,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030B320);
  * @param id  the process ID
  * @return the process, or 0
  */
-extern "C" void* func_0030B320(void* self, int id)
+extern "C" void* cProcessList_findProcess1(void* self, int id)
 {
     void* process = *(void**)self;
     while (process != 0) {
@@ -2051,26 +2051,26 @@ extern "C" void* func_0030B320(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B350);
+INCLUDE_ASM("wscript/wscriptman", cProcessList_findProcess2);
 #ifdef SKIP_ASM
 extern "C" int GetHashValue32__FPc(int);
 
 /**
- * Returns the process whose ID is the hash of @p name (GetHashValue32__FPc) in a process list (func_0030B320). The C
+ * Returns the process whose ID is the hash of @p name (GetHashValue32__FPc) in a process list (cProcessList_findProcess1). The C
  * declares no return value; the lookup's result is left in the return register.
  *
  * @param list  the process list
  * @param name  the process name
  */
-extern "C" void func_0030B350(void *list, int name) {
-    func_0030B320(list, GetHashValue32__FPc(name));
+extern "C" void cProcessList_findProcess2(void *list, int name) {
+    cProcessList_findProcess1(list, GetHashValue32__FPc(name));
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B388);
+INCLUDE_ASM("wscript/wscriptman", cProcessList_findMission);
 #ifdef SKIP_ASM
-class func_0030B388_cObj {
+class cProcessList_findMission_cObj {
 public:
     char pad_0x00[0x5C];
     // vptr at 0x5C
@@ -2079,20 +2079,20 @@ public:
     virtual int v03(); // 0x18
 };
 
-extern "C" void* func_0030B320(void*, int);
+extern "C" void* cProcessList_findProcess1(void*, int);
 
 /**
- * Returns the mission with ID @p id in a process list: the process found by func_0030B320 when its virtual slot 3 (the
+ * Returns the mission with ID @p id in a process list: the process found by cProcessList_findProcess1 when its virtual slot 3 (the
  * mission test) returns non-zero.
  *
  * @param id  the mission ID, or -1
  * @return the mission, or 0 (also for -1)
  */
-extern "C" func_0030B388_cObj* func_0030B388(void* self, unsigned int id)
+extern "C" cProcessList_findMission_cObj* cProcessList_findMission(void* self, unsigned int id)
 {
-    func_0030B388_cObj* result = 0;
+    cProcessList_findMission_cObj* result = 0;
     if (id != 0xFFFFFFFF) {
-        func_0030B388_cObj* process = (func_0030B388_cObj*)func_0030B320(self, id);
+        cProcessList_findMission_cObj* process = (cProcessList_findMission_cObj*)cProcessList_findProcess1(self, id);
         if (process != 0) {
             if (process->v03()) {
                 result = process;
@@ -2104,17 +2104,17 @@ extern "C" func_0030B388_cObj* func_0030B388(void* self, unsigned int id)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B3F0);
+INCLUDE_ASM("wscript/wscriptman", cProcessList_findMission1);
 #ifdef SKIP_ASM
 /**
- * Returns the mission whose ID is the hash of @p name (GetHashValue32__FPc) in a process list (func_0030B388). The C
+ * Returns the mission whose ID is the hash of @p name (GetHashValue32__FPc) in a process list (cProcessList_findMission). The C
  * declares no return value; the lookup's result is left in the return register.
  *
  * @param name  the mission name
  */
-extern "C" void func_0030B3F0(void* self, int name)
+extern "C" void cProcessList_findMission1(void* self, int name)
 {
-    func_0030B388(self, GetHashValue32__FPc(name));
+    cProcessList_findMission(self, GetHashValue32__FPc(name));
 }
 #endif
 
@@ -2140,31 +2140,31 @@ extern "C" int cProcessList_findProcess(cWScriptListHead* self, cWScriptListNode
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B458);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_findMission);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_0030B388_vv(void* self, void* node) __asm__("func_0030B388");
+extern "C" int cProcessList_findMission_vv(void* self, void* node) __asm__("cProcessList_findMission");
 /**
  * Returns the mission with ID @p node from the active list (+0x2B8), else the idle list (+0x2B4), else the start list
- * (+0x2BC) (func_0030B388). The C declares no return value; the result is left in the return register.
+ * (+0x2BC) (cProcessList_findMission). The C declares no return value; the result is left in the return register.
  *
  * @param node  the mission ID
  */
-extern "C" void func_0030B458(char* self, void* node) {
-    if (func_0030B388_vv(self + 0x2B8, node) == 0 &&
-        func_0030B388_vv(self + 0x2B4, node) == 0) {
-        func_0030B388_vv(self + 0x2BC, node);
+extern "C" void cWScriptMan_findMission(char* self, void* node) {
+    if (cProcessList_findMission_vv(self + 0x2B8, node) == 0 &&
+        cProcessList_findMission_vv(self + 0x2B4, node) == 0) {
+        cProcessList_findMission_vv(self + 0x2BC, node);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B4B8__FPv);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_render__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing (the world script manager's render hook).
  */
-void func_0030B4B8(void* self)
+void cWScriptMan_render(void* self)
 {
 }
 #endif
@@ -2180,7 +2180,7 @@ struct cWScriptSlot {
 };
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B4C0__FPvii);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_updateMissionPoints__FPvii);
 #ifdef SKIP_ASM
 /**
  * Turns on the mission points display (+0x4) with @p points (+0x8) of @p goal (+0xC).
@@ -2188,7 +2188,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030B4C0__FPvii);
  * @param points  the current points
  * @param goal  the points goal
  */
-void func_0030B4C0(void* self, int points, int goal)
+void cWScriptMan_updateMissionPoints(void* self, int points, int goal)
 {
     *(int*)((char*)self + 0x4) = 1;
     *(int*)((char*)self + 0x8) = points;
@@ -2197,7 +2197,7 @@ void func_0030B4C0(void* self, int points, int goal)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B4D8__FPvii);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_updateMissionCount__FPvii);
 #ifdef SKIP_ASM
 /**
  * Turns on the mission count display (+0x10) with @p count (+0x14) of @p maxCount (+0x18).
@@ -2205,7 +2205,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030B4D8__FPvii);
  * @param count  the current count
  * @param maxCount  the maximum count
  */
-void func_0030B4D8(void* self, int count, int maxCount)
+void cWScriptMan_updateMissionCount(void* self, int count, int maxCount)
 {
     *(int*)((char*)self + 0x10) = 1;
     *(int*)((char*)self + 0x14) = count;
@@ -2214,7 +2214,7 @@ void func_0030B4D8(void* self, int count, int maxCount)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B4F0__FPvii);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_updateMissionTicks__FPvii);
 #ifdef SKIP_ASM
 /**
  * Turns on the mission clock display (+0x1C) with @p ticks (+0x20) counting in direction @p dir (+0x24).
@@ -2222,7 +2222,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030B4F0__FPvii);
  * @param ticks  the clock ticks
  * @param dir  the clock direction
  */
-void func_0030B4F0(void* self, int ticks, int dir)
+void cWScriptMan_updateMissionTicks(void* self, int ticks, int dir)
 {
     *(int*)((char*)self + 0x1c) = 1;
     *(int*)((char*)self + 0x20) = ticks;
@@ -2231,7 +2231,7 @@ void func_0030B4F0(void* self, int ticks, int dir)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B508__FPviT0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_updateMissionHeight__FPviT0);
 #ifdef SKIP_ASM
 /**
  * Turns on the mission height display (+0x28) for rider @p being (+0x30) above instance @p src (its resource ID, +0x78,
@@ -2240,7 +2240,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030B508__FPviT0);
  * @param being  the rider index
  * @param src  the instance record
  */
-void func_0030B508(void* self, int being, void* src)
+void cWScriptMan_updateMissionHeight(void* self, int being, void* src)
 {
     *(int*)((char*)self + 0x28) = 1;
     *(int*)((char*)self + 0x30) = being;
@@ -2249,7 +2249,7 @@ void func_0030B508(void* self, int being, void* src)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B520);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_updateMissionTrick);
 #ifdef SKIP_ASM
 struct cWScriptPair {
     int valueB;
@@ -2261,7 +2261,7 @@ struct cWScriptPair {
  *
  * @param src  the trick definition
  */
-extern "C" void func_0030B520(void* self, cWScriptPair* src)
+extern "C" void cWScriptMan_updateMissionTrick(void* self, cWScriptPair* src)
 {
     *(int*)((char*)self + 0x34) = 1;
     *(cWScriptPair*)((char*)self + 0x38) = *src;
@@ -2269,7 +2269,7 @@ extern "C" void func_0030B520(void* self, cWScriptPair* src)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B540);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_startLocalMission);
 #ifdef SKIP_ASM
 extern "C" void cPlaybackMan_stop(void* p);
 extern "C" void cReplay_reset(void* p);
@@ -2278,7 +2278,7 @@ extern "C" void cReplay_reset(void* p);
  * Requests the start of the local mission: stops the playback manager (cPlaybackMan_stop), resets the replay
  * (cReplay_reset) and queues mission command 1 (+0x2AC) for the local mission ID (+0x2A0, copied to +0x2B0).
  */
-extern "C" void func_0030B540(void* self)
+extern "C" void cWScriptMan_startLocalMission(void* self)
 {
     cPlaybackMan_stop(SSXApp->Game->PlaybackMan);
     cReplay_reset(SSXApp->Game->Replay);
@@ -2288,20 +2288,20 @@ extern "C" void func_0030B540(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B590);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_previewLocalMission);
 #ifdef SKIP_ASM
-extern "C" int func_0026CAF8(void*, int);
+extern "C" int cPlaybackMan_setupPreview(void*, int);
 /**
  * Requests a preview of the local mission: stops the playback manager and resets the replay, then loads the mission's
- * playback (func_0026CAF8 with the local mission ID, +0x2A0); on success queues mission command 5 (+0x2AC) for that
+ * playback (cPlaybackMan_setupPreview with the local mission ID, +0x2A0); on success queues mission command 5 (+0x2AC) for that
  * mission (+0x2B0).
  *
  * @return 1 when the preview was queued, else 0
  */
-extern "C" int func_0030B590(char* self) {
+extern "C" int cWScriptMan_previewLocalMission(char* self) {
     cPlaybackMan_stop(SSXApp->Game->PlaybackMan);
     cReplay_reset(SSXApp->Game->Replay);
-    if (func_0026CAF8(SSXApp->Game->PlaybackMan, *(int*)(self + 0x2A0)) != 0) {
+    if (cPlaybackMan_setupPreview(SSXApp->Game->PlaybackMan, *(int*)(self + 0x2A0)) != 0) {
         *(int*)(self + 0x2AC) = 5;
         *(int*)(self + 0x2B0) = *(int*)(self + 0x2A0);
         return 1;
@@ -2310,7 +2310,7 @@ extern "C" int func_0030B590(char* self) {
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B608);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_cancelPreviewLocalMission);
 #ifdef SKIP_ASM
 void cPlaybackMan_reset(void* self);
 
@@ -2318,7 +2318,7 @@ void cPlaybackMan_reset(void* self);
  * Cancels the local mission preview: stops and resets the playback manager (cPlaybackMan_stop, cPlaybackMan_reset) and
  * queues mission command 6 (+0x2AC) for the local mission (+0x2A0, copied to +0x2B0).
  */
-extern "C" void func_0030B608(char* self)
+extern "C" void cWScriptMan_cancelPreviewLocalMission(char* self)
 {
     cPlaybackMan_stop(SSXApp->Game->PlaybackMan);
     cPlaybackMan_reset(SSXApp->Game->PlaybackMan);
@@ -2414,20 +2414,20 @@ extern "C" void cWScriptMan_quitLocalMission(void* self)
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_failActiveLocalMission);
 #ifdef SKIP_ASM
 extern "C" void cWScriptProcess_end(void* obj);
-extern "C" void func_0030C790(void* self);
+extern "C" void tMissionMenuQueue_empty(void* self);
 
 /**
  * Fails the local mission in progress and stops every active script process.
  *
  * When a mission id is set (+0x2A0), ends that mission if it is active (cWScriptProcess_end) and clears the state
  * (+0x2AC = 0, +0x2B0 and +0x2A0 = -1). Every process left in the active list (+0x2B8) is then cleared and moved to the
- * idle list (+0x2B4), and the queue at +0x1C4 is emptied with func_0030C790.
+ * idle list (+0x2B4), and the queue at +0x1C4 is emptied with tMissionMenuQueue_empty.
  */
 extern "C" void cWScriptMan_failActiveLocalMission(void* self)
 {
     unsigned int id = *(unsigned int*)((char*)self + 0x2A0);
     if (id != 0xFFFFFFFF) {
-        func_0030B388_cObj* obj = func_0030B388((char*)self + 0x2B8, id);
+        cProcessList_findMission_cObj* obj = cProcessList_findMission((char*)self + 0x2B8, id);
         if (obj != 0) {
             cWScriptProcess_end(obj);
         }
@@ -2438,13 +2438,13 @@ extern "C" void cWScriptMan_failActiveLocalMission(void* self)
     void* process;
     while ((process = cProcessList_removeHead((char*)self + 0x2B8)) != 0) {
         *(int*)process = 0;
-        func_0030B260((char*)self + 0x2B4, process);
+        cProcessList_addProcess((char*)self + 0x2B4, process);
     }
-    func_0030C790((char*)self + 0x1C4);
+    tMissionMenuQueue_empty((char*)self + 0x1C4);
 }
 #endif
 
-extern "C" void* func_0030B320(void*, int);
+extern "C" void* cProcessList_findProcess1(void*, int);
 
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isProcessActive__FPvT0);
@@ -2457,7 +2457,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isProcessActive__FPvT0);
  */
 int cWScriptMan_isProcessActive(void* self, void* process)
 {
-    return (func_0030B320((char*)self + 0x2b8, *(int*)((char*)process + 0x20)) != 0);
+    return (cProcessList_findProcess1((char*)self + 0x2b8, *(int*)((char*)process + 0x20)) != 0);
 }
 #endif
 
@@ -2494,13 +2494,13 @@ extern "C" int cWScriptMan_isLocalMissionActive(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030B928);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_collectPool);
 #ifdef SKIP_ASM
 struct cWScriptIdTable;
 extern "C" void cCollectPool_init(cWScriptIdTable* self);
 
 // same layout as cWScriptIdTable (defined later in the unit)
-struct func_0030B928_sSlot {
+struct cWScriptMan_collectPool_sSlot {
     unsigned int id;     // 0x0
     int arg;             // 0x4
     int b;               // 0x8
@@ -2514,9 +2514,9 @@ struct func_0030B928_sSlot {
  * @param id  the pool ID
  * @param size  the pool size
  */
-extern "C" void func_0030B928(void* self, unsigned int id, int size)
+extern "C" void cWScriptMan_collectPool(void* self, unsigned int id, int size)
 {
-    func_0030B928_sSlot* pool = (func_0030B928_sSlot*)((char*)self + 0x2C0);
+    cWScriptMan_collectPool_sSlot* pool = (cWScriptMan_collectPool_sSlot*)((char*)self + 0x2C0);
     int i;
     for (i = 0; i < 1; i++, pool++) {
         if (pool->id == id) {
@@ -2538,8 +2538,8 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_collect);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-struct func_0030C3E0_sTable;
-extern "C" void func_0030C3E0(func_0030C3E0_sTable* self, int id);
+struct cCollectPool_collect_sTable;
+extern "C" void cCollectPool_collect(cCollectPool_collect_sTable* self, int id);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 extern "C" int cBENewRaceInterface_getLocationPeak1(void* iface);
@@ -2567,7 +2567,7 @@ extern "C" void cWScriptMan_collect(void* self, int rider, int id, int instId)
     int i;
     for (i = 0; i < 1; i++) {
         if (slots[i].id == id) {
-            func_0030C3E0((func_0030C3E0_sTable*)&slots[i], instId);
+            cCollectPool_collect((cCollectPool_collect_sTable*)&slots[i], instId);
             cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 5, 0, 1.0f);
             void* newRace = cBE_getInterface_Fv(cBE_getBE(), 0);
             void* econ = cBE_getInterface_Fv(cBE_getBE(), 11);
@@ -2581,34 +2581,34 @@ extern "C" void cWScriptMan_collect(void* self, int rider, int id, int instId)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030BA80);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_collectCount);
 #ifdef SKIP_ASM
-struct func_0030BA80_sEntry {
+struct cWScriptMan_collectCount_sEntry {
     int id;
     char pad04[0x10C - 4];
 };
 
-struct func_0030BA80_sMan {
+struct cWScriptMan_collectCount_sMan {
     char pad000[0x2C0];
-    func_0030BA80_sEntry entries[1];
+    cWScriptMan_collectCount_sEntry entries[1];
 };
 
-extern "C" int func_0030C468(void* entry);
+extern "C" int cCollectPool_collectCount(void* entry);
 
 /**
- * Returns the collected count of collect pool @p id (func_0030C468), or 0 when the manager's pool (+0x2C0) has another
+ * Returns the collected count of collect pool @p id (cCollectPool_collectCount), or 0 when the manager's pool (+0x2C0) has another
  * ID.
  *
  * @param id  the pool ID
  * @return the collected count
  */
-extern "C" int func_0030BA80(func_0030BA80_sMan* self, int id)
+extern "C" int cWScriptMan_collectCount(cWScriptMan_collectCount_sMan* self, int id)
 {
-    func_0030BA80_sEntry* pool = self->entries;
+    cWScriptMan_collectCount_sEntry* pool = self->entries;
     int i;
     for (i = 0; i < 1; i++, pool++) {
         if (pool->id == id) {
-            return func_0030C468(pool);
+            return cCollectPool_collectCount(pool);
         }
     }
     return 0;
@@ -2616,34 +2616,34 @@ extern "C" int func_0030BA80(func_0030BA80_sMan* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030BAC8);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_collectInst);
 #ifdef SKIP_ASM
-struct func_0030BAC8_sEntry {
+struct cWScriptMan_collectInst_sEntry {
     int id;
     char pad04[0x10C - 4];
 };
 
-struct func_0030BAC8_sMan {
+struct cWScriptMan_collectInst_sMan {
     char pad000[0x2C0];
-    func_0030BAC8_sEntry entries[1];
+    cWScriptMan_collectInst_sEntry entries[1];
 };
 
-extern "C" void func_0030C4A8(void* e, int a1, int a2);
+extern "C" void cCollectPool_collectInst(void* e, int a1, int a2);
 
 /**
- * Adds instances to collect pool @p id (func_0030C4A8) when the manager's pool (+0x2C0) has that ID.
+ * Adds instances to collect pool @p id (cCollectPool_collectInst) when the manager's pool (+0x2C0) has that ID.
  *
  * @param id  the pool ID
  * @param instIds  the instance resource IDs (unsigned int array)
  * @param size  the number of IDs
  */
-extern "C" void func_0030BAC8(func_0030BAC8_sMan* self, int id, int instIds, int size)
+extern "C" void cWScriptMan_collectInst(cWScriptMan_collectInst_sMan* self, int id, int instIds, int size)
 {
-    func_0030BAC8_sEntry* pool = self->entries;
+    cWScriptMan_collectInst_sEntry* pool = self->entries;
     int i;
     for (i = 0; i < 1; i++, pool++) {
         if (pool->id == id) {
-            func_0030C4A8(pool, instIds, size);
+            cCollectPool_collectInst(pool, instIds, size);
             return;
         }
     }
@@ -2651,7 +2651,7 @@ extern "C" void func_0030BAC8(func_0030BAC8_sMan* self, int id, int instIds, int
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030BB10);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sWSVtVBB10 {
     short delta;
@@ -2669,23 +2669,23 @@ struct sWSManBB10 {
     void* objs[50];             // 0x3CC
 };
 
-class func_0030C6C8_cObj;
-extern "C" int func_0030C6C8(void* a, func_0030C6C8_cObj* obj);
-extern "C" void func_0030BC80(void* self, void** list, void* stream);
+class cCollectPool_writeToReplayFrame_cObj;
+extern "C" int cCollectPool_writeToReplayFrame(void* a, cCollectPool_writeToReplayFrame_cObj* obj);
+extern "C" void cWScriptMan_writeReplayProcessList(void* self, void** list, void* stream);
 extern "C" int cWScriptCache_getScriptBase(void* a, int id);
-extern "C" void func_002257E0(void* obj, void* stream, int a2);
+extern "C" void luno_cLunoTable_writeToReplayFrame(void* obj, void* stream, int a2);
 
 /**
  * Saves the world script manager into a replay frame.
  *
- * Writes the first 0x28C bytes of the manager (the stream's virtual slot 1), the collect pool (func_0030C6C8), the
- * active and start process lists (func_0030BC80), the number of section global tables in use (+0x3CC, 50 slots) and for
- * each its index and its contents (func_002257E0, relative to the section's script base from
+ * Writes the first 0x28C bytes of the manager (the stream's virtual slot 1), the collect pool (cCollectPool_writeToReplayFrame), the
+ * active and start process lists (cWScriptMan_writeReplayProcessList), the number of section global tables in use (+0x3CC, 50 slots) and for
+ * each its index and its contents (luno_cLunoTable_writeToReplayFrame, relative to the section's script base from
  * cWScriptCache_getScriptBase).
  *
  * @param stream  the replay frame stream
  */
-extern "C" void func_0030BB10(sWSManBB10* self, void* stream)
+extern "C" void cWScriptMan_writeToReplayFrame(sWSManBB10* self, void* stream)
 {
     int count;
     int j;
@@ -2696,11 +2696,11 @@ extern "C" void func_0030BB10(sWSManBB10* self, void* stream)
     {
         int k;
         for (k = 0; k < 1; k++) {
-            func_0030C6C8(self->tables[k], (func_0030C6C8_cObj*)stream);
+            cCollectPool_writeToReplayFrame(self->tables[k], (cCollectPool_writeToReplayFrame_cObj*)stream);
         }
     }
-    func_0030BC80(self, &self->list2B8, stream);
-    func_0030BC80(self, &self->list2BC, stream);
+    cWScriptMan_writeReplayProcessList(self, &self->list2B8, stream);
+    cWScriptMan_writeReplayProcessList(self, &self->list2BC, stream);
     count = 0;
     {
         int i;
@@ -2720,17 +2720,17 @@ extern "C" void func_0030BB10(sWSManBB10* self, void* stream)
             int scriptBase;
             vtEntry->fn((char*)stream + vtEntry->delta, &j, 4);
             scriptBase = cWScriptCache_getScriptBase(*(void**)(self->world + 4), j);
-            func_002257E0(self->objs[j], stream, scriptBase);
+            luno_cLunoTable_writeToReplayFrame(self->objs[j], stream, scriptBase);
         }
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("wscript/wscriptman", func_0030BC80);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_writeReplayProcessList);
 #ifdef SKIP_ASM
 extern "C" int cProcessList_getCount(cWScriptListHead* self);
-extern "C" void func_00308038(void* node, void* stream);
+extern "C" void cWScriptProcess_writeToReplayFrame(void* node, void* stream);
 
 struct sVEntry30BC80 {
     short delta;
@@ -2740,12 +2740,12 @@ struct sVEntry30BC80 {
 
 /**
  * Saves a process list into a replay frame: its count (cProcessList_getCount), then per process its ID (+0x20) and its
- * state (func_00308038).
+ * state (cWScriptProcess_writeToReplayFrame).
  *
  * @param list  the process list
  * @param stream  the replay frame stream
  */
-extern "C" void func_0030BC80(void* self, void** list, void* stream)
+extern "C" void cWScriptMan_writeReplayProcessList(void* self, void** list, void* stream)
 {
     int n = cProcessList_getCount((cWScriptListHead*)list);
     sVEntry30BC80* vtEntry = &(*(sVEntry30BC80**)stream)[1];
@@ -2755,7 +2755,7 @@ extern "C" void func_0030BC80(void* self, void** list, void* stream)
         int id = *(int*)(node + 0x20);
         vtEntry = &(*(sVEntry30BC80**)stream)[1];
         vtEntry->fn((char*)stream + vtEntry->delta, &id, 4);
-        func_00308038(node, stream);
+        cWScriptProcess_writeToReplayFrame(node, stream);
         node = *(char**)(node + 0x18);
     }
 }
@@ -2782,21 +2782,21 @@ struct sWSMan_30BD20 {
 
 struct cWScriptListHead;
 extern "C" void* cProcessList_removeHead(void* self);
-int func_0030B260(void* self, void* a1);
+int cProcessList_addProcess(void* self, void* a1);
 extern "C" int cWScriptCache_getScriptBase(void* a, int id);
-class func_0030C700_cObj;
-extern "C" int func_0030C700(void* a, func_0030C700_cObj* obj);
-class func_0030BEE8_cStream;
-extern "C" void func_0030BEE8(void* self, cWScriptListHead* list, func_0030BEE8_cStream* stream);
-extern "C" void func_00224F68(void* obj);
+class cCollectPool_readFromReplayFrame_cObj;
+extern "C" int cCollectPool_readFromReplayFrame(void* a, cCollectPool_readFromReplayFrame_cObj* obj);
+class cWScriptMan_readReplayProcessList_cStream;
+extern "C" void cWScriptMan_readReplayProcessList(void* self, cWScriptListHead* list, cWScriptMan_readReplayProcessList_cStream* stream);
+extern "C" void luno_cLunoTable_emptyTable(void* obj);
 extern "C" void luno_cLunoTable_readFromReplayFrame(void* obj, cStream_30BD20* stream, int a2);
 
 /**
  * Restores the world script manager's state from a replay frame.
  *
- * Reads the first 0x28C bytes of the manager, then the collect pool (func_0030C700). Every process in the active
+ * Reads the first 0x28C bytes of the manager, then the collect pool (cCollectPool_readFromReplayFrame). Every process in the active
  * (+0x2B8) and pending (+0x2BC) lists goes back to the idle list, and both lists are then read back from @p stream
- * (func_0030BEE8). The 50 section tables at +0x3CC are emptied (func_00224F68), and a count of saved tables follows,
+ * (cWScriptMan_readReplayProcessList). The 50 section tables at +0x3CC are emptied (luno_cLunoTable_emptyTable), and a count of saved tables follows,
  * each read back against its section's script base (cWScriptCache_getScriptBase). Finally the current instance, infos, process and
  * task are cleared.
  *
@@ -2808,25 +2808,25 @@ extern "C" void cWScriptMan_readFromReplayFrame(sWSMan_30BD20* self, cStream_30B
     {
         int k;
         for (k = 0; k < 1; k++) {
-            func_0030C700(self->tables[k], (func_0030C700_cObj*)stream);
+            cCollectPool_readFromReplayFrame(self->tables[k], (cCollectPool_readFromReplayFrame_cObj*)stream);
         }
     }
     void* process;
     while ((process = cProcessList_removeHead(&self->list2B8)) != 0) {
         *(int*)process = 0;
-        func_0030B260((char*)self + 0x2B4, process);
+        cProcessList_addProcess((char*)self + 0x2B4, process);
     }
     while ((process = cProcessList_removeHead(&self->list2BC)) != 0) {
         *(int*)process = 0;
-        func_0030B260((char*)self + 0x2B4, process);
+        cProcessList_addProcess((char*)self + 0x2B4, process);
     }
-    func_0030BEE8(self, (cWScriptListHead*)&self->list2B8, (func_0030BEE8_cStream*)stream);
-    func_0030BEE8(self, (cWScriptListHead*)&self->list2BC, (func_0030BEE8_cStream*)stream);
+    cWScriptMan_readReplayProcessList(self, (cWScriptListHead*)&self->list2B8, (cWScriptMan_readReplayProcessList_cStream*)stream);
+    cWScriptMan_readReplayProcessList(self, (cWScriptListHead*)&self->list2BC, (cWScriptMan_readReplayProcessList_cStream*)stream);
     {
         int i;
         for (i = 0; i < 50; i++) {
             if (self->objs[i] != 0) {
-                func_00224F68(self->objs[i]);
+                luno_cLunoTable_emptyTable(self->objs[i]);
             }
         }
     }
@@ -2847,22 +2847,22 @@ extern "C" void cWScriptMan_readFromReplayFrame(sWSMan_30BD20* self, cStream_30B
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("wscript/wscriptman", func_0030BEE8);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_readReplayProcessList);
 #ifdef SKIP_ASM
-class func_0030BEE8_cStream {
+class cWScriptMan_readReplayProcessList_cStream {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
     virtual void Read(void* dst, int size);
 };
 
-extern "C" void func_00308118(void* proc, func_0030BEE8_cStream* stream);
+extern "C" void cWScriptProcess_readFromReplayFrame(void* proc, cWScriptMan_readReplayProcessList_cStream* stream);
 extern "C" void cProcessList_appendProcess(cWScriptListHead* self, cWScriptListNode* node);
 extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNode* node);
 
 /**
  * Restores a process list from a replay frame: reads a count, then per entry a process ID; that process is taken out of
- * the idle list (+0x2B4; func_0030B320, cProcessList_removeProcess), its state read (func_00308118) and appended to
+ * the idle list (+0x2B4; cProcessList_findProcess1, cProcessList_removeProcess), its state read (cWScriptProcess_readFromReplayFrame) and appended to
  * @p list.
  *
  * Likely bug: an ID missing from the idle list gives a null process, which is used unchecked.
@@ -2870,7 +2870,7 @@ extern "C" int cProcessList_removeProcess(cWScriptListHead* self, cWScriptListNo
  * @param list  the process list to fill
  * @param stream  the replay frame stream
  */
-extern "C" void func_0030BEE8(void* self, cWScriptListHead* list, func_0030BEE8_cStream* stream)
+extern "C" void cWScriptMan_readReplayProcessList(void* self, cWScriptListHead* list, cWScriptMan_readReplayProcessList_cStream* stream)
 {
     int n;
     int id;
@@ -2878,16 +2878,16 @@ extern "C" void func_0030BEE8(void* self, cWScriptListHead* list, func_0030BEE8_
     stream->Read(&n, 4);
     for (; i < n; i++) {
         stream->Read(&id, 4);
-        cWScriptListNode* node = (cWScriptListNode*)func_0030B320((char*)self + 0x2B4, id);
+        cWScriptListNode* node = (cWScriptListNode*)cProcessList_findProcess1((char*)self + 0x2B4, id);
         cProcessList_removeProcess((cWScriptListHead*)((char*)self + 0x2B4), node);
-        func_00308118(node, stream);
+        cWScriptProcess_readFromReplayFrame(node, stream);
         cProcessList_appendProcess(list, node);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030BFC0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_checkGate);
 #ifdef SKIP_ASM
 
 struct sRefSet_BFC0 {
@@ -2997,7 +2997,7 @@ struct sVEp_BFC0 {
  * @param id2  the next gate's instance ID, or -1
  * @return 1 passed, 0 still near, -1 missed
  */
-extern "C" int func_0030BFC0(int* who, unsigned int id0, unsigned int id1, unsigned int id2)
+extern "C" int cWScriptMan_checkGate(int* who, unsigned int id0, unsigned int id1, unsigned int id2)
 {
     void* prevInst = 0;
     void* inst = 0;
@@ -3076,14 +3076,14 @@ extern "C" void cCollectPool_init(cWScriptIdTable* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030C3E0);
+INCLUDE_ASM("wscript/wscriptman", cCollectPool_collect);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void cBEMissionInterface_setBit(void* iface, int a1, int index, int value);
 
-struct func_0030C3E0_sTable {
+struct cCollectPool_collect_sTable {
     int value;      // 0x0
     int pad4;       // 0x4
     int count;      // 0x8
@@ -3097,7 +3097,7 @@ struct func_0030C3E0_sTable {
  *
  * @param id  the instance's resource ID
  */
-extern "C" void func_0030C3E0(func_0030C3E0_sTable* self, int id)
+extern "C" void cCollectPool_collect(cCollectPool_collect_sTable* self, int id)
 {
     int i;
     for (i = 0; i < self->count; i++) {
@@ -3110,7 +3110,7 @@ extern "C" void func_0030C3E0(func_0030C3E0_sTable* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030C468);
+INCLUDE_ASM("wscript/wscriptman", cCollectPool_collectCount);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -3124,14 +3124,14 @@ extern "C" int cBEMissionInterface_getCurrentCollectByType(void* iface, int a1, 
  * @param entry  the collect pool
  * @return the collected count
  */
-extern "C" int func_0030C468(void* entry)
+extern "C" int cCollectPool_collectCount(void* entry)
 {
     return cBEMissionInterface_getCurrentCollectByType(cBE_getInterface_Fv(cBE_getBE(), 10), 0, *(int*)entry);
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030C4A8);
+INCLUDE_ASM("wscript/wscriptman", cCollectPool_collectInst);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_C4A8(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -3211,7 +3211,7 @@ static inline void respawn_C4A8(unsigned int id)
  * @param size  the number of IDs
  */
 // PORT: a1 is really an unsigned int* id list and a2 its count (the unit declares both int).
-extern "C" void func_0030C4A8(void* ep, int instIds, int size)
+extern "C" void cCollectPool_collectInst(void* ep, int instIds, int size)
 {
     sEntry_C4A8* pool = (sEntry_C4A8*)ep;
     unsigned int* ids = (unsigned int*)instIds;
@@ -3237,9 +3237,9 @@ extern "C" void func_0030C4A8(void* ep, int instIds, int size)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030C6C8);
+INCLUDE_ASM("wscript/wscriptman", cCollectPool_writeToReplayFrame);
 #ifdef SKIP_ASM
-class func_0030C6C8_cObj {
+class cCollectPool_writeToReplayFrame_cObj {
 public:
     // slot N at vtable offset N*8
     virtual int v01(void* a, int b);
@@ -3252,16 +3252,16 @@ public:
  * @param obj  the replay stream
  * @return the stream call's result
  */
-extern "C" int func_0030C6C8(void* collectPool, func_0030C6C8_cObj* obj)
+extern "C" int cCollectPool_writeToReplayFrame(void* collectPool, cCollectPool_writeToReplayFrame_cObj* obj)
 {
     return obj->v01(collectPool, 268);
 }
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030C700);
+INCLUDE_ASM("wscript/wscriptman", cCollectPool_readFromReplayFrame);
 #ifdef SKIP_ASM
-class func_0030C700_cObj {
+class cCollectPool_readFromReplayFrame_cObj {
 public:
     // slot N at vtable offset N*8
     virtual int v01(void* a, int b);
@@ -3275,7 +3275,7 @@ public:
  * @param obj  the replay stream
  * @return the stream call's result
  */
-extern "C" int func_0030C700(void* collectPool, func_0030C700_cObj* obj)
+extern "C" int cCollectPool_readFromReplayFrame(void* collectPool, cCollectPool_readFromReplayFrame_cObj* obj)
 {
     return obj->v02(collectPool, 268);
 }
@@ -3319,7 +3319,7 @@ extern "C" void tMissionMenuQueue_init(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030C790);
+INCLUDE_ASM("wscript/wscriptman", tMissionMenuQueue_empty);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int value, int size);
 
@@ -3327,7 +3327,7 @@ extern "C" void MEM_fill(void* dst, int value, int size);
  * Empties a mission menu queue: the read (+0x0) and write (+0x4) positions become 0 and the 16 entries (+0x8, 0xC0
  * bytes) are zeroed. Same body as tMissionMenuQueue_init.
  */
-extern "C" void func_0030C790(void* self)
+extern "C" void tMissionMenuQueue_empty(void* self)
 {
     *(int*)self = 0;
     *(int*)((char*)self + 4) = 0;
@@ -3880,23 +3880,23 @@ extern "C" int func_0030D258(int value) {
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D260);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_setTrickDef);
 #ifdef SKIP_ASM
 /**
  * Sets the script manager's current trick definition (On Tour TrickDef, +0x29C) to @p trickDef.
  *
- * Out-of-line copy of an inline accessor; func_003078C0 writes the same field directly around a trick event, and
- * func_0030AF08 reads the trick's fields through it.
+ * Out-of-line copy of an inline accessor; cWScriptProcess_dispatchProcessEvent writes the same field directly around a trick event, and
+ * cWScriptMan_getCurrentTrick reads the trick's fields through it.
  *
  * @param wscriptMan  the script manager
  * @param trickDef  the trick definition (a pointer passed as an int), or 0 to clear it
  */
-extern "C" void func_0030D260(void *wscriptMan, int trickDef) {
+extern "C" void cWScriptMan_setTrickDef(void *wscriptMan, int trickDef) {
     (*(int *)((char*)(wscriptMan) + (0x29C))) = trickDef;
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D268);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isPointsEnabled);
 #ifdef SKIP_ASM
 /**
  * Returns the script manager's mission-points enable flag (On Tour MissionPointsEnable, +0x4).
@@ -3906,12 +3906,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D268);
  * @param wscriptMan  the script manager
  * @return the flag word, nonzero when the points display is enabled
  */
-extern "C" int func_0030D268(void *wscriptMan) {
+extern "C" int cWScriptMan_isPointsEnabled(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (4)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D270);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getNumPointsCurr);
 #ifdef SKIP_ASM
 /**
  * Returns the script manager's current mission points (On Tour MissionPoints, +0x8).
@@ -3919,12 +3919,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D270);
  * @param wscriptMan  the script manager
  * @return the points
  */
-extern "C" int func_0030D270(void *wscriptMan) {
+extern "C" int cWScriptMan_getNumPointsCurr(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (8)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D278);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getNumPointsGoal);
 #ifdef SKIP_ASM
 /**
  * Returns the script manager's mission points goal (On Tour MissionPointsGoal, +0xC).
@@ -3932,12 +3932,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D278);
  * @param wscriptMan  the script manager
  * @return the points goal
  */
-extern "C" int func_0030D278(void *wscriptMan) {
+extern "C" int cWScriptMan_getNumPointsGoal(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0xC)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D280);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isCountEnabled);
 #ifdef SKIP_ASM
 /**
  * Returns the script manager's mission-count enable flag (On Tour MissionCountEnable, +0x10).
@@ -3947,12 +3947,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D280);
  * @param wscriptMan  the script manager
  * @return the flag word, nonzero when the count display is enabled
  */
-extern "C" int func_0030D280(void *wscriptMan) {
+extern "C" int cWScriptMan_isCountEnabled(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x10)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D288);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getCountCurr);
 #ifdef SKIP_ASM
 /**
  * Returns the script manager's current mission count (On Tour MissionCount, +0x14).
@@ -3960,12 +3960,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D288);
  * @param wscriptMan  the script manager
  * @return the count
  */
-extern "C" int func_0030D288(void *wscriptMan) {
+extern "C" int cWScriptMan_getCountCurr(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x14)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D290);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getCountMax);
 #ifdef SKIP_ASM
 /**
  * Returns the script manager's mission count maximum (On Tour MissionCountMax, +0x18).
@@ -3973,12 +3973,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D290);
  * @param wscriptMan  the script manager
  * @return the maximum count
  */
-extern "C" int func_0030D290(void *wscriptMan) {
+extern "C" int cWScriptMan_getCountMax(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x18)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D298);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isClockEnabled);
 #ifdef SKIP_ASM
 /**
  * Returns the script manager's mission-clock enable flag (On Tour MissionTicksEnable, +0x1C).
@@ -3988,12 +3988,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D298);
  * @param wscriptMan  the script manager
  * @return the flag word, nonzero when the clock display is enabled
  */
-extern "C" int func_0030D298(void *wscriptMan) {
+extern "C" int cWScriptMan_isClockEnabled(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x1C)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D2A0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getClockTicksCurr);
 #ifdef SKIP_ASM
 /**
  * Returns the script manager's current mission clock in ticks (On Tour MissionTicks, +0x20).
@@ -4001,12 +4001,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D2A0);
  * @param wscriptMan  the script manager
  * @return the tick count
  */
-extern "C" int func_0030D2A0(void *wscriptMan) {
+extern "C" int cWScriptMan_getClockTicksCurr(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x20)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D2A8);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getClockDir);
 #ifdef SKIP_ASM
 /**
  * Returns the direction of the script manager's mission clock (On Tour MissionTicksDir, +0x24).
@@ -4014,12 +4014,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D2A8);
  * @param wscriptMan  the script manager
  * @return the clock direction word
  */
-extern "C" int func_0030D2A8(void *wscriptMan) {
+extern "C" int cWScriptMan_getClockDir(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x24)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D2B0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isHeightEnabled);
 #ifdef SKIP_ASM
 /**
  * Returns the script manager's mission-height enable flag (On Tour MissionHeightEnable, +0x28).
@@ -4029,12 +4029,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D2B0);
  * @param wscriptMan  the script manager
  * @return the flag word, nonzero when the height display is enabled
  */
-extern "C" int func_0030D2B0(void *wscriptMan) {
+extern "C" int cWScriptMan_isHeightEnabled(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x28)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D2B8);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isTrickEnabled);
 #ifdef SKIP_ASM
 /**
  * Returns the script manager's mission-trick enable flag (On Tour MissionTrickEnable, +0x34).
@@ -4044,12 +4044,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D2B8);
  * @param wscriptMan  the script manager
  * @return the flag word, nonzero when the trick display is enabled
  */
-extern "C" int func_0030D2B8(void *wscriptMan) {
+extern "C" int cWScriptMan_isTrickEnabled(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x34)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D2C0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getTrickCurr);
 #ifdef SKIP_ASM
 /**
  * Returns the address of the script manager's mission trick record (On Tour MissionTrick, +0x38).
@@ -4057,12 +4057,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D2C0);
  * @param wscriptMan  the script manager
  * @return @p wscriptMan + 0x38
  */
-extern "C" int func_0030D2C0(int wscriptMan) {
+extern "C" int cWScriptMan_getTrickCurr(int wscriptMan) {
     return wscriptMan + 0x38;
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D2C8);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_setLocalMissionId);
 #ifdef SKIP_ASM
 /**
  * Sets the script manager's local mission id (On Tour LocalMissionId, +0x2A0) to @p missionId.
@@ -4070,12 +4070,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D2C8);
  * @param wscriptMan  the script manager
  * @param missionId  the mission id to store
  */
-extern "C" void func_0030D2C8(void *wscriptMan, int missionId) {
+extern "C" void cWScriptMan_setLocalMissionId(void *wscriptMan, int missionId) {
     (*(int *)((char*)(wscriptMan) + (0x2A0))) = missionId;
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D2D0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getLocalMissionId);
 #ifdef SKIP_ASM
 /**
  * Returns the script manager's local mission id (On Tour LocalMissionId, +0x2A0).
@@ -4083,12 +4083,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D2D0);
  * @param wscriptMan  the script manager
  * @return the mission id
  */
-extern "C" int func_0030D2D0(void *wscriptMan) {
+extern "C" int cWScriptMan_getLocalMissionId(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x2A0)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D2D8);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getTheWScriptMan);
 #ifdef SKIP_ASM
 extern int cWScriptMan_TheWScriptMan;
 
@@ -4099,12 +4099,12 @@ extern int cWScriptMan_TheWScriptMan;
  *
  * @return the manager
  */
-extern "C" int func_0030D2D8(void) {
+extern "C" int cWScriptMan_getTheWScriptMan(void) {
     return cWScriptMan_TheWScriptMan;
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D2E0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getInst);
 #ifdef SKIP_ASM
 /**
  * Returns the script manager's current instance record (On Tour Inst, +0x290).
@@ -4114,12 +4114,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D2E0);
  * @param wscriptMan  the script manager
  * @return the instance record, or 0
  */
-extern "C" int func_0030D2E0(void *wscriptMan) {
+extern "C" int cWScriptMan_getInst(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x290)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D2E8);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getBeing);
 #ifdef SKIP_ASM
 /**
  * Returns the script manager's current being (On Tour Being, +0x0), the index of the rider scripts act on.
@@ -4127,12 +4127,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D2E8);
  * @param wscriptMan  the script manager
  * @return the being index
  */
-extern "C" int func_0030D2E8(int *wscriptMan) {
+extern "C" int cWScriptMan_getBeing(int *wscriptMan) {
     return *wscriptMan;
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D2F0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getCollideInfo);
 #ifdef SKIP_ASM
 /**
  * Returns the script manager's current collision info (On Tour CollideInfo, +0x294).
@@ -4140,12 +4140,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D2F0);
  * @param wscriptMan  the script manager
  * @return the collision info pointer
  */
-extern "C" int func_0030D2F0(void *wscriptMan) {
+extern "C" int cWScriptMan_getCollideInfo(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x294)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D2F8);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getIntersectInfo);
 #ifdef SKIP_ASM
 /**
  * Returns the script manager's current intersection info (On Tour IntersectInfo, +0x298).
@@ -4153,12 +4153,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D2F8);
  * @param wscriptMan  the script manager
  * @return the intersection info pointer
  */
-extern "C" int func_0030D2F8(void *wscriptMan) {
+extern "C" int cWScriptMan_getIntersectInfo(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x298)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D300);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_setInst);
 #ifdef SKIP_ASM
 /**
  * Sets the script manager's current instance record (On Tour Inst, +0x290) to @p inst.
@@ -4166,28 +4166,28 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D300);
  * @param wscriptMan  the script manager
  * @param inst  the instance record (passed as an int), or 0
  */
-extern "C" void func_0030D300(void *wscriptMan, int inst) {
+extern "C" void cWScriptMan_setInst(void *wscriptMan, int inst) {
     (*(int *)((char*)(wscriptMan) + (0x290))) = inst;
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D308);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getGlobalTable);
 #ifdef SKIP_ASM
 /**
  * Returns the global Luno table of world section @p sectionId (the array at +0x3CC, On Tour GlobalTables).
  *
- * func_00308B78 allocates these tables; no bounds check.
+ * cWScriptMan_allocateGlobalTable allocates these tables; no bounds check.
  *
  * @param wscriptMan  the script manager
  * @param sectionId  the world section index
  * @return the section's cLunoTable, or 0 when none was allocated
  */
-extern "C" int func_0030D308(int wscriptMan, int sectionId) {
+extern "C" int cWScriptMan_getGlobalTable(int wscriptMan, int sectionId) {
     return (*(int *)(((char*)(wscriptMan) + (sectionId << 2)) + (0x3CC)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D318);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getCurrentTask);
 #ifdef SKIP_ASM
 /**
  * Returns the script manager's current task (On Tour CurrentTask, +0x2A8).
@@ -4195,12 +4195,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D318);
  * @param wscriptMan  the script manager
  * @return the task, or 0
  */
-extern "C" int func_0030D318(void *wscriptMan) {
+extern "C" int cWScriptMan_getCurrentTask(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x2A8)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D320);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_setCurrentTask);
 #ifdef SKIP_ASM
 /**
  * Sets the script manager's current task (On Tour CurrentTask, +0x2A8) to @p task.
@@ -4208,12 +4208,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D320);
  * @param wscriptMan  the script manager
  * @param task  the task (passed as an int), or 0
  */
-extern "C" void func_0030D320(void *wscriptMan, int task) {
+extern "C" void cWScriptMan_setCurrentTask(void *wscriptMan, int task) {
     (*(int *)((char*)(wscriptMan) + (0x2A8))) = task;
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D328);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getCurrentProcess);
 #ifdef SKIP_ASM
 /**
  * Returns the script manager's current process (On Tour CurrentProcess, +0x2A4).
@@ -4223,12 +4223,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D328);
  * @param wscriptMan  the script manager
  * @return the process, or 0
  */
-extern "C" int func_0030D328(void *wscriptMan) {
+extern "C" int cWScriptMan_getCurrentProcess(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x2A4)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D330);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isMenuQueueReady);
 #ifdef SKIP_ASM
 /**
  * Returns whether the script manager's mission menu queue (+0x1C4, On Tour MissionMenuQueue) holds an entry.
@@ -4239,38 +4239,38 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D330);
  * @param wscriptMan  the script manager
  * @return 1 when they differ, else 0
  */
-extern "C" int func_0030D330(void *wscriptMan) {
+extern "C" int cWScriptMan_isMenuQueueReady(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x1C4))) != (*(int *)((char*)(wscriptMan) + (0x1C8)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D348);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_popMenuQueueEntry);
 #ifdef SKIP_ASM
 /**
  * Pops the next entry from the script manager's mission menu queue (+0x1C4) with tMissionMenuQueue_getNextEntry.
  *
  * The callee's result (the entry) is left as this function's result, though the C here declares none.
  */
-extern "C" void func_0030D348(char* self)
+extern "C" void cWScriptMan_popMenuQueueEntry(char* self)
 {
     tMissionMenuQueue_getNextEntry((cWScriptQueue*)(self + 0x1C4));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D368);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getMenuQueueEntry);
 #ifdef SKIP_ASM
 /**
  * Returns the current entry of the script manager's mission menu queue (+0x1C4) via tMissionMenuQueue_getEntry.
  *
  * The callee's result (the entry) is left as this function's result, though the C here declares none.
  */
-extern "C" void func_0030D368(char* self)
+extern "C" void cWScriptMan_getMenuQueueEntry(char* self)
 {
     tMissionMenuQueue_getEntry((cWScriptQueue*)(self + 0x1C4));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D388);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMan_setBeing);
 #ifdef SKIP_ASM
 /**
  * Sets the script manager's current being (On Tour Being, +0x0) to @p being.
@@ -4278,7 +4278,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D388);
  * @param wscriptMan  the script manager
  * @param being  the being (rider) index
  */
-extern "C" void func_0030D388(int *wscriptMan, int being) {
+extern "C" void cWScriptMan_setBeing(int *wscriptMan, int being) {
     *wscriptMan = being;
 }
 #endif
@@ -4288,7 +4288,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D390);
 /**
  * Returns whether @p eventId is one of the 10 process event ids (0-9, unsigned compare); @p self is not used.
  *
- * func_003078C0 dispatches exactly these ten ids to a process's event handlers.
+ * cWScriptProcess_dispatchProcessEvent dispatches exactly these ten ids to a process's event handlers.
  *
  * @param eventId  the event id
  * @return 1 when @p eventId < 10, else 0
@@ -4298,19 +4298,19 @@ extern "C" int func_0030D390(void* self, unsigned int eventId) {
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D398);
+INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_clearState);
 #ifdef SKIP_ASM
 /**
  * Clears a script process's state word (+0x0) to 0.
  *
  * @param process  the process
  */
-extern "C" void func_0030D398(int *process) {
+extern "C" void cWScriptProcess_clearState(int *process) {
     *process = 0;
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D3A0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_getNext);
 #ifdef SKIP_ASM
 /**
  * Returns the next process in its process list (On Tour Next, +0x18).
@@ -4320,12 +4320,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D3A0);
  * @param process  the process
  * @return the next process, or 0 at the end of the list
  */
-extern "C" int func_0030D3A0(void *process) {
+extern "C" int cWScriptProcess_getNext(void *process) {
     return (*(int *)((char*)(process) + (0x18)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D3A8);
+INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_setNext);
 #ifdef SKIP_ASM
 /**
  * Sets the next process in a process's list link (On Tour Next, +0x18) to @p nextProcess.
@@ -4333,12 +4333,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D3A8);
  * @param process  the process
  * @param nextProcess  the process to link after it (passed as an int), or 0
  */
-extern "C" void func_0030D3A8(void *process, int nextProcess) {
+extern "C" void cWScriptProcess_setNext(void *process, int nextProcess) {
     (*(int *)((char*)(process) + (0x18))) = nextProcess;
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D3B0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_getSectionId);
 #ifdef SKIP_ASM
 /**
  * Returns the world section a script process belongs to (On Tour SectionId, +0x24).
@@ -4348,27 +4348,27 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D3B0);
  * @param process  the process
  * @return the section id
  */
-extern "C" int func_0030D3B0(void *process) {
+extern "C" int cWScriptProcess_getSectionId(void *process) {
     return (*(int *)((char*)(process) + (0x24)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D3B8);
+INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_setTrickDef);
 #ifdef SKIP_ASM
 /**
  * Sets the trick definition of a script process's manager (+0x10, its TrickDef at +0x29C) to @p trickDef.
  *
- * The same store as func_0030D260, made through the process's manager pointer.
+ * The same store as cWScriptMan_setTrickDef, made through the process's manager pointer.
  *
  * @param process  the process
  * @param trickDef  the trick definition (passed as an int), or 0
  */
-extern "C" void func_0030D3B8(void *process, int trickDef) {
+extern "C" void cWScriptProcess_setTrickDef(void *process, int trickDef) {
     (*(int *)((char*)((*(void **)((char*)(process) + (0x10)))) + (0x29C))) = trickDef;
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D3C8);
+INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_getLocalTable);
 #ifdef SKIP_ASM
 /**
  * Returns a script process's local Luno table (On Tour Local, +0x1C).
@@ -4376,12 +4376,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D3C8);
  * @param process  the process
  * @return the table, or 0 when the process has none
  */
-extern "C" int func_0030D3C8(void *process) {
+extern "C" int cWScriptProcess_getLocalTable(void *process) {
     return (*(int *)((char*)(process) + (0x1C)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D3D0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_getProcessId);
 #ifdef SKIP_ASM
 /**
  * Returns a script process's id (On Tour ProcessId, +0x20), copied from its definition by the constructor.
@@ -4389,7 +4389,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D3D0);
  * @param process  the process
  * @return the process id
  */
-extern "C" int func_0030D3D0(void *process) {
+extern "C" int cWScriptProcess_getProcessId(void *process) {
     return (*(int *)((char*)(process) + (0x20)));
 }
 #endif
@@ -4409,7 +4409,7 @@ int cWScriptProcess_isMission(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D3E0);
+INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_runScriptCode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cWScriptMan_runScriptCode_a1(void* self) __asm__("cWScriptMan_runScriptCode");
@@ -4420,26 +4420,26 @@ extern "C" void cWScriptMan_runScriptCode_a1(void* self) __asm__("cWScriptMan_ru
  * Only the manager argument is computed; the second and third arguments (the process and the script code) are passed
  * through untouched.
  */
-extern "C" void func_0030D3E0(char* self)
+extern "C" void cWScriptProcess_runScriptCode(char* self)
 {
     cWScriptMan_runScriptCode_a1(*(void**)(self + 0x10));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D400);
+INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_runScriptCode1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0030ADA8_a1(void* self) __asm__("func_0030ADA8");
+extern "C" void cWScriptMan_runScriptCode1_a1(void* self) __asm__("cWScriptMan_runScriptCode1");
 
 /**
- * Runs script code for a task through the process's manager: func_0030ADA8(+0x10, a1, a2).
+ * Runs script code for a task through the process's manager: cWScriptMan_runScriptCode1(+0x10, a1, a2).
  *
  * Only the manager argument is computed; the second and third arguments (the task and the script code) are passed
- * through untouched. func_0030ADA8 is the manager's task variant of cWScriptMan_runScriptCode.
+ * through untouched. cWScriptMan_runScriptCode1 is the manager's task variant of cWScriptMan_runScriptCode.
  */
-extern "C" void func_0030D400(char* self)
+extern "C" void cWScriptProcess_runScriptCode1(char* self)
 {
-    func_0030ADA8_a1(*(void**)(self + 0x10));
+    cWScriptMan_runScriptCode1_a1(*(void**)(self + 0x10));
 }
 #endif
 
@@ -4465,7 +4465,7 @@ extern "C" void cWScriptTask__cWScriptTask(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D450);
+INCLUDE_ASM("wscript/wscriptman", cWScriptTask_getLocalTable);
 #ifdef SKIP_ASM
 /**
  * Returns a script task's local Luno table: that of its process (+0x3C, then the process's +0x1C).
@@ -4473,41 +4473,41 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D450);
  * @param task  the task
  * @return the process's local table, or 0
  */
-extern "C" int func_0030D450(void *task) {
+extern "C" int cWScriptTask_getLocalTable(void *task) {
     return (*(int *)((char*)((*(void **)((char*)(task) + (0x3C)))) + (0x1C)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D460);
+INCLUDE_ASM("wscript/wscriptman", cWScriptTask_getTaskId);
 #ifdef SKIP_ASM
 /**
  * Returns a script task's id (On Tour TaskId, +0x4).
  *
- * func_00307EC0 and func_00307F58 look tasks up by it.
+ * cWScriptProcess_gotoTask and cWScriptProcess_advanceToTask look tasks up by it.
  *
  * @param task  the task
  * @return the task id
  */
-extern "C" int func_0030D460(void *task) {
+extern "C" int cWScriptTask_getTaskId(void *task) {
     return (*(int *)((char*)(task) + (4)));
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D468);
+INCLUDE_ASM("wscript/wscriptman", cWScriptTask_abortTask);
 #ifdef SKIP_ASM
 /**
  * Marks a script task aborted: sets its state word (+0x0) to 3.
  *
- * func_00307EC0 does the same to the task it leaves.
+ * cWScriptProcess_gotoTask does the same to the task it leaves.
  *
  * @param task  the task
  */
-extern "C" void func_0030D468(int *task) {
+extern "C" void cWScriptTask_abortTask(int *task) {
     *task = 3;
 }
 #endif
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D478);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMission_getSortKey);
 #ifdef SKIP_ASM
 /**
  * Returns a mission's sort key (On Tour SortKey, +0x64).
@@ -4515,7 +4515,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D478);
  * @param mission  the mission
  * @return the sort key
  */
-extern "C" int func_0030D478(void *mission) {
+extern "C" int cWScriptMission_getSortKey(void *mission) {
     return (*(int *)((char*)(mission) + (0x64)));
 }
 #endif
@@ -4537,7 +4537,7 @@ int cWScriptMission_isMission(void* self)
 extern "C" void* func_0030C8D8(int, int);
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D488);
+INCLUDE_ASM("wscript/wscriptman", cWScriptMission_isScopeLocal);
 #ifdef SKIP_ASM
 /**
  * Returns whether a mission's scope (On Tour Scope, +0x60) is 2, i.e. the mission is local.
@@ -4545,7 +4545,7 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D488);
  * @param mission  the mission
  * @return 1 when the scope is 2, else 0
  */
-extern "C" int func_0030D488(void *mission) {
+extern "C" int cWScriptMission_isScopeLocal(void *mission) {
     return (*(int *)((char*)(mission) + (0x60))) == 2;
 }
 #endif
@@ -4567,7 +4567,7 @@ void* func_0030D498(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D4B8);
+INCLUDE_ASM("wscript/wscriptman", cAnimModel_cAnimModel);
 #ifdef SKIP_ASM
 struct sWSVec4 {
     float x, y, z, w;
@@ -4584,11 +4584,11 @@ struct sWSSlot8 {
  * Nulls the bone matrices unk_030, unk_034 and unk_038, bones, parts, partIndex, boneChannelIndex, localPos and
  * localRot, zeroes numParts, unk_03C, the words at +0x12C and +0x130 and the second word of each lodInfo entry, and
  * sets unk_140 to (1, 1, 1, 1). feridermanager allocates 352 bytes tagged "AnimModel" for it, then calls
- * func_0030D840 with (100, 15).
+ * cAnimModel_init with (100, 15).
  *
  * @return @p self
  */
-extern "C" void* func_0030D4B8(void* self)
+extern "C" void* cAnimModel_cAnimModel(void* self)
 {
     sWSVec4 ones;
     *(int*)((char*)self + 0x38) = 0;
@@ -4772,14 +4772,14 @@ extern "C" void cAnimModel__cAnimModel(sWSMan_D540* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptman", func_0030D840);
+INCLUDE_ASM("wscript/wscriptman", cAnimModel_init);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d), like cMemMan_alloc.
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void MEM_fill(void* dst, int value, int size);
 extern char str_ModelRefs[];
 
-struct func_0030D840_sPool {
+struct cAnimModel_init_sPool {
     int count;      // 0x0
     int field_0x4;  // 0x4
     int field_0x8;  // 0x8
@@ -4793,12 +4793,12 @@ struct func_0030D840_sPool {
  *
  * Stores @p count as the part capacity (+0x0) and @p maxVariants as numLodRefs (+0x4), allocates parts (+0xC) with operator
  * new tagged "ModelRefs", clears them with MEM_fill, and zeroes numParts (+0x8) and the word at +0x60.
- * feridermanager calls it with (100, 15) right after func_0030D4B8.
+ * feridermanager calls it with (100, 15) right after cAnimModel_cAnimModel.
  *
  * @param count  how many parts the model can hold
  * @param maxVariants  refs per LOD slot (numLodRefs), how many cAnimModel_addModelPartLOD allocates
  */
-extern "C" void func_0030D840(func_0030D840_sPool* self, int count, int maxVariants)
+extern "C" void cAnimModel_init(cAnimModel_init_sPool* self, int count, int maxVariants)
 {
     self->field_0x4 = maxVariants;
     self->count = count;

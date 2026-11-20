@@ -78,38 +78,38 @@ extern "C" sInstSlot* func_003512C0(sInstPool* self, unsigned int handle)
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00351330);
+INCLUDE_ASM("object/instanceman", cAnimFrame_cAnimFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void func_003513D0(void* self);
-extern "C" void func_00351398(void* self, float* src);
+extern "C" void cAnimFrame_init(void* self);
+extern "C" void cAnimFrame_setAnimRecord(void* self, float* src);
 void cAnimFrame_update_impl(char* self, float t) __asm__("cAnimFrame_update");
 extern char cAnimFrame_vtbl[];
 
-extern "C" void* func_00351330_impl(char* self, float* src, float f) __asm__("func_00351330");
+extern "C" void* cAnimFrame_cAnimFrame_impl(char* self, float* src, float f) __asm__("cAnimFrame_cAnimFrame");
 /**
  * Constructs an animation frame for an anim record at a start time.
  *
- * Installs cAnimFrame_vtbl (+0x84), clears the frame (func_003513D0), attaches the record (func_00351398) and evaluates
+ * Installs cAnimFrame_vtbl (+0x84), clears the frame (cAnimFrame_init), attaches the record (cAnimFrame_setAnimRecord) and evaluates
  * it at time (cAnimFrame_update).
  *
  * @param src  anim record (tAnimRecord)
  * @param time  time to evaluate at
  * @return self
  */
-extern "C" void* func_00351330_impl(char* self, float* src, float time)
+extern "C" void* cAnimFrame_cAnimFrame_impl(char* self, float* src, float time)
 {
     *(void**)(self + 0x84) = cAnimFrame_vtbl;
-    func_003513D0(self);
-    func_00351398(self, src);
+    cAnimFrame_init(self);
+    cAnimFrame_setAnimRecord(self, src);
     cAnimFrame_update_impl(self, time);
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00351398);
+INCLUDE_ASM("object/instanceman", cAnimFrame_setAnimRecord);
 #ifdef SKIP_ASM
 /**
  * Attaches an anim record to an animation frame and copies its first six values.
@@ -118,7 +118,7 @@ INCLUDE_ASM("object/instanceman", func_00351398);
  *
  * @param src  anim record (tAnimRecord)
  */
-extern "C" void func_00351398(void* self, float* src)
+extern "C" void cAnimFrame_setAnimRecord(void* self, float* src)
 {
     *(float**)((char*)self + 0x40) = src;
     *(float*)((char*)self + 0x44) = src[0];
@@ -131,14 +131,14 @@ extern "C" void func_00351398(void* self, float* src)
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_003513D0);
+INCLUDE_ASM("object/instanceman", cAnimFrame_init);
 #ifdef SKIP_ASM
 extern "C" void* MEM_fill(void* dst, int value, int size);
 
 /**
  * Clears an animation frame: zeroes its two 0x40-byte value blocks (+0x0, +0x44) and the record pointer (+0x40).
  */
-extern "C" void func_003513D0(void* self)
+extern "C" void cAnimFrame_init(void* self)
 {
     MEM_fill(self, 0, 0x40);
     MEM_fill((char*)self + 0x44, 0, 0x40);
@@ -147,7 +147,7 @@ extern "C" void func_003513D0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00351410);
+INCLUDE_ASM("object/instanceman", cAnimFrame_writeToReplayFrame);
 #ifdef SKIP_ASM
 class cInstSink {
 public:
@@ -161,12 +161,12 @@ public:
  * @param src  the animation frame
  * @param sink  replay stream to write to
  */
-extern "C" void func_00351410(void *src, cInstSink *sink) {
+extern "C" void cAnimFrame_writeToReplayFrame(void *src, cInstSink *sink) {
     sink->v0(src, 0x40);
 }
 #endif
 //100%
-INCLUDE_ASM("object/instanceman", func_00351448);
+INCLUDE_ASM("object/instanceman", cAnimFrame_readFromReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Reads an animation frame's 0x40-byte value block back from a replay stream (stream vtable entry 2).
@@ -174,12 +174,12 @@ INCLUDE_ASM("object/instanceman", func_00351448);
  * @param src  the animation frame
  * @param sink  replay stream to read from
  */
-extern "C" void func_00351448(void *src, cInstSink *sink) {
+extern "C" void cAnimFrame_readFromReplayFrame(void *src, cInstSink *sink) {
     sink->v1(src, 0x40);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/instanceman", func_00351480);
+INCLUDE_ASM("object/instanceman", cMeshAnimFrame_cMeshAnimFrame);
 #ifdef SKIP_ASM
 struct sImMat44_351480 {
     float m[4][4];
@@ -204,23 +204,23 @@ static inline void vu0CopyMat_351480(sImMat44_351480* d, const sImMat44_351480* 
 
 extern void* cMeshAnimFrame_vtbl[];
 extern sImMat44_351480 t4mat_Identity;
-extern "C" void* func_00351330(void* self, float* src, float f);
+extern "C" void* cAnimFrame_cAnimFrame(void* self, float* src, float f);
 // PORT: cMeshAnimFrame_update is defined later in the unit with a typed self; bound by asm label.
 void cMeshAnimFrame_update_vf(void* self, float f) __asm__("cMeshAnimFrame_update");
 
 /**
  * Constructs a mesh animation frame for an anim record at a start time.
  *
- * Runs the cAnimFrame constructor func_00351330, installs cMeshAnimFrame_vtbl, sets the frame matrix (+0x90) to
+ * Runs the cAnimFrame constructor cAnimFrame_cAnimFrame, installs cMeshAnimFrame_vtbl, sets the frame matrix (+0x90) to
  * identity, stores the record at +0x40 again and evaluates it (cMeshAnimFrame_update).
  *
  * @param src  anim record
  * @param time  time to evaluate at
  * @return self
  */
-extern "C" void* func_00351480(void* self, float* src, float time)
+extern "C" void* cMeshAnimFrame_cMeshAnimFrame(void* self, float* src, float time)
 {
-    func_00351330(self, src, time);
+    cAnimFrame_cAnimFrame(self, src, time);
     *(void***)((char*)self + 0x84) = cMeshAnimFrame_vtbl;
     vu0CopyMat_351480((sImMat44_351480*)((char*)self + 0x90), &t4mat_Identity);
     *(float**)((char*)self + 0x40) = src;
@@ -523,40 +523,40 @@ extern "C" void cMeshAnimFrame_transform(void* self, sImMat44* xform)
 extern "C" void* cAnimFrame_update(void* self);
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("object/instanceman", func_00351A10);
+INCLUDE_ASM("object/instanceman", cCamAnimFrame_cCamAnimFrame);
 #ifdef SKIP_ASM
 extern void* D_00490AB0[];
-// PORT: func_00351A60 is defined later in the unit as (void*); bound by asm label with its real float argument.
-void func_00351A60_vf(void* self, float f) __asm__("func_00351A60__FPv");
+// PORT: cCamAnimFrame_update is defined later in the unit as (void*); bound by asm label with its real float argument.
+void cCamAnimFrame_update_vf(void* self, float f) __asm__("cCamAnimFrame_update__FPv");
 
 /**
  * Constructs a camera animation frame for an anim record at a start time.
  *
- * Runs the cAnimFrame constructor func_00351330, installs the camera-frame vtable D_00490AB0 and evaluates the frame
- * (func_00351A60).
+ * Runs the cAnimFrame constructor cAnimFrame_cAnimFrame, installs the camera-frame vtable D_00490AB0 and evaluates the frame
+ * (cCamAnimFrame_update).
  *
  * @param src  anim record
  * @param animTime  time to evaluate at
  * @return self
  */
-extern "C" void* func_00351A10(void* self, float* src, float animTime)
+extern "C" void* cCamAnimFrame_cCamAnimFrame(void* self, float* src, float animTime)
 {
-    func_00351330(self, src, animTime);
+    cAnimFrame_cAnimFrame(self, src, animTime);
     *(void***)((char*)self + 0x84) = D_00490AB0;
-    func_00351A60_vf(self, animTime);
+    cCamAnimFrame_update_vf(self, animTime);
     return self;
 }
 #endif
 
 //99.29%
-INCLUDE_ASM("object/instanceman", func_00351A60__FPv);
+INCLUDE_ASM("object/instanceman", cCamAnimFrame_update__FPv);
 #ifdef SKIP_ASM
 /**
  * Updates a camera animation frame by forwarding to cAnimFrame_update.
  *
  * @return whatever cAnimFrame_update leaves (callers ignore it)
  */
-void* func_00351A60(void* self)
+void* cCamAnimFrame_update(void* self)
 {
     return cAnimFrame_update(self);
 }
@@ -618,11 +618,11 @@ extern "C" sImRange* cAnimChannel_nextSegment(sImRangeTable* channel, int* cur, 
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00351B40);
+INCLUDE_ASM("object/instanceman", cMeshAnimNode_cMeshAnimNode1);
 #ifdef SKIP_ASM
-extern "C" void* func_0034FB00(void* self, void* a1, int type, void* def);
+extern "C" void* cInstanceNode_cInstanceNode1(void* self, void* a1, int type, void* def);
 extern "C" float cObjectInterface_getUpdateTime();
-extern "C" void func_00352230(void* self);
+extern "C" void cMeshAnimNode_init(void* self);
 
 extern void* cMeshAnimNode_vtbl[];
 
@@ -837,14 +837,14 @@ struct sImSrc {
 /**
  * Constructs a mesh-anim (break-apart) node: the instance's meshes fly off from where they are.
  *
- * Runs the record constructor func_0034FB00 (node type 11), installs cMeshAnimNode_vtbl and constructs its 24-entry
+ * Runs the record constructor cInstanceNode_cInstanceNode1 (node type 11), installs cMeshAnimNode_vtbl and constructs its 24-entry
  * Qrot, Axis, Pos and Vel arrays. From def: Type (+0x4) to +0x6B0, Drag (+0x8) to +0x6B4, Life (+0x10) to +0x1C,
  * FadeTime (+0x30) to +0x24, and AngVel (+0x2C, degrees) as radians per update to +0x20. The mesh matrices come from
  * the root instance (def RootInstId/RootMesh) or the old node owner's anim mats when it has them, else are built from
  * the model's bones scaled by the model scale; each is split into Qrot and Pos (tPose_tPose). The old node is deleted
  * (vtable entry 1, flags 3). Disperse (+0x390) and InitVel (+0x3A0) come from def, InitVel plus the hit direction
  * scaled by |speed| * VelScale when a collision is given. The record flags get bit 0x4, lose 0x2 and 0x60, then
- * func_00352230 randomises the motion.
+ * cMeshAnimNode_init randomises the motion.
  *
  * @param bucket  update bucket
  * @param instRecord  instance record to break apart
@@ -853,9 +853,9 @@ struct sImSrc {
  * @param owner  node the instance had before, deleted here, or 0
  * @return self
  */
-extern "C" sImInst* func_00351B40(sImInst* self, void* bucket, void* instRecord, sImDef* def, sImSrc* src, sImObj* owner)
+extern "C" sImInst* cMeshAnimNode_cMeshAnimNode1(sImInst* self, void* bucket, void* instRecord, sImDef* def, sImSrc* src, sImObj* owner)
 {
-    func_0034FB00(self, bucket, 11, instRecord);
+    cInstanceNode_cInstanceNode1(self, bucket, 11, instRecord);
     self->vt = cMeshAnimNode_vtbl;
     new (&self->rot) sImV4[24];
     new (&self->arr1) sImV4[24];
@@ -919,7 +919,7 @@ extern "C" sImInst* func_00351B40(sImInst* self, void* bucket, void* instRecord,
     }
     self->model->flags = (self->model->flags & ~2u) | 4u;
     self->model->flags &= ~0x60u;
-    func_00352230(self);
+    cMeshAnimNode_init(self);
     return self;
 }
 #endif
@@ -992,7 +992,7 @@ void* cMeshAnimNode__cMeshAnimNode(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/instanceman", func_00352230);
+INCLUDE_ASM("object/instanceman", cMeshAnimNode_init);
 #ifdef SKIP_ASM
 unsigned int BXrand();
 extern char* cAppMan_TheAppMan;
@@ -1098,7 +1098,7 @@ static inline void AddEq_352230(sV4_352230& d, const sV4_352230& b)
  *
  * @param debris  the mesh-anim node
  */
-extern "C" void func_00352230(void* debris)
+extern "C" void cMeshAnimNode_init(void* debris)
 {
     sDebris_352230* self = (sDebris_352230*)debris;
     char* modelDef = *(char**)(self->model + 0x80);
@@ -1256,13 +1256,13 @@ struct sInstanceManVEntry2708 {
     void (*fn)(void*, int);
 };
 
-int func_0034FCC0(void* self);
+int cInstanceNode_runExpireScript(void* self);
 extern "C" void cInstanceNode_makeThisDead(void* self);
 
 /**
  * Expires a mesh animation node according to its end mode (+0x6B0).
  *
- * When @p check is set and func_0034FCC0() runs a script for the instance (probably its on-expire script),
+ * When @p check is set and cInstanceNode_runExpireScript() runs a script for the instance (probably its on-expire script),
  * nothing else happens. Mode 0 replaces the node with a new cDeadNode for the same instance (cInstanceNode_makeThisDead);
  * mode 2 deletes the node through its virtual destructor; other modes leave it.
  *
@@ -1270,7 +1270,7 @@ extern "C" void cInstanceNode_makeThisDead(void* self);
  */
 extern "C" void cMeshAnimNode_expire(void* self, int check)
 {
-    if (check != 0 && func_0034FCC0(self) != 0) {
+    if (check != 0 && cInstanceNode_runExpireScript(self) != 0) {
         return;
     }
     if (*(int*)((char*)self + 0x6B0) == 0) {

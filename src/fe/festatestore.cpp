@@ -458,7 +458,7 @@ struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* t, int id);
 extern "C" int cBEEconInterface_reduceMoney(void* self, int a, int b, int amount);
 extern "C" int func_0014FE08(void* self, int rider, int idx, int bit);
-extern "C" void func_00184520(void* self);
+extern "C" void cFEStateUberTrick_updateTrickMenuEntry(void* self);
 extern "C" void cFEStateUberTrick_updateTrickMenu(void* self);
 extern char str_helptext_custom[];
 extern char str_kT_66HELPCustomUber[];
@@ -475,7 +475,7 @@ struct sVE_4F40 {
  * On event 22, when the popup's mbAccept (+0x6C) is set: subtracts its mInfo.mCost (+0x48) from the character's money
  * (cBEEconInterface_reduceMoney on cBE interface 11), clears flag bit "trick" (the trick menu's selected mMiscData) of the category's
  * entry (the category menu's selected mMiscData) with func_0014FE08 on interface 6, calls that interface's vtable slot
- * 1, sets "helptext_custom" to "kT_66HELPCustomUber" and refreshes the cost numbers (func_00184520). On event 22 the
+ * 1, sets "helptext_custom" to "kT_66HELPCustomUber" and refreshes the cost numbers (cFEStateUberTrick_updateTrickMenuEntry). On event 22 the
  * trick list is refilled either way (cFEStateUberTrick_updateTrickMenu). Other events do nothing. onPopupEvent slot (+0x8C) of the
  * vtable D_0046CCC0.
  *
@@ -501,7 +501,7 @@ extern "C" void cFEStateUberTrick_onPopupEvent(void* self, void* item, int msg)
             if (helpText != 0) {
                 cUIText_setUnicodeStringByID((cUIText*)helpText, GetHashValue32(str_kT_66HELPCustomUber));
             }
-            func_00184520(self);
+            cFEStateUberTrick_updateTrickMenuEntry(self);
         }
         cFEStateUberTrick_updateTrickMenu(self);
         break;
@@ -619,7 +619,7 @@ extern "C" int func_00150048(void* iface, int rider, int a, int b);
 extern "C" int cBEEconInterface_getMoney(void* iface, int a1, int charID);
 extern "C" void cFEStateUberTrick_activateMainMenu(void* self);
 extern "C" void cFEStateUberTrick_activateTrickMenu(void* self);
-extern "C" void func_00184520(void* self);
+extern "C" void cFEStateUberTrick_updateTrickMenuEntry(void* self);
 extern "C" void cFEStateUberTrick_previewVisible(void* self, int on);
 extern "C" void* cFERiderManager_getHuman1(void* self, int idx);
 extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* mem, void* owner, void* state, int a3);
@@ -728,7 +728,7 @@ static inline void Back_185268(char* self)
  *   "kT_66HELPChooseCat"; other items hide them and set "kT_FEHELPAcceptTrick". On the trick menu "helptext_custom"
  *   says "kT_66HELPCustomUber" for an equippable trick, "kT_FEHELPTrickAvailBuy" or "kT_OVRCMNSaveCashUber" for a trick
  *   for sale by whether the money covers it, "kT_FEHELPTrickBuyCTM" outside game path 0; then the cost numbers are
- *   refreshed (func_00184520).
+ *   refreshed (cFEStateUberTrick_updateTrickMenuEntry).
  * - 2 clears the FE rider's +0xCD0.
  *
  * @param item  the widget that sent the event
@@ -865,7 +865,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(char* self, char* item, int msg)
                 } else {
                     cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_FEHELPTrickBuyCTM));
                 }
-                func_00184520(self);
+                cFEStateUberTrick_updateTrickMenuEntry(self);
             }
         }
         break;

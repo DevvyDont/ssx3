@@ -6,9 +6,9 @@ INCLUDE_ASM("object/animnode", cAnimNode_setAnimMeshCache);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
-extern "C" void func_003513D0(void* self);
-extern "C" void func_003612C0(void* self);
-extern "C" void func_00351398(void* self, void* src);
+extern "C" void cAnimFrame_init(void* self);
+extern "C" void cMeshAnimFrame_init(void* self);
+extern "C" void cAnimFrame_setAnimRecord(void* self, void* src);
 extern char str_IntersectInfo[];
 extern char str_MeshVelocity[];
 extern void* cMeshAnimFrame_vtbl[];
@@ -21,9 +21,9 @@ struct sMeshInst_E448 {
     sMeshInst_E448()
     {
         vtable = cAnimFrame_vtbl;
-        func_003513D0(this);
+        cAnimFrame_init(this);
         vtable = cMeshAnimFrame_vtbl;
-        func_003612C0(this);
+        cMeshAnimFrame_init(this);
     }
     void operator delete[](void* p, unsigned int size);
 };
@@ -62,7 +62,7 @@ struct sAnimNode_E448 {
  * Counts the meshes of the instance's model (record +0x2C, model +0x80) that have an animation record (+0x8
  * of each 0x10-byte entry) into NumAnimMeshes (+0x40). AnimFrames (+0x48) gets that many 0xD0-byte frames
  * (tag "IntersectInfo"; 0 when none) and MeshVelocity (+0x4C) one 0x20-byte entry per mesh ("MeshVelocity");
- * each animated mesh's frame is then pointed at its record (func_00351398).
+ * each animated mesh's frame is then pointed at its record (cAnimFrame_setAnimRecord).
  */
 extern "C" void cAnimNode_setAnimMeshCache(sAnimNode_E448* self)
 {
@@ -86,7 +86,7 @@ extern "C" void cAnimNode_setAnimMeshCache(sAnimNode_E448* self)
     int k = 0;
     for (i = 0; i < def->count; i++, entry++) {
         if (entry->src != 0) {
-            func_00351398(&self->meshes[k++], entry->src);
+            cAnimFrame_setAnimRecord(&self->meshes[k++], entry->src);
         }
     }
 }
@@ -516,8 +516,8 @@ struct sAnimNode_EBA0 {
  * node is still the instance's active node.
  *
  * Passes the instance record at @p self + 0x2C (the node's Instance) to func_002D1AC8, which runs the record's type-5
- * script through func_0030A688 (the type cWScriptMan uses for frame-update scripts), then compares the record's
- * active-node pointer (+0xC) with @p self + 0x14. Its callers (func_00341D48, func_00342358, func_00358EB8) return 0
+ * script through cWScriptMan_doOnFrameUpdateScript (the type cWScriptMan uses for frame-update scripts), then compares the record's
+ * active-node pointer (+0xC) with @p self + 0x14. Its callers (cAnimObjectNode_updateNode, cAnimTeeterNode_updateNode, cAnimComboNode_updateNode) return 0
  * from their node update when it returns 0.
  *
  * @return 1 if the node at @p self + 0x14 is still the record's active node, otherwise 0
@@ -566,10 +566,10 @@ extern "C" int cAnimNode_frameUpdateEvent(sRange_EBE0* self, float frame)
 #endif
 
 //100%
-INCLUDE_ASM("object/animnode", func_0034EC58);
+INCLUDE_ASM("object/animnode", cFloatingNode_cFloatingNode);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* func_00355280(void* self, void* a1, int type, void* a2);
+extern "C" void* cMoveNode_cMoveNode1(void* self, void* a1, int type, void* a2);
 struct cFloatingNode;
 void cFloatingNode_initInfo(cFloatingNode* self);
 extern char str_FloatingMats[];
@@ -592,7 +592,7 @@ struct sAnimInfo_EC58 {
 /**
  * Constructs a floating node from a placed instance and its floating parameters.
  *
- * Runs the cMoveNode constructor func_00355280 with node type 0xE, installs cFloatingNode_vtbl and copies the spring
+ * Runs the cMoveNode constructor cMoveNode_cMoveNode1 with node type 0xE, installs cFloatingNode_vtbl and copies the spring
  * constants from @p info: ZSpring (+0x4), ZDamp (+0x8), ASpring (+0xC), ADamp (+0x10), ForceScale (+0x14) and
  * TorqueScale (+0x18 scaled by 1e-6). Zeroes the tilt state (OX, WX, TX, OY, WY, TY), Vel, Force and Info, and sets Zo
  * and Z to the z of the instance's root translation (record + 0x40). Then calls cFloatingNode_initInfo, allocates
@@ -606,9 +606,9 @@ struct sAnimInfo_EC58 {
  * @param info  the floating parameters: spring, damping and scale values at +0x4..+0x18
  * @return @p self
  */
-extern "C" void* func_0034EC58(cFloatingNode* self, void* bucket, void* instRecord, sAnimInfo_EC58* info)
+extern "C" void* cFloatingNode_cFloatingNode(cFloatingNode* self, void* bucket, void* instRecord, sAnimInfo_EC58* info)
 {
-    func_00355280(self, bucket, 0xE, instRecord);
+    cMoveNode_cMoveNode1(self, bucket, 0xE, instRecord);
     self->mVtbl = cFloatingNode_vtbl;
     self->ZSpring = info->f4;
     self->ZDamp = info->f8;
@@ -639,7 +639,7 @@ extern "C" void* func_0034EC58(cFloatingNode* self, void* bucket, void* instReco
 #endif
 
 //100%
-INCLUDE_ASM("object/animnode", func_0034ED88);
+INCLUDE_ASM("object/animnode", cFloatingNode_cFloatingNode1);
 #ifdef SKIP_ASM
 extern "C" void* cMoveNode_cMoveNode(void* self, void* a1, void* stream);
 struct cFloatingNode;
@@ -673,7 +673,7 @@ struct sAnimFrame_ED88 {
  * @param stream  the replay frame to read from
  * @return @p self
  */
-extern "C" void* func_0034ED88(cFloatingNode* self, void* bucket, void* stream)
+extern "C" void* cFloatingNode_cFloatingNode1(cFloatingNode* self, void* bucket, void* stream)
 {
     int hasInfo;
     cMoveNode_cMoveNode(self, bucket, stream);

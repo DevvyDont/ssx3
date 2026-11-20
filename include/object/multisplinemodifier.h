@@ -38,7 +38,7 @@ struct cMultiSplineModifier {
     tARGB Colour;                   // 0x20 [O]; [R] ctor copies it with ldl/ldr + sdl/sdr pairs (4-byte aligned)
     int RootTransformDirty;         // 0x30 [O] bool; [R] ctors store 1; [U] getRootTransform/getRootTransform1, render,
                                     //      updateNodes
-    int FocusCount;                 // 0x34 [O]; [R] ctor; [U] func_00361C08 (get), func_0035AAD0/func_0035AAE0 (inc/dec)
+    int FocusCount;                 // 0x34 [O]; [R] ctor; [U] cMultiSplineModifier_getFocusCount (get), cMultiSplineModifier_incFocusCount/cMultiSplineModifier_decFocusCount (inc/dec)
     // --- cMultiSplineModifier
     t4Matrix* AnimMats;             // 0x38 [O]; [R] allocNodes: new[] of 0x40-byte matrices (one per anim mesh of the
                                     //      owner model), tag "MultiAnimMats"; [U] getAnimMats/render pass it to the model;

@@ -33,7 +33,7 @@ struct cLunoTableRef {
 
 void operator_delete(int* ptr);
 void cMemMan_free(void* ptr);
-extern "C" void func_00224F30(cLunoTableRef* ref);
+extern "C" void luno_cLunoTable_destroyTable(cLunoTableRef* ref);
 extern "C" void luno_cLunoTable__cLunoTable(cLunoTableRef* ref, int flags);
 
 //100%
@@ -59,7 +59,7 @@ extern cLunoVar gLunoNil __asm__("luno_gLunoNil");
 struct cLunoFunc {
     const char* Code;
     int Index;
-    void init(const char* code, int index) __asm__("func_00226600__FPvii");
+    void init(const char* code, int index) __asm__("luno_cLunoFunc_init__FPvii");
     ~cLunoFunc() {}
 };
 
@@ -67,9 +67,9 @@ struct cLunoFunc {
 class cLunoTab {
 public:
     cLunoTable* m_pTable;
-    cLunoTab& operator=(const cLunoTab& o) __asm__("func_00225068");
+    cLunoTab& operator=(const cLunoTab& o) __asm__("luno_cLunoTable_operatorE");
     void set(const cLunoVar& key, const cLunoVar& val) __asm__("luno_cLunoTable_set");
-    cLunoVar& get(const cLunoVar& key) __asm__("func_00225248");
+    cLunoVar& get(const cLunoVar& key) __asm__("luno_cLunoTable_get1");
     ~cLunoTab();
 };
 __asm__("_$_8cLunoTab = luno_cLunoTable__cLunoTable");
@@ -118,9 +118,9 @@ public:
     }
     ~cLunoVar();
 
-    int& castInt() const __asm__("func_00226610__FPv");
-    float& castFloat() const __asm__("func_00226618__FPv");
-    unsigned int& castIndex() const __asm__("func_00226620__FPv");
+    int& castInt() const __asm__("luno_cLunoVar_castInt__FPv");
+    float& castFloat() const __asm__("luno_cLunoVar_castFloat__FPv");
+    unsigned int& castIndex() const __asm__("luno_cLunoVar_castIndex__FPv");
     cLunoTab& castTable()
     {
         return *(cLunoTab*)&Data;
@@ -371,7 +371,7 @@ public:
         }
         return gLunoNil;
     }
-    cLunoVar operator+(const cLunoVar& o) const __asm__("func_00226628");
+    cLunoVar operator+(const cLunoVar& o) const __asm__("luno_cLunoVar_operatorPlus");
     cLunoVar& operator+=(const cLunoVar& o)
     {
         return *this = *this + o;
@@ -381,7 +381,7 @@ public:
 };
 __asm__("_$_8cLunoVar = luno_cLunoVar__cLunoVar");
 
-// Binary arithmetic (operator+ is also emitted out of line as func_00226628).
+// Binary arithmetic (operator+ is also emitted out of line as luno_cLunoVar_operatorPlus).
 static inline cLunoVar lunoAdd(const cLunoVar& a, const cLunoVar& b)
 {
     if (b.Type == a.Type) {
@@ -839,19 +839,19 @@ extern "C" void func_00224C78(void* self, sVEntry00224C78** stream, int base)
 #endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00224D00);
+INCLUDE_ASM("luno/lunovm", luno_cLunoTableData__cLunoTableData);
 #ifdef SKIP_ASM
 /**
  * Destroys a Luno table's shared data: every entry of its entry array, the array, and optionally the object.
  *
  * When the entry array (+0x10, On Tour Entries) exists it runs each entry's virtual destructor (slot 1, flags 0) from
  * the last to the first (the count sits in the array's 0x10-byte allocation header) and frees the block with
- * cMemMan_free. It frees the object itself with operator_delete when bit 0 of @p flags is set. func_00224F30 calls it
+ * cMemMan_free. It frees the object itself with operator_delete when bit 0 of @p flags is set. luno_cLunoTable_destroyTable calls it
  * with 3 once the last reference goes.
  *
  * @param flags  destructor flags; bit 0 frees the object
  */
-extern "C" void func_00224D00(cLunoTable* self, int flags)
+extern "C" void luno_cLunoTableData__cLunoTableData(cLunoTable* self, int flags)
 {
     cLunoTableEntry* nodes = self->nodes;
 
@@ -891,7 +891,7 @@ extern "C" cLunoTableRef* luno_cLunoTable_cLunoTable(cLunoTableRef* self)
 #endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00224DD0);
+INCLUDE_ASM("luno/lunovm", luno_cLunoTable_cLunoTable1);
 #ifdef SKIP_ASM
 /**
  * Copies a Luno table handle: shares the source's table data and adds a reference to it.
@@ -902,7 +902,7 @@ INCLUDE_ASM("luno/lunovm", func_00224DD0);
  * @param src  the handle to copy
  * @return @p dest
  */
-extern "C" void **func_00224DD0(void **dest, void **src) {
+extern "C" void **luno_cLunoTable_cLunoTable1(void **dest, void **src) {
     void *temp_6;
 
     temp_6 = *src;
@@ -918,14 +918,14 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoTable__cLunoTable);
 /**
  * Destroys a Luno table reference, releasing the shared table when this was its last reference.
  *
- * Decrements the table's refCount; at zero func_00224F30() deletes the table and clears the pointer.
+ * Decrements the table's refCount; at zero luno_cLunoTable_destroyTable() deletes the table and clears the pointer.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the reference object's memory
  */
 extern "C" void luno_cLunoTable__cLunoTable(cLunoTableRef* self, int flags)
 {
     if (--self->table->refCount == 0) {
-        func_00224F30(self);
+        luno_cLunoTable_destroyTable(self);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -987,30 +987,30 @@ extern "C" void luno_cLunoTable_constructTable_n(cLunoTableRef* ref, int n)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("luno/lunovm", func_00224F30);
+INCLUDE_ASM("luno/lunovm", luno_cLunoTable_destroyTable);
 #ifdef SKIP_ASM
-extern "C" void func_00224D00(cLunoTable* table, int flags);
+extern "C" void luno_cLunoTableData__cLunoTableData(cLunoTable* table, int flags);
 
 /**
  * Destroys the table data a Luno table handle points at and clears the handle.
  *
- * Runs func_00224D00 on the data with flags 3 (destroy and free) when there is one, then sets the handle to null.
- * func_00225068 and luno_cLunoTable__cLunoTable call it when the reference count drops to 0.
+ * Runs luno_cLunoTableData__cLunoTableData on the data with flags 3 (destroy and free) when there is one, then sets the handle to null.
+ * luno_cLunoTable_operatorE and luno_cLunoTable__cLunoTable call it when the reference count drops to 0.
  *
  * @param ref  the table handle
  */
-extern "C" void func_00224F30(cLunoTableRef* ref)
+extern "C" void luno_cLunoTable_destroyTable(cLunoTableRef* ref)
 {
     cLunoTable* ownedTable = ref->table;
     if (ownedTable != 0) {
-        func_00224D00(ownedTable, 3);
+        luno_cLunoTableData__cLunoTableData(ownedTable, 3);
     }
     ref->table = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00224F68);
+INCLUDE_ASM("luno/lunovm", luno_cLunoTable_emptyTable);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
@@ -1044,7 +1044,7 @@ struct cLunoNode_224F68 {
  *
  * @param ref  the table handle
  */
-extern "C" void func_00224F68(cLunoTableRef* ref)
+extern "C" void luno_cLunoTable_emptyTable(cLunoTableRef* ref)
 {
     if (ref->table->nodes != 0) {
         cLunoTableEntry* entry = ref->table->nodes + *(int*)((char*)ref->table->nodes - 0x10);
@@ -1060,25 +1060,25 @@ extern "C" void func_00224F68(cLunoTableRef* ref)
 #endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00225068);
+INCLUDE_ASM("luno/lunovm", luno_cLunoTable_operatorE);
 #ifdef SKIP_ASM
 /**
  * Assigns one Luno table handle to another: shares the other's table data, releasing the old data on its last
  * reference.
  *
  * Does nothing when both already share the data. Otherwise it decrements the old data's reference count (+0x8) and
- * destroys it with func_00224F30 at 0, then takes @p other's data and increments its count. Used by
+ * destroys it with luno_cLunoTable_destroyTable at 0, then takes @p other's data and increments its count. Used by
  * luno_cLunoTable_set, luno_cLunoVM_execute and luno_cLunoVar_readFromReplayFrame.
  *
  * @param other  the handle to copy from
  * @return @p self
  */
-extern "C" cLunoTableRef* func_00225068(cLunoTableRef* self, cLunoTableRef* other)
+extern "C" cLunoTableRef* luno_cLunoTable_operatorE(cLunoTableRef* self, cLunoTableRef* other)
 {
     if (self->table != other->table) {
         if (self->table != 0) {
             if (--self->table->refCount == 0) {
-                func_00224F30(self);
+                luno_cLunoTable_destroyTable(self);
             }
         }
         self->table = other->table;
@@ -1093,7 +1093,7 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoTable_get);
 #ifdef SKIP_ASM
 extern "C" void luno_cLunoVar__cLunoVar(cLunoValue* self, int flags);
 extern cLunoValue luno_gLunoNil;
-void* func_00226620(void* self);
+void* luno_cLunoVar_castIndex(void* self);
 
 struct cLunoNode_50E0 {
     cLunoValue key;     // 0x00
@@ -1127,7 +1127,7 @@ extern "C" cLunoValue* luno_cLunoTable_get(cLunoTableRef* self, unsigned int int
         do {
             cLunoValue key;
             key.type = 3;
-            *(int*)func_00226620(&key) = intKey;
+            *(int*)luno_cLunoVar_castIndex(&key) = intKey;
             int eq = lunoKeyEquals_50E0(&n->key, &key);
             luno_cLunoVar__cLunoVar(&key, 2);
             if (eq) {
@@ -1141,7 +1141,7 @@ extern "C" cLunoValue* luno_cLunoTable_get(cLunoTableRef* self, unsigned int int
 #endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00225248);
+INCLUDE_ASM("luno/lunovm", luno_cLunoTable_get1);
 #ifdef SKIP_ASM
 extern cLunoValue luno_gLunoNil;
 
@@ -1184,7 +1184,7 @@ static inline int lunoKeyEquals(cLunoValue* a, cLunoValue* b)
  * @return the stored value, or luno_gLunoNil
  */
 // Table lookup: returns the value stored under key, or the nil value.
-extern "C" cLunoValue* func_00225248(cLunoTableRef* self, cLunoValue* key)
+extern "C" cLunoValue* luno_cLunoTable_get1(cLunoTableRef* self, cLunoValue* key)
 {
     cLunoTable* hashTable = self->table;
     cLunoNode* n = (cLunoNode*)hashTable->nodes + (unsigned int)key->word0 % (unsigned int)hashTable->modulus;
@@ -1232,7 +1232,7 @@ struct cLunoNode_set {
         d->type = 0;                                                       \
         (D).word0 = 0;                                                     \
         if ((S)->type == 4) {                                              \
-            func_00225068((cLunoTableRef*)d, (cLunoTableRef*)(S));         \
+            luno_cLunoTable_operatorE((cLunoTableRef*)d, (cLunoTableRef*)(S));         \
         } else if ((S)->type == 5) {                                       \
             *(sLunoPair_set*)&(D) = *(sLunoPair_set*)(S);                  \
         } else {                                                           \
@@ -1299,7 +1299,7 @@ extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoV
                     n->value.word0 = 0;
                 } while (0);
                 if (val->type == 4) {
-                    func_00225068((cLunoTableRef*)d, (cLunoTableRef*)val);
+                    luno_cLunoTable_operatorE((cLunoTableRef*)d, (cLunoTableRef*)val);
                 } else if (val->type == 5) {
                     *(sLunoPair_set*)&n->value = *(sLunoPair_set*)val;
                 } else {
@@ -1333,7 +1333,7 @@ extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoV
 #endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_002257E0);
+INCLUDE_ASM("luno/lunovm", luno_cLunoTable_writeToReplayFrame);
 #ifdef SKIP_ASM
 extern "C" void luno_cLunoVar_writeToReplayFrame(cLunoValue* self, sVEntry00224C00** stream, int base);
 
@@ -1344,13 +1344,13 @@ extern "C" void luno_cLunoVar_writeToReplayFrame(cLunoValue* self, sVEntry00224C
  * Counts the entries whose value type is non-zero over all modulus + 1 array slots and their chains (+0x18), writes the
  * count (4 bytes, write virtual slot 1), then writes key and value of each used entry with
  * luno_cLunoVar_writeToReplayFrame (pointers relative to @p base). luno_cLunoTable_readFromReplayFrame reads it back.
- * Called by luno_cLunoVar_writeToReplayFrame for type 4, func_00308038 and func_0030BB10.
+ * Called by luno_cLunoVar_writeToReplayFrame for type 4, cWScriptProcess_writeToReplayFrame and cWScriptMan_writeToReplayFrame.
  *
  * @param vself  the table handle (this)
  * @param stream  the replay frame to write to
  * @param base  the address pointers are stored relative to
  */
-extern "C" void func_002257E0(void* vself, sVEntry00224C00** stream, int base)
+extern "C" void luno_cLunoTable_writeToReplayFrame(void* vself, sVEntry00224C00** stream, int base)
 {
     cLunoTableRef* self = (cLunoTableRef*)vself;
     (*stream)[1].fn((char*)stream + (*stream)[1].delta, self->table, 8);
@@ -1487,13 +1487,13 @@ extern "C" void luno_cLunoVar__cLunoVar(cLunoValue* self, int flags)
 INCLUDE_ASM("luno/lunovm", luno_cLunoVar_writeToReplayFrame);
 #ifdef SKIP_ASM
 extern "C" void func_00224C00(void* self, sVEntry00224C00** stream, int base);
-extern "C" void func_002257E0(void* self, sVEntry00224C00** stream, int base);
+extern "C" void luno_cLunoTable_writeToReplayFrame(void* self, sVEntry00224C00** stream, int base);
 
 /**
  * Saves a Luno value into a replay frame.
  *
  * Writes the 4-byte type through the stream's slot 1, then the payload: type 5 (eLunoVar_Func, a function value)
- * with func_00224C00, type 4 (table) with func_002257E0, anything else as one 4-byte word. luno_cLunoVar_readFromReplayFrame() is the inverse.
+ * with func_00224C00, type 4 (table) with luno_cLunoTable_writeToReplayFrame, anything else as one 4-byte word. luno_cLunoVar_readFromReplayFrame() is the inverse.
  *
  * @param stream  the replay frame
  * @param base  the base address string pointers are stored relative to
@@ -1504,7 +1504,7 @@ extern "C" void luno_cLunoVar_writeToReplayFrame(cLunoValue* self, sVEntry00224C
     if (self->type == 5) {
         func_00224C00(self, stream, base);
     } else if (self->type == 4) {
-        func_002257E0(self, stream, base);
+        luno_cLunoTable_writeToReplayFrame(self, stream, base);
     } else {
         (*stream)[1].fn((char*)stream + (*stream)[1].delta, self, 4);
     }
@@ -1540,7 +1540,7 @@ static inline int lunoReadInt_225CA0(sVEntry00224C00** stream)
  * Restores a Luno value from a replay frame.
  *
  * Reads the type word. Type 5 (eLunoVar_Func) reads the function value (func_00224C78); type 4 reads a whole table into a temporary
- * (luno_cLunoTable_cLunoTable_sz + luno_cLunoTable_readFromReplayFrame) and copies it in (func_00225068); otherwise it
+ * (luno_cLunoTable_cLunoTable_sz + luno_cLunoTable_readFromReplayFrame) and copies it in (luno_cLunoTable_operatorE); otherwise it
  * reads one 4-byte word. A table this value held before is released first (luno_cLunoTable__cLunoTable with flags 2).
  *
  * @param stream  the replay frame
@@ -1570,7 +1570,7 @@ extern "C" void luno_cLunoVar_readFromReplayFrame(cLunoValue* self, sVEntry00224
         }
         self->type = 0;
         self->word0 = 0;
-        func_00225068((cLunoTableRef*)self, (cLunoTableRef*)&ref);
+        luno_cLunoTable_operatorE((cLunoTableRef*)self, (cLunoTableRef*)&ref);
         self->type = type;
         luno_cLunoTable__cLunoTable((cLunoTableRef*)&ref, 2);
     } else {
@@ -1676,7 +1676,7 @@ extern "C" void func_00225DE8_impl(int initialize, int priority)
 #endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00226600__FPvii);
+INCLUDE_ASM("luno/lunovm", luno_cLunoFunc_init__FPvii);
 #ifdef SKIP_ASM
 /**
  * Sets a Luno function value's code chunk and function index.
@@ -1684,7 +1684,7 @@ INCLUDE_ASM("luno/lunovm", func_00226600__FPvii);
  * @param firstWord  the code chunk (On Tour data, stored as Chunk)
  * @param secondWord  the function index (FuncNum)
  */
-void func_00226600(void* self, int firstWord, int secondWord)
+void luno_cLunoFunc_init(void* self, int firstWord, int secondWord)
 {
     *(int*)self = firstWord;
     *(int*)((char*)self + 0x4) = secondWord;
@@ -1692,42 +1692,42 @@ void func_00226600(void* self, int firstWord, int secondWord)
 #endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00226610__FPv);
+INCLUDE_ASM("luno/lunovm", luno_cLunoVar_castInt__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns a Luno value's data as an int reference: the value's own address, since the data is its first word.
  *
  * @return @p self
  */
-void* func_00226610(void* self)
+void* luno_cLunoVar_castInt(void* self)
 {
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00226618__FPv);
+INCLUDE_ASM("luno/lunovm", luno_cLunoVar_castFloat__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns a Luno value's data as a float reference: the value's own address.
  *
  * @return @p self
  */
-void* func_00226618(void* self)
+void* luno_cLunoVar_castFloat(void* self)
 {
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00226620__FPv);
+INCLUDE_ASM("luno/lunovm", luno_cLunoVar_castIndex__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns a Luno value's data as an index reference: the value's own address.
  *
  * @return @p self
  */
-void* func_00226620(void* self)
+void* luno_cLunoVar_castIndex(void* self)
 {
     return self;
 }
@@ -1736,7 +1736,7 @@ void* func_00226620(void* self)
 extern cLunoValue luno_gLunoNil;
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00226628);
+INCLUDE_ASM("luno/lunovm", luno_cLunoVar_operatorPlus);
 #ifdef SKIP_ASM
 /**
  * Adds two Luno values (cLunoVar operator+), returning the sum by value in @p self.
@@ -1751,32 +1751,32 @@ INCLUDE_ASM("luno/lunovm", func_00226628);
  */
 // Value add (for-loop step): same-type int/float/symbol add, float+int
 // gives float, int+float gives int; anything else gives nil.
-extern "C" cLunoValue* func_00226628(cLunoValue* self, const cLunoValue& lhs, const cLunoValue& rhs)
+extern "C" cLunoValue* luno_cLunoVar_operatorPlus(cLunoValue* self, const cLunoValue& lhs, const cLunoValue& rhs)
 {
     if (rhs.type == lhs.type) {
         if (lhs.type == 2) {
             float floatSum = *(float*)&lhs.word0 + *(float*)&rhs.word0;
             self->type = lhs.type;
-            *(float*)func_00226618(self) = floatSum;
+            *(float*)luno_cLunoVar_castFloat(self) = floatSum;
         } else if (lhs.type == 1) {
             int i = lhs.word0 + rhs.word0;
             self->type = lhs.type;
-            *(int*)func_00226610(self) = i;
+            *(int*)luno_cLunoVar_castInt(self) = i;
         } else if (lhs.type == 3) {
             int i = lhs.word0 + rhs.word0;
             self->type = lhs.type;
-            *(int*)func_00226620(self) = i;
+            *(int*)luno_cLunoVar_castIndex(self) = i;
         } else {
             *self = luno_gLunoNil;
         }
     } else if (lhs.type == 2 && rhs.type == 1) {
         float floatSum = *(float*)&lhs.word0 + (float)rhs.word0;
         self->type = lhs.type;
-        *(float*)func_00226618(self) = floatSum;
+        *(float*)luno_cLunoVar_castFloat(self) = floatSum;
     } else if (lhs.type == 1 && rhs.type == 2) {
         int i = lhs.word0 + (int)*(float*)&rhs.word0;
         self->type = lhs.type;
-        *(int*)func_00226610(self) = i;
+        *(int*)luno_cLunoVar_castInt(self) = i;
     } else {
         *self = luno_gLunoNil;
     }
@@ -1785,7 +1785,7 @@ extern "C" cLunoValue* func_00226628(cLunoValue* self, const cLunoValue& lhs, co
 #endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00226768);
+INCLUDE_ASM("luno/lunovm", luno_cLunoTableEntry__cLunoTableEntry);
 #ifdef SKIP_ASM
 struct sVEntry00226768 {
     short delta;
@@ -1803,7 +1803,7 @@ extern char D_00479890[];
  *
  * @param flags  destructor flags; bit 0 frees the entry
  */
-extern "C" void func_00226768(void* self, int flags)
+extern "C" void luno_cLunoTableEntry__cLunoTableEntry(void* self, int flags)
 {
     *(void**)((char*)self + 0x1C) = D_00479890;
     void* obj = *(void**)((char*)self + 0x18);

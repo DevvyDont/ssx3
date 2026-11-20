@@ -3,14 +3,14 @@
 
 // cParticleNode: the scene node of a placed instance that only carries particle effects. It is a cMoveNode that adds
 // no members and deletes itself once its last effect modifier has gone (update). Size 0x2C: cMemMan_alloc(0x2C,
-// "cParticleNode" / "ParticleNode") + func_003578A8 in src/seg/seg_1FBE38.cpp (checkActiveNode, func_002FD420,
+// "cParticleNode" / "ParticleNode") + cParticleNode_cParticleNode1 in src/seg/seg_1FBE38.cpp (checkActiveNode, func_002FD420,
 // cViewer_addParticle), and cMemMan_alloc(0x2C, "Particle") + cParticleNode_cParticleNode(bucket, stream) in the
 // replay rebuild (src/replay/replay.cpp, node type 13); On Tour 0x28 (its cObjNode is 4 bytes smaller).
 // Base: cMoveNode (object/movenode.h) -> cInstanceNode -> cSortObjNode -> cTypeObjNode -> cObjNode.
 // No EA path in the preview (its strings only name the class: "cParticleNode", vtable _vt$13cParticleNode), so the
 // header takes the retail unit's directory; the methods are in src/object/movenode.cpp (0x3578A8-0x3579A8) and the
 // destructor in src/object/railmodifier.cpp (0x361D50).
-// Constructors: func_003578A8(bucket, inst, pdata, oldNode): cMoveNode ctor (func_00355280, type 0xD), vtable,
+// Constructors: cParticleNode_cParticleNode1(bucket, inst, pdata, oldNode): cMoveNode ctor (cMoveNode_cMoveNode1, type 0xD), vtable,
 // cMoveNode_transferFromOld(oldNode), cMoveNode_addParticle(pdata); cParticleNode_cParticleNode(bucket, stream):
 // cMoveNode's replay ctor + vtable. Vtable cParticleNode_vtbl (0x0048EE60, 51 slots; own: 1 dtor, 2 update,
 // 12 writeToReplayFrame; the rest are cMoveNode's / cInstanceNode's).
@@ -32,7 +32,7 @@ struct cParticleNode {
     void** mVtbl;                   // 0x0C [R] both ctors and the dtor store cParticleNode_vtbl; [U] update's
                                     //      self-delete (slot 1, flags 3)
     // --- cTypeObjNode / cSortObjNode / cInstanceNode (object/instancenode.h)
-    short ObjNodeType;              // 0x10 [P] getType (lh 0x10); [O] cTypeObjNodeState; [R] func_003578A8 passes 0xD
+    short ObjNodeType;              // 0x10 [P] getType (lh 0x10); [O] cTypeObjNodeState; [R] cParticleNode_cParticleNode1 passes 0xD
     unsigned short Flags;           // 0x12 [O]; [P] bit 0 = RootTransformDirty; [R] cMoveNode_cMoveNode sets bit 0
     unsigned int SortIndex;         // 0x14 [P] getSortIndex (lw 0x14); [O] cSortObjNodeState
     tInstanceRecord* Instance;      // 0x18 [P] getInstance (lw 0x18); [O]; [U] cMoveNode_addParticle passes it to the

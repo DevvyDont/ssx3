@@ -52,25 +52,25 @@ enum tReplayState {
 };
 
 // A doubly linked list of cReplayFrames (On Tour cReplayFrameList, 0xC): Tail = oldest, Head = newest.
-// [R] func_0026E5A8 constructs it (zeroes the three words); methods cReplayFrameList_reset (reset), cReplayFrameList_addFrame (addFrame),
-// func_0026E608 (remFrame), func_0026E670 (remTail), func_0026E6A0 (findFrame).
+// [R] cReplayFrameList_cReplayFrameList constructs it (zeroes the three words); methods cReplayFrameList_reset (reset), cReplayFrameList_addFrame (addFrame),
+// cReplayFrameList_remFrame (remFrame), cReplayFrameList_remTail (remTail), cReplayFrameList_findFrame (findFrame).
 struct cReplayFrameList {
-    cReplayFrame* Tail;    // 0x000 [O]; [U] the oldest frame: func_0026E670 (remTail) unlinks it, cReplayFrameList_addFrame
+    cReplayFrame* Tail;    // 0x000 [O]; [U] the oldest frame: cReplayFrameList_remTail (remTail) unlinks it, cReplayFrameList_addFrame
                            //       (addFrame) sets it on an empty list
     cReplayFrame* Head;    // 0x004 [O]; [U] the newest frame: cReplayFrameList_addFrame appends there (frame->Prev = Head)
-    int NumFrames;         // 0x008 [O]; [U] ++/-- by cReplayFrameList_addFrame/func_0026E608; cReplay_allocReplayFrame tests
+    int NumFrames;         // 0x008 [O]; [U] ++/-- by cReplayFrameList_addFrame/cReplayFrameList_remFrame; cReplay_allocReplayFrame tests
                            //       FreeFrameList.NumFrames
 };
 
-// One player's highlight being marked (On Tour cReplayHighlight, 0xB8; retail 0xB4 [R]: func_00272288 (reset)
-// writes +0, +0xB0 and fills +4..+0xB0, cReplay_reset strides 0xB4). Methods func_0026E6E0 (begin), func_0026E7F8,
-// func_0026E800, func_0026E838 (setRanking).
+// One player's highlight being marked (On Tour cReplayHighlight, 0xB8; retail 0xB4 [R]: cReplayHighlight_reset (reset)
+// writes +0, +0xB0 and fills +4..+0xB0, cReplay_reset strides 0xB4). Methods cReplayHighlight_begin (begin), cReplayHighlight_end,
+// cReplayHighlight_cancel, cReplayHighlight_setRanking (setRanking).
 struct cReplayHighlight {
-    int PlayerId;          // 0x000 [O]; [R] func_00272288 (reset) stores -1; [U] cReplay_reset stores 0 / 1
+    int PlayerId;          // 0x000 [O]; [R] cReplayHighlight_reset (reset) stores -1; [U] cReplay_reset stores 0 / 1
     char Stats[0xAC];      // 0x004 [O] tRiderStats (On Tour 0xB0, layout not placed); [R] ctor MEM_fill(this + 4, 0,
                            //       0xAC)
-    cReplayFrame* Frame;   // 0x0B0 [O]; [R] ctor 0; [U] non-zero = marking (func_00270B88 begins only when 0,
-                           //       func_00270CE8)
+    cReplayFrame* Frame;   // 0x0B0 [O]; [R] ctor 0; [U] non-zero = marking (cReplay_beginMarkHighlight begins only when 0,
+                           //       cReplay_endMarkHighlight)
 };
 
 // The save stream's running size and byte checksum (On Tour tWriteCheckSum, 0x8).
@@ -102,7 +102,7 @@ struct cReplay {
                                          //       cReplay_update clears it outside states 3/4
     int RestoreCamera;                   // 0x024 [O] (On Tour: bool); no retail access seen (placed by the order:
                                          //       SkipFrame 0x20, PadNum 0x28)
-    int PadNum;                          // 0x028 [O]; [U] func_0026F898 (setReplayPadNum) stores it;
+    int PadNum;                          // 0x028 [O]; [U] cReplay_setReplayPadNum (setReplayPadNum) stores it;
                                          //       cReplay_updateCameraSelect/cReplay_updateInput/cReplay_update read SSXApp's pad[PadNum]
                                          //       (+0xB0)
     char Frames[16][0x38];               // 0x02C [O] cReplayFrame Frames[16] (retail 0x38 each, On Tour 0x48); [R]
@@ -111,9 +111,9 @@ struct cReplay {
                                          //       vptr is at +0
     cReplayFrame* NextCandidate;         // 0x3AC [O]; [U] cReplay_freeOneReplayFrame (freeOneReplayFrame) walks from it for a
                                          //       frame to free; cReplay_reset zeroes it
-    cReplayFrameList FrameList;          // 0x3B0 [O]; [R] ctor func_0026E5A8(this + 0x3B0); [U] the recorded frames,
+    cReplayFrameList FrameList;          // 0x3B0 [O]; [R] ctor cReplayFrameList_cReplayFrameList(this + 0x3B0); [U] the recorded frames,
                                          //       oldest first
-    cReplayFrameList FreeFrameList;      // 0x3BC [O]; [R] ctor func_0026E5A8(this + 0x3BC); [U] cReplay_reset adds
+    cReplayFrameList FreeFrameList;      // 0x3BC [O]; [R] ctor cReplayFrameList_cReplayFrameList(this + 0x3BC); [U] cReplay_reset adds
                                          //       every Frames[i]; cReplay_allocReplayFrame (allocReplayFrame) takes one
     int RecordTick;                      // 0x3C8 [O]; [U] cReplay_update counts it up while recording; cReplay_saveReplayFrame
                                          //       stamps new frames (+0x30) with it
@@ -121,7 +121,7 @@ struct cReplay {
                                          //       stops there (cReplay_stepFrame, cReplay_isPauseAI, cReplay_updateInput)
     cReplayFrame* SaveFrame;             // 0x3D0 [O]; [U] cReplay_pushReplaySaveFrame saves it (frame type 1), cReplay_popReplaySaveFrame
                                          //       restores and frees it; playback and the writer skip it
-                                         //       (cReplay_stepFrame, cReplay_writeFrameCount, func_00271380)
+                                         //       (cReplay_stepFrame, cReplay_writeFrameCount, cReplay_writeFrames)
     cReplayFrame* InstantReplayFrame;    // 0x3D4 [O]; [U] tested by cReplay_endMarkInstantReplay (endMarkInstantReplay), cleared by
                                          //       cReplay_cancelMarkInstantReplay (cancelMarkInstantReplay); cReplay_update starts the
                                          //       instant replay from it
@@ -134,9 +134,9 @@ struct cReplay {
     cReplayCache* InputCache[2];         // 0x48C [O] (On Tour 4); [R] cReplay_addCache: cMemMan_alloc(0x10,
                                          //       "ReplayCache") into the first free slot of 2, ctor cReplay_cReplay
                                          //       zeroes 2; [U] moved with the playback cursor (cReplayCache_moveTo)
-    cReplayHighlight Highlight[2];       // 0x494 [O] (On Tour 4 x 0xB8); [R] reset by func_00272288 in cReplay_cReplay
+    cReplayHighlight Highlight[2];       // 0x494 [O] (On Tour 4 x 0xB8); [R] reset by cReplayHighlight_reset in cReplay_cReplay
                                          //       on 2 x 0xB4; [U] cReplay_reset sets PlayerId 0/1;
-                                         //       func_00270B88/func_00270CE8/cReplay_cancelMarkHighlight index it by player
+                                         //       cReplay_beginMarkHighlight/cReplay_endMarkHighlight/cReplay_cancelMarkHighlight index it by player
     int Chapters[2];                     // 0x5FC [O] (On Tour 4); [U] cReplay_eventChapter (eventChapter) sets bit `pos` of
                                          //       Chapters[player] (a bit mask)
     int NextFrame;                       // 0x604 [O] (On Tour: bool); [U] cReplay_update clears it every update;
@@ -170,23 +170,23 @@ struct cReplay {
     tReplayMemCardBlock* WriteBlock;     // 0x63C [O]; [R] cReplay_allocSaveSpace: cMemMan_alloc(0x4000, "WriteBlock"); [U]
                                          //       cReplay_getSaveData fills and returns it
     char* WriteTmp;                      // 0x640 [O]; [R] cReplay_allocSaveSpace: operator new(0xC800, "WriteTmp"); [U]
-                                         //       header/frame staging buffer (cReplay_writeHeaderStart, func_00271380)
+                                         //       header/frame staging buffer (cReplay_writeHeaderStart, cReplay_writeFrames)
     char* WriteSrc;                      // 0x644 [O]; [U] cReplay_writeSetup points it at the data to write,
                                          //       cReplay_writeBuffered copies from it
     int WriteSrcSize;                    // 0x648 [O]; [U] bytes left in WriteSrc (cReplay_writeBuffered)
     int WriteSize;                       // 0x64C [O]; [U] bytes used in WriteBlock (cReplay_getSaveData, cReplay_writeBuffered)
     char* WriteData;                     // 0x650 [O]; [U] write cursor in WriteBlock (cReplay_writeBuffered)
-    int WriteIndex;                      // 0x654 [O]; [U] func_00271510 walks InputCache[WriteIndex]
+    int WriteIndex;                      // 0x654 [O]; [U] cReplay_writeInput walks InputCache[WriteIndex]
     int WriteIndexMax;                   // 0x658 [O]; [U] cReplay_writeInputStart stores 2 (the InputCache count)
-    cReplayFrame* WriteFrame;            // 0x65C [O]; [U] frame being written (cReplay_writeFramesStart, func_00271380,
+    cReplayFrame* WriteFrame;            // 0x65C [O]; [U] frame being written (cReplay_writeFramesStart, cReplay_writeFrames,
                                          //       cReplay_writeFrameCount)
-    char* WriteBlockData;                // 0x660 [O]; [U] func_00271380: the frame block pending compression
+    char* WriteBlockData;                // 0x660 [O]; [U] cReplay_writeFrames: the frame block pending compression
     int WriteBlockDataSize;              // 0x664 [O]; [U] its size
-    int WriteFrameCount;                 // 0x668 [O]; [U] frames written (cReplay_writeFramesStart, func_00271380)
-    tControlCmd* WriteCmdFrame;          // 0x66C [O]; [U] func_00271510: an input cache's command data pending
+    int WriteFrameCount;                 // 0x668 [O]; [U] frames written (cReplay_writeFramesStart, cReplay_writeFrames)
+    tControlCmd* WriteCmdFrame;          // 0x66C [O]; [U] cReplay_writeInput: an input cache's command data pending
                                          //       compression
-    int WriteCmdFrameSize;               // 0x670 [O]; [U] func_00271510 (0x8000)
-    tReplayCacheSave* WriteCacheSave;    // 0x674 [O]; [U] func_00271510: the 8-byte cache header pending write
+    int WriteCmdFrameSize;               // 0x670 [O]; [U] cReplay_writeInput (0x8000)
+    tReplayCacheSave* WriteCacheSave;    // 0x674 [O]; [U] cReplay_writeInput: the 8-byte cache header pending write
                                          //       (points into WriteTmp)
     int WriteSaveSize;                   // 0x678 [O]; [U] cReplay_writeSetup adds every written size; cReplay_writePadStart sizes
                                          //       the padding from it

@@ -86,7 +86,7 @@ extern "C" void cScriptCameraController__cScriptCameraController(void* self, int
 //100%
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController_addCamera);
 #ifdef SKIP_ASM
-int func_002743C8(void* self);
+int cScriptPlayerEntity_GetType(void* self);
 void cScriptAlgorithm_setScriptObj(void* self, int val);
 extern "C" void* cScriptManualAlgorithm_cScriptManualAlgorithm(void* self);
 extern "C" void* cScriptPointAlgorithm_cScriptPointAlgorithm(void* self);
@@ -102,7 +102,7 @@ extern char str_Algorithmic_Script_Camera_Algo[];
 /**
  * Creates the camera algorithm for a script camera object and adds it to the controller.
  *
- * The kind (func_002743C8 on the object's data) picks a manual (0), target (1), subject (2) or algorithmic
+ * The kind (cScriptPlayerEntity_GetType on the object's data) picks a manual (0), target (1), subject (2) or algorithmic
  * (3) script camera algorithm; other kinds are ignored. The algorithm is bound to the object, stored at its
  * +0x1C, added as owned (cScriptCameraController_addAlgorithm, probably addAlgorithm) and the controller becomes active (+0x18 = 1).
  *
@@ -111,7 +111,7 @@ extern char str_Algorithmic_Script_Camera_Algo[];
 extern "C" void cScriptCameraController_addCamera(char* self, char* cam)
 {
     void* ctl;
-    switch (func_002743C8(*(void**)(*(char**)(cam + 0x14) + 8)))
+    switch (cScriptPlayerEntity_GetType(*(void**)(*(char**)(cam + 0x14) + 8)))
     {
     case 0:
         ctl = cScriptManualAlgorithm_cScriptManualAlgorithm(cMemMan_alloc(176, str_Manual_Script_Camera_Algo, 0x20000000, 0));
@@ -418,8 +418,8 @@ extern "C" void cScriptManualAlgorithm_snapCurrent(cScriptCtlVirt2* self)
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptManualAlgorithm_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
-float* func_0027C098(void* cam);
-extern "C" void func_0027C0F0(void* cam, void* out);
+float* GetSSXCameraManualHeader(void* cam);
+extern "C" void GetSSXCameraManualFrame(void* cam, void* out);
 extern "C" float func_0031C228(float x);
 extern "C" void cCameraJitterer_updatePositionalJitter(void* self, float v);
 extern "C" void cCameraJitterer_updateRollJitter(void* self, float v);
@@ -533,7 +533,7 @@ struct sScrCam_169570 {
  * Updates the manual script camera: position and look-at point straight from the script, transformed to the world.
  *
  * The playing camera entity is ScriptObj (+0x14) -> mpCameraEntity (+0x14) -> mpEntity (+0x8); its header
- * (func_0027C098, the entity's +0x20) gives Near (+0x4) and Far (+0x8), and func_0027C0F0 reads this frame's channel
+ * (GetSSXCameraManualHeader, the entity's +0x20) gives Near (+0x4) and Far (+0x8), and GetSSXCameraManualFrame reads this frame's channel
  * values into FrameInfo (+0x4C, On Tour tSSXFrameCameraManual). FrameInfo angles are in degrees (converted with *
  * 0.0174533).
  *
@@ -548,11 +548,11 @@ extern "C" void cScriptManualAlgorithm_update(char* algorithm)
 {
     sScrCam_169570* self = (sScrCam_169570*)algorithm;
     char* cam = *(char**)(*(char**)(*(char**)(algorithm + 0x14) + 0x14) + 0x8);
-    float* header = func_0027C098(cam);
+    float* header = GetSSXCameraManualHeader(cam);
     char* baseTransform = *(char**)(algorithm + 0x14) + 0x30;
     self->Near = header[0];
     self->Far = header[1];
-    func_0027C0F0(cam, &self->FrameInfo);
+    GetSSXCameraManualFrame(cam, &self->FrameInfo);
     self->View = self->FrameInfo.fov * 0.01745329424738884f;
     self->Position = sVec4_169570(self->FrameInfo.posX, self->FrameInfo.posY, self->FrameInfo.posZ, 1.0f);
     self->Position = mtxMulVec_169570(baseTransform, self->Position);
@@ -814,8 +814,8 @@ extern "C" void cScriptPointAlgorithm_snapCurrent(cScriptCtlVirt2* self)
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
-float* func_0027C2A8(void* cam);
-extern "C" void func_0027C300(void* cam, void* out);
+float* GetSSXCameraTargetHeader(void* cam);
+extern "C" void GetSSXCameraTargetFrame(void* cam, void* out);
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cCameraJitterer_updatePositionalJitter(void* self, float v);
 extern "C" void cCameraJitterer_updateRollJitter(void* self, float v);
@@ -910,7 +910,7 @@ struct sScrCam_169DB0 {
  * Updates the point script camera: orbits a scripted point at a distance, heading and pitch.
  *
  * The playing camera entity is ScriptObj (+0x14) -> mpCameraEntity (+0x14) -> mpEntity (+0x8); its header
- * (func_0027C2A8, the entity's +0x20) gives Near (+0x4) and Far (+0x8), and func_0027C300 reads this frame's channel
+ * (GetSSXCameraTargetHeader, the entity's +0x20) gives Near (+0x4) and Far (+0x8), and GetSSXCameraTargetFrame reads this frame's channel
  * values into FrameInfo (+0x4C, On Tour tSSXFrameCameraTarget). FrameInfo angles are in degrees (converted with *
  * 0.0174533).
  *
@@ -927,11 +927,11 @@ extern "C" void cScriptPointAlgorithm_update(char* algorithm)
 {
     sScrCam_169DB0* self = (sScrCam_169DB0*)algorithm;
     char* cam = *(char**)(*(char**)(*(char**)(algorithm + 0x14) + 0x14) + 0x8);
-    float* header = func_0027C2A8(cam);
+    float* header = GetSSXCameraTargetHeader(cam);
     char* baseTransform = *(char**)(algorithm + 0x14) + 0x30;
     self->Near = header[0];
     self->Far = header[1];
-    func_0027C300(cam, &self->FrameInfo);
+    GetSSXCameraTargetFrame(cam, &self->FrameInfo);
     self->Near = header[0];
     self->Far = header[1];
     self->View = self->FrameInfo.fov * 0.01745329424738884f;
@@ -1197,9 +1197,9 @@ extern "C" void cScriptTargetAlgorithm_snapCurrent(cScriptCtlVirt2* self)
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
-float* func_0027C4B8(void* cam);
+float* GetSSXCameraSubjectHeader(void* cam);
 extern "C" char* cSSXScriptEngine_GetSubjectRider(void* self, int a1, int a2);
-extern "C" void func_0027C510(void* cam, void* out);
+extern "C" void GetSSXCameraSubjectFrame(void* cam, void* out);
 extern "C" float func_0031C228(float x);
 extern "C" void cCameraJitterer_updatePositionalJitter(void* self, float v);
 extern "C" void cCameraJitterer_updateRollJitter(void* self, float v);
@@ -1353,7 +1353,7 @@ struct sVEp_16A510 {
  * Updates the target script camera: a scripted position that looks at the subject rider.
  *
  * The playing camera entity is ScriptObj (+0x14) -> mpCameraEntity (+0x14) -> mpEntity (+0x8); its header
- * (func_0027C4B8, the entity's +0x20) gives Near (+0x4) and Far (+0x8), and func_0027C510 reads this frame's channel
+ * (GetSSXCameraSubjectHeader, the entity's +0x20) gives Near (+0x4) and Far (+0x8), and GetSSXCameraSubjectFrame reads this frame's channel
  * values into FrameInfo (+0x4C, On Tour tSSXFrameCameraSubject). The subject rider is
  * cSSXScriptEngine_GetSubjectRider(ScriptEngine, the header's subject byte (+0x22), the entity's script player at
  * +0x8), or the first rider (SSXApp->Game->AI->Riders[0]) when there is none. FrameInfo angles are in degrees
@@ -1372,7 +1372,7 @@ extern "C" void cScriptTargetAlgorithm_update(char* algorithm)
 {
     sScrCam_16A510* self = (sScrCam_16A510*)algorithm;
     char* cam = *(char**)(*(char**)(*(char**)(algorithm + 0x14) + 0x14) + 0x8);
-    float* header = func_0027C4B8(cam);
+    float* header = GetSSXCameraSubjectHeader(cam);
     char* baseTransform = *(char**)(algorithm + 0x14) + 0x30;
     char* rider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, ((signed char*)header)[0x22], *(int*)(cam + 8));
     if (rider == 0) {
@@ -1380,7 +1380,7 @@ extern "C" void cScriptTargetAlgorithm_update(char* algorithm)
     }
     self->Near = header[0];
     self->Far = header[1];
-    func_0027C510(cam, &self->FrameInfo);
+    GetSSXCameraSubjectFrame(cam, &self->FrameInfo);
     char* obj = rider + 0x6C0;
     sVec4_16A510 rot = *(sVec4_16A510*)(*(char**)(rider + 0x780) + 0x140);
     self->View = self->FrameInfo.fov * 0.01745329424738884f;
@@ -1618,9 +1618,9 @@ extern "C" void* cScriptRelativeAlgorithm_cScriptRelativeAlgorithm(void* self)
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptRelativeAlgorithm_snap);
 #ifdef SKIP_ASM
 // PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
-float* func_0027C6A0(void* cam);
+float* GetSSXCameraAlgorithmicHeader(void* cam);
 extern "C" char* cSSXScriptEngine_GetSubjectRider(void* self, int a1, int a2);
-extern "C" void func_0027C6F8(void* cam, void* out);
+extern "C" void GetSSXCameraAlgorithmicFrame(void* cam, void* out);
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" float func_0031C228(float x);
 extern "C" void cCameraJitterer_updatePositionalJitter(void* self, float v);
@@ -1775,7 +1775,7 @@ struct sVEp_16AD98 {
  * Snaps the relative script camera straight to its ideal place behind (or around) the subject rider.
  *
  * The playing camera entity is ScriptObj (+0x14) -> mpCameraEntity (+0x14) -> mpEntity (+0x8); its header
- * (func_0027C6A0, the entity's +0x20) gives Near (+0x4) and Far (+0x8), and func_0027C6F8 reads this frame's channel
+ * (GetSSXCameraAlgorithmicHeader, the entity's +0x20) gives Near (+0x4) and Far (+0x8), and GetSSXCameraAlgorithmicFrame reads this frame's channel
  * values into FrameInfo (+0x4C, On Tour tSSXFrameCameraAlgorithmic). The subject rider is
  * cSSXScriptEngine_GetSubjectRider(ScriptEngine, the header's subject byte (+0x1D), the entity's script player at
  * +0x8), or the first rider (SSXApp->Game->AI->Riders[0]) when there is none. FrameInfo angles are in degrees
@@ -1800,8 +1800,8 @@ extern "C" void cScriptRelativeAlgorithm_snap(char* algorithm)
 {
     sScrCam_16AD98* self = (sScrCam_16AD98*)algorithm;
     char* cam = *(char**)(*(char**)(*(char**)(algorithm + 0x14) + 0x14) + 0x8);
-    float* header = func_0027C6A0(cam);
-    func_0027C6F8(cam, &self->FrameInfo);
+    float* header = GetSSXCameraAlgorithmicHeader(cam);
+    GetSSXCameraAlgorithmicFrame(cam, &self->FrameInfo);
     self->Near = header[0];
     self->Far = header[1];
     self->View = self->FrameInfo.fov * 0.01745329424738884f;
@@ -2054,7 +2054,7 @@ static inline float Length4_B180(const sVec4_B180& v)
  * Updates the relative script camera: follows the subject rider, easing towards its ideal place at a capped speed.
  *
  * The playing camera entity is ScriptObj (+0x14) -> mpCameraEntity (+0x14) -> mpEntity (+0x8); its header
- * (func_0027C6A0, the entity's +0x20) gives Near (+0x4) and Far (+0x8), and func_0027C6F8 reads this frame's channel
+ * (GetSSXCameraAlgorithmicHeader, the entity's +0x20) gives Near (+0x4) and Far (+0x8), and GetSSXCameraAlgorithmicFrame reads this frame's channel
  * values into FrameInfo (+0x4C, On Tour tSSXFrameCameraAlgorithmic). The subject rider is
  * cSSXScriptEngine_GetSubjectRider(ScriptEngine, the header's subject byte (+0x1D), the entity's script player at
  * +0x8), or the first rider (SSXApp->Game->AI->Riders[0]) when there is none. FrameInfo angles are in degrees
@@ -2080,14 +2080,14 @@ extern "C" void cScriptRelativeAlgorithm_update(char* algorithm)
 {
     sScrCam_B180* self = (sScrCam_B180*)algorithm;
     char* cam = *(char**)(*(char**)(*(char**)(algorithm + 0x14) + 0x14) + 0x8);
-    float* header = func_0027C6A0(cam);
+    float* header = GetSSXCameraAlgorithmicHeader(cam);
     char* rider = cSSXScriptEngine_GetSubjectRider(ScriptEngine, ((signed char*)header)[0x1D], *(int*)(cam + 8));
     if (rider == 0) {
         rider = (char*)SSXApp->Game->AI->Riders[0];
     }
     self->Near = header[0];
     self->Far = header[1];
-    func_0027C6F8(cam, &self->FrameInfo);
+    GetSSXCameraAlgorithmicFrame(cam, &self->FrameInfo);
     self->View = self->FrameInfo.fov * 0.01745329424738884f;
     self->Roll = self->FrameInfo.roll * 0.01745329424738884f + *(float*)(*(char**)(algorithm + 0x14) + 0x70);
     float pitchAngle;

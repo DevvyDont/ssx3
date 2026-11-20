@@ -3459,7 +3459,7 @@ extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0029E578(void* self, void* a1);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cReplay_eventWipeout(void* self, int key, int id);
-extern "C" void func_00309990(void* self);
+extern "C" void cWScriptMan_eventWipeout(void* self);
 extern void* cWScriptMan_TheWScriptMan;
 extern char t4vect_Zero[];
 
@@ -3504,7 +3504,7 @@ struct sAiObj12CA30
  * rider's view (func_0029E578), copies the hip and board-child bone poses (plus mModelOffset) into
  * RiderPrevPose and BoardPrevPose, and sets RiderState 0 (Launch). When cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 2) is 0x16
  * it calls cWipeoutMotion_throwItem (rider velocity, no spin, BoardPrevPose) and clears unk_318. Then
- * notifies the replay (cReplay_eventWipeout) and queues world-script op 0x70004 (func_00309990).
+ * notifies the replay (cReplay_eventWipeout) and queues world-script op 0x70004 (cWScriptMan_eventWipeout).
  */
 extern "C" void cWipeoutControl_gainFocus(cWipeoutControl* self)
 {
@@ -3526,7 +3526,7 @@ extern "C" void cWipeoutControl_gainFocus(cWipeoutControl* self)
         *(int*)((char*)self->mRider + 0x318) = 0;
     }
     cReplay_eventWipeout(SSXApp->Game->Replay, *(int*)((char*)self->mRider + 0x86C), *(int*)((char*)self->mRider + 0x790) + 0xFC);
-    func_00309990(cWScriptMan_TheWScriptMan);
+    cWScriptMan_eventWipeout(cWScriptMan_TheWScriptMan);
 }
 #endif
 

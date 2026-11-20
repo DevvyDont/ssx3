@@ -37,10 +37,10 @@ enum eScriptPlayState {
 // The script data's header (On Tour tInSeqScriptHeader, 0x10).
 struct tInSeqScriptHeader {
     unsigned char isSmallEndian;      // 0x0 [O]
-    unsigned char numEntities;        // 0x1 [O]; [U] Init/DeInit/Stop/DoUpdate loop to it; func_00274C68
+    unsigned char numEntities;        // 0x1 [O]; [U] Init/DeInit/Stop/DoUpdate loop to it; cScriptPlayerMain_GetNumEntities
     unsigned short headerSize;        // 0x2 [O]; [U] entity blocks start at this + headerSize; >= 0xD = has a data header
-    unsigned int projectID;           // 0x4 [O]; [U] cScriptPlayerEntity GetProjectID; func_00274C58
-    unsigned int size;                // 0x8 [O]; [U] Init returns it; func_00274C60
+    unsigned int projectID;           // 0x4 [O]; [U] cScriptPlayerEntity GetProjectID; cScriptPlayerMain_GetProjectID
+    unsigned int size;                // 0x8 [O]; [U] Init returns it; cScriptPlayerMain_GetDataSize
     char nextSectionStart;            // 0xC [O] the data header (mpDataHeader) when headerSize >= 0xD
     char dummyPad[3];                 // 0xD [O]
 };
@@ -51,7 +51,7 @@ struct cScriptPlayerMain {
     cInSeq* mpManager;                     // 0x08 [O]; [U] Init's manager argument; the entity array and the channels
                                            //      come from its heap (mpManager + 8, cInSeq::mHeap);
                                            //      GetInSeqCommInterface falls back to its mpCommInterface (+0)
-    void* mpUserData;                      // 0x0C [O]; [R] ctor 0; [U] SetUserData (func_00274C10) swaps it
+    void* mpUserData;                      // 0x0C [O]; [R] ctor 0; [U] SetUserData (cScriptPlayerMain_SetUserData) swaps it
     tInSeqScriptHeader* mpSystemHeader;    // 0x10 [O]; [U] Init = pScriptData and returns ->size; numEntities loops
     const char* mpDataHeader;              // 0x14 [O]; [U] Init: &mpSystemHeader->nextSectionStart when headerSize >= 0xD
     cScriptPlayerEntity* mpEntityPlayers;  // 0x18 [O]; [U] Init: new[] numEntities x 0x3C + entity ctor, then Init on

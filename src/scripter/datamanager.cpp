@@ -74,7 +74,7 @@ extern "C" void cDataManager__cDataManager(void* self, int flags)
 //100%
 INCLUDE_ASM("scripter/datamanager", cDataManager_AttachData);
 #ifdef SKIP_ASM
-void* func_00275CF8(void* self);
+void* cDataManager_GetEmptyInstance(void* self);
 extern "C" int BIG_sizeofheader(void* data);
 struct sDmNode5B98;
 extern "C" sDmNode5B98* cDataManager_AttachDataFromBigfile(void* self, char* big, sDmNode5B98* prev);
@@ -97,7 +97,7 @@ struct sDmNode5920 {
 /**
  * Registers a block of data with the data manager and returns its instance record.
  *
- * Takes a free instance (func_00275CF8, On Tour GetEmptyInstance) and stores the data (+0x8), its size (+0xC) and a
+ * Takes a free instance (cDataManager_GetEmptyInstance, On Tour GetEmptyInstance) and stores the data (+0x8), its size (+0xC) and a
  * reference count of 1 (+0x10). BIG_sizeofheader() then tells whether the data is a BIG archive (REALabortflag is
  * cleared around the call so a non-BIG block does not abort). A BIG file calls virtual slot 4 of the manager's vtable
  * (+0xC) and attaches its members with cDataManager_AttachDataFromBigfile; any other block calls slot 2. Both callbacks get the name, data,
@@ -111,7 +111,7 @@ struct sDmNode5920 {
  */
 extern "C" sDmNode5920* cDataManager_AttachData(void* self, int pName, void* data, int size)
 {
-    sDmNode5920* n = (sDmNode5920*)func_00275CF8(self);
+    sDmNode5920* n = (sDmNode5920*)cDataManager_GetEmptyInstance(self);
     int saved = REALabortflag[0];
     n->data = data;
     n->refs = 1;
@@ -223,7 +223,7 @@ extern "C" void cDataManager_DetachAll(sDmTable275B08* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275B78);
+INCLUDE_ASM("scripter/datamanager", cDataManager_GetData);
 #ifdef SKIP_ASM
 /**
  * Returns the data of an attached-data handle: its pData word (+0x8 of the instance record).
@@ -231,13 +231,13 @@ INCLUDE_ASM("scripter/datamanager", func_00275B78);
  * @param dataHandle  the handle cDataManager_AttachData returned
  * @return the attached data
  */
-extern "C" int func_00275B78(void* self, char* dataHandle)
+extern "C" int cDataManager_GetData(void* self, char* dataHandle)
 {
     return *(int*)(dataHandle + 8);
 }
 #endif
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275B80);
+INCLUDE_ASM("scripter/datamanager", cDataManager_GetDataUserData);
 #ifdef SKIP_ASM
 /**
  * Reads the two user-data words of an attached-data handle (+0x0 and +0x4 of the instance record).
@@ -246,7 +246,7 @@ INCLUDE_ASM("scripter/datamanager", func_00275B80);
  * @param out0  receives the first user-data word
  * @param out1  receives the second user-data word
  */
-extern "C" void func_00275B80(void* self, char* dataHandle, int* out0, int* out1)
+extern "C" void cDataManager_GetDataUserData(void* self, char* dataHandle, int* out0, int* out1)
 {
     *out0 = *(int*)dataHandle;
     *out1 = *(int*)(dataHandle + 4);
@@ -256,7 +256,7 @@ extern "C" void func_00275B80(void* self, char* dataHandle, int* out0, int* out1
 //100%
 INCLUDE_ASM("scripter/datamanager", cDataManager_AttachDataFromBigfile);
 #ifdef SKIP_ASM
-void* func_00275CF8(void* self);
+void* cDataManager_GetEmptyInstance(void* self);
 extern "C" int BIG_sizeofheader(void* data);
 extern "C" char* BIG_locateentryz(void* big, int a1, int index, int* offset, int* size);
 extern int REALabortflag[];
@@ -282,7 +282,7 @@ struct sDmNode5B98 {
  *
  * Walks the entries with BIG_locateentryz() (entry 0, then 1, 2, ... until it returns 0). A member that is itself a BIG
  * file (BIG_sizeofheader() with REALabortflag cleared) is attached recursively; any other member gets a free instance
- * (func_00275CF8) holding its address (+0x8) and size (+0xC), is linked after the previous record through +0x14 and is
+ * (cDataManager_GetEmptyInstance) holding its address (+0x8) and size (+0xC), is linked after the previous record through +0x14 and is
  * announced through virtual slot 2 of the manager's vtable (+0xC) with its name, data, size, record and record+0x4.
  *
  * Likely bug (also in On Tour): only the first BIG_locateentryz() call passes a size pointer; the later calls pass 0,
@@ -308,7 +308,7 @@ extern "C" sDmNode5B98* cDataManager_AttachDataFromBigfile(void* self, char* big
         if (headerSize != 0) {
             prev = cDataManager_AttachDataFromBigfile(self, sub, prev);
         } else {
-            sDmNode5B98* n = (sDmNode5B98*)func_00275CF8(self);
+            sDmNode5B98* n = (sDmNode5B98*)cDataManager_GetEmptyInstance(self);
             n->data = sub;
             n->size = ent[1];
             prev->next = n;
@@ -346,7 +346,7 @@ void cDataManager_AddToEmptyInstanceList(void* self, void* node)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275CF8__FPv);
+INCLUDE_ASM("scripter/datamanager", cDataManager_GetEmptyInstance__FPv);
 #ifdef SKIP_ASM
 /**
  * Takes the first instance record off the manager's empty list (+0x8) and returns it with its next link (+0x14)
@@ -356,7 +356,7 @@ INCLUDE_ASM("scripter/datamanager", func_00275CF8__FPv);
  *
  * @return the instance record
  */
-void* func_00275CF8(void* self)
+void* cDataManager_GetEmptyInstance(void* self)
 {
     void* head = *(void**)((char*)self + 0x8);
     *(void**)((char*)self + 0x8) = *(void**)((char*)head + 0x14);
@@ -366,25 +366,25 @@ void* func_00275CF8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275D10);
+INCLUDE_ASM("scripter/datamanager", tNISList_tNISList);
 #ifdef SKIP_ASM
-extern "C" void func_00283C30(void* self);
-void func_00283C20(void* self);
+extern "C" void cCircularBuffer_cCircularBuffer(void* self);
+void cCircularBuffer_Reset(void* self);
 
 /**
  * Constructs an empty NIS list.
  *
- * Initialises the entry buffer at +0xC (func_00283C30, func_00283C20), sets the next pending index (+0xBC) to -1 and
+ * Initialises the entry buffer at +0xC (cCircularBuffer_cCircularBuffer, cCircularBuffer_Reset), sets the next pending index (+0xBC) to -1 and
  * the cut-scene flag (+0x4) to 1, and zeroes the engine pointer (+0x0), view index (+0x8), state (+0xA4) and the flag
  * and counter words at +0xA8-+0xC8.
  *
  * @return @p self
  */
-extern "C" void* func_00275D10(void* self)
+extern "C" void* tNISList_tNISList(void* self)
 {
     void* list = (char*)self + 0xC;
-    func_00283C30(list);
-    func_00283C20(list);
+    cCircularBuffer_cCircularBuffer(list);
+    cCircularBuffer_Reset(list);
     *(int*)((char*)self + 0xBC) = -1;
     *(int*)((char*)self + 0x4) = 1;
     *(int*)((char*)self + 0xA4) = 0;
@@ -403,20 +403,20 @@ extern "C" void* func_00275D10(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275D90);
+INCLUDE_ASM("scripter/datamanager", tNISList__tNISList);
 #ifdef SKIP_ASM
-extern "C" void func_00276868(void* self, int a1);
+extern "C" void tNISList_Reset(void* self, int a1);
 void operator_delete(int* ptr);
 
 /**
- * Destroys a NIS list: resets it (func_00276868 with resetTransition 1), clears its engine pointer (+0x0), and frees it
+ * Destroys a NIS list: resets it (tNISList_Reset with resetTransition 1), clears its engine pointer (+0x0), and frees it
  * with operator_delete when bit 0 of @p flags is set.
  *
  * @param flags  destructor flags; bit 0 frees the memory
  */
-extern "C" void func_00275D90(int* self, int flags)
+extern "C" void tNISList__tNISList(int* self, int flags)
 {
-    func_00276868(self, 1);
+    tNISList_Reset(self, 1);
     *self = 0;
     if (flags & 1) {
         operator_delete(self);
@@ -425,18 +425,18 @@ extern "C" void func_00275D90(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275DD8);
+INCLUDE_ASM("scripter/datamanager", tNISList_AddByVideoCategory);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
-extern "C" void func_002776E0(void* self);
+extern "C" void tNISList_WaitOnPendingNextScript(void* self);
 extern "C" void* cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1);
-int func_00283C58(void* self);
-extern "C" int func_00283C80(void* list, void* cmd);
-extern "C" void* func_00283D70(void* list, int i);
-// The unit declares func_00283D28 as returning void*, but it returns the list's count.
-int func_00283D28_count(void* list) __asm__("func_00283D28");
+int cCircularBuffer_IsFull(void* self);
+extern "C" int cCircularBuffer_AddToTail(void* list, void* cmd);
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
+// The unit declares cCircularBuffer_GetNumEntries as returning void*, but it returns the list's count.
+int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_GetNumEntries");
 struct sDmCmd5DD8 {
     int a1;         // 0x0
     int id;         // 0x4
@@ -450,22 +450,22 @@ struct sDmCmd5DD8 {
 /**
  * Appends a video entry of category @p videoCategory to the NIS list, then sets up the next script if the list is running.
  *
- * Returns 0 when the five-entry buffer is full (func_00283C58). The entry (category, script index -1, control bits
- * @p controlBits, no handle, AI rider indexes -1) is pushed with func_00283C80. When the list is active (state +0xA4 nonzero)
+ * Returns 0 when the five-entry buffer is full (cCircularBuffer_IsFull). The entry (category, script index -1, control bits
+ * @p controlBits, no handle, AI rider indexes -1) is pushed with cCircularBuffer_AddToTail. When the list is active (state +0xA4 nonzero)
  * and nothing is pending yet (+0xBC < 0), the new entry is set up as the pending one (tNISList_SetupNextScript), and if
  * the list is playing (3) while the head's script player (cBXScriptEngine_GetRequestPlayerByReqHandle) is ending
- * (mPlayState 4), func_002776E0 checks whether to wait for it.
+ * (mPlayState 4), tNISList_WaitOnPendingNextScript checks whether to wait for it.
  *
- * Quirk: unlike func_00275ED0 and func_00276048 it does not test whether the head entry is a video before asking for
+ * Quirk: unlike tNISList_AddByScriptCategory and tNISList_AddByScriptIndex it does not test whether the head entry is a video before asking for
  * its script player.
  *
  * @param videoCategory  the video category
  * @param controlBits  the entry's control bits
  * @return 1 when queued, 0 when the list is full
  */
-extern "C" int func_00275DD8(char* self, int videoCategory, int controlBits)
+extern "C" int tNISList_AddByVideoCategory(char* self, int videoCategory, int controlBits)
 {
-    if (func_00283C58(self + 0xC) != 0) {
+    if (cCircularBuffer_IsFull(self + 0xC) != 0) {
         return 0;
     }
     sDmCmd5DD8 cmd;
@@ -479,38 +479,38 @@ extern "C" int func_00275DD8(char* self, int videoCategory, int controlBits)
     long none = 0;
     cmd.a6 = -1;
     void* list = self + 0xC;
-    func_00283C80(list, &cmd);
+    cCircularBuffer_AddToTail(list, &cmd);
     if (*(int*)(self + 0xA4) == 0) {
         return 1;
     }
     if (*(int*)(self + 0xBC) >= none) {
         return 1;
     }
-    *(int*)(self + 0xBC) = tNISList_SetupNextScript(self, func_00283D28_count(list) - 1, 0);
+    *(int*)(self + 0xBC) = tNISList_SetupNextScript(self, cCircularBuffer_GetNumEntries_count(list) - 1, 0);
     if (*(int*)(self + 0xA4) == 3) {
-        int ok = *(int*)((char*)cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, *(int*)((char*)func_00283D70(list, 0) + 0xC)) + 0x20) == 4;
+        int ok = *(int*)((char*)cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, *(int*)((char*)cCircularBuffer_operatorIndex(list, 0) + 0xC)) + 0x20) == 4;
         if (ok)
-            func_002776E0(self);
+            tNISList_WaitOnPendingNextScript(self);
     }
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00275ED0);
+INCLUDE_ASM("scripter/datamanager", tNISList_AddByScriptCategory);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
-extern "C" void func_002776E0(void* self);
-extern "C" int func_00277DD8(void* self, void* a1);
+extern "C" void tNISList_WaitOnPendingNextScript(void* self);
+extern "C" int tNISList_IsVideo(void* self, void* a1);
 extern "C" int cSSXScriptEngine_SelectScriptFromCategory(void* eng, int a1, int a2, int a3, int a4);
 extern "C" void* cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1);
-extern "C" int func_00283BB8(void* self);
-int func_00283C58(void* self);
-extern "C" int func_00283C80(void* list, void* cmd);
-extern "C" void* func_00283D70(void* list, int i);
-// The unit declares func_00283D28 as returning void*, but it returns the list's count.
-int func_00283D28_count(void* list) __asm__("func_00283D28");
+extern "C" int cVidEngine_IsVideoOnLastFrame(void* self);
+int cCircularBuffer_IsFull(void* self);
+extern "C" int cCircularBuffer_AddToTail(void* list, void* cmd);
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
+// The unit declares cCircularBuffer_GetNumEntries as returning void*, but it returns the list's count.
+int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_GetNumEntries");
 
 struct sDmCmd5ED0 {
     int a1;         // 0x0
@@ -525,11 +525,11 @@ struct sDmCmd5ED0 {
 /**
  * Appends a script entry of category @p scriptCategory to the NIS list, then sets up the next script if the list is running.
  *
- * Returns 0 when the buffer is full (func_00283C58). With @p lookup set, the script is chosen now
+ * Returns 0 when the buffer is full (cCircularBuffer_IsFull). With @p lookup set, the script is chosen now
  * (cSSXScriptEngine_SelectScriptFromCategory with the three AI rider indexes) and a failed choice returns 0; otherwise
- * the entry keeps script index -1 for tNISList_SetupNextScript to resolve. After the push (func_00283C80), an active
- * list with nothing pending sets the new entry up as pending; while playing, if the head (a video: func_00283BB8 on the
- * video engine; a script: its player in mPlayState 4) is ending, func_002776E0 checks whether to wait for it.
+ * the entry keeps script index -1 for tNISList_SetupNextScript to resolve. After the push (cCircularBuffer_AddToTail), an active
+ * list with nothing pending sets the new entry up as pending; while playing, if the head (a video: cVidEngine_IsVideoOnLastFrame on the
+ * video engine; a script: its player in mPlayState 4) is ending, tNISList_WaitOnPendingNextScript checks whether to wait for it.
  *
  * @param scriptCategory  the script category
  * @param controlBits  the entry's control bits
@@ -539,9 +539,9 @@ struct sDmCmd5ED0 {
  * @param aiCharIndexSupport1  the second supporting AI rider index
  * @return 1 when queued, 0 when full or no script was found
  */
-extern "C" int func_00275ED0(char* self, int scriptCategory, int controlBits, int lookup, int aiCharIndexMain, int aiCharIndexSupport0, int aiCharIndexSupport1)
+extern "C" int tNISList_AddByScriptCategory(char* self, int scriptCategory, int controlBits, int lookup, int aiCharIndexMain, int aiCharIndexSupport0, int aiCharIndexSupport1)
 {
-    if (func_00283C58(self + 0xC) != 0) {
+    if (cCircularBuffer_IsFull(self + 0xC) != 0) {
         return 0;
     }
     sDmCmd5ED0 cmd;
@@ -560,23 +560,23 @@ extern "C" int func_00275ED0(char* self, int scriptCategory, int controlBits, in
         cmd.id = id;
     }
     void* list = self + 0xC;
-    func_00283C80(list, &cmd);
+    cCircularBuffer_AddToTail(list, &cmd);
     if (*(int*)(self + 0xA4) == 0) {
         return 1;
     }
     if (*(int*)(self + 0xBC) >= 0) {
         return 1;
     }
-    *(int*)(self + 0xBC) = tNISList_SetupNextScript(self, func_00283D28_count(list) - 1, 0);
+    *(int*)(self + 0xBC) = tNISList_SetupNextScript(self, cCircularBuffer_GetNumEntries_count(list) - 1, 0);
     if (*(int*)(self + 0xA4) == 3) {
         int ok;
-        if (func_00277DD8(self, func_00283D70(list, 0)) == 0) {
-            ok = *(int*)((char*)cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, *(int*)((char*)func_00283D70(list, 0) + 0xC)) + 0x20) == 4;
+        if (tNISList_IsVideo(self, cCircularBuffer_operatorIndex(list, 0)) == 0) {
+            ok = *(int*)((char*)cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, *(int*)((char*)cCircularBuffer_operatorIndex(list, 0) + 0xC)) + 0x20) == 4;
         } else {
-            ok = func_00283BB8((char*)*(void**)self + 0x500);
+            ok = cVidEngine_IsVideoOnLastFrame((char*)*(void**)self + 0x500);
         }
         if (ok) {
-            func_002776E0(self);
+            tNISList_WaitOnPendingNextScript(self);
         }
     }
     return 1;
@@ -584,19 +584,19 @@ extern "C" int func_00275ED0(char* self, int scriptCategory, int controlBits, in
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276048);
+INCLUDE_ASM("scripter/datamanager", tNISList_AddByScriptIndex);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
-extern "C" void func_002776E0(void* self);
-extern "C" int func_00277DD8(void* self, void* a1);
+extern "C" void tNISList_WaitOnPendingNextScript(void* self);
+extern "C" int tNISList_IsVideo(void* self, void* a1);
 extern "C" void* cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1);
-extern "C" int func_00283BB8(void* self);
-int func_00283C58(void* self);
-extern "C" int func_00283C80(void* list, void* cmd);
-extern "C" void* func_00283D70(void* list, int i);
-// The unit declares func_00283D28 as returning void*, but it returns the list's count.
-int func_00283D28_count(void* list) __asm__("func_00283D28");
+extern "C" int cVidEngine_IsVideoOnLastFrame(void* self);
+int cCircularBuffer_IsFull(void* self);
+extern "C" int cCircularBuffer_AddToTail(void* list, void* cmd);
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
+// The unit declares cCircularBuffer_GetNumEntries as returning void*, but it returns the list's count.
+int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_GetNumEntries");
 
 struct sDmCmd6048 {
     int type;       // 0x0
@@ -612,9 +612,9 @@ struct sDmCmd6048 {
  * Appends the script with master-table index @p scriptIndex to the NIS list, then sets up the next script if the list is
  * running.
  *
- * Returns 0 when the buffer is full (func_00283C58). The entry has category 0x1C (no category), script index @p scriptIndex, no
- * handle and the given control bits and AI rider indexes. After the push the follow-up matches func_00275ED0: an active
- * list with nothing pending sets the new entry up, and an ending head while playing triggers func_002776E0.
+ * Returns 0 when the buffer is full (cCircularBuffer_IsFull). The entry has category 0x1C (no category), script index @p scriptIndex, no
+ * handle and the given control bits and AI rider indexes. After the push the follow-up matches tNISList_AddByScriptCategory: an active
+ * list with nothing pending sets the new entry up, and an ending head while playing triggers tNISList_WaitOnPendingNextScript.
  *
  * @param scriptIndex  the script's master-table index
  * @param controlBits  the entry's control bits
@@ -623,9 +623,9 @@ struct sDmCmd6048 {
  * @param aiCharIndexSupport1  the second supporting AI rider index
  * @return 1 when queued, 0 when the list is full
  */
-extern "C" int func_00276048(char* self, int scriptIndex, int controlBits, int aiCharIndexMain, int aiCharIndexSupport0, int aiCharIndexSupport1)
+extern "C" int tNISList_AddByScriptIndex(char* self, int scriptIndex, int controlBits, int aiCharIndexMain, int aiCharIndexSupport0, int aiCharIndexSupport1)
 {
-    if (func_00283C58(self + 0xC) == 0) {
+    if (cCircularBuffer_IsFull(self + 0xC) == 0) {
         void* list = self + 0xC;
         sDmCmd6048 cmd;
         cmd.type = 0x1C;
@@ -635,18 +635,18 @@ extern "C" int func_00276048(char* self, int scriptIndex, int controlBits, int a
         cmd.a3 = aiCharIndexMain;
         cmd.a4 = aiCharIndexSupport0;
         cmd.a5 = aiCharIndexSupport1;
-        func_00283C80(list, &cmd);
+        cCircularBuffer_AddToTail(list, &cmd);
         if (*(int*)(self + 0xA4) != 0 && *(int*)(self + 0xBC) < 0) {
-        *(int*)(self + 0xBC) = tNISList_SetupNextScript(self, func_00283D28_count(list) - 1, 0);
+        *(int*)(self + 0xBC) = tNISList_SetupNextScript(self, cCircularBuffer_GetNumEntries_count(list) - 1, 0);
         if (*(int*)(self + 0xA4) == 3) {
             int ok;
-            if (func_00277DD8(self, func_00283D70(list, 0)) == 0) {
-                ok = *(int*)((char*)cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, *(int*)((char*)func_00283D70(list, 0) + 0xC)) + 0x20) == 4;
+            if (tNISList_IsVideo(self, cCircularBuffer_operatorIndex(list, 0)) == 0) {
+                ok = *(int*)((char*)cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, *(int*)((char*)cCircularBuffer_operatorIndex(list, 0) + 0xC)) + 0x20) == 4;
             } else {
-                ok = func_00283BB8((char*)*(void**)self + 0x500);
+                ok = cVidEngine_IsVideoOnLastFrame((char*)*(void**)self + 0x500);
             }
             if (ok) {
-                func_002776E0(self);
+                tNISList_WaitOnPendingNextScript(self);
             }
         }
         }
@@ -657,38 +657,38 @@ extern "C" int func_00276048(char* self, int scriptIndex, int controlBits, int a
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276198);
+INCLUDE_ASM("scripter/datamanager", tNISList_TransferFromNISList);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_00283C80(void* list, void* cmd);
-extern "C" int func_00283DC0(void* self, void* out);
-extern "C" void func_00276868(void* self, int a1);
+extern "C" int cCircularBuffer_AddToTail(void* list, void* cmd);
+extern "C" int cCircularBuffer_RemoveFromHead(void* self, void* out);
+extern "C" void tNISList_Reset(void* self, int a1);
 extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
-// The unit declares func_00283D28 as returning void*, but it returns the list's count.
-int func_00283D28_count(void* list) __asm__("func_00283D28");
+// The unit declares cCircularBuffer_GetNumEntries as returning void*, but it returns the list's count.
+int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_GetNumEntries");
 
 /**
  * Moves all entries of NIS list @p other to the end of this list and resets @p other.
  *
- * Refuses (returns 0) while @p other is playing (state 3). Entries are popped from @p other (func_00283DC0) and pushed
- * here (func_00283C80); @p other is then reset (func_00276868 with resetTransition 1). When this list is active with
+ * Refuses (returns 0) while @p other is playing (state 3). Entries are popped from @p other (cCircularBuffer_RemoveFromHead) and pushed
+ * here (cCircularBuffer_AddToTail); @p other is then reset (tNISList_Reset with resetTransition 1). When this list is active with
  * nothing pending, the first moved entry is set up as pending (tNISList_SetupNextScript from the old length).
  *
  * @param other  the source NIS list
  * @return 1, or 0 when @p other is playing
  */
-extern "C" int func_00276198(void* self, void* other)
+extern "C" int tNISList_TransferFromNISList(void* self, void* other)
 {
     int cmd[8];
-    int n = func_00283D28_count((char*)self + 0xC);
+    int n = cCircularBuffer_GetNumEntries_count((char*)self + 0xC);
     if (*(int*)((char*)other + 0xA4) == 3) {
         return 0;
     }
-    if (func_00283D28_count((char*)other + 0xC) != 0) {
-        while (func_00283DC0((char*)other + 0xC, cmd) != 0) {
-            func_00283C80((char*)self + 0xC, cmd);
+    if (cCircularBuffer_GetNumEntries_count((char*)other + 0xC) != 0) {
+        while (cCircularBuffer_RemoveFromHead((char*)other + 0xC, cmd) != 0) {
+            cCircularBuffer_AddToTail((char*)self + 0xC, cmd);
         }
-        func_00276868(other, 1);
+        tNISList_Reset(other, 1);
         if (*(int*)((char*)self + 0xA4) != 0 && *(int*)((char*)self + 0xBC) < 0) {
             *(int*)((char*)self + 0xBC) = tNISList_SetupNextScript(self, n, 0);
         }
@@ -698,24 +698,24 @@ extern "C" int func_00276198(void* self, void* other)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276270);
+INCLUDE_ASM("scripter/datamanager", tNISList_ReadyList);
 #ifdef SKIP_ASM
-extern "C" void func_00276868(void* self, int a1);
+extern "C" void tNISList_Reset(void* self, int a1);
 extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
-extern "C" void func_00277598(void* self, int index);
-extern "C" void func_00277778(void* self);
-extern "C" int func_00277DD8(void* self, void* a1);
-extern "C" int func_00282798(void* self, int a1);
-extern "C" void* func_00283D28(void*);
-extern "C" void* func_00283D70(void* list, int i);
+extern "C" void tNISList_RemoveFromHead(void* self, int index);
+extern "C" void tNISList_CheckOnLoading(void* self);
+extern "C" int tNISList_IsVideo(void* self, void* a1);
+extern "C" int cBXScriptEngine_GetRequestState(void* self, int a1);
+extern "C" void* cCircularBuffer_GetNumEntries(void*);
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
 
 /**
  * Readies an idle NIS list for playing and returns its state.
  *
- * A loading list (state 1) is polled first (func_00277778); a list that is not idle returns its state. Otherwise stores
+ * A loading list (state 1) is polled first (tNISList_CheckOnLoading); a list that is not idle returns its state. Otherwise stores
  * @p playOnReady (+0xB4), returns 0 for an empty list, and finds the first entry that can play
- * (tNISList_SetupNextScript from 0); with none the list is reset (func_00276868). Entries before it are dropped
- * (func_00277598), and the state becomes 1 (loading) while the head's script request waits for data or its video has no
+ * (tNISList_SetupNextScript from 0); with none the list is reset (tNISList_Reset). Entries before it are dropped
+ * (tNISList_RemoveFromHead), and the state becomes 1 (loading) while the head's script request waits for data or its video has no
  * handle, else 2 (ready). The following entry is set up as the pending one (+0xBC).
  *
  * Likely bug: the pending search starts at the old index + 1 although that many head entries were just removed, so it
@@ -724,28 +724,28 @@ extern "C" void* func_00283D70(void* list, int i);
  * @param playOnReady  0 = no, 1 = play with transition in, 2 = play without (On Tour ePlayOnReady)
  * @return the list state (+0xA4)
  */
-extern "C" int func_00276270(char* self, int playOnReady)
+extern "C" int tNISList_ReadyList(char* self, int playOnReady)
 {
     if (*(int*)(self + 0xA4) == 1) {
-        func_00277778(self);
+        tNISList_CheckOnLoading(self);
     }
     if (*(int*)(self + 0xA4) != 0) {
         return *(int*)(self + 0xA4);
     }
     *(int*)(self + 0xB4) = playOnReady;
     void* list = self + 0xC;
-    if (func_00283D28(list) == 0) {
+    if (cCircularBuffer_GetNumEntries(list) == 0) {
         return 0;
     }
     int idx = tNISList_SetupNextScript(self, 0, 0);
     if (idx < 0) {
-        func_00276868(self, 1);
+        tNISList_Reset(self, 1);
         return *(int*)(self + 0xA4);
     }
-    func_00277598(self, idx);
-    char* entry = (char*)func_00283D70(list, 0);
-    if (func_00277DD8(self, entry) == 0) {
-        if (func_00282798(*(void**)self, *(int*)(entry + 0xC)) == 1) {
+    tNISList_RemoveFromHead(self, idx);
+    char* entry = (char*)cCircularBuffer_operatorIndex(list, 0);
+    if (tNISList_IsVideo(self, entry) == 0) {
+        if (cBXScriptEngine_GetRequestState(*(void**)self, *(int*)(entry + 0xC)) == 1) {
             *(int*)(self + 0xA4) = 1;
         } else {
             *(int*)(self + 0xA4) = 2;
@@ -768,17 +768,17 @@ INCLUDE_ASM("scripter/datamanager", tNISList_Play);
 extern char str_hud_e[];
 int GetHashValue32(char* s);
 void* cGame_getTransitionMan(void* self, int a1);
-char* func_0027C070(void* obj);
-extern "C" void func_00277778(void* self);
-extern "C" int func_00277DD8(void* self, void* a1);
-// The unit declares cSSXScriptEngine_PlayRequestScript as void; it returns func_002822A0's result.
+char* GetSSXScriptHeader(void* obj);
+extern "C" void tNISList_CheckOnLoading(void* self);
+extern "C" int tNISList_IsVideo(void* self, void* a1);
+// The unit declares cSSXScriptEngine_PlayRequestScript as void; it returns cBXScriptEngine_PlayScript's result.
 int cSSXScriptEngine_PlayRequestScript_i(void* self, int val, int key, int b, int c) __asm__("cSSXScriptEngine_PlayRequestScript");
 extern "C" int cSSXScriptEngine_MakeTransitionObject(void* self, int a1, int a2);
-extern "C" void func_002826D8(void* self, int a1);
+extern "C" void cBXScriptEngine_PauseScript(void* self, int a1);
 extern "C" void* cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1);
 extern "C" int cVidEngine_PlayVideo(void* self);
 extern "C" void cVidEngine_UpdateVideo(void* self);
-extern "C" void* func_00283D70(void* list, int i);
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
 extern "C" void cTransitionMan_StartTransition(void* snd, int a1, int h, int h2, int a4, int a5, float t0, float t1, float t2);
 // PORT: real parameter order of cTransitionMan_StartTransition has the floats before the two trailing ints (cf. boardwakefx).
 void cTransitionMan_StartTransition_f(void* snd, int a1, int h, int h2, float t0, float t1, float t2, int a4, int a5) __asm__("cTransitionMan_StartTransition");
@@ -835,16 +835,16 @@ int tNISList_Play_impl(char* self, int fade, int notify) __asm__("tNISList_Play"
 /**
  * Starts the NIS list's head script (or video) once it is ready, with its transition in, and returns the list state.
  *
- * Polls a loading list first (state 1: func_00277778, On Tour CheckOnLoading) and does nothing unless the state (+0xA4)
+ * Polls a loading list first (state 1: tNISList_CheckOnLoading, On Tour CheckOnLoading) and does nothing unless the state (+0xA4)
  * is 2 (ready). It sets the state to 3 (playing) and calls virtual slot 24 of the "hud" UI state
  * (cUIStateStack_findState) with (0, 0) when that state is up.
  *
- * A script entry (func_00277DD8, On Tour IsVideo, returns 0) is started with cSSXScriptEngine_PlayRequestScript (the
+ * A script entry (tNISList_IsVideo, On Tour IsVideo, returns 0) is started with cSSXScriptEngine_PlayRequestScript (the
  * last flag is bit 3 of the entry's flags, +0x8). On the cut-scene list (+0x4) the running transition is ended
- * (func_002E4578), and the script header's in/hold/out frame counts (func_0027C070 of the request's player; 1/60 s
+ * (func_002E4578), and the script header's in/hold/out frame counts (GetSSXScriptHeader of the request's player; 1/60 s
  * each) build the transition in: type 7 is a screen grab (cTransitionMan_StartTransitionScreenGrab), any other type a full transition
  * (cTransitionMan_StartTransition with two cSSXScriptEngine_MakeTransitionObject objects). When in+hold frames remain (+0xB8) the
- * request is paused (func_002826D8, On Tour PauseScript), +0xAC and +0xB0 (On Tour mIsStartTransition,
+ * request is paused (cBXScriptEngine_PauseScript, On Tour PauseScript), +0xAC and +0xB0 (On Tour mIsStartTransition,
  * mInScriptTransition) are set and the forced update is skipped; then the cut scene starts (cCutSceneTransitionMan_StartCutScene, On Tour
  * cCutSceneTransitionMan::StartCutScene, over the transition-in time or 0.5 s). With the forced update the engine's
  * virtual slot 6 (On Tour ForcePlayUpdate) runs the request once.
@@ -860,12 +860,12 @@ int tNISList_Play_impl(char* self, int fade, int notify)
 {
     sDm_6388* dm = (sDm_6388*)self;
     if (*(int*)(self + 0xA4) == 1) {
-        func_00277778(self);
+        tNISList_CheckOnLoading(self);
     }
     if (*(int*)(self + 0xA4) != 2) {
         return *(int*)(self + 0xA4);
     }
-    sDmItem_6388* item = (sDmItem_6388*)func_00283D70(self + 0xC, 0);
+    sDmItem_6388* item = (sDmItem_6388*)cCircularBuffer_operatorIndex(self + 0xC, 0);
     dm->state = 3;
     char* table = (char*)SSXApp->Game->UI + 0x18;
     char* hudState = (char*)cUIStateStack_findState(table, GetHashValue32(str_hud_e));
@@ -873,7 +873,7 @@ int tNISList_Play_impl(char* self, int fade, int notify)
         sDmVEntry_6388* vtEntry = &(*(sDmVEntry_6388**)(hudState + 0x8))[24];
         vtEntry->fn(hudState + vtEntry->delta, 0, 0);
     }
-    if (func_00277DD8(self, item) == 0) {
+    if (tNISList_IsVideo(self, item) == 0) {
         cSSXScriptEngine_PlayRequestScript_i(*(void**)self, *(int*)(self + 0x8), item->id, 0, (item->flags >> 3) & 1);
         if (*(int*)(self + 0x4) != 0) {
             void* snd = cGame_getTransitionMan(SSXApp->Game, 0);
@@ -883,7 +883,7 @@ int tNISList_Play_impl(char* self, int fade, int notify)
             int tIn = 0;
             int tHold = 0;
             float cutSceneTime = 0.0f;
-            sDmFade_6388* transitionInfo = (sDmFade_6388*)func_0027C070(cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, item->id));
+            sDmFade_6388* transitionInfo = (sDmFade_6388*)GetSSXScriptHeader(cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, item->id));
             if (fade) {
                 tIn = transitionInfo->tIn;
                 tHold = transitionInfo->tHold;
@@ -907,7 +907,7 @@ int tNISList_Play_impl(char* self, int fade, int notify)
                 }
                 if (*(int*)(self + 0xB8) > 0) {
                     notify = 0;
-                    func_002826D8(*(void**)self, item->id);
+                    cBXScriptEngine_PauseScript(*(void**)self, item->id);
                     *(int*)(self + 0xAC) = 1;
                     *(int*)(self + 0xB0) = 1;
                 }
@@ -935,41 +935,41 @@ int tNISList_Play_impl(char* self, int fade, int notify)
 }
 #endif
 
-extern "C" void* func_00277C08(void*, int, int);
+extern "C" void* tNISList_DoPause(void*, int, int);
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_002766B0__FPvi);
+INCLUDE_ASM("scripter/datamanager", tNISList_Pause__FPvi);
 #ifdef SKIP_ASM
 /**
- * Pauses or resumes a NIS list: func_00277C08(self, @p pauseList, 0).
+ * Pauses or resumes a NIS list: tNISList_DoPause(self, @p pauseList, 0).
  *
  * @param pauseList  nonzero to pause, 0 to resume
- * @return func_00277C08's return register (it returns nothing)
+ * @return tNISList_DoPause's return register (it returns nothing)
  */
-void* func_002766B0(void* self, int pauseList)
+void* tNISList_Pause(void* self, int pauseList)
 {
-    return func_00277C08(self, pauseList, 0);
+    return tNISList_DoPause(self, pauseList, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_002766D0);
+INCLUDE_ASM("scripter/datamanager", tNISList_SkipForward);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_00276270(char* self, int a1);
-extern "C" void func_00276868(void* self, int a1);
+extern "C" int tNISList_ReadyList(char* self, int a1);
+extern "C" void tNISList_Reset(void* self, int a1);
 extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
-extern "C" void func_00277598(void* self, int index);
-extern "C" void func_00277800(void* self);
+extern "C" void tNISList_RemoveFromHead(void* self, int index);
+extern "C" void tNISList_PlayNextScriptOnAvailable(void* self);
 // The unit declares tNISList_DoTransitionToNext as void; it returns whether it handled the update.
 extern "C" int tNISList_DoTransitionToNext_r(void* self) __asm__("tNISList_DoTransitionToNext");
-extern "C" void* func_00277C08(void*, int, int);
-extern "C" int func_00277DD8(void* self, void* a1);
-extern "C" int func_00282540(void* self, int id);
+extern "C" void* tNISList_DoPause(void*, int, int);
+extern "C" int tNISList_IsVideo(void* self, void* a1);
+extern "C" int cBXScriptEngine_ReleaseRequest(void* self, int id);
 extern "C" void cVidEngine_ResetVideoEngine(void* p);
-extern "C" void* func_00283D70(void* list, int i);
-// The unit declares func_00283D28 as returning void*, but it returns the list's count.
-int func_00283D28_count(void* list) __asm__("func_00283D28");
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
+// The unit declares cCircularBuffer_GetNumEntries as returning void*, but it returns the list's count.
+int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_GetNumEntries");
 
 struct sSeqItem_66D0 {
     char pad_0x0[0xC];
@@ -993,21 +993,21 @@ struct sSeq_66D0 {
  * Skips @p delta scripts of a NIS list and returns its state.
  *
  * The target is @p delta past the skip position (+0xC0), at least the pending index (+0xBC); an unchanged target
- * returns at once. A list that is not playing drops the skipped entries (func_00277598), goes idle and, if it was
- * active, is readied again (func_00276270 with its play-on-ready mode, +0xB4); skipping past the end resets it
- * (func_00276868). A playing list stores the target; a pending entry before the target is released (script:
- * func_00282540; video: cVidEngine_ResetVideoEngine) and pausing on loading is undone (func_00277C08(self, 0, 1))
+ * returns at once. A list that is not playing drops the skipped entries (tNISList_RemoveFromHead), goes idle and, if it was
+ * active, is readied again (tNISList_ReadyList with its play-on-ready mode, +0xB4); skipping past the end resets it
+ * (tNISList_Reset). A playing list stores the target; a pending entry before the target is released (script:
+ * cBXScriptEngine_ReleaseRequest; video: cVidEngine_ResetVideoEngine) and pausing on loading is undone (tNISList_DoPause(self, 0, 1))
  * before the entry at the target is set up as pending. Unless it is paused on loading (+0xA8), the next script starts
- * (func_00277800) when @p force is 0 or tNISList_DoTransitionToNext declines; with nothing pending the list is reset.
+ * (tNISList_PlayNextScriptOnAvailable) when @p force is 0 or tNISList_DoTransitionToNext declines; with nothing pending the list is reset.
  *
  * Likely bug: a pending video is reset only when its handle is nonzero, but a readied video has handle 0
- * (tNISList_SetupNextScript), so the readied one is left running; func_00276F48 and func_00277598 test for >= 0.
+ * (tNISList_SetupNextScript), so the readied one is left running; tNISList_DoSkip and tNISList_RemoveFromHead test for >= 0.
  *
  * @param delta  the number of scripts to skip
  * @param force  nonzero to try a transition to the next script (On Tour doTransition)
  * @return the list state (+0xA4)
  */
-extern "C" int func_002766D0(sSeq_66D0* self, int delta, int force)
+extern "C" int tNISList_SkipForward(sSeq_66D0* self, int delta, int force)
 {
     int pos = delta + self->pos;
     if (pos == self->pos) {
@@ -1016,16 +1016,16 @@ extern "C" int func_002766D0(sSeq_66D0* self, int delta, int force)
     if (pos < self->cur) {
         pos = self->cur;
     }
-    int n = func_00283D28_count(self->list);
+    int n = cCircularBuffer_GetNumEntries_count(self->list);
     if (self->state != 3) {
         self->pos = 0;
         if (pos < n) {
-            func_00277598(self, pos);
+            tNISList_RemoveFromHead(self, pos);
             int st = self->state;
             self->cur = -1;
             self->state = 0;
             if (st != 0) {
-                func_00276270((char*)self, self->fB4);
+                tNISList_ReadyList((char*)self, self->fB4);
             }
             return self->state;
         }
@@ -1033,16 +1033,16 @@ extern "C" int func_002766D0(sSeq_66D0* self, int delta, int force)
     }
     self->pos = pos;
     if (self->cur > 0 && self->cur < pos) {
-        sSeqItem_66D0* it = (sSeqItem_66D0*)func_00283D70(self->list, self->cur);
-        if (func_00277DD8(self, it) == 0) {
-            func_00282540(self->owner, it->handle);
+        sSeqItem_66D0* it = (sSeqItem_66D0*)cCircularBuffer_operatorIndex(self->list, self->cur);
+        if (tNISList_IsVideo(self, it) == 0) {
+            cBXScriptEngine_ReleaseRequest(self->owner, it->handle);
         } else if (it->handle != 0) {
             cVidEngine_ResetVideoEngine(self->owner + 0x500);
         }
         it->handle = -1;
         self->cur = -1;
         if (self->fA8) {
-            func_00277C08(self, 0, 1);
+            tNISList_DoPause(self, 0, 1);
         }
         self->cur = tNISList_SetupNextScript(self, pos, 0);
     }
@@ -1051,18 +1051,18 @@ extern "C" int func_002766D0(sSeq_66D0* self, int delta, int force)
             if (self->cur < 0) {
                 goto reset;
             }
-            func_00277800(self);
+            tNISList_PlayNextScriptOnAvailable(self);
         }
     }
     return self->state;
 reset:
-    func_00276868(self, 1);
+    tNISList_Reset(self, 1);
     return self->state;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276868);
+INCLUDE_ASM("scripter/datamanager", tNISList_Reset);
 #ifdef SKIP_ASM
 extern char str_hud_e[];
 int GetHashValue32(char* s);
@@ -1070,8 +1070,8 @@ void* cGame_getTransitionMan(void* self, int a1);
 extern "C" void func_002E4578(void* p);
 extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void* p);
 extern "C" void* cUIStateStack_findState(void* table, int hash);
-extern "C" void func_00277598(void* self, int index);
-extern "C" void* func_00277C08(void*, int, int);
+extern "C" void tNISList_RemoveFromHead(void* self, int index);
+extern "C" void* tNISList_DoPause(void*, int, int);
 
 struct sDmVEntry6868 {
     short delta;
@@ -1082,25 +1082,25 @@ struct sDmVEntry6868 {
 /**
  * Empties a NIS list and returns it to idle, undoing its pauses and, on the cut-scene list, its cut-scene mode.
  *
- * Undoes a pause on loading (func_00277C08(self, 0, 1)) and any counted pauses (+0xC4 forced to 1, then
- * func_00277C08(self, 0, 0)). When the cut-scene list (+0x4) is playing: with @p resetTransition, puts the game's
+ * Undoes a pause on loading (tNISList_DoPause(self, 0, 1)) and any counted pauses (+0xC4 forced to 1, then
+ * tNISList_DoPause(self, 0, 0)). When the cut-scene list (+0x4) is playing: with @p resetTransition, puts the game's
  * cut-scene transition manager back in regular mode (cCutSceneTransitionMan_ForceToRegularMode) and ends a running
  * script transition (+0xB0) with func_002E4578; then calls virtual slot 24 of the "hud" UI state
- * (cUIStateStack_findState) with (1, 0). Last it drops all five entries (func_00277598) and clears the pending index
+ * (cUIStateStack_findState) with (1, 0). Last it drops all five entries (tNISList_RemoveFromHead) and clears the pending index
  * (-1), state and the flag and counter words at +0xAC-+0xC8.
  *
  * @param nisList  the NIS list
  * @param resetTransition  nonzero to also leave cut-scene mode and end the running transition
  */
-extern "C" void func_00276868(void* nisList, int resetTransition)
+extern "C" void tNISList_Reset(void* nisList, int resetTransition)
 {
     char* self = (char*)nisList;
     if (*(int*)(self + 0xA8) != 0) {
-        func_00277C08(self, 0, 1);
+        tNISList_DoPause(self, 0, 1);
     }
     if (*(int*)(self + 0xC4) != 0) {
         *(int*)(self + 0xC4) = 1;
-        func_00277C08(self, 0, 0);
+        tNISList_DoPause(self, 0, 0);
     }
     if (*(int*)(self + 0x4) != 0 && *(int*)(self + 0xA4) == 3) {
         void* gm = SSXApp->Game->CutSceneTransitionMan;
@@ -1117,7 +1117,7 @@ extern "C" void func_00276868(void* nisList, int resetTransition)
             vtEntry->fn(hudState + vtEntry->delta, 1, 0);
         }
     }
-    func_00277598(self, 5);
+    tNISList_RemoveFromHead(self, 5);
     *(int*)(self + 0xBC) = -1;
     *(int*)(self + 0xA4) = 0;
     *(int*)(self + 0xC8) = 0;
@@ -1131,12 +1131,12 @@ extern "C" void func_00276868(void* nisList, int resetTransition)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276998);
+INCLUDE_ASM("scripter/datamanager", tNISList_GetScriptCategory);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_00283D70(void* list, int i);
-// The unit declares func_00283D28 as returning void*, but it returns the list's count.
-int func_00283D28_count(void* list) __asm__("func_00283D28");
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
+// The unit declares cCircularBuffer_GetNumEntries as returning void*, but it returns the list's count.
+int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_GetNumEntries");
 
 /**
  * Returns the script category of entry @p i of a NIS list, or 0x1C (no script category) when @p i is past the end or
@@ -1145,23 +1145,23 @@ int func_00283D28_count(void* list) __asm__("func_00283D28");
  * @param i  the entry index
  * @return the script category
  */
-extern "C" int func_00276998(void* self, int i)
+extern "C" int tNISList_GetScriptCategory(void* self, int i)
 {
     void* list = (char*)self + 0xC;
-    if (i < func_00283D28_count(list) && *(int*)func_00283D70(list, i) < 0x1C) {
-        return *(int*)func_00283D70(list, i);
+    if (i < cCircularBuffer_GetNumEntries_count(list) && *(int*)cCircularBuffer_operatorIndex(list, i) < 0x1C) {
+        return *(int*)cCircularBuffer_operatorIndex(list, i);
     }
     return 0x1C;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276A08);
+INCLUDE_ASM("scripter/datamanager", tNISList_GetVideoCategory);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_00283D70(void* list, int i);
-// The unit declares func_00283D28 as returning void*, but it returns the list's count.
-int func_00283D28_count(void* list) __asm__("func_00283D28");
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
+// The unit declares cCircularBuffer_GetNumEntries as returning void*, but it returns the list's count.
+int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_GetNumEntries");
 
 /**
  * Returns the video category of entry @p i of a NIS list, or 0x20 (no video category) when @p i is past the end or the
@@ -1170,40 +1170,40 @@ int func_00283D28_count(void* list) __asm__("func_00283D28");
  * @param i  the entry index
  * @return the video category
  */
-extern "C" int func_00276A08(void* self, int i)
+extern "C" int tNISList_GetVideoCategory(void* self, int i)
 {
     void* list = (char*)self + 0xC;
-    if (i < func_00283D28_count(list) && *(int*)func_00283D70(list, i) >= 29) {
-        return *(int*)func_00283D70(list, i);
+    if (i < cCircularBuffer_GetNumEntries_count(list) && *(int*)cCircularBuffer_operatorIndex(list, i) >= 29) {
+        return *(int*)cCircularBuffer_operatorIndex(list, i);
     }
     return 0x20;
 }
 #endif
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276A78);
+INCLUDE_ASM("scripter/datamanager", tNISList_GetScriptIndex);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_00283D70(void* list, int i);
-extern "C" int func_002827F8(void* self, int id);
-int func_00283D28_count(void* list) __asm__("func_00283D28");
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
+extern "C" int cBXScriptEngine_GetRequestScriptIndex(void* self, int id);
+int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_GetNumEntries");
 
 /**
  * Returns the master-table script index of entry @p i of a NIS list.
  *
  * Past the end or for a video entry: -1. Otherwise the entry's own index (+0x4), or, when that is unset, the index of
- * its script request (func_002827F8 on its handle, +0xC), or -1 without a request.
+ * its script request (cBXScriptEngine_GetRequestScriptIndex on its handle, +0xC), or -1 without a request.
  *
  * @param i  the entry index
  * @return the script index, or -1
  */
-extern "C" int func_00276A78(void* self, int i)
+extern "C" int tNISList_GetScriptIndex(void* self, int i)
 {
     void* list = (char*)self + 0xC;
-    if (i >= func_00283D28_count(list)) {
+    if (i >= cCircularBuffer_GetNumEntries_count(list)) {
         return -1;
     }
-    void* item = func_00283D70(list, i);
-    if (func_00277DD8(self, item) != 0) {
+    void* item = cCircularBuffer_operatorIndex(list, i);
+    if (tNISList_IsVideo(self, item) != 0) {
         return -1;
     }
     int scriptIndex = *(int*)((char*)item + 0x4);
@@ -1211,19 +1211,19 @@ extern "C" int func_00276A78(void* self, int i)
         int id = *(int*)((char*)item + 0xC);
         scriptIndex = -1;
         if (id >= 0) {
-            scriptIndex = func_002827F8(*(void**)self, id);
+            scriptIndex = cBXScriptEngine_GetRequestScriptIndex(*(void**)self, id);
         }
     }
     return scriptIndex;
 }
 #endif
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276B08);
+INCLUDE_ASM("scripter/datamanager", tNISList_GetScriptPlayer);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_00283D70(void* list, int i);
-// The unit declares func_00283D28 as returning void*, but it returns the list's count.
-int func_00283D28_count(void* list) __asm__("func_00283D28");
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
+// The unit declares cCircularBuffer_GetNumEntries as returning void*, but it returns the list's count.
+int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_GetNumEntries");
 
 /**
  * Returns the InSeq script player of entry @p i of a NIS list (cBXScriptEngine_GetRequestPlayerByReqHandle on the
@@ -1232,12 +1232,12 @@ int func_00283D28_count(void* list) __asm__("func_00283D28");
  * @param i  the entry index
  * @return the player, or 0
  */
-extern "C" void* func_00276B08(void* self, int i)
+extern "C" void* tNISList_GetScriptPlayer(void* self, int i)
 {
     void* list = (char*)self + 0xC;
-    if (i < func_00283D28_count(list)) {
-        void* item = func_00283D70(list, i);
-        if (func_00277DD8(self, item) == 0) {
+    if (i < cCircularBuffer_GetNumEntries_count(list)) {
+        void* item = cCircularBuffer_operatorIndex(list, i);
+        if (tNISList_IsVideo(self, item) == 0) {
             int id = *(int*)((char*)item + 0xC);
             if (id >= 0) {
                 return cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, id);
@@ -1251,12 +1251,12 @@ extern "C" void* func_00276B08(void* self, int i)
 //100%
 INCLUDE_ASM("scripter/datamanager", tNISList_GetState);
 #ifdef SKIP_ASM
-extern "C" void func_00277778(void* self);
+extern "C" void tNISList_CheckOnLoading(void* self);
 
 /**
  * Returns the NIS list's state, first polling the load while it is still loading.
  *
- * In state 1 (loading) it calls func_00277778 (On Tour CheckOnLoading), which may advance the state. The state word is
+ * In state 1 (loading) it calls tNISList_CheckOnLoading (On Tour CheckOnLoading), which may advance the state. The state word is
  * +0xA4 (On Tour mState; tNISList_Play treats 2 as ready and 3 as playing).
  *
  * @return the list state (+0xA4)
@@ -1264,7 +1264,7 @@ extern "C" void func_00277778(void* self);
 extern "C" int tNISList_GetState(void* self)
 {
     if (*(int*)((char*)self + 0xA4) == 1) {
-        func_00277778(self);
+        tNISList_CheckOnLoading(self);
     }
     return *(int*)((char*)self + 0xA4);
 }
@@ -1273,15 +1273,15 @@ extern "C" int tNISList_GetState(void* self)
 //100%
 INCLUDE_ASM("scripter/datamanager", tNISList_GetPlayState);
 #ifdef SKIP_ASM
-extern "C" void* func_00283D70(void* list, int i);
-extern "C" int func_00282838(void* self, int a1);
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
+extern "C" int cBXScriptEngine_IsRequestPlaybackEnding(void* self, int a1);
 
 /**
  * Classifies a NIS list's playback for the script engine (On Tour eNISListStatePlay).
  *
  * Returns 0 unless the list is playing (+0xA4 == 3) and 3 while it is paused (+0xC4, On Tour mNumPause). Unless a skip
  * is in progress (+0xC8, On Tour mDoSkip), a head entry with flag bit 3 (+0x8) returns 2 while a script transition is
- * running (+0xB0) with more than one wait frame left (+0xB8), and any other head entry returns 1 while func_00282838
+ * running (+0xB0) with more than one wait frame left (+0xB8), and any other head entry returns 1 while cBXScriptEngine_IsRequestPlaybackEnding
  * (On Tour IsRequestPlaybackEnding) returns 0 for its request (+0xC). Otherwise it returns 4, or 5 when no next script
  * is pending (+0xBC < 0, On Tour mNextPendingScriptIndex).
  *
@@ -1293,69 +1293,69 @@ extern "C" int tNISList_GetPlayState(void* self)
     if (*(int*)((char*)self + 0xC4) != 0) return 3;
     if (*(int*)((char*)self + 0xC8) == 0) {
         void* list = (char*)self + 0xC;
-        if (*(int*)((char*)func_00283D70(list, 0) + 0x8) & 8) {
+        if (*(int*)((char*)cCircularBuffer_operatorIndex(list, 0) + 0x8) & 8) {
             if (*(int*)((char*)self + 0xB0) == 0) return 2;
             if (*(int*)((char*)self + 0xB8) - 1 > 0) return 2;
         } else {
-            if (func_00282838(*(void**)self, *(int*)((char*)func_00283D70(list, 0) + 0xC)) == 0) return 1;
+            if (cBXScriptEngine_IsRequestPlaybackEnding(*(void**)self, *(int*)((char*)cCircularBuffer_operatorIndex(list, 0) + 0xC)) == 0) return 1;
         }
     }
     return *(int*)((char*)self + 0xBC) < 0 ? 5 : 4;
 }
 #endif
 
-extern "C" void* func_00283D28(void*);
+extern "C" void* cCircularBuffer_GetNumEntries(void*);
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276CA8__FPv);
+INCLUDE_ASM("scripter/datamanager", tNISList_GetLength__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the number of entries in a NIS list (func_00283D28 on the buffer at +0xC).
+ * Returns the number of entries in a NIS list (cCircularBuffer_GetNumEntries on the buffer at +0xC).
  *
  * @return the entry count
  */
-void* func_00276CA8(void* self)
+void* tNISList_GetLength(void* self)
 {
-    return func_00283D28((char*)self + 0xc);
+    return cCircularBuffer_GetNumEntries((char*)self + 0xc);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/datamanager", func_00276CC8);
+INCLUDE_ASM("scripter/datamanager", tNISList_Update);
 #ifdef SKIP_ASM
 void* cGame_getTransitionMan(void* self, int a1);
 extern "C" void tNISList_Play(void* self, int a1, int a2);
-extern "C" void func_00277778(void* self);
-extern "C" void func_00277800(void* self);
-extern "C" void func_00277838(void* self);
+extern "C" void tNISList_CheckOnLoading(void* self);
+extern "C" void tNISList_PlayNextScriptOnAvailable(void* self);
+extern "C" void tNISList_PlayNextScript(void* self);
 extern "C" void tNISList_DoTransitionToNext(void* self);
-extern "C" int func_00277DD8(void* self, void* a1);
-extern "C" void func_00282720(void* self, int a1);
-extern "C" int func_00282798(void* self, int a1);
-extern "C" int func_00282838(void* self, int a1);
+extern "C" int tNISList_IsVideo(void* self, void* a1);
+extern "C" void cBXScriptEngine_ResumeScript(void* self, int a1);
+extern "C" int cBXScriptEngine_GetRequestState(void* self, int a1);
+extern "C" int cBXScriptEngine_IsRequestPlaybackEnding(void* self, int a1);
 extern "C" int cVidEngine_PlayVideo(void* self);
-extern "C" int func_00283BB8(void* self);
-extern "C" void* func_00283D70(void* list, int i);
+extern "C" int cVidEngine_IsVideoOnLastFrame(void* self);
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
 extern "C" void func_002E4578(void* p);
 
 /**
  * Advances a NIS list by one frame.
  *
- * A loading list (state 1) only polls (func_00277778). A ready list (2) with a play-on-ready mode (+0xB4) starts
+ * A loading list (state 1) only polls (tNISList_CheckOnLoading). A ready list (2) with a play-on-ready mode (+0xB4) starts
  * (tNISList_Play, with the transition in for mode 1) and clears the mode. The rest runs only while playing (3) and not
  * pause-counted (+0xC4): - During a script transition (+0xB0) the transition wait (+0xB8) counts down; at 0 the next
- * script starts (func_00277800) unless the start-transition flag (+0xAC) is set, in which case the head resumes
- * (func_00282720 or cVidEngine_PlayVideo). Once the game's transition manager (cGame_getTransitionMan, +0x44) is idle
+ * script starts (tNISList_PlayNextScriptOnAvailable) unless the start-transition flag (+0xAC) is set, in which case the head resumes
+ * (cBXScriptEngine_ResumeScript or cVidEngine_PlayVideo). Once the game's transition manager (cGame_getTransitionMan, +0x44) is idle
  * and the wait is over, both flags clear. - While paused on loading (+0xA8), once the pending entry (+0xBC) is ready
- * the pause is undone (func_00277C08(self, 0, 1)) and func_00277838 plays it. - A skip in progress (+0xC8) counts down;
+ * the pause is undone (tNISList_DoPause(self, 0, 1)) and tNISList_PlayNextScript plays it. - A skip in progress (+0xC8) counts down;
  * at 0 it ends a running transition (func_002E4578) and starts the next script. - Otherwise the next script starts once
- * the head script's request is back to ready (2) or ending (func_00282838), or the head video reports done
- * (func_00283BB8), after tNISList_DoTransitionToNext.
+ * the head script's request is back to ready (2) or ending (cBXScriptEngine_IsRequestPlaybackEnding), or the head video reports done
+ * (cVidEngine_IsVideoOnLastFrame), after tNISList_DoTransitionToNext.
  */
-extern "C" void func_00276CC8(char* self)
+extern "C" void tNISList_Update(char* self)
 {
     if (*(int*)(self + 0xA4) == 1) {
-        func_00277778(self);
+        tNISList_CheckOnLoading(self);
         return;
     }
     if (*(int*)(self + 0xA4) == 2) {
@@ -1372,16 +1372,16 @@ extern "C" void func_00276CC8(char* self)
         return;
     }
     if (*(int*)(self + 0xB0) != 0) {
-        char* item = (char*)func_00283D70(self + 0xC, 0);
+        char* item = (char*)cCircularBuffer_operatorIndex(self + 0xC, 0);
         char* obj = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
         if (*(int*)(self + 0xB8) != 0) {
             if (--*(int*)(self + 0xB8) == 0) {
                 if (*(int*)(self + 0xAC) == 0) {
-                    func_00277800(self);
+                    tNISList_PlayNextScriptOnAvailable(self);
                     return;
                 }
-                if (func_00277DD8(self, item) == 0) {
-                    func_00282720(*(void**)self, *(int*)(item + 0xC));
+                if (tNISList_IsVideo(self, item) == 0) {
+                    cBXScriptEngine_ResumeScript(*(void**)self, *(int*)(item + 0xC));
                 } else {
                     cVidEngine_PlayVideo(*(char**)self + 0x500);
                 }
@@ -1394,16 +1394,16 @@ extern "C" void func_00276CC8(char* self)
     }
     if (*(int*)(self + 0xA8) != 0) {
         void* list = self + 0xC;
-        char* item = (char*)func_00283D70(list, *(int*)(self + 0xBC));
+        char* item = (char*)cCircularBuffer_operatorIndex(list, *(int*)(self + 0xBC));
         int ok;
-        if (func_00277DD8(self, item) == 0) {
-            ok = func_00282798(*(void**)self, *(int*)((char*)func_00283D70(list, *(int*)(self + 0xBC)) + 0xC)) == 2;
+        if (tNISList_IsVideo(self, item) == 0) {
+            ok = cBXScriptEngine_GetRequestState(*(void**)self, *(int*)((char*)cCircularBuffer_operatorIndex(list, *(int*)(self + 0xBC)) + 0xC)) == 2;
         } else {
             ok = *(int*)(item + 0xC) >= 0;
         }
         if (ok) {
-            func_00277C08(self, 0, 1);
-            func_00277838(self);
+            tNISList_DoPause(self, 0, 1);
+            tNISList_PlayNextScript(self);
         }
         return;
     }
@@ -1415,35 +1415,35 @@ extern "C" void func_00276CC8(char* self)
                 *(int*)(self + 0xB0) = 0;
                 *(int*)(self + 0xB8) = 0;
             }
-            func_00277800(self);
+            tNISList_PlayNextScriptOnAvailable(self);
             return;
         }
     }
-    char* item = (char*)func_00283D70(self + 0xC, 0);
+    char* item = (char*)cCircularBuffer_operatorIndex(self + 0xC, 0);
     int done = 0;
-    if (func_00277DD8(self, item) == 0) {
-        if (func_00282798(*(void**)self, *(int*)(item + 0xC)) == 2 || func_00282838(*(void**)self, *(int*)(item + 0xC)) != 0) {
+    if (tNISList_IsVideo(self, item) == 0) {
+        if (cBXScriptEngine_GetRequestState(*(void**)self, *(int*)(item + 0xC)) == 2 || cBXScriptEngine_IsRequestPlaybackEnding(*(void**)self, *(int*)(item + 0xC)) != 0) {
             done = 1;
         }
-    } else if (func_00283BB8(*(char**)self + 0x500) != 0) {
+    } else if (cVidEngine_IsVideoOnLastFrame(*(char**)self + 0x500) != 0) {
         tNISList_DoTransitionToNext(self);
         done = 1;
     }
     if (done) {
-        func_00277800(self);
+        tNISList_PlayNextScriptOnAvailable(self);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00276F48);
+INCLUDE_ASM("scripter/datamanager", tNISList_DoSkip);
 #ifdef SKIP_ASM
 extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
-extern "C" void func_00277800(void* self);
-extern "C" int func_00277DD8(void* self, void* a1);
-extern "C" int func_00282540(void* self, int id);
+extern "C" void tNISList_PlayNextScriptOnAvailable(void* self);
+extern "C" int tNISList_IsVideo(void* self, void* a1);
+extern "C" int cBXScriptEngine_ReleaseRequest(void* self, int id);
 extern "C" void cVidEngine_ResetVideoEngine(void* p);
-extern "C" void* func_00283D70(void* list, int i);
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
 
 /**
  * Skips the playing script of a NIS list if its entry allows it.
@@ -1451,12 +1451,12 @@ extern "C" void* func_00283D70(void* list, int i);
  * Only while playing (3), with no skip in progress (+0xC8) and bit 0 of the head entry's control bits (+0x8) set. Marks
  * the skip (+0xC8 = 1) and finds the next entry that is not flagged to inherit the skip (tNISList_SetupNextScript with
  * skipFlagged). When that differs from the pending one (+0xBC), the old pending entry is released (script:
- * func_00282540; video: cVidEngine_ResetVideoEngine) and replaced; when one is found the next script starts
- * (func_00277800).
+ * cBXScriptEngine_ReleaseRequest; video: cVidEngine_ResetVideoEngine) and replaced; when one is found the next script starts
+ * (tNISList_PlayNextScriptOnAvailable).
  *
  * Quirk: with nothing pending, the search from entry 1 runs but its result is not stored.
  */
-extern "C" void func_00276F48(char* self)
+extern "C" void tNISList_DoSkip(char* self)
 {
     if (*(int*)(self + 0xA4) != 3) {
         return;
@@ -1465,7 +1465,7 @@ extern "C" void func_00276F48(char* self)
         return;
     }
     void* list = self + 0xC;
-    char* entry = (char*)func_00283D70(list, 0);
+    char* entry = (char*)cCircularBuffer_operatorIndex(list, 0);
     if (!(*(int*)(entry + 0x8) & 1)) {
         return;
     }
@@ -1476,9 +1476,9 @@ extern "C" void func_00276F48(char* self)
     }
     int idx = tNISList_SetupNextScript(self, *(int*)(self + 0xBC), 1);
     if (idx != *(int*)(self + 0xBC)) {
-        char* pendingEntry = (char*)func_00283D70(list, *(int*)(self + 0xBC));
-        if (func_00277DD8(self, pendingEntry) == 0) {
-            func_00282540(*(void**)self, *(int*)(pendingEntry + 0xC));
+        char* pendingEntry = (char*)cCircularBuffer_operatorIndex(list, *(int*)(self + 0xBC));
+        if (tNISList_IsVideo(self, pendingEntry) == 0) {
+            cBXScriptEngine_ReleaseRequest(*(void**)self, *(int*)(pendingEntry + 0xC));
             *(int*)(pendingEntry + 0xC) = -1;
         } else if (*(int*)(pendingEntry + 0xC) >= 0) {
             cVidEngine_ResetVideoEngine(*(char**)self + 0x500);
@@ -1486,7 +1486,7 @@ extern "C" void func_00276F48(char* self)
         *(int*)(self + 0xBC) = idx;
     }
     if (idx >= 0) {
-        func_00277800(self);
+        tNISList_PlayNextScriptOnAvailable(self);
     }
 }
 #endif
@@ -1494,7 +1494,7 @@ extern "C" void func_00276F48(char* self)
 //100%
 INCLUDE_ASM("scripter/datamanager", tNISList_IsSkipAllowed);
 #ifdef SKIP_ASM
-extern "C" void* func_00283D70(void* list, int i);
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
 
 /**
  * Says whether the playing NIS list may be skipped now.
@@ -1511,7 +1511,7 @@ extern "C" int tNISList_IsSkipAllowed(void* self)
         return 0;
     }
     int allowed = 0;
-    void* headEntry = func_00283D70((char*)self + 0xC, 0);
+    void* headEntry = cCircularBuffer_operatorIndex((char*)self + 0xC, 0);
     if (*(int*)((char*)headEntry + 0x8) & 1) {
         allowed = *(int*)((char*)self + 0xA8) == 0;
     }
@@ -1520,9 +1520,9 @@ extern "C" int tNISList_IsSkipAllowed(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_002770C0);
+INCLUDE_ASM("scripter/datamanager", tNISList_IsPauseMenuAllowed);
 #ifdef SKIP_ASM
-extern "C" void* func_00283D70(void* list, int i);
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
 
 /**
  * Returns whether the pause menu may open: always when the list is not playing, else bit 2 of the head entry's control
@@ -1530,28 +1530,28 @@ extern "C" void* func_00283D70(void* list, int i);
  *
  * @return 1 when allowed, else 0
  */
-extern "C" int func_002770C0(void* self)
+extern "C" int tNISList_IsPauseMenuAllowed(void* self)
 {
     if (*(int*)((char*)self + 0xA4) != 3) {
         return 1;
     }
-    void* entry = func_00283D70((char*)self + 0xC, 0);
+    void* entry = cCircularBuffer_operatorIndex((char*)self + 0xC, 0);
     return (*(int*)((char*)entry + 0x8) >> 2) & 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277100);
+INCLUDE_ASM("scripter/datamanager", tNISList_IsPendingScriptReady);
 #ifdef SKIP_ASM
 /**
  * Returns whether the NIS list's pending entry (+0xBC) is ready to play.
  *
  * 0 while loading (state 1); 1 when nothing is pending; for a pending video whether it has a handle (+0xC >= 0); for a
- * pending script whether its request is ready (func_00282798 returns 2).
+ * pending script whether its request is ready (cBXScriptEngine_GetRequestState returns 2).
  *
  * @return 1 when ready, else 0
  */
-extern "C" int func_00277100(void* self)
+extern "C" int tNISList_IsPendingScriptReady(void* self)
 {
     if (*(int*)((char*)self + 0xA4) == 1) {
         return 0;
@@ -1561,53 +1561,53 @@ extern "C" int func_00277100(void* self)
     if (idx < 0) {
         return 1;
     }
-    void* item = func_00283D70(list, idx);
-    if (func_00277DD8(self, item) != 0) {
+    void* item = cCircularBuffer_operatorIndex(list, idx);
+    if (tNISList_IsVideo(self, item) != 0) {
         return *(int*)((char*)item + 0xC) >= 0;
     }
-    return func_00282798(*(void**)self, *(int*)((char*)func_00283D70(list, *(int*)((char*)self + 0xBC)) + 0xC)) == 2;
+    return cBXScriptEngine_GetRequestState(*(void**)self, *(int*)((char*)cCircularBuffer_operatorIndex(list, *(int*)((char*)self + 0xBC)) + 0xC)) == 2;
 }
 #endif
 //100%
-INCLUDE_ASM("scripter/datamanager", func_002771A8);
+INCLUDE_ASM("scripter/datamanager", tNISList_IsListFull);
 #ifdef SKIP_ASM
-extern "C" void func_00283C58__FPv(int);
+extern "C" void cCircularBuffer_IsFull__FPv(int);
 
 /**
- * Asks the NIS list's entry buffer (+0xC) whether it is full: func_00283C58__FPv.
+ * Asks the NIS list's entry buffer (+0xC) whether it is full: cCircularBuffer_IsFull__FPv.
  *
  * The C declares no return value; the answer is left in the return register.
  *
  * @param nisList  the NIS list
  */
-extern "C" void func_002771A8(int nisList) {
-    func_00283C58__FPv(nisList + 0xC);
+extern "C" void tNISList_IsListFull(int nisList) {
+    cCircularBuffer_IsFull__FPv(nisList + 0xC);
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_002771C8);
+INCLUDE_ASM("scripter/datamanager", tNISList_IsPlayingScriptOwner);
 #ifdef SKIP_ASM
-extern "C" void* func_00283D70(void* list, int i);
-extern "C" int func_00277DD8(void* self, void* a1);
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
+extern "C" int tNISList_IsVideo(void* self, void* a1);
 extern "C" void* cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1);
 
 /**
  * Returns whether @p obj is the script player of the NIS list's playing head entry.
  *
- * Requires the list to be playing (3) and the head to be a script (func_00277DD8); compares @p obj with
+ * Requires the list to be playing (3) and the head to be a script (tNISList_IsVideo); compares @p obj with
  * cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, head handle).
  *
  * @param obj  the InSeq script player (cScriptPlayerMain)
  * @return 1 when it is, else 0
  */
-extern "C" int func_002771C8(void* self, void* obj)
+extern "C" int tNISList_IsPlayingScriptOwner(void* self, void* obj)
 {
     if (*(int*)((char*)self + 0xA4) != 3) {
         return 0;
     }
-    void* headEntry = func_00283D70((char*)self + 0xC, 0);
-    if (func_00277DD8(self, headEntry) != 0) {
+    void* headEntry = cCircularBuffer_operatorIndex((char*)self + 0xC, 0);
+    if (tNISList_IsVideo(self, headEntry) != 0) {
         return 0;
     }
     return obj == cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, *(int*)((char*)headEntry + 0xC));
@@ -1615,22 +1615,22 @@ extern "C" int func_002771C8(void* self, void* obj)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277248);
+INCLUDE_ASM("scripter/datamanager", tNISList_IsPlayingVideo);
 #ifdef SKIP_ASM
-extern "C" void* func_00283D70(void* list, int i);
-extern "C" int func_00277DD8(void* self, void* a1);
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
+extern "C" int tNISList_IsVideo(void* self, void* a1);
 
 /**
- * Returns whether the NIS list is playing (state 3) a video entry at its head (func_00277DD8).
+ * Returns whether the NIS list is playing (state 3) a video entry at its head (tNISList_IsVideo).
  *
  * @return 1 when playing a video, else 0
  */
-extern "C" int func_00277248(char* self)
+extern "C" int tNISList_IsPlayingVideo(char* self)
 {
     if (*(int*)(self + 0xA4) != 3) {
         return 0;
     }
-    return func_00277DD8(self, func_00283D70(self + 0xC, 0));
+    return tNISList_IsVideo(self, cCircularBuffer_operatorIndex(self + 0xC, 0));
 }
 #endif
 
@@ -1672,15 +1672,15 @@ int tNISList_IsInTransition(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/datamanager", tNISList_OnScriptPlay);
 #ifdef SKIP_ASM
-extern "C" int func_002771C8(void* self, void* obj);
-char* func_0027C070(void* obj);
+extern "C" int tNISList_IsPlayingScriptOwner(void* self, void* obj);
+char* GetSSXScriptHeader(void* obj);
 extern "C" void cRenderStateMan_setCustomIrradiance(int a0);
 extern char str_TRANSP[];
 
 /**
  * Reacts to a script starting to play: for a script this NIS list owns, switches the custom irradiance.
  *
- * When func_002771C8 (On Tour IsPlayingScriptOwner) accepts the player and the script header from func_0027C070
+ * When tNISList_IsPlayingScriptOwner (On Tour IsPlayingScriptOwner) accepts the player and the script header from GetSSXScriptHeader
  * (GetSSXScriptHeader) starts with a non-zero byte, calls cRenderStateMan_setCustomIrradiance (On Tour
  * cRenderStateMan::setCustomIrradiance) with "TRANSP".
  *
@@ -1689,8 +1689,8 @@ extern char str_TRANSP[];
  */
 extern "C" void tNISList_OnScriptPlay(void* self, int requestHandle, void* obj)
 {
-    if (func_002771C8(self, obj) != 0) {
-        char* name = func_0027C070(obj);
+    if (tNISList_IsPlayingScriptOwner(self, obj) != 0) {
+        char* name = GetSSXScriptHeader(obj);
         char* msg = str_TRANSP;
         if (*name != 0) {
             cRenderStateMan_setCustomIrradiance((int)msg); // PORT: string pointer passed as int (unit declares cRenderStateMan_setCustomIrradiance(int))
@@ -1702,17 +1702,17 @@ extern "C" void tNISList_OnScriptPlay(void* self, int requestHandle, void* obj)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/datamanager", tNISList_OnScriptUpdate);
 #ifdef SKIP_ASM
-extern "C" int func_002771C8(void* self, void* obj);
-char* func_0027C070(void* obj);
+extern "C" int tNISList_IsPlayingScriptOwner(void* self, void* obj);
+char* GetSSXScriptHeader(void* obj);
 extern "C" int cScriptPlayerMain_GetNumUpdatesToEndLeft(void* obj);
 extern "C" void tNISList_DoTransitionToNext(void* self);
 
 /**
  * Per-frame script callback: starts the transition to the next NIS once the playing script nears its end.
  *
- * Only for the list's own script player (func_002771C8, On Tour IsPlayingScriptOwner) on the cut-scene list (+0x4) and
+ * Only for the list's own script player (tNISList_IsPlayingScriptOwner, On Tour IsPlayingScriptOwner) on the cut-scene list (+0x4) and
  * while the player's +0x1C word is 0: when the updates left (cScriptPlayerMain_GetNumUpdatesToEndLeft() + 1) drop to
- * the script header's next-transition in-frame count (short at +0x12 of func_0027C070's header), calls tNISList_DoTransitionToNext
+ * the script header's next-transition in-frame count (short at +0x12 of GetSSXScriptHeader's header), calls tNISList_DoTransitionToNext
  * (On Tour DoTransitionToNext). The current frame and frame delta that On Tour passes are not declared (unused).
  *
  * @param requestHandle  the request handle (unused)
@@ -1720,9 +1720,9 @@ extern "C" void tNISList_DoTransitionToNext(void* self);
  */
 extern "C" void tNISList_OnScriptUpdate(void* self, int requestHandle, void* obj)
 {
-    if (func_002771C8(self, obj) != 0 && *(int*)((char*)self + 0x4) != 0 &&
+    if (tNISList_IsPlayingScriptOwner(self, obj) != 0 && *(int*)((char*)self + 0x4) != 0 &&
         *(int*)((char*)obj + 0x1C) == 0) {
-        char* name = func_0027C070(obj);
+        char* name = GetSSXScriptHeader(obj);
         if (cScriptPlayerMain_GetNumUpdatesToEndLeft(obj) + 1 <= *(short*)(name + 0x12)) {
             tNISList_DoTransitionToNext(self);
         }
@@ -1731,28 +1731,28 @@ extern "C" void tNISList_OnScriptUpdate(void* self, int requestHandle, void* obj
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("scripter/datamanager", func_002773A0);
+INCLUDE_ASM("scripter/datamanager", tNISList_OnScriptStopping);
 #ifdef SKIP_ASM
-extern "C" int func_002771C8(void* self, void* obj);
-extern "C" void func_002776E0(void* self);
-extern "C" void func_002826D8(void* self, int a1);
+extern "C" int tNISList_IsPlayingScriptOwner(void* self, void* obj);
+extern "C" void tNISList_WaitOnPendingNextScript(void* self);
+extern "C" void cBXScriptEngine_PauseScript(void* self, int a1);
 
 /**
  * Handles the NIS list's playing script starting to stop.
  *
- * Only for the list's own player (func_002771C8): while a transition wait is pending (+0xB8) the request is paused
- * (func_002826D8), then func_002776E0 checks whether the next script must be waited for.
+ * Only for the list's own player (tNISList_IsPlayingScriptOwner): while a transition wait is pending (+0xB8) the request is paused
+ * (cBXScriptEngine_PauseScript), then tNISList_WaitOnPendingNextScript checks whether the next script must be waited for.
  *
  * @param requestHandle  the stopping script's request handle
  * @param obj  the stopping InSeq player
  */
-extern "C" void func_002773A0(void* self, int requestHandle, void* obj)
+extern "C" void tNISList_OnScriptStopping(void* self, int requestHandle, void* obj)
 {
-    if (func_002771C8(self, obj) != 0) {
+    if (tNISList_IsPlayingScriptOwner(self, obj) != 0) {
         if (*(int*)((char*)self + 0xB8) != 0) {
-            func_002826D8(*(void**)self, requestHandle);
+            cBXScriptEngine_PauseScript(*(void**)self, requestHandle);
         }
-        func_002776E0(self);
+        tNISList_WaitOnPendingNextScript(self);
     }
 }
 #endif
@@ -1760,15 +1760,15 @@ extern "C" void func_002773A0(void* self, int requestHandle, void* obj)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/datamanager", tNISList_OnScriptStop);
 #ifdef SKIP_ASM
-extern "C" int func_002771C8(void* self, void* obj);
-char* func_0027C070(void* obj);
+extern "C" int tNISList_IsPlayingScriptOwner(void* self, void* obj);
+char* GetSSXScriptHeader(void* obj);
 extern "C" void cRenderStateMan_setCustomIrradiance(int a0);
 
 /**
  * Script stop callback: drops the custom irradiance the list's script had set.
  *
- * For the list's own script player (func_002771C8, On Tour IsPlayingScriptOwner), when the script header
- * (func_0027C070) starts with a non-empty name, calls cRenderStateMan_setCustomIrradiance(0) (On Tour cRenderStateMan::setCustomIrradiance)
+ * For the list's own script player (tNISList_IsPlayingScriptOwner, On Tour IsPlayingScriptOwner), when the script header
+ * (GetSSXScriptHeader) starts with a non-empty name, calls cRenderStateMan_setCustomIrradiance(0) (On Tour cRenderStateMan::setCustomIrradiance)
  * to clear it.
  *
  * @param requestHandle  the request handle (unused)
@@ -1776,8 +1776,8 @@ extern "C" void cRenderStateMan_setCustomIrradiance(int a0);
  */
 extern "C" void tNISList_OnScriptStop(void* self, int requestHandle, void* obj)
 {
-    if (func_002771C8(self, obj) != 0) {
-        if (*func_0027C070(obj) != 0) {
+    if (tNISList_IsPlayingScriptOwner(self, obj) != 0) {
+        if (*GetSSXScriptHeader(obj) != 0) {
             cRenderStateMan_setCustomIrradiance(0);
         }
     }
@@ -1789,13 +1789,13 @@ INCLUDE_ASM("scripter/datamanager", tNISList_SetupNextScript);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_00277DD8(void* self, void* a1);
+extern "C" int tNISList_IsVideo(void* self, void* a1);
 extern "C" int cSSXScriptEngine_RequestScriptByCategory(void* self, int category, int a, int b, int c);
 extern "C" int cSSXScriptEngine_RequestScriptByIndex(void* self, int key, int a, int b, int c);
 extern "C" int cVidEngine_ReadyVideo(void** self, int file);
-extern "C" void* func_00283D70(void* list, int i);
-extern "C" int* func_00277DE8_p(void* self, void* ent) __asm__("func_00277DE8");
-int func_00283D28_count(void* list) __asm__("func_00283D28");
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
+extern "C" int* tNISList_GetVideoDBRecord_p(void* self, void* ent) __asm__("tNISList_GetVideoDBRecord");
+int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_GetNumEntries");
 
 struct sDmEnt7450 {
     int f0;     // 0x0
@@ -1822,15 +1822,15 @@ struct sDmEnt7450 {
 extern "C" int tNISList_SetupNextScript(void* vself, int index, int skipFlagged)
 {
     char* self = (char*)vself;
-    int count = func_00283D28_count(self + 0xC);
+    int count = cCircularBuffer_GetNumEntries_count(self + 0xC);
     int i = index;
     for (; i < count; i++) {
-        sDmEnt7450* currEntry = (sDmEnt7450*)func_00283D70(self + 0xC, i);
+        sDmEnt7450* currEntry = (sDmEnt7450*)cCircularBuffer_operatorIndex(self + 0xC, i);
         if (skipFlagged && (currEntry->flags & 2))
             continue;
         if (currEntry->id >= 0)
             return i;
-        if (func_00277DD8(self, currEntry) == 0) {
+        if (tNISList_IsVideo(self, currEntry) == 0) {
             void* eng = *(void**)self;
             if (currEntry->f4 >= 0)
                 currEntry->id = cSSXScriptEngine_RequestScriptByIndex(eng, currEntry->f4, currEntry->a, currEntry->b, currEntry->c);
@@ -1840,7 +1840,7 @@ extern "C" int tNISList_SetupNextScript(void* vself, int index, int skipFlagged)
                 return i;
         } else {
             if (*(int*)(*(char**)self + 0x500) == 0) {
-                int* videoEntry = func_00277DE8_p(self, currEntry);
+                int* videoEntry = tNISList_GetVideoDBRecord_p(self, currEntry);
                 if (cVidEngine_ReadyVideo((void**)(*(char**)self + 0x500), *videoEntry) != 0)
                     currEntry->id = 0;
             }
@@ -1852,17 +1852,17 @@ extern "C" int tNISList_SetupNextScript(void* vself, int index, int skipFlagged)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277598);
+INCLUDE_ASM("scripter/datamanager", tNISList_RemoveFromHead);
 #ifdef SKIP_ASM
 struct sDmEnt7DE8;
-extern "C" int func_00277DD8(void* self, void* a1);
-extern "C" sDmEnt7DE8* func_00277DE8(void* self, int* key);
-extern "C" int func_00282540(void* self, int id);
+extern "C" int tNISList_IsVideo(void* self, void* a1);
+extern "C" sDmEnt7DE8* tNISList_GetVideoDBRecord(void* self, int* key);
+extern "C" int cBXScriptEngine_ReleaseRequest(void* self, int id);
 extern "C" void cVidEngine_ResetVideoEngine(void* p);
-extern "C" int func_00283BB8(void* self);
-extern "C" void* func_00283D70(void* list, int i);
-extern "C" int func_00283DA0(void* self);
-extern "C" int func_00283DC0(void* self, void* out);
+extern "C" int cVidEngine_IsVideoOnLastFrame(void* self);
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
+extern "C" int cCircularBuffer_IsEmpty(void* self);
+extern "C" int cCircularBuffer_RemoveFromHead(void* self, void* out);
 extern "C" void* cAudioInterface_bxAudio();
 
 struct sDmCmd7598 {
@@ -1884,31 +1884,31 @@ struct sDmSndVEntry7598 {
 /**
  * Removes up to @p n entries from the head of a NIS list, releasing what each one holds.
  *
- * Stops early when the buffer is empty (func_00283DA0). An entry with a handle (+0xC >= 0) releases its script request
- * (func_00282540) or, for a video, sends the video record's music event when the video engine is playing (+0x504): the
- * end event (+0x18 of the func_00277DE8 record) once func_00283BB8 reports the video done, else the skip event (+0x14),
+ * Stops early when the buffer is empty (cCircularBuffer_IsEmpty). An entry with a handle (+0xC >= 0) releases its script request
+ * (cBXScriptEngine_ReleaseRequest) or, for a video, sends the video record's music event when the video engine is playing (+0x504): the
+ * end event (+0x18 of the tNISList_GetVideoDBRecord record) once cVidEngine_IsVideoOnLastFrame reports the video done, else the skip event (+0x14),
  * through virtual slot 4 of the bxAudio sound system (cAudioInterface_bxAudio, +0x118); then resets the video engine
- * (cVidEngine_ResetVideoEngine). Each entry is then popped (func_00283DC0).
+ * (cVidEngine_ResetVideoEngine). Each entry is then popped (cCircularBuffer_RemoveFromHead).
  *
  * @param selfp  the NIS list
  * @param n  the number of entries to remove
  */
-extern "C" void func_00277598(void* selfp, int n)
+extern "C" void tNISList_RemoveFromHead(void* selfp, int n)
 {
     char* self = (char*)selfp;
     while (n != 0) {
-        if (func_00283DA0(self + 0xC) != 0) {
+        if (cCircularBuffer_IsEmpty(self + 0xC) != 0) {
             return;
         }
-        sDmCmd7598 cmd = *(sDmCmd7598*)func_00283D70(self + 0xC, 0);
+        sDmCmd7598 cmd = *(sDmCmd7598*)cCircularBuffer_operatorIndex(self + 0xC, 0);
         if (cmd.id >= 0) {
-            if (func_00277DD8(self, &cmd) == 0) {
-                func_00282540(*(void**)self, cmd.id);
+            if (tNISList_IsVideo(self, &cmd) == 0) {
+                cBXScriptEngine_ReleaseRequest(*(void**)self, cmd.id);
             } else {
                 if (*(int*)(*(char**)self + 0x504) != 0) {
-                    int* ent = (int*)func_00277DE8(self, (int*)&cmd);
+                    int* ent = (int*)tNISList_GetVideoDBRecord(self, (int*)&cmd);
                     int snd;
-                    if (func_00283BB8(*(char**)self + 0x500) != 0) {
+                    if (cVidEngine_IsVideoOnLastFrame(*(char**)self + 0x500) != 0) {
                         snd = ent[6];
                     } else {
                         snd = ent[5];
@@ -1923,63 +1923,63 @@ extern "C" void func_00277598(void* selfp, int n)
                 cVidEngine_ResetVideoEngine(*(char**)self + 0x500);
             }
         }
-        func_00283DC0(self + 0xC, 0);
+        cCircularBuffer_RemoveFromHead(self + 0xC, 0);
         n--;
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_002776E0);
+INCLUDE_ASM("scripter/datamanager", tNISList_WaitOnPendingNextScript);
 #ifdef SKIP_ASM
-extern "C" void* func_00283D70(void* list, int i);
-extern "C" int func_00277DD8(void* self, void* a1);
-extern "C" int func_00282798(void* self, int a1);
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
+extern "C" int tNISList_IsVideo(void* self, void* a1);
+extern "C" int cBXScriptEngine_GetRequestState(void* self, int a1);
 
 /**
  * Pauses the NIS list on loading while its pending entry (+0xBC) is still loading.
  *
- * The pending entry is still loading when its script request waits for data (func_00282798 returns 1) or, for a video,
- * it has no handle (+0xC < 0); then func_00277C08(self, 1, 1) pauses the list. Nothing happens with nothing pending.
+ * The pending entry is still loading when its script request waits for data (cBXScriptEngine_GetRequestState returns 1) or, for a video,
+ * it has no handle (+0xC < 0); then tNISList_DoPause(self, 1, 1) pauses the list. Nothing happens with nothing pending.
  */
-extern "C" void func_002776E0(void* self)
+extern "C" void tNISList_WaitOnPendingNextScript(void* self)
 {
     int idx = *(int*)((char*)self + 0xBC);
     if (idx >= 0) {
         void* list = (char*)self + 0xC;
-        char* nextEntry = (char*)func_00283D70(list, idx);
+        char* nextEntry = (char*)cCircularBuffer_operatorIndex(list, idx);
         int ok;
-        if (func_00277DD8(self, nextEntry) == 0) {
-            ok = func_00282798(*(void**)self,
-                               *(int*)((char*)func_00283D70(list, *(int*)((char*)self + 0xBC)) + 0xC)) == 1;
+        if (tNISList_IsVideo(self, nextEntry) == 0) {
+            ok = cBXScriptEngine_GetRequestState(*(void**)self,
+                               *(int*)((char*)cCircularBuffer_operatorIndex(list, *(int*)((char*)self + 0xBC)) + 0xC)) == 1;
         } else {
             ok = *(int*)(nextEntry + 0xC) < 0;
         }
         if (ok) {
-            func_00277C08(self, 1, 1);
+            tNISList_DoPause(self, 1, 1);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277778);
+INCLUDE_ASM("scripter/datamanager", tNISList_CheckOnLoading);
 #ifdef SKIP_ASM
-extern "C" void* func_00283D70(void* list, int i);
-extern "C" int func_00277DD8(void* self, void* a1);
-extern "C" int func_00282798(void* self, int a1);
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
+extern "C" int tNISList_IsVideo(void* self, void* a1);
+extern "C" int cBXScriptEngine_GetRequestState(void* self, int a1);
 
 /**
  * Moves a loading NIS list (state 1) to ready (2) once its head is ready.
  *
- * A head video counts as ready at once; a head script when its request state (func_00282798) is 2.
+ * A head video counts as ready at once; a head script when its request state (cBXScriptEngine_GetRequestState) is 2.
  */
-extern "C" void func_00277778(void* self)
+extern "C" void tNISList_CheckOnLoading(void* self)
 {
     if (*(int*)((char*)self + 0xA4) == 1) {
-        char* headEntry = (char*)func_00283D70((char*)self + 0xC, 0);
-        if (func_00277DD8(self, headEntry) == 0) {
-            int requestState = func_00282798(*(void**)self, *(int*)(headEntry + 0xC));
+        char* headEntry = (char*)cCircularBuffer_operatorIndex((char*)self + 0xC, 0);
+        if (tNISList_IsVideo(self, headEntry) == 0) {
+            int requestState = cBXScriptEngine_GetRequestState(*(void**)self, *(int*)(headEntry + 0xC));
             if (requestState == 2) {
                 *(int*)((char*)self + 0xA4) = requestState;
             }
@@ -1991,35 +1991,35 @@ extern "C" void func_00277778(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277800);
+INCLUDE_ASM("scripter/datamanager", tNISList_PlayNextScriptOnAvailable);
 #ifdef SKIP_ASM
-extern "C" void func_002776E0(void* self);
-extern "C" void func_00277838(void* self);
+extern "C" void tNISList_WaitOnPendingNextScript(void* self);
+extern "C" void tNISList_PlayNextScript(void* self);
 
 /**
- * Plays the NIS list's next script when it is available: func_002776E0 first, then func_00277838 unless the list is now
+ * Plays the NIS list's next script when it is available: tNISList_WaitOnPendingNextScript first, then tNISList_PlayNextScript unless the list is now
  * paused on loading (+0xA8).
  */
-extern "C" void func_00277800(void* self)
+extern "C" void tNISList_PlayNextScriptOnAvailable(void* self)
 {
-    func_002776E0(self);
+    tNISList_WaitOnPendingNextScript(self);
     if (*(int*)((char*)self + 0xA8) == 0) {
-        func_00277838(self);
+        tNISList_PlayNextScript(self);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277838);
+INCLUDE_ASM("scripter/datamanager", tNISList_PlayNextScript);
 #ifdef SKIP_ASM
 void* cGame_getTransitionMan(void* self, int a1);
-extern "C" void func_00276868(void* self, int a1);
+extern "C" void tNISList_Reset(void* self, int a1);
 extern "C" int tNISList_SetupNextScript(void* self, int index, int a2);
-extern "C" void func_00277598(void* self, int index);
-extern "C" int func_00277DD8(void* self, void* a1);
+extern "C" void tNISList_RemoveFromHead(void* self, int index);
+extern "C" int tNISList_IsVideo(void* self, void* a1);
 extern "C" void cSSXScriptEngine_PlayRequestScript(void* self, int val, int key, int b, int c);
 extern "C" int cVidEngine_PlayVideo(void* self);
-extern "C" void* func_00283D70(void* list, int i);
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
 extern "C" float func_002E4678(void* self);
 extern "C" void func_002EA780(void* self, float t);
 
@@ -2039,26 +2039,26 @@ struct sDmEngVEntry7838 {
 /**
  * Moves a NIS list on to its pending entry, or ends the list when nothing is pending.
  *
- * With a pending entry (+0xBC > 0): clears the skip (+0xC8), drops the entries before it (func_00277598), clears the
+ * With a pending entry (+0xBC > 0): clears the skip (+0xC8), drops the entries before it (tNISList_RemoveFromHead), clears the
  * skip position (+0xC0) and pending index, and starts the new head: a script with cSSXScriptEngine_PlayRequestScript
  * (view index +0x8, bit 3 of its control bits) and the engine's virtual slot 6 (cSSXScriptEngine_ForcePlayUpdate), a
  * video with cVidEngine_PlayVideo. A running script transition (+0xB0) sets the start-transition flag (+0xAC); the next
- * entry is set up as pending. Otherwise the list is reset without transitions (func_00276868) and, on the cut-scene
+ * entry is set up as pending. Otherwise the list is reset without transitions (tNISList_Reset) and, on the cut-scene
  * list (+0x4), the game's fade (+0x64 of the game) gets func_002EA780 with the transition manager's remaining time
  * (func_002E4678) when a script transition was running and the manager is busy, else 0.5.
  *
  * @param selfp  the NIS list
  */
-extern "C" void func_00277838(void* selfp)
+extern "C" void tNISList_PlayNextScript(void* selfp)
 {
     char* self = (char*)selfp;
     if (*(int*)(self + 0xBC) > 0) {
         *(int*)(self + 0xC8) = 0;
-        func_00277598(self, *(int*)(self + 0xBC));
+        tNISList_RemoveFromHead(self, *(int*)(self + 0xBC));
         *(int*)(self + 0xC0) = 0;
         *(int*)(self + 0xBC) = -1;
-        sDmCmd7838* cmd = (sDmCmd7838*)func_00283D70(self + 0xC, 0);
-        if (func_00277DD8(self, cmd) == 0) {
+        sDmCmd7838* cmd = (sDmCmd7838*)cCircularBuffer_operatorIndex(self + 0xC, 0);
+        if (tNISList_IsVideo(self, cmd) == 0) {
             cSSXScriptEngine_PlayRequestScript(*(void**)self, *(int*)(self + 0x8), cmd->id, 0, (cmd->flags >> 3) & 1);
             char* eng = *(char**)self;
             sDmEngVEntry7838* vt = *(sDmEngVEntry7838**)(eng + 0x2A8);
@@ -2072,7 +2072,7 @@ extern "C" void func_00277838(void* selfp)
         *(int*)(self + 0xBC) = tNISList_SetupNextScript(self, 1, 0);
     } else {
         int wasOn = *(int*)(self + 0xB0);
-        func_00276868(self, 0);
+        tNISList_Reset(self, 0);
         if (*(int*)(self + 0x4) != 0) {
             void* app = SSXApp->Game;
             void* fade = *(void**)((char*)app + 0x64);
@@ -2092,12 +2092,12 @@ INCLUDE_ASM("scripter/datamanager", tNISList_DoTransitionToNext);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* cGame_getTransitionMan(void* self, int a1);
-char* func_0027C070(void* obj);
-extern "C" int func_00277DD8(void* self, void* a1);
+char* GetSSXScriptHeader(void* obj);
+extern "C" int tNISList_IsVideo(void* self, void* a1);
 struct sDmEnt7DE8;
-extern "C" sDmEnt7DE8* func_00277DE8(void* self, int* key);
+extern "C" sDmEnt7DE8* tNISList_GetVideoDBRecord(void* self, int* key);
 extern "C" void* cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1);
-extern "C" void* func_00283D70(void* list, int i);
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
 extern "C" void func_002E4578(void* p);
 extern "C" int cSSXScriptEngine_MakeTransitionObject(void* self, int a1, int a2);
 extern "C" void cTransitionMan_StartTransition(void* snd, int a1, int h, int h2, int a4, int a5, float t0, float t1, float t2);
@@ -2129,11 +2129,11 @@ int tNISList_DoTransitionToNext_impl(char* self) __asm__("tNISList_DoTransitionT
  * With a script transition running (+0xB0, On Tour mInScriptTransition) it returns 1, unless the start flag (+0xAC,
  * mIsStartTransition) is set: then it ends the transition (func_002E4578 on the game's transition manager,
  * cGame_getTransitionMan(Game, 0)) and returns 0. Otherwise it ends any transition and builds the next one. For a script head
- * entry it reads the next-transition record of the script header (func_0027C070 of the request's player: type +0x10,
+ * entry it reads the next-transition record of the script header (GetSSXScriptHeader of the request's player: type +0x10,
  * colour +0x11, in/hold/out frame shorts +0x12..+0x16, 1/60 s each): type 7 is a screen grab (cTransitionMan_StartTransitionScreenGrab) with no
  * wait, any other type a full transition (cTransitionMan_StartTransition with two cSSXScriptEngine_MakeTransitionObject objects; returns
  * 0 if none can be made) whose in+hold frames go to +0xB8 (mTransitionWaitFrames). A video entry uses its video record
- * (func_00277DE8, On Tour GetVideoDBRecord) for a transition out (cTransitionMan_StartTransitionOut) or a screen grab. A positive wait sets
+ * (tNISList_GetVideoDBRecord, On Tour GetVideoDBRecord) for a transition out (cTransitionMan_StartTransitionOut) or a screen grab. A positive wait sets
  * +0xB0 and clears +0xAC.
  *
  * @return +0xB0: 1 while a script transition is running
@@ -2147,9 +2147,9 @@ int tNISList_DoTransitionToNext_impl(char* self)
         }
         return 1;
     }
-    char* item = (char*)func_00283D70(self + 0xC, 0);
-    if (func_00277DD8(self, item) == 0) {
-        sDmFade_7980* transitionInfo = (sDmFade_7980*)func_0027C070(cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, *(int*)(item + 0xC)));
+    char* item = (char*)cCircularBuffer_operatorIndex(self + 0xC, 0);
+    if (tNISList_IsVideo(self, item) == 0) {
+        sDmFade_7980* transitionInfo = (sDmFade_7980*)GetSSXScriptHeader(cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, *(int*)(item + 0xC)));
         void* snd = cGame_getTransitionMan(SSXApp->Game, 0);
         if (*(int*)((char*)snd + 0x44) != 0) {
             func_002E4578(snd);
@@ -2174,7 +2174,7 @@ int tNISList_DoTransitionToNext_impl(char* self)
             }
         }
     } else {
-        sDmEnt_7980* videoInfo = (sDmEnt_7980*)func_00277DE8(self, (int*)item);
+        sDmEnt_7980* videoInfo = (sDmEnt_7980*)tNISList_GetVideoDBRecord(self, (int*)item);
         void* snd = cGame_getTransitionMan(SSXApp->Game, 0);
         if (*(int*)((char*)snd + 0x44) != 0) {
             func_002E4578(snd);
@@ -2196,16 +2196,16 @@ int tNISList_DoTransitionToNext_impl(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277C08);
+INCLUDE_ASM("scripter/datamanager", tNISList_DoPause);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* cGame_getTransitionMan(void* self, int a1);
-extern "C" int func_00277DD8(void* self, void* a1);
-extern "C" void func_002826D8(void* self, int a1);
-extern "C" void func_00282720(void* self, int a1);
-extern "C" int func_00282798(void* self, int a1);
-extern "C" void func_00283B78(void* self, int on);
-extern "C" void* func_00283D70(void* list, int i);
+extern "C" int tNISList_IsVideo(void* self, void* a1);
+extern "C" void cBXScriptEngine_PauseScript(void* self, int a1);
+extern "C" void cBXScriptEngine_ResumeScript(void* self, int a1);
+extern "C" int cBXScriptEngine_GetRequestState(void* self, int a1);
+extern "C" void cVidEngine_PauseVideo(void* self, int on);
+extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
 extern "C" void func_002E4638(void* p, int on);
 extern "C" void func_002EA8B8(void* p, int on);
 
@@ -2225,8 +2225,8 @@ struct sSeq_7C08 {
     int pauseCount;     // 0xC4
 };
 
-// The unit declares func_00277C08 as returning void*; the body returns nothing. Bind by asm label.
-extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard) __asm__("func_00277C08");
+// The unit declares tNISList_DoPause as returning void*; the body returns nothing. Bind by asm label.
+extern "C" void tNISList_DoPause_impl(sSeq_7C08* self, int on, int hard) __asm__("tNISList_DoPause");
 
 /**
  * Pauses or resumes a playing NIS list, through either the pause count or the pause-on-loading flag.
@@ -2234,14 +2234,14 @@ extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard) __asm__("f
  * Does nothing unless playing (3). With @p hard 0 the pause count (+0xC4) goes up or down and only the 0-to-1 or 1-to-0
  * step acts, and not while paused on loading (+0xA8). With @p hard set the pause-on-loading flag is set to @p on and
  * acts only when it changed and no counted pause is held. Acting pauses the head (a script request in states 3-5 with
- * func_002826D8; a video with func_00283B78) or resumes it (a paused request, state 5, with func_00282720; a video with
- * func_00283B78), and on the cut-scene list (+0x4) passes the same flag to the game's cut-scene transition manager
+ * cBXScriptEngine_PauseScript; a video with cVidEngine_PauseVideo) or resumes it (a paused request, state 5, with cBXScriptEngine_ResumeScript; a video with
+ * cVidEngine_PauseVideo), and on the cut-scene list (+0x4) passes the same flag to the game's cut-scene transition manager
  * (func_002EA8B8) and, when busy (+0x44), to the transition manager (func_002E4638).
  *
  * @param on  nonzero to pause, 0 to resume
  * @param hard  nonzero for the pause-on-loading flag, 0 for the pause count
  */
-extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard)
+extern "C" void tNISList_DoPause_impl(sSeq_7C08* self, int on, int hard)
 {
     if (self->state != 3) {
         return;
@@ -2276,14 +2276,14 @@ extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard)
         }
     }
     if (on) {
-        sSeqItem_7C08* it = (sSeqItem_7C08*)func_00283D70(self->list, 0);
-        if (func_00277DD8(self, it) == 0) {
-            int st = func_00282798(self->owner, it->handle);
+        sSeqItem_7C08* it = (sSeqItem_7C08*)cCircularBuffer_operatorIndex(self->list, 0);
+        if (tNISList_IsVideo(self, it) == 0) {
+            int st = cBXScriptEngine_GetRequestState(self->owner, it->handle);
             if (st >= 3 && st <= 5) {
-                func_002826D8(self->owner, it->handle);
+                cBXScriptEngine_PauseScript(self->owner, it->handle);
             }
         } else {
-            func_00283B78(self->owner + 0x500, 1);
+            cVidEngine_PauseVideo(self->owner + 0x500, 1);
         }
         if (self->f4) {
             func_002EA8B8(SSXApp->Game->CutSceneTransitionMan, 1);
@@ -2293,13 +2293,13 @@ extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard)
             }
         }
     } else {
-        sSeqItem_7C08* it = (sSeqItem_7C08*)func_00283D70(self->list, 0);
-        if (func_00277DD8(self, it) == 0) {
-            if (func_00282798(self->owner, it->handle) == 5) {
-                func_00282720(self->owner, it->handle);
+        sSeqItem_7C08* it = (sSeqItem_7C08*)cCircularBuffer_operatorIndex(self->list, 0);
+        if (tNISList_IsVideo(self, it) == 0) {
+            if (cBXScriptEngine_GetRequestState(self->owner, it->handle) == 5) {
+                cBXScriptEngine_ResumeScript(self->owner, it->handle);
             }
         } else {
-            func_00283B78(self->owner + 0x500, 0);
+            cVidEngine_PauseVideo(self->owner + 0x500, 0);
         }
         if (self->f4) {
             func_002EA8B8(SSXApp->Game->CutSceneTransitionMan, 0);
@@ -2313,7 +2313,7 @@ extern "C" void func_00277C08_impl(sSeq_7C08* self, int on, int hard)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277DD8);
+INCLUDE_ASM("scripter/datamanager", tNISList_IsVideo);
 #ifdef SKIP_ASM
 /**
  * Returns whether a NIS list entry is a video: its category (+0x0) is 29 or more.
@@ -2321,14 +2321,14 @@ INCLUDE_ASM("scripter/datamanager", func_00277DD8);
  * @param entry  the list entry
  * @return 1 for a video, 0 for a script
  */
-extern "C" int func_00277DD8(void* self, void* entry)
+extern "C" int tNISList_IsVideo(void* self, void* entry)
 {
     return *(int*)entry >= 29;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/datamanager", func_00277DE8);
+INCLUDE_ASM("scripter/datamanager", tNISList_GetVideoDBRecord);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
@@ -2359,7 +2359,7 @@ extern sDmEnt7DE8 D_0048247C[];
  * @param key  the list entry (its first word is the video category)
  * @return the video record
  */
-extern "C" sDmEnt7DE8* func_00277DE8(void* self, int* key)
+extern "C" sDmEnt7DE8* tNISList_GetVideoDBRecord(void* self, int* key)
 {
     cBE_getInterface_Fv(cBE_getBE(), 4);
     sDmCfg7DE8 cfg = cBEOptionInterface_mOption;
@@ -2395,7 +2395,7 @@ extern "C" void cScriptObjGS_cScriptObjGS(void* self);
 extern "C" void cScriptObjEvent_cScriptObjEvent(void* self);
 extern "C" void cScriptAnimBankManager_cScriptAnimBankManager(void* self, int flags, int a2, int a3);
 extern "C" void cScriptSoundBankManager_cScriptSoundBankManager(void* self, int flags, int a2, int a3);
-void func_00281160(void* self, int i);
+void cScriptObjCameraManager_SetViewIndex(void* self, int i);
 extern void* D_00482100[];
 extern void* D_004821A0[];
 extern void* D_00482168[];
@@ -2483,7 +2483,7 @@ extern "C" sScriptMgr_7F20* cSSXScriptEngine_cSSXScriptEngine(sScriptMgr_7F20* s
         tSSXScriptBankInfo_Clear(self->cues[i]);
     }
     for (i = 0; i < 2; i++) {
-        func_00281160(self->slots[i], i);
+        cScriptObjCameraManager_SetViewIndex(self->slots[i], i);
     }
     return self;
 }

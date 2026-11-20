@@ -58,9 +58,9 @@ CHECK_OFFSET(tSSXScriptBankInfo, dynamicMem, 0xC);
 CHECK_SIZE(tSSXScriptBankInfo, 0x10);
 
 struct cSSXScriptEngine {
-    // --- cScriptDatabaseObject (base of cBXScriptEngine; ctor func_0027CDD0, vtable _vt$21cScriptDatabaseObject)
-    cScriptObject* mpObjectDatabase[20];         // 0x000 [O]; [R] func_0027CDD0 zeroes 20 words
-    char mEntityDatabase[30][0x14];              // 0x050 [O] tScriptEntityRecord[30]; [R] func_0027CDD0 sets 30
+    // --- cScriptDatabaseObject (base of cBXScriptEngine; ctor cScriptDatabaseObject_cScriptDatabaseObject, vtable _vt$21cScriptDatabaseObject)
+    cScriptObject* mpObjectDatabase[20];         // 0x000 [O]; [R] cScriptDatabaseObject_cScriptDatabaseObject zeroes 20 words
+    char mEntityDatabase[30][0x14];              // 0x050 [O] tScriptEntityRecord[30]; [R] cScriptDatabaseObject_cScriptDatabaseObject sets 30
                                                  //       0x14-byte records to {0, -1, -1, 0, -1}
     void** mVtbl;                                // 0x2A8 [R] _vt$16cSSXScriptEngine (cSSXScriptEngine_vtbl), stored by the ctor
                                                  //       over _vt$15cBXScriptEngine; [U] cSSXScriptEngine_ForcePlayUpdate calls slot 4
@@ -79,7 +79,7 @@ struct cSSXScriptEngine {
                                                  //       tested by ssxapp.cpp and all_in_one_fe.cpp
     int mFrameUpdated;                           // 0x508 [O] (a bool in On Tour); [U] cVidEngine_UpdateVideo sets 1 while
                                                  //       playing and not paused
-    int mNumPause;                               // 0x50C [O]; [U] func_00283B78 (PauseVideo) counts it up and down
+    int mNumPause;                               // 0x50C [O]; [U] cVidEngine_PauseVideo (PauseVideo) counts it up and down
     int unk_510;                                 // 0x510 [U] cVidEngine_PlayVideo saves a GrMan virtual-call result
     int unk_514;                                 // 0x514 [U] cVidEngine_PlayVideo: 1 unless the game's state object is 0 or 2
     void** mVidEngineVtbl;                       // 0x518 [R] _vt$16cSSXScriptEngine$10cVidEngine (D_004821A0)
@@ -102,12 +102,12 @@ struct cSSXScriptEngine {
     tSSXHiveScriptFilterCategory* mpCategoryFilterTable; // 0x540 [O]; [U] cSSXScriptEngine_ProcessAsyncLoadTrackTableComplete: header + 4; 8-byte
                                                  //       {numScripts, scripts} records (GetScriptFromCategory)
     tSSXScriptSetupInfoLinked* mpSetupInfoHeap;  // 0x544 [O]; [R] Load: new (0xC8, "SetupInfoHeap"), 10 x 0x14
-    tSSXScriptSetupInfoLinked* mpSetupInfoUnused; // 0x548 [O]; [U] free list (next at +0x10): func_0027BD78 pops,
-                                                 //       func_0027BD90 pushes
+    tSSXScriptSetupInfoLinked* mpSetupInfoUnused; // 0x548 [O]; [U] free list (next at +0x10): cSSXScriptEngine_AllocScriptSetupInfo pops,
+                                                 //       cSSXScriptEngine_ReleaseScriptSetupInfo pushes
     tNISList* mpNISLists;                        // 0x54C [O]; [R] Load: new[2] ("NISLists"), 0xCC each
     int mPlayingNISList;                         // 0x550 [P] GetActiveNIS (preview 0x548; IsNISActive: != 2);
                                                  //       [O] eNISList; [R] the ctor sets 2 (none)
-    int mNumFramesNoSkip;                        // 0x554 [O]; [U] func_00278DE8 (DisallowNISListSkip) stores its arg;
+    int mNumFramesNoSkip;                        // 0x554 [O]; [U] cSSXScriptEngine_DisallowNISListSkip (DisallowNISListSkip) stores its arg;
                                                  //       Update counts it down and ignores the skip button until 0
     unsigned int* mpAnchorTableDB[50];           // 0x558 [O] (tResourceID*[60] in On Tour); [R] the ctor zeroes 50;
                                                  //       [U] cSSXScriptEngine_AttachAnchorDataTable / cSSXScriptEngine_DetachAnchorDataTable (Attach/DetachAnchorDataTable)

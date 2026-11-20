@@ -121,7 +121,7 @@ extern "C" void __sti__all_in_one_scripter_cpp(int init, int prio)
  *
  * cSSXScriptEngine replaces it with cSSXScriptEngine_OnAttachData in its cDataManager table (D_00482168).
  */
-extern "C" void func_002847A8(void) {
+extern "C" void cDataManager_OnAttachData(void) {
 }
 
 /**
@@ -129,7 +129,7 @@ extern "C" void func_002847A8(void) {
  *
  * cSSXScriptEngine replaces it with cSSXScriptEngine_OnDetachData in its cDataManager table (D_00482168).
  */
-extern "C" void func_002847B0(void) {
+extern "C" void cDataManager_OnDetachData(void) {
 }
 
 /**
@@ -137,7 +137,7 @@ extern "C" void func_002847B0(void) {
  *
  * cSSXScriptEngine keeps it (slot 4 of D_00482168).
  */
-extern "C" void func_002847B8(void) {
+extern "C" void cDataManager_OnAttachDataBigFile(void) {
 }
 
 /**
@@ -145,11 +145,11 @@ extern "C" void func_002847B8(void) {
  *
  * cSSXScriptEngine keeps it (slot 5 of D_00482168).
  */
-extern "C" void func_002847C0(void) {
+extern "C" void cDataManager_OnDetachDataBigFile(void) {
 }
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_002847C8);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObject_GetObjectType);
 #ifdef SKIP_ASM
 /**
  * Returns the object type, the first word (+0x0) of a script object (On Tour's cScriptObject::mObjType).
@@ -157,13 +157,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_002847C8);
  * @param scriptObject  the script object
  * @return its object type
  */
-extern "C" int func_002847C8(int *scriptObject) {
+extern "C" int cScriptObject_GetObjectType(int *scriptObject) {
     return *scriptObject;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_002847D0);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObject_GetObjectID);
 #ifdef SKIP_ASM
 /**
  * Returns the object ID, the word at +0x4 of a script object (On Tour's cScriptObject::mObjID).
@@ -171,13 +171,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_002847D0);
  * @param scriptObject  the script object
  * @return its object ID
  */
-extern "C" int func_002847D0(void *scriptObject) {
+extern "C" int cScriptObject_GetObjectID(void *scriptObject) {
     return (*(int *)((char*)(scriptObject) + (4)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_002847D8);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObject_IsInUse);
 #ifdef SKIP_ASM
 /**
  * Returns whether a script object is in use: 1 when its use count (+0x8, On Tour's cScriptObject::mInUse) is above 0.
@@ -185,7 +185,7 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_002847D8);
  * @param scriptObject  the script object
  * @return 1 if in use, else 0
  */
-extern "C" int func_002847D8(void *scriptObject) {
+extern "C" int cScriptObject_IsInUse(void *scriptObject) {
     return (*(int *)((char*)(scriptObject) + (8))) > 0;
 }
 #endif
@@ -195,7 +195,7 @@ extern "C" int func_002847D8(void *scriptObject) {
  *
  * cSSXScriptEngine replaces it with cSSXScriptEngine_OnInSeqUpdate (D_00482100).
  */
-extern "C" void func_002847E8(void) {
+extern "C" void cBXScriptEngine_OnInSeqUpdate(void) {
 }
 
 /**
@@ -204,18 +204,18 @@ extern "C" void func_002847E8(void) {
  *
  * cSSXScriptEngine replaces it with cSSXScriptEngine_OnInSeqPlayStopping (D_00482100).
  */
-extern "C" void func_002847F0(void) {
+extern "C" void cBXScriptEngine_OnInSeqPlayStopping(void) {
 }
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_002847F8);
+INCLUDE_ASM("scripter/all_in_one_scripter", cBXScriptEngine_OnInSeqLoop);
 #ifdef SKIP_ASM
 /**
  * Returns 1: the script engine's InSeq loop hook (slot 5 of the cInSeqComm tables D_00482450 and D_00482100).
  *
  * @return always 1
  */
-extern "C" int func_002847F8(void) {
+extern "C" int cBXScriptEngine_OnInSeqLoop(void) {
     return 1;
 }
 #endif
@@ -224,18 +224,18 @@ extern "C" int func_002847F8(void) {
  * Does nothing: the script engine's InSeq remote-disconnect hook (slot 7 of the cInSeqComm tables D_00482450 and
  * D_00482100).
  */
-extern "C" void func_00284800(void) {
+extern "C" void cBXScriptEngine_OnInSeqRemoteDisconnect(void) {
 }
 
 /**
  * Does nothing: the script engine's InSeq remote-message hook (slot 8 of the cInSeqComm tables D_00482450 and
  * D_00482100).
  */
-extern "C" void func_00284808(void) {
+extern "C" void cBXScriptEngine_OnInSeqRemoteMessageSend(void) {
 }
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284810);
+INCLUDE_ASM("scripter/all_in_one_scripter", cBXScriptEngine_IsInSeqReadyForRemotePlayCommands);
 #ifdef SKIP_ASM
 /**
  * Returns 1: the script engine's answer to whether InSeq is ready for remote play commands (last slot of the cInSeqComm
@@ -243,13 +243,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284810);
  *
  * @return always 1
  */
-extern "C" int func_00284810(void) {
+extern "C" int cBXScriptEngine_IsInSeqReadyForRemotePlayCommands(void) {
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284818);
+INCLUDE_ASM("scripter/all_in_one_scripter", cBXScriptEngine_GetScriptDatabaseSize);
 #ifdef SKIP_ASM
 /**
  * Returns the engine's mScriptDatabaseSize (+0x2B4), the script slot count SetupBXEngine stores.
@@ -257,20 +257,20 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284818);
  * @param bxEngine  the script engine (cSSXScriptEngine)
  * @return mScriptDatabaseSize
  */
-extern "C" int func_00284818(void *bxEngine) {
+extern "C" int cBXScriptEngine_GetScriptDatabaseSize(void *bxEngine) {
     return (*(int *)((char*)(bxEngine) + (0x2B4)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284820);
+INCLUDE_ASM("scripter/all_in_one_scripter", cBXScriptEngine_OnDataUnavailable);
 #ifdef SKIP_ASM
 /**
  * Returns 0: cBXScriptEngine's default answer when a script's data is not loaded (slot 7 of cBXScriptEngine_vtbl).
  *
  * @return always 0
  */
-extern "C" int func_00284820(void) {
+extern "C" int cBXScriptEngine_OnDataUnavailable(void) {
     return 0;
 }
 #endif
@@ -278,36 +278,36 @@ extern "C" int func_00284820(void) {
 /**
  * Does nothing: cBXScriptEngine's hook for cancelled pending script data (slot 8 of cBXScriptEngine_vtbl).
  */
-extern "C" void func_00284828(void) {
+extern "C" void cBXScriptEngine_OnPendingDataCancelled(void) {
 }
 
 /**
  * Does nothing: cBXScriptEngine's hook for released script data (slot 9 of cBXScriptEngine_vtbl).
  */
-extern "C" void func_00284830(void) {
+extern "C" void cBXScriptEngine_OnScriptDataReleased(void) {
 }
 
 /**
  * Does nothing: cBXScriptEngine's hook for a script that starts playing (slot 10 of cBXScriptEngine_vtbl).
  */
-extern "C" void func_00284838(void) {
+extern "C" void cBXScriptEngine_OnStartScript(void) {
 }
 
 /**
  * Does nothing: cBXScriptEngine's hook for a script that stops (slot 11 of cBXScriptEngine_vtbl; cSSXScriptEngine keeps
  * it).
  */
-extern "C" void func_00284840(void) {
+extern "C" void cBXScriptEngine_OnStopScript(void) {
 }
 
 /**
  * Does nothing: cBXScriptEngine's hook for a released script request (last slot of cBXScriptEngine_vtbl).
  */
-extern "C" void func_00284848(void) {
+extern "C" void cBXScriptEngine_OnReleaseRequest(void) {
 }
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284850);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntity_GetPlayer);
 #ifdef SKIP_ASM
 /**
  * Returns the InSeq player entity (+0x8, On Tour's cScriptEntity::mpEntity) a script entity is bound to.
@@ -315,13 +315,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284850);
  * @param entity  the script entity
  * @return its player entity
  */
-extern "C" int func_00284850(void *entity) {
+extern "C" int cScriptEntity_GetPlayer(void *entity) {
     return (*(int *)((char*)(entity) + (8)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284858);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntity_GetDatabaseID);
 #ifdef SKIP_ASM
 /**
  * Returns a script entity's database ID (+0x4, On Tour's cScriptEntity::mDBID).
@@ -329,13 +329,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284858);
  * @param entity  the script entity
  * @return its database ID
  */
-extern "C" int func_00284858(void *entity) {
+extern "C" int cScriptEntity_GetDatabaseID(void *entity) {
     return (*(int *)((char*)(entity) + (4)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284860);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntity_SetDatabaseID);
 #ifdef SKIP_ASM
 /**
  * Sets a script entity's database ID (+0x4, On Tour's cScriptEntity::mDBID).
@@ -343,20 +343,20 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284860);
  * @param entity  the script entity
  * @param databaseId  the new database ID
  */
-extern "C" void func_00284860(void *entity, int databaseId) {
+extern "C" void cScriptEntity_SetDatabaseID(void *entity, int databaseId) {
     (*(int *)((char*)(entity) + (4))) = databaseId;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284868);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntity_ClearDatabaseID);
 #ifdef SKIP_ASM
 /**
  * Clears a script entity's database ID (+0x4, On Tour's cScriptEntity::mDBID) to -1.
  *
  * @param entity  the script entity
  */
-extern "C" void func_00284868(void *entity) {
+extern "C" void cScriptEntity_ClearDatabaseID(void *entity) {
     (*(int *)((char*)(entity) + (4))) = -1;
 }
 #endif
@@ -364,9 +364,9 @@ extern "C" void func_00284868(void *entity) {
 /**
  * Does nothing: the base script entity's InSeq key-event hook (slot 3 of cScriptEntity_vtbl).
  *
- * cScriptObjGS (cScriptObjGS_OnInSeqKeyEvent) and cScriptObjEvent (func_002808E8) replace it.
+ * cScriptObjGS (cScriptObjGS_OnInSeqKeyEvent) and cScriptObjEvent (cScriptObjEvent_OnInSeqKeyEvent) replace it.
  */
-extern "C" void func_00284878(void) {
+extern "C" void cScriptEntity_OnInSeqKeyEvent(void) {
 }
 
 /**
@@ -374,11 +374,11 @@ extern "C" void func_00284878(void) {
  *
  * The cScriptObjGS, cScriptObjEvent and cScriptObjRider tables keep it.
  */
-extern "C" void func_00284880(void) {
+extern "C" void cScriptEntity_OnInSeqUpdate(void) {
 }
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284888);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntity_IsMatchingEntity);
 #ifdef SKIP_ASM
 /**
  * Returns 1: the base script entity matches any InSeq player entity (slot 5 of cScriptEntity_vtbl).
@@ -387,13 +387,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284888);
  *
  * @return always 1
  */
-extern "C" int func_00284888(void) {
+extern "C" int cScriptEntity_IsMatchingEntity(void) {
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284890);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntityCamera_SetCameraManager);
 #ifdef SKIP_ASM
 /**
  * Sets a camera script entity's camera manager (+0x10, On Tour's cScriptEntityCamera::mpCamManager).
@@ -401,13 +401,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284890);
  * @param entityCamera  the camera script entity
  * @param camManager  the camera manager (cScriptObjCameraManager)
  */
-extern "C" void func_00284890(void *entityCamera, int camManager) {
+extern "C" void cScriptEntityCamera_SetCameraManager(void *entityCamera, int camManager) {
     (*(int *)((char*)(entityCamera) + (0x10))) = camManager;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284898);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntityCamera_GetSubType);
 #ifdef SKIP_ASM
 /**
  * Returns a camera script entity's sub-type (+0xC, On Tour's cScriptEntityCamera::mSubType).
@@ -415,7 +415,7 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284898);
  * @param entityCamera  the camera script entity
  * @return its sub-type
  */
-extern "C" int func_00284898(void *entityCamera) {
+extern "C" int cScriptEntityCamera_GetSubType(void *entityCamera) {
     return (*(int *)((char*)(entityCamera) + (0xC)));
 }
 #endif
@@ -446,7 +446,7 @@ extern "C" void cScriptObjCameraManager__cScriptObjCameraManager(void *manager) 
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_002848D0);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCameraManager_GetViewIndex);
 #ifdef SKIP_ASM
 /**
  * Returns a camera manager's view index (+0xF8; On Tour's cScriptObjCameraManager::mViewIndex).
@@ -454,13 +454,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_002848D0);
  * @param camManager  the camera manager
  * @return its view index
  */
-extern "C" int func_002848D0(void *camManager) {
+extern "C" int cScriptObjCameraManager_GetViewIndex(void *camManager) {
     return (*(int *)((char*)(camManager) + (0xF8)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_002848D8);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjGS__cScriptObjGS);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cScriptObject__cScriptObject_48D8(void *, int) __asm__("cScriptObject__cScriptObject");
@@ -479,7 +479,7 @@ extern char D_00482318[];
  * @param gsObject  the object (cSSXScriptEngine::mObjectGameState)
  * @param deleteFlags  destructor flags; bit 0 frees the memory
  */
-extern "C" void func_002848D8(void *gsObject, int deleteFlags) {
+extern "C" void cScriptObjGS__cScriptObjGS(void *gsObject, int deleteFlags) {
     *(char **)((char*)gsObject + 0x18) = D_00482318;
     *(char **)((char*)gsObject + 0x0) = cScriptObjGS_vtbl;
     cScriptObject__cScriptObject_48D8((char*)gsObject + 0xC, 0);
@@ -490,20 +490,20 @@ extern "C" void func_002848D8(void *gsObject, int deleteFlags) {
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284940);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjGS_GetNumScriptEntities);
 #ifdef SKIP_ASM
 /**
  * Returns 1: a cScriptObjGS has a single script entity, itself (slot 6 of D_00482318).
  *
  * @return always 1
  */
-extern "C" int func_00284940(void) {
+extern "C" int cScriptObjGS_GetNumScriptEntities(void) {
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284948);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjGS_GetScriptEntity);
 #ifdef SKIP_ASM
 /**
  * Returns the cScriptObjGS itself as its only script entity (the cScriptEntity part at +0x0).
@@ -514,13 +514,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284948);
  * @param gsObject  the cScriptObjGS
  * @return @p gsObject
  */
-extern "C" int func_00284948(int gsObject) {
+extern "C" int cScriptObjGS_GetScriptEntity(int gsObject) {
     return gsObject;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284950);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjEvent__cScriptObjEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cScriptObject__cScriptObject_4950(void *, int) __asm__("cScriptObject__cScriptObject");
@@ -539,7 +539,7 @@ extern char D_00482298[];
  * @param eventObject  the object (cSSXScriptEngine::mObjectEvent)
  * @param deleteFlags  destructor flags; bit 0 frees the memory
  */
-extern "C" void func_00284950(void *eventObject, int deleteFlags) {
+extern "C" void cScriptObjEvent__cScriptObjEvent(void *eventObject, int deleteFlags) {
     *(char **)((char*)eventObject + 0x18) = D_00482298;
     *(char **)((char*)eventObject + 0x0) = cScriptObjEvent_vtbl;
     cScriptObject__cScriptObject_4950((char*)eventObject + 0xC, 0);
@@ -550,20 +550,20 @@ extern "C" void func_00284950(void *eventObject, int deleteFlags) {
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_002849B8);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjEvent_GetNumScriptEntities);
 #ifdef SKIP_ASM
 /**
  * Returns 1: a cScriptObjEvent has a single script entity, itself (slot 6 of D_00482298).
  *
  * @return always 1
  */
-extern "C" int func_002849B8(void) {
+extern "C" int cScriptObjEvent_GetNumScriptEntities(void) {
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_002849C0);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjEvent_GetScriptEntity);
 #ifdef SKIP_ASM
 /**
  * Returns the cScriptObjEvent itself as its only script entity (the cScriptEntity part at +0x0).
@@ -574,13 +574,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_002849C0);
  * @param eventObject  the cScriptObjEvent
  * @return @p eventObject
  */
-extern "C" int func_002849C0(int eventObject) {
+extern "C" int cScriptObjEvent_GetScriptEntity(int eventObject) {
     return eventObject;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_002849C8);
+INCLUDE_ASM("scripter/all_in_one_scripter", cVidEngine_IsVideoEngineBusy);
 #ifdef SKIP_ASM
 /**
  * Returns whether the video engine has a movie player (mpPlayer, +0x0 of the cVidEngine part, set by
@@ -589,13 +589,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_002849C8);
  * @param vidEngine  the cVidEngine part of the script engine
  * @return 1 if mpPlayer is set, else 0
  */
-extern "C" int func_002849C8(int *vidEngine) {
+extern "C" int cVidEngine_IsVideoEngineBusy(int *vidEngine) {
     return *vidEngine != 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_002849D8);
+INCLUDE_ASM("scripter/all_in_one_scripter", cVidEngine_IsVideoEnginePlaying);
 #ifdef SKIP_ASM
 /**
  * Returns the video engine's mIsPlaying flag (+0x4 of the cVidEngine part; cVidEngine_PlayVideo sets it).
@@ -603,13 +603,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_002849D8);
  * @param vidEngine  the cVidEngine part of the script engine
  * @return mIsPlaying
  */
-extern "C" int func_002849D8(void *vidEngine) {
+extern "C" int cVidEngine_IsVideoEnginePlaying(void *vidEngine) {
     return (*(int *)((char*)(vidEngine) + (4)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_002849E0);
+INCLUDE_ASM("scripter/all_in_one_scripter", cSSXScriptEngine_IsNISActive);
 #ifdef SKIP_ASM
 /**
  * Returns whether an NIS list is playing: mPlayingNISList (+0x550) is not 2, the constructor's "none" value.
@@ -617,13 +617,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_002849E0);
  * @param scriptEngine  the script engine
  * @return 1 if an NIS list is active, else 0
  */
-extern "C" int func_002849E0(void *scriptEngine) {
+extern "C" int cSSXScriptEngine_IsNISActive(void *scriptEngine) {
     return (*(int *)((char*)(scriptEngine) + (0x550))) != 2;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_002849F0);
+INCLUDE_ASM("scripter/all_in_one_scripter", cSSXScriptEngine_GetActiveNIS);
 #ifdef SKIP_ASM
 /**
  * Returns the playing NIS list, mPlayingNISList (+0x550; 2 means none).
@@ -631,13 +631,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_002849F0);
  * @param scriptEngine  the script engine
  * @return mPlayingNISList
  */
-extern "C" int func_002849F0(void *scriptEngine) {
+extern "C" int cSSXScriptEngine_GetActiveNIS(void *scriptEngine) {
     return (*(int *)((char*)(scriptEngine) + (0x550)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_002849F8);
+INCLUDE_ASM("scripter/all_in_one_scripter", cSSXScriptEngine_IsBankAvailable);
 #ifdef SKIP_ASM
 struct sSlot_49F8 {
     int f0;     // 0x628
@@ -660,7 +660,7 @@ struct sEngine_49F8 {
  * @param idx  the bank index (0-9)
  * @return 1 if the bank is free, else 0
  */
-extern "C" int func_002849F8(sEngine_49F8* self, int idx)
+extern "C" int cSSXScriptEngine_IsBankAvailable(sEngine_49F8* self, int idx)
 {
     int available = 0;
     if (self->slots[idx].f8 == 0) {
@@ -689,7 +689,7 @@ extern "C" void cScriptObjCamera__cScriptObjCamera(void) {
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A48);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetCameraEntity);
 #ifdef SKIP_ASM
 /**
  * Returns a script camera object's camera entity (+0x14, On Tour's cScriptObjCamera::mpCameraEntity).
@@ -697,13 +697,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A48);
  * @param cameraObj  the camera object
  * @return its camera entity
  */
-extern "C" int func_00284A48(void *cameraObj) {
+extern "C" int cScriptObjCamera_GetCameraEntity(void *cameraObj) {
     return (*(int *)((char*)(cameraObj) + (0x14)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A50);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetCameraWeight);
 #ifdef SKIP_ASM
 /**
  * Returns a script camera object's weight (float +0x18, On Tour's cScriptObjCamera::mWeight).
@@ -711,13 +711,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A50);
  * @param cameraObj  the camera object
  * @return its weight
  */
-extern "C" float func_00284A50(void *cameraObj) {
+extern "C" float cScriptObjCamera_GetCameraWeight(void *cameraObj) {
     return (*(float *)((char*)(cameraObj) + (0x18)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A58);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetBaseTransform);
 #ifdef SKIP_ASM
 /**
  * Returns the address of a script camera object's base transform matrix (+0x30, On Tour's mBaseTransform).
@@ -725,13 +725,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A58);
  * @param cameraObj  the camera object
  * @return @p cameraObj + 0x30
  */
-extern "C" int func_00284A58(int cameraObj) {
+extern "C" int cScriptObjCamera_GetBaseTransform(int cameraObj) {
     return cameraObj + 0x30;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A60);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetBaseRotX);
 #ifdef SKIP_ASM
 /**
  * Returns a script camera object's base X rotation (float +0x70, On Tour's mBaseRotX).
@@ -739,13 +739,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A60);
  * @param cameraObj  the camera object
  * @return its base X rotation
  */
-extern "C" float func_00284A60(void *cameraObj) {
+extern "C" float cScriptObjCamera_GetBaseRotX(void *cameraObj) {
     return (*(float *)((char*)(cameraObj) + (0x70)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A68);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetBaseRotY);
 #ifdef SKIP_ASM
 /**
  * Returns a script camera object's base Y rotation (float +0x74, On Tour's mBaseRotY).
@@ -753,13 +753,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A68);
  * @param cameraObj  the camera object
  * @return its base Y rotation
  */
-extern "C" float func_00284A68(void *cameraObj) {
+extern "C" float cScriptObjCamera_GetBaseRotY(void *cameraObj) {
     return (*(float *)((char*)(cameraObj) + (0x74)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A70);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetBaseRotZ);
 #ifdef SKIP_ASM
 /**
  * Returns a script camera object's base Z rotation (float +0x78, On Tour's mBaseRotZ).
@@ -767,13 +767,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A70);
  * @param cameraObj  the camera object
  * @return its base Z rotation
  */
-extern "C" float func_00284A70(void *cameraObj) {
+extern "C" float cScriptObjCamera_GetBaseRotZ(void *cameraObj) {
     return (*(float *)((char*)(cameraObj) + (0x78)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A78);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetViewIndex);
 #ifdef SKIP_ASM
 /**
  * Returns a script camera object's view index (+0x7C, On Tour's cScriptObjCamera::mViewIndex).
@@ -781,13 +781,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A78);
  * @param cameraObj  the camera object
  * @return its view index
  */
-extern "C" int func_00284A78(void *cameraObj) {
+extern "C" int cScriptObjCamera_GetViewIndex(void *cameraObj) {
     return (*(int *)((char*)(cameraObj) + (0x7C)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A80);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetCameraManager);
 #ifdef SKIP_ASM
 /**
  * Returns a script camera object's camera manager (+0x10, On Tour's cScriptObjCamera::mpCameraManager).
@@ -795,7 +795,7 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A80);
  * @param cameraObj  the camera object
  * @return its camera manager
  */
-extern "C" int func_00284A80(void *cameraObj) {
+extern "C" int cScriptObjCamera_GetCameraManager(void *cameraObj) {
     return (*(int *)((char*)(cameraObj) + (0x10)));
 }
 #endif
@@ -833,7 +833,7 @@ extern "C" int cScriptObjCamera_GetScriptEntity(void) {
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A98);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_SetCameraAlgorithm);
 #ifdef SKIP_ASM
 /**
  * Sets a script camera object's camera algorithm (+0x1C, On Tour's cScriptObjCamera::mpCameraAlgorithm).
@@ -841,13 +841,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284A98);
  * @param cameraObj  the camera object
  * @param algorithm  the camera algorithm
  */
-extern "C" void func_00284A98(void *cameraObj, int algorithm) {
+extern "C" void cScriptObjCamera_SetCameraAlgorithm(void *cameraObj, int algorithm) {
     (*(int *)((char*)(cameraObj) + (0x1C))) = algorithm;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AA0);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetCameraAlgorithm);
 #ifdef SKIP_ASM
 /**
  * Returns a script camera object's camera algorithm (+0x1C, On Tour's cScriptObjCamera::mpCameraAlgorithm).
@@ -855,7 +855,7 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AA0);
  * @param cameraObj  the camera object
  * @return its camera algorithm
  */
-extern "C" int func_00284AA0(void *cameraObj) {
+extern "C" int cScriptObjCamera_GetCameraAlgorithm(void *cameraObj) {
     return (*(int *)((char*)(cameraObj) + (0x1C)));
 }
 #endif
@@ -878,7 +878,7 @@ extern "C" void cScriptObjTransition__cScriptObjTransition(void) {
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AC8);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjTransition_GetTransitionInfo);
 #ifdef SKIP_ASM
 /**
  * Returns the address of a script transition object's transition info (+0x18, On Tour's cScriptObjTransition::mInfo).
@@ -886,13 +886,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AC8);
  * @param transitionObj  the transition object
  * @return @p transitionObj + 0x18
  */
-extern "C" int func_00284AC8(int transitionObj) {
+extern "C" int cScriptObjTransition_GetTransitionInfo(int transitionObj) {
     return transitionObj + 0x18;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AD0);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjTransition_GetCameraManager);
 #ifdef SKIP_ASM
 /**
  * Returns a script transition object's camera manager (+0x10, On Tour's cScriptObjTransition::mpCameraManager).
@@ -900,7 +900,7 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AD0);
  * @param transitionObj  the transition object
  * @return its camera manager
  */
-extern "C" int func_00284AD0(void *transitionObj) {
+extern "C" int cScriptObjTransition_GetCameraManager(void *transitionObj) {
     return (*(int *)((char*)(transitionObj) + (0x10)));
 }
 #endif
@@ -932,7 +932,7 @@ extern "C" int cScriptObjTransition_GetScriptEntity(void) {
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284AE8);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjRider__cScriptObjRider);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cScriptObject__cScriptObject_4AE8(void *, int) __asm__("cScriptObject__cScriptObject");
@@ -951,7 +951,7 @@ extern char D_00482018[];
  * @param riderObject  the object
  * @param deleteFlags  destructor flags; bit 0 frees the memory
  */
-extern "C" void func_00284AE8(void *riderObject, int deleteFlags) {
+extern "C" void cScriptObjRider__cScriptObjRider(void *riderObject, int deleteFlags) {
     *(char **)((char*)riderObject + 0x18) = D_00482018;
     *(char **)((char*)riderObject + 0x0) = cScriptObjRider_vtbl;
     cScriptObject__cScriptObject_4AE8((char*)riderObject + 0xC, 0);
@@ -975,7 +975,7 @@ extern "C" int cScriptObjRider_GetNumScriptEntities(void) {
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B58);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjRider_GetScriptEntity);
 #ifdef SKIP_ASM
 /**
  * Returns the cScriptObjRider itself as its only script entity (the cScriptEntity part at +0x0).
@@ -986,13 +986,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B58);
  * @param riderObject  the cScriptObjRider
  * @return @p riderObject
  */
-extern "C" int func_00284B58(int riderObject) {
+extern "C" int cScriptObjRider_GetScriptEntity(int riderObject) {
     return riderObject;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B60);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjRider_GetBaseTransform);
 #ifdef SKIP_ASM
 /**
  * Returns the address of a script rider object's base transform matrix (+0x30, On Tour's
@@ -1001,13 +1001,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B60);
  * @param riderObject  the rider script object
  * @return @p riderObject + 0x30
  */
-extern "C" int func_00284B60(int riderObject) {
+extern "C" int cScriptObjRider_GetBaseTransform(int riderObject) {
     return riderObject + 0x30;
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B68);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjRider_GetBaseRotX);
 #ifdef SKIP_ASM
 /**
  * Returns a script rider object's base X rotation (float +0x70, On Tour's cScriptObjRider::mBaseRotX).
@@ -1015,13 +1015,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B68);
  * @param riderObject  the rider script object
  * @return its base X rotation
  */
-extern "C" float func_00284B68(void *riderObject) {
+extern "C" float cScriptObjRider_GetBaseRotX(void *riderObject) {
     return (*(float *)((char*)(riderObject) + (0x70)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B70);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjRider_GetBaseRotY);
 #ifdef SKIP_ASM
 /**
  * Returns a script rider object's base Y rotation (float +0x74, On Tour's cScriptObjRider::mBaseRotY).
@@ -1029,13 +1029,13 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B70);
  * @param riderObject  the rider script object
  * @return its base Y rotation
  */
-extern "C" float func_00284B70(void *riderObject) {
+extern "C" float cScriptObjRider_GetBaseRotY(void *riderObject) {
     return (*(float *)((char*)(riderObject) + (0x74)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B78);
+INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjRider_GetBaseRotZ);
 #ifdef SKIP_ASM
 /**
  * Returns a script rider object's base Z rotation (float +0x78, On Tour's cScriptObjRider::mBaseRotZ).
@@ -1043,7 +1043,7 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284B78);
  * @param riderObject  the rider script object
  * @return its base Z rotation
  */
-extern "C" float func_00284B78(void *riderObject) {
+extern "C" float cScriptObjRider_GetBaseRotZ(void *riderObject) {
     return (*(float *)((char*)(riderObject) + (0x78)));
 }
 #endif

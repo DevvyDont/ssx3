@@ -1321,9 +1321,9 @@ extern "C" void cFlexBridgeNode_writeToReplayFrame(void* self, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexbridgenode", func_00347D90);
+INCLUDE_ASM("object/flexbridgenode", cFlexRailNode_cFlexRailNode);
 #ifdef SKIP_ASM
-extern "C" void* func_0034FB00(void* self, int type, void* a2, void* a3);
+extern "C" void* cInstanceNode_cInstanceNode1(void* self, int type, void* a2, void* a3);
 extern "C" void* func_00372520(void* self, int n);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
@@ -1347,7 +1347,7 @@ struct sFlexDef_347D90 {
 /**
  * Constructs the flex-rail base of a float or spring rail (bucket 1) for a placed rail instance.
  *
- * Runs the record constructor func_0034FB00, installs the flex-rail vtable D_004900D0, sets RailFlags (+0x24) from def
+ * Runs the record constructor cInstanceNode_cInstanceNode1, installs the flex-rail vtable D_004900D0, sets RailFlags (+0x24) from def
  * +0x44 and NumNodes (+0x20) to the number of the 8 instance ids (def +0x4..+0x20) that are not -1. Allocates NumNodes
  * - 1 segment matrices ("FlexNodeMats", +0x50) and a "Tube" object (+0x58) built by func_00372520 with NumNodes * 8 -
  * 9.
@@ -1357,9 +1357,9 @@ struct sFlexDef_347D90 {
  * @param def  rail make-data
  * @return self
  */
-extern "C" void* func_00347D90(char* self, void* nodeType, void* instRecord, sFlexDef_347D90* def)
+extern "C" void* cFlexRailNode_cFlexRailNode(char* self, void* nodeType, void* instRecord, sFlexDef_347D90* def)
 {
-    func_0034FB00(self, 1, nodeType, instRecord);
+    cInstanceNode_cInstanceNode1(self, 1, nodeType, instRecord);
     *(char**)(self + 0xC) = D_004900D0;
     int len = def->f44;
     *(int*)(self + 0x20) = 0;
@@ -1377,7 +1377,7 @@ extern "C" void* func_00347D90(char* self, void* nodeType, void* instRecord, sFl
 #endif
 
 //100%
-INCLUDE_ASM("object/flexbridgenode", func_00347EA8);
+INCLUDE_ASM("object/flexbridgenode", cFlexRailNode_cFlexRailNode1);
 #ifdef SKIP_ASM
 struct sSerVEntry_00347EA8 {
     short delta;
@@ -1392,13 +1392,13 @@ extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a, void* stream);
  *
  * Runs the replay constructor cInstanceNode_cInstanceNode, installs D_004900D0, reads the 0x30-byte rail state at +0x20
  * (NumNodes, RailFlags, BoundBox) through the stream's read slot (vtable entry 2) and allocates Mats and Tube as
- * func_00347D90 does.
+ * cFlexRailNode_cFlexRailNode does.
  *
  * @param bucket  update bucket
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* func_00347EA8(char* self, void* bucket, void* stream)
+extern "C" void* cFlexRailNode_cFlexRailNode1(char* self, void* bucket, void* stream)
 {
     sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(self + 0x50);
     cInstanceNode_cInstanceNode(self, bucket, stream);
@@ -1412,7 +1412,7 @@ extern "C" void* func_00347EA8(char* self, void* bucket, void* stream)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexbridgenode", func_00347F90);
+INCLUDE_ASM("object/flexbridgenode", cFlexRailNode__cFlexRailNode);
 #ifdef SKIP_ASM
 struct sFlexBridgeVEntry7F90 {
     short delta;
@@ -1432,7 +1432,7 @@ extern char D_004900D0[];
  *
  * @param flags  destructor flags passed on to cInstanceNode__cInstanceNode
  */
-extern "C" void func_00347F90(void* self, int flags)
+extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_004900D0;
     void* buf = *(void**)((char*)self + 0x50);
@@ -1504,7 +1504,7 @@ extern "C" void nash_Nash_movenode(void* world, int type, int id, sBox00348058* 
 /**
  * Recomputes a flexible rail's bounding box and moves it in the Nash space hash.
  *
- * The box comes from virtual slot 50 (func_00349F18: the rail elements' box, padded by 200); the node moves
+ * The box comes from virtual slot 50 (cSpringRailNode_updateBoundBox: the rail elements' box, padded by 200); the node moves
  * from its old box to the new one as type 2.
  *
  * @param node  the flexible rail node
@@ -1520,7 +1520,7 @@ extern "C" void cFlexRailNode_updateSpaceHash(void* node)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexbridgenode", func_003480C8);
+INCLUDE_ASM("object/flexbridgenode", cFlexRailNode_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sMat_3480C8 {
@@ -1559,7 +1559,7 @@ struct sFlex_3480C8 {
  * Quirks: the loops have no body, so nothing is drawn; and rows 4 to 7 of the table repeat t = 3/7 instead of
  * continuing to 1.
  */
-extern "C" void func_003480C8(sFlex_3480C8* self)
+extern "C" void cFlexRailNode_render(sFlex_3480C8* self)
 {
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
     sVE_3480C8* vt = (sVE_3480C8*)ctx->mVtbl;
@@ -1611,7 +1611,7 @@ extern "C" void func_003480C8(sFlex_3480C8* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/flexbridgenode", func_00348290);
+INCLUDE_ASM("object/flexbridgenode", cFlexRailNode_splineIntersect);
 #ifdef SKIP_ASM
 struct sFbV_8290 {
     float x, y, z, w;
@@ -1806,7 +1806,7 @@ struct sFbVE_8290 {
     int (*fn)(void*, int);
 };
 
-// Closest-point result written by func_00348290.
+// Closest-point result written by cFlexRailNode_splineIntersect.
 struct sFbHit_8290 {
     sFbV_8290 pos;      // 0x00
     sFbV_8290 dir;      // 0x10: unit tangent at the hit
@@ -1872,7 +1872,7 @@ extern float D_0048E7F0[5];
  * @param dist  best distance so far; updated on a hit
  * @param intInfo  intersect info filled on a hit
  */
-extern "C" void func_00348290(char* self, const sFbV_8290* minBpos, const sFbV_8290* maxBpos, const sFbV_8290* bpos,
+extern "C" void cFlexRailNode_splineIntersect(char* self, const sFbV_8290* minBpos, const sFbV_8290* maxBpos, const sFbV_8290* bpos,
                               unsigned int splineFilterMask, int* hit, float* dist, sFbHit_8290* intInfo)
 {
     if ((*(unsigned int*)(self + 0x24) & splineFilterMask) == 0) {
@@ -1980,7 +1980,7 @@ extern "C" void func_00348290(char* self, const sFbV_8290* minBpos, const sFbV_8
 #endif
 
 //100%
-INCLUDE_ASM("object/flexbridgenode", func_00348B40);
+INCLUDE_ASM("object/flexbridgenode", cFlexRailNode_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sSerVEntry_00348B40 {
     short delta;
@@ -1998,7 +1998,7 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void func_00348B40(void* self, void* stream)
+extern "C" void cFlexRailNode_writeToReplayFrame(void* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_00348B40* vt = *(sSerVEntry_00348B40**)stream;

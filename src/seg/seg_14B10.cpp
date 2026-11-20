@@ -578,7 +578,7 @@ extern "C" float fCos(float x);
 extern "C" float fSin(float x);
 int cRider_getMotionState(void* self);
 extern "C" void cReplay_eventJump(int a, int b, void* c);
-extern "C" void func_00309848(void* self);
+extern "C" void cWScriptMan_eventJump(void* self);
 extern "C" float cRiderMetrix_evTakeoff(void* self, int a, int b);
 extern "C" void cRider_flagEventBoostPowerUp(void* self, int mask, float amt);
 extern "C" int AITick();
@@ -840,7 +840,7 @@ extern "C" void func_00114298(char* self, float speedFactor)
         }
     }
     cReplay_eventJump((int)SSXApp->Game->Replay, *(int*)(self + 0x86C), *(char**)(self + 0x790) + 0xFC);
-    func_00309848(cWScriptMan_TheWScriptMan);
+    cWScriptMan_eventJump(cWScriptMan_TheWScriptMan);
     cRider_flagEventBoostPowerUp(self, 1, cRiderMetrix_evTakeoff(*(void**)(self + 0x790), *(int*)(self + 0x320) != *(int*)(self + 0x324), steered));
     if (*(float*)(self + 0x378) > hi + 0.019999999552965164f) {
         sV4_4298 dv = Sub_4298(VEL_4298, oldVel);

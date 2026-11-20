@@ -386,9 +386,9 @@ INCLUDE_ASM("sound/soundsys", cBankSys_SFX_End);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003B58A0();
-extern "C" void func_003B58D8();
-extern "C" int func_003B6820(int bank, int id, void* ch);
+extern "C" void SNDSYS_entercritical();
+extern "C" void SNDSYS_leavecritical();
+extern "C" int SNDBANK_play(int bank, int id, void* ch);
 extern "C" void* cBankMonitor_BANKMONITOR_Create(void* sub, int h, int vol, int mode);
 void func_002ABCE8(void* self, int a1, int a2);
 extern "C" void func_002ADCA0(void*, int, long, int, int, int, int, int);
@@ -476,8 +476,8 @@ static inline int snd06B8CloseOnEnd(sSnd06B8Sub* o)
  *
  * Uses the play options of the current level (mInst) in the cBankManager's cBankMonitor (mpVBankManager + 0x1D8). A
  * positioned sound (mPosition set) starts at volume 0; otherwise a volume control (mVolControl) scales mBaseVol,
- * clamped to 0..127. Plays bank mBank[mInst] / patch mPatch[mInst] (func_003B6820, between func_003B58A0 and
- * func_003B58D8). Unless the play failed with CloseOnEnd set, creates a bank monitor for the voice
+ * clamped to 0..127. Plays bank mBank[mInst] / patch mPatch[mInst] (SNDBANK_play, between SNDSYS_entercritical and
+ * SNDSYS_leavecritical). Unless the play failed with CloseOnEnd set, creates a bank monitor for the voice
  * (BANKMONITOR_Create, then func_002ABCE8) and queues the echoes from cDelayOpts: each repeat mTime later and
  * mFeedback percent quieter (starting from mLevel percent of the base volume), until mCount runs out or the volume
  * reaches 0 (func_002ADCA0, MONITOR_Create). Finally decrements mInst.
@@ -500,9 +500,9 @@ extern "C" int cBankSys_SFX_End(cBankSys* vself)
         s->ch[s->cur].vol = SND_06B8_MAX(0, SND_06B8_MIN(s->vals[s->cur], 0x7F));
     }
     int Inst = ((sSnd06B8Mgr*)self->mpVBankManager)->sub.cur;
-    func_003B58A0();
-    int Handle = func_003B6820(snd06B8Handle(((sSnd06B8Mgr*)self->mpVBankManager), self->mBank[Inst]), self->mPatch[Inst], &((sSnd06B8Mgr*)self->mpVBankManager)->sub.ch[((sSnd06B8Mgr*)self->mpVBankManager)->sub.cur]);
-    func_003B58D8();
+    SNDSYS_entercritical();
+    int Handle = SNDBANK_play(snd06B8Handle(((sSnd06B8Mgr*)self->mpVBankManager), self->mBank[Inst]), self->mPatch[Inst], &((sSnd06B8Mgr*)self->mpVBankManager)->sub.ch[((sSnd06B8Mgr*)self->mpVBankManager)->sub.cur]);
+    SNDSYS_leavecritical();
     if (Handle >= 0 || !snd06B8CloseOnEnd(&((sSnd06B8Mgr*)self->mpVBankManager)->sub)) {
         void* Mon = cBankMonitor_BANKMONITOR_Create(&((sSnd06B8Mgr*)self->mpVBankManager)->sub, Handle, BaseVol, 1);
         if (Mon != 0) {
@@ -996,9 +996,9 @@ static inline int snd1438AddVoice(void* vself, int a, int b, int type)
     return cBankSys_SFX_End((cBankSys*)self);
 }
 
-extern "C" void func_003B58A0();
-extern "C" int func_003B8AB8(int id);
-extern "C" void func_003B58D8();
+extern "C" void SNDSYS_entercritical();
+extern "C" int SNDover(int id);
+extern "C" void SNDSYS_leavecritical();
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
 /**
@@ -1008,9 +1008,9 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
  */
 extern "C" void cSSXAudio_PlayThunder(cSSXAudio* self)
 {
-    func_003B58A0();
-    int soundFinished = func_003B8AB8(self->mThunderHandle) != 0;
-    func_003B58D8();
+    SNDSYS_entercritical();
+    int soundFinished = SNDover(self->mThunderHandle) != 0;
+    SNDSYS_leavecritical();
     if (!soundFinished) {
         cBankMonitor_BANKMONITOR_StopHandle(*(char**)self->MusicSys.mpVStreamSys + 0x1D8, self->mThunderHandle, 1, 0.0f);
     }
@@ -2277,9 +2277,9 @@ extern "C" int cSSXAudio_Surface(void* self, int id);
 void cSSXAudio_LiftWithAirTime_4170(void* self, char* obj) __asm__("cSSXAudio_LiftWithAirTime");
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_003B58A0();
-extern "C" int func_003B8AB8(int id);
-extern "C" void func_003B58D8();
+extern "C" void SNDSYS_entercritical();
+extern "C" int SNDover(int id);
+extern "C" void SNDSYS_leavecritical();
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 extern signed char D_00535C11[];
 
@@ -2415,9 +2415,9 @@ extern "C" void cSSXAudio_Lift(cSSXAudio* self, void* obj)
     }
     if (cSSXAudio_GetFocusRider(self, idx) == (int)obj) {
         int volume = clampVol_4170((int)(*(float*)((char*)obj + 0x75C) * 127.0f), 0x40, 0x7F);
-        func_003B58A0();
-        int soundFinished = func_003B8AB8(self->mCharLiftHandle) != 0;
-        func_003B58D8();
+        SNDSYS_entercritical();
+        int soundFinished = SNDover(self->mCharLiftHandle) != 0;
+        SNDSYS_leavecritical();
         if (!soundFinished) {
             cBankMonitor_BANKMONITOR_StopHandle(*(char**)self->MusicSys.mpVStreamSys + 0x1D8, self->mCharLiftHandle, 1, 0.0f);
         }
@@ -2580,9 +2580,9 @@ extern "C" int cSSXAudio_GetFocusRider(void* self, int which);
 extern "C" int cSSXAudio_CameraInRange(void* self, int which, float f);
 extern "C" void func_002A7438(cCrowdSys* self, int i);
 extern "C" void func_002A73A8(cCrowdSys* self, int level, int i);
-extern "C" void func_003B58A0();
-extern "C" void func_003B58D8();
-extern "C" int func_003B8AB8(int id);
+extern "C" void SNDSYS_entercritical();
+extern "C" void SNDSYS_leavecritical();
+extern "C" int SNDover(int id);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 // cSSXAudio_Surface takes the rider here (the unit declares (void*, int)).
 int cSSXAudio_Surface_p(void* self, cRider* rider) __asm__("cSSXAudio_Surface");
@@ -2656,9 +2656,9 @@ extern "C" void cSSXAudio_Land(cSSXAudio* vself, cRider* rider, float powerupGai
     } else {
         patchNum = cSSXAudio_Surface_p(self, rider) * 8 + 5;
     }
-    func_003B58A0();
-    int soundFinished = func_003B8AB8(*(int*)((char*)self + 0x5FB8)) != 0;
-    func_003B58D8();
+    SNDSYS_entercritical();
+    int soundFinished = SNDover(*(int*)((char*)self + 0x5FB8)) != 0;
+    SNDSYS_leavecritical();
     if (!soundFinished) {
         cBankMonitor_BANKMONITOR_StopHandle(&(*self->p118)->sub, *(int*)((char*)self + 0x5FB8), 1, 0.0f);
     }
@@ -5599,9 +5599,9 @@ static inline int sndA7D8AddVoice(void* vself, int a, int b, int type)
 }
 
 extern "C" int cSSXAudio_ReplayMode(void* self);
-extern "C" void func_003B58A0();
-extern "C" int func_003B8AB8(int id);
-extern "C" void func_003B58D8();
+extern "C" void SNDSYS_entercritical();
+extern "C" int SNDover(int id);
+extern "C" void SNDSYS_leavecritical();
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
 /**
@@ -5622,9 +5622,9 @@ extern "C" void cSSXAudio_PointsEvent(cSSXAudio* self, void* obj, int n)
     if (ok) {
         int curPoints = n % 100;
         if (curPoints < self->mPointsLastValue) {
-            func_003B58A0();
-            int soundFinished = func_003B8AB8(self->mPointsEventHandle) != 0;
-            func_003B58D8();
+            SNDSYS_entercritical();
+            int soundFinished = SNDover(self->mPointsEventHandle) != 0;
+            SNDSYS_leavecritical();
             if (!soundFinished) {
                 cBankMonitor_BANKMONITOR_StopHandle(*(char**)self->MusicSys.mpVStreamSys + 0x1D8, self->mPointsEventHandle, 1, 0.0f);
             }
@@ -7143,9 +7143,9 @@ extern "C" void func_0029D370(void* self)
 //100%
 INCLUDE_ASM("sound/soundsys", cSSXAudio_UpdateTone);
 #ifdef SKIP_ASM
-extern "C" void func_003B58A0(void);
-extern "C" void func_003B58D8(void);
-extern "C" int func_003B8AB8(int h);
+extern "C" void SNDSYS_entercritical(void);
+extern "C" void SNDSYS_leavecritical(void);
+extern "C" int SNDover(int h);
 extern "C" void cSSXAudio_StopTone(cSSXAudio* self, float v);
 extern "C" void func_0029D370(void* self);
 
@@ -7155,9 +7155,9 @@ extern "C" void func_0029D370(void* self);
 extern "C" void cSSXAudio_UpdateTone(cSSXAudio* self)
 {
     if (self->mPlayingTone != 0) {
-        func_003B58A0();
-        int done = func_003B8AB8(self->mToneHandle) != 0;
-        func_003B58D8();
+        SNDSYS_entercritical();
+        int done = SNDover(self->mToneHandle) != 0;
+        SNDSYS_leavecritical();
         if (done) {
             cSSXAudio_StopTone(self, 0.0f);
             func_0029D370(self);
@@ -10592,14 +10592,14 @@ extern "C" void func_002A39E0(cSSXAudio* self)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A3AA0);
 #ifdef SKIP_ASM
-extern "C" int func_003B7C40(int, void *);
+extern "C" int SNDSTRM_requeststatus(int, void *);
 extern "C" void func_002A73A8(cCrowdSys* self, int a1, int i);
 
 extern "C" int func_002A3AA0(void* self, void* arg1) {
     int st[4];
-    func_003B58A0();
-    int status = func_003B7C40(*(int *)((char*)arg1 + 0x1C), st);
-    func_003B58D8();
+    SNDSYS_entercritical();
+    int status = SNDSTRM_requeststatus(*(int *)((char*)arg1 + 0x1C), st);
+    SNDSYS_leavecritical();
     if (status >= 0) {
         if (st[0] == 3) {
             func_002A73A8((cCrowdSys*)self, 0, 0);
@@ -12343,7 +12343,7 @@ extern "C" void func_002A6848(cCrowdInstance* self)
 INCLUDE_ASM("sound/soundsys", func_002A68B0);
 #ifdef SKIP_ASM
 extern "C" void cBankMonitorInstance_Reset(void*);
-extern "C" void func_003BC6B8(int, int);
+extern "C" void SNDpitchbend(int, int);
 
 extern "C" void func_002A68B0(cCrowdInstance* self, char* obj, float dt) {
     if (*(int*)(obj + 4) < 0) {
@@ -12366,9 +12366,9 @@ extern "C" void func_002A68B0(cCrowdInstance* self, char* obj, float dt) {
             float r = *(float*)(e + 0x50) * rem / f;
             vol = (int)r + 0x40;
         }
-        func_003B58A0();
-        func_003BC6B8(*(int*)(obj + 4), vol);
-        func_003B58D8();
+        SNDSYS_entercritical();
+        SNDpitchbend(*(int*)(obj + 4), vol);
+        SNDSYS_leavecritical();
     }
 }
 #endif
@@ -13508,7 +13508,7 @@ INCLUDE_ASM("sound/soundsys", cMidiSys_cMidiSys);
 extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
 extern "C" char* cBankSys_cBankSys(cBankSys* self, int embedded, int count, int heap);
-extern "C" void func_003B97D8();
+extern "C" void SNDmidiinit();
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 
@@ -13568,7 +13568,7 @@ extern "C" char* cMidiSys_cMidiSys(cMidiSys* self, int embedded, int count, int 
         vtbl2.e[1].delta = D_00483A10_ct.e[1].delta + adj2;
     }
     self->mVtbl = (void**)D_00483A48;
-    func_003B97D8();
+    SNDmidiinit();
     self->mMidiBanks = (tMidiBank*)(new (str_MIDIBANKS, 0, 0) char[0x20]) ;
     D_004A3744 = (cMidiSys*)((int)self);
     return ((char*)self);
@@ -13583,7 +13583,7 @@ void operator_delete(int*);
 extern "C" void cBankManager__cBankManager(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern "C" void cBankSys__cBankSys(cBankSys* self, int flags);
-extern "C" void func_003B9880();
+extern "C" void SNDmidirestore();
 
 struct sSndDtBVtEnt {
     short delta;
@@ -13606,7 +13606,7 @@ extern char cBankMonitor_vtbl[];
  * Destroys the MIDI sound system.
  *
  * Re-installs the cMidiSys vtables (D_00483A48 at mVtbl, D_004839F0 / D_00483A10 in the virtual bases, adjusted on the
- * stack when not in charge), frees mMidiBanks, clears D_004A3744 (the instance the ctor stored), calls func_003B9880,
+ * stack when not in charge), frees mMidiBanks, clears D_004A3744 (the instance the ctor stored), calls SNDmidirestore,
  * runs the cBankSys base destructor, destroys the virtual bases when bit 1 of @p flags is set and frees the object when
  * bit 0 is set. The matching constructor is cMidiSys_cMidiSys.
  *
@@ -13633,7 +13633,7 @@ extern "C" void cMidiSys__cMidiSys(cMidiSys* self, int flags)
     }
     if (self->mMidiBanks) cMemMan_free(self->mMidiBanks);
     D_004A3744 = 0;
-    func_003B9880();
+    SNDmidirestore();
     cBankSys__cBankSys((cBankSys*)self, 0);
     if (flags & 2) {
         cBankManager__cBankManager(*(void**)self, 0);
@@ -13726,9 +13726,9 @@ extern "C" void func_002A8450(char** sys, int a, int b)
 //100%
 INCLUDE_ASM("sound/soundsys", func_002A86B8);
 #ifdef SKIP_ASM
-extern "C" void func_003B58A0();
-extern "C" void func_003B58D8();
-extern "C" int func_003B9A00(void* ch, int id, int bank, int a3);
+extern "C" void SNDSYS_entercritical();
+extern "C" void SNDSYS_leavecritical();
+extern "C" int SNDMIDI_play(void* ch, int id, int bank, int a3);
 extern "C" void* cBankMonitor_BANKMONITOR_Create(void* sub, int h, int vol, int mode);
 void func_002ABD38(void* self, int a1, int a2);
 extern "C" void func_002ADCA0(void*, int, long, int, int, int, int, int);
@@ -13842,9 +13842,9 @@ extern "C" int func_002A86B8(char** vself)
     sSnd86B8Sub* s2 = &self->mgr->sub;
     if (s2->p6C[s2->cur] == 0.0f && bank >= 0) {
         int sound = self->p10[Inst].f4;
-        func_003B58A0();
-        Handle = func_003B9A00(&self->mgr->sub.ch[self->mgr->sub.cur], sound, bank, -1);
-        func_003B58D8();
+        SNDSYS_entercritical();
+        Handle = SNDMIDI_play(&self->mgr->sub.ch[self->mgr->sub.cur], sound, bank, -1);
+        SNDSYS_leavecritical();
     }
     void* Mon = cBankMonitor_BANKMONITOR_Create(&self->mgr->sub, Handle, BaseVol, 2);
     if (Mon != 0) {
@@ -14001,8 +14001,8 @@ extern "C" void cPS2SoundManager_Init(cPS2SoundManager* self, int mode)
 //100%
 INCLUDE_ASM("sound/soundsys", cPS2SoundManager_SetMode);
 #ifdef SKIP_ASM
-extern "C" void func_003B4DD8(void* cfg);
-extern "C" void func_003B4FC0(void* cfg);
+extern "C" void SNDSYS_getopts(void* cfg);
+extern "C" void SNDSYS_setopts(void* cfg);
 extern "C" void func_003BC930();
 
 struct sSnd8D90Cfg {
@@ -14036,9 +14036,9 @@ struct sSnd8D90Cfg {
 /**
  * Switches the sound driver configuration for an audio mode.
  *
- * Fills a driver configuration (func_003B4DD8 defaults, then rates 36000/24000 and fixed levels) with per-mode voice
+ * Fills a driver configuration (SNDSYS_getopts defaults, then rates 36000/24000 and fixed levels) with per-mode voice
  * and buffer counts: mode 3 (calls func_003BC930, records unk_008 = 2), mode 2 and modes 0/1 (record unk_008 = 1), and
- * applies it with func_003B4FC0; any other mode applies the defaults. Likely bug: the early return tests the other
+ * applies it with SNDSYS_setopts; any other mode applies the defaults. Likely bug: the early return tests the other
  * group's value (mode 3 returns 1 when unk_008 is 1, modes 0-2 when it is 2), so re-applying the current setting goes
  * through and switching between the two groups never does.
  *
@@ -14048,7 +14048,7 @@ struct sSnd8D90Cfg {
 extern "C" int cPS2SoundManager_SetMode(cPS2SoundManager* self, int mode)
 {
     sSnd8D90Cfg cfg;
-    func_003B4DD8(&cfg);
+    SNDSYS_getopts(&cfg);
     cfg.f2A = 36000;
     cfg.f2C = 24000;
     cfg.f3F = 0;
@@ -14101,7 +14101,7 @@ extern "C" int cPS2SoundManager_SetMode(cPS2SoundManager* self, int mode)
         self->unk_008 = 1;
         break;
     }
-    func_003B4FC0(&cfg);
+    SNDSYS_setopts(&cfg);
     return 2;
 }
 #endif
@@ -14110,20 +14110,20 @@ extern "C" int cPS2SoundManager_SetMode(cPS2SoundManager* self, int mode)
 INCLUDE_ASM("sound/soundsys", cPS2SoundManager_Shutdown);
 #ifdef SKIP_ASM
 extern "C" void func_003B5B20(int a, int b);
-extern "C" void func_003B5320();
+extern "C" void SNDSYS_restore();
 void cMemMan_free(void*);
 
 /**
  * Shuts the PS2 sound manager down and releases its sound heap.
  *
- * Clears the sound-memory load limits (func_003B5B20(-1, -1)), restores the sound library (func_003B5320), frees
+ * Clears the sound-memory load limits (func_003B5B20(-1, -1)), restores the sound library (SNDSYS_restore), frees
  * mSoundHeap if set and zeroes it.
  */
 extern "C" void cPS2SoundManager_Shutdown(cPS2SoundManager* self)
 {
     void* soundHeap;
     func_003B5B20(-1, -1);
-    func_003B5320();
+    SNDSYS_restore();
     soundHeap = self->mSoundHeap;
     if (soundHeap != 0) {
         cMemMan_free(soundHeap);

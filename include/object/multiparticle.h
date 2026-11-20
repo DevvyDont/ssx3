@@ -5,8 +5,8 @@
 // "MultiParticleInst" in On Tour's wscript). Retail: cMultiParticleMan methods and cMultiParticle's ctors/dtor in
 // src/object/movenode.cpp (0x3579C8-0x357FA0), the rest in src/object/multiparticle.cpp (0x358020-0x358380). No EA
 // path in the preview (On Tour: all_in_one_object.cpp), so the header takes the retail unit name.
-//   cMultiParticle    0x50: cMemMan_alloc(0x50, "MultiParticle") + ctor func_00357DD8(pdata, maxInst) in
-//                     cMultiParticleMan::addParticle (cMultiParticleMan_addParticle) and + func_00357E80(replay) in its
+//   cMultiParticle    0x50: cMemMan_alloc(0x50, "MultiParticle") + ctor cMultiParticle_cMultiParticle(pdata, maxInst) in
+//                     cMultiParticleMan::addParticle (cMultiParticleMan_addParticle) and + cMultiParticle_cMultiParticle1(replay) in its
 //                     readFromReplayFrame. No vtable (dtor cMultiParticle__cMultiParticle is called directly).
 //   cMultiParticleMan 0x10: operator new(0x10, "MultiParticleMan") + ctor cMultiParticleMan_cMultiParticleMan in cGame (main/gameload.cpp;
 //                     cGame::MultiParticleMan, main/game.h +0x40). Instance cMultiParticleMan::TheMultiParticleMan =

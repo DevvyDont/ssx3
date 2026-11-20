@@ -233,7 +233,7 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("wscript/wscriptmission", func_00184520);
+INCLUDE_ASM("wscript/wscriptmission", cFEStateUberTrick_updateTrickMenuEntry);
 #ifdef SKIP_ASM
 struct cList;
 struct cUIText;
@@ -289,7 +289,7 @@ extern "C" const char* getDollarString(int id);
  * cFEStateUberTrick_onPopupEvent calls it after a trick is bought, cFEStateUberTrick_onWidgetEvent when a trick is
  * highlighted.
  */
-extern "C" void func_00184520(sWSMission4520* self)
+extern "C" void cFEStateUberTrick_updateTrickMenuEntry(sWSMission4520* self)
 {
     signed char categoryIndex = self->p4C->rider->slot;
     signed char trickIndex = self->p50->rider->slot;

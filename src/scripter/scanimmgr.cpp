@@ -125,8 +125,8 @@ struct sScBank {
 };
 
 struct sAnimList;
-extern "C" void* func_00275718(sAnimList* self, int id);
-extern "C" void* func_002757F0_v(void* self) __asm__("func_002757F0");
+extern "C" void* cScriptAnimBankManager_GetBankInfo(sAnimList* self, int id);
+extern "C" void* cScriptAnimBankManager_GetEmptyBankInfo_v(void* self) __asm__("cScriptAnimBankManager_GetEmptyBankInfo");
 
 /**
  * Links attached animation bank data to the script anim bank manager, creating the bank's entry if needed.
@@ -142,9 +142,9 @@ extern "C" void* func_002757F0_v(void* self) __asm__("func_002757F0");
  */
 extern "C" int cScriptAnimBankManager_LinkBank(sScLinkList* self, int id, void* data)
 {
-    sScLinkEntry* bankInfo = (sScLinkEntry*)func_00275718((sAnimList*)self, id);
+    sScLinkEntry* bankInfo = (sScLinkEntry*)cScriptAnimBankManager_GetBankInfo((sAnimList*)self, id);
     if (bankInfo == 0) {
-        bankInfo = (sScLinkEntry*)func_002757F0_v(self);
+        bankInfo = (sScLinkEntry*)cScriptAnimBankManager_GetEmptyBankInfo_v(self);
         bankInfo->id = id;
         bankInfo->data = data;
         sScBank* bank = (sScBank*)cAdfDataSource_cAdfDataSource1(cMemMan_alloc(0x18, str_cAdfDataSource, self->flags, 0), bankInfo->data);
@@ -173,7 +173,7 @@ extern "C" int cScriptAnimBankManager_LinkBank(sScLinkList* self, int id, void* 
 #endif
 
 //100%
-INCLUDE_ASM("scripter/scanimmgr", func_00275650);
+INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_UnlinkBank);
 #ifdef SKIP_ASM
 struct sScAnimVEntry {
     short delta;
@@ -182,19 +182,19 @@ struct sScAnimVEntry {
 };
 
 struct sAnimList;
-extern "C" void* func_00275718(sAnimList* self, int id);
+extern "C" void* cScriptAnimBankManager_GetBankInfo(sAnimList* self, int id);
 
 /**
  * Unlinks the animation bank with user ID @p id, if linked.
  *
- * Looks the bank up with func_00275718 and passes it to the manager's virtual slot 2 (vtable at +0xC; func_00275760 in
+ * Looks the bank up with cScriptAnimBankManager_GetBankInfo and passes it to the manager's virtual slot 2 (vtable at +0xC; cScriptAnimBankManager_UnlinkBank1 in
  * cScriptAnimBankManager_vtbl). cSSXScriptEngine_OnDetachData calls it on mAnimationBankManager (+0xA28).
  *
  * @param id  the bank's user ID
  */
-extern "C" void func_00275650(sAnimList* self, int id)
+extern "C" void cScriptAnimBankManager_UnlinkBank(sAnimList* self, int id)
 {
-    void* bankInfo = func_00275718(self, id);
+    void* bankInfo = cScriptAnimBankManager_GetBankInfo(self, id);
     if (bankInfo != 0) {
         sScAnimVEntry* vt = *(sScAnimVEntry**)((char*)self + 0xC);
         vt[2].fn((char*)self + vt[2].delta, bankInfo);
@@ -228,7 +228,7 @@ struct sDmTable275698 {
  * Unlinks every bank the script anim bank manager currently has linked.
  *
  * For each entry whose data pointer is set it calls the manager's virtual slot 2 (vtable at +0xC) on the entry.
- * In cScriptAnimBankManager's vtable that is func_00275760, which takes the bank out of the anim database's
+ * In cScriptAnimBankManager's vtable that is cScriptAnimBankManager_UnlinkBank1, which takes the bank out of the anim database's
  * table, destroys it, frees its index table and clears the entry.
  *
  * @param self_  the cScriptAnimBankManager, untyped
@@ -246,7 +246,7 @@ extern "C" void cScriptAnimBankManager_UnlinkBanksAll(void* self_)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/scanimmgr", func_00275718);
+INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_GetBankInfo);
 #ifdef SKIP_ASM
 struct sAnimEntry {
     int id;
@@ -271,7 +271,7 @@ struct sAnimList {
  * @param id  the bank's user ID
  * @return the record, or 0
  */
-extern "C" void* func_00275718(sAnimList* self, int id)
+extern "C" void* cScriptAnimBankManager_GetBankInfo(sAnimList* self, int id)
 {
     for (int i = 0; i < self->count; i++) {
         if (self->entries[i].data != 0 && self->entries[i].id == id) {
@@ -283,7 +283,7 @@ extern "C" void* func_00275718(sAnimList* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/scanimmgr", func_00275760);
+INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_UnlinkBank1);
 #ifdef SKIP_ASM
 extern "C" void cAnimDataBase_purgeChanCache(void** tbl);
 extern "C" void cAdfDataSource__cAdfDataSource(void* self, int flags);
@@ -299,7 +299,7 @@ extern void** cAnimDataBase_TheAnimDataBase;
  *
  * @param bankInfo  the bank record
  */
-extern "C" void func_00275760(void* self, sAnimEntry* bankInfo)
+extern "C" void cScriptAnimBankManager_UnlinkBank1(void* self, sAnimEntry* bankInfo)
 {
     void** tbl = cAnimDataBase_TheAnimDataBase;
     void** slot = &tbl[*(unsigned char*)&bankInfo->unk4];
@@ -322,14 +322,14 @@ extern "C" void func_00275760(void* self, sAnimEntry* bankInfo)
 #endif
 
 //100%
-INCLUDE_ASM("scripter/scanimmgr", func_002757F0);
+INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_GetEmptyBankInfo);
 #ifdef SKIP_ASM
 /**
  * Returns the first unused bank record (data pointer at +0x8 is 0) of the manager's records (+0x8, count at +0x4).
  *
  * @return the record, or 0 when all are in use
  */
-extern "C" sAnimEntry* func_002757F0(sAnimList* self)
+extern "C" sAnimEntry* cScriptAnimBankManager_GetEmptyBankInfo(sAnimList* self)
 {
     for (int i = 0; i < self->count; i++) {
         if (self->entries[i].data == 0) {

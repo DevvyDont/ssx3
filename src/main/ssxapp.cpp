@@ -3726,8 +3726,8 @@ extern "C" void cGame_renderPatches(void* self, void* world);
 extern "C" int cMenuSys_isActive(void* menu);
 extern "C" void func_002CC350(void* menu);
 extern "C" void func_00397DF8(void* p);
-void func_0030B4B8(void* p);
-void func_002789C0(void* p);
+void cWScriptMan_render(void* p);
+void cSSXScriptEngine_Render(void* p);
 extern "C" void cBXLoadIndicator_Render(void* p);
 extern "C" void func_00285BF8(void* snd, float dt, int a2);
 extern "C" void func_002B5D78(void* p);
@@ -4181,9 +4181,9 @@ extern "C" int cGame_render(sGame_22B008* self)
     if (cRenderToggles_m_DisableHUD == 0) {
         self->hud->scale = sScale_22B008(0.0f, 0.0f);
         func_00397DF8(self->f48);
-        func_0030B4B8(self->f30);
+        cWScriptMan_render(self->f30);
     }
-    func_002789C0(ScriptEngine);
+    cSSXScriptEngine_Render(ScriptEngine);
     cBXLoadIndicator_Render(self->f94);
     ((cGfx_22B008*)GrMan)->v20();
     func_00285BF8(gSSXAudio, (float)self->frames * (1.0f / 60.0f), 1);

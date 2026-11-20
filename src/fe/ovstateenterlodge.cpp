@@ -299,7 +299,7 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_bxAudio();
 void func_0029D6D0(void* self);
-extern "C" void func_0030B540(void* self);
+extern "C" void cWScriptMan_startLocalMission(void* self);
 extern "C" void cWScriptMan_cancelLocalMission(void* self);
 extern "C" void cWScriptMan_restartLocalMission(void* self);
 extern "C" int cWScriptMan_isLocalMissionActive(void* self);
@@ -321,7 +321,7 @@ struct sMgr_75A0 {
  *
  * Yes (Cross on choice 0) queues WScriptMan operation 2 (cWScriptMan_restartLocalMission, probably a restart) when a challenge
  * already runs (cWScriptMan_isLocalMissionActive), else stores the offer's mission id (+0x9C) in cWScriptMan_TheWScriptMan +0x2A0 and queues
- * operation 1 (start, func_0030B540); it also sets the audio's mBigChallengeStarting (func_0029D6D0). No
+ * operation 1 (start, cWScriptMan_startLocalMission); it also sets the audio's mBigChallengeStarting (func_0029D6D0). No
  * falls through to Triangle: store the id, queue operation 3 (decline, cWScriptMan_cancelLocalMission).
  * Both set the pending overlay action cOVStateManager_mStatus to 3 (close) and pop the pause-mode stack D_005366E8,
  * restoring the pause mask cPauseState_Flags.
@@ -341,7 +341,7 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(void* self, void* item
                 cWScriptMan_restartLocalMission(cWScriptMan_TheWScriptMan);
             } else {
                 ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = *(int*)((char*)self + 0x9C);
-                func_0030B540(cWScriptMan_TheWScriptMan);
+                cWScriptMan_startLocalMission(cWScriptMan_TheWScriptMan);
             }
             cOVStateManager_mStatus = 3;
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];

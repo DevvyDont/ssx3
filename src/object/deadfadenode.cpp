@@ -6,7 +6,7 @@
 INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_cDeadFadeNode);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* func_0034FB00(void* self, int a1, int type, void* a3);
+extern "C" void* cInstanceNode_cInstanceNode1(void* self, int a1, int type, void* a3);
 extern "C" float cObjectInterface_getUpdateTime();
 extern "C" void MEM_copy(void* dst, void* src, int size);
 extern char cDeadFadeNode_vtbl[];
@@ -192,7 +192,7 @@ typedef void (*DfSetFn_0750)(void*, int);
 extern "C" cDeadFadeNode_0750* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode_0750* self, int bucket, void* obj, sDfDesc_0750* desc, sDfOther_0750* other)
 {
     sDfMatElem_0750** pm = &self->mats;
-    func_0034FB00(self, bucket, 22, obj);
+    cInstanceNode_cInstanceNode1(self, bucket, 22, obj);
     self->vt = cDeadFadeNode_vtbl;
     self->block.w[0] = 0xFFFFFFFF;
     self->block = *(sDfBlock_0750*)desc;
@@ -239,7 +239,7 @@ extern "C" cDeadFadeNode_0750* cDeadFadeNode_cDeadFadeNode(cDeadFadeNode_0750* s
 #endif
 
 //100%
-INCLUDE_ASM("object/deadfadenode", func_00350B98);
+INCLUDE_ASM("object/deadfadenode", cDeadFadeNode_cDeadFadeNode1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* cInstanceNode_ctor_v(void* self) __asm__("cInstanceNode_cInstanceNode");
@@ -254,7 +254,7 @@ extern char cDeadFadeNode_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_00350B98(void* self)
+extern "C" void* cDeadFadeNode_cDeadFadeNode1(void* self)
 {
     cInstanceNode_ctor_v(self);
     *(void**)((char*)self + 0xC) = cDeadFadeNode_vtbl;
@@ -488,24 +488,24 @@ void* cDeadFadeNode_writeToReplayFrame(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/deadfadenode", func_00350E90);
+INCLUDE_ASM("object/deadfadenode", cHideNode_cHideNode);
 #ifdef SKIP_ASM
-extern "C" void* func_0034FB00(void* self, int a1, int type, void* a3);
+extern "C" void* cInstanceNode_cInstanceNode1(void* self, int a1, int type, void* a3);
 extern char D_00491800[];
 
 /**
  * Constructs a hide node for an instance record (node type 16, bucket 1).
  *
- * Runs the cInstanceNode constructor func_0034FB00 with bucket 1, type 0x10 and the instance record, installs the
+ * Runs the cInstanceNode constructor cInstanceNode_cInstanceNode1 with bucket 1, type 0x10 and the instance record, installs the
  * vtable D_00491800, then in the record's flags (+0x8) clears bits 5 and 6 (0x60) and bit 1 and sets bit 2. The world
  * script code (src/seg/seg_1FBE38.cpp) calls it on a cMemMan_alloc(0x1C) block.
  *
  * @param instRecord  the instance record to hide
  * @return @p self
  */
-extern "C" void* func_00350E90(void* self, void* instRecord)
+extern "C" void* cHideNode_cHideNode(void* self, void* instRecord)
 {
-    func_0034FB00(self, 1, 0x10, instRecord);
+    cInstanceNode_cInstanceNode1(self, 1, 0x10, instRecord);
     *(void**)((char*)self + 0xC) = D_00491800;
     unsigned int* recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
     *recordFlags &= 0xFFFFFF9F;
@@ -516,7 +516,7 @@ extern "C" void* func_00350E90(void* self, void* instRecord)
 #endif
 
 //100%
-INCLUDE_ASM("object/deadfadenode", func_00350F08);
+INCLUDE_ASM("object/deadfadenode", cHideNode_cHideNode1);
 #ifdef SKIP_ASM
 extern "C" void cInstanceNode_cInstanceNode(void* self);
 extern char D_00491800[];
@@ -529,7 +529,7 @@ extern char D_00491800[];
  *
  * @return @p self
  */
-extern "C" void* func_00350F08(void* self)
+extern "C" void* cHideNode_cHideNode1(void* self)
 {
     cInstanceNode_cInstanceNode(self);
     *(void**)((char*)self + 0xC) = D_00491800;
@@ -538,7 +538,7 @@ extern "C" void* func_00350F08(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/deadfadenode", func_00350F40__FPv);
+INCLUDE_ASM("object/deadfadenode", cHideNode_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
  * Writes the node to a replay frame by forwarding to cInstanceNode_writeToReplayFrame.
@@ -547,31 +547,31 @@ INCLUDE_ASM("object/deadfadenode", func_00350F40__FPv);
  *
  * @return cInstanceNode_writeToReplayFrame()'s result
  */
-void* func_00350F40(void* self)
+void* cHideNode_writeToReplayFrame(void* self)
 {
     return cInstanceNode_writeToReplayFrame(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("object/deadfadenode", func_00350F60);
+INCLUDE_ASM("object/deadfadenode", cRestoreNode_cRestoreNode);
 #ifdef SKIP_ASM
-extern "C" void* func_0034FB00(void* self, int a1, int type, void* a3);
+extern "C" void* cInstanceNode_cInstanceNode1(void* self, int a1, int type, void* a3);
 extern char D_00491680[];
 
 /**
  * Constructs a restore node for an instance record (node type 19, bucket 1).
  *
- * Runs the cInstanceNode constructor func_0034FB00 with bucket 1, type 19 and the instance record, installs the vtable
+ * Runs the cInstanceNode constructor cInstanceNode_cInstanceNode1 with bucket 1, type 19 and the instance record, installs the vtable
  * D_00491680, then in the record's flags (+0x8) clears bits 5 and 6 (0x60) and bit 1 and sets bit 2. World script code
  * and the debounce node code call it on a cMemMan_alloc(0x1C, "RestoreNode") block.
  *
  * @param instRecord  the instance record to restore
  * @return @p self
  */
-extern "C" void* func_00350F60(void* self, void* instRecord)
+extern "C" void* cRestoreNode_cRestoreNode(void* self, void* instRecord)
 {
-    func_0034FB00(self, 1, 19, instRecord);
+    cInstanceNode_cInstanceNode1(self, 1, 19, instRecord);
     *(void**)((char*)self + 0xC) = D_00491680;
     unsigned int* recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
     *recordFlags &= 0xFFFFFF9F;
@@ -582,7 +582,7 @@ extern "C" void* func_00350F60(void* self, void* instRecord)
 #endif
 
 //100%
-INCLUDE_ASM("object/deadfadenode", func_00350FD8);
+INCLUDE_ASM("object/deadfadenode", cRestoreNode_cRestoreNode1);
 #ifdef SKIP_ASM
 extern "C" void cInstanceNode_cInstanceNode(void* self);
 extern char D_00491680[];
@@ -595,7 +595,7 @@ extern char D_00491680[];
  *
  * @return @p self
  */
-extern "C" void* func_00350FD8(void* self)
+extern "C" void* cRestoreNode_cRestoreNode1(void* self)
 {
     cInstanceNode_cInstanceNode(self);
     *(void**)((char*)self + 0xC) = D_00491680;
@@ -604,7 +604,7 @@ extern "C" void* func_00350FD8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("object/deadfadenode", func_00351010__FPv);
+INCLUDE_ASM("object/deadfadenode", cRestoreNode_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
  * Writes the node to a replay frame by forwarding to cInstanceNode_writeToReplayFrame.
@@ -613,7 +613,7 @@ INCLUDE_ASM("object/deadfadenode", func_00351010__FPv);
  *
  * @return cInstanceNode_writeToReplayFrame()'s result
  */
-void* func_00351010(void* self)
+void* cRestoreNode_writeToReplayFrame(void* self)
 {
     return cInstanceNode_writeToReplayFrame(self);
 }

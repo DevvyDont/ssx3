@@ -5,7 +5,7 @@
 // cParticleModifier, cDynamicParticleModifier, cHaloModifier; tModifierBlock embeds one by value at +0x10 as the head).
 // Size 0xC: On Tour 0xC; tModifierBlock's next member (Rail) is at +0x1C; derived ctors store their vtable at +0x8.
 // Methods: cEffectLink_add (0x345700) and cEffectLink_append (src/object/effectlink.cpp), destructor cEffectLink__cEffectLink
-// (0x360C98), func_00360CE8 (slot 1), fadeEffect, writeToReplayFrame (src/object/railmodifier.cpp); vtable
+// (0x360C98), cEffectLink_getType (slot 1), fadeEffect, writeToReplayFrame (src/object/railmodifier.cpp); vtable
 // cEffectLink_vtbl (0x00491340, 4 slots). Local definition: src/object/effectlink.cpp `struct cEffectLink {next, prev}`.
 
 #include "layout.h"

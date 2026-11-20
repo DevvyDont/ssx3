@@ -5,10 +5,10 @@
 // effectmodifier.cpp, header ../source/object/effectmodifier.h: preview asserts; retail unit object/effectlink,
 // 0x345798-0x3460A0, plus the one-line virtuals in object/railmodifier 0x360D00-0x360D28). Chain:
 //   cEffectLink (object/effectlink.h: Next, Prev, vptr) -> cEffectModifier (+ Instance; 0x10, On Tour 0x10; ctors
-//   cEffectModifier_cEffectModifier(inst) / func_003457C8(replay), dtor cEffectModifier__cEffectModifier, vtable cEffectModifier_vtbl;
+//   cEffectModifier_cEffectModifier(inst) / cEffectModifier_cEffectModifier1(replay), dtor cEffectModifier__cEffectModifier, vtable cEffectModifier_vtbl;
 //   live count cEffectModifier::EffectCount = D_004A3FF4)
 //     -> cParticleModifier (0x1F0: cMemMan_alloc(0x1F0, "ParticleModifier") in cMoveNode_addParticle; ctors
-//        cParticleModifier_cParticleModifier(pdata, inst) / func_003459A8(replay); vtable cParticleModifier_vtbl; ParticleCount D_004A3FF8)
+//        cParticleModifier_cParticleModifier(pdata, inst) / cParticleModifier_cParticleModifier1(replay); vtable cParticleModifier_vtbl; ParticleCount D_004A3FF8)
 //     -> cDynamicParticleModifier (0x270: cMemMan_alloc(0x270, "DynamicParticleModifier") in
 //        cMoveNode_addDynamicParticle; ctors cDynamicParticleModifier_cDynamicParticleModifier1(pdata, inst, mesh, offset) / cDynamicParticleModifier_cDynamicParticleModifier(replay); vtable
 //        cDynamicParticleModifier_vtbl; DynamicParticleCount D_004A3FFC). Its second base cDynamicParticleModifierState
@@ -39,7 +39,7 @@ struct cEffectModifier {
                                     //       cEffectModifier_vtbl, ...)
     // --- cEffectModifier
     tInstanceRecord* Instance;      // 0x00C [O] cEffectModifier::Instance; [R] ctor cEffectModifier_cEffectModifier stores its inst
-                                    //       argument, the replay ctor func_003457C8 reads it from the stream; [U]
+                                    //       argument, the replay ctor cEffectModifier_cEffectModifier1 reads it from the stream; [U]
                                     //       cEffectModifier_writeToReplayFrame, cParticleModifier ctor (root
                                     //       transform), updatePosition
 };
@@ -60,7 +60,7 @@ struct cParticleModifier {
                                     //       cEffectModifier_vtbl, ...)
     // --- cEffectModifier
     tInstanceRecord* Instance;      // 0x00C [O] cEffectModifier::Instance; [R] ctor cEffectModifier_cEffectModifier stores its inst
-                                    //       argument, the replay ctor func_003457C8 reads it from the stream; [U]
+                                    //       argument, the replay ctor cEffectModifier_cEffectModifier1 reads it from the stream; [U]
                                     //       cEffectModifier_writeToReplayFrame, cParticleModifier ctor (root
                                     //       transform), updatePosition
     // --- cParticleModifier
@@ -97,7 +97,7 @@ struct cDynamicParticleModifier {
                                     //       cEffectModifier_vtbl, ...)
     // --- cEffectModifier
     tInstanceRecord* Instance;      // 0x00C [O] cEffectModifier::Instance; [R] ctor cEffectModifier_cEffectModifier stores its inst
-                                    //       argument, the replay ctor func_003457C8 reads it from the stream; [U]
+                                    //       argument, the replay ctor cEffectModifier_cEffectModifier1 reads it from the stream; [U]
                                     //       cEffectModifier_writeToReplayFrame, cParticleModifier ctor (root
                                     //       transform), updatePosition
     // --- cDynamicParticleModifierState (On Tour second base, 0x50)

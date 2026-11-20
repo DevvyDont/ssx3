@@ -565,7 +565,7 @@ extern void* gWorldTriggerManager;
 extern char t4mat_Identity[];
 extern int cDepthFog_m_Enable;
 extern "C" void cBucketMan_renderBucket(void* self, int index);
-void func_002789C0(void* p);
+void cSSXScriptEngine_Render(void* p);
 extern "C" void func_00397DF8(void* p);
 extern "C" void cBXLoadIndicator_Render(void* p);
 extern "C" int cMenuSys_isActive(void* p);
@@ -581,7 +581,7 @@ extern "C" void func_002B5D78(void* p);
  * position (slot 24), loads the camera's matrix, sets the layer and several GS state bits, and calls
  * cBucketMan_renderBucket(gBucketMan, 3). Then it resets the viewport to the full screen (slot 22 with GrMan's width
  * and height, then SetViewportOrthographic 640x480), loads t4mat_Identity, sets the debug font (+0x24) to scale 0.8, size 2 and
- * colour (1, 0.8, 0.8, 0), and draws the script engine (func_002789C0(ScriptEngine)), the UI (func_00397DF8 on +0x48),
+ * colour (1, 0.8, 0.8, 0), and draws the script engine (cSSXScriptEngine_Render(ScriptEngine)), the UI (func_00397DF8 on +0x48),
  * the load indicator (cBXLoadIndicator_Render on +0x94) and, when cMenuSys_isActive, the debug menu system (func_002CC350 on
  * +0xA4). It calls GrMan slot 14 with a zero vector and slot 19 with cDepthFog_m_Enable cleared for the call, then
  * advances the audio by mUpdateTick / 60 seconds (func_00285BF8(gSSXAudio, 1, ..)), runs
@@ -624,7 +624,7 @@ extern "C" void func_0022C830(sGame_C830* self)
     self->font->SetScale(0.8f, 0.8f);
     self->font->scale = sV2_C830(2.0f, 2.0f);
     self->font->color = sVec4_C830(1.0f, 0.8f, 0.8f, 0.0f);
-    func_002789C0(ScriptEngine);
+    cSSXScriptEngine_Render(ScriptEngine);
     func_00397DF8(self->f48);
     cBXLoadIndicator_Render(self->hudTimer);
     if (cMenuSys_isActive(self->fA4) != 0) {
@@ -1470,8 +1470,8 @@ extern "C" void cSectionMan_skyLoadComplete(cSectionMan* self, int SectionID)
 INCLUDE_ASM("main/game", cSectionMan_skySwap);
 #ifdef SKIP_ASM
 extern "C" void cSectionMan_unloadSection(cSectionMan* self, int id);
-void func_00353D98(void* self);
-extern "C" void func_00353CF0(void* self, int id);
+void cSkyBox_reset(void* self);
+extern "C" void cSkyBox_setSection(void* self, int id);
 
 /**
  * Swaps to the pending sky once triggered: unloads the other sky sections and switches the sky object's
@@ -1494,8 +1494,8 @@ extern "C" void cSectionMan_skySwap(cSectionMan* self)
     int id = cSectionMan_mSectionMap[self->m_iNextSkySectionID].field_0x4;
     void* skyBox = *(void**)((char*)self->mpGame + 0x14);
     if (*(int*)((char*)skyBox + 0x10) != id) {
-        func_00353D98(skyBox);
-        func_00353CF0(*(void**)((char*)self->mpGame + 0x14), id);
+        cSkyBox_reset(skyBox);
+        cSkyBox_setSection(*(void**)((char*)self->mpGame + 0x14), id);
     }
     self->m_bTriggerSkySwap = 0;
     self->m_bSkySwapPending = 0;

@@ -2399,7 +2399,7 @@ void cTrackPath_populateDataWithDefaults(void* self)
 }
 #endif
 
-extern "C" void func_0026BA88(void*);
+extern "C" void pathREAD_float(void*);
 
 //100%
 INCLUDE_ASM("bx/bxstringctor", cTrackPath_populateData);
@@ -2407,7 +2407,7 @@ INCLUDE_ASM("bx/bxstringctor", cTrackPath_populateData);
 /**
  * Reads a track path's attribute from the path file's data.
  *
- * Only field id 0 is used: func_0026BA88 (On Tour pathREAD_float) reads the base distance left (+0x38). As in
+ * Only field id 0 is used: pathREAD_float (On Tour pathREAD_float) reads the base distance left (+0x38). As in
  * cAIPath_populateData, the source pointer reaches the reader in $a1 though the C prototype leaves it out.
  *
  * @param data  the field's data in the path file (On Tour p)
@@ -2416,7 +2416,7 @@ INCLUDE_ASM("bx/bxstringctor", cTrackPath_populateData);
 extern "C" void cTrackPath_populateData(void* self, int data, int fieldId)
 {
     if (fieldId == 0) {
-        func_0026BA88((char*)self + 0x38);
+        pathREAD_float((char*)self + 0x38);
     }
 }
 #endif
@@ -2531,7 +2531,7 @@ INCLUDE_ASM("bx/bxstringctor", cPath_initPath);
 #ifdef SKIP_ASM
 // PORT: pathREAD_tInt32 takes (dst, src); the unit declares it with one arg
 void pathREAD_tInt32_A180(void* dst, void* src) __asm__("pathREAD_tInt32");
-extern "C" void func_0026BA48(void* p, void* q);
+extern "C" void pathREAD_t3Vector(void* p, void* q);
 extern "C" void cPath_populateNode(void* self, void* src, void* dst);
 extern "C" void cPath_populateEvent(void* self, char* src, int* dst);
 
@@ -2555,7 +2555,7 @@ struct sBXStr_26A180
  *
  * Calls the path's virtual slot 3 (defaults), then for each of the data's chunks passes (data, id, size) to virtual
  * slot 4 and skips the chunk. Then reads the node count (+0x8) and event count (+0x0), the start point (+0xC) and the
- * bounds (+0x1C, +0x28) with func_0026BA48, and converts the 16-byte nodes (+0x18, cPath_populateNode) and events (+0x4,
+ * bounds (+0x1C, +0x28) with pathREAD_t3Vector, and converts the 16-byte nodes (+0x18, cPath_populateNode) and events (+0x4,
  * cPath_populateEvent) in place in the data.
  *
  * The path-system loaders (cPathSys_loadTrackPaths, cPathSys_loadAIPaths) call it for each path.
@@ -2590,11 +2590,11 @@ extern "C" int cPath_initPath(sBXStr_26A180* self, char* src)
     pathREAD_tInt32_A180(&itemCount, src);
     src += 4;
     self->count2 = itemCount;
-    func_0026BA48(self->vecA, src);
+    pathREAD_t3Vector(self->vecA, src);
     src += 0xC;
-    func_0026BA48(self->vecB, src);
+    pathREAD_t3Vector(self->vecB, src);
     src += 0xC;
-    func_0026BA48(self->vecC, src);
+    pathREAD_t3Vector(self->vecC, src);
     src += 0xC;
     self->items1 = src;
     for (int i = 0; i < self->count1; i++)
@@ -2615,12 +2615,12 @@ extern "C" int cPath_initPath(sBXStr_26A180* self, char* src)
 //100%
 INCLUDE_ASM("bx/bxstringctor", cPath_populateNode);
 #ifdef SKIP_ASM
-extern "C" void func_0026BA48(void* p, void* q);
-// PORT: func_0026BA88 takes (dst, src); the unit declares it with one arg
-void func_0026BA88_2(void* dst, void* src) __asm__("func_0026BA88");
+extern "C" void pathREAD_t3Vector(void* p, void* q);
+// PORT: pathREAD_float takes (dst, src); the unit declares it with one arg
+void pathREAD_float_2(void* dst, void* src) __asm__("pathREAD_float");
 
 /**
- * Reads one 16-byte path node: its direction (func_0026BA48) and its length at +0xC (func_0026BA88).
+ * Reads one 16-byte path node: its direction (pathREAD_t3Vector) and its length at +0xC (pathREAD_float).
  *
  * cPath_initPath calls it with the same address for @p src and @p dst, converting the node in place.
  *
@@ -2629,8 +2629,8 @@ void func_0026BA88_2(void* dst, void* src) __asm__("func_0026BA88");
  */
 extern "C" void cPath_populateNode(void* self, void* src, void* dst)
 {
-    func_0026BA48(dst, src);
-    func_0026BA88_2((char*)dst + 0xC, (char*)src + 0xC);
+    pathREAD_t3Vector(dst, src);
+    pathREAD_float_2((char*)dst + 0xC, (char*)src + 0xC);
 }
 #endif
 
@@ -2645,7 +2645,7 @@ extern int D_004453D0[];
  * Reads one 16-byte path event: its type code, argument and start and end positions.
  *
  * The type code is looked up in the 21 codes of D_004453D0 and stored as its index (0 when not found); then the
- * argument (+0x4) and the two floats (+0x8, +0xC, func_0026BA88) follow. cPath_initPath converts the events in place
+ * argument (+0x4) and the two floats (+0x8, +0xC, pathREAD_float) follow. cPath_initPath converts the events in place
  * with it.
  *
  * @param src  the event in the serialized data
@@ -2666,8 +2666,8 @@ extern "C" void cPath_populateEvent(void* self, char* src, int* dst)
     }
     pathREAD_tInt32_K2(dst + 1, src);
     src += 4;
-    func_0026BA88_2(dst + 2, src);
-    func_0026BA88_2(dst + 3, src + 4);
+    pathREAD_float_2(dst + 2, src);
+    pathREAD_float_2(dst + 3, src + 4);
 }
 #endif
 
@@ -3523,14 +3523,14 @@ INCLUDE_ASM("bx/bxstringctor", cPathSys_resolvePaths);
 void pathREAD_tInt32_2(void* dst, void* src) __asm__("pathREAD_tInt32");
 extern "C" int cPathSys_loadAIPaths(void* self, char* p);
 extern "C" int cPathSys_loadTrackPaths(void* self, char* p);
-extern "C" int func_0026B7D8(void* self, char* p);
-extern "C" void func_0026B880(void* self, char* p);
+extern "C" int cPathSys_loadCheckpoints(void* self, char* p);
+extern "C" void cPathSys_loadStartpoints(void* self, char* p);
 
 /**
  * Parses the loaded path data (+0x48) into the path system's startpoints, AI paths, track paths and checkpoints.
  *
  * Clears the startpoint, AI path and track path counts (+0x0, +0x8, +0x10), skips a header word, then runs
- * cPathSys_loadAIPaths, cPathSys_loadTrackPaths, func_0026B7D8 and func_0026B880 in turn, each starting where the
+ * cPathSys_loadAIPaths, cPathSys_loadTrackPaths, cPathSys_loadCheckpoints and cPathSys_loadStartpoints in turn, each starting where the
  * previous one stopped. cPathSys_loadInjectedPaths and cPathSys_loadPaths call it.
  */
 extern "C" void cPathSys_resolvePaths(void* self)
@@ -3544,8 +3544,8 @@ extern "C" void cPathSys_resolvePaths(void* self)
     cursor += 4;
     cursor += cPathSys_loadAIPaths(self, cursor);
     cursor += cPathSys_loadTrackPaths(self, cursor);
-    cursor += func_0026B7D8(self, cursor);
-    func_0026B880(self, cursor);
+    cursor += cPathSys_loadCheckpoints(self, cursor);
+    cPathSys_loadStartpoints(self, cursor);
 }
 #endif
 

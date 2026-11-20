@@ -515,7 +515,7 @@ INCLUDE_ASM("world/world", cWorld_getPolyModelInfo__FPvT0);
  * Returns a world instance's poly-model list: the word at +0x8 of the record that the instance's +0x88 record links at
  * +0xC (cWScriptCacheEntry_resolve puts a collide model there).
  *
- * No null checks. The body is identical to cWorld_getSphereTreeInfo's; func_0035DF70 (railmodifier) passes its result to
+ * No null checks. The body is identical to cWorld_getSphereTreeInfo's; cRollerModifier_cRollerModifier1 (railmodifier) passes its result to
  * tSphTreeList_getMeshTree.
  *
  * @param instance  the tInstanceRecord
