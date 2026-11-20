@@ -10,13 +10,13 @@ extern int func_003FB810(int);
 /**
  * Hands the save description to the request layer (func_003FA240).
  *
- * @param a  the 976-byte save description
+ * @param saveDesc  the 976-byte save description
  * @return 0; 2 when the manager is not open, or the request error + 100
  */
-int func_003FCDC8(int a) {
+int func_003FCDC8(int saveDesc) {
     int result;
     if (func_003FC0D8()) {
-        result = func_003FB810(func_003FA240(a));
+        result = func_003FB810(func_003FA240(saveDesc));
     } else {
         result = 2;
     }
@@ -81,18 +81,18 @@ extern void func_00266760(int, int, int, int);
  */
 int func_003FCF00(int userPtr, int allocator, int size, int memType) {
     int allocInfo[2];
-    int r;
+    int result;
     allocInfo[0] = 4;
     allocInfo[1] = 1;
     func_003FB858(memType, allocInfo, &allocInfo[1]);
-    r = func_003FB898(size, memType);
+    result = func_003FB898(size, memType);
     if (userPtr) {
-        func_00266760(allocator, userPtr - 0xC, r, allocInfo[0]);
-        r = 0;
+        func_00266760(allocator, userPtr - 0xC, result, allocInfo[0]);
+        result = 0;
     } else {
-        r = 4;
+        result = 4;
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -147,39 +147,39 @@ extern void FlushCache(int);
  * D_00451530 / D_00451534 (-3 .. -5) and flushes the data and instruction caches. The DNAS manager (func_00256460)
  * calls it with the file it loaded.
  *
- * @param a  the image
- * @param b  its size
+ * @param image  the image
+ * @param imageSize  its size
  * @return 0, or -1 .. -5
  */
-int func_003FCFD8(int a, int b) {
+int func_003FCFD8(int image, int imageSize) {
     int obj[12];
     int hdr[3];
-    int r;
-    int* p;
-    if (func_003FD558(obj, a, b) == 0) {
+    int relocTable;
+    int* entrySlot;
+    if (func_003FD558(obj, image, imageSize) == 0) {
         return -1;
     }
-    r = func_003FD758(obj, str_reloctable);
-    if (r == 0) {
+    relocTable = func_003FD758(obj, str_reloctable);
+    if (relocTable == 0) {
         return -2;
     }
     hdr[0] = func_003FD908 - func_003FD810;
-    hdr[1] = r;
+    hdr[1] = relocTable;
     hdr[2] = (int)func_003FD810;
     func_003FD660((int)obj, (int)hdr);
-    p = D_0045152C_i;
-    *p = func_003FD758(obj, str_DirtyDnasRelInit);
-    if (*p == 0) {
+    entrySlot = D_0045152C_i;
+    *entrySlot = func_003FD758(obj, str_DirtyDnasRelInit);
+    if (*entrySlot == 0) {
         return -3;
     }
-    p = D_00451530_i;
-    *p = func_003FD758(obj, str_DirtyDnasRelUpdt);
-    if (*p == 0) {
+    entrySlot = D_00451530_i;
+    *entrySlot = func_003FD758(obj, str_DirtyDnasRelUpdt);
+    if (*entrySlot == 0) {
         return -4;
     }
-    p = D_00451534_i;
-    *p = func_003FD758(obj, str_DirtyDnasRelExit);
-    if (*p == 0) {
+    entrySlot = D_00451534_i;
+    *entrySlot = func_003FD758(obj, str_DirtyDnasRelExit);
+    if (*entrySlot == 0) {
         return -5;
     }
     FlushCache(0);
@@ -194,12 +194,12 @@ INCLUDE_ASM("seg/seg_2FDDC8", func_003FD0D8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern void (*D_0045152C[])(int, int);
 /**
- * Calls the DNAS module's DirtyDnasRelInit with @p a and 0x1020000.
+ * Calls the DNAS module's DirtyDnasRelInit with @p initParams and 0x1020000.
  *
- * @param a  the DNAS parameters (func_002562D0 passes its block at +0x24)
+ * @param initParams  the DNAS parameters (func_002562D0 passes its block at +0x24)
  */
-void func_003FD0D8(int a) {
-    D_0045152C[0](a, 0x1020000);
+void func_003FD0D8(int initParams) {
+    D_0045152C[0](initParams, 0x1020000);
 }
 #endif
 
@@ -243,21 +243,21 @@ extern void (*D_0045152C[])(int, int);
 extern int (*D_00451530_a[])(int) __asm__("D_00451530");
 extern int (*D_00451534_a[])(int) __asm__("D_00451534");
 /**
- * Runs the DNAS module to completion: Init with @p a and 0x1020000, Updt repeatedly with (@p fn(@p arg) == 0) until it
- * returns something other than 1, then Exit with @p b. Nothing in retail calls it.
+ * Runs the DNAS module to completion: Init with @p initParams and 0x1020000, Updt repeatedly with (@p fn(@p fnArg) == 0) until it
+ * returns something other than 1, then Exit with @p exitArg. Nothing in retail calls it.
  *
- * @param a  the DNAS parameters
- * @param b  argument for Exit
+ * @param initParams  the DNAS parameters
+ * @param exitArg  argument for Exit
  * @param fn  callback polled before each update
- * @param arg  its argument
+ * @param fnArg  its argument
  */
-void func_003FD150(int a, int b, int (*fn)(int), int arg) {
+void func_003FD150(int initParams, int exitArg, int (*fn)(int), int fnArg) {
     int none;
-    D_0045152C[0](a, 0x1020000);
+    D_0045152C[0](initParams, 0x1020000);
     none = 0;
     do {
-    } while (D_00451530_a[0](fn(arg) == none) == 1);
-    D_00451534_a[0](b);
+    } while (D_00451530_a[0](fn(fnArg) == none) == 1);
+    D_00451534_a[0](exitArg);
 }
 #endif
 

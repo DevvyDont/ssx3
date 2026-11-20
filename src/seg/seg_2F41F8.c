@@ -89,12 +89,12 @@ extern char str_hello_world[];
  * (table D_00496C08) and swaps the current slot with the slot the CRC's low byte names. A negative @p klen means
  * @p key is NUL-terminated; an empty key leaves the permutation as it is.
  *
- * @param s  the cipher state
+ * @param cipherState  the cipher state
  * @param key  key bytes
  * @param klen  key length, or negative for a C string
  * @param rounds  number of 256-step passes; negative continues without resetting
  */
-void func_003F33B0(unsigned char *s, unsigned char *key, int klen, int rounds) {
+void func_003F33B0(unsigned char *cipherState, unsigned char *key, int klen, int rounds) {
     int i;
     int lim;
     unsigned crc;
@@ -107,10 +107,10 @@ void func_003F33B0(unsigned char *s, unsigned char *key, int klen, int rounds) {
     if (rounds < 0) {
         rounds = -rounds;
     } else {
-        unsigned char *p = s + 0xFF;
-        for (; i >= 0; i--) *p-- = i;
-        s[0x100] = 0;
-        *(int *)(s + 0x104) = 0;
+        unsigned char *permSlot = cipherState + 0xFF;
+        for (; i >= 0; i--) *permSlot-- = i;
+        cipherState[0x100] = 0;
+        *(int *)(cipherState + 0x104) = 0;
     }
     if (klen < 0) {
         klen = 0;
@@ -122,18 +122,18 @@ void func_003F33B0(unsigned char *s, unsigned char *key, int klen, int rounds) {
         lim = rounds << 8;
         if (lim > 0) {
             do {
-                unsigned char *p;
-                unsigned char *q;
-                unsigned char t;
-                int r = i % klen;
-                p = s + (i & 0xFF);
-                t = *p;
+                unsigned char *permSlot;
+                unsigned char *swapSlot;
+                unsigned char swapByte;
+                int keyIndex = i % klen;
+                permSlot = cipherState + (i & 0xFF);
+                swapByte = *permSlot;
                 i++;
-                crc = (crc >> 8) ^ D_00496C08[(crc & 0xFF) ^ key[r]];
-                crc = (crc >> 8) ^ D_00496C08[(crc & 0xFF) ^ t];
-                q = s + (crc & 0xFF);
-                *p = *q;
-                *q = t;
+                crc = (crc >> 8) ^ D_00496C08[(crc & 0xFF) ^ key[keyIndex]];
+                crc = (crc >> 8) ^ D_00496C08[(crc & 0xFF) ^ swapByte];
+                swapSlot = cipherState + (crc & 0xFF);
+                *permSlot = *swapSlot;
+                *swapSlot = swapByte;
             } while (i < lim);
         }
     }
@@ -154,24 +154,24 @@ extern unsigned D_00496C08[];
  * table D_00496C08, swaps the permutation bytes at the index and at the CRC's low byte, and XORs the buffer byte with
  * the permutation byte at the difference of the two swapped values. Saves the index and CRC back.
  *
- * @param s  the cipher state
+ * @param cipherState  the cipher state
  * @param buf  bytes to encrypt or decrypt in place
  * @param n  byte count
  */
-void func_003F3530(unsigned char *s, unsigned char *buf, int n) {
-    unsigned char i = s[0x100];
-    unsigned j = *(unsigned *)(s + 0x104);
+void func_003F3530(unsigned char *cipherState, unsigned char *buf, int n) {
+    unsigned char i = cipherState[0x100];
+    unsigned j = *(unsigned *)(cipherState + 0x104);
     for (; n > 0; n--) {
-        unsigned char a, b;
-        j = (j >> 8) ^ D_00496C08[(j & 0xFF) ^ s[i++]];
-        a = s[i];
-        b = s[j & 0xFF];
-        s[i] = b;
-        s[j & 0xFF] = a;
-        *buf++ ^= s[(unsigned char)(a - b)];
+        unsigned char valueAtIndex, valueAtCrc;
+        j = (j >> 8) ^ D_00496C08[(j & 0xFF) ^ cipherState[i++]];
+        valueAtIndex = cipherState[i];
+        valueAtCrc = cipherState[j & 0xFF];
+        cipherState[i] = valueAtCrc;
+        cipherState[j & 0xFF] = valueAtIndex;
+        *buf++ ^= cipherState[(unsigned char)(valueAtIndex - valueAtCrc)];
     }
-    s[0x100] = i;
-    *(unsigned *)(s + 0x104) = j;
+    cipherState[0x100] = i;
+    *(unsigned *)(cipherState + 0x104) = j;
 }
 #endif
 
@@ -197,18 +197,18 @@ extern char str_ru_paranoid[];
  * @param out  output buffer
  * @param n  output buffer size
  * @param in  text to encrypt (may equal @p out)
- * @param a  key bytes
- * @param b  key length, or negative for a C string
- * @param c  key rounds
+ * @param cipherKey  key bytes
+ * @param cipherKeyLen  key length, or negative for a C string
+ * @param cipherRounds  key rounds
  * @return 0
  */
-int func_003F35D0(char *out, int n, unsigned char *in, int a, int b, int c) {
+int func_003F35D0(char *out, int n, unsigned char *in, int cipherKey, int cipherKeyLen, int cipherRounds) {
     unsigned char ctx[272];
     unsigned char ch;
     unsigned char k;
     k = 0;
-    f33B0w(ctx, a, b, c);
-    f33B0w(D_0051EEF8, a, b, -c);
+    f33B0w(ctx, cipherKey, cipherKeyLen, cipherRounds);
+    f33B0w(D_0051EEF8, cipherKey, cipherKeyLen, -cipherRounds);
     f33B0w(D_0051EEF8, (int)str_ru_paranoid, -1, -1);
     for (; n > 1; n--) {
         if (in == 0) {
@@ -318,9 +318,9 @@ extern void func_00256BD8(int *);
  * Sends 'name'/'free' for the lookup id at +0x58 without waiting, then frees the object with func_00256BD8.
  */
 void func_003F3940(int *self) {
-    int v = self[88 / 4];
+    int lookupId = self[88 / 4];
     func_003F4C98(D_0051F010, 'name', 'free');
-    func_003F4C68(D_0051F010, 1, v, 0, 0, 0, 0, 0, 0, 0);
+    func_003F4C68(D_0051F010, 1, lookupId, 0, 0, 0, 0, 0, 0, 0);
     func_00256BD8(self);
 }
 #endif
@@ -346,23 +346,23 @@ int *f39C8impl(int a, int b) __asm__("func_003F39C8");
  * id into +0x58. The caller polls the done function until it is nonzero, then reads the address at +0x4 and calls the
  * free function.
  *
- * @param a  host name text
- * @param b  timeout (passed through to the IOP)
+ * @param hostName  host name text
+ * @param timeout  timeout (passed through to the IOP)
  * @return the lookup object, or 0 when the allocation fails
  */
-int *f39C8impl(int a, int b) {
+int *f39C8impl(int hostName, int timeout) {
     int f;
-    int *p = RpcAlloc(92);
-    if (p) {
-        f6210k(p, 0, 92);
+    int *lookup = RpcAlloc(92);
+    if (lookup) {
+        f6210k(lookup, 0, 92);
         f = (int)func_003F3860;
-        p[3] = (int)func_003F3940;
-        p[2] = f;
+        lookup[3] = (int)func_003F3940;
+        lookup[2] = f;
         func_003F4C98(D_0051F020, 'name', 'look');
         f = 1;
-        f4C68k(D_0051F020, f, 0, b, a, -f, 0, 0, f, p + 88 / 4);
+        f4C68k(D_0051F020, f, 0, timeout, hostName, -f, 0, 0, f, lookup + 88 / 4);
     }
-    return p;
+    return lookup;
 }
 #endif
 
@@ -433,10 +433,10 @@ extern int f4C68e(char *, int, int, int, int, int, int, int, int, int *) __asm__
  * text and the argument '1731', waits for the module handle into D_004A4BA4 and sets D_004A4BA0. The cCommSystem
  * constructor calls it with "www.ea.com".
  *
- * @param a  startup parameter text
+ * @param startupParams  startup parameter text
  * @return 0, or -1 when already started
  */
-int func_003F3B18(int a) {
+int func_003F3B18(int startupParams) {
     char buf[16];
     if (D_004A4BA0 != 0) return -1;
     if (func_003F5470() <= 0) {
@@ -444,7 +444,7 @@ int func_003F3B18(int a) {
         func_003F4D68();
     }
     func_003F4C98(buf, 'netw', 'crea');
-    f4C68e(buf, 1, 0, '1731', a, -1, 0, 0, 1, &D_004A4BA4);
+    f4C68e(buf, 1, 0, '1731', startupParams, -1, 0, 0, 1, &D_004A4BA4);
     D_004A4BA0 = 1;
     return 0;
 }
@@ -462,18 +462,18 @@ extern int func_003F4C68b(char *, int, int, int, int, int, int, int, int, int *)
 /**
  * Fetches the list of network configurations from the IOP ('netw'/'list').
  *
- * Sends the device text (@p self) and waits for up to @p b 0x100-byte entries into @p a (flags 5: kick the IOP and
+ * Sends the device text (@p self) and waits for up to @p maxConfigs 0x100-byte entries into @p configList (flags 5: kick the IOP and
  * write back the buffer). cCommSystem fills cCommSystem_mNetConns (10 entries) with it.
  *
- * @param a  output list of 0x100-byte configuration entries
- * @param b  capacity in entries
+ * @param configList  output list of 0x100-byte configuration entries
+ * @param maxConfigs  capacity in entries
  * @return the number of entries
  */
-int func_003F3BC8(int self, int a, int b) {
+int func_003F3BC8(int self, int configList, int maxConfigs) {
     char buf[16];
     int out;
     func_003F4C98(buf, 'netw', 'list');
-    func_003F4C68b(buf, 5, D_004A4BA4, 0, self, -1, a, b << 8, 1, &out);
+    func_003F4C68b(buf, 5, D_004A4BA4, 0, self, -1, configList, maxConfigs << 8, 1, &out);
     return out;
 }
 #endif
@@ -492,25 +492,25 @@ extern int f4C68s(char *, int, int, int, int, int, int, int, int, int *) __asm__
  * Starts connecting with a network configuration ('netw'/'star').
  *
  * Sends the configuration text (a NUL-terminated string) and waits for the IOP's result. Both arms of the original
- * branch on @p a are identical (see the FAKEMATCH note). cCommSystem passes the text at +0x80 of the chosen
+ * branch on @p configName are identical (see the FAKEMATCH note). cCommSystem passes the text at +0x80 of the chosen
  * cCommSystem_mNetConns entry.
  *
- * @param a  configuration text
+ * @param configName  configuration text
  * @return the IOP's result
  */
 // NOTE: retail had a branch on `a` whose two paths were identical (jump2
 // cross-jumped them after sched2, leaving only a block boundary before the
 // 'netw'/'star' setup). The original condition is unknown.
-int func_003F3C50(int a) {
+int func_003F3C50(int configName) {
     char buf[16];
     int out;
-    if (a > 0) {
+    if (configName > 0) {
         func_003F4C98(buf, 'netw', 'star');
-        f4C68s(buf, 1, D_004A4BA4, 0, a, -1, 0, 0, 1, &out);
+        f4C68s(buf, 1, D_004A4BA4, 0, configName, -1, 0, 0, 1, &out);
         return out;
     }
     func_003F4C98(buf, 'netw', 'star');
-    f4C68s(buf, 1, D_004A4BA4, 0, a, -1, 0, 0, 1, &out);
+    f4C68s(buf, 1, D_004A4BA4, 0, configName, -1, 0, 0, 1, &out);
     return out;
 }
 #endif
@@ -530,54 +530,54 @@ extern int f4C68m(char *, int, int, int, int, int, int, int, int, int *) __asm__
  * Answers a network-status query by its four-character selector.
  *
  * 'open' returns the started flag D_004A4BA0 without asking the IOP. The others send 'netw'/'stat' with a selector and
- * wait for the answer: 'onln' is whether 'host' is nonzero; 'conn' (flags 5, with @p a / @p b as a reply buffer)
- * returns the connection state; 'host' and 'addr' return those words; 'macx' copies the MAC address into @p a and
+ * wait for the answer: 'onln' is whether 'host' is nonzero; 'conn' (flags 5, with @p statusBuf / @p statusBufSize as a reply buffer)
+ * returns the connection state; 'host' and 'addr' return those words; 'macx' copies the MAC address into @p statusBuf and
  * returns 0; 'type' returns the interface type word and 'bbnd' its bit 2 (broadband). Any other selector returns -1.
  *
  * @param tag  selector ('open', 'onln', 'conn', 'host', 'addr', 'macx', 'type', 'bbnd')
- * @param a  reply buffer for 'conn', 'macx' and 'type'
- * @param b  reply buffer size
+ * @param statusBuf  reply buffer for 'conn', 'macx' and 'type'
+ * @param statusBufSize  reply buffer size
  * @return the selected status, or -1 for an unknown selector
  */
-int func_003F3CC0(int tag, int a, int b) {
+int func_003F3CC0(int tag, int statusBuf, int statusBufSize) {
     char buf[16];
-    int o20;
-    int o24;
+    int statusReply;
+    int addrReply;
     if (tag == 'open') {
         return D_004A4BA0;
     }
     if (tag == 'onln') {
         func_003F4C98(buf, 'netw', 'stat');
-        f4C68m(buf, 1, D_004A4BA4, 'host', 0, 0, 0, 0, 1, &o20);
-        return o20 != 0;
+        f4C68m(buf, 1, D_004A4BA4, 'host', 0, 0, 0, 0, 1, &statusReply);
+        return statusReply != 0;
     }
     if (tag == 'conn') {
         func_003F4C98(buf, 'netw', 'stat');
-        f4C68m(buf, 5, D_004A4BA4, 'conn', 0, 0, a, b, 1, &o20);
-        return o20;
+        f4C68m(buf, 5, D_004A4BA4, 'conn', 0, 0, statusBuf, statusBufSize, 1, &statusReply);
+        return statusReply;
     }
     if (tag == 'host') {
         func_003F4C98(buf, 'netw', 'stat');
-        f4C68m(buf, 1, D_004A4BA4, 'host', 0, 0, 0, 0, 1, &o24);
-        return o24;
+        f4C68m(buf, 1, D_004A4BA4, 'host', 0, 0, 0, 0, 1, &addrReply);
+        return addrReply;
     }
     if (tag == 'addr') {
         func_003F4C98(buf, 'netw', 'stat');
-        f4C68m(buf, 1, D_004A4BA4, 'addr', 0, 0, 0, 0, 1, &o24);
-        return o24;
+        f4C68m(buf, 1, D_004A4BA4, 'addr', 0, 0, 0, 0, 1, &addrReply);
+        return addrReply;
     }
     if (tag == 'macx') {
         func_003F4C98(buf, 'netw', 'stat');
-        func_003F4C68(buf, 5, D_004A4BA4, 'macx', 0, 0, a, b, 1, 0);
+        func_003F4C68(buf, 5, D_004A4BA4, 'macx', 0, 0, statusBuf, statusBufSize, 1, 0);
         return 0;
     }
     if (tag == 'bbnd' || tag == 'type') {
         func_003F4C98(buf, 'netw', 'stat');
-        f4C68m(buf, 1, D_004A4BA4, 'type', 0, 0, a, b, 1, &o20);
+        f4C68m(buf, 1, D_004A4BA4, 'type', 0, 0, statusBuf, statusBufSize, 1, &statusReply);
         if (tag == 'bbnd') {
-            o20 = (o20 >> 2) & 1;
+            statusReply = (statusReply >> 2) & 1;
         }
-        return o20;
+        return statusReply;
     }
     return -1;
 }
@@ -600,21 +600,21 @@ extern void f3CC0(int, unsigned char *, int) __asm__("func_003F3CC0");
  * @return the static MAC text
  */
 char *func_003F3F78(void) {
-    unsigned char b[16];
+    unsigned char macBytes[16];
     if (D_004512E8[0] == 0) {
-        f3CC0(0x6d616378, b, 0x10);
-        D_004512E8[1] = str_0123456789abcdefUSBD_IRX[b[0] >> 4];
-        D_004512E8[2] = str_0123456789abcdefUSBD_IRX[b[0] & 0xF];
-        D_004512E8[3] = str_0123456789abcdefUSBD_IRX[b[1] >> 4];
-        D_004512E8[4] = str_0123456789abcdefUSBD_IRX[b[1] & 0xF];
-        D_004512E8[5] = str_0123456789abcdefUSBD_IRX[b[2] >> 4];
-        D_004512E8[6] = str_0123456789abcdefUSBD_IRX[b[2] & 0xF];
-        D_004512E8[7] = str_0123456789abcdefUSBD_IRX[b[3] >> 4];
-        D_004512E8[8] = str_0123456789abcdefUSBD_IRX[b[3] & 0xF];
-        D_004512E8[9] = str_0123456789abcdefUSBD_IRX[b[4] >> 4];
-        D_004512E8[10] = str_0123456789abcdefUSBD_IRX[b[4] & 0xF];
-        D_004512E8[11] = str_0123456789abcdefUSBD_IRX[b[5] >> 4];
-        D_004512E8[12] = str_0123456789abcdefUSBD_IRX[b[5] & 0xF];
+        f3CC0(0x6d616378, macBytes, 0x10);
+        D_004512E8[1] = str_0123456789abcdefUSBD_IRX[macBytes[0] >> 4];
+        D_004512E8[2] = str_0123456789abcdefUSBD_IRX[macBytes[0] & 0xF];
+        D_004512E8[3] = str_0123456789abcdefUSBD_IRX[macBytes[1] >> 4];
+        D_004512E8[4] = str_0123456789abcdefUSBD_IRX[macBytes[1] & 0xF];
+        D_004512E8[5] = str_0123456789abcdefUSBD_IRX[macBytes[2] >> 4];
+        D_004512E8[6] = str_0123456789abcdefUSBD_IRX[macBytes[2] & 0xF];
+        D_004512E8[7] = str_0123456789abcdefUSBD_IRX[macBytes[3] >> 4];
+        D_004512E8[8] = str_0123456789abcdefUSBD_IRX[macBytes[3] & 0xF];
+        D_004512E8[9] = str_0123456789abcdefUSBD_IRX[macBytes[4] >> 4];
+        D_004512E8[10] = str_0123456789abcdefUSBD_IRX[macBytes[4] & 0xF];
+        D_004512E8[11] = str_0123456789abcdefUSBD_IRX[macBytes[5] >> 4];
+        D_004512E8[12] = str_0123456789abcdefUSBD_IRX[macBytes[5] & 0xF];
         D_004512E8[0] = '$';
         D_004512E8[13] = 0;
     }
@@ -727,19 +727,19 @@ extern struct sTick D_0051F030[16];
  * NetConnIdle calls each registered function with its argument and the current tick.
  *
  * @param fn  the callback
- * @param arg  its argument
+ * @param procData  its argument
  * @return 0, or -1 when all slots are taken
  */
-int func_003F4210(void (*fn)(int, int), int arg) {
+int func_003F4210(void (*fn)(int, int), int procData) {
     int i;
-    struct sTick *p = D_0051F030;
+    struct sTick *idleSlot = D_0051F030;
     for (i = 0; i < 16; i++) {
-        if (p->fn == 0) {
-            p->fn = fn;
-            p->arg = arg;
+        if (idleSlot->fn == 0) {
+            idleSlot->fn = fn;
+            idleSlot->arg = procData;
             return 0;
         }
-        p++;
+        idleSlot++;
     }
     return -1;
 }
@@ -756,19 +756,19 @@ extern struct sTick D_0051F030[16];
  * Removes an idle callback registered with func_003F4210 (the slot whose function and argument both match).
  *
  * @param fn  the callback
- * @param arg  its argument
+ * @param procData  its argument
  * @return 0, or -1 when no slot matches
  */
-int func_003F4250(void (*fn)(int, int), int arg) {
+int func_003F4250(void (*fn)(int, int), int procData) {
     int i;
-    struct sTick *p = D_0051F030;
+    struct sTick *idleSlot = D_0051F030;
     for (i = 0; i < 16; i++) {
-        if (p->fn == fn && p->arg == arg) {
-            p->fn = 0;
-            p->arg = 0;
+        if (idleSlot->fn == fn && idleSlot->arg == procData) {
+            idleSlot->fn = 0;
+            idleSlot->arg = 0;
             return 0;
         }
-        p++;
+        idleSlot++;
     }
     return -1;
 }
@@ -967,16 +967,16 @@ void func_003F4448(int a, int b, struct sSifQueue *s);
  * wakes the queue thread (+0x4DE8, func_00424C50) when the oldest one's reply key matches, and sets a new 16-tick alarm
  * (func_00423B80) when none is armed.
  *
- * @param a  id of the alarm that fired
- * @param b  alarm time (unused)
- * @param s  the queue (D_0051F0C0)
+ * @param alarmId  id of the alarm that fired
+ * @param alarmTime  alarm time (unused)
+ * @param queue  the queue (D_0051F0C0)
  */
-void func_003F4448(int a, int b, struct sSifQueue *s) {
-    if (a == s->h4DEC) s->h4DEC = -1;
-    if (a == s->h4DF0) s->h4DF0 = -1;
-    if (s->tail != s->head) {
-        if (s->b[s->tail].key == s->a[s->tail].key) f4C50(s->h4DE8);
-        if (s->h4DEC < 0 && s->h4DF0 < 0) s->h4DF0 = f3B80(0x10, (void *)func_003F4448, s);
+void func_003F4448(int alarmId, int alarmTime, struct sSifQueue *queue) {
+    if (alarmId == queue->h4DEC) queue->h4DEC = -1;
+    if (alarmId == queue->h4DF0) queue->h4DF0 = -1;
+    if (queue->tail != queue->head) {
+        if (queue->b[queue->tail].key == queue->a[queue->tail].key) f4C50(queue->h4DE8);
+        if (queue->h4DEC < 0 && queue->h4DF0 < 0) queue->h4DF0 = f3B80(0x10, (void *)func_003F4448, queue);
     }
 }
 #endif
@@ -1038,7 +1038,7 @@ static __inline__ void f4528_wb(int a, int n) { func_00424698(a, a + n); }
  * @p data a {len, ptr} list ending with len 0, gathered into one payload. Under the queue semaphore, while the ring is
  * full it pumps replies (func_003F4A78). It takes room in the 64-byte-aligned payload area (-1 when none), records the
  * completion (@p fn, @p out, flags, thread id) in the callback ring, copies the payload, fills the request record
- * (payload address and size, reply buffer and size, @p fno, @p a3, service id, key) and DMAs payload and record to the
+ * (payload address and size, reply buffer and size, @p fno, @p callArg, service id, key) and DMAs payload and record to the
  * IOP (sceSifSetDma, retried every tick until accepted). Flag 4 writes the reply buffer back from the cache first; flag
  * 1 sends SIF command 1 to kick the IOP. With @p fn == 1 it arms the wake alarm (func_003F4448) and sleeps until
  * func_003F4A78 stores the reply's result in *@p out and wakes it.
@@ -1046,7 +1046,7 @@ static __inline__ void f4528_wb(int a, int n) { func_00424698(a, a + n); }
  * @param cl  service handle
  * @param flags  1 kick the IOP, 2 gather list, 4 write back the reply buffer
  * @param fno  target object id on the IOP (module or session handle)
- * @param a3  call argument word
+ * @param callArg  call argument word
  * @param data  payload
  * @param size  payload size, or negative for a C string
  * @param dst  reply buffer (IOP writes it by DMA)
@@ -1055,16 +1055,16 @@ static __inline__ void f4528_wb(int a, int n) { func_00424698(a, a + n); }
  * @param out  result pointer (or the callback's last argument)
  * @return the request's key, or -1 on error
  */
-int func_003F4528(struct sSifClient_4528 *cl, int flags, int fno, int a3, char *data, int size, int dst, int dstsize,
+int func_003F4528(struct sSifClient_4528 *cl, int flags, int fno, int callArg, char *data, int size, int dst, int dstsize,
                   int fn, int *out) {
-    struct sSifQueue *g = &D_0051F0C0;
+    struct sSifQueue *queue = &D_0051F0C0;
     struct sSifDma_4528 dma[2];
     struct sSifSeg_4528 *seg;
     int i;
     int off;
     int avail;
     int key;
-    int t;
+    int tickNow;
     int nowait;
     int wb;
     int asize;
@@ -1079,78 +1079,78 @@ int func_003F4528(struct sSifClient_4528 *cl, int flags, int fno, int a3, char *
         for (i = 0; seg[i].len > 0; i++) size += seg[i].len;
     }
     D_004A5B00 = 2;
-    WaitSema(g->sema);
+    WaitSema(queue->sema);
     D_004A5B00 = 0;
-    if ((g->head + 1) % g->cnt == g->tail) {
-        while ((g->head + 1) % g->cnt == g->tail) {
-            SignalSema(g->sema);
+    if ((queue->head + 1) % queue->cnt == queue->tail) {
+        while ((queue->head + 1) % queue->cnt == queue->tail) {
+            SignalSema(queue->sema);
             func_003F4A78();
-            WaitSema(g->sema);
+            WaitSema(queue->sema);
         }
     }
-    if (g->pad4DDC < g->pos) {
-        off = g->pad4DDC;
-        avail = g->pos - off - 0x40;
-    } else if (g->pad4DE4 - g->pad4DDC - 0x40 >= size) {
-        off = g->pad4DDC;
-        avail = g->pad4DE4 - g->pad4DDC;
+    if (queue->pad4DDC < queue->pos) {
+        off = queue->pad4DDC;
+        avail = queue->pos - off - 0x40;
+    } else if (queue->pad4DE4 - queue->pad4DDC - 0x40 >= size) {
+        off = queue->pad4DDC;
+        avail = queue->pad4DE4 - queue->pad4DDC;
     } else {
         off = 0;
-        avail = g->pos - 0x40;
+        avail = queue->pos - 0x40;
     }
     if (avail < size) {
-        SignalSema(g->sema);
+        SignalSema(queue->sema);
         return -1;
     }
     nowait = flags & 1;
     wb = flags & 4;
     asize = size + 0x3F;
-    g->c[g->head].fn = (int (*)(int, int, int, int, int, int, int, int, int *))fn;
-    g->c[g->head].out = out;
-    g->c[g->head].arg = flags;
-    g->c[g->head].th = GetThreadId();
+    queue->c[queue->head].fn = (int (*)(int, int, int, int, int, int, int, int, int *))fn;
+    queue->c[queue->head].out = out;
+    queue->c[queue->head].arg = flags;
+    queue->c[queue->head].th = GetThreadId();
     if (size > 0) {
         if (seg != 0) {
-            char *d = (char *)(g->base2 + off);
+            char *copyDst = (char *)(queue->base2 + off);
             for (i = 0; seg[i].len > 0; i++) {
-                func_0041605C(d, seg[i].ptr, seg[i].len);
-                d += seg[i].len;
+                func_0041605C(copyDst, seg[i].ptr, seg[i].len);
+                copyDst += seg[i].len;
             }
         } else {
-            func_0041605C((char *)(g->base2 + off), data, size);
+            func_0041605C((char *)(queue->base2 + off), data, size);
         }
     }
-    g->a[g->head].f0 = g->base1 + off;
-    g->a[g->head].f4 = size;
-    g->a[g->head].pad8[0] = dst;
-    g->a[g->head].pad8[1] = dstsize;
-    g->a[g->head].pad8[2] = fno;
-    g->a[g->head].pad8[3] = a3;
-    g->a[g->head].pad8[4] = cl->fC;
-    g->a[g->head].key = g->pad4DC8[1];
+    queue->a[queue->head].f0 = queue->base1 + off;
+    queue->a[queue->head].f4 = size;
+    queue->a[queue->head].pad8[0] = dst;
+    queue->a[queue->head].pad8[1] = dstsize;
+    queue->a[queue->head].pad8[2] = fno;
+    queue->a[queue->head].pad8[3] = callArg;
+    queue->a[queue->head].pad8[4] = cl->fC;
+    queue->a[queue->head].key = queue->pad4DC8[1];
     if (wb) f4528_wb(dst, dstsize + 0x80);
-    dma[0].data = g->base2 + off;
-    dma[0].addr = g->base1 + off;
+    dma[0].data = queue->base2 + off;
+    dma[0].addr = queue->base1 + off;
     dma[0].size = asize & ~0x3F;
     dma[0].mode = 0;
-    dma[1].data = (int)&g->a[g->head];
-    dma[1].addr = g->pad4D98[1] + g->head * sizeof(struct sSifReq);
+    dma[1].data = (int)&queue->a[queue->head];
+    dma[1].addr = queue->pad4D98[1] + queue->head * sizeof(struct sSifReq);
     dma[1].size = 0x20;
     dma[1].mode = 0;
-    ((int *)g->pad4DB8[0])[g->head] = dma[0].size != 0 ? sceSifSetDma(&dma[0], 2) : sceSifSetDma(&dma[1], 1);
-    while (((int *)g->pad4DB8[0])[g->head] == 0) {
-        t = func_003F4DE8();
-        while (t == func_003F4DE8()) {
+    ((int *)queue->pad4DB8[0])[queue->head] = dma[0].size != 0 ? sceSifSetDma(&dma[0], 2) : sceSifSetDma(&dma[1], 1);
+    while (((int *)queue->pad4DB8[0])[queue->head] == 0) {
+        tickNow = func_003F4DE8();
+        while (tickNow == func_003F4DE8()) {
         }
-        ((int *)g->pad4DB8[0])[g->head] = dma[0].size != 0 ? sceSifSetDma(&dma[0], 2) : sceSifSetDma(&dma[1], 1);
+        ((int *)queue->pad4DB8[0])[queue->head] = dma[0].size != 0 ? sceSifSetDma(&dma[0], 2) : sceSifSetDma(&dma[1], 1);
     }
     if (nowait) func_004261B0(1, &D_00451300, D_00451300.b, 0, 0, 0);
-    key = g->pad4DC8[1];
-    if (size > 0) g->pad4DDC = off + (asize & ~0x3F);
-    g->pad4DC8[1] = (g->pad4DC8[1] + 1) % *(int *)&g->buf[0x4D84];
-    g->head = (g->head + 1) % g->cnt;
-    SignalSema(g->sema);
-    if (g->h4DEC < 0 && fn == 1) g->h4DEC = SetAlarm(8, (void *)func_003F4448, g);
+    key = queue->pad4DC8[1];
+    if (size > 0) queue->pad4DDC = off + (asize & ~0x3F);
+    queue->pad4DC8[1] = (queue->pad4DC8[1] + 1) % *(int *)&queue->buf[0x4D84];
+    queue->head = (queue->head + 1) % queue->cnt;
+    SignalSema(queue->sema);
+    if (queue->h4DEC < 0 && fn == 1) queue->h4DEC = SetAlarm(8, (void *)func_003F4448, queue);
     if (fn == 1) {
         D_004A5B08 = 2;
         SleepThread();
@@ -1187,42 +1187,42 @@ extern int WakeupThread(int);
  * @return the number of requests completed
  */
 int func_003F4A78(void) {
-    struct sSifQueue *g = &D_0051F0C0;
+    struct sSifQueue *queue = &D_0051F0C0;
     int n = 0;
-    while (g->tail != g->head && g->b[g->tail].key == g->a[g->tail].key) {
-        int th, key, kind, arg, p10, p14, addr, len, p8, pC;
+    while (queue->tail != queue->head && queue->b[queue->tail].key == queue->a[queue->tail].key) {
+        int th, key, kind, reqFlags, replyWord10, replyResult, addr, len, replyWord8, pC;
         D_004A5B00 = 1;
-        WaitSema(g->sema);
+        WaitSema(queue->sema);
         D_004A5B00 = 0;
-        key = g->b[g->tail].key;
-        if (key != g->a[g->tail].key) {
-            SignalSema(g->sema);
+        key = queue->b[queue->tail].key;
+        if (key != queue->a[queue->tail].key) {
+            SignalSema(queue->sema);
             return n;
         }
         th = 0;
-        addr = g->base2 + (g->a[g->tail].f0 - g->base1);
-        p8 = g->b[g->tail].f8;
-        pC = g->b[g->tail].fC;
-        p10 = g->b[g->tail].f10;
-        p14 = g->b[g->tail].f14;
-        kind = (int)g->c[g->tail].fn;
-        arg = g->c[g->tail].arg;
-        len = g->a[g->tail].f4;
+        addr = queue->base2 + (queue->a[queue->tail].f0 - queue->base1);
+        replyWord8 = queue->b[queue->tail].f8;
+        pC = queue->b[queue->tail].fC;
+        replyWord10 = queue->b[queue->tail].f10;
+        replyResult = queue->b[queue->tail].f14;
+        kind = (int)queue->c[queue->tail].fn;
+        reqFlags = queue->c[queue->tail].arg;
+        len = queue->a[queue->tail].f4;
         if (kind != 0) {
             if (kind == 1) {
-                if (g->c[g->tail].out != 0) *g->c[g->tail].out = p14;
-                th = g->c[g->tail].th;
+                if (queue->c[queue->tail].out != 0) *queue->c[queue->tail].out = replyResult;
+                th = queue->c[queue->tail].th;
             } else {
-                g->c[g->tail].fn(key, arg, p10, p14, addr, len, p8, pC, g->c[g->tail].out);
+                queue->c[queue->tail].fn(key, reqFlags, replyWord10, replyResult, addr, len, replyWord8, pC, queue->c[queue->tail].out);
                 SYNC_2F41();
             }
         }
-        if (g->a[g->tail].f4 > 0) {
-            g->pos = g->a[g->tail].f0 - g->base1;
-            g->pos += (g->a[g->tail].f4 + 0x3F) & ~0x3F;
+        if (queue->a[queue->tail].f4 > 0) {
+            queue->pos = queue->a[queue->tail].f0 - queue->base1;
+            queue->pos += (queue->a[queue->tail].f4 + 0x3F) & ~0x3F;
         }
-        g->tail = (g->tail + 1) % g->cnt;
-        SignalSema(g->sema);
+        queue->tail = (queue->tail + 1) % queue->cnt;
+        SignalSema(queue->sema);
         if (th != 0) WakeupThread(th);
         n++;
     }
@@ -1243,21 +1243,21 @@ int func_003F4C68_impl(int a0, int a1, int a2, int a3, int a4, int a5, int a6, i
  * Sends an IOP request: forwards its ten arguments to func_003F4528 (passing the call argument a second time as an
  * eleventh).
  *
- * @param a0  service handle (from func_003F4C98)
- * @param a1  flags (1 kick, 2 gather list, 4 write back the reply buffer)
- * @param a2  target object id on the IOP
- * @param a3  call argument word
- * @param a4  payload
- * @param a5  payload size, or negative for a C string
- * @param a6  reply buffer
- * @param a7  reply buffer size
- * @param a8  completion: 0 none, 1 block, else a callback
- * @param a9  result pointer
+ * @param handle  service handle (from func_003F4C98)
+ * @param flags  flags (1 kick, 2 gather list, 4 write back the reply buffer)
+ * @param objectId  target object id on the IOP
+ * @param callArg  call argument word
+ * @param payload  payload
+ * @param payloadSize  payload size, or negative for a C string
+ * @param replyBuf  reply buffer
+ * @param replySize  reply buffer size
+ * @param completion  completion: 0 none, 1 block, else a callback
+ * @param resultOut  result pointer
  * @return the request's key, or -1
  */
-int func_003F4C68_impl(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9) {
-    int unused[12];
-    return func_003F4528_4C68(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a3);
+int func_003F4C68_impl(int handle, int flags, int objectId, int callArg, int payload, int payloadSize, int replyBuf, int replySize, int completion, int resultOut) {
+    int stackPad[12];
+    return func_003F4528_4C68(handle, flags, objectId, callArg, payload, payloadSize, replyBuf, replySize, completion, resultOut, callArg);
 }
 #endif
 
@@ -1279,34 +1279,34 @@ int f4C98impl(struct sSifEnt *c, int k1, int k2) __asm__("func_003F4C98");
  * of D_0051F0C0, fetched by func_003F4D68) for the pair: found, it copies the entry's index and IOP id and returns 1;
  * not found, it clears both and returns -1.
  *
- * @param c  the handle: index, module tag, function tag, IOP id
- * @param k1  module tag ('netw', 'name', 'sess', ...)
- * @param k2  function tag ('crea', 'look', 'send', ...)
+ * @param handle  the handle: index, module tag, function tag, IOP id
+ * @param moduleTag  module tag ('netw', 'name', 'sess', ...)
+ * @param funcTag  function tag ('crea', 'look', 'send', ...)
  * @return 0 cached, 1 found, -1 unknown service
  */
-int f4C98impl(struct sSifEnt *c, int k1, int k2) {
-    struct sSifQueue *g = &D_0051F0C0;
-    struct sSifEnt *e;
-    if (k1 == c->k1 && k2 == c->k2) {
-        int i = c->idx;
+int f4C98impl(struct sSifEnt *handle, int moduleTag, int funcTag) {
+    struct sSifQueue *queue = &D_0051F0C0;
+    struct sSifEnt *dirEntry;
+    if (moduleTag == handle->k1 && funcTag == handle->k2) {
+        int i = handle->idx;
         if (i >= 0) {
             if (i < 129) {
-                struct sSifEnt *ent = (struct sSifEnt *)(i * 16 + (int)g->beg);
-                if (ent->v == c->v && ent->k1 == k1) return 0;
+                struct sSifEnt *ent = (struct sSifEnt *)(i * 16 + (int)queue->beg);
+                if (ent->v == handle->v && ent->k1 == moduleTag) return 0;
             }
         }
     }
-    c->k2 = k2;
-    c->k1 = k1;
-    for (e = g->beg; e != g->end; e++) {
-        if (e->k1 == c->k1 && e->k2 == c->k2) {
-            c->idx = e->idx;
-            c->v = e->v;
+    handle->k2 = funcTag;
+    handle->k1 = moduleTag;
+    for (dirEntry = queue->beg; dirEntry != queue->end; dirEntry++) {
+        if (dirEntry->k1 == handle->k1 && dirEntry->k2 == handle->k2) {
+            handle->idx = dirEntry->idx;
+            handle->v = dirEntry->v;
             return 1;
         }
     }
-    c->idx = 0;
-    c->v = 0;
+    handle->idx = 0;
+    handle->v = 0;
     return -1;
 }
 #endif
@@ -1332,9 +1332,9 @@ extern int func_003F4A78(void);
  * @return 0
  */
 int func_003F4D68(void) {
-    int t[4];
-    t[3] = 1;
-    func_003F4C68d(t, 1, 0, 0, 0, 0, (int)D_0051F0C0.beg, (char *)D_0051F0C0.end - (char *)D_0051F0C0.beg, 1, 0);
+    int dirHandle[4];
+    dirHandle[3] = 1;
+    func_003F4C68d(dirHandle, 1, 0, 0, 0, 0, (int)D_0051F0C0.beg, (char *)D_0051F0C0.end - (char *)D_0051F0C0.beg, 1, 0);
     while (D_0051F0C0.head != D_0051F0C0.tail) func_003F4A78();
     return 0;
 }
@@ -1366,15 +1366,15 @@ int func_003F4DE8(void) {
     volatile unsigned last;
     volatile unsigned long total;
     volatile unsigned long sum;
-    unsigned c, t;
+    unsigned c, lastSeen;
     do {
         last = D_0051F0C0.last;
         total = D_0051F0C0.total;
         MFC0_COUNT_2F41(c);
         cnt = c;
-        t = cnt;
-        t = last;
-    } while (t != D_0051F0C0.last || total != D_0051F0C0.total);
+        lastSeen = cnt;
+        lastSeen = last;
+    } while (lastSeen != D_0051F0C0.last || total != D_0051F0C0.total);
     sum = total + (unsigned)(cnt - last);
     return (int)func_00411538_4DE8(sum, 0x48000);
 }
@@ -1452,7 +1452,7 @@ extern void func_004261B0(int, void *, int, int, int, int);
  * @return 1 when the IOP answered, 0 on timeout
  */
 int func_003F4F40(void) {
-    int r;
+    int answered;
     unsigned start;
     unsigned c;
     char *flag = D_0051F0C0.buf;
@@ -1461,17 +1461,17 @@ int func_003F4F40(void) {
     D_00451340.w = (int)flag + 1;
     FlushCache(0);
     func_004261B0(1, &D_00451340, D_00451340.b, 0, 0, 0);
-    r = 1;
+    answered = 1;
     MFC0_COUNT_2F41(start);
     while (*flag == 0) {
         MFC0_COUNT_2F41(c);
         if (c - start > limit) {
-            r = 0;
+            answered = 0;
             break;
         }
         FlushCache(0);
     }
-    return r;
+    return answered;
 }
 #endif
 
@@ -1519,7 +1519,7 @@ extern int func_003F4410(int, void *);
  * @return 0, or -1 .. -5 on failure
  */
 int func_003F5000(void) {
-    struct sSifQueue *g = &D_0051F0C0;
+    struct sSifQueue *queue = &D_0051F0C0;
     struct sSifHdr_5000 hdr;
     struct sSifDma_4528 dma;
     struct sSemaParam_5000 sema;
@@ -1529,62 +1529,62 @@ int func_003F5000(void) {
     int id;
 
     if (func_003F4F40() == 0) return -1;
-    f5000_6210(g, 0, 20032);
-    *(int *)&g->buf[0x4D80] = 0x10;
-    *(int *)&g->buf[0x4D84] = 0x7FFFFFFF;
-    g->beg = (struct sSifEnt *)(((int)&g->buf[0] & 0xFFFFFFF) | 0x20000000);
-    g->end = (struct sSifEnt *)(((int)&g->buf[0x800] & 0xFFFFFFF) | 0x20000000);
-    g->a = (struct sSifReq *)(((int)&g->buf[0x800] & 0xFFFFFFF) | 0x20000000);
-    g->pad4D98[0] = ((int)&g->buf[0xA00] & 0xFFFFFFF) | 0x20000000;
-    g->b = (struct sSifRes *)(((int)&g->buf[0xA00] & 0xFFFFFFF) | 0x20000000);
-    g->pad4DA4[0] = ((int)&g->buf[0xC00] & 0xFFFFFFF) | 0x20000000;
-    g->base2 = ((int)&g->buf[0xC00] & 0xFFFFFFF) | 0x20000000;
-    g->pad4DB0 = ((int)&g->buf[0x4C00] & 0xFFFFFFF) | 0x20000000;
-    g->pad4DB8[0] = (int)&g->buf[0x4C00];
-    g->pad4DB8[1] = (int)&g->buf[0x4C40];
-    g->c = (struct sSifCb *)&g->buf[0x4C40];
-    g->pad4DC8[0] = (int)&g->buf[0x4D40];
+    f5000_6210(queue, 0, 20032);
+    *(int *)&queue->buf[0x4D80] = 0x10;
+    *(int *)&queue->buf[0x4D84] = 0x7FFFFFFF;
+    queue->beg = (struct sSifEnt *)(((int)&queue->buf[0] & 0xFFFFFFF) | 0x20000000);
+    queue->end = (struct sSifEnt *)(((int)&queue->buf[0x800] & 0xFFFFFFF) | 0x20000000);
+    queue->a = (struct sSifReq *)(((int)&queue->buf[0x800] & 0xFFFFFFF) | 0x20000000);
+    queue->pad4D98[0] = ((int)&queue->buf[0xA00] & 0xFFFFFFF) | 0x20000000;
+    queue->b = (struct sSifRes *)(((int)&queue->buf[0xA00] & 0xFFFFFFF) | 0x20000000);
+    queue->pad4DA4[0] = ((int)&queue->buf[0xC00] & 0xFFFFFFF) | 0x20000000;
+    queue->base2 = ((int)&queue->buf[0xC00] & 0xFFFFFFF) | 0x20000000;
+    queue->pad4DB0 = ((int)&queue->buf[0x4C00] & 0xFFFFFFF) | 0x20000000;
+    queue->pad4DB8[0] = (int)&queue->buf[0x4C00];
+    queue->pad4DB8[1] = (int)&queue->buf[0x4C40];
+    queue->c = (struct sSifCb *)&queue->buf[0x4C40];
+    queue->pad4DC8[0] = (int)&queue->buf[0x4D40];
     size = 0x40;
-    size += (g->end - g->beg) * sizeof(struct sSifEnt);
-    size += ((struct sSifReq *)g->pad4D98[0] - g->a) * sizeof(struct sSifReq);
-    size += ((struct sSifRes *)g->pad4DA4[0] - g->b) * sizeof(struct sSifRes);
-    size += g->pad4DB0 - g->base2;
-    size += ((int *)g->pad4DB8[1] - (int *)g->pad4DB8[0]) * sizeof(int);
-    g->pad4DB8[2] = func_0042ABA0(size);
-    if (g->pad4DB8[2] == 0) return -2;
-    iop = (g->pad4DB8[2] & 0xFFFFFFF) | 0xA0000000;
-    g->pad4DB8[2] = iop;
-    hdr.f0 = *(int *)&g->buf[0x4D80];
-    hdr.f4 = *(int *)&g->buf[0x4D84];
+    size += (queue->end - queue->beg) * sizeof(struct sSifEnt);
+    size += ((struct sSifReq *)queue->pad4D98[0] - queue->a) * sizeof(struct sSifReq);
+    size += ((struct sSifRes *)queue->pad4DA4[0] - queue->b) * sizeof(struct sSifRes);
+    size += queue->pad4DB0 - queue->base2;
+    size += ((int *)queue->pad4DB8[1] - (int *)queue->pad4DB8[0]) * sizeof(int);
+    queue->pad4DB8[2] = func_0042ABA0(size);
+    if (queue->pad4DB8[2] == 0) return -2;
+    iop = (queue->pad4DB8[2] & 0xFFFFFFF) | 0xA0000000;
+    queue->pad4DB8[2] = iop;
+    hdr.f0 = *(int *)&queue->buf[0x4D80];
+    hdr.f4 = *(int *)&queue->buf[0x4D84];
     hdr.v[0] = iop + 0x40;
-    hdr.v[1] = hdr.v[0] + (g->end - g->beg) * sizeof(struct sSifEnt);
-    hdr.v[2] = (int)g->beg;
+    hdr.v[1] = hdr.v[0] + (queue->end - queue->beg) * sizeof(struct sSifEnt);
+    hdr.v[2] = (int)queue->beg;
     hdr.v[3] = hdr.v[1];
-    hdr.v[4] = hdr.v[3] + ((struct sSifReq *)g->pad4D98[0] - g->a) * sizeof(struct sSifReq);
-    hdr.v[5] = (int)g->a;
+    hdr.v[4] = hdr.v[3] + ((struct sSifReq *)queue->pad4D98[0] - queue->a) * sizeof(struct sSifReq);
+    hdr.v[5] = (int)queue->a;
     hdr.v[6] = hdr.v[4];
-    hdr.v[7] = hdr.v[6] + ((struct sSifRes *)g->pad4DA4[0] - g->b) * sizeof(struct sSifRes);
-    hdr.v[8] = (int)g->b;
+    hdr.v[7] = hdr.v[6] + ((struct sSifRes *)queue->pad4DA4[0] - queue->b) * sizeof(struct sSifRes);
+    hdr.v[8] = (int)queue->b;
     hdr.v[9] = hdr.v[7];
-    hdr.v[10] = hdr.v[9] + (g->pad4DB0 - g->base2);
-    hdr.v[11] = g->base2;
+    hdr.v[10] = hdr.v[9] + (queue->pad4DB0 - queue->base2);
+    hdr.v[11] = queue->base2;
     hdr.v[12] = hdr.v[10];
-    hdr.v[13] = hdr.v[12] + ((int *)g->pad4DB8[1] - (int *)g->pad4DB8[0]) * sizeof(int);
-    g->pad4D90 = hdr.v[0];
-    g->pad4D98[1] = hdr.v[3];
-    g->pad4DA4[1] = hdr.v[6];
-    g->base1 = hdr.v[9];
+    hdr.v[13] = hdr.v[12] + ((int *)queue->pad4DB8[1] - (int *)queue->pad4DB8[0]) * sizeof(int);
+    queue->pad4D90 = hdr.v[0];
+    queue->pad4D98[1] = hdr.v[3];
+    queue->pad4DA4[1] = hdr.v[6];
+    queue->base1 = hdr.v[9];
     FlushCache(0);
     dma.data = (int)&hdr;
-    dma.addr = g->pad4DB8[2];
+    dma.addr = queue->pad4DB8[2];
     dma.size = 0x40;
     dma.mode = 0;
     id = sceSifSetDma(&dma, 1);
     if (id == 0) return -3;
     while (sceSifDmaStat(id) >= 0) {
     }
-    dma.data = (int)g->a;
-    dma.addr = g->pad4D98[1];
+    dma.data = (int)queue->a;
+    dma.addr = queue->pad4D98[1];
     dma.size = 0x200;
     dma.mode = 0;
     id = sceSifSetDma(&dma, 1);
@@ -1592,32 +1592,32 @@ int func_003F5000(void) {
     while (sceSifDmaStat(id) >= 0) {
     }
     func_00425D38();
-    D_00451340.w = g->pad4DB8[2];
+    D_00451340.w = queue->pad4DB8[2];
     FlushCache(0);
     f5000_61B0(1, &D_00451340, D_00451340.b, 0, 0, 0);
-    g->pad4DC8[1] = 1;
-    g->cnt = ((struct sSifReq *)g->pad4D98[0] - g->a);
-    g->tail = 1;
-    g->head = 1;
-    g->pad4DE4 = g->pad4DB0 - g->base2;
+    queue->pad4DC8[1] = 1;
+    queue->cnt = ((struct sSifReq *)queue->pad4D98[0] - queue->a);
+    queue->tail = 1;
+    queue->head = 1;
+    queue->pad4DE4 = queue->pad4DB0 - queue->base2;
     f5000_6210(&sema, 0, sizeof(sema));
     sema.init_count = 1;
     sema.max_count = 1;
     sema.option = 0;
-    g->sema = CreateSema(&sema);
-    g->h4DEC = -1;
-    g->h4DF0 = -1;
+    queue->sema = CreateSema(&sema);
+    queue->h4DEC = -1;
+    queue->h4DF0 = -1;
     tp.func = func_003F44F8;
     tp.initPriority = 10;
     tp.stack = D_00523F00;
     tp.stackSize = 0x2000;
     tp.gpReg = &_gp;
     tp.option = 0;
-    g->h4DE8 = CreateThread(&tp);
-    if (g->h4DE8 <= 0) return -5;
-    g->h4DF4 = func_00423A90(2, func_003F4410, -1, g);
+    queue->h4DE8 = CreateThread(&tp);
+    if (queue->h4DE8 <= 0) return -5;
+    queue->h4DF4 = func_00423A90(2, func_003F4410, -1, queue);
     func_004248E8(2);
-    StartThread(g->h4DE8, g);
+    StartThread(queue->h4DE8, queue);
     D_004A4BB0 = 1;
     return 0;
 }
@@ -1647,13 +1647,13 @@ extern void DeleteSema(int);
  * @return 0
  */
 int func_003F53F8(void) {
-    struct sSifQueue *q = &D_0051F0C0;
-    if (q->h4DEC >= 0) func_00423B30(q->h4DEC);
-    if (q->h4DF0 >= 0) func_00423B30(q->h4DF0);
-    RemoveIntcHandler(2, q->h4DF4);
-    TerminateThread(q->h4DE8);
-    DeleteThread(q->h4DE8);
-    DeleteSema(q->sema);
+    struct sSifQueue *queue = &D_0051F0C0;
+    if (queue->h4DEC >= 0) func_00423B30(queue->h4DEC);
+    if (queue->h4DF0 >= 0) func_00423B30(queue->h4DF0);
+    RemoveIntcHandler(2, queue->h4DF4);
+    TerminateThread(queue->h4DE8);
+    DeleteThread(queue->h4DE8);
+    DeleteSema(queue->sema);
     D_004A4BB0 = 0;
     return 0;
 }
@@ -1700,29 +1700,29 @@ extern int func_003F4C68(char *, int, int, int, int, int, int, int, int, int);
  * @return the session, or 0
  */
 int *func_003F5478(int size) {
-    int *p;
+    int *session;
 
     if (size < 0x1000) size = 0x1000;
     if (size > 0x2000) size = 0x2000;
 
-    p = RpcAlloc(size + 156);
-    if (p == 0) return 0;
-    f6210h(p, 0, 156);
-    p[1] = ((int)p + 0x5B) & ~0x3F;
-    p[5] = size;
-    p[6] = p[1] + 0x40;
-    f6210h((void *)p[1], 0, 0x20);
-    f6210h((void *)p[6], 0, p[5]);
-    func_00424698(p[1], p[1] + 0x20);
-    func_00424698(p[6], p[6] + p[5]);
+    session = RpcAlloc(size + 156);
+    if (session == 0) return 0;
+    f6210h(session, 0, 156);
+    session[1] = ((int)session + 0x5B) & ~0x3F;
+    session[5] = size;
+    session[6] = session[1] + 0x40;
+    f6210h((void *)session[1], 0, 0x20);
+    f6210h((void *)session[6], 0, session[5]);
+    func_00424698(session[1], session[1] + 0x20);
+    func_00424698(session[6], session[6] + session[5]);
     FlushCache(0);
     func_003F4C98(D_00525F00, 'sess', 'crea');
-    func_003F4C68(D_00525F00, 1, 0, size, 0, 0, 0, 0, 1, (int)p);
-    if (p[0] == 0) {
-        func_00256BD8(p);
-        p = 0;
+    func_003F4C68(D_00525F00, 1, 0, size, 0, 0, 0, 0, 1, (int)session);
+    if (session[0] == 0) {
+        func_00256BD8(session);
+        session = 0;
     }
-    return p;
+    return session;
 }
 #endif
 
@@ -1736,12 +1736,12 @@ extern void func_00256BD8(int *);
 /**
  * Destroys a network packet session: sends 'sess'/'dest' for its id and waits, then frees it (func_00256BD8).
  *
- * @param p  the session
+ * @param session  the session
  */
-void func_003F55B8(int *p) {
+void func_003F55B8(int *session) {
     func_003F4C98(D_00525F10, 'sess', 'dest');
-    func_003F4C68(D_00525F10, 1, *p, 0, 0, 0, 0, 0, 1, 0);
-    func_00256BD8(p);
+    func_003F4C68(D_00525F10, 1, *session, 0, 0, 0, 0, 0, 1, 0);
+    func_00256BD8(session);
 }
 #endif
 
@@ -1769,7 +1769,7 @@ typedef struct { unsigned short family; unsigned short port; int addr; int z8; i
  * @return 0, or -1 when already connected
  */
 int func_003F5638(struct sSess *self, unsigned addr, int port) {
-    unsigned v;
+    unsigned addrShift;
     if (((SA5638 *)self->f4)->family != 0) return -1;
     ((SA5638 *)self->f4)->family = 2;
     ((SA5638 *)self->f4)->port = 0;
@@ -1778,14 +1778,14 @@ int func_003F5638(struct sSess *self, unsigned addr, int port) {
     ((SA5638 *)self->f4)->zC = 0;
     ((unsigned char *)self->f4)[2] = port >> 8;
     ((unsigned char *)self->f4)[3] = port;
-    v = addr;
-    ((unsigned char *)self->f4)[7] = v;
-    v >>= 8;
-    ((unsigned char *)self->f4)[6] = v;
-    v >>= 8;
-    ((unsigned char *)self->f4)[5] = v;
-    v >>= 8;
-    ((unsigned char *)self->f4)[4] = v;
+    addrShift = addr;
+    ((unsigned char *)self->f4)[7] = addrShift;
+    addrShift >>= 8;
+    ((unsigned char *)self->f4)[6] = addrShift;
+    addrShift >>= 8;
+    ((unsigned char *)self->f4)[5] = addrShift;
+    addrShift >>= 8;
+    ((unsigned char *)self->f4)[4] = addrShift;
     func_00424698(self->f4, self->f4 + 0x20);
     func_003F4C98(D_00525F20, 'sess', 'conn');
     func_003F4C68(D_00525F20, 0, self->f0, 0, self->f4, 0x10, 0, 0, 0, 0);
@@ -1883,13 +1883,13 @@ extern void c59_5908(int *) __asm__("func_003F5908");
  * sent as a two-piece gather list. A negative @p len means @p str is a C string sent with its NUL. BuddyApi sends its
  * tag-text commands this way (kind 'AUTH', 'PSET', ...).
  *
- * @param a  packet kind (four characters)
- * @param b  packet argument word
+ * @param packetKind  packet kind (four characters)
+ * @param packetArg  packet argument word
  * @param str  packet data
  * @param len  data length, or negative for a C string
  * @return 0
  */
-int func_003F5910(int *self, int a, int b, char *str, int len) {
+int func_003F5910(int *self, int packetKind, int packetArg, char *str, int len) {
     unsigned char hdr[12];
     IO5910 io;
     c59_5908(self);
@@ -1901,14 +1901,14 @@ int func_003F5910(int *self, int a, int b, char *str, int len) {
     hdr[9] = len >> 16;
     hdr[10] = len >> 8;
     hdr[11] = len;
-    hdr[0] = a >> 24;
-    hdr[1] = a >> 16;
-    hdr[2] = a >> 8;
-    hdr[3] = a;
-    hdr[4] = b >> 24;
-    hdr[5] = b >> 16;
-    hdr[6] = b >> 8;
-    hdr[7] = b;
+    hdr[0] = packetKind >> 24;
+    hdr[1] = packetKind >> 16;
+    hdr[2] = packetKind >> 8;
+    hdr[3] = packetKind;
+    hdr[4] = packetArg >> 24;
+    hdr[5] = packetArg >> 16;
+    hdr[6] = packetArg >> 8;
+    hdr[7] = packetArg;
     io.n0 = 0xC;
     io.p = hdr;
     io.n = len - 0xC;
@@ -1934,16 +1934,16 @@ int func_003F5A50_cb(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int
  * Called by func_003F4A78 with the reply's words; stores the received length (the eighth argument, reply word +0xC) in
  * +0x10 and clears the read offset (+0xC) and the receive-pending flag (+0x8).
  *
- * @param a0  request key (unused)
- * @param a1  request flags (unused)
- * @param a2  reply word +0x10 (unused)
- * @param a3  reply result word (unused)
- * @param a4  payload address (unused)
- * @param a5  payload size (unused)
- * @param a6  reply word +0x8 (unused)
+ * @param requestKey  request key (unused)
+ * @param requestFlags  request flags (unused)
+ * @param replyWord10  reply word +0x10 (unused)
+ * @param replyResult  reply result word (unused)
+ * @param payloadAddr  payload address (unused)
+ * @param payloadSize  payload size (unused)
+ * @param replyWord8  reply word +0x8 (unused)
  * @param len  number of bytes received
  */
-int func_003F5A50_cb(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int len, struct sSess *self) {
+int func_003F5A50_cb(int requestKey, int requestFlags, int replyWord10, int replyResult, int payloadAddr, int payloadSize, int replyWord8, int len, struct sSess *self) {
     self->f10 = len;
     self->fC = 0;
     self->f8 = 0;
@@ -1970,15 +1970,15 @@ extern int func_003F5A50(void);
  * When every received byte has been read (+0xC >= +0x10) and no receive is pending (+0x8), it marks one pending,
  * invalidates the cache over the receive buffer, resets the counts and sends 'sess'/'recv' with the receive buffer and
  * func_003F5A50 as completion; then returns -1. Otherwise it parses the 12-byte header at the read offset: kind and
- * argument (big-endian) go to *@p o1 / *@p o2, and *@p o3 points at the data, NUL-terminated by overwriting its last
+ * argument (big-endian) go to *@p kindOut / *@p argOut, and *@p dataOut points at the data, NUL-terminated by overwriting its last
  * byte (or at an empty string when there is none). The packet stays unread; func_003F5C38 consumes it.
  *
- * @param o1  receives the packet kind (may be 0)
- * @param o2  receives the packet argument (may be 0)
- * @param o3  receives the data pointer (may be 0)
+ * @param kindOut  receives the packet kind (may be 0)
+ * @param argOut  receives the packet argument (may be 0)
+ * @param dataOut  receives the data pointer (may be 0)
  * @return the data length, or -1 when no packet is waiting
  */
-int func_003F5A70(struct sSess *self, unsigned *o1, unsigned *o2, char **o3) {
+int func_003F5A70(struct sSess *self, unsigned *kindOut, unsigned *argOut, char **dataOut) {
     int n;
     if (self->fC >= self->f10) {
         if (self->f8 == 0 && self->fC >= self->f10) {
@@ -1993,15 +1993,15 @@ int func_003F5A70(struct sSess *self, unsigned *o1, unsigned *o2, char **o3) {
         }
         return -1;
     } else {
-        unsigned char *e = self->f18 + self->fC;
-        char *u = (char *)(self->f18 + self->fC) + 0xC;
-        n = e[8] << 24 | e[9] << 16 | e[10] << 8 | e[11];
+        unsigned char *header = self->f18 + self->fC;
+        char *payload = (char *)(self->f18 + self->fC) + 0xC;
+        n = header[8] << 24 | header[9] << 16 | header[10] << 8 | header[11];
         n -= 0xC;
-        if (n < 1) u = D_004A4BB8;
-        else u[n - 1] = 0;
-        if (o1) *o1 = e[0] << 24 | e[1] << 16 | e[2] << 8 | e[3];
-        if (o2) *o2 = e[4] << 24 | e[5] << 16 | e[6] << 8 | e[7];
-        if (o3) *o3 = u;
+        if (n < 1) payload = D_004A4BB8;
+        else payload[n - 1] = 0;
+        if (kindOut) *kindOut = header[0] << 24 | header[1] << 16 | header[2] << 8 | header[3];
+        if (argOut) *argOut = header[4] << 24 | header[5] << 16 | header[6] << 8 | header[7];
+        if (dataOut) *dataOut = payload;
         return n;
     }
 }
@@ -2025,24 +2025,24 @@ int func_003F5C38_impl(struct sSess *self, int a, int b, char *buf, int max) __a
 /**
  * Reads and consumes the next received packet of a network packet session.
  *
- * Peeks with func_003F5A70 (kind and argument to @p a / @p b), copies up to @p max data bytes into @p buf when given,
+ * Peeks with func_003F5A70 (kind and argument to @p kindOut / @p argOut), copies up to @p max data bytes into @p buf when given,
  * and advances the read offset past the packet. When that empties the buffer and no receive is pending it starts the
  * next 'sess'/'recv' as func_003F5A70 does. BuddyApi passes no outputs, just to drop the packet it peeked.
  *
- * @param a  receives the packet kind (may be 0)
- * @param b  receives the packet argument (may be 0)
+ * @param kindOut  receives the packet kind (may be 0)
+ * @param argOut  receives the packet argument (may be 0)
  * @param buf  data output (may be 0)
  * @param max  data output size
  * @return the data length, or -1 when no packet is waiting
  */
-int func_003F5C38_impl(struct sSess *self, int a, int b, char *buf, int max) {
-    int t;
-    int n = c38_5A70(self, a, b, 0);
+int func_003F5C38_impl(struct sSess *self, int kindOut, int argOut, char *buf, int max) {
+    int dataStart;
+    int n = c38_5A70(self, kindOut, argOut, 0);
     if (n >= 0) {
         if (n < max) max = n;
         if (buf) c38_605C(buf, self->f18 + self->fC + 0xC, max);
-        t = self->fC + 0xC;
-        self->fC = t + n;
+        dataStart = self->fC + 0xC;
+        self->fC = dataStart + n;
         if (self->fC >= self->f10 && self->f8 == 0 && self->fC >= self->f10) {
             self->f8 = 1;
             if (self->f10 > 0) {
@@ -2178,12 +2178,12 @@ extern int sceUsbKbGetInfo(char *);
  */
 void func_003F5F08(void) {
     int i;
-    char *p;
+    char *kbState;
     for (i = 0; i < D_00525F80.cnt; i++) D_00525F80.prev[i] = D_00525F80.v[i];
     if (sceUsbKbGetInfo(D_00525F88) == 0) {
-        p = D_00525F88 - 8;
-        *(int *)(p + 0x9C) = 1;
-        p[0xA0] = 1;
+        kbState = D_00525F88 - 8;
+        *(int *)(kbState + 0x9C) = 1;
+        kbState[0xA0] = 1;
     }
 }
 #endif
@@ -2208,17 +2208,17 @@ extern int f810(int, int *) __asm__("func_0040C810");
  * @return the poll result: nonzero while the query is still running
  */
 int func_003F5F88(void) {
-    int tmp;
-    int r;
+    int syncResult;
+    int syncBusy;
     int i;
-    r = f810(1, &tmp);
-    if (r != 0) return r;
+    syncBusy = f810(1, &syncResult);
+    if (syncBusy != 0) return syncBusy;
     for (i = 0; i < D_00525F80.cnt; i++) {
         if (D_00525F80.prev[i] != D_00525F80.v[i]) D_00525F80.cb1(i, D_00525F80.v[i]);
     }
     D_00525F80.flag = 0;
     D_00525F80.st = 0;
-    return r;
+    return syncBusy;
 }
 #endif
 
@@ -2238,8 +2238,8 @@ extern struct sKb D_00525F80;
  * @return the keyboard index, or -1 when there is none
  */
 int func_003F6040(int i) {
-    int c;
-    for (c = 0; c < D_00525F80.cnt; c++) {
+    int checked;
+    for (checked = 0; checked < D_00525F80.cnt; checked++) {
         if (i >= D_00525F80.cnt) i = 0;
         if (D_00525F80.v[i] != 0) {
             if (*(unsigned char *)(D_00525F80.ents + i * 0x8C + 0x88) == 0) return i;
@@ -2268,13 +2268,13 @@ extern int sceUsbKbRead(int, int *);
  */
 void func_003F60B8(void) {
     int id = func_003F6040(D_00525F80.cur + 1);
-    int *e;
+    int *readBuf;
     if (id != -1) {
         D_00525F80.cur = id;
-        e = (int *)(D_00525F80.ents + id * 0x8C);
-        D_00525F80.a = e[0];
-        D_00525F80.b = e[1];
-        if (sceUsbKbRead(id, e) == 0) {
+        readBuf = (int *)(D_00525F80.ents + id * 0x8C);
+        D_00525F80.a = readBuf[0];
+        D_00525F80.b = readBuf[1];
+        if (sceUsbKbRead(id, readBuf) == 0) {
             D_00525F80.st = 2;
             D_00525F80.flag = 1;
         }
@@ -2302,17 +2302,17 @@ extern int f810(int, int *) __asm__("func_0040C810");
  * @return 0, or func_0040C810's error (-1 when the keyboard library is not running)
  */
 int func_003F6138(void) {
-    int tmp;
-    int r;
-    r = f810(0, &tmp);
-    if (r != 0) return r;
+    int syncResult;
+    int syncStatus;
+    syncStatus = f810(0, &syncResult);
+    if (syncStatus != 0) return syncStatus;
     {
-        int *e = (int *)(D_00525F80.ents + D_00525F80.cur * 0x8C);
-        if (e[2] > 0 || e[1] != D_00525F80.b || e[0] != D_00525F80.a) ((unsigned char *)e)[0x88] = 1;
+        int *readBuf = (int *)(D_00525F80.ents + D_00525F80.cur * 0x8C);
+        if (readBuf[2] > 0 || readBuf[1] != D_00525F80.b || readBuf[0] != D_00525F80.a) ((unsigned char *)readBuf)[0x88] = 1;
     }
     D_00525F80.flag = 0;
     D_00525F80.st = 0;
-    return r;
+    return syncStatus;
 }
 #endif
 
@@ -2405,10 +2405,10 @@ extern int func_003F5E90_62F8(int, int) __asm__("func_003F5E90");
  * @return 0, or the OR of the error values of the unloads that failed
  */
 int func_003F62F8(void) {
-    int r;
+    int unloadErrors;
     func_0040C220();
-    r = func_003F5E90_62F8(D_00525F80.fd[1], 1);
-    return r | func_003F5E90_62F8(D_00525F80.fd[0], 2);
+    unloadErrors = func_003F5E90_62F8(D_00525F80.fd[1], 1);
+    return unloadErrors | func_003F5E90_62F8(D_00525F80.fd[0], 2);
 }
 #endif
 
@@ -2467,9 +2467,9 @@ extern int D_00526038[];
 /**
  * Sets how many reader updates pass between USB keyboard connection queries (D_00525F80 +0xB8).
  *
- * @param a0  the period in updates
+ * @param queryPeriod  the period in updates
  */
-void func_003F63E0(int a0) { D_00526038[0] = a0; }
+void func_003F63E0(int queryPeriod) { D_00526038[0] = queryPeriod; }
 #endif
 
 //100%
@@ -2546,10 +2546,10 @@ extern struct sKb D_00525F80;
 /**
  * Returns whether a USB keyboard is connected (its flag at D_00525F80 +0x10).
  *
- * @param a0  keyboard index
+ * @param keyboard  keyboard index
  * @return 1 when connected, else 0
  */
-int func_003F6520(int a0) { return D_00525F80.v[a0] != 0; }
+int func_003F6520(int keyboard) { return D_00525F80.v[keyboard] != 0; }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -2585,13 +2585,13 @@ extern short D_004513DC[], D_0045133A[], D_00451350[];
  * Returns the 2-byte key-map entry for a USB key code in the alternate layout: codes 46..53 use D_004513DC, codes
  * 135..139 D_0045133A, every other code the default map D_00451350 (all indexed by the code).
  *
- * @param c  USB HID key code
+ * @param keyCode  USB HID key code
  * @return the key-map entry
  */
-short *func_003F65A0(unsigned int c) {
-    if (c - 46 < 8) return &D_004513DC[c];
-    if (c - 135 >= 5) return &D_00451350[c];
-    return &D_0045133A[c];
+short *func_003F65A0(unsigned int keyCode) {
+    if (keyCode - 46 < 8) return &D_004513DC[keyCode];
+    if (keyCode - 135 >= 5) return &D_00451350[keyCode];
+    return &D_0045133A[keyCode];
 }
 #endif
 
@@ -2610,19 +2610,19 @@ extern short *func_003F65A0(unsigned int);
  * @param out  receives the virtual-key byte
  * @param flags  the keyboard read buffer (LED word first)
  * @param mode  key-map mode
- * @param c  USB HID key code
+ * @param keyCode  USB HID key code
  */
-void func_003F65F8(char *out, char *flags, int mode, int c) {
-    unsigned char *p;
-    unsigned int t;
-    if ((*(int *)flags & 1) && (t = c - 89, t < 11)) {
-        p = (unsigned char *)&D_00451420[t];
+void func_003F65F8(char *out, char *flags, int mode, int keyCode) {
+    unsigned char *mapEntry;
+    unsigned int keypadIndex;
+    if ((*(int *)flags & 1) && (keypadIndex = keyCode - 89, keypadIndex < 11)) {
+        mapEntry = (unsigned char *)&D_00451420[keypadIndex];
     } else if (mode == 0) {
-        p = (unsigned char *)&D_00451350[c];
+        mapEntry = (unsigned char *)&D_00451350[keyCode];
     } else {
-        p = (unsigned char *)func_003F65A0(c);
+        mapEntry = (unsigned char *)func_003F65A0(keyCode);
     }
-    *out = p[1];
+    *out = mapEntry[1];
 }
 #endif
 
@@ -2646,13 +2646,13 @@ void func_003F6670_impl(unsigned char *self, int *fl, int kb, unsigned code) __a
  * @param code  USB HID key code
  */
 void func_003F6670_impl(unsigned char *self, int *fl, int kb, unsigned code) {
-    unsigned t = code - 84;
-    if (t < 0x10) {
-        if (code < 89 || (fl[0] & 1)) self[1] = D_00451458[t];
+    unsigned keypadIndex = code - 84;
+    if (keypadIndex < 0x10) {
+        if (code < 89 || (fl[0] & 1)) self[1] = D_00451458[keypadIndex];
         else self[1] = 0;
     } else {
-        int r = f268(kb, fl[1], fl[0], code & 0xFFFF);
-        if (r < 0x100) self[1] = r;
+        int converted = f268(kb, fl[1], fl[0], code & 0xFFFF);
+        if (converted < 0x100) self[1] = converted;
         else self[1] = 0;
     }
 }
@@ -2678,22 +2678,22 @@ int func_003F6700_impl(unsigned flags, unsigned key, unsigned *out) __asm__("fun
  */
 int func_003F6700_impl(unsigned flags, unsigned key, unsigned *out) {
     int ok = 1;
-    unsigned v = 0;
+    unsigned modifierBits = 0;
     switch (key) {
-    case 91: v = flags & 0x8; break;
-    case 163: v = flags & 0x10; break;
-    case 161: v = flags & 0x20; break;
+    case 91: modifierBits = flags & 0x8; break;
+    case 163: modifierBits = flags & 0x10; break;
+    case 161: modifierBits = flags & 0x20; break;
     case 160:
-    case 0x10: v = flags & 0x2; break;
+    case 0x10: modifierBits = flags & 0x2; break;
     case 18:
-    case 164: v = flags & 0x4; break;
-    case 17: v = flags & 0x11; break;
-    case 92: v = flags & 0x80; break;
-    case 162: v = flags & 0x1; break;
-    case 165: v = flags & 0x40; break;
+    case 164: modifierBits = flags & 0x4; break;
+    case 17: modifierBits = flags & 0x11; break;
+    case 92: modifierBits = flags & 0x80; break;
+    case 162: modifierBits = flags & 0x1; break;
+    case 165: modifierBits = flags & 0x40; break;
     default: ok = 0; break;
     }
-    if (ok) *out = v;
+    if (ok) *out = modifierBits;
     return ok;
 }
 #endif
@@ -2772,15 +2772,15 @@ extern void func_003F6670(char *, char *, int, int);
  * Translates one key code of a USB keyboard read buffer into the static pair D_004A5B10: virtual-key byte
  * (func_003F65F8) and character (func_003F6670).
  *
- * @param a  the read buffer (key codes from +0xC)
- * @param b  key-map mode / layout
- * @param c  index of the key code
+ * @param readBuf  the read buffer (key codes from +0xC)
+ * @param mapMode  key-map mode / layout
+ * @param keyIndex  index of the key code
  * @return D_004A5B10 (overwritten by the next call)
  */
-char *func_003F68F0(char *a, int b, int c) {
-    unsigned int v = *(unsigned short *)(a + (c << 1) + 12);
-    func_003F65F8(&D_004A5B10, a, b, v);
-    func_003F6670(&D_004A5B10, a, b, v);
+char *func_003F68F0(char *readBuf, int mapMode, int keyIndex) {
+    unsigned int keyCode = *(unsigned short *)(readBuf + (keyIndex << 1) + 12);
+    func_003F65F8(&D_004A5B10, readBuf, mapMode, keyCode);
+    func_003F6670(&D_004A5B10, readBuf, mapMode, keyCode);
     return &D_004A5B10;
 }
 #endif
@@ -2807,23 +2807,23 @@ void func_003F6960_impl(int a, int b, int c, int d, int e) __asm__("func_003F696
  * Calls the voice-chat IOP module (VOIPF) through its SIF RPC client.
  *
  * Only when bound (D_004A5B14): waits for the previous call to finish (func_00426F08), puts two words in the send
- * buffer D_00526080 and calls RPC function @p a (func_00426D18 on the client D_00526100, 0x80-byte send buffer),
+ * buffer D_00526080 and calls RPC function @p rpcFunc (func_00426D18 on the client D_00526100, 0x80-byte send buffer),
  * retrying until the call is accepted.
  *
- * @param a  RPC function number
- * @param b  first argument word
- * @param c  second argument word
- * @param d  receive buffer
- * @param e  receive buffer size
+ * @param rpcFunc  RPC function number
+ * @param argWord0  first argument word
+ * @param argWord1  second argument word
+ * @param recvBuf  receive buffer
+ * @param recvSize  receive buffer size
  */
-void func_003F6960_impl(int a, int b, int c, int d, int e) {
-    struct sRpcSend *r = D_00526080;
+void func_003F6960_impl(int rpcFunc, int argWord0, int argWord1, int recvBuf, int recvSize) {
+    struct sRpcSend *sendBuf = D_00526080;
     if (D_004A5B14) {
         while (f6F08(D_00526100) > 0) ;
-        r->a = b;
-        r->b = c;
+        sendBuf->a = argWord0;
+        sendBuf->b = argWord1;
         do {
-            if (f6D18(D_00526100, a, 0, D_00526080, 0x80, d, e, 0, 0) >= 0) break;
+            if (f6D18(D_00526100, rpcFunc, 0, D_00526080, 0x80, recvBuf, recvSize, 0, 0) >= 0) break;
         } while (1);
     }
 }
@@ -2855,12 +2855,12 @@ extern void func_003F6960b(int, int, int, int *, int) __asm__("func_003F6960");
  * initOnline calls it when VOIPF.IRX loaded. Quirk: the bind result is not checked.
  */
 void func_003F6A40(void) {
-    int *p;
+    int *statusWord;
     D_004A5B14 = 1;
     func_00426B48(D_00526100, 567, 0);
-    p = (int *)(((int)D_005261C0 & 0xFFFFFFF) | 0x20000000);
-    D_004A5B18 = p;
-    func_003F6960b(0, (int)p, 0, D_00526140, 0x80);
+    statusWord = (int *)(((int)D_005261C0 & 0xFFFFFFF) | 0x20000000);
+    D_004A5B18 = statusWord;
+    func_003F6960b(0, (int)statusWord, 0, D_00526140, 0x80);
 }
 #endif
 
@@ -2890,12 +2890,12 @@ extern int func_003F6960(int, int, int, int *, int);
  *
  * The voice manager (func_00266D58) passes ports 6000 / 6000.
  *
- * @param a  peer address
- * @param b  first port (low half)
- * @param c  second port (high half)
+ * @param peerAddr  peer address
+ * @param firstPort  first port (low half)
+ * @param secondPort  second port (high half)
  * @return no meaningful value (func_003F6960 returns nothing)
  */
-int func_003F6AB8(int a, unsigned short b, int c) { return func_003F6960(2, a, b | (c << 16), D_00526140, 0x80); }
+int func_003F6AB8(int peerAddr, unsigned short firstPort, int secondPort) { return func_003F6960(2, peerAddr, firstPort | (secondPort << 16), D_00526140, 0x80); }
 #endif
 
 //100%
@@ -2965,13 +2965,13 @@ extern void func_003F6960b(int, int, int, int *, int) __asm__("func_003F6960");
 /**
  * Reads the voice level and its maximum from the voice module: RPC function 7, then the first two received words.
  *
- * @param a  receives the level
- * @param b  receives the maximum
+ * @param levelOut  receives the level
+ * @param maxOut  receives the maximum
  */
-void func_003F6BA0(int *a, int *b) {
+void func_003F6BA0(int *levelOut, int *maxOut) {
     func_003F6960b(7, 0, 0, D_00526140, 0x80);
-    *a = D_00526140[0];
-    *b = D_00526140[1];
+    *levelOut = D_00526140[0];
+    *maxOut = D_00526140[1];
 }
 #endif
 
@@ -2985,10 +2985,10 @@ extern int func_003F6960(int, int, int, int *, int);
 /**
  * Sets the voice level: RPC function 6 with the level and the maximum.
  *
- * @param a  voice level
- * @param b  maximum level
+ * @param level  voice level
+ * @param maxLevel  maximum level
  */
-void func_003F6C10(int a, int b) { func_003F6960(6, a, b, D_00526140, 0x80); }
+void func_003F6C10(int level, int maxLevel) { func_003F6960(6, level, maxLevel, D_00526140, 0x80); }
 #endif
 
 //100%
@@ -3086,29 +3086,29 @@ int func_003F6C70_impl(int *arg) __asm__("func_003F6C70");
 /**
  * Creates the network-account session D_004A4BC4 (0x14C bytes).
  *
- * Allocates it from the heap @p arg[1] with func_00266728 and zeroes it, keeps the heap (+0x140), copies the 17
- * memory-card callbacks from the table @p arg[0] into its head, and sets it idle: operation 4 (+0xD0, +0x104), mode 10
+ * Allocates it from the heap @p initParams[1] with func_00266728 and zeroes it, keeps the heap (+0x140), copies the 17
+ * memory-card callbacks from the table @p initParams[0] into its head, and sets it idle: operation 4 (+0xD0, +0x104), mode 10
  * (+0xD8), phase 5 (+0xEC), +0x148 and +0x138 0, +0x13C -1 (so +0x138 is the port list {0, -1} for func_003F6DC8).
  *
- * @param arg  {callback table, heap}
+ * @param initParams  {callback table, heap}
  * @return 0
  */
-int func_003F6C70_impl(int *arg) {
-    struct sNetAcct *d;
-    struct sNetAcct *e;
-    D_004A4BC4 = f6728(arg[1], 332, 4);
+int func_003F6C70_impl(int *initParams) {
+    struct sNetAcct *session;
+    struct sNetAcct *sessionReload;
+    D_004A4BC4 = f6728(initParams[1], 332, 4);
     f6210x(D_004A4BC4, 0, 332);
-    d = D_004A4BC4;
-    d->heap = arg[1];
-    d->hdr = *(struct sNetHdr *)arg[0];
-    e = D_004A4BC4;
-    e->st = 4;
-    e->f104 = 4;
-    e->f148 = 0;
-    e->f138 = 0;
-    e->cur.mode = 10;
-    e->cur.fEC = 5;
-    e->f13C = -1;
+    session = D_004A4BC4;
+    session->heap = initParams[1];
+    session->hdr = *(struct sNetHdr *)initParams[0];
+    sessionReload = D_004A4BC4;
+    sessionReload->st = 4;
+    sessionReload->f104 = 4;
+    sessionReload->f148 = 0;
+    sessionReload->f138 = 0;
+    sessionReload->cur.mode = 10;
+    sessionReload->cur.fEC = 5;
+    sessionReload->f13C = -1;
     return 0;
 }
 #endif
@@ -3161,11 +3161,11 @@ typedef struct { int a; int *p; struct sNetAcct *d; K6DC8 *buf; int len; int r; 
 int func_003F6DC8(void) {
     K6DC8 buf;
     R6DC8 req;
-    struct sNetAcct *d = D_004A4BC4;
+    struct sNetAcct *session = D_004A4BC4;
     buf = D_00497060;
     req.a = 2;
-    req.p = &d->f138;
-    req.d = d;
+    req.p = &session->f138;
+    req.d = session;
     req.len = 26;
     req.buf = &buf;
     req.r = fB800();
@@ -3202,17 +3202,17 @@ extern int func_003F7990(int);
  *
  * Operations: 0 create the account save, 1 save the name and password, 2 load them, 3 delete the save.
  *
- * @param a  the operation
+ * @param operation  the operation
  * @return 0, or 22 when an operation is already running
  */
-int func_003F6E98(int a) {
-    int r = 0;
+int func_003F6E98(int operation) {
+    int errorCode = 0;
     if (D_004A4BC4->st == 4) {
-        func_003F7990(a);
+        func_003F7990(operation);
     } else {
-        r = 22;
+        errorCode = 22;
     }
-    return r;
+    return errorCode;
 }
 #endif
 
@@ -3235,13 +3235,13 @@ extern struct sNetAcct *D_004A4BC4;
  * @return 0 or an error code
  */
 int func_003F6EE0(int *out) {
-    int err = 0; struct sNetAcct *d;
+    int err = 0; struct sNetAcct *session;
     *out = 0;
     if (out == 0) err = 7;
-    d = D_004A4BC4;
-    if (d->st >= 4) err = 0xF;
+    session = D_004A4BC4;
+    if (session->st >= 4) err = 0xF;
     if (err == 0) {
-        if (D_004A4BC4->cur.mode < 9) err = ((int (*)(int *, struct sNetAcct *))d->cur.fDC)(out, d);
+        if (D_004A4BC4->cur.mode < 9) err = ((int (*)(int *, struct sNetAcct *))session->cur.fDC)(out, session);
         else ((void (*)(int *, int *))D_004A4BC4->cur.fE8)(out, &err);
     }
     return err;
@@ -3269,18 +3269,18 @@ typedef struct { unsigned char b[0x18]; } B6F68;
  * @return 0 or an error code
  */
 int func_003F6F68(int *out) {
-    int t0;
+    int startFailOut;
     int st;
-    int t8;
-    int r;
-    r = 0;
+    int pollFailOut;
+    int result;
+    result = 0;
     *out = 0;
-    if (out == 0) r = 7;
+    if (out == 0) result = 7;
     if (D_004A4BC4->cur.mode >= 9) {
-        if (D_004A4BC4->cur.mode == 10) r = 0xC;
-        else r = 13;
+        if (D_004A4BC4->cur.mode == 10) result = 0xC;
+        else result = 13;
     }
-    if (r == 0) {
+    if (result == 0) {
         switch (D_004A4BC4->cur.fEC) {
         case 4:
             *(B6F68 *)&D_004A4BC4->saved.fEC = *(B6F68 *)&D_004A4BC4->cur.fEC;
@@ -3288,21 +3288,21 @@ int func_003F6F68(int *out) {
             *out = 1;
             break;
         case 0:
-            r = ((int (*)(void))D_004A4BC4->cur.fF0)();
-            if (r == 0) {
+            result = ((int (*)(void))D_004A4BC4->cur.fF0)();
+            if (result == 0) {
                 *(B6F68 *)&D_004A4BC4->saved.fEC = *(B6F68 *)&D_004A4BC4->cur.fEC;
                 D_004A4BC4->cur.fEC = 1;
                 *out = 1;
             } else {
                 *(B6F68 *)&D_004A4BC4->saved.fEC = *(B6F68 *)&D_004A4BC4->cur.fEC;
                 D_004A4BC4->cur.fEC = 2;
-                ((int (*)(int *))D_004A4BC4->cur.fDC)(&t0);
+                ((int (*)(int *))D_004A4BC4->cur.fDC)(&startFailOut);
                 func_003F7D98();
             }
             break;
         case 1:
-            r = ((int (*)(int *))D_004A4BC4->cur.fF4)(&st);
-            if (r == 0) {
+            result = ((int (*)(int *))D_004A4BC4->cur.fF4)(&st);
+            if (result == 0) {
                 *out = 1;
                 if (st == 2) {
                     *out = 2;
@@ -3311,27 +3311,27 @@ int func_003F6F68(int *out) {
             } else {
                 *(B6F68 *)&D_004A4BC4->saved.fEC = *(B6F68 *)&D_004A4BC4->cur.fEC;
                 D_004A4BC4->cur.fEC = 2;
-                ((int (*)(int *))D_004A4BC4->cur.fDC)(&t8);
+                ((int (*)(int *))D_004A4BC4->cur.fDC)(&pollFailOut);
                 func_003F7D98();
             }
             break;
         case 2:
-            r = ((int (*)(void))D_004A4BC4->cur.fF8)();
+            result = ((int (*)(void))D_004A4BC4->cur.fF8)();
             break;
         case 5:
-            r = 0x10;
+            result = 0x10;
             break;
         default:
-            r = 17;
+            result = 17;
             break;
         }
     }
-    if (r == 0) {
-        if (*out == 2) ((void (*)(int *, int *))D_004A4BC4->cur.fE0)(out, &r);
+    if (result == 0) {
+        if (*out == 2) ((void (*)(int *, int *))D_004A4BC4->cur.fE0)(out, &result);
     } else {
-        ((void (*)(int *, int *))D_004A4BC4->cur.fE4)(out, &r);
+        ((void (*)(int *, int *))D_004A4BC4->cur.fE4)(out, &result);
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -3349,14 +3349,14 @@ extern int f7A60c(int, int) __asm__("func_003F7A60");
  * Error handler of network-account modes 0..5: keeps the error in +0x148, clears it and switches to mode 7 (close the
  * save) so the operation reports the error after closing.
  *
- * @param a  receives 1 (still running)
- * @param b  the error; cleared
+ * @param statusOut  receives 1 (still running)
+ * @param errorInOut  the error; cleared
  * @return func_003F7A60's result
  */
-int func_003F71B8(int *a, int *b) {
-    *a = 1;
-    D_004A4BC4->f148 = *b;
-    *b = 0;
+int func_003F71B8(int *statusOut, int *errorInOut) {
+    *statusOut = 1;
+    D_004A4BC4->f148 = *errorInOut;
+    *errorInOut = 0;
     return f7A60c(7, 0);
 }
 #endif
@@ -3392,13 +3392,13 @@ int func_003F7218_impl(int *a, int *b) __asm__("func_003F7218");
  * operation 2; 2 goes to 3 (write PASS), 4 to 5 (read PASS), and 3 and 5 to 6 (close). Enters the new mode with
  * func_003F7A60, saving the current phase block. Any other case fails with 0xC.
  *
- * @param a  receives 1 (still running), or 0 on failure
- * @param b  receives the error on failure
+ * @param statusOut  receives 1 (still running), or 0 on failure
+ * @param errorOut  receives the error on failure
  * @return func_003F7A60's result, or 0xC
  */
-int func_003F7218_impl(int *a, int *b) {
+int func_003F7218_impl(int *statusOut, int *errorOut) {
     int x; int err = 0xC;
-    *a = 1;
+    *statusOut = 1;
     switch (D_004A4BC4->cur.mode) {
     case 0: x = 1; break;
     case 1: { unsigned sel = D_004A4BC4->st;
@@ -3410,7 +3410,7 @@ int func_003F7218_impl(int *a, int *b) {
     }
     return f7A60c(x, 1);
 fail:
-    *b = err; *a = 0; return err;
+    *errorOut = err; *statusOut = 0; return err;
 }
 #endif
 
@@ -3422,9 +3422,9 @@ extern int func_003F7BD0(void);
 /**
  * Next-mode handler of network-account modes 6 and 8: returns the session to idle and reports the operation finished.
  *
- * @param a  receives 2 (finished)
+ * @param statusOut  receives 2 (finished)
  */
-void func_003F72C8(int *a) { func_003F7BD0(); *a = 2; }
+void func_003F72C8(int *statusOut) { func_003F7BD0(); *statusOut = 2; }
 #endif
 
 //100%
@@ -3440,12 +3440,12 @@ extern int func_003F7BD0(void);
  * Handler of network-account mode 7 (closing after an error): hands back the error kept in +0x148, clears it and
  * returns the session to idle.
  *
- * @param a  status output (not written)
- * @param b  receives the kept error
+ * @param statusOut  status output (not written)
+ * @param errorOut  receives the kept error
  * @return func_003F7BD0's result (0)
  */
-int func_003F72F8(int a, int *b) {
-    *b = D_004A4BC4->f148;
+int func_003F72F8(int statusOut, int *errorOut) {
+    *errorOut = D_004A4BC4->f148;
     D_004A4BC4->f148 = 0;
     return func_003F7BD0();
 }
@@ -3468,22 +3468,22 @@ int func_003F7328_impl(int *a, int *b) __asm__("func_003F7328");
  * (delete it); entered with func_003F7A60, saving the phase block. Outside mode 9 or for another operation it fails
  * with 0xC.
  *
- * @param a  receives 1 (still running), or 0 on failure
- * @param b  receives the error on failure
+ * @param statusOut  receives 1 (still running), or 0 on failure
+ * @param errorOut  receives the error on failure
  * @return func_003F7A60's result, or 0xC
  */
-int func_003F7328_impl(int *a, int *b) {
+int func_003F7328_impl(int *statusOut, int *errorOut) {
     int ret;
     if (D_004A4BC4->cur.mode == 9) {
-        *a = 1;
+        *statusOut = 1;
         switch (D_004A4BC4->st) {
         case 0: ret = f7A60c(0, 1); break;
         case 1: case 2: ret = f7A60c(1, 1); break;
         case 3: ret = f7A60c(8, 1); break;
-        default: ret = 0xC; *b = ret; *a = 0; break;
+        default: ret = 0xC; *errorOut = ret; *statusOut = 0; break;
         }
     } else {
-        ret = 0xC; *b = ret; *a = 0;
+        ret = 0xC; *errorOut = ret; *statusOut = 0;
     }
     return ret;
 }
@@ -3510,9 +3510,9 @@ extern int func_003F8178_73A8(int) __asm__("func_003F8178");
  * @return the error mapped by func_003F8178
  */
 int func_003F73A8(void) {
-    struct sNetAcct *p = D_004A4BC4;
-    p->cur.fFC = func_003F77F8;
-    p->cur.f100 = 0;
+    struct sNetAcct *session = D_004A4BC4;
+    session->cur.fFC = func_003F77F8;
+    session->cur.f100 = 0;
     return func_003F8178_73A8(func_003FC390(str_slogin, -1, 0));
 }
 #endif
@@ -3538,9 +3538,9 @@ extern int func_003F8178_73F0(int) __asm__("func_003F8178");
  * @return the error mapped by func_003F8178
  */
 int func_003F73F0(void) {
-    struct sNetAcct *p = D_004A4BC4;
-    p->cur.fFC = func_003F7820_73F0;
-    p->cur.f100 = 0;
+    struct sNetAcct *session = D_004A4BC4;
+    session->cur.fFC = func_003F7820_73F0;
+    session->cur.f100 = 0;
     return func_003F8178_73F0(func_003FC4C8_73F0((int)str_slogin, -1, 0));
 }
 #endif
@@ -3565,9 +3565,9 @@ extern int func_003F8178_7438(int) __asm__("func_003F8178");
  * @return the error mapped by func_003F8178
  */
 int func_003F7438(void) {
-    struct sNetAcct *p = D_004A4BC4;
-    p->cur.fFC = 0;
-    p->cur.f100 = 0;
+    struct sNetAcct *session = D_004A4BC4;
+    session->cur.fFC = 0;
+    session->cur.f100 = 0;
     return func_003F8178_7438(func_003FC3C0(str_slogin, -1, 0));
 }
 #endif
@@ -3599,18 +3599,18 @@ extern int func_003F8178_7478(int) __asm__("func_003F8178");
  * @return the error mapped by func_003F8178
  */
 int func_003F7478(void) {
-    int r;
-    struct sNetAcct *d = D_004A4BC4;
-    d->cur.fFC = fn78E0;
-    d->cur.f100 = fn7920;
-    r = func_003F8178_7478(func_003FCE10((char *)&d->f144, d->heap, 17, 0));
-    if (r == 0) {
-        struct sNetAcct *e = D_004A4BC4;
-        struct sName17 *dst = (struct sName17 *)e->f144;
-        *dst = *(struct sName17 *)e->name;
-        r = func_003F8178_7478(fC548(&D_004A4BC4->params, 0x41434354, 0, (int)D_004A4BC4->f144, 17));
+    int result;
+    struct sNetAcct *session = D_004A4BC4;
+    session->cur.fFC = fn78E0;
+    session->cur.f100 = fn7920;
+    result = func_003F8178_7478(func_003FCE10((char *)&session->f144, session->heap, 17, 0));
+    if (result == 0) {
+        struct sNetAcct *sessionReload = D_004A4BC4;
+        struct sName17 *dst = (struct sName17 *)sessionReload->f144;
+        *dst = *(struct sName17 *)sessionReload->name;
+        result = func_003F8178_7478(fC548(&D_004A4BC4->params, 0x41434354, 0, (int)D_004A4BC4->f144, 17));
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -3637,18 +3637,18 @@ extern int func_003F8178_7528(int) __asm__("func_003F8178");
  * @return the error mapped by func_003F8178
  */
 int func_003F7528(void) {
-    int r;
-    struct sNetAcct *d = D_004A4BC4;
-    d->cur.fFC = fn7900;
-    d->cur.f100 = fn7958;
-    r = func_003F8178_7528(func_003FCE10((char *)&d->f144, d->heap, 17, 0));
-    if (r == 0) {
-        struct sNetAcct *e = D_004A4BC4;
-        struct sName17 *dst = (struct sName17 *)e->f144;
-        *dst = *(struct sName17 *)e->pass;
-        r = func_003F8178_7528(fC548(&D_004A4BC4->params, 0x50415353, 0, (int)D_004A4BC4->f144, 17));
+    int result;
+    struct sNetAcct *session = D_004A4BC4;
+    session->cur.fFC = fn7900;
+    session->cur.f100 = fn7958;
+    result = func_003F8178_7528(func_003FCE10((char *)&session->f144, session->heap, 17, 0));
+    if (result == 0) {
+        struct sNetAcct *sessionReload = D_004A4BC4;
+        struct sName17 *dst = (struct sName17 *)sessionReload->f144;
+        *dst = *(struct sName17 *)sessionReload->pass;
+        result = func_003F8178_7528(fC548(&D_004A4BC4->params, 0x50415353, 0, (int)D_004A4BC4->f144, 17));
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -3675,16 +3675,16 @@ extern int func_003F8178_75D8(int) __asm__("func_003F8178");
  * @return the error mapped by func_003F8178
  */
 int func_003F75D8(void) {
-    int r;
-    struct sNetAcct *d = D_004A4BC4;
-    d->cur.fFC = fn7840;
-    d->cur.f100 = fn7920;
-    r = func_003F8178_75D8(func_003FCE10((char *)&d->f144, d->heap, 17, 0));
-    if (r == 0) {
-        struct sNetAcct *e = D_004A4BC4;
-        r = func_003F8178_75D8(func_003FC708(&e->params, 0x41434354, 0, (int)e->f144, 17));
+    int result;
+    struct sNetAcct *session = D_004A4BC4;
+    session->cur.fFC = fn7840;
+    session->cur.f100 = fn7920;
+    result = func_003F8178_75D8(func_003FCE10((char *)&session->f144, session->heap, 17, 0));
+    if (result == 0) {
+        struct sNetAcct *sessionReload = D_004A4BC4;
+        result = func_003F8178_75D8(func_003FC708(&sessionReload->params, 0x41434354, 0, (int)sessionReload->f144, 17));
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -3711,16 +3711,16 @@ extern int func_003F8178_7658(int) __asm__("func_003F8178");
  * @return the error mapped by func_003F8178
  */
 int func_003F7658(void) {
-    int r;
-    struct sNetAcct *d = D_004A4BC4;
-    d->cur.fFC = fn7890;
-    d->cur.f100 = fn7958;
-    r = func_003F8178_7658(func_003FCE10((char *)&d->f144, d->heap, 17, 0));
-    if (r == 0) {
-        struct sNetAcct *e = D_004A4BC4;
-        r = func_003F8178_7658(func_003FC708(&e->params, 0x50415353, 0, (int)e->f144, 17));
+    int result;
+    struct sNetAcct *session = D_004A4BC4;
+    session->cur.fFC = fn7890;
+    session->cur.f100 = fn7958;
+    result = func_003F8178_7658(func_003FCE10((char *)&session->f144, session->heap, 17, 0));
+    if (result == 0) {
+        struct sNetAcct *sessionReload = D_004A4BC4;
+        result = func_003F8178_7658(func_003FC708(&sessionReload->params, 0x50415353, 0, (int)sessionReload->f144, 17));
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -3741,10 +3741,10 @@ extern int func_003F8178_76D8(int) __asm__("func_003F8178");
  * @return the error mapped by func_003F8178
  */
 int func_003F76D8(void) {
-    struct sNetAcct *p = D_004A4BC4;
-    p->cur.fFC = 0;
-    p->cur.f100 = 0;
-    return func_003F8178_76D8(func_003FC4E8((char *)&p->params));
+    struct sNetAcct *session = D_004A4BC4;
+    session->cur.fFC = 0;
+    session->cur.f100 = 0;
+    return func_003F8178_76D8(func_003FC4E8((char *)&session->params));
 }
 #endif
 
@@ -3771,15 +3771,15 @@ extern int func_003F8178_7708(int) __asm__("func_003F8178");
 int func_003F7708(int *out) {
     int st[2];
     int err;
-    unsigned s;
+    unsigned pollStatus;
     st[0] = 0;
     err = out ? 0 : 7;
     if (err == 0)
         err = func_003F8178_7708(func_003FCA40(st, st + 1));
     if (err == 0) {
-        s = st[0];
+        pollStatus = st[0];
         *out = 0;
-        switch (s) {
+        switch (pollStatus) {
         case 0:
             err = 23;
             break;
@@ -3791,7 +3791,7 @@ int func_003F7708(int *out) {
             if (err != 0)
                 break;
         case 1:
-            *out = s;
+            *out = pollStatus;
             break;
         default:
             err = 18;
@@ -3974,24 +3974,24 @@ extern char fn6EE0[] __asm__("func_003F6EE0");
 extern char fn7328[] __asm__("func_003F7328");
 int f7990(unsigned a) __asm__("func_003F7990");
 /**
- * Begins network-account operation @p a.
+ * Begins network-account operation @p operation.
  *
  * Stores it in +0xD0 and +0x104, installs the operation poll func_003F6EE0 at +0xD4 (only for operations below 4), and
  * sets mode 9 (choose the first card step) with phase 4, the dispatcher func_003F7328 at +0xE8 and every other handler
  * cleared.
  *
- * @param a  operation (0 create, 1 save, 2 load, 3 delete)
+ * @param operation  operation (0 create, 1 save, 2 load, 3 delete)
  * @return 0, or 0xF for an unknown operation
  */
-int f7990(unsigned a) {
-    int r = 0;
+int f7990(unsigned operation) {
+    int errorCode = 0;
     unsigned i;
-    D_004A4BC4->st = a;
-    D_004A4BC4->f104 = a;
-    if (a < 4) {
+    D_004A4BC4->st = operation;
+    D_004A4BC4->f104 = operation;
+    if (operation < 4) {
         D_004A4BC4->fD4 = fn6EE0;
     } else {
-        r = 0xF;
+        errorCode = 0xF;
     }
     D_004A4BC4->cur.mode = 9;
     D_004A4BC4->cur.fEC = 4;
@@ -4006,7 +4006,7 @@ int f7990(unsigned a) {
     D_004A4BC4->cur.fF8 = 0;
     D_004A4BC4->cur.fFC = 0;
     D_004A4BC4->cur.f100 = 0;
-    return r;
+    return errorCode;
 }
 #endif
 
@@ -4026,10 +4026,10 @@ extern int func_003F7BD0(void);
  * @return 0
  */
 int func_003F7A30(void) {
-    struct sNetAcct *p = D_004A4BC4;
-    p->st = 4;
-    p->fD4 = 0;
-    p->cur.fE8 = 0;
+    struct sNetAcct *session = D_004A4BC4;
+    session->st = 4;
+    session->fD4 = 0;
+    session->cur.fE8 = 0;
     return func_003F7BD0();
 }
 #endif
@@ -4128,11 +4128,11 @@ extern int func_003F7D98(void);
  * @return 0
  */
 int func_003F7BD0(void) {
-    struct sNetAcct *p = D_004A4BC4;
-    p->cur.mode = 10;
-    p->cur.fDC = 0;
-    p->cur.fE0 = 0;
-    p->cur.fE4 = 0;
+    struct sNetAcct *session = D_004A4BC4;
+    session->cur.mode = 10;
+    session->cur.fDC = 0;
+    session->cur.fE0 = 0;
+    session->cur.fE4 = 0;
     return func_003F7D98();
 }
 #endif
@@ -4187,9 +4187,9 @@ typedef struct { unsigned char b[0x18]; } B7C00;
  * @return 0, or 13 for a mode of 9 or more
  */
 int func_003F7C00(void) {
-    int r;
+    int errorCode;
     unsigned i;
-    i = r = 0;
+    i = errorCode = 0;
     D_004A4BC4->cur.fEC = 4;
     *(B7C00 *)&D_004A4BC4->saved.fEC = *(B7C00 *)&D_004A4BC4->cur.fEC;
     for (i = 0; i < 3; i++) ;
@@ -4203,19 +4203,19 @@ int func_003F7C00(void) {
     case 6:
     case 7: D_004A4BC4->cur.fF0 = (void *)func_003F76D8; break;
     case 8: D_004A4BC4->cur.fF0 = (void *)func_003F7438; break;
-    default: r = 13;
+    default: errorCode = 13;
     }
-    if (r == 0) {
+    if (errorCode == 0) {
         if (D_004A4BC4->cur.mode < 9) D_004A4BC4->cur.fF4 = (void *)func_003F7708;
-        else r = 13;
-        if (r == 0) {
+        else errorCode = 13;
+        if (errorCode == 0) {
             if (D_004A4BC4->cur.mode < 9) D_004A4BC4->cur.fF8 = (void *)func_003F77F0_7C00;
-            else r = 13;
+            else errorCode = 13;
         }
     }
     D_004A4BC4->cur.fFC = 0;
     D_004A4BC4->cur.f100 = 0;
-    return r;
+    return errorCode;
 }
 #endif
 
@@ -4235,17 +4235,17 @@ extern struct sNetAcct *D_004A4BC4;
  */
 int func_003F7D98(void) {
     unsigned int i;
-    int *p;
-    struct sNetAcct *g = D_004A4BC4;
-    struct sNetAcct *h;
-    g->cur.fEC = 5;
-    p = (int *)&g->cur.fF0;
+    int *handlerSlot;
+    struct sNetAcct *session = D_004A4BC4;
+    struct sNetAcct *sessionReload;
+    session->cur.fEC = 5;
+    handlerSlot = (int *)&session->cur.fF0;
     for (i = 0; i < 3; i++) {
-        *p++ = 0;
+        *handlerSlot++ = 0;
     }
-    h = D_004A4BC4;
-    h->cur.fFC = 0;
-    h->cur.f100 = 0;
+    sessionReload = D_004A4BC4;
+    sessionReload->cur.fFC = 0;
+    sessionReload->cur.f100 = 0;
     return 0;
 }
 #endif
@@ -4261,28 +4261,28 @@ extern V7DE0 *fB5E8(void) __asm__("func_003FB5E8");
 /**
  * Checks the embedded save icon: its 10606 bytes must have the CRC-32 0x0836C71D.
  *
- * Runs the CRC interface from func_003FB5E8 (reset, update over @p a, final) and compares the digest.
+ * Runs the CRC interface from func_003FB5E8 (reset, update over @p iconData, final) and compares the digest.
  *
- * @param a  the icon data (view.ico)
+ * @param iconData  the icon data (view.ico)
  * @return 0 when it matches, 21 when the CRC differs, 0x18 when the CRC interface fails
  */
-int func_003F7DE0(int a) {
+int func_003F7DE0(int iconData) {
     int err = 0;
-    V7DE0 *o = fB5E8();
-    int r;
+    V7DE0 *crcIface = fB5E8();
+    int crcStatus;
     W7DE0 *w;
-    r = o->f0();
-    if (r == 0) {
-        r = o->f1(a, 10606);
-        if (r == 0) {
-            r = o->f2(&w);
-            if (r == 0) {
+    crcStatus = crcIface->f0();
+    if (crcStatus == 0) {
+        crcStatus = crcIface->f1(iconData, 10606);
+        if (crcStatus == 0) {
+            crcStatus = crcIface->f2(&w);
+            if (crcStatus == 0) {
                 err = 21;
                 if (**(unsigned **)((char *)w + 4) == 0x836C71D) err = 0;
             }
         }
     }
-    if (r != 0) return 0x18;
+    if (crcStatus != 0) return 0x18;
     return err;
 }
 #endif
@@ -4374,26 +4374,26 @@ extern int f8258(int) __asm__("func_003F8258");
 /**
  * Starts creating the network-account save (operation 0) with a user name and password.
  *
- * Copies the name (17 bytes) and password (17 bytes at +0x11) from @p b into the session, checks the icon data
+ * Copies the name (17 bytes) and password (17 bytes at +0x11) from @p accountBuf into the session, checks the icon data
  * (func_003F7DE0), builds the save description (func_003F8258) and starts the operation (func_003F6E98(0)). Likely bug:
- * it refuses (7) only when both arguments are 0, so a 0 @p b is copied from.
+ * it refuses (7) only when both arguments are 0, so a 0 @p accountBuf is copied from.
  *
- * @param a  the save icon data (view.ico, 10606 bytes)
- * @param b  the 34-byte account buffer: name, password at +0x11
+ * @param iconData  the save icon data (view.ico, 10606 bytes)
+ * @param accountBuf  the 34-byte account buffer: name, password at +0x11
  * @return 0 or an error code
  */
-int func_003F7F48(int a, int b) {
+int func_003F7F48(int iconData, int accountBuf) {
     int err = 0;
-    if (a == 0 && b == 0) {
+    if (iconData == 0 && accountBuf == 0) {
         err = 7;
     } else {
-        f7E90(D_004A4BC4->name, b, 17);
-        f7E90(D_004A4BC4->pass, b + 17, 17);
+        f7E90(D_004A4BC4->name, accountBuf, 17);
+        f7E90(D_004A4BC4->pass, accountBuf + 17, 17);
     }
     if (err == 0) {
-        err = func_003F7DE0_7F48(a);
+        err = func_003F7DE0_7F48(iconData);
         if (err == 0) {
-            err = f8258(a);
+            err = f8258(iconData);
             if (err == 0) err = func_003F6E98_7F48(0);
         }
     }
@@ -4413,20 +4413,20 @@ extern int func_003F6E98(int);
 /**
  * Starts loading the network-account save (operation 2) into a 34-byte buffer: name at +0, password at +0x11.
  *
- * @param a  the output buffer (kept at +0xCC)
- * @return 0, 7 when @p a is 0, or 22 when busy
+ * @param accountBuf  the output buffer (kept at +0xCC)
+ * @return 0, 7 when @p accountBuf is 0, or 22 when busy
  */
-int func_003F8000(char *a) {
-    int r = 0;
-    if (a == 0) {
-        r = 7;
+int func_003F8000(char *accountBuf) {
+    int errorCode = 0;
+    if (accountBuf == 0) {
+        errorCode = 7;
     } else {
-        D_004A4BC4->out = a;
+        D_004A4BC4->out = accountBuf;
     }
-    if (r == 0) {
-        r = func_003F6E98(2);
+    if (errorCode == 0) {
+        errorCode = func_003F6E98(2);
     }
-    return r;
+    return errorCode;
 }
 #endif
 
@@ -4450,15 +4450,15 @@ extern int func_003F6E98(int);
  * @return 0, 7 when @p name is 0, or 22 when busy
  */
 int func_003F8048(char *name) {
-    int r = 0;
+    int errorCode = 0;
     if (name == 0) {
-        r = 7;
+        errorCode = 7;
     } else {
         func_003F7E90_8048(D_004A4BC4->name, name, 17);
         func_003F7E90_8048(D_004A4BC4->pass, name + 0x11, 17);
     }
-    if (r == 0) r = func_003F6E98(1);
-    return r;
+    if (errorCode == 0) errorCode = func_003F6E98(1);
+    return errorCode;
 }
 #endif
 
@@ -4495,7 +4495,7 @@ extern int func_003F7A30(void);
  */
 int func_003F80E0(int *out) {
     int err = 0;
-    int v;
+    int status;
     if (out == 0) {
         err = 7;
     } else {
@@ -4503,10 +4503,10 @@ int func_003F80E0(int *out) {
         if (D_004A4BC4->st != 4) {
             err = ((int (*)(int *))D_004A4BC4->fD4)(out);
             if (err == 0) {
-                v = *out;
-                if (v == 2) {
+                status = *out;
+                if (status == 2) {
                     func_003F7A30();
-                    *out = v;
+                    *out = status;
                 }
             } else {
                 func_003F7A30();
@@ -4561,12 +4561,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8200);
 extern struct sNetAcct *D_004A4BC4;
 
 /**
- * Stores the last network-account operation started (+0x104) in *@p a0.
+ * Stores the last network-account operation started (+0x104) in *@p operationOut.
  *
- * @param a0  output
+ * @param operationOut  output
  * @return 0
  */
-int func_003F8200(int *a0) { *a0 = D_004A4BC4->f104; return 0; }
+int func_003F8200(int *operationOut) { *operationOut = D_004A4BC4->f104; return 0; }
 #endif
 
 //100%
@@ -4578,12 +4578,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8218);
 extern struct sNetAcct *D_004A4BC4;
 
 /**
- * Stores the mode kept in the saved phase block (+0x10C) in *@p a0.
+ * Stores the mode kept in the saved phase block (+0x10C) in *@p modeOut.
  *
- * @param a0  output
+ * @param modeOut  output
  * @return 0
  */
-int func_003F8218(int *a0) { *a0 = D_004A4BC4->saved.mode; return 0; }
+int func_003F8218(int *modeOut) { *modeOut = D_004A4BC4->saved.mode; return 0; }
 #endif
 
 //100%
@@ -4655,7 +4655,7 @@ extern int func_003FCDC8(sMcSaveParam_8258 *);
  * @return 0, 7 when @p port is 0, or the error mapped by func_003F8178
  */
 int func_003F8258(int port) {
-    sMcSaveParam_8258 p;
+    sMcSaveParam_8258 saveDesc;
     iconIVECTOR_8258 bgcolor[4];
     sIconVec3_8258 lightdir;
     sIconVec3_8258 lightcol;
@@ -4671,22 +4671,22 @@ int func_003F8258(int port) {
 
     if (port == 0) err = 7;
     if (err == 0) {
-        f8258_memset(&p.icon, 0, sizeof(p.icon));
-        __builtin_memcpy(p.icon.Head, D_004A4BD0, 5);
-        func_003FA380(str_EA_Login, p.icon.TitleName);
-        p.icon.OffsLF = 16;
-        p.icon.TransRate = 0x60;
-        __builtin_memcpy(p.icon.BgColor, bgcolor, sizeof(bgcolor));
-        __builtin_memcpy(p.icon.LightDir, &lightdir, sizeof(lightdir));
-        __builtin_memcpy(p.icon.LightColor, &lightcol, sizeof(lightcol));
-        __builtin_memcpy(p.icon.Ambient, &ambient, sizeof(ambient));
-        __builtin_memcpy(p.icon.FnameView, str_view_ico, 9);
-        __builtin_memcpy(p.icon.FnameCopy, str_view_ico, 9);
-        __builtin_memcpy(p.icon.FnameDel, str_view_ico, 9);
-        p.port = port;
-        p.id = 10606;
-        p.f3CC = 34;
-        err = func_003F8178(func_003FCDC8(&p));
+        f8258_memset(&saveDesc.icon, 0, sizeof(saveDesc.icon));
+        __builtin_memcpy(saveDesc.icon.Head, D_004A4BD0, 5);
+        func_003FA380(str_EA_Login, saveDesc.icon.TitleName);
+        saveDesc.icon.OffsLF = 16;
+        saveDesc.icon.TransRate = 0x60;
+        __builtin_memcpy(saveDesc.icon.BgColor, bgcolor, sizeof(bgcolor));
+        __builtin_memcpy(saveDesc.icon.LightDir, &lightdir, sizeof(lightdir));
+        __builtin_memcpy(saveDesc.icon.LightColor, &lightcol, sizeof(lightcol));
+        __builtin_memcpy(saveDesc.icon.Ambient, &ambient, sizeof(ambient));
+        __builtin_memcpy(saveDesc.icon.FnameView, str_view_ico, 9);
+        __builtin_memcpy(saveDesc.icon.FnameCopy, str_view_ico, 9);
+        __builtin_memcpy(saveDesc.icon.FnameDel, str_view_ico, 9);
+        saveDesc.port = port;
+        saveDesc.id = 10606;
+        saveDesc.f3CC = 34;
+        err = func_003F8178(func_003FCDC8(&saveDesc));
     }
     return err;
 }
@@ -4757,25 +4757,25 @@ extern struct sMcReq *D_004A4BD8;
 /**
  * Returns the next usable memory-card slot after the request's current one (+0x10 of D_004A4BD8).
  *
- * @param v  usable-slot bit mask
+ * @param slotMask  usable-slot bit mask
  * @param dir  0 to search upward, 1 downward
  * @return the slot, -1 when there is none, or 18 for another @p dir
  */
-int func_003F85C0(unsigned short v, int dir) {
+int func_003F85C0(unsigned short slotMask, int dir) {
     short i = D_004A4BD8->body.slot;
-    int r;
+    int nextSlot;
     if (dir == 0) {
         i++;
-        while (i < 8 && !((v >> i) & 1)) i++;
-        if (i >= 8) r = -1; else r = i;
+        while (i < 8 && !((slotMask >> i) & 1)) i++;
+        if (i >= 8) nextSlot = -1; else nextSlot = i;
     } else if (dir == 1) {
         i--;
-        while (i >= 0 && !((v >> i) & 1)) i--;
-        if (i < 0) r = -1; else r = i;
+        while (i >= 0 && !((slotMask >> i) & 1)) i--;
+        if (i < 0) nextSlot = -1; else nextSlot = i;
     } else {
         return 18;
     }
-    return r;
+    return nextSlot;
 }
 #endif
 
@@ -4810,11 +4810,11 @@ void func_003F86F0_impl(int a) __asm__("func_003F86F0");
  * Records the memory-card request's error (D_004A4BD8 +0x8), unless the request is already one of the cleanup
  * operations 11..13, which keep the error that caused them.
  *
- * @param a  the error (0 clears it)
+ * @param errorCode  the error (0 clears it)
  */
-void func_003F86F0_impl(int a) {
-    struct sMcReq *p = D_004A4BD8;
-    if ((unsigned)(p->op - 11) >= 3) p->f08 = a;
+void func_003F86F0_impl(int errorCode) {
+    struct sMcReq *request = D_004A4BD8;
+    if ((unsigned)(request->op - 11) >= 3) request->f08 = errorCode;
 }
 #endif
 
@@ -4877,19 +4877,19 @@ extern struct sMcDrv *D_004A4BDC;
  *
  * func_003F9130 then closes the file and releases the unit, and the request ends with the recorded error.
  *
- * @param a  ignored (callers pass the request body)
+ * @param reqBody  ignored (callers pass the request body)
  * @param out  receives 1 (still running)
  * @return 0
  */
-int func_003F8720(int a, int *out) {
-    struct sMcReq *d;
-    struct sMcDrv *e;
+int func_003F8720(int reqBody, int *out) {
+    struct sMcReq *request;
+    struct sMcDrv *driver;
     *out = 1;
-    d = D_004A4BD8;
-    e = D_004A4BDC;
-    d->op = 11;
-    d->st = 0x18;
-    e->f38(d->body.port);
+    request = D_004A4BD8;
+    driver = D_004A4BDC;
+    request->op = 11;
+    request->st = 0x18;
+    driver->f38(request->body.port);
     return 0;
 }
 #endif
@@ -4908,19 +4908,19 @@ extern struct sMcDrv *D_004A4BDC;
  * Starts the cleanup of a failed memory-card request at the close step: operation 12, state 25, closing the file
  * (driver callback +0x1C with the descriptor in the request body).
  *
- * @param a  ignored (callers pass the request body)
+ * @param reqBody  ignored (callers pass the request body)
  * @param out  receives 1 (still running)
  * @return 0
  */
-int func_003F8768(int a, int *out) {
-    struct sMcReq *d;
-    struct sMcDrv *e;
+int func_003F8768(int reqBody, int *out) {
+    struct sMcReq *request;
+    struct sMcDrv *driver;
     *out = 1;
-    d = D_004A4BD8;
-    e = D_004A4BDC;
-    d->op = 0xC;
-    d->st = 25;
-    e->f1C(d->body.port);
+    request = D_004A4BD8;
+    driver = D_004A4BDC;
+    request->op = 0xC;
+    request->st = 25;
+    driver->f1C(request->body.port);
     return 0;
 }
 #endif
@@ -4939,19 +4939,19 @@ extern struct sMcDrv *D_004A4BDC;
  * Starts the cleanup of a failed memory-card request at the last step: operation 13, state 26, releasing the card unit
  * (driver callback +0x14).
  *
- * @param a  the card unit code
+ * @param unitCode  the card unit code
  * @param out  receives 1 (still running)
  * @return 0
  */
-int func_003F87B0(int a, int *out) {
-    struct sMcReq *d;
-    struct sMcDrv *e;
+int func_003F87B0(int unitCode, int *out) {
+    struct sMcReq *request;
+    struct sMcDrv *driver;
     *out = 1;
-    d = D_004A4BD8;
-    e = D_004A4BDC;
-    d->op = 13;
-    d->st = 26;
-    e->f14(a);
+    request = D_004A4BD8;
+    driver = D_004A4BDC;
+    request->op = 13;
+    request->st = 26;
+    driver->f14(unitCode);
     return 0;
 }
 #endif
@@ -4962,11 +4962,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F87F8);
 /**
  * Result check of memory-card request state 0 (entry 0 of the per-state table D_004514A0): accepts any result.
  *
- * @param a0  result of the finished card call
- * @return @p a0
+ * @param cardResult  result of the finished card call
+ * @return @p cardResult
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003F87F8(int a0) { return a0; }
+int func_003F87F8(int cardResult) { return cardResult; }
 #endif
 
 //100%
@@ -4979,13 +4979,13 @@ extern struct sMcReq *D_004A4BD8;
 /**
  * Result check of memory-card request state 1 (unit check): accepts results 0, 3 and 17.
  *
- * @param a  result of the finished card call
- * @return @p a, 18 when the request is not in state 1, or 0x10 for any other result
+ * @param cardResult  result of the finished card call
+ * @return @p cardResult, 18 when the request is not in state 1, or 0x10 for any other result
  */
-int func_003F8800(int a) {
+int func_003F8800(int cardResult) {
     if (D_004A4BD8->st != 1) return 18;
-    if (a != 0 && a != 3 && a != 17) return 0x10;
-    return a;
+    if (cardResult != 0 && cardResult != 3 && cardResult != 17) return 0x10;
+    return cardResult;
 }
 #endif
 
@@ -4999,13 +4999,13 @@ extern struct sMcReq *D_004A4BD8;
 /**
  * Result check of memory-card request state 2 (directory search): accepts results 0, 3, 4, 9 and 17.
  *
- * @param a  result of the finished card call
- * @return @p a, 18 when the request is not in state 2, or 0x10 for any other result
+ * @param cardResult  result of the finished card call
+ * @return @p cardResult, 18 when the request is not in state 2, or 0x10 for any other result
  */
-int func_003F8838(int a) {
+int func_003F8838(int cardResult) {
     if (D_004A4BD8->st != 2) return 18;
-    if (a != 0 && a != 4 && a != 3 && a != 9 && a != 17) return 0x10;
-    return a;
+    if (cardResult != 0 && cardResult != 4 && cardResult != 3 && cardResult != 9 && cardResult != 17) return 0x10;
+    return cardResult;
 }
 #endif
 
@@ -5023,14 +5023,14 @@ extern struct sMcReq *D_004A4BD8;
  * Quirk: the per-state table also maps state 15 here, which this check rejects (state 15 is never entered), and it
  * accepts state 24, whose table entry is func_003F8908.
  *
- * @param a  result of the finished card call
- * @return @p a, 18 for another state, or 0x10 for any other result
+ * @param cardResult  result of the finished card call
+ * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
-int func_003F8880(int a) {
-    int m = D_004A4BD8->st;
-    if (m != 27 && m != 29 && m != 0x1C && m != 7 && m != 11 && m != 0x18) return 18;
-    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 0xE && a != 13 && a != 17 && a != 10) return 0x10;
-    return a;
+int func_003F8880(int cardResult) {
+    int state = D_004A4BD8->st;
+    if (state != 27 && state != 29 && state != 0x1C && state != 7 && state != 11 && state != 0x18) return 18;
+    if (cardResult != 0 && cardResult != 3 && cardResult != 4 && cardResult != 9 && cardResult != 0xE && cardResult != 13 && cardResult != 17 && cardResult != 10) return 0x10;
+    return cardResult;
 }
 #endif
 
@@ -5044,14 +5044,14 @@ extern struct sMcReq *D_004A4BD8;
 /**
  * Result check of the memory-card flush states (8, 12, 16 and 24): accepts results 0, 3, 4, 9 and 17.
  *
- * @param a  result of the finished card call
- * @return @p a, 18 for another state, or 0x10 for any other result
+ * @param cardResult  result of the finished card call
+ * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
-int func_003F8908(int a) {
-    int m = D_004A4BD8->st;
-    if (m != 0x18 && m != 8 && m != 0xC && m != 0x10) return 18;
-    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 17) return 0x10;
-    return a;
+int func_003F8908(int cardResult) {
+    int state = D_004A4BD8->st;
+    if (state != 0x18 && state != 8 && state != 0xC && state != 0x10) return 18;
+    if (cardResult != 0 && cardResult != 3 && cardResult != 4 && cardResult != 9 && cardResult != 17) return 0x10;
+    return cardResult;
 }
 #endif
 
@@ -5065,14 +5065,14 @@ extern struct sMcReq *D_004A4BD8;
 /**
  * Result check of the memory-card close states (9, 13, 17 and 25): accepts results 0, 3, 4, 9 and 17.
  *
- * @param a  result of the finished card call
- * @return @p a, 18 for another state, or 0x10 for any other result
+ * @param cardResult  result of the finished card call
+ * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
-int func_003F8968(int a) {
-    int m = D_004A4BD8->st;
-    if (m != 25 && m != 9 && m != 13 && m != 17) return 18;
-    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 17) return 0x10;
-    return a;
+int func_003F8968(int cardResult) {
+    int state = D_004A4BD8->st;
+    if (state != 25 && state != 9 && state != 13 && state != 17) return 18;
+    if (cardResult != 0 && cardResult != 3 && cardResult != 4 && cardResult != 9 && cardResult != 17) return 0x10;
+    return cardResult;
 }
 #endif
 
@@ -5086,13 +5086,13 @@ extern struct sMcReq *D_004A4BD8;
 /**
  * Result check of memory-card request state 26 (unit released): accepts results 0, 3, 9 and 17.
  *
- * @param a  result of the finished card call
- * @return @p a, 18 for another state, or 0x10 for any other result
+ * @param cardResult  result of the finished card call
+ * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
-int func_003F89C8(int a) {
+int func_003F89C8(int cardResult) {
     if (D_004A4BD8->st != 26) return 18;
-    if (a != 0 && a != 3 && a != 9 && a != 17) return 0x10;
-    return a;
+    if (cardResult != 0 && cardResult != 3 && cardResult != 9 && cardResult != 17) return 0x10;
+    return cardResult;
 }
 #endif
 
@@ -5106,13 +5106,13 @@ extern struct sMcReq *D_004A4BD8;
 /**
  * Result check of memory-card request state 5 (directory created): accepts results 0, 3, 8, 9, 14 and 17.
  *
- * @param a  result of the finished card call
- * @return @p a, 18 for another state, or 0x10 for any other result
+ * @param cardResult  result of the finished card call
+ * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
-int func_003F8A08(int a) {
+int func_003F8A08(int cardResult) {
     if (D_004A4BD8->st != 5) return 18;
-    if (a != 0 && a != 3 && a != 9 && a != 0xE && a != 8 && a != 17) return 0x10;
-    return a;
+    if (cardResult != 0 && cardResult != 3 && cardResult != 9 && cardResult != 0xE && cardResult != 8 && cardResult != 17) return 0x10;
+    return cardResult;
 }
 #endif
 
@@ -5126,14 +5126,14 @@ extern struct sMcReq *D_004A4BD8;
 /**
  * Result check of the memory-card file-open states (6, 10, 14 and 22): accepts results 0, 3, 4, 9, 13 and 17.
  *
- * @param a  result of the finished card call
- * @return @p a, 18 for another state, or 0x10 for any other result
+ * @param cardResult  result of the finished card call
+ * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
-int func_003F8A58(int a) {
-    int m = D_004A4BD8->st;
-    if (m != 22 && m != 6 && m != 0xE && m != 10) return 18;
-    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 13 && a != 17) return 0x10;
-    return a;
+int func_003F8A58(int cardResult) {
+    int state = D_004A4BD8->st;
+    if (state != 22 && state != 6 && state != 0xE && state != 10) return 18;
+    if (cardResult != 0 && cardResult != 3 && cardResult != 4 && cardResult != 9 && cardResult != 13 && cardResult != 17) return 0x10;
+    return cardResult;
 }
 #endif
 
@@ -5147,13 +5147,13 @@ extern struct sMcReq *D_004A4BD8;
 /**
  * Result check of the memory-card file-delete states (19..21): accepts results 0, 3, 4, 5, 6, 9, 13 and 17.
  *
- * @param a  result of the finished card call
- * @return @p a, 18 for another state, or 0x10 for any other result
+ * @param cardResult  result of the finished card call
+ * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
-int func_003F8AC0(int a) {
+int func_003F8AC0(int cardResult) {
     if ((unsigned)(D_004A4BD8->st - 19) >= 3) return 18;
-    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 13 && a != 6 && a != 5 && a != 17) return 0x10;
-    return a;
+    if (cardResult != 0 && cardResult != 3 && cardResult != 4 && cardResult != 9 && cardResult != 13 && cardResult != 6 && cardResult != 5 && cardResult != 17) return 0x10;
+    return cardResult;
 }
 #endif
 
@@ -5167,13 +5167,13 @@ extern struct sMcReq *D_004A4BD8;
 /**
  * Result check of memory-card request state 18 (directory deleted): accepts results 0, 3, 4, 9, 13 and 17.
  *
- * @param a  result of the finished card call
- * @return @p a, 18 for another state, or 0x10 for any other result
+ * @param cardResult  result of the finished card call
+ * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
-int func_003F8B28(int a) {
+int func_003F8B28(int cardResult) {
     if (D_004A4BD8->st != 18) return 18;
-    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 13 && a != 17) return 0x10;
-    return a;
+    if (cardResult != 0 && cardResult != 3 && cardResult != 4 && cardResult != 9 && cardResult != 13 && cardResult != 17) return 0x10;
+    return cardResult;
 }
 #endif
 
@@ -5187,14 +5187,14 @@ extern struct sMcReq *D_004A4BD8;
 /**
  * Result check of memory-card request state 3 (free space read): accepts results 0, 3 and 17.
  *
- * @param a  result of the finished card call
- * @return @p a, 18 for another state, or 0x10 for any other result
+ * @param cardResult  result of the finished card call
+ * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
-int func_003F8B78(int a) {
-    int m = D_004A4BD8->st;
-    if (m != 3) return 18;
-    if (a != 0 && a != m && a != 17) return 0x10;
-    return a;
+int func_003F8B78(int cardResult) {
+    int state = D_004A4BD8->st;
+    if (state != 3) return 18;
+    if (cardResult != 0 && cardResult != state && cardResult != 17) return 0x10;
+    return cardResult;
 }
 #endif
 
@@ -5208,13 +5208,13 @@ extern struct sMcReq *D_004A4BD8;
 /**
  * Result check of memory-card request state 4 (second space query): accepts results 0, 3 and 17.
  *
- * @param a  result of the finished card call
- * @return @p a, 18 for another state, or 0x10 for any other result
+ * @param cardResult  result of the finished card call
+ * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
-int func_003F8BB0(int a) {
+int func_003F8BB0(int cardResult) {
     if (D_004A4BD8->st != 4) return 18;
-    if (a != 0 && a != 3 && a != 17) return 0x10;
-    return a;
+    if (cardResult != 0 && cardResult != 3 && cardResult != 17) return 0x10;
+    return cardResult;
 }
 #endif
 
@@ -5228,13 +5228,13 @@ extern struct sMcReq *D_004A4BD8;
 /**
  * Result check of memory-card request state 23: accepts results 0, 3, 4, 9 and 17. No request step enters state 23.
  *
- * @param a  result of the finished card call
- * @return @p a, 18 for another state, or 0x10 for any other result
+ * @param cardResult  result of the finished card call
+ * @return @p cardResult, 18 for another state, or 0x10 for any other result
  */
-int func_003F8BE8(int a) {
+int func_003F8BE8(int cardResult) {
     if (D_004A4BD8->st != 23) return 18;
-    if (a != 0 && a != 3 && a != 4 && a != 9 && a != 17) return 0x10;
-    return a;
+    if (cardResult != 0 && cardResult != 3 && cardResult != 4 && cardResult != 9 && cardResult != 17) return 0x10;
+    return cardResult;
 }
 #endif
 
@@ -5245,11 +5245,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8C30);
  * Step handler of memory-card request operation 0 (entry 0 of the per-operation table D_00451468): passes the result
  * on.
  *
- * @param a0  the checked result
- * @return @p a0
+ * @param cardResult  the checked result
+ * @return @p cardResult
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003F8C30(int a0) { return a0; }
+int func_003F8C30(int cardResult) { return cardResult; }
 #endif
 
 //100%
@@ -5276,31 +5276,31 @@ extern void fA818(char *, char *, int, char *) __asm__("func_003FA818");
  * finishes with the recorded error, or for operation 3 with an error tries the next unit. Failures go to the release
  * cleanup (func_003F87B0).
  *
- * @param a  checked result of the finished card call
+ * @param callResult  checked result of the finished card call
  * @param out  receives 1 while running, 2 when finished
- * @param c  the poll's result word (search: 1 found / 0 not; open: the descriptor)
+ * @param pollResult  the poll's result word (search: 1 found / 0 not; open: the descriptor)
  * @return 0 or an error code
  */
-int func_003F8C38(int a, int *out, int *c) {
+int func_003F8C38(int callResult, int *out, int *pollResult) {
     int op;
     int slot;
     char buf[80];
     if (out == 0) return 18;
-    if (c == 0) return 18;
+    if (pollResult == 0) return 18;
     op = D_004A4BD8->op;
     if (op != 3 && op != 6) return 18;
     *out = 1;
     switch ((unsigned)D_004A4BD8->st) {
     case 1:
-        if (a == 0) {
+        if (callResult == 0) {
             func_003FA7A0(buf, (int)D_004A4BDC->f50, D_004A4BD8->body.name);
             D_004A4BD8->st = 2;
             ((void (*)(char *, int))D_004A4BDC->f04)(buf, D_004A4BD8->body.slot);
             break;
         }
-        if (a != 3) {
+        if (callResult != 3) {
             *out = 2;
-            return a;
+            return callResult;
         }
         if (D_004A4BD8->op == 3) {
             slot = func_003F85C0(D_004A4BDC->ports, D_004A4BD8->f6C);
@@ -5312,16 +5312,16 @@ int func_003F8C38(int a, int *out, int *c) {
             }
         }
         *out = 2;
-        return a;
+        return callResult;
     case 2:
-        if (a == 0) {
-            if (*c == 1) {
+        if (callResult == 0) {
+            if (*pollResult == 1) {
                 fA818((char *)D_004A4BD8->body.pad08, (char *)&D_004A4BD8->body.pad08[8], (int)D_004A4BDC->f50, D_004A4BD8->body.name);
                 D_004A4BD8->st = 22;
                 ((void (*)(int *, int *, int, int))D_004A4BDC->f18)(D_004A4BD8->body.pad08, &D_004A4BD8->body.pad08[8], D_004A4BD8->body.slot, 3);
                 break;
             }
-            if (*c == 0) {
+            if (*pollResult == 0) {
                 f86F0(4);
                 D_004A4BD8->st = 26;
                 D_004A4BDC->f14(D_004A4BD8->body.slot);
@@ -5330,23 +5330,23 @@ int func_003F8C38(int a, int *out, int *c) {
             *out = 2;
             return 10;
         }
-        f86F0(a);
+        f86F0(callResult);
         return func_003F87B0(D_004A4BD8->body.slot, out);
     case 22:
-        if (a == 0) {
-            if (*c >= 0) {
-                D_004A4BD8->body.port = *c;
+        if (callResult == 0) {
+            if (*pollResult >= 0) {
+                D_004A4BD8->body.port = *pollResult;
                 *out = 2;
                 return 0;
             }
-            D_004A4BD8->body.port = *c;
+            D_004A4BD8->body.port = *pollResult;
             *out = 2;
             return 10;
         }
-        f86F0(a);
+        f86F0(callResult);
         return func_003F87B0(D_004A4BD8->body.slot, out);
     case 26:
-        if (a == 0) {
+        if (callResult == 0) {
             if (D_004A4BD8->op == 4 || D_004A4BD8->op == 6) {
                 *out = 2;
                 return func_003F8710();
@@ -5366,7 +5366,7 @@ int func_003F8C38(int a, int *out, int *c) {
             return func_003F8710();
         }
         *out = 2;
-        return a;
+        return callResult;
     default:
         *out = 2;
         return 18;
@@ -5390,37 +5390,37 @@ extern void f86F0(int) __asm__("func_003F86F0");
  * request's expected count (+0x70), else 10. A failed call records the error and starts the flush cleanup
  * (func_003F8720).
  *
- * @param a  checked result of the finished card call
+ * @param callResult  checked result of the finished card call
  * @param out  receives 1 while running, 2 when finished
- * @param c  the poll's result word (bytes moved)
+ * @param pollResult  the poll's result word (bytes moved)
  * @return 0 or an error code
  */
-int func_003F8EF8(int a, int *out, int *c) {
+int func_003F8EF8(int callResult, int *out, int *pollResult) {
     int op;
     if (out == 0) return 18;
-    if (c == 0) return 18;
+    if (pollResult == 0) return 18;
     op = D_004A4BD8->op;
     if (op != 8 && op != 10 && op != 9) return 18;
     *out = 1;
     switch ((unsigned)D_004A4BD8->st) {
     case 27:
-        if (a == 0) {
+        if (callResult == 0) {
             *out = 2;
             return 0;
         }
-        f86F0(a);
+        f86F0(callResult);
         return func_003F8720((int)&D_004A4BD8->body, out);
     case 0x1C:
     case 29:
-        if (a == 0) {
-            if (D_004A4BD8->f70 == *c) {
+        if (callResult == 0) {
+            if (D_004A4BD8->f70 == *pollResult) {
                 *out = 2;
                 return 0;
             }
             *out = 2;
             return 10;
         }
-        f86F0(a);
+        f86F0(callResult);
         return func_003F8720((int)&D_004A4BD8->body, out);
     }
     *out = 2;
@@ -5443,40 +5443,40 @@ extern void f86F0(int) __asm__("func_003F86F0");
  * the unit (26), release done finishes. A failed step records the error and continues with the matching cleanup
  * (func_003F8768, func_003F87B0).
  *
- * @param a  checked result of the finished card call
+ * @param callResult  checked result of the finished card call
  * @param out  receives 1 while running, 2 when finished
- * @param c  the poll's result word (only checked for 0)
+ * @param pollResult  the poll's result word (only checked for 0)
  * @return 0 or an error code
  */
-int func_003F8FF0(int a, int *out, int c) {
+int func_003F8FF0(int callResult, int *out, int pollResult) {
     if (out == 0) return 18;
-    if (c == 0) return 18;
+    if (pollResult == 0) return 18;
     if (D_004A4BD8->op != 7) return 18;
     *out = 1;
     switch ((unsigned)D_004A4BD8->st) {
     case 0x18:
-        if (a == 0) {
+        if (callResult == 0) {
             D_004A4BD8->st = 25;
             D_004A4BDC->f1C(D_004A4BD8->body.port);
             break;
         }
-        f86F0(a);
+        f86F0(callResult);
         return func_003F8768((int)&D_004A4BD8->body, out);
     case 25:
-        if (a == 0) {
+        if (callResult == 0) {
             D_004A4BD8->st = 26;
             D_004A4BDC->f14(D_004A4BD8->body.slot);
             break;
         }
-        f86F0(a);
+        f86F0(callResult);
         return func_003F87B0(D_004A4BD8->body.slot, out);
     case 26:
-        if (a == 0) {
+        if (callResult == 0) {
             *out = 2;
             return 0;
         }
         *out = 2;
-        return a;
+        return callResult;
     default:
         *out = 2;
         return 18;
@@ -5499,13 +5499,13 @@ extern int func_003F8710(void);
  * Step handler of the memory-card cleanup operations (11..13): flush (state 24), then close (25), then release the unit
  * (26), and finish with the recorded error (func_003F8710), whatever each step returned.
  *
- * @param a  checked result of the finished card call (ignored)
+ * @param callResult  checked result of the finished card call (ignored)
  * @param out  receives 1 while running, 2 when finished
- * @param c  the poll's result word (only checked for 0)
+ * @param pollResult  the poll's result word (only checked for 0)
  * @return 0 while running, the recorded error when finished, or 18 for a bad state
  */
-int func_003F9130(int a, int *out, int c) {
-    if (out == 0 || c == 0 || (unsigned)(D_004A4BD8->op - 11) > 2) return 18;
+int func_003F9130(int callResult, int *out, int pollResult) {
+    if (out == 0 || pollResult == 0 || (unsigned)(D_004A4BD8->op - 11) > 2) return 18;
     *out = 1;
     switch ((unsigned)D_004A4BD8->st) {
     case 0x18:
@@ -5577,7 +5577,7 @@ int func_003F9218_impl(int *ports, struct sMcCallbacks *cb, int heap) __asm__("f
  * @return 0; 1 when already open, 0xC for bad arguments, 9 for a bad unit code, 7 when an allocation fails
  */
 int func_003F9218_impl(int *ports, struct sMcCallbacks *cb, int heap) {
-    int *p;
+    int *unitEntry;
     unsigned char n = 0;
     char i;
 
@@ -5596,13 +5596,13 @@ int func_003F9218_impl(int *ports, struct sMcCallbacks *cb, int heap) {
     if (D_004A4BD8 == 0) return 7;
     D_004A4BDC->h = heap;
     D_004A4BDC->ports = 0;
-    for (p = ports; *p != -1; p++, n++) {
-        if ((unsigned)*p >= 8 && *p != 9) return 9;
+    for (unitEntry = ports; *unitEntry != -1; unitEntry++, n++) {
+        if ((unsigned)*unitEntry >= 8 && *unitEntry != 9) return 9;
         if (n == 8) return 0xC;
-        if (*p == 9) {
+        if (*unitEntry == 9) {
             for (i = 0; i < 8; i++) D_004A4BDC->ports |= 1 << i;
         } else {
-            D_004A4BDC->ports |= 1 << (unsigned short)*p;
+            D_004A4BDC->ports |= 1 << (unsigned short)*unitEntry;
         }
     }
     D_004A4BDC->f04 = cb->f[0];
@@ -5649,32 +5649,32 @@ extern int func_00266760(int, char *, int, int);
  * @return 0, or 2 when the layer is not open
  */
 int func_003F9530(void) {
-    struct sMcDrv *e;
-    struct sMcReq *s;
+    struct sMcDrv *driver;
+    struct sMcReq *request;
     if (func_003F9208() == 0) return 2;
-    e = D_004A4BDC;
-    s = D_004A4BD8;
-    if (e == 0 || s == 0) return 2;
-    e->f04 = 0;
-    e->f08 = 0;
-    e->f0C = 0;
-    e->f10 = 0;
-    e->f14 = 0;
-    e->f18 = 0;
-    e->f1C = 0;
-    e->f20 = 0;
-    e->f24 = 0;
-    e->f28 = 0;
-    e->f2C = 0;
-    e->f30 = 0;
-    e->f34 = 0;
-    e->f38 = 0;
-    e->f3C = 0;
-    e->f40 = 0;
-    e->f44 = 0;
-    s->op = 0;
-    s->st = 0;
-    func_00266760(e->h, (char *)s, 116, 4);
+    driver = D_004A4BDC;
+    request = D_004A4BD8;
+    if (driver == 0 || request == 0) return 2;
+    driver->f04 = 0;
+    driver->f08 = 0;
+    driver->f0C = 0;
+    driver->f10 = 0;
+    driver->f14 = 0;
+    driver->f18 = 0;
+    driver->f1C = 0;
+    driver->f20 = 0;
+    driver->f24 = 0;
+    driver->f28 = 0;
+    driver->f2C = 0;
+    driver->f30 = 0;
+    driver->f34 = 0;
+    driver->f38 = 0;
+    driver->f3C = 0;
+    driver->f40 = 0;
+    driver->f44 = 0;
+    request->op = 0;
+    request->st = 0;
+    func_00266760(driver->h, (char *)request, 116, 4);
     D_004A4BD8 = 0;
     func_00266760(D_004A4BDC->h, (char *)D_004A4BDC, 1068, 4);
     D_004A4BDC = 0;
@@ -5727,59 +5727,59 @@ int func_003F9698(char *str, int a, int b);
 /**
  * Starts a memory-card request that deletes the save @p str.
  *
- * With unit -1 it searches the usable units (operation 2) from the lowest (@p b 0) or the highest (@p b 1), or uses the
- * only one (operation 5); otherwise it uses unit @p a (operation 5). Clears the body and the recorded error, stores the
+ * With unit -1 it searches the usable units (operation 2) from the lowest (@p searchDir 0) or the highest (@p searchDir 1), or uses the
+ * only one (operation 5); otherwise it uses unit @p unitCode (operation 5). Clears the body and the recorded error, stores the
  * name and direction, calls the start hook func_003FB2F8 and the unit-check callback (driver +0x10), and enters state
  * 1. func_003FAE50 runs the steps.
  *
  * @param str  the save name
- * @param a  card unit code, or -1 for any usable unit
- * @param b  search direction (0 upward, 1 downward)
+ * @param unitCode  card unit code, or -1 for any usable unit
+ * @param searchDir  search direction (0 upward, 1 downward)
  * @return 0; 2 when the layer is not open, 0xC for a bad name or direction, 9 for a bad unit, 11 when the unit is not
  * usable, 13 when a request is running
  */
-int func_003F9698(char *str, int a, int b) {
-    int v;
+int func_003F9698(char *str, int unitCode, int searchDir) {
+    int firstUnit;
     int t;
-    struct sMcReq *s;
-    struct sMcReq *s2;
-    unsigned m;
+    struct sMcReq *request;
+    struct sMcReq *request2;
+    unsigned unitBit;
     if (func_003F9208() == 0) return 2;
     if (str == 0) return 0xC;
-    if ((unsigned)(a + 1) >= 9) return 9;
-    if (a != -1) {
-        m = 1 << a;
-        if (!(D_004A4BDC->ports & m)) return 11;
+    if ((unsigned)(unitCode + 1) >= 9) return 9;
+    if (unitCode != -1) {
+        unitBit = 1 << unitCode;
+        if (!(D_004A4BDC->ports & unitBit)) return 11;
     }
     if (D_004A4BD8->op != 0) return 13;
     c9698_6210(&D_004A4BD8->body, 0, 0x60);
-    if (a == -1) {
+    if (unitCode == -1) {
         if (c9698_86B8(D_004A4BDC->ports) == 1) {
-            v = c9698_8550(D_004A4BDC->ports);
-            s = D_004A4BD8;
-            s->body.slot = v;
-            s->op = 5;
-        } else if (b == 0) {
-            v = c9698_8550(D_004A4BDC->ports);
-            s = D_004A4BD8;
-            s->body.slot = v;
-            s->op = 2;
-        } else if (b == 1) {
-            v = c9698_8588(D_004A4BDC->ports);
-            s = D_004A4BD8;
-            s->body.slot = v;
-            s->op = 2;
+            firstUnit = c9698_8550(D_004A4BDC->ports);
+            request = D_004A4BD8;
+            request->body.slot = firstUnit;
+            request->op = 5;
+        } else if (searchDir == 0) {
+            firstUnit = c9698_8550(D_004A4BDC->ports);
+            request = D_004A4BD8;
+            request->body.slot = firstUnit;
+            request->op = 2;
+        } else if (searchDir == 1) {
+            firstUnit = c9698_8588(D_004A4BDC->ports);
+            request = D_004A4BD8;
+            request->body.slot = firstUnit;
+            request->op = 2;
         } else {
             return 0xC;
         }
     } else {
-        s2 = D_004A4BD8;
-        s2->body.slot = a;
-        s2->op = 5;
+        request2 = D_004A4BD8;
+        request2->body.slot = unitCode;
+        request2->op = 5;
     }
     c9698_86F0(0);
     strcpy(D_004A4BD8->body.name, str);
-    D_004A4BD8->f6C = b;
+    D_004A4BD8->f6C = searchDir;
     c9698_B2F8(1);
     D_004A4BDC->f10(D_004A4BD8->body.slot);
     D_004A4BD8->st = 1;
@@ -5816,53 +5816,53 @@ int func_003F9818(char *str, int a, int b);
  * Like func_003F9698, with a name limit: names of 0x18 characters or more give 0xC. func_003FA8F8 runs the steps.
  *
  * @param str  the save name
- * @param a  card unit code, or -1 for any usable unit
- * @param b  search direction (0 upward, 1 downward)
+ * @param unitCode  card unit code, or -1 for any usable unit
+ * @param searchDir  search direction (0 upward, 1 downward)
  * @return 0 or the error codes of func_003F9698
  */
-int func_003F9818(char *str, int a, int b) {
-    int v;
+int func_003F9818(char *str, int unitCode, int searchDir) {
+    int firstUnit;
     int t;
-    struct sMcReq *s;
-    struct sMcReq *s2;
-    unsigned m;
+    struct sMcReq *request;
+    struct sMcReq *request2;
+    unsigned unitBit;
     if (func_003F9208() == 0) return 2;
     if (str == 0) return 0xC;
     if (strlen(str) >= 0x18) return 0xC;
-    if ((unsigned)(a + 1) >= 9) return 9;
-    if (a != -1) {
-        m = 1 << a;
-        if (!(D_004A4BDC->ports & m)) return 11;
+    if ((unsigned)(unitCode + 1) >= 9) return 9;
+    if (unitCode != -1) {
+        unitBit = 1 << unitCode;
+        if (!(D_004A4BDC->ports & unitBit)) return 11;
     }
     if (D_004A4BD8->op != 0) return 13;
     c9818_6210(&D_004A4BD8->body, 0, 0x60);
-    if (a == -1) {
+    if (unitCode == -1) {
         if (c9818_86B8(D_004A4BDC->ports) == 1) {
-            v = c9818_8550(D_004A4BDC->ports);
-            s = D_004A4BD8;
-            s->body.slot = v;
-            s->op = 4;
-        } else if (b == 0) {
-            v = c9818_8550(D_004A4BDC->ports);
-            s2 = D_004A4BD8;
-            s2->body.slot = v;
-            s2->op = 1;
-        } else if (b == 1) {
-            v = c9818_8588(D_004A4BDC->ports);
-            s2 = D_004A4BD8;
-            s2->body.slot = v;
-            s2->op = b;
+            firstUnit = c9818_8550(D_004A4BDC->ports);
+            request = D_004A4BD8;
+            request->body.slot = firstUnit;
+            request->op = 4;
+        } else if (searchDir == 0) {
+            firstUnit = c9818_8550(D_004A4BDC->ports);
+            request2 = D_004A4BD8;
+            request2->body.slot = firstUnit;
+            request2->op = 1;
+        } else if (searchDir == 1) {
+            firstUnit = c9818_8588(D_004A4BDC->ports);
+            request2 = D_004A4BD8;
+            request2->body.slot = firstUnit;
+            request2->op = searchDir;
         } else {
             return 0xC;
         }
     } else {
-        s2 = D_004A4BD8;
-        s2->body.slot = a;
-        s2->op = 4;
+        request2 = D_004A4BD8;
+        request2->body.slot = unitCode;
+        request2->op = 4;
     }
     c9818_86F0(0);
     strcpy(D_004A4BD8->body.name, str);
-    D_004A4BD8->f6C = b;
+    D_004A4BD8->f6C = searchDir;
     c9818_B2F8(1);
     D_004A4BDC->f10(D_004A4BD8->body.slot);
     D_004A4BD8->st = 1;
@@ -5897,52 +5897,52 @@ int func_003F99B8_impl(char *str, int a, int b) __asm__("func_003F99B8");
  * Like func_003F9698; func_003F8C38 runs the steps.
  *
  * @param str  the save name
- * @param a  card unit code, or -1 for any usable unit
- * @param b  search direction (0 upward, 1 downward)
+ * @param unitCode  card unit code, or -1 for any usable unit
+ * @param searchDir  search direction (0 upward, 1 downward)
  * @return 0 or the error codes of func_003F9698
  */
-int func_003F99B8_impl(char *str, int a, int b) {
-    int v;
+int func_003F99B8_impl(char *str, int unitCode, int searchDir) {
+    int firstUnit;
     int t;
-    struct sMcReq *s;
-    struct sMcReq *s2;
-    unsigned m;
+    struct sMcReq *request;
+    struct sMcReq *request2;
+    unsigned unitBit;
     if (func_003F9208() == 0) return 2;
     if (str == 0) return 0xC;
-    if ((unsigned)(a + 1) >= 9) return 9;
-    if (a != -1) {
-        m = 1 << a;
-        if (!(D_004A4BDC->ports & m)) return 11;
+    if ((unsigned)(unitCode + 1) >= 9) return 9;
+    if (unitCode != -1) {
+        unitBit = 1 << unitCode;
+        if (!(D_004A4BDC->ports & unitBit)) return 11;
     }
     if (D_004A4BD8->op != 0) return 13;
     c99b8_6210(&D_004A4BD8->body, 0, 0x60);
-    if (a == -1) {
+    if (unitCode == -1) {
         if (c99b8_86B8(D_004A4BDC->ports) == 1) {
-            v = c99b8_8550(D_004A4BDC->ports);
-            s = D_004A4BD8;
-            s->body.slot = v;
-            s->op = 6;
-        } else if (b == 0) {
-            v = c99b8_8550(D_004A4BDC->ports);
-            s = D_004A4BD8;
-            s->body.slot = v;
-            s->op = 3;
-        } else if (b == 1) {
-            v = c99b8_8588(D_004A4BDC->ports);
-            s = D_004A4BD8;
-            s->body.slot = v;
-            s->op = 3;
+            firstUnit = c99b8_8550(D_004A4BDC->ports);
+            request = D_004A4BD8;
+            request->body.slot = firstUnit;
+            request->op = 6;
+        } else if (searchDir == 0) {
+            firstUnit = c99b8_8550(D_004A4BDC->ports);
+            request = D_004A4BD8;
+            request->body.slot = firstUnit;
+            request->op = 3;
+        } else if (searchDir == 1) {
+            firstUnit = c99b8_8588(D_004A4BDC->ports);
+            request = D_004A4BD8;
+            request->body.slot = firstUnit;
+            request->op = 3;
         } else {
             return 0xC;
         }
     } else {
-        s2 = D_004A4BD8;
-        s2->body.slot = a;
-        s2->op = 6;
+        request2 = D_004A4BD8;
+        request2->body.slot = unitCode;
+        request2->op = 6;
     }
     c99b8_86F0(0);
     strcpy(D_004A4BD8->body.name, str);
-    D_004A4BD8->f6C = b;
+    D_004A4BD8->f6C = searchDir;
     c99b8_B2F8(1);
     D_004A4BDC->f10(D_004A4BD8->body.slot);
     D_004A4BD8->st = 1;
@@ -6001,38 +6001,38 @@ int func_003F9C48_impl(int *src, int a, int b) __asm__("func_003F9C48");
 /**
  * Starts a memory-card request that seeks in an open save file (operation 8, state 27).
  *
- * Copies the body from @p src; with origin 0 seeks to @p a plus the base offset (func_003FA6E8, 0) from the start,
- * otherwise passes @p a and @p b on. Keeps the target in +0x70.
+ * Copies the body from @p src; with origin 0 seeks to @p offset plus the base offset (func_003FA6E8, 0) from the start,
+ * otherwise passes @p offset and @p origin on. Keeps the target in +0x70.
  *
  * @param src  the 0x60-byte request body of the open file
- * @param a  offset
- * @param b  seek origin
+ * @param offset  offset
+ * @param origin  seek origin
  * @return 0; 2 when the layer is not open, 0xC when @p src is 0, 13 when a request is running
  */
-int func_003F9C48_impl(int *src, int a, int b) {
-    struct sMcReq *s;
-    struct sMcReq *t;
-    int v;
-    struct sMcDrv *e;
+int func_003F9C48_impl(int *src, int offset, int origin) {
+    struct sMcReq *request;
+    struct sMcReq *requestAgain;
+    int target;
+    struct sMcDrv *driver;
     if (func_003F9208() == 0) return 2;
     if (src == 0) return 0xC;
-    s = D_004A4BD8;
-    if (s->op != 0) return 13;
-    s->op = 8;
-    s->st = 27;
+    request = D_004A4BD8;
+    if (request->op != 0) return 13;
+    request->op = 8;
+    request->st = 27;
     c9c48_86F0(0);
     __builtin_memcpy(&D_004A4BD8->body, (char *)src, 0x60);
-    if (b == 0) {
-        v = a + func_003FA6E8_9C48();
-        t = D_004A4BD8;
-        e = D_004A4BDC;
-        t->f70 = v;
-        e->f34(t->body.port, a + func_003FA6E8_9C48(), 0);
+    if (origin == 0) {
+        target = offset + func_003FA6E8_9C48();
+        requestAgain = D_004A4BD8;
+        driver = D_004A4BDC;
+        requestAgain->f70 = target;
+        driver->f34(requestAgain->body.port, offset + func_003FA6E8_9C48(), 0);
     } else {
-        struct sMcReq *d = D_004A4BD8;
-        struct sMcDrv *e2 = D_004A4BDC;
-        d->f70 = a;
-        e2->f34(d->body.port, a, b);
+        struct sMcReq *requestInner = D_004A4BD8;
+        struct sMcDrv *driverInner = D_004A4BDC;
+        requestInner->f70 = offset;
+        driverInner->f34(requestInner->body.port, offset, origin);
     }
     return 0;
 }
@@ -6055,29 +6055,29 @@ extern void f86F0(int) __asm__("func_003F86F0");
 int func_003F9DC0_impl(int *src, int a, int b) __asm__("func_003F9DC0");
 /**
  * Starts a memory-card request that reads from an open save file (operation 10, state 29): read callback (driver +0x2C)
- * with the descriptor, @p a and @p b; @p b is kept as the expected count.
+ * with the descriptor, @p buffer and @p byteCount; @p byteCount is kept as the expected count.
  *
  * @param src  the 0x60-byte request body of the open file
- * @param a  destination buffer
- * @param b  byte count
+ * @param buffer  destination buffer
+ * @param byteCount  byte count
  * @return 0; 2 when the layer is not open, 0xC when @p src is 0, 13 when a request is running
  */
-int func_003F9DC0_impl(int *src, int a, int b) {
-    struct sMcReq *s;
-    struct sMcReq *t;
-    struct sMcDrv *e;
+int func_003F9DC0_impl(int *src, int buffer, int byteCount) {
+    struct sMcReq *request;
+    struct sMcReq *requestAgain;
+    struct sMcDrv *driver;
     if (func_003F9208() == 0) return 2;
     if (src == 0) return 0xC;
-    s = D_004A4BD8;
-    if (s->op != 0) return 13;
-    s->op = 10;
-    s->st = 29;
+    request = D_004A4BD8;
+    if (request->op != 0) return 13;
+    request->op = 10;
+    request->st = 29;
     f86F0(0);
     __builtin_memcpy(&D_004A4BD8->body, (char *)src, 0x60);
-    t = D_004A4BD8;
-    e = D_004A4BDC;
-    t->f70 = b;
-    e->f2C(src[0], a, b);
+    requestAgain = D_004A4BD8;
+    driver = D_004A4BDC;
+    requestAgain->f70 = byteCount;
+    driver->f2C(src[0], buffer, byteCount);
     return 0;
 }
 #endif
@@ -6098,29 +6098,29 @@ extern void f86F0(int) __asm__("func_003F86F0");
 int func_003F9F00_impl(int *src, int a, int b) __asm__("func_003F9F00");
 /**
  * Starts a memory-card request that writes to an open save file (operation 9, state 28): write callback (driver +0x30)
- * with the descriptor, @p a and @p b; @p b is kept as the expected count.
+ * with the descriptor, @p buffer and @p byteCount; @p byteCount is kept as the expected count.
  *
  * @param src  the 0x60-byte request body of the open file
- * @param a  source buffer
- * @param b  byte count
+ * @param buffer  source buffer
+ * @param byteCount  byte count
  * @return 0; 2 when the layer is not open, 0xC when @p src is 0, 13 when a request is running
  */
-int func_003F9F00_impl(int *src, int a, int b) {
-    struct sMcReq *s;
-    struct sMcReq *t;
-    struct sMcDrv *e;
+int func_003F9F00_impl(int *src, int buffer, int byteCount) {
+    struct sMcReq *request;
+    struct sMcReq *requestAgain;
+    struct sMcDrv *driver;
     if (func_003F9208() == 0) return 2;
     if (src == 0) return 0xC;
-    s = D_004A4BD8;
-    if (s->op != 0) return 13;
-    s->op = 9;
-    s->st = 0x1C;
+    request = D_004A4BD8;
+    if (request->op != 0) return 13;
+    request->op = 9;
+    request->st = 0x1C;
     f86F0(0);
     __builtin_memcpy(&D_004A4BD8->body, (char *)src, 0x60);
-    t = D_004A4BD8;
-    e = D_004A4BDC;
-    t->f70 = b;
-    e->f30(src[0], a, b);
+    requestAgain = D_004A4BD8;
+    driver = D_004A4BDC;
+    requestAgain->f70 = byteCount;
+    driver->f30(src[0], buffer, byteCount);
     return 0;
 }
 #endif
@@ -6147,40 +6147,40 @@ extern void fB2F8w(int) __asm__("func_003FB2F8");
  * handler. When that finishes the request, calls the hook func_003FB2F8 for operations 2, 5, 7 and 11..13 and clears
  * the operation and state.
  *
- * @param p  receives the status: 0 idle, 1 running, 2 finished
- * @param q  receives the card call's result word
+ * @param statusOut  receives the status: 0 idle, 1 running, 2 finished
+ * @param resultOut  receives the card call's result word
  * @return the result; 2 when the layer is not open, 13 without a poll callback, 0xC for a 0 argument, 0xF when the card
  * is idle but a request is pending
  */
-int func_003FA040(int *p, int *q) {
-    int r;
+int func_003FA040(int *statusOut, int *resultOut) {
+    int result;
     if (func_003F9208() == 0) return 2;
     if (D_004A4BDC->f40 == 0) return 13;
-    if (p == 0) return 0xC;
-    if (q == 0) return 0xC;
-    r = D_004A4BDC->f40(p, q);
-    if (p[0] == 0) {
+    if (statusOut == 0) return 0xC;
+    if (resultOut == 0) return 0xC;
+    result = D_004A4BDC->f40(statusOut, resultOut);
+    if (statusOut[0] == 0) {
         if (D_004A4BD8->op != 0) return 0xF;
     }
-    if (p[0] != 2) return r;
-    r = D_004A4BDC->f4C[D_004A4BD8->st](r, 2, q[0]);
-    if (r == 10) {
-        struct sMcReq *g = D_004A4BD8;
-        g->op = 0;
-        g->st = 0;
+    if (statusOut[0] != 2) return result;
+    result = D_004A4BDC->f4C[D_004A4BD8->st](result, 2, resultOut[0]);
+    if (result == 10) {
+        struct sMcReq *request = D_004A4BD8;
+        request->op = 0;
+        request->st = 0;
         return 10;
     }
-    if (r == 0x10) return 0x10;
-    r = D_004A4BDC->f48[D_004A4BD8->op](r, p, q);
-    if (p[0] == 2) {
-        int s = D_004A4BD8->op;
-        struct sMcReq *g;
-        if (s == 5 || s == 2 || s == 7 || s == 11 || s == 0xC || s == 13) fB2F8w(0);
-        g = D_004A4BD8;
-        g->op = 0;
-        g->st = 0;
+    if (result == 0x10) return 0x10;
+    result = D_004A4BDC->f48[D_004A4BD8->op](result, statusOut, resultOut);
+    if (statusOut[0] == 2) {
+        int finishedOp = D_004A4BD8->op;
+        struct sMcReq *request;
+        if (finishedOp == 5 || finishedOp == 2 || finishedOp == 7 || finishedOp == 11 || finishedOp == 0xC || finishedOp == 13) fB2F8w(0);
+        request = D_004A4BD8;
+        request->op = 0;
+        request->st = 0;
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -6267,28 +6267,28 @@ extern T_A380 D_004973B0;
 void func_003FA380(char *src, unsigned short *dst) {
     T_A380 tbl = D_004973B0;
     unsigned char i = 0;
-    unsigned short c = *src++;
-    while (c != 0) {
-        if ((unsigned short)(c - 129) < 0x18) {
-            c = (c << 8) + *src++;
-        } else if (c >= 123) {
-            c = tbl.b[c - 94] + 33024;
-        } else if (c >= 97) {
-            c = c + 33312;
-        } else if (c >= 91) {
-            c = tbl.b[c - 68] + 33024;
-        } else if (c >= 65) {
-            c = c + 33311;
-        } else if (c >= 58) {
-            c = tbl.b[c - 42] + 33024;
-        } else if (c >= 0x30) {
-            c = c + 33311;
+    unsigned short sjisChar = *src++;
+    while (sjisChar != 0) {
+        if ((unsigned short)(sjisChar - 129) < 0x18) {
+            sjisChar = (sjisChar << 8) + *src++;
+        } else if (sjisChar >= 123) {
+            sjisChar = tbl.b[sjisChar - 94] + 33024;
+        } else if (sjisChar >= 97) {
+            sjisChar = sjisChar + 33312;
+        } else if (sjisChar >= 91) {
+            sjisChar = tbl.b[sjisChar - 68] + 33024;
+        } else if (sjisChar >= 65) {
+            sjisChar = sjisChar + 33311;
+        } else if (sjisChar >= 58) {
+            sjisChar = tbl.b[sjisChar - 42] + 33024;
+        } else if (sjisChar >= 0x30) {
+            sjisChar = sjisChar + 33311;
         } else {
-            c = tbl.b[c - 0x20] + 33024;
+            sjisChar = tbl.b[sjisChar - 0x20] + 33024;
         }
-        c = (c >> 8) | ((c & 0xFF) << 8);
-        dst[i++] = c;
-        c = *src++;
+        sjisChar = (sjisChar >> 8) | ((sjisChar & 0xFF) << 8);
+        dst[i++] = sjisChar;
+        sjisChar = *src++;
     }
 }
 #endif
@@ -6306,39 +6306,39 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FA4F0);
 void func_003FA4F0(unsigned short *src, char *dst) {
     T_A380 tbl = D_004973B0;
     unsigned char i = 0;
-    unsigned short c = *src++;
-    while (c != 0) {
-        c = (c >> 8) | ((c & 0xFF) << 8 & 0xFF00);
-        if ((c & 0x8100) == 33024) {
+    unsigned short sjisChar = *src++;
+    while (sjisChar != 0) {
+        sjisChar = (sjisChar >> 8) | ((sjisChar & 0xFF) << 8 & 0xFF00);
+        if ((sjisChar & 0x8100) == 33024) {
             char j;
-            c &= 0xFF;
+            sjisChar &= 0xFF;
             for (j = 0; j < 33; j++) {
-                if (tbl.b[j] == c) {
-                    c = j;
-                    if (c >= 29) {
-                        dst[i++] = c + 123;
-                    } else if (c >= 23) {
-                        dst[i++] = c + 91;
-                    } else if (c >= 0x10) {
-                        dst[i++] = c + 58;
+                if (tbl.b[j] == sjisChar) {
+                    sjisChar = j;
+                    if (sjisChar >= 29) {
+                        dst[i++] = sjisChar + 123;
+                    } else if (sjisChar >= 23) {
+                        dst[i++] = sjisChar + 91;
+                    } else if (sjisChar >= 0x10) {
+                        dst[i++] = sjisChar + 58;
                     } else {
-                        dst[i++] = c + 0x20;
+                        dst[i++] = sjisChar + 0x20;
                     }
                     break;
                 }
             }
-        } else if ((c & 0x8200) == 33280) {
-            if ((unsigned short)(c - 33409) < 26) {
-                dst[i++] = c - 0x20;
-            } else if ((unsigned short)(c - 33376) < 26) {
-                dst[i++] = c - 0x1F;
-            } else if ((unsigned short)(c - 33359) < 10) {
-                dst[i++] = c - 0x1F;
+        } else if ((sjisChar & 0x8200) == 33280) {
+            if ((unsigned short)(sjisChar - 33409) < 26) {
+                dst[i++] = sjisChar - 0x20;
+            } else if ((unsigned short)(sjisChar - 33376) < 26) {
+                dst[i++] = sjisChar - 0x1F;
+            } else if ((unsigned short)(sjisChar - 33359) < 10) {
+                dst[i++] = sjisChar - 0x1F;
             }
         } else {
             break;
         }
-        c = *src++;
+        sjisChar = *src++;
     }
     dst[i] = 0;
 }
@@ -6393,19 +6393,19 @@ void func_003FA708_impl(unsigned a, unsigned char *p) __asm__("func_003FA708");
  * Splits a memory-card unit code into port and slot bytes: codes 0..3 are port 0 slots 0..3, codes 4..7 port 1 slots
  * 0..3. Other codes leave the output untouched.
  *
- * @param a  unit code
- * @param p  receives port, slot
+ * @param unitCode  unit code
+ * @param portSlotOut  receives port, slot
  */
-void func_003FA708_impl(unsigned a, unsigned char *p) {
-    switch (a) {
-    case 0: p[0] = 0; p[1] = 0; break;
-    case 1: p[0] = 0; p[1] = 1; break;
-    case 2: p[0] = 0; p[1] = 2; break;
-    case 3: p[0] = 0; p[1] = 3; break;
-    case 4: p[0] = 1; p[1] = 0; break;
-    case 5: p[0] = 1; p[1] = 1; break;
-    case 6: p[0] = 1; p[1] = 2; break;
-    case 7: p[0] = 1; p[1] = 3; break;
+void func_003FA708_impl(unsigned unitCode, unsigned char *portSlotOut) {
+    switch (unitCode) {
+    case 0: portSlotOut[0] = 0; portSlotOut[1] = 0; break;
+    case 1: portSlotOut[0] = 0; portSlotOut[1] = 1; break;
+    case 2: portSlotOut[0] = 0; portSlotOut[1] = 2; break;
+    case 3: portSlotOut[0] = 0; portSlotOut[1] = 3; break;
+    case 4: portSlotOut[0] = 1; portSlotOut[1] = 0; break;
+    case 5: portSlotOut[0] = 1; portSlotOut[1] = 1; break;
+    case 6: portSlotOut[0] = 1; portSlotOut[1] = 2; break;
+    case 7: portSlotOut[0] = 1; portSlotOut[1] = 3; break;
     }
 }
 #endif
@@ -6421,16 +6421,16 @@ extern void func_0041605C(char *, char *, int);
  * Builds the directory-search pattern for a save: "*" followed by the save name, in a zeroed 32-byte buffer.
  *
  * @param dst  pattern buffer (32 bytes)
- * @param unused  ignored (callers pass the save description)
+ * @param saveDesc  ignored (callers pass the save description)
  * @param src  the save name
  * @return the end of the pattern
  */
-char *func_003FA7A0(char *dst, int unused, char *src) {
-    char *p = dst + 1;
+char *func_003FA7A0(char *dst, int saveDesc, char *src) {
+    char *nameDst = dst + 1;
     func_00416210(dst, 0, 0x20);
     *dst = D_004A4BE0[0];
-    func_0041605C(p, src, strlen(src));
-    return p + strlen(src);
+    func_0041605C(nameDst, src, strlen(src));
+    return nameDst + strlen(src);
 }
 #endif
 
@@ -6448,22 +6448,22 @@ void func_003FA818_impl(char *a, char *b, int unused, char *str) __asm__("func_0
  * Builds a save's directory name and file name, both "PSCD10088" followed by the save name, each in a zeroed 32-byte
  * buffer.
  *
- * @param a  receives the directory name
- * @param b  receives the file name
- * @param unused  ignored (callers pass the save description)
+ * @param dirName  receives the directory name
+ * @param fileName  receives the file name
+ * @param saveDesc  ignored (callers pass the save description)
  * @param str  the save name
  */
-void func_003FA818_impl(char *a, char *b, int unused, char *str) {
-    char *p;
-    f6210(a, 0, 0x20);
-    *(K9 *)a = D_00497400;
-    p = a + 9;
-    f605C(p, str, strlen(str));
-    p = b + 9;
+void func_003FA818_impl(char *dirName, char *fileName, int saveDesc, char *str) {
+    char *nameDst;
+    f6210(dirName, 0, 0x20);
+    *(K9 *)dirName = D_00497400;
+    nameDst = dirName + 9;
+    f605C(nameDst, str, strlen(str));
+    nameDst = fileName + 9;
     strlen(str);
-    f6210(b, 0, 0x20);
-    *(K9 *)b = D_00497400;
-    f605C(p, str, strlen(str));
+    f6210(fileName, 0, 0x20);
+    *(K9 *)fileName = D_00497400;
+    f605C(nameDst, str, strlen(str));
     strlen(str);
 }
 #endif
@@ -6494,14 +6494,14 @@ extern char *fA8F8_A7A0(char *, char *, char *) __asm__("func_003FA7A0");
  * next usable unit; when the unit is released with an error it does too. Failures go to the flush, close or release
  * cleanup (func_003F8720, func_003F8768, func_003F87B0).
  *
- * @param a  checked result of the finished card call
+ * @param callResult  checked result of the finished card call
  * @param st  receives 1 while running, 2 when finished
  * @param res  the poll's result word
  * @return 0 or an error code
  */
-int func_003FA8F8(int a, int *st, int *res) {
+int func_003FA8F8(int callResult, int *st, int *res) {
     char path[80];
-    int r;
+    int pollValue;
 
     if (st == 0) return 18;
     if (res == 0) return 18;
@@ -6509,13 +6509,13 @@ int func_003FA8F8(int a, int *st, int *res) {
     *st = 1;
     switch (D_004A4BD8->st) {
     case 1:
-        if (a == 0) {
+        if (callResult == 0) {
             fA8F8_A7A0(path, D_004A4BDC->f50, D_004A4BD8->body.name);
             D_004A4BD8->st = 2;
             ((void (*)(char *, int))D_004A4BDC->f04)(path, D_004A4BD8->body.slot);
             break;
         }
-        if (a == 3) {
+        if (callResult == 3) {
             if (D_004A4BD8->op == 1) {
                 D_004A4BD8->body.slot = func_003F85C0(D_004A4BDC->ports, D_004A4BD8->f6C);
                 if (D_004A4BD8->body.slot != -1) {
@@ -6530,16 +6530,16 @@ int func_003FA8F8(int a, int *st, int *res) {
             return 3;
         }
         *st = 2;
-        return a;
+        return callResult;
     case 2:
-        if (a == 0) {
-            r = *res;
-            if (r == 0) {
+        if (callResult == 0) {
+            pollValue = *res;
+            if (pollValue == 0) {
                 D_004A4BD8->st = 3;
                 ((void (*)(int))D_004A4BDC->f08)(D_004A4BD8->body.slot);
                 break;
             }
-            if (r == 1) {
+            if (pollValue == 1) {
                 fA8F8_86F0(8);
                 D_004A4BD8->st = 26;
                 D_004A4BDC->f14(D_004A4BD8->body.slot);
@@ -6548,16 +6548,16 @@ int func_003FA8F8(int a, int *st, int *res) {
             *st = 2;
             return 10;
         }
-        fA8F8_86F0(a);
+        fA8F8_86F0(callResult);
         return func_003F87B0(D_004A4BD8->body.slot, st);
     case 3:
-        if (a == 0) {
-            r = *res;
-            if (r < 0) {
+        if (callResult == 0) {
+            pollValue = *res;
+            if (pollValue < 0) {
                 *st = 2;
                 return 10;
             }
-            if ((unsigned)r >= (unsigned)D_004A4BDC->f420) {
+            if ((unsigned)pollValue >= (unsigned)D_004A4BDC->f420) {
                 D_004A4BD8->st = 4;
                 ((void (*)(int))D_004A4BDC->f0C)(D_004A4BD8->body.slot);
                 break;
@@ -6567,16 +6567,16 @@ int func_003FA8F8(int a, int *st, int *res) {
             D_004A4BDC->f14(D_004A4BD8->body.slot);
             break;
         }
-        fA8F8_86F0(a);
+        fA8F8_86F0(callResult);
         return func_003F87B0(D_004A4BD8->body.slot, st);
     case 4:
-        if (a == 0) {
-            r = *res;
-            if (r < 0) {
+        if (callResult == 0) {
+            pollValue = *res;
+            if (pollValue < 0) {
                 *st = 2;
                 return 10;
             }
-            if ((unsigned)r >= (unsigned)D_004A4BDC->f424) {
+            if ((unsigned)pollValue >= (unsigned)D_004A4BDC->f424) {
                 func_003FA818_impl((char *)D_004A4BD8->body.pad08, (char *)&D_004A4BD8->body.pad08[8], (int)D_004A4BDC->f50,
                                    D_004A4BD8->body.name);
                 D_004A4BD8->st = 5;
@@ -6589,119 +6589,119 @@ int func_003FA8F8(int a, int *st, int *res) {
             D_004A4BDC->f14(D_004A4BD8->body.slot);
             break;
         }
-        fA8F8_86F0(a);
+        fA8F8_86F0(callResult);
         return func_003F87B0(D_004A4BD8->body.slot, st);
     case 5:
-        if (a == 0) {
+        if (callResult == 0) {
             D_004A4BD8->st = 0xE;
             ((void (*)(char *, char *, int, int))D_004A4BDC->f18)((char *)D_004A4BD8->body.pad08,
                                                                   (char *)D_004A4BD8->body.pad08, D_004A4BD8->body.slot, 515);
             break;
         }
-        fA8F8_86F0(a);
+        fA8F8_86F0(callResult);
         return func_003F87B0(D_004A4BD8->body.slot, st);
     case 0xE:
-        if (a == 0) {
-            int v = *res;
-            if (v >= 0) {
+        if (callResult == 0) {
+            int openResult = *res;
+            if (openResult >= 0) {
                 D_004A4BD8->st = 0x10;
-                D_004A4BD8->body.port = v;
-                D_004A4BDC->f38(v);
+                D_004A4BD8->body.port = openResult;
+                D_004A4BDC->f38(openResult);
                 break;
             }
             fA8F8_86F0(0);
             return func_003F8720((int)&D_004A4BD8->body, st);
         }
-        fA8F8_86F0(a);
+        fA8F8_86F0(callResult);
         return func_003F8720((int)&D_004A4BD8->body, st);
     case 0x10:
-        if (a == 0) {
+        if (callResult == 0) {
             D_004A4BD8->st = 17;
             D_004A4BDC->f1C(D_004A4BD8->body.port);
             break;
         }
-        fA8F8_86F0(a);
+        fA8F8_86F0(callResult);
         return func_003F8768((int)&D_004A4BD8->body, st);
     case 17:
-        if (a == 0) {
+        if (callResult == 0) {
             D_004A4BD8->st = 6;
             ((void (*)(char *, char *, int, int))D_004A4BDC->f18)((char *)D_004A4BD8->body.pad08, str_view_ico_b,
                                                                   D_004A4BD8->body.slot, 515);
             break;
         }
-        fA8F8_86F0(a);
+        fA8F8_86F0(callResult);
         return func_003F87B0(D_004A4BD8->body.slot, st);
     case 6:
-        if (a == 0) {
-                int v = *res;
+        if (callResult == 0) {
+                int openResult = *res;
             D_004A4BD8->st = 7;
-            D_004A4BD8->body.port = v;
-            D_004A4BDC->f30(v, *(int *)&D_004A4BDC->f50[0], *(int *)&D_004A4BDC->f50[4]);
+            D_004A4BD8->body.port = openResult;
+            D_004A4BDC->f30(openResult, *(int *)&D_004A4BDC->f50[0], *(int *)&D_004A4BDC->f50[4]);
             break;
         }
-        fA8F8_86F0(a);
+        fA8F8_86F0(callResult);
         return func_003F87B0(D_004A4BD8->body.slot, st);
     case 7:
-        if (a == 0) {
+        if (callResult == 0) {
             D_004A4BD8->st = 8;
             D_004A4BDC->f38(D_004A4BD8->body.port);
             break;
         }
-        fA8F8_86F0(a);
+        fA8F8_86F0(callResult);
         return func_003F8720((int)&D_004A4BD8->body, st);
     case 8:
-        if (a == 0) {
+        if (callResult == 0) {
             D_004A4BD8->st = 9;
             D_004A4BDC->f1C(D_004A4BD8->body.port);
             break;
         }
-        fA8F8_86F0(a);
+        fA8F8_86F0(callResult);
         return func_003F8768((int)&D_004A4BD8->body, st);
     case 9:
-        if (a == 0) {
+        if (callResult == 0) {
             D_004A4BD8->st = 10;
             ((void (*)(char *, char *, int, int))D_004A4BDC->f18)((char *)D_004A4BD8->body.pad08, str_icon_sys_b,
                                                                   D_004A4BD8->body.slot, 515);
             break;
         }
-        fA8F8_86F0(a);
+        fA8F8_86F0(callResult);
         return func_003F87B0(D_004A4BD8->body.slot, st);
     case 10:
-        if (a == 0) {
-                int v = *res;
-            D_004A4BD8->body.port = v;
+        if (callResult == 0) {
+                int openResult = *res;
+            D_004A4BD8->body.port = openResult;
             D_004A4BD8->st = 11;
-            D_004A4BDC->f30(v, (int)&D_004A4BDC->f50[8], 964);
+            D_004A4BDC->f30(openResult, (int)&D_004A4BDC->f50[8], 964);
             break;
         }
-        fA8F8_86F0(a);
+        fA8F8_86F0(callResult);
         return func_003F87B0(D_004A4BD8->body.slot, st);
     case 11:
-        if (a == 0) {
+        if (callResult == 0) {
             D_004A4BD8->st = 0xC;
             D_004A4BDC->f38(D_004A4BD8->body.port);
             break;
         }
-        fA8F8_86F0(a);
+        fA8F8_86F0(callResult);
         return func_003F8720((int)&D_004A4BD8->body, st);
     case 0xC:
-        if (a == 0) {
+        if (callResult == 0) {
             D_004A4BD8->st = 13;
             D_004A4BDC->f1C(D_004A4BD8->body.port);
             break;
         }
-        fA8F8_86F0(a);
+        fA8F8_86F0(callResult);
         return func_003F8768((int)&D_004A4BD8->body, st);
     case 13:
-        if (a == 0) {
+        if (callResult == 0) {
             D_004A4BD8->st = 26;
             D_004A4BDC->f14(D_004A4BD8->body.slot);
             break;
         }
-        fA8F8_86F0(a);
+        fA8F8_86F0(callResult);
         return func_003F87B0(D_004A4BD8->body.slot, st);
     case 26:
-        if (a == 0) {
+        if (callResult == 0) {
             if (D_004A4BD8->op == 4) {
                 *st = 2;
                 return func_003F8710();
@@ -6720,7 +6720,7 @@ int func_003FA8F8(int a, int *st, int *res) {
             return func_003F8710();
         }
         *st = 2;
-        return a;
+        return callResult;
     default:
         *st = 2;
         return 18;
@@ -6753,12 +6753,12 @@ extern char *fAE50_A7A0(char *, char *, char *) __asm__("func_003FA7A0");
  * ignored; no card (3) skips to releasing the unit; other errors are recorded while the deletes go on. Not finding the
  * save records error 4. Operation 2 tries the next usable unit after an error.
  *
- * @param a  checked result of the finished card call
+ * @param callResult  checked result of the finished card call
  * @param st  receives 1 while running, 2 when finished
  * @param res  the poll's result word
  * @return 0 or an error code
  */
-int func_003FAE50(int a, int *st, int *res) {
+int func_003FAE50(int callResult, int *st, int *res) {
     char path[80];
 
     if (st == 0) return 18;
@@ -6768,13 +6768,13 @@ int func_003FAE50(int a, int *st, int *res) {
     switch (D_004A4BD8->st) {
     case 1:
         fAE50_86F0(0);
-        if (a == 0) {
+        if (callResult == 0) {
             fAE50_A7A0(path, D_004A4BDC->f50, D_004A4BD8->body.name);
             D_004A4BD8->st = 2;
             ((void (*)(char *, int))D_004A4BDC->f04)(path, D_004A4BD8->body.slot);
             break;
         }
-        if (a == 3) {
+        if (callResult == 3) {
             if (D_004A4BD8->op == 2) {
                 D_004A4BD8->body.slot = func_003F85C0(D_004A4BDC->ports, D_004A4BD8->f6C);
                 if (D_004A4BD8->body.slot != -1) {
@@ -6789,9 +6789,9 @@ int func_003FAE50(int a, int *st, int *res) {
             return 3;
         }
         *st = 2;
-        return a;
+        return callResult;
     case 2:
-        if (a == 0) {
+        if (callResult == 0) {
             if (*res == 1) {
                 ((void (*)(char *))D_004A4BDC->f44)((char *)D_004A4BD8->body.pad08);
                 D_004A4BD8->st = 19;
@@ -6806,54 +6806,54 @@ int func_003FAE50(int a, int *st, int *res) {
             *st = 2;
             return 10;
         }
-        fAE50_86F0(a);
+        fAE50_86F0(callResult);
         return func_003F87B0(D_004A4BD8->body.slot, st);
     case 19:
-        if (a == 3) {
-            if (func_003F8710() == 0) fAE50_86F0(a);
+        if (callResult == 3) {
+            if (func_003F8710() == 0) fAE50_86F0(callResult);
             return func_003F87B0(D_004A4BD8->body.slot, st);
         }
-        if (a != 4) {
-            if (func_003F8710() == 0) fAE50_86F0(a);
+        if (callResult != 4) {
+            if (func_003F8710() == 0) fAE50_86F0(callResult);
         }
         D_004A4BD8->st = 20;
         ((void (*)(char *, char *, int))D_004A4BDC->f24)((char *)D_004A4BD8->body.pad08, str_view_ico_b,
                                                         D_004A4BD8->body.slot);
         break;
     case 20:
-        if (a == 3) {
-            if (func_003F8710() == 0) fAE50_86F0(a);
+        if (callResult == 3) {
+            if (func_003F8710() == 0) fAE50_86F0(callResult);
             return func_003F87B0(D_004A4BD8->body.slot, st);
         }
-        if (a != 4) {
-            if (func_003F8710() == 0) fAE50_86F0(a);
+        if (callResult != 4) {
+            if (func_003F8710() == 0) fAE50_86F0(callResult);
         }
         D_004A4BD8->st = 21;
         ((void (*)(char *, char *, int))D_004A4BDC->f24)((char *)D_004A4BD8->body.pad08,
                                                         (char *)D_004A4BD8->body.pad08, D_004A4BD8->body.slot);
         break;
     case 21:
-        if (a == 3) {
-            if (func_003F8710() == 0) fAE50_86F0(a);
+        if (callResult == 3) {
+            if (func_003F8710() == 0) fAE50_86F0(callResult);
             return func_003F87B0(D_004A4BD8->body.slot, st);
         }
-        if (a != 4) {
-            if (func_003F8710() == 0) fAE50_86F0(a);
+        if (callResult != 4) {
+            if (func_003F8710() == 0) fAE50_86F0(callResult);
         }
         D_004A4BD8->st = 18;
         ((void (*)(char *, int))D_004A4BDC->f28)((char *)D_004A4BD8->body.pad08, D_004A4BD8->body.slot);
         break;
     case 18:
-        if (a == 0) {
+        if (callResult == 0) {
             if (func_003F8710() == 0) fAE50_86F0(0);
             D_004A4BD8->st = 26;
             D_004A4BDC->f14(D_004A4BD8->body.slot);
             break;
         }
-        if (func_003F8710() == 0) fAE50_86F0(a);
+        if (func_003F8710() == 0) fAE50_86F0(callResult);
         return func_003F87B0(D_004A4BD8->body.slot, st);
     case 26:
-        if (a == 0) {
+        if (callResult == 0) {
             if (D_004A4BD8->op == 5) {
                 *st = 2;
                 return func_003F8710();
@@ -6872,7 +6872,7 @@ int func_003FAE50(int a, int *st, int *res) {
             return func_003F8710();
         }
         *st = 2;
-        return a;
+        return callResult;
     default:
         *st = 2;
         return 18;
@@ -6954,11 +6954,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB308);
 /**
  * Checks the save description pointer: 0 when set, 12 when 0.
  *
- * @param a0  the description
+ * @param saveDesc  the description
  * @return 0 or 12
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_003FB308(int a0) { return a0 ? 0 : 12; }
+int func_003FB308(int saveDesc) { return saveDesc ? 0 : 12; }
 #endif
 
 //100%
@@ -7015,20 +7015,20 @@ extern struct sCrc D_00451518;
 extern int func_00266728(int, int, int);
 extern void func_003FB358b(int) __asm__("func_003FB358");
 /**
- * Starts the CRC interface D_00451518: allocates its 1 KB table from @p a, fills it, and resets the digest (all ones)
+ * Starts the CRC interface D_00451518: allocates its 1 KB table from @p heapId, fills it, and resets the digest (all ones)
  * and the output block.
  *
- * @param a  heap
+ * @param heapId  heap
  * @return 0; 5 when already started, 1 when the allocation fails
  */
-int func_003FB3A0(unsigned a) {
-    int r;
+int func_003FB3A0(unsigned heapId) {
+    int tableAddr;
     if (D_00451518.table != 0) return 5;
-    r = func_00266728(a, 0x400, 4);
-    D_00451518.table = (unsigned *)r;
-    if (r == 0) return 1;
-    D_00451518.heap = a;
-    func_003FB358b(r);
+    tableAddr = func_00266728(heapId, 0x400, 4);
+    D_00451518.table = (unsigned *)tableAddr;
+    if (tableAddr == 0) return 1;
+    D_00451518.heap = heapId;
+    func_003FB358b(tableAddr);
     D_00451518.f04 = 4;
     D_00451518.crc = 0xFFFFFFFF;
     D_00451518.f08 = 0;
@@ -7050,9 +7050,9 @@ extern int func_00266760(int, char *, int, int);
  * @return 0, or 6 when not started
  */
 int func_003FB430(void) {
-    struct sCrc *p = &D_00451518;
+    struct sCrc *crcState = &D_00451518;
     if (D_00451518.table == 0) return 6;
-    func_00266760(p->heap, (char *)p->table, 0x400, 4);
+    func_00266760(crcState->heap, (char *)crcState->table, 0x400, 4);
     D_00451518.table = 0;
     return 0;
 }
@@ -7087,9 +7087,9 @@ extern struct sCrc D_00451518;
  * @return 0, or 6 when not started
  */
 int func_003FB490(void) {
-    unsigned long long v = 0xFFFFFFFF;
+    unsigned long long initialCrc = 0xFFFFFFFF;
     if (D_00451518.table == 0) return 6;
-    D_00451518.crc = v;
+    D_00451518.crc = initialCrc;
     return 0;
 }
 #endif
@@ -7138,13 +7138,13 @@ extern int D_004A5B1C;
  * @return 0; 6 when not started, 2 when @p out is 0
  */
 int func_003FB558(int **out) {
-    struct sCrc *p = &D_00451518;
+    struct sCrc *crcState = &D_00451518;
     if (D_00451518.table == 0) return 6;
     if (out == 0) return 2;
-    p->f08 = &D_004A5B1C;
-    p->f04 = 4;
-    D_004A5B1C = ~p->crc;
-    *out = &p->f04;
+    crcState->f08 = &D_004A5B1C;
+    crcState->f04 = 4;
+    D_004A5B1C = ~crcState->crc;
+    *out = &crcState->f04;
     return 0;
 }
 #endif
@@ -7258,19 +7258,19 @@ extern unsigned char *D_004A4BEC;
 extern int D_004A4BF0;
 
 /**
- * Sets the XOR cipher key (slot 3): the key runs from @p a for @p b bytes and the position restarts at its first byte
+ * Sets the XOR cipher key (slot 3): the key runs from @p keyBytes for @p keyLen bytes and the position restarts at its first byte
  * (state 5).
  *
- * @param a  key bytes (kept by pointer)
- * @param b  key length
+ * @param keyBytes  key bytes (kept by pointer)
+ * @param keyLen  key length
  * @return 0; 2 for a 0 argument, 4 when stopped
  */
-int func_003FB650(unsigned char *a, int b) {
-    if (a == 0 || b == 0) return 2;
+int func_003FB650(unsigned char *keyBytes, int keyLen) {
+    if (keyBytes == 0 || keyLen == 0) return 2;
     if (D_004A4BF0 == 4) return 4;
-    D_004A4BE4 = a;
-    D_004A4BE8 = a + b - 1;
-    D_004A4BEC = a;
+    D_004A4BE4 = keyBytes;
+    D_004A4BE8 = keyBytes + keyLen - 1;
+    D_004A4BEC = keyBytes;
     D_004A4BF0 = 5;
     return 0;
 }
@@ -7396,12 +7396,12 @@ char *func_003FB810_impl(char *p) __asm__("func_003FB810");
 /**
  * Offsets an error of the memory-card request layer into the save-record manager's range: nonzero codes get 100 added.
  *
- * @param p  the error (declared as a pointer)
- * @return 0, or @p p + 100
+ * @param errorCode  the error (declared as a pointer)
+ * @return 0, or @p errorCode + 100
  */
-char *func_003FB810_impl(char *p) {
-    if (p == 0) return 0;
-    return p + 100;
+char *func_003FB810_impl(char *errorCode) {
+    if (errorCode == 0) return 0;
+    return errorCode + 100;
 }
 #endif
 
@@ -7414,12 +7414,12 @@ char *func_003FB828_impl(char *p) __asm__("func_003FB828");
 /**
  * Offsets an XOR cipher error into the save-record manager's range: nonzero codes get 200 added.
  *
- * @param p  the error (declared as a pointer)
- * @return 0, or @p p + 200
+ * @param errorCode  the error (declared as a pointer)
+ * @return 0, or @p errorCode + 200
  */
-char *func_003FB828_impl(char *p) {
-    if (p == 0) return 0;
-    return p + 200;
+char *func_003FB828_impl(char *errorCode) {
+    if (errorCode == 0) return 0;
+    return errorCode + 200;
 }
 #endif
 
@@ -7432,12 +7432,12 @@ char *func_003FB840_impl(char *p) __asm__("func_003FB840");
 /**
  * Offsets a CRC interface error into the save-record manager's range: nonzero codes get 300 added.
  *
- * @param p  the error (declared as a pointer)
- * @return 0, or @p p + 300
+ * @param errorCode  the error (declared as a pointer)
+ * @return 0, or @p errorCode + 300
  */
-char *func_003FB840_impl(char *p) {
-    if (p == 0) return 0;
-    return p + 300;
+char *func_003FB840_impl(char *errorCode) {
+    if (errorCode == 0) return 0;
+    return errorCode + 300;
 }
 #endif
 
@@ -7528,17 +7528,17 @@ typedef struct { W3FB958 x, y; } V3FB958;
  * Fills a 12-byte save-record header: key word, size word, then the 4 CRC bytes.
  *
  * @param dst  the header
- * @param a  record key
- * @param b  record size
- * @param c  record CRC
+ * @param recordKey  record key
+ * @param recordSize  record size
+ * @param recordCrc  record CRC
  */
-void func_003FB958(W3FB958 *dst, int a, int b, W3FB958 *c) {
-    V3FB958 t;
-    *(int *)&t.x = a;
-    *(int *)&t.y = b;
-    dst[0] = t.x;
-    dst[1] = t.y;
-    dst[2] = *c;
+void func_003FB958(W3FB958 *dst, int recordKey, int recordSize, W3FB958 *recordCrc) {
+    V3FB958 packed;
+    *(int *)&packed.x = recordKey;
+    *(int *)&packed.y = recordSize;
+    dst[0] = packed.x;
+    dst[1] = packed.y;
+    dst[2] = *recordCrc;
 }
 #endif
 
@@ -7623,13 +7623,13 @@ extern struct sMcState *D_004A5B20;
  * @return the entry (key, offset, size, CRC), or 0
  */
 struct sMcEnt *func_003FBA20(int key, int n) {
-    struct sMcState *s = D_004A5B20;
-    struct sMcEnt *end = s->f9C + s->f94;
-    struct sMcEnt *e = s->f9C;
+    struct sMcState *state = D_004A5B20;
+    struct sMcEnt *end = state->f9C + state->f94;
+    struct sMcEnt *entry = state->f9C;
     int cnt = 0;
-    for (; e < end; e++) {
-        if (key == e->key) {
-            if (n == cnt) return e;
+    for (; entry < end; entry++) {
+        if (key == entry->key) {
+            if (n == cnt) return entry;
             cnt++;
         }
     }
@@ -7653,13 +7653,13 @@ extern struct sMcState *D_004A5B20;
  * @param val  the CRC
  */
 void func_003FBA78(int key, int n, int *val) {
-    struct sMcState *s = D_004A5B20;
-    struct sMcEnt *end = s->f9C + s->f94;
-    struct sMcEnt *e = s->f9C;
+    struct sMcState *state = D_004A5B20;
+    struct sMcEnt *end = state->f9C + state->f94;
+    struct sMcEnt *entry = state->f9C;
     int cnt = 0;
-    for (; e < end; e++) {
-        if (key == e->key) {
-            if (n == cnt) e->c = *val;
+    for (; entry < end; entry++) {
+        if (key == entry->key) {
+            if (n == cnt) entry->c = *val;
             cnt++;
         }
     }
@@ -7688,13 +7688,13 @@ extern struct sMcState *D_004A5B20;
 // FAKEMATCH: FM_OPAQUE(e) after the e->c store hides that e == t, so the pre-if `t = &f9C[f94]` (v0) is copied into e (a3) at the join as in retail; e->c is stored through an int view (retail reloads D_004A5B20 after that store, which a struct-field store lets sched hoist); plain form 67.84% (91.38% with the struct-field store).
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
 int func_003FBAD0(int key, int size, int *val) {
-    struct sMcEnt *e, *t;
+    struct sMcEnt *e, *newEntry;
     int len;
     int end;
     if (D_004A5B20->f94 == D_004A5B20->f90) return D_004A5B20->f98;
-    t = D_004A5B20->f9C + D_004A5B20->f94;
+    newEntry = D_004A5B20->f9C + D_004A5B20->f94;
     if (D_004A5B20->f94 == 0) D_004A5B20->f9C->a = 0;
-    e = t;
+    e = newEntry;
     e->key = key;
     e->b = size;
     len = size + 0xC;
@@ -7723,22 +7723,22 @@ int func_003FBB50_impl(int a, int b, int c) __asm__("func_003FBB50");
 /**
  * Computes the CRC-32 of a buffer through the CRC interface (+0x70): reset, update, finish.
  *
- * @param a  the data
- * @param b  byte count
- * @param c  receives the output block (size, then a pointer to the digest)
+ * @param data  the data
+ * @param byteCount  byte count
+ * @param digestOut  receives the output block (size, then a pointer to the digest)
  * @return 0, or the CRC error + 300
  */
-int func_003FBB50_impl(int a, int b, int c) {
+int func_003FBB50_impl(int data, int byteCount, int digestOut) {
     struct sMcIfB *vt = D_004A5B20->f70;
-    int r = vt->f0C(a, b, c);
-    if (r == 0) {
-        r = vt->f10(a, b);
-        if (r == 0) {
-            r = vt->f14(c);
-            if (r == 0) return 0;
+    int result = vt->f0C(data, byteCount, digestOut);
+    if (result == 0) {
+        result = vt->f10(data, byteCount);
+        if (result == 0) {
+            result = vt->f14(digestOut);
+            if (result == 0) return 0;
         }
     }
-    return func_003FB840c(r);
+    return func_003FB840c(result);
 }
 #endif
 
@@ -7757,14 +7757,14 @@ extern int func_003FBB50(void *, int, int **);
  * @param out  receives the 4 digest bytes
  */
 void func_003FBBE0(struct sMcKey *out) {
-    struct sMcState *s = D_004A5B20;
-    int *r;
-    int sz = s->f94 << 4;
+    struct sMcState *state = D_004A5B20;
+    int *digestBlock;
+    int sz = state->f94 << 4;
     if (sz == 0) {
         *(int *)out = 0;
     } else {
-        func_003FBB50(s->f9C, sz, &r);
-        *out = *(struct sMcKey *)r[1];
+        func_003FBB50(state->f9C, sz, &digestBlock);
+        *out = *(struct sMcKey *)digestBlock[1];
     }
 }
 #endif
@@ -7789,17 +7789,17 @@ int func_003FBC40_impl(int x, int y) __asm__("func_003FBC40");
  * @return 0, or the cipher error + 200
  */
 int func_003FBC40_impl(int x, int y) {
-    int r;
+    int result;
     if (D_004A5B20->f6C == 0) return 0;
-    r = D_004A5B20->f6C->f0C(D_004A5B20->f64, D_004A5B20->f68);
-    if (r == 0) {
-        r = D_004A5B20->f6C->f10(x, y);
-        if (r == 0) {
-            r = D_004A5B20->f6C->f18();
-            if (r == 0) return 0;
+    result = D_004A5B20->f6C->f0C(D_004A5B20->f64, D_004A5B20->f68);
+    if (result == 0) {
+        result = D_004A5B20->f6C->f10(x, y);
+        if (result == 0) {
+            result = D_004A5B20->f6C->f18();
+            if (result == 0) return 0;
         }
     }
-    return fB828b(r);
+    return fB828b(result);
 }
 #endif
 
@@ -7822,17 +7822,17 @@ int func_003FBCD8_impl(int x, int y) __asm__("func_003FBCD8");
  * @return 0, or the cipher error + 200
  */
 int func_003FBCD8_impl(int x, int y) {
-    int r;
+    int result;
     if (D_004A5B20->f6C == 0) return 0;
-    r = D_004A5B20->f6C->f0C(D_004A5B20->f64, D_004A5B20->f68);
-    if (r == 0) {
-        r = D_004A5B20->f6C->f14(x, y);
-        if (r == 0) {
-            r = D_004A5B20->f6C->f18();
-            if (r == 0) return 0;
+    result = D_004A5B20->f6C->f0C(D_004A5B20->f64, D_004A5B20->f68);
+    if (result == 0) {
+        result = D_004A5B20->f6C->f14(x, y);
+        if (result == 0) {
+            result = D_004A5B20->f6C->f18();
+            if (result == 0) return 0;
         }
     }
-    return fB828(r);
+    return fB828(result);
 }
 #endif
 
@@ -7846,22 +7846,22 @@ extern struct sMcState *D_004A5B20;
 
 extern int func_003F99B8(int, int, int);
 /**
- * Starts opening a save (func_003F99B8) as save-record operation @p d at step 4, with an empty record table.
+ * Starts opening a save (func_003F99B8) as save-record operation @p operation at step 4, with an empty record table.
  *
- * @param a  the save name
- * @param b  card unit code, or -1 for any usable unit
- * @param c  search direction
- * @param d  the operation (4 open, 5 reopen and verify)
+ * @param saveName  the save name
+ * @param unitCode  card unit code, or -1 for any usable unit
+ * @param searchDir  search direction
+ * @param operation  the operation (4 open, 5 reopen and verify)
  * @return 0, or the request error + 100
  */
-int func_003FBD70(int a, int b, int c, int d) {
-    int r = func_003F99B8(a, b, c);
-    struct sMcState *p = D_004A5B20;
-    p->f74 = d;
-    p->f78 = 4;
-    p->f94 = 0;
-    p->f98 = 0;
-    return func_003FB810(r);
+int func_003FBD70(int saveName, int unitCode, int searchDir, int operation) {
+    int result = func_003F99B8(saveName, unitCode, searchDir);
+    struct sMcState *state = D_004A5B20;
+    state->f74 = operation;
+    state->f78 = 4;
+    state->f94 = 0;
+    state->f98 = 0;
+    return func_003FB810(result);
 }
 #endif
 
@@ -7881,9 +7881,9 @@ extern int func_003FB810(int);
  * @return 0, or the request error + 100
  */
 int func_003FBDB8(void) {
-    struct sMcState *p = D_004A5B20;
-    p->f78 = 9;
-    return func_003FB810(func_003F9C48(p, 0, 0));
+    struct sMcState *state = D_004A5B20;
+    state->f78 = 9;
+    return func_003FB810(func_003F9C48(state, 0, 0));
 }
 #endif
 
@@ -7905,9 +7905,9 @@ extern int func_003FB810(int);
  * @return 0, or the request error + 100
  */
 int func_003FBDF0(void) {
-    struct sMcState *p = D_004A5B20;
-    p->f78 = 7;
-    return func_003FB810(func_003F9DC0(D_004A5B20, p->f80, func_003FB898_BDF0(0, 1)));
+    struct sMcState *state = D_004A5B20;
+    state->f78 = 7;
+    return func_003FB810(func_003F9DC0(D_004A5B20, state->f80, func_003FB898_BDF0(0, 1)));
 }
 #endif
 
@@ -7934,17 +7934,17 @@ extern int f9C48(struct sMcState *, int, int) __asm__("func_003F9C48");
  */
 int func_003FBE40(void) {
     int x[2];
-    int r;
-    int p, q;
+    int result;
+    int recordKey, recordSize;
     x[1] = 0;
     D_004A5B20->f78 = 11;
-    r = fBCD8(D_004A5B20->f80, 0xC);
-    if (r != 0) return r;
+    result = fBCD8(D_004A5B20->f80, 0xC);
+    if (result != 0) return result;
     fB9D0(D_004A5B20->f80, &x[0], &x[1], D_004A5B20->f88.b);
-    q = x[1];
-    p = x[0];
-    r = fBAD0(p, q, D_004A5B20->f88.b);
-    if (D_004A5B20->f98 == r) return 5;
+    recordSize = x[1];
+    recordKey = x[0];
+    result = fBAD0(recordKey, recordSize, D_004A5B20->f88.b);
+    if (D_004A5B20->f98 == result) return 5;
     return func_003FB810(f9C48(D_004A5B20, D_004A5B20->f98, 0));
 }
 #endif
@@ -7975,18 +7975,18 @@ extern int f9F00(struct sMcState *, int, int) __asm__("func_003F9F00");
  * @return 0, the cipher error, or the request error + 100
  */
 int func_003FBED0(void) {
-    int h;
-    int r;
+    int header;
+    int result;
     D_004A5B20->f78 = 6;
-    h = func_003FB910(D_004A5B20->f7C, 1);
-    if (h == 0) return 4;
-    fB958(h, D_004A5B20->f8C, D_004A5B20->f84, D_004A5B20->f88.b);
-    r = fBC40(h, 0xC);
-    if (r != 0) return r;
-    r = fBC40(D_004A5B20->f7C, D_004A5B20->f84);
-    if (r != 0) return r;
-    r = func_003FB898_BED0(D_004A5B20->f84, 2);
-    return func_003FB810(f9F00(D_004A5B20, h, r));
+    header = func_003FB910(D_004A5B20->f7C, 1);
+    if (header == 0) return 4;
+    fB958(header, D_004A5B20->f8C, D_004A5B20->f84, D_004A5B20->f88.b);
+    result = fBC40(header, 0xC);
+    if (result != 0) return result;
+    result = fBC40(D_004A5B20->f7C, D_004A5B20->f84);
+    if (result != 0) return result;
+    result = func_003FB898_BED0(D_004A5B20->f84, 2);
+    return func_003FB810(f9F00(D_004A5B20, header, result));
 }
 #endif
 
@@ -8010,11 +8010,11 @@ extern int func_003FB810(int);
  * @return 0, or the request error + 100
  */
 int func_003FBF80(void) {
-    struct sMcState *p = D_004A5B20;
-    int r;
-    p->f78 = 10;
-    r = func_003FB910(p->f7C, 0);
-    return func_003FB810(func_003F9DC0(D_004A5B20, r, func_003FB898_BF80(D_004A5B20->f84, 1)));
+    struct sMcState *state = D_004A5B20;
+    int header;
+    state->f78 = 10;
+    header = func_003FB910(state->f7C, 0);
+    return func_003FB810(func_003F9DC0(D_004A5B20, header, func_003FB898_BF80(D_004A5B20->f84, 1)));
 }
 #endif
 
@@ -8041,19 +8041,19 @@ extern int f5FC8(int, char *, int) __asm__("func_00415FC8");
  * @return 0 when the record is valid, 10 when the CRC differs, 11 or 110, or the cipher / CRC error
  */
 int func_003FBFE0(void) {
-    L3FBFE0 x; int h; int r; int err = 10; int hh;
+    L3FBFE0 x; int header; int result; int err = 10; int hh;
     x.p = 0; hh = D_004A5B20->f7C; x.b = 0;
     D_004A5B20->f78 = err;
-    h = func_003FB910(hh, 0);
-    r = fBCD8(h, 0xC);
-    if (r != 0) return r;
-    fB9D0(h, &x.a, &x.b, D_004A5B20->f88.b);
+    header = func_003FB910(hh, 0);
+    result = fBCD8(header, 0xC);
+    if (result != 0) return result;
+    fB9D0(header, &x.a, &x.b, D_004A5B20->f88.b);
     if (x.a != D_004A5B20->f8C) return 11;
     if (x.b != D_004A5B20->f84) return 110;
-    r = fBCD8(D_004A5B20->f7C, x.b);
-    if (r != 0) return r;
-    r = fBB50(D_004A5B20->f7C, D_004A5B20->f84, &x.p);
-    if (r != 0) return r;
+    result = fBCD8(D_004A5B20->f7C, x.b);
+    if (result != 0) return result;
+    result = fBB50(D_004A5B20->f7C, D_004A5B20->f84, &x.p);
+    if (result != 0) return result;
     if (x.p->tag != 4) return 11;
     if (f5FC8(x.p->p, D_004A5B20->f88.b, 4) == 0) err = 0;
     return err;
@@ -8098,46 +8098,46 @@ extern void func_0041605C(char *, char *, int);
 /**
  * Opens the save-record manager.
  *
- * @p p holds: +0x0 the record limit, +0x4 the card unit list, +0x8 the 17 card callbacks, +0xC / +0x10 the cipher key
+ * @p openParams holds: +0x0 the record limit, +0x4 the card unit list, +0x8 the 17 card callbacks, +0xC / +0x10 the cipher key
  * and its length, +0x14 the cipher interface (may be 0), +0x18 the heap. Opens the request layer (func_003F9218),
  * allocates the 172-byte state, starts the CRC interface and the cipher, copies the key, allocates the record table (16
  * bytes per record) and the 12-byte header buffer (+0x80). Likely bug: the header buffer is allocated from +0xA0 before
  * +0xA0 is set to the heap.
  *
- * @param p  the open parameters
+ * @param openParams  the open parameters
  * @return 0; 1 when already open, 6 when an allocation fails, or a layer error offset by 100 / 200 / 300
  */
-int func_003FC0E8(P0E8 *p) {
-    int r;
+int func_003FC0E8(P0E8 *openParams) {
+    int result;
     struct sMcIfA *cb;
     if (func_003FC0D8() != 0) return 1;
-    r = func_003F9218(p->f4, p->f8, p->f18);
-    if (r != 0) return func_003FB810(r);
-    D_004A5B20 = c0e8_6728(p->f18, 172, 4);
+    result = func_003F9218(openParams->f4, openParams->f8, openParams->f18);
+    if (result != 0) return func_003FB810(result);
+    D_004A5B20 = c0e8_6728(openParams->f18, 172, 4);
     if (D_004A5B20 == 0) return 6;
     c0e8_A6C8(&D_004A5B20->f70);
-    r = D_004A5B20->f70->f00(p->f18);
-    if (r != 0) return func_003FB840c(r);
-    D_004A5B20->f6C = cb = p->f14;
+    result = D_004A5B20->f70->f00(openParams->f18);
+    if (result != 0) return func_003FB840c(result);
+    D_004A5B20->f6C = cb = openParams->f14;
     if (cb != 0) {
         int n;
-        r = cb->f00(p->f18);
-        if (r != 0) return fB828(r);
-        n = p->f10;
+        result = cb->f00(openParams->f18);
+        if (result != 0) return fB828(result);
+        n = openParams->f10;
         D_004A5B20->f68 = n;
-        D_004A5B20->f64 = c0e8_6728(p->f18, n, 4);
+        D_004A5B20->f64 = c0e8_6728(openParams->f18, n, 4);
         if (D_004A5B20->f64 == 0) return 6;
-        func_0041605C(D_004A5B20->f64, p->fC, D_004A5B20->f68);
+        func_0041605C(D_004A5B20->f64, openParams->fC, D_004A5B20->f68);
     }
-    D_004A5B20->f90 = p->f0;
+    D_004A5B20->f90 = openParams->f0;
     D_004A5B20->f94 = 0;
     D_004A5B20->f98 = 0;
-    D_004A5B20->f9C = c0e8_6728(p->f18, p->f0 << 4, 4);
+    D_004A5B20->f9C = c0e8_6728(openParams->f18, openParams->f0 << 4, 4);
     if (D_004A5B20->f9C == 0) return 6;
-    r = func_003FCE10((char *)&D_004A5B20->f80, D_004A5B20->fA0, 0, 1);
-    if (r != 0) return r;
+    result = func_003FCE10((char *)&D_004A5B20->f80, D_004A5B20->fA0, 0, 1);
+    if (result != 0) return result;
     D_004A5B20->f80 -= 0xC;
-    D_004A5B20->fA0 = p->f18;
+    D_004A5B20->fA0 = openParams->f18;
     D_004A5B20->fA8 = 0;
     return 0;
 }
@@ -8169,30 +8169,30 @@ extern int c260_9530(void) __asm__("func_003F9530");
  * @return 0; 2 when not open, or a layer error offset by 100 / 200 / 300
  */
 int func_003FC260(void) {
-    int r;
-    int v;
-    struct sMcIfA *q;
+    int result;
+    int userBuf;
+    struct sMcIfA *cipher;
     if (func_003FC0D8() == 0) return 2;
     c260_B9A0(D_004A5B20->f80);
-    v = D_004A5B20->f80 + 0xC;
-    D_004A5B20->f80 = v;
-    r = func_003FCF00(v, D_004A5B20->fA0, 0, 1);
-    if (r != 0) return r;
+    userBuf = D_004A5B20->f80 + 0xC;
+    D_004A5B20->f80 = userBuf;
+    result = func_003FCF00(userBuf, D_004A5B20->fA0, 0, 1);
+    if (result != 0) return result;
     c260_6760(D_004A5B20->fA0, D_004A5B20->f9C, D_004A5B20->f90 * 16, 4);
-    q = D_004A5B20->f6C;
+    cipher = D_004A5B20->f6C;
     D_004A5B20->f9C = 0;
-    if (q != 0) {
-        r = q->f04();
-        if (r != 0) return c260_B828(r);
+    if (cipher != 0) {
+        result = cipher->f04();
+        if (result != 0) return c260_B828(result);
         c260_6760(D_004A5B20->fA0, D_004A5B20->f64, D_004A5B20->f68, 4);
         D_004A5B20->f64 = 0;
     }
     D_004A5B20->f6C = 0;
-    r = D_004A5B20->f70->f04();
-    if (r != 0) return c260_B840(r);
+    result = D_004A5B20->f70->f04();
+    if (result != 0) return c260_B840(result);
     D_004A5B20->f70 = 0;
-    r = c260_9530();
-    if (r != 0) return c260_B810(r, D_004A5B20);
+    result = c260_9530();
+    if (result != 0) return c260_B810(result, D_004A5B20);
     c260_6760(D_004A5B20->fA0, D_004A5B20, 172, 4);
     D_004A5B20 = 0;
     return 0;
@@ -8213,15 +8213,15 @@ extern int func_003FB810(int);
  * Starts creating a save (save-record operation 1, func_003F9818).
  *
  * @param str  the save name
- * @param a  card unit code, or -1 for any usable unit
- * @param b  search direction
+ * @param unitCode  card unit code, or -1 for any usable unit
+ * @param searchDir  search direction
  * @return 0, or the request error + 100
  */
-int func_003FC390(char *str, int a, int b) {
-    struct sMcState *p = D_004A5B20;
-    p->f74 = 1;
-    p->f78 = 1;
-    return func_003FB810(func_003F9818(str, a, b));
+int func_003FC390(char *str, int unitCode, int searchDir) {
+    struct sMcState *state = D_004A5B20;
+    state->f74 = 1;
+    state->f78 = 1;
+    return func_003FB810(func_003F9818(str, unitCode, searchDir));
 }
 #endif
 
@@ -8239,15 +8239,15 @@ extern int func_003FB810(int);
  * Starts deleting a save (save-record operation 2, func_003F9698).
  *
  * @param str  the save name
- * @param a  card unit code, or -1 for any usable unit
- * @param b  search direction
+ * @param unitCode  card unit code, or -1 for any usable unit
+ * @param searchDir  search direction
  * @return 0, or the request error + 100
  */
-int func_003FC3C0(char *str, int a, int b) {
-    struct sMcState *p = D_004A5B20;
-    p->f74 = 2;
-    p->f78 = 2;
-    return func_003FB810(func_003F9698(str, a, b));
+int func_003FC3C0(char *str, int unitCode, int searchDir) {
+    struct sMcState *state = D_004A5B20;
+    state->f74 = 2;
+    state->f78 = 2;
+    return func_003FB810(func_003F9698(str, unitCode, searchDir));
 }
 #endif
 
@@ -8267,12 +8267,12 @@ int func_003FC3F0_impl(struct sMcParams *a) __asm__("func_003FC3F0");
  * name (+0x48) on its unit (+0x4); when the headers have been read, the record table's CRC must equal the kept one
  * (+0x60).
  *
- * @param a  the kept 100-byte save parameters
+ * @param savedParams  the kept 100-byte save parameters
  * @return 0, or the request error + 100
  */
-int func_003FC3F0_impl(struct sMcParams *a) {
-    D_004A5B20->params = *a;
-    return fBD70((char *)a + 0x48, a->w[1], -1, 5);
+int func_003FC3F0_impl(struct sMcParams *savedParams) {
+    D_004A5B20->params = *savedParams;
+    return fBD70((char *)savedParams + 0x48, savedParams->w[1], -1, 5);
 }
 #endif
 
@@ -8284,12 +8284,12 @@ extern int func_003FBD70(int, int, int, int);
 /**
  * Starts opening a save and reading its record table (save-record operation 4, func_003FBD70).
  *
- * @param a  the save name
- * @param b  card unit code, or -1 for any usable unit
- * @param c  search direction
+ * @param saveName  the save name
+ * @param unitCode  card unit code, or -1 for any usable unit
+ * @param searchDir  search direction
  * @return 0, or the request error + 100
  */
-int func_003FC4C8(int a, int b, int c) { return func_003FBD70(a, b, c, 4); }
+int func_003FC4C8(int saveName, int unitCode, int searchDir) { return func_003FBD70(saveName, unitCode, searchDir, 4); }
 #endif
 
 //100%
@@ -8312,15 +8312,15 @@ extern void func_003FBBE0b(char *) __asm__("func_003FBBE0");
  * @return 0, or the request error + 100
  */
 int func_003FC4E8(char *x) {
-    struct sMcState *p;
+    struct sMcState *state;
     func_003FBBE0b(x + 0x60);
     /* stored through a pointer, not params.w[24]: the target reloads D_004A5B20 after this store */
     *(D_004A5B20->params.w + 24) = *(int *)(x + 0x60);
-    p = D_004A5B20;
-    p->f74 = 3;
-    p->f78 = 3;
-    p->f98 = 0;
-    p->f94 = 0;
+    state = D_004A5B20;
+    state->f74 = 3;
+    state->f78 = 3;
+    state->f98 = 0;
+    state->f94 = 0;
     return func_003FB810(func_003F9B38(x));
 }
 #endif
@@ -8348,40 +8348,40 @@ extern int f9C48w(void *, int, int) __asm__("func_003F9C48");
 /**
  * Starts writing a record to an open save (save-record operation 6).
  *
- * Copies the save parameters, computes the data's CRC and either updates the @p b-th record with key @p a or appends a
- * new one at the end of the file; recomputes the table CRC into @p p +0x60 and seeks to the record's offset.
+ * Copies the save parameters, computes the data's CRC and either updates the @p recordIndex-th record with key @p recordKey or appends a
+ * new one at the end of the file; recomputes the table CRC into @p saveParams +0x60 and seeks to the record's offset.
  * func_003FBED0 then writes it. Quirk: when the CRC computation fails it reaches its end without a return value.
  *
- * @param p  the open save's parameters
- * @param a  record key
- * @param b  index among the records with that key
- * @param c  the record data (a buffer from func_003FCE10)
- * @param d  data size
+ * @param saveParams  the open save's parameters
+ * @param recordKey  record key
+ * @param recordIndex  index among the records with that key
+ * @param recordBuf  the record data (a buffer from func_003FCE10)
+ * @param recordSize  data size
  * @return 0, or the request error + 100
  */
-int func_003FC548(S64C548 *p, int a, int b, int c, int d) {
-    int *r[4];
-    int v;
+int func_003FC548(S64C548 *saveParams, int recordKey, int recordIndex, int recordBuf, int recordSize) {
+    int *digestBlock[4];
+    int writeOffset;
     void* k;
-    r[0] = 0;
+    digestBlock[0] = 0;
     D_004A5B20->f74 = 6;
     D_004A5B20->f78 = 5;
-    __builtin_memcpy(D_004A5B20, p, 100);
-    D_004A5B20->f84 = d;
-    D_004A5B20->f7C = c;
-    D_004A5B20->f8C = a;
-    k = func_003FBA20(a, b);
-    if (fBB50w(D_004A5B20->f7C, D_004A5B20->f84, (int *)r) == 0) {
-        D_004A5B20->f88 = *(struct sMcKey *)((int *)r[0])[1];
+    __builtin_memcpy(D_004A5B20, saveParams, 100);
+    D_004A5B20->f84 = recordSize;
+    D_004A5B20->f7C = recordBuf;
+    D_004A5B20->f8C = recordKey;
+    k = func_003FBA20(recordKey, recordIndex);
+    if (fBB50w(D_004A5B20->f7C, D_004A5B20->f84, (int *)digestBlock) == 0) {
+        D_004A5B20->f88 = *(struct sMcKey *)((int *)digestBlock[0])[1];
         if (k == 0) {
-            v = D_004A5B20->f98;
-            fBAD0w(a, D_004A5B20->f84, &D_004A5B20->f88);
+            writeOffset = D_004A5B20->f98;
+            fBAD0w(recordKey, D_004A5B20->f84, &D_004A5B20->f88);
         } else {
-            v = ((int *)k)[1];
-            fBA78w(a, b, &D_004A5B20->f88);
+            writeOffset = ((int *)k)[1];
+            fBA78w(recordKey, recordIndex, &D_004A5B20->f88);
         }
-        fBBE0w((char *)p + 0x60);
-        return func_003FB810(f9C48w(p, v, 0));
+        fBBE0w((char *)saveParams + 0x60);
+        return func_003FB810(f9C48w(saveParams, writeOffset, 0));
     }
 }
 #endif
@@ -8403,32 +8403,32 @@ struct sMcEnt *func_003FBA20(int key, int n);
 extern int c708_9C48(void *, int, int) __asm__("func_003F9C48");
 int func_003FC708_impl(struct sMcParams *src, int a, int b, int c, int d) __asm__("func_003FC708");
 /**
- * Starts reading a record of an open save (save-record operation 8): finds the @p b-th record with key @p a and seeks
+ * Starts reading a record of an open save (save-record operation 8): finds the @p recordIndex-th record with key @p recordKey and seeks
  * to it. func_003FBF80 then reads it and func_003FBFE0 checks it.
  *
  * @param src  the open save's parameters
- * @param a  record key
- * @param b  index among the records with that key
- * @param c  the destination (a buffer from func_003FCE10)
- * @param d  expected data size
+ * @param recordKey  record key
+ * @param recordIndex  index among the records with that key
+ * @param recordBuf  the destination (a buffer from func_003FCE10)
+ * @param recordSize  expected data size
  * @return 0; 7 when there is no such record, 110 when its size differs, or the request error + 100
  */
-int func_003FC708_impl(struct sMcParams *src, int a, int b, int c, int d) {
-    struct sMcState *s = D_004A5B20;
-    struct sMcEnt *r;
-    int v;
-    s->f74 = 8;
-    s->f78 = 5;
-    s->params = *src;
-    D_004A5B20->f7C = c;
-    D_004A5B20->f8C = a;
-    D_004A5B20->f84 = d;
-    r = func_003FBA20(a, b);
-    if (r == 0) return 7;
-    if (d != r->b) return 110;
-    v = r->a;
-    D_004A5B20->fA4 = v;
-    return func_003FB810(c708_9C48(src, v, 0));
+int func_003FC708_impl(struct sMcParams *src, int recordKey, int recordIndex, int recordBuf, int recordSize) {
+    struct sMcState *state = D_004A5B20;
+    struct sMcEnt *entry;
+    int readOffset;
+    state->f74 = 8;
+    state->f78 = 5;
+    state->params = *src;
+    D_004A5B20->f7C = recordBuf;
+    D_004A5B20->f8C = recordKey;
+    D_004A5B20->f84 = recordSize;
+    entry = func_003FBA20(recordKey, recordIndex);
+    if (entry == 0) return 7;
+    if (recordSize != entry->b) return 110;
+    readOffset = entry->a;
+    D_004A5B20->fA4 = readOffset;
+    return func_003FB810(c708_9C48(src, readOffset, 0));
 }
 #endif
 
@@ -8446,23 +8446,23 @@ int func_003FC850_impl(int a, int key, int *out) __asm__("func_003FC850");
 /**
  * Counts the records with key @p key in the open save.
  *
- * @param a  the save parameters (only checked for 0)
+ * @param saveParams  the save parameters (only checked for 0)
  * @param key  record key
  * @param out  receives the count
  * @return 0; 2 when the manager is not open, 4 for a 0 argument
  */
-int func_003FC850_impl(int a, int key, int *out) {
-    struct sMcState *s;
-    struct sMcEnt *e, *end;
+int func_003FC850_impl(int saveParams, int key, int *out) {
+    struct sMcState *state;
+    struct sMcEnt *entry, *end;
     if (!func_003FC0D8()) return 2;
-    if (a == 0) return 4;
+    if (saveParams == 0) return 4;
     if (out == 0) return 4;
     *out = 0;
-    s = D_004A5B20;
-    end = s->f9C + s->f94;
-    e = s->f9C;
-    for (; e < end; e++) {
-        if (key == e->key) *out = *out + 1;
+    state = D_004A5B20;
+    end = state->f9C + state->f94;
+    entry = state->f9C;
+    for (; entry < end; entry++) {
+        if (key == entry->key) *out = *out + 1;
     }
     return 0;
 }
@@ -8481,22 +8481,22 @@ struct sMcEnt *func_003FBA20(int key, int n);
 extern int func_003FC0D8(void);
 int func_003FC8F8_impl(int a, int b, int c, int *out) __asm__("func_003FC8F8");
 /**
- * Returns the size of the @p c-th record with key @p b in the open save.
+ * Returns the size of the @p recordIndex-th record with key @p recordKey in the open save.
  *
- * @param a  the save parameters (only checked for 0)
- * @param b  record key
- * @param c  index among the records with that key
+ * @param saveParams  the save parameters (only checked for 0)
+ * @param recordKey  record key
+ * @param recordIndex  index among the records with that key
  * @param out  receives the size (0 when not found)
  * @return 0; 7 when not found, 2 when the manager is not open, 4 for a 0 argument
  */
-int func_003FC8F8_impl(int a, int b, int c, int *out) {
+int func_003FC8F8_impl(int saveParams, int recordKey, int recordIndex, int *out) {
     int err = 0;
     struct sMcEnt *entry;
     if (!func_003FC0D8()) return 2;
-    if (a == 0) return 4;
+    if (saveParams == 0) return 4;
     if (out == 0) return 4;
     *out = 0;
-    entry = func_003FBA20(b, c);
+    entry = func_003FBA20(recordKey, recordIndex);
     if (entry) *out = entry->b;
     else err = 7;
     return err;
@@ -8555,19 +8555,19 @@ extern int fCA40_5FC8(void *, void *, int) __asm__("func_00415FC8");
  * @return 0 or an error code (request errors + 100)
  */
 int func_003FCA40(int *st, int *res) {
-    int r;
+    int cardResult;
     int key;
 
     if (func_003FC0D8() == 0) return 2;
     if (st == 0) return 4;
     if (res == 0) return 4;
-    r = func_003FA040(st, res);
+    cardResult = func_003FA040(st, res);
     if (st[0] == 0) {
         if (D_004A5B20->f74 != 0) return 8;
     }
-    if (st[0] != 2) return func_003FB810(r);
-    if (r != 0 && D_004A5B20->f74 != 4 && D_004A5B20->f74 != 5) return func_003FB810(r);
-    if (D_004A5B20->f74 == 1 && r == 0) D_004A5B20->fA8 = 1;
+    if (st[0] != 2) return func_003FB810(cardResult);
+    if (cardResult != 0 && D_004A5B20->f74 != 4 && D_004A5B20->f74 != 5) return func_003FB810(cardResult);
+    if (D_004A5B20->f74 == 1 && cardResult == 0) D_004A5B20->fA8 = 1;
     if (D_004A5B20->f74 != 1 && D_004A5B20->f74 != 4) D_004A5B20->fA8 = 0;
     if (D_004A5B20->f74 == 6) {
         if (D_004A5B20->f78 == 5) {
@@ -8575,14 +8575,14 @@ int func_003FCA40(int *st, int *res) {
             return func_003FBED0();
         }
         if (D_004A5B20->f78 == 6) {
-            int h = func_003FB910(D_004A5B20->f7C, 0);
-            int e;
-            fCA40_B9A0(h);
+            int header = func_003FB910(D_004A5B20->f7C, 0);
+            int stepError;
+            fCA40_B9A0(header);
             if (func_003FB898(D_004A5B20->f84, 2) != *res) return 110;
             *res = D_004A5B20->f84;
-            e = func_003FBCD8(D_004A5B20->f7C, D_004A5B20->f84);
-            if (e != 0) return func_003FB828(e);
-            if (r == 0) func_003FBBE0((struct sMcKey *)&D_004A5B20->params.w[24]);
+            stepError = func_003FBCD8(D_004A5B20->f7C, D_004A5B20->f84);
+            if (stepError != 0) return func_003FB828(stepError);
+            if (cardResult == 0) func_003FBBE0((struct sMcKey *)&D_004A5B20->params.w[24]);
         }
     }
     if (D_004A5B20->f74 == 8) {
@@ -8591,32 +8591,32 @@ int func_003FCA40(int *st, int *res) {
             return func_003FBF80();
         }
         if (D_004A5B20->f78 == 10) {
-            int h = func_003FB910(D_004A5B20->f7C, 0);
-            int e;
+            int header = func_003FB910(D_004A5B20->f7C, 0);
+            int stepError;
             if (func_003FB898(D_004A5B20->f84, 1) == *res) {
                 *res = D_004A5B20->f84;
-                e = func_003FBFE0();
+                stepError = func_003FBFE0();
             } else {
-                e = 110;
+                stepError = 110;
             }
-            fCA40_B9A0(h);
-            return e;
+            fCA40_B9A0(header);
+            return stepError;
         }
     }
     if (D_004A5B20->f74 == 4 || D_004A5B20->f74 == 5) {
         if (D_004A5B20->f78 == 4) {
-            if (r != 0) {
+            if (cardResult != 0) {
                 D_004A5B20->fA8 = 0;
-                return func_003FB810(r);
+                return func_003FB810(cardResult);
             }
             func_003F95E8((char *)D_004A5B20);
             *st = 1;
             return func_003FBDB8();
         }
         if (D_004A5B20->f78 == 9) {
-            if (r != 0) {
+            if (cardResult != 0) {
                 D_004A5B20->fA8 = 0;
-                return func_003FB810(r);
+                return func_003FB810(cardResult);
             }
             if ((unsigned char)D_004A5B20->fA8 != 0) {
                 D_004A5B20->fA8 = 0;
@@ -8628,11 +8628,11 @@ int func_003FCA40(int *st, int *res) {
             return func_003FBDF0();
         }
         if (D_004A5B20->f78 == 7) {
-            if (r != 0 && r != 10) {
+            if (cardResult != 0 && cardResult != 10) {
                 D_004A5B20->fA8 = 0;
-                return func_003FB810(r);
+                return func_003FB810(cardResult);
             }
-            if (r == 10 || D_004A5B20->f94 == D_004A5B20->f90) {
+            if (cardResult == 10 || D_004A5B20->f94 == D_004A5B20->f90) {
                 *st = 2;
                 fCA40_B9A0(D_004A5B20->f80);
                 func_003FBBE0((struct sMcKey *)&key);
@@ -8643,7 +8643,7 @@ int func_003FCA40(int *st, int *res) {
             *st = 1;
             return func_003FBE40();
         }
-        if (r == 0) {
+        if (cardResult == 0) {
             *st = 1;
             return func_003FBDF0();
         }
@@ -8651,6 +8651,6 @@ int func_003FCA40(int *st, int *res) {
         D_004A5B20->f74 = 0;
         D_004A5B20->f78 = 0;
     }
-    return func_003FB810(r);
+    return func_003FB810(cardResult);
 }
 #endif

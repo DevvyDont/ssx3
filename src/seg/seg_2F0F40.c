@@ -126,22 +126,22 @@ void func_003F0198(char* self, int* ev) {
     char tag[0x800];
     char name[0x100];
     char* nm;
-    char* p;
-    char* q;
+    char* domainSep;
+    char* resourceSep;
     cDirtysock_tag_TagFieldDupl(tag, 0x800, (char*)ev[3]);
     cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, str_USER_b), (char*)name, 0x100, (char*)D_004A4AE8);
     nm = (char*)name;
     cDirtysock_tag_TagFieldDelete(tag, str_USER_b);
-    p = strchr(nm, '@');
-    if (p) *p = 0;
+    domainSep = strchr(nm, '@');
+    if (domainSep) *domainSep = 0;
     cDirtysock_tag_TagFieldSetString(tag, 0x800, str_USER_b, nm);
-    if (p) {
-        nm = p + 1;
-        q = strchr(nm, '/');
-        if (q) *q = 0;
+    if (domainSep) {
+        nm = domainSep + 1;
+        resourceSep = strchr(nm, '/');
+        if (resourceSep) *resourceSep = 0;
         cDirtysock_tag_TagFieldSetString(tag, 0x800, str_DOMN, nm);
-        if (q) {
-            cDirtysock_tag_TagFieldSetString(tag, 0x800, str_RSRC, q + 1);
+        if (resourceSep) {
+            cDirtysock_tag_TagFieldSetString(tag, 0x800, str_RSRC, resourceSep + 1);
         }
     }
     ev[3] = (int)tag;
@@ -184,12 +184,12 @@ extern int func_003EFE20(char*, int, short*, int, char*, int);
 void func_003F02D0(char* self, char* ev, char* out) {
     char key[3];
     char buf[0x100];
-    short v;
+    short langCode;
     int w;
     int i = 0;
     int fourcc;
-    char* f;
-    char* p;
+    char* foundField;
+    char* langSlot;
     out[0xA7] = 0;
     out[0xA4] = 0;
     out[0x54] = 0;
@@ -202,11 +202,11 @@ void func_003F02D0(char* self, char* ev, char* out) {
         }
         i++;
     }
-    f = cDirtysock_tag_TagFieldFind(*(char**)(ev + 0xC), str_PROD_b);
-    if (f) {
+    foundField = cDirtysock_tag_TagFieldFind(*(char**)(ev + 0xC), str_PROD_b);
+    if (foundField) {
         *(int*)(out + 0xA8) |= 0x2000;
     }
-    cDirtysock_tag_TagFieldGetString(f, out + 0x54, 80, (char*)D_004A4AE8);
+    cDirtysock_tag_TagFieldGetString(foundField, out + 0x54, 80, (char*)D_004A4AE8);
     if (out[0x54] != 0) {
         func_003EFE20(self, *(int*)(self + 0x1C), (short*)(self + 0x30C), 1, out + 0x40, 20);
         out[0xA4] = *(unsigned short*)(self + 0x30C) >> 8;
@@ -218,34 +218,34 @@ void func_003F02D0(char* self, char* ev, char* out) {
         cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(*(char**)(ev + 0xC), str_STAT_b), buf, 0x100, (char*)D_004A4AE8);
         fourcc = cDirtysock_tag_TagFieldGetFourCC(cDirtysock_tag_TagFieldFind(buf, D_004A4B18), 0);
         if (*(int*)(self + 0x308) > 0) {
-            p = self + 0x30C;
-            for (; i < *(int*)(self + 0x308); i++, p += 2) {
-                short w = *(short*)p;
+            langSlot = self + 0x30C;
+            for (; i < *(int*)(self + 0x308); i++, langSlot += 2) {
+                short w = *(short*)langSlot;
                 key[0] = w >> 8;
                 key[1] = w;
                 key[2] = 0;
-                f = cDirtysock_tag_TagFieldFind(buf, key);
-                if (f) {
-                    unsigned char b0, b1;
-                    cDirtysock_tag_TagFieldGetString(f, out + 0x54, 80, (char*)D_004A4AE8);
-                    b1 = key[1];
-                    b0 = key[0];
-                    out[0xA4] = b0;
-                    out[0xA5] = b1;
+                foundField = cDirtysock_tag_TagFieldFind(buf, key);
+                if (foundField) {
+                    unsigned char langHigh, langLow;
+                    cDirtysock_tag_TagFieldGetString(foundField, out + 0x54, 80, (char*)D_004A4AE8);
+                    langLow = key[1];
+                    langHigh = key[0];
+                    out[0xA4] = langHigh;
+                    out[0xA5] = langLow;
                     out[0xA6] = 0;
-                    v = (short)((((int)(b1 << 24) >> 8) | (b0 << 24)) >> 16);
-                    func_003EFE20(self, fourcc, &v, 1, out + 0x40, 20);
+                    langCode = (short)((((int)(langLow << 24) >> 8) | (langHigh << 24)) >> 16);
+                    func_003EFE20(self, fourcc, &langCode, 1, out + 0x40, 20);
                     break;
                 }
             }
         }
         if (out[0xA4] == 0) {
-            int r = func_003EFE20(self, fourcc, (short*)(self + 0x30C), *(int*)(self + 0x308), out + 0x40, 20);
-            short s = r;
+            int matchedCode = func_003EFE20(self, fourcc, (short*)(self + 0x30C), *(int*)(self + 0x308), out + 0x40, 20);
+            short matchedShort = matchedCode;
             out[0xA6] = 0;
-            v = r;
-            out[0xA4] = s >> 8;
-            out[0xA5] = s;
+            langCode = matchedCode;
+            out[0xA4] = matchedShort >> 8;
+            out[0xA5] = matchedShort;
         }
     }
 }
@@ -267,22 +267,22 @@ extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key,
  * presence at +0x240 (RSRC and SHOW, built by func_003F15C8) plus STAT (+0x140) and PROD (+0x40) when those are
  * non-empty, sent with func_003F00D8. Clears the pending-send time at +0x2C0.
  *
- * @param p  the BuddyApi state
+ * @param buddyRef  the BuddyApi state
  */
-void func_003F0568(char* p) {
+void func_003F0568(char* buddyRef) {
     char buf[0x200];
-    if (*(int*)(p + 0x1C)) {
-        cDirtysock_tag_TagFieldSetFourCC(p + 0x140, 0x100, D_004A4B18, *(int*)(p + 0x1C));
+    if (*(int*)(buddyRef + 0x1C)) {
+        cDirtysock_tag_TagFieldSetFourCC(buddyRef + 0x140, 0x100, D_004A4B18, *(int*)(buddyRef + 0x1C));
     }
-    cDirtysock_tag_TagFieldDupl(buf, 0x200, p + 0x240);
-    if (p[0x140]) {
-        cDirtysock_tag_TagFieldSetString(buf, 0x200, str_STAT_b, p + 0x140);
+    cDirtysock_tag_TagFieldDupl(buf, 0x200, buddyRef + 0x240);
+    if (buddyRef[0x140]) {
+        cDirtysock_tag_TagFieldSetString(buf, 0x200, str_STAT_b, buddyRef + 0x140);
     }
-    if (p[0x40]) {
-        cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PROD_b, p + 0x40);
+    if (buddyRef[0x40]) {
+        cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PROD_b, buddyRef + 0x40);
     }
-    func_003F00D8((int*)p, 0x50534554, (int)buf);
-    *(int*)(p + 0x2C0) = 0;
+    func_003F00D8((int*)buddyRef, 0x50534554, (int)buf);
+    *(int*)(buddyRef + 0x2C0) = 0;
 }
 #endif
 
@@ -330,23 +330,23 @@ extern int func_003F5D88(int);
  * func_003F17D8 drops the connection when a deadline passes while the callback is still set. Callers pass 600, so
  * @p ms is in seconds.
  *
- * @param p  the BuddyApi state
+ * @param buddyRef  the BuddyApi state
  * @param idx  slot index (0 add, 1 delete, 2 send)
- * @param a  callback for the request's reply
- * @param b  user data passed to the callback
+ * @param callback  callback for the request's reply
+ * @param userData  user data passed to the callback
  * @param ms  timeout in seconds
  */
-void func_003F0658(struct S0658* p, int idx, int a, int b, int ms) {
-    int t = 0;
+void func_003F0658(struct S0658* buddyRef, int idx, int callback, int userData, int ms) {
+    int deadline = 0;
     if (ms > 0) {
-        t = func_003F5D88(((int*)p)[1]) + ms * 1000;
+        deadline = func_003F5D88(((int*)buddyRef)[1]) + ms * 1000;
     }
-    p->e[idx].f0 = D_004512B0[idx];
-    p->f14++;
-    p->e[idx].f4 = p->f14;
-    p->e[idx].fC = b;
-    p->e[idx].f10 = a;
-    p->e[idx].f8 = t;
+    buddyRef->e[idx].f0 = D_004512B0[idx];
+    buddyRef->f14++;
+    buddyRef->e[idx].f4 = buddyRef->f14;
+    buddyRef->e[idx].fC = userData;
+    buddyRef->e[idx].f10 = callback;
+    buddyRef->e[idx].f8 = deadline;
 }
 #endif
 
@@ -404,17 +404,17 @@ extern void func_00259210(void*);
  * Destroys a pending host lookup (the object at +0x0, through its slot +0xC), disconnects (func_003F0B50), frees the
  * roster (func_003F0BE0), destroys the packet session at +0x4 (func_003F55B8) and frees the state with func_00259210.
  *
- * @param p  the BuddyApi state
+ * @param buddyRef  the BuddyApi state
  */
-void func_003F07A0(struct S07A0* p) {
-    if (p->obj) {
-        p->obj->fn(p->obj);
-        p->obj = 0;
+void func_003F07A0(struct S07A0* buddyRef) {
+    if (buddyRef->obj) {
+        buddyRef->obj->fn(buddyRef->obj);
+        buddyRef->obj = 0;
     }
-    func_003F0B50(p);
-    func_003F0BE0(p);
-    func_003F55B8(p->f4);
-    func_00259210(p);
+    func_003F0B50(buddyRef);
+    func_003F0BE0(buddyRef);
+    func_003F55B8(buddyRef->f4);
+    func_00259210(buddyRef);
 }
 #endif
 
@@ -607,22 +607,22 @@ extern int func_003F5738(int);
  * (func_003F5738 on +0x4), reports state 6 when the client was online (5) and then state 0, clears the connect callback
  * (+0x4C4) and frees the roster (func_003F0BE0).
  *
- * @param p  the BuddyApi state
+ * @param buddyRef  the BuddyApi state
  * @return 0
  */
-int func_003F0B50(struct S07A0* p) {
-    if (p->obj) {
-        p->obj->fn(p->obj);
-        p->obj = 0;
+int func_003F0B50(struct S07A0* buddyRef) {
+    if (buddyRef->obj) {
+        buddyRef->obj->fn(buddyRef->obj);
+        buddyRef->obj = 0;
     }
-    func_003F00D8_0B50((int*)p, 0x44495343, (int)D_004A4AE8);
-    func_003F5738(p->f4);
-    if (((int*)p)[2] == 5) {
-        func_003F0610_0B50((int*)p, 6);
+    func_003F00D8_0B50((int*)buddyRef, 0x44495343, (int)D_004A4AE8);
+    func_003F5738(buddyRef->f4);
+    if (((int*)buddyRef)[2] == 5) {
+        func_003F0610_0B50((int*)buddyRef, 6);
     }
-    func_003F0610_0B50((int*)p, 0);
-    ((int*)p)[0x4C4 / 4] = 0;
-    func_003F0BE0(p);
+    func_003F0610_0B50((int*)buddyRef, 0);
+    ((int*)buddyRef)[0x4C4 / 4] = 0;
+    func_003F0BE0(buddyRef);
     return 0;
 }
 #endif
@@ -695,26 +695,26 @@ extern int func_003EE600(int, int);
  * packets with LRSC = the resource (+0x494) and PRES = "Y": LIST "B" (buddies) as ID 1 and LIST "I" (ignored users) as
  * ID 2. Marks the roster changed (func_003EE600). BuddyMan's onconnect calls it after a successful 'auth'.
  *
- * @param a  roster callback ('rost' changes, 'endr' when the lists are complete)
- * @param b  user data for the callback
+ * @param rosterCallback  roster callback ('rost' changes, 'endr' when the lists are complete)
+ * @param rosterUserData  user data for the callback
  * @return the roster list
  */
-void* func_003F0C90(char* self, int a, int b) {
+void* func_003F0C90(char* self, int rosterCallback, int rosterUserData) {
     char buf[0x100];
     if (*(int*)(self + 0x4A8) == 0) {
-        char* s = self + 0x494;
-        *(int*)(self + 0x4B8) = a;
-        *(int*)(self + 0x4B4) = b;
+        char* resourceName = self + 0x494;
+        *(int*)(self + 0x4B8) = rosterCallback;
+        *(int*)(self + 0x4B4) = rosterUserData;
         *(int*)(self + 0x4A4) = func_003EE778(1000, 2000);
         *(int*)(self + 0x4A8) = func_003EE1E8(100, 100, 0);
         buf[0] = 0;
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, s);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, resourceName);
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B48);
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, D_004A4B50);
         cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, 1);
         func_003F00D8((int*)self, 0x52474554, (int)buf);
         buf[0] = 0;
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, s);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, resourceName);
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B60);
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, D_004A4B50);
         cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, 2);
@@ -767,67 +767,67 @@ typedef struct { char b[0xB8]; } Ent_0E38;
  *
  * Returns -3 for a missing record, no flags (+0xA8), an empty name or a name containing '/' or '@' (or '.', unless
  * +0x18 allows it). Arms request slot 0 ('addu') with func_003F0658. Without a roster it stops there (returns 0).
- * Otherwise finds the entry by name (func_003EEC88) or adds a 0xB8-byte copy of @p e to the roster and name table, ORs
+ * Otherwise finds the entry by name (func_003EEC88) or adds a 0xB8-byte copy of @p buddyRecord to the roster and name table, ORs
  * the flags in and clears +0xAC. Flag 4 sends 'RADD' with LIST "B", PRES "Y", USER and GROUP (+0x20); flag 0x200 sends
  * 'RADD' with LIST "I"; both carry LRSC and ID = the slot's sequence number (+0x4CC), mark the entry pending (flag
  * 0x10000) and store that number in +0xAC for the reply. Flag 0x800000 sends 'PADD' with USER.
  *
- * @param e  the entry to add: name at +0x0, group at +0x20, flags at +0xA8
- * @param a  callback for the 'addu' reply
- * @param b  user data for the callback
- * @param c  timeout in seconds
+ * @param buddyRecord  the entry to add: name at +0x0, group at +0x20, flags at +0xA8
+ * @param callback  callback for the 'addu' reply
+ * @param userData  user data for the callback
+ * @param timeoutSecs  timeout in seconds
  * @return 0, or -3 when the record is refused
  */
-int func_003F0E38(char* self, char* e, int a, int b, int c) {
+int func_003F0E38(char* self, char* buddyRecord, int callback, int userData, int timeoutSecs) {
     char buf[0x100];
     char* ent;
     int x;
-    if (e == 0 || *(int*)(e + 0xA8) == 0 || e[0] == 0 || strchr(e, '/') != 0)
+    if (buddyRecord == 0 || *(int*)(buddyRecord + 0xA8) == 0 || buddyRecord[0] == 0 || strchr(buddyRecord, '/') != 0)
         return -3;
-    if (strchr(e, '@') != 0)
+    if (strchr(buddyRecord, '@') != 0)
         return -3;
     if (*(int*)(self + 0x18) == 0) {
-        if (strchr(e, '.') != 0)
+        if (strchr(buddyRecord, '.') != 0)
             return -3;
     }
-    func_003F0658((struct S0658*)self, 0, a, b, c);
+    func_003F0658((struct S0658*)self, 0, callback, userData, timeoutSecs);
     if (*(int*)(self + 0x4A8) == 0)
         return 0;
-    x = func_003EEC88(*(int*)(self + 0x4A4), (int)e);
+    x = func_003EEC88(*(int*)(self + 0x4A4), (int)buddyRecord);
     if (x == 0) {
         ent = (char*)func_002591E8(184);
-        *(Ent_0E38*)ent = *(Ent_0E38*)e;
+        *(Ent_0E38*)ent = *(Ent_0E38*)buddyRecord;
         func_003EEB30(*(int*)(self + 0x4A4), (int)ent, func_003EE320(*(int*)(self + 0x4A8), (int)ent));
     } else {
         ent = (char*)func_003EE468(*(int*)(self + 0x4A8), x);
-        *(int*)(ent + 0xA8) |= *(int*)(e + 0xA8);
+        *(int*)(ent + 0xA8) |= *(int*)(buddyRecord + 0xA8);
     }
     *(int*)(ent + 0xAC) = 0;
-    if (*(int*)(e + 0xA8) & 4) {
+    if (*(int*)(buddyRecord + 0xA8) & 4) {
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, self + 0x494);
         cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, *(int*)(self + 0x4CC));
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B48);
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_PRES, D_004A4B50);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, e);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_GROUP, e + 0x20);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, buddyRecord);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_GROUP, buddyRecord + 0x20);
         func_003F00D8((int*)self, 0x52414444, (int)buf);
         *(int*)(ent + 0xA8) |= 0x10000;
         *(int*)(ent + 0xAC) = *(int*)(self + 0x14);
     }
-    if (*(int*)(e + 0xA8) & 0x200) {
+    if (*(int*)(buddyRecord + 0xA8) & 0x200) {
         buf[0] = 0;
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, self + 0x494);
         cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, *(int*)(self + 0x4CC));
         cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LIST, D_004A4B60);
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, e);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, buddyRecord);
         func_003F00D8((int*)self, 0x52414444, (int)buf);
         *(int*)(ent + 0xA8) |= 0x10000;
         *(int*)(ent + 0xAC) = *(int*)(self + 0x14);
     }
-    if (*(int*)(e + 0xA8) & 0x800000) {
+    if (*(int*)(buddyRecord + 0xA8) & 0x800000) {
         buf[0] = 0;
-        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, e);
+        cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, buddyRecord);
         func_003F00D8((int*)self, 0x50414444, (int)buf);
     }
     return 0;
@@ -864,17 +864,17 @@ extern void* func_003EE480(int, int);
  * the flags 0x100204 is taken out of the name table and freed.
  *
  * @param name  the record: name at +0x0, group at +0x20, flags to remove at +0xA8
- * @param a  callback for the 'delu' reply
- * @param b  user data for the callback
+ * @param callback  callback for the 'delu' reply
+ * @param userData  user data for the callback
  * @param ms  timeout in seconds
  * @return 0 when the entry was found, else -2 or -3
  */
-int func_003F11F8(char* self, char* name, int a, int b, int ms) {
+int func_003F11F8(char* self, char* name, int callback, int userData, int ms) {
     char buf[0x100];
     int ret = -2;
     int id;
     char* ent;
-    int t;
+    int removedFlags;
     if (name) {
         if (*(int*)(self + 0x4A8) != 0) {
             if (strchr(name, '/')) return -3;
@@ -882,13 +882,13 @@ int func_003F11F8(char* self, char* name, int a, int b, int ms) {
             if (*(int*)(self + 0x18) == 0) {
                 if (strchr(name, '.')) return -3;
             }
-            func_003F0658((struct S0658*)self, 1, a, b, ms);
+            func_003F0658((struct S0658*)self, 1, callback, userData, ms);
             id = func_003EEC88(*(int*)(self + 0x4A4), (int)name);
             if (id != 0) {
                 ent = (char*)func_003EE468(*(int*)(self + 0x4A8), id);
-                t = *(int*)(ent + 0xA8) & *(int*)(name + 0xA8);
-                *(int*)(ent + 0xA8) ^= t;
-                if (t & 4) {
+                removedFlags = *(int*)(ent + 0xA8) & *(int*)(name + 0xA8);
+                *(int*)(ent + 0xA8) ^= removedFlags;
+                if (removedFlags & 4) {
                     buf[0] = 0;
                     cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, *(int*)(self + 0x4E0));
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, self + 0x494);
@@ -898,7 +898,7 @@ int func_003F11F8(char* self, char* name, int a, int b, int ms) {
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_GROUP, name + 0x20);
                     func_003F00D8((int*)self, 0x5244454C, (int)buf);
                 }
-                if (t & 0x200) {
+                if (removedFlags & 0x200) {
                     buf[0] = 0;
                     cDirtysock_tag_TagFieldSetNumber(buf, 0x100, str_ID, *(int*)(self + 0x4E0));
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, self + 0x494);
@@ -906,7 +906,7 @@ int func_003F11F8(char* self, char* name, int a, int b, int ms) {
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, name);
                     func_003F00D8((int*)self, 0x5244454C, (int)buf);
                 }
-                if (t & 0x800000) {
+                if (removedFlags & 0x800000) {
                     buf[0] = 0;
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_LRSC, self + 0x494);
                     cDirtysock_tag_TagFieldSetString(buf, 0x100, str_USER_b, name);
@@ -1016,39 +1016,39 @@ extern void func_003F0568(char*);
 /**
  * Sets the buddy client's resource and show state and sends the presence now or after a delay.
  *
- * Rebuilds the base presence at +0x240 (0x80 bytes): RSRC = @p s and SHOW = D_004512C0[@p st] ("CHAT", "AWAY", "XA",
- * "DND", "PASS" for 1..5, else "DISC"). With no send pending (+0x2C0 == 0) schedules one at now + @p d; a show state
+ * Rebuilds the base presence at +0x240 (0x80 bytes): RSRC = @p resourceText and SHOW = D_004512C0[@p st] ("CHAT", "AWAY", "XA",
+ * "DND", "PASS" for 1..5, else "DISC"). With no send pending (+0x2C0 == 0) schedules one at now + @p sendDelay; a show state
  * different from the last one (+0x2C4) is recorded and sent at once. Sends with func_003F0568 when the time has come;
  * otherwise func_003F17D8 sends it later.
  *
- * @param p  the BuddyApi state
- * @param s  resource text
+ * @param buddyRef  the BuddyApi state
+ * @param resourceText  resource text
  * @param st  show state index
- * @param d  delay in ticks of func_003F5D88 (BuddyMan passes 2000)
+ * @param sendDelay  delay in ticks of func_003F5D88 (BuddyMan passes 2000)
  * @return 0
  */
-int func_003F15C8(char* p, char* s, int st, int d) {
-    unsigned int now = func_003F5D88(*(int*)(p + 4));
-    int v;
+int func_003F15C8(char* buddyRef, char* resourceText, int st, int sendDelay) {
+    unsigned int now = func_003F5D88(*(int*)(buddyRef + 4));
+    int showName;
     char* buf;
     if ((unsigned int)(st - 1) < 5) {
-        v = D_004512C0[st];
+        showName = D_004512C0[st];
     } else {
-        v = D_004512C0[0];
+        showName = D_004512C0[0];
     }
-    buf = p + 0x240;
+    buf = buddyRef + 0x240;
     *buf = 0;
-    cDirtysock_tag_TagFieldSetString(buf, 0x80, str_RSRC, s);
-    cDirtysock_tag_TagFieldSetString(buf, 0x80, str_SHOW, (char*)v);
-    if (*(unsigned int*)(p + 0x2C0) == 0) {
-        *(unsigned int*)(p + 0x2C0) = now + d;
+    cDirtysock_tag_TagFieldSetString(buf, 0x80, str_RSRC, resourceText);
+    cDirtysock_tag_TagFieldSetString(buf, 0x80, str_SHOW, (char*)showName);
+    if (*(unsigned int*)(buddyRef + 0x2C0) == 0) {
+        *(unsigned int*)(buddyRef + 0x2C0) = now + sendDelay;
     }
-    if (*(int*)(p + 0x2C4) != st) {
-        *(int*)(p + 0x2C4) = st;
-        *(unsigned int*)(p + 0x2C0) = now;
+    if (*(int*)(buddyRef + 0x2C4) != st) {
+        *(int*)(buddyRef + 0x2C4) = st;
+        *(unsigned int*)(buddyRef + 0x2C0) = now;
     }
-    if (now >= *(unsigned int*)(p + 0x2C0)) {
-        func_003F0568(p);
+    if (now >= *(unsigned int*)(buddyRef + 0x2C0)) {
+        func_003F0568(buddyRef);
     }
     return 0;
 }
@@ -1069,18 +1069,18 @@ extern int cDirtysock_tag_TagFieldGetString(const char* data, char* buf, int len
  * Refused (-3) when the BODY field is 0x40 characters or longer or a SUBJ field has text. Otherwise arms request slot 2
  * ('send') with func_003F0658 and sends @p tag as a 'SEND' packet.
  *
- * @param p  the BuddyApi state
+ * @param buddyRef  the BuddyApi state
  * @param tag  the message tag text (BODY, USER, ...)
- * @param a  callback for the 'send' reply
- * @param b  user data for the callback
- * @param c  timeout in seconds
+ * @param callback  callback for the 'send' reply
+ * @param userData  user data for the callback
+ * @param timeoutSecs  timeout in seconds
  * @return 0, or -3 when refused
  */
-int func_003F16D8(int* p, char* tag, int a, int b, int c) {
+int func_003F16D8(int* buddyRef, char* tag, int callback, int userData, int timeoutSecs) {
     if (cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, str_BODY_b), 0, 0, (char*)D_004A4AE8) < 0x40) {
         if (cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, str_SUBJ_b), 0, 0, (char*)D_004A4AE8) <= 0) {
-            func_003F0658(p, 2, a, b, c);
-            func_003F00D8(p, 0x53454E44, (int)tag);
+            func_003F0658(buddyRef, 2, callback, userData, timeoutSecs);
+            func_003F00D8(buddyRef, 0x53454E44, (int)tag);
             return 0;
         }
     }
@@ -1097,13 +1097,13 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F17C8);
  * The callback gets 'chat' messages (func_003F0198) and 'admn' messages from func_003F17D8.
  *
  * @param buddyApi  the BuddyApi state
- * @param a  the callback
- * @param b  its user data
+ * @param callback  the callback
+ * @param userData  its user data
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-void func_003F17C8(int* buddyApi, int a, int b) {
-    buddyApi[1200 / 4] = a;
-    buddyApi[1196 / 4] = b;
+void func_003F17C8(int* buddyApi, int callback, int userData) {
+    buddyApi[1200 / 4] = callback;
+    buddyApi[1196 / 4] = userData;
 }
 #endif
 

@@ -569,21 +569,21 @@ extern char D_004977D8[];
  * Waits for a DMA channel to finish (its CHCR STR bit to clear). After 0x1000000 polls it prints "libdma: sync timeout"
  * and force-stops the channel (func_003FE5C8), which ends the wait.
  *
- * @param d  the channel's registers
- * @param m  ignored (func_003FE558 passes its mode)
+ * @param dmaChan  the channel's registers
+ * @param waitMode  ignored (func_003FE558 passes its mode)
  */
-void func_003FDE30(d, m)
-    sDmaChan *d;
-    int m;
+void func_003FDE30(dmaChan, waitMode)
+    sDmaChan *dmaChan;
+    int waitMode;
 {
     int n = 0x1000000;
-    if (d->chcr & 0x100) {
+    if (dmaChan->chcr & 0x100) {
         do {
             if (--n < 0) {
                 func_00425C60(D_004977D8);
-                func_003FE5C8(d);
+                func_003FE5C8(dmaChan);
             }
-        } while (d->chcr & 0x100);
+        } while (dmaChan->chcr & 0x100);
     }
 }
 #endif
@@ -601,18 +601,18 @@ extern int func_003FE5C8();
  * force-stops the channel. Quirk: the loop's only exit is MADR reaching @p lim, so a stopped channel that never gets
  * there loops forever.
  *
- * @param d  the channel's registers
+ * @param dmaChan  the channel's registers
  * @param lim  address to wait for
  * @param tmo  poll limit, or 0 for the default
  */
-void func_003FDEA0(sDmaChan *d, unsigned lim, int tmo) {
-    int t = 0x1000000;
+void func_003FDEA0(sDmaChan *dmaChan, unsigned lim, int tmo) {
+    int pollsLeft = 0x1000000;
     if (tmo)
-        t = tmo;
-    while (d->madr < lim) {
-        if (--t < 0) {
+        pollsLeft = tmo;
+    while (dmaChan->madr < lim) {
+        if (--pollsLeft < 0) {
             func_003FDEA0_log(D_004977D8);
-            func_003FE5C8(d);
+            func_003FE5C8(dmaChan);
         }
         }
 }
@@ -677,31 +677,31 @@ extern int func_003FE090(sDmaEnv *);
  *
  * Clears CHCR, MADR, TADR, ASR0, ASR1 and SADR of every channel enabled in D_004977F0, clears the D_STAT status flags
  * and turns off its interrupt masks (writing back the set mask bits toggles them), applies an all-zero environment
- * (func_003FE090) and, when @p a is 1, sets the DMA enable bit of D_CTRL. cPS2GraphicsMan_Init calls it.
+ * (func_003FE090) and, when @p enableDma is 1, sets the DMA enable bit of D_CTRL. cPS2GraphicsMan_Init calls it.
  *
- * @param a  1 to enable DMA afterwards
+ * @param enableDma  1 to enable DMA afterwards
  * @return the D_CTRL enable bit as it was on entry
  */
-int func_003FDFB0(int a) {
+int func_003FDFB0(int enableDma) {
     sDmaEnv env;
     int i;
     int saved = *(volatile int *)0x1000E000 & 1;
     for (i = 0; i < 10; i++) {
         if (D_004977F0[i] != 0) {
-            int *t = (int *)D_00451590[i];
-            t[0] = 0;
-            t[0x30 / 4] = 0;
-            t[0x10 / 4] = 0;
-            t[80 / 4] = 0;
-            t[0x40 / 4] = 0;
-            t[0x80 / 4] = 0;
+            int *chanRegs = (int *)D_00451590[i];
+            chanRegs[0] = 0;
+            chanRegs[0x30 / 4] = 0;
+            chanRegs[0x10 / 4] = 0;
+            chanRegs[80 / 4] = 0;
+            chanRegs[0x40 / 4] = 0;
+            chanRegs[0x80 / 4] = 0;
         }
     }
     *(volatile int *)0x1000E010 = 65311;
     *(int *)0x1000E010 &= 0xFF1F0000;
     func_003FDF50((char *)&env, 20);
     func_003FE090(&env);
-    if (a == 1)
+    if (enableDma == 1)
         *(volatile int *)0x1000E000 |= 1;
     return saved;
 }
@@ -721,43 +721,43 @@ extern unsigned char D_00497838[];
  * D_CTRL gets the stall source, stall drain and MFIFO fields from the tables D_00497818 / D_00497828 / D_00497838 and
  * the release cycle (0 turns release off); D_PCR, D_SQWC, D_RBOR and D_RBSR come from the other fields.
  *
- * @param p  the environment
+ * @param dmaEnv  the environment
  * @return 0, or -1 .. -4 when the stall source, stall drain, MFIFO or release-cycle field is out of range
  */
-int func_003FE090(sDmaEnv *p) {
-    unsigned c;
+int func_003FE090(sDmaEnv *dmaEnv) {
+    unsigned ctrlReg;
     unsigned pcr;
     unsigned sqwc;
     unsigned rbor;
     unsigned rbsr;
-    c = *(volatile unsigned *)0x1000E000;
+    ctrlReg = *(volatile unsigned *)0x1000E000;
     pcr = *(volatile unsigned *)0x1000E020;
     sqwc = *(volatile unsigned *)0x1000E030;
     rbor = *(volatile unsigned *)0x1000E050;
     rbsr = *(volatile unsigned *)0x1000E040;
-    if (p->sts >= 10) return -1;
-    if (p->std >= 10) return -2;
-    if (p->mfd >= 10) return -3;
-    if (p->rcyc >= 7) return -4;
-    c = (c & ~0x30) | (D_00497818[p->sts] << 4);
-    c = (c & ~0xC0) | (D_00497828[p->std] << 6);
-    c = (c & ~0xC) | (D_00497838[p->mfd] << 2);
-    if (p->rcyc != 0) {
-        c |= 2;
-        c = (c & ~0x300) | ((p->rcyc - 1) << 8);
+    if (dmaEnv->sts >= 10) return -1;
+    if (dmaEnv->std >= 10) return -2;
+    if (dmaEnv->mfd >= 10) return -3;
+    if (dmaEnv->rcyc >= 7) return -4;
+    ctrlReg = (ctrlReg & ~0x30) | (D_00497818[dmaEnv->sts] << 4);
+    ctrlReg = (ctrlReg & ~0xC0) | (D_00497828[dmaEnv->std] << 6);
+    ctrlReg = (ctrlReg & ~0xC) | (D_00497838[dmaEnv->mfd] << 2);
+    if (dmaEnv->rcyc != 0) {
+        ctrlReg |= 2;
+        ctrlReg = (ctrlReg & ~0x300) | ((dmaEnv->rcyc - 1) << 8);
     } else {
-        c &= ~2;
+        ctrlReg &= ~2;
     }
-    sqwc = (p->hA << 16) | p->h8;
-    rbsr = p->w10;
-    rbor = (unsigned)p->w0C;
-    *(volatile unsigned *)0x1000E000 = c;
-    pcr = (p->h4 << 16) | p->h6;
+    sqwc = (dmaEnv->hA << 16) | dmaEnv->h8;
+    rbsr = dmaEnv->w10;
+    rbor = (unsigned)dmaEnv->w0C;
+    *(volatile unsigned *)0x1000E000 = ctrlReg;
+    pcr = (dmaEnv->h4 << 16) | dmaEnv->h6;
     *(volatile unsigned *)0x1000E020 = pcr;
     *(volatile unsigned *)0x1000E030 = sqwc;
     *(volatile unsigned *)0x1000E050 = rbor;
     *(volatile unsigned *)0x1000E040 = rbsr;
-    D_005261D0 = *p;
+    D_005261D0 = *dmaEnv;
     return 0;
 }
 #endif
@@ -766,14 +766,14 @@ int func_003FE090(sDmaEnv *p) {
 INCLUDE_ASM("seg/seg_2FE810", func_003FE268);
 #ifdef SKIP_ASM
 /**
- * Copies the DMA environment last applied (D_005261D0) into @p d.
+ * Copies the DMA environment last applied (D_005261D0) into @p envOut.
  *
- * @param d  destination
- * @return @p d
+ * @param envOut  destination
+ * @return @p envOut
  */
-sDmaEnv *func_003FE268(sDmaEnv *d) {
-    *d = D_005261D0;
-    return d;
+sDmaEnv *func_003FE268(sDmaEnv *envOut) {
+    *envOut = D_005261D0;
+    return envOut;
 }
 #endif
 
@@ -2164,13 +2164,13 @@ extern int func_003FF5E8_a(int) __asm__("func_003FF5E8");
  * mismatch [libpad.a = 4.0, padman.irx = ...]" (when D_004515CC is set) and fails. Then initialises (func_003FF5E8).
  * systemInit calls it with 0.
  *
- * @param a  passed on to func_003FF5E8, which ignores it
+ * @param initArg  passed on to func_003FF5E8, which ignores it
  * @return func_003FF5E8's result, or 0 on a version mismatch
  */
-int func_003FF4A8(int a) {
+int func_003FF4A8(int initArg) {
     int i;
-    int v;
-    int h;
+    int version;
+    int majorVersion;
     D_004515C8 = 1;
     for (;;) {
         func_00426B48(&D_00526200[0], 0x80000100, 0);
@@ -2186,16 +2186,16 @@ int func_003FF4A8(int a) {
         for (i = 0x10000; i--; )
             ;
     }
-    v = func_00400740();
-    h = v >> 8;
-    if (h != 4) {
+    version = func_00400740();
+    majorVersion = version >> 8;
+    if (majorVersion != 4) {
         if (D_004515CC != 0) {
             func_00425C60(D_004978D0);
-            func_00425C60(D_004978F8, 4, 0, h, v & 0xFF);
+            func_00425C60(D_004978F8, 4, 0, majorVersion, version & 0xFF);
         }
         return 0;
     }
-    return func_003FF5E8_a(a);
+    return func_003FF5E8_a(initArg);
 }
 #endif
 
@@ -2234,14 +2234,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FF688);
  * @return the reply (word 3), or 0 when the call fails
  */
 int func_003FF688(void) {
-    int v;
+    int result;
     D_00526440[0] = 15;
     if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
         return 0;
-    v = D_00526440[3];
-    if (v == 1)
+    result = D_00526440[3];
+    if (result == 1)
         D_004515C8 = 0;
-    return v;
+    return result;
 }
 #endif
 
@@ -2253,20 +2253,20 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FF8F0);
 /**
  * Closes a pad port/slot: RPC command 14, then marks it closed. cPS2PadDevice's destructor calls it.
  *
- * @param a  port
- * @param b  slot
+ * @param port  port
+ * @param slot  slot
  * @return the reply (word 3); 0 when not open or the call fails
  */
-int func_003FF8F0(int a, int b) {
-    if (!D_00526250[a][b].open)
+int func_003FF8F0(int port, int slot) {
+    if (!D_00526250[port][slot].open)
         return 0;
     D_00526440[0] = 14;
-    D_00526440[1] = a;
-    D_00526440[2] = b;
+    D_00526440[1] = port;
+    D_00526440[2] = slot;
     D_00526440[4] = 1;
     if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
         return 0;
-    D_00526250[a][b].open = 0;
+    D_00526250[port][slot].open = 0;
     return D_00526440[3];
 }
 #endif
@@ -2279,17 +2279,17 @@ extern void func_00424698(int *, int *);
  * Returns the newer of the two 0x80-byte pad frames in a port/slot's DMA area (the one with the higher frame counter at
  * +0x58), after syncing the cache over the area (func_00424698).
  *
- * @param a  port
- * @param b  slot
+ * @param port  port
+ * @param slot  slot
  * @return the frame
  */
-sPadFrame *func_003FF9A8(int a, int b) {
-    sPadFrame *p;
-    int c;
-    p = (sPadFrame *)D_00526250[a][b].dmaBuf;
-    func_00424698((int *)p, (int *)((char *)p + 0xFF));
-    c = (p[0].frame < p[1].frame) << 7;
-    return (sPadFrame *)((char *)p + c);
+sPadFrame *func_003FF9A8(int port, int slot) {
+    sPadFrame *dmaArea;
+    int newerOffset;
+    dmaArea = (sPadFrame *)D_00526250[port][slot].dmaBuf;
+    func_00424698((int *)dmaArea, (int *)((char *)dmaArea + 0xFF));
+    newerOffset = (dmaArea[0].frame < dmaArea[1].frame) << 7;
+    return (sPadFrame *)((char *)dmaArea + newerOffset);
 }
 #endif
 
@@ -2299,13 +2299,13 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FFA08);
 /**
  * Returns the frame counter of a port/slot's newest pad frame.
  *
- * @param a  port
- * @param b  slot
+ * @param port  port
+ * @param slot  slot
  * @return the counter, or 0 when not open
  */
-int func_003FFA08(int a, int b) {
-    if (!D_00526250[a][b].open) return 0;
-    return func_003FF9A8(a, b)->frame;
+int func_003FFA08(int port, int slot) {
+    if (!D_00526250[port][slot].open) return 0;
+    return func_003FF9A8(port, slot)->frame;
 }
 #endif
 
@@ -2318,26 +2318,26 @@ extern void func_0042C0C0();
 extern int func_0041605C_k() __asm__("func_0041605C");
 /**
  * Reads a port/slot's newest pad data: copies the newest frame with interrupts disabled, then its data (length at
- * +0x60) to @p c. cPS2PadDevice_sampleButtons calls it.
+ * +0x60) to @p dataOut. cPS2PadDevice_sampleButtons calls it.
  *
- * @param a  port
- * @param b  slot
- * @param c  destination
+ * @param port  port
+ * @param slot  slot
+ * @param dataOut  destination
  * @return the data length, or 0 when not open
  */
-int func_003FFA58(int a, int b, int c) {
-    struct B128 s;
-    int *q;
-    int r;
-    if (!D_00526250[a][b].open)
+int func_003FFA58(int port, int slot, int dataOut) {
+    struct B128 frameCopy;
+    int *frameWords;
+    int intrState;
+    if (!D_00526250[port][slot].open)
         return 0;
-    r = func_0042C078();
-    q = (int *)&s;
-    s = *(struct B128 *)func_003FF9A8(a, b);
-    func_0041605C_k(c, q, q[0x60 / 4]);
-    if (r == 1)
+    intrState = func_0042C078();
+    frameWords = (int *)&frameCopy;
+    frameCopy = *(struct B128 *)func_003FF9A8(port, slot);
+    func_0041605C_k(dataOut, frameWords, frameWords[0x60 / 4]);
+    if (intrState == 1)
         func_0042C0C0();
-    return q[0x60 / 4];
+    return frameWords[0x60 / 4];
 }
 #endif
 
@@ -2348,18 +2348,18 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FFBC0);
  * Returns a port/slot's pad state (frame byte +0x70; names in func_003FFC38). STABLE (6) while a request is BUSY (2) is
  * reported as EXECCMD (5).
  *
- * @param a  port
- * @param b  slot
+ * @param port  port
+ * @param slot  slot
  * @return the state, or 99 when not open
  */
-int func_003FFBC0(int a, int b) {
-    unsigned char *p;
-    if (!D_00526250[a][b].open)
+int func_003FFBC0(int port, int slot) {
+    unsigned char *frameBytes;
+    if (!D_00526250[port][slot].open)
         return 99;
-    p = (unsigned char *)func_003FF9A8(a, b); /* byte reads: a sPadFrame * makes one lhu of state/reqState */
-    if (p[0x70] == 6 && p[0x71] == 2)
+    frameBytes = (unsigned char *)func_003FF9A8(port, slot); /* byte reads: a sPadFrame * makes one lhu of state/reqState */
+    if (frameBytes[0x70] == 6 && frameBytes[0x71] == 2)
         return 5;
-    return p[0x70];
+    return frameBytes[0x70];
 }
 #endif
 
@@ -2391,15 +2391,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FFC70);
 /**
  * Sets the request state (frame byte +0x71) of a port/slot's newest pad frame; the command senders set BUSY (2).
  *
- * @param a  port
- * @param b  slot
- * @param c  the request state
+ * @param port  port
+ * @param slot  slot
+ * @param newReqState  the request state
  * @return 1, or 0 when not open
  */
-int func_003FFC70(int a, int b, int c) {
-    if (!D_00526250[a][b].open)
+int func_003FFC70(int port, int slot, int newReqState) {
+    if (!D_00526250[port][slot].open)
         return 0;
-    func_003FF9A8(a, b)->reqState = c;
+    func_003FF9A8(port, slot)->reqState = newReqState;
     return 1;
 }
 #endif
@@ -2410,13 +2410,13 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FFCD8);
 /**
  * Returns the request state (frame byte +0x71) of a port/slot: 0 COMPLETE, 1 FAILED, 2 BUSY.
  *
- * @param a  port
- * @param b  slot
+ * @param port  port
+ * @param slot  slot
  * @return the request state, or 0 when not open
  */
-int func_003FFCD8(int a, int b) {
-    if (!D_00526250[a][b].open) return 0;
-    return func_003FF9A8(a, b)->reqState;
+int func_003FFCD8(int port, int slot) {
+    if (!D_00526250[port][slot].open) return 0;
+    return func_003FF9A8(port, slot)->reqState;
 }
 #endif
 
@@ -2448,32 +2448,32 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FFD60);
 /**
  * Returns actuator information of a port/slot's pad (frame +0x30, four 4-byte entries; count at +0x6A).
  *
- * Needs a valid frame (+0x72 == 1) with byte +0x64 at least 2. @p c -1 returns the count; otherwise @p d 1..4 picks
- * byte 0..3 of entry @p c. cPS2PadDevice_sampleButtons calls it.
+ * Needs a valid frame (+0x72 == 1) with byte +0x64 at least 2. @p actIndex -1 returns the count; otherwise @p infoKind 1..4 picks
+ * byte 0..3 of entry @p actIndex. cPS2PadDevice_sampleButtons calls it.
  *
- * @param a  port
- * @param b  slot
- * @param c  entry index, or -1
- * @param d  which byte (1..4)
+ * @param port  port
+ * @param slot  slot
+ * @param actIndex  entry index, or -1
+ * @param infoKind  which byte (1..4)
  * @return the value, or 0
  */
-int func_003FFD60(int a, int b, int c, int d) {
-    sPadFrame *p;
-    if (!D_00526250[a][b].open) return 0;
-    p = func_003FF9A8(a, b);
-    if (p->ok != 1) return 0;
-    if (p->f64 < 2) return 0;
-    if (c >= p->f6A) return 0;
-    if (c == -1) return p->f6A;
-    switch (d) {
+int func_003FFD60(int port, int slot, int actIndex, int infoKind) {
+    sPadFrame *frame;
+    if (!D_00526250[port][slot].open) return 0;
+    frame = func_003FF9A8(port, slot);
+    if (frame->ok != 1) return 0;
+    if (frame->f64 < 2) return 0;
+    if (actIndex >= frame->f6A) return 0;
+    if (actIndex == -1) return frame->f6A;
+    switch (infoKind) {
     case 1:
-        return p->act[c].a;
+        return frame->act[actIndex].a;
     case 2:
-        return p->act[c].b;
+        return frame->act[actIndex].b;
     case 3:
-        return p->act[c].c;
+        return frame->act[actIndex].c;
     case 4:
-        return p->act[c].d;
+        return frame->act[actIndex].d;
     }
     return 0;
 }
@@ -2484,31 +2484,31 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FFE80);
 #ifdef SKIP_ASM
 /**
  * Returns actuator-combination information of a port/slot's pad (frame +0x40; count at +0x6B), like func_003FFD60;
- * @p d -1..2 picks byte 0..3 of entry @p c.
+ * @p infoKind -1..2 picks byte 0..3 of entry @p combIndex.
  *
- * @param a  port
- * @param b  slot
- * @param c  entry index, or -1 for the count
- * @param d  which byte (-1..2)
+ * @param port  port
+ * @param slot  slot
+ * @param combIndex  entry index, or -1 for the count
+ * @param infoKind  which byte (-1..2)
  * @return the value, or 0
  */
-int func_003FFE80(int a, int b, int c, int d) {
-    sPadFrame *p;
-    if (!D_00526250[a][b].open) return 0;
-    p = func_003FF9A8(a, b);
-    if (p->ok != 1) return 0;
-    if (p->f64 < 2) return 0;
-    if (c == -1) return p->f6B;
-    if (c >= p->f6B) return 0;
-    switch (d) {
+int func_003FFE80(int port, int slot, int combIndex, int infoKind) {
+    sPadFrame *frame;
+    if (!D_00526250[port][slot].open) return 0;
+    frame = func_003FF9A8(port, slot);
+    if (frame->ok != 1) return 0;
+    if (frame->f64 < 2) return 0;
+    if (combIndex == -1) return frame->f6B;
+    if (combIndex >= frame->f6B) return 0;
+    switch (infoKind) {
     case -1:
-        return p->comb[c].a;
+        return frame->comb[combIndex].a;
     case 0:
-        return p->comb[c].b;
+        return frame->comb[combIndex].b;
     case 1:
-        return p->comb[c].c;
+        return frame->comb[combIndex].c;
     case 2:
-        return p->comb[c].d;
+        return frame->comb[combIndex].d;
     }
     return 0;
 }
@@ -2532,27 +2532,27 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FFFA0);
  */
 // scePadInfoMode(port, slot, term, offs)
 int func_003FFFA0(int port, int slot, int term, int offs) {
-    sPadFrame *p;
+    sPadFrame *frame;
     int t;
     if (!D_00526250[port][slot].open) return 0;
-    p = func_003FF9A8(port, slot);
-    if (p->ok != 1) return 0;
-    if (p->reqState == 2) return 0;
+    frame = func_003FF9A8(port, slot);
+    if (frame->ok != 1) return 0;
+    if (frame->reqState == 2) return 0;
     switch (term) {
     case 1:
-        t = p->f65;
+        t = frame->f65;
         if (t == 243) return 0;
         return t >> 4;
     case 2:
-        if (p->f64 == 1) return 0;
-        return p->modes[p->f69];
+        if (frame->f64 == 1) return 0;
+        return frame->modes[frame->f69];
     case 3:
-        if (p->f64 == 1) return 0;
-        return p->f69;
+        if (frame->f64 == 1) return 0;
+        return frame->f69;
     case 4:
-        if (p->f64 == 1) return 0;
-        if (offs == -1) return p->f68;
-        if (offs < p->f68) return p->modes[offs];
+        if (frame->f64 == 1) return 0;
+        if (offs == -1) return frame->f68;
+        if (offs < frame->f68) return frame->modes[offs];
         return 0;
     }
     return 0;
@@ -2566,24 +2566,24 @@ extern int func_003FFC70(int, int, int);
 /**
  * Sets a port/slot's main mode: RPC command 6 with the mode and lock words; on success marks the request BUSY.
  *
- * @param a  port
- * @param b  slot
- * @param c  mode index
- * @param d  lock setting
+ * @param port  port
+ * @param slot  slot
+ * @param modeIndex  mode index
+ * @param lockMode  lock setting
  * @return the reply (word 5), or 0 when the call fails
  */
-int func_004000D8(int a, int b, int c, int d) {
-    int v;
-    D_00526440[3] = c;
-    D_00526440[4] = d;
+int func_004000D8(int port, int slot, int modeIndex, int lockMode) {
+    int result;
+    D_00526440[3] = modeIndex;
+    D_00526440[4] = lockMode;
     D_00526440[0] = 6;
-    D_00526440[1] = a;
-    D_00526440[2] = b;
+    D_00526440[1] = port;
+    D_00526440[2] = slot;
     if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
         return 0;
-    v = D_00526440[5];
-    if (v == 1)
-        func_003FFC70(a, b, 2);
+    result = D_00526440[5];
+    if (result == 1)
+        func_003FFC70(port, slot, 2);
     return D_00526440[5];
 }
 #endif
@@ -2596,26 +2596,26 @@ extern int s0_F390(int, int) __asm__("func_003FF390");
  * Sends 6 actuator values to a port/slot's pad: copies them into its command block (+0xC, with words 1 and 2 set to 1
  * and 6) and sends it (func_003FF390). Needs a valid frame.
  *
- * @param a  port
- * @param b  slot
+ * @param port  port
+ * @param slot  slot
  * @param src  the 6 values
  * @return 1 when sent, else 0
  */
-int func_00400190(int a, int b, unsigned char *src) {
+int func_00400190(int port, int slot, unsigned char *src) {
     int i;
     int ok;
-    int *q;
-    char *d;
-    if (func_003FF9A8(a, b)->ok != 1)
+    int *cmdWords;
+    char *cmdBytes;
+    if (func_003FF9A8(port, slot)->ok != 1)
         return 0;
-    q = (int *)D_00526250[a][b].actBuf;
-    d = (char *)q + 0xC;
+    cmdWords = (int *)D_00526250[port][slot].actBuf;
+    cmdBytes = (char *)cmdWords + 0xC;
     for (i = 0; i < 6; i++)
-        d[i] = src[i];
+        cmdBytes[i] = src[i];
     ok = 1;
-    q[1] = ok;
-    q[2] = 6;
-    if (s0_F390(a, b) != 1)
+    cmdWords[1] = ok;
+    cmdWords[2] = 6;
+    if (s0_F390(port, slot) != 1)
         ok = 0;
     return ok;
 }
@@ -2635,19 +2635,19 @@ extern int func_003FFC70(int, int, int);
  */
 int func_00400250(int port, int slot, unsigned char *data) {
     int i;
-    unsigned char *d;
-    int *p = D_00526440;
-    p[0] = 8;
-    p[1] = port;
-    p[2] = slot;
-    d = (unsigned char *)&p[3];
+    unsigned char *alignBytes;
+    int *rpcBlock = D_00526440;
+    rpcBlock[0] = 8;
+    rpcBlock[1] = port;
+    rpcBlock[2] = slot;
+    alignBytes = (unsigned char *)&rpcBlock[3];
     for (i = 0; i < 6; i++)
-        d[i] = data[i];
-    if (func_00426D18(D_00526200, 1, 0, p, 128, p, 128, 0, 0) < 0)
+        alignBytes[i] = data[i];
+    if (func_00426D18(D_00526200, 1, 0, rpcBlock, 128, rpcBlock, 128, 0, 0) < 0)
         return 0;
-    if (p[5] == 1)
+    if (rpcBlock[5] == 1)
         func_003FFC70(port, slot, 2);
-    return p[5];
+    return rpcBlock[5];
 }
 #endif
 
@@ -2658,22 +2658,22 @@ INCLUDE_ASM("seg/seg_2FE810", func_00400328);
  * Returns the little-endian word at frame +0x79 of a port/slot's pad (0x3FFFF when all pressure-sensitive buttons are
  * available, per func_00400490). Needs a valid frame with bytes +0x64 and +0x66 at least 2.
  *
- * @param a  port
- * @param b  slot
+ * @param port  port
+ * @param slot  slot
  * @return the word, or 0
  */
-int func_00400328(int a, int b) {
-    sPadFrame *p;
-    if (!D_00526250[a][b].open)
+int func_00400328(int port, int slot) {
+    sPadFrame *frame;
+    if (!D_00526250[port][slot].open)
         return 0;
-    p = func_003FF9A8(a, b);
-    if (p->ok != 1)
+    frame = func_003FF9A8(port, slot);
+    if (frame->ok != 1)
         return 0;
-    if (p->f64 < 2)
+    if (frame->f64 < 2)
         return 0;
-    if (p->f66 < 2)
+    if (frame->f66 < 2)
         return 0;
-    return p->f79[0] + ((long)p->f79[1] << 8) + ((long)p->f79[2] << 16) + ((long)p->f79[3] << 24);
+    return frame->f79[0] + ((long)frame->f79[1] << 8) + ((long)frame->f79[2] << 16) + ((long)frame->f79[3] << 24);
 }
 #endif
 
@@ -2684,22 +2684,22 @@ extern int func_003FFC70(int, int, int);
 /**
  * Sends a port/slot's button mask (RPC command 10); on success marks the request BUSY.
  *
- * @param a  port
- * @param b  slot
- * @param c  the mask (func_004004F0 passes 0xFFF, func_00400548 0)
+ * @param port  port
+ * @param slot  slot
+ * @param buttonMask  the mask (func_004004F0 passes 0xFFF, func_00400548 0)
  * @return the reply (word 4), or 0 when the call fails
  */
-int func_004003E0(int a, int b, int c) {
-    int v;
-    D_00526440[3] = c;
+int func_004003E0(int port, int slot, int buttonMask) {
+    int result;
+    D_00526440[3] = buttonMask;
     D_00526440[0] = 10;
-    D_00526440[1] = a;
-    D_00526440[2] = b;
+    D_00526440[1] = port;
+    D_00526440[2] = slot;
     if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
         return 0;
-    v = D_00526440[4];
-    if (v == 1)
-        func_003FFC70(a, b, 2);
+    result = D_00526440[4];
+    if (result == 1)
+        func_003FFC70(port, slot, 2);
     return D_00526440[4];
 }
 #endif
@@ -2711,13 +2711,13 @@ extern int func_00400328(int, int);
 /**
  * Returns whether a port/slot's pad reports the full pressure-sensitive mask 0x3FFFF (func_00400328).
  *
- * @param a  port
- * @param b  slot
+ * @param port  port
+ * @param slot  slot
  * @return 1 or 0
  */
-int func_00400490(int a, int b) {
-    if (!D_00526250[a][b].open) return 0;
-    return func_00400328(a, b) == 0x3FFFF;
+int func_00400490(int port, int slot) {
+    if (!D_00526250[port][slot].open) return 0;
+    return func_00400328(port, slot) == 0x3FFFF;
 }
 #endif
 
@@ -2728,13 +2728,13 @@ extern int func_004003E0(int, int, int);
 /**
  * Turns on all pressure-sensitive buttons of a port/slot (func_004003E0 with mask 0xFFF).
  *
- * @param a  port
- * @param b  slot
+ * @param port  port
+ * @param slot  slot
  * @return func_004003E0's result, or 0 when not open
  */
-int func_004004F0(int a, int b) {
-    if (!D_00526250[a][b].open) return 0;
-    return func_004003E0(a, b, 0xFFF);
+int func_004004F0(int port, int slot) {
+    if (!D_00526250[port][slot].open) return 0;
+    return func_004003E0(port, slot, 0xFFF);
 }
 #endif
 
@@ -2745,13 +2745,13 @@ extern int func_004003E0(int, int, int);
 /**
  * Turns off the pressure-sensitive buttons of a port/slot (func_004003E0 with mask 0). Nothing in retail calls it.
  *
- * @param a  port
- * @param b  slot
+ * @param port  port
+ * @param slot  slot
  * @return func_004003E0's result, or 0 when not open
  */
-int func_00400548(int a, int b) {
-    if (!D_00526250[a][b].open) return 0;
-    return func_004003E0(a, b, 0);
+int func_00400548(int port, int slot) {
+    if (!D_00526250[port][slot].open) return 0;
+    return func_004003E0(port, slot, 0);
 }
 #endif
 
@@ -2764,20 +2764,20 @@ extern int func_003FFC70(int, int, int);
  * Sends RPC command 11 with a 12-byte block for a port/slot; on success marks the request BUSY. Nothing in retail calls
  * it.
  *
- * @param a  port
- * @param b  slot
- * @param c  the 12-byte block
+ * @param port  port
+ * @param slot  slot
+ * @param cmdBlock  the 12-byte block
  * @return the reply (word 7), or 0 when the call fails
  */
-int func_004005A0(int a, int b, struct P12 *c) {
-    D_00526440[1] = a;
+int func_004005A0(int port, int slot, struct P12 *cmdBlock) {
+    D_00526440[1] = port;
     D_00526440[0] = 11;
-    D_00526440[2] = b;
-    *(struct P12 *)&D_00526440[3] = *c;
+    D_00526440[2] = slot;
+    *(struct P12 *)&D_00526440[3] = *cmdBlock;
     if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
         return 0;
     if (D_00526440[7] == 1)
-        func_003FFC70(a, b, 2);
+        func_003FFC70(port, slot, 2);
     return D_00526440[7];
 }
 #endif
@@ -2804,11 +2804,11 @@ INCLUDE_ASM("seg/seg_2FE810", func_004006D8);
 /**
  * Sends pad RPC command 13 with one argument. Nothing in retail calls it.
  *
- * @param a  the argument
+ * @param argWord  the argument
  * @return the reply (word 3), or 0 when the call fails
  */
-int func_004006D8(int a) {
-    D_00526440[1] = a;
+int func_004006D8(int argWord) {
+    D_00526440[1] = argWord;
     D_00526440[0] = 13;
     if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
         return 0;
@@ -2838,11 +2838,11 @@ INCLUDE_ASM("seg/seg_2FE810", func_004007A8);
 /**
  * Sends pad RPC command 20 with one argument. Nothing in retail calls it.
  *
- * @param a  the argument
+ * @param argWord  the argument
  * @return the reply (word 2), or 0 when the call fails
  */
-int func_004007A8(int a) {
-    D_00526440[1] = a;
+int func_004007A8(int argWord) {
+    D_00526440[1] = argWord;
     D_00526440[0] = 20;
     if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
         return 0;
