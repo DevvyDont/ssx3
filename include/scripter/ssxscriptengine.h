@@ -80,8 +80,10 @@ struct cSSXScriptEngine {
     int mFrameUpdated;                           // 0x508 [O] (a bool in On Tour); [U] cVidEngine_UpdateVideo sets 1 while
                                                  //       playing and not paused
     int mNumPause;                               // 0x50C [O]; [U] cVidEngine_PauseVideo counts it up and down
-    int unk_510;                                 // 0x510 [U] cVidEngine_PlayVideo saves a GrMan virtual-call result
-    int unk_514;                                 // 0x514 [U] cVidEngine_PlayVideo: 1 unless the game's state object is 0 or 2
+    int mSavedDisplayFormat;                     // 0x510 [U] cVidEngine_PlayVideo saves GrMan's TV display format;
+                                                 //       ResetVideoEngine restores it (scripter/videngine.h)
+    int mRestoreCutSceneMode;                    // 0x514 [U] cVidEngine_PlayVideo: 1 unless the cut-scene transition
+                                                 //       state is 0 or 2; ResetVideoEngine clears it
     void** mVidEngineVtbl;                       // 0x518 [R] _vt$16cSSXScriptEngine$10cVidEngine (D_004821A0)
     // --- cDataManager (ctor cDataManager_cDataManager(self+0x51C, 0, 0x100))
     int mMaxDataInstances;                       // 0x51C [O]; [R] the ctor stores 0x100
@@ -146,8 +148,8 @@ CHECK_OFFSET(cSSXScriptEngine, mpPlayer, 0x500);
 CHECK_OFFSET(cSSXScriptEngine, mIsPlaying, 0x504);
 CHECK_OFFSET(cSSXScriptEngine, mFrameUpdated, 0x508);
 CHECK_OFFSET(cSSXScriptEngine, mNumPause, 0x50C);
-CHECK_OFFSET(cSSXScriptEngine, unk_510, 0x510);
-CHECK_OFFSET(cSSXScriptEngine, unk_514, 0x514);
+CHECK_OFFSET(cSSXScriptEngine, mSavedDisplayFormat, 0x510);
+CHECK_OFFSET(cSSXScriptEngine, mRestoreCutSceneMode, 0x514);
 CHECK_OFFSET(cSSXScriptEngine, mVidEngineVtbl, 0x518);
 CHECK_OFFSET(cSSXScriptEngine, mMaxDataInstances, 0x51C);
 CHECK_OFFSET(cSSXScriptEngine, mpDataInstanceHeap, 0x520);
