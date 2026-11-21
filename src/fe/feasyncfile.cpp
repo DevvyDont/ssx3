@@ -11976,34 +11976,34 @@ extern "C" void cFEStateChatRoom_onCreateScreen(cFEStateChatRoom* self)
     cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatUpArrow));
     cUIText* downArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatDownArrow));
     cUIText* hideOnEmpty = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_slideroutline2));
-    *(cUIText**)((char*)self->mpSlider2 + 0x7C) = uiText;
-    *(cUIText**)((char*)self->mpSlider2 + 0x80) = downArrow;
+    self->mpSlider2->mpUpArrow = (cUIThing*)uiText;
+    self->mpSlider2->mpDownArrow = (cUIThing*)downArrow;
     {
-        cUIThing* slider2 = self->mpSlider2;
+        cUIScrollBar* slider2 = self->mpSlider2;
         if ((unsigned int)strlen(str_hlu2) > 24) {
             ((char*)slider2)[0x8C] = 0;
         } else {
-            strcpy(((char*)slider2) + 0x8C, str_hlu2);
+            strcpy(slider2->mszUpAnimation, str_hlu2);
         }
     }
     {
-        cUIThing* slider2 = self->mpSlider2;
+        cUIScrollBar* slider2 = self->mpSlider2;
         if ((unsigned int)strlen(str_hld2) > 24) {
             ((char*)slider2)[0xA5] = 0;
         } else {
-            strcpy(((char*)slider2) + 0xA5, str_hld2);
+            strcpy(slider2->mszDownAnimation, str_hld2);
         }
     }
     int two = 2;
-    *(cUIText**)((char*)self->mpSlider2 + 0x84) = hideOnEmpty;
-    *(int*)((char*)self->mpSlider2 + 0x88) = two;
+    self->mpSlider2->mpHideOnEmpty = (cUIThing*)hideOnEmpty;
+    self->mpSlider2->meHideState = two;
     cUIText* upArrow1 = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_UpArrow));
     cUIText* downArrow1 = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_DownArrow));
     cUIText* outline1 = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_slideroutline1));
-    *(cUIText**)((char*)self->mpSlider1 + 0x7C) = upArrow1;
-    *(cUIText**)((char*)self->mpSlider1 + 0x80) = downArrow1;
-    *(cUIText**)((char*)self->mpSlider1 + 0x84) = outline1;
-    *(int*)((char*)self->mpSlider1 + 0x88) = two;
+    self->mpSlider1->mpUpArrow = (cUIThing*)upArrow1;
+    self->mpSlider1->mpDownArrow = (cUIThing*)downArrow1;
+    self->mpSlider1->mpHideOnEmpty = (cUIThing*)outline1;
+    self->mpSlider1->meHideState = two;
 }
 #endif
 
@@ -12616,12 +12616,12 @@ extern "C" void cFEStateChatRoom_onWidgetCreate(cFEStateChatRoom* self, cFEVObj_
     } else if (id == GetHashValue32(str_Txt_Buddies)) {
         cUIText_setUnicodeStringByID((cUIText*)obj, GetHashValue32(str_kT_BTNBuddies));
     } else if (id == GetHashValue32(str_slider1)) {
-        self->mpSlider1 = (cUIThing*)obj;
+        self->mpSlider1 = (cUIScrollBar*)obj;
         *(int*)(widget + 0x14) |= 1;
     } else if (id == GetHashValue32(str_TextScrollChat)) {
         self->mpTextScrollChat = (cUIText*)obj;
     } else if (id == GetHashValue32(str_slider2)) {
-        self->mpSlider2 = (cUIThing*)obj;
+        self->mpSlider2 = (cUIScrollBar*)obj;
         *(int*)(widget + 0x14) |= 1;
     }
     void** slots = (void**)(&self->mpQualityIcon[0]);

@@ -1756,7 +1756,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getHalfPipeNormal__FPv);
 void* cRiderCameraTarget_getHalfPipeNormal(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return (char*)self->Rider + 0x3c0;
+    return (char*)&self->Rider->HalfPipeNormal;
 }
 #endif
 
@@ -4749,11 +4749,11 @@ extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(cLookAtChaseAlgorit
     cChaseAlgorithm_cChaseAlgorithm((cChaseAlgorithm*)self);
     sCamFilter* filter = (sCamFilter*)(&self->TurningPIDFilter);
     self->mVtbl = cLookAtChaseAlgorithm_vtbl;
-    cCubicSplineInterpolant_cCubicSplineInterpolant(self->AirTargetSpline);
-    cCubicSplineInterpolant_cCubicSplineInterpolant(self->AirPositionSpline);
-    cCubicSplineInterpolant_cCubicSplineInterpolant(self->FullAirTargetSpline);
-    cCubicSplineInterpolant_cCubicSplineInterpolant(self->FullAirPositionSpline);
-    cCubicSplineInterpolant_cCubicSplineInterpolant(self->HalfPipeAngleSpline);
+    cCubicSplineInterpolant_cCubicSplineInterpolant(&self->AirTargetSpline);
+    cCubicSplineInterpolant_cCubicSplineInterpolant(&self->AirPositionSpline);
+    cCubicSplineInterpolant_cCubicSplineInterpolant(&self->FullAirTargetSpline);
+    cCubicSplineInterpolant_cCubicSplineInterpolant(&self->FullAirPositionSpline);
+    cCubicSplineInterpolant_cCubicSplineInterpolant(&self->HalfPipeAngleSpline);
     self->TurningPIDFilter.ProportionFactor = cPIDFilter_getDefaultProportionFactor();
     self->TurningPIDFilter.ErrorHistoryFactor = cPIDFilter_getDefaultErrorHistoryFactor_0();
     self->TurningPIDFilter.DerrivativeFactor = cPIDFilter_getDefaultDerrivativeFactor_0();
@@ -4804,11 +4804,11 @@ void cLookAtChaseAlgorithm__cLookAtChaseAlgorithm_dtor(void* vself, int flags)
 {
     cLookAtChaseAlgorithm* self = (cLookAtChaseAlgorithm*)vself;
     self->mVtbl = cLookAtChaseAlgorithm_vtbl;
-    cCubicSplineInterpolant__cCubicSplineInterpolant(self->HalfPipeAngleSpline, 2);
-    cCubicSplineInterpolant__cCubicSplineInterpolant(self->FullAirPositionSpline, 2);
-    cCubicSplineInterpolant__cCubicSplineInterpolant(self->FullAirTargetSpline, 2);
-    cCubicSplineInterpolant__cCubicSplineInterpolant(self->AirPositionSpline, 2);
-    cCubicSplineInterpolant__cCubicSplineInterpolant(self->AirTargetSpline, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant(&self->HalfPipeAngleSpline, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant(&self->FullAirPositionSpline, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant(&self->FullAirTargetSpline, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant(&self->AirPositionSpline, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant(&self->AirTargetSpline, 2);
     self->mVtbl = cCameraAlgorithm_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);

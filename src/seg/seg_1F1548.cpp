@@ -414,7 +414,7 @@ INCLUDE_ASM("seg/seg_1F1548", cPunchFX_reset);
  * constructor calls it as a reset.
  */
 extern "C" void cPunchFX_reset(cPunchFX* self) {
-    (*(int *)((char*)(self) + (0xA0))) = 0;
+    (self->mActive) = 0;
 }
 #endif
 

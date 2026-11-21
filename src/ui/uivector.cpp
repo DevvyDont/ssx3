@@ -2170,7 +2170,7 @@ extern "C" void* cUIMenu_cUIMenu(cUIMenu* self)
 {
     cUIThing_cUIThing_self(((char*)self));
     self->mVtbl = cUIGroup_vtbl;
-    cList_cList(self->mList);
+    cList_cList(&self->mList);
     self->mVtbl = cUIMenu_vtbl;
     tAttrMenu_tAttrMenu(&self->mAttrMenu);
     self->mStoredIndex = 0xFF;
@@ -2206,12 +2206,12 @@ extern "C" void cUIThing__cUIThing_2(void* self, int flag) __asm__("cUIThing__cU
 extern "C" void cUIMenu__cUIMenu(cUIMenu* self, int flag)
 {
     self->mVtbl = cUIGroup_vtbl;
-    *(void***)(((char*)self) + 0x8C) = cList_vtbl;
-    cList_destroyList_v(self->mList);
-    *(void***)(((char*)self) + 0x88) = cListNode_vtbl;
-    cListNode_destroyListNode((cListNode*)(((char*)self) + 0x80));
-    *(void***)(((char*)self) + 0x7C) = cListNode_vtbl;
-    cListNode_destroyListNode((cListNode*)(((char*)self) + 0x74));
+    self->mList.mVtbl = cList_vtbl;
+    cList_destroyList_v(&self->mList);
+    self->mList.mEnd.mVtbl = cListNode_vtbl;
+    cListNode_destroyListNode((cListNode*)(&self->mList.mEnd));
+    self->mList.mStart.mVtbl = cListNode_vtbl;
+    cListNode_destroyListNode((cListNode*)(&self->mList));
     cUIThing__cUIThing_2(((char*)self), flag);
 }
 #endif
@@ -2851,7 +2851,7 @@ extern "C" void* cUIState_cUIState2(cUIState* self)
     self->mpPrev = (cListNode*)((char*)self);
     self->mVtbl = cUIState_vtbl;
     tAttrState_tAttrState(&self->mAttrState);
-    cList_cList(self->mScreens);
+    cList_cList(&self->mScreens);
     return ((char*)self);
 }
 #endif

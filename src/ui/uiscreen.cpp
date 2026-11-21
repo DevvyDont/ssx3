@@ -513,7 +513,7 @@ extern "C" void cUIScreen_parseObjectAnim(cUIScreen* self, void* pFrame, void* m
     void* obj = cUIScreen_getObjectByHashName((cUIScreen*)self, *(int*)((char*)msg + 8));
     if (obj != 0) {
         void* anim = cUIAnimationBank_getAnimationByHashName(
-            self->mpState->mpEngine->mAnimBank,
+            &self->mpState->mpEngine->mAnimBank,
             *(int*)((char*)msg + 4));
         if (anim != 0) {
             cUIThing_playAnimation(obj, anim, *(unsigned char*)((char*)msg + 0xC), *(unsigned short*)((char*)pFrame + 8), 0);
@@ -1693,7 +1693,7 @@ extern "C" void* cUIState_cUIState(cUIState* self, int engine)
     *(signed char*)&self->mCtrlBits = 0xF;
     *(short*)&self->mAttrState = 536;
     self->mpParentState = 0;
-    cList_cList(self->mScreens);
+    cList_cList(&self->mScreens);
     self->mpScreen = 0;
     self->mUserNum = -1;
     return ((void*)self);
@@ -1726,7 +1726,7 @@ extern "C" void* cUIState_cUIState1(cUIState* self, int engine, int parentState)
     *(signed char*)&self->mCtrlBits = 0xF;
     *(short*)&self->mAttrState = 536;
     self->mpParentState = (cUIState*)parentState;
-    cList_cList(self->mScreens);
+    cList_cList(&self->mScreens);
     self->mpScreen = 0;
     self->mUserNum = -1;
     return ((void*)self);
@@ -1755,11 +1755,11 @@ extern "C" void cUIState__cUIState(cUIState* self, int flags)
 {
     self->mVtbl = cUIState_vtbl;
     cList_destroyList_v((char*)&self->mScreens);
-    *(void***)((char*)self + 0x3C) = cList_vtbl;
+    self->mScreens.mVtbl = cList_vtbl;
     cList_destroyList_v((char*)&self->mScreens);
-    *(void***)((char*)self + 0x38) = cListNode_vtbl;
-    cListNode_destroyListNode((char*)self + 0x30);
-    *(void***)((char*)self + 0x2C) = cListNode_vtbl;
+    self->mScreens.mEnd.mVtbl = cListNode_vtbl;
+    cListNode_destroyListNode(&self->mScreens.mEnd);
+    self->mScreens.mStart.mVtbl = cListNode_vtbl;
     cListNode_destroyListNode((char*)&self->mScreens);
     self->mVtbl = cListNode_vtbl;
     cListNode_destroyListNode(self);
@@ -1818,7 +1818,7 @@ INCLUDE_ASM("ui/uiscreen", cUIState_onDestroyScreen__FPv);
 void* cUIState_onDestroyScreen(void* vself)
 {
     cUIState* self = (cUIState*)vself;
-    return cList_destroyList((self->mScreens));
+    return cList_destroyList((&self->mScreens));
 }
 #endif
 
@@ -1916,7 +1916,7 @@ extern "C" void cUIState_onUpdate(cUIState* self)
             if (cUIState_onUpdate_padTest(input, 41) || (cUIState_onUpdate_padTest(input, 40) && (mask & 1))) {
                 cUIState_onUpdate_sVEntryP* vs = (cUIState_onUpdate_sVEntryP*)self->mVtbl;
                 if (!vs[8].fn(((char*)self) + vs[8].delta, input)) {
-                    char* n = (char*)cList_first((cList*)(((char*)self) + 0x24));
+                    char* n = (char*)cList_first((cList*)(&self->mScreens));
                     if (n != 0) {
                         do {
                             if (*(int*)(n + 0x14) & 1) {

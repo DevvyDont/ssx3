@@ -23,6 +23,7 @@
 // Unnamed fields are unk_XXX; rename only with evidence.
 
 #include "layout.h"
+#include "ai/ridermetrix.h" // tRiderStats
 
 struct cReplayFrame;      // replay/frame.h: retail 0x38 bytes (vptr at 0, Next 0x14, Prev 0x18, FrameType 0x1C,
                           // FrameStartTick 0x30)
@@ -67,8 +68,8 @@ struct cReplayFrameList {
 // cReplayHighlight_cancel, cReplayHighlight_setRanking.
 struct cReplayHighlight {
     int PlayerId;          // 0x000 [O]; [R] cReplayHighlight_reset stores -1; [U] cReplay_reset stores 0 / 1
-    char Stats[0xAC];      // 0x004 [O] tRiderStats (On Tour 0xB0, layout not placed); [R] ctor MEM_fill(this + 4, 0,
-                           //       0xAC)
+    tRiderStats Stats;     // 0x004 [O] tRiderStats (On Tour 0xB0; retail 0xAC, ai/ridermetrix.h); [R] ctor MEM_fill(this + 4, 0,
+                           //       0xAC); [U] cReplay_reset walks the highlights from +0x498 (Highlight[0].Stats)
     cReplayFrame* Frame;   // 0x0B0 [O]; [R] ctor 0; [U] non-zero = marking (cReplay_beginMarkHighlight begins only when 0,
                            //       cReplay_endMarkHighlight)
 };
@@ -125,9 +126,11 @@ struct cReplay {
     cReplayFrame* InstantReplayFrame;    // 0x3D4 [O]; [U] tested by cReplay_endMarkInstantReplay, cleared by
                                          //       cReplay_cancelMarkInstantReplay; cReplay_update starts the
                                          //       instant replay from it
-    char InstantReplayStats[0xAC];       // 0x3D8 [O] tRiderStats (retail 0xAC like cReplayHighlight::Stats, On Tour
-                                         //       0xB0); [U] cReplay_endMarkInstantReplay reads the ints at +0x9C / +0xA4 (0x474 /
-                                         //       0x47C)
+    tRiderStats InstantReplayStats;      // 0x3D8 [O] tRiderStats (retail 0xAC like cReplayHighlight::Stats, On Tour
+                                         //       0xB0; ai/ridermetrix.h); [U] cReplay_endMarkInstantReplay compares the rider's
+                                         //       stats with TotalPoints (+0x9C, 0x474) on a landing and TotalPointsLostToWipeouts
+                                         //       (+0xA4, 0x47C) on a wipeout, as On Tour's does at +0xA0 / +0xA8 (its BestTrick
+                                         //       is 4 bytes longer)
     int PlaybackTick;                    // 0x484 [O]; [U] the playback cursor: cReplay_rewind, cReplay_stepFrame
                                          //       (stepFrame), cReplay_rewindFrame/E528/E568
     cReplayFrame* PlaybackFrame;         // 0x488 [O]; [U] ditto: the frame PlaybackTick lies in

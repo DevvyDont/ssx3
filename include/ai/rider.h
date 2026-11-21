@@ -78,13 +78,70 @@ struct sRiderPair {
 
 struct cTrackPath;
 struct cAIPath;
+struct tInstanceRecord;
+struct tPatchRecord;
+struct tSplineRecord;
+struct bxSphereTree;
+
+// One path event in range (On Tour struct tPathEventNode, size 0x10; path/basepath.h only forward-declares it). cRider
+// keeps 12 of them at 0x4DC (PathEventsCur). Layout [O]; [U] the path's getEventsInRange fills 16-byte entries
+// {int, int, float min, float max} (sBXRange in bx/bxstringctor.cpp), and cRider_updateTrackPath copies count << 4 bytes.
+struct tPathEventNode {
+    int Type;           // 0x0 [O] tPathEventType
+    int Arg;            // 0x4 [O]
+    float ParamStart;   // 0x8 [O]; [U] sBXRange.min
+    float ParamEnd;     // 0xC [O]; [U] sBXRange.max
+};
+
+// cRider::tLegInfo (On Tour, nested in cRider; size 0x30). [P] the preview asserts "RightLeg.ThighSkelIndex >= 0",
+// "RightLeg.CalfSkelIndex >= 0", "RightLeg.FootSkelIndex >= 0" (and the LeftLeg ones) name the members.
+struct tLegInfo {
+    int ThighSkelIndex;     // 0x00 [O] [P]
+    int CalfSkelIndex;      // 0x04 [O] [P]
+    int FootSkelIndex;      // 0x08 [O] [P]; [U] cRider_RenderShadow reads both legs' (unk_8E8 / unk_918) as bone indices
+    tPose BoardRelativePose; // 0x10 [O]; [U] cRider_updateSkeleton combines it with the board bone for cRider_doLegIK
+};
+
+// A ray / sphere-tree hit (On Tour struct tIntersectInfo, size 0x80; wscript/wscriptman.h only forward-declares it).
+// cRider keeps its last object hit at 0x9E0 (CollideIntersectInfo). Retail confirms Ipos / Inorm / Ivel / Inst / Mesh
+// (sContact_5398 pos / normal / vel / surf / idx in cRider_checkObjectCollisions) and u / v (copied to cRider 0xAAC /
+// 0xAB0 by cRider_SetNISGroundVectors); the rest is [O] only.
+struct tIntersectInfo {
+    t4Vector Ipos;              // 0x00 [O] [U]
+    t4Vector Inorm;             // 0x10 [O] [U]
+    t4Vector Ivel;              // 0x20 [O] [U]
+    t4Vector Iangvel;           // 0x30 [O]
+    float Iparam;               // 0x40 [O]
+    int HitType;                // 0x44 [O] tHitType
+    bxSphereTree* SphTree;      // 0x48 [O]
+    int Stype;                  // 0x4C [O] eSurfaceType
+    tInstanceRecord* Inst;      // 0x50 [O]; [P] assert "CollideIntersectInfo.Inst == 0"; [U] cRider_updateSplit10 (unk_A30)
+    tPatchRecord* Patch;        // 0x54 [O]
+    tSplineRecord* Spline;      // 0x58 [O]
+    int Mesh;                   // 0x5C [O]; [U] the triangle index (sContact_5398.idx, TriFlags_5398)
+    int Face;                   // 0x60 [O]
+    int Seg;                    // 0x64 [O]
+    float T;                    // 0x68 [O]
+    float u;                    // 0x6C [O]; [U] cRider_SetNISGroundVectors (hit f6C -> unk_AAC)
+    float v;                    // 0x70 [O]; [U] cRider_SetNISGroundVectors (hit f70 -> unk_AB0)
+};
+
+// A collision response (On Tour struct tCollideInfo, size 0x40). [U] sInfo_5398 {pos, dir, normal, speed}
+// (cRider_checkObjectCollisions builds it: contact pos, normalised velocity, contact normal, closing speed).
+struct tCollideInfo {
+    t4Vector Pos;               // 0x00 [O] [U]
+    t4Vector Direct;            // 0x10 [O] [U]
+    t4Vector Reflect;           // 0x20 [O] [U]
+    float Vel;                  // 0x30 [O] [U]
+};
 
 struct cRider {
     /* 0x000 */ sRiderPair mRelations[6]; // [X] [U] per other rider, by its mAIIndex (cRider_checkOpponentCollisions)
     /* 0x0D8 */ int unk_0D8; // set to -1, then passed to cRiderMetrix_reset(mMetrix, v) (cRider_initAlways)
     /* 0x0DC */ float mRubberBandBehind; // [X] cleared on reset (cRider_initAlways); rubber-band threshold, c.lt.s in cComputer_isFarBehind, cComputer_setupWarp
     /* 0x0E0 */ float mRubberBandAhead; // [X] cleared on reset (cRider_initAlways); rubber-band threshold, c.lt.s in cComputer_isFarAhead
-    /* 0x0E4 */ char unk_0E4[0x8];
+    /* 0x0E4 */ int mGlueStrengthLevel; // [O] cRiderState::mGlueStrengthLevel (+0x8C there); [U] cComputer_setupWarp: 0 = no warp, 2/3 = catch-up, 1/3 = slow-down, as On Tour's setupWarp tests rider+0x8C
+    /* 0x0E8 */ int PrevRanking; // [O] cRiderState::PrevRanking (+0x90); [R] cRider_setPreviousRanking / getPreviousRanking (On Tour setPreviousRanking: sw a1,0x90); cRider_flagEventPathCheckpoint copies unk_0EC (On Tour RaceRanking, +0x94) into it
     /* 0x0EC */ int unk_0EC; // selector 0..5: func_002A34D0 switches it to 1,2,4,8,0x10,0x200; func_002A1E68 compares it 0..4
     /* 0x0F0 */ int mHasRival; // [X] cleared on reset (cRider_initAlways)
     /* 0x0F4 */ int mLastShoveFrame; // [X] cleared on reset (cRider_initAlways)
@@ -97,10 +154,18 @@ struct cRider {
     /* 0x130 */ t4Vector mRootPoseOverridePos; // [X] moved by AddEq by the wall-hit displacement (func_00137138)
     /* 0x140 */ char unk_140[0x10];
     /* 0x150 */ int mUseRootPoseOverride; // [X]
-    /* 0x154 */ char unk_154[0x1C];
-    /* 0x170 */ t4Vector unk_170; // dotted with mVelocity (rejected above 277.78) and the launch dir (cRider_isChangeFakieAir)
-    /* 0x180 */ t4Vector unk_180; // facing-like: dotted with the wall/contact normal (cRider_doObjectCollision); its dot with the launch dir must be >= 0 (cRider_isChangeFakieAir)
-    /* 0x190 */ char unk_190[0x10];
+    /* 0x154 */ char unk_154[0xC];
+    /* 0x160 */ union {
+        t4Matrix RiderRoot; // [O] cRiderState::RiderRoot (+0x100, between BoardOrientation/UseBoardOrientation and Transform, as here);
+                            // [U] cRider_updateSkeleton builds it from the pose (QuatToMat at +0x160; On Tour: tPose::matrix(this+0x100));
+                            // rows side/front/up/position read by cRider_reactToCollision and cRider_doOpponentCollision
+        struct {
+            char unk_160[0x10];
+            t4Vector unk_170; // RiderRoot.row[1] (front): dotted with mVelocity (rejected above 277.78) and the launch dir (cRider_isChangeFakieAir)
+            t4Vector unk_180; // RiderRoot.row[2] (up): dotted with the wall/contact normal (cRider_doObjectCollision); its dot with the launch dir must be >= 0 (cRider_isChangeFakieAir)
+            char unk_190[0x10]; // RiderRoot.row[3] (position)
+        };
+    };
     /* 0x1A0 */ t4Matrix mMatrix; // [P] rows getSide/getFront/getUp (unshifted) + position; built from mRotation/mPosition
     /* 0x1E0 */ t4Vector mVelocity; // [R] getVelocity (cRider_getVelocity); [P] setVelocity
     /* 0x1F0 */ sRiderChannel mSlewed[19]; // [X] [U] 19 channels, init by cRider_OnStartObjectUse; .cur of [0],[2],[3],[8] read as lean input
@@ -135,13 +200,14 @@ struct cRider {
     /* 0x354 */ int ReactionEventTick; // [X] = -1 on transport (cRider_putAt)
     /* 0x358 */ int ReactionEventType; // [X] cleared on transport (cRider_putAt)
     /* 0x35C */ float unk_35C; // cleared on transport (cRider_putAt); += 1/60 per frame, compared < 1.0f (cRider_checkForProximityAction)
-    /* 0x360 */ char unk_360[0x10];
+    /* 0x360 */ float JumpHeldSec; // [O] cRiderState::JumpHeldSec (+0xF70, after ProximityActionDelay = unk_35C); [U] cRider_checkForPrewind tests it == 0 and sets it to 1.0 as On Tour's checkForPrewind does at +0xF70; the gainFocus of cBoardPressControl / cRailslideControl / cCruiseControl clear it
+    /* 0x364 */ char unk_364[0xC];
     /* 0x370 */ t4Vector mGroundNormal; // [P] getGroundNormal, preview 0x350 (+0x20 assumed); slope = atan2(|xy|, z) in cRider_updateSplit12
     /* 0x380 */ t4Vector unk_380; // copy of mGroundNormal taken before the ground probe (cRider_SetNISGroundVectors)
     /* 0x390 */ t4Vector unk_390; // reference axis for lean rotation: Cross/Dot with the bone side vector (cRider_updateSkeleton)
     /* 0x3A0 */ t4Vector mGroundForward; // [X] Normalize(front minus its mGroundNormal component) (cRider_SetNISGroundVectors)
     /* 0x3B0 */ t4Vector mGroundSide; // [X] Cross(mGroundNormal, unk_3A0); scaled by lean (doLeanPoseAdjust, cRider_SetNISGroundVectors)
-    /* 0x3C0 */ char unk_3C0[0x10];
+    /* 0x3C0 */ t4Vector HalfPipeNormal; // [O] cRiderState::HalfPipeNormal (+0xFD0, between DigDir = mGroundSide and GroundVelocity = unk_3D0); [R] cRiderCameraTarget_getHalfPipeNormal returns &rider+0x3C0 (On Tour: cRiderState::getHalfPipeNormal)
     /* 0x3D0 */ t4Vector unk_3D0; // hit.v20, or t4vect_Zero on a miss (cRider_SetNISGroundVectors)
     /* 0x3E0 */ t4Vector mImpulse; // [X] damped by 0.98 per frame (cRider_updateSplit3)
     /* 0x3F0 */ float mImpactAccum; // [X]
@@ -164,9 +230,19 @@ struct cRider {
     /* 0x478 */ int mFinishTick; // [P] getFinishTick, preview 0x448 (+0x30); = now + mPenaltyTicks (cRider_doFinishEvent)
     /* 0x47C */ int mPenaltyTicks; // [P] getPenaltyTicks, preview 0x44C (+0x30)
     /* 0x480 */ int mDidNotFinish; // [P] getDidNotFinish, preview 0x450 (+0x30); set by cRider_quitEvent
-    /* 0x484 */ char unk_484[0x4C];
+    /* 0x484 */ int mEndOfTheWorldTimer; // [O] cRiderState::mEndOfTheWorldTimer (+0x1094, after isDidNotFinish); [U] cComputer_getSpinCmd counts frames with > 15 s of air time in it and sets cmd bit 12 at 31, as On Tour's getSpinCmd does with rider+0x1094
+    /* 0x488 */ char unk_488[0x8];
+    /* 0x490 */ t4Vector PathPos; // [O] cRiderState::PathPos (+0x10A0); [U] the nearest AI-path point: cPath_intersectPath1's output in cRider_initPath / updateAIPath / checkAIPathSwitch / switchToResetPath (On Tour updateAIPath: intersectPath(.., this+0x10A0, this+0x10D8, ..)); the reset position (cResetControl_update)
+    /* 0x4A0 */ t4Vector IntersectPos; // [O] cRiderState::IntersectPos (+0x10B0); [U] the look-ahead path point cPath_getPathPos(AIPath, PathParam + ahead) (On Tour updateAIPath stores getPathPos at +0x10B0); cRider_setAimTarget copies it to AimTargetPos
+    /* 0x4B0 */ t4Vector AimTargetPos; // [O] cRiderState::AimTargetPos (+0x10C0); [U] cRider_setAimTarget writes it (On Tour setAimTarget)
+    /* 0x4C0 */ float PrevPathParam; // [O] (+0x10D0); [U] cRider_updateAIPath: PrevPathParam = PathParam first (On Tour: lwc1 0x10D4 / swc1 0x10D0); the low end of the path-event queries (cComputer_checkForJumpEvent etc.)
+    /* 0x4C4 */ float PathParam; // [O] (+0x10D4); [U] the AI-path position returned by cPath_intersectPath1 (cRider_updateAIPath, initPath, switchToResetPath)
+    /* 0x4C8 */ float PathDistXY; // [O] (+0x10D8); [U] cPath_intersectPath1's distance output; > 500 starts a path switch (cRider_updateAIPath, On Tour kPathStrayDist vs +0x10D8)
+    /* 0x4CC */ float PathHeading; // [O] (+0x10DC); [U] atan2 of IntersectPos - PathPos (cRider_updateAIPath; On Tour fATan2 -> swc1 0x10DC); read by cComputer_attackTargetCruise / avoidTargetCruise
     /* 0x4D0 */ float mDistToFinish; // [X]
-    /* 0x4D4 */ char unk_4D4[0xC8];
+    /* 0x4D4 */ float MinDistanceLeft; // [O] cRiderState::MinDistanceLeft (+0x10E4, after DistanceLeft = mDistToFinish); [U] the lowest track distance so far: cRider_checkTrackPathEvents fires checkpoints only below it and then lowers it; cRider_initPath sets it with mDistToFinish; > 0 gates the path switches (cRider_updateAIPath / updateTrackPath; On Tour updateAIPath: lwc1 0x10E4)
+    /* 0x4D8 */ float TotalPathDistance; // [O] (+0x10E8); [R] cRider_getTotalPathDistance / cRider_setTotalPathDistance (On Tour getTotalPathDistance: lwc1 0x10E8)
+    /* 0x4DC */ tPathEventNode PathEventsCur[12]; // [O] (+0x10EC, tPathEventNode[12]); [U] cRider_checkTrackPathEvents has the path's getEventsInRange fill up to 0xC entries here and stores the count at 0x59C (mOverlapCount = On Tour NumPathEventsCur); cRider_updateTrackPath copies count << 4 bytes
     /* 0x59C */ int mOverlapCount; // [X] cleared on reset (cRider_initAlways)
     /* 0x5A0 */ int unk_5A0; // cleared on reset (cRider_initAlways)
     /* 0x5A4 */ int unk_5A4; // cleared on reset (cRider_initAlways)
@@ -231,18 +307,40 @@ struct cRider {
     /* 0x8A8 */ int mBoneHead; // [X] bone index into mAnimModel+0x30 (0x40-byte matrices, row 3 = position) (cPlayerIndicatorFX_render, func_002D5048)
     /* 0x8AC */ char unk_8AC[0x14];
     /* 0x8C0 */ long mUpperBodyBoneMask; // [X] 64-bit (PORT: long is 64-bit on the EE); copied to mRiderAnim+0x20 before each cRiderAnimBase_play, then reset to -1 (cRider_checkForPunch, cRider_checkForProximityAction)
-    /* 0x8C8 */ char unk_8C8[0x8];
+    /* 0x8C8 */ long GraftFromUpperSpine; // [O] cRider::GraftFromUpperSpine (unsigned long long, +0x1478, between GraftFromLowerSpine = mUpperBodyBoneMask and GraftFromClavicles = mHeadBoneMask); [U] 64-bit mask copied to mRiderAnim+0x20 before cRiderAnimBase_play in cRider_checkForReaction, as On Tour's checkForReaction does with +0x1478 (PORT: long is 64-bit on the EE)
     /* 0x8D0 */ long mHeadBoneMask; // [X] 64-bit; same use for the wide-glance anims (cRider_checkForProximityAction)
-    /* 0x8D8 */ char unk_8D8[0x10];
-    /* 0x8E8 */ int unk_8E8; // bone index (cRider_RenderShadow)
-    /* 0x8EC */ char unk_8EC[0x2C];
-    /* 0x918 */ int unk_918; // bone index (cRider_RenderShadow)
-    /* 0x91C */ char unk_91C[0xB4];
+    /* 0x8D8 */ char unk_8D8[0x8];
+    /* 0x8E0 */ union {
+        tLegInfo RightLeg; // [O] cRider::RightLeg (+0x1490); [P] assert "RightLeg.FootSkelIndex >= 0"; [U] cRider_updateSkeleton: cRider_doLegIK(self, &RightLeg, board * RightLeg.BoardRelativePose (+0x8F0), LegIK = unk_318), as On Tour's updateSkeleton (+0x1490 / +0x14A0, LegIK +0xF38)
+        struct {
+            char unk_8E0[0x8];
+            int unk_8E8; // RightLeg.FootSkelIndex: bone index (cRider_RenderShadow)
+            char unk_8EC[0x24];
+        };
+    };
+    /* 0x910 */ union {
+        tLegInfo LeftLeg; // [O] cRider::LeftLeg (+0x14C0); [P] assert "LeftLeg.FootSkelIndex >= 0"; [U] cRider_updateSkeleton: the second cRider_doLegIK (+0x910 / +0x920), as On Tour's (+0x14C0 / +0x14D0)
+        struct {
+            char unk_910[0x8];
+            int unk_918; // LeftLeg.FootSkelIndex: bone index (cRider_RenderShadow)
+            char unk_91C[0x24];
+        };
+    };
+    /* 0x940 */ char unk_940[0x90];
     /* 0x9D0 */ t4Vector mModelOffset; // [X] reset to t4vect_Zero each frame
-    /* 0x9E0 */ char unk_9E0[0x50];
-    /* 0xA30 */ void* unk_A30;
-    /* 0xA34 */ char unk_A34[0x2C];
-    /* 0xA60 */ char unk_A60[0x40];
+    /* 0x9E0 */ union {
+        tIntersectInfo CollideIntersectInfo; // [O] cRider::CollideIntersectInfo (+0x1500, after ResolveOffset = mModelOffset); [P] assert "CollideIntersectInfo.Inst == 0";
+                                             // [U] cRider_checkObjectCollisions stores the object hit here (On Tour: assert, then this+0x1500); cRider_updateSplit10 passes it to doOnCollideScript
+        struct {
+            char unk_9E0[0x50];
+            void* unk_A30; // CollideIntersectInfo.Inst
+            char unk_A34[0x2C];
+        };
+    };
+    /* 0xA60 */ union {
+        tCollideInfo CollideInfo; // [O] cRider::CollideInfo (+0x1580, before SphereTree = mSphereTree); [U] cRider_checkObjectCollisions stores the collision response here with the hit (On Tour: this+0x1580); cRider_updateSplit10 passes it to doOnCollideScript
+        char unk_A60[0x40];
+    };
     /* 0xAA0 */ void* mSphereTree; // [P] getSphereTree (seen)
     /* 0xAA4 */ int unk_AA4; // shadow drawn this frame (cRider_RenderShadow)
     /* 0xAA8 */ void* mShadow; // [P] getShadow (seen); drawn by cRider_RenderShadow
@@ -280,6 +378,8 @@ struct cRider {
 CHECK_OFFSET(cRider, unk_0D8, 0xD8);
 CHECK_OFFSET(cRider, mRubberBandBehind, 0xDC);
 CHECK_OFFSET(cRider, mRubberBandAhead, 0xE0);
+CHECK_OFFSET(cRider, mGlueStrengthLevel, 0xE4);
+CHECK_OFFSET(cRider, PrevRanking, 0xE8);
 CHECK_OFFSET(cRider, unk_0EC, 0xEC);
 CHECK_OFFSET(cRider, mHasRival, 0xF0);
 CHECK_OFFSET(cRider, mLastShoveFrame, 0xF4);
@@ -288,6 +388,7 @@ CHECK_OFFSET(cRider, unk_100, 0x100);
 CHECK_OFFSET(cRider, mPosition, 0x110);
 CHECK_OFFSET(cRider, mRotation, 0x120);
 CHECK_OFFSET(cRider, mUseRootPoseOverride, 0x150);
+CHECK_OFFSET(cRider, RiderRoot, 0x160);
 CHECK_OFFSET(cRider, unk_170, 0x170);
 CHECK_OFFSET(cRider, unk_180, 0x180);
 CHECK_OFFSET(cRider, mMatrix, 0x1A0);
@@ -322,10 +423,12 @@ CHECK_OFFSET(cRider, PunchStrength, 0x350);
 CHECK_OFFSET(cRider, ReactionEventTick, 0x354);
 CHECK_OFFSET(cRider, ReactionEventType, 0x358);
 CHECK_OFFSET(cRider, unk_35C, 0x35C);
+CHECK_OFFSET(cRider, JumpHeldSec, 0x360);
 CHECK_OFFSET(cRider, mGroundNormal, 0x370);
 CHECK_OFFSET(cRider, unk_380, 0x380);
 CHECK_OFFSET(cRider, mGroundForward, 0x3A0);
 CHECK_OFFSET(cRider, mGroundSide, 0x3B0);
+CHECK_OFFSET(cRider, HalfPipeNormal, 0x3C0);
 CHECK_OFFSET(cRider, unk_3D0, 0x3D0);
 CHECK_OFFSET(cRider, mImpulse, 0x3E0);
 CHECK_OFFSET(cRider, mImpactAccum, 0x3F0);
@@ -345,7 +448,18 @@ CHECK_OFFSET(cRider, mStartTick, 0x474);
 CHECK_OFFSET(cRider, mFinishTick, 0x478);
 CHECK_OFFSET(cRider, mPenaltyTicks, 0x47C);
 CHECK_OFFSET(cRider, mDidNotFinish, 0x480);
+CHECK_OFFSET(cRider, mEndOfTheWorldTimer, 0x484);
+CHECK_OFFSET(cRider, PathPos, 0x490);
+CHECK_OFFSET(cRider, IntersectPos, 0x4A0);
+CHECK_OFFSET(cRider, AimTargetPos, 0x4B0);
+CHECK_OFFSET(cRider, PrevPathParam, 0x4C0);
+CHECK_OFFSET(cRider, PathParam, 0x4C4);
+CHECK_OFFSET(cRider, PathDistXY, 0x4C8);
+CHECK_OFFSET(cRider, PathHeading, 0x4CC);
 CHECK_OFFSET(cRider, mDistToFinish, 0x4D0);
+CHECK_OFFSET(cRider, MinDistanceLeft, 0x4D4);
+CHECK_OFFSET(cRider, TotalPathDistance, 0x4D8);
+CHECK_OFFSET(cRider, PathEventsCur, 0x4DC);
 CHECK_OFFSET(cRider, mOverlapCount, 0x59C);
 CHECK_OFFSET(cRider, unk_5A0, 0x5A0);
 CHECK_OFFSET(cRider, unk_5A4, 0x5A4);
@@ -402,12 +516,17 @@ CHECK_OFFSET(cRider, mBoneHips, 0x89C);
 CHECK_OFFSET(cRider, mBoneBoardRoot, 0x8A0);
 CHECK_OFFSET(cRider, mBoneHead, 0x8A8);
 CHECK_OFFSET(cRider, mUpperBodyBoneMask, 0x8C0);
+CHECK_OFFSET(cRider, GraftFromUpperSpine, 0x8C8);
 CHECK_OFFSET(cRider, mHeadBoneMask, 0x8D0);
+CHECK_OFFSET(cRider, RightLeg, 0x8E0);
 CHECK_OFFSET(cRider, unk_8E8, 0x8E8);
+CHECK_OFFSET(cRider, LeftLeg, 0x910);
 CHECK_OFFSET(cRider, unk_918, 0x918);
 CHECK_OFFSET(cRider, mModelOffset, 0x9D0);
+CHECK_OFFSET(cRider, CollideIntersectInfo, 0x9E0);
 CHECK_OFFSET(cRider, unk_9E0, 0x9E0);
 CHECK_OFFSET(cRider, unk_A30, 0xA30);
+CHECK_OFFSET(cRider, CollideInfo, 0xA60);
 CHECK_OFFSET(cRider, unk_A60, 0xA60);
 CHECK_OFFSET(cRider, mSphereTree, 0xAA0);
 CHECK_OFFSET(cRider, unk_AA4, 0xAA4);

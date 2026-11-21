@@ -1181,10 +1181,10 @@ INCLUDE_ASM("visualfx/renderstateman", cAirStreamerFX_reset);
 extern "C" void cAirStreamerFX_reset(cAirStreamerFX* self)
 {
     int mode = (*(int*)(*(char**)self + 0x870) >= 0) ? 25 : 18;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0xC) = 0;
-    *(int*)((char*)self + 0x14) = mode;
+    *(int*)&self->mVOffset = 0;
+    self->StreamBufHead = 0;
+    self->StreamBufLen = 0;
+    self->mMaxStreamerSegments = mode;
 }
 #endif
 

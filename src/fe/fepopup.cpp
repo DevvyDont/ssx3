@@ -3166,15 +3166,15 @@ extern "C" void cScreenPopup_onPopupEvent(cScreenPopup* self, cUIState* child, i
         }
         break;
     case 0xF:
-        cUIStateStack_pop_i(self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop_i(&self->mpEngine->mStateStack, 1);
         self->miConfimationReturnCode = self->miActiveConfirmation + 0xF;
         break;
     case 0x10: case 20:
         self->miConfimationReturnCode = -1;
-        cUIStateStack_pop_i(self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop_i(&self->mpEngine->mStateStack, 1);
         break;
     case 17: case 18: case 19:
-        cUIStateStack_pop_i(self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop_i(&self->mpEngine->mStateStack, 1);
         break;
     case 22:
         if (((void*)child) == (void*)self->mpKeyboard) {
@@ -3866,7 +3866,7 @@ extern "C" void cKeyboardPopup_onUpdate(cKeyboardPopup* self)
 {
     cUIState_onUpdate(self);
     if (cGameComm_mGameComm != 0 && cGameComm_mGameComm->mOverlayTimeout == 0 && (int)SSXApp->Game != 0) {
-        cUIStateStack_pop(self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
     }
     if (self->mbCallParentsUpdate != 0) {
         cUIState* obj = self->mpParentState;
@@ -3894,7 +3894,7 @@ extern "C" void cKeyboardPopup_onWidgetEvent(cKeyboardPopup* self, void* pWidget
     switch (Event) {
     case 5:
     case 6:
-        cUIStateStack_pop(self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         break;
     }
 }
@@ -6067,14 +6067,14 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, cUIInput* ev)
                     cFEStateNetHelpPopup_setOption(popup, 3, GetHashValue32(str_kT_HELPKeyboardShift), 6);
                     cFEStateNetHelpPopup_setOption(popup, 4, GetHashValue32(str_kT_HELPKeyboardSelectCharacter), 0);
                     cFEStateNetHelpPopup_setOption(popup, 5, GetHashValue32(str_kT_HELPKeyboardCancel), 1);
-                    cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
+                    cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
                 }
                 sound = 5;
             }
         } else if (InputK1CDB98(((char*)ev), 6)) {
             changed = 1;
             sound = 6;
-            cUIStateStack_pop(self->mpEngine->mStateStack, 1);
+            cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
             char* o = (char*)self->mpParentState;
             sVEntryK1CDB98* vt = *(sVEntryK1CDB98**)(o + 8);
             ((void (*)(void*, int, int))vt[19].fn)(o + vt[19].delta, 0, 0xE);

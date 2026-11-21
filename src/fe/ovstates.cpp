@@ -210,7 +210,7 @@ extern "C" void cFEStateTitle_onWidgetEvent(cFEStateTitle* self, cUIThing* msg, 
         sVEntry_cFEStateTitle_onWidgetEvent* vt = *(sVEntry_cFEStateTitle_onWidgetEvent**)((char*)obj + 0x4);
         void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, msg->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
     }
 }
@@ -646,7 +646,7 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, cUIThing
             bit <<= self_->mSaveCurrentCtrl;
             *(char*)(popup + 0x15) = bit;
             *(char*)(popup + 0x48) = 0;
-            cUIStateStack_pushPopup(self_->mpEngine->mStateStack, popup);
+            cUIStateStack_pushPopup(&self_->mpEngine->mStateStack, popup);
             self_->mpSelectMultiModeWidget = (cUIThing*)item_;
             setWidgetHidden_194EB0(((char*)self_), str_hl);
             setWidgetHidden_194EB0(((char*)self_), str_3_help_multi);
@@ -657,20 +657,20 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, cUIThing
         sObj_194EB0* obj = *(sObj_194EB0**)self_->mpEngine;
         void* nextState = ((void* (*)(void*, void*, int))obj->vt[4].fn)((char*)obj + obj->vt[4].delta, ((char*)self_), item_->mMiscData);
         if (nextState != 0)
-            cUIStateStack_push(self_->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&self_->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
         sObj_194EB0* obj = *(sObj_194EB0**)self_->mpEngine;
         void* nextState = ((void* (*)(void*, void*, int))obj->vt[5].fn)((char*)obj + obj->vt[5].delta, ((char*)self_), item_->mMiscData);
         if (nextState != 0)
-            cUIStateStack_push(self_->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&self_->mpEngine->mStateStack, nextState);
         break;
     }
     case 7: {
         char* optionsState = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self_->mpEngine, 1);
         *(int*)(optionsState + 0x1C) = (*(int*)(optionsState + 0x1C) & ~0x3F00) | 0x100;
-        cUIStateStack_pushSpecial(self_->mpEngine->mStateStack, optionsState, 0, 0);
+        cUIStateStack_pushSpecial(&self_->mpEngine->mStateStack, optionsState, 0, 0);
         break;
     }
     case 8:

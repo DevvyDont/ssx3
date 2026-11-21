@@ -40,7 +40,7 @@ extern char str_BigFile_b[];
  */
 extern "C" cPlaybackMan* cPlaybackMan_cPlaybackMan(cPlaybackMan* self, int maxPlaybackFiles)
 {
-    cReplayFrame_cReplayFrame((cReplayFrame*)self->SaveFramePtr);
+    cReplayFrame_cReplayFrame((cReplayFrame*)&self->SaveFramePtr);
     cGame* world = SSXApp->Game;
     *(char**)&self->Game = ((char*)world);
     char* level = (char*)world->AI;
@@ -100,7 +100,7 @@ extern "C" void cPlaybackMan__cPlaybackMan(cPlaybackMan* self, int flags)
     operator_delete((int*)self->Input);
     operator_delete((int*)self->InputPad);
     cPlaybackMan_purgeLocation(self);
-    *(void***)((char*)self + 0x14) = cReplayFramePtr_vtbl;
+    self->SaveFramePtr.mVtbl = cReplayFramePtr_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

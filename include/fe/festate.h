@@ -24,6 +24,7 @@
 // named above and the asm); [O] SSX On Tour's DWARF (builds/x/ontour_kor/dwarf/types.h): names, types and order.
 
 #include "layout.h"
+#include "util/list.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -49,8 +50,8 @@ struct cFEState {
     int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes; every accessor lw/sw's the word, see
                                     //       ui/uistate.h)
     cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens; [U] onGainFocus / onLoseFocus look "Menu" up on
-                                    //       cList_first(&mScreens)
+    cList mScreens;                 // 0x024 [O] cList mScreens (util/list.h; ui/uistate.h); [U] onGainFocus / onLoseFocus
+                                    //       look "Menu" up on cList_first(&mScreens)
     cUIScreen* mpScreen;            // 0x040 [O]
     signed char mUserNum;           // 0x044 [O]; [R] the cUIState ctor stores -1
     char unk_045[0x3];              // 0x045 padding

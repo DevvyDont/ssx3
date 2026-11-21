@@ -375,12 +375,12 @@ extern "C" void cFEPopupScreenPos_onUpdate(cFEPopupScreenPos* self)
             sound_F050((self), 6);
             *(signed char*)&self->mAccept = 1;
             self->mAttrState |= 0x80;
-            cUIStateStack_pop(self->mpEngine->mStateStack, 1);
+            cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         } else if (padCall_F050(in, 6)) {
             sound_F050((self), 3);
             *(signed char*)&self->mAccept = 0;
             self->mAttrState |= 0x80;
-            cUIStateStack_pop(self->mpEngine->mStateStack, 1);
+            cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         } else if (padCall_F050(in, 19)) {
             self->mX--;
             playFrame_F050((self), str_hl_left);
@@ -2713,13 +2713,13 @@ extern "C" void cFEPopupSelectMultiplayerMode_onWidgetEvent(cFEPopupSelectMultip
         cUIEngine* engine = self->mpEngine;
         self->mMultiMode = 1;
         D_004A19D4 = *(int*)((char*)pWidget + 0x18) != 0;
-        cUIStateStack_pop(engine->mStateStack, 1);
+        cUIStateStack_pop(&engine->mStateStack, 1);
         break;
     }
     case 6: {
         cUIEngine* engine = self->mpEngine;
         self->mMultiMode = 0;
-        cUIStateStack_pop(engine->mStateStack, 1);
+        cUIStateStack_pop(&engine->mStateStack, 1);
         break;
     }
     }
@@ -6723,7 +6723,7 @@ extern "C" void func_001E2FE0(int id, unsigned char flag)
     messageList->mask &= ~(1 << messageList->count);
     cUIEngine* gameUi = SSXApp->Game->UI;
     if (((char*)gameUi) != 0) {
-        char* obj = (char*)cUIStateStack_findState(gameUi->mStateStack, GetHashValue32(str_hud_b));
+        char* obj = (char*)cUIStateStack_findState(&gameUi->mStateStack, GetHashValue32(str_hud_b));
         if (obj != 0) {
             sVEntryK1E2FE0* vt = *(sVEntryK1E2FE0**)(obj + 8);
             vt[24].fn(obj + vt[24].delta, 8, 0);
@@ -7434,17 +7434,17 @@ extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGEC
     {
         cUIEngine* eng = self->mpEngine;
         int nameHash = GetHashValue32(str_folder);
-        stateView->h164 = cUITextureBank_getElementByHashname(eng->mTextureBank, nameHash);
+        stateView->h164 = cUITextureBank_getElementByHashname(&eng->mTextureBank, nameHash);
     }
     {
         cUIEngine* eng = self->mpEngine;
         int nameHash = GetHashValue32(str_minus_folder);
-        stateView->h168 = cUITextureBank_getElementByHashname(eng->mTextureBank, nameHash);
+        stateView->h168 = cUITextureBank_getElementByHashname(&eng->mTextureBank, nameHash);
     }
     {
         cUIEngine* eng = self->mpEngine;
         int nameHash = GetHashValue32(str_questmark_b);
-        stateView->h16C = cUITextureBank_getElementByHashname(eng->mTextureBank, nameHash);
+        stateView->h16C = cUITextureBank_getElementByHashname(&eng->mTextureBank, nameHash);
     }
     if (~D_004A20CC != 0) {
         if (func_001E3A30((void*)7) != 0)
@@ -7822,7 +7822,7 @@ extern "C" void cOVState_MESSAGECENTER_onWidgetEvent(cOVState_MESSAGECENTER* sel
         if (outFrame != 0xFFFF) {
             cUIScreen_playFrame(self->mpMessageScreen, outFrame, 1);
         }
-        cUIStateStack_pop(self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         D_004A20C0 = 0;
         break;
     }
@@ -7968,7 +7968,7 @@ extern "C" void cOVState_MESSAGECENTER_onPopupEvent(cOVState_MESSAGECENTER* self
     if (event == 20) {
         func_001E48B0(self);
         func_001E4758(self);
-        cUIStateStack_pop(self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
     }
 }
 #endif
@@ -10395,7 +10395,7 @@ extern "C" void func_001E8098(cOVState_RACE_FINISHOV* self)
     cOVState_onUpdate(self);
     self->unk_09C += 0.01666666753590107f;
     if (self->unk_0A0 != 0 && self->unk_09C >= limit) {
-        cUIStateStack_purgeNormalStates(SSXApp->Game->UI->mStateStack);
+        cUIStateStack_purgeNormalStates(&SSXApp->Game->UI->mStateStack);
         cGame_doNextState(SSXApp->Game);
     }
 }
@@ -10420,7 +10420,7 @@ extern "C" void func_001E8160(cOVState_RACE_FINISHOV* self, void* popup, int eve
     if (popup != 0) {
         if (event == 5 && self->unk_0A0 != 0) {
             cGame* game = SSXApp->Game;
-            cUIStateStack_purgeNormalStates(game->UI->mStateStack);
+            cUIStateStack_purgeNormalStates(&game->UI->mStateStack);
             cGame_doNextState(game);
         }
     }
@@ -10652,7 +10652,7 @@ extern "C" void func_001E87B8(cOVState_BASSSP_QUAL_FINISHOV* self)
     cOVState_onUpdate(self);
     self->unk_09C += 0.01666666753590107f;
     if (self->unk_0A0 != 0 && self->unk_09C >= limit) {
-        cUIStateStack_purgeNormalStates(SSXApp->Game->UI->mStateStack);
+        cUIStateStack_purgeNormalStates(&SSXApp->Game->UI->mStateStack);
         cGame_doNextState(SSXApp->Game);
     }
 }
@@ -10677,7 +10677,7 @@ extern "C" void func_001E8880(cOVState_BASSSP_QUAL_FINISHOV* self, void* popup, 
     if (popup != 0) {
         if (event == 5 && self->unk_0A0 != 0) {
             cGame* game = SSXApp->Game;
-            cUIStateStack_purgeNormalStates(game->UI->mStateStack);
+            cUIStateStack_purgeNormalStates(&game->UI->mStateStack);
             cGame_doNextState(game);
         }
     }

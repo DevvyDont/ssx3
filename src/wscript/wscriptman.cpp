@@ -4237,7 +4237,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isMenuQueueReady);
  * @return 1 when they differ, else 0
  */
 extern "C" int cWScriptMan_isMenuQueueReady(cWScriptMan* wscriptMan) {
-    return (*(int *)((char*)(wscriptMan) + (0x1C4))) != (*(int *)((char*)(wscriptMan) + (0x1C8)));
+    return (wscriptMan->MissionMenuQueue.Current) != (wscriptMan->MissionMenuQueue.Next);
 }
 #endif
 //100%
@@ -4601,8 +4601,8 @@ extern "C" void* cAnimModel_cAnimModel(cAnimModel* self)
     self->partIndex = 0;
     self->unk_03C = 0;
     self->numParts = 0;
-    *(int*)((char*)self + 0x12C) = 0;
-    *(int*)((char*)self + 0x130) = 0;
+    self->NumTextureRefs = 0;
+    self->TextureRefs = 0;
     self->localPos = 0;
     self->localRot = 0;
     self->boneChannelIndex = 0;

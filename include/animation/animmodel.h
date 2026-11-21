@@ -13,6 +13,8 @@
 #include "layout.h"
 #include "bx/math3d.h"
 
+struct tTextureRef;             // render/ps2graphicsman.h
+
 // One LOD's entry for one ref index: the source part block and its data (addModelPartLOD).
 struct sAnimModelLodRef {
     char* part;     // 0x0 source part block (non-null = drawable, cAnimModel_render)
@@ -75,7 +77,12 @@ struct cAnimModel {
     /* 0x038 */ t4Matrix* unk_038;          // numBones; palette[i] = unk_030[i] or unk_034[i] times this (cAnimModel_rendershadow, cAnimModel_render)
     /* 0x03C */ int unk_03C;
     /* 0x040 */ sAnimModelLodInfo lodInfo[4];
-    /* 0x060 */ char unk_060[0xE0];
+    /* 0x060 */ char unk_060[0xCC];
+    /* 0x12C */ int NumTextureRefs;         // [O] cAnimModel::NumTextureRefs (+0x78C there, 0x14 before ScaleVect = unk_140, as here);
+                                            //     [R] cAnimModel_cAnimModel clears it between numParts and localPos, the same store
+                                            //     order as On Tour's ctor (NumModelParts, NumTextureRefs, TextureRefs, BoneOffset)
+    /* 0x130 */ tTextureRef* TextureRefs;   // [O] cAnimModel::TextureRefs (+0x790); [R] cAnimModel_cAnimModel clears it (see NumTextureRefs)
+    /* 0x134 */ char unk_134[0xC];
     /* 0x140 */ t4Vector unk_140;           // = (a, b, b, 1) (cAnimModel_setScale); .y is the draw call's float (cAnimModel_render); .x scales rider lean (ai/rider)
     /* 0x150 */ unsigned long mask;         // 64-bit mask of enabled parts (func_0030E9E0, func_0030EB60)
     /* 0x158 */ unsigned long unk_158;      // another such mask (cAnimModel_addAnimMinPart)
@@ -100,6 +107,8 @@ CHECK_OFFSET(cAnimModel, unk_030, 0x30);
 CHECK_OFFSET(cAnimModel, unk_034, 0x34);
 CHECK_OFFSET(cAnimModel, unk_038, 0x38);
 CHECK_OFFSET(cAnimModel, lodInfo, 0x40);
+CHECK_OFFSET(cAnimModel, NumTextureRefs, 0x12C);
+CHECK_OFFSET(cAnimModel, TextureRefs, 0x130);
 CHECK_OFFSET(cAnimModel, unk_140, 0x140);
 CHECK_OFFSET(cAnimModel, mask, 0x150);
 CHECK_OFFSET(cAnimModel, unk_158, 0x158);

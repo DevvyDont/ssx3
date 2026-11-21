@@ -130,7 +130,7 @@ extern "C" void cFEStateBonusMaterial_onWidgetEvent(cFEStateBonusMaterial* self,
         void* popup = cFEStateVideoPlayer_cFEStateVideoPlayer(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), self->mpEngine, self,
                                 self->mUserNum);
         cFEStateVideoPlayer_setVideoSourceFiles(popup, D_00441128[item->mMiscData], 0);
-        cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
+        cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
         break;
     }
     case 6: {
@@ -138,7 +138,7 @@ extern "C" void cFEStateBonusMaterial_onWidgetEvent(cFEStateBonusMaterial* self,
         sVEntryK195600* vt = *(sVEntryK195600**)(factory + 4);
         void* nextState = vt[5].fn(factory + vt[5].delta, self, item->mMiscData);
         if (nextState != 0)
-            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         break;
     }
     }

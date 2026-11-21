@@ -456,7 +456,7 @@ extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, cUIThing* pWidge
         } else {
             cOVState_MAP_cleanupIndicators(selfp);
             cOVState_MAP_setupScreenExit(selfp);
-            cUIStateStack_pop_8C28(selfp->mpEngine->mStateStack, 1);
+            cUIStateStack_pop_8C28(&selfp->mpEngine->mStateStack, 1);
             selfp->mAttrState = (selfp->mAttrState & ~0x3F00) | 0x780;
         }
         break;
@@ -1406,7 +1406,7 @@ extern "C" void cOVState_onCreateScreen(cOVState* self)
             }
         }
     }
-    char* obj = (char*)cUIStateStack_findState(self->mpEngine->mStateStack, GetHashValue32(str_hud_b));
+    char* obj = (char*)cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud_b));
     if (obj != 0) {
         sVEntry0020A380* vtEntry = &(*(sVEntry0020A380**)(obj + 8))[24];
         vtEntry->fn(obj + vtEntry->delta, 3, 0);
@@ -1444,7 +1444,7 @@ extern "C" void cOVState_onDestroyScreen(cOVState* self)
             self->mRestoreCutSceneMode = 0;
         }
     }
-    char* obj = (char*)cUIStateStack_findState(self->mpEngine->mStateStack, GetHashValue32(str_hud_b));
+    char* obj = (char*)cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud_b));
     if (obj != 0) {
         sVEntry0020A430* vtEntry = &(*(sVEntry0020A430**)(obj + 8))[24];
         vtEntry->fn(obj + vtEntry->delta, 4, 0);
@@ -1590,7 +1590,7 @@ extern "C" void cOVState_triggerTextFade(cOVState* self, char* objName, char* an
 {
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(objName));
     if (obj != 0) {
-        void* bank = self->mpEngine->mAnimBank;
+        void* bank = &self->mpEngine->mAnimBank;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(animName));
         if (anim != 0) {
             cUIThing_playAnimation(obj, anim, 3, 0, 0);

@@ -244,7 +244,7 @@ extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase*
         char* mgr = *(char**)self->mpEngine;
         sVEr_F270* vt = *(sVEr_F270**)(mgr + 4);
         void* backState = vt[5].fn(mgr + vt[5].delta, ((char*)self), self->mStoreNum >= 0);
-        cUIStateStack_push(self->mpEngine->mStateStack, backState);
+        cUIStateStack_push(&self->mpEngine->mStateStack, backState);
         return 1;
     }
     cUIIcon* cur = self->mpSelected;
@@ -1133,7 +1133,7 @@ extern "C" void cFEStateRewardGalleryBase_showReward(cFEStateRewardGalleryBase* 
         break;
     }
     if (nextState != 0) {
-        cUIStateStack_pushPopup(self->mpEngine->mStateStack, nextState);
+        cUIStateStack_pushPopup(&self->mpEngine->mStateStack, nextState);
     }
 }
 #endif
@@ -1178,7 +1178,7 @@ extern "C" void cFEStateRewardGalleryBase_showBuyPopup(cFEStateRewardGalleryBase
     sVE_0510b* vt3 = (sVE_0510b*)self->mVtbl;
     int cost = vt3[35].fn((char*)self + vt3[35].delta, sel);
     cBuyPopupInfo_initBuyReward(popup + 0x48, self->mRewardType, rewardName, cost, self->mMoney);
-    cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
+    cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
 }
 #endif
 
@@ -2530,7 +2530,7 @@ extern "C" void cFEStateRewardGalleryCheatChars_getTextureElement(cFEStateReward
     cUIEngine* obj = self->mpEngine;
     void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
     int textureHash = GetHashValue32(*(char**)((char*)reward + 4));
-    cUITextureBank_getElementByHashname(obj->mTextureBank, textureHash);
+    cUITextureBank_getElementByHashname(&obj->mTextureBank, textureHash);
 }
 #endif
 
@@ -2915,7 +2915,7 @@ extern "C" int cFEStatePreviewReward_onInputBegin(cFEStatePreviewReward* self, c
         }
     }
     cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut)), 1);
-    cUIStateStack_pop(self->mpEngine->mStateStack, 1);
+    cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
     return 1;
     }
     return 0;
@@ -3318,7 +3318,7 @@ extern "C" void cFEStateVideoPlayer_Stop(cFEStateVideoPlayer* self)
 {
     func_002B3A98((char*)cAudioInterface_bxAudio() + 0x118);
     self->mStopPending = 0;
-    cUIStateStack_pop(self->mpEngine->mStateStack, 1);
+    cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
 }
 #endif
 

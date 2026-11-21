@@ -2496,9 +2496,9 @@ extern "C" void cSSXScriptEngine__cSSXScriptEngine(cSSXScriptEngine* self, int f
     D_004A34B0 = 0;
     cScriptSoundBankManager__cScriptSoundBankManager(self->mSoundBankManager, 2);
     cScriptAnimBankManager__cScriptAnimBankManager(&self->mAnimationBankManager, 2);
-    *(void***)(((char*)self) + 0x944) = D_00482298;
-    *(void***)(((char*)self) + 0x92C) = cScriptObjEvent_vtbl;
-    cScriptObject__cScriptObject(((char*)self) + 0x938, 0);
+    self->mObjectEvent.mScriptObjectVtbl = D_00482298;
+    self->mObjectEvent.mVtbl = cScriptObjEvent_vtbl;
+    cScriptObject__cScriptObject(&self->mObjectEvent.mObjType, 0);
     self->mObjectGameState.mScriptObjectVtbl = D_00482318;
     self->mObjectGameState.mVtbl = cScriptObjGS_vtbl;
     cScriptObject__cScriptObject(&self->mObjectGameState.mObjType, 0);

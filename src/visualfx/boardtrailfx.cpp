@@ -1438,8 +1438,8 @@ INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX_reset__FPv);
 void cTrickBoostFX_reset(void* vself)
 {
     cTrickBoostFX* self = (cTrickBoostFX*)vself;
-    *(int*)((char*)self + 0xc) = 0;
-    *(int*)((char*)self + 0x10) = 0;
+    self->mNumActiveBlurBuffers = 0;
+    self->mCurrentBlurBuffer = 0;
 }
 #endif
 

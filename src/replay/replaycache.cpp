@@ -433,10 +433,10 @@ extern "C" void cReplay_endMarkInstantReplay(cReplay* self, int obj, int alt)
     int start;
     if (alt != 0) {
         now = *(int*)(stats + 0x9C);
-        start = *(int*)(((char*)self) + 0x474);
+        start = self->InstantReplayStats.TotalPoints;
     } else {
         now = *(int*)(stats + 0xA4);
-        start = *(int*)(((char*)self) + 0x47C);
+        start = self->InstantReplayStats.TotalPointsLostToWipeouts;
     }
     now -= start;
     if (now >= 1000) {

@@ -44,12 +44,12 @@ extern "C" void* cFE_cFE(cFE* self)
 {
     cFadeScreen_cFadeScreen(self);
     self->mVtbl = cFE_vtbl;
-    cSimpleCamera_cSimpleCamera(self->mCamera);
-    *(void***)((char*)self + 0xA0) = D_0046D8D8;
-    cFERiderManager_cFERiderManager(self->mRiderManager);
+    cSimpleCamera_cSimpleCamera(&self->mCamera);
+    self->mCamera.mVtbl = D_0046D8D8;
+    cFERiderManager_cFERiderManager(&self->mRiderManager);
     func_0019CDF0(self->mBoltFileManager);
     self->mpUI = (cUIEngine*)(new (str_UIEngine, 0, 0) cFEObjK1956F8_70);
-    cSimpleCamera_init_i(self->mCamera, 0, 0.7853981852531433f, 5.0f, 5000.0f);
+    cSimpleCamera_init_i(&self->mCamera, 0, 0.7853981852531433f, 5.0f, 5000.0f);
     self->mFXLoader = (cFXLoader*)(new (str_FXLoader_FE, 0, 0) cFEObjK1956F8_1(1));
     return ((void*)self);
 }
@@ -90,8 +90,8 @@ extern "C" void cFE__cFE(cFE* self, int flags)
         cFXLoader__cFXLoader(self->mFXLoader, 3);
     }
     func_0019CE20(self->mBoltFileManager, 2);
-    cFERiderManager__cFERiderManager(self->mRiderManager, 2);
-    *(void***)((char*)self + 0xA0) = cSimpleCamera_vtbl;
+    cFERiderManager__cFERiderManager(&self->mRiderManager, 2);
+    self->mCamera.mVtbl = cSimpleCamera_vtbl;
     self->mVtbl = cAppModule_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);

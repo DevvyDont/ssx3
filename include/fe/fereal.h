@@ -21,8 +21,9 @@
 // 8 loadStartState), cFE_vtbl in cFE_cFE / cFE__cFE.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet. bools are
-// ints. The embedded objects (cFECamera, cFERiderManager, the bolt file manager, cConnMan, cGameConnMan) are raw regions
-// sized from the ctors' offsets; their own layouts are not covered here.
+// ints. cFECamera (On Tour: a cSimpleCamera with its own vtable and no data, 0xA0) is embedded as its base cSimpleCamera
+// (camera/camera.h) and cFERiderManager by value (fe/feridermanager.h); the other embedded objects (the bolt file
+// manager, cConnMan, cGameConnMan) are raw regions sized from the ctors' offsets.
 // Evidence tags:
 //   [R] retail's constructors cRealFE_cRealFE / cFE_cFE / cFadeScreen_cFadeScreen, destructors and the allocation size;
 //   [P] the July 2003 preview's inline accessors (getUI__3cFE, getCamera__3cFE, getRiderManager__3cFE,
@@ -32,6 +33,8 @@
 //   [O] SSX On Tour's DWARF (class cRealFE, cFE, cFadeScreen): names, types and order.
 
 #include "layout.h"
+#include "camera/camera.h"        // cSimpleCamera (cFE::mCamera)
+#include "fe/feridermanager.h"     // cFERiderManager (cFE::mRiderManager)
 
 struct cUIEngine;
 struct cFXLoader;
@@ -46,13 +49,14 @@ struct cRealFE {
     // --- cFE (On Tour 0x33C0; retail 0xB5AB0)
     cUIEngine* mpUI;                // 0x00C [O][P] getUI (preview 0x18); [R] cFE_cFE: cMemMan_alloc(0x70, "UIEngine") +
                                     //       cUIEngine_cUIEngine; [U] load / loadStartState / render / update
-    char mCamera[0xA0];             // 0x010 [O] cFECamera (On Tour 0xA0) [P] getCamera returns this + 0x10; [R]
-                                    //       cSimpleCamera_cSimpleCamera(this + 0x10), its vptr D_0046D8D8 at 0xA0
-                                    //       (+0x90), cSimpleCamera_init; [U] render reads View / Near / Far (0x10 / 0x14 /
-                                    //       0x18 floats) and passes 0x50; update calls the vtable at 0xA0 (slot 3)
-    char mRiderManager[0x19C0];     // 0x0B0 [O] cFERiderManager [P] getRiderManager returns this + 0xB0; [R]
-                                    //       cFERiderManager_cFERiderManager(this + 0xB0); extent: up to 0x1A70; [U]
-                                    //       load / purge / render / update pass its address
+    cSimpleCamera mCamera;          // 0x010 [O] cFECamera mCamera (On Tour 0xA0: a cSimpleCamera, no data of its own); [P]
+                                    //       getCamera returns this + 0x10; [R] cSimpleCamera_cSimpleCamera(&mCamera), cFECamera's
+                                    //       vtable D_0046D8D8 in mCamera.mVtbl (0xA0), cSimpleCamera_init; [U] render passes
+                                    //       mCamera.View / Near / Far (0x10 / 0x14 / 0x18) and &mCamera.CamMat (0x50) to the
+                                    //       graphics manager; update calls slot 3 of mCamera.mVtbl; load sets mCamera.Pose
+    cFERiderManager mRiderManager;  // 0x0B0 [O] cFERiderManager (fe/feridermanager.h, 0x19C0); [P] getRiderManager returns
+                                    //       this + 0xB0; [R] cFERiderManager_cFERiderManager(&mRiderManager); [U] load / purge /
+                                    //       render / update pass its address
     char mBoltFileManager[0xB4030]; // 0x1A70 [P] getBoltFileManager returns this + 0x1A70 (name from the accessor; On
                                     //       Tour has no such member); [R] func_0019CDF0(this + 0x1A70) (its ctor),
                                     //       func_0019CE20(.., 2) in cFE__cFE; extent: up to mFXLoader; [U] load / purge /
@@ -122,14 +126,14 @@ struct cFE {
     cUIEngine* mpUI;                // 0x00C [O][P] getUI; [R] cFE_cFE: cMemMan_alloc(0x70, "UIEngine") +
                                     //       cUIEngine_cUIEngine; cFE__cFE deletes it (cUIEngine__cUIEngine(.., 3)) when
                                     //       set; [U] cFE_getUI returns it
-    char mCamera[0xA0];             // 0x010 [O] cFECamera (= cSimpleCamera, camera/camera.h; its vptr at +0x90 = 0xA0);
-                                    //       [P] getCamera returns this + 0x10; [R] cFE_cFE:
-                                    //       cSimpleCamera_cSimpleCamera(this + 0x10), cFECamera's vtable D_0046D8D8 at
-                                    //       0xA0, cSimpleCamera_init(this + 0x10, 0, pi/4, 5, 5000); cFE__cFE stores
-                                    //       cSimpleCamera_vtbl back at 0xA0
-    char mRiderManager[0x19C0];     // 0x0B0 [O] cFERiderManager; [P] getRiderManager / getHuman use this + 0xB0; [R]
-                                    //       cFERiderManager_cFERiderManager / __cFERiderManager(this + 0xB0); extent:
-                                    //       up to 0x1A70
+    cSimpleCamera mCamera;          // 0x010 [O] cFECamera mCamera (= cSimpleCamera, camera/camera.h, with cFECamera's
+                                    //       vtable in mCamera.mVtbl at 0xA0); [P] getCamera returns this + 0x10; [R] cFE_cFE:
+                                    //       cSimpleCamera_cSimpleCamera(&mCamera), D_0046D8D8 in mCamera.mVtbl,
+                                    //       cSimpleCamera_init(&mCamera, 0, pi/4, 5, 5000); cFE__cFE stores cSimpleCamera_vtbl
+                                    //       back; [U] cRealFE_load sets mCamera.Pose (P 0x30, Q 0x40) and updates it
+    cFERiderManager mRiderManager;  // 0x0B0 [O] cFERiderManager (fe/feridermanager.h, 0x19C0); [P] getRiderManager /
+                                    //       getHuman use this + 0xB0; [R] cFERiderManager_cFERiderManager /
+                                    //       __cFERiderManager(&mRiderManager)
     char mBoltFileManager[0xB4030]; // 0x1A70 [P] getBoltFileManager returns this + 0x1A70 (no On Tour member); [R]
                                     //       func_0019CDF0(this + 0x1A70) (its ctor), func_0019CE20(.., 2) in cFE__cFE;
                                     //       extent: up to mFXLoader

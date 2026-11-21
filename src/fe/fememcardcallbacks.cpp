@@ -1370,7 +1370,7 @@ extern "C" void cFEMemCard_getPopup(cFEMemCard* self_, int displayText, int yesO
         void* engine = *(void**)((char*)cFEMemCard_mInstance + 0x10);
         cPopup_8530* n = (cPopup_8530*)cFEPopupConfirm_cFEPopupConfirm_8530(mem, engine, cFEMemCard_mInstance, displayText, yesOnly, noButtons, layerOffset, passUpdate, snowFlake);
         self_->mStatusPopup = (cFEPopupConfirm*)n;
-        cUIStateStack_pushPopup(self_->mpEngine->mStateStack, n);
+        cUIStateStack_pushPopup(&self_->mpEngine->mStateStack, n);
     }
     if (*(int*)((char*)cFEMemCard_mInstance + 0x19C) == 1) {
         ((cPopup_8530*)self_->mStatusPopup)->setDefaultButton(1);
@@ -2175,7 +2175,7 @@ extern "C" void cFEMemCard_triggerArrowPulse(cFEMemCard* self, char* objName, ch
 {
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(objName));
     if (obj != 0) {
-        void* bank = self->mpEngine->mAnimBank;
+        void* bank = &self->mpEngine->mAnimBank;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(animName));
         if (anim != 0) {
             cUIThing_playAnimation(obj, anim, 3, 0, 1);

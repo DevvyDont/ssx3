@@ -240,17 +240,17 @@ extern "C" void cFEStateUberTrick_onCreateScreen(cFEStateUberTrick* self)
     {
         cUIEngine* uiEngine = self->mpEngine;
         int iconHash = GetHashValue32(str_empty_box);
-        self->mpCheckbox = (cTextureElement*)cUITextureBank_getElementByHashname(uiEngine->mTextureBank, iconHash);
+        self->mpCheckbox = (cTextureElement*)cUITextureBank_getElementByHashname(&uiEngine->mTextureBank, iconHash);
     }
     {
         cUIEngine* uiEngine = self->mpEngine;
         int iconHash = GetHashValue32(str_checkbox);
-        self->mpCheckmark = (cTextureElement*)cUITextureBank_getElementByHashname(uiEngine->mTextureBank, iconHash);
+        self->mpCheckmark = (cTextureElement*)cUITextureBank_getElementByHashname(&uiEngine->mTextureBank, iconHash);
     }
     {
         cUIEngine* uiEngine = self->mpEngine;
         int iconHash = GetHashValue32(str_yell_dollar_sign);
-        self->mpDollarSign = (cTextureElement*)cUITextureBank_getElementByHashname(uiEngine->mTextureBank, iconHash);
+        self->mpDollarSign = (cTextureElement*)cUITextureBank_getElementByHashname(&uiEngine->mTextureBank, iconHash);
     }
     func_0028F140(cAudioInterface_bxAudio(), 5);
     cFEStateUberTrick_costVisible(self, 0);
@@ -783,7 +783,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
                     if (points >= tbl[bi].cost) {
                         void* popup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_UITRICKBUY, 0x100, 0), self->mpEngine, ((char*)self), self->mUserNum);
                         cUIStateBuyPopup_initBuyTrick(popup, trick, tbl[bi].cost, points);
-                        cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
+                        cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
                     } else {
                         PlaySound_185268(((char*)self), 4);
                     }

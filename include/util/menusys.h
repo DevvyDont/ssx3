@@ -6,8 +6,8 @@
 // util/menu: init, input, render, activate / isActive, the key getters.
 // Size 0x68 [R] (the retail allocation; On Tour's is the same). A FLAT layout, like main/game.h: member names,
 // order and offsets are EA's, from SSX On Tour's PSP DWARF ([O]), and every retail access in the methods
-// falls on a member start. Enums and bools are words; members of class type are byte arrays (type in
-// the comment).
+// falls on a member start. Enums and bools are words (type in the comment); members of class type are byte
+// arrays (type in the comment).
 
 #include "layout.h"
 
@@ -19,7 +19,9 @@ struct cMenuSys {
     int MenuDepth;                  // 0x000 [O]
     cMenu* MenuStack[16];           // 0x004 [O]
     int Owner;                      // 0x044 [O]
-    char Key[0x4];                  // 0x048 [O] tMenuKeys
+    int Key;                        // 0x048 [O] tMenuKeys (an enum, 4 bytes: kMenuKeyUp 0 .. kMenuKeyNull 11);
+                                    //       [R] cMenuSys_init stores 11 (kMenuKeyNull, sw); [U] cMenuSys_getKey returns it (lw),
+                                    //       cMenuSys_input stores the pad's menu key
     int VKey;                       // 0x04C [O]
     int AsciiKey;                   // 0x050 [O]
     int Active;                     // 0x054 [O]

@@ -474,7 +474,7 @@ extern sFlowState_865A8 gFlowState;
  */
 extern "C" void cFEState_onGainFocus(cFEState* self, cUIState* pPrevState)
 {
-    void* screen = cList_first((cList*)((char*)self + 0x24));
+    void* screen = cList_first((cList*)(&self->mScreens));
     if (screen != 0) {
         void* menu = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Menu));
         if (menu != 0) {
@@ -505,7 +505,7 @@ extern sFlowState_865A8 gFlowState;
  */
 extern "C" void cFEState_onLoseFocus(cFEState* self)
 {
-    void* screen = cList_first((cList*)((char*)self + 0x24));
+    void* screen = cList_first((cList*)(&self->mScreens));
     if (screen != 0) {
         void* obj = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Menu));
         if (obj != 0) {

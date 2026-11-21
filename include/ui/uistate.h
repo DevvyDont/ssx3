@@ -27,6 +27,7 @@
 // so it is an int here and covers the 2 padding bytes.
 
 #include "layout.h"
+#include "util/list.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -51,8 +52,11 @@ struct cUIState {
                                      //       cUIState_getMode..cUIState_setVisible); [R] sh 0x218 in the constructors
     cUIState* mpParentState;         // 0x020 [P] getParentState (retail cUIState_getParentState; setter cUIState_setParentState); [R] = pParentState
                                      //       (cUIState_cUIState1), 0 (cUIState_cUIState)
-    char mScreens[0x1C];             // 0x024 [O] cList of cUIScreen; [U] cUIState_addScreen appends, cUIState_updateScreens walks it,
-                                     //       cUIState_onDestroyScreen destroys it; [R] the destructor tears down its 3 vptrs (0x2C/0x38/0x3C)
+    cList mScreens;                  // 0x024 [O] cList mScreens, the state's cUIScreens (util/list.h: mStart 0x24, mEnd 0x30, vptr 0x3C);
+                                     //       [R] the ctors cList_cList(&mScreens); the destructor cUIState__cUIState restores
+                                     //       mScreens.mVtbl (0x3C, cList_vtbl), mEnd.mVtbl (0x38) and mStart.mVtbl (0x2C, cListNode_vtbl);
+                                     //       [U] cUIState_addScreen appends (cList_addToEnd), cUIState_updateScreens / cUIState_onUpdate
+                                     //       walk it (cList_first), cUIState_onDestroyScreen destroys it
     cUIScreen* mpScreen;             // 0x040 [P] getScreen (retail cUIState_getScreen); [R] = 0
     signed char mUserNum;            // 0x044 [P] getUserNum/setUserNum (lb/sb; retail cUIState_getUserNum/cUIState_setUserNum); [R] = -1 (On Tour: char)
     char unk_045[0x3];               // 0x045 padding

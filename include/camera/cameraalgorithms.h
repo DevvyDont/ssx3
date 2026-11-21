@@ -31,6 +31,7 @@
 
 #include "layout.h"
 #include "bx/math3d.h"
+#include "bx/cubicspline.h"
 
 struct cRiderCameraTarget;
 
@@ -248,12 +249,12 @@ struct cLookAtChaseAlgorithm {
     float Setup_VisualBoost;        // 0x2F8 [O]; [U] cLookAtChaseAlgorithm_setupChaseData (swc1)
     int Setup_IsTargetHandplanting; // 0x2FC [O] bool; [U] cLookAtChaseAlgorithm_setupChaseData (sw)
     int SlowCamState;               // 0x300 [O] eCamAttributeBlendState; [U] cLookAtChaseAlgorithm_updateSlowSpeedCam (lw/sw)
-    char AirTargetSpline[0xC];      // 0x304 [O] cCubicSplineInterpolant (bx/cubicspline.h: bitfield word, MaxX,
+    cCubicSplineInterpolant AirTargetSpline; // 0x304 [O] cCubicSplineInterpolant (bx/cubicspline.h: bitfield word, MaxX,
                                     //       CubicSplines); [R] constructed by cCubicSplineInterpolant_cCubicSplineInterpolant, destroyed by cCubicSplineInterpolant__cCubicSplineInterpolant
-    char AirPositionSpline[0xC];    // 0x310 [O] cCubicSplineInterpolant; [R] ditto
-    char FullAirTargetSpline[0xC];  // 0x31C [O] cCubicSplineInterpolant; [R] ditto
-    char FullAirPositionSpline[0xC]; // 0x328 [O] cCubicSplineInterpolant; [R] ditto
-    char HalfPipeAngleSpline[0xC];  // 0x334 [O] cCubicSplineInterpolant; [R] ditto
+    cCubicSplineInterpolant AirPositionSpline; // 0x310 [O] cCubicSplineInterpolant; [R] ditto; [U] cLookAtChaseAlgorithm_updateAirCam (initAsNatural / addPoint / evaluate)
+    cCubicSplineInterpolant FullAirTargetSpline; // 0x31C [O] cCubicSplineInterpolant; [R] ditto; [U] cLookAtChaseAlgorithm_updateAirCam
+    cCubicSplineInterpolant FullAirPositionSpline; // 0x328 [O] cCubicSplineInterpolant; [R] ditto; [U] cLookAtChaseAlgorithm_updateAirCam
+    cCubicSplineInterpolant HalfPipeAngleSpline; // 0x334 [O] cCubicSplineInterpolant; [R] ditto; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
     cPIDFilter TurningPIDFilter;    // 0x340 [O]; [R] the ctor sets its three factors and calls cPIDFilter_reset;
                                     //       [U] cLookAtChaseAlgorithm_setupCamDirection runs the filter inline
     char unk_38C[0x4];              // 0x38C padding to the 16-byte class alignment

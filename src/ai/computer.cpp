@@ -1291,14 +1291,14 @@ extern "C" float cComputer_setupWarp(cComputer* self)
     int rival = cComputer_getRival(self);
     if (rival == 0) return 1.0f;
     cRider* rider = self->mRider;
-    if (*(int*)(((char*)rider) + 0xE4) == 0) return 1.0f;
+    if (rider->mGlueStrengthLevel == 0) return 1.0f;
     if (cBENewRaceInterface_newRace.cGamePath == 2) return 1.0f;
     if (rider->mDistToFinish < 50000.0f) return 1.0f;
     float warpVal;
     float relDist = cRider_getDistanceLeft((void*)rival) - self->mRider->mDistToFinish;
     cRider* rider2 = self->mRider;
     float k = rider2->mRubberBandBehind;
-    if (relDist < k && (*(int*)(((char*)rider2) + 0xE4) == 2 || *(int*)(((char*)rider2) + 0xE4) == 3))
+    if (relDist < k && (rider2->mGlueStrengthLevel == 2 || rider2->mGlueStrengthLevel == 3))
     {
         warpVal = ((relDist - k) / k + 1.0f) * 1.100000023841858f;
     }
@@ -1306,7 +1306,7 @@ extern "C" float cComputer_setupWarp(cComputer* self)
     {
         cRider* rider3 = self->mRider;
         float rubberAhead = rider3->mRubberBandAhead;
-        if (rubberAhead < relDist && (*(int*)(((char*)rider3) + 0xE4) == 1 || *(int*)(((char*)rider3) + 0xE4) == 3))
+        if (rubberAhead < relDist && (rider3->mGlueStrengthLevel == 1 || rider3->mGlueStrengthLevel == 3))
         {
             warpVal = 1.0f / ((relDist - rubberAhead) / rubberAhead + 1.0f);
             warpVal *= 0.9090908765792847f;
@@ -1601,7 +1601,7 @@ extern "C" void cRiderMetrix_evCheckpoint(void*, int);
  */
 extern "C" void cRider_flagEventPathCheckpoint(cRider* self, int* checkpoint)
 {
-    *(int*)((char*)self + 0xE8) = self->unk_0EC;
+    self->PrevRanking = self->unk_0EC;
     if (((D_005308D0[0] >> 9) & 1) == 0)
     {
         cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -3737,11 +3737,11 @@ extern "C" void cRider_initPath(cRider* self, int flag)
     float trackLen = *(float*)((char*)self->TrackPath + 0x38);
     if (trackLen < res)
         res = 0.0f;
-    self->mDistToFinish = *(float*)(((char*)self) + 0x4D4) = trackLen - res;
-    res = cPath_intersectPath1(self->AIPath, &self->mPosition, ((char*)self) + 0x490, ((char*)self) + 0x4C8, self->mAIPathHint, 1);
-    *(float*)(((char*)self) + 0x4C0) = *(float*)(((char*)self) + 0x4C4) = res;
+    self->mDistToFinish = self->MinDistanceLeft = trackLen - res;
+    res = cPath_intersectPath1(self->AIPath, &self->mPosition, &self->PathPos, &self->PathDistXY, self->mAIPathHint, 1);
+    self->PrevPathParam = self->PathParam = res;
     sVec4_00112180 pos2 = cPath_getPathPos_112180(self->AIPath, 0, res + 796.0f);
-    *(sVec4_00112180*)(((char*)self) + 0x4A0) = pos2;
+    *(sVec4_00112180*)&self->IntersectPos = pos2;
 }
 #endif
 
@@ -3781,7 +3781,7 @@ extern "C" void cRider_updateTrackPath(cRider* self)
     float pathDistXY;
     float pathParam;
     cRider_checkTrackPathEvents(self, &pathDistXY, &pathParam, &pathPos);
-    if (0.0f < *(float*)(((char*)self) + 0x4D4))
+    if (0.0f < self->MinDistanceLeft)
     {
         void* old = self->TrackPath;
         if (500.0f < pathDistXY && SSXApp->Game->AI->AITick % 60 == 0)
@@ -3792,7 +3792,7 @@ extern "C" void cRider_updateTrackPath(cRider* self)
         {
             char* trackPath = (char*)self->TrackPath;
             sVE_00112338* ve = &(*(sVE_00112338**)(trackPath + 0x34))[2];
-            if (ve->fn(trackPath + ve->delta, *(float*)(((char*)self) + 0x4D4), self->mDistToFinish))
+            if (ve->fn(trackPath + ve->delta, self->MinDistanceLeft, self->mDistToFinish))
                 cRider_checkTrackPathSwitch(self, 0);
         }
         if ((void*)self->TrackPath != old)
@@ -3859,8 +3859,8 @@ INCLUDE_ASM("ai/computer", cRider_setAimTarget);
  */
 extern "C" cQuad128 cRider_setAimTarget(cRider* self)
 {
-    cQuad128 aimPoint = *(cQuad128*)((char*)self + 0x4A0);
-    *(cQuad128*)((char*)self + 0x4B0) = aimPoint;
+    cQuad128 aimPoint = *(cQuad128*)&self->IntersectPos;
+    *(cQuad128*)&self->AimTargetPos = aimPoint;
     return aimPoint;
 }
 #endif
@@ -3936,32 +3936,32 @@ static inline float atan2_001125C0(float y, float x)
  */
 extern "C" void cRider_updateAIPath(cRider* self)
 {
-    *(float*)(((char*)self) + 0x4C0) = *(float*)(((char*)self) + 0x4C4);
+    self->PrevPathParam = self->PathParam;
     int nf = !cRider_isPipeJump_b((char*)self);
     if (nf)
-        *(float*)(((char*)self) + 0x4C4) = cPath_intersectPath1(self->AIPath, &self->mPosition, ((char*)self) + 0x490, ((char*)self) + 0x4C8, self->mAIPathHint, nf);
+        self->PathParam = cPath_intersectPath1(self->AIPath, &self->mPosition, &self->PathPos, &self->PathDistXY, self->mAIPathHint, nf);
     else
-        *(float*)(((char*)self) + 0x4C4) = cPath_intersectPath(self->AIPath, &self->mPosition, ((char*)self) + 0x490, ((char*)self) + 0x4C8, 0);
+        self->PathParam = cPath_intersectPath(self->AIPath, &self->mPosition, &self->PathPos, &self->PathDistXY, 0);
     float k = cRider_calculateAheadDist(self, nf);
-    *(sVec4_001125C0*)(((char*)self) + 0x4A0) = cPath_getPathPos_1125C0(self->AIPath, 0, *(float*)(((char*)self) + 0x4C4) + k);
+    *(sVec4_001125C0*)&self->IntersectPos = cPath_getPathPos_1125C0(self->AIPath, 0, self->PathParam + k);
     cRider_setAimTarget_2(((char*)self), nf);
-    if (0.0f < *(float*)(((char*)self) + 0x4D4))
+    if (0.0f < self->MinDistanceLeft)
     {
-        if (500.0f < *(float*)(((char*)self) + 0x4C8) && SSXApp->Game->AI->AITick % 60 == 0)
+        if (500.0f < self->PathDistXY && SSXApp->Game->AI->AITick % 60 == 0)
             cRider_checkAIPathSwitch(self, 0);
-        else if (cPath_getLength(self->AIPath) - 200.0f < *(float*)(((char*)self) + 0x4C4))
+        else if (cPath_getLength(self->AIPath) - 200.0f < self->PathParam)
             cRider_checkAIPathSwitch(self, 1);
         else
         {
             char* aiPath = (char*)self->AIPath;
             sVE_001125C0* ve = &(*(sVE_001125C0**)(aiPath + 0x34))[2];
-            if (ve->fn(aiPath + ve->delta, *(float*)(((char*)self) + 0x4C0), *(float*)(((char*)self) + 0x4C4)))
+            if (ve->fn(aiPath + ve->delta, self->PrevPathParam, self->PathParam))
                 cRider_checkAIPathSwitch(self, 0);
         }
     }
-    float dx = *(float*)(((char*)self) + 0x4A0) - *(float*)(((char*)self) + 0x490);
-    float dy = *(float*)(((char*)self) + 0x4A4) - *(float*)(((char*)self) + 0x494);
-    *(float*)(((char*)self) + 0x4CC) = atan2_001125C0(dy, dx);
+    float dx = self->IntersectPos.x - self->PathPos.x;
+    float dy = self->IntersectPos.y - self->PathPos.y;
+    self->PathHeading = atan2_001125C0(dy, dx);
 }
 #endif
 
@@ -4285,10 +4285,10 @@ extern "C" void cRider_checkAIPathSwitch(cRider* vself, int keep)
     if (best != 0) {
         vself->AIPath = (cAIPath*)best;
         *(int*)((char*)vself->mAIPathHint + 0x14) = -1;
-        float pathParam = cPath_intersectPath1(vself->AIPath, &vself->mPosition, ((char*)vself) + 0x490, ((char*)vself) + 0x4C8, vself->mAIPathHint, 1);
-        *(float*)(((char*)vself) + 0x4C4) = pathParam;
-        *(sVec4_112A50*)(((char*)vself) + 0x4A0) = cPath_getPathPos_112A50(vself->AIPath, 0, pathParam + 796.0f);
-        *(float*)(((char*)vself) + 0x4C0) = *(float*)(((char*)vself) + 0x4C4);
+        float pathParam = cPath_intersectPath1(vself->AIPath, &vself->mPosition, &vself->PathPos, &vself->PathDistXY, vself->mAIPathHint, 1);
+        vself->PathParam = pathParam;
+        *(sVec4_112A50*)&vself->IntersectPos = cPath_getPathPos_112A50(vself->AIPath, 0, pathParam + 796.0f);
+        vself->PrevPathParam = vself->PathParam;
     }
 }
 #endif
@@ -4389,11 +4389,11 @@ extern "C" void cRider_switchToResetPath(cRider* self)
     if (best)
         self->AIPath = (cAIPath*)best;
     *(int*)((char*)self->mAIPathHint + 0x14) = -1;
-    *(float*)(((char*)self) + 0x4C4) = cPath_intersectPath1(self->AIPath, &self->mPosition, ((char*)self) + 0x490, ((char*)self) + 0x4C8, self->mAIPathHint, 1);
-    *(sVec4_112D58*)(((char*)self) + 0x490) = cAIPath_getResetPos_112D58(self->AIPath, (float*)(((char*)self) + 0x4C4));
-    float aimParam = *(float*)(((char*)self) + 0x4C4) + 796.0f;
-    *(sVec4_112D58*)(((char*)self) + 0x4A0) = cAIPath_getResetPos_112D58(self->AIPath, &aimParam);
-    *(float*)(((char*)self) + 0x4C0) = *(float*)(((char*)self) + 0x4C4);
+    self->PathParam = cPath_intersectPath1(self->AIPath, &self->mPosition, &self->PathPos, &self->PathDistXY, self->mAIPathHint, 1);
+    *(sVec4_112D58*)&self->PathPos = cAIPath_getResetPos_112D58(self->AIPath, (float*)(&self->PathParam));
+    float aimParam = self->PathParam + 796.0f;
+    *(sVec4_112D58*)&self->IntersectPos = cAIPath_getResetPos_112D58(self->AIPath, &aimParam);
+    self->PrevPathParam = self->PathParam;
 }
 #endif
 
@@ -4434,7 +4434,7 @@ extern "C" void cRider_checkTrackPathEvents(cRider* vself, float* pathDistXY, fl
     float trackParam = cPath_intersectPath1_2FB0(self->TrackPath, &self->mPosition, pathPos, pathDistXY, self->mTrackPathHint, 1);
     *pathParam = trackParam;
     char* track = (char*)self->TrackPath;
-    float cur = *(float*)((char*)self + 0x4D4);
+    float cur = self->MinDistanceLeft;
     float distLeft = *(float*)(track + 0x38) - trackParam;
     self->mDistToFinish = distLeft;
     if (distLeft < cur)
@@ -4446,18 +4446,18 @@ extern "C" void cRider_checkTrackPathEvents(cRider* vself, float* pathDistXY, fl
             float dist = tbl->Checkpoints[i].DistanceLeft;
             if (dist == 0.0f || dist < self->mDistToFinish)
                 break;
-            if (cp->DistanceLeft < *(float*)((char*)self + 0x4D4))
+            if (cp->DistanceLeft < self->MinDistanceLeft)
                 cRider_flagEventPathCheckpoint(self, (int*)cp);
         }
         char* curTrack = (char*)self->TrackPath;
         sVEntry_112FB0* vt = *(sVEntry_112FB0**)(curTrack + 0x34);
-        self->mOverlapCount = vt[1].fn(curTrack + vt[1].delta, *(float*)((char*)self + 0x4D4), self->mDistToFinish, (char*)self + 0x4DC, 0xC);
-        *(float*)((char*)self + 0x4D4) = self->mDistToFinish;
+        self->mOverlapCount = vt[1].fn(curTrack + vt[1].delta, self->MinDistanceLeft, self->mDistToFinish, (char*)&self->PathEventsCur[0], 0xC);
+        self->MinDistanceLeft = self->mDistToFinish;
     }
     else
     {
         sVEntry_112FB0* vt = *(sVEntry_112FB0**)(track + 0x34);
-        self->mOverlapCount = vt[1].fn(track + vt[1].delta, cur, cur, (char*)self + 0x4DC, 0xC);
+        self->mOverlapCount = vt[1].fn(track + vt[1].delta, cur, cur, (char*)&self->PathEventsCur[0], 0xC);
     }
 }
 #endif
@@ -4490,7 +4490,7 @@ INCLUDE_ASM("ai/computer", cRider_getTotalPathDistance__FPv);
 float cRider_getTotalPathDistance(void* vself)
 {
     cRider* self = (cRider*)vself;
-    return *(float*)((char*)self + 0x4D8);
+    return self->TotalPathDistance;
 }
 #endif
 

@@ -2104,15 +2104,15 @@ extern "C" void cRider_updateSkeleton_impl(cRider* self)
     {
         sXf_EB98* bb = (sXf_EB98*)(self->mAnimModel->bones + self->mBoneBoardChild);
         {
-            sXf_EB98 xx = Combine_EB98(*bb, *(sXf_EB98*)((char*)self + 0x8F0));
-            cRider_doLegIK(self, (char*)self + 0x8E0, &xx, self->unk_318);
+            sXf_EB98 xx = Combine_EB98(*bb, *(sXf_EB98*)&self->RightLeg.BoardRelativePose);
+            cRider_doLegIK(self, &self->RightLeg, &xx, self->unk_318);
         }
         {
-            sXf_EB98 xx = Combine_EB98(*bb, *(sXf_EB98*)((char*)self + 0x920));
-            cRider_doLegIK(self, (char*)self + 0x910, &xx, self->unk_318);
+            sXf_EB98 xx = Combine_EB98(*bb, *(sXf_EB98*)&self->LeftLeg.BoardRelativePose);
+            cRider_doLegIK(self, &self->LeftLeg, &xx, self->unk_318);
         }
     }
-    QuatToMat_EB98((char*)self + 0x160, &xf.rot, &xf.pos);
+    QuatToMat_EB98(&self->RiderRoot, &xf.rot, &xf.pos);
     cRider_updateCollideInfo(self);
 }
 #endif

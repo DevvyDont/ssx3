@@ -615,7 +615,7 @@ extern "C" void cComputer_jumpSetupCruise(cComputer* self, sPad_09E0* cmd)
     cmd->b20 = (int)(steer * 31.0f);
     cRider* rider = self->mRider;
     float len = vLen_09E0(*(sVec4_09E0*)&rider->mVelocity);
-    if (below && *(float*)(((char*)rider) + 0x4C8) < 10000.0f && vAbs_09E0(steer) < 1.0f) {
+    if (below && rider->PathDistXY < 10000.0f && vAbs_09E0(steer) < 1.0f) {
         cComputer_setupPrewindState_09E0(((char*)self), isSpin, isFlip, toRail, toPipe);
         cmd->b14 = 3;
         return;
@@ -825,7 +825,7 @@ extern "C" void cComputer_attackTargetCruise(cComputer* self, sPad_0B90* cmd)
     sRiders_0B90* list = D_004A28A8_0B90->game->list;
     sCtl_0B90* ctl = (sCtl_0B90*)(&self->mDesiredSpeed);
     cRider_0B90* tgt = list->riders[ctl->target];
-    float diff = rec->angle - *(float*)((char*)self->mRider + 0x4CC);
+    float diff = rec->angle - self->mRider->PathHeading;
     float ang = diff - Floor_0B90(diff * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
     float mySpd = Len_0B90(*(sV4_0B90*)&self->mRider->mVelocity);
     float absAng = Abs_0B90(ang);
@@ -1018,7 +1018,7 @@ extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* cmd)
     sCtl_0F88* ctl = (sCtl_0F88*)(&self->mDesiredSpeed);
     sRec_0F88* rec = Rec_0F88((char*)self);
     cRider_0F88* tgt = D_004A28A8_0F88->game->list->riders[ctl->target];
-    float diff = rec->angle - *(float*)((char*)self->mRider + 0x4CC);
+    float diff = rec->angle - self->mRider->PathHeading;
     float ang = diff - Floor_0F88(diff * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
     float mySpd = Len_0F88(*(sV4_0F88*)&self->mRider->mVelocity);
     float hisSpd = Len_0F88(*tgt->GetVel());
@@ -2998,7 +2998,7 @@ INCLUDE_ASM("seg/seg_1218", cRiderAnim_onUpdateASYNC_GATEROCK);
  * @return 1 when the sequence was expired, else 0
  */
 extern "C" int cRiderAnim_onUpdateASYNC_GATEROCK(cRiderAnim* self, void* x, cRiderAnim* anim, float dt) {
-    cAnimSequence_setSubAnimTime(anim, 0, *(float*)&anim->CurrentAnimID[4] * *(float*)((char*)self->Rider->mRiderHandler + 0x2A0));
+    cAnimSequence_setSubAnimTime(anim, 0, *(float*)&anim->CurrentAnimID[4] * self->Rider->mRiderHandler->GateControl.GateAnticipate);
     if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
         cAnimSequencer_expire(x, anim);
         return 1;
@@ -4203,7 +4203,7 @@ extern "C" void cRider_checkObjectCollisions(cRider* self, sV4_5398* norm)
             else
                 contact.normal = Div_5398(flatNormal, len);
         } else if (cRider_getMotionState((char*)self) == 4) {
-            sV4_5398* up = (sV4_5398*)((char*)self->mRiderHandler + 0xB0);
+            sV4_5398* up = (sV4_5398*)(&self->mRiderHandler->RailslideMotion);
             if (Dot_5398(contact.normal, *up) > zero)
                 contact.normal = *up;
             else
@@ -4217,8 +4217,8 @@ extern "C" void cRider_checkObjectCollisions(cRider* self, sV4_5398* norm)
         info.normal = contact.normal;
         info.speed = k;
         if ((TriFlags_5398(contact.surf, contact.idx) & 2) && !(contact.surf->flags & 0x2000)) {
-            *(sContact_5398*)(((char*)self) + 0x9E0) = contact;
-            *(sInfo_5398*)(((char*)self) + 0xA60) = info;
+            *(sContact_5398*)&self->CollideIntersectInfo = contact;
+            *(sInfo_5398*)&self->CollideInfo = info;
         }
         if (TriFlags_5398(contact.surf, contact.idx) & 1)
             cRider_doObjectCollision_5398(((char*)self), contact.surf, &info, &contact, overlap);
@@ -4461,7 +4461,7 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
         bounce = Sqrt_57B8((linearTerm * linearTerm - constTerm) >? 0.0f) - linearTerm; // PORT: g++ maximum operator
     }
     float facing = DotV_57B8(rider->unk_180, hit->n);
-    if (cRider_getMotionState(rider) == 1 || (cRider_getMotionState(rider) == 2 && *(int*)((char*)rider->mRiderHandler + 0x30) == 1)) {
+    if (cRider_getMotionState(rider) == 1 || (cRider_getMotionState(rider) == 2 && rider->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1)) {
         if (Len_57B8(rider->mVelocity) < 833.3333740234375f) {
             float* acc = &rider->mImpactAccum2;
             *acc = *acc + (2.5f - facing) * (hit->n.z >= 0.20000000298023224f ? hit->n.z : 0.20000000298023224f);
@@ -4652,7 +4652,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
     vt[kRiderVt_vibrationBump].fn((char*)self + vt[kRiderVt_vibrationBump].delta, info->vn);
     char* sub = (char*)&self->mVtbl;
     if (cRider_getMotionState(self) == 2) {
-        if (*(int*)((char*)self->mRiderHandler + 0x30) == 1) {
+        if (self->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1) {
             sVEv_5D98* vt2 = *(sVEv_5D98**)sub;
             t4Vector* pos = vt2[kRiderVt_getPosition].fn(sub + vt2[kRiderVt_getPosition].delta);
             sVEv_5D98* vt3 = *(sVEv_5D98**)sub;
@@ -4671,10 +4671,10 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
         t4Vector* vel = vt3[kRiderVt_getVelocity].fn(sub + vt3[kRiderVt_getVelocity].delta);
         cAirPredictor_startLaunchIntoAir_5D98(self->mAirPredictor, pos, vel, self->unk_2E4);
     }
-    float sideDot = Dot_5D98(Get_5D98((char*)self + 0x160), info->off);
+    float sideDot = Dot_5D98(Get_5D98((char*)&self->RiderRoot), info->off);
     float frontDot = Dot_5D98(Get_5D98((char*)&self->unk_170), info->off);
     float upDot = Dot_5D98(Get_5D98((char*)&self->unk_180), info->off);
-    t4Vector origin = Get_5D98((char*)self + 0x190);
+    t4Vector origin = Get_5D98((char*)&self->RiderRoot.row[3]);
     t4Vector rel = Sub_5D98(info->pos, origin);
     float h = Dot_5D98(rel, Get_5D98((char*)&self->unk_180));
     int cur = cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 2);
@@ -5312,7 +5312,7 @@ extern "C" int cRider_checkRailBoardCollisions(cRider* self)
                 cRiderAnimBase_play(self->mRiderAnim, 34, 0, -1.0f);
             cRider_setControlState_57B8(self, 1);
         } else {
-            cRailslideControl_playGainFocusAnim((char*)self->mRiderHandler + 0x2B0, fall);
+            cRailslideControl_playGainFocusAnim(&self->mRiderHandler->RailslideControl, fall);
             cRider_setControlState_57B8(self, 7);
         }
     } else if (prev != RAIL_STYLE(self)) {
@@ -5333,7 +5333,7 @@ extern "C" int cRider_checkRailBoardCollisions(cRider* self)
         }
         cRider_doRailslideModeOrientation(self);
     }
-    cRailslideMotion_setCrookedAngle((char*)self->mRiderHandler + 0xB0, &land.n);
+    cRailslideMotion_setCrookedAngle(&self->mRiderHandler->RailslideMotion, &land.n);
     return 1;
 }
 
@@ -5858,7 +5858,7 @@ static inline float Kph_7578(float kph) { return kph / 3.6f; }
  */
 extern "C" int cRider_checkHandplantCollisions(cRider* self)
 {
-    cCheatFX_setCheatInput((char*)self->mRiderHandler + 0xD20, 2);
+    cCheatFX_setCheatInput(&self->mRiderHandler->CheatFX, 2);
     if (cRider_getMotionState((char*)self) == 1) {
         if (self->mVelocity.z < Kph_7578(-2000.0f))
             return 0;
@@ -5891,8 +5891,8 @@ extern "C" int cRider_checkHandplantCollisions(cRider* self)
     if (Dot(hit.normal, *(sVec4*)&self->mVelocity) < 0.0f)
         ScaleEq(hit.normal, -1.0f);
     cRider_setControlState_2(((char*)self), 13);
-    cHandplantMotion_init(enterSec, (char*)self->mRiderHandler + 0x110, &hit);
-    cHandplantControl_init(enterSec, (char*)self->mRiderHandler + 0x370, &hit, *(int*)((char*)self->mRiderHandler + 0x1A4));
+    cHandplantMotion_init(enterSec, &self->mRiderHandler->HandplantMotion, &hit);
+    cHandplantControl_init(enterSec, &self->mRiderHandler->HandplantControl, &hit, self->mRiderHandler->HandplantMotion.IsToeside);
     cRider_setControlState_2(((char*)self), 11);
     cRider_setMotionState_7578(((char*)self), 5);
     return 1;
@@ -6373,7 +6373,7 @@ extern "C" void cRider_doOpponentCollision(cRider* self, cRider* other, sV4_7E70
                    Sub_7E70(imp, Scale_7E70(*(sV4_7E70*)&self->mGroundNormal, Dot_7E70(imp, *(sV4_7E70*)&self->mGroundNormal))));
     } else {
         AddEq_7E70(*(sV4_7E70*)&self->mVelocity, imp);
-        if (cRider_getMotionState((char*)self) == 1 || (cRider_getMotionState((char*)self) == 2 && *(int*)((char*)self->mRiderHandler + 0x30) == 1)) {
+        if (cRider_getMotionState((char*)self) == 1 || (cRider_getMotionState((char*)self) == 2 && self->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1)) {
             cAI_7E70* ai = (cAI_7E70*)(&self->mVtbl);
             sV4_7E70* pos = ai->GetPos();
             cAirPredictor_startLaunchIntoAir(self->mAirPredictor, pos, ai->GetDir(), self->unk_2E4);
@@ -6396,7 +6396,7 @@ extern "C" void cRider_doOpponentCollision(cRider* self, cRider* other, sV4_7E70
     if ((D_005308D0_7E70[0] >> 5) & 1)
         absSpd = 599.9739990234375f;
     if (absSpd > 599.9739990234375f) {
-        float dz = Dot_7E70(Get_7E70(((char*)self) + 0x160), *n);
+        float dz = Dot_7E70(Get_7E70((char*)&self->RiderRoot), *n);
         float dy = Dot_7E70(Get_7E70((char*)&self->unk_170), *n);
         float dx = Dot_7E70(Get_7E70((char*)&self->unk_180), *n);
         int anim;
@@ -6528,7 +6528,7 @@ extern "C" void cRider_doBump(cRider* self, char* info, int flag)
     if (cRider_getMotionState((char*)self) != 0 && cRider_getMotionState((char*)self) != 4)
         return;
     if (cRider_getControlState_8388((char*)self) == 1) {
-        cBoardPressControl_forceExit((char*)self->mRiderHandler + 0x1D0);
+        cBoardPressControl_forceExit(&self->mRiderHandler->BoardPressControl);
     } else if (cRider_getControlState_8388((char*)self) != 0 && cRider_getControlState_8388((char*)self) != 2 && cRider_getControlState_8388((char*)self) != 7) {
         return;
     }
@@ -6952,36 +6952,36 @@ extern "C" char* cComputer_cComputer(cComputer* self, int inChrg, int actor)
     if (inChrg)
     {
         cRider* vb = (cRider*)(&self->Rider);
-        *(cRider**)(((char*)self) + 0xD20) = vb;
-        *(cRider**)(((char*)self) + 0xC70) = vb;
-        *(cRider**)(((char*)self) + 0xB40) = vb;
-        *(cRider**)(((char*)self) + 0xB00) = vb;
-        *(cRider**)(((char*)self) + 0xAF0) = vb;
-        *(cRider**)(((char*)self) + 0xAD0) = vb;
-        *(cRider**)(((char*)self) + 0x9C0) = vb;
-        *(cRider**)(((char*)self) + 0x610) = vb;
-        *(cRider**)(((char*)self) + 0x520) = vb;
-        *(cRider**)(((char*)self) + 0x470) = vb;
-        *(cRider**)(((char*)self) + 0x3B0) = vb;
-        *(cRider**)(((char*)self) + 0x3A0) = vb;
-        *(cRider**)(((char*)self) + 0x398) = vb;
-        *(cRider**)(((char*)self) + 0x384) = vb;
-        *(cRider**)(((char*)self) + 0x364) = vb;
-        *(cRider**)(((char*)self) + 0x358) = vb;
-        *(cRider**)(((char*)self) + 0x340) = vb;
-        *(cRider**)(((char*)self) + 0x2B8) = vb;
-        *(cRider**)(((char*)self) + 0x2A4) = vb;
-        *(cRider**)(((char*)self) + 0x288) = vb;
-        *(cRider**)(((char*)self) + 0x224) = vb;
-        *(cRider**)(((char*)self) + 0x200) = vb;
-        *(cRider**)(((char*)self) + 0x1F0) = vb;
-        *(cRider**)(((char*)self) + 0x1E4) = vb;
-        *(cRider**)(((char*)self) + 0x1C0) = vb;
-        *(cRider**)(((char*)self) + 0x1B0) = vb;
-        *(cRider**)(((char*)self) + 0x100) = vb;
-        *(cRider**)(((char*)self) + 0xA0) = vb;
-        *(cRider**)(((char*)self) + 0x70) = vb;
-        *(cRider**)(((char*)self) + 0x24) = vb;
+        self->RiderHandler.CheatFX.mRider = vb;
+        self->RiderHandler.PunchFX.mRider = vb;
+        self->RiderHandler.DynamicSprayFX.mRider = vb;
+        self->RiderHandler.PlayerIndicatorFX.mRider = vb;
+        self->RiderHandler.AngerFX.mRider = vb;
+        self->RiderHandler.AirStreamerFX.mRider = vb;
+        self->RiderHandler.TrickBoostFX.mRider = vb;
+        self->RiderHandler.SpeedBoostFX.mRider = vb;
+        self->RiderHandler.BoardTrailFX.mRider = vb;
+        self->RiderHandler.BoardSparkFX.mRider = vb;
+        self->RiderHandler.BoardWakeFX.mRider = vb;
+        self->RiderHandler.VoidControl.mRider = vb;
+        self->RiderHandler.UberGrindControl.mRider = vb;
+        self->RiderHandler.HandplantControl.mRider = vb;
+        self->RiderHandler.FinishLineControl.mRider = vb;
+        self->RiderHandler.ResetControl.mRider = vb;
+        self->RiderHandler.WipeoutControl.mRider = vb;
+        self->RiderHandler.RailslideControl.mRider = vb;
+        self->RiderHandler.GateControl.mRider = vb;
+        self->RiderHandler.SpinControl.mRider = vb;
+        self->RiderHandler.NaturalAirControl.mRider = vb;
+        self->RiderHandler.BumpControl.mRider = vb;
+        self->RiderHandler.PrewindControl.mRider = vb;
+        self->RiderHandler.BoardPressControl.mRider = vb;
+        self->RiderHandler.CruiseControl.mRider = vb;
+        self->RiderHandler.HandplantMotion.mRider = vb;
+        self->RiderHandler.RailslideMotion.mRider = vb;
+        self->RiderHandler.StaticMotion.mRider = vb;
+        self->RiderHandler.WipeoutMotion.mRider = vb;
+        self->RiderHandler.AirMotion.mRider = vb;
         self->mRider = vb;
         cRider_cRider(vb);
     }
@@ -7458,7 +7458,7 @@ extern "C" void cComputer_getPrewindCmd(cComputer* self, sPad_AA70* cmd)
     sRec_AA70 buf[12];
     cRider* rider = self->mRider;
     cTrack_AA70* trk = (cTrack_AA70*)rider->AIPath;
-    int n = trk->Query(buf, 12, *(float*)(((char*)rider) + 0x4C0), *(float*)(((char*)rider) + 0x4C4) + 50.0f);
+    int n = trk->Query(buf, 12, rider->PrevPathParam, rider->PathParam + 50.0f);
     int sel = -1;
     if (Len_AA70(*(sV4_AA70*)&self->mRider->mVelocity) < self->mDesiredSpeed - 138.88890075683594f)
         cmd->b14 = 1;
@@ -7479,7 +7479,7 @@ extern "C" void cComputer_getPrewindCmd(cComputer* self, sPad_AA70* cmd)
     float* ctl = (float*)(&self->mDesiredSpeed);
     if (sel != -1) {
         cRider* riderBytes = self->mRider;
-        sV4_AA70 half = Sub_AA70(*(sV4_AA70*)(((char*)riderBytes) + 0x490), *(sV4_AA70*)&riderBytes->mPosition);
+        sV4_AA70 half = Sub_AA70(*(sV4_AA70*)&riderBytes->PathPos, *(sV4_AA70*)&riderBytes->mPosition);
         half = Scale_AA70(half, 0.5f);
         sV4_AA70 pos = cPath_getPathPos_AA70(trk, 0, buf[sel].b);
         sV4_AA70 toTarget = Sub_AA70(pos, half);
@@ -7671,8 +7671,8 @@ extern "C" void cSpinControl_predictFlipSec(void*, float*, float*);
 extern "C" void cComputer_setupEndSpin(cComputer* self, float airTime)
 {
     float spinCur, spinNext, flipCur, flipNext;
-    cSpinControl_predictSpinSec((char*)self->mRider->mRiderHandler + 0x230, &spinCur, &spinNext);
-    cSpinControl_predictFlipSec((char*)self->mRider->mRiderHandler + 0x230, &flipCur, &flipNext);
+    cSpinControl_predictSpinSec(&self->mRider->mRiderHandler->SpinControl, &spinCur, &spinNext);
+    cSpinControl_predictFlipSec(&self->mRider->mRiderHandler->SpinControl, &flipCur, &flipNext);
     int stop = 0;
     if (self->mToRail && airTime < 1.0f)
         stop = 1;
@@ -7758,15 +7758,15 @@ extern "C" int cComputer_getSpinCmd(cComputer* self, sPad_B250* cmd)
     if (ok) {
         gap = *(float*)(obj + 0x98) - *(float*)(obj + 0xA0);
         if (gap > 15.0f)
-            (*(int*)((char*)self->mRider + 0x484))++;
+            (self->mRider->mEndOfTheWorldTimer)++;
         else
-            *(int*)((char*)self->mRider + 0x484) = 0;
+            self->mRider->mEndOfTheWorldTimer = 0;
     } else {
         gap = 100.0f;
-        *(int*)((char*)self->mRider + 0x484) = 0;
+        self->mRider->mEndOfTheWorldTimer = 0;
     }
-    if (*(int*)((char*)self->mRider + 0x484) >= 31) {
-        *(int*)((char*)self->mRider + 0x484) = 0;
+    if (self->mRider->mEndOfTheWorldTimer >= 31) {
+        self->mRider->mEndOfTheWorldTimer = 0;
         cmd->b12 = 1;
     } else {
         if (self->mIsGonnaMessUp == 0) {
@@ -8009,7 +8009,7 @@ extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* approachSpeed
     sRec_B980 buf[12];
     cRider* rider = self->mRider;
     cTrack_B980* trk = (cTrack_B980*)rider->AIPath;
-    int n = trk->Query(buf, 12, *(float*)(((char*)rider) + 0x4C0), *(float*)(((char*)rider) + 0x4C4) + 300.0f);
+    int n = trk->Query(buf, 12, rider->PrevPathParam, rider->PathParam + 300.0f);
     for (int i = 0; i < n; i++) {
         if (buf[i].type == 0x10) {
             int fl = buf[i].flags;
@@ -8018,7 +8018,7 @@ extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* approachSpeed
             *toRail = (fl >> 2) & 1;
             *isSpin = (fl >> 1) & 1;
             *isFlip = fl & 1;
-            *below = (buf[i].a <= *(float*)((char*)self->mRider + 0x4C4)) ? 1 : 0;
+            *below = (buf[i].a <= self->mRider->PathParam) ? 1 : 0;
             *(sVec4_B980*)&self->mStartJumpPos = cPath_getPathPos(trk, 0, buf[i].a);
             *(sVec4_B980*)&self->mEndJumpPos = cPath_getPathPos(trk, 0, buf[i].b);
             return 1;
@@ -8049,11 +8049,11 @@ extern "C" int cComputer_checkForSpeedZone(cComputer* self_, float* out, int* ok
     cRider* rider = self_->mRider;
     char* track = (char*)rider->AIPath;
     char* vt = *(char**)(track + 0x34);
-    int n = (*(int (**)(char*, sHit_BB18*, int, float, float))(vt + 0xC))(track + *(short*)(vt + 8), buf, 12, *(float*)(((char*)rider) + 0x4C0), *(float*)(((char*)rider) + 0x4C4) + 600.0f);
+    int n = (*(int (**)(char*, sHit_BB18*, int, float, float))(vt + 0xC))(track + *(short*)(vt + 8), buf, 12, rider->PrevPathParam, rider->PathParam + 600.0f);
     for (int i = 0; i < n; i++) {
         if (buf[i].type == 17) {
             *out = (float)buf[i].val * 27.777780532836914f;
-            *ok = buf[i].lim <= *(float*)((char*)self_->mRider + 0x4C4);
+            *ok = buf[i].lim <= self_->mRider->PathParam;
             return 1;
         }
     }
@@ -8080,7 +8080,7 @@ extern "C" int cComputer_checkForBoardPress(cComputer* self_, int* out) {
     cRider* rider = self_->mRider;
     char* track = (char*)rider->AIPath;
     char* vt = *(char**)(track + 0x34);
-    int n = (*(int (**)(char*, sHit_BBF8*, int, float, float))(vt + 0xC))(track + *(short*)(vt + 8), buf, 12, *(float*)(((char*)rider) + 0x4C0), *(float*)(((char*)rider) + 0x4C4) + 50.0f);
+    int n = (*(int (**)(char*, sHit_BBF8*, int, float, float))(vt + 0xC))(track + *(short*)(vt + 8), buf, 12, rider->PrevPathParam, rider->PathParam + 50.0f);
     *out = 0;
     for (int i = 0; i < n; i++) {
         if (buf[i].type == 19) {
@@ -8109,7 +8109,7 @@ extern "C" int cComputer_checkForRail(cComputer* self) {
     cRider* rider = self->mRider;
     char* track = (char*)rider->AIPath;
     char* vt = *(char**)(track + 0x34);
-    int n = (*(int (**)(char*, sHit_BC98*, int, float, float))(vt + 0xC))(track + *(short*)(vt + 8), buf, 12, *(float*)(((char*)rider) + 0x4C0), *(float*)(((char*)rider) + 0x4C4));
+    int n = (*(int (**)(char*, sHit_BC98*, int, float, float))(vt + 0xC))(track + *(short*)(vt + 8), buf, 12, rider->PrevPathParam, rider->PathParam);
     for (int i = 0; i < n; i++) {
         if (buf[i].type == 0xF) return 1;
     }

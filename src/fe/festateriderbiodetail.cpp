@@ -351,7 +351,7 @@ extern "C" void cFEStateRiderBio_onWidgetEvent(cFEStateRiderBio* self, cUIThing*
         sVEntry001912D0* vt = *(sVEntry001912D0**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
         break;
     }

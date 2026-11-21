@@ -3322,7 +3322,7 @@ extern "C" void MEM_fill(void* dst, int c, int n);
 extern "C" void cBEUserAwards_clear(cBEUserAwards* self)
 {
     MEM_fill(self, 0, 372);
-    *(short*)((char*)self + 0x4) = -1;
+    self->mAwards.iCharBoltID = -1;
 }
 #endif
 

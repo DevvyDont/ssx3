@@ -117,7 +117,7 @@ extern "C" void cFEStateMPCircuit_onWidgetEvent(cFEStateMPCircuit* self, cUIThin
         sVEntry_33A0* vt = *(sVEntry_33A0**)((char*)obj + 4);
         void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
         break;
     }
@@ -126,7 +126,7 @@ extern "C" void cFEStateMPCircuit_onWidgetEvent(cFEStateMPCircuit* self, cUIThin
         sVEntry_33A0* vt = *(sVEntry_33A0**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
         break;
     }

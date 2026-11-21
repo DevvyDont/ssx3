@@ -445,10 +445,10 @@ extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(cFEStateAudioOptions*
     self->mInStore = inStore;
     cUIEngine* engineObj = self->mpEngine;
     int hash = GetHashValue32(str_checkbox);
-    self->mpCheckBox = (cTextureElement*)cUITextureBank_getElementByHashname(engineObj->mTextureBank, hash);
+    self->mpCheckBox = (cTextureElement*)cUITextureBank_getElementByHashname(&engineObj->mTextureBank, hash);
     cUIEngine* engineObj2 = self->mpEngine;
     int emptyBoxHash = GetHashValue32(str_empty_box);
-    self->mpEmptyBox = (cTextureElement*)cUITextureBank_getElementByHashname(engineObj2->mTextureBank, emptyBoxHash);
+    self->mpEmptyBox = (cTextureElement*)cUITextureBank_getElementByHashname(&engineObj2->mTextureBank, emptyBoxHash);
     self->mCharID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
     void* ri = cBE_getInterface_Fv(cBE_getBE(), 13);
     self->mRadioMode = cBERewardInterface_getRadioMode(ri, self->mUserNum, self->mCharID);
@@ -512,7 +512,7 @@ extern "C" void cFEStateAudioOptions_onCreateScreen(cFEStateAudioOptions* self)
     char* name;
     if ((void*)SSXApp->Game != 0) {
         name = str_142audio_pda;
-        cFEStateAudioOptions_onCreateScreen_cObj* obj = (cFEStateAudioOptions_onCreateScreen_cObj*)cUIStateStack_findState(self->mpEngine->mStateStack, GetHashValue32(str_hud));
+        cFEStateAudioOptions_onCreateScreen_cObj* obj = (cFEStateAudioOptions_onCreateScreen_cObj*)cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud));
         if (obj != 0) {
             obj->handleEvent(3, 0);
         }
@@ -574,7 +574,7 @@ extern "C" cFEStateAudioOptions_onDestroyScreen_cObj* cUIStateStack_findState(vo
 extern "C" void cFEStateAudioOptions_onDestroyScreen(cFEStateAudioOptions* self)
 {
     if ((void*)SSXApp->Game != 0) {
-        cFEStateAudioOptions_onDestroyScreen_cObj* obj = cUIStateStack_findState(self->mpEngine->mStateStack, GetHashValue32(str_hud));
+        cFEStateAudioOptions_onDestroyScreen_cObj* obj = cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud));
         if (obj != 0) {
             obj->handleEvent(4, 0);
         }

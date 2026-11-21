@@ -777,7 +777,7 @@ void cReplayFrame_setRanking(void*, int, int);
 extern "C" int cReplayHighlight_setRanking(cReplayHighlight* self, tRiderStats* stats, int mode)
 {
     if (mode) {
-        int pointsGained = stats->TotalPoints - *(int*)((char*)self + 0xA0);
+        int pointsGained = stats->TotalPoints - self->Stats.TotalPoints;
         if (pointsGained == 0) return 0;
         if (pointsGained >= 1000) {
             cReplayFrame_setRanking(self->Frame, *(int*)self, pointsGained);
@@ -789,7 +789,7 @@ extern "C" int cReplayHighlight_setRanking(cReplayHighlight* self, tRiderStats* 
             return 1;
         }
     }
-    int pointsLost = stats->TotalPointsLostToWipeouts - *(int*)((char*)self + 0xA8);
+    int pointsLost = stats->TotalPointsLostToWipeouts - self->Stats.TotalPointsLostToWipeouts;
     if (pointsLost == 0) return 0;
     cReplayFrame_setRanking(self->Frame, *(int*)self, -pointsLost);
     return 1;

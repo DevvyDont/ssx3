@@ -54,14 +54,14 @@ extern "C" void* cUIEngine_cUIEngine(cUIEngine* self)
     self->mpLocaleInterface = 0;
     self->mpSound = 0;
     cList_cList((char*)&self->mStateStack);
-    cList_cList((char*)self + 0x34);
-    *(int*)((char*)self + 0x58) = 0;
-    *(int*)((char*)self + 0x5C) = 0;
-    *(int*)((char*)self + 0x60) = 0;
-    *(int*)((char*)self + 0x64) = 0;
-    *(int*)((char*)self + 0x68) = 0;
-    *(void**)((char*)self + 0x54) = ((void*)self);
-    *(void**)((char*)self + 0x6C) = ((void*)self);
+    cList_cList(&self->mStateStack.mExplicitStack);
+    *(int*)&self->mTextureBank = 0;
+    self->mTextureBank.mpTexturesIDs = 0;
+    self->mTextureBank.mNumTextureIDs = 0;
+    self->mTextureBank.mpElements = 0;
+    self->mTextureBank.mNumElements = 0;
+    self->mAnimBank.mpEngine = (cUIEngine*)((void*)self);
+    self->mTextureBank.mpEngine = (cUIEngine*)((void*)self);
     return ((void*)self);
 }
 #endif
@@ -1058,7 +1058,7 @@ extern "C" void cUIIcon_setUIData(cUIIcon* self, sUIData8998* data)
     cUIThing_setUIData_8998(((sUIObj8998*)self), data);
     ((sUIObj8998*)self)->clip = data->clip;
     ((sUIObj8998*)self)->align = data->align;
-    self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname((cUITextureBank*)((char*)self->mpScreen->mpState->mpEngine + 0x58), data->id);
+    self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname((cUITextureBank*)(&self->mpScreen->mpState->mpEngine->mTextureBank), data->id);
     *(sUISize8998*)&self->mTileUV[0] = sUISize8998(data->w * 0.01f, data->h * 0.01f);
 }
 #endif
@@ -1373,7 +1373,7 @@ extern "C" void cUIIcon_setTextureByHashValue(cUIIcon* self, int id)
     cUIScreen* screen = self->mpScreen;
     cUIState* state = screen->mpState;
     cUIEngine* engine = state->mpEngine;
-    self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname((cUITextureBank*)((char*)engine + 0x58), id);
+    self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname((cUITextureBank*)(&engine->mTextureBank), id);
 }
 #endif
 

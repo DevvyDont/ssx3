@@ -216,7 +216,7 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThin
         sVEntryK182C80* vt = *(sVEntryK182C80**)(factory + 4);
         void* nextState = vt[4].fn(factory + vt[4].delta, self, item->mMiscData);
         if (nextState != 0)
-            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         cFEStateCharSetup_show3DCharacter(self, 0);
         break;
     }
@@ -225,7 +225,7 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThin
         sVEntryK182C80* vt = *(sVEntryK182C80**)(factory + 4);
         void* nextState = vt[5].fn(factory + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
             cFEStateCharSetup_show3DCharacter(self, 0);
         }
         break;
@@ -234,7 +234,7 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThin
         sStateK182C80* st = (sStateK182C80*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0),
                                                           self->mpEngine, 1);
         st->mode = 1;
-        cUIStateStack_pushSpecial(self->mpEngine->mStateStack, st, 0, 0);
+        cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, st, 0, 0);
         break;
     }
     }

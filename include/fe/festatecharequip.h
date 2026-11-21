@@ -30,6 +30,7 @@
 //   [O] SSX On Tour's DWARF (class cFEStateCharEquip, cUIState, cListNode): names, types and order.
 
 #include "layout.h"
+#include "util/list.h"
 #include "bx/math3d.h"
 
 struct cListNode;
@@ -58,7 +59,7 @@ struct cFEStateCharEquip {
     int mAttrState;                 // 0x01C [O] tAttrState (word, see ui/uistate.h); [U] onPopupEvent clears / sets
                                     //       bit 3 (mVisible) while its buy popup is up (lw/sw)
     cUIState* mpParentState;        // 0x020 [O]
-    char mScreens[0x1C];            // 0x024 [O] cList mScreens; [U] onUpdate: cList_first(&mScreens)
+    cList mScreens;                 // 0x024 [O] cList mScreens (util/list.h; ui/uistate.h); [U] onUpdate: cList_first(&mScreens)
     cUIScreen* mpScreen;            // 0x040 [O]
     signed char mUserNum;           // 0x044 [O]; [R] the ctor's userNum argument (sb); [U] passed to the BE player /
                                     //       economy / shop interfaces and cFERiderManager everywhere

@@ -98,14 +98,14 @@ extern "C" void* cBoardWakeFX_cBoardWakeFX(cBoardWakeFX* self, int inChrg)
         *(void**)(*(char**)self + 0x6C0) = &vtbl2;
         vtbl2.e[1].delta = D_00488DF0.e[1].delta + vc;
     }
-    sWakeStripBW*& strips = *(sWakeStripBW**)((char*)self + 0xC);
+    sWakeStripBW*& strips = (sWakeStripBW*)self->mWakeLines;
     strips = new (str_WakeLines_cBoardWakeFX, 0, 0) sWakeStripBW[32];
-    sWakeElemBW** rows = (sWakeElemBW**)((char*)self + 0x10);
+    sWakeElemBW** rows = (sWakeElemBW**)(&self->mWakeVerts[0]);
     rows[0] = new (str_WakeVerts_cBoardWakeFX, 0, 0) sWakeElemBW[160];
     for (int i = 1; i < 5; i++) {
-        rows[i] = *(sWakeElemBW**)((char*)self + 0x10) + i * 32;
+        rows[i] = (sWakeElemBW*)self->mWakeVerts[0] + i * 32;
     }
-    *(int*)((char*)self + 0xB4) = -1;
+    self->mWakeLineSegs = -1;
     cBoardWakeFX_reset((sWakeDCF28*)self);
     return ((void*)self);
 }
@@ -6968,8 +6968,8 @@ extern "C" void* cSpeedBoostFX_cSpeedBoostFX(cSpeedBoostFX* self, int inChrg)
         *(void**)(*(char**)self + 0x6C0) = &vtbl2;
         vtbl2.e[1].delta = D_00488598.e[1].delta + vc;
     }
-    new ((char*)self + 0x50) sWakeSeg_6320[30];
-    sWakePt_6320*& pts = *(sWakePt_6320**)((char*)self + 0x3AC);
+    new ((char*)&self->mSpeedBoostTrail[0]) sWakeSeg_6320[30];
+    sWakePt_6320*& pts = (sWakePt_6320*)self->mStreamBuf;
     pts = new (str_cSpeedBoostStreamerFX, 0, 0) sWakePt_6320[20];
     cSpeedBoostFX_reset(self);
     return ((void*)self);
@@ -7025,18 +7025,18 @@ extern "C" void cSpeedBoostFX_reset(cSpeedBoostFX* self)
     defaultSide.y = 0.0f;
     defaultSide.z = 0.0f;
     defaultSide.w = 1.0f;
-    *(int*)((char*)self + 0x398) = 57;
-    *(int*)((char*)self + 0x8) = 0;
-    *(sWakeVec4*)((char*)self + 0x40) = defaultSide;
-    *(int*)((char*)self + 0xC) = 0;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x18) = 0;
-    *(int*)((char*)self + 0x14) = 0;
-    *(int*)((char*)self + 0x30) = 0;
-    *(int*)((char*)self + 0x3A0) = 0;
-    *(int*)((char*)self + 0x39C) = 0;
-    *(int*)((char*)self + 0x3A4) = (*(int*)(*(char**)self + 0x870) >= 0) ? 20 : 18;
-    *(int*)((char*)self + 0x3A8) = 0;
+    self->mCurrentTexture = 57;
+    *(int*)&self->mAlpha = 0;
+    *(sWakeVec4*)&self->mLastSide = defaultSide;
+    *(int*)&self->mWidth = 0;
+    *(int*)&self->mVOffset = 0;
+    *(int*)&self->mSpeedBoostTrailCurrentLength = 0;
+    self->mSpeedBoostTrailNumSegs = 0;
+    self->mSpeedBoostTrailCurrentSeg = 0;
+    self->mStreamBufLen = 0;
+    self->mStreamBufHead = 0;
+    self->mMaxStreamerSegments = (*(int*)(*(char**)self + 0x870) >= 0) ? 20 : 18;
+    self->mWasInAir = 0;
 }
 #endif
 

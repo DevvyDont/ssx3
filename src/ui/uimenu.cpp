@@ -123,7 +123,7 @@ extern "C" int cUIMenu_onInputChangeItem(cUIMenu* selfp, unsigned char OldScroll
             cUIMenu_onInputChangeItem_notify(((char*)selfp), 3, selfp->mScrollItemOffset);
             cUIMenu_onInputChangeItem_notify(((char*)selfp), 4, selfp->mScrollItemOffset);
         }
-        char* pNextSelected = (char*)cList_getByIndex_i_AE98(selfp->mList, MenuEntryIndex);
+        char* pNextSelected = (char*)cList_getByIndex_i_AE98(&selfp->mList, MenuEntryIndex);
         cUIMenu_setSelected(selfp, (cUIThing*)pNextSelected, *(int*)&selfp->mAttrMenu & 1);
         cUIMenu_onInputChangeItem_notify(((char*)selfp), 5, selfp->mScrollItemOffset);
         return 1;
@@ -266,7 +266,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
             }
         }
     } else if (inputIs_B000(in, 5)) {
-        char* item = (char*)cList_getByIndex_i(self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(&self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
         focusNotify_B000(((char*)self), item, 5);
         moveResult = focusMove_B000(((char*)self), 6, self->mScrollItemCurrent - self->mScrollItemOffset);
         if (moveResult & 0x100) {
@@ -278,7 +278,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
             result = cUIThing_getSound(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 6)) {
-        char* item = (char*)cList_getByIndex_i(self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(&self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
         focusNotify_B000(((char*)self), item, 6);
         moveResult = focusMove_B000(((char*)self), 7, self->mScrollItemCurrent - self->mScrollItemOffset);
         if (moveResult & 0x100) {
@@ -290,7 +290,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
             result = cUIThing_getSound(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 8)) {
-        char* item = (char*)cList_getByIndex_i(self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(&self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
         focusNotify_B000(((char*)self), item, 8);
         moveResult = focusMove_B000(((char*)self), 9, self->mScrollItemCurrent - self->mScrollItemOffset);
         if (moveResult & 0x100) {
@@ -302,7 +302,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
             result = cUIThing_getSound(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 7)) {
-        char* item = (char*)cList_getByIndex_i(self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(&self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
         focusNotify_B000(((char*)self), item, 7);
         moveResult = focusMove_B000(((char*)self), 8, self->mScrollItemCurrent - self->mScrollItemOffset);
         if (moveResult & 0x100) {
@@ -314,7 +314,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
             result = cUIThing_getSound(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 4)) {
-        char* item = (char*)cList_getByIndex_i(self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(&self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
         focusNotify_B000(((char*)self), item, 4);
     } else {
         return 0;
@@ -479,7 +479,7 @@ extern "C" unsigned char cUIMenu_reverseFindFirstHighlightable(cUIMenu* self, un
     }
     i = idx;
     for (; i >= 0; i--) {
-        item = (char*)cList_getByIndex_i(self->mList, i);
+        item = (char*)cList_getByIndex_i(&self->mList, i);
         if (*(int*)&self->mAttrMenu & 4) {
             obj = *(char**)((char*)self->mpScreen + 0xD0);
             vtbl = *(char**)(obj + 8);
@@ -532,7 +532,7 @@ extern "C" void cUIMenu_setSelectedByIndex(cUIMenu* self, unsigned char idx)
         cUIMenu_notify(((char*)self), 2, self->mScrollItemOffset);
         cUIMenu_notify(((char*)self), 4, self->mScrollItemOffset);
     }
-    cUIMenu_setSelected(self, (cUIThing*)((char*)cList_getByIndex_i(self->mList, idx - self->mScrollItemOffset)), 1);
+    cUIMenu_setSelected(self, (cUIThing*)((char*)cList_getByIndex_i(&self->mList, idx - self->mScrollItemOffset)), 1);
 }
 #endif
 

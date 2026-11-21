@@ -187,7 +187,7 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
         void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
         void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
         self->mPathToSaveProfile = 0x10;
-        cUIStateStack_pushPopup(self->mpEngine->mStateStack, newState);
+        cUIStateStack_pushPopup(&self->mpEngine->mStateStack, newState);
         return;
     }
     int k = w->mMiscData;
@@ -198,14 +198,14 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
         void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
         void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
         self->mPathToSaveProfile = k;
-        cUIStateStack_pushPopup(self->mpEngine->mStateStack, newState);
+        cUIStateStack_pushPopup(&self->mpEngine->mStateStack, newState);
         return;
     }
     if (k == 8) {
         *(int*)(*(char**)self->mpEngine + 0xC) = 39;
         void* mem = cMemMan_alloc(640, str_cFEStateProfileLoad_b, 0, 0);
         void* newState = cFEStateProfileLoad_cFEStateProfileLoad(mem, self->mpEngine, 3, 1 << self->mCurrentCtrl);
-        cUIStateStack_push(self->mpEngine->mStateStack, newState);
+        cUIStateStack_push(&self->mpEngine->mStateStack, newState);
         return;
     }
     cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
@@ -213,7 +213,7 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
     sVE_1F3A38p* vt = *(sVE_1F3A38p**)(obj + 4);
     void* nextState = vt[4].fn(obj + vt[4].delta, ((char*)self), w->mMiscData);
     if (nextState != 0) {
-        cUIStateStack_push(self->mpEngine->mStateStack, nextState);
+        cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
     }
 }
 #endif
@@ -302,12 +302,12 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
     case 0xF:
         self->mbIsYesOrNo = 1;
         if (self->mPathToSaveProfile == 6 || self->mPathToSaveProfile == 0x10 || self->mPathToSaveProfile == 17) {
-            cUIStateStack_pop(self->mpEngine->mStateStack, 1);
+            cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         }
         break;
     case 0x10:
         self->mbIsYesOrNo = 0;
-        cUIStateStack_pop(self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
         switch (self->mPathToSaveProfile) {
         case 0x10: {
             self->bToNextState = 1;
@@ -322,7 +322,7 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
             sVE_1F3CF0p* vt = *(sVE_1F3CF0p**)(obj + 4);
             void* nextState = vt[4].fn(obj + vt[4].delta, ((char*)self), 6);
             if (nextState != 0) {
-                cUIStateStack_pushCheck(self->mpEngine->mStateStack, nextState);
+                cUIStateStack_pushCheck(&self->mpEngine->mStateStack, nextState);
             }
             break;
         }
@@ -343,7 +343,7 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
             char* newState = (char*)cFEStateProfileLoad_cFEStateProfileLoad(mem, self->mpEngine, 3, self->mCtrlBits);
             *(int*)(newState + 0x27C) = 1;
             *(int*)(newState + 0x1C) = (*(int*)(newState + 0x1C) & ~0x3F00) | 0x100;
-            cUIStateStack_pushSpecial(self->mpEngine->mStateStack, newState, 0, 1);
+            cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, newState, 0, 1);
             break;
         }
         case 17: {
@@ -351,7 +351,7 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
             char* newState = (char*)cFEStateProfileLoad_cFEStateProfileLoad(mem, self->mpEngine, 3, self->mCtrlBits);
             *(int*)(newState + 0x27C) = 2;
             *(int*)(newState + 0x1C) = (*(int*)(newState + 0x1C) & ~0x3F00) | 0x100;
-            cUIStateStack_pushSpecial(self->mpEngine->mStateStack, newState, 0, 1);
+            cUIStateStack_pushSpecial(&self->mpEngine->mStateStack, newState, 0, 1);
             break;
         }
         case 6: {
@@ -361,7 +361,7 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
             void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
             void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
             self->mPathToSaveProfile = 17;
-            cUIStateStack_pushPopup(self->mpEngine->mStateStack, newState);
+            cUIStateStack_pushPopup(&self->mpEngine->mStateStack, newState);
             break;
         }
         }
@@ -678,7 +678,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
             cKeyboardPopup_setIncludeKey(popup, 0x40, 0, 2);
             cKeyboardPopup_setIncludeKey(popup, 65, 0, 2);
             cKeyboardPopup_setIncludeKey(popup, 66, 0, 2);
-            cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
+            cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
             cKeyboardPopup_setInputText(popup, cBENewPlayerInterface_getPlayerName(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum));
             return;
         }
@@ -687,7 +687,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
             if (cBERewardInterface_getNumOwnedCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum, id) > 0) {
                 void* mem = cMemMan_alloc(484, str_cFEStateCheatCharSelect_b, 0, 0);
                 void* popup = cFEStateCheatCharSelect_cFEStateCheatCharSelect(mem, self->mpEngine, ((char*)self), self->mUserNum, id);
-                cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
+                cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
             }
             return;
         }
@@ -696,7 +696,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
         sVE_1F4400* vt = *(sVE_1F4400**)(obj + 4);
         void* nextState = vt[4].fn(obj + vt[4].delta, ((char*)self), w->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
         break;
     }
@@ -705,7 +705,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
         sVE_1F4400* vt = *(sVE_1F4400**)(obj + 4);
         void* nextState = vt[5].fn(obj + vt[5].delta, ((char*)self), 0);
         if (nextState != 0) {
-            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
         break;
     }

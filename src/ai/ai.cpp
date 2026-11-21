@@ -5441,10 +5441,10 @@ extern "C" void cResetControl_update(cResetControl* self)
         float range = 200.0f;
         cRider_switchToResetPath(self->mRider);
         cRider* rider = self->mRider;
-        const sVec4_12F398& dir = cPath_getPathHeading(rider->AIPath, *(float*)(((char*)rider) + 0x4C4));
+        const sVec4_12F398& dir = cPath_getPathHeading(rider->AIPath, rider->PathParam);
         if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && cBENewRaceInterface_newRace.cGameEvent == 2)
             range = 1000.0f;
-        cRider_putAt_12F398(self->mRider, (char*)self->mRider + 0x490, (sVec4_12F398*)&dir, 287, range);
+        cRider_putAt_12F398(self->mRider, &self->mRider->PathPos, (sVec4_12F398*)&dir, 287, range);
         cRider_cleanupAfterPutAt(self->mRider, 1);
         if (*(int*)self != 0)
             cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evReset(self->mRider->mMetrix, 0));
@@ -5847,7 +5847,7 @@ void cBoardPressControl_gainFocus(void* vself)
 {
     cBoardPressControl* self = (cBoardPressControl*)vself;
     *(int*)self = 0;
-    *(int*)((char*)self->mRider + 0x360) = 0;
+    *(int*)&self->mRider->JumpHeldSec = 0;
     *(int*)&self->BalanceSec = 0;
     *(int*)&self->OffBalanceSec = 0;
     *(int*)&self->PressTimer = 0;
@@ -7415,7 +7415,7 @@ INCLUDE_ASM("ai/ai", cRailslideControl_gainFocus);
 extern "C" void cRailslideControl_gainFocus(cRailslideControl* self)
 {
     *(int*)&self->RSpinAngle = 0;
-    *(int*)((char*)self->mRider + 0x360) = 0;
+    *(int*)&self->mRider->JumpHeldSec = 0;
     self->PrevGrindHeld = -1;
     cRider* rider = self->mRider;
     rider->mSlewed[1].rate = 0.06666667014360428f;

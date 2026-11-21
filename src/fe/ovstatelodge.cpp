@@ -343,7 +343,7 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(cFEStateMountainRoom* self, 
         cUIEngine* eng = self->mpEngine;
         buf[2] = *(unsigned char*)&self->mLevel + '0';
         int hash = GetHashValue32(buf);
-        int texElem = cUITextureBank_getElementByHashname(eng->mTextureBank, hash);
+        int texElem = cUITextureBank_getElementByHashname(&eng->mTextureBank, hash);
         w->f78 = -1;
         w->f7C = texElem;
         return;
@@ -579,7 +579,7 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(cFEStateMountainRoom* self, c
         }
         sFactory_MR* factory = *(sFactory_MR**)self->mpEngine;
         void* nextState = factory->vt[4].fn((char*)factory + factory->vt[4].delta, ((char*)self), idx - 1);
-        cUIStateStack_push_MR(self->mpEngine->mStateStack, nextState);
+        cUIStateStack_push_MR(&self->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
@@ -588,7 +588,7 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(cFEStateMountainRoom* self, c
         if (nextState == 0) {
             break;
         }
-        cUIStateStack_push_MR(self->mpEngine->mStateStack, nextState);
+        cUIStateStack_push_MR(&self->mpEngine->mStateStack, nextState);
         break;
     }
     case 1: {
@@ -1173,7 +1173,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
             void* obj = *(void**)self->mpEngine;
             sVEntA_001D3C80* vt = *(sVEntA_001D3C80**)((char*)obj + 4);
             void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, (self->mPeakNum << 16) | item->mMiscData);
-            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
         break;
     case 6: {
@@ -1188,7 +1188,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
         sVEntA_001D3C80* vt = *(sVEntA_001D3C80**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, id);
         if (nextState != 0) {
-            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
         break;
     }

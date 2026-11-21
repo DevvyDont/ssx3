@@ -239,7 +239,7 @@ extern "C" void cFEStateTrophyRoom_onWidgetEvent(cFEStateTrophyRoom* self, cUITh
         sVEntry001D4698* vt = *(sVEntry001D4698**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, self->mPeakNum);
         if (nextState != 0) {
-            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
         break;
     }
@@ -761,7 +761,7 @@ extern "C" void cFEStateRewardsRoom_onWidgetEvent(cFEStateRewardsRoom* self, cUI
         void* obj = *(void**)self->mpEngine;
         sVEntry001D4EA8* vt = *(sVEntry001D4EA8**)((char*)obj + 4);
         void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, item->mMiscData);
-        cUIStateStack_push(self->mpEngine->mStateStack, nextState);
+        cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
@@ -769,7 +769,7 @@ extern "C" void cFEStateRewardsRoom_onWidgetEvent(cFEStateRewardsRoom* self, cUI
         sVEntry001D4EA8* vt = *(sVEntry001D4EA8**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
+            cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
         break;
     }
@@ -1016,8 +1016,8 @@ extern "C" void func_001D5280(cFEStateLogin* self, void* item, int msg)
 {
     if (msg == 0xF || msg == 20) {
         cFEStateNet_onPopupEvent(self, item, msg);
-        cUIStateStack_popToState(self->mpEngine->mStateStack);
-        void* state = cUIStateStack_getCurrentState(self->mpEngine->mStateStack);
+        cUIStateStack_popToState(&self->mpEngine->mStateStack);
+        void* state = cUIStateStack_getCurrentState(&self->mpEngine->mStateStack);
         *(int*)((char*)state + 0x1C) |= 0x80;
         func_002636F0(func_002591B8(), 0);
         func_001A8A40(self, cFEStateNetConfig_cFEStateNetConfig(cMemMan_alloc(2332, str_cFEStateNetConfig, 0, 0), self->mpEngine));

@@ -12,9 +12,13 @@
 //       stack (0x18, 0x34), zeroes the banks and stores itself into both banks' mpEngine (0x54, 0x6C);
 //   [U] how retail code uses the field;
 //   [O] On Tour's member order.
-// The state stack and the banks are byte arrays here (no header has cList / cUIStateStack / the banks yet).
+// The state stack and the banks are embedded by value, from their own headers (ui/uistatestack.h, ui/uianimation.h,
+// ui/uitexturebank.h).
 
 #include "layout.h"
+#include "ui/uistatestack.h"
+#include "ui/uianimation.h"
+#include "ui/uitexturebank.h"
 
 struct cUICustomInterface;
 struct cUIFontInterface;
@@ -29,11 +33,15 @@ struct cUIEngine {
     cUIInput* mpInput;                     // 0x0C [O]; [R] ctor = 0
     cUILocaleInterface* mpLocaleInterface; // 0x10 [O]; [R] ctor = 0
     cUISoundInterface* mpSound;            // 0x14 [O]; [R] ctor = 0; [U] the states' UI sounds
-    char mStateStack[0x38];                // 0x18 [O] cUIStateStack: cList mStack (0x18), cList mExplicitStack
-                                           //      (0x34); [R] cList_cList on both; [U] cUIStateStack_pushPopup ...
-    char mAnimBank[0x8];                   // 0x50 [O] cUIAnimationBank: mpAnimationBlock, mpEngine (= this, [R])
-    char mTextureBank[0x18];               // 0x58 [O] cUITextureBank: header, texture IDs, count, elements, count,
-                                           //      mpEngine (0x6C = this, [R]); [U] cUITextureBank_getElementByHashname
+    cUIStateStack mStateStack;             // 0x18 [O] cUIStateStack (ui/uistatestack.h): cList mStack (0x18), cList
+                                           //      mExplicitStack (0x34); [R] cUIEngine_cUIEngine: cList_cList on both;
+                                           //      [U] cUIStateStack_push / pushPopup ... (&mStateStack)
+    cUIAnimationBank mAnimBank;            // 0x50 [O] cUIAnimationBank (ui/uianimation.h): mpAnimationBlock, mpEngine
+                                           //      (0x54); [R] the ctor stores this in mAnimBank.mpEngine; [U]
+                                           //      cUIAnimationBank_setData (cUIEngine_loadFile)
+    cUITextureBank mTextureBank;           // 0x58 [O] cUITextureBank (ui/uitexturebank.h): header, texture IDs, count,
+                                           //      elements, count (0x58..0x68, zeroed by the ctor), mpEngine (0x6C = this,
+                                           //      [R]); [U] cUITextureBank_getElementByHashname(&mTextureBank, ...)
 };
 
 CHECK_OFFSET(cUIEngine, mpSound, 0x14);

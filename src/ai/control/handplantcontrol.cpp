@@ -6042,7 +6042,7 @@ static inline void hpCopyMat(void* dst, const void* src)
  */
 extern "C" void* cRider_getRoot(void* out, cRider* self)
 {
-    hpCopyMat(out, ((char*)self) + 0x160);
+    hpCopyMat(out, &self->RiderRoot);
     return out;
 }
 #endif
@@ -6296,7 +6296,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setTotalPathDistance);
  * @param fparg0  the distance
  */
 extern "C" void cRider_setTotalPathDistance(cRider* rider, float fparg0) {
-    (*(float *)((char*)(rider) + (0x4D8))) = fparg0;
+    (rider->TotalPathDistance) = fparg0;
 }
 #endif
 //100%
@@ -6309,7 +6309,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_setPreviousRanking);
  * @param value  the ranking
  */
 extern "C" void cRider_setPreviousRanking(cRider* rider, int value) {
-    (*(int *)((char*)(rider) + (0xE8))) = value;
+    (rider->PrevRanking) = value;
 }
 #endif
 //100%
@@ -6322,7 +6322,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRider_getPreviousRanking);
  * @return the word at +0xE8
  */
 extern "C" int cRider_getPreviousRanking(cRider* rider) {
-    return (*(int *)((char*)(rider) + (0xE8)));
+    return (rider->PrevRanking);
 }
 #endif
 //100%

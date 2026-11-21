@@ -20,6 +20,7 @@
 // Enums and bools are words.
 
 #include "layout.h"
+#include "replay/frame.h" // cReplayFrame
 
 struct cBigFile;
 struct cGame;
@@ -51,7 +52,7 @@ struct cPlaybackMan {
                                     //      0xDBAC0101 / 0x1C200; purgeLocation frees it; the ctor zeroes it
     char Location[8];               // 0x08 [O] (char[32] in On Tour); [U] initLocation strcpy's the location name here
     int SaveFrame;                  // 0x10 [O] bool; [R] ctor 0; [U] initLocation 0, saveFrame / restoreFrame
-    char SaveFramePtr[0x38];        // 0x14 [O] cReplayFrame (retail 0x38: replay/replay.h); [R] the ctor runs
+    cReplayFrame SaveFramePtr;      // 0x14 [O] cReplayFrame (retail 0x38: replay/frame.h); [R] the ctor runs
                                     //      cReplayFrame_cReplayFrame(self+0x14), the dtor stores cReplayFramePtr_vtbl
                                     //       there;
                                     //      [U] initLocation: cReplayFrame_clearFrame / cReplayFramePtr_setBlock on it

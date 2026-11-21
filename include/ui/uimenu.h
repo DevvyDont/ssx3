@@ -11,7 +11,7 @@
 // (cUIThing ctor cUIThing_cUIThing, cUIGroup's vtable, cList ctor cList_cList at 0x74, cUIMenu's vtable, tAttrMenu ctor
 // tAttrMenu_tAttrMenu at 0x90, then the stores below); cUIMenu_cUIMenu is the same constructor out of line. Retail vtable
 // _vt$7cUIMenu = D_00494928 (cUIMenu_vtbl).
-// Bases: cUIGroup (0x90 bytes: cUIThing 0x74 + cList mList 0x1C; ui/uithing.h, tag "cUIGroup" 0x90) <- cUIThing <-
+// Bases: cUIGroup (0x90 bytes: cUIThing 0x74 + cList mList 0x1C; ui/uigroup.h, tag "cUIGroup" 0x90) <- cUIThing <-
 // cListNode, written out flat below. The vptr is cUIThing's (0x8).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals.
@@ -36,6 +36,7 @@
 
 #include "layout.h"
 #include "ui/uithing.h"
+#include "util/list.h"
 
 struct cUIAnimation;
 struct cUIScreen;
@@ -77,10 +78,11 @@ struct cUIMenu {
     t3Vector mSize;                  // 0x060 [P] cUIThing::getSize/setSize
     int mSound[2];                   // 0x06C [O]; [R] = {4, 6} (cUIThing ctor)
     // --- cUIGroup (0x90)
-    char mList[0x1C];                // 0x074 [O] cList mList (cListNode mStart 0x74, mEnd 0x80, the list's vptr 0x8C): the menu
-                                     //       items; [R] constructed by cList_cList(this + 0x74); the destructor stores
-                                     //       cList's vtable at 0x8C and cListNode's (cListNode_vtbl) at 0x88 / 0x7C;
-                                     //       [U] cList_size(this + 0x74) in cUIMenu_setScrollableMenu / setUIData
+    cList mList;                     // 0x074 [O] cUIGroup::mList (util/list.h; as ui/uigroup.h): cListNode mStart 0x74, mEnd 0x80,
+                                     //       the list's vptr 0x8C: the menu items; [R] constructed by cList_cList(&mList); the
+                                     //       destructor cUIMenu__cUIMenu stores cList_vtbl in mList.mVtbl (0x8C) and cListNode_vtbl in
+                                     //       mEnd.mVtbl (0x88) / mStart.mVtbl (0x7C); [U] cList_size(&mList) in
+                                     //       cUIMenu_setScrollableMenu / setUIData, cList_getByIndex in the menu code
     // --- cUIMenu
     tAttrMenu mAttrMenu;             // 0x090 [O] tAttrMenu; [P] isFlipInput/setFlipInput (bit 1, lw/sw the word at 0x90;
                                      //       retail cUIMenu_isFlipInput/cUIMenu_setFlipInput); [R] tAttrMenu() tAttrMenu_tAttrMenu clears

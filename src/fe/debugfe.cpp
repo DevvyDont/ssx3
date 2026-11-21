@@ -476,7 +476,7 @@ extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(cDebugLobbyScreen* self)
 {
     *(void***)self = cDebugLobbyScreen_vtbl;
     self->mState = 0;
-    cMenuSys_cMenuSys(self->mMenuSys);
+    cMenuSys_cMenuSys(&self->mMenuSys);
     sDbgOwner17D298 onCreate;
     onCreate.owner = ((char*)self);
     sDbgOwner17D298 onLogin;
@@ -514,9 +514,9 @@ extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(cDebugLobbyScreen* self)
     self->mUserName = (char*)emptyText;
     self->mPassword = (char*)emptyText;
     self->mChallenger = (char*)emptyText;
-    *(int*)(((char*)self) + 0x60) = (int)app->DebugFE->Font;
-    *(int*)(((char*)self) + 0x64) = (int)app->Inputs[0];
-    *(int*)(((char*)self) + 0x68) = app->DebugFE->BoxTID;
+    self->mMenuSys.Font = (cFont*)((int)app->DebugFE->Font);
+    self->mMenuSys.Input = (cInput*)((int)app->Inputs[0]);
+    self->mMenuSys.BoxTexture = app->DebugFE->BoxTID;
     D_004A4E90 = ((char*)self);
     return ((char*)self);
 }
@@ -629,7 +629,7 @@ extern "C" void cDebugLobbyScreen__cDebugLobbyScreen(cDebugLobbyScreen* self, in
     PersonaMenu__PersonaMenu(&self->mPersonaMenu, 2);
     dtorF_17D3B0((char*)&self->mContinueMenu);
     AccountMenu__AccountMenu(&self->mLoginMenu, 2);
-    cMenuSys__cMenuSys(self->mMenuSys, 2);
+    cMenuSys__cMenuSys(&self->mMenuSys, 2);
     *(void***)self = cDebugScreen_vtbl;
     if (flags & 1)
         operator_delete((int*)self);
@@ -1447,7 +1447,7 @@ extern "C" void cMenuSys_popMenu(void* list);
  */
 extern "C" void func_0017E368(cDebugLobbyScreen* self)
 {
-    int* list = (int*)((char*)self + 0x8);
+    int* list = (int*)(&self->mMenuSys);
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
@@ -1466,12 +1466,12 @@ extern "C" void cMenuSys_pushMenu(void* list, void* item);
  */
 extern "C" void func_0017E3B8(cDebugLobbyScreen* self)
 {
-    int* list = (int*)((char*)self + 0x8);
+    int* list = (int*)(&self->mMenuSys);
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
     self->mState = 0xE;
-    cMenuSys_pushMenu(self->mMenuSys, &self->mChatMenu);
+    cMenuSys_pushMenu(&self->mMenuSys, &self->mChatMenu);
 }
 #endif
 
@@ -2067,9 +2067,9 @@ extern "C" void* cDebugFE_cDebugFE(cDebugFE* self)
     cFadeScreen_cFadeScreen(self);
     *(void**)self = cDebugFE_vtbl;
     *(int*)&self->HeartBeat = 0;
-    *(int*)((char*)self + 0x28) = 0;
-    *(int*)((char*)self + 0x2C) = 0;
-    *(int*)((char*)self + 0x30) = 0;
+    *(int*)&self->HeartBeat.Angle[1] = 0;
+    *(int*)&self->HeartBeat.Phase[0] = 0;
+    *(int*)&self->HeartBeat.Phase[1] = 0;
     sDbgList17F7B8* list = (sDbgList17F7B8*)(&self->HeartBeat);
     new (list->e) sDbgEntry17F7B8[64];
     list->n = 0;

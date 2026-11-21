@@ -24,6 +24,7 @@
 
 #include "layout.h"
 #include "fe/heartbeat.h"
+#include "util/menusys.h" // cMenuSys (cDebugLobbyScreen::mMenuSys)
 #include "fe/backgroundman.h" // cBackgroundMan (cDebugMenuScreen)
 #include "fe/debuglobbymenus.h" // the debug lobby menus (cDebugLobbyScreen)
 
@@ -226,10 +227,12 @@ struct cDebugLobbyScreen {
                                     //       persona, 10 / 11 room, 12 occupants, 13 waiting, 14 chat, 15 challenged, 16
                                     //       play game, 17 declined, 18 ... 24 errors): func_0017D6F0 / func_0017DB18 /
                                     //       the callbacks set it, draw prints its line
-    char mMenuSys[0x68];            // 0x0008 cMenuSys (raw); [R] cMenuSys_cMenuSys(this + 0x8) / cMenuSys__cMenuSys;
-                                    //       the ctor sets its font, input and box texture (+0x58 / +0x5C / +0x60 = 0x60
-                                    //       / 0x64 / 0x68) from the debug FE; [U] the open-menu stack (count at +0x0,
-                                    //       menus from +0x4): cMenuSys_pushMenu / popMenu / isActive / input / render
+    cMenuSys mMenuSys;              // 0x0008 cMenuSys (util/menusys.h, 0x68); [R] cMenuSys_cMenuSys(&mMenuSys) /
+                                    //       cMenuSys__cMenuSys(.., 2); the ctor sets mMenuSys.Font / Input / BoxTexture
+                                    //       (0x60 / 0x64 / 0x68) from the debug FE's Font, SSXApp's Inputs[0] and BoxTID;
+                                    //       [U] the open-menu stack (MenuDepth, MenuStack): cMenuSys_pushMenu / popMenu
+                                    //       (func_0017E368 / func_0017E3B8 pop while MenuDepth != 0) / isActive / input /
+                                    //       render
     AccountMenu mLoginMenu;         // 0x0070 [R] the "Login Method" menu (Create Account, Login): AccountMenu_AccountMenu(this +
                                     //       0x70, ...), AccountMenu__AccountMenu(.., 2) (dtor); [U] pushed on the login step
                                     //       (state 3)

@@ -700,21 +700,21 @@ static inline void pop_B478(cPS2GraphicsMan* ctx)
  */
 extern "C" void cBoardSparkFX_render(cBoardSparkFX* self)
 {
-    char* gfx = *(char**)(((char*)self) + 0x20);
+    char* gfx = (char*)self->mEmitter;
     if (*(int*)(gfx + 0x1E0) > 0) {
         cDynamicColourEmitter_render(gfx, 7);
     }
-    if (*(int*)(((char*)self) + 0x70) != 0) {
+    if (self->mRenderSparks != 0) {
         push_B478(GrMan);
-        *GrMan->m_pCurrentDrawState = *(sDrawState*)(((char*)self) + 0x7C);
+        *GrMan->m_pCurrentDrawState = self->mSparkDrawState;
         cPS2GraphicsMan* ctx = GrMan;
         sVE_B478a* vt = (sVE_B478a*)ctx->mVtbl;
-        vt[82].fn((char*)ctx + vt[82].delta, *(int*)(((char*)self) + 0x28));
+        vt[82].fn((char*)ctx + vt[82].delta, (int)self->mSparkEmitter);
         pop_B478(GrMan);
     }
-    if (*(int*)(((char*)self) + 0x74) != 0) {
+    if (self->mRenderSparkFlash != 0) {
         push_B478(GrMan);
-        *GrMan->m_pCurrentDrawState = *(sDrawState*)(((char*)self) + 0x90);
+        *GrMan->m_pCurrentDrawState = self->mSparkFlashDrawState;
         if (D_004A54D8 == 0) {
             D_004A54D8 = 1;
             D_004A54D0 = 0.0f;

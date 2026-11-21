@@ -2856,12 +2856,12 @@ struct sBmVtF5B8 {
  */
 extern "C" void func_0028F5B8(cSSXAudio* self)
 {
-    *(int*)((char*)self + 0x6088) = 0;
+    self->mPausedSFXForMapScreen = 0;
     if (self->mAudioPaused != 0) return;
     if (cAudioInterface_isInGame() == 0) return;
     if (self->unk_5818 == 0) {
         cSSXAudio_PauseSFX(self);
-        *(int*)((char*)self + 0x6088) = 1;
+        self->mPausedSFXForMapScreen = 1;
     }
     cSSXAudio_MenuSound(self, 9);
     if (self->unk_608C != 2) {
@@ -2894,9 +2894,9 @@ extern "C" void func_0028FA98(cSSXAudio* self, float v);
  */
 extern "C" void func_0028F678(cSSXAudio* self, int restartMusic)
 {
-    if (*(int*)((char*)self + 0x6088) != 0) {
+    if (self->mPausedSFXForMapScreen != 0) {
         cSSXAudio_ResumeSFX(self);
-        *(int*)((char*)self + 0x6088) = 0;
+        self->mPausedSFXForMapScreen = 0;
     }
     if (self->unk_62A8 >= 0) {
         func_0028FA98(self, 1.0f);

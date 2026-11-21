@@ -1930,7 +1930,7 @@ void cMenuSys_init(void* vself)
     *(int*)self = 0;
     self->MenuYOffset = 0;
     self->VKey = -1;
-    *(int*)((char*)self + 0x48) = 11;
+    self->Key = 11;
     self->AsciiKey = -1;
 }
 #endif
@@ -2067,7 +2067,7 @@ INCLUDE_ASM("util/menu", cMenuSys_getKey__FPv);
 int cMenuSys_getKey(void* vself)
 {
     cMenuSys* self = (cMenuSys*)vself;
-    return *(int*)((char*)self + 0x48);
+    return self->Key;
 }
 #endif
 

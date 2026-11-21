@@ -50,7 +50,7 @@ extern "C" void* cFECustom_cFECustom(cFECustom* self, cUIEngine* owner)
     self->mpTransitionState = (cFEStateTransition*)transition;
     if (transition != 0) {
         cFEStateTransition_vtbl[4].fn(transition + cFEStateTransition_vtbl[4].delta);
-        cUIStateStack_pushExplicit(self->mpEngine->mStateStack, self->mpTransitionState);
+        cUIStateStack_pushExplicit(&self->mpEngine->mStateStack, self->mpTransitionState);
     }
     return ((void*)self);
 }
@@ -956,7 +956,7 @@ extern "C" void cRealFE_load(cRealFE* self)
     progress_1E80(75.0f);
     cRealFE_loadCharAnimations_1(self);
     func_0019CE68(self->mBoltFileManager);
-    cFERiderManager_init(self->mRiderManager);
+    cFERiderManager_init(&self->mRiderManager);
     cFE* cam = SSXApp->RealFE;
     sV4_1E80 pos;
     sV4_1E80 up;
@@ -971,9 +971,9 @@ extern "C" void cRealFE_load(cRealFE* self)
     scratchVec.y = 1.0f;
     scratchVec.z = 0.0f;
     up = scratchVec;
-    *(sV4_1E80*)((char*)cam + 0x30) = pos;
-    *(sV4_1E80*)((char*)cam + 0x40) = up;
-    ((cCamObj_1E80*)((char*)cam + 0x10))->update();
+    *(sV4_1E80*)&cam->mCamera.Pose = pos;
+    *(sV4_1E80*)&cam->mCamera.Pose.Q = up;
+    ((cCamObj_1E80*)(&cam->mCamera))->update();
     progress_1E80(99.0f);
     char* in = (char*)cMemMan_alloc(0x1C, str_FEUIInput, 0, 0);
     sUI_1E80* ui2 = ((sUI_1E80*)self->mpUI);
@@ -1063,7 +1063,7 @@ extern "C" void cRealFE_purge(cRealFE* self)
     sVEntry001A2190* vt = (sVEntry001A2190*)ps2GraphicsMan->mVtbl;
     vt[19].fn((char*)ps2GraphicsMan + vt[19].delta);
     cRealFE_purgeCharAnimations(self);
-    cFERiderManager_purge(self->mRiderManager);
+    cFERiderManager_purge(&self->mRiderManager);
     func_0019CF40(self->mBoltFileManager);
     cIrradianceDataBase_Purge(cIrradianceDataBase_TheDataBase);
     cSSXApp* st = SSXApp;
@@ -1424,11 +1424,11 @@ noh:
         } else {
             self->IsEnding = 1;
         }
-        sVE_27A0* vt = *(sVE_27A0**)(((char*)self) + 0xA0);
-        char* obj = self->mCamera;
+        sVE_27A0* vt = (sVE_27A0*)self->mCamera.mVtbl;
+        char* obj = (char*)&self->mCamera;
         vt[3].fn(obj + vt[3].delta);
         func_0019D250(self->mBoltFileManager);
-        cFERiderManager_update(self->mRiderManager);
+        cFERiderManager_update(&self->mRiderManager);
         if ((void*)SSXApp->mFEAsyncManager != 0) {
             cFEAsyncManager_Update(SSXApp->mFEAsyncManager);
         }
@@ -1575,25 +1575,25 @@ extern "C" void cRealFE_loadStartState(cRealFE* self)
     cUIState_cUIState(backState, (char*)self->mpUI);
     backState->vt = (sVEnt_1A2C40*)cFEStateBackground_vtbl;
     backState->vt[4].fn((char*)backState + backState->vt[4].delta);
-    cUIStateStack_pushExplicit(self->mpUI->mStateStack, backState);
+    cUIStateStack_pushExplicit(&self->mpUI->mStateStack, backState);
     switch (cRealFE_mStartState) {
     case 0: {
         gInLodge = 0;
         void* st = cFEStateTitle_cFEStateTitle1(cMemMan_alloc(76, str_cFEStateTitle, 0, 0), (char*)self->mpUI);
-        cUIStateStack_push(self->mpUI->mStateStack, st);
+        cUIStateStack_push(&self->mpUI->mStateStack, st);
         break;
     }
     case 39: {
         gInLodge = 1;
         void* st = cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge, 0, 0), (char*)self->mpUI);
-        cUIStateStack_push(self->mpUI->mStateStack, st);
+        cUIStateStack_push(&self->mpUI->mStateStack, st);
         cRealFE_mStartState = 0;
         break;
     }
     case 52: {
         gInLodge = 0;
         void* st = cFEStateRelogin_cFEStateRelogin(cMemMan_alloc(1748, str_cFEStateRelogin, 0, 0), (char*)self->mpUI);
-        cUIStateStack_push(self->mpUI->mStateStack, st);
+        cUIStateStack_push(&self->mpUI->mStateStack, st);
         cCommSystem_closeChannel(cCommSystem_mCommSystem, cGameComm_mGameComm->unk_06C);
         func_00266E88(VoipMan);
         func_00266DF8(VoipMan);

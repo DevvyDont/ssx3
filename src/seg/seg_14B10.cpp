@@ -1736,24 +1736,24 @@ extern "C" void cRider_checkForReaction(cRider* self)
         }
         switch (self->ReactionEventType) {
         case 1:
-            *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)(((char*)self) + 0x8C8);
+            *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)&self->GraftFromUpperSpine;
             cRiderAnimBase_play(self->mRiderAnim, 315, 0, -1.0f);
             *(long*)((char*)self->mRiderAnim + 0x20) = -1;
             func_0029FF80(cAudioInterface_bxAudio(), ((char*)self), 0);
             break;
         case 2:
-            *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)(((char*)self) + 0x8C8);
+            *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)&self->GraftFromUpperSpine;
             cRiderAnimBase_play(self->mRiderAnim, 315, 0, -1.0f);
             *(long*)((char*)self->mRiderAnim + 0x20) = -1;
             func_0029FF80(cAudioInterface_bxAudio(), ((char*)self), 1);
             break;
         case 3:
-            *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)(((char*)self) + 0x8C8);
+            *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)&self->GraftFromUpperSpine;
             cRiderAnimBase_play(self->mRiderAnim, 315, 0, -1.0f);
             *(long*)((char*)self->mRiderAnim + 0x20) = -1;
             break;
         case 4:
-            *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)(((char*)self) + 0x8C8);
+            *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)&self->GraftFromUpperSpine;
             cRiderAnimBase_play(self->mRiderAnim, 314, 0, -1.0f);
             *(long*)((char*)self->mRiderAnim + 0x20) = -1;
             break;
@@ -1998,13 +1998,13 @@ extern "C" void cCheatFX_setCheatInput(char *, int);
 extern "C" int cRider_checkForPrewind(cRider* self, int isJumpHeld, int isJumpPressed) {
     if (isJumpPressed != 0)
         cCheatFX_setCheatInput((char*)self->mRiderHandler + 0xD20, 1);
-    if ((*(float *)(((char*)self) + 0x360) == 0.0f && isJumpHeld != 0) || isJumpPressed != 0) {
+    if ((self->JumpHeldSec == 0.0f && isJumpHeld != 0) || isJumpPressed != 0) {
         if (cRider_getControlState_62C8((char*)self) == 1)
             cBoardPressControl_forceExit((char*)self->mRiderHandler + 0x1D0);
         cRider_setControlState_62C8(((char*)self), 2);
         return 1;
     }
-    *(float *)(((char*)self) + 0x360) = 1.0f;
+    self->JumpHeldSec = 1.0f;
     return 0;
 }
 #endif

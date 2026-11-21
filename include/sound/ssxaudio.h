@@ -200,9 +200,11 @@ struct cSSXAudio {
     float mCurTrickPower[2];            // 0x6074 [O]; [U] cSSXAudio_SetCurTrickPower swc1, cSSXAudio_ResetAudioVariables reads [0] and zero-stores both
     int mLastTime;                      // 0x607C [O]; [U] cSSXAudio_UpdateTimedEvent
     float mLastWipeoutRecoverPercent[2]; // 0x6080 [O]; [U] cSSXAudio_ResetWipeoutRecoverHit/cSSXAudio_PlayWipeoutRecoverHit/cSSXAudio_PlayWipeoutRecoverFull (wipeout recover hits)
-    char unk_6088[0x4];                 // 0x6088 [U] func_0028F5B8 (to the map screen) sets it,
-                                        //        func_0028F678 reads and clears it: likely On Tour's
-                                        //        mPausedSFXForMapScreen
+    int mPausedSFXForMapScreen;         // 0x6088 [O] bool (a word in retail; On Tour's member right after
+                                        //        mLastWipeoutRecoverPercent, before mAudioMode); [U] func_0028F5B8
+                                        //        (cUITemplate_MAP's map-screen entry) clears it, then sets it to 1 when
+                                        //        it pauses the SFX (cSSXAudio_PauseSFX); func_0028F678 (map-screen exit)
+                                        //        resumes them (cSSXAudio_ResumeSFX) only when set, and clears it
     int unk_608C;                       // 0x608C [R] ctor 0; [U] func_0028BF78 sets it (switching the radio mode
                                         //        restarts the music) and 11 methods read it (cSSXAudio_FrontEndLoad,
                                         //        cSSXAudio_FrontEndPurge, cSSXAudio_NeedWPAmbience, func_0028CF98,
@@ -405,7 +407,7 @@ CHECK_OFFSET(cSSXAudio, mpAvalancheRiderIndex, 0x6070);
 CHECK_OFFSET(cSSXAudio, mCurTrickPower, 0x6074);
 CHECK_OFFSET(cSSXAudio, mLastTime, 0x607C);
 CHECK_OFFSET(cSSXAudio, mLastWipeoutRecoverPercent, 0x6080);
-CHECK_OFFSET(cSSXAudio, unk_6088, 0x6088);
+CHECK_OFFSET(cSSXAudio, mPausedSFXForMapScreen, 0x6088);
 CHECK_OFFSET(cSSXAudio, unk_608C, 0x608C);
 CHECK_OFFSET(cSSXAudio, unk_6090, 0x6090);
 CHECK_OFFSET(cSSXAudio, unk_6094, 0x6094);

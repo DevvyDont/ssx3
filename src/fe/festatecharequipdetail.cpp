@@ -706,7 +706,7 @@ extern "C" void cFEStateCharEquip_onUpdate(cFEStateCharEquip* self)
         self->mIconsLoaded = 1;
         func_0019A9B8(self);
     }
-    void* screen = cList_first((cList*)((char*)self + 0x24));
+    void* screen = cList_first((cList*)(&self->mScreens));
     char* obj = (char*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_loading_text));
     if (obj != 0) {
         char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum);
@@ -3100,7 +3100,7 @@ extern "C" void func_0019C7E8(cFEStateCharEquip* self, void* item)
         price *= 10;
     }
     cBuyPopupInfo_initBuyBolt((int*)((char*)popup + 0x48), id, price, self->mMoneyAvailable);
-    cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
+    cUIStateStack_pushPopup(&self->mpEngine->mStateStack, popup);
 }
 #endif
 

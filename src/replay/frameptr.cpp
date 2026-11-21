@@ -790,7 +790,7 @@ extern "C" void cReplay_reset(cReplay* self)
     self->WriteRemaining = 0;
     self->WriteFrameCount = 0;
     cReplayHighlight* highlight = ((&self->Highlight[0]));
-    char* highlightData = ((char*)self) + 0x498;
+    char* highlightData = (char*)&self->Highlight[0].Stats;
     void** pp = (void**)(&self->InputCache[0]);
     do {
         if (*pp) cReplayCache_reset(*pp);

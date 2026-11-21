@@ -32,6 +32,7 @@
 #include "layout.h"
 #include "fe/festatenet.h"
 #include "ui/uithing.h"
+#include "ui/uiscrollbar.h"   // cUIScrollBar (mpSlider1 / mpSlider2)
 
 struct cUIThing;
 struct cUIMenu;
@@ -119,16 +120,19 @@ struct cFEStateChatRoom {
                                     //       row i and sets its quality (func_001AAD50)
     cUIText* mpTextRoomName;        // 0x6E8 [U] onWidgetCreate: widget "TextRoomName"; func_001B2378 sets the room
                                     //       name text on it
-    cUIThing* mpSlider1;            // 0x6EC [R] 0; [U] onWidgetCreate: widget "slider1" (the player list's scroll
-                                    //       bar; attr bit 0 set); onCreateScreen cFEStateChatRoom_onCreateScreen stores its arrows /
-                                    //       outline at + 0x7C/0x80/0x84 and 2 at + 0x88; func_001B3D20 updates it
-                                    //       from miMenuScroll[0] (cUIScrollBar_setValues)
+    cUIScrollBar* mpSlider1;        // 0x6EC [R] 0; [U] onWidgetCreate: widget "slider1" (the player list's scroll
+                                    //       bar; attr bit 0 set); onCreateScreen cFEStateChatRoom_onCreateScreen stores its
+                                    //       mpUpArrow / mpDownArrow / mpHideOnEmpty (+ 0x7C/0x80/0x84) and meHideState = 2
+                                    //       (+ 0x88) (ui/uiscrollbar.h); func_001B3D20 updates it from miMenuScroll[0]
+                                    //       (cUIScrollBar_setValues); cFEStateChatRoom_onGainTransition hides it (cUIScrollBar_setScrollVisibile)
     cUIText* mpTextScrollChat;      // 0x6F0 [R] 0; [U] onWidgetCreate: widget "TextScrollChat" (the chat history);
                                     //       onCreateScreen gives it mChatColour (+ 0xA8) and mpSlider2 (+ 0xB8);
                                     //       func_001B2CD0 appends "name: message" lines to it (cUITextScroll_addAsciiString,
                                     //       func_001A83D8)
-    cUIThing* mpSlider2;            // 0x6F4 [R] 0; [U] onWidgetCreate: widget "slider2" (the chat history's scroll
-                                    //       bar); onCreateScreen sets it up like mpSlider1
+    cUIScrollBar* mpSlider2;        // 0x6F4 [R] 0; [U] onWidgetCreate: widget "slider2" (the chat history's scroll
+                                    //       bar); onCreateScreen sets it up like mpSlider1 and also copies the highlight
+                                    //       names into its mszUpAnimation / mszDownAnimation (+ 0x8C / + 0xA5), then hands
+                                    //       it to mpTextScrollChat's cUITextScroll::mpScrollBar (+ 0xB8)
     int mbExiting;                  // 0x6F8 [R] 0 (both ctors); [U] onWidgetEvent cFEStateChatRoom_onWidgetEvent (back) sets 1 and
                                     //       opens "kT_POPUP231ExitingRoom"; the net-event handler func_001B3A30 drops
                                     //       chat messages (0xDE) while it is set
