@@ -261,9 +261,9 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
         if (self->mBuyPrompt != 0) {
             self->mBuyPrompt = 0;
             cUIState_hideObjSafe(((char*)self), str_PopupGroup);
-            char* o = (char*)self->pAttribMenu;
-            sVE_4A90* vt = *(sVE_4A90**)(o + 8);
-            vt[7].fn(o + vt[7].delta, 1);
+            cUIMenu* o = self->pAttribMenu;
+            sVE_4A90* vt = (sVE_4A90*)o->mVtbl;
+            vt[7].fn(((char*)o) + vt[7].delta, 1);
         } else {
             char* mgr = *(char**)self->mpEngine;
             sVEr_4A90* vt = *(sVEr_4A90**)(mgr + 4);

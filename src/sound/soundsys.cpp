@@ -7504,13 +7504,13 @@ static inline int sndIsOn(char* t)
  */
 extern "C" void cSSXAudio_UpdateTrackBanks(cSSXAudio* self)
 {
-    char* rider = (char*)((cAI*)cAudioInterface_getAI())->Riders[0];
-    int patchRID = *(int*)(rider + 0x430);
+    cRider* rider = ((cAI*)cAudioInterface_getAI())->Riders[0];
+    int patchRID = (int)rider->mGroundPolyId;
     int ok = patchRID != -1;
     if (ok) {
         if ((patchRID & 0xFF) != *(unsigned char*)&self->mLastPatchRID) {
             self->mLastPatchRID = (unsigned int)patchRID;
-            if (*(int*)(rider + 0x434) < 22) {
+            if (rider->mGroundMaterial < 22) {
                 cSSXAudio_StartTone(self);
             } else {
                 cSSXAudio_StopTone(self, 5.029983997344971f);
@@ -12526,14 +12526,14 @@ extern "C" void func_002A45C0(cSSXAudio* self)
         func_002A4590(self, 0);
     }
     int id = D_00536730[0];
-    char* rider = (char*)((cAI*)cAudioInterface_getAI())->Riders[0];
+    cRider* rider = ((cAI*)cAudioInterface_getAI())->Riders[0];
     int fragCount;
     if (func_002A4078(self) != 0) {
-        fragCount = *(int*)(*(char**)(rider + 0x790) + 0x128);
+        fragCount = *(int*)((char*)rider->mMetrix + 0x128);
     } else {
         fragCount = 0;
     }
-    func_002A4660(self, id, fragCount, *(int*)(*(char**)(rider + 0x790) + 0x114), *(int*)(rider + 0x480) ^ 1);
+    func_002A4660(self, id, fragCount, *(int*)((char*)rider->mMetrix + 0x114), rider->mDidNotFinish ^ 1);
 }
 #endif
 

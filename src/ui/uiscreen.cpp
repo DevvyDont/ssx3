@@ -305,7 +305,7 @@ void* cUIScreen_playFrame_impl(void* vself, unsigned short frame, int ThreadType
     pNewThread->mpPrev = pNewThread;
     pNewThread->setActive(true);
     pNewThread->setPrimary(ThreadType == 0);
-    cList_addToEnd((cList*)((char*)self + 0x18), (cListNode*)pNewThread);
+    cList_addToEnd((cList*)(&self->mThreads), (cListNode*)pNewThread);
     return pNewThread;
 }
 #endif
@@ -762,9 +762,9 @@ extern "C" void cUIScreen_createAllObjects(cUIScreen* self)
     for (unsigned int i = 0; i < *(unsigned int*)self->mpObjectBlock; i++) {
         void* uiObj = ((void**)self->mppObjectList)[i];
         if (uiObj != 0) {
-            char* state = (char*)self->mpState;
-            sUIVtCED0* vt = *(sUIVtCED0**)(state + 8);
-            vt[18].fn(state + vt[18].delta, uiObj);
+            cUIState* state = self->mpState;
+            sUIVtCED0* vt = (sUIVtCED0*)state->mVtbl;
+            vt[18].fn(((char*)state) + vt[18].delta, uiObj);
         }
     }
 }
@@ -1097,7 +1097,7 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_onInput__FPv);
 void* cUIScreen_onInput(void* vself)
 {
     cUIScreen* self = (cUIScreen*)vself;
-    return cUIGroup_onInput((char*)self + 0x40);
+    return cUIGroup_onInput(&self->mRootGroup);
 }
 #endif
 
@@ -1235,18 +1235,18 @@ struct cUIScrollBar_render2D_sVEntry {
  */
 extern "C" void cUIScrollBar_render2D(cUIScrollBar* self, float x, float y)
 {
-    char* background = (char*)self->mpObjBackground;
-    if (background != 0 && self->mpObjKnob != 0) {
+    cUIThing* background = self->mpObjBackground;
+    if (((char*)background) != 0 && self->mpObjKnob != 0) {
         float px = x + self->mPosition.x;
         float py = y + self->mPosition.y;
-        if ((*(int*)(background + 0x14) >> 6) & 1) {
-            cUIScrollBar_render2D_sVEntry* vt = *(cUIScrollBar_render2D_sVEntry**)(background + 8);
-            vt[17].fn(background + vt[17].delta, px, py);
+        if ((background->mAttr >> 6) & 1) {
+            cUIScrollBar_render2D_sVEntry* vt = (cUIScrollBar_render2D_sVEntry*)background->mVtbl;
+            vt[17].fn(((char*)background) + vt[17].delta, px, py);
         }
-        char* knob = (char*)self->mpObjKnob;
-        if ((*(int*)(knob + 0x14) >> 6) & 1) {
-            cUIScrollBar_render2D_sVEntry* vt = *(cUIScrollBar_render2D_sVEntry**)(knob + 8);
-            vt[17].fn(knob + vt[17].delta, px, py);
+        cUIThing* knob = self->mpObjKnob;
+        if ((knob->mAttr >> 6) & 1) {
+            cUIScrollBar_render2D_sVEntry* vt = (cUIScrollBar_render2D_sVEntry*)knob->mVtbl;
+            vt[17].fn(((char*)knob) + vt[17].delta, px, py);
         }
     }
 }
@@ -1560,9 +1560,9 @@ extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
                 cUIScreen_playFrame(self->mpScreen, ev, 1);
             }
             self->mValue = self->mValue - 1;
-            char* mgr = (char*)self->mpScreen->mpState;
-            cUISlider_onInput_sVEntryM* vm = *(cUISlider_onInput_sVEntryM**)(mgr + 8);
-            vm[19].fn(mgr + vm[19].delta, ((char*)self), 9);
+            cUIState* mgr = self->mpScreen->mpState;
+            cUISlider_onInput_sVEntryM* vm = (cUISlider_onInput_sVEntryM*)mgr->mVtbl;
+            vm[19].fn(((char*)mgr) + vm[19].delta, ((char*)self), 9);
             cUISlider_onInput_sVEntryS* vs = *(cUISlider_onInput_sVEntryS**)snd;
             vs[2].fn(snd + vs[2].delta, 1);
         }
@@ -1576,9 +1576,9 @@ extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
                 cUIScreen_playFrame(self->mpScreen, ev, 1);
             }
             self->mValue = self->mValue + 1;
-            char* mgr = (char*)self->mpScreen->mpState;
-            cUISlider_onInput_sVEntryM* vm = *(cUISlider_onInput_sVEntryM**)(mgr + 8);
-            vm[19].fn(mgr + vm[19].delta, ((char*)self), 9);
+            cUIState* mgr = self->mpScreen->mpState;
+            cUISlider_onInput_sVEntryM* vm = (cUISlider_onInput_sVEntryM*)mgr->mVtbl;
+            vm[19].fn(((char*)mgr) + vm[19].delta, ((char*)self), 9);
             cUISlider_onInput_sVEntryS* vs = *(cUISlider_onInput_sVEntryS**)snd;
             vs[2].fn(snd + vs[2].delta, 1);
         }
@@ -1617,31 +1617,31 @@ struct cUISlider_render2D_sVEntryV {
  */
 extern "C" void cUISlider_render2D(cUISlider* self, float dx, float dy)
 {
-    char* background = (char*)self->mpObjBackground;
-    if (background == 0 || (char*)self->mpObjKnob == 0) {
+    cUIThing* background = self->mpObjBackground;
+    if (((char*)background) == 0 || (char*)self->mpObjKnob == 0) {
         return;
     }
     float x = dx + self->mPosition.x;
     float y = dy + self->mPosition.y;
-    cUISlider_render2D_sVEntryF* va = *(cUISlider_render2D_sVEntryF**)(background + 8);
-    va[17].fn(background + va[17].delta, x, y);
-    char* bgObj = (char*)self->mpObjBackground;
-    cUISlider_render2D_sVec3 pos = *(cUISlider_render2D_sVec3*)(bgObj + 0x44);
+    cUISlider_render2D_sVEntryF* va = (cUISlider_render2D_sVEntryF*)background->mVtbl;
+    va[17].fn(((char*)background) + va[17].delta, x, y);
+    cUIThing* bgObj = self->mpObjBackground;
+    cUISlider_render2D_sVec3 pos = *(cUISlider_render2D_sVec3*)&bgObj->mPosition;
     cUISlider_render2D_sVec3 bgSize;
-    cUISlider_render2D_sVEntryV* vo = *(cUISlider_render2D_sVEntryV**)(bgObj + 8);
-    vo[20].fn(bgObj + vo[20].delta, &bgSize);
-    char* knob = (char*)self->mpObjKnob;
+    cUISlider_render2D_sVEntryV* vo = (cUISlider_render2D_sVEntryV*)bgObj->mVtbl;
+    vo[20].fn(((char*)bgObj) + vo[20].delta, &bgSize);
+    cUIThing* knob = self->mpObjKnob;
     cUISlider_render2D_sVec3 knobSize;
-    cUISlider_render2D_sVEntryV* vb = *(cUISlider_render2D_sVEntryV**)(knob + 8);
-    vb[20].fn(knob + vb[20].delta, &knobSize);
+    cUISlider_render2D_sVEntryV* vb = (cUISlider_render2D_sVEntryV*)knob->mVtbl;
+    vb[20].fn(((char*)knob) + vb[20].delta, &knobSize);
     float w = bgSize.x - knobSize.x;
-    char* knobObj = (char*)self->mpObjKnob;
-    cUISlider_render2D_sVec3 knobPos = *(cUISlider_render2D_sVec3*)(knobObj + 0x44);
+    cUIThing* knobObj = self->mpObjKnob;
+    cUISlider_render2D_sVec3 knobPos = *(cUISlider_render2D_sVec3*)&knobObj->mPosition;
     knobPos.x = pos.x + w / ((float)self->mNumValues - 1.0f) * (float)self->mValue;
-    *(cUISlider_render2D_sVec3*)(knobObj + 0x44) = knobPos;
-    char* knobWidget = (char*)self->mpObjKnob;
-    cUISlider_render2D_sVEntryF* vb3 = *(cUISlider_render2D_sVEntryF**)(knobWidget + 8);
-    vb3[17].fn(knobWidget + vb3[17].delta, x, y);
+    *(cUISlider_render2D_sVec3*)&knobObj->mPosition = knobPos;
+    cUIThing* knobWidget = self->mpObjKnob;
+    cUISlider_render2D_sVEntryF* vb3 = (cUISlider_render2D_sVEntryF*)knobWidget->mVtbl;
+    vb3[17].fn(((char*)knobWidget) + vb3[17].delta, x, y);
 }
 #endif
 
@@ -1817,7 +1817,7 @@ INCLUDE_ASM("ui/uiscreen", cUIState_onDestroyScreen__FPv);
 void* cUIState_onDestroyScreen(void* vself)
 {
     cUIState* self = (cUIState*)vself;
-    return cList_destroyList(((char*)self + 0x24));
+    return cList_destroyList((self->mScreens));
 }
 #endif
 

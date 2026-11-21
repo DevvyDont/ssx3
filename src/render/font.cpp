@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "render/ps2gridmesh.h"
 #include "render/particle.h"
 #include "render/graphicsman.h"
@@ -4691,7 +4692,7 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_PushView);
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
 extern "C" void cPS2GraphicsMan_PushView(cPS2GraphicsMan* self)
 {
-    char* top = (char*)self->mCurrentView;
+    t4Matrix* top = self->mCurrentView;
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2      $vf1, 0x0(%1)\n"
@@ -4704,7 +4705,7 @@ extern "C" void cPS2GraphicsMan_PushView(cPS2GraphicsMan* self)
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"(top + 0x40), "r"(top)
+        : "r"(((char*)top) + 0x40), "r"(((char*)top))
         : "memory");
     *(char**)&self->mCurrentView += 0x40;
     self->mViewDepth += 1;

@@ -443,12 +443,12 @@ extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(cFEStateAudioOptions*
         ((int*)(&self->mpChecks[0]))[i] = 0;
     }
     self->mInStore = inStore;
-    char* engineObj = (char*)self->mpEngine;
+    cUIEngine* engineObj = self->mpEngine;
     int hash = GetHashValue32(str_checkbox);
-    self->mpCheckBox = (cTextureElement*)cUITextureBank_getElementByHashname(engineObj + 0x58, hash);
-    char* engineObj2 = (char*)self->mpEngine;
+    self->mpCheckBox = (cTextureElement*)cUITextureBank_getElementByHashname(engineObj->mTextureBank, hash);
+    cUIEngine* engineObj2 = self->mpEngine;
     int emptyBoxHash = GetHashValue32(str_empty_box);
-    self->mpEmptyBox = (cTextureElement*)cUITextureBank_getElementByHashname(engineObj2 + 0x58, emptyBoxHash);
+    self->mpEmptyBox = (cTextureElement*)cUITextureBank_getElementByHashname(engineObj2->mTextureBank, emptyBoxHash);
     self->mCharID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
     void* ri = cBE_getInterface_Fv(cBE_getBE(), 13);
     self->mRadioMode = cBERewardInterface_getRadioMode(ri, self->mUserNum, self->mCharID);

@@ -1208,9 +1208,9 @@ extern "C" void cSectionMan_eventbegin(cSectionMan* self, int mode)
         return;
     }
     cAI_resetRidersStatTotals(SSXApp->Game->AI);
-    char* app = (char*)SSXApp;
-    *(int*)(*(char**)(*(char**)(app + 0x84) + 0xC) + 0xC) = 0;
-    if ((unsigned int)(*(int*)(*(char**)(*(char**)(app + 0x84) + 0x78) + 0x1BC) - 14) < 3) {
+    cSSXApp* app = SSXApp;
+    *(int*)((char*)app->Game->AI + 0xC) = 0;
+    if ((unsigned int)(app->Game->SectionMan->mBELocationID - 14) < 3) {
         cBENewRaceInterface_setGameMode(race, 4);
         cBENewRaceInterface_setGameEvent(race, 12);
     } else {

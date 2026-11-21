@@ -238,9 +238,9 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
             }
         }
         void* menu = cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_SessionViewPoints));
-        char* game = (char*)SSXApp->Game;
-        if (game != 0) {
-            char* rider = *(char**)(*(char**)(game + 0xC) + 0x28);
+        cGame* game = SSXApp->Game;
+        if (((char*)game) != 0) {
+            char* rider = (char*)game->AI->Riders[0];
             sV4_87F0 riderPos = *((cRiderSub_87F0*)(rider + 0x6C0))->getPosition();
             sV3_87F0 riderPos3;
             riderPos3.x = riderPos.x;
@@ -1394,9 +1394,9 @@ struct sSelf0020A380 {
 extern "C" void cOVState_onCreateScreen(cOVState* self)
 {
     self->mRestoreCutSceneMode = 0;
-    char* game = (char*)SSXApp->Game;
-    if (game != 0) {
-        char* cutSceneMan = *(char**)(game + 0x64);
+    cGame* game = SSXApp->Game;
+    if (((char*)game) != 0) {
+        char* cutSceneMan = (char*)game->CutSceneTransitionMan;
         int mode = *(int*)(cutSceneMan + 0x10);
         if (mode != 0) {
             cCutSceneTransitionMan_ForceToRegularMode(cutSceneMan);
@@ -1437,9 +1437,9 @@ struct sVEntry0020A430 {
 extern "C" void cOVState_onDestroyScreen(cOVState* self)
 {
     if (self->mRestoreCutSceneMode != 0) {
-        char* game = (char*)SSXApp->Game;
-        if (game != 0) {
-            cCutSceneTransitionMan_ForceToCutSceneMode(*(void**)(game + 0x64));
+        cGame* game = SSXApp->Game;
+        if (((char*)game) != 0) {
+            cCutSceneTransitionMan_ForceToCutSceneMode(game->CutSceneTransitionMan);
             self->mRestoreCutSceneMode = 0;
         }
     }
@@ -1506,7 +1506,7 @@ extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
 {
     int ret = 0;
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    char* net = ((char*)&cBENetworkInterface_networkOpt);
+    tBENetworkDB* net = &cBENetworkInterface_networkOpt;
     if (*(int*)net != 0 && self->mpScreen != 0) {
         cGameComm* sess = cGameComm_mGameComm;
         if (sess != 0 && sess->mConnected != 0) {
@@ -1525,7 +1525,7 @@ extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
                 unsigned short linesOffset = *(unsigned short*)(obj + 0xC6);
                 int none = origNumLines == 0;
                 sBXString_A4E0 chatLine;
-                cBXString_cBXString2(&chatLine, net + 0x498);
+                cBXString_cBXString2(&chatLine, ((char*)net) + 0x498);
                 cBXString_Concat(&chatLine, str_colon_sp_b);
                 cBXString_Concat(&chatLine, name);
                 cUITextScroll_addAsciiString(obj, chatLine.str);
@@ -1560,9 +1560,9 @@ struct sVEntry0020A6A8 {
  */
 extern "C" void cOVState_onWidgetEvent(cOVState* self, int pWidget, int Event)
 {
-    char* w = (char*)SSXApp->Game;
-    if (w != 0) {
-        char* currentState = *(char**)(w + 0x200);
+    cGame* w = SSXApp->Game;
+    if (((char*)w) != 0) {
+        char* currentState = (char*)w->mCurrentState;
         if (currentState != 0) {
             sVEntry0020A6A8* vt = *(sVEntry0020A6A8**)(currentState + 0xC);
             vt[9].fn(currentState + vt[9].delta, pWidget, Event);

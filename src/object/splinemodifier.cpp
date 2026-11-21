@@ -589,7 +589,7 @@ static inline void vu0AddTo_9CF8(sSmVec4_9CF8& a, const sSmVec4_9CF8& b)
  */
 extern "C" void cSplineModifier_updateIntersectInfo(cSplineModifier* self, sSmBody_9CF8* body)
 {
-    char* sub = (char*)&self->BoundBox;
+    tBoundBox* sub = &self->BoundBox;
     if (self->Start == 0) {
         return;
     }
@@ -608,7 +608,7 @@ extern "C" void cSplineModifier_updateIntersectInfo(cSplineModifier* self, sSmBo
         rateZ *= ddirY / dirX - self->Dir.y * ddirX / selfX2;
         rateY = (1.0f / Sqrt_9CF8(sum)) * (self->DDir.z - self->Dir.z * (ddirX + ddirY) / sum);
     }
-    sSmVec4_9CF8 vel = vu0Scale_9CF8(vu0Normalize_9CF8((*(sSmVec4_9CF8*)&self->Dir)), *(float*)(sub + 0x38));
+    sSmVec4_9CF8 vel = vu0Scale_9CF8(vu0Normalize_9CF8((*(sSmVec4_9CF8*)&self->Dir)), *(float*)(((char*)sub) + 0x38));
     sSmVec4_9CF8 w;
     w.x = 0.0f;
     w.z = rateZ * self->Velocity;

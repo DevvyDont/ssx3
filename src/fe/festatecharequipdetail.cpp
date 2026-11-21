@@ -2661,14 +2661,14 @@ struct sVec3K19BC90 {
  */
 extern "C" void cFEStateCharEquip_updatePolyBar(cFEStateCharEquip* self)
 {
-    char* pointsBar = (char*)self->mpPointsBar;
-    if (pointsBar != 0) {
+    cUIThing* pointsBar = self->mpPointsBar;
+    if (((char*)pointsBar) != 0) {
         float fillRatio = (float)(self->mCurrentPolyCount - 1500) / (float)(D_004A18D8 - 1500);
         if (fillRatio < 0.0f) {
             fillRatio = 0.0f;
         }
-        sVEntry0019BC90* vt = *(sVEntry0019BC90**)(pointsBar + 8);
-        vt[9].fn(pointsBar + vt[9].delta, 1);
+        sVEntry0019BC90* vt = (sVEntry0019BC90*)pointsBar->mVtbl;
+        vt[9].fn(((char*)pointsBar) + vt[9].delta, 1);
         *(sVec3K19BC90*)&self->mpPointsBar->mScale = sVec3K19BC90(1.0f, -fillRatio, 1.0f);
     }
 }
@@ -2716,18 +2716,18 @@ extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* s
     else if (fillRatio < 0.0f)
         fillRatio = 0.0f;
     if (D_004A18D8 < self->mCurrentPolyCount + delta) {
-        char* equipBar = (char*)self->mpPointsEquipBar;
-        sVEntryK19BD48* vt = *(sVEntryK19BD48**)(equipBar + 8);
-        vt[11].fn(equipBar + vt[11].delta, D_004C66E8);
+        cUIThing* equipBar = self->mpPointsEquipBar;
+        sVEntryK19BD48* vt = (sVEntryK19BD48*)equipBar->mVtbl;
+        vt[11].fn(((char*)equipBar) + vt[11].delta, D_004C66E8);
     } else {
-        char* equipBar = (char*)self->mpPointsEquipBar;
-        sVEntryK19BD48* vt = *(sVEntryK19BD48**)(equipBar + 8);
-        vt[11].fn(equipBar + vt[11].delta, D_004C66F8);
+        cUIThing* equipBar = self->mpPointsEquipBar;
+        sVEntryK19BD48* vt = (sVEntryK19BD48*)equipBar->mVtbl;
+        vt[11].fn(((char*)equipBar) + vt[11].delta, D_004C66F8);
     }
     {
-        char* equipBar = (char*)self->mpPointsEquipBar;
-        sVEntryIK19BD48* vt = *(sVEntryIK19BD48**)(equipBar + 8);
-        vt[9].fn(equipBar + vt[9].delta, 1);
+        cUIThing* equipBar = self->mpPointsEquipBar;
+        sVEntryIK19BD48* vt = (sVEntryIK19BD48*)equipBar->mVtbl;
+        vt[9].fn(((char*)equipBar) + vt[9].delta, 1);
     }
     *(sVec3K19BD48*)&self->mpPointsEquipBar->mScale = sVec3K19BD48(1.0f, -fillRatio, 1.0f);
 }

@@ -3170,10 +3170,10 @@ extern "C" void cRider_updateSplit1(cRider* self)
     int frameSlot = AITick() % 3;
     if (frameSlot != self->mAIIndex % 3)
     {
-        char* game = (char*)SSXApp->Game;
-        if (*(int*)((char*)self->mOverlapList + 4) == *(int*)(*(char**)(game + 0x20) + 0xA0))
+        cGame* game = SSXApp->Game;
+        if (*(int*)((char*)self->mOverlapList + 4) == *(int*)((char*)game->BXNash + 0xA0))
         {
-            void* obj = *(void**)(game + 0x34);
+            void* obj = game->PlaybackMan;
             int busy = 0;
             if (cPlaybackMan_isRecord(obj) || IsState1_120F20(obj))
                 busy = 1;
@@ -6523,8 +6523,8 @@ extern "C" void cTransitionMan_EndTransition(void* p);
  */
 extern "C" void cRider_cancelRiderTransitions(cRider* self)
 {
-    void* w = SSXApp->Game;
-    if (*(void**)((char*)w + 0x84) != 0 && self->mViewIndex >= 0)
+    cGame* w = SSXApp->Game;
+    if (w->ViewMan != 0 && self->mViewIndex >= 0)
     {
         if (*(int*)((char*)cGame_getTransitionMan(w, self->mViewIndex) + 0x78) == 1)
             cTransitionMan_EndTransition(cGame_getTransitionMan(SSXApp->Game, self->mViewIndex));
@@ -6662,10 +6662,10 @@ extern "C" int cRider_updateFinishTest(cRider* self)
             cBE_getInterface(cBE_getBE(), 0);
             if (cBENewRaceInterface_newRace.cGameMode == 4)
                 return self->mFinishTime >= zeroF;
-            char* app = (char*)SSXApp;
-            char* gameModeMan = *(char**)(app + 0xC0);
+            cSSXApp* app = SSXApp;
+            char* gameModeMan = (char*)app->GameModeMan;
             if (*(int*)(gameModeMan + 0x88) != 0 && ((D_005308D0[0] >> 9) & 1) == 0) {
-                int eventTicks = *(int*)(*(char**)(*(char**)(app + 0x84) + 0xC) + 0xC);
+                int eventTicks = app->Game->AI->EventTimerTick;
                 int secs = fptoui((float)*(unsigned int*)(gameModeMan + 0x78) * 0.01666666753590107f);
                 if (secs * 60 < eventTicks) {
                     self->mDidNotFinish = 1;

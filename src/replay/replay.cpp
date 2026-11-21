@@ -79,9 +79,9 @@ extern "C" void cReplay_restoreFrame(cReplay* self, cStreamRF* stream)
     char* game = (char*)SSXApp->Game;
     sVtS_DBF0* vt = *(sVtS_DBF0**)game;
     vt[9].fn(game + vt[9].delta, stream);
-    char* aiObj = (char*)SSXApp->Game->AI;
-    sVtS_DBF0* vt2 = *(sVtS_DBF0**)(aiObj + 0xCC);
-    vt2[8].fn(aiObj + vt2[8].delta, stream);
+    cAI* aiObj = SSXApp->Game->AI;
+    sVtS_DBF0* vt2 = (sVtS_DBF0*)aiObj->mVtbl;
+    vt2[8].fn(((char*)aiObj) + vt2[8].delta, stream);
     cAvalanche_readFromReplayFrame((char*)stream);
     cWScriptMan_readFromReplayFrame(cWScriptMan_TheWScriptMan, stream);
     func_00229E58(D_004A2A00, stream);
@@ -390,7 +390,7 @@ INCLUDE_ASM("replay/replay", cReplay_findFrame__FPv);
 void* cReplay_findFrame(void* vself)
 {
     cReplay* self = (cReplay*)vself;
-    return cReplayFrameList_findFrame((char*)self + 0x3b0);
+    return cReplayFrameList_findFrame(&self->FrameList);
 }
 #endif
 

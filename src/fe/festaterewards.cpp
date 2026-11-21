@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "fe/festatevideoplayer.h"
 #include "ui/uiicon.h"
 #include "ui/uiinput.h"
@@ -247,10 +248,10 @@ extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase*
         cUIStateStack_push(self->mpEngine->mStateStack, backState);
         return 1;
     }
-    char* cur = (char*)self->mpSelected;
+    cUIIcon* cur = self->mpSelected;
     int curIdx = 0;
-    if (cur != 0) {
-        curIdx = *(int*)(cur + 0x18);
+    if (((char*)cur) != 0) {
+        curIdx = cur->mMiscData;
     }
     int changed = 0;
     int row = curIdx / self->mMaxRewardColumns;
@@ -1590,15 +1591,15 @@ struct sVEK1D0D30d {
  */
 extern "C" void cFEStateRewardGalleryBase_updateRewardInfo(cFEStateRewardGalleryBase* self)
 {
-    char* grid = (char*)self->mpSelected;
-    if (grid == 0) {
+    cUIIcon* grid = self->mpSelected;
+    if (((char*)grid) == 0) {
         if (self->mpRewardNameText != 0)
             cUIText_setAsciiString(self->mpRewardNameText, D_004A1408);
         if (self->mpRewardCostText != 0)
             cUIText_setAsciiString(self->mpRewardCostText, D_004A1408);
         return;
     }
-    int idx = self->mFirstVisibleRow * self->mMaxRewardColumns + *(int*)(grid + 0x18);
+    int idx = self->mFirstVisibleRow * self->mMaxRewardColumns + grid->mMiscData;
     sVEK1D0D30a* vt = (sVEK1D0D30a*)self->mVtbl;
     void* item = vt[34].fn((char*)self + vt[34].delta, idx);
     if (self->mpRewardNameText != 0) {
@@ -1700,8 +1701,8 @@ struct sVEK1D0F30c {
  */
 extern "C" void cFEStateRewardGalleryBase_updateHighlither(cFEStateRewardGalleryBase* self)
 {
-    char* icon = (char*)self->mpHilighter;
-    if (icon != 0) {
+    cUIThing* icon = self->mpHilighter;
+    if (((char*)icon) != 0) {
         if ((char*)self->mpSelected != 0) {
             sVec3_F168 cellPos;
             sVec3_F168 barPos;
@@ -1710,18 +1711,18 @@ extern "C" void cFEStateRewardGalleryBase_updateHighlither(cFEStateRewardGallery
             barPos.y = cellPos.y + self->mVertHilighterOffset;
             barPos.x = cellPos.x + self->mHorizHilighterOffset;
             *(sVec3_F168*)&self->mpHilighter->mPosition = barPos;
-            char* selectBar = (char*)self->mpHilighter;
-            sVEK1D0F30a* vt = *(sVEK1D0F30a**)(selectBar + 8);
-            vt[9].fn(selectBar + vt[9].delta, 1);
+            cUIThing* selectBar = self->mpHilighter;
+            sVEK1D0F30a* vt = (sVEK1D0F30a*)selectBar->mVtbl;
+            vt[9].fn(((char*)selectBar) + vt[9].delta, 1);
         } else {
-            sVEK1D0F30a* vt = *(sVEK1D0F30a**)(icon + 8);
-            vt[9].fn(icon + vt[9].delta, 0);
+            sVEK1D0F30a* vt = (sVEK1D0F30a*)icon->mVtbl;
+            vt[9].fn(((char*)icon) + vt[9].delta, 0);
         }
     }
-    char* grid = (char*)self->mpSelected;
-    if (grid == 0)
+    cUIIcon* grid = self->mpSelected;
+    if (((char*)grid) == 0)
         return;
-    int idx = self->mFirstVisibleRow * self->mMaxRewardColumns + *(int*)(grid + 0x18);
+    int idx = self->mFirstVisibleRow * self->mMaxRewardColumns + grid->mMiscData;
     sVEK1D0F30b* vt = (sVEK1D0F30b*)self->mVtbl;
     if (vt[38].fn((char*)self + vt[38].delta, idx) != 0) {
         sVEK1D0F30b* vt2 = (sVEK1D0F30b*)self->mVtbl;
@@ -1729,18 +1730,18 @@ extern "C" void cFEStateRewardGalleryBase_updateHighlither(cFEStateRewardGallery
         if (iconId < 0) {
             sVEK1D0F30b* vt3 = (sVEK1D0F30b*)self->mVtbl;
             int textureElement = vt3[27].fn((char*)self + vt3[27].delta, idx);
-            char* curCell = (char*)self->mpSelected;
-            *(int*)(curCell + 0x78) = -1;
-            *(int*)(curCell + 0x7C) = textureElement;
+            cUIIcon* curCell = self->mpSelected;
+            curCell->mTextureID = -1;
+            curCell->mpTextureElem = (const cTextureElement*)textureElement;
         } else {
-            char* curCell = (char*)self->mpSelected;
-            *(int*)(curCell + 0x78) = iconId;
-            *(int*)(curCell + 0x7C) = 0;
+            cUIIcon* curCell = self->mpSelected;
+            curCell->mTextureID = iconId;
+            curCell->mpTextureElem = 0;
         }
     }
-    char* curCell = (char*)self->mpSelected;
-    sVEK1D0F30c* vt4 = *(sVEK1D0F30c**)(curCell + 8);
-    vt4[11].fn(curCell + vt4[11].delta, D_004C6808);
+    cUIIcon* curCell = self->mpSelected;
+    sVEK1D0F30c* vt4 = (sVEK1D0F30c*)curCell->mVtbl;
+    vt4[11].fn(((char*)curCell) + vt4[11].delta, D_004C6808);
 }
 #endif
 
@@ -2531,10 +2532,10 @@ extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
  */
 extern "C" void cFEStateRewardGalleryCheatChars_getTextureElement(cFEStateRewardGalleryCheatChars* self, int i)
 {
-    char* obj = (char*)self->mpEngine;
+    cUIEngine* obj = self->mpEngine;
     void* reward = *(void**)((char*)self + (i << 2) + 0xA28);
     int textureHash = GetHashValue32(*(char**)((char*)reward + 4));
-    cUITextureBank_getElementByHashname(obj + 0x58, textureHash);
+    cUITextureBank_getElementByHashname(obj->mTextureBank, textureHash);
 }
 #endif
 

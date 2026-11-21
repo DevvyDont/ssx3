@@ -340,10 +340,10 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(cFEStateMountainRoom* self, 
         char buf[20];
         *(sName5_2AD0*)buf = D_00467298[0];
         func_00416210(buf + 5, 0, 15);
-        char* eng = (char*)self->mpEngine;
+        cUIEngine* eng = self->mpEngine;
         buf[2] = *(unsigned char*)&self->mLevel + '0';
         int hash = GetHashValue32(buf);
-        int texElem = cUITextureBank_getElementByHashname(eng + 0x58, hash);
+        int texElem = cUITextureBank_getElementByHashname(eng->mTextureBank, hash);
         w->f78 = -1;
         w->f7C = texElem;
         return;
@@ -483,9 +483,9 @@ extern "C" int cFEStateMountainRoom_onInputBegin(cFEStateMountainRoom* self, cUI
         }
         sVEv1D2EA0* svt = *(sVEv1D2EA0**)snd;
         svt[2].fn(snd + svt[2].delta, 3);
-        char* w = (char*)self->mpPassGroup;
-        sVEv1D2EA0* vt = *(sVEv1D2EA0**)(w + 8);
-        vt[9].fn(w + vt[9].delta, 0);
+        cUIGroup* w = self->mpPassGroup;
+        sVEv1D2EA0* vt = (sVEv1D2EA0*)w->mVtbl;
+        vt[9].fn(((char*)w) + vt[9].delta, 0);
     }
     return 1;
     }

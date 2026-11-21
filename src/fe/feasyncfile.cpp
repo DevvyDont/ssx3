@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "fe/festatenethelppopup.h"
 #include "ui/uimenu.h"
 #include "fe/screenpopup.h"
@@ -1068,10 +1069,10 @@ static inline void* GetSession_001A4750()
  */
 extern "C" void func_001A4750(cFEStateNetMessenger* self)
 {
-    char* keyboard = (char*)self->mpKeyboard;
-    switch (*(int*)(keyboard + 0x18)) {
+    cKeyboardPopup* keyboard = self->mpKeyboard;
+    switch (keyboard->miMiscData) {
     case 1:
-        func_001A4810(self, keyboard + 0x74);
+        func_001A4810(self, keyboard->mszEditString);
         break;
     case 2:
         func_00262690(GetSession_001A4750(), func_001A98B0(((cFEStateNet*)self)), self->mpKeyboard->mszEditString);
@@ -2048,9 +2049,9 @@ extern "C" void func_001A5898(cFEStateNetMessenger* vself)
         }
     }
     if (((void*)self->mpScreen) != 0) {
-        char* list = (char*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_playerMenu));
+        cUIText* list = cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_playerMenu));
         int n = ((sElem1A5898*)(*(&self->mNames)).mpFinish) - ((sElem1A5898*)(*(&self->mNames)).mpStart);
-        if (*(unsigned char*)(list + 0x96) != n) {
+        if (*(unsigned char*)(((char*)list) + 0x96) != n) {
             cUIMenu_setScrollableMenu(list, n);
         }
     }
@@ -2088,9 +2089,9 @@ extern "C" void func_001A5FB8(cFEStateNetMessenger* self, int sel)
     int i;
     for (i = 0; i < 15; i++) {
         sprintf(buf, str_ps2Xpct_02d, i);
-        void* obj = (void*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
-        if (obj != 0) {
-            sVE1A5FB8* vt = *(sVE1A5FB8**)((char*)obj + 0x8);
+        cUIText* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
+        if (((void*)obj) != 0) {
+            sVE1A5FB8* vt = (sVE1A5FB8*)obj->mVtbl;
             vt[9].fn((char*)obj + vt[9].delta, i == sel);
         }
         func_001A66A8(self, sel, i == sel);
@@ -3180,25 +3181,25 @@ extern "C" void cFEStateReadMessagePopup_onCreateScreen(cFEStateReadMessagePopup
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    char* scrollBar = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgreementSlider));
-    *(int*)(scrollBar + 0x14) |= 1;
+    cUIText* scrollBar = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgreementSlider));
+    scrollBar->mAttr |= 1;
     void* upArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatUpArrow));
     void* downArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatDownArrow));
     void* sliderOutline = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_slideroutline2));
-    *(void**)(scrollBar + 0x7C) = upArrow;
-    *(void**)(scrollBar + 0x80) = downArrow;
-    *(void**)(scrollBar + 0x84) = sliderOutline;
-    *(int*)(scrollBar + 0x88) = 2;
-    char* textScroll = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat));
-    if (textScroll != 0) {
+    *(void**)&scrollBar->mShadowColour.R = upArrow;
+    *(void**)&scrollBar->mShadowColour.G = downArrow;
+    *(void**)&scrollBar->mShadowColour.B = sliderOutline;
+    *(int*)&scrollBar->mStaticColour = 2;
+    cUIText* textScroll = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat));
+    if (((char*)textScroll) != 0) {
         cFEVObj_001A7970* obj = (cFEVObj_001A7970*)textScroll;
-        *(int*)(textScroll + 0x74) |= 1;
+        textScroll->mAttrText |= 1;
         cUITextScroll_setInputMap(textScroll, 1);
         obj->setVisible(1);
-        *(int*)(textScroll + 0x14) |= 0x80;
+        textScroll->mAttr |= 0x80;
         obj->setColour(sCol1A7970(1.0f, 0.0f, 0.0f, 0.0f));
-        *(sBlk1A7970*)(textScroll + 0xA8) = *(sBlk1A7970*)&self->mTextColour;
-        *(char**)(textScroll + 0xB8) = scrollBar;
+        *(sBlk1A7970*)&textScroll->mNumLines = *(sBlk1A7970*)&self->mTextColour;
+        *(char**)&textScroll->mStringSize = ((char*)scrollBar);
     }
 }
 #endif
@@ -7824,10 +7825,10 @@ static inline void Show1ACDD0(char* o, int on)
  */
 extern "C" void func_001ACDD0(cFEUseExistingAccount* self)
 {
-    char* keyboard = (char*)self->mpKeyboard;
-    switch (*(int*)(keyboard + 0x18)) {
+    cKeyboardPopup* keyboard = self->mpKeyboard;
+    switch (keyboard->miMiscData) {
     case 6: {
-        const char* name = keyboard + 0x74;
+        const char* name = keyboard->mszEditString;
         cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterAccountName));
         if (text != 0) {
             cUIText_setAsciiString(text, name);
@@ -7841,7 +7842,7 @@ extern "C" void func_001ACDD0(cFEUseExistingAccount* self)
         break;
     }
     case 7: {
-        const char* name = keyboard + 0x74;
+        const char* name = keyboard->mszEditString;
         if (cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterPassword)) != 0) {
             func_001A98B8((cFEStateNet*)self, name);
             cUIText_setAsciiString(self->mpKeyboardText, (char*)&self->mszMaskedText);
@@ -9734,9 +9735,9 @@ extern "C" void func_001AF568(cFEStateChallengePopup* self)
         char* obj = locale + vt[4].delta;
         sprintf1(buf, vt[4].fn(obj, GetHashValue32(str_kT_240WaitingChallenge)), name);
         cUIText_setUnicodeString(text, buf);
-        char* submitText = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextSubmit));
-        sVE_001AF568b* vt2 = *(sVE_001AF568b**)(submitText + 8);
-        vt2[8].fn(submitText + vt2[8].delta, 1);
+        cUIText* submitText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextSubmit));
+        sVE_001AF568b* vt2 = (sVE_001AF568b*)submitText->mVtbl;
+        vt2[8].fn(((char*)submitText) + vt2[8].delta, 1);
         cUIMenu_setSelectedByIndex(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_MenuChallenge)), 7);
         func_001AEC60(self, 1);
     }
@@ -11112,10 +11113,10 @@ extern "C" int cFEStateOnlineCharacterSelect_onGainTransition(cFEStateOnlineChar
     if (bFirstTime != 0) {
         func_001B1B10(self, cUIListBox_getCurrentEntryData(self->mpLBChallengerSelect), 0);
         cBE_getInterface_Fv(SSXApp->BE, 7);
-        char* net = ((char*)&cBENetworkInterface_networkOpt);
-        if (*(int*)(net + 0x32C) >= 0) {
-            func_001B1760(self, *(int*)(net + 0x32C));
-            func_001B1B10(self, *(int*)(net + 0x32C), 1);
+        tBENetworkDB* net = &cBENetworkInterface_networkOpt;
+        if (net->OpponentCharacterID >= 0) {
+            func_001B1760(self, net->OpponentCharacterID);
+            func_001B1B10(self, net->OpponentCharacterID, 1);
         }
         func_001B1808(self);
         self->mbConfirmed = 0;
@@ -11820,14 +11821,14 @@ extern "C" void func_001B1B98(cFEStateOnlineCharacterSelect* self, int index, in
         name1[0] = '0' + i;
         cFEVObj_001B1B98* valueText = (cFEVObj_001B1B98*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name1));
         name2[0] = '0' + i;
-        void* attrBar = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name2));
-        if (valueText != 0 && attrBar != 0) {
+        cUIText* attrBar = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name2));
+        if (valueText != 0 && ((void*)attrBar) != 0) {
             int attrValue = stats[i];
             int displayValue = attrValue / 5;
             sprintf(num, str_pct_d_b, displayValue);
             valueText->setVisible(1);
             cUIText_setAsciiString((cUIText*)valueText, num);
-            *(int*)((char*)attrBar + 0x80) = 55;
+            *(int*)&attrBar->mShadowColour.G = 55;
             cUIProgress_setValue(attrBar, attrValue);
         }
     }
@@ -12033,19 +12034,19 @@ extern "C" void cFEStateChatRoom_onCreateScreen(cFEStateChatRoom* self)
     *(cUIText**)((char*)self->mpSlider2 + 0x7C) = uiText;
     *(cUIText**)((char*)self->mpSlider2 + 0x80) = downArrow;
     {
-        char* slider2 = (char*)self->mpSlider2;
+        cUIThing* slider2 = self->mpSlider2;
         if ((unsigned int)strlen(str_hlu2) > 24) {
-            slider2[0x8C] = 0;
+            ((char*)slider2)[0x8C] = 0;
         } else {
-            strcpy(slider2 + 0x8C, str_hlu2);
+            strcpy(((char*)slider2) + 0x8C, str_hlu2);
         }
     }
     {
-        char* slider2 = (char*)self->mpSlider2;
+        cUIThing* slider2 = self->mpSlider2;
         if ((unsigned int)strlen(str_hld2) > 24) {
-            slider2[0xA5] = 0;
+            ((char*)slider2)[0xA5] = 0;
         } else {
-            strcpy(slider2 + 0xA5, str_hld2);
+            strcpy(((char*)slider2) + 0xA5, str_hld2);
         }
     }
     int two = 2;
@@ -12808,10 +12809,10 @@ static inline void* GetSession_001B33D8()
  */
 extern "C" void func_001B33D8(cFEStateChatRoom* self)
 {
-    char* keyboard = (char*)self->mpKeyboard;
-    switch (*(int*)(keyboard + 0x18)) {
+    cKeyboardPopup* keyboard = self->mpKeyboard;
+    switch (keyboard->miMiscData) {
     case 4:
-        func_0025AAE0(LobbyMan_mLobbyMan, keyboard + 0x74);
+        func_0025AAE0(LobbyMan_mLobbyMan, keyboard->mszEditString);
         break;
     case 2:
         func_00262690(GetSession_001B33D8(), func_001A98B0(((cFEStateNet*)self)), self->mpKeyboard->mszEditString);
@@ -14947,9 +14948,9 @@ extern "C" void func_001B5A58(cFEStateNetConfig* self, void* popup, int event)
         func_00261408(BuddyMan_mBuddyMan);
         func_0025B800(LobbyMan_mLobbyMan);
         func_002636F0(func_002591B8(), 0);
-        char* obj = (char*)self->mpPairSettings;
-        sVE1B5A58* vt = *(sVE1B5A58**)(obj + 8);
-        vt[8].fn(obj + vt[8].delta, 0);
+        cUIThing* obj = self->mpPairSettings;
+        sVE1B5A58* vt = (sVE1B5A58*)obj->mVtbl;
+        vt[8].fn(((char*)obj) + vt[8].delta, 0);
         break;
     }
     case 22:
@@ -17986,10 +17987,10 @@ extern "C" void cFEStateCreateStep1_onWidgetEvent(cFEStateCreateStep1* self, cha
         break;
     case 13: {
         func_001B9820(self);
-        char* staticContinue = (char*)self->mpStaticContinue;
-        if (staticContinue != 0) {
-            sVE_001B8C38* vt = *(sVE_001B8C38**)(staticContinue + 8);
-            vt[8].fn(staticContinue + vt[8].delta, !func_001B9558(self));
+        cUIText* staticContinue = self->mpStaticContinue;
+        if (((char*)staticContinue) != 0) {
+            sVE_001B8C38* vt = (sVE_001B8C38*)staticContinue->mVtbl;
+            vt[8].fn(((char*)staticContinue) + vt[8].delta, !func_001B9558(self));
         }
         break;
     }
@@ -18424,30 +18425,30 @@ extern "C" void func_001B9950(cFEStateCreateStep1* self, cUIText* text, char* st
  */
 extern "C" void func_001B9820(cFEStateCreateStep1* self)
 {
-    char* keyboard = (char*)self->mpKeyboard;
-    switch (*(unsigned int*)(keyboard + 0x18)) {
+    cKeyboardPopup* keyboard = self->mpKeyboard;
+    switch ((unsigned int)keyboard->miMiscData) {
     case 11:
         if (self->mpKeyboardText != 0) {
-            func_001A98B8((cFEStateNet*)self, keyboard + 0x74);
+            func_001A98B8((cFEStateNet*)self, keyboard->mszEditString);
             cUIText_setAsciiString(self->mpKeyboardText, (char*)&self->mszMaskedText);
         }
         cBXString_operatorE1(&self->mpAccount->mPassword, self->mpKeyboard->mszEditString);
         break;
     case 12:
         if (self->mpKeyboardText != 0) {
-            func_001A98B8((cFEStateNet*)self, keyboard + 0x74);
+            func_001A98B8((cFEStateNet*)self, keyboard->mszEditString);
             cUIText_setAsciiString(self->mpKeyboardText, (char*)&self->mszMaskedText);
         }
         cBXString_operatorE1(&self->mpAccount->unk_08, self->mpKeyboard->mszEditString);
         break;
     case 10:
         if (self->mpKeyboardText != 0) {
-            cUIText_setAsciiString(self->mpKeyboardText, keyboard + 0x74);
+            cUIText_setAsciiString(self->mpKeyboardText, keyboard->mszEditString);
         }
         cBXString_operatorE1((char*)self->mpAccount, self->mpKeyboard->mszEditString);
         break;
     case 13: {
-        cBXString_operatorE1(&self->mpAccount->mMail, keyboard + 0x74);
+        cBXString_operatorE1(&self->mpAccount->mMail, keyboard->mszEditString);
         char* email = self->mpAccount->mMail;
         if (((int*)email)[-2] != 0) {
             func_001B9950(self, self->mpKeyboardText, email);
@@ -18892,9 +18893,9 @@ extern "C" void func_001BA178(cFEStateCreateStep1* self)
         cBXString_operatorE((char*)&self->mszSavedPassword, &self->mpAccount->mPassword);
         cBXString_operatorE((char*)&self->mszSavedConfirm, &self->mpAccount->unk_08);
         cBXString_operatorE((char*)&self->mszSavedMail, &self->mpAccount->mMail);
-        char* account = (char*)self->mpAccount;
-        self->miSavedSpam[0] = *(int*)(account + 0x38);
-        self->miSavedSpam[1] = *(int*)(account + 0x3C);
+        tLobbyAccount* account = self->mpAccount;
+        self->miSavedSpam[0] = account->mSpam[0];
+        self->miSavedSpam[1] = account->mSpam[1];
     } else {
         cBXString_Reset((char*)&self->mszSavedPassword);
         cBXString_Reset((char*)&self->mszSavedConfirm);
@@ -18953,8 +18954,8 @@ extern char str_kT_POPUP210EditingAccount[];
 extern "C" void func_001BA280(cFEStateCreateStep1* self)
 {
     func_001BA358(self);
-    char* account = (char*)self->mpAccount;
-    if (*(int*)(account + 0x4C) == 0 && *(int*)(account + 0x44) == 0 && *(int*)(account + 0x48) == 0) {
+    tLobbyAccount* account = self->mpAccount;
+    if (account->mChangeMail == 0 && account->mChangePassword == 0 && account->mChangeSpam == 0) {
         func_001A8A40(self, cFEStateSelectPersona_cFEStateSelectPersona((cFEStateSelectPersona*)cMemMan_alloc(1752, str_cFEStateSelectPersona, 0, 0), (int)self->mpEngine));
     } else {
         void* pp = func_001A9C50((cFEStateNet*)self);
@@ -18989,9 +18990,9 @@ extern "C" void func_001BA358(cFEStateCreateStep1* self)
     if (func_004165A8(self->mpAccount->mMail, self->mszSavedMail) != 0) {
         self->mpAccount->mChangeMail = 1;
     }
-    char* account = (char*)self->mpAccount;
-    if (*(int*)(account + 0x38) != self->miSavedSpam[0] || *(int*)(account + 0x3C) != self->miSavedSpam[1]) {
-        *(int*)(account + 0x48) = 1;
+    tLobbyAccount* account = self->mpAccount;
+    if (account->mSpam[0] != self->miSavedSpam[0] || account->mSpam[1] != self->miSavedSpam[1]) {
+        account->mChangeSpam = 1;
     }
 }
 #endif
@@ -19175,8 +19176,8 @@ extern "C" void cFEStateCreateStep2_onWidgetEvent(cFEStateCreateStep2* self, int
                 self->mpAccount->mBornMonth = cUIListBox_getCurrentEntryData(obj);
                 cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_LBDay));
                 if (box != 0) {
-                    char* account = (char*)self->mpAccount;
-                    func_001BB840(self, box, *(int*)(account + 0x28), *(int*)(account + 0x30), *(int*)(account + 0x2C));
+                    tLobbyAccount* account = self->mpAccount;
+                    func_001BB840(self, box, account->mBornMonth, account->mBornYear, account->mBornDay);
                 }
             }
             if (IsHash_001BA618(*(int*)(obj + 0x38), str_LBYear)) {
@@ -19187,8 +19188,8 @@ extern "C" void cFEStateCreateStep2_onWidgetEvent(cFEStateCreateStep2* self, int
                 cBXString_Reset(&self->mpAccount->mParentMail);
                 cUIText* box = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_LBDay));
                 if (box != 0) {
-                    char* account = (char*)self->mpAccount;
-                    func_001BB840(self, box, *(int*)(account + 0x28), *(int*)(account + 0x30), *(int*)(account + 0x2C));
+                    tLobbyAccount* account = self->mpAccount;
+                    func_001BB840(self, box, account->mBornMonth, account->mBornYear, account->mBornDay);
                 }
             }
             if (IsHash_001BA618(*(int*)(obj + 0x38), str_LBDay)) {
@@ -20751,9 +20752,9 @@ extern "C" int func_001BC4F0(cFEStateCreateDuplicate* self, int id, int data)
         break;
     case 258:
         if (*(unsigned int*)((char*)data + 8) == 0x6475706C) {
-            char* openPopup = (char*)self->mpPopup;
-            if (openPopup != 0) {
-                int popupId = *(int*)(openPopup + 0x18);
+            cScreenPopup* openPopup = self->mpPopup;
+            if (((char*)openPopup) != 0) {
+                int popupId = openPopup->miMiscData;
                 if (popupId == 2080 || popupId == 2069) {
                     cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
                 }
@@ -21532,9 +21533,9 @@ extern "C" void func_001BD540(cFEStateLobbyMenu* self, int a1, void* a2);
  */
 extern "C" void func_001BD428(cFEStateLobbyMenu* self)
 {
-    char* keyboard = (char*)self->mpKeyboard;
-    if (*(int*)(keyboard + 0x18) == 8) {
-        func_001BD540(self, (int)self->mszRoomName, keyboard + 0x74);
+    cKeyboardPopup* keyboard = self->mpKeyboard;
+    if (keyboard->miMiscData == 8) {
+        func_001BD540(self, (int)self->mszRoomName, keyboard->mszEditString);
     }
 }
 #endif
@@ -22899,14 +22900,14 @@ extern "C" void cFEStateNetCreateRoomPopup_onWidgetEvent(cFEStateNetCreateRoomPo
         }
         break;
     case 13: {
-        char* keyboard = (char*)self->mpKeyboard;
-        switch (*(int*)(keyboard + 0x18)) {
+        cKeyboardPopup* keyboard = self->mpKeyboard;
+        switch (keyboard->miMiscData) {
         case 1:
-            cBXString_operatorE1((char*)&self->mszRoomName, keyboard + 0x74);
+            cBXString_operatorE1((char*)&self->mszRoomName, keyboard->mszEditString);
             cUIText_setAsciiString(self->mpTextRoomName, (const char*)self->mszRoomName);
             break;
         case 2:
-            cBXString_operatorE1((char*)&self->mszPassword, keyboard + 0x74);
+            cBXString_operatorE1((char*)&self->mszPassword, keyboard->mszEditString);
             cUIText_setAsciiString(self->mpTextPassword, (const char*)self->mszPassword);
             break;
         }
@@ -23439,9 +23440,9 @@ extern "C" void func_001BF438(cFEStateLogin* self, void* popup, int kind)
                 ((cFEVObj_001BF438*)self)->onWidgetCreate(widget);
             }
         }
-        void* menu = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000));
-        if (menu) {
-            char* item = *(char**)((char*)menu + 0xA0);
+        cUIText* menu = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000));
+        if (((void*)menu)) {
+            char* item = *(char**)&menu->mDisabledColour.G;
             if (item && ((*(int*)(item + 0x14) >> 5) & 1)) {
                 cUIMenu_setSelectedByIndex(menu, 1);
             }
@@ -24550,33 +24551,33 @@ public:
 extern "C" int cFEStateOnlineAgreement_onGainTransition(cFEStateOnlineAgreement* self)
 {
     ((cFEVObj_001C0B20*)self)->v32();
-    char* scrollBar = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgreementSlider));
+    cUIText* scrollBar = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgreementSlider));
     cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatUpArrow));
     cUIText* downArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatDownArrow));
     cUIText* sliderOutline = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_slideroutline2));
-    *(cUIText**)(scrollBar + 0x7C) = uiText;
-    *(cUIText**)(scrollBar + 0x80) = downArrow;
+    *(cUIText**)&scrollBar->mShadowColour.R = uiText;
+    *(cUIText**)&scrollBar->mShadowColour.G = downArrow;
     if ((unsigned int)strlen(str_top_arrow) > 24) {
-        scrollBar[0x8C] = 0;
+        ((char*)scrollBar)[0x8C] = 0;
     } else {
-        strcpy(scrollBar + 0x8C, str_top_arrow);
+        strcpy((char*)&scrollBar->mStaticColour.R, str_top_arrow);
     }
     if ((unsigned int)strlen(str_bot_arrow) > 24) {
-        scrollBar[0xA5] = 0;
+        ((char*)scrollBar)[0xA5] = 0;
     } else {
-        strcpy(scrollBar + 0xA5, str_bot_arrow);
+        strcpy(((char*)scrollBar) + 0xA5, str_bot_arrow);
     }
     if ((unsigned int)strlen(str_bot_arrow) > 24) {
-        scrollBar[0xA5] = 0;
+        ((char*)scrollBar)[0xA5] = 0;
     } else {
-        strcpy(scrollBar + 0xA5, str_bot_arrow);
+        strcpy(((char*)scrollBar) + 0xA5, str_bot_arrow);
     }
-    *(cUIText**)(scrollBar + 0x84) = sliderOutline;
-    char* x = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgTextScroll));
-    *(char**)(x + 0xB8) = scrollBar;
+    *(cUIText**)&scrollBar->mShadowColour.B = sliderOutline;
+    cUIText* x = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgTextScroll));
+    *(char**)&x->mStringSize = ((char*)scrollBar);
     cUITextScroll_setInputMap(x, 1);
     ((cFEVObj_001C0B20*)x)->setFocus(1);
-    if (scrollBar) {
+    if (((char*)scrollBar)) {
         ((cFEVObj_001C0B20*)scrollBar)->setVisible(1);
     }
     return 1;
@@ -26153,9 +26154,9 @@ struct sVE1C2A18 {
  */
 extern "C" void func_001C2A18(cFEStateNetQuickMessages* self)
 {
-    char* keyboard = (char*)self->mpKeyboard;
-    unsigned int idx = *(unsigned int*)(keyboard + 0x18);
-    char* name = keyboard + 0x74;
+    cKeyboardPopup* keyboard = self->mpKeyboard;
+    unsigned int idx = (unsigned int)keyboard->miMiscData;
+    char* name = keyboard->mszEditString;
     if (idx < 10) {
         char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
         if (strlen(name) == 0) {
@@ -26645,9 +26646,9 @@ extern "C" void func_001C3310(cFEStateStats* self_)
     int secondStat;
     if (self_->mpScreen != 0) {
         int n = func_0025F338(LobbyMan_mLobbyMan);
-        char* obj = (char*)cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(str_ResultsMenu));
-        if (obj != 0) {
-            if (*(unsigned char*)(obj + 0x96) != n) {
+        cUIText* obj = cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(str_ResultsMenu));
+        if (((char*)obj) != 0) {
+            if (*(unsigned char*)(((char*)obj) + 0x96) != n) {
                 cUIMenu_setScrollableMenu(obj, n);
                 if (n == 0) {
                     cUIMenu_setScrollableMenu(obj, 1);
@@ -27853,27 +27854,27 @@ public:
 extern "C" int cFEStateNetNews_onGainTransition(cFEStateNet* self, int on)
 {
     if (on) {
-        char* scrollBar = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_NewsSlider));
+        cUIText* scrollBar = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_NewsSlider));
         cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatUpArrow));
         cUIText* downArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatDownArrow));
         cUIText* hideOnEmpty = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_slideroutline2));
-        *(cUIText**)(scrollBar + 0x7C) = uiText;
-        *(cUIText**)(scrollBar + 0x80) = downArrow;
+        *(cUIText**)&scrollBar->mShadowColour.R = uiText;
+        *(cUIText**)&scrollBar->mShadowColour.G = downArrow;
         if ((unsigned int)strlen(str_top_arrow) > 24) {
-            scrollBar[0x8C] = 0;
+            ((char*)scrollBar)[0x8C] = 0;
         } else {
-            strcpy(scrollBar + 0x8C, str_top_arrow);
+            strcpy((char*)&scrollBar->mStaticColour.R, str_top_arrow);
         }
         if ((unsigned int)strlen(str_bot_arrow) > 24) {
-            scrollBar[0xA5] = 0;
+            ((char*)scrollBar)[0xA5] = 0;
         } else {
-            strcpy(scrollBar + 0xA5, str_bot_arrow);
+            strcpy(((char*)scrollBar) + 0xA5, str_bot_arrow);
         }
-        *(cUIText**)(scrollBar + 0x84) = hideOnEmpty;
-        char* x = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextScroll_News));
-        *(char**)(x + 0xB8) = scrollBar;
+        *(cUIText**)&scrollBar->mShadowColour.B = hideOnEmpty;
+        cUIText* x = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextScroll_News));
+        *(char**)&x->mStringSize = ((char*)scrollBar);
         ((cFEVObj_001C5198*)x)->setFocus(1);
-        if (scrollBar) {
+        if (((char*)scrollBar)) {
             ((cFEVObj_001C5198*)scrollBar)->setVisible(1);
         }
     }

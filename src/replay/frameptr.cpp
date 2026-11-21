@@ -1350,13 +1350,13 @@ extern "C" int cReplay_updateInput_impl(void* self, int a1) __asm__("cReplay_upd
 extern "C" int cReplay_updateInput_impl(void* self, int debug)
 {
     char* replay = (char*)self;
-    char* app = (char*)SSXApp;
+    cSSXApp* app = SSXApp;
     sFpView_FB88* uiSound = (sFpView_FB88*)&gUISoundNull;
-    sFpView_FB88* cur = *(sFpView_FB88**)(*(char**)(*(char**)(app + 0x84) + 0x48) + 0x14);
+    sFpView_FB88* cur = *(sFpView_FB88**)((char*)app->Game->UI + 0x14);
     if (cur != 0) uiSound = cur;
     if (*(int*)(replay + 0x618) != 0) return 0;
     int command = 0;
-    void* input = *(void**)(app + (*(int*)(replay + 0x28) << 2) + 0xB0);
+    void* input = *(void**)(((char*)app) + (*(int*)(replay + 0x28) << 2) + 0xB0);
     if (*(int*)(replay + 0x61C) == 0 && *(int*)(replay + 0x620) == 0) {
         if (cInput_getState(input, 106)) {
             *(int*)(replay + 0x1C) = 10;

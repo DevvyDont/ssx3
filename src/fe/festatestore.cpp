@@ -238,19 +238,19 @@ extern "C" void cFEStateUberTrick_onCreateScreen(cFEStateUberTrick* self)
     cSimpleCamera_setupCamWithPosAndTarget(realFe + 0x10, &camPos, &lookAt);
     *(float*)(realFe + 0x10) = 0.4363323450088501f;
     {
-        char* uiEngine = (char*)self->mpEngine;
+        cUIEngine* uiEngine = self->mpEngine;
         int iconHash = GetHashValue32(str_empty_box);
-        self->mpCheckbox = (cTextureElement*)cUITextureBank_getElementByHashname(uiEngine + 0x58, iconHash);
+        self->mpCheckbox = (cTextureElement*)cUITextureBank_getElementByHashname(uiEngine->mTextureBank, iconHash);
     }
     {
-        char* uiEngine = (char*)self->mpEngine;
+        cUIEngine* uiEngine = self->mpEngine;
         int iconHash = GetHashValue32(str_checkbox);
-        self->mpCheckmark = (cTextureElement*)cUITextureBank_getElementByHashname(uiEngine + 0x58, iconHash);
+        self->mpCheckmark = (cTextureElement*)cUITextureBank_getElementByHashname(uiEngine->mTextureBank, iconHash);
     }
     {
-        char* uiEngine = (char*)self->mpEngine;
+        cUIEngine* uiEngine = self->mpEngine;
         int iconHash = GetHashValue32(str_yell_dollar_sign);
-        self->mpDollarSign = (cTextureElement*)cUITextureBank_getElementByHashname(uiEngine + 0x58, iconHash);
+        self->mpDollarSign = (cTextureElement*)cUITextureBank_getElementByHashname(uiEngine->mTextureBank, iconHash);
     }
     func_0028F140(cAudioInterface_bxAudio(), 5);
     cFEStateUberTrick_costVisible(self, 0);

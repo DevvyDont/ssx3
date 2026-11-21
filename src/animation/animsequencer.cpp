@@ -198,8 +198,8 @@ extern "C" void cAnimSequence_removeAllTriggers(cAnimSequence* self)
 {
     while ((char*)self->Triggers != 0)
     {
-        char* node = (char*)self->Triggers;
-        self->Triggers = (tTrigger*)(*(char**)(node + 0xC));
+        tTrigger* node = self->Triggers;
+        self->Triggers = (tTrigger*)((char*)node->Next);
         operator_delete((int*)node);
     }
 }

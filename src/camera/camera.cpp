@@ -31,8 +31,8 @@ extern "C" void cChaseCameraController_switchCamera_SoftReset(cChaseCameraContro
  */
 extern "C" void cCamera_resetChaseControllerSwitches(void)
 {
-    void* cam = SSXApp->Game;
-    int* chase = *(int**)((char*)cam + 0x84);
+    cGame* cam = SSXApp->Game;
+    int* chase = (int*)cam->ViewMan;
     if (chase != 0) {
         cChaseCameraController_switchCamera_SoftReset((cChaseCameraController*)(*(sCam162138**)(*(char**)((char*)chase + 4) + 0xA8)));
         if (*chase >= 2) {
@@ -311,7 +311,7 @@ INCLUDE_ASM("camera/camera", cCamera_snapResultAlgorithm__FPv);
 void* cCamera_snapResultAlgorithm(void* vself)
 {
     cCamera* self = (cCamera*)vself;
-    return cLookAtChaseAlgorithm_snapCurrent((cLookAtChaseAlgorithm*)((char*)self + 0xc0));
+    return cLookAtChaseAlgorithm_snapCurrent((cLookAtChaseAlgorithm*)(&self->ResultAlgorithm));
 }
 #endif
 
@@ -1153,8 +1153,8 @@ public:
  */
 extern "C" void cCamera_switchChaseControllerTargetRider(cCamera* self, int value)
 {
-    char* obj = (char*)self->ChaseController;
-    *(int*)(*(char**)(obj + 0x20) + 0x4) = value;
+    cChaseCameraController* obj = self->ChaseController;
+    obj->Target->Rider = (cRider*)value;
     ((cCamVObj_0015EDC8*)self->ChaseController)->snapCurrent();
 }
 #endif
@@ -1514,8 +1514,8 @@ public:
  */
 extern "C" void* cRiderCameraTarget_getVelocity(void* result, cRiderCameraTarget* target)
 {
-    char* rider = (char*)target->Rider;
-    *(sQuad_0015F5B0*)result = *((cCamVObj_0015F5B0*)(rider + 0x6C0))->getVelocity();
+    cRider* rider = target->Rider;
+    *(sQuad_0015F5B0*)result = *((cCamVObj_0015F5B0*)(&rider->mVtbl))->getVelocity();
     return result;
 }
 #endif
@@ -1593,7 +1593,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getLean__FPv);
 float cRiderCameraTarget_getLean(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return *(float*)((char*)self->Rider + 0x1f0);
+    return self->Rider->mSlewed[0].cur;
 }
 #endif
 
@@ -1650,7 +1650,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getHandplantSplineTangent__FPv);
 void* cRiderCameraTarget_getHandplantSplineTangent(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return (char*)*(void**)((char*)self->Rider + 0x77c) + 0x130;
+    return (char*)self->Rider->mRiderHandler + 0x130;
 }
 #endif
 
@@ -1667,7 +1667,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getHandplantTarget__FPv);
 void* cRiderCameraTarget_getHandplantTarget(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return (char*)*(void**)((char*)self->Rider + 0x77c) + 0x140;
+    return (char*)self->Rider->mRiderHandler + 0x140;
 }
 #endif
 
@@ -1684,7 +1684,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getTotalAirTime__FPv);
 float cRiderCameraTarget_getTotalAirTime(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return *(float*)((char*)*(void**)((char*)self->Rider + 0x788) + 0x98);
+    return *(float*)((char*)self->Rider->mAirPredictor + 0x98);
 }
 #endif
 
@@ -1739,7 +1739,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getApexPos__FPv);
 void* cRiderCameraTarget_getApexPos(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return (char*)*(void**)((char*)self->Rider + 0x788) + 0x40;
+    return (char*)self->Rider->mAirPredictor + 0x40;
 }
 #endif
 
@@ -1773,7 +1773,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getBoostWarp__FPv);
 float cRiderCameraTarget_getBoostWarp(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return *(float*)((char*)self->Rider + 0x2fc);
+    return self->Rider->mBoostStrength;
 }
 #endif
 
@@ -1790,7 +1790,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getCrouch__FPv);
 float cRiderCameraTarget_getCrouch(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return *(float*)((char*)self->Rider + 0x220);
+    return self->Rider->mSlewed[4].cur;
 }
 #endif
 
@@ -1828,7 +1828,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getSurfaceType__FPv);
 int cRiderCameraTarget_getSurfaceType(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return *(int*)((char*)self->Rider + 0x438);
+    return self->Rider->mSurfaceType;
 }
 #endif
 
@@ -1845,7 +1845,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getVerticalJump__FPv);
 float cRiderCameraTarget_getVerticalJump(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return *(float*)((char*)self->Rider + 0x5a4);
+    return *(float*)&self->Rider->unk_5A4;
 }
 #endif
 
@@ -1862,7 +1862,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_didPop__FPv);
 int cRiderCameraTarget_didPop(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return *(int*)((char*)self->Rider + 0x5a8);
+    return self->Rider->unk_5A8;
 }
 #endif
 
@@ -1968,7 +1968,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_isRidingFlexRail__FPv);
 int cRiderCameraTarget_isRidingFlexRail(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return *(int*)((char*)self->Rider + 0x5ac);
+    return self->Rider->unk_5AC;
 }
 #endif
 
@@ -1985,7 +1985,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getLandingNormal__FPv);
 void* cRiderCameraTarget_getLandingNormal(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return (char*)*(void**)((char*)self->Rider + 0x788) + 0x20;
+    return (char*)self->Rider->mAirPredictor + 0x20;
 }
 #endif
 
@@ -2002,7 +2002,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getLandingVelocity__FPv);
 void* cRiderCameraTarget_getLandingVelocity(void* vself)
 {
     cRiderCameraTarget* self = (cRiderCameraTarget*)vself;
-    return (char*)*(void**)((char*)self->Rider + 0x788) + 0x10;
+    return (char*)self->Rider->mAirPredictor + 0x10;
 }
 #endif
 
@@ -4808,11 +4808,11 @@ void cLookAtChaseAlgorithm__cLookAtChaseAlgorithm_dtor(void* vself, int flags)
 {
     cLookAtChaseAlgorithm* self = (cLookAtChaseAlgorithm*)vself;
     self->mVtbl = cLookAtChaseAlgorithm_vtbl;
-    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x334, 2);
-    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x328, 2);
-    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x31C, 2);
-    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x310, 2);
-    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x304, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant(self->HalfPipeAngleSpline, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant(self->FullAirPositionSpline, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant(self->FullAirTargetSpline, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant(self->AirPositionSpline, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant(self->AirTargetSpline, 2);
     self->mVtbl = D_0045BDE0;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -11042,8 +11042,8 @@ public:
  */
 extern "C" void cLookBackChaseAlgorithm_snap(cLookBackChaseAlgorithm* self, int id)
 {
-    char* rider = (char*)self->Target->Rider;
-    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->getAIIndex()) {
+    cRider* rider = self->Target->Rider;
+    if (id == ((cCamTargetK8940*)(&rider->mVtbl))->getAIIndex()) {
         cLookAtChaseAlgorithm_snap(((cCamCtrlK8940*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cLookAtChaseAlgorithm*)self), 559.7440185546875f, 300.0f);
         ((cCamCtrlK8940*)self)->update();
@@ -11199,8 +11199,8 @@ INCLUDE_ASM("camera/camera", cMidRightChaseAlgorithm_snap);
  */
 extern "C" void cMidRightChaseAlgorithm_snap(cMidRightChaseAlgorithm* self, int id)
 {
-    char* rider = (char*)self->Target->Rider;
-    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->getAIIndex()) {
+    cRider* rider = self->Target->Rider;
+    if (id == ((cCamTargetK8940*)(&rider->mVtbl))->getAIIndex()) {
         cLookAtChaseAlgorithm_snap(((cCamCtrlK8940*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cLookAtChaseAlgorithm*)self), 559.7440185546875f, 300.0f);
         ((cCamCtrlK8940*)self)->update();
@@ -11355,8 +11355,8 @@ INCLUDE_ASM("camera/camera", cMidLeftChaseAlgorithm_snap);
  */
 extern "C" void cMidLeftChaseAlgorithm_snap(cMidLeftChaseAlgorithm* self, int id)
 {
-    char* rider = (char*)self->Target->Rider;
-    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->getAIIndex()) {
+    cRider* rider = self->Target->Rider;
+    if (id == ((cCamTargetK8940*)(&rider->mVtbl))->getAIIndex()) {
         cLookAtChaseAlgorithm_snap(((cCamCtrlK8940*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cLookAtChaseAlgorithm*)self), 559.7440185546875f, 300.0f);
         ((cCamCtrlK8940*)self)->update();

@@ -2717,16 +2717,16 @@ extern "C" void cFEPopupSelectMultiplayerMode_onWidgetEvent(cFEPopupSelectMultip
 {
     switch (Event) {
     case 5: {
-        char* engine = (char*)self->mpEngine;
+        cUIEngine* engine = self->mpEngine;
         self->mMultiMode = 1;
         D_004A19D4 = *(int*)((char*)pWidget + 0x18) != 0;
-        cUIStateStack_pop(engine + 0x18, 1);
+        cUIStateStack_pop(engine->mStateStack, 1);
         break;
     }
     case 6: {
-        char* engine = (char*)self->mpEngine;
+        cUIEngine* engine = self->mpEngine;
         self->mMultiMode = 0;
-        cUIStateStack_pop(engine + 0x18, 1);
+        cUIStateStack_pop(engine->mStateStack, 1);
         break;
     }
     }
@@ -6720,9 +6720,9 @@ extern "C" void func_001E2FE0(int id, unsigned char flag)
     messageList->entries[messageList->count].id = id;
     messageList->entries[messageList->count].flag = flag;
     messageList->mask &= ~(1 << messageList->count);
-    char* gameUi = (char*)SSXApp->Game->UI;
-    if (gameUi != 0) {
-        char* obj = (char*)cUIStateStack_findState(gameUi + 0x18, GetHashValue32(str_hud_b));
+    cUIEngine* gameUi = SSXApp->Game->UI;
+    if (((char*)gameUi) != 0) {
+        char* obj = (char*)cUIStateStack_findState(gameUi->mStateStack, GetHashValue32(str_hud_b));
         if (obj != 0) {
             sVEntryK1E2FE0* vt = *(sVEntryK1E2FE0**)(obj + 8);
             vt[24].fn(obj + vt[24].delta, 8, 0);
@@ -7431,19 +7431,19 @@ extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGEC
     self->mpArrowUp = 0;
     self->mpArrowDown = 0;
     {
-        char* eng = (char*)self->mpEngine;
+        cUIEngine* eng = self->mpEngine;
         int nameHash = GetHashValue32(str_folder);
-        stateView->h164 = cUITextureBank_getElementByHashname(eng + 0x58, nameHash);
+        stateView->h164 = cUITextureBank_getElementByHashname(eng->mTextureBank, nameHash);
     }
     {
-        char* eng = (char*)self->mpEngine;
+        cUIEngine* eng = self->mpEngine;
         int nameHash = GetHashValue32(str_minus_folder);
-        stateView->h168 = cUITextureBank_getElementByHashname(eng + 0x58, nameHash);
+        stateView->h168 = cUITextureBank_getElementByHashname(eng->mTextureBank, nameHash);
     }
     {
-        char* eng = (char*)self->mpEngine;
+        cUIEngine* eng = self->mpEngine;
         int nameHash = GetHashValue32(str_questmark_b);
-        stateView->h16C = cUITextureBank_getElementByHashname(eng + 0x58, nameHash);
+        stateView->h16C = cUITextureBank_getElementByHashname(eng->mTextureBank, nameHash);
     }
     if (~D_004A20CC != 0) {
         if (func_001E3A30((void*)7) != 0)
@@ -10416,8 +10416,8 @@ extern "C" void func_001E8160(void* self, void* popup, int event)
 {
     if (popup != 0) {
         if (event == 5 && *(int*)((char*)self + 0xA0) != 0) {
-            char* game = (char*)SSXApp->Game;
-            cUIStateStack_purgeNormalStates(*(char**)(game + 0x48) + 0x18);
+            cGame* game = SSXApp->Game;
+            cUIStateStack_purgeNormalStates(game->UI->mStateStack);
             cGame_doNextState(game);
         }
     }
@@ -10673,8 +10673,8 @@ extern "C" void func_001E8880(void* self, void* popup, int event)
 {
     if (popup != 0) {
         if (event == 5 && *(int*)((char*)self + 0xA0) != 0) {
-            char* game = (char*)SSXApp->Game;
-            cUIStateStack_purgeNormalStates(*(char**)(game + 0x48) + 0x18);
+            cGame* game = SSXApp->Game;
+            cUIStateStack_purgeNormalStates(game->UI->mStateStack);
             cGame_doNextState(game);
         }
     }

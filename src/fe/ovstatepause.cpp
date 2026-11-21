@@ -2237,7 +2237,7 @@ extern "C" int func_001FD320(void* self, void* msg)
         void* iface0 = cBE_getInterface_Fv(cBE_getBE(), 0);
         void* iface2 = cBE_getInterface_Fv(cBE_getBE(), 2);
         void* iface13 = cBE_getInterface_Fv(cBE_getBE(), 13);
-        char* stats = (char*)SSXApp->GameModeMan;
+        cGameModeMan* stats = SSXApp->GameModeMan;
         int mode = getField_1FD320((signed char*)&cBENewRaceInterface_newRace, 74);
         void* widget = getObj_1FD320(self, str_name);
         cUIText_setAsciiString((cUIText*)widget, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 0)));
@@ -2307,7 +2307,7 @@ extern "C" int func_001FD320(void* self, void* msg)
         case 7:
         case 8: {
             widget = getObj_1FD320(self, str_timescoretobeat);
-            float mins = (float)*(unsigned int*)(stats + 0x78) * 0.01666666753590107f;
+            float mins = (float)stats->uiTimeLimit * 0.01666666753590107f;
             void* wholeSeconds = fptoui(mins);
             func_002C2540_r(num, func_0020A1A8(wholeSeconds));
             unsigned short* labelText = lookupString_1FD320(str_kT_OVRCMNTimeToBeatColon);
@@ -2324,7 +2324,7 @@ extern "C" int func_001FD320(void* self, void* msg)
         case 9:
         case 10:
         case 11: {
-            int n = *(int*)(stats + 0x7C);
+            int n = (int)stats->uiPointTarget;
             unsigned short* labelText = lookupString_1FD320(str_kT_OVRCMNScoreToBeatColon);
             func_002C2540_r(title, str_pct_s_pct_d_c);
             sprintf1(num, title, labelText, n);

@@ -115,11 +115,11 @@ INCLUDE_ASM("world/worldcache", cWorldBlockAllocator_getFreeBlock__FPv);
 void* cWorldBlockAllocator_getFreeBlock(void* vself)
 {
     cWorldBlockAllocator* self = (cWorldBlockAllocator*)vself;
-    void* item = self->m_pFreeBlocks;
-    self->m_pFreeBlocks = (tWorldMemBlock*)(*(void**)((char*)item + 0x14));
+    tWorldMemBlock* item = self->m_pFreeBlocks;
+    self->m_pFreeBlocks = (tWorldMemBlock*)(item->pNext);
     *(int*)&self->m_uiNumFreeBlocks -= 1;
-    *(int*)((char*)item + 0x10) = 1;
-    return item;
+    item->bActive = 1;
+    return ((void*)item);
 }
 #endif
 
@@ -739,8 +739,8 @@ extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int pNash)
     cBXString__cBXString(&path, 2);
     cBXString__cBXString(&full, 2);
     cBXString__cBXString(&base, 2);
-    char* hdr = (char*)self->mp_DataHeader;
-    *(char**)(hdr + 0x14) = hdr + 0x50;
+    tStreamDataHeader* hdr = self->mp_DataHeader;
+    hdr->m_pSection = (struct tBxSection*)(((char*)hdr) + 0x50);
     self->m_pSharedCacheTable = (cWorldCacheTable*)cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(232, str_SharedTable, 0, 0), &self->mp_DataHeader->m_iTable[0]);
     self->m_pSectionCacheTable = (cWorldCacheTable**)((void**)operator_new_tag((int)self->mp_DataHeader->m_uiNumSections * 4, str_SectionTables, 0, 0));
     for (unsigned int i = 0; i < self->mp_DataHeader->m_uiNumSections; i++)

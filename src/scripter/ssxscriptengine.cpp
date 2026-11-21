@@ -378,7 +378,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_Render__FPv);
 void* cSSXScriptEngine_Render(void* vself)
 {
     cSSXScriptEngine* self = (cSSXScriptEngine*)vself;
-    return cVidEngine_RenderVideo((char*)self + 0x500);
+    return cVidEngine_RenderVideo(&self->mpPlayer);
 }
 #endif
 
@@ -1780,7 +1780,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetAnimationBankInfo__F
 void* cSSXScriptEngine_GetAnimationBankInfo(void* vself)
 {
     cSSXScriptEngine* self = (cSSXScriptEngine*)vself;
-    return cScriptAnimBankManager_GetBankInfo((char*)self + 0xa28);
+    return cScriptAnimBankManager_GetBankInfo(self->mAnimationBankManager);
 }
 #endif
 
@@ -1800,7 +1800,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetSoundBankInfo__FPv);
 void* cSSXScriptEngine_GetSoundBankInfo(void* vself)
 {
     cSSXScriptEngine* self = (cSSXScriptEngine*)vself;
-    return cScriptSoundBankManager_GetBankInfo((char*)self + 0xa38);
+    return cScriptSoundBankManager_GetBankInfo(self->mSoundBankManager);
 }
 #endif
 
@@ -2560,12 +2560,12 @@ extern "C" void cSSXScriptEngine_AppendEndEventSequence(cSSXScriptEngine* self)
     if (*(int*)((char*)SSXApp->GameModeMan + 0x98) == 0) {
         return;
     }
-    char* x = (char*)SSXApp->Game;
-    if (*(int*)(*(char**)(x + 0x84) + 0x10) != 1) {
+    cGame* x = SSXApp->Game;
+    if (*(int*)((char*)x->ViewMan + 0x10) != 1) {
         return;
     }
     int found = 0;
-    sScList_AC60* list = *(sScList_AC60**)(x + 0xC);
+    sScList_AC60* list = (sScList_AC60*)x->AI;
     if (beRaceDB->cGamePath == 0) {
         for (int i = 0; i < list->nslots; i++) {
             if (D_00536730[Call_AC60(list->slots[i]->rider, 7)] < 3) {
@@ -5116,10 +5116,10 @@ public:
 extern "C" void cScriptObjCamera_OnEndObjectUse(cScriptObjCamera* self)
 {
     cScriptObject_OnEndObjectUse(self);
-    char* app = (char*)SSXApp;
-    if (*(void**)(app + 0x84) != 0) {
+    cSSXApp* app = SSXApp;
+    if (app->Game != 0) {
         *(int*)&self->mWeight = 0;
-        char* riders = *(char**)(*(char**)(app + 0x84) + 0x84);
+        char* riders = (char*)app->Game->ViewMan;
         char* rider = *(char**)(riders + (self->mViewIndex << 2) + 4);
         cScriptCameraController_removeCamera(*(void**)(rider + 0xAC), self);
         if (*(int*)(*(char**)(rider + 0xAC) + 0x18) == 0) {
@@ -6764,8 +6764,8 @@ extern "C" void cScriptObjCameraManager_OnEndObjectUse(sSeEng1400* self, int pla
         cScriptObjTransition_SetTransition_f(self->fade, -1, 9, 0.0f, 0.0f, 0.0f, 0.0f);
     }
     if (self->pending != 0) {
-        char* lvl = (char*)SSXApp->Game->AI;
-        cFocusMan_removebox(*(void**)(lvl + 0xA4), self->area, lvl);
+        cAI* lvl = SSXApp->Game->AI;
+        cFocusMan_removebox(lvl->FocusMan, self->area, lvl);
         self->pending = 0;
     }
     cScriptObjCameraManager_ResetScriptManagementVars(self);

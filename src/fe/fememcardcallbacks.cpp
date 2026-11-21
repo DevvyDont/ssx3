@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/popupinfo.h"
 #include "fe/fepopupconfirm.h"
 #include "fe/festatenethelppopup.h"
 #include "movie/mcoverlaymanager.h"
@@ -494,9 +495,9 @@ extern "C" void cFEMemCard_callbackSaveFileCorrupt(void)
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
     cMCOverlayManager_getDeviceNumberString(mp, name, *(int*)(mp + 0x428));
-    void* app = SSXApp;
+    cSSXApp* app = SSXApp;
     *(int*)((char*)cFEMemCard_mInstance + 0x19C) = 13;
-    char* locale = *(char**)((char*)app + 0x8C);
+    char* locale = (char*)app->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
     sprintf1(buf, (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMCorruptSavePS2)), name);
     char* fe = (char*)cFEMemCard_mInstance;
@@ -911,11 +912,11 @@ extern char str_kT_CMNContinue[];
  */
 extern "C" void cFEMemCard_callbackFileExists(void)
 {
-    void* app = SSXApp;
+    cSSXApp* app = SSXApp;
     char* fe = (char*)cFEMemCard_mInstance;
     *(int*)(fe + 0x19C) = 23;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
-    char* locale = *(char**)((char*)app + 0x8C);
+    char* locale = (char*)app->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
     vt[36].fn(fe + vt[36].delta, ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_FENameAlreadyExists)), 1, 0, 0, 0, 0);
     char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
@@ -2552,7 +2553,7 @@ extern char D_004A1408[];
 extern "C" void cFEPopupConfirm_initPopup(cFEPopupConfirm* self, int ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate, int bSnowFlake)
 {
     void* str = (void*)ustrDisplay;
-    char* sub = (char*)&self->info;
+    cPopupInfo* sub = &self->info;
     func_001C57C0(sub, 0, GetHashValue32(str_kT_CMNYes));
     func_001C57C0(sub, 1, GetHashValue32(str_kT_CMNNo));
     self->info.meType = 2;
@@ -2571,18 +2572,18 @@ extern "C" void cFEPopupConfirm_initPopup(cFEPopupConfirm* self, int ustrDisplay
     strcpy1(displayText, str);
     if (bNoButtons) {
         self->mNumButtons = 0;
-        *(int*)(sub + 0x98) = 1;
-        *(int*)(sub + 0) = 0;
+        sub->mbPassUpdate = 1;
+        sub->meType = 0;
     } else if (bYesOnly) {
         self->mNumButtons = 1;
-        *(int*)(sub + 0) = 1;
-        *(int*)(sub + 0x98) = passUpdate;
+        sub->meType = 1;
+        sub->mbPassUpdate = passUpdate;
     } else {
         self->mNumButtons = 2;
-        *(int*)(sub + 0x98) = passUpdate;
+        sub->mbPassUpdate = passUpdate;
     }
-    *(char**)(sub + 8) = displayText;
-    *(int*)(sub + 4) = 1;
+    sub->mtMessage.pustr = (const unsigned short*)displayText;
+    sub->mtMessage.eType = 1;
     if ((int)self->mpScreen) {
         cScreenPopup_redrawPopup_self(self);
     }

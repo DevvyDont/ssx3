@@ -1068,9 +1068,9 @@ extern "C" void cRealFE_purge(cRealFE* self)
     cFERiderManager_purge(self->mRiderManager);
     func_0019CF40(self->mBoltFileManager);
     cIrradianceDataBase_Purge(D_005047F8);
-    char* st = (char*)SSXApp;
-    *(int*)(st + 0x7C) = 0;
-    *(int*)(st + 0x80) = 0;
+    cSSXApp* st = SSXApp;
+    st->RealFE = 0;
+    st->DebugFE = 0;
     cSSXAudio_FrontEndPurge(cAudioInterface_bxAudio());
 }
 #endif

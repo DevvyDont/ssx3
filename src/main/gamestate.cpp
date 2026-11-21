@@ -845,10 +845,10 @@ extern "C" void cGFTrackStartState_loseFocus(cGFTrackStartState* self)
     restart:
         cGameModeMan_riderCheckpointHit(SSXApp->GameModeMan, 0, 0);
     }
-    char* game = (char*)SSXApp->Game;
-    char* x = *(char**)(game + 0x84);
+    cGame* game = SSXApp->Game;
+    char* x = (char*)game->ViewMan;
     if (*(int*)(x + 0x10) == 1) {
-        sTbl_235868* viewTbl = **(sTbl_235868***)(game + 0x10);
+        sTbl_235868* viewTbl = *(sTbl_235868**)game->World;
         viewTbl->slot[otherSide_235868(*(char**)(x + 4))].f0 = 0;
     }
 }
@@ -1072,13 +1072,13 @@ extern "C" void cGFNextHeatState_update(cGFNextHeatState* self)
 {
     self->WaitTicks += 1;
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    char* game = (char*)SSXApp->Game;
+    cGame* game = SSXApp->Game;
     int state = self->CurrentNextHeatState;
-    char** cache = *(char***)(game + 0x10);
-    int idx = *(int*)(*(char**)(*(char**)(game + 0x84) + 4) + 0xB0) == 0;
+    char** cache = (char**)game->World;
+    int idx = *(int*)(*(char**)((char*)game->ViewMan + 4) + 0xB0) == 0;
     switch (state) {
     case 0:
-        if (cAI_isReadyToPurgeComputerRiders(*(void**)(game + 0xC))) {
+        if (cAI_isReadyToPurgeComputerRiders(game->AI)) {
             cAI_cleanupAfterRace(SSXApp->Game->AI);
             if (cBENewRaceInterface_newRace.iNumberAI >= 2)
                 cAI_cleanupActors(SSXApp->Game->AI);
@@ -1087,12 +1087,12 @@ extern "C" void cGFNextHeatState_update(cGFNextHeatState* self)
         }
         break;
     case 1:
-        if (cAI_isAILoadedAndReady(*(void**)(game + 0xC))) {
+        if (cAI_isAILoadedAndReady(game->AI)) {
             cAI_resolveRace(SSXApp->Game->AI);
             (*(sRaceMan_235CC8**)(cGameState_mpGame + 0xC))->f14 = 1;
             ((sCacheTbl_235CC8*)*cache)->slot[idx].f0 = 1;
-            char* player = (char*)SSXApp->Game->AI->Players[0];
-            sVec4_235CC8 pos = cRider_getEventStartPos(*(void**)(player + 0x18));
+            cPlayer* player = SSXApp->Game->AI->Players[0];
+            sVec4_235CC8 pos = cRider_getEventStartPos(player->mRider);
             cWorldView_setFocus(*cache + 0x10, idx, (const sVec4_236960*)&pos, 45000.0f);
             self->CurrentNextHeatState = 2;
         } else {
@@ -1742,19 +1742,19 @@ extern "C" void cSSXScriptEngine_EndTransportSequence(void* p);
  */
 extern "C" void cGFSectionLoadState_update(cGFSectionLoadState* self)
 {
-    char* appGame = (char*)SSXApp->Game;
-    char* sectionMan = *(char**)(appGame + 0x78);
+    cGame* appGame = SSXApp->Game;
+    char* sectionMan = (char*)appGame->SectionMan;
     if (*(int*)(sectionMan + 0x1C8) == 0) {
         return;
     }
     int state = self->mSubState;
-    char** cache = *(char***)(appGame + 0x10);
-    int idx = *(int*)(*(char**)(*(char**)(appGame + 0x84) + 4) + 0xB0) == 0;
+    char** cache = (char**)appGame->World;
+    int idx = *(int*)(*(char**)((char*)appGame->ViewMan + 4) + 0xB0) == 0;
     switch (state) {
     case 0:
         if (cSectionMan_isLoaded(sectionMan, *(int*)(sectionMan + 0x1BC)) != 0) {
-            char* aiPlayer = (char*)SSXApp->Game->AI->Players[0];
-            sVec4_236960 pos = cRider_GetNISEndPosition(*(void**)(aiPlayer + 0x18));
+            cPlayer* aiPlayer = SSXApp->Game->AI->Players[0];
+            sVec4_236960 pos = cRider_GetNISEndPosition(aiPlayer->mRider);
             char* viewEntry = *cache + idx * 80;
             *(int*)(viewEntry + 0x250) = 1;
             cWorldView_setFocus(*cache + 0x10, idx, &pos, 45000.0f);

@@ -773,9 +773,9 @@ struct sVEntry2D7DD8 {
  */
 extern "C" void tActiveAvalancheNode_end(tActiveAvalancheNode* self, int force)
 {
-    char* avData = (char*)self->m_node;
-    if (avData != 0 && (force != 0 || *(unsigned short*)(avData + 0xF0) != 2)) {
-        char* inst = *(char**)(avData + 0xF8);
+    tAvalancheNode* avData = self->m_node;
+    if (((char*)avData) != 0 && (force != 0 || avData->m_baseType != 2)) {
+        char* inst = (char*)avData->m_instance;
         if (inst != 0) {
             char* obj = *(char**)(inst + 0xC);
             if (obj != 0) {

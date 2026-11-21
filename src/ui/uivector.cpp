@@ -2599,10 +2599,10 @@ struct sVEntry5530 {
  */
 extern "C" void cUIPair_setEntry(cUIPair* self, cUIThing* obj)
 {
-    char* old = (char*)self->mpEntry;
-    if (old != 0) {
-        sVEntry5530* vt = *(sVEntry5530**)(old + 8);
-        vt[1].fn(old + vt[1].delta, 3);
+    cUIThing* old = self->mpEntry;
+    if (((char*)old) != 0) {
+        sVEntry5530* vt = (sVEntry5530*)old->mVtbl;
+        vt[1].fn(((char*)old) + vt[1].delta, 3);
     }
     self->mpEntry = (cUIThing*)obj;
 }
@@ -2637,10 +2637,10 @@ struct sVEntry5588 {
  */
 extern "C" void cUIPair_setWidget(cUIPair* self, cUIThing* obj)
 {
-    char* old = (char*)self->mpWidget;
-    if (old != 0) {
-        sVEntry5588* vt = *(sVEntry5588**)(old + 8);
-        vt[1].fn(old + vt[1].delta, 3);
+    cUIThing* old = self->mpWidget;
+    if (((char*)old) != 0) {
+        sVEntry5588* vt = (sVEntry5588*)old->mVtbl;
+        vt[1].fn(((char*)old) + vt[1].delta, 3);
     }
     self->mpWidget = (cUIThing*)obj;
 }

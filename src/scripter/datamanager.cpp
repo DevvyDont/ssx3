@@ -363,10 +363,10 @@ INCLUDE_ASM("scripter/datamanager", cDataManager_GetEmptyInstance__FPv);
 void* cDataManager_GetEmptyInstance(void* vself)
 {
     cDataManager* self = (cDataManager*)vself;
-    void* head = self->mpEmptyDataInstanceList;
-    self->mpEmptyDataInstanceList = (tDataInstanceInfo*)(*(void**)((char*)head + 0x14));
-    *(void**)((char*)head + 0x14) = 0;
-    return head;
+    tDataInstanceInfo* head = self->mpEmptyDataInstanceList;
+    self->mpEmptyDataInstanceList = (tDataInstanceInfo*)(head->pNext);
+    head->pNext = 0;
+    return ((void*)head);
 }
 #endif
 
@@ -2075,8 +2075,8 @@ extern "C" void tNISList_PlayNextScript(tNISList* selfp)
         int wasOn = selfp->mInScriptTransition;
         tNISList_Reset(selfp, 0);
         if (selfp->mIsCutSceneHandler != 0) {
-            void* app = SSXApp->Game;
-            void* fade = *(void**)((char*)app + 0x64);
+            cGame* app = SSXApp->Game;
+            void* fade = app->CutSceneTransitionMan;
             char* transitionMan = (char*)cGame_getTransitionMan(app, 0);
             if (wasOn != 0 && *(int*)(transitionMan + 0x44) != 0) {
                 cCutSceneTransitionMan_EndCutScene(fade, cTransitionMan_GetTransitionTimeLeft(transitionMan));

@@ -959,8 +959,8 @@ extern "C" int func_001D5138(void* self, int msg)
         break;
     case 273: {
         cBE_getInterface_Fv(SSXApp->BE, 7);
-        char* netOpt = ((char*)&cBENetworkInterface_networkOpt);
-        func_0025FD50(LobbyMan_mLobbyMan, *(int*)(netOpt + 4), *(int*)(netOpt + 8) == 0, *(int*)(netOpt + 8) != 0, netOpt + 0x330, netOpt + 0x3DC);
+        tBENetworkDB* netOpt = &cBENetworkInterface_networkOpt;
+        func_0025FD50(LobbyMan_mLobbyMan, netOpt->bIsRankedGame, netOpt->bIsHost == 0, netOpt->bIsHost != 0, netOpt->MyStats, netOpt->OpponentStats);
         break;
     }
     default:

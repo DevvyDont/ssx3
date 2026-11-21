@@ -173,8 +173,8 @@ extern "C" void func_002D4C08(sAnger_2D4C08* self)
         return;
     }
     for (unsigned int i = 0; i < players_2D4C08()->count; i++) {
-        char* game = (char*)SSXApp->Game;
-        char* other = *(char**)(*(char**)(*(char**)((*(sPlayers_2D4C08**)(game + 0x84))->p[i] + 0xA8) + 0x20) + 4);
+        cGame* game = SSXApp->Game;
+        char* other = *(char**)(*(char**)(*(char**)(((sPlayers_2D4C08*)game->ViewMan)->p[i] + 0xA8) + 0x20) + 4);
         if (other == 0) {
             continue;
         }
@@ -183,7 +183,7 @@ extern "C" void func_002D4C08(sAnger_2D4C08* self)
             st->level = 0;
             return;
         }
-        int n = **(int**)(game + 0x28);
+        int n = *(int*)game->Replay;
         int ok = n != 0 && n < 10;
         if (ok) {
             st->level = 0;

@@ -164,12 +164,12 @@ struct cGameViewMan22E550 {
  */
 extern "C" void cGameViewMan_updateViewState(cGameViewMan22E550* self)
 {
-    char* game = (char*)SSXApp->Game;
-    int mode = *(int*)(game + 0x214);
+    cGame* game = SSXApp->Game;
+    int mode = game->mCurrentStateID;
     if (self->mode == mode) {
         return;
     }
-    int n = **(int**)(game + 0x28);
+    int n = *(int*)game->Replay;
     int busy = n && n < 10;
     if (busy) {
         return;

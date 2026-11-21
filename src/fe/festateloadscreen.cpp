@@ -809,9 +809,9 @@ extern "C" void cGFFinishlineState_update(cGFFinishlineState* self)
     int state = self->mSubState;
     switch (state) {
     case 0: {
-        char* ssxApp = (char*)SSXApp;
-        char* x = *(char**)(ssxApp + 0xC0);
-        char* gameAI = *(char**)(*(char**)(ssxApp + 0x84) + 0xC);
+        cSSXApp* ssxApp = SSXApp;
+        char* x = (char*)ssxApp->GameModeMan;
+        char* gameAI = (char*)ssxApp->Game->AI;
         int cnt = *(int*)(gameAI + 0x7C);
         if (D_005366A8[0] == 0) {
             for (int i = 0; i < cnt; i++) {
@@ -1333,10 +1333,10 @@ extern "C" void cGFEventStartState_loseFocus(cGFEventStartState* self)
     if (raceDB->cGamePath != 0)
         cBEAggressionInterface_regressAggression(cBEAggressionInterface_getThis());
     self->mHasTransitionNIS = 0;
-    char* game = (char*)SSXApp->Game;
-    char* x = *(char**)(game + 0x84);
+    cGame* game = SSXApp->Game;
+    char* x = (char*)game->ViewMan;
     if (*(int*)(x + 0x10) == 1) {
-        sTbl_234750* slotTable = **(sTbl_234750***)(game + 0x10);
+        sTbl_234750* slotTable = *(sTbl_234750**)game->World;
         slotTable->slot[otherSide_234750(*(char**)(x + 4))].f0 = 0;
     }
 }

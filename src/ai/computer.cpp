@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/animmodel.h"
 #include "ai/airpredictor.h"
 #include "replay/frameptr.h"
 #include "ai/riderhandler.h"
@@ -860,8 +861,8 @@ extern "C" float cComputer_scorePath(cComputer* self, char* tgt)
             return 0.0f;
         }
     }
-    char* rider = (char*)self->mRider;
-    float len = vu0Length_10D410(*(sVec4_10D410*)(rider + 0x1E0));
+    cRider* rider = self->mRider;
+    float len = vu0Length_10D410(*(sVec4_10D410*)&rider->mVelocity);
     float total = 22.0f;
     float lookAheadSec = cRider_calculateAheadDist((cRider*)rider, 1) / len;
     sVec4_10D410 pos = vu0Add_10D410(*(sVec4_10D410*)&self->mRider->mPosition, vu0Scale_10D410(*(sVec4_10D410*)&self->mRider->mVelocity, lookAheadSec));
@@ -877,8 +878,8 @@ extern "C" float cComputer_scorePath(cComputer* self, char* tgt)
         return -1.0f;
     }
     sc[0] = distScore * 0.22727273404598236f;
-    char* rider2 = (char*)self->mRider;
-    if (*(int*)(rider2 + 0xF0) != 0 && *(char**)(((sAi_10D410*)ai)->riders[*(int*)(rider2 + 0xF8)] + 0xAB8) == tgt) {
+    cRider* rider2 = self->mRider;
+    if (rider2->mHasRival != 0 && *(char**)(((sAi_10D410*)ai)->riders[rider2->mRivalIndex] + 0xAB8) == tgt) {
         return 100.0f;
     }
     float zero = 0.0f;
@@ -1297,23 +1298,23 @@ extern "C" float cComputer_setupWarp(cComputer* self)
     // PORT: cComputer_getRival returns a pointer as int (unit declaration).
     int rival = cComputer_getRival(self);
     if (rival == 0) return 1.0f;
-    char* rider = (char*)self->mRider;
-    if (*(int*)(rider + 0xE4) == 0) return 1.0f;
+    cRider* rider = self->mRider;
+    if (*(int*)(((char*)rider) + 0xE4) == 0) return 1.0f;
     if (cBENewRaceInterface_newRace.cGamePath == 2) return 1.0f;
-    if (*(float*)(rider + 0x4D0) < 50000.0f) return 1.0f;
+    if (rider->mDistToFinish < 50000.0f) return 1.0f;
     float warpVal;
     float relDist = cRider_getDistanceLeft((void*)rival) - self->mRider->mDistToFinish;
-    char* rider2 = (char*)self->mRider;
-    float k = *(float*)(rider2 + 0xDC);
-    if (relDist < k && (*(int*)(rider2 + 0xE4) == 2 || *(int*)(rider2 + 0xE4) == 3))
+    cRider* rider2 = self->mRider;
+    float k = rider2->mRubberBandBehind;
+    if (relDist < k && (*(int*)(((char*)rider2) + 0xE4) == 2 || *(int*)(((char*)rider2) + 0xE4) == 3))
     {
         warpVal = ((relDist - k) / k + 1.0f) * 1.100000023841858f;
     }
     else
     {
-        char* rider3 = (char*)self->mRider;
-        float rubberAhead = *(float*)(rider3 + 0xE0);
-        if (rubberAhead < relDist && (*(int*)(rider3 + 0xE4) == 1 || *(int*)(rider3 + 0xE4) == 3))
+        cRider* rider3 = self->mRider;
+        float rubberAhead = rider3->mRubberBandAhead;
+        if (rubberAhead < relDist && (*(int*)(((char*)rider3) + 0xE4) == 1 || *(int*)(((char*)rider3) + 0xE4) == 3))
         {
             warpVal = 1.0f / ((relDist - rubberAhead) / rubberAhead + 1.0f);
             warpVal *= 0.9090908765792847f;
@@ -2095,11 +2096,11 @@ extern "C" void cRider_flagEventWipeout(cRider* rider, int anim, int isPunch, in
     cRiderAnimBase_getAIAnimFrame(buf, rider->mRiderAnim, anim, D_004A4C08.a, rider->mSlewed[0].target);
     sXf_EB30 animPose;
     func_0030ECD8(&animPose, rider->mAnimModel, buf, 0);
-    char* trk = (char*)rider->mAnimModel;
-    sQuat_EB30* n = (sQuat_EB30*)((rider->mBoneHips << 4) + *(int*)(trk + 0x24));
+    cAnimModel* trk = rider->mAnimModel;
+    sQuat_EB30* n = (sQuat_EB30*)((rider->mBoneHips << 4) + (int)trk->localPos);
     sXf_EB30 node;
-    node.pos = sQuat_EB30(n->x * *(float*)(trk + 0x140), n->y * *(float*)(trk + 0x144),
-                          n->z * *(float*)(trk + 0x148), n->w * *(float*)(trk + 0x14C));
+    node.pos = sQuat_EB30(n->x * trk->unk_140.x, n->y * trk->unk_140.y,
+                          n->z * trk->unk_140.z, n->w * trk->unk_140.w);
     node.rot = *(sQuat_EB30*)((char*)rider->mAnimModel->localRot + (rider->mBoneHips << 4));
     sXf_EB30 y = Combine_EB30(node, Invert_EB30(animPose));
     *(sXf_EB30*)&rider->mPosition = Combine_EB30(*(sXf_EB30*)&rider->mPosition, y);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/animmodel.h"
 #include "ai/hudfx.h"
 #include "ai/ridermetrix.h"
 #include "ai/ai.h"
@@ -1313,12 +1314,12 @@ extern "C" int cRider_isChangeFakieAir(cRider* rider)
     if (Dot_4DB8(side, vel) > D_004A0EA8[0]) {
         return 0;
     }
-    char* animModel = (char*)rider->mAnimModel;
-    float* hipBone = (float*)((rider->mBoneHips << 4) + *(int*)(animModel + 0x24));
+    cAnimModel* animModel = rider->mAnimModel;
+    float* hipBone = (float*)((rider->mBoneHips << 4) + (int)animModel->localPos);
     {
         const t4Vector& origin = D_004FF130_4DB8;
-        t4Vector off = SubO_4DB8(sV4_4DB8(hipBone[0] * *(float*)(animModel + 0x140), hipBone[1] * *(float*)(animModel + 0x144),
-                                         hipBone[2] * *(float*)(animModel + 0x148), hipBone[3] * *(float*)(animModel + 0x14C)),
+        t4Vector off = SubO_4DB8(sV4_4DB8(hipBone[0] * animModel->unk_140.x, hipBone[1] * animModel->unk_140.y,
+                                         hipBone[2] * animModel->unk_140.z, hipBone[3] * animModel->unk_140.w),
                                 origin);
         off.z = 0.0f;
         AddEq_4DB8(rider->mPosition, Rot_4DB8(rider->mRotation, Scale_4DB8(off, 2.0f)));

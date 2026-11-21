@@ -1566,9 +1566,9 @@ extern "C" void cScriptPlayerMain_Pause(void* self);
  */
 extern "C" void cScriptEntity_PauseEntityScript(cScriptEntity* self)
 {
-    void* entity = self->mpEntity;
-    if (entity != 0) {
-        cScriptPlayerMain_Pause(*(void**)((char*)entity + 0x8));
+    cScriptPlayerEntity* entity = self->mpEntity;
+    if (((void*)entity) != 0) {
+        cScriptPlayerMain_Pause(entity->mpOwner);
     }
 }
 #endif
@@ -1585,9 +1585,9 @@ extern "C" void cScriptPlayerMain_Resume(void* self);
  */
 extern "C" void cScriptEntity_ResumeEntityScript(cScriptEntity* self)
 {
-    void* entity = self->mpEntity;
-    if (entity != 0) {
-        cScriptPlayerMain_Resume(*(void**)((char*)entity + 0x8));
+    cScriptPlayerEntity* entity = self->mpEntity;
+    if (((void*)entity) != 0) {
+        cScriptPlayerMain_Resume(entity->mpOwner);
     }
 }
 #endif

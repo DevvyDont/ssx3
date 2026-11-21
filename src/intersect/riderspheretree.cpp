@@ -1858,8 +1858,8 @@ INCLUDE_ASM("intersect/riderspheretree", SphereTree_GetRadius);
  */
 extern "C" float SphereTree_GetRadius(SphereTree* self)
 {
-    void* tree = self->treeInfo;
-    void* levels = *(void**)((char*)tree + 0x20);
+    tSphTreeInfo* tree = self->treeInfo;
+    void* levels = tree->levels;
     return *(float*)levels * self->scale;
 }
 #endif
@@ -1881,9 +1881,9 @@ struct sSphereRadius12 {
  */
 extern "C" float SphereTree_GetResolution(SphereTree* self)
 {
-    void* treeInfo = self->treeInfo;
-    int idx = *(int*)((char*)treeInfo + 0xc);
-    sSphereRadius12* tab = *(sSphereRadius12**)((char*)treeInfo + 0x20);
+    tSphTreeInfo* treeInfo = self->treeInfo;
+    int idx = treeInfo->depth;
+    sSphereRadius12* tab = (sSphereRadius12*)treeInfo->levels;
     return tab[idx].value * self->scale * 0.5f;
 }
 #endif
@@ -2095,8 +2095,8 @@ extern "C" int SphereTree_isSphereCollision(SphereTree* self, t4Vector* a1, floa
  */
 extern "C" int SphereTree_IsSphereCollision(SphereTree* self, t4Vector* spherePos, float sphereRadius, t4Vector* outPush, t4Vector* outContact)
 {
-    void* tree = self->treeInfo;
-    if (*(int*)((char*)tree + 0x8) != 0) {
+    tSphTreeInfo* tree = self->treeInfo;
+    if (tree->isCompressed != 0) {
         self->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
     }
     return SphereTree_isSphereCollision(self, spherePos, sphereRadius, (t4Vector*)&self->transCenter, 0, 0, outPush, outContact);
@@ -2122,8 +2122,8 @@ extern "C" int SphereTree_isBoxCollision(SphereTree* self, t3Vector* a1, t3Vecto
  */
 extern "C" int SphereTree_IsBoxCollision(SphereTree* self, t3Vector* boxMin, t3Vector* boxMax, t4Vector* outPos, t4Vector* outNormal)
 {
-    void* tree = self->treeInfo;
-    if (*(int*)((char*)tree + 0x8) != 0) {
+    tSphTreeInfo* tree = self->treeInfo;
+    if (tree->isCompressed != 0) {
         self->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
     }
     return SphereTree_isBoxCollision(self, boxMin, boxMax, (t4Vector*)&self->transCenter, 0, 0, outPos, outNormal);
@@ -2164,8 +2164,8 @@ extern "C" void SphereTree_checkPlaneCollision(SphereTree* self, void* a1, t4Vec
  */
 extern "C" int SphereTree_IsPlaneCollision(SphereTree* self, sVecArg_C9B8* plane, t4Vector* outPush, t4Vector* outContact)
 {
-    void* tree = self->treeInfo;
-    if (*(int*)((char*)tree + 0x8) != 0) {
+    tSphTreeInfo* tree = self->treeInfo;
+    if (tree->isCompressed != 0) {
         self->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
     }
     SphereTree_populateSortAxis_v(self, zeroW_C9B8(*plane));
@@ -2201,8 +2201,8 @@ extern "C" int SphereTree_checkTriCollision(void* self, void* a1, void* a2, void
  */
 extern "C" int SphereTree_IsTriCollision(SphereTree* self, t4Vector* point1, t4Vector* point2, t4Vector* point3, t4Vector* uNorm, t4Vector* overlap, t4Vector* loc)
 {
-    void* treeInfo = self->treeInfo;
-    if (*(int*)((char*)treeInfo + 0x8) != 0) {
+    tSphTreeInfo* treeInfo = self->treeInfo;
+    if (treeInfo->isCompressed != 0) {
         self->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(treeInfo);
     }
     SphereTree_populateSortAxis(self, (t4Vector*)uNorm);
@@ -4378,8 +4378,8 @@ extern "C" float cWorldRider_GetIdealParam(cWorldRider* self)
     if (*(int*)self == 0) {
         return -1.0f;
     }
-    void* sphere = self->st;
-    return *(float*)((char*)sphere + 0x20) * 2.0f;
+    cRiderSphereTree* sphere = self->st;
+    return sphere->boundRad * 2.0f;
 }
 #endif
 

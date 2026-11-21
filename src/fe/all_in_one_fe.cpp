@@ -1890,11 +1890,11 @@ extern "C" void cOVStateHUD1P_renderRank(cOVStateHUD1P* self, char* obj, int* ri
     scale.x = 1.0f;
     scale.y = 1.0f;
     float k = 1.0f;
-    char* panelRider = (char*)SSXApp->Game->AI->Riders[rider[0]];
-    tHUDDef_getColour(D_00477F30 + *(int*)(panelRider + 0xEC) * 36, &col);
+    cRider* panelRider = SSXApp->Game->AI->Riders[rider[0]];
+    tHUDDef_getColour(D_00477F30 + panelRider->unk_0EC * 36, &col);
     float rankAnimFrame = ((float*)rider)[0x12];
     if (rankAnimFrame >= 0.0f) {
-        if (*(int*)(panelRider + 0xEC) == 0) {
+        if (panelRider->unk_0EC == 0) {
             k = D_00504FB8[(int)(rankAnimFrame * 12.566370964050293f * 81.4873275756836f) & 0x1FF] * 0.199636310338974f * (1.0f - rankAnimFrame * rankAnimFrame) + k;
         } else {
             col.a = col.a * (rankAnimFrame * 0.5f + 0.5f);
@@ -1906,8 +1906,8 @@ extern "C" void cOVStateHUD1P_renderRank(cOVStateHUD1P* self, char* obj, int* ri
     tHUDDef_getSize(D_00477F30 + 0xD8, &size1, 0);
     size1.x *= sc.x;
     size1.y *= sc.y;
-    int off = *(int*)(panelRider + 0xEC) << 2;
-    tHUDDef_getSize(D_00477F30 + *(int*)(panelRider + 0xEC) * 36, &size2, *(int*)((char*)tex + off));
+    int off = panelRider->unk_0EC << 2;
+    tHUDDef_getSize(D_00477F30 + panelRider->unk_0EC * 36, &size2, *(int*)((char*)tex + off));
     size2.x *= sc.x;
     size2.y *= sc.y;
     dim.x = size2.x + size1.x;
@@ -1939,9 +1939,9 @@ extern "C" void cOVStateHUD1P_renderRank(cOVStateHUD1P* self, char* obj, int* ri
     cOVStateHUD1P_calcElemPos(((char*)self), &drawPos, &elemPos, &dim, &scale, obj[0x380], obj[0x381], x);
     w = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
     *w = (*w & ~0x3E0) | ((obj[0x382] << 5) & 0x3E0);
-    int off4 = *(int*)(panelRider + 0xEC) << 2;
+    int off4 = panelRider->unk_0EC << 2;
     cOVStateHUD1P_renderBitmap(((char*)self), *(int*)((char*)tex + off4), &drawPos, &size2, &scale, &col);
-    signed char n = *(int*)(panelRider + 0xEC) < 4 ? *(int*)(panelRider + 0xEC) : 3;
+    signed char n = panelRider->unk_0EC < 4 ? panelRider->unk_0EC : 3;
     suffixPos = drawPos;
     int off5 = n * 4;
     int tx = *(int*)(((char*)self) + off5 + 0x45C);
@@ -2469,7 +2469,7 @@ extern "C" void cOVStateHUD1P_renderFinishMessage(cOVStateHUD1P* self, int elems
     char buf[64];
     V4_F660 col;
     int idx = 66;
-    char* panelRider = (char*)SSXApp->Game->AI->Riders[*rider];
+    cRider* panelRider = SSXApp->Game->AI->Riders[*rider];
     int sz = (int)self->mpGenTexElem[8];
     if (flag) {
         sz = (int)self->mpGenTexElem[2];
@@ -2491,7 +2491,7 @@ extern "C" void cOVStateHUD1P_renderFinishMessage(cOVStateHUD1P* self, int elems
     if (flag == 0) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         signed char mode = cBENewRaceInterface_newRace.cGameMode;
-        Obj_F660* being = (Obj_F660*)(panelRider + 0x6C0);
+        Obj_F660* being = (Obj_F660*)(&panelRider->mVtbl);
         int k = being->getAIIndex();
         int val = D_00536640[k];
         if (mode == 0 || mode == 5) {

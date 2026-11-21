@@ -1378,8 +1378,8 @@ INCLUDE_ASM("ui/uiengine", cUIIcon_setTextureByHashValue);
 extern "C" void cUIIcon_setTextureByHashValue(cUIIcon* self, int id)
 {
     cUIScreen* screen = self->mpScreen;
-    void* state = screen->mpState;
-    void* engine = *(void**)((char*)state + 0x10);
+    cUIState* state = screen->mpState;
+    void* engine = state->mpEngine;
     self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname((cUITextureBank*)((char*)engine + 0x58), id);
 }
 #endif
@@ -1687,8 +1687,8 @@ struct cUIListBox_setUnicodePrivate_sEntry {
 extern "C" void cUIListBox_setUnicodePrivate(cUIListBox* self, unsigned char idx, unsigned short* str)
 {
     cUIScreen* screen = self->mpScreen;
-    void* state = screen->mpState;
-    void* engine = *(void**)((char*)state + 0x10);
+    cUIState* state = screen->mpState;
+    void* engine = state->mpEngine;
     if (*(void**)((char*)engine + 0x10) != 0) {
         cUIListBox_setUnicodePrivate_sEntry* tbl = (cUIListBox_setUnicodePrivate_sEntry*)(&self->mpEntries[0].mpString);
         cUIListBox_setUnicodePrivate_sEntry* entry = &tbl[idx];

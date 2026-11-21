@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "ui/uilistbox.h"
 #include "ui/uimenu.h"
 
@@ -352,13 +353,13 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
             cUIMenu_setSelectedByIndex(((char*)self), self->mStoredIndex);
             return;
         }
-        char* cur = (char*)self->mpSelected;
-        if (cur == 0) {
+        cUIThing* cur = self->mpSelected;
+        if (((char*)cur) == 0) {
             unsigned char idx = cUIMenu_findFirstHighlightable(((char*)self), 0);
             if (idx == 0xFF)
                 idx = 0;
             cUIMenu_setSelectedByIndex(((char*)self), idx);
-        } else if (((*(int*)(cur + 0x14) >> 4) & 1) == 0) {
+        } else if (((cur->mAttr >> 4) & 1) == 0) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)cur, 0);
             if (ev != 0xFFFF) {
                 void* scr = self->mpSelected->mpScreen;
@@ -366,16 +367,16 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
                     cUIScreen_playFrame(scr, ev, 1);
                 }
             }
-            char* selected = (char*)self->mpSelected;
-            sVEntry39A928a* va = *(sVEntry39A928a**)(selected + 8);
-            va[7].fn(selected + va[7].delta, 1);
+            cUIThing* selected = self->mpSelected;
+            sVEntry39A928a* va = (sVEntry39A928a*)selected->mVtbl;
+            va[7].fn(((char*)selected) + va[7].delta, 1);
             char* owner = *(char**)((char*)self->mpScreen + 0xD0);
             sVEntry39A928b* vb = *(sVEntry39A928b**)(owner + 8);
             vb[19].fn(owner + vb[19].delta, self->mpSelected, 1);
         }
     } else {
-        char* cur = (char*)self->mpSelected;
-        if (cur != 0) {
+        cUIThing* cur = self->mpSelected;
+        if (((char*)cur) != 0) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)cur, 1);
             if (ev != 0xFFFF) {
                 void* scr = self->mpSelected->mpScreen;
@@ -383,9 +384,9 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
                     cUIScreen_playFrame(scr, ev, 1);
                 }
             }
-            char* selected = (char*)self->mpSelected;
-            sVEntry39A928a* va = *(sVEntry39A928a**)(selected + 8);
-            va[7].fn(selected + va[7].delta, 0);
+            cUIThing* selected = self->mpSelected;
+            sVEntry39A928a* va = (sVEntry39A928a*)selected->mVtbl;
+            va[7].fn(((char*)selected) + va[7].delta, 0);
             char* owner = *(char**)((char*)self->mpScreen + 0xD0);
             sVEntry39A928b* vb = *(sVEntry39A928b**)(owner + 8);
             vb[19].fn(owner + vb[19].delta, self->mpSelected, 2);

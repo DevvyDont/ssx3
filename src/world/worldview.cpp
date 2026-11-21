@@ -261,7 +261,7 @@ INCLUDE_ASM("world/worldview", cWorldView_getNumHull__FPv);
 int cWorldView_getNumHull(void* vself)
 {
     cWorldView* self = (cWorldView*)vself;
-    return *(int*)((char*)self->mp_Hdr + 0x10);
+    return (int)self->mp_Hdr->m_uiNumBSPHulls;
 }
 #endif
 
@@ -284,13 +284,13 @@ extern void cWorldView_recursiveIsValid_9AC0(void* self, int sec, int box, int* 
  */
 extern "C" int cWorldView_isBoxValid(cWorldView* vself, int box)
 {
-    char* cur = (char*)vself->mp_Section;
+    tBxSection* cur = vself->mp_Section;
     int ok;
     unsigned i;
-    int off = *(int*)(cur + 0x18);
+    int off = cur->m_BSP.m_iGlobalHull;
     off *= 68;
     if (*(unsigned short*)(off + (int)vself->mp_Hulls) != 0) {
-        if (cWorldCache_isPageLoaded(vself->mp_WorldCache, *(int*)(cur + 0x18)) == 0)
+        if (cWorldCache_isPageLoaded(vself->mp_WorldCache, cur->m_BSP.m_iGlobalHull) == 0)
             return 0;
     }
     ok = 1;

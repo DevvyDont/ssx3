@@ -296,8 +296,8 @@ extern "C" void* cScriptAlgorithm_cScriptAlgorithm(void* object)
     self->nearZ = 10.0f;
     self->farZ = 30000.0f;
     self->f14 = 0;
-    void* cam = SSXApp->Game;
-    void* chase = *(void**)((char*)cam + 0x84);
+    cGame* cam = SSXApp->Game;
+    void* chase = cam->ViewMan;
     void* ctrl = *(void**)((char*)chase + 0x4);
     self->f18 = *(int*)((char*)ctrl + 0xAC);
     self->v20 = D_004FF130_K9418;

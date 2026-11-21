@@ -1249,8 +1249,8 @@ extern "C" void cSSXAudio_InGameInit(cSSXAudio* self)
         int* firstTimeFlag = (int*)(&self->unk_579C[0]);
         do {
             void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-            char* playerRider = (char*)((cAI*)cAudioInterface_getAI())->Riders[0];
-            *firstTimeFlag = cBENewPlayerInterface_isFirstTimeOnTrack(iface, ((cSSXAudio_InGameInit_cObj*)(playerRider + 0x6C0))->getAIIndex(), i);
+            cRider* playerRider = ((cAI*)cAudioInterface_getAI())->Riders[0];
+            *firstTimeFlag = cBENewPlayerInterface_isFirstTimeOnTrack(iface, ((cSSXAudio_InGameInit_cObj*)(&playerRider->mVtbl))->getAIIndex(), i);
             i++;
             firstTimeFlag++;
         } while (i < 23);

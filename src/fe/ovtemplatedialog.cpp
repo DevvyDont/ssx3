@@ -1259,8 +1259,8 @@ extern "C" void func_0020CA10(void)
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
         cGameComm* net = cGameComm_mGameComm;
         if (net != 0) {
-            char* game = (char*)SSXApp->Game;
-            if (game != 0 && *(int*)(game + 0x224) != 0) {
+            cGame* game = SSXApp->Game;
+            if (((char*)game) != 0 && game->ControllerUnplugged != 0) {
                 cGameComm_sendUnplugCmd((char*)net);
             }
             cGameComm_sendPauseCmd((char*)cGameComm_mGameComm, 1);

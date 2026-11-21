@@ -2257,10 +2257,10 @@ extern "C" void cGameComm_checkActive(cGameComm* gameComm)
     if (gameComm->mPauseMenu[0] == 0) {
         if (gameComm->mGameStartGate != 0) {
             if (gameComm->mPauseMenu[1] == 0 && gameComm->mUnPauseTimer <= 0) {
-                char* appObj = (char*)SSXApp;
+                cSSXApp* appObj = SSXApp;
                 int n = ++gameComm->mStallThreshold;
                 ++gameComm->unk_060;
-                unsigned int st = *(int*)(*(char**)(*(char**)(appObj + 0x84) + 0xC)) - 4;
+                unsigned int st = *(int*)((char*)appObj->Game->AI) - 4;
                 if (st < 2) {
                     if (n >= 10) gameComm->mStallTimer += 1.0f;
                     if (gameComm->mStallThreshold == 10) ++gameComm->mStallCount;
@@ -2809,12 +2809,12 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_calcLatency);
  * @param gameComm  the game link
  */
 extern "C" void cGameComm_calcLatency(cGameComm* gameComm) {
-    char *app = (char*)SSXApp;
+    cSSXApp* app = SSXApp;
     float latency1 = gameComm->mNetLatency[1];
     float latency0 = gameComm->mNetLatency[0];
     float maxLatency = latency1 >? latency0;
     gameComm->mLatency = maxLatency;
-    float frameTime = *(float *)(app + 0x14);
+    float frameTime = *(float *)(((char*)app) + 0x14);
     if (maxLatency < frameTime) {
         gameComm->mLatency = frameTime;
     }
@@ -3490,11 +3490,11 @@ static inline int& RingAt_8F20(Ring_8F20* r, int frame)
  */
 extern "C" void cGameComm_updateSyncPacket(cGameComm* gameComm, int frame, int value)
 {
-    char* gs = (char*)SSXApp->Game;
-    int st = **(int**)(gs + 0xC);
+    cGame* gs = SSXApp->Game;
+    int st = *(int*)gs->AI;
     if (st != 5) {
         if (st != 3) return;
-        if (*(int*)(gs + 0x214) != st) return;
+        if (gs->mCurrentStateID != st) return;
     }
     if (gameComm->mSyncInput == 0) return;
     if (gameComm->mError != 0) return;

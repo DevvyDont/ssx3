@@ -1482,9 +1482,9 @@ extern "C" void cFenceNode_update(cFenceNode* self)
             cFenceNode_makeNeighbour(self, (char*)self->PrevInstance, 0);
         }
     }
-    char* osc = (char*)&self->FenceData;
+    tMakeFenceData* osc = &self->FenceData;
     self->Force += self->ForceStep;
-    if (self->ForceMax < 0.01f && fabs_34CE48(*(float*)(osc + 0x10)) < 0.01f) {
+    if (self->ForceMax < 0.01f && fabs_34CE48(*(float*)(((char*)osc) + 0x10)) < 0.01f) {
         sFlagVE_34CE48* vt = (sFlagVE_34CE48*)self->mVtbl;
         vt[34].fn(((char*)self) + vt[34].delta, 1);
         return;

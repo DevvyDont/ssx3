@@ -3114,8 +3114,8 @@ extern "C" void cUIState_onUpdate(void*);
 extern "C" void cScreenPopup_onUpdate(cScreenPopup* self)
 {
     if (self->mbPassUpdate != 0) {
-        void* obj = self->mpParentState;
-        sVEntry001CA528* vt = *(sVEntry001CA528**)((char*)obj + 8);
+        cUIState* obj = self->mpParentState;
+        sVEntry001CA528* vt = (sVEntry001CA528*)obj->mVtbl;
         vt[12].fn((char*)obj + vt[12].delta);
     }
     cUIState_onUpdate(self);
@@ -3192,9 +3192,9 @@ extern "C" void cScreenPopup_onPopupEvent(cScreenPopup* self, cUIState* child, i
         if (((void*)child) == (void*)self->mpConfirmPopup) {
             self->mpConfirmPopup = 0;
             if (self->miConfimationReturnCode != -1) {
-                char* obj = (char*)self->mpParentState;
-                sVE1CA598* vt = *(sVE1CA598**)(obj + 8);
-                vt[17].fn(obj + vt[17].delta, ((char*)self), self->miConfimationReturnCode);
+                cUIState* obj = self->mpParentState;
+                sVE1CA598* vt = (sVE1CA598*)obj->mVtbl;
+                vt[17].fn(((char*)obj) + vt[17].delta, ((char*)self), self->miConfimationReturnCode);
             }
         }
         break;
@@ -3878,9 +3878,9 @@ extern "C" void cKeyboardPopup_onUpdate(cKeyboardPopup* self)
         cUIStateStack_pop(self->mpEngine->mStateStack, 1);
     }
     if (self->mbCallParentsUpdate != 0) {
-        void* obj = self->mpParentState;
-        if (obj != 0) {
-            sVEntry001CB208* vt = *(sVEntry001CB208**)((char*)obj + 8);
+        cUIState* obj = self->mpParentState;
+        if (((void*)obj) != 0) {
+            sVEntry001CB208* vt = (sVEntry001CB208*)obj->mVtbl;
             vt[12].fn((char*)obj + vt[12].delta);
         }
     }
@@ -3987,9 +3987,9 @@ struct sVEntry001CB3D0 {
 extern "C" int cKeyboardPopup_handleEvent(cKeyboardPopup* self, int msg, int pParam)
 {
     if (self->mbReferEventsToParent != 0) {
-        void* obj = self->mpParentState;
-        if (obj != 0) {
-            sVEntry001CB3D0* vt = *(sVEntry001CB3D0**)((char*)obj + 8);
+        cUIState* obj = self->mpParentState;
+        if (((void*)obj) != 0) {
+            sVEntry001CB3D0* vt = (sVEntry001CB3D0*)obj->mVtbl;
             return vt[24].fn((char*)obj + vt[24].delta, msg, pParam);
         }
     }

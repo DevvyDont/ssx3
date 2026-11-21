@@ -2355,9 +2355,9 @@ extern "C" void cBERewardInterface_clearUserAwards(cBERewardInterface* self)
         gNextCollectiblesLimit[i] = cBERewardInterface_calculateNextCollectiblesLevel(self, 0, charID, i);
     for (int i = 0; i < 3; i++)
         gNextBigChallengesLimit[i] = cBERewardInterface_calculateNextBigChallengesLevel(self, 0, charID, i);
-    char* rewardIface = (char*)cBERewardInterface_instance;
-    *(int*)(rewardIface + 0x10) = 0;
-    *(int*)(rewardIface + 0x14) = -1;
+    cBERewardInterface* rewardIface = cBERewardInterface_instance;
+    rewardIface->mLastEventCashReward = 0;
+    rewardIface->mLastEventMedal = -1;
 }
 #endif
 

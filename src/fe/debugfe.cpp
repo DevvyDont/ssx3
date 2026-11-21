@@ -509,13 +509,13 @@ extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(char* self)
     onAbortChallenge.owner = self;
     func_001DB2B0(self + 0x1AAC, &onAbortChallenge);
     int emptyText = cBXString_EmptyString;
-    char* app = (char*)SSXApp;
+    cSSXApp* app = SSXApp;
     *(int*)(self + 0x1C04) = emptyText;
     *(int*)(self + 0x1C08) = emptyText;
     *(int*)(self + 0x1C0C) = emptyText;
-    *(int*)(self + 0x60) = *(int*)(*(char**)(app + 0x80) + 0x18);
-    *(int*)(self + 0x64) = *(int*)(app + 0xB0);
-    *(int*)(self + 0x68) = *(int*)(*(char**)(app + 0x80) + 0x20);
+    *(int*)(self + 0x60) = (int)app->DebugFE->Font;
+    *(int*)(self + 0x64) = (int)app->Inputs[0];
+    *(int*)(self + 0x68) = app->DebugFE->BoxTID;
     D_004A4E90 = self;
     return self;
 }
@@ -2265,9 +2265,9 @@ extern "C" void cDebugFE_purge(cDebugFE* self)
             vt[1].fn(screen + vt[1].delta, 3);
         }
     }
-    char* app = (char*)SSXApp;
-    *(int*)(app + 0x7C) = 0;
-    *(int*)(app + 0x80) = 0;
+    cSSXApp* app = SSXApp;
+    app->RealFE = 0;
+    app->DebugFE = 0;
     if (self->BoxTID >= 0)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;

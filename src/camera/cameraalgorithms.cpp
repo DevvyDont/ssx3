@@ -535,8 +535,8 @@ INCLUDE_ASM("camera/cameraalgorithms", cCamera_invalidateSafePosition);
  */
 extern "C" void cCamera_invalidateSafePosition(void)
 {
-    void* cam = SSXApp->Game;
-    void* chase = *(void**)((char*)cam + 0x84);
+    cGame* cam = SSXApp->Game;
+    void* chase = cam->ViewMan;
     void* ctrl = *(void**)((char*)chase + 0x4);
     *(int*)((char*)ctrl + 0x4A4) = 1;
 }
@@ -555,8 +555,8 @@ struct cCamera_snapChaseControllers_VE { short delta; short index; void (*fn)(vo
  */
 extern "C" void cCamera_snapChaseControllers(void)
 {
-    void* cam = SSXApp->Game;
-    char* ctx = *(char**)((char*)cam + 0x84);
+    cGame* cam = SSXApp->Game;
+    char* ctx = (char*)cam->ViewMan;
     int count = *(int*)ctx;
     char* firstController = *(char**)(*(char**)(ctx + 4) + 0xA8);
     cCamera_snapChaseControllers_VE* firstSlot = &(*(cCamera_snapChaseControllers_VE**)(firstController + 0x14))[4];

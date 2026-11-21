@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/rider.h"
 #include "sound/bankmanager.h"
 #include "sound/asyncsys.h"
 #include "replay/frameptr.h"
@@ -2864,8 +2865,8 @@ extern "C" void cWorldPainterMan_render1(cWorldPainterMan* ctx, sQtTree_B928* tr
         cWorldPainterMan_render1(ctx, tree, tree->nodes + (node->child[3] >> 1), verts, &mid, hi);
     } else {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-        char* rider = (char*)SSXApp->Game->AI->Players[0]->mRider;
-        sQtVec4_B928 cam = *((cQtCam_B928*)(rider + 0x6C0))->getPosition();
+        cRider* rider = SSXApp->Game->AI->Players[0]->mRider;
+        sQtVec4_B928 cam = *((cQtCam_B928*)(&rider->mVtbl))->getPosition();
         sQtVec4_B928 corner;
         corner.x = lo->x;
         corner.y = lo->y;

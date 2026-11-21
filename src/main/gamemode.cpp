@@ -2583,10 +2583,10 @@ extern "C" int func_0023B5F8(void* self)
     }
     if (ok) {
         int bonus = cBENewRaceInterface_getPeakSplitTimePoints(iface, cBENewRaceInterface_newRace.cGameEvent, *(short*)((char*)self + 0xA), *(unsigned short*)((char*)self + 8));
-        void* clk = SSXApp->Game->AI;
-        int secs = (int)((float)*(int*)((char*)clk + 0xC) * 0.01666666753590107f);
+        cAI* clk = SSXApp->Game->AI;
+        int secs = (int)((float)clk->EventTimerTick * 0.01666666753590107f);
         if (bonus != 0) {
-            cRiderMetrix_evSplitTime(*(void**)(*(char**)((char*)clk + 0x28) + 0x790), secs - bonus);
+            cRiderMetrix_evSplitTime(clk->Riders[0]->mMetrix, secs - bonus);
         }
         (*(unsigned short*)((char*)self + 8))++;
     }

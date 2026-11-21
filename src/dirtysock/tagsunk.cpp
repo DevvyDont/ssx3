@@ -1618,9 +1618,9 @@ extern "C" void func_0025AC50(LobbyMan* self)
             func_003EE620(self->mpRoomList);
             func_003EE620(self->mpUserList);
         }
-        char* app = (char*)SSXApp;
-        self->mTimeout -= *(float*)(app + 0x14);
-        self->unk_0E4 -= *(float*)(app + 0x14);
+        cSSXApp* app = SSXApp;
+        self->mTimeout -= *(float*)(((char*)app) + 0x14);
+        self->unk_0E4 -= *(float*)(((char*)app) + 0x14);
     }
     func_00261490(BuddyMan_mBuddyMan);
     while (((sMsgListAC50*)(((char*)self) + 0xEC))->first() != *(sMsgListNodeAC50**)(((char*)self) + 0xF0)) {

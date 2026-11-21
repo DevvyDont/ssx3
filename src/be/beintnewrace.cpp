@@ -150,12 +150,12 @@ extern char str_dbg[];
 extern "C" void cBENewRaceInterface_setDebugLocationFile(cBENewRaceInterface* self, const char* name)
 {
     char* base = (char*)&D_0043D984;
-    char* newRace = (char*)&(*(&cBENewRaceInterface_newRace));
-    strcpy(base + *(int*)(newRace + 0x40) * 100, name);
+    cBERaceDB* newRace = &(*(&cBENewRaceInterface_newRace));
+    strcpy(base + newRace->iLocationIdx * 100, name);
     char* bigFileNames = base + 0x10;
-    strcpy(bigFileNames + *(int*)(newRace + 0x40) * 100, name);
+    strcpy(bigFileNames + newRace->iLocationIdx * 100, name);
     char* locationNames = base - 0x30;
-    strcpy(locationNames + *(int*)(newRace + 0x40) * 100, name);
+    strcpy(locationNames + newRace->iLocationIdx * 100, name);
     strcpy(str_dbg, name);
 }
 #endif
@@ -766,8 +766,8 @@ extern sRaceLookup_00440B38 D_00440B38[];
  */
 extern "C" int cBENewRaceInterface_getTimeLimit(cBENewRaceInterface* self, int kind)
 {
-    char* newRaceDb = (char*)&(*(&cBENewRaceInterface_newRace));
-    unsigned char mode = *(unsigned char*)(newRaceDb + 0x4A);
+    cBERaceDB* newRaceDb = &(*(&cBENewRaceInterface_newRace));
+    unsigned char mode = *(unsigned char*)&newRaceDb->cGameEvent;
     if (mode >= 6 && mode < 12)
     {
         return cBENewRaceInterface_getPeakTimeLimit(self, (signed char)mode, kind);
@@ -776,7 +776,7 @@ extern "C" int cBENewRaceInterface_getTimeLimit(cBENewRaceInterface* self, int k
     {
         kind = 1;
     }
-    int key = *(int*)(newRaceDb + 0x40);
+    int key = newRaceDb->iLocationIdx;
     for (int i = 0; i < 30; i++)
     {
         if (D_00440B38[i].key == key && D_00440B38[i].kind == kind)

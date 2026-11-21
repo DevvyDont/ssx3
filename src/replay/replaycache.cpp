@@ -1315,15 +1315,15 @@ extern "C" void cReplay_writeHeaderStart(cReplay* self)
 {
     sReplayHdr_1228* hdr = (sReplayHdr_1228*)self->WriteTmp;
     hdr->count = cReplay_writeFrameCount(self);
-    char* app = (char*)SSXApp;
+    cSSXApp* app = SSXApp;
     hdr->a = self->SaveFrameTicks;
     hdr->b = self->ReplayError;
     hdr->c = self->RecordTick;
     hdr->d = self->EndRecordTick;
-    int mode = *(int*)(*(char**)(*(char**)(app + 0x84) + 0xC) + 0x7C);
+    int mode = app->Game->AI->NumberOfPlayersAllocated;
     hdr->magic = 0xABCD0002;
     hdr->mode = mode;
-    cAI_getPodiumActorList(*(void**)(*(char**)(app + 0x84) + 0xC), hdr->data);
+    cAI_getPodiumActorList(app->Game->AI, hdr->data);
     self->WriteSrc = 0;
     self->WriteSrcSize = 0;
     self->WriteState = self->WriteState + 1;
@@ -3017,8 +3017,8 @@ extern "C" int cScriptPlayerChannelBlock_Play(cScriptPlayerChannelBlock* self, u
     self->mpOwner = (cScriptPlayerEntity*)owner;
     self->mpHeader = (tInSeqBlockChannelHeader*)data;
     if (data[0] != 0) {
-        char* heap = (char*)owner->mpOwner->mpManager;
-        self->mpBlockArray = (tBlockEntry*)cScriptHeap_AllocMem(heap + 8, data[1] * 0x1C);
+        cInSeq* heap = owner->mpOwner->mpManager;
+        self->mpBlockArray = (tBlockEntry*)cScriptHeap_AllocMem(&heap->mHeap, data[1] * 0x1C);
         self->mNextKeyIndex = 0;
         char* base = (char*)self->mpHeader;
         self->mpNextKey = (tInSeqBlockChannelKey*)(base + 4);
@@ -3042,11 +3042,11 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_Stop);
  */
 extern "C" void cScriptPlayerChannelBlock_Stop(cScriptPlayerChannelBlock* self)
 {
-    char* owner = (char*)self->mpOwner;
-    if (owner != 0) {
+    cScriptPlayerEntity* owner = self->mpOwner;
+    if (((char*)owner) != 0) {
         void* heapBlock = self->mpBlockArray;
         if (heapBlock != 0) {
-            cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(*(char**)(*(char**)(owner + 0x8) + 0x8) + 0x8)), heapBlock);
+            cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(&owner->mpOwner->mpManager->mHeap)), heapBlock);
         }
         self->mpData = 0;
         self->mpOwner = 0;
@@ -3318,8 +3318,8 @@ extern "C" int cScriptPlayerChannelEvent_Play(cScriptPlayerChannelEvent* self, u
     self->mpOwner = (cScriptPlayerEntity*)owner;
     self->mpHeader = (tInSeqEventChannelHeader*)data;
     if (data[0] != 0) {
-        char* heap = (char*)owner->mpOwner->mpManager;
-        self->mpEventArray = (tEventEntry*)cScriptHeap_AllocMem(heap + 8, data[1] * 8);
+        cInSeq* heap = owner->mpOwner->mpManager;
+        self->mpEventArray = (tEventEntry*)cScriptHeap_AllocMem(&heap->mHeap, data[1] * 8);
         self->mNextKeyIndex = 0;
         char* base = (char*)self->mpHeader;
         self->mpNextKey = (tInSeqEventChannelKey*)(base + 4);
@@ -3344,11 +3344,11 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_Stop);
  */
 extern "C" void cScriptPlayerChannelEvent_Stop(cScriptPlayerChannelEvent* self)
 {
-    char* owner = (char*)self->mpOwner;
-    if (owner != 0) {
+    cScriptPlayerEntity* owner = self->mpOwner;
+    if (((char*)owner) != 0) {
         void* heapBlock = self->mpEventArray;
         if (heapBlock != 0) {
-            cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(*(char**)(*(char**)(owner + 0x8) + 0x8) + 0x8)), heapBlock);
+            cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(&owner->mpOwner->mpManager->mHeap)), heapBlock);
         }
         self->mpData = 0;
         self->mpOwner = 0;
@@ -3552,8 +3552,8 @@ extern "C" int cScriptPlayerChannelObject_Play(cScriptPlayerChannelObject* self,
     self->mpOwner = (cScriptPlayerEntity*)owner;
     self->mpHeader = (tInSeqObjectChannelHeader*)data;
     if (data[0] != 0) {
-        char* heap = (char*)owner->mpOwner->mpManager;
-        self->mpObjectArray = (tObjectEntry*)cScriptHeap_AllocMem(heap + 8, data[1] * 36);
+        cInSeq* heap = owner->mpOwner->mpManager;
+        self->mpObjectArray = (tObjectEntry*)cScriptHeap_AllocMem(&heap->mHeap, data[1] * 36);
         for (int i = 0; i < ((unsigned short*)self->mpHeader)[1]; i++) {
         }
         self->mNextKeyIndex = 0;
@@ -3579,11 +3579,11 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_Stop);
  */
 extern "C" void cScriptPlayerChannelObject_Stop(cScriptPlayerChannelObject* self)
 {
-    char* owner = (char*)self->mpOwner;
-    if (owner != 0) {
+    cScriptPlayerEntity* owner = self->mpOwner;
+    if (((char*)owner) != 0) {
         void* heapBlock = self->mpObjectArray;
         if (heapBlock != 0) {
-            cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(*(char**)(*(char**)(owner + 0x8) + 0x8) + 0x8)), heapBlock);
+            cScriptHeap_FreeMem((cScriptHeap*)((sRcHeap*)(&owner->mpOwner->mpManager->mHeap)), heapBlock);
         }
         self->mpData = 0;
         self->mpOwner = 0;
@@ -4440,7 +4440,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_GetScriptLength__FPv);
 int cScriptPlayerEntity_GetScriptLength(void* vself)
 {
     cScriptPlayerEntity* self = (cScriptPlayerEntity*)vself;
-    return *(int*)((char*)self->mpSystemHeader + 0x4);
+    return self->mpSystemHeader->numFrames;
 }
 #endif
 
@@ -4490,7 +4490,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_GetNumVariations__FPv);
 int cScriptPlayerEntity_GetNumVariations(void* vself)
 {
     cScriptPlayerEntity* self = (cScriptPlayerEntity*)vself;
-    return *(int*)((char*)self->mpBlockHeader + 0x4);
+    return (int)self->mpBlockHeader->numVariations;
 }
 #endif
 
@@ -4565,7 +4565,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_GetType__FPv);
 unsigned char cScriptPlayerEntity_GetType(void* vself)
 {
     cScriptPlayerEntity* self = (cScriptPlayerEntity*)vself;
-    return *(unsigned char*)((char*)self->mpSystemHeader + 0x3);
+    return self->mpSystemHeader->type;
 }
 #endif
 

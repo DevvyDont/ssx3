@@ -59,9 +59,9 @@ struct cPlaybackMan_C458 {
 extern "C" cPlaybackMan_C458* cPlaybackMan_cPlaybackMan(cPlaybackMan_C458* self, int maxPlaybackFiles)
 {
     cReplayFrame_cReplayFrame((char*)self + 0x14);
-    char* world = (char*)SSXApp->Game;
-    self->world = world;
-    char* level = *(char**)(world + 0xC);
+    cGame* world = SSXApp->Game;
+    self->world = ((char*)world);
+    char* level = (char*)world->AI;
     self->level = level;
     self->field_0x74 = -1;
     self->field_0x54 = maxPlaybackFiles;
@@ -577,8 +577,8 @@ extern "C" void cPlaybackMan_startPreview(cPlaybackMan* self)
     if (self->State == 0 && *(int*)((char*)self->CurrentFrame + 0xC) > 0) {
         cAI_purgeMissionRiders(self->AI);
         cAI_reinitMissionRiders(self->AI);
-        void* replay = self->Game->Replay;
-        *(int*)((char*)replay + 0x4) = *(int*)replay;
+        cReplay* replay = self->Game->Replay;
+        replay->SaveState = *(int*)replay;
         cReplay_setReplayState(replay, 14);
         cPlaybackMan_saveFrame(self);
         *(int*)((char*)self->CurrentFrame + 0x8) = 0;
@@ -612,8 +612,8 @@ extern "C" void cPlaybackMan_stopPreview(cPlaybackMan* self)
     if (self->State == 1) {
         cAI_purgeMissionRiders(self->AI);
         cAI_reinitMissionRiders(self->AI);
-        void* replay = self->Game->Replay;
-        cReplay_setReplayState(replay, *(int*)((char*)replay + 0x4));
+        cReplay* replay = self->Game->Replay;
+        cReplay_setReplayState(replay, replay->SaveState);
         cPlaybackMan_restoreFrame(self);
         self->State = 0;
         int targetRider = *(int*)((char*)self->AI + 0x28);
@@ -939,8 +939,8 @@ extern "C" int cReplayCache_updateControlCmd(cReplayCache* self, int controlCmd)
     int result = 1;
     switch (SSXApp->Game->Replay->State) {
     case 0: {
-        char* replay = (char*)SSXApp->Game->Replay;
-        if (*(int*)(replay + 0x60C) != 0 || *(int*)(replay + 0x608) != 0 || *(int*)(replay + 0x610) != 0) {
+        cReplay* replay = SSXApp->Game->Replay;
+        if (replay->EndReplay != 0 || replay->Loaded != 0 || replay->ReplayError != 0) {
             break;
         }
         cReplayCache_addControlCmd_D178(self, controlCmd);
@@ -993,9 +993,9 @@ extern "C" void cReplayCache_addCmdFrame(cReplayCache* stream, sPbChunk_D2B0* ch
     sPbStream_D228* self = (sPbStream_D228*)stream;
     sPbChunk_D228* chunk = (sPbChunk_D228*)chunkp;
     if (self->count >= 0x1000) {
-        char* replay = (char*)SSXApp->Game->Replay;
-        *(int*)(replay + 0x610) = 1;
-        *(int*)(replay + 0x614) = 180;
+        cReplay* replay = SSXApp->Game->Replay;
+        replay->ReplayError = 1;
+        replay->ShowError = 180;
         return;
     }
     self->chunks[self->count] = *chunk;
@@ -1387,7 +1387,7 @@ INCLUDE_ASM("replay/playbackman", cReplay_addReplayFrame__FPv);
 void* cReplay_addReplayFrame(void* vself)
 {
     cReplay* self = (cReplay*)vself;
-    return cReplayFrameList_addFrame((char*)self + 0x3b0);
+    return cReplayFrameList_addFrame(&self->FrameList);
 }
 #endif
 

@@ -82,14 +82,14 @@ extern "C" void cWipeoutMotion_gainFocus(cWipeoutMotion* self, int prev)
     {
         self->BoardSphereTree = (cRiderSphereTree*)cRiderSphereTree_cRiderSphereTree((cRiderSphereTree*)cMemMan_alloc(688, str_BoardSphereTree, 0, 0));
     }
-    char* rider = (char*)self->mRider;
-    sVec4WG* pos = (sVec4WG*)(rider + 0x110);
+    cRider* rider = self->mRider;
+    sVec4WG* pos = (sVec4WG*)(&rider->mPosition);
     *(sVec4WG*)&self->BoardIntersectBox = *pos;
     *(sVec4WG*)&self->BoardIntersectBox.MaxPoint = *pos;
     if (prev == 0)
     {
-        sVec4WG* n = (sVec4WG*)(rider + 0x370);
-        float normalSpeed = vu0DotWG(*(sVec4WG*)(rider + 0x1E0), *n);
+        sVec4WG* n = (sVec4WG*)(&rider->mGroundNormal);
+        float normalSpeed = vu0DotWG(*(sVec4WG*)&rider->mVelocity, *n);
         sVec4WG normalPart = vu0ScaleMemWG(*n, normalSpeed);
         sVec4WG* velocity = (sVec4WG*)(&self->mRider->mVelocity);
         vu0SubWG(*velocity, *velocity, normalPart);
@@ -98,7 +98,7 @@ extern "C" void cWipeoutMotion_gainFocus(cWipeoutMotion* self, int prev)
     else
     {
         *(int*)self = 1;
-        cAirPredictor_startLaunchIntoAir(*(void**)(rider + 0x788), pos, rider + 0x1E0, 3333.33349609375f);
+        cAirPredictor_startLaunchIntoAir(rider->mAirPredictor, pos, &rider->mVelocity, 3333.33349609375f);
     }
     self->ForceNaturalAir = 0;
     *(int*)&self->mRider->mSpinRate = 0;
@@ -237,8 +237,8 @@ extern "C" void cWipeoutMotion_throwRider(cWipeoutMotion* self, sVec4WM* initVel
     }
     else
     {
-        char* rider = (char*)self->mRider;
-        cAirPredictor_startLaunchIntoAir(*(void**)(rider + 0x788), rider + 0x110, rider + 0x1E0, 3333.33349609375f);
+        cRider* rider = self->mRider;
+        cAirPredictor_startLaunchIntoAir(rider->mAirPredictor, &rider->mPosition, &rider->mVelocity, 3333.33349609375f);
     }
     self->ForceNaturalAir = 0;
 }
@@ -793,9 +793,9 @@ extern "C" void cWipeoutMotion_updateBoardSphereTree(cWipeoutMotion* self)
 {
     sVec4_7550 pts[4];
     sRadii_7550 radii = D_00458220;
-    char* rider = (char*)self->mRider;
-    char* model = *(char**)(rider + 0x780);
-    sBone_7550* bone = &(*(sBone_7550**)(model + 0x2C))[*(int*)(rider + 0x8A4)];
+    cRider* rider = self->mRider;
+    char* model = (char*)rider->mAnimModel;
+    sBone_7550* bone = &(*(sBone_7550**)(model + 0x2C))[rider->mBoneBoardChild];
     float modelScale = *(float*)(model + 0x140);
     sVec4_7550 boardAxis = vu0Scale_7550(xAxis_7550(bone), modelScale);
     pts[0] = vu0Add_7550(bone->pos, vu0Scale_7550(boardAxis, 70.0f));
@@ -845,25 +845,25 @@ static inline void vu0ScaleEqW7(sVec4W7& v, float s)
  */
 extern "C" void cWipeoutMotion_stepAirMotion(cWipeoutMotion* wipeoutMotion)
 {
-    char* rider = (char*)wipeoutMotion->mRider;
-    float dt = *(float*)(rider + 0x300) * 0.01666666753590107f;
-    cAirPredictor_updateFlightPath(*(void**)(rider + 0x788), rider + 0x110, rider + 0x1E0, dt);
+    cRider* rider = wipeoutMotion->mRider;
+    float dt = rider->mTimeScale * 0.01666666753590107f;
+    cAirPredictor_updateFlightPath(rider->mAirPredictor, &rider->mPosition, &rider->mVelocity, dt);
     int st = *(int*)((char*)wipeoutMotion->mRider->mAirPredictor + 0xAC);
     int ok = 0;
     if (st == 1 || st == 3) ok = 1;
     if (ok)
     {
-        char* airRider = (char*)wipeoutMotion->mRider;
-        char* ap = *(char**)(airRider + 0x788);
+        cRider* airRider = wipeoutMotion->mRider;
+        char* ap = (char*)airRider->mAirPredictor;
         float timeLeft = *(float*)(ap + 0x98) - *(float*)(ap + 0xA0);
-        float x = *(float*)(airRider + 0x300);
+        float x = airRider->mTimeScale;
         if (timeLeft >= 0.01666666753590107f)
             x /= timeLeft;
         else
             x *= 59.999996185302734f;
-        char* alignRider = (char*)wipeoutMotion->mRider;
+        cRider* alignRider = wipeoutMotion->mRider;
         float k = 6.632251739501953f;
-        cRider_alignRiderAxis(alignRider, *(char**)(alignRider + 0x788) + 0x20, *(char**)(alignRider + 0x788) + 0x10, x, *(float*)(alignRider + 0x300) * k);
+        cRider_alignRiderAxis(alignRider, (char*)alignRider->mAirPredictor + 0x20, (char*)alignRider->mAirPredictor + 0x10, x, alignRider->mTimeScale * k);
     }
     vu0ScaleEqW7(*(sVec4W7*)&wipeoutMotion->RiderAngVelocity, 1.0f - dt * 1.5f);
     cRider_updateOrientationImplicit(wipeoutMotion->mRider);
@@ -1030,9 +1030,9 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
             cAirPredictor_land_137860(RIDER->mAirPredictor, &RIDER->mPosition, &RIDER->mVelocity);
             func_00111AA0_137860(RIDER->mRiderHandler, &hitB, &hitB.normal, hitB.material, vn);
             cRider* landedRider = RIDER;
-            char* hd = (char*)landedRider->mRiderHandler;
-            *(int*)(hd + 0x314) = 1;
-            *(t4Vector*)(hd + 0x320) = landedRider->mVelocity;
+            cRiderHandler* hd = landedRider->mRiderHandler;
+            hd->WipeoutControl.IsNewImpact = 1;
+            hd->WipeoutControl.LatestImpact = landedRider->mVelocity;
             RIDER->unk_3D0 = hitB.v20;
             RIDER->mGroundNormal = hitB.normal;
             RIDER->mSurfaceType = hitB.material;

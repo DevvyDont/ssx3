@@ -1047,16 +1047,16 @@ extern char str_JUGADOR_pct_d[];
 extern "C" char* func_00146F88(cBENewPlayerInterface* self, int idx)
 {
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    char* net = ((char*)&cBENetworkInterface_networkOpt);
+    tBENetworkDB* net = &cBENetworkInterface_networkOpt;
     if (*(int*)net != 0 && idx < 2) {
-        if (*(int*)(net + 0x8) != 0) {
+        if (net->bIsHost != 0) {
             if (idx == 0)
-                return net + 0x488;
-            return net + 0x498;
+                return ((char*)net) + 0x488;
+            return ((char*)net) + 0x498;
         }
         if (idx == 0)
-            return net + 0x498;
-        return net + 0x488;
+            return ((char*)net) + 0x498;
+        return ((char*)net) + 0x488;
     }
     if (cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(idx)].pad_0x00[0] == 0) {
         cBE_getInterface_Fv(cBE_getBE(), 4);

@@ -37,8 +37,8 @@ struct cUIMenu_sVEntryB {
 extern "C" void cUIMenu_setSelected(cUIMenu* self, cUIThing* item, int play)
 {
     self->mStoredIndex = 0xFF;
-    char* cur = (char*)self->mpSelected;
-    if (cur != 0 && ((*(int*)(cur + 0x14) >> 4) & 1)) {
+    cUIThing* cur = self->mpSelected;
+    if (((char*)cur) != 0 && ((cur->mAttr >> 4) & 1)) {
         unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)cur, 1);
         if (ev != 0xFFFF) {
             void* scr = self->mpSelected->mpScreen;
@@ -46,9 +46,9 @@ extern "C" void cUIMenu_setSelected(cUIMenu* self, cUIThing* item, int play)
                 cUIScreen_playFrame(scr, ev, 1);
             }
         }
-        char* oldSelected = (char*)self->mpSelected;
-        cUIMenu_sVEntryA* va = *(cUIMenu_sVEntryA**)(oldSelected + 8);
-        va[7].fn(oldSelected + va[7].delta, 0);
+        cUIThing* oldSelected = self->mpSelected;
+        cUIMenu_sVEntryA* va = (cUIMenu_sVEntryA*)oldSelected->mVtbl;
+        va[7].fn(((char*)oldSelected) + va[7].delta, 0);
         char* screenState = *(char**)((char*)self->mpScreen + 0xD0);
         cUIMenu_sVEntryB* vb = *(cUIMenu_sVEntryB**)(screenState + 8);
         vb[19].fn(screenState + vb[19].delta, self->mpSelected, 2);
@@ -57,9 +57,9 @@ extern "C" void cUIMenu_setSelected(cUIMenu* self, cUIThing* item, int play)
     char* selState = *(char**)((char*)self->mpScreen + 0xD0);
     cUIMenu_sVEntryB* vb2 = *(cUIMenu_sVEntryB**)(selState + 8);
     vb2[19].fn(selState + vb2[19].delta, ((char*)item), 1);
-    char* newSelected = (char*)self->mpSelected;
-    cUIMenu_sVEntryA* va2 = *(cUIMenu_sVEntryA**)(newSelected + 8);
-    va2[7].fn(newSelected + va2[7].delta, 1);
+    cUIThing* newSelected = self->mpSelected;
+    cUIMenu_sVEntryA* va2 = (cUIMenu_sVEntryA*)newSelected->mVtbl;
+    va2[7].fn(((char*)newSelected) + va2[7].delta, 1);
     unsigned short ev2 = cUIThing_getKeyframerEvent(self->mpSelected, 0);
     if (ev2 != 0xFFFF) {
         void* scr = self->mpSelected->mpScreen;
@@ -206,13 +206,13 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
     if (((self->mAttr >> 5) & 1) || (char*)self->mpSelected == 0) {
         return 0;
     }
-    char* cur = (char*)self->mpSelected;
+    cUIThing* cur = self->mpSelected;
     if (!bit_B000(((char*)self), 20, 4)) {
         return 0;
     }
-    if (bit_B000(cur, 20, 3) && !bit_B000(cur, 20, 5)) {
-        sVE_B000* vt = *(sVE_B000**)(cur + 8);
-        if (vt[15].fn(cur + vt[15].delta, in) != 0) {
+    if (bit_B000(((char*)cur), 20, 3) && !bit_B000(((char*)cur), 20, 5)) {
+        sVE_B000* vt = (sVE_B000*)cur->mVtbl;
+        if (vt[15].fn(((char*)cur) + vt[15].delta, in) != 0) {
             return 1;
         }
     }
@@ -663,10 +663,10 @@ struct cUIPair_setFocus_sFlags {
 extern "C" void cUIPair_setFocus(cUIPair* self, int on)
 {
     ((cUIPair_setFocus_sFlags*)(&self->mAttr))->on = on != 0;
-    char* entry = (char*)self->mpEntry;
-    if (entry != 0) {
-        cUIPair_setFocus_sVEntryA* va = *(cUIPair_setFocus_sVEntryA**)(entry + 8);
-        va[7].fn(entry + va[7].delta, on);
+    cUIThing* entry = self->mpEntry;
+    if (((char*)entry) != 0) {
+        cUIPair_setFocus_sVEntryA* va = (cUIPair_setFocus_sVEntryA*)entry->mVtbl;
+        va[7].fn(((char*)entry) + va[7].delta, on);
     }
     char* widget = (char*)self->mpWidget;
     if (widget == 0) {
@@ -680,9 +680,9 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
                 cUIScreen_playFrame(scr, ev, 1);
             }
         }
-        char* widgetObj = (char*)self->mpWidget;
-        cUIPair_setFocus_sVEntryA* vc = *(cUIPair_setFocus_sVEntryA**)(widgetObj + 8);
-        vc[7].fn(widgetObj + vc[7].delta, 1);
+        cUIThing* widgetObj = self->mpWidget;
+        cUIPair_setFocus_sVEntryA* vc = (cUIPair_setFocus_sVEntryA*)widgetObj->mVtbl;
+        vc[7].fn(((char*)widgetObj) + vc[7].delta, 1);
         char* screenState = *(char**)((char*)self->mpScreen + 0xD0);
         cUIPair_setFocus_sVEntryB* vo = *(cUIPair_setFocus_sVEntryB**)(screenState + 8);
         vo[19].fn(screenState + vo[19].delta, self->mpWidget, 1);
@@ -694,9 +694,9 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
                 cUIScreen_playFrame(scr, ev, 1);
             }
         }
-        char* widgetObj = (char*)self->mpWidget;
-        cUIPair_setFocus_sVEntryA* vc = *(cUIPair_setFocus_sVEntryA**)(widgetObj + 8);
-        vc[7].fn(widgetObj + vc[7].delta, 0);
+        cUIThing* widgetObj = self->mpWidget;
+        cUIPair_setFocus_sVEntryA* vc = (cUIPair_setFocus_sVEntryA*)widgetObj->mVtbl;
+        vc[7].fn(((char*)widgetObj) + vc[7].delta, 0);
         char* screenState = *(char**)((char*)self->mpScreen + 0xD0);
         cUIPair_setFocus_sVEntryB* vo = *(cUIPair_setFocus_sVEntryB**)(screenState + 8);
         vo[19].fn(screenState + vo[19].delta, self->mpWidget, 2);
@@ -930,10 +930,10 @@ extern "C" int cUIPair_onInput(cUIPair* self, cUIInput* in)
         focusNotify_BED8(((char*)self), 4);
         return 1;
     } else {
-        char* sub = (char*)self->mpWidget;
-        if (sub != 0) {
-            sVE_BED8* vt = *(sVE_BED8**)(sub + 8);
-            return vt[15].fn(sub + vt[15].delta, in);
+        cUIThing* sub = self->mpWidget;
+        if (((char*)sub) != 0) {
+            sVE_BED8* vt = (sVE_BED8*)sub->mVtbl;
+            return vt[15].fn(((char*)sub) + vt[15].delta, in);
         }
         return 0;
     }

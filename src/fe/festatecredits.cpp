@@ -248,11 +248,11 @@ static inline void DrawText_185F40(char* font, unsigned short* s, float x, float
  */
 extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
 {
-    char* textScroll = (char*)self->mpTextScroll;
-    if (textScroll != 0)
+    cUITextScroll* textScroll = self->mpTextScroll;
+    if (((char*)textScroll) != 0)
     {
-        sV3_185F40 pos = *(sV3_185F40*)(textScroll + 0x44);
-        sV3_185F40 size = *(sV3_185F40*)(textScroll + 0x50);
+        sV3_185F40 pos = *(sV3_185F40*)&textScroll->mPosition;
+        sV3_185F40 size = *(sV3_185F40*)&textScroll->mScale;
         sV4_185F40 box;
         ((cUIObj185F40*)textScroll)->getSize(&box);
         char* font = cUITextScroll_getFont(self->mpTextScroll);

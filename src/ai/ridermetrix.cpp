@@ -308,13 +308,13 @@ extern "C" void cRiderMetrix_addToComboChain(cRiderMetrix* self, int points)
         float k = rmClamp_117638(rawMult, 0.5f, 2.0f);
         self->ComboResetDelay = -1.0f;
         self->ComboPoints += (int)(points * k);
-        char* hudBank = (char*)self->HUDfx;
-        if (hudBank != 0)
+        cHUDFX* hudBank = self->HUDfx;
+        if (((char*)hudBank) != 0)
         {
             int curValue = 0;
-            char* hudSlot = hudBank + 0x1D4;
+            char* hudSlot = ((char*)hudBank) + 0x1D4;
             if (!rmIsState_117638(hudSlot, 52))
-                curValue = *(int*)(hudBank + 0x1E8);
+                curValue = *(int*)(((char*)hudBank) + 0x1E8);
             cHUDFX_setAsync(hudSlot, 3, curValue, n, 0.0f);
         }
     }
@@ -1550,12 +1550,12 @@ extern "C" void cHUDFX_setAsync(void* self, int type, int value, int arg, float 
 extern "C" float cRiderMetrix_evCollectMultiplier(cRiderMetrix* self, float value)
 {
     self->Totals.NumMultipliers += 1;
-    char* hudBank = (char*)self->HUDfx;
-    if (hudBank != 0)
+    cHUDFX* hudBank = self->HUDfx;
+    if (((char*)hudBank) != 0)
     {
         if (self->CurTrickPointMult < value)
         {
-            cHUDFX_setAsync(hudBank + 0x270, 4, (int)value, 0, 0.0f);
+            cHUDFX_setAsync(((char*)hudBank) + 0x270, 4, (int)value, 0, 0.0f);
             self->CurTrickPointMult = value;
         }
     }
@@ -3040,8 +3040,8 @@ extern "C" void cRider_updateTerminalVelocity(char* self)
     float speedAttribute = cBEStatInterface_getSpeedAttrib(cBE_getInterface(cBE_getBE(), 3), *(int*)(self + 0x86C), *(int*)(self + 0xB34));
     // NOTE: the retail code adds and subtracts 1.0 (likely an inlined bx range helper).
     speedAttribute = speedAttribute + 1.0f - 1.0f;
-    char* surfPropCache = (char*)SSXApp->Game;
-    char* snow = *(char**)(surfPropCache + 0x44) + *(int*)(self + 0x438) * 176;
+    cGame* surfPropCache = SSXApp->Game;
+    char* snow = (char*)surfPropCache->SurfPropCache + *(int*)(self + 0x438) * 176;
     const int motionState = cRider_getMotionState(self);
     const float surfaceProperty = (motionState == 0) ? *(float*)(snow + 4) : 1.0f;
     const bool fasterThanPacked = 0.0f < surfaceProperty;

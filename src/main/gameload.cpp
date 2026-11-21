@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/gamestate.h"
 #include "sound/icepick/worldtriggermanager.h"
 #include "camera/trigger/cameratriggerman.h"
 #include "main/fadescreen.h"
@@ -292,8 +293,8 @@ extern "C" void cGame_load(cGame* self)
         } else if (mode == 5 && sub != 4) {
         } else if (mode == 6 && sub != 5) {
         } else {
-            char* ai = (char*)self->AI;
-            if (*(int*)(ai + 0x80) == 0) {
+            cAI* ai = self->AI;
+            if (ai->NumberOfComputersAllocated == 0) {
                 if (mode == 0)
                     cAI_initAIActors(ai, 0);
                 else
@@ -929,9 +930,9 @@ extern "C" void cGame_partialRestart(cGame* self)
     cBucketMan_mergeBucket(bm, 1);
     cBucketMan_purgeBucket(bm, 1);
     cBucketMan_purgeBucket(bm, 8);
-    char* gameAI = (char*)self->AI;
-    sVEntry_230180a* vt = *(sVEntry_230180a**)(gameAI + 0xCC);
-    vt[5].fn(gameAI + vt[5].delta, 3);
+    cAI* gameAI = self->AI;
+    sVEntry_230180a* vt = (sVEntry_230180a*)gameAI->mVtbl;
+    vt[5].fn(((char*)gameAI) + vt[5].delta, 3);
     cAvalanche_reset();
     cGameViewMan_snapAll(self->ViewMan);
     cWorld_resetMap(self->World);
@@ -1544,9 +1545,9 @@ extern "C" void cGame_update(cGame* self)
                     cReplay_update((char*)self->Replay);
                 }
                 if (cReplay_isPauseAI((char*)self->Replay) == 0 && !(cPauseState_Flags & 8)) {
-                    char* w = (char*)ScriptEngine;
-                    sVEntry_2306B8* vt = *(sVEntry_2306B8**)(w + 0x2A8);
-                    vt[5].fn(w + vt[5].delta);
+                    cSSXScriptEngine* w = ScriptEngine;
+                    sVEntry_2306B8* vt = (sVEntry_2306B8*)w->mVtbl;
+                    vt[5].fn(((char*)w) + vt[5].delta);
                 }
             }
             skip = 0;
@@ -1569,9 +1570,9 @@ extern "C" void cGame_update(cGame* self)
                     cBucketMan_applyBucket(&gBucketMan, 1);
                 }
                 {
-                    char* gameAI = (char*)self->AI;
-                    sVEntry_2306B8* vt = *(sVEntry_2306B8**)(gameAI + 0xCC);
-                    vt[3].fn(gameAI + vt[3].delta);
+                    cAI* gameAI = self->AI;
+                    sVEntry_2306B8* vt = (sVEntry_2306B8*)gameAI->mVtbl;
+                    vt[3].fn(((char*)gameAI) + vt[3].delta);
                 }
                 if (!(cPauseState_Flags & 0x10)) {
                     cBucketMan_updateBucket(&gBucketMan, 2);
@@ -1991,11 +1992,11 @@ extern "C" int cGame_isPreloadedStateReady(cGame* self)
     if (self->mPendingPreloadStateID != 0) {
         return 0;
     }
-    void* preloadingState = self->mPreloadingState;
-    if (preloadingState == 0) {
+    cGameState* preloadingState = self->mPreloadingState;
+    if (((void*)preloadingState) == 0) {
         return 1;
     }
-    sVEntry_002312D8* vt = *(sVEntry_002312D8**)((char*)preloadingState + 0xC);
+    sVEntry_002312D8* vt = (sVEntry_002312D8*)preloadingState->mVtbl;
     return vt[8].fn((char*)preloadingState + vt[8].delta);
 }
 #endif
