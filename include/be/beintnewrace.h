@@ -142,5 +142,8 @@ CHECK_OFFSET(tBEEventDB, iValidMode, 0x00);
 CHECK_OFFSET(tBEEventDB, strEventName, 0x04);
 CHECK_SIZE(tBEEventDB, 0x54);
 
+extern tBEPathDB cBELibrary_gamePathDB[3];      // [O] cBELibrary::gamePathDB; [R] 0x0043E700
+extern tBEEventDB cBELibrary_gameEventDB[];     // [O] cBELibrary::gameEventDB (tBEEventDB[15] in On Tour); [R] 0x0043E978
+
 
 #endif /* BE_BEINTNEWRACE_H */

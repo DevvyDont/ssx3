@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beintoption.h"
 #include "input/inputpad.h"
 #include "sound/ssxaudio.h"
 #include "ui/uistate.h"
@@ -268,7 +269,6 @@ extern "C" void func_0025B688();
 extern "C" void cGameComm_destroy();
 extern "C" void cCommSystem_destroy();
 extern char str_07main_men[];
-extern char cBERules_mRules[];
 
 struct sVEnt2_00194AA8 { short delta; short index; int (*fn)(void*); };
 
@@ -288,7 +288,7 @@ extern "C" void cFEStateMainMenu_onCreateScreen(cFEStateMainMenu* self)
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    MEM_fill(cBERules_mRules, 0, 0x20);
+    MEM_fill(((char*)&cBERules_mRules), 0, 0x20);
     self->mGoToNextState = 0;
     self->mHackCheatTotal = 0;
     func_00266CD8();

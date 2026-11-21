@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintoption.h"
 #include "be/beintreward.h"
 #include "be/beintcharacter.h"
 #include "be/beintnetwork.h"
@@ -185,7 +186,6 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBECharProfileDB_init(void* p, int i, int arg);
 extern "C" void func_00156810(void* self);
-extern sNetTrip_E2C8 D_005308B8_E5C8[] __asm__("cBERules_mRules");
 
 struct sProfChar_E5C8 {
     char d[0xF88];
@@ -227,7 +227,7 @@ extern "C" void cBENetworkInterface_setSyncData(cBENetworkInterface* self, int p
     signed char characterId = in->charID;
     if (cBENetworkInterface_networkOpt.bIsHost == 0)
         *(sNetPair_E2C8*)D_005308D0 = in->pair;
-    D_005308B8_E5C8[player] = (&in->t0)[player];
+    ((sNetTrip_E2C8*)&cBERules_mRules)[player] = (&in->t0)[player];
     cBECharProfileDB_init(&D_004A6CA8_E5C8[player][characterId], characterId, 1);
     func_00156810(D_004A6CA8_E5C8[player]);
     for (int k = 0; k < 525; k++)
@@ -346,7 +346,6 @@ struct sNetSlot_0014EB08
     int y;
 };
 
-extern sNetSlot_0014EB08 cBERules_mRules[];
 
 /**
  * Swaps most of the two 12-byte bragging-rights records at the start of the rules block cBERules_mRules (see
@@ -359,15 +358,15 @@ extern sNetSlot_0014EB08 cBERules_mRules[];
  */
 extern "C" void func_0014EB08(void)
 {
-    sNetSlot_0014EB08 firstRecord = cBERules_mRules[0];
-    cBERules_mRules[0].y = cBERules_mRules[1].y;
-    cBERules_mRules[0].c = cBERules_mRules[1].c;
-    cBERules_mRules[0].a = cBERules_mRules[1].a;
-    cBERules_mRules[0].x = cBERules_mRules[1].x;
-    cBERules_mRules[1].y = firstRecord.y;
-    cBERules_mRules[1].c = firstRecord.c;
-    cBERules_mRules[1].a = firstRecord.a;
-    cBERules_mRules[1].x = firstRecord.x;
+    sNetSlot_0014EB08 firstRecord = (*(sNetSlot_0014EB08*)&cBERules_mRules.Bragging[0]);
+    cBERules_mRules.Bragging[0].HeadStartSecs = cBERules_mRules.Bragging[1].HeadStartSecs;
+    (*(sNetSlot_0014EB08*)&cBERules_mRules.Bragging[0]).c = (*(sNetSlot_0014EB08*)&cBERules_mRules.Bragging[1]).c;
+    (*(sNetSlot_0014EB08*)&cBERules_mRules.Bragging[0]).a = (*(sNetSlot_0014EB08*)&cBERules_mRules.Bragging[1]).a;
+    cBERules_mRules.Bragging[0].StartingPoints = cBERules_mRules.Bragging[1].StartingPoints;
+    cBERules_mRules.Bragging[1].HeadStartSecs = firstRecord.y;
+    (*(sNetSlot_0014EB08*)&cBERules_mRules.Bragging[1]).c = firstRecord.c;
+    (*(sNetSlot_0014EB08*)&cBERules_mRules.Bragging[1]).a = firstRecord.a;
+    cBERules_mRules.Bragging[1].StartingPoints = firstRecord.x;
 }
 #endif
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintoption.h"
 
 extern int cBELibrary_raceDB[];
 
@@ -134,7 +135,6 @@ struct sProfileBlk_A188 {
 extern int cBELibrary_profileLib[];
 extern sBlkF88_A188 D_004B07F8_A188[] __asm__("D_004B07F8");
 extern sBlk9B50_A188 D_004BA348_A188 __asm__("D_004BA348");
-extern sBlk20_A188 D_005308B8_A188 __asm__("cBERules_mRules");
 
 #define PROFILE_A188 ((sProfileBlk_A188*)cBELibrary_playerDB)
 
@@ -165,7 +165,7 @@ extern "C" void func_0014A188(char* data)
     }
     *(sBlk9B50_A188*)data = D_004BA348_A188;
     data += sizeof(sBlk9B50_A188);
-    *(sBlk20_A188*)data = D_005308B8_A188;
+    *(sBlk20_A188*)data = (*(sBlk20_A188*)&cBERules_mRules);
 }
 #endif
 
@@ -195,7 +195,6 @@ struct sBlk20_14A5E0 { char d[0x20]; };
 extern sBlkF88_14A5E0 D_004A6CA8_14A5E0[] __asm__("cBELibrary_profileLib");
 extern sBlkF88_14A5E0 D_004B07F8[];
 extern sBlk9B50_14A5E0 D_004BA348;
-extern sBlk20_14A5E0 cBERules_mRules;
 
 /**
  * Restores the career data from a loaded save buffer.
@@ -228,7 +227,7 @@ extern "C" void cBELibrary_readFromData(char* data)
     }
     D_004BA348 = *(sBlk9B50_14A5E0*)data;
     data += 0x9B50;
-    cBERules_mRules = *(sBlk20_14A5E0*)data;
+    (*(sBlk20_14A5E0*)&cBERules_mRules) = *(sBlk20_14A5E0*)data;
     beInterface = cBEBAGTInterface_getThis();
     beInterface->onLoad();
     beInterface = cBEMissionInterface_getThis();

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintoption.h"
 #include "online/commchannel.h"
 #include "online/onlineevent.h"
 #include "online/voipman.h"
@@ -843,7 +844,6 @@ extern char str_FROM[];
 extern char str_ADDR[];
 extern char str_SEED[];
 extern int cBENewRaceInterface_bIsBamLocation;
-extern char cBERules_mRules[];
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
@@ -970,7 +970,7 @@ extern "C" void LobbyMan_onplaymsg(LobbyMan* self, char* msg)
         cBE_getInterface_Fv(((void*)(SSXApp)->BE), 7);
         if (cBENetworkInterface_networkOpt.bIsRankedGame != 0)
         {
-            char* cfg = cBERules_mRules;
+            char* cfg = ((char*)&cBERules_mRules);
             *(int*)(cfg + 0x18) |= 0x1C0;
             cBENewRaceInterface_setNumberAI(ri, 0);
             sVEntryA1D0* vt = *(sVEntryA1D0**)(ri + 0xC);

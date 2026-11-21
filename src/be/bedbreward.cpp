@@ -1145,7 +1145,6 @@ INCLUDE_ASM("be/bedbreward", cBERules_reset);
 #ifdef SKIP_ASM
 // MEM_fill looks like memset(dst, value, size).
 extern "C" void* MEM_fill(void* dst, int value, int size);
-extern char cBERules_mRules[];
 
 /**
  * Clears the 0x20-byte rules block cBERules_mRules (MEM_fill with 0).
@@ -1156,7 +1155,7 @@ extern char cBERules_mRules[];
  */
 extern "C" void cBERules_reset()
 {
-    MEM_fill(cBERules_mRules, 0, 0x20);
+    MEM_fill(((char*)&cBERules_mRules), 0, 0x20);
 }
 #endif
 

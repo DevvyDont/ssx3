@@ -341,18 +341,6 @@ extern "C" void cBEOptionInterface_resetAllQuickKeys(cBEOptionInterface* self)
 //100%
 INCLUDE_ASM("be/beintoption", cBERules_getPlayerStartDelaySecs);
 #ifdef SKIP_ASM
-struct sOptionTripleView_0014F7A8 {
-    int a;
-    int b;
-    int c;
-};
-
-struct sOptionTriplesView_0014F7A8 {
-    sOptionTripleView_0014F7A8 triples[2]; // 0x0
-};
-
-struct sOptionGlobal_005308B8;
-extern sOptionGlobal_005308B8 cBERules_mRules;
 extern "C" int cBERules_getMaxDelaySecs();
 
 /**
@@ -364,7 +352,8 @@ extern "C" int cBERules_getMaxDelaySecs();
  */
 extern "C" int cBERules_getPlayerStartDelaySecs(int i)
 {
-    int headStart = ((sOptionTriplesView_0014F7A8*)&cBERules_mRules)->triples[i].c;
+    tBERuleOptionDB* rules = &cBERules_mRules;  // through a pointer: the code adds HeadStartSecs' 8 at the load
+    int headStart = rules->Bragging[i].HeadStartSecs;
     return cBERules_getMaxDelaySecs() - headStart;
 }
 #endif
@@ -390,22 +379,6 @@ extern "C" int cBERules_getAIStartDelaySecs(void* self)
 //100%
 INCLUDE_ASM("be/beintoption", cBERules_hasModifiedRules);
 #ifdef SKIP_ASM
-// View of cBERules_mRules (the unit defines sOptionGlobal_005308B8 further down).
-struct sOptionTriple_005308B8 {
-    int a;
-    int b;
-    int c;
-};
-
-struct sOptionView_005308B8 {
-    sOptionTriple_005308B8 triples[2]; // 0x0
-    int field_0x18;
-    int field_0x1C;
-};
-
-struct sOptionGlobal_005308B8;
-extern sOptionGlobal_005308B8 cBERules_mRules;
-
 /**
  * Tells whether any rule is set for player @p i: a nonzero word in record @p i of the rules block cBERules_mRules or in the
  * "my rules" pair (+0x18, +0x1C).
@@ -415,8 +388,9 @@ extern sOptionGlobal_005308B8 cBERules_mRules;
  */
 extern "C" int cBERules_hasModifiedRules(int i)
 {
-    sOptionView_005308B8* rules = (sOptionView_005308B8*)&cBERules_mRules;
-    if (rules->triples[i].a != 0 || rules->triples[i].b != 0 || rules->triples[i].c != 0 || rules->field_0x18 != 0 || rules->field_0x1C != 0)
+    tBERuleOptionDB* rules = &cBERules_mRules;
+    if (rules->Bragging[i].unk_00 != 0 || rules->Bragging[i].StartingPoints != 0 || rules->Bragging[i].HeadStartSecs != 0
+        || rules->MyRules.unk_00 != 0 || rules->MyRules.AIHeadStartSecs != 0)
     {
         return 1;
     }
@@ -427,16 +401,6 @@ extern "C" int cBERules_hasModifiedRules(int i)
 //100%
 INCLUDE_ASM("be/beintoption", cBERules_getMaxDelaySecs);
 #ifdef SKIP_ASM
-struct sOptionGlobal_005308B8 {
-    char pad_0x00[0x8];
-    int field_0x8;
-    char pad_0xC[0x8];
-    int field_0x14;
-    char pad_0x18[0x4];
-    int field_0x1C;
-};
-extern sOptionGlobal_005308B8 cBERules_mRules;
-
 /**
  * Returns the largest head start in the rules block cBERules_mRules: the maximum of the AI head start (+0x1C) and the two
  * records' head starts (+0x8, +0x14).
@@ -445,11 +409,11 @@ extern sOptionGlobal_005308B8 cBERules_mRules;
  */
 extern "C" int cBERules_getMaxDelaySecs()
 {
-    int maxHeadStart = cBERules_mRules.field_0x1C;
-    if (maxHeadStart < cBERules_mRules.field_0x8)
-        maxHeadStart = cBERules_mRules.field_0x8;
-    if (maxHeadStart < cBERules_mRules.field_0x14)
-        maxHeadStart = cBERules_mRules.field_0x14;
+    int maxHeadStart = cBERules_mRules.MyRules.AIHeadStartSecs;
+    if (maxHeadStart < cBERules_mRules.Bragging[0].HeadStartSecs)
+        maxHeadStart = cBERules_mRules.Bragging[0].HeadStartSecs;
+    if (maxHeadStart < cBERules_mRules.Bragging[1].HeadStartSecs)
+        maxHeadStart = cBERules_mRules.Bragging[1].HeadStartSecs;
     return maxHeadStart;
 }
 #endif
@@ -461,10 +425,9 @@ INCLUDE_ASM("be/beintoption", cBERules_swap);
 /**
  * Swaps the two 12-byte bragging-rights records at the start of the rules block cBERules_mRules (all three words of each).
  */
-// Swaps the two 12-byte triples at the start of cBERules_mRules.
 extern "C" void cBERules_swap()
 {
-    tBEBraggingRights* records = (tBEBraggingRights*)&cBERules_mRules;
+    tBEBraggingRights* records = cBERules_mRules.Bragging;
     tBEBraggingRights firstRecord = records[0];
     records[0] = records[1];
     records[1] = firstRecord;

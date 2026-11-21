@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintoption.h"
 #include "sound/ssxaudio.h"
 #include "bx/appman.h"
 #include "fe/fesound.h"
@@ -810,7 +811,6 @@ extern "C" void cGraphicsMan_UploadTextures(void* p);
 extern "C" void cFELocale_unloadOV(void* p);
 extern "C" void cFEFlowState_setNumStates(void* flow, int n);
 extern char gFlowState;
-extern char cBERules_mRules[];
 extern int gWeHaveToClearTheBackEnd;
 extern int cDepthFog_m_Enable;
 extern int cScreenTint_m_Enable;
@@ -840,7 +840,7 @@ extern "C" void cRealFE_gainFocus(cRealFE* self)
         cBE_newProfile(cBE_getBE(), 0);
         cBE_newProfile(cBE_getBE(), 1);
         cBE_newProfile(cBE_getBE(), 2);
-        MEM_fill(cBERules_mRules, 0, 0x20);
+        MEM_fill(((char*)&cBERules_mRules), 0, 0x20);
         gWeHaveToClearTheBackEnd = 0;
     }
     self->mMovieSkippable = 0;

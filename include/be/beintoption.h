@@ -93,6 +93,7 @@ struct tBERuleOptionDB {
 CHECK_OFFSET(tBERuleOptionDB, Bragging, 0x00);
 CHECK_OFFSET(tBERuleOptionDB, MyRules, 0x18);
 CHECK_SIZE(tBERuleOptionDB, 0x20);
+extern tBERuleOptionDB cBERules_mRules;         // [O] cBERules::mRules; [R] 0x005308B8
 
 
 #endif /* BE_BEINTOPTION_H */

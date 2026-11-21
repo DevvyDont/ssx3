@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "be/beintoption.h"
 #include "online/privatemessage.h"
 #include "sound/ssxaudio.h"
 #include "ui/uiengine.h"
@@ -6850,7 +6851,6 @@ extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern int D_004A4E88_v[2] __asm__("D_004A4E88");
-extern char cBERules_mRules[];
 extern char str_cFEStateChallengeReceivedPopup[];
 extern char str_cFEStateChallengePopup[];
 
@@ -6889,7 +6889,7 @@ extern "C" void func_001ABCD0(cFEStateNet* self, int playerName, void* popup, in
         }
         cUIStateStack_pushPopup(*(char**)((char*)self->mpScreen->mpState + 0x10) + 0x18, newPopup);
     } else {
-        MEM_fill(cBERules_mRules, 0, 0x20);
+        MEM_fill(((char*)&cBERules_mRules), 0, 0x20);
         LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
         D_004A4E88_v[1] = 4;
         char opponentName[4];
@@ -8993,7 +8993,6 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
 extern "C" int cUIListBox_getCurrentEntryData(void* a);
-extern char cBERules_mRules[];
 
 struct sVE1AE680 {
     short delta;
@@ -9031,7 +9030,7 @@ extern "C" void func_001AE680(cFEStateChallengePopup* self)
         sVE1AE680* vt = *(sVE1AE680**)(iface + 0xC);
         vt[1].fn(iface + vt[1].delta);
         int multipliers = cUIListBox_getCurrentEntryData(self->mpLBMultipliers);
-        sOpts1AE680* raceOptions = (sOpts1AE680*)cBERules_mRules;
+        sOpts1AE680* raceOptions = (sOpts1AE680*)((char*)&cBERules_mRules);
         raceOptions->b6 = multipliers;
         raceOptions->b8 = cUIListBox_getCurrentEntryData(self->mpLBPowerUps);
         raceOptions->b7 = cUIListBox_getCurrentEntryData(self->mpLBPointIcons);
@@ -9073,7 +9072,6 @@ struct sRaceOpts_E7A0 {
     unsigned int bit8 : 1;
     unsigned int high : 23;
 };
-extern sRaceOpts_E7A0 D_005308B8_E7A0 __asm__("cBERules_mRules");
 
 struct sIVE_E7A0 {
     short delta;
@@ -9131,16 +9129,16 @@ extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* sel
             cBENetworkInterface_networkOpt.bIsRankedGame = cUIListBox_getCurrentEntryData_E7A0(self->mpLBRankedGame) != 0;
             commit_E7A0(opts);
             if (cUIListBox_getCurrentEntryData_E7A0(self->mpLBRankedGame)) {
-                D_005308B8_E7A0.bit6 = 1;
-                D_005308B8_E7A0.bit7 = 1;
-                D_005308B8_E7A0.bit8 = 1;
+                (*(sRaceOpts_E7A0*)&cBERules_mRules).bit6 = 1;
+                (*(sRaceOpts_E7A0*)&cBERules_mRules).bit7 = 1;
+                (*(sRaceOpts_E7A0*)&cBERules_mRules).bit8 = 1;
                 char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
                 cBENewRaceInterface_setNumberAI_E7A0(race, 0);
                 commit_E7A0(race);
             } else {
-                D_005308B8_E7A0.bit6 = cUIListBox_getCurrentEntryData_E7A0(self->mpLBMultipliers);
-                D_005308B8_E7A0.bit8 = cUIListBox_getCurrentEntryData_E7A0(self->mpLBPowerUps);
-                D_005308B8_E7A0.bit7 = cUIListBox_getCurrentEntryData_E7A0(self->mpLBPointIcons);
+                (*(sRaceOpts_E7A0*)&cBERules_mRules).bit6 = cUIListBox_getCurrentEntryData_E7A0(self->mpLBMultipliers);
+                (*(sRaceOpts_E7A0*)&cBERules_mRules).bit8 = cUIListBox_getCurrentEntryData_E7A0(self->mpLBPowerUps);
+                (*(sRaceOpts_E7A0*)&cBERules_mRules).bit7 = cUIListBox_getCurrentEntryData_E7A0(self->mpLBPointIcons);
                 char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
                 cBENewRaceInterface_setNumberAI_E7A0(race, cUIListBox_getCurrentEntryData_E7A0(self->mpLBCPURiders));
                 commit_E7A0(race);
@@ -9168,11 +9166,11 @@ extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* sel
             func_001AF098_E7A0((self), cUIListBox_getCurrentEntryData_E7A0(self->mpLBRankedGame) != 0);
             func_001AEC60_E7A0((self), self->mbChallengeSent);
         } else if (pWidget == (void*)self->mpLBMultipliers) {
-            D_005308B8_E7A0.bit6 = cUIListBox_getCurrentEntryData_E7A0(pWidget);
+            (*(sRaceOpts_E7A0*)&cBERules_mRules).bit6 = cUIListBox_getCurrentEntryData_E7A0(pWidget);
         } else if (pWidget == (void*)self->mpLBPowerUps) {
-            D_005308B8_E7A0.bit8 = cUIListBox_getCurrentEntryData_E7A0(pWidget);
+            (*(sRaceOpts_E7A0*)&cBERules_mRules).bit8 = cUIListBox_getCurrentEntryData_E7A0(pWidget);
         } else if (pWidget == (void*)self->mpLBPointIcons) {
-            D_005308B8_E7A0.bit7 = cUIListBox_getCurrentEntryData_E7A0(pWidget);
+            (*(sRaceOpts_E7A0*)&cBERules_mRules).bit7 = cUIListBox_getCurrentEntryData_E7A0(pWidget);
         } else if (pWidget == (void*)self->mpLBCPURiders) {
             char* race = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
             cBENewRaceInterface_setNumberAI_E7A0(race, cUIListBox_getCurrentEntryData_E7A0(self->mpLBCPURiders));
@@ -10113,7 +10111,6 @@ struct sRaceFlags_FE68 {
     unsigned int b9 : 23;
     char pad1C[0x4];
 };
-extern sRaceFlags_FE68 D_005308B8_FE68 __asm__("cBERules_mRules");
 
 struct sInfo_FE68 {
     int v[5];
@@ -10159,10 +10156,10 @@ extern "C" void cFEStateChallengeReceivedPopup_onCreateScreen(cFEStateChallengeR
     if (challenge == 0)
         return;
     cBXString_operatorE1(&LobbyMan_mLobbyMan->unk_08C, challenge->name);
-    MEM_fill(&D_005308B8_FE68, 0, 0x20);
-    D_005308B8_FE68.b6 = challenge->f18;
-    D_005308B8_FE68.b7 = challenge->f24;
-    D_005308B8_FE68.b8 = challenge->f1C;
+    MEM_fill(&(*(sRaceFlags_FE68*)&cBERules_mRules), 0, 0x20);
+    (*(sRaceFlags_FE68*)&cBERules_mRules).b6 = challenge->f18;
+    (*(sRaceFlags_FE68*)&cBERules_mRules).b7 = challenge->f24;
+    (*(sRaceFlags_FE68*)&cBERules_mRules).b8 = challenge->f1C;
     void* be = cBE_getInterface_Fv_FE68(cBE_getBE(), 0);
     cBENewRaceInterface_newRace.iLocationIdx = challenge->f8;
     cBENewRaceInterface_bIsBamLocation = 1;
@@ -24650,7 +24647,6 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern char str_233QuickPlayPopup[];
-extern char cBERules_mRules[];
 
 /**
  * Creates the "233QuickPlayPopup" screen; when it exists, plays it and clears the 32 race-option bytes cBERules_mRules.
@@ -24662,7 +24658,7 @@ extern "C" void cFEStateNetQuickPlayPopup_onCreateScreen(cFEStateNetQuickPlayPop
     self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
-        MEM_fill(cBERules_mRules, 0, 0x20);
+        MEM_fill(((char*)&cBERules_mRules), 0, 0x20);
     }
 }
 #endif

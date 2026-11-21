@@ -442,11 +442,6 @@ extern "C" void cBENewPlayerInterface_setToMissionMan(int a0);
 int cBENewPlayerInterface_isMissionMan(int a0);
 void* cBENewPlayerInterface_getThis();
 
-// Allowed game modes per game type (one byte per mode).
-struct sModeRow_144DF0 {
-    signed char allowed[0x43];
-};
-extern sModeRow_144DF0 cBELibrary_gamePathDB[];
 
 struct sVE_144DF0 {
     short delta;
@@ -472,14 +467,14 @@ static inline char* Race_144DF0()
  */
 extern "C" int cBENewRaceInterface_setGameMode(cBENewRaceInterface* self, int mode)
 {
-    sModeRow_144DF0 row = cBELibrary_gamePathDB[*((signed char*)Race_144DF0() + 0x49)];
+    tBEPathDB row = cBELibrary_gamePathDB[*((signed char*)Race_144DF0() + 0x49)];
     int humans = 1;
     int ai = 5;
     if (*((signed char*)Race_144DF0() + 0x49) == 2) {
         humans = 2;
         ai = 4;
     }
-    if (row.allowed[mode] != 1) {
+    if (row.cModes[mode] != 1) {
         return 0;
     }
     if (mode == 4) {
@@ -570,8 +565,6 @@ extern "C" void cBENewRaceInterface_setGamePath(cBENewRaceInterface* self, int m
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGameEvent);
 #ifdef SKIP_ASM
 extern "C" int cBENewRaceInterface_setNumberAI(cBENewRaceInterface* self, int count);
-
-extern tBEEventDB cBELibrary_gameEventDB[];
 
 static inline char* Race_1451E8()
 {
