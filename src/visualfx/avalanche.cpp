@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "visualfx/avalanche.h"
@@ -757,11 +758,6 @@ INCLUDE_ASM("visualfx/avalanche", tActiveAvalancheNode_end);
 #ifdef SKIP_ASM
 extern "C" void cDynamicColourEmitter_reset(void* self);
 
-struct sVEntry2D7DD8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Releases an active node from its avalanche node.
@@ -780,7 +776,7 @@ extern "C" void tActiveAvalancheNode_end(tActiveAvalancheNode* self, int force)
         if (inst != 0) {
             char* obj = *(char**)(inst + 0xC);
             if (obj != 0) {
-                sVEntry2D7DD8* vt = *(sVEntry2D7DD8**)(obj + 0xC);
+                sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(obj + 0xC);
                 vt[1].fn(obj + vt[1].delta, 3);
             }
         }

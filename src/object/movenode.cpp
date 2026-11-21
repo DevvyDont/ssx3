@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "bx/appman.h"
 #include "object/objectnode.h"
@@ -23,11 +24,6 @@
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_cMoveNode);
 #ifdef SKIP_ASM
-struct sSerVEntry_55298 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 struct cMoveNode;
 void cMoveNode_addModifierBlock(cMoveNode* self);
@@ -59,13 +55,13 @@ void* cMoveNode_cMoveNode_3(void* vself, void* bucket, void* stream)
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->ModifierBlock = 0;
     self->mVtbl = (void**)cMoveNode_vtbl;
-    sSerVEntry_55298* readEntry = &(*(sSerVEntry_55298**)stream)[2];
+    sVEntry<void(void*, void*, int)>* readEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
     readEntry->fn((char*)stream + readEntry->delta, (char*)&self->Debounce, 4);
-    readEntry = &(*(sSerVEntry_55298**)stream)[2];
+    readEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
     readEntry->fn((char*)stream + readEntry->delta, (char*)&self->Fade, 4);
-    readEntry = &(*(sSerVEntry_55298**)stream)[2];
+    readEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
     readEntry->fn((char*)stream + readEntry->delta, (char*)&self->TransferHack, 4);
-    readEntry = &(*(sSerVEntry_55298**)stream)[2];
+    readEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
     readEntry->fn((char*)stream + readEntry->delta, &flag, 4);
     if (flag) {
         cMoveNode_addModifierBlock((cMoveNode*)self);
@@ -157,11 +153,6 @@ void cMoveNode_addModifierBlock(cMoveNode* self)
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_addTransformModifier);
 #ifdef SKIP_ASM
-struct sMoveNodeVEntryV54B0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 extern "C" void tModifierBlock_remTransformModifier(void* block);
 
@@ -176,7 +167,7 @@ extern "C" void tModifierBlock_remTransformModifier(void* block);
  */
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifier* mod)
 {
-    sMoveNodeVEntryV54B0* vtEntry = &((sMoveNodeVEntryV54B0*)self->mVtbl)[49];
+    sVEntry<void(void*)>* vtEntry = &((sVEntry<void(void*)>*)self->mVtbl)[49];
     vtEntry->fn((char*)self + vtEntry->delta);
     if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
@@ -184,7 +175,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifi
         tModifierBlock_remTransformModifier(((void*)self->ModifierBlock));
     }
     *(void**)((void*)self->ModifierBlock) = ((void*)mod);
-    vtEntry = &((sMoveNodeVEntryV54B0*)self->mVtbl)[48];
+    vtEntry = &((sVEntry<void(void*)>*)self->mVtbl)[48];
     vtEntry->fn((char*)self + vtEntry->delta);
     unsigned int* instFlags = (unsigned int*)((char*)self->Instance + 8);
     *instFlags = (*instFlags & ~0x20u) | 0x40;
@@ -358,11 +349,6 @@ struct cMN_355770_Obj {
     virtual int collide(int a, int b);
 };
 
-struct cMN_355770_VEnt {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
 
 /**
  * Handles a collision with the node: the root transform reacts first, then the collision is passed on at most
@@ -386,7 +372,7 @@ extern "C" void cMoveNode_onCollide(cMoveNode* self, int tc, int ti, int pBeing)
         if (obj != 0) {
             obj->collide(tc, ti);
             char* transformModifier = *(char**)((void*)self->ModifierBlock);
-            cMN_355770_VEnt* vt = *(cMN_355770_VEnt**)transformModifier;
+            sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)transformModifier;
             if (vt[9].fn(transformModifier + vt[9].delta, cObjectInterface_getAIIndex(pBeing)) == 0) {
                 return;
             }
@@ -793,16 +779,6 @@ static inline void vu0CopyMatrix_355F10(void* dst, void* src)
         : "memory");
 }
 
-struct sNodeVEntryI_355F10 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-struct sNodeVEntryP_355F10 {
-    short delta;
-    short index;
-    char* (*fn)(void*);
-};
 struct sNodeVEntryD_355F10 {
     short delta;
     short index;
@@ -829,11 +805,11 @@ extern "C" void cMoveNode_transferFromOld(cMoveNode* self, cInstanceNode* srcv)
     if (((char*)srcv) == 0) {
         return;
     }
-    sNodeVEntryI_355F10* vi = (sNodeVEntryI_355F10*)srcv->mVtbl;
+    sVEntry<int(void*)>* vi = (sVEntry<int(void*)>*)srcv->mVtbl;
     if (vi[16].fn(((char*)srcv) + vi[16].delta) != 0) {
         cMoveNode_transferEffectModifier(self, (cMoveNode*)srcv);
     }
-    sNodeVEntryP_355F10* vp = (sNodeVEntryP_355F10*)srcv->mVtbl;
+    sVEntry<char*(void*)>* vp = (sVEntry<char*(void*)>*)srcv->mVtbl;
     char* transform = vp[24].fn(((char*)srcv) + vp[24].delta);
     if (transform == (char*)self->Instance + 0x10) {
         sNodeVEntryD_355F10* vd = (sNodeVEntryD_355F10*)srcv->mVtbl;
@@ -913,11 +889,6 @@ struct sMnVEntryI2_60C0 {
     short index;
     int (*fn)(void*, int);
 };
-struct sMnVEntryI_60C0 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 // Taking the object by reference matches the target's register allocation (see cMoveNode_getRootTransform).
 static inline int VCall23_60C0(char*& o, int a)
 {
@@ -940,7 +911,7 @@ extern "C" int cMoveNode_getInstAnimMats(cMoveNode* self, int inst)
         int animMats = VCall23_60C0(transformModifier, inst);
         if (animMats != 0) return animMats;
     }
-    sMnVEntryI_60C0* vs = (sMnVEntryI_60C0*)self->mVtbl;
+    sVEntry<int(void*)>* vs = (sVEntry<int(void*)>*)self->mVtbl;
     return vs[27].fn(((char*)self) + vs[27].delta);
 }
 #endif
@@ -988,16 +959,6 @@ int cInstanceNode_runOnLoseFocusScript(void* self);
 extern "C" int tModifierBlock_isComplete(void* block);
 extern "C" void tModifierBlock_clearComplete(void* block);
 
-struct sMnVEntryI_356198 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-struct sMnVEntryV_356198 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 struct sMnVEntryVi_356198 {
     short delta;
     short index;
@@ -1019,17 +980,17 @@ extern "C" void cMoveNode_update(cMoveNode* selfv)
     if (selfv->Debounce > 0) {
         selfv->Debounce -= 1;
     }
-    sMnVEntryI_356198* vi = (sMnVEntryI_356198*)selfv->mVtbl;
+    sVEntry<int(void*)>* vi = (sVEntry<int(void*)>*)selfv->mVtbl;
     if (vi[20].fn(((char*)selfv) + vi[20].delta) != 0) {
-        sMnVEntryI_356198* vi2 = (sMnVEntryI_356198*)selfv->mVtbl;
+        sVEntry<int(void*)>* vi2 = (sVEntry<int(void*)>*)selfv->mVtbl;
         if (vi2[23].fn(((char*)selfv) + vi2[23].delta) <= 0 && cInstanceNode_runOnLoseFocusScript(self) == 0) {
-            sMnVEntryV_356198* vv = (sMnVEntryV_356198*)selfv->mVtbl;
+            sVEntry<void(void*)>* vv = (sVEntry<void(void*)>*)selfv->mVtbl;
             vv[35].fn(((char*)selfv) + vv[35].delta);
             return;
         }
     }
     cMoveNode_preUpdateModifierBlock(self);
-    sMnVEntryI_356198* vi3 = (sMnVEntryI_356198*)selfv->mVtbl;
+    sVEntry<int(void*)>* vi3 = (sVEntry<int(void*)>*)selfv->mVtbl;
     if (vi3[15].fn(((char*)selfv) + vi3[15].delta) != 0) {
         cMoveNode_postUpdateModifierBlock(self);
         if (((void*)self->ModifierBlock) != 0 && tModifierBlock_isComplete(((void*)self->ModifierBlock)) != 0) {
@@ -1730,11 +1691,6 @@ extern "C" void cMoveNode_signal(cMoveNode* self)
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sSerVEntry_56B30 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 extern "C" void tModifierBlock_writeToReplayFrame(void* block, void* stream);
@@ -1753,14 +1709,14 @@ void cMoveNode_writeToReplayFrame_2(void* vself, void* stream)
 {
     cMoveNode* self = (cMoveNode*)vself;
     cInstanceNode_writeToReplayFrame(self, stream);
-    sSerVEntry_56B30* writeEntry = &(*(sSerVEntry_56B30**)stream)[1];
+    sVEntry<void(void*, void*, int)>* writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Debounce, 4);
-    writeEntry = &(*(sSerVEntry_56B30**)stream)[1];
+    writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Fade, 4);
-    writeEntry = &(*(sSerVEntry_56B30**)stream)[1];
+    writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->TransferHack, 4);
     int flag = self->ModifierBlock != 0;
-    writeEntry = &(*(sSerVEntry_56B30**)stream)[1];
+    writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, &flag, 4);
     void* block = self->ModifierBlock;
     if (block != 0) {
@@ -1803,11 +1759,6 @@ extern "C" int cMoveNode_hasFocusCount(cMoveNode* self)
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_incFocusCount);
 #ifdef SKIP_ASM
-struct sMnVEntryI6C48 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 // PORT: cMultiSplineModifier_incFocusCount takes one argument, but this caller passes a second ($5 = a1);
 // the original declaration it was compiled against must have had two parameters.
@@ -1825,7 +1776,7 @@ extern "C" int cMoveNode_incFocusCount(cMoveNode* self, void* pInst)
     if (block != 0) {
         void* node = *(void**)block;
         if (node != 0) {
-            sMnVEntryI6C48* vt = *(sMnVEntryI6C48**)node;
+            sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)node;
             if (vt[26].fn((char*)node + vt[26].delta) == 2) {
                 return cMultiSplineModifier_incFocusCount_2(*(void**)((void*)self->ModifierBlock), pInst);
             }
@@ -2067,11 +2018,6 @@ extern "C" void* cPositionModifier_cPositionModifier1(cPositionModifier* self, v
 //100%
 INCLUDE_ASM("object/movenode", cPositionModifier_cPositionModifier2);
 #ifdef SKIP_ASM
-struct sMnVEntrySer6F68 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 // PORT: callers declare this void; the body returns self, so bind it via an asm label.
 extern "C" void* cPositionModifier_cPositionModifier2_ret(void* self, void* stream) __asm__("cPositionModifier_cPositionModifier2");
@@ -2087,7 +2033,7 @@ extern "C" void* cPositionModifier_cPositionModifier2_ret(void* self, void* stre
 extern "C" void* cPositionModifier_cPositionModifier2_ret(void* self, void* stream)
 {
     *(void***)self = cPositionModifier_vtbl;
-    sMnVEntrySer6F68* vt = *(sMnVEntrySer6F68**)stream;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x10, 0x40);
     // PORT: PS2-only VU0 inline asm (4x4 matrix copy, t4mat_Identity -> self+0x50).
     __asm__ __volatile__(
@@ -2176,17 +2122,7 @@ extern "C" void* cParentModifier_cParentModifier1(cParentModifier* self, void* p
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", cParentModifier_cParentModifier);
 #ifdef SKIP_ASM
-struct sMnVEntrySer7090 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
-struct sMnVEntryRd7090 {
-    short delta;
-    short index;
-    void* (*fn)(void*);
-};
 
 extern "C" void cPositionModifier_cPositionModifier2(void* self, void* stream);
 extern char cParentModifier_vtbl[];
@@ -2204,9 +2140,9 @@ extern "C" void* cParentModifier_cParentModifier(cParentModifier* self, void* st
 {
     cPositionModifier_cPositionModifier2(self, stream);
     self->mVtbl = (void**)cParentModifier_vtbl;
-    sMnVEntrySer7090* readEntry = &(*(sMnVEntrySer7090**)stream)[2];
+    sVEntry<void(void*, void*, int)>* readEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
     readEntry->fn((char*)stream + readEntry->delta, (char*)&self->Mesh, 4);
-    sMnVEntryRd7090* readPtrEntry = &(*(sMnVEntryRd7090**)stream)[3];
+    sVEntry<void*(void*)>* readPtrEntry = &(*(sVEntry<void*(void*)>**)stream)[3];
     self->ParentInst = (tInstanceRecord*)readPtrEntry->fn((char*)stream + readPtrEntry->delta);
     return ((void*)self);
 }
@@ -2280,16 +2216,6 @@ static inline t4Vector vel_357108(char* self)
     return *(t4Vector*)(self + 0x80);
 }
 
-struct sMnVEntryI_357108 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-struct sMnVEntryM_357108 {
-    short delta;
-    short index;
-    t4Matrix* (*fn)(void*, int);
-};
 
 /**
  * Follows the parent instance: copies the parent mesh's matrix and places the offset in its space.
@@ -2303,9 +2229,9 @@ extern "C" void cParentModifier_updateRootTransform(cParentModifier* self)
 {
     char* parentNode = *(char**)((char*)self->ParentInst + 0xC);
     if (parentNode != 0) {
-        sMnVEntryI_357108* vi = *(sMnVEntryI_357108**)(parentNode + 0xC);
+        sVEntry<int(void*)>* vi = *(sVEntry<int(void*)>**)(parentNode + 0xC);
         if (vi[26].fn(parentNode + vi[26].delta) != 0) {
-            sMnVEntryM_357108* vm = *(sMnVEntryM_357108**)(parentNode + 0xC);
+            sVEntry<t4Matrix*(void*, int)>* vm = *(sVEntry<t4Matrix*(void*, int)>**)(parentNode + 0xC);
             vu0CopyMtx_357108(&self->Transform, vm[29].fn(parentNode + vm[29].delta, self->Mesh));
         } else {
             cInstanceNode_buildMeshMat(self->ParentInst, self->Mesh, ((&self->Transform)));
@@ -2319,11 +2245,6 @@ extern "C" void cParentModifier_updateRootTransform(cParentModifier* self)
 //100%
 INCLUDE_ASM("object/movenode", cParentModifier_updateIntersectInfo);
 #ifdef SKIP_ASM
-struct sMnVEntry7210 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 
 /**
  * Lets the parent instance's node fill an intersection record as if it hit Mesh.
@@ -2345,7 +2266,7 @@ extern "C" void cParentModifier_updateIntersectInfo(cParentModifier* self, void*
     }
     int saved = *(int*)((char*)obj + 0x5C);
     *(int*)((char*)obj + 0x5C) = self->Mesh;
-    sMnVEntry7210* vt = *(sMnVEntry7210**)((char*)parentNode + 0xC);
+    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)((char*)parentNode + 0xC);
     vt[42].fn((char*)parentNode + vt[42].delta, obj);
     *(int*)((char*)obj + 0x5C) = saved;
 }
@@ -2354,17 +2275,7 @@ extern "C" void cParentModifier_updateIntersectInfo(cParentModifier* self, void*
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", cParentModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sMnVEntry7278a {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
-struct sMnVEntry7278b {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 
 
 /**
@@ -2376,9 +2287,9 @@ struct sMnVEntry7278b {
 extern "C" void cParentModifier_writeToReplayFrame(cParentModifier* self, void* stream)
 {
     cPositionModifier_writeToReplayFrame((cPositionModifier*)self, (cPositionModifier_writeToReplayFrame_cObj*)stream);
-    sMnVEntry7278a* vt1 = *(sMnVEntry7278a**)stream;
+    sVEntry<void(void*, void*, int)>* vt1 = *(sVEntry<void(void*, void*, int)>**)stream;
     vt1[1].fn((char*)stream + vt1[1].delta, (char*)&self->Mesh, 4);
-    sMnVEntry7278b* vt2 = *(sMnVEntry7278b**)stream;
+    sVEntry<void(void*, void*)>* vt2 = *(sVEntry<void(void*, void*)>**)stream;
     vt2[5].fn((char*)stream + vt2[5].delta, self->ParentInst);
 }
 #endif
@@ -2434,17 +2345,7 @@ extern "C" void* cMagnetModifier_cMagnetModifier(cMagnetModifier* self, void* in
 //100%
 INCLUDE_ASM("object/movenode", cMagnetModifier_cMagnetModifier1);
 #ifdef SKIP_ASM
-struct sMnVEntrySer7358 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
-struct sMnVEntryRd7358 {
-    short delta;
-    short index;
-    void* (*fn)(void*);
-};
 
 extern char cMagnetModifier_vtbl[];
 
@@ -2461,11 +2362,11 @@ extern "C" void* cMagnetModifier_cMagnetModifier1(cMagnetModifier* self, void* s
 {
     char* payload = (char*)&self->Offset;
     *(void**)self = cMagnetModifier_vtbl;
-    sMnVEntryRd7358* readInstFn = &(*(sMnVEntryRd7358**)stream)[3];
+    sVEntry<void*(void*)>* readInstFn = &(*(sVEntry<void*(void*)>**)stream)[3];
     self->Instance = (tInstanceRecord*)readInstFn->fn((char*)stream + readInstFn->delta);
-    sMnVEntrySer7358* readFn = &(*(sMnVEntrySer7358**)stream)[2];
+    sVEntry<void(void*, void*, int)>* readFn = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
     readFn->fn((char*)stream + readFn->delta, payload, 80);
-    readFn = &(*(sMnVEntrySer7358**)stream)[2];
+    readFn = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
     readFn->fn((char*)stream + readFn->delta, (char*)&self->Transform, 0x40);
     self->RootTransformDirty = 1;
     return ((void*)self);
@@ -2601,11 +2502,6 @@ INCLUDE_ASM("object/movenode", cMagnetModifier_intersect);
 //100%
 INCLUDE_ASM("object/movenode", cMagnetModifier_runCollide);
 #ifdef SKIP_ASM
-struct sMnVEntryI7660 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 extern "C" void* cObjectInterface_getBeing(int id);
 
@@ -2629,7 +2525,7 @@ extern "C" int cMagnetModifier_runCollide(cMagnetModifier* self, int id)
         return 0;
     }
     void* obj = cObjectInterface_getBeing(id);
-    sMnVEntryI7660* vt = *(sMnVEntryI7660**)obj;
+    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
     if (vt[8].fn((char*)obj + vt[8].delta) != 0) {
         self->Being = id;
     }
@@ -2640,17 +2536,7 @@ extern "C" int cMagnetModifier_runCollide(cMagnetModifier* self, int id)
 //100%
 INCLUDE_ASM("object/movenode", cMagnetModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sMnVEntryPtr76D0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 
-struct sMnVEntrySer76D0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Saves a magnet modifier to a replay frame: Instance (writeReplayInstance, slot 5), the 0x50 bytes from +0x10
@@ -2660,11 +2546,11 @@ struct sMnVEntrySer76D0 {
  */
 extern "C" void cMagnetModifier_writeToReplayFrame(cMagnetModifier* self, void* stream)
 {
-    sMnVEntryPtr76D0* writePtrEntry = &(*(sMnVEntryPtr76D0**)stream)[5];
+    sVEntry<void(void*, void*)>* writePtrEntry = &(*(sVEntry<void(void*, void*)>**)stream)[5];
     writePtrEntry->fn((char*)stream + writePtrEntry->delta, self->Instance);
-    sMnVEntrySer76D0* writeEntry = &(*(sMnVEntrySer76D0**)stream)[1];
+    sVEntry<void(void*, void*, int)>* writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Offset, 80);
-    writeEntry = &(*(sMnVEntrySer76D0**)stream)[1];
+    writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Transform, 0x40);
 }
 #endif
@@ -2710,17 +2596,7 @@ extern "C" void* cAvaSplineModifier_cAvaSplineModifier(cAvaSplineModifier* self,
 //100%
 INCLUDE_ASM("object/movenode", cAvaSplineModifier_cAvaSplineModifier1);
 #ifdef SKIP_ASM
-struct sMnVEntrySer7798 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
-struct sMnVEntryRd7798 {
-    short delta;
-    short index;
-    void* (*fn)(void*);
-};
 
 // PORT: the project names this cObjectInterface_getAvaSplineTransform__FPv (one void* arg), but it is a
 // pass-through wrapper and this caller passes two args (prototype mismatch).
@@ -2739,9 +2615,9 @@ extern "C" void* cAvaSplineModifier_cAvaSplineModifier1(cAvaSplineModifier* self
 {
     char* payload = (char*)&self->BoundBox;
     *(void***)self = cAvaSplineModifier_vtbl;
-    sMnVEntryRd7798* readInstFn = &(*(sMnVEntryRd7798**)stream)[3];
+    sVEntry<void*(void*)>* readInstFn = &(*(sVEntry<void*(void*)>**)stream)[3];
     self->Instance = (tInstanceRecord*)readInstFn->fn((char*)stream + readInstFn->delta);
-    sMnVEntrySer7798* readFn = &(*(sMnVEntrySer7798**)stream)[2];
+    sVEntry<void(void*, void*, int)>* readFn = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
     readFn->fn((char*)stream + readFn->delta, payload, 0x30);
     cObjectInterface_getAvaSplineTransform_2(self->Instance, (char*)&self->Transform);
     return ((void*)self);
@@ -2768,17 +2644,7 @@ extern "C" void cAvaSplineModifier_update(cAvaSplineModifier* self)
 //100%
 INCLUDE_ASM("object/movenode", cAvaSplineModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sMnVEntry7848a {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 
-struct sMnVEntry7848b {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Saves an avalanche-spline modifier to a replay frame: Instance (writeReplayInstance, slot 5), then the 0x30 bytes
@@ -2788,9 +2654,9 @@ struct sMnVEntry7848b {
  */
 extern "C" void cAvaSplineModifier_writeToReplayFrame(cAvaSplineModifier* self, void* stream)
 {
-    sMnVEntry7848a* vt1 = *(sMnVEntry7848a**)stream;
+    sVEntry<void(void*, void*)>* vt1 = *(sVEntry<void(void*, void*)>**)stream;
     vt1[5].fn((char*)stream + vt1[5].delta, self->Instance);
-    sMnVEntry7848b* vt2 = *(sMnVEntry7848b**)stream;
+    sVEntry<void(void*, void*, int)>* vt2 = *(sVEntry<void(void*, void*, int)>**)stream;
     vt2[1].fn((char*)stream + vt2[1].delta, (char*)&self->BoundBox, 0x30);
 }
 #endif
@@ -2849,11 +2715,6 @@ extern "C" void* cParticleNode_cParticleNode(cParticleNode* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", cParticleNode_update);
 #ifdef SKIP_ASM
-struct sMnDtorVEntry7950 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 extern "C" void cMoveNode_update(cMoveNode* self);
 
@@ -2871,7 +2732,7 @@ extern "C" void cParticleNode_update(cParticleNode* self)
         return;
     }
     if (((void*)self) != 0) {
-        sMnDtorVEntry7950* vt = (sMnDtorVEntry7950*)self->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
         vt[1].fn((char*)self + vt[1].delta, 3);
     }
 }
@@ -3129,11 +2990,6 @@ extern "C" void cMultiParticleMan_writeToReplayFrame(void** self, void* stream)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/movenode", cMultiParticleMan_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sMnVEntrySer7D28 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 extern "C" void* cMultiParticle_cMultiParticle1(cMultiParticle* mem, void* stream);
 
@@ -3152,7 +3008,7 @@ extern "C" void cMultiParticleMan_readFromReplayFrame(void** self, void* stream)
     cMultiParticleMan_reset(self);
     for (i = 0; i < 4; i++) {
         int has;
-        sMnVEntrySer7D28* readSlot = &(*(sMnVEntrySer7D28**)stream)[2];
+        sVEntry<void(void*, void*, int)>* readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
         readSlot->fn((char*)stream + readSlot->delta, &has, 4);
         if (has) {
             self[i] = cMultiParticle_cMultiParticle1((cMultiParticle*)cMemMan_alloc(80, str_MultiParticle, 0x20000000, 0), stream);

@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "be/beintnewrace.h"
@@ -651,11 +652,6 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_processComplete);
 #ifdef SKIP_ASM
 int cWScriptMan_isProcessActive(void* man, void* proc);
 
-struct sVEntry00307DC8 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Completes a world-script process if its manager still has it on the running list.
@@ -667,7 +663,7 @@ struct sVEntry00307DC8 {
 extern "C" void cWScriptProcess_processComplete(cWScriptProcess* self)
 {
     if (cWScriptMan_isProcessActive(self->Manager, self) != 0) {
-        sVEntry00307DC8* vt = (sVEntry00307DC8*)self->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
         vt[6].fn((char*)self + vt[6].delta);
     }
 }

@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "ui/uithing.h"
 #include "ui/uiengine.h"
@@ -25,7 +26,6 @@ extern char str_kT_14Heading2[];
 extern char str_kT_14Heading3[];
 extern char str_kT_14Heading4[];
 
-struct sVEnt_001908C0 { short delta; short index; void (*fn)(void*); };
 
 /**
  * Builds the rider bio screen ("14rid_prof"): its four heading tabs, the rider and the first page.
@@ -51,7 +51,7 @@ extern "C" void cFEStateRiderBio_onCreateScreen(cFEStateRiderBio* self)
     }
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
     self->mCharID = cBENewPlayerInterface_getPlayerCharID(iface, self->mUserNum);
-    sVEnt_001908C0* vt = *(sVEnt_001908C0**)((char*)iface + 0xC);
+    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)iface + 0xC);
     vt[2].fn((char*)iface + vt[2].delta);
     self->mScreen = 0;
     cFEStateRiderBio_setupBioScreen(self);
@@ -322,11 +322,6 @@ extern "C" void cFEStateRiderBio_fillBioInfo(cFEStateRiderBio* self)
 //100%
 INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRiderBio_onWidgetEvent);
 #ifdef SKIP_ASM
-struct sVEntry001912D0 {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void cFEStateRiderBio_setupBioScreen(cFEStateRiderBio* self);
 
@@ -348,7 +343,7 @@ extern "C" void cFEStateRiderBio_onWidgetEvent(cFEStateRiderBio* self, cUIThing*
     switch (msg) {
     case 6: {
         void* obj = *(void**)self->mpEngine;
-        sVEntry001912D0* vt = *(sVEntry001912D0**)((char*)obj + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);

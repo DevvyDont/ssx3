@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "fe/uistatebuypopup.h"
@@ -839,11 +840,6 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern char str_kT_OVRCMNSongsInList[];
 extern char str_disconnected_from_serverErrorString[];
 
-struct sVtEntry_00198118 {
-    short delta;
-    short index;
-    unsigned short* (*fn)(void*, int);
-};
 
 
 /**
@@ -857,7 +853,7 @@ extern "C" void cFEStateRequestLine_updatePlayListCounter(cFEStateRequestLine* r
 {
     cFEStateRequestLine* self = requestLine;
     char* db = (char*)SSXApp->FELocale;
-    sVtEntry_00198118* vt = *(sVtEntry_00198118**)(db + 4);
+    sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(db + 4);
     unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(str_kT_OVRCMNSongsInList));
     unsigned short* buf = (unsigned short*)operator_new_tag((USTR_length(fmt) + 5) * 2, str_disconnected_from_serverErrorString, 0x100, 0);
     int n = 0;

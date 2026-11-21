@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "fe/popupinfo.h"
 #include "ui/uiinput.h"
@@ -161,11 +162,6 @@ void* cScreenPopup_onDestroyScreen(void* vself)
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_onGainFocus);
 #ifdef SKIP_ASM
-struct sVE5B88 {
-    short delta;
-    short index;
-    void* fn;
-};
 extern "C" void cScreenPopup_SetTextObjectsAlpha(cScreenPopup* self, float t);
 extern "C" void cScreenPopup_setPrivateDefaultOption(cScreenPopup* self, void* menu, int idx, int max);
 
@@ -182,17 +178,17 @@ extern "C" void cScreenPopup_onGainFocus(cScreenPopup* self)
         cScreenPopup_SetTextObjectsAlpha(self, 1.0f);
         {
             char* menu = (char*)self->mpMenu;
-            sVE5B88* vt = *(sVE5B88**)(menu + 8);
+            sVEntry<void>* vt = *(sVEntry<void>**)(menu + 8);
             ((void (*)(void*, int))vt[8].fn)(menu + vt[8].delta, 0);
         }
         cScreenPopup_setPrivateDefaultOption(self, self->mpMenu, self->miDefaultOption, self->meType);
         {
             char* menu = (char*)self->mpMenu;
-            sVE5B88* vt = *(sVE5B88**)(menu + 8);
+            sVEntry<void>* vt = *(sVEntry<void>**)(menu + 8);
             ((void (*)(void*, int))vt[7].fn)(menu + vt[7].delta, 1);
         }
         {
-            sVE5B88* vt = (sVE5B88*)self->mVtbl;
+            sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
             ((int (*)(void*, void*, int, int))vt[20].fn)((char*)self + vt[20].delta, self->mpMenu, 5, 0);
         }
     }
@@ -286,11 +282,6 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_redrawPopup);
 #ifdef SKIP_ASM
 struct sColor_7738;
 struct sColor5DD8 { int r, g, b; };
-struct sVEntry001C5DD8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 extern "C" void cScreenPopup_restoreElements(cScreenPopup* self);
 extern "C" void cScreenPopup_initScreenPopup(cScreenPopup* self, cPopupInfo* p);
 extern "C" void cScreenPopup_scaleBackground(cScreenPopup* self, sColor_7738* color);
@@ -309,7 +300,7 @@ extern "C" void cScreenPopup_redrawPopup(cScreenPopup* self)
         cScreenPopup_initScreenPopup(self, (cPopupInfo*)&self->info);
         sColor5DD8 bgScale = *(sColor5DD8*)&self->mvCurrentScale[0];
         cScreenPopup_scaleBackground(self, (sColor_7738*)&bgScale);
-        sVEntry001C5DD8* vt = (sVEntry001C5DD8*)self->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
         vt[6].fn((char*)self + vt[6].delta, 0);
     }
 }
@@ -1803,11 +1794,6 @@ extern "C" void cScreenPopup_getStringSize3(cScreenPopup* self, void* obj, void*
 INCLUDE_ASM("fe/fepopup", cScreenPopup_createTitleBar);
 #ifdef SKIP_ASM
 struct cUIText;
-struct sVE8678 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 extern "C" void cScreenPopup_setTextString2(cScreenPopup* self, cUIText* text, int* info);
 extern "C" void cScreenPopup_getStringSize(cScreenPopup* self, cUIText* text, int* info, float* out);
 extern "C" void cScreenPopup_increaseBoxSize(cScreenPopup* self, float* size, float* item);
@@ -1832,7 +1818,7 @@ extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, cPopupInfo* pInf
             cScreenPopup_setTextString2(self, text, info);
             {
                 char* titleText = (char*)self->mpTitleText;
-                sVE8678* vt = *(sVE8678**)(titleText + 8);
+                sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(titleText + 8);
                 vt[9].fn(titleText + vt[9].delta, 1);
             }
             cScreenPopup_getStringSize(self, self->mpTitleText, info, item);
@@ -1842,7 +1828,7 @@ extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, cPopupInfo* pInf
                 cScreenPopup_changePivot(self, self->mpTitleText, 17, 0.0f);
             }
         } else {
-            sVE8678* vt = *(sVE8678**)((char*)text + 8);
+            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)text + 8);
             vt[9].fn((char*)text + vt[9].delta, 0);
         }
     }
@@ -2281,11 +2267,6 @@ extern "C" void cScreenPopup_getMessageLineWrapSize(cScreenPopup* self, void* te
 extern "C" void cScreenPopup_getMessageLineWrapSize2(cScreenPopup* self, void* text, void* str, void* out);
 extern char str_String_pct_08x[];
 
-struct sVEntryK93B0 {
-    short delta;
-    short index;
-    void* (*fn)(void*, int);
-};
 
 /**
  * Measures the first wrapped line of a popup message with the popup's message text object.
@@ -2312,7 +2293,7 @@ extern "C" void cScreenPopup_getMessageLineWrapSize1(cScreenPopup* self, int* ms
         break;
     case 3: {
         char* locale = (char*)SSXApp->FELocale;
-        sVEntryK93B0* vt = *(sVEntryK93B0**)(locale + 4);
+        sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(locale + 4);
         void* str = vt[4].fn(locale + vt[4].delta, msg[1]);
         if (str) {
             cScreenPopup_getMessageLineWrapSize2(self, self->mpMessageText, str, out);
@@ -2487,11 +2468,6 @@ extern "C" void cScreenPopup_getTextBoxWrapSize2(cScreenPopup* self, cUIText* te
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_String_pct_08x[];
 
-struct sVEntry_97E0 {
-    short delta;
-    short index;
-    void* (*fn)(void*, int);
-};
 
 /**
  * Sets the popup's message or post text from a popup string and grows a size by the wrapped text plus a gap.
@@ -2526,7 +2502,7 @@ extern "C" void cScreenPopup_getTextBoxWrapSize(cScreenPopup* self, void* ptElem
         break;
     case 3: {
         char* locale = (char*)SSXApp->FELocale;
-        sVEntry_97E0* vt = *(sVEntry_97E0**)(locale + 4);
+        sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(locale + 4);
         void* str = vt[4].fn(locale + vt[4].delta, info[1]);
         if (str) {
             cScreenPopup_getTextBoxWrapSize1(self, text, str, out);
@@ -3087,11 +3063,6 @@ extern "C" int cScreenPopup_handleEvent(cScreenPopup* self, int msg, int pParam)
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_onUpdate);
 #ifdef SKIP_ASM
-struct sVEntry001CA528 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 extern "C" void cUIState_onUpdate(void*);
 
@@ -3105,7 +3076,7 @@ extern "C" void cScreenPopup_onUpdate(cScreenPopup* self)
 {
     if (self->mbPassUpdate != 0) {
         cUIState* obj = self->mpParentState;
-        sVEntry001CA528* vt = (sVEntry001CA528*)obj->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)obj->mVtbl;
         vt[12].fn((char*)obj + vt[12].delta);
     }
     cUIState_onUpdate(self);
@@ -3137,11 +3108,6 @@ extern "C" void cKeyboardPopup_setStatic2(cKeyboardPopup* popup, const char* a1)
 // PORT: the unit declares cUIStateStack_pop as void; it returns a value this caller ignores.
 extern "C" int cUIStateStack_pop_i(void* self, int a1) __asm__("cUIStateStack_pop");
 
-struct sVE1CA598 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Handles events from the popup's own child popups (the keyboard and the confirmation popup).
@@ -3183,7 +3149,7 @@ extern "C" void cScreenPopup_onPopupEvent(cScreenPopup* self, cUIState* child, i
             self->mpConfirmPopup = 0;
             if (self->miConfimationReturnCode != -1) {
                 cUIState* obj = self->mpParentState;
-                sVE1CA598* vt = (sVE1CA598*)obj->mVtbl;
+                sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)obj->mVtbl;
                 vt[17].fn(((char*)obj) + vt[17].delta, ((char*)self), self->miConfimationReturnCode);
             }
         }
@@ -3845,11 +3811,6 @@ extern "C" void cKeyboardPopup_onCreateScreen(cKeyboardPopup* self)
 //100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onUpdate);
 #ifdef SKIP_ASM
-struct sVEntry001CB208 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 extern "C" void cUIState_onUpdate(void*);
 extern "C" void cUIStateStack_pop(void* self, int a1);
@@ -3870,7 +3831,7 @@ extern "C" void cKeyboardPopup_onUpdate(cKeyboardPopup* self)
     if (self->mbCallParentsUpdate != 0) {
         cUIState* obj = self->mpParentState;
         if (((void*)obj) != 0) {
-            sVEntry001CB208* vt = (sVEntry001CB208*)obj->mVtbl;
+            sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)obj->mVtbl;
             vt[12].fn((char*)obj + vt[12].delta);
         }
     }
@@ -3909,11 +3870,6 @@ extern char str_back_com[];
 extern char str_back_exp[];
 extern char str_back_reg[];
 
-struct sVEntryK1CB2C8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 static inline int isOnK1CB2C8()
 {
@@ -3936,14 +3892,14 @@ static inline int IsK1CB2C8(int id, char* s)
 extern "C" void cKeyboardPopup_onWidgetCreate(cKeyboardPopup* self, void* widget)
 {
     if (IsK1CB2C8(*(int*)((char*)widget + 0x38), str_HelpGroup)) {
-        sVEntryK1CB2C8* vt = *(sVEntryK1CB2C8**)((char*)widget + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)widget + 8);
         vt[9].fn((char*)widget + vt[9].delta, 0);
         if (isOnK1CB2C8()) {
-            sVEntryK1CB2C8* vt2 = *(sVEntryK1CB2C8**)((char*)widget + 8);
+            sVEntry<void(void*, int)>* vt2 = *(sVEntry<void(void*, int)>**)((char*)widget + 8);
             vt2[9].fn((char*)widget + vt2[9].delta, 1);
         }
         if ((int)SSXApp->Game != 0) {
-            sVEntryK1CB2C8* vt3 = *(sVEntryK1CB2C8**)((char*)widget + 8);
+            sVEntry<void(void*, int)>* vt3 = *(sVEntry<void(void*, int)>**)((char*)widget + 8);
             vt3[9].fn((char*)widget + vt3[9].delta, 0);
         }
     } else if (IsK1CB2C8(*(int*)((char*)widget + 0x38), str_back_com)) {
@@ -3959,11 +3915,6 @@ extern "C" void cKeyboardPopup_onWidgetCreate(cKeyboardPopup* self, void* widget
 //100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_handleEvent);
 #ifdef SKIP_ASM
-struct sVEntry001CB3D0 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, int);
-};
 
 /**
  * Passes an event on to the parent state when the keyboard refers its events to it.
@@ -3979,7 +3930,7 @@ extern "C" int cKeyboardPopup_handleEvent(cKeyboardPopup* self, int msg, int pPa
     if (self->mbReferEventsToParent != 0) {
         cUIState* obj = self->mpParentState;
         if (((void*)obj) != 0) {
-            sVEntry001CB3D0* vt = (sVEntry001CB3D0*)obj->mVtbl;
+            sVEntry<int(void*, int, int)>* vt = (sVEntry<int(void*, int, int)>*)obj->mVtbl;
             return vt[24].fn((char*)obj + vt[24].delta, msg, pParam);
         }
     }
@@ -5731,11 +5682,6 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_redrawScreen);
 static inline bool Neg_D708(bool b) { return !b; }
 static inline bool Shift_D708(char* s) { return *(bool*)(s + 0x6C); }
 struct cUIText;
-struct sVEntry_D708 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 extern "C" int cKeyboardPopup_getObjName(cKeyboardPopup* self, int i, char* out, int mode);
 extern "C" void cKeyboardPopup_SetNameForKey(cKeyboardPopup* self, cUIText* text, int i);
 extern "C" void cKeyboardPopup_checkAndFixConflict(cKeyboardPopup* self);
@@ -5789,10 +5735,10 @@ extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self)
             if (text != 0) {
                 cUIText_setAsciiString(text, ch);
                 if (cKeyboardPopup_allowSelection(self, i, 0) == 0) {
-                    sVEntry_D708* vt = *(sVEntry_D708**)((char*)text + 8);
+                    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)((char*)text + 8);
                     vt[11].fn((char*)text + vt[11].delta, gtStaticColor);
                 } else {
-                    sVEntry_D708* vt = *(sVEntry_D708**)((char*)text + 8);
+                    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)((char*)text + 8);
                     vt[11].fn((char*)text + vt[11].delta, gtNotStatic);
                 }
             }
@@ -5802,19 +5748,19 @@ extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self)
         if (uiObj != 0) {
             if (self->meType == 1) {
                 if (i >= 0 && i < 0xE) {
-                    sVEntry_D708* vt = *(sVEntry_D708**)(uiObj + 8);
+                    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(uiObj + 8);
                     vt[9].fn(uiObj + vt[9].delta, (void*)0);
                 } else {
-                    sVEntry_D708* vt = *(sVEntry_D708**)(uiObj + 8);
+                    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(uiObj + 8);
                     vt[9].fn(uiObj + vt[9].delta, (void*)1);
                 }
             } else {
                 {
-                    sVEntry_D708* vt = *(sVEntry_D708**)(uiObj + 8);
+                    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(uiObj + 8);
                     vt[11].fn(uiObj + vt[11].delta, gtNonSelectedKey);
                 }
                 {
-                    sVEntry_D708* vt = *(sVEntry_D708**)(uiObj + 8);
+                    sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(uiObj + 8);
                     vt[9].fn(uiObj + vt[9].delta, (void*)1);
                 }
             }
@@ -5823,7 +5769,7 @@ extern "C" void cKeyboardPopup_redrawScreen(cKeyboardPopup* self)
     cKeyboardPopup_getObjName(self, self->miCurrentKey, name, 1);
     char* uiObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name));
     if (uiObj != 0) {
-        sVEntry_D708* vt = *(sVEntry_D708**)(uiObj + 8);
+        sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(uiObj + 8);
         vt[11].fn(uiObj + vt[11].delta, gtSelectedKey);
     }
 }
@@ -6368,11 +6314,6 @@ extern "C" char* strcat(char* dst, const char* src);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" int strlen(const char* s);
 
-struct sVEntryK1CE5E0 {
-    short delta;
-    short index;
-    void* (*fn)(void*, int);
-};
 
 /**
  * Appends a quick message to the edit string, cut to the room left, and moves the cursor to its end.
@@ -6391,7 +6332,7 @@ extern "C" void cKeyboardPopup_handleQuickKeyPress(cKeyboardPopup* self, int key
     char* msg = cBEOptionInterface_getQuickKeyMessage(opt, key);
     if (msg == 0) {
         char* locale = (char*)SSXApp->FELocale;
-        sVEntryK1CE5E0* vt = *(sVEntryK1CE5E0**)(locale + 4);
+        sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(locale + 4);
         void* str = vt[4].fn(locale + vt[4].delta, cBEOptionInterface_getDefaultQuickKeyMessageHashValue(opt, key));
         if (str)
             USTR_strcpyW(buf, str);

@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "object/bucketman.h"
 #include "object/objnode.h"
@@ -78,11 +79,6 @@ extern "C" void* cTypeObjNode_cTypeObjNode1(cTypeObjNode* self, void* bucket, in
 //100%
 INCLUDE_ASM("object/objnode", cTypeObjNode_cTypeObjNode);
 #ifdef SKIP_ASM
-struct sObjNodeVEntry4788 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 extern void* cTypeObjNode_vtbl[];
 extern int cTypeObjNode_ObjNodeCount[];
@@ -100,7 +96,7 @@ extern "C" void* cTypeObjNode_cTypeObjNode(cTypeObjNode* self, void* bucket, voi
 {
     cObjNode_cObjNode_3((cObjNode*)self, bucket, stream);
     self->mVtbl = cTypeObjNode_vtbl;
-    sObjNodeVEntry4788* vt = *(sObjNodeVEntry4788**)stream;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)&self->ObjNodeType, 4);
     cTypeObjNode_ObjNodeCount[self->ObjNodeType]++;
     return ((void*)self);

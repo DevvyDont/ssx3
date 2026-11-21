@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "ui/uiengine.h"
 #include "ui/uithing.h"
@@ -1266,7 +1267,6 @@ extern "C" int cBENewRaceInterface_setGameEvent(void* iface, int ev);
 extern "C" int cBENewPlayerInterface_getLastHub(void* self, int index);
 extern "C" void cUIStateStack_push(void* list, void* item);
 
-struct sVEnt_00212508 { short delta; short index; void (*fn)(void*); };
 
 /**
  * Tears down the autosave overlay and moves on to where the save was started from.
@@ -1294,7 +1294,7 @@ extern "C" void cOVState_AUTOSAVE_onDestroyScreen(cOVState_AUTOSAVE* self)
         cBENewRaceInterface_setGameEvent(race, 0xC);
         cBENewRaceInterface_newRace.iLocationIdx = cBENewPlayerInterface_getLastHub(player, 0);
         cBENewRaceInterface_bIsBamLocation = 1;
-        sVEnt_00212508* vt = *(sVEnt_00212508**)((char*)race + 0xC);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)race + 0xC);
         vt[1].fn((char*)race + vt[1].delta);
         cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen_b, 0x100, 0)));
     }

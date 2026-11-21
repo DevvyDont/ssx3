@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "main/gamestate.h"
@@ -1373,11 +1374,6 @@ int GetHashValue32(char* str);
 extern char str_hud_b[];
 extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void* self);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
-struct sVEntry0020A380 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, int);
-};
 
 struct sSelf0020A380 {
     char pad[0x10];
@@ -1409,7 +1405,7 @@ extern "C" void cOVState_onCreateScreen(cOVState* self)
     }
     char* obj = (char*)cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud_b));
     if (obj != 0) {
-        sVEntry0020A380* vtEntry = &(*(sVEntry0020A380**)(obj + 8))[24];
+        sVEntry<int(void*, int, int)>* vtEntry = &(*(sVEntry<int(void*, int, int)>**)(obj + 8))[24];
         vtEntry->fn(obj + vtEntry->delta, 3, 0);
     }
 }
@@ -1424,11 +1420,6 @@ extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* self);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
 extern "C" void cOVStateManager_removePDATemplate();
 void* cUIState_onDestroyScreen(void* self);
-struct sVEntry0020A430 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, int);
-};
 
 /**
  * Common overlay tear-down: restores cut-scene TV mode, tells the HUD, removes the PDA template.
@@ -1447,7 +1438,7 @@ extern "C" void cOVState_onDestroyScreen(cOVState* self)
     }
     char* obj = (char*)cUIStateStack_findState(&self->mpEngine->mStateStack, GetHashValue32(str_hud_b));
     if (obj != 0) {
-        sVEntry0020A430* vtEntry = &(*(sVEntry0020A430**)(obj + 8))[24];
+        sVEntry<int(void*, int, int)>* vtEntry = &(*(sVEntry<int(void*, int, int)>**)(obj + 8))[24];
         vtEntry->fn(obj + vtEntry->delta, 4, 0);
     }
     if (self->mRemovePDA != 0) {
@@ -1544,11 +1535,6 @@ extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
 //100%
 INCLUDE_ASM("fe/ovstatemap", cOVState_onWidgetEvent);
 #ifdef SKIP_ASM
-struct sVEntry0020A6A8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, int);
-};
 
 
 /**
@@ -1566,7 +1552,7 @@ extern "C" void cOVState_onWidgetEvent(cOVState* self, int pWidget, int Event)
     if (((char*)w) != 0) {
         cGameState* currentState = w->mCurrentState;
         if (((char*)currentState) != 0) {
-            sVEntry0020A6A8* vt = (sVEntry0020A6A8*)currentState->mVtbl;
+            sVEntry<void(void*, int, int)>* vt = (sVEntry<void(void*, int, int)>*)currentState->mVtbl;
             vt[9].fn(((char*)currentState) + vt[9].delta, pWidget, Event);
         }
     }

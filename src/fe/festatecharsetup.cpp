@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "fe/ferider.h"
 #include "sound/ssxaudio.h"
@@ -37,11 +38,6 @@ extern char str_Option_Rider[];
 extern char str_Option_Radio[];
 extern char str_Option_GBA[];
 
-struct sVEntry_182928 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 class cWidget_182928 {
 public:
@@ -89,7 +85,7 @@ extern "C" void cFEStateCharSetup_onCreateScreen(cFEStateCharSetup* self)
     cFEStateCharSetup_updateWidget(self);
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
     int charId = cBENewPlayerInterface_getPlayerCharID(iface, self->mUserNum);
-    sVEntry_182928* vt = *(sVEntry_182928**)(iface + 0xC);
+    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(iface + 0xC);
     vt[2].fn(iface + vt[2].delta);
     cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 0);
     cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, charId, 0);
@@ -185,11 +181,6 @@ extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void cFEStateCharSetup_show3DCharacter(cFEStateCharSetup* self, int a1);
 extern char str_FEOptions[];
 
-struct sVEntryK182C80 {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 
 struct sStateK182C80 {
     char pad_0x0[0x1C];
@@ -216,7 +207,7 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThin
     switch (event) {
     case 5: {
         char* factory = *(char**)self->mpEngine;
-        sVEntryK182C80* vt = *(sVEntryK182C80**)(factory + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(factory + 4);
         void* nextState = vt[4].fn(factory + vt[4].delta, self, item->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -225,7 +216,7 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThin
     }
     case 6: {
         char* factory = *(char**)self->mpEngine;
-        sVEntryK182C80* vt = *(sVEntryK182C80**)(factory + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(factory + 4);
         void* nextState = vt[5].fn(factory + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);

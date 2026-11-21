@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "world/worldview.h"
 #include "object/spline3d.h"
@@ -1253,11 +1254,6 @@ struct sSmElem_A918 {
     char pad_0x50[0x10];
 };
 
-struct sSmVE_A918 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 
 struct sBox_F048;
@@ -1332,7 +1328,7 @@ static inline void setMax_A918(sSmInst_A918* in, const sSmVec4_A918& v)
 extern "C" void cMultiSplineModifier_updateOverlapSystem(cMultiSplineModifier* self)
 {
     if (self->RootTransformDirty != 0) {
-        ((sSmVE_A918*)self->mVtbl)[3].fn((char*)self + ((sSmVE_A918*)self->mVtbl)[3].delta);
+        ((sVEntry<void(void*)>*)self->mVtbl)[3].fn((char*)self + ((sVEntry<void(void*)>*)self->mVtbl)[3].delta);
     }
     for (int i = 1; i < self->NumModels; i++) {
         sSmBox_A918 old = ((sSmElem_A918*)self->Nodes)[i].box;
@@ -1855,11 +1851,6 @@ struct sSmBox_35B418 {
     char pad_0x50[0x10];
 };
 
-struct sSmVE_35B418 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 struct sSmMat_35B418 {
     sSmVec4_35B418 r[4];
 };
@@ -1896,7 +1887,7 @@ extern "C" void cSpline_draw(void* a, void* b);
 extern "C" void cMultiSplineModifier_render(cMultiSplineModifier* self)
 {
     if (self->RootTransformDirty != 0) {
-        ((sSmVE_35B418*)self->mVtbl)[3].fn((char*)self + ((sSmVE_35B418*)self->mVtbl)[3].delta);
+        ((sVEntry<void(void*)>*)self->mVtbl)[3].fn((char*)self + ((sVEntry<void(void*)>*)self->mVtbl)[3].delta);
     }
     char* model = *(char**)(((char*)self->Instance) + 0xC);
     cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;

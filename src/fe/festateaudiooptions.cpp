@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "fe/festateaudiooptions.h"
@@ -505,11 +506,6 @@ extern char str_hud[];
 extern char str_16radio[];
 extern char str_143radio_pda[];
 
-struct sVEntry00196DB0 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, int);
-};
 
 /**
  * Creates the request-line screen: "16radio" in the front end, or "143radio_pda" in game with the HUD told to
@@ -525,7 +521,7 @@ extern "C" void cFEStateRequestLine_onCreateScreen(cFEStateRequestLine* self)
         void* list = (char*)self->mpEngine + 0x18;
         char* obj = (char*)cUIStateStack_findState(list, GetHashValue32(str_hud));
         if (obj != 0) {
-            sVEntry00196DB0* vt = *(sVEntry00196DB0**)(obj + 8);
+            sVEntry<int(void*, int, int)>* vt = *(sVEntry<int(void*, int, int)>**)(obj + 8);
             vt[24].fn(obj + vt[24].delta, 3, 0);
         }
     }
@@ -541,11 +537,6 @@ extern "C" void cFEStateRequestLine_onCreateScreen(cFEStateRequestLine* self)
 //100%
 INCLUDE_ASM("fe/festateaudiooptions", cFEStateRequestLine_onDestroyScreen);
 #ifdef SKIP_ASM
-struct sVEntry00196E80 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, int);
-};
 
 int GetHashValue32(char* str);
 void* cUIState_onDestroyScreen(void* self);
@@ -560,7 +551,7 @@ extern "C" void cFEStateRequestLine_onDestroyScreen(cFEStateRequestLine* self)
     if ((int)SSXApp->Game != 0) {
         void* obj = cUIStateStack_findState((char*)self->mpEngine + 0x18, GetHashValue32(str_hud));
         if (obj != 0) {
-            sVEntry00196E80* vtEntry = &(*(sVEntry00196E80**)((char*)obj + 8))[24];
+            sVEntry<int(void*, int, int)>* vtEntry = &(*(sVEntry<int(void*, int, int)>**)((char*)obj + 8))[24];
             vtEntry->fn((char*)obj + vtEntry->delta, 4, 0);
         }
     }

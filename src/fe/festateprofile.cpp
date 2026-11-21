@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "fe/festateprofile.h"
 #include "ui/uithing.h"
@@ -51,11 +52,6 @@ public:
     virtual void v10();
     virtual void setColor(const sColorK18EB40& c);
 };
-struct sVEK18EB40b {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 
 
 /**
@@ -75,7 +71,7 @@ extern "C" void cFEStateProfileSelect_onWidgetEvent(cFEStateProfileSelect* self,
     case 5: {
         ((cUIObjK18EB40*)menu)->setColor(sColorK18EB40(1.0f, 1.0f, 0.0f, 0.0f));
         char* custom = *(char**)self->mpEngine;
-        sVEK18EB40b* vt = *(sVEK18EB40b**)(custom + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(custom + 4);
         void* nextState = vt[4].fn(custom + vt[4].delta, self, menu->mMiscData);
         if (nextState != 0)
             cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
@@ -83,7 +79,7 @@ extern "C" void cFEStateProfileSelect_onWidgetEvent(cFEStateProfileSelect* self,
     }
     case 6: {
         char* custom = *(char**)self->mpEngine;
-        sVEK18EB40b* vt = *(sVEK18EB40b**)(custom + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(custom + 4);
         void* nextState = vt[5].fn(custom + vt[5].delta, self, menu->mMiscData);
         if (nextState != 0)
             cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
@@ -861,16 +857,6 @@ extern int gInLodge;
 extern char str_cPreGameLoadScreen[];
 extern char str_cFEStateTitle[];
 
-struct sVEK18FAF0a {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
-struct sVEK18FAF0b {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Leaves the profile load screen once its card work is done, going where +0x27C says.
@@ -890,7 +876,7 @@ extern "C" void cFEStateProfileLoad_updateDone(cFEStateProfileLoad* self)
         int sel = self->mTypeOfQuit;
         if (sel == 0) {
             char* frontEnd = *(char**)self->mpEngine;
-            sVEK18FAF0a* vt = *(sVEK18FAF0a**)(frontEnd + 4);
+            sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(frontEnd + 4);
             void* nextState = vt[5].fn(frontEnd + vt[5].delta, self, self->mType);
             if (nextState != 0)
                 cUIStateStack_pushCheck((char*)self->mpEngine + 0x18, nextState);
@@ -902,7 +888,7 @@ extern "C" void cFEStateProfileLoad_updateDone(cFEStateProfileLoad* self)
             int x = cBENewPlayerInterface_getLastHub(pl, 0);
             cBENewRaceInterface_bIsBamLocation = 1;
             cBENewRaceInterface_newRace.iLocationIdx = x;
-            sVEK18FAF0b* vt = *(sVEK18FAF0b**)(race + 0xC);
+            sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(race + 0xC);
             vt[1].fn(race + vt[1].delta);
             cAppMan_setNextModule((cAppMan*)SSXApp, (unsigned int)cPreGameLoadScreen_cPreGameLoadScreen(cMemMan_alloc(8, str_cPreGameLoadScreen, 0x100, 0)));
         } else if (sel == 2) {

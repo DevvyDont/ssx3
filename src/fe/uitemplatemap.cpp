@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "fe/uitemplatemap.h"
@@ -686,11 +687,6 @@ extern "C" void cUITemplate_MAP_setupPeakUnlock(cUITemplate_MAP* tmpl)
 //100%
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupScreenExit);
 #ifdef SKIP_ASM
-struct sVEntry00201868 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Prepares the map template for leaving the screen: marks it exiting, forgets the map texture and hides the map
@@ -705,7 +701,7 @@ extern "C" void cUITemplate_MAP_setupScreenExit(cUITemplate_MAP* self)
     self->mMapTextureSet = 0;
     void* obj = self->mpMap;
     if (obj != 0) {
-        sVEntry00201868* vt = *(sVEntry00201868**)((char*)obj + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
         vt[9].fn((char*)obj + vt[9].delta, 0);
     }
 }
@@ -757,11 +753,6 @@ extern "C" void cUITemplate_MAP_setupLayout(cUITemplate_MAP* self);
 extern "C" void cUITemplate_MAP_setupLocationInfo(void* self);
 extern int cUITemplate_MAP_mMapState;
 
-struct sVEntry00202770 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 // PORT: the unit declares cUITemplate_MAP_onInputAlways(void*); the body also takes the menu object in $5.
 extern "C" void cUITemplate_MAP_onInputAlways_r(void* self, void* menu) __asm__("cUITemplate_MAP_onInputAlways");
@@ -776,9 +767,9 @@ extern "C" void cUITemplate_MAP_onInputAlways_r(void* self, void* menu) __asm__(
  */
 extern "C" void cUITemplate_MAP_onInputAlways_r(void* self, void* menu)
 {
-    sVEntry00202770* isUpSlot = &(*(sVEntry00202770**)((char*)menu + 8))[17];
+    sVEntry<int(void*)>* isUpSlot = &(*(sVEntry<int(void*)>**)((char*)menu + 8))[17];
     if (isUpSlot->fn((char*)menu + isUpSlot->delta) == 0) {
-        sVEntry00202770* isDownSlot = &(*(sVEntry00202770**)((char*)menu + 8))[18];
+        sVEntry<int(void*)>* isDownSlot = &(*(sVEntry<int(void*)>**)((char*)menu + 8))[18];
         if (isDownSlot->fn((char*)menu + isDownSlot->delta) == 0) {
             return;
         }
@@ -1407,7 +1398,6 @@ extern "C" void cUITemplate_MAP_setShowInfo(cUITemplate_MAP* self, int show)
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_setupPeakInfo);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-#include "vtable.h"
 
 // A UI widget as cUIScreen_getObjectByHashName returns it: vptr at 0x8. Slot names from the prototype's
 // _vt$8cUIThing (as in fe/feasyncfile); the other slots are known only by position.

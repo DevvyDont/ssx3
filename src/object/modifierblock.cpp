@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "object/skybox.h"
 #include "object/flexbridgenode.h"
@@ -195,11 +196,6 @@ void tModifierBlock_setRadius(tModifierBlock* self)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_preUpdate);
 #ifdef SKIP_ASM
-struct sMbVEntryV2C70 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 struct sMbVEntryI2C70 {
     short delta;
@@ -223,7 +219,7 @@ extern "C" void tModifierBlock_preUpdate(tModifierBlock* self)
 {
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     if (node != 0) {
-        sMbVEntryV2C70* vt = *(sMbVEntryV2C70**)node;
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)node;
         vt[2].fn((char*)node + vt[2].delta);
     }
     if (self->UVScroll != 0) {
@@ -234,9 +230,9 @@ extern "C" void tModifierBlock_preUpdate(tModifierBlock* self)
     }
     cPhysicsModifier* physicsModifier = self->Physics;
     if (physicsModifier != 0) {
-        ((sMbVEntryV2C70*)physicsModifier->mVtbl)[2].fn((char*)physicsModifier + ((sMbVEntryV2C70*)physicsModifier->mVtbl)[2].delta);
+        ((sVEntry<void(void*)>*)physicsModifier->mVtbl)[2].fn((char*)physicsModifier + ((sVEntry<void(void*)>*)physicsModifier->mVtbl)[2].delta);
         physicsModifier = self->Physics;
-        sMbVEntryI2C70* vt2 = (sMbVEntryI2C70*)((sMbVEntryV2C70*)physicsModifier->mVtbl);
+        sMbVEntryI2C70* vt2 = (sMbVEntryI2C70*)((sVEntry<void(void*)>*)physicsModifier->mVtbl);
         if (vt2[4].fn((char*)physicsModifier + vt2[4].delta) == 0) {
             tModifierBlock_remPhysicsModifier(self);
         }
@@ -247,16 +243,11 @@ extern "C" void tModifierBlock_preUpdate(tModifierBlock* self)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_postUpdate);
 #ifdef SKIP_ASM
-struct sMbVEntryV2D20 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 struct sMbLink2D20 {
     sMbLink2D20* next;      // 0x0
     int field_0x4;
-    sMbVEntryV2D20* vt;     // 0x8
+    sVEntry<void(void*)>* vt;     // 0x8
 };
 
 /**
@@ -288,7 +279,7 @@ extern "C" void tModifierBlock_postUpdate(tModifierBlock* self)
     }
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     if (node != 0) {
-        sMbVEntryV2D20* vt = *(sMbVEntryV2D20**)node;
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)node;
         vt[4].fn((char*)node + vt[4].delta);
     }
 }
@@ -351,11 +342,6 @@ extern "C" int tModifierBlock_isRootTransformDirty(tModifierBlock* self)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_updateRootTransform);
 #ifdef SKIP_ASM
-struct sMbVEntryV_2E98 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Updates the block's root transform: slot 3 of its transform modifier (+0x0), when it has one.
@@ -364,7 +350,7 @@ extern "C" void tModifierBlock_updateRootTransform(tModifierBlock* self)
 {
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     if (node != 0) {
-        sMbVEntryV_2E98* vt = *(sMbVEntryV_2E98**)node;
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)node;
         vt[3].fn((char*)node + vt[3].delta);
     }
 }
@@ -418,17 +404,12 @@ extern "C" void tModifierBlock_clearComplete(tModifierBlock* self)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_signal);
 #ifdef SKIP_ASM
-struct sMbVEntryP2F40 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, float);
-};
 
 
 struct sMbLink2F40 {
     sMbLink2F40* next;      // 0x0
     int field_0x4;
-    sMbVEntryP2F40* vt;     // 0x8
+    sVEntry<void(void*, int, float)>* vt;     // 0x8
 };
 
 extern "C" void cUVScrollModifier_signal(void* self, int id, float v);
@@ -447,7 +428,7 @@ extern "C" void tModifierBlock_signal(tModifierBlock* self, int id, float value)
 {
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     if (node != 0) {
-        sMbVEntryP2F40* vt = *(sMbVEntryP2F40**)node;
+        sVEntry<void(void*, int, float)>* vt = *(sVEntry<void(void*, int, float)>**)node;
         vt[5].fn((char*)node + vt[5].delta, id, value);
     }
     if (self->UVScroll != 0) {
@@ -458,7 +439,7 @@ extern "C" void tModifierBlock_signal(tModifierBlock* self, int id, float value)
     }
     cPhysicsModifier* physicsModifier = self->Physics;
     if (physicsModifier != 0) {
-        ((sMbVEntryP2F40*)physicsModifier->mVtbl)[3].fn((char*)physicsModifier + ((sMbVEntryP2F40*)physicsModifier->mVtbl)[3].delta, id, value);
+        ((sVEntry<void(void*, int, float)>*)physicsModifier->mVtbl)[3].fn((char*)physicsModifier + ((sVEntry<void(void*, int, float)>*)physicsModifier->mVtbl)[3].delta, id, value);
     }
     sMbLink2F40* firstEffect = (sMbLink2F40*)self->Effect.Next;
     if (firstEffect != 0) {
@@ -475,17 +456,7 @@ extern "C" void tModifierBlock_signal(tModifierBlock* self, int id, float value)
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_applyForce);
 #ifdef SKIP_ASM
-struct sMbVEntryP3020 {
-    short delta;
-    short index;
-    void* (*fn)(void*);
-};
 
-struct sMbVEntryVII3020 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, int);
-};
 
 /**
  * Passes a force on to the move node that owns the modifier block's root transform modifier.
@@ -501,13 +472,13 @@ extern "C" void tModifierBlock_applyForce(tModifierBlock* self, int intInfo, int
     sBoundBoxNode* node = (sBoundBoxNode*)self->RootTransform;
     void* obj;
     if (node != 0) {
-        sMbVEntryP3020* vt = *(sMbVEntryP3020**)node;
+        sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)node;
         obj = vt[25].fn((char*)node + vt[25].delta);
     } else {
         obj = 0;
     }
     if (obj != 0) {
-        sMbVEntryVII3020* vt2 = *(sMbVEntryVII3020**)((char*)obj + 0xC);
+        sVEntry<void(void*, int, int)>* vt2 = *(sVEntry<void(void*, int, int)>**)((char*)obj + 0xC);
         vt2[43].fn((char*)obj + vt2[43].delta, intInfo, force);
     }
 }
@@ -780,11 +751,6 @@ extern "C" void tModifierBlock_remRailModifier(tModifierBlock* self, unsigned in
 //100%
 INCLUDE_ASM("object/modifierblock", tModifierBlock_transferEffectModifier);
 #ifdef SKIP_ASM
-struct sMbVEntryV3398 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 extern "C" void cEffectLink_append(void* pool, void* item);
 
@@ -801,7 +767,7 @@ extern "C" void tModifierBlock_transferEffectModifier(tModifierBlock* self, cEff
     void* effect = *(void**)list;
     while (effect != 0) {
         void* next = *(void**)effect;
-        sMbVEntryV3398* vt = *(sMbVEntryV3398**)((char*)effect + 0x8);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)effect + 0x8);
         vt[3].fn((char*)effect + vt[3].delta);
         cEffectLink_append(&self->Effect, effect);
         effect = next;
@@ -849,7 +815,6 @@ extern "C" void cUVScrollModifier_writeToReplayFrame(void* self, void* stream);
 
 struct sVE_353448 { short delta; short index; int (*fn)(void*); };
 struct sVEv_353448 { short delta; short index; void (*fn)(void*, void*); };
-struct sVEw_353448 { short delta; short index; void (*fn)(void*, void*, int); };
 
 struct sHdr_353448 {
     int flags;
@@ -923,7 +888,7 @@ extern "C" void tModifierBlock_writeToReplayFrame(tModifierBlock* self, char* st
         info.flags |= 0x20;
     }
     {
-        sVEw_353448* writeEntry = &(*(sVEw_353448**)stream)[1];
+        sVEntry<void(void*, void*, int)>* writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
         writeEntry->fn(stream + writeEntry->delta, &info, 52);
     }
     char* w0 = (char*)self->RootTransform;
@@ -1414,11 +1379,6 @@ extern "C" void cSpring_setupSpring(void* self, sSpringDesc_3E08* sdata, float l
 //100%
 INCLUDE_ASM("object/modifierblock", cSpring_cSpring1);
 #ifdef SKIP_ASM
-struct sMbVEntrySer3E80 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 extern "C" void cSpring_setupNodes(void* self);
 
@@ -1433,10 +1393,10 @@ extern "C" void cSpring_setupNodes(void* self);
  */
 extern "C" void* cSpring_cSpring1(cSpring* self, void* stream)
 {
-    sMbVEntrySer3E80* readSlot = &(*(sMbVEntrySer3E80**)stream)[2];
+    sVEntry<void(void*, void*, int)>* readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
     readSlot->fn((char*)stream + readSlot->delta, self, 36);
     cSpring_setupNodes(self);
-    readSlot = &(*(sMbVEntrySer3E80**)stream)[2];
+    readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
     readSlot->fn((char*)stream + readSlot->delta, self->Nodes, *(int*)self * 80);
     return ((void*)self);
 }

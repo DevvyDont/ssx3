@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "ui/uithing.h"
 #include "ui/uiinput.h"
@@ -1828,11 +1829,6 @@ INCLUDE_ASM("ui/uiscreen", cUIState_onGainFocus);
 struct cList;
 void* cList_first(cList*);
 
-struct sVEntry39E4C0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 
 /**
  * Gives a UI state focus by focusing its first screen's root group (slot 13).
@@ -1843,7 +1839,7 @@ extern "C" void cUIState_onGainFocus(cUIState* self)
 {
     void* n = cList_first((cList*)&self->mScreens);
     if (n != 0) {
-        sVEntry39E4C0* vt = (sVEntry39E4C0*)self->mVtbl;
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)self->mVtbl;
         vt[13].fn((char*)self + vt[0xD].delta, (char*)n + 0x40);
     }
 }
@@ -1975,11 +1971,6 @@ struct cListNode;
 void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 
-struct sVEntry39E6B8a {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 struct sVEntry39E6B8b {
     short delta;
     short index;
@@ -1996,7 +1987,7 @@ extern "C" void cUIState_onRender2D(cUIState* self)
 {
     void* n = cList_first((cList*)&self->mScreens);
     if (n != 0) {
-        sVEntry39E6B8a* vt = (sVEntry39E6B8a*)self->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
         vt[0xE].fn((char*)self + vt[0xE].delta);
         do {
             char* obj = (char*)n + 0x40;

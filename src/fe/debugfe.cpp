@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "fe/debuglobbymenus.h"
 #include "fe/debugfe.h"
@@ -2199,11 +2200,6 @@ INCLUDE_ASM("fe/debugfe", cDebugFE_purge);
 #ifdef SKIP_ASM
 extern "C" void cFont__cFont(void* p, int flags);
 
-struct sVEi_0017FAD0 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 struct sDebugFE_0017FAD0 {
     char pad_0x00[0xC];
@@ -2229,7 +2225,7 @@ extern "C" void cDebugFE_purge(cDebugFE* self)
         char* screen = ((char**)&self->Screens[0])[i];
         if (screen != 0)
         {
-            sVEi_0017FAD0* vt = *(sVEi_0017FAD0**)screen;
+            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)screen;
             vt[1].fn(screen + vt[1].delta, 3);
         }
     }
@@ -2239,13 +2235,13 @@ extern "C" void cDebugFE_purge(cDebugFE* self)
     if (self->BoxTID >= 0)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEi_0017FAD0* vt = (sVEi_0017FAD0*)ps2GraphicsMan->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ps2GraphicsMan->mVtbl;
         vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, self->BoxTID);
     }
     if (self->ParticleTID >= 0)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEi_0017FAD0* vt = (sVEi_0017FAD0*)ps2GraphicsMan->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ps2GraphicsMan->mVtbl;
         vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, self->ParticleTID);
     }
     if (self->Font != 0)
@@ -2286,7 +2282,6 @@ extern char t4mat_Identity[];
 extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void cHeartBeat_draw(cHeartBeat* self, int a1);
 
-struct sVEnt_17FBF0 { short delta; short index; void* fn; };
 typedef int (*FnI_17FBF0)(void*);
 typedef void (*FnV_17FBF0)(void*);
 typedef void (*FnP_17FBF0)(void*, void*);
@@ -2335,13 +2330,13 @@ static inline void setC5_17FBF0(sRS_17FBF0* r, int v) { r->c5 = v; }
 extern "C" int cDebugFE_render(cDebugFE* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVEnt_17FBF0* vt = (sVEnt_17FBF0*)ps2GraphicsMan->mVtbl;
+    sVEntry<void>* vt = (sVEntry<void>*)ps2GraphicsMan->mVtbl;
     if (!((FnI_17FBF0)vt[17].fn)((char*)ps2GraphicsMan + vt[17].delta)) {
         return 0;
     }
     if (cFadeScreen_drawFade(((char*)self)) == 0) {
         cPS2GraphicsMan* graphicsMan1 = GrMan;
-        sVEnt_17FBF0* vt1 = (sVEnt_17FBF0*)graphicsMan1->mVtbl;
+        sVEntry<void>* vt1 = (sVEntry<void>*)graphicsMan1->mVtbl;
         char* this1 = (char*)graphicsMan1 + vt1[15].delta;
         sVec4_17FBF0 pos;
         float one = 1.0f;
@@ -2352,10 +2347,10 @@ extern "C" int cDebugFE_render(cDebugFE* self)
         pos.z = zeroF;
         ((FnP_17FBF0)vt1[15].fn)(this1, &pos);
         cPS2GraphicsMan* graphicsMan2 = GrMan;
-        sVEnt_17FBF0* vt2 = (sVEnt_17FBF0*)graphicsMan2->mVtbl;
+        sVEntry<void>* vt2 = (sVEntry<void>*)graphicsMan2->mVtbl;
         ((FnView_17FBF0)vt2[26].fn)((char*)graphicsMan2 + vt2[26].delta, 0, 0, zeroF, zeroF, 640.0f, 480.0f, -1.0f, one);
         cPS2GraphicsMan* graphicsMan3 = GrMan;
-        sVEnt_17FBF0* vt3 = (sVEnt_17FBF0*)graphicsMan3->mVtbl;
+        sVEntry<void>* vt3 = (sVEntry<void>*)graphicsMan3->mVtbl;
         ((FnP_17FBF0)vt3[34].fn)((char*)graphicsMan3 + vt3[34].delta, t4mat_Identity);
         cPS2GraphicsMan* graphicsMan4 = GrMan;
         setB23_17FBF0(rs_17FBF0((char*)graphicsMan4), 2);
@@ -2366,11 +2361,11 @@ extern "C" int cDebugFE_render(cDebugFE* self)
         cHeartBeat_draw((cHeartBeat*)(&self->HeartBeat), self->ParticleTID);
         setC5_17FBF0(rs_17FBF0((char*)GrMan), 9);
         void* menu = self->ActiveScreen;
-        sVEnt_17FBF0* mvt = *(sVEnt_17FBF0**)menu;
+        sVEntry<void>* mvt = *(sVEntry<void>**)menu;
         ((FnV_17FBF0)mvt[3].fn)((char*)menu + mvt[3].delta);
     }
     cPS2GraphicsMan* graphicsMan5 = GrMan;
-    sVEnt_17FBF0* vt5 = (sVEnt_17FBF0*)graphicsMan5->mVtbl;
+    sVEntry<void>* vt5 = (sVEntry<void>*)graphicsMan5->mVtbl;
     ((FnV_17FBF0)vt5[20].fn)((char*)graphicsMan5 + vt5[20].delta);
     return 1;
 }

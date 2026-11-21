@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "render/simpletube.h"
 #include "render/ps2gridmesh.h"
@@ -3074,11 +3075,6 @@ extern char* cGraphicsMan_TheGraphicsMan_particle __asm__("cGraphicsMan_TheGraph
 extern "C" void func_00367B60(void* mgr, int id);
 void operator_delete(int* ptr);
 
-struct sPtVEntry_5918 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Destroys a rider's shadow: releases its locked texture and frees it if asked.
@@ -3095,7 +3091,7 @@ extern "C" void cPlayerShadow__cPlayerShadow(cPlayerShadow* self, int flags)
     if (tex >= 0) {
         func_00367B60(*(void**)(cGraphicsMan_TheGraphicsMan_particle + 0x18F4), tex);
         char* mgr = cGraphicsMan_TheGraphicsMan_particle;
-        sPtVEntry_5918* vt = *(sPtVEntry_5918**)(mgr + 0x10D8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(mgr + 0x10D8);
         vt[50].fn(mgr + vt[50].delta, self->mLockTexture);
         self->mLockTexture = -1;
     }
@@ -3321,11 +3317,6 @@ extern "C" int cPS2GraphicsMan_GetDisplayMode(cPS2GraphicsMan* self, int width, 
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetDisplayMode);
 #ifdef SKIP_ASM
-struct sVEntry00376468 {
-    short delta;
-    short index;
-    void* fn;
-};
 
 /**
  * Switches to the display mode that matches a resolution and pixel formats.
@@ -3338,10 +3329,10 @@ struct sVEntry00376468 {
  */
 extern "C" void* cPS2GraphicsMan_SetDisplayMode(cPS2GraphicsMan* self)
 {
-    sVEntry00376468* vt = (sVEntry00376468*)self->mVtbl;
+    sVEntry<void>* vt = (sVEntry<void>*)self->mVtbl;
     int i = ((int (*)(void*))vt[123].fn)((char*)self + vt[123].delta);
     if (i >= 0) {
-        vt = (sVEntry00376468*)self->mVtbl;
+        vt = (sVEntry<void>*)self->mVtbl;
         return ((void* (*)(void*, int))vt[4].fn)((char*)self + vt[4].delta, i);
     }
     return 0;
@@ -5753,17 +5744,7 @@ extern "C" void func_0037A430(sPtGfx_A430* self)
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_CreateGridMesh);
 #ifdef SKIP_ASM
-struct sPartVEntryI_A540 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
-struct sPartVEntryD_A540 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 struct sPartEmitter_A540 {
     int field_0x0;
@@ -5793,9 +5774,9 @@ extern "C" sPartEmitter_A540* cPS2GraphicsMan_CreateGridMesh(cPS2GraphicsMan* pS
         if (gridMesh == 0) {
             return 0;
         }
-        sPartVEntryI_A540* vt = (sPartVEntryI_A540*)gridMesh->vt;
+        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)gridMesh->vt;
         if (vt[2].fn((char*)gridMesh + vt[2].delta) == 0) {
-            sPartVEntryD_A540* vt2 = (sPartVEntryD_A540*)gridMesh->vt;
+            sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)gridMesh->vt;
             vt2[1].fn((char*)gridMesh + vt2[1].delta, 3);
             return 0;
         }
@@ -7221,11 +7202,6 @@ extern "C" void cPS2GraphicsMan_CreateScreenGrabTexture(cPS2GraphicsMan* self, v
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_RemoveScreenGrabTexture);
 #ifdef SKIP_ASM
-struct sVEntry0037CC30 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 extern "C" void func_00367B60(void* mgr, int id);
 
@@ -7239,7 +7215,7 @@ extern "C" void cPS2GraphicsMan_RemoveScreenGrabTexture(cPS2GraphicsMan* self, v
 {
     if (*(int*)((char*)item + 0x4) != -1) {
         func_00367B60(self->mpTextureMan, *(int*)((char*)item + 0x4));
-        sVEntry0037CC30* vt = (sVEntry0037CC30*)self->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
         vt[50].fn((char*)self + vt[50].delta, *(int*)((char*)item + 0x4));
         *(int*)((char*)item + 0x4) = -1;
     }

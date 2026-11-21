@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "bx/appman.h"
 #include "object/flexbridgenode.h"
@@ -278,11 +279,6 @@ extern "C" void cSpring_update(sSpring_53FC0* self)
 //100%
 INCLUDE_ASM("object/spring", cSpring_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sSpringVEntry45D8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Saves a spring into a replay frame: its parameters, then its nodes.
@@ -294,9 +290,9 @@ struct sSpringVEntry45D8 {
  */
 extern "C" void cSpring_writeToReplayFrame(cSpring* self, void* stream)
 {
-    sSpringVEntry45D8* writeSlot = &(*(sSpringVEntry45D8**)stream)[1];
+    sVEntry<void(void*, void*, int)>* writeSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
     writeSlot->fn((char*)stream + writeSlot->delta, self, 36);
-    writeSlot = &(*(sSpringVEntry45D8**)stream)[1];
+    writeSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
     writeSlot->fn((char*)stream + writeSlot->delta, self->Nodes, *(int*)self * 80);
 }
 #endif

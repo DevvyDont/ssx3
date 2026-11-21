@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "ui/uianimation.h"
 #include "ui/uitextscroll.h"
@@ -1505,11 +1506,6 @@ extern "C" void cListOpOnInput__cListOpOnInput(int* self, int flags)
 //100%
 INCLUDE_ASM("ui/uivector", cListOpOnInput_onListNode);
 #ifdef SKIP_ASM
-struct sVEntry3A4D00 {
-    short delta;
-    short index;
-    int (*fn)(void*, void*);
-};
 
 /**
  * Offers the operator's controller input to one list node.
@@ -1521,7 +1517,7 @@ struct sVEntry3A4D00 {
  */
 extern "C" void* cListOpOnInput_onListNode(cList* self, cListNode* obj)
 {
-    sVEntry3A4D00* vt = (sVEntry3A4D00*)obj->mVtbl;
+    sVEntry<int(void*, void*)>* vt = (sVEntry<int(void*, void*)>*)obj->mVtbl;
     if (vt[0xF].fn((char*)obj + vt[0xF].delta, self->mStart.mpNext) == 0) {
         return 0;
     }
@@ -2550,11 +2546,6 @@ extern "C" int cUIPair_getEntry(cUIPair* uiPair) {
 //100%
 INCLUDE_ASM("ui/uivector", cUIPair_setEntry);
 #ifdef SKIP_ASM
-struct sVEntry5530 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Replaces the pair's entry object: destroys the old one through its virtual destructor (slot 1, flags 3) and stores
@@ -2566,7 +2557,7 @@ extern "C" void cUIPair_setEntry(cUIPair* self, cUIThing* obj)
 {
     cUIThing* old = self->mpEntry;
     if (((char*)old) != 0) {
-        sVEntry5530* vt = (sVEntry5530*)old->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)old->mVtbl;
         vt[1].fn(((char*)old) + vt[1].delta, 3);
     }
     self->mpEntry = (cUIThing*)obj;
@@ -2588,11 +2579,6 @@ extern "C" int cUIPair_getWidget(cUIPair* uiPair) {
 //100%
 INCLUDE_ASM("ui/uivector", cUIPair_setWidget);
 #ifdef SKIP_ASM
-struct sVEntry5588 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Replaces the pair's widget object: destroys the old one through its virtual destructor (slot 1, flags 3) and stores
@@ -2604,7 +2590,7 @@ extern "C" void cUIPair_setWidget(cUIPair* self, cUIThing* obj)
 {
     cUIThing* old = self->mpWidget;
     if (((char*)old) != 0) {
-        sVEntry5588* vt = (sVEntry5588*)old->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)old->mVtbl;
         vt[1].fn(((char*)old) + vt[1].delta, 3);
     }
     self->mpWidget = (cUIThing*)obj;

@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "main/gameviewman.h"
 #include "ui/uiengine.h"
@@ -1321,11 +1322,6 @@ extern void* PadCache;
 extern unsigned int D_004A20CC;
 extern char str_90bc_fail_b[];
 
-struct sVEntry_2306B8 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 struct sVEntryI_2306B8 {
     short delta;
@@ -1417,7 +1413,7 @@ static inline int updatePause_2306B8(cGame* self)
         self->IsStreamPaused = 1;
         if (self->m_bFlushStreamer != 0) {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            sVEntry_2306B8* vt = (sVEntry_2306B8*)ps2GraphicsMan->mVtbl;
+            sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)ps2GraphicsMan->mVtbl;
             vt[19].fn((char*)ps2GraphicsMan + vt[19].delta);
             cGameViewMan_updateStreamFocus(((char*)self->ViewMan));
             cWorldCache_flushInActivePages(*((void**)((char*)self->World)));
@@ -1542,7 +1538,7 @@ extern "C" void cGame_update(cGame* self)
                 }
                 if (cReplay_isPauseAI((char*)self->Replay) == 0 && !(cPauseState_Flags & 8)) {
                     cSSXScriptEngine* w = ScriptEngine;
-                    sVEntry_2306B8* vt = (sVEntry_2306B8*)w->mVtbl;
+                    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)w->mVtbl;
                     vt[5].fn(((char*)w) + vt[5].delta);
                 }
             }
@@ -1567,7 +1563,7 @@ extern "C" void cGame_update(cGame* self)
                 }
                 {
                     cAI* gameAI = self->AI;
-                    sVEntry_2306B8* vt = (sVEntry_2306B8*)gameAI->mVtbl;
+                    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)gameAI->mVtbl;
                     vt[3].fn(((char*)gameAI) + vt[3].delta);
                 }
                 if (!(cPauseState_Flags & 0x10)) {
@@ -1605,7 +1601,7 @@ extern "C" void cGame_update(cGame* self)
                 int i;
                 for (i = 0; i < (((sRiderList_2306B8*)(char*)self->AI))->getCount(); i++) {
                     char* rider = (((sRiderList_2306B8*)(char*)self->AI))->getRider(i);
-                    sVEntry_2306B8* vt = *(sVEntry_2306B8**)(rider + 0x6C0);
+                    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(rider + 0x6C0);
                     vt[19].fn(rider + vt[19].delta);
                 }
             }
@@ -1969,11 +1965,6 @@ extern "C" void cGame_cancelPreloadingState(cGame* self) {
 //100%
 INCLUDE_ASM("main/gameload", cGame_isPreloadedStateReady);
 #ifdef SKIP_ASM
-struct sVEntry_002312D8 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 /**
  * Tells whether the state being preloaded is ready to run.
@@ -1992,7 +1983,7 @@ extern "C" int cGame_isPreloadedStateReady(cGame* self)
     if (((void*)preloadingState) == 0) {
         return 1;
     }
-    sVEntry_002312D8* vt = (sVEntry_002312D8*)preloadingState->mVtbl;
+    sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)preloadingState->mVtbl;
     return vt[8].fn((char*)preloadingState + vt[8].delta);
 }
 #endif

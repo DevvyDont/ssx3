@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "scripter/scriptentitycam.h"
 #include "scripter/scriptobjtransition.h"
@@ -889,11 +890,6 @@ extern "C" void cBXScriptEngine_OnInSeqPlay(cBXScriptEngine* self, cScriptPlayer
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_OnInSeqStop);
 #ifdef SKIP_ASM
-struct sVEntry282A18 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int, int);
-};
 
 extern "C" void cBXScriptEngine_ReleaseRequest(void* self, int id);
 
@@ -911,7 +907,7 @@ extern "C" void cBXScriptEngine_ReleaseRequest(void* self, int id);
 extern "C" void cBXScriptEngine_OnInSeqStop(cBXScriptEngine* self, cScriptPlayerMain* msg)
 {
     char* request = (char*)msg->mpUserData;
-    sVEntry282A18* vt = (sVEntry282A18*)self->mVtbl;
+    sVEntry<void(void*, void*, int, int)>* vt = (sVEntry<void(void*, void*, int, int)>*)self->mVtbl;
     vt[11].fn((char*)self + vt[11].delta, msg, *(int*)(request + 0x8), *(int*)(request + 0xC));
     *(int*)(request + 0x4) = 2;
     if (*(short*)(request + 0x10) != 0) {

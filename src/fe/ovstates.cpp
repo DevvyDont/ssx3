@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "ui/uistate.h"
@@ -272,8 +273,6 @@ extern "C" void cCommSystem_destroy();
 extern char str_07main_men[];
 extern char cBERules_mRules[];
 
-struct sVEnt0_00194AA8 { short delta; short index; void (*fn)(void*); };
-struct sVEnt1_00194AA8 { short delta; short index; void (*fn)(void*, unsigned char); };
 struct sVEnt2_00194AA8 { short delta; short index; int (*fn)(void*); };
 
 /**
@@ -302,13 +301,13 @@ extern "C" void cFEStateMainMenu_onCreateScreen(cFEStateMainMenu* self)
     cCommSystem_destroy();
     void* iface = cBE_getInterface_Fv(SSXApp->BE, 7);
     cBENetworkInterface_networkOpt.bIsNetworkGame = 0;
-    sVEnt0_00194AA8* vt0 = *(sVEnt0_00194AA8**)((char*)iface + 0xC);
+    sVEntry<void(void*)>* vt0 = *(sVEntry<void(void*)>**)((char*)iface + 0xC);
     vt0[1].fn((char*)iface + vt0[1].delta);
     func_0028F140(cAudioInterface_bxAudio(), 1);
     char* obj = *(char**)&self->mpEngine->mpInput;
     *(unsigned char*)&self->mNumOfCtrl = 0;
     for (int i = 0; i < 2; i++) {
-        sVEnt1_00194AA8* vt1 = *(sVEnt1_00194AA8**)(obj + 8);
+        sVEntry<void(void*, unsigned char)>* vt1 = *(sVEntry<void(void*, unsigned char)>**)(obj + 8);
         vt1[44].fn(obj + vt1[44].delta, i);
         sVEnt2_00194AA8* vt2 = *(sVEnt2_00194AA8**)(obj + 8);
         if (vt2[45].fn(obj + vt2[45].delta) != 0) {
@@ -557,22 +556,17 @@ extern char str_btext5[];
 extern char str_ps2sq[];
 extern char str_hl[];
 
-struct sVE_194EB0 {
-    short delta;
-    short index;
-    void* fn;
-};
 
 struct sObj_194EB0 {
     int pad0;
-    sVE_194EB0* vt;
+    sVEntry<void>* vt;
 };
 
 static inline void setWidgetHidden_194EB0(char* self, char* name)
 {
     char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
     if (o != 0) {
-        sVE_194EB0* vt = *(sVE_194EB0**)(o + 0x8);
+        sVEntry<void>* vt = *(sVEntry<void>**)(o + 0x8);
         ((void (*)(void*, int))vt[9].fn)(o + vt[9].delta, 0);
     }
 }
@@ -581,7 +575,7 @@ static inline void setWidgetVisible_194EB0(char* self, char* name)
 {
     char* o = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name));
     if (o != 0) {
-        sVE_194EB0* vt = *(sVE_194EB0**)(o + 0x8);
+        sVEntry<void>* vt = *(sVEntry<void>**)(o + 0x8);
         ((void (*)(void*, int))vt[8].fn)(o + vt[8].delta, 0);
     }
 }
@@ -636,7 +630,7 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, cUIThing
             self_->mGoToNextState = 1;
             break;
         }
-        sVE_194EB0* ivt = *(sVE_194EB0**)(iface + 0xC);
+        sVEntry<void>* ivt = *(sVEntry<void>**)(iface + 0xC);
         ((void (*)(void*))ivt[1].fn)(iface + ivt[1].delta);
         if (item_->mMiscData == 22 && self_->mGoToNextState == 0) {
             self_->mSaveCurrentCtrl = self_->mCurrentCtrl;
@@ -720,23 +714,13 @@ extern char str_3_help_multi[];
 extern char str_btext5[];
 extern char str_ps2sq[];
 
-struct sVEi_195328 {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
 
-struct sVEv_195328 {
-    short delta;
-    short index;
-    void (*fn)(void*, ...);
-};
 
 static inline void Show195328(void* self, char* name)
 {
     char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
     if (o != 0) {
-        sVEv_195328* vt = *(sVEv_195328**)(o + 8);
+        sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)(o + 8);
         vt[9].fn(o + vt[9].delta, 1);
     }
 }
@@ -761,13 +745,13 @@ extern "C" void cFEStateMainMenu_onPopupEvent(cFEStateMainMenu* self, cUIState* 
     if (msg != 22) {
         return;
     }
-    sVEi_195328* ovt = (sVEi_195328*)obj->mVtbl;
+    sVEntry<int(void*, int)>* ovt = (sVEntry<int(void*, int)>*)obj->mVtbl;
     if (ovt[23].fn(((char*)obj) + ovt[23].delta, 0) != 0) {
         self->mGoToNextState = 1;
         int savedCtrl = *(signed char*)&self->mSaveCurrentCtrl;
         *(char*)&self->mCurrentCtrl = savedCtrl;
         cUIThing_playKeyframerEvent(self->mpSelectMultiModeWidget, 2);
-        sVEv_195328* svt = (sVEv_195328*)self->mVtbl;
+        sVEntry<void(void*, ...)>* svt = (sVEntry<void(void*, ...)>*)self->mVtbl;
         svt[19].fn((char*)self + svt[19].delta, self->mpSelectMultiModeWidget, 5);
     }
     Show195328(self, str_hl);

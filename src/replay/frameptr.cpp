@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "main/gameviewman.h"
@@ -629,14 +630,9 @@ extern "C" void cReplay_stopReplay(cReplay* self);
 void cReplay_frameSync(void* self);
 void operator_delete(int* ptr);
 
-struct sFpVEntryF088 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 struct sFpNodeF088 {
-    sFpVEntryF088* vtable;  // 0x0
+    sVEntry<void(void*, int)>* vtable;  // 0x0
     char pad_0x4[0x34];
 };
 
@@ -680,7 +676,7 @@ extern "C" void cReplay__cReplay(int* self, int flags)
         char* element = replay + 0x2C + 0x380;
         while (replay + 0x2C != element) {
             element -= 0x38;
-            sFpVEntryF088* vt = ((sFpNodeF088*)element)->vtable;
+            sVEntry<void(void*, int)>* vt = ((sFpNodeF088*)element)->vtable;
             vt[7].fn(element + vt[7].delta, 0);
         }
     }

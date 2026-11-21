@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "main/gameviewman.h"
@@ -361,16 +362,6 @@ extern "C" void cFELoadScreen_purge(cFELoadScreen* self)
 //100%
 INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_render);
 #ifdef SKIP_ASM
-struct sVEntryI002339F8 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
-struct sVEntryV002339F8 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void cUIEngine_render2D(void* engine);
@@ -386,7 +377,7 @@ extern "C" void cUIEngine_render2D(void* engine);
 extern "C" int cFELoadScreen_render(cFELoadScreen* self)
 {
     char* graphicsMan = (char*)GrMan;
-    sVEntryI002339F8* vt = *(sVEntryI002339F8**)(graphicsMan + 0x10D8);
+    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)(graphicsMan + 0x10D8);
     if (vt[17].fn(graphicsMan + vt[17].delta) == 0) {
         return 0;
     }
@@ -394,7 +385,7 @@ extern "C" int cFELoadScreen_render(cFELoadScreen* self)
         cUIEngine_render2D(self->mpUI);
     }
     graphicsMan = (char*)GrMan;
-    sVEntryV002339F8* vt2 = *(sVEntryV002339F8**)(graphicsMan + 0x10D8);
+    sVEntry<void(void*)>* vt2 = *(sVEntry<void(void*)>**)(graphicsMan + 0x10D8);
     vt2[20].fn(graphicsMan + vt2[20].delta);
     return 1;
 }

@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "ui/uianimation.h"
 #include "ui/uistatestack.h"
@@ -827,11 +828,6 @@ extern "C" void cUIThing_playAnimation(cUIThing* self, void* anim, unsigned char
 //100%
 INCLUDE_ASM("ui/uistatestack", cUIThing_deleteAnimation);
 #ifdef SKIP_ASM
-struct sVEntry39FD38 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Deletes the UI thing's animation through its virtual destructor (flags 3) and clears mpAnim.
@@ -842,7 +838,7 @@ extern "C" void cUIThing_deleteAnimation(cUIThing* self)
 {
     cUIAnimation* obj = self->mpAnim;
     if (obj != 0) {
-        sVEntry39FD38* vt = (sVEntry39FD38*)obj->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
         vt[1].fn((char*)obj + vt[1].delta, 3);
         self->mpAnim = (cUIAnimation*)0;
     }

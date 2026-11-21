@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "bx/math3d.h"
 #include "bx/appman.h"
@@ -935,11 +936,6 @@ extern void* cMeshAnimNode_vtbl[];
 
 inline void* operator new[](unsigned int, void* p) { return p; }
 
-struct sInstManVEntry2168 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 struct sInstElem2168 {
     float v[4];
@@ -965,7 +961,7 @@ extern "C" void* cMeshAnimNode_cMeshAnimNode(cMeshAnimNode* self, void* bucket, 
     new ((char*)&self->Axis[0]) sInstElem2168[24];
     new ((char*)&self->Angle[0]) sInstElem2168[24];
     new ((char*)&self->Pos[16]) sInstElem2168[24];
-    sInstManVEntry2168* vtEntry = &(*(sInstManVEntry2168**)stream)[2];
+    sVEntry<void(void*, void*, int)>* vtEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
     vtEntry->fn((char*)stream + vtEntry->delta, (char*)&self->Life, 0xC);
     self->Life = -1.0f;
     return ((void*)self);
@@ -1238,11 +1234,6 @@ extern "C" void cMeshAnimNode_update(sDebris_352500* self)
 //100%
 INCLUDE_ASM("object/instanceman", cMeshAnimNode_expire);
 #ifdef SKIP_ASM
-struct sInstanceManVEntry2708 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 int cInstanceNode_runExpireScript(void* self);
 extern "C" void cInstanceNode_makeThisDead(void* self);
@@ -1265,7 +1256,7 @@ extern "C" void cMeshAnimNode_expire(cMeshAnimNode* self, int check)
         cInstanceNode_makeThisDead(self);
     }
     if (self->Type == 2 && ((void*)self) != 0) {
-        sInstanceManVEntry2708* vt = (sInstanceManVEntry2708*)self->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
         vt[1].fn((char*)self + vt[1].delta, 3);
     }
 }
@@ -1276,11 +1267,6 @@ INCLUDE_ASM("object/instanceman", cMeshAnimNode_loseFocus);
 #ifdef SKIP_ASM
 extern "C" void cInstanceNode_makeThisDead(void* self);
 
-struct sInstManVEntry2780 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Handles a mesh animation node losing focus: deletes it or swaps it for a dead node, by its end mode (+0x6B0).
@@ -1296,7 +1282,7 @@ extern "C" void cMeshAnimNode_loseFocus(cMeshAnimNode* self)
         *(int*)((char*)self->Instance + 0x8) |= *(int*)((char*)self->Instance + 0x8) >> 16;
         *(int*)((char*)self->Instance + 0x8) |= 2;
         if (((void*)self) != 0) {
-            sInstManVEntry2780* vt = (sInstManVEntry2780*)self->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
             vt[1].fn((char*)self + vt[1].delta, 3);
         }
     } else {
@@ -1475,11 +1461,6 @@ extern "C" void cMeshAnimNode_render(cMeshAnimNode* self)
 //100%
 INCLUDE_ASM("object/instanceman", cMeshAnimNode_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sSerVEntry_00352A58 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 
@@ -1493,7 +1474,7 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 extern "C" void cMeshAnimNode_writeToReplayFrame(cMeshAnimNode* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
-    sSerVEntry_00352A58* vt = *(sSerVEntry_00352A58**)stream;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)&self->Life, 0xC);
 }
 #endif

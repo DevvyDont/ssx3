@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "main/gameviewman.h"
 #include "render/ps2graphicsman.h"
@@ -253,11 +254,6 @@ extern "C" void cGameViewMan__cGameViewMan(cGameViewMan* self, int flags)
 //100%
 INCLUDE_ASM("main/gamerender", cGameViewMan_snapAll);
 #ifdef SKIP_ASM
-struct sVEntry_0022E7C8 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Snaps the camera of every active view through its current controller's virtual slot 4 (probably snap).
@@ -271,7 +267,7 @@ extern "C" void cGameViewMan_snapAll(cGameViewMan* self)
     for (i = 0; i < self->m_uiNumView; i++) {
         void* camera = ((void**)(&self->PlayerCamera[0]))[i];
         void* controller = *(void**)((char*)camera + 0xA0);
-        sVEntry_0022E7C8* vt = *(sVEntry_0022E7C8**)((char*)controller + 0x14);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)controller + 0x14);
         vt[4].fn((char*)controller + vt[4].delta);
     }
 }
@@ -280,11 +276,6 @@ extern "C" void cGameViewMan_snapAll(cGameViewMan* self)
 //100%
 INCLUDE_ASM("main/gamerender", cGameViewMan_updateAll);
 #ifdef SKIP_ASM
-struct sVEntry_0022E840 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Updates the camera of every active view through its virtual update (cCamera vtable slot 3).
@@ -296,7 +287,7 @@ extern "C" void cGameViewMan_updateAll(cGameViewMan* self)
     unsigned int i;
     for (i = 0; i < self->m_uiNumView; i++) {
         void* camera = ((void**)(&self->PlayerCamera[0]))[i];
-        sVEntry_0022E840* vt = *(sVEntry_0022E840**)((char*)camera + 0x90);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)camera + 0x90);
         vt[3].fn((char*)camera + vt[3].delta);
     }
 }

@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "fe/fereal.h"
@@ -134,11 +135,6 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(cFEStateMountainRoom*
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom__cFEStateMountainRoom);
 #ifdef SKIP_ASM
-struct sVEntry001D28F8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 extern void* cFEStateMountainRoom_vtbl[];
 extern void* cFEState_vtbl[];
@@ -162,7 +158,7 @@ extern "C" void cFEStateMountainRoom__cFEStateMountainRoom(cFEStateMountainRoom*
     int id = self->mFrontTextureID;
     if (id >= 0) {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEntry001D28F8* vt = (sVEntry001D28F8*)ps2GraphicsMan->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ps2GraphicsMan->mVtbl;
         vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, id);
     }
     self->mVtbl = cFEState_vtbl;
@@ -456,8 +452,6 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(cFEStateMountainRoom* self, 
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onInputBegin);
 #ifdef SKIP_ASM
-struct sVEi1D2EA0 { short delta; short index; int (*fn)(void*); };
-struct sVEv1D2EA0 { short delta; short index; void (*fn)(void*, int); };
 extern char gUISoundNull;
 
 static inline int IsShown1D2EA0(char* self)
@@ -477,16 +471,16 @@ static inline int IsShown1D2EA0(char* self)
 extern "C" int cFEStateMountainRoom_onInputBegin(cFEStateMountainRoom* self, cUIInput* widget)
 {
     if (IsShown1D2EA0(((char*)self))) {
-    sVEi1D2EA0* wvt = (sVEi1D2EA0*)widget->mVtbl;
+    sVEntry<int(void*)>* wvt = (sVEntry<int(void*)>*)widget->mVtbl;
     if (wvt[6].fn(((char*)widget) + wvt[6].delta)) {
         char* snd = *(char**)&self->mpEngine->mpSound;
         if (snd == 0) {
             snd = &gUISoundNull;
         }
-        sVEv1D2EA0* svt = *(sVEv1D2EA0**)snd;
+        sVEntry<void(void*, int)>* svt = *(sVEntry<void(void*, int)>**)snd;
         svt[2].fn(snd + svt[2].delta, 3);
         cUIGroup* w = self->mpPassGroup;
-        sVEv1D2EA0* vt = (sVEv1D2EA0*)w->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)w->mVtbl;
         vt[9].fn(((char*)w) + vt[9].delta, 0);
     }
     return 1;
@@ -683,11 +677,6 @@ extern "C" void* func_0019E2B0(void* mgr, int bank, int i);
 extern "C" void cFEStateMountainRoom_showPassFront(cFEStateMountainRoom* self);
 extern char str_pass[];
 
-struct sVE_31C0 {
-    short delta;
-    short index;
-    int (*fn)(void*, void*, void*, int, int, int);
-};
 
 
 static inline int isActive_31C0(cUIGroup* w)
@@ -719,7 +708,7 @@ extern "C" void cFEStateMountainRoom_updateTextureLoad(cFEStateMountainRoom* vse
     }
     char* fileData = (char*)func_0019E2B0(mgr, vself->mCharID, vself->mTextureFileIndex);
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    sVE_31C0* vt = (sVE_31C0*)ps2GraphicsMan->mVtbl;
+    sVEntry<int(void*, void*, void*, int, int, int)>* vt = (sVEntry<int(void*, void*, void*, int, int, int)>*)ps2GraphicsMan->mVtbl;
     int id = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, fileData + *(int*)(fileData + 0x14), str_pass, 0, 1, -1);
     char* snd = (char*)vself->mpPassIcon;
     vself->mFrontTextureID = id;
@@ -1148,7 +1137,6 @@ extern "C" void cFEStatePeakRoom_updateHelpText(cFEStatePeakRoom* self, int id);
 extern "C" void cFEStatePeakRoom_updateMedalsList(cFEStatePeakRoom* self, int id);
 extern "C" void cUIStateStack_push(void* list, void* item);
 
-struct sVEntA_001D3C80 { short delta; short index; void* (*fn)(void*, void*, int); };
 struct sVEntB_001D3C80 { short delta; short index; void (*fn)(void*, int); };
 struct sItem_001D3C80 { int pad[2]; sVEntB_001D3C80* vt; };
 
@@ -1173,7 +1161,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
         if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum,
                           self->mCharID, self->mPeakNum, item->mMiscData) != 0) {
             void* obj = *(void**)self->mpEngine;
-            sVEntA_001D3C80* vt = *(sVEntA_001D3C80**)((char*)obj + 4);
+            sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
             void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, (self->mPeakNum << 16) | item->mMiscData);
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         }
@@ -1187,7 +1175,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
             }
         }
         void* obj = *(void**)self->mpEngine;
-        sVEntA_001D3C80* vt = *(sVEntA_001D3C80**)((char*)obj + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, id);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -1403,11 +1391,6 @@ int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void cFEStateTrophyRoom_loadTextures(void* self);
 extern void* cFEStateTrophyRoom_vtbl[];
 
-struct sVE_4268 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 
 /**
@@ -1440,7 +1423,7 @@ extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom(cFEStateTrophyRoom* self,
     *(int*)&trophyRoom->mpBigIcon = 0;
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     trophyRoom->mCharID = cBENewPlayerInterface_getPlayerCharID(pi, self->mUserNum);
-    sVE_4268* vt = *(sVE_4268**)((char*)pi + 0xC);
+    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)pi + 0xC);
     vt[2].fn((char*)pi + vt[2].delta);
     trophyRoom->mPeakNum = peakNum;
     trophyRoom->mTrophyType = trophyType;

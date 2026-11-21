@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "ui/uiengine.h"
@@ -707,11 +708,6 @@ extern "C" void func_001A4040(cFEStateNetMessenger* self, cMenu* menu)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetMessenger_onInputBegin);
 #ifdef SKIP_ASM
-struct sVE1A4170 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 extern "C" void func_001A6C40(cFEStateNetMessenger* self, int a1);
 
@@ -728,7 +724,7 @@ extern "C" void func_001A6C40(cFEStateNetMessenger* self, int a1);
 extern "C" int cFEStateNetMessenger_onInputBegin(cFEStateNetMessenger* self, void* obj)
 {
     int handled;
-    sVE1A4170* vt = *(sVE1A4170**)((char*)obj + 0x8);
+    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)((char*)obj + 0x8);
     if (vt[27].fn((char*)obj + vt[27].delta) == 0) {
         handled = 0;
     } else {
@@ -11195,11 +11191,6 @@ extern char str_kT_POPUPCMNCancelChallenge[];
 extern char str_kT_CMNYes[];
 extern char str_kT_CMNNo[];
 
-struct sVE1B1280 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 class cFEVObj_001B1280 {
 public:
@@ -11249,7 +11240,7 @@ extern "C" void cFEStateOnlineCharacterSelect_onWidgetEvent(cFEStateOnlineCharac
         if (self->miCharID != cUIListBox_getCurrentEntryData(self->mpLBChallengerSelect)) {
             char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 1);
             cBENewPlayerInterface_setPlayerCheatCharID(iface, 0, 0);
-            sVE1B1280* vt = *(sVE1B1280**)(iface + 0xC);
+            sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(iface + 0xC);
             vt[1].fn(iface + vt[1].delta);
         }
         {
@@ -13054,7 +13045,7 @@ extern char D_004A1408[];
  */
 extern "C" int cFEStateChatRoom_onInputBegin(cFEStateChatRoom* self, void* obj)
 {
-    sVE1A4170* vt = *(sVE1A4170**)((char*)obj + 0x8);
+    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)((char*)obj + 0x8);
     if (vt[27].fn((char*)obj + vt[27].delta) != 0) {
         // PORT: string pointer passed through an int parameter (func_001A9150's a3)
         func_001A9150(((cFEStateNet*)self), 0, GetHashValue32(str_kT_POPUP235Chat), (int)D_004A1408, 0, 4, 0x3F);
@@ -16992,7 +16983,6 @@ INCLUDE_ASM("fe/feasyncfile", func_001B7E40);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-#include "vtable.h"
 
 int GetHashValue32(char* str);
 
@@ -17647,11 +17637,6 @@ void* cFEStateCreateStep1_onUpdate(void* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateCreateStep1_onGainTransition);
 #ifdef SKIP_ASM
-struct sVE1B8A08 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 extern "C" bool func_001B9558(cFEStateCreateStep1* self);
 extern "C" void func_001B95C0(cFEStateCreateStep1* self);
@@ -17685,7 +17670,7 @@ extern "C" int cFEStateCreateStep1_onGainTransition(cFEStateCreateStep1* self, i
         func_001BA178(self);
         cUIText* obj = self->mpStaticContinue;
         if (obj != 0) {
-            sVE1B8A08* vt = (sVE1B8A08*)obj->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
             void* target = (char*)obj + vt[8].delta;
             vt[8].fn(target, !func_001B9558(self));
         }
@@ -21092,11 +21077,6 @@ extern "C" void func_001BE3A8(cFEStateLobbyMenu* self, int id);
 extern "C" void func_001BE720(cFEStateLobbyMenu*);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 
-struct sVE1BCD18 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Refreshes the lobby's channel lists and player list when the screen gains focus.
@@ -21112,7 +21092,7 @@ struct sVE1BCD18 {
 extern "C" int cFEStateLobbyMenu_onGainTransition(cFEStateLobbyMenu* self, int reset)
 {
     if (reset != 0) {
-        sVE1BCD18* vt = (sVE1BCD18*)self->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
         vt[32].fn((char*)self + vt[32].delta);
         self->mbRoomChanged = 0;
         func_001BE0A8(self);

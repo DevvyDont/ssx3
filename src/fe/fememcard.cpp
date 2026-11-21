@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "fe/festatelegal.h"
 #include "fe/festatememcard.h"
@@ -738,12 +739,6 @@ INCLUDE_ASM("fe/fememcard", cFEStateMemCard_onPopupEvent);
 
 extern "C" void cFEMemCard_onPopupEvent(void *self, void *a1, int key);
 extern "C" void cMCOverlayManager_update(void *mp);
-struct sVtEntK187580
-{
-  short delta;
-  short index;
-  void (*fn)(void *);
-};
 /**
  * Handles a popup answer on the memory-card state: runs cFEMemCard's handler, then the state's own popups.
  *
@@ -797,7 +792,7 @@ extern "C" void cFEStateMemCard_onPopupEvent(cFEStateMemCard* self, cUIState* po
     int cancel = key == 0x10;
     if (!cancel)
     {
-      sVtEntK187580 *vt = (sVtEntK187580*)self->mVtbl;
+      sVEntry<void(void *)> *vt = (sVEntry<void(void *)>*)self->mVtbl;
       vt[41].fn(((char *) self) + vt[41].delta);
       cMCOverlayManager_update(cSSXApp_getMCManager(SSXApp));
       cFEStateMemCard_terminateFreeSpaceCheck(self);
@@ -818,11 +813,6 @@ extern void* cFEStateMemCard_mInstance;
 extern "C" void cMCOverlayManager_GetMessage(void*, unsigned short*, int);
 extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str);
 
-struct sVtEntK1876A8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Shows the memory-card manager's status message in the screen's "mc messages" text while a load or a card check runs.
@@ -844,10 +834,10 @@ extern "C" void cFEStateMemCard_displayStatus(void)
         unsigned short buf[800];
         cMCOverlayManager_GetMessage(mp, buf, 800);
         cUIText_setUnicodeStringWrap(obj, buf);
-        sVtEntK1876A8* vt = *(sVtEntK1876A8**)((char*)obj + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
         vt[9].fn((char*)obj + vt[9].delta, 1);
     } else {
-        sVtEntK1876A8* vt = *(sVtEntK1876A8**)((char*)obj + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
         vt[9].fn((char*)obj + vt[9].delta, 0);
     }
 }
@@ -947,11 +937,6 @@ extern "C" void* cUIAnimationBank_getAnimationByHashName(void* bank, int hash);
 extern "C" void cUIThing_playAnimation(void* obj, void* anim, int a, int b, int c);
 extern "C" void cFEMemCard_SetLoadPressed(void*, int);
 
-struct sVtEntK187920 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Starts reading the settings file from the memory card (stage 4).
@@ -974,7 +959,7 @@ extern "C" void cFEStateMemCard_startSettingsRead(void)
     *(int*)((char*)memCardState + 0x1C4) = 0;
     cMCOverlayManager_readSetSize(mp, cBESaveInterface_getSaveGameSize_K187920());
     cMCOverlayManager_readSetFileType(mp, 2);
-    sVtEntK187920* vt = *(sVtEntK187920**)((char*)mp + 0x748);
+    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)mp + 0x748);
     vt[1].fn((char*)mp + vt[1].delta, 53);
     void* st = cFEStateMemCard_mInstance;
     *(int*)((char*)st + 0x1BC) = two;

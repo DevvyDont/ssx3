@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "fe/fereal.h"
@@ -193,11 +194,6 @@ extern "C" int cFEStateTrophyRoom_onWidgetMenu(cFEStateTrophyRoom* self, int pMe
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateTrophyRoom_onWidgetEvent);
 #ifdef SKIP_ASM
-struct sVEntry001D4698 {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void cFEStateTrophyRoom_updateBigArt(cFEStateTrophyRoom* self, int index);
 extern "C" void cFEStateTrophyRoom_updateStats(cFEStateTrophyRoom* self, int index);
@@ -238,7 +234,7 @@ extern "C" void cFEStateTrophyRoom_onWidgetEvent(cFEStateTrophyRoom* self, cUITh
             w->show(0);
         }
         void* obj = *(void**)self->mpEngine;
-        sVEntry001D4698* vt = *(sVEntry001D4698**)((char*)obj + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, self->mPeakNum);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -735,11 +731,6 @@ extern "C" void cFEStateRewardsRoom_onWidgetCreate(cFEStateRewardsRoom* self, cU
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onWidgetEvent);
 #ifdef SKIP_ASM
-struct sVEntry001D4EA8 {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 extern "C" void cUIStateStack_push(void* list, void* item);
 
 /**
@@ -761,14 +752,14 @@ extern "C" void cFEStateRewardsRoom_onWidgetEvent(cFEStateRewardsRoom* self, cUI
         break;
     case 5: {
         void* obj = *(void**)self->mpEngine;
-        sVEntry001D4EA8* vt = *(sVEntry001D4EA8**)((char*)obj + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, item->mMiscData);
         cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
         void* obj = *(void**)self->mpEngine;
-        sVEntry001D4EA8* vt = *(sVEntry001D4EA8**)((char*)obj + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);

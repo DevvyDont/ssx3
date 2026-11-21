@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "ui/uiscreen.h"
 #include "ui/uiinput.h"
@@ -362,11 +363,6 @@ extern "C" void cUIEngine_render3D(cUIEngine* self)
 //100%
 INCLUDE_ASM("ui/uiengine", cUIEngine_update);
 #ifdef SKIP_ASM
-struct sVEntry398038 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 extern "C" void cUIStateStack_update(void*);
 
@@ -379,7 +375,7 @@ extern "C" void cUIStateStack_update(void*);
 extern "C" void cUIEngine_update(cUIEngine* self)
 {
     cUIInput* obj = self->mpInput;
-    sVEntry398038* vt = (sVEntry398038*)obj->mVtbl;
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)obj->mVtbl;
     vt[46].fn((char*)obj + vt[0x2E].delta);
     cUIStateStack_update((char*)&self->mStateStack);
 }
@@ -388,11 +384,6 @@ extern "C" void cUIEngine_update(cUIEngine* self)
 //100%
 INCLUDE_ASM("ui/uiengine", cUITextureBank__cUITextureBank);
 #ifdef SKIP_ASM
-struct sVEntry398078 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 extern void* GrMan_uiengine __asm__("GrMan");
 
 /**
@@ -408,7 +399,7 @@ extern "C" void cUITextureBank__cUITextureBank(cUITextureBank* self, int flags)
     int i;
     for (i = 0; i < self->mNumTextureIDs; i++) {
         char* obj = (char*)GrMan_uiengine;
-        sVEntry398078* vt = *(sVEntry398078**)(obj + 0x10D8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(obj + 0x10D8);
         vt[50].fn(obj + vt[50].delta, (self->mpTexturesIDs)[i]);
     }
     if (self->mpTexturesIDs != 0) {
@@ -1512,7 +1503,6 @@ extern "C" int cUIThing_getSound(void* self, int a);
 extern char gUISoundNull[4];
 
 struct sVE_9970 { short delta; short index; int (*fn)(void*, ...); };
-struct sVEv_9970 { short delta; short index; void (*fn)(void*, ...); };
 
 static inline int inputIs_9970(void* in, int slot)
 {
@@ -1523,7 +1513,7 @@ static inline int inputIs_9970(void* in, int slot)
 static inline void focusNotify_9970(char* self, int what)
 {
     char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
-    sVEv_9970* vt = *(sVEv_9970**)(o + 8);
+    sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)(o + 8);
     vt[19].fn(o + vt[19].delta, self, what);
 }
 
@@ -1592,7 +1582,7 @@ extern "C" int cUIListBox_onInput(cUIListBox* self, cUIInput* in)
             result = cUIThing_getSound(((char*)self), 0);
         }
         if (listener != 0) {
-            sVEv_9970* vt = *(sVEv_9970**)listener;
+            sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)listener;
             vt[2].fn(listener + vt[2].delta, result);
         }
         return 1;
@@ -1625,7 +1615,7 @@ extern "C" int cUIListBox_onInput(cUIListBox* self, cUIInput* in)
             result = cUIThing_getSound(((char*)self), 0);
         }
         if (listener != 0) {
-            sVEv_9970* vt = *(sVEv_9970**)listener;
+            sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)listener;
             vt[2].fn(listener + vt[2].delta, result);
         }
         return 1;
@@ -1644,7 +1634,7 @@ extern "C" int cUIListBox_onInput(cUIListBox* self, cUIInput* in)
             result = cUIThing_getSound(((char*)self), 0);
         }
         if (listener != 0) {
-            sVEv_9970* vt = *(sVEv_9970**)listener;
+            sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)listener;
             vt[2].fn(listener + vt[2].delta, result);
         }
         return 1;

@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "bx/math3d.h"
 #include "world/worldview.h"
@@ -1249,11 +1250,6 @@ extern "C" void cFlexBridgeNode_render(cFlexBridgeNode* self)
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sFlexBridgeVEntry7D38 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 extern "C" void cSpring_writeToReplayFrame(void* p, void* stream);
@@ -1271,7 +1267,7 @@ extern "C" void cFlexBridgeNode_writeToReplayFrame(cFlexBridgeNode* self, void* 
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     cSpring_writeToReplayFrame((char*)&self->Mesh, stream);
-    sFlexBridgeVEntry7D38* vt = *(sFlexBridgeVEntry7D38**)stream;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)&self->BottomLeftOffset, 0x30);
 }
 #endif
@@ -1335,11 +1331,6 @@ extern "C" void* cFlexRailNode_cFlexRailNode(cFlexRailNode* self, void* nodeType
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexRailNode_cFlexRailNode1);
 #ifdef SKIP_ASM
-struct sSerVEntry_00347EA8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a, void* stream);
 
@@ -1359,7 +1350,7 @@ extern "C" void* cFlexRailNode_cFlexRailNode1(cFlexRailNode* self, void* bucket,
     sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(&self->Mats);
     cInstanceNode_cInstanceNode(((char*)self), bucket, stream);
     self->mVtbl = (void**)cFlexRailNode_vtbl;
-    sSerVEntry_00347EA8* readSlot = &(*(sSerVEntry_00347EA8**)stream)[2];
+    sVEntry<void(void*, void*, int)>* readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
     readSlot->fn((char*)stream + readSlot->delta, (char*)&self->NumNodes, 0x30);
     *segs = new (str_FlexNodeMats, 0x20000000, 0) sFlexSeg_347D90[self->NumNodes - 1];
     self->Tube = (cSimpleTube*)cSimpleTube_cSimpleTube(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), self->NumNodes * 8 - 9);
@@ -1370,11 +1361,6 @@ extern "C" void* cFlexRailNode_cFlexRailNode1(cFlexRailNode* self, void* bucket,
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexRailNode__cFlexRailNode);
 #ifdef SKIP_ASM
-struct sFlexBridgeVEntry7F90 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 void cMemMan_free(void*);
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
@@ -1397,7 +1383,7 @@ extern "C" void cFlexRailNode__cFlexRailNode(cFlexRailNode* self, int flags)
     }
     void* obj = self->Tube;
     if (obj != 0) {
-        sFlexBridgeVEntry7F90* vt = *(sFlexBridgeVEntry7F90**)obj;
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)obj;
         vt[1].fn((char*)obj + vt[1].delta, 3);
     }
     cInstanceNode__cInstanceNode(self, flags);
@@ -1407,11 +1393,6 @@ extern "C" void cFlexRailNode__cFlexRailNode(cFlexRailNode* self, int flags)
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexRailNode_update);
 #ifdef SKIP_ASM
-struct sFlexBridgeVEntry8008 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 extern "C" void cFlexRailNode_updateSpaceHash(cFlexRailNode* self);
 
@@ -1423,9 +1404,9 @@ extern "C" void cFlexRailNode_updateSpaceHash(cFlexRailNode* self);
  */
 extern "C" void cFlexRailNode_update(cFlexRailNode* self)
 {
-    sFlexBridgeVEntry8008* vt1 = (sFlexBridgeVEntry8008*)self->mVtbl;
+    sVEntry<void(void*)>* vt1 = (sVEntry<void(void*)>*)self->mVtbl;
     vt1[47].fn((char*)self + vt1[47].delta);
-    sFlexBridgeVEntry8008* vt2 = (sFlexBridgeVEntry8008*)self->mVtbl;
+    sVEntry<void(void*)>* vt2 = (sVEntry<void(void*)>*)self->mVtbl;
     vt2[48].fn((char*)self + vt2[48].delta);
     cFlexRailNode_updateSpaceHash(self);
 }
@@ -1435,11 +1416,6 @@ extern "C" void cFlexRailNode_update(cFlexRailNode* self)
 INCLUDE_ASM("object/flexbridgenode", cFlexRailNode_updateSpaceHash);
 #ifdef SKIP_ASM
 
-struct sFlexBridgeVEntry8058 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 
 extern "C" void* cObjectInterface_getNash();
@@ -1458,7 +1434,7 @@ extern "C" void cFlexRailNode_updateSpaceHash(cFlexRailNode* node)
     cFlexRailNode* self = node;
     tBoundBox* box = (&self->BoundBox);
     tBoundBox old = *(&self->BoundBox);
-    ((sFlexBridgeVEntry8058*)self->mVtbl)[50].fn((char*)self + ((sFlexBridgeVEntry8058*)self->mVtbl)[50].delta);
+    ((sVEntry<void(void*)>*)self->mVtbl)[50].fn((char*)self + ((sVEntry<void(void*)>*)self->mVtbl)[50].delta);
     nash_Nash_movenode(cObjectInterface_getNash(), 2, ((int)self->Node), box, &old);
 }
 #endif
@@ -1922,11 +1898,6 @@ extern "C" void cFlexRailNode_splineIntersect(cFlexRailNode* self, const sFbV_82
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexRailNode_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sSerVEntry_00348B40 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 
@@ -1941,7 +1912,7 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 extern "C" void cFlexRailNode_writeToReplayFrame(cFlexRailNode* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
-    sSerVEntry_00348B40* vt = *(sSerVEntry_00348B40**)stream;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)&self->NumNodes, 0x30);
 }
 #endif

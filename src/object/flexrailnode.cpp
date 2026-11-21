@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "bx/appman.h"
 #include "bx/math3d.h"
@@ -223,11 +224,6 @@ struct sFlexRailElem_348FA0 {
     char pad44[0xC];
 };
 
-struct sFrStreamVEntry_348FA0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Constructs a float rail from a replay frame.
@@ -244,11 +240,11 @@ extern "C" void* cFloatRailNode_cFloatRailNode1(cFloatRailNode* self, void* buck
 {
     cFlexRailNode_cFlexRailNode1(((char*)self), bucket, stream);
     self->mVtbl = (void**)cFloatRailNode_vtbl;
-    sFrStreamVEntry_348FA0* vt = *(sFrStreamVEntry_348FA0**)stream;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)&self->LSpring, 0xC);
     sFlexRailElem_348FA0** elems = (sFlexRailElem_348FA0**)(&self->Nodes);
     *elems = new (str_FloatRailNodes, 0x20000000, 0) sFlexRailElem_348FA0[self->NumNodes];
-    sFrStreamVEntry_348FA0* vt2 = *(sFrStreamVEntry_348FA0**)stream;
+    sVEntry<void(void*, void*, int)>* vt2 = *(sVEntry<void(void*, void*, int)>**)stream;
     vt2[2].fn((char*)stream + vt2[2].delta, self->Nodes, self->NumNodes * 80);
     cFloatRailNode_updateMats(self);
     cFloatRailNode_updateBoundBox(self);
@@ -902,11 +898,6 @@ struct sFlexRailElem_349DB0 {
     sFlexRailElem_349DB0() : link(~0u) {}
 };
 
-struct sFrStreamVEntry_349DB0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Constructs a spring rail from a replay frame.
@@ -923,11 +914,11 @@ extern "C" void* cSpringRailNode_cSpringRailNode1(cSpringRailNode* self, void* b
 {
     cFlexRailNode_cFlexRailNode1(((char*)self), bucket, stream);
     self->mVtbl = (void**)cSpringRailNode_vtbl;
-    sFrStreamVEntry_349DB0* vt = *(sFrStreamVEntry_349DB0**)stream;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)&self->ASpring, 0xC);
     sFlexRailElem_349DB0** elems = (sFlexRailElem_349DB0**)(&self->Nodes);
     *elems = new (str_SpringRailNodes, 0x20000000, 0) sFlexRailElem_349DB0[self->NumNodes];
-    sFrStreamVEntry_349DB0* vt2 = *(sFrStreamVEntry_349DB0**)stream;
+    sVEntry<void(void*, void*, int)>* vt2 = *(sVEntry<void(void*, void*, int)>**)stream;
     vt2[2].fn((char*)stream + vt2[2].delta, self->Nodes, self->NumNodes * 0x60);
     cSpringRailNode_updateMats(self);
     cFlexRailNode_addSpaceHash((cFlexRailNode*)self);

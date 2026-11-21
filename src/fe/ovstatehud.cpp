@@ -2540,11 +2540,6 @@ void* cBXLoadIndicator_cBXLoadIndicator(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_Init);
 #ifdef SKIP_ASM
-struct sVEntry001F30D8 {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
 struct sHudIds001F30D8 {
     int a;
     int b;
@@ -2570,7 +2565,7 @@ extern "C" void cBXLoadIndicator_Init(cBXLoadIndicator* vself)
 {
     sHudIds001F30D8* self = (sHudIds001F30D8*)vself;
     char* locale = (char*)SSXApp->FELocale;
-    sVEntry001F30D8* vt = *(sVEntry001F30D8**)(locale + 4);
+    sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)(locale + 4);
     char* adj = locale + vt[4].delta;
     int loadingHash = GetHashValue32(str_kT_ovrcmnloading_b);
     self->a = vt[4].fn(adj, loadingHash);

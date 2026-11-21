@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "world/worldview.h"
 #include "object/flexbridgenode.h"
@@ -122,11 +123,6 @@ struct sEffectLinkObj_57C8 {
     int value;         // 0xC
 };
 
-struct sEffVEntry57C8 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 /**
  * Constructs an effect modifier from a replay frame.
@@ -145,7 +141,7 @@ extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* effectModifie
     self->link.next = 0;
     self->link.prev = 0;
     self->vt = cEffectModifier_vtbl;
-    sEffVEntry57C8* vt = *(sEffVEntry57C8**)obj;
+    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
     self->value = vt[3].fn((char*)obj + vt[3].delta);
     cEffectModifier_EffectCount++;
     return ((void*)effectModifier);
@@ -212,11 +208,6 @@ extern "C" void cStaticEmitter_setupEmitter(void* self, void* mat, int a2);
 extern int cParticleModifier_ParticleCount;
 extern void* cParticleModifier_vtbl[];
 
-struct sVEntry003458C0 {
-    short delta;
-    short index;
-    void* (*fn)(void*);
-};
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy); returns dst.
 static inline void* vu0CopyMatrix003458C0(void* dst, void* src)
@@ -261,7 +252,7 @@ extern "C" void* cParticleModifier_cParticleModifier(cParticleModifier* self, in
     void* obj = *(void**)(own + 0xC);
     void* transform;
     if (obj != 0) {
-        sVEntry003458C0* vt = *(sVEntry003458C0**)((char*)obj + 0xC);
+        sVEntry<void*(void*)>* vt = *(sVEntry<void*(void*)>**)((char*)obj + 0xC);
         transform = vu0CopyMatrix003458C0(&self->Transform, vt[24].fn((char*)obj + vt[24].delta));
     } else {
         transform = vu0CopyMatrix003458C0(&self->Transform, own + 0x10);
@@ -280,11 +271,6 @@ void* operator_new1(int size);
 extern "C" void cStaticEmitter_readFromReplayFrame(void* self, void* stream);
 extern char t4mat_Identity[];
 
-struct sEffectLinkVEntry_3459A8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Constructs a particle modifier from a replay frame.
@@ -303,14 +289,14 @@ extern "C" void* cParticleModifier_cParticleModifier1(cParticleModifier* self, v
     cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
     self->mVtbl = cParticleModifier_vtbl;
     cStaticEmitter_cStaticEmitter(&self->Emitter);
-    sEffectLinkVEntry_3459A8* readSlot = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
+    sVEntry<void(void*, void*, int)>* readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
     readSlot->fn((char*)stream + readSlot->delta, (char*)&self->Complete, 4);
     if (self->Complete == 0) {
         void* buf = operator_new1(216);
         self->ParticleData = (tParticleData*)buf;
-        readSlot = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
+        readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
         readSlot->fn((char*)stream + readSlot->delta, buf, 216);
-        readSlot = &(*(sEffectLinkVEntry_3459A8**)stream)[2];
+        readSlot = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
         readSlot->fn((char*)stream + readSlot->delta, (char*)&self->Transform, 0x40);
         cStaticEmitter_setupEmitter(&self->Emitter, &self->Transform, (int)self->ParticleData);
         cStaticEmitter_readFromReplayFrame(&self->Emitter, stream);
@@ -502,11 +488,6 @@ struct cStream00371318;
 extern "C" void cBaseClass_DynamicEmitter_readFromReplayFrame(void* self, cStream00371318* stream);
 extern "C" void cBaseClass_DynamicEmitter_updateBASE(void* sub, void* a, void* b, int flag, float dt);
 
-struct sEffectLinkVEntry_345D80 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Rebuilds a dynamic (moving) particle effect from a replay frame (On Tour cDynamicParticleModifier(cBxReplayFrame*
@@ -530,12 +511,12 @@ extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleMo
     void* data = &self->Mesh;
     cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter(((char*)&self->Emitter));
     self->Emitter.mVtbl = cDynamicEmitter_vtbl;
-    sEffectLinkVEntry_345D80* vt = *(sEffectLinkVEntry_345D80**)stream;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
     vt[2].fn((char*)stream + vt[2].delta, data, 80);
     if (self->Complete == 0) {
         void* particleData = operator_new1(216);
         self->ParticleData = (tParticleData*)((sTarget00345C90*)particleData);
-        sEffectLinkVEntry_345D80* vt2 = *(sEffectLinkVEntry_345D80**)stream;
+        sVEntry<void(void*, void*, int)>* vt2 = *(sVEntry<void(void*, void*, int)>**)stream;
         vt2[2].fn((char*)stream + vt2[2].delta, particleData, 216);
         cBaseClass_DynamicEmitter_setupEmitter(((char*)&self->Emitter), (sTarget00345C90*)self->ParticleData, -1.0f);
         cBaseClass_DynamicEmitter_readFromReplayFrame(((char*)&self->Emitter), (cStream00371318*)stream);
@@ -720,11 +701,6 @@ extern "C" void cDynamicParticleModifier_render(cDynamicParticleModifier* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/effectlink", cDynamicParticleModifier_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sEffectLinkVEntry60A0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 extern "C" void cBaseClass_DynamicEmitter_writeToReplayFrame(void* self, void* stream);
 
@@ -739,10 +715,10 @@ extern "C" void cBaseClass_DynamicEmitter_writeToReplayFrame(void* self, void* s
 extern "C" void cDynamicParticleModifier_writeToReplayFrame(cDynamicParticleModifier* self, void* stream)
 {
     cEffectModifier_writeToReplayFrame((cEffectModifier*)self, stream);
-    sEffectLinkVEntry60A0* writeEntry = &(*(sEffectLinkVEntry60A0**)stream)[1];
+    sVEntry<void(void*, void*, int)>* writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Mesh, 80);
     if (self->Complete == 0) {
-        writeEntry = &(*(sEffectLinkVEntry60A0**)stream)[1];
+        writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
         writeEntry->fn((char*)stream + writeEntry->delta, self->ParticleData, 216);
         cBaseClass_DynamicEmitter_writeToReplayFrame((char*)&self->Emitter, stream);
     }
@@ -818,11 +794,6 @@ extern int cHaloModifier_HaloCount;
 extern void* cHaloModifier_vtbl[];
 extern "C" void* cEffectModifier_cEffectModifier1(cEffectModifier* p, void* obj);
 
-struct sEffVEntry61C0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Constructs a halo modifier from a replay frame.
@@ -837,7 +808,7 @@ extern "C" void* cHaloModifier_cHaloModifier1(cHaloModifier* self, void* stream)
 {
     cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
     self->mVtbl = cHaloModifier_vtbl;
-    sEffVEntry61C0* vt = *(sEffVEntry61C0**)stream;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)&self->Color, 0x30);
     cHaloModifier_HaloCount++;
     return ((void*)self);
@@ -1036,11 +1007,6 @@ extern "C" void cFlexBridgeNode_setupGrid(void* self);
 extern "C" void cFlexBridgeNode_updateGrid(void*);
 extern void* cFlexBridgeNode_vtbl[];
 
-struct sEffectLinkVEntry64E0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Constructs a flexible bridge node from a replay frame.
@@ -1059,7 +1025,7 @@ extern "C" void* cFlexBridgeNode_cFlexBridgeNode1(cFlexBridgeNode* self, void* b
     self->mVtbl = cFlexBridgeNode_vtbl;
     cSpring_cSpring1((char*)&self->Mesh, stream);
     cFlexBridgeNode_setupGrid(self);
-    sEffectLinkVEntry64E0* readEntry = &(*(sEffectLinkVEntry64E0**)stream)[2];
+    sVEntry<void(void*, void*, int)>* readEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
     readEntry->fn((char*)stream + readEntry->delta, payload, 0x30);
     cFlexBridgeNode_updateGrid(self);
     return ((void*)self);
@@ -1088,14 +1054,9 @@ struct sInst_346568 {
 
 extern "C" void nash_Nash_movenode(void* world, int type, void* id, tBoundBox* box, tBoundBox* old);
 
-struct sRVEntry_346568 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 struct sRCtx_346568 {
     char pad[0x10D8];
-    sRVEntry_346568* vt;
+    sVEntry<void(void*, void*)>* vt;
 };
 
 /**
@@ -1120,7 +1081,7 @@ extern "C" void cFlexBridgeNode__cFlexBridgeNode(cFlexBridgeNode* self, int flag
         cMemMan_free(self->Verts);
     }
     tBoundBox* box = ((&self->BoundBox));
-    ((sRVEntry_346568*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].fn((char*)cGraphicsMan_TheGraphicsMan + ((sRVEntry_346568*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].delta, self->GridMesh);
+    ((sVEntry<void(void*, void*)>*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].fn((char*)cGraphicsMan_TheGraphicsMan + ((sVEntry<void(void*, void*)>*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].delta, self->GridMesh);
     tBoundBox old = *(&self->BoundBox);
     sInst_346568* inst = (sInst_346568*)self->Instance;
     sVec4_346568 corner;

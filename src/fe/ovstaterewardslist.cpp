@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "fe/ovstaterewardslist.h"
 
@@ -51,11 +52,6 @@ public:
     virtual int setColor(const sColor_200288& c);
 };
 
-struct sVEntry_200288 {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 
 /**
  * Handles the rewards list's select and back events by pushing the state the custom interface returns.
@@ -77,7 +73,7 @@ extern "C" void cOVStateRewardsList_onWidgetEvent(cOVStateRewardsList* self, cUI
         void* nextState = 0;
         if (*(int*)((char*)item + 0x18) == 1) {
             void* obj = *(void**)self->mpEngine;
-            sVEntry_200288* vt = *(sVEntry_200288**)((char*)obj + 4);
+            sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
             nextState = vt[4].fn((char*)obj + vt[4].delta, self, 1);
         }
         cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
@@ -85,7 +81,7 @@ extern "C" void cOVStateRewardsList_onWidgetEvent(cOVStateRewardsList* self, cUI
     }
     case 6: {
         void* obj = *(void**)self->mpEngine;
-        sVEntry_200288* vt = *(sVEntry_200288**)((char*)obj + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
         if (nextState != 0) {
             cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);

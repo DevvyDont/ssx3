@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "ui/uistate.h"
@@ -822,11 +823,6 @@ extern "C" int cOVState_TOPTIMES_onWidgetMenu(cOVState_TOPTIMES* self, int pMenu
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_TOPTIMES_onWidgetEvent);
 #ifdef SKIP_ASM
-struct sVEntry_001F80D8 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * On Cross, passes the chosen button to the panel's virtual slot 26 (cOVState_TOPTIMES_handleNext: continue or save
@@ -842,7 +838,7 @@ extern "C" void cOVState_TOPTIMES_onWidgetEvent(cOVState_TOPTIMES* self, cUIThin
 {
     if (((void*)pWidget) != 0) {
         if (Event == 5) {
-            sVEntry_001F80D8* vt = (sVEntry_001F80D8*)self->mVtbl;
+            sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
             vt[26].fn((char*)self + vt[26].delta);
         }
     }

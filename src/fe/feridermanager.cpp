@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "bx/math3d.h"
@@ -560,11 +561,6 @@ extern "C" void func_002F1A08(void* p);
 extern "C" void func_002ECF78(void* p);
 
 
-struct sVEF138 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 /**
  * Updates the front-end rider each frame: finishes deferred loads, compiles the model and advances its animation.
@@ -583,7 +579,7 @@ extern "C" void cFERider_update(cFERider* selfp)
     cFERider* self = selfp;
     if (self->mSafeRenderCount >= 0) {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-        sVEF138* vt = (sVEF138*)ps2GraphicsMan->mVtbl;
+        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)ps2GraphicsMan->mVtbl;
         if (self->mSafeRenderCount < vt[114].fn((char*)ps2GraphicsMan + vt[114].delta)) {
             self->mSafeRenderCount = -1;
             cFERider_init(self, self->mProfileIndex, self->mNewCharID, self->mNewLoadAll);

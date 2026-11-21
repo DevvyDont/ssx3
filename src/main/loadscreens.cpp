@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "fe/backgroundman.h"
@@ -19,15 +20,10 @@ extern char str_data_textures_backs_ssh[];
 extern char str_BackTID[];
 extern char str_back[];
 
-struct sRVEntry_17ACC8 {
-    short delta;
-    short index;
-    int (*fn)(void*, void*, const char*, int, int, int);
-};
 
 struct sRCtx_17ACC8 {
     char pad[0x10D8];
-    sRVEntry_17ACC8* vt;
+    sVEntry<int(void*, void*, const char*, int, int, int)>* vt;
 };
 
 struct sBgFile_17ACC8 {
@@ -67,7 +63,7 @@ extern "C" int cBackgroundMan_loadImages(cBackgroundMan* self)
     for (int i = 0; i < self->miNumImage; i++) {
         char* shape = (char*)file + file->shapes[i].offset;
         void* img = SHAPE_unpack(shape);
-        self->mpiImageTID[i] = ((sRVEntry_17ACC8*)GrMan->mVtbl)[46].fn((char*)GrMan + ((sRVEntry_17ACC8*)GrMan->mVtbl)[46].delta, img, str_back, 0, 1, -1);
+        self->mpiImageTID[i] = ((sVEntry<int(void*, void*, const char*, int, int, int)>*)GrMan->mVtbl)[46].fn((char*)GrMan + ((sVEntry<int(void*, void*, const char*, int, int, int)>*)GrMan->mVtbl)[46].delta, img, str_back, 0, 1, -1);
         if (img != shape && img != 0) {
             cMemMan_free(img);
         }

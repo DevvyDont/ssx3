@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "fe/festate.h"
 #include "fe/festateload.h"
@@ -20,11 +21,6 @@ extern char str_Menu0000[];
 extern char str_Bitmap0000[];
 extern char str_Bitmap0001[];
 
-struct sVEntryK185A98 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Opens the credits screen ("26credits") and hides its two bitmaps, keeping the second as the Dolby icon.
@@ -46,13 +42,13 @@ extern "C" void cFEStateCredits_onCreateScreen(cFEStateCredits* self)
     char* bitmap = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Bitmap0000));
     self->mpDolbyIcon = (cUIIcon*)bitmap;
     if (bitmap != 0) {
-        sVEntryK185A98* vt = *(sVEntryK185A98**)(bitmap + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(bitmap + 8);
         vt[9].fn(bitmap + vt[9].delta, 0);
     }
     bitmap = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Bitmap0001));
     self->mpDolbyIcon = (cUIIcon*)bitmap;
     if (bitmap != 0) {
-        sVEntryK185A98* vt = *(sVEntryK185A98**)(bitmap + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(bitmap + 8);
         vt[9].fn(bitmap + vt[9].delta, 0);
     }
 }
@@ -356,11 +352,6 @@ extern "C" void cFEStateCredits_onUpdate(cFEStateCredits* self)
 //100%
 INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onInputBegin);
 #ifdef SKIP_ASM
-struct sVEntry001863E8 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 /**
  * Changes the credits scroll speed with up and down.
@@ -373,14 +364,14 @@ struct sVEntry001863E8 {
  */
 extern "C" int cFEStateCredits_onInputBegin(cFEStateCredits* self, cUIInput* pInput)
 {
-    sVEntry001863E8* vtEntry = &((sVEntry001863E8*)pInput->mVtbl)[17];
+    sVEntry<int(void*)>* vtEntry = &((sVEntry<int(void*)>*)pInput->mVtbl)[17];
     if (vtEntry->fn((char*)pInput + vtEntry->delta)) {
         if (self->mPixelDelta >= -7) {
             self->mPixelDelta -= 1;
         }
         return 1;
     }
-    vtEntry = &((sVEntry001863E8*)pInput->mVtbl)[18];
+    vtEntry = &((sVEntry<int(void*)>*)pInput->mVtbl)[18];
     if (vtEntry->fn((char*)pInput + vtEntry->delta)) {
         if (self->mPixelDelta < 8) {
             self->mPixelDelta += 1;
@@ -420,11 +411,6 @@ extern "C" int cFEStateCredits_onWidgetMenu(cFEStateCredits* self, int pMenu, un
 //100%
 INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onWidgetEvent);
 #ifdef SKIP_ASM
-struct sVEntry001864B0 {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 extern "C" void cUIStateStack_push(void* list, void* item);
 
 /**
@@ -437,7 +423,7 @@ extern "C" void cFEStateCredits_onWidgetEvent(cFEStateCredits* self, cUIThing* i
 {
     if (((void*)item) != 0 && msg == 6) {
         void* obj = *(void**)self->mpEngine;
-        sVEntry001864B0* vt = *(sVEntry001864B0**)((char*)obj + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, 36);
         if (nextState != 0) {
             cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);

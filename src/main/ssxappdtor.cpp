@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "main/gameviewman.h"
@@ -3168,7 +3169,6 @@ extern "C" bool cGame_updateUI(cGame* self)
 INCLUDE_ASM("main/ssxappdtor", cGame_updateAI);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sVE_244E60 { short delta; short index; void* fn; };
 extern "C" int cInputSync_aiinputready(int);
 extern "C" int cInputSync_aiupdate(int);
 extern "C" int cReplay_isPauseAI(int);
@@ -3216,7 +3216,7 @@ extern "C" void cGame_updateAI(cGame* self)
         if ((cPauseState_Flags & 1) == 0)
             cReplay_update((int)self->Replay);
         if (cReplay_isPauseAI((int)self->Replay) == 0 && (cPauseState_Flags & 8) == 0) {
-            sVE_244E60* vt = (sVE_244E60*)ScriptEngine->mVtbl;
+            sVEntry<void>* vt = (sVEntry<void>*)ScriptEngine->mVtbl;
             ((void (*)(void*))vt[5].fn)((char*)ScriptEngine + vt[5].delta);
         }
     }
@@ -3242,7 +3242,7 @@ extern "C" void cGame_updateAI(cGame* self)
             cBucketMan_applyBucket(obj, 1);
         {
             char* aiMan = (char*)self->AI;
-            sVE_244E60* vt = *(sVE_244E60**)(aiMan + 0xCC);
+            sVEntry<void>* vt = *(sVEntry<void>**)(aiMan + 0xCC);
             ((void (*)(void*))vt[3].fn)(aiMan + vt[3].delta);
         }
         if ((cPauseState_Flags & 0x10) == 0)

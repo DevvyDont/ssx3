@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "ui/uilistbox.h"
 #include "ui/uiscreen.h"
@@ -370,11 +371,6 @@ extern "C" void MEM_fill(void* dst, int c, int n);
 extern char str_FEOptions[];
 extern char cBERules_mRules[];
 
-struct sVE_1C68 {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 
 struct sMsg_1C68 {
     char pad_0x0[0x18];
@@ -405,7 +401,7 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, sMsg_
     case 5:
         if (msg->info[6] == 0) {
             char* custom = *(char**)self->mpEngine;
-            sVE_1C68* vt = *(sVE_1C68**)(custom + 0x4);
+            sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(custom + 0x4);
             void* st = vt[4].fn(custom + vt[4].delta, ((char*)self), msg->id);
             if (st) {
                 cUIStateStack_push(&self->mpEngine->mStateStack, st);
@@ -414,7 +410,7 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, sMsg_
         break;
     case 6: {
         char* custom = *(char**)self->mpEngine;
-        sVE_1C68* vt = *(sVE_1C68**)(custom + 0x4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(custom + 0x4);
         void* st = vt[5].fn(custom + vt[5].delta, ((char*)self), msg->id);
         if (st) {
             cUIStateStack_push(&self->mpEngine->mStateStack, st);

@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "be/beintnewrace.h"
 #include "main/gamemode.h"
@@ -266,11 +267,6 @@ extern "C" void func_002382B8(cGameModeMan* self, int i)
 //100%
 INCLUDE_ASM("main/gamemode", cGameModeMan_restartHeat);
 #ifdef SKIP_ASM
-struct sVEntry_002382D8 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 extern void* cGameModeMan_aHandler[];
 extern int cGameModeMan_bGiveUp[];
@@ -283,7 +279,7 @@ extern "C" void cGameModeMan_restartHeat(cGameModeMan* self)
 {
     int i;
     void* obj = cGameModeMan_aHandler[self->iCurrModeHandler];
-    sVEntry_002382D8* vt = *(sVEntry_002382D8**)obj;
+    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)obj;
     vt[2].fn((char*)obj + vt[2].delta);
     for (i = 5; i >= 0; i--) {
         cGameModeMan_bGiveUp[i] = 0;
@@ -379,11 +375,6 @@ extern "C" void cGameModeMan_raceFinish(cGameModeMan* self, int idx, int pRiderS
 //100%
 INCLUDE_ASM("main/gamemode", cGameModeMan_riderCheckpointHit);
 #ifdef SKIP_ASM
-struct sVEntry_00238510 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, int);
-};
 
 extern void* cGameModeMan_aHandler[];
 
@@ -398,7 +389,7 @@ extern void* cGameModeMan_aHandler[];
 extern "C" void cGameModeMan_riderCheckpointHit(cGameModeMan* self, int iRider, int iSecsAdded)
 {
     void* obj = cGameModeMan_aHandler[self->iCurrModeHandler];
-    sVEntry_00238510* vt = *(sVEntry_00238510**)obj;
+    sVEntry<void(void*, int, int)>* vt = *(sVEntry<void(void*, int, int)>**)obj;
     vt[6].fn((char*)obj + vt[6].delta, iRider, iSecsAdded);
 }
 #endif
@@ -406,11 +397,6 @@ extern "C" void cGameModeMan_riderCheckpointHit(cGameModeMan* self, int iRider, 
 //100%
 INCLUDE_ASM("main/gamemode", cGameModeMan_riderGateHit);
 #ifdef SKIP_ASM
-struct sVEntry_00238550 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, int);
-};
 
 extern void* cGameModeMan_aHandler[];
 
@@ -423,7 +409,7 @@ extern void* cGameModeMan_aHandler[];
 extern "C" void cGameModeMan_riderGateHit(cGameModeMan* self, int iRider, int iGateID)
 {
     void* obj = cGameModeMan_aHandler[self->iCurrModeHandler];
-    sVEntry_00238550* vt = *(sVEntry_00238550**)obj;
+    sVEntry<void(void*, int, int)>* vt = *(sVEntry<void(void*, int, int)>**)obj;
     vt[7].fn((char*)obj + vt[7].delta, iRider, iGateID);
 }
 #endif
@@ -431,11 +417,6 @@ extern "C" void cGameModeMan_riderGateHit(cGameModeMan* self, int iRider, int iG
 //100%
 INCLUDE_ASM("main/gamemode", cGameModeMan_getHeatScore);
 #ifdef SKIP_ASM
-struct sVEntry_00238590 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, int);
-};
 
 extern void* cGameModeMan_aHandler[];
 
@@ -450,7 +431,7 @@ extern void* cGameModeMan_aHandler[];
 extern "C" void cGameModeMan_getHeatScore(cGameModeMan* self, int iRider, int iHeat)
 {
     void* obj = cGameModeMan_aHandler[self->iCurrModeHandler];
-    sVEntry_00238590* vt = *(sVEntry_00238590**)obj;
+    sVEntry<void(void*, int, int)>* vt = *(sVEntry<void(void*, int, int)>**)obj;
     vt[9].fn((char*)obj + vt[9].delta, iRider, iHeat);
 }
 #endif
@@ -1812,7 +1793,6 @@ INCLUDE_ASM("main/gamemode", cGMRaceHandler_raceFinish);
 // From peak3project's fork (github.com/peak3project/ssx3).
 // g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type).
 // Virtual calls in this unit go through these by hand.
-#include "vtable.h"
 
 // The game-mode manager (cGameModeMan, 0xA0 bytes; cGameModeMan_getGM creates it). cGameModeMan_instance owns it and
 // D_004A2C70_A760 is the pointer the handlers read it through. iNumberAI is the prototype's name (assert

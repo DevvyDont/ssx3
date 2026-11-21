@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "ui/uiengine.h"
 #include "ui/uithing.h"
@@ -2175,7 +2176,6 @@ extern char str_showtimeline[];
 extern char str_ReplayMenu[];
 extern char str_option_savereplay[];
 
-struct sVE_20DC68 { short delta; short index; void (*fn)(void*, int); };
 
 /**
  * Creates the replay overlay ("64replay"): hides the popup and help, shows the timeline toggle and sets the
@@ -2222,9 +2222,9 @@ extern "C" void cOVState_REPLAY_onCreateScreen(cOVState_REPLAY* self)
         if (obj != 0) cUIMenu_setSelectedByIndex(obj, 2);
         char* saveReplayOption = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_option_savereplay));
         if (saveReplayOption != 0) {
-            sVE_20DC68* vtEntry = &(*(sVE_20DC68**)(saveReplayOption + 8))[9];
+            sVEntry<void(void*, int)>* vtEntry = &(*(sVEntry<void(void*, int)>**)(saveReplayOption + 8))[9];
             vtEntry->fn(saveReplayOption + vtEntry->delta, 0);
-            vtEntry = &(*(sVE_20DC68**)(saveReplayOption + 8))[8];
+            vtEntry = &(*(sVEntry<void(void*, int)>**)(saveReplayOption + 8))[8];
             vtEntry->fn(saveReplayOption + vtEntry->delta, 0);
         }
     }

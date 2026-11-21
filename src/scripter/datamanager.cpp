@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "ui/uiengine.h"
@@ -1050,11 +1051,6 @@ extern "C" void* cUIStateStack_findState(void* table, int hash);
 extern "C" void tNISList_RemoveFromHead(tNISList* self, int index);
 extern "C" void* tNISList_DoPause(void*, int, int);
 
-struct sDmVEntry6868 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, int);
-};
 
 /**
  * Empties a NIS list and returns it to idle, undoing its pauses and, on the cut-scene list, its cut-scene mode.
@@ -1089,7 +1085,7 @@ extern "C" void tNISList_Reset(tNISList* nisList, int resetTransition)
         char* table = (char*)&SSXApp->Game->UI->mStateStack;
         char* hudState = (char*)cUIStateStack_findState(table, GetHashValue32(str_hud_e));
         if (hudState != 0) {
-            sDmVEntry6868* vtEntry = &(*(sDmVEntry6868**)(hudState + 0x8))[24];
+            sVEntry<int(void*, int, int)>* vtEntry = &(*(sVEntry<int(void*, int, int)>**)(hudState + 0x8))[24];
             vtEntry->fn(hudState + vtEntry->delta, 1, 0);
         }
     }
@@ -1850,11 +1846,6 @@ struct sDmCmd7598 {
     int c;          // 0x18
 };
 
-struct sDmSndVEntry7598 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Removes up to @p n entries from the head of a NIS list, releasing what each one holds.
@@ -1889,7 +1880,7 @@ extern "C" void tNISList_RemoveFromHead(tNISList* selfp, int n)
                     }
                     if (snd >= 0) {
                         char* soundMan = (char*)cAudioInterface_bxAudio();
-                        sDmSndVEntry7598* vt = *(sDmSndVEntry7598**)(soundMan + 0x5558);
+                        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(soundMan + 0x5558);
                         char* sys = soundMan + 0x118;
                         vt[4].fn(sys + vt[4].delta, snd);
                     }
@@ -2004,11 +1995,6 @@ struct sDmCmd7838 {
     int id;         // 0xC
 };
 
-struct sDmEngVEntry7838 {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
 
 /**
  * Moves a NIS list on to its pending entry, or ends the list when nothing is pending.
@@ -2034,7 +2020,7 @@ extern "C" void tNISList_PlayNextScript(tNISList* selfp)
         if (tNISList_IsVideo(selfp, cmd) == 0) {
             cSSXScriptEngine_PlayRequestScript(*(void**)selfp, selfp->mViewIndex, cmd->id, 0, (cmd->flags >> 3) & 1);
             char* eng = *(char**)selfp;
-            sDmEngVEntry7838* vt = *(sDmEngVEntry7838**)(eng + 0x2A8);
+            sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)(eng + 0x2A8);
             vt[6].fn(eng + vt[6].delta, cmd->id);
         } else {
             cVidEngine_PlayVideo(*(char**)selfp + 0x500);

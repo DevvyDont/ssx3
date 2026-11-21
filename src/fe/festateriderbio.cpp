@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "fe/fereal.h"
@@ -27,11 +28,6 @@ extern "C" void func_0028F140(void* self, int a1);
 extern "C" int cBERewardInterface_getNumOwnedCheatChars(void* self, int a1, int a2);
 extern char str_154rider_details[];
 
-struct sVE_32A8 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 /**
  * Creates the rider-details screen "154rider_details" and shows the player's character.
@@ -51,7 +47,7 @@ extern "C" void cFEStateRiderDetail_onCreateScreen(cFEStateRiderDetail* self)
     cFEStateCharSetup_updateWidget(self);
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     int charID = cBENewPlayerInterface_getPlayerCharID(pi, self->mUserNum);
-    sVE_32A8* vt = *(sVE_32A8**)((char*)pi + 0xC);
+    sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)((char*)pi + 0xC);
     vt[2].fn((char*)pi + vt[2].delta);
     cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 0);
     cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, charID, 0);
@@ -180,11 +176,6 @@ extern "C" void cFEStateCharSetup_show3DCharacter(void* self, int a1);
 extern "C" unsigned int strlen(const char* s);
 extern char str_131cheat_char[];
 
-struct sVE_35F8 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 static inline int Is_001835F8(int id, char* s) { return id == GetHashValue32(s); }
 
@@ -207,14 +198,14 @@ extern "C" void cFEStateRiderDetail_onPopupEvent(cFEStateRiderDetail* self, cUIS
             if (((cFEStateCheatCharSelect*)item)->mDone != 0) {
                 void* pi2 = cBE_getInterface_Fv(cBE_getBE(), 1);
                 cBENewPlayerInterface_setPlayerCheatCharID(pi2, self->mUserNum, cheatCharId);
-                sVE_35F8* vt = *(sVE_35F8**)((char*)pi2 + 0xC);
+                sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)pi2 + 0xC);
                 vt[1].fn((char*)pi2 + vt[1].delta);
             }
         } else if (item->mHashName == 0) {
             char* name = ((cKeyboardPopup*)item)->mszEditString;
             if (((cKeyboardPopup*)item)->mbAcceptText != 0 && strlen(name) != 0) {
                 cBENewPlayerInterface_setPlayerName(pi, self->mUserNum, name);
-                sVE_35F8* vt = *(sVE_35F8**)((char*)pi + 0xC);
+                sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)pi + 0xC);
                 vt[1].fn((char*)pi + vt[1].delta);
             }
         }

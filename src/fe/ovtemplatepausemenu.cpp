@@ -152,7 +152,6 @@ extern char str_pct_s_group[];
 struct sVec3_001F8448 {
     float x, y, z;
 };
-struct sVEnt_001F8448 { short delta; short index; void (*fn)(void*, int); };
 
 /**
  * On its first transition, shows only the PDA icon groups of the menu's options and stacks them 40 units
@@ -169,7 +168,7 @@ extern "C" int cOVTemplate_PauseMenu_onGainTransition(cOVTemplate_PauseMenu* sel
             sprintf(buf, str_pct_s_group, gMenuItemIcons[i]);
             char* obj = (char*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf));
             if (obj != 0) {
-                sVEnt_001F8448* vt = *(sVEnt_001F8448**)(obj + 8);
+                sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(obj + 8);
                 vt[9].fn(obj + vt[9].delta, 0);
             }
         }
@@ -178,7 +177,7 @@ extern "C" int cOVTemplate_PauseMenu_onGainTransition(cOVTemplate_PauseMenu* sel
                 sprintf(buf, str_pct_s_group, gMenuItemIcons[((int*)&self->mPauseMenuOptions)[i]]);
                 char* obj = (char*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf));
                 if (obj != 0) {
-                    sVEnt_001F8448* vt = *(sVEnt_001F8448**)(obj + 8);
+                    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(obj + 8);
                     vt[9].fn(obj + vt[9].delta, 1);
                     sVec3_001F8448 itemPos;
                     itemPos.x = 0.0f;
@@ -286,7 +285,6 @@ extern char str_NewMail[];
 extern char str_trans_out[];
 
 struct sColor_1F8728 { float r, g, b, a; };
-struct sVEnt_1F8728 { short delta; short index; void (*fn)(void*, void*); };
 
 /**
  * Pulses the "NewMail" icon while messages are waiting and closes the pause menu when an online pause times
@@ -318,7 +316,7 @@ extern "C" void cOVTemplate_PauseMenu_onUpdate(cOVTemplate_PauseMenu* self)
         {
             sColor_1F8728 color = *(sColor_1F8728*)(uiObj + 0x1C);
             color.r = self->mNewMailAlpha;
-            sVEnt_1F8728* vt = *(sVEnt_1F8728**)(uiObj + 8);
+            sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(uiObj + 8);
             vt[11].fn(uiObj + vt[11].delta, &color);
         }
     }

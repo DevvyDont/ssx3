@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "main/gameviewman.h"
@@ -125,11 +126,6 @@ extern char* cGameState_mpGame;
 extern char str_StartgateOpen[];
 extern char str_hud_c[];
 
-struct sVEntry00234C68 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, int);
-};
 
 // PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
 static inline float ffloor_00234C68(float x)
@@ -163,7 +159,7 @@ extern "C" void cGFGateState_update(cGFGateState* self)
         cGFGateState_runScript(self, GetHashValue32(str_StartgateOpen));
         char* obj = (char*)cUIStateStack_findState(*(char**)(cGameState_mpGame + 0x48) + 0x18, GetHashValue32(str_hud_c));
         if (obj != 0) {
-            sVEntry00234C68* vtEntry = &(*(sVEntry00234C68**)(obj + 8))[24];
+            sVEntry<int(void*, int, int)>* vtEntry = &(*(sVEntry<int(void*, int, int)>**)(obj + 8))[24];
             vtEntry->fn(obj + vtEntry->delta, 6, 0);
         }
         cSSXAudio_CountdownGateDrop(cAudioInterface_bxAudio());
@@ -399,7 +395,6 @@ INCLUDE_ASM("main/gamestate", cGFTrackStartState_preloadUpdate);
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 // g++ 2.95 vtable slot: this-pointer adjustment, index, function (F is the slot's function type).
 // Virtual calls in this unit go through these by hand.
-#include "vtable.h"
 
 
 
@@ -946,11 +941,6 @@ extern char* cGameState_mpGame;
 extern void* cWScriptMan_TheWScriptMan;
 
 
-struct sVE_235AA0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 
 /**
@@ -984,7 +974,7 @@ extern "C" void cGFNextHeatState_gainFocus(cGFNextHeatState* self)
     int i = 0;
     cBENewRaceInterface_setNumberAI(race, n);
     {
-        sVE_235AA0* vt = *(sVE_235AA0**)(race + 0xC);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(race + 0xC);
         vt[1].fn(race + vt[1].delta);
     }
     for (; i < n; i++) {
@@ -992,7 +982,7 @@ extern "C" void cGFNextHeatState_gainFocus(cGFNextHeatState* self)
         cBENewPlayerInterface_setRiderCheatCharID(player, i + base, gm->iCheatCharacters[base + i]);
     }
     {
-        sVE_235AA0* vt = *(sVE_235AA0**)(player + 0xC);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(player + 0xC);
         vt[1].fn(player + vt[1].delta);
     }
     cAI_prepareToPurgeComputerRiders(SSXApp->Game->AI);

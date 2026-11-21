@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "ui/uistatestack.h"
 #include "ui/uistate.h"
@@ -12,11 +13,6 @@ int cListNode_isSentinel(cListNode*);
 int GetHashValue32(char*);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 
-struct sVEntry39E8B8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Hides a named object on the UI state's screens, doing nothing when no screen has it.
@@ -33,7 +29,7 @@ extern "C" void cUIState_hideObjSafe(cUIState* self, char* name)
         do {
             void* obj = cUIScreen_getObjectByHashName(n, GetHashValue32(name));
             if (obj != 0) {
-                sVEntry39E8B8* vt = *(sVEntry39E8B8**)((char*)obj + 8);
+                sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
                 vt[9].fn((char*)obj + vt[9].delta, 0);
                 return;
             }
@@ -53,11 +49,6 @@ int cListNode_isSentinel(cListNode*);
 int GetHashValue32(char*);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 
-struct sVEntry39E948 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Shows a named object on the UI state's screens, doing nothing when no screen has it.
@@ -74,7 +65,7 @@ extern "C" void cUIState_showObjSafe(cUIState* self, char* name)
         do {
             void* obj = cUIScreen_getObjectByHashName(n, GetHashValue32(name));
             if (obj != 0) {
-                sVEntry39E948* vt = *(sVEntry39E948**)((char*)obj + 8);
+                sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)obj + 8);
                 vt[9].fn((char*)obj + vt[9].delta, 1);
                 return;
             }
@@ -451,11 +442,6 @@ INCLUDE_ASM("ui/uistate", cUIStateStack_update);
 extern "C" int cUIStateStack_updateLoop(cUIStateStack* self);
 extern "C" void cUIState_updateScreens(void* self);
 
-struct sVEntry39F100 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Updates a state stack: runs cUIStateStack_updateLoop (a second pass when the first returns nonzero), then updates the explicit
@@ -473,7 +459,7 @@ extern "C" void cUIStateStack_update(cUIStateStack* self)
     if (n != 0) {
         do {
             if ((*(int*)((char*)n + 0x1C) >> 5) & 1) {
-                sVEntry39F100* vt = (sVEntry39F100*)n->mVtbl;
+                sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)n->mVtbl;
                 vt[0xC].fn((char*)n + vt[0xC].delta);
             }
             cUIState_updateScreens(n);

@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "bx/appman.h"
 #include "object/flagset.h"
@@ -203,15 +204,10 @@ struct sFlagVert_B818 {
     sFlagVert_B818() {}
 };
 
-struct sFlagVEntry_B818 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 
 struct sFlagMesh_B818 {
     int pad0;
-    sFlagVEntry_B818* vt;   // 0x4
+    sVEntry<void(void*, void*)>* vt;   // 0x4
 };
 
 
@@ -253,7 +249,7 @@ extern "C" void cFlagSet_update(cFlagSet* elem)
         sFlagVert_B818 verts[50];
         cFlagSet_updateGrid((cFlagSet*)self, (t3Vector*)verts);
         sFlagMesh_B818* gridMesh = ((sFlagMesh_B818*)self->mGridMesh);
-        sFlagVEntry_B818* setVertsSlot = &gridMesh->vt[3];
+        sVEntry<void(void*, void*)>* setVertsSlot = &gridMesh->vt[3];
         setVertsSlot->fn((char*)gridMesh + setVertsSlot->delta, verts);
     }
     if (0.001f < self->mFlagData.mUScrollRate || 0.001f < self->mFlagData.mVScrollRate) {
@@ -622,17 +618,7 @@ extern "C" void cFlagSet_writeToReplayFrame(cFlagSet* elem, void* stream)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flagset", cFlagSet_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sFlagSetVEntryC378a {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
-struct sFlagSetVEntryC378b {
-    short delta;
-    short index;
-    void* (*fn)(void*);
-};
 
 extern "C" void cFlagSet_CreateMesh(cFlagSet* self, void* item);
 
@@ -650,10 +636,10 @@ extern "C" void cFlagSet_readFromReplayFrame(cFlagSet* elem, void* stream)
 {
     int i;
     sFlagSet_C2E0* self = (sFlagSet_C2E0*)elem;
-    sFlagSetVEntryC378a* readFn = &(*(sFlagSetVEntryC378a**)stream)[2];
+    sVEntry<void(void*, void*, int)>* readFn = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
     readFn->fn((char*)stream + readFn->delta, self, 0x60);
     for (i = 0; i < self->count; i++) {
-        sFlagSetVEntryC378b* readItemFn = &(*(sFlagSetVEntryC378b**)stream)[3];
+        sVEntry<void*(void*)>* readItemFn = &(*(sVEntry<void*(void*)>**)stream)[3];
         self->items[i] = readItemFn->fn((char*)stream + readItemFn->delta);
     }
     if (self->count > 0) {
@@ -1408,11 +1394,6 @@ INCLUDE_ASM("object/flagset", cFenceNode_update);
 extern "C" void cFenceNode_makeNeighbour(cFenceNode* self, char* obj, int flag);
 extern "C" void cFenceNode_updateGrid(cFenceNode* self);
 
-struct sFlagVE_34CE48 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 // PORT: SN abs.s asm helper (PS2 FPU).
 static inline float fabs_34CE48(float x)
@@ -1445,7 +1426,7 @@ extern "C" void cFenceNode_update(cFenceNode* self)
     tMakeFenceData* osc = &self->FenceData;
     self->Force += self->ForceStep;
     if (self->ForceMax < 0.01f && fabs_34CE48(*(float*)(((char*)osc) + 0x10)) < 0.01f) {
-        sFlagVE_34CE48* vt = (sFlagVE_34CE48*)self->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
         vt[34].fn(((char*)self) + vt[34].delta, 1);
         return;
     }
@@ -1844,11 +1825,6 @@ extern "C" void cFenceNode_render(cFenceNode* self)
 //100%
 INCLUDE_ASM("object/flagset", cFenceNode_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sSerVEntry_0034D960 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 
@@ -1860,7 +1836,7 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 extern "C" void cFenceNode_writeToReplayFrame(cFenceNode* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
-    sSerVEntry_0034D960* vt = *(sSerVEntry_0034D960**)stream;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)&self->FenceData, 36);
 }
 #endif

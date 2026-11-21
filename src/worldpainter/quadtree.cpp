@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "util/localefile.h"
 #include "util/bxps2memcard.h"
@@ -1463,11 +1464,6 @@ INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetDir1);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 char* strcpy2_impl(char* dst, unsigned short* src) __asm__("strcpy2");
 
-struct sVEntry002C4198 {
-    short delta;
-    short index;
-    void (*fn)(void*, char*);
-};
 
 /**
  * Starts a directory listing from a 16-bit pattern: converts @p name to ASCII into a 1000-byte stack buffer (strcpy2)
@@ -1479,7 +1475,7 @@ extern "C" void cPS2MemCard_GetDir1(cPS2MemCard* self, unsigned short* name)
 {
     char buf[1000];
     strcpy2_impl(buf, name);
-    sVEntry002C4198* vt = *(sVEntry002C4198**)self;
+    sVEntry<void(void*, char*)>* vt = *(sVEntry<void(void*, char*)>**)self;
     vt[6].fn((char*)self + vt[6].delta, buf);
 }
 #endif

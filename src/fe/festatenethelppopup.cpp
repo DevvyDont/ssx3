@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "fe/debuglobbymenus.h"
 #include "fe/festatenethelppopup.h"
@@ -28,11 +29,6 @@ extern "C" void cFEStateNetHelpPopup_onCreateScreen(cFEStateNetHelpPopup* self)
 //100%
 INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_handleEvent);
 #ifdef SKIP_ASM
-struct sVEntry001D9E20 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, int);
-};
 
 /**
  * Forwards an event to the state that opened the help popup.
@@ -49,7 +45,7 @@ extern "C" int cFEStateNetHelpPopup_handleEvent(cFEStateNetHelpPopup* self, int 
     if (self->mbReferEventsToParent != 0) {
         void* obj = self->mpParentState;
         if (obj != 0) {
-            sVEntry001D9E20* vt = *(sVEntry001D9E20**)((char*)obj + 8);
+            sVEntry<int(void*, int, int)>* vt = *(sVEntry<int(void*, int, int)>**)((char*)obj + 8);
             return vt[24].fn((char*)obj + vt[24].delta, msg, msgParam);
         }
     }

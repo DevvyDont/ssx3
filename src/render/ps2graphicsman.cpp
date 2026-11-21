@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "render/bxps2tex.h"
 #include "render/graphicsman.h"
@@ -1633,11 +1634,6 @@ extern "C" void cGraphicsMan__cGraphicsMan(cGraphicsMan* self, int flags)
 //100%
 INCLUDE_ASM("render/ps2graphicsman", cGraphicsMan_ForceActiveDrawState);
 #ifdef SKIP_ASM
-struct sVEntry00369610 {
-    short delta;
-    short index;
-    void (*fn)(void*, int*);
-};
 
 /**
  * Forces the whole draw state to be resent: the cached active state (+0xED8, 4 words) becomes ~mask so every field
@@ -1655,7 +1651,7 @@ extern "C" void cGraphicsMan_ForceActiveDrawState(cGraphicsMan* self, int* mask)
     for (j = 0; j < 2; j++) {
         ((short*)(&self->m_activeDrawState.m_textureState))[j] = 0x7FFF;
     }
-    sVEntry00369610* vt = (sVEntry00369610*)self->mVtbl;
+    sVEntry<void(void*, int*)>* vt = (sVEntry<void(void*, int*)>*)self->mVtbl;
     vt[62].fn((char*)self + vt[62].delta, mask);
 }
 #endif
@@ -1694,11 +1690,6 @@ struct sTexEnt_96C8 {
     char name[8];   // 0x4
 };
 
-struct sVE_96C8 {
-    short delta;
-    short index;
-    int (*fn)(void*, void*, const char*, int, int, int);
-};
 
 struct sGfx_96C8 {
     char pad0[0x278];
@@ -1743,7 +1734,7 @@ extern "C" int cGraphicsMan_GetTextureID(cGraphicsMan* graphicsMan, const char* 
     for (int j = 0; j < self->numSrc; j++) {
         void* shape = SHAPE_locatez(self->src[j], self->ents[self->count].name);
         if (shape != 0) {
-            sVE_96C8* vt = *(sVE_96C8**)((char*)self + 0x10D8);
+            sVEntry<int(void*, void*, const char*, int, int, int)>* vt = *(sVEntry<int(void*, void*, const char*, int, int, int)>**)((char*)self + 0x10D8);
             self->ents[self->count].handle = vt[46].fn((char*)self + vt[46].delta, shape, str_charshp_b, 0, 1, -1);
             return self->ents[self->count++].handle;
         }

@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "bx/appman.h"
 #include "object/spline3d.h"
@@ -10,11 +11,6 @@
 //100%
 INCLUDE_ASM("object/debouncenode", cDebounceNode_cDebounceNode);
 #ifdef SKIP_ASM
-struct sDebounceVEntry2D10 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 extern "C" void* cMoveNode_cMoveNode(void* self, void*, void*);
 extern char cDebounceNode_vtbl[];
@@ -33,9 +29,9 @@ extern "C" void* cDebounceNode_cDebounceNode(cDebounceNode* self, void* bucket, 
 {
     cMoveNode_cMoveNode(self, bucket, stream);
     self->mVtbl = (void**)cDebounceNode_vtbl;
-    sDebounceVEntry2D10* readEntry = &(*(sDebounceVEntry2D10**)stream)[2];
+    sVEntry<void(void*, void*, int)>* readEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
     readEntry->fn((char*)stream + readEntry->delta, (char*)&self->Life, 4);
-    readEntry = &(*(sDebounceVEntry2D10**)stream)[2];
+    readEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[2];
     readEntry->fn((char*)stream + readEntry->delta, (char*)&self->Type, 4);
     return ((void*)self);
 }
@@ -44,11 +40,6 @@ extern "C" void* cDebounceNode_cDebounceNode(cDebounceNode* self, void* bucket, 
 //100%
 INCLUDE_ASM("object/debouncenode", cDebounceNode_updateNode);
 #ifdef SKIP_ASM
-struct sDebounceVEntry2D88 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Counts down the debounce node's timer and expires the node when it runs out.
@@ -65,7 +56,7 @@ extern "C" int cDebounceNode_updateNode(cDebounceNode* self)
         n--;
         self->Life = n;
         if (n == 0) {
-            sDebounceVEntry2D88* vt = (sDebounceVEntry2D88*)self->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
             vt[34].fn((char*)self + vt[34].delta, 1);
             return 0;
         }
@@ -279,11 +270,6 @@ extern "C" void* cConveyorNode_cConveyorNode(sDebounce_3010* self, void* bucket,
 //100%
 INCLUDE_ASM("object/debouncenode", cConveyorNode_cConveyorNode1);
 #ifdef SKIP_ASM
-struct sDebounceVEntry30D0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void*, void*);
 extern char cConveyorNode_vtbl[];
@@ -302,7 +288,7 @@ extern "C" void* cConveyorNode_cConveyorNode1(cConveyorNode* self, void* bucket,
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->mVtbl = (void**)cConveyorNode_vtbl;
-    sDebounceVEntry30D0* vt = *(sDebounceVEntry30D0**)stream;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)&self->Vel, 44);
     return ((void*)self);
 }
@@ -672,15 +658,10 @@ struct sDfObj_343588 {
     void* light;                    // 0x94
 };
 
-struct sDfGfxVt_343588 {
-    short delta;
-    short index;
-    void* fn;
-};
 
 struct cDfGfx_343588 {
     char pad_0x0[0x10D8];
-    sDfGfxVt_343588* vt;            // 0x10D8
+    sVEntry<void>* vt;            // 0x10D8
 };
 
 typedef sDfMat_343588 (*DfViewFn_343588)(void*);
@@ -740,7 +721,7 @@ extern "C" void cConveyorNode_render(cConveyorNode* self)
     }
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
     {
-        sDfGfxVt_343588* vt = (sDfGfxVt_343588*)gfx->mVtbl;
+        sVEntry<void>* vt = (sVEntry<void>*)gfx->mVtbl;
         char* thisp = (char*)gfx + vt[93].delta;
         sDfVec_343588 cullBox[2];
         cullBox[0].x = OBJ_343588(self)->pos[0];
@@ -751,7 +732,7 @@ extern "C" void cConveyorNode_render(cConveyorNode* self)
         cullBox[1].y = OBJ_343588(self)->scl[1];
         cullBox[1].z = OBJ_343588(self)->scl[2];
         cullBox[1].w = 1.0f;
-        int res = ((DfCullFn_343588)vt[93].fn)(thisp, &cullBox[0], &cullBox[1], ((DfViewFn_343588)((sDfGfxVt_343588*)gfx->mVtbl)[43].fn)((char*)gfx + ((sDfGfxVt_343588*)gfx->mVtbl)[43].delta));
+        int res = ((DfCullFn_343588)vt[93].fn)(thisp, &cullBox[0], &cullBox[1], ((DfViewFn_343588)((sVEntry<void>*)gfx->mVtbl)[43].fn)((char*)gfx + ((sVEntry<void>*)gfx->mVtbl)[43].delta));
         if (res == 1) {
             return;
         }
@@ -760,7 +741,7 @@ extern "C" void cConveyorNode_render(cConveyorNode* self)
     MatCopy_343588(&xf, &D_004FF1A0_343588);
     xf.r[3].x = self->UV[0];
     xf.r[3].y = self->UV[1];
-    ((DfDrawFn_343588)((sDfGfxVt_343588*)gfx->mVtbl)[96].fn)((char*)gfx + ((sDfGfxVt_343588*)gfx->mVtbl)[96].delta, OBJ_343588(self), 0, &xf, 2);
+    ((DfDrawFn_343588)((sVEntry<void>*)gfx->mVtbl)[96].fn)((char*)gfx + ((sVEntry<void>*)gfx->mVtbl)[96].delta, OBJ_343588(self), 0, &xf, 2);
 }
 #endif
 
@@ -821,11 +802,6 @@ extern "C" void* cCounterNode_cCounterNode1(cCounterNode* self, void* bucket, vo
 //100%
 INCLUDE_ASM("object/debouncenode", cCounterNode_cCounterNode);
 #ifdef SKIP_ASM
-struct sDebounceVEntry37C0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void*, void*);
 extern char cCounterNode_vtbl[];
@@ -844,7 +820,7 @@ extern "C" void* cCounterNode_cCounterNode(cCounterNode* self, void* bucket, voi
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->mVtbl = (void**)cCounterNode_vtbl;
-    sDebounceVEntry37C0* vt = *(sDebounceVEntry37C0**)stream;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)&self->Count, 0x8);
     return ((void*)self);
 }
@@ -2508,9 +2484,9 @@ extern "C" int cSpline_isVisible(sTrackRef51C0* self)
     box[1].z = bounds[6];
     box[1].w = 1.0f;
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
-    sDfGfxVt_343588* vt = (sDfGfxVt_343588*)gfx->mVtbl;
+    sVEntry<void>* vt = (sVEntry<void>*)gfx->mVtbl;
     char* thisp = (char*)gfx + vt[93].delta;
-    int res = ((DfCullFn_343588)vt[93].fn)(thisp, &box[0], &box[1], ((DfViewFn_343588)((sDfGfxVt_343588*)gfx->mVtbl)[43].fn)((char*)gfx + ((sDfGfxVt_343588*)gfx->mVtbl)[43].delta));
+    int res = ((DfCullFn_343588)vt[93].fn)(thisp, &box[0], &box[1], ((DfViewFn_343588)((sVEntry<void>*)gfx->mVtbl)[43].fn)((char*)gfx + ((sVEntry<void>*)gfx->mVtbl)[43].delta));
     return res != 1;
 }
 #endif

@@ -687,11 +687,6 @@ extern "C" void cFEStateCharEquip_update3DPositions(cFEStateCharEquip* self);
 extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern char str_loading_text[];
 
-struct sVEntryK199938 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Updates the equip-gear state each frame: the icon file's arrival, the "loading text" and the preview loads.
@@ -723,7 +718,7 @@ extern "C" void cFEStateCharEquip_onUpdate(cFEStateCharEquip* self)
             on = *(int*)(feRider + 0xCC8);
             on ^= 1;
         }
-        sVEntryK199938* vt = *(sVEntryK199938**)(obj + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(obj + 8);
         vt[9].fn(obj + vt[9].delta, on);
     }
     cFEStateCharEquip_updatePreviewLoad(self);
@@ -1207,11 +1202,6 @@ int GetHashValue32(char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern char str_kT_CMNEquipGear[];
 
-struct sVEntry0019A238 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Sets the equip screen up for the inventory.
@@ -1227,17 +1217,17 @@ extern "C" void cFEStateCharEquip_initInventoryPreview(cFEStateCharEquip* self)
     }
     char* widget = (char*)self->mpMoneyGroup;
     if (widget != 0) {
-        sVEntry0019A238* vt = *(sVEntry0019A238**)(widget + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 0);
     }
     widget = (char*)self->mpLargePreview;
     if (widget != 0) {
-        sVEntry0019A238* vt = *(sVEntry0019A238**)(widget + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 0);
     }
     widget = (char*)self->mpSmallIconPreviewGroup;
     if (widget != 0) {
-        sVEntry0019A238* vt = *(sVEntry0019A238**)(widget + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 1);
     }
     cFERider_setVisible((cFERider*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum), 1);
@@ -1253,11 +1243,6 @@ int GetHashValue32(char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern char str_kT_CMNBuyGear[];
 
-struct sVEntry0019A308 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Sets the equip screen up for the store.
@@ -1272,18 +1257,18 @@ extern "C" void cFEStateCharEquip_initStorePreview(cFEStateCharEquip* self)
     }
     char* widget = (char*)self->mpSmallIconPreviewGroup;
     if (widget != 0) {
-        sVEntry0019A308* vt = *(sVEntry0019A308**)(widget + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 0);
     }
     widget = (char*)self->mpPointsGroup;
     if (widget != 0) {
-        sVEntry0019A308* vt = *(sVEntry0019A308**)(widget + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 0);
     }
     cFERider_setVisible((cFERider*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum), 0);
     widget = (char*)self->mpMoneyGroup;
     if (widget != 0) {
-        sVEntry0019A308* vt = *(sVEntry0019A308**)(widget + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 1);
     }
 }
@@ -1440,11 +1425,6 @@ extern "C" int func_0019DA10(void* self, int bank, void* name, int a3, int a4, i
 extern "C" void func_0019A9B8(cFEStateCharEquip* self);
 extern char str_preview[];
 
-struct sVEntryK19A638 {
-    short delta;
-    short index;
-    int (*fn)(void*, void*, char*, int, int, int);
-};
 
 /**
  * Advances the store's large-preview load (store mode only).
@@ -1470,7 +1450,7 @@ extern "C" void cFEStateCharEquip_updatePreviewLoad(cFEStateCharEquip* self)
             char* entry = (char*)func_0019E2B0((sEquipTable*)tbl, self->mCharID, self->mPreviewTextureFileIndex);
             if (entry != 0) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-                sVEntryK19A638* vt = (sVEntryK19A638*)ps2GraphicsMan->mVtbl;
+                sVEntry<int(void*, void*, char*, int, int, int)>* vt = (sVEntry<int(void*, void*, char*, int, int, int)>*)ps2GraphicsMan->mVtbl;
                 self->mPreviewTextureID = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, entry + *(int*)(entry + 0x14), str_preview, 0, 1, -1);
             } else {
                 self->mPreviewTextureID = -1;
@@ -4829,11 +4809,6 @@ extern "C" void* cFERider_cFERider(sRiderSlotCE* self)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFERider__cFERider);
 #ifdef SKIP_ASM
-struct sVEntry0019E498 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 struct sSlot0019E498 {
     int id;
     char flag;
@@ -4861,7 +4836,7 @@ extern "C" void cFERider__cFERider(cFERider* self, int flags)
     for (i = 0xFF; i >= 0; i--, slot++) {
         if (slot->id >= 0) {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-            sVEntry0019E498* vt = (sVEntry0019E498*)ps2GraphicsMan->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ps2GraphicsMan->mVtbl;
             vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, slot->id);
         }
         slot->id = none;
@@ -4905,11 +4880,6 @@ extern "C" void cFERider_setVisible(cFERider* self, int enable)
 INCLUDE_ASM("fe/festatecharequipdetail", cFERider_setCharID);
 #ifdef SKIP_ASM
 
-struct sVE_E588 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 struct sRider_E588 {
     unsigned int item;  // 0x0
@@ -4966,7 +4936,7 @@ extern "C" void cFERider_setCharID(cFERider* self, unsigned int item, int flag)
     }
     if (self->mSafeRenderCount < 0) {
         cPS2GraphicsMan* w = GrMan;
-        sVE_E588* vt = (sVE_E588*)w->mVtbl;
+        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)w->mVtbl;
         self->mSafeRenderCount = vt[114].fn((char*)w + vt[114].delta) + 4;
         self->mSetVisible = self->mVisible;
         self->mVisible = 0;

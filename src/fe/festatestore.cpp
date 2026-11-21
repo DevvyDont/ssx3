@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "fe/ferider.h"
 #include "sound/ssxaudio.h"
@@ -193,11 +194,6 @@ struct sVec4_1849B0 {
     float x, y, z, w;
 };
 
-struct sVE_1849B0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Builds the uber-trick store screen ("66ut_btnmap") and sets up the rider preview, the camera and the icons.
@@ -220,7 +216,7 @@ extern "C" void cFEStateUberTrick_onCreateScreen(cFEStateUberTrick* self)
     char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
     signed char charID = cBENewPlayerInterface_getPlayerCharID(player, self->mUserNum);
     {
-        sVE_1849B0* vt = *(sVE_1849B0**)(player + 0xC);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(player + 0xC);
         vt[2].fn(player + vt[2].delta);
     }
     cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, charID, 0);
@@ -473,11 +469,6 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(void* self);
 extern char str_helptext_custom[];
 extern char str_kT_66HELPCustomUber[];
 
-struct sVE_4F40 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 /**
  * Pays for and unlocks the selected uber trick when the buy popup closes accepted.
@@ -505,7 +496,7 @@ extern "C" void cFEStateUberTrick_onPopupEvent(cFEStateUberTrick* self, cUIState
             int flagBit = *(signed char*)(*(char**)((char*)self->mpTrickMenu + 0xA0) + 0x18);
             void* pi = cBE_getInterface_Fv(cBE_getBE(), 6);
             func_0014FE08(pi, self->mUserNum, entryIndex, flagBit);
-            sVE_4F40* vt = *(sVE_4F40**)((char*)pi + 0xC);
+            sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)((char*)pi + 0xC);
             vt[1].fn((char*)pi + vt[1].delta);
             void* helpText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_custom));
             if (helpText != 0) {

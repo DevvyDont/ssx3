@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "render/ps2bezierman.h"
 #include "render/ps2graphicsman.h"
@@ -251,11 +252,6 @@ INCLUDE_ASM("render/bezierman", cPS2BezierMan_AddPatch);
 #ifdef SKIP_ASM
 extern int cRenderToggles_m_DisablePatches;
 
-struct sBezVEntry_B338 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, void*, void*, void*, int);
-};
 
 /**
  * Queues a Bezier patch for drawing unless patch drawing is disabled (cRenderToggles_m_DisablePatches non-zero).
@@ -270,7 +266,7 @@ struct sBezVEntry_B338 {
 extern "C" void cPS2BezierMan_AddPatch(cPS2BezierMan* self, void* pPatch, void* edges, void* texid, void* clip)
 {
     if (cRenderToggles_m_DisablePatches == 0) {
-        sBezVEntry_B338* vt = (sBezVEntry_B338*)self->mVtbl;
+        sVEntry<void(void*, void*, void*, void*, void*, int)>* vt = (sVEntry<void(void*, void*, void*, void*, void*, int)>*)self->mVtbl;
         vt[22].fn((char*)self + vt[22].delta, pPatch, edges, texid, clip, 0);
     }
 }

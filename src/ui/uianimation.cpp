@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "ui/uithing.h"
 #include "ui/uianimation.h"
@@ -351,7 +352,6 @@ extern "C" void cUIAnimation_updateFrame(cUIAnimation_updateFrame_sAnim* self, u
 //100%
 INCLUDE_ASM("ui/uianimation", cUIAnimation_updateThing);
 #ifdef SKIP_ASM
-struct sUIAnimVt75E0 { short delta; short index; void (*fn)(void*, int, float); };
 struct sUIAnimHdr75E0 { short f0; unsigned short nframes; unsigned int ntracks; };
 
 /**
@@ -379,7 +379,7 @@ extern "C" void cUIAnimation_updateThing(cUIAnimation* self, cUIThing* obj, int 
     if (frame < ((sUIAnimHdr75E0*)self->mpAnimHeader)->nframes) {
         for (unsigned int i = 0; i < ((sUIAnimHdr75E0*)self->mpAnimHeader)->ntracks; i++) {
             float chanValue = cUIAnimationChannel_evalAtFrameFloat((cUIAnimationChannel_evalAtFrameFloat_sAnim**)&self->mpAnimChannels[i], frame);
-            sUIAnimVt75E0* vt = (sUIAnimVt75E0*)obj->mVtbl;
+            sVEntry<void(void*, int, float)>* vt = (sVEntry<void(void*, int, float)>*)obj->mVtbl;
             vt[12].fn(((char*)obj) + vt[12].delta, cUIAnimationChannel_getAnimChanType(&self->mpAnimChannels[i]), chanValue);
         }
     }

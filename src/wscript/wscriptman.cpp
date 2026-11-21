@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "wscript/missionmenuqueue.h"
@@ -139,11 +140,6 @@ extern "C" void cWScriptMan_removeProcess(cWScriptMan* self, cWScriptProcess* no
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_startProcess);
 #ifdef SKIP_ASM
-struct sVEntry00309750 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Starts a world script process.
@@ -157,7 +153,7 @@ extern "C" void cWScriptMan_startProcess(cWScriptMan* self, cWScriptProcess* obj
 {
     void* saved = self->CurrentProcess;
     self->CurrentProcess = (cWScriptProcess*)obj;
-    sVEntry00309750* vt = (sVEntry00309750*)obj->mVtbl;
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)obj->mVtbl;
     vt[4].fn((char*)obj + vt[4].delta);
     self->CurrentProcess = (cWScriptProcess*)saved;
 }
@@ -166,11 +162,6 @@ extern "C" void cWScriptMan_startProcess(cWScriptMan* self, cWScriptProcess* obj
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_stopProcess);
 #ifdef SKIP_ASM
-struct sVEntry00309798 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Stops a world script process.
@@ -184,7 +175,7 @@ extern "C" void cWScriptMan_stopProcess(cWScriptMan* self, cWScriptProcess* obj)
 {
     void* saved = self->CurrentProcess;
     self->CurrentProcess = (cWScriptProcess*)obj;
-    sVEntry00309798* vt = (sVEntry00309798*)obj->mVtbl;
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)obj->mVtbl;
     vt[6].fn((char*)obj + vt[6].delta);
     self->CurrentProcess = (cWScriptProcess*)saved;
 }
@@ -738,11 +729,6 @@ struct sCall_30A060 {
     int pad;
     ~sCall_30A060() {}
 };
-struct sVE_30A060 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 struct sVEF_30A060 {
     short delta;
     short index;
@@ -782,7 +768,7 @@ extern "C" void cWScriptMan_doOnCollideScript(cWScriptMan* self, void* collideIn
 {
     int saved = self->Being;
     {
-        sVE_30A060* vt = *(sVE_30A060**)obj;
+        sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
         self->Being = vt[7].fn((char*)obj + vt[7].delta);
     }
     self->Inst = (tInstanceRecord*)(*(int*)((char*)intersectInfo + 0x50));
@@ -790,7 +776,7 @@ extern "C" void cWScriptMan_doOnCollideScript(cWScriptMan* self, void* collideIn
     self->IntersectInfo = (tIntersectInfo*)intersectInfo;
     int raiseEvent;
     {
-        sVE_30A060* vt = *(sVE_30A060**)obj;
+        sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)obj;
         raiseEvent = vt[8].fn((char*)obj + vt[8].delta);
     }
     if (raiseEvent) {
@@ -1649,11 +1635,6 @@ extern "C" void cWScriptMan_runScriptCode1(cWScriptMan* self, void* obj, int scr
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getCurrentMission);
 #ifdef SKIP_ASM
-struct sVEntry0030AEB8 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 /**
  * Returns the current world script process if it is a mission.
@@ -1664,7 +1645,7 @@ extern "C" void* cWScriptMan_getCurrentMission(cWScriptMan* self)
 {
     cWScriptProcess* obj = self->CurrentProcess;
     if (obj != 0) {
-        sVEntry0030AEB8* vt = (sVEntry0030AEB8*)obj->mVtbl;
+        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)obj->mVtbl;
         if (vt[3].fn((char*)obj + vt[3].delta) != 0) {
             return self->CurrentProcess;
         }
@@ -2730,11 +2711,6 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_writeReplayProcessList);
 extern "C" int cProcessList_getCount(cWScriptListHead* self);
 extern "C" void cWScriptProcess_writeToReplayFrame(void* node, void* stream);
 
-struct sVEntry30BC80 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Saves a process list into a replay frame: its count (cProcessList_getCount), then per process its ID (+0x20) and its
@@ -2746,12 +2722,12 @@ struct sVEntry30BC80 {
 extern "C" void cWScriptMan_writeReplayProcessList(cWScriptMan* self, void** list, cReplayFramePtr* stream)
 {
     int n = cProcessList_getCount((cWScriptListHead*)list);
-    sVEntry30BC80* vtEntry = &(*(sVEntry30BC80**)stream)[1];
+    sVEntry<void(void*, void*, int)>* vtEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
     vtEntry->fn((char*)stream + vtEntry->delta, &n, 4);
     char* node = (char*)*list;
     while (node != 0) {
         int id = *(int*)(node + 0x20);
-        vtEntry = &(*(sVEntry30BC80**)stream)[1];
+        vtEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
         vtEntry->fn((char*)stream + vtEntry->delta, &id, 4);
         cWScriptProcess_writeToReplayFrame(node, stream);
         node = *(char**)(node + 0x18);

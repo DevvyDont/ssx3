@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "bx/appman.h"
 #include "bx/math3d.h"
@@ -160,11 +161,6 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_FlushRenderer);
 extern "C" void SYNCTASK_run(int a);
 extern "C" void THREAD_yield(int a);
 
-struct sGmVEntryI_9C28 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 class cGmApp_9C28 {
 public:
@@ -191,7 +187,7 @@ public:
 extern "C" void cGraphicsMan_FlushRenderer(cGraphicsMan* self)
 {
     for (;;) {
-        sGmVEntryI_9C28* vt = (sGmVEntryI_9C28*)self->mVtbl;
+        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)self->mVtbl;
         if (vt[18].fn((char*)self + vt[18].delta) != 0) break;
         ((cGmApp_9C28*)cAppMan_TheAppMan->ExecutionMan)->prepause();
         SYNCTASK_run(0);

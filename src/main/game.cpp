@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "main/gameviewman.h"
 #include "sound/icepick/worldtriggermanager.h"
@@ -1175,11 +1176,6 @@ extern "C" int cBENewRaceInterface_setGameEvent(void* self, int event);
 extern "C" void cGameModeMan_initGameMode(void* self, unsigned int type);
 extern "C" void cGame_setState(void* gm, int state, int a, int b);
 
-struct sVE_22D6C8 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 static inline bool Is_22D6C8(int m, int v)
 {
@@ -1241,7 +1237,7 @@ extern "C" void cSectionMan_eventbegin(cSectionMan* self, int mode)
             break;
         }
     }
-    sVE_22D6C8* vt = *(sVE_22D6C8**)(race + 0xC);
+    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)(race + 0xC);
     vt[1].fn(race + vt[1].delta);
     cGameModeMan_initGameMode(SSXApp->GameModeMan, cBENewRaceInterface_newRace.cGameEvent);
     cGame_setState(self->mpGame, 1, 1, 0);

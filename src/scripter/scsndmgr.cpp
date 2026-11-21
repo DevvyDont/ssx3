@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "scripter/scsndmgr.h"
@@ -142,11 +143,6 @@ extern "C" void cScriptSoundBankManager_UnlinkBank1(cScriptSoundBankManager* sel
 INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_UnlinkBanksAll);
 #ifdef SKIP_ASM
 
-struct sDmVEntry283658 {
-    short delta;
-    short index;
-    void (*fn)(void*, tScriptSoundBankInfo*);
-};
 
 
 /**
@@ -163,7 +159,7 @@ extern "C" void cScriptSoundBankManager_UnlinkBanksAll(cScriptSoundBankManager* 
     int i;
     for (i = 0; i < self->mMaxBanks; i++) {
         if (((int)(self->mpBankInfo)[i].pData) != 0) {
-            ((sDmVEntry283658*)self->mVtbl)[2].fn((char*)self + ((sDmVEntry283658*)self->mVtbl)[2].delta, &(self->mpBankInfo)[i]);
+            ((sVEntry<void(void*, tScriptSoundBankInfo*)>*)self->mVtbl)[2].fn((char*)self + ((sVEntry<void(void*, tScriptSoundBankInfo*)>*)self->mVtbl)[2].delta, &(self->mpBankInfo)[i]);
         }
     }
 }

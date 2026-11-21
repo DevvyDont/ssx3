@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "ui/uiscreen.h"
 #include "ui/uiinput.h"
@@ -145,32 +146,30 @@ extern "C" unsigned char cUIMenu_getNext(void* self);
 extern "C" unsigned char cUIMenu_getPrev(void* self);
 extern "C" int cUIMenu_onInputChangeItem(cUIMenu* self, unsigned char old);
 
-struct sVE_B000 { short delta; short index; int (*fn)(void*, ...); };
-struct sVEv_B000 { short delta; short index; void (*fn)(void*, ...); };
 
 static inline int inputIs_B000(void* in, int slot)
 {
-    sVE_B000* vt = *(sVE_B000**)((char*)in + 8);
+    sVEntry<int(void*, ...)>* vt = *(sVEntry<int(void*, ...)>**)((char*)in + 8);
     return vt[slot].fn((char*)in + vt[slot].delta);
 }
 
 static inline int inputBtn_B000(void* in, int button)
 {
-    sVE_B000* vt = *(sVE_B000**)((char*)in + 8);
+    sVEntry<int(void*, ...)>* vt = *(sVEntry<int(void*, ...)>**)((char*)in + 8);
     return vt[2].fn((char*)in + vt[2].delta, button);
 }
 
 static inline void focusNotify_B000(char* self, void* item, int what)
 {
     char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
-    sVEv_B000* vt = *(sVEv_B000**)(o + 8);
+    sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)(o + 8);
     vt[19].fn(o + vt[19].delta, item, what);
 }
 
 static inline int focusMove_B000(char* self, int dir, int idx)
 {
     char* o = *(char**)(*(char**)(self + 0x5C) + 0xD0);
-    sVE_B000* vt = *(sVE_B000**)(o + 8);
+    sVEntry<int(void*, ...)>* vt = *(sVEntry<int(void*, ...)>**)(o + 8);
     return vt[20].fn(o + vt[20].delta, self, dir, idx);
 }
 
@@ -212,7 +211,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
         return 0;
     }
     if (bit_B000(((char*)cur), 20, 3) && !bit_B000(((char*)cur), 20, 5)) {
-        sVE_B000* vt = (sVE_B000*)cur->mVtbl;
+        sVEntry<int(void*, ...)>* vt = (sVEntry<int(void*, ...)>*)cur->mVtbl;
         if (vt[15].fn(((char*)cur) + vt[15].delta, in) != 0) {
             return 1;
         }
@@ -326,7 +325,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
         listener = gUISoundNull;
     }
     if (listener != 0) {
-        sVEv_B000* vt = *(sVEv_B000**)listener;
+        sVEntry<void(void*, ...)>* vt = *(sVEntry<void(void*, ...)>**)listener;
         vt[2].fn(listener + vt[2].delta, result);
     }
     return 1;

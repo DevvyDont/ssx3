@@ -4109,11 +4109,6 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_cLensFxMan);
 #ifdef SKIP_ASM
-struct sBWVEntry2E18 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, void*);
-};
 
 struct sWakePair2E18 {
     int a;
@@ -4187,7 +4182,7 @@ extern "C" void* cLensFxMan_cLensFxMan(cLensFxMan* self)
     }
     {
         char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
-        sBWVEntry2E18* setPhase2Slot = &(*(sBWVEntry2E18**)(obj + 0x10D8))[117];
+        sVEntry<void(void*, void*, void*)>* setPhase2Slot = &(*(sVEntry<void(void*, void*, void*)>**)(obj + 0x10D8))[117];
         setPhase2Slot->fn(obj + setPhase2Slot->delta, (void*)cLensFxMan__drawFrameCallBack, self);
     }
     cLensFxMan_mbDrawSun = 1;
@@ -5429,17 +5424,7 @@ extern "C" void cTransitionMan_StartTransitionScreenGrab(cTransitionMan* self, i
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_EndTransition);
 #ifdef SKIP_ASM
-struct sBWVEntryI_4578 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
-struct sBWVEntryR_4578 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
 
@@ -5459,13 +5444,13 @@ extern "C" void cTransitionMan_EndTransition(cTransitionMan* self)
         self->mNumPause = 0;
         char* object = (char*)self->mTransitionIn;
         if (object != 0) {
-            sBWVEntryI_4578* entry = &(*(sBWVEntryI_4578**)object)[1];
+            sVEntry<void(void*, int)>* entry = &(*(sVEntry<void(void*, int)>**)object)[1];
             entry->fn(object + entry->delta, 3);
         }
         self->mTransitionIn = 0;
         object = (char*)self->mTransitionOut;
         if (object != 0) {
-            sBWVEntryI_4578* entry = &(*(sBWVEntryI_4578**)object)[1];
+            sVEntry<void(void*, int)>* entry = &(*(sVEntry<void(void*, int)>**)object)[1];
             entry->fn(object + entry->delta, 3);
         }
         self->mTransitionOut = 0;
@@ -5473,7 +5458,7 @@ extern "C" void cTransitionMan_EndTransition(cTransitionMan* self)
         if (~self->mScreenGrabHandle.mTextureId != 0) {
             char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
             self->mRequestingDelete = 1;
-            sBWVEntryR_4578* entry = &(*(sBWVEntryR_4578**)(obj + 0x10D8))[114];
+            sVEntry<int(void*)>* entry = &(*(sVEntry<int(void*)>**)(obj + 0x10D8))[114];
             self->mRequestDeleteFrame = entry->fn(obj + entry->delta);
             self->mRequestingScreenGrab = 0;
             self->mUsingScreenGrab = 0;
@@ -5540,8 +5525,6 @@ INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_update);
 #ifdef SKIP_ASM
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
 
-struct sWkVtA46C8 { short delta; short index; int (*fn)(void*); };
-struct sWkVtB46C8 { short delta; short index; void (*fn)(void*, void*); };
 
 /**
  * Advances a screen transition's clock and ends it once the fade in, hold and fade out are over.
@@ -5554,9 +5537,9 @@ extern "C" void cTransitionMan_update(cTransitionMan* self)
 {
     char* ctx = cGraphicsMan_TheGraphicsMan_boardwakefx;
     if (self->mRequestingDelete != 0) {
-        sWkVtA46C8* vt = *(sWkVtA46C8**)(ctx + 0x10D8);
+        sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)(ctx + 0x10D8);
         if (vt[114].fn(ctx + vt[114].delta) - self->mRequestDeleteFrame >= 3) {
-            sWkVtB46C8* vt2 = *(sWkVtB46C8**)(ctx + 0x10D8);
+            sVEntry<void(void*, void*)>* vt2 = *(sVEntry<void(void*, void*)>**)(ctx + 0x10D8);
             vt2[60].fn(ctx + vt2[60].delta, (char*)&self->mScreenGrabHandle);
             self->mRequestingDelete = 0;
         }
@@ -5599,11 +5582,6 @@ struct sRsVt47E8 {
     void (*fn)(void*);
 };
 
-struct sRsVtP47E8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 
 struct sRsVtV47E8 {
     short delta;
@@ -5681,7 +5659,7 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
     }
     float curTime = self->mfCurrentTime;
     if (self->mRequestingScreenGrab != 0 && self->mfInTime + self->mfHoldTime <= curTime) {
-        sRsVtP47E8* vt = (sRsVtP47E8*)ctx->vtable;
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)ctx->vtable;
         vt[61].fn((char*)ctx + vt[61].delta, (int*)&self->mScreenGrabHandle);
         self->mRequestingScreenGrab = 0;
     }

@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "bx/math3d.h"
@@ -3043,7 +3044,6 @@ struct sNode_27B750
     float dx, dy, dz;
 };
 
-struct sVEntry_27B750 { short delta; short index; int (*fn)(void*); };
 
 // PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
 static inline float Sqrt_27B750(float x)
@@ -3094,7 +3094,7 @@ static inline float Atan2_27B750(float y, float x)
 extern "C" void cSSXScriptEngine_FillOrientationFromStartPointInfo(cSSXScriptEngine* self, cRider* obj, sVec4_27B750* pos, int* roll, float* pitch, float* yaw)
 {
     char* sub = (char*)&obj->mVtbl;
-    sVEntry_27B750* vtEntry = &(*(sVEntry_27B750**)sub)[7];
+    sVEntry<int(void*)>* vtEntry = &(*(sVEntry<int(void*)>**)sub)[7];
     sNode_27B750* startPoint = (sNode_27B750*)cPathSys_getStartpoint(gPaths, 1, vtEntry->fn(sub + vtEntry->delta));
     *pos = sVec4_27B750(startPoint->px, startPoint->py, startPoint->pz, 1.0f);
     *yaw = Atan2_27B750(startPoint->dy, startPoint->dx);
@@ -3119,7 +3119,6 @@ struct sVec2_27B948
     sVec2_27B948(float a, float b) : x(a), y(b) {}
 };
 
-struct sVEntry_27B948 { short delta; short index; t4Vector* (*fn)(void*); };
 
 // PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
 static inline float Sqrt_27B948(float x)
@@ -3167,7 +3166,7 @@ static inline float Atan2_27B948(float y, float x)
 extern "C" void cSSXScriptEngine_FillOrientationFromRiderOrientationInfo(cSSXScriptEngine* self, cRider* obj, t4Vector* pos, int* roll, float* pitch, float* yaw)
 {
     char* sub = (char*)&obj->mVtbl;
-    sVEntry_27B948* vtEntry = &(*(sVEntry_27B948**)sub)[5];
+    sVEntry<t4Vector*(void*)>* vtEntry = &(*(sVEntry<t4Vector*(void*)>**)sub)[5];
     *pos = *vtEntry->fn(sub + vtEntry->delta);
     t4Vector dir = *(&obj->mMatrix.row[1]);
     *yaw = Atan2_27B948(dir.y, dir.x);
@@ -4380,11 +4379,6 @@ extern "C" int cScriptDatabaseObject_RemoveObject(cScriptDatabaseObject* self, i
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_RemoveObjectAll);
 #ifdef SKIP_ASM
-struct sVEntry0027D050 {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
 
 /**
  * Removes every object registered in the script object database.
@@ -4398,7 +4392,7 @@ extern "C" void cScriptDatabaseObject_RemoveObjectAll(cScriptDatabaseObject* sel
     int i;
     for (i = 0; i < 20; i++) {
         if (((int*)self)[i] != 0) {
-            sVEntry0027D050* vt = (sVEntry0027D050*)self->mVtbl;
+            sVEntry<int(void*, int)>* vt = (sVEntry<int(void*, int)>*)self->mVtbl;
             vt[3].fn((char*)self + vt[3].delta, i);
         }
     }
@@ -4679,11 +4673,6 @@ extern "C" int cScriptDatabaseObject_RemoveEntity(cScriptDatabaseObject* self, v
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_MarkEntityAsUsed);
 #ifdef SKIP_ASM
-struct sScrVEntryD400 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, int);
-};
 
 struct sScrVEntryD400b {
     short delta;
@@ -4716,7 +4705,7 @@ struct sScrOwnerD400 {
  */
 extern "C" void cScriptDatabaseObject_MarkEntityAsUsed(sScrOwnerD400* self, int* key, int value)
 {
-    sScrVEntryD400* vt = *(sScrVEntryD400**)((char*)self + 0x2A8);
+    sVEntry<int(void*, int, int)>* vt = *(sVEntry<int(void*, int, int)>**)((char*)self + 0x2A8);
     sScrSlotD400* record = &self->slots[key[1]];
     if (vt[4].fn((char*)self + vt[4].delta, record->id, value) == 0) {
         char* obj = (char*)self->objs[record->id];
@@ -4912,11 +4901,6 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_SetCameraEntity);
 #ifdef SKIP_ASM
 extern char t4mat_Identity[];
 
-struct sSeVEntryD688 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Binds a script camera object to camera entity @p anim, or unbinds it when @p anim is 0.
@@ -4936,12 +4920,12 @@ extern "C" void cScriptObjCamera_SetCameraEntity(cScriptObjCamera* self, void* a
     if (anim != 0) {
         int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)(cScriptDatabaseObject_GetDatabaseObject()), anim);
         if (self->mpCameraEntity != 0) {
-            sSeVEntryD688* vt = (sSeVEntryD688*)self->mVtbl;
+            sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
             vt[5].fn(((char*)self) + vt[5].delta, self->mPlayerID);
         }
         self->mpCameraEntity = (cScriptEntityCamera*)anim;
         self->mPlayerID = id;
-        sSeVEntryD688* vt = (sSeVEntryD688*)self->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
         vt[4].fn(((char*)self) + vt[4].delta, id);
     } else if (self->mpCameraEntity != 0) {
         __asm__ __volatile__(
@@ -4961,7 +4945,7 @@ extern "C" void cScriptObjCamera_SetCameraEntity(cScriptObjCamera* self, void* a
         *(int*)&self->mBaseRotX = 0;
         *(int*)&self->mBaseRotY = 0;
         *(int*)&self->mBaseRotZ = 0;
-        sSeVEntryD688* vt = (sSeVEntryD688*)self->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)self->mVtbl;
         vt[5].fn(((char*)self) + vt[5].delta, self->mPlayerID);
         self->mpCameraEntity = 0;
         self->mPlayerID = -1;

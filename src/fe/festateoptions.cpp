@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "fe/ferider.h"
 #include "sound/ssxaudio.h"
@@ -1602,11 +1603,6 @@ extern "C" void cSSXAudio_SetDJSpeech(void* snd, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern "C" void cSSXAudio_FrontEndLoad(void* snd);
 
-struct sVE_18BEF8i {
-    short delta;
-    short index;
-    int (*fn)(void*, int);
-};
 
 struct sVE_18BEF8v {
     short delta;
@@ -1649,7 +1645,7 @@ extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, un
         break;
     }
     char* obj = *(char**)(**(char***)&cAudioInterface_bxAudio()->MusicSys + 0x1D8);
-    sVE_18BEF8i* vt = *(sVE_18BEF8i**)(obj + 4);
+    sVEntry<int(void*, int)>* vt = *(sVEntry<int(void*, int)>**)(obj + 4);
     if (vt[2].fn(obj + vt[2].delta, audioMode) == 1) {
         float sfxVolume = func_00287670(cAudioInterface_bxAudio());
         float speechVolume = cSSXAudio_GetSFXVolume(cAudioInterface_bxAudio());
@@ -2804,11 +2800,6 @@ extern "C" void* cFEPopupConfirm_cFEPopupConfirm(void* self, void* engine, void*
 extern char str_kT_HELPCreateNewFilePrompt[];
 extern char str_cFEPopupConfirm[];
 
-struct sVE_18D648s {
-    short delta;
-    short index;
-    unsigned short* (*fn)(void*, int);
-};
 
 struct sVE_18D648p {
     short delta;
@@ -2816,11 +2807,6 @@ struct sVE_18D648p {
     void* (*fn)(void*, void*, int);
 };
 
-struct sVE_18D648v {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Handles a select or back on the save/load menu.
@@ -2847,11 +2833,11 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(cFEStateOptionsSaveLoad* s
         if (widgetId == 3) {
             self->mSaveLoadCurrentCtrl = self->mCurrentCtrl;
             char* mgr = (char*)SSXApp->FELocale;
-            sVE_18D648s* vt = *(sVE_18D648s**)(mgr + 4);
+            sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(mgr + 4);
             unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(str_kT_HELPCreateNewFilePrompt));
             char* mem = (char*)operator new(3068, str_cFEPopupConfirm, 0x100, 0);
             char* confirmPopup = (char*)cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
-            sVE_18D648v* vt2 = *(sVE_18D648v**)(confirmPopup + 8);
+            sVEntry<void(void*, int)>* vt2 = *(sVEntry<void(void*, int)>**)(confirmPopup + 8);
             vt2[25].fn(confirmPopup + vt2[25].delta, 1);
             *(int*)(confirmPopup + 0x18) = 0;
             cUIStateStack_pushPopup(&self->mpEngine->mStateStack, confirmPopup);
@@ -3506,11 +3492,6 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_updateDone);
 #ifdef SKIP_ASM
 extern "C" void cUIStateStack_pushCheck(void* list, void* item);
 
-struct sVEntry0018E478 {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 
 /**
  * Leaves the device select screen once its card work is done, pushing the state chosen for the outcome.
@@ -3535,7 +3516,7 @@ extern "C" void cFEStateOptionsDeviceSelect_updateDone(cFEStateOptionsDeviceSele
             mode = 2;
         }
         void* obj = *(void**)self->mpEngine;
-        sVEntry0018E478* vt = *(sVEntry0018E478**)((char*)obj + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, mode);
         if (nextState != 0) {
             cUIStateStack_pushCheck(&self->mpEngine->mStateStack, nextState);
@@ -3600,11 +3581,6 @@ struct sDevVtI_18E510 {
     short index;
     int (*fn)(void*, int);
 };
-struct sDevVt0_18E510 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 struct sDevVtS_18E510 {
     short delta;
     short index;
@@ -3613,7 +3589,7 @@ struct sDevVtS_18E510 {
 
 // Virtual calls on the memory-card device list (cMCOverlayManager + 0x434, vptr at +0), slot n.
 #define DEVS_18E510(mc, n, a, b) ((*(sDevVtS_18E510**)*(char**)((mc) + 0x434))[n].fn(*(char**)((mc) + 0x434) + (*(sDevVtS_18E510**)*(char**)((mc) + 0x434))[n].delta, a, b))
-#define DEV0_18E510(mc, n) ((*(sDevVt0_18E510**)*(char**)((mc) + 0x434))[n].fn(*(char**)((mc) + 0x434) + (*(sDevVt0_18E510**)*(char**)((mc) + 0x434))[n].delta))
+#define DEV0_18E510(mc, n) ((*(sVEntry<int(void*)>**)*(char**)((mc) + 0x434))[n].fn(*(char**)((mc) + 0x434) + (*(sVEntry<int(void*)>**)*(char**)((mc) + 0x434))[n].delta))
 #define DEVI_18E510(mc, n, a) ((*(sDevVtI_18E510**)*(char**)((mc) + 0x434))[n].fn(*(char**)((mc) + 0x434) + (*(sDevVtI_18E510**)*(char**)((mc) + 0x434))[n].delta, a))
 
 

@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "bx/appman.h"
@@ -309,17 +310,7 @@ struct sVEi_F050 {
     int (*fn)(void*);
 };
 
-struct sVEs_F050 {
-    short delta;
-    short index;
-    void (*fn)(void*, unsigned char);
-};
 
-struct sVEp_F050 {
-    short delta;
-    short index;
-    void (*fn)(void*, int, int);
-};
 
 
 static inline int padCall_F050(char* in, int slot)
@@ -368,7 +359,7 @@ extern "C" void cFEPopupScreenPos_onUpdate(cFEPopupScreenPos* self)
 {
     char* in = *(char**)&self->mpEngine->mpInput;
     for (int i = 0; i < 2; i++) {
-        sVEs_F050* vt = *(sVEs_F050**)(in + 8);
+        sVEntry<void(void*, unsigned char)>* vt = *(sVEntry<void(void*, unsigned char)>**)(in + 8);
         vt[44].fn(in + vt[44].delta, i);
         if (padCall_F050(in, 40) == 0) {
             continue;
@@ -401,7 +392,7 @@ extern "C" void cFEPopupScreenPos_onUpdate(cFEPopupScreenPos* self)
         }
         self->mX = clamp_F050(self->mX, -20, 20);
         self->mY = clamp_F050(self->mY, -20, 20);
-        sVEp_F050* rv = (sVEp_F050*)GrMan->mVtbl;
+        sVEntry<void(void*, int, int)>* rv = (sVEntry<void(void*, int, int)>*)GrMan->mVtbl;
         rv[12].fn((char*)GrMan + rv[12].delta, self->mX, self->mY);
         return;
     }
@@ -576,11 +567,6 @@ extern void* cFEStateBraggingRights_vtbl[];
 // PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
 extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
 
-struct sVEntry001DF4E8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Destroys the bragging-rights front-end state: its two embedded 0x34-byte members (+0x6D0), then the base
@@ -597,7 +583,7 @@ extern "C" void cFEStateBraggingRights__cFEStateBraggingRights(cFEStateBraggingR
         char* panel = (char*)&self->mMenuCtrl[0] + 0x68;
         while ((char*)&self->mMenuCtrl[0] != panel) {
             panel -= 0x34;
-            sVEntry001DF4E8* vt = *(sVEntry001DF4E8**)(panel + 0x30);
+            sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(panel + 0x30);
             vt[1].fn(panel + vt[1].delta, 0);
         }
     }
@@ -3429,11 +3415,6 @@ extern "C" void* cFEStateChallengePopup_cFEStateChallengePopup1(cFEStateChalleng
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateChallengePopup__cFEStateChallengePopup);
 #ifdef SKIP_ASM
-struct sVEntry001E09A0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 extern void* cFEStateChallengePopup_vtbl[];
 // PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
@@ -3451,7 +3432,7 @@ extern "C" void cFEStateChallengePopup__cFEStateChallengePopup(cFEStateChallenge
 {
     self->mVtbl = cFEStateChallengePopup_vtbl;
     void* obj = self->mpParentState;
-    sVEntry001E09A0* vt = *(sVEntry001E09A0**)((char*)obj + 8);
+    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)obj + 8);
     vt[32].fn((char*)obj + vt[32].delta);
     cFEStateNet__cFEStateNet_dtor(self, flags);
 }
@@ -3501,11 +3482,6 @@ extern void* cFEStateChallengeReceivedPopup_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 // PORT: unit declares cFEStateNet__cFEStateNet with one arg; the body takes (self, flags)
 extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
-struct sVEntry001E0A50 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Destroys the challenge-received popup: calls its parent state's slot 32, frees the string at +0x6D0, then runs the
@@ -3517,7 +3493,7 @@ extern "C" void cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup(c
 {
     self->mVtbl = cFEStateChallengeReceivedPopup_vtbl;
     void* obj = self->mpParentState;
-    sVEntry001E0A50* vt = *(sVEntry001E0A50**)((char*)obj + 8);
+    sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)obj + 8);
     vt[32].fn((char*)obj + vt[32].delta);
     cBXString__cBXString((char*)&self->mszChallenger, 2);
     cFEStateNet__cFEStateNet_dtor(self, flags);
@@ -7687,11 +7663,6 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" unsigned char func_001E3680(int id);
 extern "C" void func_001E50C8(cOVState_MESSAGECENTER* self, int a1, int a2);
 
-struct sVEntry001E4168 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Focuses the message center's menu and, when it opened by itself, shows message 37 (vtable entry 6, onGainFocus).
@@ -7709,12 +7680,12 @@ extern "C" void cOVState_MESSAGECENTER_onGainFocus(cOVState_MESSAGECENTER* self)
     reset:
         cUIMenu_setSelectedByIndex(self->mpMenu, func_001E3680(37));
         void* menu = self->mpMenu;
-        sVEntry001E4168* vt = *(sVEntry001E4168**)((char*)menu + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)menu + 8);
         vt[7].fn((char*)menu + vt[7].delta, 1);
         func_001E50C8(self, 37, -1);
     } else {
         void* menu = self->mpMenu;
-        sVEntry001E4168* vt = *(sVEntry001E4168**)((char*)menu + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)menu + 8);
         vt[7].fn((char*)menu + vt[7].delta, 1);
     }
 }
@@ -9547,7 +9518,6 @@ extern "C" void cOVState_FINAL_STANDINGS_onCreateScreen(cOVState_FINAL_STANDINGS
 INCLUDE_ASM("fe/fepopupmisc", cOVState_FINAL_STANDINGS_onGainTransition);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-#include "vtable.h"
 
 // A UI widget as cUIScreen_getObjectByHashName returns it: vptr at 0x8. Slot names from the prototype's
 // _vt$8cUIThing (as in fe/feasyncfile).
@@ -10149,11 +10119,6 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_FINAL_STANDINGS_onInputBegin);
 #ifdef SKIP_ASM
 extern "C" void cOVStateManager_triggerOverlay(int state);
 
-struct sVEntry001E7AA8 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 /**
  * Handles input on the final standings overlay (vtable entry 8, onInputBegin).
@@ -10174,7 +10139,7 @@ extern "C" int cOVState_FINAL_STANDINGS_onInputBegin(cOVState_FINAL_STANDINGS* s
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cGameComm_mGameComm != 0 && cGameComm_mGameComm->mConnected != 0) {
-        sVEntry001E7AA8* vt = *(sVEntry001E7AA8**)((char*)input + 8);
+        sVEntry<int(void*)>* vt = *(sVEntry<int(void*)>**)((char*)input + 8);
         if (vt[27].fn((char*)input + vt[27].delta) != 0) {
             cOVStateManager_triggerOverlay(40);
         }

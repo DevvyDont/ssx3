@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "bx/appman.h"
@@ -992,11 +993,6 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onWidgetEvent(cOVState_PAUSE_ONLINE_
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut);
 #ifdef SKIP_ASM
 struct cUIText;
-struct sVE_FB180 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
@@ -1016,7 +1012,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(cOVState_PAUSE_O
         if (infoText != 0 && self->mbShouldDisplayAuxInfo != 0) {
             cUIText_setUnicodeStringByID(infoText, GetHashValue32(str_kT_PauseErrorServerCheckTimedOut));
         }
-        sVE_FB180* vt = *(sVE_FB180**)((char*)infoText + 0x8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)infoText + 0x8);
         vt[9].fn((char*)infoText + vt[9].delta, self->mbShouldDisplayAuxInfo);
     }
 }
@@ -1026,11 +1022,6 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(cOVState_PAUSE_O
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_displayPingReceived);
 #ifdef SKIP_ASM
 struct cUIText;
-struct sVE_FB218 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
@@ -1053,7 +1044,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(cOVState_PAUSE_O
         if (infoText != 0 && self->mbShouldDisplayAuxInfo != 0) {
             cUIText_setUnicodeStringByID(infoText, GetHashValue32(str_kT_PauseErrorOpponentDisconnected));
         }
-        sVE_FB218* vt = *(sVE_FB218**)((char*)infoText + 0x8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)infoText + 0x8);
         vt[9].fn((char*)infoText + vt[9].delta, self->mbShouldDisplayAuxInfo);
         cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(self, 1);
     }
@@ -1341,7 +1332,6 @@ extern "C" void cOVState_HEAT_PREEVENT_onUpdate(cOVState_HEAT_PREEVENT* self)
 INCLUDE_ASM("fe/ovstatepause", func_001FBD20);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-#include "vtable.h"
 
 struct sColour {
     float r, g, b, a;

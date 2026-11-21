@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "fe/festateselectmp.h"
 #include "ui/uithing.h"
@@ -58,11 +59,6 @@ extern "C" void cFEStateSelectMultiplayerMode_onWidgetCreate(cFEStateSelectMulti
 //100%
 INCLUDE_ASM("fe/festateselectmp", cFEStateSelectMultiplayerMode_onWidgetEvent);
 #ifdef SKIP_ASM
-struct sVEntry001A3160 {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 extern "C" void cUIStateStack_push(void* list, void* item);
 
 /**
@@ -83,7 +79,7 @@ extern "C" void cFEStateSelectMultiplayerMode_onWidgetEvent(cFEStateSelectMultip
     switch (msg) {
     case 5: {
         void* obj = *(void**)self->mpEngine;
-        sVEntry001A3160* vt = *(sVEntry001A3160**)((char*)obj + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
@@ -92,7 +88,7 @@ extern "C" void cFEStateSelectMultiplayerMode_onWidgetEvent(cFEStateSelectMultip
     }
     case 6: {
         void* obj = *(void**)self->mpEngine;
-        sVEntry001A3160* vt = *(sVEntry001A3160**)((char*)obj + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);

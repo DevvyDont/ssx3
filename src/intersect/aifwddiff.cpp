@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "object/rollermodifier.h"
 #include "bx/math3d.h"
@@ -588,7 +589,6 @@ struct sAI_281D0 {
     char pad94[4];
     sGrid_281D0* grid;     // 0x98
 };
-struct sVE87_281D0 { short delta; short index; void (*fn)(void*, float, void*, void*, int); };
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline void vu0Scale_281D0(sVec4_281D0& r, const sVec4_281D0& v, float s)
@@ -652,7 +652,7 @@ extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level
         }
     } else {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
-        sVE87_281D0* vt = &((sVE87_281D0*)w->mVtbl)[87];
+        sVEntry<void(void*, float, void*, void*, int)>* vt = &((sVEntry<void(void*, float, void*, void*, int)>*)w->mVtbl)[87];
         char* thisp = (char*)w + vt->delta;
         sVec4_281D0 color;
         float boxSize = self->grid->levels[level].scale * self->unit;

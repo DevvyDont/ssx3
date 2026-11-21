@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "fe/uistatebuypopup.h"
@@ -120,11 +121,6 @@ extern "C" int cFEStateBuyAttrib_onGainTransition(cFEStateBuyAttrib* self, int o
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateBuyAttrib_onGainFocus);
 #ifdef SKIP_ASM
-struct sVEntry001F49F8 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 extern "C" void cFEState_onGainFocus(void* self);
 
@@ -138,7 +134,7 @@ extern "C" void cFEStateBuyAttrib_onGainFocus(cFEStateBuyAttrib* self)
 {
     cFEState_onGainFocus(self);
     cUIMenu* obj = self->pAttribMenu;
-    sVEntry001F49F8* vt = (sVEntry001F49F8*)obj->mVtbl;
+    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)obj->mVtbl;
     vt[7].fn((char*)obj + vt[7].delta, 1);
 }
 #endif
@@ -295,11 +291,6 @@ extern char str_AttribMenu[];
 extern char str_hl_right_b[];
 extern char str_hl_left_b[];
 
-struct sVEi_4C30 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
 
 static inline void defaultMsg_4C30(cFEStateBuyAttrib* s, int msg)
@@ -338,7 +329,7 @@ extern "C" void cFEStateBuyAttrib_onInputAlways(cFEStateBuyAttrib* self, cUIInpu
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 11);
     unsigned char idx = *((unsigned char*)cUIScreen_getObjectByHashName(self->mpAttribScreen, GetHashValue32(str_AttribMenu)) + 0x95);
     if (self->mBuyPrompt == 0) {
-        sVEi_4C30* vt = (sVEi_4C30*)w->mVtbl;
+        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)w->mVtbl;
         if (vt[19].fn(((char*)w) + vt[19].delta) != 0) {
             int* bought = self->mPotentialExperience;
             int* cnt = &bought[idx];
@@ -352,7 +343,7 @@ extern "C" void cFEStateBuyAttrib_onInputAlways(cFEStateBuyAttrib* self, cUIInpu
                 defaultMsg_4C30((self), 4);
             }
         } else {
-            sVEi_4C30* vt2 = (sVEi_4C30*)w->mVtbl;
+            sVEntry<int(void*)>* vt2 = (sVEntry<int(void*)>*)w->mVtbl;
             if (vt2[20].fn(((char*)w) + vt2[20].delta) != 0) {
                 int* level = self->mExperienceLevel;
                 int* lvl = &level[idx];
@@ -481,11 +472,6 @@ struct sVEK1F50B0a {
     short index;
     void (*fn)(void*, sVec3K1F50B0*);
 };
-struct sVEK1F50B0b {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Sizes the seven attributes' bars: "Vector%d" for the points owned and "under%d" for owned plus bought.
@@ -510,7 +496,7 @@ extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(cFEStateBuyAttrib* buy
             barSize.z = 0.0f;
             sVEK1F50B0a* vt = *(sVEK1F50B0a**)(bar + 8);
             vt[21].fn(bar + vt[21].delta, &barSize);
-            sVEK1F50B0b* vt2 = *(sVEK1F50B0b**)(bar + 8);
+            sVEntry<void(void*, int)>* vt2 = *(sVEntry<void(void*, int)>**)(bar + 8);
             vt2[9].fn(bar + vt2[9].delta, 1);
         }
         sprintf(name, str_underpct_d, i);
@@ -522,7 +508,7 @@ extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(cFEStateBuyAttrib* buy
             barSize.z = 0.0f;
             sVEK1F50B0a* vt = *(sVEK1F50B0a**)(bar + 8);
             vt[21].fn(bar + vt[21].delta, &barSize);
-            sVEK1F50B0b* vt2 = *(sVEK1F50B0b**)(bar + 8);
+            sVEntry<void(void*, int)>* vt2 = *(sVEntry<void(void*, int)>**)(bar + 8);
             vt2[9].fn(bar + vt2[9].delta, 1);
         }
     }
@@ -806,11 +792,6 @@ extern "C" int cFEStateCareerStats_onWidgetMenu(cFEStateCareerStats* self, int p
 //100%
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_onWidgetEvent);
 #ifdef SKIP_ASM
-struct sVEntry001F5650 {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 extern "C" void cUIStateStack_push(void* list, void* item);
 
 /**
@@ -832,7 +813,7 @@ extern "C" void cFEStateCareerStats_onWidgetEvent(cFEStateCareerStats* self, cUI
         break;
     case 6: {
         void* obj = *(void**)self->mpEngine;
-        sVEntry001F5650* vt = *(sVEntry001F5650**)((char*)obj + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -1005,11 +986,6 @@ extern char str_ridersbest[];
 extern char str_horizontal_dash_b[];
 extern char str_vertical_dash_b[];
 
-struct sVEK1F5A38 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Shows the career-stats page chosen by the page index (+0x48).
@@ -1042,12 +1018,12 @@ extern "C" void cFEStateCareerStats_setupLayout(cFEStateCareerStats* self)
     }
     char* dashObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_horizontal_dash_b));
     if (dashObj != 0) {
-        sVEK1F5A38* vt = *(sVEK1F5A38**)(dashObj + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(dashObj + 8);
         vt[9].fn(dashObj + vt[9].delta, show);
     }
     dashObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_vertical_dash_b));
     if (dashObj != 0) {
-        sVEK1F5A38* vt = *(sVEK1F5A38**)(dashObj + 8);
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)(dashObj + 8);
         vt[9].fn(dashObj + vt[9].delta, show);
     }
 }

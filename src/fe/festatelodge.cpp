@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/ssxaudio.h"
 #include "fe/keyboardpopup.h"
@@ -74,7 +75,6 @@ extern char str_kT_TITLELodgePeak1[];
 extern char str_kT_TITLELodgePeak2[];
 extern char str_kT_TITLELodgePeak3[];
 
-struct sWVt_3840 { short delta; short index; void (*fn)(void*, int); };
 
 /**
  * Numbers the lodge's option widgets and titles the screen with the current peak.
@@ -106,9 +106,9 @@ extern "C" void cFEStateLodge_onWidgetCreate(cFEStateLodge* self, cUIThing* w)
         w->mMiscData = 6;
     } else if (hashName == GetHashValue32(str_option_7)) {
         w->mMiscData = 7;
-        sWVt_3840* vt = (sWVt_3840*)w->mVtbl;
+        sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)w->mVtbl;
         vt[8].fn((char*)w + vt[8].delta, 1);
-        vt = (sWVt_3840*)w->mVtbl;
+        vt = (sVEntry<void(void*, int)>*)w->mVtbl;
         vt[9].fn((char*)w + vt[9].delta, 0);
     } else if (hashName == GetHashValue32(str_title_lodge)) {
         int lvl = cBENewPlayerInterface_getLastHub(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
@@ -147,11 +147,6 @@ extern char str_kT_OVRCMNQuitTitlePrompt[];
 extern char str_cFEStateProfileLoad_b[];
 extern char str_TransitionOut_b[];
 
-struct sVE_1F3A38s {
-    short delta;
-    short index;
-    unsigned short* (*fn)(void*, int);
-};
 
 struct sVE_1F3A38p {
     short delta;
@@ -185,7 +180,7 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
     cBE_getInterface_Fv(cBE_getBE(), 4);
     if (w->mMiscData == 0 && self->bToNextState == 0) {
         char* mgr = (char*)SSXApp->FELocale;
-        sVE_1F3A38s* vt = *(sVE_1F3A38s**)(mgr + 4);
+        sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(mgr + 4);
         unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(str_kT_CMNSaveProgress));
         void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
         void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
@@ -196,7 +191,7 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, in
     int k = w->mMiscData;
     if (k == 6 && self->bToNextState == 0) {
         char* mgr = (char*)SSXApp->FELocale;
-        sVE_1F3A38s* vt = *(sVE_1F3A38s**)(mgr + 4);
+        sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(mgr + 4);
         unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(str_kT_OVRCMNQuitTitlePrompt));
         void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm_b, 0x100, 0);
         void* newState = cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
@@ -275,17 +270,7 @@ struct sVE_1F3CF0s {
     unsigned short* (*fn)(void*, int);
 };
 
-struct sVE_1F3CF0p {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 
-struct sVE_1F3CF0o {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Runs the lodge's save and quit prompts: records yes or no, then saves, quits or carries on.
@@ -314,7 +299,7 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
         switch (self->mPathToSaveProfile) {
         case 0x10: {
             self->bToNextState = 1;
-            sVE_1F3CF0o* vt = (sVE_1F3CF0o*)self->mVtbl;
+            sVEntry<void(void*, void*, int)>* vt = (sVEntry<void(void*, void*, int)>*)self->mVtbl;
             vt[19].fn(((char*)self) + vt[19].delta, cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_option_0)), 5);
             break;
         }
@@ -322,7 +307,7 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, u
             self->bToNextState = 1;
             cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
             char* obj = *(char**)self->mpEngine;
-            sVE_1F3CF0p* vt = *(sVE_1F3CF0p**)(obj + 4);
+            sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
             void* nextState = vt[4].fn(obj + vt[4].delta, ((char*)self), 6);
             if (nextState != 0) {
                 cUIStateStack_pushCheck(&self->mpEngine->mStateStack, nextState);
@@ -633,11 +618,6 @@ extern char str_cKeyboardPopup_b[];
 extern char str_cFEStateCheatCharSelect_b[];
 extern char str_TransitionOut_b[];
 
-struct sVE_1F4400 {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 
 /**
  * Acts on the rider-details options: renames the rider, picks a cheat character, opens a screen, or leaves.
@@ -696,7 +676,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
         }
         cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
         char* obj = *(char**)self->mpEngine;
-        sVE_1F4400* vt = *(sVE_1F4400**)(obj + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
         void* nextState = vt[4].fn(obj + vt[4].delta, ((char*)self), w->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -705,7 +685,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
     }
     case 6: {
         char* obj = *(char**)self->mpEngine;
-        sVE_1F4400* vt = *(sVE_1F4400**)(obj + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)(obj + 4);
         void* nextState = vt[5].fn(obj + vt[5].delta, ((char*)self), 0);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);

@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "bx/appman.h"
 #include "render/bxps2deferman.h"
@@ -6529,11 +6530,6 @@ int cFloatingNode_hasAnimMats(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cFloatingNode_getAnimMats);
 #ifdef SKIP_ASM
-struct sRailVEntry17B8 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Returns the floating node's animation matrices, first refreshing the root transform when it is dirty.
@@ -6546,7 +6542,7 @@ struct sRailVEntry17B8 {
 extern "C" int cFloatingNode_getAnimMats(cFloatingNode* self)
 {
     if (self->Flags & 1) {
-        sRailVEntry17B8* vt = (sRailVEntry17B8*)self->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
         vt[51].fn((char*)self + vt[51].delta);
     }
     return (int)self->AnimMats;
@@ -6556,11 +6552,6 @@ extern "C" int cFloatingNode_getAnimMats(cFloatingNode* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cFloatingNode_getAnimMat);
 #ifdef SKIP_ASM
-struct sVEntry00361800 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 
 /**
@@ -6575,7 +6566,7 @@ struct sVEntry00361800 {
 extern "C" t4Matrix* cFloatingNode_getAnimMat(cFloatingNode* self, int i)
 {
     if (self->Flags & 1) {
-        sVEntry00361800* vt = (sVEntry00361800*)self->mVtbl;
+        sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
         vt[51].fn((char*)self + vt[51].delta);
     }
     return &(self->AnimMats)[i];
@@ -6744,11 +6735,6 @@ void cPositionModifier_setRadius(void* vself, float val)
 //100%
 INCLUDE_ASM("object/railmodifier", cPositionModifier_getRootTransform);
 #ifdef SKIP_ASM
-struct sRailVEntry1940 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Returns the position modifier's root transform (Transform, +0x50), first rebuilding it (slot 3,
@@ -6759,7 +6745,7 @@ struct sRailVEntry1940 {
 extern "C" void* cPositionModifier_getRootTransform(cPositionModifier* self)
 {
     if (self->RootTransformDirty != 0) {
-        sRailVEntry1940* vt = *(sRailVEntry1940**)self;
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)self;
         vt[3].fn((char*)self + vt[3].delta);
     }
     return (char*)&self->Transform;
@@ -6971,11 +6957,6 @@ int cMagnetModifier_getTransformType(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cMagnetModifier_getRootTransform);
 #ifdef SKIP_ASM
-struct sRailVEntry1A60 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Returns the magnet modifier's root transform (Transform, +0x60), first rebuilding it (slot 3, updateRootTransform)
@@ -6986,7 +6967,7 @@ struct sRailVEntry1A60 {
 extern "C" void* cMagnetModifier_getRootTransform(cMagnetModifier* self)
 {
     if (self->RootTransformDirty != 0) {
-        sRailVEntry1A60* vt = *(sRailVEntry1A60**)self;
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)self;
         vt[3].fn((char*)self + vt[3].delta);
     }
     return (char*)&self->Transform;
@@ -7228,11 +7209,6 @@ int cSplineModifier_isRootTransformDirty(void* vself)
 //100%
 INCLUDE_ASM("object/railmodifier", cSplineModifier_getRootTransform);
 #ifdef SKIP_ASM
-struct sRailVEntry1B90 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Returns the spline modifier's root transform, rebuilding it first when it is dirty.
@@ -7244,7 +7220,7 @@ struct sRailVEntry1B90 {
 extern "C" void* cSplineModifier_getRootTransform(cSplineModifier* self)
 {
     if (self->RootTransformDirty != 0) {
-        sRailVEntry1B90* vt = *(sRailVEntry1B90**)self;
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)self;
         vt[3].fn((char*)self + vt[3].delta);
     }
     return (char*)&self->Transform;
@@ -7346,11 +7322,6 @@ void cMultiSplineModifier_setRadius(void* vself, float val)
 //100%
 INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_getRootTransform1);
 #ifdef SKIP_ASM
-struct sRailVEntry1C20 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Returns the root transform of the modifier's first instance, rebuilding the transforms first when dirty.
@@ -7363,7 +7334,7 @@ struct sRailVEntry1C20 {
 extern "C" void* cMultiSplineModifier_getRootTransform1(cMultiSplineModifier* self)
 {
     if (self->RootTransformDirty != 0) {
-        sRailVEntry1C20* vt = *(sRailVEntry1C20**)self;
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)self;
         vt[3].fn((char*)self + vt[3].delta);
     }
     return *(char**)self->NodeInst + 0x10;

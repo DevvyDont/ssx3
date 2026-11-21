@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "render/2drender.h"
 #include "render/ps2lightman.h"
@@ -1971,11 +1972,6 @@ INCLUDE_ASM("render/lightman", cRenderToggles_update);
 extern int cRenderToggles_m_AIUpdatesPerRender;
 extern int cRenderToggles_m_ResetStats;
 
-struct sLmVEntry_0C20 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Passes cRenderToggles_m_AIUpdatesPerRender (menu "AI Frames per Render Frame") to vtable slot 16 (func_00394008) and clears cRenderToggles_m_ResetStats (menu
@@ -1986,7 +1982,7 @@ struct sLmVEntry_0C20 {
 extern "C" void cRenderToggles_update()
 {
     cPS2GraphicsMan* mgr = cGraphicsMan_TheGraphicsMan;
-    sLmVEntry_0C20* vt = (sLmVEntry_0C20*)mgr->mVtbl;
+    sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)mgr->mVtbl;
     vt[16].fn((char*)mgr + vt[16].delta, cRenderToggles_m_AIUpdatesPerRender);
     if (cRenderToggles_m_ResetStats != 0) {
         cRenderToggles_m_ResetStats = 0;

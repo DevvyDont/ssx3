@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "ui/uiscreen.h"
 #include "ui/uithing.h"
@@ -72,7 +73,6 @@ extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
 extern char str_UILBStrID[];
 
-struct sUIStrVtA568 { short delta; short index; unsigned short* (*fn)(void*, int); };
 
 /**
  * Appends a list-box entry showing a localized string, copied from the UI string table ("UILBStrID").
@@ -87,7 +87,7 @@ extern "C" unsigned char cUIListBox_addEntryByStringID(cUIListBox* self, int id,
 {
     char* tbl = *(char**)(*(char**)((char*)self->mpScreen->mpState + 0x10) + 0x10);
     if (tbl != 0) {
-        sUIStrVtA568* vt = *(sUIStrVtA568**)(tbl + 4);
+        sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(tbl + 4);
         unsigned short* str = vt[4].fn(tbl + vt[4].delta, id);
         if (str != 0) {
             unsigned short* wide = (unsigned short*)operator_new_tag((USTR_length(str) + 1) * 2, str_UILBStrID, 0x100, 0);
@@ -288,11 +288,6 @@ extern "C" void cUIListBox_setEntryByAsciiString(cUIListBox_sObj* self, unsigned
 //100%
 INCLUDE_ASM("ui/uilistbox", cUIListBox_setCallbackListBox);
 #ifdef SKIP_ASM
-struct sVEntry39A8D8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 /**
  * Turns the list box into a callback list of @p count entries: mNumEntries = count, mCurrentEntry 0, sets mCallback
@@ -307,7 +302,7 @@ extern "C" void cUIListBox_setCallbackListBox(cUIListBox* self, int count)
     *(char*)&self->mCurrentEntry = 0;
     *(int*)&self->mAttrListBox |= 0x10;
     void* obj = self->mpScreen->mpState;
-    sVEntry39A8D8* vt = *(sVEntry39A8D8**)((char*)obj + 8);
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)((char*)obj + 8);
     vt[19].fn((char*)obj + vt[0x13].delta, self, 9);
 }
 #endif
@@ -321,16 +316,6 @@ extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" unsigned char cUIMenu_findFirstHighlightable(void* self, int a1);
 
-struct sVEntry39A928a {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
-struct sVEntry39A928b {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 struct sUIFlags39A928 {
     unsigned int pad0 : 4;
@@ -369,10 +354,10 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
                 }
             }
             cUIThing* selected = self->mpSelected;
-            sVEntry39A928a* va = (sVEntry39A928a*)selected->mVtbl;
+            sVEntry<void(void*, int)>* va = (sVEntry<void(void*, int)>*)selected->mVtbl;
             va[7].fn(((char*)selected) + va[7].delta, 1);
             char* owner = (char*)self->mpScreen->mpState;
-            sVEntry39A928b* vb = *(sVEntry39A928b**)(owner + 8);
+            sVEntry<void(void*, void*, int)>* vb = *(sVEntry<void(void*, void*, int)>**)(owner + 8);
             vb[19].fn(owner + vb[19].delta, self->mpSelected, 1);
         }
     } else {
@@ -386,10 +371,10 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
                 }
             }
             cUIThing* selected = self->mpSelected;
-            sVEntry39A928a* va = (sVEntry39A928a*)selected->mVtbl;
+            sVEntry<void(void*, int)>* va = (sVEntry<void(void*, int)>*)selected->mVtbl;
             va[7].fn(((char*)selected) + va[7].delta, 0);
             char* owner = (char*)self->mpScreen->mpState;
-            sVEntry39A928b* vb = *(sVEntry39A928b**)(owner + 8);
+            sVEntry<void(void*, void*, int)>* vb = *(sVEntry<void(void*, void*, int)>**)(owner + 8);
             vb[19].fn(owner + vb[19].delta, self->mpSelected, 2);
         }
     }

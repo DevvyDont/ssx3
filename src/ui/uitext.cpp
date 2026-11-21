@@ -1173,11 +1173,6 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_setAsciiString);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 typedef void (*fnUT1C80)(char*, int);
 
-struct sUTVEntry1C80 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Replaces the text with ASCII text: clears the lines (cUITextScroll_clearBuffer_1), clears mStringID, calls virtual
@@ -1189,8 +1184,8 @@ extern "C" void cUITextScroll_setAsciiString(cUITextScroll* self, char* str)
 {
     cUITextScroll_clearBuffer_1(self);
     self->mStringID = (unsigned int)0;
-    ((sUTVEntry1C80*)self->mVtbl)[5].fn((char*)self + ((sUTVEntry1C80*)self->mVtbl)[5].delta, 1);
-    ((sUTVEntry1C80*)self->mVtbl)[24].fn((char*)self + ((sUTVEntry1C80*)self->mVtbl)[24].delta, 0);
+    ((sVEntry<void(void*, int)>*)self->mVtbl)[5].fn((char*)self + ((sVEntry<void(void*, int)>*)self->mVtbl)[5].delta, 1);
+    ((sVEntry<void(void*, int)>*)self->mVtbl)[24].fn((char*)self + ((sVEntry<void(void*, int)>*)self->mVtbl)[24].delta, 0);
     cUITextScroll_addAsciiString(self, str);
 }
 #endif

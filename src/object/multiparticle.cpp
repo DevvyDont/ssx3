@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "bx/appman.h"
 #include "bx/math3d.h"
@@ -275,11 +276,6 @@ extern "C" void cMultiParticle_render(cMultiParticle* self)
 //100%
 INCLUDE_ASM("object/multiparticle", cMultiParticle_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sSerVEntry_58380 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 
 extern "C" void cStaticEmitter_writeToReplayFrame(void* desc, void* stream);
@@ -296,19 +292,19 @@ extern "C" void cStaticEmitter_writeToReplayFrame(void* desc, void* stream);
  */
 extern "C" void cMultiParticle_writeToReplayFrame(cMultiParticle* self, void* stream)
 {
-    sSerVEntry_58380* writeEntry = &(*(sSerVEntry_58380**)stream)[1];
+    sVEntry<void(void*, void*, int)>* writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, (self), 4);
-    writeEntry = &(*(sSerVEntry_58380**)stream)[1];
+    writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, &self->NumInst, 4);
-    writeEntry = &(*(sSerVEntry_58380**)stream)[1];
+    writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, self->Particle, 216);
     cStaticEmitter_writeToReplayFrame(self->Emitter, stream);
-    writeEntry = &(*(sSerVEntry_58380**)stream)[1];
+    writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Offset, 0x10);
-    writeEntry = &(*(sSerVEntry_58380**)stream)[1];
+    writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
     writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->BoundBox, 0x20);
     if (self->NumInst > 0) {
-        writeEntry = &(*(sSerVEntry_58380**)stream)[1];
+        writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
         writeEntry->fn((char*)stream + writeEntry->delta, (int*)self->InstIds, self->NumInst << 2);
     }
 }
@@ -828,11 +824,6 @@ found:
 //100%
 INCLUDE_ASM("object/multiparticle", cRailManNode_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sSerVEntry_00358C30 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 extern "C" void cSortObjNode_writeToReplayFrame(void* self, void* stream);
 
@@ -847,7 +838,7 @@ extern "C" void cSortObjNode_writeToReplayFrame(void* self, void* stream);
 extern "C" void cRailManNode_writeToReplayFrame(cRailManNode* self, void* stream)
 {
     cSortObjNode_writeToReplayFrame(self, stream);
-    sSerVEntry_00358C30* vt = *(sSerVEntry_00358C30**)stream;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)&self->RailInfo, 0x200);
 }
 #endif
@@ -1235,11 +1226,6 @@ extern "C" void cAnimComboNode_loseFocus(cAnimComboNode* self)
 //100%
 INCLUDE_ASM("object/multiparticle", cAnimComboNode_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sVEntry003590F0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 extern "C" void cAnimObjectNode_writeToReplayFrame(void* self, void* stream);
 
@@ -1252,7 +1238,7 @@ extern "C" void cAnimObjectNode_writeToReplayFrame(void* self, void* stream);
 extern "C" void cAnimComboNode_writeToReplayFrame(cAnimComboNode* self, void* obj)
 {
     cAnimObjectNode_writeToReplayFrame((char*)&self->AnimType, obj);
-    sVEntry003590F0* vt = *(sVEntry003590F0**)obj;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x18);
 }
 #endif
@@ -1354,11 +1340,6 @@ extern "C" void* cAnimDeltaNode_cAnimDeltaNode1(cAnimDeltaNode* self, int bucket
 //100%
 INCLUDE_ASM("object/multiparticle", cAnimDeltaNode_cAnimDeltaNode);
 #ifdef SKIP_ASM
-struct sVEntry00359270 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 extern "C" void* cAnimObjectNode_cAnimObjectNode(void* self, void* a, void* stream);
 extern void* cAnimDeltaNode_vtbl[];
@@ -1377,7 +1358,7 @@ extern "C" void* cAnimDeltaNode_cAnimDeltaNode(cAnimDeltaNode* self, void* bucke
 {
     cAnimObjectNode_cAnimObjectNode(self, bucket, stream);
     self->mVtbl = cAnimDeltaNode_vtbl;
-    sVEntry00359270* vt = *(sVEntry00359270**)stream;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)&self->Delta, 4);
     return ((void*)self);
 }
@@ -1473,11 +1454,6 @@ extern "C" void cAnimDeltaNode_signal(cAnimDeltaNode* self, int id, float signal
 //100%
 INCLUDE_ASM("object/multiparticle", cAnimDeltaNode_writeToReplayFrame);
 #ifdef SKIP_ASM
-struct sSerVEntry_00359410 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*, int);
-};
 
 extern "C" void cAnimObjectNode_writeToReplayFrame(void* self, void* stream);
 
@@ -1489,7 +1465,7 @@ extern "C" void cAnimObjectNode_writeToReplayFrame(void* self, void* stream);
 extern "C" void cAnimDeltaNode_writeToReplayFrame(cAnimDeltaNode* self, void* stream)
 {
     cAnimObjectNode_writeToReplayFrame(self, stream);
-    sSerVEntry_00359410* vt = *(sSerVEntry_00359410**)stream;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
     vt[1].fn((char*)stream + vt[1].delta, (char*)&self->Delta, 0x4);
 }
 #endif

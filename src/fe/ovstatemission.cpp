@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "ui/uithing.h"
 #include "fe/feasyncmanager.h"
@@ -93,11 +94,6 @@ extern "C" char* cUIListBox_getCurrentAsciiText(void* self);
 extern "C" void cUIStateStack_push(void* list, void* item);
 void cFEStateMPCircuit_updateWidget(void* self);
 
-struct sVEntry_33A0 {
-    short delta;
-    short index;
-    void* (*fn)(void*, void*, int);
-};
 
 /**
  * Handles the circuit select's widget events: select or event 6 push the factory's state, a change plays the
@@ -114,7 +110,7 @@ extern "C" void cFEStateMPCircuit_onWidgetEvent(cFEStateMPCircuit* self, cUIThin
     switch (msg) {
     case 5: {
         void* obj = *(void**)self->mpEngine;
-        sVEntry_33A0* vt = *(sVEntry_33A0**)((char*)obj + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);
@@ -123,7 +119,7 @@ extern "C" void cFEStateMPCircuit_onWidgetEvent(cFEStateMPCircuit* self, cUIThin
     }
     case 6: {
         void* obj = *(void**)self->mpEngine;
-        sVEntry_33A0* vt = *(sVEntry_33A0**)((char*)obj + 4);
+        sVEntry<void*(void*, void*, int)>* vt = *(sVEntry<void*(void*, void*, int)>**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(&self->mpEngine->mStateStack, nextState);

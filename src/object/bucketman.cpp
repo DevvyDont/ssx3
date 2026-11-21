@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "object/movenode.h"
 #include "object/objnode.h"
@@ -163,11 +164,6 @@ struct sSortVE_4C98 {
     int (*fn)(void*, void*);
 };
 
-struct sSortDelVE_4C98 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 struct sSortNode_4C98 {
     int f0;
@@ -207,7 +203,7 @@ extern "C" void cBucketMan_mergeBucket(cBucketMan* self, int index)
                     other->prev = 0;
                     other->next = 0;
                     if (other) {
-                        sSortDelVE_4C98* dv = (sSortDelVE_4C98*)other->vt;
+                        sVEntry<void(void*, int)>* dv = (sVEntry<void(void*, int)>*)other->vt;
                         dv[1].fn((char*)other + dv[1].delta, 3);
                     }
                 } else {
@@ -393,11 +389,6 @@ extern "C" void* cBucketMan_addnext(cBucketMan* self, void* node, int index)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/bucketman", cBucketMan_updateBucket);
 #ifdef SKIP_ASM
-struct sBucketVEntry4F98 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Runs the update virtual (slot 2) of every node in one bucket, reading each node's successor first so a node may
@@ -412,7 +403,7 @@ extern "C" void cBucketMan_updateBucket(cBucketMan* self, int index)
     void* node = cBucketMan_first(self, index);
     while (node != 0) {
         void* next = cBucketMan_next(self, node, index);
-        sBucketVEntry4F98* vt = *(sBucketVEntry4F98**)((char*)node + 0xC);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)node + 0xC);
         vt[2].fn((char*)node + vt[2].delta);
         node = next;
     }
@@ -423,11 +414,6 @@ extern "C" void cBucketMan_updateBucket(cBucketMan* self, int index)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/bucketman", cBucketMan_applyBucket);
 #ifdef SKIP_ASM
-struct sBucketVEntry5028 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Runs the apply virtual (slot 3) of every node in one bucket, in list order.
@@ -438,7 +424,7 @@ extern "C" void cBucketMan_applyBucket(cBucketMan* self, int index)
 {
     void* node = cBucketMan_first(self, index);
     while (node != 0) {
-        sBucketVEntry5028* vt = *(sBucketVEntry5028**)((char*)node + 0xC);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)node + 0xC);
         vt[3].fn((char*)node + vt[3].delta);
         node = cBucketMan_next(self, node, index);
     }
@@ -448,11 +434,6 @@ extern "C" void cBucketMan_applyBucket(cBucketMan* self, int index)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/bucketman", cBucketMan_renderBucket);
 #ifdef SKIP_ASM
-struct sBucketVEntry50A0 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 /**
  * Renders every node in one bucket: calls slot 4 (render) of each node from cBucketMan_first / cBucketMan_next.
@@ -463,7 +444,7 @@ extern "C" void cBucketMan_renderBucket(cBucketMan* self, int index)
 {
     void* node = cBucketMan_first(self, index);
     while (node != 0) {
-        sBucketVEntry50A0* vt = *(sBucketVEntry50A0**)((char*)node + 0xC);
+        sVEntry<void(void*)>* vt = *(sVEntry<void(void*)>**)((char*)node + 0xC);
         vt[4].fn((char*)node + vt[4].delta);
         node = cBucketMan_next(self, node, index);
     }
@@ -501,17 +482,7 @@ extern "C" void cBucketMan_purgeBucket(cBucketMan* self, int index)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/bucketman", cBucketMan_purgeBucket1);
 #ifdef SKIP_ASM
-struct sBucketVEntry51A8 {
-    short delta;
-    short index;
-    int (*fn)(void*);
-};
 
-struct sBucketVEntry51A8b {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 void* cBucketMan_first(cBucketMan* self, int index);
 void* cBucketMan_next(cBucketMan* self, void* node, int index);
@@ -532,10 +503,10 @@ extern "C" void cBucketMan_purgeBucket1(cBucketMan* self, int index, int key)
     void* node = cBucketMan_first(self, index);
     while (node != 0) {
         void* next = cBucketMan_next(self, node, index);
-        sBucketVEntry51A8* sectionIdSlot = &(*(sBucketVEntry51A8**)((char*)node + 0xC))[11];
+        sVEntry<int(void*)>* sectionIdSlot = &(*(sVEntry<int(void*)>**)((char*)node + 0xC))[11];
         if (sectionIdSlot->fn((char*)node + sectionIdSlot->delta) == key) {
             if (node != 0) {
-                sBucketVEntry51A8b* vt = *(sBucketVEntry51A8b**)((char*)node + 0xC);
+                sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)node + 0xC);
                 vt[1].fn((char*)node + vt[1].delta, 3);
             }
         }

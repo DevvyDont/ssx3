@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "scripter/scanimmgr.h"
 
@@ -194,11 +195,6 @@ extern "C" void cScriptAnimBankManager_UnlinkBank(cScriptAnimBankManager* self, 
 INCLUDE_ASM("scripter/scanimmgr", cScriptAnimBankManager_UnlinkBanksAll);
 #ifdef SKIP_ASM
 
-struct sDmVEntry275698 {
-    short delta;
-    short index;
-    void (*fn)(void*, tScriptAnimBankInfo*);
-};
 
 
 /**
@@ -216,7 +212,7 @@ extern "C" void cScriptAnimBankManager_UnlinkBanksAll(cScriptAnimBankManager* se
     int i;
     for (i = 0; i < self->mMaxBanks; i++) {
         if (((int)(self->mpBankInfo)[i].pData) != 0) {
-            ((sDmVEntry275698*)self->mVtbl)[2].fn((char*)self + ((sDmVEntry275698*)self->mVtbl)[2].delta, &(self->mpBankInfo)[i]);
+            ((sVEntry<void(void*, tScriptAnimBankInfo*)>*)self->mVtbl)[2].fn((char*)self + ((sVEntry<void(void*, tScriptAnimBankInfo*)>*)self->mVtbl)[2].delta, &(self->mpBankInfo)[i]);
         }
     }
 }

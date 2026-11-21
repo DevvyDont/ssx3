@@ -1074,11 +1074,6 @@ struct sColor4_4498 {
     float x, y, z, w;
 };
 
-struct sVEntry00194498a {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 struct sVEntry00194498b {
     short delta;
@@ -1096,7 +1091,7 @@ struct sVEntry00194498b {
  */
 extern "C" void DisableTextWidget(void* self)
 {
-    sVEntry00194498a* vt = *(sVEntry00194498a**)((char*)self + 8);
+    sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)self + 8);
     vt[8].fn((char*)self + vt[8].delta, 1);
     sColor4_4498 colour = *(sColor4_4498*)((char*)self + 0x1C);
     if (colour.x > 0.5f) {
