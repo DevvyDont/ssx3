@@ -302,7 +302,7 @@ struct sVEi_4C30 {
 
 static inline void defaultMsg_4C30(cFEStateBuyAttrib* s, int msg)
 {
-    sDefObj_4A90* p = *(sDefObj_4A90**)(((char*)s->mpEngine) + 0x14);
+    sDefObj_4A90* p = (sDefObj_4A90*)s->mpEngine->mpSound;
     if (p == 0)
         p = &gUISoundNull;
     if (p != 0)

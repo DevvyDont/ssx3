@@ -953,8 +953,8 @@ extern "C" void cRealFE_load(cRealFE* self)
     } while (0);
     progress_1E80(75.0f);
     cRealFE_loadCharAnimations_1(self);
-    func_0019CE68((char*)self + 0x1A70);
-    cFERiderManager_init((char*)self + 0xB0);
+    func_0019CE68(self->mBoltFileManager);
+    cFERiderManager_init(self->mRiderManager);
     cFE* cam = SSXApp->RealFE;
     sV4_1E80 pos;
     sV4_1E80 up;

@@ -325,7 +325,7 @@ static inline int padCall_F050(char* in, int slot)
 
 static inline void sound_F050(cFEPopupScreenPos* s, int msg)
 {
-    sDefObj_F050* p = *(sDefObj_F050**)(((char*)s->mpEngine) + 0x14);
+    sDefObj_F050* p = (sDefObj_F050*)s->mpEngine->mpSound;
     if (p == 0)
         p = &gUISoundNull;
     if (p != 0)

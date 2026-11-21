@@ -490,7 +490,7 @@ extern "C" void cFEStateRequestLine_onPopupEvent(cFEStateRequestLine* self, cUIS
             self->mAttrState |= 8;
         }
         if (item->mHashName == 7 && *(int*)((char*)item + 0x6C) != 0) {
-            int song = self->mSongOrder[self->mFirstVisibleSong + *(int*)(*(char**)(((char*)self->mpRadioMenu) + 0xA0) + 0x18)];
+            int song = self->mSongOrder[self->mFirstVisibleSong + self->mpRadioMenu->mpSelected->mMiscData];
             cFEStateRequestLine_buySong((cFEStateRequestLine*)self, song);
             cFEStateRequestLine_updatePlayList((cFEStateRequestLine*)self);
             cFEStateRequestLine_updateHilightedSongInfo((cFEStateRequestLine*)self, song);

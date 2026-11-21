@@ -3039,7 +3039,7 @@ INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onWidgetCreate__FPv);
 void* cOVState_TRANSPORT_onWidgetCreate(void* vself)
 {
     cOVState_TRANSPORT* self = (cOVState_TRANSPORT*)vself;
-    return cUITemplate_MAP_onWidgetCreate((char*)self + 0x9c);
+    return cUITemplate_MAP_onWidgetCreate(&self->mMap);
 }
 #endif
 
@@ -3060,7 +3060,7 @@ INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onGainTransition__FPv);
 void* cOVState_TRANSPORT_onGainTransition(void* vself)
 {
     cOVState_TRANSPORT* self = (cOVState_TRANSPORT*)vself;
-    return cUITemplate_MAP_onGainTransition((char*)self + 0x9c);
+    return cUITemplate_MAP_onGainTransition(&self->mMap);
 }
 #endif
 
@@ -3170,7 +3170,7 @@ INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onInputAlways__FPv);
 void* cOVState_TRANSPORT_onInputAlways(void* vself)
 {
     cOVState_TRANSPORT* self = (cOVState_TRANSPORT*)vself;
-    return cUITemplate_MAP_onInputAlways((char*)self + 0x9c);
+    return cUITemplate_MAP_onInputAlways(&self->mMap);
 }
 #endif
 

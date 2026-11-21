@@ -56,7 +56,7 @@ INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onWidgetCreate__FPv);
 void* cFEStateEventSelect_onWidgetCreate(void* vself)
 {
     cFEStateEventSelect* self = (cFEStateEventSelect*)vself;
-    return cUITemplate_MAP_onWidgetCreate((char*)self + 0x48);
+    return cUITemplate_MAP_onWidgetCreate(&self->mMap);
 }
 #endif
 
@@ -73,7 +73,7 @@ INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onGainTransition__FPv);
 void* cFEStateEventSelect_onGainTransition(void* vself)
 {
     cFEStateEventSelect* self = (cFEStateEventSelect*)vself;
-    return cUITemplate_MAP_onGainTransition((char*)self + 0x48);
+    return cUITemplate_MAP_onGainTransition(&self->mMap);
 }
 #endif
 
