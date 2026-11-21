@@ -1856,7 +1856,7 @@ extern "C" void func_0021E7E0_E1B0(char* self, sColour* colp, t2Vector* pos, t2V
  * Draws a rider's race place: the place digit with its ordinal suffix and, under the suffix, a slash and the number of
  * riders in the race.
  *
- * The rider is AI->Riders[aiIndex] (SSXApp->Game->AI; aiIndex from @p rider) and its place is cRider::unk_0EC (0-based;
+ * The rider is AI->Riders[aiIndex] (SSXApp->Game->AI; aiIndex from @p rider) and its place is cRider::RaceRanking (0-based;
  * the ranking pass writes it). Element 24 of @p obj (+0x360) gives position and scale and D_00477F30, a 9-entry tHUDDef
  * table, the rest: entry [place] the digit (size fallback: the digit texture w444[place], "nm1w".."nm6w"), entry 6 the
  * suffix, entry 7 the slash, entry 8 the total. cOVStateHUD1P_calcElemPos places the digit-plus-suffix box with element 24's
@@ -1895,10 +1895,10 @@ extern "C" void cOVStateHUD1P_renderRank(cOVStateHUD1P* self, char* obj, int* ri
     scale.y = 1.0f;
     float k = 1.0f;
     cRider* panelRider = SSXApp->Game->AI->Riders[rider[0]];
-    tHUDDef_getColour(D_00477F30 + panelRider->unk_0EC * 36, &col);
+    tHUDDef_getColour(D_00477F30 + panelRider->RaceRanking * 36, &col);
     float rankAnimFrame = ((float*)rider)[0x12];
     if (rankAnimFrame >= 0.0f) {
-        if (panelRider->unk_0EC == 0) {
+        if (panelRider->RaceRanking == 0) {
             k = cSinCosTable_gSinCosTable[(int)(rankAnimFrame * 12.566370964050293f * 81.4873275756836f) & 0x1FF] * 0.199636310338974f * (1.0f - rankAnimFrame * rankAnimFrame) + k;
         } else {
             col.a = col.a * (rankAnimFrame * 0.5f + 0.5f);
@@ -1910,8 +1910,8 @@ extern "C" void cOVStateHUD1P_renderRank(cOVStateHUD1P* self, char* obj, int* ri
     tHUDDef_getSize(D_00477F30 + 0xD8, &size1, 0);
     size1.x *= sc.x;
     size1.y *= sc.y;
-    int off = panelRider->unk_0EC << 2;
-    tHUDDef_getSize(D_00477F30 + panelRider->unk_0EC * 36, &size2, *(int*)((char*)tex + off));
+    int off = panelRider->RaceRanking << 2;
+    tHUDDef_getSize(D_00477F30 + panelRider->RaceRanking * 36, &size2, *(int*)((char*)tex + off));
     size2.x *= sc.x;
     size2.y *= sc.y;
     dim.x = size2.x + size1.x;
@@ -1943,9 +1943,9 @@ extern "C" void cOVStateHUD1P_renderRank(cOVStateHUD1P* self, char* obj, int* ri
     cOVStateHUD1P_calcElemPos(((char*)self), &drawPos, &elemPos, &dim, &scale, obj[0x380], obj[0x381], x);
     w = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
     *w = (*w & ~0x3E0) | ((obj[0x382] << 5) & 0x3E0);
-    int off4 = panelRider->unk_0EC << 2;
+    int off4 = panelRider->RaceRanking << 2;
     cOVStateHUD1P_renderBitmap(((char*)self), *(int*)((char*)tex + off4), &drawPos, &size2, &scale, &col);
-    signed char n = panelRider->unk_0EC < 4 ? panelRider->unk_0EC : 3;
+    signed char n = panelRider->RaceRanking < 4 ? panelRider->RaceRanking : 3;
     suffixPos = drawPos;
     int off5 = n * 4;
     int tx = *(int*)(((char*)self) + off5 + 0x45C);

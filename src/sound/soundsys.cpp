@@ -10467,7 +10467,7 @@ extern int cGameModeMan_iRanking[];
 /**
  * Returns a rider's place in the race as a bit (1 first, 2 second, ...), for the place speech.
  *
- * In the multiplayer game path (newRace.cGamePath == 2): when func_002A4078 is nonzero, the rider's unk_0EC (its place) 0..4
+ * In the multiplayer game path (newRace.cGamePath == 2): when func_002A4078 is nonzero, the rider's RaceRanking (its place) 0..4
  * gives 1, 2, 4, 8, 0x10 and anything else 0x200; otherwise 1 for place 0 and 2 for the rest. In the other paths rider
  * 0's rank cGameModeMan_iRanking[0] gives 0: 1, 1: 2, 2: 4, 3: 8, 4: 0x10, 5: 0x200, 6: 0x40, 7: 0x80, 8: 0x100, 9: 0x200, else 0
  * (the @p obj rider is not used there).
@@ -10483,7 +10483,7 @@ extern "C" int func_002A1E68(void *self, cRider* obj)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == 2) {
         if (func_002A4078(self) != 0) {
-            racePlace = obj->unk_0EC;
+            racePlace = obj->RaceRanking;
             if (racePlace == 0) {
                 placeBit = 1;
             } else if (racePlace == 1) {
@@ -10496,7 +10496,7 @@ extern "C" int func_002A1E68(void *self, cRider* obj)
                 placeBit = (racePlace == 4) ? 0x10 : 0x200;
             }
         } else {
-            racePlace = obj->unk_0EC;
+            racePlace = obj->RaceRanking;
             placeBit = (racePlace == 0) ? 1 : 2;
         }
         return placeBit;
@@ -11545,7 +11545,7 @@ struct sSsVt_34D0 { short delta; short index; int (*fn)(void *); };
  * creates a 1000 ms monitor (cMonitor_MONITOR_Create) with the callback D_004A36E8 (func_002A1388) and the rider's AI index, and
  * returns 1. Events 6..11 (func_002A42C8) return 1. With @p flag set, speech instance 0 must be ready (func_002B0E28),
  * else 0 is returned. Without a rider, the location must pass func_002A4078 and the game mode must not be 4, and the
- * focus rider of view @p which is used, its place bit coming from unk_0EC (0..4: 1..0x10, 5: 0x200). Riders with a
+ * focus rider of view @p which is used, its place bit coming from RaceRanking (0..4: 1..0x10, 5: 0x200). Riders with a
  * cheat identity give 1. When request 8388 (identity 11) is queued, the speech hook D_004A482C gets its packed id, the
  * language bit, the rider's character bit (func_002A1D48) and the place bit (func_002A1E68 for a given rider).
  *
@@ -11607,7 +11607,7 @@ extern "C" int func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int whic
     if (sel != 0) {
         placeBit = func_002A1E68(((char*)vself), rider);
     } else {
-        switch ((unsigned int)rider->unk_0EC) {
+        switch ((unsigned int)rider->RaceRanking) {
         case 0:
             placeBit = 1;
             break;

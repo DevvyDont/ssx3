@@ -1030,7 +1030,7 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
             cRiderHandler* hd = landedRider->mRiderHandler;
             hd->WipeoutControl.IsNewImpact = 1;
             hd->WipeoutControl.LatestImpact = landedRider->mVelocity;
-            RIDER->unk_3D0 = hitB.v20;
+            RIDER->GroundVelocity = hitB.v20;
             RIDER->mGroundNormal = hitB.normal;
             RIDER->mSurfaceType = hitB.material;
             RIDER->mGroundContactPoint = hitB.pos;
@@ -1334,10 +1334,10 @@ static inline t4Vector getFront_137D18(cRider* rider)
  *
  * RiderAngVelocity's length eases toward the speed x 0.0125. Friction comes from the surface material's curve
  * (SurfPropCache entry for mSurfaceType, its four points at +0x90) at the tangential speed relative to the ground
- * (unk_3D0), x 3 + 1.5; slow slides (under 1111) during the root pose override or anim categories 29 / 25 blend toward
+ * (GroundVelocity), x 3 + 1.5; slow slides (under 1111) during the root pose override or anim categories 29 / 25 blend toward
  * 40. It is scaled by mGroundNormal.z + 0.3 (clamped 0-1) and capped at 1 / dt. Position and velocity are integrated
  * with gravity -1800 and the speed capped at 3333.3, and the rider is aligned to the ground (cRider_alignRiderAxis).
- * cWipeoutMotion_intersectGround then probes the ground: a hit updates unk_3D0, mGroundNormal, mSurfaceType, mGroundContactPoint and
+ * cWipeoutMotion_intersectGround then probes the ground: a hit updates GroundVelocity, mGroundNormal, mSurfaceType, mGroundContactPoint and
  * unk_454; sinking deeper than the material limit (mAnimModel unk_140.x x material +0x18) pushes the rider out and
  * cancels the inward velocity, a shallower dip springs it back, both spawning the impact effect (func_00111AA0); more
  * than 10 above it launches the rider (cAirPredictor_startLaunchIntoAir, ForceNaturalAir (+0x4) = 1), as does a miss.
@@ -1357,7 +1357,7 @@ extern "C" void cWipeoutMotion_stepGroundMotion(void* vself)
     if (0.0010000000474974513f < len)
         vu0ScaleEq_137D18(*(t4Vector*)(self + 0x30), nl / len);
     sMat_137D18* mat = &materials_137D18()[RIDER->mSurfaceType];
-    t4Vector netVelocity = vu0Sub_137D18(RIDER->mVelocity, RIDER->unk_3D0);
+    t4Vector netVelocity = vu0Sub_137D18(RIDER->mVelocity, RIDER->GroundVelocity);
     float vn = vu0Dot_137D18(netVelocity, RIDER->mGroundNormal);
     t4Vector n = vu0Scale_137D18(RIDER->mGroundNormal, vn);
     t4Vector tang = vu0Sub_137D18(netVelocity, n);
@@ -1387,7 +1387,7 @@ extern "C" void cWipeoutMotion_stepGroundMotion(void* vself)
     sHit_137D18 hit;
     float groundParam = cWipeoutMotion_intersectGround((cWipeoutMotion*)self, (char*)&hit, (sVec4WG*)&RIDER->mGroundNormal);
     if (0.0f <= groundParam) {
-        RIDER->unk_3D0 = hit.v20;
+        RIDER->GroundVelocity = hit.v20;
         RIDER->mGroundNormal = hit.normal;
         RIDER->mSurfaceType = hit.material;
         RIDER->mGroundContactPoint = hit.pos;
@@ -1417,7 +1417,7 @@ extern "C" void cWipeoutMotion_stepGroundMotion(void* vself)
             if (hitOwner != 0) {
                 sVEntH_137D18* vt = *(sVEntH_137D18**)(hitOwner + 0xC);
                 vt[43].fn(hitOwner + vt[43].delta, &hit,
-                          vu0Div_137D18(vu0Add_137D18(vu0Sub_137D18(netVelocity, RIDER->mVelocity), RIDER->unk_3D0), dt));
+                          vu0Div_137D18(vu0Add_137D18(vu0Sub_137D18(netVelocity, RIDER->mVelocity), RIDER->GroundVelocity), dt));
             }
         }
         sMat_137D18* ground = &materials_137D18()[hit.material];
@@ -1698,7 +1698,7 @@ struct sVEntry_138960 { short delta; short index; void (*fn)(void*, void*); };
  *
  * Builds a capsule (cWorldLine_cWorldLine, radius 0.575) from mPosition - 200 x @p dir to mPosition + 200 x @p dir and tests it
  * against the rider's mOverlapList with mLineHint (cOverlapList_terrainIntersect1). On a hit with a patch object it stores the patch's
- * resource id (+0x150) in mGroundPolyId, the hit's u/v in unk_AAC / unk_AB0 and the patch's flags (+0xA) in unk_2D4
+ * resource id (+0x150) in mGroundPolyId, the hit's u/v in unk_AAC / unk_AB0 and the patch's flags (+0xA) in SurfaceFlags
  * (else mGroundPolyId = -1), and calls the hit object's owner's virtual slot 42 with the hit.
  *
  * @param hit  receives the intersection
@@ -1721,7 +1721,7 @@ extern "C" float cWipeoutMotion_intersectGround(cWipeoutMotion* self, char* hit,
             self->mRider->mGroundPolyId = *(int*)(obj + 0x150);
             self->mRider->unk_AAC = *(float*)(hit + 0x6C);
             self->mRider->unk_AB0 = *(float*)(hit + 0x70);
-            self->mRider->unk_2D4 = *(unsigned short*)(*(char**)(hit + 0x54) + 0xA);
+            self->mRider->SurfaceFlags = *(unsigned short*)(*(char**)(hit + 0x54) + 0xA);
         }
         else
         {

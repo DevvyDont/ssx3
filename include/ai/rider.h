@@ -141,8 +141,8 @@ struct cRider {
     /* 0x0DC */ float mRubberBandBehind; // [X] cleared on reset (cRider_initAlways); rubber-band threshold, c.lt.s in cComputer_isFarBehind, cComputer_setupWarp
     /* 0x0E0 */ float mRubberBandAhead; // [X] cleared on reset (cRider_initAlways); rubber-band threshold, c.lt.s in cComputer_isFarAhead
     /* 0x0E4 */ int mGlueStrengthLevel; // [O] cRiderState::mGlueStrengthLevel (+0x8C there); [U] cComputer_setupWarp: 0 = no warp, 2/3 = catch-up, 1/3 = slow-down, as On Tour's setupWarp tests rider+0x8C
-    /* 0x0E8 */ int PrevRanking; // [O] cRiderState::PrevRanking (+0x90); [R] cRider_setPreviousRanking / getPreviousRanking (On Tour setPreviousRanking: sw a1,0x90); cRider_flagEventPathCheckpoint copies unk_0EC (On Tour RaceRanking, +0x94) into it
-    /* 0x0EC */ int unk_0EC; // selector 0..5: func_002A34D0 switches it to 1,2,4,8,0x10,0x200; func_002A1E68 compares it 0..4
+    /* 0x0E8 */ int PrevRanking; // [O] cRiderState::PrevRanking (+0x90); [R] cRider_setPreviousRanking / getPreviousRanking (On Tour setPreviousRanking: sw a1,0x90); cRider_flagEventPathCheckpoint copies RaceRanking (On Tour RaceRanking, +0x94) into it
+    /* 0x0EC */ int RaceRanking; // [O] cRiderState::RaceRanking (+0x94, after PrevRanking); [U] copied into PrevRanking; the place 0..5: func_002A34D0 switches it to 1,2,4,8,0x10,0x200; func_002A1E68 compares it 0..4
     /* 0x0F0 */ int mHasRival; // [X] cleared on reset (cRider_initAlways)
     /* 0x0F4 */ int mLastShoveFrame; // [X] cleared on reset (cRider_initAlways)
     /* 0x0F8 */ int mRivalIndex; // [X] set to -1 on reset (cRider_initAlways)
@@ -169,7 +169,7 @@ struct cRider {
     /* 0x1A0 */ t4Matrix mMatrix; // [P] rows getSide/getFront/getUp (unshifted) + position; built from mRotation/mPosition
     /* 0x1E0 */ t4Vector mVelocity; // [R] getVelocity (cRider_getVelocity); [P] setVelocity
     /* 0x1F0 */ sRiderChannel mSlewed[19]; // [X] [U] 19 channels, init by cRider_OnStartObjectUse; .cur of [0],[2],[3],[8] read as lean input
-    /* 0x2D4 */ unsigned short unk_2D4; // = hit object +0xA (cRider_SetNISGroundVectors)
+    /* 0x2D4 */ unsigned short SurfaceFlags; // [O] SurfaceFlags (placed by its neighbours); [U] = hit object +0xA (cRider_SetNISGroundVectors)
     /* 0x2D6 */ char unk_2D6[0x2];
     /* 0x2D8 */ int unk_2D8; // = 0x320 on reset (cRider_OnStartObjectUse)
     /* 0x2DC */ float mSpinRate; // [X] cleared on transport (cRider_putAt)
@@ -187,7 +187,7 @@ struct cRider {
     /* 0x30C */ float mBoostMaxSpeed; // [X] = 4000.0 (ctor)
     /* 0x310 */ float mCheatSteerAlign; // [X] = 0.18 (ctor)
     /* 0x314 */ float mCheatSpeedLerp; // [X] = 0.015 (ctor)
-    /* 0x318 */ float unk_318;
+    /* 0x318 */ float LegIK; // [O] LegIK (+0xF38); [U] the blend cRider_updateSkeleton passes to cRider_doLegIK
     /* 0x31C */ float unk_31C; // cleared on transport (cRider_putAt); lwc1, compared > 0.0f, scales mGroundNormal (cRider_updateSkeleton)
     /* 0x320 */ int IsRidingFakie; // copied into unk_2D8 (cRider_OnStartObjectUse)
     /* 0x324 */ int IsGoofyStance; // [X] = cBECharacterInterface_getIsGoofyFoot(interface 2, mAIIndex) (cRider_initAlways)
@@ -203,12 +203,12 @@ struct cRider {
     /* 0x360 */ float JumpHeldSec; // [O] cRiderState::JumpHeldSec (+0xF70, after ProximityActionDelay = unk_35C); [U] cRider_checkForPrewind tests it == 0 and sets it to 1.0 as On Tour's checkForPrewind does at +0xF70; the gainFocus of cBoardPressControl / cRailslideControl / cCruiseControl clear it
     /* 0x364 */ char unk_364[0xC];
     /* 0x370 */ t4Vector mGroundNormal; // [P] getGroundNormal, preview 0x350 (+0x20 assumed); slope = atan2(|xy|, z) in cRider_updateSplit12
-    /* 0x380 */ t4Vector unk_380; // copy of mGroundNormal taken before the ground probe (cRider_SetNISGroundVectors)
-    /* 0x390 */ t4Vector unk_390; // reference axis for lean rotation: Cross/Dot with the bone side vector (cRider_updateSkeleton)
+    /* 0x380 */ t4Vector LastGroundNormal; // [O] LastGroundNormal; [U] copy of mGroundNormal taken before the ground probe (cRider_SetNISGroundVectors)
+    /* 0x390 */ t4Vector DampGroundNormal; // [O] DampGroundNormal; [U] reference axis for lean rotation: Cross/Dot with the bone side vector (cRider_updateSkeleton)
     /* 0x3A0 */ t4Vector mGroundForward; // [X] Normalize(front minus its mGroundNormal component) (cRider_SetNISGroundVectors)
     /* 0x3B0 */ t4Vector mGroundSide; // [X] Cross(mGroundNormal, unk_3A0); scaled by lean (doLeanPoseAdjust, cRider_SetNISGroundVectors)
-    /* 0x3C0 */ t4Vector HalfPipeNormal; // [O] cRiderState::HalfPipeNormal (+0xFD0, between DigDir = mGroundSide and GroundVelocity = unk_3D0); [R] cRiderCameraTarget_getHalfPipeNormal returns &rider+0x3C0 (On Tour: cRiderState::getHalfPipeNormal)
-    /* 0x3D0 */ t4Vector unk_3D0; // hit.v20, or t4vect_Zero on a miss (cRider_SetNISGroundVectors)
+    /* 0x3C0 */ t4Vector HalfPipeNormal; // [O] cRiderState::HalfPipeNormal (+0xFD0, between DigDir = mGroundSide and GroundVelocity); [R] cRiderCameraTarget_getHalfPipeNormal returns &rider+0x3C0 (On Tour: cRiderState::getHalfPipeNormal)
+    /* 0x3D0 */ t4Vector GroundVelocity; // [O] GroundVelocity (after HalfPipeNormal); [U] hit.v20, or t4vect_Zero on a miss (cRider_SetNISGroundVectors)
     /* 0x3E0 */ t4Vector mImpulse; // [X] damped by 0.98 per frame (cRider_updateSplit3)
     /* 0x3F0 */ float mImpactAccum; // [X]
     /* 0x3F4 */ float mImpactAccum2; // [X]
@@ -242,8 +242,8 @@ struct cRider {
     /* 0x4D0 */ float mDistToFinish; // [X]
     /* 0x4D4 */ float MinDistanceLeft; // [O] cRiderState::MinDistanceLeft (+0x10E4, after DistanceLeft = mDistToFinish); [U] the lowest track distance so far: cRider_checkTrackPathEvents fires checkpoints only below it and then lowers it; cRider_initPath sets it with mDistToFinish; > 0 gates the path switches (cRider_updateAIPath / updateTrackPath; On Tour updateAIPath: lwc1 0x10E4)
     /* 0x4D8 */ float TotalPathDistance; // [O] (+0x10E8); [R] cRider_getTotalPathDistance / cRider_setTotalPathDistance (On Tour getTotalPathDistance: lwc1 0x10E8)
-    /* 0x4DC */ tPathEventNode PathEventsCur[12]; // [O] (+0x10EC, tPathEventNode[12]); [U] cRider_checkTrackPathEvents has the path's getEventsInRange fill up to 0xC entries here and stores the count at 0x59C (mOverlapCount = On Tour NumPathEventsCur); cRider_updateTrackPath copies count << 4 bytes
-    /* 0x59C */ int mOverlapCount; // [X] cleared on reset (cRider_initAlways)
+    /* 0x4DC */ tPathEventNode PathEventsCur[12]; // [O] (+0x10EC, tPathEventNode[12]); [U] cRider_checkTrackPathEvents has the path's getEventsInRange fill up to 0xC entries here and stores the count at 0x59C (NumPathEventsCur = On Tour NumPathEventsCur); cRider_updateTrackPath copies count << 4 bytes
+    /* 0x59C */ int NumPathEventsCur; // [O] NumPathEventsCur, PathEventsCur's count (max 12); [U] set by cRider_checkTrackPathEvents, cleared on reset (cRider_initAlways)
     /* 0x5A0 */ int unk_5A0; // cleared on reset (cRider_initAlways)
     /* 0x5A4 */ int unk_5A4; // cleared on reset (cRider_initAlways)
     /* 0x5A8 */ int unk_5A8; // cleared on reset (cRider_initAlways)
@@ -311,7 +311,7 @@ struct cRider {
     /* 0x8D0 */ long mHeadBoneMask; // [X] 64-bit; same use for the wide-glance anims (cRider_checkForProximityAction)
     /* 0x8D8 */ char unk_8D8[0x8];
     /* 0x8E0 */ union {
-        tLegInfo RightLeg; // [O] cRider::RightLeg (+0x1490); [P] assert "RightLeg.FootSkelIndex >= 0"; [U] cRider_updateSkeleton: cRider_doLegIK(self, &RightLeg, board * RightLeg.BoardRelativePose (+0x8F0), LegIK = unk_318), as On Tour's updateSkeleton (+0x1490 / +0x14A0, LegIK +0xF38)
+        tLegInfo RightLeg; // [O] cRider::RightLeg (+0x1490); [P] assert "RightLeg.FootSkelIndex >= 0"; [U] cRider_updateSkeleton: cRider_doLegIK(self, &RightLeg, board * RightLeg.BoardRelativePose (+0x8F0), LegIK), as On Tour's updateSkeleton (+0x1490 / +0x14A0, LegIK +0xF38)
         struct {
             char unk_8E0[0x8];
             int unk_8E8; // RightLeg.FootSkelIndex: bone index (cRider_RenderShadow)
@@ -380,7 +380,7 @@ CHECK_OFFSET(cRider, mRubberBandBehind, 0xDC);
 CHECK_OFFSET(cRider, mRubberBandAhead, 0xE0);
 CHECK_OFFSET(cRider, mGlueStrengthLevel, 0xE4);
 CHECK_OFFSET(cRider, PrevRanking, 0xE8);
-CHECK_OFFSET(cRider, unk_0EC, 0xEC);
+CHECK_OFFSET(cRider, RaceRanking, 0xEC);
 CHECK_OFFSET(cRider, mHasRival, 0xF0);
 CHECK_OFFSET(cRider, mLastShoveFrame, 0xF4);
 CHECK_OFFSET(cRider, mRivalIndex, 0xF8);
@@ -394,7 +394,7 @@ CHECK_OFFSET(cRider, unk_180, 0x180);
 CHECK_OFFSET(cRider, mMatrix, 0x1A0);
 CHECK_OFFSET(cRider, mVelocity, 0x1E0);
 CHECK_OFFSET(cRider, mSlewed, 0x1F0);
-CHECK_OFFSET(cRider, unk_2D4, 0x2D4);
+CHECK_OFFSET(cRider, SurfaceFlags, 0x2D4);
 CHECK_OFFSET(cRider, unk_2D8, 0x2D8);
 CHECK_OFFSET(cRider, mSpinRate, 0x2DC);
 CHECK_OFFSET(cRider, mFlipRate, 0x2E0);
@@ -411,7 +411,7 @@ CHECK_OFFSET(cRider, unk_308, 0x308);
 CHECK_OFFSET(cRider, mBoostMaxSpeed, 0x30C);
 CHECK_OFFSET(cRider, mCheatSteerAlign, 0x310);
 CHECK_OFFSET(cRider, mCheatSpeedLerp, 0x314);
-CHECK_OFFSET(cRider, unk_318, 0x318);
+CHECK_OFFSET(cRider, LegIK, 0x318);
 CHECK_OFFSET(cRider, unk_31C, 0x31C);
 CHECK_OFFSET(cRider, IsRidingFakie, 0x320);
 CHECK_OFFSET(cRider, IsGoofyStance, 0x324);
@@ -425,11 +425,11 @@ CHECK_OFFSET(cRider, ReactionEventType, 0x358);
 CHECK_OFFSET(cRider, unk_35C, 0x35C);
 CHECK_OFFSET(cRider, JumpHeldSec, 0x360);
 CHECK_OFFSET(cRider, mGroundNormal, 0x370);
-CHECK_OFFSET(cRider, unk_380, 0x380);
+CHECK_OFFSET(cRider, LastGroundNormal, 0x380);
 CHECK_OFFSET(cRider, mGroundForward, 0x3A0);
 CHECK_OFFSET(cRider, mGroundSide, 0x3B0);
 CHECK_OFFSET(cRider, HalfPipeNormal, 0x3C0);
-CHECK_OFFSET(cRider, unk_3D0, 0x3D0);
+CHECK_OFFSET(cRider, GroundVelocity, 0x3D0);
 CHECK_OFFSET(cRider, mImpulse, 0x3E0);
 CHECK_OFFSET(cRider, mImpactAccum, 0x3F0);
 CHECK_OFFSET(cRider, mImpactAccum2, 0x3F4);
@@ -460,7 +460,7 @@ CHECK_OFFSET(cRider, mDistToFinish, 0x4D0);
 CHECK_OFFSET(cRider, MinDistanceLeft, 0x4D4);
 CHECK_OFFSET(cRider, TotalPathDistance, 0x4D8);
 CHECK_OFFSET(cRider, PathEventsCur, 0x4DC);
-CHECK_OFFSET(cRider, mOverlapCount, 0x59C);
+CHECK_OFFSET(cRider, NumPathEventsCur, 0x59C);
 CHECK_OFFSET(cRider, unk_5A0, 0x5A0);
 CHECK_OFFSET(cRider, unk_5A4, 0x5A4);
 CHECK_OFFSET(cRider, unk_5A8, 0x5A8);

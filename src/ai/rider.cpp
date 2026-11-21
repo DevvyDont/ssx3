@@ -775,7 +775,7 @@ void cRider_initAlways_impl(cRider* self)
         self->mStartTick = SSXApp->Game->AI->AITick;
         self->mFinishTick = 0;
         self->mPenaltyTicks = 0;
-        self->mOverlapCount = 0;
+        self->NumPathEventsCur = 0;
         self->mPowerUpBoostTimer = 0;
         self->mPowerUpTrickTimer = 0;
         self->unk_5A0 = 0;
@@ -1170,7 +1170,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
     }
     cRider_updateOrientationImplicit(self);
     self->mGroundNormal = n;
-    self->unk_3D0 = D_004FF120_D660;
+    self->GroundVelocity = D_004FF120_D660;
     self->mGroundForward = Normalize_D660(SubV_D660(self->mMatrix.row[1], Scale_D660(self->mGroundNormal, DotV_D660(self->mMatrix.row[1], self->mGroundNormal))));
     self->mGroundSide = Cross_D660(self->mGroundNormal, self->mGroundForward);
     self->mVelocity = D_004FF120_D660;
@@ -1203,7 +1203,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
     self->mFlipRate = 0.0f;
     self->mBoostStrength = 0.0f;
     self->mTimeScale = 1.0f;
-    self->unk_318 = 1.0f;
+    self->LegIK = 1.0f;
     self->unk_31C = 0.0f;
     self->RailslideMode = 0;
     self->HandplantMode = 0;
@@ -2035,7 +2035,7 @@ extern "C" void cRider_updateSkeleton_impl(cRider* self) __asm__("cRider_updateS
  * override pose. cAnimModel_transform poses the bones from the body and board roots.
  *
  * Channel 17 then tilts the board-root bone toward the axis at +0x390 (and lifts it along mGroundNormal by unk_31C),
- * re-deriving the board child bone; unless wiping out, unk_318 drives cRider_doLegIK (per-leg adjustment) for the two
+ * re-deriving the board child bone; unless wiping out, LegIK drives cRider_doLegIK (per-leg adjustment) for the two
  * leg records at +0x8E0/+0x910. Finally the rider matrix (+0x160) is rebuilt from the pose and cRider_updateCollideInfo runs.
  *
  * The C definition is cRider_updateSkeleton with an asm label.
@@ -2075,11 +2075,11 @@ extern "C" void cRider_updateSkeleton_impl(cRider* self)
         ax.x = 1.0f - 2.0f * (qy * qy + qz * qz);
         ax.y = 2.0f * (qx * qy + qw * qz);
         ax.z = 2.0f * (qx * qz - qw * qy);
-        sVec4W tiltAxis = Cross_EB98(*(sVec4W*)&self->unk_390, ax);
+        sVec4W tiltAxis = Cross_EB98(*(sVec4W*)&self->DampGroundNormal, ax);
         float len = Length_EB98(tiltAxis);
         if (len > 9.99999993922529e-09f)
         {
-            float tiltDot = DivDot_EB98(tiltAxis, len, *(sVec4W*)&self->unk_390, ax);
+            float tiltDot = DivDot_EB98(tiltAxis, len, *(sVec4W*)&self->DampGroundNormal, ax);
             float sinTilt = Min_EB98(len, 1.0f);
             sVec4W tiltRot;
             if (tiltDot < 0.0f)
@@ -2100,16 +2100,16 @@ extern "C" void cRider_updateSkeleton_impl(cRider* self)
             *bn = Combine_EB98(*boardRoot, local);
         }
     }
-    if (cRider_getControlState(self) != 13 && self->unk_318 != 0.0f)
+    if (cRider_getControlState(self) != 13 && self->LegIK != 0.0f)
     {
         sXf_EB98* bb = (sXf_EB98*)(self->mAnimModel->bones + self->mBoneBoardChild);
         {
             sXf_EB98 xx = Combine_EB98(*bb, *(sXf_EB98*)&self->RightLeg.BoardRelativePose);
-            cRider_doLegIK(self, &self->RightLeg, &xx, self->unk_318);
+            cRider_doLegIK(self, &self->RightLeg, &xx, self->LegIK);
         }
         {
             sXf_EB98 xx = Combine_EB98(*bb, *(sXf_EB98*)&self->LeftLeg.BoardRelativePose);
-            cRider_doLegIK(self, &self->LeftLeg, &xx, self->unk_318);
+            cRider_doLegIK(self, &self->LeftLeg, &xx, self->LegIK);
         }
     }
     QuatToMat_EB98(&self->RiderRoot, &xf.rot, &xf.pos);
@@ -2171,7 +2171,7 @@ extern "C" void cRider_doLegIK_impl(cRider* self, int* chain, sXf_EB98* target, 
  * middle bone's local transform is the upper length along x with a rotation about Z. The root is then turned about the
  * cross product of the bent leg's direction and the root-to-target direction, by the arcsine of that cross product's
  * length (skipped below 1e-5), and the middle bone is rebuilt from the turned root. cRider_updateSkeleton calls it for
- * the legs at +0x8E0 and +0x910 with blend unk_318.
+ * the legs at +0x8E0 and +0x910 with blend LegIK.
  *
  * @param chain  the leg's bone indices: root, middle joint, end
  * @param target  the transform (position, rotation) the end bone should take
@@ -2944,7 +2944,7 @@ static inline float Clamp_120378(float v, float lo, float hi)
 /**
  * Drives the rider's three look animations (head, upper body, hips) from its velocity relative to the ground.
  *
- * The relative velocity is mVelocity - unk_3D0. Layers 3-5's current sequences get a playback rate of speed / 1666.7,
+ * The relative velocity is mVelocity - GroundVelocity. Layers 3-5's current sequences get a playback rate of speed / 1666.7,
  * clamped to 0.5-2 (sequence + 0x90). Every 6th AI tick, on the tick equal to mAIIndex, each enabled look controller
  * (rider + 0x940, 0x970, 0x9A0: an enabled word and two offset quaternions, the second used when IsRidingFakie) picks
  * an animation from its base (411, 418, 425): base when the rider is nearly still (speed 138.9 or less, except in
@@ -2960,7 +2960,7 @@ extern "C" void func_00120378(cRider* vself)
     cRider* self = (cRider*)vself;
     float sideLimit = 416.66668701171875f;
     float upLimit = 888.888916015625f;
-    sV_120378 v = Sub_120378(*(sV_120378*)&self->mVelocity, *(sV_120378*)&self->unk_3D0);
+    sV_120378 v = Sub_120378(*(sV_120378*)&self->mVelocity, *(sV_120378*)&self->GroundVelocity);
     float speed = Length_120378(v);
     float rate = Clamp_120378(speed / 1666.666748046875f, 0.5f, 2.0f);
     if (cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 3)) {
@@ -3021,7 +3021,7 @@ static inline float riderApproach_00120D90(float v, float t, float s)
 }
 
 /**
- * Fades the weight at unk_318, probably the leg-IK blend, in or out at 0.05 per frame.
+ * Fades the weight at LegIK, probably the leg-IK blend, in or out at 0.05 per frame.
  *
  * It goes toward 0 while the current animation of the rider animation's sequencer 2 (cRiderAnimBase_getCurrentAnimCategory) is
  * 0x14-0x1A, otherwise toward 1.
@@ -3030,9 +3030,9 @@ extern "C" void cRider_updateLegIK(cRider* self)
 {
     int animState = cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 2);
     if (animState >= 20 && animState <= 26)
-        self->unk_318 = riderApproach_00120D90(self->unk_318, 0.0f, 0.05000000447034836f);
+        self->LegIK = riderApproach_00120D90(self->LegIK, 0.0f, 0.05000000447034836f);
     else
-        self->unk_318 = riderApproach_00120D90(self->unk_318, 1.0f, 0.05000000447034836f);
+        self->LegIK = riderApproach_00120D90(self->LegIK, 1.0f, 0.05000000447034836f);
 }
 #endif
 
@@ -6033,14 +6033,14 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* p) __asm__("
  *
  * The probe base is @p pRiderPos moved along mGroundSide by mAnimModel->unk_140.x * mSlewed[0].cur * 45; a line from 100 below
  * to 200 above it (along mGroundNormal) is built with cWorldLine_cWorldLine and intersected with the terrain through
- * mOverlapList (cOverlapList_terrainIntersect1). The speed is the length of the virtual getVelocity, and unk_380 keeps the previous
+ * mOverlapList (cOverlapList_terrainIntersect1). The speed is the length of the virtual getVelocity, and LastGroundNormal keeps the previous
  * mGroundNormal. A hit object sets mGroundPolyId (object +0x150), unk_AAC / unk_AB0 (the hit's +0x6C / +0x70) and
- * unk_2D4 (the object's half-word +0xA); otherwise mGroundPolyId becomes -1.
+ * SurfaceFlags (the object's half-word +0xA); otherwise mGroundPolyId becomes -1.
  *
- * On a miss (negative distance): unk_B00 = 0, mGroundNormal = the Z axis, unk_3D0 = zero, mSurfaceType and the four
+ * On a miss (negative distance): unk_B00 = 0, mGroundNormal = the Z axis, GroundVelocity = zero, mSurfaceType and the four
  * audio values 0. On a hit: the first contact (unk_AFC set, unk_B00 clear) is reported to the rider handler
  * (func_00111AA0 with the hit point, its normal, material and the length of its third vector); then unk_B00 = 1,
- * mSurfaceType = the material (0 for -1), mGroundNormal, mGroundContactPoint and unk_3D0 come from the hit, unk_454 =
+ * mSurfaceType = the material (0 for -1), mGroundNormal, mGroundContactPoint and GroundVelocity come from the hit, unk_454 =
  * the probe base's height above the hit, mAudioSpeed = speed * 0.00072 (at most 1), mAudioPressure 0.3, mAudioEdging 0,
  * and mAudioBraking = (speed - unk_B04) * 0.0036 (at most 1) when the speed rose since the last call, else 0: the sign
  * looks inverted, but On Tour computes it the same way. Both cases rebuild mGroundForward (row 1 of mMatrix projected
@@ -6061,19 +6061,19 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
     sRay_42B0 ray;
     cWorldLine_cWorldLine(&ray, lo, hi, 2, 0.5f);
     float hitDist = cOverlapList_terrainIntersect1(self->mOverlapList, &ray, &hit, 0);
-    *(&self->unk_380) = *(&self->mGroundNormal);
+    *(&self->LastGroundNormal) = *(&self->mGroundNormal);
     if (hitDist > 0.0f && hit.obj != 0) {
         self->mGroundPolyId = *(int*)(hit.obj + 0x150);
         self->unk_AAC = hit.f6C;
         self->unk_AB0 = hit.f70;
-        self->unk_2D4 = *(unsigned short*)(hit.obj + 0xA);
+        self->SurfaceFlags = *(unsigned short*)(hit.obj + 0xA);
     } else {
         *(unsigned int*)&self->mGroundPolyId = 0xFFFFFFFF;
     }
     if (hitDist < 0.0f) {
         self->unk_B00 = 0;
         *(&self->mGroundNormal) = D_004FF160_42B0;
-        *(&self->unk_3D0) = D_004FF120_42B0;
+        *(&self->GroundVelocity) = D_004FF120_42B0;
         *(&self->mGroundForward) = Normalize_42B0(SubV_42B0(*(&self->mMatrix.row[1]), Scale_42B0(*(&self->mGroundNormal), DotV_42B0(*(&self->mMatrix.row[1]), *(&self->mGroundNormal)))));
         *(&self->mGroundSide) = Cross_42B0(*(&self->mGroundNormal), *(&self->mGroundForward));
         self->mSurfaceType = 0;
@@ -6093,7 +6093,7 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
         self->mSurfaceType = 0;
     *(&self->mGroundNormal) = hit.nrm;
     *(&self->mGroundContactPoint) = hit.pos;
-    *(&self->unk_3D0) = hit.v20;
+    *(&self->GroundVelocity) = hit.v20;
     *(&self->mGroundForward) = Normalize_42B0(SubV_42B0(*(&self->mMatrix.row[1]), Scale_42B0(*(&self->mGroundNormal), DotV_42B0(*(&self->mMatrix.row[1]), *(&self->mGroundNormal)))));
     *(&self->mGroundSide) = Cross_42B0(*(&self->mGroundNormal), *(&self->mGroundForward));
     self->unk_454 = Dot_42B0(Sub_42B0(probeBase, hit.pos), *(&self->mGroundNormal));

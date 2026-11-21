@@ -1010,7 +1010,7 @@ extern "C" void cAirMotion_step(cAirMotion* self)
         sVec4HP up = *(sVec4HP*)&rider1->unk_180;
         *(sVec4HP*)&rider1->mGroundNormal = up;
     }
-    *(sVec4HP*)&self->mRider->unk_3D0 = *(sVec4HP*)t4vect_Zero;
+    *(sVec4HP*)&self->mRider->GroundVelocity = *(sVec4HP*)t4vect_Zero;
     int st = *(int*)((char*)self->mRider->mAirPredictor + 0xAC);
     int ok = 0;
     if (st == 1 || st == 3) ok = 1;
@@ -4222,7 +4222,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     self->PowderDepth1G = approach_13D818(self->PowderDepth1G, scale * snow->m14, dt * 100.0f);
     self->PowderDepth3G = approach_13D818(self->PowderDepth3G, scale * snow->m18, dt * 100.0f);
 
-    t4Vector rel = vu0Sub_13D818(self->mRider->mVelocity, self->mRider->unk_3D0);
+    t4Vector rel = vu0Sub_13D818(self->mRider->mVelocity, self->mRider->GroundVelocity);
     float dN = vu0Dot_13D818(rel, self->mRider->mGroundNormal);
     float dF = vu0Dot_13D818(rel, self->mRider->mGroundForward);
     float dS = vu0Dot_13D818(rel, self->mRider->mGroundSide);
@@ -4258,7 +4258,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         self->mRider->unk_454 -= pen;
         if (dN < 0.0f) {
             vu0SubEq_13D818(rel, vu0Scale_13D818(self->mRider->mGroundNormal, dN));
-            self->mRider->mVelocity = vu0Add_13D818(rel, self->mRider->unk_3D0);
+            self->mRider->mVelocity = vu0Add_13D818(rel, self->mRider->GroundVelocity);
         }
         float fn = vu0Dot_13D818(force, self->mRider->mGroundNormal);
         if (fn < 0.0f)
@@ -4270,7 +4270,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     }
 
     float vv = vu0Dot_13D818(rel, rel);
-    float heightBefore = vu0Dot_13D818(self->mRider->mPosition, self->mRider->unk_390);
+    float heightBefore = vu0Dot_13D818(self->mRider->mPosition, self->mRider->DampGroundNormal);
     if (0.5f < absf_13D818(self->mRider->mSlewed[3].cur) && vv < 250026.640625f) {
         t4Vector n = self->mRider->mGroundNormal;
         if (0.866100013256073f < n.z) {
@@ -4278,7 +4278,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
             if (vv < 2.0f)
                 damp = 0.0f;
             vu0ScaleEq_13D818(rel, damp);
-            self->mRider->mVelocity = vu0Add_13D818(self->mRider->unk_3D0, rel);
+            self->mRider->mVelocity = vu0Add_13D818(self->mRider->GroundVelocity, rel);
             force = D_004FF120_13D818;
         }
     }
@@ -4286,8 +4286,8 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     t4Vector diff = vu0Sub_13D818(grav, force);
     vu0AddEq_13D818(self->mRider->mPosition, vu0Scale_13D818(self->mRider->mVelocity, dt));
     vu0AddEq_13D818(self->mRider->mVelocity, vu0Scale_13D818(force, dt));
-    rel = vu0Sub_13D818(self->mRider->mVelocity, self->mRider->unk_3D0);
-    float heightAfter = vu0Dot_13D818(self->mRider->mPosition, self->mRider->unk_390);
+    rel = vu0Sub_13D818(self->mRider->mVelocity, self->mRider->GroundVelocity);
+    float heightAfter = vu0Dot_13D818(self->mRider->mPosition, self->mRider->DampGroundNormal);
     float lo2 = (1.0f - self->mRider->mSlewed[4].cur) * -20.0f;
     float hi2 = self->mRider->mSlewed[4].cur * 10.0f;
     float ch = self->mRider->mSlewed[18].cur + (heightBefore - heightAfter) * 10.0f;
@@ -4412,7 +4412,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         float lenAfter = vu0Len_13D818(rel);
         if (lenAfter != 0.0f)
             vu0ScaleEq_13D818(rel, lenBefore / lenAfter);
-        self->mRider->mVelocity = vu0Add_13D818(self->mRider->unk_3D0, rel);
+        self->mRider->mVelocity = vu0Add_13D818(self->mRider->GroundVelocity, rel);
     }
 
     float maxH = snow->m10;

@@ -3502,7 +3502,7 @@ struct sAiObj12CA30
  * Zeroes mPowerUpBoostTimer, mPowerUpTrickTimer, IsNewImpact and RecoverPercent, clears the audio word of the
  * rider's view (cSSXAudio_ResetWipeoutRecoverHit), copies the hip and board-child bone poses (plus mModelOffset) into
  * RiderPrevPose and BoardPrevPose, and sets RiderState 0 (Launch). When cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 2) is 0x16
- * it calls cWipeoutMotion_throwItem (rider velocity, no spin, BoardPrevPose) and clears unk_318. Then
+ * it calls cWipeoutMotion_throwItem (rider velocity, no spin, BoardPrevPose) and clears LegIK. Then
  * notifies the replay (cReplay_eventWipeout) and queues world-script op 0x70004 (cWScriptMan_eventWipeout).
  */
 extern "C" void cWipeoutControl_gainFocus(cWipeoutControl* self)
@@ -3522,7 +3522,7 @@ extern "C" void cWipeoutControl_gainFocus(cWipeoutControl* self)
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 22)
     {
         cWipeoutMotion_throwItem((char*)&self->mRider->mRiderHandler->WipeoutMotion, (sVec4_12CA30*)(&self->mRider->mVelocity), (sVec4_12CA30*)t4vect_Zero, boardPrevPose);
-        *(int*)&self->mRider->unk_318 = 0;
+        *(int*)&self->mRider->LegIK = 0;
     }
     cReplay_eventWipeout(SSXApp->Game->Replay, self->mRider->mAIIndex, (int)self->mRider->mMetrix + 0xFC);
     cWScriptMan_eventWipeout(cWScriptMan_TheWScriptMan);

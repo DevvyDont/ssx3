@@ -1601,7 +1601,7 @@ extern "C" void cRiderMetrix_evCheckpoint(void*, int);
  */
 extern "C" void cRider_flagEventPathCheckpoint(cRider* self, int* checkpoint)
 {
-    self->PrevRanking = self->unk_0EC;
+    self->PrevRanking = self->RaceRanking;
     if (((D_005308D0[0] >> 9) & 1) == 0)
     {
         cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -2536,9 +2536,9 @@ float cRider_getDistanceLeft(void* self);
  * Re-ranks the riders by the AI's RaceRankType and tells the audio system about each change of place.
  *
  * Does nothing for rank type 0 or before cAI_isAILoadedAndReady. Type 1 ranks racers by -(distance left + 20 x their
- * current place unk_0EC), so a rider must gain 20 units to pass; type 2 ranks by the metrix's +0x198 points. Keys are
- * sorted largest first (SORT_shell). For each new place that differs from unk_0EC, cSSXAudio_ChangePosition gets the
- * rider, the riders after and before it and the old and new place; the place is stored in unk_0EC. Actors get key
+ * current place RaceRanking), so a rider must gain 20 units to pass; type 2 ranks by the metrix's +0x198 points. Keys are
+ * sorted largest first (SORT_shell). For each new place that differs from RaceRanking, cSSXAudio_ChangePosition gets the
+ * rider, the riders after and before it and the old and new place; the place is stored in RaceRanking. Actors get key
  * 0xFFFF in type 1, which sorts them ahead of every racer, but -0xFFFF in type 2. The two branches on mFinishTime >= 10
  * compute the same key.
  *
@@ -2567,9 +2567,9 @@ extern "C" void cAI_UpdateRankingPlacement(cAI* aiObj)
             {
                 int far = rider->mFinishTime >= 10.0f;
                 if (far)
-                    keys[i] = -(int)(cRider_getDistanceLeft(rider) + (float)(rider->unk_0EC * 20));
+                    keys[i] = -(int)(cRider_getDistanceLeft(rider) + (float)(rider->RaceRanking * 20));
                 else
-                    keys[i] = -(int)(cRider_getDistanceLeft(rider) + (float)(rider->unk_0EC * 20));
+                    keys[i] = -(int)(cRider_getDistanceLeft(rider) + (float)(rider->RaceRanking * 20));
             }
             break;
         case 2:
@@ -2587,7 +2587,7 @@ extern "C" void cAI_UpdateRankingPlacement(cAI* aiObj)
     int j;
     for (j = 0; j < self->count; j++)
     {
-        if (self->riders[idx[j]]->unk_0EC != j)
+        if (self->riders[idx[j]]->RaceRanking != j)
         {
             cRider* next = 0;
             cRider* prev = 0;
@@ -2595,9 +2595,9 @@ extern "C" void cAI_UpdateRankingPlacement(cAI* aiObj)
                 prev = self->riders[idx[j - 1]];
             if (j < self->count - 1)
                 next = self->riders[idx[j + 1]];
-            cSSXAudio_ChangePosition(cAudioInterface_bxAudio(), self->riders[idx[j]], next, prev, self->riders[idx[j]]->unk_0EC, j);
+            cSSXAudio_ChangePosition(cAudioInterface_bxAudio(), self->riders[idx[j]], next, prev, self->riders[idx[j]]->RaceRanking, j);
         }
-        self->riders[idx[j]]->unk_0EC = j;
+        self->riders[idx[j]]->RaceRanking = j;
     }
 }
 #endif
@@ -4419,7 +4419,7 @@ struct sPathSys_112FB0 { char pad0[0x18]; tPathCheckpoint_112FB0 Checkpoints[6];
  * Intersects the rider with the track path (+0xAB4, mTrackPathHint) and sets mDistToFinish = path length (+0x38) - path
  * position. When the rider moved forward (below the previous distance at +0x4D4), every one of gPaths' 6 checkpoints
  * between the old and new distance (the list ends at a zero entry) goes to cRider_flagEventPathCheckpoint, the
- * path's vtable slot 1 collects up to 12 events in the covered range into +0x4DC (count in mOverlapCount), and +0x4D4
+ * path's vtable slot 1 collects up to 12 events in the covered range into +0x4DC (count in NumPathEventsCur), and +0x4D4
  * advances. Otherwise the same query runs on the empty range at the old distance.
  *
  * @param vself  the rider (this)
@@ -4451,13 +4451,13 @@ extern "C" void cRider_checkTrackPathEvents(cRider* vself, float* pathDistXY, fl
         }
         char* curTrack = (char*)self->TrackPath;
         sVEntry_112FB0* vt = *(sVEntry_112FB0**)(curTrack + 0x34);
-        self->mOverlapCount = vt[1].fn(curTrack + vt[1].delta, self->MinDistanceLeft, self->mDistToFinish, (char*)&self->PathEventsCur[0], 0xC);
+        self->NumPathEventsCur = vt[1].fn(curTrack + vt[1].delta, self->MinDistanceLeft, self->mDistToFinish, (char*)&self->PathEventsCur[0], 0xC);
         self->MinDistanceLeft = self->mDistToFinish;
     }
     else
     {
         sVEntry_112FB0* vt = *(sVEntry_112FB0**)(track + 0x34);
-        self->mOverlapCount = vt[1].fn(track + vt[1].delta, cur, cur, (char*)&self->PathEventsCur[0], 0xC);
+        self->NumPathEventsCur = vt[1].fn(track + vt[1].delta, cur, cur, (char*)&self->PathEventsCur[0], 0xC);
     }
 }
 #endif

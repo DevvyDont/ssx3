@@ -820,8 +820,8 @@ extern "C" int cSSXAudio_GetFocusRider(cSSXAudio* self, int which)
         int bestPrio = 30000;
         for (int i = 0; i < ((cAI*)cAudioInterface_getAI())->NumberOfPlayersAllocated; i++) {
             cRider* curRider = ((cAI*)cAudioInterface_getAI())->Riders[i];
-            if (isLocalHuman(curRider) && curRider->unk_0EC < bestPrio) {
-                bestPrio = curRider->unk_0EC;
+            if (isLocalHuman(curRider) && curRider->RaceRanking < bestPrio) {
+                bestPrio = curRider->RaceRanking;
                 best = i;
             }
         }

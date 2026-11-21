@@ -1632,7 +1632,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getLastGroundNormal);
 extern "C" void* cRiderCameraTarget_getLastGroundNormal(void* result, cRiderCameraTarget* target)
 {
     cRider* rider = target->Rider;
-    *(cQuad128*)result = *(cQuad128*)&rider->unk_380;
+    *(cQuad128*)result = *(cQuad128*)&rider->LastGroundNormal;
     return result;
 }
 #endif
