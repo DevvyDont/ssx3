@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/ferider.h"
 #include "sound/ssxaudio.h"
 #include "fe/fereal.h"
 #include "fe/festateriderdetail.h"
@@ -298,7 +299,7 @@ extern "C" void cFEStateCharSetup_updateWidget(cFEStateCharSetup* self)
 INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_updateCharacter3DPos);
 #ifdef SKIP_ASM
 extern "C" void fSinCos(float* s, float* c, float angle);
-extern "C" void* cFERiderManager_getHuman1(void* self, int idx);
+extern "C" cFERider* cFERiderManager_getHuman1(void* self, int idx);
 extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
 extern "C" void cFERider_speak(void* rider);
@@ -418,7 +419,7 @@ extern "C" void cFEStateCharSetup_updateCharacter3DPos(cFEStateCharSetup* self_)
 //100%
 INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_show3DCharacter);
 #ifdef SKIP_ASM
-extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
+extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFERider_setVisible(void* self, int a1);
 
 /**

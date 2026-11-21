@@ -563,7 +563,7 @@ extern "C" int cSSXAudio_PlayPositional(cSSXAudio* vself, int streamIndex, const
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_Calc3DPos);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* cAudioInterface_getApp();
+extern "C" cSSXApp* cAudioInterface_getApp();
 extern "C" cGame* cAudioInterface_getGame();
 extern "C" float func_0031C228(float);
 
@@ -650,7 +650,7 @@ static inline float Atan2_5930(float y, float x)
  */
 extern "C" float cSSXAudio_Calc3DPos(cSSXAudio* audio, char* source, SNDPLAYOPTS* outAngles)
 {
-    if (*(int*)((char*)cAudioInterface_getApp() + 0x84) == 0)
+    if ((int)cAudioInterface_getApp()->Game == 0)
         return 1.0f;
     char* game = (char*)cAudioInterface_getGame();
     char* obj = (*(sObjList_5930**)(game + 0x84))->items[*(int*)(source + 0x84)];
@@ -725,7 +725,7 @@ extern "C" void cSSXAudio_UpdateTimedEvent(void* self);
 extern "C" void cSSXAudio_UpdateTone(void* self);
 extern "C" void cSSXAudio_ApplyRMSData(cSSXAudio* self);
 extern "C" void cSSXAudio_DuckToStream(cSSXAudio* self, int a1, float f0, float f1);
-extern "C" void* cAudioInterface_getApp();
+extern "C" cSSXApp* cAudioInterface_getApp();
 extern "C" cGame* cAudioInterface_getGame();
 extern "C" void cSSXAudio_ResetLift(void* self);
 extern "C" void cSSXAudio_ResumeAudio(cSSXAudio* self);
@@ -760,7 +760,7 @@ extern "C" void cSSXAudio_Update(cSSXAudio* self, float dt)
     }
     cSSXAudio_UpdateDuck((cSSXAudio*)self);
     cSSXAudio_UpdateMix((sSaMix87F8*)self);
-    if (*(int*)((char*)cAudioInterface_getApp() + 0x84) != 0) {
+    if ((int)cAudioInterface_getApp()->Game != 0) {
         func_0028C8C8(((char*)self));
         if (self->mAudioUpdateState == 6) {
             if (self->mAudioPaused == 0)
@@ -3016,7 +3016,7 @@ extern "C" int cSSXAudio_InCameraView(cSSXAudio* self, sAudV4* pos, float radius
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetNumViews);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_getApp();
+extern "C" cSSXApp* cAudioInterface_getApp();
 extern "C" int cAudioInterface_getNumGameView();
 
 /**
@@ -3028,7 +3028,7 @@ extern "C" int cAudioInterface_getNumGameView();
  */
 extern "C" int cSSXAudio_GetNumViews()
 {
-    if (*(int*)((char*)cAudioInterface_getApp() + 0x84) != 0) {
+    if ((int)cAudioInterface_getApp()->Game != 0) {
         return cAudioInterface_getNumGameView();
     }
     return 1;

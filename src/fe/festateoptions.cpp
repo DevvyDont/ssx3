@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/ferider.h"
 #include "sound/ssxaudio.h"
 #include "fe/fereal.h"
 #include "fe/festateprofile.h"
@@ -2712,7 +2713,7 @@ extern "C" void cUIStateStack_pop(void* list, int a1);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void cBENewPlayerInterface_setPlayerName(void* self, int a1, const char* name);
 extern "C" void cBE_newProfile(void* self, int c);
-extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
+extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFERider_purge(void* self);
 extern "C" int cFERider_init(void* self, int a1, int a2, int a3);
 struct cUIScreen;

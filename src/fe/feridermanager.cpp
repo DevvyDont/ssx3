@@ -1844,9 +1844,9 @@ INCLUDE_ASM("fe/feridermanager", cFERiderManager_getHuman1);
  * @param index  the rider
  * @return the rider
  */
-extern "C" void* cFERiderManager_getHuman1(cFERiderManager* self, int index)
+extern "C" cFERider* cFERiderManager_getHuman1(cFERiderManager* self, int index)
 {
-    return (char*)&self->mHumans[index];
+    return (cFERider*)(char*)&self->mHumans[index];
 }
 #endif
 

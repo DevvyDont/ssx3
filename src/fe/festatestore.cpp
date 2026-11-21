@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/ferider.h"
 #include "sound/ssxaudio.h"
 #include "fe/fereal.h"
 #include "fe/uistatebuypopup.h"
@@ -350,7 +351,7 @@ extern "C" void cFEStateUberTrick_onGainFocus(cFEStateUberTrick* self, int prevS
 INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void fSinCos(float* s, float* c, float angle);
-extern "C" void* cFERiderManager_getHuman1(void* self, int idx);
+extern "C" cFERider* cFERiderManager_getHuman1(void* self, int idx);
 extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
 extern "C" void cUIState_onUpdate(void* self);
@@ -630,7 +631,7 @@ extern "C" void cFEStateUberTrick_activateMainMenu(void* self);
 extern "C" void cFEStateUberTrick_activateTrickMenu(void* self);
 extern "C" void cFEStateUberTrick_updateTrickMenuEntry(void* self);
 extern "C" void cFEStateUberTrick_previewVisible(cFEStateUberTrick* self, int on);
-extern "C" void* cFERiderManager_getHuman1(void* self, int idx);
+extern "C" cFERider* cFERiderManager_getHuman1(void* self, int idx);
 extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* mem, void* owner, void* state, int a3);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
@@ -829,7 +830,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
         }
         break;
     case 1:
-        *(int*)((char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum) + 0xCD0) = 1;
+        cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum)->mUberIrradiance = 1;
         if ((char*)item->mpParent == (char*)self->mpMainMenu) {
             if (self->mpTrickMenu != 0 && item->mMiscData != -1) {
                 cFEStateUberTrick_trickVisible(self, 1);
@@ -878,7 +879,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThin
         }
         break;
     case 2:
-        *(int*)((char*)cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum) + 0xCD0) = 0;
+        cFERiderManager_getHuman1(&SSXApp->RealFE->mRiderManager, self->mUserNum)->mUberIrradiance = 0;
         break;
     }
 }

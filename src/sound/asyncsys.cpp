@@ -891,9 +891,9 @@ INCLUDE_ASM("sound/asyncsys", cAudioInterface_getApp);
  *
  * @return SSXApp
  */
-extern "C" void* cAudioInterface_getApp()
+extern "C" cSSXApp* cAudioInterface_getApp()
 {
-    return (char*)SSXApp;
+    return (cSSXApp*)(char*)SSXApp;
 }
 #endif
 

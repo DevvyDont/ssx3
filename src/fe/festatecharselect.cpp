@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/ferider.h"
 #include "be/berewarddb.h"
 #include "fe/fereal.h"
 #include "fe/festatecharsetup.h"
@@ -19,7 +20,7 @@ extern char str_08sel_char[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cSimpleCamera_setupCamWithPosAndTarget(void* cam, sVec4_181148* a, sVec4_181148* b);
-extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
+extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFERider_setVisible(void* self, int a1);
 
 /**
@@ -64,7 +65,7 @@ INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onDestroyScreen);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
+extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFERider_setVisible(void* self, int a1);
 void* cUIState_onDestroyScreen(void* self);
 
@@ -124,7 +125,7 @@ int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int a2, int a3);
-extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
+extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFEStateCharSelect_updateCharacter3DPos(cFEStateCharSelect* self);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
 extern signed char D_00440F68[];
@@ -381,7 +382,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void* func_001887A0(void* mem, void* owner, int a2);
 extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(void* mem, void* owner, int a2, unsigned char a3);
-extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
+extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFERider_setVisible(void* self, int a1);
 extern "C" void cFECustom_setPlayerCtrlMask(void* self, int rider, unsigned char mask);
 extern "C" void cFEStateCharSelect_updateWidget(void* self, int index, signed char charID);

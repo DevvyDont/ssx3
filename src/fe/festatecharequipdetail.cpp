@@ -307,7 +307,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
+extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cRiderAnimBase_reset(void* self);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" void cFEStateCharEquip_update3DPositions(cFEStateCharEquip* self);
@@ -352,7 +352,7 @@ extern "C" void cFEStateCharEquip_onCreateScreen(cFEStateCharEquip* self)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onDestroyScreen);
 #ifdef SKIP_ASM
-extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
+extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 void* cUIState_onDestroyScreen(void* self);
 
 /**
@@ -409,7 +409,7 @@ extern "C" void cFEStateCharEquip_onGainFocus(cFEStateCharEquip* self, int pPrev
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onLoseFocus);
 #ifdef SKIP_ASM
-extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
+extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFERider_setVisible(cFERider* rider, int a1);
 
 /**
@@ -684,7 +684,7 @@ extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
 extern "C" void func_0019A9B8(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_updatePreviewLoad(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_update3DPositions(cFEStateCharEquip* self);
-extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
+extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern char str_loading_text[];
 
 struct sVEntryK199938 {
@@ -846,7 +846,7 @@ extern "C" int func_0014B478(void* self, int a1, int a2);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
+extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern int D_004A11E0;
 extern int D_004A18D8;
 
@@ -1777,7 +1777,7 @@ extern "C" void func_0019AB78(cFEStateCharEquip* self)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019ACA0);
 #ifdef SKIP_ASM
-extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
+extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2818,7 +2818,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_update3DPositions);
 // reload; before that they lengthen yaw's live range from 166 to 169 insns, so global-alloc ranks the 0.0174533 constant above yaw and
 // they take retail's fs3/fs4); plain form 99.95%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
+extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void fSinCos(float angle, float* s, float* c);
 
 struct sQuat_BFE8
