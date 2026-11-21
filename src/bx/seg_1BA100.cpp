@@ -4922,11 +4922,11 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_isEqual);
  * @param rhs  the region's tWPData_MusicTrigger (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_MusicTrigger_isEqual(tWPInGameData_MusicTrigger* lhs, tWPData* rhs) {
-    if ((lhs->m_Type) != (*(int *)((char*)(rhs) + (4)))) {
+extern "C" int tWPInGameData_MusicTrigger_isEqual(tWPInGameData_MusicTrigger* lhs, tWPData_MusicTrigger* rhs) {
+    if ((lhs->m_Type) != (rhs->m_Type)) {
         return 0;
     }
-    return (lhs->m_Value) == (*(int *)((char*)(rhs) + (8)));
+    return (lhs->m_Value) == (rhs->m_Value);
 }
 #endif
 
@@ -4942,8 +4942,8 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_isEqual);
  * @param rhs  the region's tWPData_Mix (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Mix_isEqual(tWPInGameData_Mix* lhs, tWPData* rhs) {
-    return (lhs->m_MixPreset) == (*(int *)((char*)(rhs) + (4)));
+extern "C" int tWPInGameData_Mix_isEqual(tWPInGameData_Mix* lhs, tWPData_Mix* rhs) {
+    return (lhs->m_MixPreset) == (rhs->m_MixPreset);
 }
 #endif
 
@@ -4959,8 +4959,8 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_isEqual);
  * @param rhs  the region's tWPData_Ambience (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Ambience_isEqual(tWPInGameData_Ambience* lhs, tWPData* rhs) {
-    return (lhs->m_BankID) == (*(int *)((char*)(rhs) + (4)));
+extern "C" int tWPInGameData_Ambience_isEqual(tWPInGameData_Ambience* lhs, tWPData_Ambience* rhs) {
+    return (lhs->m_BankID) == (rhs->m_BankID);
 }
 #endif
 
@@ -4976,8 +4976,8 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_isEqual);
  * @param rhs  the region's tWPData_Speech (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Speech_isEqual(tWPInGameData_Speech* lhs, tWPData* rhs) {
-    return (lhs->m_SpeechID) == (*(int *)((char*)(rhs) + (4)));
+extern "C" int tWPInGameData_Speech_isEqual(tWPInGameData_Speech* lhs, tWPData_Speech* rhs) {
+    return (lhs->m_SpeechID) == (rhs->m_SpeechID);
 }
 #endif
 
@@ -4993,11 +4993,11 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_isEqual);
  * @param rhs  the region's tWPData_Camera (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Camera_isEqual(tWPInGameData_Camera* lhs, tWPData* rhs) {
+extern "C" int tWPInGameData_Camera_isEqual(tWPInGameData_Camera* lhs, tWPData_Camera* rhs) {
     int var_2;
 
     var_2 = 0;
-    if ((lhs->m_DrawDistance) == (*(float *)((char*)(rhs) + (4)))) {
+    if ((lhs->m_DrawDistance) == (rhs->m_DrawDistance)) {
         var_2 = 1;
     }
     return var_2;
@@ -5017,13 +5017,13 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_isEqual);
  * @param rhs  the region's tWPData_Fog (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Fog_isEqual(tWPInGameData_Fog* lhs, tWPData* rhs) {
-    if (lhs->m_FogDensity != *(float*)((char*)rhs + 4)) return 0;
-    if (lhs->m_FogNear != *(float*)((char*)rhs + 8)) return 0;
-    if (lhs->m_FogFar != *(float*)((char*)rhs + 0xC)) return 0;
-    if (lhs->m_FogColourR != *(float*)((char*)rhs + 0x10)) return 0;
-    if (lhs->m_FogColourG != *(float*)((char*)rhs + 0x14)) return 0;
-    if (lhs->m_FogColourB != *(float*)((char*)rhs + 0x18)) return 0;
+extern "C" int tWPInGameData_Fog_isEqual(tWPInGameData_Fog* lhs, tWPData_Fog* rhs) {
+    if (lhs->m_FogDensity != rhs->m_FogDensity) return 0;
+    if (lhs->m_FogNear != rhs->m_FogNear) return 0;
+    if (lhs->m_FogFar != rhs->m_FogFar) return 0;
+    if (lhs->m_FogColourR != rhs->m_FogColourR) return 0;
+    if (lhs->m_FogColourG != rhs->m_FogColourG) return 0;
+    if (lhs->m_FogColourB != rhs->m_FogColourB) return 0;
     return 1;
 }
 #endif
@@ -5041,14 +5041,14 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_isEqual);
  * @param rhs  the region's tWPData_LightGlow (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_LightGlow_isEqual(tWPInGameData_LightGlow* lhs, tWPData* rhs) {
-    if (lhs->m_LightGlowCutoff != *(float*)((char*)rhs + 0x4)) return 0;
-    if (lhs->m_LightGlowCutoffScale != *(float*)((char*)rhs + 0x8)) return 0;
-    if (lhs->m_LightGlowCopyIntensity != *(float*)((char*)rhs + 0xC)) return 0;
-    if (lhs->m_LightGlowSourceIntensity != *(float*)((char*)rhs + 0x10)) return 0;
-    if (lhs->m_LightGlowFrameIntensity != *(float*)((char*)rhs + 0x14)) return 0;
-    if (lhs->m_LightGlowBlend2 != *(float*)((char*)rhs + 0x18)) return 0;
-    if (lhs->m_LightGlowBlend3 != *(float*)((char*)rhs + 0x1C)) return 0;
+extern "C" int tWPInGameData_LightGlow_isEqual(tWPInGameData_LightGlow* lhs, tWPData_LightGlow* rhs) {
+    if (lhs->m_LightGlowCutoff != rhs->m_LightGlowCutoff) return 0;
+    if (lhs->m_LightGlowCutoffScale != rhs->m_LightGlowCutoffScale) return 0;
+    if (lhs->m_LightGlowCopyIntensity != rhs->m_LightGlowCopyIntensity) return 0;
+    if (lhs->m_LightGlowSourceIntensity != rhs->m_LightGlowSourceIntensity) return 0;
+    if (lhs->m_LightGlowFrameIntensity != rhs->m_LightGlowFrameIntensity) return 0;
+    if (lhs->m_LightGlowBlend2 != rhs->m_LightGlowBlend2) return 0;
+    if (lhs->m_LightGlowBlend3 != rhs->m_LightGlowBlend3) return 0;
     return 1;
 }
 #endif
@@ -5066,13 +5066,13 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_isEqual);
  * @param rhs  the region's tWPData_ScreenTint (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_ScreenTint_isEqual(tWPInGameData_ScreenTint* lhs, tWPData* rhs) {
-    if (lhs->m_ScreenTintScaleR != *(float*)((char*)rhs + 4)) return 0;
-    if (lhs->m_ScreenTintScaleG != *(float*)((char*)rhs + 8)) return 0;
-    if (lhs->m_ScreenTintScaleB != *(float*)((char*)rhs + 0xC)) return 0;
-    if (lhs->m_ScreenTintOffsetR != *(float*)((char*)rhs + 0x10)) return 0;
-    if (lhs->m_ScreenTintOffsetG != *(float*)((char*)rhs + 0x14)) return 0;
-    if (lhs->m_ScreenTintOffsetB != *(float*)((char*)rhs + 0x18)) return 0;
+extern "C" int tWPInGameData_ScreenTint_isEqual(tWPInGameData_ScreenTint* lhs, tWPData_ScreenTint* rhs) {
+    if (lhs->m_ScreenTintScaleR != rhs->m_ScreenTintScaleR) return 0;
+    if (lhs->m_ScreenTintScaleG != rhs->m_ScreenTintScaleG) return 0;
+    if (lhs->m_ScreenTintScaleB != rhs->m_ScreenTintScaleB) return 0;
+    if (lhs->m_ScreenTintOffsetR != rhs->m_ScreenTintOffsetR) return 0;
+    if (lhs->m_ScreenTintOffsetG != rhs->m_ScreenTintOffsetG) return 0;
+    if (lhs->m_ScreenTintOffsetB != rhs->m_ScreenTintOffsetB) return 0;
     return 1;
 }
 #endif
@@ -5089,11 +5089,11 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_isEqual);
  * @param rhs  the region's tWPData_SkyBox (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_SkyBox_isEqual(tWPInGameData_SkyBox* lhs, tWPData* rhs) {
+extern "C" int tWPInGameData_SkyBox_isEqual(tWPInGameData_SkyBox* lhs, tWPData_SkyBox* rhs) {
     int var_2;
 
     var_2 = 0;
-    if ((lhs->m_SkyBoxRotation) == (*(float *)((char*)(rhs) + (4)))) {
+    if ((lhs->m_SkyBoxRotation) == (rhs->m_SkyBoxRotation)) {
         var_2 = 1;
     }
     return var_2;
@@ -5113,16 +5113,16 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_isEqual);
  * @param rhs  the region's tWPData_Sun (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Sun_isEqual(tWPInGameData_Sun* lhs, tWPData* rhs) {
-    if (lhs->m_SunPitchOffset != *(float*)((char*)rhs + 0x4)) return 0;
-    if (lhs->m_SunYawOffset != *(float*)((char*)rhs + 0x8)) return 0;
-    if (lhs->m_SunColorR != *(float*)((char*)rhs + 0xC)) return 0;
-    if (lhs->m_SunColorG != *(float*)((char*)rhs + 0x10)) return 0;
-    if (lhs->m_SunColorB != *(float*)((char*)rhs + 0x14)) return 0;
-    if (lhs->m_SunIntensity != *(float*)((char*)rhs + 0x18)) return 0;
-    if (lhs->m_SunType != *(int*)((char*)rhs + 0x1C)) return 0;
-    if (lhs->m_LensIntensity != *(float*)((char*)rhs + 0x20)) return 0;
-    if (lhs->m_SunRadius != *(float*)((char*)rhs + 0x24)) return 0;
+extern "C" int tWPInGameData_Sun_isEqual(tWPInGameData_Sun* lhs, tWPData_Sun* rhs) {
+    if (lhs->m_SunPitchOffset != rhs->m_SunPitchOffset) return 0;
+    if (lhs->m_SunYawOffset != rhs->m_SunYawOffset) return 0;
+    if (lhs->m_SunColorR != rhs->m_SunColorR) return 0;
+    if (lhs->m_SunColorG != rhs->m_SunColorG) return 0;
+    if (lhs->m_SunColorB != rhs->m_SunColorB) return 0;
+    if (lhs->m_SunIntensity != rhs->m_SunIntensity) return 0;
+    if (lhs->m_SunType != rhs->m_SunType) return 0;
+    if (lhs->m_LensIntensity != rhs->m_LensIntensity) return 0;
+    if (lhs->m_SunRadius != rhs->m_SunRadius) return 0;
     return 1;
 }
 #endif
@@ -5140,11 +5140,11 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_isEqual);
  * @param rhs  the region's tWPData_Surface (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Surface_isEqual(tWPInGameData_Surface* lhs, tWPData* rhs) {
+extern "C" int tWPInGameData_Surface_isEqual(tWPInGameData_Surface* lhs, tWPData_Surface* rhs) {
     int var_2;
 
     var_2 = 0;
-    if ((lhs->m_SnowSparkleDensity) == (*(float *)((char*)(rhs) + (4)))) {
+    if ((lhs->m_SnowSparkleDensity) == (rhs->m_SnowSparkleDensity)) {
         var_2 = 1;
     }
     return var_2;
@@ -5167,13 +5167,13 @@ extern "C" int func_002BB100_DE30(char *, char *) __asm__("func_002BB100");
  * @param rhs  the region's tWPData_Lighting (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Lighting_isEqual(tWPInGameData_Lighting* lhs, tWPData* rhs) {
+extern "C" int tWPInGameData_Lighting_isEqual(tWPInGameData_Lighting* lhs, tWPData_Lighting* rhs) {
     if (func_002BB100_DE30((char*)&lhs->m_LightIrradianceName, ((char*)rhs) + 4)) return 0;
     if (func_002BB100_DE30((char*)&lhs->m_ShadowIrradianceName, ((char*)rhs) + 0xC)) return 0;
     if (func_002BB100_DE30((char*)&lhs->m_TunnelIrradianceName, ((char*)rhs) + 0x14)) return 0;
     if (func_002BB100_DE30((char*)&lhs->m_ObjectIrradianceName, ((char*)rhs) + 0x1C)) return 0;
-    if (lhs->m_AmbientLightIntensityOffset != *(float*)(((char*)rhs) + 0x24)) return 0;
-    if (lhs->m_RimLightIntensityOffset != *(float*)(((char*)rhs) + 0x28)) return 0;
+    if (lhs->m_AmbientLightIntensityOffset != rhs->m_AmbientLightIntensityOffset) return 0;
+    if (lhs->m_RimLightIntensityOffset != rhs->m_RimLightIntensityOffset) return 0;
     return 1;
 }
 #endif
@@ -5192,62 +5192,62 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_isEqual);
  * @return 1 if every value matches, else 0
  */
 // Environment property compare: all 19 current values against the incoming set.
-extern "C" int tWPInGameData_Weather_isEqual(tWPInGameData_Weather* lhs, tWPData* rhs) {
-    if ((lhs->m_SnowIntensity) != (*(float *)((char*)(rhs) + (0x4)))) {
+extern "C" int tWPInGameData_Weather_isEqual(tWPInGameData_Weather* lhs, tWPData_Weather* rhs) {
+    if ((lhs->m_SnowIntensity) != (rhs->m_SnowIntensity)) {
         return 0;
     }
-    if ((lhs->m_FlakeSize) != (*(float *)((char*)(rhs) + (0x8)))) {
+    if ((lhs->m_FlakeSize) != (rhs->m_FlakeSize)) {
         return 0;
     }
-    if ((lhs->m_WindIntensity) != (*(float *)((char*)(rhs) + (0xC)))) {
+    if ((lhs->m_WindIntensity) != (rhs->m_WindIntensity)) {
         return 0;
     }
-    if ((lhs->m_WindRotation) != (*(float *)((char*)(rhs) + (0x10)))) {
+    if ((lhs->m_WindRotation) != (rhs->m_WindRotation)) {
         return 0;
     }
-    if ((lhs->m_PlayerWindIntensity) != (*(float *)((char*)(rhs) + (0x14)))) {
+    if ((lhs->m_PlayerWindIntensity) != (rhs->m_PlayerWindIntensity)) {
         return 0;
     }
-    if ((lhs->m_Temperature) != (*(float *)((char*)(rhs) + (0x18)))) {
+    if ((lhs->m_Temperature) != (rhs->m_Temperature)) {
         return 0;
     }
-    if ((lhs->m_SnowFlurries) != (*(float *)((char*)(rhs) + (0x1C)))) {
+    if ((lhs->m_SnowFlurries) != (rhs->m_SnowFlurries)) {
         return 0;
     }
-    if ((lhs->m_SnowGravityMultiplier) != (*(float *)((char*)(rhs) + (0x20)))) {
+    if ((lhs->m_SnowGravityMultiplier) != (rhs->m_SnowGravityMultiplier)) {
         return 0;
     }
-    if ((lhs->m_SnowFluffItensity) != (*(float *)((char*)(rhs) + (0x24)))) {
+    if ((lhs->m_SnowFluffItensity) != (rhs->m_SnowFluffItensity)) {
         return 0;
     }
-    if ((lhs->m_SnowFluffWindIntensity) != (*(float *)((char*)(rhs) + (0x28)))) {
+    if ((lhs->m_SnowFluffWindIntensity) != (rhs->m_SnowFluffWindIntensity)) {
         return 0;
     }
-    if ((lhs->m_LightningChance) != (*(float *)((char*)(rhs) + (0x2C)))) {
+    if ((lhs->m_LightningChance) != (rhs->m_LightningChance)) {
         return 0;
     }
-    if ((lhs->m_SnowFlakeColourA) != (*(float *)((char*)(rhs) + (0x30)))) {
+    if ((lhs->m_SnowFlakeColourA) != (rhs->m_SnowFlakeColourA)) {
         return 0;
     }
-    if ((lhs->m_SnowFlakeColourR) != (*(float *)((char*)(rhs) + (0x34)))) {
+    if ((lhs->m_SnowFlakeColourR) != (rhs->m_SnowFlakeColourR)) {
         return 0;
     }
-    if ((lhs->m_SnowFlakeColourG) != (*(float *)((char*)(rhs) + (0x38)))) {
+    if ((lhs->m_SnowFlakeColourG) != (rhs->m_SnowFlakeColourG)) {
         return 0;
     }
-    if ((lhs->m_SnowFlakeColourB) != (*(float *)((char*)(rhs) + (0x3C)))) {
+    if ((lhs->m_SnowFlakeColourB) != (rhs->m_SnowFlakeColourB)) {
         return 0;
     }
-    if ((lhs->m_SnowFluffColourA) != (*(float *)((char*)(rhs) + (0x40)))) {
+    if ((lhs->m_SnowFluffColourA) != (rhs->m_SnowFluffColourA)) {
         return 0;
     }
-    if ((lhs->m_SnowFluffColourR) != (*(float *)((char*)(rhs) + (0x44)))) {
+    if ((lhs->m_SnowFluffColourR) != (rhs->m_SnowFluffColourR)) {
         return 0;
     }
-    if ((lhs->m_SnowFluffColourG) != (*(float *)((char*)(rhs) + (0x48)))) {
+    if ((lhs->m_SnowFluffColourG) != (rhs->m_SnowFluffColourG)) {
         return 0;
     }
-    if ((lhs->m_SnowFluffColourB) != (*(float *)((char*)(rhs) + (0x4C)))) {
+    if ((lhs->m_SnowFluffColourB) != (rhs->m_SnowFluffColourB)) {
         return 0;
     }
     return 1;
@@ -5267,11 +5267,11 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_isEqual);
  * @param rhs  the region's tWPData_Danger (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Danger_isEqual(tWPInGameData_Danger* lhs, tWPData* rhs) {
-    if ((lhs->m_Level) != (*(int *)((char*)(rhs) + (4)))) {
+extern "C" int tWPInGameData_Danger_isEqual(tWPInGameData_Danger* lhs, tWPData_Danger* rhs) {
+    if ((lhs->m_Level) != (rhs->m_Level)) {
         return 0;
     }
-    if ((lhs->m_PointRate) != (*(float *)((char*)(rhs) + (8)))) {
+    if ((lhs->m_PointRate) != (rhs->m_PointRate)) {
         return 0;
     }
     return 1;
