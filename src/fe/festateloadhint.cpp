@@ -927,9 +927,9 @@ extern "C" void cGameLoadState_widgetCreateQP(cGameLoadState* self, char* obj)
         sprintf1((unsigned short*)buf, fmtA, D_005308B8[idx].b1 ? 1 : v);
         cUIText_setUnicodeString(obj, buf);
     } else if (IsId_2464E8(obj, str_map_box)) {
-        char* loadScreen = (char*)self->mpParentModule;
-        if (loadScreen != 0) {
-            int v = *(int*)(loadScreen + 0x10);
+        cGameLoadScreen* loadScreen = self->mpParentModule;
+        if (((char*)loadScreen) != 0) {
+            int v = loadScreen->mTexID[0];
             if (v != 0) {
                 *(int*)(obj + 0x78) = v;
                 *(int*)(obj + 0x7C) = 0;

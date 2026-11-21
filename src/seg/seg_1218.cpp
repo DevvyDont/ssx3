@@ -100,9 +100,9 @@ static inline sVec4_0250 vNorm_0250(const sVec4_0250& v)
  */
 extern "C" float cComputer_calcTilt(cComputer* self, const sVec4_0250* direction)
 {
-    char* rider = (char*)self->mRider;
-    sVec4_0250 riderSide = *(sVec4_0250*)(rider + 0x1A0);
-    sVec4_0250 riderUp = *(sVec4_0250*)(rider + 0x1C0);
+    cRider* rider = self->mRider;
+    sVec4_0250 riderSide = *(sVec4_0250*)&rider->mMatrix;
+    sVec4_0250 riderUp = *(sVec4_0250*)&rider->mMatrix.row[2];
     sVec4_0250 planarDir = vSub_0250(*direction, vScale_0250(riderSide, vDot_0250(*direction, riderSide)));
     float slope = -vDot_0250(vNorm_0250(planarDir), riderUp);
     float accuracy = self->mAccuracy;

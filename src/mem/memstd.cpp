@@ -2058,9 +2058,9 @@ extern "C" void cMoviePlayer_purge(cMoviePlayer* self)
     if (moviePlayer->mbNewFrame != 0 && moviePlayer->mpCurrFrame != 0) {
         RCMP_DECODER_ReleaseFrame(*(void**)(((char*)moviePlayer->m_pPlayer) + 0x64), moviePlayer->mpCurrFrame);
     }
-    void* videoDriver = moviePlayer->m_pVd;
-    if (videoDriver != 0) {
-        sVEntry002535F8* dtorEntry = &(*(sVEntry002535F8**)((char*)videoDriver + 4))[1];
+    RCMP_VIDEO_DRIVER* videoDriver = moviePlayer->m_pVd;
+    if (((void*)videoDriver) != 0) {
+        sVEntry002535F8* dtorEntry = &((sVEntry002535F8*)videoDriver->mVtbl)[1];
         dtorEntry->fn((char*)videoDriver + dtorEntry->delta, 3);
         moviePlayer->m_pVd = 0;
         cMoviePlayer_m_isPlaying--;
@@ -2153,22 +2153,22 @@ extern "C" void cMoviePlayer_syncPlay(cMoviePlayer* self)
         cMoviePlayer_startPlay((cMoviePlayer*)moviePlayer);
         do {
             if (moviePlayer->mbReDraw != 0) {
-                char* videoDriver = (char*)moviePlayer->m_pVd;
-                sVE0_253748* slotEntry = &(*(sVE0_253748**)(videoDriver + 4))[5];
-                slotEntry->fn(videoDriver + slotEntry->delta);
+                RCMP_VIDEO_DRIVER* videoDriver = moviePlayer->m_pVd;
+                sVE0_253748* slotEntry = &((sVE0_253748*)videoDriver->mVtbl)[5];
+                slotEntry->fn(((char*)videoDriver) + slotEntry->delta);
             } else {
-                char* videoDriver = (char*)moviePlayer->m_pVd;
-                sVE1_253748* slotEntry = &(*(sVE1_253748**)(videoDriver + 4))[4];
-                slotEntry->fn(videoDriver + slotEntry->delta, moviePlayer->mpCurrFrame);
+                RCMP_VIDEO_DRIVER* videoDriver = moviePlayer->m_pVd;
+                sVE1_253748* slotEntry = &((sVE1_253748*)videoDriver->mVtbl)[4];
+                slotEntry->fn(((char*)videoDriver) + slotEntry->delta, moviePlayer->mpCurrFrame);
             }
             sVE0_253748* w = &((sVE0_253748*)cGraphicsMan_TheGraphicsMan->mVtbl)[20];
             w->fn((char*)cGraphicsMan_TheGraphicsMan + w->delta);
             SYNCTASK_run(0);
             THREAD_yield(0);
             if (func_003AE780(((char*)moviePlayer->m_pPlayer)) != 0) {
-                char* videoDriver = (char*)moviePlayer->m_pVd;
-                sVE0_253748* slotEntry = &(*(sVE0_253748**)(videoDriver + 4))[6];
-                slotEntry->fn(videoDriver + slotEntry->delta);
+                RCMP_VIDEO_DRIVER* videoDriver = moviePlayer->m_pVd;
+                sVE0_253748* slotEntry = &((sVE0_253748*)videoDriver->mVtbl)[6];
+                slotEntry->fn(((char*)videoDriver) + slotEntry->delta);
                 moviePlayer->mpCurrFrame = (void*)func_003AE6C8(((char*)moviePlayer->m_pPlayer), *(float*)(((char*)moviePlayer->m_pPlayer) + 0x48));
                 moviePlayer->mbReDraw = 0;
             } else {

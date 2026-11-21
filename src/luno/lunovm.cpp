@@ -1816,9 +1816,9 @@ extern char D_00479890[];
 extern "C" void luno_cLunoTableEntry__cLunoTableEntry(luno_cLunoTableEntry* self, int flags)
 {
     self->mVtbl = (void**)D_00479890;
-    void* obj = self->Next;
-    if (obj != 0) {
-        sVEntry00226768* vt = *(sVEntry00226768**)((char*)obj + 0x1C);
+    luno_cLunoTableEntry* obj = self->Next;
+    if (((void*)obj) != 0) {
+        sVEntry00226768* vt = (sVEntry00226768*)obj->mVtbl;
         vt[1].fn((char*)obj + vt[1].delta, 3);
     }
     luno_cLunoVar__cLunoVar((cLunoValue*)(&self->Value), 2);
