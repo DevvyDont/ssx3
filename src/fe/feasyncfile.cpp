@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ui/uiprogress.h"
+#include "ui/uitextscroll.h"
+#include "ui/uiscrollbar.h"
 #include "bx/appman.h"
 #include "util/menu.h"
 #include "ui/uithing.h"
@@ -2050,9 +2053,9 @@ extern "C" void func_001A5898(cFEStateNetMessenger* vself)
         }
     }
     if (((void*)self->mpScreen) != 0) {
-        cUIText* list = cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_playerMenu));
+        cUIMenu* list = (cUIMenu*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_playerMenu));
         int n = ((sElem1A5898*)(*(&self->mNames)).mpFinish) - ((sElem1A5898*)(*(&self->mNames)).mpStart);
-        if (*(unsigned char*)(((char*)list) + 0x96) != n) {
+        if (list->mScrollItemNum != n) {
             cUIMenu_setScrollableMenu(list, n);
         }
     }
@@ -2496,17 +2499,17 @@ extern "C" void func_001A6978(cFEStateNetMessenger* vself)
         row++;
         first++;
     }
-    cUIText* menu = cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_playerMenu));
-    if (menu != 0) {
-        if (*(unsigned char*)((char*)menu + 0x96) != Size_001A6978(self)) {
+    cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_playerMenu));
+    if (((cUIText*)menu) != 0) {
+        if (menu->mScrollItemNum != Size_001A6978(self)) {
             cUIMenu_setScrollableMenu(menu, Size_001A6978(self));
             if (Size_001A6978(self) == 0) {
                 cUIMenu_setScrollableMenu(menu, 1);
             }
         }
-        if (func_001A6070((cFEStateNetMessenger*)self, *(unsigned char*)((char*)menu + 0x95)) != 0 && Size_001A6978(self) != 0) {
-            func_001A5FB8((cFEStateNetMessenger*)((cFEStateNet*)self), *(unsigned char*)((char*)menu + 0x95) - *(unsigned char*)&menu->mDisabledColour);
-            func_001A66A8((cFEStateNetMessenger*)self, *(unsigned char*)((char*)menu + 0x95) - *(unsigned char*)&menu->mDisabledColour, 1);
+        if (func_001A6070((cFEStateNetMessenger*)self, menu->mScrollItemCurrent) != 0 && Size_001A6978(self) != 0) {
+            func_001A5FB8((cFEStateNetMessenger*)((cFEStateNet*)self), menu->mScrollItemCurrent - menu->mScrollItemOffset);
+            func_001A66A8((cFEStateNetMessenger*)self, menu->mScrollItemCurrent - menu->mScrollItemOffset, 1);
         } else {
             func_001A5FB8((cFEStateNetMessenger*)((cFEStateNet*)self), -1);
         }
@@ -3149,25 +3152,25 @@ extern "C" void cFEStateReadMessagePopup_onCreateScreen(cFEStateReadMessagePopup
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cUIText* scrollBar = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgreementSlider));
+    cUIScrollBar* scrollBar = (cUIScrollBar*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgreementSlider));
     scrollBar->mAttr |= 1;
     void* upArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatUpArrow));
     void* downArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatDownArrow));
     void* sliderOutline = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_slideroutline2));
-    *(void**)&scrollBar->mShadowColour.R = upArrow;
-    *(void**)&scrollBar->mShadowColour.G = downArrow;
-    *(void**)&scrollBar->mShadowColour.B = sliderOutline;
-    *(int*)&scrollBar->mStaticColour = 2;
-    cUIText* textScroll = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat));
+    *(void**)(float*)&scrollBar->mpUpArrow = upArrow;
+    *(void**)(float*)&scrollBar->mpDownArrow = downArrow;
+    *(void**)(float*)&scrollBar->mpHideOnEmpty = sliderOutline;
+    scrollBar->meHideState = 2;
+    cUITextScroll* textScroll = (cUITextScroll*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat));
     if (((char*)textScroll) != 0) {
         cFEVObj_001A7970* obj = (cFEVObj_001A7970*)textScroll;
-        textScroll->mAttrText |= 1;
+        *(int*)&textScroll->mAttrTextScroll |= 1;
         cUITextScroll_setInputMap(textScroll, 1);
         obj->setVisible(1);
         textScroll->mAttr |= 0x80;
         obj->setColour(sCol1A7970(1.0f, 0.0f, 0.0f, 0.0f));
-        *(sBlk1A7970*)&textScroll->mNumLines = *(sBlk1A7970*)&self->mTextColour;
-        *(char**)&textScroll->mStringSize = ((char*)scrollBar);
+        *(sBlk1A7970*)(int*)&textScroll->mSelectedColour = *(sBlk1A7970*)&self->mTextColour;
+        textScroll->mpScrollBar = (cUIThing*)scrollBar;
     }
 }
 #endif
@@ -3605,7 +3608,7 @@ extern "C" void func_001A83D8(sList1A83D8* list, int keep, unsigned int sel, int
 extern "C" void sprintf1_1A81F0(void* str, int fmt, ...) __asm__("sprintf1");
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 extern "C" void cUITextScroll_clearBuffer(void* list);
-extern "C" void cUITextScroll_addAsciiString(cUIText* text, char* str);
+extern "C" void cUITextScroll_addAsciiString(cUITextScroll* text, char* str);
 extern "C" char* strcat(char*, const char*);
 extern "C" char* strcpy(char* dst, const char* src);
 extern char str_TextFromX[];
@@ -3671,13 +3674,13 @@ extern "C" void func_001A81F0(cFEStateReadMessagePopup* self)
         cUIText_setUnicodeString(text, buf);
         ((cFEVObj_001A81F0*)text)->setVisible(1);
     }
-    cUIText* list = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat));
-    if (list == 0) {
+    cUITextScroll* list = (cUITextScroll*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_textScrollChat));
+    if (((cUIText*)list) == 0) {
         return;
     }
-    unsigned short count = *(unsigned short*)((char*)list + 0xC8);
-    unsigned short top = *(unsigned short*)((char*)list + 0xC4);
-    unsigned short sel = *(unsigned short*)((char*)list + 0xC6);
+    unsigned short count = list->mLineSize;
+    unsigned short top = list->mSelectedIndex;
+    unsigned short sel = list->mLinesOffset;
     cUITextScroll_clearBuffer(list);
     unsigned int i;
     for (i = 0; i < Count1A81F0(self); i++) {
@@ -10846,8 +10849,8 @@ extern "C" void func_001B0C08(cFEStateChallengeReceivedPopup* self)
         if (widget != 0) {
             widget->setFocus(1);
         }
-        cUIText* menu = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_MenuChallenge));
-        if (menu != 0) {
+        cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_MenuChallenge));
+        if (((cUIText*)menu) != 0) {
             cUIMenu_setSelectedByIndex(menu, 1);
         }
         widget = (cFEVObj_001B0C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_staticTextSetchallenge));
@@ -11781,14 +11784,14 @@ extern "C" void func_001B1B98(cFEStateOnlineCharacterSelect* self, int index, in
         name1[0] = '0' + i;
         cFEVObj_001B1B98* valueText = (cFEVObj_001B1B98*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name1));
         name2[0] = '0' + i;
-        cUIText* attrBar = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name2));
+        cUIProgress* attrBar = (cUIProgress*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(name2));
         if (valueText != 0 && ((void*)attrBar) != 0) {
             int attrValue = stats[i];
             int displayValue = attrValue / 5;
             sprintf(num, str_pct_d_b, displayValue);
             valueText->setVisible(1);
             cUIText_setAsciiString((cUIText*)valueText, num);
-            *(int*)&attrBar->mShadowColour.G = 55;
+            *(int*)(float*)&attrBar->mNumValues = 55;
             cUIProgress_setValue(attrBar, attrValue);
         }
     }
@@ -11967,10 +11970,10 @@ extern "C" void cFEStateChatRoom_onCreateScreen(cFEStateChatRoom* self)
     cUIScreen_playFrame(screen, 0, 0);
     func_001B2378(self, 1);
     func_001B3978(self, LobbyMan_mLobbyMan->mPersona);
-    self->mpTextScrollChat->mAttrText |= 1;
+    self->mpTextScrollChat->mAttrTextScroll.mMode = 1;
     cUITextScroll_setInputMap(self->mpTextScrollChat, 1);
-    *(sBlk1B2070*)&self->mpTextScrollChat->mNumLines = *(sBlk1B2070*)&self->mChatColour;
-    *(void**)&self->mpTextScrollChat->mStringSize = (void*)self->mpSlider2;
+    self->mpTextScrollChat->mSelectedColour = self->mChatColour;
+    self->mpTextScrollChat->mpScrollBar = (cUIThing*)self->mpSlider2;
     cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatUpArrow));
     cUIText* downArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatDownArrow));
     cUIText* hideOnEmpty = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_slideroutline2));
@@ -12144,8 +12147,8 @@ extern "C" void func_001B2378(cFEStateChatRoom* vself, int reselect)
     }
     int n = func_0025F1B0(LobbyMan_mLobbyMan);
     func_001B3D20(((char*)vself), -1, 0);
-    cUIText* menu = cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_PlayerListMenu));
-    if (*(unsigned char*)((char*)menu + 0x96) != n) {
+    cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_PlayerListMenu));
+    if (menu->mScrollItemNum != n) {
         cUIMenu_setScrollableMenu(menu, n);
     }
     if (n < 7) {
@@ -12424,7 +12427,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001B2CD0);
 struct cUIText;
 struct sList1A83D8;
 extern "C" void func_001A83D8(sList1A83D8* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
-extern "C" void cUITextScroll_addAsciiString(cUIText* text, char* str);
+extern "C" void cUITextScroll_addAsciiString(cUITextScroll* text, char* str);
 extern char str_colon_sp[];
 extern "C" void* cBXString_cBXString1(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
@@ -12616,7 +12619,7 @@ extern "C" void cFEStateChatRoom_onWidgetCreate(cFEStateChatRoom* self, cFEVObj_
         self->mpSlider1 = (cUIScrollBar*)obj;
         *(int*)(widget + 0x14) |= 1;
     } else if (id == GetHashValue32(str_TextScrollChat)) {
-        self->mpTextScrollChat = (cUIText*)obj;
+        self->mpTextScrollChat = (cUITextScroll*)obj;
     } else if (id == GetHashValue32(str_slider2)) {
         self->mpSlider2 = (cUIScrollBar*)obj;
         *(int*)(widget + 0x14) |= 1;
@@ -23365,9 +23368,9 @@ extern "C" void func_001BF438(cFEStateLogin* self, void* popup, int kind)
                 ((cFEVObj_001BF438*)self)->onWidgetCreate(widget);
             }
         }
-        cUIText* menu = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000));
+        cUIMenu* menu = (cUIMenu*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000));
         if (((void*)menu)) {
-            char* item = *(char**)&menu->mDisabledColour.G;
+            char* item = *(char**)(float*)&menu->mpSelected;
             if (item && ((*(int*)(item + 0x14) >> 5) & 1)) {
                 cUIMenu_setSelectedByIndex(menu, 1);
             }
@@ -24372,7 +24375,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" void* cFEStateNet_onUpdate(cFEStateNet* self);
-extern "C" void cUITextScroll_addUnicodeStringByID(cUIText* text, int a1);
+extern "C" void cUITextScroll_addUnicodeStringByID(cUITextScroll* text, int a1);
 extern char str_AgTextScroll[];
 
 /**
@@ -24383,7 +24386,7 @@ extern char str_AgTextScroll[];
 extern "C" void cFEStateOnlineAgreement_onUpdate(cFEStateOnlineAgreement* self)
 {
     if (self->miNextTOSLine < self->miNumTOSLines && self->mpTOSLines != 0) {
-        cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgTextScroll));
+        cUITextScroll* text = (cUITextScroll*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgTextScroll));
         if (text != 0) {
             cUITextScroll_addUnicodeStringByID(text, (self->mpTOSLines)[(self->miNextTOSLine)++]);
         }
@@ -24476,30 +24479,30 @@ public:
 extern "C" int cFEStateOnlineAgreement_onGainTransition(cFEStateOnlineAgreement* self)
 {
     ((cFEVObj_001C0B20*)self)->v32();
-    cUIText* scrollBar = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgreementSlider));
+    cUIScrollBar* scrollBar = (cUIScrollBar*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgreementSlider));
     cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatUpArrow));
     cUIText* downArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatDownArrow));
     cUIText* sliderOutline = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_slideroutline2));
-    *(cUIText**)&scrollBar->mShadowColour.R = uiText;
-    *(cUIText**)&scrollBar->mShadowColour.G = downArrow;
+    scrollBar->mpUpArrow = (cUIThing*)uiText;
+    scrollBar->mpDownArrow = (cUIThing*)downArrow;
     if ((unsigned int)strlen(str_top_arrow) > 24) {
-        ((char*)scrollBar)[0x8C] = 0;
+        scrollBar->mszUpAnimation[0] = 0;
     } else {
-        strcpy((char*)&scrollBar->mStaticColour.R, str_top_arrow);
+        strcpy(scrollBar->mszUpAnimation, str_top_arrow);
     }
     if ((unsigned int)strlen(str_bot_arrow) > 24) {
-        ((char*)scrollBar)[0xA5] = 0;
+        scrollBar->mszDownAnimation[0] = 0;
     } else {
-        strcpy(((char*)scrollBar) + 0xA5, str_bot_arrow);
+        strcpy(scrollBar->mszDownAnimation, str_bot_arrow);
     }
     if ((unsigned int)strlen(str_bot_arrow) > 24) {
-        ((char*)scrollBar)[0xA5] = 0;
+        scrollBar->mszDownAnimation[0] = 0;
     } else {
-        strcpy(((char*)scrollBar) + 0xA5, str_bot_arrow);
+        strcpy(scrollBar->mszDownAnimation, str_bot_arrow);
     }
-    *(cUIText**)&scrollBar->mShadowColour.B = sliderOutline;
-    cUIText* x = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgTextScroll));
-    *(char**)&x->mStringSize = ((char*)scrollBar);
+    scrollBar->mpHideOnEmpty = (cUIThing*)sliderOutline;
+    cUITextScroll* x = (cUITextScroll*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_AgTextScroll));
+    x->mpScrollBar = (cUIThing*)scrollBar;
     cUITextScroll_setInputMap(x, 1);
     ((cFEVObj_001C0B20*)x)->setFocus(1);
     if (((char*)scrollBar)) {
@@ -27776,25 +27779,25 @@ public:
 extern "C" int cFEStateNetNews_onGainTransition(cFEStateNet* self, int on)
 {
     if (on) {
-        cUIText* scrollBar = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_NewsSlider));
+        cUIScrollBar* scrollBar = (cUIScrollBar*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_NewsSlider));
         cUIText* uiText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatUpArrow));
         cUIText* downArrow = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatDownArrow));
         cUIText* hideOnEmpty = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_slideroutline2));
-        *(cUIText**)&scrollBar->mShadowColour.R = uiText;
-        *(cUIText**)&scrollBar->mShadowColour.G = downArrow;
+        scrollBar->mpUpArrow = (cUIThing*)uiText;
+        scrollBar->mpDownArrow = (cUIThing*)downArrow;
         if ((unsigned int)strlen(str_top_arrow) > 24) {
-            ((char*)scrollBar)[0x8C] = 0;
+            scrollBar->mszUpAnimation[0] = 0;
         } else {
-            strcpy((char*)&scrollBar->mStaticColour.R, str_top_arrow);
+            strcpy(scrollBar->mszUpAnimation, str_top_arrow);
         }
         if ((unsigned int)strlen(str_bot_arrow) > 24) {
-            ((char*)scrollBar)[0xA5] = 0;
+            scrollBar->mszDownAnimation[0] = 0;
         } else {
-            strcpy(((char*)scrollBar) + 0xA5, str_bot_arrow);
+            strcpy(scrollBar->mszDownAnimation, str_bot_arrow);
         }
-        *(cUIText**)&scrollBar->mShadowColour.B = hideOnEmpty;
-        cUIText* x = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextScroll_News));
-        *(char**)&x->mStringSize = ((char*)scrollBar);
+        scrollBar->mpHideOnEmpty = (cUIThing*)hideOnEmpty;
+        cUITextScroll* x = (cUITextScroll*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextScroll_News));
+        x->mpScrollBar = (cUIThing*)scrollBar;
         ((cFEVObj_001C5198*)x)->setFocus(1);
         if (((char*)scrollBar)) {
             ((cFEVObj_001C5198*)scrollBar)->setVisible(1);
@@ -27905,7 +27908,7 @@ extern "C" void* cBXString_cBXString1(void* self, void* other);
 extern "C" void cBXString__cBXString(void* self, int flags);
 int cBXString_find(cBXString* self, char ch, int len);
 extern "C" void cBXString_setAt(cBXString* self, int idx, char ch);
-extern "C" void cUITextScroll_addAsciiString(cUIText* text, char* str);
+extern "C" void cUITextScroll_addAsciiString(cUITextScroll* text, char* str);
 // PORT: unit declares func_001A8E40 with one arg; the handler passes (self, a1, a2) through
 extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8E40");
 extern char str_TextScroll_News[];
@@ -27931,7 +27934,7 @@ struct sBXString1C5430 {
 extern "C" void* func_001C5430(cFEStateNet* self, int msg, int data)
 {
     if (msg == 226) {
-        cUIText* text = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextScroll_News));
+        cUITextScroll* text = (cUITextScroll*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextScroll_News));
         if (text != 0) {
             sBXString1C5430 newsStr;
             cBXString_cBXString1(&newsStr, (char*)data + 8);

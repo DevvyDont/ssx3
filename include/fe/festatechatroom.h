@@ -36,6 +36,7 @@
 
 struct cUIThing;
 struct cUIMenu;
+struct cUITextScroll;
 
 struct cFEStateChatRoom {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
@@ -125,7 +126,7 @@ struct cFEStateChatRoom {
                                     //       mpUpArrow / mpDownArrow / mpHideOnEmpty (+ 0x7C/0x80/0x84) and meHideState = 2
                                     //       (+ 0x88) (ui/uiscrollbar.h); func_001B3D20 updates it from miMenuScroll[0]
                                     //       (cUIScrollBar_setValues); cFEStateChatRoom_onGainTransition hides it (cUIScrollBar_setScrollVisibile)
-    cUIText* mpTextScrollChat;      // 0x6F0 [R] 0; [U] onWidgetCreate: widget "TextScrollChat" (the chat history);
+    cUITextScroll* mpTextScrollChat; // 0x6F0 [R] 0; [U] onWidgetCreate: widget "TextScrollChat" (the chat history);
                                     //       onCreateScreen gives it mChatColour (+ 0xA8) and mpSlider2 (+ 0xB8);
                                     //       func_001B2CD0 appends "name: message" lines to it (cUITextScroll_addAsciiString,
                                     //       func_001A83D8)
