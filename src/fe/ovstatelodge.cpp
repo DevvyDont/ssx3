@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "fe/fereal.h"
 #include "fe/festatetrophyroom.h"
 #include "ui/uigroup.h"
@@ -178,7 +179,7 @@ extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 extern char str_125mountainroom[];
 extern char str_Numb_1[];

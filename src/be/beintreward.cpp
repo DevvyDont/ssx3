@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "be/beuserawards.h"
 #include "be/berewarddb.h"
 #include "be/beintreward.h"
@@ -100,7 +101,7 @@ int cBERewardInterface_isBetterMedal(void* self, int oldMedal, int newMedal)
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrophy);
 #ifdef SKIP_ASM
-extern "C" void* cBERewardInterface_getDB(cBERewardInterface* self);
+extern "C" cBERewardDB* cBERewardInterface_getDB(cBERewardInterface* self);
 
 /**
  * Returns the trophy record for @p trophyId on @p peakId: the 12-byte entry trophyId * 3 + peakId of the reward
@@ -114,14 +115,14 @@ extern "C" void* cBERewardInterface_getDB(cBERewardInterface* self);
  */
 extern "C" char* cBERewardInterface_getTrophy(cBERewardInterface* self, int peakId, int trophyId)
 {
-    return *(char**)((char*)cBERewardInterface_getDB(self) + 0x8) + (trophyId * 3 + peakId) * 0xC;
+    return (char*)cBERewardInterface_getDB(self)->mpTrophies + (trophyId * 3 + peakId) * 0xC;
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getMedal);
 #ifdef SKIP_ASM
-extern "C" void* cBERewardInterface_getDB(cBERewardInterface* self);
+extern "C" cBERewardDB* cBERewardInterface_getDB(cBERewardInterface* self);
 
 /**
  * Returns the medal record for @p trophyId and @p medalId: the 12-byte entry trophyId * 4 + medalId of the reward
@@ -133,14 +134,14 @@ extern "C" void* cBERewardInterface_getDB(cBERewardInterface* self);
  */
 extern "C" char* cBERewardInterface_getMedal(cBERewardInterface* self, int trophyId, int medalId)
 {
-    return *(char**)((char*)cBERewardInterface_getDB(self) + 0xC) + (trophyId * 4 + medalId) * 0xC;
+    return (char*)cBERewardInterface_getDB(self)->mpMedals + (trophyId * 4 + medalId) * 0xC;
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getPeakPass);
 #ifdef SKIP_ASM
-extern "C" void* cBERewardInterface_getDB(cBERewardInterface* self);
+extern "C" cBERewardDB* cBERewardInterface_getDB(cBERewardInterface* self);
 
 /**
  * Returns the peak pass record for @p charId and @p peakId: the 8-byte entry charId * 3 + peakId of the reward
@@ -152,7 +153,7 @@ extern "C" void* cBERewardInterface_getDB(cBERewardInterface* self);
  */
 extern "C" char* cBERewardInterface_getPeakPass(cBERewardInterface* self, int peakId, int charId)
 {
-    return *(char**)((char*)cBERewardInterface_getDB(self) + 0x10) + (charId * 3 + peakId) * 8;
+    return (char*)cBERewardInterface_getDB(self)->mpPeakPasses + (charId * 3 + peakId) * 8;
 }
 #endif
 
@@ -166,7 +167,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrophies);
  * @return the trophy records
  */
 extern "C" int cBERewardInterface_getTrophies(cBERewardInterface* rewardInterface) {
-    return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (8)));
+    return ((int)cBERewardInterface_getDB(rewardInterface)->mpTrophies);
 }
 #endif
 //100%
@@ -179,7 +180,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getMedals);
  * @return the medal records
  */
 extern "C" int cBERewardInterface_getMedals(cBERewardInterface* rewardInterface) {
-    return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0xC)));
+    return ((int)cBERewardInterface_getDB(rewardInterface)->mpMedals);
 }
 #endif
 //100%
@@ -192,7 +193,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getPeakPasses);
  * @return the peak pass records
  */
 extern "C" int cBERewardInterface_getPeakPasses(cBERewardInterface* rewardInterface) {
-    return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0x10)));
+    return ((int)cBERewardInterface_getDB(rewardInterface)->mpPeakPasses);
 }
 #endif
 //100%
@@ -205,7 +206,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getPosters);
  * @return the poster records
  */
 extern "C" int cBERewardInterface_getPosters(cBERewardInterface* rewardInterface) {
-    return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0x14)));
+    return ((int)cBERewardInterface_getDB(rewardInterface)->mpPosters);
 }
 #endif
 //100%
@@ -218,7 +219,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTradingCards);
  * @return the trading card records
  */
 extern "C" int cBERewardInterface_getTradingCards(cBERewardInterface* rewardInterface) {
-    return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0x18)));
+    return ((int)cBERewardInterface_getDB(rewardInterface)->mpTradingCards);
 }
 #endif
 //100%
@@ -231,7 +232,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getConceptArts);
  * @return the concept-art records
  */
 extern "C" int cBERewardInterface_getConceptArts(cBERewardInterface* rewardInterface) {
-    return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0x1C)));
+    return ((int)cBERewardInterface_getDB(rewardInterface)->mpConceptArts);
 }
 #endif
 //100%
@@ -244,7 +245,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getToys);
  * @return the toy records
  */
 extern "C" int cBERewardInterface_getToys(cBERewardInterface* rewardInterface) {
-    return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0x20)));
+    return ((int)cBERewardInterface_getDB(rewardInterface)->mpToys);
 }
 #endif
 //100%
@@ -257,7 +258,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getVideos);
  * @return the video records
  */
 extern "C" int cBERewardInterface_getVideos(cBERewardInterface* rewardInterface) {
-    return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0x24)));
+    return ((int)cBERewardInterface_getDB(rewardInterface)->mpVideos);
 }
 #endif
 
@@ -585,7 +586,7 @@ extern "C" int cBERewardInterface_getTotalNumRewards(cBERewardInterface* self, i
 }
 #endif
 
-extern "C" void* cBERewardInterface_getDB(cBERewardInterface* self);
+extern "C" cBERewardDB* cBERewardInterface_getDB(cBERewardInterface* self);
 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumPosters__FPv);
@@ -598,7 +599,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumPosters__FPv);
  */
 int cBERewardInterface_getTotalNumPosters(void* self)
 {
-    return *(int*)((char*)cBERewardInterface_getDB((cBERewardInterface*)self) + 0x3c);
+    return cBERewardInterface_getDB((cBERewardInterface*)self)->mNumPosters;
 }
 #endif
 
@@ -613,7 +614,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumTradingCards__FPv);
  */
 int cBERewardInterface_getTotalNumTradingCards(void* self)
 {
-    return *(int*)((char*)cBERewardInterface_getDB((cBERewardInterface*)self) + 0x40);
+    return cBERewardInterface_getDB((cBERewardInterface*)self)->mNumTradingCards;
 }
 #endif
 
@@ -628,7 +629,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumConceptArts__FPv);
  */
 int cBERewardInterface_getTotalNumConceptArts(void* self)
 {
-    return *(int*)((char*)cBERewardInterface_getDB((cBERewardInterface*)self) + 0x44);
+    return cBERewardInterface_getDB((cBERewardInterface*)self)->mNumConceptArts;
 }
 #endif
 
@@ -643,7 +644,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumToys__FPv);
  */
 int cBERewardInterface_getTotalNumToys(void* self)
 {
-    return *(int*)((char*)cBERewardInterface_getDB((cBERewardInterface*)self) + 0x48);
+    return cBERewardInterface_getDB((cBERewardInterface*)self)->mNumToys;
 }
 #endif
 
@@ -658,11 +659,11 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumVideos__FPv);
  */
 int cBERewardInterface_getTotalNumVideos(void* self)
 {
-    return *(int*)((char*)cBERewardInterface_getDB((cBERewardInterface*)self) + 0x4c);
+    return cBERewardInterface_getDB((cBERewardInterface*)self)->mNumVideos;
 }
 #endif
 
-extern "C" void* cAudioInterface_bxAudio(void* self);
+extern "C" cSSXAudio* cAudioInterface_bxAudio(void* self);
 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumSongs__FPv);
@@ -674,7 +675,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumSongs__FPv);
  */
 int cBERewardInterface_getTotalNumSongs(void* self)
 {
-    return *(int*)((char*)cAudioInterface_bxAudio(self) + 0x504);
+    return cAudioInterface_bxAudio(self)->MusicSys.mNumFESongs;
 }
 #endif
 
@@ -689,7 +690,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTotalNumCheatChars__FPv);
  */
 int cBERewardInterface_getTotalNumCheatChars(void* self)
 {
-    return *(int*)((char*)cBERewardInterface_getDB((cBERewardInterface*)self) + 0x50);
+    return cBERewardInterface_getDB((cBERewardInterface*)self)->mNumCheatChars;
 }
 #endif
 
@@ -3275,9 +3276,9 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getDB);
  *
  * @return cBELibrary_rewardDB
  */
-void* cBERewardInterface_getDB(cBERewardInterface* self)
+cBERewardDB* cBERewardInterface_getDB(cBERewardInterface* self)
 {
-    return (void*)cBELibrary_rewardDB;
+    return (cBERewardDB*)(void*)cBELibrary_rewardDB;
 }
 #endif
 

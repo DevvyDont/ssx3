@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "wscript/missionmenuqueue.h"
 #include "wscript/wscriptmission.h"
 #include "animation/animmodel.h"
@@ -1311,7 +1312,7 @@ extern "C" int cBEMissionInterface_isMissionLocked(void* iface, unsigned int id)
 extern "C" int cBEMissionInterface_isMissionAvailable(void* iface, unsigned int id);
 extern "C" int cBEMissionInterface_isMissionShowIcon(void* iface, unsigned int id);
 extern "C" int cBEMissionInterface_getNextMissionID(void* iface, unsigned int id);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_BigChallengeBegin(void* p, unsigned int id);
 extern "C" void cSSXAudio_BigChallengeFailed(void* p, int a1);
 
@@ -2537,7 +2538,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 struct cCollectPool_collect_sTable;
 extern "C" void cCollectPool_collect(cCollectPool_collect_sTable* self, int id);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 extern "C" int cBENewRaceInterface_getLocationPeak1(void* iface);
 extern "C" int cBEEconInterface_getCollectableCash(void* self, int level);

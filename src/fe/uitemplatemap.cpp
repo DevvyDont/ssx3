@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "fe/uitemplatemap.h"
 #include "ui/uistate.h"
 #include "fe/ovstatetransport.h"
@@ -234,7 +235,7 @@ extern "C" int cUITemplate_MAP_onGainTransition_r(void* self, int on)
 INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void cUITemplate_MAP_setupMenuFocus(cUITemplate_MAP* self, int focus);
-extern "C" void* cAudioInterface_bxAudio(void);
+extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 extern "C" void func_0028F5B8(void* mgr);
 extern int cUITemplate_MAP_mMapState;
 
@@ -256,7 +257,7 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onDestroyScreen);
 #ifdef SKIP_ASM
 extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int file);
 extern "C" void cOVStateManager_removePDATemplate(void);
-extern "C" void* cAudioInterface_bxAudio(void);
+extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 extern "C" void func_0028F678(void* mgr, int a);
 extern unsigned int cUITemplate_MAP_mMapStyle;
 

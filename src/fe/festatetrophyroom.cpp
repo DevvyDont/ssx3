@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "fe/fereal.h"
 #include "fe/festatelogin.h"
 #include "fe/festatetrophyroom.h"
@@ -654,7 +655,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onCreateScreen);
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 extern char str_128rewardsroom[];
 
@@ -1698,7 +1699,7 @@ void cFEMemCard_writeDone(void* self)
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_readDone);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" int cBESaveInterface_loadSaveGame(void* self, char* buf);
 extern "C" int cBESaveInterface_loadSaveProfile(void* self, char* buf, int idx);
 extern "C" void cFEMemCard_setSoundMode(unsigned int mode);
@@ -1783,7 +1784,7 @@ extern "C" int cFEMemCard_readDone()
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_setSoundMode);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" int func_00287670(void* opt);
 extern "C" int cSSXAudio_GetSFXVolume(void* opt);
 extern "C" int func_002876D0(void* opt);
@@ -1855,9 +1856,9 @@ extern "C" void cFEMemCard_setSoundMode(unsigned int mode)
         float sfxVolume = func_00287670(cAudioInterface_bxAudio());
         float speechVolume = cSSXAudio_GetSFXVolume(cAudioInterface_bxAudio());
         float musicVolume = func_002876D0(cAudioInterface_bxAudio());
-        int djSpeech = *(int*)((char*)cAudioInterface_bxAudio() + 0x62B8);
-        int arcadeSfx = *(int*)((char*)cAudioInterface_bxAudio() + 0x62B4);
-        int saved534 = *(int*)((char*)cAudioInterface_bxAudio() + 0x534);
+        int djSpeech = cAudioInterface_bxAudio()->unk_62B8;
+        int arcadeSfx = cAudioInterface_bxAudio()->mArcadeSFX;
+        int saved534 = cAudioInterface_bxAudio()->MusicSys.unk_41C;
         cSSXAudio_FrontEndPurge(cAudioInterface_bxAudio());
         SSXAUDIO_DeInit();
         SSXAUDIO_Init(lang);

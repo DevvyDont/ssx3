@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/game.h"
 #include "sound/icepick/worldtriggermanager.h"
 #include "sound/ps2soundman.h"
 #include "sound/crowdsys.h"
@@ -1774,7 +1775,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_HandleChatter);
 #ifdef SKIP_ASM
 extern "C" void cSSXAudio_ChatterProgram(cSSXAudio*, cRider*, int*, int*);
 extern "C" void cBankMonitorInstance_PitchUpdate(void*, int);
-extern "C" void* cAudioInterface_getGame();
+extern "C" cGame* cAudioInterface_getGame();
 extern "C" int cReplay_isPauseAI(void* p);
 extern int cPauseState_Flags;
 
@@ -1805,7 +1806,7 @@ extern "C" void cSSXAudio_HandleChatter(cSSXAudio* self, void* obj) {
         volume = 0;
     }
     int paused = 0;
-    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(*(void**)((char*)cAudioInterface_getGame() + 0x28)) != 0) {
+    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(cAudioInterface_getGame()->Replay) != 0) {
         paused = 1;
     }
     if (paused) {
@@ -1822,7 +1823,7 @@ extern "C" int cSSXAudio_GetSurfaceProgramType(cSSXAudio* self, int id, cRider* 
 extern "C" void cSSXAudio_GlideProgram(cSSXAudio* self, int id, cRider* rider, int* out, int* size);
 extern "C" void cBankMonitorInstance_Reset(void*);
 extern "C" void cBankMonitorInstance_PitchUpdate(void*, int);
-extern "C" void* cAudioInterface_getGame();
+extern "C" cGame* cAudioInterface_getGame();
 extern "C" int cReplay_isPauseAI(void* p);
 extern int cPauseState_Flags;
 
@@ -1868,7 +1869,7 @@ extern "C" void cSSXAudio_HandleGlide(cSSXAudio* self, void* obj) {
         volume = 0;
     }
     int paused = 0;
-    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(*(void**)((char*)cAudioInterface_getGame() + 0x28)) != 0) {
+    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(cAudioInterface_getGame()->Replay) != 0) {
         paused = 1;
     }
     if (paused) {
@@ -1884,7 +1885,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_HandleAIGlide);
 extern "C" void cSSXAudio_AIGlideProgram(cSSXAudio* self, int id, cRider* rider, int* out, int* size);
 extern "C" void cBankMonitorInstance_Reset(void*);
 extern "C" void cBankMonitorInstance_PitchUpdate(void*, int);
-extern "C" void* cAudioInterface_getGame();
+extern "C" cGame* cAudioInterface_getGame();
 extern "C" int cReplay_isPauseAI(void* p);
 extern int cPauseState_Flags;
 
@@ -1915,7 +1916,7 @@ extern "C" void cSSXAudio_HandleAIGlide(cSSXAudio* self, void* obj) {
         cSSXAudio_AIGlideProgram(self, cSSXAudio_Surface(self, (int)rider), rider, &volume, &bend);
     }
     int paused = 0;
-    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(*(void**)((char*)cAudioInterface_getGame() + 0x28)) != 0) {
+    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(cAudioInterface_getGame()->Replay) != 0) {
         paused = 1;
     }
     if (paused) {
@@ -1932,7 +1933,7 @@ extern "C" int cSSXAudio_GetSurfaceProgramType(cSSXAudio* self, int id, cRider* 
 extern "C" void cSSXAudio_CarveProgram(cSSXAudio* self, int id, cRider* rider, int* out, int* size);
 extern "C" void cBankMonitorInstance_Reset(void*);
 extern "C" void cBankMonitorInstance_PitchUpdate(void*, int);
-extern "C" void* cAudioInterface_getGame();
+extern "C" cGame* cAudioInterface_getGame();
 extern "C" int cReplay_isPauseAI(void* p);
 extern int cPauseState_Flags;
 
@@ -1970,7 +1971,7 @@ extern "C" void cSSXAudio_HandleCarve(cSSXAudio* self, void* obj) {
         volume = 0;
     }
     int paused = 0;
-    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(*(void**)((char*)cAudioInterface_getGame() + 0x28)) != 0) {
+    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(cAudioInterface_getGame()->Replay) != 0) {
         paused = 1;
     }
     if (paused) {
@@ -3896,7 +3897,7 @@ extern "C" void cSSXAudio_HandleWipeoutSlide(void) {
 //100%
 INCLUDE_ASM("sound/soundsys", cSSXAudio_WipeoutSlideEnd);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
 /**
@@ -3911,7 +3912,7 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
 extern "C" void cSSXAudio_WipeoutSlideEnd(cSSXAudio* self, cRider* obj)
 {
     if (obj->mWipeoutSlideHandle >= 0) {
-        cBankMonitor_BANKMONITOR_StopHandle((char*)**(void***)((char*)cAudioInterface_bxAudio() + 0x118) + 0x1D8, obj->mWipeoutSlideHandle, 1, 0.75f);
+        cBankMonitor_BANKMONITOR_StopHandle((char*)**(void***)&cAudioInterface_bxAudio()->MusicSys + 0x1D8, obj->mWipeoutSlideHandle, 1, 0.75f);
         obj->mWipeoutSlideHandle = -1;
     }
 }
@@ -4060,7 +4061,7 @@ extern "C" void cSSXAudio_HandleWipeoutTumble(void) {
 //100%
 INCLUDE_ASM("sound/soundsys", cSSXAudio_WipeoutTumbleEnd);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
 /**
@@ -4075,7 +4076,7 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
 extern "C" void cSSXAudio_WipeoutTumbleEnd(cSSXAudio* self, cRider* obj)
 {
     if (obj->mWipeoutTumbleHandle >= 0) {
-        cBankMonitor_BANKMONITOR_StopHandle((char*)**(void***)((char*)cAudioInterface_bxAudio() + 0x118) + 0x1D8, obj->mWipeoutTumbleHandle, 1, 0.75f);
+        cBankMonitor_BANKMONITOR_StopHandle((char*)**(void***)&cAudioInterface_bxAudio()->MusicSys + 0x1D8, obj->mWipeoutTumbleHandle, 1, 0.75f);
         obj->mWipeoutTumbleHandle = -1;
     }
 }
@@ -5429,7 +5430,7 @@ static inline int snd97B8AddVoice(void* vself, int a, int b, int type)
 }
 
 extern "C" int cSSXAudio_ReplayMode(void* self);
-extern "C" void* cAudioInterface_getGame();
+extern "C" cGame* cAudioInterface_getGame();
 extern "C" int cReplay_isPauseAI(void* p);
 extern int cPauseState_Flags;
 
@@ -5452,8 +5453,8 @@ extern "C" void cSSXAudio_LoseMaxPowerEvent(cSSXAudio* self, cRider* obj)
     int playBeeps = 1;
     int pos = obj->mFinishTime >= 0.0f;
     if (pos) playBeeps = 0;
-    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(*(void**)((char*)cAudioInterface_getGame() + 0x28)) != 0) playBeeps = 0;
-    if (*(int*)((char*)cAudioInterface_getGame() + 0x214) != 4) playBeeps = 0;
+    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(cAudioInterface_getGame()->Replay) != 0) playBeeps = 0;
+    if (cAudioInterface_getGame()->mCurrentStateID != 4) playBeeps = 0;
     if (playBeeps) {
         snd97B8AddVoice(self, 0, 105, 9);
     }
@@ -5649,7 +5650,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_002A4290(void* self);
-extern "C" void* cAudioInterface_getGame();
+extern "C" cGame* cAudioInterface_getGame();
 extern "C" void* cAudioInterface_getAI();
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
@@ -5679,7 +5680,7 @@ extern "C" void cSSXAudio_ChangePosition(cSSXAudio* self, cRider* obj, cRider* p
     if (cBENewRaceInterface_newRace.cGameMode != 0 && func_002A4290(self) == 0) {
         return;
     }
-    if (*(int*)((char*)cAudioInterface_getGame() + 0x214) != 4) {
+    if (cAudioInterface_getGame()->mCurrentStateID != 4) {
         return;
     }
     bool ok = obj->mIsHuman && obj->mIsLocal;
@@ -6070,7 +6071,7 @@ extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
-extern "C" void* cAudioInterface_getGame();
+extern "C" cGame* cAudioInterface_getGame();
 extern "C" void* cAudioInterface_getAI();
 extern "C" int cReplay_isPauseAI(void* p);
 // PORT: cMonitor_MONITOR_Create returns int; the unit declares it void elsewhere.
@@ -6255,8 +6256,8 @@ extern "C" void cSSXAudio_UpdateBoostBar(cSSXAudio* vself)
                     int playBeep = 1;
                     int pos = rider->f470 >= 0.0f;
                     if (pos) playBeep = 0;
-                    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(*(void**)((char*)cAudioInterface_getGame() + 0x28)) != 0) playBeep = 0;
-                    if (*(int*)((char*)cAudioInterface_getGame() + 0x214) != 4) playBeep = 0;
+                    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(cAudioInterface_getGame()->Replay) != 0) playBeep = 0;
+                    if (cAudioInterface_getGame()->mCurrentStateID != 4) playBeep = 0;
                     if (playBeep) {
                         sndAB40Add(self, 0, 104, 9);
                     }
@@ -6522,7 +6523,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_UpdateLandedUber);
 #ifdef SKIP_ASM
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" int cSSXAudio_GetFocusRider(void* self, int which);
-extern "C" void* cAudioInterface_getGame();
+extern "C" cGame* cAudioInterface_getGame();
 extern "C" void func_002A3DE0(cSSXAudio* self, cRider* obj, int ev);
 
 /**
@@ -6540,7 +6541,7 @@ extern "C" void cSSXAudio_UpdateLandedUber(cSSXAudio* self)
     cRider* localRider = (cRider*)((char*)cSSXAudio_GetFocusRider(self, -1));
     if (localRider->mViewIndex == self->unk_5820) {
         if (localRider->mUberLevel == 10 && self->unk_581C != localRider->mUberLevel &&
-            *(int*)((char*)cAudioInterface_getGame() + 0x214) == 4) {
+            cAudioInterface_getGame()->mCurrentStateID == 4) {
             func_002A3DE0((cSSXAudio*)self, (cRider*)localRider, 2);
         }
     } else {
@@ -7070,7 +7071,7 @@ extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(cBankSys* self);
 extern "C" int cSSXAudio_ReplayMode(void* self);
-extern "C" void* cAudioInterface_getGame();
+extern "C" cGame* cAudioInterface_getGame();
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cSSXAudio_PlayHistoryExists(cSSXAudio* self, int a, int b);
@@ -7198,7 +7199,7 @@ extern "C" void cSSXAudio_CountdownGateDrop(void* vself)
     char* base = (char*)vself;
     func_002B3A98_C7B0(base + 0x118);
     func_0028DF08_C7B0(vself);
-    *(int*)(base + 0x582C) = *(int*)(*(int*)((char*)cAudioInterface_getGame() + 0xC) + 8);
+    *(int*)(base + 0x582C) = *(int*)((int)cAudioInterface_getGame()->AI + 8);
     ((sSs7B0Self*)vself)->v01(0, 98);
     if (cSSXAudio_ReplayMode(vself) == 0) {
         snd7B0Add(vself, 0, 94);
@@ -9450,7 +9451,7 @@ extern "C" int func_002B0E28(void* self, int i);
 int func_002B1458_f(void* self, int a, int b, int c, int d, float f, int e, int refresh) __asm__("func_002B1458");
 extern "C" void* func_003D8008(int a, int b, int c);
 extern "C" int cRider_getIdentity(void*);
-extern "C" void* cAudioInterface_getGame();
+extern "C" cGame* cAudioInterface_getGame();
 // PORT: the unit defines func_0029F330/func_002A1D48 as void; they return their tail call's result.
 int func_0029F330_i(void* self) __asm__("func_0029F330");
 int func_002A1D48_i(void* self, void* obj) __asm__("func_002A1D48");
@@ -9537,7 +9538,7 @@ void func_002A0560_0560(void* self, sSs0560Rider* passer, sSs0560Rider* passed)
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (cRider_getCheatIdentity(passer) != 0) return;
     if (cRider_getCheatIdentity(passed) != 0) return;
-    if (*(int*)(*(int*)((char*)cAudioInterface_getGame() + 0xC) + 8) - *(int*)((char*)self + 0x582C) < 600) return;
+    if (*(int*)((int)cAudioInterface_getGame()->AI + 8) - *(int*)((char*)self + 0x582C) < 600) return;
     int posA = passer->f470 >= 0.0f;
     if (posA) return;
     int posB = passed->f470 >= 0.0f;

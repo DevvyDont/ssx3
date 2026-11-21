@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "scripter/videngine.h"
 #include "scripter/circularbuffer.h"
 #include "render/ps2graphicsman.h"
@@ -63,7 +64,7 @@ extern "C" int cVidEngine_ReadyVideo(void** self, int file)
 INCLUDE_ASM("scripter/videngine", cVidEngine_PlayVideo);
 #ifdef SKIP_ASM
 extern "C" int cMoviePlayer_asyncPlay(void*);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PauseSFX(void*);
 extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void*);
 extern int cPauseState_StackIdx;

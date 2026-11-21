@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "fe/fereal.h"
 #include "fe/keyboardpopup.h"
 #include "fe/festatecharselect.h"
@@ -21,7 +22,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void cFERiderManager_setHumanVisible(void* self, int a1, int a2);
 extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int a2, int a3);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 extern "C" int cBERewardInterface_getNumOwnedCheatChars(void* self, int a1, int a2);
 extern char str_154rider_details[];

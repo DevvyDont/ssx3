@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "scripter/scsndmgr.h"
 #include "scripter/videngine.h"
 #include "render/ps2graphicsman.h"
@@ -78,7 +79,7 @@ struct sSndEntry;
 struct sSndList;
 extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(sSndList* self, int id);
 extern "C" sSndEntry* cScriptSoundBankManager_GetEmptyBankInfo(sSndList* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cBankManager_BANK_Attach(void* bank, int handle, void* data, int b);
 
 /**
@@ -100,7 +101,7 @@ extern "C" int cScriptSoundBankManager_LinkBank(cScriptSoundBankManager* self, i
         bankInfo = (char*)cScriptSoundBankManager_GetEmptyBankInfo(((sSndList*)self));
         *(int*)(bankInfo + 0x0) = id;
         *(void**)(bankInfo + 0x8) = data;
-        cBankManager_BANK_Attach(**(void***)((char*)cAudioInterface_bxAudio() + 0x118), *(int*)(bankInfo + 0x4), data, dataSize);
+        cBankManager_BANK_Attach(**(void***)&cAudioInterface_bxAudio()->MusicSys, *(int*)(bankInfo + 0x4), data, dataSize);
     }
     return *(int*)(bankInfo + 0x4);
 }
@@ -205,7 +206,7 @@ extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(sSndList* self, int id
 //100%
 INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_UnlinkBank);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cBankManager_BANK_UnAttach(void* bank, int handle);
 
 /**
@@ -218,7 +219,7 @@ extern "C" void cBankManager_BANK_UnAttach(void* bank, int handle);
  */
 extern "C" void cScriptSoundBankManager_UnlinkBank(cScriptSoundBankManager* self, sSndEntry* pBankInfo)
 {
-    cBankManager_BANK_UnAttach(**(void***)((char*)cAudioInterface_bxAudio() + 0x118), pBankInfo->unk4);
+    cBankManager_BANK_UnAttach(**(void***)&cAudioInterface_bxAudio()->MusicSys, pBankInfo->unk4);
     pBankInfo->id = -1;
     pBankInfo->data = 0;
 }
@@ -294,7 +295,7 @@ extern "C" void cVidEngine__cVidEngine(cVidEngine* self, int flags)
 INCLUDE_ASM("scripter/scsndmgr", cVidEngine_ResetVideoEngine);
 #ifdef SKIP_ASM
 extern "C" void cMoviePlayer__cMoviePlayer(void* p, int flags);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_ResumeSFX(void* p);
 extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* p);
 extern int cPauseState_StackIdx;

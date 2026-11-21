@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "fe/uistatebuypopup.h"
 #include "ui/uimenu.h"
 #include "ui/uiinput.h"
@@ -25,7 +26,7 @@ extern "C" void cFEStateBuyAttrib_updateLevels(cFEStateBuyAttrib* self);
 extern "C" void cFEStateBuyAttrib_updateCostPerLevel(cFEStateBuyAttrib* self);
 extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(cFEStateBuyAttrib* self);
 extern "C" void cFEStateBuyAttrib_updateBank(cFEStateBuyAttrib* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 
 /**
@@ -698,7 +699,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cFEStateCareerStats_initTotalEventMedal(cFEStateCareerStats* self);
 extern "C" void cFEStateCareerStats_setupLayout(cFEStateCareerStats* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 
 /**

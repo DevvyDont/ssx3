@@ -838,9 +838,9 @@ INCLUDE_ASM("sound/asyncsys", cAudioInterface_bxAudio);
  *
  * @return gSSXAudio (On Tour cSSXAudio*)
  */
-extern "C" void* cAudioInterface_bxAudio()
+extern "C" cSSXAudio* cAudioInterface_bxAudio()
 {
-    return gSSXAudio;
+    return (cSSXAudio*)gSSXAudio;
 }
 #endif
 
@@ -909,9 +909,9 @@ INCLUDE_ASM("sound/asyncsys", cAudioInterface_getGame);
  *
  * @return SSXApp->Game (0 outside a game)
  */
-extern "C" void* cAudioInterface_getGame()
+extern "C" cGame* cAudioInterface_getGame()
 {
-    return SSXApp->Game;
+    return (cGame*)SSXApp->Game;
 }
 #endif
 

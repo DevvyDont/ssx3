@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "bx/appman.h"
 #include "fe/fesound.h"
 #include "fe/festateselectmp.h"
@@ -877,7 +878,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cFECustom_cFECustom(cFECustom* self, cUIEngine* owner);
 extern "C" void* cFESound_cFESound(cFESound* self);
 extern "C" void cIrradianceDataBase_Load(void* db);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_FrontEndLoad(void* snd);
 extern char str_data_ui_fe[];
 extern char str_FEUIInput[];
@@ -1046,7 +1047,7 @@ extern "C" void cRealFE_purgeCharAnimations(cRealFE* self);
 extern "C" void cFERiderManager_purge(void* p);
 extern "C" void func_0019CF40(void* p);
 extern "C" void cIrradianceDataBase_Purge(void* p);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_FrontEndPurge(void* p);
 
 /**
@@ -1082,7 +1083,7 @@ extern "C" void cUIEngine_render3D(void* ui);
 extern "C" void cFERiderManager_render(void* p);
 extern "C" void cUIEngine_render2D(void* ui);
 extern "C" void cSSXAudio_Update(void* snd, int a1, float t);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern int cRealFE_mMovieList;
 extern char t4mat_Identity[];
 
@@ -1293,7 +1294,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cFadeScreen_update(void* self);
 extern "C" void* cMoviePlayer_cMoviePlayer(void* mem);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_002B3A70(void* p);
 extern "C" void func_002B3A98(void* p);
 extern "C" void tMoviePlayOptions_SetDefaults(void* self);
@@ -1355,7 +1356,7 @@ extern "C" void cRealFE_update(cRealFE* self)
     if (self->mpMoviePlayer == 0) {
         if (cRealFE_mMovieList != 0) {
             self->mpMoviePlayer = (cMoviePlayer*)cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, str_MoviePlayer, 0x100, 0));
-            func_002B3A70((char*)cAudioInterface_bxAudio() + 0x118);
+            func_002B3A70(&cAudioInterface_bxAudio()->MusicSys);
             sVidInfo_27A0 info;
             tMoviePlayOptions_SetDefaults(&info);
             int movieBits = cRealFE_mMovieList;
@@ -1414,7 +1415,7 @@ extern "C" void cRealFE_update(cRealFE* self)
     self->mpMoviePlayer = 0;
     self->mMovieSkippable = 0;
     if (movieBits == 0) {
-        func_002B3A98((char*)cAudioInterface_bxAudio() + 0x118);
+        func_002B3A98(&cAudioInterface_bxAudio()->MusicSys);
     }
     return;
     }
@@ -1634,7 +1635,7 @@ extern "C" void* cFESound_cFESound(cFESound* self)
 INCLUDE_ASM("fe/fereal", cFESound_playSound);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void* snd, int a1);
 /**
  * Plays the front-end menu sound for a UI sound event (vtable cFESound_vtbl entry 2, playSound).
@@ -1695,7 +1696,7 @@ extern "C" void* cOVSound_cOVSound(cOVSound* self)
 INCLUDE_ASM("fe/fereal", cOVSound_playSound);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void* snd, int a1);
 /**
  * Plays the overlay menu sound for a UI sound event.

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "ui/uiengine.h"
 #include "scripter/datamanager.h"
 #include "scripter/nislist.h"
@@ -1837,7 +1838,7 @@ extern "C" int cVidEngine_IsVideoOnLastFrame(void* self);
 extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
 extern "C" int cCircularBuffer_IsEmpty(void* self);
 extern "C" int cCircularBuffer_RemoveFromHead(void* self, void* out);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 
 struct sDmCmd7598 {
     int category;   // 0x0

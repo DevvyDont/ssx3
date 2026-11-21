@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/berewarddb.h"
 #include "fe/fereal.h"
 #include "fe/festatecharsetup.h"
 #include "ui/uistate.h"
@@ -777,7 +778,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index);
 extern "C" int cBERewardInterface_isCheatCharOwned(void* iface, int a1, int a2, int a3);
-extern "C" void* cBERewardInterface_getDB();
+extern "C" cBERewardDB* cBERewardInterface_getDB();
 extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
 extern "C" void* cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);

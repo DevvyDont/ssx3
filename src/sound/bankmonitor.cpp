@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "sound/songinstance.h"
 #include "sound/speechinstance.h"
 #include "sound/soundsys.h"
@@ -2825,7 +2826,7 @@ extern "C" int func_002AF608(int idx, int targetVolume, int fadeMs, char busy)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002AF6C0);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_002AEFA8(int a0);
 extern "C" void SNDSYS_entercritical(void);
 extern "C" void SNDSYS_leavecritical(void);
@@ -2848,7 +2849,7 @@ extern "C" int func_002AF6C0(int idx, int volume)
 {
     void* slotData = D_004D3E98[idx];
     int result = 0;
-    if (*(int*)((char*)cAudioInterface_bxAudio() + 0x6280) == 0) return 0;
+    if (cAudioInterface_bxAudio()->unk_6280 == 0) return 0;
     if (*(signed char*)((char*)slotData + 0x65) != 0) {
         func_002AEFA8(0);
     }

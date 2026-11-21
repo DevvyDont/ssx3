@@ -4689,7 +4689,7 @@ extern "C" float cOverlapList_terrainIntersect1(void* world, void* seg, void* hi
 extern "C" void cRider_moveFromCollision(void* rider, void* v);
 extern "C" void cRider_turnFromCollision(void* rider, void* hit);
 extern "C" void cRider_reactToCollision(void* rider, void* info, int id);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_WallCollision(void* snd, void* rider);
 extern "C" void* cWorldRider_cWorldRider(void* self, void* tree, int flag);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);

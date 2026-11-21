@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "bx/appman.h"
 #include "util/list.h"
 #include "world/ps2chunkresolve.h"
@@ -1668,7 +1669,7 @@ extern "C" void cSSXScriptEngine_AttachAnchorDataTable(void* self, int a, void* 
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void cBEMissionInterface_addStreamData_AE68(void* self, int a, void* p, int v) __asm__("cBEMissionInterface_addStreamData__FPv");
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_AttachAudioBank(void* self, unsigned int arg, void* obj);
 extern "C" void func_002105D0(void* obj);
 extern "C" void cAvalanche_resolve(void* obj);
@@ -1836,8 +1837,8 @@ extern "C" void func_00210608(void* data);
 extern "C" void cOcclusionMan_removeVisCurtain(void* p, void* data);
 extern "C" void cSSXScriptEngine_DetachAnchorDataTable(void* p, unsigned char id);
 extern "C" void cSSXAudio_UnAttachAudioBank(void* p, unsigned int param, void* data);
-extern "C" void* cAudioInterface_bxAudio();
-extern "C" void* cAudioInterface_getGame();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
+extern "C" cGame* cAudioInterface_getGame();
 extern "C" void cWorldSound_PurgeWorldAudioFile(void* p, void* data, unsigned int param);
 extern "C" void cWorldPainterSection_unload(void* entry);
 extern "C" void cAvalanche_reset();
@@ -1997,7 +1998,7 @@ extern "C" void* cPS2ChunkResolve_unresolve(cPS2ChunkResolve* self, unsigned int
         break;
     }
     case 13:
-        cWorldSound_PurgeWorldAudioFile(*(void**)((char*)cAudioInterface_getGame() + 0x4C), data, resourceId);
+        cWorldSound_PurgeWorldAudioFile(cAudioInterface_getGame()->WorldSound, data, resourceId);
         break;
     case 17:
         func_0016CF18(resourceId);

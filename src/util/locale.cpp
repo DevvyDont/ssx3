@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "fe/festateaudiooptions.h"
 #include "util/locale.h"
 #include "ui/uiengine.h"
@@ -468,7 +469,7 @@ class cFEStateAudioOptions_onDestroyScreen_cObj;
 extern "C" cFEStateAudioOptions_onDestroyScreen_cObj* cUIStateStack_findState(void* list, int hash);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 
 class cFEStateAudioOptions_onCreateScreen_cObj {

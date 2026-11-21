@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "fe/festateaudiooptions.h"
 #include "fe/festatebigradio.h"
 #include "ui/uithing.h"
@@ -116,7 +117,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" void cBERewardInterface_setRadioMode(void* iface, int player, int a2, int a3);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028BF78(void* audio, int a1);
 extern "C" void* cFEStateRequestLine_cFEStateRequestLine(cFEStateRequestLine* p, int a1, signed char idx, int a3);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
@@ -370,7 +371,7 @@ extern "C" int cBEEconInterface_getMoney(void* iface, int idx, int ch);
 // PORT: 64-bit results (long is 8 bytes on the EE).
 extern "C" long cBERewardInterface_getOwnedSongList(void* iface, int idx, int ch);
 extern "C" long cBERewardInterface_getPlayList(void* iface, int idx, int ch);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cFEStateRequestLine_generatePlayList(void* self);
 extern void* cFEStateRequestLine_vtbl[];
 extern char str_checkbox[];
@@ -486,7 +487,7 @@ extern "C" void* cFEStateRequestLine_cFEStateRequestLine(cFEStateRequestLine* re
     void* ifc = cBE_getInterface_Fv(cBE_getBE(), 13);
     self->f160 = cBERewardInterface_getOwnedSongList(ifc, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
     self->f158 = cBERewardInterface_getPlayList(ifc, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48));
-    self->f14C = *(int*)((char*)cAudioInterface_bxAudio() + 0x504);
+    self->f14C = cAudioInterface_bxAudio()->MusicSys.mNumFESongs;
     cFEStateRequestLine_generatePlayList(self);
     return self;
 }

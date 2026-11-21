@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "main/gameviewman.h"
 #include "bx/appman.h"
 #include "main/fadescreen.h"
@@ -2989,7 +2990,7 @@ INCLUDE_ASM("main/ssxappdtor", cGame_updateUI);
 extern "C" void cOVStateManager_update(void);
 extern "C" int cMenuSys_isActive(void* p);
 extern "C" void cOVStateManager_triggerOverlay(int id);
-extern "C" void* cAudioInterface_bxAudio(void);
+extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 extern "C" void cSSXAudio_PlayIconSound(void* snd, int a, int b, float f);
 extern "C" void cWScriptMan_doMissionCmd(void* mgr, int a, int b, int c);
 extern "C" void cUIEngine_update(void* p);

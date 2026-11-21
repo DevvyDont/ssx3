@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "fe/backgroundman.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
@@ -276,7 +277,7 @@ extern "C" void cBENewRaceInterface_setDebugLocationFile(void* self, const char*
 extern "C" void cBENewPlayerInterface_setPlayerCtrlID(void* self, int a1, int a2);
 extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int a1, int a2);
 extern "C" int cBENewPlayerInterface_getControllerMapping(void* self, int a1);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_00289520(void* snd, void* entry);
 
 
@@ -442,7 +443,7 @@ extern "C" void cBENewRaceInterface_setDebugLocationFile(void* self, const char*
 
 extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int a1, int a2);
 
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 
 extern "C" void func_00289520(void* snd, void* entry);
 
@@ -541,7 +542,7 @@ static inline bool netOn_B4E0(int mode)
 
 static inline int numSongs_B4E0()
 {
-    return *(int*)((char*)cAudioInterface_bxAudio() + 0x6234);
+    return cAudioInterface_bxAudio()->mNumPlayLists;
 }
 
 static inline void playSong_B4E0(sLS_B1B0* self)

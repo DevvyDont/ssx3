@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "fe/fereal.h"
 #include "ui/uimenu.h"
 #include "fe/uistatebuypopup.h"
@@ -310,7 +311,7 @@ extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cRiderAnimBase_reset(void* self);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" void cFEStateCharEquip_update3DPositions(cFEStateCharEquip* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 extern char str_12equ_char[];
 

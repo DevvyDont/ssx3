@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "bx/math3d.h"
 #include "animation/animmodel.h"
 #include "fe/fereal.h"
@@ -1683,7 +1684,7 @@ extern "C" int func_001A0100(int* self)
 //100%
 INCLUDE_ASM("fe/feridermanager", cFERider_speak);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_002A16B0(void* mgr, int id);
 extern "C" void func_002A1778(void* mgr, int id);
 

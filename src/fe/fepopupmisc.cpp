@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "bx/appman.h"
 #include "fe/ovstateeventresults.h"
 #include "fe/fesound.h"
@@ -9399,7 +9400,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_HEAT_STANDINGS_onGainFocus);
 #ifdef SKIP_ASM
 // cUIState_onGainFocus returns nothing (ends in a void vcall); the unit's later void* declaration is a guess.
 void cUIState_onGainFocus_v(void* self) __asm__("cUIState_onGainFocus");
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -9990,7 +9991,7 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_FINAL_STANDINGS_onGainFocus);
 #ifdef SKIP_ASM
 // cUIState_onGainFocus returns nothing (ends in a void vcall); the unit's later void* declaration is a guess.
 void cUIState_onGainFocus_v(void* self) __asm__("cUIState_onGainFocus");
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -10241,7 +10242,7 @@ void cUIText_setAsciiString(cUIText* text, const char* str);
 extern "C" int fptoui(float f);
 extern "C" char* func_0020A1A8(int v);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 extern int D_004A213C;
 extern int cGameModeMan_iRanking[];
@@ -10971,7 +10972,7 @@ extern "C" void func_001E8EA8(void* self, void* popup, int event)
 INCLUDE_ASM("fe/fepopupmisc", func_001E8ED0);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_onGainFocus(void* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 
 /**
@@ -10995,7 +10996,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cOVState_onCreateScreen(void* self);
 void func_001E8FC0(void* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 
 /**

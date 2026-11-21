@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "main/gameviewman.h"
 #include "main/sectionman.h"
 #include "main/inputsync.h"
@@ -25,7 +26,7 @@ extern "C" void cBE_setState(int state);
 extern "C" void cUIStateStack_purgeNormalStates(void* list);
 extern "C" void cGameState_gotoNextState(void* self);
 extern "C" void cReplay_reset(void* p);
-extern "C" void* cAudioInterface_bxAudio(void);
+extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 extern "C" void cGameComm_gameStartGate(void* p);
 extern "C" void cGame_resetWorld(void* self);
 extern "C" void cReplay_startRace(void* p);
@@ -115,7 +116,7 @@ int GetHashValue32(char* str);
 extern "C" int cReplay_isPauseAI(void* p);
 extern "C" void cGFGateState_runScript(cGFGateState* self, int a1);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
-extern "C" void* cAudioInterface_bxAudio(void);
+extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 extern "C" void cSSXAudio_CountdownGateDrop(void* p);
 void func_0028C8C0(void* self, int val);
 extern "C" void cGameState_gotoNextState(void* self);
@@ -332,7 +333,7 @@ extern "C" void cAI_prepareToPurgeComputerRiders(void* self);
 extern "C" void cAI_prepareToPurgeComputerActors(void* self);
 extern "C" int cBENewPlayerInterface_isFirstTimeOnTrack(void* self, int index, int bit);
 extern "C" void cSSXScriptEngine_AppendStartSequence(void* a, int b);
-extern "C" void* cAudioInterface_bxAudio(void);
+extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 extern char* cGameState_mpGame;
 
 struct sVEntry_234F40 {
@@ -464,7 +465,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
-extern "C" void* cAudioInterface_bxAudio(void);
+extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 
 
 // PORT: cSSXScriptEngine_ReadyNISList returns tNISList_ReadyList's result (ssxscriptengine defines it void).
@@ -530,7 +531,7 @@ extern "C" void cGFTrackStartState_preloadUpdate(cGFTrackStartState* self)
             if (locationId == 14) {
                 cSSXScriptEngine_AddToNISListByVideoCategory(ScriptEngine, 1, 29, 3);
                 func_0028CD48(cAudioInterface_bxAudio());
-                func_002B3A70((char*)cAudioInterface_bxAudio() + 0x118);
+                func_002B3A70(&cAudioInterface_bxAudio()->MusicSys);
                 cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0, 3, 0, -1, -1, -1);
                 cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 1, 3, 0, -1, -1, -1);
             } else {
@@ -687,7 +688,7 @@ extern "C" int cBENewRaceInterface_getLocationType(void* race, int a);
 extern "C" void cBENewPlayerInterface_setLastHub(void* player, int a, int b);
 extern "C" void cBXLoadIndicator_Hide(void* hud, int a);
 extern "C" int cSSXScriptEngine_PlayNISList(void* self, int i, int a, int b);
-extern "C" void* cAudioInterface_bxAudio(void);
+extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 extern "C" void func_002B3A98(void* p);
 extern "C" void func_002A4B68(void* p);
 extern char* cGameState_mpGame;
@@ -764,7 +765,7 @@ extern "C" void cGFTrackStartState_gainFocus(cGFTrackStartState* self)
     } else if (self->mPlayFirstTimeBCVideo) {
         cSSXScriptEngine_PlayNISList(ScriptEngine, 1, 1, 0);
     }
-    func_002B3A98((char*)cAudioInterface_bxAudio() + 0x118);
+    func_002B3A98(&cAudioInterface_bxAudio()->MusicSys);
     func_002A4B68(cAudioInterface_bxAudio());
 }
 #endif
@@ -2001,7 +2002,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cSSXScriptEngine_ResetNISList(void* a, int b);
-extern "C" void* cAudioInterface_bxAudio(void);
+extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 extern "C" void cSSXAudio_ResetAudioVariables(void* mgr);
 extern char* cGameState_mpGame;
 
@@ -2177,7 +2178,7 @@ void* cGFPostEventState_readFromReplayFrame(void* self)
 //100%
 INCLUDE_ASM("main/gamestate", cGFPodiumState_gainFocus);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio(void);
+extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 extern "C" void func_0028CDF8(void* mgr);
 
 /**

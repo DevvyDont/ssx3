@@ -564,7 +564,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_Calc3DPos);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cAudioInterface_getApp();
-extern "C" void* cAudioInterface_getGame();
+extern "C" cGame* cAudioInterface_getGame();
 extern "C" float func_0031C228(float);
 
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
@@ -705,7 +705,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_Update);
 #ifdef SKIP_ASM
 extern int cPauseState_Flags;
 extern "C" int func_00390EF8();
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayThunder(void* p, float f);
 extern "C" void cController_Update(void* self, float dt);
 extern "C" int cStreamSys_STREAM_Playing(void* p, int idx);
@@ -726,7 +726,7 @@ extern "C" void cSSXAudio_UpdateTone(void* self);
 extern "C" void cSSXAudio_ApplyRMSData(cSSXAudio* self);
 extern "C" void cSSXAudio_DuckToStream(cSSXAudio* self, int a1, float f0, float f1);
 extern "C" void* cAudioInterface_getApp();
-extern "C" void* cAudioInterface_getGame();
+extern "C" cGame* cAudioInterface_getGame();
 extern "C" void cSSXAudio_ResetLift(void* self);
 extern "C" void cSSXAudio_ResumeAudio(cSSXAudio* self);
 
@@ -766,7 +766,7 @@ extern "C" void cSSXAudio_Update(cSSXAudio* self, float dt)
             if (self->mAudioPaused == 0)
                 func_0028F000(((char*)self));
             cSSXAudio_PlayHistoryUpdate(((char*)self));
-            if (*(int*)((char*)cAudioInterface_getGame() + 0x214) == 4)
+            if (cAudioInterface_getGame()->mCurrentStateID == 4)
                 cSSXAudio_UpdateLift(((char*)self));
             else
                 cSSXAudio_ResetLift(((char*)self));
@@ -1442,7 +1442,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_StartEvent);
 extern "C" void cSSXAudio_SetAudioUpdateState(cSSXAudio* self, int a1);
 void cWorldTriggerManager_ResetStates(void* self);
 extern "C" void cSSXAudio_BeginAllRiderSound(void* self);
-extern "C" void* cAudioInterface_getGame();
+extern "C" cGame* cAudioInterface_getGame();
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1460,7 +1460,7 @@ extern "C" void cSSXAudio_StartEvent(cSSXAudio* self)
     cSSXAudio_SetAudioUpdateState((cSSXAudio*)self, 6);
     cWorldTriggerManager_ResetStates(gWorldTriggerManager);
     cSSXAudio_BeginAllRiderSound(self);
-    self->mGruntCycle = *(int*)(*(char**)((char*)cAudioInterface_getGame() + 0xC) + 0x8);
+    self->mGruntCycle = cAudioInterface_getGame()->AI->AITick;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     int mode = cBENewRaceInterface_newRace.cGamePath;
     if (mode == 1) {
@@ -1681,7 +1681,7 @@ struct sSaVt72A8 { short delta; short index; int (*fn)(void*, int); };
  */
 extern "C" void func_002872A8(cSSXAudio* self)
 {
-    self->mGruntCycle = *(int*)(*(char**)((char*)cAudioInterface_getGame() + 0xC) + 0x8);
+    self->mGruntCycle = cAudioInterface_getGame()->AI->AITick;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     signed char* raceDb = (signed char*)&cBENewRaceInterface_newRace;
     int mode = raceDb[0x48];
@@ -2890,7 +2890,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_ReplayMode);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int cAudioInterface_isInGame(void);
-extern "C" void* cAudioInterface_getGame();
+extern "C" cGame* cAudioInterface_getGame();
 
 /**
  * Returns whether the game is playing back a replay.
@@ -2902,8 +2902,8 @@ extern "C" void* cAudioInterface_getGame();
 extern "C" int cSSXAudio_ReplayMode(cSSXAudio* self)
 {
     if (cAudioInterface_isInGame() != 0) {
-        if (*(int**)((char*)cAudioInterface_getGame() + 0x28) != 0) {
-            int replayState = **(int**)((char*)cAudioInterface_getGame() + 0x28);
+        if ((int*)cAudioInterface_getGame()->Replay != 0) {
+            int replayState = *(int*)cAudioInterface_getGame()->Replay;
             int busy = replayState != 0 && replayState < 10;
             if (busy) {
                 return 1;

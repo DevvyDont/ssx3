@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "bx/math3d.h"
 #include "ai/rider.h"
 #include "ai/hudfx.h"
@@ -676,7 +677,7 @@ int cRiderMetrix_addHUDfx1_impl(void* vself, int type, int value, int data, floa
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_update);
 #ifdef SKIP_ASM
 extern "C" void cRiderMetrix_earnComboChain(cRiderMetrix*);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 struct sGradeStep_119210;
 extern "C" int cRiderMetrix_updateBonusLevelAndCalcPoints(cRiderMetrix* self, int* idx, sGradeStep_119210* tbl, int type, float x);
 extern "C" void cHUDFX_update(void* slot);
@@ -1490,7 +1491,7 @@ extern "C" float cRiderMetrix_evCollectMultiplier(cRiderMetrix* self, float valu
 //100%
 INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evCheckpoint);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
 extern "C" int cGameModeMan_riderCheckpointHit(void* mgr, int id, int a2);
 extern "C" void func_002A3CE8(void* snd, void* rider, int a2);
@@ -2331,7 +2332,7 @@ struct sTrickId;
 extern "C" int cRiderMetrix_buildTrickName(cRiderMetrix* self, sTrickId* id, int stance, int alternate, int style, int flag);
 extern "C" int cRiderMetrix_checkForMonsterTrick(cRiderMetrix* self, sTrickId* id);
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_LandedMonsterCombo(void* audio, int rider);
 extern "C" int cRiderMetrix_addToHistory(cRiderMetrix* self, sTrickId* id);
 extern "C" void cRiderMetrix_addTrick(cRiderMetrix* self, sTrickId* id, int repeat);
@@ -2393,7 +2394,7 @@ extern "C" int cRiderMetrix_buildTrickName(cRiderMetrix* self, sTrickId* id, int
 extern "C" int cRiderMetrix_getCurTrickPoints(cRiderMetrix* self);
 extern "C" int cRiderMetrix_checkForMonsterTrick(cRiderMetrix* self, sTrickId* id);
 extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg, float duration);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_LandedMonsterCombo(void* audio, int rider);
 extern "C" int cRiderMetrix_addToHistory(cRiderMetrix* self, sTrickId* id);
 extern "C" void cRiderMetrix_addTrick(cRiderMetrix* self, sTrickId* id, int repeat);

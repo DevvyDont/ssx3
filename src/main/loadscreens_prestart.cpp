@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "main/loadscreens.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
@@ -1254,7 +1255,7 @@ INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_gainFocus);
 extern int cDepthFog_m_Enable;
 extern "C" void cGraphicsMan_UploadTextures(void* g);
 extern "C" void cSSXApp_startGameLoad(void* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028F768(void* snd);
 
 struct sVec3i_3260 {
@@ -1312,7 +1313,7 @@ INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_purge);
 #ifdef SKIP_ASM
 extern "C" void cGraphicsMan_PurgeTextures(void* world);
 extern "C" void cUIEngine__cUIEngine(void* obj, int a);
-extern "C" void* cAudioInterface_bxAudio(void);
+extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 extern "C" void func_0028FA98(void* self, float v);
 
 class cWorld002332E8 {

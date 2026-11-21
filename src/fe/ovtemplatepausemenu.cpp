@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "fe/ovstatepause.h"
 #include "be/beintnetwork.h"
 #include "online/gamecomm.h"
@@ -41,7 +42,7 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 
 extern "C" int cGame_canUserActivatePauseMenu(void* game);
 
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 
 
 extern char str_Menu_b[];
@@ -407,7 +408,7 @@ extern "C" void cOVStateManager_removePDATemplate(void);
 void* cUIStateStack_pop_r(void* self, int a1) __asm__("cUIStateStack_pop");
 extern "C" void cOVStateManager_triggerOverlay(int cmd);
 extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* mem, void* owner, int a2, int a3);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_ResumeAudio(void* audio);
 extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(cOVTemplate_PauseMenu* self, int idx, int on);
 extern int cPauseState_Flags;

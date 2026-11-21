@@ -1355,7 +1355,7 @@ INCLUDE_ASM("ai/computer", cRider_flagEventBoostPowerUp);
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cBEStatInterface_getTrickAttrib(void* iface, int rider, int b);
 extern "C" void cSSXAudio_BoostBar(void* mgr, void* rider, float cur, float amt);
 extern "C" void cRider_flagEventReaction(cRider* self, int mode, float t);
@@ -1423,7 +1423,7 @@ struct sVEntry0010E228 {
     int (*fn)(void*);
 };
 
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_RiderCollision(void* snd, void* a, void* b);
 extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
 void* cBEAggressionInterface_getThis();
@@ -1463,7 +1463,7 @@ struct sVEntry0010E2E8 {
     int (*fn)(void*);
 };
 
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_RiderCollision(void* snd, void* a, void* b);
 extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
 void* cBEAggressionInterface_getThis();
@@ -1501,7 +1501,7 @@ struct sVEntry0010E3A8 {
     int (*fn)(void*);
 };
 
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_Punch(void* snd, void* a, void* b);
 extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
 void* cBEAggressionInterface_getThis();
@@ -1540,7 +1540,7 @@ struct sVEntry0010E468 {
     int (*fn)(void*);
 };
 
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_Punch(void* snd, void* a, void* b);
 extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
 extern "C" void cSSXAudio_KnockdownSFX(void* snd, void* obj);
@@ -1671,7 +1671,7 @@ extern "C" void cRider_flagEventPathEvent(cRider* self, int* pathEvent, int isPr
 //100%
 INCLUDE_ASM("ai/computer", cRider_flagEventSpeedBoost);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 extern "C" void func_002A3B18(void*, void*, int);
 
@@ -1695,7 +1695,7 @@ extern "C" void cRider_flagEventSpeedBoost(cRider* self, float amount)
 //100%
 INCLUDE_ASM("ai/computer", cRider_flagEventTrickBoost);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 extern "C" void func_002A3B18(void*, void*, int);
 
@@ -1720,7 +1720,7 @@ INCLUDE_ASM("ai/computer", cRider_flagEventTrickMultiplier);
 int cRider_getMotionState(void* self);
 extern "C" float cRiderMetrix_evCollectMultiplier(char* self, float value);
 extern "C" void cRider_flagEventBoostPowerUp(cRider*, int, float);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 
 /**
@@ -1747,7 +1747,7 @@ INCLUDE_ASM("ai/computer", cRider_flagEventAddPoints);
 #ifdef SKIP_ASM
 extern "C" void cRider_flagEventBoostPowerUp(cRider*, int, float);
 extern "C" float cRiderMetrix_evAddPoints(int);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 
 /**
@@ -2525,7 +2525,7 @@ INCLUDE_ASM("ai/computer", cAI_UpdateRankingPlacement);
 #ifdef SKIP_ASM
 struct sAI_0010F998 { char pad[0x28]; cRider* riders[19]; int mode; int count; };
 extern "C" int cAI_isAILoadedAndReady(void* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_ChangePosition(void* mgr, void* rider, void* next, void* prev, int oldPos, int newPos);
 extern "C" void SORT_shell(int n, int* keys, int* idx);
 float cRider_getDistanceLeft(void* self);

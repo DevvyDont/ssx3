@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "visualfx/avalanche.h"
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
@@ -903,7 +904,7 @@ extern char str_AnimObject_b[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cAnimObjectNode_cAnimObjectNode1(void* self, int a, int type, void* b, void* c);
 extern "C" bool tActiveAvalancheNode_update_7EF8(void* node, float t) __asm__("tActiveAvalancheNode_update");
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void tActiveAvalanche_end_7EF8(void* self) __asm__("tActiveAvalanche_end");
 void cSSXAudio_AvalancheGroundHit_7EF8(void* snd, const sAvV4_7EF8& pos) __asm__("cSSXAudio_AvalancheGroundHit__FPv");
 
@@ -975,7 +976,7 @@ extern "C" void tActiveAvalanche_update_7EF8(sAvActive_7EF8* self)
 INCLUDE_ASM("visualfx/avalanche", tActiveAvalanche_end);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_Avalanche(void* self, int a1);
 
 /**

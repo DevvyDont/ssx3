@@ -1047,7 +1047,7 @@ extern "C" void cRiderAnimBase_initAIAnimEventMap();
 extern "C" void* cGameAnimMap_cGameAnimMap(void* self);
 extern "C" void cGameAnimMap_initMap(void* self);
 extern "C" void* cAnimDataBase_cAnimDataBase(void* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" int cSSXAudio_BEAudioModeToAudioMode(void* self, unsigned char a1);
 extern "C" void SSXAUDIO_Init(int a);
 extern "C" void func_0031A6B8();

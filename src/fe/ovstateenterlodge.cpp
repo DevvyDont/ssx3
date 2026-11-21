@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "ui/uistate.h"
 #include "ui/uithing.h"
 #include "ui/uitext.h"
@@ -304,7 +305,7 @@ extern "C" int cOVState_BIGCHALLENGE_START_onWidgetMenu(cOVState_BIGCHALLENGE_ST
 //100%
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onWidgetEvent);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 void cSSXAudio_SetBigChallengeStarting(void* self);
 extern "C" void cWScriptMan_startLocalMission(void* self);
 extern "C" void cWScriptMan_cancelLocalMission(void* self);
@@ -551,7 +552,7 @@ extern "C" char* func_00155208(void* iface, int i);
 extern "C" int func_001FD190();
 extern "C" char* func_0020A1A8(char* s);
 extern "C" void cOVState_onCreateScreen(void* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void* p, int id);
 extern "C" void strcpy1(void* str, int a1);
 extern "C" void func_002C2540(void* str, const char* s);

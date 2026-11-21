@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "ui/uiengine.h"
 #include "ui/uiscreen.h"
 #include "ui/uiprogress.h"
@@ -4365,7 +4366,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNet_handleEvent);
 #ifdef SKIP_ASM
 void func_00261058(void* self);
 extern "C" void func_00261408(void* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void* p, int id);
 void operator_delete(int* ptr);
 
@@ -13485,7 +13486,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cGameComm_destroy();
 extern "C" void func_001B5268(cFEStateNetConfig* self, int a1);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 void func_0028FC38(void* self);
 extern char str_200net_config[];
 
@@ -13516,7 +13517,7 @@ extern "C" void cFEStateNetConfig_onCreateScreen(cFEStateNetConfig* self)
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetConfig_onDestroyScreen);
 #ifdef SKIP_ASM
 void* cUIState_onDestroyScreen(void* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028FC58(void*);
 
 /**
@@ -14909,7 +14910,7 @@ int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_FrontEndPurge(void* p);
 extern "C" void func_00256088();
 extern char str_TextCreateConfig[];
@@ -23705,7 +23706,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void func_001A9930(cFEStateNet* self);
 extern "C" void cGameComm_destroy();
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* p, int a1);
 extern char str_230online_main_menu[];
 

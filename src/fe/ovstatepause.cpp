@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "bx/appman.h"
 #include "ui/uistate.h"
 #include "be/beintnewrace.h"
@@ -31,7 +32,7 @@ extern "C" int cUIListBox_getEntryByData(void* box, int key, unsigned char* out)
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* box, unsigned char sel);
 extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
@@ -417,7 +418,7 @@ extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int 
 extern "C" void cUIStateStack_pop(void* self, int a1);
 extern "C" int cUIListBox_getCurrentEntryData(void* obj);
 extern "C" void cChaseCameraController_switchCamera_UserChange(void* a0, int a1, void* a2);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
@@ -1686,7 +1687,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cOVState_triggerTextFade(void* self, char* text, char* label);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 extern "C" void func_002A31C0(void* self);
 extern char str_at_TextPulseWhiteOrange[];
@@ -2001,7 +2002,7 @@ extern "C" int func_001FCEC0(void* self, void* msg)
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FD0D8);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 extern "C" void cUIState_onGainFocus(void* self);
 
@@ -2025,7 +2026,7 @@ extern "C" void func_001FD0D8(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatepause", func_001FD118);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_002872A8(void* self);
 
 /**
@@ -2118,7 +2119,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void cOVState_onCreateScreen(void* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 extern char str_68rival_pre[];
 extern char str_OV_darkblue[];

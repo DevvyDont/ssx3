@@ -1,4 +1,6 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
+#include "main/game.h"
 #include "sound/icepick/worldsound.h"
 #include "sound/icepick/worldtriggermanager.h"
 #include "ai/rider.h"
@@ -131,7 +133,7 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerInstance_Update);
 struct sWorldTrigger70;
 struct sTriggerIdCache;
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" int cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(void* self);
 extern "C" char* cSSXAudio_GetFocusRider(void* self, int which);
@@ -388,7 +390,7 @@ extern "C" void cWorldTriggerInstance_Update(cWorldTriggerInstance* tt)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerInstance_Stop);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_002A72D8(void* snd, int id, float t);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* self, int idx, int a2, float v);
 extern unsigned char D_004A35A8[];
@@ -412,7 +414,7 @@ extern "C" void cWorldTriggerInstance_Stop(cWorldTriggerInstance* instance)
             func_002A72D8(cAudioInterface_bxAudio(), instance->m_iAudioHandle, 0.25f);
         }
     } else if (instance->m_iAudioHandle != -9999) {
-        cBankMonitor_BANKMONITOR_StopHandle(**(char***)((char*)cAudioInterface_bxAudio() + 0x118) + 0x1D8, instance->m_iAudioHandle, 1, 0.25f);
+        cBankMonitor_BANKMONITOR_StopHandle(**(char***)&cAudioInterface_bxAudio()->MusicSys + 0x1D8, instance->m_iAudioHandle, 1, 0.25f);
     }
     instance->m_iAudioHandle = -1;
     instance->m_iSwapString[0] = D_004A35A8[0];
@@ -776,7 +778,7 @@ extern "C" void cWorldTriggerManager_HandleTrigger(sWorldTrigger70** self, int o
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_Update);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" int func_004165A8(const void* a, const void* b);
 // PORT: cSSXAudio_SwapBankStopped__FPv is an empty stub whose caller passes (mgr, name).
 void cSSXAudio_SwapBankStopped_2(void* mgr, void* name) __asm__("cSSXAudio_SwapBankStopped__FPv");
@@ -793,7 +795,7 @@ extern unsigned char D_004A35A8[];
  */
 extern "C" void cWorldTriggerManager_Update(sWorldTrigger70** self)
 {
-    if (*(int*)((char*)cAudioInterface_bxAudio() + 0x5FB0) != 0) return;
+    if (cAudioInterface_bxAudio()->mSFXPaused != 0) return;
     for (int i = 0; i < 40; i++) {
         if ((*self)[i].active == 1) {
             if ((*self)[i].unk34 == 0) {
@@ -858,7 +860,7 @@ extern "C" void cWorldTriggerManager_StopTrigger(sWorldTrigger70** self, int id)
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_HandleCollision);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" int cWorldTriggerManager_TriggerToPatch(cWorldTriggerManager* self, int idx, int* type, int* a, int* b, int c, int d);
 extern "C" int cWorldTriggerManager_HasAfterCollisionTrigger(cWorldTriggerManager* self, void* obj);
 struct sTriggerIdCache;
@@ -1012,7 +1014,7 @@ extern "C" int cWorldTriggerManager_HandleCollision(cWorldTriggerManager* self, 
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_TriggerToPatch);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" int cSoundSys_SndRand(int a);
 extern "C" int cWorldTriggerManager_AdvancedTriggerToPatch(cWorldTriggerManager* self, int type, int* a, int* b, int* c, int arg);
 
@@ -1089,7 +1091,7 @@ extern "C" int cWorldTriggerManager_TriggerToPatch(cWorldTriggerManager* self, i
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_AdvancedTriggerToPatch);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" int func_002A34D0(void* mgr, int a1, int a2, int a3);
 
 /**
@@ -1228,7 +1230,7 @@ extern "C" int cWorldTriggerManager_PlayingTriggerInstance(sWorldTrigger70** sel
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_HasAfterCollisionTrigger);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_getGame(void);
+extern "C" cGame* cAudioInterface_getGame(void);
 extern "C" void cWorldSound_GetAudioVolumeTriggers(cWorldSound* self, void* obj, int* o0, int* o1, int* o2, int* o3);
 extern "C" int cWorldTriggerManager_AfterCollisionTrigger(cWorldTriggerManager* self, unsigned int i);
 
@@ -1243,7 +1245,7 @@ extern "C" int cWorldTriggerManager_AfterCollisionTrigger(cWorldTriggerManager* 
 extern "C" int cWorldTriggerManager_HasAfterCollisionTrigger(cWorldTriggerManager* self, void* obj)
 {
     int ids[4];
-    cWorldSound_GetAudioVolumeTriggers((cWorldSound*)(*(void**)((char*)cAudioInterface_getGame() + 0x4C)), obj, &ids[0], &ids[1], &ids[2], &ids[3]);
+    cWorldSound_GetAudioVolumeTriggers((cWorldSound*)(cAudioInterface_getGame()->WorldSound), obj, &ids[0], &ids[1], &ids[2], &ids[3]);
     if (cWorldTriggerManager_AfterCollisionTrigger(self, ids[0])) {
         return 1;
     }
@@ -1916,7 +1918,7 @@ extern "C" void cWorldSound_AddInstanceToGrid(cWorldSound* self, sTriggerEntry18
     sVec3_2B6CF8 min;
     sVec3_2B6CF8 max;
     cWorldSound_CalcInstAudioBoundingBox_7318(self, trig, &min, &max);
-    char* w = *(char**)((char*)cAudioInterface_getGame() + 0x20);
+    char* w = (char*)cAudioInterface_getGame()->BXNash;
     *(int*)(trig + 8) = 5;
     float one = 1.0f;
     sWtBox_7318 box;
@@ -1987,7 +1989,7 @@ extern "C" void cWorldSound_RemoveInstanceFromGrid(cWorldSound* self, sWtmEnt18*
     sVec3_2B6CF8 lo;
     sVec3_2B6CF8 hi;
     cWorldSound_CalcInstAudioBoundingBox(self, instAudio, &lo, &hi);
-    char* base = *(char**)((char*)cAudioInterface_getGame() + 0x20);
+    char* base = (char*)cAudioInterface_getGame()->BXNash;
     sBox_2B7410 box;
     box.x0 = lo.x;
     box.y0 = lo.y;
@@ -2032,7 +2034,7 @@ struct sOctRoot_75D0 {
 
 struct sQH_75D0 {};
 
-extern "C" void* cAudioInterface_getGame(void);
+extern "C" cGame* cAudioInterface_getGame(void);
 extern "C" void wtq_75D0(sQH_75D0* h, void* partial, void* inside, void* pos, void* node, void* key) __asm__("func_002B83F8");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
@@ -2085,7 +2087,7 @@ extern "C" void cAudioOverlapList_update(cWorldSound* self, const sV4_75D0* pos)
 {
     if (self->m_OverlapLists[0].lastposition.w == 0.0f || Length_75D0(Sub_75D0(*pos, *(sV4_75D0*)&self->m_OverlapLists[0].lastposition)) > 10.0f) {
         self->m_OverlapLists[0].numoverlaps = 0;
-        sOctRoot_75D0* root = *(sOctRoot_75D0**)((char*)cAudioInterface_getGame() + 0x20);
+        sOctRoot_75D0* root = (sOctRoot_75D0*)cAudioInterface_getGame()->BXNash;
         cWorldSound* selfList[1];
         selfList[0] = (self);
         const sV4_75D0* posPtr = pos;

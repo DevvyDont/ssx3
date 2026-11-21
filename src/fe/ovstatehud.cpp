@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "ui/uiengine.h"
 #include "fe/textpictline.h"
 #include "fe/ovstatehud.h"
@@ -34,7 +35,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 extern char str_hiscorelist[];
 extern char str_helptext02[];
@@ -1218,7 +1219,7 @@ extern "C" int cOVStateHUD1P_handleEvent(cOVStateHUD1P* self, int msg, unsigned 
         break;
     case 5: {
         self->mRenderFlags &= ~0x10000;
-        char* name = (char*)func_002B40F0((char*)cAudioInterface_bxAudio() + 0x118, -1);
+        char* name = (char*)func_002B40F0(&cAudioInterface_bxAudio()->MusicSys, -1);
         unsigned int hash = 0xF0000000;
         if (name != 0 && *name != 0) {
             self->mRenderFlags |= 0x10000;

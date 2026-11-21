@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "fe/fereal.h"
 #include "fe/uistatebuypopup.h"
 #include "ui/uistate.h"
@@ -178,7 +179,7 @@ extern "C" void cFERiderManager_setHumanCharacter(void* self, int a1, int a2, in
 extern "C" void cFERiderManager_setHumanVisible(void* self, int a1, int a2);
 extern "C" void cSimpleCamera_setupCamWithPosAndTarget(void* cam, void* a, void* b);
 extern "C" void* cUITextureBank_getElementByHashname(void* list, int hash);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* p, int a);
 extern "C" void cFEStateUberTrick_costVisible(cFEStateUberTrick* self, int on);
 extern "C" void cFEStateUberTrick_previewVisible(cFEStateUberTrick* self, int on);

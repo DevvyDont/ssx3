@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "main/gameviewman.h"
 #include "main/sectionman.h"
 #include "ai/player.h"
@@ -28,7 +29,7 @@ extern "C" void* func_002F1850(void* mem, void* rider);
 extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface(void* self, int a1, int a2);
 void* cPlayerShadow_cPlayerShadow(void* self);
 extern "C" void cScriptObject_InitScriptObject(void* rig);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 // PORT: cSSXAudio_RiderCreated is declared (void*) but takes (mgr, rider).
 void cSSXAudio_RiderCreated_impl(void* mgr, void* rider) __asm__("cSSXAudio_RiderCreated__FPv");
 extern "C" void* MEM_fill(void* dst, int value, int size);
@@ -169,7 +170,7 @@ struct sVE_11B978 {
     short index;
     void (*fn)(void*, int);
 };
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 // PORT: cSSXAudio_RiderDeleted takes (mgr, rider); the mangled name says one void* param.
 void cSSXAudio_RiderDeleted_impl(void* mgr, void* rider) __asm__("cSSXAudio_RiderDeleted__FPv");
 extern "C" void cScriptObject_DeInitScriptObject(void* p);
@@ -3528,7 +3529,7 @@ extern "C" void cRider_updateSplit11(cRider* self)
 INCLUDE_ASM("ai/rider", cRider_updateSplit12);
 #ifdef SKIP_ASM
 extern "C" int cRider_isGroundNormalValid(cRider* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_UpdateAudioWorldPainter(void* mgr, void* rider);
 extern "C" float func_0031C228(float x);
 extern "C" void cRider_updateDangerLevel(cRider* self);
@@ -5401,7 +5402,7 @@ INCLUDE_ASM("ai/rider", cRider_OnEndObjectUse);
 #ifdef SKIP_ASM
 extern "C" void cScriptObjRider_OnEndObjectUse(void* self);
 extern "C" void cRider_initAlways(void* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 void func_002A1BD0(void* p);
 extern "C" void func_0030EA80(void* model, int i, int channel);
 extern "C" void func_0030E9E0(void* model, int i, int channel);
@@ -5525,7 +5526,7 @@ extern "C" void cRider_OnEndObjectUse(cRider* self)
     int j;
     for (j = 0; j < 4; j++) {
         if (ids[j] >= 0) {
-            cBankMonitor_BANKMONITOR_StopHandle(*(char**)*(char**)((char*)cAudioInterface_bxAudio() + 0x118) + 0x1D8, ids[j], 1, 0.0f);
+            cBankMonitor_BANKMONITOR_StopHandle(*(char**)*(char**)&cAudioInterface_bxAudio()->MusicSys + 0x1D8, ids[j], 1, 0.0f);
         }
         ids[j] = -1;
     }
@@ -5569,7 +5570,7 @@ extern "C" void cRider_OnInSeqUpdate(cRider* self, int id, float currFrame, floa
 INCLUDE_ASM("ai/rider", cRider_OnInSeqKeyEvent);
 #ifdef SKIP_ASM
 extern "C" void GetSSXActorFrame(int, void*);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" int func_002A1B58(void* self, int msg, int a);
 extern "C" int func_002A1B88(void* self, int type, int a, int b);
 extern "C" void* cSSXScriptEngine_GetSubjectRider(void* self, int i, int a2);
@@ -6554,7 +6555,7 @@ extern "C" float cRiderMetrix_evFinishRace(void* self);
 extern "C" void cChaseCameraController_switchCamera_EndRace(void* self);
 extern "C" void cGameModeMan_raceFinish(void* self, int a1, int a2);
 extern "C" void cSSXAudio_OnFinishEvent(void* self, void* rider);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 
 struct sVEntry125108 { short delta; short index; int (*fn)(void*); };
 
@@ -6611,7 +6612,7 @@ struct sVE_125228 {
 extern "C" void* cBE_getBE();
 void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cRider_doFinishEvent(cRider* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_002A3C00(void* a, void* self, int n);
 extern "C" unsigned int fptoui(float f);
 extern int D_005308D0[];
@@ -6697,7 +6698,7 @@ extern "C" void cRider_quitEvent(cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", cRider_DoInSeqSoundUpdate);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" int cBankMonitor_BANKMONITOR_GetHandle(void* bank, int id, int a);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
 void cScriptObjRider_ScriptSoundIDToGameSoundInfo(void* self, int a1, void* a2, void* a3);

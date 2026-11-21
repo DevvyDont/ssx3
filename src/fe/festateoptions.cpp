@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "fe/fereal.h"
 #include "fe/festateprofile.h"
 #include "fe/festateoptions.h"
@@ -613,7 +614,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBEOptionInterface_defaultGame(void* iface);
 extern "C" void cFEStateOptionsGame_updateWidget(cFEStateOptionsGame* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0029ED90(void* p, int a);
 extern char str_111resetopts[];
 extern char str_24screen_position[];
@@ -767,7 +768,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
 extern "C" void cSSXApp_activateBEOptions(void* p);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0029ED90(void* p, int a);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void cUIState_cUIState1(void* self, void* engine, void* owner);
@@ -1117,7 +1118,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBEOptionInterface_defaultSound(void* iface);
 extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, unsigned int mode);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
@@ -1270,7 +1271,7 @@ extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, unsigned int mode);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
@@ -1425,7 +1426,7 @@ extern "C" int cUIListBox_addEntryByStringID_i(void* box, int id, int idx) __asm
 extern "C" void cUIListBox_deleteAllEntries(void* box);
 extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int v);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 int cSSXAudio_GetCurrentSoundMode(void* snd);
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
@@ -1586,7 +1587,7 @@ extern "C" void cFEStateOptionsSound_updateWidget(cFEStateOptionsSound* vself)
 //100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_setSoundMode);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" int func_00287670(void* snd);
 extern "C" int cSSXAudio_GetSFXVolume(void* snd);
 extern "C" int func_002876D0(void* snd);
@@ -1646,15 +1647,15 @@ extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, un
         audioMode = 1;
         break;
     }
-    char* obj = *(char**)(**(char***)((char*)cAudioInterface_bxAudio() + 0x118) + 0x1D8);
+    char* obj = *(char**)(**(char***)&cAudioInterface_bxAudio()->MusicSys + 0x1D8);
     sVE_18BEF8i* vt = *(sVE_18BEF8i**)(obj + 4);
     if (vt[2].fn(obj + vt[2].delta, audioMode) == 1) {
         float sfxVolume = func_00287670(cAudioInterface_bxAudio());
         float speechVolume = cSSXAudio_GetSFXVolume(cAudioInterface_bxAudio());
         float musicVolume = func_002876D0(cAudioInterface_bxAudio());
-        int djSpeech = *(int*)((char*)cAudioInterface_bxAudio() + 0x62B8);
-        int arcadeSfx = *(int*)((char*)cAudioInterface_bxAudio() + 0x62B4);
-        int saved534 = *(int*)((char*)cAudioInterface_bxAudio() + 0x534);
+        int djSpeech = cAudioInterface_bxAudio()->unk_62B8;
+        int arcadeSfx = cAudioInterface_bxAudio()->mArcadeSFX;
+        int saved534 = cAudioInterface_bxAudio()->MusicSys.unk_41C;
         cSSXAudio_FrontEndPurge(cAudioInterface_bxAudio());
         SSXAUDIO_DeInit();
         SSXAUDIO_Init(audioMode);

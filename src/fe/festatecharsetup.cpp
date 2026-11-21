@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "fe/fereal.h"
 #include "fe/festateriderdetail.h"
 #include "fe/festatecharsetup.h"
@@ -23,7 +24,7 @@ int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void cFEStateCharSetup_updateWidget(cFEStateCharSetup* self);
 extern "C" void cFERiderManager_setHumanVisible(void* self, int i, int v);
 extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int a2, int a3);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* snd, int a);
 extern char str_09set_char[];
 extern char str_title[];

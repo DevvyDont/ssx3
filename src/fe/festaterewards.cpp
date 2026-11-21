@@ -1,4 +1,6 @@
 #include "common.h"
+#include "be/berewarddb.h"
+#include "sound/ssxaudio.h"
 #include "fe/fereal.h"
 #include "fe/uistatebuypopup.h"
 #include "ui/uithing.h"
@@ -1853,7 +1855,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBERewardInterface_getTotalNumPosters(void* self);
-extern "C" void* cBERewardInterface_getDB();
+extern "C" cBERewardDB* cBERewardInterface_getDB();
 
 struct sRewardList_11F8 {
     char pad_0x0[0x68];
@@ -1875,7 +1877,7 @@ extern "C" void cFEStateRewardGalleryPosters_allocRewards(sRewardList_11F8* self
 {
     int n = cBERewardInterface_getTotalNumPosters(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
-    self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x14);
+    self->base = (int)cBERewardInterface_getDB()->mpPosters;
     for (int i = 0; i < n; i++) {
         self->items[self->count++] = self->base + i * 16;
     }
@@ -1983,7 +1985,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBERewardInterface_getTotalNumTradingCards(void* self);
-extern "C" void* cBERewardInterface_getDB();
+extern "C" cBERewardDB* cBERewardInterface_getDB();
 
 struct sRewardList_1390 {
     char pad_0x0[0x68];
@@ -2005,7 +2007,7 @@ extern "C" void cFEStateRewardGalleryTradingCards_allocRewards(sRewardList_1390*
 {
     int n = cBERewardInterface_getTotalNumTradingCards(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
-    self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x18);
+    self->base = (int)cBERewardInterface_getDB()->mpTradingCards;
     for (int i = 0; i < n; i++) {
         self->items[self->count++] = self->base + i * 16;
     }
@@ -2113,7 +2115,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBERewardInterface_getTotalNumConceptArts(void* self);
-extern "C" void* cBERewardInterface_getDB();
+extern "C" cBERewardDB* cBERewardInterface_getDB();
 
 struct sRewardList_1528 {
     char pad_0x0[0x68];
@@ -2135,7 +2137,7 @@ extern "C" void cFEStateRewardGalleryConceptArts_allocRewards(sRewardList_1528* 
 {
     int n = cBERewardInterface_getTotalNumConceptArts(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
-    self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x1C);
+    self->base = (int)cBERewardInterface_getDB()->mpConceptArts;
     for (int i = 0; i < n; i++) {
         self->items[self->count++] = self->base + i * 16;
     }
@@ -2243,7 +2245,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBERewardInterface_getTotalNumVideos(void* self);
-extern "C" void* cBERewardInterface_getDB();
+extern "C" cBERewardDB* cBERewardInterface_getDB();
 
 struct sRewardList_16C0 {
     char pad_0x0[0x68];
@@ -2265,7 +2267,7 @@ extern "C" void cFEStateRewardGalleryVideos_allocRewards(sRewardList_16C0* self)
 {
     int n = cBERewardInterface_getTotalNumVideos(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
-    self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x24);
+    self->base = (int)cBERewardInterface_getDB()->mpVideos;
     for (int i = 0; i < n; i++) {
         self->items[self->count++] = self->base + i * 16;
     }
@@ -2373,7 +2375,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBERewardInterface_getTotalNumToys(void* self);
-extern "C" void* cBERewardInterface_getDB();
+extern "C" cBERewardDB* cBERewardInterface_getDB();
 
 struct sRewardList_1858 {
     char pad_0x0[0x68];
@@ -2395,7 +2397,7 @@ extern "C" void cFEStateRewardGalleryToys_allocRewards(sRewardList_1858* self)
 {
     int n = cBERewardInterface_getTotalNumToys(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
-    self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x20);
+    self->base = (int)cBERewardInterface_getDB()->mpToys;
     for (int i = 0; i < n; i++) {
         self->items[self->count++] = self->base + i * 16;
     }
@@ -2461,7 +2463,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBERewardInterface_getTotalNumCheatChars(void* self);
-extern "C" void* cBERewardInterface_getDB();
+extern "C" cBERewardDB* cBERewardInterface_getDB();
 
 struct sRewardList_1990 {
     char pad_0x0[0x68];
@@ -2483,7 +2485,7 @@ extern "C" void cFEStateRewardGalleryCheatChars_allocRewards(sRewardList_1990* s
 {
     int n = cBERewardInterface_getTotalNumCheatChars(cBE_getInterface_Fv(cBE_getBE(), 13));
     self->count = 0;
-    self->base = *(int*)((char*)cBERewardInterface_getDB() + 0x28);
+    self->base = (int)cBERewardInterface_getDB()->mpCheatChars;
     for (int i = 0; i < n; i++) {
         self->items[self->count++] = self->base + i * 16;
     }
@@ -3279,7 +3281,7 @@ extern "C" void cFEStateVideoPlayer_setVideoSourceFiles(cFEStateVideoPlayer* sel
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_Start);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_002B3A70(void* p);
 extern "C" int cMoviePlayer_init(void* p, void* q);
 extern "C" void cMoviePlayer_asyncPlay(void* p);
@@ -3293,7 +3295,7 @@ extern "C" void cMoviePlayer_asyncPlay(void* p);
  */
 extern "C" void cFEStateVideoPlayer_Start(cFEStateVideoPlayer* self)
 {
-    func_002B3A70((char*)cAudioInterface_bxAudio() + 0x118);
+    func_002B3A70(&cAudioInterface_bxAudio()->MusicSys);
     self->mOptions.bSoundOn = 1;
     cMoviePlayer_init(self->mpMoviePlayer, (char*)&self->mOptions);
     cMoviePlayer_asyncPlay(self->mpMoviePlayer);
@@ -3305,7 +3307,7 @@ extern "C" void cFEStateVideoPlayer_Start(cFEStateVideoPlayer* self)
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_Stop);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_002B3A98(void* self);
 extern "C" void cUIStateStack_pop(void* self, int a1);
 
@@ -3318,7 +3320,7 @@ extern "C" void cUIStateStack_pop(void* self, int a1);
  */
 extern "C" void cFEStateVideoPlayer_Stop(cFEStateVideoPlayer* self)
 {
-    func_002B3A98((char*)cAudioInterface_bxAudio() + 0x118);
+    func_002B3A98(&cAudioInterface_bxAudio()->MusicSys);
     self->mStopPending = 0;
     cUIStateStack_pop(&self->mpEngine->mStateStack, 1);
 }

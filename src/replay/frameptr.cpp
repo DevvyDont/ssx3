@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "main/gameviewman.h"
 #include "ui/uiengine.h"
 #include "camera/trigger/cameratriggerman.h"
@@ -1126,7 +1127,7 @@ extern "C" void cReplay_pushReplaySaveFrame(cReplay* self);
 void cReplay_setReplayState(void* self, int state);
 extern "C" void cReplay_rewind(void* self, void* a1);
 extern "C" void cReplay_stepFrame(void* self, int a1);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028F200(void* self);
 
 
@@ -1176,7 +1177,7 @@ extern "C" void cReplay_setupGameCamerasOnExitInstantReplay(void* self);
 void cReplay_setReplayState(void* self, int state);
 extern "C" void cReplay_popReplaySaveFrame(cReplay* self);
 extern "C" void cReplay_cancelMarkInstantReplay(void* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028F2C0(void* self);
 
 

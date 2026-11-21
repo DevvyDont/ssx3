@@ -6423,7 +6423,7 @@ void cRider_setControlState_8388(void* self, int v) __asm__("cRider_setControlSt
 int AIrand();
 extern "C" void cBoardPressControl_forceExit(void*);
 extern "C" void cRiderAnimBase_play(void*, int, int, float);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_002A0E70(void*, void*, int);
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).

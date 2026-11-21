@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "main/gameviewman.h"
 #include "ui/uiengine.h"
 #include "main/loadscreens.h"
@@ -229,7 +230,7 @@ INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_gainFocus);
 extern int cDepthFog_m_Enable;
 extern "C" void cGraphicsMan_UploadTextures(void* g);
 extern "C" void cSSXApp_startFELoad(void* app);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028F768(void* snd);
 
 struct sVec3i_38C8 {
@@ -323,7 +324,7 @@ struct cGame00233930 {
 
 extern "C" void cUIEngine__cUIEngine(void* self, int a1);
 extern "C" void cGraphicsMan_PurgeTextures(void* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028FA98(void* self, float f);
 
 /**

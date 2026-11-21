@@ -3442,7 +3442,7 @@ extern "C" void cFinishLineControl_readFromReplayFrame(cFinishLineControl* self,
 //100%
 INCLUDE_ASM("ai/ai", cWipeoutControl_gainFocus);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_ResetWipeoutRecoverHit(void* self, void* a1);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cReplay_eventWipeout(void* self, int key, int id);
@@ -3524,7 +3524,7 @@ INCLUDE_ASM("ai/ai", cWipeoutControl_update);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cRider_setupBoostWarp(void* rider, int a, int b);
 extern "C" int cRider_checkForReset_CB68(void* rider, int a, int b) __asm__("cRider_checkForReset");
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayWipeoutRecoverFull(void* snd, void* rider);
 extern "C" void cSSXAudio_PlayWipeoutRecoverHit(void* snd, void* rider, float t);
 extern "C" void cWipeoutControl_updateLaunch_CB68(void* self) __asm__("cWipeoutControl_updateLaunch");
@@ -3770,7 +3770,7 @@ extern "C" void cWipeoutControl_playWipeoutGroundRecoverAnim(cWipeoutControl* se
 extern "C" void cWipeoutControl_playWipeoutStuckAnim(cWipeoutControl* self);
 extern "C" float cWipeoutControl_chooseTumbleAnimRate(cWipeoutControl* self);
 extern "C" void cCamera_shakeCamera(void* obj, int mode, float a, float b);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_WipeoutSlideEnd(void* mgr, void* rider);
 extern "C" void cSSXAudio_WipeoutTumbleEnd(void* mgr, void* rider);
 extern "C" void cSSXAudio_PlayGrunt(void* mgr, void* rider, int a, int b);
@@ -3914,7 +3914,7 @@ extern "C" void cWipeoutControl_playWipeoutAirRecoverAnim(cWipeoutControl* self)
 extern "C" void cWipeoutControl_playWipeoutStuckAnim(cWipeoutControl* self);
 extern "C" void cWipeoutControl_playWipeoutGroundImpactAnim(cWipeoutControl* self);
 extern "C" float cWipeoutControl_chooseTumbleAnimRate(cWipeoutControl* self);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_WipeoutHit(void* mgr, void* rider);
 extern "C" void cSSXAudio_WipeoutSlideStart(void* mgr, void* self);
 extern "C" void cSSXAudio_WipeoutTumbleStart(void* mgr, void* self);
@@ -4758,7 +4758,7 @@ struct sVEntry0012E690 {
 
 extern "C" int AITick();
 extern "C" void cRider_flagEventReaction(void* self, int mode, float t);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_002A02D8(void*, void*);
 
 /**
@@ -6645,7 +6645,7 @@ extern "C" int cBoardPressControl_checkForPivot(cBoardPressControl* vself, void*
 //100%
 INCLUDE_ASM("ai/ai", cBoardPressControl_checkForWipeout);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_002A1560(void* mgr, void* rider);
 extern "C" void cRider_flagEventWipeout(void* rider, int id, int a, int b, void* info);
 
@@ -7656,7 +7656,7 @@ INCLUDE_ASM("ai/ai", cRailslideControl_checkForUberGrind);
 // PORT: prototype mismatch. cRider_setControlState is defined with one param, but its body
 // forwards $5 to cRiderHandler__setControlState.
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_UberRailDeny(void* snd, void* rider);
 
 /**
@@ -7833,7 +7833,7 @@ extern "C" void cRailslideControl_readFromReplayFrame(cRailslideControl* self, c
 //100%
 INCLUDE_ASM("ai/ai", cHandplantControl_gainFocus);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_HandPlantSound(void* self, void* rider);
 extern "C" float cRiderAnimBase_getAIAnimDuration(char* self, int a1);
 extern "C" void cHandplantControl_playHandplantAnim(cHandplantControl* self, int a1, int a2);

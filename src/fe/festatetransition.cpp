@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "ui/uiscreen.h"
 #include "fe/festatetransition.h"
 #include "fe/festatetitle.h"
@@ -79,7 +80,7 @@ extern "C" int cFEStateTransition_onScreenEvent(cFEStateTransition* self, cUIScr
 INCLUDE_ASM("fe/festatetransition", cFEStateTransition_handleEvent);
 #ifdef SKIP_ASM
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void*, int);
 
 /**

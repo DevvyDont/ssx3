@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "bx/math3d.h"
 #include "main/gameviewman.h"
 #include "scripter/scriptentitycam.h"
@@ -2309,7 +2310,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_PlayTransportSequence);
 extern "C" void cSSXScriptEngine_AddToNISListByScriptCategory(cSSXScriptEngine* self, int i, int a, int b, int c, int d, int f, int g);
 extern "C" void cSSXScriptEngine_ReadyNISList(cSSXScriptEngine* self, int i);
 extern "C" int cSSXScriptEngine_PlayNISList(cSSXScriptEngine* self, int i, int a, int b);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028E8C0(void* self, int id, int a2);
 struct sSseGame_A860 {
     char pad_0x0[0xF44];
@@ -3490,7 +3491,7 @@ extern "C" int cSSXScriptEngine_IsBankLoading(cSSXScriptEngine* self, int i)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_ClearNISPlayListState);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028E888(void*);
 extern "C" void cRenderStateMan_setInNIS(int);
 
@@ -6003,7 +6004,7 @@ extern "C" void cScriptObjEvent_OnStartObjectUse(cScriptObjEvent* self)
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjEvent_OnEndObjectUse);
 #ifdef SKIP_ASM
 void cScriptObject_OnEndObjectUse(void*);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 void func_002A1BD0(void* p);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
 extern "C" void cWScriptMan_runFunc(void* mgr, int a, int b);
@@ -6064,7 +6065,7 @@ extern "C" void cScriptObjEvent_OnEndObjectUse(sSeEngine07B0* self)
     for (int i = 0; i < 4; i++) {
         int id = self->sounds[i].id;
         if (id >= 0) {
-            cBankMonitor_BANKMONITOR_StopHandle(*(char**)*(char**)((char*)cAudioInterface_bxAudio() + 0x118) + 0x1D8, id, 1, 0.0f);
+            cBankMonitor_BANKMONITOR_StopHandle(*(char**)*(char**)&cAudioInterface_bxAudio()->MusicSys + 0x1D8, id, 1, 0.0f);
         }
         sSeSound07B0* soundSlot = &self->sounds[i];
         soundSlot->field_0x8 = -1;
@@ -6112,7 +6113,7 @@ int cSSXScriptEngine_GetTransportWorldSectionID_08E8(void* engine) __asm__("cSSX
 extern "C" int* cBENewRaceInterface_getLocation(void* iface);
 extern "C" int cSectionMan_getWorldSectionIDFromBELocationID(void* mgr, int id);
 extern "C" void cWScriptMan_runFunc(void* mgr, int a, int b);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028E8C0(void* self, int id, int a2);
 extern "C" void func_002A19D8(void* self, int id);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
@@ -6835,7 +6836,7 @@ void cScriptObjCamera_SetCameraWeight(void* self, float val);
 extern "C" int cScriptObjCameraManager_GetCameraObjectByTrack(cScriptObjCameraManager* self, int i);
 extern "C" void cScriptObjCameraManager_DoCameraTransition(cScriptObjCameraManager* self, int* info, float t);
 extern "C" void cScriptObjTransition_Update(void* self, float dt);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" float func_002B4920(void* p);
 
 struct sNode_2816A0

@@ -2194,7 +2194,7 @@ extern "C" int SphereTree_IsTriCollision(SphereTree* self, t4Vector* point1, t4V
 INCLUDE_ASM("intersect/riderspheretree", SphereTree_IsTreeCollision);
 #ifdef SKIP_ASM
 extern "C" int SphereTree_AllocBuf(void* self);
-extern "C" int SphereTree_isTreeCollision(SphereTree* self, void* other, t4Vector* pos, int a3, int a4, t4Vector* a5, t4Vector* a6);
+extern "C" int SphereTree_isTreeCollision(SphereTree* self, SphereTree* other, t4Vector* pos, int a3, int a4, t4Vector* a5, t4Vector* a6);
 
 /**
  * Tests a sphere tree against another sphere tree.
@@ -2217,7 +2217,7 @@ extern "C" int SphereTree_IsTreeCollision(SphereTree* self, void* other, t4Vecto
     if (*(int*)((char*)tree + 0x8) != 0) {
         *(int*)((char*)*(void**)((char*)other + 0x98) + 0x28) = SphereTree_AllocBuf(tree);
     }
-    return SphereTree_isTreeCollision(self, other, (t4Vector*)&self->transCenter, 0, 0, outPush, outContact);
+    return SphereTree_isTreeCollision(self, (SphereTree*)other, (t4Vector*)&self->transCenter, 0, 0, outPush, outContact);
 }
 #endif
 
@@ -2225,7 +2225,7 @@ extern "C" int SphereTree_IsTreeCollision(SphereTree* self, void* other, t4Vecto
 INCLUDE_ASM("intersect/riderspheretree", SphereTree_isTreeCollision);
 #ifdef SKIP_ASM
 extern "C" int SphereTree_isSphereCollision(SphereTree* self, t4Vector* a1, float f, t4Vector* pos, int a4, int a5, t4Vector* a6, t4Vector* a7);
-extern "C" int SphereTree_isTreeCollision(SphereTree* self, void* other, t4Vector* pos, int a3, int a4, t4Vector* a5, t4Vector* a6);
+extern "C" int SphereTree_isTreeCollision(SphereTree* self, SphereTree* other, t4Vector* pos, int a3, int a4, t4Vector* a5, t4Vector* a6);
 
 struct sSphereLevel_CBF8 {
     float radius;   // 0x0
@@ -2299,7 +2299,7 @@ static inline sSphereVec4 Add_CBF8(const sSphereVec4& a, const sSphereVec4& b)
  * @param outContact  out: the contact point (On Tour loc)
  * @return 1 on contact, else 0
  */
-extern "C" int SphereTree_isTreeCollision(SphereTree* selfp, void* other, t4Vector* posp, int depth, int base, t4Vector* outPush, t4Vector* outContact)
+extern "C" int SphereTree_isTreeCollision(SphereTree* selfp, SphereTree* other, t4Vector* posp, int depth, int base, t4Vector* outPush, t4Vector* outContact)
 {
     sSphereOct_CBF8* self = (sSphereOct_CBF8*)selfp;
     sSphereVec4 childPos;
@@ -2313,7 +2313,7 @@ extern "C" int SphereTree_isTreeCollision(SphereTree* selfp, void* other, t4Vect
             for (int i = 0; i < 8; i++) {
                 if ((mask >> i) & 1) {
                     childPos = Add_CBF8(*(sSphereVec4*)posp, Scale_CBF8(self->dirs[i], off));
-                    if (SphereTree_isSphereCollision((SphereTree*)other, (t4Vector*)(&childPos), self->tree->levels[depth].radius * self->scale, (t4Vector*)((char*)other + 0x80), 0, 0, outPush, outContact) &&
+                    if (SphereTree_isSphereCollision((SphereTree*)other, (t4Vector*)(&childPos), self->tree->levels[depth].radius * self->scale, (t4Vector*)(&other->transCenter), 0, 0, outPush, outContact) &&
                         SphereTree_isTreeCollision((SphereTree*)self, other, (t4Vector*)(&childPos), depth + 1, (i + 1) * self->tree->levels[depth].stride + base, outPush, outContact)) {
                         return 1;
                     }

@@ -101,31 +101,31 @@ static inline void call1_6D60(char* o, int vtoff, int slot, int a)
  * @param av  command-line arguments (char**, passed as int)
  * @return 0
  */
-extern "C" int cAppMan_run(char* self, char* exec, int ac, int av)
+extern "C" int cAppMan_run(cAppMan* self, char* exec, int ac, int av)
 {
-    *(float*)(self + 0x14) = 0.01666666753590107f;
-    *(char**)(self + 0x8) = exec;
-    *(int*)(self + 0x10) = 60;
+    self->TimerPeriod = 0.01666666753590107f;
+    self->ExecutionMan = (cExecutionMan*)exec;
+    self->TimerHz = 60;
     call1_6D60(exec, 8, 2, 60);
-    sVt2_6D60* vt = *(sVt2_6D60**)(self + 0x5C);
-    vt[3].fn(self + vt[3].delta, ac, av);
-    call1_6D60(*(char**)(self + 0x8), 8, 9, *(int*)(self + 0x4));
-    while (call0_6D60(*(char**)(self + 0x8), 8, 10) == 0) {
-        callv_6D60(*(char**)(self + 0x8), 8, 11);
+    sVt2_6D60* vt = (sVt2_6D60*)self->mVtbl;
+    vt[3].fn(((char*)self) + vt[3].delta, ac, av);
+    call1_6D60((char*)self->ExecutionMan, 8, 9, (int)self->LoadingModule);
+    while (call0_6D60((char*)self->ExecutionMan, 8, 10) == 0) {
+        callv_6D60((char*)self->ExecutionMan, 8, 11);
         SYNCTASK_run(0);
-        callv_6D60(*(char**)(self + 0x8), 8, 12);
-        callv_6D60(*(char**)(self + 0x8), 8, 4);
+        callv_6D60((char*)self->ExecutionMan, 8, 12);
+        callv_6D60((char*)self->ExecutionMan, 8, 4);
         cAppMan_checkHalt((cAppMan*)self);
     }
-    char* next = *(char**)(self + 0x4);
-    *(int*)(self + 0x4) = 0;
-    *(char**)(self + 0x0) = next;
+    char* next = (char*)self->LoadingModule;
+    self->LoadingModule = 0;
+    self->ActiveModule = (cAppModule*)next;
     callv_6D60(next, 0, 5);
-    *(int*)(self + 0x58) = 0;
+    self->LoadState = 0;
     cAppMan_mainLoop(self);
-    callv_6D60(self, 92, 4);
-    callv_6D60(*(char**)(self + 0x8), 8, 3);
-    char* execMan = *(char**)(self + 0x8);
+    callv_6D60(((char*)self), 92, 4);
+    callv_6D60((char*)self->ExecutionMan, 8, 3);
+    char* execMan = (char*)self->ExecutionMan;
     if (execMan)
         call1_6D60(execMan, 8, 1, 3);
     return 0;

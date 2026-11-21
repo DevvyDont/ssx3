@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "fe/uistatebuypopup.h"
 #include "fe/festatebigradio.h"
 #include "ui/uimenu.h"
@@ -236,7 +237,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBERewardInterface_setPlayList(void* iface, int a, int b, unsigned long m);
 extern "C" void cBERewardInterface_setOwnedSongList(void* iface, int a, int b, unsigned long m);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void func_0028C2D0(void* p, unsigned long m);
 extern "C" void cUIStateStack_pop(void* list, int a);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -378,7 +379,7 @@ INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_onWidgetMenu);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 
 extern "C" void cFEStateRequestLine_updatePlayList_77D0(void* self) __asm__("cFEStateRequestLine_updatePlayList");
 
@@ -438,11 +439,11 @@ extern "C" int cFEStateRequestLine_onWidgetMenu(void* requestLine, cUIMenu* item
                 ret10:
                     return 0x10;
                 }
-                *(int*)((char*)cAudioInterface_bxAudio() + 0x508) = idx;
+                cAudioInterface_bxAudio()->MusicSys.mCurrentSongNum = idx;
                 func_0028CF98(cAudioInterface_bxAudio(), 0, 0, -1, 1);
                 cFEStateRequestLine_updateCurrentlyPlaying_77D0(self);
             } else {
-                func_002B4978((char*)cAudioInterface_bxAudio() + 0x118, idx);
+                func_002B4978(&cAudioInterface_bxAudio()->MusicSys, idx);
             }
         }
         break;
@@ -736,7 +737,7 @@ void cMemMan_free(void* p);
 extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, int n);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void* func_002B40F0(void* self, int i);
 extern "C" void* func_002B4120(void* self, int i);
 extern char str_cFEStateRequestLine[];
@@ -783,10 +784,10 @@ extern "C" void cFEStateRequestLine_updateCurrentlyPlaying(cFEStateRequestLine* 
     if (((cMsgWidget_197E70*)self->mpCurSongTitle) == 0 || ((cMsgWidget_197E70*)self->mpCurSongArtist) == 0) {
         return;
     }
-    int cur = *(int*)((char*)cAudioInterface_bxAudio() + 0x508);
-    if (cur < *(int*)((char*)cAudioInterface_bxAudio() + 0x504)) {
-        char* name = (char*)func_002B40F0((char*)cAudioInterface_bxAudio() + 0x118, cur);
-        char* artist = (char*)func_002B4120((char*)cAudioInterface_bxAudio() + 0x118, cur);
+    int cur = cAudioInterface_bxAudio()->MusicSys.mCurrentSongNum;
+    if (cur < cAudioInterface_bxAudio()->MusicSys.mNumFESongs) {
+        char* name = (char*)func_002B40F0(&cAudioInterface_bxAudio()->MusicSys, cur);
+        char* artist = (char*)func_002B4120(&cAudioInterface_bxAudio()->MusicSys, cur);
         if (strlen(name) != 0) {
             ((cMsgWidget_197E70*)self->mpCurSongTitle)->show(1);
             char* db = (char*)SSXApp->FELocale;
@@ -1295,7 +1296,7 @@ extern "C" void cFEStateRequestLine_showBuyPopup(cFEStateRequestLine* self, int 
 //100%
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_getSongTitle);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void* func_002B40F0(void* self, int i);
 
 /**
@@ -1306,14 +1307,14 @@ extern "C" void* func_002B40F0(void* self, int i);
  */
 extern "C" void* cFEStateRequestLine_getSongTitle(cFEStateRequestLine* self, int i)
 {
-    return func_002B40F0((char*)cAudioInterface_bxAudio() + 0x118, i);
+    return func_002B40F0(&cAudioInterface_bxAudio()->MusicSys, i);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_getSongArtist);
 #ifdef SKIP_ASM
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void* func_002B4120(void* self, int i);
 
 /**
@@ -1325,7 +1326,7 @@ extern "C" void* func_002B4120(void* self, int i);
  */
 extern "C" void* cFEStateRequestLine_getSongArtist(cFEStateRequestLine* self, int i)
 {
-    return func_002B4120((char*)cAudioInterface_bxAudio() + 0x118, i);
+    return func_002B4120(&cAudioInterface_bxAudio()->MusicSys, i);
 }
 #endif
 

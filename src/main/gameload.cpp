@@ -900,7 +900,7 @@ extern "C" void func_00343BC0(void* self);
 extern "C" void cMultiParticleMan_reset(void* self);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
 extern "C" void cSSXAudio_PartialRestart(void* self);
-extern "C" void* cAudioInterface_bxAudio(void);
+extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 int GetHashValue32(char* s);
 extern char str_hud_c[];
 
@@ -961,7 +961,7 @@ INCLUDE_ASM("main/gameload", cGame_restart);
 extern "C" void cGame_partialRestart(cGame* self);
 extern "C" void cGameModeMan_restartHeat(void* gm);
 extern "C" void cGame_setState(cGame* self, int a, int b, int refresh);
-extern "C" void* cAudioInterface_bxAudio(void);
+extern "C" cSSXAudio* cAudioInterface_bxAudio(void);
 extern "C" void cSSXAudio_RestartEvent(void* mgr);
 
 static inline int numRiders_2302A8(void* game)

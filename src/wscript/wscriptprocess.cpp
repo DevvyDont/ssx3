@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "be/beintnewrace.h"
 #include "wscript/wscriptprocess.h"
 #include "wscript/wscriptman.h"
@@ -1937,7 +1938,7 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_processLocalMissionCmd);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cWScriptMan_updateWorld(cWScriptMan* self);
 extern "C" void cWScriptMan_doMissionCmd(void* self, int id, int a2, int a3);
-extern "C" void* cAudioInterface_bxAudio();
+extern "C" cSSXAudio* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_BigChallengeBegin(void* snd, int a1);
 extern "C" void cSSXAudio_BigChallengeFailed(void* snd, int a1);
 extern "C" void cReplay_startRace(void* p);

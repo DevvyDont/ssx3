@@ -3825,14 +3825,14 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerEntity_Init);
  * @param size  despite the name, the owning cScriptPlayerMain (On Tour pOwner), stored in mpOwner
  * @return the block's blockSize, so the caller can step to the next entity block
  */
-extern "C" int cScriptPlayerEntity_Init(cScriptPlayerEntity* self, char* data, int size)
+extern "C" int cScriptPlayerEntity_Init(cScriptPlayerEntity* self, tInSeqScriptEntityBlockHeader* data, int size)
 {
     self->mpData = (const char*)data;
     self->mpBlockHeader = (tInSeqScriptEntityBlockHeader*)data;
     self->mpOwner = (cScriptPlayerMain*)size;
-    self->mpVariationTable = (unsigned int*)(data + 8);
+    self->mpVariationTable = (unsigned int*)(&data->varOffsetTableStart);
     self->mCurrVariation = 0;
-    tInSeqEntityHeader* rec = (tInSeqEntityHeader*)(data + *(int*)(data + 8));
+    tInSeqEntityHeader* rec = (tInSeqEntityHeader*)(((char*)data) + (int)data->varOffsetTableStart);
     self->mpSystemHeader = (tInSeqEntityHeader*)rec;
     if (*(unsigned short*)rec > 8) {
         self->mpHeader = (const char*)(&rec->nextSectionStart);
@@ -4688,7 +4688,7 @@ extern "C" int cScriptPlayerMain_Init_impl(cScriptPlayerMain* self, tInSeqScript
         sRcElem45C0** slot = (sRcElem45C0**)&self->mpEntityPlayers;
         *slot = new (owner + 8) sRcElem45C0[(self->mpSystemHeader)->numEntities];
         for (int i = 0; i < (self->mpSystemHeader)->numEntities; i++) {
-            entityData += cScriptPlayerEntity_Init((cScriptPlayerEntity*)(&((sRcElem45C0*)self->mpEntityPlayers)[i]), entityData, (int)self);
+            entityData += cScriptPlayerEntity_Init((cScriptPlayerEntity*)(&((sRcElem45C0*)self->mpEntityPlayers)[i]), (tInSeqScriptEntityBlockHeader*)entityData, (int)self);
         }
     }
     return ((int)(self->mpSystemHeader)->size);
