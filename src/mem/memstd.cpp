@@ -2104,7 +2104,7 @@ extern "C" void cMoviePlayer_startPlay(cMoviePlayer* self)
     self->mpCurrFrame = (void*)func_003AE450(self->m_pPlayer, 1, 33);
     self->mbNewFrame = 1;
     func_003AE938(self->m_pPlayer);
-    self->m_pVd = SSX_VD_create(*(void**)((char*)self->m_pPlayer + 0x64), (int)self->mpCurrFrame, (int)cGraphicsMan_TheGraphicsMan, self->m_PlayOp.iDrawLayer);
+    self->m_pVd = (RCMP_VIDEO_DRIVER*)SSX_VD_create(*(void**)((char*)self->m_pPlayer + 0x64), (int)self->mpCurrFrame, (int)cGraphicsMan_TheGraphicsMan, self->m_PlayOp.iDrawLayer);
     func_003AE958_i(self->m_pPlayer);
     cMoviePlayer_m_isPlaying++;
 }

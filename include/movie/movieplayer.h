@@ -22,6 +22,8 @@
 
 #include "layout.h"
 
+struct RCMP_VIDEO_DRIVER; // movie/videodriver.h
+
 struct cMoviePlayer;
 
 // tMoviePlayOptions (0x24 [R] tMoviePlayOptions_SetDefaults writes 0x0..0x20; callers keep it on the stack; [O] On Tour
@@ -64,7 +66,7 @@ struct cMoviePlayer {
                                 //       cMoviePlayer_init creates it (0x78 bytes from the movie allocator,
                                 //       func_003ADE08 / func_003ADDC0), purge deletes it (func_003AE300(p, 3)); every
                                 //       method tests it first
-    void* m_pVd;                // 0x3C [O] VIDEO_DRIVER*; [R] ctor 0; [U] startPlay = SSX_VD_create(...); asyncRender /
+    RCMP_VIDEO_DRIVER* m_pVd;   // 0x3C [O] VIDEO_DRIVER*; [R] ctor 0; [U] startPlay = SSX_VD_create(...); asyncRender /
                                 //       syncPlay / asyncUpdate call its vtable slots 4 / 5 / 6 (vptr at +0x4); purge
                                 //       deletes it (slot 1, flags 3)
     int mbNewFrame;             // 0x40 [O] (On Tour bool); [R] ctor 0; [U] startPlay / asyncUpdate set it, asyncRender
