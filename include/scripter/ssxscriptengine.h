@@ -29,6 +29,8 @@
 // Unnamed fields are unk_XXX; rename only with evidence.
 
 #include "layout.h"
+#include "scripter/scriptobjgs.h"
+#include "scripter/scanimmgr.h"
 
 struct cScriptObject;
 struct cInSeq;
@@ -123,11 +125,11 @@ struct cSSXScriptEngine {
                                                  //       before its 16-byte-aligned camera managers)
     char mObjectCameraManager[2][0x120];         // 0x6D0 [O] cScriptObjCameraManager (4 in On Tour); [R] the ctor
                                                  //       builds 2 x 0x120 (cScriptObjCameraManager_cScriptObjCameraManager); vptr at +0xC (dtor)
-    char mObjectGameState[0x1C];                 // 0x910 [O] cScriptObjGS; [R] cScriptObjGS_cScriptObjGS(self+0x910);
+    cScriptObjGS mObjectGameState;                 // 0x910 [O] cScriptObjGS; [R] cScriptObjGS_cScriptObjGS(self+0x910);
                                                  //       vptrs at +0x0 and +0x18, cScriptObject part at +0xC (dtor)
     char mObjectEvent[0xFC];                     // 0x92C [O] cScriptObjEvent (0xF8 in On Tour); [R]
                                                  //       cScriptObjEvent_cScriptObjEvent(self+0x92C) writes up to +0xF8
-    char mAnimationBankManager[0x10];            // 0xA28 [O] cScriptAnimBankManager; [R] its ctor (self+0xA28, 0, 10, 0xF0)
+    cScriptAnimBankManager mAnimationBankManager;  // 0xA28 [O] cScriptAnimBankManager; [R] its ctor (self+0xA28, 0, 10, 0xF0)
     char mSoundBankManager[0x10];                // 0xA38 [O] cScriptSoundBankManager; [R] its ctor (self+0xA38, 0, 10, 0x11)
     int mCurrAttachingBankNum;                   // 0xA48 [O]; [R] the ctor sets 10 (none); [U] SyncLoadScriptBank and
                                                  //       ProcessAsyncLoadScriptBankComplete set it around the cDataManager

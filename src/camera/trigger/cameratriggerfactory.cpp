@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/script/scriptcontroller.h"
 #include "camera/trigger/cameratriggeractions.h"
 #include "camera/trigger/cameratriggervolumes.h"
 #include "camera/script/scriptalgorithms.h"
@@ -3587,8 +3588,8 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptCameraController_IsCon
  * @param object  the object to read
  * @return the 32-bit word at +0x18
  */
-extern "C" int cScriptCameraController_IsControllerActive(void *object) {
-    return (*(int *)((char*)(object) + (0x18)));
+extern "C" int cScriptCameraController_IsControllerActive(cScriptCameraController* object) {
+    return (object->IsActive);
 }
 #endif
 

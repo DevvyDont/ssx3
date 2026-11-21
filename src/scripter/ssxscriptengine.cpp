@@ -1469,7 +1469,7 @@ extern "C" void cSSXScriptEngine_OnAttachData(cSSXScriptEngine* self, const char
     } else if (func_00416B18(str_anm, ext, 3) == 0) {
         *kind = 1;
         *bank = self->mCurrAttachingBankNum;
-        cScriptAnimBankManager_LinkBank(self->mAnimationBankManager, self->mCurrAttachingBankNum, data);
+        cScriptAnimBankManager_LinkBank(&self->mAnimationBankManager, self->mCurrAttachingBankNum, data);
     } else if (func_00416B18(str_snd, ext, 3) == 0) {
         *kind = 2;
         *bank = self->mCurrAttachingBankNum;
@@ -1501,7 +1501,7 @@ extern "C" void cSSXScriptEngine_OnDetachData(cSSXScriptEngine* self, void* obj,
         cBXScriptEngine_DetachScript(self, *(int*)((char*)GetSSXScriptHeader1(obj) + 0x18));
         break;
     case 1:
-        cScriptAnimBankManager_UnlinkBank((char*)&self->mAnimationBankManager, id);
+        cScriptAnimBankManager_UnlinkBank(&self->mAnimationBankManager, id);
         break;
     case 2:
         cScriptSoundBankManager_UnlinkBank1((char*)&self->mSoundBankManager, id);
@@ -1776,7 +1776,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_GetAnimationBankInfo__F
 void* cSSXScriptEngine_GetAnimationBankInfo(void* vself)
 {
     cSSXScriptEngine* self = (cSSXScriptEngine*)vself;
-    return cScriptAnimBankManager_GetBankInfo(self->mAnimationBankManager);
+    return cScriptAnimBankManager_GetBankInfo(&self->mAnimationBankManager);
 }
 #endif
 

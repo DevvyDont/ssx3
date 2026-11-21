@@ -18,12 +18,6 @@ struct cWScriptKeyword {
     char pad80[0x30];
 };
 
-struct cWScriptCompileKw {
-    int f0;
-    int count;
-    cWScriptKeyword* free;
-    cWScriptKeyword* pool;
-};
 
 /**
  * Despite the name, constructs the instance manager: a pool of instance records on a free list.
@@ -38,12 +32,12 @@ struct cWScriptCompileKw {
  * @param n  number of instance records (On Tour numInstances)
  * @return @p self
  */
-extern "C" cWScriptCompileKw* cInstanceMan_cInstanceMan(cWScriptCompileKw* self, int instanceSectionId, int n)
+extern "C" cInstanceMan* cInstanceMan_cInstanceMan(cInstanceMan* self, int instanceSectionId, int n)
 {
     int i;
-    self->f0 = instanceSectionId;
-    self->count = n;
-    cWScriptKeyword** slot = &self->pool;
+    self->InstanceSectionId = instanceSectionId;
+    self->NumInstances = n;
+    cWScriptKeyword** slot = &(*(cWScriptKeyword**)&self->Instances);
     cWScriptKeyword* mem = (cWScriptKeyword*)operator_new_tag(n * 176, str_Instance, 0x20000000, 0);
     cWScriptKeyword* keyword = mem;
     int j;
@@ -54,10 +48,10 @@ extern "C" cWScriptCompileKw* cInstanceMan_cInstanceMan(cWScriptCompileKw* self,
         keyword->f7E = -1;
     }
     *slot = mem;
-    self->free = 0;
-    for (i = 0; i < self->count; i++) {
-        self->pool[i].next = self->free;
-        self->free = &self->pool[i];
+    (*(cWScriptKeyword**)&self->FreeInstances) = 0;
+    for (i = 0; i < self->NumInstances; i++) {
+        ((cWScriptKeyword*)self->Instances)[i].next = ((cWScriptKeyword*)self->FreeInstances);
+        (*(cWScriptKeyword**)&self->FreeInstances) = &((cWScriptKeyword*)self->Instances)[i];
     }
     return self;
 }
