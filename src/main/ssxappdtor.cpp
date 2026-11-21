@@ -3315,7 +3315,7 @@ extern "C" void cFadeScreen_update(void *);
  */
 extern "C" int cGame_updateScreenFade(cGame* self) {
     cFadeScreen_update(self);
-    if (*(int *)((char*)SSXApp + 4) != 0) {
+    if ((int)SSXApp->LoadingModule != 0) {
         self->unk_08 = 1;
         return 0;
     }

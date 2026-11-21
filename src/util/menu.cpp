@@ -7395,7 +7395,7 @@ INCLUDE_ASM("util/menu", cObjectInterface_getUpdateTime);
  */
 extern "C" float cObjectInterface_getUpdateTime()
 {
-    return *(float*)((char*)SSXApp + 0x14);
+    return SSXApp->TimerPeriod;
 }
 #endif
 
@@ -7409,7 +7409,7 @@ INCLUDE_ASM("util/menu", cObjectInterface_getUpdateHz);
  * @return updates per second
  */
 extern "C" float cObjectInterface_getUpdateHz(void) {
-    return (float) (*(int *)((char*)(SSXApp) + (0x10)));
+    return (float) (SSXApp->TimerHz);
 }
 #endif
 

@@ -5645,7 +5645,7 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
     t4Vector oldVel = self->mVelocity;
     float push = (Dot_6F78(off, Sub_6F78(hit.vel, self->mVelocity)) >? 0.0f) + 55.55555725097656f; // PORT: g++ maximum operator
     AddEq_6F78(self->mVelocity, Scale_6F78(off, push));
-    t4Vector imp = Scale_6F78(Sub_6F78(oldVel, self->mVelocity), (float)*(int*)((char*)SSXApp + 0x10));
+    t4Vector imp = Scale_6F78(Sub_6F78(oldVel, self->mVelocity), (float)SSXApp->TimerHz);
     if (hit.obj != 0) {
         char* handler = *(char**)(hit.obj + 0xC);
         if (handler != 0) {

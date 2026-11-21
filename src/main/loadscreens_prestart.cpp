@@ -43,7 +43,7 @@ extern "C" void cPreStartScreen_update(cPreStartScreen* self)
     if (*fade > 1.0f) {
         *fade = 1.0f;
     }
-    if (*(int*)((char*)SSXApp + 4) == 0) {
+    if ((int)SSXApp->LoadingModule == 0) {
         sModule_232348* loadScreen = (sModule_232348*)cMemMan_alloc(0xC, str_InitLoadScreen, 0x100, 0);
         cAppMan* app = (cAppMan*)SSXApp;
         loadScreen->vt = cInitLoadScreen_vtbl;
@@ -210,7 +210,7 @@ extern "C" void cInitLoadScreen_update(cInitLoadScreen* self)
             *fade = 1.0f;
         }
     }
-    if (*(int*)((char*)SSXApp + 4) == 0) {
+    if ((int)SSXApp->LoadingModule == 0) {
         cAppMan_setNextModule((cAppMan*)SSXApp,
             (unsigned int)cStartScreen_cStartScreen((cStartScreen*)cMemMan_alloc(0x1C, str_StartScreen, 0x100, 0), self->progressive ? 2 : 0));
     }
@@ -605,7 +605,7 @@ extern "C" void cPreGameLoadScreen_update(cPreGameLoadScreen* self)
             *fade = 1.0f;
         }
     }
-    if (*(int*)((char*)SSXApp + 4) == 0) {
+    if ((int)SSXApp->LoadingModule == 0) {
         sModule_232930* loadScreen = (sModule_232930*)cMemMan_alloc(0x18, str_cGameLoadScreen, 0x100, 0);
         cFadeScreen_cFadeScreen_r(loadScreen);
         tmp = (unsigned int)loadScreen;
@@ -671,7 +671,7 @@ extern "C" void cPreFELoadScreen_update(cPreFELoadScreen* self)
             *fade = 1.0f;
         }
     }
-    if (*(int*)((char*)SSXApp + 4) == 0) {
+    if ((int)SSXApp->LoadingModule == 0) {
         sModule_232A00* loadScreen = (sModule_232A00*)cMemMan_alloc(0x1C, str_FELoad, 0x100, 0);
         cFadeScreen_cFadeScreen_r(loadScreen);
         tmp = (unsigned int)loadScreen;

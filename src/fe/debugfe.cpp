@@ -220,7 +220,7 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     cFont_centertextf(font, 320.0f, y, str_Lobby);
     font->setColor(self->cursor == 14 ? selectColor : normalColor);
     cFont_centertextf(font, 320.0f, y + lineheight, str_Real_Front_End);
-    if (*(int*)((char*)SSXApp + 0x4) == 0) {
+    if ((int)SSXApp->LoadingModule == 0) {
         tARGB promptColour;
         promptColour.A = 1.0f;
         promptColour.R = 0.9f;
@@ -2305,7 +2305,7 @@ extern "C" void cHeartBeat_update(cHeartBeat* p);
 extern "C" void cDebugFE_update(cDebugFE* self)
 {
     cFadeScreen_update(self);
-    if (*(int*)((char*)SSXApp + 4) == 0)
+    if ((int)SSXApp->LoadingModule == 0)
         ((cFEObjK17FB98*)self->ActiveScreen)->v02();
     cHeartBeat_update((cHeartBeat*)(&self->HeartBeat));
 }

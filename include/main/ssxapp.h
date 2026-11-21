@@ -18,6 +18,10 @@
 // (getNumInputs is 2 in SSX 3). Unnamed fields are unk_XXX; rename only with evidence, and say which kind.
 
 #include "layout.h"
+#include "bx/loadtimer.h"
+
+struct cAppModule;
+struct cExecutionMan;
 
 struct cBE;
 struct cFE;
@@ -38,7 +42,23 @@ struct cNetMan;
 struct cFEAsyncManager;
 
 struct cSSXApp {
-    char mAppMan[0x5C];                  // 0x000 cAppMan base data (bx/appman; not modelled here)
+    // --- cAppMan (bx/appman.h; On Tour's names and offsets): modules, frame timer, load state ---
+    cAppModule* ActiveModule;            // 0x000 [O] cAppMan::ActiveModule
+    cAppModule* LoadingModule;           // 0x004 [O] cAppMan::LoadingModule; [U] non-zero while a module loads
+    cExecutionMan* ExecutionMan;         // 0x008 [O] cAppMan::ExecutionMan
+    int m_AIUpdatesPerRender;            // 0x00C [O] cAppMan::m_AIUpdatesPerRender
+    int TimerHz;                         // 0x010 [O] cAppMan::TimerHz; [U] ticks per second (statemachine timers)
+    float TimerPeriod;                   // 0x014 [O] cAppMan::TimerPeriod; [U] the frame time the timeouts count down by
+    int TimerTick;                       // 0x018 [O] cAppMan::TimerTick; [U] the current timer tick
+    int Tick;                            // 0x01C [O] cAppMan::Tick
+    int MaxUpdateSteps;                  // 0x020 [O] cAppMan::MaxUpdateSteps
+    float GameRate;                      // 0x024 [O] cAppMan::GameRate
+    float FracTick;                      // 0x028 [O] cAppMan::FracTick
+    float FrameRate;                     // 0x02C [O] cAppMan::FrameRate
+    float FrameRateDamp;                 // 0x030 [O] cAppMan::FrameRateDamp
+    int mLock30Fps;                      // 0x034 [O] cAppMan::mLock30Fps (bool)
+    cLoadTimer LoadTimer;                // 0x038 [O] cAppMan::LoadTimer
+    int LoadState;                       // 0x058 [O] cAppMan::LoadState (volatile eLoadState)
     void** mVtbl;                        // 0x05C cAppMan's vtable pointer (_vt$7cSSXApp after construction)
     int unk_60;                          // 0x060 [R] set to 1 by the constructor
     int unk_64;                          // 0x064 [R] set to 1 by the constructor
@@ -72,6 +92,12 @@ struct cSSXApp {
     cFEAsyncManager* mFEAsyncManager;    // 0x11C [P] GetFEAsyncManager; [R] init: new ("FEAsyncManager")
 };
 
+CHECK_OFFSET(cSSXApp, LoadingModule, 0x04);
+CHECK_OFFSET(cSSXApp, TimerHz, 0x10);
+CHECK_OFFSET(cSSXApp, TimerPeriod, 0x14);
+CHECK_OFFSET(cSSXApp, TimerTick, 0x18);
+CHECK_OFFSET(cSSXApp, Tick, 0x1C);
+CHECK_OFFSET(cSSXApp, LoadState, 0x58);
 CHECK_OFFSET(cSSXApp, mVtbl, 0x5C);
 CHECK_OFFSET(cSSXApp, BE, 0x78);
 CHECK_OFFSET(cSSXApp, RealFE, 0x7C);

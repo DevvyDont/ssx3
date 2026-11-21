@@ -2615,7 +2615,7 @@ extern "C" void cInputSync_preupdate(cInputSync* self)
                     (sp.samples)[sp.writepos % self->latency] = localsample;
                     sp.writepos++;
                 }
-                int n = (int)(cGameComm_getLatency(GameComm()) / *(float*)((char*)SSXApp + 0x14));
+                int n = (int)(cGameComm_getLatency(GameComm()) / SSXApp->TimerPeriod);
                 if (!(1 < n)) {
                     n = 2;
                 }

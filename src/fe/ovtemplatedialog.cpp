@@ -68,7 +68,7 @@ extern "C" void cPDATemplate_onCreateScreen(char* self)
         int fmt = Loc_PDA(*(int*)(text + 0xB0));
         if (fmt != 0) {
             char buf[48];
-            sprintf1_v(buf, fmt, -10 - div_PDA(*(int*)((char*)SSXApp + 0x1C), 3600) % 15, 67);
+            sprintf1_v(buf, fmt, -10 - div_PDA(SSXApp->Tick, 3600) % 15, 67);
             cUIText_setUnicodeString(text, buf);
         }
     }

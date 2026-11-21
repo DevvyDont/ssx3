@@ -1349,7 +1349,7 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
             char* handler = *(char**)(hit.obj50 + 0xC);
             if (handler != 0) {
                 sVEnt_139C88* vt = *(sVEnt_139C88**)(handler + 0xC);
-                vt[43].fn(handler + vt[43].delta, &hit, vu0Scale_139C88(vu0Scale_139C88(imp, -1.0f), (float)*(int*)((char*)SSXApp + 0x10)));
+                vt[43].fn(handler + vt[43].delta, &hit, vu0Scale_139C88(vu0Scale_139C88(imp, -1.0f), (float)SSXApp->TimerHz));
             }
         }
         int anim = 438;

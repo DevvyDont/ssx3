@@ -265,7 +265,7 @@ extern "C" void cGame_load(cGame* self)
     self->FXLoader = (cFXLoader*)cFXLoader_cFXLoader(operator new(1, str_FXLoader, 0, 0), 0);
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
-        float dt = *(float*)((char*)SSXApp + 0x14);
+        float dt = SSXApp->TimerPeriod;
         int n = (int)((cBENetworkInterface_networkOpt.fLatency + (float)cGameComm_mGameComm->mNumSamples * dt) / dt) + 2;
         self->InputSync = (cInputSync*)cInputSync_cInputSync(operator new(68, str_InputSync, 0, 0), n, cGameComm_mGameComm->mNumSamples);
     } else {
@@ -1398,7 +1398,7 @@ struct sRiderList_2306B8 {
 
 static inline int canUpdate_2306B8(cGame* self)
 {
-    if (*(int*)((char*)SSXApp + 0x4) != 0) {
+    if ((int)SSXApp->LoadingModule != 0) {
         self->unk_08 = 1;
         return 0;
     }

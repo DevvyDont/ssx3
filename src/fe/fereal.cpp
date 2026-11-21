@@ -1417,7 +1417,7 @@ extern "C" void cRealFE_update(cRealFE* self)
     return;
     }
 noh:
-        if (*(int*)((char*)SSXApp + 4) == 0) {
+        if ((int)SSXApp->LoadingModule == 0) {
             cUIEngine_update(self->mpUI);
         } else {
             self->IsEnding = 1;

@@ -2018,7 +2018,7 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_localDisconnected);
  */
 extern "C" void cGameComm_localDisconnected(cGameComm* gameComm, int force) {
     if (((force != 0) || (((gameComm->mError) == 0) && ((gameComm->mState) < 0xF))) && ((gameComm->unk_038) == 0)) {
-        (gameComm->unk_038) = (int) ((int) (*(int *)((char*)(SSXApp) + (0x18))) / (int) (*(int *)((char*)(SSXApp) + (0x10))));
+        (gameComm->unk_038) = (int) ((int) (SSXApp->TimerTick) / (int) (SSXApp->TimerHz));
     }
     (gameComm->mConnected) = 0;
     (gameComm->mRaceInProgress) = 0;
@@ -2591,7 +2591,7 @@ extern "C" void cGameComm_updateCmdQueue(sGameComm_7F98* self)
         case 5:
             self->f88 = 1;
             if (self->f3C == 0) {
-                self->f3C = *(int*)((char*)SSXApp + 0x18) / *(int*)((char*)SSXApp + 0x10);
+                self->f3C = SSXApp->TimerTick / SSXApp->TimerHz;
             }
             self->f78 = 0;
             self->f0 = 0;
@@ -2814,7 +2814,7 @@ extern "C" void cGameComm_calcLatency(cGameComm* gameComm) {
     float latency0 = gameComm->mNetLatency[0];
     float maxLatency = latency1 >? latency0;
     gameComm->mLatency = maxLatency;
-    float frameTime = *(float *)(((char*)app) + 0x14);
+    float frameTime = app->TimerPeriod;
     if (maxLatency < frameTime) {
         gameComm->mLatency = frameTime;
     }
@@ -2836,7 +2836,7 @@ extern "C" float cCommSystem_getLatency(int, int);
  * @return the latency
  */
 extern "C" float cGameComm_getLatency(cGameComm* gameComm) {
-    return cCommSystem_getLatency((int)cCommSystem_mCommSystem, (gameComm->unk_06C)) + ((float) (gameComm->mNumSamples) * (*(float *)((char*)(SSXApp) + (0x14))));
+    return cCommSystem_getLatency((int)cCommSystem_mCommSystem, (gameComm->unk_06C)) + ((float) (gameComm->mNumSamples) * (SSXApp->TimerPeriod));
 }
 #endif
 
@@ -3182,7 +3182,7 @@ extern "C" void cGameComm_gameStartRace(cGameComm* self) {
         if (buddyMan != 0) {
             func_00262768_8988((int)buddyMan, 1, 9, ((int)LobbyMan_mLobbyMan->mOpponent), 0, 0);
         }
-        self->unk_034 = *(int *)((char*)SSXApp + 0x18) / *(int *)((char*)SSXApp + 0x10);
+        self->unk_034 = SSXApp->TimerTick / SSXApp->TimerHz;
         self->mRaceInProgress = 1;
         self->unk_094 = 0;
     }
@@ -3211,10 +3211,10 @@ extern "C" void cGameComm_gameEnded(cGameComm* gameComm) {
         cGameComm_setState_8A48(gameComm, 0xF);
     }
     if ((gameComm->unk_038) == 0) {
-        (gameComm->unk_038) = (int) ((int) (*(int *)((char*)(SSXApp) + (0x18))) / (int) (*(int *)((char*)(SSXApp) + (0x10))));
+        (gameComm->unk_038) = (int) ((int) (SSXApp->TimerTick) / (int) (SSXApp->TimerHz));
     }
     if ((gameComm->unk_03C) == 0) {
-        (gameComm->unk_03C) = (int) ((int) (*(int *)((char*)(SSXApp) + (0x18))) / (int) (*(int *)((char*)(SSXApp) + (0x10))));
+        (gameComm->unk_03C) = (int) ((int) (SSXApp->TimerTick) / (int) (SSXApp->TimerHz));
     }
 }
 #endif

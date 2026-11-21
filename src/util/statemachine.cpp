@@ -260,8 +260,8 @@ extern "C" void cConsoleConfig_updateDateTime(void* self) {
     int now;
     int ticks;
 
-    now = *(int*)((char*)SSXApp + 0x18);
-    ticks = (now - *(int*)((char*)self + 0x20)) / *(int*)((char*)SSXApp + 0x10);
+    now = SSXApp->TimerTick;
+    ticks = (now - *(int*)((char*)self + 0x20)) / SSXApp->TimerHz;
     if (ticks != 0) {
         *(int*)((char*)self + 0x20) = now;
         rem = cConsoleConfig_addSecondsToTime_v(self, (int*)((char*)self + 0x10), (int*)((char*)self + 0xC), (int*)((char*)self + 8), ticks);

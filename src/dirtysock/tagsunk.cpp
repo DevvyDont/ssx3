@@ -1619,8 +1619,8 @@ extern "C" void func_0025AC50(LobbyMan* self)
             func_003EE620(self->mpUserList);
         }
         cSSXApp* app = SSXApp;
-        self->mTimeout -= *(float*)(((char*)app) + 0x14);
-        self->unk_0E4 -= *(float*)(((char*)app) + 0x14);
+        self->mTimeout -= app->TimerPeriod;
+        self->unk_0E4 -= app->TimerPeriod;
     }
     func_00261490(BuddyMan_mBuddyMan);
     while (((sMsgListAC50*)(&self->mEventList))->first() != (sMsgListNodeAC50*)self->mEventList.mpHead) {
@@ -8886,7 +8886,7 @@ extern "C" void func_00263828(int* self)
             if (expired)
                 func_002636F0(self, 0x2D3F3F3F);
             else
-                connection->timer -= *(float*)((char*)SSXApp + 0x14);
+                connection->timer -= SSXApp->TimerPeriod;
         }
         break;
     case 2:
@@ -9209,7 +9209,7 @@ extern "C" void func_00263CF0(int* self)
             func_00263BA8(self, 0);
             return;
         }
-        *(float*)(self + 4) = *(float*)(self + 4) - *(float*)((char*)SSXApp + 0x14);
+        *(float*)(self + 4) = *(float*)(self + 4) - SSXApp->TimerPeriod;
         return;
     case 2:
         if (cCommSystem_getError(cCommSystem_mCommSystem, self[1]))

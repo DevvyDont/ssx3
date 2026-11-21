@@ -672,7 +672,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
             if (o != 0) {
                 sVEntH_137138* vt = *(sVEntH_137138**)(o + 0xC);
                 vt[43].fn(o + vt[43].delta, &hit,
-                          vu0Scale_137138(impulse, (float)*(int*)((char*)SSXApp + 0x10) * -0.05000000074505806f));
+                          vu0Scale_137138(impulse, (float)SSXApp->TimerHz * -0.05000000074505806f));
             }
         }
         vu0ScaleEq_137138(self->BoardAngVelocity, 0.8500000238418579f);
@@ -692,7 +692,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
             if (o != 0) {
                 sVEntH_137138* vt = *(sVEntH_137138**)(o + 0xC);
                 vt[43].fn(o + vt[43].delta, &hit,
-                          vu0Scale_137138(self->BoardVelocity, (float)*(int*)((char*)SSXApp + 0x10) * 0.05000000074505806f));
+                          vu0Scale_137138(self->BoardVelocity, (float)SSXApp->TimerHz * 0.05000000074505806f));
             }
         }
         self->BoardVelocity = D_004FF120_137138;
@@ -1047,7 +1047,7 @@ extern "C" void cWipeoutMotion_resolveAirMotion(void* vself)
                 {
                     sVEntH_137860* vt = *(sVEntH_137860**)(hitOwner + 0xC);
                     vt[43].fn(hitOwner + vt[43].delta, &hitB,
-                              vu0Scale_137860(vu0Scale_137860(impulse, -1.0f), (float)*(int*)((char*)SSXApp + 0x10)));
+                              vu0Scale_137860(vu0Scale_137860(impulse, -1.0f), (float)SSXApp->TimerHz));
                 }
             }
             float pen = vu0Dot_137860(vu0Sub_137860(RIDER->mPosition, hitB.pos), hitB.normal);
