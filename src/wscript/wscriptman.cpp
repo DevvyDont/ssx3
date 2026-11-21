@@ -96,21 +96,21 @@ extern "C" int cProcessList_removeProcess_a(void* self, void* node) __asm__("cPr
  * @param id  the process ID
  */
 extern "C" void cWScriptMan_remProcess(cWScriptMan* self, int id) {
-    cWSObj_309618* obj = (cWSObj_309618*)cProcessList_findProcess1_a(((char*)self) + 0x2B8, id);
+    cWSObj_309618* obj = (cWSObj_309618*)cProcessList_findProcess1_a(&self->ActiveList, id);
     if (obj != 0) {
-        cProcessList_removeProcess_a(((char*)self) + 0x2B8, obj);
+        cProcessList_removeProcess_a(&self->ActiveList, obj);
         obj->v00(3);
         return;
     }
-    obj = (cWSObj_309618*)cProcessList_findProcess1_a(((char*)self) + 0x2BC, id);
+    obj = (cWSObj_309618*)cProcessList_findProcess1_a(&self->AddList, id);
     if (obj != 0) {
-        cProcessList_removeProcess_a(((char*)self) + 0x2BC, obj);
+        cProcessList_removeProcess_a(&self->AddList, obj);
         obj->v00(3);
         return;
     }
-    obj = (cWSObj_309618*)cProcessList_findProcess1_a(((char*)self) + 0x2B4, id);
+    obj = (cWSObj_309618*)cProcessList_findProcess1_a(&self->IdleList, id);
     if (obj != 0) {
-        cProcessList_removeProcess_a(((char*)self) + 0x2B4, obj);
+        cProcessList_removeProcess_a(&self->IdleList, obj);
         obj->v00(3);
     }
 }
@@ -127,9 +127,9 @@ extern "C" int cProcessList_removeProcess_vv(void* self, void* node) __asm__("cP
  * @param node  the process
  */
 extern "C" void cWScriptMan_removeProcess(cWScriptMan* self, cWScriptProcess* node) {
-    if (cProcessList_removeProcess_vv(((char*)self) + 0x2B8, node) == 0 &&
-        cProcessList_removeProcess_vv(((char*)self) + 0x2B4, node) == 0) {
-        cProcessList_removeProcess_vv(((char*)self) + 0x2BC, node);
+    if (cProcessList_removeProcess_vv(&self->ActiveList, node) == 0 &&
+        cProcessList_removeProcess_vv(&self->IdleList, node) == 0) {
+        cProcessList_removeProcess_vv(&self->AddList, node);
     }
 }
 #endif
@@ -942,7 +942,7 @@ extern "C" int cWScriptMan_isFocusInstance(cWScriptMan* self, void* obj)
     if (*(int*)(inst + 0xC) != 0) {
         return 1;
     }
-    sEntry_A310* tab = *(sEntry_A310**)(*(char**)((char*)self->World + 0x4) + 0x4);
+    sEntry_A310* tab = *(sEntry_A310**)((char*)self->World->m_pWScriptCache + 0x4);
     bool isType3 = tab[*(unsigned char*)(inst + 0x78)].type == 3;
     if (isType3) {
         if (cWScriptMan_hasOnFocusScript(self, (int)obj) || cWScriptMan_hasOnLoseFocusScript(self, (int)obj)) {
@@ -1025,7 +1025,7 @@ extern "C" void cWScriptMan_upFocusScript(cWScriptMan* self, void* obj)
             (*(cWScriptCtl**)((char*)obj + 0xC))->incFocusCount(obj);
         }
     } else {
-        cWScriptMan_upFocusScript_sType* instTypes = *(cWScriptMan_upFocusScript_sType**)(*(char**)((char*)self->World + 0x4) + 0x4);
+        cWScriptMan_upFocusScript_sType* instTypes = *(cWScriptMan_upFocusScript_sType**)((char*)self->World->m_pWScriptCache + 0x4);
         bool isScript = instTypes[*(unsigned char*)((char*)obj + 0x78)].type == 3;
         if (isScript) {
             if (cWScriptMan_hasOnFocusScript(self, (int)obj) != 0) {
@@ -1580,7 +1580,7 @@ extern "C" void cWScriptMan_runScriptCode(cWScriptMan* self, void* obj, int data
     ret.type = 0;
     ret.word0 = 0;
     luno_cLunoVM_cLunoVM(&call);
-    void* table = *(void**)((char*)self->CurrentProcess + 0x1C);
+    void* table = self->CurrentProcess->Local;
     if (table != 0) {
         luno_cLunoVM_run(&call, &scriptFunc, table, &ret);
     } else {
@@ -1641,7 +1641,7 @@ extern "C" void cWScriptMan_runScriptCode1(cWScriptMan* self, void* obj, int scr
     ret.type = 0;
     ret.word0 = 0;
     luno_cLunoVM_cLunoVM(&call);
-    void* table = *(void**)(*(char**)((char*)self->CurrentTask + 0x3C) + 0x1C);
+    void* table = self->CurrentTask->Process->Local;
     if (table != 0) {
         luno_cLunoVM_run(&call, &codeVar, table, &ret);
     } else {
@@ -1675,7 +1675,7 @@ extern "C" void* cWScriptMan_getCurrentMission(cWScriptMan* self)
 {
     cWScriptProcess* obj = self->CurrentProcess;
     if (obj != 0) {
-        sVEntry0030AEB8* vt = *(sVEntry0030AEB8**)((char*)obj + 0x5C);
+        sVEntry0030AEB8* vt = (sVEntry0030AEB8*)obj->mVtbl;
         if (vt[3].fn((char*)obj + vt[3].delta) != 0) {
             return self->CurrentProcess;
         }
@@ -2155,9 +2155,9 @@ extern "C" int cProcessList_findMission_vv(void* self, void* node) __asm__("cPro
  * @param node  the mission ID
  */
 extern "C" void cWScriptMan_findMission(cWScriptMan* self, void* node) {
-    if (cProcessList_findMission_vv(((char*)self) + 0x2B8, node) == 0 &&
-        cProcessList_findMission_vv(((char*)self) + 0x2B4, node) == 0) {
-        cProcessList_findMission_vv(((char*)self) + 0x2BC, node);
+    if (cProcessList_findMission_vv(&self->ActiveList, node) == 0 &&
+        cProcessList_findMission_vv(&self->IdleList, node) == 0) {
+        cProcessList_findMission_vv(&self->AddList, node);
     }
 }
 #endif
@@ -4478,7 +4478,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptTask_getLocalTable);
  * @return the process's local table, or 0
  */
 extern "C" int cWScriptTask_getLocalTable(cWScriptTask* task) {
-    return (*(int *)((char*)((task->Process)) + (0x1C)));
+    return ((int)task->Process->Local);
 }
 #endif
 //100%
@@ -4614,7 +4614,7 @@ extern "C" void* cAnimModel_cAnimModel(cAnimModel* self)
     self->localRot = 0;
     self->boneChannelIndex = 0;
     for (int i = 3; i >= 0; i--) {
-        ((sWSSlot8*)((char*)self + 0x44))[i].a = 0;
+        ((sWSSlot8*)(&self->lodInfo[0].unk_04))[i].a = 0;
     }
     return ((void*)self);
 }

@@ -440,7 +440,7 @@ extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(cFEStateAudioOptions*
     self->mpRequestLineOption = 0;
     self->mpPlaylistOption = 0;
     for (int i = 3; i >= 0; i--) {
-        ((int*)(((char*)self) + 0x4C))[i] = 0;
+        ((int*)(&self->mpChecks[0]))[i] = 0;
     }
     self->mInStore = inStore;
     char* engineObj = (char*)self->mpEngine;
@@ -512,7 +512,7 @@ extern "C" void cFEStateAudioOptions_onCreateScreen(cFEStateAudioOptions* self)
     char* name;
     if ((void*)SSXApp->Game != 0) {
         name = str_142audio_pda;
-        cFEStateAudioOptions_onCreateScreen_cObj* obj = (cFEStateAudioOptions_onCreateScreen_cObj*)cUIStateStack_findState((char*)self->mpEngine + 0x18, GetHashValue32(str_hud));
+        cFEStateAudioOptions_onCreateScreen_cObj* obj = (cFEStateAudioOptions_onCreateScreen_cObj*)cUIStateStack_findState(self->mpEngine->mStateStack, GetHashValue32(str_hud));
         if (obj != 0) {
             obj->handleEvent(3, 0);
         }
@@ -574,7 +574,7 @@ extern "C" cFEStateAudioOptions_onDestroyScreen_cObj* cUIStateStack_findState(vo
 extern "C" void cFEStateAudioOptions_onDestroyScreen(cFEStateAudioOptions* self)
 {
     if ((void*)SSXApp->Game != 0) {
-        cFEStateAudioOptions_onDestroyScreen_cObj* obj = cUIStateStack_findState((char*)self->mpEngine + 0x18, GetHashValue32(str_hud));
+        cFEStateAudioOptions_onDestroyScreen_cObj* obj = cUIStateStack_findState(self->mpEngine->mStateStack, GetHashValue32(str_hud));
         if (obj != 0) {
             obj->handleEvent(4, 0);
         }

@@ -893,7 +893,7 @@ extern "C" void* cUIThing_cUIThing1(cUIThing* self)
     self->mpNext = (cListNode*)((char*)self);
     self->mpPrev = (cListNode*)((char*)self);
     self->mVtbl = cUIThing_vtbl;
-    tAttrThing_tAttrThing((sFlags_6548*)(((char*)self) + 0x14));
+    tAttrThing_tAttrThing((sFlags_6548*)(&self->mAttr));
     return ((char*)self);
 }
 #endif
@@ -1696,7 +1696,7 @@ extern "C" void* cUIIcon_cUIIcon1(cUIIcon* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
     self->mVtbl = cUIIcon_vtbl;
-    func_0021CCC8(((char*)self) + 0x74);
+    func_0021CCC8(&self->mAttrIcon);
     return ((char*)self);
 }
 #endif
@@ -1719,7 +1719,7 @@ extern "C" void* cUIIcon_cUIIcon(cUIIcon* self)
 {
     cUIThing_cUIThing_self(((char*)self));
     self->mVtbl = cUIIcon_vtbl;
-    func_0021CCC8(((char*)self) + 0x74);
+    func_0021CCC8(&self->mAttrIcon);
     self->mTextureID = -1;
     self->mpTextureElem = 0;
     return ((char*)self);
@@ -1979,7 +1979,7 @@ extern "C" void* cUIGroup_cUIGroup1(cUIGroup* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
     self->mVtbl = cUIGroup_vtbl;
-    cList_cList(((char*)self) + 0x74);
+    cList_cList(&self->mList);
     return ((char*)self);
 }
 #endif
@@ -2001,7 +2001,7 @@ extern "C" void* cUIGroup_cUIGroup(cUIGroup* self)
 {
     cUIThing_cUIThing_self(((char*)self));
     self->mVtbl = cUIGroup_vtbl;
-    cList_cList(((char*)self) + 0x74);
+    cList_cList(&self->mList);
     return ((char*)self);
 }
 #endif
@@ -2027,11 +2027,11 @@ extern "C" void cUIGroup__cUIGroup(cUIGroup* self, int flag)
 {
     self->mVtbl = cUIGroup_vtbl;
     self->mList.mVtbl = cList_vtbl;
-    cList_destroyList_v(((char*)self) + 0x74);
+    cList_destroyList_v(&self->mList);
     self->mList.mEnd.mVtbl = cListNode_vtbl;
-    cListNode_destroyListNode((cListNode*)(((char*)self) + 0x80));
+    cListNode_destroyListNode((cListNode*)(&self->mList.mEnd));
     self->mList.mStart.mVtbl = cListNode_vtbl;
-    cListNode_destroyListNode((cListNode*)(((char*)self) + 0x74));
+    cListNode_destroyListNode((cListNode*)(&self->mList));
     cUIThing__cUIThing_2(((char*)self), flag);
 }
 #endif
@@ -2204,9 +2204,9 @@ extern "C" void* cUIMenu_cUIMenu(cUIMenu* self)
 {
     cUIThing_cUIThing_self(((char*)self));
     self->mVtbl = cUIGroup_vtbl;
-    cList_cList(((char*)self) + 0x74);
+    cList_cList(self->mList);
     self->mVtbl = cUIMenu_vtbl;
-    tAttrMenu_tAttrMenu(((char*)self) + 0x90);
+    tAttrMenu_tAttrMenu(&self->mAttrMenu);
     self->mStoredIndex = 0xFF;
     self->mScrollItemCurrent = 0;
     self->mScrollItemNum = 0;
@@ -2241,7 +2241,7 @@ extern "C" void cUIMenu__cUIMenu(cUIMenu* self, int flag)
 {
     self->mVtbl = cUIGroup_vtbl;
     *(void***)(((char*)self) + 0x8C) = cList_vtbl;
-    cList_destroyList_v(((char*)self) + 0x74);
+    cList_destroyList_v(self->mList);
     *(void***)(((char*)self) + 0x88) = cListNode_vtbl;
     cListNode_destroyListNode((cListNode*)(((char*)self) + 0x80));
     *(void***)(((char*)self) + 0x7C) = cListNode_vtbl;
@@ -2483,7 +2483,7 @@ extern "C" void* cUIPair_cUIPair1(cUIPair* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
     self->mVtbl = cUIPair_vtbl;
-    tAttrPair_tAttrPair(((char*)self) + 0x74);
+    tAttrPair_tAttrPair(&self->mAttrPair);
     return ((char*)self);
 }
 #endif
@@ -2505,10 +2505,10 @@ extern "C" void* cUIPair_cUIPair(cUIPair* self)
 {
     cUIThing_cUIThing_self(((char*)self));
     self->mVtbl = cUIPair_vtbl;
-    tAttrPair_tAttrPair(((char*)self) + 0x74);
+    tAttrPair_tAttrPair(&self->mAttrPair);
     self->mpEntry = 0;
     self->mpWidget = 0;
-    ((sUIVectorFlags*)(((char*)self) + 0x14))->bit1 = 1;
+    ((sUIVectorFlags*)(&self->mAttr))->bit1 = 1;
     return ((char*)self);
 }
 #endif
@@ -2666,8 +2666,8 @@ extern "C" void* cUIListBox_cUIListBox1(cUIListBox* self)
     int i;
     cUIThing_cUIThing(((char*)self), 0, 0);
     self->mVtbl = cUIListBox_vtbl;
-    tAttrListBox_tAttrListBox((unsigned char*)(((char*)self) + 0x74));
-    char* entry = ((char*)self) + 0x98;
+    tAttrListBox_tAttrListBox((unsigned char*)(&self->mAttrListBox));
+    char* entry = (char*)&self->mpEntries[0];
     for (i = 0x1F; i != -1; i--) {
         tListBoxEntry_tListBoxEntry(entry);
         entry += 0x14;
@@ -2884,8 +2884,8 @@ extern "C" void* cUIState_cUIState2(cUIState* self)
     self->mpNext = (cListNode*)((char*)self);
     self->mpPrev = (cListNode*)((char*)self);
     self->mVtbl = cUIState_vtbl;
-    tAttrState_tAttrState(((char*)self) + 0x1C);
-    cList_cList(((char*)self) + 0x24);
+    tAttrState_tAttrState(&self->mAttrState);
+    cList_cList(self->mScreens);
     return ((char*)self);
 }
 #endif
@@ -3240,7 +3240,7 @@ struct sUIVecMode1C {
  */
 extern "C" void cUIState_incrementPopup(cUIState* self)
 {
-    sUIVecMode1C* attr = (sUIVecMode1C*)(((char*)self) + 0x1C);
+    sUIVecMode1C* attr = (sUIVecMode1C*)(&self->mAttrState);
     attr->mode = attr->mode + 1;
 }
 #endif
@@ -3252,7 +3252,7 @@ INCLUDE_ASM("ui/uivector", cUIState_decrementPopup);
  */
 extern "C" void cUIState_decrementPopup(cUIState* self)
 {
-    sUIVecMode1C* attr = (sUIVecMode1C*)(((char*)self) + 0x1C);
+    sUIVecMode1C* attr = (sUIVecMode1C*)(&self->mAttrState);
     if (attr->mode != 0)
         attr->mode = attr->mode - 1;
 }
@@ -3617,11 +3617,11 @@ extern "C" void* cUIScreen_cUIScreen1(cUIScreen* self)
     self->mpNext = (cListNode*)((char*)self);
     self->mpPrev = (cListNode*)((char*)self);
     self->mVtbl = cUIScreen_vtbl;
-    tAttrScreen_tAttrScreen(((char*)self) + 0x14);
-    cList_cList(((char*)self) + 0x18);
-    cUIThing_cUIThing(((char*)self) + 0x40, 0, 0);
+    tAttrScreen_tAttrScreen(&self->mAttrScreen);
+    cList_cList(&self->mThreads);
+    cUIThing_cUIThing(&self->mRootGroup, 0, 0);
     self->mRootGroup.mVtbl = cUIGroup_vtbl;
-    cList_cList(((char*)self) + 0xB4);
+    cList_cList(&self->mRootGroup.mList);
     return ((char*)self);
 }
 #endif
@@ -3651,14 +3651,14 @@ extern "C" void* cUIScreen_cUIScreen(cUIScreen* self, int pState)
     self->mpBuffer = 0;
     self->mpScreenHeader = 0;
     self->mVtbl = cUIScreen_vtbl;
-    tAttrScreen_tAttrScreen(((char*)self) + 0x14);
-    cList_cList(((char*)self) + 0x18);
+    tAttrScreen_tAttrScreen(&self->mAttrScreen);
+    cList_cList(&self->mThreads);
     self->mpKeyframeBlock = 0;
     self->mpObjectBlock = 0;
     self->mppObjectList = 0;
-    cUIThing_cUIThing(((char*)self) + 0x40, 0, 0);
+    cUIThing_cUIThing(&self->mRootGroup, 0, 0);
     self->mRootGroup.mVtbl = cUIGroup_vtbl;
-    cList_cList(((char*)self) + 0xB4);
+    cList_cList(&self->mRootGroup.mList);
     self->mpState = (cUIState*)pState;
     return ((char*)self);
 }
@@ -3755,7 +3755,7 @@ INCLUDE_ASM("ui/uivector", cUIScreen_setVisible);
  */
 extern "C" void cUIScreen_setVisible(cUIScreen* self, int enable)
 {
-    ((sUIVectorFlags*)((char*)self + 0x54))->bit6 = enable;
+    ((sUIVectorFlags*)(&self->mRootGroup.mAttr))->bit6 = enable;
 }
 #endif
 //100%
@@ -3781,7 +3781,7 @@ INCLUDE_ASM("ui/uivector", cUIScreen_getEngine);
  * @return the state's engine
  */
 extern "C" int cUIScreen_getEngine(cUIScreen* uiScreen) {
-    return (*(int *)((char*)((uiScreen->mpState)) + (0x10)));
+    return ((int)uiScreen->mpState->mpEngine);
 }
 #endif
 //100%
@@ -3816,7 +3816,7 @@ extern "C" void* cUIText_cUIText1(cUIText* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
     self->mVtbl = cUIText_vtbl;
-    tAttrText_tAttrText((unsigned char*)(((char*)self) + 0x74));
+    tAttrText_tAttrText((unsigned char*)(&self->mAttrText));
     return ((char*)self);
 }
 #endif
@@ -4216,10 +4216,10 @@ extern "C" char* strcpy(char*, const char*);
 extern "C" void cUIScrollBar_setUpAnimationName(cUIScrollBar* self, char* str)
 {
     if (strlen(str) >= 25U) {
-        *(((char*)self) + 0x8C) = 0;
+        *(self->mszUpAnimation) = 0;
         return;
     }
-    strcpy(((char*)self) + 0x8C, str);
+    strcpy(self->mszUpAnimation, str);
 }
 #endif
 //100%
@@ -4240,7 +4240,7 @@ extern "C" void cUIScrollBar_setDownAnimationName(cUIScrollBar* self, char* str)
         ((char*)self)[0xA5] = 0;
         return;
     }
-    strcpy(((char*)self) + 0xA5, str);
+    strcpy(self->mszDownAnimation, str);
 }
 #endif
 //100%
@@ -4513,8 +4513,8 @@ extern "C" void* cUITextScroll_cUITextScroll1(cUITextScroll* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
     self->mVtbl = cUITextScroll_vtbl;
-    tAttrTextScroll_tAttrTextScroll((unsigned char*)(((char*)self) + 0x74));
-    cList_cList(((char*)self) + 0x8C);
+    tAttrTextScroll_tAttrTextScroll((unsigned char*)(&self->mAttrTextScroll));
+    cList_cList(&self->mList);
     return ((char*)self);
 }
 #endif
@@ -4546,7 +4546,7 @@ extern "C" void cUITextScroll__cUITextScroll(cUITextScroll* self, int flags)
     self->mList.mVtbl = cList_vtbl;
     cList_destroyList_v((char*)&self->mList);
     self->mList.mEnd.mVtbl = cListNode_vtbl;
-    cListNode_destroyListNode((cListNode*)((char*)self + 0x98));
+    cListNode_destroyListNode((cListNode*)(&self->mList.mEnd));
     self->mList.mStart.mVtbl = cListNode_vtbl;
     cListNode_destroyListNode((cListNode*)&self->mList);
     cUIThing__cUIThing_dtor(self, flags);
@@ -4861,7 +4861,7 @@ extern "C" void* cUIVector_cUIVector1(cUIVector* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
     self->mVtbl = cUIVector_vtbl;
-    tAttrVector_tAttrVector(((char*)self) + 0x74);
+    tAttrVector_tAttrVector(&self->mAttrVector);
     return ((char*)self);
 }
 #endif

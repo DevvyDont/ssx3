@@ -1505,8 +1505,8 @@ extern "C" char* cController_cController(cController* self, int embedded, int ma
         cStreamSys_cStreamSys(*(sStreamSysA490**)&self->SpeechSys, 0, maxBanks, maxStreams, heap);
     }
     cCrowdSys_cCrowdSys(((char*)self), 0, maxBanks, maxStreams, heap);
-    func_002B28C0(((char*)self) + 0x118, 0, maxBanks, maxStreams, heap);
-    cSpeechSys_cSpeechSys(((char*)self) + 0x5560, 0, maxBanks, maxStreams, heap);
+    func_002B28C0(&self->MusicSys, 0, maxBanks, maxStreams, heap);
+    cSpeechSys_cSpeechSys(&self->SpeechSys, 0, maxBanks, maxStreams, heap);
     *(const sSsVtblAB200**)(*(char**)(**(char***)&self->MusicSys + 0x1D8) + 4) = &D_004837D8_B200;
     *(const sSsVtblBB200**)(**(char***)&self->MusicSys + 0xAB0) = &D_00483760_B200;
     *(const sSsVtblCB200**)(**(char***)&self->MusicSys + 0x1D4) = &D_004837A0_B200;
@@ -1579,8 +1579,8 @@ extern const sSsVtblCB478 D_004837A0;
 // PORT: g++ 2.95 virtual-base destruction with stack vtable this-adjust fix-ups, written out by hand.
 extern "C" void cController__cController(cController* self, int flags)
 {
-    char* mon = ((char*)self) + 0x118;
-    char* bank = ((char*)self) + 0x5560;
+    char* mon = (char*)&self->MusicSys;
+    char* bank = (char*)&self->SpeechSys;
     self->MusicSys.mVtbl = D_004838F8;
     self->SpeechSys.mVtbl = cSpeechSys_vtbl;
     self->mVtbl = D_004837F8;
@@ -1773,7 +1773,7 @@ struct sStrmVtEntF { short delta; short index; void (*fn)(void*, float); };
  */
 extern "C" void cController_Update(cController* self, float frameTime)
 {
-    char** sys = (char**)((char*)self + 0x118);
+    char** sys = (char**)(&self->MusicSys);
     cAsyncSys_ASYNCSYS_Update(*(void**)*sys);
     func_002A6D18(self);
     char* bankMan = *(char**)*sys;
@@ -1781,7 +1781,7 @@ extern "C" void cController_Update(cController* self, float frameTime)
     sStrmVtEntF* entry = &(*(sStrmVtEntF**)(bankMan + 0xAB0))[5];
     entry->fn(bankMon + entry->delta, frameTime);
     func_002B4388(sys);
-    func_002B0C78((char*)self + 0x5560);
+    func_002B0C78(&self->SpeechSys);
     cStreamSys_STREAM_Update((cStreamSys*)(*sys));
 }
 #endif
@@ -2052,7 +2052,7 @@ extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void cBankMonitorInstance_SetStream(cBankMonitorInstance* self, int streamInst, const char* name, int fileOffset)
 {
     self->mRestartInfo.bank.mBank = streamInst;
-    strcpy((char*)self + 0x10, name);
+    strcpy((char*)&self->mRestartInfo.bank.mPatch, name);
     self->mRestartInfo.stream.mOffset = fileOffset;
 }
 #endif

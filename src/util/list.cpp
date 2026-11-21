@@ -120,9 +120,9 @@ extern "C" void* cList_cList(cList* self)
     *(void**)&self->mStart = ((char*)self);
     self->mVtbl = cList_vtbl;
     self->mStart.mVtbl = cListNode_vtbl;
-    self->mEnd.mpNext = (cListNode*)(((char*)self) + 0xC);
+    self->mEnd.mpNext = (cListNode*)(&self->mEnd);
     self->mEnd.mVtbl = cListNode_vtbl;
-    *(void**)&self->mEnd = ((char*)self) + 0xC;
+    *(void**)&self->mEnd = (char*)&self->mEnd;
     cList_clear(((char*)self));
     return ((void*)self);
 }

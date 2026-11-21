@@ -638,7 +638,7 @@ extern "C" float func_00290C10(int i, float v);
  */
 extern "C" int cSSXAudio_GetGruntVol(cSSXAudio* self, cRider* src)
 {
-    char* obj = (char*)src + 0x6C0;
+    char* obj = (char*)&src->mVtbl;
     sSndVEntryVec* vt = *(sSndVEntryVec**)obj;
     sSndVec4* velocity = vt[2].fn(obj + vt[2].delta);
     int level = (int)func_00290C10(3, sndVu0Length(*velocity));
@@ -2691,14 +2691,14 @@ extern "C" void cSSXAudio_LiftWithAirTime(cSSXAudio* self, cRider* rider)
     int simState = *(int*)((char*)rider->mAirPredictor + 0xAC);
     int ok = simState == 1 || simState == 3;
     if (!ok) {
-        char* riderObj = ((char*)rider) + 0x6C0;
+        char* riderObj = (char*)&rider->mVtbl;
         sSsVt4678* vtEntry = &(*(sSsVt4678**)riderObj)[7];
         cSSXAudio_SetNeedLift(self, vtEntry->fn(riderObj + vtEntry->delta), 1);
         return;
     }
     int idx = -1;
     {
-        char* riderObj = ((char*)rider) + 0x6C0;
+        char* riderObj = (char*)&rider->mVtbl;
         sSsVt4678* vtEntry = &(*(sSsVt4678**)riderObj)[7];
         cSSXAudio_SetNeedLift(self, vtEntry->fn(riderObj + vtEntry->delta), 0);
     }
@@ -3374,7 +3374,7 @@ struct sSsVt6088 { short delta; short index; int (*fn)(void*); };
 extern "C" void cSSXAudio_CollisionSound(cSSXAudio* self, cRider* rider, char* evt, int idx)
 {
     if (*(void**)(evt + 0x8C) == 0) return;
-    char* obj = ((char*)rider) + 0x6C0;
+    char* obj = (char*)&rider->mVtbl;
     sSsVt6088* vtEntry = &(*(sSsVt6088**)obj)[5];
     if (cSSXAudio_CameraInRange(self, vtEntry->fn(obj + vtEntry->delta), 100.0f) < 0) return;
     if (cSSXAudio_PlayHistoryExists_p(self, evt, idx) != 0) return;
@@ -3712,8 +3712,8 @@ extern func_00290B58_sCurve D_00482DA0;
 extern "C" void cSSXAudio_WipeoutHit(cSSXAudio* vself, cRider* obj)
 {
     struct sSSXAudioView* self = (struct sSSXAudioView*)vself;
-    if (vcall_6310(((char*)obj) + 0x6C0, 9) != 0 || obj->mIsLocal == 0) {
-        if (cSSXAudio_CameraInRange(self, vcall_6310(((char*)obj) + 0x6C0, 5), 100.0f) < 0) {
+    if (vcall_6310((char*)&obj->mVtbl, 9) != 0 || obj->mIsLocal == 0) {
+        if (cSSXAudio_CameraInRange(self, vcall_6310((char*)&obj->mVtbl, 5), 100.0f) < 0) {
             return;
         }
     }
@@ -3752,7 +3752,7 @@ state23:
     (*pp)->sub.p3C[(*pp)->sub.cur] = volumeControl;
     {
         struct cBankManager* optsManager = *self->p118;
-        optsManager->sub.tgt[optsManager->sub.cur] = ((char*)obj) + 0x110;
+        optsManager->sub.tgt[optsManager->sub.cur] = (char*)&obj->mPosition;
     }
     {
         struct cBankManager** pq = self->p118;
@@ -4223,7 +4223,7 @@ extern "C" void cSSXAudio_WorldSound(cSSXAudio* self, char* evt, int n)
 {
     if (n == 0) return;
     if (n == 102 && *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) == 0) return;
-    if (*(int*)((char*)self + 0x62A8) >= 0) return;
+    if (self->unk_62A8 >= 0) return;
     if (cSSXAudio_PlayHistoryExists(self, (int)evt, 0) != 0) return;
     int pri = 80;
     sSndVec4 pos = *(sSndVec4*)(evt + 0x40);
@@ -4348,7 +4348,7 @@ extern "C" void cSSXAudio_AttachSound(cSSXAudio* self, char* obj, int type, int 
         if (*cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)) == 0)
             return;
     }
-    if (*(int*)((char*)self + 0x62A8) >= 0)
+    if (self->unk_62A8 >= 0)
         return;
     if (*(int*)(obj + 0xC) == 0)
         return;
@@ -7755,7 +7755,7 @@ extern "C" int func_0028DEF0_D6E0(void* self, int a1) __asm__("func_0028DEF0");
  */
 extern "C" void cSSXAudio_BigChallengeBegin(cSSXAudio* self, int mission)
 {
-    char* bank = ((char*)self) + 0x118;
+    char* bank = (char*)&self->MusicSys;
     self->mBigChallengeStarting = 0;
     cSSXAudio_WipeoutSlideEnd((cSSXAudio*)self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
     cSSXAudio_WipeoutTumbleEnd((cSSXAudio*)self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
@@ -7770,7 +7770,7 @@ extern "C" void cSSXAudio_BigChallengeBegin(cSSXAudio* self, int mission)
     if (self->unk_608C == 2) {
         return;
     }
-    if ((unsigned int)(func_002B49E0(((char*)self) + 0x118) - 1) < 3) {
+    if ((unsigned int)(func_002B49E0(&self->MusicSys) - 1) < 3) {
         cMonitor_MONITOR_DestroyAll1_D6E0(**(char***)&self->MusicSys + 0x1D8, D_004A3648[0]);
         cMonitor_MONITOR_DestroyAll1_D6E0(**(char***)&self->MusicSys + 0x1D8, D_004A3650_D6E0[0]);
         cMonitor_MONITOR_DestroyAll1_D6E0(**(char***)&self->MusicSys + 0x1D8, D_004A3658[0]);
@@ -7790,13 +7790,13 @@ extern "C" void cSSXAudio_BigChallengeBegin(cSSXAudio* self, int mission)
     case 4: track = -1; break;
     }
     do {
-        if (func_002B4620(((char*)self) + 0x118) != 0) {
+        if (func_002B4620(&self->MusicSys) != 0) {
             sSndVtVI_D6E0* vt = (sSndVtVI_D6E0*)self->MusicSys.mVtbl;
-            char* mon = ((char*)self) + 0x118;
+            char* mon = (char*)&self->MusicSys;
             ((int (*)(void*, int))vt[4].fn)(mon + vt[4].delta, track);
             self->mInBigChallenge = 1;
         }
-        func_002B4708(((char*)self) + 0x118);
+        func_002B4708(&self->MusicSys);
     } while (0);
 }
 #endif
@@ -8622,9 +8622,9 @@ extern "C" void func_0029ED90(cSSXAudio* self, int restart)
         return;
     }
     if (restart) {
-        func_002B0DA0(((char*)self) + 0x5560);
+        func_002B0DA0(&self->SpeechSys);
     }
-    void** streamHandle = (void**)(((char*)self) + 0x5728);
+    void** streamHandle = (void**)(&self->unk_5728);
     if (*streamHandle) {
         FILESYS_delbigsync(*streamHandle, 100);
     }
@@ -8639,8 +8639,8 @@ extern "C" void func_0029ED90(cSSXAudio* self, int restart)
     }
     self->unk_572C = mode;
     if (restart) {
-        SPCH_Init(((char*)self) + 0x5560);
-        func_002B0E60(((char*)self) + 0x5560, 0, 0, str_CHAR, (int)cSSXAudio_GetCurrAppliedVolumePtr(((char*)self), 4, 0), 1, -1);
+        SPCH_Init(&self->SpeechSys);
+        func_002B0E60(&self->SpeechSys, 0, 0, str_CHAR, (int)cSSXAudio_GetCurrAppliedVolumePtr(((char*)self), 4, 0), 1, -1);
     }
 }
 #endif
@@ -8709,7 +8709,7 @@ extern "C" void* cSSXAudio_UpdateSpeechVolume(cSSXAudio* self, int instanceIndex
             cSSXAudio_DuckToStream(self, 0, 0.9999024868011475f, 0.6499993801116943f);
         }
         if (type == 11) {
-            return (char*)self + 0x5730;
+            return (char*)&self->unk_5730;
         }
         return cSSXAudio_GetCurrAppliedVolumePtr(self, type, charIndex);
     }
@@ -10228,7 +10228,7 @@ extern "C" int func_002A19D8(cSSXAudio* self, int ev)
 {
     if (ev == 0) {
         func_002A31C0(self);
-        if (*(int*)((char*)self + 0x530) == 0) {
+        if (self->MusicSys.mSongPlaying == 0) {
             func_0028D488(self);
             cMonitor_MONITOR_Create(*(char**)self->MusicSys.mpVStreamSys + 0x1D8, 10, D_004A3648_19D8[0].v, 0, 3, 1, 0, 0);
         }
@@ -10935,7 +10935,7 @@ extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A26F0(cSSXAudio* self, int firstChoice, int secondChoice)
 {
     if (func_0029F0D8(self) != 0) {
-        char* bm = (char*)self + 0x5560;
+        char* bm = (char*)&self->SpeechSys;
         func_002B11B0(bm, 0);
         if (func_002B1458(bm, 0, 8421, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = func_0029F198(self);
@@ -11148,7 +11148,7 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern "C" void func_002A2B88(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
-        if (func_002B1458((char*)self + 0x5560, 0, 8492, 0, 10, 0, 0, 0.0f) != 0) {
+        if (func_002B1458(&self->SpeechSys, 0, 8492, 0, 10, 0, 0, 0.0f) != 0) {
             int languageBit = func_0029F198(self);
             int playedBefore = self->unk_5780;
             D_004A482C_4(func_003D8008(1, 0, 8492), 2, languageBit, playedBefore);
@@ -11344,7 +11344,7 @@ extern "C" void func_002A2E50(cSSXAudio* vself, int bonus)
         }
     }
     *(unsigned int*)&vself->unk_573C |= 1 << pick;
-    char* snd = ((char*)vself) + 0x5560;
+    char* snd = (char*)&vself->SpeechSys;
     switch (pick) {
     case 0:
         func_002A2188((cSSXAudio*)vself);
@@ -11392,9 +11392,9 @@ int func_002B4908(void* self);
 extern "C" void func_002A3170(cSSXAudio* self)
 {
     func_002A26F0(self, 0, 0);
-    func_002B1758((char*)self + 0x5560, 0);
+    func_002B1758(&self->SpeechSys, 0);
     self->unk_5774 = 1;
-    self->unk_5778 = func_002B4908((char*)self + 0x118);
+    self->unk_5778 = func_002B4908(&self->MusicSys);
 }
 #endif
 
@@ -11594,7 +11594,7 @@ extern "C" int func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int whic
         return 1;
     }
     if (flag != 0) {
-        if (func_002B0E28(((char*)vself) + 0x5560, 0) == 0) {
+        if (func_002B0E28(&vself->SpeechSys, 0) == 0) {
             return 0;
         }
     }
@@ -11612,7 +11612,7 @@ extern "C" int func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int whic
     if (cRider_getCheatIdentity(rider) != 0) {
         return 1;
     }
-    if (func_002B1458_f(((char*)vself) + 0x5560, 0, 8388, 0, 11, 0.0f, 0, 0) == 0) {
+    if (func_002B1458_f(&vself->SpeechSys, 0, 8388, 0, 11, 0.0f, 0, 0) == 0) {
         return 1;
     }
     languageBit = func_0029F198(((char*)vself));
@@ -12798,7 +12798,7 @@ extern "C" void func_002A4A78(cSSXAudio* self)
         } else {
             char* bankMonitor = **(char***)&self->MusicSys + 0x1D8;
             const sSndKey8_4A78* key = D_004A3650;
-            int songValue = func_002B4908((char*)self + 0x118);
+            int songValue = func_002B4908(&self->MusicSys);
             cMonitor_MONITOR_Create(bankMonitor, 2, key->v, 0, 4, songValue, 0, 0);
         }
     }
@@ -13704,7 +13704,7 @@ extern "C" void func_002A62F0(cCrowdInstance* voice, int b, float v);
 extern "C" void func_002A6430(cCrowdInstance* self, float fade)
 {
     for (int i = 0; i < 15; i++) {
-        if (*(int*)((char*)self + 0x20 + i * 0xC) != 0) {
+        if (*(int*)((char*)&self->mCrowdObjectsInfo[0] + i * 0xC) != 0) {
             func_002A62F0(self, i, fade);
         }
     }
@@ -13777,7 +13777,7 @@ extern "C" void func_002A64A0(cCrowdInstance* vself, int idx)
     if (cheerSample == 0) return;
     func_002A8450((char**)D_004A36F8, vself->unk_0D8, cheerSample);
     sSnd64A0Mgr* posMgr = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
-    posMgr->sub.tgt[posMgr->sub.cur] = ((char*)vself) + 0x10;
+    posMgr->sub.tgt[posMgr->sub.cur] = (char*)&vself->unk_010;
     sSnd64A0Mgr* volMgr = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
     volMgr->sub.setVal(volMgr->sub.cur, vself->unk_178);
     volMgr->sub.update(volMgr->sub.cur);
@@ -13855,7 +13855,7 @@ extern "C" void func_002A6648(cCrowdInstance* vself, int idx)
     if (cheerSample == 0) return;
     func_002A8450((char**)D_004A36F8, vself->unk_0D8, cheerSample);
     sSnd6648Mgr* posMgr = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
-    posMgr->sub.tgt[posMgr->sub.cur] = ((char*)vself) + 0x10;
+    posMgr->sub.tgt[posMgr->sub.cur] = (char*)&vself->unk_010;
     sSnd6648Mgr* volMgr = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
     volMgr->sub.setVal(volMgr->sub.cur, vself->unk_178);
     volMgr->sub.update(volMgr->sub.cur);
@@ -14054,7 +14054,7 @@ extern "C" char* cCrowdSys_cCrowdSys(cCrowdSys* self, int embedded, int count, i
     self->mVtbl = (void**)D_004837F8;
     self->mNumInstances = 0;
     self->mpCrowdInstances = 0;
-    new (((char*)self) + 0x1C) sSnd69Ent[3];
+    new ((char*)&self->mCrowdData[0]) sSnd69Ent[3];
     D_004A36F8 = (cCrowdSys*)((char**)self);
     return ((char*)self);
 }
@@ -14119,9 +14119,9 @@ extern "C" void cCrowdSys__cCrowdSys(cCrowdSys* self, int flags)
     }
     func_002A6F38((sSsMgr6F38*)self);
     D_004A36F8 = 0;
-    if (((char*)self) + 0x1C != 0) {
-        char* crowdEntry = ((char*)self) + 0x1C + 3 * 84;
-        while (((char*)self) + 0x1C != crowdEntry) {
+    if ((char*)&self->mCrowdData[0] != 0) {
+        char* crowdEntry = (char*)&self->mCrowdData[0] + 3 * 84;
+        while ((char*)&self->mCrowdData[0] != crowdEntry) {
             crowdEntry -= 0x54;
             func_002A4BE0((tCrowdEventData*)(crowdEntry + 0x30), 2);
             func_002A4BE0((tCrowdEventData*)(crowdEntry + 0x18), 2);

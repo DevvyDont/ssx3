@@ -379,7 +379,7 @@ extern "C" void cUIStateStack_update(void*);
 extern "C" void cUIEngine_update(cUIEngine* self)
 {
     cUIInput* obj = self->mpInput;
-    sVEntry398038* vt = *(sVEntry398038**)((char*)obj + 8);
+    sVEntry398038* vt = (sVEntry398038*)obj->mVtbl;
     vt[46].fn((char*)obj + vt[0x2E].delta);
     cUIStateStack_update((char*)&self->mStateStack);
 }
@@ -1065,7 +1065,7 @@ extern "C" void cUIIcon_setUIData(cUIIcon* self, sUIData8998* data)
     cUIThing_setUIData_8998(((sUIObj8998*)self), data);
     ((sUIObj8998*)self)->clip = data->clip;
     ((sUIObj8998*)self)->align = data->align;
-    self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname((cUITextureBank*)(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x58), data->id);
+    self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname((cUITextureBank*)((char*)self->mpScreen->mpState->mpEngine + 0x58), data->id);
     (*(sUISize8998*)&self->mTileUV[0]) = sUISize8998(data->w * 0.01f, data->h * 0.01f);
 }
 #endif
@@ -1378,7 +1378,7 @@ INCLUDE_ASM("ui/uiengine", cUIIcon_setTextureByHashValue);
 extern "C" void cUIIcon_setTextureByHashValue(cUIIcon* self, int id)
 {
     cUIScreen* screen = self->mpScreen;
-    void* state = *(void**)((char*)screen + 0xD0);
+    void* state = screen->mpState;
     void* engine = *(void**)((char*)state + 0x10);
     self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname((cUITextureBank*)((char*)engine + 0x58), id);
 }
@@ -1687,10 +1687,10 @@ struct cUIListBox_setUnicodePrivate_sEntry {
 extern "C" void cUIListBox_setUnicodePrivate(cUIListBox* self, unsigned char idx, unsigned short* str)
 {
     cUIScreen* screen = self->mpScreen;
-    void* state = *(void**)((char*)screen + 0xD0);
+    void* state = screen->mpState;
     void* engine = *(void**)((char*)state + 0x10);
     if (*(void**)((char*)engine + 0x10) != 0) {
-        cUIListBox_setUnicodePrivate_sEntry* tbl = (cUIListBox_setUnicodePrivate_sEntry*)((char*)self + 0x9C);
+        cUIListBox_setUnicodePrivate_sEntry* tbl = (cUIListBox_setUnicodePrivate_sEntry*)(&self->mpEntries[0].mpString);
         cUIListBox_setUnicodePrivate_sEntry* entry = &tbl[idx];
         if (entry->str) {
             cMemMan_free(entry->str);

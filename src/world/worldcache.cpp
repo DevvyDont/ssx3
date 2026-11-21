@@ -327,8 +327,8 @@ extern "C" void cWorldBlockAllocator_init(void* self, int count, int blockSize);
 extern "C" void* cWorldMemoryMan_cWorldMemoryMan(cWorldMemoryMan* self)
 {
     cWorldBlockAllocator_init(self, D_0044C1E0[0].count, D_0044C1E0[0].blockSize);
-    cWorldBlockAllocator_init((char*)self + 0x14, D_0044C1E0[1].count, D_0044C1E0[1].blockSize);
-    cWorldBlockAllocator_init((char*)self + 0x28, D_0044C1E0[2].count, D_0044C1E0[2].blockSize);
+    cWorldBlockAllocator_init(&self->m_BlockAllocator[1], D_0044C1E0[1].count, D_0044C1E0[1].blockSize);
+    cWorldBlockAllocator_init(&self->m_BlockAllocator[2], D_0044C1E0[2].count, D_0044C1E0[2].blockSize);
     int i;
     for (i = 63; i >= 0; i--) {
         ((int*)&self->m_pSectionAllocator)[i] = 0;
@@ -739,8 +739,8 @@ extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int pNash)
     cBXString__cBXString(&base, 2);
     char* hdr = (char*)self->mp_DataHeader;
     *(char**)(hdr + 0x14) = hdr + 0x50;
-    self->m_pSharedCacheTable = (cWorldCacheTable*)cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(232, str_SharedTable, 0, 0), (char*)self->mp_DataHeader + 0x18);
-    self->m_pSectionCacheTable = (cWorldCacheTable**)((void**)operator_new_tag(*(int*)((char*)self->mp_DataHeader + 0x8) * 4, str_SectionTables, 0, 0));
+    self->m_pSharedCacheTable = (cWorldCacheTable*)cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(232, str_SharedTable, 0, 0), &self->mp_DataHeader->m_iTable[0]);
+    self->m_pSectionCacheTable = (cWorldCacheTable**)((void**)operator_new_tag((int)self->mp_DataHeader->m_uiNumSections * 4, str_SectionTables, 0, 0));
     for (unsigned int i = 0; i < self->mp_DataHeader->m_uiNumSections; i++)
         ((void**)self->m_pSectionCacheTable)[i] = 0;
     char* x = (char*)cChunkResolve_construct();
@@ -776,7 +776,7 @@ extern "C" void cWorldCache_activateSectionMem(cWorldCache* self, int i, int sec
     // PORT: pointer held in int (index-first address arithmetic)
     void** slot = (void**)(i * 4 + (int)self->m_pSectionCacheTable);
     *slot = cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(232, str_SectionTable, 0, 0),
-        *(char**)((char*)self->mp_DataHeader + 0x14) + i * 88 + 0x20);
+        (char*)self->mp_DataHeader->m_pSection + i * 88 + 0x20);
 }
 #endif
 

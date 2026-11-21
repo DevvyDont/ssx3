@@ -995,7 +995,7 @@ extern "C" int cWorldTriggerManager_HandleCollision(cWorldTriggerManager* self, 
         if (((char*)rider) != 0)
         {
             sWtTrack5F60* riderManager = *((sWtSnd5F60*)cAudioInterface_bxAudio())->cur;
-            riderManager->sub.arr24[riderManager->sub.cur] = (int)(((char*)rider) + 0x110);
+            riderManager->sub.arr24[riderManager->sub.cur] = (int)(&rider->mPosition);
             sWtTrack5F60** pt = ((sWtSnd5F60*)cAudioInterface_bxAudio())->cur;
             int h = cSSXAudio_GetClosestCamera1(cAudioInterface_bxAudio(), ((char*)rider));
             (*pt)->sub.p64[(*pt)->sub.cur] = h;

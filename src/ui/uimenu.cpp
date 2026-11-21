@@ -41,7 +41,7 @@ extern "C" void cUIMenu_setSelected(cUIMenu* self, cUIThing* item, int play)
     if (cur != 0 && ((*(int*)(cur + 0x14) >> 4) & 1)) {
         unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)cur, 1);
         if (ev != 0xFFFF) {
-            void* scr = *(void**)((char*)self->mpSelected + 0x5C);
+            void* scr = self->mpSelected->mpScreen;
             if (scr != 0) {
                 cUIScreen_playFrame(scr, ev, 1);
             }
@@ -62,7 +62,7 @@ extern "C" void cUIMenu_setSelected(cUIMenu* self, cUIThing* item, int play)
     va2[7].fn(newSelected + va2[7].delta, 1);
     unsigned short ev2 = cUIThing_getKeyframerEvent(self->mpSelected, 0);
     if (ev2 != 0xFFFF) {
-        void* scr = *(void**)((char*)self->mpSelected + 0x5C);
+        void* scr = self->mpSelected->mpScreen;
         if (scr != 0) {
             if (play) {
                 cUIScreen_playFrame(scr, ev2, 1);
@@ -123,7 +123,7 @@ extern "C" int cUIMenu_onInputChangeItem(cUIMenu* selfp, unsigned char OldScroll
             cUIMenu_onInputChangeItem_notify(((char*)selfp), 3, selfp->mScrollItemOffset);
             cUIMenu_onInputChangeItem_notify(((char*)selfp), 4, selfp->mScrollItemOffset);
         }
-        char* pNextSelected = (char*)cList_getByIndex_i_AE98(((char*)selfp) + 0x74, MenuEntryIndex);
+        char* pNextSelected = (char*)cList_getByIndex_i_AE98(selfp->mList, MenuEntryIndex);
         cUIMenu_setSelected(selfp, (cUIThing*)pNextSelected, *(int*)&selfp->mAttrMenu & 1);
         cUIMenu_onInputChangeItem_notify(((char*)selfp), 5, selfp->mScrollItemOffset);
         return 1;
@@ -266,7 +266,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
             }
         }
     } else if (inputIs_B000(in, 5)) {
-        char* item = (char*)cList_getByIndex_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
         focusNotify_B000(((char*)self), item, 5);
         moveResult = focusMove_B000(((char*)self), 6, self->mScrollItemCurrent - self->mScrollItemOffset);
         if (moveResult & 0x100) {
@@ -278,7 +278,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
             result = cUIThing_getSound(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 6)) {
-        char* item = (char*)cList_getByIndex_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
         focusNotify_B000(((char*)self), item, 6);
         moveResult = focusMove_B000(((char*)self), 7, self->mScrollItemCurrent - self->mScrollItemOffset);
         if (moveResult & 0x100) {
@@ -290,7 +290,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
             result = cUIThing_getSound(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 8)) {
-        char* item = (char*)cList_getByIndex_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
         focusNotify_B000(((char*)self), item, 8);
         moveResult = focusMove_B000(((char*)self), 9, self->mScrollItemCurrent - self->mScrollItemOffset);
         if (moveResult & 0x100) {
@@ -302,7 +302,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
             result = cUIThing_getSound(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 7)) {
-        char* item = (char*)cList_getByIndex_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
         focusNotify_B000(((char*)self), item, 7);
         moveResult = focusMove_B000(((char*)self), 8, self->mScrollItemCurrent - self->mScrollItemOffset);
         if (moveResult & 0x100) {
@@ -314,7 +314,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
             result = cUIThing_getSound(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 4)) {
-        char* item = (char*)cList_getByIndex_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
+        char* item = (char*)cList_getByIndex_i(self->mList, self->mScrollItemCurrent - self->mScrollItemOffset);
         focusNotify_B000(((char*)self), item, 4);
     } else {
         return 0;
@@ -479,7 +479,7 @@ extern "C" unsigned char cUIMenu_reverseFindFirstHighlightable(cUIMenu* self, un
     }
     i = idx;
     for (; i >= 0; i--) {
-        item = (char*)cList_getByIndex_i(((char*)self) + 0x74, i);
+        item = (char*)cList_getByIndex_i(self->mList, i);
         if (*(int*)&self->mAttrMenu & 4) {
             obj = *(char**)((char*)self->mpScreen + 0xD0);
             vtbl = *(char**)(obj + 8);
@@ -532,7 +532,7 @@ extern "C" void cUIMenu_setSelectedByIndex(cUIMenu* self, unsigned char idx)
         cUIMenu_notify(((char*)self), 2, self->mScrollItemOffset);
         cUIMenu_notify(((char*)self), 4, self->mScrollItemOffset);
     }
-    cUIMenu_setSelected(self, (cUIThing*)((char*)cList_getByIndex_i(((char*)self) + 0x74, idx - self->mScrollItemOffset)), 1);
+    cUIMenu_setSelected(self, (cUIThing*)((char*)cList_getByIndex_i(self->mList, idx - self->mScrollItemOffset)), 1);
 }
 #endif
 
@@ -617,12 +617,12 @@ extern "C" void cUIPair_setVisible(cUIPair* self, int on)
     ((cUIPair_setVisible_sFlags*)&self->mAttr)->on = (on != 0);
     cUIThing* entry = self->mpEntry;
     if (entry != 0) {
-        cUIPair_setVisible_sVEntry* vt = *(cUIPair_setVisible_sVEntry**)((char*)entry + 8);
+        cUIPair_setVisible_sVEntry* vt = (cUIPair_setVisible_sVEntry*)entry->mVtbl;
         vt[9].fn((char*)entry + vt[9].delta, on);
     }
     cUIThing* widget = self->mpWidget;
     if (widget != 0) {
-        cUIPair_setVisible_sVEntry* vt = *(cUIPair_setVisible_sVEntry**)((char*)widget + 8);
+        cUIPair_setVisible_sVEntry* vt = (cUIPair_setVisible_sVEntry*)widget->mVtbl;
         vt[9].fn((char*)widget + vt[9].delta, on);
     }
 }
@@ -662,7 +662,7 @@ struct cUIPair_setFocus_sFlags {
  */
 extern "C" void cUIPair_setFocus(cUIPair* self, int on)
 {
-    ((cUIPair_setFocus_sFlags*)(((char*)self) + 0x14))->on = on != 0;
+    ((cUIPair_setFocus_sFlags*)(&self->mAttr))->on = on != 0;
     char* entry = (char*)self->mpEntry;
     if (entry != 0) {
         cUIPair_setFocus_sVEntryA* va = *(cUIPair_setFocus_sVEntryA**)(entry + 8);
@@ -675,7 +675,7 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
     if (on) {
         unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)widget, 0);
         if (ev != 0xFFFF) {
-            void* scr = *(void**)((char*)self->mpWidget + 0x5C);
+            void* scr = self->mpWidget->mpScreen;
             if (scr != 0) {
                 cUIScreen_playFrame(scr, ev, 1);
             }
@@ -689,7 +689,7 @@ extern "C" void cUIPair_setFocus(cUIPair* self, int on)
     } else {
         unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)widget, 1);
         if (ev != 0xFFFF) {
-            void* scr = *(void**)((char*)self->mpWidget + 0x5C);
+            void* scr = self->mpWidget->mpScreen;
             if (scr != 0) {
                 cUIScreen_playFrame(scr, ev, 1);
             }
@@ -960,12 +960,12 @@ extern "C" void cUIPair_render2D(cUIPair* self, float x, float y)
 {
     cUIThing* entry = self->mpEntry;
     if (entry != 0) {
-        cUIPair_render2D_sVEntry* vtEntry = &(*(cUIPair_render2D_sVEntry**)((char*)entry + 8))[17];
+        cUIPair_render2D_sVEntry* vtEntry = &((cUIPair_render2D_sVEntry*)entry->mVtbl)[17];
         vtEntry->fn((char*)entry + vtEntry->delta, x + self->mPosition.x, y + self->mPosition.y);
     }
     cUIThing* widget = self->mpWidget;
     if (widget != 0) {
-        cUIPair_render2D_sVEntry* vtEntry = &(*(cUIPair_render2D_sVEntry**)((char*)widget + 8))[17];
+        cUIPair_render2D_sVEntry* vtEntry = &((cUIPair_render2D_sVEntry*)widget->mVtbl)[17];
         vtEntry->fn((char*)widget + vtEntry->delta, x + self->mPosition.x, y + self->mPosition.y);
     }
 }
@@ -1042,12 +1042,12 @@ extern "C" void cUIProgress__cUIProgress(cUIProgress* self, int flags)
     self->mVtbl = cUIProgress_vtbl;
     cUIThing* background = self->mpObjBackground;
     if (background != 0) {
-        cUIProgress__cUIProgress_sVEntry* vt = *(cUIProgress__cUIProgress_sVEntry**)((char*)background + 8);
+        cUIProgress__cUIProgress_sVEntry* vt = (cUIProgress__cUIProgress_sVEntry*)background->mVtbl;
         vt[1].fn((char*)background + vt[1].delta, 3);
     }
     cUIThing* knob = self->mpObjKnob;
     if (knob != 0) {
-        cUIProgress__cUIProgress_sVEntry* vt = *(cUIProgress__cUIProgress_sVEntry**)((char*)knob + 8);
+        cUIProgress__cUIProgress_sVEntry* vt = (cUIProgress__cUIProgress_sVEntry*)knob->mVtbl;
         vt[1].fn((char*)knob + vt[1].delta, 3);
     }
     cUIThing__cUIThing(self, flags);
@@ -1093,10 +1093,10 @@ extern "C" void cUIProgress_render2D(cUIProgress* self, float x, float y)
     if (background != 0 && self->mpObjKnob != 0) {
         float px = x + self->mPosition.x;
         float py = y + self->mPosition.y;
-        cUIProgress_render2D_sVEntry* vt = *(cUIProgress_render2D_sVEntry**)((char*)background + 8);
+        cUIProgress_render2D_sVEntry* vt = (cUIProgress_render2D_sVEntry*)background->mVtbl;
         vt[17].fn((char*)background + vt[17].delta, px, py);
         cUIThing* knob = self->mpObjKnob;
-        cUIProgress_render2D_sVEntry* vt2 = *(cUIProgress_render2D_sVEntry**)((char*)knob + 8);
+        cUIProgress_render2D_sVEntry* vt2 = (cUIProgress_render2D_sVEntry*)knob->mVtbl;
         vt2[17].fn((char*)knob + vt2[17].delta, px, py);
     }
 }
@@ -1127,12 +1127,12 @@ extern "C" void cUIProgress_update(cUIProgress* self, unsigned short ev)
     }
     cUIThing* knob = self->mpObjKnob;
     if (knob != 0) {
-        cUIProgress_update_sVEntry* vt = *(cUIProgress_update_sVEntry**)((char*)knob + 8);
+        cUIProgress_update_sVEntry* vt = (cUIProgress_update_sVEntry*)knob->mVtbl;
         vt[19].fn((char*)knob + vt[19].delta, ev);
     }
     cUIThing* background = self->mpObjBackground;
     if (background != 0) {
-        cUIProgress_update_sVEntry* vt = *(cUIProgress_update_sVEntry**)((char*)background + 8);
+        cUIProgress_update_sVEntry* vt = (cUIProgress_update_sVEntry*)background->mVtbl;
         vt[19].fn((char*)background + vt[19].delta, ev);
     }
 }

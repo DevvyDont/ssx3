@@ -783,9 +783,9 @@ extern "C" void tActiveAvalancheNode_end(tActiveAvalancheNode* self, int force)
                 vt[1].fn(obj + vt[1].delta, 3);
             }
         }
-        *(int*)((char*)self->m_node + 0x114) = 0;
+        self->m_node->m_activeNode = 0;
         self->m_node = 0;
-        cDynamicColourEmitter_reset((char*)self + 0xD0);
+        cDynamicColourEmitter_reset(&self->m_emitter);
     }
 }
 #endif

@@ -125,11 +125,11 @@ struct sBankMonitorE40 {
 extern "C" void cBankMonitor__cBankMonitor(cBankMonitor* self, int flags)
 {
     self->mVtbl = cBankMonitor_vtbl;
-    *(const sBmVtblE40**)((char*)self->mpVSoundSys + 4) = &D_00483B88_E40;
+    self->mpVSoundSys->mVtbl = (void**)(&D_00483B88_E40);
     if (flags == 0) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
         sBmVtblE40 vt = D_00483B88_E40;
-        *(sBmVtblE40**)((char*)self->mpVSoundSys + 4) = &vt;
+        self->mpVSoundSys->mVtbl = (void**)(&vt);
         char* base = (char*)self->mpVSoundSys - 0x8F0;
         int thisAdjust = (char*)self - base;
         vt.e[1].delta = D_00483B88_E40.e[1].delta + thisAdjust;
@@ -1011,11 +1011,11 @@ extern "C" void cMonitor__cMonitor(cMonitor* self, int flags)
 {
     cMonitorInstance* end = ((&self->mMonitorInstance[0])) + 48;
     self->mVtbl = cMonitor_vtbl;
-    *(const sBmVtblDAC8**)((char*)self->mpVSoundSys + 4) = &D_00483BC0_DAC8;
+    self->mpVSoundSys->mVtbl = (void**)(&D_00483BC0_DAC8);
     if (flags == 0) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
         sBmVtblDAC8 vt = D_00483BC0_DAC8;
-        *(sBmVtblDAC8**)((char*)self->mpVSoundSys + 4) = &vt;
+        self->mpVSoundSys->mVtbl = (void**)(&vt);
         char* base = (char*)self->mpVSoundSys - 0x8DC;
         int thisAdjust = (char*)self - base;
         vt.e[1].delta = D_00483BC0_DAC8.e[1].delta + thisAdjust;
@@ -3486,13 +3486,13 @@ extern "C" void func_002B0088(cSpeechInstance* speechInstance, int instanceIndex
             }
             if (strcasecmp(str_BASEPATH, key) == 0)
             {
-                FileParser_AssignString(parser, str_BASEPATH, ((char*)speechInstance) + 0x6C);
-                sprintf(value, str_pct_sheaders_big, ((char*)speechInstance) + 0x6C);
+                FileParser_AssignString(parser, str_BASEPATH, speechInstance->mBasePath);
+                sprintf(value, str_pct_sheaders_big, speechInstance->mBasePath);
                 if (func_002AFD40(speechInstance, 1, value, instanceIndex, section) == 0)
                     break;
                 if (loadLangHead)
                 {
-                    sprintf(value, str_pct_slanghead_big, ((char*)speechInstance) + 0x6C);
+                    sprintf(value, str_pct_slanghead_big, speechInstance->mBasePath);
                     func_002AFD40(speechInstance, 0, value, instanceIndex, section);
                 }
                 speechInstance->unk_0EC += 1;
@@ -3500,7 +3500,7 @@ extern "C" void func_002B0088(cSpeechInstance* speechInstance, int instanceIndex
             if (strcasecmp(str_BANK, key) == 0)
             {
                 FileParser_AssignString(parser, str_BANK, value);
-                sprintf(path, str_pct_spct_s_c, ((char*)speechInstance) + 0x6C, name);
+                sprintf(path, str_pct_spct_s_c, speechInstance->mBasePath, name);
                 func_002B0348((sBankList_0348*)speechInstance, (int)path, (int)name, 0);
             }
         }
@@ -3691,7 +3691,7 @@ extern "C" int func_002B04D8_impl(sBankList* self, sBmArgs_04D8* speechEvent)
         sBmObj** slot = at_04D8(self->streams, idx);
         int lang = func_002B03B8((char*)*slot + 4);
         char buf[0x100];
-        sprintf(buf, str_pct_spct_spct_s_dat, str_data_b, (char*)D_004A37B4 + 0x158 + lang * 20, (char*)*slot + 4);
+        sprintf(buf, str_pct_spct_spct_s_dat, str_data_b, (char*)&D_004A37B4->mBigFileName[0] + lang * 20, (char*)*slot + 4);
         cSpeechSys* speechSys = D_004A37B4;
         sSndVtSlot* vt0 = (sSndVtSlot*)speechSys->mVtbl;
         int volumeId = ((int (*)(void*, int, int))vt0[2].fn)((char*)speechSys + vt0[2].delta, self->f0, (*slot)->f40);
@@ -5204,12 +5204,12 @@ extern "C" void func_002B21E0(cSongInstance* mon, int force)
         (mon)->unk_2C = 1;
         func_003D2350(cMusicSys_GetMPFFile((void***)gMusicSys));
         char buf[256];
-        sprintf(buf, str_pct_spct_s_c, ((char*)mon) + 0x60, *(char**)mon + 0x20);
-        mon->unk_1C = func_003D25F0(0x11000001, buf, 500, ((char*)mon) + 4, 2, 150, mon->unk_24, 0x37000);
+        sprintf(buf, str_pct_spct_s_c, mon->mPath, *(char**)mon + 0x20);
+        mon->unk_1C = func_003D25F0(0x11000001, buf, 500, &mon->mPlayOpts, 2, 150, mon->unk_24, 0x37000);
         if (*(int*)(*(char**)mon + 0x40) > 0)
         {
-            sprintf(buf, str_pct_spct_s_c, ((char*)mon) + 0x60, *(char**)mon + 0x44);
-            mon->unk_20 = func_003D25F0(0x11000002, buf, 10, ((char*)mon) + 4, 1, 0, mon->unk_28, 0x6A400);
+            sprintf(buf, str_pct_spct_s_c, mon->mPath, *(char**)mon + 0x44);
+            mon->unk_20 = func_003D25F0(0x11000002, buf, 10, &mon->mPlayOpts, 1, 0, mon->unk_28, 0x6A400);
         }
         if (mon->unk_30 != -1)
         {
@@ -5999,7 +5999,7 @@ extern "C" void func_002B3398(cMusicSys* self, int flags)
         bankManagerVtbl.e[1].delta = D_00483948.e[1].delta + bankManagerDelta;
     }
     for (int i = 0; i < self->mNumSongs; i++) {
-        char* songConfig = ((char**)(((char*)self) + 4))[i];
+        char* songConfig = ((char**)(&self->mSongConfig[0]))[i];
         if (songConfig != 0) {
             sBmonVcall3398* dtorSlot = &(*(sBmonVcall3398**)(songConfig + 0xA8))[1];
             dtorSlot->fn(songConfig + dtorSlot->delta, 3);

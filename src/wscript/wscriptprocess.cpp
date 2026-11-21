@@ -226,9 +226,9 @@ extern "C" void cWScriptProcess_dispatchProcessEvent(cWScriptProcess* vself, voi
         VCall_003078C0(((char*)vself), 9);
         break;
     case 3:
-        *(unsigned short**)((char*)vself->Manager + 0x29C) = msg + 2;
+        vself->Manager->TrickDef = (tTrickNameDef*)(msg + 2);
         VCall_003078C0(((char*)vself), 10);
-        *(unsigned short**)((char*)vself->Manager + 0x29C) = 0;
+        vself->Manager->TrickDef = 0;
         break;
     case 4:
         VCall_003078C0(((char*)vself), 11);
@@ -1080,9 +1080,9 @@ extern "C" void cWScriptTask_dispatchTaskEvent(cWScriptTask* vself, void* vmsg)
         VCall_003083A0(((char*)vself), 9);
         break;
     case 3:
-        *(unsigned short**)(*(char**)((char*)vself->Process + 0x10) + 0x29C) = msg + 2;
+        vself->Process->Manager->TrickDef = (tTrickNameDef*)(msg + 2);
         VCall_003083A0(((char*)vself), 10);
-        *(unsigned short**)(*(char**)((char*)vself->Process + 0x10) + 0x29C) = 0;
+        vself->Process->Manager->TrickDef = 0;
         break;
     case 4:
         VCall_003083A0(((char*)vself), 11);
@@ -1119,7 +1119,7 @@ extern "C" void cWScriptTask_eventOnCollide(cWScriptTask* self)
 {
     void* script = self->EventScriptCode[0];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
+        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
     }
 }
 #endif
@@ -1137,7 +1137,7 @@ extern "C" void cWScriptTask_eventOnJump(cWScriptTask* self)
 {
     void* script = self->EventScriptCode[1];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
+        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
     }
 }
 #endif
@@ -1155,7 +1155,7 @@ extern "C" void cWScriptTask_eventOnLand(cWScriptTask* self)
 {
     void* script = self->EventScriptCode[2];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
+        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
     }
 }
 #endif
@@ -1173,7 +1173,7 @@ extern "C" void cWScriptTask_eventOnTrick(cWScriptTask* self)
 {
     void* script = self->EventScriptCode[3];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
+        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
     }
 }
 #endif
@@ -1191,7 +1191,7 @@ extern "C" void cWScriptTask_eventOnWipeout(cWScriptTask* self)
 {
     void* script = self->EventScriptCode[4];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
+        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
     }
 }
 #endif
@@ -1209,7 +1209,7 @@ extern "C" void cWScriptTask_eventOnReset(cWScriptTask* self)
 {
     void* script = self->EventScriptCode[5];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
+        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
     }
 }
 #endif
@@ -1227,7 +1227,7 @@ extern "C" void cWScriptTask_eventOnCollect(cWScriptTask* self)
 {
     void* script = self->EventScriptCode[6];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
+        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
     }
 }
 #endif
@@ -1245,7 +1245,7 @@ extern "C" void cWScriptTask_eventOnEvent1(cWScriptTask* self)
 {
     void* script = self->EventScriptCode[7];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
+        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
     }
 }
 #endif
@@ -1263,7 +1263,7 @@ extern "C" void cWScriptTask_eventOnEvent2(cWScriptTask* self)
 {
     void* script = self->EventScriptCode[8];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
+        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
     }
 }
 #endif
@@ -1281,7 +1281,7 @@ extern "C" void cWScriptTask_eventOnEvent3(cWScriptTask* self)
 {
     void* script = self->EventScriptCode[9];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
+        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
     }
 }
 #endif
@@ -1301,7 +1301,7 @@ extern "C" void cWScriptTask_taskStart(cWScriptTask* self)
         *(int*)self = 1;
         void* script = self->TaskScriptCode[0];
         if (script != 0) {
-            cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
+            cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
         }
     }
 }
@@ -1320,7 +1320,7 @@ extern "C" void cWScriptTask_taskUpdate(cWScriptTask* self)
 {
     void* script = self->TaskScriptCode[1];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
+        cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
     }
 }
 #endif
@@ -1340,7 +1340,7 @@ extern "C" void cWScriptTask_taskEnd(cWScriptTask* self)
         *(int*)self = 3;
         void* script = self->TaskScriptCode[2];
         if (script != 0) {
-            cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
+            cWScriptMan_runScriptCode1(self->Process->Manager, self, script);
         }
     }
 }
@@ -1587,7 +1587,7 @@ extern "C" void cWScriptMan_rebuildGlobalTables(cWScriptMan* self)
     cWScriptMan_purgeGlobalTables(self);
     int n = cWorldView_getNumSections((cWorldView*)(*(char**)self->World + 0x10));
     for (; i < n; i++) {
-        cWScriptMan_rebuildGlobalTables_sSection* tbl = *(cWScriptMan_rebuildGlobalTables_sSection**)(*(char**)((char*)self->World + 0x4) + 0x4);
+        cWScriptMan_rebuildGlobalTables_sSection* tbl = *(cWScriptMan_rebuildGlobalTables_sSection**)((char*)self->World->m_pWScriptCache + 0x4);
         int ok = tbl[i].type >= 2 && tbl[i].f8 != 0;
         if (ok) {
             cWScriptMan_allocateGlobalTable_impl(self, i);
@@ -1878,7 +1878,7 @@ extern "C" void cWScriptMan_unloadSection(cWScriptMan* self, int i)
 {
     cWScriptMan_purgeSection(self, i);
     cWScriptMan_unloadSection_sEntry* items =
-        *(cWScriptMan_unloadSection_sEntry**)(*(char**)((char*)self->World + 4) + 4);
+        *(cWScriptMan_unloadSection_sEntry**)((char*)self->World->m_pWScriptCache + 4);
     cWScriptCacheEntry_unload(&items[i]);
 }
 #endif
@@ -1918,7 +1918,7 @@ extern "C" void cWScriptMan_initMissions(cWScriptMan* self)
     cWScriptMan_init(self);
     int n = cWorldView_getNumSections((cWorldView*)(*(char**)self->World + 0x10));
     for (; i < n; i++) {
-        cWScriptMan_initMissions_sSection* tbl = *(cWScriptMan_initMissions_sSection**)(*(char**)((char*)self->World + 0x4) + 0x4);
+        cWScriptMan_initMissions_sSection* tbl = *(cWScriptMan_initMissions_sSection**)((char*)self->World->m_pWScriptCache + 0x4);
         int ok = tbl[i].type >= 2 && tbl[i].f8 != 0;
         if (ok) {
             cWScriptMan_activeSection(self, i);

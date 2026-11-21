@@ -1708,7 +1708,7 @@ extern "C" int func_002D4008(const void*, const void*);
 extern "C" void cMenu_sortItems(cMenu* self, int (*cmp)(int, int))
 {
     D_004A54BC = cmp;
-    qsort((char*)self + 0xC, *(int*)self, 4, func_002D4008);
+    qsort(&self->Items[0], *(int*)self, 4, func_002D4008);
     D_004A54BC = 0;
     cMenu_checkFocus((cMenu*)self);
 }
@@ -4751,7 +4751,7 @@ public:
 extern "C" void cTextMenuItem_render(cTextMenuItem* self, float* rect)
 {
     char buf[0x20];
-    char* name = (char*)self + 0x18;
+    char* name = self->Text;
     int focused = ((void*)self) == cMenu_getFocusItem((cMenu*)(*(void**)self));
     strcpy(buf, name);
     int len = strlen(name);
@@ -5338,9 +5338,9 @@ extern "C" void* cExpandMenuItem_cExpandMenuItem1(cExpandMenuItem* self)
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->Title = 0;
     self->mVtbl = cExpandMenuItem_vtbl;
-    cMenu_cMenu(((char*)self) + 0x18);
+    cMenu_cMenu(&self->ExpandMenu);
     self->ExpandMenu.mVtbl = cExpandMenuItemMenu_vtbl;
-    new (((char*)self) + 0x24) sMenuSlot_F7E8[70];
+    new ((char*)&self->ExpandMenu.Items[0]) sMenuSlot_F7E8[70];
     self->ExpandMenu.Item = (cExpandMenuItem*)((void*)self);
     return ((void*)self);
 }
@@ -5378,9 +5378,9 @@ extern "C" void* cExpandMenuItem_cExpandMenuItem(cExpandMenuItem* self, void* na
     cMenuItem_cMenuItem((cMenuItem*)self, name);
     self->Title = (cMenuItem*)parent;
     self->mVtbl = cExpandMenuItem_vtbl;
-    cMenu_cMenu(((char*)self) + 0x18);
+    cMenu_cMenu(&self->ExpandMenu);
     self->ExpandMenu.mVtbl = cExpandMenuItemMenu_vtbl;
-    new (((char*)self) + 0x24) sMenuSlot_F860[70];
+    new ((char*)&self->ExpandMenu.Items[0]) sMenuSlot_F860[70];
     self->ExpandMenu.Item = (cExpandMenuItem*)((void*)self);
     if (self->Title != 0) {
         cExpandMenuItem_addItem3(self, self->Title, -1);
@@ -5415,7 +5415,7 @@ extern "C" void* cMenu_getFocusItem(cMenu* self);
  */
 extern "C" void cExpandMenuItem_zeroValue(cExpandMenuItem* self)
 {
-    ((cExpandMenuItem_zeroValue_cItem*)cMenu_getFocusItem((cMenu*)((char*)self + 0x18)))->zeroValue();
+    ((cExpandMenuItem_zeroValue_cItem*)cMenu_getFocusItem((cMenu*)(&self->ExpandMenu)))->zeroValue();
 }
 #endif
 
@@ -5463,7 +5463,7 @@ INCLUDE_ASM("util/menu", cExpandMenuItem_remAllItems);
  */
 extern "C" void cExpandMenuItem_remAllItems(cExpandMenuItem* self)
 {
-    cMenu_remAllItems((cMenu*)(((char*)self) + 0x18));
+    cMenu_remAllItems((cMenu*)(&self->ExpandMenu));
     void* item = self->Title;
     if (item != 0) {
         cExpandMenuItem_addItem3(self, item, -1);
@@ -5485,9 +5485,9 @@ void cExpandMenuItem_addItem3(void* self, void* item, int index) __asm__("cExpan
  */
 extern "C" void cExpandMenuItem_setTitle(cExpandMenuItem* self, cMenuItem* item)
 {
-    for (int i = 0; i < ((cMenuList*)(((char*)self) + 0x18))->count; i++) {
-        if (((cMenuList*)(((char*)self) + 0x18))->items[i] == (void*)self->Title) {
-            cMenu_remItem_pi(((char*)self) + 0x18, i);
+    for (int i = 0; i < ((cMenuList*)(&self->ExpandMenu))->count; i++) {
+        if (((cMenuList*)(&self->ExpandMenu))->items[i] == (void*)self->Title) {
+            cMenu_remItem_pi(&self->ExpandMenu, i);
             break;
         }
     }
@@ -5764,13 +5764,13 @@ extern "C" void cExpandMenuItem_gainFocus(cExpandMenuItem* self, int mode)
     cMenuItem_gainFocus_2(self, mode);
     switch (mode) {
     case 0:
-        cMenu_setFocus_v((char*)self + 0x18, 0);
+        cMenu_setFocus_v(&self->ExpandMenu, 0);
         break;
     case 1:
-        cMenu_setFocus_v((char*)self + 0x18, -1);
+        cMenu_setFocus_v(&self->ExpandMenu, -1);
         break;
     }
-    cMenu_onGainFocus((cMenu*)((char*)self + 0x18), *(int*)(*(char**)self + 0x124));
+    cMenu_onGainFocus((cMenu*)(&self->ExpandMenu), *(int*)(*(char**)self + 0x124));
 }
 #endif
 
@@ -5787,7 +5787,7 @@ extern "C" void cMenu_onLoseFocus(cMenu* p);
 extern "C" void cExpandMenuItem_loseFocus(cExpandMenuItem* self)
 {
     cMenuItem_loseFocus(self);
-    cMenu_onLoseFocus((cMenu*)((char*)self + 0x18));
+    cMenu_onLoseFocus((cMenu*)(&self->ExpandMenu));
 }
 #endif
 
@@ -6076,19 +6076,19 @@ extern void* cARGBMenuItem_vtbl[];
  */
 extern "C" void* cARGBMenuItem_cARGBMenuItem(cARGBMenuItem* self, void* name, void* title, tARGB* color)
 {
-    cExpandMenuItem_cExpandMenuItem((cExpandMenuItem*)self, name, ((char*)self) + 0x640);
+    cExpandMenuItem_cExpandMenuItem((cExpandMenuItem*)self, name, &self->TitleItem);
     self->Color = (tARGB*)((void*)color);
     self->mVtbl = cARGBMenuItem_vtbl;
     // PORT: the channel index is passed in the unit's void* parameter
-    cColorMenuItem_cColorMenuItem((cColorMenuItem*)((sColorMenuItem*)(((char*)self) + 0x5B0)), color, (void*)0);
-    cColorMenuItem_cColorMenuItem((cColorMenuItem*)((sColorMenuItem*)(((char*)self) + 0x5D4)), color, (void*)1);
-    cColorMenuItem_cColorMenuItem((cColorMenuItem*)((sColorMenuItem*)(((char*)self) + 0x5F8)), color, (void*)2);
-    cColorMenuItem_cColorMenuItem((cColorMenuItem*)((sColorMenuItem*)(((char*)self) + 0x61C)), color, (void*)3);
-    cRGBTitleMenuItem_cRGBTitleMenuItem((cRGBTitleMenuItem*)((cRGBTitleMenuItem_sItem*)(((char*)self) + 0x640)), title, (tARGB*)color);
-    cExpandMenuItem_addItem3(self, ((char*)self) + 0x5B0, -1);
-    cExpandMenuItem_addItem3(self, ((char*)self) + 0x5D4, -1);
-    cExpandMenuItem_addItem3(self, ((char*)self) + 0x5F8, -1);
-    cExpandMenuItem_addItem3(self, ((char*)self) + 0x61C, -1);
+    cColorMenuItem_cColorMenuItem((cColorMenuItem*)((sColorMenuItem*)(&self->Alpha)), color, (void*)0);
+    cColorMenuItem_cColorMenuItem((cColorMenuItem*)((sColorMenuItem*)(&self->Red)), color, (void*)1);
+    cColorMenuItem_cColorMenuItem((cColorMenuItem*)((sColorMenuItem*)(&self->Green)), color, (void*)2);
+    cColorMenuItem_cColorMenuItem((cColorMenuItem*)((sColorMenuItem*)(&self->Blue)), color, (void*)3);
+    cRGBTitleMenuItem_cRGBTitleMenuItem((cRGBTitleMenuItem*)((cRGBTitleMenuItem_sItem*)(&self->TitleItem)), title, (tARGB*)color);
+    cExpandMenuItem_addItem3(self, &self->Alpha, -1);
+    cExpandMenuItem_addItem3(self, &self->Red, -1);
+    cExpandMenuItem_addItem3(self, &self->Green, -1);
+    cExpandMenuItem_addItem3(self, &self->Blue, -1);
     return ((void*)self);
 }
 #endif
@@ -6235,16 +6235,16 @@ extern char D_004A39E8[];
  */
 extern "C" void* cVectorMenuItem_cVectorMenuItem(cVectorMenuItem* self, void* name, float* values, int caption, float minValue, float maxValue)
 {
-    cExpandMenuItem_cExpandMenuItem((cExpandMenuItem*)self, name, ((char*)self) + 0x654);
+    cExpandMenuItem_cExpandMenuItem((cExpandMenuItem*)self, name, &self->TitleItem);
     self->Vector = (t3Vector*)values;
     self->mVtbl = cVectorMenuItem_vtbl;
-    cFloatMenuItem_ptr(((char*)self) + 0x5B8, 0, values, D_004A39D8, minValue, maxValue);
-    cFloatMenuItem_ptr(((char*)self) + 0x5EC, 1, values + 1, D_004A39E0, minValue, maxValue);
-    cFloatMenuItem_ptr(((char*)self) + 0x620, 2, values + 2, D_004A39E8, minValue, maxValue);
-    cVectorTitleMenuItem_cVectorTitleMenuItem((cVectorTitleMenuItem*)(((char*)self) + 0x654), caption, (int)values);
-    cExpandMenuItem_addItem3(self, ((char*)self) + 0x5B8, -1);
-    cExpandMenuItem_addItem3(self, ((char*)self) + 0x5EC, -1);
-    cExpandMenuItem_addItem3(self, ((char*)self) + 0x620, -1);
+    cFloatMenuItem_ptr(&self->X, 0, values, D_004A39D8, minValue, maxValue);
+    cFloatMenuItem_ptr(&self->Y, 1, values + 1, D_004A39E0, minValue, maxValue);
+    cFloatMenuItem_ptr(&self->Z, 2, values + 2, D_004A39E8, minValue, maxValue);
+    cVectorTitleMenuItem_cVectorTitleMenuItem((cVectorTitleMenuItem*)(&self->TitleItem), caption, (int)values);
+    cExpandMenuItem_addItem3(self, &self->X, -1);
+    cExpandMenuItem_addItem3(self, &self->Y, -1);
+    cExpandMenuItem_addItem3(self, &self->Z, -1);
     self->Normalize = 0;
     return ((void*)self);
 }
@@ -6956,9 +6956,9 @@ extern void* cErrorMenu_vtbl[];
  */
 extern "C" void* cErrorMenu_cErrorMenu(cErrorMenu* self)
 {
-    char* nullItem = ((char*)self) + 0x130;
-    char* spaceItem = ((char*)self) + 0x14C;
-    char* item3 = ((char*)self) + 0x164;
+    char* nullItem = (char*)&self->Error;
+    char* spaceItem = (char*)&self->Space;
+    char* item3 = (char*)&self->Ok;
     cMenu_cMenu(self);
     self->mVtbl = cErrorMenu_vtbl;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)nullItem, 0);
@@ -6986,11 +6986,11 @@ extern void* cErrorMenu_vtbl[];
  */
 extern "C" void* cErrorMenu_cErrorMenu1(cErrorMenu* self, void* nullText, void* text3)
 {
-    char* nullItem = ((char*)self) + 0x130;
+    char* nullItem = (char*)&self->Error;
     cMenu_cMenu(self);
-    char* item3 = ((char*)self) + 0x164;
+    char* item3 = (char*)&self->Ok;
     self->mVtbl = cErrorMenu_vtbl;
-    char* spaceItem = ((char*)self) + 0x14C;
+    char* spaceItem = (char*)&self->Space;
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)nullItem, nullText);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)spaceItem, (void*)0x1E);
     cPopMenuItem_cPopMenuItem((cPopMenuItem*)((s2CCDF0Item*)item3), text3);

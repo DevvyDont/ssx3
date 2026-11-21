@@ -346,7 +346,7 @@ struct sUIFlags39A928 {
  */
 extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
 {
-    ((sUIFlags39A928*)(((char*)self) + 0x14))->active = on != 0;
+    ((sUIFlags39A928*)(&self->mAttr))->active = on != 0;
     if (on) {
         if (self->mStoredIndex != 0xFF) {
             cUIMenu_setSelectedByIndex(((char*)self), self->mStoredIndex);
@@ -361,7 +361,7 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
         } else if (((*(int*)(cur + 0x14) >> 4) & 1) == 0) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)cur, 0);
             if (ev != 0xFFFF) {
-                void* scr = *(void**)((char*)self->mpSelected + 0x5C);
+                void* scr = self->mpSelected->mpScreen;
                 if (scr != 0) {
                     cUIScreen_playFrame(scr, ev, 1);
                 }
@@ -378,7 +378,7 @@ extern "C" void cUIMenu_setFocus(cUIMenu* self, int on)
         if (cur != 0) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)cur, 1);
             if (ev != 0xFFFF) {
-                void* scr = *(void**)((char*)self->mpSelected + 0x5C);
+                void* scr = self->mpSelected->mpScreen;
                 if (scr != 0) {
                     cUIScreen_playFrame(scr, ev, 1);
                 }

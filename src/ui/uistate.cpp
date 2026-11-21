@@ -37,7 +37,7 @@ extern "C" void cUIState_hideObjSafe(cUIState* self, char* name)
                 vt[9].fn((char*)obj + vt[9].delta, 0);
                 return;
             }
-            n = *(cListNode**)((char*)n + 4);
+            n = n->mpNext;
         } while (!cListNode_isSentinel(n));
     }
 }
@@ -78,7 +78,7 @@ extern "C" void cUIState_showObjSafe(cUIState* self, char* name)
                 vt[9].fn((char*)obj + vt[9].delta, 1);
                 return;
             }
-            n = *(cListNode**)((char*)n + 4);
+            n = n->mpNext;
         } while (!cListNode_isSentinel(n));
     }
 }
@@ -108,13 +108,13 @@ extern "C" void cUIStateStack__cUIStateStack(cUIStateStack* self, int flags)
     self->mExplicitStack.mVtbl = cList_vtbl;
     cList_destroyList((char*)&self->mExplicitStack);
     self->mExplicitStack.mEnd.mVtbl = cListNode_vtbl;
-    cListNode_destroyListNode((char*)self + 0x28);
+    cListNode_destroyListNode(&self->mExplicitStack.mEnd);
     self->mExplicitStack.mStart.mVtbl = cListNode_vtbl;
     cListNode_destroyListNode((char*)&self->mExplicitStack);
     self->mStack.mVtbl = cList_vtbl;
     cList_destroyList(self);
     self->mStack.mEnd.mVtbl = cListNode_vtbl;
-    cListNode_destroyListNode((char*)self + 0xC);
+    cListNode_destroyListNode(&self->mStack.mEnd);
     self->mStack.mStart.mVtbl = cListNode_vtbl;
     cListNode_destroyListNode(self);
     if (flags & 1) {
@@ -473,11 +473,11 @@ extern "C" void cUIStateStack_update(cUIStateStack* self)
     if (n != 0) {
         do {
             if ((*(int*)((char*)n + 0x1C) >> 5) & 1) {
-                sVEntry39F100* vt = *(sVEntry39F100**)((char*)n + 8);
+                sVEntry39F100* vt = (sVEntry39F100*)n->mVtbl;
                 vt[0xC].fn((char*)n + vt[0xC].delta);
             }
             cUIState_updateScreens(n);
-            n = *(cListNode**)((char*)n + 4);
+            n = n->mpNext;
         } while (!cListNode_isSentinel(n));
     }
 }

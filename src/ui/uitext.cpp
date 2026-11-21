@@ -148,7 +148,7 @@ extern "C" void cUIText_render2D(sText_05E8* self, float x, float y)
     } else {
         font->shadowOfs = sV2_05E8(0.0f, 0.0f);
     }
-    int* drawFlags = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
+    int* drawFlags = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
     *drawFlags = (*drawFlags & ~0x3E0) | (((((sLayerBits_05E8*)&self->flags14)->layer + 9) << 5) & 0x3E0);
     sV3_05E8 pos(self->x + x, self->y + y, 0.0f);
     int i = 0;
@@ -632,7 +632,7 @@ extern "C" void* cUITextScroll_cUITextScroll(cUITextScroll* self, int pState, in
     cUIThing_cUIThing(self, pState, pParent);
     self->mVtbl = cUITextScroll_vtbl;
     *(unsigned char*)&self->mAttrTextScroll &= 0xC6;
-    cList_cList(((char*)self) + 0x8C);
+    cList_cList(&self->mList);
     self->mpScrollBar = 0;
     self->mpLineOffset = 0;
     self->mStringID = (unsigned int)0;
@@ -997,7 +997,7 @@ extern "C" void cUITextScroll_render2D(sText_1588* self, float x, float y)
     } else {
         font->shadowOfs = sV2_1588(0.0f, 0.0f);
     }
-    int* drawFlags = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
+    int* drawFlags = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
     *drawFlags = (*drawFlags & ~0x3E0) | (((((sLayerBits_1588*)&self->flags14)->layer + 9) << 5) & 0x3E0);
     sV3_1588 pos(self->x + x, self->y + y, 0.0f);
     float lineH = self->sy * ((float)font->height * font->scale.y) + 3.0f;

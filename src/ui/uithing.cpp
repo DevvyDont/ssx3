@@ -416,7 +416,7 @@ INCLUDE_ASM("ui/uithing", cUIText_getFont);
  */
 extern "C" int cUIText_getFont(cUIText* self)
 {
-    void* engine = *(void**)((char*)*(void**)((char*)self->mpScreen + 0xd0) + 0x10);
+    void* engine = *(void**)((char*)self->mpScreen->mpState + 0x10);
     if (engine != 0) {
         return *(int*)((char*)*(void**)((char*)engine + 0x8) + (*(unsigned char*)&self->mAttrText & 3) * 12 + 0xC);
     }
@@ -444,7 +444,7 @@ extern "C" void cUIText_updateLocale(cUIText* self)
     int id = self->mStringID;
     if (id != 0) {
         cUIScreen* screen = self->mpScreen;
-        void* state = *(void**)((char*)screen + 0xD0);
+        void* state = screen->mpState;
         void* engine = *(void**)((char*)state + 0x10);
         char* loc = *(char**)((char*)engine + 0x10);
         if (loc != 0) {

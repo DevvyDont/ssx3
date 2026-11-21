@@ -530,7 +530,7 @@ static inline void lensVecOneED048(sLensVec_ED048* v)
  */
 extern "C" void cRenderStateMan_init(void)
 {
-    void* pm = *(void**)((char*)SSXApp->Game->World + 0x8);
+    void* pm = SSXApp->Game->World->m_pWorldPainterMan;
     int i;
     cWorldPainterManArg* cameraRegion = &kWPR_Camera;
     cWorldPainterManArg* fogRegion = &kWPR_Fog;

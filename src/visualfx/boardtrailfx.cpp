@@ -1192,7 +1192,7 @@ extern "C" void cCutSceneTransitionMan_ForceToRegularMode(cCutSceneTransitionMan
         self->mCurrentState = 0;
         cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
         sBTVEntry* vtblEntry = &(((sBTVEntry*)obj->mVtbl))[41];
-        vtblEntry->fn((char*)obj + vtblEntry->delta, (char*)self + 0x20);
+        vtblEntry->fn((char*)obj + vtblEntry->delta, (char*)&self->mRegularTVFormat);
     }
 }
 #endif
@@ -1215,7 +1215,7 @@ extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(cCutSceneTransitionMa
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
     self->mCurrentState = 1;
     sBTVEntry* vtblEntry = &(((sBTVEntry*)obj->mVtbl))[41];
-    vtblEntry->fn((char*)obj + vtblEntry->delta, (char*)self + 0x34);
+    vtblEntry->fn((char*)obj + vtblEntry->delta, (char*)&self->mCutSceneTVFormat);
 }
 #endif
 
@@ -1990,7 +1990,7 @@ struct sBTVtx_BF48 {
  */
 extern "C" void InitVertex(sBTVtx_BF48* vertex, float* colour, float x, float y)
 {
-    if (*(short*)((char*)cGraphicsMan_TheGraphicsMan->m_pCurrentDrawState + 0x10) != -1) {
+    if (cGraphicsMan_TheGraphicsMan->m_pCurrentDrawState->m_textureState.m_texid[0] != -1) {
         vertex->r = (int)(colour[1] * 128.0f);
         vertex->g = (int)(colour[2] * 128.0f);
         vertex->b = (int)(colour[3] * 128.0f);

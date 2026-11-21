@@ -968,7 +968,7 @@ extern "C" void cSSXAudio_FrontEndLoad(cSSXAudio* self)
         }
     }
     cSSXAudio_DuckToStream(self, 3, 0.5f, 1.0f);
-    char* mon = ((char*)self) + 0x118;
+    char* mon = (char*)&self->MusicSys;
     sSaVt5FB0* vt = (sSaVt5FB0*)self->MusicSys.mVtbl;
     char* thisp = mon + vt[2].delta;
     vt[2].fn(thisp, str_charsel, 0xC, cSSXAudio_GetCurrAppliedVolumePtr((cSSXAudio*)self, 1, 0), 1);
@@ -990,7 +990,7 @@ struct sSaVt61D0 { short delta; short index; int (*fn)(void*, int); };
  */
 extern "C" void func_002861D0(cSSXAudio* self)
 {
-    char* mon = ((char*)self) + 0x118;
+    char* mon = (char*)&self->MusicSys;
     sSaVt61D0* vt = (sSaVt61D0*)self->MusicSys.mVtbl;
     vt[4].fn(mon + vt[4].delta, 1);
 }
@@ -1091,7 +1091,7 @@ extern "C" void cSSXAudio_InGameLoad(cSSXAudio* self)
     while ((section = FileParser_FindNextSection(&parser)) != 0) {
         if (func_004165A8(section, ext) == 0) {
             strcpy(name, key);
-            strcpy(((char*)self) + 0x587C, name);
+            strcpy(self->mSwapBasePath, name);
             while (FileParser_IsEOF(&parser) == 0) {
                 char* k = FileParser_GetName(&parser);
                 FileParser_AssignString_r(&parser, str_BASEPATH, name);
@@ -1212,7 +1212,7 @@ extern "C" void cSSXAudio_InGameInit(cSSXAudio* self)
     int radioPlaylist = cBERewardInterface_getPlayList(be, 0, (int)rider);
     func_0028BF78(((char*)self), cBERewardInterface_getRadioMode(be, 0, (int)rider));
     func_0028C2D0(((char*)self), radioPlaylist);
-    char* musicSys = ((char*)self) + 0x118;
+    char* musicSys = (char*)&self->MusicSys;
     if (self->MusicSys.mSongPlaying == 0 || func_002B49E0(musicSys) != 401) {
         func_0028D488(((char*)self));
         cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1246,7 +1246,7 @@ extern "C" void cSSXAudio_InGameInit(cSSXAudio* self)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (sa_state_867E8() == 0) {
         int i = 0;
-        int* firstTimeFlag = (int*)(((char*)self) + 0x579C);
+        int* firstTimeFlag = (int*)(&self->unk_579C[0]);
         do {
             void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
             char* playerRider = (char*)((cAI*)cAudioInterface_getAI())->Riders[0];
@@ -1304,12 +1304,12 @@ extern "C" void cSSXAudio_InGameDeInit(cSSXAudio* self)
     cSSXAudio_StopTone(self, 0.0f);
     func_002A4550(self);
     cSSXAudio_StopAllRiderSounds(self);
-    saDeleteObj((void**)((char*)self + 0x625C));
-    saDeleteObj((void**)((char*)self + 0x6260));
+    saDeleteObj((void**)(&self->unk_625C[0]));
+    saDeleteObj((void**)(&self->unk_625C[1]));
     saDeleteObj((void**)&self->mpAmbienceQuery);
-    saDeleteObj((void**)((char*)self + 0x5FA4));
+    saDeleteObj((void**)(&self->mpAmbienceQuery[1]));
     saDeleteObj((void**)&self->mpMixQuery);
-    saDeleteObj((void**)((char*)self + 0x6C84));
+    saDeleteObj((void**)(&self->mpMixQuery[1]));
     cSSXAudio_ResetAttachedSounds(self);
     cSSXAudio_MixVolume(self, 0);
     cMonitor_MONITOR_DestroyAll(*(char**)self->MusicSys.mpVStreamSys + 0x1D8);
@@ -1530,7 +1530,7 @@ extern "C" void cSSXAudio_OnFinishEvent(cSSXAudio* self, cRider* rider)
     int mode = raceDb[0x48];
     if ((mode == 2 || mode == 3) && heatNum < nextHeat) {
         if (func_0028D960(((char*)self))) {
-            char* mon = ((char*)self) + 0x118;
+            char* mon = (char*)&self->MusicSys;
             sSaVt6EA0* vt = (sSaVt6EA0*)self->MusicSys.mVtbl;
             vt[4].fn(mon + vt[4].delta, 36);
             flag = 0;
@@ -1539,7 +1539,7 @@ extern "C" void cSSXAudio_OnFinishEvent(cSSXAudio* self, cRider* rider)
     }
     if (flag) {
         if (func_0028D960(((char*)self))) {
-            char* mon = ((char*)self) + 0x118;
+            char* mon = (char*)&self->MusicSys;
             sSaVt6EA0* vt = (sSaVt6EA0*)self->MusicSys.mVtbl;
             vt[4].fn(mon + vt[4].delta, 10);
         }
@@ -1685,7 +1685,7 @@ extern "C" void func_002872A8(cSSXAudio* self)
     signed char* raceDb = (signed char*)&cBENewRaceInterface_newRace;
     int mode = raceDb[0x48];
     if (mode != 5 && mode != 6) return;
-    char* mon = (char*)self + 0x118;
+    char* mon = (char*)&self->MusicSys;
     if (self->MusicSys.mSongPlaying != 0) {
         sSaVt72A8* vt = (sSaVt72A8*)self->MusicSys.mVtbl;
         vt[4].fn(mon + vt[4].delta, 0);
@@ -1701,7 +1701,7 @@ extern "C" void func_002872A8(cSSXAudio* self)
             self->unk_5788 = 1;
         } else {
             func_002A26F0(self, 0, 0);
-            func_002B1758((char*)self + 0x5560, 0);
+            func_002B1758(&self->SpeechSys, 0);
         }
     }
     self->unk_5774 = 1;
@@ -3410,7 +3410,7 @@ extern "C" void func_00289520(cSSXAudio* self, const char* name)
         }
     }
     func_002B4060((char*)&self->MusicSys);
-    *(long*)((char*)self + 0x518) = (long)self->MusicSys.mActiveMap;
+    *(long*)&self->MusicSys.mDefaultActiveMap = (long)self->MusicSys.mActiveMap;
     FileParser__FileParser(parser, 2);
 }
 #endif
@@ -3621,7 +3621,7 @@ extern "C" void cSSXAudio_UpdateAudioWorldPainter(cSSXAudio* self, cRider* rider
     if (idx >= 2) return;
     sSaVec98A8 pos;
     {
-        char* being = ((char*)rider) + 0x6C0;
+        char* being = (char*)&rider->mVtbl;
         sSaVt98A8a* vt = *(sSaVt98A8a**)being;
         pos = *vt[5].fn(being + vt[5].delta);
     }
@@ -3834,7 +3834,7 @@ struct sSsxAudioVEntryI {
 extern "C" int cSSXAudio_GetCharacterLevel(cSSXAudio* self, cRider* src)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
-    char* obj = (char*)src + 0x6C0;
+    char* obj = (char*)&src->mVtbl;
     sSsxAudioVEntryI* vt = *(sSsxAudioVEntryI**)obj;
     int n = cBEStatInterface_getStatLevel(iface, vt[7].fn(obj + vt[7].delta));
     if (n < 4) {

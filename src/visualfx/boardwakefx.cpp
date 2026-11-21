@@ -4162,7 +4162,7 @@ extern "C" void* cLensFxMan_cLensFxMan(cLensFxMan* self)
 {
     self->mVtbl = cLensFxMan_vtbl;
     {
-        char* rowPtr = (char*)self + 0x68;
+        char* rowPtr = (char*)&self->mLightHalo[0];
         int rowsLeft = 0;
         do {
             char* colPtr = rowPtr;
@@ -4180,7 +4180,7 @@ extern "C" void* cLensFxMan_cLensFxMan(cLensFxMan* self)
         } while (--rowsLeft != -1);
     }
     {
-        char* rowPtr = (char*)self + 0x6070;
+        char* rowPtr = (char*)&self->mSunHalo[0];
         int rowsLeft = 0;
         do {
             char* colPtr = rowPtr;
@@ -5572,7 +5572,7 @@ extern "C" void cTransitionMan_update(cTransitionMan* self)
         sWkVtA46C8* vt = *(sWkVtA46C8**)(ctx + 0x10D8);
         if (vt[114].fn(ctx + vt[114].delta) - self->mRequestDeleteFrame >= 3) {
             sWkVtB46C8* vt2 = *(sWkVtB46C8**)(ctx + 0x10D8);
-            vt2[60].fn(ctx + vt2[60].delta, ((char*)self) + 0x68);
+            vt2[60].fn(ctx + vt2[60].delta, (char*)&self->mScreenGrabHandle);
             self->mRequestingDelete = 0;
         }
     }

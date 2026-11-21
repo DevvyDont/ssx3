@@ -1517,7 +1517,7 @@ extern "C" void* MEM_fill(void* dst, int c, int n);
  */
 extern "C" void func_002C4210(cPS2MemCard* self)
 {
-    char* buf = (char*)self + 0x4C0;
+    char* buf = (char*)&self->unk_4C0[0];
     MEM_fill(buf, 0, 0x1000);
     int mcResult = sceMcGetDir(self->mDevice, 0, (char*)self + 0x139, 0, 6, buf);
     D_004A3940 = mcResult;
@@ -1572,7 +1572,7 @@ extern "C" void func_002C42B0(cPS2MemCard* self)
     char* path = (char*)self + 0xF9;
     strcpy(name, (char*)self + self->unk_01C * 0x78 + 0x1B0);
     sprintf(path, str_pct_s_pct_s_h, name, name);
-    int mcResult = sceMcGetDir(self->mDevice, 0, path, 0, 1, (char*)self + 0x480);
+    int mcResult = sceMcGetDir(self->mDevice, 0, path, 0, 1, &self->unk_480);
     D_004A3940 = mcResult;
     if (mcResult < 0) {
         func_002C48C0(self, 1);
@@ -2667,9 +2667,9 @@ extern "C" void func_002C5278(cPS2MemCard* self)
 {
     self->unk_050 = 0;
     self->mNumDirTable = 0;
-    MEM_fill((char*)self + 0x480, 0, 0x40);
-    MEM_fill((char*)self + 0x1A4, 0, 720);
-    MEM_fill((char*)self + 0x4C0, 0, 0x1000);
+    MEM_fill(&self->unk_480, 0, 0x40);
+    MEM_fill(&self->unk_1A4[0], 0, 720);
+    MEM_fill(&self->unk_4C0[0], 0, 0x1000);
     func_002C52D8(self);
 }
 #endif
@@ -2684,7 +2684,7 @@ extern "C" void* MEM_fill(void* dst, int c, int n);
  */
 extern "C" void func_002C52D8(cPS2MemCard* self)
 {
-    MEM_fill((char*)self + 0x480, 0, 0x40);
+    MEM_fill(&self->unk_480, 0, 0x40);
 }
 #endif
 
@@ -4219,7 +4219,7 @@ extern "C" void* MEM_fill(void* dst, int c, int n);
  */
 extern "C" void func_002C6848(cPS2MemCard* self)
 {
-    char* buf = (char*)self + 0x4C0;
+    char* buf = (char*)&self->unk_4C0[0];
     MEM_fill(buf, 0, 0x1000);
     int mcResult = sceMcGetDir(self->mDevice, 0, (char*)self + 0x139, 0, 0x40, buf);
     D_004A3940 = mcResult;

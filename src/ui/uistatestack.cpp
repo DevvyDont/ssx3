@@ -842,7 +842,7 @@ extern "C" void cUIThing_deleteAnimation(cUIThing* self)
 {
     cUIAnimation* obj = self->mpAnim;
     if (obj != 0) {
-        sVEntry39FD38* vt = *(sVEntry39FD38**)((char*)obj + 0x10);
+        sVEntry39FD38* vt = (sVEntry39FD38*)obj->mVtbl;
         vt[1].fn((char*)obj + vt[1].delta, 3);
         self->mpAnim = (cUIAnimation*)0;
     }

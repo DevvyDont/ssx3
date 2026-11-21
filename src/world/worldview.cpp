@@ -294,7 +294,7 @@ extern "C" int cWorldView_isBoxValid(cWorldView* vself, int box)
     }
     ok = 1;
     for (i = 0; i < ((cWorldView*)vself)->mp_Hdr->m_uiNumSections; i++) {
-        if (*(int*)(((char*)vself) + 0x14 + i * 8) == 6)
+        if (*(int*)((char*)&vself->mp_SectionState[0] + i * 8) == 6)
             cWorldView_recursiveIsValid_9AC0(((char*)vself), *(int*)((char*)vself->mp_Section + i * 0x58 + 0x1C), box, &ok);
     }
     return ok;
