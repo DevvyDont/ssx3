@@ -2216,9 +2216,6 @@ extern "C" void* cParentModifier_cParentModifier(cParentModifier* self, void* st
 //100%
 INCLUDE_ASM("object/movenode", cParentModifier_updateRootTransform);
 #ifdef SKIP_ASM
-struct sMnVec4_357108 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 extern "C" void cInstanceNode_buildMeshMat(void* model, int bone, t4Matrix* out);
@@ -2241,9 +2238,9 @@ static inline void vu0CopyMtx_357108(void* dst, void* src)
 }
 
 // PORT: PS2-only VU0 inline asm (matrix * vector).
-static inline sMnVec4_357108 vu0MtxApply_357108(t4Matrix* m, sMnVec4_357108* v)
+static inline t4Vector vu0MtxApply_357108(t4Matrix* m, t4Vector* v)
 {
-    sMnVec4_357108 out;
+    t4Vector out;
     __asm__(
         ".set push\n"
         ".set noreorder\n"
@@ -2265,9 +2262,9 @@ static inline sMnVec4_357108 vu0MtxApply_357108(t4Matrix* m, sMnVec4_357108* v)
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sMnVec4_357108 vu0Add_357108(const sMnVec4_357108& a, const sMnVec4_357108& b)
+static inline t4Vector vu0Add_357108(const t4Vector& a, const t4Vector& b)
 {
-    sMnVec4_357108 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2279,9 +2276,9 @@ static inline sMnVec4_357108 vu0Add_357108(const sMnVec4_357108& a, const sMnVec
     return r;
 }
 
-static inline sMnVec4_357108 vel_357108(char* self)
+static inline t4Vector vel_357108(char* self)
 {
-    return *(sMnVec4_357108*)(self + 0x80);
+    return *(t4Vector*)(self + 0x80);
 }
 
 struct sMnVEntryI_357108 {
@@ -2314,7 +2311,7 @@ extern "C" void cParentModifier_updateRootTransform(cParentModifier* self)
         } else {
             cInstanceNode_buildMeshMat(self->ParentInst, self->Mesh, ((&self->Transform)));
         }
-        *(sMnVec4_357108*)&self->Transform.row[3] = vu0Add_357108(vel_357108(((char*)self)), vu0MtxApply_357108(((&self->Transform)), (sMnVec4_357108*)(&self->Offset)));
+        *(&self->Transform.row[3]) = vu0Add_357108(vel_357108(((char*)self)), vu0MtxApply_357108(((&self->Transform)), ((&self->Offset))));
     }
     self->RootTransformDirty = 0;
 }
@@ -2482,14 +2479,11 @@ INCLUDE_ASM("object/movenode", cMagnetModifier_update);
 extern "C" float cObjectInterface_getUpdateTime();
 extern "C" void* cObjectInterface_getPosition(int id);
 
-struct sMnVec4_3573F8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sMnVec4_3573F8 vu0Sub_3573F8(const sMnVec4_3573F8& a, const sMnVec4_3573F8& b)
+static inline t4Vector vu0Sub_3573F8(const t4Vector& a, const t4Vector& b)
 {
-    sMnVec4_3573F8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2501,7 +2495,7 @@ static inline sMnVec4_3573F8 vu0Sub_3573F8(const sMnVec4_3573F8& a, const sMnVec
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float vu0Length_3573F8(const sMnVec4_3573F8& v)
+static inline float vu0Length_3573F8(const t4Vector& v)
 {
     float r;
     int t;
@@ -2522,9 +2516,9 @@ static inline float vu0Length_3573F8(const sMnVec4_3573F8& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sMnVec4_3573F8 vu0Scale_3573F8(const sMnVec4_3573F8& v, float s)
+static inline t4Vector vu0Scale_3573F8(const t4Vector& v, float s)
 {
-    sMnVec4_3573F8 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2538,7 +2532,7 @@ static inline sMnVec4_3573F8 vu0Scale_3573F8(const sMnVec4_3573F8& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (dst += v).
-static inline void vu0AddTo_3573F8(sMnVec4_3573F8& dst, const sMnVec4_3573F8& v)
+static inline void vu0AddTo_3573F8(t4Vector& dst, const t4Vector& v)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -2551,7 +2545,7 @@ static inline void vu0AddTo_3573F8(sMnVec4_3573F8& dst, const sMnVec4_3573F8& v)
 
 struct sMnMover_3573F8 {
     char pad0[0x10];
-    sMnVec4_3573F8 pos;
+    t4Vector pos;
     char pad20[0x24];
     int target;
     float speed;
@@ -2573,17 +2567,17 @@ extern "C" void cMagnetModifier_update(cMagnetModifier* self)
         return;
     }
     self->Time += cObjectInterface_getUpdateTime();
-    sMnVec4_3573F8 delta = vu0Sub_3573F8(*(sMnVec4_3573F8*)cObjectInterface_getPosition(self->Being), *(sMnVec4_3573F8*)&self->Offset);
+    t4Vector delta = vu0Sub_3573F8(*(t4Vector*)cObjectInterface_getPosition(self->Being), *(&self->Offset));
     float len = vu0Length_3573F8(delta);
     if (len < 50.0f) {
         self->AllowCollide = 1;
     } else {
-        sMnVec4_3573F8 step = vu0Scale_3573F8(delta, self->Speed / len * self->Time);
+        t4Vector step = vu0Scale_3573F8(delta, self->Speed / len * self->Time);
         if (len < vu0Length_3573F8(step)) {
             self->AllowCollide = 1;
             step = delta;
         }
-        vu0AddTo_3573F8(*(sMnVec4_3573F8*)&self->Offset, step);
+        vu0AddTo_3573F8(*(&self->Offset), step);
     }
     self->RootTransformDirty = 1;
 }

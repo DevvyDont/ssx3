@@ -270,9 +270,6 @@ struct sVec3_E798 {
     float x, y, z;
 };
 
-struct sRow_E798 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 struct sDelta_E798 {
@@ -396,7 +393,7 @@ static inline void vu0AddEq_E798(sVec4_E798& a, const sVec4_E798& b)
 
 static inline sVec4_E798 boneE798Pos(char* self, int i)
 {
-    return *(sVec4_E798*)&((sRow_E798*)&(*(t4Matrix**)(self + 0x44))[i].row[0])[3];
+    return *(sVec4_E798*)&((&(*(t4Matrix**)(self + 0x44))[i].row[0]))[3];
 }
 
 /**
@@ -446,22 +443,22 @@ extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
             float sinY, cosY, sinZ, cosZ;
             fSinCos(&sinY, &cosY, eulerAngles.y);
             fSinCos(&sinZ, &cosZ, eulerAngles.z);
-            ((sRow_E798*)&eulerMat.row[0])[0].x = cosY * cosZ;
-            ((sRow_E798*)&eulerMat.row[0])[0].y = -cosY * sinZ;
-            ((sRow_E798*)&eulerMat.row[0])[0].z = sinY;
-            ((sRow_E798*)&eulerMat.row[0])[0].w = 0.0f;
-            ((sRow_E798*)&eulerMat.row[0])[1].x = sinZ;
-            ((sRow_E798*)&eulerMat.row[0])[1].y = cosZ;
-            ((sRow_E798*)&eulerMat.row[0])[1].z = 0.0f;
-            ((sRow_E798*)&eulerMat.row[0])[1].w = 0.0f;
-            ((sRow_E798*)&eulerMat.row[0])[2].x = 0.0f;
-            ((sRow_E798*)&eulerMat.row[0])[2].y = 0.0f;
-            ((sRow_E798*)&eulerMat.row[0])[2].z = 1.0f;
-            ((sRow_E798*)&eulerMat.row[0])[2].w = 0.0f;
-            ((sRow_E798*)&eulerMat.row[0])[3].x = 0.0f;
-            ((sRow_E798*)&eulerMat.row[0])[3].y = 0.0f;
-            ((sRow_E798*)&eulerMat.row[0])[3].z = 0.0f;
-            ((sRow_E798*)&eulerMat.row[0])[3].w = 1.0f;
+            ((&eulerMat.row[0]))[0].x = cosY * cosZ;
+            ((&eulerMat.row[0]))[0].y = -cosY * sinZ;
+            ((&eulerMat.row[0]))[0].z = sinY;
+            ((&eulerMat.row[0]))[0].w = 0.0f;
+            ((&eulerMat.row[0]))[1].x = sinZ;
+            ((&eulerMat.row[0]))[1].y = cosZ;
+            ((&eulerMat.row[0]))[1].z = 0.0f;
+            ((&eulerMat.row[0]))[1].w = 0.0f;
+            ((&eulerMat.row[0]))[2].x = 0.0f;
+            ((&eulerMat.row[0]))[2].y = 0.0f;
+            ((&eulerMat.row[0]))[2].z = 1.0f;
+            ((&eulerMat.row[0]))[2].w = 0.0f;
+            ((&eulerMat.row[0]))[3].x = 0.0f;
+            ((&eulerMat.row[0]))[3].y = 0.0f;
+            ((&eulerMat.row[0]))[3].z = 0.0f;
+            ((&eulerMat.row[0]))[3].w = 1.0f;
         }
         rotv = vu0MulMat_E798(&eulerMat, rotv);
         pos = vu0MulMat_E798(&(self->AnimMats)[i], pos);

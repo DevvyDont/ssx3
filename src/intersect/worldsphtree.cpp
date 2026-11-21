@@ -94,14 +94,11 @@ extern "C" void cWorldSphTree__cWorldSphTree(cWorldSphTree* self, int flags)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_IsInBoxTransformed);
 #ifdef SKIP_ASM
-struct sV4_330540 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sV4_330540 add_330540(const sV4_330540& a, const sV4_330540& b)
+static inline t4Vector add_330540(const t4Vector& a, const t4Vector& b)
 {
-    sV4_330540 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -114,9 +111,9 @@ static inline sV4_330540 add_330540(const sV4_330540& a, const sV4_330540& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sV4_330540 sub_330540(const sV4_330540& a, const sV4_330540& b)
+static inline t4Vector sub_330540(const t4Vector& a, const t4Vector& b)
 {
-    sV4_330540 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -141,7 +138,7 @@ extern "C" float SphereTree_GetRadius(void* self);
  */
 extern "C" int cWorldSphTree_IsInBoxTransformed(cWorldSphTree* self, float* lo, float* hi)
 {
-    sV4_330540 ext;
+    t4Vector ext;
     float rx = SphereTree_GetRadius(self->st);
     float ry = SphereTree_GetRadius(self->st);
     float rz = SphereTree_GetRadius(self->st);
@@ -149,8 +146,8 @@ extern "C" int cWorldSphTree_IsInBoxTransformed(cWorldSphTree* self, float* lo, 
     ext.y = ry;
     ext.z = rz;
     ext.w = 0.0f;
-    sV4_330540 mx = add_330540(*(sV4_330540*)&self->st->transCenter, ext);
-    sV4_330540 mn = sub_330540(*(sV4_330540*)&self->st->transCenter, ext);
+    t4Vector mx = add_330540(*(&self->st->transCenter), ext);
+    t4Vector mn = sub_330540(*(&self->st->transCenter), ext);
     float lx = lo[0];
     float tx = mx.x;
     if (tx < lx && mn.x < lx) return 0;
@@ -5796,14 +5793,11 @@ extern "C" void cBoostNode_applyDrag(cBoostNode* self, cMover_341770* obj)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cBoostNode_applyBoost);
 #ifdef SKIP_ASM
-struct sVec4_341818 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (v / |v|).
-static inline sVec4_341818 vu0Normalize_341818(const sVec4_341818& v)
+static inline t4Vector vu0Normalize_341818(const t4Vector& v)
 {
-    sVec4_341818 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -5822,7 +5816,7 @@ static inline sVec4_341818 vu0Normalize_341818(const sVec4_341818& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_341818(const sVec4_341818& a, const sVec4_341818& b)
+static inline float vu0Dot_341818(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -5842,9 +5836,9 @@ static inline float vu0Dot_341818(const sVec4_341818& a, const sVec4_341818& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_341818 vu0Scale_341818(const sVec4_341818& v, float s)
+static inline t4Vector vu0Scale_341818(const t4Vector& v, float s)
 {
-    sVec4_341818 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -5861,15 +5855,15 @@ static inline sVec4_341818 vu0Scale_341818(const sVec4_341818& v, float s)
 class cMover_341818 {
 public:
     virtual void v01();
-    virtual sVec4_341818* getVelocity();
+    virtual t4Vector* getVelocity();
     virtual void v03();
-    virtual void applyBoost(sVec4_341818* v);
+    virtual void applyBoost(t4Vector* v);
 };
 
 extern "C" float cObjectInterface_getUpdateTime();
 
 struct sParams_341818 {
-    sVec4_341818 dir;
+    t4Vector dir;
     float speed;
     float scale;
 };
@@ -5880,9 +5874,9 @@ struct sSph_341818 {
     int type;
 };
 
-static inline void push_341818(sParams_341818* p, cMover_341818* obj, const sVec4_341818& dir, float amount)
+static inline void push_341818(sParams_341818* p, cMover_341818* obj, const t4Vector& dir, float amount)
 {
-    sVec4_341818 u = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, amount), p->scale), cObjectInterface_getUpdateTime());
+    t4Vector u = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, amount), p->scale), cObjectInterface_getUpdateTime());
     obj->applyBoost(&u);
 }
 
@@ -5898,8 +5892,8 @@ static inline void push_341818(sParams_341818* p, cMover_341818* obj, const sVec
  */
 extern "C" void cBoostNode_applyBoost(cBoostNode* self, cMover_341818* obj)
 {
-    sVec4_341818 vel = *obj->getVelocity();
-    sVec4_341818 dir = *(sVec4_341818*)&self->Boost;
+    t4Vector vel = *obj->getVelocity();
+    t4Vector dir = *(&self->Boost);
     if (dir.x == 0.0f && dir.y == 0.0f && dir.z == 0.0f) {
         dir = vu0Normalize_341818(vel);
     }
@@ -5908,11 +5902,11 @@ extern "C" void cBoostNode_applyBoost(cBoostNode* self, cMover_341818* obj)
     sParams_341818* boostParams = (sParams_341818*)&self->Boost;
     if (self->Type == 2) {
         if (alongSpeed >= 0.0f) {
-            sVec4_341818 newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, boostParams->speed), boostParams->scale), cObjectInterface_getUpdateTime());
+            t4Vector newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, boostParams->speed), boostParams->scale), cObjectInterface_getUpdateTime());
             obj->applyBoost(&newVel);
         }
     } else if (diff > 0.0f) {
-        sVec4_341818 newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, diff), boostParams->scale), cObjectInterface_getUpdateTime());
+        t4Vector newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, diff), boostParams->scale), cObjectInterface_getUpdateTime());
         obj->applyBoost(&newVel);
     }
 }
@@ -6950,9 +6944,6 @@ extern "C" void cAnimTeeterNode_writeToReplayFrame(cAnimTeeterNode* self, void* 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_cBoostModifier);
 #ifdef SKIP_ASM
-struct sVec4_342768 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 struct sSphDef_342768 {
     int f00;
     short type;
@@ -6988,12 +6979,12 @@ extern "C" void* cBoostModifier_cBoostModifier(cBoostModifier* self, sSphDef_342
     self->Type = type;
     int boostFrames = (int)(def->time * (float)*(int*)(cAppMan_TheAppMan + 0x10));
     self->BoostTime = boostFrames;
-    sVec4_342768 boostDir;
+    t4Vector boostDir;
     boostDir.x = def->x;
     boostDir.y = def->y;
     boostDir.z = def->z;
     boostDir.w = 0.0f;
-    *(sVec4_342768*)&self->Boost = boostDir;
+    *(&self->Boost) = boostDir;
     self->MaxSpeed = def->f10 * 100.0f;
     self->Drag = def->f0C;
     self->Time = type == 1 ? boostFrames : 0;

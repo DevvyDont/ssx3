@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "ai/rider.h"
 #include "ai/hudfx.h"
 #include "ai/ridermetrix.h"
@@ -691,15 +692,12 @@ extern sGradeStep_119210 D_00459F68[];
 extern sGradeStep_119210 D_00459E40[];
 extern sGradeStep_119210 D_00459F08[];
 
-struct sVec17C28 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 
 
 // PORT: PS2-only VU0 inline asm (vector length).
-static inline float len17C28(const sVec17C28& v)
+static inline float len17C28(const t4Vector& v)
 {
     float r;
     int t;
@@ -733,7 +731,7 @@ static inline float len17C28(const sVec17C28& v)
 extern "C" void cRiderMetrix_update(cRiderMetrix* self)
 {
     float dt = (self->Rider)->mTimeScale * 0.016666668f;
-    float speed = len17C28((*(sVec17C28*)&(self->Rider)->mVelocity));
+    float speed = len17C28((*(&(self->Rider)->mVelocity)));
     if (self->ComboResetDelay >= 0.0f) {
         if (cRider_getMotionState((self->Rider)) == 0 && cRider_getControlState((self->Rider)) != 1) {
             self->ComboResetDelay = self->ComboResetDelay - dt;
@@ -755,7 +753,7 @@ extern "C" void cRiderMetrix_update(cRiderMetrix* self)
         float stepDist = speed * dt;
         self->CurTrickRailslideDist += stepDist;
         self->CurTrickPower += stepDist * 5e-05f;
-        sVec17C28 up = (*(sVec17C28*)&(self->Rider)->mMatrix.row[2]);
+        t4Vector up = (*(&(self->Rider)->mMatrix.row[2]));
         if (up.z < 0.0f) {
             self->CurTrickStylePower += stepDist * 0.0002f;
         }

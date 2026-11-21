@@ -1380,18 +1380,14 @@ extern "C" void cRiderHandler_resetRiderFX(void* self);
 extern "C" void cWScriptMan_eventReset(void* self);
 extern void* cWScriptMan_TheWScriptMan;
 
-struct sVec4_0011DF18
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sVEntryA_0011DF18 { short delta; short index; int (*fn)(void*); };
 struct sVEntryB_0011DF18 { short delta; short index; void (*fn)(void*, int); };
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_0011DF18 vu0Scale_11DF18(const sVec4_0011DF18& v, float s)
+static inline t4Vector vu0Scale_11DF18(const t4Vector& v, float s)
 {
-    sVec4_0011DF18 r;
+    t4Vector r;
     int t;
     __asm__ __volatile__(
         "mfc1      %1, %3\n"
@@ -1416,10 +1412,10 @@ static inline sVec4_0011DF18 vu0Scale_11DF18(const sVec4_0011DF18& v, float s)
  */
 extern "C" void cRider_cleanupAfterPutAt(cRider* self, int notify)
 {
-    sVec4_0011DF18 forwardAxis = *(sVec4_0011DF18*)&self->mMatrix.row[1];
+    t4Vector forwardAxis = *(&self->mMatrix.row[1]);
     *(int*)(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2) + 0x90) = 0;
-    sVec4_0011DF18 launchVelocity = vu0Scale_11DF18(forwardAxis, 833.3333740234375f);
-    *(sVec4_0011DF18*)&self->mVelocity = launchVelocity;
+    t4Vector launchVelocity = vu0Scale_11DF18(forwardAxis, 833.3333740234375f);
+    *(&self->mVelocity) = launchVelocity;
     self->mVelocity.z = 0.0f;
     cRiderHandler_resetRiderFX(self->mRiderHandler);
     if (notify != 0)
@@ -3139,12 +3135,8 @@ extern "C" void cRider_updateActiveLights(cRider*);
 extern "C" void cRider_SetNISGroundVectors(void* self, void* p);
 extern "C" void cRider_updateTerminalVelocity(void* self);
 
-struct sQuad_120F20
-{
-    float v[4];
-} __attribute__((aligned(16)));
 // t4vect_Zero is declared later in the unit as a 4-aligned sVec4; this view gives the lq/sq copy.
-extern sQuad_120F20 D_004FF120_q120F20 __asm__("t4vect_Zero");
+extern t4Vector D_004FF120_q120F20 __asm__("t4vect_Zero");
 
 static inline int IsState1_120F20(void* obj)
 {
@@ -3191,7 +3183,7 @@ skip:
             refPos = (char*)self->mAnimModel->bones + (self->mBoneBoardRoot << 5);
         cRider_SetNISGroundVectors(self, refPos);
     }
-    *(sQuad_120F20*)&self->mModelOffset = D_004FF120_q120F20;
+    *(&self->mModelOffset) = D_004FF120_q120F20;
     self->unk_A30 = 0;
     self->mVisitedIds = 0xFFFFFFFF;
     cRider_updateTerminalVelocity(self);
@@ -3235,13 +3227,9 @@ extern "C" void cRider_checkForReset(void* rider, int a, int b);
 extern "C" void cRider_updateBoost(cRider* self);
 extern "C" void cRider_updateLegIK(cRider* self);
 
-struct sVec4_1210B0
-{
-    float v[4];
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (v *= s).
-static inline void VecScale_1210B0(sVec4_1210B0* v, float s)
+static inline void VecScale_1210B0(t4Vector* v, float s)
 {
     int t;
     __asm__(
@@ -3264,7 +3252,7 @@ static inline void VecScale_1210B0(sVec4_1210B0* v, float s)
  */
 extern "C" void cRider_updateSplit3(cRider* self)
 {
-    VecScale_1210B0((sVec4_1210B0*)&self->mImpulse, 0.9800000190734863f);
+    VecScale_1210B0((&self->mImpulse), 0.9800000190734863f);
     self->mImpactAccum *= 0.9559999704360962f;
     self->mImpactAccum2 *= 0.9783333539962769f;
     if (self->mImpactAccum > 4.5f)
@@ -4071,7 +4059,6 @@ INCLUDE_ASM("ai/rider", cRider_renderClip);
 extern char D_828[];
 
 struct sMat_122278 { float m[16]; };
-struct sQ128_122278 { float v[4]; } __attribute__((aligned(16)));
 struct sVE_122278 {
     short delta;
     short index;
@@ -4080,14 +4067,14 @@ struct sVE_122278 {
 typedef sMat_122278 (*GetMatFn_122278)(void*);
 typedef int (*TestFn_122278)(void*, void*, void*, sMat_122278*);
 
-static inline int inFrustum_122278(sQ128_122278* v)
+static inline int inFrustum_122278(t4Vector* v)
 {
     char* inst = (char*)SSXApp->Game->OcclusionMan;
     int mask = *(int*)(inst + 0x110);
     for (int i = 0; i < *(int*)(inst + 0x10C); i++) {
         int bit = 1 << i;
         if (mask & bit) {
-            sQ128_122278* m = (sQ128_122278*)(*(char**)(inst + 8 + i * 8) + 0x50);
+            t4Vector* m = (t4Vector*)(*(char**)(inst + 8 + i * 8) + 0x50);
             int r;
             __asm__ __volatile__(
                 ".set push\n"
@@ -4148,7 +4135,7 @@ extern "C" int cRider_renderClip(cRider* self)
         }
     }
     if (self->mUseRootPoseOverride == 0) {
-        if (inFrustum_122278((sQ128_122278*)&self->mBoundSphere))
+        if (inFrustum_122278((&self->mBoundSphere)))
             self->mIsOnScreen = 0;
     }
     return self->mIsOnScreen;
@@ -5653,28 +5640,25 @@ extern "C" void* cPathSys_getStartpoint(void*, int, int);
 extern char gPaths[];
 int GetSSXActorHeader(void* self);
 
-struct sV_3F38 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-extern sV_3F38 D_004FF160_3F38 __asm__("t4vect_ZAxis");
+extern t4Vector D_004FF160_3F38 __asm__("t4vect_ZAxis");
 
 struct sRay_3F38 {
     char data[0xB0];
 } __attribute__((aligned(16)));
 
 struct sHit_3F38 {
-    sV_3F38 pos;
+    t4Vector pos;
     char pad[0x70];
 } __attribute__((aligned(16)));
 
-extern "C" void cWorldLine_cWorldLine_3F38(sRay_3F38* ray, const sV_3F38& a, const sV_3F38& b, int n, float t) __asm__("cWorldLine_cWorldLine");
+extern "C" void cWorldLine_cWorldLine_3F38(sRay_3F38* ray, const t4Vector& a, const t4Vector& b, int n, float t) __asm__("cWorldLine_cWorldLine");
 extern "C" float cBXNash_terrainIntersect1(void* self, sRay_3F38* ray, sHit_3F38* out, int a3);
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
-static inline sV_3F38 Scale_3F38(const sV_3F38& v, float s)
+static inline t4Vector Scale_3F38(const t4Vector& v, float s)
 {
-    sV_3F38 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -5689,9 +5673,9 @@ static inline sV_3F38 Scale_3F38(const sV_3F38& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sV_3F38 Add_3F38(const sV_3F38& a, const sV_3F38& b)
+static inline t4Vector Add_3F38(const t4Vector& a, const t4Vector& b)
 {
-    sV_3F38 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -5704,7 +5688,7 @@ static inline sV_3F38 Add_3F38(const sV_3F38& a, const sV_3F38& b)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector add).
-static inline void AddTo_3F38(sV_3F38& a, const sV_3F38& b)
+static inline void AddTo_3F38(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -5727,21 +5711,21 @@ static inline void AddTo_3F38(sV_3F38& a, const sV_3F38& b)
  *
  * @return the end position
  */
-extern "C" sV_3F38 cRider_GetNISEndPosition(cRider* self)
+extern "C" t4Vector cRider_GetNISEndPosition(cRider* self)
 {
     if (self->unk_6E4 <= 0)
-        return *(sV_3F38*)&self->mPosition;
+        return *(&self->mPosition);
     float lift = 0.0f;
     // PORT: GetSSXActorHeader returns a record pointer as int
     char* rec = (char*)GetSSXActorHeader(self->unk_6D8);
-    sV_3F38 pos = *(sV_3F38*)&self->mPosition;
+    t4Vector pos = *(&self->mPosition);
     switch (*(signed char*)(rec + 5)) {
     case 0:
         break;
     case 1:
         {
             float* startPoint = (float*)cPathSys_getStartpoint(gPaths, 1, self->mAIIndex);
-            sV_3F38 startPos;
+            t4Vector startPos;
             startPos.x = startPoint[2];
             startPos.y = startPoint[3];
             startPos.z = startPoint[4];
@@ -5752,7 +5736,7 @@ extern "C" sV_3F38 cRider_GetNISEndPosition(cRider* self)
     case 2:
         {
             float* startPoint = (float*)cPathSys_getStartpoint(gPaths, 2, 0);
-            sV_3F38 startPos;
+            t4Vector startPos;
             startPos.x = startPoint[2];
             startPos.y = startPoint[3];
             startPos.z = startPoint[4];
@@ -5769,7 +5753,7 @@ extern "C" sV_3F38 cRider_GetNISEndPosition(cRider* self)
         case 21:
             {
                 float* startPoint = (float*)cPathSys_getStartpoint(gPaths, 2, 0);
-                sV_3F38 startPos;
+                t4Vector startPos;
                 startPos.x = startPoint[2];
                 startPos.y = startPoint[3];
                 startPos.z = startPoint[4];
@@ -5782,7 +5766,7 @@ extern "C" sV_3F38 cRider_GetNISEndPosition(cRider* self)
         case 16:
             {
                 float* startPoint = (float*)cPathSys_getStartpoint(gPaths, 2, self->mAIIndex);
-                sV_3F38 startPos;
+                t4Vector startPos;
                 startPos.x = startPoint[2];
                 startPos.y = startPoint[3];
                 startPos.z = startPoint[4];
@@ -5793,7 +5777,7 @@ extern "C" sV_3F38 cRider_GetNISEndPosition(cRider* self)
         default:
             {
                 float* startPoint = (float*)cPathSys_getStartpoint(gPaths, 2, 1);
-                sV_3F38 startPos;
+                t4Vector startPos;
                 startPos.x = startPoint[2];
                 startPos.y = startPoint[3];
                 startPos.z = startPoint[4];
@@ -5806,7 +5790,7 @@ extern "C" sV_3F38 cRider_GetNISEndPosition(cRider* self)
     case 4:
         {
             float* startPoint = (float*)cPathSys_getStartpoint(gPaths, 2, self->mAIIndex);
-            sV_3F38 startPos;
+            t4Vector startPos;
             startPos.x = startPoint[2];
             startPos.y = startPoint[3];
             startPos.z = startPoint[4];
@@ -5816,8 +5800,8 @@ extern "C" sV_3F38 cRider_GetNISEndPosition(cRider* self)
         lift = 2999.942626953125f;
         break;
     }
-    sV_3F38 lo = Add_3F38(pos, Scale_3F38(D_004FF160_3F38, -7000.0f));
-    sV_3F38 hi = Add_3F38(pos, Scale_3F38(D_004FF160_3F38, 200.0f));
+    t4Vector lo = Add_3F38(pos, Scale_3F38(D_004FF160_3F38, -7000.0f));
+    t4Vector hi = Add_3F38(pos, Scale_3F38(D_004FF160_3F38, 200.0f));
     sHit_3F38 hit;
     sRay_3F38 ray;
     cWorldLine_cWorldLine_3F38(&ray, lo, hi, 2, 0.9791666865348816f);
@@ -5869,21 +5853,18 @@ extern "C" void cRider_EulerToQuat(cRider* self, sQuat_001241C0* out, float rx, 
 //100%
 INCLUDE_ASM("ai/rider", cRider_SetNISGroundVectors);
 #ifdef SKIP_ASM
-struct sV_42B0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-extern sV_42B0 D_004FF120_42B0 __asm__("t4vect_Zero");
-extern sV_42B0 D_004FF160_42B0 __asm__("t4vect_ZAxis");
+extern t4Vector D_004FF120_42B0 __asm__("t4vect_Zero");
+extern t4Vector D_004FF160_42B0 __asm__("t4vect_ZAxis");
 
 struct sRay_42B0 {
     char data[0xB0];
 } __attribute__((aligned(16)));
 
 struct sHit_42B0 {
-    sV_42B0 pos;        // 0x00
-    sV_42B0 nrm;        // 0x10
-    sV_42B0 v20;        // 0x20
+    t4Vector pos;        // 0x00
+    t4Vector nrm;        // 0x10
+    t4Vector v20;        // 0x20
     char pad30[0x1C];
     int mat;            // 0x4C
     int pad50;
@@ -5894,14 +5875,14 @@ struct sHit_42B0 {
     char pad74[0xC];
 } __attribute__((aligned(16)));
 
-struct sVE_42B0 { short delta; short index; sV_42B0* (*fn)(void*); };
+struct sVE_42B0 { short delta; short index; t4Vector* (*fn)(void*); };
 
-extern "C" void cWorldLine_cWorldLine(sRay_42B0* ray, const sV_42B0& a, const sV_42B0& b, int n, float t);
+extern "C" void cWorldLine_cWorldLine(sRay_42B0* ray, const t4Vector& a, const t4Vector& b, int n, float t);
 extern "C" float cOverlapList_terrainIntersect1(void* coll, sRay_42B0* ray, sHit_42B0* hit, int flags);
 void func_00111AA0_42B0(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
 
 // PORT: PS2-only VU0 inline asm (vector length).
-static inline float Length_42B0(const sV_42B0& v)
+static inline float Length_42B0(const t4Vector& v)
 {
     float r;
     int t;
@@ -5922,7 +5903,7 @@ static inline float Length_42B0(const sV_42B0& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_42B0(const sV_42B0& a, const sV_42B0& b)
+static inline float Dot_42B0(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -5942,9 +5923,9 @@ static inline float Dot_42B0(const sV_42B0& a, const sV_42B0& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
-static inline sV_42B0 Scale_42B0(const sV_42B0& v, float s)
+static inline t4Vector Scale_42B0(const t4Vector& v, float s)
 {
-    sV_42B0 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -5959,9 +5940,9 @@ static inline sV_42B0 Scale_42B0(const sV_42B0& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sV_42B0 Add_42B0(const sV_42B0& a, const sV_42B0& b)
+static inline t4Vector Add_42B0(const t4Vector& a, const t4Vector& b)
 {
-    sV_42B0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -5974,9 +5955,9 @@ static inline sV_42B0 Add_42B0(const sV_42B0& a, const sV_42B0& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sV_42B0 Sub_42B0(const sV_42B0& a, const sV_42B0& b)
+static inline t4Vector Sub_42B0(const t4Vector& a, const t4Vector& b)
 {
-    sV_42B0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -5989,9 +5970,9 @@ static inline sV_42B0 Sub_42B0(const sV_42B0& a, const sV_42B0& b)
 }
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
-static inline sV_42B0 Cross_42B0(const sV_42B0& a, const sV_42B0& b)
+static inline t4Vector Cross_42B0(const t4Vector& a, const t4Vector& b)
 {
-    sV_42B0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -6006,9 +5987,9 @@ static inline sV_42B0 Cross_42B0(const sV_42B0& a, const sV_42B0& b)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sV_42B0 Normalize_42B0(const sV_42B0& v)
+static inline t4Vector Normalize_42B0(const t4Vector& v)
 {
-    sV_42B0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -6026,7 +6007,7 @@ static inline sV_42B0 Normalize_42B0(const sV_42B0& v)
     return r;
 }
 
-static inline float DotV_42B0(sV_42B0 a, const sV_42B0& b)
+static inline float DotV_42B0(t4Vector a, const t4Vector& b)
 {
     return Dot_42B0(a, b);
 }
@@ -6035,13 +6016,13 @@ static inline float DotV_42B0(sV_42B0 a, const sV_42B0& b)
 // Non-POD by-value vector (user copy ctor => passed by invisible reference, no callee copy).
 struct sVecP_42B0 {
     float x, y, z, w;
-    sVecP_42B0(const sV_42B0& v) { *(sV_42B0*)this = v; }
-    sVecP_42B0(const sVecP_42B0& v) { *(sV_42B0*)this = *(const sV_42B0*)&v; }
+    sVecP_42B0(const t4Vector& v) { *(t4Vector*)this = v; }
+    sVecP_42B0(const sVecP_42B0& v) { *(t4Vector*)this = *(const t4Vector*)&v; }
 } __attribute__((aligned(16)));
 
-static inline sV_42B0 SubV_42B0(sVecP_42B0 a, const sV_42B0& b)
+static inline t4Vector SubV_42B0(sVecP_42B0 a, const t4Vector& b)
 {
-    return Sub_42B0(*(sV_42B0*)&a, b);
+    return Sub_42B0(*(t4Vector*)&a, b);
 }
 
 // PORT: the unit declares cRider_SetNISGroundVectors(void*, void*); this definition binds the cRider* view by asm
@@ -6073,14 +6054,14 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
     sVE_42B0* ve = &(*(sVE_42B0**)vtObj)[kRiderVt_getVelocity];
     float speed = Length_42B0(*ve->fn(vtObj + ve->delta));
     float sideOffset = self->mAnimModel->unk_140.x * (self->mSlewed[0].cur * 45.0f);
-    sV_42B0 probeBase = Add_42B0(*(sV_42B0*)pRiderPos, Scale_42B0(*(sV_42B0*)&self->mGroundSide, sideOffset));
-    sV_42B0 lo = Add_42B0(probeBase, Scale_42B0(*(sV_42B0*)&self->mGroundNormal, -100.0f));
-    sV_42B0 hi = Add_42B0(probeBase, Scale_42B0(*(sV_42B0*)&self->mGroundNormal, 200.0f));
+    t4Vector probeBase = Add_42B0(*(t4Vector*)pRiderPos, Scale_42B0(*(&self->mGroundSide), sideOffset));
+    t4Vector lo = Add_42B0(probeBase, Scale_42B0(*(&self->mGroundNormal), -100.0f));
+    t4Vector hi = Add_42B0(probeBase, Scale_42B0(*(&self->mGroundNormal), 200.0f));
     sHit_42B0 hit;
     sRay_42B0 ray;
     cWorldLine_cWorldLine(&ray, lo, hi, 2, 0.5f);
     float hitDist = cOverlapList_terrainIntersect1(self->mOverlapList, &ray, &hit, 0);
-    *(sV_42B0*)&self->unk_380 = *(sV_42B0*)&self->mGroundNormal;
+    *(&self->unk_380) = *(&self->mGroundNormal);
     if (hitDist > 0.0f && hit.obj != 0) {
         self->mGroundPolyId = *(int*)(hit.obj + 0x150);
         self->unk_AAC = hit.f6C;
@@ -6091,10 +6072,10 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
     }
     if (hitDist < 0.0f) {
         self->unk_B00 = 0;
-        *(sV_42B0*)&self->mGroundNormal = D_004FF160_42B0;
-        *(sV_42B0*)&self->unk_3D0 = D_004FF120_42B0;
-        *(sV_42B0*)&self->mGroundForward = Normalize_42B0(SubV_42B0(*(sV_42B0*)&self->mMatrix.row[1], Scale_42B0(*(sV_42B0*)&self->mGroundNormal, DotV_42B0(*(sV_42B0*)&self->mMatrix.row[1], *(sV_42B0*)&self->mGroundNormal))));
-        *(sV_42B0*)&self->mGroundSide = Cross_42B0(*(sV_42B0*)&self->mGroundNormal, *(sV_42B0*)&self->mGroundForward);
+        *(&self->mGroundNormal) = D_004FF160_42B0;
+        *(&self->unk_3D0) = D_004FF120_42B0;
+        *(&self->mGroundForward) = Normalize_42B0(SubV_42B0(*(&self->mMatrix.row[1]), Scale_42B0(*(&self->mGroundNormal), DotV_42B0(*(&self->mMatrix.row[1]), *(&self->mGroundNormal)))));
+        *(&self->mGroundSide) = Cross_42B0(*(&self->mGroundNormal), *(&self->mGroundForward));
         self->mSurfaceType = 0;
         self->mAudioBraking = 0.0f;
         self->mAudioEdging = 0.0f;
@@ -6110,12 +6091,12 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
     self->mSurfaceType = hit.mat;
     if (hit.mat == -1)
         self->mSurfaceType = 0;
-    *(sV_42B0*)&self->mGroundNormal = hit.nrm;
-    *(sV_42B0*)&self->mGroundContactPoint = hit.pos;
-    *(sV_42B0*)&self->unk_3D0 = hit.v20;
-    *(sV_42B0*)&self->mGroundForward = Normalize_42B0(SubV_42B0(*(sV_42B0*)&self->mMatrix.row[1], Scale_42B0(*(sV_42B0*)&self->mGroundNormal, DotV_42B0(*(sV_42B0*)&self->mMatrix.row[1], *(sV_42B0*)&self->mGroundNormal))));
-    *(sV_42B0*)&self->mGroundSide = Cross_42B0(*(sV_42B0*)&self->mGroundNormal, *(sV_42B0*)&self->mGroundForward);
-    self->unk_454 = Dot_42B0(Sub_42B0(probeBase, hit.pos), *(sV_42B0*)&self->mGroundNormal);
+    *(&self->mGroundNormal) = hit.nrm;
+    *(&self->mGroundContactPoint) = hit.pos;
+    *(&self->unk_3D0) = hit.v20;
+    *(&self->mGroundForward) = Normalize_42B0(SubV_42B0(*(&self->mMatrix.row[1]), Scale_42B0(*(&self->mGroundNormal), DotV_42B0(*(&self->mMatrix.row[1]), *(&self->mGroundNormal)))));
+    *(&self->mGroundSide) = Cross_42B0(*(&self->mGroundNormal), *(&self->mGroundForward));
+    self->unk_454 = Dot_42B0(Sub_42B0(probeBase, hit.pos), *(&self->mGroundNormal));
     float speedDrop = self->unk_B04 - speed;
     *(int*)&self->mAudioBraking = 0;
     if (speedDrop < self->mAudioBraking) {
@@ -6537,13 +6518,9 @@ INCLUDE_ASM("ai/rider", cRider_applyBoost);
 #ifdef SKIP_ASM
 extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, float t);
 
-struct sRiderVec4_001250A8
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (a += b).
-static inline void riderAddEq_001250A8(sRiderVec4_001250A8& a, const sRiderVec4_001250A8& b)
+static inline void riderAddEq_001250A8(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -6562,9 +6539,9 @@ static inline void riderAddEq_001250A8(sRiderVec4_001250A8& a, const sRiderVec4_
  *
  * @param impulse  the velocity change (On Tour: const t4Vector & f)
  */
-extern "C" void cRider_applyBoost(cRider* self, sRiderVec4_001250A8* impulse)
+extern "C" void cRider_applyBoost(cRider* self, t4Vector* impulse)
 {
-    sRiderVec4_001250A8* velocity = (sRiderVec4_001250A8*)&self->mVelocity;
+    t4Vector* velocity = (&self->mVelocity);
     riderAddEq_001250A8(*velocity, *impulse);
     if (cRider_getMotionState(self) == 1)
         cAirPredictor_startLaunchIntoAir(self->mAirPredictor, &self->mPosition, velocity, 3333.33349609375f);
@@ -6930,15 +6907,11 @@ extern "C" float cRenderStateMan_PlayerWindIntensity(int rider);
 extern "C" float cRenderStateMan_WindRotation(int rider);
 extern float D_00504FB8[];
 
-struct sVec4_125970
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-struct sVEntry_125970 { short delta; short index; void (*fn)(void*, sVec4_125970*); };
+struct sVEntry_125970 { short delta; short index; void (*fn)(void*, t4Vector*); };
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_125970(const sVec4_125970& a, const sVec4_125970& b)
+static inline float Dot_125970(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -6958,9 +6931,9 @@ static inline float Dot_125970(const sVec4_125970& a, const sVec4_125970& b)
 }
 
 // PORT: PS2-only VU0 inline asm (v * s).
-static inline sVec4_125970 Scale_125970(const sVec4_125970& v, float s)
+static inline t4Vector Scale_125970(const t4Vector& v, float s)
 {
-    sVec4_125970 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -6993,16 +6966,16 @@ extern "C" void cRider_updateWind(cRider* self)
     if (speed >= 277.77777099609375f)
     {
         float ang = cRenderStateMan_WindRotation(self->mAIIndex) * 0.01745329424738884f;
-        sVec4_125970 dir;
+        t4Vector dir;
         dir.z = 0.0f;
         dir.w = 0.0f;
         int idx = (int)(ang * 81.4873275756836f) & 0x1FF;
         dir.y = D_00504FB8[idx];
         dir.x = D_00504FB8[idx + 0x80];
-        float speedDeficit = speed - Dot_125970(*(sVec4_125970*)&self->mVelocity, dir);
+        float speedDeficit = speed - Dot_125970(*(&self->mVelocity), dir);
         if (speedDeficit > dir.z)
         {
-            sVec4_125970 imp = Scale_125970(Scale_125970(dir, speedDeficit), 0.015000000596046448f);
+            t4Vector imp = Scale_125970(Scale_125970(dir, speedDeficit), 0.015000000596046448f);
             char* obj = (char*)&self->mVtbl;
             sVEntry_125970* vt = *(sVEntry_125970**)obj;
             vt[kRiderVt_applyBoost].fn(obj + vt[kRiderVt_applyBoost].delta, &imp);

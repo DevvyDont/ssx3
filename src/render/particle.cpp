@@ -673,9 +673,6 @@ extern "C" void cDynamicColourEmitter_render(cDynamicColourEmitter* self, int bl
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/particle", cDynamicColourEmitter_update);
 #ifdef SKIP_ASM
-struct sPtCol17C0 {
-    float r, g, b, a;
-} __attribute__((aligned(16)));
 
 struct sPtRGBA17C0 {
     unsigned char r, g, b, a;
@@ -707,17 +704,17 @@ static inline float clamp17C0(float v, float lo, float hi)
  * @param col  the colour (r, g, b, a floats) or 0 to keep the previous one
  * @param enable   nonzero to emit this frame (On Tour: bool enable)
  */
-extern "C" void cDynamicColourEmitter_update(cDynamicColourEmitter* self, int position, int velocity, sPtCol17C0* col, int enable)
+extern "C" void cDynamicColourEmitter_update(cDynamicColourEmitter* self, int position, int velocity, t4Vector* col, int enable)
 {
     if (col != 0) {
-        *(sPtCol17C0*)&self->m_currColour = *col;
+        *(&self->m_currColour) = *col;
     } else {
-        col = (sPtCol17C0*)&self->m_currColour;
+        col = (&self->m_currColour);
     }
-    ((sPtRGBA17C0*)self->m_colours)[self->m_subEmitterId].a = (int)clamp17C0(col->a * 255.0f, 0.0f, 255.0f);
-    ((sPtRGBA17C0*)self->m_colours)[self->m_subEmitterId].r = (int)clamp17C0(col->r * 255.0f, 0.0f, 255.0f);
-    ((sPtRGBA17C0*)self->m_colours)[self->m_subEmitterId].g = (int)clamp17C0(col->g * 255.0f, 0.0f, 255.0f);
-    ((sPtRGBA17C0*)self->m_colours)[self->m_subEmitterId].b = (int)clamp17C0(col->b * 255.0f, 0.0f, 255.0f);
+    ((sPtRGBA17C0*)self->m_colours)[self->m_subEmitterId].a = (int)clamp17C0(col->w * 255.0f, 0.0f, 255.0f);
+    ((sPtRGBA17C0*)self->m_colours)[self->m_subEmitterId].r = (int)clamp17C0(col->x * 255.0f, 0.0f, 255.0f);
+    ((sPtRGBA17C0*)self->m_colours)[self->m_subEmitterId].g = (int)clamp17C0(col->y * 255.0f, 0.0f, 255.0f);
+    ((sPtRGBA17C0*)self->m_colours)[self->m_subEmitterId].b = (int)clamp17C0(col->z * 255.0f, 0.0f, 255.0f);
     cBaseClass_DynamicEmitter_updateBASE(self, position, velocity, enable);
 }
 #endif
@@ -3443,9 +3440,6 @@ extern "C" int cPS2GraphicsMan_SetDTV(cPS2GraphicsMan* self, int enable)
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_PushViewport);
 #ifdef SKIP_ASM
-struct sPtQ65B8 {
-    float v[4];
-} __attribute__((aligned(16)));
 
 struct sPtMtx65B8 {
     float m[4][4];
@@ -3465,23 +3459,23 @@ struct sPtGfx65B8 {
     sPtMtx65B8 m5780;               // 0x5780
     sPtMtx65B8 m57C0;               // 0x57C0
     sPtMtx65B8 m5800;               // 0x5800
-    sPtQ65B8 q5840;                 // 0x5840
-    sPtQ65B8 q5850;                 // 0x5850
+    t4Vector q5840;                 // 0x5840
+    t4Vector q5850;                 // 0x5850
     sPtMtx65B8 m5860;               // 0x5860
     sPtMtx65B8 m58A0;               // 0x58A0
-    sPtQ65B8 q58E0;                 // 0x58E0
-    sPtQ65B8 q58F0;                 // 0x58F0
+    t4Vector q58E0;                 // 0x58E0
+    t4Vector q58F0;                 // 0x58F0
     sPtScis65B8 scissor;            // 0x5900
     float f5908;                    // 0x5908
     float f590C;                    // 0x590C
     float f5910;                    // 0x5910
     char pad_0x5914[0xC];
-    sPtQ65B8 q5920;                 // 0x5920
+    t4Vector q5920;                 // 0x5920
     char pad_0x5930[0x6AF0 - 0x5930];
     sPtMtx65B8 m6AF0;               // 0x6AF0
     char pad_0x6B30[0x40];
-    sPtQ65B8 q6B70;                 // 0x6B70
-    sPtQ65B8 q6B80;                 // 0x6B80
+    t4Vector q6B70;                 // 0x6B70
+    t4Vector q6B80;                 // 0x6B80
     char pad_0x6B90[0x6D20 - 0x6B90];
     sViewportStack views[1];           // 0x6D20
 };
@@ -3519,19 +3513,19 @@ extern "C" void cPS2GraphicsMan_PushViewport(cPS2GraphicsMan* self)
     viewportStack->unk_024 = self->unk_590C;
     viewportStack->unk_028 = self->unk_5908;
     vu0CopyMtx65B8((sPtMtx65B8*)&viewportStack->mScreenMatrix, (sPtMtx65B8*)&self->mScreenMatrix);
-    *(sPtQ65B8*)&viewportStack->unk_030 = *(sPtQ65B8*)&self->unk_6B70;
-    *(sPtQ65B8*)&viewportStack->unk_040 = *(sPtQ65B8*)&self->unk_6B80;
+    *(&viewportStack->unk_030) = *(&self->unk_6B70);
+    *(&viewportStack->unk_040) = *(&self->unk_6B80);
     vu0CopyMtx65B8((sPtMtx65B8*)&viewportStack->mWorld, (sPtMtx65B8*)&self->mWorld);
     vu0CopyMtx65B8((sPtMtx65B8*)&viewportStack->mView, (sPtMtx65B8*)&self->mView);
     vu0CopyMtx65B8((sPtMtx65B8*)&viewportStack->mGuardBandMatrix, (sPtMtx65B8*)&self->mGuardBandMatrix);
-    *(sPtQ65B8*)&viewportStack->mGuardScale = *(sPtQ65B8*)&self->mGuardScale;
-    *(sPtQ65B8*)&viewportStack->mGuardOffset = *(sPtQ65B8*)&self->mGuardOffset;
+    *(&viewportStack->mGuardScale) = *(&self->mGuardScale);
+    *(&viewportStack->mGuardOffset) = *(&self->mGuardOffset);
     vu0CopyMtx65B8((sPtMtx65B8*)&viewportStack->mViewProj, (sPtMtx65B8*)&self->mViewProj);
     vu0CopyMtx65B8((sPtMtx65B8*)&viewportStack->mNetMatrix, (sPtMtx65B8*)&self->mNetMatrix);
-    *(sPtQ65B8*)&viewportStack->mScreenScale = *(sPtQ65B8*)&self->mScreenScale;
-    *(sPtQ65B8*)&viewportStack->mScreenOffset = *(sPtQ65B8*)&self->mScreenOffset;
+    *(&viewportStack->mScreenScale) = *(&self->mScreenScale);
+    *(&viewportStack->mScreenOffset) = *(&self->mScreenOffset);
     viewportStack->unk_02C = self->unk_5910;
-    *(sPtQ65B8*)&viewportStack->unk_050 = *(sPtQ65B8*)&self->unk_5920;
+    *(&viewportStack->unk_050) = *(&self->unk_5920);
     self->mViewportDepth++;
     cPS2GraphicsMan_sViewportStack_operatorE(&((&self->mViewportStack[0]))[self->mViewportDepth], viewportStack);
 }
@@ -3540,9 +3534,6 @@ extern "C" void cPS2GraphicsMan_PushViewport(cPS2GraphicsMan* self)
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_PopViewport);
 #ifdef SKIP_ASM
-struct sPtQ6768 {
-    float v[4];
-} __attribute__((aligned(16)));
 
 struct sPtMtx6768 {
     float m[4][4];
@@ -3562,23 +3553,23 @@ struct sPtGfx6768 {
     sPtMtx6768 m5780;               // 0x5780
     sPtMtx6768 m57C0;               // 0x57C0
     sPtMtx6768 m5800;               // 0x5800
-    sPtQ6768 q5840;                 // 0x5840
-    sPtQ6768 q5850;                 // 0x5850
+    t4Vector q5840;                 // 0x5840
+    t4Vector q5850;                 // 0x5850
     sPtMtx6768 m5860;               // 0x5860
     sPtMtx6768 m58A0;               // 0x58A0
-    sPtQ6768 q58E0;                 // 0x58E0
-    sPtQ6768 q58F0;                 // 0x58F0
+    t4Vector q58E0;                 // 0x58E0
+    t4Vector q58F0;                 // 0x58F0
     sPtScis6768 scissor;            // 0x5900
     float f5908;                    // 0x5908
     float f590C;                    // 0x590C
     float f5910;                    // 0x5910
     char pad_0x5914[0xC];
-    sPtQ6768 q5920;                 // 0x5920
+    t4Vector q5920;                 // 0x5920
     char pad_0x5930[0x6AF0 - 0x5930];
     sPtMtx6768 m6AF0;               // 0x6AF0
     char pad_0x6B30[0x40];
-    sPtQ6768 q6B70;                 // 0x6B70
-    sPtQ6768 q6B80;                 // 0x6B80
+    t4Vector q6B70;                 // 0x6B70
+    t4Vector q6B80;                 // 0x6B80
     int i6B90;                      // 0x6B90
     char pad_0x6B94[0x6D20 - 0x6B94];
     sViewportStack views[1];           // 0x6D20
@@ -3622,19 +3613,19 @@ extern "C" void cPS2GraphicsMan_PopViewport(cPS2GraphicsMan* self)
     self->unk_590C = viewportStack->unk_024;
     self->unk_5908 = viewportStack->unk_028;
     vu0CopyMtx6768((sPtMtx6768*)&self->mScreenMatrix, (sPtMtx6768*)&viewportStack->mScreenMatrix);
-    *(sPtQ6768*)&self->unk_6B70 = *(sPtQ6768*)&viewportStack->unk_030;
-    *(sPtQ6768*)&self->unk_6B80 = *(sPtQ6768*)&viewportStack->unk_040;
+    *(&self->unk_6B70) = *(&viewportStack->unk_030);
+    *(&self->unk_6B80) = *(&viewportStack->unk_040);
     vu0CopyMtx6768((sPtMtx6768*)&self->mWorld, (sPtMtx6768*)&viewportStack->mWorld);
     vu0CopyMtx6768((sPtMtx6768*)&self->mView, (sPtMtx6768*)&viewportStack->mView);
     vu0CopyMtx6768((sPtMtx6768*)&self->mGuardBandMatrix, (sPtMtx6768*)&viewportStack->mGuardBandMatrix);
-    *(sPtQ6768*)&self->mGuardScale = *(sPtQ6768*)&viewportStack->mGuardScale;
-    *(sPtQ6768*)&self->mGuardOffset = *(sPtQ6768*)&viewportStack->mGuardOffset;
+    *(&self->mGuardScale) = *(&viewportStack->mGuardScale);
+    *(&self->mGuardOffset) = *(&viewportStack->mGuardOffset);
     vu0CopyMtx6768((sPtMtx6768*)&self->mViewProj, (sPtMtx6768*)&viewportStack->mViewProj);
     vu0CopyMtx6768((sPtMtx6768*)&self->mNetMatrix, (sPtMtx6768*)&viewportStack->mNetMatrix);
-    *(sPtQ6768*)&self->mScreenScale = *(sPtQ6768*)&viewportStack->mScreenScale;
-    *(sPtQ6768*)&self->mScreenOffset = *(sPtQ6768*)&viewportStack->mScreenOffset;
+    *(&self->mScreenScale) = *(&viewportStack->mScreenScale);
+    *(&self->mScreenOffset) = *(&viewportStack->mScreenOffset);
     self->unk_5910 = viewportStack->unk_02C;
-    *(sPtQ6768*)&self->unk_5920 = *(sPtQ6768*)&viewportStack->unk_050;
+    *(&self->unk_5920) = *(&viewportStack->unk_050);
     self->mMatricesValid = 0;
 }
 #endif
@@ -3845,10 +3836,6 @@ struct sPtMatrix_6C58 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
-// Four floats as an aligned array (indexed access; same bytes as t4Vector).
-struct sPtQuadF_6C58 {
-    float v[4];
-} __attribute__((aligned(16)));
 
 
 struct sPtVtU6C58 {
@@ -3959,14 +3946,14 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, fl
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[1][3] = 0.0f;
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[2][3] = 1.0f;
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[3][3] = 0.0f;
-    (*(sPtQuadF_6C58*)&self->unk_6B70).v[0] = x * 16.0f + offX;
-    (*(sPtQuadF_6C58*)&self->unk_6B70).v[1] = y * 16.0f + offY;
-    (*(sPtQuadF_6C58*)&self->unk_6B70).v[2] = zA * zNear + zB;
-    (*(sPtQuadF_6C58*)&self->unk_6B80).v[0] = (x + w) * 16.0f + offX;
-    (*(sPtQuadF_6C58*)&self->unk_6B80).v[1] = (y + viewHeight) * 16.0f + offY;
-    (*(sPtQuadF_6C58*)&self->unk_6B80).v[2] = zA * zFar + zB;
-    (*(sPtQuadF_6C58*)&self->unk_6B70).v[3] = 1.0f / zNear;
-    (*(sPtQuadF_6C58*)&self->unk_6B80).v[3] = 1.0f / zFar;
+    ((float*)&(*(&self->unk_6B70)).x)[0] = x * 16.0f + offX;
+    ((float*)&(*(&self->unk_6B70)).x)[1] = y * 16.0f + offY;
+    ((float*)&(*(&self->unk_6B70)).x)[2] = zA * zNear + zB;
+    ((float*)&(*(&self->unk_6B80)).x)[0] = (x + w) * 16.0f + offX;
+    ((float*)&(*(&self->unk_6B80)).x)[1] = (y + viewHeight) * 16.0f + offY;
+    ((float*)&(*(&self->unk_6B80)).x)[2] = zA * zFar + zB;
+    ((float*)&(*(&self->unk_6B70)).x)[3] = 1.0f / zNear;
+    ((float*)&(*(&self->unk_6B80)).x)[3] = 1.0f / zFar;
     self->mMatricesValid = 0;
     float aspect2 = aspect * (w / viewHeight);
     float px = 1.0f / tanf(fov);
@@ -3996,14 +3983,14 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, fl
     (*(sPtMatrix_6C58*)&self->mViewProj).m[3][1] = 0.0f;
     (*(sPtMatrix_6C58*)&self->mViewProj).m[3][2] = zw;
     (*(sPtMatrix_6C58*)&self->mViewProj).m[3][3] = 0.0f;
-    (*(sPtQuadF_6C58*)&self->mScreenScale).v[0] = w * 0.5f;
-    (*(sPtQuadF_6C58*)&self->mScreenScale).v[1] = -(viewHeight * 0.5f);
-    (*(sPtQuadF_6C58*)&self->mScreenScale).v[2] = zlo;
-    (*(sPtQuadF_6C58*)&self->mScreenScale).v[3] = 0.0f;
-    (*(sPtQuadF_6C58*)&self->mScreenOffset).v[0] = cx + 2047.5f;
-    (*(sPtQuadF_6C58*)&self->mScreenOffset).v[1] = cy + 2047.5f;
-    (*(sPtQuadF_6C58*)&self->mScreenOffset).v[2] = zhi + viewEntry->unk_01C;
-    (*(sPtQuadF_6C58*)&self->mScreenOffset).v[3] = 0.0f;
+    ((float*)&(*(&self->mScreenScale)).x)[0] = w * 0.5f;
+    ((float*)&(*(&self->mScreenScale)).x)[1] = -(viewHeight * 0.5f);
+    ((float*)&(*(&self->mScreenScale)).x)[2] = zlo;
+    ((float*)&(*(&self->mScreenScale)).x)[3] = 0.0f;
+    ((float*)&(*(&self->mScreenOffset)).x)[0] = cx + 2047.5f;
+    ((float*)&(*(&self->mScreenOffset)).x)[1] = cy + 2047.5f;
+    ((float*)&(*(&self->mScreenOffset)).x)[2] = zhi + viewEntry->unk_01C;
+    ((float*)&(*(&self->mScreenOffset)).x)[3] = 0.0f;
     float gw = 2048.0f - 2.0f * fsAbs_6C58(cx);
     float gh = 2048.0f - 2.0f * fsAbs_6C58(cy);
     (*(sPtMatrix_6C58*)&self->mView).m[0][0] = (w / gw) * px;
@@ -4022,20 +4009,20 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(cPS2GraphicsMan* self, fl
     (*(sPtMatrix_6C58*)&self->mView).m[3][1] = 0.0f;
     (*(sPtMatrix_6C58*)&self->mView).m[3][2] = zw;
     (*(sPtMatrix_6C58*)&self->mView).m[3][3] = 0.0f;
-    (*(sPtQuadF_6C58*)&self->mGuardScale).v[0] = gw * 0.5f;
-    (*(sPtQuadF_6C58*)&self->mGuardScale).v[1] = -(gh * 0.5f);
-    (*(sPtQuadF_6C58*)&self->mGuardScale).v[2] = zlo;
-    (*(sPtQuadF_6C58*)&self->mGuardScale).v[3] = 0.0f;
-    (*(sPtQuadF_6C58*)&self->mGuardOffset).v[0] = cx + 2047.5f;
-    (*(sPtQuadF_6C58*)&self->mGuardOffset).v[1] = cy + 2047.5f;
-    (*(sPtQuadF_6C58*)&self->mGuardOffset).v[2] = zhi + viewEntry->unk_01C;
-    (*(sPtQuadF_6C58*)&self->mGuardOffset).v[3] = 0.0f;
+    ((float*)&(*(&self->mGuardScale)).x)[0] = gw * 0.5f;
+    ((float*)&(*(&self->mGuardScale)).x)[1] = -(gh * 0.5f);
+    ((float*)&(*(&self->mGuardScale)).x)[2] = zlo;
+    ((float*)&(*(&self->mGuardScale)).x)[3] = 0.0f;
+    ((float*)&(*(&self->mGuardOffset)).x)[0] = cx + 2047.5f;
+    ((float*)&(*(&self->mGuardOffset)).x)[1] = cy + 2047.5f;
+    ((float*)&(*(&self->mGuardOffset)).x)[2] = zhi + viewEntry->unk_01C;
+    ((float*)&(*(&self->mGuardOffset)).x)[3] = 0.0f;
     func_00376938_6C58(self, x, y, w, viewHeight);
     self->unk_5910 = 40000.0f;
-    (*(sPtQuadF_6C58*)&self->unk_5920).v[0] = 1023.0f;
-    (*(sPtQuadF_6C58*)&self->unk_5920).v[1] = 0.0f;
-    (*(sPtQuadF_6C58*)&self->unk_5920).v[2] = 0.0f;
-    (*(sPtQuadF_6C58*)&self->unk_5920).v[3] = 1023.0f / 40000.0f;
+    ((float*)&(*(&self->unk_5920)).x)[0] = 1023.0f;
+    ((float*)&(*(&self->unk_5920)).x)[1] = 0.0f;
+    ((float*)&(*(&self->unk_5920)).x)[2] = 0.0f;
+    ((float*)&(*(&self->unk_5920)).x)[3] = 1023.0f / 40000.0f;
 }
 #endif
 
@@ -4240,14 +4227,14 @@ extern "C" void cPS2GraphicsMan_SetViewportOrthographic(cPS2GraphicsMan* self, f
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[1][3] = 0.0f;
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[2][3] = 0.0f;
     (*(sPtMatrix_6C58*)&self->mScreenMatrix).m[3][3] = 1.0f;
-    (*(sPtQuadF_6C58*)&self->unk_6B70).v[0] = x * 16.0f + offX;
-    (*(sPtQuadF_6C58*)&self->unk_6B70).v[1] = y * 16.0f + offY;
-    (*(sPtQuadF_6C58*)&self->unk_6B70).v[2] = zA * zNear + zB;
-    (*(sPtQuadF_6C58*)&self->unk_6B70).v[3] = 1.0f;
-    (*(sPtQuadF_6C58*)&self->unk_6B80).v[0] = (x + w) * 16.0f + offX;
-    (*(sPtQuadF_6C58*)&self->unk_6B80).v[1] = (y + viewHeight) * 16.0f + offY;
-    (*(sPtQuadF_6C58*)&self->unk_6B80).v[2] = zA * zFar + zB;
-    (*(sPtQuadF_6C58*)&self->unk_6B80).v[3] = 1.0f;
+    ((float*)&(*(&self->unk_6B70)).x)[0] = x * 16.0f + offX;
+    ((float*)&(*(&self->unk_6B70)).x)[1] = y * 16.0f + offY;
+    ((float*)&(*(&self->unk_6B70)).x)[2] = zA * zNear + zB;
+    ((float*)&(*(&self->unk_6B70)).x)[3] = 1.0f;
+    ((float*)&(*(&self->unk_6B80)).x)[0] = (x + w) * 16.0f + offX;
+    ((float*)&(*(&self->unk_6B80)).x)[1] = (y + viewHeight) * 16.0f + offY;
+    ((float*)&(*(&self->unk_6B80)).x)[2] = zA * zFar + zB;
+    ((float*)&(*(&self->unk_6B80)).x)[3] = 1.0f;
     self->mMatricesValid = 0;
     float zlo, zhi;
     if (self->mCurrentZBFormat == 49) {
@@ -4283,16 +4270,16 @@ extern "C" void cPS2GraphicsMan_SetViewportOrthographic(cPS2GraphicsMan* self, f
     (*(sPtMatrix_6C58*)&self->mViewProj).m[3][1] = -1.0f;
     (*(sPtMatrix_6C58*)&self->mViewProj).m[3][2] = zw;
     (*(sPtMatrix_6C58*)&self->mViewProj).m[3][3] = 1.0f;
-    (*(sPtQuadF_6C58*)&self->mScreenScale).v[0] = w * 0.5f;
-    (*(sPtQuadF_6C58*)&self->mScreenScale).v[1] = viewHeight * 0.5f;
-    (*(sPtQuadF_6C58*)&self->mScreenScale).v[2] = zlo;
-    (*(sPtQuadF_6C58*)&self->mScreenScale).v[3] = 0.0f;
+    ((float*)&(*(&self->mScreenScale)).x)[0] = w * 0.5f;
+    ((float*)&(*(&self->mScreenScale)).x)[1] = viewHeight * 0.5f;
+    ((float*)&(*(&self->mScreenScale)).x)[2] = zlo;
+    ((float*)&(*(&self->mScreenScale)).x)[3] = 0.0f;
     float tx = (ox + 2047.5f) - cx * w / fx;
     float ty = (oy + 2047.5f) - cy * viewHeight / fy;
-    (*(sPtQuadF_6C58*)&self->mScreenOffset).v[0] = tx;
-    (*(sPtQuadF_6C58*)&self->mScreenOffset).v[1] = ty;
-    (*(sPtQuadF_6C58*)&self->mScreenOffset).v[2] = zhi;
-    (*(sPtQuadF_6C58*)&self->mScreenOffset).v[3] = 0.0f;
+    ((float*)&(*(&self->mScreenOffset)).x)[0] = tx;
+    ((float*)&(*(&self->mScreenOffset)).x)[1] = ty;
+    ((float*)&(*(&self->mScreenOffset)).x)[2] = zhi;
+    ((float*)&(*(&self->mScreenOffset)).x)[3] = 0.0f;
     float gw = 2048.0f - 2.0f * fsAbs_6C58(ox);
     float gh = 2048.0f - 2.0f * fsAbs_6C58(oy);
     float gx = w / gw;
@@ -4313,20 +4300,20 @@ extern "C" void cPS2GraphicsMan_SetViewportOrthographic(cPS2GraphicsMan* self, f
     (*(sPtMatrix_6C58*)&self->mView).m[3][1] = -gy;
     (*(sPtMatrix_6C58*)&self->mView).m[3][2] = zw;
     (*(sPtMatrix_6C58*)&self->mView).m[3][3] = 1.0f;
-    (*(sPtQuadF_6C58*)&self->mGuardScale).v[0] = gw * 0.5f;
-    (*(sPtQuadF_6C58*)&self->mGuardScale).v[1] = gh * 0.5f;
-    (*(sPtQuadF_6C58*)&self->mGuardScale).v[2] = zlo;
-    (*(sPtQuadF_6C58*)&self->mGuardScale).v[3] = 0.0f;
-    (*(sPtQuadF_6C58*)&self->mGuardOffset).v[0] = tx;
-    (*(sPtQuadF_6C58*)&self->mGuardOffset).v[1] = ty;
-    (*(sPtQuadF_6C58*)&self->mGuardOffset).v[2] = zhi;
-    (*(sPtQuadF_6C58*)&self->mGuardOffset).v[3] = 0.0f;
+    ((float*)&(*(&self->mGuardScale)).x)[0] = gw * 0.5f;
+    ((float*)&(*(&self->mGuardScale)).x)[1] = gh * 0.5f;
+    ((float*)&(*(&self->mGuardScale)).x)[2] = zlo;
+    ((float*)&(*(&self->mGuardScale)).x)[3] = 0.0f;
+    ((float*)&(*(&self->mGuardOffset)).x)[0] = tx;
+    ((float*)&(*(&self->mGuardOffset)).x)[1] = ty;
+    ((float*)&(*(&self->mGuardOffset)).x)[2] = zhi;
+    ((float*)&(*(&self->mGuardOffset)).x)[3] = 0.0f;
     func_00376938((cPS2GraphicsMan*)self, x, y, w, viewHeight);
     self->unk_5910 = 40000.0f;
-    (*(sPtQuadF_6C58*)&self->unk_5920).v[0] = 1023.0f;
-    (*(sPtQuadF_6C58*)&self->unk_5920).v[1] = 0.0f;
-    (*(sPtQuadF_6C58*)&self->unk_5920).v[2] = 0.0f;
-    (*(sPtQuadF_6C58*)&self->unk_5920).v[3] = 1023.0f / 40000.0f;
+    ((float*)&(*(&self->unk_5920)).x)[0] = 1023.0f;
+    ((float*)&(*(&self->unk_5920)).x)[1] = 0.0f;
+    ((float*)&(*(&self->unk_5920)).x)[2] = 0.0f;
+    ((float*)&(*(&self->unk_5920)).x)[3] = 1023.0f / 40000.0f;
 }
 #endif
 

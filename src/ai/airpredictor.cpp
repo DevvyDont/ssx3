@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "ai/airpredictor.h"
 #include "replay/frameptr.h"
 #include "main/game.h"
@@ -41,18 +42,10 @@ extern "C" void cAirPredictor_reset(cAirPredictor* self)
 //100%
 INCLUDE_ASM("ai/airpredictor", cAirPredictor_simStep);
 #ifdef SKIP_ASM
-// FAKEMATCH: identical arms `else if (self) { state = 1; f20 = normal; f90 = surf; } else { same }` (cross-jumping merges them later; at
-// GCSE time they raise the expression table from 73 to 77 buckets, which gives the &p1/&p0 PRE copies retail's s5/s6 order); plain form 99.95%. Byte-identical and behaves like the plain form; landed marked under
-// the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-struct sVec4_3200
-{
-    float x, y, z, w;
-    sVec4_3200() {}
-} __attribute__((aligned(16)));
 
 struct sHit_3200 {
-    sVec4_3200 pos;          // 0x00
-    sVec4_3200 normal;       // 0x10
+    t4Vector pos;          // 0x00
+    t4Vector normal;       // 0x10
     char pad20[0x4C - 0x20];
     int surf;                // 0x4C
     char pad50[4];
@@ -68,16 +61,16 @@ struct sRay_3200 {
 
 extern sQuadR t4vect_ZAxis;
 // cAirPredictor_simOneTick is defined later in the unit (with its own vector type).
-float cAirPredictor_simOneTick_3200(void* self, sVec4_3200* pos, sVec4_3200* vel, sVec4_3200* outPos, sVec4_3200* outVel) __asm__("cAirPredictor_simOneTick");
+float cAirPredictor_simOneTick_3200(void* self, t4Vector* pos, t4Vector* vel, t4Vector* outPos, t4Vector* outVel) __asm__("cAirPredictor_simOneTick");
 // cWorldLine_cWorldLine (intersect/riderspheretree) builds the capsule and returns it.
-extern "C" sRay_3200* cWorldLine_cWorldLine(sRay_3200* ray, sVec4_3200* a, sVec4_3200* b, int c, float d);
+extern "C" sRay_3200* cWorldLine_cWorldLine(sRay_3200* ray, t4Vector* a, t4Vector* b, int c, float d);
 extern "C" float cBXNash_terrainIntersect1(void* world, sRay_3200* ray, sHit_3200* hit, int c);
 extern "C" float cBXNash_staticObjectIntersect1(void* world, sRay_3200* ray, sHit_3200* hit, int c);
 
 // PORT: PS2-only VU0 inline asm (normalize).
-static inline sVec4_3200 vu0Normalize_3200(const sVec4_3200& v)
+static inline t4Vector vu0Normalize_3200(const t4Vector& v)
 {
-    sVec4_3200 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -96,7 +89,7 @@ static inline sVec4_3200 vu0Normalize_3200(const sVec4_3200& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_3200(const sVec4_3200& a, const sVec4_3200& b)
+static inline float vu0Dot_3200(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -116,9 +109,9 @@ static inline float vu0Dot_3200(const sVec4_3200& a, const sVec4_3200& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec4_3200 vu0Sub_3200(const sVec4_3200& a, const sVec4_3200& b)
+static inline t4Vector vu0Sub_3200(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_3200 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -130,9 +123,9 @@ static inline sVec4_3200 vu0Sub_3200(const sVec4_3200& a, const sVec4_3200& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sVec4_3200 vu0Add_3200(const sVec4_3200& a, const sVec4_3200& b)
+static inline t4Vector vu0Add_3200(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_3200 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -145,9 +138,9 @@ static inline sVec4_3200 vu0Add_3200(const sVec4_3200& a, const sVec4_3200& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_3200 vu0Scale_3200(const sVec4_3200& v, float s)
+static inline t4Vector vu0Scale_3200(const t4Vector& v, float s)
 {
-    sVec4_3200 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -162,7 +155,7 @@ static inline sVec4_3200 vu0Scale_3200(const sVec4_3200& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times-assign scalar).
-static inline void vu0ScaleEq_3200(sVec4_3200& v, float s)
+static inline void vu0ScaleEq_3200(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -176,7 +169,7 @@ static inline void vu0ScaleEq_3200(sVec4_3200& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract-assign).
-static inline void vu0SubEq_3200(sVec4_3200& a, const sVec4_3200& b)
+static inline void vu0SubEq_3200(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -188,7 +181,7 @@ static inline void vu0SubEq_3200(sVec4_3200& a, const sVec4_3200& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-static inline void vu0AddEq_3200(sVec4_3200& a, const sVec4_3200& b)
+static inline void vu0AddEq_3200(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         ".set push\n"
@@ -221,26 +214,26 @@ static inline void vu0AddEq_3200(sVec4_3200& a, const sVec4_3200& b)
 extern "C" void cAirPredictor_simStep(cAirPredictor* vself)
 {
     cAirPredictor* self = vself;
-    sVec4_3200 prevPos = *(sVec4_3200*)&self->CurSimPos;
-    sVec4_3200 prevVel = *(sVec4_3200*)&self->CurSimVel;
-    sVec4_3200 uPrevVel = vu0Normalize_3200(*(sVec4_3200*)&self->CurSimVel);
+    t4Vector prevPos = *(&self->CurSimPos);
+    t4Vector prevVel = *(&self->CurSimVel);
+    t4Vector uPrevVel = vu0Normalize_3200(*(&self->CurSimVel));
     float numSubStep = 0.0f;
     float maxResampleSteps = 270000.0f / self->TerminalVel;
     float speed;
     do {
         self->TotalAirTime += 0.01666666753590107f;
         numSubStep += 1.0f;
-        float prevZ = (*(sVec4_3200*)&self->CurSimPos).z;
-        speed = cAirPredictor_simOneTick_3200(self, (sVec4_3200*)&self->CurSimPos, (sVec4_3200*)&self->CurSimVel, (sVec4_3200*)&self->CurSimPos, (sVec4_3200*)&self->CurSimVel);
-        if (prevZ <= (*(sVec4_3200*)&self->CurSimPos).z) {
+        float prevZ = (*(&self->CurSimPos)).z;
+        speed = cAirPredictor_simOneTick_3200(self, (&self->CurSimPos), (&self->CurSimVel), (&self->CurSimPos), (&self->CurSimVel));
+        if (prevZ <= (*(&self->CurSimPos)).z) {
             self->ApexTime = self->TotalAirTime;
-            *(sVec4_3200*)&self->GuessApexPos = *(sVec4_3200*)&self->CurSimPos;
+            *(&self->GuessApexPos) = *(&self->CurSimPos);
         }
         if (maxResampleSteps < numSubStep) break;
-    } while (!(speed * 0.9900000095367432f > vu0Dot_3200(uPrevVel, *(sVec4_3200*)&self->CurSimVel)));
-    sVec4_3200 segStart = prevPos;
-    sVec4_3200 segEnd = *(sVec4_3200*)&self->CurSimPos;
-    sVec4_3200 ray = vu0Sub_3200(segEnd, segStart);
+    } while (!(speed * 0.9900000095367432f > vu0Dot_3200(uPrevVel, *(&self->CurSimVel))));
+    t4Vector segStart = prevPos;
+    t4Vector segEnd = *(&self->CurSimPos);
+    t4Vector ray = vu0Sub_3200(segEnd, segStart);
     vu0ScaleEq_3200(ray, 0.019999999552965164f);
     vu0SubEq_3200(segStart, ray);
     vu0AddEq_3200(segEnd, ray);
@@ -254,20 +247,20 @@ extern "C" void cAirPredictor_simStep(cAirPredictor* vself)
         hitParam = cBXNash_staticObjectIntersect1(SSXApp->Game->BXNash, &w1, &ti, 0);
     }
     if (hitParam >= 0.0f && vu0Dot_3200(ray, ti.normal) < 0.0f) {
-        *(sVec4_3200*)&self->GuessLandPosition = ti.pos;
+        *(&self->GuessLandPosition) = ti.pos;
         self->TotalAirTime = self->TotalAirTime - numSubStep * (hitParam * 0.01666666753590107f);
-        *(sVec4_3200*)&self->GuessLandVelocity = vu0Add_3200(vu0Scale_3200(prevVel, hitParam), vu0Scale_3200(*(sVec4_3200*)&self->CurSimVel, 1.0f - hitParam));
+        *(&self->GuessLandVelocity) = vu0Add_3200(vu0Scale_3200(prevVel, hitParam), vu0Scale_3200(*(&self->CurSimVel), 1.0f - hitParam));
         if (self->SimState == 2) {
             self->SimState = 3;
-            *(sQuadR*)(sVec4_3200*)&self->GuessLandNormal = t4vect_ZAxis;
+            *(sQuadR*)(&self->GuessLandNormal) = t4vect_ZAxis;
             self->GuessLandSurface = 13;
         } else if (self) { // FAKEMATCH: identical arms, see header
             self->SimState = 1;
-            *(sVec4_3200*)&self->GuessLandNormal = ti.normal;
+            *(&self->GuessLandNormal) = ti.normal;
             self->GuessLandSurface = ti.surf;
         } else {
             self->SimState = 1;
-            *(sVec4_3200*)&self->GuessLandNormal = ti.normal;
+            *(&self->GuessLandNormal) = ti.normal;
             self->GuessLandSurface = ti.surf;
         }
         char* hitObj = ti.obj;
@@ -341,19 +334,14 @@ extern sQuadR t4vect_XAxis;
 extern sQuadR t4vect_ZAxis;
 extern "C" void cAirPredictor_simStep(cAirPredictor* self);
 
-struct sVec4_3648
-{
-    float x, y, z, w;
-    sVec4_3648() {}
-} __attribute__((aligned(16)));
 
 // cAirPredictor_simOneTick is defined later in the unit (with its own vector type).
-float cAirPredictor_simOneTick_3648(char* self, sVec4_3648* pos, sVec4_3648* vel, sVec4_3648* outPos, sVec4_3648* outVel) __asm__("cAirPredictor_simOneTick");
+float cAirPredictor_simOneTick_3648(char* self, t4Vector* pos, t4Vector* vel, t4Vector* outPos, t4Vector* outVel) __asm__("cAirPredictor_simOneTick");
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_3648 vu0Scale_3648(const sVec4_3648& v, float s)
+static inline t4Vector vu0Scale_3648(const t4Vector& v, float s)
 {
-    sVec4_3648 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -368,9 +356,9 @@ static inline sVec4_3648 vu0Scale_3648(const sVec4_3648& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sVec4_3648 vu0Add_3648(const sVec4_3648& a, const sVec4_3648& b)
+static inline t4Vector vu0Add_3648(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_3648 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -431,16 +419,16 @@ extern "C" void cAirPredictor_updateFlightPath(cAirPredictor* self, sQuad* airPo
     float sinceLastTick = self->CurAirTime - self->PrevTickTime + dt;
     while (sinceLastTick >= 0.01666666753590107f) {
         sinceLastTick -= 0.01666666753590107f;
-        cAirPredictor_simOneTick_3648(((char*)self), (sVec4_3648*)(&self->PrevTickPos), (sVec4_3648*)(&self->PrevTickVel), (sVec4_3648*)(&self->PrevTickPos), (sVec4_3648*)(&self->PrevTickVel));
+        cAirPredictor_simOneTick_3648(((char*)self), ((&self->PrevTickPos)), ((&self->PrevTickVel)), ((&self->PrevTickPos)), ((&self->PrevTickVel)));
         self->PrevTickTime += 0.01666666753590107f;
     }
     if (sinceLastTick > 0.009999999776482582f) {
-        sVec4_3648 nextSimPos;
-        sVec4_3648 nextSimVel;
-        cAirPredictor_simOneTick_3648(((char*)self), (sVec4_3648*)(&self->PrevTickPos), (sVec4_3648*)(&self->PrevTickVel), &nextSimPos, &nextSimVel);
+        t4Vector nextSimPos;
+        t4Vector nextSimVel;
+        cAirPredictor_simOneTick_3648(((char*)self), ((&self->PrevTickPos)), ((&self->PrevTickVel)), &nextSimPos, &nextSimVel);
         float k = sinceLastTick * 59.999996185302734f;
-        *(sVec4_3648*)airPos = vu0Add_3648(vu0Scale_3648(nextSimPos, k), vu0Scale_3648(*(sVec4_3648*)&self->PrevTickPos, 1.0f - k));
-        *(sVec4_3648*)airVel = vu0Add_3648(vu0Scale_3648(nextSimVel, k), vu0Scale_3648(*(sVec4_3648*)&self->PrevTickVel, 1.0f - k));
+        *(t4Vector*)airPos = vu0Add_3648(vu0Scale_3648(nextSimPos, k), vu0Scale_3648(*(&self->PrevTickPos), 1.0f - k));
+        *(t4Vector*)airVel = vu0Add_3648(vu0Scale_3648(nextSimVel, k), vu0Scale_3648(*(&self->PrevTickVel), 1.0f - k));
         ((float*)airPos)[3] = 1.0f;
     } else {
         *(sQuad*)airPos = *(sQuad*)&self->PrevTickPos;

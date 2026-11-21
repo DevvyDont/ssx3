@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "world/worldview.h"
 #include "object/flexbridgenode.h"
 #include "object/flexrailnode.h"
@@ -304,23 +305,20 @@ extern "C" void cFlexBridgeNode_initSpringNodes(sFlexBridge* self)
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_applyForce);
 #ifdef SKIP_ASM
-struct sV4_6E38 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sMat_6E38 {
-    sV4_6E38 r[4];
+    t4Vector r[4];
 };
 
 struct sSeg_6E38 {
     char pad_0x0[0x30];
-    sV4_6E38 force;             // 0x30
+    t4Vector force;             // 0x30
     float torque;               // 0x40
     char pad_0x44[0xC];
 };
 
 struct sNode_6E38 {
-    sV4_6E38 pos;               // 0x00
+    t4Vector pos;               // 0x00
     char pad_0x10[0x50];
     int idx;                    // 0x60
 };
@@ -356,9 +354,9 @@ public:
 
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sV4_6E38 vu0Sub_6E38(const sV4_6E38& a, const sV4_6E38& b)
+static inline t4Vector vu0Sub_6E38(const t4Vector& a, const t4Vector& b)
 {
-    sV4_6E38 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -371,9 +369,9 @@ static inline sV4_6E38 vu0Sub_6E38(const sV4_6E38& a, const sV4_6E38& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sV4_6E38 vu0Scale_6E38(float s, const sV4_6E38& v)
+static inline t4Vector vu0Scale_6E38(float s, const t4Vector& v)
 {
-    sV4_6E38 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -388,9 +386,9 @@ static inline sV4_6E38 vu0Scale_6E38(float s, const sV4_6E38& v)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sV4_6E38 vu0Norm_6E38(const sV4_6E38& v)
+static inline t4Vector vu0Norm_6E38(const t4Vector& v)
 {
-    sV4_6E38 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -409,9 +407,9 @@ static inline sV4_6E38 vu0Norm_6E38(const sV4_6E38& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * vector).
-static inline sV4_6E38 vu0MulMat_6E38(const sMat_6E38* m, const sV4_6E38& v)
+static inline t4Vector vu0MulMat_6E38(const sMat_6E38* m, const t4Vector& v)
 {
-    sV4_6E38 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf8, %2\n"
         "lqc2      $vf4, 0x0(%1)\n"
@@ -430,7 +428,7 @@ static inline sV4_6E38 vu0MulMat_6E38(const sMat_6E38* m, const sV4_6E38& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_6E38(const sV4_6E38& a, const sV4_6E38& b)
+static inline float vu0Dot_6E38(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -450,7 +448,7 @@ static inline float vu0Dot_6E38(const sV4_6E38& a, const sV4_6E38& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-static inline void vu0AddEq_6E38(sV4_6E38& dst, sV4_6E38 b)
+static inline void vu0AddEq_6E38(t4Vector& dst, t4Vector b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -461,15 +459,15 @@ static inline void vu0AddEq_6E38(sV4_6E38& dst, sV4_6E38 b)
         : "m"(dst), "m"(b));
 }
 
-static inline sV4_6E38 Pos_6E38(const sMat_6E38* m)
+static inline t4Vector Pos_6E38(const sMat_6E38* m)
 {
     return m->r[3];
 }
 
-static inline sV4_6E38 ToLocal_6E38(const sMat_6E38* m, const sV4_6E38& v)
+static inline t4Vector ToLocal_6E38(const sMat_6E38* m, const t4Vector& v)
 {
-    sV4_6E38 r;
-    sV4_6E38 f = vu0Sub_6E38(v, vu0Scale_6E38(v.w, Pos_6E38(m)));
+    t4Vector r;
+    t4Vector f = vu0Sub_6E38(v, vu0Scale_6E38(v.w, Pos_6E38(m)));
     r.x = m->r[0].x * f.x + m->r[0].y * f.y + m->r[0].z * f.z;
     r.y = m->r[1].x * f.x + m->r[1].y * f.y + m->r[1].z * f.z;
     r.z = m->r[2].x * f.x + m->r[2].y * f.y + m->r[2].z * f.z;
@@ -477,7 +475,7 @@ static inline sV4_6E38 ToLocal_6E38(const sMat_6E38* m, const sV4_6E38& v)
     return r;
 }
 
-static inline float Torque_6E38(float k, const sV4_6E38& a, const sV4_6E38& b)
+static inline float Torque_6E38(float k, const t4Vector& a, const t4Vector& b)
 {
     return k * vu0Dot_6E38(a, b);
 }
@@ -492,16 +490,16 @@ static inline float Torque_6E38(float k, const sV4_6E38& a, const sV4_6E38& b)
  * @param intInfo  the hit (On Tour tIntersectInfo): position and triangle index
  * @param force    the force to apply
  */
-extern "C" void cFlexBridgeNode_applyForce(cFlexBridgeNode* self, sNode_6E38* intInfo, sV4_6E38* force)
+extern "C" void cFlexBridgeNode_applyForce(cFlexBridgeNode* self, sNode_6E38* intInfo, t4Vector* force)
 {
     cFlexBridgeNode* data = self;
     if (intInfo->idx < 0) {
         return;
     }
     sMat_6E38* transform = ((cBridge_6E38*)self)->GetMatrix();
-    sV4_6E38 relPos = vu0Sub_6E38(intInfo->pos, Pos_6E38(transform));
-    sV4_6E38 y = vu0MulMat_6E38(transform, vu0Norm_6E38(*(sV4_6E38*)&data->BottomRightOffset));
-    sV4_6E38 n = vu0MulMat_6E38(transform, ((sV4_6E38*)data->FaceNorms)[intInfo->idx]);
+    t4Vector relPos = vu0Sub_6E38(intInfo->pos, Pos_6E38(transform));
+    t4Vector y = vu0MulMat_6E38(transform, vu0Norm_6E38(*(&data->BottomRightOffset)));
+    t4Vector n = vu0MulMat_6E38(transform, (data->FaceNorms)[intInfo->idx]);
     float yoffset = vu0Dot_6E38(relPos, y);
     int seg = intInfo->idx / 2;
     sSeg_6E38* pNode = ((sSeg_6E38*)data->Mesh.Nodes);

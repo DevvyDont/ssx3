@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "visualfx/visualeffectsman.h"
 #include "visualfx/worldlightman.h"
 #include "visualfx/lensfx.h"
@@ -2905,14 +2906,11 @@ extern "C" void cSplashManager_CameraSnapped(int camera) {
 //100%
 INCLUDE_ASM("seg/seg_1F1548", cSplashManager_ReportImpactLocal);
 #ifdef SKIP_ASM
-struct sV4_4260 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sV4_4260 Sub_4260(const sV4_4260& a, const sV4_4260& b)
+static inline t4Vector Sub_4260(const t4Vector& a, const t4Vector& b)
 {
-    sV4_4260 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2925,7 +2923,7 @@ static inline sV4_4260 Sub_4260(const sV4_4260& a, const sV4_4260& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector length via vsqrt).
-static inline float Length_4260(const sV4_4260& v)
+static inline float Length_4260(const t4Vector& v)
 {
     float r;
     int t;
@@ -2961,9 +2959,9 @@ extern float D_004A427C;
  * @param impactPos  the impact position
  * @param speed  the impact strength (times 0.036, km/h)
  */
-extern "C" void cSplashManager_ReportImpactLocal(cSplashManager* self, sV4_4260* impactPos, float speed)
+extern "C" void cSplashManager_ReportImpactLocal(cSplashManager* self, t4Vector* impactPos, float speed)
 {
-    float k = 1.0f - Length_4260(Sub_4260(*(sV4_4260*)&self->mLastCameraPosition, *impactPos)) / D_004A4270;
+    float k = 1.0f - Length_4260(Sub_4260(*(&self->mLastCameraPosition), *impactPos)) / D_004A4270;
     if (k > 0.0f && self->mLastSnowfallIntensity > D_004A4278) {
         float lo = D_004A4274;
         float impactRamp = (speed * 0.036f - lo) / (120.0f - lo);

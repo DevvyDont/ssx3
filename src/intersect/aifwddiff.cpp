@@ -454,14 +454,11 @@ INCLUDE_ASM("intersect/aifwddiff", bxSphereTree_Is2SidedTriCollision);
 extern "C" float SphereTree_GetRadius(void* self);
 extern "C" int SphereTree_IsTriCollision(void* self, void* a1, void* a2, void* a3, void* v, void* a5, void* a6);
 
-struct sVec4_28030 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec4_28030 vu0Sub_28030(const sVec4_28030& a, const sVec4_28030& b)
+static inline t4Vector vu0Sub_28030(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_28030 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -473,7 +470,7 @@ static inline sVec4_28030 vu0Sub_28030(const sVec4_28030& a, const sVec4_28030& 
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_28030(const sVec4_28030& a, const sVec4_28030& b)
+static inline float vu0Dot_28030(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -493,9 +490,9 @@ static inline float vu0Dot_28030(const sVec4_28030& a, const sVec4_28030& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_28030 vu0Scale_28030(const sVec4_28030& v, float s)
+static inline t4Vector vu0Scale_28030(const t4Vector& v, float s)
 {
-    sVec4_28030 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -523,18 +520,18 @@ static inline sVec4_28030 vu0Scale_28030(const sVec4_28030& v, float s)
  * @param loc   out: the contact point (On Tour loc)
  * @return 1 on contact
  */
-extern "C" int bxSphereTree_Is2SidedTriCollision(bxSphereTree* self, sVec4_28030* point1, t4Vector* point2, t4Vector* point3, sVec4_28030* dir, t4Vector* overlap, t4Vector* loc)
+extern "C" int bxSphereTree_Is2SidedTriCollision(bxSphereTree* self, t4Vector* point1, t4Vector* point2, t4Vector* point3, t4Vector* dir, t4Vector* overlap, t4Vector* loc)
 {
     float dot;
     {
-        sVec4_28030 toCentre = vu0Sub_28030(*(sVec4_28030*)&self->transCenter, *point1);
+        t4Vector toCentre = vu0Sub_28030(*(&self->transCenter), *point1);
         dot = vu0Dot_28030(*dir, toCentre);
     }
     if (SphereTree_GetRadius(self) < __builtin_fabsf(dot)) {
         return 0;
     }
     if (dot < 0.0f) {
-        sVec4_28030 nd = vu0Scale_28030(*dir, -1.0f);
+        t4Vector nd = vu0Scale_28030(*dir, -1.0f);
         return SphereTree_IsTriCollision(self, point1, point2, point3, &nd, overlap, loc);
     }
     return SphereTree_IsTriCollision(self, point1, point2, point3, dir, overlap, loc);

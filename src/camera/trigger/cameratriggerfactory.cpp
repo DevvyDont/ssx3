@@ -5868,12 +5868,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSUPERPIPEChaseAlgorithm_snap
 extern "C" void cLookAtChaseAlgorithm_snap(void* self, int id);
 extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, float b);
 
-struct sVec4_00178938 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-extern "C" sVec4_00178938 cSUPERPIPEChaseAlgorithm_getIdealPosition(void* self);
-extern "C" sVec4_00178938 cSUPERPIPEChaseAlgorithm_getIdealTargetPos(void* self);
+extern "C" t4Vector cSUPERPIPEChaseAlgorithm_getIdealPosition(void* self);
+extern "C" t4Vector cSUPERPIPEChaseAlgorithm_getIdealTargetPos(void* self);
 
 class cCamTarget_00178938 {
 public:
@@ -5908,8 +5905,8 @@ extern "C" void cSUPERPIPEChaseAlgorithm_snap(cSUPERPIPEChaseAlgorithm* self, in
 {
     char* rider = (char*)self->Target->Rider;
     if (id == ((cCamTarget_00178938*)(rider + 0x6C0))->getAIIndex()) {
-        *(sVec4_00178938*)&self->Position = cSUPERPIPEChaseAlgorithm_getIdealPosition(((cCamCtrl_00178938*)self));
-        *(sVec4_00178938*)&self->CamTargetPos = cSUPERPIPEChaseAlgorithm_getIdealTargetPos(((cCamCtrl_00178938*)self));
+        *(&self->Position) = cSUPERPIPEChaseAlgorithm_getIdealPosition(((cCamCtrl_00178938*)self));
+        *(&self->CamTargetPos) = cSUPERPIPEChaseAlgorithm_getIdealTargetPos(((cCamCtrl_00178938*)self));
         cLookAtChaseAlgorithm_snap(((cCamCtrl_00178938*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cCamCtrl_00178938*)self), 559.7440185546875f, 300.0f);
         ((cCamCtrl_00178938*)self)->update();
@@ -5920,18 +5917,14 @@ extern "C" void cSUPERPIPEChaseAlgorithm_snap(cSUPERPIPEChaseAlgorithm* self, in
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm);
 #ifdef SKIP_ASM
-struct sVec4_1789E8
-{
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
-struct sVEntry_1789E8 { short delta; short index; sVec4_1789E8 (*fn)(void*); };
+struct sVEntry_1789E8 { short delta; short index; t4Vector (*fn)(void*); };
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sVec4_1789E8 Sub_1789E8(const sVec4_1789E8& a, const sVec4_1789E8& b)
+static inline t4Vector Sub_1789E8(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_1789E8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -5944,9 +5937,9 @@ static inline sVec4_1789E8 Sub_1789E8(const sVec4_1789E8& a, const sVec4_1789E8&
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sVec4_1789E8 Add_1789E8(const sVec4_1789E8& a, const sVec4_1789E8& b)
+static inline t4Vector Add_1789E8(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_1789E8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -5959,9 +5952,9 @@ static inline sVec4_1789E8 Add_1789E8(const sVec4_1789E8& a, const sVec4_1789E8&
 }
 
 // PORT: PS2-only VU0 inline asm (v * s).
-static inline sVec4_1789E8 Scale_1789E8(const sVec4_1789E8& v, float s)
+static inline t4Vector Scale_1789E8(const t4Vector& v, float s)
 {
-    sVec4_1789E8 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -5976,9 +5969,9 @@ static inline sVec4_1789E8 Scale_1789E8(const sVec4_1789E8& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sVec4_1789E8 Normalize_1789E8(const sVec4_1789E8& v)
+static inline t4Vector Normalize_1789E8(const t4Vector& v)
 {
-    sVec4_1789E8 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -5997,7 +5990,7 @@ static inline sVec4_1789E8 Normalize_1789E8(const sVec4_1789E8& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float Length_1789E8(const sVec4_1789E8& v)
+static inline float Length_1789E8(const t4Vector& v)
 {
     float r;
     int t;
@@ -6018,7 +6011,7 @@ static inline float Length_1789E8(const sVec4_1789E8& v)
 }
 
 // PORT: PS2-only VU0 inline asm (in-place vector divided by scalar).
-static inline void DivEq_1789E8(sVec4_1789E8& v, float s)
+static inline void DivEq_1789E8(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -6035,7 +6028,7 @@ static inline void DivEq_1789E8(sVec4_1789E8& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float Dot_1789E8(const sVec4_1789E8& a, const sVec4_1789E8& b)
+static inline float Dot_1789E8(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -6054,15 +6047,11 @@ static inline float Dot_1789E8(const sVec4_1789E8& a, const sVec4_1789E8& b)
     return r;
 }
 
-struct sQuad_1789E8
-{
-    float v[4];
-} __attribute__((aligned(16)));
-extern sQuad_1789E8 D_004FF140_v1789E8 __asm__("t4vect_XAxis");
+extern t4Vector D_004FF140_v1789E8 __asm__("t4vect_XAxis");
 extern void* cPOST_RACE_1ChaseAlgorithm_vtbl[];
 extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(void* self);
 
-static inline sVec4_1789E8 Get_1789E8(char* o, int slot)
+static inline t4Vector Get_1789E8(char* o, int slot)
 {
     sVEntry_1789E8* e = &(*(sVEntry_1789E8**)o)[slot];
     return e->fn(o + e->delta);
@@ -6082,18 +6071,18 @@ static inline sVec4_1789E8 Get_1789E8(char* o, int slot)
 extern "C" void* cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cPOST_RACE_1ChaseAlgorithm* self, cRiderCameraTarget* src)
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(((char*)self));
-    sVec4_1789E8* startDir = (sVec4_1789E8*)(&self->StartDir);
+    t4Vector* startDir = ((&self->StartDir));
     self->AlgorithmType = 68;
     self->mVtbl = cPOST_RACE_1ChaseAlgorithm_vtbl;
     self->AgeInFrames = 0;
-    sVec4_1789E8 dir = (Length_1789E8(Get_1789E8(((char*)src), 3)) > 1.0f) ? Normalize_1789E8(Get_1789E8(((char*)src), 3)) : Get_1789E8(((char*)src), 4);
+    t4Vector dir = (Length_1789E8(Get_1789E8(((char*)src), 3)) > 1.0f) ? Normalize_1789E8(Get_1789E8(((char*)src), 3)) : Get_1789E8(((char*)src), 4);
     *startDir = dir;
     self->StartDir.z = 0.0f;
-    float len = Length_1789E8(*(sVec4_1789E8*)&self->StartDir);
+    float len = Length_1789E8(*(&self->StartDir));
     if (len > 0.009999999776482582f)
-        DivEq_1789E8(*(sVec4_1789E8*)&self->StartDir, len);
+        DivEq_1789E8(*(&self->StartDir), len);
     else
-        *(sQuad_1789E8*)&self->StartDir = D_004FF140_v1789E8;
+        *(&self->StartDir) = D_004FF140_v1789E8;
     return ((char*)self);
 }
 #endif
@@ -6156,30 +6145,25 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cPOST_RACE_1ChaseAlgorithm_up
 extern "C" float fCos(float x);
 extern "C" void fSinCos(float* s, float* c, float angle);
 
-struct sVec_00178BB0 {
-    float x, y, z, w;
-    sVec_00178BB0() {}
-    sVec_00178BB0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-} __attribute__((aligned(16)));
 
 struct sCamInfo_00178BB0 {
     char data[0x68];
 } __attribute__((aligned(16)));
 
-extern sVec_00178BB0 t4vect_ZAxis;
+extern t4Vector t4vect_ZAxis;
 extern "C" void cLookAtChaseAlgorithm_setupChaseData(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
                               float e, float f, float g, float h);
 
 struct sVEv_00178BB0 {
     short delta;
     short index;
-    sVec_00178BB0 (*fn)(void*);
+    t4Vector (*fn)(void*);
 };
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec_00178BB0 ctScale_00178BB0(const sVec_00178BB0& v, float s)
+static inline t4Vector ctScale_00178BB0(const t4Vector& v, float s)
 {
-    sVec_00178BB0 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -6194,9 +6178,9 @@ static inline sVec_00178BB0 ctScale_00178BB0(const sVec_00178BB0& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sVec_00178BB0 ctAdd_00178BB0(const sVec_00178BB0& a, const sVec_00178BB0& b)
+static inline t4Vector ctAdd_00178BB0(const t4Vector& a, const t4Vector& b)
 {
-    sVec_00178BB0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -6209,9 +6193,9 @@ static inline sVec_00178BB0 ctAdd_00178BB0(const sVec_00178BB0& a, const sVec_00
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec_00178BB0 ctSub_00178BB0(const sVec_00178BB0& a, const sVec_00178BB0& b)
+static inline t4Vector ctSub_00178BB0(const t4Vector& a, const t4Vector& b)
 {
-    sVec_00178BB0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -6224,9 +6208,9 @@ static inline sVec_00178BB0 ctSub_00178BB0(const sVec_00178BB0& a, const sVec_00
 }
 
 // PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
-static inline sVec_00178BB0 ctRot_00178BB0(const sVec_00178BB0& q, const sVec_00178BB0& v)
+static inline t4Vector ctRot_00178BB0(const t4Vector& q, const t4Vector& v)
 {
-    sVec_00178BB0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -6263,11 +6247,11 @@ static inline float wrap_00178BB0(float x)
     return x - ffloor_00178BB0(x * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
 }
 
-static inline sVec_00178BB0 AxisAngle_00178BB0(const sVec_00178BB0& axis, float angle)
+static inline t4Vector AxisAngle_00178BB0(const t4Vector& axis, float angle)
 {
     float s, c;
     fSinCos(&s, &c, angle * 0.5f);
-    sVec_00178BB0 q;
+    t4Vector q;
     q.w = c;
     q.x = s * axis.x;
     q.y = s * axis.y;
@@ -6275,7 +6259,7 @@ static inline sVec_00178BB0 AxisAngle_00178BB0(const sVec_00178BB0& axis, float 
     return q;
 }
 
-static inline sVec_00178BB0 getPos_00178BB0(char* self)
+static inline t4Vector getPos_00178BB0(char* self)
 {
     char* o = *(char**)(self + 0x30);
     sVEv_00178BB0* e = &(*(sVEv_00178BB0**)o)[1];
@@ -6301,9 +6285,9 @@ extern "C" void cPOST_RACE_1ChaseAlgorithm_update(cPOST_RACE_1ChaseAlgorithm* se
     float ang = wrap_00178BB0((float)self->AgeInFrames * 0.0009090909152291715f * 6.2831854820251465f);
     float angle = (1.0f - fCos(ang)) * 0.7482788562774658f + -0.7482788562774658f;
     angle -= ffloor_00178BB0(angle * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
-    sVec_00178BB0 rotation = AxisAngle_00178BB0(t4vect_ZAxis, angle);
-    sVec_00178BB0 look = ctRot_00178BB0(rotation, *(sVec_00178BB0*)&self->StartDir);
-    *(sVec_00178BB0*)&self->CamTargetPos = ctAdd_00178BB0(getPos_00178BB0(((char*)self)), ctScale_00178BB0(t4vect_ZAxis, -3.0f));
+    t4Vector rotation = AxisAngle_00178BB0(t4vect_ZAxis, angle);
+    t4Vector look = ctRot_00178BB0(rotation, *(&self->StartDir));
+    *(&self->CamTargetPos) = ctAdd_00178BB0(getPos_00178BB0(((char*)self)), ctScale_00178BB0(t4vect_ZAxis, -3.0f));
     int multi = SSXApp->Game->AI->NumberOfRidersAllocated >= 2;
     float multiplayerHeight = 0.0f;
     if (multi) {
@@ -6313,8 +6297,8 @@ extern "C" void cPOST_RACE_1ChaseAlgorithm_update(cPOST_RACE_1ChaseAlgorithm* se
     if (multi) {
         multiplayerDistance = 200.0f;
     }
-    *(sVec_00178BB0*)&self->Position =
-        ctAdd_00178BB0(ctSub_00178BB0(*(sVec_00178BB0*)&self->CamTargetPos, ctScale_00178BB0(look, multiplayerDistance + 126.0f)),
+    *(&self->Position) =
+        ctAdd_00178BB0(ctSub_00178BB0(*(&self->CamTargetPos), ctScale_00178BB0(look, multiplayerDistance + 126.0f)),
                        ctScale_00178BB0(t4vect_ZAxis, multiplayerHeight + -27.0f));
 }
 #endif

@@ -469,7 +469,7 @@ struct sVec4_2F650;
  * @param mnp   out: the box minimum
  * @param mxp   out: the box maximum
  */
-extern "C" void cRiderSphereTree_GetMaskBoundBox(void* tree, sVec4_2F650* mnp, sVec4_2F650* mxp)
+extern "C" void cRiderSphereTree_GetMaskBoundBox(void* tree, t4Vector* mnp, t4Vector* mxp)
 {
     sSphereBox_9DC8* node = (sSphereBox_9DC8*)tree;
     sSphereV4_9DC8* mn = (sSphereV4_9DC8*)mnp;
@@ -4081,14 +4081,11 @@ extern "C" void cWorldLine_IntersectSubPatch(cWorldLine* line, sPatch_E9A0* patc
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("intersect/riderspheretree", cWorldRider_cWorldRider);
 #ifdef SKIP_ASM
-struct sVec4_2F650 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
-static inline sVec4_2F650 vecAdd_2F650(sVec4_2F650* a, sVec4_2F650* b)
+static inline t4Vector vecAdd_2F650(t4Vector* a, t4Vector* b)
 {
-    sVec4_2F650 r;
+    t4Vector r;
     __asm__(
         ".set push\n"
         ".set noreorder\n"
@@ -4104,9 +4101,9 @@ static inline sVec4_2F650 vecAdd_2F650(sVec4_2F650* a, sVec4_2F650* b)
 }
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (v * s).
-static inline sVec4_2F650 vecScale_2F650(const sVec4_2F650& v, float s)
+static inline t4Vector vecScale_2F650(const t4Vector& v, float s)
 {
-    sVec4_2F650 r;
+    t4Vector r;
     int t;
     __asm__(
         ".set push\n"
@@ -4128,9 +4125,9 @@ struct sRiderSphere_2F650 {
     int f4;             // 0x04
     int f8;             // 0x08
     int pad_0xC[5];
-    sVec4_2F650 max;    // 0x20
-    sVec4_2F650 min;    // 0x30
-    sVec4_2F650 center; // 0x40
+    t4Vector max;    // 0x20
+    t4Vector min;    // 0x30
+    t4Vector center; // 0x40
     void** vtbl;        // 0x50
     int pad_0x54[3];
     void* tree;         // 0x60
@@ -4140,7 +4137,7 @@ struct sRiderSphere_2F650 {
 };
 
 cRiderSphereTree* cRiderSphereTree_cRiderSphereTree(cRiderSphereTree* self);
-extern "C" void cRiderSphereTree_GetMaskBoundBox(void* tree, sVec4_2F650* mn, sVec4_2F650* mx);
+extern "C" void cRiderSphereTree_GetMaskBoundBox(void* tree, t4Vector* mn, t4Vector* mx);
 extern void* cWorldRider_vtbl[];
 
 /**
@@ -4162,8 +4159,8 @@ extern "C" sRiderSphere_2F650* cWorldRider_cWorldRider(cWorldRider* self, cRider
     self->origSt = (cRiderSphereTree*)((void*)tree);
     self->st = (cRiderSphereTree*)((void*)tree);
     self->mPrecision = flag == 0;
-    cRiderSphereTree_GetMaskBoundBox(tree, (sVec4_2F650*)&self->boxMin, (sVec4_2F650*)&self->boxMax);
-    *(sVec4_2F650*)&self->boxCenter = vecScale_2F650(vecAdd_2F650((sVec4_2F650*)&self->boxMin, (sVec4_2F650*)&self->boxMax), 0.5f);
+    cRiderSphereTree_GetMaskBoundBox(tree, (&self->boxMin), (&self->boxMax));
+    *(&self->boxCenter) = vecScale_2F650(vecAdd_2F650((&self->boxMin), (&self->boxMax)), 0.5f);
     return ((sRiderSphere_2F650*)self);
 }
 #endif

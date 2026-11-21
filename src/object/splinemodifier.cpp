@@ -17,14 +17,11 @@ public:
     virtual void read(void* buf, int size);
 };
 
-struct sSmQuad_95D8 {
-    float v[4];
-} __attribute__((aligned(16)));
 
 
 
 extern void* cSplineModifier_vtbl[];
-extern sSmQuad_95D8 t4vect_Zero;
+extern t4Vector t4vect_Zero;
 extern "C" void cSpline_readFromReplayFrame(void* self, cStream003595D8* stream);
 
 /**
@@ -48,8 +45,8 @@ extern "C" cSplineModifier* cSplineModifier_cSplineModifier(cSplineModifier* sel
     self->Spline.Length = 0;
     stream->read((char*)&self->BoundBox, 80);
     cSpline_readFromReplayFrame(follower, stream);
-    *(sSmQuad_95D8*)&self->Dir = t4vect_Zero;
-    *(sSmQuad_95D8*)&self->DDir = t4vect_Zero;
+    *(&self->Dir) = t4vect_Zero;
+    *(&self->DDir) = t4vect_Zero;
     self->RootTransformDirty = 1;
     *(int*)&self->X2 = 0;
     *(int*)&self->Y2 = 0;
@@ -2051,9 +2048,6 @@ extern "C" void cRailModifier_buildXform(void* self);
 struct sSmMod_C040;
 extern "C" void cRailModifier_updateBoundBox(cRailModifier* self);
 
-struct sSmVec4_B708 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 struct sSmCell_B708 {
     int level;
     int x, y, z;
@@ -2176,7 +2170,7 @@ struct sSmRef_B708 {
 };
 
 // PORT: PS2-only VU0 inline asm (a -= b).
-static inline void subEq_B708(sSmVec4_B708& a, const sSmVec4_B708& b)
+static inline void subEq_B708(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -2188,7 +2182,7 @@ static inline void subEq_B708(sSmVec4_B708& a, const sSmVec4_B708& b)
 }
 
 // PORT: PS2-only VU0 inline asm (a += b).
-static inline void addEq_B708(sSmVec4_B708& a, const sSmVec4_B708& b)
+static inline void addEq_B708(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %0\n"
@@ -2202,14 +2196,14 @@ static inline void addEq_B708(sSmVec4_B708& a, const sSmVec4_B708& b)
 static inline tBoundBox getBox_B708(const sSmModel_B708* m)
 {
     tBoundBox b;
-    (*(sSmVec4_B708*)&b.MinPoint).x = m->minx;
-    (*(sSmVec4_B708*)&b.MinPoint).y = m->miny;
-    (*(sSmVec4_B708*)&b.MinPoint).z = m->minz;
-    (*(sSmVec4_B708*)&b.MinPoint).w = 1.0f;
-    (*(sSmVec4_B708*)&b.MaxPoint).x = m->maxx;
-    (*(sSmVec4_B708*)&b.MaxPoint).y = m->maxy;
-    (*(sSmVec4_B708*)&b.MaxPoint).z = m->maxz;
-    (*(sSmVec4_B708*)&b.MaxPoint).w = 1.0f;
+    (*(&b.MinPoint)).x = m->minx;
+    (*(&b.MinPoint)).y = m->miny;
+    (*(&b.MinPoint)).z = m->minz;
+    (*(&b.MinPoint)).w = 1.0f;
+    (*(&b.MaxPoint)).x = m->maxx;
+    (*(&b.MaxPoint)).y = m->maxy;
+    (*(&b.MaxPoint)).z = m->maxz;
+    (*(&b.MaxPoint)).w = 1.0f;
     return b;
 }
 
@@ -2220,13 +2214,13 @@ static inline void setBox_B708(char* self, tBoundBox b)
 
 static inline void grow_B708(tBoundBox& box, float d)
 {
-    sSmVec4_B708 pad;
+    t4Vector pad;
     pad.x = d;
     pad.y = d;
     pad.z = d;
     pad.w = 0.0f;
-    subEq_B708(*(sSmVec4_B708*)&box.MinPoint, pad);
-    addEq_B708(*(sSmVec4_B708*)&box.MaxPoint, pad);
+    subEq_B708(*(&box.MinPoint), pad);
+    addEq_B708(*(&box.MaxPoint), pad);
 }
 
 /**
@@ -2256,22 +2250,22 @@ extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, sSmDesc_B708* 
     if (modelObj->vt[44].fn((char*)modelObj + modelObj->vt[44].delta) == 0) {
         sSmModel_B708* instModel = (sSmModel_B708*)self->Instance;
         tBoundBox bounds;
-        (*(sSmVec4_B708*)&bounds.MinPoint).x = instModel->minx;
-        (*(sSmVec4_B708*)&bounds.MinPoint).y = instModel->miny;
-        (*(sSmVec4_B708*)&bounds.MinPoint).z = instModel->minz;
-        (*(sSmVec4_B708*)&bounds.MinPoint).w = 1.0f;
-        (*(sSmVec4_B708*)&bounds.MaxPoint).x = instModel->maxx;
-        (*(sSmVec4_B708*)&bounds.MaxPoint).y = instModel->maxy;
-        (*(sSmVec4_B708*)&bounds.MaxPoint).z = instModel->maxz;
-        (*(sSmVec4_B708*)&bounds.MaxPoint).w = 1.0f;
+        (*(&bounds.MinPoint)).x = instModel->minx;
+        (*(&bounds.MinPoint)).y = instModel->miny;
+        (*(&bounds.MinPoint)).z = instModel->minz;
+        (*(&bounds.MinPoint)).w = 1.0f;
+        (*(&bounds.MaxPoint)).x = instModel->maxx;
+        (*(&bounds.MaxPoint)).y = instModel->maxy;
+        (*(&bounds.MaxPoint)).z = instModel->maxz;
+        (*(&bounds.MaxPoint)).w = 1.0f;
         setBox_B708(((char*)self), bounds);
-        sSmVec4_B708 margin;
+        t4Vector margin;
         margin.x = 100.0f;
         margin.y = 100.0f;
         margin.z = 100.0f;
         margin.w = 0.0f;
-        subEq_B708((*(sSmVec4_B708*)&(((&self->BoundBox)))->MinPoint), margin);
-        addEq_B708((*(sSmVec4_B708*)&(((&self->BoundBox)))->MaxPoint), margin);
+        subEq_B708((*(&(((&self->BoundBox)))->MinPoint)), margin);
+        addEq_B708((*(&(((&self->BoundBox)))->MaxPoint)), margin);
     }
     cRailModifier_buildXform(((char*)self));
     cRailModifier_updateBoundBox(self);
@@ -2280,14 +2274,14 @@ extern "C" char* cRailModifier_cRailModifier(cRailModifier* self, sSmDesc_B708* 
     sSmSeg_B708* seg = track->first;
     for (int i = 0; i < track->count; i++) {
         tBoundBox bounds;
-        (*(sSmVec4_B708*)&bounds.MinPoint).x = seg->minx;
-        (*(sSmVec4_B708*)&bounds.MinPoint).y = seg->miny;
-        (*(sSmVec4_B708*)&bounds.MinPoint).z = seg->minz;
-        (*(sSmVec4_B708*)&bounds.MinPoint).w = 1.0f;
-        (*(sSmVec4_B708*)&bounds.MaxPoint).x = seg->maxx;
-        (*(sSmVec4_B708*)&bounds.MaxPoint).y = seg->maxy;
-        (*(sSmVec4_B708*)&bounds.MaxPoint).z = seg->maxz;
-        (*(sSmVec4_B708*)&bounds.MaxPoint).w = 1.0f;
+        (*(&bounds.MinPoint)).x = seg->minx;
+        (*(&bounds.MinPoint)).y = seg->miny;
+        (*(&bounds.MinPoint)).z = seg->minz;
+        (*(&bounds.MinPoint)).w = 1.0f;
+        (*(&bounds.MaxPoint)).x = seg->maxx;
+        (*(&bounds.MaxPoint)).y = seg->maxy;
+        (*(&bounds.MaxPoint)).z = seg->maxz;
+        (*(&bounds.MaxPoint)).w = 1.0f;
         remove_B708((char*)cObjectInterface_getNash(), seg, &bounds);
         seg = seg->next;
     }
@@ -2624,9 +2618,6 @@ extern "C" void cRailModifier__cRailModifier(cRailModifier* self, int flags)
 //100%
 INCLUDE_ASM("object/splinemodifier", cRailModifier_updateBoundBox);
 #ifdef SKIP_ASM
-struct sSmVec4_C040 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 
 struct sSmVEntryI_C040 {
@@ -2659,7 +2650,7 @@ struct sSmOwner_C040 {
 
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (a -= b, 4 floats).
-static inline void vecSubEq_C040(sSmVec4_C040& a, const sSmVec4_C040& b)
+static inline void vecSubEq_C040(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         ".set push\n"
@@ -2675,7 +2666,7 @@ static inline void vecSubEq_C040(sSmVec4_C040& a, const sSmVec4_C040& b)
 }
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (a += b, 4 floats).
-static inline void vecAddEq_C040(sSmVec4_C040& a, const sSmVec4_C040& b)
+static inline void vecAddEq_C040(t4Vector& a, const t4Vector& b)
 {
     __asm__(
         ".set push\n"
@@ -2704,13 +2695,13 @@ extern "C" void cRailModifier_updateBoundBox(cRailModifier* self)
         ownerObj = ((sSmOwner_C040*)self->Instance)->obj;
         tBoundBox* bounds = ownerObj->vt->v45.fn((char*)ownerObj + ownerObj->vt->v45.delta);
         (*(&self->BoundBox)) = *bounds;
-        sSmVec4_C040 margin;
+        t4Vector margin;
         margin.x = 100.0f;
         margin.y = 100.0f;
         margin.z = 100.0f;
         margin.w = 0.0f;
-        vecSubEq_C040((*(sSmVec4_C040*)&(*(&self->BoundBox)).MinPoint), margin);
-        vecAddEq_C040((*(sSmVec4_C040*)&(*(&self->BoundBox)).MaxPoint), margin);
+        vecSubEq_C040((*(&(*(&self->BoundBox)).MinPoint)), margin);
+        vecAddEq_C040((*(&(*(&self->BoundBox)).MaxPoint)), margin);
     }
 }
 #endif

@@ -5913,12 +5913,9 @@ void* cTransitionObj_cTransitionObj(void* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cSnowBox_cSnowBox);
 #ifdef SKIP_ASM
-struct sVec4D88 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sMatD88 {
-    sVec4D88 r[4];
+    t4Vector r[4];
 };
 
 extern char t4mat_Identity[];
@@ -5942,7 +5939,7 @@ static inline void wakeCopyMatD88(sMatD88* dst, const sMatD88* src)
 }
 
 // PORT: PS2-only VU0 inline asm (scale matrix rows by the components of s).
-static inline void wakeScaleMatD88(sMatD88* dst, const sMatD88* src, const sVec4D88& s)
+static inline void wakeScaleMatD88(sMatD88* dst, const sMatD88* src, const t4Vector& s)
 {
     __asm__ __volatile__(
         "lqc2       $vf1, %2\n"
@@ -6012,7 +6009,7 @@ extern "C" void* cSnowBox_cSnowBox(cSnowBox* self, int viewNum, int snowBoxType,
     wakeCopyMatD88((sMatD88*)&self->mBoxMatrix, (sMatD88*)t4mat_Identity);
     {
         sMatD88 scaledCopy;
-        sVec4D88 scale;
+        t4Vector scale;
         sMatD88 scaled;
         scale.x = self->mBoxScale;
         scale.y = self->mBoxScale;
@@ -6023,12 +6020,12 @@ extern "C" void* cSnowBox_cSnowBox(cSnowBox* self, int viewNum, int snowBoxType,
         wakeCopyMatD88((sMatD88*)&self->mBoxMatrix, &scaledCopy);
     }
     {
-        sVec4D88 origin;
+        t4Vector origin;
         origin.x = 0.0f;
         origin.y = 0.0f;
         origin.z = 0.0f;
         origin.w = 1.0f;
-        *(sVec4D88*)&self->mOffset = origin;
+        *(&self->mOffset) = origin;
     }
     return ((char*)self);
 }

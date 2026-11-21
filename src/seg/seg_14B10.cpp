@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "animation/animmodel.h"
 #include "ai/hudfx.h"
 #include "ai/ridermetrix.h"
@@ -416,12 +417,9 @@ extern "C" void cShutdownHandler_OnLoseState(void) {
 //100%
 INCLUDE_ASM("seg/seg_14B10", cRider_setupLean);
 #ifdef SKIP_ASM
-struct sV4_3E80 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float Len_3E80(const sV4_3E80& v)
+static inline float Len_3E80(const t4Vector& v)
 {
     float r;
     int t;
@@ -466,7 +464,7 @@ static inline float Clamp_3E80(float v, float lo, float hi)
  * @param desLean  the desired lean (the steering input)
  */
 extern "C" void cRider_setupLean(cRider* self, float desLean) {
-    float speedScale = Len_3E80(*(sV4_3E80*)&self->mVelocity) / 694.538818359375f;
+    float speedScale = Len_3E80(*(&self->mVelocity)) / 694.538818359375f;
     if (speedScale < 1.0f)
         desLean = desLean * speedScale;
     float rawRate = Abs_3E80(desLean - self->mSlewed[0].cur) * 12.002403259277344f;
@@ -531,12 +529,9 @@ static inline float Clamp_3F88(float v, float lo, float hi)
     return (v >= lo) ? (v <? hi) : lo;
 }
 
-struct sVec4_3F88 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_3F88(const sVec4_3F88& a, const sVec4_3F88& b)
+static inline float vu0Dot_3F88(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -598,7 +593,7 @@ extern "C" void cRider_setupCrouchBrake(cRider* self, float desCrouch, float des
     if (0.0f < desBrake) {
         if (0.0f < self->mSlewed[4].cur) {
             desBrake = 0.0f;
-        } else if (vu0Dot_3F88(*(sVec4_3F88*)&self->mVelocity, *(sVec4_3F88*)&self->mGroundForward) < 0.0f) {
+        } else if (vu0Dot_3F88(*(&self->mVelocity), *(&self->mGroundForward)) < 0.0f) {
             desBrake = 0.0f;
         }
     }
@@ -1921,12 +1916,9 @@ extern "C" int cRider_checkForReset(cRider* self, int isResetInput, int forceAut
 //100%
 INCLUDE_ASM("seg/seg_14B10", cRider_checkForBoardPress);
 #ifdef SKIP_ASM
-struct V4_61D0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4D dot product).
-static inline float Dot4_61D0(const V4_61D0& a, const V4_61D0& b)
+static inline float Dot4_61D0(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -1969,7 +1961,7 @@ extern "C" int cRider_checkForBoardPress(cRider* rider, float dir)
     if (dir == 0.0f) return 0;
     if (rider->RailslideMode == 3 || rider->RailslideMode == 4) return 0;
     if (!cRider_getMotionState((char*)rider)) {
-        if (Dot4_61D0(*(V4_61D0*)&rider->mVelocity, *(V4_61D0*)&rider->mGroundForward) < 0.0f) return 0;
+        if (Dot4_61D0(*(&rider->mVelocity), *(&rider->mGroundForward)) < 0.0f) return 0;
     }
     if (dir > 0.0f) {
         cRiderAnimBase_play_61D0(rider->mRiderAnim, 0x18, 0, -1.0f);
