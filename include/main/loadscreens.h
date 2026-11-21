@@ -88,4 +88,232 @@ CHECK_OFFSET(cGameLoadScreen, mpUI, 0x0C);
 CHECK_OFFSET(cGameLoadScreen, mTexID, 0x10);
 CHECK_SIZE(cGameLoadScreen, 0x18);
 
+
+// ---------------------------------------------------------------------------------------------------------------------
+// cFELoadScreen: the app module shown while the front end loads a race: a cLoadScreen whose UI engine ("data/ui/fl")
+// runs one load state - cFELoadStateInLodge (going to the lodge), cFELoadHintState (a hint, with the rider's picture)
+// or cFELoadState (both riders' stats) - plus the riders' pictures it loads for them. EA's source: probably
+// d:/ssx/code/source/main/loadscreens.cpp (builds/x/v2 file_hints: retail cFELoadState_InitwidgetMultiP's assert, line
+// 1191, names that file; On Tour keeps all four classes in main/all_in_one_main). Retail code: load, gainFocus, purge,
+// render, update and loadTexture (func_00233640) in fe/festateloadscreen (0x00233438 ... 0x00233A70); the dtor, the
+// ctor and getTexttureID in main/ssxappdtor (0x00243C00 ... 0x00243C70).
+//
+// Size 0x1C:
+//   [R] cPreFELoadScreen_update: cMemMan_alloc(0x1C, "FELoad") + the inlined ctor (cFadeScreen_cFadeScreen, vtable,
+//       0xC / 0x10 / 0x14 = 0); the same stores in cFELoadScreen_cFELoadScreen;
+//   [O] On Tour's class is 0x1C: cLoadScreen (0x10) + int mTexID[2] + int SplashTexID.
+// Base: cLoadScreen (above, 0x10: mpUI at 0xC) : cFadeScreen (main/fadescreen.h, 0xC) : cAppModule (the vptr). Vtable
+// cFELoadScreen_vtbl (0x0047D740, 7 slots: 1 dtor, 2 load, 3 purge, 4 cLoadScreen_loseFocus, 5 gainFocus, 6 update,
+// 7 render); the dtor stores cAppModule's D_0046D970.
+// A FLAT layout, like main/game.h. Evidence tags: [R] retail's ctor / dtor / allocation; [U] how retail code uses the
+// field (src/fe/festateloadscreen.cpp, src/main/ssxappdtor.cpp, the asm); [O] SSX On Tour's DWARF (class cFELoadScreen,
+// cLoadScreen, cFadeScreen): names, types and order.
+
+struct cListNode;
+struct cUIState;
+struct cUIScreen;
+struct cFELoadScreen;
+
+struct cFELoadScreen {
+    // --- cAppModule / cFadeScreen (main/fadescreen.h, 0xC)
+    void** mVtbl;                   // 0x000 [R] cFadeScreen_vtbl, then cFELoadScreen_vtbl (ctor); D_0046D970 (dtor)
+    float FadeTimer;                // 0x004 [O] cFadeScreen::FadeTimer; [R] cFadeScreen_cFadeScreen 0.2; [U] render:
+                                    //       cFadeScreen_drawFade(this)
+    int IsEnding;                   // 0x008 [O] cFadeScreen::IsEnding (bool, a word); [R] 0; [U] cLoadScreen_update /
+                                    //       loseFocus
+    // --- cLoadScreen (above, 0x10)
+    cUIEngine* mpUI;                // 0x00C [O] cLoadScreen::mpUI; [R] ctor 0; [U] load builds it (cMemMan_alloc(0x70,
+                                    //       "UIEngine"), "data/ui/fl", fonts / locale / a cFEInput) and pushes the load
+                                    //       state on its stack (+0x18); purge deletes it; render / update draw and run
+                                    //       it
+    // --- cFELoadScreen
+    int mTexID[2];                  // 0x010 [O]; [R] ctor 0, 0; [U] loadTexture (func_00233640) fills [0] (type 1: the
+                                    //       human's "CharaPics") or [0] and [1] (type 2: both players'); purge frees
+                                    //       the non-zero ones; getTexttureID returns [index]; the load states read them
+                                    //       through mpParentModule
+    int SplashTexID;                // 0x018 [O]; [U] load sets -1; purge frees it when >= 0
+};
+
+CHECK_OFFSET(cFELoadScreen, mVtbl, 0x000);
+CHECK_OFFSET(cFELoadScreen, FadeTimer, 0x004);
+CHECK_OFFSET(cFELoadScreen, IsEnding, 0x008);
+CHECK_OFFSET(cFELoadScreen, mpUI, 0x00C);
+CHECK_OFFSET(cFELoadScreen, mTexID, 0x010);
+CHECK_OFFSET(cFELoadScreen, SplashTexID, 0x018);
+CHECK_SIZE(cFELoadScreen, 0x1C);
+
+// ---------------------------------------------------------------------------------------------------------------------
+// cFELoadState: cFELoadScreen's race-stats load state: "103MPStat" (two players on the online game path:
+// InitwidgetMultiP fills each player's rank, time / score, knockdowns, wipeouts, tricks, handplants, ubertricks,
+// ubergrinds and picture) or "100QPStat" (widgetCreateQP fills the quick-play stats); onGainTransition prints the load
+// percentage into "%%".
+// Retail code: all in fe/festateloadhint: the dtor (0x00245B58), onCreateScreen, onGainTransition, onWidgetCreate,
+// InitwidgetMultiP (0x002472C0) and widgetCreateQP (0x00247AB0); there is no out-of-line ctor.
+//
+// Size 0x4C: [R] cFELoadScreen_load: cMemMan_alloc(0x4C, "cFELoadState") + cUIState_cUIState(mem, mpUI), word 0x48 = 0,
+// vtable, then 0x48 = the load screen; [O] On Tour's class is 0x4C: cFELoadScreen* mpParentModule at 0x48.
+// Base: cUIState (ui/uistate.h, 0x48) : cListNode (vptr at 0x8); not a cFEState (the dtor stores cFELoadState_vtbl and
+// runs cUIState__cUIState). Vtable cFELoadState_vtbl (0x0047C608, 24 slots: 1 dtor, 4 onCreateScreen,
+// 7 onGainTransition, 18 onWidgetCreate).
+// A FLAT layout, like main/game.h. Evidence tags: [R] retail's dtor and the inlined ctors / allocations in
+// cFELoadScreen_load; [U] how retail code uses the field (src/fe/festateloadhint.cpp and the asm); [O] SSX On Tour's
+// DWARF (class cFELoadState, cUIState): names, types and order.
+
+struct cFELoadState {
+    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
+    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the cUIState ctor links the node to itself
+    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
+    void** mVtbl;                   // 0x008 [R] cFELoadState_vtbl (cFELoadScreen_load, dtor)
+    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
+    int mHashName;                  // 0x00C [O]
+    cUIEngine* mpEngine;            // 0x010 [O]; [R] the load screen's mpUI; [U] onCreateScreen adds the screen through
+                                    //       it
+    signed char mCurrentCtrl;       // 0x014 [O]; [R] the cUIState ctor stores -1
+    unsigned char mCtrlBits;        // 0x015 [O]; [R] the cUIState ctor stores 0xF
+    char unk_016[0x2];              // 0x016 padding
+    int miMiscData;                 // 0x018 [O]
+    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes; every accessor lw/sw's the word, see
+                                    //       ui/uistate.h)
+    cUIState* mpParentState;        // 0x020 [O]
+    char mScreens[0x1C];            // 0x024 [O] cList mScreens
+    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen stores the screen; onGainTransition and
+                                    //       InitwidgetMultiP look the widgets up on it
+    signed char mUserNum;           // 0x044 [O]; [R] the cUIState ctor stores -1
+    char unk_045[0x3];              // 0x045 padding
+    // --- cFELoadState
+    cFELoadScreen* mpParentModule;  // 0x048 [O]; [R] 0, then cFELoadScreen_load stores the load screen; [U]
+                                    //       InitwidgetMultiP shows mpParentModule->mTexID[player] as the player's
+                                    //       picture
+};
+
+CHECK_OFFSET(cFELoadState, mpPrev, 0x000);
+CHECK_OFFSET(cFELoadState, mpNext, 0x004);
+CHECK_OFFSET(cFELoadState, mVtbl, 0x008);
+CHECK_OFFSET(cFELoadState, mHashName, 0x00C);
+CHECK_OFFSET(cFELoadState, mpEngine, 0x010);
+CHECK_OFFSET(cFELoadState, mCurrentCtrl, 0x014);
+CHECK_OFFSET(cFELoadState, mCtrlBits, 0x015);
+CHECK_OFFSET(cFELoadState, unk_016, 0x016);
+CHECK_OFFSET(cFELoadState, miMiscData, 0x018);
+CHECK_OFFSET(cFELoadState, mAttrState, 0x01C);
+CHECK_OFFSET(cFELoadState, mpParentState, 0x020);
+CHECK_OFFSET(cFELoadState, mScreens, 0x024);
+CHECK_OFFSET(cFELoadState, mpScreen, 0x040);
+CHECK_OFFSET(cFELoadState, mUserNum, 0x044);
+CHECK_OFFSET(cFELoadState, unk_045, 0x045);
+CHECK_OFFSET(cFELoadState, mpParentModule, 0x048);
+CHECK_SIZE(cFELoadState, 0x4C);
+
+// ---------------------------------------------------------------------------------------------------------------------
+// cFELoadHintState: cFELoadScreen's hint load state ("101QPMPHints": a hint title and body, and the rider's picture
+// mpParentModule->mTexID[0] on "Bitmap0000"); onGainTransition prints the load percentage. Retail code: onCreateScreen,
+// onGainTransition, onWidgetCreate (empty) in fe/festateloadhint (0x00245950 ... 0x00245B50); the dtor sits in
+// main/ssxappdtor (0x00245928); there is no out-of-line ctor.
+//
+// Size 0x4C: [R] cFELoadScreen_load: cMemMan_alloc(0x4C, "cFELoadHintState") + cUIState_cUIState(mem, mpUI), word 0x48
+// = 0, vtable, then 0x48 = the load screen; [O] On Tour's class is 0x4C: cFELoadScreen* mpParentModule at 0x48.
+// Base: cUIState (ui/uistate.h, 0x48) : cListNode (vptr at 0x8). Vtable cFELoadHintState_vtbl (0x0047C6D8, 24 slots:
+// 1 dtor, 4 onCreateScreen, 7 onGainTransition, 18 onWidgetCreate).
+// A FLAT layout, like main/game.h. Evidence tags: [R] retail's dtor and the inlined ctors / allocations in
+// cFELoadScreen_load; [U] how retail code uses the field (src/fe/festateloadhint.cpp and the asm); [O] SSX On Tour's
+// DWARF (class cFELoadHintState, cUIState): names, types and order.
+
+struct cFELoadHintState {
+    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
+    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the cUIState ctor links the node to itself
+    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
+    void** mVtbl;                   // 0x008 [R] cFELoadHintState_vtbl (cFELoadScreen_load, dtor)
+    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
+    int mHashName;                  // 0x00C [O]
+    cUIEngine* mpEngine;            // 0x010 [O]; [R] the load screen's mpUI; [U] onCreateScreen adds the screen through
+                                    //       it
+    signed char mCurrentCtrl;       // 0x014 [O]; [R] the cUIState ctor stores -1
+    unsigned char mCtrlBits;        // 0x015 [O]; [R] the cUIState ctor stores 0xF
+    char unk_016[0x2];              // 0x016 padding
+    int miMiscData;                 // 0x018 [O]
+    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes; every accessor lw/sw's the word, see
+                                    //       ui/uistate.h)
+    cUIState* mpParentState;        // 0x020 [O]
+    char mScreens[0x1C];            // 0x024 [O] cList mScreens
+    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen stores the screen and looks "hint_title",
+                                    //       "hint_body" and "Bitmap0000" up on it
+    signed char mUserNum;           // 0x044 [O]; [R] the cUIState ctor stores -1
+    char unk_045[0x3];              // 0x045 padding
+    // --- cFELoadHintState
+    cFELoadScreen* mpParentModule;  // 0x048 [O]; [R] 0, then cFELoadScreen_load stores the load screen; [U]
+                                    //       onCreateScreen shows mpParentModule->mTexID[0] on "Bitmap0000" when both
+                                    //       are set
+};
+
+CHECK_OFFSET(cFELoadHintState, mpPrev, 0x000);
+CHECK_OFFSET(cFELoadHintState, mpNext, 0x004);
+CHECK_OFFSET(cFELoadHintState, mVtbl, 0x008);
+CHECK_OFFSET(cFELoadHintState, mHashName, 0x00C);
+CHECK_OFFSET(cFELoadHintState, mpEngine, 0x010);
+CHECK_OFFSET(cFELoadHintState, mCurrentCtrl, 0x014);
+CHECK_OFFSET(cFELoadHintState, mCtrlBits, 0x015);
+CHECK_OFFSET(cFELoadHintState, unk_016, 0x016);
+CHECK_OFFSET(cFELoadHintState, miMiscData, 0x018);
+CHECK_OFFSET(cFELoadHintState, mAttrState, 0x01C);
+CHECK_OFFSET(cFELoadHintState, mpParentState, 0x020);
+CHECK_OFFSET(cFELoadHintState, mScreens, 0x024);
+CHECK_OFFSET(cFELoadHintState, mpScreen, 0x040);
+CHECK_OFFSET(cFELoadHintState, mUserNum, 0x044);
+CHECK_OFFSET(cFELoadHintState, unk_045, 0x045);
+CHECK_OFFSET(cFELoadHintState, mpParentModule, 0x048);
+CHECK_SIZE(cFELoadHintState, 0x4C);
+
+// ---------------------------------------------------------------------------------------------------------------------
+// cFELoadStateInLodge: cFELoadScreen's load state when the front end starts in the lodge (cRealFE_mStartState 39):
+// "117loadinlodge" and the load percentage. Retail code: the dtor, onCreateScreen, onWidgetCreate (empty) and
+// onGainTransition in fe/festateloadhint (0x00245D28 ... 0x00245DC0); there is no out-of-line ctor.
+//
+// Size 0x48: [R] cFELoadScreen_load: cMemMan_alloc(0x48, "cFELoadStateInLodge") + cUIState_cUIState(mem, mpUI) +
+// vtable; [O] On Tour's class is 0x48 (no members).
+// Base: cUIState (ui/uistate.h, 0x48) : cListNode (vptr at 0x8). Vtable cFELoadStateInLodge_vtbl (0x0047C538, 24 slots:
+// 1 dtor, 4 onCreateScreen, 7 onGainTransition, 18 onWidgetCreate).
+// A FLAT layout, like main/game.h. Evidence tags: [R] retail's dtor and the inlined ctors / allocations in
+// cFELoadScreen_load; [U] how retail code uses the field (src/fe/festateloadhint.cpp and the asm); [O] SSX On Tour's
+// DWARF (class cFELoadStateInLodge, cUIState): names, types and order.
+
+struct cFELoadStateInLodge {
+    // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
+    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the cUIState ctor links the node to itself
+    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
+    void** mVtbl;                   // 0x008 [R] cFELoadStateInLodge_vtbl (cFELoadScreen_load, dtor)
+    // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
+    int mHashName;                  // 0x00C [O]
+    cUIEngine* mpEngine;            // 0x010 [O]; [R] the load screen's mpUI; [U] onCreateScreen adds "117loadinlodge"
+                                    //       through it
+    signed char mCurrentCtrl;       // 0x014 [O]; [R] the cUIState ctor stores -1
+    unsigned char mCtrlBits;        // 0x015 [O]; [R] the cUIState ctor stores 0xF
+    char unk_016[0x2];              // 0x016 padding
+    int miMiscData;                 // 0x018 [O]
+    int mAttrState;                 // 0x01C [O] tAttrState (EA: 2 bytes; every accessor lw/sw's the word, see
+                                    //       ui/uistate.h)
+    cUIState* mpParentState;        // 0x020 [O]
+    char mScreens[0x1C];            // 0x024 [O] cList mScreens
+    cUIScreen* mpScreen;            // 0x040 [O]; [U] onCreateScreen stores the screen; onGainTransition looks "%" up on
+                                    //       it
+    signed char mUserNum;           // 0x044 [O]; [R] the cUIState ctor stores -1
+    char unk_045[0x3];              // 0x045 padding
+};
+
+CHECK_OFFSET(cFELoadStateInLodge, mpPrev, 0x000);
+CHECK_OFFSET(cFELoadStateInLodge, mpNext, 0x004);
+CHECK_OFFSET(cFELoadStateInLodge, mVtbl, 0x008);
+CHECK_OFFSET(cFELoadStateInLodge, mHashName, 0x00C);
+CHECK_OFFSET(cFELoadStateInLodge, mpEngine, 0x010);
+CHECK_OFFSET(cFELoadStateInLodge, mCurrentCtrl, 0x014);
+CHECK_OFFSET(cFELoadStateInLodge, mCtrlBits, 0x015);
+CHECK_OFFSET(cFELoadStateInLodge, unk_016, 0x016);
+CHECK_OFFSET(cFELoadStateInLodge, miMiscData, 0x018);
+CHECK_OFFSET(cFELoadStateInLodge, mAttrState, 0x01C);
+CHECK_OFFSET(cFELoadStateInLodge, mpParentState, 0x020);
+CHECK_OFFSET(cFELoadStateInLodge, mScreens, 0x024);
+CHECK_OFFSET(cFELoadStateInLodge, mpScreen, 0x040);
+CHECK_OFFSET(cFELoadStateInLodge, mUserNum, 0x044);
+CHECK_OFFSET(cFELoadStateInLodge, unk_045, 0x045);
+CHECK_SIZE(cFELoadStateInLodge, 0x48);
+
 #endif /* MAIN_LOADSCREENS_H */

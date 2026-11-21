@@ -124,9 +124,9 @@ struct sDebugMenuScreen {
  * screen calibration, HDTV, playlist and network (with the IP address), then the "Lobby" and "Real Front End"
  * entries, highlighting the cursor row. Also prints "press <start> to play" and an anims count.
  */
-extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
+extern "C" void cDebugMenuScreen_draw(cDebugMenuScreen* self)
 {
-    sDbgPopup* popup = &self->popup;
+    sDbgPopup* popup = &(*(sDbgPopup*)&self->BackgroundMan);
     if (popup->active >= 0) {
         cBackgroundMan_renderImage(popup);
         return;
@@ -150,15 +150,15 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     cFont_text(font, 60.0f, y, str_Game_Path);
     cFont_righttext(font, cBENewRaceInterface_getPathName(newRace), 580.0f, y);
     y += lineheight;
-    font->setColor(self->cursor == 1 ? selectColor : normalColor);
+    font->setColor(self->SelectedItem == 1 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Game_Mode);
     cFont_righttext(font, cBENewRaceInterface_getModeName(newRace), 580.0f, y);
     y += lineheight;
-    font->setColor(self->cursor == 2 ? selectColor : normalColor);
+    font->setColor(self->SelectedItem == 2 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Game_Event);
     cFont_righttext(font, cBENewRaceInterface_getEventName(newRace), 580.0f, y);
     y += lineheight;
-    font->setColor(self->cursor == 3 ? selectColor : normalColor);
+    font->setColor(self->SelectedItem == 3 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_1st_Time_WC_Flag);
     cFont_righttextf(font, 580.0f, y, str_pct_d_b, cBENewPlayerInterface_isFirstTimeWC(intPlayer, 0));
     y += lineheight;
@@ -166,31 +166,31 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
         sprintf(buf, str_pct_s_pct_s_pct_s, cBENewRaceInterface_getLocation(newRace) + 4, cBENewRaceInterface_getLocation(newRace) + 0x44, cBENewRaceInterface_getLocation(newRace) + 0x34);
     else
         sprintf(buf, str_pct_s_pct_s_b, cBENewRaceInterface_getLocation(newRace) + 0x34, cBENewRaceInterface_getLocation(newRace) + 0x34);
-    font->setColor(self->cursor == 4 ? selectColor : normalColor);
+    font->setColor(self->SelectedItem == 4 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Track);
     cFont_righttext(font, buf, 580.0f, y);
     y += lineheight;
-    font->setColor(self->cursor == 5 ? selectColor : normalColor);
+    font->setColor(self->SelectedItem == 5 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Character);
     cFont_righttext(font, cBECharacterInterface_getName(character, 0), 580.0f, y);
     y += lineheight;
-    font->setColor(self->cursor == 6 ? selectColor : normalColor);
+    font->setColor(self->SelectedItem == 6 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Control_Map);
     cFont_righttextf(font, 580.0f, y, str_pct_d_b, cBENewPlayerInterface_getControllerMapping(intPlayer, 0));
     y += lineheight;
-    font->setColor(self->cursor == 7 ? selectColor : normalColor);
+    font->setColor(self->SelectedItem == 7 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Board);
-    cFont_righttext(font, D_004A12E0[self->optFlag], 580.0f, y);
+    cFont_righttext(font, D_004A12E0[self->CurrentBoard], 580.0f, y);
     y += lineheight;
-    font->setColor(self->cursor == 8 ? selectColor : normalColor);
+    font->setColor(self->SelectedItem == 8 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Number_of_AI_riders);
     cFont_righttextf(font, 580.0f, y, str_pct_d_b, cBENewRaceInterface_newRace.iNumberAI);
     y += lineheight;
-    font->setColor(self->cursor == 9 ? selectColor : normalColor);
+    font->setColor(self->SelectedItem == 9 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Screen_Calibration);
-    cFont_righttextf(font, 580.0f, y, str_pct_d_b, self->optVal);
+    cFont_righttextf(font, 580.0f, y, str_pct_d_b, self->CurrentBack);
     y += lineheight;
-    font->setColor(self->cursor == 10 ? selectColor : normalColor);
+    font->setColor(self->SelectedItem == 10 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_HDTV);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -198,9 +198,9 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
         cFont_righttextf(font, 580.0f, y, str_pct_s, vt[9].fn((char*)ps2GraphicsMan + vt[9].delta) ? str_On_480p : str_Off_NTSC);
     }
     y += lineheight;
-    font->setColor(self->cursor == 11 ? selectColor : normalColor);
+    font->setColor(self->SelectedItem == 11 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Playlist);
-    cFont_righttextf(font, 580.0f, y, str_pct_s, cAudioInterface_bxAudio() + (self->optTrack * 20 + 24740));
+    cFont_righttextf(font, 580.0f, y, str_pct_s, cAudioInterface_bxAudio() + (self->CurrentPlaylist * 20 + 24740));
     y += lineheight;
     unsigned int ip = 0;
     if (cCommSystem_mCommSystem != 0)
@@ -209,16 +209,16 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     sprintf(ipbuf, str_pct_d_pct_d_pct_d_pct_d, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
     sModeNamesDbg modes = D_0045CFB8;
     if (cCommSystem_mCommSystem != 0)
-        font->setColor(self->cursor == 12 ? selectColor : normalColor);
+        font->setColor(self->SelectedItem == 12 ? selectColor : normalColor);
     else
-        font->setColor(self->cursor == 12 ? selectColor : disabledColor);
+        font->setColor(self->SelectedItem == 12 ? selectColor : disabledColor);
     cFont_textf(font, 60.0f, y, str_Network_pct_s, ipbuf);
-    cFont_righttextf(font, 580.0f, y, str_pct_s, modes.name[self->optMode]);
+    cFont_righttextf(font, 580.0f, y, str_pct_s, modes.name[self->NetworkMode]);
     y += lineheight;
     y += 5.0f;
-    font->setColor(self->cursor == 13 ? selectColor : disabledColor);
+    font->setColor(self->SelectedItem == 13 ? selectColor : disabledColor);
     cFont_centertextf(font, 320.0f, y, str_Lobby);
-    font->setColor(self->cursor == 14 ? selectColor : normalColor);
+    font->setColor(self->SelectedItem == 14 ? selectColor : normalColor);
     cFont_centertextf(font, 320.0f, y + lineheight, str_Real_Front_End);
     if ((int)SSXApp->LoadingModule == 0) {
         tARGB promptColour;
@@ -270,7 +270,7 @@ extern "C" int cBENewRaceInterface_setGameMode(void* iface, int mode);
  *
  * @param idx  the game path to switch to (On Tour eBEGamePath)
  */
-extern "C" void cDebugMenuScreen_setGamePath(void* self, int idx)
+extern "C" void cDebugMenuScreen_setGamePath(cDebugMenuScreen* self, int idx)
 {
     cBENewRaceIfaceK17D008* iface = (cBENewRaceIfaceK17D008*)cBE_getInterface_Fv(SSXApp->BE, 0);
     ((sDbgFE17D008*)self)->modes[cBENewRaceInterface_newRace.cGamePath] = cBENewRaceInterface_newRace.cGameMode;
@@ -366,7 +366,7 @@ INCLUDE_ASM("fe/debugfe", cDebugMenuScreen_getMaxAIRiders);
  * @return the maximum number of AI riders
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int cDebugMenuScreen_getMaxAIRiders(void* self, int path, int mode)
+extern "C" int cDebugMenuScreen_getMaxAIRiders(cDebugMenuScreen* self, int path, int mode)
 {
     int maxAIRiders = (path == 2) ? 4 : 5;
     switch (mode) {
@@ -413,7 +413,7 @@ extern "C" void* ContinueMenu_ContinueMenu(void* self)
 INCLUDE_ASM("fe/debugfe", func_0017D260);
 #ifdef SKIP_ASM
 extern void* D_004A4E90;
-extern "C" void func_0017D6F0(void* self, void* ev);
+extern "C" void func_0017D6F0(cDebugLobbyScreen* self, void* ev);
 extern "C" void func_00259230(void* ev);
 
 /**
@@ -428,7 +428,7 @@ extern "C" void func_00259230(void* ev);
 extern "C" void func_0017D260(void* self, void* ev)
 {
     if (D_004A4E90 != 0)
-        func_0017D6F0(D_004A4E90, ev);
+        func_0017D6F0((cDebugLobbyScreen*)D_004A4E90, ev);
     func_00259230(ev);
 }
 #endif
@@ -471,53 +471,53 @@ struct sDbgOwner17D298 {
  *
  * @return @p self
  */
-extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(char* self)
+extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(cDebugLobbyScreen* self)
 {
     *(void***)self = cDebugLobbyScreen_vtbl;
-    *(int*)(self + 0x4) = 0;
-    cMenuSys_cMenuSys(self + 0x8);
+    self->mState = 0;
+    cMenuSys_cMenuSys(self->mMenuSys);
     sDbgOwner17D298 onCreate;
-    onCreate.owner = self;
+    onCreate.owner = ((char*)self);
     sDbgOwner17D298 onLogin;
-    onLogin.owner = self;
-    func_001DA988(self + 0x70, &onCreate, &onLogin);
-    ContinueMenu_ContinueMenu(self + 0x604);
+    onLogin.owner = ((char*)self);
+    func_001DA988(self->mLoginMenu, &onCreate, &onLogin);
+    ContinueMenu_ContinueMenu(self->mContinueMenu);
     sDbgOwner17D298 onSelectPersona;
-    onSelectPersona.owner = self;
+    onSelectPersona.owner = ((char*)self);
     sDbgOwner17D298 onCreatePersona;
-    onCreatePersona.owner = self;
+    onCreatePersona.owner = ((char*)self);
     sDbgOwner17D298 onDeletePersona;
-    onDeletePersona.owner = self;
-    func_001DACB8(self + 0x74C, &onSelectPersona, &onCreatePersona, &onDeletePersona);
+    onDeletePersona.owner = ((char*)self);
+    func_001DACB8(self->mPersonaMenu, &onSelectPersona, &onCreatePersona, &onDeletePersona);
     sDbgOwner17D298 onSelectRoom;
-    onSelectRoom.owner = self;
-    func_001DAE20(self + 0xD2C, &onSelectRoom);
+    onSelectRoom.owner = ((char*)self);
+    func_001DAE20(self->mRoomMenu, &onSelectRoom);
     sDbgOwner17D298 onSelectUser;
-    onSelectUser.owner = self;
+    onSelectUser.owner = ((char*)self);
     sDbgOwner17D298 onChat;
-    onChat.owner = self;
-    func_001DAF08(self + 0x1044, &onSelectUser, &onChat);
+    onChat.owner = ((char*)self);
+    func_001DAF08(self->mOccupantsMenu, &onSelectUser, &onChat);
     sDbgOwner17D298 onMessage;
-    onMessage.owner = self;
-    func_001DB028(self + 0x1534, &onMessage);
+    onMessage.owner = ((char*)self);
+    func_001DB028(self->mChatMenu, &onMessage);
     sDbgOwner17D298 onAcceptChallenge;
-    onAcceptChallenge.owner = self;
+    onAcceptChallenge.owner = ((char*)self);
     sDbgOwner17D298 onDeclineChallenge;
-    onDeclineChallenge.owner = self;
-    __sti__all_in_one_main_cpp(self + 0x18C0, &onAcceptChallenge, &onDeclineChallenge);
+    onDeclineChallenge.owner = ((char*)self);
+    __sti__all_in_one_main_cpp(self->mChallengedMenu, &onAcceptChallenge, &onDeclineChallenge);
     sDbgOwner17D298 onAbortChallenge;
-    onAbortChallenge.owner = self;
-    func_001DB2B0(self + 0x1AAC, &onAbortChallenge);
+    onAbortChallenge.owner = ((char*)self);
+    func_001DB2B0(self->mAbortMenu, &onAbortChallenge);
     int emptyText = cBXString_EmptyString;
     cSSXApp* app = SSXApp;
-    *(int*)(self + 0x1C04) = emptyText;
-    *(int*)(self + 0x1C08) = emptyText;
-    *(int*)(self + 0x1C0C) = emptyText;
-    *(int*)(self + 0x60) = (int)app->DebugFE->Font;
-    *(int*)(self + 0x64) = (int)app->Inputs[0];
-    *(int*)(self + 0x68) = app->DebugFE->BoxTID;
-    D_004A4E90 = self;
-    return self;
+    self->mUserName = (char*)emptyText;
+    self->mPassword = (char*)emptyText;
+    self->mChallenger = (char*)emptyText;
+    *(int*)(((char*)self) + 0x60) = (int)app->DebugFE->Font;
+    *(int*)(((char*)self) + 0x64) = (int)app->Inputs[0];
+    *(int*)(((char*)self) + 0x68) = app->DebugFE->BoxTID;
+    D_004A4E90 = ((char*)self);
+    return ((char*)self);
 }
 #endif
 
@@ -613,22 +613,22 @@ static inline void dtorF_17D3B0(char* sub)
  *
  * @param flags  g++ destructor flags; bit 0 set frees the screen
  */
-extern "C" void cDebugLobbyScreen__cDebugLobbyScreen(char* self, int flags)
+extern "C" void cDebugLobbyScreen__cDebugLobbyScreen(cDebugLobbyScreen* self, int flags)
 {
     *(void***)self = cDebugLobbyScreen_vtbl;
     D_004A4E90 = 0;
-    cBXString__cBXString(self + 0x1C0C, 2);
-    cBXString__cBXString(self + 0x1C08, 2);
-    cBXString__cBXString(self + 0x1C04, 2);
-    dtorA_17D3B0(self + 0x1AAC);
-    dtorB_17D3B0(self + 0x18C0);
-    dtorC_17D3B0(self + 0x1534);
-    dtorD_17D3B0(self + 0x1044);
-    dtorE_17D3B0(self + 0xD2C);
-    func_001DD0C8(self + 0x74C, 2);
-    dtorF_17D3B0(self + 0x604);
-    func_001DCEA0(self + 0x70, 2);
-    cMenuSys__cMenuSys(self + 0x8, 2);
+    cBXString__cBXString(&self->mChallenger, 2);
+    cBXString__cBXString(&self->mPassword, 2);
+    cBXString__cBXString(&self->mUserName, 2);
+    dtorA_17D3B0(self->mAbortMenu);
+    dtorB_17D3B0(self->mChallengedMenu);
+    dtorC_17D3B0(self->mChatMenu);
+    dtorD_17D3B0(self->mOccupantsMenu);
+    dtorE_17D3B0(self->mRoomMenu);
+    func_001DD0C8(self->mPersonaMenu, 2);
+    dtorF_17D3B0(self->mContinueMenu);
+    func_001DCEA0(self->mLoginMenu, 2);
+    cMenuSys__cMenuSys(self->mMenuSys, 2);
     *(void***)self = cDebugScreen_vtbl;
     if (flags & 1)
         operator_delete((int*)self);
@@ -641,7 +641,7 @@ INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_update);
 extern "C" void cCommSystem_update(void*);
 extern "C" void func_0025AC50(void*);
 extern "C" void cMenuSys_input(void* stack);
-extern "C" void func_0017DB18(void* self);
+extern "C" void func_0017DB18(cDebugLobbyScreen* self);
 
 struct sMenuStack17D688 {
     int count;      // 0x0
@@ -674,7 +674,7 @@ extern "C" void cDebugLobbyScreen_update(sDebugFE17D688* self)
     func_0025AC50(LobbyMan_mLobbyMan);
     if (sMenuStack17D688_top(&self->stack) != 0)
         cMenuSys_input(&self->stack);
-    func_0017DB18(self);
+    func_0017DB18((cDebugLobbyScreen*)self);
 }
 #endif
 
@@ -687,8 +687,8 @@ extern "C" void* cBXString_operatorE(void* self, void* other);
 extern "C" void cMenuSys_pushMenu(void* menu, void* items);
 extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void func_0025C610(void* net);
-extern "C" void func_0017DA30(void* self, int a1);
-extern "C" void func_0017DE70(char* self);
+extern "C" void func_0017DA30(cDebugLobbyScreen* self, int a1);
+extern "C" void func_0017DE70(cDebugLobbyScreen* self);
 extern "C" void func_001DB418(void* items, void* net);
 extern "C" int func_0025F120(void* net);
 extern "C" char* func_0025F150(void* net, int i);
@@ -759,7 +759,7 @@ static inline void SetMenu0017D6F0(int* menu, void* items)
  * @param vself  the debug lobby screen
  * @param ev  the lobby event
  */
-extern "C" void func_0017D6F0(void* vself, void* ev)
+extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, void* ev)
 {
     sDebugFE17D6F0* self = (sDebugFE17D6F0*)vself;
     switch (*(int*)ev) {
@@ -777,7 +777,7 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
         break;
     }
     case 258:
-        func_0017DA30(self, *(int*)((char*)ev + 8));
+        func_0017DA30((cDebugLobbyScreen*)self, *(int*)((char*)ev + 8));
         break;
     case 201:
         if (SSXApp->unk_74 != 0) {
@@ -847,7 +847,7 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
         break;
     }
     case 239:
-        func_0017DE70((char*)self);
+        func_0017DE70((cDebugLobbyScreen*)((char*)self));
         self->state = 0x10;
         break;
     case 236:
@@ -895,10 +895,10 @@ static inline void SetMode0017DA30(void* self, int mode)
  *
  * @param errorCode  the lobby error code (a four-character tag)
  */
-extern "C" void func_0017DA30(void* self, int errorCode)
+extern "C" void func_0017DA30(cDebugLobbyScreen* self, int errorCode)
 {
-    *(int*)((char*)self + 0x1C14) = errorCode;
-    switch (*(int*)((char*)self + 0x4)) {
+    self->mErrorCode = errorCode;
+    switch (self->mState) {
     case 2:
         SetMode0017DA30(self, 18);
         break;
@@ -993,7 +993,7 @@ struct sDebugFE17DB18 {
  *
  * @param vself  the debug lobby screen
  */
-extern "C" void func_0017DB18(void* vself)
+extern "C" void func_0017DB18(cDebugLobbyScreen* vself)
 {
     sDebugFE17DB18* self = (sDebugFE17DB18*)vself;
     unsigned int state;
@@ -1169,7 +1169,7 @@ static inline void vcall1_17DE70(void* obj)
  * cCommSystem_openDSockChannel with networkOpt.iPort and bIsHost. Stores the channel at +0x1C10 and sets state 16,
  * where func_0017DB18 waits for the connection. func_0017D6F0 calls it for event 239 (game ready).
  */
-extern "C" void func_0017DE70(char* self)
+extern "C" void func_0017DE70(cDebugLobbyScreen* self)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     cBENewRaceInterface_setGamePath(race, 1);
@@ -1199,8 +1199,8 @@ extern "C" void func_0017DE70(char* self)
     }
     char buf[256];
     sprintf(buf, str_pct_d_pct_d_pct_d_pct_d, ip >> 24, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
-    *(int*)(self + 0x1C10) = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, buf, D_00534B30_cfg.port, D_00534B30_cfg.host);
-    *(int*)(self + 4) = 0x10;
+    self->mGameChannel = cCommSystem_openDSockChannel(cCommSystem_mCommSystem, buf, D_00534B30_cfg.port, D_00534B30_cfg.host);
+    self->mState = 0x10;
 }
 #endif
 
@@ -1444,13 +1444,13 @@ extern "C" void cMenuSys_popMenu(void* list);
  * this function ignores it and sends no challenge, so the screen waits for a reply that is never requested (the Abort
  * menu, func_0017E558, gets it out).
  */
-extern "C" void func_0017E368(void* self)
+extern "C" void func_0017E368(cDebugLobbyScreen* self)
 {
     int* list = (int*)((char*)self + 0x8);
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
-    *(int*)((char*)self + 0x4) = 13;
+    self->mState = 13;
 }
 #endif
 
@@ -1463,14 +1463,14 @@ extern "C" void cMenuSys_pushMenu(void* list, void* item);
 /**
  * Opens the debug chat menu from "Room Occupants": closes all menus, sets state 14 and pushes the chat menu (+0x1534).
  */
-extern "C" void func_0017E3B8(void* self)
+extern "C" void func_0017E3B8(cDebugLobbyScreen* self)
 {
     int* list = (int*)((char*)self + 0x8);
     while (*list != 0) {
         cMenuSys_popMenu(list);
     }
-    *(int*)((char*)self + 0x4) = 0xE;
-    cMenuSys_pushMenu((char*)self + 0x8, (char*)self + 0x1534);
+    self->mState = 0xE;
+    cMenuSys_pushMenu(self->mMenuSys, self->mChatMenu);
 }
 #endif
 
@@ -2116,7 +2116,7 @@ extern "C" void* cFont_cFont(void* self, const char* name, int a2);
 extern "C" int* FILE_loadz(const char* name, int flags);
 extern "C" int* FILE_load(const char* name, int flags);
 extern "C" void* cDebugMenuScreen_cDebugMenuScreen(void* self);
-extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(char* self);
+extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(cDebugLobbyScreen* self);
 
 struct sVEnt_17F868 { short delta; short index; void* fn; };
 typedef void (*Fn1_17F868)(void*, int);
@@ -2172,7 +2172,7 @@ extern "C" void cDebugFE_load(sDebugFE_17F868* self)
         self->objs[i] = 0;
     }
     self->cur = self->objs[0] = cDebugMenuScreen_cDebugMenuScreen(cMemMan_alloc(35912, str_DebugMenu, 0, 0));
-    self->objs[1] = cDebugLobbyScreen_cDebugLobbyScreen((char*)cMemMan_alloc(7192, str_LobbyMenu, 0, 0));
+    self->objs[1] = cDebugLobbyScreen_cDebugLobbyScreen((cDebugLobbyScreen*)((char*)cMemMan_alloc(7192, str_LobbyMenu, 0, 0)));
     if (SSXApp->unk_74) {
         self->cur = self->objs[1];
     } else {

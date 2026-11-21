@@ -76,4 +76,51 @@ CHECK_OFFSET(cUIScreen, mRootGroup, 0x040);
 CHECK_OFFSET(cUIScreen, mpState, 0x0D0);
 CHECK_SIZE(cUIScreen, 0xD4);
 
+
+// ---------------------------------------------------------------------------------------------------------------------
+// cUIThread: one animation thread of a UI screen (cUIScreen::mThreads): the frame it is on, the last frame evaluated, a
+// stop frame, the step, and active / primary flags. cUIScreen_playFrame creates it (one primary thread per screen,
+// replacing the old one; extra threads otherwise), the keyframe handlers stop it, cUIScreen_getPrimaryThread finds the
+// primary one. EA's source: d:/ssx/code/source/ui/uiscreen.cpp (the preview's assert strings name the unit). Retail
+// code: deleteThread in ui/uiscreen (0x0039C518), the dtor in ui/uivector (0x003A5B48); the ctor and the accessors are
+// inlined.
+//
+// Size 0x14: [R] cUIScreen_playFrame: cMemMan_alloc(0x14, "UIThread") and the inlined ctor (stores up to 0x13, the
+// flag byte, through the word at 0x10); [O] On Tour's class is 0x14 with the same members at the same offsets.
+// Base: cListNode (mpPrev / mpNext, vptr at 0x8). Vtable cUIThread_vtbl D_004946A0 (3 slots: 1 dtor, 2 / 3
+// cListNode_traverseFlat / traverseRecurse); the dtor stores cListNode_vtbl and runs cListNode_destroyListNode.
+// The two flags are On Tour's `unsigned char mIsActive : 1, mIsPrimary : 1` at 0x13, but retail reads and writes them
+// as bits 24 / 25 of the word at 0x10 (lw / and / or / sw), so they are int bitfields here, as in src/ui/uiscreen.cpp's
+// matching view cUIThread_C870 (a bitfield has no CHECK_OFFSET; CHECK_SIZE covers it).
+// A FLAT layout, like main/game.h. Evidence tags: [R] the inlined ctor, the dtor and the allocation; [U] how retail
+// code uses the field; [O] SSX On Tour's DWARF (class cUIThread): names, types and order.
+
+struct cUIThread {
+    // --- cListNode
+    cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the inlined ctor links the node to itself, then
+                                    //       cList_addToEnd(&screen->mThreads)
+    cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto; [U] cUIScreen_getPrimaryThread walks the
+                                    //       list through it
+    void** mVtbl;                   // 0x008 [R] cUIThread_vtbl D_004946A0 (playFrame), cListNode_vtbl (dtor); [U]
+                                    //       deleteThread calls slot 1 (dtor, flags 3)
+    // --- cUIThread
+    unsigned short mCurrentFrameNumber; // 0x00C [O]; [R] playFrame's frame (sh)
+    unsigned short mLastFrameNumber; // 0x00E [O]; [R] 0xFFFF (sh)
+    unsigned short mStopFrameNumber; // 0x010 [O]; [R] 0xFFFF (sh)
+    signed char mFrameIncrement;    // 0x012 [O]; [R] 1 (sb)
+    unsigned int mIsActive : 1;     // 0x013 bit 0 (bit 24 of the word at 0x10) [O]; [R] playFrame sets it; [U] the
+                                    //       keyframe stop handlers clear it (&= 0xFEFFFFFF)
+    unsigned int mIsPrimary : 1;    // 0x013 bit 1 (bit 25 of the word at 0x10) [O]; [R] playFrame: ThreadType == 0; [U]
+                                    //       cUIScreen_getPrimaryThread tests it
+};
+
+CHECK_OFFSET(cUIThread, mpPrev, 0x000);
+CHECK_OFFSET(cUIThread, mpNext, 0x004);
+CHECK_OFFSET(cUIThread, mVtbl, 0x008);
+CHECK_OFFSET(cUIThread, mCurrentFrameNumber, 0x00C);
+CHECK_OFFSET(cUIThread, mLastFrameNumber, 0x00E);
+CHECK_OFFSET(cUIThread, mStopFrameNumber, 0x010);
+CHECK_OFFSET(cUIThread, mFrameIncrement, 0x012);
+CHECK_SIZE(cUIThread, 0x14);
+
 #endif /* UI_UISCREEN_H */

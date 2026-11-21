@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festate.h"
 #include "fe/festateload.h"
 #include "ui/uitextscroll.h"
 #include "ui/uiinput.h"
@@ -63,7 +64,7 @@ INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onGainFocus);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUITextScroll_addUnicodeStringByID(void* self, int id);
-extern "C" void cFEState_onGainFocus(void* self, cUIState* a1);
+extern "C" void cFEState_onGainFocus(cFEState* self, cUIState* a1);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_TextScroll[];
 extern char str_kT_CREDITSpct_03d[];
@@ -169,7 +170,7 @@ extern "C" void cFEStateCredits_onGainFocus(cFEStateCredits* self, cUIState* pPr
             cUITextScroll_addUnicodeStringByID(self->mpTextScroll, GetHashValue32(buf));
         }
     }
-    cFEState_onGainFocus(self, pPrevState);
+    cFEState_onGainFocus((cFEState*)self, pPrevState);
 }
 #endif
 
@@ -471,13 +472,13 @@ extern sFlowState_865A8 D_004A4E80;
  *
  * @param pPrevState  the state that had focus before, passed on to cUIState_onGainFocus()
  */
-extern "C" void cFEState_onGainFocus(void* self, cUIState* pPrevState)
+extern "C" void cFEState_onGainFocus(cFEState* self, cUIState* pPrevState)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));
     if (screen != 0) {
         void* menu = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Menu));
         if (menu != 0) {
-            cUIMenu_setSelectedByIndex(menu, cFEFlowState_getValue(&D_004A4E80, *(signed char*)((char*)self + 0xC)));
+            cUIMenu_setSelectedByIndex(menu, cFEFlowState_getValue(&D_004A4E80, *(signed char*)&self->mHashName));
         }
     }
     cUIState_onGainFocus(self, pPrevState);
@@ -502,13 +503,13 @@ extern sFlowState_865A8 D_004A4E80;
  * Finds the "Menu" object on the state's first screen and calls cFEFlowState_setValue (On Tour cFEFlowState::setValue)
  * on the flow state D_004A4E80 with this state's id (+0xC) and the menu's selected index (+0x95).
  */
-extern "C" void cFEState_onLoseFocus(void* self)
+extern "C" void cFEState_onLoseFocus(cFEState* self)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));
     if (screen != 0) {
         void* obj = cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Menu));
         if (obj != 0) {
-            cFEFlowState_setValue(&D_004A4E80, *(signed char*)((char*)self + 0xC), *(signed char*)((char*)obj + 0x95));
+            cFEFlowState_setValue(&D_004A4E80, *(signed char*)&self->mHashName, *(signed char*)((char*)obj + 0x95));
         }
     }
 }

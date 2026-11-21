@@ -16,11 +16,11 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 /**
  * Creates the profile select screen ("05sel_prof") and shows its first frame.
  */
-extern "C" void cFEStateProfileSelect_onCreateScreen(void* self)
+extern "C" void cFEStateProfileSelect_onCreateScreen(cFEStateProfileSelect* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_05sel_prof), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -67,26 +67,26 @@ struct sVEK18EB40b {
  * @param menu  the widget the event is for (null: nothing happens)
  * @param msg  UI event code (1, 2, 5 or 6)
  */
-extern "C" void cFEStateProfileSelect_onWidgetEvent(void* self, cUIThing* menu, unsigned int msg)
+extern "C" void cFEStateProfileSelect_onWidgetEvent(cFEStateProfileSelect* self, cUIThing* menu, unsigned int msg)
 {
     if (((char*)menu) == 0)
         return;
     switch (msg) {
     case 5: {
         ((cUIObjK18EB40*)menu)->setColor(sColorK18EB40(1.0f, 1.0f, 0.0f, 0.0f));
-        char* custom = **(char***)((char*)self + 0x10);
+        char* custom = *(char**)self->mpEngine;
         sVEK18EB40b* vt = *(sVEK18EB40b**)(custom + 4);
         void* nextState = vt[4].fn(custom + vt[4].delta, self, menu->mMiscData);
         if (nextState != 0)
-            cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         break;
     }
     case 6: {
-        char* custom = **(char***)((char*)self + 0x10);
+        char* custom = *(char**)self->mpEngine;
         sVEK18EB40b* vt = *(sVEK18EB40b**)(custom + 4);
         void* nextState = vt[5].fn(custom + vt[5].delta, self, menu->mMiscData);
         if (nextState != 0)
-            cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         break;
     }
     case 1: {

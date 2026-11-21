@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateselectmp.h"
 #include "ui/uithing.h"
 #include "fe/festatempcircuit.h"
 
@@ -15,11 +16,11 @@ extern char str_86sel_multi[];
  *
  * The new screen is kept in mpScreen (+0x40); the frame is played only when the screen was created.
  */
-extern "C" void cFEStateSelectMultiplayerMode_onCreateScreen(void* self)
+extern "C" void cFEStateSelectMultiplayerMode_onCreateScreen(cFEStateSelectMultiplayerMode* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_86sel_multi), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -40,7 +41,7 @@ extern char D_004A1500[];
  *
  * @param item  the widget just created (On Tour pWidget)
  */
-extern "C" void cFEStateSelectMultiplayerMode_onWidgetCreate(void* self, cUIThing* item)
+extern "C" void cFEStateSelectMultiplayerMode_onWidgetCreate(cFEStateSelectMultiplayerMode* self, cUIThing* item)
 {
     int id = item->mHashName;
     if (id == GetHashValue32(D_004A14F8)) {
@@ -74,27 +75,27 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * @param item  the widget (On Tour pWidget)
  * @param msg  the event (On Tour Event)
  */
-extern "C" void cFEStateSelectMultiplayerMode_onWidgetEvent(void* self, cUIThing* item, int msg)
+extern "C" void cFEStateSelectMultiplayerMode_onWidgetEvent(cFEStateSelectMultiplayerMode* self, cUIThing* item, int msg)
 {
     if (((void*)item) == 0) {
         return;
     }
     switch (msg) {
     case 5: {
-        void* obj = **(void***)((char*)self + 0x10);
+        void* obj = *(void**)self->mpEngine;
         sVEntry001A3160* vt = *(sVEntry001A3160**)((char*)obj + 4);
         void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }
         break;
     }
     case 6: {
-        void* obj = **(void***)((char*)self + 0x10);
+        void* obj = *(void**)self->mpEngine;
         sVEntry001A3160* vt = *(sVEntry001A3160**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }
         break;
     }

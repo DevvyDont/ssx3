@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateselectmp.h"
 #include "fe/fereal.h"
 #include "fe/fecustom.h"
 #include "ui/uistate.h"
@@ -1743,11 +1744,11 @@ extern void* cFEStateSelectMultiplayerMode_vtbl[];
  * @param owner  the UI engine
  * @return @p self
  */
-extern "C" void* cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode(void* self, cUIEngine* owner)
+extern "C" void* cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode(cFEStateSelectMultiplayerMode* self, cUIEngine* owner)
 {
     cUIState_cUIState(self, owner);
-    *(int*)((char*)self + 0xC) = 22;
-    *(void***)((char*)self + 0x8) = cFEStateSelectMultiplayerMode_vtbl;
-    return self;
+    self->mHashName = 22;
+    self->mVtbl = cFEStateSelectMultiplayerMode_vtbl;
+    return ((void*)self);
 }
 #endif

@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/ovstatetrophy.h"
+#include "fe/ovstaterewardslist.h"
 #include "fe/ovstatehud.h"
 #include "ai/rider.h"
 #include "be/beintnewrace.h"
@@ -139,8 +141,8 @@ extern char cOVState_vtbl[];
  *
  * @param ovState  the object being destroyed
  */
-extern "C" void cOVTemplate_Simple__cOVTemplate_Simple(void *ovState) {
-    *(char **)((char*)ovState + 8) = cOVState_vtbl;
+extern "C" void cOVTemplate_Simple__cOVTemplate_Simple(cOVTemplate_Simple* ovState) {
+    ovState->mVtbl = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
@@ -561,10 +563,10 @@ extern char cPDATemplate_vtbl[];
  *
  * @return the object
  */
-extern "C" void* cPDATemplate_cPDATemplate(void *self) {
+extern "C" void* cPDATemplate_cPDATemplate(cPDATemplate* self) {
     cUIState_cUIState_x(self);
-    *(char**)((char*)self + 8) = cPDATemplate_vtbl;
-    return self;
+    self->mVtbl = (void**)cPDATemplate_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -1170,17 +1172,17 @@ extern unsigned short str_sp_b[];
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_0021D070(void *ovState) {
+extern "C" void *func_0021D070(cOVStateHiScoreList* ovState) {
     cUIState_cUIState(ovState, 0);
-    (*(int *)((char*)(ovState) + (0x98))) = 0;
-    (*(int *)((char*)(ovState) + (0x48))) = 0;
-    (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
-    (*(int *)((char*)(ovState) + (0x4C))) = 0;
-    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    (ovState->mOVID) = 0;
+    (ovState->mDoneTransition) = 0;
+    ((char*)ovState->mVtbl) = cOVState_vtbl;
+    (ovState->mAllowPauseMenu) = 0;
+    (ovState->mRemovePDA) = 0;
     unsigned short chatInit = str_sp_b[0];
-    (*(char **)((char*)(ovState) + (8))) = cOVStateHiScoreList_vtbl;
+    ((char*)ovState->mVtbl) = cOVStateHiScoreList_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
-    return ovState;
+    return ((void*)ovState);
 }
 #endif
 
@@ -1206,17 +1208,17 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_0021D0D0(void *ovState, int engine, int overlayId) {
+extern "C" void *func_0021D0D0(cOVStateHiScoreList* ovState, int engine, int overlayId) {
     cUIState_cUIState_D0D0(ovState);
-    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
-    (*(int *)((char*)(ovState) + (0x48))) = 0;
-    (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
-    (*(int *)((char*)(ovState) + (0x4C))) = 0;
-    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    (ovState->mOVID) = overlayId;
+    (ovState->mDoneTransition) = 0;
+    ((char*)ovState->mVtbl) = cOVState_vtbl;
+    (ovState->mAllowPauseMenu) = 0;
+    (ovState->mRemovePDA) = 0;
     unsigned short chatInit = str_sp_b[0];
-    (*(char **)((char*)(ovState) + (8))) = cOVStateHiScoreList_vtbl;
+    ((char*)ovState->mVtbl) = cOVStateHiScoreList_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
-    return ovState;
+    return ((void*)ovState);
 }
 #endif
 
@@ -1234,8 +1236,8 @@ extern char cOVState_vtbl[];
  * as cOVState's own destructor cOVState__cOVState, so the class tears down nothing of its own. The g++ delete
  * flags reach cUIState__cUIState() untouched in the second argument register.
  */
-extern "C" void cOVStateHiScoreList__cOVStateHiScoreList(void *self) {
-    *(char **)((char*)self + 8) = cOVState_vtbl;
+extern "C" void cOVStateHiScoreList__cOVStateHiScoreList(cOVStateHiScoreList* self) {
+    self->mVtbl = (void**)cOVState_vtbl;
     cUIState__cUIState_a(self);
 }
 #endif
@@ -4957,17 +4959,17 @@ extern unsigned short str_sp_b[];
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_00222100(void *ovState) {
+extern "C" void *func_00222100(cOVStateRewardsList* ovState) {
     cUIState_cUIState(ovState, 0);
-    (*(int *)((char*)(ovState) + (0x98))) = 0;
-    (*(int *)((char*)(ovState) + (0x48))) = 0;
-    (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
-    (*(int *)((char*)(ovState) + (0x4C))) = 0;
-    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    (ovState->mOVID) = 0;
+    (ovState->mDoneTransition) = 0;
+    ((char*)ovState->mVtbl) = cOVState_vtbl;
+    (ovState->mAllowPauseMenu) = 0;
+    (ovState->mRemovePDA) = 0;
     unsigned short chatInit = str_sp_b[0];
-    (*(char **)((char*)(ovState) + (8))) = cOVStateRewardsList_vtbl;
+    ((char*)ovState->mVtbl) = cOVStateRewardsList_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
-    return ovState;
+    return ((void*)ovState);
 }
 #endif
 
@@ -4993,17 +4995,17 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_00222160(void *ovState, int engine, int overlayId) {
+extern "C" void *func_00222160(cOVStateRewardsList* ovState, int engine, int overlayId) {
     cUIState_cUIState_2160(ovState);
-    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
-    (*(int *)((char*)(ovState) + (0x48))) = 0;
-    (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
-    (*(int *)((char*)(ovState) + (0x4C))) = 0;
-    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    (ovState->mOVID) = overlayId;
+    (ovState->mDoneTransition) = 0;
+    ((char*)ovState->mVtbl) = cOVState_vtbl;
+    (ovState->mAllowPauseMenu) = 0;
+    (ovState->mRemovePDA) = 0;
     unsigned short chatInit = str_sp_b[0];
-    (*(char **)((char*)(ovState) + (8))) = cOVStateRewardsList_vtbl;
+    ((char*)ovState->mVtbl) = cOVStateRewardsList_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
-    return ovState;
+    return ((void*)ovState);
 }
 #endif
 
@@ -5022,8 +5024,8 @@ extern char cOVState_vtbl[];
  *
  * @return no meaningful value (cUIState__cUIState() returns nothing)
  */
-extern "C" void* cOVStateRewardsList__cOVStateRewardsList(void *self) {
-    *(char**)((char*)self + 8) = cOVState_vtbl;
+extern "C" void* cOVStateRewardsList__cOVStateRewardsList(cOVStateRewardsList* self) {
+    self->mVtbl = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif
@@ -5162,17 +5164,17 @@ extern unsigned short str_sp_b[];
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_002222F8(void *ovState) {
+extern "C" void *func_002222F8(cOVStateTrophy* ovState) {
     cUIState_cUIState(ovState, 0);
-    (*(int *)((char*)(ovState) + (0x98))) = 0;
-    (*(int *)((char*)(ovState) + (0x48))) = 0;
-    (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
-    (*(int *)((char*)(ovState) + (0x4C))) = 0;
-    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    (ovState->mOVID) = 0;
+    (ovState->mDoneTransition) = 0;
+    ((char*)ovState->mVtbl) = cOVState_vtbl;
+    (ovState->mAllowPauseMenu) = 0;
+    (ovState->mRemovePDA) = 0;
     unsigned short chatInit = str_sp_b[0];
-    (*(char **)((char*)(ovState) + (8))) = cOVStateTrophy_vtbl;
+    ((char*)ovState->mVtbl) = cOVStateTrophy_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
-    return ovState;
+    return ((void*)ovState);
 }
 #endif
 
@@ -5198,17 +5200,17 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_00222358(void *ovState, int engine, int overlayId) {
+extern "C" void *func_00222358(cOVStateTrophy* ovState, int engine, int overlayId) {
     cUIState_cUIState_2358(ovState);
-    (*(int *)((char*)(ovState) + (0x98))) = overlayId;
-    (*(int *)((char*)(ovState) + (0x48))) = 0;
-    (*(char **)((char*)(ovState) + (8))) = cOVState_vtbl;
-    (*(int *)((char*)(ovState) + (0x4C))) = 0;
-    (*(int *)((char*)(ovState) + (0x54))) = 0;
+    (ovState->mOVID) = overlayId;
+    (ovState->mDoneTransition) = 0;
+    ((char*)ovState->mVtbl) = cOVState_vtbl;
+    (ovState->mAllowPauseMenu) = 0;
+    (ovState->mRemovePDA) = 0;
     unsigned short chatInit = str_sp_b[0];
-    (*(char **)((char*)(ovState) + (8))) = cOVStateTrophy_vtbl;
+    ((char*)ovState->mVtbl) = cOVStateTrophy_vtbl;
     (*(unsigned short *)((char*)(ovState) + (0x58))) = chatInit;
-    return ovState;
+    return ((void*)ovState);
 }
 #endif
 
@@ -5227,8 +5229,8 @@ extern char cOVState_vtbl[];
  *
  * @return no meaningful value (cUIState__cUIState() returns nothing)
  */
-extern "C" void* cOVStateTrophy__cOVStateTrophy(void *self) {
-    *(char**)((char*)self + 8) = cOVState_vtbl;
+extern "C" void* cOVStateTrophy__cOVStateTrophy(cOVStateTrophy* self) {
+    self->mVtbl = (void**)cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
 #endif

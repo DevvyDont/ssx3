@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/ovstaterewardslist.h"
 
 //100%
 INCLUDE_ASM("fe/ovstaterewardslist", cOVStateRewardsList_onCreateScreen);
@@ -12,11 +13,11 @@ extern char str_rewardslist[];
 /**
  * Creates the overlay rewards-list screen "rewardslist", then runs cOVState_onCreateScreen().
  */
-extern "C" void cOVStateRewardsList_onCreateScreen(void* self)
+extern "C" void cOVStateRewardsList_onCreateScreen(cOVStateRewardsList* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_rewardslist), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -65,7 +66,7 @@ struct sVEntry_200288 {
  * @param item  the widget (ignored when 0); its miscellaneous data (+0x18) is the id
  * @param msg  the widget event
  */
-extern "C" void cOVStateRewardsList_onWidgetEvent(void* self, cUIObj_200288* item, int msg)
+extern "C" void cOVStateRewardsList_onWidgetEvent(cOVStateRewardsList* self, cUIObj_200288* item, int msg)
 {
     if (item == 0) {
         return;
@@ -75,19 +76,19 @@ extern "C" void cOVStateRewardsList_onWidgetEvent(void* self, cUIObj_200288* ite
         item->setColor(sColor_200288(1.0f, 1.0f, 0.0f, 0.0f));
         void* nextState = 0;
         if (*(int*)((char*)item + 0x18) == 1) {
-            void* obj = **(void***)((char*)self + 0x10);
+            void* obj = *(void**)self->mpEngine;
             sVEntry_200288* vt = *(sVEntry_200288**)((char*)obj + 4);
             nextState = vt[4].fn((char*)obj + vt[4].delta, self, 1);
         }
-        cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
+        cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         break;
     }
     case 6: {
-        void* obj = **(void***)((char*)self + 0x10);
+        void* obj = *(void**)self->mpEngine;
         sVEntry_200288* vt = *(sVEntry_200288**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
         if (nextState != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }
         break;
     }

@@ -592,13 +592,13 @@ extern char cFELoadScreen_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *cFELoadScreen_cFELoadScreen(void *self) {
+extern "C" void *cFELoadScreen_cFELoadScreen(cFELoadScreen* self) {
     cFadeScreen_cFadeScreen(self);
-    *(int *)((char *)self + 0xC) = 0;
-    *(void **)((char *)self + 0) = cFELoadScreen_vtbl;
-    *(int *)((char *)self + 0x10) = 0;
-    *(int *)((char *)self + 0x14) = 0;
-    return self;
+    self->mpUI = 0;
+    self->mVtbl = (void**)cFELoadScreen_vtbl;
+    self->mTexID[0] = 0;
+    self->mTexID[1] = 0;
+    return ((void*)self);
 }
 #endif
 //100%
@@ -610,7 +610,7 @@ INCLUDE_ASM("main/ssxappdtor", cFELoadScreen_getTexttureID);
  * @param index  which texture (0 or 1; not range-checked)
  * @return the texture id at +0x10 + 4 * @p index
  */
-extern "C" int cFELoadScreen_getTexttureID(void *self, int index) {
+extern "C" int cFELoadScreen_getTexttureID(cFELoadScreen* self, int index) {
     return *(int *)((char *)self + (index << 2) + 0x10);
 }
 #endif
@@ -3845,9 +3845,9 @@ extern "C" void* cUIState__cUIState(void* self);
  *
  * @return no meaningful value (cUIState__cUIState returns nothing)
  */
-extern "C" void* cFELoadHintState__cFELoadHintState(void* self)
+extern "C" void* cFELoadHintState__cFELoadHintState(cFELoadHintState* self)
 {
-    *(void**)((char*)self + 0x8) = cFELoadHintState_vtbl;
+    self->mVtbl = (void**)cFELoadHintState_vtbl;
     return cUIState__cUIState(self);
 }
 #endif

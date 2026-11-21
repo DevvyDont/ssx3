@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatelegal.h"
 #include "fe/festateoptions.h"
 
 //100%
@@ -12,15 +13,15 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 /**
  * Creates the autosave notice screen ("122bAutosave") and resets its frame counter.
  */
-extern "C" void cFEStateLegal_onCreateScreen(void* self)
+extern "C" void cFEStateLegal_onCreateScreen(cFEStateLegal* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_122bAutosave), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    *(int*)((char*)self + 0x48) = 0;
+    self->mDisplayTicks = 0;
 }
 #endif
 
@@ -38,15 +39,15 @@ extern "C" void cUIStateStack_pop(void* list, int a1);
 /**
  * Shows the autosave notice for 240 frames, then plays "TransitionOut" and closes it.
  */
-extern "C" void cFEStateLegal_onUpdate(void* self)
+extern "C" void cFEStateLegal_onUpdate(cFEStateLegal* self)
 {
     cUIState_onUpdate(self);
-    if (++*(int*)((char*)self + 0x48) == 0xF0) {
-        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_TransitionOut));
+    if (++self->mDisplayTicks == 0xF0) {
+        int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut));
         if (frame != 0xFFFF) {
-            cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
+            cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
-        cUIStateStack_pop((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
+        cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
     }
 }
 #endif

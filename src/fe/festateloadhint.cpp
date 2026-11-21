@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/loadscreens.h"
 #include "ui/uithing.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
@@ -30,11 +31,11 @@ extern char str_Bitmap0000_b[];
  * Hints cycle through kT_FEHINTTitle%d / kT_FEHINTDES%d numbers 1-15, skipping 12 (counter D_004A2C38). The
  * image comes from the load info at +0x48 (its word at +0x10) and goes on the "Bitmap0000" widget.
  */
-extern "C" void cFELoadHintState_onCreateScreen(void* self)
+extern "C" void cFELoadHintState_onCreateScreen(cFELoadHintState* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_101QPMPHints), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -48,17 +49,17 @@ extern "C" void cFELoadHintState_onCreateScreen(void* self)
     sprintf(title, str_kT_FEHINTTitlepct_d, n);
     sprintf(body, str_kT_FEHINTDESpct_d, n);
     D_004A2C38 = (D_004A2C38 + 1) % 15;
-    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hint_title));
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hint_title));
     if (text != 0) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(title));
     }
-    text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hint_body));
+    text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hint_body));
     if (text != 0) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(body));
     }
-    char* icon = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Bitmap0000_b));
+    char* icon = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Bitmap0000_b));
     if (icon != 0) {
-        char* loadInfo = *(char**)((char*)self + 0x48);
+        char* loadInfo = (char*)self->mpParentModule;
         if (loadInfo != 0) {
             int textureId = *(int*)(loadInfo + 0x10);
             if (textureId != 0) {
@@ -88,10 +89,10 @@ extern "C" void cUIText_setUnicodeString(void* obj, char* text);
  *
  * @return always 0
  */
-extern "C" int cFELoadHintState_onGainTransition(void* self)
+extern "C" int cFELoadHintState_onGainTransition(cFELoadHintState* self)
 {
     char buf[200];
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pct));
+    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {
         sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)((char*)cAppMan_TheAppMan + 0x38));
         cUIText_setUnicodeString(obj, buf);
@@ -106,8 +107,9 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadHintState_onWidgetCreate__FPv);
 /**
  * Does nothing: the load-hint state's onWidgetCreate has an empty body.
  */
-void cFELoadHintState_onWidgetCreate(void* self)
+void cFELoadHintState_onWidgetCreate(void* vself)
 {
+    cFELoadHintState* self = (cFELoadHintState*)vself;
 }
 #endif
 
@@ -125,9 +127,9 @@ extern "C" void* cUIState__cUIState(void* self);
  *
  * @return no meaningful value (cUIState__cUIState returns nothing)
  */
-extern "C" void* cFELoadState__cFELoadState(void* self)
+extern "C" void* cFELoadState__cFELoadState(cFELoadState* self)
 {
-    *(void**)((char*)self + 0x8) = cFELoadState_vtbl;
+    self->mVtbl = (void**)cFELoadState_vtbl;
     return cUIState__cUIState(self);
 }
 #endif
@@ -151,22 +153,22 @@ extern char str_100QPStat[];
  * The online check is the new-race game path (newRace.cGamePath == 2); the two-player screen is filled with
  * InitwidgetMultiP() for players 0 and 1.
  */
-extern "C" void cFELoadState_onCreateScreen(void* self)
+extern "C" void cFELoadState_onCreateScreen(cFELoadState* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == 2) {
-        void* engine = *(void**)((char*)self + 0x10);
+        void* engine = self->mpEngine;
         void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_103MPStat), 0);
-        *(void**)((char*)self + 0x40) = screen;
+        self->mpScreen = (cUIScreen*)screen;
         if (screen != 0) {
             cUIScreen_playFrame(screen, 0, 0);
             cFELoadState_InitwidgetMultiP(self, 0);
             cFELoadState_InitwidgetMultiP(self, 1);
         }
     } else {
-        void* engine = *(void**)((char*)self + 0x10);
+        void* engine = self->mpEngine;
         void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_100QPStat), 0);
-        *(void**)((char*)self + 0x40) = screen;
+        self->mpScreen = (cUIScreen*)screen;
         if (screen != 0) {
             cUIScreen_playFrame(screen, 0, 0);
         }
@@ -192,10 +194,10 @@ extern "C" void cUIText_setUnicodeString(void* obj, char* text);
  *
  * @return always 0
  */
-extern "C" int cFELoadState_onGainTransition(void* self)
+extern "C" int cFELoadState_onGainTransition(cFELoadState* self)
 {
     char buf[200];
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pct));
+    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {
         sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)((char*)cAppMan_TheAppMan + 0x38));
         cUIText_setUnicodeString(obj, buf);
@@ -210,7 +212,7 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadState_onWidgetCreate);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void cFELoadState_widgetCreateQP(void* self, cUIThing* widget);
+extern "C" void cFELoadState_widgetCreateQP(cFELoadState* self, cUIThing* widget);
 
 /**
  * Creates the load screen's quick-play widget, except on the online game path.
@@ -220,7 +222,7 @@ extern "C" void cFELoadState_widgetCreateQP(void* self, cUIThing* widget);
  *
  * @param widget  the widget being created
  */
-extern "C" void cFELoadState_onWidgetCreate(void* self, cUIThing* widget)
+extern "C" void cFELoadState_onWidgetCreate(cFELoadState* self, cUIThing* widget)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath != 2) {
@@ -243,9 +245,9 @@ extern "C" void* cUIState__cUIState(void* self);
  *
  * @return no meaningful value (cUIState__cUIState returns nothing)
  */
-extern "C" void* cFELoadStateInLodge__cFELoadStateInLodge(void* self)
+extern "C" void* cFELoadStateInLodge__cFELoadStateInLodge(cFELoadStateInLodge* self)
 {
-    *(void**)((char*)self + 0x8) = cFELoadStateInLodge_vtbl;
+    self->mVtbl = (void**)cFELoadStateInLodge_vtbl;
     return cUIState__cUIState(self);
 }
 #endif
@@ -261,11 +263,11 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 /**
  * Creates the in-lodge loading screen ("117loadinlodge") and plays its first frame.
  */
-extern "C" void cFELoadStateInLodge_onCreateScreen(void* self)
+extern "C" void cFELoadStateInLodge_onCreateScreen(cFELoadStateInLodge* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_117loadinlodge), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -278,8 +280,9 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadStateInLodge_onWidgetCreate__FPv);
 /**
  * Does nothing: the in-lodge loading state's onWidgetCreate has an empty body.
  */
-void cFELoadStateInLodge_onWidgetCreate(void* self)
+void cFELoadStateInLodge_onWidgetCreate(void* vself)
 {
+    cFELoadStateInLodge* self = (cFELoadStateInLodge*)vself;
 }
 #endif
 
@@ -301,10 +304,10 @@ extern "C" void cUIText_setUnicodeString(void* obj, char* text);
  *
  * @return always 0
  */
-extern "C" int cFELoadStateInLodge_onGainTransition(void* self)
+extern "C" int cFELoadStateInLodge_onGainTransition(cFELoadStateInLodge* self)
 {
     char buf[200];
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pct));
+    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {
         sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)((char*)cAppMan_TheAppMan + 0x38));
         cUIText_setUnicodeString(obj, buf);
@@ -1392,7 +1395,7 @@ struct sVEnt_7AB0 { short delta; short index; void* (*fn)(void*, int); };
  *
  * @param widget  the widget being created (On Tour cUIThing* pWidget)
  */
-extern "C" void cFELoadState_widgetCreateQP(void* self, cUIThing* widget)
+extern "C" void cFELoadState_widgetCreateQP(cFELoadState* self, cUIThing* widget)
 {
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* iface2 = cBE_getInterface_Fv(cBE_getBE(), 2);

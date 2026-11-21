@@ -91,4 +91,62 @@ CHECK_OFFSET(cRealFE, mMovieSkippable, 0xB5AD8);
 CHECK_OFFSET(cRealFE, mWaitRenderNum, 0xB5ADC);
 CHECK_SIZE(cRealFE, 0xB5AE0);
 
+
+// ---------------------------------------------------------------------------------------------------------------------
+// cFE: the front-end app module's base (cRealFE above derives from it; cDebugFE does not): a cFadeScreen with the UI
+// engine, the front-end camera, the rider manager, the bolt file manager and the FX loader. Never allocated on its own
+// (its vtable's load and render, slots 2 / 7, are the pure-virtual stub func_00411530).
+// EA's source file is not known (On Tour: fe/all_in_one_fe). Retail code: cFE_cFE and cFE__cFE in fe/festatecharequip
+// (0x001956F8, 0x001957D0); the out-of-line getters getCamera / getHuman / getRiderManager / getBoltFileManager (two
+// copies each) and getUI in main/all_in_one_main (0x001DCB60 ... 0x001DCBD0).
+//
+// Size 0xB5AB0:
+//   [R] cRealFE_cRealFE builds its own cConnMan at 0xB5AB0 after cFE_cFE; cFE_cFE's last member is mFXLoader at 0xB5AA0
+//       and the class is 16-byte aligned (cSimpleCamera's t4Matrix), so 0xB5AA4 ... 0xB5AAF is tail padding (see
+//       cRealFE above);
+//   [O] On Tour's class is 0x33C0 (a smaller cFERiderManager and no bolt file manager).
+// Base: cFadeScreen (main/fadescreen.h, 0xC) : cAppModule (the vptr). cFE_cFE runs cFadeScreen_cFadeScreen and stores
+// cFE_vtbl (0x0046D878, 7 slots: 1 dtor cFE__cFE, 2 / 7 func_00411530, 3 cAppModule_purge, 4 cFadeScreen_loseFocus,
+// 5 cAppModule_gainFocus, 6 cFadeScreen_update); cFE__cFE stores it again and ends with cAppModule's D_0046D970.
+// A FLAT layout, like main/game.h; the embedded objects are raw regions (as in cRealFE above). Evidence tags: [R]
+// cFE_cFE / cFE__cFE; [P] the July 2003 preview's inline getters (see cRealFE); [U] how retail code uses the field; [O]
+// SSX On Tour's DWARF (class cFE, cFadeScreen): names, types and order.
+
+struct cFE {
+    // --- cAppModule / cFadeScreen (main/fadescreen.h, 0xC)
+    void** mVtbl;                   // 0x000 [R] cFadeScreen_vtbl, then cFE_vtbl (cFE_cFE); cFE_vtbl, then D_0046D970
+                                    //       (cFE__cFE)
+    float FadeTimer;                // 0x004 [O]; [R] cFadeScreen_cFadeScreen 0.2
+    int IsEnding;                   // 0x008 [O] (bool, a word); [R] 0
+    // --- cFE
+    cUIEngine* mpUI;                // 0x00C [O][P] getUI; [R] cFE_cFE: cMemMan_alloc(0x70, "UIEngine") +
+                                    //       cUIEngine_cUIEngine; cFE__cFE deletes it (cUIEngine__cUIEngine(.., 3)) when
+                                    //       set; [U] cFE_getUI returns it
+    char mCamera[0xA0];             // 0x010 [O] cFECamera (= cSimpleCamera, camera/camera.h; its vptr at +0x90 = 0xA0);
+                                    //       [P] getCamera returns this + 0x10; [R] cFE_cFE:
+                                    //       cSimpleCamera_cSimpleCamera(this + 0x10), cFECamera's vtable D_0046D8D8 at
+                                    //       0xA0, cSimpleCamera_init(this + 0x10, 0, pi/4, 5, 5000); cFE__cFE stores
+                                    //       cSimpleCamera_vtbl back at 0xA0
+    char mRiderManager[0x19C0];     // 0x0B0 [O] cFERiderManager; [P] getRiderManager / getHuman use this + 0xB0; [R]
+                                    //       cFERiderManager_cFERiderManager / __cFERiderManager(this + 0xB0); extent:
+                                    //       up to 0x1A70
+    char mBoltFileManager[0xB4030]; // 0x1A70 [P] getBoltFileManager returns this + 0x1A70 (no On Tour member); [R]
+                                    //       func_0019CDF0(this + 0x1A70) (its ctor), func_0019CE20(.., 2) in cFE__cFE;
+                                    //       extent: up to mFXLoader
+    cFXLoader* mFXLoader;           // 0xB5AA0 [O]; [R] cFE_cFE: cMemMan_alloc(1, "FXLoader_FE") + cFXLoader_cFXLoader;
+                                    //       cFE__cFE destroys it when set
+    char unk_B5AA4[0xC];            // 0xB5AA4 tail padding (16-byte alignment; no access)
+};
+
+CHECK_OFFSET(cFE, mVtbl, 0x000);
+CHECK_OFFSET(cFE, FadeTimer, 0x004);
+CHECK_OFFSET(cFE, IsEnding, 0x008);
+CHECK_OFFSET(cFE, mpUI, 0x00C);
+CHECK_OFFSET(cFE, mCamera, 0x010);
+CHECK_OFFSET(cFE, mRiderManager, 0x0B0);
+CHECK_OFFSET(cFE, mBoltFileManager, 0x1A70);
+CHECK_OFFSET(cFE, mFXLoader, 0xB5AA0);
+CHECK_OFFSET(cFE, unk_B5AA4, 0xB5AA4);
+CHECK_SIZE(cFE, 0xB5AB0);
+
 #endif /* FE_FEREAL_H */

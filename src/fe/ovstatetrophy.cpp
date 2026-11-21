@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/ovstatetrophy.h"
 #include "be/beintnetwork.h"
 #include "fe/ovstateprofile.h"
 #include "render/ps2graphicsman.h"
@@ -17,11 +18,11 @@ extern char str_34trophy[];
 /**
  * Builds the trophy screen ("34trophy") and plays its first frame.
  */
-extern "C" void cOVStateTrophy_onCreateScreen(void* self)
+extern "C" void cOVStateTrophy_onCreateScreen(cOVStateTrophy* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_34trophy), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -71,7 +72,7 @@ struct sVEntry_20E9A0 {
  * @param item  the item; ignored when null
  * @param msg  the widget event: 5 Cross, 6 Triangle
  */
-extern "C" void cOVStateTrophy_onWidgetEvent(void* self, cUIObj_20E9A0* item, int msg)
+extern "C" void cOVStateTrophy_onWidgetEvent(cOVStateTrophy* self, cUIObj_20E9A0* item, int msg)
 {
     if (item == 0) {
         return;
@@ -81,19 +82,19 @@ extern "C" void cOVStateTrophy_onWidgetEvent(void* self, cUIObj_20E9A0* item, in
         item->setColor(sColor_20E9A0(1.0f, 1.0f, 0.0f, 0.0f));
         void* nextState = 0;
         if (*(int*)((char*)item + 0x18) == 1) {
-            void* obj = **(void***)((char*)self + 0x10);
+            void* obj = *(void**)self->mpEngine;
             sVEntry_20E9A0* vt = *(sVEntry_20E9A0**)((char*)obj + 4);
             nextState = vt[4].fn((char*)obj + vt[4].delta, self, 1);
         }
-        cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
+        cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         break;
     }
     case 6: {
-        void* obj = **(void***)((char*)self + 0x10);
+        void* obj = *(void**)self->mpEngine;
         sVEntry_20E9A0* vt = *(sVEntry_20E9A0**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
         if (nextState != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }
         break;
     }

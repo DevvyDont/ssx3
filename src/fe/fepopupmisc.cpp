@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateselectmp.h"
 #include "fe/festatestats.h"
 #include "fe/festateaudiooptions.h"
 #include "fe/festatetrophyroom.h"
@@ -3209,11 +3210,11 @@ extern void* cFEStateSelectMultiplayerMode_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode1(void* self)
+extern "C" void* cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode1(cFEStateSelectMultiplayerMode* self)
 {
     cUIState_cUIState(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStateSelectMultiplayerMode_vtbl;
-    return self;
+    self->mVtbl = cFEStateSelectMultiplayerMode_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -3229,9 +3230,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectMultiplayerMode__cFEStateSelectMulti
  *
  * @return meaningless (the void base destructor's leftover return register)
  */
-void* cFEStateSelectMultiplayerMode__cFEStateSelectMultiplayerMode(void* self)
+void* cFEStateSelectMultiplayerMode__cFEStateSelectMultiplayerMode(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEState_vtbl;
+    cFEStateSelectMultiplayerMode* self = (cFEStateSelectMultiplayerMode*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEState_vtbl);
     return cUIState__cUIState(self);
 }
 #endif
@@ -4136,11 +4138,11 @@ extern void* cFEStateRelogin_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRelogin_cFEStateRelogin1(void* self)
+extern "C" void* cFEStateRelogin_cFEStateRelogin1(cFEStateLogin* self)
 {
     cFEStateLogin_cFEStateLogin(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStateRelogin_vtbl;
-    return self;
+    self->mVtbl = cFEStateRelogin_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -4153,9 +4155,10 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRelogin__cFEStateRelogin__FPv);
  *
  * @return cFEStateLogin__cFEStateLogin's result
  */
-void* cFEStateRelogin__cFEStateRelogin(void* self)
+void* cFEStateRelogin__cFEStateRelogin(void* vself)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)cFEStateRelogin_vtbl;
+    cFEStateLogin* self = (cFEStateLogin*)vself;
+    self->mVtbl = (void**)((int)(void*)cFEStateRelogin_vtbl);
     return cFEStateLogin__cFEStateLogin(self);
 }
 #endif
@@ -4168,8 +4171,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRelogin_onLoseTransition__FPv);
  *
  * @return 1
  */
-int cFEStateRelogin_onLoseTransition(void* self)
+int cFEStateRelogin_onLoseTransition(void* vself)
 {
+    cFEStateLogin* self = (cFEStateLogin*)vself;
     return 0x1;
 }
 #endif

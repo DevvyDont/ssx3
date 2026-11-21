@@ -1,4 +1,9 @@
 #include "common.h"
+#include "fe/festatelegal.h"
+#include "fe/festate.h"
+#include "fe/fepopupoptionreset.h"
+#include "camera/camera.h"
+#include "fe/fereal.h"
 #include "fe/fepopupconfirm.h"
 #include "fe/debugfe.h"
 #include "fe/screenkeyboard.h"
@@ -1509,8 +1514,8 @@ extern void* cSimpleCamera_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cFECamera__cFECamera(void *self, int flags) {
-    *(void***)((char*)self + 0x90) = cSimpleCamera_vtbl;
+extern "C" void cFECamera__cFECamera(cSimpleCamera* self, int flags) {
+    self->mVtbl = cSimpleCamera_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1672,8 +1677,8 @@ INCLUDE_ASM("main/all_in_one_main", cFE_getUI);
  * @param frontEnd  the front end (cFE)
  * @return the UI engine pointer cFE_cFE allocates ("UIEngine") and stores at +0xC
  */
-extern "C" int cFE_getUI(void *frontEnd) {
-    return (*(int *)((char*)(frontEnd) + (0xC)));
+extern "C" int cFE_getUI(cFE* frontEnd) {
+    return ((int)frontEnd->mpUI);
 }
 #endif
 
@@ -1936,8 +1941,8 @@ extern void* cDebugScreen_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cDebugMenuScreen__cDebugMenuScreen(void *self, int flags) {
-    cBackgroundMan__cBackgroundMan_CD00((char *)self + 0x8C10, 2);
+extern "C" void cDebugMenuScreen__cDebugMenuScreen(cDebugMenuScreen* self, int flags) {
+    cBackgroundMan__cBackgroundMan_CD00(&self->BackgroundMan, 2);
     *(void ***)self = cDebugScreen_vtbl;
     if (flags & 1) {
         operator_delete((int *)self);
@@ -2644,10 +2649,10 @@ extern void* cFEState_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001DD6A8(void *self) {
+extern "C" void* func_001DD6A8(cFEState* self) {
     cUIState_cUIState_D6A8(self, 0);
-    *(void***)((char*)self + 8) = cFEState_vtbl;
-    return self;
+    self->mVtbl = cFEState_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -2666,10 +2671,10 @@ extern void* cFEState_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001DD6E0(void *self) {
+extern "C" void* func_001DD6E0(cFEState* self) {
     cUIState_cUIState_D6E0(self);
-    *(void***)((char*)self + 8) = cFEState_vtbl;
-    return self;
+    self->mVtbl = cFEState_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -2688,10 +2693,10 @@ extern void* cFEState_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_001DD718(void *self) {
+extern "C" void* func_001DD718(cFEState* self) {
     cUIState_cUIState1_D718(self);
-    *(void***)((char*)self + 8) = cFEState_vtbl;
-    return self;
+    self->mVtbl = cFEState_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -2709,8 +2714,8 @@ extern void* cFEState_vtbl[];
  * The g++ delete flags pass through in the second argument register. cFEStateLodge, cFEStateLodgeRiderDetail,
  * cFEStateBuyAttrib, cFEStateCareerStats and cFEStateCredits destructors call it as their base destructor.
  */
-extern "C" void cFEState__cFEState(void *self) {
-    *(void***)((char*)self + 8) = cFEState_vtbl;
+extern "C" void cFEState__cFEState(cFEState* self) {
+    self->mVtbl = cFEState_vtbl;
     cUIState__cUIState_DD750(self);
 }
 #endif
@@ -2729,17 +2734,17 @@ extern "C" int cFECustom_getPlayerCtrlMask(int, signed char);
  *
  * @param n  number of users whose masks to remove
  */
-extern "C" void cFEState_setControllerFilter(char *self, signed char n) {
+extern "C" void cFEState_setControllerFilter(cFEState* self, signed char n) {
     int i = 0;
     int mask = 0xFF;
-    int realFe = **(int **)(self + 0x10);
+    int realFe = *(int*)self->mpEngine;
     if (n > 0) {
         do {
             mask &= ~cFECustom_getPlayerCtrlMask(realFe, i);
             i++;
         } while (i < n);
     }
-    *(char *)(self + 0x15) = mask;
+    *(char*)&self->mCtrlBits = mask;
 }
 #endif
 
@@ -2758,8 +2763,8 @@ extern "C" void cFECustom_setPlayerCtrlMask(int, signed char, int);
  * @param userNum  the user
  * @param controllerNum  the controller port
  */
-extern "C" void cFEState_setControllerMask(void *feState, signed char userNum, signed char controllerNum) {
-    cFECustom_setPlayerCtrlMask(*(*(int **)((char*)(feState) + (0x10))), userNum, (1 << controllerNum) & 0xFF);
+extern "C" void cFEState_setControllerMask(cFEState* feState, signed char userNum, signed char controllerNum) {
+    cFECustom_setPlayerCtrlMask(*((int*)feState->mpEngine), userNum, (1 << controllerNum) & 0xFF);
 }
 #endif
 
@@ -4560,10 +4565,10 @@ extern int cFEStateProfileSelect_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *cFEStateProfileSelect_cFEStateProfileSelect(void *self) {
+extern "C" void *cFEStateProfileSelect_cFEStateProfileSelect(cFEStateProfileSelect* self) {
     cUIState_cUIState_E1B8(self, 0);
-    *(int **)((char *)self + 8) = cFEStateProfileSelect_vtbl;
-    return self;
+    self->mVtbl = (void**)cFEStateProfileSelect_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -4583,8 +4588,8 @@ extern void* cFEState_vtbl[];
  *
  * @return nothing meaningful (whatever cUIState__cUIState leaves)
  */
-extern "C" void* cFEStateProfileSelect__cFEStateProfileSelect(void *self) {
-    *(void***)((char*)self + 8) = cFEState_vtbl;
+extern "C" void* cFEStateProfileSelect__cFEStateProfileSelect(cFEStateProfileSelect* self) {
+    self->mVtbl = cFEState_vtbl;
     return cUIState__cUIState_E1F0(self);
 }
 #endif
@@ -5158,10 +5163,10 @@ extern int D_0046BC58_E558[] __asm__("cFEStateBackground_vtbl");
  *
  * @return @p self
  */
-extern "C" void *func_001DE558(void *self) {
+extern "C" void *func_001DE558(cFEStateBackground* self) {
     cUIState_cUIState_E558(self, 0);
-    *(int **)((char *)self + 8) = D_0046BC58_E558;
-    return self;
+    self->mVtbl = (void**)D_0046BC58_E558;
+    return ((void*)self);
 }
 #endif
 
@@ -5180,10 +5185,10 @@ extern void* cFEStateBackground_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateBackground_cFEStateBackground(void *self) {
+extern "C" void* cFEStateBackground_cFEStateBackground(cFEStateBackground* self) {
     cUIState_cUIState_E590(self);
-    *(void***)((char*)self + 8) = cFEStateBackground_vtbl;
-    return self;
+    self->mVtbl = cFEStateBackground_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -5202,8 +5207,8 @@ extern void* cFEStateBackground_vtbl[];
  *
  * @return no meaningful value (cUIState__cUIState returns nothing)
  */
-extern "C" void* cFEStateBackground__cFEStateBackground(void *self) {
-    *(void***)((char*)self + 8) = cFEStateBackground_vtbl;
+extern "C" void* cFEStateBackground__cFEStateBackground(cFEStateBackground* self) {
+    self->mVtbl = cFEStateBackground_vtbl;
     return cUIState__cUIState_E5C8(self);
 }
 #endif
@@ -5588,10 +5593,10 @@ extern int D_0046B6F8_E8C8[] __asm__("cFEBlankPopup_vtbl");
  *
  * @return @p self
  */
-extern "C" void *cFEBlankPopup_cFEBlankPopup1(void *self) {
+extern "C" void *cFEBlankPopup_cFEBlankPopup1(cFEStateNet* self) {
     cFEStateNet_cFEStateNet_E8C8(self, 0, 0);
-    *(int **)((char *)self + 8) = D_0046B6F8_E8C8;
-    return self;
+    self->mVtbl = (void**)D_0046B6F8_E8C8;
+    return ((void*)self);
 }
 #endif
 
@@ -5629,8 +5634,8 @@ extern void* cFEBlankPopup_vtbl[];
  *
  * @return cFEStateNet__cFEStateNet's result
  */
-extern "C" void* cFEBlankPopup__cFEBlankPopup(void *self) {
-    *(void***)((char*)self + 8) = cFEBlankPopup_vtbl;
+extern "C" void* cFEBlankPopup__cFEBlankPopup(cFEStateNet* self) {
+    self->mVtbl = cFEBlankPopup_vtbl;
     return cFEStateNet__cFEStateNet_E918(self);
 }
 #endif
@@ -5681,10 +5686,10 @@ extern int D_0046B4A0_E990[] __asm__("cFEStateLegal_vtbl");
  *
  * @return @p self
  */
-extern "C" void *cFEStateLegal_cFEStateLegal(void *self) {
+extern "C" void *cFEStateLegal_cFEStateLegal(cFEStateLegal* self) {
     cUIState_cUIState_E990(self, 0);
-    *(int **)((char *)self + 8) = D_0046B4A0_E990;
-    return self;
+    self->mVtbl = (void**)D_0046B4A0_E990;
+    return ((void*)self);
 }
 #endif
 
@@ -5703,8 +5708,8 @@ extern void* cFEStateLegal_vtbl[];
  *
  * @return no meaningful value (cUIState__cUIState returns nothing)
  */
-extern "C" void* cFEStateLegal__cFEStateLegal(void *self) {
-    *(void***)((char*)self + 8) = cFEStateLegal_vtbl;
+extern "C" void* cFEStateLegal__cFEStateLegal(cFEStateLegal* self) {
+    self->mVtbl = cFEStateLegal_vtbl;
     return cUIState__cUIState_E9C8(self);
 }
 #endif
@@ -5741,8 +5746,8 @@ extern void* cFEPopupOptionReset_vtbl[];
  *
  * @return the result of cUIState__cUIState
  */
-extern "C" void* cFEPopupOptionReset__cFEPopupOptionReset(void *self) {
-    *(void***)((char*)self + 8) = cFEPopupOptionReset_vtbl;
+extern "C" void* cFEPopupOptionReset__cFEPopupOptionReset(cFEPopupOptionReset* self) {
+    self->mVtbl = cFEPopupOptionReset_vtbl;
     return cUIState__cUIState_E9F8(self);
 }
 #endif
@@ -5762,11 +5767,11 @@ extern char str_111resetopts[];
  * Stores GetHashValue32("111resetopts") in mHashName (+0xC), adds the screen with cUIEngine_addScreenByHashName on the
  * engine (+0x10), keeps it at +0x40 and, when it exists, calls cUIScreen_playFrame(screen, 0, 0).
  */
-extern "C" void cFEPopupOptionReset_onCreateScreen(void *self) {
+extern "C" void cFEPopupOptionReset_onCreateScreen(cFEPopupOptionReset* self) {
     int hashName = GetHashValue32_EA20(str_111resetopts);
-    *(int *)((char *)self + 0xC) = hashName;
-    int screen = cUIEngine_addScreenByHashName_EA20(*(int *)((char *)self + 0x10), self, hashName, 0);
-    *(int *)((char *)self + 0x40) = screen;
+    self->mHashName = hashName;
+    int screen = cUIEngine_addScreenByHashName_EA20((int)self->mpEngine, self, hashName, 0);
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame_EA20(screen, 0, 0);
     }
@@ -5785,7 +5790,7 @@ INCLUDE_ASM("main/all_in_one_main", cFEPopupOptionReset_onWidgetMenu);
  * @param key  the menu event
  * @return 0x100 or 0x101
  */
-extern "C" int cFEPopupOptionReset_onWidgetMenu(void* self, int menu, unsigned int key)
+extern "C" int cFEPopupOptionReset_onWidgetMenu(cFEPopupOptionReset* self, int menu, unsigned int key)
 {
     int result = 257;
     if (key < 10) {
@@ -5817,18 +5822,18 @@ extern char str_no[];
  * @param widget  the widget (may be null)
  * @param event  the widget event
  */
-extern "C" void cFEPopupOptionReset_onWidgetEvent(char *self, cUIThing* widget, int event) {
+extern "C" void cFEPopupOptionReset_onWidgetEvent(cFEPopupOptionReset* self, cUIThing* widget, int event) {
     if (((char*)widget) != 0) {
         if (event == 5) {
             int yesCheckHash = widget->mHashName;
             if (yesCheckHash == GetHashValue32(str_yes)) {
-                *(char*)(self + 0x48) = 1;
-                cUIStateStack_pop(*(int*)(self + 0x10) + 0x18, 1);
+                self->mAccept = 1;
+                cUIStateStack_pop((int)self->mpEngine + 0x18, 1);
             } else {
                 int noCheckHash = widget->mHashName;
                 if (noCheckHash == GetHashValue32(str_no)) {
-                    *(char*)(self + 0x48) = 0;
-                    cUIStateStack_pop(*(int*)(self + 0x10) + 0x18, 1);
+                    self->mAccept = 0;
+                    cUIStateStack_pop((int)self->mpEngine + 0x18, 1);
                 }
             }
         }
@@ -5845,8 +5850,8 @@ INCLUDE_ASM("main/all_in_one_main", cFEPopupOptionReset_getData);
  * @param resetPopup  the popup
  * @return the accept byte
  */
-extern "C" signed char cFEPopupOptionReset_getData(void *resetPopup) {
-    return (*(signed char *)((char*)(resetPopup) + (0x48)));
+extern "C" signed char cFEPopupOptionReset_getData(cFEPopupOptionReset* resetPopup) {
+    return (*(signed char*)&resetPopup->mAccept);
 }
 #endif
 

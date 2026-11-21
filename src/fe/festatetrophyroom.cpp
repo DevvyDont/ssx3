@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatelogin.h"
 #include "fe/festatetrophyroom.h"
 #include "ui/uithing.h"
 #include "ui/uitext.h"
@@ -852,12 +853,12 @@ extern void* cFEStateRelogin_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRelogin_cFEStateRelogin(void* self)
+extern "C" void* cFEStateRelogin_cFEStateRelogin(cFEStateLogin* self)
 {
     cFEStateLogin_cFEStateLogin(self);
-    *(void***)((char*)self + 0x8) = cFEStateRelogin_vtbl;
-    *(int*)((char*)self + 0xC) = 52;
-    return self;
+    self->mVtbl = cFEStateRelogin_vtbl;
+    self->mHashName = 52;
+    return ((void*)self);
 }
 #endif
 
@@ -873,11 +874,11 @@ extern char str_248lobby_reconnect[];
  * Creates the relogin screen: adds the "248lobby_reconnect" screen to the engine (+0x10) with
  * cUIEngine_addScreenByHashName, stores it in the screen pointer (+0x40) and plays it from frame 0.
  */
-extern "C" void cFEStateRelogin_onCreateScreen(void* self)
+extern "C" void cFEStateRelogin_onCreateScreen(cFEStateLogin* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_248lobby_reconnect), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -899,7 +900,7 @@ extern char str_kT_POPUPCMNReconnecting[];
  *
  * @param item  the widget being created
  */
-extern "C" void cFEStateRelogin_onWidgetCreate(void* self, cUIText* item)
+extern "C" void cFEStateRelogin_onWidgetCreate(cFEStateLogin* self, cUIText* item)
 {
     int id = item->mHashName;
     if (id == GetHashValue32(str_TextReconnecting)) {
@@ -935,7 +936,7 @@ extern char str_cFEStateOnlineMainMenu[];
  * @param msg  the lobby event id
  * @return 0 for the handled events, else func_001BF228's result
  */
-extern "C" int func_001D5138(void* self, int msg)
+extern "C" int func_001D5138(cFEStateLogin* self, int msg)
 {
     switch (msg) {
     case 201:
@@ -945,7 +946,7 @@ extern "C" int func_001D5138(void* self, int msg)
         func_0025CD50(LobbyMan_mLobbyMan, ((int)LobbyMan_mLobbyMan->mPersona));
         break;
     case 257:
-        func_001A8A40(self, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(1744, str_cFEStateOnlineMainMenu, 0, 0), *(int*)((char*)self + 0x10)));
+        func_001A8A40(self, cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(1744, str_cFEStateOnlineMainMenu, 0, 0), (int)self->mpEngine));
         break;
     case 273: {
         cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -974,7 +975,7 @@ extern "C" int cFEStateLogin_onPopupEvent(void* self, void* a1, int a2);
  * @param event  the popup event
  * @return the handler's result
  */
-extern "C" int cFEStateRelogin_onPopupEvent(void* self, void* popup, int event)
+extern "C" int cFEStateRelogin_onPopupEvent(cFEStateLogin* self, void* popup, int event)
 {
     int result;
     if (*(int*)((char*)popup + 0x18) == 258) {
@@ -1011,15 +1012,15 @@ extern char str_cFEStateNetConfig[];
  * @param item  the popup that sent the event
  * @param msg  the popup event
  */
-extern "C" void func_001D5280(void* self, void* item, int msg)
+extern "C" void func_001D5280(cFEStateLogin* self, void* item, int msg)
 {
     if (msg == 0xF || msg == 20) {
         cFEStateNet_onPopupEvent(self, item, msg);
-        cUIStateStack_popToState((char*)*(void**)((char*)self + 0x10) + 0x18);
-        void* state = cUIStateStack_getCurrentState((char*)*(void**)((char*)self + 0x10) + 0x18);
+        cUIStateStack_popToState(self->mpEngine->mStateStack);
+        void* state = cUIStateStack_getCurrentState(self->mpEngine->mStateStack);
         *(int*)((char*)state + 0x1C) |= 0x80;
         func_002636F0(func_002591B8(), 0);
-        func_001A8A40(self, cFEStateNetConfig_cFEStateNetConfig(cMemMan_alloc(2332, str_cFEStateNetConfig, 0, 0), *(void**)((char*)self + 0x10)));
+        func_001A8A40(self, cFEStateNetConfig_cFEStateNetConfig(cMemMan_alloc(2332, str_cFEStateNetConfig, 0, 0), self->mpEngine));
     } else {
         cFEStateNet_onPopupEvent(self, item, msg);
     }

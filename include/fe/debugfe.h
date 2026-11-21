@@ -24,6 +24,7 @@
 
 #include "layout.h"
 #include "fe/heartbeat.h"
+#include "fe/backgroundman.h" // cBackgroundMan (cDebugMenuScreen)
 
 struct cDebugScreen;
 struct cFont;
@@ -118,5 +119,166 @@ CHECK_OFFSET(cTrackFileMan, LocationInfo, 0x4);
 CHECK_OFFSET(cTrackFileMan, NumBAMLocations, 0x8C04);
 CHECK_OFFSET(cTrackFileMan, NumWCBAMStartLocations, 0x8C08);
 CHECK_SIZE(cTrackFileMan, 0x8C0C);
+
+
+// ---------------------------------------------------------------------------------------------------------------------
+// cDebugMenuScreen: the debug front end's race-setup menu (cDebugFE::Screens[0], "DebugMenu"): game path / mode /
+// event, first-time flag, track, character, control map, board, AI riders, screen calibration, HDTV, playlist and
+// network rows, then "Lobby" and "Real Front End". EA's source file is not established (the preview's asserts name
+// fe/debugfe.cpp and main/debugmenu.cpp; On Tour: fe/all_in_one_fe). Retail code: the ctor and update in
+// main/loadscreens (0x0017B1B0, 0x0017B4E0), draw / setGamePath / getMaxAIRiders in fe/debugfe (0x0017C5F8, 0x0017D008,
+// 0x0017D1B8) and the dtor in main/all_in_one_main (0x001DCD00).
+//
+// Size 0x8C48:
+//   [R] cDebugFE_load: cMemMan_alloc(0x8C48, "DebugMenu") + cDebugMenuScreen_cDebugMenuScreen; the last word written is
+//       0x8C44;
+//   [O] On Tour's class is 0x8850: the same order, but its cTrackFileMan is 0x400 smaller (1-byte bools) and it has
+//       CurrentHomo / CurrentBoardTexture (after CurrentBoard), CurrentMissionIdx (after CurrentMap) and CurrentMovie
+//       (after CurrentBack), which retail does not; retail has a playlist word where CurrentMovie is and a network word
+//       after LastGamePathGameMode. Retail fields are placed by their use, not by On Tour's offsets.
+// Base: cDebugScreen (On Tour 0x4: the vptr only; vtable cDebugScreen_vtbl D_0046D948, slots 2 / 3 the pure-virtual
+// stub). Vtable cDebugMenuScreen_vtbl (0x0046D798, 3 slots: 1 dtor, 2 update, 3 draw); the dtor destroys BackgroundMan
+// and stores cDebugScreen_vtbl.
+// A FLAT layout, like main/game.h. Evidence tags: [R] retail's ctor / dtor / allocation; [U] how retail code uses the
+// field (src/main/loadscreens.cpp views sLS_B1B0 / sLSSub_B1B0, src/fe/debugfe.cpp views sDebugMenuScreen /
+// sDbgFE17D008, and the asm); [O] SSX On Tour's DWARF (class cDebugMenuScreen, cDebugScreen): names, types and order.
+
+struct cDebugMenuScreen {
+    // --- cDebugScreen (On Tour 0x4: the vptr)
+    void** mVtbl;                   // 0x0000 [R] cDebugMenuScreen_vtbl (ctor); cDebugScreen_vtbl (dtor); [U]
+                                    //       cDebugFE_update / render call slots 2 / 3
+    // --- cDebugMenuScreen
+    cTrackFileMan TrackFileMan;     // 0x0004 [O] (0x8C0C, above); [R] the ctor runs cTrackFileMan_scanLocations(this +
+                                    //       0x4); [U] the ctor / update step the track row through it
+                                    //       (getNext/PrevLocation, the WCBAM steppers, legalTrackMode, the entries'
+                                    //       locationID / bIsBAM)
+    cBackgroundMan BackgroundMan;   // 0x8C10 [O] (fe/backgroundman.h); [R] cBackgroundMan_cBackgroundMan + loadImages
+                                    //       (ctor), cBackgroundMan__cBackgroundMan(.., 2) (dtor); [U] update sets the
+                                    //       active image; draw renders it instead of the menu while miActiveImage
+                                    //       (0x8C18) >= 0
+    int SelectedItem;               // 0x8C1C [O] tItems (an enum, a word); [R] ctor 4; [U] the cursor row: update moves
+                                    //       it over the 15 rows (12 network is skipped without a comm system, 13 Lobby,
+                                    //       14 Real Front End), draw highlights it (lw 0x8C1C through this + 0x8000)
+    int currentLocation;            // 0x8C20 [O]; [R] ctor 0, then the first WCBAM start location; [U] the track row:
+                                    //       the TrackFileMan.LocationInfo index the race uses
+    int CurrentBoard;               // 0x8C24 [O] tBoardTypes; [R] ctor 0, also stored into the back end's first word;
+                                    //       [U] the board row: update cycles it (% 1) and stores it there; draw prints
+                                    //       D_004A12E0[CurrentBoard]
+    int CurrentChar;                // 0x8C28 [O]; [R] ctor 2 (player 0's character); [U] the character row: update
+                                    //       cycles it over 10 and sets player 0's character; reloaded from the back end
+                                    //       after a game
+    int CurrentMap;                 // 0x8C2C [O]; [R] ctor: player 0's controller mapping; [U] the control-map row:
+                                    //       update toggles it and sets the mapping
+    int CurrentBack;                // 0x8C30 [O]; [R] ctor -1; [U] the screen-calibration row: update cycles it over
+                                    //       BackgroundMan's images (-1 = none) and makes it the active image; draw
+                                    //       prints it
+    int CurrentPlaylist;            // 0x8C34 [U] the playlist row (name from its use; On Tour's CurrentMovie sits in
+                                    //       this place): ctor 0 and starts that playlist entry (bxAudio + 0x60A4 + 0x14
+                                    //       * it); update cycles it and plays it; draw prints the entry's name
+    int LastGamePathGameMode[3];    // 0x8C38 [O]; [R] ctor 4, 4, 4; [U] setGamePath saves the current game mode under
+                                    //       the current path and restores the new path's
+    int NetworkMode;                // 0x8C44 [U] the network row (name from its use; no On Tour member): ctor 0; update
+                                    //       cycles 0 ... 4 (1 / 2 only with a net connection) and sets
+                                    //       networkOpt.bIsNetworkGame / bIsHost (1 = host) from it; draw prints
+                                    //       D_0045CFB8's name for it
+};
+
+CHECK_OFFSET(cDebugMenuScreen, mVtbl, 0x0000);
+CHECK_OFFSET(cDebugMenuScreen, TrackFileMan, 0x0004);
+CHECK_OFFSET(cDebugMenuScreen, BackgroundMan, 0x8C10);
+CHECK_OFFSET(cDebugMenuScreen, SelectedItem, 0x8C1C);
+CHECK_OFFSET(cDebugMenuScreen, currentLocation, 0x8C20);
+CHECK_OFFSET(cDebugMenuScreen, CurrentBoard, 0x8C24);
+CHECK_OFFSET(cDebugMenuScreen, CurrentChar, 0x8C28);
+CHECK_OFFSET(cDebugMenuScreen, CurrentMap, 0x8C2C);
+CHECK_OFFSET(cDebugMenuScreen, CurrentBack, 0x8C30);
+CHECK_OFFSET(cDebugMenuScreen, CurrentPlaylist, 0x8C34);
+CHECK_OFFSET(cDebugMenuScreen, LastGamePathGameMode, 0x8C38);
+CHECK_OFFSET(cDebugMenuScreen, NetworkMode, 0x8C44);
+CHECK_SIZE(cDebugMenuScreen, 0x8C48);
+
+// ---------------------------------------------------------------------------------------------------------------------
+// cDebugLobbyScreen: the debug front end's online lobby screen (cDebugFE::Screens[1], "LobbyMenu"; the July 2003
+// preview names the class): a menu system with eight debug menus (login, persona, room, occupants, chat, challenge) and
+// a state machine over the lobby manager's events, ending in a two-player game over a DirtySock channel. No On Tour
+// class (On Tour has no online front end), so its own fields are named from their retail use. Retail code: fe/debugfe:
+// the ctor (0x0017D298), the dtor, update, the lobby-event handler func_0017D6F0, the error / state / channel steps
+// func_0017DA30 / func_0017DB18 / func_0017DE70, the menu callbacks func_0017E030 ... func_0017E558 and draw
+// (0x0017E5C8).
+//
+// Size 0x1C18: [R] cDebugFE_load: cMemMan_alloc(7192, "LobbyMenu") + cDebugLobbyScreen_cDebugLobbyScreen; the ctor's
+// regions follow from the sub-object ctors' addresses and the dtor's item loops; the last words (0x1C10, 0x1C14) are
+// used by func_0017DE70 / func_0017DA30.
+// Base: cDebugScreen (the vptr only). Vtable cDebugLobbyScreen_vtbl (0x0046D350, 3 slots: 1 dtor, 2 update, 3 draw);
+// the dtor clears the screen pointer D_004A4E90 (the ctor sets it; func_0017D260 sends lobby events through it),
+// destroys the strings, menus and menu system and stores cDebugScreen_vtbl. The menus are raw regions: their classes
+// (cMenu / cMenuItem subclasses built by func_001DA988 ... func_001DB2B0) are not laid out here.
+// A FLAT layout, like main/game.h. Evidence tags: [R] retail's ctor / dtor / allocation; [U] how retail code uses the
+// field (src/fe/debugfe.cpp views sDebugFE17D6F0 / 17DB18 / 17D688 / 17E5C8 / sDebugFEState17E*, and the asm).
+
+struct cDebugLobbyScreen {
+    // --- cDebugScreen (the vptr)
+    void** mVtbl;                   // 0x0000 [R] cDebugLobbyScreen_vtbl (ctor, dtor), then cDebugScreen_vtbl (dtor)
+    // --- cDebugLobbyScreen
+    int mState;                     // 0x0004 [R] ctor 0; [U] the lobby state (0 / 1 connecting, 2 lobby, 3 login menu,
+                                    //       4 creating account, 5 authenticating, 6 / 7 persona, 8 / 9 create / delete
+                                    //       persona, 10 / 11 room, 12 occupants, 13 waiting, 14 chat, 15 challenged, 16
+                                    //       play game, 17 declined, 18 ... 24 errors): func_0017D6F0 / func_0017DB18 /
+                                    //       the callbacks set it, draw prints its line
+    char mMenuSys[0x68];            // 0x0008 cMenuSys (raw); [R] cMenuSys_cMenuSys(this + 0x8) / cMenuSys__cMenuSys;
+                                    //       the ctor sets its font, input and box texture (+0x58 / +0x5C / +0x60 = 0x60
+                                    //       / 0x64 / 0x68) from the debug FE; [U] the open-menu stack (count at +0x0,
+                                    //       menus from +0x4): cMenuSys_pushMenu / popMenu / isActive / input / render
+    char mLoginMenu[0x594];         // 0x0070 [R] the "Login Method" menu (Create Account, Login): func_001DA988(this +
+                                    //       0x70, ...), func_001DCEA0(.., 2) (dtor); [U] pushed on the login step
+                                    //       (state 3)
+    char mContinueMenu[0x148];      // 0x0604 [R] ContinueMenu_ContinueMenu(this + 0x604) (fe/debugfe: a cMenu + one
+                                    //       cPopMenuItem at +0x130); [U] pushed under every error and "declined"
+                                    //       message
+    char mPersonaMenu[0x5E0];       // 0x074C [R] "Select Persona" (Create / Delete Persona): func_001DACB8 /
+                                    //       func_001DD0C8; [U] func_001DB418 fills it from the lobby manager
+    char mRoomMenu[0x318];          // 0x0D2C [R] "Select Room" (12 items): func_001DAE20; dtor loop over 12 * 0x24 from
+                                    //       +0x168
+    char mOccupantsMenu[0x4F0];     // 0x1044 [R] "Room Occupants" (24 items, Chat): func_001DAF08; [U] func_001DB620
+                                    //       fills it
+    char mChatMenu[0x38C];          // 0x1534 [R] the chat menu (14 lines): func_001DB028; dtor loop over 14 * 0x24 from
+                                    //       +0x194
+    char mChallengedMenu[0x1EC];    // 0x18C0 [R] "You've been Challenged!" (Accept, Decline):
+                                    //       __sti__all_in_one_main_cpp(this + 0x18C0, ...); [U] func_0017D6F0 stores
+                                    //       the challenger's name into its third line (lw/sw 0x1A44 = +0x184)
+    char mAbortMenu[0x158];         // 0x1AAC [R] "Abort": func_001DB2B0; [U] func_0017DB18 pushes it while a challenge
+                                    //       is pending
+    char* mUserName;                // 0x1C04 cBXString (a char*, bx/bxstring.h); [R] ctor cBXString_EmptyString, dtor
+                                    //       cBXString__cBXString; [U] func_0017E030 / func_0017E118 keep the typed
+                                    //       name; it is copied to LobbyMan's mUserName
+    char* mPassword;                // 0x1C08 cBXString; [R] as mUserName; [U] func_0017E030 / func_0017E118 keep the
+                                    //       typed password; copied to LobbyMan's mPassword
+    char* mChallenger;              // 0x1C0C cBXString; [R] as mUserName; [U] func_0017D6F0 copies the challenge
+                                    //       event's name (+0x8) into it; func_0017E490 / func_0017E4F0 / func_0017E558
+                                    //       answer that rider
+    int mGameChannel;               // 0x1C10 [U] func_0017DE70 stores cCommSystem_openDSockChannel's channel;
+                                    //       func_0017DB18 (state 16) waits for it to connect and builds the game comm
+                                    //       on it
+    int mErrorCode;                 // 0x1C14 [U] func_0017DA30 stores the lobby error code; draw prints its text
+                                    //       (func_00260E50) in the error states
+};
+
+CHECK_OFFSET(cDebugLobbyScreen, mVtbl, 0x0000);
+CHECK_OFFSET(cDebugLobbyScreen, mState, 0x0004);
+CHECK_OFFSET(cDebugLobbyScreen, mMenuSys, 0x0008);
+CHECK_OFFSET(cDebugLobbyScreen, mLoginMenu, 0x0070);
+CHECK_OFFSET(cDebugLobbyScreen, mContinueMenu, 0x0604);
+CHECK_OFFSET(cDebugLobbyScreen, mPersonaMenu, 0x074C);
+CHECK_OFFSET(cDebugLobbyScreen, mRoomMenu, 0x0D2C);
+CHECK_OFFSET(cDebugLobbyScreen, mOccupantsMenu, 0x1044);
+CHECK_OFFSET(cDebugLobbyScreen, mChatMenu, 0x1534);
+CHECK_OFFSET(cDebugLobbyScreen, mChallengedMenu, 0x18C0);
+CHECK_OFFSET(cDebugLobbyScreen, mAbortMenu, 0x1AAC);
+CHECK_OFFSET(cDebugLobbyScreen, mUserName, 0x1C04);
+CHECK_OFFSET(cDebugLobbyScreen, mPassword, 0x1C08);
+CHECK_OFFSET(cDebugLobbyScreen, mChallenger, 0x1C0C);
+CHECK_OFFSET(cDebugLobbyScreen, mGameChannel, 0x1C10);
+CHECK_OFFSET(cDebugLobbyScreen, mErrorCode, 0x1C14);
+CHECK_SIZE(cDebugLobbyScreen, 0x1C18);
 
 #endif /* FE_DEBUGFE_H */

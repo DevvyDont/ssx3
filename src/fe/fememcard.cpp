@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatelegal.h"
 #include "fe/festatememcard.h"
 #include "ui/uistate.h"
 #include "main/ssxapp.h"
@@ -1102,11 +1103,11 @@ extern char cFEStateLegal_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* func_00187C18(void* self)
+extern "C" void* func_00187C18(cFEStateLegal* self)
 {
     cUIState_cUIState1(self);
-    *(int*)((char*)self + 0x48) = 0;
-    *(void**)((char*)self + 8) = cFEStateLegal_vtbl;
-    return self;
+    self->mDisplayTicks = 0;
+    self->mVtbl = (void**)cFEStateLegal_vtbl;
+    return ((void*)self);
 }
 #endif

@@ -22,11 +22,12 @@ INCLUDE_ASM("ui/uiscreen", cUIThread_deleteThread__FPv);
 /**
  * Unlinks an animation thread from its screen's thread list and deletes it.
  */
-void cUIThread_deleteThread(void* self)
+void cUIThread_deleteThread(void* vself)
 {
+    cUIThread* self = (cUIThread*)vself;
     cListNode_removeFromList(self);
-    if (self != 0) {
-        sDeleteTarget* target = *(sDeleteTarget**)((char*)self + 0x8);
+    if (((void*)self) != 0) {
+        sDeleteTarget* target = (sDeleteTarget*)self->mVtbl;
         target->fn((char*)self + target->field_0x8, 3);
     }
 }

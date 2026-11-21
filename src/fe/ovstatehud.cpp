@@ -53,11 +53,11 @@ static inline int HasScores1E8FF0(char* hs)
  * 0xE.
  */
 // Builds the hi-score list screen and shows/hides its panels for the current game mode.
-extern "C" void cOVStateHiScoreList_onCreateScreen(void* self)
+extern "C" void cOVStateHiScoreList_onCreateScreen(cOVStateHiScoreList* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_hiscorelist), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -105,15 +105,15 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * @param item  the chosen item; ignored when null
  * @param Event  the widget event; only 5 (Cross) acts
  */
-extern "C" void cOVStateHiScoreList_onWidgetEvent(void* self, cUIThing* item, int Event)
+extern "C" void cOVStateHiScoreList_onWidgetEvent(cOVStateHiScoreList* self, cUIThing* item, int Event)
 {
     if (((void*)item) != 0 && Event == 5) {
         void* nextState = 0;
         if (item->mMiscData == 1) {
-            sObj001E9130* factory = **(sObj001E9130***)((char*)self + 0x10);
+            sObj001E9130* factory = *(sObj001E9130**)self->mpEngine;
             nextState = factory->vt[4].fn((char*)factory + factory->vt[4].delta, self, 1);
         }
-        cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
+        cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
     }
 }
 #endif

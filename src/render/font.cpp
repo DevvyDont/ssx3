@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uianimation.h"
 #include "render/simpletube.h"
 #include "bx/math3d.h"
 #include "render/ps2gridmesh.h"
@@ -8678,9 +8679,10 @@ INCLUDE_ASM("render/font", cUIAnimationBank_setData__FPvi);
  *
  * @param val  the animation block's address (On Tour: char* pData)
  */
-void cUIAnimationBank_setData(void* self, int val)
+void cUIAnimationBank_setData(void* vself, int val)
 {
-    *(int*)((char*)self + 0x0) = val;
+    cUIAnimationBank* self = (cUIAnimationBank*)vself;
+    self->mpAnimationBlock = (tUIAnimationBlock*)val;
 }
 #endif
 

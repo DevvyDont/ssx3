@@ -14,9 +14,9 @@ extern char str_snowanim[];
 /**
  * Creates the front end's background screen ("snowanim") and plays its first frame.
  */
-extern "C" void cFEStateBackground_onCreateScreen(void* self)
+extern "C" void cFEStateBackground_onCreateScreen(cFEStateBackground* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_snowanim), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);

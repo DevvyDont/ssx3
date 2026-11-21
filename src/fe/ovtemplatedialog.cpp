@@ -49,21 +49,21 @@ static inline int div_PDA(int a, int b)
  * The temperature is -10 C minus (app update ticks / 3600) mod 15, so it drops by one degree a minute (at 60
  * updates a second) and wraps from -24 back to -10.
  */
-extern "C" void cPDATemplate_onCreateScreen(char* self)
+extern "C" void cPDATemplate_onCreateScreen(cPDATemplate* self)
 {
-    *(int*)(self + 0xC) = 41;
-    void* engine = *(void**)(self + 0x10);
+    self->mHashName = 41;
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_PDATemplate), 0);
-    *(void**)(self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    engine = *(void**)(self + 0x10);
+    engine = (void*)self->mpEngine;
     screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_bganim1), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 1);
     }
-    char* text = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_temperature));
+    char* text = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_temperature));
     if (text != 0) {
         int fmt = Loc_PDA(*(int*)(text + 0xB0));
         if (fmt != 0) {
@@ -1696,15 +1696,15 @@ public:
  * onCreateScreen slot (+0x24) of D_00474D30, the vtable that also holds cOVTemplate_Simple_onWidgetMenu and cOVTemplate_Simple_onWidgetEvent; func_001FBD20
  * and cOVState_HEAT_PREEVENT_onCreateScreen call it as their base.
  */
-extern "C" void cOVTemplate_Simple_onCreateScreen(void* self)
+extern "C" void cOVTemplate_Simple_onCreateScreen(cOVTemplate_Simple* self)
 {
     cOVState_onCreateScreen(self);
-    char* list = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_overlayMenu));
+    char* list = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_overlayMenu));
     *(int*)(list + 0x90) |= 8;
     for (int i = 0; i < 5; i++) {
         char buf[32];
         sprintf(buf, str_overlayOptpct_d, i);
-        cUIObj_20D1D8* optionWidget = (cUIObj_20D1D8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
+        cUIObj_20D1D8* optionWidget = (cUIObj_20D1D8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
         if (optionWidget != 0) {
             if (i < 1) {
                 int labelIndex = D_004A2860[i];
@@ -1732,7 +1732,7 @@ INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Simple_onWidgetMenu);
  * @param event  the menu event
  * @return 0x101 for event 6, else 0
  */
-extern "C" int cOVTemplate_Simple_onWidgetMenu(void* self, int menu, int event)
+extern "C" int cOVTemplate_Simple_onWidgetMenu(cOVTemplate_Simple* self, int menu, int event)
 {
     return event == 6 ? 257 : 0;
 }
@@ -1753,7 +1753,7 @@ extern int cOVStateManager_mStatus;
  * @param widget  the widget; nothing happens when it is null
  * @param key  the widget event
  */
-extern "C" void cOVTemplate_Simple_onWidgetEvent(void* self, int widget, int key)
+extern "C" void cOVTemplate_Simple_onWidgetEvent(cOVTemplate_Simple* self, int widget, int key)
 {
     if (widget != 0 && key == 5) {
         cOVStateManager_mStatus = 1;

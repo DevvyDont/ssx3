@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fereal.h"
 #include "util/locale.h"
 #include "render/ps2graphicsman.h"
 
@@ -39,18 +40,18 @@ public:
  *
  * @return @p self
  */
-extern "C" void* cFE_cFE(void* self)
+extern "C" void* cFE_cFE(cFE* self)
 {
     cFadeScreen_cFadeScreen(self);
-    *(void***)((char*)self + 0x0) = cFE_vtbl;
-    cSimpleCamera_cSimpleCamera((char*)self + 0x10);
+    self->mVtbl = cFE_vtbl;
+    cSimpleCamera_cSimpleCamera(self->mCamera);
     *(void***)((char*)self + 0xA0) = D_0046D8D8;
-    cFERiderManager_cFERiderManager((char*)self + 0xB0);
-    func_0019CDF0((char*)self + 0x1A70);
-    *(cFEObjK1956F8_70**)((char*)self + 0xC) = new (str_UIEngine, 0, 0) cFEObjK1956F8_70;
-    cSimpleCamera_init_i((char*)self + 0x10, 0, 0.7853981852531433f, 5.0f, 5000.0f);
-    *(cFEObjK1956F8_1**)((char*)self + 0xB5AA0) = new (str_FXLoader_FE, 0, 0) cFEObjK1956F8_1(1);
-    return self;
+    cFERiderManager_cFERiderManager(self->mRiderManager);
+    func_0019CDF0(self->mBoltFileManager);
+    self->mpUI = (cUIEngine*)(new (str_UIEngine, 0, 0) cFEObjK1956F8_70);
+    cSimpleCamera_init_i(self->mCamera, 0, 0.7853981852531433f, 5.0f, 5000.0f);
+    self->mFXLoader = (cFXLoader*)(new (str_FXLoader_FE, 0, 0) cFEObjK1956F8_1(1));
+    return ((void*)self);
 }
 #endif
 
@@ -78,20 +79,20 @@ extern void* cSimpleCamera_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cFE__cFE(void* self, int flags)
+extern "C" void cFE__cFE(cFE* self, int flags)
 {
-    *(void***)((char*)self + 0x0) = cFE_vtbl;
-    if (*(void**)((char*)self + 0xC) != 0) {
-        cUIEngine__cUIEngine(*(void**)((char*)self + 0xC), 3);
+    self->mVtbl = cFE_vtbl;
+    if (self->mpUI != 0) {
+        cUIEngine__cUIEngine(self->mpUI, 3);
     }
     cGraphicsMan_PurgeTextures(GrMan);
-    if (*(void**)((char*)self + 0xB5AA0) != 0) {
-        cFXLoader__cFXLoader(*(void**)((char*)self + 0xB5AA0), 3);
+    if (self->mFXLoader != 0) {
+        cFXLoader__cFXLoader(self->mFXLoader, 3);
     }
-    func_0019CE20((char*)self + 0x1A70, 2);
-    cFERiderManager__cFERiderManager((char*)self + 0xB0, 2);
+    func_0019CE20(self->mBoltFileManager, 2);
+    cFERiderManager__cFERiderManager(self->mRiderManager, 2);
     *(void***)((char*)self + 0xA0) = cSimpleCamera_vtbl;
-    *(void***)((char*)self + 0x0) = D_0046D970;
+    self->mVtbl = D_0046D970;
     if (flags & 1) {
         operator_delete((int*)self);
     }

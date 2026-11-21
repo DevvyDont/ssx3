@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/loadscreens.h"
 #include "main/gamestate.h"
 #include "replay/frameptr.h"
 #include "render/ps2graphicsman.h"
@@ -19,7 +20,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cUIEngine_cUIEngine(void* mem);
 extern "C" void cUIEngine_loadFile(void* engine, const char* name);
 extern "C" void* cUIState_cUIState(void* self, void* engine);
-extern "C" void func_00233640(void* self, int type);
+extern "C" void func_00233640(cFELoadScreen* self, int type);
 extern "C" void cUIStateStack_push(void* list, void* screen);
 extern int cRealFE_mStartState;
 extern char str_UIEngine_b[];
@@ -92,7 +93,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
  * the lodge), cFELoadHintState when results are not locked or the game path is 0, else cFELoadState; the last
  * two get this screen as parent and a texture (func_00233640 with 1 or 2). SplashTexID (+0x18) becomes -1.
  */
-extern "C" void cFELoadScreen_load(void* self)
+extern "C" void cFELoadScreen_load(cFELoadScreen* self)
 {
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -100,10 +101,10 @@ extern "C" void cFELoadScreen_load(void* self)
         vt[44].fn((char*)ps2GraphicsMan + vt[44].delta, 0x100);
     }
     void* eng = cUIEngine_cUIEngine(cMemMan_alloc(0x70, str_UIEngine_b, 0x100, 0));
-    *(void**)((char*)self + 0xC) = eng;
+    self->mpUI = (cUIEngine*)eng;
     cUIEngine_loadFile(eng, str_data_ui_fl);
-    (*(sEngine_233438**)((char*)self + 0xC))->f8 = (int)SSXApp->Fonts;
-    (*(sEngine_233438**)((char*)self + 0xC))->f10 = (int)SSXApp->FELocale;
+    ((sEngine_233438*)self->mpUI)->f8 = (int)SSXApp->Fonts;
+    ((sEngine_233438*)self->mpUI)->f10 = (int)SSXApp->FELocale;
     {
         sObj_233438* feInput = new (str_FLUIInput, 0x100, 0) sObj_233438;
         feInput->f4 = 0;
@@ -112,7 +113,7 @@ extern "C" void cFELoadScreen_load(void* self)
         feInput->fC = 0;
         feInput->f10 = 0;
         feInput->f14 = 0;
-        (*(sEngine_233438**)((char*)self + 0xC))->fC = feInput;
+        ((sEngine_233438*)self->mpUI)->fC = feInput;
     }
     char* gm = (char*)SSXApp->GameModeMan;
     cBE_getInterface_3438(cBE_getBE(), 0);
@@ -121,15 +122,15 @@ extern "C" void cFELoadScreen_load(void* self)
         screen = newScreenA_233438(self);
     } else if (*(int*)(gm + 0x9C) == 0 || cBENewRaceInterface_newRace.cGamePath == 0) {
         screen = newScreenB_233438(self);
-        *(void**)(screen + 0x48) = self;
+        *(void**)(screen + 0x48) = ((void*)self);
         func_00233640(self, 1);
     } else {
         screen = newScreenC_233438(self);
-        *(void**)(screen + 0x48) = self;
+        *(void**)(screen + 0x48) = ((void*)self);
         func_00233640(self, 2);
     }
-    cUIStateStack_push(*(char**)((char*)self + 0xC) + 0x18, screen);
-    *(int*)((char*)self + 0x18) = -1;
+    cUIStateStack_push((char*)self->mpUI + 0x18, screen);
+    self->SplashTexID = -1;
 }
 #endif
 
@@ -181,7 +182,7 @@ static inline int loadTex_3640(char* data, const char* name)
  *
  * @param type  1 for the single-player portrait, 2 for the two online players' portraits
  */
-extern "C" void func_00233640(void* self, int type)
+extern "C" void func_00233640(cFELoadScreen* self, int type)
 {
     char name[0x70];
     cBigFile bf;
@@ -202,11 +203,11 @@ extern "C" void func_00233640(void* self, int type)
             sprintf(name, fmt, D_00442928[cBENewPlayerInterface_getRiderCharID(plr, cBENewPlayerInterface_getHumanRider(plr, 0))], D_004A2B38);
         }
         char* data = FILE_loadpackz(name, 0x3000100);
-        *(int*)((char*)self + 0x10) = loadTex_3640(data, str_CharaPics);
+        self->mTexID[0] = loadTex_3640(data, str_CharaPics);
         if (data != 0)
             cMemMan_free(data);
     } else if (type == 2 && cBENewRaceInterface_newRace.cGamePath == 2) {
-        int* slot = (int*)((char*)self + 0x10);
+        int* slot = (int*)(&self->mTexID[0]);
         for (int i = 0; i < 2; i++) {
             sprintf(name, str_pct_spct_s_ssh, D_00442928[cBENewPlayerInterface_getPlayerCharID(plr, i)], D_004A2B3C);
             char* data = FILE_loadpackz(name, 0x3000100);
@@ -331,20 +332,20 @@ extern "C" void func_0028FA98(void* self, float f);
  * when non-zero, purges the textures (cGraphicsMan_PurgeTextures()) and calls func_0028FA98 on the audio object with
  * 1.0.
  */
-extern "C" void cFELoadScreen_purge(void* self)
+extern "C" void cFELoadScreen_purge(cFELoadScreen* self)
 {
     ((cGame00233930*)GrMan)->FlushRenderer();
-    int id = *(int*)((char*)self + 0x18);
+    int id = self->SplashTexID;
     if (id >= 0) {
         ((cGame00233930*)GrMan)->RemoveTexture(id);
     }
-    void* uiObject = *(void**)((char*)self + 0xC);
+    void* uiObject = self->mpUI;
     if (uiObject != 0) {
         cUIEngine__cUIEngine(uiObject, 3);
     }
     int i;
     for (i = 0; i < 2; i++) {
-        int textureId = *(int*)((char*)self + 0x10 + i * 4);
+        int textureId = *(int*)((char*)&self->mTexID[0] + i * 4);
         if (textureId != 0) {
             ((cGame00233930*)GrMan)->RemoveTexture(textureId);
         }
@@ -379,7 +380,7 @@ extern "C" void cUIEngine_render2D(void* engine);
  *
  * @return 1 when a frame was drawn, 0 when the renderer was not ready
  */
-extern "C" int cFELoadScreen_render(void* self)
+extern "C" int cFELoadScreen_render(cFELoadScreen* self)
 {
     char* graphicsMan = (char*)GrMan;
     sVEntryI002339F8* vt = *(sVEntryI002339F8**)(graphicsMan + 0x10D8);
@@ -387,7 +388,7 @@ extern "C" int cFELoadScreen_render(void* self)
         return 0;
     }
     if (cFadeScreen_drawFade(self) == 0) {
-        cUIEngine_render2D(*(void**)((char*)self + 0xC));
+        cUIEngine_render2D(self->mpUI);
     }
     graphicsMan = (char*)GrMan;
     sVEntryV002339F8* vt2 = *(sVEntryV002339F8**)(graphicsMan + 0x10D8);
@@ -406,9 +407,9 @@ void cLoadScreen_update(void*);
  * Per-frame update of the front-end load screen: updates its UI object (+0xC, cUIEngine_update), then runs the base
  * update cLoadScreen_update (which calls cFadeScreen_update()).
  */
-extern "C" void cFELoadScreen_update(void* self)
+extern "C" void cFELoadScreen_update(cFELoadScreen* self)
 {
-    cUIEngine_update(*(void**)((char*)self + 0xC));
+    cUIEngine_update(self->mpUI);
     cLoadScreen_update(self);
 }
 #endif

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateprofile.h"
 #include "fe/festateoptions.h"
 #include "ui/uimenu.h"
 #include "ui/uiinput.h"
@@ -3786,11 +3787,11 @@ extern void* cFEStateProfileSelect_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateProfileSelect_cFEStateProfileSelect1(void* self)
+extern "C" void* cFEStateProfileSelect_cFEStateProfileSelect1(cFEStateProfileSelect* self)
 {
     cUIState_cUIState(self);
-    *(void***)((char*)self + 0x8) = cFEStateProfileSelect_vtbl;
-    *(int*)((char*)self + 0xC) = 8;
-    return self;
+    self->mVtbl = cFEStateProfileSelect_vtbl;
+    self->mHashName = 8;
+    return ((void*)self);
 }
 #endif
