@@ -1422,7 +1422,7 @@ extern void* cWScriptMan_cWScriptMan_current __asm__("cWScriptMan_TheWScriptMan"
 extern "C" void* cWScriptMan_cWScriptMan(cWScriptMan* self)
 {
     self->MissionHeightInstId = 0xFFFFFFFF;
-    tMissionMenuQueue_tMissionMenuQueue(self->MissionMenuQueue);
+    tMissionMenuQueue_tMissionMenuQueue(&self->MissionMenuQueue);
     self->mVtbl = cWScriptMan_vtbl;
     cProcessList_cProcessList((char*)&self->IdleList);
     cProcessList_cProcessList((char*)&self->ActiveList);
@@ -1527,7 +1527,7 @@ extern "C" void cWScriptMan_init(cWScriptMan* self)
     WSP308988_I(36) = -1;
     WSP308988_U(44) = 0xFFFFFFFF;
     MEM_fill((char*)self->MissionTrick, 0, 8);
-    tMissionMenuQueue_init(self->MissionMenuQueue);
+    tMissionMenuQueue_init(&self->MissionMenuQueue);
     WSP308988_I(0x40) = 0;
     MEM_fill((char*)self + 0x44, 0, 0x180);
     cWScriptMan_rebuildGlobalTables(self);

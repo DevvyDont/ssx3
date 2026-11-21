@@ -1391,7 +1391,7 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
         int replayState = *(int*)SSXApp->Game->Replay;
         int busy = replayState != 0 && replayState < 10;
         if (!busy) {
-            tMissionMenuQueue_addEntry_a(self->MissionMenuQueue, id, cmd, self->Being);
+            tMissionMenuQueue_addEntry_a(&self->MissionMenuQueue, id, cmd, self->Being);
         }
         break;
     }
@@ -2436,7 +2436,7 @@ extern "C" void cWScriptMan_failActiveLocalMission(cWScriptMan* self)
         *(int*)process = 0;
         cProcessList_addProcess((char*)&self->IdleList, process);
     }
-    tMissionMenuQueue_empty((tMissionMenuQueue*)self->MissionMenuQueue);
+    tMissionMenuQueue_empty(&self->MissionMenuQueue);
 }
 #endif
 
@@ -4250,7 +4250,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_popMenuQueueEntry);
  */
 extern "C" void cWScriptMan_popMenuQueueEntry(cWScriptMan* self)
 {
-    tMissionMenuQueue_getNextEntry((tMissionMenuQueue*)((cWScriptQueue*)(self->MissionMenuQueue)));
+    tMissionMenuQueue_getNextEntry(&self->MissionMenuQueue);
 }
 #endif
 //100%
@@ -4263,7 +4263,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_getMenuQueueEntry);
  */
 extern "C" void cWScriptMan_getMenuQueueEntry(cWScriptMan* self)
 {
-    tMissionMenuQueue_getEntry((tMissionMenuQueue*)((cWScriptQueue*)(self->MissionMenuQueue)));
+    tMissionMenuQueue_getEntry(&self->MissionMenuQueue);
 }
 #endif
 //100%

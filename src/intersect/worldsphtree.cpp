@@ -594,9 +594,9 @@ static inline int overlapBox_3309D8(const sBox_3309D8* b, const sBox_3309D8* o)
  * @param ctx  the callback: instance list, count pointer, maximum, query box (On Tour OverlapInstancesCallback, this)
  * @param tree  the octree cell (On Tour const Cell& cell)
  */
-extern "C" void OverlapInstancesCallback_operatorCall(sCtx_3309D8* ctx, void* tree)
+extern "C" void OverlapInstancesCallback_operatorCall(sCtx_3309D8* ctx, nash_Cell* tree)
 {
-    for (sNode_3309D8* node = *(sNode_3309D8**)((char*)tree + 0x20); node != 0; node = node->next) {
+    for (sNode_3309D8* node = *(sNode_3309D8**)&tree->nodesinside[0]; node != 0; node = node->next) {
         int flags = node->flags;
         if (flags & 0x20) {
             if (overlapNode_3309D8(ctx->box, node)) {
@@ -657,7 +657,7 @@ struct sQuery_330BA8 {
 
 static inline void collect_330BA8(sOctNode_330BA8* node, sCtx_3309D8* ctx)
 {
-    OverlapInstancesCallback_operatorCall(ctx, node);
+    OverlapInstancesCallback_operatorCall(ctx, (nash_Cell*)node);
     if (node->child[0] != 0) nash_Cell_descend((nash_Cell*)node->child[0], ctx);
     if (node->child[1] != 0) nash_Cell_descend((nash_Cell*)node->child[1], ctx);
     if (node->child[2] != 0) nash_Cell_descend((nash_Cell*)node->child[2], ctx);
@@ -881,7 +881,7 @@ static inline int overlapObj_331E90(const sBox_3309D8* b, const sObj_331E90* n)
 
 static inline void collect_331E90(sTree_331E90* tree, sCtx_3309D8* ctx)
 {
-    OverlapInstancesCallback_operatorCall(ctx, tree);
+    OverlapInstancesCallback_operatorCall(ctx, (nash_Cell*)tree);
     sCtx_3309D8* q = (sCtx_3309D8*)((char*)ctx + 0x10);
     for (sObj_331E90* p = tree->objs; p != 0; p = p->next) {
         if (overlapObj_331E90(q->box, p)) {
@@ -1025,7 +1025,7 @@ static inline void add_332DB8(sCtx_3309D8* s, void* p)
 
 static inline void collect_332DB8(sTree_332DB8* tree, sCtx3_332DB8* ctx)
 {
-    OverlapInstancesCallback_operatorCall(&ctx->nodes, tree);
+    OverlapInstancesCallback_operatorCall(&ctx->nodes, (nash_Cell*)tree);
     sCtx_3309D8* s = &ctx->objs;
     for (sObj_332DB8* p = tree->objs; p != 0; p = p->next) {
         if (overlapObj_332DB8(s->box, p)) {
@@ -3509,7 +3509,7 @@ extern "C" void nash_privy_QueryHelper_helpX1(char* flag, sCtx_3309D8* ctx, sCtx
     sBox_3309D8* box = (sBox_3309D8*)vbox;
     sOctNode_330BA8* node = (sOctNode_330BA8*)vnode;
     sCell_338920* cell = (sCell_338920*)vcell;
-    OverlapInstancesCallback_operatorCall(ctx, node);
+    OverlapInstancesCallback_operatorCall(ctx, (nash_Cell*)node);
     if (cell->level == 11) {
         return;
     }
@@ -3792,7 +3792,7 @@ static inline int overlapObj_33A3D8(const sBox_3309D8* b, const sObj_33A3D8* n)
 
 static inline void collectObjs_33A3D8(sTree_33A3D8* tree, sCtx_3309D8* ctx)
 {
-    OverlapInstancesCallback_operatorCall(ctx, tree);
+    OverlapInstancesCallback_operatorCall(ctx, (nash_Cell*)tree);
     sCtx_3309D8* q = (sCtx_3309D8*)((char*)ctx + 0x10);
     for (sObj_33A3D8* p = tree->objs; p != 0; p = p->next) {
         if (overlapObj_33A3D8(q->box, p)) {
@@ -4018,7 +4018,7 @@ static inline int overlap_33B748(const sBox_33B748* b, const sObjNode_33B748* n)
 
 static inline void visit_33B748(sTree_33B748* self, sCtx_33B748* ctx)
 {
-    OverlapInstancesCallback_operatorCall((sCtx_3309D8*)ctx, self);
+    OverlapInstancesCallback_operatorCall((sCtx_3309D8*)ctx, (nash_Cell*)self);
     sSub_33B748* s = &ctx->objs;
     for (sObjNode_33B748* p = self->objs; p != 0; p = p->next) {
         if (overlap_33B748(s->box, p)) {
@@ -5241,7 +5241,7 @@ extern "C" void nash_Cell_descend2(nash_Cell* tree, sCtx_3309D8* ctx)
 INCLUDE_ASM("intersect/worldsphtree", nash_Cell_descend3);
 #ifdef SKIP_ASM
 struct sCtx_3309D8;
-extern "C" void OverlapInstancesCallback_operatorCall(sCtx_3309D8* ctx, void* tree);
+extern "C" void OverlapInstancesCallback_operatorCall(sCtx_3309D8* ctx, nash_Cell* tree);
 
 struct sBox_340DC0 {
     float min[4];

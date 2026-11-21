@@ -43,6 +43,8 @@
 // creator.
 
 #include "layout.h"
+
+struct DNASMan;
 #include "fe/festatenet.h"
 
 struct cUIThing;
@@ -124,9 +126,9 @@ struct cFEStateAuthDNAS {
                                     //       func_001ABB30 opens the status popup only when it and mpPopup are set
     tFEStateNetMsgList mMsgList;    // 0x6C8 [R] see tFEStateNetMsgList; [P] the preview's list at 0xA4
     // --- cFEStateAuthDNAS
-    void* mpAuth;                   // 0x6D0 [R] 0; [U] onCreateScreen cFEStateAuthDNAS_onCreateScreen stores
+    DNASMan* mpAuth;                // 0x6D0 [R] 0; [U] onCreateScreen cFEStateAuthDNAS_onCreateScreen stores
                                     //       func_002561B8(cMemMan_alloc(0xA50, "cFEStateAuthDNASCreate")) (the DNAS
-                                    //       authentication object, class not named) and starts it in the mode of the
+                                    //       authentication object, online/dnasman.h) and starts it in the mode of the
                                     //       profile bits cBEOptionInterface_mOption; onUpdate cFEStateAuthDNAS_onUpdate polls it (its first word:
                                     //       >= 3 ready, 5 done; + 0x1C error; error texts at + 0x450/0x650/0x850),
                                     //       cFEStateAuthDNAS_onInputBegin cancels it (+ 0x14 = 1); the destructor shuts it down

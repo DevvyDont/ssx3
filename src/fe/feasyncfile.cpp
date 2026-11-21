@@ -15476,7 +15476,7 @@ extern "C" void cFEStateAuthDNAS_onCreateScreen(cFEStateAuthDNAS* self)
             widget->setVisible(0);
         }
     }
-    self->mpAuth = func_002561B8(cMemMan_alloc(2640, str_cFEStateAuthDNASCreate, 0x100, 0));
+    self->mpAuth = (DNASMan*)func_002561B8(cMemMan_alloc(2640, str_cFEStateAuthDNASCreate, 0x100, 0));
     self->miState = 1;
     cBE_getInterface_Fv(cBE_getBE(), 4);
     int mode = 0;
