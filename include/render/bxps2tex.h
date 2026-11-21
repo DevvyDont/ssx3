@@ -39,8 +39,8 @@
 
 #include "layout.h"
 
-// One texture's record (0x58 [R]: cMemMan_alloc(0x58, "NBTexInfo") in cPSPGraphicsMan_NewNonBindTexID, "BTexInfo" in
-// cPSPGraphicsMan_NewBindTexID). Type name: On Tour's tTexInfo (the record tLinkTexInfo points to; a different 0x14 PSP
+// One texture's record (0x58 [R]: cMemMan_alloc(0x58, "NBTexInfo") in cTextureMan_NewNonBindTexID, "BTexInfo" in
+// cTextureMan_NewBindTexID). Type name: On Tour's tTexInfo (the record tLinkTexInfo points to; a different 0x14 PSP
 // layout there) - the retail type name is not attested (the preview's asserts call a record variable "Tex").
 // Filled by func_00367440 (create), func_00368660 (VRAM allocation on bind); 64-bit fields are GS register values.
 struct tTexInfo {
@@ -82,22 +82,22 @@ struct tTexInfo {
 // An id slot (4 bytes [P] "sizeof(cLinkTexInfo)==4"; On Tour tLinkTexInfo, an anonymous union): a used id holds its
 // record, a free non-bound id holds the next free slot.
 union cLinkTexInfo {
-    tTexInfo* pTexInfo;         // [P] "m_pTexInfo[texid].pTexInfo"; [U] cPSPGraphicsMan_NewNonBindTexID / NewBindTexID
+    tTexInfo* pTexInfo;         // [P] "m_pTexInfo[texid].pTexInfo"; [U] cTextureMan_NewNonBindTexID / NewBindTexID
                                 //      store the new record, Delete* free it
-    cLinkTexInfo* pNextFree;    // (our name) [U] func_003670E0 chains slots 1500..1999; cPSPGraphicsMan_NewNonBindTexID
-                                //      pops, cPSPGraphicsMan_DeleteNonBindTexID pushes
+    cLinkTexInfo* pNextFree;    // (our name) [U] func_003670E0 chains slots 1500..1999; cTextureMan_NewNonBindTexID
+                                //      pops, cTextureMan_DeleteNonBindTexID pushes
 };
 
 struct cTextureMan {
     int m_iNumBindTextures;              // 0x0000 [O]; [P] "m_iNumBindTextures==0"; [R] func_003670E0 0;
-                                         //        [U] cPSPGraphicsMan_NewBindTexID ++, cPSPGraphicsMan_DeleteBindTexID --
-    int m_iNumNonBindTextures;           // 0x0004 [O]; [R] func_003670E0 0; [U] cPSPGraphicsMan_NewNonBindTexID ++,
-                                         //        cPSPGraphicsMan_DeleteNonBindTexID --
+                                         //        [U] cTextureMan_NewBindTexID ++, cTextureMan_DeleteBindTexID --
+    int m_iNumNonBindTextures;           // 0x0004 [O]; [R] func_003670E0 0; [U] cTextureMan_NewNonBindTexID ++,
+                                         //        cTextureMan_DeleteNonBindTexID --
     cLinkTexInfo m_pTexInfo[2000];       // 0x0008 [O][P] (kMaxTextures 2000; ids < 1500 = kMaxVirtualBindTextures are
                                          //        bound); [R] func_003670E0 MEM_fill()s 8000 bytes; [U] every method
                                          //        indexes it by texture id (self + 8 + id * 4)
     cLinkTexInfo* m_pNonBindFreeTexInfo; // 0x1F48 [O][P]; [R] func_003670E0: &m_pTexInfo[1500]; [U]
-                                         //        cPSPGraphicsMan_NewNonBindTexID pops, DeleteNonBindTexID pushes
+                                         //        cTextureMan_NewNonBindTexID pops, DeleteNonBindTexID pushes
     int mBoundTex[2];                    // 0x1F4C (our name; [X] boundTex) texture id selected in GS context 1 / 2;
                                          //        [R] func_00366FE8 -1; [U] func_00368970 compares / stores;
                                          //        func_00368660, func_00367360, func_00367078, func_00367BC0,

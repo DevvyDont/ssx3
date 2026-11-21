@@ -9,10 +9,10 @@
 // sound/bankmonitor unit 0x2AF8A8..0x2B07F8, just before cSpeechSys's. Neither class has a vtable.
 // Class names from the allocation tags "SpeechInstance" / "SpeechBank". On Tour has no speech system.
 // Sizes [R]: cSpeechSys func_002B0E60 = func_002AFA68(cMemMan_alloc(0x904, "SpeechInstance")); func_002AF960 =
-// func_002AF8E0(cMemMan_alloc(0x4C, "SpeechBank")).
+// cSpeechBank_cSpeechBank(cMemMan_alloc(0x4C, "SpeechBank")).
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] constructors func_002AFA68 / func_002AF8E0, destructors func_002AFB38 / func_002AF900, the speech.inf keys
+//   [R] constructors func_002AFA68 / cSpeechBank_cSpeechBank, destructors func_002AFB38 / cSpeechBank__cSpeechBank, the speech.inf keys
 //       func_002B0088 reads;
 //   [U] how the retail methods use the field. Names marked "(our name)" describe that use; the rest are unk_.
 
@@ -43,7 +43,7 @@ struct cSpeechInstance {
     tSpeechEventFile mEventFile[4];    // 0x0CC [R] ctor zeroes 4; [U] func_002AFD40 fills [unk_0EC]; dtor frees
     int unk_0EC;                       // 0x0EC [R] ctor 0; [U] number of event files loaded (func_002B0088 ++ per speech.inf BASEPATH entry); dtor loop bound
     int unk_0F0;                       // 0x0F0 [R] ctor 0; [U] number of speech banks in unk_0F4 (func_002B0348 ++, D_004A37B8 counts them all); dtor / func_002B04D8 loop bound
-    cSpeechBank* unk_0F4[500];         // 0x0F4 [U] func_002B0348 appends func_002AF960(...); func_002B04D8 searches by bank id; dtor destroys them (func_002AF900)
+    cSpeechBank* unk_0F4[500];         // 0x0F4 [U] func_002B0348 appends func_002AF960(...); func_002B04D8 searches by bank id; dtor destroys them (cSpeechBank__cSpeechBank)
     int unk_8C4;                       // 0x8C4 [R] ctor 0; [U] set by func_002B07E8 (cSpeechSys func_002B0FE8)
     int unk_8C8;                       // 0x8C8 [R] ctor 0; [U] set by func_002B07F0 (cSpeechSys func_002B1020); func_002B04D8 passes it to cSpeechSys's play slot
     int unk_8CC;                       // 0x8CC [R] ctor 0; [U] cSpeechSys func_002B1058 / func_002B1520 set it; func_002B04D8 passes it to the play slot

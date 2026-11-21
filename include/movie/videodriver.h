@@ -20,8 +20,8 @@
 // position / scale sit 4 bytes earlier (0x3C..0x4C: one word less somewhere in 0x24..0x3C).
 //
 // Vtables: D_004802B0 RCMP::VIDEO_DRIVER (slot 1 VIDEO_DRIVER__VIDEO_DRIVER, 2-5 pure virtual, 6
-// VIDEO_DRIVER_CompleteDraw__FPv); D_00480270 SSX_VD_PS2_SINGLE_BUFFERD (1 func_002547B8 dtor, 2 func_002543F0
-// SetPosition, 3 func_00254400__FPvff SetScale, 4 func_00254C48 Draw, 5 func_00254DA0__FPv ReDraw, 6 func_00254DC0
+// VIDEO_DRIVER_CompleteDraw__FPv); D_00480270 SSX_VD_PS2_SINGLE_BUFFERD (1 func_002547B8 dtor, 2 SSX_VD_PS2_SINGLE_BUFFERD_SetPosition
+// SetPosition, 3 SSX_VD_PS2_SINGLE_BUFFERD_SetScale__FPvff SetScale, 4 func_00254C48 Draw, 5 func_00254DA0__FPv ReDraw, 6 SSX_VD_PS2_SINGLE_BUFFERD_CompleteDraw
 // CompleteDraw) - On Tour's VIDEO_DRIVER method order (SetPosition, SetScale, Draw, ReDraw, CompleteDraw).
 //
 // FLAT layouts. Evidence tags: [R] the constructor func_00254410, the destructors and SSX_VD_create's 84-byte
@@ -62,10 +62,10 @@ struct SSX_VD_PS2_SINGLE_BUFFERD {
     int mRowHeights[6];                 // 0x24 [R] ctor: the power-of-two strip heights (func_00254350); [U] Draw /
                                         //      func_002548D0 step by them
     int mDrawLayer;                     // 0x3C [R] ctor: its DrawLayer argument; [U] func_002548D0
-    float mPosX;                        // 0x40 [R] ctor centres the frame (func_002543F0); [U] SetPosition; func_002548D0
+    float mPosX;                        // 0x40 [R] ctor centres the frame (SSX_VD_PS2_SINGLE_BUFFERD_SetPosition); [U] SetPosition; func_002548D0
     float mPosY;                        // 0x44 [R]; [U] SetPosition; func_002548D0
     float mPosZ;                        // 0x48 [R] ctor D_004A2EB0; [U] SetPosition; func_002548D0
-    float mScaleX;                      // 0x4C [R] ctor 1.0f (func_00254400); [U] SetScale; func_002548D0
+    float mScaleX;                      // 0x4C [R] ctor 1.0f (SSX_VD_PS2_SINGLE_BUFFERD_SetScale); [U] SetScale; func_002548D0
     float mScaleY;                      // 0x50 [R] ctor 1.0f; [U] SetScale; func_002548D0
 };
 

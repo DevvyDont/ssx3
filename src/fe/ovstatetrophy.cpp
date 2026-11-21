@@ -104,7 +104,7 @@ extern "C" void cOVStateTrophy_onWidgetEvent(cOVStateTrophy* self, cUIObj_20E9A0
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_0020EAA0);
+INCLUDE_ASM("fe/ovstatetrophy", cHUDRadar_cHUDRadar);
 #ifdef SKIP_ASM
 struct sRect20EAA0 {
     float x, y, w, h;
@@ -117,11 +117,11 @@ extern "C" void func_0020EC18(cHUDRadar* self, sRect20EAA0* a, sRect20EAA0* r);
  * Constructs a course-progress tracker, the 0x3C-byte object at +0x8 of each cOVStateHUD1P panel.
  *
  * Installs its vtable D_00474230 at +0x38, lays it out over the whole 640 x 480 screen with func_0020EC18 and counts
- * the instance in D_004A276C (func_0020EB08 drops the count). cOVStateHUD1P_cOVStateHUD1P and func_0021CBA0 call it.
+ * the instance in D_004A276C (cHUDRadar__cHUDRadar drops the count). cOVStateHUD1P_cOVStateHUD1P and func_0021CBA0 call it.
  *
  * @return @p self
  */
-extern "C" void* func_0020EAA0(cHUDRadar* self)
+extern "C" void* cHUDRadar_cHUDRadar(cHUDRadar* self)
 {
     sRect20EAA0 screenRect;
     self->mVtbl = (void**)D_00474230;
@@ -136,7 +136,7 @@ extern "C" void* func_0020EAA0(cHUDRadar* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatetrophy", func_0020EB08);
+INCLUDE_ASM("fe/ovstatetrophy", cHUDRadar__cHUDRadar);
 #ifdef SKIP_ASM
 extern char D_00474230[];
 extern int D_004A276C;
@@ -152,7 +152,7 @@ void operator_delete(int*);
  *
  * @param flags  bit 0 frees the object with operator_delete (the g++ deleting-destructor flag)
  */
-extern "C" void func_0020EB08(cHUDRadar* self, int flags)
+extern "C" void cHUDRadar__cHUDRadar(cHUDRadar* self, int flags)
 {
     int n = D_004A276C - 1;
     self->mVtbl = (void**)D_00474230;

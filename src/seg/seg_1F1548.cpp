@@ -427,7 +427,7 @@ INCLUDE_ASM("seg/seg_1F1548", cPunchFX_update);
 int cRiderAnimBase_getCurrentAnimID(void* self, int i);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
-extern "C" int func_001446A0(void*, int);
+extern "C" int tEventFlags_isSet1(void*, int);
 extern int D_004A3AFC;
 
 struct sVec4_1150 {
@@ -538,8 +538,8 @@ extern "C" void cPunchFX_update(sFx_1150* self)
     int a = cRiderAnimBase_getCurrentAnimID(*(void**)(self->owner + 0x784), 0);
     int layer1Anim = cRiderAnimBase_getCurrentAnimID(*(void**)(self->owner + 0x784), 1);
     if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self->owner + 0x784), 1) == 13) {
-        if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self->owner + 0x784), 1) + 0xB0, 1) == 0) {
-            flag = func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self->owner + 0x784), 1) + 0xB0, 0) != 0;
+        if (tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self->owner + 0x784), 1) + 0xB0, 1) == 0) {
+            flag = tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self->owner + 0x784), 1) + 0xB0, 0) != 0;
         }
     }
     if (a == 326 || (layer1Anim == 323 && flag)) {

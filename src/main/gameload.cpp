@@ -1944,7 +1944,7 @@ void cGame_setPreloadState(void* vself, int val)
 #endif
 
 //100%
-INCLUDE_ASM("main/gameload", func_00231280);
+INCLUDE_ASM("main/gameload", cGame_cancelPreloadingState);
 #ifdef SKIP_ASM
 /**
  * Cancels the game's state preload.
@@ -1953,7 +1953,7 @@ INCLUDE_ASM("main/gameload", func_00231280);
  * state's preloadCancel (vtable slot +0x24 of mPreloadingState, +0x204) and clears mPreloadStateID and
  * mPreloadingState.
  */
-extern "C" void func_00231280(cGame* self) {
+extern "C" void cGame_cancelPreloadingState(cGame* self) {
     void *obj;
     void *vtbl;
 

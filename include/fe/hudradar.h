@@ -6,14 +6,14 @@
 // source fe/hudradar.cpp (preview assert strings, e.g. "radarLoc.H > (messageHeight + (offScreenArrowHeight * 2.0f))";
 // retail code sits in the decomp's unit fe/ovstatetrophy). Name: the preview's vtable section _vt$9cHUDRadar pairs with
 // retail D_00474230 (builds/x/v2/vtables_v2.tsv) and its slot 1 (preview 0x001D1930) matches the retail destructor
-// func_0020EB08; the preview also keeps the static inlines IsRadarShown__9cHUDRadar / ShowRadar__9cHUDRadarb (a gp
+// cHUDRadar__cHUDRadar; the preview also keeps the static inlines IsRadarShown__9cHUDRadar / ShowRadar__9cHUDRadarb (a gp
 // global, not a member). On Tour has no cHUDRadar.
 //
 // Size 0x3C: one per rider info of cOVStateHUD1P (fe/ovstatehud.h: char unk_08[0x3C] at +0x8 of each tHUDRiderInfo,
-// built by the constructor func_0020EAA0, which stores the vptr at +0x38 - the last word - and counts live instances
-// in D_004A276C; the destructor func_0020EB08 undoes both). No allocation of its own. No base class; the class
+// built by the constructor cHUDRadar_cHUDRadar, which stores the vptr at +0x38 - the last word - and counts live instances
+// in D_004A276C; the destructor cHUDRadar__cHUDRadar undoes both). No allocation of its own. No base class; the class
 // declares a virtual destructor, so g++ 2.95 puts the vptr after its data (0x38).
-// Methods: ctor func_0020EAA0, dtor func_0020EB08 (vtable slot 1, the only slot), init/layout func_0020EB50 (loads
+// Methods: ctor cHUDRadar_cHUDRadar, dtor cHUDRadar__cHUDRadar (vtable slot 1, the only slot), init/layout func_0020EB50 (loads
 // the shared icons and font, then func_0020EC18 lays it out), 1-player render func_0020EDA0, split-screen render
 // func_0020FB40. func_0020ED20 and func_002105B0 ... func_002108F8 are statics (course progress of all riders).
 //
@@ -43,7 +43,7 @@ struct cHUDRadar {
                                      //       func_0020FB40 lwc1)
     int unk_034;                     // 0x034 [U] the viewer's AI index from the last frame: both renders compare and
                                      //       store it (lw/sw)
-    void** mVtbl;                    // 0x038 [R] func_0020EAA0 stores D_00474230 (1 slot), func_0020EB08 restores it;
+    void** mVtbl;                    // 0x038 [R] cHUDRadar_cHUDRadar stores D_00474230 (1 slot), cHUDRadar__cHUDRadar restores it;
                                      //       [P] _vt$9cHUDRadar
 };
 

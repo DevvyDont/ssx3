@@ -394,7 +394,7 @@ extern "C" void cMenu_addItem(void* menu, void* item, int index);
 /**
  * Constructs the debug lobby's "Continue" menu: a cMenu with a single "Continue" command item.
  *
- * Runs cMenu_cMenu, stores the menu's vtable D_0046D740 at +0x12C (its destructor is func_001DCD58), builds the item at
+ * Runs cMenu_cMenu, stores the menu's vtable D_0046D740 at +0x12C (its destructor is ContinueMenu__ContinueMenu), builds the item at
  * +0x130 with cPopMenuItem_cPopMenuItem and str_Continue and appends it (cMenu_addItem, index -1). The debug lobby screen
  * (cDebugLobbyScreen_cDebugLobbyScreen) keeps it at +0x604 and pushes it under every error and "declined" message.
  *
@@ -441,13 +441,13 @@ extern void* cDebugLobbyScreen_vtbl[];
 extern int cBXString_EmptyString;
 extern void* D_004A4E90;
 extern "C" void* cMenuSys_cMenuSys(void* self);
-extern "C" void* func_001DA988(void* self, void* a, void* b);
-extern "C" void* func_001DACB8(void* self, void* a, void* b, void* c);
-extern "C" void* func_001DAE20(void* self, void* a);
-extern "C" void* func_001DAF08(void* self, void* a, void* b);
-extern "C" void* func_001DB028(void* self, void* a);
-extern "C" void* __sti__all_in_one_main_cpp(void* self, void* a, void* b);
-extern "C" void* func_001DB2B0(void* self, void* a);
+extern "C" void* AccountMenu_AccountMenu(void* self, void* a, void* b);
+extern "C" void* PersonaMenu_PersonaMenu(void* self, void* a, void* b, void* c);
+extern "C" void* LobbyMenu_LobbyMenu(void* self, void* a);
+extern "C" void* RoomMenu_RoomMenu(void* self, void* a, void* b);
+extern "C" void* ChatMenu_ChatMenu(void* self, void* a);
+extern "C" void* ChallengeResponseMenu_ChallengeResponseMenu(void* self, void* a, void* b);
+extern "C" void* AbortMenu_AbortMenu(void* self, void* a);
 
 // Owner reference handed to each debug sub-menu (a one-pointer functor).
 struct sDbgOwner17D298 {
@@ -459,11 +459,11 @@ struct sDbgOwner17D298 {
  *
  * Stores the vtable cDebugLobbyScreen_vtbl (slots: destructor cDebugLobbyScreen__cDebugLobbyScreen, update cDebugLobbyScreen_update, draw cDebugLobbyScreen_draw), zeroes the
  * state at +0x4 and builds the menu system at +0x8 (cMenuSys_cMenuSys). Each menu gets a one-pointer functor holding
- * this screen, which its command handler calls back: the account menu "Login Method" at +0x70 (func_001DA988, Create
- * Account and Login), the "Continue" menu at +0x604 (ContinueMenu_ContinueMenu), "Select Persona" at +0x74C (func_001DACB8, with
- * Create Persona and Delete Persona), "Select Room" at +0xD2C (func_001DAE20), "Room Occupants" at +0x1044
- * (func_001DAF08, occupants and Chat), the chat menu at +0x1534 (func_001DB028), the "You've been Challenged!" menu at
- * +0x18C0 (__sti__all_in_one_main_cpp, Accept and Decline) and the "Abort" menu at +0x1AAC (func_001DB2B0). The three
+ * this screen, which its command handler calls back: the account menu "Login Method" at +0x70 (AccountMenu_AccountMenu, Create
+ * Account and Login), the "Continue" menu at +0x604 (ContinueMenu_ContinueMenu), "Select Persona" at +0x74C (PersonaMenu_PersonaMenu, with
+ * Create Persona and Delete Persona), "Select Room" at +0xD2C (LobbyMenu_LobbyMenu), "Room Occupants" at +0x1044
+ * (RoomMenu_RoomMenu, occupants and Chat), the chat menu at +0x1534 (ChatMenu_ChatMenu), the "You've been Challenged!" menu at
+ * +0x18C0 (ChallengeResponseMenu_ChallengeResponseMenu, Accept and Decline) and the "Abort" menu at +0x1AAC (AbortMenu_AbortMenu). The three
  * cBXStrings at +0x1C04 (typed user name), +0x1C08 (typed password) and +0x1C0C (challenger's name) start empty. The
  * menu system's font, input and box texture (its +0x58, +0x5C, +0x60, here +0x60, +0x64, +0x68) are taken from the
  * debug front end's font (+0x18), SSXApp->Inputs[0] and its box texture (+0x20). Finally the screen registers itself in
@@ -481,7 +481,7 @@ extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(cDebugLobbyScreen* self)
     onCreate.owner = ((char*)self);
     sDbgOwner17D298 onLogin;
     onLogin.owner = ((char*)self);
-    func_001DA988(self->mLoginMenu, &onCreate, &onLogin);
+    AccountMenu_AccountMenu(self->mLoginMenu, &onCreate, &onLogin);
     ContinueMenu_ContinueMenu((ContinueMenu*)self->mContinueMenu);
     sDbgOwner17D298 onSelectPersona;
     onSelectPersona.owner = ((char*)self);
@@ -489,26 +489,26 @@ extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(cDebugLobbyScreen* self)
     onCreatePersona.owner = ((char*)self);
     sDbgOwner17D298 onDeletePersona;
     onDeletePersona.owner = ((char*)self);
-    func_001DACB8(self->mPersonaMenu, &onSelectPersona, &onCreatePersona, &onDeletePersona);
+    PersonaMenu_PersonaMenu(self->mPersonaMenu, &onSelectPersona, &onCreatePersona, &onDeletePersona);
     sDbgOwner17D298 onSelectRoom;
     onSelectRoom.owner = ((char*)self);
-    func_001DAE20(self->mRoomMenu, &onSelectRoom);
+    LobbyMenu_LobbyMenu(self->mRoomMenu, &onSelectRoom);
     sDbgOwner17D298 onSelectUser;
     onSelectUser.owner = ((char*)self);
     sDbgOwner17D298 onChat;
     onChat.owner = ((char*)self);
-    func_001DAF08(self->mOccupantsMenu, &onSelectUser, &onChat);
+    RoomMenu_RoomMenu(self->mOccupantsMenu, &onSelectUser, &onChat);
     sDbgOwner17D298 onMessage;
     onMessage.owner = ((char*)self);
-    func_001DB028(self->mChatMenu, &onMessage);
+    ChatMenu_ChatMenu(self->mChatMenu, &onMessage);
     sDbgOwner17D298 onAcceptChallenge;
     onAcceptChallenge.owner = ((char*)self);
     sDbgOwner17D298 onDeclineChallenge;
     onDeclineChallenge.owner = ((char*)self);
-    __sti__all_in_one_main_cpp(self->mChallengedMenu, &onAcceptChallenge, &onDeclineChallenge);
+    ChallengeResponseMenu_ChallengeResponseMenu(self->mChallengedMenu, &onAcceptChallenge, &onDeclineChallenge);
     sDbgOwner17D298 onAbortChallenge;
     onAbortChallenge.owner = ((char*)self);
-    func_001DB2B0(self->mAbortMenu, &onAbortChallenge);
+    AbortMenu_AbortMenu(self->mAbortMenu, &onAbortChallenge);
     int emptyText = cBXString_EmptyString;
     cSSXApp* app = SSXApp;
     self->mUserName = (char*)emptyText;
@@ -528,8 +528,8 @@ INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen__cDebugLobbyScreen);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void cMenuItem__cMenuItem(void* self, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
-extern "C" void func_001DD0C8(void* self, int flags);
-extern "C" void func_001DCEA0(void* self, int flags);
+extern "C" void PersonaMenu__PersonaMenu(void* self, int flags);
+extern "C" void AccountMenu__AccountMenu(void* self, int flags);
 extern "C" void cMenuSys__cMenuSys(void* self, int flags);
 void operator_delete(int* ptr);
 extern void* cDebugLobbyScreen_vtbl[];
@@ -608,8 +608,8 @@ static inline void dtorF_17D3B0(char* sub)
  * Stores the vtable cDebugLobbyScreen_vtbl again, clears the screen pointer D_004A4E90, destroys the cBXStrings at +0x1C0C, +0x1C08
  * and +0x1C04, then the menus in reverse order: Abort (+0x1AAC), You've been Challenged (+0x18C0), the chat menu
  * (+0x1534, its 14 line items through their virtual destructors), Room Occupants (+0x1044, 24 items), Select Room
- * (+0xD2C, 12 items), Select Persona (+0x74C, func_001DD0C8), Continue (+0x604) and Login Method (+0x70,
- * func_001DCEA0), and the menu system (+0x8, cMenuSys__cMenuSys). Ends with cDebugScreen's vtable cDebugScreen_vtbl and
+ * (+0xD2C, 12 items), Select Persona (+0x74C, PersonaMenu__PersonaMenu), Continue (+0x604) and Login Method (+0x70,
+ * AccountMenu__AccountMenu), and the menu system (+0x8, cMenuSys__cMenuSys). Ends with cDebugScreen's vtable cDebugScreen_vtbl and
  * operator_delete when bit 0 of @p flags is set. The item and menu destructors run with flags 2 (no free).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the screen
@@ -626,9 +626,9 @@ extern "C" void cDebugLobbyScreen__cDebugLobbyScreen(cDebugLobbyScreen* self, in
     dtorC_17D3B0(self->mChatMenu);
     dtorD_17D3B0(self->mOccupantsMenu);
     dtorE_17D3B0(self->mRoomMenu);
-    func_001DD0C8(self->mPersonaMenu, 2);
+    PersonaMenu__PersonaMenu(self->mPersonaMenu, 2);
     dtorF_17D3B0(self->mContinueMenu);
-    func_001DCEA0(self->mLoginMenu, 2);
+    AccountMenu__AccountMenu(self->mLoginMenu, 2);
     cMenuSys__cMenuSys(self->mMenuSys, 2);
     *(void***)self = cDebugScreen_vtbl;
     if (flags & 1)
@@ -690,7 +690,7 @@ extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void func_0025C610(void* net);
 extern "C" void func_0017DA30(cDebugLobbyScreen* self, int a1);
 extern "C" void func_0017DE70(cDebugLobbyScreen* self);
-extern "C" void func_001DB418(void* items, void* net);
+extern "C" void PersonaMenu_setpersonas(void* items, void* net);
 extern "C" int func_0025F120(void* net);
 extern "C" char* func_0025F150(void* net, int i);
 extern "C" int func_0025F430(void* net);
@@ -742,7 +742,7 @@ static inline void SetMenu0017D6F0(int* menu, void* items)
  *   and mPassword, logs in (func_0025C610) and sets state 5; otherwise state 3 and the Login Method menu (+0x70).
  * - 203 (account created): state 5 and a login with the typed user name and password (+0x1C04, +0x1C08).
  * - 212 (logged in): automatic mode selects persona 0 (func_0025CD28, state 7); otherwise fills Select Persona (+0x74C)
- *   from the lobby (func_001DB418), opens it and sets state 6.
+ *   from the lobby (PersonaMenu_setpersonas), opens it and sets state 6.
  * - 218 (persona selected): automatic mode joins every room named "A.West" (func_0025F120, func_0025F150,
  *   func_004165A8, then func_0025D800, state 11); otherwise state 10 with Select Room (+0xD2C).
  * - 214, 216 (persona created or deleted): refills and opens Select Persona, state 6.
@@ -802,7 +802,7 @@ extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, void* ev)
             self->state = 7;
             func_0025CD28(LobbyMan_mLobbyMan, 0);
         } else {
-            func_001DB418(self->items74C, LobbyMan_mLobbyMan);
+            PersonaMenu_setpersonas(self->items74C, LobbyMan_mLobbyMan);
             cMenuSys_pushMenu(self->menu, self->items74C);
             self->state = 6;
         }
@@ -823,7 +823,7 @@ extern "C" void func_0017D6F0(cDebugLobbyScreen* vself, void* ev)
         break;
     case 214:
     case 216:
-        func_001DB418(self->items74C, LobbyMan_mLobbyMan);
+        PersonaMenu_setpersonas(self->items74C, LobbyMan_mLobbyMan);
         cMenuSys_pushMenu(self->menu, self->items74C);
         self->state = 6;
         break;
@@ -944,9 +944,9 @@ extern "C" void cMenuSys_pushMenu(void* menu, void* items);
 extern "C" int cMenuSys_isActive(void* menu);
 extern "C" void cCommSystem_netConnConnect(void* comm, int a1);
 extern "C" void func_0025B6D8(void* net, int a1);
-extern "C" void func_001DB418(void* items, void* net);
-extern "C" void func_001DB528(void* items, void* net);
-extern "C" void func_001DB620(void* items, void* net);
+extern "C" void PersonaMenu_setpersonas(void* items, void* net);
+extern "C" void LobbyMenu_updaterooms(void* items, void* net);
+extern "C" void RoomMenu_updateusers(void* items, void* net);
 extern "C" void func_0025D800(void* a, int b, int c);
 extern "C" int cCommSystem_isChannelConnected(void* comm, int ch);
 extern "C" void cGameComm_construct(int ch, int host);
@@ -977,9 +977,9 @@ struct sDebugFE17DB18 {
  *   state 1.
  * - 1: once mNetConnState is neither 3 nor 4, starts connecting to the lobby server (func_0025B6D8) and sets state 2.
  * - 3, 6, 10, 15: reopens Login Method (+0x70), Select Persona (+0x74C), Select Room (+0xD2C) or the challenge menu
- *   (+0x18C0) when no menu is open (cMenuSys_pushMenu); state 10 also refreshes the room list (func_001DB528) every pass.
+ *   (+0x18C0) when no menu is open (cMenuSys_pushMenu); state 10 also refreshes the room list (LobbyMenu_updaterooms) every pass.
  * - 12: with no menu open it joins the empty-named room (func_0025D800 with index -1) and sets state 11; otherwise it
- *   refreshes the occupant list (func_001DB620).
+ *   refreshes the occupant list (RoomMenu_updateusers).
  * - 13: opens the Abort menu (+0x1AAC) when the menu system is inactive (cMenuSys_isActive).
  * - 14: with no menu open, state 12 and Room Occupants (+0x1044).
  * - After the Continue menu closes: 17 and 24 return to Room Occupants (state 12), 20 and 21 to Login Method (state 3),
@@ -1053,7 +1053,7 @@ extern "C" void func_0017DB18(cDebugLobbyScreen* vself)
             break;
         case 22:
             if (cMenuSys_isActive(self->menu) == 0) {
-                func_001DB418(self->items74C, LobbyMan_mLobbyMan);
+                PersonaMenu_setpersonas(self->items74C, LobbyMan_mLobbyMan);
                 cMenuSys_pushMenu(self->menu, self->items74C);
                 self->state = 6;
             }
@@ -1084,7 +1084,7 @@ extern "C" void func_0017DB18(cDebugLobbyScreen* vself)
             if (*menu == 0) {
                 cMenuSys_pushMenu(menu, items);
             }
-            func_001DB528(items, LobbyMan_mLobbyMan);
+            LobbyMenu_updaterooms(items, LobbyMan_mLobbyMan);
             break;
         }
         case 12:
@@ -1092,7 +1092,7 @@ extern "C" void func_0017DB18(cDebugLobbyScreen* vself)
                 func_0025D800(LobbyMan_mLobbyMan, -1, 0);
                 self->state = 11;
             } else {
-                func_001DB620(self->items1044, LobbyMan_mLobbyMan);
+                RoomMenu_updateusers(self->items1044, LobbyMan_mLobbyMan);
             }
             break;
         case 3: {
@@ -1242,7 +1242,7 @@ struct sDsReq17E030 {
  * and +0x1C08 and sets state 4 ("Creating account"). Fills LobbyMan's mNewAccount form: mName @p userName, mPassword and
  * unk_08 @p password, mMail "please@get.lost", born 1950-01-01 (mBornYear, mBornMonth, mBornDay), mGender 1 (sent as 'F'),
  * both mSpam flags 0, and sends it with func_0025B9C8. On event 203 func_0017D6F0 then logs in with the same name and
- * password. Called by the Create Account menu's command handler func_001DBC38.
+ * password. Called by the Create Account menu's command handler AccountDetailsMenu_onCommand.
  *
  * @param userName  account name
  * @param password  password
@@ -1292,7 +1292,7 @@ struct sDebugFEState17E118 {
  *
  * Closes all menus, copies @p userName and @p password into the screen's strings at +0x1C04 and +0x1C08, sets state 5
  * ("Authenticating account"), copies both into LobbyMan's mUserName and mPassword and sends the login (func_0025C610).
- * Called by the Login menu's command handler func_001DBC68.
+ * Called by the Login menu's command handler AccountDetailsMenu_onCommand1.
  *
  * @param userName  account name
  * @param password  password
@@ -1327,7 +1327,7 @@ extern "C" void func_0025D1B8(void* a, int b);
  * Creates a persona from the debug "Create Persona" menu.
  *
  * Closes all menus, sets state 8 ("Creating Persona") and sends the create-persona request (func_0025D1B8). The menu's
- * command handler func_001DBBE8 passes the typed name buffer, although the parameter is declared int.
+ * command handler CreatePersonaMenu_onCommand passes the typed name buffer, although the parameter is declared int.
  *
  * @param persona  the new persona's name (a char pointer)
  */
@@ -1357,7 +1357,7 @@ extern "C" void func_0025D428(void* a, int b);
  * Deletes a persona chosen in the debug "Delete Persona" menu.
  *
  * Closes all menus, sets state 9 ("Deleting Persona") and sends the delete-persona request for that index
- * (func_0025D428). Called by the menu's command handler func_001DBC10.
+ * (func_0025D428). Called by the menu's command handler DeletePersonaMenu_onCommand.
  *
  * @param persona  index of the persona in LobbyMan's list
  */
@@ -1387,7 +1387,7 @@ void func_0025CD28(void* a, int b);
  * Selects the persona chosen in the debug "Select Persona" menu.
  *
  * Closes all menus, sets state 7 ("Selecting Persona") and selects the persona with func_0025CD28. Called by the menu's
- * command handler func_001DBBC0.
+ * command handler PersonaMenu_onCommand.
  *
  * @param persona  index of the persona in LobbyMan's list
  */
@@ -1417,7 +1417,7 @@ extern "C" void func_0025D800(void* a, int b, int c);
  * Joins the room chosen in the debug "Select Room" menu.
  *
  * Closes all menus, sets state 11 ("Selecting Room") and joins the room without a password (func_0025D800). Called by
- * the menu's command handler func_001DBB90.
+ * the menu's command handler LobbyMenu_onCommand.
  *
  * @param room  index in the lobby's room list
  */
@@ -1441,7 +1441,7 @@ extern "C" void cMenuSys_popMenu(void* list);
  * Handles picking a user in the debug "Room Occupants" menu: closes all menus and sets state 13 ("Waiting for
  * reponse").
  *
- * Likely bug: the menu's command handler func_001DBB48 passes the chosen occupant's index as a second argument, but
+ * Likely bug: the menu's command handler RoomMenu_onCommand passes the chosen occupant's index as a second argument, but
  * this function ignores it and sends no challenge, so the screen waits for a reply that is never requested (the Abort
  * menu, func_0017E558, gets it out).
  */
@@ -1491,7 +1491,7 @@ extern "C" void func_0025AAE0(void* a, int b);
  * Sends a chat line chosen in the debug chat menu and returns to "Room Occupants".
  *
  * Closes all menus, pushes Room Occupants (+0x1044), sets state 12 and sends @p messageText as a lobby message with
- * func_0025AAE0 ('mesg'). The chat menu's command handler func_001DBB20 passes the item's caption.
+ * func_0025AAE0 ('mesg'). The chat menu's command handler ChatMenu_onCommand passes the item's caption.
  *
  * @param messageText  the line to send (a char pointer, declared int)
  */
@@ -1523,7 +1523,7 @@ extern "C" void func_0025FB58(void* a, int b, int c);
  *
  * Closes all menus, sets state 13 ("Waiting for reponse") and locks the challenge with the challenger named in +0x1C0C
  * (func_0025FB58, match type 0). func_0017DB18 then shows the Abort menu. Called by the challenge menu's command
- * handler func_001DBAD8.
+ * handler ChallengeResponseMenu_onCommand.
  */
 extern "C" void func_0017E490(sDebugFEState17E490* self)
 {
@@ -1552,7 +1552,7 @@ void func_0025FC28(void* a, int b);
  * Declines a challenge from the debug "You've been Challenged!" menu and returns to "Room Occupants".
  *
  * Closes all menus, pushes Room Occupants (+0x1044), sets state 12 and sends "decline" to the challenger named in
- * +0x1C0C (func_0025FC28). Called by the challenge menu's command handler func_001DBAD8.
+ * +0x1C0C (func_0025FC28). Called by the challenge menu's command handler ChallengeResponseMenu_onCommand.
  */
 extern "C" void func_0017E4F0(sDebugFEState17E4F0* self)
 {
@@ -1583,7 +1583,7 @@ extern "C" void func_0025F628(void* a, int b, int c);
  *
  * Closes all menus, pushes Room Occupants (+0x1044), sets state 12 and cancels the challenge with func_0025F628(..., 1,
  * 0): a type-238 event is posted and no "abortChal" is sent to the opponent. Called by the Abort menu's command handler
- * func_001DBAB8.
+ * AbortMenu_onCommand.
  */
 extern "C" void func_0017E558(sDebugFEState17E558* self)
 {

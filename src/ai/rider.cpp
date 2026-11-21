@@ -23,7 +23,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void cRiderState_cRiderState(void* self);
 extern "C" void* cScriptObjRider_cScriptObjRider(void* self);
 extern "C" void* func_002F1850(void* mem, void* rider);
-extern "C" void* func_002EC9E0(void* self, int a1, int a2);
+extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface(void* self, int a1, int a2);
 void* cPlayerShadow_cPlayerShadow(void* self);
 extern "C" void cScriptObject_InitScriptObject(void* rig);
 extern "C" void* cAudioInterface_bxAudio();
@@ -114,7 +114,7 @@ extern "C" void* cRider_cRider_impl(cRider* self)
     aux->f210 = none;
     self->mOverlapList = aux;
     self->mAttachedEmitterFX = func_002F1850(cMemMan_alloc(168, str_AttachedEmitterFX, 0, 0), self);
-    self->mBoltOnFX = func_002EC9E0(cMemMan_alloc(200, str_cBoltOnFXInterface, 0, 0), (int)self, (int)self->mAttachedEmitterFX);
+    self->mBoltOnFX = cBoltOnFXInterface_cBoltOnFXInterface(cMemMan_alloc(200, str_cBoltOnFXInterface, 0, 0), (int)self, (int)self->mAttachedEmitterFX);
     self->mLineHint = cMemMan_alloc(0x10, str_Line_Intersect_Hint, 0, 0);
     self->mWallHint = cMemMan_alloc(0x10, str_Wall_Intersect_Hint, 0, 0);
     MEM_fill_v(self->unk_794, 0, 0x20);
@@ -4784,7 +4784,7 @@ extern "C" int cSpinControl_isGrabHeld(void* p);
 extern "C" int cSpinControl_isTweakHeld(void* p);
 extern "C" int cSpinControl_isUberHeld(void* p);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void* self, int i);
-extern "C" int func_001446A0(void* self, int a1);
+extern "C" int tEventFlags_isSet1(void* self, int a1);
 
 /**
  * Answers a mission query about the rider.
@@ -4854,8 +4854,8 @@ extern "C" int cRider_getMissionInt(cRider* self, int query)
     case 18:
         res = 0;
         if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13) {
-            if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0)) {
-                res = !func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1);
+            if (tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0)) {
+                res = !tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1);
             }
         }
         return res;
@@ -6160,9 +6160,9 @@ extern "C" void cRiderAnimBase_setupAnimation(void* anim, int a1);
 extern "C" void cRider_EulerToQuat(cRider* self, sQuat_001241C0* out, float rx, float ry, float rz);
 extern "C" void cRider_updateAnimation(cRider* self, float value);
 extern "C" void cRider_updateSkeleton(void* self);
-extern "C" int func_001446A0(void* self, int a1);
-extern "C" int func_001446B8(void* self, int a1);
-extern "C" void func_00144670(void* self, int a1);
+extern "C" int tEventFlags_isSet1(void* self, int a1);
+extern "C" int tEventFlags_isJustChanged(void* self, int a1);
+extern "C" void tEventFlags_clear1(void* self, int a1);
 extern "C" void func_0030E9E0(void* model, int i, int channel);
 extern "C" void func_0030EA80(void* model, int i, int channel);
 struct sQ_124788;
@@ -6486,20 +6486,20 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* 
     }
     char* ch = cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2) + 0xB0;
     int on = 0;
-    if (func_001446A0(ch, 0) != 0) {
-        on = func_001446B8(ch, 0) != 0;
+    if (tEventFlags_isSet1(ch, 0) != 0) {
+        on = tEventFlags_isJustChanged(ch, 0) != 0;
     }
     if (on) {
         func_0030E9E0(self->mAnimModel, 11, 0);
-        func_00144670(ch, 0);
+        tEventFlags_clear1(ch, 0);
     } else {
         int on2 = 0;
-        if (func_001446A0(ch, 1) != 0) {
-            on2 = func_001446B8(ch, 1) != 0;
+        if (tEventFlags_isSet1(ch, 1) != 0) {
+            on2 = tEventFlags_isJustChanged(ch, 1) != 0;
         }
         if (on2) {
             func_0030EA80(self->mAnimModel, 11, 0);
-            func_00144670(ch, 1);
+            tEventFlags_clear1(ch, 1);
         }
     }
     sQ_124788 hipsPos = *(sQ_124788*)((char*)self->mAnimModel->bones + (self->mBoneHips << 5));

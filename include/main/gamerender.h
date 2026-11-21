@@ -2,7 +2,7 @@
 #define MAIN_GAMERENDER_H
 
 // FrustumIntersector: one camera view's visibility query. cGame_render builds one on its stack per view
-// (func_0022ADD8, the ctor: it runs the whole query): it culls the world's octree cells against the view
+// (FrustumIntersector_FrustumIntersector, the ctor: it runs the whole query): it culls the world's octree cells against the view
 // (FrustumCallback, func_0022A830), then sorts the objects of the inside / crossing cells into fixed-size lists -
 // instances, patches, fog volumes and light halos, each "inside" (whole object visible) or "crossing" (tested again on
 // VU0, one object pending at a time in last*). cGame's render passes (renderModels, renderPatches, renderFogVolumes,
@@ -20,7 +20,7 @@
 // allocation); the ctor zeroes every count and last* word up to 0x7FC4, and lighthaloscrossing[128] ends at 0x81C8,
 // rounded up to the 16-byte alignment of the matrices; [O] On Tour's 0x8210 minus 0x40. No vtable, no base class.
 //
-// A FLAT layout, like main/game.h. Evidence tags: [R] the ctor func_0022ADD8; [U] how retail code uses the field
+// A FLAT layout, like main/game.h. Evidence tags: [R] the ctor FrustumIntersector_FrustumIntersector; [U] how retail code uses the field
 // (src/main/ssxapp.cpp and the asm of the functions above); [O] SSX On Tour's DWARF (names, types, order);
 // [P] the preview's asserts (array bounds).
 

@@ -212,7 +212,7 @@ CHECK_SIZE(cDebugMenuScreen, 0x8C48);
 // Base: cDebugScreen (the vptr only). Vtable cDebugLobbyScreen_vtbl (0x0046D350, 3 slots: 1 dtor, 2 update, 3 draw);
 // the dtor clears the screen pointer D_004A4E90 (the ctor sets it; func_0017D260 sends lobby events through it),
 // destroys the strings, menus and menu system and stores cDebugScreen_vtbl. The menus are raw regions: their classes
-// (cMenu / cMenuItem subclasses built by func_001DA988 ... func_001DB2B0) are not laid out here.
+// (cMenu / cMenuItem subclasses built by AccountMenu_AccountMenu ... AbortMenu_AbortMenu) are not laid out here.
 // A FLAT layout, like main/game.h. Evidence tags: [R] retail's ctor / dtor / allocation; [U] how retail code uses the
 // field (src/fe/debugfe.cpp views sDebugFE17D6F0 / 17DB18 / 17D688 / 17E5C8 / sDebugFEState17E*, and the asm).
 
@@ -229,24 +229,24 @@ struct cDebugLobbyScreen {
                                     //       the ctor sets its font, input and box texture (+0x58 / +0x5C / +0x60 = 0x60
                                     //       / 0x64 / 0x68) from the debug FE; [U] the open-menu stack (count at +0x0,
                                     //       menus from +0x4): cMenuSys_pushMenu / popMenu / isActive / input / render
-    char mLoginMenu[0x594];         // 0x0070 [R] the "Login Method" menu (Create Account, Login): func_001DA988(this +
-                                    //       0x70, ...), func_001DCEA0(.., 2) (dtor); [U] pushed on the login step
+    char mLoginMenu[0x594];         // 0x0070 [R] the "Login Method" menu (Create Account, Login): AccountMenu_AccountMenu(this +
+                                    //       0x70, ...), AccountMenu__AccountMenu(.., 2) (dtor); [U] pushed on the login step
                                     //       (state 3)
     char mContinueMenu[0x148];      // 0x0604 [R] ContinueMenu_ContinueMenu(this + 0x604) (fe/debugfe: a cMenu + one
                                     //       cPopMenuItem at +0x130); [U] pushed under every error and "declined"
                                     //       message
-    char mPersonaMenu[0x5E0];       // 0x074C [R] "Select Persona" (Create / Delete Persona): func_001DACB8 /
-                                    //       func_001DD0C8; [U] func_001DB418 fills it from the lobby manager
-    char mRoomMenu[0x318];          // 0x0D2C [R] "Select Room" (12 items): func_001DAE20; dtor loop over 12 * 0x24 from
+    char mPersonaMenu[0x5E0];       // 0x074C [R] "Select Persona" (Create / Delete Persona): PersonaMenu_PersonaMenu /
+                                    //       PersonaMenu__PersonaMenu; [U] PersonaMenu_setpersonas fills it from the lobby manager
+    char mRoomMenu[0x318];          // 0x0D2C [R] "Select Room" (12 items): LobbyMenu_LobbyMenu; dtor loop over 12 * 0x24 from
                                     //       +0x168
-    char mOccupantsMenu[0x4F0];     // 0x1044 [R] "Room Occupants" (24 items, Chat): func_001DAF08; [U] func_001DB620
+    char mOccupantsMenu[0x4F0];     // 0x1044 [R] "Room Occupants" (24 items, Chat): RoomMenu_RoomMenu; [U] RoomMenu_updateusers
                                     //       fills it
-    char mChatMenu[0x38C];          // 0x1534 [R] the chat menu (14 lines): func_001DB028; dtor loop over 14 * 0x24 from
+    char mChatMenu[0x38C];          // 0x1534 [R] the chat menu (14 lines): ChatMenu_ChatMenu; dtor loop over 14 * 0x24 from
                                     //       +0x194
     char mChallengedMenu[0x1EC];    // 0x18C0 [R] "You've been Challenged!" (Accept, Decline):
-                                    //       __sti__all_in_one_main_cpp(this + 0x18C0, ...); [U] func_0017D6F0 stores
+                                    //       ChallengeResponseMenu_ChallengeResponseMenu(this + 0x18C0, ...); [U] func_0017D6F0 stores
                                     //       the challenger's name into its third line (lw/sw 0x1A44 = +0x184)
-    char mAbortMenu[0x158];         // 0x1AAC [R] "Abort": func_001DB2B0; [U] func_0017DB18 pushes it while a challenge
+    char mAbortMenu[0x158];         // 0x1AAC [R] "Abort": AbortMenu_AbortMenu; [U] func_0017DB18 pushes it while a challenge
                                     //       is pending
     char* mUserName;                // 0x1C04 cBXString (a char*, bx/bxstring.h); [R] ctor cBXString_EmptyString, dtor
                                     //       cBXString__cBXString; [U] func_0017E030 / func_0017E118 keep the typed

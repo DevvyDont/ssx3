@@ -311,7 +311,7 @@ INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX_shouldPlow);
 int cRider_getMotionState(void* self);
 int cRiderAnimBase_getCurrentAnimID(void* self, int a1);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void* self, int a1);
-extern "C" int func_001446A0(void* self, int a1);
+extern "C" int tEventFlags_isSet1(void* self, int a1);
 extern float D_004A4590;
 extern float D_004A4594;
 extern float D_004A4598;
@@ -328,7 +328,7 @@ static inline int boardTrailCanDraw(char* r)
  *
  * In motion state 2 (wipeout, cRider_getMotionState) there is no trail when the word at mRiderHandler + 0x30 is set. In
  * the other non-ground states it needs mIsInNIS set, unk_AD0 clear and unk_AFC and unk_B00 set. When layer 2's
- * animation (cRiderAnimBase_getCurrentAnimID on mRiderAnim) is 22 and func_001446A0 on its sequence (+0xB0) is true for
+ * animation (cRiderAnimBase_getCurrentAnimID on mRiderAnim) is 22 and tEventFlags_isSet1 on its sequence (+0xB0) is true for
  * 0 but false for 1, there is no trail either.
  *
  * Then by mSurfaceType: 1 sets D_004A4594 (0); 0, 5, 6 and 12 set D_004A4590 (5); 2 and 13 set D_004A4598 (-20); 3 sets
@@ -347,8 +347,8 @@ extern "C" int cBoardTrailFX_shouldPlow(char** self)
         if (*(int*)(self[0] + 0xB00) == 0) return 0;
     }
     if (cRiderAnimBase_getCurrentAnimID(*(void**)(self[0] + 0x784), 2) == 22) {
-        if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self[0] + 0x784), 2) + 0xB0, 0)) {
-            if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self[0] + 0x784), 2) + 0xB0, 1)) {
+        if (tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self[0] + 0x784), 2) + 0xB0, 0)) {
+            if (!tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self[0] + 0x784), 2) + 0xB0, 1)) {
                 return 0;
             }
         }

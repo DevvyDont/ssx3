@@ -2487,7 +2487,7 @@ INCLUDE_ASM("main/ssxapp", func_00229F30);
  * Stores two 4x4 matrices in VU0 data memory, eight quadwords from the address 0x40 put in vi1.
  *
  * The matrices go in order, @p firstMatrix then @p secondMatrix, with vsqi (which advances vi1 by one quadword).
- * func_0022ADD8 calls it with its two matrices before gathering the visible world.
+ * FrustumIntersector_FrustumIntersector calls it with its two matrices before gathering the visible world.
  *
  * @param firstMatrix  the first 4x4 matrix (16-byte aligned)
  * @param secondMatrix  the second 4x4 matrix (16-byte aligned)
@@ -2526,7 +2526,7 @@ extern "C" void func_00229F30(void* firstMatrix, void* secondMatrix)
 INCLUDE_ASM("main/ssxapp", func_00229F80__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: func_0022ADD8 calls it right after func_00229F30.
+ * Does nothing: FrustumIntersector_FrustumIntersector calls it right after func_00229F30.
  */
 void func_00229F80(void* self)
 {
@@ -2571,7 +2571,7 @@ extern "C" void func_00229F88(int index, void* vector, void* matrix)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_00229FC8);
+INCLUDE_ASM("main/ssxapp", FrustumIntersector_crossinginstance);
 #ifdef SKIP_ASM
 struct sVisEnt_9FC8 {
     int a;
@@ -2615,7 +2615,7 @@ static inline int visOk_9FC8(sVisOwner_9FC8 *self, char *node)
 
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallms/cfc2); the PC port needs a C
 // version of the microprogram at 0xDB8 (box vs frustum test).
-extern "C" void func_00229FC8_impl(sVisOwner_9FC8 *self, void *vnode, int frustum) __asm__("func_00229FC8");
+extern "C" void FrustumIntersector_crossinginstance_impl(sVisOwner_9FC8 *self, void *vnode, int frustum) __asm__("FrustumIntersector_crossinginstance");
 /**
  * Files the previously tested world node by its VU0 frustum result, then starts the test for @p vnode.
  *
@@ -2626,12 +2626,12 @@ extern "C" void func_00229FC8_impl(sVisOwner_9FC8 *self, void *vnode, int frustu
  * page (+0x7E) is loaded (m_State 3), the cache being m_pWorldCache of the world at +0x90. Otherwise the call returns
  * at once and the pending node waits for the next call. The test loads the node's box (+0x60 min, +0x6C max, w = 1) and
  * the vector at +0x50 into vf20-vf22 and @p frustum into vi14, and starts the VU0 microprogram at 0xDB8 (vcallms).
- * func_0022A368 calls it for each node, then once with null to file the last one.
+ * FrustumIntersector_AddAllInstancesCrossing calls it for each node, then once with null to file the last one.
  *
  * @param vnode  the node to test, or null to file the pending node
  * @param frustum  the value put in vi14 for the microprogram
  */
-extern "C" void func_00229FC8_impl(sVisOwner_9FC8 *self, void *vnode, int frustum)
+extern "C" void FrustumIntersector_crossinginstance_impl(sVisOwner_9FC8 *self, void *vnode, int frustum)
 {
     char *node = (char *)vnode;
     unsigned int testResult;
@@ -2685,7 +2685,7 @@ extern "C" void func_00229FC8_impl(sVisOwner_9FC8 *self, void *vnode, int frustu
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_0022A128);
+INCLUDE_ASM("main/ssxapp", FrustumIntersector_crossingpatch);
 #ifdef SKIP_ASM
 struct sVisEnt_A128 {
     int a;
@@ -2727,20 +2727,20 @@ static inline int visOk_A128(sVisOwner_A128 *self, char *node)
 
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallms/cfc2); the PC port needs a C
 // version of the microprogram at 0xDB8 (box vs frustum test).
-extern "C" void func_0022A128_impl(sVisOwner_A128 *self, void *vnode, int frustum) __asm__("func_0022A128");
+extern "C" void FrustumIntersector_crossingpatch_impl(sVisOwner_A128 *self, void *vnode, int frustum) __asm__("FrustumIntersector_crossingpatch");
 /**
  * Files the previously tested world node of the second kind by its VU0 frustum result, then starts the test
  * for @p vnode.
  *
- * Same pipeline as func_00229FC8 with other offsets: the pending node is +0x78B0, result 0 or 3 appends it to the list
+ * Same pipeline as FrustumIntersector_crossinginstance with other offsets: the pending node is +0x78B0, result 0 or 3 appends it to the list
  * at +0x50AC (count +0x50A8, 0x800 entries), 4 to the list at +0x70B0 (count +0x70AC, 0x200 entries). A node is tested
  * only when its hull page (+0x156) is not negative, the state of its section (+0x155) is 6 and the page is loaded
- * (m_State 3). The test uses the box at +0x158 / +0x164 and the vector at +0x140. func_0022A408 calls it.
+ * (m_State 3). The test uses the box at +0x158 / +0x164 and the vector at +0x140. FrustumIntersector_AddAllPatchesCrossing calls it.
  *
  * @param vnode  the node to test, or null to file the pending node
  * @param frustum  the value put in vi14 for the microprogram
  */
-extern "C" void func_0022A128_impl(sVisOwner_A128 *self, void *vnode, int frustum)
+extern "C" void FrustumIntersector_crossingpatch_impl(sVisOwner_A128 *self, void *vnode, int frustum)
 {
     char *node = (char *)vnode;
     unsigned int testResult;
@@ -2794,7 +2794,7 @@ extern "C" void func_0022A128_impl(sVisOwner_A128 *self, void *vnode, int frustu
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_0022A270);
+INCLUDE_ASM("main/ssxapp", FrustumIntersector_crossingfogvolume);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sVisObj_A270 {
@@ -2814,15 +2814,15 @@ struct sVisOwner_A270 {
     sVisObj_A270* nodesB[1];     // 0x7AC0
 };
 
-// PORT: callers declare func_0022A270 with other pointer types; defined under an asm label.
-extern "C" void func_0022A270_impl(sVisOwner_A270* self, sVisObj_A270* obj, int frustum) __asm__("func_0022A270");
+// PORT: callers declare FrustumIntersector_crossingfogvolume with other pointer types; defined under an asm label.
+extern "C" void FrustumIntersector_crossingfogvolume_impl(sVisOwner_A270* self, sVisObj_A270* obj, int frustum) __asm__("FrustumIntersector_crossingfogvolume");
 
 /**
  * Files the previously tested object by its VU0 frustum result, then starts the test for @p obj.
  *
- * Same pipeline as func_00229FC8 without the residency checks: the pending object is +0x7AB8, result 0 or 3 appends it
+ * Same pipeline as FrustumIntersector_crossinginstance without the residency checks: the pending object is +0x7AB8, result 0 or 3 appends it
  * to the list at +0x78B8 (count +0x78B4), 4 to the list at +0x7AC0 (count +0x7ABC). The test uses the box at +0x68 /
- * +0x74 and the vector at +0x50. func_0022A4A8 calls it for objects of type 7.
+ * +0x74 and the vector at +0x50. FrustumIntersector_AddAllTypedCrossing calls it for objects of type 7.
  *
  * @param obj  the object to test, or null to file the pending object
  * @param frustum  the value put in vi14 for the microprogram
@@ -2830,7 +2830,7 @@ extern "C" void func_0022A270_impl(sVisOwner_A270* self, sVisObj_A270* obj, int 
 // PORT: PS2-only VU0 microprogram call (lqc2/ctc2/vcallms/cfc2); the PC port needs a C
 // version of the microprogram at 0xDB8 (box vs frustum test).
 // Files the previous object by the result of its test, then starts the test for this one.
-extern "C" void func_0022A270_impl(sVisOwner_A270* self, sVisObj_A270* obj, int frustum)
+extern "C" void FrustumIntersector_crossingfogvolume_impl(sVisOwner_A270* self, sVisObj_A270* obj, int frustum)
 {
     unsigned int r;
     if (obj != 0) {
@@ -2884,9 +2884,9 @@ extern "C" void func_0022A270_impl(sVisOwner_A270* self, sVisObj_A270* obj, int 
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/ssxapp", func_0022A368);
+INCLUDE_ASM("main/ssxapp", FrustumIntersector_AddAllInstancesCrossing);
 #ifdef SKIP_ASM
-extern "C" void func_00229FC8(void* self, void* node, int frustum);
+extern "C" void FrustumIntersector_crossinginstance(void* self, void* node, int frustum);
 
 struct sNode_A368 {
     sNode_A368* next;
@@ -2903,33 +2903,33 @@ struct sList_A368 {
 };
 
 /**
- * Frustum-tests the nodes of each listed source with func_00229FC8, then files the last pending one.
+ * Frustum-tests the nodes of each listed source with FrustumIntersector_crossinginstance, then files the last pending one.
  *
  * Each of the @p count 8-byte entries holds a source and a frustum value; the source's linked node list starts at +0x20
- * (next link at +0x0). Ends with func_00229FC8(self, 0, 0) when a node is pending (+0x50A4). func_0022ADD8 calls it.
+ * (next link at +0x0). Ends with FrustumIntersector_crossinginstance(self, 0, 0) when a node is pending (+0x50A4). FrustumIntersector_FrustumIntersector calls it.
  *
  * @param list  the source entries
  * @param count  the number of entries
  */
-extern "C" void func_0022A368(FrustumIntersector* self, sList_A368* list, int count)
+extern "C" void FrustumIntersector_AddAllInstancesCrossing(FrustumIntersector* self, sList_A368* list, int count)
 {
     for (; count > 0; count--, list++) {
         sNode_A368* n = list->src->head;
         while (n != 0) {
-            func_00229FC8(self, n, list->vuFrustum);
+            FrustumIntersector_crossinginstance(self, n, list->vuFrustum);
             n = n->next;
         }
     }
     if ((int)self->lastinstance != 0) {
-        func_00229FC8(self, 0, 0);
+        FrustumIntersector_crossinginstance(self, 0, 0);
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/ssxapp", func_0022A408);
+INCLUDE_ASM("main/ssxapp", FrustumIntersector_AddAllPatchesCrossing);
 #ifdef SKIP_ASM
-extern "C" void func_0022A128(void* self, void* node, int frustum);
+extern "C" void FrustumIntersector_crossingpatch(void* self, void* node, int frustum);
 
 struct sNode_A408 {
     sNode_A408* next;
@@ -2946,30 +2946,30 @@ struct sList_A408 {
 };
 
 /**
- * Frustum-tests the nodes of each listed source with func_0022A128, then files the last pending one.
+ * Frustum-tests the nodes of each listed source with FrustumIntersector_crossingpatch, then files the last pending one.
  *
- * Same as func_0022A368 with the list at +0x24 of each source and the pending node at +0x78B0. func_0022ADD8 calls it.
+ * Same as FrustumIntersector_AddAllInstancesCrossing with the list at +0x24 of each source and the pending node at +0x78B0. FrustumIntersector_FrustumIntersector calls it.
  *
  * @param list  the source entries
  * @param count  the number of entries
  */
-extern "C" void func_0022A408(FrustumIntersector* self, sList_A408* list, int count)
+extern "C" void FrustumIntersector_AddAllPatchesCrossing(FrustumIntersector* self, sList_A408* list, int count)
 {
     for (; count > 0; count--, list++) {
         sNode_A408* n = list->src->head;
         while (n != 0) {
-            func_0022A128(self, n, list->vuFrustum);
+            FrustumIntersector_crossingpatch(self, n, list->vuFrustum);
             n = n->next;
         }
     }
     if ((int)self->lastpatch != 0) {
-        func_0022A128(self, 0, 0);
+        FrustumIntersector_crossingpatch(self, 0, 0);
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/ssxapp", func_0022A4A8);
+INCLUDE_ASM("main/ssxapp", FrustumIntersector_AddAllTypedCrossing);
 #ifdef SKIP_ASM
 struct sNode_22A4A8 {
     sNode_22A4A8* next;
@@ -2982,7 +2982,7 @@ struct sItem_22A4A8 {
     int arg;
 };
 
-extern "C" void func_0022A270(void* self, sNode_22A4A8* node, int arg);
+extern "C" void FrustumIntersector_crossingfogvolume(void* self, sNode_22A4A8* node, int arg);
 
 struct sWorld_22A4A8 {
     char pad[0x7AB8];
@@ -2993,35 +2993,35 @@ struct sWorld_22A4A8 {
 };
 
 /**
- * Sorts the objects of each listed source: type 7 is frustum-tested (func_0022A270), type 8 goes straight into the list
+ * Sorts the objects of each listed source: type 7 is frustum-tested (FrustumIntersector_crossingfogvolume), type 8 goes straight into the list
  * at +0x7BC4 (count +0x7BC0).
  *
  * Walks the linked list at +0x28 of each of the @p n 8-byte entries (source, frustum value); the type is at +0x8 of
- * each object. Other types are skipped. Ends with func_0022A270(self, 0, 0) when an object is pending (+0x7AB8).
- * func_0022ADD8 calls it.
+ * each object. Other types are skipped. Ends with FrustumIntersector_crossingfogvolume(self, 0, 0) when an object is pending (+0x7AB8).
+ * FrustumIntersector_FrustumIntersector calls it.
  *
  * @param items  the source entries
  * @param n  the number of entries
  */
-extern "C" void func_0022A4A8(sWorld_22A4A8* self, sItem_22A4A8* items, int n)
+extern "C" void FrustumIntersector_AddAllTypedCrossing(sWorld_22A4A8* self, sItem_22A4A8* items, int n)
 {
     for (; n > 0; n--, items++) {
         for (sNode_22A4A8* object = *(sNode_22A4A8**)(items->list + 0x28); object != 0; object = object->next) {
             if (object->type == 7) {
-                func_0022A270(self, object, items->arg);
+                FrustumIntersector_crossingfogvolume(self, object, items->arg);
             } else if (object->type == 8) {
                 self->nodes[self->count++] = object;
             }
         }
     }
     if (self->f7AB8 != 0) {
-        func_0022A270(self, 0, 0);
+        FrustumIntersector_crossingfogvolume(self, 0, 0);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_0022A5A0);
+INCLUDE_ASM("main/ssxapp", FrustumIntersector_AddAllInstancesInside);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sVisNode_A5A0 {
@@ -3112,13 +3112,13 @@ static inline int visUsable_A5A0(sVisOwner_A5A0* self, sVisNode_A5A0* n)
  * unassigned (slot +0x7D is 0xFF) or its slot in the camera-slot table (*(self + 0x90), entries at +0x20) has type 6
  * and the path it names (+0x7E) has kind 3. Qualifying objects are sphere-tested against the masked planes by the VU0
  * microprogram at 0xEF0 (skipped when the mask is 0; result 2 means outside) and appended to the list at +0x20A0, count
- * +0x209C (no bounds check). func_0022ADD8 calls it with the fully-inside cell list (+0x98, count +0x94).
+ * +0x209C (no bounds check). FrustumIntersector_FrustumIntersector calls it with the fully-inside cell list (+0x98, count +0x94).
  *
- * @param self_  the world view being built (see func_0022ADD8)
+ * @param self_  the world view being built (see FrustumIntersector_FrustumIntersector)
  * @param list_  the cell entries (cell, plane mask)
  * @param count  the number of entries
  */
-extern "C" void func_0022A5A0(FrustumIntersector* self_, void* list_, int count)
+extern "C" void FrustumIntersector_AddAllInstancesInside(FrustumIntersector* self_, void* list_, int count)
 {
     sVisOwner_A5A0* self = (sVisOwner_A5A0*)self_;
     sVisList_A5A0* list = (sVisList_A5A0*)list_;
@@ -3140,7 +3140,7 @@ extern "C" void func_0022A5A0(FrustumIntersector* self_, void* list_, int count)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_0022A698);
+INCLUDE_ASM("main/ssxapp", FrustumIntersector_AddAllPatchesInside);
 #ifdef SKIP_ASM
 struct sVisNode_A698 {
     sVisNode_A698* next;    // 0x000
@@ -3215,16 +3215,16 @@ static inline int visOnPath_A698(sVisCam_A698* cam, sVisNode_A698* n)
 /**
  * Collects the visible path-bound objects of each listed octree cell into the world view's list at +0x50AC.
  *
- * Same walk as func_0022A5A0 over the object list at +0x24 of each cell: an object qualifies when its path index
+ * Same walk as FrustumIntersector_AddAllInstancesInside over the object list at +0x24 of each cell: an object qualifies when its path index
  * (+0x156) is not negative, its slot (+0x155) is a type-6 entry of the camera-slot table and that path has kind 3. Its
  * sphere (+0x140) is tested on VU0 (microprogram 0xEF0, 2 = outside) unless the entry's plane mask is 0; survivors go
  * to the list at +0x50AC, count +0x50A8 (no bounds check).
  *
- * @param self_  the world view being built (see func_0022ADD8)
+ * @param self_  the world view being built (see FrustumIntersector_FrustumIntersector)
  * @param list_  the cell entries (cell, plane mask)
  * @param count  the number of entries
  */
-extern "C" void func_0022A698(FrustumIntersector* self_, void* list_, int count)
+extern "C" void FrustumIntersector_AddAllPatchesInside(FrustumIntersector* self_, void* list_, int count)
 {
     sVisOwner_A698* self = (sVisOwner_A698*)self_;
     sVisList_A698* list = (sVisList_A698*)list_;
@@ -3247,7 +3247,7 @@ extern "C" void func_0022A698(FrustumIntersector* self_, void* list_, int count)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxapp", func_0022A770);
+INCLUDE_ASM("main/ssxapp", FrustumIntersector_AddAllTypedInside);
 #ifdef SKIP_ASM
 struct sVisNode_A770 {
     sVisNode_A770* next;    // 0x00
@@ -3302,7 +3302,7 @@ static inline int visSphereTest_A770(int* sphere, int frustum)
  * @param list  the cell entries (cell, plane mask)
  * @param count  the number of entries
  */
-extern "C" void func_0022A770(sVisOwner_A770* self, sVisList_A770* list, int count)
+extern "C" void FrustumIntersector_AddAllTypedInside(sVisOwner_A770* self, sVisList_A770* list, int count)
 {
     for (; count > 0; count--, list++) {
         sVisNode_A770* n = list->src->head;
@@ -3552,14 +3552,14 @@ extern "C" void func_0022A830(void* vctx, void* vnode, void* vcfg)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/ssxapp", func_0022ADD8);
+INCLUDE_ASM("main/ssxapp", FrustumIntersector_FrustumIntersector);
 #ifdef SKIP_ASM
 extern "C" void cOcclusionMan_updateView(void* a, void* b);
 extern "C" void func_00229F30(void* a, void* b);
 void func_00229F80(void* p);
 extern "C" void func_0022A830(void* ctx, void* data, void* cfg);
-extern "C" void func_0022A698(FrustumIntersector* self, void* list, int n);
-extern "C" void func_0022A5A0(FrustumIntersector* self, void* list, int n);
+extern "C" void FrustumIntersector_AddAllPatchesInside(FrustumIntersector* self, void* list, int n);
+extern "C" void FrustumIntersector_AddAllInstancesInside(FrustumIntersector* self, void* list, int n);
 
 struct sMat_22ADD8 {
     float m[4][4];
@@ -3644,17 +3644,17 @@ static inline void Load_22ADD8(sCtx_22ADD8* ctx, void* data, sCfg_22ADD8* c)
  * returned by the graphics manager's vtable slot 43 to +0x10 and GrMan's matrix at +0x5800 to +0x50, calls
  * cOcclusionMan_updateView(@p visSource, @p viewBounds), loads both matrices into VU0 with func_00229F30 and calls func_00229F80 (empty). Then
  * runs func_0022A830 on each non-null root of the eight @p cfg entries (data at +0x10 of each 0x14-byte entry) with
- * plane mask *(@p visSource + 0x110), and sorts the culled cells' objects: func_0022A698, func_0022A5A0 and func_0022A770 over
- * the inside list (+0x98), func_0022A408, func_0022A368 and func_0022A4A8 over the partial list (+0x109C). cGame_render
+ * plane mask *(@p visSource + 0x110), and sorts the culled cells' objects: FrustumIntersector_AddAllPatchesInside, FrustumIntersector_AddAllInstancesInside and FrustumIntersector_AddAllTypedInside over
+ * the inside list (+0x98), FrustumIntersector_AddAllPatchesCrossing, FrustumIntersector_AddAllInstancesCrossing and FrustumIntersector_AddAllTypedCrossing over the partial list (+0x109C). cGame_render
  * calls it once per view with a stack-allocated view.
  *
  * @param cfg  the eight octree roots (cell entries whose node pointer is at +0x10)
  * @param visSource  the visibility source: holds the clip planes and the initial plane mask (+0x110)
  * @param viewBounds  the view's bounding box (passed to cOcclusionMan_updateView)
- * @param cameraSlots  the camera-slot table pointer stored at +0x90 (read by func_0022A5A0 and func_0022A698)
+ * @param cameraSlots  the camera-slot table pointer stored at +0x90 (read by FrustumIntersector_AddAllInstancesInside and FrustumIntersector_AddAllPatchesInside)
  * @return @p self
  */
-extern "C" char* func_0022ADD8(char* self, sCfg_22ADD8* cfg, void* visSource, void* viewBounds, int cameraSlots)
+extern "C" char* FrustumIntersector_FrustumIntersector(char* self, sCfg_22ADD8* cfg, void* visSource, void* viewBounds, int cameraSlots)
 {
     sWorldInit_22ADD8* w = (sWorldInit_22ADD8*)self;
     w->f0 = visSource;
@@ -3698,12 +3698,12 @@ extern "C" char* func_0022ADD8(char* self, sCfg_22ADD8* cfg, void* visSource, vo
     Load_22ADD8(&ctx, cfg[5].data, &cfg[5]);
     Load_22ADD8(&ctx, cfg[6].data, &cfg[6]);
     Load_22ADD8(&ctx, cfg[7].data, &cfg[7]);
-    func_0022A698((FrustumIntersector*)self, self + 0x98, *(int*)(self + 0x94));
-    func_0022A5A0((FrustumIntersector*)self, self + 0x98, *(int*)(self + 0x94));
-    func_0022A770((sVisOwner_A770*)self, (sVisList_A770*)(self + 0x98), *(int*)(self + 0x94));
-    func_0022A408((FrustumIntersector*)self, (sList_A408*)(self + 0x109C), *(int*)(self + 0x1098));
-    func_0022A368((FrustumIntersector*)self, (sList_A368*)(self + 0x109C), *(int*)(self + 0x1098));
-    func_0022A4A8((sWorld_22A4A8*)self, (sItem_22A4A8*)(self + 0x109C), *(int*)(self + 0x1098));
+    FrustumIntersector_AddAllPatchesInside((FrustumIntersector*)self, self + 0x98, *(int*)(self + 0x94));
+    FrustumIntersector_AddAllInstancesInside((FrustumIntersector*)self, self + 0x98, *(int*)(self + 0x94));
+    FrustumIntersector_AddAllTypedInside((sVisOwner_A770*)self, (sVisList_A770*)(self + 0x98), *(int*)(self + 0x94));
+    FrustumIntersector_AddAllPatchesCrossing((FrustumIntersector*)self, (sList_A408*)(self + 0x109C), *(int*)(self + 0x1098));
+    FrustumIntersector_AddAllInstancesCrossing((FrustumIntersector*)self, (sList_A368*)(self + 0x109C), *(int*)(self + 0x1098));
+    FrustumIntersector_AddAllTypedCrossing((sWorld_22A4A8*)self, (sItem_22A4A8*)(self + 0x109C), *(int*)(self + 0x1098));
     return self;
 }
 #endif
@@ -4041,7 +4041,7 @@ static inline int IsReady_22B008(sGame_22B008* self)
  * ViewMan view: sets the view, viewport (slot 24), camera matrix (slot 34) and projection (slot 25), draws SkyBox
  * (slot 4) with a near plane of 1.0, then the real near / far planes and render states; builds the world-space box
  * of the view frustum's eight corners (each corner sum, camera position included, is scaled by the near or far
- * distance), gathers the visible world (func_0022ADD8 with BXNash, OcclusionMan and World), and draws
+ * distance), gathers the visible world (FrustumIntersector_FrustumIntersector with BXNash, OcclusionMan and World), and draws
  * func_00230640, CrowdMan2d, CrowdMan3d, MultiParticleMan, the AI (riders, slot 4), models, fog volumes, light
  * halos and patches. Then a 640x480 2D pass: DebugFont at 0.8 scale, MenuSys when active, the UI engine and
  * WScriptMan (unless cRenderToggles_m_DisableHUD), the script engine, LoadIndicator, GrMan slot 20, the audio update for mUpdateTick
@@ -4142,7 +4142,7 @@ extern "C" int cGame_render(sGame_22B008* self)
         Grow_22B008(bounds, corner);
         sWorld_22B008 worldData;
         world = &worldData;
-        func_0022ADD8((char*)world, self->cfg, self->f8C, &box, self->f10);
+        FrustumIntersector_FrustumIntersector((char*)world, self->cfg, self->f8C, &box, self->f10);
         func_00230640(self);
         func_00229BA8((cCrowdMan2d*)self->f38);
         func_00344138(self->f3C);

@@ -1102,8 +1102,8 @@ extern "C" void cRider_flagEventWipeout_9C88(void* rider, int anim, int a2, int 
 extern "C" void cRider_flagEventLand(void* rider, int a1, int a2, int a3, sHit_139C88* hit, float spd);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void* ra, int layer);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void* ra, int layer);
-extern "C" bool func_001446A0(tEventFlags* self, int bit);
-extern "C" int func_001446A0_i(void* self, int bit) __asm__("func_001446A0");
+extern "C" bool tEventFlags_isSet1(tEventFlags* self, int bit);
+extern "C" int tEventFlags_isSet1_i(void* self, int bit) __asm__("tEventFlags_isSet1");
 extern "C" float cBEStatInterface_getLandingAttrib(void* be, int idx, int stat);
 extern "C" void cRider_undoRailslideModeOrientation(void* rider);
 extern "C" int cRider_isChangeFakieGround(void* rider);
@@ -1361,16 +1361,16 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
         V4_139C88(RIDER_139C88, 1120) = hit.pos;
         *(float*)(RIDER_139C88 + 0x454) = vu0Dot_139C88(vu0Sub_139C88(V4_139C88(RIDER_139C88, 272), hit.pos), V4_139C88(RIDER_139C88, 880));
         if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 20) {
-            if (!func_001446A0((tEventFlags*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0), 2)) anim = 361;
+            if (!tEventFlags_isSet1((tEventFlags*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0), 2)) anim = 361;
         } else if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 21) {
-            if (!func_001446A0((tEventFlags*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0), 3)) anim = 361;
+            if (!tEventFlags_isSet1((tEventFlags*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0), 3)) anim = 361;
         } else {
             int flip = 0;
             if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 19) {
-                flip = func_001446A0_i(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 2) == 0;
+                flip = tEventFlags_isSet1_i(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 2) == 0;
             } else if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(RIDER_139C88 + 0x784), 2) == 18 &&
-                       !func_001446A0((tEventFlags*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0), 2)) {
-                flip = func_001446A0_i(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 0) != 0;
+                       !tEventFlags_isSet1((tEventFlags*)(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0), 2)) {
+                flip = tEventFlags_isSet1_i(cRiderAnimBase_getCurrentAnimSequence(*(void**)(RIDER_139C88 + 0x784), 2) + 0xB0, 0) != 0;
             }
             char* r4 = RIDER_139C88;
             if (vu0Dot_139C88(row_139C88(r4, 2), V4_139C88(r4, 880)) < 0.0f) {
@@ -8625,7 +8625,7 @@ extern "C" void* cRiderAnim_cRiderAnim(cRiderAnim* self)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_00144670);
+INCLUDE_ASM("ai/control/handplantcontrol", tEventFlags_clear1);
 #ifdef SKIP_ASM
 /**
  * Clears event flag @p bit in a 64-bit flag set (+0x0) and sets it in the second set (+0x8) when it was set.
@@ -8633,7 +8633,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_00144670);
  * @param bit  the flag number, 0-63
  */
 // PORT: ulong is 64-bit here
-extern "C" void func_00144670(tEventFlags* self, int bit)
+extern "C" void tEventFlags_clear1(tEventFlags* self, int bit)
 {
     ulong mask = (ulong)1 << bit;
     ulong oldBits = *(ulong*)self;
@@ -8643,7 +8643,7 @@ extern "C" void func_00144670(tEventFlags* self, int bit)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001446A0);
+INCLUDE_ASM("ai/control/handplantcontrol", tEventFlags_isSet1);
 #ifdef SKIP_ASM
 /**
  * Returns whether event flag @p bit is set in a 64-bit flag set (+0x0).
@@ -8651,7 +8651,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", func_001446A0);
  * @param bit  the flag number, 0-63
  * @return true when set
  */
-extern "C" bool func_001446A0(tEventFlags* self, int bit)
+extern "C" bool tEventFlags_isSet1(tEventFlags* self, int bit)
 {
     ulong mask = (ulong)1 << bit;
     return (*(ulong*)self & mask) != 0;
@@ -8659,15 +8659,15 @@ extern "C" bool func_001446A0(tEventFlags* self, int bit)
 #endif
 
 //100%
-INCLUDE_ASM("ai/control/handplantcontrol", func_001446B8);
+INCLUDE_ASM("ai/control/handplantcontrol", tEventFlags_isJustChanged);
 #ifdef SKIP_ASM
 /**
- * Returns whether event flag @p bit is set in the second 64-bit set (+0x8), the one func_00144670 fills.
+ * Returns whether event flag @p bit is set in the second 64-bit set (+0x8), the one tEventFlags_clear1 fills.
  *
  * @param bit  the flag number, 0-63
  * @return true when set
  */
-extern "C" bool func_001446B8(tEventFlags* self, int bit)
+extern "C" bool tEventFlags_isJustChanged(tEventFlags* self, int bit)
 {
     ulong mask = (ulong)1 << bit;
     return (self->IsJustChanged & mask) != 0;

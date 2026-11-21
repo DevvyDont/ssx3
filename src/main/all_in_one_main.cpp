@@ -38,7 +38,7 @@
 #include "fe/festatenet.h"
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", __sti__all_in_one_main_cpp);
+INCLUDE_ASM("main/all_in_one_main", ChallengeResponseMenu_ChallengeResponseMenu);
 #ifdef SKIP_ASM
 struct cNullMenuItem;
 struct cSpaceMenuItem;
@@ -67,7 +67,7 @@ extern int D_00467DD8[];
  * @param declineOwner  the owner for Decline: its first word is stored at +0x134
  * @return self
  */
-extern "C" char* __sti__all_in_one_main_cpp(ChallengeResponseMenu* self, int* acceptOwner, int* declineOwner)
+extern "C" char* ChallengeResponseMenu_ChallengeResponseMenu(ChallengeResponseMenu* self, int* acceptOwner, int* declineOwner)
 {
     char* item0 = (char*)&self->unk_138;
     char* item1 = (char*)&self->unk_154;
@@ -96,7 +96,7 @@ extern "C" char* __sti__all_in_one_main_cpp(ChallengeResponseMenu* self, int* ac
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DB2B0);
+INCLUDE_ASM("main/all_in_one_main", AbortMenu_AbortMenu);
 #ifdef SKIP_ASM
 void cMenu_cMenu(void*);
 extern "C" void cCommandMenuItem_cCommandMenuItem2(char*, int, int *, int);
@@ -109,13 +109,13 @@ extern int D_0046D378[];
  *
  * Runs cMenu_cMenu, stores the menu's vtable D_0046D378 at +0x12C and the owner's first word at +0x130, builds a
  * command item (cCommandMenuItem_cCommandMenuItem2) at +0x134 with ID 0 and caption "Abort", and adds it with cMenu_addItem. Selecting it
- * runs func_001DBAB8. cDebugLobbyScreen_cDebugLobbyScreen builds it at +0x1AAC of the debug front end.
+ * runs AbortMenu_onCommand. cDebugLobbyScreen_cDebugLobbyScreen builds it at +0x1AAC of the debug front end.
  *
  * @param menu  the menu to construct
  * @param owner  the owner reference; its first word (the debug front end) is stored at +0x130
  * @return @p menu
  */
-extern "C" void *func_001DB2B0(AbortMenu* menu, int *owner) {
+extern "C" void *AbortMenu_AbortMenu(AbortMenu* menu, int *owner) {
     cMenu_cMenu(menu);
     char *abortItem = (char*)&menu->unk_134;
     menu->mVtbl = (void**)D_0046D378;
@@ -127,7 +127,7 @@ extern "C" void *func_001DB2B0(AbortMenu* menu, int *owner) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DB330);
+INCLUDE_ASM("main/all_in_one_main", DeletePersonaMenu_setpersonas);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cMenuItem_activate(void* item, int enable);
@@ -135,7 +135,7 @@ extern "C" void cMenuItem_activate(void* item, int enable);
 // Separate inline accessor: its own `i * 0x24` (not CSE'd with the call's address).
 static inline void setItemData_B330(char* row, int value) { *(int*)(row + 0x17C) = value; }
 
-extern "C" void func_001DB330_impl(char *self, char *src) __asm__("func_001DB330");
+extern "C" void DeletePersonaMenu_setpersonas_impl(char *self, char *src) __asm__("DeletePersonaMenu_setpersonas");
 /**
  * Fills the debug "Delete Persona" menu with every persona except the first.
  *
@@ -143,11 +143,11 @@ extern "C" void func_001DB330_impl(char *self, char *src) __asm__("func_001DB330
  * the caption (+0x14 of the item) becomes mPersonas[i], the item is activated (cMenuItem_activate with 1) and its ID (+0x8)
  * is set to i. The remaining items up to 4 are deactivated. Persona 0 is never offered for deletion.
  *
- * The object is the Delete Persona menu (built by func_001DABD0).
+ * The object is the Delete Persona menu (built by DeletePersonaMenu_DeletePersonaMenu).
  *
  * @param src  the lobby manager (LobbyMan): mNumPersonas at +0x6C, mPersonas at +0x70
  */
-extern "C" void func_001DB330_impl(char *self, char *src) {
+extern "C" void DeletePersonaMenu_setpersonas_impl(char *self, char *src) {
     int i = 0;
     int next;
     while (i < *(int*)(src + 0x6C) - 1) {
@@ -165,7 +165,7 @@ extern "C" void func_001DB330_impl(char *self, char *src) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("main/all_in_one_main", func_001DB418);
+INCLUDE_ASM("main/all_in_one_main", PersonaMenu_setpersonas);
 #ifdef SKIP_ASM
 struct MenuItem_B418 {
     char pad0[8];
@@ -190,21 +190,21 @@ struct Src_B418 {
 };
 
 extern "C" void cMenuItem_activate(void* item, int enable);
-extern "C" void func_001DB330(void* sub, Src_B418* src);
+extern "C" void DeletePersonaMenu_setpersonas(void* sub, Src_B418* src);
 
 /**
  * Fills the debug "Select Persona" menu from the lobby manager's persona list.
  *
  * For each of LobbyMan::mNumPersonas personas, the command item at +0x518 + i * 0x24 gets the persona name as its
  * caption, is activated (cMenuItem_activate) and gets ID i; the remaining items up to 4 are deactivated. It then refreshes
- * the Delete Persona submenu at +0x2E8 (func_001DB330), enables the "Delete Persona" item (+0x5C4) only when there are
+ * the Delete Persona submenu at +0x2E8 (DeletePersonaMenu_setpersonas), enables the "Delete Persona" item (+0x5C4) only when there are
  * at least 2 personas, and the "Create Persona" item (+0x5A8) only while there are fewer than 4.
  *
- * The object is the Select Persona menu (built by func_001DACB8).
+ * The object is the Select Persona menu (built by PersonaMenu_PersonaMenu).
  *
  * @param src  the lobby manager (LobbyMan): mNumPersonas at +0x6C, mPersonas at +0x70
  */
-extern "C" void func_001DB418(PersonaMenu* self, Src_B418* src)
+extern "C" void PersonaMenu_setpersonas(PersonaMenu* self, Src_B418* src)
 {
     int i = 0;
     for (; i < src->count; i++) {
@@ -217,14 +217,14 @@ extern "C" void func_001DB418(PersonaMenu* self, Src_B418* src)
     for (; i < 4; i++) {
         cMenuItem_activate(&((MenuItem_B418*)&self->unk_518[0])[i], 0);
     }
-    func_001DB330(((char*)&self->unk_2E8), src);
+    DeletePersonaMenu_setpersonas(((char*)&self->unk_2E8), src);
     cMenuItem_activate(((char*)&self->unk_5C4), src->count >= 2);
     cMenuItem_activate(((char*)&self->unk_5A8), src->count < 4);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DB528);
+INCLUDE_ASM("main/all_in_one_main", LobbyMenu_updaterooms);
 #ifdef SKIP_ASM
 struct MenuItem_B528 {
     char pad0[8];
@@ -249,13 +249,13 @@ extern char str_Receiving_Room_List[];
  *
  * Asks func_0025F120 for the room count and gives command item i (12 items of 0x24 bytes from +0x168) the name from
  * func_0025F150(src, i), activates it and sets its ID to i. With no rooms yet, the first item shows "Receiving Room
- * List" with ID -1 (which the menu's command handler func_001DBB90 ignores). The remaining items are deactivated.
+ * List" with ID -1 (which the menu's command handler LobbyMenu_onCommand ignores). The remaining items are deactivated.
  *
- * The object is the Select Room menu (built by func_001DAE20).
+ * The object is the Select Room menu (built by LobbyMenu_LobbyMenu).
  *
  * @param src  the lobby manager (LobbyMan)
  */
-extern "C" void func_001DB528(LobbyMenu* self, void* src)
+extern "C" void LobbyMenu_updaterooms(LobbyMenu* self, void* src)
 {
     int i = 0;
     int n = func_0025F120(src);
@@ -278,7 +278,7 @@ extern "C" void func_001DB528(LobbyMenu* self, void* src)
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DB620);
+INCLUDE_ASM("main/all_in_one_main", RoomMenu_updateusers);
 #ifdef SKIP_ASM
 struct MenuItem_B620 {
     char pad0[8];
@@ -303,13 +303,13 @@ extern char str_No_users_in_room[];
  *
  * Asks func_0025F1B0 for the user count and gives command item i (24 items of 0x24 bytes from +0x16C) the name from
  * func_0025F1E0(src, i, 0), activates it and sets its ID to i. An empty room shows "No users in room" with ID -1 (which
- * the command handler func_001DBB48 ignores). The remaining items are deactivated.
+ * the command handler RoomMenu_onCommand ignores). The remaining items are deactivated.
  *
- * The object is the Room Occupants menu (built by func_001DAF08).
+ * The object is the Room Occupants menu (built by RoomMenu_RoomMenu).
  *
  * @param src  the lobby manager (LobbyMan)
  */
-extern "C" void func_001DB620(RoomMenu* self, void* src)
+extern "C" void RoomMenu_updateusers(RoomMenu* self, void* src)
 {
     int i = 0;
     int n = func_0025F1B0(src);
@@ -555,7 +555,7 @@ extern "C" void func_001DB918(sPtrVecDB918* self, void** pos, void* const& x)
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DBAB8);
+INCLUDE_ASM("main/all_in_one_main", AbortMenu_onCommand);
 #ifdef SKIP_ASM
 extern "C" void func_0017E558(int);
 
@@ -568,14 +568,14 @@ extern "C" void func_0017E558(int);
  * @param menu  the Abort menu; the debug front end is at +0x130
  * @return 0
  */
-extern "C" int func_001DBAB8(AbortMenu* menu) {
+extern "C" int AbortMenu_onCommand(AbortMenu* menu) {
     func_0017E558(((int)menu->unk_130));
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DBAD8);
+INCLUDE_ASM("main/all_in_one_main", ChallengeResponseMenu_onCommand);
 #ifdef SKIP_ASM
 extern "C" void func_0017E490(int);
 extern "C" void func_0017E4F0(int);
@@ -583,7 +583,7 @@ extern "C" void func_0017E4F0(int);
 /**
  * Handles the debug challenge menu's commands: Accept or Decline.
  *
- * It is the onCommand slot of the challenge menu's vtable D_0046D3D0 (built by __sti__all_in_one_main_cpp). Item ID 0
+ * It is the onCommand slot of the challenge menu's vtable D_0046D3D0 (built by ChallengeResponseMenu_ChallengeResponseMenu). Item ID 0
  * (Accept) calls func_0017E490 with the owner at +0x130, which answers the challenge through func_0025FB58; ID 1
  * (Decline) calls func_0017E4F0 with the owner at +0x134, which declines through func_0025FC28.
  *
@@ -591,7 +591,7 @@ extern "C" void func_0017E4F0(int);
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int func_001DBAD8(ChallengeResponseMenu* menu, void *item) {
+extern "C" int ChallengeResponseMenu_onCommand(ChallengeResponseMenu* menu, void *item) {
     int temp_3;
 
     temp_3 = (*(int *)((char*)(item) + (8)));
@@ -605,14 +605,14 @@ extern "C" int func_001DBAD8(ChallengeResponseMenu* menu, void *item) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DBB20);
+INCLUDE_ASM("main/all_in_one_main", ChatMenu_onCommand);
 #ifdef SKIP_ASM
 extern "C" void func_0017E418(int, int);
 
 /**
  * Handles the debug "Chat Menu" command: sends the chosen line as a lobby chat message.
  *
- * It is the onCommand slot of the chat menu's vtable D_0046D428 (built by func_001DB028). It passes the item's caption
+ * It is the onCommand slot of the chat menu's vtable D_0046D428 (built by ChatMenu_ChatMenu). It passes the item's caption
  * (+0x14, one of the canned lines in D_00467D70) to func_0017E418 with the debug front end at +0x130, which returns to
  * the Room Occupants menu and sends the text with func_0025AAE0 ("mesg").
  *
@@ -620,14 +620,14 @@ extern "C" void func_0017E418(int, int);
  * @param item  the chosen command item
  * @return 0
  */
-extern "C" int func_001DBB20(ChatMenu* menu, void *item) {
+extern "C" int ChatMenu_onCommand(ChatMenu* menu, void *item) {
     func_0017E418(((int)menu->unk_130), (*(int *)((char*)(item) + (0x14))));
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DBB48);
+INCLUDE_ASM("main/all_in_one_main", RoomMenu_onCommand);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0017E368_BB48(int, int) __asm__("func_0017E368");
@@ -636,7 +636,7 @@ extern "C" void func_0017E3B8_BB48(int) __asm__("func_0017E3B8");
 /**
  * Handles the debug "Room Occupants" menu's commands.
  *
- * It is the onCommand slot of vtable D_0046D480 (built by func_001DAF08). The "Chat" item (ID -2) calls func_0017E3B8
+ * It is the onCommand slot of vtable D_0046D480 (built by RoomMenu_RoomMenu). The "Chat" item (ID -2) calls func_0017E3B8
  * with the owner at +0x134, which opens the chat menu; an occupant (ID 0 and up) calls func_0017E368 with the owner at
  * +0x130 and the occupant's index; the placeholder line (ID -1) does nothing.
  *
@@ -644,7 +644,7 @@ extern "C" void func_0017E3B8_BB48(int) __asm__("func_0017E3B8");
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int func_001DBB48(RoomMenu* menu, void *item) {
+extern "C" int RoomMenu_onCommand(RoomMenu* menu, void *item) {
     int itemValue = *(int *)((char *)item + 8);
     if (itemValue == -2) {
         func_0017E3B8_BB48((int)menu->unk_134);
@@ -656,14 +656,14 @@ extern "C" int func_001DBB48(RoomMenu* menu, void *item) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DBB90);
+INCLUDE_ASM("main/all_in_one_main", LobbyMenu_onCommand);
 #ifdef SKIP_ASM
 extern "C" void func_0017E2F8(int, int);
 
 /**
  * Handles the debug "Select Room" menu's command: joins the chosen room.
  *
- * It is the onCommand slot of vtable D_0046D4D8 (built by func_001DAE20). For an item ID of 0 or more it calls
+ * It is the onCommand slot of vtable D_0046D4D8 (built by LobbyMenu_LobbyMenu). For an item ID of 0 or more it calls
  * func_0017E2F8 with the debug front end at +0x130 and the room index (state 11, then func_0025D800 on the lobby
  * manager); the "Receiving Room List" placeholder (ID -1) is ignored.
  *
@@ -671,7 +671,7 @@ extern "C" void func_0017E2F8(int, int);
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int func_001DBB90(LobbyMenu* menu, void *item) {
+extern "C" int LobbyMenu_onCommand(LobbyMenu* menu, void *item) {
     int temp_5;
 
     temp_5 = (*(int *)((char*)(item) + (8)));
@@ -683,14 +683,14 @@ extern "C" int func_001DBB90(LobbyMenu* menu, void *item) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DBBC0);
+INCLUDE_ASM("main/all_in_one_main", PersonaMenu_onCommand);
 #ifdef SKIP_ASM
 extern "C" void func_0017E290(int, int);
 
 /**
  * Handles the debug "Select Persona" menu's command: selects the chosen persona.
  *
- * It is the onCommand slot of vtable D_0046D530 (built by func_001DACB8). It calls func_0017E290 with the debug front
+ * It is the onCommand slot of vtable D_0046D530 (built by PersonaMenu_PersonaMenu). It calls func_0017E290 with the debug front
  * end stored at +0x4E0 and the item's ID (the persona index), which sets state 7 and calls func_0025CD28 on the lobby
  * manager.
  *
@@ -698,14 +698,14 @@ extern "C" void func_0017E290(int, int);
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int func_001DBBC0(PersonaMenu* menu, void *item) {
+extern "C" int PersonaMenu_onCommand(PersonaMenu* menu, void *item) {
     func_0017E290(((int)menu->unk_4E0), (*(int *)((char*)(item) + (8))));
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DBBE8);
+INCLUDE_ASM("main/all_in_one_main", CreatePersonaMenu_onCommand);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0017E1C0_BBE8(int, void *) __asm__("func_0017E1C0");
@@ -713,43 +713,43 @@ extern "C" void func_0017E1C0_BBE8(int, void *) __asm__("func_0017E1C0");
 /**
  * Handles the debug "Create Persona" menu's command: creates a persona with the typed name.
  *
- * It is the onCommand slot of vtable D_0046D588 (built by func_001DAAC8). It calls func_0017E1C0 with the debug front
+ * It is the onCommand slot of vtable D_0046D588 (built by CreatePersonaMenu_CreatePersonaMenu). It calls func_0017E1C0 with the debug front
  * end at +0x130 and the persona name buffer at +0x180 (the text-entry item at +0x168), which sets state 8 and calls
  * func_0025D1B8 on the lobby manager. It ignores which item was chosen.
  *
  * @param menu  the Create Persona menu
  * @return 0
  */
-extern "C" int func_001DBBE8(CreatePersonaMenu* menu) {
+extern "C" int CreatePersonaMenu_onCommand(CreatePersonaMenu* menu) {
     func_0017E1C0_BBE8((int)menu->unk_130, ((char*)menu) + 0x180);
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DBC10);
+INCLUDE_ASM("main/all_in_one_main", DeletePersonaMenu_onCommand);
 #ifdef SKIP_ASM
 extern "C" void func_0017E228(int, int);
 
 /**
  * Handles the debug "Delete Persona" menu's command: deletes the chosen persona.
  *
- * It is the onCommand slot of vtable D_0046D5E0 (built by func_001DABD0). It calls func_0017E228 with the debug front
- * end at +0x130 and the item's ID (the persona index set by func_001DB330), which sets state 9 and calls func_0025D428
+ * It is the onCommand slot of vtable D_0046D5E0 (built by DeletePersonaMenu_DeletePersonaMenu). It calls func_0017E228 with the debug front
+ * end at +0x130 and the item's ID (the persona index set by DeletePersonaMenu_setpersonas), which sets state 9 and calls func_0025D428
  * on the lobby manager.
  *
  * @param menu  the Delete Persona menu
  * @param item  the chosen item; its ID is at +0x8
  * @return 0
  */
-extern "C" int func_001DBC10(DeletePersonaMenu* menu, void *item) {
+extern "C" int DeletePersonaMenu_onCommand(DeletePersonaMenu* menu, void *item) {
     func_0017E228(((int)menu->unk_130), (*(int *)((char*)(item) + (8))));
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DBC38);
+INCLUDE_ASM("main/all_in_one_main", AccountDetailsMenu_onCommand);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0017E030_BC38(int, char*, char*) __asm__("func_0017E030");
@@ -757,7 +757,7 @@ extern "C" void func_0017E030_BC38(int, char*, char*) __asm__("func_0017E030");
 /**
  * Handles the debug "Create Account" menu's command: creates an account with the typed name and password.
  *
- * It is the onCommand slot of vtable D_0046D690 (built by func_001DA648). It calls func_0017E030 with the debug front
+ * It is the onCommand slot of vtable D_0046D690 (built by AccountDetailsMenu_AccountDetailsMenu). It calls func_0017E030 with the debug front
  * end at +0x130, the login-name buffer at +0x180 and the password buffer at +0x1AC; that fills the lobby manager's
  * mNewAccount form and sends it with func_0025B9C8. It ignores which item was chosen.
  *
@@ -765,14 +765,14 @@ extern "C" void func_0017E030_BC38(int, char*, char*) __asm__("func_0017E030");
  *
  * @return 0
  */
-extern "C" int func_001DBC38(AccountDetailsMenu* self) {
+extern "C" int AccountDetailsMenu_onCommand(AccountDetailsMenu* self) {
     func_0017E030_BC38((int)self->unk_130, ((char*)self) + 0x180, ((char*)self) + 0x1AC);
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DBC68);
+INCLUDE_ASM("main/all_in_one_main", AccountDetailsMenu_onCommand1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0017E118_BC68(int, char*, char*) __asm__("func_0017E118");
@@ -780,7 +780,7 @@ extern "C" void func_0017E118_BC68(int, char*, char*) __asm__("func_0017E118");
 /**
  * Handles the debug "Login" menu's command: logs in with the typed name and password.
  *
- * It is the onCommand slot of vtable D_0046D6E8 (built by func_001DA7E8). It calls func_0017E118 with the debug front
+ * It is the onCommand slot of vtable D_0046D6E8 (built by AccountDetailsMenu_AccountDetailsMenu1). It calls func_0017E118 with the debug front
  * end at +0x130, the login-name buffer at +0x180 and the password buffer at +0x1AC; that copies them into the lobby
  * manager's mUserName / mPassword and calls func_0025C610. It ignores which item was chosen.
  *
@@ -788,7 +788,7 @@ extern "C" void func_0017E118_BC68(int, char*, char*) __asm__("func_0017E118");
  *
  * @return 0
  */
-extern "C" int func_001DBC68(AccountDetailsMenu* self) {
+extern "C" int AccountDetailsMenu_onCommand1(AccountDetailsMenu* self) {
     func_0017E118_BC68((int)self->unk_130, ((char*)self) + 0x180, ((char*)self) + 0x1AC);
     return 0;
 }
@@ -1953,7 +1953,7 @@ extern "C" void cDebugMenuScreen__cDebugMenuScreen(cDebugMenuScreen* self, int f
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCD58);
+INCLUDE_ASM("main/all_in_one_main", ContinueMenu__ContinueMenu);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
@@ -1967,20 +1967,20 @@ extern "C" void cMenu__cMenu(int, int);
  * @param menu  the menu
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void func_001DCD58(int menu, int flags) {
+extern "C" void ContinueMenu__ContinueMenu(int menu, int flags) {
     cMenuItem__cMenuItem(menu + 304, 2);
     cMenu__cMenu(menu, flags);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCDA0);
+INCLUDE_ASM("main/all_in_one_main", AccountDetailsMenu__AccountDetailsMenu1);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 /**
- * Destroys the debug lobby's "Login" menu (vtable D_0046D6E8, built by func_001DA7E8).
+ * Destroys the debug lobby's "Login" menu (vtable D_0046D6E8, built by AccountDetailsMenu_AccountDetailsMenu1).
  *
  * Destroys its six items in reverse order (+0x1E4 Cancel, +0x1C0 the command item, +0x194 password, +0x168 login name,
  * +0x150 spacer, +0x134 title) with cMenuItem__cMenuItem (flags 2), then runs cMenu__cMenu with the caller's flags. The
@@ -1989,7 +1989,7 @@ extern "C" void cMenu__cMenu(int, int);
  * @param menu  the menu
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void func_001DCDA0(int menu, int flags) {
+extern "C" void AccountDetailsMenu__AccountDetailsMenu1(int menu, int flags) {
     cMenuItem__cMenuItem(menu + 484, 2);
     cMenuItem__cMenuItem(menu + 0x1C0, 2);
     cMenuItem__cMenuItem(menu + 404, 2);
@@ -2001,13 +2001,13 @@ extern "C" void func_001DCDA0(int menu, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCE20);
+INCLUDE_ASM("main/all_in_one_main", AccountDetailsMenu__AccountDetailsMenu);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 /**
- * Destroys the debug lobby's "Create Account" menu (vtable D_0046D690, built by func_001DA648).
+ * Destroys the debug lobby's "Create Account" menu (vtable D_0046D690, built by AccountDetailsMenu_AccountDetailsMenu).
  *
  * Same layout as the Login menu: destroys the six items from +0x1E4 down to +0x134 with cMenuItem__cMenuItem (flags 2),
  * then runs cMenu__cMenu with the caller's flags. The preview calls this class
@@ -2016,7 +2016,7 @@ extern "C" void cMenu__cMenu(int, int);
  * @param menu  the menu
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void func_001DCE20(int menu, int flags) {
+extern "C" void AccountDetailsMenu__AccountDetailsMenu(int menu, int flags) {
     cMenuItem__cMenuItem(menu + 484, 2);
     cMenuItem__cMenuItem(menu + 0x1C0, 2);
     cMenuItem__cMenuItem(menu + 404, 2);
@@ -2028,7 +2028,7 @@ extern "C" void func_001DCE20(int menu, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCEA0);
+INCLUDE_ASM("main/all_in_one_main", AccountMenu__AccountMenu);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
@@ -2062,7 +2062,7 @@ static inline void SubMenuA_CEA0(int m)
 }
 
 /**
- * Destroys the debug lobby's "Login Method" menu (vtable D_0046D638, built by func_001DA988) with its two submenus.
+ * Destroys the debug lobby's "Login Method" menu (vtable D_0046D638, built by AccountMenu_AccountMenu) with its two submenus.
  *
  * Tears down, innermost first, the menu's four items (+0x578, +0x55C, +0x544, +0x528), the embedded Login menu at
  * +0x32C (its items and cMenu base) and the Create Account menu at +0x130 (its items and cMenu base), all with flags 2,
@@ -2071,7 +2071,7 @@ static inline void SubMenuA_CEA0(int m)
  *
  * @param flags  g++ destructor flags passed on to the last cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void func_001DCEA0(int self, int flags)
+extern "C" void AccountMenu__AccountMenu(int self, int flags)
 {
     SubMenuA_CEA0(self + 304);
     cMenu__cMenu(self, flags);
@@ -2079,7 +2079,7 @@ extern "C" void func_001DCEA0(int self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DCFC8);
+INCLUDE_ASM("main/all_in_one_main", DeletePersonaMenu__DeletePersonaMenu);
 #ifdef SKIP_ASM
 struct VEnt { short delta; short idx; void (*fn)(void*, int); };
 struct VTab { int a; int b; VEnt dtor; };
@@ -2089,7 +2089,7 @@ extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 /**
- * Destroys the debug lobby's "Delete Persona" menu (vtable D_0046D5E0, built by func_001DABD0).
+ * Destroys the debug lobby's "Delete Persona" menu (vtable D_0046D5E0, built by DeletePersonaMenu_DeletePersonaMenu).
  *
  * Destroys the four command items at +0x168 (0x24 bytes each) in reverse order through each item's virtual destructor
  * (the vtable at +0x10 of the item, with the entry's this adjustment), then the spacer (+0x150) and the title (+0x134)
@@ -2098,7 +2098,7 @@ extern "C" void cMenu__cMenu(int, int);
  *
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void func_001DCFC8(DeletePersonaMenu* self, int flags) {
+extern "C" void DeletePersonaMenu__DeletePersonaMenu(DeletePersonaMenu* self, int flags) {
     if (((Elem*)&self->unk_168[0]) != 0) {
         Elem *end = ((Elem*)&self->unk_168[0]) + 4;
         Elem *elem = end;
@@ -2114,13 +2114,13 @@ extern "C" void func_001DCFC8(DeletePersonaMenu* self, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD060);
+INCLUDE_ASM("main/all_in_one_main", CreatePersonaMenu__CreatePersonaMenu);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 /**
- * Destroys the debug lobby's "Create Persona" menu (vtable D_0046D588, built by func_001DAAC8).
+ * Destroys the debug lobby's "Create Persona" menu (vtable D_0046D588, built by CreatePersonaMenu_CreatePersonaMenu).
  *
  * Destroys its four items (+0x194 Create, +0x168 persona name, +0x150 spacer, +0x134 title) with cMenuItem__cMenuItem
  * (flags 2), then runs cMenu__cMenu with the caller's flags. The preview calls this class
@@ -2129,7 +2129,7 @@ extern "C" void cMenu__cMenu(int, int);
  * @param menu  the menu
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void func_001DD060(int menu, int flags) {
+extern "C" void CreatePersonaMenu__CreatePersonaMenu(int menu, int flags) {
     cMenuItem__cMenuItem(menu + 404, 2);
     cMenuItem__cMenuItem(menu + 360, 2);
     cMenuItem__cMenuItem(menu + 336, 2);
@@ -2139,7 +2139,7 @@ extern "C" void func_001DD060(int menu, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD0C8);
+INCLUDE_ASM("main/all_in_one_main", PersonaMenu__PersonaMenu);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PersonaMenu<cDebugLobbyScreen::OnSelectPersona, OnCreatePersona, OnDeletePersona>::~PersonaMenu (prototype name);
@@ -2191,7 +2191,7 @@ struct cPersonaMenu_DD0C8 : cMenuBase_DD0C8 {
 };
 
 /**
- * Destroys the debug lobby's "Select Persona" menu (vtable D_0046D530, built by func_001DACB8) with its two submenus.
+ * Destroys the debug lobby's "Select Persona" menu (vtable D_0046D530, built by PersonaMenu_PersonaMenu) with its two submenus.
  *
  * A compiler-generated destructor: it destroys the menu's own items (the Create/Delete Persona submenu items at +0x5C4
  * and +0x5A8, the four persona items at +0x518 through their virtual destructors, the spacer and the title), then the
@@ -2203,12 +2203,12 @@ cPersonaMenu_DD0C8::~cPersonaMenu_DD0C8()
 {
 }
 // PORT: the compiler names these dtors _$_<len><Class>; map them to the address-derived names.
-__asm__(".globl func_001DD0C8\n.type func_001DD0C8,@function\nfunc_001DD0C8 = _$_18cPersonaMenu_DD0C8\n.size func_001DD0C8,0x18C\n");
+__asm__(".globl PersonaMenu__PersonaMenu\n.type PersonaMenu__PersonaMenu,@function\nPersonaMenu__PersonaMenu = _$_18cPersonaMenu_DD0C8\n.size PersonaMenu__PersonaMenu,0x18C\n");
 __asm__("_$_15cMenuPart_DD0C8 = cMenuItem__cMenuItem\n_$_15cMenuBase_DD0C8 = cMenu__cMenu\n");
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD258);
+INCLUDE_ASM("main/all_in_one_main", LobbyMenu__LobbyMenu);
 #ifdef SKIP_ASM
 struct VEnt_D258 { short delta; short idx; void (*fn)(void*, int); };
 struct VTab_D258 { int a; int b; VEnt_D258 dtor; };
@@ -2216,7 +2216,7 @@ struct Elem_D258 { char pad[0x10]; VTab_D258 *vt; char pad2[0x24 - 0x14]; };
 struct Obj_D258 { char pad[0x168]; Elem_D258 elems[12]; };
 
 /**
- * Destroys the debug lobby's "Select Room" menu (vtable D_0046D4D8, built by func_001DAE20).
+ * Destroys the debug lobby's "Select Room" menu (vtable D_0046D4D8, built by LobbyMenu_LobbyMenu).
  *
  * Destroys the twelve room items at +0x168 in reverse order through their virtual destructors, then the spacer (+0x150)
  * and the title (+0x134) with cMenuItem__cMenuItem, and finally cMenu__cMenu with the caller's flags. The preview calls
@@ -2224,7 +2224,7 @@ struct Obj_D258 { char pad[0x168]; Elem_D258 elems[12]; };
  *
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void func_001DD258(LobbyMenu* self, int flags) {
+extern "C" void LobbyMenu__LobbyMenu(LobbyMenu* self, int flags) {
     if (((Elem_D258*)&self->unk_168[0]) != 0) {
         Elem_D258 *end = ((Elem_D258*)&self->unk_168[0]) + 12;
         Elem_D258 *elem = end;
@@ -2240,7 +2240,7 @@ extern "C" void func_001DD258(LobbyMenu* self, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD2F0);
+INCLUDE_ASM("main/all_in_one_main", RoomMenu__RoomMenu);
 #ifdef SKIP_ASM
 struct VEnt_D2F0 { short delta; short idx; void (*fn)(void*, int); };
 struct VTab_D2F0 { int a; int b; VEnt_D2F0 dtor; };
@@ -2248,7 +2248,7 @@ struct Elem_D2F0 { char pad[0x10]; VTab_D2F0 *vt; char pad2[0x24 - 0x14]; };
 struct Obj_D2F0 { char pad[0x16C]; Elem_D2F0 elems[24]; };
 
 /**
- * Destroys the debug lobby's "Room Occupants" menu (vtable D_0046D480, built by func_001DAF08).
+ * Destroys the debug lobby's "Room Occupants" menu (vtable D_0046D480, built by RoomMenu_RoomMenu).
  *
  * Destroys the "Chat" item (+0x4CC), the 24 occupant items at +0x16C in reverse order through their virtual
  * destructors, the spacer (+0x154) and the title (+0x138), then runs cMenu__cMenu with the caller's flags. The preview
@@ -2256,7 +2256,7 @@ struct Obj_D2F0 { char pad[0x16C]; Elem_D2F0 elems[24]; };
  *
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void func_001DD2F0(RoomMenu* self, int flags) {
+extern "C" void RoomMenu__RoomMenu(RoomMenu* self, int flags) {
     cMenuItem__cMenuItem((int)self + 1228, 2);
     if (((Elem_D2F0*)&self->unk_16C[0]) != 0) {
         Elem_D2F0 *elem = ((Elem_D2F0*)&self->unk_16C[0]) + 24;
@@ -2272,7 +2272,7 @@ extern "C" void func_001DD2F0(RoomMenu* self, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD398);
+INCLUDE_ASM("main/all_in_one_main", ChatMenu__ChatMenu);
 #ifdef SKIP_ASM
 struct VEnt_D398 { short delta; short idx; void (*fn)(void*, int); };
 struct VTab_D398 { int a; int b; VEnt_D398 dtor; };
@@ -2280,7 +2280,7 @@ struct Elem_D398 { char pad[0x10]; VTab_D398 *vt; char pad2[0x24 - 0x14]; };
 struct Obj_D398 { char pad[0x194]; Elem_D398 elems[14]; };
 
 /**
- * Destroys the debug lobby's "Chat Menu" (vtable D_0046D428, built by func_001DB028).
+ * Destroys the debug lobby's "Chat Menu" (vtable D_0046D428, built by ChatMenu_ChatMenu).
  *
  * Destroys the 14 canned-message items at +0x194 in reverse order through their virtual destructors, then the chat
  * text-entry item (+0x168), the spacer (+0x150) and the title (+0x134) with cMenuItem__cMenuItem, and finally
@@ -2288,7 +2288,7 @@ struct Obj_D398 { char pad[0x194]; Elem_D398 elems[14]; };
  *
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void func_001DD398(ChatMenu* self, int flags) {
+extern "C" void ChatMenu__ChatMenu(ChatMenu* self, int flags) {
     if (((Elem_D398*)&self->unk_194[0]) != 0) {
         Elem_D398 *elem = ((Elem_D398*)&self->unk_194[0]) + 14;
         while (((Elem_D398*)&self->unk_194[0]) != elem) {
@@ -2304,13 +2304,13 @@ extern "C" void func_001DD398(ChatMenu* self, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD440);
+INCLUDE_ASM("main/all_in_one_main", ChallengeResponseMenu__ChallengeResponseMenu);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 /**
- * Destroys the debug lobby's challenge menu (vtable D_0046D3D0, built by __sti__all_in_one_main_cpp).
+ * Destroys the debug lobby's challenge menu (vtable D_0046D3D0, built by ChallengeResponseMenu_ChallengeResponseMenu).
  *
  * Destroys its six items in reverse order (+0x1C8 Decline, +0x1A4 Accept, +0x18C spacer, +0x170 empty line, +0x154
  * "by", +0x138 "You've been Challenged!") with cMenuItem__cMenuItem (flags 2), then runs cMenu__cMenu with the caller's
@@ -2319,7 +2319,7 @@ extern "C" void cMenu__cMenu(int, int);
  * @param menu  the menu
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void func_001DD440(int menu, int flags) {
+extern "C" void ChallengeResponseMenu__ChallengeResponseMenu(int menu, int flags) {
     cMenuItem__cMenuItem(menu + 456, 2);
     cMenuItem__cMenuItem(menu + 420, 2);
     cMenuItem__cMenuItem(menu + 396, 2);
@@ -2331,13 +2331,13 @@ extern "C" void func_001DD440(int menu, int flags) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DD4C0);
+INCLUDE_ASM("main/all_in_one_main", AbortMenu__AbortMenu);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
 /**
- * Destroys the debug lobby's "Abort" menu (vtable D_0046D378, built by func_001DB2B0): its one item, then the menu.
+ * Destroys the debug lobby's "Abort" menu (vtable D_0046D378, built by AbortMenu_AbortMenu): its one item, then the menu.
  *
  * Destroys the command item at +0x134 with cMenuItem__cMenuItem (flags 2), then runs cMenu__cMenu with the caller's
  * flags. The preview calls this class AbortMenu<cDebugLobbyScreen::OnAbortChallenge>.
@@ -2345,7 +2345,7 @@ extern "C" void cMenu__cMenu(int, int);
  * @param menu  the menu
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
-extern "C" void func_001DD4C0(int menu, int flags) {
+extern "C" void AbortMenu__AbortMenu(int menu, int flags) {
     cMenuItem__cMenuItem(menu + 308, 2);
     cMenu__cMenu(menu, flags);
 }

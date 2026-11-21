@@ -2030,7 +2030,7 @@ public:
  * Gives a frame back to the decoder's codec.
  *
  * Calls the codec's slot 6 without checking that a codec exists. The game's movie code (cMoviePlayer_purge, func_002547B8,
- * func_00254DC0) calls it on frames it got from func_003AE6C8.
+ * SSX_VD_PS2_SINGLE_BUFFERD_CompleteDraw) calls it on frames it got from func_003AE6C8.
  *
  * @param frame  the frame
  */

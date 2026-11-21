@@ -7428,7 +7428,7 @@ INCLUDE_ASM("ai/ai", cRailslideControl_update);
 #ifdef SKIP_ASM
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" bool func_001446A0(void* self, int bit);
+extern "C" bool tEventFlags_isSet1(void* self, int bit);
 extern "C" int cRider_checkForReset_i(void* rider, int a, int b) __asm__("cRider_checkForReset");
 extern "C" int cRider_checkForBoardPress(void* rider, float v);
 extern "C" void cRailslideControl_chooseRailSpin(cRailslideControl* self, int neg);
@@ -7492,7 +7492,7 @@ extern "C" void cRailslideControl_update(cRailslideControl* self, void* in)
     cRider_checkForProximityAction(self->mRider);
     sPadC_131D30* in2 = (sPadC_131D30*)((char*)in + 4);
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 0xE) {
-        if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 0))
+        if (!tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 0))
             return;
         if (cRider_checkForBoardPress(self->mRider, in2->y * k))
             return;
@@ -7756,7 +7756,7 @@ int cRider_getMotionState(void* self);
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
-extern "C" bool func_001446A0(void* self, int bit);
+extern "C" bool tEventFlags_isSet1(void* self, int bit);
 extern "C" void cRider_undoRailslideModeOrientation(void* rider);
 
 struct sAiBits00132770
@@ -7782,7 +7782,7 @@ extern "C" int cRailslideControl_checkAirMotion(cRailslideControl* self, void* c
     }
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 0xE)
     {
-        if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 0))
+        if (!tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 0))
         {
             return 0;
         }
@@ -7978,7 +7978,7 @@ extern "C" void cRider_doLeanPoseAdjust(void* self, void* p);
 extern "C" void cRider_updateOrientationImplicit(void*);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" int cRider_checkRailBoardCollisions(void*);
-extern "C" bool func_001446A0(void* self, int bit);
+extern "C" bool tEventFlags_isSet1(void* self, int bit);
 int cRider_getMotionState(void* self);
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_impl(void* self, int v) __asm__("cRider_setMotionState__FPv");
@@ -8111,7 +8111,7 @@ extern "C" void cHandplantControl_update(cHandplantControl* self, sPad_2A30* in)
         cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evHandplantEnd(self->mRider->mMetrix));
         cRider_setMotionState_impl(self->mRider, 1);
     }
-    if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
+    if (tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
         if (cRider_checkRailBoardCollisions(self->mRider)) {
             return;
         }
@@ -9542,12 +9542,12 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
                 cRiderAnimBase_play(rider->mRiderAnim, cBEBAGTInterface_getGrabAnim(iface, rider->mAIIndex, self->CurrentGrab), 0, -1.0f);
             }
             *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = speed;
-        } else if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 0)) {
+        } else if (tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 0)) {
             self->GrabState = 1;
         }
     }
     if (self->GrabState == 1) {
-        if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
+        if (tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
             cRider* rider = self->mRider;
             cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, cBEBAGTInterface_getGrabName(iface, rider->mAIIndex, self->CurrentGrab)));
             *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = 0.0f;
@@ -9584,7 +9584,7 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
     }
     if (self->GrabState == 3) {
         if (trick == self->CurrentGrab && held != 0
-            && func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
+            && tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 1)) {
             *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = 0.0f;
             if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 19) {
                 cRider* rider = self->mRider;
@@ -9604,9 +9604,9 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
                 }
             }
             self->GrabState = 4;
-        } else if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 1)
-                   || func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 3)
-                   || func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 2)) {
+        } else if (tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 1)
+                   || tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 3)
+                   || tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 2)) {
             if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 19) {
                 cRider* rider = self->mRider;
                 cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evGrabHold(rider->mMetrix, cBEBAGTInterface_getTweakName(iface, rider->mAIIndex, self->CurrentGrab)));
@@ -9637,7 +9637,7 @@ extern "C" int cSpinControl_isGrabPlaying(cSpinControl* vself, int trick, int he
     }
     anim = cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2);
     if (self->GrabState == 5) {
-        if (anim == 2 || func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 3)) {
+        if (anim == 2 || tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 3)) {
             if (anim == 20 && held != 0 && trick != -1
                 && cBEBAGTInterface_getUberAnim(iface, self->mRider->mAIIndex, trick, hi) != 438) {
                 self->CurrentGrab = trick;
@@ -10099,7 +10099,7 @@ extern "C" float cRiderMetrix_evUberGrindEnd(void* p, int v);
 int cRider_getMotionState(void* self);
 void cRider_setControlState_impl(void* self, int v) __asm__("cRider_setControlState__FPv");
 extern "C" void cRailslideControl_playGainFocusAnim(cRailslideControl*, int);
-extern "C" bool func_001446A0(void* self, int bit);
+extern "C" bool tEventFlags_isSet1(void* self, int bit);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 int cRiderAnimBase_getCurrentAnimID(void* self, int i);
@@ -10211,7 +10211,7 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, void* in)
         rider2->mSlewed[6].rate = 0.05833333730697632f;
         if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 21 &&
             !cRiderAnimBase_isCurrentAnimEndFlag(self->mRider->mRiderAnim, 2) &&
-            !func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 0))
+            !tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0xB0, 0))
             return;
         if (cRider_getMotionState((char*)self->mRider) == 4)
         {

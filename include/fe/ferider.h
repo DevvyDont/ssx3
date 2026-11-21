@@ -56,7 +56,7 @@ struct cFERider {
     tPose mBoardPose;               // 0xC50 [O]; [R] tPose_Identity; [U] setBoardPose / translateBoard / rotateBoard
     void* mpAttachedEmitterFX;      // 0xC70 [R] 0; init: func_002F1890(cMemMan_alloc(168, "AttachedEmitterFX"), this);
                                     //       purge destroys it (no On Tour member; named after the allocation tag)
-    void* mpBoltOnFX;               // 0xC74 [R] 0; init: func_002ECA68(cMemMan_alloc(200, "cBoltOnFXInterface"), this,
+    void* mpBoltOnFX;               // 0xC74 [R] 0; init: cBoltOnFXInterface_cBoltOnFXInterface1(cMemMan_alloc(200, "cBoltOnFXInterface"), this,
                                     //       mpAttachedEmitterFX); [U] updateAnimModelParts sets its first word
     int mBoltPoints;                // 0xC78 [O] order only (On Tour: after mBoardPose, before mBoneMap); [R] 0 in the
                                     //       ctor and purge, no other retail access

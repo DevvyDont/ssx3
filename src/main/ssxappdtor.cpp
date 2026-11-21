@@ -2093,7 +2093,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_init__FPv);
  * Does nothing: the base game mode handler's init.
  *
  * Slot +0x14 of the base handler vtable cGameModeHandler_vtbl; the event handlers override it with their heat set-up (for example
- * func_00238E20, func_0023A108).
+ * cGMBigAirHandler_init, cGMRaceHandler_init).
  */
 void cGameModeHandler_init(void* self)
 {
@@ -2187,7 +2187,7 @@ void cGameModeHandler_readFromReplayFrame(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244560);
+INCLUDE_ASM("main/ssxappdtor", cGMBigAirHandler__cGMBigAirHandler);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -2199,7 +2199,7 @@ extern char cGameModeHandler_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_00244560(int* self, int flags)
+extern "C" void cGMBigAirHandler__cGMBigAirHandler(int* self, int flags)
 {
     *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
@@ -2209,7 +2209,7 @@ extern "C" void func_00244560(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244590);
+INCLUDE_ASM("main/ssxappdtor", cGMRaceHandler__cGMRaceHandler);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -2221,7 +2221,7 @@ extern char cGameModeHandler_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_00244590(int* self, int flags)
+extern "C" void cGMRaceHandler__cGMRaceHandler(int* self, int flags)
 {
     *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
@@ -2231,7 +2231,7 @@ extern "C" void func_00244590(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002445C0);
+INCLUDE_ASM("main/ssxappdtor", cGMMPRaceHandler__cGMMPRaceHandler);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -2243,7 +2243,7 @@ extern char cGameModeHandler_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_002445C0(int* self, int flags)
+extern "C" void cGMMPRaceHandler__cGMMPRaceHandler(int* self, int flags)
 {
     *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
@@ -2253,7 +2253,7 @@ extern "C" void func_002445C0(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002445F0);
+INCLUDE_ASM("main/ssxappdtor", cGMMPSlopeHandler__cGMMPSlopeHandler);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -2265,7 +2265,7 @@ extern char cGameModeHandler_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_002445F0(int* self, int flags)
+extern "C" void cGMMPSlopeHandler__cGMMPSlopeHandler(int* self, int flags)
 {
     *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
@@ -2275,28 +2275,28 @@ extern "C" void func_002445F0(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244620__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGMMPSlopeHandler_writeToReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: handler 9 (the two-player online event, vtable D_0047CE68) saves nothing into a replay frame.
  *
  * Slot +0x54 (writeToReplayFrame) of D_0047CE68.
  */
-void func_00244620(void* vself)
+void cGMMPSlopeHandler_writeToReplayFrame(void* vself)
 {
     cGMMPSlopeHandler* self = (cGMMPSlopeHandler*)vself;
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244628__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGMMPSlopeHandler_readFromReplayFrame__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: handler 9 (the two-player online event, vtable D_0047CE68) restores nothing from a replay frame.
  *
  * Slot +0x5C (readFromReplayFrame) of D_0047CE68.
  */
-void func_00244628(void* vself)
+void cGMMPSlopeHandler_readFromReplayFrame(void* vself)
 {
     cGMMPSlopeHandler* self = (cGMMPSlopeHandler*)vself;
 }
@@ -2325,7 +2325,7 @@ extern "C" void func_00244630(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00244660);
+INCLUDE_ASM("main/ssxappdtor", cGMTimeHandler__cGMTimeHandler);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -2337,7 +2337,7 @@ extern char cGameModeHandler_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_00244660(int* self, int flags)
+extern "C" void cGMTimeHandler__cGMTimeHandler(int* self, int flags)
 {
     *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
@@ -2391,7 +2391,7 @@ extern "C" void func_002446C0(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002446F0);
+INCLUDE_ASM("main/ssxappdtor", cGMPointHandler__cGMPointHandler);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -2403,7 +2403,7 @@ extern char cGameModeHandler_vtbl[];
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_002446F0(int* self, int flags)
+extern "C" void cGMPointHandler__cGMPointHandler(int* self, int flags)
 {
     *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
@@ -2424,7 +2424,7 @@ extern char cGameModeHandler_vtbl[];
  * the object when asked.
  *
  * Its vtable starts at cMCOverlayManager_vtbl + 0x20 (0x0047CBF8; the label covers both tables), with init
- * func_0023C618.
+ * cGMDebugHandler_init.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
@@ -3494,7 +3494,7 @@ extern "C" int func_002453E0(void* self, int menu, int event)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002453F0);
+INCLUDE_ASM("main/ssxappdtor", cGameLoadState__cGameLoadState);
 #ifdef SKIP_ASM
 extern void* D_0047C948[];
 extern "C" void* cUIState__cUIState(void* self);
@@ -3507,7 +3507,7 @@ extern "C" void* cUIState__cUIState(void* self);
  *
  * @return cUIState__cUIState's result, passed through
  */
-extern "C" void* func_002453F0(cGameLoadState* self)
+extern "C" void* cGameLoadState__cGameLoadState(cGameLoadState* self)
 {
     self->mVtbl = (void**)D_0047C948;
     return cUIState__cUIState(self);
@@ -3515,7 +3515,7 @@ extern "C" void* func_002453F0(cGameLoadState* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00245418);
+INCLUDE_ASM("main/ssxappdtor", cGameLoadState_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
@@ -3534,7 +3534,7 @@ extern char str_99QPEvent[];
  * keeps it at +0x40 and plays its first frame, then fills both players' panels with func_00246CF8(self, 0) and (self,
  * 1). Slot +0x24 (onCreateScreen) of D_0047C948.
  */
-extern "C" void func_00245418(cGameLoadState* self)
+extern "C" void cGameLoadState_onCreateScreen(cGameLoadState* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath == 2) {
@@ -3593,35 +3593,35 @@ extern "C" int func_002454F8(cGameLoadState* self, int refresh)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00245598);
+INCLUDE_ASM("main/ssxappdtor", cGameLoadState_onWidgetCreate);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_002464E8(void* self, int a1);
-extern "C" void func_00246278(void* self, int a1);
+extern "C" void cGameLoadState_widgetCreateQP(void* self, int a1);
+extern "C" void cGameLoadState_widgetCreateMultiP(void* self, int a1);
 
 /**
- * Creates a widget of the match / event loading screen: func_00246278 when newRace.cGamePath is 2, else func_002464E8.
+ * Creates a widget of the match / event loading screen: cGameLoadState_widgetCreateMultiP when newRace.cGamePath is 2, else cGameLoadState_widgetCreateQP.
  *
  * Fetches the BE interface 0 first (result unused). Slot +0x94 (onWidgetCreate) of D_0047C948.
  *
  * @param widget  the widget being created (passed on)
  */
-extern "C" void func_00245598(cGameLoadState* self, int widget)
+extern "C" void cGameLoadState_onWidgetCreate(cGameLoadState* self, int widget)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     bool ok = cBENewRaceInterface_newRace.cGamePath != 2;
     if (ok) {
-        func_002464E8(self, widget);
+        cGameLoadState_widgetCreateQP(self, widget);
     } else {
-        func_00246278(self, widget);
+        cGameLoadState_widgetCreateMultiP(self, widget);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00245600);
+INCLUDE_ASM("main/ssxappdtor", cGameLoadStateOutLodge__cGameLoadStateOutLodge);
 #ifdef SKIP_ASM
 extern void* D_0047C878[];
 extern "C" void* cUIState__cUIState(void* self);
@@ -3634,7 +3634,7 @@ extern "C" void* cUIState__cUIState(void* self);
  *
  * @return cUIState__cUIState's result, passed through
  */
-extern "C" void* func_00245600(cGameLoadStateOutLodge* self)
+extern "C" void* cGameLoadStateOutLodge__cGameLoadStateOutLodge(cGameLoadStateOutLodge* self)
 {
     self->mVtbl = (void**)D_0047C878;
     return cUIState__cUIState(self);
@@ -3642,7 +3642,7 @@ extern "C" void* func_00245600(cGameLoadStateOutLodge* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00245628);
+INCLUDE_ASM("main/ssxappdtor", cGameLoadStateOutLodge_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
@@ -3653,7 +3653,7 @@ extern char str_118loadoutlodge[];
  * Creates the leaving-the-lodge loading screen ("118loadoutlodge"): adds it to the UI engine (+0x10) with this state as
  * owner, keeps it at +0x40 and plays its first frame. Slot +0x24 (onCreateScreen) of D_0047C878.
  */
-extern "C" void func_00245628(cGameLoadStateOutLodge* self)
+extern "C" void cGameLoadStateOutLodge_onCreateScreen(cGameLoadStateOutLodge* self)
 {
     void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_118loadoutlodge), 0);
@@ -3665,13 +3665,13 @@ extern "C" void func_00245628(cGameLoadStateOutLodge* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_00245690__FPv);
+INCLUDE_ASM("main/ssxappdtor", cGameLoadStateOutLodge_onWidgetCreate__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the leaving-the-lodge loading state creates no widgets of its own. Slot +0x94 (onWidgetCreate) of
  * D_0047C878.
  */
-void func_00245690(void* vself)
+void cGameLoadStateOutLodge_onWidgetCreate(void* vself)
 {
     cGameLoadStateOutLodge* self = (cGameLoadStateOutLodge*)vself;
 }

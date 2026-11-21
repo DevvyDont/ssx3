@@ -2046,8 +2046,8 @@ INCLUDE_ASM("seg/seg_14B10", cRider_checkForPunch);
 #ifdef SKIP_ASM
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void* cRiderAnimBase_getCurrentAnimSequence(void* anim, int layer);
-extern "C" int func_001446A0(void* p, int i);
-extern "C" int func_001446B8(void* p, int i);
+extern "C" int tEventFlags_isSet1(void* p, int i);
+extern "C" int tEventFlags_isJustChanged(void* p, int i);
 extern "C" void cRiderAnimBase_blendOutAll(void* anim, int layer, float t);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 int cRiderAnimBase_getCurrentAnimID(void* anim, int layer);
@@ -2078,7 +2078,7 @@ static inline t4Vector Scale_163B0(const t4Vector& v, float s)
 
 static inline int seqDone_163B0(char* p)
 {
-    return func_001446A0(p, 2) && func_001446B8(p, 2);
+    return tEventFlags_isSet1(p, 2) && tEventFlags_isJustChanged(p, 2);
 }
 
 /**
@@ -2151,20 +2151,20 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
         }
     }
     if (isLeft != 0 && isRight != 0) {
-        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13 && func_001446A0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0) != 0 &&
-            func_001446A0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
+        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13 && tEventFlags_isSet1((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0) != 0 &&
+            tEventFlags_isSet1((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
             return 1;
-        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 && func_001446A0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
+        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 && tEventFlags_isSet1((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
             return 1;
         *(long*)((char*)self->mRiderAnim + 0x20) = self->mUpperBodyBoneMask;
         cRiderAnimBase_play(self->mRiderAnim, 322, 1, -1.0f);
         *(long*)((char*)self->mRiderAnim + 0x20) = -1;
         self->PunchStrength = 0.0f;
     } else if (isLeft != 0 || isRight != 0) {
-        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 && func_001446A0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0) != 0 &&
-            func_001446A0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
+        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 3 && tEventFlags_isSet1((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0) != 0 &&
+            tEventFlags_isSet1((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
             return 1;
-        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13 && func_001446A0((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
+        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13 && tEventFlags_isSet1((char*)cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) == 0)
             return 1;
         int anim;
         if (isLeft != 0) {

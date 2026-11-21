@@ -709,20 +709,20 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021CBA0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_CBA0(void*, int) __asm__("cUIState_cUIState");
-extern "C" void func_0020EAA0(void*);
+extern "C" void cHUDRadar_cHUDRadar(void*);
 extern char cOVStateHUD1P_vtbl[];
 struct sElem_CBA0 {
     void* operator new[](unsigned int, void* p) { return p; }
     char pad[8];
     char sub[0x84];
-    sElem_CBA0() { func_0020EAA0(sub); }
+    sElem_CBA0() { cHUDRadar_cHUDRadar(sub); }
 };
 
 /**
  * Constructs a cOVStateHUD1P without an engine and installs cOVStateHUD1P_vtbl.
  *
  * Runs the cUIState constructor cUIState_cUIState with a null engine, constructs the two 0x8C-byte elements at 0x48 with
- * func_0020EAA0, sets 0x474 to -1, 0x478 / 0x47C / 0x488 / 0x48C to 1.0f and 0x480 / 0x484 to 0. The real constructor
+ * cHUDRadar_cHUDRadar, sets 0x474 to -1, 0x478 / 0x47C / 0x488 / 0x48C to 1.0f and 0x480 / 0x484 to 0. The real constructor
  * cOVStateHUD1P_cOVStateHUD1P does the same with an engine and also clears 0x3D4 and 0x3D8. Out-of-line copy with no
  * callers.
  *
@@ -747,7 +747,7 @@ extern "C" void *func_0021CBA0(cOVStateHUD1P* state) {
 //100%
 INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P__cOVStateHUD1P);
 #ifdef SKIP_ASM
-extern "C" void func_0020EB08(void *, int);
+extern "C" void cHUDRadar__cHUDRadar(void *, int);
 extern "C" void cUIState__cUIState(void *, int);
 extern char cOVStateHUD1P_vtbl[];
 
@@ -755,8 +755,8 @@ extern char cOVStateHUD1P_vtbl[];
  * Destroys the one-player HUD overlay state: its two HUD elements, then the cUIState base.
  *
  * Restores cOVStateHUD1P_vtbl, destroys the two 0x8C-byte elements at +0x48 last to first (each through
- * func_0020EB08() on its part at +8, with flags 2 so nothing is freed), then calls the cUIState destructor
- * cUIState__cUIState(). func_0020EB08 drops the shared instance count D_004A276C and clears the textures-loaded
+ * cHUDRadar__cHUDRadar() on its part at +8, with flags 2 so nothing is freed), then calls the cUIState destructor
+ * cUIState__cUIState(). cHUDRadar__cHUDRadar drops the shared instance count D_004A276C and clears the textures-loaded
  * flag D_004A2768 when the last element goes.
  *
  * @param flags  g++ destructor flags, passed on to cUIState__cUIState(); bit 0 set frees the object
@@ -767,7 +767,7 @@ extern "C" void cOVStateHUD1P__cOVStateHUD1P(cOVStateHUD1P* self, int flags) {
         char *element = (char*)&self->mRiderInfo[0] + 0x118;
         while ((char*)&self->mRiderInfo[0] != element) {
             element -= 0x8C;
-            func_0020EB08(element + 8, 2);
+            cHUDRadar__cHUDRadar(element + 8, 2);
         }
     }
     cUIState__cUIState(((void*)self), flags);
@@ -793,7 +793,7 @@ extern "C" unsigned char *func_0021CCC8(unsigned char *flags) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CCE0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_HEAT_STANDINGS__cOVState_HEAT_STANDINGS);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
@@ -808,14 +808,14 @@ extern char cOVState_vtbl[];
  *
  * @param ovState  the object being destroyed
  */
-extern "C" void func_0021CCE0(cOVState_HEAT_STANDINGS* ovState) {
+extern "C" void cOVState_HEAT_STANDINGS__cOVState_HEAT_STANDINGS(cOVState_HEAT_STANDINGS* ovState) {
     ovState->mVtbl = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CD08);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_HEAT_STANDINGS_cOVState_HEAT_STANDINGS);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char D_00474088[];
@@ -836,7 +836,7 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_0021CD08(cOVState_HEAT_STANDINGS* ovState, int engine, int overlayId) {
+extern "C" void *cOVState_HEAT_STANDINGS_cOVState_HEAT_STANDINGS(cOVState_HEAT_STANDINGS* ovState, int engine, int overlayId) {
     cUIState_cUIState(ovState);
     (ovState->mOVID) = overlayId;
     (ovState->mDoneTransition) = 0;
@@ -851,7 +851,7 @@ extern "C" void *func_0021CD08(cOVState_HEAT_STANDINGS* ovState, int engine, int
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CD70);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_FINAL_STANDINGS__cOVState_FINAL_STANDINGS);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
@@ -866,14 +866,14 @@ extern char cOVState_vtbl[];
  *
  * @param ovState  the object being destroyed
  */
-extern "C" void func_0021CD70(cOVState_FINAL_STANDINGS* ovState) {
+extern "C" void cOVState_FINAL_STANDINGS__cOVState_FINAL_STANDINGS(cOVState_FINAL_STANDINGS* ovState) {
     ovState->mVtbl = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CD98);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_FINAL_STANDINGS_cOVState_FINAL_STANDINGS);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char D_00473FB0[];
@@ -894,7 +894,7 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_0021CD98(cOVState_FINAL_STANDINGS* ovState, int engine, int overlayId) {
+extern "C" void *cOVState_FINAL_STANDINGS_cOVState_FINAL_STANDINGS(cOVState_FINAL_STANDINGS* ovState, int engine, int overlayId) {
     cUIState_cUIState(ovState);
     (ovState->mOVID) = overlayId;
     (ovState->mDoneTransition) = 0;
@@ -968,7 +968,7 @@ extern "C" void *func_0021CE28(void *ovState, int engine, int overlayId) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CE90);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_RACE_FINISHOV__cOVState_RACE_FINISHOV);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
@@ -983,14 +983,14 @@ extern char cOVState_vtbl[];
  *
  * @param ovState  the object being destroyed
  */
-extern "C" void func_0021CE90(cOVState_RACE_FINISHOV* ovState) {
+extern "C" void cOVState_RACE_FINISHOV__cOVState_RACE_FINISHOV(cOVState_RACE_FINISHOV* ovState) {
     ovState->mVtbl = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CEB8);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_RACE_FINISHOV_cOVState_RACE_FINISHOV);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_CEB8(void*) __asm__("cUIState_cUIState");
@@ -1015,7 +1015,7 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_0021CEB8(cOVState_RACE_FINISHOV* ovState, int engine, int overlayId) {
+extern "C" void *cOVState_RACE_FINISHOV_cOVState_RACE_FINISHOV(cOVState_RACE_FINISHOV* ovState, int engine, int overlayId) {
     cUIState_cUIState_CEB8(ovState);
     (ovState->mOVID) = overlayId;
     (ovState->mDoneTransition) = 0;
@@ -1032,7 +1032,7 @@ extern "C" void *func_0021CEB8(cOVState_RACE_FINISHOV* ovState, int engine, int 
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CF38);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_BASSSP_QUAL_FINISHOV__cOVState_BASSSP_QUAL_FINISHOV);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
@@ -1047,14 +1047,14 @@ extern char cOVState_vtbl[];
  *
  * @param ovState  the object being destroyed
  */
-extern "C" void func_0021CF38(cOVState_BASSSP_QUAL_FINISHOV* ovState) {
+extern "C" void cOVState_BASSSP_QUAL_FINISHOV__cOVState_BASSSP_QUAL_FINISHOV(cOVState_BASSSP_QUAL_FINISHOV* ovState) {
     ovState->mVtbl = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CF60);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_BASSSP_QUAL_FINISHOV_cOVState_BASSSP_QUAL_FINISHOV);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_CF60(void*) __asm__("cUIState_cUIState");
@@ -1079,7 +1079,7 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_0021CF60(cOVState_BASSSP_QUAL_FINISHOV* ovState, int engine, int overlayId) {
+extern "C" void *cOVState_BASSSP_QUAL_FINISHOV_cOVState_BASSSP_QUAL_FINISHOV(cOVState_BASSSP_QUAL_FINISHOV* ovState, int engine, int overlayId) {
     cUIState_cUIState_CF60(ovState);
     (ovState->mOVID) = overlayId;
     (ovState->mDoneTransition) = 0;
@@ -1096,7 +1096,7 @@ extern "C" void *func_0021CF60(cOVState_BASSSP_QUAL_FINISHOV* ovState, int engin
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021CFE0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_TOURNAMENT_STANDINGS__cOVState_TOURNAMENT_STANDINGS);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
@@ -1111,14 +1111,14 @@ extern char cOVState_vtbl[];
  *
  * @param ovState  the object being destroyed
  */
-extern "C" void func_0021CFE0(cOVState_TOURNAMENT_STANDINGS* ovState) {
+extern "C" void cOVState_TOURNAMENT_STANDINGS__cOVState_TOURNAMENT_STANDINGS(cOVState_TOURNAMENT_STANDINGS* ovState) {
     ovState->mVtbl = (void**)cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021D008);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_TOURNAMENT_STANDINGS_cOVState_TOURNAMENT_STANDINGS);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *cUIState_cUIState_D008(void*) __asm__("cUIState_cUIState");
@@ -1140,7 +1140,7 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_0021D008(cOVState_TOURNAMENT_STANDINGS* ovState, int engine, int overlayId) {
+extern "C" void *cOVState_TOURNAMENT_STANDINGS_cOVState_TOURNAMENT_STANDINGS(cOVState_TOURNAMENT_STANDINGS* ovState, int engine, int overlayId) {
     cUIState_cUIState_D008(ovState);
     (ovState->mOVID) = overlayId;
     (ovState->mDoneTransition) = 0;
@@ -1637,7 +1637,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
 void tHUDDef_getColour(void*, void*);
 
-extern "C" void func_001E95A0(void*, void*, void*, void*, int, int);
+extern "C" void drawTextPictLine(void*, void*, void*, void*, int, int);
 
 struct sPlayerHud_D9A0 {
     char pad[0x48];
@@ -1662,7 +1662,7 @@ extern "C" void cOVStateHUD1P_renderQuad(void* self, void* pos, void* size, void
  *
  * The controller mapping (cBENewPlayerInterface_getControllerMapping on back-end interface 1) of panel @p idx's rider
  * (the aiIndex at +0x48 + idx * 0x8C) picks between two variants. With @p icon nonzero, element 55 of @p elems (+0x7BC)
- * gives position, scale and colour for func_001E95A0, which draws the text-and-picture line at +0x6AC (mapping 0) or
+ * gives position, scale and colour for drawTextPictLine, which draws the text-and-picture line at +0x6AC (mapping 0) or
  * the one at +0x7F8 (otherwise); cOVStateHUD1P_onCreateScreen builds both from "RECOVER = @square".
  *
  * The meter is element 54 (+0x798): its size times its scale times @p scale, placed by cOVStateHUD1P_calcElemPos with the element's
@@ -1699,10 +1699,10 @@ extern "C" void cOVStateHUD1P_renderWipeoutMeter(float fill, float alpha, char* 
         tHUDDef_getColour(ie, &colourOrSize);
         if (alt == 0) {
             pos = elemPos;
-            func_001E95A0(self + 0x6AC, &pos, &sc, &colourOrSize, elems[0x7DC], elems[0x7DD]);
+            drawTextPictLine(self + 0x6AC, &pos, &sc, &colourOrSize, elems[0x7DC], elems[0x7DD]);
         } else {
             pos = elemPos;
-            func_001E95A0(self + 0x7F8, &pos, &sc, &colourOrSize, elems[0x7DC], elems[0x7DD]);
+            drawTextPictLine(self + 0x7F8, &pos, &sc, &colourOrSize, elems[0x7DC], elems[0x7DD]);
         }
     }
     char* meterDef = elems + 0x798;
@@ -2944,7 +2944,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void tHUDDef_getPos(void*, void*);
 void tHUDDef_getScale(void*, void*);
 void tHUDDef_getColour(void*, void*);
-extern "C" void func_001E95A0(void*, void*, void*, void*, int, int);
+extern "C" void drawTextPictLine(void*, void*, void*, void*, int, int);
 
 /**
  * Draws the skip prompt (the "Press ... to skip" text-and-picture line), fading in and out over @p progress.
@@ -2953,7 +2953,7 @@ extern "C" void func_001E95A0(void*, void*, void*, void*, int, int);
  * kT_OVRCMNToSkip). Element 77 of @p obj (+0xAD4) gives position, scale and colour. While ScriptEngine->mIsPlaying is
  * set and the display format (bits 20-21 of cBEOptionInterface_mOption) is not 2 (widescreen), the y scale is cut to
  * 0.75 and the line moved up by 60. The colour's alpha is multiplied by 2 * @p progress up to 0.5 and by 2 * (1
- * - @p progress) above. The line's font (+0xB50) gets ShadowOffset (2, 2); then func_001E95A0 draws the line with the
+ * - @p progress) above. The line's font (+0xB50) gets ShadowOffset (2, 2); then drawTextPictLine draws the line with the
  * element's alignment on the element's layer. The result of the back-end interface 4 lookup is discarded.
  *
  * @param obj  the HUD element table (0x24-byte tHUDDef records)
@@ -2987,7 +2987,7 @@ extern "C" void cOVStateHUD1P_renderNISSkipMessage(cOVStateHUD1P* self, char* ob
     int* w = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
     *w = (*w & ~0x3E0) | ((obj[0xAF6] << 5) & 0x3E0);
     drawPos = pos;
-    func_001E95A0(self->mSkipMessage, &drawPos, &scale, &colour, obj[0xAF4], obj[0xAF5]);
+    drawTextPictLine(self->mSkipMessage, &drawPos, &scale, &colour, obj[0xAF4], obj[0xAF5]);
 }
 #endif
 

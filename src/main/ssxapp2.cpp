@@ -100,27 +100,27 @@ INCLUDE_ASM("main/ssxapp2", cGameModeHandler_writeToReplayFrame);
 
 INCLUDE_ASM("main/ssxapp2", cGameModeHandler_readFromReplayFrame);
 
-INCLUDE_ASM("main/ssxapp2", func_00244560);
+INCLUDE_ASM("main/ssxapp2", cGMBigAirHandler__cGMBigAirHandler);
 
-INCLUDE_ASM("main/ssxapp2", func_00244590);
+INCLUDE_ASM("main/ssxapp2", cGMRaceHandler__cGMRaceHandler);
 
-INCLUDE_ASM("main/ssxapp2", func_002445C0);
+INCLUDE_ASM("main/ssxapp2", cGMMPRaceHandler__cGMMPRaceHandler);
 
-INCLUDE_ASM("main/ssxapp2", func_002445F0);
+INCLUDE_ASM("main/ssxapp2", cGMMPSlopeHandler__cGMMPSlopeHandler);
 
-INCLUDE_ASM("main/ssxapp2", func_00244620);
+INCLUDE_ASM("main/ssxapp2", cGMMPSlopeHandler_writeToReplayFrame);
 
-INCLUDE_ASM("main/ssxapp2", func_00244628);
+INCLUDE_ASM("main/ssxapp2", cGMMPSlopeHandler_readFromReplayFrame);
 
 INCLUDE_ASM("main/ssxapp2", func_00244630);
 
-INCLUDE_ASM("main/ssxapp2", func_00244660);
+INCLUDE_ASM("main/ssxapp2", cGMTimeHandler__cGMTimeHandler);
 
 INCLUDE_ASM("main/ssxapp2", func_00244690);
 
 INCLUDE_ASM("main/ssxapp2", func_002446C0);
 
-INCLUDE_ASM("main/ssxapp2", func_002446F0);
+INCLUDE_ASM("main/ssxapp2", cGMPointHandler__cGMPointHandler);
 
 INCLUDE_ASM("main/ssxapp2", func_00244720);
 
@@ -154,19 +154,19 @@ INCLUDE_ASM("main/ssxapp2", func_002452D8);
 
 INCLUDE_ASM("main/ssxapp2", func_002453E0);
 
-INCLUDE_ASM("main/ssxapp2", func_002453F0);
+INCLUDE_ASM("main/ssxapp2", cGameLoadState__cGameLoadState);
 
-INCLUDE_ASM("main/ssxapp2", func_00245418);
+INCLUDE_ASM("main/ssxapp2", cGameLoadState_onCreateScreen);
 
 INCLUDE_ASM("main/ssxapp2", func_002454F8);
 
-INCLUDE_ASM("main/ssxapp2", func_00245598);
+INCLUDE_ASM("main/ssxapp2", cGameLoadState_onWidgetCreate);
 
-INCLUDE_ASM("main/ssxapp2", func_00245600);
+INCLUDE_ASM("main/ssxapp2", cGameLoadStateOutLodge__cGameLoadStateOutLodge);
 
-INCLUDE_ASM("main/ssxapp2", func_00245628);
+INCLUDE_ASM("main/ssxapp2", cGameLoadStateOutLodge_onCreateScreen);
 
-INCLUDE_ASM("main/ssxapp2", func_00245690);
+INCLUDE_ASM("main/ssxapp2", cGameLoadStateOutLodge_onWidgetCreate);
 
 INCLUDE_ASM("main/ssxapp2", func_00245698);
 

@@ -11,7 +11,7 @@
 #include "ai/rider.h"
 
 //100%
-INCLUDE_ASM("seg/seg_1218", func_00100250);
+INCLUDE_ASM("seg/seg_1218", cComputer_calcTilt);
 #ifdef SKIP_ASM
 struct sVec4_0250 {
     float x, y, z, w;
@@ -98,7 +98,7 @@ static inline sVec4_0250 vNorm_0250(const sVec4_0250& v)
  * @param direction  the direction to measure
  * @return the slope value
  */
-extern "C" float func_00100250(cComputer* self, const sVec4_0250* direction)
+extern "C" float cComputer_calcTilt(cComputer* self, const sVec4_0250* direction)
 {
     char* rider = (char*)self->mRider;
     sVec4_0250 riderSide = *(sVec4_0250*)(rider + 0x1A0);
@@ -2424,17 +2424,17 @@ struct sBankTab_3AA0 {
 };
 
 extern sBankTab_3AA0* cAnimDataBase_TheAnimDataBase;
-extern "C" int func_001446A0(void*, int);
-extern "C" int func_001446B8(void*, int);
-extern "C" void func_00144670(void*, int);
+extern "C" int tEventFlags_isSet1(void*, int);
+extern "C" int tEventFlags_isJustChanged(void*, int);
+extern "C" void tEventFlags_clear1(void*, int);
 extern "C" void cRiderAnim_triggerAnimSound(cRiderAnim*, int);
 
 /**
  * Plays the sounds tagged on the frames a rider animation just passed.
  *
  * The tag count and tag words come from cAnimDataBase_TheAnimDataBase (bank = id & 0xFF, entry = id >> 8 of the
- * sequence's animation id at +4). For each tag whose event the sequence's +0xB0 object reports through func_001446A0
- * and func_001446B8, and whose tag word has bit 15 set, it clears the event (func_00144670) and plays the sound
+ * sequence's animation id at +4). For each tag whose event the sequence's +0xB0 object reports through tEventFlags_isSet1
+ * and tEventFlags_isJustChanged, and whose tag word has bit 15 set, it clears the event (tEventFlags_clear1) and plays the sound
  * (cRiderAnim_triggerAnimSound with the low 15 bits). cRiderAnim_updateRule calls it for local human riders.
  *
  * @param sequence  the animation sequence
@@ -2444,13 +2444,13 @@ extern "C" void cRiderAnim_checkForSoundEvents(cRiderAnim* self, sObj_3AA0* sequ
     int n = cAnimDataBase_TheAnimDataBase->banks[sequence->id & 0xFF]->ents[sequence->id >> 8].count;
     for (int i = 0; i < n; i++) {
         int ok = 0;
-        if (func_001446A0(sequence->sub, i) && func_001446B8(sequence->sub, i))
+        if (tEventFlags_isSet1(sequence->sub, i) && tEventFlags_isJustChanged(sequence->sub, i))
             ok = 1;
         if (ok) {
             sBank_3AA0* animBank = cAnimDataBase_TheAnimDataBase->banks[sequence->id & 0xFF];
             unsigned short soundEvent = animBank->recs[animBank->ents[sequence->id >> 8].first + i].b;
             if (soundEvent & 0x8000) {
-                func_00144670(sequence->sub, i);
+                tEventFlags_clear1(sequence->sub, i);
                 cRiderAnim_triggerAnimSound(self, soundEvent & 0x7FFF);
             }
         }
@@ -6094,8 +6094,8 @@ extern "C" void cRider_checkOpponentCollisions(cRider* self)
     int busy = 0;
     float mass = cRider_getMass(self);
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) != 13 ||
-        func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) ||
-        !func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0))
+        tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1) ||
+        !tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0))
         busy = 1;
     for (int i = 0; i < 6; i++) {
         if (!Rec_7888(self, i)->active)
@@ -6135,8 +6135,8 @@ extern "C" void cRider_checkOpponentCollisions(cRider* self)
         if (orec->lastShove >= AITick() - 3)
             continue;
         if (cRiderAnimBase_getCurrentAnimCategory(other->mRiderAnim, 1) == 3 &&
-            func_001446A0(cRiderAnimBase_getCurrentAnimSequence(other->mRiderAnim, 1) + 0xB0, 0) &&
-            !func_001446A0(cRiderAnimBase_getCurrentAnimSequence(other->mRiderAnim, 1) + 0xB0, 1))
+            tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(other->mRiderAnim, 1) + 0xB0, 0) &&
+            !tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(other->mRiderAnim, 1) + 0xB0, 1))
             continue;
         t4Vector toOther = Sub_7888(other->mPosition, self->mPosition);
         float len = Len_7888(toOther);
@@ -6845,7 +6845,7 @@ int cRider_getMotionState(void*);
 extern "C" int cOverlapList_splineIntersect(void*, sVec4_8A48*, sVec4_8A48*, int, float);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
-extern "C" int func_001446A0(void*, int);
+extern "C" int tEventFlags_isSet1(void*, int);
 extern "C" int cRider_isRailBoardIntersect(void*, sVec4_8A48*, sVec4_8A48*);
 
 /**
@@ -6853,7 +6853,7 @@ extern "C" int cRider_isRailBoardIntersect(void*, sVec4_8A48*, sVec4_8A48*);
  *
  * Only on the ground or in the air (motion states 0 and 1). It probes for a rail (cOverlapList_splineIntersect, type 1, radius 300)
  * from the board root bone (mAnimModel bone mBoneBoardRoot + mModelOffset) and rejects rails behind the motion. In
- * channel 2 animation categories 0x12 .. 0x14 the current sequence's flags (func_001446A0 on cRiderAnimBase_getCurrentAnimSequence + 0xB0) must
+ * channel 2 animation categories 0x12 .. 0x14 the current sequence's flags (tEventFlags_isSet1 on cRiderAnimBase_getCurrentAnimSequence + 0xB0) must
  * allow it. The answer is cRider_isRailBoardIntersect (On Tour isRailBoardIntersect) on the hit. Callers:
  * cRider_checkRailBoardCollisions and cRider_checkRailBodyCollisions.
  *
@@ -6875,12 +6875,12 @@ extern "C" int cRider_isRailLandSuccess(cRider* self, sVec4_8A48* tgt)
             return 0;
     }
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 2) == 18) {
-        if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2) + 0xB0, 2) &&
-            func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2) + 0xB0, 0))
+        if (!tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2) + 0xB0, 2) &&
+            tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2) + 0xB0, 0))
             return 0;
     } else if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 2) == 19 ||
                cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 2) == 20) {
-        if (!func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2) + 0xB0, 2))
+        if (!tEventFlags_isSet1(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 2) + 0xB0, 2))
             return 0;
     }
     return cRider_isRailBoardIntersect(((char*)self), tgt, tgt + 1);

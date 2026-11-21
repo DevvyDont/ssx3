@@ -2567,7 +2567,7 @@ extern "C" void* SSX_VD_create(void* framesDecoder, int firstFrame, int graphics
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_002543F0);
+INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_SetPosition);
 #ifdef SKIP_ASM
 /**
  * Sets the video driver's screen position: +0x40, +0x44, +0x48 = @p posX, @p posY, @p posZ.
@@ -2576,7 +2576,7 @@ INCLUDE_ASM("mem/memstd", func_002543F0);
  * @param posY  top edge
  * @param posZ  depth
  */
-extern "C" void func_002543F0(SSX_VD_PS2_SINGLE_BUFFERD* self, float posX, float posY, float posZ)
+extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_SetPosition(SSX_VD_PS2_SINGLE_BUFFERD* self, float posX, float posY, float posZ)
 {
     self->mPosX = posX;
     self->mPosY = posY;
@@ -2585,7 +2585,7 @@ extern "C" void func_002543F0(SSX_VD_PS2_SINGLE_BUFFERD* self, float posX, float
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00254400__FPvff);
+INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_SetScale__FPvff);
 #ifdef SKIP_ASM
 /**
  * Sets the video driver's scale: +0x4C (width) and +0x50 (height) = @p scaleX, @p scaleY.
@@ -2593,7 +2593,7 @@ INCLUDE_ASM("mem/memstd", func_00254400__FPvff);
  * @param scaleX  horizontal scale
  * @param scaleY  vertical scale
  */
-void func_00254400(void* vself, float scaleX, float scaleY)
+void SSX_VD_PS2_SINGLE_BUFFERD_SetScale(void* vself, float scaleX, float scaleY)
 {
     SSX_VD_PS2_SINGLE_BUFFERD* self = (SSX_VD_PS2_SINGLE_BUFFERD*)vself;
     self->mScaleX = scaleX;
@@ -2618,8 +2618,8 @@ extern char D_004A2EA0[];
 extern char D_004A2EA8[];
 extern float D_004A2EB0[];
 extern "C" int func_00254350(int x);
-extern "C" void func_002543F0(SSX_VD_PS2_SINGLE_BUFFERD* self, float a, float b, float c);
-void func_00254400(void* self, float f0, float f1);
+extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_SetPosition(SSX_VD_PS2_SINGLE_BUFFERD* self, float a, float b, float c);
+void SSX_VD_PS2_SINGLE_BUFFERD_SetScale(void* self, float f0, float f1);
 // PORT: the project names this func_0037D090__FPv (one arg); this caller passes six.
 void func_0037D090_6(void* ctx, int id, int a, int b, int c, int d) __asm__("func_0037D090__FPv");
 
@@ -2691,8 +2691,8 @@ extern "C" void* func_00254410_body(sTexSheet_4410* self, void* owner, char* res
  * (@p res + 4; data at header + 0x10, or at its offset +0x10 when flag 0x1000 is set). The image is cut into 16-pixel
  * columns (+0x1C) and power-of-two row heights (+0x24, count +0x20, func_00254350); each tile (12 bytes from the movie
  * allocator) gets a texture from graphics manager slot 47 (cPS2GraphicsMan_AddTexture1) and func_0037D090. The tile table (+0x14,
- * name "VD: VD_TEXTURE_POINTER") holds +0x18 entries. Centres the image on the screen (func_002543F0 with the screen
- * width and height from slots 10/11, depth D_004A2EB0), sets the scale to 1 (func_00254400) and stores the draw layer
+ * name "VD: VD_TEXTURE_POINTER") holds +0x18 entries. Centres the image on the screen (SSX_VD_PS2_SINGLE_BUFFERD_SetPosition with the screen
+ * width and height from slots 10/11, depth D_004A2EB0), sets the scale to 1 (SSX_VD_PS2_SINGLE_BUFFERD_SetScale) and stores the draw layer
  * (+0x3C).
  *
  * @param owner  the decoder
@@ -2744,8 +2744,8 @@ extern "C" void* func_00254410_body(sTexSheet_4410* self, void* owner, char* res
     self->fC = 0;
     float sw = (float)self->rend->width();
     float sh = (float)self->rend->height() - fh;
-    func_002543F0((SSX_VD_PS2_SINGLE_BUFFERD*)self, (sw - fw) * 0.5f, sh * 0.5f, D_004A2EB0[0]);
-    func_00254400(self, 1.0f, 1.0f);
+    SSX_VD_PS2_SINGLE_BUFFERD_SetPosition((SSX_VD_PS2_SINGLE_BUFFERD*)self, (sw - fw) * 0.5f, sh * 0.5f, D_004A2EB0[0]);
+    SSX_VD_PS2_SINGLE_BUFFERD_SetScale(self, 1.0f, 1.0f);
     self->f3C = drawLayer;
     return self;
 }
@@ -3136,7 +3136,7 @@ void* func_00254DA0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00254DC0);
+INCLUDE_ASM("mem/memstd", SSX_VD_PS2_SINGLE_BUFFERD_CompleteDraw);
 #ifdef SKIP_ASM
 struct sMemStdVEntry {
     short delta;
@@ -3152,7 +3152,7 @@ extern "C" void RCMP_DECODER_ReleaseFrame(void*, void*);
  *
  * Vtable slot 6 of D_00480270.
  */
-extern "C" void func_00254DC0(SSX_VD_PS2_SINGLE_BUFFERD* self)
+extern "C" void SSX_VD_PS2_SINGLE_BUFFERD_CompleteDraw(SSX_VD_PS2_SINGLE_BUFFERD* self)
 {
     void* rend;
     sMemStdVEntry* vt;

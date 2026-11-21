@@ -106,45 +106,45 @@ extern "C" void cWScriptCache_update(cWScriptCache* self) {
 }
 #endif
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003AC9E0);
+INCLUDE_ASM("world/wscriptcache", cWScriptCache_load);
 #ifdef SKIP_ASM
-extern "C" void func_003ACBB8(int, int);
+extern "C" void cWScriptCacheEntry_load(int, int);
 
 /**
- * Starts loading section @p index's script file by name: func_003ACBB8 on that cache entry.
+ * Starts loading section @p index's script file by name: cWScriptCacheEntry_load on that cache entry.
  *
  * No C caller in the source.
  *
  * @param cache  the cWScriptCache
  * @param index  the section id
- * @param fileNum  the file name passed on to func_003ACBB8
+ * @param fileNum  the file name passed on to cWScriptCacheEntry_load
  */
-extern "C" void func_003AC9E0(cWScriptCache* cache, int index, int fileNum) {
-    func_003ACBB8(((int)cache->mpCache) + (index * 0xC), fileNum);
+extern "C" void cWScriptCache_load(cWScriptCache* cache, int index, int fileNum) {
+    cWScriptCacheEntry_load(((int)cache->mpCache) + (index * 0xC), fileNum);
 }
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003ACA10);
+INCLUDE_ASM("world/wscriptcache", cWScriptCache_load1);
 #ifdef SKIP_ASM
 struct sWScriptCacheItem {
     char pad_0x00[0xC];
 };
 
-extern "C" void func_003ACC50(sWScriptCacheItem* e, int index, int value);
+extern "C" void cWScriptCacheEntry_load1(sWScriptCacheItem* e, int index, int value);
 
 /**
- * Hands section @p index's script data to its cache entry (func_003ACC50), which resolves it.
+ * Hands section @p index's script data to its cache entry (cWScriptCacheEntry_load1), which resolves it.
  *
  * Called by cPS2ChunkResolve_resolve when a section's script chunk arrives.
  *
  * @param index  the section id
  * @param value  the script file header
  */
-extern "C" void func_003ACA10(cWScriptCache* self, int index, int value)
+extern "C" void cWScriptCache_load1(cWScriptCache* self, int index, int value)
 {
     sWScriptCacheItem* items = (sWScriptCacheItem*)self->mpCache;
-    func_003ACC50(&items[index], index, value);
+    cWScriptCacheEntry_load1(&items[index], index, value);
 }
 #endif
 
@@ -264,7 +264,7 @@ extern "C" void cWScriptCacheEntry_update_impl(void *self_) {
 }
 #endif
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003ACBB8);
+INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_load);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sBXStr_CBB8 { char *p; int pad[3]; sBXStr_CBB8() {} };
@@ -274,7 +274,7 @@ extern "C" int ASYNCFILE_load_CBB8(const char*, int) __asm__("ASYNCFILE_load");
 extern "C" void cBXString_dt_CBB8(sBXStr_CBB8*, int) __asm__("cBXString__cBXString");
 extern char str_bar_e[];
 extern char str_ssf[];
-extern "C" void func_003ACBB8_impl(void *self, int arg) __asm__("func_003ACBB8");
+extern "C" void cWScriptCacheEntry_load_impl(void *self, int arg) __asm__("cWScriptCacheEntry_load");
 /**
  * Starts loading an entry's script file asynchronously from str_bar_e + @p fileName + str_ssf.
  *
@@ -283,7 +283,7 @@ extern "C" void func_003ACBB8_impl(void *self, int arg) __asm__("func_003ACBB8")
  *
  * @param fileName  the file name (a cBXString)
  */
-extern "C" void func_003ACBB8_impl(void *self, int fileName) {
+extern "C" void cWScriptCacheEntry_load_impl(void *self, int fileName) {
     sBXStr_CBB8 fullPath;
     sBXStr_CBB8 prefixed;
     *(short*)((char*)self + 2) = 0;
@@ -298,7 +298,7 @@ extern "C" void func_003ACBB8_impl(void *self, int fileName) {
 #endif
 
 //100%
-INCLUDE_ASM("world/wscriptcache", func_003ACC50);
+INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_load1);
 #ifdef SKIP_ASM
 struct sWSCItemFields {
     short type;   // 0x0
@@ -317,7 +317,7 @@ extern "C" void cWScriptCacheEntry_resolve(sWScriptCacheItem* e, cWorld* world, 
  * @param index  the section id
  * @param value  the script file header
  */
-extern "C" void func_003ACC50(sWScriptCacheItem* item, int index, int value)
+extern "C" void cWScriptCacheEntry_load1(sWScriptCacheItem* item, int index, int value)
 {
     sWSCItemFields* fields = (sWSCItemFields*)item;
     fields->value = value;

@@ -1659,7 +1659,7 @@ extern char* D_004A28A8_AE68 __asm__("SSXApp");
 extern "C" int cAI_swaploadInjectedPathFile(void* self, int a, unsigned int b, void* obj);
 void cMemMan_free(void* p);
 extern "C" void cWorldPainterMan_load1(void* self, int a, void* obj);
-extern "C" void func_003ACA10(void* self, int a, void* obj);
+extern "C" void cWScriptCache_load1(void* self, int a, void* obj);
 extern "C" void* func_003AD188();
 extern "C" void cGame_loadWScriptManSection(void* self, int a);
 void gCamTriggerMan_resolve(void* a, int b);
@@ -1786,7 +1786,7 @@ extern "C" void* cPS2ChunkResolve_resolve(cPS2ChunkResolve* self, int msg, unsig
     case 16:
         if (cWorld_m_pTheWorld) {
             int sectionIdx = RID & 0xFF;
-            func_003ACA10((char**)cWorld_m_pTheWorld->m_pWScriptCache, sectionIdx, obj);
+            cWScriptCache_load1((char**)cWorld_m_pTheWorld->m_pWScriptCache, sectionIdx, obj);
             cGame_loadWScriptManSection(func_003AD188(), sectionIdx);
         }
         break;

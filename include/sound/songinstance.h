@@ -8,11 +8,11 @@
 // "PathfinderOverlay", "cSongConfiguration", "mSongConfigurations[mNumSongs]->mNumBankData < MUSIC_MAXLOOPFILES";
 // preview vtable _vt$18cSongConfiguration). Retail methods: sound/bankmonitor unit 0x2B1A98..0x2B2850, just before
 // cMusicSys's. On Tour has no music system: no [O] evidence.
-// Sizes [R]: cMusicSys ctor func_002B28C0: cSongConfiguration_cSongConfiguration(cMemMan_alloc(0xAC, "cSongConfiguration"));
+// Sizes [R]: cMusicSys ctor cMusicSys_cMusicSys: cSongConfiguration_cSongConfiguration(cMemMan_alloc(0xAC, "cSongConfiguration"));
 // func_002B1B98: func_002B1C50(cMemMan_alloc(0xC4, "SongInstance"), ...).
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] constructors cSongConfiguration_cSongConfiguration / func_002B1C50, destructors func_002B1B68 / func_002B1F78, the music.inf keys
+//   [R] constructors cSongConfiguration_cSongConfiguration / func_002B1C50, destructors cSongConfiguration__cSongConfiguration / func_002B1F78, the music.inf keys
 //       cMusicSys's ctor parses into each cSongConfiguration (member names follow the key; EA's own names unknown);
 //   [P] the preview's assert strings;
 //   [U] how the retail methods use the field. Names marked "(our name)" describe that use; the rest are unk_.
@@ -43,7 +43,7 @@ struct cSongConfiguration {
     int mLowPass;            // 0x9C [R] music.inf LOWPASS (ctor 0xFFFF); [U] func_002B21E0 -> func_002B2160 (low-pass cutoff, 0..0xFFFF)
     int mPreview;            // 0xA0 [R] music.inf PREVIEW (ctor -1)
     int mSongBig;            // 0xA4 [R] music.inf SONGBIG (ctor 1); [U] cSongInstance ctor: 1 = "audio/music.big", else "audio/music2.big"
-    void** mVtbl;            // 0xA8 [R] D_00483980 (_vt$18cSongConfiguration: slot 1 = the dtor func_002B1B68)
+    void** mVtbl;            // 0xA8 [R] D_00483980 (_vt$18cSongConfiguration: slot 1 = the dtor cSongConfiguration__cSongConfiguration)
 };
 
 // cSongInstance (0xC4): the playing song (cMusicSys::mCurrent). No vtable.

@@ -645,7 +645,7 @@ extern "C" void cRiderAnimBase_updateAnimation(cRiderAnimBase* self, int animMin
 //100%
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_expireAnimation);
 #ifdef SKIP_ASM
-extern "C" int func_001446A0(void* self, int mask);
+extern "C" int tEventFlags_isSet1(void* self, int mask);
 
 struct sVEntry00312490 {
     short delta;
@@ -661,7 +661,7 @@ struct sSeqRef_00312490 {
 /**
  * Expires every sequence that has reached its end trigger.
  *
- * Collects up to 32 (sequence, sequencer) pairs whose event 0x3F is set (func_001446A0 on the sequence's +0xB0 flags),
+ * Collects up to 32 (sequence, sequencer) pairs whose event 0x3F is set (tEventFlags_isSet1 on the sequence's +0xB0 flags),
  * then calls vtable slot 3 (vtable at +0x58) on each. The release build drops On Tour's bound check on the 32-entry
  * list.
  */
@@ -674,7 +674,7 @@ extern "C" void cRiderAnimBase_expireAnimation(cRiderAnimBase* self)
         cAnimSequenceNode* node = cAnimSequencer_getSequence(&(self->Sequencer)[i], 0);
         while (node)
         {
-            if (func_001446A0((char*)node + 0xB0, 0x3F) != 0)
+            if (tEventFlags_isSet1((char*)node + 0xB0, 0x3F) != 0)
             {
                 list[n].node = node;
                 list[n].seq = &(self->Sequencer)[i];
@@ -1040,13 +1040,13 @@ extern "C" int cRiderAnimBase_playInto(cRiderAnimBase* self, cAnimSequencer* seq
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_playBlendIn);
 #ifdef SKIP_ASM
-extern "C" void func_00144670(void* self, int bit);
+extern "C" void tEventFlags_clear1(void* self, int bit);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
 /**
  * Clears event bit 63 of sequence @p sequence's event flags (+0xB0) and plays AI anim @p anim with the default blend-in.
  *
- * The bit is cleared with func_00144670 (the same clear-and-mark-changed operation as tEventFlags_clear); the anim starts
+ * The bit is cleared with tEventFlags_clear1 (the same clear-and-mark-changed operation as tEventFlags_clear); the anim starts
  * with cRiderAnimBase_play(anim, 0, -1). Unlike cRiderAnimBase_playInto the old sequence is left to blend out.
  *
  * @param sequencer  the sequencer the sequence plays on (unused)
@@ -1055,7 +1055,7 @@ extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend
  */
 extern "C" void cRiderAnimBase_playBlendIn(cRiderAnimBase* self, void* sequencer, void* sequence, int anim)
 {
-    func_00144670((char*)sequence + 0xB0, 0x3F);
+    tEventFlags_clear1((char*)sequence + 0xB0, 0x3F);
     cRiderAnimBase_play(self, anim, 0, -1.0f);
 }
 #endif

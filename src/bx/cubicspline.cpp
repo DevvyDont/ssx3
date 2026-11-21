@@ -2207,7 +2207,7 @@ extern "C" void func_003200E0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003200E8__FPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer8_TMemContainer8__FPv);
 #ifdef SKIP_ASM
 /**
  * Builds the 8-byte block pool's free list: 256 blocks of 8 bytes, each linked to the next.
@@ -2217,7 +2217,7 @@ INCLUDE_ASM("bx/cubicspline", func_003200E8__FPv);
  *
  * @return @p self
  */
-void* func_003200E8(void* self)
+void* TMemContainer8_TMemContainer8(void* self)
 {
     *(void**)((char*)self + 0x800) = self;
     char* cursor = (char*)self;
@@ -2233,7 +2233,7 @@ void* func_003200E8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320120__FPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer16_TMemContainer16__FPv);
 #ifdef SKIP_ASM
 /**
  * Builds the 16-byte block pool's free list: 512 blocks of 16 bytes, each linked to the next.
@@ -2243,7 +2243,7 @@ INCLUDE_ASM("bx/cubicspline", func_00320120__FPv);
  *
  * @return @p self
  */
-void* func_00320120(void* self)
+void* TMemContainer16_TMemContainer16(void* self)
 {
     *(void**)((char*)self + 0x2000) = self;
     char* cursor = (char*)self;
@@ -2259,7 +2259,7 @@ void* func_00320120(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320158__FPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer32_TMemContainer32__FPv);
 #ifdef SKIP_ASM
 /**
  * Builds the 32-byte block pool's free list: 768 blocks of 32 bytes, each linked to the next.
@@ -2269,7 +2269,7 @@ INCLUDE_ASM("bx/cubicspline", func_00320158__FPv);
  *
  * @return @p self
  */
-void* func_00320158(void* self)
+void* TMemContainer32_TMemContainer32(void* self)
 {
     *(void**)((char*)self + 0x6000) = self;
     char* cursor = (char*)self;
@@ -2285,7 +2285,7 @@ void* func_00320158(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320190__FPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer64_TMemContainer64__FPv);
 #ifdef SKIP_ASM
 /**
  * Builds the 64-byte block pool's free list: 3200 blocks of 64 bytes, each linked to the next.
@@ -2295,7 +2295,7 @@ INCLUDE_ASM("bx/cubicspline", func_00320190__FPv);
  *
  * @return @p self
  */
-void* func_00320190(void* self)
+void* TMemContainer64_TMemContainer64(void* self)
 {
     unsigned int i = 0;
     *(void**)((char*)self + 0x32000) = self;
@@ -2312,7 +2312,7 @@ void* func_00320190(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003201D8__FPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer128_TMemContainer128__FPv);
 #ifdef SKIP_ASM
 /**
  * Builds the 128-byte block pool's free list: 1200 blocks of 128 bytes, each linked to the next.
@@ -2322,7 +2322,7 @@ INCLUDE_ASM("bx/cubicspline", func_003201D8__FPv);
  *
  * @return @p self
  */
-void* func_003201D8(void* self)
+void* TMemContainer128_TMemContainer128(void* self)
 {
     unsigned int i = 0;
     *(void**)((char*)self + 0x25800) = self;
@@ -2339,7 +2339,7 @@ void* func_003201D8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320220__FPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer256_TMemContainer256__FPv);
 #ifdef SKIP_ASM
 /**
  * Builds the 256-byte block pool's free list: 512 blocks of 256 bytes, each linked to the next.
@@ -2349,7 +2349,7 @@ INCLUDE_ASM("bx/cubicspline", func_00320220__FPv);
  *
  * @return @p self
  */
-void* func_00320220(void* self)
+void* TMemContainer256_TMemContainer256(void* self)
 {
     unsigned int i = 0;
     *(void**)((char*)self + 0x20000) = self;
@@ -2366,7 +2366,7 @@ void* func_00320220(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320270__FPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer512_TMemContainer512__FPv);
 #ifdef SKIP_ASM
 /**
  * Builds the 512-byte block pool's free list: 256 blocks of 512 bytes, each linked to the next.
@@ -2376,7 +2376,7 @@ INCLUDE_ASM("bx/cubicspline", func_00320270__FPv);
  *
  * @return @p self
  */
-void* func_00320270(void* self)
+void* TMemContainer512_TMemContainer512(void* self)
 {
     unsigned int i = 0;
     *(void**)((char*)self + 0x20000) = self;
@@ -2395,7 +2395,7 @@ void* func_00320270(void* self)
 extern "C" void* cMemBlockMan_alloc(int size);
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003202C0__FPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer8_alloc__FPv);
 #ifdef SKIP_ASM
 /**
  * Takes a block from the 8-byte pool.
@@ -2405,7 +2405,7 @@ INCLUDE_ASM("bx/cubicspline", func_003202C0__FPv);
  *
  * @return the block
  */
-void* func_003202C0(void* self)
+void* TMemContainer8_alloc(void* self)
 {
     void* node = *(void**)((char*)self + 0x800);
     if (node != 0) {
@@ -2418,7 +2418,7 @@ void* func_003202C0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003202F8__FPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer16_alloc__FPv);
 #ifdef SKIP_ASM
 /**
  * Takes a block from the 16-byte pool.
@@ -2428,7 +2428,7 @@ INCLUDE_ASM("bx/cubicspline", func_003202F8__FPv);
  *
  * @return the block
  */
-void* func_003202F8(void* self)
+void* TMemContainer16_alloc(void* self)
 {
     void* node = *(void**)((char*)self + 0x2000);
     if (node != 0) {
@@ -2441,7 +2441,7 @@ void* func_003202F8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320330__FPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer32_alloc__FPv);
 #ifdef SKIP_ASM
 /**
  * Takes a block from the 32-byte pool.
@@ -2451,7 +2451,7 @@ INCLUDE_ASM("bx/cubicspline", func_00320330__FPv);
  *
  * @return the block
  */
-void* func_00320330(void* self)
+void* TMemContainer32_alloc(void* self)
 {
     void* node = *(void**)((char*)self + 0x6000);
     if (node != 0) {
@@ -2464,7 +2464,7 @@ void* func_00320330(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320368__FPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer64_alloc__FPv);
 #ifdef SKIP_ASM
 static inline void* popFreeNode(void** head)
 {
@@ -2481,7 +2481,7 @@ static inline void* popFreeNode(void** head)
  *
  * @return the block
  */
-void* func_00320368(void* self)
+void* TMemContainer64_alloc(void* self)
 {
     if (*(void**)((char*)self + 0x32000) != 0) {
         return popFreeNode((void**)((char*)self + 0x32000));
@@ -2491,7 +2491,7 @@ void* func_00320368(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003203B8__FPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer128_alloc__FPv);
 #ifdef SKIP_ASM
 /**
  * Takes a block from the 128-byte pool.
@@ -2501,7 +2501,7 @@ INCLUDE_ASM("bx/cubicspline", func_003203B8__FPv);
  *
  * @return the block
  */
-void* func_003203B8(void* self)
+void* TMemContainer128_alloc(void* self)
 {
     if (*(void**)((char*)self + 0x25800) != 0) {
         return popFreeNode((void**)((char*)self + 0x25800));
@@ -2511,7 +2511,7 @@ void* func_003203B8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320408__FPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer256_alloc__FPv);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cMemBlockMan_alloc_0408(unsigned int size, unsigned int align) __asm__("cMemBlockMan_alloc");
@@ -2534,7 +2534,7 @@ static inline void* reserveBlock_0408(TMemBlock_0408** blockptr)
     return block;
 }
 
-void* func_00320408(TMemContainer_0408* self, unsigned int align) __asm__("func_00320408__FPv");
+void* TMemContainer256_alloc(TMemContainer_0408* self, unsigned int align) __asm__("TMemContainer256_alloc__FPv");
 /**
  * Takes a block from the 256-byte pool.
  *
@@ -2544,7 +2544,7 @@ void* func_00320408(TMemContainer_0408* self, unsigned int align) __asm__("func_
  * @param align  the alignment, passed to the fallback
  * @return the block
  */
-void* func_00320408(TMemContainer_0408* self, unsigned int align)
+void* TMemContainer256_alloc(TMemContainer_0408* self, unsigned int align)
 {
     if (self->m_freeList != 0) {
         return reserveBlock_0408(&self->m_freeList);
@@ -2554,7 +2554,7 @@ void* func_00320408(TMemContainer_0408* self, unsigned int align)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320448__FPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer512_alloc__FPv);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cMemBlockMan_alloc_0448(unsigned int size, unsigned int align) __asm__("cMemBlockMan_alloc");
@@ -2577,7 +2577,7 @@ static inline void* reserveBlock_0448(TMemBlock_0448** blockptr)
     return block;
 }
 
-void* func_00320448(TMemContainer_0448* self, unsigned int align) __asm__("func_00320448__FPv");
+void* TMemContainer512_alloc(TMemContainer_0448* self, unsigned int align) __asm__("TMemContainer512_alloc__FPv");
 /**
  * Takes a block from the 512-byte pool.
  *
@@ -2587,7 +2587,7 @@ void* func_00320448(TMemContainer_0448* self, unsigned int align) __asm__("func_
  * @param align  the alignment, passed to the fallback
  * @return the block
  */
-void* func_00320448(TMemContainer_0448* self, unsigned int align)
+void* TMemContainer512_alloc(TMemContainer_0448* self, unsigned int align)
 {
     if (self->m_freeList != 0) {
         return reserveBlock_0448(&self->m_freeList);
@@ -2597,7 +2597,7 @@ void* func_00320448(TMemContainer_0448* self, unsigned int align)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320488__FPvPPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer8_free__FPvPPv);
 #ifdef SKIP_ASM
 /**
  * Returns a block to the 8-byte pool by pushing it onto the free list at +0x800.
@@ -2606,7 +2606,7 @@ INCLUDE_ASM("bx/cubicspline", func_00320488__FPvPPv);
  *
  * @param node  the block to free
  */
-void func_00320488(void* self, void** node)
+void TMemContainer8_free(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x800);
     *(void**)((char*)self + 0x800) = node;
@@ -2614,7 +2614,7 @@ void func_00320488(void* self, void** node)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320498__FPvPPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer16_free__FPvPPv);
 #ifdef SKIP_ASM
 /**
  * Returns a block to the 16-byte pool by pushing it onto the free list at +0x2000.
@@ -2623,7 +2623,7 @@ INCLUDE_ASM("bx/cubicspline", func_00320498__FPvPPv);
  *
  * @param node  the block to free
  */
-void func_00320498(void* self, void** node)
+void TMemContainer16_free(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x2000);
     *(void**)((char*)self + 0x2000) = node;
@@ -2631,7 +2631,7 @@ void func_00320498(void* self, void** node)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003204A8__FPvPPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer32_free__FPvPPv);
 #ifdef SKIP_ASM
 /**
  * Returns a block to the 32-byte pool by pushing it onto the free list at +0x6000.
@@ -2640,7 +2640,7 @@ INCLUDE_ASM("bx/cubicspline", func_003204A8__FPvPPv);
  *
  * @param node  the block to free
  */
-void func_003204A8(void* self, void** node)
+void TMemContainer32_free(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x6000);
     *(void**)((char*)self + 0x6000) = node;
@@ -2648,7 +2648,7 @@ void func_003204A8(void* self, void** node)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003204B8__FPvPPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer64_free__FPvPPv);
 #ifdef SKIP_ASM
 /**
  * Returns a block to the 64-byte pool by pushing it onto the free list at +0x32000.
@@ -2657,7 +2657,7 @@ INCLUDE_ASM("bx/cubicspline", func_003204B8__FPvPPv);
  *
  * @param node  the block to free
  */
-void func_003204B8(void* self, void** node)
+void TMemContainer64_free(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x32000);
     *(void**)((char*)self + 0x32000) = node;
@@ -2665,7 +2665,7 @@ void func_003204B8(void* self, void** node)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003204D0__FPvPPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer128_free__FPvPPv);
 #ifdef SKIP_ASM
 /**
  * Returns a block to the 128-byte pool by pushing it onto the free list at +0x25800.
@@ -2674,7 +2674,7 @@ INCLUDE_ASM("bx/cubicspline", func_003204D0__FPvPPv);
  *
  * @param node  the block to free
  */
-void func_003204D0(void* self, void** node)
+void TMemContainer128_free(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x25800);
     *(void**)((char*)self + 0x25800) = node;
@@ -2682,7 +2682,7 @@ void func_003204D0(void* self, void** node)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_003204E8__FPvPPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer256_free__FPvPPv);
 #ifdef SKIP_ASM
 /**
  * Returns a block to the 256-byte pool by pushing it onto the free list at +0x20000.
@@ -2691,7 +2691,7 @@ INCLUDE_ASM("bx/cubicspline", func_003204E8__FPvPPv);
  *
  * @param node  the block to free
  */
-void func_003204E8(void* self, void** node)
+void TMemContainer256_free(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x20000);
     *(void**)((char*)self + 0x20000) = node;
@@ -2699,7 +2699,7 @@ void func_003204E8(void* self, void** node)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320500__FPvPPv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer512_free__FPvPPv);
 #ifdef SKIP_ASM
 /**
  * Returns a block to the 512-byte pool by pushing it onto the free list at +0x20000.
@@ -2708,7 +2708,7 @@ INCLUDE_ASM("bx/cubicspline", func_00320500__FPvPPv);
  *
  * @param node  the block to free
  */
-void func_00320500(void* self, void** node)
+void TMemContainer512_free(void* self, void** node)
 {
     *node = *(void**)((char*)self + 0x20000);
     *(void**)((char*)self + 0x20000) = node;
@@ -2716,92 +2716,92 @@ void func_00320500(void* self, void** node)
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320518__Fv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer8_validate__Fv);
 #ifdef SKIP_ASM
 /**
  * Does nothing (empty body): the 8-byte pool's check.
  *
  * cMemBlockMan_validate calls it on cMemBlockMan_m_container8.
  */
-void func_00320518(void)
+void TMemContainer8_validate(void)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320520__Fv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer16_validate__Fv);
 #ifdef SKIP_ASM
 /**
  * Does nothing (empty body): the 16-byte pool's check.
  *
  * cMemBlockMan_validate calls it on cMemBlockMan_m_container16.
  */
-void func_00320520(void)
+void TMemContainer16_validate(void)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320528__Fv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer32_validate__Fv);
 #ifdef SKIP_ASM
 /**
  * Does nothing (empty body): the 32-byte pool's check.
  *
  * cMemBlockMan_validate calls it on cMemBlockMan_m_container32.
  */
-void func_00320528(void)
+void TMemContainer32_validate(void)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320530__Fv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer64_validate__Fv);
 #ifdef SKIP_ASM
 /**
  * Does nothing (empty body): the 64-byte pool's check.
  *
  * cMemBlockMan_validate calls it on cMemBlockMan_m_container64.
  */
-void func_00320530(void)
+void TMemContainer64_validate(void)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320538__Fv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer128_validate__Fv);
 #ifdef SKIP_ASM
 /**
  * Does nothing (empty body): the 128-byte pool's check.
  *
  * cMemBlockMan_validate calls it on cMemBlockMan_m_container128.
  */
-void func_00320538(void)
+void TMemContainer128_validate(void)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320540__Fv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer256_validate__Fv);
 #ifdef SKIP_ASM
 /**
  * Does nothing (empty body): the 256-byte pool's check.
  *
  * cMemBlockMan_validate calls it on cMemBlockMan_m_container256.
  */
-void func_00320540(void)
+void TMemContainer256_validate(void)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/cubicspline", func_00320548__Fv);
+INCLUDE_ASM("bx/cubicspline", TMemContainer512_validate__Fv);
 #ifdef SKIP_ASM
 /**
  * Does nothing (empty body): the 512-byte pool's check.
  *
  * cMemBlockMan_validate calls it on cMemBlockMan_m_container512.
  */
-void func_00320548(void)
+void TMemContainer512_validate(void)
 {
 }
 #endif

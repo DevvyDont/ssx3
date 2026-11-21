@@ -40,9 +40,9 @@ INCLUDE_ASM("fe/festateload4", func_002461E0);
 
 INCLUDE_ASM("fe/festateload4", func_00246268);
 
-INCLUDE_ASM("fe/festateload4", func_00246278);
+INCLUDE_ASM("fe/festateload4", cGameLoadState_widgetCreateMultiP);
 
-INCLUDE_ASM("fe/festateload4", func_002464E8);
+INCLUDE_ASM("fe/festateload4", cGameLoadState_widgetCreateQP);
 
 INCLUDE_ASM("fe/festateload4", func_00246CF8);
 

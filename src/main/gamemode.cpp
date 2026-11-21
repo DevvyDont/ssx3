@@ -754,7 +754,7 @@ extern "C" void cGameModeHandler_cleanRiderRanksTime(void)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00238E20);
+INCLUDE_ASM("main/gamemode", cGMBigAirHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -821,7 +821,7 @@ static inline cAI* race_238E20()
  * heat and ranks on heat 3. When the game path (newRace.cGamePath) is not 0 it first sets up a single heat-3 event with fresh
  * line-up. It fills the init slot (+0x14), which cGameModeMan_restartHeat calls.
  */
-extern "C" void func_00238E20(sScore_238E20* self)
+extern "C" void cGMBigAirHandler_init(sScore_238E20* self)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     int i;
@@ -1310,7 +1310,7 @@ extern "C" void func_00239D50(void* self, cGameModeStream* stream)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00239D88);
+INCLUDE_ASM("main/gamemode", cGMMPSlopeHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1356,7 +1356,7 @@ struct sVEntry_239D88 {
  * Sets a single last heat (3) with no AI, a time limit of cBENewRaceInterface_getTimeLimit(race, 3) * 60, runs slot +0x24, puts both
  * players' characters and cheat characters in the tables and clears the two per-player counters (+0x4, +0x6).
  */
-extern "C" void func_00239D88(void* self)
+extern "C" void cGMMPSlopeHandler_init(void* self)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -1393,7 +1393,7 @@ extern "C" void func_00239D88(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_00239EC8);
+INCLUDE_ASM("main/gamemode", cGMMPSlopeHandler_raceFinish);
 #ifdef SKIP_ASM
 /**
  * Records a rider's finish in the two-player online event of handler 9 and locks the results when the race is over.
@@ -1404,7 +1404,7 @@ INCLUDE_ASM("main/gamemode", func_00239EC8);
  *
  * @param idx  the rider index
  */
-extern "C" void func_00239EC8(void* self, int idx)
+extern "C" void cGMMPSlopeHandler_raceFinish(void* self, int idx)
 {
     cAI* race = Race_239230();
     sStats_239230 st = *(sStats_239230*)((char*)race->Riders[idx]->mMetrix + 0xFC);
@@ -1430,7 +1430,7 @@ extern "C" void func_00239EC8(void* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023A070);
+INCLUDE_ASM("main/gamemode", cGMMPSlopeHandler_riderCheckpointHit);
 #ifdef SKIP_ASM
 
 /**
@@ -1444,7 +1444,7 @@ INCLUDE_ASM("main/gamemode", func_0023A070);
  * @param secs  seconds to add
  * @return 1 when the player took the lead (and time was added), otherwise 0
  */
-extern "C" int func_0023A070(char* self, int player, int secs)
+extern "C" int cGMMPSlopeHandler_riderCheckpointHit(char* self, int player, int secs)
 {
     short* score = (short*)(self + 4);
     short* mine = (short*)((char*)score + (player << 1));
@@ -1470,7 +1470,7 @@ extern "C" int func_0023A070(char* self, int player, int secs)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023A108);
+INCLUDE_ASM("main/gamemode", cGMRaceHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -1564,7 +1564,7 @@ static inline void fillOthers_23A108(int* dst, int p)
  * (D_00536708) in the next line-up and apply it, and reset the score and rank tables. +0x8 and +0xC remember which heat
  * set-up already ran.
  */
-extern "C" void func_0023A108(sMode_23A108* self)
+extern "C" void cGMRaceHandler_init(sMode_23A108* self)
 {
     cGameModeMan* gameModeMan = cGameModeHandler_pManager;
     gameModeMan->bAreResultsLocked = 0;
@@ -2006,7 +2006,7 @@ void func_0023AC10(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023AC18);
+INCLUDE_ASM("main/gamemode", cGMRaceHandler_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Saves the whole 208-byte timed event handler to a replay frame with the stream's write (its first virtual).
@@ -2017,14 +2017,14 @@ INCLUDE_ASM("main/gamemode", func_0023AC18);
  * @param stream  the replay stream
  */
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
-extern "C" void func_0023AC18(void* self, cGameModeStream* stream)
+extern "C" void cGMRaceHandler_writeToReplayFrame(void* self, cGameModeStream* stream)
 {
     stream->write(self, 208);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023AC50);
+INCLUDE_ASM("main/gamemode", cGMRaceHandler_readFromReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Restores the whole 208-byte timed event handler from a replay frame with the stream's read (its second virtual).
@@ -2034,14 +2034,14 @@ INCLUDE_ASM("main/gamemode", func_0023AC50);
  * @param stream  the replay stream
  */
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
-extern "C" void func_0023AC50(void* self, cGameModeStream* stream)
+extern "C" void cGMRaceHandler_readFromReplayFrame(void* self, cGameModeStream* stream)
 {
     stream->read(self, 208);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023AC88);
+INCLUDE_ASM("main/gamemode", cGMMPRaceHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2088,7 +2088,7 @@ struct sVEntry_23AC88 {
  * says it is a network game), no time limit, fills the time table (+0x4) with 9s, runs slot +0x2C and stores both
  * players' characters. When the event was done it also runs func_0023B0A8.
  */
-extern "C" void func_0023AC88(void* self)
+extern "C" void cGMMPRaceHandler_init(void* self)
 {
     int one = 1;
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2131,7 +2131,7 @@ extern "C" void func_0023AC88(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023AE00);
+INCLUDE_ASM("main/gamemode", cGMMPRaceHandler_raceFinish);
 #ifdef SKIP_ASM
 extern unsigned int D_00536640[];
 extern int D_005366A8[];
@@ -2190,7 +2190,7 @@ static inline int finished_23AE00(sRider_23AE00* r)
  *
  * @param idx  the rider index
  */
-extern "C" void func_0023AE00(sSelf_23AE00* self, int idx)
+extern "C" void cGMMPRaceHandler_raceFinish(sSelf_23AE00* self, int idx)
 {
     sRace_23AE00* rc = race_23AE00();
     if (cAI_isRaceFinished(rc) == 0 || subActive_23AE00((char*)rc->riders[idx] + 0x6C0) == 0) {
@@ -2221,7 +2221,7 @@ extern "C" void func_0023AE00(sSelf_23AE00* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023B038);
+INCLUDE_ASM("main/gamemode", cGMMPRaceHandler_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Saves the online race handler's first 44 bytes (from +0x0, vtable pointer included) to a replay frame with the
@@ -2232,14 +2232,14 @@ INCLUDE_ASM("main/gamemode", func_0023B038);
  * @param stream  the replay stream
  */
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
-extern "C" void func_0023B038(void* self, cGameModeStream* stream)
+extern "C" void cGMMPRaceHandler_writeToReplayFrame(void* self, cGameModeStream* stream)
 {
     stream->write(self, 44);
 }
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023B070);
+INCLUDE_ASM("main/gamemode", cGMMPRaceHandler_readFromReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Restores the online race handler's first 44 bytes (from +0x0, vtable pointer included) from a replay frame with the
@@ -2250,7 +2250,7 @@ INCLUDE_ASM("main/gamemode", func_0023B070);
  * @param stream  the replay stream
  */
 // Serialisation stream (a replay frame): write(buf, size) is its first virtual, read(buf, size) its second.
-extern "C" void func_0023B070(void* self, cGameModeStream* stream)
+extern "C" void cGMMPRaceHandler_readFromReplayFrame(void* self, cGameModeStream* stream)
 {
     stream->read(self, 44);
 }
@@ -2259,7 +2259,7 @@ extern "C" void func_0023B070(void* self, cGameModeStream* stream)
 INCLUDE_ASM("main/gamemode", func_0023B0A8);
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023B170);
+INCLUDE_ASM("main/gamemode", cGMFreerideHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2304,7 +2304,7 @@ struct sVEntry_23B170 {
  * Clears iCharacters to -1 and gives the human rider its character, runs slot +0x24, sets iNextHeat and iRestoreHeat to
  * 1 and clears the time limit, point target and flags. Slot +0x14 (init) of D_0047CE00.
  */
-extern "C" void func_0023B170(void* self)
+extern "C" void cGMFreerideHandler_init(void* self)
 {
     int one = 1;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2335,7 +2335,7 @@ extern "C" void func_0023B170(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023B268);
+INCLUDE_ASM("main/gamemode", cGMTimeHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2392,7 +2392,7 @@ struct sMode_23B268 {
  * cBENewRaceInterface_getPeakGoal(race, event, tier) * 60 and also becomes the point target. Runs slot +0x2C, gives the human its
  * character and clears the checkpoint counter (+0x8). Slot +0x14 (init) of D_0047CD98.
  */
-extern "C" void func_0023B268(void* self)
+extern "C" void cGMTimeHandler_init(void* self)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2450,7 +2450,7 @@ extern "C" void func_0023B268(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023B468);
+INCLUDE_ASM("main/gamemode", cGMTimeHandler_raceFinish);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2499,7 +2499,7 @@ static inline char* rider_23B468(char* g, int off)
  *
  * @param riderIndex  the rider index
  */
-extern "C" void func_0023B468(void* self, int riderIndex)
+extern "C" void cGMTimeHandler_raceFinish(void* self, int riderIndex)
 {
     int one = 1;
     int off = riderIndex << 2;
@@ -2536,7 +2536,7 @@ extern "C" void func_0023B468(void* self, int riderIndex)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023B5F8);
+INCLUDE_ASM("main/gamemode", cGMTimeHandler_riderCheckpointHit);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
@@ -2555,7 +2555,7 @@ extern "C" float cRiderMetrix_evSplitTime(void* self, int value);
  *
  * @return 1
  */
-extern "C" int func_0023B5F8(void* self)
+extern "C" int cGMTimeHandler_riderCheckpointHit(void* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     int state = cBENewRaceInterface_getLocationID(iface);
@@ -2579,7 +2579,7 @@ extern "C" int func_0023B5F8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023B6C0);
+INCLUDE_ASM("main/gamemode", cGMRivalTimeHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2627,7 +2627,7 @@ struct sVEntry_23B6C0 {
  * Runs slot +0x2C. Online (path 2) both players take their characters and no AI; offline the human gets its character
  * and the next slot gets the rival (cBENewRaceInterface_getRival). Slot +0x14 (init) of D_0047CD30.
  */
-extern "C" void func_0023B6C0(void* self)
+extern "C" void cGMRivalTimeHandler_init(void* self)
 {
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -2671,7 +2671,7 @@ extern "C" void func_0023B6C0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023B8C8);
+INCLUDE_ASM("main/gamemode", cGMRivalTimeHandler_raceFinish);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2717,7 +2717,7 @@ static inline char* Rider_23B8C8(int i)
  *
  * @param idx  the rider index
  */
-extern "C" void func_0023B8C8(void* self, int idx)
+extern "C" void cGMRivalTimeHandler_raceFinish(void* self, int idx)
 {
     if (cAI_isRaceFinished(SSXApp->Game->AI) == 0 ||
         ((cRiderState_23B8C8*)(Rider_23B8C8(idx) + 0x6C0))->isFinished() == 0) {
@@ -2774,7 +2774,7 @@ extern "C" void func_0023B8C8(void* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023BB98);
+INCLUDE_ASM("main/gamemode", cGMRivalPointHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2824,7 +2824,7 @@ struct sVEntry_23BB98 {
  * The time limit is cBENewRaceInterface_getTimeLimit(race, 1) * 60. Runs slot +0x24; online both players take their characters, offline
  * the human and the rival (cBENewRaceInterface_getRival). Slot +0x14 (init) of D_0047CCC8.
  */
-extern "C" void func_0023BB98(void* self)
+extern "C" void cGMRivalPointHandler_init(void* self)
 {
     int one = 1;
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2870,7 +2870,7 @@ extern "C" void func_0023BB98(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023BDB8);
+INCLUDE_ASM("main/gamemode", cGMRivalPointHandler_raceFinish);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2909,7 +2909,7 @@ static inline char* Rider_23BDB8(int i)
  *
  * @param idx  the rider index
  */
-extern "C" void func_0023BDB8(void* self, int idx)
+extern "C" void cGMRivalPointHandler_raceFinish(void* self, int idx)
 {
     char* rider = Rider_23BDB8(idx);
     if (*(int*)(rider + 0x480) != 0) {
@@ -2962,7 +2962,7 @@ extern "C" void func_0023BDB8(void* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023C0D0);
+INCLUDE_ASM("main/gamemode", cGMPointHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -3013,7 +3013,7 @@ struct sVEntry_23C0D0 {
  * cBENewRaceInterface_getPeakTimeLimit(..) * 60. Runs slot +0x24, gives the human its character and clears the checkpoint counter (+0x8). Slot
  * +0x14 (init) of D_0047CC60.
  */
-extern "C" void func_0023C0D0(void* self)
+extern "C" void cGMPointHandler_init(void* self)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -3073,7 +3073,7 @@ extern "C" void func_0023C0D0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023C2D8);
+INCLUDE_ASM("main/gamemode", cGMPointHandler_raceFinish);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -3128,7 +3128,7 @@ struct sClk_23C2D8 {
  *
  * @param idx  the rider index
  */
-extern "C" void func_0023C2D8(void* self, int idx)
+extern "C" void cGMPointHandler_raceFinish(void* self, int idx)
 {
     sClk_23C2D8* clk = (sClk_23C2D8*)SSXApp->Game->AI;
     sStats_23C2D8 st = *(sStats_23C2D8*)(*(char**)(clk->riders[idx] + 0x790) + 0xFC);
@@ -3167,7 +3167,7 @@ extern "C" void func_0023C2D8(void* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023C560);
+INCLUDE_ASM("main/gamemode", cGMPointHandler_riderCheckpointHit);
 #ifdef SKIP_ASM
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
@@ -3186,7 +3186,7 @@ extern "C" float cRiderMetrix_evSplitPoints(void* self, int value);
  *
  * @return 1
  */
-extern "C" int func_0023C560(void* self)
+extern "C" int cGMPointHandler_riderCheckpointHit(void* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     int state = cBENewRaceInterface_getLocationID(iface);
@@ -3210,7 +3210,7 @@ extern "C" int func_0023C560(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("main/gamemode", func_0023C618);
+INCLUDE_ASM("main/gamemode", cGMDebugHandler_init);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -3257,7 +3257,7 @@ struct sVEntry_23C618 {
  * repeating the player's character, runs slot +0x24 and clears the time limit, point target and flags. Slot +0x14 of
  * the handler vtable at cMCOverlayManager_vtbl + 0x20.
  */
-extern "C" void func_0023C618(void* self)
+extern "C" void cGMDebugHandler_init(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* player = cBE_getInterface_Fv(cBE_getBE(), 1);

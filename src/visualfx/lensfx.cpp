@@ -99,7 +99,7 @@ void* func_002EC9D0(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/lensfx", func_002EC9E0);
+INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface_cBoltOnFXInterface);
 #ifdef SKIP_ASM
 extern void* D_00487EE8[];
 struct sLensFx;
@@ -117,7 +117,7 @@ extern "C" void func_002ECAF0(cBoltOnFXInterface* self);
  * @param emitterOwner  the attached-emitter owner the emitters are created in
  * @return @p self
  */
-extern "C" void* func_002EC9E0(cBoltOnFXInterface* self, int rider, int emitterOwner)
+extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface(cBoltOnFXInterface* self, int rider, int emitterOwner)
 {
     self->mVtbl = D_00487EE8;
     self->mDirty = 1;
@@ -135,7 +135,7 @@ extern "C" void* func_002EC9E0(cBoltOnFXInterface* self, int rider, int emitterO
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/lensfx", func_002ECA68);
+INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface_cBoltOnFXInterface1);
 #ifdef SKIP_ASM
 extern void* D_00487EE8[];
 struct sLensFx;
@@ -145,14 +145,14 @@ extern "C" void func_002ECAF0(cBoltOnFXInterface* self);
  * Constructs a front-end character's bolt-on effect set ("cBoltOnFXInterface"), keyed by a character id instead of a
  * rider.
  *
- * Same as func_002EC9E0 except that it stores a pointer to the character id (+0x8) and leaves the rider (+0x4) 0.
+ * Same as cBoltOnFXInterface_cBoltOnFXInterface except that it stores a pointer to the character id (+0x8) and leaves the rider (+0x4) 0.
  * cFERider_init builds it on 200 bytes.
  *
  * @param charIdPtr  pointer to the character id
  * @param emitterOwner  the attached-emitter owner the emitters are created in
  * @return @p self
  */
-extern "C" void* func_002ECA68(cBoltOnFXInterface* self, int charIdPtr, int emitterOwner)
+extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface1(cBoltOnFXInterface* self, int charIdPtr, int emitterOwner)
 {
     self->mVtbl = D_00487EE8;
     self->mDirty = 1;
@@ -186,7 +186,7 @@ struct sLensFx {
 /**
  * Marks all 15 entries of a bolt-on effect set as free (emitter index -1).
  *
- * The two constructors func_002EC9E0 and func_002ECA68 call it.
+ * The two constructors cBoltOnFXInterface_cBoltOnFXInterface and cBoltOnFXInterface_cBoltOnFXInterface1 call it.
  */
 extern "C" void func_002ECAF0(cBoltOnFXInterface* self)
 {
@@ -198,7 +198,7 @@ extern "C" void func_002ECAF0(cBoltOnFXInterface* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002ECB28);
+INCLUDE_ASM("visualfx/lensfx", cBoltOnFXInterface__cBoltOnFXInterface);
 #ifdef SKIP_ASM
 extern void* D_00487EE8[];
 extern "C" void func_002F2218(int a, int id);
@@ -213,7 +213,7 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_002ECB28(sLensFx* self, int flags)
+extern "C" void cBoltOnFXInterface__cBoltOnFXInterface(sLensFx* self, int flags)
 {
     *(void***)((char*)self + 0xC4) = D_00487EE8;
     int i;

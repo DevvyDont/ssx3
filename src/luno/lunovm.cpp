@@ -782,7 +782,7 @@ void cLunoVM::execute(const cLunoFunc& func, cLunoVar& result)
 #endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00224C00);
+INCLUDE_ASM("luno/lunovm", luno_cLunoFunc_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry00224C00 {
     short delta;
@@ -794,13 +794,13 @@ struct sVEntry00224C00 {
  * Writes a Luno function value (type 5) to a replay frame: its code-chunk pointer relative to @p base, then its index.
  *
  * Writes the first word (On Tour cLunoFunc Chunk) minus @p base and the second word (FuncNum), 4 bytes each, through
- * the frame's write virtual (slot 1). Called by luno_cLunoVar_writeToReplayFrame for type 5; func_00224C78 is the
+ * the frame's write virtual (slot 1). Called by luno_cLunoVar_writeToReplayFrame for type 5; luno_cLunoFunc_readFromReplayFrame is the
  * inverse.
  *
  * @param stream  the replay frame to write to
  * @param base  the address the chunk pointer is stored relative to
  */
-extern "C" void func_00224C00(luno_cLunoFunc* self, sVEntry00224C00** stream, int base)
+extern "C" void luno_cLunoFunc_writeToReplayFrame(luno_cLunoFunc* self, sVEntry00224C00** stream, int base)
 {
     int off;
     int secondWord;
@@ -812,7 +812,7 @@ extern "C" void func_00224C00(luno_cLunoFunc* self, sVEntry00224C00** stream, in
 #endif
 
 //100%
-INCLUDE_ASM("luno/lunovm", func_00224C78);
+INCLUDE_ASM("luno/lunovm", luno_cLunoFunc_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct sVEntry00224C78 {
     short delta;
@@ -825,12 +825,12 @@ struct sVEntry00224C78 {
  *
  * Reads two 4-byte words through the frame's read virtual (slot 2): the first plus @p base becomes the code-chunk
  * pointer (+0x0), the second the function index (+0x4). Called by luno_cLunoVar_readFromReplayFrame; inverse of
- * func_00224C00.
+ * luno_cLunoFunc_writeToReplayFrame.
  *
  * @param stream  the replay frame to read from
  * @param base  the address the chunk pointer was stored relative to
  */
-extern "C" void func_00224C78(luno_cLunoFunc* self, sVEntry00224C78** stream, int base)
+extern "C" void luno_cLunoFunc_readFromReplayFrame(luno_cLunoFunc* self, sVEntry00224C78** stream, int base)
 {
     int buf[2];
     (*stream)[2].fn((char*)stream + (*stream)[2].delta, &buf[0], 4);
@@ -1497,14 +1497,14 @@ extern "C" void luno_cLunoVar__cLunoVar(cLunoValue* self, int flags)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("luno/lunovm", luno_cLunoVar_writeToReplayFrame);
 #ifdef SKIP_ASM
-extern "C" void func_00224C00(luno_cLunoFunc* self, sVEntry00224C00** stream, int base);
+extern "C" void luno_cLunoFunc_writeToReplayFrame(luno_cLunoFunc* self, sVEntry00224C00** stream, int base);
 extern "C" void luno_cLunoTable_writeToReplayFrame(void* self, sVEntry00224C00** stream, int base);
 
 /**
  * Saves a Luno value into a replay frame.
  *
  * Writes the 4-byte type through the stream's slot 1, then the payload: type 5 (eLunoVar_Func, a function value)
- * with func_00224C00, type 4 (table) with luno_cLunoTable_writeToReplayFrame, anything else as one 4-byte word. luno_cLunoVar_readFromReplayFrame() is the inverse.
+ * with luno_cLunoFunc_writeToReplayFrame, type 4 (table) with luno_cLunoTable_writeToReplayFrame, anything else as one 4-byte word. luno_cLunoVar_readFromReplayFrame() is the inverse.
  *
  * @param stream  the replay frame
  * @param base  the base address string pointers are stored relative to
@@ -1513,7 +1513,7 @@ extern "C" void luno_cLunoVar_writeToReplayFrame(cLunoValue* self, sVEntry00224C
 {
     (*stream)[1].fn((char*)stream + (*stream)[1].delta, &self->type, 4);
     if (self->type == 5) {
-        func_00224C00((luno_cLunoFunc*)self, stream, base);
+        luno_cLunoFunc_writeToReplayFrame((luno_cLunoFunc*)self, stream, base);
     } else if (self->type == 4) {
         luno_cLunoTable_writeToReplayFrame(self, stream, base);
     } else {
@@ -1550,7 +1550,7 @@ static inline int lunoReadInt_225CA0(sVEntry00224C00** stream)
 /**
  * Restores a Luno value from a replay frame.
  *
- * Reads the type word. Type 5 (eLunoVar_Func) reads the function value (func_00224C78); type 4 reads a whole table into a temporary
+ * Reads the type word. Type 5 (eLunoVar_Func) reads the function value (luno_cLunoFunc_readFromReplayFrame); type 4 reads a whole table into a temporary
  * (luno_cLunoTable_cLunoTable_sz + luno_cLunoTable_readFromReplayFrame) and copies it in (luno_cLunoTable_operatorE); otherwise it
  * reads one 4-byte word. A table this value held before is released first (luno_cLunoTable__cLunoTable with flags 2).
  *
@@ -1564,7 +1564,7 @@ extern "C" void luno_cLunoVar_readFromReplayFrame(cLunoValue* self, sVEntry00224
         sLunoPair_225CA0 pair;
         pair.word0 = 0;
         pair.word1 = 0;
-        func_00224C78((luno_cLunoFunc*)(&pair), (sVEntry00224C78**)stream, base);
+        luno_cLunoFunc_readFromReplayFrame((luno_cLunoFunc*)(&pair), (sVEntry00224C78**)stream, base);
         if (self->type == 4) {
             luno_cLunoTable__cLunoTable((cLunoTableRef*)self, 2);
         }

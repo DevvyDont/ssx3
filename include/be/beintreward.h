@@ -49,7 +49,7 @@ struct cBERewardInterface {
                                      //       zeroes it; cOVStateManager_gotoOverlay/cOVStateManager_gotoNextOverlay test it != 0
     int mLastEventMedal;             // 0x014 [O] eBEMedalID (On Tour 0x00C); [U] cBERewardInterface_calculateUserTrackMedalRewards stores the event's medal;
                                      //       clearUserAwards sets -1 (no medal, as in isBetterMedal); compared with
-                                     //       0..3 by func_001E7BB0/func_001E8200, ==0 by func_002A3860, read by
+                                     //       0..3 by cOVState_RACE_FINISHOV_onCreateScreen/cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen, ==0 by func_002A3860, read by
                                      //       cOVState_REWARDS_checkRewardList (asm)
 };
 

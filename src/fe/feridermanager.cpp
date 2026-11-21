@@ -134,7 +134,7 @@ extern "C" void cFERider_purge(cFERider* self);
 extern "C" void cFERider_queueLoadExtraTextures(int* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* func_002F1890(void* mem, void* owner);
-extern "C" void* func_002ECA68(void* mem, void* owner, void* a2);
+extern "C" void* cBoltOnFXInterface_cBoltOnFXInterface1(void* mem, void* owner, void* a2);
 extern "C" void* cAnimModel_cAnimModel(void* mem);
 extern "C" void cAnimModel_init(void* pool, int a1, int a2);
 extern "C" void func_002F19F0(void* a, void* b);
@@ -184,7 +184,7 @@ extern "C" int cFERider_init_impl(int* self, int profile, int character, int slo
     self[3108 / 4] = -1;
     self[3268 / 4] = dirty;
     *(void**)&self[3184 / 4] = func_002F1890(cMemMan_alloc(168, str_AttachedEmitterFX_b, 0, 0), self);
-    *(void**)&self[3188 / 4] = func_002ECA68(cMemMan_alloc(200, str_cBoltOnFXInterface_b, 0, 0), self, *(void**)&self[3184 / 4]);
+    *(void**)&self[3188 / 4] = cBoltOnFXInterface_cBoltOnFXInterface1(cMemMan_alloc(200, str_cBoltOnFXInterface_b, 0, 0), self, *(void**)&self[3184 / 4]);
     *(void**)&self[2] = cAnimModel_cAnimModel(cMemMan_alloc(352, str_AnimModel, 0, 0));
     cAnimModel_init(*(void**)&self[2], 100, 15);
     func_002F19F0(*(void**)&self[3184 / 4], *(void**)&self[2]);

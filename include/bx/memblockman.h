@@ -16,10 +16,10 @@
 //
 // Sizes: [R] cMemBlockMan_initialize's cMemMan_alloc(Count * N + 4, "m_containerN", 0xK000000) per pool: 2052,
 // 8196, 24580, 0x32004, 0x25804, 0x20004, 0x20004; [O] On Tour's 16-block instance is 0x84 (16 * 8 + 4).
-// No vtable. Retail methods (bx/cubicspline, C++ linkage, self = void*): ctor func_003200E8 .. func_00320270 (builds
-// the free list through every block, last link 0, m_freeList = block 0), alloc func_003202C0 .. func_00320448 (pops
-// m_freeList, else cMemBlockMan_alloc(N + 4)), free func_00320488 .. func_00320500 (pushes the block),
-// validate func_00320518 .. func_00320548 (empty). isIn is inlined into cMemBlockMan_free (inPool_319F68<bytes>).
+// No vtable. Retail methods (bx/cubicspline, C++ linkage, self = void*): ctor TMemContainer8_TMemContainer8 .. TMemContainer512_TMemContainer512 (builds
+// the free list through every block, last link 0, m_freeList = block 0), alloc TMemContainer8_alloc .. TMemContainer512_alloc (pops
+// m_freeList, else cMemBlockMan_alloc(N + 4)), free TMemContainer8_free .. TMemContainer512_free (pushes the block),
+// validate TMemContainer8_validate .. TMemContainer512_validate (empty). isIn is inlined into cMemBlockMan_free (inPool_319F68<bytes>).
 //
 // Evidence tags: [R] retail allocation and constructor; [P] preview template instances; [O] On Tour DWARF; [U] retail
 // use (the C bodies' raw +0x800 .. +0x32000 accesses and the TMemContainer_0408 / _0448 views in bx/cubicspline.cpp).

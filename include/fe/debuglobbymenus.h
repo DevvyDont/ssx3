@@ -31,7 +31,7 @@ struct cDebugLobbyScreen;
 
 
 // ContinueMenu (0x148): a single "Continue" row. Preview _vt$12ContinueMenu = retail D_0046D740; ctor
-// ContinueMenu_ContinueMenu (fe/debugfe), dtor func_001DCD58 (slot 1). cDebugLobbyScreen +0x604.
+// ContinueMenu_ContinueMenu (fe/debugfe), dtor ContinueMenu__ContinueMenu (slot 1). cDebugLobbyScreen +0x604.
 
 struct ContinueMenu {
     // --- cMenu (util/menu.h, 0x130; no base class, vptr after its data)
@@ -44,7 +44,7 @@ struct ContinueMenu {
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
     void** mVtbl;                    // 0x12C [R] ContinueMenu_ContinueMenu stores D_0046D740
     cPopMenuItem unk_130;            // 0x130 [R] ctor cPopMenuItem_cPopMenuItem(this + 0x130, "Continue");
-                                     //       func_001DCD58 destroys it
+                                     //       ContinueMenu__ContinueMenu destroys it
 };
 
 CHECK_OFFSET(ContinueMenu, NumItems, 0x000);
@@ -59,8 +59,8 @@ CHECK_SIZE(ContinueMenu, 0x148);
 
 // AccountDetailsMenu<cDebugLobbyScreen::OnCreate> / <cDebugLobbyScreen::OnLogin> (0x1FC): title, spacer, login name
 // and password entry rows, the action row and "Cancel". Preview vtables pair with retail D_0046D690 (OnCreate; ctor
-// func_001DA648, onCommand func_001DBC38, dtor func_001DCE20) and D_0046D6E8 (OnLogin; ctor func_001DA7E8, onCommand
-// func_001DBC68, dtor func_001DCDA0). AccountMenu embeds one of each at 0x130 / 0x32C.
+// AccountDetailsMenu_AccountDetailsMenu, onCommand AccountDetailsMenu_onCommand, dtor AccountDetailsMenu__AccountDetailsMenu) and D_0046D6E8 (OnLogin; ctor AccountDetailsMenu_AccountDetailsMenu1, onCommand
+// AccountDetailsMenu_onCommand1, dtor AccountDetailsMenu__AccountDetailsMenu1). AccountMenu embeds one of each at 0x130 / 0x32C.
 
 struct AccountDetailsMenu {
     // --- cMenu (util/menu.h, 0x130; no base class, vptr after its data)
@@ -106,8 +106,8 @@ CHECK_OFFSET(AccountDetailsMenu, unk_1E4, 0x1E4);
 CHECK_SIZE(AccountDetailsMenu, 0x1FC);
 
 // AccountMenu<cDebugLobbyScreen::OnCreate, cDebugLobbyScreen::OnLogin> (0x594): "Login Method" with two sub-menu rows
-// that open the two account menus. Preview vtable pairs with retail D_0046D638; ctor func_001DA988, dtor
-// func_001DCEA0 (it inlines both AccountDetailsMenu destructors). cDebugLobbyScreen +0x070 (mLoginMenu).
+// that open the two account menus. Preview vtable pairs with retail D_0046D638; ctor AccountMenu_AccountMenu, dtor
+// AccountMenu__AccountMenu (it inlines both AccountDetailsMenu destructors). cDebugLobbyScreen +0x070 (mLoginMenu).
 
 struct AccountMenu {
     // --- cMenu (util/menu.h, 0x130; no base class, vptr after its data)
@@ -118,10 +118,10 @@ struct AccountMenu {
     cMenuItem* Items[70];            // 0x00C [O] cMenu::Items; [U] cMenu_addItem(this, item, -1) appends each row below
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
-    void** mVtbl;                    // 0x12C [R] func_001DA988 stores D_0046D638
-    AccountDetailsMenu unk_130;      // 0x130 [R] ctor func_001DA648(this + 0x130, functor, "Create Account"); dtor
+    void** mVtbl;                    // 0x12C [R] AccountMenu_AccountMenu stores D_0046D638
+    AccountDetailsMenu unk_130;      // 0x130 [R] ctor AccountDetailsMenu_AccountDetailsMenu(this + 0x130, functor, "Create Account"); dtor
                                      //       destroys its rows
-    AccountDetailsMenu unk_32C;      // 0x32C [R] ctor func_001DA7E8(this + 0x32C, functor, "Login"); dtor destroys its
+    AccountDetailsMenu unk_32C;      // 0x32C [R] ctor AccountDetailsMenu_AccountDetailsMenu1(this + 0x32C, functor, "Login"); dtor destroys its
                                      //       rows
     cNullMenuItem unk_528;           // 0x528 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x528, "Login Method");
                                      //       destroyed by the dtor
@@ -149,7 +149,7 @@ CHECK_OFFSET(AccountMenu, unk_578, 0x578);
 CHECK_SIZE(AccountMenu, 0x594);
 
 // CreatePersonaMenu<cDebugLobbyScreen::OnCreatePersona> (0x1B8): "Create Persona", a name entry row and "Create".
-// Preview vtable pairs with retail D_0046D588; ctor func_001DAAC8, onCommand func_001DBBE8, dtor func_001DD060.
+// Preview vtable pairs with retail D_0046D588; ctor CreatePersonaMenu_CreatePersonaMenu, onCommand CreatePersonaMenu_onCommand, dtor CreatePersonaMenu__CreatePersonaMenu.
 
 struct CreatePersonaMenu {
     // --- cMenu (util/menu.h, 0x130; no base class, vptr after its data)
@@ -160,16 +160,16 @@ struct CreatePersonaMenu {
     cMenuItem* Items[70];            // 0x00C [O] cMenu::Items; [U] cMenu_addItem(this, item, -1) appends each row below
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
-    void** mVtbl;                    // 0x12C [R] func_001DAAC8 stores D_0046D588
+    void** mVtbl;                    // 0x12C [R] CreatePersonaMenu_CreatePersonaMenu stores D_0046D588
     cDebugLobbyScreen* unk_130;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnCreatePersona: the owning screen); [U]
-                                     //       func_001DBBE8 passes it to func_0017E1C0
+                                     //       CreatePersonaMenu_onCommand passes it to func_0017E1C0
     cNullMenuItem unk_134;           // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, "Create Persona");
                                      //       destroyed by the dtor
     cSpaceMenuItem unk_150;          // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
                                      //       dtor
     cTextMenuItem unk_168;           // 0x168 [R] ctor cTextMenuItem_cTextMenuItem(this + 0x168, "Persona Name");
-                                     //       destroyed by the dtor [U] func_001DBBE8 passes its Text (this + 0x180)
+                                     //       destroyed by the dtor [U] CreatePersonaMenu_onCommand passes its Text (this + 0x180)
     cCommandMenuItem unk_194;        // 0x194 [R] ctor cCommandMenuItem_cCommandMenuItem2 ("Create"); destroyed by the
                                      //       dtor
 };
@@ -189,8 +189,8 @@ CHECK_OFFSET(CreatePersonaMenu, unk_194, 0x194);
 CHECK_SIZE(CreatePersonaMenu, 0x1B8);
 
 // DeletePersonaMenu<cDebugLobbyScreen::OnDeletePersona> (0x1F8): "Delete Persona" and four persona rows. Preview vtable
-// pairs with retail D_0046D5E0; ctor func_001DABD0, onCommand func_001DBC10, dtor func_001DCFC8, row fill
-// func_001DB330.
+// pairs with retail D_0046D5E0; ctor DeletePersonaMenu_DeletePersonaMenu, onCommand DeletePersonaMenu_onCommand, dtor DeletePersonaMenu__DeletePersonaMenu, row fill
+// DeletePersonaMenu_setpersonas.
 
 struct DeletePersonaMenu {
     // --- cMenu (util/menu.h, 0x130; no base class, vptr after its data)
@@ -201,16 +201,16 @@ struct DeletePersonaMenu {
     cMenuItem* Items[70];            // 0x00C [O] cMenu::Items; [U] cMenu_addItem(this, item, -1) appends each row below
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
-    void** mVtbl;                    // 0x12C [R] func_001DABD0 stores D_0046D5E0
+    void** mVtbl;                    // 0x12C [R] DeletePersonaMenu_DeletePersonaMenu stores D_0046D5E0
     cDebugLobbyScreen* unk_130;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnDeletePersona: the owning screen); [U]
-                                     //       func_001DBC10 passes it to func_0017E228
+                                     //       DeletePersonaMenu_onCommand passes it to func_0017E228
     cNullMenuItem unk_134;           // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, "Delete Persona");
                                      //       destroyed by the dtor
     cSpaceMenuItem unk_150;          // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
                                      //       dtor
     cCommandMenuItem unk_168[4];     // 0x168 [R] ctor cCommandMenuItem_cCommandMenuItem2 (4 persona rows); destroyed by
-                                     //       the dtor (loop of 4) [U] func_001DB330 sets their captions and IDs
+                                     //       the dtor (loop of 4) [U] DeletePersonaMenu_setpersonas sets their captions and IDs
 };
 
 CHECK_OFFSET(DeletePersonaMenu, NumItems, 0x000);
@@ -228,7 +228,7 @@ CHECK_SIZE(DeletePersonaMenu, 0x1F8);
 
 // PersonaMenu<cDebugLobbyScreen::OnSelectPersona, ::OnCreatePersona, ::OnDeletePersona> (0x5E0): "Select Persona",
 // four persona rows and sub-menu rows for the create / delete menus. Preview vtable pairs with retail D_0046D530; ctor
-// func_001DACB8, onCommand func_001DBBC0, dtor func_001DD0C8, row fill func_001DB418. cDebugLobbyScreen +0x74C.
+// PersonaMenu_PersonaMenu, onCommand PersonaMenu_onCommand, dtor PersonaMenu__PersonaMenu, row fill PersonaMenu_setpersonas. cDebugLobbyScreen +0x74C.
 
 struct PersonaMenu {
     // --- cMenu (util/menu.h, 0x130; no base class, vptr after its data)
@@ -239,19 +239,19 @@ struct PersonaMenu {
     cMenuItem* Items[70];            // 0x00C [O] cMenu::Items; [U] cMenu_addItem(this, item, -1) appends each row below
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
-    void** mVtbl;                    // 0x12C [R] func_001DACB8 stores D_0046D530
-    CreatePersonaMenu unk_130;       // 0x130 [R] ctor func_001DAAC8(this + 0x130, functor); dtor
-    DeletePersonaMenu unk_2E8;       // 0x2E8 [R] ctor func_001DABD0(this + 0x2E8, functor); dtor; [U] func_001DB418
-                                     //       fills it (func_001DB330)
+    void** mVtbl;                    // 0x12C [R] PersonaMenu_PersonaMenu stores D_0046D530
+    CreatePersonaMenu unk_130;       // 0x130 [R] ctor CreatePersonaMenu_CreatePersonaMenu(this + 0x130, functor); dtor
+    DeletePersonaMenu unk_2E8;       // 0x2E8 [R] ctor DeletePersonaMenu_DeletePersonaMenu(this + 0x2E8, functor); dtor; [U] PersonaMenu_setpersonas
+                                     //       fills it (DeletePersonaMenu_setpersonas)
     cDebugLobbyScreen* unk_4E0;      // 0x4E0 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnSelectPersona: the owning screen); [U]
-                                     //       func_001DBBC0 passes it to func_0017E290
+                                     //       PersonaMenu_onCommand passes it to func_0017E290
     cNullMenuItem unk_4E4;           // 0x4E4 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x4E4, "Select Persona");
                                      //       destroyed by the dtor
     cSpaceMenuItem unk_500;          // 0x500 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x500, h); destroyed by the
                                      //       dtor
     cCommandMenuItem unk_518[4];     // 0x518 [R] ctor cCommandMenuItem_cCommandMenuItem2 (4 persona rows); destroyed by
-                                     //       the dtor [U] func_001DB418 sets their data and IDs (view Menu_B418
+                                     //       the dtor [U] PersonaMenu_setpersonas sets their data and IDs (view Menu_B418
                                      //       items[4])
     cSubMenuItem unk_5A8;            // 0x5A8 [R] ctor cSubMenuItem_cSubMenuItem(this + 0x5A8, "Create Persona", this +
                                      //       0x130); destroyed by the dtor
@@ -277,7 +277,7 @@ CHECK_OFFSET(PersonaMenu, unk_5C4, 0x5C4);
 CHECK_SIZE(PersonaMenu, 0x5E0);
 
 // LobbyMenu<cDebugLobbyScreen::OnSelectRoom> (0x318): "Select Room" and twelve room rows. Preview vtable pairs with
-// retail D_0046D4D8; ctor func_001DAE20, onCommand func_001DBB90, dtor func_001DD258, row fill func_001DB528.
+// retail D_0046D4D8; ctor LobbyMenu_LobbyMenu, onCommand LobbyMenu_onCommand, dtor LobbyMenu__LobbyMenu, row fill LobbyMenu_updaterooms.
 // cDebugLobbyScreen +0xD2C.
 
 struct LobbyMenu {
@@ -289,16 +289,16 @@ struct LobbyMenu {
     cMenuItem* Items[70];            // 0x00C [O] cMenu::Items; [U] cMenu_addItem(this, item, -1) appends each row below
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
-    void** mVtbl;                    // 0x12C [R] func_001DAE20 stores D_0046D4D8
+    void** mVtbl;                    // 0x12C [R] LobbyMenu_LobbyMenu stores D_0046D4D8
     cDebugLobbyScreen* unk_130;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnSelectRoom: the owning screen); [U]
-                                     //       func_001DBB90 passes it to func_0017E2F8
+                                     //       LobbyMenu_onCommand passes it to func_0017E2F8
     cNullMenuItem unk_134;           // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, "Select Room");
                                      //       destroyed by the dtor
     cSpaceMenuItem unk_150;          // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
                                      //       dtor
     cCommandMenuItem unk_168[12];    // 0x168 [R] ctor cCommandMenuItem_cCommandMenuItem2 (12 room rows); destroyed by
-                                     //       the dtor (loop of 12) [U] func_001DB528 sets their data (+0x14 Caption)
+                                     //       the dtor (loop of 12) [U] LobbyMenu_updaterooms sets their data (+0x14 Caption)
                                      //       and ID (view Menu_B528 items[12])
 };
 
@@ -316,8 +316,8 @@ CHECK_OFFSET(LobbyMenu, unk_168, 0x168);
 CHECK_SIZE(LobbyMenu, 0x318);
 
 // RoomMenu<cDebugLobbyScreen::OnSelectUser, cDebugLobbyScreen::OnChat> (0x4F0): "Room Occupants", 24 user rows and
-// "Chat". Preview vtable pairs with retail D_0046D480; ctor func_001DAF08, onCommand func_001DBB48, dtor
-// func_001DD2F0, row fill func_001DB620. cDebugLobbyScreen +0x1044 (mOccupantsMenu).
+// "Chat". Preview vtable pairs with retail D_0046D480; ctor RoomMenu_RoomMenu, onCommand RoomMenu_onCommand, dtor
+// RoomMenu__RoomMenu, row fill RoomMenu_updateusers. cDebugLobbyScreen +0x1044 (mOccupantsMenu).
 
 struct RoomMenu {
     // --- cMenu (util/menu.h, 0x130; no base class, vptr after its data)
@@ -328,19 +328,19 @@ struct RoomMenu {
     cMenuItem* Items[70];            // 0x00C [O] cMenu::Items; [U] cMenu_addItem(this, item, -1) appends each row below
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
-    void** mVtbl;                    // 0x12C [R] func_001DAF08 stores D_0046D480
+    void** mVtbl;                    // 0x12C [R] RoomMenu_RoomMenu stores D_0046D480
     cDebugLobbyScreen* unk_130;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnSelectUser: the owning screen); [U]
-                                     //       func_001DBB48 passes it to func_0017E368 (a user row)
+                                     //       RoomMenu_onCommand passes it to func_0017E368 (a user row)
     cDebugLobbyScreen* unk_134;      // 0x134 [R] ctor stores the first word of its functor argument (preview template
-                                     //       argument cDebugLobbyScreen::OnChat: the owning screen); [U] func_001DBB48
+                                     //       argument cDebugLobbyScreen::OnChat: the owning screen); [U] RoomMenu_onCommand
                                      //       passes it to func_0017E3B8 (ID -2, "Chat")
     cNullMenuItem unk_138;           // 0x138 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x138, "Room Occupants");
                                      //       destroyed by the dtor
     cSpaceMenuItem unk_154;          // 0x154 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x154, h); destroyed by the
                                      //       dtor
     cCommandMenuItem unk_16C[24];    // 0x16C [R] ctor cCommandMenuItem_cCommandMenuItem2 (24 user rows); destroyed by
-                                     //       the dtor [U] func_001DB620 sets their data and ID (view Menu_B620
+                                     //       the dtor [U] RoomMenu_updateusers sets their data and ID (view Menu_B620
                                      //       items[24])
     cCommandMenuItem unk_4CC;        // 0x4CC [R] ctor cCommandMenuItem_cCommandMenuItem2 ("Chat"); destroyed by the
                                      //       dtor
@@ -362,7 +362,7 @@ CHECK_OFFSET(RoomMenu, unk_4CC, 0x4CC);
 CHECK_SIZE(RoomMenu, 0x4F0);
 
 // ChatMenu<cDebugLobbyScreen::OnMessage> (0x38C): "Chat Menu", an "Enter Chat" entry row and 14 message rows.
-// Preview vtable pairs with retail D_0046D428; ctor func_001DB028, onCommand func_001DBB20, dtor func_001DD398.
+// Preview vtable pairs with retail D_0046D428; ctor ChatMenu_ChatMenu, onCommand ChatMenu_onCommand, dtor ChatMenu__ChatMenu.
 // cDebugLobbyScreen +0x1534.
 
 struct ChatMenu {
@@ -374,10 +374,10 @@ struct ChatMenu {
     cMenuItem* Items[70];            // 0x00C [O] cMenu::Items; [U] cMenu_addItem(this, item, -1) appends each row below
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
-    void** mVtbl;                    // 0x12C [R] func_001DB028 stores D_0046D428
+    void** mVtbl;                    // 0x12C [R] ChatMenu_ChatMenu stores D_0046D428
     cDebugLobbyScreen* unk_130;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnMessage: the owning screen); [U]
-                                     //       func_001DBB20 passes it to func_0017E418
+                                     //       ChatMenu_onCommand passes it to func_0017E418
     cNullMenuItem unk_134;           // 0x134 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x134, "Chat Menu"); destroyed
                                      //       by the dtor
     cSpaceMenuItem unk_150;          // 0x150 [R] ctor cSpaceMenuItem_cSpaceMenuItem(this + 0x150, h); destroyed by the
@@ -404,8 +404,8 @@ CHECK_SIZE(ChatMenu, 0x38C);
 
 // ChallengeResponseMenu<cDebugLobbyScreen::OnAcceptChallenge, cDebugLobbyScreen::OnDeclineChallenge> (0x1EC):
 // "You've been Challenged!", "by", the challenger line, a spacer and Accept / Decline. Preview vtable pairs with retail
-// D_0046D3D0; ctor at 0x001DB148 (misnamed __sti__all_in_one_main_cpp in retail symbols), onCommand func_001DBAD8,
-// dtor func_001DD440. cDebugLobbyScreen +0x18C0.
+// D_0046D3D0; ctor at 0x001DB148 (misnamed ChallengeResponseMenu_ChallengeResponseMenu in retail symbols), onCommand ChallengeResponseMenu_onCommand,
+// dtor ChallengeResponseMenu__ChallengeResponseMenu. cDebugLobbyScreen +0x18C0.
 
 struct ChallengeResponseMenu {
     // --- cMenu (util/menu.h, 0x130; no base class, vptr after its data)
@@ -419,10 +419,10 @@ struct ChallengeResponseMenu {
     void** mVtbl;                    // 0x12C [R] ctor (0x001DB148) stores D_0046D3D0
     cDebugLobbyScreen* unk_130;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnAcceptChallenge: the owning screen); [U]
-                                     //       func_001DBAD8 ID 0 calls func_0017E490 with it
+                                     //       ChallengeResponseMenu_onCommand ID 0 calls func_0017E490 with it
     cDebugLobbyScreen* unk_134;      // 0x134 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnDeclineChallenge: the owning screen); [U]
-                                     //       func_001DBAD8 ID 1 calls func_0017E4F0 with it
+                                     //       ChallengeResponseMenu_onCommand ID 1 calls func_0017E4F0 with it
     cNullMenuItem unk_138;           // 0x138 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x138, "You've been
                                      //       Challenged!"); destroyed by the dtor
     cNullMenuItem unk_154;           // 0x154 [R] ctor cNullMenuItem_cNullMenuItem(this + 0x154, "by"); destroyed by the
@@ -455,7 +455,7 @@ CHECK_OFFSET(ChallengeResponseMenu, unk_1C8, 0x1C8);
 CHECK_SIZE(ChallengeResponseMenu, 0x1EC);
 
 // AbortMenu<cDebugLobbyScreen::OnAbortChallenge> (0x158): one "Abort" row. Preview vtable pairs with retail
-// D_0046D378; ctor func_001DB2B0, onCommand func_001DBAB8, dtor func_001DD4C0. cDebugLobbyScreen +0x1AAC.
+// D_0046D378; ctor AbortMenu_AbortMenu, onCommand AbortMenu_onCommand, dtor AbortMenu__AbortMenu. cDebugLobbyScreen +0x1AAC.
 
 struct AbortMenu {
     // --- cMenu (util/menu.h, 0x130; no base class, vptr after its data)
@@ -466,10 +466,10 @@ struct AbortMenu {
     cMenuItem* Items[70];            // 0x00C [O] cMenu::Items; [U] cMenu_addItem(this, item, -1) appends each row below
     cMenuSys* MenuSys;               // 0x124 [O] cMenu::MenuSys; [R] cMenu_cMenu zeroes it
     int DrawLayer;                   // 0x128 [O] cMenu::DrawLayer; no access seen
-    void** mVtbl;                    // 0x12C [R] func_001DB2B0 stores D_0046D378
+    void** mVtbl;                    // 0x12C [R] AbortMenu_AbortMenu stores D_0046D378
     cDebugLobbyScreen* unk_130;      // 0x130 [R] ctor stores the first word of its functor argument (preview template
                                      //       argument cDebugLobbyScreen::OnAbortChallenge: the owning screen); [U]
-                                     //       func_001DBAB8 passes it to func_0017E558
+                                     //       AbortMenu_onCommand passes it to func_0017E558
     cCommandMenuItem unk_134;        // 0x134 [R] ctor cCommandMenuItem_cCommandMenuItem2 (ID 0 "Abort"); destroyed by
                                      //       the dtor
 };

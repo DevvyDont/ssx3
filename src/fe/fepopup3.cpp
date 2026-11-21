@@ -512,37 +512,37 @@ INCLUDE_ASM("fe/fepopup3", cOVState_ViewPopup_onWidgetMenu);
 
 INCLUDE_ASM("fe/fepopup3", func_001E5AA0);
 
-INCLUDE_ASM("fe/fepopup3", func_001E5B80);
+INCLUDE_ASM("fe/fepopup3", cOVState_HEAT_STANDINGS_onCreateScreen);
 
-INCLUDE_ASM("fe/fepopup3", func_001E64A8);
+INCLUDE_ASM("fe/fepopup3", cOVState_HEAT_STANDINGS_onUpdate);
 
-INCLUDE_ASM("fe/fepopup3", func_001E64C8);
+INCLUDE_ASM("fe/fepopup3", cOVState_HEAT_STANDINGS_onGainFocus);
 
-INCLUDE_ASM("fe/fepopup3", func_001E65B8);
+INCLUDE_ASM("fe/fepopup3", cOVState_HEAT_STANDINGS_onInputBegin);
 
-INCLUDE_ASM("fe/fepopup3", func_001E6630);
+INCLUDE_ASM("fe/fepopup3", cOVState_HEAT_STANDINGS_onWidgetMenu);
 
-INCLUDE_ASM("fe/fepopup3", func_001E6640);
+INCLUDE_ASM("fe/fepopup3", cOVState_HEAT_STANDINGS_onWidgetEvent);
 
-INCLUDE_ASM("fe/fepopup3", func_001E6668);
+INCLUDE_ASM("fe/fepopup3", cOVState_FINAL_STANDINGS_onCreateScreen);
 
-INCLUDE_ASM("fe/fepopup3", func_001E6718);
+INCLUDE_ASM("fe/fepopup3", cOVState_FINAL_STANDINGS_onGainTransition);
 
-INCLUDE_ASM("fe/fepopup3", func_001E7558);
+INCLUDE_ASM("fe/fepopup3", cOVState_FINAL_STANDINGS_onWidgetCreate);
 
-INCLUDE_ASM("fe/fepopup3", func_001E75D0);
+INCLUDE_ASM("fe/fepopup3", cOVState_FINAL_STANDINGS_onGainFocus);
 
-INCLUDE_ASM("fe/fepopup3", func_001E7920);
+INCLUDE_ASM("fe/fepopup3", cOVState_FINAL_STANDINGS_onLoseFocus);
 
-INCLUDE_ASM("fe/fepopup3", func_001E7928);
+INCLUDE_ASM("fe/fepopup3", cOVState_FINAL_STANDINGS_onUpdate);
 
-INCLUDE_ASM("fe/fepopup3", func_001E7AA8);
+INCLUDE_ASM("fe/fepopup3", cOVState_FINAL_STANDINGS_onInputBegin);
 
-INCLUDE_ASM("fe/fepopup3", func_001E7B78);
+INCLUDE_ASM("fe/fepopup3", cOVState_FINAL_STANDINGS_onWidgetMenu);
 
-INCLUDE_ASM("fe/fepopup3", func_001E7B88);
+INCLUDE_ASM("fe/fepopup3", cOVState_FINAL_STANDINGS_onWidgetEvent);
 
-INCLUDE_ASM("fe/fepopup3", func_001E7BB0);
+INCLUDE_ASM("fe/fepopup3", cOVState_RACE_FINISHOV_onCreateScreen);
 
 INCLUDE_ASM("fe/fepopup3", func_001E8098);
 
@@ -552,7 +552,7 @@ INCLUDE_ASM("fe/fepopup3", func_001E81B0);
 
 INCLUDE_ASM("fe/fepopup3", func_001E81D0);
 
-INCLUDE_ASM("fe/fepopup3", func_001E8200);
+INCLUDE_ASM("fe/fepopup3", cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen);
 
 INCLUDE_ASM("fe/fepopup3", func_001E87B8);
 
@@ -574,7 +574,7 @@ INCLUDE_ASM("fe/fepopup3", func_001E8EA8);
 
 INCLUDE_ASM("fe/fepopup3", func_001E8ED0);
 
-INCLUDE_ASM("fe/fepopup3", func_001E8F00);
+INCLUDE_ASM("fe/fepopup3", cOVState_TOURNAMENT_STANDINGS_onCreateScreen);
 
 INCLUDE_ASM("fe/fepopup3", func_001E8FC0);
 

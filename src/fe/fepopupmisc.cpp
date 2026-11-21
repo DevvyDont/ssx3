@@ -9113,7 +9113,7 @@ extern "C" unsigned char func_001E5AA0(cOVState_ViewPopup* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E5B80);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_HEAT_STANDINGS_onCreateScreen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sInfo5B80 {
@@ -9203,7 +9203,7 @@ public:
  * qualifying round), help_advance or help_sorry in heat 2, and the five overlayOpt buttons take their option ids from
  * D_0046E488 (names D_00441D10, kT_OVRCMNFinalRound for a final round), stored at +0x18.
  */
-extern "C" void func_001E5B80(cOVState_HEAT_STANDINGS* self)
+extern "C" void cOVState_HEAT_STANDINGS_onCreateScreen(cOVState_HEAT_STANDINGS* self)
 {
     unsigned short title[0x38];
     unsigned short line[104];
@@ -9380,14 +9380,14 @@ extern "C" void func_001E5B80(cOVState_HEAT_STANDINGS* self)
 extern "C" void* cOVState_onUpdate(void* self);
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E64A8__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_HEAT_STANDINGS_onUpdate__FPv);
 #ifdef SKIP_ASM
 /**
  * Updates the freestyle standings overlay: runs cOVState_onUpdate (vtable entry 12).
  *
  * @return cOVState_onUpdate's result
  */
-void* func_001E64A8(void* vself)
+void* cOVState_HEAT_STANDINGS_onUpdate(void* vself)
 {
     cOVState_HEAT_STANDINGS* self = (cOVState_HEAT_STANDINGS*)vself;
     return cOVState_onUpdate(self);
@@ -9395,7 +9395,7 @@ void* func_001E64A8(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E64C8);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_HEAT_STANDINGS_onGainFocus);
 #ifdef SKIP_ASM
 // cUIState_onGainFocus returns nothing (ends in a void vcall); the unit's later void* declaration is a guess.
 void cUIState_onGainFocus_v(void* self) __asm__("cUIState_onGainFocus");
@@ -9419,7 +9419,7 @@ extern char str_run_pct_d_pct_d[];
  * manager's first word) with "@TextPulseWhiteOrange" (cOVState_triggerTextFade; place capped at 6) and plays menu sound
  * 0xE.
  */
-extern "C" void func_001E64C8(cOVState_HEAT_STANDINGS* self)
+extern "C" void cOVState_HEAT_STANDINGS_onGainFocus(cOVState_HEAT_STANDINGS* self)
 {
     char buf[32];
     cUIState_onGainFocus_v(self);
@@ -9439,7 +9439,7 @@ extern "C" void func_001E64C8(cOVState_HEAT_STANDINGS* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E65B8);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_HEAT_STANDINGS_onInputBegin);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char str_overlayMenu[];
@@ -9455,7 +9455,7 @@ void cReplay_setReplayPadNum(void* self, int val);
  * @param input  the input
  * @return 0
  */
-extern "C" int func_001E65B8(cOVState_HEAT_STANDINGS* self, void* input)
+extern "C" int cOVState_HEAT_STANDINGS_onInputBegin(cOVState_HEAT_STANDINGS* self, void* input)
 {
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_overlayMenu));
     if (obj != 0) {
@@ -9468,7 +9468,7 @@ extern "C" int func_001E65B8(cOVState_HEAT_STANDINGS* self, void* input)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E6630);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_HEAT_STANDINGS_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Answers the freestyle standings menu's events (vtable entry 20, onWidgetMenu): 257 for event 6, else 0.
@@ -9477,14 +9477,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E6630);
  * @param event   the menu event
  * @return 257 or 0
  */
-extern "C" int func_001E6630(cOVState_HEAT_STANDINGS* self, int widget, int event)
+extern "C" int cOVState_HEAT_STANDINGS_onWidgetMenu(cOVState_HEAT_STANDINGS* self, int widget, int event)
 {
     return event == 6 ? 257 : 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E6640);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_HEAT_STANDINGS_onWidgetEvent);
 #ifdef SKIP_ASM
 extern int cOVStateManager_mStatus;
 extern int cOVStateManager_mMiscData;
@@ -9498,7 +9498,7 @@ extern int cOVStateManager_mMiscData;
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void func_001E6640(cOVState_HEAT_STANDINGS* self, void* popup, int event)
+extern "C" void cOVState_HEAT_STANDINGS_onWidgetEvent(cOVState_HEAT_STANDINGS* self, void* popup, int event)
 {
     if (popup != 0 && event == 5) {
         int popupId = *(int*)((char*)popup + 0x18);
@@ -9509,7 +9509,7 @@ extern "C" void func_001E6640(cOVState_HEAT_STANDINGS* self, void* popup, int ev
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E6668);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_FINAL_STANDINGS_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char str_43final_standings[];
@@ -9524,7 +9524,7 @@ extern "C" void cOVState_onCreateScreen(void* self);
  * Adds "43final_standings" (kept at +0x40) over "OV_darkblue", runs cOVState_onCreateScreen and sets +0x9C so the next
  * onGainTransition fills the screen.
  */
-extern "C" void func_001E6668(cOVState_FINAL_STANDINGS* self)
+extern "C" void cOVState_FINAL_STANDINGS_onCreateScreen(cOVState_FINAL_STANDINGS* self)
 {
     void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_43final_standings), 0);
@@ -9543,7 +9543,7 @@ extern "C" void func_001E6668(cOVState_FINAL_STANDINGS* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E6718);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_FINAL_STANDINGS_onGainTransition);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "vtable.h"
@@ -9681,7 +9681,7 @@ static inline unsigned short* Loc1E6718(char* name)
  *
  * @return 0 (the transition is not finished)
  */
-extern "C" int func_001E6718(cOVState_FINAL_STANDINGS* self)
+extern "C" int cOVState_FINAL_STANDINGS_onGainTransition(cOVState_FINAL_STANDINGS* self)
 {
     if (self->doInit != 0) {
         self->doInit = 0;
@@ -9957,7 +9957,7 @@ extern "C" int func_001E6718(cOVState_FINAL_STANDINGS* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E7558);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_FINAL_STANDINGS_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char str_overlayMenu[];
@@ -9973,7 +9973,7 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
  *
  * @param menu  the widget being created
  */
-extern "C" void func_001E7558(cOVState_FINAL_STANDINGS* self, void* menu)
+extern "C" void cOVState_FINAL_STANDINGS_onWidgetCreate(cOVState_FINAL_STANDINGS* self, void* menu)
 {
     int hash = *(int*)((char*)menu + 0x38);
     if (hash == GetHashValue32(str_overlayMenu)) {
@@ -9986,7 +9986,7 @@ extern "C" void func_001E7558(cOVState_FINAL_STANDINGS* self, void* menu)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E75D0);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_FINAL_STANDINGS_onGainFocus);
 #ifdef SKIP_ASM
 // cUIState_onGainFocus returns nothing (ends in a void vcall); the unit's later void* declaration is a guess.
 void cUIState_onGainFocus_v(void* self) __asm__("cUIState_onGainFocus");
@@ -10024,7 +10024,7 @@ extern sRect_75D0 D_004C8408;
  * "ChatGroup", sets "chatText" to kT_POPUP235Chat, shows "helptexts" and prepares "textScrollChat" (flag +0x74 bit 0,
  * rectangle D_004C8408, input map 1). Plays menu sound 0xE.
  */
-extern "C" void func_001E75D0(cOVState_FINAL_STANDINGS* self)
+extern "C" void cOVState_FINAL_STANDINGS_onGainFocus(cOVState_FINAL_STANDINGS* self)
 {
     char buf[32];
     int second = 0;
@@ -10078,19 +10078,19 @@ extern "C" void func_001E75D0(cOVState_FINAL_STANDINGS* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E7920__FPv);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_FINAL_STANDINGS_onLoseFocus__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing when the final standings overlay loses focus (vtable entry 11, onLoseFocus).
  */
-void func_001E7920(void* vself)
+void cOVState_FINAL_STANDINGS_onLoseFocus(void* vself)
 {
     cOVState_FINAL_STANDINGS* self = (cOVState_FINAL_STANDINGS*)vself;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E7928);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_FINAL_STANDINGS_onUpdate);
 #ifdef SKIP_ASM
 extern void* cAppMan_TheAppMan;
 extern int cOVStateManager_mStatus;
@@ -10109,7 +10109,7 @@ extern char str_kT_POPUP235Chat_b[];
  * hides "helptext" and "helptexts"; every 30 frames while disconnected hides "ChatGroup" and resets "chatText"; when
  * cGameComm's mOverlayTimeout reaches 0 sets it to -1 and chooses option 8 (cOVStateManager_mMiscData 8, mStatus 1).
  */
-extern "C" void func_001E7928(cOVState_FINAL_STANDINGS* self)
+extern "C" void cOVState_FINAL_STANDINGS_onUpdate(cOVState_FINAL_STANDINGS* self)
 {
     cOVState_onUpdate(self);
     if (cGameComm_mGameComm != 0) {
@@ -10145,7 +10145,7 @@ extern "C" void func_001E7928(cOVState_FINAL_STANDINGS* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E7AA8);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_FINAL_STANDINGS_onInputBegin);
 #ifdef SKIP_ASM
 extern "C" void cOVStateManager_triggerOverlay(int state);
 
@@ -10164,7 +10164,7 @@ struct sVEntry001E7AA8 {
  * @param input  the input
  * @return 0
  */
-extern "C" int func_001E7AA8(cOVState_FINAL_STANDINGS* self, void* input)
+extern "C" int cOVState_FINAL_STANDINGS_onInputBegin(cOVState_FINAL_STANDINGS* self, void* input)
 {
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_overlayMenu));
     if (obj != 0) {
@@ -10184,7 +10184,7 @@ extern "C" int func_001E7AA8(cOVState_FINAL_STANDINGS* self, void* input)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E7B78);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_FINAL_STANDINGS_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Answers the final standings menu's events (vtable entry 20, onWidgetMenu): 257 for event 6, else 0.
@@ -10193,14 +10193,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E7B78);
  * @param event   the menu event
  * @return 257 or 0
  */
-extern "C" int func_001E7B78(cOVState_FINAL_STANDINGS* self, int widget, int event)
+extern "C" int cOVState_FINAL_STANDINGS_onWidgetMenu(cOVState_FINAL_STANDINGS* self, int widget, int event)
 {
     return event == 6 ? 257 : 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E7B88);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_FINAL_STANDINGS_onWidgetEvent);
 #ifdef SKIP_ASM
 extern int cOVStateManager_mStatus;
 extern int cOVStateManager_mMiscData;
@@ -10213,7 +10213,7 @@ extern int cOVStateManager_mMiscData;
  * @param popup  the widget
  * @param event  the widget event
  */
-extern "C" void func_001E7B88(cOVState_FINAL_STANDINGS* self, void* popup, int event)
+extern "C" void cOVState_FINAL_STANDINGS_onWidgetEvent(cOVState_FINAL_STANDINGS* self, void* popup, int event)
 {
     if (popup != 0 && event == 5) {
         int popupId = *(int*)((char*)popup + 0x18);
@@ -10224,7 +10224,7 @@ extern "C" void func_001E7B88(cOVState_FINAL_STANDINGS* self, void* popup, int e
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E7BB0);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_RACE_FINISHOV_onCreateScreen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cUIText;
@@ -10287,7 +10287,7 @@ public:
  * (+0x18 or +0x1C not negative). Online, when the human rider's word +0x480 is set, or for game events 6-8 hides
  * "screendata" and "3D_Ov"; otherwise plays menu sound 0xE.
  */
-extern "C" void func_001E7BB0(cOVState_RACE_FINISHOV* self)
+extern "C" void cOVState_RACE_FINISHOV_onCreateScreen(cOVState_RACE_FINISHOV* self)
 {
     char buf[32];
     void* engine = self->mpEngine;
@@ -10480,7 +10480,7 @@ extern "C" int func_001E81D0(cOVState_RACE_FINISHOV* self, int message)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E8200);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen);
 #ifdef SKIP_ASM
 // Wide-string copy; returns dst.
 extern "C" unsigned short* strcpy1(unsigned short* dst, const unsigned short* src);
@@ -10519,7 +10519,7 @@ struct sVEntry8200 {
  * online, when the human rider's word +0x480 is set, for game events 9-11 or in a final qualifying round; plays menu
  * sound 0xE.
  */
-extern "C" void func_001E8200(cOVState_BASSSP_QUAL_FINISHOV* self)
+extern "C" void cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen(cOVState_BASSSP_QUAL_FINISHOV* self)
 {
     char buf[32];
     unsigned short fmt[104];
@@ -10987,7 +10987,7 @@ extern "C" void func_001E8ED0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001E8F00);
+INCLUDE_ASM("fe/fepopupmisc", cOVState_TOURNAMENT_STANDINGS_onCreateScreen);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern char str_109MultiplayerStandings[];
@@ -11005,7 +11005,7 @@ extern "C" void cSSXAudio_MenuSound(void*, int);
  * Adds "109MultiplayerStandings" (kept at +0x40) over "OV_darkblue", calls the empty func_001E8FC0, runs
  * cOVState_onCreateScreen and plays menu sound 0xE.
  */
-extern "C" void func_001E8F00(cOVState_TOURNAMENT_STANDINGS* self)
+extern "C" void cOVState_TOURNAMENT_STANDINGS_onCreateScreen(cOVState_TOURNAMENT_STANDINGS* self)
 {
     void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_109MultiplayerStandings), 0);

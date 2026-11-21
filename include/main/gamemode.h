@@ -22,7 +22,7 @@
 //       constructor (iHeatNum = 0, iCurrModeHandler = 0, iCurrentGameEvent = -1), cGameModeHandler::purge
 //       (cGameModeHandler_purge: iCurrModeHandler/iLocation/iNextLocation/iCurrentGameEvent = -1, bIsEventDone = 1, the
 //       rest 0,
-//       memset of both character tables), cGMFreerideHandler::init (func_0023B170: iHeatNum = 1, bIsLastHeat = 1,
+//       memset of both character tables), cGMFreerideHandler::init (cGMFreerideHandler_init: iHeatNum = 1, bIsLastHeat = 1,
 //       iCharacters[] = -1, iNextHeat = iRestoreHeat = 1, bAreResultsLocked = 1, iNextLocation = -1),
 //       restorePreviousHeat (cGameModeMan_restorePreviousHeat: iNextHeat = iRestoreHeat), initGameMode
 //       (iCurrentGameEvent = argument,
@@ -62,7 +62,7 @@ struct cGameModeMan {
     int bIsTimedEvent;          // 0x88 [R] purge = 0; big air = 1 with a time limit, race = 0 with uiTimeLimit = 0;
                                 //      [U] read with uiTimeLimit by cRider_updateFinishTest, and by the trophy screens
     int bHasPointTarget;        // 0x8C [R] cleared with uiPointTarget (big air init); [O] after bIsTimedEvent
-    int unk_90;                 // 0x90 [R] purge = 0; cGMRaceHandler init (func_0023A108) = 1 in heat 1, big air = 0
+    int unk_90;                 // 0x90 [R] purge = 0; cGMRaceHandler init (cGMRaceHandler_init) = 1 in heat 1, big air = 0
     int unk_94;                 // 0x94 [R] purge = 0; big air: 1 unless iCurrentGameEvent == 2
     int bIsLastHeat;            // 0x98 [R] freeride init = 1 (On Tour: bIsLastHeat = 1), heat 3 = 1; [U] script engine
     int bAreResultsLocked;      // 0x9C [R] freeride init = 1 (On Tour: bAreResultsLocked = 1); [U] raceFinish reads it

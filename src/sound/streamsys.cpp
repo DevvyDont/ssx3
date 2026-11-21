@@ -1455,7 +1455,7 @@ INCLUDE_ASM("sound/streamsys", cController_cController);
 extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
 extern "C" void* cCrowdSys_cCrowdSys(void* self, int embedded, int a2, int a3, int heap);
-extern "C" void* func_002B28C0(void* self, int embedded, int a2, int a3, int heap);
+extern "C" void* cMusicSys_cMusicSys(void* self, int embedded, int a2, int a3, int heap);
 extern "C" void* cSpeechSys_cSpeechSys(void* self, int embedded, int a2, int a3, int heap);
 extern void* D_004838F8[];
 extern void* D_004837F8[];
@@ -1484,7 +1484,7 @@ extern const sSsVtblCB200 D_004837A0_B200 __asm__("D_004837A0");
  * vtables.
  *
  * With @p embedded set it wires the virtual-base pointers inside the object and constructs cSoundSys (at +0x5728),
- * cBankManager (+0x5730) and cStreamSys (+0x6200). Then cCrowdSys_cCrowdSys, the music system (func_002B28C0 at +0x118)
+ * cBankManager (+0x5730) and cStreamSys (+0x6200). Then cCrowdSys_cCrowdSys, the music system (cMusicSys_cMusicSys at +0x118)
  * and cSpeechSys_cSpeechSys (+0x5560) run, and the cController vtables D_004837D8, D_00483760 and D_004837A0 are
  * installed on the bases (temporary copies with adjusted deltas when not complete). Finally the primary vtables
  * D_004838F8, cSpeechSys_vtbl and D_004837F8 are stored and +0x5720 is cleared.
@@ -1509,7 +1509,7 @@ extern "C" char* cController_cController(cController* self, int embedded, int ma
         cStreamSys_cStreamSys(*(sStreamSysA490**)&self->SpeechSys, 0, maxBanks, maxStreams, heap);
     }
     cCrowdSys_cCrowdSys(((char*)self), 0, maxBanks, maxStreams, heap);
-    func_002B28C0(&self->MusicSys, 0, maxBanks, maxStreams, heap);
+    cMusicSys_cMusicSys(&self->MusicSys, 0, maxBanks, maxStreams, heap);
     cSpeechSys_cSpeechSys(&self->SpeechSys, 0, maxBanks, maxStreams, heap);
     *(const sSsVtblAB200**)(*(char**)(**(char***)&self->MusicSys + 0x1D8) + 4) = &D_004837D8_B200;
     *(const sSsVtblBB200**)(**(char***)&self->MusicSys + 0xAB0) = &D_00483760_B200;

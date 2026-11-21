@@ -321,9 +321,9 @@ CHECK_SIZE(cFELoadStateInLodge, 0x48);
 // both players' panels: level and seven attribute bars) or "99QPEvent" (the event's location, titles, course stats,
 // rider and map); onGainTransition prints the load percentage into "%%". The class name: the allocation tag
 // "cGameLoadState" in cGameLoadScreen_load and the preview's _vt$14cGameLoadState (builds/x/v2 pairs it with retail
-// 0x0047C948; its onWidgetCreate__14cGameLoadStateP8cUIThing is an exact body match of func_00245598).
+// 0x0047C948; its onWidgetCreate__14cGameLoadStateP8cUIThing is an exact body match of cGameLoadState_onWidgetCreate).
 // Retail code: the dtor, onCreateScreen, onGainTransition and onWidgetCreate in main/ssxappdtor (0x002453F0 ...
-// 0x00245598); the preview's widgetCreateMultiP / widgetCreateQP (func_00246278 / func_002464E8) and the player-panel
+// 0x00245598); the preview's widgetCreateMultiP / widgetCreateQP (cGameLoadState_widgetCreateMultiP / cGameLoadState_widgetCreateQP) and the player-panel
 // helper func_00246CF8 in fe/festateloadhint; there is no out-of-line ctor. No On Tour class.
 //
 // Size 0x4C: [R] cGameLoadScreen_load: operator new(0x4C, "cGameLoadState") + cUIState_cUIState(mem, mpUI), vtable,
@@ -338,7 +338,7 @@ struct cGameLoadState {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_0047C948 (cGameLoadScreen_load, dtor func_002453F0)
+    void** mVtbl;                   // 0x008 [R] D_0047C948 (cGameLoadScreen_load, dtor cGameLoadState__cGameLoadState)
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the load screen's mpUI; [U] onCreateScreen adds the screen through
@@ -357,7 +357,7 @@ struct cGameLoadState {
     char unk_045[0x3];              // 0x045 padding
     // --- cGameLoadState
     cGameLoadScreen* mpParentModule; // 0x048 [R] 0, then cGameLoadScreen_load stores the load screen (and loads its
-                                    //       texture 0); [U] func_00246CF8 and func_002464E8 show
+                                    //       texture 0); [U] func_00246CF8 and cGameLoadState_widgetCreateQP show
                                     //       mpParentModule->mTexID[player] (views sLoadInfo_6CF8 / image[2] at 0x10).
                                     //       Name taken from cFELoadState's [O] member in the same role (no DWARF here)
 };
@@ -398,7 +398,7 @@ struct cGameLoadStateOutLodge {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] the cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_0047C878 (cGameLoadScreen_load, dtor func_00245600)
+    void** mVtbl;                   // 0x008 [R] D_0047C878 (cGameLoadScreen_load, dtor cGameLoadStateOutLodge__cGameLoadStateOutLodge)
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the load screen's mpUI; [U] onCreateScreen adds "118loadoutlodge"

@@ -50,7 +50,7 @@ cBXString2* cBXString_cBXString(cBXString2* self)
 #endif
 
 //100%
-INCLUDE_ASM("bx/bxstringctor", func_002688E0);
+INCLUDE_ASM("bx/bxstringctor", cPrivateMessage__cPrivateMessage1);
 #ifdef SKIP_ASM
 extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
@@ -65,7 +65,7 @@ extern char cPrivateMessage_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void func_002688E0(cPrivateMessage* self, int flags)
+extern "C" void cPrivateMessage__cPrivateMessage1(cPrivateMessage* self, int flags)
 {
     self->mVtbl = (void**)cPrivateMessage_vtbl;
     cBXString__cBXString(&self->mDate, 2);

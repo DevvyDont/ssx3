@@ -169,7 +169,7 @@ struct cPS2MemCard {
                                     //       [U] func_002C5278 / func_002C6810 store it; Update stores it
     char unk_058[0x21];             // 0x0058 [U] the save title ([P] kMCTitleStringSize likely 0x21): SetState(0x26)
                                     //       converts it into the icon's title (cMemCard_AsciiToShiftJIS AsciiToShiftJIS); slot 45
-                                    //       func_002C5500 fills it; Update copies it into the file slot
+                                    //       cPS2MemCard_SetTitleString fills it; Update copies it into the file slot
     char unk_079[0x40];             // 0x0079 [R] Reset clears it; [U] scratch path (sprintf target before sceMcOpen /
                                     //       sceMcDelete of the icon files)
     char unk_0B9[0x40];             // 0x00B9 [R] Reset clears it; [U] the file name (slots 34-37, func_002C4788)

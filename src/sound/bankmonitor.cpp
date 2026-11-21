@@ -2972,7 +2972,7 @@ extern "C" int func_002AF8A8_impl(int speechEvent)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002AF8E0__FPv);
+INCLUDE_ASM("sound/bankmonitor", cSpeechBank_cSpeechBank__FPv);
 #ifdef SKIP_ASM
 /**
  * Constructs a cSpeechBank: unk_00 = -1, mOwnsData = 0, mpData = 0 and an empty mName.
@@ -2981,7 +2981,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002AF8E0__FPv);
  *
  * @return self
  */
-void* func_002AF8E0(void* vself)
+void* cSpeechBank_cSpeechBank(void* vself)
 {
     cSpeechBank* self = (cSpeechBank*)vself;
     int zero = 0;
@@ -2994,7 +2994,7 @@ void* func_002AF8E0(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002AF900);
+INCLUDE_ASM("sound/bankmonitor", cSpeechBank__cSpeechBank);
 #ifdef SKIP_ASM
 extern "C" void func_003D6CA0(void* a0);
 
@@ -3005,7 +3005,7 @@ extern "C" void func_003D6CA0(void* a0);
  *
  * @param flags  g++ 2.95 destructor flags (bit 0: operator delete the object)
  */
-extern "C" void func_002AF900(int* self, int flags)
+extern "C" void cSpeechBank__cSpeechBank(int* self, int flags)
 {
     func_003D6CA0(*(void**)self);
     if (*(int*)((char*)self + 0x48) != 0) {
@@ -3025,7 +3025,7 @@ extern "C" void* FILE_load(const char* name, int a1);
 extern "C" int func_003D69F0(void* data);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" char* strrchr(const char* s, int c);
-void* func_002AF8E0(void* self);
+void* cSpeechBank_cSpeechBank(void* self);
 extern char str_pct_s_hdr[];
 extern char str_SpeechBank[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -3038,7 +3038,7 @@ void* func_002AF960_impl(const char* name, int unused, void* data) __asm__("func
  * Creates a cSpeechBank for "<name>.hdr": loads the header unless given, registers it with the speech driver.
  *
  * Without data it returns 0 when the file is missing (BXFILE_exists), else FILE_load()s it and sets mOwnsData.
- * Allocates the bank (cMemMan_alloc(0x4C, "SpeechBank") + func_002AF8E0), stores mpData, the driver bank id unk_00 =
+ * Allocates the bank (cMemMan_alloc(0x4C, "SpeechBank") + cSpeechBank_cSpeechBank), stores mpData, the driver bank id unk_00 =
  * func_003D69F0(data), copies name into mName and points mShortName after its last '\'. Called by func_002B0348.
  *
  * @param name  the bank path without extension
@@ -3057,7 +3057,7 @@ void* func_002AF960_impl(const char* name, int shortName, void* data)
         }
         data = FILE_load(buf, 0);
     }
-    char* obj = (char*)func_002AF8E0(cMemMan_alloc(76, str_SpeechBank, 0, 0));
+    char* obj = (char*)cSpeechBank_cSpeechBank(cMemMan_alloc(76, str_SpeechBank, 0, 0));
     *(int*)(obj + 0x48) = owned;
     *(void**)(obj + 0x44) = data;
     *(int*)obj = func_003D69F0(data);
@@ -3164,7 +3164,7 @@ extern "C" void* func_002AFA68(cSpeechInstance* mem, int instanceIndex, int stre
 INCLUDE_ASM("sound/bankmonitor", func_002AFB38);
 #ifdef SKIP_ASM
 extern "C" void cStreamSys_STREAM_Destroy(void* self, int i);
-extern "C" void func_002AF900(int* self, int flags);
+extern "C" void cSpeechBank__cSpeechBank(int* self, int flags);
 extern int D_004A37B8;
 
 struct sBmVoiceFB38 {
@@ -3190,7 +3190,7 @@ struct sBankMonFB38 {
 /**
  * Destroys a cSpeechInstance: its speech banks, event files and header data, then closes its stream.
  *
- * Destroys each speech bank (func_002AF900 with 3) and subtracts their count (unk_0F0) from D_004A37B8; for each event
+ * Destroys each speech bank (cSpeechBank__cSpeechBank with 3) and subtracts their count (unk_0F0) from D_004A37B8; for each event
  * file frees both header blocks (unk_8D4) and the separately loaded event data; closes the stream (cStreamSys_STREAM_Destroy on
  * cStreamSys). Deletes the object when bit 0 of flags is set. func_002B0DA0 calls it with 3.
  *
@@ -3203,7 +3203,7 @@ extern "C" void func_002AFB38(cSpeechInstance* selfp, int flags)
     int i;
     for (i = 0; i < self->streamCount; i++) {
         if (self->streams[i] != 0) {
-            func_002AF900(self->streams[i], 3);
+            cSpeechBank__cSpeechBank(self->streams[i], 3);
         }
     }
     D_004A37B8 -= self->streamCount;
@@ -4806,7 +4806,7 @@ extern "C" void* cSongConfiguration_cSongConfiguration(cSongConfiguration* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002B1B68);
+INCLUDE_ASM("sound/bankmonitor", cSongConfiguration__cSongConfiguration);
 #ifdef SKIP_ASM
 extern char D_00483980[];
 
@@ -4817,7 +4817,7 @@ extern char D_00483980[];
  *
  * @param flags  g++ 2.95 destructor flags (bit 0: operator delete the object)
  */
-extern "C" void func_002B1B68(int* self, int flags)
+extern "C" void cSongConfiguration__cSongConfiguration(int* self, int flags)
 {
     *(void**)((char*)self + 0xA8) = D_00483980;
     if (flags & 1) {
@@ -5638,7 +5638,7 @@ extern "C" void func_002B2850(sBMSrc** src, sBMTrack*** dst)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002B28C0);
+INCLUDE_ASM("sound/bankmonitor", cMusicSys_cMusicSys);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 class cController;
@@ -5780,7 +5780,7 @@ static inline int* Row_28C0(int (*g)[5], int i)
  */
 // The music system's constructor (sound/musicsys.cpp in the July 2003 prototype): reads the song list.
 // PORT: g++ 2.95 constructor of a class with virtual bases (stack vtable this-adjust fix-ups written out by hand).
-extern "C" char* func_002B28C0(char* self, int inchrg, int maxBanks, int maxStreams, int heap)
+extern "C" char* cMusicSys_cMusicSys(char* self, int inchrg, int maxBanks, int maxStreams, int heap)
 {
     if (inchrg) {
         char* vb = self + 0x5448;

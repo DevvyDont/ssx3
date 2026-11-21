@@ -248,13 +248,13 @@ int func_00319D18(void* self)
 INCLUDE_ASM("bx/memblockman", cMemBlockMan_initialize);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-void* func_003200E8(void* p);
-void* func_00320120(void* p);
-void* func_00320158(void* p);
-void* func_00320190(void* p);
-void* func_003201D8(void* p);
-void* func_00320220(void* p);
-void* func_00320270(void* p);
+void* TMemContainer8_TMemContainer8(void* p);
+void* TMemContainer16_TMemContainer16(void* p);
+void* TMemContainer32_TMemContainer32(void* p);
+void* TMemContainer64_TMemContainer64(void* p);
+void* TMemContainer128_TMemContainer128(void* p);
+void* TMemContainer256_TMemContainer256(void* p);
+void* TMemContainer512_TMemContainer512(void* p);
 extern const char str_m_container8[];
 extern const char str_m_container16[];
 extern const char str_m_container32[];
@@ -277,13 +277,13 @@ extern int cMemBlockMan_m_initialized;
  */
 extern "C" void cMemBlockMan_initialize(void)
 {
-    cMemBlockMan_m_container8 = func_003200E8(cMemMan_alloc(2052, str_m_container8, 0x1000000, 0));
-    cMemBlockMan_m_container16 = func_00320120(cMemMan_alloc(8196, str_m_container16, 0x2000000, 0));
-    cMemBlockMan_m_container32 = func_00320158(cMemMan_alloc(24580, str_m_container32, 0x3000000, 0));
-    cMemBlockMan_m_container64 = func_00320190(cMemMan_alloc(0x32004, str_m_container64, 0x4000000, 0));
-    cMemBlockMan_m_container128 = func_003201D8(cMemMan_alloc(0x25804, str_m_container128, 0x5000000, 0));
-    cMemBlockMan_m_container256 = func_00320220(cMemMan_alloc(0x20004, str_m_container256, 0x6000000, 0));
-    cMemBlockMan_m_container512 = func_00320270(cMemMan_alloc(0x20004, str_m_container512, 0x7000000, 0));
+    cMemBlockMan_m_container8 = TMemContainer8_TMemContainer8(cMemMan_alloc(2052, str_m_container8, 0x1000000, 0));
+    cMemBlockMan_m_container16 = TMemContainer16_TMemContainer16(cMemMan_alloc(8196, str_m_container16, 0x2000000, 0));
+    cMemBlockMan_m_container32 = TMemContainer32_TMemContainer32(cMemMan_alloc(24580, str_m_container32, 0x3000000, 0));
+    cMemBlockMan_m_container64 = TMemContainer64_TMemContainer64(cMemMan_alloc(0x32004, str_m_container64, 0x4000000, 0));
+    cMemBlockMan_m_container128 = TMemContainer128_TMemContainer128(cMemMan_alloc(0x25804, str_m_container128, 0x5000000, 0));
+    cMemBlockMan_m_container256 = TMemContainer256_TMemContainer256(cMemMan_alloc(0x20004, str_m_container256, 0x6000000, 0));
+    cMemBlockMan_m_container512 = TMemContainer512_TMemContainer512(cMemMan_alloc(0x20004, str_m_container512, 0x7000000, 0));
     cMemBlockMan_m_initialized = 1;
 }
 #endif
@@ -294,13 +294,13 @@ INCLUDE_ASM("bx/memblockman", cMemBlockMan_alloc);
 extern "C" void* cMemMan_internalAlloc(unsigned int size, unsigned int align, int flags, int top);
 // PORT: the pool allocators are bound with their real (pool, align) arity; the
 // symbols are named __FPv upstream.
-void* func_003202C0_impl(void* pool, unsigned int align) __asm__("func_003202C0__FPv");
-void* func_003202F8_impl(void* pool, unsigned int align) __asm__("func_003202F8__FPv");
-void* func_00320330_impl(void* pool, unsigned int align) __asm__("func_00320330__FPv");
-void* func_00320368_impl(void* pool, unsigned int align) __asm__("func_00320368__FPv");
-void* func_003203B8_impl(void* pool, unsigned int align) __asm__("func_003203B8__FPv");
-void* func_00320408_impl(void* pool, unsigned int align) __asm__("func_00320408__FPv");
-void* func_00320448_impl(void* pool, unsigned int align) __asm__("func_00320448__FPv");
+void* TMemContainer8_alloc_impl(void* pool, unsigned int align) __asm__("TMemContainer8_alloc__FPv");
+void* TMemContainer16_alloc_impl(void* pool, unsigned int align) __asm__("TMemContainer16_alloc__FPv");
+void* TMemContainer32_alloc_impl(void* pool, unsigned int align) __asm__("TMemContainer32_alloc__FPv");
+void* TMemContainer64_alloc_impl(void* pool, unsigned int align) __asm__("TMemContainer64_alloc__FPv");
+void* TMemContainer128_alloc_impl(void* pool, unsigned int align) __asm__("TMemContainer128_alloc__FPv");
+void* TMemContainer256_alloc_impl(void* pool, unsigned int align) __asm__("TMemContainer256_alloc__FPv");
+void* TMemContainer512_alloc_impl(void* pool, unsigned int align) __asm__("TMemContainer512_alloc__FPv");
 extern void* cMemBlockMan_m_container8;
 extern void* cMemBlockMan_m_container16;
 extern void* cMemBlockMan_m_container32;
@@ -330,19 +330,19 @@ extern "C" void* cMemBlockMan_alloc_impl(unsigned int size, unsigned int align)
     if (cMemBlockMan_m_initialized) {
         size = size + (-(size & 3) & 3);
         if (size <= 8)
-            return func_003202C0_impl(cMemBlockMan_m_container8, align);
+            return TMemContainer8_alloc_impl(cMemBlockMan_m_container8, align);
         if (size <= 0x10)
-            return func_003202F8_impl(cMemBlockMan_m_container16, align);
+            return TMemContainer16_alloc_impl(cMemBlockMan_m_container16, align);
         if (size <= 0x20)
-            return func_00320330_impl(cMemBlockMan_m_container32, align);
+            return TMemContainer32_alloc_impl(cMemBlockMan_m_container32, align);
         if (size <= 0x40)
-            return func_00320368_impl(cMemBlockMan_m_container64, align);
+            return TMemContainer64_alloc_impl(cMemBlockMan_m_container64, align);
         if (size <= 0x80)
-            return func_003203B8_impl(cMemBlockMan_m_container128, align);
+            return TMemContainer128_alloc_impl(cMemBlockMan_m_container128, align);
         if (size <= 0x100)
-            return func_00320408_impl(cMemBlockMan_m_container256, align);
+            return TMemContainer256_alloc_impl(cMemBlockMan_m_container256, align);
         if (size <= 0x200)
-            return func_00320448_impl(cMemBlockMan_m_container512, align);
+            return TMemContainer512_alloc_impl(cMemBlockMan_m_container512, align);
     } else
         size = 513;
     return cMemMan_internalAlloc(size, align > 7 ? align : 8, 0, 0);
@@ -352,13 +352,13 @@ extern "C" void* cMemBlockMan_alloc_impl(unsigned int size, unsigned int align)
 //100%
 INCLUDE_ASM("bx/memblockman", cMemBlockMan_free);
 #ifdef SKIP_ASM
-void func_00320488(void* pool, void** p);
-void func_00320498(void* pool, void** p);
-void func_003204A8(void* pool, void** p);
-void func_003204B8(void* pool, void** p);
-void func_003204D0(void* pool, void** p);
-void func_003204E8(void* pool, void** p);
-void func_00320500(void* pool, void** p);
+void TMemContainer8_free(void* pool, void** p);
+void TMemContainer16_free(void* pool, void** p);
+void TMemContainer32_free(void* pool, void** p);
+void TMemContainer64_free(void* pool, void** p);
+void TMemContainer128_free(void* pool, void** p);
+void TMemContainer256_free(void* pool, void** p);
+void TMemContainer512_free(void* pool, void** p);
 extern void* cMemBlockMan_m_container8;
 extern void* cMemBlockMan_m_container16;
 extern void* cMemBlockMan_m_container32;
@@ -384,19 +384,19 @@ inline bool inPool_319F68(void* pool, void* p)
 extern "C" void cMemBlockMan_free(void* block)
 {
     if (inPool_319F68<0x800>(cMemBlockMan_m_container8, block))
-        func_00320488(cMemBlockMan_m_container8, (void**)block);
+        TMemContainer8_free(cMemBlockMan_m_container8, (void**)block);
     else if (inPool_319F68<0x2000>(cMemBlockMan_m_container16, block))
-        func_00320498(cMemBlockMan_m_container16, (void**)block);
+        TMemContainer16_free(cMemBlockMan_m_container16, (void**)block);
     else if (inPool_319F68<0x6000>(cMemBlockMan_m_container32, block))
-        func_003204A8(cMemBlockMan_m_container32, (void**)block);
+        TMemContainer32_free(cMemBlockMan_m_container32, (void**)block);
     else if (inPool_319F68<0x32000>(cMemBlockMan_m_container64, block))
-        func_003204B8(cMemBlockMan_m_container64, (void**)block);
+        TMemContainer64_free(cMemBlockMan_m_container64, (void**)block);
     else if (inPool_319F68<0x25800>(cMemBlockMan_m_container128, block))
-        func_003204D0(cMemBlockMan_m_container128, (void**)block);
+        TMemContainer128_free(cMemBlockMan_m_container128, (void**)block);
     else if (inPool_319F68<0x20000>(cMemBlockMan_m_container256, block))
-        func_003204E8(cMemBlockMan_m_container256, (void**)block);
+        TMemContainer256_free(cMemBlockMan_m_container256, (void**)block);
     else if (inPool_319F68<0x20000>(cMemBlockMan_m_container512, block))
-        func_00320500(cMemBlockMan_m_container512, (void**)block);
+        TMemContainer512_free(cMemBlockMan_m_container512, (void**)block);
 }
 #endif
 
@@ -503,30 +503,30 @@ extern void* cMemBlockMan_m_container256;
 extern void* cMemBlockMan_m_container64;
 extern void* cMemBlockMan_m_container128;
 // PORT: these empty stubs are defined as f(void), but this caller passes one argument.
-void func_00320518_1(void*) __asm__("func_00320518__Fv");
-void func_00320520_1(void*) __asm__("func_00320520__Fv");
-void func_00320528_1(void*) __asm__("func_00320528__Fv");
-void func_00320530_1(void*) __asm__("func_00320530__Fv");
-void func_00320538_1(void*) __asm__("func_00320538__Fv");
-void func_00320540_1(void*) __asm__("func_00320540__Fv");
-void func_00320548_1(void*) __asm__("func_00320548__Fv");
+void TMemContainer8_validate_1(void*) __asm__("TMemContainer8_validate__Fv");
+void TMemContainer16_validate_1(void*) __asm__("TMemContainer16_validate__Fv");
+void TMemContainer32_validate_1(void*) __asm__("TMemContainer32_validate__Fv");
+void TMemContainer64_validate_1(void*) __asm__("TMemContainer64_validate__Fv");
+void TMemContainer128_validate_1(void*) __asm__("TMemContainer128_validate__Fv");
+void TMemContainer256_validate_1(void*) __asm__("TMemContainer256_validate__Fv");
+void TMemContainer512_validate_1(void*) __asm__("TMemContainer512_validate__Fv");
 
 /**
  * Checks all fixed-size block pools for corruption.
  *
- * When cMemBlockMan_m_initialized is set, calls the per-pool validate functions func_00320518 ... func_00320548 on the
+ * When cMemBlockMan_m_initialized is set, calls the per-pool validate functions TMemContainer8_validate ... TMemContainer512_validate on the
  * 8- to 512-byte pools; they are empty in this build.
  */
 extern "C" void cMemBlockMan_validate(void)
 {
     if (cMemBlockMan_m_initialized != 0) {
-        func_00320518_1(cMemBlockMan_m_container8);
-        func_00320520_1(cMemBlockMan_m_container16);
-        func_00320528_1(cMemBlockMan_m_container32);
-        func_00320530_1(cMemBlockMan_m_container64);
-        func_00320538_1(cMemBlockMan_m_container128);
-        func_00320540_1(cMemBlockMan_m_container256);
-        func_00320548_1(cMemBlockMan_m_container512);
+        TMemContainer8_validate_1(cMemBlockMan_m_container8);
+        TMemContainer16_validate_1(cMemBlockMan_m_container16);
+        TMemContainer32_validate_1(cMemBlockMan_m_container32);
+        TMemContainer64_validate_1(cMemBlockMan_m_container64);
+        TMemContainer128_validate_1(cMemBlockMan_m_container128);
+        TMemContainer256_validate_1(cMemBlockMan_m_container256);
+        TMemContainer512_validate_1(cMemBlockMan_m_container512);
     }
 }
 #endif

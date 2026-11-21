@@ -18,8 +18,8 @@
 
 struct luno_cLunoFunc {
     const char* Chunk;                  // 0x0 [O] const tChunkHeader* (no tChunkHeader in include/ yet); [U] init stores
-                                        //     its data argument; writeToReplayFrame (func_00224C00) writes Chunk - base,
-                                        //     readFromReplayFrame (func_00224C78) stores base + the value read
+                                        //     its data argument; writeToReplayFrame (luno_cLunoFunc_writeToReplayFrame) writes Chunk - base,
+                                        //     readFromReplayFrame (luno_cLunoFunc_readFromReplayFrame) stores base + the value read
     int FuncNum;                        // 0x4 [O]; [U] init; written / read as is by the replay functions
 };
 

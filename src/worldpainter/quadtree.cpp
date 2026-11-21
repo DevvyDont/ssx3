@@ -572,7 +572,7 @@ INCLUDE_ASM("worldpainter/quadtree", strcpy2);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // The unit declares this as extern "C" void* strcpy2(void*) further down
-// (its caller func_002C5500 passes one arg); bind the 2-arg body to the symbol.
+// (its caller cPS2MemCard_SetTitleString passes one arg); bind the 2-arg body to the symbol.
 char* strcpy2_impl(char* dst, unsigned short* src) __asm__("strcpy2");
 /**
  * Copies a 16-bit-character string into a byte string, keeping only the low byte of each character.
@@ -1928,7 +1928,7 @@ extern "C" void cPS2MemCard_StartFileSlotWrite2(cPS2MemCard* self, int fileSlot,
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C4720__FPvii);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_WriteData__FPvii);
 #ifdef SKIP_ASM
 /**
  * Starts writing more data to the open save file: stores the buffer in unk_02C and the size in unk_020 and calls
@@ -1938,7 +1938,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C4720__FPvii);
  * @param transferSize  the number of bytes to write
  * @return func_002C48C0's return register (it returns nothing)
  */
-void* func_002C4720(void* vself, int buffer, int transferSize)
+void* cPS2MemCard_WriteData(void* vself, int buffer, int transferSize)
 {
     cPS2MemCard* self = (cPS2MemCard*)vself;
     self->unk_02C = buffer;
@@ -2046,7 +2046,7 @@ extern "C" void cPS2MemCard_StartFileSlotRead(cPS2MemCard* self, int fileSlot, i
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C4858__FPvii);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_ReadData__FPvii);
 #ifdef SKIP_ASM
 /**
  * Starts reading more data from the open save file: stores the buffer in unk_02C and the size in unk_020 and calls
@@ -2056,7 +2056,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C4858__FPvii);
  * @param transferSize  the number of bytes to read
  * @return func_002C48C0's return register (it returns nothing)
  */
-void* func_002C4858(void* vself, int buffer, int transferSize)
+void* cPS2MemCard_ReadData(void* vself, int buffer, int transferSize)
 {
     cPS2MemCard* self = (cPS2MemCard*)vself;
     self->unk_02C = buffer;
@@ -2634,7 +2634,7 @@ extern "C" int cPS2MemCard_GetLastError_impl(sQTState* self, int i)
 extern "C" void* cPS2MemCard_GetLastError(void*, int);
 
 //99.38%
-INCLUDE_ASM("worldpainter/quadtree", func_002C5230__FPv);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_DidErrorOccur__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns whether the current port (mDevice) has an error: cPS2MemCard_GetLastError for it is nonzero. Card vtable slot 73;
@@ -2642,7 +2642,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C5230__FPv);
  *
  * @return 1 when cPS2MemCard_GetLastError returns nonzero, else 0
  */
-int func_002C5230(void* vself)
+int cPS2MemCard_DidErrorOccur(void* vself)
 {
     cPS2MemCard* self = (cPS2MemCard*)vself;
     return (cPS2MemCard_GetLastError(self, self->mDevice) != 0);
@@ -2898,7 +2898,7 @@ extern "C" void func_002C54D0(cPS2MemCard* self, int fileSlot, char* dst)
 extern "C" void* strcpy2(void*);
 
 //99.29%
-INCLUDE_ASM("worldpainter/quadtree", func_002C5500__FPv);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_SetTitleString__FPv);
 #ifdef SKIP_ASM
 /**
  * Sets the save title (unk_058): converts the 16-bit string the caller passes in the second argument register to ASCII
@@ -2906,7 +2906,7 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C5500__FPv);
  *
  * @return strcpy2's result
  */
-void* func_002C5500(void* vself)
+void* cPS2MemCard_SetTitleString(void* vself)
 {
     cPS2MemCard* self = (cPS2MemCard*)vself;
     return strcpy2((char*)self + 0x58);

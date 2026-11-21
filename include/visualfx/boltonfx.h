@@ -10,16 +10,16 @@
 // (0x2EC9D0..0x2ECFA0).
 // Class name: [R] the allocation tag "cBoltOnFXInterface" (cRider_cRider and cFERider_init: cMemMan_alloc(200,
 // "cBoltOnFXInterface") + its constructor) and the preview's vtable _vt$18cBoltOnFXInterface (builds/x/v2: its slot 1
-// matches func_002ECB28).
+// matches cBoltOnFXInterface__cBoltOnFXInterface).
 //
 // Size 0xC8 [R] (cMemMan_alloc(200, ...)). No base class; the class declares a virtual destructor, so g++ 2.95 puts
-// the vptr after its data, at +0xC4. Vtable D_00487EE8 (1 slot: the destructor func_002ECB28), stored by both
+// the vptr after its data, at +0xC4. Vtable D_00487EE8 (1 slot: the destructor cBoltOnFXInterface__cBoltOnFXInterface), stored by both
 // constructors and the destructor.
 // Owners: cRider::mBoltOnFX (+0x890, ai/rider.h; built with the rider's mAttachedEmitterFX), cFERider::mpBoltOnFX
 // (+0xC74, fe/ferider.h). Each frame cRider_updateSplitMiscFX / cFERider_update call func_002ECF78 (rebuild when dirty).
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] the constructors func_002EC9E0 (rider) / func_002ECA68 (front-end character id), the destructor func_002ECB28,
+//   [R] the constructors cBoltOnFXInterface_cBoltOnFXInterface (rider) / cBoltOnFXInterface_cBoltOnFXInterface1 (front-end character id), the destructor cBoltOnFXInterface__cBoltOnFXInterface,
 //       the allocation;
 //   [P] the preview's assert strings (member names);
 //   [U] how retail code uses the field.
@@ -34,7 +34,7 @@ struct cAttachedEmitterFX; // preview class name (cAttachedEmitterFX::ShouldDisa
 // by both constructors) sets mEmitter = -1; func_002ECAF0 empties all 15.
 struct tBoltOnFXEntry {
     int mEmitter;   // 0x0 (our name) the cAttachedEmitterFX emitter index, -1 = free: [U] func_002ECC28 stores
-                    //     func_002F2130's result; func_002ECB28 / func_002ECCB8 release it with func_002F2218
+                    //     func_002F2130's result; cBoltOnFXInterface__cBoltOnFXInterface / func_002ECCB8 release it with func_002F2218
     int mItem;      // 0x4 (our name) the item (attach point) id: [U] func_002ECC28 stores, func_002ECBC0 matches
     int mKind;      // 0x8 (our name) the particle effect kind: [U] func_002ECC28 stores, func_002ECBC0 matches
 };
@@ -42,17 +42,17 @@ struct tBoltOnFXEntry {
 struct cBoltOnFXInterface {
     int mDirty;                             // 0x00 (our name) [R] ctors 1; [U] func_002ECF78 rebuilds while set,
                                             //      func_002ECCB8 clears it
-    cRider* mpRider;                        // 0x04 (our name) [R] func_002EC9E0 stores the rider, func_002ECA68 0;
+    cRider* mpRider;                        // 0x04 (our name) [R] cBoltOnFXInterface_cBoltOnFXInterface stores the rider, cBoltOnFXInterface_cBoltOnFXInterface1 0;
                                             //      [P] "The bolt on interface has to have some sort of rider known to
                                             //      it"; [U] func_002ECCB8 reads its AI index and identity
-    int* mpCharId;                          // 0x08 (our name) [R] func_002ECA68 stores a pointer to the front-end
-                                            //      character id, func_002EC9E0 0; [U] func_002ECCB8 uses it without a rider
+    int* mpCharId;                          // 0x08 (our name) [R] cBoltOnFXInterface_cBoltOnFXInterface1 stores a pointer to the front-end
+                                            //      character id, cBoltOnFXInterface_cBoltOnFXInterface 0; [U] func_002ECCB8 uses it without a rider
     cAttachedEmitterFX* mAttachedEmitterFX; // 0x0C [P] "mAttachedEmitterFX!=NULL"; [R] both ctors store their third
                                             //      argument (cRider::mAttachedEmitterFX / cFERider's emitter owner);
                                             //      [U] passed to func_002F2130 / func_002F2218 (create / release)
     tBoltOnFXEntry mEntries[15];            // 0x10 (our name) [R] ctors construct 15 (func_002EC9D0) and free them
                                             //      (func_002ECAF0); [U] func_002ECBC0 / func_002ECC28 / func_002ECCB8 /
-                                            //      func_002ECB28 walk 15; [P] "Ran out of bolt on emitters"
+                                            //      cBoltOnFXInterface__cBoltOnFXInterface walk 15; [P] "Ran out of bolt on emitters"
     void** mVtbl;                           // 0xC4 [R] D_00487EE8 (_vt$18cBoltOnFXInterface), stored by the ctors / dtor
 };
 

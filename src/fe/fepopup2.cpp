@@ -24,21 +24,21 @@ INCLUDE_ASM("fe/fepopup2", cFEStateNetHelpPopup_setNumHelpOptions);
 
 INCLUDE_ASM("fe/fepopup2", cFEStateNetHelpPopup_setDescription);
 
-INCLUDE_ASM("fe/fepopup2", func_001DA648);
+INCLUDE_ASM("fe/fepopup2", AccountDetailsMenu_AccountDetailsMenu);
 
-INCLUDE_ASM("fe/fepopup2", func_001DA7E8);
+INCLUDE_ASM("fe/fepopup2", AccountDetailsMenu_AccountDetailsMenu1);
 
-INCLUDE_ASM("fe/fepopup2", func_001DA988);
+INCLUDE_ASM("fe/fepopup2", AccountMenu_AccountMenu);
 
-INCLUDE_ASM("fe/fepopup2", func_001DAAC8);
+INCLUDE_ASM("fe/fepopup2", CreatePersonaMenu_CreatePersonaMenu);
 
-INCLUDE_ASM("fe/fepopup2", func_001DABD0);
+INCLUDE_ASM("fe/fepopup2", DeletePersonaMenu_DeletePersonaMenu);
 
-INCLUDE_ASM("fe/fepopup2", func_001DACB8);
+INCLUDE_ASM("fe/fepopup2", PersonaMenu_PersonaMenu);
 
-INCLUDE_ASM("fe/fepopup2", func_001DAE20);
+INCLUDE_ASM("fe/fepopup2", LobbyMenu_LobbyMenu);
 
-INCLUDE_ASM("fe/fepopup2", func_001DAF08);
+INCLUDE_ASM("fe/fepopup2", RoomMenu_RoomMenu);
 
-INCLUDE_ASM("fe/fepopup2", func_001DB028);
+INCLUDE_ASM("fe/fepopup2", ChatMenu_ChatMenu);
 

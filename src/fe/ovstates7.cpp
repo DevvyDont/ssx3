@@ -4,9 +4,9 @@ INCLUDE_ASM("fe/ovstates7", cOVStateTrophy_onCreateScreen);
 
 INCLUDE_ASM("fe/ovstates7", cOVStateTrophy_onWidgetEvent);
 
-INCLUDE_ASM("fe/ovstates7", func_0020EAA0);
+INCLUDE_ASM("fe/ovstates7", cHUDRadar_cHUDRadar);
 
-INCLUDE_ASM("fe/ovstates7", func_0020EB08);
+INCLUDE_ASM("fe/ovstates7", cHUDRadar__cHUDRadar);
 
 INCLUDE_ASM("fe/ovstates7", func_0020EB50);
 

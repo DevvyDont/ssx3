@@ -1544,7 +1544,7 @@ extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg,
 /**
  * Shows HUD effect 42 with @p value for 5 seconds.
  *
- * Called by func_0023B5F8 (game mode) with a time difference in seconds.
+ * Called by cGMTimeHandler_riderCheckpointHit (game mode) with a time difference in seconds.
  *
  * @param value  the value to show
  * @return 0.0
@@ -1564,7 +1564,7 @@ extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg,
 /**
  * Shows HUD effect 43 with @p value for 5 seconds.
  *
- * Called by func_0023C560 (game mode) with a points difference.
+ * Called by cGMPointHandler_riderCheckpointHit (game mode) with a points difference.
  *
  * @param value  the value to show
  * @return 0.0

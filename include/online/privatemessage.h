@@ -12,7 +12,7 @@
 // _$_15cPrivateMessage (its out-of-line dtor) and vector<const cPrivateMessage*, BXAllocator<..>>. Not in On Tour's
 // DWARF. No base class: the class's only virtual is its destructor, so g++ 2.95 puts the vptr after the data (0xC).
 // Vtable cPrivateMessage_vtbl (0x0046D8C0, 1 slot: the deleting dtor cPrivateMessage__cPrivateMessage).
-// Methods: cPrivateMessage__cPrivateMessage (main/all_in_one_main, 0x1DCAF0) and its out-of-line twin func_002688E0
+// Methods: cPrivateMessage__cPrivateMessage (main/all_in_one_main, 0x1DCAF0) and its out-of-line twin cPrivateMessage__cPrivateMessage1
 // (bx/bxstringctor): vptr, then cBXString dtors on +8, +4, +0, delete when flags & 1.
 //
 // A FLAT layout. Evidence tags: [R] retail allocation, inline constructor and destructor; [P] preview symbols; [U] how

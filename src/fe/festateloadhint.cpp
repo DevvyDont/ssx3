@@ -611,7 +611,7 @@ extern "C" int func_00246268(void* self, int menu, int event)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00246278);
+INCLUDE_ASM("fe/festateloadhint", cGameLoadState_widgetCreateMultiP);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_00416210(void* dst, int c, int n);
@@ -668,7 +668,7 @@ static inline bool IsId_246278(char* obj, char* key)
 /**
  * Fills in one widget of the online load screen as it is created: the location text or the game-mode title.
  *
- * func_00245598() calls it when the game path (cBENewRaceInterface_newRace.cGamePath) is 2 (online).
+ * cGameLoadState_onWidgetCreate() calls it when the game path (cBENewRaceInterface_newRace.cGamePath) is 2 (online).
  * "Location Text" gets "%s-%S" of the localised peak name ("kT_Peak1name".."kT_Peak3name" by cBENewRaceInterface_getLocationPeak1(), the
  * location's peak) and the location name (cBENewRaceInterface_getLocationName1()). Otherwise the title widget matching the game mode
  * (newRace.cGameMode) is shown (setVisible, slot 9, with 1): "Title_Multi_Race" for modes 0 and 4, "_SS" 1, "_BA"
@@ -676,7 +676,7 @@ static inline bool IsId_246278(char* obj, char* key)
  *
  * @param obj  the widget being created (its hash name is at +0x38)
  */
-extern "C" void func_00246278(cGameLoadState* self, char* obj)
+extern "C" void cGameLoadState_widgetCreateMultiP(cGameLoadState* self, char* obj)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (IsId_246278(obj, str_Location_Text)) {
@@ -724,7 +724,7 @@ extern "C" void func_00246278(cGameLoadState* self, char* obj)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_002464E8);
+INCLUDE_ASM("fe/festateloadhint", cGameLoadState_widgetCreateQP);
 #ifdef SKIP_ASM
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
 extern "C" int cBENewRaceInterface_getLocationDifficulty(void* iface, int idx);
@@ -812,8 +812,8 @@ static inline void Fmt_2464E8(char* buf, char* fmt, char* key, void* iface)
  * Fills in one widget of the offline load screen as it is created: location, titles, course stats, rider name and
  * level, and the map image.
  *
- * func_00245598() calls it when the game path (newRace.cGamePath) is not 2. "Location" gets the peak and location
- * name as in func_00246278(). The widgets matching the game mode (cBENewRaceInterface_newRace.cGameMode) are shown
+ * cGameLoadState_onWidgetCreate() calls it when the game path (newRace.cGamePath) is not 2. "Location" gets the peak and location
+ * name as in cGameLoadState_widgetCreateMultiP(). The widgets matching the game mode (cBENewRaceInterface_newRace.cGameMode) are shown
  * (setVisible, slot 9, with 1): "Title_Quick_Race/SS/BA/SP/BC" (modes 0/4, 1, 2, 3, 5/6) and "et_race/SS/BA/SP/TChal/
  * PChal" (modes 0, 1, 2, 3, 5, 6), and "ec_beg/inter/expert" by the location's cBENewRaceInterface_getLocationDifficulty() value (0-2).
  * "vert_drop_percent" and "cou_leng_percent" get "kT_OVRCMNNumberOfFeet" with the location's entry in the 17-entry
@@ -825,7 +825,7 @@ static inline void Fmt_2464E8(char* buf, char* fmt, char* key, void* iface)
  *
  * @param obj  the widget being created (its hash name is at +0x38)
  */
-extern "C" void func_002464E8(cGameLoadState* self, char* obj)
+extern "C" void cGameLoadState_widgetCreateQP(cGameLoadState* self, char* obj)
 {
     sTable17_2464E8 tA = D_0047BAE0;
     sTable17_2464E8 tB = D_0047BB28;
@@ -1022,7 +1022,7 @@ struct sName5_6CF8 { char c[5]; };
  * cBENetworkInterface_networkOpt.oppCharacterAttributes. Writes the level ("%d") into "ranking00" or "ranking01"; for each stat i shows label "<player+1>0<i>"
  * (setVisible 1, text "kT_CMNLvNum" with stat / 5) and sets bar "<player><i>pb" to range 55 (+0x80) and value stat
  * (cUIProgress_setValue()). The picture widget "<player>" takes this player's portrait texture (+0x10 or +0x14 of the
- * load screen at +0x48, loaded by func_00233640()). func_00245418() and func_002454F8() call it for players 0 and 1.
+ * load screen at +0x48, loaded by func_00233640()). cGameLoadState_onCreateScreen() and func_002454F8() call it for players 0 and 1.
  *
  * @param player  the player slot (0 or 1)
  */

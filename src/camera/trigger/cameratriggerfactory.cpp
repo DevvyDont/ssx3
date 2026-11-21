@@ -3253,7 +3253,7 @@ void sti_00175A20(int init, int prio)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176270);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCameraAlgorithm__cCameraAlgorithm1);
 #ifdef SKIP_ASM
 extern void* D_0045BDE0[];
 
@@ -3265,7 +3265,7 @@ extern void* D_0045BDE0[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void func_00176270(cCameraAlgorithm* self, int flags)
+extern "C" void cCameraAlgorithm__cCameraAlgorithm1(cCameraAlgorithm* self, int flags)
 {
     self->mVtbl = D_0045BDE0;
     if (flags & 1) {

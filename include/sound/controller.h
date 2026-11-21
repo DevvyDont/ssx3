@@ -46,8 +46,8 @@ struct cController {
     int mNumInstances;              // 0x0014 [R] cCrowdSys ctor 0 (sound/crowdsys.h)
     cCrowdInstance* mpCrowdInstances; // 0x0018 [R] cCrowdSys ctor 0 (sound/crowdsys.h)
     tCrowdData mCrowdData[3];       // 0x001C [R] cCrowdSys ctor (sound/crowdsys.h)
-    // --- cMusicSys (sound/musicsys.h, non-virtual 0x5448; ctor func_002B28C0(this + 0x118))
-    cMusicSys MusicSys;             // 0x0118 [R] ctor func_002B28C0(this + 0x118, 0, ...); [U] every cController method reaches
+    // --- cMusicSys (sound/musicsys.h, non-virtual 0x5448; ctor cMusicSys_cMusicSys(this + 0x118))
+    cMusicSys MusicSys;             // 0x0118 [R] ctor cMusicSys_cMusicSys(this + 0x118, 0, ...); [U] every cController method reaches
                                     //        cBankManager as **(this + 0x118) (MusicSys.mpVStreamSys, then the cStreamSys's own
                                     //        vbase pointer); the ctor / dtor store MusicSys.mVtbl (0x5558) = D_004838F8
     // --- cSpeechSys (sound/speechsys.h, non-virtual 0x1C0)

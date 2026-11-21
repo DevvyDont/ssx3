@@ -8,11 +8,11 @@
 // slot functions in fe/fepopupmisc, the out-of-line constructors / destructors in fe/all_in_one_fe.
 //
 //   type  class                          size  vtable      screen                      ctor          dtor (slot 1)
-//   10    cOVState_HEAT_STANDINGS        0x9C  D_00474088  "42freestyle_standings"     func_0021CD08 func_0021CCE0
-//   11    cOVState_FINAL_STANDINGS       0xA0  D_00473FB0  "43final_standings"         func_0021CD98 func_0021CD70
-//   12    cOVState_RACE_FINISHOV         0xA4  D_00473E00  "finishov" (mHashName)      func_0021CEB8 func_0021CE90
-//   13    cOVState_BASSSP_QUAL_FINISHOV  0xA4  D_00473D28  "finishov" (mHashName)      func_0021CF60 func_0021CF38
-//   35    cOVState_TOURNAMENT_STANDINGS  0x9C  D_00473C50  "109MultiplayerStandings"   func_0021D008 func_0021CFE0
+//   10    cOVState_HEAT_STANDINGS        0x9C  D_00474088  "42freestyle_standings"     cOVState_HEAT_STANDINGS_cOVState_HEAT_STANDINGS cOVState_HEAT_STANDINGS__cOVState_HEAT_STANDINGS
+//   11    cOVState_FINAL_STANDINGS       0xA0  D_00473FB0  "43final_standings"         cOVState_FINAL_STANDINGS_cOVState_FINAL_STANDINGS cOVState_FINAL_STANDINGS__cOVState_FINAL_STANDINGS
+//   12    cOVState_RACE_FINISHOV         0xA4  D_00473E00  "finishov" (mHashName)      cOVState_RACE_FINISHOV_cOVState_RACE_FINISHOV cOVState_RACE_FINISHOV__cOVState_RACE_FINISHOV
+//   13    cOVState_BASSSP_QUAL_FINISHOV  0xA4  D_00473D28  "finishov" (mHashName)      cOVState_BASSSP_QUAL_FINISHOV_cOVState_BASSSP_QUAL_FINISHOV cOVState_BASSSP_QUAL_FINISHOV__cOVState_BASSSP_QUAL_FINISHOV
+//   35    cOVState_TOURNAMENT_STANDINGS  0x9C  D_00473C50  "109MultiplayerStandings"   cOVState_TOURNAMENT_STANDINGS_cOVState_TOURNAMENT_STANDINGS cOVState_TOURNAMENT_STANDINGS__cOVState_TOURNAMENT_STANDINGS
 //
 // Names (two signals each): HEAT_STANDINGS and FINAL_STANDINGS - On Tour's DWARF has both classes with exactly the
 // retail override sets (6 and 9 slots) and sizes base+0 / base+4 (doInit), and the retail screens / texts say
@@ -35,14 +35,14 @@ struct cUIState;
 struct cUIScreen;
 
 // cOVState_HEAT_STANDINGS (0x9C, no own members; On Tour likewise has none: size 0x90 = its cOVState). Slots: 4
-// onCreateScreen func_001E5B80, 6 onGainFocus func_001E64C8, 8 onInputBegin func_001E65B8, 12 onUpdate func_001E64A8,
-// 19 onWidgetEvent func_001E6640, 20 onWidgetMenu func_001E6630.
+// onCreateScreen cOVState_HEAT_STANDINGS_onCreateScreen, 6 onGainFocus cOVState_HEAT_STANDINGS_onGainFocus, 8 onInputBegin cOVState_HEAT_STANDINGS_onInputBegin, 12 onUpdate cOVState_HEAT_STANDINGS_onUpdate,
+// 19 onWidgetEvent cOVState_HEAT_STANDINGS_onWidgetEvent, 20 onWidgetMenu cOVState_HEAT_STANDINGS_onWidgetMenu.
 
 struct cOVState_HEAT_STANDINGS {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                    // 0x008 [R] func_0021CD08 stores D_00474088 after cOVState_vtbl
+    void** mVtbl;                    // 0x008 [R] cOVState_HEAT_STANDINGS_cOVState_HEAT_STANDINGS stores D_00474088 after cOVState_vtbl
     // --- cUIState (ui/uistate.h, 0x48; same member names)
     int mHashName;                   // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;             // 0x010 [O]; [R] the ctor's engine argument
@@ -88,16 +88,16 @@ CHECK_OFFSET(cOVState_HEAT_STANDINGS, mszChatBuff, 0x058);
 CHECK_OFFSET(cOVState_HEAT_STANDINGS, mOVID, 0x098);
 CHECK_SIZE(cOVState_HEAT_STANDINGS, 0x9C);
 
-// cOVState_FINAL_STANDINGS (0xA0: cMemMan size for type 11). Slots: 4 onCreateScreen func_001E6668, 6 onGainFocus
-// func_001E75D0, 7 onGainTransition func_001E6718, 8 onInputBegin func_001E7AA8, 11 onLoseFocus func_001E7920, 12
+// cOVState_FINAL_STANDINGS (0xA0: cMemMan size for type 11). Slots: 4 onCreateScreen cOVState_FINAL_STANDINGS_onCreateScreen, 6 onGainFocus
+// cOVState_FINAL_STANDINGS_onGainFocus, 7 onGainTransition cOVState_FINAL_STANDINGS_onGainTransition, 8 onInputBegin cOVState_FINAL_STANDINGS_onInputBegin, 11 onLoseFocus cOVState_FINAL_STANDINGS_onLoseFocus, 12
 // onUpdate
-// func_001E7928, 18 onWidgetCreate func_001E7558, 19 onWidgetEvent func_001E7B88, 20 onWidgetMenu func_001E7B78.
+// cOVState_FINAL_STANDINGS_onUpdate, 18 onWidgetCreate cOVState_FINAL_STANDINGS_onWidgetCreate, 19 onWidgetEvent cOVState_FINAL_STANDINGS_onWidgetEvent, 20 onWidgetMenu cOVState_FINAL_STANDINGS_onWidgetMenu.
 
 struct cOVState_FINAL_STANDINGS {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                    // 0x008 [R] func_0021CD98 stores D_00473FB0 after cOVState_vtbl
+    void** mVtbl;                    // 0x008 [R] cOVState_FINAL_STANDINGS_cOVState_FINAL_STANDINGS stores D_00473FB0 after cOVState_vtbl
     // --- cUIState (ui/uistate.h, 0x48; same member names)
     int mHashName;                   // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;             // 0x010 [O]; [R] the ctor's engine argument
@@ -120,7 +120,7 @@ struct cOVState_FINAL_STANDINGS {
     int mOVID;                       // 0x098 [O] tOVStateEnum; [R] ctor stores its id argument
     // --- cOVState_FINAL_STANDINGS
     int doInit;                      // 0x09C [O] bool doInit (On Tour 0x90, its only member); [U] onCreateScreen
-                                     //       func_001E6668 sets it, onGainTransition func_001E6718 tests and clears it
+                                     //       cOVState_FINAL_STANDINGS_onCreateScreen sets it, onGainTransition cOVState_FINAL_STANDINGS_onGainTransition tests and clears it
                                      //       (lw/sw: a word, as retail bools are)
 };
 
@@ -149,7 +149,7 @@ CHECK_OFFSET(cOVState_FINAL_STANDINGS, doInit, 0x09C);
 CHECK_SIZE(cOVState_FINAL_STANDINGS, 0xA0);
 
 // cOVState_RACE_FINISHOV (0xA4: cMemMan size for type 12). The ctor also sets mHashName = GetHashValue32("finishov").
-// Slots: 4 onCreateScreen func_001E7BB0, 12 onUpdate func_001E8098, 19 onWidgetEvent func_001E8160, 20 onWidgetMenu
+// Slots: 4 onCreateScreen cOVState_RACE_FINISHOV_onCreateScreen, 12 onUpdate func_001E8098, 19 onWidgetEvent func_001E8160, 20 onWidgetMenu
 // func_001E81B0, 24 handleEvent func_001E81D0. Preview: _vt$22cOVState_RACE_FINISHOV (overrides 4 / 13 / 19 / 22 in
 // its 23-slot layout = retail 4 / 12 / 19 / 24).
 
@@ -157,7 +157,7 @@ struct cOVState_RACE_FINISHOV {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                    // 0x008 [R] func_0021CEB8 stores D_00473E00 after cOVState_vtbl
+    void** mVtbl;                    // 0x008 [R] cOVState_RACE_FINISHOV_cOVState_RACE_FINISHOV stores D_00473E00 after cOVState_vtbl
     // --- cUIState (ui/uistate.h, 0x48; same member names)
     int mHashName;                   // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;             // 0x010 [O]; [R] the ctor's engine argument
@@ -212,7 +212,7 @@ CHECK_OFFSET(cOVState_RACE_FINISHOV, unk_0A0, 0x0A0);
 CHECK_SIZE(cOVState_RACE_FINISHOV, 0xA4);
 
 // cOVState_BASSSP_QUAL_FINISHOV (0xA4: cMemMan size for type 13; same members as RACE_FINISHOV, both written by the
-// same ctor pattern). Slots: 4 onCreateScreen func_001E8200, 12 onUpdate func_001E87B8, 19 onWidgetEvent func_001E8880,
+// same ctor pattern). Slots: 4 onCreateScreen cOVState_BASSSP_QUAL_FINISHOV_onCreateScreen, 12 onUpdate func_001E87B8, 19 onWidgetEvent func_001E8880,
 // 20 onWidgetMenu func_001E88D0, 24 handleEvent func_001E88F0. Preview: _vt$29cOVState_BASSSP_QUAL_FINISHOV (same
 // override set as RACE_FINISHOV; its onCreateScreen labels the runs by heat).
 
@@ -220,7 +220,7 @@ struct cOVState_BASSSP_QUAL_FINISHOV {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                    // 0x008 [R] func_0021CF60 stores D_00473D28 after cOVState_vtbl
+    void** mVtbl;                    // 0x008 [R] cOVState_BASSSP_QUAL_FINISHOV_cOVState_BASSSP_QUAL_FINISHOV stores D_00473D28 after cOVState_vtbl
     // --- cUIState (ui/uistate.h, 0x48; same member names)
     int mHashName;                   // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;             // 0x010 [O]; [R] the ctor's engine argument
@@ -274,7 +274,7 @@ CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, unk_09C, 0x09C);
 CHECK_OFFSET(cOVState_BASSSP_QUAL_FINISHOV, unk_0A0, 0x0A0);
 CHECK_SIZE(cOVState_BASSSP_QUAL_FINISHOV, 0xA4);
 
-// cOVState_TOURNAMENT_STANDINGS (0x9C, no own members). Slots: 4 onCreateScreen func_001E8F00, 19 onWidgetEvent
+// cOVState_TOURNAMENT_STANDINGS (0x9C, no own members). Slots: 4 onCreateScreen cOVState_TOURNAMENT_STANDINGS_onCreateScreen, 19 onWidgetEvent
 // func_001E8FC8. Preview: _vt$29cOVState_TOURNAMENT_STANDINGS overrides the same two slots, screen
 // "109MultiplayerStandings".
 
@@ -282,7 +282,7 @@ struct cOVState_TOURNAMENT_STANDINGS {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                    // 0x008 [R] func_0021D008 stores D_00473C50 after cOVState_vtbl
+    void** mVtbl;                    // 0x008 [R] cOVState_TOURNAMENT_STANDINGS_cOVState_TOURNAMENT_STANDINGS stores D_00473C50 after cOVState_vtbl
     // --- cUIState (ui/uistate.h, 0x48; same member names)
     int mHashName;                   // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;             // 0x010 [O]; [R] the ctor's engine argument

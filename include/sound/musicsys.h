@@ -6,7 +6,7 @@
 // "gMusicSys->GetMPFFile() != NULL"); retail methods are the tail of the sound/bankmonitor unit (0x2B28C0..0x2B4B04)
 // plus out-of-line inline accessors in bx/seg_1BA100 (0x2BAC30..0x2BACEC).
 // One instance: the cMusicSys base of cController, i.e. gSSXAudio + 0x118 (sound/ssxaudio.h), built by the cController
-// ctor func_002B28C0(this + 0x118, 0, ...); gMusicSys (gMusicSys) points at it.
+// ctor cMusicSys_cMusicSys(this + 0x118, 0, ...); gMusicSys (gMusicSys) points at it.
 //   cMusicSys : virtual cStreamSys (: virtual cBankManager : cAsyncSys, cBankMonitor, virtual cSoundSys)
 // Non-virtual part 0x5448 [R]: in a complete cMusicSys the ctor (inchrg != 0) puts cSoundSys at +0x5448, cBankManager
 // at +0x5450 and cStreamSys at +0x5F20 (and the vptr at +0x5440 is the last non-virtual field); in cSSXAudio the next
@@ -14,7 +14,7 @@
 // D_00483688 (cSSXAudio). The struct below is the NON-VIRTUAL part, so it can be embedded where the object lives.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance. Evidence tags:
-//   [R] retail constructor func_002B28C0 (zeroes the fields, allocates "MPF data file", parses the music .ini: section
+//   [R] retail constructor cMusicSys_cMusicSys (zeroes the fields, allocates "MPF data file", parses the music .ini: section
 //       GLOBAL key BASEPATH, then one section per song with keys TITLE ARTIST ALBUM ADDTOFE CATEGORY PATHDATA MUSDATA
 //       LOOPDATA ... into a cMemMan_alloc(0xAC, "cSongConfiguration") per song) and destructor func_002B3398;
 //   [P] the July 2003 preview's inline accessors (MUSIC_*, IsSongPlaying, Get/SetShortcut), retail copies at

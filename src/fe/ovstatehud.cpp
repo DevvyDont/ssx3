@@ -246,7 +246,7 @@ float tHUDDef_getScale(void* self, void* outRange)
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001E92A8);
+INCLUDE_ASM("fe/ovstatehud", splitTextPictLine);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" float cFont_textExtent1(void* self, const unsigned short* str, void* out, int n, float sx, float sy);
@@ -287,7 +287,7 @@ extern sIcon_1E92A8 D_004C8980[];
  * Lays out a HUD text line with inline pictures: splits its 16-bit text into text and picture segments and measures
  * them.
  *
- * The line object (filled by func_001E94E0 / func_001E9540) holds the total width (+0x0), height (+0x4), font (+0x8),
+ * The line object (filled by func_001E94E0 / makeTextPictLine) holds the total width (+0x0), height (+0x4), font (+0x8),
  * text y offset (+0xC), scale (+0x10, +0x14), segment count (+0x18), six (width, pointer) segments (+0x1C) and the text
  * (+0x4C). First the font's Scale is set to BaseScale times the line scale. Each '@' ends the current text segment (it
  * is overwritten with 0) and starts a picture name that runs to the next space or the end; the name's GetHashValue32 is
@@ -303,7 +303,7 @@ extern sIcon_1E92A8 D_004C8980[];
  *
  * @param textLine  the text line to lay out
  */
-extern "C" void func_001E92A8(tTextPictLine* textLine)
+extern "C" void splitTextPictLine(tTextPictLine* textLine)
 {
     sLine_1E92A8* self = (sLine_1E92A8*)textLine;
     unsigned short* cursor;
@@ -377,14 +377,14 @@ extern "C" void func_001E92A8(tTextPictLine* textLine)
 INCLUDE_ASM("fe/ovstatehud", func_001E94E0);
 #ifdef SKIP_ASM
 extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src);
-extern "C" void func_001E92A8(tTextPictLine* self);
+extern "C" void splitTextPictLine(tTextPictLine* self);
 struct sVec2f { float x, y; };
 
 /**
  * Sets a HUD text line from an 8-bit string and lays it out.
  *
  * Widens @p str into the line's 16-bit text (+0x4C) with func_002C2540, stores @p font (+0x8) and @p scale (+0x10),
- * then runs func_001E92A8. cOVStateHUD1P_onCreateScreen fills three of its message lines this way with the HUD's +0x428
+ * then runs splitTextPictLine. cOVStateHUD1P_onCreateScreen fills three of its message lines this way with the HUD's +0x428
  * font.
  *
  * @param str  the text; "@name" embeds a picture from D_004C8980
@@ -396,36 +396,36 @@ extern "C" void func_001E94E0(tTextPictLine* self, char* str, int font, sVec2f* 
     func_002C2540((unsigned short*)(&self->text[0]), str);
     self->pFont = (cFont*)font;
     *(sVec2f*)&self->fontScaleBase[0] = *scale;
-    func_001E92A8(self);
+    splitTextPictLine(self);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("fe/ovstatehud", func_001E9540);
+INCLUDE_ASM("fe/ovstatehud", makeTextPictLine);
 #ifdef SKIP_ASM
 extern "C" unsigned short* strcpy1(unsigned short* dst, unsigned short* src);
-extern "C" void func_001E92A8(tTextPictLine* self);
+extern "C" void splitTextPictLine(tTextPictLine* self);
 /**
  * Sets a HUD text line from a 16-bit string and lays it out.
  *
  * Copies @p str into the line's text (+0x4C) with strcpy1, stores @p font (+0x8) and @p scale (+0x10), then runs
- * func_001E92A8. cOVStateHUD1P_onCreateScreen uses it for a line built with USTR_sprintf.
+ * splitTextPictLine. cOVStateHUD1P_onCreateScreen uses it for a line built with USTR_sprintf.
  *
  * @param str  the 16-bit text; "@name" embeds a picture from D_004C8980
  * @param font  the font (a cFont*) to measure and draw with
  * @param scale  the line's x and y scale
  */
-extern "C" void func_001E9540(tTextPictLine* self, unsigned short* str, int font, sVec2f* scale)
+extern "C" void makeTextPictLine(tTextPictLine* self, unsigned short* str, int font, sVec2f* scale)
 {
     strcpy1((unsigned short*)(&self->text[0]), str);
     self->pFont = (cFont*)font;
     *(sVec2f*)&self->fontScaleBase[0] = *scale;
-    func_001E92A8(self);
+    splitTextPictLine(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("fe/ovstatehud", func_001E95A0);
+INCLUDE_ASM("fe/ovstatehud", drawTextPictLine);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void cFont_text1_95A0(void* self, float x, float y, void* m) __asm__("cFont_text1");
@@ -515,7 +515,7 @@ static inline void setScale_E95A0(sFont_E95A0* f, const sSize_E95A0& s)
  * @param alignX  horizontal pivot: 0 centre, > 0 right edge at pos, < 0 left edge
  * @param alignY  vertical pivot: 0 centre, > 0 bottom edge at pos, < 0 top edge
  */
-extern "C" void func_001E95A0(sHudLine_E95A0* self, float* pos, float* scale, sCol_E95A0* color, int alignX, int alignY)
+extern "C" void drawTextPictLine(sHudLine_E95A0* self, float* pos, float* scale, sCol_E95A0* color, int alignX, int alignY)
 {
     if (self->count == 0) {
         return;
@@ -623,21 +623,21 @@ INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_cOVStateHUD1P);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cUIState_cUIState_9A30(void* self, int a1) __asm__("cUIState_cUIState");
-extern "C" void func_0020EAA0(void*);
+extern "C" void cHUDRadar_cHUDRadar(void*);
 extern char cOVStateHUD1P_vtbl[];
 
 struct sElem_9A30 {
     void* operator new[](unsigned int, void* p) { return p; }
     char pad[8];
     char sub[0x84];
-    sElem_9A30() { func_0020EAA0(sub); }
+    sElem_9A30() { cHUDRadar_cHUDRadar(sub); }
 };
 
 /**
  * Constructs the one-player HUD overlay state.
  *
  * Runs the cUIState constructor (cUIState_cUIState) with @p pEngine, installs cOVStateHUD1P_vtbl at +0x8, constructs the
- * two 0x8C-byte HUD elements at +0x48 (func_0020EAA0 on each one's +0x8), sets +0x474 to -1, clears +0x3D4, +0x3D8,
+ * two 0x8C-byte HUD elements at +0x48 (cHUDRadar_cHUDRadar on each one's +0x8), sets +0x474 to -1, clears +0x3D4, +0x3D8,
  * +0x480 and +0x484 and sets the four scales +0x478, +0x47C, +0x488 and +0x48C to 1.0. The caller (gameload) passes a
  * third argument, 0, which is not used.
  *
@@ -684,7 +684,7 @@ extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n,
 extern "C" void func_001E94E0_reen(void* self, char* str, int a2, sVec2f* pos) __asm__("func_001E94E0");
 
 // (prototype from their definition at line 328)
-extern "C" void func_001E9540_reen(void* self, unsigned short* str, int a2, sVec2f* pos) __asm__("func_001E9540");
+extern "C" void makeTextPictLine_reen(void* self, unsigned short* str, int a2, sVec2f* pos) __asm__("makeTextPictLine");
 
 extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
 extern "C" int cUIFontInterface_getFontByHashName(void* self, int key);
@@ -1165,7 +1165,7 @@ extern "C" void cOVStateHUD1P_onCreateScreen(cOVStateHUD1P* vself)
     unsigned short* skip = getLocString_9AD0(str_kT_OVRCMNToSkip);
     unsigned short buf[32];
     USTR_sprintf(buf, fmt, name, skip);
-    func_001E9540_reen(self->boxB48, buf, self->bank428, &D_004A4F58);
+    makeTextPictLine_reen(self->boxB48, buf, self->bank428, &D_004A4F58);
 }
 #endif
 

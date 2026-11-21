@@ -11153,7 +11153,7 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  *
  * Zeroes the two words at +0x0 and +0x4 (the latter counts allocated ids) and the 2000-entry record table at +0x8 (8000
  * bytes), then points the free list head (+0x1F48) at slot 1500 (+0x1778) and makes each of slots 1500 to 1998 point at
- * the next one; slot 1999 stays 0 and ends the list. cPSPGraphicsMan_NewNonBindTexID pops ids from this list.
+ * the next one; slot 1999 stays 0 and ends the list. cTextureMan_NewNonBindTexID pops ids from this list.
  */
 extern "C" void func_003670E0(cTextureMan* self)
 {
