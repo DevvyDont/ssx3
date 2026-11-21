@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/debugmenu.h"
 
 //100%
 INCLUDE_ASM("main/debugmenu", cRenderTogglesMenu_cRenderTogglesMenu);
@@ -117,109 +118,109 @@ extern int D_004A4578;
  *
  * @return @p self
  */
-extern "C" void* cRenderTogglesMenu_cRenderTogglesMenu(void* self)
+extern "C" void* cRenderTogglesMenu_cRenderTogglesMenu(cRenderTogglesMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cRenderTogglesMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_Render_Toggles_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A44C0, 0, 0x3c, str_AI_Frames_per_Render_Frame);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x194, 1, &D_004A44C4, 0, 1, str_Display_Render_Stats);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x1C4, 2, &D_004A44C8, 0, 1, str_Reset_Stats);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x1F4, 3, &D_004A44CC, 0, 1, str_Use_Small_Texture_0);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x224, 4, &D_004A44D0, 0, 1, str_Use_Small_Texture_1);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x254, 5, &D_004A44D4, 0, 1, str_Disable_Patches);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x284, 6, &D_004A44D8, 0, 1, str_Disable_Patch_Reflection);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x2B4, 7, &D_004A44DC, 0, 1, str_Disable_Patch_Shadows);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x2E4, 8, &D_004A44E0, 0, 1, str_Disable_Sparkles);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x314, 9, &D_004A44E4, 0, 1, str_Disable_Line_Strips);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x344, 10, &D_004A44E8, 0, 3, str_Disable_Tri_Strips);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x374, 11, &D_004A44EC, 0, 1, str_Disable_Transform_Strips);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x3A4, 0xc, &D_004A44F0, 0, 1, str_Disable_Meshes);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x3D4, 13, &D_004A44F4, 0, 1, str_Disable_Mesh_Reflection);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x404, 0xe, &D_004A44F8, 0, 1, str_Disable_Static_Emitters);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x434, 0xf, &D_004A44FC, 0, 1, str_Disable_Dynamic_Emitters);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x464, 0x10, &D_004A4500, 0, 1, str_Disable_Dynamic_Colour_Emitters);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x494, 17, &D_004A4504, 0, 1, str_Disable_Sprites);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x4C4, 18, &D_004A4508, 0, 1, str_Disable_3D_Sprites);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x4F4, 19, &D_004A450C, 0, 1, str_Disable_Texture_Rects);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x524, 20, &D_004A4510, 0, 1, str_Disable_Player_Strips);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x554, 21, &D_004A4514, 0, 1, str_Disable_Shadows);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x584, 22, &D_004A4518, 0, 1, str_Disable_Board_Trail);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x5B4, 23, &D_004A451C, 0, 1, str_Disable_AI_Board_Trail);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x5E4, 0x18, &D_004A4520, 0, 1, str_Disable_Visibility_Rects);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x614, 25, &cRenderToggles_m_DisableSnowFall, 0, 1, str_Disable_Snowfall);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x644, 26, &cRenderToggles_m_DisableBoardWake, 0, 1, str_Disable_Board_Wake);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x674, 27, &cRenderToggles_m_DisableSkyBox, 0, 1, str_Disable_Sky_Box);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x6A4, 0x1c, &cRenderToggles_m_DisableCharacterSpecular, 0, 1, str_Disable_Character_Specular);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x6D4, 29, &cRenderToggles_m_DisableAIVisualFX, 0, 1, str_Disable_AI_Visual_FX);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x704, 0x1e, &cRenderToggles_m_DisableBoundingBoxes, 0, 1, str_Disable_Bounding_Boxes);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x734, 0x1f, &cRenderToggles_m_UseReflectionVector, 0, 1, str_Use_Reflection_Vector_for_Sphere_Map);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x764, 0x20, &cRenderToggles_m_DisableHUD, 0, 1, str_Disable_HUD_elements);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x794, 33, &D_004A4544, 0, 1, str_Test_Tunnel);
-    cFloatMenuItem_ctor((char*)self + 0x7C4, 34, &D_004A4548, 1.0f, 2000.0f, str_Particle_Size_Scale);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x7F8, 35, &D_004A454C, 0, 1, str_Test_Surface_Types);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x828, 36, &D_004A4550, 0, 1, str_Software_Based_Dynamic_Systems);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x858, 37, &D_004A4554, 0, 20, str_Temp_Int);
-    cFloatMenuItem_ctor((char*)self + 0x888, 38, &D_004A4558, -10.0f, 10.0f, str_PROG2_x);
-    cFloatMenuItem_ctor((char*)self + 0x8BC, 39, &D_004A455C, -10.0f, 10.0f, str_PROG2_y);
-    cFloatMenuItem_ctor((char*)self + 0x8F0, 40, &D_004A4560, -10.0f, 10.0f, str_PROG2_z);
-    cFloatMenuItem_ctor((char*)self + 0x924, 41, &D_004A4564, -10.0f, 10.0f, str_PROG2_w);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x958, 42, &D_004A4568, 0, 1, str_Enable_Build_Info);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x988, 43, &D_004A456C, 0, 1, str_Enable_NIS_Mem_Usage_Info);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x9B8, 44, &D_004A4570, 0, 1, str_Enable_Gameflow_Info);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x9E8, 45, &D_004A4574, 0, 1, str_Profile_Individual_Effects);
-    cIntMenuItem_cIntMenuItem((char*)self + 0xA18, 46, &D_004A4578, 0, 1, str_Show_Surface_Types);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    cMenu_addItem(self, (char*)self + 0x1C4, -1);
-    cMenu_addItem(self, (char*)self + 0x1F4, -1);
-    cMenu_addItem(self, (char*)self + 0x224, -1);
-    cMenu_addItem(self, (char*)self + 0x254, -1);
-    cMenu_addItem(self, (char*)self + 0x284, -1);
-    cMenu_addItem(self, (char*)self + 0x2B4, -1);
-    cMenu_addItem(self, (char*)self + 0x2E4, -1);
-    cMenu_addItem(self, (char*)self + 0x314, -1);
-    cMenu_addItem(self, (char*)self + 0x344, -1);
-    cMenu_addItem(self, (char*)self + 0x374, -1);
-    cMenu_addItem(self, (char*)self + 0x3A4, -1);
-    cMenu_addItem(self, (char*)self + 0x3D4, -1);
-    cMenu_addItem(self, (char*)self + 0x404, -1);
-    cMenu_addItem(self, (char*)self + 0x434, -1);
-    cMenu_addItem(self, (char*)self + 0x464, -1);
-    cMenu_addItem(self, (char*)self + 0x494, -1);
-    cMenu_addItem(self, (char*)self + 0x4C4, -1);
-    cMenu_addItem(self, (char*)self + 0x4F4, -1);
-    cMenu_addItem(self, (char*)self + 0x524, -1);
-    cMenu_addItem(self, (char*)self + 0x554, -1);
-    cMenu_addItem(self, (char*)self + 0x584, -1);
-    cMenu_addItem(self, (char*)self + 0x5B4, -1);
-    cMenu_addItem(self, (char*)self + 0x5E4, -1);
-    cMenu_addItem(self, (char*)self + 0x614, -1);
-    cMenu_addItem(self, (char*)self + 0x644, -1);
-    cMenu_addItem(self, (char*)self + 0x674, -1);
-    cMenu_addItem(self, (char*)self + 0x6A4, -1);
-    cMenu_addItem(self, (char*)self + 0x6D4, -1);
-    cMenu_addItem(self, (char*)self + 0x704, -1);
-    cMenu_addItem(self, (char*)self + 0x734, -1);
-    cMenu_addItem(self, (char*)self + 0x764, -1);
-    cMenu_addItem(self, (char*)self + 0x794, -1);
-    cMenu_addItem(self, (char*)self + 0x7C4, -1);
-    cMenu_addItem(self, (char*)self + 0x7F8, -1);
-    cMenu_addItem(self, (char*)self + 0x828, -1);
-    cMenu_addItem(self, (char*)self + 0x858, -1);
-    cMenu_addItem(self, (char*)self + 0x888, -1);
-    cMenu_addItem(self, (char*)self + 0x8BC, -1);
-    cMenu_addItem(self, (char*)self + 0x8F0, -1);
-    cMenu_addItem(self, (char*)self + 0x924, -1);
-    cMenu_addItem(self, (char*)self + 0x958, -1);
-    cMenu_addItem(self, (char*)self + 0x988, -1);
-    cMenu_addItem(self, (char*)self + 0x9B8, -1);
-    cMenu_addItem(self, (char*)self + 0x9E8, -1);
-    cMenu_addItem(self, (char*)self + 0xA18, -1);
-    return self;
+    self->mVtbl = cRenderTogglesMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_Render_Toggles_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->AIUpdatesPerRenderItem, 0, &D_004A44C0, 0, 0x3c, str_AI_Frames_per_Render_Frame);
+    cIntMenuItem_cIntMenuItem(&self->DisplayRenderStatsItem, 1, &D_004A44C4, 0, 1, str_Display_Render_Stats);
+    cIntMenuItem_cIntMenuItem(&self->ResetStatsItem, 2, &D_004A44C8, 0, 1, str_Reset_Stats);
+    cIntMenuItem_cIntMenuItem(&self->UseSmallTexture0Item, 3, &D_004A44CC, 0, 1, str_Use_Small_Texture_0);
+    cIntMenuItem_cIntMenuItem(&self->UseSmallTexture1Item, 4, &D_004A44D0, 0, 1, str_Use_Small_Texture_1);
+    cIntMenuItem_cIntMenuItem(&self->DisablePatchesItem, 5, &D_004A44D4, 0, 1, str_Disable_Patches);
+    cIntMenuItem_cIntMenuItem(&self->DisablePatchReflectionItem, 6, &D_004A44D8, 0, 1, str_Disable_Patch_Reflection);
+    cIntMenuItem_cIntMenuItem(&self->DisablePatchShadowItem, 7, &D_004A44DC, 0, 1, str_Disable_Patch_Shadows);
+    cIntMenuItem_cIntMenuItem(&self->DisableSparklesItem, 8, &D_004A44E0, 0, 1, str_Disable_Sparkles);
+    cIntMenuItem_cIntMenuItem(&self->DisableLineStripsItem, 9, &D_004A44E4, 0, 1, str_Disable_Line_Strips);
+    cIntMenuItem_cIntMenuItem(&self->DisableTriStripsItem, 10, &D_004A44E8, 0, 3, str_Disable_Tri_Strips);
+    cIntMenuItem_cIntMenuItem(&self->DisableTransformStripsItem, 11, &D_004A44EC, 0, 1, str_Disable_Transform_Strips);
+    cIntMenuItem_cIntMenuItem(&self->DisableMeshesItem, 0xc, &D_004A44F0, 0, 1, str_Disable_Meshes);
+    cIntMenuItem_cIntMenuItem(&self->DisableMeshReflectionItem, 13, &D_004A44F4, 0, 1, str_Disable_Mesh_Reflection);
+    cIntMenuItem_cIntMenuItem(&self->DisableStaticEmittersItem, 0xe, &D_004A44F8, 0, 1, str_Disable_Static_Emitters);
+    cIntMenuItem_cIntMenuItem(&self->DisableDynamicEmittersItem, 0xf, &D_004A44FC, 0, 1, str_Disable_Dynamic_Emitters);
+    cIntMenuItem_cIntMenuItem(&self->DisableDynamicColourEmittersItem, 0x10, &D_004A4500, 0, 1, str_Disable_Dynamic_Colour_Emitters);
+    cIntMenuItem_cIntMenuItem(&self->DisableSpritesItem, 17, &D_004A4504, 0, 1, str_Disable_Sprites);
+    cIntMenuItem_cIntMenuItem(&self->Disable3DSpritesItem, 18, &D_004A4508, 0, 1, str_Disable_3D_Sprites);
+    cIntMenuItem_cIntMenuItem(&self->DisableTextureRectsItem, 19, &D_004A450C, 0, 1, str_Disable_Texture_Rects);
+    cIntMenuItem_cIntMenuItem(&self->DisablePlayerStripsItem, 20, &D_004A4510, 0, 1, str_Disable_Player_Strips);
+    cIntMenuItem_cIntMenuItem(&self->DisableShadowsItem, 21, &D_004A4514, 0, 1, str_Disable_Shadows);
+    cIntMenuItem_cIntMenuItem(&self->DisableBoardTrailItem, 22, &D_004A4518, 0, 1, str_Disable_Board_Trail);
+    cIntMenuItem_cIntMenuItem(&self->DisableAIBoardTrailItem, 23, &D_004A451C, 0, 1, str_Disable_AI_Board_Trail);
+    cIntMenuItem_cIntMenuItem(&self->DisableVisibilityRectsItem, 0x18, &D_004A4520, 0, 1, str_Disable_Visibility_Rects);
+    cIntMenuItem_cIntMenuItem(&self->DisableSnowFallItem, 25, &cRenderToggles_m_DisableSnowFall, 0, 1, str_Disable_Snowfall);
+    cIntMenuItem_cIntMenuItem(&self->DisableBoardWakeItem, 26, &cRenderToggles_m_DisableBoardWake, 0, 1, str_Disable_Board_Wake);
+    cIntMenuItem_cIntMenuItem(&self->DisableSkyBoxItem, 27, &cRenderToggles_m_DisableSkyBox, 0, 1, str_Disable_Sky_Box);
+    cIntMenuItem_cIntMenuItem(&self->DisableCharacterSpecularItem, 0x1c, &cRenderToggles_m_DisableCharacterSpecular, 0, 1, str_Disable_Character_Specular);
+    cIntMenuItem_cIntMenuItem(&self->DisableAIVisualFXItem, 29, &cRenderToggles_m_DisableAIVisualFX, 0, 1, str_Disable_AI_Visual_FX);
+    cIntMenuItem_cIntMenuItem(&self->DisableBoundingBoxesItem, 0x1e, &cRenderToggles_m_DisableBoundingBoxes, 0, 1, str_Disable_Bounding_Boxes);
+    cIntMenuItem_cIntMenuItem(&self->UseReflectionVectorItem, 0x1f, &cRenderToggles_m_UseReflectionVector, 0, 1, str_Use_Reflection_Vector_for_Sphere_Map);
+    cIntMenuItem_cIntMenuItem(&self->DisableHUDItem, 0x20, &cRenderToggles_m_DisableHUD, 0, 1, str_Disable_HUD_elements);
+    cIntMenuItem_cIntMenuItem(&self->TestTunnelItem, 33, &D_004A4544, 0, 1, str_Test_Tunnel);
+    cFloatMenuItem_ctor(&self->ParticleSizeScaleItem, 34, &D_004A4548, 1.0f, 2000.0f, str_Particle_Size_Scale);
+    cIntMenuItem_cIntMenuItem(&self->TestSurfaceTypesItem, 35, &D_004A454C, 0, 1, str_Test_Surface_Types);
+    cIntMenuItem_cIntMenuItem(&self->SoftwareDynamicParticleSystemsItem, 36, &D_004A4550, 0, 1, str_Software_Based_Dynamic_Systems);
+    cIntMenuItem_cIntMenuItem(&self->TempIntItem, 37, &D_004A4554, 0, 20, str_Temp_Int);
+    cFloatMenuItem_ctor(&self->Prog2xItem, 38, &D_004A4558, -10.0f, 10.0f, str_PROG2_x);
+    cFloatMenuItem_ctor(&self->Prog2yItem, 39, &D_004A455C, -10.0f, 10.0f, str_PROG2_y);
+    cFloatMenuItem_ctor(&self->Prog2zItem, 40, &D_004A4560, -10.0f, 10.0f, str_PROG2_z);
+    cFloatMenuItem_ctor(&self->Prog2wItem, 41, &D_004A4564, -10.0f, 10.0f, str_PROG2_w);
+    cIntMenuItem_cIntMenuItem(&self->DebugInfoItem, 42, &D_004A4568, 0, 1, str_Enable_Build_Info);
+    cIntMenuItem_cIntMenuItem(&self->DebugNISMemInfoItem, 43, &D_004A456C, 0, 1, str_Enable_NIS_Mem_Usage_Info);
+    cIntMenuItem_cIntMenuItem(&self->DebugGameModeInfoItem, 44, &D_004A4570, 0, 1, str_Enable_Gameflow_Info);
+    cIntMenuItem_cIntMenuItem(&self->ProfileIndividualFXItem, 45, &D_004A4574, 0, 1, str_Profile_Individual_Effects);
+    cIntMenuItem_cIntMenuItem(&self->ShowSurfaceTypesItem, 46, &D_004A4578, 0, 1, str_Show_Surface_Types);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->AIUpdatesPerRenderItem, -1);
+    cMenu_addItem(self, &self->DisplayRenderStatsItem, -1);
+    cMenu_addItem(self, &self->ResetStatsItem, -1);
+    cMenu_addItem(self, &self->UseSmallTexture0Item, -1);
+    cMenu_addItem(self, &self->UseSmallTexture1Item, -1);
+    cMenu_addItem(self, &self->DisablePatchesItem, -1);
+    cMenu_addItem(self, &self->DisablePatchReflectionItem, -1);
+    cMenu_addItem(self, &self->DisablePatchShadowItem, -1);
+    cMenu_addItem(self, &self->DisableSparklesItem, -1);
+    cMenu_addItem(self, &self->DisableLineStripsItem, -1);
+    cMenu_addItem(self, &self->DisableTriStripsItem, -1);
+    cMenu_addItem(self, &self->DisableTransformStripsItem, -1);
+    cMenu_addItem(self, &self->DisableMeshesItem, -1);
+    cMenu_addItem(self, &self->DisableMeshReflectionItem, -1);
+    cMenu_addItem(self, &self->DisableStaticEmittersItem, -1);
+    cMenu_addItem(self, &self->DisableDynamicEmittersItem, -1);
+    cMenu_addItem(self, &self->DisableDynamicColourEmittersItem, -1);
+    cMenu_addItem(self, &self->DisableSpritesItem, -1);
+    cMenu_addItem(self, &self->Disable3DSpritesItem, -1);
+    cMenu_addItem(self, &self->DisableTextureRectsItem, -1);
+    cMenu_addItem(self, &self->DisablePlayerStripsItem, -1);
+    cMenu_addItem(self, &self->DisableShadowsItem, -1);
+    cMenu_addItem(self, &self->DisableBoardTrailItem, -1);
+    cMenu_addItem(self, &self->DisableAIBoardTrailItem, -1);
+    cMenu_addItem(self, &self->DisableVisibilityRectsItem, -1);
+    cMenu_addItem(self, &self->DisableSnowFallItem, -1);
+    cMenu_addItem(self, &self->DisableBoardWakeItem, -1);
+    cMenu_addItem(self, &self->DisableSkyBoxItem, -1);
+    cMenu_addItem(self, &self->DisableCharacterSpecularItem, -1);
+    cMenu_addItem(self, &self->DisableAIVisualFXItem, -1);
+    cMenu_addItem(self, &self->DisableBoundingBoxesItem, -1);
+    cMenu_addItem(self, &self->UseReflectionVectorItem, -1);
+    cMenu_addItem(self, &self->DisableHUDItem, -1);
+    cMenu_addItem(self, &self->TestTunnelItem, -1);
+    cMenu_addItem(self, &self->ParticleSizeScaleItem, -1);
+    cMenu_addItem(self, &self->TestSurfaceTypesItem, -1);
+    cMenu_addItem(self, &self->SoftwareDynamicParticleSystemsItem, -1);
+    cMenu_addItem(self, &self->TempIntItem, -1);
+    cMenu_addItem(self, &self->Prog2xItem, -1);
+    cMenu_addItem(self, &self->Prog2yItem, -1);
+    cMenu_addItem(self, &self->Prog2zItem, -1);
+    cMenu_addItem(self, &self->Prog2wItem, -1);
+    cMenu_addItem(self, &self->DebugInfoItem, -1);
+    cMenu_addItem(self, &self->DebugNISMemInfoItem, -1);
+    cMenu_addItem(self, &self->DebugGameModeInfoItem, -1);
+    cMenu_addItem(self, &self->ProfileIndividualFXItem, -1);
+    cMenu_addItem(self, &self->ShowSurfaceTypesItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -281,49 +282,49 @@ extern int cVisualEffectsTest_m_LayerId;
  *
  * @return @p self
  */
-extern "C" void* cVisualEffectsTestMenu_cVisualEffectsTestMenu(void* self)
+extern "C" void* cVisualEffectsTestMenu_cVisualEffectsTestMenu(cVisualEffectsTestMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cVisualEffectsTestMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_Visual_Effects_Test_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A4478, 0, 1, str_Show_All_HUD_Graphics);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x194, 1, &D_004A447C, 0, 1, str_Show_Current_Element);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x1C4, 2, &D_004A4480, 0, 1, str_Output_HUD_Data);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x1F4, 3, &D_004A4484, 0, 1000, str_Current_Element_Id);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x224, 4, &D_004A4488, -640, 640, str_Position_X);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x254, 5, &D_004A448C, -480, 0x1e0, str_Position_Y);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x284, 6, &D_004A4490, -640, 640, str_Size_X);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x2B4, 7, &D_004A4494, -640, 640, str_Size_Y);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x2E4, 8, &D_004A4498, -1, 1000, str_Scale_X);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x314, 9, &D_004A449C, -1, 1000, str_Scale_Y);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x344, 10, &D_004A44A0, -255, 0xff, str_Alpha);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x374, 11, &D_004A44A4, -255, 0xff, str_Red);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x3A4, 0xc, &D_004A44A8, -255, 0xff, str_Green);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x3D4, 13, &D_004A44AC, -255, 0xff, str_Blue);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x404, 0xe, &D_004A44B0, -16, 0x10, str_Layer_Offset);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x434, 0xf, &cVisualEffectsTest_m_Enable, 0, 1, str_World_Painter_Display_Enable);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x464, 0x10, &cVisualEffectsTest_m_LayerId, 0, 100, str_World_Painter_LayerId);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    cMenu_addItem(self, (char*)self + 0x1C4, -1);
-    cMenu_addItem(self, (char*)self + 0x1F4, -1);
-    cMenu_addItem(self, (char*)self + 0x224, -1);
-    cMenu_addItem(self, (char*)self + 0x254, -1);
-    cMenu_addItem(self, (char*)self + 0x284, -1);
-    cMenu_addItem(self, (char*)self + 0x2B4, -1);
-    cMenu_addItem(self, (char*)self + 0x2E4, -1);
-    cMenu_addItem(self, (char*)self + 0x314, -1);
-    cMenu_addItem(self, (char*)self + 0x344, -1);
-    cMenu_addItem(self, (char*)self + 0x374, -1);
-    cMenu_addItem(self, (char*)self + 0x3A4, -1);
-    cMenu_addItem(self, (char*)self + 0x3D4, -1);
-    cMenu_addItem(self, (char*)self + 0x404, -1);
-    cMenu_addItem(self, (char*)self + 0x434, -1);
-    cMenu_addItem(self, (char*)self + 0x464, -1);
-    return self;
+    self->mVtbl = cVisualEffectsTestMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_Visual_Effects_Test_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->HUDEnableItem, 0, &D_004A4478, 0, 1, str_Show_All_HUD_Graphics);
+    cIntMenuItem_cIntMenuItem(&self->ShowCurrentElementItem, 1, &D_004A447C, 0, 1, str_Show_Current_Element);
+    cIntMenuItem_cIntMenuItem(&self->HUDPrintItem, 2, &D_004A4480, 0, 1, str_Output_HUD_Data);
+    cIntMenuItem_cIntMenuItem(&self->CurrElementItem, 3, &D_004A4484, 0, 1000, str_Current_Element_Id);
+    cIntMenuItem_cIntMenuItem(&self->PositionXItem, 4, &D_004A4488, -640, 640, str_Position_X);
+    cIntMenuItem_cIntMenuItem(&self->PositionYItem, 5, &D_004A448C, -480, 0x1e0, str_Position_Y);
+    cIntMenuItem_cIntMenuItem(&self->SizeXItem, 6, &D_004A4490, -640, 640, str_Size_X);
+    cIntMenuItem_cIntMenuItem(&self->SizeYItem, 7, &D_004A4494, -640, 640, str_Size_Y);
+    cIntMenuItem_cIntMenuItem(&self->ScaleXItem, 8, &D_004A4498, -1, 1000, str_Scale_X);
+    cIntMenuItem_cIntMenuItem(&self->ScaleYItem, 9, &D_004A449C, -1, 1000, str_Scale_Y);
+    cIntMenuItem_cIntMenuItem(&self->AlphaItem, 10, &D_004A44A0, -255, 0xff, str_Alpha);
+    cIntMenuItem_cIntMenuItem(&self->RedItem, 11, &D_004A44A4, -255, 0xff, str_Red);
+    cIntMenuItem_cIntMenuItem(&self->GreenItem, 0xc, &D_004A44A8, -255, 0xff, str_Green);
+    cIntMenuItem_cIntMenuItem(&self->BlueItem, 13, &D_004A44AC, -255, 0xff, str_Blue);
+    cIntMenuItem_cIntMenuItem(&self->LayerOffsetItem, 0xe, &D_004A44B0, -16, 0x10, str_Layer_Offset);
+    cIntMenuItem_cIntMenuItem(&self->EnableItem, 0xf, &cVisualEffectsTest_m_Enable, 0, 1, str_World_Painter_Display_Enable);
+    cIntMenuItem_cIntMenuItem(&self->LayerIdItem, 0x10, &cVisualEffectsTest_m_LayerId, 0, 100, str_World_Painter_LayerId);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->HUDEnableItem, -1);
+    cMenu_addItem(self, &self->ShowCurrentElementItem, -1);
+    cMenu_addItem(self, &self->HUDPrintItem, -1);
+    cMenu_addItem(self, &self->CurrElementItem, -1);
+    cMenu_addItem(self, &self->PositionXItem, -1);
+    cMenu_addItem(self, &self->PositionYItem, -1);
+    cMenu_addItem(self, &self->SizeXItem, -1);
+    cMenu_addItem(self, &self->SizeYItem, -1);
+    cMenu_addItem(self, &self->ScaleXItem, -1);
+    cMenu_addItem(self, &self->ScaleYItem, -1);
+    cMenu_addItem(self, &self->AlphaItem, -1);
+    cMenu_addItem(self, &self->RedItem, -1);
+    cMenu_addItem(self, &self->GreenItem, -1);
+    cMenu_addItem(self, &self->BlueItem, -1);
+    cMenu_addItem(self, &self->LayerOffsetItem, -1);
+    cMenu_addItem(self, &self->EnableItem, -1);
+    cMenu_addItem(self, &self->LayerIdItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -374,39 +375,39 @@ extern float D_004A4470;
  *
  * @return @p self
  */
-extern "C" void* cPlantsMenu_cPlantsMenu(void* self)
+extern "C" void* cPlantsMenu_cPlantsMenu(cPlantsMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cPlantsMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_Plants_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &cPlants_m_Enable, 0, 2, str_Enable);
-    cFloatMenuItem_ctor((char*)self + 0x194, 1, &D_004A4448, 0.0f, 2.0f, str_Sway_Amplitude);
-    cFloatMenuItem_ctor((char*)self + 0x1C8, 2, &D_004A444C, -5.0f, 5.0f, str_Sway_Offset);
-    cFloatMenuItem_ctor((char*)self + 0x1FC, 3, &D_004A4450, 0.0f, 2.0f, str_Branch_Amplitude);
-    cFloatMenuItem_ctor((char*)self + 0x230, 4, &D_004A4454, 0.0f, 2.0f, str_Rotation_Amplitude);
-    cFloatMenuItem_ctor((char*)self + 0x264, 5, &D_004A4458, 0.0f, 1000.0f, str_Position_Scale);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x298, 6, &D_004A445C, 0, 6000, str_Sway_Frequency_x_600_Hz);
-    cFloatMenuItem_ctor((char*)self + 0x2C8, 7, &D_004A4460, 0.0f, 6000.0f, str_Rotation_Frequency);
-    cFloatMenuItem_ctor((char*)self + 0x2FC, 8, &D_004A4464, 0.0f, 6000.0f, str_Branch_Frequency_x_600_Hz);
-    cFloatMenuItem_ctor((char*)self + 0x330, 9, &D_004A4468, 0.0f, 6000.0f, str_Branch_Frequency_2_x_600_Hz);
-    cFloatMenuItem_ctor((char*)self + 0x364, 10, &D_004A446C, 0.0f, 360.0f, str_Sway_Direction);
-    cFloatMenuItem_ctor((char*)self + 0x398, 11, &D_004A4470, 0.0f, 360.0f, str_Branch_Direction);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    cMenu_addItem(self, (char*)self + 0x1C8, -1);
-    cMenu_addItem(self, (char*)self + 0x1FC, -1);
-    cMenu_addItem(self, (char*)self + 0x230, -1);
-    cMenu_addItem(self, (char*)self + 0x264, -1);
-    cMenu_addItem(self, (char*)self + 0x298, -1);
-    cMenu_addItem(self, (char*)self + 0x2C8, -1);
-    cMenu_addItem(self, (char*)self + 0x2FC, -1);
-    cMenu_addItem(self, (char*)self + 0x330, -1);
-    cMenu_addItem(self, (char*)self + 0x364, -1);
-    cMenu_addItem(self, (char*)self + 0x398, -1);
-    return self;
+    self->mVtbl = cPlantsMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_Plants_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->EnableItem, 0, &cPlants_m_Enable, 0, 2, str_Enable);
+    cFloatMenuItem_ctor(&self->SwayAmplitudeItem, 1, &D_004A4448, 0.0f, 2.0f, str_Sway_Amplitude);
+    cFloatMenuItem_ctor(&self->SwayOffsetItem, 2, &D_004A444C, -5.0f, 5.0f, str_Sway_Offset);
+    cFloatMenuItem_ctor(&self->BranchAmplitudeItem, 3, &D_004A4450, 0.0f, 2.0f, str_Branch_Amplitude);
+    cFloatMenuItem_ctor(&self->RotationAmplitudeItem, 4, &D_004A4454, 0.0f, 2.0f, str_Rotation_Amplitude);
+    cFloatMenuItem_ctor(&self->PositionScaleItem, 5, &D_004A4458, 0.0f, 1000.0f, str_Position_Scale);
+    cIntMenuItem_cIntMenuItem(&self->SwayFrequencyItem, 6, &D_004A445C, 0, 6000, str_Sway_Frequency_x_600_Hz);
+    cFloatMenuItem_ctor(&self->RotationFrequencyItem, 7, &D_004A4460, 0.0f, 6000.0f, str_Rotation_Frequency);
+    cFloatMenuItem_ctor(&self->BranchFrequencyItem, 8, &D_004A4464, 0.0f, 6000.0f, str_Branch_Frequency_x_600_Hz);
+    cFloatMenuItem_ctor(&self->BranchFrequency2Item, 9, &D_004A4468, 0.0f, 6000.0f, str_Branch_Frequency_2_x_600_Hz);
+    cFloatMenuItem_ctor(&self->SwayDirectionItem, 10, &D_004A446C, 0.0f, 360.0f, str_Sway_Direction);
+    cFloatMenuItem_ctor(&self->BranchDirectionItem, 11, &D_004A4470, 0.0f, 360.0f, str_Branch_Direction);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->EnableItem, -1);
+    cMenu_addItem(self, &self->SwayAmplitudeItem, -1);
+    cMenu_addItem(self, &self->SwayOffsetItem, -1);
+    cMenu_addItem(self, &self->BranchAmplitudeItem, -1);
+    cMenu_addItem(self, &self->RotationAmplitudeItem, -1);
+    cMenu_addItem(self, &self->PositionScaleItem, -1);
+    cMenu_addItem(self, &self->SwayFrequencyItem, -1);
+    cMenu_addItem(self, &self->RotationFrequencyItem, -1);
+    cMenu_addItem(self, &self->BranchFrequencyItem, -1);
+    cMenu_addItem(self, &self->BranchFrequency2Item, -1);
+    cMenu_addItem(self, &self->SwayDirectionItem, -1);
+    cMenu_addItem(self, &self->BranchDirectionItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -489,73 +490,73 @@ extern float D_004A4438;
  *
  * @return @p self
  */
-extern "C" void* cLightGlowMenu_cLightGlowMenu(void* self)
+extern "C" void* cLightGlowMenu_cLightGlowMenu(cLightGlowMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cLightGlowMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_Light_Glow_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &cLightGlow_m_Enable, 0, 1, str_Enable);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x194, 1, &cLightGlow_m_OverrideWP, 0, 1, str_Override_World_Painter);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x1C4, 2, &D_004A43D0, 4, 8, str_PS2_Capture_Size_2_x);
-    cFloatMenuItem_ctor((char*)self + 0x1F4, 3, &cLightGlow_m_PS2MinIntensity, 0.0f, 2.0f, str_PS2_Minimum_Intensity_Cutoff);
-    cFloatMenuItem_ctor((char*)self + 0x228, 4, &cLightGlow_m_PS2ModIntensity, 0.0f, 2.0f, str_PS2_Post_Cutoff_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x25C, 5, &cLightGlow_m_PS2CopyIntensity, 0.0f, 8.0f, str_PS2_Copy_Intensity);
-    cFloatMenuItem_ctor((char*)self + 0x290, 6, &cLightGlow_m_PS2FrameSrcScale, 0.0f, 2.0f, str_PS2_Frame_Source_Intensity);
-    cFloatMenuItem_ctor((char*)self + 0x2C4, 7, &cLightGlow_m_PS2FrameDstScale, 0.0f, 2.0f, str_PS2_Frame_Blend_Intensity);
-    cFloatMenuItem_ctor((char*)self + 0x2F8, 8, &D_004A43E8, 0.0f, 2.0f, str_PS2_Blend_Texture_0);
-    cFloatMenuItem_ctor((char*)self + 0x32C, 9, &D_004A43EC, 0.0f, 2.0f, str_PS2_Blend_Texture_1);
-    cFloatMenuItem_ctor((char*)self + 0x360, 10, &cLightGlow_m_PS2IntensityTex2, 0.0f, 2.0f, str_PS2_Blend_Texture_2);
-    cFloatMenuItem_ctor((char*)self + 0x394, 11, &cLightGlow_m_PS2IntensityTex3, 0.0f, 2.0f, str_PS2_Blend_Texture_3);
-    cFloatMenuItem_ctor((char*)self + 0x3C8, 12, &D_004A43F8, 0.0f, 8.0f, str_PS2_Texture_Jitter);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x3FC, 13, &D_004A43FC, 0, 1, str_PS2_Show_Textures);
-    cFloatMenuItem_ctor((char*)self + 0x42C, 14, &D_004A4400, 0.0f, 64.0f, str_Size);
-    cFloatMenuItem_ctor((char*)self + 0x460, 15, &D_004A4404, 0.0f, 1.0f, str_Cutoff);
-    cFloatMenuItem_ctor((char*)self + 0x494, 16, &D_004A4408, 0.0f, 4.0f, str_Colour_Power);
-    cFloatMenuItem_ctor((char*)self + 0x4C8, 17, &D_004A440C, 0.0f, 64.0f, str_Colour_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x4FC, 18, &D_004A4410, 0.0f, 16.0f, str_Colour_Ambient);
-    cFloatMenuItem_ctor((char*)self + 0x530, 19, &D_004A4414, 0.0f, 4.0f, str_Size_Power);
-    cFloatMenuItem_ctor((char*)self + 0x564, 20, &D_004A4418, 0.0f, 64.0f, str_Size_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x598, 21, &D_004A441C, 0.0f, 64.0f, str_Size_Ambient);
-    cFloatMenuItem_ctor((char*)self + 0x5CC, 22, &D_004A4420, 0.0f, 1.0f, str_Fade_Rate);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x600, 23, &D_004A4424, 0, 255, str_Background_Alpha);
-    cFloatMenuItem_ctor((char*)self + 0x630, 24, &D_004A4428, 0.0f, 1.0f, str_Intensity_Red);
-    cFloatMenuItem_ctor((char*)self + 0x664, 25, &D_004A442C, 0.0f, 1.0f, str_Intensity_Green);
-    cFloatMenuItem_ctor((char*)self + 0x698, 26, &D_004A4430, 0.0f, 1.0f, str_Intensity_Blue);
-    cFloatMenuItem_ctor((char*)self + 0x6CC, 27, &D_004A4434, 0.0f, 1.0f, str_Intensity_Alpha);
-    cFloatMenuItem_ctor((char*)self + 0x700, 28, &D_004A4438, 0.0f, 1.0f, str_Intensity_Scale);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    cMenu_addItem(self, (char*)self + 0x1C4, -1);
-    cMenu_addItem(self, (char*)self + 0x1F4, -1);
-    cMenu_addItem(self, (char*)self + 0x228, -1);
-    cMenu_addItem(self, (char*)self + 0x25C, -1);
-    cMenu_addItem(self, (char*)self + 0x290, -1);
-    cMenu_addItem(self, (char*)self + 0x2C4, -1);
-    cMenu_addItem(self, (char*)self + 0x2F8, -1);
-    cMenu_addItem(self, (char*)self + 0x32C, -1);
-    cMenu_addItem(self, (char*)self + 0x360, -1);
-    cMenu_addItem(self, (char*)self + 0x394, -1);
-    cMenu_addItem(self, (char*)self + 0x3C8, -1);
-    cMenu_addItem(self, (char*)self + 0x3FC, -1);
-    cMenu_addItem(self, (char*)self + 0x42C, -1);
-    cMenu_addItem(self, (char*)self + 0x460, -1);
-    cMenu_addItem(self, (char*)self + 0x494, -1);
-    cMenu_addItem(self, (char*)self + 0x4C8, -1);
-    cMenu_addItem(self, (char*)self + 0x4FC, -1);
-    cMenu_addItem(self, (char*)self + 0x530, -1);
-    cMenu_addItem(self, (char*)self + 0x564, -1);
-    cMenu_addItem(self, (char*)self + 0x598, -1);
-    cMenu_addItem(self, (char*)self + 0x5CC, -1);
-    cMenu_addItem(self, (char*)self + 0x600, -1);
-    cMenu_addItem(self, (char*)self + 0x630, -1);
-    cMenu_addItem(self, (char*)self + 0x664, -1);
-    cMenu_addItem(self, (char*)self + 0x698, -1);
-    cMenu_addItem(self, (char*)self + 0x6CC, -1);
-    cMenu_addItem(self, (char*)self + 0x700, -1);
-    return self;
+    self->mVtbl = cLightGlowMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_Light_Glow_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->EnableItem, 0, &cLightGlow_m_Enable, 0, 1, str_Enable);
+    cIntMenuItem_cIntMenuItem(&self->OverrideWPItem, 1, &cLightGlow_m_OverrideWP, 0, 1, str_Override_World_Painter);
+    cIntMenuItem_cIntMenuItem(&self->PS2CaptureSizeItem, 2, &D_004A43D0, 4, 8, str_PS2_Capture_Size_2_x);
+    cFloatMenuItem_ctor(&self->PS2MinIntensityItem, 3, &cLightGlow_m_PS2MinIntensity, 0.0f, 2.0f, str_PS2_Minimum_Intensity_Cutoff);
+    cFloatMenuItem_ctor(&self->PS2ModIntensityItem, 4, &cLightGlow_m_PS2ModIntensity, 0.0f, 2.0f, str_PS2_Post_Cutoff_Scale);
+    cFloatMenuItem_ctor(&self->PS2CopyIntensityItem, 5, &cLightGlow_m_PS2CopyIntensity, 0.0f, 8.0f, str_PS2_Copy_Intensity);
+    cFloatMenuItem_ctor(&self->PS2FrameSrcScaleItem, 6, &cLightGlow_m_PS2FrameSrcScale, 0.0f, 2.0f, str_PS2_Frame_Source_Intensity);
+    cFloatMenuItem_ctor(&self->PS2FrameDstScaleItem, 7, &cLightGlow_m_PS2FrameDstScale, 0.0f, 2.0f, str_PS2_Frame_Blend_Intensity);
+    cFloatMenuItem_ctor(&self->PS2IntensityTex0Item, 8, &D_004A43E8, 0.0f, 2.0f, str_PS2_Blend_Texture_0);
+    cFloatMenuItem_ctor(&self->PS2IntensityTex1Item, 9, &D_004A43EC, 0.0f, 2.0f, str_PS2_Blend_Texture_1);
+    cFloatMenuItem_ctor(&self->PS2IntensityTex2Item, 10, &cLightGlow_m_PS2IntensityTex2, 0.0f, 2.0f, str_PS2_Blend_Texture_2);
+    cFloatMenuItem_ctor(&self->PS2IntensityTex3Item, 11, &cLightGlow_m_PS2IntensityTex3, 0.0f, 2.0f, str_PS2_Blend_Texture_3);
+    cFloatMenuItem_ctor(&self->PS2JitterTexItem, 12, &D_004A43F8, 0.0f, 8.0f, str_PS2_Texture_Jitter);
+    cIntMenuItem_cIntMenuItem(&self->PS2ShowTexturesItem, 13, &D_004A43FC, 0, 1, str_PS2_Show_Textures);
+    cFloatMenuItem_ctor(&self->SizeItem, 14, &D_004A4400, 0.0f, 64.0f, str_Size);
+    cFloatMenuItem_ctor(&self->CutoffItem, 15, &D_004A4404, 0.0f, 1.0f, str_Cutoff);
+    cFloatMenuItem_ctor(&self->ColourPowerItem, 16, &D_004A4408, 0.0f, 4.0f, str_Colour_Power);
+    cFloatMenuItem_ctor(&self->ColourScaleItem, 17, &D_004A440C, 0.0f, 64.0f, str_Colour_Scale);
+    cFloatMenuItem_ctor(&self->ColourAmbientItem, 18, &D_004A4410, 0.0f, 16.0f, str_Colour_Ambient);
+    cFloatMenuItem_ctor(&self->SizePowerItem, 19, &D_004A4414, 0.0f, 4.0f, str_Size_Power);
+    cFloatMenuItem_ctor(&self->SizeScaleItem, 20, &D_004A4418, 0.0f, 64.0f, str_Size_Scale);
+    cFloatMenuItem_ctor(&self->SizeAmbientItem, 21, &D_004A441C, 0.0f, 64.0f, str_Size_Ambient);
+    cFloatMenuItem_ctor(&self->FadeRateItem, 22, &D_004A4420, 0.0f, 1.0f, str_Fade_Rate);
+    cIntMenuItem_cIntMenuItem(&self->ClearAlphaItem, 23, &D_004A4424, 0, 255, str_Background_Alpha);
+    cFloatMenuItem_ctor(&self->IntensityRItem, 24, &D_004A4428, 0.0f, 1.0f, str_Intensity_Red);
+    cFloatMenuItem_ctor(&self->IntensityGItem, 25, &D_004A442C, 0.0f, 1.0f, str_Intensity_Green);
+    cFloatMenuItem_ctor(&self->IntensityBItem, 26, &D_004A4430, 0.0f, 1.0f, str_Intensity_Blue);
+    cFloatMenuItem_ctor(&self->IntensityAItem, 27, &D_004A4434, 0.0f, 1.0f, str_Intensity_Alpha);
+    cFloatMenuItem_ctor(&self->IntensityScaleItem, 28, &D_004A4438, 0.0f, 1.0f, str_Intensity_Scale);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->EnableItem, -1);
+    cMenu_addItem(self, &self->OverrideWPItem, -1);
+    cMenu_addItem(self, &self->PS2CaptureSizeItem, -1);
+    cMenu_addItem(self, &self->PS2MinIntensityItem, -1);
+    cMenu_addItem(self, &self->PS2ModIntensityItem, -1);
+    cMenu_addItem(self, &self->PS2CopyIntensityItem, -1);
+    cMenu_addItem(self, &self->PS2FrameSrcScaleItem, -1);
+    cMenu_addItem(self, &self->PS2FrameDstScaleItem, -1);
+    cMenu_addItem(self, &self->PS2IntensityTex0Item, -1);
+    cMenu_addItem(self, &self->PS2IntensityTex1Item, -1);
+    cMenu_addItem(self, &self->PS2IntensityTex2Item, -1);
+    cMenu_addItem(self, &self->PS2IntensityTex3Item, -1);
+    cMenu_addItem(self, &self->PS2JitterTexItem, -1);
+    cMenu_addItem(self, &self->PS2ShowTexturesItem, -1);
+    cMenu_addItem(self, &self->SizeItem, -1);
+    cMenu_addItem(self, &self->CutoffItem, -1);
+    cMenu_addItem(self, &self->ColourPowerItem, -1);
+    cMenu_addItem(self, &self->ColourScaleItem, -1);
+    cMenu_addItem(self, &self->ColourAmbientItem, -1);
+    cMenu_addItem(self, &self->SizePowerItem, -1);
+    cMenu_addItem(self, &self->SizeScaleItem, -1);
+    cMenu_addItem(self, &self->SizeAmbientItem, -1);
+    cMenu_addItem(self, &self->FadeRateItem, -1);
+    cMenu_addItem(self, &self->ClearAlphaItem, -1);
+    cMenu_addItem(self, &self->IntensityRItem, -1);
+    cMenu_addItem(self, &self->IntensityGItem, -1);
+    cMenu_addItem(self, &self->IntensityBItem, -1);
+    cMenu_addItem(self, &self->IntensityAItem, -1);
+    cMenu_addItem(self, &self->IntensityScaleItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -598,31 +599,31 @@ extern float cDepthFog_m_XBoxDensityScale;
  *
  * @return @p self
  */
-extern "C" void* cDepthFogMenu_cDepthFogMenu(void* self)
+extern "C" void* cDepthFogMenu_cDepthFogMenu(cDepthFogMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cDepthFogMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_Depth_Fog_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &cDepthFog_m_Enable, 0, 1, str_Enable);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x194, 1, &cDepthFog_m_OverrideWP, 0, 1, str_Override_World_Painter);
-    cFloatMenuItem_ctor((char*)self + 0x1C4, 2, &cDepthFog_m_NearPlane, 1.0f, 100000.0f, str_Near_Plane);
-    cFloatMenuItem_ctor((char*)self + 0x1F8, 3, &cDepthFog_m_FarPlane, 1.0f, 100000.0f, str_Far_Plane);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x22C, 4, &cDepthFog_m_Exponent, 0, 2, str_Exponent);
-    cFloatMenuItem_ctor((char*)self + 0x25C, 5, &cDepthFog_m_Density, 0.0f, 100.0f, str_Density);
-    cFloatMenuItem_ctor((char*)self + 0x290, 6, &cDepthFog_m_XBoxDensityScale, 0.0f, 1.0f, str_XBox_Skybox_Density_Scale);
-    cARGBMenuItem_cARGBMenuItem((char*)self + 0x2C4, 7, str_Colour, cDepthFog_m_Colour);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    cMenu_addItem(self, (char*)self + 0x1C4, -1);
-    cMenu_addItem(self, (char*)self + 0x1F8, -1);
-    cMenu_addItem(self, (char*)self + 0x22C, -1);
-    cMenu_addItem(self, (char*)self + 0x25C, -1);
-    cMenu_addItem(self, (char*)self + 0x290, -1);
-    cMenu_addItem(self, (char*)self + 0x2C4, -1);
-    return self;
+    self->mVtbl = cDepthFogMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_Depth_Fog_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->EnableItem, 0, &cDepthFog_m_Enable, 0, 1, str_Enable);
+    cIntMenuItem_cIntMenuItem(&self->OverrideWPItem, 1, &cDepthFog_m_OverrideWP, 0, 1, str_Override_World_Painter);
+    cFloatMenuItem_ctor(&self->NearPlaneItem, 2, &cDepthFog_m_NearPlane, 1.0f, 100000.0f, str_Near_Plane);
+    cFloatMenuItem_ctor(&self->FarPlaneItem, 3, &cDepthFog_m_FarPlane, 1.0f, 100000.0f, str_Far_Plane);
+    cIntMenuItem_cIntMenuItem(&self->ExponentItem, 4, &cDepthFog_m_Exponent, 0, 2, str_Exponent);
+    cFloatMenuItem_ctor(&self->DensityItem, 5, &cDepthFog_m_Density, 0.0f, 100.0f, str_Density);
+    cFloatMenuItem_ctor(&self->XBoxDensityScaleItem, 6, &cDepthFog_m_XBoxDensityScale, 0.0f, 1.0f, str_XBox_Skybox_Density_Scale);
+    cARGBMenuItem_cARGBMenuItem(&self->ColourItem, 7, str_Colour, cDepthFog_m_Colour);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->EnableItem, -1);
+    cMenu_addItem(self, &self->OverrideWPItem, -1);
+    cMenu_addItem(self, &self->NearPlaneItem, -1);
+    cMenu_addItem(self, &self->FarPlaneItem, -1);
+    cMenu_addItem(self, &self->ExponentItem, -1);
+    cMenu_addItem(self, &self->DensityItem, -1);
+    cMenu_addItem(self, &self->XBoxDensityScaleItem, -1);
+    cMenu_addItem(self, &self->ColourItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -652,21 +653,21 @@ extern float D_004A43BC;
  *
  * @return @p self
  */
-extern "C" void* cHeightFogMenu_cHeightFogMenu(void* self)
+extern "C" void* cHeightFogMenu_cHeightFogMenu(cHeightFogMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cHeightFogMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_Height_Fog_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A43B4, 0, 1, str_Enable);
-    cFloatMenuItem_cFloatMenuItem((char*)self + 0x194, 1, &D_004A43B8, str_Start_Height, -100000.0f, 100000.0f);
-    cFloatMenuItem_cFloatMenuItem((char*)self + 0x1C8, 2, &D_004A43BC, str_Thickness, 9.999999747378752e-05f, 10000.0f);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    cMenu_addItem(self, (char*)self + 0x1C8, -1);
-    return self;
+    self->mVtbl = cHeightFogMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_Height_Fog_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->EnableItem, 0, &D_004A43B4, 0, 1, str_Enable);
+    cFloatMenuItem_cFloatMenuItem(&self->StartHeightItem, 1, &D_004A43B8, str_Start_Height, -100000.0f, 100000.0f);
+    cFloatMenuItem_cFloatMenuItem(&self->ThicknessItem, 2, &D_004A43BC, str_Thickness, 9.999999747378752e-05f, 10000.0f);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->EnableItem, -1);
+    cMenu_addItem(self, &self->StartHeightItem, -1);
+    cMenu_addItem(self, &self->ThicknessItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -713,35 +714,35 @@ extern float D_004A4364;
  *
  * @return @p self
  */
-extern "C" void* cDetailSystemMenu_cDetailSystemMenu(void* self)
+extern "C" void* cDetailSystemMenu_cDetailSystemMenu(cDetailSystemMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cDetailSystemMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_Detail_System_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A4340, 0, 1, str_Enable);
-    cFloatMenuItem_ctor((char*)self + 0x194, 1, &D_004A4344, -1.0f, 1.0f, str_Sparkle_Spin_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x1C8, 2, &D_004A4348, 0.0f, 20.0f, str_PS2_Sparkle_Count);
-    cFloatMenuItem_ctor((char*)self + 0x1FC, 3, &D_004A434C, 0.0f, 500.0f, str_PS2_Sparkle_World_Size);
-    cFloatMenuItem_ctor((char*)self + 0x230, 4, &D_004A4350, 0.0f, 100.0f, str_PS2_Min_Sparkle_Screen_Size);
-    cFloatMenuItem_ctor((char*)self + 0x264, 5, &D_004A4354, 0.0f, 100.0f, str_PS2_Max_Sparkle_Screen_Size);
-    cFloatMenuItem_ctor((char*)self + 0x298, 6, &D_004A4358, 1.0f, 300.0f, str_XBox_Sparkle_Count);
-    cFloatMenuItem_ctor((char*)self + 0x2CC, 7, &D_004A435C, 0.0f, 500.0f, str_XBox_World_Size);
-    cFloatMenuItem_ctor((char*)self + 0x300, 8, &D_004A4360, 0.0f, 100.0f, str_XBox_Min_Screen_Size);
-    cFloatMenuItem_ctor((char*)self + 0x334, 9, &D_004A4364, 0.0f, 100.0f, str_XBox_Max_Screen_Size);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    cMenu_addItem(self, (char*)self + 0x1C8, -1);
-    cMenu_addItem(self, (char*)self + 0x1FC, -1);
-    cMenu_addItem(self, (char*)self + 0x230, -1);
-    cMenu_addItem(self, (char*)self + 0x264, -1);
-    cMenu_addItem(self, (char*)self + 0x298, -1);
-    cMenu_addItem(self, (char*)self + 0x2CC, -1);
-    cMenu_addItem(self, (char*)self + 0x300, -1);
-    cMenu_addItem(self, (char*)self + 0x334, -1);
-    return self;
+    self->mVtbl = cDetailSystemMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_Detail_System_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->EnableItem, 0, &D_004A4340, 0, 1, str_Enable);
+    cFloatMenuItem_ctor(&self->SpinScaleItem, 1, &D_004A4344, -1.0f, 1.0f, str_Sparkle_Spin_Scale);
+    cFloatMenuItem_ctor(&self->PS2SparkleCountItem, 2, &D_004A4348, 0.0f, 20.0f, str_PS2_Sparkle_Count);
+    cFloatMenuItem_ctor(&self->PS2SparkleSizeItem, 3, &D_004A434C, 0.0f, 500.0f, str_PS2_Sparkle_World_Size);
+    cFloatMenuItem_ctor(&self->PS2MinSparkleSizeItem, 4, &D_004A4350, 0.0f, 100.0f, str_PS2_Min_Sparkle_Screen_Size);
+    cFloatMenuItem_ctor(&self->PS2MaxSparkleSizeItem, 5, &D_004A4354, 0.0f, 100.0f, str_PS2_Max_Sparkle_Screen_Size);
+    cFloatMenuItem_ctor(&self->XBoxNumSparklesItem, 6, &D_004A4358, 1.0f, 300.0f, str_XBox_Sparkle_Count);
+    cFloatMenuItem_ctor(&self->XBoxSizeItem, 7, &D_004A435C, 0.0f, 500.0f, str_XBox_World_Size);
+    cFloatMenuItem_ctor(&self->XBoxMinSizeItem, 8, &D_004A4360, 0.0f, 100.0f, str_XBox_Min_Screen_Size);
+    cFloatMenuItem_ctor(&self->XBoxMaxSizeItem, 9, &D_004A4364, 0.0f, 100.0f, str_XBox_Max_Screen_Size);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->EnableItem, -1);
+    cMenu_addItem(self, &self->SpinScaleItem, -1);
+    cMenu_addItem(self, &self->PS2SparkleCountItem, -1);
+    cMenu_addItem(self, &self->PS2SparkleSizeItem, -1);
+    cMenu_addItem(self, &self->PS2MinSparkleSizeItem, -1);
+    cMenu_addItem(self, &self->PS2MaxSparkleSizeItem, -1);
+    cMenu_addItem(self, &self->XBoxNumSparklesItem, -1);
+    cMenu_addItem(self, &self->XBoxSizeItem, -1);
+    cMenu_addItem(self, &self->XBoxMinSizeItem, -1);
+    cMenu_addItem(self, &self->XBoxMaxSizeItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -787,33 +788,33 @@ extern int D_004A46D8;
  *
  * @return @p self
  */
-extern "C" void* cShellRendererMenu_cShellRendererMenu(void* self)
+extern "C" void* cShellRendererMenu_cShellRendererMenu(cShellRendererMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cShellRendererMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_Shell_Renderer_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A46B8, 0, 1, str_Enable);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x194, 1, &D_004A46BC, 0, 200, str_Model_Texture_Id);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x1C4, 2, &D_004A46C0, 0, 200, str_Shell_Texture_Id);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x1F4, 3, &D_004A46C4, 1, 10000, str_Near_Plane);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x224, 4, &D_004A46C8, 1, 10000, str_Far_Plane);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x254, 5, &D_004A46CC, 1, 0x186a0, str_DistScale);
-    cFloatMenuItem_ctor((char*)self + 0x284, 6, &D_004A46D0, 1e-05f, 2.0f, str_Depth_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x2B8, 7, &D_004A46D4, 0.0f, 1.0f, str_Depth_Brightness);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x2EC, 8, &D_004A46D8, 1, 0x40, str_Max_Shells);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    cMenu_addItem(self, (char*)self + 0x1C4, -1);
-    cMenu_addItem(self, (char*)self + 0x1F4, -1);
-    cMenu_addItem(self, (char*)self + 0x224, -1);
-    cMenu_addItem(self, (char*)self + 0x254, -1);
-    cMenu_addItem(self, (char*)self + 0x284, -1);
-    cMenu_addItem(self, (char*)self + 0x2B8, -1);
-    cMenu_addItem(self, (char*)self + 0x2EC, -1);
-    return self;
+    self->mVtbl = cShellRendererMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_Shell_Renderer_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->EnableItem, 0, &D_004A46B8, 0, 1, str_Enable);
+    cIntMenuItem_cIntMenuItem(&self->ModelTextureIdItem, 1, &D_004A46BC, 0, 200, str_Model_Texture_Id);
+    cIntMenuItem_cIntMenuItem(&self->ShellTextureIdItem, 2, &D_004A46C0, 0, 200, str_Shell_Texture_Id);
+    cIntMenuItem_cIntMenuItem(&self->NearPlaneItem, 3, &D_004A46C4, 1, 10000, str_Near_Plane);
+    cIntMenuItem_cIntMenuItem(&self->FarPlaneItem, 4, &D_004A46C8, 1, 10000, str_Far_Plane);
+    cIntMenuItem_cIntMenuItem(&self->DistScaleItem, 5, &D_004A46CC, 1, 0x186a0, str_DistScale);
+    cFloatMenuItem_ctor(&self->DepthScaleItem, 6, &D_004A46D0, 1e-05f, 2.0f, str_Depth_Scale);
+    cFloatMenuItem_ctor(&self->DepthBrightnessItem, 7, &D_004A46D4, 0.0f, 1.0f, str_Depth_Brightness);
+    cIntMenuItem_cIntMenuItem(&self->MaxShellsItem, 8, &D_004A46D8, 1, 0x40, str_Max_Shells);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->EnableItem, -1);
+    cMenu_addItem(self, &self->ModelTextureIdItem, -1);
+    cMenu_addItem(self, &self->ShellTextureIdItem, -1);
+    cMenu_addItem(self, &self->NearPlaneItem, -1);
+    cMenu_addItem(self, &self->FarPlaneItem, -1);
+    cMenu_addItem(self, &self->DistScaleItem, -1);
+    cMenu_addItem(self, &self->DepthScaleItem, -1);
+    cMenu_addItem(self, &self->DepthBrightnessItem, -1);
+    cMenu_addItem(self, &self->MaxShellsItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -919,95 +920,95 @@ extern float D_004A4674;
  *
  * @return @p self
  */
-extern "C" void* cScreenTintMenu_cScreenTintMenu(void* self)
+extern "C" void* cScreenTintMenu_cScreenTintMenu(cScreenTintMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cScreenTintMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_Screen_Tint_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &cScreenTint_m_Enable, 0, 1, str_Enable);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x194, 1, &cScreenTint_m_OverrideWP, 0, 1, str_Override_World_Painter);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x1C4, 2, &cScreenTint_m_DisplayValues, 0, 1, str_Display_Values);
-    cFloatMenuItem_ctor((char*)self + 0x1F4, 3, &cScreenTint_m_ColourR, 0.0f, 2.0f, str_Tint_Red);
-    cFloatMenuItem_ctor((char*)self + 0x228, 4, &cScreenTint_m_ColourG, 0.0f, 2.0f, str_Tint_Green);
-    cFloatMenuItem_ctor((char*)self + 0x25C, 5, &cScreenTint_m_ColourB, 0.0f, 2.0f, str_Tint_Blue);
-    cFloatMenuItem_ctor((char*)self + 0x290, 6, &cScreenTint_m_FillR, 0.0f, 1.0f, str_Fill_Red);
-    cFloatMenuItem_ctor((char*)self + 0x2C4, 7, &cScreenTint_m_FillG, 0.0f, 1.0f, str_Fill_Green);
-    cFloatMenuItem_ctor((char*)self + 0x2F8, 8, &cScreenTint_m_FillB, 0.0f, 1.0f, str_Fill_Blue);
-    cFloatMenuItem_ctor((char*)self + 0x32C, 9, &cScreenTint_m_XNColourR, 0.0f, 2.0f, str_XN_Tint_Red);
-    cFloatMenuItem_ctor((char*)self + 0x360, 10, &cScreenTint_m_XNColourG, 0.0f, 2.0f, str_XN_Tint_Green);
-    cFloatMenuItem_ctor((char*)self + 0x394, 11, &cScreenTint_m_XNColourB, 0.0f, 2.0f, str_XN_Tint_Blue);
-    cFloatMenuItem_ctor((char*)self + 0x3C8, 0xc, &D_004A4608, 0.0f, 2.0f, str_XN_Lerp);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x3FC, 13, &cScreenTint_m_LightningEnable, 0, 1, str_Enable_Lightning);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x42C, 0xe, &D_004A4610, -1, 1000, str_Frame_Id);
-    cFloatMenuItem_ctor((char*)self + 0x45C, 0xf, &cScreenTint_m_LightningChance, 0.0f, 1.0f, str_Lightning_Chance);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x490, 0x10, &D_004A4618, 0, 600, str_Flash_Fade_In);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x4C0, 17, &D_004A461C, 0, 600, str_Flash_Sustain);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x4F0, 18, &D_004A4620, 0, 600, str_Inverse_Duration);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x520, 19, &D_004A4624, 0, 600, str_Recover_Fade_In);
-    cFloatMenuItem_ctor((char*)self + 0x550, 20, &D_004A4628, 0.0f, 2.0f, str_Flash_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x584, 21, &D_004A462C, 0.0f, 2.0f, str_Inverse_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x5B8, 22, &D_004A4630, 0.0f, 2.0f, str_Recover_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x5EC, 23, &D_004A4634, 0.0f, 2.0f, str_Flash_Tint_Red);
-    cFloatMenuItem_ctor((char*)self + 0x620, 0x18, &D_004A4638, 0.0f, 2.0f, str_Flash_Tint_Green);
-    cFloatMenuItem_ctor((char*)self + 0x654, 25, &D_004A463C, 0.0f, 2.0f, str_Flash_Tint_Blue);
-    cFloatMenuItem_ctor((char*)self + 0x688, 26, &D_004A4640, 0.0f, 2.0f, str_Inverse_Tint_Red);
-    cFloatMenuItem_ctor((char*)self + 0x6BC, 27, &D_004A4644, 0.0f, 2.0f, str_Inverse_Tint_Green);
-    cFloatMenuItem_ctor((char*)self + 0x6F0, 0x1c, &D_004A4648, 0.0f, 2.0f, str_Inverse_Tint_Blue);
-    cFloatMenuItem_ctor((char*)self + 0x724, 29, &D_004A464C, 0.0f, 2.0f, str_Recover_Tint_Red);
-    cFloatMenuItem_ctor((char*)self + 0x758, 0x1e, &D_004A4650, 0.0f, 2.0f, str_Recover_Tint_Green);
-    cFloatMenuItem_ctor((char*)self + 0x78C, 0x1f, &D_004A4654, 0.0f, 2.0f, str_Recover_Tint_Blue);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x7C0, 0x20, &D_004A4658, 0, 1, str_Gamma_Enable);
-    cFloatMenuItem_ctor((char*)self + 0x7F0, 33, &D_004A465C, 0.0f, 2.0f, str_Gamma_Power);
-    cFloatMenuItem_ctor((char*)self + 0x824, 34, &D_004A4660, 0.0f, 2.0f, str_Gamma_Tint_Red);
-    cFloatMenuItem_ctor((char*)self + 0x858, 35, &D_004A4664, 0.0f, 2.0f, str_Gamma_Tint_Green);
-    cFloatMenuItem_ctor((char*)self + 0x88C, 36, &D_004A4668, 0.0f, 2.0f, str_Gamma_Tint_Blue);
-    cFloatMenuItem_ctor((char*)self + 0x8C0, 37, &D_004A466C, 0.0f, 1.0f, str_Gamma_Fill_Red);
-    cFloatMenuItem_ctor((char*)self + 0x8F4, 38, &D_004A4670, 0.0f, 1.0f, str_Gamma_Fill_Green);
-    cFloatMenuItem_ctor((char*)self + 0x928, 39, &D_004A4674, 0.0f, 1.0f, str_Gamma_Fill_Blue);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    cMenu_addItem(self, (char*)self + 0x1C4, -1);
-    cMenu_addItem(self, (char*)self + 0x1F4, -1);
-    cMenu_addItem(self, (char*)self + 0x228, -1);
-    cMenu_addItem(self, (char*)self + 0x25C, -1);
-    cMenu_addItem(self, (char*)self + 0x290, -1);
-    cMenu_addItem(self, (char*)self + 0x2C4, -1);
-    cMenu_addItem(self, (char*)self + 0x2F8, -1);
-    cMenu_addItem(self, (char*)self + 0x32C, -1);
-    cMenu_addItem(self, (char*)self + 0x360, -1);
-    cMenu_addItem(self, (char*)self + 0x394, -1);
-    cMenu_addItem(self, (char*)self + 0x3C8, -1);
-    cMenu_addItem(self, (char*)self + 0x3FC, -1);
-    cMenu_addItem(self, (char*)self + 0x42C, -1);
-    cMenu_addItem(self, (char*)self + 0x45C, -1);
-    cMenu_addItem(self, (char*)self + 0x490, -1);
-    cMenu_addItem(self, (char*)self + 0x4C0, -1);
-    cMenu_addItem(self, (char*)self + 0x4F0, -1);
-    cMenu_addItem(self, (char*)self + 0x520, -1);
-    cMenu_addItem(self, (char*)self + 0x550, -1);
-    cMenu_addItem(self, (char*)self + 0x584, -1);
-    cMenu_addItem(self, (char*)self + 0x5B8, -1);
-    cMenu_addItem(self, (char*)self + 0x5EC, -1);
-    cMenu_addItem(self, (char*)self + 0x620, -1);
-    cMenu_addItem(self, (char*)self + 0x654, -1);
-    cMenu_addItem(self, (char*)self + 0x688, -1);
-    cMenu_addItem(self, (char*)self + 0x6BC, -1);
-    cMenu_addItem(self, (char*)self + 0x6F0, -1);
-    cMenu_addItem(self, (char*)self + 0x724, -1);
-    cMenu_addItem(self, (char*)self + 0x758, -1);
-    cMenu_addItem(self, (char*)self + 0x78C, -1);
-    cMenu_addItem(self, (char*)self + 0x7C0, -1);
-    cMenu_addItem(self, (char*)self + 0x7F0, -1);
-    cMenu_addItem(self, (char*)self + 0x824, -1);
-    cMenu_addItem(self, (char*)self + 0x858, -1);
-    cMenu_addItem(self, (char*)self + 0x88C, -1);
-    cMenu_addItem(self, (char*)self + 0x8C0, -1);
-    cMenu_addItem(self, (char*)self + 0x8F4, -1);
-    cMenu_addItem(self, (char*)self + 0x928, -1);
-    return self;
+    self->mVtbl = cScreenTintMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_Screen_Tint_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->EnableItem, 0, &cScreenTint_m_Enable, 0, 1, str_Enable);
+    cIntMenuItem_cIntMenuItem(&self->OverrideWPItem, 1, &cScreenTint_m_OverrideWP, 0, 1, str_Override_World_Painter);
+    cIntMenuItem_cIntMenuItem(&self->DisplayValuesItem, 2, &cScreenTint_m_DisplayValues, 0, 1, str_Display_Values);
+    cFloatMenuItem_ctor(&self->ColourRItem, 3, &cScreenTint_m_ColourR, 0.0f, 2.0f, str_Tint_Red);
+    cFloatMenuItem_ctor(&self->ColourGItem, 4, &cScreenTint_m_ColourG, 0.0f, 2.0f, str_Tint_Green);
+    cFloatMenuItem_ctor(&self->ColourBItem, 5, &cScreenTint_m_ColourB, 0.0f, 2.0f, str_Tint_Blue);
+    cFloatMenuItem_ctor(&self->FillRItem, 6, &cScreenTint_m_FillR, 0.0f, 1.0f, str_Fill_Red);
+    cFloatMenuItem_ctor(&self->FillGItem, 7, &cScreenTint_m_FillG, 0.0f, 1.0f, str_Fill_Green);
+    cFloatMenuItem_ctor(&self->FillBItem, 8, &cScreenTint_m_FillB, 0.0f, 1.0f, str_Fill_Blue);
+    cFloatMenuItem_ctor(&self->XNColourRItem, 9, &cScreenTint_m_XNColourR, 0.0f, 2.0f, str_XN_Tint_Red);
+    cFloatMenuItem_ctor(&self->XNColourGItem, 10, &cScreenTint_m_XNColourG, 0.0f, 2.0f, str_XN_Tint_Green);
+    cFloatMenuItem_ctor(&self->XNColourBItem, 11, &cScreenTint_m_XNColourB, 0.0f, 2.0f, str_XN_Tint_Blue);
+    cFloatMenuItem_ctor(&self->XNLerpItem, 0xc, &D_004A4608, 0.0f, 2.0f, str_XN_Lerp);
+    cIntMenuItem_cIntMenuItem(&self->LightningEnableItem, 13, &cScreenTint_m_LightningEnable, 0, 1, str_Enable_Lightning);
+    cIntMenuItem_cIntMenuItem(&self->FrameIdItem, 0xe, &D_004A4610, -1, 1000, str_Frame_Id);
+    cFloatMenuItem_ctor(&self->LightningChanceItem, 0xf, &cScreenTint_m_LightningChance, 0.0f, 1.0f, str_Lightning_Chance);
+    cIntMenuItem_cIntMenuItem(&self->LightningFadeInItem, 0x10, &D_004A4618, 0, 600, str_Flash_Fade_In);
+    cIntMenuItem_cIntMenuItem(&self->LightningFadeOutItem, 17, &D_004A461C, 0, 600, str_Flash_Sustain);
+    cIntMenuItem_cIntMenuItem(&self->LightningFadeIn2Item, 18, &D_004A4620, 0, 600, str_Inverse_Duration);
+    cIntMenuItem_cIntMenuItem(&self->LightningFadeIn3Item, 19, &D_004A4624, 0, 600, str_Recover_Fade_In);
+    cFloatMenuItem_ctor(&self->LightningScaleItem, 20, &D_004A4628, 0.0f, 2.0f, str_Flash_Scale);
+    cFloatMenuItem_ctor(&self->LightningScale2Item, 21, &D_004A462C, 0.0f, 2.0f, str_Inverse_Scale);
+    cFloatMenuItem_ctor(&self->LightningScale3Item, 22, &D_004A4630, 0.0f, 2.0f, str_Recover_Scale);
+    cFloatMenuItem_ctor(&self->LightningColourRItem, 23, &D_004A4634, 0.0f, 2.0f, str_Flash_Tint_Red);
+    cFloatMenuItem_ctor(&self->LightningColourGItem, 0x18, &D_004A4638, 0.0f, 2.0f, str_Flash_Tint_Green);
+    cFloatMenuItem_ctor(&self->LightningColourBItem, 25, &D_004A463C, 0.0f, 2.0f, str_Flash_Tint_Blue);
+    cFloatMenuItem_ctor(&self->LightningColour2RItem, 26, &D_004A4640, 0.0f, 2.0f, str_Inverse_Tint_Red);
+    cFloatMenuItem_ctor(&self->LightningColour2GItem, 27, &D_004A4644, 0.0f, 2.0f, str_Inverse_Tint_Green);
+    cFloatMenuItem_ctor(&self->LightningColour2BItem, 0x1c, &D_004A4648, 0.0f, 2.0f, str_Inverse_Tint_Blue);
+    cFloatMenuItem_ctor(&self->LightningColour3RItem, 29, &D_004A464C, 0.0f, 2.0f, str_Recover_Tint_Red);
+    cFloatMenuItem_ctor(&self->LightningColour3GItem, 0x1e, &D_004A4650, 0.0f, 2.0f, str_Recover_Tint_Green);
+    cFloatMenuItem_ctor(&self->LightningColour3BItem, 0x1f, &D_004A4654, 0.0f, 2.0f, str_Recover_Tint_Blue);
+    cIntMenuItem_cIntMenuItem(&self->GammaEnableItem, 0x20, &D_004A4658, 0, 1, str_Gamma_Enable);
+    cFloatMenuItem_ctor(&self->GammaPowerItem, 33, &D_004A465C, 0.0f, 2.0f, str_Gamma_Power);
+    cFloatMenuItem_ctor(&self->GammaColourRItem, 34, &D_004A4660, 0.0f, 2.0f, str_Gamma_Tint_Red);
+    cFloatMenuItem_ctor(&self->GammaColourGItem, 35, &D_004A4664, 0.0f, 2.0f, str_Gamma_Tint_Green);
+    cFloatMenuItem_ctor(&self->GammaColourBItem, 36, &D_004A4668, 0.0f, 2.0f, str_Gamma_Tint_Blue);
+    cFloatMenuItem_ctor(&self->GammaFillRItem, 37, &D_004A466C, 0.0f, 1.0f, str_Gamma_Fill_Red);
+    cFloatMenuItem_ctor(&self->GammaFillGItem, 38, &D_004A4670, 0.0f, 1.0f, str_Gamma_Fill_Green);
+    cFloatMenuItem_ctor(&self->GammaFillBItem, 39, &D_004A4674, 0.0f, 1.0f, str_Gamma_Fill_Blue);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->EnableItem, -1);
+    cMenu_addItem(self, &self->OverrideWPItem, -1);
+    cMenu_addItem(self, &self->DisplayValuesItem, -1);
+    cMenu_addItem(self, &self->ColourRItem, -1);
+    cMenu_addItem(self, &self->ColourGItem, -1);
+    cMenu_addItem(self, &self->ColourBItem, -1);
+    cMenu_addItem(self, &self->FillRItem, -1);
+    cMenu_addItem(self, &self->FillGItem, -1);
+    cMenu_addItem(self, &self->FillBItem, -1);
+    cMenu_addItem(self, &self->XNColourRItem, -1);
+    cMenu_addItem(self, &self->XNColourGItem, -1);
+    cMenu_addItem(self, &self->XNColourBItem, -1);
+    cMenu_addItem(self, &self->XNLerpItem, -1);
+    cMenu_addItem(self, &self->LightningEnableItem, -1);
+    cMenu_addItem(self, &self->FrameIdItem, -1);
+    cMenu_addItem(self, &self->LightningChanceItem, -1);
+    cMenu_addItem(self, &self->LightningFadeInItem, -1);
+    cMenu_addItem(self, &self->LightningFadeOutItem, -1);
+    cMenu_addItem(self, &self->LightningFadeIn2Item, -1);
+    cMenu_addItem(self, &self->LightningFadeIn3Item, -1);
+    cMenu_addItem(self, &self->LightningScaleItem, -1);
+    cMenu_addItem(self, &self->LightningScale2Item, -1);
+    cMenu_addItem(self, &self->LightningScale3Item, -1);
+    cMenu_addItem(self, &self->LightningColourRItem, -1);
+    cMenu_addItem(self, &self->LightningColourGItem, -1);
+    cMenu_addItem(self, &self->LightningColourBItem, -1);
+    cMenu_addItem(self, &self->LightningColour2RItem, -1);
+    cMenu_addItem(self, &self->LightningColour2GItem, -1);
+    cMenu_addItem(self, &self->LightningColour2BItem, -1);
+    cMenu_addItem(self, &self->LightningColour3RItem, -1);
+    cMenu_addItem(self, &self->LightningColour3GItem, -1);
+    cMenu_addItem(self, &self->LightningColour3BItem, -1);
+    cMenu_addItem(self, &self->GammaEnableItem, -1);
+    cMenu_addItem(self, &self->GammaPowerItem, -1);
+    cMenu_addItem(self, &self->GammaColourRItem, -1);
+    cMenu_addItem(self, &self->GammaColourGItem, -1);
+    cMenu_addItem(self, &self->GammaColourBItem, -1);
+    cMenu_addItem(self, &self->GammaFillRItem, -1);
+    cMenu_addItem(self, &self->GammaFillGItem, -1);
+    cMenu_addItem(self, &self->GammaFillBItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -1052,33 +1053,33 @@ extern float D_004A41D0;
  *
  * @return @p self
  */
-extern "C" void* cShadowMenu_cShadowMenu(void* self)
+extern "C" void* cShadowMenu_cShadowMenu(cShadowMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cShadowMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_Shadow_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A41B0, 0, 1, str_Enable);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x194, 1, &D_004A41B4, 0, 1, str_Show_Shadow_Polys);
-    cFloatMenuItem_ctor((char*)self + 0x1C4, 2, &D_004A41B8, -1.0f, 1.0f, str_Shadow_Dir_X);
-    cFloatMenuItem_ctor((char*)self + 0x1F8, 3, &D_004A41BC, -1.0f, 1.0f, str_Shadow_Dir_Y);
-    cFloatMenuItem_ctor((char*)self + 0x22C, 4, &D_004A41C0, -1.0f, 1.0f, str_Shadow_Dir_Z);
-    cFloatMenuItem_ctor((char*)self + 0x260, 5, &D_004A41C4, 0.1f, 100000.0f, str_Length);
-    cFloatMenuItem_ctor((char*)self + 0x294, 6, &D_004A41C8, 0.0f, 1.0f, str_Intensity);
-    cFloatMenuItem_ctor((char*)self + 0x2C8, 7, &D_004A41CC, -64.0f, 64.0f, str_Start_UV);
-    cFloatMenuItem_ctor((char*)self + 0x2FC, 8, &D_004A41D0, -64.0f, 64.0f, str_End_UV);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    cMenu_addItem(self, (char*)self + 0x1C4, -1);
-    cMenu_addItem(self, (char*)self + 0x1F8, -1);
-    cMenu_addItem(self, (char*)self + 0x22C, -1);
-    cMenu_addItem(self, (char*)self + 0x260, -1);
-    cMenu_addItem(self, (char*)self + 0x294, -1);
-    cMenu_addItem(self, (char*)self + 0x2C8, -1);
-    cMenu_addItem(self, (char*)self + 0x2FC, -1);
-    return self;
+    self->mVtbl = cShadowMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_Shadow_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->EnableItem, 0, &D_004A41B0, 0, 1, str_Enable);
+    cIntMenuItem_cIntMenuItem(&self->ShowShadowPolysItem, 1, &D_004A41B4, 0, 1, str_Show_Shadow_Polys);
+    cFloatMenuItem_ctor(&self->ShadowDirXItem, 2, &D_004A41B8, -1.0f, 1.0f, str_Shadow_Dir_X);
+    cFloatMenuItem_ctor(&self->ShadowDirYItem, 3, &D_004A41BC, -1.0f, 1.0f, str_Shadow_Dir_Y);
+    cFloatMenuItem_ctor(&self->ShadowDirZItem, 4, &D_004A41C0, -1.0f, 1.0f, str_Shadow_Dir_Z);
+    cFloatMenuItem_ctor(&self->LengthItem, 5, &D_004A41C4, 0.1f, 100000.0f, str_Length);
+    cFloatMenuItem_ctor(&self->IntensityItem, 6, &D_004A41C8, 0.0f, 1.0f, str_Intensity);
+    cFloatMenuItem_ctor(&self->StartUVItem, 7, &D_004A41CC, -64.0f, 64.0f, str_Start_UV);
+    cFloatMenuItem_ctor(&self->EndUVItem, 8, &D_004A41D0, -64.0f, 64.0f, str_End_UV);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->EnableItem, -1);
+    cMenu_addItem(self, &self->ShowShadowPolysItem, -1);
+    cMenu_addItem(self, &self->ShadowDirXItem, -1);
+    cMenu_addItem(self, &self->ShadowDirYItem, -1);
+    cMenu_addItem(self, &self->ShadowDirZItem, -1);
+    cMenu_addItem(self, &self->LengthItem, -1);
+    cMenu_addItem(self, &self->IntensityItem, -1);
+    cMenu_addItem(self, &self->StartUVItem, -1);
+    cMenu_addItem(self, &self->EndUVItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -1116,29 +1117,29 @@ extern float D_004A46F4;
  *
  * @return @p self
  */
-extern "C" void* cSnowSurfaceMenu_cSnowSurfaceMenu(void* self)
+extern "C" void* cSnowSurfaceMenu_cSnowSurfaceMenu(cSnowSurfaceMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cSnowSurfaceMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_Snow_Surface_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A46DC, 0, 1, str_Enable);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x194, 1, &D_004A46E0, 0, 1, str_Enable_Patch_Reflect);
-    cFloatMenuItem_cFloatMenuItem((char*)self + 0x1C4, 2, &D_004A46E4, str_Base, 0.0f, 32.0f);
-    cFloatMenuItem_cFloatMenuItem((char*)self + 0x1F8, 3, &D_004A46E8, str_Bump, 0.0f, 32.0f);
-    cFloatMenuItem_cFloatMenuItem((char*)self + 0x22C, 4, &D_004A46EC, str_Noise, 0.0f, 32.0f);
-    cFloatMenuItem_cFloatMenuItem((char*)self + 0x260, 5, &D_004A46F0, str_Min_Colour_Add, 0.0f, 3.0f);
-    cFloatMenuItem_cFloatMenuItem((char*)self + 0x294, 6, &D_004A46F4, str_Max_Colour_Scale, 0.0f, 3.0f);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    cMenu_addItem(self, (char*)self + 0x1C4, -1);
-    cMenu_addItem(self, (char*)self + 0x1F8, -1);
-    cMenu_addItem(self, (char*)self + 0x22C, -1);
-    cMenu_addItem(self, (char*)self + 0x260, -1);
-    cMenu_addItem(self, (char*)self + 0x294, -1);
-    return self;
+    self->mVtbl = cSnowSurfaceMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_Snow_Surface_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->EnableItem, 0, &D_004A46DC, 0, 1, str_Enable);
+    cIntMenuItem_cIntMenuItem(&self->EnablePatchReflectItem, 1, &D_004A46E0, 0, 1, str_Enable_Patch_Reflect);
+    cFloatMenuItem_cFloatMenuItem(&self->BaseItem, 2, &D_004A46E4, str_Base, 0.0f, 32.0f);
+    cFloatMenuItem_cFloatMenuItem(&self->BumpItem, 3, &D_004A46E8, str_Bump, 0.0f, 32.0f);
+    cFloatMenuItem_cFloatMenuItem(&self->NoiseItem, 4, &D_004A46EC, str_Noise, 0.0f, 32.0f);
+    cFloatMenuItem_cFloatMenuItem(&self->MinColourScaleItem, 5, &D_004A46F0, str_Min_Colour_Add, 0.0f, 3.0f);
+    cFloatMenuItem_cFloatMenuItem(&self->MaxColourScaleItem, 6, &D_004A46F4, str_Max_Colour_Scale, 0.0f, 3.0f);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->EnableItem, -1);
+    cMenu_addItem(self, &self->EnablePatchReflectItem, -1);
+    cMenu_addItem(self, &self->BaseItem, -1);
+    cMenu_addItem(self, &self->BumpItem, -1);
+    cMenu_addItem(self, &self->NoiseItem, -1);
+    cMenu_addItem(self, &self->MinColourScaleItem, -1);
+    cMenu_addItem(self, &self->MaxColourScaleItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -1210,59 +1211,59 @@ extern float D_004A45C4;
  *
  * @return @p self
  */
-extern "C" void* cBoardTrailMenu_cBoardTrailMenu(void* self)
+extern "C" void* cBoardTrailMenu_cBoardTrailMenu(cBoardTrailMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cBoardTrailMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_Board_Trail_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A457C, 0, 0x1, str_Enable);
-    cFloatMenuItem_ctor((char*)self + 0x194, 1, &D_004A4580, -100.0f, 100.0f, str_Inner_Width_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x1C8, 2, &D_004A4584, -1000.0f, 1000.0f, str_Outer_Width_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x1FC, 3, &D_004A4588, -20.0f, 20.0f, str_Height_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x230, 4, &D_004A458C, 0.0f, 1.0f, str_Depth_to_Height_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x264, 5, &D_004A4590, -100.0f, 100.0f, str_Packed_Depth_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x298, 6, &D_004A4594, -100.0f, 100.0f, str_Loose_Depth_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x2CC, 7, &D_004A4598, -1000.0f, 1000.0f, str_Powder_Depth_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x300, 8, &D_004A459C, -1000.0f, 1000.0f, str_Deep_Powder_Depth_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x334, 9, &D_004A45A0, -1000.0f, 1000.0f, str_Top_Bias_Front);
-    cFloatMenuItem_ctor((char*)self + 0x368, 10, &D_004A45A4, -1000.0f, 1000.0f, str_Top_Bias_Behind);
-    cFloatMenuItem_ctor((char*)self + 0x39C, 11, &D_004A45A8, -16777215.0f, 16777215.0f, str_Top_Bias_Clear);
-    cFloatMenuItem_ctor((char*)self + 0x3D0, 12, &D_004A45AC, -10.0f, 10.0f, str_Inner_Position_Jitter);
-    cFloatMenuItem_ctor((char*)self + 0x404, 13, &D_004A45B0, 0.0f, 1.0f, str_Base_U);
-    cFloatMenuItem_ctor((char*)self + 0x438, 14, &D_004A45B4, 0.0f, 1.0f, str_Inner_U);
-    cFloatMenuItem_ctor((char*)self + 0x46C, 15, &D_004A45B8, 0.0f, 1.0f, str_Outer_U);
-    cFloatMenuItem_ctor((char*)self + 0x4A0, 16, &D_004A45BC, -10.0f, 10.0f, str_Outer_Normal_Offset);
-    cFloatMenuItem_ctor((char*)self + 0x4D4, 17, &D_004A45C0, -10.0f, 10.0f, str_Inner_Normal_Offset);
-    cFloatMenuItem_ctor((char*)self + 0x508, 18, &D_004A45C4, -10.0f, 10.0f, str_Base_Normal_Offset);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x53C, 19, &D_004A45C8, 0, 0x40, str_Num_Fade_Segments);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x56C, 20, &D_004A45CC.fba, 0, 0x1, str_Draw_Fixup_Layer);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x59C, 21, &D_004A45D0, 0, 0x1, str_Use_Slice_Caps);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    cMenu_addItem(self, (char*)self + 0x1C8, -1);
-    cMenu_addItem(self, (char*)self + 0x1FC, -1);
-    cMenu_addItem(self, (char*)self + 0x230, -1);
-    cMenu_addItem(self, (char*)self + 0x264, -1);
-    cMenu_addItem(self, (char*)self + 0x298, -1);
-    cMenu_addItem(self, (char*)self + 0x2CC, -1);
-    cMenu_addItem(self, (char*)self + 0x300, -1);
-    cMenu_addItem(self, (char*)self + 0x334, -1);
-    cMenu_addItem(self, (char*)self + 0x368, -1);
-    cMenu_addItem(self, (char*)self + 0x39C, -1);
-    cMenu_addItem(self, (char*)self + 0x3D0, -1);
-    cMenu_addItem(self, (char*)self + 0x404, -1);
-    cMenu_addItem(self, (char*)self + 0x438, -1);
-    cMenu_addItem(self, (char*)self + 0x46C, -1);
-    cMenu_addItem(self, (char*)self + 0x4A0, -1);
-    cMenu_addItem(self, (char*)self + 0x4D4, -1);
-    cMenu_addItem(self, (char*)self + 0x508, -1);
-    cMenu_addItem(self, (char*)self + 0x53C, -1);
-    cMenu_addItem(self, (char*)self + 0x56C, -1);
-    cMenu_addItem(self, (char*)self + 0x59C, -1);
-    return self;
+    self->mVtbl = cBoardTrailMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_Board_Trail_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->EnableItem, 0, &D_004A457C, 0, 0x1, str_Enable);
+    cFloatMenuItem_ctor(&self->InnerWidthScaleItem, 1, &D_004A4580, -100.0f, 100.0f, str_Inner_Width_Scale);
+    cFloatMenuItem_ctor(&self->OuterWidthScaleItem, 2, &D_004A4584, -1000.0f, 1000.0f, str_Outer_Width_Scale);
+    cFloatMenuItem_ctor(&self->HeightScaleItem, 3, &D_004A4588, -20.0f, 20.0f, str_Height_Scale);
+    cFloatMenuItem_ctor(&self->Depth2HeightScaleItem, 4, &D_004A458C, 0.0f, 1.0f, str_Depth_to_Height_Scale);
+    cFloatMenuItem_ctor(&self->PackedDepthScaleItem, 5, &D_004A4590, -100.0f, 100.0f, str_Packed_Depth_Scale);
+    cFloatMenuItem_ctor(&self->LooseDepthScaleItem, 6, &D_004A4594, -100.0f, 100.0f, str_Loose_Depth_Scale);
+    cFloatMenuItem_ctor(&self->PowderDepthScaleItem, 7, &D_004A4598, -1000.0f, 1000.0f, str_Powder_Depth_Scale);
+    cFloatMenuItem_ctor(&self->DeepPowderDepthScaleItem, 8, &D_004A459C, -1000.0f, 1000.0f, str_Deep_Powder_Depth_Scale);
+    cFloatMenuItem_ctor(&self->TopBiasFrontItem, 9, &D_004A45A0, -1000.0f, 1000.0f, str_Top_Bias_Front);
+    cFloatMenuItem_ctor(&self->TopBiasBehindItem, 10, &D_004A45A4, -1000.0f, 1000.0f, str_Top_Bias_Behind);
+    cFloatMenuItem_ctor(&self->TopBiasClearItem, 11, &D_004A45A8, -16777215.0f, 16777215.0f, str_Top_Bias_Clear);
+    cFloatMenuItem_ctor(&self->InnerPositionJitterItem, 12, &D_004A45AC, -10.0f, 10.0f, str_Inner_Position_Jitter);
+    cFloatMenuItem_ctor(&self->BaseUItem, 13, &D_004A45B0, 0.0f, 1.0f, str_Base_U);
+    cFloatMenuItem_ctor(&self->InnerUItem, 14, &D_004A45B4, 0.0f, 1.0f, str_Inner_U);
+    cFloatMenuItem_ctor(&self->OuterUItem, 15, &D_004A45B8, 0.0f, 1.0f, str_Outer_U);
+    cFloatMenuItem_ctor(&self->OuterNormalOffsetItem, 16, &D_004A45BC, -10.0f, 10.0f, str_Outer_Normal_Offset);
+    cFloatMenuItem_ctor(&self->InnerNormalOffsetItem, 17, &D_004A45C0, -10.0f, 10.0f, str_Inner_Normal_Offset);
+    cFloatMenuItem_ctor(&self->BaseNormalOffsetItem, 18, &D_004A45C4, -10.0f, 10.0f, str_Base_Normal_Offset);
+    cIntMenuItem_cIntMenuItem(&self->NumFadeSegmentsItem, 19, &D_004A45C8, 0, 0x40, str_Num_Fade_Segments);
+    cIntMenuItem_cIntMenuItem(&self->DrawFixupLayerItem, 20, &D_004A45CC.fba, 0, 0x1, str_Draw_Fixup_Layer);
+    cIntMenuItem_cIntMenuItem(&self->UseSliceCapsItem, 21, &D_004A45D0, 0, 0x1, str_Use_Slice_Caps);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->EnableItem, -1);
+    cMenu_addItem(self, &self->InnerWidthScaleItem, -1);
+    cMenu_addItem(self, &self->OuterWidthScaleItem, -1);
+    cMenu_addItem(self, &self->HeightScaleItem, -1);
+    cMenu_addItem(self, &self->Depth2HeightScaleItem, -1);
+    cMenu_addItem(self, &self->PackedDepthScaleItem, -1);
+    cMenu_addItem(self, &self->LooseDepthScaleItem, -1);
+    cMenu_addItem(self, &self->PowderDepthScaleItem, -1);
+    cMenu_addItem(self, &self->DeepPowderDepthScaleItem, -1);
+    cMenu_addItem(self, &self->TopBiasFrontItem, -1);
+    cMenu_addItem(self, &self->TopBiasBehindItem, -1);
+    cMenu_addItem(self, &self->TopBiasClearItem, -1);
+    cMenu_addItem(self, &self->InnerPositionJitterItem, -1);
+    cMenu_addItem(self, &self->BaseUItem, -1);
+    cMenu_addItem(self, &self->InnerUItem, -1);
+    cMenu_addItem(self, &self->OuterUItem, -1);
+    cMenu_addItem(self, &self->OuterNormalOffsetItem, -1);
+    cMenu_addItem(self, &self->InnerNormalOffsetItem, -1);
+    cMenu_addItem(self, &self->BaseNormalOffsetItem, -1);
+    cMenu_addItem(self, &self->NumFadeSegmentsItem, -1);
+    cMenu_addItem(self, &self->DrawFixupLayerItem, -1);
+    cMenu_addItem(self, &self->UseSliceCapsItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -1288,19 +1289,19 @@ extern int D_004A4244;
  *
  * @return @p self
  */
-extern "C" void* cFlagsMenu_cFlagsMenu(void* self)
+extern "C" void* cFlagsMenu_cFlagsMenu(cFlagsMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cFlagsMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_Flags_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A4240, 0, 1, str_EnableUpdate);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x194, 1, &D_004A4244, 0, 1, str_EnableRender);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    return self;
+    self->mVtbl = cFlagsMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_Flags_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->EnableUpdateItem, 0, &D_004A4240, 0, 1, str_EnableUpdate);
+    cIntMenuItem_cIntMenuItem(&self->EnableRenderItem, 1, &D_004A4244, 0, 1, str_EnableRender);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->EnableUpdateItem, -1);
+    cMenu_addItem(self, &self->EnableRenderItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -1358,45 +1359,45 @@ extern int cPowerUpFXToggles_m_TestOrangeRibbon;
  *
  * @return @p self
  */
-extern "C" void* cPowerUpFXTogglesMenu_cPowerUpFXTogglesMenu(void* self)
+extern "C" void* cPowerUpFXTogglesMenu_cPowerUpFXTogglesMenu(cPowerUpFXTogglesMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cPowerUpFXTogglesMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_PowerUpFXToggles_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &cPowerUpFXToggles_m_EnableSpeedBoostStreamers, 0, 1, str_Enable_Speed_Boost_Streamers);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x194, 1, &cPowerUpFXToggles_m_EnableSpeedBoostScreenBlur, 0, 1, str_Enable_Speed_Boost_Screen_Blur);
-    cFloatMenuItem_ctor((char*)self + 0x1C4, 2, &cPowerUpFXToggles_m_SpeedBoostScreenBlurMaxPercent, 0.0f, 1.0f, str_Max_Screen_Blur_Percent);
-    cFloatMenuItem_ctor((char*)self + 0x1F8, 3, &cPowerUpFXToggles_m_SpeedBoostScreenBlurIncreaseRate, 0.0f, 60.0f, str_Screen_Blur_Transition_On_Rate);
-    cFloatMenuItem_ctor((char*)self + 0x22C, 4, &cPowerUpFXToggles_m_SpeedBoostScreenBlurDecreaseRate, 0.0f, 60.0f, str_Screen_Blur_Transition_Off_Rate);
-    cFloatMenuItem_ctor((char*)self + 0x260, 5, &cPowerUpFXToggles_m_SpeedBoostMinSpeed, 0.0f, 120.0f, str_Screen_Blur_is_not_active_at_this_speed);
-    cFloatMenuItem_ctor((char*)self + 0x294, 6, &cPowerUpFXToggles_m_SpeedBoostMaxSpeed, 0.0f, 120.0f, str_Screen_Blur_is_full_at_this_speed);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x2C8, 7, &cPowerUpFXToggles_m_MinSpeedBoostTimeBeforeBlur, 0, 100, str_Speed_Boost_Time_before_Blur);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x2F8, 8, &cPowerUpFXToggles_m_TestTrickBoost, 0, 1, str_Test_Trick_Boost);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x328, 9, &cPowerUpFXToggles_m_EnableSpeedBoostFX, 0, 1, str_Enable_SpeedBoostFX);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x358, 10, &cPowerUpFXToggles_m_UberStateTest, 0, 1, str_Uber_State_Test);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x388, 11, &cPowerUpFXToggles_m_SuperUberStateTest, 0, 1, str_Super_Uber_State_Test);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x3B8, 0xc, &cPowerUpFXToggles_m_TestSpeedBoostRibbon, 0, 1, str_Test_Speed_Boost_Ribbon);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x3E8, 13, &cPowerUpFXToggles_m_TestRedRibbon, 0, 1, str_Test_Red_Ribbon);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x418, 0xe, &cPowerUpFXToggles_m_TestOrangeRibbon, 0, 1, str_Test_Orange_Ribbon);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    cMenu_addItem(self, (char*)self + 0x1C4, -1);
-    cMenu_addItem(self, (char*)self + 0x1F8, -1);
-    cMenu_addItem(self, (char*)self + 0x22C, -1);
-    cMenu_addItem(self, (char*)self + 0x260, -1);
-    cMenu_addItem(self, (char*)self + 0x294, -1);
-    cMenu_addItem(self, (char*)self + 0x2C8, -1);
-    cMenu_addItem(self, (char*)self + 0x2F8, -1);
-    cMenu_addItem(self, (char*)self + 0x328, -1);
-    cMenu_addItem(self, (char*)self + 0x358, -1);
-    cMenu_addItem(self, (char*)self + 0x388, -1);
-    cMenu_addItem(self, (char*)self + 0x3B8, -1);
-    cMenu_addItem(self, (char*)self + 0x3E8, -1);
-    cMenu_addItem(self, (char*)self + 0x418, -1);
-    return self;
+    self->mVtbl = cPowerUpFXTogglesMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_PowerUpFXToggles_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->EnableSpeedBoostStreamersItem, 0, &cPowerUpFXToggles_m_EnableSpeedBoostStreamers, 0, 1, str_Enable_Speed_Boost_Streamers);
+    cIntMenuItem_cIntMenuItem(&self->EnableSpeedBoostScreenBlurItem, 1, &cPowerUpFXToggles_m_EnableSpeedBoostScreenBlur, 0, 1, str_Enable_Speed_Boost_Screen_Blur);
+    cFloatMenuItem_ctor(&self->SpeedBoostScreenBlurMaxPercentItem, 2, &cPowerUpFXToggles_m_SpeedBoostScreenBlurMaxPercent, 0.0f, 1.0f, str_Max_Screen_Blur_Percent);
+    cFloatMenuItem_ctor(&self->SpeedBoostScreenBlurIncreaseRateItem, 3, &cPowerUpFXToggles_m_SpeedBoostScreenBlurIncreaseRate, 0.0f, 60.0f, str_Screen_Blur_Transition_On_Rate);
+    cFloatMenuItem_ctor(&self->SpeedBoostScreenBlurDecreaseRateItem, 4, &cPowerUpFXToggles_m_SpeedBoostScreenBlurDecreaseRate, 0.0f, 60.0f, str_Screen_Blur_Transition_Off_Rate);
+    cFloatMenuItem_ctor(&self->SpeedBoostMinSpeedItem, 5, &cPowerUpFXToggles_m_SpeedBoostMinSpeed, 0.0f, 120.0f, str_Screen_Blur_is_not_active_at_this_speed);
+    cFloatMenuItem_ctor(&self->SpeedBoostMaxSpeedItem, 6, &cPowerUpFXToggles_m_SpeedBoostMaxSpeed, 0.0f, 120.0f, str_Screen_Blur_is_full_at_this_speed);
+    cIntMenuItem_cIntMenuItem(&self->MinSpeedBoostTimeBeforeBlurItem, 7, &cPowerUpFXToggles_m_MinSpeedBoostTimeBeforeBlur, 0, 100, str_Speed_Boost_Time_before_Blur);
+    cIntMenuItem_cIntMenuItem(&self->TestTrickBoostItem, 8, &cPowerUpFXToggles_m_TestTrickBoost, 0, 1, str_Test_Trick_Boost);
+    cIntMenuItem_cIntMenuItem(&self->EnableSpeedBoostFXItem, 9, &cPowerUpFXToggles_m_EnableSpeedBoostFX, 0, 1, str_Enable_SpeedBoostFX);
+    cIntMenuItem_cIntMenuItem(&self->UberStateTestItem, 10, &cPowerUpFXToggles_m_UberStateTest, 0, 1, str_Uber_State_Test);
+    cIntMenuItem_cIntMenuItem(&self->SuperUberStateTestItem, 11, &cPowerUpFXToggles_m_SuperUberStateTest, 0, 1, str_Super_Uber_State_Test);
+    cIntMenuItem_cIntMenuItem(&self->TestSpeedBoostRibbonItem, 0xc, &cPowerUpFXToggles_m_TestSpeedBoostRibbon, 0, 1, str_Test_Speed_Boost_Ribbon);
+    cIntMenuItem_cIntMenuItem(&self->TestRedRibbonItem, 13, &cPowerUpFXToggles_m_TestRedRibbon, 0, 1, str_Test_Red_Ribbon);
+    cIntMenuItem_cIntMenuItem(&self->TestOrangeRibbonItem, 0xe, &cPowerUpFXToggles_m_TestOrangeRibbon, 0, 1, str_Test_Orange_Ribbon);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->EnableSpeedBoostStreamersItem, -1);
+    cMenu_addItem(self, &self->EnableSpeedBoostScreenBlurItem, -1);
+    cMenu_addItem(self, &self->SpeedBoostScreenBlurMaxPercentItem, -1);
+    cMenu_addItem(self, &self->SpeedBoostScreenBlurIncreaseRateItem, -1);
+    cMenu_addItem(self, &self->SpeedBoostScreenBlurDecreaseRateItem, -1);
+    cMenu_addItem(self, &self->SpeedBoostMinSpeedItem, -1);
+    cMenu_addItem(self, &self->SpeedBoostMaxSpeedItem, -1);
+    cMenu_addItem(self, &self->MinSpeedBoostTimeBeforeBlurItem, -1);
+    cMenu_addItem(self, &self->TestTrickBoostItem, -1);
+    cMenu_addItem(self, &self->EnableSpeedBoostFXItem, -1);
+    cMenu_addItem(self, &self->UberStateTestItem, -1);
+    cMenu_addItem(self, &self->SuperUberStateTestItem, -1);
+    cMenu_addItem(self, &self->TestSpeedBoostRibbonItem, -1);
+    cMenu_addItem(self, &self->TestRedRibbonItem, -1);
+    cMenu_addItem(self, &self->TestOrangeRibbonItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -1447,39 +1448,39 @@ extern int cSnowfallToggles_m_TestAdditive;
  *
  * @return @p self
  */
-extern "C" void* cSnowfallTogglesMenu_cSnowfallTogglesMenu(void* self)
+extern "C" void* cSnowfallTogglesMenu_cSnowfallTogglesMenu(cSnowfallTogglesMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cSnowfallTogglesMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_Snowfall_Toggles);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &cSnowfallToggles_m_EnableTest, 0, 1, str_Enable_Test_Values);
-    cFloatMenuItem_ctor((char*)self + 0x194, 1, &cSnowfallToggles_m_TestSnowIntensity, 0.0f, 4.0f, str_Test_Snowfall_Intensity);
-    cFloatMenuItem_ctor((char*)self + 0x1C8, 2, &cSnowfallToggles_m_TestWindIntensity, 0.0f, 100.0f, str_Test_Snowfall_Wind);
-    cFloatMenuItem_ctor((char*)self + 0x1FC, 3, &cSnowfallToggles_m_TestFlakeSize, 0.1f, 10.0f, str_Test_Snowflake_Size);
-    cFloatMenuItem_ctor((char*)self + 0x230, 4, &cSnowfallToggles_m_TestWindRotation, 0.0f, 360.0f, str_Test_Wind_Rotation);
-    cFloatMenuItem_ctor((char*)self + 0x264, 5, &cSnowfallToggles_m_TestSnowFlurries, 0.0f, 1.0f, str_Test_Snow_Flurries);
-    cFloatMenuItem_ctor((char*)self + 0x298, 6, &cSnowfallToggles_m_SnowGravityMultiplier, -2.0f, 5.0f, str_Snow_Gravity_Multiplier);
-    cFloatMenuItem_ctor((char*)self + 0x2CC, 7, &cSnowfallToggles_m_SnowFluffItensity, 0.0f, 1.0f, str_Snow_Fluff_Intensity);
-    cFloatMenuItem_ctor((char*)self + 0x300, 8, &cSnowfallToggles_m_SnowFluffWindIntensity, 0.0f, 100.0f, str_Snow_Fluff_Wind_Intensity);
-    cARGBMenuItem_cARGBMenuItem((char*)self + 0x334, 9, str_Snow_Flake_Colour, cSnowfallToggles_m_SnowFlakeColour);
-    cARGBMenuItem_cARGBMenuItem((char*)self + 0x990, 10, str_Snow_Fluff_Colour, cSnowfallToggles_m_SnowFluffColour);
-    cIntMenuItem_cIntMenuItem((char*)self + 0xFEC, 11, &cSnowfallToggles_m_TestAdditive, 0, 1, str_Test_Additive_Snowfall);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    cMenu_addItem(self, (char*)self + 0x1C8, -1);
-    cMenu_addItem(self, (char*)self + 0x1FC, -1);
-    cMenu_addItem(self, (char*)self + 0x230, -1);
-    cMenu_addItem(self, (char*)self + 0x264, -1);
-    cMenu_addItem(self, (char*)self + 0x298, -1);
-    cMenu_addItem(self, (char*)self + 0x2CC, -1);
-    cMenu_addItem(self, (char*)self + 0x300, -1);
-    cMenu_addItem(self, (char*)self + 0x334, -1);
-    cMenu_addItem(self, (char*)self + 0x990, -1);
-    cMenu_addItem(self, (char*)self + 0xFEC, -1);
-    return self;
+    self->mVtbl = cSnowfallTogglesMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_Snowfall_Toggles);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->EnableTestItem, 0, &cSnowfallToggles_m_EnableTest, 0, 1, str_Enable_Test_Values);
+    cFloatMenuItem_ctor(&self->TestSnowIntensityItem, 1, &cSnowfallToggles_m_TestSnowIntensity, 0.0f, 4.0f, str_Test_Snowfall_Intensity);
+    cFloatMenuItem_ctor(&self->TestWindIntensityItem, 2, &cSnowfallToggles_m_TestWindIntensity, 0.0f, 100.0f, str_Test_Snowfall_Wind);
+    cFloatMenuItem_ctor(&self->TestFlakeSizeItem, 3, &cSnowfallToggles_m_TestFlakeSize, 0.1f, 10.0f, str_Test_Snowflake_Size);
+    cFloatMenuItem_ctor(&self->TestWindRotationItem, 4, &cSnowfallToggles_m_TestWindRotation, 0.0f, 360.0f, str_Test_Wind_Rotation);
+    cFloatMenuItem_ctor(&self->TestSnowFlurriesItem, 5, &cSnowfallToggles_m_TestSnowFlurries, 0.0f, 1.0f, str_Test_Snow_Flurries);
+    cFloatMenuItem_ctor(&self->SnowGravityMultiplierItem, 6, &cSnowfallToggles_m_SnowGravityMultiplier, -2.0f, 5.0f, str_Snow_Gravity_Multiplier);
+    cFloatMenuItem_ctor(&self->SnowFluffItensityItem, 7, &cSnowfallToggles_m_SnowFluffItensity, 0.0f, 1.0f, str_Snow_Fluff_Intensity);
+    cFloatMenuItem_ctor(&self->SnowFluffWindIntensityItem, 8, &cSnowfallToggles_m_SnowFluffWindIntensity, 0.0f, 100.0f, str_Snow_Fluff_Wind_Intensity);
+    cARGBMenuItem_cARGBMenuItem(&self->SnowFlakeColourItem, 9, str_Snow_Flake_Colour, cSnowfallToggles_m_SnowFlakeColour);
+    cARGBMenuItem_cARGBMenuItem(&self->SnowFluffColourItem, 10, str_Snow_Fluff_Colour, cSnowfallToggles_m_SnowFluffColour);
+    cIntMenuItem_cIntMenuItem(&self->TestAdditiveItem, 11, &cSnowfallToggles_m_TestAdditive, 0, 1, str_Test_Additive_Snowfall);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->EnableTestItem, -1);
+    cMenu_addItem(self, &self->TestSnowIntensityItem, -1);
+    cMenu_addItem(self, &self->TestWindIntensityItem, -1);
+    cMenu_addItem(self, &self->TestFlakeSizeItem, -1);
+    cMenu_addItem(self, &self->TestWindRotationItem, -1);
+    cMenu_addItem(self, &self->TestSnowFlurriesItem, -1);
+    cMenu_addItem(self, &self->SnowGravityMultiplierItem, -1);
+    cMenu_addItem(self, &self->SnowFluffItensityItem, -1);
+    cMenu_addItem(self, &self->SnowFluffWindIntensityItem, -1);
+    cMenu_addItem(self, &self->SnowFlakeColourItem, -1);
+    cMenu_addItem(self, &self->SnowFluffColourItem, -1);
+    cMenu_addItem(self, &self->TestAdditiveItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -1617,127 +1618,127 @@ extern float D_004A4318;
  *
  * @return @p self
  */
-extern "C" void* cSplashTogglesMenu_cSplashTogglesMenu(void* self)
+extern "C" void* cSplashTogglesMenu_cSplashTogglesMenu(cSplashTogglesMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cSplashTogglesMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_Camera_Splash_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A424C, 0, 1, str_Enable);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x194, 1, &D_004A4250, 0, 1, str_Render);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x1C4, 2, &D_004A4254, 1, 0x1e, str_Max_Drops);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x1F4, 3, &D_004A4258, 1, 0x1e, str_Max_Crystals);
-    cFloatMenuItem_ctor((char*)self + 0x224, 4, &D_004A425C, 0.0f, 1.0f, str_Percentage_Ice_Crystals);
-    cFloatMenuItem_ctor((char*)self + 0x258, 5, &D_004A4260, 0.0f, 1.0f, str_Percentage_Ice_Crystal_Spawn);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x28C, 6, &D_004A4264, 1, 10, str_Ice_Crystal_Minimum_in_Group);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x2BC, 7, &D_004A4268, 1, 10, str_Ice_Crystal_Maximum_in_Group);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x2EC, 8, &D_004A426C, 1, 10, str_Max_Spawn_Per_Crystal);
-    cFloatMenuItem_ctor((char*)self + 0x31C, 9, &D_004A4270, 0.0f, 2000.0f, str_Farthest_Impact_Distance);
-    cFloatMenuItem_ctor((char*)self + 0x350, 10, &D_004A4274, 0.0f, 120.0f, str_Lowest_Impact_Intensity);
-    cFloatMenuItem_ctor((char*)self + 0x384, 11, &D_004A4278, 0.0f, 10.0f, str_Lowest_Snowfall_For_Impacts);
-    cFloatMenuItem_ctor((char*)self + 0x3B8, 0xc, &D_004A427C, 0.0f, 10.0f, str_Impact_Multiplier);
-    cFloatMenuItem_ctor((char*)self + 0x3EC, 13, &D_004A4280, 0.0f, 10.0f, str_Lowest_Snowfall_Amount);
-    cFloatMenuItem_ctor((char*)self + 0x420, 0xe, &D_004A4284, 0.0f, 10.0f, str_Snowfall_Multiplier);
-    cFloatMenuItem_ctor((char*)self + 0x454, 0xf, &D_004A4288, 0.0f, 10.0f, str_Min_Velocity_For_Pushoff);
-    cFloatMenuItem_ctor((char*)self + 0x488, 0x10, &D_004A428C, 0.0f, 100.0f, str_Drop_Min_Life_Span);
-    cFloatMenuItem_ctor((char*)self + 0x4BC, 17, &D_004A4290, 0.0f, 100.0f, str_Drop_Max_Life_Span);
-    cFloatMenuItem_ctor((char*)self + 0x4F0, 18, &D_004A4294, 0.0f, 40.0f, str_Drop_Min_Size);
-    cFloatMenuItem_ctor((char*)self + 0x524, 19, &D_004A4298, 0.0f, 40.0f, str_Drop_Max_Size);
-    cFloatMenuItem_ctor((char*)self + 0x558, 20, &D_004A429C, 0.0f, 10.0f, str_Drop_Max_Width_Height_Difference);
-    cFloatMenuItem_ctor((char*)self + 0x58C, 21, &D_004A42A0, -10.0f, 10.0f, str_Drop_Min_Velocity_Jiggle_X);
-    cFloatMenuItem_ctor((char*)self + 0x5C0, 22, &D_004A42A4, -10.0f, 10.0f, str_Drop_Max_Velocity_Jiggle_X);
-    cFloatMenuItem_ctor((char*)self + 0x5F4, 23, &D_004A42A8, -10.0f, 10.0f, str_Drop_Min_Velocity_Jiggle_Y);
-    cFloatMenuItem_ctor((char*)self + 0x628, 0x18, &D_004A42AC, -10.0f, 10.0f, str_Drop_Max_Velocity_Jiggle_Y);
-    cFloatMenuItem_ctor((char*)self + 0x65C, 25, &D_004A42B0, -10.0f, 10.0f, str_Drop_Min_Size_Growth);
-    cFloatMenuItem_ctor((char*)self + 0x690, 26, &D_004A42B4, -10.0f, 10.0f, str_Drop_Max_Size_Growth);
-    cFloatMenuItem_ctor((char*)self + 0x6C4, 27, &D_004A42B8, 0.0f, 10.0f, str_Drop_Min_Push_Off_Speed);
-    cFloatMenuItem_ctor((char*)self + 0x6F8, 0x1c, &D_004A42BC, 0.0f, 10.0f, str_Drop_Max_Push_Off_Speed);
-    cFloatMenuItem_ctor((char*)self + 0x72C, 29, &D_004A42C0, 0.0f, 100.0f, str_Drop_Maximum_Velocity);
-    cFloatMenuItem_ctor((char*)self + 0x760, 0x1e, &D_004A42C4, 0.0f, 10.0f, str_Drop_Min_Velocity_Usage);
-    cFloatMenuItem_ctor((char*)self + 0x794, 0x1f, &D_004A42C8, 0.0f, 10.0f, str_Drop_Max_Velocity_Usage);
-    cFloatMenuItem_ctor((char*)self + 0x7C8, 0x20, &D_004A42CC, 0.0f, 720.0f, str_Crystal_Max_Rotation_Overall_Change);
-    cARGBMenuItem_cARGBMenuItem((char*)self + 0x7FC, 33, str_Drop_Tint_Min, D_005046E0);
-    cARGBMenuItem_cARGBMenuItem((char*)self + 0xE58, 34, str_Drop_Tint_Max, D_005046F0);
-    cFloatMenuItem_ctor((char*)self + 0x14B4, 35, &D_004A42D0, 0.0f, 100.0f, str_Crystal_Group_Spacing_X);
-    cFloatMenuItem_ctor((char*)self + 0x14E8, 36, &D_004A42D4, 0.0f, 100.0f, str_Crystal_Group_Spacing_Y);
-    cFloatMenuItem_ctor((char*)self + 0x151C, 37, &D_004A42D8, 0.0f, 100.0f, str_Crystal_Min_Life_Span);
-    cFloatMenuItem_ctor((char*)self + 0x1550, 38, &D_004A42DC, 0.0f, 100.0f, str_Crystal_Max_Life_Span);
-    cFloatMenuItem_ctor((char*)self + 0x1584, 39, &D_004A42E0, 0.0f, 40.0f, str_Crystal_Min_Size);
-    cFloatMenuItem_ctor((char*)self + 0x15B8, 40, &D_004A42E4, 0.0f, 40.0f, str_Crystal_Max_Size);
-    cFloatMenuItem_ctor((char*)self + 0x15EC, 41, &D_004A42E8, 0.0f, 10.0f, str_Crystal_Max_Width_Height_Difference);
-    cFloatMenuItem_ctor((char*)self + 0x1620, 42, &D_004A42EC, -10.0f, 10.0f, str_Crystal_Min_Velocity_Jiggle_X);
-    cFloatMenuItem_ctor((char*)self + 0x1654, 43, &D_004A42F0, -10.0f, 10.0f, str_Crystal_Max_Velocity_Jiggle_X);
-    cFloatMenuItem_ctor((char*)self + 0x1688, 44, &D_004A42F4, -10.0f, 10.0f, str_Crystal_Min_Velocity_Jiggle_Y);
-    cFloatMenuItem_ctor((char*)self + 0x16BC, 45, &D_004A42F8, -10.0f, 10.0f, str_Crystal_Max_Velocity_Jiggle_Y);
-    cFloatMenuItem_ctor((char*)self + 0x16F0, 46, &D_004A42FC, 0.0f, 10.0f, str_Crsytal_Min_Time_In_One_Jiggle_Direction);
-    cFloatMenuItem_ctor((char*)self + 0x1724, 47, &D_004A4300, 0.0f, 10.0f, str_Crsytal_Max_Time_In_One_Jiggle_Direction);
-    cFloatMenuItem_ctor((char*)self + 0x1758, 0x30, &D_004A4304, -10.0f, 10.0f, str_Crystal_Min_Size_Growth);
-    cFloatMenuItem_ctor((char*)self + 0x178C, 49, &D_004A4308, -10.0f, 10.0f, str_Crystal_Max_Size_Growth);
-    cFloatMenuItem_ctor((char*)self + 0x17C0, 50, &D_004A430C, 0.0f, 10.0f, str_Crystal_Min_Push_Off_Speed);
-    cFloatMenuItem_ctor((char*)self + 0x17F4, 51, &D_004A4310, 0.0f, 10.0f, str_Crystal_Max_Push_Off_Speed);
-    cFloatMenuItem_ctor((char*)self + 0x1828, 52, &D_004A4314, 0.0f, 100.0f, str_Crystal_Maximum_Velocity);
-    cFloatMenuItem_ctor((char*)self + 0x185C, 53, &D_004A4318, 0.0f, 720.0f, str_Crystal_Max_Rotation_Overall_Change);
-    cARGBMenuItem_cARGBMenuItem((char*)self + 0x1890, 54, str_Crystal_Tint_Min, D_00504700);
-    cARGBMenuItem_cARGBMenuItem((char*)self + 0x1EEC, 55, str_Crystal_Tint_Max, D_00504710);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    cMenu_addItem(self, (char*)self + 0x1C4, -1);
-    cMenu_addItem(self, (char*)self + 0x1F4, -1);
-    cMenu_addItem(self, (char*)self + 0x224, -1);
-    cMenu_addItem(self, (char*)self + 0x258, -1);
-    cMenu_addItem(self, (char*)self + 0x28C, -1);
-    cMenu_addItem(self, (char*)self + 0x2BC, -1);
-    cMenu_addItem(self, (char*)self + 0x2EC, -1);
-    cMenu_addItem(self, (char*)self + 0x31C, -1);
-    cMenu_addItem(self, (char*)self + 0x350, -1);
-    cMenu_addItem(self, (char*)self + 0x384, -1);
-    cMenu_addItem(self, (char*)self + 0x3B8, -1);
-    cMenu_addItem(self, (char*)self + 0x3EC, -1);
-    cMenu_addItem(self, (char*)self + 0x420, -1);
-    cMenu_addItem(self, (char*)self + 0x454, -1);
-    cMenu_addItem(self, (char*)self + 0x488, -1);
-    cMenu_addItem(self, (char*)self + 0x4BC, -1);
-    cMenu_addItem(self, (char*)self + 0x4F0, -1);
-    cMenu_addItem(self, (char*)self + 0x524, -1);
-    cMenu_addItem(self, (char*)self + 0x558, -1);
-    cMenu_addItem(self, (char*)self + 0x58C, -1);
-    cMenu_addItem(self, (char*)self + 0x5C0, -1);
-    cMenu_addItem(self, (char*)self + 0x5F4, -1);
-    cMenu_addItem(self, (char*)self + 0x628, -1);
-    cMenu_addItem(self, (char*)self + 0x65C, -1);
-    cMenu_addItem(self, (char*)self + 0x690, -1);
-    cMenu_addItem(self, (char*)self + 0x6C4, -1);
-    cMenu_addItem(self, (char*)self + 0x6F8, -1);
-    cMenu_addItem(self, (char*)self + 0x72C, -1);
-    cMenu_addItem(self, (char*)self + 0x760, -1);
-    cMenu_addItem(self, (char*)self + 0x794, -1);
-    cMenu_addItem(self, (char*)self + 0x7C8, -1);
-    cMenu_addItem(self, (char*)self + 0x7FC, -1);
-    cMenu_addItem(self, (char*)self + 0xE58, -1);
-    cMenu_addItem(self, (char*)self + 0x14B4, -1);
-    cMenu_addItem(self, (char*)self + 0x14E8, -1);
-    cMenu_addItem(self, (char*)self + 0x151C, -1);
-    cMenu_addItem(self, (char*)self + 0x1550, -1);
-    cMenu_addItem(self, (char*)self + 0x1584, -1);
-    cMenu_addItem(self, (char*)self + 0x15B8, -1);
-    cMenu_addItem(self, (char*)self + 0x15EC, -1);
-    cMenu_addItem(self, (char*)self + 0x1620, -1);
-    cMenu_addItem(self, (char*)self + 0x1654, -1);
-    cMenu_addItem(self, (char*)self + 0x1688, -1);
-    cMenu_addItem(self, (char*)self + 0x16BC, -1);
-    cMenu_addItem(self, (char*)self + 0x16F0, -1);
-    cMenu_addItem(self, (char*)self + 0x1724, -1);
-    cMenu_addItem(self, (char*)self + 0x1758, -1);
-    cMenu_addItem(self, (char*)self + 0x178C, -1);
-    cMenu_addItem(self, (char*)self + 0x17C0, -1);
-    cMenu_addItem(self, (char*)self + 0x17F4, -1);
-    cMenu_addItem(self, (char*)self + 0x1828, -1);
-    cMenu_addItem(self, (char*)self + 0x185C, -1);
-    cMenu_addItem(self, (char*)self + 0x1890, -1);
-    cMenu_addItem(self, (char*)self + 0x1EEC, -1);
-    return self;
+    self->mVtbl = cSplashTogglesMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_Camera_Splash_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->EnableItem, 0, &D_004A424C, 0, 1, str_Enable);
+    cIntMenuItem_cIntMenuItem(&self->RenderItem, 1, &D_004A4250, 0, 1, str_Render);
+    cIntMenuItem_cIntMenuItem(&self->NumDropsItem, 2, &D_004A4254, 1, 0x1e, str_Max_Drops);
+    cIntMenuItem_cIntMenuItem(&self->NumIceCrystalsItem, 3, &D_004A4258, 1, 0x1e, str_Max_Crystals);
+    cFloatMenuItem_ctor(&self->PercentageIceCrystalItem, 4, &D_004A425C, 0.0f, 1.0f, str_Percentage_Ice_Crystals);
+    cFloatMenuItem_ctor(&self->PercentageIceCrystalSpawnChanceItem, 5, &D_004A4260, 0.0f, 1.0f, str_Percentage_Ice_Crystal_Spawn);
+    cIntMenuItem_cIntMenuItem(&self->IceCrystalMinGroupingItem, 6, &D_004A4264, 1, 10, str_Ice_Crystal_Minimum_in_Group);
+    cIntMenuItem_cIntMenuItem(&self->IceCrystalMaxGroupingItem, 7, &D_004A4268, 1, 10, str_Ice_Crystal_Maximum_in_Group);
+    cIntMenuItem_cIntMenuItem(&self->MaxSpawnPerCrystalItem, 8, &D_004A426C, 1, 10, str_Max_Spawn_Per_Crystal);
+    cFloatMenuItem_ctor(&self->FarthestImpactDistanceItem, 9, &D_004A4270, 0.0f, 2000.0f, str_Farthest_Impact_Distance);
+    cFloatMenuItem_ctor(&self->LowestImpactItensityItem, 10, &D_004A4274, 0.0f, 120.0f, str_Lowest_Impact_Intensity);
+    cFloatMenuItem_ctor(&self->MinimumSnowfallForImpactsItem, 11, &D_004A4278, 0.0f, 10.0f, str_Lowest_Snowfall_For_Impacts);
+    cFloatMenuItem_ctor(&self->ImpactMultiplierItem, 0xc, &D_004A427C, 0.0f, 10.0f, str_Impact_Multiplier);
+    cFloatMenuItem_ctor(&self->LowestSnowfallAmountItem, 13, &D_004A4280, 0.0f, 10.0f, str_Lowest_Snowfall_Amount);
+    cFloatMenuItem_ctor(&self->SnowfallMultiplierItem, 0xe, &D_004A4284, 0.0f, 10.0f, str_Snowfall_Multiplier);
+    cFloatMenuItem_ctor(&self->MinVelocityForPushoffItem, 0xf, &D_004A4288, 0.0f, 10.0f, str_Min_Velocity_For_Pushoff);
+    cFloatMenuItem_ctor(&self->DropMinLifeSpanItem, 0x10, &D_004A428C, 0.0f, 100.0f, str_Drop_Min_Life_Span);
+    cFloatMenuItem_ctor(&self->DropMaxLifeSpanItem, 17, &D_004A4290, 0.0f, 100.0f, str_Drop_Max_Life_Span);
+    cFloatMenuItem_ctor(&self->DropMinSizeItem, 18, &D_004A4294, 0.0f, 40.0f, str_Drop_Min_Size);
+    cFloatMenuItem_ctor(&self->DropMaxSizeItem, 19, &D_004A4298, 0.0f, 40.0f, str_Drop_Max_Size);
+    cFloatMenuItem_ctor(&self->DropMaxWidthHeightDifferenceItem, 20, &D_004A429C, 0.0f, 10.0f, str_Drop_Max_Width_Height_Difference);
+    cFloatMenuItem_ctor(&self->DropMinVelocityJiggleXItem, 21, &D_004A42A0, -10.0f, 10.0f, str_Drop_Min_Velocity_Jiggle_X);
+    cFloatMenuItem_ctor(&self->DropMaxVelocityJiggleXItem, 22, &D_004A42A4, -10.0f, 10.0f, str_Drop_Max_Velocity_Jiggle_X);
+    cFloatMenuItem_ctor(&self->DropMinVelocityJiggleYItem, 23, &D_004A42A8, -10.0f, 10.0f, str_Drop_Min_Velocity_Jiggle_Y);
+    cFloatMenuItem_ctor(&self->DropMaxVelocityJiggleYItem, 0x18, &D_004A42AC, -10.0f, 10.0f, str_Drop_Max_Velocity_Jiggle_Y);
+    cFloatMenuItem_ctor(&self->DropMinSizeGrowthItem, 25, &D_004A42B0, -10.0f, 10.0f, str_Drop_Min_Size_Growth);
+    cFloatMenuItem_ctor(&self->DropMaxSizeGrowthItem, 26, &D_004A42B4, -10.0f, 10.0f, str_Drop_Max_Size_Growth);
+    cFloatMenuItem_ctor(&self->DropMinPushOffSpeedItem, 27, &D_004A42B8, 0.0f, 10.0f, str_Drop_Min_Push_Off_Speed);
+    cFloatMenuItem_ctor(&self->DropMaxPushOffSpeedItem, 0x1c, &D_004A42BC, 0.0f, 10.0f, str_Drop_Max_Push_Off_Speed);
+    cFloatMenuItem_ctor(&self->DropMaxVelocityItem, 29, &D_004A42C0, 0.0f, 100.0f, str_Drop_Maximum_Velocity);
+    cFloatMenuItem_ctor(&self->DropMinVelocityUsageItem, 0x1e, &D_004A42C4, 0.0f, 10.0f, str_Drop_Min_Velocity_Usage);
+    cFloatMenuItem_ctor(&self->DropMaxVelocityUsageItem, 0x1f, &D_004A42C8, 0.0f, 10.0f, str_Drop_Max_Velocity_Usage);
+    cFloatMenuItem_ctor(&self->DropMaxRotationChangeItem, 0x20, &D_004A42CC, 0.0f, 720.0f, str_Crystal_Max_Rotation_Overall_Change);
+    cARGBMenuItem_cARGBMenuItem(&self->DropTintMinItem, 33, str_Drop_Tint_Min, D_005046E0);
+    cARGBMenuItem_cARGBMenuItem(&self->DropTintMaxItem, 34, str_Drop_Tint_Max, D_005046F0);
+    cFloatMenuItem_ctor(&self->CrystalGroupSpacingXItem, 35, &D_004A42D0, 0.0f, 100.0f, str_Crystal_Group_Spacing_X);
+    cFloatMenuItem_ctor(&self->CrystalGroupSpacingYItem, 36, &D_004A42D4, 0.0f, 100.0f, str_Crystal_Group_Spacing_Y);
+    cFloatMenuItem_ctor(&self->CrystalMinLifeSpanItem, 37, &D_004A42D8, 0.0f, 100.0f, str_Crystal_Min_Life_Span);
+    cFloatMenuItem_ctor(&self->CrystalMaxLifeSpanItem, 38, &D_004A42DC, 0.0f, 100.0f, str_Crystal_Max_Life_Span);
+    cFloatMenuItem_ctor(&self->CrystalMinSizeItem, 39, &D_004A42E0, 0.0f, 40.0f, str_Crystal_Min_Size);
+    cFloatMenuItem_ctor(&self->CrystalMaxSizeItem, 40, &D_004A42E4, 0.0f, 40.0f, str_Crystal_Max_Size);
+    cFloatMenuItem_ctor(&self->CrystalMaxWidthHeightDifferenceItem, 41, &D_004A42E8, 0.0f, 10.0f, str_Crystal_Max_Width_Height_Difference);
+    cFloatMenuItem_ctor(&self->CrystalMinVelocityJiggleXItem, 42, &D_004A42EC, -10.0f, 10.0f, str_Crystal_Min_Velocity_Jiggle_X);
+    cFloatMenuItem_ctor(&self->CrystalMaxVelocityJiggleXItem, 43, &D_004A42F0, -10.0f, 10.0f, str_Crystal_Max_Velocity_Jiggle_X);
+    cFloatMenuItem_ctor(&self->CrystalMinVelocityJiggleYItem, 44, &D_004A42F4, -10.0f, 10.0f, str_Crystal_Min_Velocity_Jiggle_Y);
+    cFloatMenuItem_ctor(&self->CrystalMaxVelocityJiggleYItem, 45, &D_004A42F8, -10.0f, 10.0f, str_Crystal_Max_Velocity_Jiggle_Y);
+    cFloatMenuItem_ctor(&self->CrystalMinJiggleTimeItem, 46, &D_004A42FC, 0.0f, 10.0f, str_Crsytal_Min_Time_In_One_Jiggle_Direction);
+    cFloatMenuItem_ctor(&self->CrystalMaxJiggleTimeItem, 47, &D_004A4300, 0.0f, 10.0f, str_Crsytal_Max_Time_In_One_Jiggle_Direction);
+    cFloatMenuItem_ctor(&self->CrystalMinSizeGrowthItem, 0x30, &D_004A4304, -10.0f, 10.0f, str_Crystal_Min_Size_Growth);
+    cFloatMenuItem_ctor(&self->CrystalMaxSizeGrowthItem, 49, &D_004A4308, -10.0f, 10.0f, str_Crystal_Max_Size_Growth);
+    cFloatMenuItem_ctor(&self->CrystalMinPushOffSpeedItem, 50, &D_004A430C, 0.0f, 10.0f, str_Crystal_Min_Push_Off_Speed);
+    cFloatMenuItem_ctor(&self->CrystalMaxPushOffSpeedItem, 51, &D_004A4310, 0.0f, 10.0f, str_Crystal_Max_Push_Off_Speed);
+    cFloatMenuItem_ctor(&self->CrystalMaxVelocityItem, 52, &D_004A4314, 0.0f, 100.0f, str_Crystal_Maximum_Velocity);
+    cFloatMenuItem_ctor(&self->CrystalMaxRotationChangeItem, 53, &D_004A4318, 0.0f, 720.0f, str_Crystal_Max_Rotation_Overall_Change);
+    cARGBMenuItem_cARGBMenuItem(&self->CrystalTintMinItem, 54, str_Crystal_Tint_Min, D_00504700);
+    cARGBMenuItem_cARGBMenuItem(&self->CrystalTintMaxItem, 55, str_Crystal_Tint_Max, D_00504710);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->EnableItem, -1);
+    cMenu_addItem(self, &self->RenderItem, -1);
+    cMenu_addItem(self, &self->NumDropsItem, -1);
+    cMenu_addItem(self, &self->NumIceCrystalsItem, -1);
+    cMenu_addItem(self, &self->PercentageIceCrystalItem, -1);
+    cMenu_addItem(self, &self->PercentageIceCrystalSpawnChanceItem, -1);
+    cMenu_addItem(self, &self->IceCrystalMinGroupingItem, -1);
+    cMenu_addItem(self, &self->IceCrystalMaxGroupingItem, -1);
+    cMenu_addItem(self, &self->MaxSpawnPerCrystalItem, -1);
+    cMenu_addItem(self, &self->FarthestImpactDistanceItem, -1);
+    cMenu_addItem(self, &self->LowestImpactItensityItem, -1);
+    cMenu_addItem(self, &self->MinimumSnowfallForImpactsItem, -1);
+    cMenu_addItem(self, &self->ImpactMultiplierItem, -1);
+    cMenu_addItem(self, &self->LowestSnowfallAmountItem, -1);
+    cMenu_addItem(self, &self->SnowfallMultiplierItem, -1);
+    cMenu_addItem(self, &self->MinVelocityForPushoffItem, -1);
+    cMenu_addItem(self, &self->DropMinLifeSpanItem, -1);
+    cMenu_addItem(self, &self->DropMaxLifeSpanItem, -1);
+    cMenu_addItem(self, &self->DropMinSizeItem, -1);
+    cMenu_addItem(self, &self->DropMaxSizeItem, -1);
+    cMenu_addItem(self, &self->DropMaxWidthHeightDifferenceItem, -1);
+    cMenu_addItem(self, &self->DropMinVelocityJiggleXItem, -1);
+    cMenu_addItem(self, &self->DropMaxVelocityJiggleXItem, -1);
+    cMenu_addItem(self, &self->DropMinVelocityJiggleYItem, -1);
+    cMenu_addItem(self, &self->DropMaxVelocityJiggleYItem, -1);
+    cMenu_addItem(self, &self->DropMinSizeGrowthItem, -1);
+    cMenu_addItem(self, &self->DropMaxSizeGrowthItem, -1);
+    cMenu_addItem(self, &self->DropMinPushOffSpeedItem, -1);
+    cMenu_addItem(self, &self->DropMaxPushOffSpeedItem, -1);
+    cMenu_addItem(self, &self->DropMaxVelocityItem, -1);
+    cMenu_addItem(self, &self->DropMinVelocityUsageItem, -1);
+    cMenu_addItem(self, &self->DropMaxVelocityUsageItem, -1);
+    cMenu_addItem(self, &self->DropMaxRotationChangeItem, -1);
+    cMenu_addItem(self, &self->DropTintMinItem, -1);
+    cMenu_addItem(self, &self->DropTintMaxItem, -1);
+    cMenu_addItem(self, &self->CrystalGroupSpacingXItem, -1);
+    cMenu_addItem(self, &self->CrystalGroupSpacingYItem, -1);
+    cMenu_addItem(self, &self->CrystalMinLifeSpanItem, -1);
+    cMenu_addItem(self, &self->CrystalMaxLifeSpanItem, -1);
+    cMenu_addItem(self, &self->CrystalMinSizeItem, -1);
+    cMenu_addItem(self, &self->CrystalMaxSizeItem, -1);
+    cMenu_addItem(self, &self->CrystalMaxWidthHeightDifferenceItem, -1);
+    cMenu_addItem(self, &self->CrystalMinVelocityJiggleXItem, -1);
+    cMenu_addItem(self, &self->CrystalMaxVelocityJiggleXItem, -1);
+    cMenu_addItem(self, &self->CrystalMinVelocityJiggleYItem, -1);
+    cMenu_addItem(self, &self->CrystalMaxVelocityJiggleYItem, -1);
+    cMenu_addItem(self, &self->CrystalMinJiggleTimeItem, -1);
+    cMenu_addItem(self, &self->CrystalMaxJiggleTimeItem, -1);
+    cMenu_addItem(self, &self->CrystalMinSizeGrowthItem, -1);
+    cMenu_addItem(self, &self->CrystalMaxSizeGrowthItem, -1);
+    cMenu_addItem(self, &self->CrystalMinPushOffSpeedItem, -1);
+    cMenu_addItem(self, &self->CrystalMaxPushOffSpeedItem, -1);
+    cMenu_addItem(self, &self->CrystalMaxVelocityItem, -1);
+    cMenu_addItem(self, &self->CrystalMaxRotationChangeItem, -1);
+    cMenu_addItem(self, &self->CrystalTintMinItem, -1);
+    cMenu_addItem(self, &self->CrystalTintMaxItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -1773,27 +1774,27 @@ extern int D_004A41E8;
  *
  * @return @p self
  */
-extern "C" void* cTubeMenu_cTubeMenu(void* self)
+extern "C" void* cTubeMenu_cTubeMenu(cTubeMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cTubeMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_Tube_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A41D4, 0, 1, str_Enable);
-    cFloatMenuItem_cFloatMenuItem((char*)self + 0x194, 1, &D_004A41D8, str_Scale_Width, 0.0f, 1000.0f);
-    cFloatMenuItem_cFloatMenuItem((char*)self + 0x1C8, 2, &D_004A41DC, str_Scale_Height, 0.0f, 1000.0f);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x1FC, 3, &D_004A41E0, 0, 0xFF, D_004A2DA8);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x22C, 4, &D_004A41E4, 0, 0xFF, D_004A2DB0);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x25C, 5, &D_004A41E8, 0, 0xFF, D_004A2DB8);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    cMenu_addItem(self, (char*)self + 0x1C8, -1);
-    cMenu_addItem(self, (char*)self + 0x1FC, -1);
-    cMenu_addItem(self, (char*)self + 0x22C, -1);
-    cMenu_addItem(self, (char*)self + 0x25C, -1);
-    return self;
+    self->mVtbl = cTubeMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_Tube_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->EnableItem, 0, &D_004A41D4, 0, 1, str_Enable);
+    cFloatMenuItem_cFloatMenuItem(&self->ScaleWidthItem, 1, &D_004A41D8, str_Scale_Width, 0.0f, 1000.0f);
+    cFloatMenuItem_cFloatMenuItem(&self->ScaleHeightItem, 2, &D_004A41DC, str_Scale_Height, 0.0f, 1000.0f);
+    cIntMenuItem_cIntMenuItem(&self->RItem, 3, &D_004A41E0, 0, 0xFF, D_004A2DA8);
+    cIntMenuItem_cIntMenuItem(&self->GItem, 4, &D_004A41E4, 0, 0xFF, D_004A2DB0);
+    cIntMenuItem_cIntMenuItem(&self->BItem, 5, &D_004A41E8, 0, 0xFF, D_004A2DB8);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->EnableItem, -1);
+    cMenu_addItem(self, &self->ScaleWidthItem, -1);
+    cMenu_addItem(self, &self->ScaleHeightItem, -1);
+    cMenu_addItem(self, &self->RItem, -1);
+    cMenu_addItem(self, &self->GItem, -1);
+    cMenu_addItem(self, &self->BItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -1852,47 +1853,47 @@ extern int D_004A4228;
  *
  * @return @p self
  */
-extern "C" void* cPathArrowMenu_cPathArrowMenu(void* self)
+extern "C" void* cPathArrowMenu_cPathArrowMenu(cPathArrowMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cPathArrowMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_PathArrow_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &D_004A41EC, 0, 1, str_Enable);
-    cFloatMenuItem_ctor((char*)self + 0x194, 1, &D_004A41F0, 0.0f, 1000.0f, str_Forward_Width);
-    cFloatMenuItem_ctor((char*)self + 0x1C8, 2, &D_004A41F4, 0.0f, 1000.0f, str_Middle_Width);
-    cFloatMenuItem_ctor((char*)self + 0x1FC, 3, &D_004A41F8, 0.0f, 1000.0f, str_Rear_Width);
-    cFloatMenuItem_ctor((char*)self + 0x230, 4, &D_004A41FC, 0.0f, 1000.0f, str_Forward_Length);
-    cFloatMenuItem_ctor((char*)self + 0x264, 5, &D_004A4200, 0.0f, 1000.0f, str_Rear_Length);
-    cFloatMenuItem_ctor((char*)self + 0x298, 6, &D_004A4204, 0.0f, 1000.0f, str_Height);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x2CC, 7, &D_004A4208, 0, 0xff, D_004A2DA8);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x2FC, 8, &D_004A420C, 0, 0xff, D_004A2DB0);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x32C, 9, &D_004A4210, 0, 0xff, D_004A2DB8);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x35C, 10, &D_004A4214, 0, 0xff, D_004A2DC8);
-    cFloatMenuItem_ctor((char*)self + 0x38C, 11, &D_004A4218, 0.0f, 1000.0f, str_Move_Speed);
-    cFloatMenuItem_ctor((char*)self + 0x3C0, 0xc, &D_004A421C, 0.0f, 1000.0f, str_Draw_Speed);
-    cFloatMenuItem_ctor((char*)self + 0x3F4, 13, &D_004A4220, 50.0f, 1000.0f, str_Distance);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x428, 0xe, &D_004A4224, 0, 1000, str_Path_Id);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x458, 0xf, &D_004A4228, 1, 18000, str_Max_Tick);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    cMenu_addItem(self, (char*)self + 0x1C8, -1);
-    cMenu_addItem(self, (char*)self + 0x1FC, -1);
-    cMenu_addItem(self, (char*)self + 0x230, -1);
-    cMenu_addItem(self, (char*)self + 0x264, -1);
-    cMenu_addItem(self, (char*)self + 0x298, -1);
-    cMenu_addItem(self, (char*)self + 0x2CC, -1);
-    cMenu_addItem(self, (char*)self + 0x2FC, -1);
-    cMenu_addItem(self, (char*)self + 0x32C, -1);
-    cMenu_addItem(self, (char*)self + 0x35C, -1);
-    cMenu_addItem(self, (char*)self + 0x38C, -1);
-    cMenu_addItem(self, (char*)self + 0x3C0, -1);
-    cMenu_addItem(self, (char*)self + 0x3F4, -1);
-    cMenu_addItem(self, (char*)self + 0x428, -1);
-    cMenu_addItem(self, (char*)self + 0x458, -1);
-    return self;
+    self->mVtbl = cPathArrowMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_PathArrow_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->EnableItem, 0, &D_004A41EC, 0, 1, str_Enable);
+    cFloatMenuItem_ctor(&self->ScaleForwardWidthItem, 1, &D_004A41F0, 0.0f, 1000.0f, str_Forward_Width);
+    cFloatMenuItem_ctor(&self->ScaleMiddleWidthItem, 2, &D_004A41F4, 0.0f, 1000.0f, str_Middle_Width);
+    cFloatMenuItem_ctor(&self->ScaleRearWidthItem, 3, &D_004A41F8, 0.0f, 1000.0f, str_Rear_Width);
+    cFloatMenuItem_ctor(&self->ScaleFowardLengthItem, 4, &D_004A41FC, 0.0f, 1000.0f, str_Forward_Length);
+    cFloatMenuItem_ctor(&self->ScaleRearLengthItem, 5, &D_004A4200, 0.0f, 1000.0f, str_Rear_Length);
+    cFloatMenuItem_ctor(&self->ScaleHeightItem, 6, &D_004A4204, 0.0f, 1000.0f, str_Height);
+    cIntMenuItem_cIntMenuItem(&self->RItem, 7, &D_004A4208, 0, 0xff, D_004A2DA8);
+    cIntMenuItem_cIntMenuItem(&self->GItem, 8, &D_004A420C, 0, 0xff, D_004A2DB0);
+    cIntMenuItem_cIntMenuItem(&self->BItem, 9, &D_004A4210, 0, 0xff, D_004A2DB8);
+    cIntMenuItem_cIntMenuItem(&self->AItem, 10, &D_004A4214, 0, 0xff, D_004A2DC8);
+    cFloatMenuItem_ctor(&self->MoveSpeedItem, 11, &D_004A4218, 0.0f, 1000.0f, str_Move_Speed);
+    cFloatMenuItem_ctor(&self->DrawSpeedItem, 0xc, &D_004A421C, 0.0f, 1000.0f, str_Draw_Speed);
+    cFloatMenuItem_ctor(&self->DistanceItem, 13, &D_004A4220, 50.0f, 1000.0f, str_Distance);
+    cIntMenuItem_cIntMenuItem(&self->PathIdItem, 0xe, &D_004A4224, 0, 1000, str_Path_Id);
+    cIntMenuItem_cIntMenuItem(&self->MaxTickItem, 0xf, &D_004A4228, 1, 18000, str_Max_Tick);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->EnableItem, -1);
+    cMenu_addItem(self, &self->ScaleForwardWidthItem, -1);
+    cMenu_addItem(self, &self->ScaleMiddleWidthItem, -1);
+    cMenu_addItem(self, &self->ScaleRearWidthItem, -1);
+    cMenu_addItem(self, &self->ScaleFowardLengthItem, -1);
+    cMenu_addItem(self, &self->ScaleRearLengthItem, -1);
+    cMenu_addItem(self, &self->ScaleHeightItem, -1);
+    cMenu_addItem(self, &self->RItem, -1);
+    cMenu_addItem(self, &self->GItem, -1);
+    cMenu_addItem(self, &self->BItem, -1);
+    cMenu_addItem(self, &self->AItem, -1);
+    cMenu_addItem(self, &self->MoveSpeedItem, -1);
+    cMenu_addItem(self, &self->DrawSpeedItem, -1);
+    cMenu_addItem(self, &self->DistanceItem, -1);
+    cMenu_addItem(self, &self->PathIdItem, -1);
+    cMenu_addItem(self, &self->MaxTickItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -1953,47 +1954,47 @@ extern char D_004D1480[];
  *
  * @return @p self
  */
-extern "C" void* cVisualEffectsMainMenu_cVisualEffectsMainMenu(void* self)
+extern "C" void* cVisualEffectsMainMenu_cVisualEffectsMainMenu(cVisualEffectsMainMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cVisualEffectsMainMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_Visual_Effects_Main_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x164, D_004C98E0, str_Render_Toggles);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x180, D_004CA328, str_Visual_Effects_Test);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x19C, D_004CA7C0, str_Light_Glow);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x1B8, D_004CAEF8, str_Plants);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x1D4, D_004CB2C8, str_Depth_Fog);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x1F0, D_004CBBE8, str_Height_Fog);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x20C, D_004CBDE8, str_Detail_System);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x228, D_004CC150, str_Screen_Tint);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x244, D_004CCAB0, str_Shadow_b);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x260, D_004CCDE0, str_Snow_Surface);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x27C, D_004CD0A8, str_Board_Trail);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x298, D_004CD678, str_Flags);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x2B4, D_004CD840, str_Power_Up_Effects_Toggles);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x2D0, D_004CDC88, str_Snowfall_Test_Effects);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x2EC, D_004CECA8, str_Camera_Snow_Splash_Effects);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x308, D_004D11F0, str_Tube_Effects);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x324, D_004D1480, str_Path_Arrow_Effects);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x180, -1);
-    cMenu_addItem(self, (char*)self + 0x19C, -1);
-    cMenu_addItem(self, (char*)self + 0x1B8, -1);
-    cMenu_addItem(self, (char*)self + 0x1D4, -1);
-    cMenu_addItem(self, (char*)self + 0x1F0, -1);
-    cMenu_addItem(self, (char*)self + 0x20C, -1);
-    cMenu_addItem(self, (char*)self + 0x228, -1);
-    cMenu_addItem(self, (char*)self + 0x244, -1);
-    cMenu_addItem(self, (char*)self + 0x260, -1);
-    cMenu_addItem(self, (char*)self + 0x27C, -1);
-    cMenu_addItem(self, (char*)self + 0x298, -1);
-    cMenu_addItem(self, (char*)self + 0x2B4, -1);
-    cMenu_addItem(self, (char*)self + 0x2D0, -1);
-    cMenu_addItem(self, (char*)self + 0x2EC, -1);
-    cMenu_addItem(self, (char*)self + 0x308, -1);
-    cMenu_addItem(self, (char*)self + 0x324, -1);
-    return self;
+    self->mVtbl = cVisualEffectsMainMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_Visual_Effects_Main_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cSubMenuItem_cSubMenuItem(&self->RenderTogglesItem, D_004C98E0, str_Render_Toggles);
+    cSubMenuItem_cSubMenuItem(&self->VisualEffectsTestItem, D_004CA328, str_Visual_Effects_Test);
+    cSubMenuItem_cSubMenuItem(&self->LightGlowItem, D_004CA7C0, str_Light_Glow);
+    cSubMenuItem_cSubMenuItem(&self->PlantsItem, D_004CAEF8, str_Plants);
+    cSubMenuItem_cSubMenuItem(&self->DepthFogItem, D_004CB2C8, str_Depth_Fog);
+    cSubMenuItem_cSubMenuItem(&self->HeightFogItem, D_004CBBE8, str_Height_Fog);
+    cSubMenuItem_cSubMenuItem(&self->DetailSystemItem, D_004CBDE8, str_Detail_System);
+    cSubMenuItem_cSubMenuItem(&self->ScreenTintItem, D_004CC150, str_Screen_Tint);
+    cSubMenuItem_cSubMenuItem(&self->ShadowItem, D_004CCAB0, str_Shadow_b);
+    cSubMenuItem_cSubMenuItem(&self->SnowSurfaceItem, D_004CCDE0, str_Snow_Surface);
+    cSubMenuItem_cSubMenuItem(&self->BoardTrailItem, D_004CD0A8, str_Board_Trail);
+    cSubMenuItem_cSubMenuItem(&self->FlagsItem, D_004CD678, str_Flags);
+    cSubMenuItem_cSubMenuItem(&self->PowerUpFXTogglesItem, D_004CD840, str_Power_Up_Effects_Toggles);
+    cSubMenuItem_cSubMenuItem(&self->SnowfallTogglesItem, D_004CDC88, str_Snowfall_Test_Effects);
+    cSubMenuItem_cSubMenuItem(&self->SplashTogglesItem, D_004CECA8, str_Camera_Snow_Splash_Effects);
+    cSubMenuItem_cSubMenuItem(&self->TubeItem, D_004D11F0, str_Tube_Effects);
+    cSubMenuItem_cSubMenuItem(&self->PathArrowItem, D_004D1480, str_Path_Arrow_Effects);
+    cMenu_addItem(self, &self->RenderTogglesItem, -1);
+    cMenu_addItem(self, &self->VisualEffectsTestItem, -1);
+    cMenu_addItem(self, &self->LightGlowItem, -1);
+    cMenu_addItem(self, &self->PlantsItem, -1);
+    cMenu_addItem(self, &self->DepthFogItem, -1);
+    cMenu_addItem(self, &self->HeightFogItem, -1);
+    cMenu_addItem(self, &self->DetailSystemItem, -1);
+    cMenu_addItem(self, &self->ScreenTintItem, -1);
+    cMenu_addItem(self, &self->ShadowItem, -1);
+    cMenu_addItem(self, &self->SnowSurfaceItem, -1);
+    cMenu_addItem(self, &self->BoardTrailItem, -1);
+    cMenu_addItem(self, &self->FlagsItem, -1);
+    cMenu_addItem(self, &self->PowerUpFXTogglesItem, -1);
+    cMenu_addItem(self, &self->SnowfallTogglesItem, -1);
+    cMenu_addItem(self, &self->SplashTogglesItem, -1);
+    cMenu_addItem(self, &self->TubeItem, -1);
+    cMenu_addItem(self, &self->PathArrowItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -2067,57 +2068,57 @@ extern "C" void cMenu__cMenu(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cRenderTogglesMenu__cRenderTogglesMenu(void* self, int flags)
+extern "C" void cRenderTogglesMenu__cRenderTogglesMenu(cRenderTogglesMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0xA18, 2);
-    cMenuItem__cMenuItem((char*)self + 0x9E8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x9B8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x988, 2);
-    cMenuItem__cMenuItem((char*)self + 0x958, 2);
-    cMenuItem__cMenuItem((char*)self + 0x924, 2);
-    cMenuItem__cMenuItem((char*)self + 0x8F0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x8BC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x888, 2);
-    cMenuItem__cMenuItem((char*)self + 0x858, 2);
-    cMenuItem__cMenuItem((char*)self + 0x828, 2);
-    cMenuItem__cMenuItem((char*)self + 0x7F8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x7C4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x794, 2);
-    cMenuItem__cMenuItem((char*)self + 0x764, 2);
-    cMenuItem__cMenuItem((char*)self + 0x734, 2);
-    cMenuItem__cMenuItem((char*)self + 0x704, 2);
-    cMenuItem__cMenuItem((char*)self + 0x6D4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x6A4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x674, 2);
-    cMenuItem__cMenuItem((char*)self + 0x644, 2);
-    cMenuItem__cMenuItem((char*)self + 0x614, 2);
-    cMenuItem__cMenuItem((char*)self + 0x5E4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x5B4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x584, 2);
-    cMenuItem__cMenuItem((char*)self + 0x554, 2);
-    cMenuItem__cMenuItem((char*)self + 0x524, 2);
-    cMenuItem__cMenuItem((char*)self + 0x4F4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x4C4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x494, 2);
-    cMenuItem__cMenuItem((char*)self + 0x464, 2);
-    cMenuItem__cMenuItem((char*)self + 0x434, 2);
-    cMenuItem__cMenuItem((char*)self + 0x404, 2);
-    cMenuItem__cMenuItem((char*)self + 0x3D4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x3A4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x374, 2);
-    cMenuItem__cMenuItem((char*)self + 0x344, 2);
-    cMenuItem__cMenuItem((char*)self + 0x314, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2E4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2B4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x284, 2);
-    cMenuItem__cMenuItem((char*)self + 0x254, 2);
-    cMenuItem__cMenuItem((char*)self + 0x224, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1F4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->ShowSurfaceTypesItem, 2);
+    cMenuItem__cMenuItem(&self->ProfileIndividualFXItem, 2);
+    cMenuItem__cMenuItem(&self->DebugGameModeInfoItem, 2);
+    cMenuItem__cMenuItem(&self->DebugNISMemInfoItem, 2);
+    cMenuItem__cMenuItem(&self->DebugInfoItem, 2);
+    cMenuItem__cMenuItem(&self->Prog2wItem, 2);
+    cMenuItem__cMenuItem(&self->Prog2zItem, 2);
+    cMenuItem__cMenuItem(&self->Prog2yItem, 2);
+    cMenuItem__cMenuItem(&self->Prog2xItem, 2);
+    cMenuItem__cMenuItem(&self->TempIntItem, 2);
+    cMenuItem__cMenuItem(&self->SoftwareDynamicParticleSystemsItem, 2);
+    cMenuItem__cMenuItem(&self->TestSurfaceTypesItem, 2);
+    cMenuItem__cMenuItem(&self->ParticleSizeScaleItem, 2);
+    cMenuItem__cMenuItem(&self->TestTunnelItem, 2);
+    cMenuItem__cMenuItem(&self->DisableHUDItem, 2);
+    cMenuItem__cMenuItem(&self->UseReflectionVectorItem, 2);
+    cMenuItem__cMenuItem(&self->DisableBoundingBoxesItem, 2);
+    cMenuItem__cMenuItem(&self->DisableAIVisualFXItem, 2);
+    cMenuItem__cMenuItem(&self->DisableCharacterSpecularItem, 2);
+    cMenuItem__cMenuItem(&self->DisableSkyBoxItem, 2);
+    cMenuItem__cMenuItem(&self->DisableBoardWakeItem, 2);
+    cMenuItem__cMenuItem(&self->DisableSnowFallItem, 2);
+    cMenuItem__cMenuItem(&self->DisableVisibilityRectsItem, 2);
+    cMenuItem__cMenuItem(&self->DisableAIBoardTrailItem, 2);
+    cMenuItem__cMenuItem(&self->DisableBoardTrailItem, 2);
+    cMenuItem__cMenuItem(&self->DisableShadowsItem, 2);
+    cMenuItem__cMenuItem(&self->DisablePlayerStripsItem, 2);
+    cMenuItem__cMenuItem(&self->DisableTextureRectsItem, 2);
+    cMenuItem__cMenuItem(&self->Disable3DSpritesItem, 2);
+    cMenuItem__cMenuItem(&self->DisableSpritesItem, 2);
+    cMenuItem__cMenuItem(&self->DisableDynamicColourEmittersItem, 2);
+    cMenuItem__cMenuItem(&self->DisableDynamicEmittersItem, 2);
+    cMenuItem__cMenuItem(&self->DisableStaticEmittersItem, 2);
+    cMenuItem__cMenuItem(&self->DisableMeshReflectionItem, 2);
+    cMenuItem__cMenuItem(&self->DisableMeshesItem, 2);
+    cMenuItem__cMenuItem(&self->DisableTransformStripsItem, 2);
+    cMenuItem__cMenuItem(&self->DisableTriStripsItem, 2);
+    cMenuItem__cMenuItem(&self->DisableLineStripsItem, 2);
+    cMenuItem__cMenuItem(&self->DisableSparklesItem, 2);
+    cMenuItem__cMenuItem(&self->DisablePatchShadowItem, 2);
+    cMenuItem__cMenuItem(&self->DisablePatchReflectionItem, 2);
+    cMenuItem__cMenuItem(&self->DisablePatchesItem, 2);
+    cMenuItem__cMenuItem(&self->UseSmallTexture1Item, 2);
+    cMenuItem__cMenuItem(&self->UseSmallTexture0Item, 2);
+    cMenuItem__cMenuItem(&self->ResetStatsItem, 2);
+    cMenuItem__cMenuItem(&self->DisplayRenderStatsItem, 2);
+    cMenuItem__cMenuItem(&self->AIUpdatesPerRenderItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -2140,27 +2141,27 @@ extern "C" void cMenu__cMenu(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cVisualEffectsTestMenu__cVisualEffectsTestMenu(void* self, int flags)
+extern "C" void cVisualEffectsTestMenu__cVisualEffectsTestMenu(cVisualEffectsTestMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x464, 2);
-    cMenuItem__cMenuItem((char*)self + 0x434, 2);
-    cMenuItem__cMenuItem((char*)self + 0x404, 2);
-    cMenuItem__cMenuItem((char*)self + 0x3D4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x3A4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x374, 2);
-    cMenuItem__cMenuItem((char*)self + 0x344, 2);
-    cMenuItem__cMenuItem((char*)self + 0x314, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2E4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2B4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x284, 2);
-    cMenuItem__cMenuItem((char*)self + 0x254, 2);
-    cMenuItem__cMenuItem((char*)self + 0x224, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1F4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->LayerIdItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->LayerOffsetItem, 2);
+    cMenuItem__cMenuItem(&self->BlueItem, 2);
+    cMenuItem__cMenuItem(&self->GreenItem, 2);
+    cMenuItem__cMenuItem(&self->RedItem, 2);
+    cMenuItem__cMenuItem(&self->AlphaItem, 2);
+    cMenuItem__cMenuItem(&self->ScaleYItem, 2);
+    cMenuItem__cMenuItem(&self->ScaleXItem, 2);
+    cMenuItem__cMenuItem(&self->SizeYItem, 2);
+    cMenuItem__cMenuItem(&self->SizeXItem, 2);
+    cMenuItem__cMenuItem(&self->PositionYItem, 2);
+    cMenuItem__cMenuItem(&self->PositionXItem, 2);
+    cMenuItem__cMenuItem(&self->CurrElementItem, 2);
+    cMenuItem__cMenuItem(&self->HUDPrintItem, 2);
+    cMenuItem__cMenuItem(&self->ShowCurrentElementItem, 2);
+    cMenuItem__cMenuItem(&self->HUDEnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -2182,39 +2183,39 @@ extern "C" void cMenu__cMenu(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cLightGlowMenu__cLightGlowMenu(void* self, int flags)
+extern "C" void cLightGlowMenu__cLightGlowMenu(cLightGlowMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x700, 2);
-    cMenuItem__cMenuItem((char*)self + 0x6CC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x698, 2);
-    cMenuItem__cMenuItem((char*)self + 0x664, 2);
-    cMenuItem__cMenuItem((char*)self + 0x630, 2);
-    cMenuItem__cMenuItem((char*)self + 0x600, 2);
-    cMenuItem__cMenuItem((char*)self + 0x5CC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x598, 2);
-    cMenuItem__cMenuItem((char*)self + 0x564, 2);
-    cMenuItem__cMenuItem((char*)self + 0x530, 2);
-    cMenuItem__cMenuItem((char*)self + 0x4FC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x4C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x494, 2);
-    cMenuItem__cMenuItem((char*)self + 0x460, 2);
-    cMenuItem__cMenuItem((char*)self + 0x42C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x3FC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x3C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x394, 2);
-    cMenuItem__cMenuItem((char*)self + 0x360, 2);
-    cMenuItem__cMenuItem((char*)self + 0x32C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2F8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2C4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x290, 2);
-    cMenuItem__cMenuItem((char*)self + 0x25C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x228, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1F4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->IntensityScaleItem, 2);
+    cMenuItem__cMenuItem(&self->IntensityAItem, 2);
+    cMenuItem__cMenuItem(&self->IntensityBItem, 2);
+    cMenuItem__cMenuItem(&self->IntensityGItem, 2);
+    cMenuItem__cMenuItem(&self->IntensityRItem, 2);
+    cMenuItem__cMenuItem(&self->ClearAlphaItem, 2);
+    cMenuItem__cMenuItem(&self->FadeRateItem, 2);
+    cMenuItem__cMenuItem(&self->SizeAmbientItem, 2);
+    cMenuItem__cMenuItem(&self->SizeScaleItem, 2);
+    cMenuItem__cMenuItem(&self->SizePowerItem, 2);
+    cMenuItem__cMenuItem(&self->ColourAmbientItem, 2);
+    cMenuItem__cMenuItem(&self->ColourScaleItem, 2);
+    cMenuItem__cMenuItem(&self->ColourPowerItem, 2);
+    cMenuItem__cMenuItem(&self->CutoffItem, 2);
+    cMenuItem__cMenuItem(&self->SizeItem, 2);
+    cMenuItem__cMenuItem(&self->PS2ShowTexturesItem, 2);
+    cMenuItem__cMenuItem(&self->PS2JitterTexItem, 2);
+    cMenuItem__cMenuItem(&self->PS2IntensityTex3Item, 2);
+    cMenuItem__cMenuItem(&self->PS2IntensityTex2Item, 2);
+    cMenuItem__cMenuItem(&self->PS2IntensityTex1Item, 2);
+    cMenuItem__cMenuItem(&self->PS2IntensityTex0Item, 2);
+    cMenuItem__cMenuItem(&self->PS2FrameDstScaleItem, 2);
+    cMenuItem__cMenuItem(&self->PS2FrameSrcScaleItem, 2);
+    cMenuItem__cMenuItem(&self->PS2CopyIntensityItem, 2);
+    cMenuItem__cMenuItem(&self->PS2ModIntensityItem, 2);
+    cMenuItem__cMenuItem(&self->PS2MinIntensityItem, 2);
+    cMenuItem__cMenuItem(&self->PS2CaptureSizeItem, 2);
+    cMenuItem__cMenuItem(&self->OverrideWPItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -2244,23 +2245,23 @@ static inline void dtorSubMenuItem_24DC68(void* p)
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cDepthFogMenu__cDepthFogMenu(void* self, int flags)
+extern "C" void cDepthFogMenu__cDepthFogMenu(cDepthFogMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x904, 2);
-    cMenuItem__cMenuItem((char*)self + 0x8E0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x8BC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x898, 2);
-    cMenuItem__cMenuItem((char*)self + 0x874, 2);
-    dtorSubMenuItem_24DC68((char*)self + 0x2C4);
-    cMenuItem__cMenuItem((char*)self + 0x290, 2);
-    cMenuItem__cMenuItem((char*)self + 0x25C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x22C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1F8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->ColourItem.TitleItem, 2);
+    cMenuItem__cMenuItem(&self->ColourItem.Blue, 2);
+    cMenuItem__cMenuItem(&self->ColourItem.Green, 2);
+    cMenuItem__cMenuItem(&self->ColourItem.Red, 2);
+    cMenuItem__cMenuItem(&self->ColourItem.Alpha, 2);
+    dtorSubMenuItem_24DC68(&self->ColourItem);
+    cMenuItem__cMenuItem(&self->XBoxDensityScaleItem, 2);
+    cMenuItem__cMenuItem(&self->DensityItem, 2);
+    cMenuItem__cMenuItem(&self->ExponentItem, 2);
+    cMenuItem__cMenuItem(&self->FarPlaneItem, 2);
+    cMenuItem__cMenuItem(&self->NearPlaneItem, 2);
+    cMenuItem__cMenuItem(&self->OverrideWPItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -2282,50 +2283,50 @@ extern "C" void cMenu__cMenu(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cScreenTintMenu__cScreenTintMenu(void* self, int flags)
+extern "C" void cScreenTintMenu__cScreenTintMenu(cScreenTintMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x928, 2);
-    cMenuItem__cMenuItem((char*)self + 0x8F4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x8C0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x88C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x858, 2);
-    cMenuItem__cMenuItem((char*)self + 0x824, 2);
-    cMenuItem__cMenuItem((char*)self + 0x7F0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x7C0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x78C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x758, 2);
-    cMenuItem__cMenuItem((char*)self + 0x724, 2);
-    cMenuItem__cMenuItem((char*)self + 0x6F0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x6BC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x688, 2);
-    cMenuItem__cMenuItem((char*)self + 0x654, 2);
-    cMenuItem__cMenuItem((char*)self + 0x620, 2);
-    cMenuItem__cMenuItem((char*)self + 0x5EC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x5B8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x584, 2);
-    cMenuItem__cMenuItem((char*)self + 0x550, 2);
-    cMenuItem__cMenuItem((char*)self + 0x520, 2);
-    cMenuItem__cMenuItem((char*)self + 0x4F0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x4C0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x490, 2);
-    cMenuItem__cMenuItem((char*)self + 0x45C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x42C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x3FC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x3C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x394, 2);
-    cMenuItem__cMenuItem((char*)self + 0x360, 2);
-    cMenuItem__cMenuItem((char*)self + 0x32C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2F8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2C4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x290, 2);
-    cMenuItem__cMenuItem((char*)self + 0x25C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x228, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1F4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->GammaFillBItem, 2);
+    cMenuItem__cMenuItem(&self->GammaFillGItem, 2);
+    cMenuItem__cMenuItem(&self->GammaFillRItem, 2);
+    cMenuItem__cMenuItem(&self->GammaColourBItem, 2);
+    cMenuItem__cMenuItem(&self->GammaColourGItem, 2);
+    cMenuItem__cMenuItem(&self->GammaColourRItem, 2);
+    cMenuItem__cMenuItem(&self->GammaPowerItem, 2);
+    cMenuItem__cMenuItem(&self->GammaEnableItem, 2);
+    cMenuItem__cMenuItem(&self->LightningColour3BItem, 2);
+    cMenuItem__cMenuItem(&self->LightningColour3GItem, 2);
+    cMenuItem__cMenuItem(&self->LightningColour3RItem, 2);
+    cMenuItem__cMenuItem(&self->LightningColour2BItem, 2);
+    cMenuItem__cMenuItem(&self->LightningColour2GItem, 2);
+    cMenuItem__cMenuItem(&self->LightningColour2RItem, 2);
+    cMenuItem__cMenuItem(&self->LightningColourBItem, 2);
+    cMenuItem__cMenuItem(&self->LightningColourGItem, 2);
+    cMenuItem__cMenuItem(&self->LightningColourRItem, 2);
+    cMenuItem__cMenuItem(&self->LightningScale3Item, 2);
+    cMenuItem__cMenuItem(&self->LightningScale2Item, 2);
+    cMenuItem__cMenuItem(&self->LightningScaleItem, 2);
+    cMenuItem__cMenuItem(&self->LightningFadeIn3Item, 2);
+    cMenuItem__cMenuItem(&self->LightningFadeIn2Item, 2);
+    cMenuItem__cMenuItem(&self->LightningFadeOutItem, 2);
+    cMenuItem__cMenuItem(&self->LightningFadeInItem, 2);
+    cMenuItem__cMenuItem(&self->LightningChanceItem, 2);
+    cMenuItem__cMenuItem(&self->FrameIdItem, 2);
+    cMenuItem__cMenuItem(&self->LightningEnableItem, 2);
+    cMenuItem__cMenuItem(&self->XNLerpItem, 2);
+    cMenuItem__cMenuItem(&self->XNColourBItem, 2);
+    cMenuItem__cMenuItem(&self->XNColourGItem, 2);
+    cMenuItem__cMenuItem(&self->XNColourRItem, 2);
+    cMenuItem__cMenuItem(&self->FillBItem, 2);
+    cMenuItem__cMenuItem(&self->FillGItem, 2);
+    cMenuItem__cMenuItem(&self->FillRItem, 2);
+    cMenuItem__cMenuItem(&self->ColourBItem, 2);
+    cMenuItem__cMenuItem(&self->ColourGItem, 2);
+    cMenuItem__cMenuItem(&self->ColourRItem, 2);
+    cMenuItem__cMenuItem(&self->DisplayValuesItem, 2);
+    cMenuItem__cMenuItem(&self->OverrideWPItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -2344,32 +2345,32 @@ INCLUDE_ASM("main/debugmenu", cBoardTrailMenu__cBoardTrailMenu);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cBoardTrailMenu__cBoardTrailMenu(void* self, int flags)
+extern "C" void cBoardTrailMenu__cBoardTrailMenu(cBoardTrailMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x59C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x56C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x53C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x508, 2);
-    cMenuItem__cMenuItem((char*)self + 0x4D4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x4A0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x46C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x438, 2);
-    cMenuItem__cMenuItem((char*)self + 0x404, 2);
-    cMenuItem__cMenuItem((char*)self + 0x3D0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x39C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x368, 2);
-    cMenuItem__cMenuItem((char*)self + 0x334, 2);
-    cMenuItem__cMenuItem((char*)self + 0x300, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2CC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x298, 2);
-    cMenuItem__cMenuItem((char*)self + 0x264, 2);
-    cMenuItem__cMenuItem((char*)self + 0x230, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1FC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->UseSliceCapsItem, 2);
+    cMenuItem__cMenuItem(&self->DrawFixupLayerItem, 2);
+    cMenuItem__cMenuItem(&self->NumFadeSegmentsItem, 2);
+    cMenuItem__cMenuItem(&self->BaseNormalOffsetItem, 2);
+    cMenuItem__cMenuItem(&self->InnerNormalOffsetItem, 2);
+    cMenuItem__cMenuItem(&self->OuterNormalOffsetItem, 2);
+    cMenuItem__cMenuItem(&self->OuterUItem, 2);
+    cMenuItem__cMenuItem(&self->InnerUItem, 2);
+    cMenuItem__cMenuItem(&self->BaseUItem, 2);
+    cMenuItem__cMenuItem(&self->InnerPositionJitterItem, 2);
+    cMenuItem__cMenuItem(&self->TopBiasClearItem, 2);
+    cMenuItem__cMenuItem(&self->TopBiasBehindItem, 2);
+    cMenuItem__cMenuItem(&self->TopBiasFrontItem, 2);
+    cMenuItem__cMenuItem(&self->DeepPowderDepthScaleItem, 2);
+    cMenuItem__cMenuItem(&self->PowderDepthScaleItem, 2);
+    cMenuItem__cMenuItem(&self->LooseDepthScaleItem, 2);
+    cMenuItem__cMenuItem(&self->PackedDepthScaleItem, 2);
+    cMenuItem__cMenuItem(&self->Depth2HeightScaleItem, 2);
+    cMenuItem__cMenuItem(&self->HeightScaleItem, 2);
+    cMenuItem__cMenuItem(&self->OuterWidthScaleItem, 2);
+    cMenuItem__cMenuItem(&self->InnerWidthScaleItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -2392,25 +2393,25 @@ extern "C" void cMenu__cMenu(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cPowerUpFXTogglesMenu__cPowerUpFXTogglesMenu(void* self, int flags)
+extern "C" void cPowerUpFXTogglesMenu__cPowerUpFXTogglesMenu(cPowerUpFXTogglesMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x418, 2);
-    cMenuItem__cMenuItem((char*)self + 0x3E8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x3B8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x388, 2);
-    cMenuItem__cMenuItem((char*)self + 0x358, 2);
-    cMenuItem__cMenuItem((char*)self + 0x328, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2F8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x294, 2);
-    cMenuItem__cMenuItem((char*)self + 0x260, 2);
-    cMenuItem__cMenuItem((char*)self + 0x22C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1F8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->TestOrangeRibbonItem, 2);
+    cMenuItem__cMenuItem(&self->TestRedRibbonItem, 2);
+    cMenuItem__cMenuItem(&self->TestSpeedBoostRibbonItem, 2);
+    cMenuItem__cMenuItem(&self->SuperUberStateTestItem, 2);
+    cMenuItem__cMenuItem(&self->UberStateTestItem, 2);
+    cMenuItem__cMenuItem(&self->EnableSpeedBoostFXItem, 2);
+    cMenuItem__cMenuItem(&self->TestTrickBoostItem, 2);
+    cMenuItem__cMenuItem(&self->MinSpeedBoostTimeBeforeBlurItem, 2);
+    cMenuItem__cMenuItem(&self->SpeedBoostMaxSpeedItem, 2);
+    cMenuItem__cMenuItem(&self->SpeedBoostMinSpeedItem, 2);
+    cMenuItem__cMenuItem(&self->SpeedBoostScreenBlurDecreaseRateItem, 2);
+    cMenuItem__cMenuItem(&self->SpeedBoostScreenBlurIncreaseRateItem, 2);
+    cMenuItem__cMenuItem(&self->SpeedBoostScreenBlurMaxPercentItem, 2);
+    cMenuItem__cMenuItem(&self->EnableSpeedBoostScreenBlurItem, 2);
+    cMenuItem__cMenuItem(&self->EnableSpeedBoostStreamersItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -2437,32 +2438,32 @@ static inline void dtorSubMenuItem_24E200(void* p)
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cSnowfallTogglesMenu__cSnowfallTogglesMenu(void* self, int flags)
+extern "C" void cSnowfallTogglesMenu__cSnowfallTogglesMenu(cSnowfallTogglesMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0xFEC, 2);
-    cMenuItem__cMenuItem((char*)self + 0xFD0, 2);
-    cMenuItem__cMenuItem((char*)self + 0xFAC, 2);
-    cMenuItem__cMenuItem((char*)self + 0xF88, 2);
-    cMenuItem__cMenuItem((char*)self + 0xF64, 2);
-    cMenuItem__cMenuItem((char*)self + 0xF40, 2);
-    dtorSubMenuItem_24E200((char*)self + 0x990);
-    cMenuItem__cMenuItem((char*)self + 0x974, 2);
-    cMenuItem__cMenuItem((char*)self + 0x950, 2);
-    cMenuItem__cMenuItem((char*)self + 0x92C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x908, 2);
-    cMenuItem__cMenuItem((char*)self + 0x8E4, 2);
-    dtorSubMenuItem_24E200((char*)self + 0x334);
-    cMenuItem__cMenuItem((char*)self + 0x300, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2CC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x298, 2);
-    cMenuItem__cMenuItem((char*)self + 0x264, 2);
-    cMenuItem__cMenuItem((char*)self + 0x230, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1FC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->TestAdditiveItem, 2);
+    cMenuItem__cMenuItem(&self->SnowFluffColourItem.TitleItem, 2);
+    cMenuItem__cMenuItem(&self->SnowFluffColourItem.Blue, 2);
+    cMenuItem__cMenuItem(&self->SnowFluffColourItem.Green, 2);
+    cMenuItem__cMenuItem(&self->SnowFluffColourItem.Red, 2);
+    cMenuItem__cMenuItem(&self->SnowFluffColourItem.Alpha, 2);
+    dtorSubMenuItem_24E200(&self->SnowFluffColourItem);
+    cMenuItem__cMenuItem(&self->SnowFlakeColourItem.TitleItem, 2);
+    cMenuItem__cMenuItem(&self->SnowFlakeColourItem.Blue, 2);
+    cMenuItem__cMenuItem(&self->SnowFlakeColourItem.Green, 2);
+    cMenuItem__cMenuItem(&self->SnowFlakeColourItem.Red, 2);
+    cMenuItem__cMenuItem(&self->SnowFlakeColourItem.Alpha, 2);
+    dtorSubMenuItem_24E200(&self->SnowFlakeColourItem);
+    cMenuItem__cMenuItem(&self->SnowFluffWindIntensityItem, 2);
+    cMenuItem__cMenuItem(&self->SnowFluffItensityItem, 2);
+    cMenuItem__cMenuItem(&self->SnowGravityMultiplierItem, 2);
+    cMenuItem__cMenuItem(&self->TestSnowFlurriesItem, 2);
+    cMenuItem__cMenuItem(&self->TestWindRotationItem, 2);
+    cMenuItem__cMenuItem(&self->TestFlakeSizeItem, 2);
+    cMenuItem__cMenuItem(&self->TestWindIntensityItem, 2);
+    cMenuItem__cMenuItem(&self->TestSnowIntensityItem, 2);
+    cMenuItem__cMenuItem(&self->EnableTestItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -2493,86 +2494,86 @@ static inline void dtorSubMenuItem_24E388(void* p)
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cSplashTogglesMenu__cSplashTogglesMenu(void* self, int flags)
+extern "C" void cSplashTogglesMenu__cSplashTogglesMenu(cSplashTogglesMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x252C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2508, 2);
-    cMenuItem__cMenuItem((char*)self + 0x24E4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x24C0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x249C, 2);
-    dtorSubMenuItem_24E388((char*)self + 0x1EEC);
-    cMenuItem__cMenuItem((char*)self + 0x1ED0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1EAC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1E88, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1E64, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1E40, 2);
-    dtorSubMenuItem_24E388((char*)self + 0x1890);
-    cMenuItem__cMenuItem((char*)self + 0x185C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1828, 2);
-    cMenuItem__cMenuItem((char*)self + 0x17F4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x17C0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x178C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1758, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1724, 2);
-    cMenuItem__cMenuItem((char*)self + 0x16F0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x16BC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1688, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1654, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1620, 2);
-    cMenuItem__cMenuItem((char*)self + 0x15EC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x15B8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1584, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1550, 2);
-    cMenuItem__cMenuItem((char*)self + 0x151C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14E8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14B4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1498, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1474, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1450, 2);
-    cMenuItem__cMenuItem((char*)self + 0x142C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1408, 2);
-    dtorSubMenuItem_24E388((char*)self + 0xE58);
-    cMenuItem__cMenuItem((char*)self + 0xE3C, 2);
-    cMenuItem__cMenuItem((char*)self + 0xE18, 2);
-    cMenuItem__cMenuItem((char*)self + 0xDF4, 2);
-    cMenuItem__cMenuItem((char*)self + 0xDD0, 2);
-    cMenuItem__cMenuItem((char*)self + 0xDAC, 2);
-    dtorSubMenuItem_24E388((char*)self + 0x7FC);
-    cMenuItem__cMenuItem((char*)self + 0x7C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x794, 2);
-    cMenuItem__cMenuItem((char*)self + 0x760, 2);
-    cMenuItem__cMenuItem((char*)self + 0x72C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x6F8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x6C4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x690, 2);
-    cMenuItem__cMenuItem((char*)self + 0x65C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x628, 2);
-    cMenuItem__cMenuItem((char*)self + 0x5F4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x5C0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x58C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x558, 2);
-    cMenuItem__cMenuItem((char*)self + 0x524, 2);
-    cMenuItem__cMenuItem((char*)self + 0x4F0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x4BC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x488, 2);
-    cMenuItem__cMenuItem((char*)self + 0x454, 2);
-    cMenuItem__cMenuItem((char*)self + 0x420, 2);
-    cMenuItem__cMenuItem((char*)self + 0x3EC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x3B8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x384, 2);
-    cMenuItem__cMenuItem((char*)self + 0x350, 2);
-    cMenuItem__cMenuItem((char*)self + 0x31C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2EC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2BC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x28C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x258, 2);
-    cMenuItem__cMenuItem((char*)self + 0x224, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1F4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->CrystalTintMaxItem.TitleItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalTintMaxItem.Blue, 2);
+    cMenuItem__cMenuItem(&self->CrystalTintMaxItem.Green, 2);
+    cMenuItem__cMenuItem(&self->CrystalTintMaxItem.Red, 2);
+    cMenuItem__cMenuItem(&self->CrystalTintMaxItem.Alpha, 2);
+    dtorSubMenuItem_24E388(&self->CrystalTintMaxItem);
+    cMenuItem__cMenuItem(&self->CrystalTintMinItem.TitleItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalTintMinItem.Blue, 2);
+    cMenuItem__cMenuItem(&self->CrystalTintMinItem.Green, 2);
+    cMenuItem__cMenuItem(&self->CrystalTintMinItem.Red, 2);
+    cMenuItem__cMenuItem(&self->CrystalTintMinItem.Alpha, 2);
+    dtorSubMenuItem_24E388(&self->CrystalTintMinItem);
+    cMenuItem__cMenuItem(&self->CrystalMaxRotationChangeItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalMaxVelocityItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalMaxPushOffSpeedItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalMinPushOffSpeedItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalMaxSizeGrowthItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalMinSizeGrowthItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalMaxJiggleTimeItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalMinJiggleTimeItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalMaxVelocityJiggleYItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalMinVelocityJiggleYItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalMaxVelocityJiggleXItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalMinVelocityJiggleXItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalMaxWidthHeightDifferenceItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalMaxSizeItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalMinSizeItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalMaxLifeSpanItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalMinLifeSpanItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalGroupSpacingYItem, 2);
+    cMenuItem__cMenuItem(&self->CrystalGroupSpacingXItem, 2);
+    cMenuItem__cMenuItem(&self->DropTintMaxItem.TitleItem, 2);
+    cMenuItem__cMenuItem(&self->DropTintMaxItem.Blue, 2);
+    cMenuItem__cMenuItem(&self->DropTintMaxItem.Green, 2);
+    cMenuItem__cMenuItem(&self->DropTintMaxItem.Red, 2);
+    cMenuItem__cMenuItem(&self->DropTintMaxItem.Alpha, 2);
+    dtorSubMenuItem_24E388(&self->DropTintMaxItem);
+    cMenuItem__cMenuItem(&self->DropTintMinItem.TitleItem, 2);
+    cMenuItem__cMenuItem(&self->DropTintMinItem.Blue, 2);
+    cMenuItem__cMenuItem(&self->DropTintMinItem.Green, 2);
+    cMenuItem__cMenuItem(&self->DropTintMinItem.Red, 2);
+    cMenuItem__cMenuItem(&self->DropTintMinItem.Alpha, 2);
+    dtorSubMenuItem_24E388(&self->DropTintMinItem);
+    cMenuItem__cMenuItem(&self->DropMaxRotationChangeItem, 2);
+    cMenuItem__cMenuItem(&self->DropMaxVelocityUsageItem, 2);
+    cMenuItem__cMenuItem(&self->DropMinVelocityUsageItem, 2);
+    cMenuItem__cMenuItem(&self->DropMaxVelocityItem, 2);
+    cMenuItem__cMenuItem(&self->DropMaxPushOffSpeedItem, 2);
+    cMenuItem__cMenuItem(&self->DropMinPushOffSpeedItem, 2);
+    cMenuItem__cMenuItem(&self->DropMaxSizeGrowthItem, 2);
+    cMenuItem__cMenuItem(&self->DropMinSizeGrowthItem, 2);
+    cMenuItem__cMenuItem(&self->DropMaxVelocityJiggleYItem, 2);
+    cMenuItem__cMenuItem(&self->DropMinVelocityJiggleYItem, 2);
+    cMenuItem__cMenuItem(&self->DropMaxVelocityJiggleXItem, 2);
+    cMenuItem__cMenuItem(&self->DropMinVelocityJiggleXItem, 2);
+    cMenuItem__cMenuItem(&self->DropMaxWidthHeightDifferenceItem, 2);
+    cMenuItem__cMenuItem(&self->DropMaxSizeItem, 2);
+    cMenuItem__cMenuItem(&self->DropMinSizeItem, 2);
+    cMenuItem__cMenuItem(&self->DropMaxLifeSpanItem, 2);
+    cMenuItem__cMenuItem(&self->DropMinLifeSpanItem, 2);
+    cMenuItem__cMenuItem(&self->MinVelocityForPushoffItem, 2);
+    cMenuItem__cMenuItem(&self->SnowfallMultiplierItem, 2);
+    cMenuItem__cMenuItem(&self->LowestSnowfallAmountItem, 2);
+    cMenuItem__cMenuItem(&self->ImpactMultiplierItem, 2);
+    cMenuItem__cMenuItem(&self->MinimumSnowfallForImpactsItem, 2);
+    cMenuItem__cMenuItem(&self->LowestImpactItensityItem, 2);
+    cMenuItem__cMenuItem(&self->FarthestImpactDistanceItem, 2);
+    cMenuItem__cMenuItem(&self->MaxSpawnPerCrystalItem, 2);
+    cMenuItem__cMenuItem(&self->IceCrystalMaxGroupingItem, 2);
+    cMenuItem__cMenuItem(&self->IceCrystalMinGroupingItem, 2);
+    cMenuItem__cMenuItem(&self->PercentageIceCrystalSpawnChanceItem, 2);
+    cMenuItem__cMenuItem(&self->PercentageIceCrystalItem, 2);
+    cMenuItem__cMenuItem(&self->NumIceCrystalsItem, 2);
+    cMenuItem__cMenuItem(&self->NumDropsItem, 2);
+    cMenuItem__cMenuItem(&self->RenderItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -2594,26 +2595,26 @@ extern "C" void cMenu__cMenu(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cPathArrowMenu__cPathArrowMenu(void* self, int flags)
+extern "C" void cPathArrowMenu__cPathArrowMenu(cPathArrowMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x458, 2);
-    cMenuItem__cMenuItem((char*)self + 0x428, 2);
-    cMenuItem__cMenuItem((char*)self + 0x3F4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x3C0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x38C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x35C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x32C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2FC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2CC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x298, 2);
-    cMenuItem__cMenuItem((char*)self + 0x264, 2);
-    cMenuItem__cMenuItem((char*)self + 0x230, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1FC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->MaxTickItem, 2);
+    cMenuItem__cMenuItem(&self->PathIdItem, 2);
+    cMenuItem__cMenuItem(&self->DistanceItem, 2);
+    cMenuItem__cMenuItem(&self->DrawSpeedItem, 2);
+    cMenuItem__cMenuItem(&self->MoveSpeedItem, 2);
+    cMenuItem__cMenuItem(&self->AItem, 2);
+    cMenuItem__cMenuItem(&self->BItem, 2);
+    cMenuItem__cMenuItem(&self->GItem, 2);
+    cMenuItem__cMenuItem(&self->RItem, 2);
+    cMenuItem__cMenuItem(&self->ScaleHeightItem, 2);
+    cMenuItem__cMenuItem(&self->ScaleRearLengthItem, 2);
+    cMenuItem__cMenuItem(&self->ScaleFowardLengthItem, 2);
+    cMenuItem__cMenuItem(&self->ScaleRearWidthItem, 2);
+    cMenuItem__cMenuItem(&self->ScaleMiddleWidthItem, 2);
+    cMenuItem__cMenuItem(&self->ScaleForwardWidthItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -2638,136 +2639,143 @@ struct sSlot_E8D8 {
 
 extern "C" void cMenuItem__cMenuItem(void* p, int flags);
 extern "C" void cMenu__cMenu(void* self, int flags);
-extern "C" void* cRenderTogglesMenu_cRenderTogglesMenu(void* self);
-extern "C" void cRenderTogglesMenu__cRenderTogglesMenu(void* self, int flags);
-extern "C" void* cVisualEffectsTestMenu_cVisualEffectsTestMenu(void* self);
-extern "C" void cVisualEffectsTestMenu__cVisualEffectsTestMenu(void* self, int flags);
-extern "C" void* cLightGlowMenu_cLightGlowMenu(void* self);
-extern "C" void cLightGlowMenu__cLightGlowMenu(void* self, int flags);
-extern "C" void* cPlantsMenu_cPlantsMenu(void* self);
-extern "C" void* cDepthFogMenu_cDepthFogMenu(void* self);
-extern "C" void cDepthFogMenu__cDepthFogMenu(void* self, int flags);
-extern "C" void* cHeightFogMenu_cHeightFogMenu(void* self);
-extern "C" void* cDetailSystemMenu_cDetailSystemMenu(void* self);
-extern "C" void* cScreenTintMenu_cScreenTintMenu(void* self);
-extern "C" void cScreenTintMenu__cScreenTintMenu(void* self, int flags);
-extern "C" void* cShadowMenu_cShadowMenu(void* self);
-extern "C" void* cSnowSurfaceMenu_cSnowSurfaceMenu(void* self);
-extern "C" void* cBoardTrailMenu_cBoardTrailMenu(void* self);
-extern "C" void cBoardTrailMenu__cBoardTrailMenu(void* self, int flags);
-extern "C" void* cFlagsMenu_cFlagsMenu(void* self);
-extern "C" void* cPowerUpFXTogglesMenu_cPowerUpFXTogglesMenu(void* self);
-extern "C" void cPowerUpFXTogglesMenu__cPowerUpFXTogglesMenu(void* self, int flags);
-extern "C" void* cSnowfallTogglesMenu_cSnowfallTogglesMenu(void* self);
-extern "C" void cSnowfallTogglesMenu__cSnowfallTogglesMenu(void* self, int flags);
-extern "C" void* cSplashTogglesMenu_cSplashTogglesMenu(void* self);
-extern "C" void cSplashTogglesMenu__cSplashTogglesMenu(void* self, int flags);
-extern "C" void* cTubeMenu_cTubeMenu(void* self);
-extern "C" void* cPathArrowMenu_cPathArrowMenu(void* self);
-extern "C" void cPathArrowMenu__cPathArrowMenu(void* self, int flags);
+extern "C" void* cRenderTogglesMenu_cRenderTogglesMenu(cRenderTogglesMenu* self);
+extern "C" void cRenderTogglesMenu__cRenderTogglesMenu(cRenderTogglesMenu* self, int flags);
+extern "C" void* cVisualEffectsTestMenu_cVisualEffectsTestMenu(cVisualEffectsTestMenu* self);
+extern "C" void cVisualEffectsTestMenu__cVisualEffectsTestMenu(cVisualEffectsTestMenu* self, int flags);
+extern "C" void* cLightGlowMenu_cLightGlowMenu(cLightGlowMenu* self);
+extern "C" void cLightGlowMenu__cLightGlowMenu(cLightGlowMenu* self, int flags);
+extern "C" void* cPlantsMenu_cPlantsMenu(cPlantsMenu* self);
+extern "C" void* cDepthFogMenu_cDepthFogMenu(cDepthFogMenu* self);
+extern "C" void cDepthFogMenu__cDepthFogMenu(cDepthFogMenu* self, int flags);
+extern "C" void* cHeightFogMenu_cHeightFogMenu(cHeightFogMenu* self);
+extern "C" void* cDetailSystemMenu_cDetailSystemMenu(cDetailSystemMenu* self);
+extern "C" void* cScreenTintMenu_cScreenTintMenu(cScreenTintMenu* self);
+extern "C" void cScreenTintMenu__cScreenTintMenu(cScreenTintMenu* self, int flags);
+extern "C" void* cShadowMenu_cShadowMenu(cShadowMenu* self);
+extern "C" void* cSnowSurfaceMenu_cSnowSurfaceMenu(cSnowSurfaceMenu* self);
+extern "C" void* cBoardTrailMenu_cBoardTrailMenu(cBoardTrailMenu* self);
+extern "C" void cBoardTrailMenu__cBoardTrailMenu(cBoardTrailMenu* self, int flags);
+extern "C" void* cFlagsMenu_cFlagsMenu(cFlagsMenu* self);
+extern "C" void* cPowerUpFXTogglesMenu_cPowerUpFXTogglesMenu(cPowerUpFXTogglesMenu* self);
+extern "C" void cPowerUpFXTogglesMenu__cPowerUpFXTogglesMenu(cPowerUpFXTogglesMenu* self, int flags);
+extern "C" void* cSnowfallTogglesMenu_cSnowfallTogglesMenu(cSnowfallTogglesMenu* self);
+extern "C" void cSnowfallTogglesMenu__cSnowfallTogglesMenu(cSnowfallTogglesMenu* self, int flags);
+extern "C" void* cSplashTogglesMenu_cSplashTogglesMenu(cSplashTogglesMenu* self);
+extern "C" void cSplashTogglesMenu__cSplashTogglesMenu(cSplashTogglesMenu* self, int flags);
+extern "C" void* cTubeMenu_cTubeMenu(cTubeMenu* self);
+extern "C" void* cPathArrowMenu_cPathArrowMenu(cPathArrowMenu* self);
+extern "C" void cPathArrowMenu__cPathArrowMenu(cPathArrowMenu* self, int flags);
 
 // cPlantsMenu's destructor, inlined here (no out-of-line copy is called).
-static inline void cPlantsMenu_dtor(void* self)
+static inline void cPlantsMenu_dtor(void* vself)
 {
-    cMenuItem__cMenuItem((char*)self + 0x398, 2);
-    cMenuItem__cMenuItem((char*)self + 0x364, 2);
-    cMenuItem__cMenuItem((char*)self + 0x330, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2FC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x298, 2);
-    cMenuItem__cMenuItem((char*)self + 0x264, 2);
-    cMenuItem__cMenuItem((char*)self + 0x230, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1FC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cPlantsMenu* self = (cPlantsMenu*)vself;
+    cMenuItem__cMenuItem(&self->BranchDirectionItem, 2);
+    cMenuItem__cMenuItem(&self->SwayDirectionItem, 2);
+    cMenuItem__cMenuItem(&self->BranchFrequency2Item, 2);
+    cMenuItem__cMenuItem(&self->BranchFrequencyItem, 2);
+    cMenuItem__cMenuItem(&self->RotationFrequencyItem, 2);
+    cMenuItem__cMenuItem(&self->SwayFrequencyItem, 2);
+    cMenuItem__cMenuItem(&self->PositionScaleItem, 2);
+    cMenuItem__cMenuItem(&self->RotationAmplitudeItem, 2);
+    cMenuItem__cMenuItem(&self->BranchAmplitudeItem, 2);
+    cMenuItem__cMenuItem(&self->SwayOffsetItem, 2);
+    cMenuItem__cMenuItem(&self->SwayAmplitudeItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, 2);
 }
 
 // cHeightFogMenu's destructor, inlined here (no out-of-line copy is called).
-static inline void cHeightFogMenu_dtor(void* self)
+static inline void cHeightFogMenu_dtor(void* vself)
 {
-    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cHeightFogMenu* self = (cHeightFogMenu*)vself;
+    cMenuItem__cMenuItem(&self->ThicknessItem, 2);
+    cMenuItem__cMenuItem(&self->StartHeightItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, 2);
 }
 
 // cDetailSystemMenu's destructor, inlined here (no out-of-line copy is called).
-static inline void cDetailSystemMenu_dtor(void* self)
+static inline void cDetailSystemMenu_dtor(void* vself)
 {
-    cMenuItem__cMenuItem((char*)self + 0x334, 2);
-    cMenuItem__cMenuItem((char*)self + 0x300, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2CC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x298, 2);
-    cMenuItem__cMenuItem((char*)self + 0x264, 2);
-    cMenuItem__cMenuItem((char*)self + 0x230, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1FC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cDetailSystemMenu* self = (cDetailSystemMenu*)vself;
+    cMenuItem__cMenuItem(&self->XBoxMaxSizeItem, 2);
+    cMenuItem__cMenuItem(&self->XBoxMinSizeItem, 2);
+    cMenuItem__cMenuItem(&self->XBoxSizeItem, 2);
+    cMenuItem__cMenuItem(&self->XBoxNumSparklesItem, 2);
+    cMenuItem__cMenuItem(&self->PS2MaxSparkleSizeItem, 2);
+    cMenuItem__cMenuItem(&self->PS2MinSparkleSizeItem, 2);
+    cMenuItem__cMenuItem(&self->PS2SparkleSizeItem, 2);
+    cMenuItem__cMenuItem(&self->PS2SparkleCountItem, 2);
+    cMenuItem__cMenuItem(&self->SpinScaleItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, 2);
 }
 
 // cShadowMenu's destructor, inlined here (no out-of-line copy is called).
-static inline void cShadowMenu_dtor(void* self)
+static inline void cShadowMenu_dtor(void* vself)
 {
-    cMenuItem__cMenuItem((char*)self + 0x2FC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x294, 2);
-    cMenuItem__cMenuItem((char*)self + 0x260, 2);
-    cMenuItem__cMenuItem((char*)self + 0x22C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1F8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cShadowMenu* self = (cShadowMenu*)vself;
+    cMenuItem__cMenuItem(&self->EndUVItem, 2);
+    cMenuItem__cMenuItem(&self->StartUVItem, 2);
+    cMenuItem__cMenuItem(&self->IntensityItem, 2);
+    cMenuItem__cMenuItem(&self->LengthItem, 2);
+    cMenuItem__cMenuItem(&self->ShadowDirZItem, 2);
+    cMenuItem__cMenuItem(&self->ShadowDirYItem, 2);
+    cMenuItem__cMenuItem(&self->ShadowDirXItem, 2);
+    cMenuItem__cMenuItem(&self->ShowShadowPolysItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, 2);
 }
 
 // cSnowSurfaceMenu's destructor, inlined here (no out-of-line copy is called).
-static inline void cSnowSurfaceMenu_dtor(void* self)
+static inline void cSnowSurfaceMenu_dtor(void* vself)
 {
-    cMenuItem__cMenuItem((char*)self + 0x294, 2);
-    cMenuItem__cMenuItem((char*)self + 0x260, 2);
-    cMenuItem__cMenuItem((char*)self + 0x22C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1F8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cSnowSurfaceMenu* self = (cSnowSurfaceMenu*)vself;
+    cMenuItem__cMenuItem(&self->MaxColourScaleItem, 2);
+    cMenuItem__cMenuItem(&self->MinColourScaleItem, 2);
+    cMenuItem__cMenuItem(&self->NoiseItem, 2);
+    cMenuItem__cMenuItem(&self->BumpItem, 2);
+    cMenuItem__cMenuItem(&self->BaseItem, 2);
+    cMenuItem__cMenuItem(&self->EnablePatchReflectItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, 2);
 }
 
 // cFlagsMenu's destructor, inlined here (no out-of-line copy is called).
-static inline void cFlagsMenu_dtor(void* self)
+static inline void cFlagsMenu_dtor(void* vself)
 {
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cFlagsMenu* self = (cFlagsMenu*)vself;
+    cMenuItem__cMenuItem(&self->EnableRenderItem, 2);
+    cMenuItem__cMenuItem(&self->EnableUpdateItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, 2);
 }
 
 // cTubeMenu's destructor, inlined here (no out-of-line copy is called).
-static inline void cTubeMenu_dtor(void* self)
+static inline void cTubeMenu_dtor(void* vself)
 {
-    cMenuItem__cMenuItem((char*)self + 0x25C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x22C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1FC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cTubeMenu* self = (cTubeMenu*)vself;
+    cMenuItem__cMenuItem(&self->BItem, 2);
+    cMenuItem__cMenuItem(&self->GItem, 2);
+    cMenuItem__cMenuItem(&self->RItem, 2);
+    cMenuItem__cMenuItem(&self->ScaleHeightItem, 2);
+    cMenuItem__cMenuItem(&self->ScaleWidthItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, 2);
 }
 
@@ -2923,41 +2931,41 @@ extern "C" void __sti__visualeffectsmenu_cpp_impl(int init, int prio)
             new (&D_004A5048) sSlot_E8D8(11);
             new (&D_004A5050) sSlot_E8D8(12);
             new (&D_004A5058) sSlot_E8D8(13);
-            cRenderTogglesMenu_cRenderTogglesMenu(D_004C98E0);
-            cVisualEffectsTestMenu_cVisualEffectsTestMenu(D_004CA328);
-            cLightGlowMenu_cLightGlowMenu(D_004CA7C0);
-            cPlantsMenu_cPlantsMenu(D_004CAEF8);
-            cDepthFogMenu_cDepthFogMenu(D_004CB2C8);
-            cHeightFogMenu_cHeightFogMenu(D_004CBBE8);
-            cDetailSystemMenu_cDetailSystemMenu(D_004CBDE8);
-            cScreenTintMenu_cScreenTintMenu(D_004CC150);
-            cShadowMenu_cShadowMenu(D_004CCAB0);
-            cSnowSurfaceMenu_cSnowSurfaceMenu(D_004CCDE0);
-            cBoardTrailMenu_cBoardTrailMenu(D_004CD0A8);
-            cFlagsMenu_cFlagsMenu(D_004CD678);
-            cPowerUpFXTogglesMenu_cPowerUpFXTogglesMenu(D_004CD840);
-            cSnowfallTogglesMenu_cSnowfallTogglesMenu(D_004CDC88);
-            cSplashTogglesMenu_cSplashTogglesMenu(D_004CECA8);
-            cTubeMenu_cTubeMenu(D_004D11F0);
-            cPathArrowMenu_cPathArrowMenu(D_004D1480);
+            cRenderTogglesMenu_cRenderTogglesMenu((cRenderTogglesMenu*)D_004C98E0);
+            cVisualEffectsTestMenu_cVisualEffectsTestMenu((cVisualEffectsTestMenu*)D_004CA328);
+            cLightGlowMenu_cLightGlowMenu((cLightGlowMenu*)D_004CA7C0);
+            cPlantsMenu_cPlantsMenu((cPlantsMenu*)D_004CAEF8);
+            cDepthFogMenu_cDepthFogMenu((cDepthFogMenu*)D_004CB2C8);
+            cHeightFogMenu_cHeightFogMenu((cHeightFogMenu*)D_004CBBE8);
+            cDetailSystemMenu_cDetailSystemMenu((cDetailSystemMenu*)D_004CBDE8);
+            cScreenTintMenu_cScreenTintMenu((cScreenTintMenu*)D_004CC150);
+            cShadowMenu_cShadowMenu((cShadowMenu*)D_004CCAB0);
+            cSnowSurfaceMenu_cSnowSurfaceMenu((cSnowSurfaceMenu*)D_004CCDE0);
+            cBoardTrailMenu_cBoardTrailMenu((cBoardTrailMenu*)D_004CD0A8);
+            cFlagsMenu_cFlagsMenu((cFlagsMenu*)D_004CD678);
+            cPowerUpFXTogglesMenu_cPowerUpFXTogglesMenu((cPowerUpFXTogglesMenu*)D_004CD840);
+            cSnowfallTogglesMenu_cSnowfallTogglesMenu((cSnowfallTogglesMenu*)D_004CDC88);
+            cSplashTogglesMenu_cSplashTogglesMenu((cSplashTogglesMenu*)D_004CECA8);
+            cTubeMenu_cTubeMenu((cTubeMenu*)D_004D11F0);
+            cPathArrowMenu_cPathArrowMenu((cPathArrowMenu*)D_004D1480);
         } else {
-            cPathArrowMenu__cPathArrowMenu(D_004D1480, 2);
+            cPathArrowMenu__cPathArrowMenu((cPathArrowMenu*)D_004D1480, 2);
             cTubeMenu_dtor(D_004D11F0);
-            cSplashTogglesMenu__cSplashTogglesMenu(D_004CECA8, 2);
-            cSnowfallTogglesMenu__cSnowfallTogglesMenu(D_004CDC88, 2);
-            cPowerUpFXTogglesMenu__cPowerUpFXTogglesMenu(D_004CD840, 2);
+            cSplashTogglesMenu__cSplashTogglesMenu((cSplashTogglesMenu*)D_004CECA8, 2);
+            cSnowfallTogglesMenu__cSnowfallTogglesMenu((cSnowfallTogglesMenu*)D_004CDC88, 2);
+            cPowerUpFXTogglesMenu__cPowerUpFXTogglesMenu((cPowerUpFXTogglesMenu*)D_004CD840, 2);
             cFlagsMenu_dtor(D_004CD678);
-            cBoardTrailMenu__cBoardTrailMenu(D_004CD0A8, 2);
+            cBoardTrailMenu__cBoardTrailMenu((cBoardTrailMenu*)D_004CD0A8, 2);
             cSnowSurfaceMenu_dtor(D_004CCDE0);
             cShadowMenu_dtor(D_004CCAB0);
-            cScreenTintMenu__cScreenTintMenu(D_004CC150, 2);
+            cScreenTintMenu__cScreenTintMenu((cScreenTintMenu*)D_004CC150, 2);
             cDetailSystemMenu_dtor(D_004CBDE8);
             cHeightFogMenu_dtor(D_004CBBE8);
-            cDepthFogMenu__cDepthFogMenu(D_004CB2C8, 2);
+            cDepthFogMenu__cDepthFogMenu((cDepthFogMenu*)D_004CB2C8, 2);
             cPlantsMenu_dtor(D_004CAEF8);
-            cLightGlowMenu__cLightGlowMenu(D_004CA7C0, 2);
-            cVisualEffectsTestMenu__cVisualEffectsTestMenu(D_004CA328, 2);
-            cRenderTogglesMenu__cRenderTogglesMenu(D_004C98E0, 2);
+            cLightGlowMenu__cLightGlowMenu((cLightGlowMenu*)D_004CA7C0, 2);
+            cVisualEffectsTestMenu__cVisualEffectsTestMenu((cVisualEffectsTestMenu*)D_004CA328, 2);
+            cRenderTogglesMenu__cRenderTogglesMenu((cRenderTogglesMenu*)D_004C98E0, 2);
         }
     }
 }
@@ -2981,27 +2989,27 @@ extern "C" void cMenu__cMenu(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cVisualEffectsMainMenu__cVisualEffectsMainMenu(void* self, int flags)
+extern "C" void cVisualEffectsMainMenu__cVisualEffectsMainMenu(cVisualEffectsMainMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x324, 2);
-    cMenuItem__cMenuItem((char*)self + 0x308, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2EC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2D0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2B4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x298, 2);
-    cMenuItem__cMenuItem((char*)self + 0x27C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x260, 2);
-    cMenuItem__cMenuItem((char*)self + 0x244, 2);
-    cMenuItem__cMenuItem((char*)self + 0x228, 2);
-    cMenuItem__cMenuItem((char*)self + 0x20C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1F0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1D4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1B8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x19C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x180, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->PathArrowItem, 2);
+    cMenuItem__cMenuItem(&self->TubeItem, 2);
+    cMenuItem__cMenuItem(&self->SplashTogglesItem, 2);
+    cMenuItem__cMenuItem(&self->SnowfallTogglesItem, 2);
+    cMenuItem__cMenuItem(&self->PowerUpFXTogglesItem, 2);
+    cMenuItem__cMenuItem(&self->FlagsItem, 2);
+    cMenuItem__cMenuItem(&self->BoardTrailItem, 2);
+    cMenuItem__cMenuItem(&self->SnowSurfaceItem, 2);
+    cMenuItem__cMenuItem(&self->ShadowItem, 2);
+    cMenuItem__cMenuItem(&self->ScreenTintItem, 2);
+    cMenuItem__cMenuItem(&self->DetailSystemItem, 2);
+    cMenuItem__cMenuItem(&self->HeightFogItem, 2);
+    cMenuItem__cMenuItem(&self->DepthFogItem, 2);
+    cMenuItem__cMenuItem(&self->PlantsItem, 2);
+    cMenuItem__cMenuItem(&self->LightGlowItem, 2);
+    cMenuItem__cMenuItem(&self->VisualEffectsTestItem, 2);
+    cMenuItem__cMenuItem(&self->RenderTogglesItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -3085,22 +3093,22 @@ extern "C" void cMenu__cMenu(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cPlantsMenu__cPlantsMenu(void* self, int flags)
+extern "C" void cPlantsMenu__cPlantsMenu(cPlantsMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x398, 2);
-    cMenuItem__cMenuItem((char*)self + 0x364, 2);
-    cMenuItem__cMenuItem((char*)self + 0x330, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2FC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x298, 2);
-    cMenuItem__cMenuItem((char*)self + 0x264, 2);
-    cMenuItem__cMenuItem((char*)self + 0x230, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1FC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->BranchDirectionItem, 2);
+    cMenuItem__cMenuItem(&self->SwayDirectionItem, 2);
+    cMenuItem__cMenuItem(&self->BranchFrequency2Item, 2);
+    cMenuItem__cMenuItem(&self->BranchFrequencyItem, 2);
+    cMenuItem__cMenuItem(&self->RotationFrequencyItem, 2);
+    cMenuItem__cMenuItem(&self->SwayFrequencyItem, 2);
+    cMenuItem__cMenuItem(&self->PositionScaleItem, 2);
+    cMenuItem__cMenuItem(&self->RotationAmplitudeItem, 2);
+    cMenuItem__cMenuItem(&self->BranchAmplitudeItem, 2);
+    cMenuItem__cMenuItem(&self->SwayOffsetItem, 2);
+    cMenuItem__cMenuItem(&self->SwayAmplitudeItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -3215,13 +3223,13 @@ extern "C" void cMenu__cMenu(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cHeightFogMenu__cHeightFogMenu(void* self, int flags)
+extern "C" void cHeightFogMenu__cHeightFogMenu(cHeightFogMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->ThicknessItem, 2);
+    cMenuItem__cMenuItem(&self->StartHeightItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -3275,20 +3283,20 @@ extern "C" void cMenu__cMenu(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cDetailSystemMenu__cDetailSystemMenu(void* self, int flags)
+extern "C" void cDetailSystemMenu__cDetailSystemMenu(cDetailSystemMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x334, 2);
-    cMenuItem__cMenuItem((char*)self + 0x300, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2CC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x298, 2);
-    cMenuItem__cMenuItem((char*)self + 0x264, 2);
-    cMenuItem__cMenuItem((char*)self + 0x230, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1FC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->XBoxMaxSizeItem, 2);
+    cMenuItem__cMenuItem(&self->XBoxMinSizeItem, 2);
+    cMenuItem__cMenuItem(&self->XBoxSizeItem, 2);
+    cMenuItem__cMenuItem(&self->XBoxNumSparklesItem, 2);
+    cMenuItem__cMenuItem(&self->PS2MaxSparkleSizeItem, 2);
+    cMenuItem__cMenuItem(&self->PS2MinSparkleSizeItem, 2);
+    cMenuItem__cMenuItem(&self->PS2SparkleSizeItem, 2);
+    cMenuItem__cMenuItem(&self->PS2SparkleCountItem, 2);
+    cMenuItem__cMenuItem(&self->SpinScaleItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -3341,19 +3349,19 @@ extern "C" void cMenu__cMenu(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cShellRendererMenu__cShellRendererMenu(void* self, int flags)
+extern "C" void cShellRendererMenu__cShellRendererMenu(cShellRendererMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x2EC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2B8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x284, 2);
-    cMenuItem__cMenuItem((char*)self + 0x254, 2);
-    cMenuItem__cMenuItem((char*)self + 0x224, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1F4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->MaxShellsItem, 2);
+    cMenuItem__cMenuItem(&self->DepthBrightnessItem, 2);
+    cMenuItem__cMenuItem(&self->DepthScaleItem, 2);
+    cMenuItem__cMenuItem(&self->DistScaleItem, 2);
+    cMenuItem__cMenuItem(&self->FarPlaneItem, 2);
+    cMenuItem__cMenuItem(&self->NearPlaneItem, 2);
+    cMenuItem__cMenuItem(&self->ShellTextureIdItem, 2);
+    cMenuItem__cMenuItem(&self->ModelTextureIdItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -3437,19 +3445,19 @@ extern "C" void cMenu__cMenu(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cShadowMenu__cShadowMenu(void* self, int flags)
+extern "C" void cShadowMenu__cShadowMenu(cShadowMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x2FC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x294, 2);
-    cMenuItem__cMenuItem((char*)self + 0x260, 2);
-    cMenuItem__cMenuItem((char*)self + 0x22C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1F8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->EndUVItem, 2);
+    cMenuItem__cMenuItem(&self->StartUVItem, 2);
+    cMenuItem__cMenuItem(&self->IntensityItem, 2);
+    cMenuItem__cMenuItem(&self->LengthItem, 2);
+    cMenuItem__cMenuItem(&self->ShadowDirZItem, 2);
+    cMenuItem__cMenuItem(&self->ShadowDirYItem, 2);
+    cMenuItem__cMenuItem(&self->ShadowDirXItem, 2);
+    cMenuItem__cMenuItem(&self->ShowShadowPolysItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -3502,17 +3510,17 @@ extern "C" void cMenu__cMenu(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cSnowSurfaceMenu__cSnowSurfaceMenu(void* self, int flags)
+extern "C" void cSnowSurfaceMenu__cSnowSurfaceMenu(cSnowSurfaceMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x294, 2);
-    cMenuItem__cMenuItem((char*)self + 0x260, 2);
-    cMenuItem__cMenuItem((char*)self + 0x22C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1F8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->MaxColourScaleItem, 2);
+    cMenuItem__cMenuItem(&self->MinColourScaleItem, 2);
+    cMenuItem__cMenuItem(&self->NoiseItem, 2);
+    cMenuItem__cMenuItem(&self->BumpItem, 2);
+    cMenuItem__cMenuItem(&self->BaseItem, 2);
+    cMenuItem__cMenuItem(&self->EnablePatchReflectItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -3596,12 +3604,12 @@ extern "C" void cMenu__cMenu(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cFlagsMenu__cFlagsMenu(void* self, int flags)
+extern "C" void cFlagsMenu__cFlagsMenu(cFlagsMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->EnableRenderItem, 2);
+    cMenuItem__cMenuItem(&self->EnableUpdateItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -3741,16 +3749,16 @@ INCLUDE_ASM("main/debugmenu", cTubeMenu__cTubeMenu);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cTubeMenu__cTubeMenu(void* self, int flags)
+extern "C" void cTubeMenu__cTubeMenu(cTubeMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x25C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x22C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1FC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->BItem, 2);
+    cMenuItem__cMenuItem(&self->GItem, 2);
+    cMenuItem__cMenuItem(&self->RItem, 2);
+    cMenuItem__cMenuItem(&self->ScaleHeightItem, 2);
+    cMenuItem__cMenuItem(&self->ScaleWidthItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -3941,79 +3949,79 @@ extern float D_004A3AAC;
  *
  * @return @p self
  */
-extern "C" void* cAvalancheMenu_cAvalancheMenu(void* self)
+extern "C" void* cAvalancheMenu_cAvalancheMenu(cAvalancheMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cAvalancheMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_Avalanche_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x164, 0, &cAvalanche_m_Enable, 0, 1, str_Enable_b);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x194, 1, &cAvalanche_m_Recalc, -1, 1, str_Recalc);
-    cFloatMenuItem_ctor((char*)self + 0x1C4, 2, &D_004A3A38, 0.0f, 4.0f, str_Brightness);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x1F8, 3, &D_004A3A3C, 0, 1, str_Use_Light_Map_Colour);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x228, 4, &D_004A3A40, 0, 1, str_Use_End_Colour);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x258, 5, &D_004A3A44, 0, 1, str_Square_Lerp_Value);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x288, 6, &D_004A3A48, 0, 1, str_Save);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x2B8, 7, &D_004A3A4C, 0, 1, str_Load);
-    cFloatMenuItem_ctor((char*)self + 0x2E8, 8, &D_004A3A50, 0.0f, 120.0f, str_Min_Impact_Velocity);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x31C, 9, &D_004A3A54, 0, 1, str_Render_Emitters);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x34C, 10, &D_004A3A58, 0, 0x3F, str_Render_N_Lines);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x37C, 11, &cAvalanche_m_Trigger, -1, 1, str_Trigger_Avalanche);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x3AC, 0xC, &cAvalanche_m_Update, -1, 1, str_Update);
-    cFloatMenuItem_ctor((char*)self + 0x3DC, 13, &cAvalanche_m_UpdateTimeStep, 0.0f, 1.0f, str_Update_Time_Step);
-    cFloatMenuItem_ctor((char*)self + 0x410, 0xE, &cAvalanche_m_RotationalVelocityScale, 0.0f, 1000.0f, str_Rotational_Velocity_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x444, 0xF, &cAvalanche_m_RandomBounceChance, 0.0f, 1.0f, str_Random_Bounce_Chance);
-    cFloatMenuItem_ctor((char*)self + 0x478, 0x10, &cAvalanche_m_RandomBounceVelocityScaleXY, 0.0f, 1000.0f, str_Random_Bounce_Velocity_Scale_XY);
-    cFloatMenuItem_ctor((char*)self + 0x4AC, 17, &cAvalanche_m_RandomBounceVelocityScaleZ, 0.0f, 1000.0f, str_Random_Bounce_Velocity_Scale_Z);
-    cFloatMenuItem_ctor((char*)self + 0x4E0, 18, &cAvalanche_m_RandomBounceVelocityScale, 1.0f, 1000.0f, str_Random_Bounce_Velocity_Scale);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x514, 19, &cAvalanche_m_AvalancheId, 0, 1000, str_Avalanche_Id);
-    cFloatMenuItem_ctor((char*)self + 0x544, 20, &cAvalanche_m_Gravity, 0.0f, 127.0f, str_Gravity);
-    cFloatMenuItem_ctor((char*)self + 0x578, 21, &D_004A3A84, 0.0f, 1.0f, str_Velocity_Damping);
-    cFloatMenuItem_ctor((char*)self + 0x5AC, 22, &cAvalanche_m_NormalVelocityScale, 0.0f, 1.0f, str_Normal_Velocity_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x5E0, 23, &D_004A3A8C, 0.0f, 1.0f, str_Forward_Velocity_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x614, 0x18, &D_004A3A90, 0.0f, 1.0f, str_Normal_To_Forward_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x648, 25, &D_004A3A94, 1.0f, 119.0f, str_Max_Velocity);
-    cFloatMenuItem_ctor((char*)self + 0x67C, 26, &D_004A3A98, 0.0f, 1.0f, str_Damping);
-    cIntMenuItem_cIntMenuItem((char*)self + 0x6B0, 27, &D_004A3A9C, 1, 0x400, str_Num_Particles);
-    cFloatMenuItem_ctor((char*)self + 0x6E0, 0x1C, &D_004A3AA0, 1.0f, 1000.0f, str_Default_Size);
-    cFloatMenuItem_ctor((char*)self + 0x714, 29, &D_004A3AA4, 0.0f, 10.0f, str_Patch_Colour_Scale);
-    cFloatMenuItem_ctor((char*)self + 0x748, 0x1E, &D_004A3AA8, 0.0f, 10.0f, str_Patch_Colour_Scale_2);
-    cFloatMenuItem_ctor((char*)self + 0x77C, 0x1F, &D_004A3AAC, -1.0f, 1000.0f, str_Seed_b);
-    cMenu_addItem(self, (char*)self + 0x130, -1);
-    cMenu_addItem(self, (char*)self + 0x14C, -1);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    cMenu_addItem(self, (char*)self + 0x194, -1);
-    cMenu_addItem(self, (char*)self + 0x1C4, -1);
-    cMenu_addItem(self, (char*)self + 0x1F8, -1);
-    cMenu_addItem(self, (char*)self + 0x228, -1);
-    cMenu_addItem(self, (char*)self + 0x258, -1);
-    cMenu_addItem(self, (char*)self + 0x288, -1);
-    cMenu_addItem(self, (char*)self + 0x2B8, -1);
-    cMenu_addItem(self, (char*)self + 0x2E8, -1);
-    cMenu_addItem(self, (char*)self + 0x31C, -1);
-    cMenu_addItem(self, (char*)self + 0x34C, -1);
-    cMenu_addItem(self, (char*)self + 0x37C, -1);
-    cMenu_addItem(self, (char*)self + 0x3AC, -1);
-    cMenu_addItem(self, (char*)self + 0x3DC, -1);
-    cMenu_addItem(self, (char*)self + 0x410, -1);
-    cMenu_addItem(self, (char*)self + 0x444, -1);
-    cMenu_addItem(self, (char*)self + 0x478, -1);
-    cMenu_addItem(self, (char*)self + 0x4AC, -1);
-    cMenu_addItem(self, (char*)self + 0x4E0, -1);
-    cMenu_addItem(self, (char*)self + 0x514, -1);
-    cMenu_addItem(self, (char*)self + 0x544, -1);
-    cMenu_addItem(self, (char*)self + 0x578, -1);
-    cMenu_addItem(self, (char*)self + 0x5AC, -1);
-    cMenu_addItem(self, (char*)self + 0x5E0, -1);
-    cMenu_addItem(self, (char*)self + 0x614, -1);
-    cMenu_addItem(self, (char*)self + 0x648, -1);
-    cMenu_addItem(self, (char*)self + 0x67C, -1);
-    cMenu_addItem(self, (char*)self + 0x6B0, -1);
-    cMenu_addItem(self, (char*)self + 0x6E0, -1);
-    cMenu_addItem(self, (char*)self + 0x714, -1);
-    cMenu_addItem(self, (char*)self + 0x748, -1);
-    cMenu_addItem(self, (char*)self + 0x77C, -1);
-    return self;
+    self->mVtbl = cAvalancheMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_Avalanche_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cIntMenuItem_cIntMenuItem(&self->EnableItem, 0, &cAvalanche_m_Enable, 0, 1, str_Enable_b);
+    cIntMenuItem_cIntMenuItem(&self->RecalcItem, 1, &cAvalanche_m_Recalc, -1, 1, str_Recalc);
+    cFloatMenuItem_ctor(&self->BrightnessItem, 2, &D_004A3A38, 0.0f, 4.0f, str_Brightness);
+    cIntMenuItem_cIntMenuItem(&self->UseLightMapColourItem, 3, &D_004A3A3C, 0, 1, str_Use_Light_Map_Colour);
+    cIntMenuItem_cIntMenuItem(&self->UseEndColourItem, 4, &D_004A3A40, 0, 1, str_Use_End_Colour);
+    cIntMenuItem_cIntMenuItem(&self->SquareLerpItem, 5, &D_004A3A44, 0, 1, str_Square_Lerp_Value);
+    cIntMenuItem_cIntMenuItem(&self->SaveItem, 6, &D_004A3A48, 0, 1, str_Save);
+    cIntMenuItem_cIntMenuItem(&self->LoadItem, 7, &D_004A3A4C, 0, 1, str_Load);
+    cFloatMenuItem_ctor(&self->MinImpactVelocityItem, 8, &D_004A3A50, 0.0f, 120.0f, str_Min_Impact_Velocity);
+    cIntMenuItem_cIntMenuItem(&self->RenderEmittersItem, 9, &D_004A3A54, 0, 1, str_Render_Emitters);
+    cIntMenuItem_cIntMenuItem(&self->RenderLinesItem, 10, &D_004A3A58, 0, 0x3F, str_Render_N_Lines);
+    cIntMenuItem_cIntMenuItem(&self->TriggerItem, 11, &cAvalanche_m_Trigger, -1, 1, str_Trigger_Avalanche);
+    cIntMenuItem_cIntMenuItem(&self->UpdateItem, 0xC, &cAvalanche_m_Update, -1, 1, str_Update);
+    cFloatMenuItem_ctor(&self->UpdateTimeStepItem, 13, &cAvalanche_m_UpdateTimeStep, 0.0f, 1.0f, str_Update_Time_Step);
+    cFloatMenuItem_ctor(&self->RotationalVelocityScaleItem, 0xE, &cAvalanche_m_RotationalVelocityScale, 0.0f, 1000.0f, str_Rotational_Velocity_Scale);
+    cFloatMenuItem_ctor(&self->RandomBounceChanceItem, 0xF, &cAvalanche_m_RandomBounceChance, 0.0f, 1.0f, str_Random_Bounce_Chance);
+    cFloatMenuItem_ctor(&self->RandomBounceVelocityScaleXYItem, 0x10, &cAvalanche_m_RandomBounceVelocityScaleXY, 0.0f, 1000.0f, str_Random_Bounce_Velocity_Scale_XY);
+    cFloatMenuItem_ctor(&self->RandomBounceVelocityScaleZItem, 17, &cAvalanche_m_RandomBounceVelocityScaleZ, 0.0f, 1000.0f, str_Random_Bounce_Velocity_Scale_Z);
+    cFloatMenuItem_ctor(&self->RandomBounceVelocityScaleItem, 18, &cAvalanche_m_RandomBounceVelocityScale, 1.0f, 1000.0f, str_Random_Bounce_Velocity_Scale);
+    cIntMenuItem_cIntMenuItem(&self->AvalancheIdItem, 19, &cAvalanche_m_AvalancheId, 0, 1000, str_Avalanche_Id);
+    cFloatMenuItem_ctor(&self->GravityItem, 20, &cAvalanche_m_Gravity, 0.0f, 127.0f, str_Gravity);
+    cFloatMenuItem_ctor(&self->VelocityDampingItem, 21, &D_004A3A84, 0.0f, 1.0f, str_Velocity_Damping);
+    cFloatMenuItem_ctor(&self->NormalVelocityScaleItem, 22, &cAvalanche_m_NormalVelocityScale, 0.0f, 1.0f, str_Normal_Velocity_Scale);
+    cFloatMenuItem_ctor(&self->ForwardVelocityScaleItem, 23, &D_004A3A8C, 0.0f, 1.0f, str_Forward_Velocity_Scale);
+    cFloatMenuItem_ctor(&self->NormalToForwardScaleItem, 0x18, &D_004A3A90, 0.0f, 1.0f, str_Normal_To_Forward_Scale);
+    cFloatMenuItem_ctor(&self->MaxVelocityItem, 25, &D_004A3A94, 1.0f, 119.0f, str_Max_Velocity);
+    cFloatMenuItem_ctor(&self->DampingItem, 26, &D_004A3A98, 0.0f, 1.0f, str_Damping);
+    cIntMenuItem_cIntMenuItem(&self->NumParticlesItem, 27, &D_004A3A9C, 1, 0x400, str_Num_Particles);
+    cFloatMenuItem_ctor(&self->DefaultSizeItem, 0x1C, &D_004A3AA0, 1.0f, 1000.0f, str_Default_Size);
+    cFloatMenuItem_ctor(&self->PatchColourScaleItem, 29, &D_004A3AA4, 0.0f, 10.0f, str_Patch_Colour_Scale);
+    cFloatMenuItem_ctor(&self->PatchColourScale2Item, 0x1E, &D_004A3AA8, 0.0f, 10.0f, str_Patch_Colour_Scale_2);
+    cFloatMenuItem_ctor(&self->SeedItem, 0x1F, &D_004A3AAC, -1.0f, 1000.0f, str_Seed_b);
+    cMenu_addItem(self, &self->TitleItem, -1);
+    cMenu_addItem(self, &self->SpaceItem, -1);
+    cMenu_addItem(self, &self->EnableItem, -1);
+    cMenu_addItem(self, &self->RecalcItem, -1);
+    cMenu_addItem(self, &self->BrightnessItem, -1);
+    cMenu_addItem(self, &self->UseLightMapColourItem, -1);
+    cMenu_addItem(self, &self->UseEndColourItem, -1);
+    cMenu_addItem(self, &self->SquareLerpItem, -1);
+    cMenu_addItem(self, &self->SaveItem, -1);
+    cMenu_addItem(self, &self->LoadItem, -1);
+    cMenu_addItem(self, &self->MinImpactVelocityItem, -1);
+    cMenu_addItem(self, &self->RenderEmittersItem, -1);
+    cMenu_addItem(self, &self->RenderLinesItem, -1);
+    cMenu_addItem(self, &self->TriggerItem, -1);
+    cMenu_addItem(self, &self->UpdateItem, -1);
+    cMenu_addItem(self, &self->UpdateTimeStepItem, -1);
+    cMenu_addItem(self, &self->RotationalVelocityScaleItem, -1);
+    cMenu_addItem(self, &self->RandomBounceChanceItem, -1);
+    cMenu_addItem(self, &self->RandomBounceVelocityScaleXYItem, -1);
+    cMenu_addItem(self, &self->RandomBounceVelocityScaleZItem, -1);
+    cMenu_addItem(self, &self->RandomBounceVelocityScaleItem, -1);
+    cMenu_addItem(self, &self->AvalancheIdItem, -1);
+    cMenu_addItem(self, &self->GravityItem, -1);
+    cMenu_addItem(self, &self->VelocityDampingItem, -1);
+    cMenu_addItem(self, &self->NormalVelocityScaleItem, -1);
+    cMenu_addItem(self, &self->ForwardVelocityScaleItem, -1);
+    cMenu_addItem(self, &self->NormalToForwardScaleItem, -1);
+    cMenu_addItem(self, &self->MaxVelocityItem, -1);
+    cMenu_addItem(self, &self->DampingItem, -1);
+    cMenu_addItem(self, &self->NumParticlesItem, -1);
+    cMenu_addItem(self, &self->DefaultSizeItem, -1);
+    cMenu_addItem(self, &self->PatchColourScaleItem, -1);
+    cMenu_addItem(self, &self->PatchColourScale2Item, -1);
+    cMenu_addItem(self, &self->SeedItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -4037,15 +4045,15 @@ extern char str_Avalanche_Effects[];
  *
  * @return @p self
  */
-extern "C" void* cAIVisualEffectsMainMenu_cAIVisualEffectsMainMenu(void* self)
+extern "C" void* cAIVisualEffectsMainMenu_cAIVisualEffectsMainMenu(cAIVisualEffectsMainMenu* self)
 {
     cMenu_cMenu(self);
-    *(void***)((char*)self + 0x12C) = cAIVisualEffectsMainMenu_vtbl;
-    cNullMenuItem_cNullMenuItem((cNullMenuItem*)((char*)self + 0x130), str_AIVisual_Effects_Main_Menu);
-    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)((char*)self + 0x14C), (void*)40);
-    cSubMenuItem_cSubMenuItem((char*)self + 0x164, D_004D1C88, str_Avalanche_Effects);
-    cMenu_addItem(self, (char*)self + 0x164, -1);
-    return self;
+    self->mVtbl = cAIVisualEffectsMainMenu_vtbl;
+    cNullMenuItem_cNullMenuItem((cNullMenuItem*)(&self->TitleItem), str_AIVisual_Effects_Main_Menu);
+    cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)(&self->SpaceItem), (void*)40);
+    cSubMenuItem_cSubMenuItem(&self->AvalancheItem, D_004D1C88, str_Avalanche_Effects);
+    cMenu_addItem(self, &self->AvalancheItem, -1);
+    return ((void*)self);
 }
 #endif
 
@@ -4114,42 +4122,42 @@ extern "C" void cMenu__cMenu(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cAvalancheMenu__cAvalancheMenu(void* self, int flags)
+extern "C" void cAvalancheMenu__cAvalancheMenu(cAvalancheMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x77C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x748, 2);
-    cMenuItem__cMenuItem((char*)self + 0x714, 2);
-    cMenuItem__cMenuItem((char*)self + 0x6E0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x6B0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x67C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x648, 2);
-    cMenuItem__cMenuItem((char*)self + 0x614, 2);
-    cMenuItem__cMenuItem((char*)self + 0x5E0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x5AC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x578, 2);
-    cMenuItem__cMenuItem((char*)self + 0x544, 2);
-    cMenuItem__cMenuItem((char*)self + 0x514, 2);
-    cMenuItem__cMenuItem((char*)self + 0x4E0, 2);
-    cMenuItem__cMenuItem((char*)self + 0x4AC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x478, 2);
-    cMenuItem__cMenuItem((char*)self + 0x444, 2);
-    cMenuItem__cMenuItem((char*)self + 0x410, 2);
-    cMenuItem__cMenuItem((char*)self + 0x3DC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x3AC, 2);
-    cMenuItem__cMenuItem((char*)self + 0x37C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x34C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x31C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2E8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x2B8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x288, 2);
-    cMenuItem__cMenuItem((char*)self + 0x258, 2);
-    cMenuItem__cMenuItem((char*)self + 0x228, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1F8, 2);
-    cMenuItem__cMenuItem((char*)self + 0x1C4, 2);
-    cMenuItem__cMenuItem((char*)self + 0x194, 2);
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->SeedItem, 2);
+    cMenuItem__cMenuItem(&self->PatchColourScale2Item, 2);
+    cMenuItem__cMenuItem(&self->PatchColourScaleItem, 2);
+    cMenuItem__cMenuItem(&self->DefaultSizeItem, 2);
+    cMenuItem__cMenuItem(&self->NumParticlesItem, 2);
+    cMenuItem__cMenuItem(&self->DampingItem, 2);
+    cMenuItem__cMenuItem(&self->MaxVelocityItem, 2);
+    cMenuItem__cMenuItem(&self->NormalToForwardScaleItem, 2);
+    cMenuItem__cMenuItem(&self->ForwardVelocityScaleItem, 2);
+    cMenuItem__cMenuItem(&self->NormalVelocityScaleItem, 2);
+    cMenuItem__cMenuItem(&self->VelocityDampingItem, 2);
+    cMenuItem__cMenuItem(&self->GravityItem, 2);
+    cMenuItem__cMenuItem(&self->AvalancheIdItem, 2);
+    cMenuItem__cMenuItem(&self->RandomBounceVelocityScaleItem, 2);
+    cMenuItem__cMenuItem(&self->RandomBounceVelocityScaleZItem, 2);
+    cMenuItem__cMenuItem(&self->RandomBounceVelocityScaleXYItem, 2);
+    cMenuItem__cMenuItem(&self->RandomBounceChanceItem, 2);
+    cMenuItem__cMenuItem(&self->RotationalVelocityScaleItem, 2);
+    cMenuItem__cMenuItem(&self->UpdateTimeStepItem, 2);
+    cMenuItem__cMenuItem(&self->UpdateItem, 2);
+    cMenuItem__cMenuItem(&self->TriggerItem, 2);
+    cMenuItem__cMenuItem(&self->RenderLinesItem, 2);
+    cMenuItem__cMenuItem(&self->RenderEmittersItem, 2);
+    cMenuItem__cMenuItem(&self->MinImpactVelocityItem, 2);
+    cMenuItem__cMenuItem(&self->LoadItem, 2);
+    cMenuItem__cMenuItem(&self->SaveItem, 2);
+    cMenuItem__cMenuItem(&self->SquareLerpItem, 2);
+    cMenuItem__cMenuItem(&self->UseEndColourItem, 2);
+    cMenuItem__cMenuItem(&self->UseLightMapColourItem, 2);
+    cMenuItem__cMenuItem(&self->BrightnessItem, 2);
+    cMenuItem__cMenuItem(&self->RecalcItem, 2);
+    cMenuItem__cMenuItem(&self->EnableItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
@@ -4171,8 +4179,8 @@ struct sSlot_0CB0 {
     sSlot_0CB0(int n) { a = n; b = n; }
 };
 
-extern "C" void* cAvalancheMenu_cAvalancheMenu(void* self);
-extern "C" void cAvalancheMenu__cAvalancheMenu(void* self, int flags);
+extern "C" void* cAvalancheMenu_cAvalancheMenu(cAvalancheMenu* self);
+extern "C" void cAvalancheMenu__cAvalancheMenu(cAvalancheMenu* self, int flags);
 
 extern char D_004D1908[], D_004D1918[], D_004D1928[], D_004D1938[], D_004D1948[], D_004D1958[], D_004D1968[], D_004D1978[], D_004D1988[], D_004D1998[], D_004D19A8[], D_004D19B8[], D_004D19C8[], D_004D19D8[], D_004D19E8[], D_004D19F8[], D_004D1A08[], D_004D1A18[], D_004D1A28[], D_004D1A38[], D_004D1A48[], D_004D1A58[], D_004D1A68[], D_004D1A78[], D_004D1A88[], D_004D1A98[], D_004D1AA8[], D_004D1AB8[], D_004D1AC8[], D_004D1AD8[], D_004D1AE8[], D_004D1AF8[], D_004D1B08[], D_004D1B18[], D_004D1B28[], D_004D1B38[], D_004D1B48[], D_004D1B58[], D_004D1B68[], D_004D1B78[], D_004D1B88[], D_004D1B98[], D_004D1BA8[], D_004D1BB8[], D_004D1BC8[], D_004D1BD8[], D_004D1BE8[], D_004D1BF8[], D_004D1C08[], D_004D1C18[], D_004D1C28[], D_004D1C38[], D_004D1C48[], D_004D1C58[], D_004D1C68[], D_004D1C78[];
 extern char D_004D1C88[];
@@ -4270,9 +4278,9 @@ extern "C" void __sti__aivisualeffectsmenu_cpp_impl(int init, int prio)
             new (&D_004A50C0) sSlot_0CB0(11);
             new (&D_004A50C8) sSlot_0CB0(12);
             new (&D_004A50D0) sSlot_0CB0(13);
-            cAvalancheMenu_cAvalancheMenu(D_004D1C88);
+            cAvalancheMenu_cAvalancheMenu((cAvalancheMenu*)D_004D1C88);
         } else {
-            cAvalancheMenu__cAvalancheMenu(D_004D1C88, 2);
+            cAvalancheMenu__cAvalancheMenu((cAvalancheMenu*)D_004D1C88, 2);
         }
     }
 }
@@ -4327,11 +4335,11 @@ extern "C" void cMenu__cMenu(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cAIVisualEffectsMainMenu__cAIVisualEffectsMainMenu(void* self, int flags)
+extern "C" void cAIVisualEffectsMainMenu__cAIVisualEffectsMainMenu(cAIVisualEffectsMainMenu* self, int flags)
 {
-    cMenuItem__cMenuItem((char*)self + 0x164, 2);
-    cMenuItem__cMenuItem((char*)self + 0x14C, 2);
-    cMenuItem__cMenuItem((char*)self + 0x130, 2);
+    cMenuItem__cMenuItem(&self->AvalancheItem, 2);
+    cMenuItem__cMenuItem(&self->SpaceItem, 2);
+    cMenuItem__cMenuItem(&self->TitleItem, 2);
     cMenu__cMenu(self, flags);
 }
 #endif
