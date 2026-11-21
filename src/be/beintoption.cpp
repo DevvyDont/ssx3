@@ -457,11 +457,6 @@ extern "C" int cBERules_getMaxDelaySecs()
 //100%
 INCLUDE_ASM("be/beintoption", cBERules_swap);
 #ifdef SKIP_ASM
-struct sOptionTriple_0014F898 {
-    int a;
-    int b;
-    int c;
-};
 
 /**
  * Swaps the two 12-byte bragging-rights records at the start of the rules block cBERules_mRules (all three words of each).
@@ -469,8 +464,8 @@ struct sOptionTriple_0014F898 {
 // Swaps the two 12-byte triples at the start of cBERules_mRules.
 extern "C" void cBERules_swap()
 {
-    sOptionTriple_0014F898* records = (sOptionTriple_0014F898*)&cBERules_mRules;
-    sOptionTriple_0014F898 firstRecord = records[0];
+    tBEBraggingRights* records = (tBEBraggingRights*)&cBERules_mRules;
+    tBEBraggingRights firstRecord = records[0];
     records[0] = records[1];
     records[1] = firstRecord;
 }

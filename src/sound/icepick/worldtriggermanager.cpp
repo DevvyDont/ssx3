@@ -1,4 +1,5 @@
 #include "common.h"
+#include "intersect/bxnash.h"
 #include "sound/ssxaudio.h"
 #include "main/game.h"
 #include "sound/icepick/worldsound.h"
@@ -523,9 +524,6 @@ extern "C" void* cWorldTriggerInstance_cWorldTriggerInstance(cWorldTriggerInstan
 extern "C" void cWorldTriggerManager_LoadTriggerInfo(void* self);
 extern const char str_m_aWorldTriggerInstances[];
 
-struct sWorldTrigger58D0 {
-    char pad[0x70];
-};
 
 /**
  * Constructs the world trigger manager: resets its state, builds 40 trigger instances and loads the trigger
@@ -544,12 +542,12 @@ extern "C" void* cWorldTriggerManager_cWorldTriggerManager(cWorldTriggerManager*
     self->mMonitorTriggers = 1;
     int* mem = (int*)operator_new_tag(4496, str_m_aWorldTriggerInstances, 0, 0);
     mem[0] = 40;
-    sWorldTrigger58D0* arr = (sWorldTrigger58D0*)((char*)mem + 0x10);
-    sWorldTrigger58D0* trigger = arr;
+    cWorldTriggerInstance* arr = (cWorldTriggerInstance*)((char*)mem + 0x10);
+    cWorldTriggerInstance* trigger = arr;
     for (int i = 39; i != -1; i--, trigger++) {
         cWorldTriggerInstance_cWorldTriggerInstance((cWorldTriggerInstance*)trigger);
     }
-    *(sWorldTrigger58D0**)self = arr;
+    *(cWorldTriggerInstance**)self = arr;
     self->m_pcTriggerInfoFile = 0;
     cWorldTriggerManager_LoadTriggerInfo(self);
     return ((void*)self);
@@ -1482,7 +1480,6 @@ extern "C" int cWorldTriggerManager_ObjectRefFirstFrame(cWorldTriggerManager* se
 //100%
 INCLUDE_ASM("sound/icepick/worldtriggermanager", cWorldTriggerManager_DuckAmbientAudioTrigger);
 #ifdef SKIP_ASM
-struct sTrigObj_6A38 { char pad[0xC]; int state; };
 
 /**
  * Returns whether trigger idx ducks ambient audio: its type data's +0xC is 1 (never for idx < 2).
@@ -1497,7 +1494,7 @@ extern "C" int cWorldTriggerManager_DuckAmbientAudioTrigger(cWorldTriggerManager
     if (idx < 2U) {
         return 0;
     }
-    return ((sTrigObj_6A38*)(self->m_aTriggerInfo)[idx].m_pTriggerTypeStruct)->state == 1;
+    return ((self->m_aTriggerInfo)[idx].m_pTriggerTypeStruct)->m_DuckAmbientAudio == 1;
 }
 #endif
 
@@ -2023,19 +2020,11 @@ struct sV4_75D0 {
     sV4_75D0(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-struct sOctRoot_75D0 {
-    int lvl;
-    int x;
-    int y;
-    int z;
-    void* node;     // 0x10
-};
 
 
-struct sQH_75D0 {};
 
 extern "C" cGame* cAudioInterface_getGame(void);
-extern "C" void wtq_75D0(sQH_75D0* h, void* partial, void* inside, void* pos, void* node, void* key) __asm__("func_002B83F8");
+extern "C" void wtq_75D0(nash_privy_QueryHelper* h, void* partial, void* inside, void* pos, void* node, void* key) __asm__("func_002B83F8");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline sV4_75D0 Sub_75D0(const sV4_75D0& a, const sV4_75D0& b)
@@ -2087,29 +2076,29 @@ extern "C" void cAudioOverlapList_update(cWorldSound* self, const sV4_75D0* pos)
 {
     if (self->m_OverlapLists[0].lastposition.w == 0.0f || Length_75D0(Sub_75D0(*pos, *(sV4_75D0*)&self->m_OverlapLists[0].lastposition)) > 10.0f) {
         self->m_OverlapLists[0].numoverlaps = 0;
-        sOctRoot_75D0* root = (sOctRoot_75D0*)cAudioInterface_getGame()->BXNash;
+        nash_Octant* root = (nash_Octant*)cAudioInterface_getGame()->BXNash;
         cWorldSound* selfList[1];
         selfList[0] = (self);
         const sV4_75D0* posPtr = pos;
         cWorldSound** pl = selfList;
         const sV4_75D0** pp = &posPtr;
-        sQH_75D0 octantQuery0, octantQuery1, octantQuery2, octantQuery3, octantQuery4, octantQuery5, octantQuery6, octantQuery7;
-        sOctRoot_75D0* k;
-        if (root[0].node) wtq_75D0(&octantQuery0, pl, pl, pp, root[0].node, &root[0]);
+        nash_privy_QueryHelper octantQuery0, octantQuery1, octantQuery2, octantQuery3, octantQuery4, octantQuery5, octantQuery6, octantQuery7;
+        nash_Octant* k;
+        if (((void*)root[0].rootcell)) wtq_75D0(&octantQuery0, pl, pl, pp, ((void*)root[0].rootcell), &root[0]);
         k = &root[1];
-        if (root[1].node) wtq_75D0(&octantQuery1, pl, pl, pp, k->node, k);
+        if (((void*)root[1].rootcell)) wtq_75D0(&octantQuery1, pl, pl, pp, ((void*)k->rootcell), k);
         k = &root[2];
-        if (root[2].node) wtq_75D0(&octantQuery2, pl, pl, pp, k->node, k);
+        if (((void*)root[2].rootcell)) wtq_75D0(&octantQuery2, pl, pl, pp, ((void*)k->rootcell), k);
         k = &root[3];
-        if (root[3].node) wtq_75D0(&octantQuery3, pl, pl, pp, k->node, k);
+        if (((void*)root[3].rootcell)) wtq_75D0(&octantQuery3, pl, pl, pp, ((void*)k->rootcell), k);
         k = &root[4];
-        if (root[4].node) wtq_75D0(&octantQuery4, pl, pl, pp, k->node, k);
+        if (((void*)root[4].rootcell)) wtq_75D0(&octantQuery4, pl, pl, pp, ((void*)k->rootcell), k);
         k = &root[5];
-        if (root[5].node) wtq_75D0(&octantQuery5, pl, pl, pp, k->node, k);
+        if (((void*)root[5].rootcell)) wtq_75D0(&octantQuery5, pl, pl, pp, ((void*)k->rootcell), k);
         k = &root[6];
-        if (root[6].node) wtq_75D0(&octantQuery6, pl, pl, pp, k->node, k);
+        if (((void*)root[6].rootcell)) wtq_75D0(&octantQuery6, pl, pl, pp, ((void*)k->rootcell), k);
         k = &root[7];
-        if (root[7].node) wtq_75D0(&octantQuery7, pl, pl, pp, k->node, k);
+        if (((void*)root[7].rootcell)) wtq_75D0(&octantQuery7, pl, pl, pp, ((void*)k->rootcell), k);
         *(sV4_75D0*)&self->m_OverlapLists[0].lastposition = *pos;
     }
 }

@@ -1,4 +1,7 @@
 #include "common.h"
+#include "worldpainter/quadtree.h"
+#include "bx/math3d.h"
+#include "render/2drender.h"
 #include "ai/rider.h"
 #include "sound/bankmanager.h"
 #include "sound/asyncsys.h"
@@ -2735,31 +2738,14 @@ extern "C" void cWorldPainterMan_render_impl(cWorldPainterMan_B6E0* self) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_render1);
 #ifdef SKIP_ASM
-// PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
-struct sQtVec4_B928 {
-    float x, y, z, w;
-    sQtVec4_B928() {}
-    sQtVec4_B928(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
-} __attribute__((aligned(16)));
 
-struct sQtVtx_B928 {
-    char pad_0x0[0x20];
-    sQtVec4_B928 pos;   // 0x20
-};
 
-struct sQtNode_B928 {
-    unsigned short child[4];
-};
 
-struct sQtTree_B928 {
-    char pad_0x0[0x20];
-    sQtNode_B928* nodes;    // 0x20
-};
 
 struct sQtVEntry_B928 {
     short delta;
     short index;
-    void (*fn)(void*, int, sQtVtx_B928*, int);
+    void (*fn)(void*, int, tBxVertex*, int);
 };
 
 struct sQtCtx_B928 {
@@ -2773,14 +2759,14 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual sQtVec4_B928* getPosition();
+    virtual t4Vector* getPosition();
 };
 
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sQtVec4_B928 qtAdd_B928(const sQtVec4_B928& a, const sQtVec4_B928& b)
+static inline t4Vector qtAdd_B928(const t4Vector& a, const t4Vector& b)
 {
-    sQtVec4_B928 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2793,9 +2779,9 @@ static inline sQtVec4_B928 qtAdd_B928(const sQtVec4_B928& a, const sQtVec4_B928&
 }
 
 // PORT: PS2-only VU0 inline asm (v / s).
-static inline sQtVec4_B928 qtDiv_B928(const sQtVec4_B928& v, float s)
+static inline t4Vector qtDiv_B928(const t4Vector& v, float s)
 {
-    sQtVec4_B928 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -2829,65 +2815,65 @@ static inline sQtVec4_B928 qtDiv_B928(const sQtVec4_B928& v, float s)
  */
 // Walks a quadtree: inner nodes split the rect (lo, hi) at its midpoint into four children;
 // leaves submit the rect's outline as a 5-vertex strip at the camera's height.
-extern "C" void cWorldPainterMan_render1(cWorldPainterMan* ctx, sQtTree_B928* tree, sQtNode_B928* node, sQtVtx_B928* verts,
-                              sQtVec4_B928* lo, sQtVec4_B928* hi)
+extern "C" void cWorldPainterMan_render1(cWorldPainterMan* ctx, cQuadTree* tree, tQuadTreeNode* node, tBxVertex* verts,
+                              t4Vector* lo, t4Vector* hi)
 {
-    if (node->child[0] & 1) {
-        sQtVec4_B928 mid = qtDiv_B928(qtAdd_B928(*lo, *hi), 2.0f);
-        sQtVec4_B928 leftEdgeMid;
+    if (((unsigned short*)&node->m_leaf)[0] & 1) {
+        t4Vector mid = qtDiv_B928(qtAdd_B928(*lo, *hi), 2.0f);
+        t4Vector leftEdgeMid;
         leftEdgeMid.x = lo->x;
         leftEdgeMid.y = mid.y;
         leftEdgeMid.z = 0.0f;
         leftEdgeMid.w = 1.0f;
-        sQtVec4_B928 rightEdgeMid;
+        t4Vector rightEdgeMid;
         rightEdgeMid.x = hi->x;
         rightEdgeMid.y = mid.y;
         rightEdgeMid.z = 0.0f;
         rightEdgeMid.w = 1.0f;
-        sQtVec4_B928 bottomEdgeMid;
+        t4Vector bottomEdgeMid;
         bottomEdgeMid.x = mid.x;
         bottomEdgeMid.y = lo->y;
         bottomEdgeMid.z = 0.0f;
         bottomEdgeMid.w = 1.0f;
-        sQtVec4_B928 topEdgeMid;
+        t4Vector topEdgeMid;
         topEdgeMid.x = mid.x;
         topEdgeMid.y = hi->y;
         topEdgeMid.z = 0.0f;
         topEdgeMid.w = 1.0f;
-        cWorldPainterMan_render1(ctx, tree, tree->nodes + (node->child[0] >> 1), verts, lo, &mid);
-        cWorldPainterMan_render1(ctx, tree, tree->nodes + (node->child[1] >> 1), verts, &leftEdgeMid, &topEdgeMid);
-        cWorldPainterMan_render1(ctx, tree, tree->nodes + (node->child[2] >> 1), verts, &bottomEdgeMid, &rightEdgeMid);
-        cWorldPainterMan_render1(ctx, tree, tree->nodes + (node->child[3] >> 1), verts, &mid, hi);
+        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (((unsigned short*)&node->m_leaf)[0] >> 1), verts, lo, &mid);
+        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (((unsigned short*)&node->m_leaf)[1] >> 1), verts, &leftEdgeMid, &topEdgeMid);
+        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (((unsigned short*)&node->m_leaf)[2] >> 1), verts, &bottomEdgeMid, &rightEdgeMid);
+        cWorldPainterMan_render1(ctx, tree, (tree->m_nodes) + (((unsigned short*)&node->m_leaf)[3] >> 1), verts, &mid, hi);
     } else {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
         cRider* rider = SSXApp->Game->AI->Players[0]->mRider;
-        sQtVec4_B928 cam = *((cQtCam_B928*)(&rider->mVtbl))->getPosition();
-        sQtVec4_B928 corner;
+        t4Vector cam = *((cQtCam_B928*)(&rider->mVtbl))->getPosition();
+        t4Vector corner;
         corner.x = lo->x;
         corner.y = lo->y;
         corner.z = cam.z;
         corner.w = 1.0f;
-        verts[0].pos = corner;
+        (*(&verts[0].p)) = corner;
         corner.x = hi->x;
         corner.y = lo->y;
         corner.z = cam.z;
         corner.w = 1.0f;
-        verts[1].pos = corner;
+        (*(&verts[1].p)) = corner;
         corner.x = hi->x;
         corner.y = hi->y;
         corner.z = cam.z;
         corner.w = 1.0f;
-        verts[2].pos = corner;
+        (*(&verts[2].p)) = corner;
         corner.x = lo->x;
         corner.y = hi->y;
         corner.z = cam.z;
         corner.w = 1.0f;
-        verts[3].pos = corner;
+        (*(&verts[3].p)) = corner;
         corner.x = lo->x;
         corner.y = lo->y;
         corner.z = cam.z;
         corner.w = 1.0f;
-        verts[4].pos = corner;
+        (*(&verts[4].p)) = corner;
         sQtVEntry_B928* vt = (sQtVEntry_B928*)ps2GraphicsMan->mVtbl;
         vt[73].fn((char*)ps2GraphicsMan + vt[73].delta, 5, verts, 0);
     }
@@ -5168,10 +5154,10 @@ extern "C" int func_002BB100_DE30(char *, char *) __asm__("func_002BB100");
  * @return 1 if every value matches, else 0
  */
 extern "C" int tWPInGameData_Lighting_isEqual(tWPInGameData_Lighting* lhs, tWPData_Lighting* rhs) {
-    if (func_002BB100_DE30((char*)&lhs->m_LightIrradianceName, ((char*)rhs) + 4)) return 0;
-    if (func_002BB100_DE30((char*)&lhs->m_ShadowIrradianceName, ((char*)rhs) + 0xC)) return 0;
-    if (func_002BB100_DE30((char*)&lhs->m_TunnelIrradianceName, ((char*)rhs) + 0x14)) return 0;
-    if (func_002BB100_DE30((char*)&lhs->m_ObjectIrradianceName, ((char*)rhs) + 0x1C)) return 0;
+    if (func_002BB100_DE30((char*)&lhs->m_LightIrradianceName, (char*)&rhs->m_LightIrradianceName)) return 0;
+    if (func_002BB100_DE30((char*)&lhs->m_ShadowIrradianceName, (char*)&rhs->m_ShadowIrradianceName)) return 0;
+    if (func_002BB100_DE30((char*)&lhs->m_TunnelIrradianceName, (char*)&rhs->m_TunnelIrradianceName)) return 0;
+    if (func_002BB100_DE30((char*)&lhs->m_ObjectIrradianceName, (char*)&rhs->m_ObjectIrradianceName)) return 0;
     if (lhs->m_AmbientLightIntensityOffset != rhs->m_AmbientLightIntensityOffset) return 0;
     if (lhs->m_RimLightIntensityOffset != rhs->m_RimLightIntensityOffset) return 0;
     return 1;
@@ -5719,10 +5705,9 @@ extern "C" void tWPInGameData_Camera_readFromReplayFrame(int camera, void **fram
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct VEnt_E518 { short delta; short idx; void (*fn)(void*, void*, int); };
-struct Stream_E518 { char* vt; };
 
-static inline void Wr_E518(Stream_E518* s, void* p, int n) {
-    VEnt_E518* e = (VEnt_E518*)(s->vt + 0x10);
+static inline void Wr_E518(cReplayFramePtr* s, void* p, int n) {
+    VEnt_E518* e = (VEnt_E518*)(((char*)s->mVtbl) + 0x10);
     e->fn((char*)s + e->delta, p, n);
 }
 
@@ -5734,7 +5719,7 @@ static inline void Wr_E518(Stream_E518* s, void* p, int n) {
  *
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_Fog_readFromReplayFrame(tWPInGameData_Fog* self, Stream_E518* frame) {
+extern "C" void tWPInGameData_Fog_readFromReplayFrame(tWPInGameData_Fog* self, cReplayFramePtr* frame) {
     Wr_E518(frame, &self->m_FogDensity, 4);
     Wr_E518(frame, ((char*)self), 4);
     Wr_E518(frame, &self->m_FogNear, 4);
@@ -5754,10 +5739,9 @@ extern "C" void tWPInGameData_Fog_readFromReplayFrame(tWPInGameData_Fog* self, S
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct VEnt_E698 { short delta; short idx; void (*fn)(void*, void*, int); };
-struct Stream_E698 { char* vt; };
 
-static inline void Wr_E698(Stream_E698* s, void* p, int n) {
-    VEnt_E698* e = (VEnt_E698*)(s->vt + 0x10);
+static inline void Wr_E698(cReplayFramePtr* s, void* p, int n) {
+    VEnt_E698* e = (VEnt_E698*)(((char*)s->mVtbl) + 0x10);
     e->fn((char*)s + e->delta, p, n);
 }
 
@@ -5769,7 +5753,7 @@ static inline void Wr_E698(Stream_E698* s, void* p, int n) {
  *
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_LightGlow_readFromReplayFrame(tWPInGameData_LightGlow* self, Stream_E698* frame) {
+extern "C" void tWPInGameData_LightGlow_readFromReplayFrame(tWPInGameData_LightGlow* self, cReplayFramePtr* frame) {
     Wr_E698(frame, &self->m_LightGlowCutoff, 4);
     Wr_E698(frame, ((char*)self), 4);
     Wr_E698(frame, &self->m_LightGlowCutoffScale, 4);
@@ -5791,10 +5775,9 @@ extern "C" void tWPInGameData_LightGlow_readFromReplayFrame(tWPInGameData_LightG
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_readFromReplayFrame);
 #ifdef SKIP_ASM
 struct VEnt_E850 { short delta; short idx; void (*fn)(void*, void*, int); };
-struct Stream_E850 { char* vt; };
 
-static inline void Wr_E850(Stream_E850* s, void* p, int n) {
-    VEnt_E850* e = (VEnt_E850*)(s->vt + 0x10);
+static inline void Wr_E850(cReplayFramePtr* s, void* p, int n) {
+    VEnt_E850* e = (VEnt_E850*)(((char*)s->mVtbl) + 0x10);
     e->fn((char*)s + e->delta, p, n);
 }
 
@@ -5806,7 +5789,7 @@ static inline void Wr_E850(Stream_E850* s, void* p, int n) {
  *
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_ScreenTint_readFromReplayFrame(tWPInGameData_ScreenTint* self, Stream_E850* frame) {
+extern "C" void tWPInGameData_ScreenTint_readFromReplayFrame(tWPInGameData_ScreenTint* self, cReplayFramePtr* frame) {
     Wr_E850(frame, &self->m_ScreenTintScaleR, 4);
     Wr_E850(frame, ((char*)self), 4);
     Wr_E850(frame, &self->m_ScreenTintScaleG, 4);
@@ -6152,10 +6135,9 @@ extern "C" void tWPInGameData_Camera_writeToReplayFrame(int camera, void **frame
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct VEnt_F580 { short delta; short idx; void (*fn)(void*, void*, int); };
-struct Stream_F580 { char* vt; };
 
-static inline void Wr_F580(Stream_F580* s, void* p, int n) {
-    VEnt_F580* e = (VEnt_F580*)(s->vt + 0x8);
+static inline void Wr_F580(cReplayFramePtr* s, void* p, int n) {
+    VEnt_F580* e = (VEnt_F580*)(((char*)s->mVtbl) + 0x8);
     e->fn((char*)s + e->delta, p, n);
 }
 
@@ -6167,7 +6149,7 @@ static inline void Wr_F580(Stream_F580* s, void* p, int n) {
  *
  * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_Fog_writeToReplayFrame(tWPInGameData_Fog* self, Stream_F580* frame) {
+extern "C" void tWPInGameData_Fog_writeToReplayFrame(tWPInGameData_Fog* self, cReplayFramePtr* frame) {
     Wr_F580(frame, &self->m_FogDensity, 4);
     Wr_F580(frame, ((char*)self), 4);
     Wr_F580(frame, &self->m_FogNear, 4);
@@ -6187,10 +6169,9 @@ extern "C" void tWPInGameData_Fog_writeToReplayFrame(tWPInGameData_Fog* self, St
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_writeToReplayFrame);
 #ifdef SKIP_ASM
 struct VEnt_F700 { short delta; short idx; void (*fn)(void*, void*, int); };
-struct Stream_F700 { char* vt; };
 
-static inline void Wr_F700(Stream_F700* s, void* p, int n) {
-    VEnt_F700* e = (VEnt_F700*)(s->vt + 0x8);
+static inline void Wr_F700(cReplayFramePtr* s, void* p, int n) {
+    VEnt_F700* e = (VEnt_F700*)(((char*)s->mVtbl) + 0x8);
     e->fn((char*)s + e->delta, p, n);
 }
 
@@ -6202,7 +6183,7 @@ static inline void Wr_F700(Stream_F700* s, void* p, int n) {
  *
  * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_LightGlow_writeToReplayFrame(tWPInGameData_LightGlow* self, Stream_F700* frame) {
+extern "C" void tWPInGameData_LightGlow_writeToReplayFrame(tWPInGameData_LightGlow* self, cReplayFramePtr* frame) {
     Wr_F700(frame, &self->m_LightGlowCutoff, 4);
     Wr_F700(frame, ((char*)self), 4);
     Wr_F700(frame, &self->m_LightGlowCutoffScale, 4);

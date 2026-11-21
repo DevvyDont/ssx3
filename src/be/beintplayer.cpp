@@ -1,4 +1,6 @@
+#include "vtable.h"
 #include "common.h"
+#include "be/bedbprofile.h"
 #include "be/beintplayer.h"
 #include "be/beintstat.h"
 #include "be/beintnetwork.h"
@@ -155,11 +157,6 @@ extern "C" void cBENewPlayerInterface_discard(cBENewPlayerInterface* self)
 //100%
 INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_defaultCtrl);
 #ifdef SKIP_ASM
-struct sVEntry00145BD8 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 struct sCtrlEntry00145BD8 {
     char pad_0x00[0x10];
@@ -184,7 +181,7 @@ extern "C" void cBENewPlayerInterface_defaultCtrl(cBENewPlayerInterface* self)
         ((char*)&entry[i])[0x13] = 0;
         entry[i].flag1 = 1;
     }
-    sVEntry00145BD8* vt = (sVEntry00145BD8*)self->mVtbl;
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)self->mVtbl;
     vt[2].fn((char*)self + vt[2].delta);
 }
 #endif
@@ -280,9 +277,6 @@ int cBENewPlayerInterface_getPlayerID(int index);
 extern int cBELibrary_profileLib[];
 extern "C" void cBECharProfileDB_setLocationVisited(void* self, int bit, int on);
 
-struct sProfileSlot_00145DD0 {
-    char data[0xF88];
-};
 
 /**
  * Marks a location as new or already visited for a rider's character.
@@ -299,7 +293,7 @@ extern "C" void cBENewPlayerInterface_setFirstTimeOnTrack(cBENewPlayerInterface*
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int characterId = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    cBECharProfileDB_setLocationVisited(&((sProfileSlot_00145DD0 (*)[10])cBELibrary_profileLib)[profile][characterId], bit, !flag);
+    cBECharProfileDB_setLocationVisited(&((cBECharProfileDB (*)[10])cBELibrary_profileLib)[profile][characterId], bit, !flag);
 }
 #endif
 
@@ -311,9 +305,6 @@ int cBENewPlayerInterface_getPlayerID(int index);
 extern int cBELibrary_profileLib[];
 extern "C" int cBECharProfileDB_hasVisitedPeak(void* self, int kind);
 
-struct sProfileSlot_00145E68 {
-    char data[0xF88];
-};
 
 /**
  * Returns whether a rider's character has visited any location of a peak.
@@ -330,7 +321,7 @@ extern "C" int cBENewPlayerInterface_hasVisitedPeakWC(cBENewPlayerInterface* sel
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    return cBECharProfileDB_hasVisitedPeak(&((sProfileSlot_00145E68 (*)[10])cBELibrary_profileLib)[profile][charId], kind);
+    return cBECharProfileDB_hasVisitedPeak(&((cBECharProfileDB (*)[10])cBELibrary_profileLib)[profile][charId], kind);
 }
 #endif
 
@@ -342,9 +333,6 @@ int cBENewPlayerInterface_getPlayerID(int index);
 extern int cBELibrary_profileLib[];
 void* cBECharProfileDB_getScoreStats(void* self, int a, int b);
 
-struct sProfileSlot_00145EF0 {
-    char data[0xF88];
-};
 
 /**
  * Returns whether a rider's character has a result for an event on a location: the first byte of its score record.
@@ -363,7 +351,7 @@ extern "C" int cBENewPlayerInterface_hasPlayedEvent(cBENewPlayerInterface* self,
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
     int charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
-    signed char* stats = (signed char*)cBECharProfileDB_getScoreStats(&((sProfileSlot_00145EF0 (*)[10])cBELibrary_profileLib)[profile][charId], locationId, event);
+    signed char* stats = (signed char*)cBECharProfileDB_getScoreStats(&((cBECharProfileDB (*)[10])cBELibrary_profileLib)[profile][charId], locationId, event);
     return *stats != 0;
 }
 #endif
@@ -1107,11 +1095,6 @@ extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, int n);
 extern "C" char* strcpy2(char* dst, unsigned short* src);
 extern char str_kT_MEMPlayerName[];
 
-struct sVtEntry_00147170 {
-    short delta;
-    short index;
-    unsigned short* (*fn)(void*, int);
-};
 
 
 /**
@@ -1127,7 +1110,7 @@ extern "C" char* cBENewPlayerInterface_getPlayerName(cBENewPlayerInterface* self
     {
         unsigned short buf[104];
         char* db = (char*)SSXApp->FELocale;
-        sVtEntry_00147170* vt = *(sVtEntry_00147170**)(db + 4);
+        sVEntry<unsigned short*(void*, int)>* vt = *(sVEntry<unsigned short*(void*, int)>**)(db + 4);
         sprintf1(buf, vt[4].fn(db + vt[4].delta, GetHashValue32(str_kT_MEMPlayerName)), idx + 1);
         strcpy2(name, buf);
     }

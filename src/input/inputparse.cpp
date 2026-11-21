@@ -1,4 +1,6 @@
+#include "vtable.h"
 #include "common.h"
+#include "input/inputpad.h"
 #include "input/ps2pad.h"
 #include "input/padcache.h"
 #include "intersect/aifwddiff.h"
@@ -1661,10 +1663,6 @@ struct sNode_324678 {
     };
     sNode_324678* else_;
 };
-struct sVar_324678 {
-    char name[0x40];
-    sNode_324678* expr;         // 0x40
-};
 union sInsn_324678 {
     struct {
         unsigned int op : 6;
@@ -1721,7 +1719,7 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNod
         code[1].f = node->value;
         return 2;
     case 1:
-        return cInputMapParser_compileParseNode(self, (tParseNode*)((sVar_324678*)node->a)->expr, dst, code, cap, node->b != 5 ? node->b : defaultModifier);
+        return cInputMapParser_compileParseNode(self, (tParseNode*)((sNode_324678*)((tIdentifier*)node->a)->Expression), dst, code, cap, node->b != 5 ? node->b : defaultModifier);
     case 2: {
         int idx = cInputMapParser_buttonToRegister(self, node->index, node->b == 5 ? defaultModifier : node->b);
         if (*dst == -1) {
@@ -2015,10 +2013,6 @@ extern "C" float cInputExec_getRegister(cInputExec* self, unsigned int id)
 //100%
 INCLUDE_ASM("input/inputparse", cInputExec_getTempReg);
 #ifdef SKIP_ASM
-struct sInputParse_003252E8 {
-    int pad[2];
-    int a[1];
-};
 
 /**
  * Returns the address of one of an input map evaluator's temporary registers.
@@ -2030,7 +2024,7 @@ struct sInputParse_003252E8 {
  */
 extern "C" void* cInputExec_getTempReg(cInputExec* self, int i)
 {
-    return &((sInputParse_003252E8*)self)->a[i];
+    return &((int*)&(self)->Temp[0])[i];
 }
 #endif
 
@@ -2047,40 +2041,36 @@ struct sInputEntry3252F8 {
     int pad[2];
 };
 
-struct sInputList3252F8 {
-    int count;
-    sInputEntry3252F8 entries[1];
-};
 
 
-static inline unsigned int GetA3252F8(sInputList3252F8* l, int idx)
+static inline unsigned int GetA3252F8(cInputPad* l, int idx)
 {
-    if (idx < l->count) {
-        return l->entries[idx].a;
+    if (idx < l->NumButtons) {
+        return ((sInputEntry3252F8*)&l->Buttons[0])[idx].a;
     }
     return 0;
 }
 
-static inline unsigned int GetB3252F8(sInputList3252F8* l, int idx)
+static inline unsigned int GetB3252F8(cInputPad* l, int idx)
 {
-    if (idx < l->count) {
-        return l->entries[idx].b;
+    if (idx < l->NumButtons) {
+        return ((sInputEntry3252F8*)&l->Buttons[0])[idx].b;
     }
     return 0;
 }
 
-static inline unsigned int GetC3252F8(sInputList3252F8* l, int idx)
+static inline unsigned int GetC3252F8(cInputPad* l, int idx)
 {
-    if (idx < l->count) {
-        return l->entries[idx].c;
+    if (idx < l->NumButtons) {
+        return ((sInputEntry3252F8*)&l->Buttons[0])[idx].c;
     }
     return 0;
 }
 
-static inline unsigned int GetD3252F8(sInputList3252F8* l, int idx)
+static inline unsigned int GetD3252F8(cInputPad* l, int idx)
 {
-    if (idx < l->count) {
-        return l->entries[idx].d;
+    if (idx < l->NumButtons) {
+        return ((sInputEntry3252F8*)&l->Buttons[0])[idx].d;
     }
     return 0;
 }
@@ -2104,18 +2094,18 @@ float cInputExec_getButton_impl(cInputExec* self, int idx, unsigned int kind)
 {
     switch (kind) {
     case 0:
-        if (idx < ((sInputList3252F8*)self->Pad)->count) {
-            return ((sInputList3252F8*)self->Pad)->entries[idx].value;
+        if (idx < (self->Pad)->NumButtons) {
+            return ((sInputEntry3252F8*)&(self->Pad)->Buttons[0])[idx].value;
         }
         break;
     case 1:
-        return (float)GetC3252F8(((sInputList3252F8*)self->Pad), idx);
+        return (float)GetC3252F8((self->Pad), idx);
     case 2:
-        return (float)GetA3252F8(((sInputList3252F8*)self->Pad), idx);
+        return (float)GetA3252F8((self->Pad), idx);
     case 3:
-        return (float)GetB3252F8(((sInputList3252F8*)self->Pad), idx);
+        return (float)GetB3252F8((self->Pad), idx);
     case 4:
-        return (float)GetD3252F8(((sInputList3252F8*)self->Pad), idx);
+        return (float)GetD3252F8((self->Pad), idx);
     case 5:
         return cInputExec_getButton_impl(self, idx, self->DefaultButtonModifier);
     }
@@ -2882,14 +2872,11 @@ struct sVEntry00326A68 {
     void (*fn)(void*, int);
 };
 
-struct sObj00326A68 {
-    sVEntry00326A68* vt;
-};
 
 struct sOwner00326A68 {
     char pad[0x2EE8];
     int count;
-    sObj00326A68* objs[1];
+    cPadDevice* objs[1];
 };
 
 /**
@@ -2902,9 +2889,9 @@ extern "C" void cPadCache_purge(cPadCache* self)
 {
     int i;
     for (i = 0; i < self->NumPadDevices; i++) {
-        sObj00326A68* inputPad = ((sObj00326A68**)&self->PadDevices[0])[i];
+        cPadDevice* inputPad = ((cPadDevice**)&self->PadDevices[0])[i];
         if (inputPad != 0) {
-            inputPad->vt[1].fn((char*)inputPad + inputPad->vt[1].delta, 3);
+            ((sVEntry00326A68*)inputPad->mVtbl)[1].fn((char*)inputPad + ((sVEntry00326A68*)inputPad->mVtbl)[1].delta, 3);
         }
     }
 }
@@ -3086,11 +3073,6 @@ extern "C" void* cPadCache_buttonValues(cPadCache* self, int i)
 //100%
 INCLUDE_ASM("input/inputparse", cPadDevice_clearAllVibrations);
 #ifdef SKIP_ASM
-struct sVEntry00326CF0 {
-    short delta;
-    short index;
-    void* fn;
-};
 
 typedef int (*CountFn00326CF0)(void*);
 typedef void (*SetFn00326CF0)(void*, int, float);
@@ -3105,7 +3087,7 @@ typedef void (*SetFn00326CF0)(void*, int, float);
  */
 extern "C" void cPadDevice_clearAllVibrations(void* inputPad)
 {
-    sVEntry00326CF0** self = (sVEntry00326CF0**)inputPad;
+    sVEntry<void>** self = (sVEntry<void>**)inputPad;
     int i;
     for (i = 0; i < ((CountFn00326CF0)(*self)[3].fn)((char*)self + (*self)[3].delta); i++) {
         ((SetFn00326CF0)(*self)[4].fn)((char*)self + (*self)[4].delta, i, 0.0f);

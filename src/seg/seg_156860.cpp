@@ -3462,19 +3462,11 @@ INCLUDE_ASM("seg/seg_156860", cGameComm_updateSyncPacket);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cGameComm_writePacket_8F20(void* self, int type, const void* data, int len) __asm__("cGameComm_writePacket");
 
-struct SyncMsg_8F20 {
-    unsigned char type;     // 0x0
-    int frame;              // 0x4
-    int value;              // 0x8
-};
 
-struct Ring_8F20 {
-    int v[60];
-};
 
-static inline int& RingAt_8F20(Ring_8F20* r, int frame)
+static inline int& RingAt_8F20(cGameComm* r, int frame)
 {
-    return r->v[(frame / 60) % 60];
+    return ((int*)&r->mConnected)[(frame / 60) % 60];
 }
 
 /**
@@ -3501,7 +3493,7 @@ extern "C" void cGameComm_updateSyncPacket(cGameComm* gameComm, int frame, int v
     if (gameComm->mError != 0) return;
     if (gameComm->mConnected == 0) return;
     if (gameComm->mDesync != 0) return;
-    RingAt_8F20((Ring_8F20*)(&gameComm->mCheckSumBuffer[0]), frame) = value;
+    RingAt_8F20((cGameComm*)(&gameComm->mCheckSumBuffer[0]), frame) = value;
     gameComm->mAITick[0] = frame;
     if (gameComm->mCheckSumSent != 0) {
         if (gameComm->mCheckSumReceived != 0) {
@@ -3509,10 +3501,10 @@ extern "C" void cGameComm_updateSyncPacket(cGameComm* gameComm, int frame, int v
             gameComm->mCheckSumSent = 0;
         }
     } else {
-        SyncMsg_8F20 msg;
-        msg.frame = frame;
-        msg.value = value;
-        msg.type = 4;
+        tGameCmdPacket msg;
+        msg.AITick = frame;
+        msg.CheckSum = value;
+        msg.Cmd = 4;
         cGameComm_writePacket_8F20(((char*)gameComm), 3, &msg, 12);
         gameComm->mCheckSumSent = 1;
     }
@@ -3522,7 +3514,7 @@ extern "C" void cGameComm_updateSyncPacket(cGameComm* gameComm, int frame, int v
         int peerTick = gameComm->mAITick[1];
         if (peerTick < 0) return;
         int minTick = peerTick < localTick ? peerTick : localTick;
-        if (RingAt_8F20((Ring_8F20*)(&gameComm->mCheckSumBuffer[0]), minTick) != RingAt_8F20((Ring_8F20*)(&gameComm->mCheckSumBuffer[1]), minTick)) gameComm->mDesync = 1;
+        if (RingAt_8F20((cGameComm*)(&gameComm->mCheckSumBuffer[0]), minTick) != RingAt_8F20((cGameComm*)(&gameComm->mCheckSumBuffer[1]), minTick)) gameComm->mDesync = 1;
     }
 }
 #endif

@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "ai/player.h"
 #include "ealib/rcmpbase.h"
@@ -1892,11 +1893,6 @@ extern "C" void RCMP_DECODER_ChooseCodec(RCMP_DECODER* self, RCMP_DECODER_Choose
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_DECODER_FreeChosenCodec);
 #ifdef SKIP_ASM
-struct sVEntry003B0538 {
-    short delta;
-    short index;
-    void (*fn)(void*, int);
-};
 
 /**
  * Deletes the DECODER's codec, if any.
@@ -1907,7 +1903,7 @@ extern "C" void RCMP_DECODER_FreeChosenCodec(RCMP_DECODER* self)
 {
     void* obj = self->m_codec;
     if (obj != 0) {
-        sVEntry003B0538* vt = *(sVEntry003B0538**)obj;
+        sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)obj;
         vt[1].fn((char*)obj + vt[1].delta, 3);
         self->m_codec = 0;
     }

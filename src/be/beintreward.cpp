@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/bedbprofile.h"
 #include "sound/ssxaudio.h"
 #include "be/beuserawards.h"
 #include "be/berewarddb.h"
@@ -1478,12 +1479,6 @@ extern int cBELibrary_profileLib[];
 // PORT: the unit declares cBERewardInterface_getDB(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 
-struct sRewardDef_157FD0
-{
-    char pad0[0xC];
-    short amount;   // 0xC
-    short padE;
-};
 
 /**
  * Gives the character poster @p bit, charging its price when @p give is set.
@@ -1507,7 +1502,7 @@ extern "C" void cBERewardInterface_buyPoster(cBERewardInterface* self, int profi
     if (give)
     {
         char* defs = *(char**)((char*)cBERewardInterface_getDB_noargs() + 0x14);
-        int amount = ((sRewardDef_157FD0*)(defs + (bit << 4)))->amount;
+        int amount = ((tPosterInfo*)(defs + (bit << 4)))->mCost;
         if (amount > 0) amount *= 10;
         cBEEconInterface_reduceMoney(econ, profileIndex, characterId, amount);
     }
@@ -1535,12 +1530,6 @@ extern int cBELibrary_profileLib[];
 // PORT: the unit declares cBERewardInterface_getDB(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 
-struct sRewardDef_1580F8
-{
-    char pad0[0xC];
-    short amount;   // 0xC
-    short padE;
-};
 
 /**
  * Gives the character trading card @p bit, charging its price when @p give is set.
@@ -1564,7 +1553,7 @@ extern "C" void cBERewardInterface_buyTradingCard(cBERewardInterface* self, int 
     if (give)
     {
         char* defs = *(char**)((char*)cBERewardInterface_getDB_noargs() + 0x18);
-        int amount = ((sRewardDef_1580F8*)(defs + (bit << 4)))->amount;
+        int amount = ((tTradingCardInfo*)(defs + (bit << 4)))->mCost;
         if (amount > 0) amount *= 10;
         cBEEconInterface_reduceMoney(econ, profileIndex, characterId, amount);
     }
@@ -1592,12 +1581,6 @@ extern int cBELibrary_profileLib[];
 // PORT: the unit declares cBERewardInterface_getDB(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 
-struct sRewardDef_158220
-{
-    char pad0[0xC];
-    short amount;   // 0xC
-    short padE;
-};
 
 /**
  * Gives the character concept art @p bit, charging its price when @p give is set.
@@ -1621,7 +1604,7 @@ extern "C" void cBERewardInterface_buyConceptArt(cBERewardInterface* self, int p
     if (give)
     {
         char* defs = *(char**)((char*)cBERewardInterface_getDB_noargs() + 0x1C);
-        int amount = ((sRewardDef_158220*)(defs + (bit << 4)))->amount;
+        int amount = ((tConceptArtInfo*)(defs + (bit << 4)))->mCost;
         if (amount > 0) amount *= 10;
         cBEEconInterface_reduceMoney(econ, profileIndex, characterId, amount);
     }
@@ -1649,12 +1632,6 @@ extern int cBELibrary_profileLib[];
 // PORT: the unit declares cBERewardInterface_getDB(void*), but it takes no args (returns &cBELibrary_rewardDB).
 void* cBERewardInterface_getDB_noargs() __asm__("cBERewardInterface_getDB");
 
-struct sRewardDef_158348
-{
-    char pad0[0xC];
-    short amount;   // 0xC
-    short padE;
-};
 
 /**
  * Gives the character toy @p bit, charging its price when @p give is set.
@@ -1678,7 +1655,7 @@ extern "C" void cBERewardInterface_buyToy(cBERewardInterface* self, int profileI
     if (give)
     {
         char* defs = *(char**)((char*)cBERewardInterface_getDB_noargs() + 0x20);
-        int amount = ((sRewardDef_158348*)(defs + (bit << 4)))->amount;
+        int amount = ((tToyInfo*)(defs + (bit << 4)))->mCost;
         if (amount > 0) amount *= 10;
         cBEEconInterface_reduceMoney(econ, profileIndex, characterId, amount);
     }
@@ -2057,10 +2034,6 @@ extern "C" int cBERewardInterface_calculateCollectibleMedal(cBERewardInterface* 
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrackMedal__FPviiii);
 #ifdef SKIP_ASM
-struct sProfileSlot_00158910
-{
-    char data[0xF88];
-};
 
 /**
  * Returns a character's medal for one event: byte 1 of its score record.
@@ -2075,7 +2048,7 @@ struct sProfileSlot_00158910
  */
 signed char cBERewardInterface_getTrackMedal(void* self, int iProfileIndex, int iCharacterID, int eventID, int location)
 {
-    void* result = cBECharProfileDB_getScoreStats(&((sProfileSlot_00158910 (*)[10])cBELibrary_profileLib)[iProfileIndex][iCharacterID], location, eventID);
+    void* result = cBECharProfileDB_getScoreStats(&((cBECharProfileDB (*)[10])cBELibrary_profileLib)[iProfileIndex][iCharacterID], location, eventID);
     if (result == 0) {
         return -1;
     }
@@ -2101,7 +2074,7 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrackHighScore);
  */
 extern "C" int cBERewardInterface_getTrackHighScore(cBERewardInterface* self, int profileIndex, int characterId, int event, int locationId)
 {
-    void* result = cBECharProfileDB_getScoreStats(&((sProfileSlot_00158910 (*)[10])cBELibrary_profileLib)[profileIndex][characterId], locationId, event);
+    void* result = cBECharProfileDB_getScoreStats(&((cBECharProfileDB (*)[10])cBELibrary_profileLib)[profileIndex][characterId], locationId, event);
     if (result == 0) {
         return 0;
     }

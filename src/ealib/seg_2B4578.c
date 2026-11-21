@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ealib/sst.h"
+#include "ealib/mtdecf.h"
+#include "ealib/sfilter.h"
 
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SHAPE_unpack);
@@ -3082,8 +3085,7 @@ void SNDSTRMI_releasecallback(void *samples) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ealib/seg_2B4578", SNDSTRMI_framescallback);
 #ifdef SKIP_ASM
-struct Q_6B10 { int p0; int p1; int p2; volatile int owner; int p4; volatile unsigned int pos; volatile unsigned int end; volatile unsigned int left; };
-struct C_6B10 { char pad[0x11C]; struct Q_6B10 *q; };
+struct C_6B10 { char pad[0x11C]; struct SNDSTREAMREQUEST *q; };
 
 /**
  * Advances a stream's requests by the amount just played and retires finished ones.
@@ -3100,21 +3102,21 @@ void SNDSTRMI_framescallback(int packetChan, unsigned int n, struct C_6B10 *stre
     unsigned int rem = 0;
     int i = 0;
     while (1) {
-        struct Q_6B10 *request;
+        struct SNDSTREAMREQUEST *request;
         i++;
         request = stream->q;
         if (i >= 201) {
-            SNDSTRMI_removerequest(request->owner);
+            SNDSTRMI_removerequest(request->sndrequesthandle);
             return;
         }
-        if (request->left < n) {
-            rem = n - request->left;
+        if (request->outstandingframes < n) {
+            rem = n - request->outstandingframes;
             n -= rem;
         }
-        request->pos += n;
-        request->left -= n;
-        if (request->pos >= request->end) {
-            SNDSTRMI_removerequest(request->owner);
+        request->currentframe += n;
+        request->outstandingframes -= n;
+        if (request->currentframe >= ((volatile unsigned int)request->totalframes)) {
+            SNDSTRMI_removerequest(request->sndrequesthandle);
         }
         if (rem == 0) return;
         n = rem;
@@ -19473,7 +19475,6 @@ int SFILTER_unpackfgetframe(void *node) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpackf);
 #ifdef SKIP_ASM
-struct R_9A00 { char pad[0x1C]; short *data; unsigned int pos; unsigned int cap; int flag; };
 
 /**
  * Converts frames of a one-shot 16-bit PCM sample to floats (a filter node's process function).
@@ -19487,19 +19488,19 @@ struct R_9A00 { char pad[0x1C]; short *data; unsigned int pos; unsigned int cap;
  * @param buf  the float destination
  * @return 1, or -1 when the sample has ended
  */
-int SFILTER_unpackf(struct R_9A00 *reader, unsigned int n, int srcBuffer, int *buf) {
-    unsigned int pos = reader->pos;
-    unsigned int cap = reader->cap;
+int SFILTER_unpackf(struct UNPACKFSTATE *reader, unsigned int n, int srcBuffer, int *buf) {
+    unsigned int pos = reader->curframe;
+    unsigned int cap = reader->totalframes;
     if (pos >= cap) return -1;
-    reader->pos = pos + n;
+    reader->curframe = pos + n;
     if (pos + n < cap) {
-        if (reader->flag) {
-            func_003C9E50(n, reader->data + pos, buf);
+        if (reader->bits16) {
+            func_003C9E50(n, ((short*)reader->psample) + pos, buf);
         }
     } else {
         unsigned int first = cap - pos;
-        if (reader->flag) {
-            func_003C9E50(first, reader->data + pos, buf);
+        if (reader->bits16) {
+            func_003C9E50(first, ((short*)reader->psample) + pos, buf);
         }
         func_00416210(buf + first, 0, (n - first) * 4);
     }
@@ -19555,7 +19556,6 @@ INCLUDE_ASM("ealib/seg_2B4578", SFILTER_unpacklf);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void f_9E50_9B10(int, void *, void *) __asm__("func_003C9E50");
-struct R_9B10 { char pad[0x1C]; short *buf; unsigned cur; unsigned start; unsigned end; int en; };
 
 /**
  * Converts frames of a looped 16-bit PCM sample to floats (a filter node's process function).
@@ -19568,19 +19568,19 @@ struct R_9B10 { char pad[0x1C]; short *buf; unsigned cur; unsigned start; unsign
  * @param dst  the float destination
  * @return 1
  */
-int SFILTER_unpacklf(struct R_9B10 *self, int n, int srcBuffer, int *dst) {
+int SFILTER_unpacklf(struct UNPACKLFSTATE *self, int n, int srcBuffer, int *dst) {
     int runLength;
     while (n > 0) {
-        runLength = self->end - self->cur + 1;
+        runLength = self->sustainend - self->curframe + 1;
         if (n < runLength)
             runLength = n;
-        if (self->en != 0)
-            f_9E50_9B10(runLength, self->buf + self->cur, dst);
+        if (self->bits16 != 0)
+            f_9E50_9B10(runLength, ((short*)self->psample) + self->curframe, dst);
         dst += runLength;
-        self->cur = self->cur + runLength;
+        self->curframe = self->curframe + runLength;
         n -= runLength;
-        if (self->end < self->cur)
-            self->cur = self->start;
+        if (self->sustainend < self->curframe)
+            self->curframe = self->sustainstart;
     }
     return 1;
 }
@@ -20789,12 +20789,6 @@ int stretch(char *self, int cnt, char *buf, char *dst) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", SFILTER_timestretchsetratio);
 #ifdef SKIP_ASM
-// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-// Sets f24 = v / 4096 clamped to [0.5, 2.0]; the double compares are the soft-float
-// helpers called directly (fptodp = float->double, dpcmp = double compare).
-struct O_B110 { char p[0x24]; float f; };
 extern long fptodp_B110(float) __asm__("fptodp");
 extern int dpcmp_B110(long, long) __asm__("dpcmp");
 /**
@@ -20803,12 +20797,12 @@ extern int dpcmp_B110(long, long) __asm__("dpcmp");
  * @param stretcher  the time-stretch state
  * @param timeMult  the time multiplier (4096 = 1.0)
  */
-void SFILTER_timestretchsetratio(struct O_B110 *stretcher, int timeMult) {
-    stretcher->f = timeMult * (1.0f / 4096.0f);
-    if (dpcmp_B110(fptodp_B110(stretcher->f), 0x3FE0000000000000L) < 0) {
-        stretcher->f = 0.5f;
-    } else if (dpcmp_B110(fptodp_B110(stretcher->f), 0x4000000000000000L) > 0) {
-        stretcher->f = 2.0f;
+void SFILTER_timestretchsetratio(struct TIMESTRETCHSTATE *stretcher, int timeMult) {
+    stretcher->stretchratio = timeMult * (1.0f / 4096.0f);
+    if (dpcmp_B110(fptodp_B110(stretcher->stretchratio), 0x3FE0000000000000L) < 0) {
+        stretcher->stretchratio = 0.5f;
+    } else if (dpcmp_B110(fptodp_B110(stretcher->stretchratio), 0x4000000000000000L) > 0) {
+        stretcher->stretchratio = 2.0f;
     }
 }
 #endif
@@ -22766,7 +22760,6 @@ int CMTBLKDecf_Decode(struct S_DE68 *decoder, char **dstBuf, int max) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", CMTBLKDecf_GetState);
 #ifdef SKIP_ASM
-struct V3_E078 { int a; int b; int c; };
 
 /**
  * Returns a snapshot of a MicroTalk decoder's resumable state.
@@ -22777,11 +22770,11 @@ struct V3_E078 { int a; int b; int c; };
  *
  * @return the snapshot {shift register, frames left, whole-init flag}
  */
-struct V3_E078 CMTBLKDecf_GetState(char *self) {
-    struct V3_E078 snapshot;
-    snapshot.a = *(int *)(self + 4);
-    snapshot.c = *(int *)(self + 0xD5C);
-    snapshot.b = *(int *)(self + 0xD44);
+struct MTFSTATE CMTBLKDecf_GetState(char *self) {
+    struct MTFSTATE snapshot;
+    snapshot.shiftreg = *(int *)(self + 4);
+    snapshot.doWholeInit = *(int *)(self + 0xD5C);
+    snapshot.bufframes = *(int *)(self + 0xD44);
     return snapshot;
 }
 #endif

@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "main/game.h"
 #include "sound/icepick/worldtriggermanager.h"
@@ -2665,7 +2666,6 @@ extern "C" int cSSXAudio_ReplayMode(void* self);
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 
-struct sSsVt4678 { short delta; short index; int (*fn)(void*); };
 
 /**
  * Handles the air-time side of a lift-off, from the rider's air predictor.
@@ -2683,14 +2683,14 @@ extern "C" void cSSXAudio_LiftWithAirTime(cSSXAudio* self, cRider* rider)
     int ok = simState == 1 || simState == 3;
     if (!ok) {
         char* riderObj = (char*)&rider->mVtbl;
-        sSsVt4678* vtEntry = &(*(sSsVt4678**)riderObj)[7];
+        sVEntry<int(void*)>* vtEntry = &(*(sVEntry<int(void*)>**)riderObj)[7];
         cSSXAudio_SetNeedLift(self, vtEntry->fn(riderObj + vtEntry->delta), 1);
         return;
     }
     int idx = -1;
     {
         char* riderObj = (char*)&rider->mVtbl;
-        sSsVt4678* vtEntry = &(*(sSsVt4678**)riderObj)[7];
+        sVEntry<int(void*)>* vtEntry = &(*(sVEntry<int(void*)>**)riderObj)[7];
         cSSXAudio_SetNeedLift(self, vtEntry->fn(riderObj + vtEntry->delta), 0);
     }
     float x = *(float*)((char*)rider->mAirPredictor + 0x98);
@@ -2950,11 +2950,6 @@ extern "C" void cSSXAudio_Land(cSSXAudio* vself, cRider* rider, float powerupGai
 //100%
 INCLUDE_ASM("sound/soundsys", cSSXAudio_PlayPauseSound);
 #ifdef SKIP_ASM
-struct sSndVEntry294F48 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, int);
-};
 
 /**
  * Plays bank 0, patch 0 as a 2D sound through virtual slot 1 of cSSXAudio_vtbl (cSSXAudio_SFX_Play2D).
@@ -2965,7 +2960,7 @@ struct sSndVEntry294F48 {
  */
 extern "C" int cSSXAudio_PlayPauseSound(cSSXAudio* self)
 {
-    sSndVEntry294F48* vt = (sSndVEntry294F48*)self->mVtbl;
+    sVEntry<int(void*, int, int)>* vt = (sVEntry<int(void*, int, int)>*)self->mVtbl;
     return vt[1].fn((char*)self + vt[1].delta, 0, 0);
 }
 #endif
@@ -2974,7 +2969,6 @@ extern "C" int cSSXAudio_PlayPauseSound(cSSXAudio* self)
 INCLUDE_ASM("sound/soundsys", cSSXAudio_MenuSound);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sVEnt_294F78 { short delta; short index; int (*fn)(void*, int, int); };
 
 /**
  * Plays a front-end menu sound.
@@ -3021,7 +3015,7 @@ extern "C" void cSSXAudio_MenuSound(cSSXAudio* self, int cue)
         break;
     }
     if (id != -1) {
-        sVEnt_294F78* vt = (sVEnt_294F78*)self->mVtbl;
+        sVEntry<int(void*, int, int)>* vt = (sVEntry<int(void*, int, int)>*)self->mVtbl;
         vt[1].fn((char*)self + vt[1].delta, 0, id);
     }
 }
@@ -3342,7 +3336,6 @@ int cSSXAudio_PlayHistoryExists_p(void* self, void* evt, int idx) __asm__("cSSXA
 extern "C" int cWorldTriggerManager_HandleCollision(void* mgr, void* evt, int id, void* rider, int vol);
 extern "C" void cSSXAudio_PlayHistoryAdd(cSSXAudio* self, void* evt, int h, int t, int a, int idx);
 
-struct sSsVt6088 { short delta; short index; int (*fn)(void*); };
 
 /**
  * Plays the collision sound of a world instance a rider has hit, scaled by the rider's speed.
@@ -3361,7 +3354,7 @@ extern "C" void cSSXAudio_CollisionSound(cSSXAudio* self, cRider* rider, char* e
 {
     if (*(void**)(evt + 0x8C) == 0) return;
     char* obj = (char*)&rider->mVtbl;
-    sSsVt6088* vtEntry = &(*(sSsVt6088**)obj)[5];
+    sVEntry<int(void*)>* vtEntry = &(*(sVEntry<int(void*)>**)obj)[5];
     if (cSSXAudio_CameraInRange(self, vtEntry->fn(obj + vtEntry->delta), 100.0f) < 0) return;
     if (cSSXAudio_PlayHistoryExists_p(self, evt, idx) != 0) return;
     sSndVEntryVec* vt = *(sSndVEntryVec**)obj;
@@ -8209,7 +8202,6 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_HandleAvalanche);
 extern "C" int cSSXAudio_GetAvalancheVolume(cSSXAudio*, tAvalanchePositionalData*);
 extern "C" void cAvalanche_getAvalancheDataByPosition(void *, float *);
 
-struct sVEntryP_29E4A0 { short delta; short index; float* (*fn)(void*); };
 
 /**
  * Updates the avalanche loop's voice: refreshes mAvalancheData around the avalanche rider and resets the volume.
@@ -8228,7 +8220,7 @@ extern "C" void cSSXAudio_HandleAvalanche(cSSXAudio* ssxAudio, void *voice) {
         tAvalanchePositionalData* dst = &(*(&ssxAudio->mAvalancheData));
         cRider* rider = ((cAI*)cAudioInterface_getAI())->Riders[ssxAudio->mpAvalancheRiderIndex];
         char* obj = (char*)&rider->mVtbl;
-        sVEntryP_29E4A0* vt = *(sVEntryP_29E4A0**)obj;
+        sVEntry<float*(void*)>* vt = *(sVEntry<float*(void*)>**)obj;
         float* pos = vt[kRiderVt_getPosition].fn(obj + vt[kRiderVt_getPosition].delta);
         riderPos[0] = pos[0];
         riderPos[1] = pos[1];

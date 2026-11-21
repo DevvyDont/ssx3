@@ -6939,10 +6939,6 @@ static inline sMsgListIter_00261970 sMsgList_00261970_insert(sMsgListIter_002619
     return tmp;
 }
 
-struct sMsg_00261970 {
-    int kind;
-    void** vt;
-};
 
 /**
  * Posts an online::Event of type 267 on LobbyMan_mLobbyMan's mEventList when a roster delete request answers.
@@ -6955,9 +6951,9 @@ struct sMsg_00261970 {
 extern "C" void BuddyMan_onBuddyDelete(int buddyMan)
 {
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
-    sMsg_00261970* event = (sMsg_00261970*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
-    event->vt = online_Event_vtbl;
-    event->kind = 267;
+    online_Event* event = (online_Event*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
+    event->mVtbl = online_Event_vtbl;
+    event->mType = 267;
     void* mp = event;
     sMsgList_00261970_insert(((sMsgListNode_00261970*)lobbyMan->mEventList.mpHead), mp);
 }
@@ -13849,21 +13845,14 @@ extern "C" void* cBXString_cBXString2(void* self, const char* s);
 extern char str_NetEvent[];
 extern char online_AcctLockedEvent_vtbl[];
 
-struct sLockMsg268308 {
-    int type;       // 0x00
-    char* name;     // 0x04
-    int tag;        // 0x08
-    char a[4];      // 0x0C
-    char b[4];      // 0x10
-};
 
-static inline void Init268308(sLockMsg268308* m, const char* a, const char* b)
+static inline void Init268308(online_AcctLockedEvent* m, const char* a, const char* b)
 {
-    m->type = 0x102;
-    m->tag = 0x6C6F636B;
-    m->name = online_AcctLockedEvent_vtbl;
-    cBXString_cBXString2(m->a, a);
-    cBXString_cBXString2(m->b, b);
+    m->mType = 0x102;
+    m->mError = 0x6C6F636B;
+    (*(char**)&m->mVtbl) = online_AcctLockedEvent_vtbl;
+    cBXString_cBXString2(((char*)&m->mDate), a);
+    cBXString_cBXString2(((char*)&m->mIntro), b);
 }
 
 /**
@@ -13878,7 +13867,7 @@ static inline void Init268308(sLockMsg268308* m, const char* a, const char* b)
 // Builds a "lock" message carrying the two name strings of this request.
 extern "C" void* online_AcctLockedEvent_clone(online_AcctLockedEvent* self)
 {
-    sLockMsg268308* lockMsg = (sLockMsg268308*)operator new(20, str_NetEvent, 0x20000000, 0);
+    online_AcctLockedEvent* lockMsg = (online_AcctLockedEvent*)operator new(20, str_NetEvent, 0x20000000, 0);
     Init268308(lockMsg, (const char*)self->mDate, (const char*)self->mIntro);
     return lockMsg;
 }
@@ -13972,24 +13961,15 @@ extern char str_NetEvent[];
 extern void* online_FindPlayerEvent_vtbl[];
 
 
-struct sMsg2684C0 {
-    int type;           // 0x00
-    void** vt;          // 0x04
-    char a[4];          // 0x08
-    char b[4];          // 0x0C
-    int f10;            // 0x10
-    int f14;            // 0x14
-    tLobbyStats blk;     // 0x18
-};
 
-static inline void Init2684C0(sMsg2684C0* m, const char* a, const char* b, int c, int d)
+static inline void Init2684C0(online_FindPlayerEvent* m, const char* a, const char* b, int c, int d)
 {
-    m->type = 0xE3;
-    m->vt = online_FindPlayerEvent_vtbl;
-    cBXString_cBXString2(m->a, a);
-    cBXString_cBXString2(m->b, b);
-    m->f10 = c;
-    m->f14 = d;
+    m->mType = 0xE3;
+    m->mVtbl = online_FindPlayerEvent_vtbl;
+    cBXString_cBXString2(((char*)&m->mName), a);
+    cBXString_cBXString2(((char*)&m->mRoom), b);
+    m->mOnline = c;
+    m->mAddr = d;
 }
 
 /**
@@ -14005,9 +13985,9 @@ static inline void Init2684C0(sMsg2684C0* m, const char* a, const char* b, int c
 // Clones a 0xE3 message (strings, ids and trailing data block).
 extern "C" void* online_FindPlayerEvent_clone(online_FindPlayerEvent* src)
 {
-    sMsg2684C0* copy = (sMsg2684C0*)operator new(44, str_NetEvent, 0x20000000, 0);
+    online_FindPlayerEvent* copy = (online_FindPlayerEvent*)operator new(44, str_NetEvent, 0x20000000, 0);
     Init2684C0(copy, *(const char**)((char*)&src->mName), *(const char**)((char*)&src->mRoom), src->mOnline, src->mAddr);
-    copy->blk = (*(&src->mStats));
+    copy->mStats = (*(&src->mStats));
     return copy;
 }
 #endif

@@ -12,11 +12,6 @@ struct sScoreStat_00152398
     int b;
 };
 
-struct sCharProfile_00152398
-{
-    char pad0[0xAD0];
-    sScoreStat_00152398 stats[0x1A];  // 0xAD0
-};
 
 /**
  * Returns a character's score record for a location and event.
@@ -33,7 +28,7 @@ void* cBECharProfileDB_getScoreStats(void* self, int locID, int event)
     if (type == 26) {
         return 0;
     }
-    return &((sCharProfile_00152398*)self)->stats[type];
+    return &((sScoreStat_00152398*)&((cBECharProfileDB*)self)->mScoreStats[0])[type];
 }
 #endif
 
@@ -142,13 +137,6 @@ extern "C" int cBECharProfileDB_updateScoreStats(cBECharProfileDB* self, int loc
 //100%
 INCLUDE_ASM("be/bedbprofile", cBECharProfileDB_updateMedalStats);
 #ifdef SKIP_ASM
-struct sPlaceStat_00152528
-{
-    unsigned char done;     // 0x0
-    signed char best;       // 0x1
-    unsigned short count;   // 0x2
-    int pad4;
-};
 
 struct sMedals_00152528
 {
@@ -159,7 +147,7 @@ struct sMedals_00152528
 struct sCharProfile_00152528
 {
     char pad0[0xAD0];
-    sPlaceStat_00152528 stats[0x1A];    // 0xAD0
+    tBETrackScore stats[0x1A];    // 0xAD0
     sMedals_00152528 medals[1];         // 0xBA0
 };
 
@@ -191,13 +179,13 @@ extern "C" int cBECharProfileDB_updateMedalStats(sCharProfile_00152528* self, in
         int type = cBELibrary_getScoreType(ev, mode);
         if (type != 26)
         {
-            sPlaceStat_00152528* placeStat = &self->stats[type];
-            placeStat->done = 1;
+            tBETrackScore* placeStat = &self->stats[type];
+            placeStat->hasPlayed = 1;
             if ((unsigned int)place < 2)
-                placeStat->count++;
-            if (placeStat->best != -1)
+                placeStat->iNumGoldOrPlat++;
+            if (placeStat->BestMedal != -1)
             {
-                if (place >= placeStat->best)
+                if (place >= placeStat->BestMedal)
                     goto fail;
             }
             else
@@ -208,7 +196,7 @@ extern "C" int cBECharProfileDB_updateMedalStats(sCharProfile_00152528* self, in
                 else if ((unsigned int)(mode - 1) < 3)
                     self->medals[cat].b++;
             }
-            placeStat->best = place;
+            placeStat->BestMedal = place;
             return 1;
         }
     }

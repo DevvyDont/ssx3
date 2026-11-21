@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "bx/appman.h"
 #include "bx/loadtimer.h"
@@ -67,7 +68,6 @@ int cAppMan_checkHalt(cAppMan* self);
 
 struct sVt0_6D60 { short delta; short index; int (*fn)(void*); };
 struct sVt1_6D60 { short delta; short index; void (*fn)(void*, int); };
-struct sVt2_6D60 { short delta; short index; void (*fn)(void*, int, int); };
 
 static inline int call0_6D60(char* o, int vtoff, int slot)
 {
@@ -107,7 +107,7 @@ extern "C" int cAppMan_run(cAppMan* self, char* exec, int ac, int av)
     self->ExecutionMan = (cExecutionMan*)exec;
     self->TimerHz = 60;
     call1_6D60(exec, 8, 2, 60);
-    sVt2_6D60* vt = (sVt2_6D60*)self->mVtbl;
+    sVEntry<void(void*, int, int)>* vt = (sVEntry<void(void*, int, int)>*)self->mVtbl;
     vt[3].fn(((char*)self) + vt[3].delta, ac, av);
     call1_6D60((char*)self->ExecutionMan, 8, 9, (int)self->LoadingModule);
     while (call0_6D60((char*)self->ExecutionMan, 8, 10) == 0) {
@@ -377,22 +377,18 @@ struct sVEntry00317400 {
     void* fn;
 };
 
-struct sAppObj00317400 {
-    char pad[8];
-    sVEntry00317400* vt;
-};
 
 /**
  * Tells the execution manager to purge (slot 3), then to shut down with code 3 (slot 1).
  */
 extern "C" void cAppMan_loadexecpurge(void* self)
 {
-    sAppObj00317400* execMan = *(sAppObj00317400**)((char*)self + 8);
-    ((void (*)(void*))execMan->vt[3].fn)((char*)execMan + execMan->vt[3].delta);
-    sAppObj00317400* execMan2 = *(sAppObj00317400**)((char*)self + 8);
+    cExecutionMan* execMan = *(cExecutionMan**)((char*)self + 8);
+    ((void (*)(void*))((sVEntry00317400*)execMan->mVtbl)[3].fn)((char*)execMan + ((sVEntry00317400*)execMan->mVtbl)[3].delta);
+    cExecutionMan* execMan2 = *(cExecutionMan**)((char*)self + 8);
     if (execMan2 != 0)
     {
-        ((void (*)(void*, int))execMan2->vt[1].fn)((char*)execMan2 + execMan2->vt[1].delta, 3);
+        ((void (*)(void*, int))((sVEntry00317400*)execMan2->mVtbl)[1].fn)((char*)execMan2 + ((sVEntry00317400*)execMan2->mVtbl)[1].delta, 3);
     }
 }
 #endif
@@ -426,11 +422,6 @@ INCLUDE_ASM("bx/appman", cExecutionMan_halt);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // LANDING: the unit declares `extern "C" void cExecutionMan_halt(int);` (line ~245, used by cAppMan_halt);
 // retype it to (cExecutionMan*, int, int) or keep the alias below.
-struct sVEntry00317478 {
-    short delta;
-    short index;
-    void (*fn)(void*);
-};
 
 extern "C" void cExecutionMan_halt_impl(cExecutionMan* self, int a1, int a2) __asm__("cExecutionMan_halt");
 
@@ -445,7 +436,7 @@ extern "C" void cExecutionMan_halt_impl(cExecutionMan* self, int a1, int a2) __a
 extern "C" void cExecutionMan_halt_impl(cExecutionMan* self, int callback, int data)
 {
     (*(int*)&self->HaltData) = data;
-    sVEntry00317478* vt = (sVEntry00317478*)((void*)self->mVtbl);
+    sVEntry<void(void*)>* vt = (sVEntry<void(void*)>*)((void*)self->mVtbl);
     (*(int*)&self->HaltCallback) = callback;
     vt[13].fn((char*)self + vt[13].delta);
 }

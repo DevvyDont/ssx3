@@ -1,4 +1,7 @@
 #include "common.h"
+#include "util/objectinterface.h"
+#include "bx/math3d.h"
+#include "ui/uithing.h"
 #include "util/consoleconfig.h"
 #include "util/menu.h"
 #include "util/bxps2memcard.h"
@@ -46,8 +49,6 @@ extern "C" int get_uint(unsigned char **pp, unsigned int *out) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", get_t3Vector);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct t3Vector_25A0 { float x, y, z; };
 extern "C" int get_float_25A0(void*, void*) __asm__("get_float");
 /**
  * Reads a three-float vector from a comms data stream.
@@ -56,8 +57,8 @@ extern "C" int get_float_25A0(void*, void*) __asm__("get_float");
  * @param out  receives the vector
  * @return number of bytes read
  */
-extern "C" int get_t3Vector(void *src, t3Vector_25A0 *out) {
-    t3Vector_25A0 vec;
+extern "C" int get_t3Vector(void *src, t3Vector *out) {
+    t3Vector vec;
     int total = 0;
     int i;
     float *component = &vec.x;
@@ -135,8 +136,6 @@ extern "C" int get_t4Matrix(int src, int out) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", get_tQuaternion);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct V4_26F8 { float x, y, z, w; } __attribute__((aligned(16)));
 extern "C" int get_float_26F8(void*, void*) __asm__("get_float");
 /**
  * Reads four floats from a byte stream into a 16-byte aligned vector, the first one read going to the last component.
@@ -147,9 +146,9 @@ extern "C" int get_float_26F8(void*, void*) __asm__("get_float");
  * @param out  receives the vector
  * @return the bytes read (16)
  */
-extern "C" int get_tQuaternion(void *src, V4_26F8 *out) {
+extern "C" int get_tQuaternion(void *src, tQuaternion *out) {
     float readW, readX, readY, readZ;
-    V4_26F8 result;
+    tQuaternion result;
     int total;
     total = get_float_26F8(src, &readW);
     total += get_float_26F8(src, &readX);
@@ -227,7 +226,6 @@ extern "C" int get_char_2868(unsigned char **, unsigned char *) __asm__("get_cha
 extern "C" int get_uint_2868(unsigned char **, void *) __asm__("get_uint");
 extern char str_Comm_Data_Block[];
 extern char str_Comm_Data[];
-struct Data_2868 { unsigned int n; unsigned char *data; };
 /**
  * Reads a length-prefixed byte block from a comms data stream into a new "Comm Data Block".
  *
@@ -235,18 +233,18 @@ struct Data_2868 { unsigned int n; unsigned char *data; };
  * @param out  receives the new block (count and "Comm Data" bytes)
  * @return number of bytes read
  */
-extern "C" int get_data(unsigned char **src, Data_2868 **out) {
+extern "C" int get_data(unsigned char **src, tCommDataBlock **out) {
     unsigned int i = 0;
-    Data_2868 *newData = (Data_2868*)cMemMan_alloc_2868(8, str_Comm_Data_Block, 0x100, 0);
-    newData->n = 0;
-    newData->data = 0;
+    tCommDataBlock *newData = (tCommDataBlock*)cMemMan_alloc_2868(8, str_Comm_Data_Block, 0x100, 0);
+    newData->Size = 0;
+    (*(unsigned char**)&newData->Data) = 0;
     *out = newData;
     int total = get_uint_2868(src, newData);
-    Data_2868 *reloaded = *out;
-    reloaded->data = (unsigned char*)operator_new_tag_2868(reloaded->n, str_Comm_Data, 0x100, 0);
-    Data_2868 *current = *out;
-    for (i = 0; i < current->n; i++) {
-        total += get_char_2868(src, current->data + i);
+    tCommDataBlock *reloaded = *out;
+    (*(unsigned char**)&reloaded->Data) = (unsigned char*)operator_new_tag_2868(reloaded->Size, str_Comm_Data, 0x100, 0);
+    tCommDataBlock *current = *out;
+    for (i = 0; i < current->Size; i++) {
+        total += get_char_2868(src, ((unsigned char*)current->Data) + i);
         current = *out;
     }
     return total;

@@ -2326,19 +2326,7 @@ union sTrickId_6E10 {
 
 extern "C" void gGenTrickName(char* buf, sTrickId_6E10* id, int size);
 
-struct sMonsterReq_6E10 {
-    int trick;
-    int pad4;
-    unsigned char kind;
-    unsigned char dir;
-    unsigned char spin;
-    unsigned char flip;
-    unsigned char grab;
-    unsigned char mod;
-    unsigned char extra;
-    unsigned char padF;
-};
-extern sMonsterReq_6E10 gMonsterComboTable[];
+extern tMonsterTrick gMonsterComboTable[];
 
 /**
  * Writes the name of the monster trick that a trick requires, or an empty string when it is not in the
@@ -2351,18 +2339,18 @@ extern sMonsterReq_6E10 gMonsterComboTable[];
 // Name of the monster trick required for `trick` (empty when it is not one).
 extern "C" void gGenMonsterTrickReqName(char* buf, int trick, int size)
 {
-    sMonsterReq_6E10* req = gMonsterComboTable;
+    tMonsterTrick* req = gMonsterComboTable;
     for (int i = 0; i < 0x18; i++, req++) {
-        if (req->trick == trick) {
+        if (req->id == trick) {
             sTrickId_6E10 id;
             MEM_fill(&id, 0, 8);
-            id.b.kind = req->kind;
-            id.b.dir = req->dir;
-            id.b.spin = req->spin;
-            id.b.flip = req->flip;
-            id.b.grab = req->grab;
-            id.b.mod = req->mod;
-            id.b.extra = req->extra;
+            id.b.kind = req->reqOrient;
+            id.b.dir = req->reqSpin;
+            id.b.spin = req->reqReps;
+            id.b.flip = req->reqFlip;
+            id.b.grab = req->reqPostSpin;
+            id.b.mod = req->reqGrab;
+            id.b.extra = req->reqLateGrab;
             if (id.w[1] & 0x3F800) {  // extra != 0
                 id.b.hasExtra = 1;
             }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintreward.h"
 #include "be/beintcharacter.h"
 #include "be/beintnetwork.h"
 
@@ -309,10 +310,6 @@ struct sVEntry0014EA90 {
     void (*fn)(void*);
 };
 
-struct sBEIface0014EA90 {
-    char pad_0x00[0xC];
-    sVEntry0014EA90* vtable; // 0xC
-};
 
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -328,10 +325,10 @@ void func_0014EB08_self(void* self) __asm__("func_0014EB08");
  */
 extern "C" void cBENetworkInterface_postInitBE(cBENetworkInterface* self)
 {
-    sBEIface0014EA90* statInterface = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 3);
-    statInterface->vtable[2].fn((char*)statInterface + statInterface->vtable[2].delta);
-    sBEIface0014EA90* aggressionInterface = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 0xC);
-    aggressionInterface->vtable[2].fn((char*)aggressionInterface + aggressionInterface->vtable[2].delta);
+    cBEInterface* statInterface = (cBEInterface*)cBE_getInterface_Fv(cBE_getBE(), 3);
+    ((sVEntry0014EA90*)statInterface->mVtbl)[2].fn((char*)statInterface + ((sVEntry0014EA90*)statInterface->mVtbl)[2].delta);
+    cBEInterface* aggressionInterface = (cBEInterface*)cBE_getInterface_Fv(cBE_getBE(), 0xC);
+    ((sVEntry0014EA90*)aggressionInterface->mVtbl)[2].fn((char*)aggressionInterface + ((sVEntry0014EA90*)aggressionInterface->mVtbl)[2].delta);
     func_0014EB08_self(self);
 }
 #endif
@@ -469,10 +466,10 @@ extern "C" void cBENetworkInterface_restoreCharProfile(cBENetworkInterface* self
     {
         cBELibrary_playerDB[i] = cBENetworkInterface_BackupPlayerDB[i];
     }
-    sBEIface0014EA90* playerInterface = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 1);
-    playerInterface->vtable[2].fn((char*)playerInterface + playerInterface->vtable[2].delta);
-    sBEIface0014EA90* grabTable = (sBEIface0014EA90*)cBE_getInterface_Fv(cBE_getBE(), 6);
-    grabTable->vtable[2].fn((char*)grabTable + grabTable->vtable[2].delta);
+    cBEInterface* playerInterface = (cBEInterface*)cBE_getInterface_Fv(cBE_getBE(), 1);
+    ((sVEntry0014EA90*)playerInterface->mVtbl)[2].fn((char*)playerInterface + ((sVEntry0014EA90*)playerInterface->mVtbl)[2].delta);
+    cBEInterface* grabTable = (cBEInterface*)cBE_getInterface_Fv(cBE_getBE(), 6);
+    ((sVEntry0014EA90*)grabTable->mVtbl)[2].fn((char*)grabTable + ((sVEntry0014EA90*)grabTable->mVtbl)[2].delta);
 }
 #endif
 

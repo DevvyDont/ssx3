@@ -1,4 +1,5 @@
 #include "common.h"
+#include "seg/newlib_reent.h"
 
 // PORT: PS2 kernel syscall stub: the syscall number goes in $3. Defined under a second C name with an
 // asm label because this file declares these symbols with their argument lists elsewhere.
@@ -1202,41 +1203,14 @@ void _cleanup(void) {
 //100%
 INCLUDE_ASM("seg/seg_316FB8", fseek);
 #ifdef SKIP_ASM
-struct R17008 {
-    int err;
-    char pad[0x38 - 4];
-    int didinit;
-};
-struct F17008 {
-    unsigned char *p;
-    int r;
-    int w;
-    unsigned short flags;
-    short file;
-    unsigned char *base;
-    int size;
-    int lbfsize;
-    int cookie;
-    int pad20[2];
-    long (*seek)(int, long, int);
-    int pad2C;
-    unsigned char *ubbase;
-    int ubsize;
-    unsigned char *up;
-    int ur;
-    char pad40[0x4C - 0x40];
-    int blksize;
-    int offset;
-    struct R17008 *data;
-};
-extern struct R17008 *g17008_impure __asm__("D_00454944");
-extern void g17008_init(struct R17008 *) __asm__("__sinit");
-extern int g17008_fflush(struct F17008 *) __asm__("fflush");
-extern int g17008_fstat(struct R17008 *, int, int *) __asm__("_fstat_r");
+extern struct _reent *g17008_impure __asm__("D_00454944");
+extern void g17008_init(struct _reent *) __asm__("__sinit");
+extern int g17008_fflush(struct __sFILE *) __asm__("fflush");
+extern int g17008_fstat(struct _reent *, int, int *) __asm__("_fstat_r");
 extern long g17008_sseek(int, long, int) __asm__("__sseek");
-extern void g17008_smakebuf(struct F17008 *) __asm__("__smakebuf");
-extern int g17008_srefill(struct F17008 *) __asm__("__srefill");
-int fseek_(struct F17008 *fp, long offset, int whence) __asm__("fseek");
+extern void g17008_smakebuf(struct __sFILE *) __asm__("__smakebuf");
+extern int g17008_srefill(struct __sFILE *) __asm__("__srefill");
+int fseek_(struct __sFILE *fp, long offset, int whence) __asm__("fseek");
 /**
  * Repositions a stdio stream, seeking inside the buffer when it can, and returns 0 or -1.
  *
@@ -1259,40 +1233,40 @@ int fseek_(struct F17008 *fp, long offset, int whence) __asm__("fseek");
  * @param whence  0 from the start, 1 from the current position, 2 from the end
  * @return 0 on success, -1 on failure
  */
-int fseek_(struct F17008 *stream, long offset, int whence) {
+int fseek_(struct __sFILE *stream, long offset, int whence) {
     long (*seekfn)(int, long, int);
     long target, curoff;
     unsigned n;
     int st[104 / 4];
     int havepos;
-    struct R17008 *ptr;
-    if (stream->data == 0)
-        stream->data = g17008_impure;
-    if (stream->data->didinit == 0)
-        g17008_init(stream->data);
-    ptr = stream->data;
-    if ((*(int *)&stream->flags & 0x108) == 264)
+    struct _reent *ptr;
+    if (((struct _reent*)stream->_data) == 0)
+        (*(struct _reent**)&stream->_data) = g17008_impure;
+    if (((struct _reent*)stream->_data)->__sdidinit == 0)
+        g17008_init(((struct _reent*)stream->_data));
+    ptr = ((struct _reent*)stream->_data);
+    if ((*(int *)&(*(unsigned short*)&stream->_flags) & 0x108) == 264)
         g17008_fflush(stream);
-    if ((seekfn = stream->seek) == 0) {
-        ptr->err = 29;
+    if ((seekfn = ((long (*)(int, long, int))stream->_seek)) == 0) {
+        ptr->_errno = 29;
         return -1;
     }
     switch (whence) {
     case 1:
         g17008_fflush(stream);
-        if (stream->flags & 0x1000)
-            curoff = stream->offset;
+        if ((*(unsigned short*)&stream->_flags) & 0x1000)
+            curoff = stream->_offset;
         else {
-            curoff = (*seekfn)(stream->cookie, 0, 1);
+            curoff = (*seekfn)(((int)stream->_cookie), 0, 1);
             if (curoff == -1)
                 return -1;
         }
-        if (stream->flags & 4) {
-            curoff -= stream->r;
-            if (stream->ubbase)
-                curoff -= stream->ur;
-        } else if (stream->flags & 8 && stream->p != 0)
-            curoff += stream->p - stream->base;
+        if ((*(unsigned short*)&stream->_flags) & 4) {
+            curoff -= stream->_r;
+            if (stream->_ub._base)
+                curoff -= stream->_ur;
+        } else if ((*(unsigned short*)&stream->_flags) & 8 && stream->_p != 0)
+            curoff += stream->_p - stream->_bf._base;
         offset += curoff;
         whence = 0;
         havepos = 1;
@@ -1302,77 +1276,77 @@ int fseek_(struct F17008 *stream, long offset, int whence) {
         havepos = 0;
         break;
     default:
-        ptr->err = 22;
+        ptr->_errno = 22;
         return -1;
     }
-    if (stream->base == 0)
+    if (stream->_bf._base == 0)
         g17008_smakebuf(stream);
-    if (stream->flags & 0x81A)
+    if ((*(unsigned short*)&stream->_flags) & 0x81A)
         goto dumb;
-    if ((stream->flags & 0x400) == 0) {
-        if (seekfn != g17008_sseek || stream->file < 0 || g17008_fstat(ptr, stream->file, st) ||
+    if (((*(unsigned short*)&stream->_flags) & 0x400) == 0) {
+        if (seekfn != g17008_sseek || stream->_file < 0 || g17008_fstat(ptr, stream->_file, st) ||
             (st[1] & 0xF000) != 0x8000) {
-            stream->flags |= 0x800;
+            (*(unsigned short*)&stream->_flags) |= 0x800;
             goto dumb;
         }
-        stream->blksize = 0x400;
-        stream->flags |= 0x400;
+        stream->_blksize = 0x400;
+        (*(unsigned short*)&stream->_flags) |= 0x400;
     }
     if (whence == 0)
         target = offset;
     else {
-        if (g17008_fstat(ptr, stream->file, st))
+        if (g17008_fstat(ptr, stream->_file, st))
             goto dumb;
         target = *(long *)&st[4] + offset;
     }
     if (!havepos) {
-        if (stream->flags & 0x1000)
-            curoff = stream->offset;
+        if ((*(unsigned short*)&stream->_flags) & 0x1000)
+            curoff = stream->_offset;
         else {
-            curoff = (*seekfn)(stream->cookie, 0, 1);
+            curoff = (*seekfn)(((int)stream->_cookie), 0, 1);
             if (curoff == -1)
                 goto dumb;
         }
-        curoff -= stream->r;
-        if (stream->ubbase)
-            curoff -= stream->ur;
+        curoff -= stream->_r;
+        if (stream->_ub._base)
+            curoff -= stream->_ur;
     }
-    if (stream->ubbase) {
-        curoff += stream->r;
-        n = stream->up - stream->base;
+    if (stream->_ub._base) {
+        curoff += stream->_r;
+        n = stream->_up - stream->_bf._base;
         curoff -= n;
-        n += stream->ur;
+        n += stream->_ur;
     } else {
-        n = stream->p - stream->base;
+        n = stream->_p - stream->_bf._base;
         curoff -= n;
-        n += stream->r;
+        n += stream->_r;
     }
-    if ((stream->flags & 0x2000) == 0 && target >= curoff && target < curoff + n) {
+    if (((*(unsigned short*)&stream->_flags) & 0x2000) == 0 && target >= curoff && target < curoff + n) {
         int bufOffset = target - curoff;
-        stream->p = stream->base + bufOffset;
-        stream->r = n - bufOffset;
-        stream->flags &= ~0x20;
+        stream->_p = stream->_bf._base + bufOffset;
+        stream->_r = n - bufOffset;
+        (*(unsigned short*)&stream->_flags) &= ~0x20;
         return 0;
     }
-    curoff = target & -stream->blksize;
-    if ((*seekfn)(stream->cookie, curoff, 0) == -1)
+    curoff = target & -stream->_blksize;
+    if ((*seekfn)(((int)stream->_cookie), curoff, 0) == -1)
         goto dumb;
-    stream->r = 0;
-    stream->flags &= ~0x20;
+    stream->_r = 0;
+    (*(unsigned short*)&stream->_flags) &= ~0x20;
     n = target - curoff;
     if (n) {
-        if (g17008_srefill(stream) || stream->r < n)
+        if (g17008_srefill(stream) || stream->_r < n)
             goto dumb;
-        stream->p += n;
-        stream->r -= n;
+        stream->_p += n;
+        stream->_r -= n;
     }
     return 0;
 dumb:
-    if (g17008_fflush(stream) || (*seekfn)(stream->cookie, offset, whence) == -1)
+    if (g17008_fflush(stream) || (*seekfn)(((int)stream->_cookie), offset, whence) == -1)
         return -1;
-    stream->p = stream->base;
-    stream->r = 0;
-    stream->flags &= ~0x20;
+    stream->_p = stream->_bf._base;
+    stream->_r = 0;
+    (*(unsigned short*)&stream->_flags) &= ~0x20;
     return 0;
 }
 #endif
@@ -1380,11 +1354,6 @@ dumb:
 //100%
 INCLUDE_ASM("seg/seg_316FB8", _fwalk);
 #ifdef SKIP_ASM
-struct G17418 {
-    struct G17418 *next;
-    int n;
-    char *files;
-};
 /**
  * Calls a function on every in-use stream of a reentrancy struct and returns the OR of the results.
  *
@@ -1398,13 +1367,13 @@ struct G17418 {
 int _fwalk(int r_, void (*fn_)(void)) {
     char *reent = (char *)r_;
     int (*fn)(char *) = (int (*)(char *))fn_;
-    struct G17418 *glue;
+    struct _glue *glue;
     char *stream;
     int n;
     int ret = 0;
-    for (glue = (struct G17418 *)(reent + 0x1D8); glue; glue = glue->next) {
-        stream = glue->files;
-        for (n = glue->n; --n >= 0; stream += 0x58)
+    for (glue = (struct _glue *)(reent + 0x1D8); glue; glue = ((struct G17418*)glue->_next)) {
+        stream = ((char*)glue->_iobs);
+        for (n = glue->_niobs; --n >= 0; stream += 0x58)
             if (*(short *)(stream + 0xC))
                 ret |= fn(stream);
     }
@@ -1644,16 +1613,6 @@ INCLUDE_ASM("seg/seg_316FB8", _sprintf_r);
 #define _sprintf_r_va_start(ap) \
     (ap = (char*)__builtin_next_arg() \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
-struct F177B0 {
-    char *p;
-    int r;
-    int w;
-    short flags, file;
-    char *base;
-    int size;
-    int pad[0x54 / 4 - 6];
-    int ent;
-};
 /**
  * Formats into a caller buffer with no length limit, for a given reentrancy struct.
  *
@@ -1666,16 +1625,16 @@ struct F177B0 {
  */
 void _sprintf_r(int reent, char *buf, int fmt, ...) {
     char *ap;
-    struct F177B0 strStream;
+    struct __sFILE strStream;
     _sprintf_r_va_start(ap);
-    strStream.p = buf;
-    strStream.w = 0x7FFFFFFF;
-    strStream.flags = 520;
-    strStream.base = buf;
-    strStream.size = 0x7FFFFFFF;
-    strStream.ent = reent;
+    (*(char**)&strStream._p) = buf;
+    strStream._w = 0x7FFFFFFF;
+    strStream._flags = 520;
+    (*(char**)&strStream._bf) = buf;
+    strStream._bf._size = 0x7FFFFFFF;
+    (*(int*)&strStream._data) = reent;
     vfprintf((int)&strStream, fmt, ap);
-    *strStream.p = 0;
+    *((char*)strStream._p) = 0;
 }
 #endif
 
@@ -2888,14 +2847,6 @@ INCLUDE_ASM("seg/seg_316FB8", _mbtowc_r);
  * default: Copyright (c) 1994-2000 Red Hat, Inc. Permission to use, copy, modify and distribute this software is
  * freely granted, provided that this notice is preserved.) */
 typedef unsigned short wchar_t_8958;
-struct _reent_8958 {
-  int _errno;
-  void *_stdin, *_stdout, *_stderr;
-  int  _inc;
-  char _emergency[25];
-  int _current_category;
-  const char *_current_locale;
-};
 
 #define ESC_CHAR_8958 0x1b
 #define _issjis1_8958(c)    (((c) >= 0x81 && (c) <= 0x9f) || ((c) >= 0xe0 && (c) <= 0xef))
@@ -2930,7 +2881,7 @@ extern int strcmp_8958(const char *, const char *) __asm__("func_004165A8");
  * @return the bytes used, 0 for a NUL character, or -1 for an invalid or incomplete sequence
  */
 int
-_mbtowc_r (struct _reent_8958 *reent, wchar_t_8958 *pwc, const char *src, unsigned int n, int *state)
+_mbtowc_r (struct _reent *reent, wchar_t_8958 *pwc, const char *src, unsigned int n, int *state)
 {
   wchar_t_8958 scratchWc;
   unsigned char *srcBytes = (unsigned char *)src;
@@ -6502,54 +6453,14 @@ struct __sbuf_0010 {
 	unsigned char *_base;
 	int	_size;
 };
-struct __sFILE_0010 {
-  unsigned char *_p;	/* current position in (some) buffer */
-  int	_r;		/* read space left for getc() */
-  int	_w;		/* write space left for putc() */
-  short	_flags;		/* flags, below; this FILE is free if 0 */
-  short	_file;		/* fileno, if Unix descriptor, else -1 */
-  struct __sbuf_0010 _bf;	/* the buffer (at least 1 byte, if !NULL) */
-  int	_lbfsize;	/* 0 or -_bf._size, for inline putc */
-  void *_cookie;	/* cookie passed to io functions */
-  int	(*_read)(void *_cookie, char *_buf, int _n);
-  int	(*_write)(void *_cookie, const char *_buf, int _n);
-  long	(*_seek)(void *_cookie, long _offset, int _whence);
-  int	(*_close)(void *_cookie);
-  struct __sbuf_0010 _ub;	/* ungetc buffer */
-  unsigned char *_up;	/* saved _p when _p is doing ungetc data */
-  int	_ur;		/* saved _r when _r is counting ungetc data */
-  unsigned char _ubuf[3];	/* guarantee an ungetc() buffer */
-  unsigned char _nbuf[1];	/* guarantee a getc() buffer */
-  struct __sbuf_0010 _lb;	/* buffer for fgetline() */
-  int	_blksize;	/* stat.st_blksize (may be != _bf._size) */
-  int	_offset;	/* current lseek offset */
-  struct _reent_0010 *_data;
-};
-struct _glue_0010
-{
-  struct _glue_0010 *_next;
-  int _niobs;
-  struct __sFILE_0010 *_iobs;
-};
 /* newlib 1.9's struct _reent up to __sglue (0x1d8) */
-struct _reent_0010 {
-  int _errno;
-  struct __sFILE_0010 *_stdin, *_stdout, *_stderr;
-  int  _inc;
-  char _emergency[25];
-  int _current_category;
-  const char *_current_locale;
-  int __sdidinit;
-  char _pad_0x3c[0x1d8 - 0x3c];
-  struct _glue_0010 __sglue;
-};
 #define NDYNAMIC_0010 4
 #define ENOMEM_0010 12
-extern void __sinit_0010(struct _reent_0010 *) __asm__("__sinit");
-extern struct _glue_0010 *__sfmoreglue_0010(struct _reent_0010 *, int) __asm__("__sfmoreglue");
+extern void __sinit_0010(struct _reent *) __asm__("__sinit");
+extern struct _glue *__sfmoreglue_0010(struct _reent *, int) __asm__("__sfmoreglue");
 
 /* the unit declares __sfp(int) for its caller _fopen_r */
-struct __sFILE_0010 *__sfp_0010(struct _reent_0010 *d) __asm__("__sfp");
+struct __sFILE *__sfp_0010(struct _reent *d) __asm__("__sfp");
 /**
  * Finds a free FILE struct, adding more when all are taken, and returns it reset, or null.
  *
@@ -6560,22 +6471,22 @@ struct __sFILE_0010 *__sfp_0010(struct _reent_0010 *d) __asm__("__sfp");
  * @param reent  the reentrancy struct
  * @return the FILE, or null
  */
-struct __sFILE_0010 *
-__sfp_0010 (struct _reent_0010 *reent)
+struct __sFILE *
+__sfp_0010 (struct _reent *reent)
 {
-  struct __sFILE_0010 *stream;
+  struct __sFILE *stream;
   int n;
-  struct _glue_0010 *glue;
+  struct _glue *glue;
 
   if (!reent->__sdidinit)
     __sinit_0010 (reent);
-  for (glue = &reent->__sglue;; glue = glue->_next)
+  for (glue = &(*(struct _glue*)&reent->__sglue);; glue = ((struct _glue_0010*)glue->_next))
     {
-      for (stream = glue->_iobs, n = glue->_niobs; --n >= 0; stream++)
+      for (stream = ((struct __sFILE*)glue->_iobs), n = glue->_niobs; --n >= 0; stream++)
 	if (stream->_flags == 0)
 	  goto found;
-      if (glue->_next == 0 &&
-	  (glue->_next = __sfmoreglue_0010 (reent, NDYNAMIC_0010)) == 0)
+      if (((struct _glue_0010*)glue->_next) == 0 &&
+	  ((*(struct _glue_0010**)&glue->_next) = __sfmoreglue_0010 (reent, NDYNAMIC_0010)) == 0)
 	break;
     }
   reent->_errno = ENOMEM_0010;
@@ -6586,16 +6497,16 @@ found:
   stream->_p = 0;		/* no current pointer */
   stream->_w = 0;			/* nothing to read or write */
   stream->_r = 0;
-  stream->_bf._base = 0;		/* no buffer */
-  stream->_bf._size = 0;
+  (*(struct __sbuf_0010*)&stream->_bf)._base = 0;		/* no buffer */
+  (*(struct __sbuf_0010*)&stream->_bf)._size = 0;
   stream->_lbfsize = 0;		/* not line buffered */
   stream->_file = -1;		/* no file */
   /* fp->_cookie = <any>; */	/* caller sets cookie, _read/_write etc */
-  stream->_ub._base = 0;		/* no ungetc buffer */
-  stream->_ub._size = 0;
-  stream->_lb._base = 0;		/* no line buffer */
-  stream->_lb._size = 0;
-  stream->_data = reent;
+  (*(struct __sbuf_0010*)&stream->_ub)._base = 0;		/* no ungetc buffer */
+  (*(struct __sbuf_0010*)&stream->_ub)._size = 0;
+  (*(struct __sbuf_0010*)&stream->_lb)._base = 0;		/* no line buffer */
+  (*(struct __sbuf_0010*)&stream->_lb)._size = 0;
+  (*(struct _reent**)&stream->_data) = reent;
   return stream;
 }
 #endif
@@ -6646,9 +6557,6 @@ INCLUDE_ASM("seg/seg_316FB8", __sflags);
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 #include "fakematch.h"
-struct _reent_0180 {
-  int _errno;
-};
 #define __SRD_0180	0x0004
 #define __SWR_0180	0x0008
 #define __SRW_0180	0x0010
@@ -6662,7 +6570,7 @@ struct _reent_0180 {
 #define EINVAL_0180	22
 
 /* the unit declares __sflags(int, char *, int *) for its caller _fopen_r */
-int __sflags_0180(struct _reent_0180 *ptr, register char *mode, int *optr) __asm__("__sflags");
+int __sflags_0180(struct _reent *ptr, register char *mode, int *optr) __asm__("__sflags");
 /**
  * Converts a file-open mode string into stdio flags and open flags.
  *
@@ -6682,7 +6590,7 @@ int __sflags_0180(struct _reent_0180 *ptr, register char *mode, int *optr) __asm
 // plain form 97.62% (97.86% honest best with `*optr = o | m`).
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
 int
-__sflags_0180 (struct _reent_0180 *ptr, register char *mode, int *optr)
+__sflags_0180 (struct _reent *ptr, register char *mode, int *optr)
 {
   register int openFlags FM_REG("$3");
   register int ret FM_REG("$9");

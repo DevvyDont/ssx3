@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "fe/ferider.h"
 #include "animation/animmodel.h"
@@ -14,12 +15,9 @@
 //100%
 INCLUDE_ASM("seg/seg_1218", cComputer_calcTilt);
 #ifdef SKIP_ASM
-struct sVec4_0250 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vDot_0250(const sVec4_0250& a, const sVec4_0250& b)
+static inline float vDot_0250(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -39,9 +37,9 @@ static inline float vDot_0250(const sVec4_0250& a, const sVec4_0250& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_0250 vScale_0250(const sVec4_0250& v, float s)
+static inline t4Vector vScale_0250(const t4Vector& v, float s)
 {
-    sVec4_0250 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -55,9 +53,9 @@ static inline sVec4_0250 vScale_0250(const sVec4_0250& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec4_0250 vSub_0250(const sVec4_0250& a, const sVec4_0250& b)
+static inline t4Vector vSub_0250(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_0250 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -69,9 +67,9 @@ static inline sVec4_0250 vSub_0250(const sVec4_0250& a, const sVec4_0250& b)
 }
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
-static inline sVec4_0250 vNorm_0250(const sVec4_0250& v)
+static inline t4Vector vNorm_0250(const t4Vector& v)
 {
-    sVec4_0250 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "vaddw.x   $vf6, $vf0, $vf0w\n"
@@ -99,12 +97,12 @@ static inline sVec4_0250 vNorm_0250(const sVec4_0250& v)
  * @param direction  the direction to measure
  * @return the slope value
  */
-extern "C" float cComputer_calcTilt(cComputer* self, const sVec4_0250* direction)
+extern "C" float cComputer_calcTilt(cComputer* self, const t4Vector* direction)
 {
     cRider* rider = self->mRider;
-    sVec4_0250 riderSide = *(sVec4_0250*)&rider->mMatrix;
-    sVec4_0250 riderUp = *(sVec4_0250*)&rider->mMatrix.row[2];
-    sVec4_0250 planarDir = vSub_0250(*direction, vScale_0250(riderSide, vDot_0250(*direction, riderSide)));
+    t4Vector riderSide = *(t4Vector*)&rider->mMatrix;
+    t4Vector riderUp = *(&rider->mMatrix.row[2]);
+    t4Vector planarDir = vSub_0250(*direction, vScale_0250(riderSide, vDot_0250(*direction, riderSide)));
     float slope = -vDot_0250(vNorm_0250(planarDir), riderUp);
     float accuracy = self->mAccuracy;
     if (accuracy == 1.0f)
@@ -296,14 +294,11 @@ extern "C" float cComputer_calcTurn_0348(char* self, sV4_0348* target)
 //100%
 INCLUDE_ASM("seg/seg_1218", cComputer_calculateTargetPos);
 #ifdef SKIP_ASM
-struct sV4_0610 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sV4_0610 Add_0610(const sV4_0610& a, const sV4_0610& b)
+static inline t4Vector Add_0610(const t4Vector& a, const t4Vector& b)
 {
-    sV4_0610 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -315,9 +310,9 @@ static inline sV4_0610 Add_0610(const sV4_0610& a, const sV4_0610& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sV4_0610 Sub_0610(const sV4_0610& a, const sV4_0610& b)
+static inline t4Vector Sub_0610(const t4Vector& a, const t4Vector& b)
 {
-    sV4_0610 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -329,9 +324,9 @@ static inline sV4_0610 Sub_0610(const sV4_0610& a, const sV4_0610& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sV4_0610 Scale_0610(const sV4_0610& v, float s)
+static inline t4Vector Scale_0610(const t4Vector& v, float s)
 {
-    sV4_0610 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -347,15 +342,15 @@ static inline sV4_0610 Scale_0610(const sV4_0610& v, float s)
 
 struct sCam_0610 {
     char pad0[0x110];
-    sV4_0610 pos;       // 0x110
+    t4Vector pos;       // 0x110
     char pad120[0x490 - 0x120];
-    sV4_0610 target;    // 0x490
+    t4Vector target;    // 0x490
     char pad4A0[0x10];
-    sV4_0610 base;      // 0x4B0
+    t4Vector base;      // 0x4B0
 };
 
 // PORT: the unit later declares cComputer_calculateTargetPos with the out-pointer spelled out; same symbol, by-value return here
-sV4_0610 cComputer_calculateTargetPos_0610(char* self) __asm__("cComputer_calculateTargetPos");
+t4Vector cComputer_calculateTargetPos_0610(char* self) __asm__("cComputer_calculateTargetPos");
 
 /**
  * Returns the point the computer rider steers towards.
@@ -365,9 +360,9 @@ sV4_0610 cComputer_calculateTargetPos_0610(char* self) __asm__("cComputer_calcul
  *
  * @return the target point
  */
-sV4_0610 cComputer_calculateTargetPos_0610(char* self)
+t4Vector cComputer_calculateTargetPos_0610(char* self)
 {
-    sV4_0610 toTarget = Sub_0610((*(sCam_0610**)(self + 0x18))->target, (*(sCam_0610**)(self + 0x18))->pos);
+    t4Vector toTarget = Sub_0610((*(sCam_0610**)(self + 0x18))->target, (*(sCam_0610**)(self + 0x18))->pos);
     toTarget = Scale_0610(toTarget, 0.1f);
     return Add_0610((*(sCam_0610**)(self + 0x18))->base, toTarget);
 }
@@ -1164,7 +1159,6 @@ struct sWorld_13A8 {
 
 
 // Entry of cRider's primary vtable (_vt$6cRider, at self->mVtbl): g++ 2.95 {delta, index, pfn}.
-struct sVEi_13A8 { short delta; short index; int (*fn)(void*, sObj_13A8*); };
 
 struct sRiders_13A8 {
     char pad[0x28];
@@ -1229,7 +1223,7 @@ extern "C" void cDangerMan_Update(cDangerMan* self)
         sNode_13A8* pCurrDangerZone = ((sNode_13A8*)self->mpActiveList);
         int baseDangerZoneLevel = 0;
         do {
-            sVEi_13A8* vt = *(sVEi_13A8**)&pRider->mVtbl;
+            sVEntry<int(void*, sObj_13A8*)>* vt = *(sVEntry<int(void*, sObj_13A8*)>**)&pRider->mVtbl;
             int (**pf)(void*, sObj_13A8*) = &vt[kRiderVt_isIntersecting].fn;
             if ((*pf)(sub + vt[kRiderVt_isIntersecting].delta, lookup_13A8(pCurrDangerZone->id))) {
                 if (baseDangerZoneLevel < pCurrDangerZone->val)
@@ -1356,13 +1350,10 @@ extern "C" void cDangerMan_Reset(cDangerMan* vself)
 //100%
 INCLUDE_ASM("seg/seg_1218", cDangerMan_AddDangerElem);
 #ifdef SKIP_ASM
-struct sVec4_1728 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sXform_1728 {
     char pad[0x30];
-    sVec4_1728 pos;
+    t4Vector pos;
 };
 
 class cComp_1728 {
@@ -1453,7 +1444,7 @@ extern "C" void cDangerMan_AddDangerElem(cDangerMan* self, unsigned int* idp, fl
             elemInfo->rID = *idp;
             elemInfo->radius = x;
             elemInfo->endDelaySecsLeft = y;
-            sVec4_1728 instPos = instNode->GetXform()->pos;
+            t4Vector instPos = instNode->GetXform()->pos;
             elemInfo->pos[0] = instPos.x;
             elemInfo->pos[1] = instPos.y;
             elemInfo->pos[2] = instPos.z;
@@ -2033,7 +2024,6 @@ extern "C" void cFocusMan_reset(cFocusMan* self) {
 //100%
 INCLUDE_ASM("seg/seg_1218", cFocusMan_addbox);
 #ifdef SKIP_ASM
-struct V_33B0 { int x, y, z, w; } __attribute__((aligned(16)));
 
 /**
  * Registers a focus box with the focus manager.
@@ -2046,13 +2036,13 @@ struct V_33B0 { int x, y, z, w; } __attribute__((aligned(16)));
  * @param focusMan  the focus manager (this; cAI's FocusMan, +0xA4)
  * @param focusBox  the cFocusBox to add
  */
-extern "C" void cFocusMan_addbox(cFocusMan* focusMan, V_33B0 *focusBox) {
-    V_33B0 boxCopy;
+extern "C" void cFocusMan_addbox(cFocusMan* focusMan, t4Vector *focusBox) {
+    t4Vector boxCopy;
 
     (focusMan->LastUpdateTick) = -1;
-    ((V_33B0*)focusMan->Boxes[focusMan->NumBoxes].Box) = focusBox;
+    ((t4Vector*)focusMan->Boxes[focusMan->NumBoxes].Box) = focusBox;
     boxCopy = *focusBox;
-    (*(V_33B0 *)((char*)((((focusMan->NumBoxes) << 5) + (int)focusMan)) + (0x20))) = boxCopy;
+    (*(t4Vector *)((char*)((((focusMan->NumBoxes) << 5) + (int)focusMan)) + (0x20))) = boxCopy;
     (focusMan->NumBoxes) = (int) ((focusMan->NumBoxes) + 1);
 }
 #endif
@@ -2060,15 +2050,11 @@ extern "C" void cFocusMan_addbox(cFocusMan* focusMan, V_33B0 *focusBox) {
 //100%
 INCLUDE_ASM("seg/seg_1218", cFocusMan_removebox);
 #ifdef SKIP_ASM
-struct sEntry1033F8 {
-    int id;
-    int data[7];
-} __attribute__((aligned(16)));
 
 struct sList1033F8 {
     int count;
     char pad4[0xC];
-    sEntry1033F8 entries[6];    // 0x10
+    FocusRecord entries[6];    // 0x10
     int fD0;                    // 0xD0
 };
 
@@ -2087,9 +2073,9 @@ extern "C" void cFocusMan_removebox(cFocusMan* self, int id)
     int i;
     self->LastUpdateTick = -1;
     for (i = 0; i < self->NumBoxes; i++) {
-        if (((sEntry1033F8*)&self->Boxes[0])[i].id == id) {
+        if (((int)((&self->Boxes[0]))[i].Box) == id) {
             for (i++; i < self->NumBoxes; i++) {
-                ((sEntry1033F8*)&self->Boxes[0])[i - 1] = ((sEntry1033F8*)&self->Boxes[0])[i];
+                ((&self->Boxes[0]))[i - 1] = ((&self->Boxes[0]))[i];
             }
             self->NumBoxes--;
             return;
@@ -5321,19 +5307,7 @@ INCLUDE_ASM("seg/seg_1218", cRider_checkRailBodyCollisions);
 extern "C" int cRider_isRailLandSuccess_6F78(cRider* self, void* land) __asm__("cRider_isRailLandSuccess");
 extern "C" int cOverlapList_splineIntersect_6F78(void*, t4Vector*, t4Vector*, int, float) __asm__("cOverlapList_splineIntersect");
 
-struct sHit_6F78 {
-    t4Vector pos;       // 0x00
-    t4Vector n;         // 0x10
-    t4Vector vel;       // 0x20
-    char pad30[0x1C];
-    int mat;            // 0x4C
-    char* obj;          // 0x50
-    char pad54[0x2C];
-} __attribute__((aligned(16)));
 
-struct sLand_6F78 {
-    char pad0[0x80];
-} __attribute__((aligned(16)));
 
 struct sInfo_6F78 {
     t4Vector pos;       // 0x00
@@ -5342,8 +5316,7 @@ struct sInfo_6F78 {
     float vn;           // 0x30
 } __attribute__((aligned(16)));
 
-struct sVEh_6F78 { short delta; short index; void (*fn)(void*, sHit_6F78*); };
-struct sVEhv_6F78 { short delta; short index; void (*fn)(void*, sHit_6F78*, t4Vector*); };
+struct sVEhv_6F78 { short delta; short index; void (*fn)(void*, tIntersectInfo*, t4Vector*); };
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
 static inline float Dot_6F78(const t4Vector& a, const t4Vector& b)
@@ -5565,50 +5538,50 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
     }
     sAnimModelBone* animModelBone = &self->mAnimModel->bones[self->mBoneHips];
     const t4Vector& dir = Front_6F78(animModelBone);
-    sHit_6F78 hit;
-    if (!cOverlapList_splineIntersect_6F78(self->mOverlapList, &animModelBone->pos, &hit.pos, 1, 300.0f)) {
+    tIntersectInfo hit;
+    if (!cOverlapList_splineIntersect_6F78(self->mOverlapList, &animModelBone->pos, &hit.Ipos, 1, 300.0f)) {
         return 0;
     }
     float speed = Len_6F78(self->mVelocity);
     if (speed > 0.0010000000474974513f) {
-        float back = Dot_6F78(Sub_6F78(hit.pos, animModelBone->pos), self->mVelocity);
+        float back = Dot_6F78(Sub_6F78(hit.Ipos, animModelBone->pos), self->mVelocity);
         if (back < speed * -0.20000000298023224f) {
             return 0;
         }
     }
-    float along = Clamp_6F78(Dot_6F78(dir, Sub_6F78(hit.pos, animModelBone->pos)), -50.0f, 50.0f);
-    t4Vector delta = Sub_6F78(Add_6F78(animModelBone->pos, Scale_6F78(dir, along)), hit.pos);
+    float along = Clamp_6F78(Dot_6F78(dir, Sub_6F78(hit.Ipos, animModelBone->pos)), -50.0f, 50.0f);
+    t4Vector delta = Sub_6F78(Add_6F78(animModelBone->pos, Scale_6F78(dir, along)), hit.Ipos);
     if (Len_6F78(delta) > 50.0f) {
         return 0;
     }
-    sLand_6F78 land;
+    tIntersectInfo land;
     if (cRider_isRailLandSuccess_6F78(self, &land)) {
         return 0;
     }
-    float vn = Dot_6F78(self->mVelocity, hit.n);
+    float vn = Dot_6F78(self->mVelocity, hit.Inorm);
     if (vn < 0.0f) {
         vn = -vn;
-        ScaleEq_6F78(hit.n, -1.0f);
+        ScaleEq_6F78(hit.Inorm, -1.0f);
     }
-    if (hit.obj != 0) {
-        char* handler = *(char**)(hit.obj + 0xC);
+    if (((char*)hit.Inst) != 0) {
+        char* handler = *(char**)(((char*)hit.Inst) + 0xC);
         if (handler != 0) {
-            sVEh_6F78* vt = *(sVEh_6F78**)(handler + 0xC);
+            sVEntry<void(void*, tIntersectInfo*)>* vt = *(sVEntry<void(void*, tIntersectInfo*)>**)(handler + 0xC);
             vt[42].fn(handler + vt[42].delta, &hit);
         }
     }
     sInfo_6F78 info;
-    info.pos = hit.pos;
+    info.pos = hit.Ipos;
     info.dir = Norm_6F78(self->mVelocity);
     info.vn = vn;
-    t4Vector off = Sub_6F78(animModelBone->pos, hit.pos);
-    SubEq_6F78(off, Scale_6F78(hit.n, Dot_6F78(off, hit.n)));
+    t4Vector off = Sub_6F78(animModelBone->pos, hit.Ipos);
+    SubEq_6F78(off, Scale_6F78(hit.Inorm, Dot_6F78(off, hit.Inorm)));
     if (cRider_isGroundNormalValid(self)) {
         SubEq_6F78(off, Scale_6F78(self->mGroundNormal, Dot_6F78(off, self->mGroundNormal)));
     }
     float offLen = Len_6F78(off);
     if (offLen < 0.0010000000474974513f) {
-        off = hit.n;
+        off = hit.Inorm;
     } else {
         DivEq_6F78(off, offLen);
     }
@@ -5618,22 +5591,22 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
         cRider_moveFromCollision(self, Scale_6F78(off, 50.0f - clearance));
     }
     t4Vector oldVel = self->mVelocity;
-    float push = (Dot_6F78(off, Sub_6F78(hit.vel, self->mVelocity)) >? 0.0f) + 55.55555725097656f; // PORT: g++ maximum operator
+    float push = (Dot_6F78(off, Sub_6F78(hit.Ivel, self->mVelocity)) >? 0.0f) + 55.55555725097656f; // PORT: g++ maximum operator
     AddEq_6F78(self->mVelocity, Scale_6F78(off, push));
     t4Vector imp = Scale_6F78(Sub_6F78(oldVel, self->mVelocity), (float)SSXApp->TimerHz);
-    if (hit.obj != 0) {
-        char* handler = *(char**)(hit.obj + 0xC);
+    if (((char*)hit.Inst) != 0) {
+        char* handler = *(char**)(((char*)hit.Inst) + 0xC);
         if (handler != 0) {
             sVEhv_6F78* vt = *(sVEhv_6F78**)(handler + 0xC);
             vt[43].fn(handler + vt[43].delta, &hit, &imp);
         }
     }
     if (cRider_getMotionState(self) == 0) {
-        hit.n = off;
+        hit.Inorm = off;
         cRider_turnFromCollision(self, &hit);
         cRider_updateOrientationImplicit(self);
     }
-    cRider_reactToCollision(self, &info, hit.mat);
+    cRider_reactToCollision(self, &info, hit.Stype);
     return 1;
 }
 #endif
@@ -5763,16 +5736,11 @@ extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 // PORT: the project names these __FPv (one param); callers pass a state too.
 void cRider_setMotionState_7578(void* self, int v) __asm__("cRider_setMotionState__FPv");
 
-struct sHit_7578 {
-    sVec4 pos;
-    sVec4 normal;
-    char pad[0x80 - 0x20];
-};
 
 extern "C" void cCheatFX_setCheatInput(void*, int);
-extern "C" int cOverlapList_splineIntersect_7578(void*, sVec4*, sHit_7578*, int, float) __asm__("cOverlapList_splineIntersect");
-extern "C" void cHandplantMotion_init(float, void*, sHit_7578*);
-extern "C" void cHandplantControl_init(float, void*, sHit_7578*, int);
+extern "C" int cOverlapList_splineIntersect_7578(void*, sVec4*, tIntersectInfo*, int, float) __asm__("cOverlapList_splineIntersect");
+extern "C" void cHandplantMotion_init(float, void*, tIntersectInfo*);
+extern "C" void cHandplantControl_init(float, void*, tIntersectInfo*, int);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar, sVec4 operands).
 static inline sVec4 ScaleV_7578(const sVec4& v, float s)
@@ -5843,7 +5811,7 @@ extern "C" int cRider_checkHandplantCollisions(cRider* self)
     }
     float spd = Len(*(sVec4*)&self->mVelocity);
     sVec4 dir;
-    sHit_7578 hit;
+    tIntersectInfo hit;
     if (spd > Kph_7578(100.0f))
         dir = DivV(*(sVec4*)&self->mVelocity, spd);
     else
@@ -5851,19 +5819,19 @@ extern "C" int cRider_checkHandplantCollisions(cRider* self)
     sVec4 probePos = AddV_7578(*(sVec4*)&self->mPosition, ScaleV_7578(dir, 300.0f));
     if (!cOverlapList_splineIntersect_7578(self->mOverlapList, &probePos, &hit, 2, 300.0f))
         return 0;
-    if (Abs(hit.normal.z) > 0.8999999761581421f)
+    if (Abs((*(sVec4*)&hit.Inorm).z) > 0.8999999761581421f)
         return 0;
-    sVec4 toHit = SubV(hit.pos, probePos);
+    sVec4 toHit = SubV((*(sVec4*)&hit.Ipos), probePos);
     if (Len(toHit) > 300.0f)
         return 0;
-    toHit = SubV(hit.pos, *(sVec4*)&self->mPosition);
+    toHit = SubV((*(sVec4*)&hit.Ipos), *(sVec4*)&self->mPosition);
     if (Dot(*(sVec4*)&self->mVelocity, toHit) < 0.0f)
         return 0;
     spd = Max_7578(spd, Kph_7578(1000.0f));
     float speedRatio = Clamp(Kph_7578(5000.0f) / spd, 0.5f, 1.5f);
     float enterSec = speedRatio * 0.5f;
-    if (Dot(hit.normal, *(sVec4*)&self->mVelocity) < 0.0f)
-        ScaleEq(hit.normal, -1.0f);
+    if (Dot((*(sVec4*)&hit.Inorm), *(sVec4*)&self->mVelocity) < 0.0f)
+        ScaleEq((*(sVec4*)&hit.Inorm), -1.0f);
     cRider_setControlState_2(((char*)self), 13);
     cHandplantMotion_init(enterSec, &self->mRiderHandler->HandplantMotion, &hit);
     cHandplantControl_init(enterSec, &self->mRiderHandler->HandplantControl, &hit, self->mRiderHandler->HandplantMotion.IsToeside);
@@ -7934,17 +7902,11 @@ extern "C" void cComputer_getGateCmd(cComputer* self, sPad_B790* cmd)
 INCLUDE_ASM("seg/seg_1218", cComputer_checkForJumpEvent);
 #ifdef SKIP_ASM
 
-struct sRec_B980 {
-    int type;
-    int flags;
-    float a;
-    float b;
-};
 
 class cTrack_B980 {
 public:
     char pad[0x34];
-    virtual int Query(sRec_B980* buf, int max, float x, float y);
+    virtual int Query(tPathEventNode* buf, int max, float x, float y);
 };
 
 extern "C" t4Vector cPath_getPathPos(cTrack_B980*, int, float);
@@ -7967,21 +7929,21 @@ extern "C" t4Vector cPath_getPathPos(cTrack_B980*, int, float);
  */
 extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* approachSpeed, int* below, int* toPipe, int* toRail, int* isSpin, int* isFlip)
 {
-    sRec_B980 buf[12];
+    tPathEventNode buf[12];
     cRider* rider = self->mRider;
     cTrack_B980* trk = (cTrack_B980*)rider->AIPath;
     int n = trk->Query(buf, 12, rider->PrevPathParam, rider->PathParam + 300.0f);
     for (int i = 0; i < n; i++) {
-        if (buf[i].type == 0x10) {
-            int fl = buf[i].flags;
+        if (buf[i].Type == 0x10) {
+            int fl = buf[i].Arg;
             *approachSpeed = (float)(fl >> 4) * 27.777780532836914f;
             *toPipe = (fl >> 3) & 1;
             *toRail = (fl >> 2) & 1;
             *isSpin = (fl >> 1) & 1;
             *isFlip = fl & 1;
-            *below = (buf[i].a <= self->mRider->PathParam) ? 1 : 0;
-            *(&self->mStartJumpPos) = cPath_getPathPos(trk, 0, buf[i].a);
-            *(&self->mEndJumpPos) = cPath_getPathPos(trk, 0, buf[i].b);
+            *below = (buf[i].ParamStart <= self->mRider->PathParam) ? 1 : 0;
+            *(&self->mStartJumpPos) = cPath_getPathPos(trk, 0, buf[i].ParamStart);
+            *(&self->mEndJumpPos) = cPath_getPathPos(trk, 0, buf[i].ParamEnd);
             return 1;
         }
     }

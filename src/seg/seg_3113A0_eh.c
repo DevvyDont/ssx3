@@ -9,6 +9,7 @@
    Bodies credited to peak3project come from their fork (github.com/peak3project/ssx3). */
 
 #include "common.h"
+#include "seg/libgcc_frame.h"
 
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", __default_terminate);
@@ -335,7 +336,6 @@ int __get_eh_table_language(short *table) {
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", old_find_exception_handler);
 #ifdef SKIP_ASM
-struct E410858 { unsigned start; unsigned end; int data; };
 /**
  * Finds the handler of the innermost region containing a PC in an old-format exception table.
  *
@@ -346,19 +346,19 @@ struct E410858 { unsigned start; unsigned end; int data; };
  * @param tab  the table, or 0
  * @return the handler address, or 0
  */
-int old_find_exception_handler(unsigned pc, struct E410858 *tab) {
+int old_find_exception_handler(unsigned pc, struct old_exception_table *tab) {
     int best, i;
     if (tab) {
         best = -1;
-        for (i = 0; tab[i].start != 0xFFFFFFFF; i++) {
-            if (pc >= tab[i].start && pc < tab[i].end) {
-                if (best == -1 || (tab[best].end >= tab[i].end && tab[best].start <= tab[i].start))
+        for (i = 0; ((unsigned int)tab[i].start_region) != 0xFFFFFFFF; i++) {
+            if (pc >= ((unsigned int)tab[i].start_region) && pc < ((unsigned int)tab[i].end_region)) {
+                if (best == -1 || (((unsigned int)tab[best].end_region) >= ((unsigned int)tab[i].end_region) && ((unsigned int)tab[best].start_region) <= ((unsigned int)tab[i].start_region)))
                     best = i;
-            } else if (best >= 0 && pc < tab[i].start)
+            } else if (best >= 0 && pc < ((unsigned int)tab[i].start_region))
                 break;
         }
         if (best != -1)
-            return tab[best].data;
+            return ((int)tab[best].exception_handler);
     }
     return 0;
 }
@@ -367,8 +367,6 @@ int old_find_exception_handler(unsigned pc, struct E410858 *tab) {
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", find_exception_handler);
 #ifdef SKIP_ASM
-struct E410930 { unsigned start; unsigned end; int val; int cb; };
-struct C410930 { int (*match)(struct C410930 *, int, int); };
 /**
  * Finds the handler for an exception in a new-format exception table, noting cleanup-only matches.
  *
@@ -384,33 +382,33 @@ struct C410930 { int (*match)(struct C410930 *, int, int); };
  * @param out  receives 1 when only a cleanup was found, 0 for a real handler
  * @return the handler address, or 0
  */
-int find_exception_handler(unsigned pc, int obj, struct C410930 *ctx, int flag, int *out) {
+int find_exception_handler(unsigned pc, int obj, struct __eh_info *ctx, int flag, int *out) {
     int retval = 0;
     *out = 1;
     if (obj != 0) {
         int idx = 0;
-        struct E410930 *tbl = (struct E410930 *)(obj + 8);
+        struct exception_table *tbl = (struct exception_table *)(obj + 8);
         if (flag) {
             idx = ((int)pc - (int)tbl) >> 4;
             pc = ((unsigned *)pc)[1] - 1;
-            if (tbl[idx].start != 0xFFFFFFFF)
+            if (((unsigned int)tbl[idx].start_region) != 0xFFFFFFFF)
                 idx++;
         } else {
             pc = pc - 1;
         }
-        for (; tbl[idx].start != 0xFFFFFFFF; idx++) {
-            if (pc >= tbl[idx].start && pc < tbl[idx].end) {
-                if (tbl[idx].cb) {
-                    if (ctx->match) {
-                        if (ctx->match(ctx, tbl[idx].cb, obj)) {
+        for (; ((unsigned int)tbl[idx].start_region) != 0xFFFFFFFF; idx++) {
+            if (pc >= ((unsigned int)tbl[idx].start_region) && pc < ((unsigned int)tbl[idx].end_region)) {
+                if (((int)tbl[idx].match_info)) {
+                    if (((int (*)(struct C410930*, int, int))ctx->match_function)) {
+                        if (((int (*)(struct C410930*, int, int))ctx->match_function)(ctx, ((int)tbl[idx].match_info), obj)) {
                             if (retval == 0)
-                                retval = tbl[idx].val;
+                                retval = ((int)tbl[idx].exception_handler);
                             *out = 0;
                             break;
                         }
                     }
                 } else if (retval == 0) {
-                    retval = tbl[idx].val;
+                    retval = ((int)tbl[idx].exception_handler);
                 }
             }
         }
@@ -518,21 +516,20 @@ void __unwinding_cleanup(void) {
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", throw_helper);
 #ifdef SKIP_ASM
-struct S410C18 { char b[0x2F0]; } __attribute__((aligned(8)));
 /* frame.h frame_state: cfa, eh_ptr, cfa_offset, args_size, reg_or_offset[], cfa_reg, retaddr_column (idx), saved[]
    (kind) */
 struct F410C18 { int f0; unsigned *p; long cfa_offset; long args_size; long reg_or_offset[0x50]; unsigned short cfa_reg;
     unsigned short idx; signed char kind[0x50]; } __attribute__((aligned(8)));
 extern void __terminate(void);
 extern void __unwinding_cleanup(void);
-extern struct F410C18 *f_b80_410C18(int, struct F410C18 *, struct S410C18 *) __asm__("next_stack_level");
-extern long long *f_a78_410C18(int, struct F410C18 *, struct S410C18 *) __asm__("get_reg_addr");
-extern void f_b00_410C18(int, struct F410C18 *, struct S410C18 *) __asm__("copy_reg");
+extern struct F410C18 *f_b80_410C18(int, struct F410C18 *, struct frame_state *) __asm__("next_stack_level");
+extern long long *f_a78_410C18(int, struct F410C18 *, struct frame_state *) __asm__("get_reg_addr");
+extern void f_b00_410C18(int, struct F410C18 *, struct frame_state *) __asm__("copy_reg");
 extern int f_930_410C18(int, int, int, int, int *) __asm__("find_exception_handler");
 extern int f_858_410C18(int, int) __asm__("old_find_exception_handler");
 /* libgcc2.c: without INCOMING_REGNO (MIPS) no register lives in a register window */
 static inline int in_reg_window_410C18(int reg, struct F410C18 *udata) { return 0; }
-int unwind_410C18(int *info, int pc, struct S410C18 *buf, struct F410C18 **pout) __asm__("throw_helper");
+int unwind_410C18(int *info, int pc, struct frame_state *buf, struct F410C18 **pout) __asm__("throw_helper");
 /**
  * Finds the handler for the exception being thrown and unwinds the saved registers to its frame.
  *
@@ -552,12 +549,12 @@ int unwind_410C18(int *info, int pc, struct S410C18 *buf, struct F410C18 **pout)
  * @param pout  in: a frame-state buffer to work in; out: the frame state below the handler
  * @return the handler address
  */
-int unwind_410C18(int *info, int pc, struct S410C18 *buf, struct F410C18 **pout) {
-    struct S410C18 first;
-    struct S410C18 save;
+int unwind_410C18(int *info, int pc, struct frame_state *buf, struct F410C18 **pout) {
+    struct frame_state first;
+    struct frame_state save;
     struct F410C18 *cur;
     struct F410C18 *calleeFrame;
-    struct S410C18 *prev;
+    struct frame_state *prev;
     int flag;
     int pc0, sres, spc, have2, have;
     int result = 0;
@@ -572,7 +569,7 @@ int unwind_410C18(int *info, int pc, struct S410C18 *buf, struct F410C18 **pout)
     for (;;) {
         calleeFrame = cur;
         cur = f_b80_410C18(pc, calleeFrame, prev);
-        prev = (struct S410C18 *)calleeFrame;
+        prev = (struct frame_state *)calleeFrame;
         if (cur == 0)
             break;
         {
@@ -594,7 +591,7 @@ int unwind_410C18(int *info, int pc, struct S410C18 *buf, struct F410C18 **pout)
         if (result != 0) {
             if (flag != 0) {
                 if (have == 0) {
-                    save = *(struct S410C18 *)cur;
+                    save = *(struct frame_state *)cur;
                     spc = pc;
                     sres = result;
                     have = 1;
@@ -606,7 +603,7 @@ int unwind_410C18(int *info, int pc, struct S410C18 *buf, struct F410C18 **pout)
             }
         }
         {
-            long long returnAddr = *f_a78_410C18(cur->idx, cur, (struct S410C18 *)calleeFrame);
+            long long returnAddr = *f_a78_410C18(cur->idx, cur, (struct frame_state *)calleeFrame);
             pc = (int)returnAddr - 1;
         }
     }
@@ -631,8 +628,8 @@ int unwind_410C18(int *info, int pc, struct S410C18 *buf, struct F410C18 **pout)
             *cur = *(struct F410C18 *)buf;
             while (pc != stop) {
                 calleeFrame = cur;
-                cur = f_b80_410C18(pc, calleeFrame, (struct S410C18 *)prev);
-                prev = (struct S410C18 *)calleeFrame;
+                cur = f_b80_410C18(pc, calleeFrame, (struct frame_state *)prev);
+                prev = (struct frame_state *)calleeFrame;
                 for (i = 0; i < 79; i++) {
                     if (i != cur->idx && cur->kind[i] != 0) {
                         if (in_reg_window_410C18(i, cur) && cur->kind[cur->idx] == 2 && cur->reg_or_offset[cur->idx] == i)
@@ -641,7 +638,7 @@ int unwind_410C18(int *info, int pc, struct S410C18 *buf, struct F410C18 **pout)
                     }
                 }
                 {
-                    long long returnAddr = *f_a78_410C18(cur->idx, cur, (struct S410C18 *)calleeFrame);
+                    long long returnAddr = *f_a78_410C18(cur->idx, cur, (struct frame_state *)calleeFrame);
                     pc = (int)returnAddr - 1;
                 }
             }

@@ -61,33 +61,29 @@ void* cBENewRaceInterface_getThis()
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_submit);
 #ifdef SKIP_ASM
-struct sRaceSettings_00144928
-{
-    int data[0x4C / 4];
-};
 
-extern sRaceSettings_00144928 cBELibrary_raceDB;
+extern cBERaceDB cBELibrary_raceDB;
 
 /**
  * Commits the race being set up: copies cBENewRaceInterface_newRace (0x4C bytes) into cBELibrary_raceDB.
  */
 extern "C" void cBENewRaceInterface_submit(void)
 {
-    cBELibrary_raceDB = *(sRaceSettings_00144928*)&cBENewRaceInterface_newRace.playerID[0];
+    cBELibrary_raceDB = *(cBERaceDB*)&cBENewRaceInterface_newRace.playerID[0];
 }
 #endif
 
 //100%
 INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_discard);
 #ifdef SKIP_ASM
-extern sRaceSettings_00144928 cBELibrary_raceDB;
+extern cBERaceDB cBELibrary_raceDB;
 
 /**
  * Drops changes to the race being set up: copies cBELibrary_raceDB back into cBENewRaceInterface_newRace (0x4C bytes).
  */
 extern "C" void cBENewRaceInterface_discard(void)
 {
-    *(sRaceSettings_00144928*)&cBENewRaceInterface_newRace.playerID[0] = cBELibrary_raceDB;
+    *(cBERaceDB*)&cBENewRaceInterface_newRace.playerID[0] = cBELibrary_raceDB;
 }
 #endif
 
@@ -575,12 +571,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGameEvent);
 #ifdef SKIP_ASM
 extern "C" int cBENewRaceInterface_setNumberAI(cBENewRaceInterface* self, int count);
 
-struct sGameEvent_001451E8
-{
-    int kind;
-    char rest[0x50];
-};
-extern sGameEvent_001451E8 cBELibrary_gameEventDB[];
+extern tBEEventDB cBELibrary_gameEventDB[];
 
 static inline char* Race_1451E8()
 {
@@ -595,7 +586,7 @@ static inline char* Race_1451E8()
  */
 extern "C" int cBENewRaceInterface_setGameEvent(cBENewRaceInterface* self, int event)
 {
-    sGameEvent_001451E8 eventRec = cBELibrary_gameEventDB[event];
+    tBEEventDB eventRec = cBELibrary_gameEventDB[event];
     *((signed char*)Race_1451E8() + 0x4A) = event;
     if (event < 6)
     {
@@ -607,7 +598,7 @@ extern "C" int cBENewRaceInterface_setGameEvent(cBENewRaceInterface* self, int e
                 cBENewRaceInterface_setNumberAI(self, 1);
         }
     }
-    return eventRec.kind == *((signed char*)Race_1451E8() + 0x48);
+    return eventRec.iValidMode == *((signed char*)Race_1451E8() + 0x48);
 }
 #endif
 

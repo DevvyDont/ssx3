@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "sound/bankmanager.h"
 #include "sound/asyncsys.h"
@@ -69,11 +70,6 @@ extern "C" int ASYNCFILE_loadat(char* name, int a1, int a2);
 extern "C" int ASYNCFILE_load(char* name, int a1);
 
 
-struct sVE_A298 {
-    short delta;
-    short index;
-    int (*fn)(void*, int, int, int);
-};
 
 class cAsync_A298 {
 public:
@@ -156,7 +152,7 @@ extern "C" void cAsyncSys_ASYNCSYS_StartLoad(cAsyncSys* self)
         char* name = asyncSys->mFilename[idx];
         int allocHandle, allocFlags;
         // PORT: g++ 2.95 virtual calls (vptr at 0x1D4) written out by hand: delta + saved &pfn, args evaluated after.
-        sVE_A298* vt = ((sVE_A298*)asyncSys->mVtbl);
+        sVEntry<int(void*, int, int, int)>* vt = ((sVEntry<int(void*, int, int, int)>*)asyncSys->mVtbl);
         char* thisp = (char*)asyncSys + vt[3].delta;
         int (**pf)(void*, int, int, int) = &vt[3].fn;
         if ((*(&asyncSys->mUserHandle)).Head == (*(&asyncSys->mUserHandle)).Tail) {
@@ -171,7 +167,7 @@ extern "C" void cAsyncSys_ASYNCSYS_StartLoad(cAsyncSys* self)
             allocFlags = flagQueue->Array[flagQueue->Tail];
         }
         int allocBuffer = (*pf)(thisp, allocHandle, -1, allocFlags);
-        sVE_A298* vt2 = ((sVE_A298*)asyncSys->mVtbl);
+        sVEntry<int(void*, int, int, int)>* vt2 = ((sVEntry<int(void*, int, int, int)>*)asyncSys->mVtbl);
         char* thisp2 = (char*)asyncSys + vt2[4].delta;
         int (**pf2)(void*, int, int, int) = &vt2[4].fn;
         int sizeHandle;
@@ -788,7 +784,6 @@ extern "C" void cAsyncSys_ASYNCSYS_Update(cAsyncSys* self)
 //100%
 INCLUDE_ASM("sound/asyncsys", cAsyncSys_ASYNCSYS_OnCurAsyncMainMemAlloc);
 #ifdef SKIP_ASM
-struct sVE_0028B0F0 { short delta; short index; void (*fn)(void*, int, int, int); };
 
 
 struct sAsync_0028B0F0 {
@@ -810,7 +805,7 @@ struct sAsync_0028B0F0 {
  */
 extern "C" void cAsyncSys_ASYNCSYS_OnCurAsyncMainMemAlloc(cAsyncSys* self, int size)
 {
-    sVE_0028B0F0* vtEntry = &((sVE_0028B0F0*)self->mVtbl)[3];
+    sVEntry<void(void*, int, int, int)>* vtEntry = &((sVEntry<void(void*, int, int, int)>*)self->mVtbl)[3];
     void (**pf)(void*, int, int, int) = &vtEntry->fn;
     char* thisp = (char*)self + vtEntry->delta;
     cCircBuffer* handleQueue = &(*(&self->mUserHandle));

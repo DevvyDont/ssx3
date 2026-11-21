@@ -1,4 +1,6 @@
+#include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "bx/appman.h"
 #include "sound/icepick/worldtriggermanager.h"
 #include "sound/asyncsys.h"
@@ -2155,10 +2157,6 @@ struct sSaChan7A10 {
     float pad;
 };
 
-struct sSaMixOut7A10 {
-    char pad0[0x636C];
-    float mix[10];          // 0x636C
-};
 
 struct sSaMix7A10 {
     char pad0[0x62C0];
@@ -2205,17 +2203,17 @@ extern "C" void cSSXAudio_DuckVolume(cSSXAudio* self_, int mask, float finalLeve
         if (mask & 4) {
             sSaMix7A10_set(self, 4, finalLevel);
             float level = self->chan[4].out;
-            sSaMixOut7A10* mixOut = (sSaMixOut7A10*)self;
-            mixOut->mix[0] = level * gMobyScaling;
-            mixOut->mix[1] = level * gKaoriScaling;
-            mixOut->mix[2] = level * gAerielScaling;
-            mixOut->mix[3] = level * gMacScaling;
-            mixOut->mix[4] = level * gZoeScaling;
-            mixOut->mix[5] = level * gGrommetScaling;
-            mixOut->mix[6] = level * gEliseScaling;
-            mixOut->mix[7] = level * gRocoScaling;
-            mixOut->mix[8] = level * gPsymonScaling;
-            mixOut->mix[9] = level * gDeiterScaling;
+            cSSXAudio* mixOut = (cSSXAudio*)self;
+            mixOut->unk_636C[0] = level * gMobyScaling;
+            mixOut->unk_636C[1] = level * gKaoriScaling;
+            mixOut->unk_636C[2] = level * gAerielScaling;
+            mixOut->unk_636C[3] = level * gMacScaling;
+            mixOut->unk_636C[4] = level * gZoeScaling;
+            mixOut->unk_636C[5] = level * gGrommetScaling;
+            mixOut->unk_636C[6] = level * gEliseScaling;
+            mixOut->unk_636C[7] = level * gRocoScaling;
+            mixOut->unk_636C[8] = level * gPsymonScaling;
+            mixOut->unk_636C[9] = level * gDeiterScaling;
         }
         if (mask & 8)
             sSaMix7A10_set(self, 2, finalLevel);
@@ -2262,10 +2260,6 @@ struct sSaChan7C48 {
     float pad;
 };
 
-struct sSaMixOut7C48 {
-    char pad0[0x636C];
-    float mix[10];          // 0x636C
-};
 
 struct sSaMix7C48 {
     char pad0[0x62C0];
@@ -2316,17 +2310,17 @@ extern "C" void cSSXAudio_UpdateDuck(cSSXAudio* self_)
         if (self->fadeMask & 4) {
             sSaMix7C48_set(self, 4, self->fadeCur);
             float level = self->chan[4].out;
-            sSaMixOut7C48* mixOut = (sSaMixOut7C48*)self;
-            mixOut->mix[0] = level * gMobyScaling;
-            mixOut->mix[1] = level * gKaoriScaling;
-            mixOut->mix[2] = level * gAerielScaling;
-            mixOut->mix[3] = level * gMacScaling;
-            mixOut->mix[4] = level * gZoeScaling;
-            mixOut->mix[5] = level * gGrommetScaling;
-            mixOut->mix[6] = level * gEliseScaling;
-            mixOut->mix[7] = level * gRocoScaling;
-            mixOut->mix[8] = level * gPsymonScaling;
-            mixOut->mix[9] = level * gDeiterScaling;
+            cSSXAudio* mixOut = (cSSXAudio*)self;
+            mixOut->unk_636C[0] = level * gMobyScaling;
+            mixOut->unk_636C[1] = level * gKaoriScaling;
+            mixOut->unk_636C[2] = level * gAerielScaling;
+            mixOut->unk_636C[3] = level * gMacScaling;
+            mixOut->unk_636C[4] = level * gZoeScaling;
+            mixOut->unk_636C[5] = level * gGrommetScaling;
+            mixOut->unk_636C[6] = level * gEliseScaling;
+            mixOut->unk_636C[7] = level * gRocoScaling;
+            mixOut->unk_636C[8] = level * gPsymonScaling;
+            mixOut->unk_636C[9] = level * gDeiterScaling;
         }
         if (self->fadeMask & 8)
             sSaMix7C48_set(self, 2, self->fadeCur);
@@ -2705,12 +2699,6 @@ struct sSaMix87F8 {
     float target[11];           // 0x6440
 };
 
-struct sSaMixOut87F8 {
-    char pad0[0x6308];
-    float master;               // 0x6308
-    char pad630C[0x636C - 0x630C];
-    float out[10];              // 0x636C
-};
 
 /**
  * Steps the mix levels toward their final values and re-applies the volumes, while a mix is fading.
@@ -2745,18 +2733,18 @@ extern "C" void cSSXAudio_UpdateMix(sSaMix87F8* self)
         }
         self->chan[i][1] = self->chan[i][0] * self->cur[i];
     }
-    sSaMixOut87F8* mixOut = (sSaMixOut87F8*)self;
-    float charLevel = mixOut->master;
-    mixOut->out[0] = charLevel * gMobyScaling;
-    mixOut->out[1] = charLevel * gKaoriScaling;
-    mixOut->out[2] = charLevel * gAerielScaling;
-    mixOut->out[3] = charLevel * gMacScaling;
-    mixOut->out[4] = charLevel * gZoeScaling;
-    mixOut->out[5] = charLevel * gGrommetScaling;
-    mixOut->out[6] = charLevel * gEliseScaling;
-    mixOut->out[7] = charLevel * gRocoScaling;
-    mixOut->out[8] = charLevel * gPsymonScaling;
-    mixOut->out[9] = charLevel * gDeiterScaling;
+    cSSXAudio* mixOut = (cSSXAudio*)self;
+    float charLevel = mixOut->mSoundVolume[4].appliedVolume;
+    mixOut->unk_636C[0] = charLevel * gMobyScaling;
+    mixOut->unk_636C[1] = charLevel * gKaoriScaling;
+    mixOut->unk_636C[2] = charLevel * gAerielScaling;
+    mixOut->unk_636C[3] = charLevel * gMacScaling;
+    mixOut->unk_636C[4] = charLevel * gZoeScaling;
+    mixOut->unk_636C[5] = charLevel * gGrommetScaling;
+    mixOut->unk_636C[6] = charLevel * gEliseScaling;
+    mixOut->unk_636C[7] = charLevel * gRocoScaling;
+    mixOut->unk_636C[8] = charLevel * gPsymonScaling;
+    mixOut->unk_636C[9] = charLevel * gDeiterScaling;
 }
 #endif
 
@@ -2764,17 +2752,14 @@ extern "C" void cSSXAudio_UpdateMix(sSaMix87F8* self)
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetClosestCamera);
 #ifdef SKIP_ASM
 #include "fakematch.h"
-struct sAudV4_8940 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 extern "C" int cSSXAudio_GetNumViews();
 void* cSSXAudio_GetCameraPos(void* self, int a1);
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sAudV4_8940 audVu0Sub_8940(const sAudV4_8940& a, const sAudV4_8940& b)
+static inline t4Vector audVu0Sub_8940(const t4Vector& a, const t4Vector& b)
 {
-    sAudV4_8940 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -2786,7 +2771,7 @@ static inline sAudV4_8940 audVu0Sub_8940(const sAudV4_8940& a, const sAudV4_8940
 }
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float audVu0Dot_8940(const sAudV4_8940& a, const sAudV4_8940& b)
+static inline float audVu0Dot_8940(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -2820,8 +2805,8 @@ extern "C" int cSSXAudio_GetClosestCamera(cSSXAudio* self, int id)
     if (cSSXAudio_GetNumViews() < 2) {
         return 0;
     }
-    sAudV4_8940 offset0 = audVu0Sub_8940(*(sAudV4_8940*)cSSXAudio_GetCameraPos(self, 0), *(sAudV4_8940*)id);
-    sAudV4_8940 offset1 = audVu0Sub_8940(*(sAudV4_8940*)cSSXAudio_GetCameraPos(self, 1), *(sAudV4_8940*)id);
+    t4Vector offset0 = audVu0Sub_8940(*(t4Vector*)cSSXAudio_GetCameraPos(self, 0), *(t4Vector*)id);
+    t4Vector offset1 = audVu0Sub_8940(*(t4Vector*)cSSXAudio_GetCameraPos(self, 1), *(t4Vector*)id);
     register int nearest FM_REG("$2") = 0;
     if (!(audVu0Dot_8940(offset0, offset0) < audVu0Dot_8940(offset1, offset1))) {
         nearest = 1;
@@ -3563,9 +3548,6 @@ extern "C" int cSSXAudio_NeedWPAmbience(cSSXAudio* self);
 extern "C" void cSSXAudio_ReactToWPAmbienceEvent(cSSXAudio* self, cRider* rider, tWPInGameData* obj);
 extern "C" void cSSXAudio_ReactToWPMixEvent(cSSXAudio* self, int id, tWPInGameData* obj);
 
-struct sSaVec98A8 { float x, y, z, w; } __attribute__((aligned(16)));
-struct sSaVt98A8a { short delta; short index; sSaVec98A8* (*fn)(void*); };
-struct sSaVt98A8b { short delta; short index; void* (*fn)(void*, float, float, float); };
 
 struct sSaObjs98A8 {
     char pad0[0x5FA0];
@@ -3589,25 +3571,25 @@ extern "C" void cSSXAudio_UpdateAudioWorldPainter(cSSXAudio* self, cRider* rider
 {
     unsigned int idx = (unsigned int)rider->mViewIndex;
     if (idx >= 2) return;
-    sSaVec98A8 pos;
+    t4Vector pos;
     {
         char* being = (char*)&rider->mVtbl;
-        sSaVt98A8a* vt = *(sSaVt98A8a**)being;
+        sVEntry<t4Vector*(void*)>* vt = *(sVEntry<t4Vector*(void*)>**)being;
         pos = *vt[5].fn(being + vt[5].delta);
     }
     if (func_0028D960(self) != 0) {
         float k = -99999.0f;
         char* painterQuery = ((sSaObjs98A8*)self)->a[idx];
-        sSaVt98A8b* va = *(sSaVt98A8b**)(painterQuery + 4);
+        sVEntry<void*(void*, float, float, float)>* va = *(sVEntry<void*(void*, float, float, float)>**)(painterQuery + 4);
         func_0028D988(self, ((char*)rider), va[2].fn(painterQuery + va[2].delta, pos.x, pos.y, k));
         char* mixQuery = ((sSaObjs98A8*)self)->b[idx];
-        sSaVt98A8b* vb = *(sSaVt98A8b**)(mixQuery + 4);
+        sVEntry<void*(void*, float, float, float)>* vb = *(sVEntry<void*(void*, float, float, float)>**)(mixQuery + 4);
         // PORT: cSSXAudio_ReactToWPMixEvent's unit declaration takes the rider as int
         cSSXAudio_ReactToWPMixEvent(self, (int)rider, (tWPInGameData*)vb[2].fn(mixQuery + vb[2].delta, pos.x, pos.y, k));
     }
     if (cSSXAudio_NeedWPAmbience(self) != 0) {
         char* ambienceQuery = ((sSaObjs98A8*)self)->c[idx];
-        sSaVt98A8b* vc = *(sSaVt98A8b**)(ambienceQuery + 4);
+        sVEntry<void*(void*, float, float, float)>* vc = *(sVEntry<void*(void*, float, float, float)>**)(ambienceQuery + 4);
         cSSXAudio_ReactToWPAmbienceEvent(self, rider, (tWPInGameData*)vc[2].fn(ambienceQuery + vc[2].delta, pos.x, pos.y, -99999.0f));
     }
 }
@@ -3636,8 +3618,6 @@ extern "C" int func_002B49E0(void* monitor);
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 
-struct sSaVt99F8a { short delta; short index; int* (*fn)(void*); };
-struct sSaVt99F8b { short delta; short index; int (*fn)(void*, int); };
 
 /**
  * Reacts to a world-painter music event for the focus rider: switches the song or the music track.
@@ -3654,7 +3634,7 @@ extern "C" void cSSXAudio_ReactToWPAmbienceEvent(cSSXAudio* self, cRider* rider,
 {
     if (((void*)rider) != cSSXAudio_GetFocusRider_p(self, -1)) return;
     if (((void*)obj) == 0) return;
-    sSaVt99F8a* vt = (sSaVt99F8a*)obj->mVtbl;
+    sVEntry<int*(void*)>* vt = (sVEntry<int*(void*)>*)obj->mVtbl;
     int id = *vt[4].fn((char*)obj + vt[4].delta);
     if (id == -1) return;
     if (id == 0x1F) {
@@ -3667,7 +3647,7 @@ extern "C" void cSSXAudio_ReactToWPAmbienceEvent(cSSXAudio* self, cRider* rider,
         }
     } else if (id != 33) {
         char* mon = (char*)&self->MusicSys;
-        sSaVt99F8b* vb = (sSaVt99F8b*)self->MusicSys.mVtbl;
+        sVEntry<int(void*, int)>* vb = (sVEntry<int(void*, int)>*)self->MusicSys.mVtbl;
         vb[4].fn(mon + vb[4].delta, id);
     }
 }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "bx/statscalc.h"
 
 //100%
@@ -29,10 +30,9 @@ extern "C" void cStatsCalc_add(cStatsCalc* self, float x) {
 //100%
 INCLUDE_ASM("seg/seg_218AE8", tSemiSpace_set);
 #ifdef SKIP_ASM
-struct sVec4_7B50 { float x, y, z, w; } __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float vu0Dot_7B50(const sVec4_7B50& a, const sVec4_7B50& b)
+static inline float vu0Dot_7B50(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -52,9 +52,9 @@ static inline float vu0Dot_7B50(const sVec4_7B50& a, const sVec4_7B50& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_7B50 vu0Scale_7B50(const sVec4_7B50& v, float s)
+static inline t4Vector vu0Scale_7B50(const t4Vector& v, float s)
 {
-    sVec4_7B50 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -70,7 +70,7 @@ static inline sVec4_7B50 vu0Scale_7B50(const sVec4_7B50& v, float s)
 
 
 // Plane through p with normal n: w = -dot(n, p).
-static inline void setPlane_7B50(sVec4_7B50* out, const sVec4_7B50& n, const sVec4_7B50& p)
+static inline void setPlane_7B50(t4Vector* out, const t4Vector& n, const t4Vector& p)
 {
     *out = n;
     out->w = vu0Dot_7B50(vu0Scale_7B50(n, -1.0f), p);
@@ -88,7 +88,7 @@ static inline void setPlane_7B50(sVec4_7B50* out, const sVec4_7B50& n, const sVe
  * @param point  a point on the plane
  * @param frontPoint  a point that must end up on the positive side
  */
-extern "C" void tSemiSpace_set(sVec4_7B50* out, sVec4_7B50* n, sVec4_7B50* point, sVec4_7B50* frontPoint)
+extern "C" void tSemiSpace_set(t4Vector* out, t4Vector* n, t4Vector* point, t4Vector* frontPoint)
 {
     setPlane_7B50(out, *n, *point);
     if (vu0Dot_7B50(*out, *frontPoint) < 0.0f) {

@@ -1,4 +1,6 @@
+#include "vtable.h"
 #include "common.h"
+#include "util/objectinterface.h"
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -65,11 +67,6 @@ struct sCol_1D10 {
     float a, r, g, b;
 };
 
-struct sVE_1D10 {
-    short delta;
-    short index;
-    void* fn;
-};
 
 typedef int (*IsHiddenFn_1D10)(void*, void*);
 typedef void (*DrawFn_1D10)(void*, void*, const sVec2_1D10&, const sVec2_1D10&, const sVec2_1D10&, const sCol_1D10*);
@@ -81,7 +78,7 @@ struct sRCtx_1D10 {
     char padE88[0xF50 - 0xE88];
     int texs[0x40];             // 0xF50
     char pad1050[0x10D8 - 0x1050];
-    sVE_1D10* vt;               // 0x10D8
+    sVEntry<void>* vt;               // 0x10D8
 };
 
 static inline int tex_1D10(sRCtx_1D10* c, int i)
@@ -108,7 +105,7 @@ extern sDrawState sDrawState_s_defaultDrawState;
 extern "C" void cObjectInterface_renderSimpleLightHalo(void* obj, float* src, int kind, float size, float angle)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
-    if (((IsHiddenFn_1D10)((sVE_1D10*)ps2GraphicsMan->mVtbl)[91].fn)((char*)ps2GraphicsMan + ((sVE_1D10*)ps2GraphicsMan->mVtbl)[91].delta, obj) != 0) {
+    if (((IsHiddenFn_1D10)((sVEntry<void>*)ps2GraphicsMan->mVtbl)[91].fn)((char*)ps2GraphicsMan + ((sVEntry<void>*)ps2GraphicsMan->mVtbl)[91].delta, obj) != 0) {
         return;
     }
     sCol_1D10 col;
@@ -130,12 +127,12 @@ extern "C" void cObjectInterface_renderSimpleLightHalo(void* obj, float* src, in
     setA_1D10((ctx->m_pCurrentDrawState), 20, 0xFF, 12);
     (ctx->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex_1D10((sRCtx_1D10*)ctx, kind + 37);
     if (angle != 0.0f) {
-        ((DrawRotFn_1D10)((sVE_1D10*)ctx->mVtbl)[79].fn)((char*)ctx + ((sVE_1D10*)ctx->mVtbl)[79].delta, angle * 0.01745329424738884f, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col, 1);
+        ((DrawRotFn_1D10)((sVEntry<void>*)ctx->mVtbl)[79].fn)((char*)ctx + ((sVEntry<void>*)ctx->mVtbl)[79].delta, angle * 0.01745329424738884f, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col, 1);
         if (kind == 1 || kind == 4) {
-            ((DrawRotFn_1D10)((sVE_1D10*)ctx->mVtbl)[79].fn)((char*)ctx + ((sVE_1D10*)ctx->mVtbl)[79].delta, -angle * 0.01745329424738884f, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col, 1);
+            ((DrawRotFn_1D10)((sVEntry<void>*)ctx->mVtbl)[79].fn)((char*)ctx + ((sVEntry<void>*)ctx->mVtbl)[79].delta, -angle * 0.01745329424738884f, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col, 1);
         }
     } else {
-        ((DrawFn_1D10)((sVE_1D10*)ctx->mVtbl)[78].fn)((char*)ctx + ((sVE_1D10*)ctx->mVtbl)[78].delta, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col);
+        ((DrawFn_1D10)((sVEntry<void>*)ctx->mVtbl)[78].fn)((char*)ctx + ((sVEntry<void>*)ctx->mVtbl)[78].delta, obj, sVec2_1D10(size, size), sVec2_1D10(0.0f, 0.0f), sVec2_1D10(1.0f, 1.0f), &col);
     }
     (*(sDrawState**)&ctx->m_pCurrentDrawState)--;
 }
@@ -551,10 +548,6 @@ INCLUDE_ASM("util/objectinterface", put_data);
 #ifdef SKIP_ASM
 extern "C" int put_uint(signed char** out, unsigned int len);
 
-struct sStr_2478 {
-    unsigned int len;
-    signed char* data;
-};
 
 /**
  * Writes a sized data block to the byte stream @p out: the block's byte count (put_uint), then that many bytes of
@@ -564,12 +557,12 @@ struct sStr_2478 {
  * @param pp  reference to the block pointer (a count, then a byte pointer)
  * @return the bytes written, 4 + count
  */
-extern "C" int put_data(signed char** out, sStr_2478** pp)
+extern "C" int put_data(signed char** out, tCommDataBlock** pp)
 {
     unsigned int i;
-    int n = put_uint(out, (*pp)->len);
-    for (i = 0; i < (*pp)->len; i++) {
-        n += put_char(out, (*pp)->data[i]);
+    int n = put_uint(out, (*pp)->Size);
+    for (i = 0; i < (*pp)->Size; i++) {
+        n += put_char(out, ((signed char*)(*pp)->Data)[i]);
     }
     return n;
 }

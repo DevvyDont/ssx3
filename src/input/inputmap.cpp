@@ -1,4 +1,5 @@
 #include "common.h"
+#include "input/inputpad.h"
 #include "input/inputmap.h"
 #include "input/inputparse.h"
 
@@ -201,7 +202,7 @@ extern "C" float cInputMap_getValue(cInputMap* self, void* inputPad, int id)
 {
     char parser[400];
     cInputExec_cInputExec(parser);
-    return cInputExec_execute(parser, inputPad, (char*)self->OpCodeBuf + ((self->MapOffset)[id] << 2));
+    return cInputExec_execute(parser, inputPad, &self->OpCodeBuf[(self->MapOffset)[id]]);
 }
 #endif
 
@@ -251,7 +252,7 @@ extern "C" float cInputMap_getValue1(cInputMap* self, void* inputPad, int stateI
     parser.v[5] = config5;
     parser.v[6] = config6;
     parser.v[7] = config7;
-    return cInputExec_execute(&parser, inputPad, (char*)self->OpCodeBuf + ((self->MapOffset)[stateId] << 2));
+    return cInputExec_execute(&parser, inputPad, &self->OpCodeBuf[(self->MapOffset)[stateId]]);
 }
 #endif
 
@@ -274,7 +275,7 @@ extern "C" int cInputMap_getState(cInputMap* self, void* inputPad, int id)
 {
     char parser[400];
     cInputExec_cInputExec(parser);
-    return cInputExec_execute(parser, inputPad, (char*)self->OpCodeBuf + ((self->MapOffset)[id] << 2)) != 0.0f;
+    return cInputExec_execute(parser, inputPad, &self->OpCodeBuf[(self->MapOffset)[id]]) != 0.0f;
 }
 #endif
 
@@ -324,25 +325,16 @@ extern "C" int cInputMap_getState1(cInputMap* self, void* inputPad, int stateId,
     parser.v[5] = config5;
     parser.v[6] = config6;
     parser.v[7] = config7;
-    return cInputExec_execute(&parser, inputPad, (char*)self->OpCodeBuf + ((self->MapOffset)[stateId] << 2)) != 0.0f;
+    return cInputExec_execute(&parser, inputPad, &self->OpCodeBuf[(self->MapOffset)[stateId]]) != 0.0f;
 }
 #endif
 
 //100%
 INCLUDE_ASM("input/inputmap", cInputPad_update);
 #ifdef SKIP_ASM
-struct sBtn_00321298 {
-    float value;    // 0x00
-    int pressed;    // 0x04
-    int released;   // 0x08
-    int down;       // 0x0C
-    int repeat;     // 0x10
-    int timer;      // 0x14
-    int settle;     // 0x18
-};
 struct sBtnSet_00321298 {
     int count;
-    sBtn_00321298 b[1];
+    tButton b[1];
 };
 
 /**
@@ -358,48 +350,48 @@ struct sBtnSet_00321298 {
 extern "C" void cInputPad_update(sBtnSet_00321298* self, int n, float* vals)
 {
     if (self->count < n) {
-        MEM_fill(&self->b[self->count], 0, (n - self->count) * sizeof(sBtn_00321298));
+        MEM_fill(&self->b[self->count], 0, (n - self->count) * sizeof(tButton));
     }
     self->count = n;
     for (int i = 0; i < n; i++) {
-        self->b[i].value = vals[i];
-        if (self->b[i].settle < 3) {
-            self->b[i].pressed = 0;
-            self->b[i].settle++;
-            self->b[i].released = 0;
+        self->b[i].Value = vals[i];
+        if (self->b[i].DebounceCount < 3) {
+            self->b[i].IsPressed = 0;
+            self->b[i].DebounceCount++;
+            self->b[i].IsReleased = 0;
         } else {
-            int on = self->b[i].value > 0.0f;
-            if (on == self->b[i].down) {
-                self->b[i].pressed = 0;
-                self->b[i].released = 0;
+            int on = self->b[i].Value > 0.0f;
+            if (on == self->b[i].IsHeld) {
+                self->b[i].IsPressed = 0;
+                self->b[i].IsReleased = 0;
             } else {
-                self->b[i].down = on;
+                self->b[i].IsHeld = on;
                 if (on) {
-                    self->b[i].pressed = 1;
-                    self->b[i].released = 0;
+                    self->b[i].IsPressed = 1;
+                    self->b[i].IsReleased = 0;
                 } else {
-                    self->b[i].pressed = 0;
-                    self->b[i].released = 1;
+                    self->b[i].IsPressed = 0;
+                    self->b[i].IsReleased = 1;
                 }
-                self->b[i].settle = 0;
+                self->b[i].DebounceCount = 0;
             }
         }
-        if (self->b[i].down) {
-            if (self->b[i].timer == 0) {
-                self->b[i].repeat = 1;
-                self->b[i].timer = 0x18;
+        if (self->b[i].IsHeld) {
+            if (self->b[i].RepeatCount == 0) {
+                self->b[i].IsRepeated = 1;
+                self->b[i].RepeatCount = 0x18;
             } else {
-                self->b[i].timer--;
-                if (self->b[i].timer <= 0) {
-                    self->b[i].repeat = 1;
-                    self->b[i].timer = 0xC;
+                self->b[i].RepeatCount--;
+                if (self->b[i].RepeatCount <= 0) {
+                    self->b[i].IsRepeated = 1;
+                    self->b[i].RepeatCount = 0xC;
                 } else {
-                    self->b[i].repeat = 0;
+                    self->b[i].IsRepeated = 0;
                 }
             }
         } else {
-            self->b[i].repeat = 0;
-            self->b[i].timer = 0;
+            self->b[i].IsRepeated = 0;
+            self->b[i].RepeatCount = 0;
         }
     }
 }

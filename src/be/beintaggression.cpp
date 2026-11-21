@@ -1,3 +1,4 @@
+#include "vtable.h"
 #include "common.h"
 #include "be/beintaggression.h"
 #include "replay/frameptr.h"
@@ -341,7 +342,6 @@ INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_readFromReplayFrame);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
-struct sStreamVE_1561B0 { short delta; short index; void (*fn)(void*, void*, int); };
 
 /**
  * Reads the aggression state back from a replay stream: a rider count (4 bytes), then for each of that many riders
@@ -354,7 +354,7 @@ struct sStreamVE_1561B0 { short delta; short index; void (*fn)(void*, void*, int
 extern "C" void cBEAggressionInterface_readFromReplayFrame(cBEAggressionInterface* self, cReplayFramePtr* stream)
 {
     int n;
-    sStreamVE_1561B0* vt = *(sStreamVE_1561B0**)stream;
+    sVEntry<void(void*, void*, int)>* vt = *(sVEntry<void(void*, void*, int)>**)stream;
     vt[2].fn((char*)stream + vt[2].delta, &n, 4);
     for (int i = 0; i < n; i++)
     {
@@ -362,7 +362,7 @@ extern "C" void cBEAggressionInterface_readFromReplayFrame(cBEAggressionInterfac
         for (int j = 0; j < 10; j++)
         {
             int charId = cBELibrary_getCharacterID(i);
-            sStreamVE_1561B0* vt2 = *(sStreamVE_1561B0**)stream;
+            sVEntry<void(void*, void*, int)>* vt2 = *(sVEntry<void(void*, void*, int)>**)stream;
             vt2[2].fn((char*)stream + vt2[2].delta, &cBELibrary_profileLib[profile][charId].aggression[j], 3);
         }
     }

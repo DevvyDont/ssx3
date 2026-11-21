@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "main/gameviewman.h"
 #include "bx/math3d.h"
 #include "visualfx/visualeffectsman.h"
@@ -2411,12 +2412,10 @@ extern "C" void cSplashManager_AddCrystal(cSplashManager* self, sVec2_3640* base
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1F1548", cSplashManager_AddDrop);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct S37A8 { int a, b; S37A8() {} S37A8(const S37A8 &o) { *this = o; } };
-extern "C" void tDrop_init(void *, S37A8, void *);
+extern "C" void tDrop_init(void *, t2Vector, void *);
 extern int cSplashToggles_m_NumDrops;
 
-extern "C" void cSplashManager_AddDrop_37A8(void *arg0, S37A8 *arg1, void *arg2) __asm__("cSplashManager_AddDrop");
+extern "C" void cSplashManager_AddDrop_37A8(void *arg0, t2Vector *arg1, void *arg2) __asm__("cSplashManager_AddDrop");
 /**
  * Adds one drop to the splash manager when fewer than "Max Drops" (cSplashToggles_m_NumDrops) are active.
  *
@@ -2427,7 +2426,7 @@ extern "C" void cSplashManager_AddDrop_37A8(void *arg0, S37A8 *arg1, void *arg2)
  * @param basePos  the drop position (copied)
  * @param maxSize  the largest drop size
  */
-extern "C" void cSplashManager_AddDrop_37A8(void *splashManager, S37A8 *basePos, void *maxSize) {
+extern "C" void cSplashManager_AddDrop_37A8(void *splashManager, t2Vector *basePos, void *maxSize) {
     int n = *(int *)((char*)splashManager + 0x14);
     if (n < cSplashToggles_m_NumDrops) {
         tDrop_init((char*)splashManager + (n * 0x3C + 0x1C), *basePos, maxSize);
@@ -2439,9 +2438,6 @@ extern "C" void cSplashManager_AddDrop_37A8(void *splashManager, S37A8 *basePos,
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("seg/seg_1F1548", cSplashManager_AddSplashes);
 #ifdef SKIP_ASM
-struct sVec2_3810 {
-    float x, y;
-};
 
 extern int D_004A3AFC;
 extern float cSplashToggles_m_PercentageIceCrystal;
@@ -2449,8 +2445,8 @@ extern int cSplashToggles_m_IceCrystalMinGrouping;
 extern int cSplashToggles_m_IceCrystalMaxGrouping;
 extern float cSplashToggles_m_DropMaxSize;
 unsigned int BXrand();
-extern "C" void cSplashManager_AddCrystal_3810(void*, sVec2_3810*, int) __asm__("cSplashManager_AddCrystal");
-extern "C" void cSplashManager_AddDrop(void*, sVec2_3810*, sVec2_3810*);
+extern "C" void cSplashManager_AddCrystal_3810(void*, t2Vector*, int) __asm__("cSplashManager_AddCrystal");
+extern "C" void cSplashManager_AddDrop(void*, t2Vector*, t2Vector*);
 
 // PORT: float bit-pattern random number in [0,1) (seed reused as float storage).
 static inline float randf_3810()
@@ -2480,7 +2476,7 @@ extern "C" void cSplashManager_AddSplashes(cSplashManager* self)
     int n = (int)acc;
     self->mNumSplashesToAdd = acc - (float)n;
     while (n > 0) {
-        sVec2_3810 pos;
+        t2Vector pos;
         pos.x = randScaled_3810(640.0f);
         pos.y = randScaled_3810(480.0f);
         if (randf_3810() < cSplashToggles_m_PercentageIceCrystal) {
@@ -2490,7 +2486,7 @@ extern "C" void cSplashManager_AddSplashes(cSplashManager* self)
             n -= k;
             cSplashManager_AddCrystal_3810(((char*)self), &pos, k);
         } else {
-            sVec2_3810 dropSize;
+            t2Vector dropSize;
             dropSize.x = cSplashToggles_m_DropMaxSize;
             dropSize.y = cSplashToggles_m_DropMaxSize;
             cSplashManager_AddDrop(((char*)self), &pos, &dropSize);
@@ -3109,25 +3105,20 @@ INCLUDE_ASM("seg/seg_1F1548", cSunHalo_RenderLens);
 #ifdef SKIP_ASM
 extern "C" float cRenderStateMan_LensIntensity(int);
 
-struct sV2_4690 {
-    float x, y;
-    sV2_4690() {}
-    sV2_4690(const float& ax, const float& ay) : x(ax), y(ay) {}
-};
 
-static inline sV2_4690 operator-(const sV2_4690& a, const sV2_4690& b)
+static inline t2Vector operator-(const t2Vector& a, const t2Vector& b)
 {
-    return sV2_4690(a.x - b.x, a.y - b.y);
+    return t2Vector(a.x - b.x, a.y - b.y);
 }
 
-static inline sV2_4690 operator+(const sV2_4690& a, const sV2_4690& b)
+static inline t2Vector operator+(const t2Vector& a, const t2Vector& b)
 {
-    return sV2_4690(a.x + b.x, a.y + b.y);
+    return t2Vector(a.x + b.x, a.y + b.y);
 }
 
-static inline sV2_4690 operator*(const sV2_4690& a, float s)
+static inline t2Vector operator*(const t2Vector& a, float s)
 {
-    return sV2_4690(a.x * s, a.y * s);
+    return t2Vector(a.x * s, a.y * s);
 }
 
 struct sV4_4690 {
@@ -3135,15 +3126,12 @@ struct sV4_4690 {
     sV4_4690(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
 };
 
-struct sCol_4690 {
-    float r, g, b, a;
-};
 
 struct sLight_4690 {
     int type;
     float dist;
     float size;
-    sCol_4690 col;
+    tARGB col;
 };
 
 struct sFlare_4690 {
@@ -3193,7 +3181,7 @@ public:
     virtual void v67(); virtual void v68(); virtual void v69(); virtual void v70();
     virtual void v71(); virtual void v72(); virtual void v73(); virtual void v74();
     virtual void v75(); virtual void v76();
-    virtual void DrawSprite(const sV4_4690&, const sV2_4690&, const sV2_4690&, const sV2_4690&, const sCol_4690&);
+    virtual void DrawSprite(const sV4_4690&, const t2Vector&, const t2Vector&, const t2Vector&, const tARGB&);
 };
 
 
@@ -3210,41 +3198,41 @@ extern "C" void cSunHalo_RenderLens(sFlare_4690* self)
 {
     float cx = (float)((cWorld_4690*)GrMan)->GetScreenWidth() * 0.5f;
     float cy = (float)((cWorld_4690*)GrMan)->GetScreenHeight() * 0.5f;
-    sV2_4690 center(cx, cy);
-    sV2_4690 sun(self->sunX, self->sunY);
-    sV2_4690 dir = sun - center;
+    t2Vector center(cx, cy);
+    t2Vector sun(self->sunX, self->sunY);
+    t2Vector dir = sun - center;
     cPS2GraphicsMan* w = GrMan;
     ((cWorld_4690*)w)->stateTop->SetF10(((cWorld_4690*)w)->GetF1004());
     for (int i = 0; i < self->count; i++) {
-        sV2_4690 pos = center + dir * self->lights[i].dist;
-        sV2_4690 uv0;
-        sCol_4690 col = self->lights[i].col;
-        col.r *= self->intensity * cRenderStateMan_LensIntensity(6);
-        sV2_4690 uv1;
+        t2Vector pos = center + dir * self->lights[i].dist;
+        t2Vector uv0;
+        tARGB col = self->lights[i].col;
+        col.A *= self->intensity * cRenderStateMan_LensIntensity(6);
+        t2Vector uv1;
         switch (self->lights[i].type) {
         case 0:
-            uv0 = sV2_4690(0.0f, 0.0f);
-            uv1 = sV2_4690(0.5f, 0.5f);
+            uv0 = t2Vector(0.0f, 0.0f);
+            uv1 = t2Vector(0.5f, 0.5f);
             break;
         case 1:
-            uv0 = sV2_4690(0.5f, 0.0f);
-            uv1 = sV2_4690(1.0f, 0.5f);
+            uv0 = t2Vector(0.5f, 0.0f);
+            uv1 = t2Vector(1.0f, 0.5f);
             break;
         case 2:
-            uv0 = sV2_4690(0.0f, 0.5f);
-            uv1 = sV2_4690(0.5f, 1.0f);
+            uv0 = t2Vector(0.0f, 0.5f);
+            uv1 = t2Vector(0.5f, 1.0f);
             break;
         case 3:
-            uv0 = sV2_4690(0.5f, 0.5f);
-            uv1 = sV2_4690(1.0f, 1.0f);
+            uv0 = t2Vector(0.5f, 0.5f);
+            uv1 = t2Vector(1.0f, 1.0f);
             break;
         default:
-            uv0 = sV2_4690(0.0f, 0.0f);
-            uv1 = sV2_4690(0.5f, 1.0f);
+            uv0 = t2Vector(0.0f, 0.0f);
+            uv1 = t2Vector(0.5f, 1.0f);
             break;
         }
         float spriteSize = self->lights[i].size * 300.0f;
-        sV2_4690 sz(spriteSize, spriteSize);
+        t2Vector sz(spriteSize, spriteSize);
         ((cWorld_4690*)GrMan)->DrawSprite(sV4_4690(pos.x, pos.y, 0.0f, 1.0f), sz, uv0, uv1, col);
     }
 }

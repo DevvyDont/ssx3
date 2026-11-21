@@ -613,12 +613,6 @@ extern "C" void cBankMonitorInstance_Reset(void*);
 // the 2nd parameter in the original, which orders the argument moves.
 void cBankMonitorInstance_Fade_f(void* voice, float v, int a, int b) __asm__("cBankMonitorInstance_Fade");
 
-struct sVoiceD650 {
-    int state;      // 0x0
-    int pad_4[2];
-    int id;         // 0xC
-    char pad[0xC0 - 0x10];
-};
 
 /**
  * Stops every playing sound of one bank, at once or with a fade.
@@ -633,8 +627,8 @@ extern "C" void cBankMonitor_BANKMONITOR_StopBank(cBankMonitor* self, int id, fl
     for (int i = 0; i < 64; i++) {
         if (cBankMonitorInstance_IsFree(&self->mBankMonitorInstance[i]) == 0) {
             // PORT: pointer arithmetic through int
-            sVoiceD650* instance = (sVoiceD650*)(i * 0xC0 + (int)self->mBankMonitorInstance);
-            if (instance->state == 1 && instance->id == id) {
+            cBankMonitorInstance* instance = (cBankMonitorInstance*)(i * 0xC0 + (int)self->mBankMonitorInstance);
+            if (instance->mMonitorType == 1 && instance->mRestartInfo.bank.mBank == id) {
                 if (FadeTime != 0.0f) {
                     cBankMonitorInstance_Fade_f(instance, FadeTime, -1, 1);
                 } else {
@@ -651,11 +645,6 @@ INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Active);
 #ifdef SKIP_ASM
 extern "C" int cBankMonitorInstance_IsFree(void*);
 
-struct sVoiceAD730 {
-    int pad_0[2];
-    int active;     // 0x8
-    char pad[0xC0 - 0xC];
-};
 
 /**
  * Counts the bank monitor's busy instances (of 64, 0xC0 bytes each) whose active word is set.
@@ -668,8 +657,8 @@ extern "C" int cBankMonitor_BANKMONITOR_Active(cBankMonitor* self)
     for (int i = 0; i < 64; i++) {
         if (cBankMonitorInstance_IsFree(&self->mBankMonitorInstance[i]) == 0) {
             // PORT: pointer arithmetic through int
-            sVoiceAD730* instance = (sVoiceAD730*)(i * 0xC0 + (int)self->mBankMonitorInstance);
-            if (instance->active != 0) {
+            cBankMonitorInstance* instance = (cBankMonitorInstance*)(i * 0xC0 + (int)self->mBankMonitorInstance);
+            if (instance->mActive != 0) {
                 count++;
             }
         }
@@ -766,11 +755,6 @@ extern "C" void cMonitorInstance_Reset(cMonitorInstance*);
 void cMonitorInstance_CountReset(void* self, int a1);
 void cMonitorInstance_Enable(void* self);
 
-struct sBmKeyD888 {
-    short a;
-    short id;
-    int v;
-};
 
 /**
  * Sets up a monitor instance: a callback to run every @p Freq ms with up to five values.
@@ -792,7 +776,7 @@ extern "C" void cMonitorInstance_Create(cMonitorInstance* self, int Freq, long k
     cMonitorInstance_Reset(self);
     cMonitorInstance_CountReset(self, Freq);
     // PORT: the 8-byte key is copied through its in-memory layout
-    *(sBmKeyD888*)&self->mCallback = *(sBmKeyD888*)&key;
+    *(&self->mCallback) = *(tSndCallback*)&key;
     self->mPtr = (void*)Ptr;
     self->mData1 = Data1;
     self->mData2 = Data2;

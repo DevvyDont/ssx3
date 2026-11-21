@@ -32,12 +32,6 @@ extern "C" int cBlockMan_isBlock(cBlockMan* block, int addr) {
 //100%
 INCLUDE_ASM("bx/blockman", cBlockMan_alloc);
 #ifdef SKIP_ASM
-struct sPool_6C00 {
-    int base;
-    int size;
-    unsigned int blockSize;
-    int* freeList;
-};
 
 /**
  * Takes a free block from the first group whose block size fits @p size.
@@ -50,15 +44,15 @@ struct sPool_6C00 {
  */
 extern "C" int* cBlockMan_alloc(cBlockMan* self, unsigned int size) {
     int i;
-    sPool_6C00* pool;
+    tBlockGroup* pool;
     int* head;
 
     for (i = 0; i < self->NumGroups; i++) {
-        pool = (sPool_6C00*)((i << 4) + (int)self->Groups);
-        if (pool->blockSize >= size) {
-            head = pool->freeList;
+        pool = (tBlockGroup*)((i << 4) + (int)self->Groups);
+        if (pool->Size >= size) {
+            head = ((int*)pool->FreeBlocks);
             if (head != 0) {
-                pool->freeList = (int*)*head;
+                (*(int**)&pool->FreeBlocks) = (int*)*head;
                 return head;
             }
         }
@@ -69,12 +63,6 @@ extern "C" int* cBlockMan_alloc(cBlockMan* self, unsigned int size) {
 //100%
 INCLUDE_ASM("bx/blockman", cBlockMan_free);
 #ifdef SKIP_ASM
-struct sPool_6C60 {
-    int base;
-    int size;
-    unsigned int blockSize;
-    int* freeList;
-};
 
 /**
  * Returns a block to the free list of the group whose memory contains it.
@@ -87,14 +75,14 @@ struct sPool_6C60 {
 extern "C" void cBlockMan_free(cBlockMan* self, int* ptr) {
     int i;
     int off;
-    sPool_6C60* pool;
+    tBlockGroup* pool;
 
     for (i = 0; i < self->NumGroups; i++) {
-        pool = (sPool_6C60*)((i << 4) + (int)self->Groups);
-        off = (int)ptr - pool->base;
-        if (off >= 0 && off < pool->size) {
-            *ptr = (int)pool->freeList;
-            ((sPool_6C60*)((i << 4) + (int)self->Groups))->freeList = ptr;
+        pool = (tBlockGroup*)((i << 4) + (int)self->Groups);
+        off = (int)ptr - ((int)pool->MemBlock);
+        if (off >= 0 && off < pool->MemBlockSize) {
+            *ptr = (int)((int*)pool->FreeBlocks);
+            (*(int**)&((tBlockGroup*)((i << 4) + (int)self->Groups))->FreeBlocks) = ptr;
             return;
         }
     }

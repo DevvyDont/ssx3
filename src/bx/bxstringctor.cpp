@@ -1,4 +1,6 @@
+#include "vtable.h"
 #include "common.h"
+#include "ai/rider.h"
 #include "online/privatemessage.h"
 #include "online/setupman.h"
 #include "path/trackpath.h"
@@ -2348,16 +2350,6 @@ extern "C" sBXVec4K2 cAIPath_getResetPos(sBXPath* path, float* pathParam)
 //100%
 INCLUDE_ASM("bx/bxstringctor", cAIPath_isResetPermitted);
 #ifdef SKIP_ASM
-struct sEntry_0026A000 {
-    int type;
-    int pad4;
-    float lo;
-    float hi;
-};
-struct sTable_0026A000 {
-    int count;
-    sEntry_0026A000* entries;
-};
 
 /**
  * Returns whether a reset is allowed at position @p x along an AI path: 0 inside any event of type 13, else 1.
@@ -2369,11 +2361,11 @@ struct sTable_0026A000 {
  * @param x  the position along the path
  * @return 1 when a reset is allowed, else 0
  */
-extern "C" int cAIPath_isResetPermitted(sTable_0026A000* table, float x) {
+extern "C" int cAIPath_isResetPermitted(cPath* table, float x) {
     int i;
-    for (i = 0; i < table->count; i++) {
-        sEntry_0026A000* entry = &table->entries[i];
-        if (!(x < entry->lo) && !(entry->hi < x) && entry->type == 13)
+    for (i = 0; i < table->NumEvents; i++) {
+        tPathEventNode* entry = &(table->Events)[i];
+        if (!(x < entry->ParamStart) && !(entry->ParamEnd < x) && entry->Type == 13)
             return 0;
     }
     return 1;
@@ -2490,16 +2482,6 @@ extern "C" int cTrackPath_isForkInPath(cTrackPath* self, float ldist, float hdis
 //100%
 INCLUDE_ASM("bx/bxstringctor", cTrackPath_getFinishLineParam);
 #ifdef SKIP_ASM
-struct sEntry_0026A138 {
-    int type;
-    int pad4;
-    float value;
-    int pad[1];
-};
-struct sTable_0026A138 {
-    int count;
-    sEntry_0026A138* entries;
-};
 
 /**
  * Returns the start position (+0x8) of a track path's first type-1 event, or -1 when it has none.
@@ -2510,13 +2492,13 @@ struct sTable_0026A138 {
  * @param table  the track path
  * @return the position along the path, or -1.0
  */
-extern "C" float cTrackPath_getFinishLineParam(sTable_0026A138* table)
+extern "C" float cTrackPath_getFinishLineParam(cPath* table)
 {
     int i;
-    for (i = 0; i < table->count; i++) {
-        sEntry_0026A138* entry = &table->entries[i];
-        if (entry->type == 1)
-            return entry->value;
+    for (i = 0; i < table->NumEvents; i++) {
+        tPathEventNode* entry = &(table->Events)[i];
+        if (entry->Type == 1)
+            return entry->ParamStart;
     }
     return -1.0f;
 }
@@ -2531,8 +2513,6 @@ extern "C" void pathREAD_t3Vector(void* p, void* q);
 extern "C" void cPath_populateNode(void* self, void* src, void* dst);
 extern "C" void cPath_populateEvent(void* self, char* src, int* dst);
 
-struct sVE0_26A180 { short delta; short index; void (*fn)(void*); };
-struct sVE1_26A180 { short delta; short index; void (*fn)(void*, char*, int, int); };
 
 
 /**
@@ -2555,7 +2535,7 @@ extern "C" int cPath_initPath(cPath* self, char* src)
     int chunkId;
     int itemSize;
     int itemCount;
-    sVE0_26A180* vt0 = (sVE0_26A180*)((void*)self->mVtbl);
+    sVEntry<void(void*)>* vt0 = (sVEntry<void(void*)>*)((void*)self->mVtbl);
     vt0[3].fn((char*)self + vt0[3].delta);
     pathREAD_tInt32_A180(&n, src);
     src += 4;
@@ -2565,7 +2545,7 @@ extern "C" int cPath_initPath(cPath* self, char* src)
         src += 4;
         pathREAD_tInt32_A180(&itemSize, src);
         src += 4;
-        sVE1_26A180* vt1 = (sVE1_26A180*)((void*)self->mVtbl);
+        sVEntry<void(void*, char*, int, int)>* vt1 = (sVEntry<void(void*, char*, int, int)>*)((void*)self->mVtbl);
         vt1[4].fn((char*)self + vt1[4].delta, src, chunkId, itemSize);
         src += itemSize;
     }
@@ -2584,13 +2564,13 @@ extern "C" int cPath_initPath(cPath* self, char* src)
     *(char**)&self->Nodes = src;
     for (int i = 0; i < self->NumNodes; i++)
     {
-        cPath_populateNode(self, src, ((char*)self->Nodes) + i * 16);
+        cPath_populateNode(self, src, &self->Nodes[i]);
         src += 16;
     }
     *(char**)&self->Events = src;
     for (int i = 0; i < self->NumEvents; i++)
     {
-        cPath_populateEvent(self, src, (int*)(((char*)self->Events) + i * 16));
+        cPath_populateEvent(self, src, &self->Events[i].Type);
         src += 16;
     }
     return src - start;
@@ -2666,10 +2646,6 @@ struct sBXVec4_A428 {
     sBXVec4_A428(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-struct sBXPathSeg_A428 {
-    float x, y, z;   // direction
-    float len;       // 0xC
-};
 
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
@@ -2789,11 +2765,11 @@ extern "C" float cPath_intersectPath(cPath* self, const sBXVec4_A428& cursor, sB
     sBXVec4_A428 pos(self->Start[0], self->Start[1], self->Start[2], 1.0f);
     for (int i = 0; i < self->NumNodes; i++) {
         sBXVec4_A428 dir;
-        dir.x = ((sBXPathSeg_A428*)self->Nodes)[i].x;
-        dir.y = ((sBXPathSeg_A428*)self->Nodes)[i].y;
-        dir.z = ((sBXPathSeg_A428*)self->Nodes)[i].z;
+        dir.x = (self->Nodes)[i].Dir[0];
+        dir.y = (self->Nodes)[i].Dir[1];
+        dir.z = (self->Nodes)[i].Dir[2];
         dir.w = 0.0f;
-        float len = ((sBXPathSeg_A428*)self->Nodes)[i].len;
+        float len = (self->Nodes)[i].Len;
         sBXVec4_A428 delta = bxVu0Sub_A428(cursor, pos);
         float projLen;
         if (flat)
@@ -2835,10 +2811,6 @@ struct sBXVec4_A638 {
     sBXVec4_A638(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-struct sBXPathSeg_A638 {
-    float x, y, z;   // direction
-    float len;       // 0xC
-};
 
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
@@ -2933,11 +2905,6 @@ static inline float bxClamp_A638(float v, float lo, float hi)
     return lo <= v ? v <? hi : lo;
 }
 
-struct sBXPathCache_A638 {
-    sBXVec4_A638 pos;  // 0x0
-    float along;       // 0x10
-    int idx;           // 0x14
-};
 
 /**
  * Finds the point of a path nearest to @p cursor, starting from a cached segment, and returns its position along the path.
@@ -2958,7 +2925,7 @@ struct sBXPathCache_A638 {
  * @return the position along the path of the nearest point
  */
 extern "C" float cPath_intersectPath1(cPath* self, const sBXVec4_A638& cursor, sBXVec4_A638* outPos,
-                               float* outDist, sBXPathCache_A638* cache, int flat)
+                               float* outDist, tPathIntersectInfo* cache, int flat)
 {
     float bestT = 0.0f;
     float bestDist = 0.0f;
@@ -2967,11 +2934,11 @@ extern "C" float cPath_intersectPath1(cPath* self, const sBXVec4_A638& cursor, s
     float limit;
     int i;
     sBXVec4_A638 pos;
-    int cached = cache->idx >= 0;
+    int cached = cache->NodeID >= 0;
     if (cached) {
-        along = cache->along;
-        i = cache->idx;
-        pos = cache->pos;
+        along = cache->Param;
+        i = cache->NodeID;
+        pos = (*(sBXVec4_A638*)&cache->Pos);
         limit = along + 3000.0f;
     } else {
         i = 0;
@@ -2981,11 +2948,11 @@ extern "C" float cPath_intersectPath1(cPath* self, const sBXVec4_A638& cursor, s
     }
     for (; i < self->NumNodes; i++) {
         sBXVec4_A638 dir;
-        dir.x = ((sBXPathSeg_A638*)self->Nodes)[i].x;
-        dir.y = ((sBXPathSeg_A638*)self->Nodes)[i].y;
-        dir.z = ((sBXPathSeg_A638*)self->Nodes)[i].z;
+        dir.x = (self->Nodes)[i].Dir[0];
+        dir.y = (self->Nodes)[i].Dir[1];
+        dir.z = (self->Nodes)[i].Dir[2];
         dir.w = 0.0f;
-        float len = ((sBXPathSeg_A638*)self->Nodes)[i].len;
+        float len = (self->Nodes)[i].Len;
         sBXVec4_A638 delta = bxVu0Sub_A638(cursor, pos);
         float projLen;
         if (flat)
@@ -3008,9 +2975,9 @@ extern "C" float cPath_intersectPath1(cPath* self, const sBXVec4_A638& cursor, s
                 bestDist = delta.x * delta.x + delta.y * delta.y;
             bestT = along + tc;
             *outPos = nearPoint;
-            cache->pos = pos;
-            cache->along = along;
-            cache->idx = i;
+            (*(sBXVec4_A638*)&cache->Pos) = pos;
+            cache->Param = along;
+            cache->NodeID = i;
             if (cached && tc == projLen)
                 break;
         }
@@ -3067,15 +3034,6 @@ done:
 //100%
 INCLUDE_ASM("bx/bxstringctor", cPath_findEvent);
 #ifdef SKIP_ASM
-struct sEntry_0026A920 {
-    int key0;
-    int key1;
-    int pad[2];
-};
-struct sTable_0026A920 {
-    int count;
-    sEntry_0026A920* entries;
-};
 
 /**
  * Returns the path's first event whose type (+0x0) is @p firstKey and argument (+0x4) is @p secondKey.
@@ -3087,13 +3045,13 @@ struct sTable_0026A920 {
  * @param secondKey  the event argument
  * @return the event, or null
  */
-extern "C" sEntry_0026A920* cPath_findEvent(sTable_0026A920* table, int firstKey, int secondKey)
+extern "C" tPathEventNode* cPath_findEvent(cPath* table, int firstKey, int secondKey)
 {
     int i = 0;
-    sEntry_0026A920* entry = table->entries;
-    while (i < table->count) {
+    tPathEventNode* entry = (table->Events);
+    while (i < table->NumEvents) {
         i++;
-        if (entry->key0 == firstKey && entry->key1 == secondKey)
+        if (entry->Type == firstKey && entry->Arg == secondKey)
             return entry;
         entry++;
     }
@@ -3103,14 +3061,6 @@ extern "C" sEntry_0026A920* cPath_findEvent(sTable_0026A920* table, int firstKey
 //100%
 INCLUDE_ASM("bx/bxstringctor", cPath_findEvent1);
 #ifdef SKIP_ASM
-struct sEntry_0026A970 {
-    int key;
-    int pad[3];
-};
-struct sTable_0026A970 {
-    int count;
-    sEntry_0026A970* entries;
-};
 
 /**
  * Returns the path's first event whose type (+0x0) is @p key.
@@ -3121,13 +3071,13 @@ struct sTable_0026A970 {
  * @param key  the event type
  * @return the event, or null
  */
-extern "C" sEntry_0026A970* cPath_findEvent1(sTable_0026A970* table, int key)
+extern "C" tPathEventNode* cPath_findEvent1(cPath* table, int key)
 {
     int i = 0;
-    sEntry_0026A970* entry = table->entries;
-    while (i < table->count) {
+    tPathEventNode* entry = (table->Events);
+    while (i < table->NumEvents) {
         i++;
-        if (entry->key == key)
+        if (entry->Type == key)
             return entry;
         entry++;
     }

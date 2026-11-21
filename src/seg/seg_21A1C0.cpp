@@ -1,18 +1,15 @@
 #include "common.h"
+#include "bx/bxstring.h"
+#include "bx/dynamicmemman.h"
 
 //100%
 INCLUDE_ASM("seg/seg_21A1C0", cBXString_vprintf);
 #ifdef SKIP_ASM
-// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct cBXString_91C0 {
-    char* str;
-};
 extern "C" long strtol(const char* s, char** end, int base);
 extern "C" int strlen(const char* s);
-extern "C" void cBXString_getBuffer(cBXString_91C0* self, int len);
+extern "C" void cBXString_getBuffer(cBXString* self, int len);
 extern "C" int vsprintf(char* buf, const char* fmt, char* ap);
-extern "C" void cBXString_releaseBuffer(cBXString_91C0* self, int len);
+extern "C" void cBXString_releaseBuffer(cBXString* self, int len);
 
 #define MAX_91C0(a, b) (((a) > (b)) ? (a) : (b))
 #define MIN_91C0(a, b) (((a) < (b)) ? (a) : (b))
@@ -35,7 +32,7 @@ extern "C" void cBXString_releaseBuffer(cBXString_91C0* self, int len);
 // scheme), reserves it, then formats in place.
 extern "C" void cBXString_vprintf(void* self_, const char* fmt, char* args)
 {
-    cBXString_91C0* self = (cBXString_91C0*)self_;
+    cBXString* self = (cBXString*)self_;
     char* ap = args;
     int maxLen = 1;
     const char* fmtPos;
@@ -136,7 +133,7 @@ extern "C" void cBXString_vprintf(void* self_, const char* fmt, char* args)
         maxLen += itemLen;
     }
     cBXString_getBuffer(self, maxLen);
-    vsprintf(self->str, fmt, args);
+    vsprintf(self->Str, fmt, args);
     cBXString_releaseBuffer(self, -1);
 }
 #endif
@@ -568,20 +565,7 @@ extern "C" void func_00319930(void)
 //100%
 INCLUDE_ASM("seg/seg_21A1C0", cMemMan_totalUnused);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sMallinfo_99D0 {
-    int arena;
-    int ordblks;
-    int smblks;
-    int hblks;
-    int hblkhd;
-    int usmblks;
-    int fsmblks;
-    int uordblks;
-    int fordblks;
-    int keepcost;
-};
-extern "C" sMallinfo_99D0 cDynamicMemMan_dlmallinfo(void* ms);
+extern "C" mallinfo cDynamicMemMan_dlmallinfo(void* ms);
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
 extern void* cMemMan_m_mutex[16];
@@ -600,7 +584,7 @@ extern unsigned int cMemMan_m_heapSize;
 extern "C" int cMemMan_totalUnused(void)
 {
     MUTEX_lock(cMemMan_m_mutex);
-    sMallinfo_99D0 mi = cDynamicMemMan_dlmallinfo(TheDynamicMemMan);
+    mallinfo mi = cDynamicMemMan_dlmallinfo(TheDynamicMemMan);
     int freeBytes = cMemMan_m_heapSize - mi.uordblks;
     MUTEX_unlock(cMemMan_m_mutex);
     return freeBytes;

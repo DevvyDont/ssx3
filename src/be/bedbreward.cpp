@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/ridermetrix.h"
 #include "fe/fereal.h"
 #include "be/bestate.h"
 #include "camera/cameraalgolist.h"
@@ -1487,7 +1488,6 @@ extern "C" int cBENetworkInterface_getOpponentCharacterID(void) {
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setMyStats);
 #ifdef SKIP_ASM
-struct sBEBlk_C418 { int v[0x2B]; };
 
 /**
  * Copies the 0xAC-byte rider stats at @p src into cBENetworkInterface_networkOpt.MyStats. @p self is
@@ -1495,9 +1495,9 @@ struct sBEBlk_C418 { int v[0x2B]; };
  *
  * @param src  this player's rider stats (tRiderStats)
  */
-extern "C" void cBENetworkInterface_setMyStats(cBENetworkInterface* self, sBEBlk_C418* src)
+extern "C" void cBENetworkInterface_setMyStats(cBENetworkInterface* self, tRiderStats* src)
 {
-    (*(sBEBlk_C418*)&cBENetworkInterface_networkOpt.MyStats) = *src;
+    (*(&cBENetworkInterface_networkOpt.MyStats)) = *src;
 }
 #endif
 //100%
@@ -1509,8 +1509,8 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getMyStats);
  *
  * @return the stats block
  */
-extern "C" sBEBlk_C418* cBENetworkInterface_getMyStats(void) {
-    return (sBEBlk_C418*)&cBENetworkInterface_networkOpt.MyStats;
+extern "C" tRiderStats* cBENetworkInterface_getMyStats(void) {
+    return (&cBENetworkInterface_networkOpt.MyStats);
 }
 #endif
 //100%
@@ -1523,9 +1523,9 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setOpponentStats);
  *
  * @param src  the remote player's rider stats (tRiderStats)
  */
-extern "C" void cBENetworkInterface_setOpponentStats(cBENetworkInterface* self, sBEBlk_C418* src)
+extern "C" void cBENetworkInterface_setOpponentStats(cBENetworkInterface* self, tRiderStats* src)
 {
-    (*(sBEBlk_C418*)&cBENetworkInterface_networkOpt.OpponentStats) = *src;
+    (*(&cBENetworkInterface_networkOpt.OpponentStats)) = *src;
 }
 #endif
 //100%
@@ -1537,8 +1537,8 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getOpponentStats);
  *
  * @return the stats block
  */
-extern "C" sBEBlk_C418* cBENetworkInterface_getOpponentStats(void) {
-    return (sBEBlk_C418*)&cBENetworkInterface_networkOpt.OpponentStats;
+extern "C" tRiderStats* cBENetworkInterface_getOpponentStats(void) {
+    return (&cBENetworkInterface_networkOpt.OpponentStats);
 }
 #endif
 //100%

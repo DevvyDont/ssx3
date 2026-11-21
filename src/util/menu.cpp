@@ -1,4 +1,7 @@
+#include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
+#include "render/2drender.h"
 #include "ui/uithing.h"
 #include "util/menusys.h"
 #include "render/ps2graphicsman.h"
@@ -322,10 +325,6 @@ INCLUDE_ASM("util/menu", cMenuItem_textPreRender);
 #ifdef SKIP_ASM
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 
-struct sRect_2CA4C8 { float x, y, w, h; };
-struct sVec2_2CA4C8 {
-    float x, y;
-};
 
 static inline char* font_2CA4C8(char* item)
 {
@@ -352,7 +351,7 @@ static inline float widthOr0_2CA4C8(char* item, const char* s)
 
 // PORT: the unit's callers declare cMenuItem_textPreRender as (void*, void*, int, int, void*) returning void;
 // the body returns an sRect by value (hidden return pointer) from (item, left, center, right). Bound by asm label.
-extern "C" sRect_2CA4C8 cMenuItem_textPreRender_impl(char* item, const char* left, const char* center, const char* right) __asm__("cMenuItem_textPreRender");
+extern "C" tRect cMenuItem_textPreRender_impl(char* item, const char* left, const char* center, const char* right) __asm__("cMenuItem_textPreRender");
 
 /**
  * Measures a menu row made of up to three texts (left, centre, right) and returns its rect, by value.
@@ -369,22 +368,22 @@ extern "C" sRect_2CA4C8 cMenuItem_textPreRender_impl(char* item, const char* lef
  * @param right  text drawn at the right edge, or 0
  * @return the row's rect (x, y, w, h)
  */
-extern "C" sRect_2CA4C8 cMenuItem_textPreRender_impl(char* item, const char* left, const char* center, const char* right)
+extern "C" tRect cMenuItem_textPreRender_impl(char* item, const char* left, const char* center, const char* right)
 {
-    sRect_2CA4C8 rect;
-    sVec2_2CA4C8 sc;
+    tRect rect;
+    t2Vector sc;
     float zero = 0.0f;
-    rect.y = zero;
-    rect.x = zero;
+    rect.Y = zero;
+    rect.X = zero;
     char* font = font_2CA4C8(item);
     float lineHeight = (float)*(int*)(font + 0x14) * *(float*)(font + 0x34);
     float sx = *(float*)(font + 0x38) / *(float*)(font + 0x30);
     float sy = *(float*)(font + 0x3C) / *(float*)(font + 0x34);
     sc.x = sx;
     sc.y = sy;
-    rect.h = lineHeight * sy;
+    rect.H = lineHeight * sy;
     if (left && center && right) {
-        rect.w = width_2CA4C8(item, center) + MAXF_2CA4C8(width_2CA4C8(item, left), width_2CA4C8(item, right)) * 2.0f + 32.0f;
+        rect.W = width_2CA4C8(item, center) + MAXF_2CA4C8(width_2CA4C8(item, left), width_2CA4C8(item, right)) * 2.0f + 32.0f;
     } else {
         float w = widthOr0_2CA4C8(item, left);
         if (center) {
@@ -393,13 +392,13 @@ extern "C" sRect_2CA4C8 cMenuItem_textPreRender_impl(char* item, const char* lef
         if (right) {
             w += width_2CA4C8(item, right);
         }
-        rect.w = w;
+        rect.W = w;
         if ((left && (center || right)) || (center && right)) {
-            rect.w += 16.0f;
+            rect.W += 16.0f;
         }
     }
-    rect.h += 12.0f;
-    rect.w = (rect.w >? 100.0f) + 32.0f;
+    rect.H += 12.0f;
+    rect.W = (rect.W >? 100.0f) + 32.0f;
     return rect;
 }
 #endif
@@ -410,14 +409,11 @@ INCLUDE_ASM("util/menu", cMenuItem_textRender);
 extern "C" void cFont_text(void* self, float x, float y, const char* str);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 
-struct sRect_2CA768 { float x, y, w, h; };
-struct sColor_2CA768 { float r, g, b, a; };
 struct sVec2_2CA768 {
     float x, y;
     sVec2_2CA768(float ax, float ay) : x(ax), y(ay) {}
 };
 
-struct sVEnt_2CA768 { short delta; short index; void (*fn)(void*, sRect_2CA768*, char*); };
 
 static inline char* font_2CA768(char* item)
 {
@@ -426,7 +422,7 @@ static inline char* font_2CA768(char* item)
 
 // PORT: the unit's callers declare cMenuItem_textRender as (void*, int, int, int, void*, char*, sColor*) returning void*;
 // the body takes (item, rect, left, center, right, style, color) and returns nothing. Bound by asm label.
-extern "C" void cMenuItem_textRender_impl(char* item, sRect_2CA768* rect, const char* left, const char* center, const char* right, char* style, sColor_2CA768* color) __asm__("cMenuItem_textRender");
+extern "C" void cMenuItem_textRender_impl(char* item, tRect* rect, const char* left, const char* center, const char* right, char* style, tARGB* color) __asm__("cMenuItem_textRender");
 
 /**
  * Draws a menu row: its box in @p style, then up to three texts in colour @p color.
@@ -444,27 +440,27 @@ extern "C" void cMenuItem_textRender_impl(char* item, sRect_2CA768* rect, const 
  * @param style  the box colour (a tARGB) passed to the box drawer
  * @param color  the text colour (tARGB) copied into the font
  */
-extern "C" void cMenuItem_textRender_impl(char* item, sRect_2CA768* rect, const char* left, const char* center, const char* right, char* style, sColor_2CA768* color)
+extern "C" void cMenuItem_textRender_impl(char* item, tRect* rect, const char* left, const char* center, const char* right, char* style, tARGB* color)
 {
     char* menu = *(char**)item;
-    sVEnt_2CA768* vt = *(sVEnt_2CA768**)(menu + 0x12C);
+    sVEntry<void(void*, tRect*, char*)>* vt = *(sVEntry<void(void*, tRect*, char*)>**)(menu + 0x12C);
     vt[8].fn(menu + vt[8].delta, rect, style);
-    *(sColor_2CA768*)(font_2CA768(item) + 0x40) = *color;
+    *(tARGB*)(font_2CA768(item) + 0x40) = *color;
     char* font = font_2CA768(item);
     sVec2_2CA768 sc(2.0f, 2.0f);
     *(sVec2_2CA768*)(font + 0x28) = sc;
     if (left) {
-        cFont_text(font_2CA768(item), rect->x + 16.0f, rect->y + 6.0f - 1.0f, left);
+        cFont_text(font_2CA768(item), rect->X + 16.0f, rect->Y + 6.0f - 1.0f, left);
     }
     if (center) {
         char* measureFont = font_2CA768(item);
         float w = cFont_textExtent(measureFont, center, 0, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
-        cFont_text(font_2CA768(item), rect->x + (rect->w - w) * 0.5f, rect->y + 6.0f - 1.0f, center);
+        cFont_text(font_2CA768(item), rect->X + (rect->W - w) * 0.5f, rect->Y + 6.0f - 1.0f, center);
     }
     if (right) {
         char* measureFont = font_2CA768(item);
         float w = cFont_textExtent(measureFont, right, 0, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
-        cFont_text(font_2CA768(item), rect->x + (rect->w - w) - 16.0f, rect->y + 6.0f - 1.0f, right);
+        cFont_text(font_2CA768(item), rect->X + (rect->W - w) - 16.0f, rect->Y + 6.0f - 1.0f, right);
     }
     *(sVec2_2CA768*)(font_2CA768(item) + 0x28) = sVec2_2CA768(0.0f, 0.0f);
 }
@@ -2420,7 +2416,6 @@ INCLUDE_ASM("util/menu", cBoolMenuItem_preRender);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem_textPreRender(void*, void*, int, int, void*);
 
-struct sMenuRectC648 { float x, y, z, w; };
 
 /**
  * Measures an on/off item: caption on the left with the wider of the two state texts on the right, or the caption
@@ -2432,17 +2427,17 @@ struct sMenuRectC648 { float x, y, z, w; };
  * @param item  the on/off item
  * @return @p ret
  */
-extern "C" sMenuRectC648* cBoolMenuItem_preRender(sMenuRectC648* ret, char* item)
+extern "C" tRect* cBoolMenuItem_preRender(tRect* ret, char* item)
 {
     if (*(void**)(item + 0x18) != 0 && *(void**)(item + 0x1C) != 0) {
-        sMenuRectC648 trueRect;
-        sMenuRectC648 falseRect;
-        sMenuRectC648 measured;
+        tRect trueRect;
+        tRect falseRect;
+        tRect measured;
         cMenuItem_textPreRender(&measured, item, *(int*)(item + 0x14), 0, *(void**)(item + 0x18));
         trueRect = measured;
         cMenuItem_textPreRender(&measured, item, *(int*)(item + 0x14), 0, *(void**)(item + 0x1C));
         falseRect = measured;
-        *ret = (trueRect.z > falseRect.z) ? trueRect : falseRect;
+        *ret = (trueRect.W > falseRect.W) ? trueRect : falseRect;
     } else {
         cMenuItem_textPreRender(ret, item, 0, *(int*)(item + 0x14), 0);
     }
@@ -2584,7 +2579,6 @@ extern "C" int cMenuItem_input(cMenuItem* self);
 extern "C" int cMenuItem_isLocked(cMenuItem* self);
 extern "C" int cMenuItem_getKey(void** self);
 
-struct sVEnt_2CC8F0 { short delta; short index; void* fn; };
 typedef int (*Pick_2CC8F0)(void*, void*, int);
 typedef void (*Notify_2CC8F0)(void*, void*);
 
@@ -2596,7 +2590,7 @@ struct sEnt_2CC8F0 {
 
 static inline void notify_2CC8F0(cEnumMenuItem* self)
 {
-    sVEnt_2CC8F0* vt = (sVEnt_2CC8F0*)self->Menu->mVtbl;
+    sVEntry<void>* vt = (sVEntry<void>*)self->Menu->mVtbl;
     ((Notify_2CC8F0)vt[4].fn)(((char*)self->Menu) + vt[4].delta, self);
 }
 
@@ -2624,7 +2618,7 @@ extern "C" int cEnumMenuItem_input(cEnumMenuItem* vself)
         return result;
     }
     if (cMenuItem_getKey((void**)self) == 6) {
-        sVEnt_2CC8F0* vt = (sVEnt_2CC8F0*)self->Menu->mVtbl;
+        sVEntry<void>* vt = (sVEntry<void>*)self->Menu->mVtbl;
         result = ((Pick_2CC8F0)vt[3].fn)(((char*)self->Menu) + vt[3].delta, self, 0);
     } else {
     int n = self->NumTags;
@@ -3376,9 +3370,6 @@ int cSpaceMenuItem_canHaveFocus(void* self)
 //100%
 INCLUDE_ASM("util/menu", cSpaceMenuItem_preRender);
 #ifdef SKIP_ASM
-struct s2CD3A0Vec {
-    float x, y, z, w;
-};
 
 /**
  * Returns a spacer item's row rectangle: zero position and width, with the spacer's size (+0x14) as the
@@ -3388,11 +3379,11 @@ struct s2CD3A0Vec {
  *
  * @return the rectangle {0, 0, 0, size}
  */
-extern "C" s2CD3A0Vec cSpaceMenuItem_preRender(cSpaceMenuItem* self)
+extern "C" tRect cSpaceMenuItem_preRender(cSpaceMenuItem* self)
 {
-    s2CD3A0Vec rect;
-    rect.x = rect.y = rect.z = 0.0f;
-    rect.w = (float)self->Space;
+    tRect rect;
+    rect.X = rect.Y = rect.W = 0.0f;
+    rect.H = (float)self->Space;
     return rect;
 }
 #endif
@@ -3546,11 +3537,6 @@ INCLUDE_ASM("util/menu", cCharMenuItem_input);
 float cMenuItem_getLeft_f(void* self) __asm__("cMenuItem_getLeft__FPv");
 float cMenuItem_getRight_f(void* self) __asm__("cMenuItem_getRight__FPv");
 
-struct sVEntry002CD5A0 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 
 // PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
 static inline float ffloor_002CD5A0(float x)
@@ -3630,7 +3616,7 @@ extern "C" int cCharMenuItem_input(cCharMenuItem* self)
         self->Fraction = step + (float)(cur - newValue);
         *valuePtr = newValue;
         char* menu = *(char**)self;
-        sVEntry002CD5A0* entry = &(*(sVEntry002CD5A0**)(menu + 0x12C))[4];
+        sVEntry<void(void*, void*)>* entry = &(*(sVEntry<void(void*, void*)>**)(menu + 0x12C))[4];
         entry->fn(menu + entry->delta, self);
     }
     return result;
@@ -3837,11 +3823,6 @@ INCLUDE_ASM("util/menu", cIntMenuItem_input);
 float cMenuItem_getLeft_f(void* self) __asm__("cMenuItem_getLeft__FPv");
 float cMenuItem_getRight_f(void* self) __asm__("cMenuItem_getRight__FPv");
 
-struct sVEntry002CD9D8 {
-    short delta;
-    short index;
-    void (*fn)(void*, void*);
-};
 
 // PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
 static inline float ffloor_002CD9D8(float x)
@@ -3923,7 +3904,7 @@ extern "C" int cIntMenuItem_input(cIntMenuItem* self)
         self->Fraction = side + (float)(cur - newValue);
         *valuePtr = newValue;
         char* menu = *(char**)self;
-        sVEntry002CD9D8* vtEntry = &(*(sVEntry002CD9D8**)(menu + 0x12C))[4];
+        sVEntry<void(void*, void*)>* vtEntry = &(*(sVEntry<void(void*, void*)>**)(menu + 0x12C))[4];
         vtEntry->fn(menu + vtEntry->delta, self);
     }
     return result;
@@ -4058,7 +4039,6 @@ extern "C" cFloatMenuItem_sItem* cFloatMenuItem_cFloatMenuItem(cFloatMenuItem* s
 INCLUDE_ASM("util/menu", cFloatMenuItem_input);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-#include "vtable.h"
 
 // PORT: cMenuItem_getLeft/cMenuItem_getRight return a float (axis value, $f0); the unit declares them void*.
 float cMenuItem_getLeft_f(void* self) __asm__("cMenuItem_getLeft__FPv");
@@ -4379,7 +4359,7 @@ extern "C" int cAngleMenuItem_input(cAngleMenuItem* self)
             *self->Value = self->Max;
         }
         char* menu = *(char**)self;
-        sVEntry002CD9D8* vt = *(sVEntry002CD9D8**)(menu + 0x12C);
+        sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(menu + 0x12C);
         vt[4].fn(menu + vt[4].delta, self);
     }
     return result;
@@ -4910,7 +4890,7 @@ extern "C" int cColorMenuItem_input(cColorMenuItem* self)
         }
         *chanPtr = value;
         char* menu = *(char**)self;
-        sVEntry002CD9D8* vt = *(sVEntry002CD9D8**)(menu + 0x12C);
+        sVEntry<void(void*, void*)>* vt = *(sVEntry<void(void*, void*)>**)(menu + 0x12C);
         vt[4].fn(menu + vt[4].delta, self);
     }
     return result;
@@ -4999,11 +4979,6 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char* ColorNames[];
 extern char str_pct_3f_pct_03d[];
 
-struct sVEntry_2CF1C8 {
-    short delta;
-    short index;
-    void (*fn)(void*, float*, int);
-};
 
 struct sVec2_2CF1C8 {
     float x, y;
@@ -5131,7 +5106,7 @@ extern "C" void cColorMenuItem_render(cColorMenuItem* self, float* rect)
 {
     {
         cMenu* menu = (cMenu*)(*(char**)self);
-        sVEntry_2CF1C8* vt = (sVEntry_2CF1C8*)menu->mVtbl;
+        sVEntry<void(void*, float*, int)>* vt = (sVEntry<void(void*, float*, int)>*)menu->mVtbl;
         char* thisp = ((char*)menu) + vt[9].delta;
         vt[9].fn(thisp, rect, ((void*)self) == cMenu_getFocusItem((cMenu*)menu));
     }
@@ -5875,20 +5850,12 @@ INCLUDE_ASM("util/menu", cRGBTitleMenuItem_render);
 void* cMenuItem_textRender1_5(void*, int, int, int, void*) __asm__("cMenuItem_textRender1");
 
 
-struct sVtx_2D0008 {
-    float u, v, q;
-    int pad;
-    int r, g, b, a;
-    float pos[4] __attribute__((aligned(16)));
-    sVtx_2D0008() {}
-};
 
 struct sVec4_2D0008 {
     float x, y, z, w;
     sVec4_2D0008(const float& ax, const float& ay, const float& az, const float& aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-struct sRect_2D0008 { float x, y, w, h; };
 
 struct sRS_2D0008 {
     int f0;
@@ -5992,14 +5959,14 @@ public:
 extern "C" void cRGBTitleMenuItem_render(cRGBTitleMenuItem* self, float* rect)
 {
     cMenuItem_textRender1_5(((char*)self), (int)rect, (int)self->Caption, 0, 0);
-    sVtx_2D0008 verts[4];
-    sRect_2D0008 rc;
-    rc.w = 20.0f;
-    rc.h = 17.0f;
-    rc.x = rect[0] + rect[2] - 16.0f - rc.w;
-    rc.y = rect[1] + 6.0f + 2.0f;
-    float x2 = rc.x + rc.w;
-    float y2 = rc.y + rc.h;
+    tBxVertex verts[4];
+    tRect rc;
+    rc.W = 20.0f;
+    rc.H = 17.0f;
+    rc.X = rect[0] + rect[2] - 16.0f - rc.W;
+    rc.Y = rect[1] + 6.0f + 2.0f;
+    float x2 = rc.X + rc.W;
+    float y2 = rc.Y + rc.H;
     tARGB* colour = self->Color;
     float zeroF = 0.0f;
     float one = 1.0f;
@@ -6009,32 +5976,32 @@ extern "C" void cRGBTitleMenuItem_render(cRGBTitleMenuItem* self, float* rect)
     verts[0].a = (int)(colour->A * 128.0f);
     verts[0].v = zeroF;
     verts[0].u = zeroF;
-    verts[0].q = one;
-    *(sVec4_2D0008*)verts[0].pos = sVec4_2D0008(rc.x, rc.y, zeroF, one);
+    verts[0].one = one;
+    *(sVec4_2D0008*)((float*)&verts[0].p) = sVec4_2D0008(rc.X, rc.Y, zeroF, one);
     verts[1].r = (int)(colour->R * 128.0f);
     verts[1].g = (int)(colour->G * 128.0f);
     verts[1].b = (int)(colour->B * 128.0f);
     verts[1].a = (int)(colour->A * 128.0f);
     verts[1].v = zeroF;
     verts[1].u = zeroF;
-    verts[1].q = one;
-    *(sVec4_2D0008*)verts[1].pos = sVec4_2D0008(rc.x, y2, zeroF, one);
+    verts[1].one = one;
+    *(sVec4_2D0008*)((float*)&verts[1].p) = sVec4_2D0008(rc.X, y2, zeroF, one);
     verts[2].r = (int)(colour->R * 128.0f);
     verts[2].g = (int)(colour->G * 128.0f);
     verts[2].b = (int)(colour->B * 128.0f);
     verts[2].a = (int)(colour->A * 128.0f);
     verts[2].v = zeroF;
     verts[2].u = zeroF;
-    verts[2].q = one;
-    *(sVec4_2D0008*)verts[2].pos = sVec4_2D0008(x2, rc.y, zeroF, one);
+    verts[2].one = one;
+    *(sVec4_2D0008*)((float*)&verts[2].p) = sVec4_2D0008(x2, rc.Y, zeroF, one);
     verts[3].r = (int)(colour->R * 128.0f);
     verts[3].g = (int)(colour->G * 128.0f);
     verts[3].b = (int)(colour->B * 128.0f);
     verts[3].a = (int)(colour->A * 128.0f);
     verts[3].v = zeroF;
     verts[3].u = zeroF;
-    verts[3].q = one;
-    *(sVec4_2D0008*)verts[3].pos = sVec4_2D0008(x2, y2, zeroF, one);
+    verts[3].one = one;
+    *(sVec4_2D0008*)((float*)&verts[3].p) = sVec4_2D0008(x2, y2, zeroF, one);
     if (colour->A != 1.0f) {
         ((cCtx_2D0008*)GrMan)->top->f4_2 = 5;
     } else {
@@ -6390,9 +6357,6 @@ float cMenuItem_getRight_f(void* self) __asm__("cMenuItem_getRight__FPv");
 float cMenuItem_getUp_f(void* self) __asm__("cMenuItem_getUp__FPv");
 float cMenuItem_getDown_f(void* self) __asm__("cMenuItem_getDown__FPv");
 
-struct sCurvePt_D0908 {
-    float x, y;
-};
 
 struct sVE_D0908 {
     short delta;
@@ -6443,47 +6407,47 @@ extern "C" int cGraphMenuItem_input(cGraphMenuItem* self)
             float step = (self->MaxPoint[0] - self->MinPoint[0]) / (float)(self->NumPoints * 2 > 49 ? self->NumPoints * 2 : 50);
             float dy = cMenuItem_getUp_f(self) - cMenuItem_getDown_f(self);
             if (dy != 0.0f && (self->YLock & (1 << self->OnPoint)) == 0) {
-                ((sCurvePt_D0908*)self->Points)[self->OnPoint].y += dy * (self->MaxPoint[1] - self->MinPoint[1]) * 0.008333333767950535f;
+                ((t2Vector*)self->Points)[self->OnPoint].y += dy * (self->MaxPoint[1] - self->MinPoint[1]) * 0.008333333767950535f;
                 changed = 1;
-                if (self->MaxPoint[1] < ((sCurvePt_D0908*)self->Points)[self->OnPoint].y) {
-                    ((sCurvePt_D0908*)self->Points)[self->OnPoint].y = self->MaxPoint[1];
+                if (self->MaxPoint[1] < ((t2Vector*)self->Points)[self->OnPoint].y) {
+                    ((t2Vector*)self->Points)[self->OnPoint].y = self->MaxPoint[1];
                 }
-                if (((sCurvePt_D0908*)self->Points)[self->OnPoint].y < self->MinPoint[1]) {
-                    ((sCurvePt_D0908*)self->Points)[self->OnPoint].y = self->MinPoint[1];
+                if (((t2Vector*)self->Points)[self->OnPoint].y < self->MinPoint[1]) {
+                    ((t2Vector*)self->Points)[self->OnPoint].y = self->MinPoint[1];
                 }
                 if (self->OnPoint < self->NumPoints - 1) {
-                    if (self->Slope > 0 && ((sCurvePt_D0908*)self->Points)[self->OnPoint + 1].y < ((sCurvePt_D0908*)self->Points)[self->OnPoint].y) {
-                        ((sCurvePt_D0908*)self->Points)[self->OnPoint].y = ((sCurvePt_D0908*)self->Points)[self->OnPoint + 1].y;
-                    } else if (self->Slope < 0 && ((sCurvePt_D0908*)self->Points)[self->OnPoint].y < ((sCurvePt_D0908*)self->Points)[self->OnPoint + 1].y) {
-                        ((sCurvePt_D0908*)self->Points)[self->OnPoint].y = ((sCurvePt_D0908*)self->Points)[self->OnPoint + 1].y;
+                    if (self->Slope > 0 && ((t2Vector*)self->Points)[self->OnPoint + 1].y < ((t2Vector*)self->Points)[self->OnPoint].y) {
+                        ((t2Vector*)self->Points)[self->OnPoint].y = ((t2Vector*)self->Points)[self->OnPoint + 1].y;
+                    } else if (self->Slope < 0 && ((t2Vector*)self->Points)[self->OnPoint].y < ((t2Vector*)self->Points)[self->OnPoint + 1].y) {
+                        ((t2Vector*)self->Points)[self->OnPoint].y = ((t2Vector*)self->Points)[self->OnPoint + 1].y;
                     }
                 }
                 if (self->OnPoint > 0) {
-                    if (self->Slope > 0 && ((sCurvePt_D0908*)self->Points)[self->OnPoint].y < ((sCurvePt_D0908*)self->Points)[self->OnPoint - 1].y) {
-                        ((sCurvePt_D0908*)self->Points)[self->OnPoint].y = ((sCurvePt_D0908*)self->Points)[self->OnPoint - 1].y;
-                    } else if (self->Slope < 0 && ((sCurvePt_D0908*)self->Points)[self->OnPoint - 1].y < ((sCurvePt_D0908*)self->Points)[self->OnPoint].y) {
-                        ((sCurvePt_D0908*)self->Points)[self->OnPoint].y = ((sCurvePt_D0908*)self->Points)[self->OnPoint - 1].y;
+                    if (self->Slope > 0 && ((t2Vector*)self->Points)[self->OnPoint].y < ((t2Vector*)self->Points)[self->OnPoint - 1].y) {
+                        ((t2Vector*)self->Points)[self->OnPoint].y = ((t2Vector*)self->Points)[self->OnPoint - 1].y;
+                    } else if (self->Slope < 0 && ((t2Vector*)self->Points)[self->OnPoint - 1].y < ((t2Vector*)self->Points)[self->OnPoint].y) {
+                        ((t2Vector*)self->Points)[self->OnPoint].y = ((t2Vector*)self->Points)[self->OnPoint - 1].y;
                     }
                 }
             }
             float dx = cMenuItem_getRight_f(self) - cMenuItem_getLeft_f(self);
             if (dx != 0.0f && (self->XLock & (1 << self->OnPoint)) == 0) {
-                ((sCurvePt_D0908*)self->Points)[self->OnPoint].x += dx * (self->MaxPoint[0] - self->MinPoint[0]) * 0.008333333767950535f;
+                ((t2Vector*)self->Points)[self->OnPoint].x += dx * (self->MaxPoint[0] - self->MinPoint[0]) * 0.008333333767950535f;
                 changed = 1;
-                if (self->MaxPoint[0] < ((sCurvePt_D0908*)self->Points)[self->OnPoint].x) {
-                    ((sCurvePt_D0908*)self->Points)[self->OnPoint].x = self->MaxPoint[0];
+                if (self->MaxPoint[0] < ((t2Vector*)self->Points)[self->OnPoint].x) {
+                    ((t2Vector*)self->Points)[self->OnPoint].x = self->MaxPoint[0];
                 }
-                if (((sCurvePt_D0908*)self->Points)[self->OnPoint].x < self->MinPoint[0]) {
-                    ((sCurvePt_D0908*)self->Points)[self->OnPoint].x = self->MinPoint[0];
+                if (((t2Vector*)self->Points)[self->OnPoint].x < self->MinPoint[0]) {
+                    ((t2Vector*)self->Points)[self->OnPoint].x = self->MinPoint[0];
                 }
                 if (self->OnPoint < self->NumPoints - 1) {
-                    if (((sCurvePt_D0908*)self->Points)[self->OnPoint + 1].x - step < ((sCurvePt_D0908*)self->Points)[self->OnPoint].x) {
-                        ((sCurvePt_D0908*)self->Points)[self->OnPoint].x = ((sCurvePt_D0908*)self->Points)[self->OnPoint + 1].x - step;
+                    if (((t2Vector*)self->Points)[self->OnPoint + 1].x - step < ((t2Vector*)self->Points)[self->OnPoint].x) {
+                        ((t2Vector*)self->Points)[self->OnPoint].x = ((t2Vector*)self->Points)[self->OnPoint + 1].x - step;
                     }
                 }
                 if (self->OnPoint > 0) {
-                    if (((sCurvePt_D0908*)self->Points)[self->OnPoint].x < ((sCurvePt_D0908*)self->Points)[self->OnPoint - 1].x + step) {
-                        ((sCurvePt_D0908*)self->Points)[self->OnPoint].x = ((sCurvePt_D0908*)self->Points)[self->OnPoint - 1].x + step;
+                    if (((t2Vector*)self->Points)[self->OnPoint].x < ((t2Vector*)self->Points)[self->OnPoint - 1].x + step) {
+                        ((t2Vector*)self->Points)[self->OnPoint].x = ((t2Vector*)self->Points)[self->OnPoint - 1].x + step;
                     }
                 }
             }
@@ -6509,7 +6473,6 @@ extern "C" void* cMenu_getFocusItem(cMenu* self);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 extern char str_9_999_9_999[];
 
-struct sMenuRect_2D0D48 { float x, y, z, w; };
 
 static inline char* font_2D0D48(char* item)
 {
@@ -6527,7 +6490,7 @@ static inline char* font_2D0D48(char* item)
  * @param item  the graph item
  * @return @p ret
  */
-extern "C" sMenuRect_2D0D48* cGraphMenuItem_preRender(sMenuRect_2D0D48* ret, cGraphMenuItem* item)
+extern "C" tRect* cGraphMenuItem_preRender(tRect* ret, cGraphMenuItem* item)
 {
     int margin = 100;
     int focused = 0;
@@ -6541,10 +6504,10 @@ extern "C" sMenuRect_2D0D48* cGraphMenuItem_preRender(sMenuRect_2D0D48* ret, cGr
     char* font2 = font_2D0D48(((char*)item));
     float w2 = cFont_textExtent(font2, str_9_999_9_999, 0, 0, *(float*)(font2 + 0x38), *(float*)(font2 + 0x3C));
     if (w < w2) w = w2;
-    sMenuRect_2D0D48 rect;
+    tRect rect;
     float zero = 0.0f;
-    rect.y = zero;
-    rect.x = zero;
+    rect.Y = zero;
+    rect.X = zero;
     if (focused) {
         float height = lh + lh + 6.0f;
         float minHeightF = (float)minHeight;
@@ -6553,12 +6516,12 @@ extern "C" sMenuRect_2D0D48* cGraphMenuItem_preRender(sMenuRect_2D0D48* ret, cGr
         } else {
             height = height + 24.0f;
         }
-        rect.w = height;
+        rect.H = height;
     } else {
         char* font3 = font_2D0D48(((char*)item));
-        rect.w = (float)*(int*)(font3 + 0x14) * *(float*)(font3 + 0x34) + 12.0f;
+        rect.H = (float)*(int*)(font3 + 0x14) * *(float*)(font3 + 0x34) + 12.0f;
     }
-    rect.z = (float)margin + w + 64.0f;
+    rect.W = (float)margin + w + 64.0f;
     *ret = rect;
     return ret;
 }
