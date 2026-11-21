@@ -2453,7 +2453,7 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isProcessActive__FPvT0);
 int cWScriptMan_isProcessActive(void* vself, void* process)
 {
     cWScriptMan* self = (cWScriptMan*)vself;
-    return (cProcessList_findProcess1((char*)self + 0x2b8, *(int*)((char*)process + 0x20)) != 0);
+    return (cProcessList_findProcess1(&self->ActiveList, *(int*)((char*)process + 0x20)) != 0);
 }
 #endif
 

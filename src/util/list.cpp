@@ -262,7 +262,7 @@ INCLUDE_ASM("util/list", cList_clear__FPv);
 void cList_clear(void* vself)
 {
     cList* self = (cList*)vself;
-    void* sentinel = (char*)self + 0xc;
+    void* sentinel = (char*)&self->mEnd;
     self->mStart.mpNext = (cListNode*)sentinel;
     *(void**)&self->mEnd = ((void*)self);
     self->mEnd.mpNext = (cListNode*)sentinel;

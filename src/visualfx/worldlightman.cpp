@@ -984,7 +984,7 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX_resetStates__FPv);
 void* cCheatFX_resetStates(void* vself)
 {
     cCheatFX* self = (cCheatFX*)vself;
-    return func_00416210(((char*)self + 0x4), 0, 4);
+    return func_00416210((&self->m_cheatState.m_state), 0, 4);
 }
 #endif
 

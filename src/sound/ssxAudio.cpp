@@ -1961,7 +1961,7 @@ extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio* self_, float volume, int ch)
     case 1:
         currVolume->setVolume = volume;
         currVolume->curVolume = volume * D_004A3508;
-        func_002B4388((char*)self + 0x118);
+        func_002B4388(&self->MusicSys);
         break;
     case 2:
         currVolume->setVolume = volume;
@@ -2007,7 +2007,7 @@ extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio* self_, float volume, int ch)
         SNDmastervol((int)(currVolume->appliedVolume * 127.0f));
         break;
     case 1:
-        func_002B4388((char*)self + 0x118);
+        func_002B4388(&self->MusicSys);
         break;
     case 4:
         self->unk_636C[0] = currVolume->appliedVolume * D_004A352C;

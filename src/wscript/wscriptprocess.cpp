@@ -1639,7 +1639,7 @@ void* cWScriptMan_allocateGlobalTable_impl(void* self, int i) __asm__("cWScriptM
 void* cWScriptMan_allocateGlobalTable_impl(void* vself, int i)
 {
     cWScriptMan* self = (cWScriptMan*)vself;
-    char* base = (char*)self + 0x3CC;
+    char* base = (char*)&self->GlobalTables[0];
     void** slot = (void**)(base + (i << 2));
     if (*slot != 0) {
         luno_cLunoTable__cLunoTable(*slot, 3);

@@ -1219,8 +1219,8 @@ void cMonitor_MONITOR_DestroyAll1_impl(void* vself, sBmKeyDDE0 key)
 {
     cMonitor* self = (cMonitor*)vself;
     for (int i = 0; i < 48; i++) {
-        if (cMonitor_MONITOR_DestroyAll1_match((char*)self + 0x98 + i * 44, key)) {
-            cMonitorInstance_Reset((cMonitorInstance*)((char*)self + 0x98 + i * 0x2C));
+        if (cMonitor_MONITOR_DestroyAll1_match((char*)&self->mMonitorInstance[0] + i * 44, key)) {
+            cMonitorInstance_Reset((cMonitorInstance*)((char*)&self->mMonitorInstance[0] + i * 0x2C));
         }
         ASSERT_DDE0(i < 48);
     }

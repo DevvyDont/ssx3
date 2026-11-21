@@ -2596,7 +2596,7 @@ struct sEnt_2CC8F0 {
 
 static inline void notify_2CC8F0(cEnumMenuItem* self)
 {
-    sVEnt_2CC8F0* vt = *(sVEnt_2CC8F0**)(((char*)self->Menu) + 0x12C);
+    sVEnt_2CC8F0* vt = (sVEnt_2CC8F0*)self->Menu->mVtbl;
     ((Notify_2CC8F0)vt[4].fn)(((char*)self->Menu) + vt[4].delta, self);
 }
 
@@ -2624,7 +2624,7 @@ extern "C" int cEnumMenuItem_input(cEnumMenuItem* vself)
         return result;
     }
     if (cMenuItem_getKey((void**)self) == 6) {
-        sVEnt_2CC8F0* vt = *(sVEnt_2CC8F0**)(((char*)self->Menu) + 0x12C);
+        sVEnt_2CC8F0* vt = (sVEnt_2CC8F0*)self->Menu->mVtbl;
         result = ((Pick_2CC8F0)vt[3].fn)(((char*)self->Menu) + vt[3].delta, self, 0);
     } else {
     int n = self->NumTags;
@@ -4548,8 +4548,8 @@ extern "C" int cTextMenuItem_input(cTextMenuItem* self)
     } else if (key == 6) {
         result = 3;
     } else {
-        int code = cMenuSys_getVKey(*(void**)(((char*)self->Menu) + 0x124));
-        int ch = cMenuSys_getAsciiKey(*(void**)(((char*)self->Menu) + 0x124));
+        int code = cMenuSys_getVKey(self->Menu->MenuSys);
+        int ch = cMenuSys_getAsciiKey(self->Menu->MenuSys);
         if (code == 8) {
             if (len != 0 && self->CursorPos > 0) {
                 for (int i = self->CursorPos; i < len - 1; i++) {
@@ -5430,7 +5430,7 @@ INCLUDE_ASM("util/menu", cExpandMenuItem_addItem__FPvT0);
 void cExpandMenuItem_addItem(void* vself, void* item)
 {
     cExpandMenuItem* self = (cExpandMenuItem*)vself;
-    cMenu_addItem2((char*)self + 0x18, item);
+    cMenu_addItem2(&self->ExpandMenu, item);
 }
 #endif
 
@@ -6494,7 +6494,7 @@ extern "C" int cGraphMenuItem_input(cGraphMenuItem* self)
         result = cMenuItem_input((cMenuItem*)self);
     }
     if (changed) {
-        sVE_D0908* vt = *(sVE_D0908**)(((char*)self->Menu) + 0x12C);
+        sVE_D0908* vt = (sVE_D0908*)self->Menu->mVtbl;
         vt[4].fn(((char*)self->Menu) + vt[4].delta, self);
     }
     }
