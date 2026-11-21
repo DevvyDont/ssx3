@@ -2983,11 +2983,11 @@ extern "C" void cOVStateHUD1P_renderNISSkipMessage(cOVStateHUD1P* self, char* ob
     }
     spriteScale.x = 2.0f;
     spriteScale.y = 2.0f;
-    *(V2_0AD0*)(*(char**)(((char*)self) + 0xB50) + 0x28) = spriteScale;
+    *(V2_0AD0*)((char*)self->mSkipMessage.pFont + 0x28) = spriteScale;
     int* w = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
     *w = (*w & ~0x3E0) | ((obj[0xAF6] << 5) & 0x3E0);
     drawPos = pos;
-    drawTextPictLine(self->mSkipMessage, &drawPos, &scale, &colour, obj[0xAF4], obj[0xAF5]);
+    drawTextPictLine(&self->mSkipMessage, &drawPos, &scale, &colour, obj[0xAF4], obj[0xAF5]);
 }
 #endif
 

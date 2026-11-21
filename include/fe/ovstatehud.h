@@ -35,6 +35,8 @@
 
 #include "layout.h"
 #include "ui/uithing.h" // tARGB
+#include "fe/hudradar.h" // cHUDRadar
+#include "fe/textpictline.h" // tTextPictLine
 
 struct cListNode;
 struct cUIEngine;
@@ -62,7 +64,7 @@ struct tHUDRiderInfo {
     int rider;                      // 0x00 [O]; [U] onCreateScreen: the local rider's cBeing getAIIndex() (On Tour stores
                                     //       the same call's result here)
     int playerID;                   // 0x04 [O]; [U] onCreateScreen: the rider's index in the race (On Tour: player index)
-    char unk_08[0x3C];              // 0x08 [R] course-progress tracker (cHUDRadar_cHUDRadar constructs it, vptr D_00474230 at its
+    cHUDRadar unk_08;               // 0x08 [R] course-progress tracker (cHUDRadar_cHUDRadar constructs it, vptr D_00474230 at its
                                     //       0x38; cHUDRadar__cHUDRadar destroys it; func_0020EB50 lays it out); retail only
     int currRank;                   // 0x44 [O]; [U] -1
     float rankAnimFrame;            // 0x48 [O]; [U] 1.0
@@ -188,14 +190,14 @@ struct cOVStateHUD1P {
                                     //       and width / 18, as On Tour's code)
     tBarConfig mWipeoutMeterConfig2P; // 0x554 [O]; [U] ditto from D_00477B88
     int mTextUberIndexLast;         // 0x55C [O]; [U] BXrand() & 1: which Uber hint mTextUberHelp shows; onUpdate
-    char mTextUberHelp[0x14C];      // 0x560 [O] tTextPictLine (0x14C, as On Tour); [U] func_001E94E0 builds it
-    char mTextRecoverHelp[0x14C];   // 0x6AC [O] tTextPictLine; [U] built from D_004A21D8 (RECOVER);
+    tTextPictLine mTextUberHelp;      // 0x560 [O] tTextPictLine (0x14C, as On Tour); [U] func_001E94E0 builds it
+    tTextPictLine mTextRecoverHelp;   // 0x6AC [O] tTextPictLine; [U] built from D_004A21D8 (RECOVER);
                                     //       renderWipeoutMeter draws it
-    char mTextRecoverHelpAlt[0x14C]; // 0x7F8 [O] tTextPictLine; [U] ditto
+    tTextPictLine mTextRecoverHelpAlt; // 0x7F8 [O] tTextPictLine; [U] ditto
     unsigned short mMessage[128];   // 0x944 [O]; [U] handleEvent 12 copies the text in, 13 / 7 clear it
     float mMessageFrame;            // 0xA44 [O]; [U] onUpdate animates it (handleEvent / onCreateScreen store int 0)
     unsigned short mNetStatusMessage[128]; // 0xA48 [O]; [U] handleEvent 14 copies the text in, 15 clears it
-    char mSkipMessage[0x14C];       // 0xB48 [O] tTextPictLine; [U] makeTextPictLine builds "%s @skip %s";
+    tTextPictLine mSkipMessage;       // 0xB48 [O] tTextPictLine; [U] makeTextPictLine builds "%s @skip %s";
                                     //       renderNISSkipMessage draws it (reads its font pointer at +0x8)
     float mNISSkipMessageFrame;     // 0xC94 [O]; [U] -1.0 (onCreateScreen); onUpdate / onRender2D
 };
