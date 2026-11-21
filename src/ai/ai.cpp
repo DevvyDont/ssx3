@@ -25,7 +25,7 @@ extern char cPreRaceHandler_vtbl[];
 extern char cGameInitHandler_vtbl[];
 extern char cCountdownHandler_vtbl[];
 extern char cAI_vtbl[];
-extern char cAIStateHandler_vtbl[];
+extern char cRaceHandler_vtbl[];
 extern char cEndRaceHandler_vtbl[];
 extern char cShutdownHandler_vtbl[];
 extern char str_FocusMan[];
@@ -57,8 +57,7 @@ struct sAIObj_1286A0 {
  *
  * Stores _vt$3cAI and the seven state handlers' vtables (GameInit .. Shutdown). The "FocusMan" block (0x8E0)
  * is built inline (+0x00 = 0, +0xD0 = -1, +0xD4 = 1, +0xD8 = 0); DangerMan is cDangerMan_cDangerMan() on a
- * new "DangerMan" block (0xB60) with this AI. The extern named cAIStateHandler_vtbl (0x00458528) is
- * cRaceHandler's vtable.
+ * new "DangerMan" block (0xB60) with this AI. mRaceHandler gets cRaceHandler_vtbl (0x00458528).
  *
  * @return the constructed object (self)
  */
@@ -69,7 +68,7 @@ extern "C" void* cAI_cAI(cAI* self)
     *(void**)&self->mFreerideHandler = cFreerideHandler_vtbl;
     *(void**)&self->mPreRaceHandler = cPreRaceHandler_vtbl;
     *(void**)&self->mCountdownHandler = cCountdownHandler_vtbl;
-    *(void**)&self->mRaceHandler = cAIStateHandler_vtbl;
+    *(void**)&self->mRaceHandler = cRaceHandler_vtbl;
     *(void**)&self->mEndRaceHandler = cEndRaceHandler_vtbl;
     *(void**)&self->mShutdownHandler = cShutdownHandler_vtbl;
     sAIState_1286A0** slot = (sAIState_1286A0**)&self->FocusMan;

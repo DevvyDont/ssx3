@@ -310,7 +310,7 @@ extern "C" void cGameComm_gameStartRace(int);
  * Tells the online game layer that the race has started.
  *
  * Calls cGameComm_gameStartRace on cGameComm_mGameComm when an online game comm exists. Slot 1 of cRaceHandler's vtable
- * (cAIStateHandler_vtbl, the extern named cAIStateHandler_vtbl), run by cAI_AIStateUpdate when the AI enters the race state; it
+ * (cRaceHandler_vtbl), run by cAI_AIStateUpdate when the AI enters the race state; it
  * is called with the handler and the AI but uses neither, so the C view takes no parameters.
  */
 extern "C" void cRaceHandler_OnGainState(void) {
@@ -332,7 +332,7 @@ extern "C" void cGame_setState(int, int, int, int);
  *
  * Increments the AI's EventTimerTick (+0xC). When cAI_isRaceFinished returns 1 it sets AI state 6 (end race) and the
  * game state to 5 (cGame_setState(SSXApp->Game, 5, 0, 0), On Tour cGame::setState). Slot 3 of cRaceHandler's vtable
- * (cAIStateHandler_vtbl); cRaceHandler keeps the base cAIStateHandler_OnLoseState.
+ * (cRaceHandler_vtbl); cRaceHandler keeps the base cAIStateHandler_OnLoseState.
  *
  * @param handler  the handler (this; unused)
  * @param aiManager  the AI (cAI)
