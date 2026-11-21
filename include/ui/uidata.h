@@ -1,0 +1,175 @@
+#ifndef UI_UIDATA_H
+#define UI_UIDATA_H
+
+// The UI screen data records: what a screen file holds and the UI engine reads in place (cUIScreen_createAllObjects /
+// createObjectByHashName walk the object records, each object's setUIData reads its own record, the keyframer walks
+// the frames and their key-channel packets, cUIAnimation reads its header). Every object record starts with the
+// 0x20-byte tUIBaseObject and continues with the kind's own fields from 0x20.
+//
+// Names and layouts: SSX On Tour's DWARF ([O] tUIBaseObject, tUIText, tUITextScroll, tUIIcon, tUIListBox, tUIARGB,
+// tUIAnimation, tUIFrameHeader, tUIKCPBase), placed by retail use ([U], the setUIData functions in ui/uithing,
+// ui/uitext and ui/uiengine; cUIScreen_createObjectByHashName / playFrameByThread in ui/uiscreen; cUIAnimation_updateThing
+// in ui/uianimation). The records are byte data, so On Tour's sizes and offsets hold unchanged (no bools, no vptrs).
+// The derived records repeat tUIBaseObject's members (flat, like main/game.h).
+//
+// Evidence tags: [O] On Tour's DWARF; [U] how retail code uses the field.
+
+#include "layout.h"
+
+// A record colour: four bytes, scaled by 1/255 into a tARGB. [O] struct tUIARGB (0x4).
+struct tUIARGB {
+    unsigned char a;                // 0x0 [O]; [U] the setUIData functions scale each byte by 1/255
+    unsigned char r;                // 0x1 [O]
+    unsigned char g;                // 0x2 [O]
+    unsigned char b;                // 0x3 [O]
+};
+
+// The common head of every object record. [O] struct tUIBaseObject (0x20).
+struct tUIBaseObject {
+    unsigned short mTag;            // 0x00 [O] the object kind
+    unsigned short mByteSize;       // 0x02 [O]; [U] cUIScreen_createObjectByHashName steps to the next record by it
+    unsigned int mHashID;           // 0x04 [O]; [U] createObjectByHashName matches the hash; the object's mHashName
+    unsigned int mBaseFlags;        // 0x08 [O]; [U] the base setUIData reads the layer bits
+    unsigned short mEventAnims[10]; // 0x0C [O]; [U] the object's keyframer events (cUIThing::mpEvents points here)
+};
+
+// A text object's record. [O] struct tUIText : tUIBaseObject (0x2C).
+struct tUIText {
+    unsigned short mTag;            // 0x00 [O] tUIBaseObject
+    unsigned short mByteSize;       // 0x02 [O]
+    unsigned int mHashID;           // 0x04 [O]
+    unsigned int mBaseFlags;        // 0x08 [O]
+    unsigned short mEventAnims[10]; // 0x0C [O]
+    unsigned char mFontID;          // 0x20 [O]; [U] cUIText_setUIData: & 3 (one of the four fonts)
+    unsigned char mTypeFlags;       // 0x21 [O]
+    unsigned char mBools1;          // 0x22 [O]; [U] cUIText_setUIData passes bit 0 to vtable slot 23
+    unsigned char mPad1_tUIText;    // 0x23 [O]
+    unsigned int mStringID;         // 0x24 [O]; [U] cUIText_setUnicodeStringByID's id
+    tUIARGB mSColour;               // 0x28 [O]; [U] the static colour (bytes / 255)
+};
+
+// A scrolling text object's record. [O] struct tUITextScroll : tUIBaseObject (0x2C).
+struct tUITextScroll {
+    unsigned short mTag;            // 0x00 [O] tUIBaseObject
+    unsigned short mByteSize;       // 0x02 [O]
+    unsigned int mHashID;           // 0x04 [O]
+    unsigned int mBaseFlags;        // 0x08 [O]
+    unsigned short mEventAnims[10]; // 0x0C [O]
+    unsigned char mFontID;          // 0x20 [O]; [U] cUITextScroll_setUIData: the font
+    unsigned char mTextFlags;       // 0x21 [O]; [U] cUITextScroll_setUIData uses bit 0
+    unsigned char mNumItems;        // 0x22 [O]
+    unsigned char mPad1_tUITextScroll; // 0x23 [O]
+    unsigned int mStringID;         // 0x24 [O]; [U] the text's string id
+    tUIARGB mSColour;               // 0x28 [O]; [U] the static colour
+};
+
+// An icon's record. [O] struct tUIIcon : tUIBaseObject (0x2C).
+struct tUIIcon {
+    unsigned short mTag;            // 0x00 [O] tUIBaseObject
+    unsigned short mByteSize;       // 0x02 [O]
+    unsigned int mHashID;           // 0x04 [O]
+    unsigned int mBaseFlags;        // 0x08 [O]
+    unsigned short mEventAnims[10]; // 0x0C [O]
+    unsigned int mIconFlags;        // 0x20 [O]; [U] cUIIcon_setUIData copies bits 0-1 (alignment) and bit 2 (clip)
+    unsigned int mTextureID;        // 0x24 [O]; [U] the texture-bank element's hash (getElementByHashname)
+    unsigned short mTiledU;         // 0x28 [O]; [U] the tile size u in hundredths (x 0.01)
+    unsigned short mTiledV;         // 0x2A [O]; [U] the tile size v in hundredths
+};
+
+// A list box's record. [O] struct tUIListBox : tUIBaseObject (0x28).
+struct tUIListBox {
+    unsigned short mTag;            // 0x00 [O] tUIBaseObject
+    unsigned short mByteSize;       // 0x02 [O]
+    unsigned int mHashID;           // 0x04 [O]
+    unsigned int mBaseFlags;        // 0x08 [O]
+    unsigned short mEventAnims[10]; // 0x0C [O]
+    unsigned char mFontID;          // 0x20 [O]; [U] cUIListBox_setUIData: & 3
+    unsigned char mNumEntries;      // 0x21 [O]
+    unsigned short mFlags;          // 0x22 [O]; [U] cUIListBox_setUIData passes bit 0 to vtable slot 23
+    tUIARGB mSColour;               // 0x24 [O]; [U] the static colour (bytes / 255)
+};
+
+// An animation's header. [O] struct tUIAnimation (0x10).
+struct tUIAnimation {
+    unsigned short mTag;            // 0x00 [O]
+    unsigned short mNumFrames;      // 0x02 [O]; [U] cUIAnimation_updateThing: the frame count
+    unsigned int mNumChannels;      // 0x04 [O]; [U] cUIAnimation_updateThing: the channel count
+    unsigned int mHashID;           // 0x08 [O]
+    unsigned int mByteSize;         // 0x0C [O]
+};
+
+// A keyframe's header; its key-channel packets follow from 0xC. [O] struct tUIFrameHeader (0xC).
+struct tUIFrameHeader {
+    unsigned int mHashID;           // 0x00 [O]
+    unsigned int mByteSize;         // 0x04 [O]
+    unsigned short mFrameNumber;    // 0x08 [O]
+    unsigned short mNumKCP;         // 0x0A [O]; [U] cUIScreen_playFrameByThread runs this many packets
+};
+
+// The head of every key-channel packet in a frame. [O] struct tUIKCPBase (0x4).
+struct tUIKCPBase {
+    unsigned char mTag;             // 0x0 [O]; [U] cUIScreen_playFrameByThread switches on it
+    unsigned char mPad1_tUIKCPBase; // 0x1 [O]
+    unsigned short mPacketSize;     // 0x2 [O]; [U] playFrameByThread steps to the next packet by it
+};
+
+CHECK_OFFSET(tUIARGB, a, 0x0);
+CHECK_OFFSET(tUIARGB, r, 0x1);
+CHECK_OFFSET(tUIARGB, g, 0x2);
+CHECK_OFFSET(tUIARGB, b, 0x3);
+CHECK_SIZE(tUIARGB, 0x4);
+
+CHECK_OFFSET(tUIBaseObject, mTag, 0x00);
+CHECK_OFFSET(tUIBaseObject, mByteSize, 0x02);
+CHECK_OFFSET(tUIBaseObject, mHashID, 0x04);
+CHECK_OFFSET(tUIBaseObject, mBaseFlags, 0x08);
+CHECK_OFFSET(tUIBaseObject, mEventAnims, 0x0C);
+CHECK_SIZE(tUIBaseObject, 0x20);
+
+CHECK_OFFSET(tUIText, mFontID, 0x20);
+CHECK_OFFSET(tUIText, mTypeFlags, 0x21);
+CHECK_OFFSET(tUIText, mBools1, 0x22);
+CHECK_OFFSET(tUIText, mPad1_tUIText, 0x23);
+CHECK_OFFSET(tUIText, mStringID, 0x24);
+CHECK_OFFSET(tUIText, mSColour, 0x28);
+CHECK_SIZE(tUIText, 0x2C);
+
+CHECK_OFFSET(tUITextScroll, mFontID, 0x20);
+CHECK_OFFSET(tUITextScroll, mTextFlags, 0x21);
+CHECK_OFFSET(tUITextScroll, mNumItems, 0x22);
+CHECK_OFFSET(tUITextScroll, mPad1_tUITextScroll, 0x23);
+CHECK_OFFSET(tUITextScroll, mStringID, 0x24);
+CHECK_OFFSET(tUITextScroll, mSColour, 0x28);
+CHECK_SIZE(tUITextScroll, 0x2C);
+
+CHECK_OFFSET(tUIIcon, mIconFlags, 0x20);
+CHECK_OFFSET(tUIIcon, mTextureID, 0x24);
+CHECK_OFFSET(tUIIcon, mTiledU, 0x28);
+CHECK_OFFSET(tUIIcon, mTiledV, 0x2A);
+CHECK_SIZE(tUIIcon, 0x2C);
+
+CHECK_OFFSET(tUIListBox, mFontID, 0x20);
+CHECK_OFFSET(tUIListBox, mNumEntries, 0x21);
+CHECK_OFFSET(tUIListBox, mFlags, 0x22);
+CHECK_OFFSET(tUIListBox, mSColour, 0x24);
+CHECK_SIZE(tUIListBox, 0x28);
+
+CHECK_OFFSET(tUIAnimation, mTag, 0x00);
+CHECK_OFFSET(tUIAnimation, mNumFrames, 0x02);
+CHECK_OFFSET(tUIAnimation, mNumChannels, 0x04);
+CHECK_OFFSET(tUIAnimation, mHashID, 0x08);
+CHECK_OFFSET(tUIAnimation, mByteSize, 0x0C);
+CHECK_SIZE(tUIAnimation, 0x10);
+
+CHECK_OFFSET(tUIFrameHeader, mHashID, 0x00);
+CHECK_OFFSET(tUIFrameHeader, mByteSize, 0x04);
+CHECK_OFFSET(tUIFrameHeader, mFrameNumber, 0x08);
+CHECK_OFFSET(tUIFrameHeader, mNumKCP, 0x0A);
+CHECK_SIZE(tUIFrameHeader, 0xC);
+
+CHECK_OFFSET(tUIKCPBase, mTag, 0x0);
+CHECK_OFFSET(tUIKCPBase, mPad1_tUIKCPBase, 0x1);
+CHECK_OFFSET(tUIKCPBase, mPacketSize, 0x2);
+CHECK_SIZE(tUIKCPBase, 0x4);
+
+#endif /* UI_UIDATA_H */

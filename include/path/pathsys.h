@@ -11,6 +11,7 @@
 // (type in the comment).
 
 #include "layout.h"
+#include "ui/uithing.h"
 
 struct cAIPath;
 struct cTrackPath;
@@ -53,5 +54,26 @@ CHECK_OFFSET(cPathSys, CheckpointList, 0x018);
 CHECK_OFFSET(cPathSys, Data, 0x048);
 CHECK_OFFSET(cPathSys, m_bIsFileLoaded, 0x04C);
 CHECK_SIZE(cPathSys, 0x50);
+
+// One race start point (On Tour struct tPathStartpoint, 0x28): its type / argument key, position and direction,
+// and the paths a rider starting there begins on. [R] cPathSys_getStartpoint walks Startpoints 0x28 apart comparing
+// Type (+0x4) and Arg (+0x0); [U] cSSXScriptEngine_FillOrientationFromStartPointInfo reads Pos (+0x8) and Dir
+// (+0x14) (view sNode_27B750).
+struct tPathStartpoint {
+    int Arg;                        // 0x00 [O]; [R] getStartpoint compares it with its arg
+    int Type;                       // 0x04 [O] tPathStartType; [R] getStartpoint compares it with its type
+    t3Vector Pos;                   // 0x08 [O]; [U] FillOrientationFromStartPointInfo
+    t3Vector Dir;                   // 0x14 [O]; [U] ditto (yaw / pitch)
+    cTrackPath* InitTrackPath;      // 0x20 [O]
+    cAIPath* InitAIPath;            // 0x24 [O]
+};
+
+CHECK_OFFSET(tPathStartpoint, Arg, 0x00);
+CHECK_OFFSET(tPathStartpoint, Type, 0x04);
+CHECK_OFFSET(tPathStartpoint, Pos, 0x08);
+CHECK_OFFSET(tPathStartpoint, Dir, 0x14);
+CHECK_OFFSET(tPathStartpoint, InitTrackPath, 0x20);
+CHECK_OFFSET(tPathStartpoint, InitAIPath, 0x24);
+CHECK_SIZE(tPathStartpoint, 0x28);
 
 #endif

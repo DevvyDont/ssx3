@@ -21,8 +21,8 @@
 // Retail = On Tour - 4 from mColour on (On Tour aligns tARGB to 16), and has no field after mSound.
 //
 // The attribute word mAttr is EA's tAttrThing bitfield (On Tour, LSB first): mOrientation:1 mActive:1 mCached:1
-// mEnabled:1 mFocused:1 mStatic:1 mVisible:1 mWrap:1 mLayer:5 mPivot:6. Retail code reads and writes it as a whole
-// word (lw/sw 0x14), so it is an int here.
+// mEnabled:1 mFocused:1 mStatic:1 mVisible:1 mWrap:1 mLayer:5 mPivot:6 (struct tAttrThing below). Retail code reads and
+// writes it as a whole word (lw/sw 0x14), so it is an int here.
 
 #include "layout.h"
 
@@ -40,6 +40,24 @@ struct t3Vector {
 // (it sits at cUIThing+0x1C; copied with two ldl/ldr pairs). Members from On Tour's DWARF (struct tARGB: A R G B).
 struct tARGB {
     float A, R, G, B;
+};
+
+// EA's tAttrThing, the type of cUIThing::mAttr (On Tour struct tAttrThing, size 0x4, LSB first). cUIThing keeps mAttr
+// an int (every accessor uses lw/sw 0x14); this type names the bits for code that reads one field, e.g.
+// ((tAttrThing*)&thing->mAttr)->mPivot. [R] tAttrThing_tAttrThing (the ctor: sets bits 0, 1, 3, 6, clears 2, 4, 5, 7,
+// mLayer = 0, mPivot = 9); [P] the inline accessors isActive .. isWrap, get/setDrawLayer, get/setPivot.
+struct tAttrThing {
+    unsigned int mOrientation : 1;   // bit 0 [O]; [P] isHorizontal
+    unsigned int mActive : 1;        // bit 1 [O]; [P] isActive / setActive
+    unsigned int mCached : 1;        // bit 2 [O]; [P] isCached / setCached (vtable slot 5)
+    unsigned int mEnabled : 1;       // bit 3 [O]; [P] isEnabled / setEnabled (slot 6)
+    unsigned int mFocused : 1;       // bit 4 [O]; [P] isFocused / setFocus (slot 7); [U] cUIMenu_setFocus sets bit 4
+    unsigned int mStatic : 1;        // bit 5 [O]; [P] isStatic / setStatic (slot 8)
+    unsigned int mVisible : 1;       // bit 6 [O]; [P] isVisible / setVisible (slot 9)
+    unsigned int mWrap : 1;          // bit 7 [O]; [P] isWrap
+    unsigned int mLayer : 5;         // bits 8-12 [O]; [P] getDrawLayer / setDrawLayer
+    unsigned int mPivot : 6;         // bits 13-18 [O]; [P] getPivot / setPivot; [U] cScreenPopup_changePivot and
+                                     //       cUIVector_setChannelDataKCP channel 12 write bits 13-18
 };
 
 struct cUIThing {
@@ -70,6 +88,8 @@ struct cUIThing {
                                      //       [U] channels 6-7; cUIText wraps at mSize.x
     int mSound[2];                   // 0x06C [O] (On Tour: int mSound[2]); [R] = {4, 6}; [U] cUIThing_getSound/cUIThing_setSound get/set by index
 };
+
+CHECK_SIZE(tAttrThing, 0x4);
 
 CHECK_OFFSET(cUIThing, mpPrev, 0x000);
 CHECK_OFFSET(cUIThing, mpNext, 0x004);

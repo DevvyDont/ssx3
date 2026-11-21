@@ -48,6 +48,7 @@ struct tParticleData;         // render/particle.h (On Tour 0xD8; retail copies 
 struct tParticleEmitter;      // render/particle.h
 struct tWakeLine;             // On Tour 0x60 (mVel[4], ...); retail 0x70 (five row vectors: cBoardWakeFX_update's view)
 struct tBoardWakeVertex;      // On Tour 0x20; retail 0x30 (cBoardWakeFX_reset's view)
+struct tBxVertex;             // render/2drender.h (cBoardTrailFX's strips)
 
 // On Tour struct tCheatState (4 chars). Retail reads m_misc with lbu only (it also holds the cheat input bits).
 struct tCheatState {
@@ -618,13 +619,59 @@ CHECK_SIZE(cBoardSparkFX, 0xB0);
 
 // cBoardTrailFX (cRiderHandler + 0x520, 0xF0 bytes): FX part; ctor cBoardTrailFX_initialize (in charge: cRider at this
 // + 0xF0); vtable cBoardTrailFX$6cRider D_00488C00.
+// Members: On Tour class cBoardTrailFX (0x110) in the same order. Retail has the virtual-base pointer first (so the
+// first four members sit 4 bytes later) and lacks On Tour's m_L2WOffset and the three index-buffer pointer pairs
+// (0x24 bytes), so from CurSliceCap on every member sits 0x20 bytes before On Tour's. Placed by [U]
+// cBoardTrailFX_reset (State = 2 eBTSNormal, BufLen / BufHead / CurAlpha / CurDepth / CurHeight / LightSide = 0,
+// LastCen = t4vect_Origin, LastVel / LastSide = t4vect_Zero, Left/RightRandWidth = 1.0, DelaySampling = 0),
+// cBoardTrailFX_initialize (CurSliceCap = 0, SliceCaps[] = -1, BufVerts[0..5] = new [324] "BoardTrailVertices"),
+// cBoardTrailFX_update and cBoardTrailFX_shouldSample (the views sBoardTrailFXView, sBTrail_8938, sBTrail_86F0).
 struct cBoardTrailFX {
-    cRider* mRider;     // 0x00 [R] virtual-base pointer to the shared cRider; [R] cBoardTrailFX_initialize
-    char unk_004[0xEC]; // 0x04 not laid out yet (see the unit's local view)
+    cRider* mRider;                 // 0x00 [R] virtual-base pointer to the shared cRider; [R] cBoardTrailFX_initialize
+    float LeftRandWidth;            // 0x04 [O] (0x00); [U] reset 1.0; update: 1 + random spread, scales the inner edge
+    float RightRandWidth;           // 0x08 [O] (0x04); [U] reset 1.0; update: the same for the outer edge
+    int BufId;                      // 0x0C [O] (0x08); [U] update flips it (1 - BufId)
+    tBxVertex* BufVerts[6];         // 0x10 [O] (0x0C; On Tour tColourUVVertex*, the PSP vertex); [R] initialize:
+                                    //      new tBxVertex[324] each ("BoardTrailVertices", 0x30 bytes with the
+                                    //      empty construction loop); [U] reset rewrites u / v / one of 54 per strip
+    int CurSliceCap;                // 0x28 [O] (0x48); [R] initialize 0
+    short SliceCaps[48];            // 0x2C [O] (0x4C); [R] initialize fills -1 (from the last)
+    int BufHead;                    // 0x8C [O] (0xAC); [U] reset 0; update: the ring-buffer head
+    int BufLen;                     // 0x90 [O] (0xB0); [U] reset 0; update counts up to the segment count
+    int State;                      // 0x94 [O] eBoardTrailState (0xB4): 0 eBTSInAir, 1 eBTSLand, 2 eBTSNormal;
+                                    //      [U] reset 2; update / shouldSample test 0 and 1
+    float CurAlpha;                 // 0x98 [O] (0xB8); [U] reset 0
+    float CurDepth;                 // 0x9C [O] (0xBC); [U] reset 0; update: CurHeight = a - CurDepth * b
+    float CurHeight;                // 0xA0 [O] (0xC0); [U] reset 0; update scales the rider's up vector by it
+    float LightSide;                // 0xA4 [O] (0xC4); [U] reset 0
+    char unk_0A8[0x8];              // 0xA8 padding to the 16-byte aligned LastCen (On Tour 0xC8 likewise)
+    t4Vector LastCen;               // 0xB0 [O] (0xD0); [U] reset t4vect_Origin; shouldSample: distance from it
+    t4Vector LastVel;               // 0xC0 [O] (0xE0); [U] reset t4vect_Zero; update: the last direction
+    t4Vector LastSide;              // 0xD0 [O] (0xF0); [U] reset t4vect_Zero; update: the last side vector
+    int DelaySampling;              // 0xE0 [O] (0x100); [U] reset 0; shouldSample counts it down, sets 2 on landing
+    char unk_0E4[0xC];              // 0xE4 tail padding to 0xF0 (On Tour 0x104 likewise)
 };
 
 CHECK_OFFSET(cBoardTrailFX, mRider, 0x00);
-CHECK_OFFSET(cBoardTrailFX, unk_004, 0x04);
+CHECK_OFFSET(cBoardTrailFX, LeftRandWidth, 0x04);
+CHECK_OFFSET(cBoardTrailFX, RightRandWidth, 0x08);
+CHECK_OFFSET(cBoardTrailFX, BufId, 0x0C);
+CHECK_OFFSET(cBoardTrailFX, BufVerts, 0x10);
+CHECK_OFFSET(cBoardTrailFX, CurSliceCap, 0x28);
+CHECK_OFFSET(cBoardTrailFX, SliceCaps, 0x2C);
+CHECK_OFFSET(cBoardTrailFX, BufHead, 0x8C);
+CHECK_OFFSET(cBoardTrailFX, BufLen, 0x90);
+CHECK_OFFSET(cBoardTrailFX, State, 0x94);
+CHECK_OFFSET(cBoardTrailFX, CurAlpha, 0x98);
+CHECK_OFFSET(cBoardTrailFX, CurDepth, 0x9C);
+CHECK_OFFSET(cBoardTrailFX, CurHeight, 0xA0);
+CHECK_OFFSET(cBoardTrailFX, LightSide, 0xA4);
+CHECK_OFFSET(cBoardTrailFX, unk_0A8, 0xA8);
+CHECK_OFFSET(cBoardTrailFX, LastCen, 0xB0);
+CHECK_OFFSET(cBoardTrailFX, LastVel, 0xC0);
+CHECK_OFFSET(cBoardTrailFX, LastSide, 0xD0);
+CHECK_OFFSET(cBoardTrailFX, DelaySampling, 0xE0);
+CHECK_OFFSET(cBoardTrailFX, unk_0E4, 0xE4);
 CHECK_SIZE(cBoardTrailFX, 0xF0);
 
 // cSpeedBoostFX (cRiderHandler + 0x610, 0x3B0 bytes): FX part; ctor cSpeedBoostFX_cSpeedBoostFX (in charge: cRider at
@@ -744,6 +791,9 @@ CHECK_SIZE(cTrickBoostFX, 0x110);
 struct tAirStreamerSeg {
     t4Vector l; // 0x00 [O]; [U] cAirStreamerFX_update: board point + board axis * 90 (sRsSeg_EF6D0.p0)
     t4Vector r; // 0x10 [O]; [U] cAirStreamerFX_update: board point - board axis * 90 (p1)
+
+    tAirStreamerSeg() {} // [O] tAirStreamerSeg::tAirStreamerSeg(); [R] cAirStreamerFX's ctor keeps the empty
+                         //     construction loop of its new tAirStreamerSeg[25] (view cRsmItem_2EF3B0)
 };
 
 CHECK_OFFSET(tAirStreamerSeg, l, 0x00);

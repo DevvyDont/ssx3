@@ -50,4 +50,24 @@ CHECK_OFFSET(cBoostModifier, Instance, 0x40);
 CHECK_OFFSET(cBoostModifier, unk_44, 0x44);
 CHECK_SIZE(cBoostModifier, 0x50);
 
+// cBoostModifierState (On Tour, 0x30): the boost state cBoostModifier carries at +0x10 (Boost .. Type above, written
+// out inline there); the boost-plane helper takes it whole (view sPlane_342A88: n = Boost, d = MaxSpeed, k = Drag).
+struct cBoostModifierState {
+    t4Vector Boost;                 // 0x00 [O]
+    float MaxSpeed;                 // 0x10 [O]
+    float Drag;                     // 0x14 [O]
+    int BoostTime;                  // 0x18 [O]
+    int Time;                       // 0x1C [O]
+    int Type;                       // 0x20 [O]
+    char unk_024[0xC];              // 0x24 padding (16-byte aligned)
+};
+
+CHECK_OFFSET(cBoostModifierState, Boost, 0x00);
+CHECK_OFFSET(cBoostModifierState, MaxSpeed, 0x10);
+CHECK_OFFSET(cBoostModifierState, Drag, 0x14);
+CHECK_OFFSET(cBoostModifierState, BoostTime, 0x18);
+CHECK_OFFSET(cBoostModifierState, Time, 0x1C);
+CHECK_OFFSET(cBoostModifierState, Type, 0x20);
+CHECK_SIZE(cBoostModifierState, 0x30);
+
 #endif /* OBJECT_BOOSTMODIFIER_H */

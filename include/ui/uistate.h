@@ -22,7 +22,7 @@
 //   [O] On Tour's member order alone, where the fields on both sides of it are placed by [P] or [R].
 //
 // mAttrState is EA's tAttrState (On Tour, LSB first): mIsPopup:1 mHasPopup:2 mVisible:1 mFirstTime:1 mEnabled:1
-// mExplicit:1 mPendingDelete:1 mMode:6 mPushCheck:1 mPopFloor:1. EA's type is 2 bytes (the constructors store it
+// mExplicit:1 mPendingDelete:1 mMode:6 mPushCheck:1 mPopFloor:1 (struct tAttrState below). EA's type is 2 bytes (the constructors store it
 // with sh 0x218 = visible, first time, mode 2), but every accessor reads and writes the aligned word (lw/sw 0x1C),
 // so it is an int here and covers the 2 padding bytes.
 
@@ -32,6 +32,25 @@
 struct cListNode;
 struct cUIEngine;
 struct cUIScreen;
+
+// EA's tAttrState, the type of cUIState::mAttrState (On Tour struct tAttrState, size 0x2, LSB first). cUIState keeps
+// mAttrState an int (its accessors use lw/sw 0x1C, and it covers the 2 padding bytes); this type names the bits for
+// code that reads one field, e.g. ((tAttrState*)&state->mAttrState)->mMode. [R] the constructors store 0x218 with sh
+// (mVisible, mFirstTime, mMode = 2); [P] the inline accessors getMode (lbu 0x1D), isFirstTime ... setVisible.
+struct tAttrState {
+    unsigned short mIsPopup : 1;       // bit 0 [O]
+    unsigned short mHasPopup : 2;      // bits 1-2 [O]
+    unsigned short mVisible : 1;       // bit 3 [O]; [R] set by the ctors (0x218); [P] setVisible; [U]
+                                       //       cUIStateStack_setVisibleToChain writes bit 3 along the parent chain
+    unsigned short mFirstTime : 1;     // bit 4 [O]; [R] set by the ctors; [P] isFirstTime
+    unsigned short mEnabled : 1;       // bit 5 [O]
+    unsigned short mExplicit : 1;      // bit 6 [O]
+    unsigned short mPendingDelete : 1; // bit 7 [O]
+    unsigned short mMode : 6;          // bits 8-13 [O]; [R] 2 in the ctors; [P] getMode (lbu 0x1D); [U] "FEOptions"
+                                       //       states set it (func_001887A0 callers mask 0x3F00)
+    unsigned short mPushCheck : 1;     // bit 14 [O]
+    unsigned short mPopFloor : 1;      // bit 15 [O]
+};
 
 struct cUIState {
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructors self-link it
@@ -61,6 +80,8 @@ struct cUIState {
     signed char mUserNum;            // 0x044 [P] getUserNum/setUserNum (lb/sb; retail cUIState_getUserNum/cUIState_setUserNum); [R] = -1 (On Tour: char)
     char unk_045[0x3];               // 0x045 padding
 };
+
+CHECK_SIZE(tAttrState, 0x2);
 
 CHECK_OFFSET(cUIState, mpPrev, 0x000);
 CHECK_OFFSET(cUIState, mpNext, 0x004);

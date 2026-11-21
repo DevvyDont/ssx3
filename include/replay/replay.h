@@ -23,13 +23,14 @@
 // Unnamed fields are unk_XXX; rename only with evidence.
 
 #include "layout.h"
+#include "replay/frame.h"
 #include "ai/ridermetrix.h" // tRiderStats
 
 struct cReplayFrame;      // replay/frame.h: retail 0x38 bytes (vptr at 0, Next 0x14, Prev 0x18, FrameType 0x1C,
                           // FrameStartTick 0x30)
 struct cReplayCache;      // 0x10 bytes ("ReplayCache"): one rider's recorded input
 struct tReplayMemCardBlock;
-struct tControlCmd;
+union tControlCmd;
 struct tReplayCacheSave;
 
 // tReplayState (On Tour enum; every value below is what retail stores or tests at the same transition).
@@ -106,7 +107,7 @@ struct cReplay {
     int PadNum;                          // 0x028 [O]; [U] cReplay_setReplayPadNum stores it;
                                          //       cReplay_updateCameraSelect/cReplay_updateInput/cReplay_update read SSXApp's pad[PadNum]
                                          //       (+0xB0)
-    char Frames[16][0x38];               // 0x02C [O] cReplayFrame Frames[16] (retail 0x38 each, On Tour 0x48); [R]
+    cReplayFrame Frames[16];             // 0x02C [O] cReplayFrame Frames[16] (retail 0x38 each, On Tour 0x48); [R]
                                          //       ctor cReplay_cReplay constructs 16 x 0x38 (cReplayFrame_cReplayFrame), dtor
                                          //       cReplay__cReplay destroys them through vtable slot 7; each frame's
                                          //       vptr is at +0
@@ -268,5 +269,32 @@ CHECK_OFFSET(cReplay, WriteSaveSize, 0x678);
 CHECK_OFFSET(cReplay, WriteRemaining, 0x67C);
 CHECK_OFFSET(cReplay, WriteCheckSum, 0x680);
 CHECK_SIZE(cReplay, 0x688);
+
+// The replay save header (On Tour struct tReplayManSaveHeader, 0x28). [U] cReplay_writeHeaderStart fills it in
+// WriteTmp field by field from the same cReplay members (view sReplayHdr_1228: Version 0xABCD0002, the frame count,
+// SaveFrameTicks, ReplayError, RecordTick, EndRecordTick, the player count, then cAI_getPodiumActorList fills the
+// actor list at +0x20); cReplay_writeHeader queues these 0x28 bytes.
+struct tReplayManSaveHeader {
+    int Version;                    // 0x00 [O]; [U] 0xABCD0002
+    int NumSaveFrames;              // 0x04 [O]; [U] cReplay_writeFrameCount
+    int SaveFrameTicks;             // 0x08 [O]; [U] cReplay::SaveFrameTicks
+    int ReplayError;                // 0x0C [O]; [U] cReplay::ReplayError
+    int RecordTick;                 // 0x10 [O]; [U] cReplay::RecordTick
+    int EndRecordTick;              // 0x14 [O]; [U] cReplay::EndRecordTick
+    int Players;                    // 0x18 [O]; [U] the AI's NumberOfPlayersAllocated
+    int Player;                     // 0x1C [O]; no write in writeHeaderStart
+    int PodiumActorList[2];         // 0x20 [O] eBECharacters[2]; [U] cAI_getPodiumActorList fills it
+};
+
+CHECK_OFFSET(tReplayManSaveHeader, Version, 0x00);
+CHECK_OFFSET(tReplayManSaveHeader, NumSaveFrames, 0x04);
+CHECK_OFFSET(tReplayManSaveHeader, SaveFrameTicks, 0x08);
+CHECK_OFFSET(tReplayManSaveHeader, ReplayError, 0x0C);
+CHECK_OFFSET(tReplayManSaveHeader, RecordTick, 0x10);
+CHECK_OFFSET(tReplayManSaveHeader, EndRecordTick, 0x14);
+CHECK_OFFSET(tReplayManSaveHeader, Players, 0x18);
+CHECK_OFFSET(tReplayManSaveHeader, Player, 0x1C);
+CHECK_OFFSET(tReplayManSaveHeader, PodiumActorList, 0x20);
+CHECK_SIZE(tReplayManSaveHeader, 0x28);
 
 #endif /* REPLAY_REPLAY_H */

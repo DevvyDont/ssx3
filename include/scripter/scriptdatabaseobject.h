@@ -15,9 +15,30 @@
 
 struct cScriptObject;
 
+// One entity record of the script database (On Tour tScriptEntityRecord, 0x14). [R]
+// cScriptDatabaseObject_cScriptDatabaseObject sets 30 of them to {0, -1, -1, 0, -1}; [U] AddEntity / RemoveEntity /
+// MarkEntityAsUsed / GetPlayerIDByEntity / GetAvailableEntities / IsObjInUseByPlayer (views sVar0050, sScrSlotD400,
+// sScrEnt27D390).
+struct cScriptEntity;
+
+struct tScriptEntityRecord {
+    cScriptEntity* pEntity;         // 0x00 [O]; [U] RemoveEntity clears it, GetAvailableEntities returns it
+    int objID;                      // 0x04 [O]
+    int playerID;                   // 0x08 [O]; [U] MarkEntityAsUsed stores it, GetPlayerIDByEntity returns it
+    int relation;                   // 0x0C [O] eScriptEntityRelation; [U] MarkEntityAsUsed stores 1
+    int reservedPlayerID;           // 0x10 [O]
+};
+
+CHECK_OFFSET(tScriptEntityRecord, pEntity, 0x00);
+CHECK_OFFSET(tScriptEntityRecord, objID, 0x04);
+CHECK_OFFSET(tScriptEntityRecord, playerID, 0x08);
+CHECK_OFFSET(tScriptEntityRecord, relation, 0x0C);
+CHECK_OFFSET(tScriptEntityRecord, reservedPlayerID, 0x10);
+CHECK_SIZE(tScriptEntityRecord, 0x14);
+
 struct cScriptDatabaseObject {
     cScriptObject* mpObjectDatabase[20]; // 0x000 [O]
-    char mEntityDatabase[30][0x14];      // 0x050 [O] tScriptEntityRecord[30] {pEntity, objID, playerID, relation,
+    tScriptEntityRecord mEntityDatabase[30]; // 0x050 [O] tScriptEntityRecord[30] {pEntity, objID, playerID, relation,
                                          //       reservedPlayerID}
     void** mVtbl;                        // 0x2A8 [R] cScriptDatabaseObject_vtbl
 };

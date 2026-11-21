@@ -103,6 +103,28 @@ struct tBarConfig {
     int numMidSegments;             // 0x4 [O]; [U] onCreateScreen: the segment count
 };
 
+// One HUD element's layout (On Tour struct tHUDDef, 0x24): the const tables in .rodata the HUD renderers take a
+// pointer into (D_00477000 ...; renderTime1 / renderText index them by 0x24). [O] tHUDDef (same members and offsets);
+// [P] the preview mangles the type (renderTrickLevel__13cOVStateHUD1PPC7tHUDDef ...); [R] retail's out-of-line
+// accessors tHUDDef_getPos / tHUDDef_getSize / tHUDDef_getScale / tHUDDef_getColour. Replaces ovstatehud.cpp's
+// sHudElem_9AD0 / sHudElemDef_001F16C0 and cOVStateHUDElem views (same layout).
+struct tHUDDef {
+    short px;                       // 0x00 [O]; [U] tHUDDef_getPos: the x position (short -> float)
+    short py;                       // 0x02 [O]; [U] tHUDDef_getPos: the y position
+    short sx;                       // 0x04 [O]; [U] tHUDDef_getSize: the width (negative = not set)
+    short sy;                       // 0x06 [O]; [U] tHUDDef_getSize: the height
+    float xx;                       // 0x08 [O]; [U] tHUDDef_getScale: the x scale
+    float xy;                       // 0x0C [O]; [U] tHUDDef_getScale: the y scale
+    float a;                        // 0x10 [O]; [U] tHUDDef_getColour copies a, r, g, b into a tARGB
+    float r;                        // 0x14 [O]
+    float g;                        // 0x18 [O]
+    float b;                        // 0x1C [O]
+    char pivotX;                    // 0x20 [O]; [U] renderTime1 / renderText: the horizontal alignment (signed)
+    char pivotY;                    // 0x21 [O]; [U] the vertical alignment
+    char layer;                     // 0x22 [O]; [U] the element's draw layer (renderMultiText passes +0x22 on)
+    char unk_23[0x1];               // 0x23 tail padding
+};
+
 struct cOVStateHUD1P {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState_cUIState links the node to itself
@@ -245,6 +267,21 @@ CHECK_SIZE(tSSPlaceInfo, 0x18);
 CHECK_OFFSET(tBarConfig, partScale, 0x0);
 CHECK_OFFSET(tBarConfig, numMidSegments, 0x4);
 CHECK_SIZE(tBarConfig, 0x8);
+
+CHECK_OFFSET(tHUDDef, px, 0x00);
+CHECK_OFFSET(tHUDDef, py, 0x02);
+CHECK_OFFSET(tHUDDef, sx, 0x04);
+CHECK_OFFSET(tHUDDef, sy, 0x06);
+CHECK_OFFSET(tHUDDef, xx, 0x08);
+CHECK_OFFSET(tHUDDef, xy, 0x0C);
+CHECK_OFFSET(tHUDDef, a, 0x10);
+CHECK_OFFSET(tHUDDef, r, 0x14);
+CHECK_OFFSET(tHUDDef, g, 0x18);
+CHECK_OFFSET(tHUDDef, b, 0x1C);
+CHECK_OFFSET(tHUDDef, pivotX, 0x20);
+CHECK_OFFSET(tHUDDef, pivotY, 0x21);
+CHECK_OFFSET(tHUDDef, layer, 0x22);
+CHECK_SIZE(tHUDDef, 0x24);
 
 CHECK_OFFSET(cOVStateHUD1P, mpPrev, 0x000);
 CHECK_OFFSET(cOVStateHUD1P, mpNext, 0x004);

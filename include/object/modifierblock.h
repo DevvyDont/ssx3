@@ -21,6 +21,26 @@ struct cUVScrollModifier;
 struct cTexFlipModifier;
 struct cPhysicsModifier;
 
+// A modifier block's replay record (On Tour struct tModifierBlockInfo, 0x34): which modifiers it has.
+// [U] tModifierBlock_writeToReplayFrame fills it (flags, transform / physics type, effect and rail counts, one type
+// byte per effect; view sHdr_353448) and readFromReplayFrame rebuilds the block from it (view sMbReplayHdr36D8).
+struct tModifierBlockInfo {
+    int Flags;                      // 0x00 [O]
+    int TransformType;              // 0x04 [O]
+    int PhysicsType;                // 0x08 [O]
+    int NumEffects;                 // 0x0C [O]
+    int NumRails;                   // 0x10 [O]
+    char EffectType[32];            // 0x14 [O]
+};
+
+CHECK_OFFSET(tModifierBlockInfo, Flags, 0x00);
+CHECK_OFFSET(tModifierBlockInfo, TransformType, 0x04);
+CHECK_OFFSET(tModifierBlockInfo, PhysicsType, 0x08);
+CHECK_OFFSET(tModifierBlockInfo, NumEffects, 0x0C);
+CHECK_OFFSET(tModifierBlockInfo, NumRails, 0x10);
+CHECK_OFFSET(tModifierBlockInfo, EffectType, 0x14);
+CHECK_SIZE(tModifierBlockInfo, 0x34);
+
 struct tModifierBlock {
     cTransformModifier* RootTransform; // 0x00 [O]; [R] ctor 0; [U] getBoundBox / getRadius / applyForce call through
                                        //      its vtable

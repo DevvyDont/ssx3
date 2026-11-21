@@ -41,6 +41,30 @@ struct cFlexRailSpaceNode;
 struct cSimpleTube;
 struct tSpringRailNode;
 
+// One node of a spring rail (On Tour struct tSpringRailNode, 0x60). [R] the ctors allocate NumNodes x 0x60 with the
+// element ctor setting InstId = -1 (view sFlexRailElem_349DB0: link at 0x50); [U] cSpringRailNode_getPosition reads
+// P / InstId / Mesh (view sFrNodeA028), applyForce / updateIntersectInfo read P / V / O / W / T (views sFrElem_A568,
+// sFrE_A838).
+struct tSpringRailNode {
+    t4Vector P;                     // 0x00 [O]
+    t4Vector V;                     // 0x10 [O]
+    t4Vector O;                     // 0x20 [O]
+    t4Vector W;                     // 0x30 [O]
+    t4Vector T;                     // 0x40 [O]
+    unsigned int InstId;            // 0x50 [O] tResourceID; [R] the element ctor sets -1
+    int Mesh;                       // 0x54 [O]
+    char unk_058[0x8];              // 0x58 padding (16-byte aligned)
+};
+
+CHECK_OFFSET(tSpringRailNode, P, 0x00);
+CHECK_OFFSET(tSpringRailNode, V, 0x10);
+CHECK_OFFSET(tSpringRailNode, O, 0x20);
+CHECK_OFFSET(tSpringRailNode, W, 0x30);
+CHECK_OFFSET(tSpringRailNode, T, 0x40);
+CHECK_OFFSET(tSpringRailNode, InstId, 0x50);
+CHECK_OFFSET(tSpringRailNode, Mesh, 0x54);
+CHECK_SIZE(tSpringRailNode, 0x60);
+
 struct cSpringRailNode {
     // --- cFlexRailNode (0x60; object/flexrailnode.h): cInstanceNode 0x00-0x1C (object/instancenode.h)
     int unk_00;                     // 0x000 cObjNode's leading word; no ctor writes it (see object/objnode.h)

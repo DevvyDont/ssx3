@@ -15,6 +15,20 @@
 
 struct tPose;
 
+// One sphere of a rider's collision list (On Tour struct tSphereList, 0x20): its centre in bone space, radius and bone.
+// [U] cRiderSphereTree's methods walk sphList 0x20 apart (views sRiderSphere_329910 / sRiderSphere_2F650: the
+// placement-new array element, which also needs an empty constructor in its unit).
+struct tSphereList {
+    t4Vector cen;                   // 0x00 [O]
+    float rad;                      // 0x10 [O]
+    int bone;                       // 0x14 [O]
+};
+
+CHECK_OFFSET(tSphereList, cen, 0x00);
+CHECK_OFFSET(tSphereList, rad, 0x10);
+CHECK_OFFSET(tSphereList, bone, 0x14);
+CHECK_SIZE(tSphereList, 0x20);
+
 struct cRiderSphereTree {
     tPose* bonePoses;               // 0x000 [O]
     char unk_004[0xC];              // 0x004 padding
@@ -23,7 +37,7 @@ struct cRiderSphereTree {
     int boundBone;                  // 0x024 [O]
     unsigned int sphMask;           // 0x028 [O]
     int listLen;                    // 0x02C [O]
-    char sphList[0x280];            // 0x030 [O] tSphereList[20]
+    tSphereList sphList[20];        // 0x030 [O] tSphereList[20] (0x280 bytes)
 };
 
 CHECK_OFFSET(cRiderSphereTree, bonePoses, 0x000);

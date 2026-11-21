@@ -199,4 +199,113 @@ CHECK_OFFSET(cScriptPlayerChannelEvent, mNumActiveEvents, 0x20);
 CHECK_OFFSET(cScriptPlayerChannelEvent, mEventFrame, 0x24);
 CHECK_SIZE(cScriptPlayerChannelEvent, 0x28);
 
+// Block-channel key and active-block record (On Tour tInSeqBlockChannelKey 0x14, tInSeqBlock 0x14, tBlockEntry 0x1C).
+// [R] cScriptPlayerChannelBlock_Play allocates header[1] x 0x1C entries; [U] cScriptPlayerChannelBlock_AddActiveKey
+// copies key +0x8 / +0x2 / +0x4 / +0x6 / +0xC into entry +0x0 / +0x4 / +0x8 / +0xC / +0x10, stores the custom
+// pointer at +0x14 and pushes the entry through +0x18; Update reads key +0x4 (view sCacheRec_2F28) and entry +0xC /
+// +0x18 (view sCacheEvent_2F28).
+struct tInSeqBlockChannelKey {
+    unsigned short keySize;         // 0x00 [O]; [U] the custom data exists when keySize > 0x14
+    unsigned short track;           // 0x02 [O]
+    unsigned short frameStart;      // 0x04 [O]; [U] Play / Update compare it with the frame
+    unsigned short frameEnd;        // 0x06 [O]
+    int enumVal;                    // 0x08 [O]
+    unsigned int numOverlapFrames;  // 0x0C [O]
+    char customDataStart;           // 0x10 [O]
+    char dummyPad[3];               // 0x11 [O]
+};
+
+CHECK_OFFSET(tInSeqBlockChannelKey, keySize, 0x00);
+CHECK_OFFSET(tInSeqBlockChannelKey, track, 0x02);
+CHECK_OFFSET(tInSeqBlockChannelKey, frameStart, 0x04);
+CHECK_OFFSET(tInSeqBlockChannelKey, frameEnd, 0x06);
+CHECK_OFFSET(tInSeqBlockChannelKey, enumVal, 0x08);
+CHECK_OFFSET(tInSeqBlockChannelKey, numOverlapFrames, 0x0C);
+CHECK_OFFSET(tInSeqBlockChannelKey, customDataStart, 0x10);
+CHECK_SIZE(tInSeqBlockChannelKey, 0x14);
+
+struct tInSeqBlock {
+    int value;                      // 0x00 [O]; [U] AddActiveKey: key enumVal
+    int track;                      // 0x04 [O]; [U] key track
+    int scriptStartFrame;           // 0x08 [O]; [U] key frameStart
+    int scriptEndFrame;             // 0x0C [O]; [U] key frameEnd; Update ends the block there
+    unsigned int overlapInFrames;   // 0x10 [O]; [U] key numOverlapFrames
+};
+
+CHECK_OFFSET(tInSeqBlock, value, 0x00);
+CHECK_OFFSET(tInSeqBlock, track, 0x04);
+CHECK_OFFSET(tInSeqBlock, scriptStartFrame, 0x08);
+CHECK_OFFSET(tInSeqBlock, scriptEndFrame, 0x0C);
+CHECK_OFFSET(tInSeqBlock, overlapInFrames, 0x10);
+CHECK_SIZE(tInSeqBlock, 0x14);
+
+struct tBlockEntry {
+    tInSeqBlock data;               // 0x00 [O]
+    void* pCustom;                  // 0x14 [O]; [U] AddActiveKey: key + 0x10 or 0
+    tBlockEntry* pNext;             // 0x18 [O]; [U] the active list link (mpActiveBlockList)
+};
+
+CHECK_OFFSET(tBlockEntry, data, 0x00);
+CHECK_OFFSET(tBlockEntry, pCustom, 0x14);
+CHECK_OFFSET(tBlockEntry, pNext, 0x18);
+CHECK_SIZE(tBlockEntry, 0x1C);
+
+// Object-channel key and active-object record (On Tour tInSeqObjectChannelKey 0x1C, tInSeqObject 0x1C,
+// tObjectEntry 0x24). [R] cScriptPlayerChannelObject_Play allocates header[1] x 0x24 entries; [U]
+// cScriptPlayerChannelObject_Update reads key +0x4 (view sCacheRec_3698) and entry +0x8 / +0x10 / +0x14 / +0x20
+// (view sCacheEvent_3698).
+struct tInSeqObjectChannelKey {
+    unsigned short keySize;         // 0x00 [O]
+    unsigned short track;           // 0x02 [O]
+    unsigned short frameStart;      // 0x04 [O]; [U] Play / Update compare it with the frame
+    unsigned short frameEnd;        // 0x06 [O]
+    int objectID;                   // 0x08 [O]
+    int objectFrameStart;           // 0x0C [O]
+    float playRate;                 // 0x10 [O]
+    unsigned int blendInFrames;     // 0x14 [O]
+    char customDataStart;           // 0x18 [O]
+    char dummyPad[3];               // 0x19 [O]
+};
+
+CHECK_OFFSET(tInSeqObjectChannelKey, keySize, 0x00);
+CHECK_OFFSET(tInSeqObjectChannelKey, track, 0x02);
+CHECK_OFFSET(tInSeqObjectChannelKey, frameStart, 0x04);
+CHECK_OFFSET(tInSeqObjectChannelKey, frameEnd, 0x06);
+CHECK_OFFSET(tInSeqObjectChannelKey, objectID, 0x08);
+CHECK_OFFSET(tInSeqObjectChannelKey, objectFrameStart, 0x0C);
+CHECK_OFFSET(tInSeqObjectChannelKey, playRate, 0x10);
+CHECK_OFFSET(tInSeqObjectChannelKey, blendInFrames, 0x14);
+CHECK_OFFSET(tInSeqObjectChannelKey, customDataStart, 0x18);
+CHECK_SIZE(tInSeqObjectChannelKey, 0x1C);
+
+struct tInSeqObject {
+    int objectID;                   // 0x00 [O]
+    int scriptStartFrame;           // 0x04 [O]
+    int scriptEndFrame;             // 0x08 [O]; [U] Update ends the object there
+    int trackIndex;                 // 0x0C [O]
+    float currObjectFrame;          // 0x10 [O]; [U] Update advances it by playRate
+    float playRate;                 // 0x14 [O]; [U] Update
+    unsigned int blendInFrames;     // 0x18 [O]
+};
+
+CHECK_OFFSET(tInSeqObject, objectID, 0x00);
+CHECK_OFFSET(tInSeqObject, scriptStartFrame, 0x04);
+CHECK_OFFSET(tInSeqObject, scriptEndFrame, 0x08);
+CHECK_OFFSET(tInSeqObject, trackIndex, 0x0C);
+CHECK_OFFSET(tInSeqObject, currObjectFrame, 0x10);
+CHECK_OFFSET(tInSeqObject, playRate, 0x14);
+CHECK_OFFSET(tInSeqObject, blendInFrames, 0x18);
+CHECK_SIZE(tInSeqObject, 0x1C);
+
+struct tObjectEntry {
+    tInSeqObject data;              // 0x00 [O]
+    void* pCustom;                  // 0x1C [O]
+    tObjectEntry* pNext;            // 0x20 [O]; [U] the active list link (mpActiveObjectList)
+};
+
+CHECK_OFFSET(tObjectEntry, data, 0x00);
+CHECK_OFFSET(tObjectEntry, pCustom, 0x1C);
+CHECK_OFFSET(tObjectEntry, pNext, 0x20);
+CHECK_SIZE(tObjectEntry, 0x24);
+
 #endif /* INSEQ_SCRIPTPLAYERCHANNEL_H */

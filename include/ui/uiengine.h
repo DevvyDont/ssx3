@@ -71,4 +71,20 @@ CHECK_OFFSET(cUICustomInterface, mpEngine, 0x000);
 CHECK_OFFSET(cUICustomInterface, mVtbl, 0x004);
 CHECK_SIZE(cUICustomInterface, 0x8);
 
+// cUISoundInterface: the UI engine's sound hook (cUIEngine::mpSound above): the states play their UI sounds through
+// its slot 2 (playSound). The front end's cFESound and the overlays' cOVSound derive from it (fe/fesound.h, 0x8 each);
+// gUISoundNull is a bare instance the engine falls back to when no sound interface is set (cUIEngine's listener,
+// cFEStateStore's sound). [O] On Tour's class: size 0x4, no data, virtual ~ / playSound / soundInitialize /
+// soundShutdown; [R] retail vtable cUISoundInterface_vtbl (0x0046DD60, 4 slots: cUISoundInterface__cUISoundInterface,
+// _playSound, _soundInitialize, _soundShutdown), stored back at +0x0 by the cFESound / cOVSound destructors. A FLAT
+// layout. Evidence tags as above.
+struct cUISoundInterface {
+    void** mVtbl;                    // 0x000 [R] cUISoundInterface_vtbl (cUISoundInterface_cUISoundInterface; the cFESound
+                                     //       / cOVSound dtors restore it); cFESound_cFESound stores cFESound_vtbl;
+                                     //       [O] the vptr only (On Tour size 0x4)
+};
+
+CHECK_OFFSET(cUISoundInterface, mVtbl, 0x000);
+CHECK_SIZE(cUISoundInterface, 0x4);
+
 #endif

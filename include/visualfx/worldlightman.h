@@ -19,22 +19,73 @@
 //   [U] how retail code uses the field (the C bodies in src/visualfx/worldlightman.cpp and src/seg/seg_1F1548.cpp and
 //       their asm);
 //   [O] SSX On Tour's DWARF (cWorldLightMan, tOverlapListNode, tLightCacheEntry): names, types and order.
-// The irradiance sets are EA's tIrradianceInfo (type name from the preview's
-// SetIrradiance__15cPS2GraphicsManRC15tIrradianceInfob; 0xA0 bytes, copied as 10 qwords), not laid out yet.
+// The irradiance sets are cIrradiance (render/irradiance.h: 0xA0 bytes, copied as 10 qwords; the preview's
+// SetIrradiance__15cPS2GraphicsManRC15tIrradianceInfob takes the same block as tIrradianceInfo).
 
 #include "layout.h"
 #include "bx/math3d.h"
 #include "world/worldview.h" /* tBoundBox */
+#include "render/irradiance.h" /* cIrradiance */
+#include "world/worldcache.h" /* tResourceID */
 
 struct cBXNash;
 struct cOverlapList;
 struct tWorldPainterQuery;
 
+// A world light (On Tour struct tLightRecord : tLightRecord_PSP, 0x68; retail 0x70: [R] cPS2LightMan_CreateLights
+// steps its record array by 0x70). It is a Nash space node of type kSNT_Light (6): cOverlapList::typed[] points at
+// it (cWorldLightMan_IntersectLights keeps the typed nodes whose type word (+0x8) is 6 and scores them with
+// GetIntensity). Retail agrees with On Tour's offsets from 0x14 on; its light type is at 0x10 (On Tour: m_eLightType at
+// 0xC, m_iFlags at 0x10). Readers: cWorldLightMan_GetIntensity ([O] GetIntensity(const t4Vector&, const tLightRecord&)),
+// cWorldLightMan_CalcLightDist, cWorldLightMan_IntersectLights ([O] ..., tLightRecord** Lights, int Max),
+// cPS2LightMan_CreateLights (render/lightman). EA's header for it is not known.
+struct tLightRecord {
+    int m_iIntersect[3];            // 0x00 [O] (the Nash space-node header: next, prev, type); [U] IntersectLights
+                                    //      tests [2] == 6 (kSNT_Light)
+    int unk_00C;                    // 0x0C no retail access seen (On Tour's m_eLightType / m_iFlags pair is swapped
+                                    //      here: the halo records keep their flags at 0xC, see cLightHalo_Process)
+    int m_eLightType;               // 0x10 [O] eNEWLightType (On Tour at 0xC): 0 directional, 1 spot, 2 point,
+                                    //      3 ambient; [U] GetIntensity and CreateLights switch on it
+    float m_fIntensity;             // 0x14 [O]; [U] GetIntensity, CreateLights
+    float m_fRGBIntensity;          // 0x18 [O]; [U] GetIntensity scales by it (and returns it for type 0)
+    float m_fMaxDistance;           // 0x1C [O]; [U] GetIntensity (fade past 3750 when >= 5000), CalcLightDist (range)
+    float m_fvColor[3];             // 0x20 [O] tf3Vector; [U] CreateLights: the colour's r, g, b
+    float m_fvDirection[3];         // 0x2C [O] tf3Vector; [U] CalcLightDist, CreateLights (normalised)
+    float m_fvWorldPos[3];          // 0x38 [O] tf3Vector; [U] CalcLightDist, CreateLights
+    float m_fvMin[3];               // 0x44 [O] tf3Vector (the bound box)
+    float m_fvMax[3];               // 0x50 [O] tf3Vector
+    float unk_05C;                  // 0x5C [O] anonymous union (spot cone); [U] GetIntensity: inner cosine; CreateLights:
+                                    //      cone angle = pi/2 - func_0031C128(it)
+    float unk_060;                  // 0x60 [O] anonymous union; [U] GetIntensity: outer cosine
+    signed char m_cDecayRate;       // 0x64 [O] char; [U] GetIntensity falloff power (1..3), CreateLights decay (lb)
+    signed char m_cDropOff;         // 0x65 [O] char; [U] GetIntensity cone power, CreateLights dropoff (lb)
+    char unk_066[0xA];              // 0x66 padding to the 0x70 record size
+};
+
+CHECK_OFFSET(tLightRecord, m_iIntersect, 0x00);
+CHECK_OFFSET(tLightRecord, unk_00C, 0x0C);
+CHECK_OFFSET(tLightRecord, m_eLightType, 0x10);
+CHECK_OFFSET(tLightRecord, m_fIntensity, 0x14);
+CHECK_OFFSET(tLightRecord, m_fRGBIntensity, 0x18);
+CHECK_OFFSET(tLightRecord, m_fMaxDistance, 0x1C);
+CHECK_OFFSET(tLightRecord, m_fvColor, 0x20);
+CHECK_OFFSET(tLightRecord, m_fvDirection, 0x2C);
+CHECK_OFFSET(tLightRecord, m_fvWorldPos, 0x38);
+CHECK_OFFSET(tLightRecord, m_fvMin, 0x44);
+CHECK_OFFSET(tLightRecord, m_fvMax, 0x50);
+CHECK_OFFSET(tLightRecord, unk_05C, 0x5C);
+CHECK_OFFSET(tLightRecord, unk_060, 0x60);
+CHECK_OFFSET(tLightRecord, m_cDecayRate, 0x64);
+CHECK_OFFSET(tLightRecord, m_cDropOff, 0x65);
+CHECK_OFFSET(tLightRecord, unk_066, 0x66);
+CHECK_SIZE(tLightRecord, 0x70);
+
 // A cached world-light overlap list around a point (On Tour tOverlapListNode, 0x40; same layout in retail).
 struct tOverlapListNode {
-    unsigned int RID;               // 0x000 [O] tResourceID (a word; Invalid() = 0xFFFFFFFF); [R] ctor and
+    tResourceID RID;                // 0x000 [O] tResourceID (world/worldcache.h; Invalid() = 0xFFFFFFFF); [R] ctor and
                                     //       initLightCache set -1; [U] flushOverlapCache sets -1, evictOverlapNode
-                                    //       takes a -1 node first, getRealTimeLights stores the owning entry's id
+                                    //       takes a -1 node first (RID == tResourceID::Invalid(), a word compare),
+                                    //       getRealTimeLights stores the owning entry's id
     int iTick;                      // 0x004 [O]; [R] initLightCache 0; [U] getRealTimeLights stores the app tick;
                                     //       evictOverlapNode picks the oldest
     char unk_008[0x8];              // 0x008 padding (tBoundBox is 16-aligned)
@@ -62,7 +113,7 @@ struct tLightCacheEntry {
     int iTick;                      // 0x004 [O]; [R] initLightCache 0; [U] getRealTimeLights stores the app tick;
                                     //       evictHashTableEntry picks the lowest
     char unk_008[0x8];              // 0x008 padding
-    char RTlightInfo[0xA0];         // 0x010 [O] (On Tour tRTLightInfo; retail a tIrradianceInfo); [U] getRealTimeLights
+    cIrradiance RTlightInfo;        // 0x010 [O] (On Tour tRTLightInfo; retail a cIrradiance, render/irradiance.h); [U] getRealTimeLights
                                     //       copies ObjIrradiance here, adds the 4 strongest lights
                                     //       (IntersectLights1) and returns its address
     t4Vector pos;                   // 0x0B0 [O]; [R] initLightCache t4vect_Zero; [U] getRealTimeLights: the position
@@ -70,7 +121,7 @@ struct tLightCacheEntry {
     tOverlapListNode* pOverlapNode; // 0x0C0 [O]; [R] initLightCache 0; [U] getRealTimeLights takes it from
                                     //       evictOverlapNode
     char unk_0C4[0xC];              // 0x0C4 padding
-    char ObjIrradiance[0xA0];       // 0x0D0 [O] (On Tour cIrradiance; retail a tIrradianceInfo); [U] getRealTimeLights
+    cIrradiance ObjIrradiance;      // 0x0D0 [O] cIrradiance (On Tour's PSP one is 0x44; retail's 0xA0); [U] getRealTimeLights
                                     //       loads it from the world painter's object / light irradiance name, the
                                     //       default, or the custom irradiance
     tLightCacheEntry* pNext;        // 0x170 [O]; [R] initLightCache 0; [U] the hash chain (getRealTimeLights,

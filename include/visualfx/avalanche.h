@@ -120,8 +120,8 @@ CHECK_SIZE(tAvalanche, 0x210);
 
 // One falling instance of a recorded avalanche (cAvalanche_m_nodeList[id]; the instance's flags at +0x92 keep id << 8).
 struct tAvalancheNode {
-    char m_data[0xD8];              // 0x000 [O] tParticleData m_data (retail 0xD8: setAvalancheNodeEmitterData copies 0xD8
-                                    //       bytes when the node gets an emitter)
+    tParticleData m_data;           // 0x000 [O] tParticleData (render/particle.h, 0xD8); [U] setAvalancheNodeEmitterData
+                                    //       copies the 0xD8-byte record in when the node gets an emitter
     char unk_0D8[0x8];              // 0x0D8 alignment gap before the 16-aligned m_start (On Tour has it too)
     t4Vector m_start;               // 0x0E0 [O]; [U] resolveDataPointers stores (x, y, z, 1.0) from the file; calculate (lq)
     unsigned short m_baseType;      // 0x0F0 [O]; [R] addAvalancheNode: 2 / 0 / 1 from the instance type; [U] calculate (lhu)

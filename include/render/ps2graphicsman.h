@@ -30,7 +30,29 @@
 struct cPS2DeferManager;
 struct cTextureMan;
 struct tDisplayMode;
-struct tMdfBlendedMatrix;
+
+// One weighted matrix of a blended (skinning) matrix (On Tour struct tMdfBlendedMatrixComponent, 0x4).
+// [U] cPS2GraphicsMan_ResolveCharModel rebases m_iMatrixId by the part's bone offset (w[j*4+2] += tbl[w[j*4+3]]);
+// cPS2GraphicsMan_GenerateBlendedMatrices reads the weight (lh +0) and the matrix id (lbu +2) (its view sBlendLink_6BD0);
+// areBlendedMatricesEqual compares the weights (lh) and the two id bytes together (lhu +2, its view sKey_9A78).
+struct tMdfBlendedMatrixComponent {
+    short m_iWeight;                // 0x0 [O]; [U] GenerateBlendedMatrices, areBlendedMatricesEqual (tolerances)
+    unsigned char m_iMatrixId;      // 0x2 [O]; [U] ResolveCharModel rebases it; GenerateBlendedMatrices indexes the
+                                    //     matrix list with it
+    unsigned char m_iPartId;        // 0x3 [O]; [U] ResolveCharModel: index into the part bone offsets
+};
+
+// A blended (skinning) matrix: up to three weighted matrices (On Tour struct tMdfBlendedMatrix, 0xC).
+// [R] cGraphicsMan_AddBlendedMatrix allocates the 512-entry history (0x3000 bytes "BlendedMatrixHistory": 512 x 0xC
+// records, then 512 x 3 components) and points each m_matrixList at its 3 components; [U] areBlendedMatricesEqual
+// (its view sEnt_9A78), AddBlendedMatrix (sBlendMatrix), ResolveCharModel (sBlend_66F0), GenerateBlendedMatrices
+// (sBlendEnt_6BD0).
+struct tMdfBlendedMatrix {
+    int m_iNumMatrices;             // 0x0 [O]; [U] the count compared / copied (1..3)
+    tMdfBlendedMatrixComponent* m_matrixList; // 0x4 [O]; [R] AddBlendedMatrix; [U] every user walks it
+    int m_iMatrixId;                // 0x8 [O]; [U] ResolveCharModel stores the record's index in the blended matrix
+                                    //     list (sBlend_66F0::idx)
+};
 
 // [O] sTextureState: one texture id per GS context (On Tour's PSP build has 1); -1 = none.
 struct sTextureState {
@@ -100,6 +122,16 @@ struct sViewportStack {
     int mDeferScissorIndex;         // 0x228 [U] the DeferMan's scissor index (+0x69CC4); -1 = re-register
     char unk_22C[0x4];              // 0x22C padding to 16
 };
+
+CHECK_OFFSET(tMdfBlendedMatrixComponent, m_iWeight, 0x0);
+CHECK_OFFSET(tMdfBlendedMatrixComponent, m_iMatrixId, 0x2);
+CHECK_OFFSET(tMdfBlendedMatrixComponent, m_iPartId, 0x3);
+CHECK_SIZE(tMdfBlendedMatrixComponent, 0x4);
+
+CHECK_OFFSET(tMdfBlendedMatrix, m_iNumMatrices, 0x0);
+CHECK_OFFSET(tMdfBlendedMatrix, m_matrixList, 0x4);
+CHECK_OFFSET(tMdfBlendedMatrix, m_iMatrixId, 0x8);
+CHECK_SIZE(tMdfBlendedMatrix, 0xC);
 
 struct cPS2GraphicsMan {
     // --- cGraphicsMan (On Tour: size 0x10D0; retail's ends at 0x10DC with the vptr)

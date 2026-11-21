@@ -21,8 +21,11 @@
 // the first 0xC bytes by use. No preview evidence (no accessors; layout_xlate has no pairs).
 
 #include "layout.h"
+#include "ai/controlcmd.h"
 
-struct tControlCmd;   // 8-byte union of the rider command records (On Tour union tControlCmd); first word bits 0-11 = repeat count
+// tControlCmd (On Tour union tControlCmd, 8 bytes) is in ai/controlcmd.h: one recorded rider command. [R] the cache
+// allocates 0x8000 bytes = 0x1000 commands; [O] cReplayCache::getControlCmd(tControlCmd&), addCmdFrame(const
+// tControlCmd&), getCmdFrame() returns tControlCmd*.
 
 struct cReplayCache {
     // --- cReplayCacheState (On Tour: size 0xC; [O] names, placed by [U])

@@ -53,4 +53,70 @@ CHECK_OFFSET(cOverlapList, numtyped, 0x210);
 CHECK_OFFSET(cOverlapList, typed, 0x214);
 CHECK_SIZE(cOverlapList, 0xA14);
 
+// cOverlapList's gather functors (On Tour's DWARF: OverlapInstancesCallback / OverlapPatchesCallback /
+// OverlapTypedCallback 0x10, OverlapPatchesAndInstancesCallback 0x20, OverlapEverythingCallback 0x30). The overlap
+// queries build one on the stack; nash_privy_QueryHelper_helpX* / nash_Cell_descend* call its operator() (retail
+// OverlapInstancesCallback_operatorCall ...) for every object whose box overlaps, appending it while number < maximum
+// ([P] assert "number < maximum", d:/ssx/code/source/intersect/overlaplist.cpp). Reference members are pointers here.
+struct tBoundBox;               // world/worldview.h
+
+struct OverlapInstancesCallback {
+    tInstanceRecord** instances;    // 0x0 [O]; [U] the output array (view sCtx_3309D8 list)
+    unsigned int* number;           // 0x4 [O] unsigned int&; [P] assert number < maximum; [U] the count
+    unsigned int maximum;           // 0x8 [O]; [P] ditto
+    const tBoundBox* box;           // 0xC [O] const tBoundBox&; [U] the overlap test (view sCtx_3309D8 box)
+};
+
+CHECK_OFFSET(OverlapInstancesCallback, instances, 0x0);
+CHECK_OFFSET(OverlapInstancesCallback, number, 0x4);
+CHECK_OFFSET(OverlapInstancesCallback, maximum, 0x8);
+CHECK_OFFSET(OverlapInstancesCallback, box, 0xC);
+CHECK_SIZE(OverlapInstancesCallback, 0x10);
+
+struct OverlapPatchesCallback {
+    tPatchRecord** patches;         // 0x0 [O]; [U] the output array
+    unsigned int* number;           // 0x4 [O] unsigned int&; [P]
+    unsigned int maximum;           // 0x8 [O]; [P]
+    const tBoundBox* box;           // 0xC [O]
+};
+
+CHECK_OFFSET(OverlapPatchesCallback, patches, 0x0);
+CHECK_OFFSET(OverlapPatchesCallback, number, 0x4);
+CHECK_OFFSET(OverlapPatchesCallback, maximum, 0x8);
+CHECK_OFFSET(OverlapPatchesCallback, box, 0xC);
+CHECK_SIZE(OverlapPatchesCallback, 0x10);
+
+struct OverlapTypedCallback {
+    cTypedSpaceNode** typed;        // 0x0 [O]; [U] the output array
+    unsigned int* number;           // 0x4 [O] unsigned int&; [P]
+    unsigned int maximum;           // 0x8 [O]; [P]
+    const tBoundBox* box;           // 0xC [O]
+};
+
+CHECK_OFFSET(OverlapTypedCallback, typed, 0x0);
+CHECK_OFFSET(OverlapTypedCallback, number, 0x4);
+CHECK_OFFSET(OverlapTypedCallback, maximum, 0x8);
+CHECK_OFFSET(OverlapTypedCallback, box, 0xC);
+CHECK_SIZE(OverlapTypedCallback, 0x10);
+
+struct OverlapPatchesAndInstancesCallback {
+    OverlapInstancesCallback instancecallback; // 0x00 [O]; [U] the instance part (helpX3 / descend2)
+    OverlapPatchesCallback patchescallback;    // 0x10 [O]; [U] the patch part (ctx + 0x10)
+};
+
+CHECK_OFFSET(OverlapPatchesAndInstancesCallback, instancecallback, 0x00);
+CHECK_OFFSET(OverlapPatchesAndInstancesCallback, patchescallback, 0x10);
+CHECK_SIZE(OverlapPatchesAndInstancesCallback, 0x20);
+
+struct OverlapEverythingCallback {
+    OverlapInstancesCallback instancecallback; // 0x00 [O]; [U] views sCtx_340DC0 / sCtx_33B748 nodes
+    OverlapPatchesCallback patchescallback;    // 0x10 [O]; [U] ditto objs
+    OverlapTypedCallback typedcallback;        // 0x20 [O]; [U] ditto all
+};
+
+CHECK_OFFSET(OverlapEverythingCallback, instancecallback, 0x00);
+CHECK_OFFSET(OverlapEverythingCallback, patchescallback, 0x10);
+CHECK_OFFSET(OverlapEverythingCallback, typedcallback, 0x20);
+CHECK_SIZE(OverlapEverythingCallback, 0x30);
+
 #endif /* INTERSECT_OVERLAPLIST_H */

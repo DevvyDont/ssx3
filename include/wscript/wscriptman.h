@@ -35,6 +35,31 @@ struct cProcessList {
     cWScriptProcess* List;  // 0x0 [O]
 };
 
+// One queued world-script event (On Tour struct tWScriptEvent : tWScriptEventBase {EventId}, then an anonymous
+// union; retail 0xC, On Tour 0x10) and the 32-entry event list (On Tour tWScriptEventList; retail 4 + 32 x 0xC =
+// 0x184, cWScriptMan::Events). [U] cWScriptMan_update copies the list and walks it (views sCmdList_309270,
+// sCmd_309270: flags 0x0, the instance id 0x4 it looks up, a word 0x8). The union's member names are not in the
+// DWARF dump, so its words stay unk_.
+struct tWScriptEvent {
+    unsigned int EventId;           // 0x0 [O] tWScriptEventBase::EventId; [U] masked and tested by update
+    unsigned int unk_04;            // 0x4 [O] union; [U] the instance resource id update looks up
+    int unk_08;                     // 0x8 [O] union
+};
+
+CHECK_OFFSET(tWScriptEvent, EventId, 0x0);
+CHECK_OFFSET(tWScriptEvent, unk_04, 0x4);
+CHECK_OFFSET(tWScriptEvent, unk_08, 0x8);
+CHECK_SIZE(tWScriptEvent, 0xC);
+
+struct tWScriptEventList {
+    int NumEvents;                  // 0x000 [O]; [U] update's loop bound
+    tWScriptEvent Events[32];       // 0x004 [O]
+};
+
+CHECK_OFFSET(tWScriptEventList, NumEvents, 0x000);
+CHECK_OFFSET(tWScriptEventList, Events, 0x004);
+CHECK_SIZE(tWScriptEventList, 0x184);
+
 struct cWScriptMan {
     // cWScriptManState
     int Being;                         // 0x000 [O]; [R] init = 0

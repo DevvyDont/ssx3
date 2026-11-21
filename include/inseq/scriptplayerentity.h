@@ -106,4 +106,30 @@ CHECK_OFFSET(cScriptPlayerEntity, mSetupScriptInitialEventBits, 0x34);
 CHECK_OFFSET(cScriptPlayerEntity, mWaitingPlayExec, 0x38);
 CHECK_SIZE(cScriptPlayerEntity, 0x3C);
 
+// cInSeqCommEntity: the per-entity callback interface (On Tour class cInSeqCommEntity: pure virtuals OnInSeqLock 1,
+// OnInSeqRelease 2, OnInSeqKeyEvent 3, OnInSeqUpdate 4). cScriptEntity implements it with its vptr at +0
+// (scripter/scriptentity.h: cScriptEntity_vtbl slots 1..4 are these). [U] cScriptPlayerEntity_SetEntityComm calls
+// slots 1 / 2 (view cRcListener4240), cScriptPlayerEntity_ExecutePlay slots 3 / 4 (view cRcListener3D20).
+struct cInSeqCommEntity {
+    void** mVtbl;                   // 0x0 [O] (interface: vptr only); [U] the callers load it at +0
+};
+
+CHECK_OFFSET(cInSeqCommEntity, mVtbl, 0x0);
+CHECK_SIZE(cInSeqCommEntity, 0x4);
+
+// One channel record of a variation (On Tour tInSeqEntityChannelHeader, 0x8): the channel type and the size of its
+// data. [U] cScriptPlayerEntity_SetupPlay reads type (+0) and steps by dataSize (+2) (view sRcRec_273AA8).
+struct tInSeqEntityChannelHeader {
+    unsigned short type;            // 0x0 [O]; [U] SetupPlay switches on it (eChannelType)
+    unsigned short dataSize;        // 0x2 [O]; [U] SetupPlay steps to the next record by it
+    char dataStart;                 // 0x4 [O] the channel data
+    char dummyPad[3];               // 0x5 [O]
+};
+
+CHECK_OFFSET(tInSeqEntityChannelHeader, type, 0x0);
+CHECK_OFFSET(tInSeqEntityChannelHeader, dataSize, 0x2);
+CHECK_OFFSET(tInSeqEntityChannelHeader, dataStart, 0x4);
+CHECK_OFFSET(tInSeqEntityChannelHeader, dummyPad, 0x5);
+CHECK_SIZE(tInSeqEntityChannelHeader, 0x8);
+
 #endif /* INSEQ_SCRIPTPLAYERENTITY_H */

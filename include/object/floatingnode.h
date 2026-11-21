@@ -12,6 +12,7 @@
 // in order, each On Tour offset + 4) + AnimMats + Info. getNodeState (0x361768) returns +0x2C, the state.
 
 #include "layout.h"
+#include "world/worldview.h"
 #include "bx/math3d.h"
 
 struct cObjNode;
@@ -99,5 +100,61 @@ CHECK_OFFSET(cFloatingNode, TY, 0x70);
 CHECK_OFFSET(cFloatingNode, AnimMats, 0x74);
 CHECK_OFFSET(cFloatingNode, Info, 0x78);
 CHECK_SIZE(cFloatingNode, 0x7C);
+
+// cFloatingNodeState (On Tour, 0x48): the spring state cFloatingNode carries at +0x2C (ZSpring .. TY above, written
+// out inline there). The tilt helpers take &self->ZSpring as one (views sFloatTilt_34F930 / sFloatTilt_F120:
+// pos2 = OX, pos3 = OY).
+struct cFloatingNodeState {
+    float ZSpring;                  // 0x00 [O]
+    float ZDamp;                    // 0x04 [O]
+    float ForceScale;               // 0x08 [O]
+    float ASpring;                  // 0x0C [O]
+    float ADamp;                    // 0x10 [O]
+    float TorqueScale;              // 0x14 [O]
+    float Force;                    // 0x18 [O]
+    float Vel;                      // 0x1C [O]
+    float Zo;                       // 0x20 [O]
+    float Z;                        // 0x24 [O]
+    float OX;                       // 0x28 [O]
+    float OoX;                      // 0x2C [O]
+    float WX;                       // 0x30 [O]
+    float TX;                       // 0x34 [O]
+    float OY;                       // 0x38 [O]
+    float OoY;                      // 0x3C [O]
+    float WY;                       // 0x40 [O]
+    float TY;                       // 0x44 [O]
+};
+
+CHECK_OFFSET(cFloatingNodeState, ZSpring, 0x00);
+CHECK_OFFSET(cFloatingNodeState, ZDamp, 0x04);
+CHECK_OFFSET(cFloatingNodeState, ForceScale, 0x08);
+CHECK_OFFSET(cFloatingNodeState, ASpring, 0x0C);
+CHECK_OFFSET(cFloatingNodeState, ADamp, 0x10);
+CHECK_OFFSET(cFloatingNodeState, TorqueScale, 0x14);
+CHECK_OFFSET(cFloatingNodeState, Force, 0x18);
+CHECK_OFFSET(cFloatingNodeState, Vel, 0x1C);
+CHECK_OFFSET(cFloatingNodeState, Zo, 0x20);
+CHECK_OFFSET(cFloatingNodeState, Z, 0x24);
+CHECK_OFFSET(cFloatingNodeState, OX, 0x28);
+CHECK_OFFSET(cFloatingNodeState, OoX, 0x2C);
+CHECK_OFFSET(cFloatingNodeState, WX, 0x30);
+CHECK_OFFSET(cFloatingNodeState, TX, 0x34);
+CHECK_OFFSET(cFloatingNodeState, OY, 0x38);
+CHECK_OFFSET(cFloatingNodeState, OoY, 0x3C);
+CHECK_OFFSET(cFloatingNodeState, WY, 0x40);
+CHECK_OFFSET(cFloatingNodeState, TY, 0x44);
+CHECK_SIZE(cFloatingNodeState, 0x48);
+
+// tFloatBoundBoxInfo (On Tour, 0x30): the floating bound box Info points at. [R] cMemMan_alloc(0x30,
+// "FloatingBoundBox"); [U] view sFlInfo_34EF40 (the box, then the radius at 0x20).
+struct tFloatBoundBoxInfo {
+    tBoundBox BoundBox;             // 0x00 [O]
+    float Radius;                   // 0x20 [O]
+    char unk_024[0xC];              // 0x24 padding (16-byte aligned)
+};
+
+CHECK_OFFSET(tFloatBoundBoxInfo, BoundBox, 0x00);
+CHECK_OFFSET(tFloatBoundBoxInfo, Radius, 0x20);
+CHECK_SIZE(tFloatBoundBoxInfo, 0x30);
 
 #endif /* OBJECT_FLOATINGNODE_H */

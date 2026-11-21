@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "render/font.h"
 #include "fe/fememcard.h"
 #include "fe/ovstateeventresults.h"
@@ -1280,10 +1281,6 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021D1A0);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "vtable.h"
 
-// EA's 2-float vector (prototype name, e.g. setTileUV__7cUIIconG8t2Vector).
-struct t2Vector {
-    float x, y;
-};
 
 // Vertex position of the HUD sprite quads: 16-byte aligned, with an empty default ctor (vertex arrays get a vec_new
 // loop) and the (x, y, z, const float& w) ctor the quad builders use.
@@ -1817,7 +1814,6 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P_renderRank);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-#include "bx/math3d.h"
 
 // EA's 2-float vector (prototype name, e.g. setTileUV__7cUIIconG8t2Vector).
 // The render context D_004A289C_E1B0 as these functions use it: GS state block pointer at 0xE84, vptr at 0x10D8 (slot

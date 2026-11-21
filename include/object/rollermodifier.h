@@ -26,6 +26,7 @@
 // from world/worldview.h until both move to a bx header.
 
 #include "layout.h"
+#include "intersect/spheretree.h"
 #include "bx/math3d.h"
 #include "world/worldview.h"
 
@@ -46,7 +47,7 @@ struct bxSphereTree {
     int sortAxis[8];       // 0x09C [O]; [U] riderspheretree.cpp's views ("order[8]", child visiting order)
     char unk_0BC[0x4];     // 0x0BC padding
     // --- bxSphereTree
-    char staticInfo[0x80]; // 0x0C0 [O] tSphTreeInfo staticInfo (not laid out); [U] operator= copies 0xC0-0x140
+    tSphTreeInfo staticInfo; // 0x0C0 [O] tSphTreeInfo staticInfo (intersect/spheretree.h); [U] operator= copies 0xC0-0x140
 };
 
 CHECK_OFFSET(bxSphereTree, axis, 0x000);

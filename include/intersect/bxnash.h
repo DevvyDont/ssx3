@@ -113,4 +113,76 @@ CHECK_OFFSET(cBXNash, deletecount, 0x0A0);
 CHECK_OFFSET(cBXNash, TheAIFwdDiffCache, 0x0A4);
 CHECK_SIZE(cBXNash, 0xA8);
 
+// The cBXNash query functors (On Tour's DWARF: structs TerrainCallback 0x18, StaticObjectCallback 0x14, SplineCallback
+// 0x18, VerticalLineProximityTest 0x4; their operator()s are retail's TerrainCallback_intersectpatch /
+// _intersectinstance, StaticObjectCallback_intersectinstance, ...). A query builds one on the stack and hands it to
+// nash_privy_QueryHelper_* / nash_Cell_descend*, which call it per object in the overlapped cells. [P] the preview's
+// asserts "numintersectinfo < maxintersectinfo" / "inum >= 0 && inum <= maxintersectinfo - numintersectinfo"
+// (d:/ssx/code/source/intersect/overlaplist.cpp) name the count members. On Tour's reference members are pointers
+// here (one word each); retail bools are words.
+struct cWorldIntersectType;     // intersect/worldinttypes.h
+struct tIntersectInfo;          // ai/rider.h (EA: intersect/intersectinfo.h)
+struct tIntHint;
+struct t4Vector;
+struct tBoundBox;
+
+struct TerrainCallback {
+    cWorldIntersectType* intersecttype; // 0x00 [O] cWorldIntersectType&; [U] passed to the patch / instance tests
+                                    //      (views sCtx_335960 q, sCtx_335B90 q, sQuery_369D8 seg)
+    tIntersectInfo* intersectinfo;  // 0x04 [O]; [U] the hit array (sCtx_335960 hits)
+    int maxintersectinfo;           // 0x08 [O]; [P] assert; [U] the hit cap
+    int* numintersectinfo;          // 0x0C [O] int&; [P] assert; [U] the hit count, incremented per hit
+    tIntHint* hint;                 // 0x10 [O]; [U] passed through (sCtx_335960 arg)
+    cAIFwdDiffCache* fwddiffcache;  // 0x14 [O]; [U] passed to the patch test (sCtx_335960 cache)
+};
+
+CHECK_OFFSET(TerrainCallback, intersecttype, 0x00);
+CHECK_OFFSET(TerrainCallback, intersectinfo, 0x04);
+CHECK_OFFSET(TerrainCallback, maxintersectinfo, 0x08);
+CHECK_OFFSET(TerrainCallback, numintersectinfo, 0x0C);
+CHECK_OFFSET(TerrainCallback, hint, 0x10);
+CHECK_OFFSET(TerrainCallback, fwddiffcache, 0x14);
+CHECK_SIZE(TerrainCallback, 0x18);
+
+struct StaticObjectCallback {
+    cWorldIntersectType* intersecttype; // 0x00 [O] cWorldIntersectType&; [U] StaticObjectCallback_intersectinstance
+                                    //      (view sCtx_336D40 q)
+    tIntersectInfo* intersectinfo;  // 0x04 [O]; [U] the hit array (sCtx_336D40 buf)
+    int maxintersectinfo;           // 0x08 [O]; [U] cap
+    int* numintersectinfo;          // 0x0C [O] int&; [U] count
+    int includeridable;             // 0x10 [O] bool (retail word); [U] sCtx_336D40 full
+};
+
+CHECK_OFFSET(StaticObjectCallback, intersecttype, 0x00);
+CHECK_OFFSET(StaticObjectCallback, intersectinfo, 0x04);
+CHECK_OFFSET(StaticObjectCallback, maxintersectinfo, 0x08);
+CHECK_OFFSET(StaticObjectCallback, numintersectinfo, 0x0C);
+CHECK_OFFSET(StaticObjectCallback, includeridable, 0x10);
+CHECK_SIZE(StaticObjectCallback, 0x14);
+
+struct SplineCallback {
+    const t4Vector* intersectpos;   // 0x00 [O] const t4Vector&; [U] the query point (views sQuery_33ED60 / sQry_337A48 pos)
+    tIntersectInfo* intersectinfo;  // 0x04 [O]; [U] passed through (views: a7)
+    unsigned int splinefiltermask;  // 0x08 [O]; [U] tested against the rail's mask (views: mask)
+    int* hit;                       // 0x0C [O] bool& (retail word); [U] set on a hit (views: cnt)
+    float* intersectdist;           // 0x10 [O] float&; [U] the best distance so far (views: dist)
+    const tBoundBox* box;           // 0x14 [O] const tBoundBox&; [U] the overlap box (views: box)
+};
+
+CHECK_OFFSET(SplineCallback, intersectpos, 0x00);
+CHECK_OFFSET(SplineCallback, intersectinfo, 0x04);
+CHECK_OFFSET(SplineCallback, splinefiltermask, 0x08);
+CHECK_OFFSET(SplineCallback, hit, 0x0C);
+CHECK_OFFSET(SplineCallback, intersectdist, 0x10);
+CHECK_OFFSET(SplineCallback, box, 0x14);
+CHECK_SIZE(SplineCallback, 0x18);
+
+struct VerticalLineProximityTest {
+    const t4Vector* position;       // 0x00 [O] const t4Vector&; [U] the test point (view sCtx_369D8 pos; the flags
+                                    //      after it in that view are the caller's locals)
+};
+
+CHECK_OFFSET(VerticalLineProximityTest, position, 0x00);
+CHECK_SIZE(VerticalLineProximityTest, 0x4);
+
 #endif /* INTERSECT_BXNASH_H */

@@ -9,7 +9,7 @@
 // EA's source: d:/ssx/code/source/main/gamemodehandler.cpp (the July 2003 preview's assert strings); retail keeps the
 // subclasses' methods in main/gamemode (0x00238E20..0x0023C618) and their destructors in main/ssxappdtor.
 //
-// The base cGameModeHandler has no data in retail (vptr only, no header: see the group E report); its vptr is at 0x0
+// The base cGameModeHandler has no data in retail (vptr only: struct cGameModeHandler below); its vptr is at 0x0
 // and each subclass appends from 0x4. On Tour's cGameModeHandler carries 0x2F4 bytes (sHeatResults) that retail does
 // not have, so On Tour's subclass members at 0x2F4.. sit at 0x4.. here.
 //
@@ -32,6 +32,19 @@
 // cGMPointHandler, cGMMPSlopeHandler, cGMMPRaceHandler, cGMRaceHandler: names, types and order).
 
 #include "layout.h"
+
+// cGameModeHandler: the base, vptr only in retail (On Tour's 0x2F4 sHeatResults lastHeatResults is not there: every
+// subclass appends from 0x4). Used through a base pointer only: cGameModeMan_aHandler[i] (main/gamemode.h), which
+// cGameModeMan dispatches through the 11 slots above and cGameModeMan_purgeGM deletes through slot 1.
+struct cGameModeHandler {
+    void** mVtbl;                   // 0x00 [R] _vt$16cGameModeHandler (0x0047D008, 11 slots: cGameModeHandler__cGameModeHandler,
+                                    //      cGameModeHandler_init ...), stored back by every subclass dtor; [P] the
+                                    //      preview's _vt$16cGameModeHandler; [O] class cGameModeHandler (virtual ~, init,
+                                    //      riderCheckpointHit, riderGateHit, raceFinish, getHeatScore ...)
+};
+
+CHECK_OFFSET(cGameModeHandler, mVtbl, 0x00);
+CHECK_SIZE(cGameModeHandler, 0x4);
 
 // cGMBigAirHandler: the scored event (big air; heats scored by points). Vtable 0x0047CFA0 (D_0047CFA0): init
 // cGMBigAirHandler_init, riderCheckpointHit func_002398E8, raceFinish func_00239230, getHeatScore func_00239CE0,

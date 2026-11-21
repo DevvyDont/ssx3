@@ -41,7 +41,36 @@
 #include "bx/math3d.h"
 #include "render/2drender.h"
 
-struct tHaloRecord;
+// A world light halo (On Tour struct tHaloRecord : tHaloRecord_PSP : _tPSPHalo, 0x68; cHalo::mpHalo points at one).
+// Retail's record is more compact than the PSP one (no intensity / direction pads) and keeps one occlusion value per
+// view. Placed by [U] cChunkResolve_resolveHalo ([O] cChunkResolve::resolveHalo(tHaloRecord* pLightHalo): the box
+// is the position -/+ the radius of the halo type flags & 0x70; it clears both occlusion words; its view
+// cChunkResolve_resolveHalo_sObj in world/worldview.cpp) and cLightHalo_Render (boardwakefx view sPart_2868: the
+// colour is the normalised vector at 0x10, the sprite is drawn at 0x1C, alpha = the occlusion of the view index,
+// flags & 0x70 pick texture and size). The type / flags swap of tLightRecord (visualfx/worldlightman.h) shows here
+// too: retail flags at 0xC. Size: 0x48 is the end of the last member retail touches; no array stride is known.
+struct tHaloRecord {
+    char unk_000[0xC];              // 0x00 (On Tour: the Nash node header m_iIntersect[3]); no retail access seen
+    unsigned int m_iFlags;          // 0x0C [O] m_iFlags; [U] resolveHalo / cLightHalo_Render: flags & 0x70 = the
+                                    //      halo type (0x10, 0x20, 0x40)
+    float m_fvColor[3];             // 0x10 [O] tf3Vector (the first vector, as in On Tour); [U] cLightHalo_Render:
+                                    //      normalised, it gives the sprite's r, g, b
+    float m_fvWorldPos[3];          // 0x1C [O] tf3Vector; [U] resolveHalo centres the box on it; cLightHalo_Render
+                                    //      draws the sprite there
+    float m_fvMin[3];               // 0x28 [O] tf3Vector; [U] resolveHalo = m_fvWorldPos - radius
+    float m_fvMax[3];               // 0x34 [O] tf3Vector; [U] resolveHalo = m_fvWorldPos + radius
+    float m_fOcclude[2];            // 0x40 [O] m_fOcclude (one float on the single-view PSP); [U] resolveHalo clears
+                                    //      both; cLightHalo_Render reads [view] as the alpha (cLensFxMan's 2 views)
+};
+
+CHECK_OFFSET(tHaloRecord, unk_000, 0x00);
+CHECK_OFFSET(tHaloRecord, m_iFlags, 0x0C);
+CHECK_OFFSET(tHaloRecord, m_fvColor, 0x10);
+CHECK_OFFSET(tHaloRecord, m_fvWorldPos, 0x1C);
+CHECK_OFFSET(tHaloRecord, m_fvMin, 0x28);
+CHECK_OFFSET(tHaloRecord, m_fvMax, 0x34);
+CHECK_OFFSET(tHaloRecord, m_fOcclude, 0x40);
+CHECK_SIZE(tHaloRecord, 0x48);
 
 // The view the halos are processed against (On Tour tViewInfo, 0x60). cLensFxMan_ProcessLens fills it from the
 // graphics manager each view; cSunHalo_Process / cLightHalo_Process read it.

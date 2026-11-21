@@ -41,6 +41,28 @@ struct cFlexRailSpaceNode;
 struct cSimpleTube;
 struct tFloatRailNode;
 
+// One node of a floating rail (On Tour struct tFloatRailNode, 0x50). [R] the ctors allocate NumNodes x 0x50
+// ("FloatRailNodes") and set InstId / Mesh from the make data (views sFlexRailElem_348FA0: InstId at 0x40 = -1 by the
+// element ctor); [U] getPosition reads Pos / OPos / InstId / Mesh (view sFrNode9220), updateMats reads Pos (view
+// sFrElem_92A8).
+struct tFloatRailNode {
+    t4Vector Force;                 // 0x00 [O]
+    t4Vector Vel;                   // 0x10 [O]
+    t4Vector Pos;                   // 0x20 [O]; [U] getPosition, updateMats
+    t4Vector OPos;                  // 0x30 [O]; [U] getPosition
+    unsigned int InstId;            // 0x40 [O] tResourceID; [R] the element ctor sets -1
+    int Mesh;                       // 0x44 [O]; [U] getMesh returns Nodes[seg].Mesh
+    char unk_048[0x8];              // 0x48 padding (16-byte aligned)
+};
+
+CHECK_OFFSET(tFloatRailNode, Force, 0x00);
+CHECK_OFFSET(tFloatRailNode, Vel, 0x10);
+CHECK_OFFSET(tFloatRailNode, Pos, 0x20);
+CHECK_OFFSET(tFloatRailNode, OPos, 0x30);
+CHECK_OFFSET(tFloatRailNode, InstId, 0x40);
+CHECK_OFFSET(tFloatRailNode, Mesh, 0x44);
+CHECK_SIZE(tFloatRailNode, 0x50);
+
 struct cFloatRailNode {
     // --- cFlexRailNode (0x60; object/flexrailnode.h): cInstanceNode 0x00-0x1C (object/instancenode.h)
     int unk_00;                     // 0x000 cObjNode's leading word; no ctor writes it (see object/objnode.h)

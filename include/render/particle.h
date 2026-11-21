@@ -45,9 +45,148 @@
 #include "world/worldview.h"       // tBoundBox
 #include "render/ps2graphicsman.h" // sDrawState
 
-struct tParticleData;   // On Tour: 0xD8 bytes (NumParticles, NumBlur, Duration, Damp, Size, Life, ...); retail
-                        // copies 0xD8 (cMultiParticle, the modifiers' replay ctors)
-struct tPackedRGBA;     // 4 bytes {r, g, b, a} (the preview mangles getSubEmitterColour with it)
+// One particle effect's parameters (On Tour struct tParticleData, 0xD8). [R] retail copies and allocates exactly 0xD8
+// bytes of it (cMultiParticle "Particle", the effect modifiers' replay ctors, cBoardSparkFX "mEmitterData",
+// cAvalanche_setAvalancheNodeEmitterData into tAvalancheNode::m_data); [U] tParticleEmitter_setupEmitter
+// (render/graphicsman.cpp) reads Duration 0x8, Damp 0xC, Size 0x10, Life 0x14, SizeR 0x18, LifeR 0x1C, the offsets and
+// spreads 0x24-0x74, the four colour corners 0x84-0xC0 and SizeFinal 0xCC at exactly On Tour's offsets. All members are
+// words (no bools), so On Tour's layout is retail's.
+struct tParticleData {
+    int NumParticles;               // 0x000 [O]
+    int NumBlur;                    // 0x004 [O]
+    float Duration;                 // 0x008 [O]; [U] setupEmitter: < 0 starts the time at Life + LifeR / 2
+    float Damp;                     // 0x00C [O]; [U] setupEmitter divides the velocities by it
+    float Size;                     // 0x010 [O]; [U] setupEmitter setSize(Size, SizeFinal, SizeR)
+    float Life;                     // 0x014 [O]; [U] setupEmitter setLife(Life -/+ LifeR / 2)
+    float SizeR;                    // 0x018 [O]; [U] setSize
+    float LifeR;                    // 0x01C [O]; [U] setLife
+    float BlurStep;                 // 0x020 [O]
+    float OffX;                     // 0x024 [O]; [U] setupEmitter: the transformed start position (x, y, z, 1)
+    float OffY;                     // 0x028 [O]
+    float OffZ;                     // 0x02C [O]
+    float R0X;                      // 0x030 [O]; [U] setupEmitter: first position spread (w 0)
+    float R0Y;                      // 0x034 [O]
+    float R0Z;                      // 0x038 [O]
+    float R1X;                      // 0x03C [O]; [U] second position spread
+    float R1Y;                      // 0x040 [O]
+    float R1Z;                      // 0x044 [O]
+    float VelX;                     // 0x048 [O]; [U] setupEmitter: velocity / Damp
+    float VelY;                     // 0x04C [O]
+    float VelZ;                     // 0x050 [O]
+    float R0VX;                     // 0x054 [O]; [U] velocity spreads / Damp
+    float R0VY;                     // 0x058 [O]
+    float R0VZ;                     // 0x05C [O]
+    float R1VX;                     // 0x060 [O]
+    float R1VY;                     // 0x064 [O]
+    float R1VZ;                     // 0x068 [O]
+    float R2VX;                     // 0x06C [O]
+    float R2VY;                     // 0x070 [O]
+    float R2VZ;                     // 0x074 [O]
+    float ForceX;                   // 0x078 [O]
+    float ForceY;                   // 0x07C [O]
+    float ForceZ;                   // 0x080 [O]
+    float StartColA;                // 0x084 [O]; [U] setupEmitter: setColour corner 1 = (R, G, B, A) * 128
+    float StartColR;                // 0x088 [O]
+    float StartColG;                // 0x08C [O]
+    float StartColB;                // 0x090 [O]
+    float EndColA;                  // 0x094 [O]; [U] corner 2
+    float EndColR;                  // 0x098 [O]
+    float EndColG;                  // 0x09C [O]
+    float EndColB;                  // 0x0A0 [O]
+    float R0A;                      // 0x0A4 [O]; [U] corner 3
+    float R0R;                      // 0x0A8 [O]
+    float R0G;                      // 0x0AC [O]
+    float R0B;                      // 0x0B0 [O]
+    float R1A;                      // 0x0B4 [O]; [U] corner 4
+    float R1R;                      // 0x0B8 [O]
+    float R1G;                      // 0x0BC [O]
+    float R1B;                      // 0x0C0 [O]
+    int TextureId;                  // 0x0C4 [O]
+    int BlendMode;                  // 0x0C8 [O]
+    float SizeFinal;                // 0x0CC [O]; [U] setSize
+    int NumFlipTextures;            // 0x0D0 [O]
+    float FlipTextureRate;          // 0x0D4 [O]
+};
+
+CHECK_OFFSET(tParticleData, NumParticles, 0x000);
+CHECK_OFFSET(tParticleData, NumBlur, 0x004);
+CHECK_OFFSET(tParticleData, Duration, 0x008);
+CHECK_OFFSET(tParticleData, Damp, 0x00C);
+CHECK_OFFSET(tParticleData, Size, 0x010);
+CHECK_OFFSET(tParticleData, Life, 0x014);
+CHECK_OFFSET(tParticleData, SizeR, 0x018);
+CHECK_OFFSET(tParticleData, LifeR, 0x01C);
+CHECK_OFFSET(tParticleData, BlurStep, 0x020);
+CHECK_OFFSET(tParticleData, OffX, 0x024);
+CHECK_OFFSET(tParticleData, OffY, 0x028);
+CHECK_OFFSET(tParticleData, OffZ, 0x02C);
+CHECK_OFFSET(tParticleData, R0X, 0x030);
+CHECK_OFFSET(tParticleData, R0Y, 0x034);
+CHECK_OFFSET(tParticleData, R0Z, 0x038);
+CHECK_OFFSET(tParticleData, R1X, 0x03C);
+CHECK_OFFSET(tParticleData, R1Y, 0x040);
+CHECK_OFFSET(tParticleData, R1Z, 0x044);
+CHECK_OFFSET(tParticleData, VelX, 0x048);
+CHECK_OFFSET(tParticleData, VelY, 0x04C);
+CHECK_OFFSET(tParticleData, VelZ, 0x050);
+CHECK_OFFSET(tParticleData, R0VX, 0x054);
+CHECK_OFFSET(tParticleData, R0VY, 0x058);
+CHECK_OFFSET(tParticleData, R0VZ, 0x05C);
+CHECK_OFFSET(tParticleData, R1VX, 0x060);
+CHECK_OFFSET(tParticleData, R1VY, 0x064);
+CHECK_OFFSET(tParticleData, R1VZ, 0x068);
+CHECK_OFFSET(tParticleData, R2VX, 0x06C);
+CHECK_OFFSET(tParticleData, R2VY, 0x070);
+CHECK_OFFSET(tParticleData, R2VZ, 0x074);
+CHECK_OFFSET(tParticleData, ForceX, 0x078);
+CHECK_OFFSET(tParticleData, ForceY, 0x07C);
+CHECK_OFFSET(tParticleData, ForceZ, 0x080);
+CHECK_OFFSET(tParticleData, StartColA, 0x084);
+CHECK_OFFSET(tParticleData, StartColR, 0x088);
+CHECK_OFFSET(tParticleData, StartColG, 0x08C);
+CHECK_OFFSET(tParticleData, StartColB, 0x090);
+CHECK_OFFSET(tParticleData, EndColA, 0x094);
+CHECK_OFFSET(tParticleData, EndColR, 0x098);
+CHECK_OFFSET(tParticleData, EndColG, 0x09C);
+CHECK_OFFSET(tParticleData, EndColB, 0x0A0);
+CHECK_OFFSET(tParticleData, R0A, 0x0A4);
+CHECK_OFFSET(tParticleData, R0R, 0x0A8);
+CHECK_OFFSET(tParticleData, R0G, 0x0AC);
+CHECK_OFFSET(tParticleData, R0B, 0x0B0);
+CHECK_OFFSET(tParticleData, R1A, 0x0B4);
+CHECK_OFFSET(tParticleData, R1R, 0x0B8);
+CHECK_OFFSET(tParticleData, R1G, 0x0BC);
+CHECK_OFFSET(tParticleData, R1B, 0x0C0);
+CHECK_OFFSET(tParticleData, TextureId, 0x0C4);
+CHECK_OFFSET(tParticleData, BlendMode, 0x0C8);
+CHECK_OFFSET(tParticleData, SizeFinal, 0x0CC);
+CHECK_OFFSET(tParticleData, NumFlipTextures, 0x0D0);
+CHECK_OFFSET(tParticleData, FlipTextureRate, 0x0D4);
+CHECK_SIZE(tParticleData, 0xD8);
+
+// A packed 8-bit colour (4 bytes, 1-byte aligned). [P] the preview mangles cDynamicColourEmitter::
+// getSubEmitterPositionVelocityColour(int, t4Vector&, t4Vector&, tPackedRGBA&); [U] cDynamicColourEmitter_update
+// stores clamp(colour * 255) as bytes r (+0), g (+1), b (+2), a (+3) from the t4Vector colour's x, y, z, w (member
+// names from the type name and that order). cDynamicColourEmitter::m_colours holds one per sub-emitter.
+// The empty default constructor is EA's: [R] cDynamicColourEmitter_Allocate keeps the empty construction loop of its
+// new tPackedRGBA[m_numSubEmitters] ("DynEmitterData Colours").
+// NOTE: cDynamicColourEmitter_getSubEmitterColour returns one by value through a hidden result pointer (lwl/lwr ->
+// swl/swr), which g++ 2.95 does only for a class with a user copy constructor; its view sFontWord_67D8 declares one
+// (copying the 4 bytes as one unaligned word). EA's copy constructor is not visible, so it is left out here.
+struct tPackedRGBA {
+    unsigned char r;                // 0x0 [P] (type name); [U] update stores clamp(colour.x * 255)
+    unsigned char g;                // 0x1 [U] clamp(colour.y * 255)
+    unsigned char b;                // 0x2 [U] clamp(colour.z * 255)
+    unsigned char a;                // 0x3 [U] clamp(colour.w * 255)
+
+    tPackedRGBA() {}                // [R] the empty construction loop in cDynamicColourEmitter_Allocate
+};
+
+CHECK_OFFSET(tPackedRGBA, r, 0x0);
+CHECK_OFFSET(tPackedRGBA, g, 0x1);
+CHECK_OFFSET(tPackedRGBA, b, 0x2);
+CHECK_OFFSET(tPackedRGBA, a, 0x3);
+CHECK_SIZE(tPackedRGBA, 0x4);
 
 // The particle system (On Tour struct tParticleEmitter, 0x150). Its methods take the Damp value as their time scale.
 struct tParticleEmitter {

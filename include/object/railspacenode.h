@@ -28,4 +28,22 @@ CHECK_OFFSET(cRailSpaceNode, type, 0x08);
 CHECK_OFFSET(cRailSpaceNode, Rail, 0x0C);
 CHECK_SIZE(cRailSpaceNode, 0x10);
 
+// cFlexRailSpaceNode: the same node for a flex rail (cFlexRailNode): [O] On Tour cFlexRailSpaceNode : cTypedSpaceNode
+// {FlexNode at 0xC}, size 0x10; [R] cFlexRailNode_addSpaceHash: cMemMan_alloc(0x10, "FlexRailSpaceNode"), type 3;
+// [U] view sHashNode_8B90 (object/flexrailnode).
+struct cFlexRailNode;
+
+struct cFlexRailSpaceNode {
+    cFlexRailSpaceNode* next;       // 0x00 [O] nash Node::next
+    cFlexRailSpaceNode* prev;       // 0x04 [O] nash Node::prev
+    int type;                       // 0x08 [O] cTypedSpaceNode::type; [R] addSpaceHash stores 3
+    cFlexRailNode* FlexNode;        // 0x0C [O]; [R] addSpaceHash stores the owning node
+};
+
+CHECK_OFFSET(cFlexRailSpaceNode, next, 0x00);
+CHECK_OFFSET(cFlexRailSpaceNode, prev, 0x04);
+CHECK_OFFSET(cFlexRailSpaceNode, type, 0x08);
+CHECK_OFFSET(cFlexRailSpaceNode, FlexNode, 0x0C);
+CHECK_SIZE(cFlexRailSpaceNode, 0x10);
+
 #endif /* OBJECT_RAILSPACENODE_H */

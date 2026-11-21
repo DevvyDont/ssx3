@@ -27,8 +27,35 @@ struct cGame;
 struct cAI;
 struct cInput;
 struct cInputPad;
-struct tPlaybackFrame;      // On Tour 0x1C22C (Version, tPlaybackInputBuffer, AITick, AISeed[6]); retail allocates
-                            //       0x1C22C
+// The recorded pad input of one playback (On Tour struct tPlaybackInputBuffer, 0x1C20C) and the playback frame that
+// holds it (On Tour struct tPlaybackFrame, 0x1C22C; retail allocates 0x1C22C). [U] cPlaybackMan_isPauseAI reads /
+// writes Buffer.Index / Buffer.IndexMax and the packed bytes at Buffer.Buffer (view sPbBuf_26CE50: size 0x4,
+// pos 0x8, end 0xC, data 0x10).
+struct tPlaybackInputBuffer {
+    int Size;                       // 0x00000 [O]
+    int Index;                      // 0x00004 [O]; [U] the read / write cursor
+    int IndexMax;                   // 0x00008 [O]; [U] the end of the recorded data
+    unsigned char Buffer[115200];   // 0x0000C [O]; [U] a count byte, then one byte per pad value
+};
+
+CHECK_OFFSET(tPlaybackInputBuffer, Size, 0x0);
+CHECK_OFFSET(tPlaybackInputBuffer, Index, 0x4);
+CHECK_OFFSET(tPlaybackInputBuffer, IndexMax, 0x8);
+CHECK_OFFSET(tPlaybackInputBuffer, Buffer, 0xC);
+CHECK_SIZE(tPlaybackInputBuffer, 0x1C20C);
+
+struct tPlaybackFrame {
+    unsigned int Version;           // 0x00000 [O]
+    tPlaybackInputBuffer Buffer;    // 0x00004 [O]
+    int AITick;                     // 0x1C210 [O]
+    unsigned int AISeed[6];         // 0x1C214 [O]
+};
+
+CHECK_OFFSET(tPlaybackFrame, Version, 0x0);
+CHECK_OFFSET(tPlaybackFrame, Buffer, 0x4);
+CHECK_OFFSET(tPlaybackFrame, AITick, 0x1C210);
+CHECK_OFFSET(tPlaybackFrame, AISeed, 0x1C214);
+CHECK_SIZE(tPlaybackFrame, 0x1C22C);
 
 // One playback file (On Tour struct tPlaybackFile, 0xC); cPlaybackMan_initLocation allocates MaxPlaybackFiles of them
 // ("tPlaybackFile") and sets {-1, 0, 0}.

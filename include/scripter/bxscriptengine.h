@@ -30,6 +30,7 @@
 //       uScriptRequestData): names, types and order; here also the same offsets.
 
 #include "layout.h"
+#include "scripter/scriptdatabaseobject.h"
 
 struct cScriptObject;
 struct cScriptPlayerMain;
@@ -97,7 +98,7 @@ struct cBXScriptEngine {
     //     its AddObject / RemoveObject / IsObjInUseByPlayer)
     cScriptObject* mpObjectDatabase[20];    // 0x000 [O]; [R] cScriptDatabaseObject_cScriptDatabaseObject zeroes 20
                                             //       words
-    char mEntityDatabase[30][0x14];         // 0x050 [O] tScriptEntityRecord[30] {pEntity, objID, playerID, relation,
+    tScriptEntityRecord mEntityDatabase[30]; // 0x050 [O] tScriptEntityRecord[30] {pEntity, objID, playerID, relation,
                                             //       reservedPlayerID}; [R] the base ctor sets each to {0, -1, -1, 0,
                                             //       -1}
     void** mVtbl;                           // 0x2A8 [R] cBXScriptEngine_vtbl (_vt$15cBXScriptEngine), stored by the

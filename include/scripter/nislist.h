@@ -22,6 +22,29 @@
 
 struct cSSXScriptEngine;
 
+// One queued NIS (cutscene) request (On Tour tNISListEntry, 0x1C): the cCircularBuffer<5, tNISListEntry> element of
+// tNISList::mList. [U] cCircularBuffer_AddToTail copies 0x1C bytes (view sVidCmd3C80); tNISList_RemoveFromHead /
+// PlayNextScript / SkipForward / DoPause read category, scriptIndex, controlBits and scriptHandle (views sDmCmd7598,
+// sDmCmd7838, sSeqItem_66D0, sSeqItem_7C08).
+struct tNISListEntry {
+    int category;                   // 0x00 [O]
+    int scriptIndex;                // 0x04 [O]
+    int controlBits;                // 0x08 [O]
+    int scriptHandle;               // 0x0C [O]; [U] the request handle (cBXScriptEngine_GetRequestPlayerByReqHandle)
+    int aiCharIndexMain;            // 0x10 [O]
+    int aiCharIndexSupport0;        // 0x14 [O]
+    int aiCharIndexSupport1;        // 0x18 [O]
+};
+
+CHECK_OFFSET(tNISListEntry, category, 0x00);
+CHECK_OFFSET(tNISListEntry, scriptIndex, 0x04);
+CHECK_OFFSET(tNISListEntry, controlBits, 0x08);
+CHECK_OFFSET(tNISListEntry, scriptHandle, 0x0C);
+CHECK_OFFSET(tNISListEntry, aiCharIndexMain, 0x10);
+CHECK_OFFSET(tNISListEntry, aiCharIndexSupport0, 0x14);
+CHECK_OFFSET(tNISListEntry, aiCharIndexSupport1, 0x18);
+CHECK_SIZE(tNISListEntry, 0x1C);
+
 struct tNISList {
     cSSXScriptEngine* mpNISEngine;      // 0x000 [O]; [R] the ctor zeroes it, cSSXScriptEngine_Load stores the engine;
                                         //       [U] read by every method that calls the engine (e.g. DoSkip)

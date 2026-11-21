@@ -29,6 +29,7 @@
 // Unnamed fields are unk_XXX; rename only with evidence.
 
 #include "layout.h"
+#include "scripter/scriptdatabaseobject.h"
 #include "scripter/scriptobjgs.h"
 #include "scripter/scanimmgr.h"
 #include "scripter/scriptobjevent.h"
@@ -46,6 +47,89 @@ struct tSSXScriptSetupInfoLinked;
 struct tNISList;
 
 // One script data bank (On Tour struct tSSXScriptBankInfo, 0x10; retail clears it with tSSXScriptBankInfo_Clear).
+// The hive script tables (On Tour, both 2 variants: the file stores offsets, InitOnce / ProcessAsyncLoadTrackTableComplete
+// turn them into pointers in place).
+// tSSXHiveScriptMaster (0xC): one script of the master table. [U] cSSXScriptEngine_RequestScriptByHashID compares
+// hashID (+0x4) while walking mpMasterTable 0xC apart (view sEnt_002796B8).
+union tSSXHiveScriptNameDebug {
+    const char* pScriptName;        // [O]
+    unsigned int scriptNameOffset;  // [O]
+};
+
+struct tSSXHiveScriptMaster {
+    int numTimesPlayed;             // 0x0 [O]
+    unsigned int hashID;            // 0x4 [O]; [U] RequestScriptByHashID
+    tSSXHiveScriptNameDebug debugNamePtr; // 0x8 [O]
+};
+
+CHECK_OFFSET(tSSXHiveScriptMaster, numTimesPlayed, 0x0);
+CHECK_OFFSET(tSSXHiveScriptMaster, hashID, 0x4);
+CHECK_OFFSET(tSSXHiveScriptMaster, debugNamePtr, 0x8);
+CHECK_SIZE(tSSXHiveScriptMaster, 0xC);
+
+// tSSXHiveScriptFilter (0x30): one script of a category with its 21 character filters; tSSXHiveScriptFilterCategory
+// (0x8): a category's count and script list. [U] cSSXScriptEngine_GetScriptFromCategory indexes mpCategoryFilterTable
+// 8 apart and the scripts 0x30 apart (views sCategory_27B0C0, sScript_27B0C0).
+struct tSSXHiveScriptFilter {
+    int scriptIndex;                // 0x00 [O]
+    short charFilters[21];          // 0x04 [O]; [U] GetScriptFromCategory tests the riders' entries
+};
+
+CHECK_OFFSET(tSSXHiveScriptFilter, scriptIndex, 0x00);
+CHECK_OFFSET(tSSXHiveScriptFilter, charFilters, 0x04);
+CHECK_SIZE(tSSXHiveScriptFilter, 0x30);
+
+union tSSXHiveScriptFilterPtr {
+    tSSXHiveScriptFilter* pScriptFilter; // [O]
+    unsigned int scriptFilterOffset;     // [O]
+};
+
+struct tSSXHiveScriptFilterCategory {
+    int numScripts;                 // 0x0 [O]; [U] GetScriptFromCategory's count
+    tSSXHiveScriptFilterPtr scriptFilterPtr; // 0x4 [O]; [U] the category's scripts
+};
+
+CHECK_OFFSET(tSSXHiveScriptFilterCategory, numScripts, 0x0);
+CHECK_OFFSET(tSSXHiveScriptFilterCategory, scriptFilterPtr, 0x4);
+CHECK_SIZE(tSSXHiveScriptFilterCategory, 0x8);
+
+// tSSXScriptHeader (0x20): the SSX header at the start of a script's data (GetSSXScriptHeader). [U]
+// tNISList_DoTransitionToNext reads the end transition (+0x10 type, +0x11 colour, +0x12 / +0x14 / +0x16 frames;
+// view sDmFade_7980).
+struct tSSXScriptHeader {
+    signed char isTransport;        // 0x00 [O]
+    signed char padding[3];         // 0x01 [O]
+    int track;                      // 0x04 [O]
+    signed char startTransitionType; // 0x08 [O]
+    signed char startTransitionColour; // 0x09 [O]
+    short startFadeToTransitionFrames; // 0x0A [O]
+    short startHoldTransitionFrames;   // 0x0C [O]
+    short startFadeFromTransitionFrames; // 0x0E [O]
+    signed char endTransitionType;  // 0x10 [O]; [U] DoTransitionToNext
+    signed char endTransitionColour; // 0x11 [O]; [U] ditto
+    short endFadeToTransitionFrames; // 0x12 [O]; [U] ditto
+    short endHoldTransitionFrames;  // 0x14 [O]; [U] ditto
+    short endFadeFromTransitionFrames; // 0x16 [O]; [U] ditto
+    int scriptIndex;                // 0x18 [O]
+    int bankNum;                    // 0x1C [O]
+};
+
+CHECK_OFFSET(tSSXScriptHeader, isTransport, 0x00);
+CHECK_OFFSET(tSSXScriptHeader, track, 0x04);
+CHECK_OFFSET(tSSXScriptHeader, startTransitionType, 0x08);
+CHECK_OFFSET(tSSXScriptHeader, startTransitionColour, 0x09);
+CHECK_OFFSET(tSSXScriptHeader, startFadeToTransitionFrames, 0x0A);
+CHECK_OFFSET(tSSXScriptHeader, startHoldTransitionFrames, 0x0C);
+CHECK_OFFSET(tSSXScriptHeader, startFadeFromTransitionFrames, 0x0E);
+CHECK_OFFSET(tSSXScriptHeader, endTransitionType, 0x10);
+CHECK_OFFSET(tSSXScriptHeader, endTransitionColour, 0x11);
+CHECK_OFFSET(tSSXScriptHeader, endFadeToTransitionFrames, 0x12);
+CHECK_OFFSET(tSSXScriptHeader, endHoldTransitionFrames, 0x14);
+CHECK_OFFSET(tSSXScriptHeader, endFadeFromTransitionFrames, 0x16);
+CHECK_OFFSET(tSSXScriptHeader, scriptIndex, 0x18);
+CHECK_OFFSET(tSSXScriptHeader, bankNum, 0x1C);
+CHECK_SIZE(tSSXScriptHeader, 0x20);
+
 struct tSSXScriptBankInfo {
     void* dataBankHandle; // 0x0 [O]; [R] cDataManager attach handle (SyncLoadScriptBank); [U] detached by PurgeScriptBank
     int dataIdentifier;   // 0x4 [O]; [R] the bank's key (SyncLoadScriptBank, cSSXScriptEngine_AsyncLoadScriptBank); Clear sets -1
@@ -63,7 +147,7 @@ CHECK_SIZE(tSSXScriptBankInfo, 0x10);
 struct cSSXScriptEngine {
     // --- cScriptDatabaseObject (base of cBXScriptEngine; ctor cScriptDatabaseObject_cScriptDatabaseObject, vtable _vt$21cScriptDatabaseObject)
     cScriptObject* mpObjectDatabase[20];         // 0x000 [O]; [R] cScriptDatabaseObject_cScriptDatabaseObject zeroes 20 words
-    char mEntityDatabase[30][0x14];              // 0x050 [O] tScriptEntityRecord[30]; [R] cScriptDatabaseObject_cScriptDatabaseObject sets 30
+    tScriptEntityRecord mEntityDatabase[30];     // 0x050 [O] tScriptEntityRecord[30]; [R] cScriptDatabaseObject_cScriptDatabaseObject sets 30
                                                  //       0x14-byte records to {0, -1, -1, 0, -1}
     void** mVtbl;                                // 0x2A8 [R] _vt$16cSSXScriptEngine (cSSXScriptEngine_vtbl), stored by the ctor
                                                  //       over _vt$15cBXScriptEngine; [U] cSSXScriptEngine_ForcePlayUpdate calls slot 4

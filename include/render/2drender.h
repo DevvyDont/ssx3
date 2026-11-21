@@ -23,6 +23,13 @@
 #include "bx/math3d.h"
 
 // One renderer vertex (On Tour tBxVertex, 0x30). Colours are 0..255 (alpha 0..128) ints, as the GS takes them.
+// The other users of the type: cPS2GraphicsMan::RenderTriStrip(int, const tBxVertex*, bool) (vtable slot 71; [O] the
+// PSP twin's signature), cSimpleTube::m_vertices ([O] tBxVertex[262], retail cSimpleTube_m_vertices: u 0, v 0/1,
+// one 1.0, colour, p set per frame), cGraphicsMan::RenderIndexedTriList / RenderSpline (local tBxVertex arrays) and
+// the transition objects' InitVertex(tBxVertex&, ...) ([O]).
+// The empty default constructor is EA's ([O] On Tour lists tBxVertex::tBxVertex()): [R] retail code that declares a
+// local array of them keeps the empty construction loop (cGraphicsMan_RenderIndexedTriList verts[3],
+// cCircle_TObj_Draw top[80] / bot[80], cWorldPainterMan_render1 quadVerts[5]).
 struct tBxVertex {
     float u;                        // 0x00 [O]; [U] drawRect2/3 and drawRotRect2/3 store the UVs; drawRect4 0/1
     float v;                        // 0x04 [O]
@@ -33,6 +40,8 @@ struct tBxVertex {
     unsigned int b;                 // 0x18 [O]; [U] (int)(colour.B * 255)
     unsigned int a;                 // 0x1C [O]; [U] (int)(colour.A * 128)
     t4Vector p;                     // 0x20 [O]; [U] every method stores the position (sqc2/sq), w = 1
+
+    tBxVertex() {}                  // [O] tBxVertex::tBxVertex(); [R] the empty construction loops above
 };
 
 CHECK_OFFSET(tBxVertex, u, 0x00);

@@ -82,4 +82,24 @@ CHECK_OFFSET(cBoostNode, Type, 0x40);
 CHECK_OFFSET(cBoostNode, unk_044, 0x44);
 CHECK_SIZE(cBoostNode, 0x50);
 
+// cBoostNodeState (On Tour, 0x30): the boost state cBoostNode carries at +0x20 (Boost .. Type above, written out
+// inline there); cBoostNode_applyBoost reads it as one (view sParams_341818, inside sSph_341818 at 0x20).
+struct cBoostNodeState {
+    t4Vector Boost;                 // 0x00 [O]
+    float MaxSpeed;                 // 0x10 [O]
+    float Drag;                     // 0x14 [O]
+    int BoostTime;                  // 0x18 [O]
+    int Time;                       // 0x1C [O]
+    int Type;                       // 0x20 [O]
+    char unk_024[0xC];              // 0x24 padding (16-byte aligned)
+};
+
+CHECK_OFFSET(cBoostNodeState, Boost, 0x00);
+CHECK_OFFSET(cBoostNodeState, MaxSpeed, 0x10);
+CHECK_OFFSET(cBoostNodeState, Drag, 0x14);
+CHECK_OFFSET(cBoostNodeState, BoostTime, 0x18);
+CHECK_OFFSET(cBoostNodeState, Time, 0x1C);
+CHECK_OFFSET(cBoostNodeState, Type, 0x20);
+CHECK_SIZE(cBoostNodeState, 0x30);
+
 #endif /* OBJECT_BOOSTNODE_H */

@@ -32,6 +32,22 @@ CHECK_OFFSET(cInputSync_PadSample, NumButtons, 0x0);
 CHECK_OFFSET(cInputSync_PadSample, Buttons, 0x4);
 CHECK_SIZE(cInputSync_PadSample, 0x64);
 
+// One compressed input sample, as sent over the network: the button count, a bit mask of the non-zero buttons and
+// the non-zero values only, one byte each. [O] struct CompressedSample (On Tour 0x1D: an extra `unsigned char
+// PlayerID` first, which retail does not have); [U] cInputSync_compressinput / decompressinput: count at 0x0, mask
+// bytes 0x1-0x3 (24 bits, one per button), kept bytes from 0x4, return value 4 + the number kept; [R]
+// sendClientInput / preupdate build it in a stack buffer and send 4 + n bytes with cGameComm_writePacket.
+struct cInputSync_CompressedSample {
+    unsigned char NumButtons;           // 0x000 [O]; [U] compressinput stores the sample's NumButtons, decompressinput
+                                        //       restores it
+    unsigned char NonZeroBitBytes[3];   // 0x001 [O]; [U] bit i of the 24 = button i is non-zero
+    unsigned char NonZeroBytes[24];     // 0x004 [O]; [U] the non-zero buttons' values (value * 255), in button order
+};
+CHECK_OFFSET(cInputSync_CompressedSample, NumButtons, 0x0);
+CHECK_OFFSET(cInputSync_CompressedSample, NonZeroBitBytes, 0x1);
+CHECK_OFFSET(cInputSync_CompressedSample, NonZeroBytes, 0x4);
+CHECK_SIZE(cInputSync_CompressedSample, 0x1C);
+
 // One synced pad. [O] struct SyncedPad (On Tour 0x1C: it has an extra `int sendpos` after writepos); retail stride 0x18
 // ([U] createlocalinput / aiupdate / preupdate / the destructor index `self + 0x14 + i * 0x18`).
 struct cInputSync_SyncedPad {

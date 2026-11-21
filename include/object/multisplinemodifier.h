@@ -15,12 +15,34 @@
 // Evidence tags: [R] ctors/dtor/allocation; [U] retail use (asm of every method in methods.txt); [O] On Tour.
 
 #include "layout.h"
+#include "world/worldview.h"
 #include "ui/uithing.h"
 #include "bx/math3d.h"
 #include "object/spline3d.h"
 
 struct tInstanceRecord;
 struct tMultiNode;
+
+// One node of a multi-spline modifier (On Tour struct tMultiNode, 0x60). [R] cMultiSplineModifier_allocNodes
+// allocates the Nodes array 0x60 apart (view sSplineSeg_A330, with an empty element ctor) next to the 0x40-byte
+// AnimMats (view sSplineNode_A330 = t4Matrix).
+struct tMultiNode {
+    t4Vector Pos;                   // 0x00 [O]
+    t4Vector Dir;                   // 0x10 [O]
+    t4Vector DDir;                  // 0x20 [O]
+    tBoundBox BoundBox;             // 0x30 [O]
+    float X2;                       // 0x50 [O]
+    float Y2;                       // 0x54 [O]
+    char unk_058[0x8];              // 0x58 padding (16-byte aligned)
+};
+
+CHECK_OFFSET(tMultiNode, Pos, 0x00);
+CHECK_OFFSET(tMultiNode, Dir, 0x10);
+CHECK_OFFSET(tMultiNode, DDir, 0x20);
+CHECK_OFFSET(tMultiNode, BoundBox, 0x30);
+CHECK_OFFSET(tMultiNode, X2, 0x50);
+CHECK_OFFSET(tMultiNode, Y2, 0x54);
+CHECK_SIZE(tMultiNode, 0x60);
 
 struct cMultiSplineModifier {
     // --- cTransformModifier (vptr only)

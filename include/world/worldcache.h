@@ -36,6 +36,43 @@
 
 struct cChunkResolve;
 
+// tResourceID: a world resource handle, one word: the section in the low 8 bits, the resource's index in that
+// section's tables in the high 24 (0xFF = the shared table). Invalid() is 0xFFFFFFFF.
+// Name and bitfield: [P] the preview's asserts "RID.m_bfRID.m_uiSectionID < cWorldCache::mp_DataHeader->
+// m_uiNumSections" (an inline of this header), "instId.m_bfRID.m_uiUID < (unsigned int)NumInstances",
+// "FlashInst[index] != tResourceID::Invalid()", "instanceid != tResourceID::Invalid()", and its mangled
+// ...PC11tResourceID parameters; [O] On Tour struct tResourceID : _tResourceID (0x4, an anonymous union), with
+// operator==, operator!=, tResourceID(), tResourceID(unsigned int rid), tResourceID(unsigned int sid, unsigned int uid),
+// static Invalid(). Bit order: [U] the matched HandleToModel_229910 (src/main/ssxapp.cpp) and tResourceID_352810
+// (src/object/instanceman.cpp) views read m_uiSectionID as the low byte. EA's header for it is not known; it sits here
+// because the world cache resolves it (flattened: the base's union is inline).
+// operator== / != compare the whole word ([U] cWorldLightMan's overlap-node search: one word compare against -1, the
+// view tResourceID_5A70); the word member's name is not known (unk_000).
+struct tResourceID {
+    union {
+        struct {
+            unsigned int m_uiSectionID : 8; // [P] asserts above; [U] the low byte (the section)
+            unsigned int m_uiUID : 24;      // [P] asserts above; [U] the high 24 bits (the index)
+        } m_bfRID;                          // 0x0 [P] "RID.m_bfRID.m_uiSectionID"
+        unsigned int unk_000;               // 0x0 the whole word (On Tour tResourceID(unsigned int rid) stores it)
+    };
+
+    tResourceID() {}                                    // [O]
+    tResourceID(unsigned int rid) { unk_000 = rid; }    // [O]
+    tResourceID(unsigned int sid, unsigned int uid)     // [O]
+    {
+        m_bfRID.m_uiSectionID = sid;
+        m_bfRID.m_uiUID = uid;
+    }
+    bool operator==(const tResourceID& a) const { return unk_000 == a.unk_000; } // [O]
+    bool operator!=(const tResourceID& a) const { return unk_000 != a.unk_000; } // [O]
+    static const tResourceID Invalid() { return tResourceID(0xFFFFFFFF); }      // [O] [P] "tResourceID::Invalid()"
+};
+
+CHECK_OFFSET(tResourceID, m_bfRID, 0x0);
+CHECK_OFFSET(tResourceID, unk_000, 0x0);
+CHECK_SIZE(tResourceID, 0x4);
+
 // One pool block (On Tour tWorldMemBlock). 0x18 bytes: cWorldBlockAllocator_init's array stride.
 struct tWorldMemBlock {
     char* pBaseMem;                 // 0x00 [O]; [R] new(blockSize, "WORLD MEMBLOCK")

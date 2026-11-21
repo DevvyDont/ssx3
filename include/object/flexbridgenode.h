@@ -44,6 +44,28 @@ struct cGridMesh;
 // cSpring_setupSpring, cSpring_setupNodes, cSpring_update, cSpring_writeToReplayFrame). Move it to object/spring.h
 // when that header is written. [U] cSpring_setupSpring stores 0x0..0x24; writeToReplayFrame writes the 0x24-byte
 // state, then Width * 0x50 bytes of Nodes.
+// One node of a cSpring (On Tour struct tSpringNode, 0x50). [R] cSpring's setupSpring allocates Width x 0x50
+// ("SpringNodes"); [U] cFlexBridgeNode_applyForce adds into F / T (view sSeg_6E38: force 0x30, torque 0x40),
+// cFlexBridgeNode_updateGrid reads P / O (view sFlexNode_75D8: pos 0x00, angle 0x20).
+struct tSpringNode {
+    t4Vector P;                     // 0x00 [O]
+    t4Vector V;                     // 0x10 [O]
+    float O;                        // 0x20 [O]; [U] updateGrid
+    float W;                        // 0x24 [O]
+    char unk_028[0x8];              // 0x28 padding (F is 16-byte aligned)
+    t4Vector F;                     // 0x30 [O]; [U] applyForce
+    float T;                        // 0x40 [O]; [U] applyForce
+    char unk_044[0xC];              // 0x44 padding
+};
+
+CHECK_OFFSET(tSpringNode, P, 0x00);
+CHECK_OFFSET(tSpringNode, V, 0x10);
+CHECK_OFFSET(tSpringNode, O, 0x20);
+CHECK_OFFSET(tSpringNode, W, 0x24);
+CHECK_OFFSET(tSpringNode, F, 0x30);
+CHECK_OFFSET(tSpringNode, T, 0x40);
+CHECK_SIZE(tSpringNode, 0x50);
+
 struct cSpring {
     int Width;                      // 0x00 [O]; [U] setupSpring (sw), setupNodes / update loop bounds (lw);
                                     //      cFlexBridgeNode grid size (lw 0x50)

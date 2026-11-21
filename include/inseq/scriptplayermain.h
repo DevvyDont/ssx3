@@ -105,4 +105,15 @@ CHECK_OFFSET(cScriptPlayerMain, mDoStopInEntityUpdate, 0x40);
 CHECK_OFFSET(cScriptPlayerMain, mpPreviewCommInterface, 0x44);
 CHECK_SIZE(cScriptPlayerMain, 0x48);
 
+// cInSeqComm: the interface the script player calls back on (On Tour class cInSeqComm: pure virtuals only, in this
+// slot order: OnInSeqPlay 1, OnInSeqUpdate 2, OnInSeqPlayStopping 3, OnInSeqStop 4, OnInSeqLoop,
+// OnInSeqRequestEntityCommInterface, ...). cBXScriptEngine implements it at +0x2AC. [U] cScriptPlayerMain_Stop calls
+// slot 4 (view cRcListener4918), cScriptPlayerMain_DoUpdate slot 2 (view cRcListener51A0), through the vptr at +0.
+struct cInSeqComm {
+    void** mVtbl;                   // 0x0 [O] (interface: vptr only); [U] the callers above load it at +0
+};
+
+CHECK_OFFSET(cInSeqComm, mVtbl, 0x0);
+CHECK_SIZE(cInSeqComm, 0x4);
+
 #endif /* INSEQ_SCRIPTPLAYERMAIN_H */

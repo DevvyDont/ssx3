@@ -32,6 +32,17 @@
 
 struct cLocaleFile;
 
+// EA's tAttrLocale (On Tour struct tAttrLocale, size 0x1, LSB first): cUILocaleInterface's attribute byte at 0x3.
+// [R] tAttrLocale_tAttrLocale (lbu / andi 0xE0 / sb) clears the five bits; [U] setTextNumCharFlag sets mTextNumChar
+// (bit 27 of the word at 0x0: g++ widens a bit-field store in a 4-aligned object to the word, as cUIState's tAttrState).
+struct tAttrLocale {
+    unsigned char mLocaleTest : 1;  // bit 0 [O]; [U] setLanguage / unloadFE / unloadOV keep the files while it is set
+    unsigned char mObjPivot : 1;    // bit 1 [O]
+    unsigned char mTextBox : 1;     // bit 2 [O]
+    unsigned char mTextNumChar : 1; // bit 3 [O]; [U] cUILocaleInterface_setTextNumCharFlag (bit 27 of word 0)
+    unsigned char mTextRefresh : 1; // bit 4 [O]
+};
+
 struct cFELocale {
     // --- cUILocaleInterface (On Tour: size 0x8)
     signed char mDisplayMode;       // 0x000 [O] char; [R] 0; [U] cUILocaleInterface_setDisplayMode stores it;
@@ -39,7 +50,7 @@ struct cFELocale {
     signed char mLanguage;          // 0x001 [O] char; [R] 0; [U] setLanguage compares and stores it; loadCommon /
                                     //       loadFE / loadOV switch on it; getStringByHash matches files on it
     signed char mNumLanguages;      // 0x002 [O] char; [R] the base part stores 0, cFELocale's ctor 4
-    unsigned char mAttrLocale;      // 0x003 [O] tAttrLocale (1 byte, LSB first: mLocaleTest:1 mObjPivot:1 mTextBox:1
+    tAttrLocale mAttrLocale;        // 0x003 [O] tAttrLocale (1 byte, LSB first: mLocaleTest:1 mObjPivot:1 mTextBox:1
                                     //       mTextNumChar:1 mTextRefresh:1); [R] tAttrLocale_tAttrLocale clears the low
                                     //       5 bits; [U] setLanguage / unloadFE / unloadOV keep the files while bit 0
                                     //       (mLocaleTest) is set
@@ -57,6 +68,8 @@ struct cFELocale {
                                     //       it
     char unk_0BE[0x2];              // 0x0BE tail padding
 };
+
+CHECK_SIZE(tAttrLocale, 0x1);
 
 CHECK_OFFSET(cFELocale, mDisplayMode, 0x000);
 CHECK_OFFSET(cFELocale, mLanguage, 0x001);
