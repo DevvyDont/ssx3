@@ -18,7 +18,7 @@ INCLUDE_ASM("fe/fepopup3", cFEStateRiderBio__cFEStateRiderBio);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateRuleSelect__cFEStateRuleSelect);
 
-INCLUDE_ASM("fe/fepopup3", func_001DF440);
+INCLUDE_ASM("fe/fepopup3", cBraggingRightsMenu__cBraggingRightsMenu);
 
 INCLUDE_ASM("fe/fepopup3", cFEStateBraggingRights__cFEStateBraggingRights);
 

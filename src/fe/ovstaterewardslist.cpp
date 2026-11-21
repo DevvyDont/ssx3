@@ -146,7 +146,7 @@ extern int cUITemplate_MAP_mPeak;
  *
  * Then cUITemplate_MAP_mPeak = the word at +0x54 of cBENewRaceInterface_getLocation (back-end interface 0); styles 0
  * and 1 leave it alone. Called when the map overlays are built (cOVStateManager_triggerOverlay, cOVStateManager_triggerPopup,
- * func_00221228) and by the credits and main-module code.
+ * cOVState_TRANSPORT_cOVState_TRANSPORT_2) and by the credits and main-module code.
  */
 extern "C" void cUITemplate_MAP_init(void)
 {

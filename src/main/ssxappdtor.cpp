@@ -1870,7 +1870,7 @@ extern "C" int cGame_getCurrentRenderViewNum(cGame* game) {
 #endif
 
 //100%
-INCLUDE_ASM("main/ssxappdtor", func_002443C0);
+INCLUDE_ASM("main/ssxappdtor", cGenericStreamPause__cGenericStreamPause);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -1880,11 +1880,11 @@ extern char cStreamPause_vtbl[];
  * Destroys the game's stream-pause object: resets the vtable to cStreamPause_vtbl and frees the object when asked.
  *
  * It is the destructor slot of cGenericStreamPause_vtbl, the vtable cStreamPause_construct installs ("GenericStreamPause");
- * cStreamPause_vtbl is the base vtable (destructor func_00245F00, two pure-virtual slots __pure_virtual).
+ * cStreamPause_vtbl is the base vtable (destructor cStreamPause__cStreamPause, two pure-virtual slots __pure_virtual).
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
-extern "C" void func_002443C0(int* self, int flags)
+extern "C" void cGenericStreamPause__cGenericStreamPause(int* self, int flags)
 {
     *(void**)self = cStreamPause_vtbl;
     if (flags & 1) {

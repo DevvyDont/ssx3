@@ -629,7 +629,7 @@ void cBEScoreInterface_readFromReplayFrame(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("be/beintscore", func_00155390);
+INCLUDE_ASM("be/beintscore", cBEScoreInterface_processHighlight);
 #ifdef SKIP_ASM
 extern short cBELibrary_highlightLevel[][3];
 
@@ -643,7 +643,7 @@ extern short cBELibrary_highlightLevel[][3];
  * @param idx  which highlight, 0 to 7
  * @param score  the value to rate
  */
-extern "C" void func_00155390(char* self, int idx, int score)
+extern "C" void cBEScoreInterface_processHighlight(char* self, int idx, int score)
 {
     signed char cur = *(signed char*)(self + idx + 0xBB8);
     int level = 0;
@@ -664,7 +664,7 @@ extern "C" void func_00155390(char* self, int idx, int score)
 INCLUDE_ASM("be/beintscore", func_00155420);
 #ifdef SKIP_ASM
 int cBELibrary_getProfileIndex(int);
-extern "C" void func_00155390(char* self, int idx, int score);
+extern "C" void cBEScoreInterface_processHighlight(char* self, int idx, int score);
 
 struct sRaceSettings_155420 {
     char pad_0x00[0x40];
@@ -711,7 +711,7 @@ struct sRecord_155420 {
  * 0-7 take the larger of the stored value and the stats words at +0x2C, +0x18, +0x1C, +0x20, +0x88 and the rounded
  * floats at +0x5C, +0x58, +0x50 (On Tour tRiderStats has NumFrags, NumUberTricks, NumSuperUberTricks,
  * NumUberGrindTricks, LongestCombo, BiggestHandplantTime, BiggestRailDist, BiggestAirTime there), each also raising a
- * highlight with func_00155390 (pair 1 excepted).
+ * highlight with cBEScoreInterface_processHighlight (pair 1 excepted).
  *
  * Pair 8 keeps the shortest positive @p eventTime in race event 0 (raceDB +0x4A); pair 9 keeps the largest positive @p eventPoints in
  * events 1-3 or race kind 6 (raceDB +0x48) and raises highlight 6 with @p eventPoints / 100. Without @p statsArg, or in event
@@ -752,7 +752,7 @@ extern "C" void func_00155420(int rider, int statsArg, int eventPoints, int even
             if (statValue >= slot->score) {
                 slot->score = statValue;
                 slot->event = event;
-                func_00155390(rec, 3, statValue);
+                cBEScoreInterface_processHighlight(rec, 3, statValue);
             }
             break;
         case 1:
@@ -767,7 +767,7 @@ extern "C" void func_00155420(int rider, int statsArg, int eventPoints, int even
             if (statValue >= slot->score) {
                 slot->score = statValue;
                 slot->event = event;
-                func_00155390(rec, 5, statValue);
+                cBEScoreInterface_processHighlight(rec, 5, statValue);
             }
             break;
         case 3:
@@ -775,7 +775,7 @@ extern "C" void func_00155420(int rider, int statsArg, int eventPoints, int even
             if (statValue >= slot->score) {
                 slot->score = statValue;
                 slot->event = event;
-                func_00155390(rec, 4, statValue);
+                cBEScoreInterface_processHighlight(rec, 4, statValue);
             }
             break;
         case 4:
@@ -783,7 +783,7 @@ extern "C" void func_00155420(int rider, int statsArg, int eventPoints, int even
             if (statValue >= slot->score) {
                 slot->score = statValue;
                 slot->event = event;
-                func_00155390(rec, 7, statValue);
+                cBEScoreInterface_processHighlight(rec, 7, statValue);
             }
             break;
         case 5:
@@ -791,7 +791,7 @@ extern "C" void func_00155420(int rider, int statsArg, int eventPoints, int even
             if (statValue >= slot->score) {
                 slot->score = statValue;
                 slot->event = event;
-                func_00155390(rec, 1, statValue);
+                cBEScoreInterface_processHighlight(rec, 1, statValue);
             }
             break;
         case 6:
@@ -799,7 +799,7 @@ extern "C" void func_00155420(int rider, int statsArg, int eventPoints, int even
             if (statValue >= slot->score) {
                 slot->score = statValue;
                 slot->event = event;
-                func_00155390(rec, 0, statValue);
+                cBEScoreInterface_processHighlight(rec, 0, statValue);
             }
             break;
         case 7:
@@ -807,7 +807,7 @@ extern "C" void func_00155420(int rider, int statsArg, int eventPoints, int even
             if (statValue >= slot->score) {
                 slot->score = statValue;
                 slot->event = event;
-                func_00155390(rec, 2, statValue);
+                cBEScoreInterface_processHighlight(rec, 2, statValue);
             }
             break;
         case 8:
@@ -824,7 +824,7 @@ extern "C" void func_00155420(int rider, int statsArg, int eventPoints, int even
                     if (eventPoints >= slot->score) {
                         slot->score = eventPoints;
                         slot->event = event;
-                        func_00155390(rec, 6, eventPoints / 100);
+                        cBEScoreInterface_processHighlight(rec, 6, eventPoints / 100);
                     }
                 }
             }

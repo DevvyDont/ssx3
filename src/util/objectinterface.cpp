@@ -197,7 +197,7 @@ extern "C" int cObjectInterface_isSphereOccluded(sQ128* box)
 #endif
 
 //100%
-INCLUDE_ASM("util/objectinterface", func_002D20F8);
+INCLUDE_ASM("util/objectinterface", SSXStatsMan);
 #ifdef SKIP_ASM
 extern void* gSSXStatsMan;
 
@@ -206,7 +206,7 @@ extern void* gSSXStatsMan;
  *
  * @return the stats manager (On Tour's global gSSXStatsMan)
  */
-extern "C" int func_002D20F8(void) {
+extern "C" int SSXStatsMan(void) {
     return (*(int*)&gSSXStatsMan);
 }
 #endif
@@ -358,7 +358,7 @@ INCLUDE_ASM("util/objectinterface", cSSXStatsMan_cSSXStatsMan);
 extern void* gSSXStatsMan;
 
 /**
- * Constructs the stats manager: stores @p statsMan in gSSXStatsMan, the global func_002D20F8 returns.
+ * Constructs the stats manager: stores @p statsMan in gSSXStatsMan, the global SSXStatsMan returns.
  *
  * @param statsMan  the object being constructed
  * @return @p statsMan

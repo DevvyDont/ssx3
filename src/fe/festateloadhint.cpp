@@ -392,7 +392,7 @@ extern "C" int func_00245EC0(int* firstRider, int* secondRider)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateloadhint", func_00245F00);
+INCLUDE_ASM("fe/festateloadhint", cStreamPause__cStreamPause);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern char cStreamPause_vtbl[];
@@ -400,11 +400,11 @@ extern char cStreamPause_vtbl[];
 /**
  * Destroys an object whose vptr is at +0: stores vtable cStreamPause_vtbl and frees the object when bit 0 of @p flags is set.
  *
- * cStreamPause_vtbl holds this destructor and two slots of __pure_virtual. func_002443C0 in ssxappdtor is an identical copy.
+ * cStreamPause_vtbl holds this destructor and two slots of __pure_virtual. cGenericStreamPause__cGenericStreamPause in ssxappdtor is an identical copy.
  *
  * @param flags  g++ destructor flags (bit 0: free with operator_delete)
  */
-extern "C" void func_00245F00(void* self, int flags)
+extern "C" void cStreamPause__cStreamPause(void* self, int flags)
 {
     *(void**)self = cStreamPause_vtbl;
     if (flags & 1) {

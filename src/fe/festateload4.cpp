@@ -28,7 +28,7 @@ INCLUDE_ASM("fe/festateload4", func_00245E78);
 
 INCLUDE_ASM("fe/festateload4", func_00245EC0);
 
-INCLUDE_ASM("fe/festateload4", func_00245F00);
+INCLUDE_ASM("fe/festateload4", cStreamPause__cStreamPause);
 
 INCLUDE_ASM("fe/festateload4", func_00245F30);
 

@@ -513,7 +513,7 @@ void* cFEStateRuleSelect__cFEStateRuleSelect(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("fe/fepopupmisc", func_001DF440);
+INCLUDE_ASM("fe/fepopupmisc", cBraggingRightsMenu__cBraggingRightsMenu);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern void* cBraggingRightsMenu_vtbl[];
@@ -526,7 +526,7 @@ extern void* cBraggingRightsMenu_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_001DF440(cBraggingRightsMenu* self, int flags)
+extern "C" void cBraggingRightsMenu__cBraggingRightsMenu(cBraggingRightsMenu* self, int flags)
 {
     self->mVtbl = cBraggingRightsMenu_vtbl;
     if (flags & 1) {

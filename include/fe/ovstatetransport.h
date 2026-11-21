@@ -5,7 +5,7 @@
 // cOVState around an embedded cUITemplate_MAP (the same map template the FE's event select and credits use at +0x48):
 // every method forwards to the template's same-named method with &mMap.
 // Retail code: cOVState_TRANSPORT_* in fe/uitemplatemap (0x00208498 ... 0x00208678) and fe/all_in_one_fe (destructor
-// cOVState_TRANSPORT__cOVState_TRANSPORT, the out-of-line ctor copies func_00221228 (engine, id) and func_002211C8
+// cOVState_TRANSPORT__cOVState_TRANSPORT, the out-of-line ctor copies cOVState_TRANSPORT_cOVState_TRANSPORT_2 (engine, id) and cOVState_TRANSPORT_cOVState_TRANSPORT
 // (engine-less)). On Tour defines it in fe/all_in_one_fe.cpp.
 //
 // Size 0x390:
@@ -37,7 +37,7 @@ struct cOVState_TRANSPORT {
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
     void** mVtbl;                   // 0x008 [R] cOVState_TRANSPORT_vtbl (no symbol yet; vtables.tsv: cOVState_TRANSPORT, slot 0
                                     //       cOVState_TRANSPORT__cOVState_TRANSPORT), stored after cOVState_vtbl by
-                                    //       func_00221228 / func_002211C8 / the inlined ctor in
+                                    //       cOVState_TRANSPORT_cOVState_TRANSPORT_2 / cOVState_TRANSPORT_cOVState_TRANSPORT / the inlined ctor in
                                     //       cOVStateManager_triggerOverlay
     // --- cUIState (ui/uistate.h; same offsets as On Tour)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor

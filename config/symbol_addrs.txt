@@ -10899,6 +10899,17 @@ cWScriptCache_load1 = 0x003ACA10; //type:func
 cWScriptCacheEntry_load = 0x003ACBB8; //type:func
 cWScriptCacheEntry_load1 = 0x003ACC50; //type:func
 
+// 2026-11-21-funcs-dtors: names by evidence (docs/function_names.tsv)
+cBEScoreInterface_processHighlight = 0x00155390; //type:func
+cBraggingRightsMenu__cBraggingRightsMenu = 0x001DF440; //type:func
+cOVState_BIGCHALLENGE_FAIL_cOVState_BIGCHALLENGE_FAIL = 0x00221040; //type:func
+cOVState_BIGCHALLENGE_FAIL_cOVState_BIGCHALLENGE_FAIL_2 = 0x002210A0; //type:func
+cOVState_TRANSPORT_cOVState_TRANSPORT = 0x002211C8; //type:func
+cOVState_TRANSPORT_cOVState_TRANSPORT_2 = 0x00221228; //type:func
+cGenericStreamPause__cGenericStreamPause = 0x002443C0; //type:func
+cStreamPause__cStreamPause = 0x00245F00; //type:func
+SSXStatsMan = 0x002D20F8; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

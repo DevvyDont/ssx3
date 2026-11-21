@@ -56,7 +56,7 @@ CHECK_SIZE(cFEStateRuleSelect, 0x9C);
 // cFEStateBraggingRights's next member is at 0x738); [O] On Tour's class is 0x34 too. It has virtuals (EA's
 // ~cBraggingRightsMenu): g++ 2.95 puts the vptr after the data, at 0x30.
 // [R] cBraggingRightsMenu_cBraggingRightsMenu (fe/festateruleselect 0x001926F0) stores its vtable cBraggingRightsMenu_vtbl (1 slot:
-// the destructor func_001DF440, fe/fepopupmisc) at 0x30 and zeroes 0x0, 0x4, the eight list boxes, 0x28 and 0x2C.
+// the destructor cBraggingRightsMenu__cBraggingRightsMenu, fe/fepopupmisc) at 0x30 and zeroes 0x0, 0x4, the eight list boxes, 0x28 and 0x2C.
 
 struct cUIMenu;
 struct cUIGroup;
@@ -72,7 +72,7 @@ struct cBraggingRightsMenu {
                                     //       onGainFocus / onWidgetEvent / onWidgetMenu / updateConfirmedState test it
     int mcItemEnableFlag;           // 0x02C [O]; [R] 0; [U] setEnableFlag stores it, isItemEnable / setEnableItem test its
                                     //       bits
-    void** mVtbl;                   // 0x030 [R] cBraggingRightsMenu_vtbl (ctor); the dtor func_001DF440 stores it again
+    void** mVtbl;                   // 0x030 [R] cBraggingRightsMenu_vtbl (ctor); the dtor cBraggingRightsMenu__cBraggingRightsMenu stores it again
 };
 
 CHECK_OFFSET(cBraggingRightsMenu, mpPlayerMenu, 0x000);

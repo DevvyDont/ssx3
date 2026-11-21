@@ -3312,7 +3312,7 @@ extern "C" void cOVState_BIGCHALLENGE_START__cOVState_BIGCHALLENGE_START(cOVStat
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221040);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_BIGCHALLENGE_FAIL_cOVState_BIGCHALLENGE_FAIL);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_BIGCHALLENGE_FAIL_vtbl[];
@@ -3324,13 +3324,13 @@ extern unsigned short str_sp_b[];
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
- * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Unlike func_002210A0
+ * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Unlike cOVState_BIGCHALLENGE_FAIL_cOVState_BIGCHALLENGE_FAIL_2
  * it does not call cOVState_BIGCHALLENGE_FAIL_getChallengeData. Out-of-line copy with no callers.
  *
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_00221040(cOVState_BIGCHALLENGE_FAIL* ovState) {
+extern "C" void *cOVState_BIGCHALLENGE_FAIL_cOVState_BIGCHALLENGE_FAIL(cOVState_BIGCHALLENGE_FAIL* ovState) {
     cUIState_cUIState(ovState, 0);
     (ovState->mOVID) = 0;
     (ovState->mDoneTransition) = 0;
@@ -3345,7 +3345,7 @@ extern "C" void *func_00221040(cOVState_BIGCHALLENGE_FAIL* ovState) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002210A0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_BIGCHALLENGE_FAIL_cOVState_BIGCHALLENGE_FAIL_2);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cOVState_BIGCHALLENGE_FAIL_getChallengeData(void*);
@@ -3370,7 +3370,7 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_002210A0(cOVState_BIGCHALLENGE_FAIL* ovState, int engine, int overlayId) {
+extern "C" void *cOVState_BIGCHALLENGE_FAIL_cOVState_BIGCHALLENGE_FAIL_2(cOVState_BIGCHALLENGE_FAIL* ovState, int engine, int overlayId) {
     cUIState_cUIState_10A0(ovState);
     (ovState->mOVID) = overlayId;
     (ovState->mDoneTransition) = 0;
@@ -3467,7 +3467,7 @@ extern "C" void *cOVState_TOPTIMES_cOVState_TOPTIMES(cOVState_TOPTIMES* ovState,
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_002211C8);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_TRANSPORT_cOVState_TRANSPORT);
 #ifdef SKIP_ASM
 extern "C" void *cUIState_cUIState(void*, ...);
 extern char cOVState_TRANSPORT_vtbl[];
@@ -3479,13 +3479,13 @@ extern unsigned short str_sp_b[];
  *
  * Runs cUIState_cUIState with a null engine, then the inlined cOVState part with overlay id 0: mOVID (0x98),
  * mDoneTransition (0x48), mAllowPauseMenu (0x4C) and mRemovePDA (0x54) are cleared, mszChatBuff (0x58) gets " " (one
- * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Unlike func_00221228
+ * halfword from str_sp_b) and the cOVState vtable cOVState_vtbl is stored before the class's own. Unlike cOVState_TRANSPORT_cOVState_TRANSPORT_2
  * it does not run cUITemplate_MAP_init on the member at 0x9C. Out-of-line copy with no callers.
  *
  * @param ovState  the object to construct
  * @return @p ovState
  */
-extern "C" void *func_002211C8(cOVState_TRANSPORT* ovState) {
+extern "C" void *cOVState_TRANSPORT_cOVState_TRANSPORT(cOVState_TRANSPORT* ovState) {
     cUIState_cUIState(ovState, 0);
     (ovState->mOVID) = 0;
     (ovState->mDoneTransition) = 0;
@@ -3500,7 +3500,7 @@ extern "C" void *func_002211C8(cOVState_TRANSPORT* ovState) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221228);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_TRANSPORT_cOVState_TRANSPORT_2);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void *cUITemplate_MAP_init(void*);
@@ -3525,7 +3525,7 @@ extern unsigned short str_sp_b[];
  * @param overlayId  the overlay id (tOVStateEnum), stored in mOVID
  * @return @p ovState
  */
-extern "C" void *func_00221228(cOVState_TRANSPORT* ovState, int engine, int overlayId) {
+extern "C" void *cOVState_TRANSPORT_cOVState_TRANSPORT_2(cOVState_TRANSPORT* ovState, int engine, int overlayId) {
     cUIState_cUIState_1228(ovState);
     (ovState->mOVID) = overlayId;
     (ovState->mDoneTransition) = 0;

@@ -13,7 +13,7 @@
 // cOVState_BIGCHALLENGE_START__cOVState_BIGCHALLENGE_START. On Tour: size 0x94, one member.
 //
 // cOVState_BIGCHALLENGE_FAIL: the challenge-failed screen (overlay id 30). Allocated 0xA4 (+ getChallengeData).
-// Vtable cOVState_BIGCHALLENGE_FAIL_vtbl; constructors func_002210A0 (engine, id; calls getChallengeData) and func_00221040 (no engine);
+// Vtable cOVState_BIGCHALLENGE_FAIL_vtbl; constructors cOVState_BIGCHALLENGE_FAIL_cOVState_BIGCHALLENGE_FAIL_2 (engine, id; calls getChallengeData) and cOVState_BIGCHALLENGE_FAIL_cOVState_BIGCHALLENGE_FAIL (no engine);
 // destructor cOVState_BIGCHALLENGE_FAIL__cOVState_BIGCHALLENGE_FAIL. On Tour: size 0x98, mMissionId + mRider.
 //
 // cOVState_BIGCHALLENGE_PASS is On Tour only: retail has no vtable, constructor or overlay id for it (the preview

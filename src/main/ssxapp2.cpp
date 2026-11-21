@@ -68,7 +68,7 @@ INCLUDE_ASM("main/ssxapp2", cGFReplayStartState__cGFReplayStartState);
 
 INCLUDE_ASM("main/ssxapp2", func_00244240);
 
-INCLUDE_ASM("main/ssxapp2", func_002443C0);
+INCLUDE_ASM("main/ssxapp2", cGenericStreamPause__cGenericStreamPause);
 
 INCLUDE_ASM("main/ssxapp2", cGenericStreamPause_StreamFocusRender);
 

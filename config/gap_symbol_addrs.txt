@@ -488,7 +488,6 @@ func_001550E8 = 0x001550E8; //type:func
 func_00155130 = 0x00155130; //type:func
 func_00155190 = 0x00155190; //type:func
 func_00155208 = 0x00155208; //type:func
-func_00155390 = 0x00155390; //type:func
 func_00155420 = 0x00155420; //type:func
 lbl_00155530 = 0x00155530; //type:label
 lbl_00155564 = 0x00155564; //type:label
@@ -1934,7 +1933,6 @@ lbl_001D8F90 = 0x001D8F90; //type:label
 // --- src/fe/festatenethelppopup.cpp ---
 
 // --- src/fe/fepopupmisc.cpp ---
-func_001DF440 = 0x001DF440; //type:func
 func_001E08D0__FPv = 0x001E08D0; //type:func
 func_001E0940__FPv = 0x001E0940; //type:func
 func_001E0948__FPv = 0x001E0948; //type:func
@@ -2656,7 +2654,6 @@ func_00242EB8 = 0x00242EB8; //type:func
 
 // --- src/main/ssxappdtor.cpp ---
 func_00244240 = 0x00244240; //type:func
-func_002443C0 = 0x002443C0; //type:func
 func_00244630 = 0x00244630; //type:func
 func_00244690 = 0x00244690; //type:func
 func_002446C0 = 0x002446C0; //type:func
@@ -2676,7 +2673,6 @@ func_002458B8 = 0x002458B8; //type:func
 func_00245E30 = 0x00245E30; //type:func
 func_00245E78 = 0x00245E78; //type:func
 func_00245EC0 = 0x00245EC0; //type:func
-func_00245F00 = 0x00245F00; //type:func
 func_00245F30__FPv = 0x00245F30; //type:func
 func_00245F50 = 0x00245F50; //type:func
 func_00246098 = 0x00246098; //type:func
