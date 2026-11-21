@@ -5164,13 +5164,13 @@ extern "C" void nash_Cell_descend1(nash_Cell* self, sOctCollect* out)
         out->arr[(*out->count)++] = objNode;
     }
     if (*(void**)&self->children[0]) nash_Cell_descend1((nash_Cell*)(*(void**)&self->children[0]), out);
-    if (*(void**)((char*)self + 0x4)) nash_Cell_descend1((nash_Cell*)(*(void**)((char*)self + 0x4)), out);
-    if (*(void**)((char*)self + 0x8)) nash_Cell_descend1((nash_Cell*)(*(void**)((char*)self + 0x8)), out);
-    if (*(void**)((char*)self + 0xC)) nash_Cell_descend1((nash_Cell*)(*(void**)((char*)self + 0xC)), out);
+    if (self->children[0][0][1]) nash_Cell_descend1((nash_Cell*)(self->children[0][0][1]), out);
+    if (self->children[0][1][0]) nash_Cell_descend1((nash_Cell*)(self->children[0][1][0]), out);
+    if (self->children[0][1][1]) nash_Cell_descend1((nash_Cell*)(self->children[0][1][1]), out);
     if (*(void**)&self->children[1]) nash_Cell_descend1((nash_Cell*)(*(void**)&self->children[1]), out);
-    if (*(void**)((char*)self + 0x14)) nash_Cell_descend1((nash_Cell*)(*(void**)((char*)self + 0x14)), out);
-    if (*(void**)((char*)self + 0x18)) nash_Cell_descend1((nash_Cell*)(*(void**)((char*)self + 0x18)), out);
-    if (*(void**)((char*)self + 0x1C)) nash_Cell_descend1((nash_Cell*)(*(void**)((char*)self + 0x1C)), out);
+    if (self->children[1][0][1]) nash_Cell_descend1((nash_Cell*)(self->children[1][0][1]), out);
+    if (self->children[1][1][0]) nash_Cell_descend1((nash_Cell*)(self->children[1][1][0]), out);
+    if (self->children[1][1][1]) nash_Cell_descend1((nash_Cell*)(self->children[1][1][1]), out);
 }
 #endif
 
@@ -5351,13 +5351,13 @@ extern "C" void nash_Cell_descend4(nash_Cell* self, void* ctx)
         TerrainCallback_intersectinstance(ctx, objNode);
     }
     if (*(void**)&self->children[0]) nash_Cell_descend4((nash_Cell*)(*(void**)&self->children[0]), ctx);
-    if (*(void**)((char*)self + 0x4)) nash_Cell_descend4((nash_Cell*)(*(void**)((char*)self + 0x4)), ctx);
-    if (*(void**)((char*)self + 0x8)) nash_Cell_descend4((nash_Cell*)(*(void**)((char*)self + 0x8)), ctx);
-    if (*(void**)((char*)self + 0xC)) nash_Cell_descend4((nash_Cell*)(*(void**)((char*)self + 0xC)), ctx);
+    if (self->children[0][0][1]) nash_Cell_descend4((nash_Cell*)(self->children[0][0][1]), ctx);
+    if (self->children[0][1][0]) nash_Cell_descend4((nash_Cell*)(self->children[0][1][0]), ctx);
+    if (self->children[0][1][1]) nash_Cell_descend4((nash_Cell*)(self->children[0][1][1]), ctx);
     if (*(void**)&self->children[1]) nash_Cell_descend4((nash_Cell*)(*(void**)&self->children[1]), ctx);
-    if (*(void**)((char*)self + 0x14)) nash_Cell_descend4((nash_Cell*)(*(void**)((char*)self + 0x14)), ctx);
-    if (*(void**)((char*)self + 0x18)) nash_Cell_descend4((nash_Cell*)(*(void**)((char*)self + 0x18)), ctx);
-    if (*(void**)((char*)self + 0x1C)) nash_Cell_descend4((nash_Cell*)(*(void**)((char*)self + 0x1C)), ctx);
+    if (self->children[1][0][1]) nash_Cell_descend4((nash_Cell*)(self->children[1][0][1]), ctx);
+    if (self->children[1][1][0]) nash_Cell_descend4((nash_Cell*)(self->children[1][1][0]), ctx);
+    if (self->children[1][1][1]) nash_Cell_descend4((nash_Cell*)(self->children[1][1][1]), ctx);
 }
 #endif
 
@@ -5381,13 +5381,13 @@ extern "C" void nash_Cell_descend5(nash_Cell* self, void* ctx)
         StaticObjectCallback_intersectinstance(ctx, objNode);
     }
     if (*(void**)&self->children[0]) nash_Cell_descend5((nash_Cell*)(*(void**)&self->children[0]), ctx);
-    if (*(void**)((char*)self + 0x4)) nash_Cell_descend5((nash_Cell*)(*(void**)((char*)self + 0x4)), ctx);
-    if (*(void**)((char*)self + 0x8)) nash_Cell_descend5((nash_Cell*)(*(void**)((char*)self + 0x8)), ctx);
-    if (*(void**)((char*)self + 0xC)) nash_Cell_descend5((nash_Cell*)(*(void**)((char*)self + 0xC)), ctx);
+    if (self->children[0][0][1]) nash_Cell_descend5((nash_Cell*)(self->children[0][0][1]), ctx);
+    if (self->children[0][1][0]) nash_Cell_descend5((nash_Cell*)(self->children[0][1][0]), ctx);
+    if (self->children[0][1][1]) nash_Cell_descend5((nash_Cell*)(self->children[0][1][1]), ctx);
     if (*(void**)&self->children[1]) nash_Cell_descend5((nash_Cell*)(*(void**)&self->children[1]), ctx);
-    if (*(void**)((char*)self + 0x14)) nash_Cell_descend5((nash_Cell*)(*(void**)((char*)self + 0x14)), ctx);
-    if (*(void**)((char*)self + 0x18)) nash_Cell_descend5((nash_Cell*)(*(void**)((char*)self + 0x18)), ctx);
-    if (*(void**)((char*)self + 0x1C)) nash_Cell_descend5((nash_Cell*)(*(void**)((char*)self + 0x1C)), ctx);
+    if (self->children[1][0][1]) nash_Cell_descend5((nash_Cell*)(self->children[1][0][1]), ctx);
+    if (self->children[1][1][0]) nash_Cell_descend5((nash_Cell*)(self->children[1][1][0]), ctx);
+    if (self->children[1][1][1]) nash_Cell_descend5((nash_Cell*)(self->children[1][1][1]), ctx);
 }
 #endif
 

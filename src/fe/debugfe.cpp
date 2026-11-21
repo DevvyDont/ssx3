@@ -3120,7 +3120,7 @@ extern "C" void* func_00180508(cScreenKeyboard* self, int parentState)
     self->mppObjectList = 0;
     cUIThing_cUIThing(self->mRootGroup, 0, 0);
     *(int**)(((char*)self) + 0x48) = cUIGroup_vtbl;
-    cList_cList(((char*)self) + 0xB4);
+    cList_cList(&self->mRootGroup[116]);
     self->mpState = (cUIState*)parentState;
     self->mVtbl = (void**)cScreenKeyboard_vtbl;
     self->mIncludeNumbers = 0;
@@ -3130,7 +3130,7 @@ extern "C" void* func_00180508(cScreenKeyboard* self, int parentState)
     self->mFirstKey = 1;
     self->mCurrentKey = 10;
     self->mMaxChars = 45;
-    *(char*)(((char*)self) + 0xEC) = 0;
+    self->mHiScoreName[0] = 0;
     self->mCursorPos = 0;
     return ((char*)self);
 }

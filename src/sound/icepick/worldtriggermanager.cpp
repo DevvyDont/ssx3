@@ -71,7 +71,7 @@ extern "C" void* cWorldTriggerInstance_cWorldTriggerInstance(cWorldTriggerInstan
     *(int*)&self->m_vPosition.z = 0;
     self->m_bTouch = 0;
     self->m_bCrowdTrigger = 0;
-    *(unsigned char*)((char*)self + 0x40) = D_004A35A8[0];
+    self->m_iSwapString[0] = D_004A35A8[0];
     self->m_iLastAnimFrame = -1.0f;
     self->m_iBankReference = 0;
     self->m_iPatchReference = 0;
@@ -415,7 +415,7 @@ extern "C" void cWorldTriggerInstance_Stop(cWorldTriggerInstance* instance)
         cBankMonitor_BANKMONITOR_StopHandle(**(char***)((char*)cAudioInterface_bxAudio() + 0x118) + 0x1D8, instance->m_iAudioHandle, 1, 0.25f);
     }
     instance->m_iAudioHandle = -1;
-    *(unsigned char*)((char*)instance + 0x40) = D_004A35A8[0];
+    instance->m_iSwapString[0] = D_004A35A8[0];
     instance->m_iLastAnimFrame = -1.0f;
     instance->m_iBankReference = 0;
     instance->m_iPatchReference = 0;
@@ -504,7 +504,7 @@ extern "C" void cWorldTriggerInstance_Reset(cWorldTriggerInstance* self)
     self->m_bInUse = 0;
     self->m_iAudioHandle = -1;
     self->m_bTouch = 0;
-    *(unsigned char*)((char*)self + 0x40) = D_004A35A8[0];
+    self->m_iSwapString[0] = D_004A35A8[0];
     self->m_iLastAnimFrame = -1.0f;
     self->m_iBankReference = 0;
     self->m_iPatchReference = 0;

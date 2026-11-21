@@ -702,7 +702,7 @@ extern "C" void func_0017E1C0_BBE8(int, void *) __asm__("func_0017E1C0");
  * @return 0
  */
 extern "C" int CreatePersonaMenu_onCommand(CreatePersonaMenu* menu) {
-    func_0017E1C0_BBE8((int)menu->unk_130, ((char*)menu) + 0x180);
+    func_0017E1C0_BBE8((int)menu->unk_130, &menu->unk_168.Text[0]);
     return 0;
 }
 #endif
@@ -747,7 +747,7 @@ extern "C" void func_0017E030_BC38(int, char*, char*) __asm__("func_0017E030");
  * @return 0
  */
 extern "C" int AccountDetailsMenu_onCommand(AccountDetailsMenu* self) {
-    func_0017E030_BC38((int)self->unk_130, ((char*)self) + 0x180, ((char*)self) + 0x1AC);
+    func_0017E030_BC38((int)self->unk_130, (char*)&self->unk_168.Text[0], (char*)&self->unk_194.Text[0]);
     return 0;
 }
 #endif
@@ -770,7 +770,7 @@ extern "C" void func_0017E118_BC68(int, char*, char*) __asm__("func_0017E118");
  * @return 0
  */
 extern "C" int AccountDetailsMenu_onCommand1(AccountDetailsMenu* self) {
-    func_0017E118_BC68((int)self->unk_130, ((char*)self) + 0x180, ((char*)self) + 0x1AC);
+    func_0017E118_BC68((int)self->unk_130, (char*)&self->unk_168.Text[0], (char*)&self->unk_194.Text[0]);
     return 0;
 }
 #endif
@@ -2499,7 +2499,7 @@ extern "C" void *cScreenKeyboard_cScreenKeyboard(cScreenKeyboard* self) {
     self->mppObjectList = 0;
     cUIThing_cUIThing(self->mRootGroup, 0, 0);
     *(int **)(((char*)self) + 0x48) = cUIGroup_vtbl;
-    cList_cList(((char*)self) + 0xB4);
+    cList_cList(&self->mRootGroup[116]);
     self->mpState = 0;
     self->mVtbl = (void**)cScreenKeyboard_vtbl;
     return ((char*)self);

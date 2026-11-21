@@ -1353,7 +1353,7 @@ extern "C" void cFEStateCharEquip_cancelLargePreviewLoad(cFEStateCharEquip* self
     if (idx >= 0) {
         func_0019DC20((sEquipTable_DC20*)((char*)SSXApp->RealFE + 0x1A70), self->mCharID, idx);
     }
-    *(char*)((char*)self + 0x960) = 0;
+    self->mLargePreviewFileName[0] = 0;
     self->mPreviewTextureFileIndex = -1;
     self->mLargePreviewDelay = -1;
 }

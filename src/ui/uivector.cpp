@@ -4067,8 +4067,8 @@ extern "C" void* cUIScrollBar_cUIScrollBar(cUIScrollBar* self)
     self->mValue = 0;
     self->mNumValues = 0;
     self->mPage = 0;
-    *(char*)(((char*)self) + 0x8C) = 0;
-    *(char*)(((char*)self) + 0xA5) = 0;
+    self->mszUpAnimation[0] = 0;
+    self->mszDownAnimation[0] = 0;
     return ((char*)self);
 }
 #endif

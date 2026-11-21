@@ -1076,7 +1076,7 @@ extern "C" void cSSXAudio_InGameLoad(cSSXAudio* self)
     __builtin_memcpy(ext, D_004A35A0, 6);
     cSSXAudio_InitSoundLevels((cSSXAudio*)self, 1);
     cAsyncSys_Init3(**(cAsyncSys***)&self->MusicSys, 0, 0);
-    *(char*)(((char*)self) + 0x5838) = D_004A35A8[0];
+    self->mUsedBank[0] = D_004A35A8[0];
     self->mNextUsedBank = 0;
     FileParser_FileParser_r(&parser, str_H_H, 0x100);
     parser.cur = parser.start;

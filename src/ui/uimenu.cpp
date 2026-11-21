@@ -219,10 +219,10 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
     int result = 0;
     unsigned char old = self->mScrollItemCurrent;
     int moveResult;
-    if ((inputBtn_B000(in, *(signed char*)(((char*)self) + 0x94)) && !(self->mAttr & 1)) ||
-        (inputBtn_B000(in, *(signed char*)(((char*)self) + 0x92)) && (self->mAttr & 1))) {
+    if ((inputBtn_B000(in, self->mInputMap[3]) && !(self->mAttr & 1)) ||
+        (inputBtn_B000(in, self->mInputMap[1]) && (self->mAttr & 1))) {
         unsigned short ev;
-        if (inputBtn_B000(in, *(signed char*)(((char*)self) + 0x94)) && !(self->mAttr & 1)) {
+        if (inputBtn_B000(in, self->mInputMap[3]) && !(self->mAttr & 1)) {
             ev = cUIThing_getKeyframerEvent((cUIThing*)self, 9);
         } else {
             ev = cUIThing_getKeyframerEvent((cUIThing*)self, 7);
@@ -242,10 +242,10 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
                 result = cUIThing_getSound(self->mpSelected, 0);
             }
         }
-    } else if ((inputBtn_B000(in, *(signed char*)(((char*)self) + 0x93)) && !(self->mAttr & 1)) ||
-               (inputBtn_B000(in, *(signed char*)(((char*)self) + 0x91)) && (self->mAttr & 1))) {
+    } else if ((inputBtn_B000(in, self->mInputMap[2]) && !(self->mAttr & 1)) ||
+               (inputBtn_B000(in, self->mInputMap[0]) && (self->mAttr & 1))) {
         unsigned short ev;
-        if (inputBtn_B000(in, *(signed char*)(((char*)self) + 0x93)) && !(self->mAttr & 1)) {
+        if (inputBtn_B000(in, self->mInputMap[2]) && !(self->mAttr & 1)) {
             ev = cUIThing_getKeyframerEvent((cUIThing*)self, 8);
         } else {
             ev = cUIThing_getKeyframerEvent((cUIThing*)self, 6);

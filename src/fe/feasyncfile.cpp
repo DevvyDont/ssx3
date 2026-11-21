@@ -16250,8 +16250,8 @@ void* func_001B70A8(void* vself)
 {
     cFEStateNetAccountMem* self = (cFEStateNetAccountMem*)vself;
     int zero = 0;
-    *(signed char*)((char*)self + 0x6e0) = (signed char)zero;
-    *(signed char*)((char*)self + 0x6f1) = (signed char)zero;
+    self->mszUserName[0] = (signed char)zero;
+    self->mszPassword[0] = (signed char)zero;
     return func_001B7778((cFEStateNetAccountMem*)self);
 }
 #endif

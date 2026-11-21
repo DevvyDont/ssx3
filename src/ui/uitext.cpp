@@ -705,15 +705,15 @@ INCLUDE_ASM("ui/uitext", cUITextScroll_setInputMap);
 extern "C" void cUITextScroll_setInputMap(cUITextScroll* self, char value)
 {
     if (value == 0) {
-        *(char*)((char*)self + 0x88) = 0;
-        *(char*)((char*)self + 0x89) = 1;
-        *(char*)((char*)self + 0x8A) = 2;
-        *(char*)((char*)self + 0x8B) = 3;
+        self->mInputMap[0] = 0;
+        self->mInputMap[1] = 1;
+        self->mInputMap[2] = 2;
+        self->mInputMap[3] = 3;
     } else {
-        *(char*)((char*)self + 0x88) = 4;
-        *(char*)((char*)self + 0x89) = 5;
-        *(char*)((char*)self + 0x8A) = 6;
-        *(char*)((char*)self + 0x8B) = 7;
+        self->mInputMap[0] = 4;
+        self->mInputMap[1] = 5;
+        self->mInputMap[2] = 6;
+        self->mInputMap[3] = 7;
     }
 }
 #endif

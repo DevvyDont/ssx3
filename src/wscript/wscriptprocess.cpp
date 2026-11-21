@@ -1529,7 +1529,7 @@ extern "C" void cWScriptMan_init(cWScriptMan* self)
     MEM_fill((char*)self->MissionTrick, 0, 8);
     tMissionMenuQueue_init(&self->MissionMenuQueue);
     WSP308988_I(0x40) = 0;
-    MEM_fill((char*)self + 0x44, 0, 0x180);
+    MEM_fill(&self->Events[4], 0, 0x180);
     cWScriptMan_rebuildGlobalTables(self);
 }
 

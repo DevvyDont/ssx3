@@ -428,15 +428,15 @@ INCLUDE_ASM("ui/uilistbox", cUIMenu_setInputMap);
 extern "C" void cUIMenu_setInputMap(cUIMenu* self, char value)
 {
     if (value == 0) {
-        *(char*)((char*)self + 0x91) = 0;
-        *(char*)((char*)self + 0x92) = 1;
-        *(char*)((char*)self + 0x93) = 2;
-        *(char*)((char*)self + 0x94) = 3;
+        self->mInputMap[0] = 0;
+        self->mInputMap[1] = 1;
+        self->mInputMap[2] = 2;
+        self->mInputMap[3] = 3;
     } else {
-        *(char*)((char*)self + 0x91) = 4;
-        *(char*)((char*)self + 0x92) = 5;
-        *(char*)((char*)self + 0x93) = 6;
-        *(char*)((char*)self + 0x94) = 7;
+        self->mInputMap[0] = 4;
+        self->mInputMap[1] = 5;
+        self->mInputMap[2] = 6;
+        self->mInputMap[3] = 7;
     }
 }
 #endif

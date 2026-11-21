@@ -118,7 +118,7 @@ extern "C" void cStreamMan_reset(cStreamMan* self)
     self->m_ActiveHull = -1;
     self->m_bLimitBandWidth = 1;
     self->m_uiNumHullChunk = (unsigned int)0;
-    *(char*)((char*)self + 0x4) = 0;
+    self->m_filename[0] = 0;
     self->m_bActive = 0;
     self->m_uiBxChunkSizeLeft = (unsigned int)0;
     self->m_pBxChunkMemHandle = 0;

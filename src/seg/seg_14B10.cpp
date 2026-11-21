@@ -2424,7 +2424,7 @@ INCLUDE_ASM("seg/seg_14B10", cHUDFX_copyDispStr);
  */
 extern "C" void cHUDFX_copyDispStr(cHUDFX* self, signed char *str) {
     signed char *src = str;
-    unsigned char *dst = (unsigned char*)(((char*)self) + 0x18);
+    unsigned char *dst = (unsigned char*)(&self->DisplayStr[0]);
     if (src != 0) {
         while (*src != 0) {
             *dst = *src;

@@ -592,8 +592,8 @@ extern "C" void* AccountDetailsMenu_AccountDetailsMenu(AccountDetailsMenu* self,
     cMenu_addItem(self, &self->unk_194, -1);
     cMenu_addItem(self, &self->unk_1C0, -1);
     cMenu_addItem(self, &self->unk_1E4, -1);
-    copyName_1DA648((char*)self + 0x180, SSXApp->UserName);
-    copyName_1DA648((char*)self + 0x1AC, SSXApp->Password);
+    copyName_1DA648((char*)&self->unk_168.Text[0], SSXApp->UserName);
+    copyName_1DA648((char*)&self->unk_194.Text[0], SSXApp->Password);
     return ((void*)self);
 }
 #endif
@@ -654,8 +654,8 @@ extern "C" void* AccountDetailsMenu_AccountDetailsMenu1(AccountDetailsMenu* self
     cMenu_addItem(self, &self->unk_194, -1);
     cMenu_addItem(self, &self->unk_1C0, -1);
     cMenu_addItem(self, &self->unk_1E4, -1);
-    copyName_1DA7E8((char*)self + 0x180, SSXApp->UserName);
-    copyName_1DA7E8((char*)self + 0x1AC, SSXApp->Password);
+    copyName_1DA7E8((char*)&self->unk_168.Text[0], SSXApp->UserName);
+    copyName_1DA7E8((char*)&self->unk_194.Text[0], SSXApp->Password);
     return ((void*)self);
 }
 #endif

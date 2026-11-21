@@ -3759,7 +3759,7 @@ extern "C" void* cKeyboardPopup_cKeyboardPopup(cKeyboardPopup* self, cUIEngine* 
     self->miMinCharacters = 0;
     self->mbShiftOn = 0;
     self->mbCapsOn = 1;
-    *(char*)((char*)self + 0x74) = 0;
+    self->mszEditString[0] = 0;
     self->miCursorPos = 0;
     self->miViewableStartIndex = 0;
     self->miViewableEndIndex = 0;

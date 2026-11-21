@@ -2988,7 +2988,7 @@ void* cSpeechBank_cSpeechBank(void* vself)
     self->mOwnsData = zero;
     *(int*)self = -1;
     self->mpData = (void*)zero;
-    *(signed char*)((char*)self + 0x4) = (signed char)zero;
+    self->mName[0] = (signed char)zero;
     return ((void*)self);
 }
 #endif
@@ -4795,8 +4795,8 @@ extern "C" void* cSongConfiguration_cSongConfiguration(cSongConfiguration* self)
     self->mLowPass = 0xFFFF;
     self->mPreview = -1;
     self->mSongBig = 1;
-    *(unsigned char*)((char*)self + 0x0) = D_004A35A8[0];
-    *(unsigned char*)((char*)self + 0x20) = D_004A35A8[0];
+    self->mPathData[0] = D_004A35A8[0];
+    self->mMusData[0] = D_004A35A8[0];
     cSongConfiguration_cSongConfiguration_sElem20* bankData = (cSongConfiguration_cSongConfiguration_sElem20*)&self->mBankData;
     for (int i = 0; i >= 0; i--, bankData++) {
         bankData->b = D_004A35A8[0];

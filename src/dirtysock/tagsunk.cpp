@@ -6329,8 +6329,8 @@ void func_00261058(void* vself)
     BuddyMan* self = (BuddyMan*)vself;
     *(char*)self = 0;
     self->miPort = -1;
-    *(char*)((char*)self + 0x44) = 0;
-    *(char*)((char*)self + 0x64) = 0;
+    self->mUserName[0] = 0;
+    self->mPassword[0] = 0;
 }
 #endif
 

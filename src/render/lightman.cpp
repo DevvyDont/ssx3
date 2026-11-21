@@ -2525,7 +2525,7 @@ extern "C" void* cFont_cFont1(cFont* self)
     self->MaxCharHeight = 0;
     self->FirstCode = 0;
     self->LastLinearCode = 0;
-    *(char*)(((char*)self) + 0x64) = 0;
+    self->FontName[0] = 0;
     return ((char*)self);
 }
 #endif

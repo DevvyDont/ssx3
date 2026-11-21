@@ -1036,7 +1036,7 @@ extern "C" void* cBankInstance_cBankInstance(cBankInstance* self)
     self->mMainMemDataSize = 0;
     self->mpNext = 0;
     self->mpPrev = 0;
-    *(char*)((char*)self + 0x20) = 0;
+    self->mBankFilename[0] = 0;
     return ((void*)self);
 }
 #endif
