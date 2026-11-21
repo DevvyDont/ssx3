@@ -390,14 +390,14 @@ extern "C" void cGame_renderFogVolumes(cGame* self, void* world)
     int n = *(int*)((char*)world + 0x78B4);
     if (n != 0) {
         cFogParticleMan* fogMan = self->FogMan;
-        sVEntry_renderFog* vt = *(sVEntry_renderFog**)((char*)fogMan + 0x4);
+        sVEntry_renderFog* vt = (sVEntry_renderFog*)fogMan->mVtbl;
         vt[2].fn((char*)fogMan + vt[2].delta, fog, n, 0);
     }
     fog = (char*)world + 0x7AC0;
     n = *(int*)((char*)world + 0x7ABC);
     if (n != 0) {
         cFogParticleMan* fogMan = self->FogMan;
-        sVEntry_renderFog* vt = *(sVEntry_renderFog**)((char*)fogMan + 0x4);
+        sVEntry_renderFog* vt = (sVEntry_renderFog*)fogMan->mVtbl;
         vt[2].fn((char*)fogMan + vt[2].delta, fog, n, 2);
     }
     cFogParticleMan_render(self->FogMan);
@@ -1068,7 +1068,7 @@ extern "C" void cSectionMan_activateSection(cSectionMan* self_, int i)
     case 1:
     case 5:
         cSectionMan_mSectionMap[i].field_0x8 = 2;
-        cWorldView_activateSection_478(*(char**)*(char**)((char*)self_->mpGame + 0x10) + 0x10, cSectionMan_mSectionMap[i].field_0x4);
+        cWorldView_activateSection_478(*(char**)(char*)self_->mpGame->World + 0x10, cSectionMan_mSectionMap[i].field_0x4);
         changed = 1;
         break;
     case 8:
@@ -1405,7 +1405,7 @@ extern "C" void cSectionMan_update(cSectionMan* self)
     } else if (self->mbLocationIsActivated == 0) {
         self->mStreamRate = 3;
     } else {
-        char* w = *(char**)*(char**)((char*)self->mpGame + 0x10);
+        char* w = *(char**)(char*)self->mpGame->World;
         if (*(int*)(w + 0x250) != 0 && *(int*)(w + 0x2A0) != 0) {
             self->mStreamRate = 1;
         } else {
@@ -1445,7 +1445,7 @@ extern "C" void cSectionMan_update(cSectionMan* self)
     } else {
         self->m_bStreamReady = 1;
     }
-    cStreamMan_setBandWidthLimit(*(char**)*(char**)((char*)self->mpGame + 0x10) + 0x300, D_00442150[self->mStreamRate]);
+    cStreamMan_setBandWidthLimit(*(char**)(char*)self->mpGame->World + 0x300, D_00442150[self->mStreamRate]);
 }
 #endif
 
@@ -1495,10 +1495,10 @@ extern "C" void cSectionMan_skySwap(cSectionMan* self)
         }
     }
     int id = cSectionMan_mSectionMap[self->m_iNextSkySectionID].field_0x4;
-    void* skyBox = *(void**)((char*)self->mpGame + 0x14);
+    void* skyBox = self->mpGame->SkyBox;
     if (*(int*)((char*)skyBox + 0x10) != id) {
         cSkyBox_reset(skyBox);
-        cSkyBox_setSection(*(void**)((char*)self->mpGame + 0x14), id);
+        cSkyBox_setSection(self->mpGame->SkyBox, id);
     }
     self->m_bTriggerSkySwap = 0;
     self->m_bSkySwapPending = 0;
