@@ -1513,8 +1513,8 @@ static inline sEconItem_001520E8* getItem_001520E8(sEconItems_001520E8* self, in
 extern "C" int func_001520E8(cBECharProfileDB* self, int* changed)
 {
     void* db = func_0014BDB8(((sEconItems_001520E8*)self));
-    int n = func_0014D988(db, *((signed char*)self + 0xBC0));
-    sEconDef_001520E8* def = (sEconDef_001520E8*)func_0014D998(db, *((signed char*)self + 0xBC0));
+    int n = func_0014D988(db, *((char*)&self->unk_BC0));
+    sEconDef_001520E8* def = (sEconDef_001520E8*)func_0014D998(db, *((char*)&self->unk_BC0));
     *changed = 0;
     for (int i = 0; i < n; i++, def++)
     {

@@ -211,7 +211,7 @@ extern "C" void cCameraTriggerMan__cCameraTriggerMan(cCameraTriggerMan* self, in
 {
     cCameraTriggerMan_purge(self);
     if ((char*)&self->ActiveTriggerList != 0) {
-        char* activeList = (char*)self + 0x14 + 8;
+        char* activeList = (char*)&self->ActiveTriggerList[0] + 8;
         while ((char*)&self->ActiveTriggerList != activeList) {
             activeList -= 4;
             cActiveTriggerList__cActiveTriggerList(activeList, 0);
@@ -243,9 +243,9 @@ extern "C" void cCameraTriggerMan_init(cCameraTriggerMan* self)
 {
     cCameraTriggerList_init((cCameraTriggerList*)self);
     cActiveTriggerList_purge((cActiveTriggerList*)&self->ActiveTriggerList);
-    cActiveTriggerList_purge((cActiveTriggerList*)((char*)self + 0x18));
+    cActiveTriggerList_purge((cActiveTriggerList*)(&self->ActiveTriggerList[1]));
     cCameraTriggerStack_init((cCameraTriggerStack*)&self->CameraTriggerStack);
-    cCameraTriggerStack_init((cCameraTriggerStack*)((char*)self + 0x3C));
+    cCameraTriggerStack_init((cCameraTriggerStack*)(&self->CameraTriggerStack[1]));
     cCamera_resetChaseControllerSwitches();
 }
 #endif
@@ -266,9 +266,9 @@ extern "C" void cCamera_resetChaseControllerSwitches(void);
 extern "C" void cCameraTriggerMan_initOnRestart(cCameraTriggerMan* self)
 {
     cActiveTriggerList_purge((cActiveTriggerList*)&self->ActiveTriggerList);
-    cActiveTriggerList_purge((cActiveTriggerList*)((char*)self + 0x18));
+    cActiveTriggerList_purge((cActiveTriggerList*)(&self->ActiveTriggerList[1]));
     cCameraTriggerStack_init((cCameraTriggerStack*)&self->CameraTriggerStack);
-    cCameraTriggerStack_init((cCameraTriggerStack*)((char*)self + 0x3C));
+    cCameraTriggerStack_init((cCameraTriggerStack*)(&self->CameraTriggerStack[1]));
     cCamera_resetChaseControllerSwitches();
 }
 #endif

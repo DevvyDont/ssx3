@@ -1064,8 +1064,8 @@ extern "C" int cComputer_checkForAttack(cComputer* self, int oppID)
 {
     cRider* rider = self->mRider;
     int shouldAttack = 0;
-    if (*(int*)((char*)rider + 0xf0) != 0) {
-        shouldAttack = *(int*)((char*)rider + 0xf8) == oppID;
+    if (rider->mHasRival != 0) {
+        shouldAttack = rider->mRivalIndex == oppID;
     }
     return shouldAttack;
 }
@@ -1110,7 +1110,7 @@ extern "C" int cComputer_checkForBlock(cComputer* self)
     int i;
     for (i = 0; i < ai->count; i++)
     {
-        char* myBeing = (char*)self->mRider + 0x6C0;
+        char* myBeing = (char*)&self->mRider->mVtbl;
         sVE_0010DA10* ve = &(*(sVE_0010DA10**)myBeing)[7];
         if (i == ve->fn(myBeing + ve->delta))
             continue;
@@ -1123,7 +1123,7 @@ extern "C" int cComputer_checkForBlock(cComputer* self)
         if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(ai->riders[i] + 0x784), 1) != 13)
             continue;
         unsigned int randomRoll = AIrand() % 100;
-        int* pf = (int*)(((char*)self) + 0xF34);
+        int* pf = (int*)(&self->mShouldIBlock);
         *pf = (float)randomRoll < 25.0f;
         self->mBlockTimer = 2.0f;
         return self->mShouldIBlock;
@@ -1454,10 +1454,10 @@ extern "C" void cRider_flagEventBump(cRider* self, cRider* attacker)
     cSSXAudio_RiderCollision(cAudioInterface_bxAudio(), self, attacker);
     func_002A0A30(cAudioInterface_bxAudio(), attacker, self, 1, 0);
     void* agg = cBEAggressionInterface_getThis();
-    char* ob = (char*)attacker + 0x6C0;
+    char* ob = (char*)&attacker->mVtbl;
     sVEntry0010E228* eb = &(*(sVEntry0010E228**)ob)[7];
     int rb = eb->fn(ob + eb->delta);
-    char* oa = (char*)self + 0x6C0;
+    char* oa = (char*)&self->mVtbl;
     sVEntry0010E228* ea = &(*(sVEntry0010E228**)oa)[7];
     cBEAggressionInterface_applyAggression(agg, rb, ea->fn(oa + ea->delta), 0);
 }
@@ -1492,10 +1492,10 @@ extern "C" void cRider_flagEventBumpKnockdown(cRider* self, cRider* attacker)
     cSSXAudio_RiderCollision(cAudioInterface_bxAudio(), self, attacker);
     func_002A0A30(cAudioInterface_bxAudio(), attacker, self, 1, 1);
     void* agg = cBEAggressionInterface_getThis();
-    char* ob = (char*)attacker + 0x6C0;
+    char* ob = (char*)&attacker->mVtbl;
     sVEntry0010E2E8* eb = &(*(sVEntry0010E2E8**)ob)[7];
     int rb = eb->fn(ob + eb->delta);
-    char* oa = (char*)self + 0x6C0;
+    char* oa = (char*)&self->mVtbl;
     sVEntry0010E2E8* ea = &(*(sVEntry0010E2E8**)oa)[7];
     cBEAggressionInterface_applyAggression(agg, rb, ea->fn(oa + ea->delta), 1);
 }
@@ -1531,10 +1531,10 @@ extern "C" void cRider_flagEventPunch(cRider* self, cRider* attacker)
     cSSXAudio_Punch(cAudioInterface_bxAudio(), attacker, self);
     func_002A0A30(cAudioInterface_bxAudio(), attacker, self, 0, 0);
     void* agg = cBEAggressionInterface_getThis();
-    char* ob = (char*)attacker + 0x6C0;
+    char* ob = (char*)&attacker->mVtbl;
     sVEntry0010E3A8* eb = &(*(sVEntry0010E3A8**)ob)[7];
     int rb = eb->fn(ob + eb->delta);
-    char* oa = (char*)self + 0x6C0;
+    char* oa = (char*)&self->mVtbl;
     sVEntry0010E3A8* ea = &(*(sVEntry0010E3A8**)oa)[7];
     cBEAggressionInterface_applyAggression(agg, rb, ea->fn(oa + ea->delta), 2);
 }
@@ -1577,10 +1577,10 @@ extern "C" void cRider_flagEventPunchKnockdown(cRider* self, cRider* attacker)
     func_002A0A30(cAudioInterface_bxAudio(), attacker, self, 0, 1);
     cSSXAudio_KnockdownSFX(cAudioInterface_bxAudio(), attacker);
     void* agg = cBEAggressionInterface_getThis();
-    char* ob = (char*)attacker + 0x6C0;
+    char* ob = (char*)&attacker->mVtbl;
     sVEntry0010E468* eb = &(*(sVEntry0010E468**)ob)[7];
     int rb = eb->fn(ob + eb->delta);
-    char* oa = (char*)self + 0x6C0;
+    char* oa = (char*)&self->mVtbl;
     sVEntry0010E468* ea = &(*(sVEntry0010E468**)oa)[7];
     cBEAggressionInterface_applyAggression(agg, rb, ea->fn(oa + ea->delta), 3);
     cRider_flagEventBoostPowerUp((cRider*)attacker, 2, cRiderMetrix_evFrag((char*)attacker->mMetrix));
@@ -1669,7 +1669,7 @@ extern "C" void cRider_flagEventPathEvent(cRider* self, int* pathEvent, int isPr
     }
     if (*pathEvent == 11)
     {
-        char* being = (char*)self + 0x6C0;
+        char* being = (char*)&self->mVtbl;
         sVEntry0010E5D8* idSlot = &(*(sVEntry0010E5D8**)being)[7];
         void* tgt = SSXApp->Game->Replay;
         cReplay_eventChapter(tgt, idSlot->fn(being + idSlot->delta), pathEvent[1]);
@@ -1836,7 +1836,7 @@ extern "C" void cRider_flagEventLand(cRider* self, int isPipe, int rsm, int pres
         }
     }
     func_00111AA0_impl(self->mRiderHandler, evt, evt + 0x10, *(int*)(evt + 0x4C), speed);
-    char* being = ((char*)self) + 0x6C0;
+    char* being = (char*)&self->mVtbl;
     sVE_0010E910* ve = &(*(sVE_0010E910**)being)[8];
     if (ve->fn(being + ve->delta))
     {
@@ -2100,7 +2100,7 @@ extern "C" void cRider_flagEventWipeout(cRider* rider, int anim, int isPunch, in
     sXf_EB30 node;
     node.pos = sQuat_EB30(n->x * *(float*)(trk + 0x140), n->y * *(float*)(trk + 0x144),
                           n->z * *(float*)(trk + 0x148), n->w * *(float*)(trk + 0x14C));
-    node.rot = *(sQuat_EB30*)(*(char**)((char*)rider->mAnimModel + 0x28) + (rider->mBoneHips << 4));
+    node.rot = *(sQuat_EB30*)((char*)rider->mAnimModel->localRot + (rider->mBoneHips << 4));
     sXf_EB30 y = Combine_EB30(node, Invert_EB30(animPose));
     *(sXf_EB30*)&rider->mPosition = Combine_EB30(*(sXf_EB30*)&rider->mPosition, y);
     cRider_updateOrientationImplicit(rider);
@@ -2623,7 +2623,7 @@ extern "C" int cAI_ridersOnPath(cAI* self, int value)
 {
     int count = 0;
     for (int i = 0; i < self->NumberOfRidersAllocated; i++) {
-        cRider* rider = *(cRider**)(((char*)self) + 0x28 + i * 4);
+        cRider* rider = *(cRider**)((char*)&self->Riders[0] + i * 4);
         if (*(int*)((char*)rider + 0xAB8) == value) {
             count++;
         }
@@ -3249,17 +3249,17 @@ struct sVEntry00111890 { short delta; short index; void (*fn)(void*); };
  */
 extern "C" void cRiderHandler_resetRiderFX(cRiderHandler* self)
 {
-    cBoardWakeFX_reset(((char*)self) + 0x3B0);
-    cBoardSparkFX_reset(((char*)self) + 0x470);
-    cBoardTrailFX_reset(((char*)self) + 0x520);
-    cSpeedBoostFX_reset(((char*)self) + 0x610);
-    cTrickBoostFX_reset(((char*)self) + 0x9C0);
-    cAirStreamerFX_reset(((char*)self) + 0xAD0);
-    func_002D4BE0(((char*)self) + 0xAF0);
-    cPlayerIndicatorFX_reset(((char*)self) + 0xB00);
-    func_002DF3B0(((char*)self) + 0xB40);
-    cPunchFX_reset(((char*)self) + 0xC70);
-    cCheatFX_reset(((char*)self) + 0xD20);
+    cBoardWakeFX_reset(&self->BoardWakeFX);
+    cBoardSparkFX_reset(&self->BoardSparkFX);
+    cBoardTrailFX_reset(&self->BoardTrailFX);
+    cSpeedBoostFX_reset(&self->SpeedBoostFX);
+    cTrickBoostFX_reset(&self->TrickBoostFX);
+    cAirStreamerFX_reset(&self->AirStreamerFX);
+    func_002D4BE0(&self->AngerFX);
+    cPlayerIndicatorFX_reset(&self->PlayerIndicatorFX);
+    func_002DF3B0(&self->DynamicSprayFX);
+    cPunchFX_reset(&self->PunchFX);
+    cCheatFX_reset(&self->CheatFX);
     cWorldPainterMan_reset_noarg();
     int id = self->GroundMotion.mRider->mViewIndex;
     if (id >= 0)
@@ -3608,33 +3608,33 @@ extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, cReplayFr
     if (~wallId.id != 0) {
         *(void**)self->GroundMotion.mRider->mWallHint = wallId.get();
     }
-    st->Read(((char*)self) + 0xDE0, 4);
-    st->Read(((char*)self) + 0xDE4, 4);
+    st->Read(&self->MotionState, 4);
+    st->Read(&self->ControlState, 4);
     cGroundMotion_readFromReplayFrame(((char*)self), ((char*)data));
-    cAirMotion_readFromReplayFrame(((char*)self) + 0x20, ((char*)data));
-    cWipeoutMotion_readFromReplayFrame(((char*)self) + 0x30, ((char*)data));
-    cRailslideMotion_readFromReplayFrame(((char*)self) + 0xB0, ((char*)data));
-    cHandplantMotion_readFromReplayFrame(((char*)self) + 0x110, ((char*)data));
-    cBoardPressControl_readFromReplayFrame(((char*)self) + 0x1D0, ((char*)data));
-    cNaturalAirControl_readFromReplayFrame(((char*)self) + 0x210, ((char*)data));
-    cSpinControl_readFromReplayFrame(((char*)self) + 0x230, ((char*)data));
-    cGateControl_readFromReplayFrame(((char*)self) + 0x290, ((char*)data));
-    cRailslideControl_readFromReplayFrame(((char*)self) + 0x2B0, ((char*)data));
-    cWipeoutControl_readFromReplayFrame(((char*)self) + 0x2C0, ((char*)data));
-    cResetControl_readFromReplayFrame(((char*)self) + 0x350, ((char*)data));
-    cFinishLineControl_readFromReplayFrame(((char*)self) + 0x360, ((char*)data));
-    cHandplantControl_readFromReplayFrame(((char*)self) + 0x370, ((char*)data));
-    cUberGrindControl_readFromReplayFrame(((char*)self) + 0x390, ((char*)data));
-    cBoardWakeFX_reset(((char*)self) + 0x3B0);
-    cBoardSparkFX_reset(((char*)self) + 0x470);
-    cBoardTrailFX_reset(((char*)self) + 0x520);
-    cSpeedBoostFX_reset(((char*)self) + 0x610);
-    cTrickBoostFX_reset(((char*)self) + 0x9C0);
-    cAirStreamerFX_reset(((char*)self) + 0xAD0);
-    func_002D4BE0(((char*)self) + 0xAF0);
-    cPlayerIndicatorFX_reset(((char*)self) + 0xB00);
-    cPunchFX_reset(((char*)self) + 0xC70);
-    cCheatFX_readFromReplayFrame(((char*)self) + 0xD20, ((char*)data));
+    cAirMotion_readFromReplayFrame(&self->AirMotion, ((char*)data));
+    cWipeoutMotion_readFromReplayFrame(&self->WipeoutMotion, ((char*)data));
+    cRailslideMotion_readFromReplayFrame(&self->RailslideMotion, ((char*)data));
+    cHandplantMotion_readFromReplayFrame(&self->HandplantMotion, ((char*)data));
+    cBoardPressControl_readFromReplayFrame(&self->BoardPressControl, ((char*)data));
+    cNaturalAirControl_readFromReplayFrame(&self->NaturalAirControl, ((char*)data));
+    cSpinControl_readFromReplayFrame(&self->SpinControl, ((char*)data));
+    cGateControl_readFromReplayFrame(&self->GateControl, ((char*)data));
+    cRailslideControl_readFromReplayFrame(&self->RailslideControl, ((char*)data));
+    cWipeoutControl_readFromReplayFrame(&self->WipeoutControl, ((char*)data));
+    cResetControl_readFromReplayFrame(&self->ResetControl, ((char*)data));
+    cFinishLineControl_readFromReplayFrame(&self->FinishLineControl, ((char*)data));
+    cHandplantControl_readFromReplayFrame(&self->HandplantControl, ((char*)data));
+    cUberGrindControl_readFromReplayFrame(&self->UberGrindControl, ((char*)data));
+    cBoardWakeFX_reset(&self->BoardWakeFX);
+    cBoardSparkFX_reset(&self->BoardSparkFX);
+    cBoardTrailFX_reset(&self->BoardTrailFX);
+    cSpeedBoostFX_reset(&self->SpeedBoostFX);
+    cTrickBoostFX_reset(&self->TrickBoostFX);
+    cAirStreamerFX_reset(&self->AirStreamerFX);
+    func_002D4BE0(&self->AngerFX);
+    cPlayerIndicatorFX_reset(&self->PlayerIndicatorFX);
+    cPunchFX_reset(&self->PunchFX);
+    cCheatFX_readFromReplayFrame(&self->CheatFX, ((char*)data));
     st->Read(self->GroundMotion.mRider->mAIPathHint, 0x20);
     st->Read(self->GroundMotion.mRider->mTrackPathHint, 0x20);
     st->Read(ids, 8);
@@ -3739,12 +3739,12 @@ extern "C" void cRider_initPath(cRider* self, int flag)
     up.z = 0.0f;
     up.w = 1.0f;
     float out;
-    float res = cPath_intersectPath1(*(void**)(((char*)self) + 0xAB4), ((char*)self) + 0x110, &up, &out, self->mTrackPathHint, 1);
+    float res = cPath_intersectPath1(*(void**)(((char*)self) + 0xAB4), &self->mPosition, &up, &out, self->mTrackPathHint, 1);
     float trackLen = *(float*)(*(char**)(((char*)self) + 0xAB4) + 0x38);
     if (trackLen < res)
         res = 0.0f;
     self->mDistToFinish = *(float*)(((char*)self) + 0x4D4) = trackLen - res;
-    res = cPath_intersectPath1(*(void**)(((char*)self) + 0xAB8), ((char*)self) + 0x110, ((char*)self) + 0x490, ((char*)self) + 0x4C8, self->mAIPathHint, 1);
+    res = cPath_intersectPath1(*(void**)(((char*)self) + 0xAB8), &self->mPosition, ((char*)self) + 0x490, ((char*)self) + 0x4C8, self->mAIPathHint, 1);
     *(float*)(((char*)self) + 0x4C0) = *(float*)(((char*)self) + 0x4C4) = res;
     sVec4_00112180 pos2 = cPath_getPathPos_112180(*(void**)(((char*)self) + 0xAB8), 0, res + 796.0f);
     *(sVec4_00112180*)(((char*)self) + 0x4A0) = pos2;
@@ -3945,9 +3945,9 @@ extern "C" void cRider_updateAIPath(cRider* self)
     *(float*)(((char*)self) + 0x4C0) = *(float*)(((char*)self) + 0x4C4);
     int nf = !cRider_isPipeJump_b((char*)self);
     if (nf)
-        *(float*)(((char*)self) + 0x4C4) = cPath_intersectPath1(*(void**)(((char*)self) + 0xAB8), ((char*)self) + 0x110, ((char*)self) + 0x490, ((char*)self) + 0x4C8, self->mAIPathHint, nf);
+        *(float*)(((char*)self) + 0x4C4) = cPath_intersectPath1(*(void**)(((char*)self) + 0xAB8), &self->mPosition, ((char*)self) + 0x490, ((char*)self) + 0x4C8, self->mAIPathHint, nf);
     else
-        *(float*)(((char*)self) + 0x4C4) = cPath_intersectPath(*(void**)(((char*)self) + 0xAB8), ((char*)self) + 0x110, ((char*)self) + 0x490, ((char*)self) + 0x4C8, 0);
+        *(float*)(((char*)self) + 0x4C4) = cPath_intersectPath(*(void**)(((char*)self) + 0xAB8), &self->mPosition, ((char*)self) + 0x490, ((char*)self) + 0x4C8, 0);
     float k = cRider_calculateAheadDist(self, nf);
     *(sVec4_001125C0*)(((char*)self) + 0x4A0) = cPath_getPathPos_1125C0(*(void**)(((char*)self) + 0xAB8), 0, *(float*)(((char*)self) + 0x4C4) + k);
     cRider_setAimTarget_2(((char*)self), nf);
@@ -4266,7 +4266,7 @@ extern "C" void cRider_checkAIPathSwitch(cRider* vself, int keep)
         sVec4_112A50 aheadDelta = vu0Sub_112A50(pos, cPath_getPathPos_112A50(paths[i], 0, nearParam + 796.0f));
         sVec4_112A50 nearDelta = vu0Sub_112A50(*(sVec4_112A50*)&vself->mPosition, out);
         float dist = vu0Dot_112A50(nearDelta, nearDelta) + vu0Dot_112A50(aheadDelta, aheadDelta);
-        char* being = ((char*)vself) + 0x6C0;
+        char* being = (char*)&vself->mVtbl;
         sVEi_112A50* ve = &(*(sVEi_112A50**)being)[9];
         if (ve->fn(being + ve->delta) == 1) {
             sVEf_112A50* vf = &((sVEf_112A50*)vself->mVtbl)[20];
@@ -4291,7 +4291,7 @@ extern "C" void cRider_checkAIPathSwitch(cRider* vself, int keep)
     if (best != 0) {
         *(void**)(((char*)vself) + 0xAB8) = best;
         *(int*)((char*)vself->mAIPathHint + 0x14) = -1;
-        float pathParam = cPath_intersectPath1(*(void**)(((char*)vself) + 0xAB8), ((char*)vself) + 0x110, ((char*)vself) + 0x490, ((char*)vself) + 0x4C8, vself->mAIPathHint, 1);
+        float pathParam = cPath_intersectPath1(*(void**)(((char*)vself) + 0xAB8), &vself->mPosition, ((char*)vself) + 0x490, ((char*)vself) + 0x4C8, vself->mAIPathHint, 1);
         *(float*)(((char*)vself) + 0x4C4) = pathParam;
         *(sVec4_112A50*)(((char*)vself) + 0x4A0) = cPath_getPathPos_112A50(*(void**)(((char*)vself) + 0xAB8), 0, pathParam + 796.0f);
         *(float*)(((char*)vself) + 0x4C0) = *(float*)(((char*)vself) + 0x4C4);
@@ -4365,16 +4365,16 @@ extern "C" void cRider_switchToResetPath(cRider* self)
 {
     void* paths[6];
     sVec4_112D58 pos;
-    int n = cPathSys_getNearResetPaths_112D58(gPaths, ((char*)self) + 0x110, paths, 6);
+    int n = cPathSys_getNearResetPaths_112D58(gPaths, &self->mPosition, paths, 6);
     void* best = 0;
     float bestD = 9.999999933815813e+36f;
     int i;
     for (i = 0; i < n; i++)
     {
         float tOut;
-        float nearParam = cPath_intersectPath(paths[i], ((char*)self) + 0x110, &pos, &tOut, 1);
+        float nearParam = cPath_intersectPath(paths[i], &self->mPosition, &pos, &tOut, 1);
         float len = cPath_getLength(paths[i]);
-        char* being = ((char*)self) + 0x6C0;
+        char* being = (char*)&self->mVtbl;
         sVE_112D58* ve = &(*(sVE_112D58**)being)[8];
         if (ve->fn(being + ve->delta) == 0 && len - 200.0f < nearParam)
             continue;
@@ -4395,7 +4395,7 @@ extern "C" void cRider_switchToResetPath(cRider* self)
     if (best)
         *(void**)(((char*)self) + 0xAB8) = best;
     *(int*)((char*)self->mAIPathHint + 0x14) = -1;
-    *(float*)(((char*)self) + 0x4C4) = cPath_intersectPath1(*(void**)(((char*)self) + 0xAB8), ((char*)self) + 0x110, ((char*)self) + 0x490, ((char*)self) + 0x4C8, self->mAIPathHint, 1);
+    *(float*)(((char*)self) + 0x4C4) = cPath_intersectPath1(*(void**)(((char*)self) + 0xAB8), &self->mPosition, ((char*)self) + 0x490, ((char*)self) + 0x4C8, self->mAIPathHint, 1);
     *(sVec4_112D58*)(((char*)self) + 0x490) = cAIPath_getResetPos_112D58(*(void**)(((char*)self) + 0xAB8), (float*)(((char*)self) + 0x4C4));
     float aimParam = *(float*)(((char*)self) + 0x4C4) + 796.0f;
     *(sVec4_112D58*)(((char*)self) + 0x4A0) = cAIPath_getResetPos_112D58(*(void**)(((char*)self) + 0xAB8), &aimParam);

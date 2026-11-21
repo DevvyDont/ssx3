@@ -531,13 +531,13 @@ extern "C" void cFERider_render(cFERider* selfp)
         sVE_EE88* vt = (sVE_EE88*)ps2GraphicsMan->mVtbl;
         vt[69].fn((char*)ps2GraphicsMan + vt[69].delta, &worldMatrix, 1);
     }
-    int* fl = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
+    int* fl = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
     unsigned int old = (unsigned int)(*fl & 0x3E0) >> 5;
     if (self->layer >= 0)
         *fl = (*fl & ~0x3E0) | ((self->layer << 5) & 0x3E0);
     cAnimModel_render(self->model, 0, 0, 0);
     func_002F2088(self->fC70);
-    fl = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
+    fl = (int*)(&GrMan->m_pCurrentDrawState->unk_00[2]);
     *fl = (*fl & ~0x3E0) | (old << 5);
 }
 #endif
@@ -754,7 +754,7 @@ static inline void AddTo_F418(sVec_F418& dst, const sVec_F418& b)
 extern "C" void cFERider_translate(cFERider* self, sVec_F418* delta)
 {
     sVec_F418* pos = (sVec_F418*)&self->mPose;
-    sVec_F418* rot = (sVec_F418*)((char*)self + 0xC40);
+    sVec_F418* rot = (sVec_F418*)(&self->mPose.Q);
     AddTo_F418(*pos, Rot_F418(*rot, *delta));
     cFERider_updateModelPose(self);
 }
@@ -803,7 +803,7 @@ static inline sQuat_F488 QuatMul_F488(const sQuat_F488& a, const sQuat_F488& b)
  */
 extern "C" void cFERider_rotate(cFERider* self, sQuat_F488* axis, float angle)
 {
-    sQuat_F488* rot = (sQuat_F488*)((char*)self + 0xC40);
+    sQuat_F488* rot = (sQuat_F488*)(&self->mPose.Q);
     sQuat_F488 turn;
     float sinHalf, cosHalf;
     fSinCos(&sinHalf, &cosHalf, angle * 0.5f);
@@ -894,7 +894,7 @@ static inline void AddTo_F578(sVec_F578& dst, const sVec_F578& b)
 extern "C" void cFERider_translateBoard(cFERider* self, sVec_F578* delta)
 {
     sVec_F578* pos = (sVec_F578*)&self->mBoardPose;
-    sVec_F578* rot = (sVec_F578*)((char*)self + 0xC60);
+    sVec_F578* rot = (sVec_F578*)(&self->mBoardPose.Q);
     AddTo_F578(*pos, Rot_F578(*rot, *delta));
     cFERider_updateModelPose(self);
 }
@@ -942,7 +942,7 @@ static inline sQuat_F5E8 QuatMul_F5E8(const sQuat_F5E8& a, const sQuat_F5E8& b)
  */
 extern "C" void cFERider_rotateBoard(cFERider* self, sQuat_F5E8* axis, float angle)
 {
-    sQuat_F5E8* rot = (sQuat_F5E8*)((char*)self + 0xC60);
+    sQuat_F5E8* rot = (sQuat_F5E8*)(&self->mBoardPose.Q);
     sQuat_F5E8 turn;
     float sinHalf, cosHalf;
     fSinCos(&sinHalf, &cosHalf, angle * 0.5f);

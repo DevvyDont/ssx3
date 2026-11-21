@@ -393,7 +393,7 @@ extern "C" void cScreenPopup_SetTextObjectsAlpha(cScreenPopup* self, float fAlph
     SetAlpha_5F20((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_xba)), fAlpha);
     SetAlpha_5F20((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x)), fAlpha);
     for (int i = 0; i < 5; i++) {
-        SetAlpha_5F20(((char**)(((char*)self) + 0x90))[i], fAlpha);
+        SetAlpha_5F20(((char**)(&self->mpOptions[0]))[i], fAlpha);
     }
 }
 #endif
@@ -1878,7 +1878,7 @@ extern "C" void cScreenPopup_adjustMenuPosition(cScreenPopup* self)
         if (self->mbCenterOptions != 0) {
             int i;
             for (i = 0; i < 5; i++) {
-                void* option = *(void**)((char*)self + 0x90 + i * 4);
+                void* option = *(void**)((char*)&self->mpOptions[0] + i * 4);
                 if (option != 0)
                     cScreenPopup_changePivot(self, option, 18, self->mvLargestOption[0] * 0.5f);
             }
@@ -2053,7 +2053,7 @@ extern "C" void cScreenPopup_restoreElements(cScreenPopup* self)
     }
     int i;
     for (i = 0; i < 5; i++) {
-        void* option = *(void**)((char*)self + 0x90 + i * 4);
+        void* option = *(void**)((char*)&self->mpOptions[0] + i * 4);
         if (option != 0) {
             cScreenPopup_changePivot(self, option, 10, self->mvLargestOption[0] * 0.5f);
         }
@@ -2873,9 +2873,9 @@ extern "C" int cScreenPopup_onWidgetMenu(cScreenPopup* self, char* menu, int msg
                 obj = (char*)self->mpStaticBox;
             }
             if (i == sel) {
-                SetColour1CA180(obj, ((char*)self) + 0x32C);
+                SetColour1CA180(obj, &self->mtHighlightedColor[0]);
             } else {
-                SetColour1CA180(obj, ((char*)self) + 0x33C);
+                SetColour1CA180(obj, &self->mtUnhighlightColor[0]);
             }
         }
         break;
@@ -2945,8 +2945,8 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
             int i;
             self->mbNoEntryOnNext = 0;
             for (i = 0; i < 5; i++) {
-                if (id == ((int*)(((char*)self) + 0x90))[i]) {
-                    if (((sBtn_1CA298*)(((char*)self) + 0x2D0))[i].confirm != 0) {
+                if (id == ((int*)(&self->mpOptions[0]))[i]) {
+                    if (((sBtn_1CA298*)(&self->mtConfirmation[0]))[i].confirm != 0) {
                         cScreenPopup_createConfirmationPopup(self, i);
                     } else {
                         Notify_1CA298((sPopupOwner_1CA298*)self->mpParentState, 17, ((char*)self), i + 15);
@@ -2966,7 +2966,7 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
             cKeyboardPopup_setMaxCharacters(self->mpKeyboard, self->miMaxChars);
             cUIStateStack_pushPopup(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, self->mpKeyboard);
             if (self->mpStaticBox != 0) {
-                cScreenPopup_setTextString(self, ((char*)self) + 0x2B4, self->mpStaticBox);
+                cScreenPopup_setTextString(self, &self->mszStaticText, self->mpStaticBox);
             }
         } else {
             self->mbNoEntryOnNext = 1;
@@ -2981,7 +2981,7 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
     case 8:
         break;
     case 13:
-        cBXString_operatorE1(((char*)self) + 0x2B0, (char*)self->mpKeyboard + 0x74);
+        cBXString_operatorE1(&self->mszInputText, self->mpKeyboard->mszEditString);
         if (self->mpEnterBox != 0 && *(int*)(self->mszInputText - 8) != 0) {
             cScreenPopup_checkAndFixTextEntry(self, self->mpEnterBox, (const char*)self->mszInputText);
         }
@@ -3316,14 +3316,14 @@ extern "C" void cBuyPopupInfo_initBuySongByCredit(cBuyPopupInfo* self, int song,
 {
     int three = 3;
     int hash = GetHashValue32(str_kT_OVRSong);
-    *(int*)((char*)self + 0x10) = song;
+    self->mItemName.ui = song;
     self->mItemType.eType = three;
     self->mItemName.eType = 2;
-    *(int*)((char*)self + 0x18) = hash;
+    self->mItemType.ui = hash;
     hash = GetHashValue32(str_kT_OVRCMNBuySongCredit);
     self->mCreditsLeft = credit;
     self->mQuestion.eType = three;
-    *(int*)((char*)self + 0x20) = hash;
+    self->mQuestion.ui = hash;
 }
 #endif
 
@@ -3686,14 +3686,14 @@ extern "C" void cUIStateBuyPopup_initBuyTrick(cUIStateBuyPopup* self, int trick,
     int three = 3;
     self->mInfo.mCost = cost;
     self->mInfo.mMoney = money;
-    *(int*)((char*)self + 0x58) = trick;
+    self->mInfo.mItemName.ui = trick;
     self->mInfo.mItemName.eType = 2;
     int hash = GetHashValue32(str_kT_OVRCMNUbertrick);
     self->mInfo.mItemType.eType = three;
-    *(int*)((char*)self + 0x60) = hash;
+    self->mInfo.mItemType.ui = hash;
     hash = GetHashValue32(str_kT_OVRCMNBuyThisUber);
     self->mInfo.mQuestion.eType = three;
-    *(int*)((char*)self + 0x68) = hash;
+    self->mInfo.mQuestion.ui = hash;
 }
 #endif
 
@@ -3718,15 +3718,15 @@ extern "C" void cUIStateBuyPopup_initBuyAttributes(cUIStateBuyPopup* self, int p
 {
     char* defaultStr = D_004A1408;
     int two = 2;
-    *(char**)((char*)self + 0x58) = defaultStr;
+    self->mInfo.mItemName.pustr = (const unsigned short*)defaultStr;
     self->mInfo.mItemName.eType = two;
     self->mInfo.mCost = cost;
     self->mInfo.mMoney = money;
     int hash = GetHashValue32(str_kT_OVRCMNBuyAttributesColon);
     self->mInfo.mQuestion.eType = two;
-    *(char**)((char*)self + 0x68) = defaultStr;
+    self->mInfo.mQuestion.pustr = (const unsigned short*)defaultStr;
     self->mInfo.mItemType.eType = 3;
-    *(int*)((char*)self + 0x60) = hash;
+    self->mInfo.mItemType.ui = hash;
 }
 #endif
 
@@ -5251,7 +5251,7 @@ extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self)
     char* uiObj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterValue));
     if (uiObj != 0) {
         sVEntry_CC30* vt = *(sVEntry_CC30**)(uiObj + 8);
-        vt[20].fn(uiObj + vt[20].delta, ((char*)self) + 0x3F4);
+        vt[20].fn(uiObj + vt[20].delta, (char*)&self->mvSizeEnter[0]);
         *(sVec3_CC30*)&self->mvPosEnter[0] = *(sVec3_CC30*)(uiObj + 0x44);
     }
     self->mvPosCursor[1] = self->mvSizeEnter[1] + self->mvPosEnter[1] - self->mvSizeCursor[1] - 2.0f;
@@ -5277,10 +5277,10 @@ extern "C" void cKeyboardPopup_updateCursor(cKeyboardPopup* self)
     vt[21].fn(uiObj + vt[21].delta, &pos);
     char buf[0x40];
     if (self->mbPassword != 0) {
-        cKeyboardPopup_setPasswordText((sPwd_CCE98*)self, ((char*)self) + 0xB4);
-        strncpy(buf, ((char*)self) + 0xF4, self->miCursorPos - self->miViewableStartIndex);
+        cKeyboardPopup_setPasswordText((sPwd_CCE98*)self, self->mszViewableString);
+        strncpy(buf, self->mszPasswordString, self->miCursorPos - self->miViewableStartIndex);
     } else {
-        strncpy(buf, ((char*)self) + 0xB4, self->miCursorPos - self->miViewableStartIndex);
+        strncpy(buf, self->mszViewableString, self->miCursorPos - self->miViewableStartIndex);
     }
     buf[self->miCursorPos - self->miViewableStartIndex] = 0;
     cKeyboardPopup_setScale(self, text);
@@ -5682,13 +5682,13 @@ extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* self, int first)
         char* charCursor = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_CharacterCursor));
         if (charCursor != 0) {
             sVEp_D348* vt = *(sVEp_D348**)(charCursor + 8);
-            vt[20].fn(charCursor + vt[20].delta, ((char*)self) + 0x400);
+            vt[20].fn(charCursor + vt[20].delta, (char*)&self->mvSizeCursor[0]);
             *(sVec3_D348*)&self->mvPosCursor[0] = *(sVec3_D348*)(charCursor + 0x44);
         }
         char* enterValue = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_EnterValue));
         if (enterValue != 0) {
             sVEp_D348* vt = *(sVEp_D348**)(enterValue + 8);
-            vt[20].fn(enterValue + vt[20].delta, ((char*)self) + 0x3F4);
+            vt[20].fn(enterValue + vt[20].delta, (char*)&self->mvSizeEnter[0]);
             *(sVec3_D348*)&self->mvPosEnter[0] = *(sVec3_D348*)(enterValue + 0x44);
             self->mvPosCursor[1] = self->mvSizeEnter[1] + self->mvPosEnter[1];
         }
@@ -5708,7 +5708,7 @@ extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* self, int first)
             SetVis_D348(extendCursorRight, 0);
         }
         if (self->mbSetInputText != 0) {
-            cKeyboardPopup_setInputText(self, ((char*)self) + 0x74);
+            cKeyboardPopup_setInputText(self, self->mszEditString);
         }
         if ((int)self->muiStatic != 0) {
             cKeyboardPopup_setStatic1(self, (int)self->muiStatic);
@@ -5720,7 +5720,7 @@ extern "C" int cKeyboardPopup_onGainTransition(cKeyboardPopup* self, int first)
             }
             self->mpustrStatic = 0;
         } else {
-            char** str = (char**)(((char*)self) + 0x424);
+            char** str = (char**)(&self->mszStatic);
             if (*(int*)(*str - 8) != 0) {
                 cKeyboardPopup_setStatic2((cKeyboardPopup*)(((char*)self)), *str);
                 cBXString_Reset(str);

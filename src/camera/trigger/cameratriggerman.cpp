@@ -25,9 +25,9 @@ extern "C" void cCamera_resetChaseControllerSwitches();
 extern "C" void cCameraTriggerMan_cleanupOnExit(cCameraTriggerMan* self)
 {
     cActiveTriggerList_purge((cActiveTriggerList*)&self->ActiveTriggerList);
-    cActiveTriggerList_purge((cActiveTriggerList*)((char*)self + 0x18));
+    cActiveTriggerList_purge((cActiveTriggerList*)(&self->ActiveTriggerList[1]));
     cCameraTriggerStack_init((cCameraTriggerStack*)&self->CameraTriggerStack);
-    cCameraTriggerStack_init((cCameraTriggerStack*)((char*)self + 0x3C));
+    cCameraTriggerStack_init((cCameraTriggerStack*)(&self->CameraTriggerStack[1]));
     cCameraTriggerMan_purge(self);
     cCameraTriggerList_init((cCameraTriggerList*)self);
     cCamera_resetChaseControllerSwitches();
@@ -282,10 +282,10 @@ extern "C" void cCameraTriggerMan_purge(cCameraTriggerMan* vself)
         }
     }
     cCameraTriggerStack_init((cCameraTriggerStack*)&vself->CameraTriggerStack);
-    cCameraTriggerStack_init((cCameraTriggerStack*)((char*)vself + 0x3C));
+    cCameraTriggerStack_init((cCameraTriggerStack*)(&vself->CameraTriggerStack[1]));
     cCameraTriggerList_purge((void**)vself);
     cActiveTriggerList_purge((cActiveTriggerList*)&vself->ActiveTriggerList);
-    cActiveTriggerList_purge((cActiveTriggerList*)((char*)vself + 0x18));
+    cActiveTriggerList_purge((cActiveTriggerList*)(&vself->ActiveTriggerList[1]));
     cCamera_resetChaseControllerSwitches();
 }
 #endif
@@ -840,12 +840,12 @@ extern "C" void cCameraTriggerMan_checkCollisions(cCameraTriggerMan* self, cRide
 {
     if (active_D320(((char*)rider))) {
         int idx = rider->mViewIndex;
-        cActiveTriggerList_clearFlags(((char*)self) + 0x14 + idx * 4);
+        cActiveTriggerList_clearFlags((char*)&self->ActiveTriggerList[0] + idx * 4);
         sCtx_D320 ctx;
         sRoot_D320* w = (sRoot_D320*)SSXApp->Game->BXNash;
         ctx.list = (char*)(idx * 4 + (int)self) + 0x14;
         ctx.rider = ((char*)rider);
-        char* sub = ((char*)rider) + 0x6C0;
+        char* sub = (char*)&rider->mVtbl;
         sQuad_D320* riderPosMin = getPos_D320(sub);
         sQuad_D320* riderPosMax = getPos_D320(sub);
         sBox_D320 box;

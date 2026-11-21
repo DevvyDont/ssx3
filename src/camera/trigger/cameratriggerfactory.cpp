@@ -1828,7 +1828,7 @@ struct sVE173678b {
 extern "C" void* cTriggerAlgorithm_snapCurrent(cTriggerAlgorithm* self)
 {
     sVE173678b* vt = (sVE173678b*)self->mVtbl;
-    char* riderIface = *(char**)((char*)self->Target + 0x4) + 0x6C0;
+    char* riderIface = (char*)self->Target->Rider + 0x6C0;
     sVE173678a* vt2 = *(sVE173678a**)riderIface;
     return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(riderIface + vt2[7].delta));
 }
@@ -2454,7 +2454,7 @@ extern "C" void cBoundedAlgorithm_update(cBoundedAlgorithm* self)
     {
         char* calleeObj = *(char**)((char*)self->BoundAction + 8);
         sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)(calleeObj + 0x24))[6];
-        ((void (*)(void*, void*))vEntry->fn)(calleeObj + vEntry->delta, ((char*)self) + 0x40);
+        ((void (*)(void*, void*))vEntry->fn)(calleeObj + vEntry->delta, (char*)&self->Position);
     }
     t4Vector toTarget = Sub_174200(lookTarget, self->Position);
     self->Heading = Atan2_174200(toTarget.y, toTarget.x);
@@ -2610,7 +2610,7 @@ extern "C" void cTriggerAlgorithm_snap(void* self, long a1);
 extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
 {
     {
-        char* calleeObj = *(char**)((char*)self->Target + 4) + 0x6C0;
+        char* calleeObj = (char*)self->Target->Rider + 0x6C0;
         sVEntry<long(void*)>* vEntry = &(*(sVEntry<long(void*)>**)calleeObj)[7];
         if (vEntry->fn(calleeObj + vEntry->delta) != subjectId)
             return;
@@ -2647,7 +2647,7 @@ extern "C" void cBoundedAlgorithm_snap(cBoundedAlgorithm* self, long subjectId)
     {
         char* calleeObj = *(char**)((char*)self->BoundAction + 8);
         sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)(calleeObj + 0x24))[6];
-        ((void (*)(void*, void*))vEntry->fn)(calleeObj + vEntry->delta, ((char*)self) + 0x40);
+        ((void (*)(void*, void*))vEntry->fn)(calleeObj + vEntry->delta, (char*)&self->Position);
     }
     t4Vector toTarget = Sub_1744B0(lookTarget, self->Position);
     self->Heading = Atan2_1744B0(toTarget.y, toTarget.x);
@@ -2679,7 +2679,7 @@ struct sVE1747A0b {
 extern "C" void* cBoundedAlgorithm_snapCurrent(cBoundedAlgorithm* self)
 {
     sVE1747A0b* vt = (sVE1747A0b*)self->mVtbl;
-    char* riderIface = *(char**)((char*)self->Target + 0x4) + 0x6C0;
+    char* riderIface = (char*)self->Target->Rider + 0x6C0;
     sVE1747A0a* vt2 = *(sVE1747A0a**)riderIface;
     return vt[3].fn((char*)self + vt[3].delta, vt2[7].fn(riderIface + vt2[7].delta));
 }
@@ -4154,7 +4154,7 @@ public:
  */
 extern "C" void cDEFAULT_2ChaseAlgorithm_snap(cDEFAULT_2ChaseAlgorithm* self, int id)
 {
-    char* rider = *(char**)((char*)self->Target + 4);
+    char* rider = (char*)self->Target->Rider;
     if (id == ((cCamTargetK8940*)(rider + 0x6C0))->getAIIndex()) {
         cLookAtChaseAlgorithm_snap(((cCamCtrlK8940*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cCamCtrlK8940*)self), 559.7440185546875f, 300.0f);
@@ -4319,7 +4319,7 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, fl
  */
 extern "C" void cDEFAULT_3ChaseAlgorithm_snap(cDEFAULT_3ChaseAlgorithm* self, int id)
 {
-    char* rider = *(char**)((char*)self->Target + 4);
+    char* rider = (char*)self->Target->Rider;
     if (id == ((cCamTargetK8940*)(rider + 0x6C0))->getAIIndex()) {
         cLookAtChaseAlgorithm_snap(((cCamCtrlK8940*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cCamCtrlK8940*)self), 559.7440185546875f, 300.0f);
@@ -4484,7 +4484,7 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, fl
  */
 extern "C" void cDEFAULT_4ChaseAlgorithm_snap(cDEFAULT_4ChaseAlgorithm* self, int id)
 {
-    char* rider = *(char**)((char*)self->Target + 4);
+    char* rider = (char*)self->Target->Rider;
     if (id == ((cCamTargetK8940*)(rider + 0x6C0))->getAIIndex()) {
         cLookAtChaseAlgorithm_snap(((cCamCtrlK8940*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cCamCtrlK8940*)self), 559.7440185546875f, 300.0f);
@@ -4646,7 +4646,7 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, fl
  */
 extern "C" void cDirectionChaseAlgorithm_snap(cDirectionChaseAlgorithm* self, int id)
 {
-    char* rider = *(char**)((char*)self->Target + 4);
+    char* rider = (char*)self->Target->Rider;
     if (id == ((cCamTargetK8940*)(rider + 0x6C0))->getAIIndex()) {
         cLookAtChaseAlgorithm_snap(((cCamCtrlK8940*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cCamCtrlK8940*)self), 559.7440185546875f, 300.0f);
@@ -4991,7 +4991,7 @@ static inline sVec_00177EF8 ctGetB_00177EF8(void* self)
  */
 extern "C" sVec_00177EF8 cSPOKEChaseAlgorithm_getRiderPosition(cSPOKEChaseAlgorithm* self)
 {
-    char* riderIface = *(char**)((char*)self->Target + 4) + 0x6C0;
+    char* riderIface = (char*)self->Target->Rider + 0x6C0;
     sVEa_00177EF8* posEntry = &(*(sVEa_00177EF8**)riderIface)[5];
     sVec_00177EF8* riderPos = posEntry->fn(riderIface + posEntry->delta);
     return ctAdd_00177EF8(ctScale_00177EF8(*riderPos, 0.19999998807907104f), ctScale_00177EF8(ctGetB_00177EF8(self), 0.800000011920929f));
@@ -5145,7 +5145,7 @@ static inline t4Vector ctScaleP_7FC0(const t4Vector* v, float s)
 extern "C" t4Vector cSPOKEChaseAlgorithm_getDesiredPosition(cSPOKEChaseAlgorithm* self, const t4Vector& in)
 {
     t4Vector dir;
-    if (cRider_getMotionState_7FC0(*(void**)((char*)self->Target + 4)) == 5)
+    if (cRider_getMotionState_7FC0(self->Target->Rider) == 5)
         dir = *ctGetA_7FC0(self);
     else
         dir = in;
@@ -5446,7 +5446,7 @@ static inline t4Vector ScaleP_1783E0(const t4Vector* v, float s)
  */
 extern "C" void cSPOKEChaseAlgorithm_snap(cSPOKEChaseAlgorithm* self, long id)
 {
-    char* rider = *(char**)((char*)self->Target + 4);
+    char* rider = (char*)self->Target->Rider;
     if (id == ((cBeing*)(rider + 0x6C0))->getAIIndex()) {
         char* subject = (char*)self->Target;
         sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)subject)[4];
@@ -5891,7 +5891,7 @@ public:
  */
 extern "C" void cSUPERPIPEChaseAlgorithm_snap(cSUPERPIPEChaseAlgorithm* self, int id)
 {
-    char* rider = *(char**)((char*)self->Target + 4);
+    char* rider = (char*)self->Target->Rider;
     if (id == ((cCamTarget_00178938*)(rider + 0x6C0))->getAIIndex()) {
         *(sVec4_00178938*)&self->Position = cSUPERPIPEChaseAlgorithm_getIdealPosition(((cCamCtrl_00178938*)self));
         *(sVec4_00178938*)&self->CamTargetPos = cSUPERPIPEChaseAlgorithm_getIdealTargetPos(((cCamCtrl_00178938*)self));
@@ -6067,7 +6067,7 @@ static inline sVec4_1789E8 Get_1789E8(char* o, int slot)
 extern "C" void* cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cPOST_RACE_1ChaseAlgorithm* self, cRiderCameraTarget* src)
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(((char*)self));
-    sVec4_1789E8* startDir = (sVec4_1789E8*)(((char*)self) + 0x390);
+    sVec4_1789E8* startDir = (sVec4_1789E8*)(&self->StartDir);
     self->AlgorithmType = 68;
     self->mVtbl = cPOST_RACE_1ChaseAlgorithm_vtbl;
     self->AgeInFrames = 0;
@@ -6330,7 +6330,7 @@ struct sCamVEntryVoidA {
  */
 extern "C" void cPOST_RACE_1ChaseAlgorithm_snap(cPOST_RACE_1ChaseAlgorithm* self, int id)
 {
-    char* obj = *(char**)((char*)self->Target + 0x4) + 0x6C0;
+    char* obj = (char*)self->Target->Rider + 0x6C0;
     sCamVEntryIntA* vt = *(sCamVEntryIntA**)obj;
     if (id == vt[7].fn(obj + vt[7].delta))
     {
@@ -7101,7 +7101,7 @@ extern "C" void cTrackFileMan_scanLocations(cTrackFileMan* self)
                 ap[self->NumLocations * 35] = 1;
                 self->NumBAMLocations++;
                 if (cTrackFileMan_testWCBAMStartLocation_A638(((sCamMgr*)self), ip[self->NumLocations * 35])) {
-                    *(int*)((char*)self + 0x8C + self->NumLocations * 0x8C) = 1;
+                    *(int*)((char*)&self->LocationInfo[0].bIsWCBAMStart + self->NumLocations * 0x8C) = 1;
                     self->NumWCBAMStartLocations++;
                 }
                 self->NumLocations++;

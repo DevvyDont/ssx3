@@ -1310,7 +1310,7 @@ extern "C" void cAI_swaploadPathFile(cAI* self, int filename) {
     cPathSys_purgePaths(gPaths);
     cPathSys_loadPaths(gPaths, filename);
     for (i = 0; i < self->NumberOfRidersAllocated; i++) {
-        cRider_initPath(*(void**)((char*)self + 0x28 + (i << 2)), 0);
+        cRider_initPath(*(void**)((char*)&self->Riders[0] + (i << 2)), 0);
     }
 }
 #endif
@@ -1436,7 +1436,7 @@ INCLUDE_ASM("ai/ai", func_0012A4F0);
 extern "C" void func_0012A4F0(cAI* self) {
     int i;
     for (i = 0; i < self->NumberOfRidersAllocated; i++) {
-        cRider_initPath(*(void**)((char*)self + 0x28 + (i << 2)), 0);
+        cRider_initPath(*(void**)((char*)&self->Riders[0] + (i << 2)), 0);
     }
 }
 #endif
@@ -1960,7 +1960,7 @@ extern "C" int cAI_isReadyToPurgeMissionRiders(cAI* self) {
     int i;
     int ok = 1;
     for (i = 0; i < self->NumberOfMissionRidersLoaded; i++) {
-        void* missionRider = *(void**)((char*)self + 0x70 + (i << 2));
+        void* missionRider = *(void**)((char*)&self->MissionRiders[0] + (i << 2));
         if (cRider_isSafeToDelete(*(void**)((char*)missionRider + 0x18)) == 0)
             ok = 0;
     }
@@ -2412,25 +2412,25 @@ extern "C" void cAI_applyPlayerRulesCustom(cAI* self, cPlayer* obj, int i)
     *(int*)(playerRider + 0x304) = boostMode;
     cRider_initBoost(playerRider);
     if ((D_005308B8_12B498.e[i].f0 >> 3) & 1)
-        *(float*)((char*)obj->mRider + 0xB24) = 1.0f;
+        obj->mRider->mBoostMeterStart = 1.0f;
     if (OptBit_12B498(&D_005308B8_12B498, 4))
-        *(int*)((char*)obj->mRider + 0xB28) = 2;
+        obj->mRider->mBoostSourceMask = 2;
     if ((D_005308B8_12B498.e[i].f0 >> 4) & 1)
         cRider_setUbersAllowed(obj->mRider, 0);
     else if (OptBit_12B498(&D_005308B8_12B498, 1))
         cRider_setUbersAllowed(obj->mRider, 1);
     if (D_005308B8_12B498.e[i].f0 & 1)
-        *(int*)((char*)obj->mRider + 0xB20) = 2;
+        obj->mRider->unk_B20 = 2;
     ((sRider_12B498*)obj->mRider)->fB30 = cBERules_getPlayerStartDelaySecs(i);
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0)
     {
         if (cBENetworkInterface_networkOpt.bIsRankedGame != 0)
-            *(int*)((char*)obj->mRider + 0xB34) = 8;
+            obj->mRider->mStatsIndex = 8;
     }
     else if ((D_005308B8_12B498.e[i].f0 >> 1) & 1)
-        *(int*)((char*)obj->mRider + 0xB34) = 1;
-    char* riderMetrix = *(char**)((char*)obj->mRider + 0x790);
+        obj->mRider->mStatsIndex = 1;
+    char* riderMetrix = (char*)obj->mRider->mMetrix;
     if ((D_005308B8_12B498.e[i].f0 >> 2) & 1)
         *(float*)(riderMetrix + 0x1C4) = 0.5f;
     cRiderMetrix_setInitialPointsTotal(riderMetrix, D_005308B8_12B498.e[i].x);
@@ -2479,12 +2479,12 @@ extern "C" void cAI_applyComputerRulesCustom(cAI* self, cComputer* rider)
     *(int*)(computerRider + 0x304) = boostMode;
     cRider_initBoost(computerRider);
     if ((D_005308B8.f0 >> 3) & 1)
-        *(float*)((char*)rider->mRider + 0xB24) = 1.0f;
+        rider->mRider->mBoostMeterStart = 1.0f;
     if (OptBit_0012B698(&D_005308B8, 4))
-        *(int*)((char*)rider->mRider + 0xB28) = 2;
+        rider->mRider->mBoostSourceMask = 2;
     if (OptBit_0012B698(&D_005308B8, 1))
         cRider_setUbersAllowed(rider->mRider, 1);
-    *(int*)((char*)rider->mRider + 0xB30) = cBERules_getAIStartDelaySecs();
+    rider->mRider->mStartHandicap = cBERules_getAIStartDelaySecs();
 }
 #endif
 
@@ -3525,7 +3525,7 @@ extern "C" void cWipeoutControl_gainFocus(cWipeoutControl* self)
     self->RiderState = 0;
     if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 22)
     {
-        cWipeoutMotion_throwItem((char*)self->mRider->mRiderHandler + 0x30, (sVec4_12CA30*)((char*)self->mRider + 0x1E0), (sVec4_12CA30*)t4vect_Zero, boardPrevPose);
+        cWipeoutMotion_throwItem((char*)&self->mRider->mRiderHandler->WipeoutMotion, (sVec4_12CA30*)(&self->mRider->mVelocity), (sVec4_12CA30*)t4vect_Zero, boardPrevPose);
         *(int*)&self->mRider->unk_318 = 0;
     }
     cReplay_eventWipeout(SSXApp->Game->Replay, self->mRider->mAIIndex, (int)self->mRider->mMetrix + 0xFC);
@@ -3740,16 +3740,16 @@ extern "C" void cWipeoutControl_updateLaunch(cWipeoutControl* self)
         sV_12CD20 deltaQuat = Sub_12CD20((*(sV_12CD20*)&pose->Q), (*(sV_12CD20*)&self->RiderPrevPose.Q));
         sV_12CD20 angVelQuat = QuatMul_12CD20(deltaQuat, Conj_12CD20(*pose));
         sV_12CD20 angvel = Scale_12CD20(sV_12CD20(angVelQuat.x, angVelQuat.y, angVelQuat.z, 0.0f), doubleInvDeltaTime);
-        cWipeoutMotion_throwRider((char*)self->mRider->mRiderHandler + 0x30, (char*)self->mRider + 0x1E0, &angvel);
+        cWipeoutMotion_throwRider((char*)&self->mRider->mRiderHandler->WipeoutMotion, &self->mRider->mVelocity, &angvel);
         if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 23)
         {
             vel = Scale_12CD20(Scale_12CD20(Sub_12CD20((*(sV_12CD20*)&boardPose->P), (*(sV_12CD20*)&self->BoardPrevPose)), *(float*)((char*)self->mRider->mRiderAnim + 0x1C)), invDeltaTime);
             deltaQuat = Sub_12CD20((*(sV_12CD20*)&boardPose->Q), (*(sV_12CD20*)&self->BoardPrevPose.Q));
             angVelQuat = QuatMul_12CD20(deltaQuat, Conj_12CD20(*boardPose));
             angvel = Scale_12CD20(sV_12CD20(angVelQuat.x, angVelQuat.y, angVelQuat.z, 0.0f), doubleInvDeltaTime);
-            cWipeoutMotion_throwItem((char*)self->mRider->mRiderHandler + 0x30, (sVec4_12CA30*)&vel, (sVec4_12CA30*)&angvel, boardPose);
+            cWipeoutMotion_throwItem((char*)&self->mRider->mRiderHandler->WipeoutMotion, (sVec4_12CA30*)&vel, (sVec4_12CA30*)&angvel, boardPose);
         }
-        if (*(int*)((char*)self->mRider->mRiderHandler + 0x30) == 1)
+        if (self->mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1)
         {
             self->RiderState = 1;
             cWipeoutControl_playWipeoutHitTransitionAnim(self);
@@ -3905,7 +3905,7 @@ extern "C" void cWipeoutControl_updateGround(cWipeoutControl* self)
         }
         aiTail_12D160(self);
     }
-    else if (*(int*)((char*)self->mRider->mRiderHandler + 0x30) == 1)
+    else if (self->mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState == 1)
     {
         cWipeoutControl_playWipeoutAirAnim(self);
         *(int*)self = 1;
@@ -4011,7 +4011,7 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
     cWipeoutControl_chooseTumbleAnimRate(self);
     if (self->IsNewImpact != 0)
     {
-        if (*(int*)((char*)self->mRider->mRiderHandler + 0x30) == 0)
+        if (self->mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState == 0)
         {
             if (self->mRider->mGroundNormal.z > 0.8999999761581421f &&
                 aiDot_12D4E8(*(sAiVec4_12D4E8*)&self->LatestImpact, *(sAiVec4_12D4E8*)&self->mRider->mGroundNormal) <
@@ -4069,7 +4069,7 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
                 cRider_flagEventWipeoutRecover(self->mRider, 1);
             }
         }
-        else if (*(int*)((char*)self->mRider->mRiderHandler + 0x30) == 0)
+        else if (self->mRider->mRiderHandler->WipeoutMotion.WipeoutMotionState == 0)
         {
             cWipeoutControl_playWipeoutGroundAnim(self);
             *(int*)self = 2;
@@ -4669,7 +4669,7 @@ extern "C" void cWipeoutControl_playWipeoutStuckAnim(cWipeoutControl* self)
                             n->z * *(float*)(trk + 0x148), n->w * *(float*)(trk + 0x14C));
     node.rot = *(sQuat_12BE20*)(*(char**)(*(char**)(rd + 0x780) + 0x28) + (*(int*)(rd + 0x89C) << 4));
     sXf_12E010 y = Combine_12E010(node, Invert_12E010(newPose));
-    sXf_12E010* rx = (sXf_12E010*)((char*)self->mRider + 0x110);
+    sXf_12E010* rx = (sXf_12E010*)(&self->mRider->mPosition);
     *rx = Combine_12E010(*rx, y);
     cRider_updateOrientationImplicit(self->mRider);
     char* rd3 = (char*)self->mRider;
@@ -4792,7 +4792,7 @@ extern "C" void cWipeoutControl_loseFocus(cWipeoutControl* self)
 {
     if ((AITick() & 1) == 0)
     {
-        char* sub = (char*)self->mRider + 0x6C0;
+        char* sub = (char*)&self->mRider->mVtbl;
         sVEntry0012E690* vt = *(sVEntry0012E690**)sub;
         if (vt[8].fn(sub + vt[8].delta))
         {
@@ -5478,7 +5478,7 @@ INCLUDE_ASM("ai/ai", cResetControl_shouldTransition);
 extern "C" int cResetControl_shouldTransition(cResetControl* self)
 {
     cRider* rider = self->mRider;
-    return *(int*)((char*)rider + 0x87C) != 0 && *(int*)((char*)rider + 0x870) >= 0;
+    return rider->mIsLocal != 0 && rider->mViewIndex >= 0;
 }
 #endif
 
@@ -6355,7 +6355,7 @@ extern "C" void cBoardPressControl_handleExitState(cBoardPressControl* self, sPa
     }
     if (cRider_getMotionState(self->mRider) == 4)
     {
-        cRailslideControl_playGainFocusAnim((cRailslideControl*)((char*)self->mRider->mRiderHandler + 0x2B0), 0);
+        cRailslideControl_playGainFocusAnim((cRailslideControl*)(&self->mRider->mRiderHandler->RailslideControl), 0);
         cRider_setControlState_impl(self->mRider, 7);
     }
     else
@@ -6921,10 +6921,10 @@ extern "C" void cBoardPressControl_forceExit(cBoardPressControl* self)
     cBoardPressControl_autoCompletePivot(self);
     cBoardPressControl_blendOutOfPivot(self);
     cRider* rider = self->mRider;
-    int pressType = *(int*)((char*)rider + 0x330);
+    int pressType = rider->PressMode;
     if (pressType >= 1 && pressType <= 2)
     {
-        cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evPressEnd(*(void**)((char*)rider + 0x790)));
+        cRider_flagEventBoostPowerUp(self->mRider, 1, cRiderMetrix_evPressEnd(rider->mMetrix));
     }
 }
 #endif
@@ -9098,7 +9098,7 @@ extern "C" void cSpinControl_loseFocus(cSpinControl* self)
     char* rider4 = (char*)self->mRider;
     *(float*)(rider4 + 0x29C) = 0.01666666753590107f;
     *(int*)(rider4 + 0x2A0) = 0;
-    cSpinControl_applyFlipSpinAngle(self, (char*)self->mRider + 0x110);
+    cSpinControl_applyFlipSpinAngle(self, &self->mRider->mPosition);
     cRider_updateOrientationImplicit(self->mRider);
     self->mRider->mSpinRate *= 0.7500380277633667f;
     char* rider5 = (char*)self->mRider;
@@ -10218,7 +10218,7 @@ extern "C" void cUberGrindControl_update(cUberGrindControl* self, void* in)
             return;
         if (cRider_getMotionState((char*)self->mRider) == 4)
         {
-            cRailslideControl_playGainFocusAnim((cRailslideControl*)((char*)self->mRider->mRiderHandler + 0x2B0), 0);
+            cRailslideControl_playGainFocusAnim((cRailslideControl*)(&self->mRider->mRiderHandler->RailslideControl), 0);
             cRider_setControlState_impl((char*)self->mRider, 7);
         }
         else

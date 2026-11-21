@@ -1092,7 +1092,7 @@ struct Q_9E28 { int a; int *data; int tail; int head; };
 extern "C" int cAsyncSys_ASYNCSYS_GetCurrOperationUserHandle(cAsyncSys* self) {
     int userHandle;
     if (self->mBusy != 0) {
-        Q_9E28 *handleQueue = (Q_9E28 *)(((char*)self) + 0x18C);
+        Q_9E28 *handleQueue = (Q_9E28 *)(&self->mUserHandle);
         if (self->mUserHandle.Head == self->mUserHandle.Tail) userHandle = -1;
         else userHandle = handleQueue->data[handleQueue->head];
     } else userHandle = -1;
@@ -1759,7 +1759,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BACE8);
  * @return unk_41C
  */
 extern "C" int func_002BACE8(cMusicSys* musicSys) {
-    return (*(int *)((char*)(musicSys) + (0x41C)));
+    return (musicSys->unk_41C);
 }
 #endif
 
@@ -1963,7 +1963,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetPlayListIndex);
  * @return mPlayListIndex
  */
 extern "C" int cSSXAudio_GetPlayListIndex(cSSXAudio* audio) {
-    return (*(int *)((char*)(audio) + (0x6238)));
+    return (audio->mPlayListIndex);
 }
 #endif
 
@@ -2118,8 +2118,8 @@ struct E_AF08 { int a; int off; };
 extern "C" void cWorldPainterLayer_resolve(cWorldPainterLayer* self) {
     *(char**)self = ((char*)self) + *(int*)self;
     cQuadTree_resolve(*(char**)self);
-    *(char**)(((char*)self) + 8) = ((char*)self) + *(int*)(((char*)self) + 8);
-    E_AF08 *region = *(E_AF08**)(((char*)self) + 8);
+    self->m_pRegions = (tWPRegion*)(((char*)self) + self->m_iRegionOffset);
+    E_AF08 *region = (E_AF08*)self->m_pRegions;
     int i;
     for (i = 0; i < self->m_iNumRegions; i++, region++) {
         int off = region->off;
@@ -5172,10 +5172,10 @@ extern "C" int func_002BB100_DE30(char *, char *) __asm__("func_002BB100");
  * @return 1 if every value matches, else 0
  */
 extern "C" int tWPInGameData_Lighting_isEqual(tWPInGameData_Lighting* lhs, tWPData* rhs) {
-    if (func_002BB100_DE30(((char*)lhs) + 8, ((char*)rhs) + 4)) return 0;
-    if (func_002BB100_DE30(((char*)lhs) + 0x18, ((char*)rhs) + 0xC)) return 0;
-    if (func_002BB100_DE30(((char*)lhs) + 0x28, ((char*)rhs) + 0x14)) return 0;
-    if (func_002BB100_DE30(((char*)lhs) + 0x38, ((char*)rhs) + 0x1C)) return 0;
+    if (func_002BB100_DE30((char*)&lhs->m_LightIrradianceName, ((char*)rhs) + 4)) return 0;
+    if (func_002BB100_DE30((char*)&lhs->m_ShadowIrradianceName, ((char*)rhs) + 0xC)) return 0;
+    if (func_002BB100_DE30((char*)&lhs->m_TunnelIrradianceName, ((char*)rhs) + 0x14)) return 0;
+    if (func_002BB100_DE30((char*)&lhs->m_ObjectIrradianceName, ((char*)rhs) + 0x1C)) return 0;
     if (lhs->m_AmbientLightIntensityOffset != *(float*)(((char*)rhs) + 0x24)) return 0;
     if (lhs->m_RimLightIntensityOffset != *(float*)(((char*)rhs) + 0x28)) return 0;
     return 1;
@@ -5614,11 +5614,11 @@ struct VE_E2D8 { short delta; short idx; int (*fn)(void *, void *, int); };
  */
 extern "C" void tWPInGameData_MusicTrigger_readFromReplayFrame(tWPInGameData_MusicTrigger* self, cReplayFramePtr* frame) {
     VE_E2D8 *readEntry = &(*(VE_E2D8 **)frame)[2];
-    readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self) + 8, 4);
+    readEntry->fn(((char*)frame) + readEntry->delta, (char*)&self->m_Type, 4);
     readEntry = &(*(VE_E2D8 **)frame)[2];
     readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self), 4);
     readEntry = &(*(VE_E2D8 **)frame)[2];
-    readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self) + 0x10, 4);
+    readEntry->fn(((char*)frame) + readEntry->delta, (char*)&self->m_Value, 4);
     readEntry = &(*(VE_E2D8 **)frame)[2];
     readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self), 4);
 }
@@ -5739,17 +5739,17 @@ static inline void Wr_E518(Stream_E518* s, void* p, int n) {
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
 extern "C" void tWPInGameData_Fog_readFromReplayFrame(tWPInGameData_Fog* self, Stream_E518* frame) {
-    Wr_E518(frame, ((char*)self) + 0x8, 4);
+    Wr_E518(frame, &self->m_FogDensity, 4);
     Wr_E518(frame, ((char*)self), 4);
-    Wr_E518(frame, ((char*)self) + 0x10, 4);
+    Wr_E518(frame, &self->m_FogNear, 4);
     Wr_E518(frame, ((char*)self), 4);
-    Wr_E518(frame, ((char*)self) + 0x18, 4);
+    Wr_E518(frame, &self->m_FogFar, 4);
     Wr_E518(frame, ((char*)self), 4);
-    Wr_E518(frame, ((char*)self) + 0x20, 4);
+    Wr_E518(frame, &self->m_FogColourR, 4);
     Wr_E518(frame, ((char*)self), 4);
-    Wr_E518(frame, ((char*)self) + 0x28, 4);
+    Wr_E518(frame, &self->m_FogColourG, 4);
     Wr_E518(frame, ((char*)self), 4);
-    Wr_E518(frame, ((char*)self) + 0x30, 4);
+    Wr_E518(frame, &self->m_FogColourB, 4);
     Wr_E518(frame, ((char*)self), 4);
 }
 #endif
@@ -5774,19 +5774,19 @@ static inline void Wr_E698(Stream_E698* s, void* p, int n) {
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
 extern "C" void tWPInGameData_LightGlow_readFromReplayFrame(tWPInGameData_LightGlow* self, Stream_E698* frame) {
-    Wr_E698(frame, ((char*)self) + 0x8, 4);
+    Wr_E698(frame, &self->m_LightGlowCutoff, 4);
     Wr_E698(frame, ((char*)self), 4);
-    Wr_E698(frame, ((char*)self) + 0x10, 4);
+    Wr_E698(frame, &self->m_LightGlowCutoffScale, 4);
     Wr_E698(frame, ((char*)self), 4);
-    Wr_E698(frame, ((char*)self) + 0x18, 4);
+    Wr_E698(frame, &self->m_LightGlowCopyIntensity, 4);
     Wr_E698(frame, ((char*)self), 4);
-    Wr_E698(frame, ((char*)self) + 0x20, 4);
+    Wr_E698(frame, &self->m_LightGlowSourceIntensity, 4);
     Wr_E698(frame, ((char*)self), 4);
-    Wr_E698(frame, ((char*)self) + 0x28, 4);
+    Wr_E698(frame, &self->m_LightGlowFrameIntensity, 4);
     Wr_E698(frame, ((char*)self), 4);
-    Wr_E698(frame, ((char*)self) + 0x30, 4);
+    Wr_E698(frame, &self->m_LightGlowBlend2, 4);
     Wr_E698(frame, ((char*)self), 4);
-    Wr_E698(frame, ((char*)self) + 0x38, 4);
+    Wr_E698(frame, &self->m_LightGlowBlend3, 4);
     Wr_E698(frame, ((char*)self), 4);
 }
 #endif
@@ -5811,17 +5811,17 @@ static inline void Wr_E850(Stream_E850* s, void* p, int n) {
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
 extern "C" void tWPInGameData_ScreenTint_readFromReplayFrame(tWPInGameData_ScreenTint* self, Stream_E850* frame) {
-    Wr_E850(frame, ((char*)self) + 0x8, 4);
+    Wr_E850(frame, &self->m_ScreenTintScaleR, 4);
     Wr_E850(frame, ((char*)self), 4);
-    Wr_E850(frame, ((char*)self) + 0x10, 4);
+    Wr_E850(frame, &self->m_ScreenTintScaleG, 4);
     Wr_E850(frame, ((char*)self), 4);
-    Wr_E850(frame, ((char*)self) + 0x18, 4);
+    Wr_E850(frame, &self->m_ScreenTintScaleB, 4);
     Wr_E850(frame, ((char*)self), 4);
-    Wr_E850(frame, ((char*)self) + 0x20, 4);
+    Wr_E850(frame, &self->m_ScreenTintOffsetR, 4);
     Wr_E850(frame, ((char*)self), 4);
-    Wr_E850(frame, ((char*)self) + 0x28, 4);
+    Wr_E850(frame, &self->m_ScreenTintOffsetG, 4);
     Wr_E850(frame, ((char*)self), 4);
-    Wr_E850(frame, ((char*)self) + 0x30, 4);
+    Wr_E850(frame, &self->m_ScreenTintOffsetB, 4);
     Wr_E850(frame, ((char*)self), 4);
 }
 #endif
@@ -5870,23 +5870,23 @@ static inline void Wr_EA38(Stream_EA38* s, void* p, int n) {
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
 extern "C" void tWPInGameData_Sun_readFromReplayFrame(tWPInGameData_Sun* self, Stream_EA38* frame) {
-    Wr_EA38(frame, ((char*)self) + 0x8, 4);
+    Wr_EA38(frame, &self->m_SunPitchOffset, 4);
     Wr_EA38(frame, ((char*)self), 4);
-    Wr_EA38(frame, ((char*)self) + 0x10, 4);
+    Wr_EA38(frame, &self->m_SunYawOffset, 4);
     Wr_EA38(frame, ((char*)self), 4);
-    Wr_EA38(frame, ((char*)self) + 0x18, 4);
+    Wr_EA38(frame, &self->m_SunColorR, 4);
     Wr_EA38(frame, ((char*)self), 4);
-    Wr_EA38(frame, ((char*)self) + 0x20, 4);
+    Wr_EA38(frame, &self->m_SunColorG, 4);
     Wr_EA38(frame, ((char*)self), 4);
-    Wr_EA38(frame, ((char*)self) + 0x28, 4);
+    Wr_EA38(frame, &self->m_SunColorB, 4);
     Wr_EA38(frame, ((char*)self), 4);
-    Wr_EA38(frame, ((char*)self) + 0x30, 4);
+    Wr_EA38(frame, &self->m_SunIntensity, 4);
     Wr_EA38(frame, ((char*)self), 4);
-    Wr_EA38(frame, ((char*)self) + 0x38, 4);
+    Wr_EA38(frame, &self->m_SunType, 4);
     Wr_EA38(frame, ((char*)self), 4);
-    Wr_EA38(frame, ((char*)self) + 0x40, 4);
+    Wr_EA38(frame, &self->m_LensIntensity, 4);
     Wr_EA38(frame, ((char*)self), 4);
-    Wr_EA38(frame, ((char*)self) + 0x48, 4);
+    Wr_EA38(frame, &self->m_SunRadius, 4);
     Wr_EA38(frame, ((char*)self), 4);
 }
 #endif
@@ -5936,17 +5936,17 @@ static inline void Wr_ECC8(Stream_ECC8* s, void* p, int n) {
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
 extern "C" void tWPInGameData_Lighting_readFromReplayFrame(tWPInGameData_Lighting* self, Stream_ECC8* frame) {
-    Wr_ECC8(frame, ((char*)self) + 0x8, 8);
+    Wr_ECC8(frame, &self->m_LightIrradianceName, 8);
     Wr_ECC8(frame, ((char*)self), 4);
-    Wr_ECC8(frame, ((char*)self) + 0x18, 8);
+    Wr_ECC8(frame, &self->m_ShadowIrradianceName, 8);
     Wr_ECC8(frame, ((char*)self), 4);
-    Wr_ECC8(frame, ((char*)self) + 0x28, 8);
+    Wr_ECC8(frame, &self->m_TunnelIrradianceName, 8);
     Wr_ECC8(frame, ((char*)self), 4);
-    Wr_ECC8(frame, ((char*)self) + 0x38, 8);
+    Wr_ECC8(frame, &self->m_ObjectIrradianceName, 8);
     Wr_ECC8(frame, ((char*)self), 4);
-    Wr_ECC8(frame, ((char*)self) + 0x48, 4);
+    Wr_ECC8(frame, &self->m_AmbientLightIntensityOffset, 4);
     Wr_ECC8(frame, ((char*)self), 4);
-    Wr_ECC8(frame, ((char*)self) + 0x50, 4);
+    Wr_ECC8(frame, &self->m_RimLightIntensityOffset, 4);
     Wr_ECC8(frame, ((char*)self), 4);
 }
 #endif
@@ -5971,43 +5971,43 @@ public:
 // Streams 19 words of self (at +0x8 .. +0x98), each followed by the word at +0x0.
 extern "C" void tWPInGameData_Weather_readFromReplayFrame(tWPInGameData_Weather* self, cStream_EE48* frame)
 {
-    frame->write(((char*)self) + 0x8, 4);
+    frame->write(&self->m_SnowIntensity, 4);
     frame->write(((char*)self), 4);
-    frame->write(((char*)self) + 0x10, 4);
+    frame->write(&self->m_FlakeSize, 4);
     frame->write(((char*)self), 4);
-    frame->write(((char*)self) + 0x18, 4);
+    frame->write(&self->m_WindIntensity, 4);
     frame->write(((char*)self), 4);
-    frame->write(((char*)self) + 0x20, 4);
+    frame->write(&self->m_WindRotation, 4);
     frame->write(((char*)self), 4);
-    frame->write(((char*)self) + 0x28, 4);
+    frame->write(&self->m_PlayerWindIntensity, 4);
     frame->write(((char*)self), 4);
-    frame->write(((char*)self) + 0x30, 4);
+    frame->write(&self->m_Temperature, 4);
     frame->write(((char*)self), 4);
-    frame->write(((char*)self) + 0x38, 4);
+    frame->write(&self->m_SnowFlurries, 4);
     frame->write(((char*)self), 4);
-    frame->write(((char*)self) + 0x40, 4);
+    frame->write(&self->m_SnowGravityMultiplier, 4);
     frame->write(((char*)self), 4);
-    frame->write(((char*)self) + 0x48, 4);
+    frame->write(&self->m_SnowFluffItensity, 4);
     frame->write(((char*)self), 4);
-    frame->write(((char*)self) + 0x50, 4);
+    frame->write(&self->m_SnowFluffWindIntensity, 4);
     frame->write(((char*)self), 4);
-    frame->write(((char*)self) + 0x58, 4);
+    frame->write(&self->m_LightningChance, 4);
     frame->write(((char*)self), 4);
-    frame->write(((char*)self) + 0x60, 4);
+    frame->write(&self->m_SnowFlakeColourA, 4);
     frame->write(((char*)self), 4);
-    frame->write(((char*)self) + 0x68, 4);
+    frame->write(&self->m_SnowFlakeColourR, 4);
     frame->write(((char*)self), 4);
-    frame->write(((char*)self) + 0x70, 4);
+    frame->write(&self->m_SnowFlakeColourG, 4);
     frame->write(((char*)self), 4);
-    frame->write(((char*)self) + 0x78, 4);
+    frame->write(&self->m_SnowFlakeColourB, 4);
     frame->write(((char*)self), 4);
-    frame->write(((char*)self) + 0x80, 4);
+    frame->write(&self->m_SnowFluffColourA, 4);
     frame->write(((char*)self), 4);
-    frame->write(((char*)self) + 0x88, 4);
+    frame->write(&self->m_SnowFluffColourR, 4);
     frame->write(((char*)self), 4);
-    frame->write(((char*)self) + 0x90, 4);
+    frame->write(&self->m_SnowFluffColourG, 4);
     frame->write(((char*)self), 4);
-    frame->write(((char*)self) + 0x98, 4);
+    frame->write(&self->m_SnowFluffColourB, 4);
     frame->write(((char*)self), 4);
 }
 #endif
@@ -6026,11 +6026,11 @@ struct VE_F2A0 { short delta; short idx; int (*fn)(void *, void *, int); };
  */
 extern "C" void tWPInGameData_Danger_readFromReplayFrame(tWPInGameData_Danger* self, cReplayFramePtr* frame) {
     VE_F2A0 *readEntry = &(*(VE_F2A0 **)frame)[2];
-    readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self) + 8, 4);
+    readEntry->fn(((char*)frame) + readEntry->delta, (char*)&self->m_Level, 4);
     readEntry = &(*(VE_F2A0 **)frame)[2];
     readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self), 4);
     readEntry = &(*(VE_F2A0 **)frame)[2];
-    readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self) + 0x10, 4);
+    readEntry->fn(((char*)frame) + readEntry->delta, (char*)&self->m_PointRate, 4);
     readEntry = &(*(VE_F2A0 **)frame)[2];
     readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self), 4);
 }
@@ -6050,11 +6050,11 @@ struct VE_F340 { short delta; short idx; int (*fn)(void *, void *, int); };
  */
 extern "C" void tWPInGameData_MusicTrigger_writeToReplayFrame(tWPInGameData_MusicTrigger* self, cReplayFramePtr* frame) {
     VE_F340 *writeEntry = &(*(VE_F340 **)frame)[1];
-    writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self) + 8, 4);
+    writeEntry->fn(((char*)frame) + writeEntry->delta, (char*)&self->m_Type, 4);
     writeEntry = &(*(VE_F340 **)frame)[1];
     writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self), 4);
     writeEntry = &(*(VE_F340 **)frame)[1];
-    writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self) + 0x10, 4);
+    writeEntry->fn(((char*)frame) + writeEntry->delta, (char*)&self->m_Value, 4);
     writeEntry = &(*(VE_F340 **)frame)[1];
     writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self), 4);
 }
@@ -6172,17 +6172,17 @@ static inline void Wr_F580(Stream_F580* s, void* p, int n) {
  * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
 extern "C" void tWPInGameData_Fog_writeToReplayFrame(tWPInGameData_Fog* self, Stream_F580* frame) {
-    Wr_F580(frame, ((char*)self) + 0x8, 4);
+    Wr_F580(frame, &self->m_FogDensity, 4);
     Wr_F580(frame, ((char*)self), 4);
-    Wr_F580(frame, ((char*)self) + 0x10, 4);
+    Wr_F580(frame, &self->m_FogNear, 4);
     Wr_F580(frame, ((char*)self), 4);
-    Wr_F580(frame, ((char*)self) + 0x18, 4);
+    Wr_F580(frame, &self->m_FogFar, 4);
     Wr_F580(frame, ((char*)self), 4);
-    Wr_F580(frame, ((char*)self) + 0x20, 4);
+    Wr_F580(frame, &self->m_FogColourR, 4);
     Wr_F580(frame, ((char*)self), 4);
-    Wr_F580(frame, ((char*)self) + 0x28, 4);
+    Wr_F580(frame, &self->m_FogColourG, 4);
     Wr_F580(frame, ((char*)self), 4);
-    Wr_F580(frame, ((char*)self) + 0x30, 4);
+    Wr_F580(frame, &self->m_FogColourB, 4);
     Wr_F580(frame, ((char*)self), 4);
 }
 #endif
@@ -6207,19 +6207,19 @@ static inline void Wr_F700(Stream_F700* s, void* p, int n) {
  * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
 extern "C" void tWPInGameData_LightGlow_writeToReplayFrame(tWPInGameData_LightGlow* self, Stream_F700* frame) {
-    Wr_F700(frame, ((char*)self) + 0x8, 4);
+    Wr_F700(frame, &self->m_LightGlowCutoff, 4);
     Wr_F700(frame, ((char*)self), 4);
-    Wr_F700(frame, ((char*)self) + 0x10, 4);
+    Wr_F700(frame, &self->m_LightGlowCutoffScale, 4);
     Wr_F700(frame, ((char*)self), 4);
-    Wr_F700(frame, ((char*)self) + 0x18, 4);
+    Wr_F700(frame, &self->m_LightGlowCopyIntensity, 4);
     Wr_F700(frame, ((char*)self), 4);
-    Wr_F700(frame, ((char*)self) + 0x20, 4);
+    Wr_F700(frame, &self->m_LightGlowSourceIntensity, 4);
     Wr_F700(frame, ((char*)self), 4);
-    Wr_F700(frame, ((char*)self) + 0x28, 4);
+    Wr_F700(frame, &self->m_LightGlowFrameIntensity, 4);
     Wr_F700(frame, ((char*)self), 4);
-    Wr_F700(frame, ((char*)self) + 0x30, 4);
+    Wr_F700(frame, &self->m_LightGlowBlend2, 4);
     Wr_F700(frame, ((char*)self), 4);
-    Wr_F700(frame, ((char*)self) + 0x38, 4);
+    Wr_F700(frame, &self->m_LightGlowBlend3, 4);
     Wr_F700(frame, ((char*)self), 4);
 }
 #endif
@@ -6244,17 +6244,17 @@ static inline void Wr_F8B8(Stream_F8B8* s, void* p, int n) {
  * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
 extern "C" void tWPInGameData_ScreenTint_writeToReplayFrame(tWPInGameData_ScreenTint* self, Stream_F8B8* frame) {
-    Wr_F8B8(frame, ((char*)self) + 0x8, 4);
+    Wr_F8B8(frame, &self->m_ScreenTintScaleR, 4);
     Wr_F8B8(frame, ((char*)self), 4);
-    Wr_F8B8(frame, ((char*)self) + 0x10, 4);
+    Wr_F8B8(frame, &self->m_ScreenTintScaleG, 4);
     Wr_F8B8(frame, ((char*)self), 4);
-    Wr_F8B8(frame, ((char*)self) + 0x18, 4);
+    Wr_F8B8(frame, &self->m_ScreenTintScaleB, 4);
     Wr_F8B8(frame, ((char*)self), 4);
-    Wr_F8B8(frame, ((char*)self) + 0x20, 4);
+    Wr_F8B8(frame, &self->m_ScreenTintOffsetR, 4);
     Wr_F8B8(frame, ((char*)self), 4);
-    Wr_F8B8(frame, ((char*)self) + 0x28, 4);
+    Wr_F8B8(frame, &self->m_ScreenTintOffsetG, 4);
     Wr_F8B8(frame, ((char*)self), 4);
-    Wr_F8B8(frame, ((char*)self) + 0x30, 4);
+    Wr_F8B8(frame, &self->m_ScreenTintOffsetB, 4);
     Wr_F8B8(frame, ((char*)self), 4);
 }
 #endif
@@ -6302,23 +6302,23 @@ static inline void Wr_FAA0(Stream_FAA0* s, void* p, int n) {
  * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
 extern "C" void tWPInGameData_Sun_writeToReplayFrame(tWPInGameData_Sun* self, Stream_FAA0* frame) {
-    Wr_FAA0(frame, ((char*)self) + 0x8, 4);
+    Wr_FAA0(frame, &self->m_SunPitchOffset, 4);
     Wr_FAA0(frame, ((char*)self), 4);
-    Wr_FAA0(frame, ((char*)self) + 0x10, 4);
+    Wr_FAA0(frame, &self->m_SunYawOffset, 4);
     Wr_FAA0(frame, ((char*)self), 4);
-    Wr_FAA0(frame, ((char*)self) + 0x18, 4);
+    Wr_FAA0(frame, &self->m_SunColorR, 4);
     Wr_FAA0(frame, ((char*)self), 4);
-    Wr_FAA0(frame, ((char*)self) + 0x20, 4);
+    Wr_FAA0(frame, &self->m_SunColorG, 4);
     Wr_FAA0(frame, ((char*)self), 4);
-    Wr_FAA0(frame, ((char*)self) + 0x28, 4);
+    Wr_FAA0(frame, &self->m_SunColorB, 4);
     Wr_FAA0(frame, ((char*)self), 4);
-    Wr_FAA0(frame, ((char*)self) + 0x30, 4);
+    Wr_FAA0(frame, &self->m_SunIntensity, 4);
     Wr_FAA0(frame, ((char*)self), 4);
-    Wr_FAA0(frame, ((char*)self) + 0x38, 4);
+    Wr_FAA0(frame, &self->m_SunType, 4);
     Wr_FAA0(frame, ((char*)self), 4);
-    Wr_FAA0(frame, ((char*)self) + 0x40, 4);
+    Wr_FAA0(frame, &self->m_LensIntensity, 4);
     Wr_FAA0(frame, ((char*)self), 4);
-    Wr_FAA0(frame, ((char*)self) + 0x48, 4);
+    Wr_FAA0(frame, &self->m_SunRadius, 4);
     Wr_FAA0(frame, ((char*)self), 4);
 }
 #endif
@@ -6367,17 +6367,17 @@ static inline void Wr_FD30(Stream_FD30* s, void* p, int n) {
  * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
 extern "C" void tWPInGameData_Lighting_writeToReplayFrame(tWPInGameData_Lighting* self, Stream_FD30* frame) {
-    Wr_FD30(frame, ((char*)self) + 0x8, 8);
+    Wr_FD30(frame, &self->m_LightIrradianceName, 8);
     Wr_FD30(frame, ((char*)self), 4);
-    Wr_FD30(frame, ((char*)self) + 0x18, 8);
+    Wr_FD30(frame, &self->m_ShadowIrradianceName, 8);
     Wr_FD30(frame, ((char*)self), 4);
-    Wr_FD30(frame, ((char*)self) + 0x28, 8);
+    Wr_FD30(frame, &self->m_TunnelIrradianceName, 8);
     Wr_FD30(frame, ((char*)self), 4);
-    Wr_FD30(frame, ((char*)self) + 0x38, 8);
+    Wr_FD30(frame, &self->m_ObjectIrradianceName, 8);
     Wr_FD30(frame, ((char*)self), 4);
-    Wr_FD30(frame, ((char*)self) + 0x48, 4);
+    Wr_FD30(frame, &self->m_AmbientLightIntensityOffset, 4);
     Wr_FD30(frame, ((char*)self), 4);
-    Wr_FD30(frame, ((char*)self) + 0x50, 4);
+    Wr_FD30(frame, &self->m_RimLightIntensityOffset, 4);
     Wr_FD30(frame, ((char*)self), 4);
 }
 #endif
@@ -6404,43 +6404,43 @@ public:
 // (the read-side twin of tWPInGameData_Weather_readFromReplayFrame).
 extern "C" void tWPInGameData_Weather_writeToReplayFrame(tWPInGameData_Weather* self, cStream_FEB0* frame)
 {
-    frame->read(((char*)self) + 0x8, 4);
+    frame->read(&self->m_SnowIntensity, 4);
     frame->read(((char*)self), 4);
-    frame->read(((char*)self) + 0x10, 4);
+    frame->read(&self->m_FlakeSize, 4);
     frame->read(((char*)self), 4);
-    frame->read(((char*)self) + 0x18, 4);
+    frame->read(&self->m_WindIntensity, 4);
     frame->read(((char*)self), 4);
-    frame->read(((char*)self) + 0x20, 4);
+    frame->read(&self->m_WindRotation, 4);
     frame->read(((char*)self), 4);
-    frame->read(((char*)self) + 0x28, 4);
+    frame->read(&self->m_PlayerWindIntensity, 4);
     frame->read(((char*)self), 4);
-    frame->read(((char*)self) + 0x30, 4);
+    frame->read(&self->m_Temperature, 4);
     frame->read(((char*)self), 4);
-    frame->read(((char*)self) + 0x38, 4);
+    frame->read(&self->m_SnowFlurries, 4);
     frame->read(((char*)self), 4);
-    frame->read(((char*)self) + 0x40, 4);
+    frame->read(&self->m_SnowGravityMultiplier, 4);
     frame->read(((char*)self), 4);
-    frame->read(((char*)self) + 0x48, 4);
+    frame->read(&self->m_SnowFluffItensity, 4);
     frame->read(((char*)self), 4);
-    frame->read(((char*)self) + 0x50, 4);
+    frame->read(&self->m_SnowFluffWindIntensity, 4);
     frame->read(((char*)self), 4);
-    frame->read(((char*)self) + 0x58, 4);
+    frame->read(&self->m_LightningChance, 4);
     frame->read(((char*)self), 4);
-    frame->read(((char*)self) + 0x60, 4);
+    frame->read(&self->m_SnowFlakeColourA, 4);
     frame->read(((char*)self), 4);
-    frame->read(((char*)self) + 0x68, 4);
+    frame->read(&self->m_SnowFlakeColourR, 4);
     frame->read(((char*)self), 4);
-    frame->read(((char*)self) + 0x70, 4);
+    frame->read(&self->m_SnowFlakeColourG, 4);
     frame->read(((char*)self), 4);
-    frame->read(((char*)self) + 0x78, 4);
+    frame->read(&self->m_SnowFlakeColourB, 4);
     frame->read(((char*)self), 4);
-    frame->read(((char*)self) + 0x80, 4);
+    frame->read(&self->m_SnowFluffColourA, 4);
     frame->read(((char*)self), 4);
-    frame->read(((char*)self) + 0x88, 4);
+    frame->read(&self->m_SnowFluffColourR, 4);
     frame->read(((char*)self), 4);
-    frame->read(((char*)self) + 0x90, 4);
+    frame->read(&self->m_SnowFluffColourG, 4);
     frame->read(((char*)self), 4);
-    frame->read(((char*)self) + 0x98, 4);
+    frame->read(&self->m_SnowFluffColourB, 4);
     frame->read(((char*)self), 4);
 }
 #endif
@@ -6459,11 +6459,11 @@ struct VE_0308 { short delta; short idx; int (*fn)(void *, void *, int); };
  */
 extern "C" void tWPInGameData_Danger_writeToReplayFrame(tWPInGameData_Danger* self, cReplayFramePtr* frame) {
     VE_0308 *writeEntry = &(*(VE_0308 **)frame)[1];
-    writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self) + 8, 4);
+    writeEntry->fn(((char*)frame) + writeEntry->delta, (char*)&self->m_Level, 4);
     writeEntry = &(*(VE_0308 **)frame)[1];
     writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self), 4);
     writeEntry = &(*(VE_0308 **)frame)[1];
-    writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self) + 0x10, 4);
+    writeEntry->fn(((char*)frame) + writeEntry->delta, (char*)&self->m_PointRate, 4);
     writeEntry = &(*(VE_0308 **)frame)[1];
     writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self), 4);
 }

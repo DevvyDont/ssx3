@@ -220,7 +220,7 @@ extern "C" void cGameAnimMap_setMap(cGameAnimMap* self, unsigned int hash, void*
     int i = cGameAnimMap_lookupGAD(((sMdfIndex_00314E88*)self), hash);
     if (i >= 0)
     {
-        ((void**)((char*)self + 0x1030))[i] = value;
+        ((void**)(&self->GameAnimMap[0]))[i] = value;
     }
 }
 #endif
@@ -300,7 +300,7 @@ extern "C" char* cGameAnimMap_getAnimName(cGameAnimMap* self, void* value)
 {
     for (int i = 0; i < 518; i++)
     {
-        if (value == ((void**)(((char*)self) + 0x1030))[i])
+        if (value == ((void**)(&self->GameAnimMap[0]))[i])
         {
             return D_0048CFC0[i];
         }

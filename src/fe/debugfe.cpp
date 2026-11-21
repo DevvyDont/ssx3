@@ -131,7 +131,7 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
         cBackgroundMan_renderImage(popup);
         return;
     }
-    cFont_Dbg* font = *(cFont_Dbg**)((char*)SSXApp->DebugFE + 0x18);
+    cFont_Dbg* font = (cFont_Dbg*)SSXApp->DebugFE->Font;
     void* newRace = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* character = cBE_getInterface_Fv(cBE_getBE(), 2);
     void* intPlayer = cBE_getInterface_Fv(SSXApp->BE, 1);
@@ -781,8 +781,8 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
         break;
     case 201:
         if (SSXApp->unk_74 != 0) {
-            cBXString_operatorE1((char*)LobbyMan_mLobbyMan + 0x48, SSXApp->UserName);
-            cBXString_operatorE1((char*)LobbyMan_mLobbyMan + 0x4C, SSXApp->Password);
+            cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, SSXApp->UserName);
+            cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, SSXApp->Password);
             func_0025C610(LobbyMan_mLobbyMan);
             self->state = 5;
         } else {
@@ -792,8 +792,8 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
         break;
     case 203:
         self->state = 5;
-        cBXString_operatorE1((char*)LobbyMan_mLobbyMan + 0x48, self->user);
-        cBXString_operatorE1((char*)LobbyMan_mLobbyMan + 0x4C, self->pass);
+        cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, self->user);
+        cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, self->pass);
         func_0025C610(LobbyMan_mLobbyMan);
         break;
     case 212:
@@ -907,8 +907,8 @@ extern "C" void func_0017DA30(void* self, int errorCode)
         break;
     case 5:
         if (SSXApp->unk_74 != 0) {
-            cBXString_operatorE1((char*)LobbyMan_mLobbyMan + 0x48, SSXApp->UserName);
-            cBXString_operatorE1((char*)LobbyMan_mLobbyMan + 0x4C, SSXApp->Password);
+            cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, SSXApp->UserName);
+            cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, SSXApp->Password);
             func_0025C610(LobbyMan_mLobbyMan);
         } else {
             SetMode0017DA30(self, 21);
@@ -1305,8 +1305,8 @@ extern "C" void func_0017E118(sDebugFEState17E118* self, const char* userName, c
     cBXString_operatorE1(&self->user, userName);
     cBXString_operatorE1(&self->pass, password);
     self->state = 0x5;
-    cBXString_operatorE1((char*)LobbyMan_mLobbyMan + 0x48, self->user);
-    cBXString_operatorE1((char*)LobbyMan_mLobbyMan + 0x4C, self->pass);
+    cBXString_operatorE1(&LobbyMan_mLobbyMan->mUserName, self->user);
+    cBXString_operatorE1(&LobbyMan_mLobbyMan->mPassword, self->pass);
     func_0025C610(LobbyMan_mLobbyMan);
 }
 #endif
@@ -1709,7 +1709,7 @@ static inline int isEq17E5C8(int a, int b) { return a == b; }
  */
 extern "C" void cDebugLobbyScreen_draw(sDebugFE17E5C8* self)
 {
-    sFont17E5C8* font = *(sFont17E5C8**)((char*)SSXApp->DebugFE + 0x18);
+    sFont17E5C8* font = (sFont17E5C8*)SSXApp->DebugFE->Font;
     switch (self->state) {
     case 0:
     case 1:
@@ -2069,7 +2069,7 @@ extern "C" void* cDebugFE_cDebugFE(cDebugFE* self)
     *(int*)((char*)self + 0x28) = 0;
     *(int*)((char*)self + 0x2C) = 0;
     *(int*)((char*)self + 0x30) = 0;
-    sDbgList17F7B8* list = (sDbgList17F7B8*)((char*)self + 0x24);
+    sDbgList17F7B8* list = (sDbgList17F7B8*)(&self->HeartBeat);
     new (list->e) sDbgEntry17F7B8[64];
     list->n = 0;
     MEM_fill(list->e, 0, 0x200);
@@ -2307,7 +2307,7 @@ extern "C" void cDebugFE_update(cDebugFE* self)
     cFadeScreen_update(self);
     if (*(int*)((char*)SSXApp + 4) == 0)
         ((cFEObjK17FB98*)self->ActiveScreen)->v02();
-    cHeartBeat_update((cHeartBeat*)((char*)self + 0x24));
+    cHeartBeat_update((cHeartBeat*)(&self->HeartBeat));
 }
 #endif
 
@@ -2395,7 +2395,7 @@ extern "C" int cDebugFE_render(cDebugFE* self)
         setB12_17FBF0(rs_17FBF0((char*)graphicsMan4), 13);
         setB2_17FBF0(rs_17FBF0((char*)graphicsMan4), 5);
         setB22_17FBF0(rs_17FBF0((char*)graphicsMan4), 1);
-        cHeartBeat_draw((cHeartBeat*)(((char*)self) + 0x24), self->ParticleTID);
+        cHeartBeat_draw((cHeartBeat*)(&self->HeartBeat), self->ParticleTID);
         setC5_17FBF0(rs_17FBF0((char*)GrMan), 9);
         void* menu = self->ActiveScreen;
         sVEnt_17FBF0* mvt = *(sVEnt_17FBF0**)menu;
@@ -3076,12 +3076,12 @@ extern "C" void* func_00180508(cScreenKeyboard* self, int parentState)
     self->mpBuffer = 0;
     self->mpScreenHeader = 0;
     self->mVtbl = (void**)cUIScreen_vtbl;
-    tAttrScreen_tAttrScreen((unsigned short*)(((char*)self) + 0x14));
-    cList_cList(((char*)self) + 0x18);
+    tAttrScreen_tAttrScreen((unsigned short*)(&self->mAttrScreen));
+    cList_cList(self->mThreads);
     self->mpKeyframeBlock = 0;
     self->mpObjectBlock = 0;
     self->mppObjectList = 0;
-    cUIThing_cUIThing(((char*)self) + 0x40, 0, 0);
+    cUIThing_cUIThing(self->mRootGroup, 0, 0);
     *(int**)(((char*)self) + 0x48) = cUIGroup_vtbl;
     cList_cList(((char*)self) + 0xB4);
     self->mpState = (cUIState*)parentState;
@@ -3115,7 +3115,7 @@ extern "C" int strlen(const char* s);
  */
 extern "C" void cScreenKeyboard_setInputText(cScreenKeyboard* self, const char* text)
 {
-    char* buf = (char*)self + 0xEC;
+    char* buf = self->mHiScoreName;
     strcpy(buf, text);
     self->mCursorPos = strlen(buf);
 }

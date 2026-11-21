@@ -1369,7 +1369,7 @@ extern "C" void cFEMemCard_getPopup(cFEMemCard* self_, int displayText, int yesO
         void* engine = *(void**)((char*)cFEMemCard_mInstance + 0x10);
         cPopup_8530* n = (cPopup_8530*)cFEPopupConfirm_cFEPopupConfirm_8530(mem, engine, cFEMemCard_mInstance, displayText, yesOnly, noButtons, layerOffset, passUpdate, snowFlake);
         self_->mStatusPopup = (cFEPopupConfirm*)n;
-        cUIStateStack_pushPopup((char*)self_->mpEngine + 0x18, n);
+        cUIStateStack_pushPopup(self_->mpEngine->mStateStack, n);
     }
     if (*(int*)((char*)cFEMemCard_mInstance + 0x19C) == 1) {
         ((cPopup_8530*)self_->mStatusPopup)->setDefaultButton(1);
@@ -2171,7 +2171,7 @@ extern "C" void cFEMemCard_triggerArrowPulse(cFEMemCard* self, char* objName, ch
 {
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(objName));
     if (obj != 0) {
-        void* bank = (char*)self->mpEngine + 0x50;
+        void* bank = self->mpEngine->mAnimBank;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(animName));
         if (anim != 0) {
             cUIThing_playAnimation(obj, anim, 3, 0, 1);
@@ -2549,7 +2549,7 @@ extern char D_004A1408[];
 extern "C" void cFEPopupConfirm_initPopup(cFEPopupConfirm* self, int ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate, int bSnowFlake)
 {
     void* str = (void*)ustrDisplay;
-    char* sub = ((char*)self) + 0xBC;
+    char* sub = (char*)&self->info;
     func_001C57C0(sub, 0, GetHashValue32(str_kT_CMNYes));
     func_001C57C0(sub, 1, GetHashValue32(str_kT_CMNNo));
     self->info.meType = 2;
@@ -2559,10 +2559,10 @@ extern "C" void cFEPopupConfirm_initPopup(cFEPopupConfirm* self, int ustrDisplay
     self->info.mbReceivePrev = 0;
     char* displayText;
     if (str) {
-        strcpy1(((char*)self) + 0x360, str);
-        displayText = ((char*)self) + 0x360;
+        strcpy1(&self->mDisplayText[0], str);
+        displayText = (char*)&self->mDisplayText[0];
     } else {
-        displayText = ((char*)self) + 0x360;
+        displayText = (char*)&self->mDisplayText[0];
         func_002C2540(displayText, D_004A1408);
     }
     strcpy1(displayText, str);
@@ -2606,19 +2606,19 @@ void cScreenPopup_redrawPopup_self(void* self) __asm__("cScreenPopup_redrawPopup
  */
 extern "C" void cFEPopupConfirm_setButtonText(cFEPopupConfirm* self, void* src, int mode)
 {
-    void* slots = (char*)self + 0xBC;
+    void* slots = (char*)&self->info;
     if (mode == 0) {
-        void* buttonText = (char*)self + 0x9A0;
+        void* buttonText = (char*)&self->mYesText[0];
         strcpy1(buttonText, src);
         func_001C57A0(slots, 0, (int)buttonText); // PORT: pointer passed as int
     } else if (mode == 1) {
         if (self->mNumButtons >= 2) {
-            void* buttonText = (char*)self + 0xA68;
+            void* buttonText = (char*)&self->mNoText[0];
             strcpy1(buttonText, src);
             func_001C57A0(slots, 1, (int)buttonText);
         }
     } else {
-        void* buttonText = (char*)self + 0xB30;
+        void* buttonText = (char*)&self->mAltText[0];
         self->mNumButtons = 3;
         self->info.meType = 3;
         strcpy1(buttonText, src);
@@ -2650,9 +2650,9 @@ void cScreenPopup_redrawPopup_self(void* self) __asm__("cScreenPopup_redrawPopup
 extern "C" void cFEPopupConfirm_setMessage(cFEPopupConfirm* self, void* src)
 {
     if (src != 0 && strlen1(src) != 0) {
-        void* dst = (char*)self + 0x360;
+        void* dst = (char*)&self->mDisplayText[0];
         strcpy1(dst, src);
-        *(void**)((char*)self + 0xC4) = dst;
+        self->info.mtMessage.pustr = (const unsigned short*)dst;
         self->info.mtMessage.eType = 1;
         if ((int)self->mpScreen != 0) {
             cScreenPopup_redrawPopup_self(self);

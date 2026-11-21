@@ -567,7 +567,7 @@ extern "C" void* cFEStateBraggingRights_cFEStateBraggingRights1(cFEStateBragging
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
     self->mVtbl = cFEStateBraggingRights_vtbl;
-    new ((char*)self + 0x6D0) sElem_F470[2];
+    new ((char*)&self->mMenuCtrl[0]) sElem_F470[2];
     return ((void*)self);
 }
 #endif
@@ -596,9 +596,9 @@ struct sVEntry001DF4E8 {
 extern "C" void cFEStateBraggingRights__cFEStateBraggingRights(cFEStateBraggingRights* self, int flags)
 {
     self->mVtbl = cFEStateBraggingRights_vtbl;
-    if ((char*)self + 0x6D0 != 0) {
-        char* panel = (char*)self + 0x6D0 + 0x68;
-        while ((char*)self + 0x6D0 != panel) {
+    if ((char*)&self->mMenuCtrl[0] != 0) {
+        char* panel = (char*)&self->mMenuCtrl[0] + 0x68;
+        while ((char*)&self->mMenuCtrl[0] != panel) {
             panel -= 0x34;
             sVEntry001DF4E8* vt = *(sVEntry001DF4E8**)(panel + 0x30);
             vt[1].fn(panel + vt[1].delta, 0);
@@ -10366,7 +10366,7 @@ extern "C" void func_001E8098(void* self)
     cOVState_onUpdate(self);
     *(float*)((char*)self + 0x9C) += 0.01666666753590107f;
     if (*(int*)((char*)self + 0xA0) != 0 && *(float*)((char*)self + 0x9C) >= limit) {
-        cUIStateStack_purgeNormalStates((char*)SSXApp->Game->UI + 0x18);
+        cUIStateStack_purgeNormalStates(SSXApp->Game->UI->mStateStack);
         cGame_doNextState(SSXApp->Game);
     }
 }
@@ -10623,7 +10623,7 @@ extern "C" void func_001E87B8(void* self)
     cOVState_onUpdate(self);
     *(float*)((char*)self + 0x9C) += 0.01666666753590107f;
     if (*(int*)((char*)self + 0xA0) != 0 && *(float*)((char*)self + 0x9C) >= limit) {
-        cUIStateStack_purgeNormalStates((char*)SSXApp->Game->UI + 0x18);
+        cUIStateStack_purgeNormalStates(SSXApp->Game->UI->mStateStack);
         cGame_doNextState(SSXApp->Game);
     }
 }

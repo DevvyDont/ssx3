@@ -48,7 +48,7 @@ extern "C" void* cFECustom_cFECustom(cFECustom* self, cUIEngine* owner)
     self->mpTransitionState = (cFEStateTransition*)transition;
     if (transition != 0) {
         cFEStateTransition_vtbl[4].fn(transition + cFEStateTransition_vtbl[4].delta);
-        cUIStateStack_pushExplicit((char*)self->mpEngine + 0x18, self->mpTransitionState);
+        cUIStateStack_pushExplicit(self->mpEngine->mStateStack, self->mpTransitionState);
     }
     return ((void*)self);
 }
@@ -759,8 +759,8 @@ extern "C" void* cRealFE_cRealFE(cRealFE* self)
 {
     cFE_cFE(self);
     *(void***)self = cRealFE_vtbl;
-    cConnMan_cConnMan((char*)self + 0xB5AB0);
-    cGameConnMan_cGameConnMan((char*)self + 0xB5ABC);
+    cConnMan_cConnMan(self->mConnMan);
+    cGameConnMan_cGameConnMan(self->mGameConnMan);
     self->mpMoviePlayer = 0;
     self->mMovieSkippable = 0;
     self->mWaitRenderNum = 0;
@@ -788,8 +788,8 @@ extern "C" void cFE__cFE(void* self, int flags);
 extern "C" void cRealFE__cRealFE(cRealFE* self, int flags)
 {
     *(void***)self = cRealFE_vtbl;
-    cGameConnMan__cGameConnMan((char*)self + 0xB5ABC, 2);
-    cConnMan__cConnMan((char*)self + 0xB5AB0, 2);
+    cGameConnMan__cGameConnMan(self->mGameConnMan, 2);
+    cConnMan__cConnMan(self->mConnMan, 2);
     cFE__cFE(self, flags);
 }
 #endif
@@ -1065,8 +1065,8 @@ extern "C" void cRealFE_purge(cRealFE* self)
     sVEntry001A2190* vt = (sVEntry001A2190*)ps2GraphicsMan->mVtbl;
     vt[19].fn((char*)ps2GraphicsMan + vt[19].delta);
     cRealFE_purgeCharAnimations(self);
-    cFERiderManager_purge((char*)self + 0xB0);
-    func_0019CF40((char*)self + 0x1A70);
+    cFERiderManager_purge(self->mRiderManager);
+    func_0019CF40(self->mBoltFileManager);
     cIrradianceDataBase_Purge(D_005047F8);
     char* st = (char*)SSXApp;
     *(int*)(st + 0x7C) = 0;
@@ -1427,16 +1427,16 @@ noh:
             self->IsEnding = 1;
         }
         sVE_27A0* vt = *(sVE_27A0**)(((char*)self) + 0xA0);
-        char* obj = ((char*)self) + 0x10;
+        char* obj = self->mCamera;
         vt[3].fn(obj + vt[3].delta);
-        func_0019D250(((char*)self) + 0x1A70);
-        cFERiderManager_update(((char*)self) + 0xB0);
+        func_0019D250(self->mBoltFileManager);
+        cFERiderManager_update(self->mRiderManager);
         if ((void*)SSXApp->mFEAsyncManager != 0) {
             cFEAsyncManager_Update(SSXApp->mFEAsyncManager);
         }
         if (D_004A29EC != 0) {
-            func_00263828(((char*)self) + 0xB5AB0);
-            func_00263CF0(((char*)self) + 0xB5ABC);
+            func_00263828(self->mConnMan);
+            func_00263CF0(self->mGameConnMan);
             if (LobbyMan_mLobbyMan != 0) {
                 func_0025AC50(LobbyMan_mLobbyMan);
             }
@@ -1577,25 +1577,25 @@ extern "C" void cRealFE_loadStartState(cRealFE* self)
     cUIState_cUIState(backState, (char*)self->mpUI);
     backState->vt = (sVEnt_1A2C40*)cFEStateBackground_vtbl;
     backState->vt[4].fn((char*)backState + backState->vt[4].delta);
-    cUIStateStack_pushExplicit((char*)self->mpUI + 0x18, backState);
+    cUIStateStack_pushExplicit(self->mpUI->mStateStack, backState);
     switch (cRealFE_mStartState) {
     case 0: {
         D_004A19D8 = 0;
         void* st = cFEStateTitle_cFEStateTitle1(cMemMan_alloc(76, str_cFEStateTitle, 0, 0), (char*)self->mpUI);
-        cUIStateStack_push((char*)self->mpUI + 0x18, st);
+        cUIStateStack_push(self->mpUI->mStateStack, st);
         break;
     }
     case 39: {
         D_004A19D8 = 1;
         void* st = cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge, 0, 0), (char*)self->mpUI);
-        cUIStateStack_push((char*)self->mpUI + 0x18, st);
+        cUIStateStack_push(self->mpUI->mStateStack, st);
         cRealFE_mStartState = 0;
         break;
     }
     case 52: {
         D_004A19D8 = 0;
         void* st = cFEStateRelogin_cFEStateRelogin(cMemMan_alloc(1748, str_cFEStateRelogin, 0, 0), (char*)self->mpUI);
-        cUIStateStack_push((char*)self->mpUI + 0x18, st);
+        cUIStateStack_push(self->mpUI->mStateStack, st);
         cCommSystem_closeChannel(cCommSystem_mCommSystem, cGameComm_mGameComm->unk_06C);
         func_00266E88(D_004A33F4);
         func_00266DF8(D_004A33F4);

@@ -91,7 +91,7 @@ extern "C" void cWipeoutMotion_gainFocus(cWipeoutMotion* self, int prev)
         sVec4WG* n = (sVec4WG*)(rider + 0x370);
         float normalSpeed = vu0DotWG(*(sVec4WG*)(rider + 0x1E0), *n);
         sVec4WG normalPart = vu0ScaleMemWG(*n, normalSpeed);
-        sVec4WG* velocity = (sVec4WG*)((char*)self->mRider + 0x1E0);
+        sVec4WG* velocity = (sVec4WG*)(&self->mRider->mVelocity);
         vu0SubWG(*velocity, *velocity, normalPart);
         *(int*)self = 0;
     }
@@ -183,7 +183,7 @@ extern "C" void cWipeoutMotion_throwItem(cWipeoutMotion* self, sVec4WM* initVel,
     *(sVec4WM*)&self->BoardVelocity = *initVel;
     if (*(int*)self == 0)
     {
-        sVec4WM* n = (sVec4WM*)((char*)self->mRider + 0x370);
+        sVec4WM* n = (sVec4WM*)(&self->mRider->mGroundNormal);
         float normalSpeed = vu0DotWM(*n, *initVel);
         sVec4WM normalPart = vu0ScaleWM(*n, normalSpeed);
         vu0SubWM(*(sVec4WM*)&self->BoardVelocity, *(sVec4WM*)&self->BoardVelocity, normalPart);
@@ -229,10 +229,10 @@ extern "C" void cWipeoutMotion_throwRider(cWipeoutMotion* self, sVec4WM* initVel
     *(sVec4WM*)&self->mRider->mVelocity = *initVel;
     if (*(int*)self == 0)
     {
-        sVec4WM* n = (sVec4WM*)((char*)self->mRider + 0x370);
+        sVec4WM* n = (sVec4WM*)(&self->mRider->mGroundNormal);
         float normalSpeed = vu0DotWM(*n, *initVel);
         sVec4WM normalPart = vu0ScaleMemWM_136DE0(*n, normalSpeed);
-        sVec4WM* velocity = (sVec4WM*)((char*)self->mRider + 0x1E0);
+        sVec4WM* velocity = (sVec4WM*)(&self->mRider->mVelocity);
         vu0SubWM(*velocity, *velocity, normalPart);
     }
     else
@@ -803,7 +803,7 @@ extern "C" void cWipeoutMotion_updateBoardSphereTree(cWipeoutMotion* self)
     pts[2] = vu0Sub_7550(bone->pos, vu0Scale_7550(boardAxis, 30.0f));
     pts[3] = vu0Sub_7550(bone->pos, vu0Scale_7550(boardAxis, 70.0f));
     cRiderSphereTree_Update(self->BoardSphereTree, 4, pts, radii.r, &bone->pos,
-                  *(float*)((char*)self->mRider->mAnimModel + 0x140) * 90.0f);
+                  self->mRider->mAnimModel->unk_140.x * 90.0f);
 }
 #endif
 

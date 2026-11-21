@@ -749,7 +749,7 @@ extern "C" void* cFEStateBuyAttrib_cFEStateBuyAttrib(cFEStateBuyAttrib* stateMem
     stateMemory->mUserNum = 0;
     stateMemory->mCtrlBits = cFECustom_getPlayerCtrlMask_4728(*(void**)stateMemory->mpEngine, 0);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
-    MEM_fill(((char*)stateMemory) + 0x84, 0, 0x1C);
+    MEM_fill(&stateMemory->mPotentialExperience[0], 0, 0x1C);
     for (int i = 0; i < 7; i++) {
         self->mExperience[i] = cBEStatInterface_getStatFromProfile_4728(iface, 0, D_004780B0[i]);
         self->mExperienceLevel[i] = (signed char)(cBEStatInterface_getStatFromProfile_4728(iface, 0, D_004780B0[i]) / 5);

@@ -452,13 +452,13 @@ extern "C" void cAirPredictor_updateFlightPath(cAirPredictor* self, sQuad* airPo
     float sinceLastTick = self->CurAirTime - self->PrevTickTime + dt;
     while (sinceLastTick >= 0.01666666753590107f) {
         sinceLastTick -= 0.01666666753590107f;
-        cAirPredictor_simOneTick_3648(((char*)self), (sVec4_3648*)(((char*)self) + 0x70), (sVec4_3648*)(((char*)self) + 0x80), (sVec4_3648*)(((char*)self) + 0x70), (sVec4_3648*)(((char*)self) + 0x80));
+        cAirPredictor_simOneTick_3648(((char*)self), (sVec4_3648*)(&self->PrevTickPos), (sVec4_3648*)(&self->PrevTickVel), (sVec4_3648*)(&self->PrevTickPos), (sVec4_3648*)(&self->PrevTickVel));
         self->PrevTickTime += 0.01666666753590107f;
     }
     if (sinceLastTick > 0.009999999776482582f) {
         sVec4_3648 nextSimPos;
         sVec4_3648 nextSimVel;
-        cAirPredictor_simOneTick_3648(((char*)self), (sVec4_3648*)(((char*)self) + 0x70), (sVec4_3648*)(((char*)self) + 0x80), &nextSimPos, &nextSimVel);
+        cAirPredictor_simOneTick_3648(((char*)self), (sVec4_3648*)(&self->PrevTickPos), (sVec4_3648*)(&self->PrevTickVel), &nextSimPos, &nextSimVel);
         float k = sinceLastTick * 59.999996185302734f;
         *(sVec4_3648*)airPos = vu0Add_3648(vu0Scale_3648(nextSimPos, k), vu0Scale_3648(*(sVec4_3648*)&self->PrevTickPos, 1.0f - k));
         *(sVec4_3648*)airVel = vu0Add_3648(vu0Scale_3648(nextSimVel, k), vu0Scale_3648(*(sVec4_3648*)&self->PrevTickVel, 1.0f - k));

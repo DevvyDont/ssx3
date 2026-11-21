@@ -63,19 +63,19 @@ extern "C" void cUIScreen__cUIScreen(cUIScreen* self, int flags)
     }
     self->mRootGroup.mList.mVtbl = cList_vtbl;
     self->mRootGroup.mVtbl = cUIGroup_vtbl;
-    cList_destroyList_C558(((char*)self) + 0xB4);
-    char* rootGroup = ((char*)self) + 0x40;
+    cList_destroyList_C558(&self->mRootGroup.mList);
+    char* rootGroup = (char*)&self->mRootGroup;
     self->mRootGroup.mList.mEnd.mVtbl = cListNode_vtbl;
-    cListNode_destroyListNode(((char*)self) + 0xC0);
+    cListNode_destroyListNode(&self->mRootGroup.mList.mEnd);
     self->mRootGroup.mList.mStart.mVtbl = cListNode_vtbl;
-    cListNode_destroyListNode(((char*)self) + 0xB4);
+    cListNode_destroyListNode(&self->mRootGroup.mList);
     cUIThing__cUIThing(rootGroup, 2);
     self->mThreads.mVtbl = cList_vtbl;
-    cList_destroyList_C558(((char*)self) + 0x18);
+    cList_destroyList_C558(&self->mThreads);
     self->mThreads.mEnd.mVtbl = cListNode_vtbl;
-    cListNode_destroyListNode(((char*)self) + 0x24);
+    cListNode_destroyListNode(&self->mThreads.mEnd);
     self->mThreads.mStart.mVtbl = cListNode_vtbl;
-    cListNode_destroyListNode(((char*)self) + 0x18);
+    cListNode_destroyListNode(&self->mThreads);
     self->mVtbl = cListNode_vtbl;
     cListNode_destroyListNode(((char*)self));
     if (flags & 1) {
@@ -511,7 +511,7 @@ extern "C" void cUIScreen_parseObjectAnim(cUIScreen* self, void* pFrame, void* m
     void* obj = cUIScreen_getObjectByHashName((cUIScreen*)self, *(int*)((char*)msg + 8));
     if (obj != 0) {
         void* anim = cUIAnimationBank_getAnimationByHashName(
-            (char*)*(void**)((char*)self->mpState + 0x10) + 0x50,
+            self->mpState->mpEngine->mAnimBank,
             *(int*)((char*)msg + 4));
         if (anim != 0) {
             cUIThing_playAnimation(obj, anim, *(unsigned char*)((char*)msg + 0xC), *(unsigned short*)((char*)pFrame + 8), 0);
@@ -637,7 +637,7 @@ extern "C" void cUIScreen_parseEventTrigger(cUIScreen* self, void* pFrame, int* 
 {
     cUIScreen_parseEventTrigger_cVirtA* state = (cUIScreen_parseEventTrigger_cVirtA*)self->mpState;
     if (state->onScreenEvent(self, msg[1]) == 0) {
-        cUIScreen_parseEventTrigger_cVirtB* customInterface = **(cUIScreen_parseEventTrigger_cVirtB***)((char*)self->mpState + 0x10);
+        cUIScreen_parseEventTrigger_cVirtB* customInterface = *(cUIScreen_parseEventTrigger_cVirtB**)self->mpState->mpEngine;
         if (customInterface != 0) {
             customInterface->onScreenEvent(self, msg[1]);
         }
@@ -1185,12 +1185,12 @@ extern "C" void cUIScrollBar__cUIScrollBar(cUIScrollBar* self, int flags)
     self->mVtbl = cUIScrollBar_vtbl;
     cUIThing* background = self->mpObjBackground;
     if (background != 0) {
-        sDeleteTarget* dtorEntry = *(sDeleteTarget**)((char*)background + 0x8);
+        sDeleteTarget* dtorEntry = (sDeleteTarget*)background->mVtbl;
         dtorEntry->fn((char*)background + dtorEntry->field_0x8, 3);
     }
     cUIThing* knob = self->mpObjKnob;
     if (knob != 0) {
-        sDeleteTarget* dtorEntry = *(sDeleteTarget**)((char*)knob + 0x8);
+        sDeleteTarget* dtorEntry = (sDeleteTarget*)knob->mVtbl;
         dtorEntry->fn((char*)knob + dtorEntry->field_0x8, 3);
     }
     cUIThing__cUIThing(self, flags);
@@ -1482,12 +1482,12 @@ extern "C" void cUISlider__cUISlider(cUISlider* self, int flags)
     self->mVtbl = cUISlider_vtbl;
     cUIThing* background = self->mpObjBackground;
     if (background != 0) {
-        sDeleteTarget* dtorEntry = *(sDeleteTarget**)((char*)background + 0x8);
+        sDeleteTarget* dtorEntry = (sDeleteTarget*)background->mVtbl;
         dtorEntry->fn((char*)background + dtorEntry->field_0x8, 3);
     }
     cUIThing* knob = self->mpObjKnob;
     if (knob != 0) {
-        sDeleteTarget* dtorEntry = *(sDeleteTarget**)((char*)knob + 0x8);
+        sDeleteTarget* dtorEntry = (sDeleteTarget*)knob->mVtbl;
         dtorEntry->fn((char*)knob + dtorEntry->field_0x8, 3);
     }
     cUIThing__cUIThing(self, flags);
@@ -1558,7 +1558,7 @@ extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
                 cUIScreen_playFrame(self->mpScreen, ev, 1);
             }
             self->mValue = self->mValue - 1;
-            char* mgr = *(char**)((char*)self->mpScreen + 0xD0);
+            char* mgr = (char*)self->mpScreen->mpState;
             cUISlider_onInput_sVEntryM* vm = *(cUISlider_onInput_sVEntryM**)(mgr + 8);
             vm[19].fn(mgr + vm[19].delta, ((char*)self), 9);
             cUISlider_onInput_sVEntryS* vs = *(cUISlider_onInput_sVEntryS**)snd;
@@ -1574,7 +1574,7 @@ extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
                 cUIScreen_playFrame(self->mpScreen, ev, 1);
             }
             self->mValue = self->mValue + 1;
-            char* mgr = *(char**)((char*)self->mpScreen + 0xD0);
+            char* mgr = (char*)self->mpScreen->mpState;
             cUISlider_onInput_sVEntryM* vm = *(cUISlider_onInput_sVEntryM**)(mgr + 8);
             vm[19].fn(mgr + vm[19].delta, ((char*)self), 9);
             cUISlider_onInput_sVEntryS* vs = *(cUISlider_onInput_sVEntryS**)snd;
@@ -1690,7 +1690,7 @@ extern "C" void* cUIState_cUIState(cUIState* self, int engine)
     *(signed char*)&self->mCtrlBits = 0xF;
     *(short*)&self->mAttrState = 536;
     self->mpParentState = 0;
-    cList_cList(((char*)self) + 0x24);
+    cList_cList(self->mScreens);
     self->mpScreen = 0;
     self->mUserNum = -1;
     return ((void*)self);
@@ -1723,7 +1723,7 @@ extern "C" void* cUIState_cUIState1(cUIState* self, int engine, int parentState)
     *(signed char*)&self->mCtrlBits = 0xF;
     *(short*)&self->mAttrState = 536;
     self->mpParentState = (cUIState*)parentState;
-    cList_cList(((char*)self) + 0x24);
+    cList_cList(self->mScreens);
     self->mpScreen = 0;
     self->mUserNum = -1;
     return ((void*)self);

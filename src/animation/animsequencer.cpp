@@ -135,7 +135,7 @@ struct sNode_00313B38 {
  */
 extern "C" void cAnimSequence_removeTrigger(cAnimSequence* self, int id, float time) {
     sNode_00313B38** link;
-    for (link = (sNode_00313B38**)(((char*)self) + 0xAC); *link != 0; link = &(*link)->next) {
+    for (link = (sNode_00313B38**)(&self->Triggers); *link != 0; link = &(*link)->next) {
         sNode_00313B38* n = *link;
         if (n->id == id && n->time == time && n->refs == 0) {
             *link = n->next;

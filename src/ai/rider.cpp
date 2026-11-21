@@ -5346,7 +5346,7 @@ extern "C" void cRider_OnStartObjectUse(cRider* self)
     self->unk_AF4 = fb[10] * 0.01745329424738884f;
     self->unk_AF8 = fb[11] * 0.01745329424738884f;
     *(sV_3640*)&self->unk_AE0 = poseVec;
-    poseVec = MatMulV_3640((char*)self + 0x700, *(sV_3640*)&self->unk_AE0);
+    poseVec = MatMulV_3640((char*)&self->mScriptMatrix, *(sV_3640*)&self->unk_AE0);
     *(sV_3640*)&self->mPosition = poseVec;
     float ry = self->unk_744;
     float rz = self->unk_740;

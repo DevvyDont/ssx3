@@ -37,7 +37,7 @@ extern "C" void cRiderMetrix_linkToRider(cRiderMetrix* self, cRider* rider)
     self->Rider = (cRider*)rider;
     if (rider->mViewIndex >= 0)
     {
-        sMetrixEntry_001172E0** slot = (sMetrixEntry_001172E0**)(((char*)self) + 0x1B0);
+        sMetrixEntry_001172E0** slot = (sMetrixEntry_001172E0**)(&self->HUDfx);
         self->NumHUDfx = 44;
         *slot = new (operator_new_tag(44 * sizeof(sMetrixEntry_001172E0), str_cHUDFX, 0, 0)) sMetrixEntry_001172E0[44];
         for (int i = 0; i < self->NumHUDfx; i++)
@@ -221,13 +221,13 @@ extern "C" void cRiderMetrix_reset(cRiderMetrix* self)
 {
     cRiderMetrix_resetTotals(self);
     cRiderMetrix_resetHUDfx((sRiderMetrix_001173B8*)self);
-    MEM_fill(((char*)self) + 0xA8, 0, 80);
+    MEM_fill(&self->TrickHistory[0], 0, 80);
     self->TrickHistoryPtr = 0;
     cRiderMetrix_resetCurTrick(self);
     cRiderMetrix_resetComboChain(self);
     *(int*)&self->CurAvgSpeedCPS = 0;
     self->ComboResetDelay = -1.0f;
-    MEM_fill(((char*)self) + 0x1B8, 0, 8);
+    MEM_fill(&self->ActiveFXListCache[0], 0, 8);
     self->IsActiveFXListCacheInvalid = 1;
 }
 #endif
@@ -244,7 +244,7 @@ extern "C" void MEM_fill(void* dst, int value, int size);
  */
 extern "C" void cRiderMetrix_resetTotals(cRiderMetrix* self)
 {
-    MEM_fill(((char*)self) + 0xFC, 0, 172);
+    MEM_fill(&self->Totals, 0, 172);
     self->Totals.BestTrickPoints = -1;
     self->Totals.TotalPoints = self->mPointsTotalInitial;
 }
@@ -467,7 +467,7 @@ extern "C" void cRiderMetrix_resetCurTrick(cRiderMetrix* riderMetrix)
     riderMetrix->CurTrickLongPressBonusLevel = 0;
     riderMetrix->CurTrickLongPlantBonusLevel = 0;
     riderMetrix->CurTrickLongRailBonusLevel = 0;
-    MEM_fill(((char*)riderMetrix) + 0x60, 0, 0xC);
+    MEM_fill(&riderMetrix->CurTrickGrabList[0], 0, 0xC);
 }
 #endif
 
@@ -1250,7 +1250,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
         cHUDFX_setAsync_f(s2, 2, val, 0.0f, x);
     }
     void* stats = cBE_getInterface_Fv(cBE_getBE(), 11);
-    char* obj = (char*)(self->Rider) + 0x6C0;
+    char* obj = (char*)&self->Rider->mVtbl;
     sVE_117FE0* vt = *(sVE_117FE0**)obj;
     int moneyTotal = cBEEconInterface_getMoney1(stats, vt[7].fn(obj + vt[7].delta));
     cHUDFX_setAsync_f(&self->HUDfx[25], 25, moneyTotal, 0.0f, 0);
@@ -1487,8 +1487,8 @@ extern "C" float cRiderMetrix_evReset(cRiderMetrix* self, int isUserReset)
     cRiderMetrix_resetComboChain(self);
     self->Totals.NumResets += 1;
     if (!isUserReset)
-        return *(float*)((char*)self->Rider + 0x2F8) * -0.10000000149011612f;
-    return *(float*)((char*)self->Rider + 0x2F8) * -0.699999988079071f;
+        return self->Rider->unk_2F8 * -0.10000000149011612f;
+    return self->Rider->unk_2F8 * -0.699999988079071f;
 }
 #endif
 
@@ -1587,12 +1587,12 @@ static inline bool rmRiderFlags_1194C0(char* r)
  */
 extern "C" float cRiderMetrix_evCheckpoint(cRiderMetrix* self, int timeBonusSec)
 {
-    char* sub = (char*)self->Rider + 0x6C0;
+    char* sub = (char*)&self->Rider->mVtbl;
     sVEntry001194C0* vt = *(sVEntry001194C0**)sub;
     if (vt[8].fn(sub + vt[8].delta) != 0)
     {
         void* mgr = SSXApp->GameModeMan;
-        char* sub2 = (char*)self->Rider + 0x6C0;
+        char* sub2 = (char*)&self->Rider->mVtbl;
         sVEntry001194C0* vt2 = *(sVEntry001194C0**)sub2;
         if (cGameModeMan_riderCheckpointHit(mgr, vt2[7].fn(sub2 + vt2[7].delta), timeBonusSec) != 0)
         {
@@ -1763,7 +1763,7 @@ extern "C" float cRiderMetrix_evReleaseGrab(cRiderMetrix* riderMetrix, int grabI
     if (grabID >= 35)
     {
         (riderMetrix->CurTrickNumUbers)++;
-        if (*(int*)((char*)riderMetrix->Rider + 0x2F4) >= 6)
+        if (riderMetrix->Rider->mUberLevel >= 6)
             (riderMetrix->CurTrickNumSuperUbers)++;
     }
     else if (grabID >= 19)
@@ -2800,7 +2800,7 @@ extern "C" int cRiderMetrix_buildTrickName(cRiderMetrix* vself, sTrickId* vid, i
         } else {
             id->k0 = self->CurTrickRailslideMode;
             id->k1 = spins < 11 ? spins : 10;
-            if (*(int*)(((char*)self->Rider) + 0x324) != 0) {
+            if (self->Rider->IsGoofyStance != 0) {
                 if (self->CurTrickRailslideMode == 1) {
                     id->k0 = 2;
                 } else if (self->CurTrickRailslideMode == 2) {
