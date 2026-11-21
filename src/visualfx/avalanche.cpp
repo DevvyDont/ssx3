@@ -1361,12 +1361,6 @@ struct sMat_8A00 {
     sRow_8A00 v[4];
 } __attribute__((aligned(16)));
 
-struct sRec_8A00 {
-    signed char dx, dy, dz;
-    unsigned char r, g, b;
-    signed char ax, ay, az;
-    unsigned char angle;
-};
 
 
 
@@ -1541,18 +1535,18 @@ extern "C" void tActiveAvalancheNode_renderLines(tActiveAvalancheNode* nodep)
         int i = 0;
         sRow_8A00 pos = (*(sRow_8A00*)&(node->m_node)->m_start);
         for (; i < (int)(node->m_node)->m_life; i++) {
-            sVec4_8A00 scratchVec(((sRec_8A00*)(node->m_node)->m_history)[i].dx * 2.0f, ((sRec_8A00*)(node->m_node)->m_history)[i].dy * 2.0f, ((sRec_8A00*)(node->m_node)->m_history)[i].dz * 2.0f, 0.0f);
+            sVec4_8A00 scratchVec(((node->m_node)->m_history)[i].m_x * 2.0f, ((node->m_node)->m_history)[i].m_y * 2.0f, ((node->m_node)->m_history)[i].m_z * 2.0f, 0.0f);
             AddTo_8A00(pos, scratchVec);
-            sVec3_8A00 n = Normalize_8A00(sVec3_8A00(((sRec_8A00*)(node->m_node)->m_history)[i].ax * 0.007874015718698502f, ((sRec_8A00*)(node->m_node)->m_history)[i].ay * 0.007874015718698502f, ((sRec_8A00*)(node->m_node)->m_history)[i].az * 0.007874015718698502f));
+            sVec3_8A00 n = Normalize_8A00(sVec3_8A00(((node->m_node)->m_history)[i].m_rx * 0.007874015718698502f, ((node->m_node)->m_history)[i].m_ry * 0.007874015718698502f, ((node->m_node)->m_history)[i].m_rz * 0.007874015718698502f));
             scratchVec.x = n.x;
             scratchVec.y = n.y;
             scratchVec.z = n.z;
             scratchVec.w = 0.0f;
-            Rotate_8A00(matrix, scratchVec, ((sRec_8A00*)(node->m_node)->m_history)[i].angle * 0.008213315159082413f);
+            Rotate_8A00(matrix, scratchVec, ((node->m_node)->m_history)[i].m_rs * 0.008213315159082413f);
             matrix.v[3] = pos;
-            D_004D5B70_8A00[i].r = ((sRec_8A00*)(node->m_node)->m_history)[i].r;
-            D_004D5B70_8A00[i].g = ((sRec_8A00*)(node->m_node)->m_history)[i].g;
-            D_004D5B70_8A00[i].b = ((sRec_8A00*)(node->m_node)->m_history)[i].b;
+            D_004D5B70_8A00[i].r = ((node->m_node)->m_history)[i].m_r;
+            D_004D5B70_8A00[i].g = ((node->m_node)->m_history)[i].m_g;
+            D_004D5B70_8A00[i].b = ((node->m_node)->m_history)[i].m_b;
             D_004D5B70_8A00[i].pos = pos;
         }
         ((sVE_8A00*)GrMan->mVtbl)[0x248 / 8].fn((char*)GrMan + ((sVE_8A00*)GrMan->mVtbl)[0x248 / 8].delta, (int)(node->m_node)->m_life, D_004D5B70_8A00, 0);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "visualfx/snowfall.h"
 #include "visualfx/visualeffectsman.h"
 #include "visualfx/transitionobj.h"
@@ -3284,7 +3285,6 @@ extern "C" void cFade_TObj__cFade_TObj(cFade_TObj* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cFade_TObj_cFade_TObj);
 #ifdef SKIP_ASM
-struct sLightVec_002F8060 { float x, y, z, w; };
 
 extern void* cFade_TObj_vtbl[];
 void cTransitionObj_cTransitionObj(void* self);
@@ -3298,11 +3298,11 @@ void cTransitionObj_cTransitionObj(void* self);
  * @param colour  the fade colour
  * @return @p self
  */
-extern "C" void* cFade_TObj_cFade_TObj(cFade_TObj* self, sLightVec_002F8060 colour)
+extern "C" void* cFade_TObj_cFade_TObj(cFade_TObj* self, tARGB colour)
 {
     cTransitionObj_cTransitionObj(self);
     *(void***)self = cFade_TObj_vtbl;
-    *(sLightVec_002F8060*)&self->mColour = colour;
+    *(&self->mColour) = colour;
     return ((void*)self);
 }
 #endif

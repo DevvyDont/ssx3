@@ -270,17 +270,6 @@ struct sSeg_1E92A8 {
     float w;
     unsigned short* str;
 };
-struct sLine_1E92A8 {
-    float total;        // 0x0
-    float height;       // 0x4
-    sFont_1E92A8* font; // 0x8
-    float yoff;         // 0xC
-    float sx;           // 0x10
-    float sy;           // 0x14
-    int count;          // 0x18
-    sSeg_1E92A8 segs[6];// 0x1C
-    unsigned short text[1]; // 0x4C
-};
 extern sIcon_1E92A8 D_004C8980[];
 
 /**
@@ -305,20 +294,20 @@ extern sIcon_1E92A8 D_004C8980[];
  */
 extern "C" void splitTextPictLine(tTextPictLine* textLine)
 {
-    sLine_1E92A8* self = (sLine_1E92A8*)textLine;
+    tTextPictLine* self = textLine;
     unsigned short* cursor;
     int n = 0;
-    sFont_1E92A8* font = self->font;
-    sSeg_1E92A8* segs = self->segs;
+    sFont_1E92A8* font = ((sFont_1E92A8*)self->pFont);
+    sSeg_1E92A8* segs = ((sSeg_1E92A8*)&self->elems[0]);
     char buf[16];
     char name[32];
-    font->sx = font->w30 * self->sx;
-    font->sy = font->h34 * self->sy;
-    self->segs[0].w = 0;
-    float maxh = self->segs[0].w;
-    self->count = 0;
-    self->segs[0].str = self->text;
-    cursor = self->segs[0].str;
+    font->sx = font->w30 * self->fontScaleBase[0];
+    font->sy = font->h34 * self->fontScaleBase[1];
+    ((sSeg_1E92A8*)&self->elems[0])[0].w = 0;
+    float maxh = ((sSeg_1E92A8*)&self->elems[0])[0].w;
+    self->numElems = 0;
+    ((sSeg_1E92A8*)&self->elems[0])[0].str = ((unsigned short*)&self->text[0]);
+    cursor = ((sSeg_1E92A8*)&self->elems[0])[0].str;
     float total = maxh;
     while (*cursor != 0) {
         if (*cursor == 0x40) {
@@ -363,13 +352,13 @@ extern "C" void splitTextPictLine(tTextPictLine* textLine)
         segs[n].w = w;
         n++;
     }
-    self->count = n;
-    float h = (float)font->lineH * font->h34 * self->sy;
-    self->total = total;
+    self->numElems = n;
+    float h = (float)font->lineH * font->h34 * self->fontScaleBase[1];
+    self->width = total;
     // PORT: `>?` is the g++ maximum operator (EE max.s).
     float lineHeight = h >? maxh;
     self->height = lineHeight;
-    self->yoff = (lineHeight - h) * 0.5f;
+    self->fontOffsetY = (lineHeight - h) * 0.5f;
 }
 #endif
 

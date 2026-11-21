@@ -1264,9 +1264,6 @@ struct sMpItem_9140 {
     char data[0xD0];
 };
 
-struct sMpMtx_9140 {
-    float m[16];
-};
 
 struct sMpPartInfo_9140 {
     char pad_0x0[0x1C];
@@ -1293,7 +1290,7 @@ struct sMpInst_9140 {
 
 
 extern "C" void cAnimNode_cacheFrame(void* self);
-extern "C" void cMeshAnimFrame_transform(sMpItem_9140* item, sMpMtx_9140* mtx);
+extern "C" void cMeshAnimFrame_transform(sMpItem_9140* item, t4Matrix* mtx);
 
 /**
  * Caches a combo node's animation frame and applies its combo transforms to every animated mesh.
@@ -1321,7 +1318,7 @@ extern "C" void cAnimComboNode_cacheFrame(cAnimComboNode* self)
     sMpPart_9140* meshPart = model->parts;
     for (int i = 0; i < model->count; i++, meshPart++) {
         if (meshPart->info->active != 0) {
-            cMeshAnimFrame_transform(&((sMpItem_9140*)self->AnimFrames)[n], (sMpMtx_9140*)((char*)((sMpMtx_9140*)self->ComboXform) + (n << 6)));
+            cMeshAnimFrame_transform(&((sMpItem_9140*)self->AnimFrames)[n], (t4Matrix*)((char*)(self->ComboXform) + (n << 6)));
             n++;
         }
     }

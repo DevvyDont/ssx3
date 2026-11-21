@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/worldview.h"
 #include "object/flexbridgenode.h"
 #include "object/flexrailnode.h"
 #include "render/ps2graphicsman.h"
@@ -936,10 +937,6 @@ struct sMat_75D8 {
     sV4_75D8 row[4];
 };
 
-struct sBox_75D8 {
-    sV4_75D8 min;
-    sV4_75D8 max;
-};
 
 struct sVE_75D8 {
     short delta;
@@ -1129,7 +1126,7 @@ extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode* vself)
         ((sV4_75D8*)self->FaceNorms)[k + 1] = Normalize_75D8(Cross_75D8(Sub_75D8(((sV4_75D8*)self->Verts)[j + 1], ((sV4_75D8*)self->Verts)[j]), Sub_75D8(((sV4_75D8*)self->Verts)[n + j + 1], ((sV4_75D8*)self->Verts)[j])));
         j++;
     }
-    sBox_75D8* box = (sBox_75D8*)&self->BoundBox;
+    tBoundBox* box = (&self->BoundBox);
     sV3_75D8 pos[32];
     float minX = 1e10f, minY = 1e10f, minZ = 1e10f;
     float maxX = -1e10f, maxY = -1e10f, maxZ = -1e10f;
@@ -1144,17 +1141,17 @@ extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode* vself)
         minZ = w.Z() < minZ ? w.Z() : minZ;
         maxZ = maxZ < w.Z() ? w.Z() : maxZ;
     }
-    sBox_75D8 old = *(sBox_75D8*)&self->BoundBox;
+    tBoundBox old = *(&self->BoundBox);
     sV4_75D8 corner;
     corner.x = minX;
     corner.y = minY;
     corner.z = minZ;
     corner.w = 1.0f;
-    (*(sBox_75D8*)&self->BoundBox).min = corner;
+    (*(sV4_75D8*)&(*(&self->BoundBox)).MinPoint) = corner;
     corner.x = maxX;
     corner.y = maxY;
     corner.z = maxZ;
-    (*(sBox_75D8*)&self->BoundBox).max = corner;
+    (*(sV4_75D8*)&(*(&self->BoundBox)).MaxPoint) = corner;
     int id = ((int)self->Instance);
     nash_Nash_movenode_75D8(cObjectInterface_getNash(), 0, id, box, &old);
     ((sFlexMesh_75D8*)self->GridMesh)->vt[3].fn((char*)((sFlexMesh_75D8*)self->GridMesh) + ((sFlexMesh_75D8*)self->GridMesh)->vt[3].delta, pos);

@@ -15,9 +15,6 @@ void cDataManager_AddToEmptyInstanceList(void* self, void* node);
 extern char cDataManager_vtbl[];
 extern const char str_tDataInstanceInfo[];
 
-struct sDataNode5828 {
-    char pad[0x18];
-};
 
 
 /**
@@ -31,10 +28,10 @@ extern "C" cDataManager* cDataManager_cDataManager(cDataManager* self, int flags
 {
     *(void**)&self->mVtbl = cDataManager_vtbl;
     self->mMaxDataInstances = count;
-    *(sDataNode5828**)&self->mpDataInstanceHeap = (sDataNode5828*)operator_new_tag(count * sizeof(sDataNode5828), str_tDataInstanceInfo, flags, 0);
+    *(tDataInstanceInfo**)&self->mpDataInstanceHeap = (tDataInstanceInfo*)operator_new_tag(count * sizeof(tDataInstanceInfo), str_tDataInstanceInfo, flags, 0);
     *(int*)&self->mpEmptyDataInstanceList = 0;
     for (int i = 0; i < count; i++) {
-        cDataManager_AddToEmptyInstanceList(self, &((sDataNode5828*)self->mpDataInstanceHeap)[i]);
+        cDataManager_AddToEmptyInstanceList(self, &(self->mpDataInstanceHeap)[i]);
     }
     return self;
 }

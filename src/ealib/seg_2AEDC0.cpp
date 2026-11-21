@@ -1166,10 +1166,6 @@ struct sElem_AF020 {
     void* operator new[](unsigned int size) { return D_00509430_ADEC8.alloc(D_00495260, size, 0, 0, D_00509430_ADEC8.flags); }
     void operator delete[](void* p) { D_00509430_ADEC8.free(p); }
 };
-struct sArr_AF020 {
-    sElem_AF020* arr;
-    int n;
-};
 
 /**
  * Destroys a subtitle array: deletes its entries and clears the count.
@@ -1179,13 +1175,13 @@ struct sArr_AF020 {
  *
  * @param flags  bit 0 frees the array itself
  */
-extern "C" void RCMP_AV_SUBTITLE_ARRAY__AV_SUBTITLE_ARRAY(sArr_AF020* self, int flags)
+extern "C" void RCMP_AV_SUBTITLE_ARRAY__AV_SUBTITLE_ARRAY(RCMP_AV_SUBTITLE_ARRAY* self, int flags)
 {
-    if (self->arr) {
-        delete[] self->arr;
-        self->arr = 0;
+    if (((sElem_AF020*)self->mSubTitle)) {
+        delete[] ((sElem_AF020*)self->mSubTitle);
+        (*(sElem_AF020**)&self->mSubTitle) = 0;
     }
-    self->n = 0;
+    self->mNumberOfSubtitle = 0;
     if (flags & 1) D_00509434_AF020[0](self);
 }
 #endif
@@ -1267,10 +1263,6 @@ INCLUDE_ASM("ealib/seg_2AEDC0", RCMP_AV_SUBTITLE_ARRAY_GetSubtitle);
 struct sWScriptEntry_3AF230 {
     char pad[0x34];
 };
-struct sWScriptArray_3AF230 {
-    sWScriptEntry_3AF230* items;
-    unsigned int count;
-};
 
 /**
  * Returns a subtitle array's entry by index.
@@ -1281,12 +1273,12 @@ struct sWScriptArray_3AF230 {
  * @param i  the entry index
  * @return the entry (0x34-byte stride), or 0 when index > count
  */
-extern "C" sWScriptEntry_3AF230* RCMP_AV_SUBTITLE_ARRAY_GetSubtitle(sWScriptArray_3AF230* self, unsigned int i)
+extern "C" sWScriptEntry_3AF230* RCMP_AV_SUBTITLE_ARRAY_GetSubtitle(RCMP_AV_SUBTITLE_ARRAY* self, unsigned int i)
 {
-    if (self->count < i) {
+    if (self->mNumberOfSubtitle < i) {
         return 0;
     }
-    return &self->items[i];
+    return &((sWScriptEntry_3AF230*)self->mSubTitle)[i];
 }
 #endif
 //100%
@@ -2361,16 +2353,6 @@ struct sWSList_09A0 {
     void kill() { next = (sWSNode2*)7; prev = (sWSNode2*)7; }
 };
 
-struct sPl_09A0 {
-    void** vt;
-    char pad4[0x14];
-    sWSList_09A0 list18;
-    sWSList_09A0 list20;
-    char pad28[4];
-    void* work;
-    char pad30[0x48];
-    void* ipuBuf;
-};
 
 static inline void wsUnlink_09A0(sWSNode2* n)
 {
@@ -2393,22 +2375,22 @@ static inline void wsUnlink_09A0(sWSNode2* n)
  *
  * @param flags  bit 0 frees the object itself
  */
-extern "C" void PS2_SONY_CODEC_INTERNAL__PS2_SONY_CODEC_INTERNAL(sPl_09A0* self, int flags)
+extern "C" void PS2_SONY_CODEC_INTERNAL__PS2_SONY_CODEC_INTERNAL(PS2_SONY_CODEC_INTERNAL* self, int flags)
 {
-    self->vt = D_00456850;
-    if (self->work != 0) {
-        D_00509434[0](self->work);
-        self->work = 0;
+    self->mVtbl = D_00456850;
+    if (self->mpWorkBuffer != 0) {
+        D_00509434[0](self->mpWorkBuffer);
+        self->mpWorkBuffer = 0;
     }
-    if (self->ipuBuf != 0) {
-        D_00509434[0](self->ipuBuf);
-        self->ipuBuf = 0;
+    if (self->mpChunkBuffer != 0) {
+        D_00509434[0](self->mpChunkBuffer);
+        self->mpChunkBuffer = 0;
     }
-    while (!self->list18.empty()) wsUnlink_09A0(self->list18.front());
-    while (!self->list20.empty()) wsUnlink_09A0(self->list20.front());
-    self->list20.kill();
-    self->list18.kill();
-    self->vt = D_00456810;
+    while (!(*(sWSList_09A0*)&self->mUsedFrames).empty()) wsUnlink_09A0((*(sWSList_09A0*)&self->mUsedFrames).front());
+    while (!(*(sWSList_09A0*)&self->mFreeFrames).empty()) wsUnlink_09A0((*(sWSList_09A0*)&self->mFreeFrames).front());
+    (*(sWSList_09A0*)&self->mFreeFrames).kill();
+    (*(sWSList_09A0*)&self->mUsedFrames).kill();
+    self->mVtbl = D_00456810;
     if (flags & 1) D_00509434[0](self);
 }
 #endif
@@ -2558,21 +2540,6 @@ struct sData_B0C58 {
     void* data;
 };
 
-struct sPlayer_B0C58 {
-    int f0;
-    int state;              // 0x4
-    int w;                  // 0x8
-    int h;                  // 0xC
-    int f10;                // 0x10
-    int f14;                // 0x14
-    sWSNode_B0C58 list18;   // 0x18
-    sWSNode_B0C58 frames;   // 0x20
-    sScript_B0C58* script;  // 0x28
-    void* work;             // 0x2C
-    char mpeg[0x48];        // 0x30
-    void* ipuBuf;           // 0x78
-    void* ipuBufUc;         // 0x7C
-};
 
 /**
  * Initialises the Sony MPEG codec from the first chunk: reads the headers, sizes and allocates frames.
@@ -2591,20 +2558,20 @@ struct sPlayer_B0C58 {
  * @param firstChunk  the first CHUNK
  * @return 2 (usable)
  */
-extern "C" int PS2_SONY_CODEC_INTERNAL_Init(sPlayer_B0C58* self, sScript_B0C58* script, sData_B0C58* firstChunk)
+extern "C" int PS2_SONY_CODEC_INTERNAL_Init(PS2_SONY_CODEC_INTERNAL* self, sScript_B0C58* script, sData_B0C58* firstChunk)
 {
-    self->script = script;
-    self->f10 = 0;
-    self->f14 = 0;
-    if (self->work != 0) {
-        D_00509430_B0C58.free(self->work);
-        self->work = 0;
+    (*(sScript_B0C58**)&self->mpDecoder) = script;
+    self->mCurrentFrameNumber = 0;
+    self->unk_14 = 0;
+    if (self->mpWorkBuffer != 0) {
+        D_00509430_B0C58.free(self->mpWorkBuffer);
+        self->mpWorkBuffer = 0;
     }
-    if (self->ipuBuf != 0) {
-        D_00509430_B0C58.free(self->ipuBuf);
-        self->ipuBuf = 0;
+    if (self->mpChunkBuffer != 0) {
+        D_00509430_B0C58.free(self->mpChunkBuffer);
+        self->mpChunkBuffer = 0;
     }
-    self->state = 1;
+    self->unk_04 = 1;
     void* data = firstChunk->data;
     ld = (layer_data*)D_00509648;
     Initialize_Buffer(data);
@@ -2621,31 +2588,31 @@ extern "C" int PS2_SONY_CODEC_INTERNAL_Init(sPlayer_B0C58* self, sScript_B0C58* 
     D_00509500_s = (mode != 0 && D_00509524_s == 0) ? (D_005094F8_s + 31) / 32 * 2 : (D_005094F8_s + 15) / 16;
     int w = D_005094FC_s * 16;
     D_005094D4_s = w;
-    self->w = w;
+    self->mWidth = w;
     int codedHeight = D_00509500_s * 16;
     D_005094D8_s = codedHeight;
-    self->h = codedHeight;
+    self->mHeight = codedHeight;
     D_005094DC_s = w >> 1;
     D_005094E0_s = codedHeight >> 1;
-    int n = self->script->count;
+    int n = ((sScript_B0C58*)self->mpDecoder)->count;
     for (int i = 0; i < n; i++) {
-        int cw = self->w;
-        int ch = self->h;
+        int cw = self->mWidth;
+        int ch = self->mHeight;
         char* newFrame = (char*)func_003B07F8(D_00509430_B0C58.alloc(D_004953E8, 20, 0, 0, D_00509430_B0C58.flags), cw, ch);
         sWSNode_B0C58* node = newFrame ? (sWSNode_B0C58*)(newFrame + 8) : 0;
-        sWSNode_B0C58* head = &self->frames;
+        sWSNode_B0C58* head = &(*(sWSNode_B0C58*)&self->mFreeFrames);
         sWSNode_B0C58* old = head->next;
         head->next = node;
         old->prev = node;
         node->next = old;
         node->prev = head;
     }
-    self->work = D_00509430_B0C58.alloc(str_RCMP_mpegbuff, self->w * self->h * 9 / 2 + 5996, 0, 0, D_00509430_B0C58.flags | 0x400);
-    self->ipuBuf = D_00509430_B0C58.alloc(str_RCMP_chunkbuff, 0x32000, 0, 0, D_00509430_B0C58.flags | 0x400);
-    self->ipuBufUc = (void*)(((unsigned int)self->ipuBuf & 0x0FFFFFFF) | 0x30000000);
+    self->mpWorkBuffer = D_00509430_B0C58.alloc(str_RCMP_mpegbuff, self->mWidth * self->mHeight * 9 / 2 + 5996, 0, 0, D_00509430_B0C58.flags | 0x400);
+    self->mpChunkBuffer = D_00509430_B0C58.alloc(str_RCMP_chunkbuff, 0x32000, 0, 0, D_00509430_B0C58.flags | 0x400);
+    (*(void**)&self->mpChunkBufferUncached) = (void*)(((unsigned int)self->mpChunkBuffer & 0x0FFFFFFF) | 0x30000000);
     sceMpegInit();
-    sceMpegCreate(self->mpeg, self->work, self->w * self->h * 9 / 2 + 5996);
-    sceMpegAddCallback(self->mpeg, 1, (void*)func_003B0B10, self);
+    sceMpegCreate(self->mMpeg, self->mpWorkBuffer, self->mWidth * self->mHeight * 9 / 2 + 5996);
+    sceMpegAddCallback(self->mMpeg, 1, (void*)func_003B0B10, self);
     return 2;
 }
 #endif

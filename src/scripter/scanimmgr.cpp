@@ -17,12 +17,6 @@ struct sScAnimBank53B8 {
     int c;          // 0x10
 };
 
-struct cScriptAnimBankManager53B8 {
-    int flags;                  // 0x0
-    int count;                  // 0x4
-    sScAnimBank53B8* banks;     // 0x8
-    void* vtable;               // 0xC
-};
 
 /**
  * Constructs a script animation bank manager with a fixed number of empty bank slots.
@@ -35,22 +29,22 @@ struct cScriptAnimBankManager53B8 {
  * @param base   bank number of the first slot (On Tour startBankNum)
  * @return self
  */
-extern "C" cScriptAnimBankManager53B8* cScriptAnimBankManager_cScriptAnimBankManager(
-    cScriptAnimBankManager53B8* self, int flags, int count, int base)
+extern "C" cScriptAnimBankManager* cScriptAnimBankManager_cScriptAnimBankManager(
+    cScriptAnimBankManager* self, int flags, int count, int base)
 {
     //S
-    self->vtable = cScriptAnimBankManager_vtbl;
-    self->flags = flags;
-    self->count = count;
+    (*(void**)&self->mVtbl) = cScriptAnimBankManager_vtbl;
+    self->mMemFlags = flags;
+    self->mMaxBanks = count;
     //E
-    self->banks = (sScAnimBank53B8*)operator_new_tag(count * sizeof(sScAnimBank53B8), str_tScriptAnimBankInfo, flags, 0);
+    (*(sScAnimBank53B8**)&self->mpBankInfo) = (sScAnimBank53B8*)operator_new_tag(count * sizeof(sScAnimBank53B8), str_tScriptAnimBankInfo, flags, 0);
     int idx = base;
-    for (int i = 0; i < self->count; i++) {
-        self->banks[i].id = -1;
-        self->banks[i].index = idx++;
-        self->banks[i].a = 0;
-        self->banks[i].b = 0;
-        self->banks[i].c = 0;
+    for (int i = 0; i < self->mMaxBanks; i++) {
+        ((sScAnimBank53B8*)self->mpBankInfo)[i].id = -1;
+        ((sScAnimBank53B8*)self->mpBankInfo)[i].index = idx++;
+        ((sScAnimBank53B8*)self->mpBankInfo)[i].a = 0;
+        ((sScAnimBank53B8*)self->mpBankInfo)[i].b = 0;
+        ((sScAnimBank53B8*)self->mpBankInfo)[i].c = 0;
     }
     return self;
 }
@@ -218,12 +212,6 @@ struct sDmVEntry275698 {
     void (*fn)(void*, sDmEntry275698*);
 };
 
-struct sDmTable275698 {
-    int unk_0x0;
-    int count;
-    sDmEntry275698* entries;
-    sDmVEntry275698* vt;
-};
 
 /**
  * Unlinks every bank the script anim bank manager currently has linked.
@@ -236,11 +224,11 @@ struct sDmTable275698 {
  */
 extern "C" void cScriptAnimBankManager_UnlinkBanksAll(cScriptAnimBankManager* self_)
 {
-    sDmTable275698* self = (sDmTable275698*)self_;
+    cScriptAnimBankManager* self = self_;
     int i;
-    for (i = 0; i < self->count; i++) {
-        if (self->entries[i].used != 0) {
-            self->vt[2].fn((char*)self + self->vt[2].delta, &self->entries[i]);
+    for (i = 0; i < self->mMaxBanks; i++) {
+        if (((sDmEntry275698*)self->mpBankInfo)[i].used != 0) {
+            ((sDmVEntry275698*)self->mVtbl)[2].fn((char*)self + ((sDmVEntry275698*)self->mVtbl)[2].delta, &((sDmEntry275698*)self->mpBankInfo)[i]);
         }
     }
 }

@@ -17,11 +17,6 @@ extern char* PadCache;
 extern char str_InitLoadScreen[];
 extern void* cInitLoadScreen_vtbl[];
 
-struct sModule_232348 {
-    void** vt;
-    int f4;
-    int f8;
-};
 
 
 /**
@@ -44,12 +39,12 @@ extern "C" void cPreStartScreen_update(cPreStartScreen* self)
         *fade = 1.0f;
     }
     if ((int)SSXApp->LoadingModule == 0) {
-        sModule_232348* loadScreen = (sModule_232348*)cMemMan_alloc(0xC, str_InitLoadScreen, 0x100, 0);
+        cInitLoadScreen* loadScreen = (cInitLoadScreen*)cMemMan_alloc(0xC, str_InitLoadScreen, 0x100, 0);
         cAppMan* app = (cAppMan*)SSXApp;
-        loadScreen->vt = cInitLoadScreen_vtbl;
-        loadScreen->f4 = 0;
-        loadScreen->f8 = 0;
-        *(sModule_232348**)&self->nextscreen = loadScreen;
+        loadScreen->mVtbl = cInitLoadScreen_vtbl;
+        loadScreen->progressive = 0;
+        loadScreen->ending = 0;
+        *(cInitLoadScreen**)&self->nextscreen = loadScreen;
         // PORT: setNextModule takes the module pointer as an unsigned int
         cAppMan_setNextModule(app, (unsigned int)loadScreen);
     }
@@ -58,7 +53,7 @@ extern "C" void cPreStartScreen_update(cPreStartScreen* self)
         self->progressivetimer += 0.15000000596046448f;
         if (cPadCache_numButtons(PadCache, 0) >= 11) {
             if (*(float*)(cPadCache_buttonValues(PadCache, 0) + 0x20) != 0.0f && *(float*)(cPadCache_buttonValues(PadCache, 0) + 0x28) != 0.0f) {
-                ((sModule_232348*)self->nextscreen)->f4 = 1;
+                (self->nextscreen)->progressive = 1;
             }
         }
     }

@@ -132,13 +132,6 @@ struct sVec89B8 {
     void** mCap;
 };
 
-struct sOwner89B8 {
-    char pad[0xA8];
-    sVec89B8 mVecA;   // 0xA8
-    sVec89B8 mVecB;   // 0xB8
-    char padC8[0x24];
-    char str[4];      // 0xEC
-};
 
 /**
  * Destroys the buddy manager: its resource string, then the storage of its two pointer vectors, and frees it when
@@ -150,13 +143,13 @@ struct sOwner89B8 {
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void BuddyMan__BuddyMan(sOwner89B8* self, int flags)
+extern "C" void BuddyMan__BuddyMan(BuddyMan* self, int flags)
 {
-    cBXString__cBXString(self->str, 2);
-    sVec89B8* vb = &self->mVecB;
-    Dealloc89B8(vb->mBegin, self->mVecB.mCap - self->mVecB.mBegin);
-    sVec89B8* va = &self->mVecA;
-    Dealloc89B8(va->mBegin, self->mVecA.mCap - self->mVecA.mBegin);
+    cBXString__cBXString(((char*)&self->mResource), 2);
+    sVec89B8* vb = &(*(sVec89B8*)&self->mChallengersAlloc);
+    Dealloc89B8(vb->mBegin, (*(sVec89B8*)&self->mChallengersAlloc).mCap - (*(sVec89B8*)&self->mChallengersAlloc).mBegin);
+    sVec89B8* va = &(*(sVec89B8*)&self->mMessagesAlloc);
+    Dealloc89B8(va->mBegin, (*(sVec89B8*)&self->mMessagesAlloc).mCap - (*(sVec89B8*)&self->mMessagesAlloc).mBegin);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1130,9 +1123,6 @@ static inline sMsgListIter_00269188 sMsgList_00269188_insert(sMsgListIter_002691
     return tmp;
 }
 
-struct sMsgSelf_00269188 {
-    int f0;
-};
 
 /**
  * Handles the host echoing the client's withdrawn confirmation: takes the host's state and posts an event.
@@ -1146,7 +1136,7 @@ struct sMsgSelf_00269188 {
 extern "C" void func_00269188(cSetupMan* self, int hostState)
 {
     int kind = 247;
-    ((sMsgSelf_00269188*)self)->f0 = hostState;
+    (self)->mState = hostState;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int* netEvent = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     netEvent[0] = kind;
@@ -1320,9 +1310,6 @@ static inline sMsgListIter_002693C0 sMsgList_002693C0_insert(sMsgListIter_002693
     return tmp;
 }
 
-struct sMsgSelf_002693C0 {
-    int f0;
-};
 
 /**
  * Handles the host withdrawing its confirmation on the client: takes the host's state and posts an event.
@@ -1336,7 +1323,7 @@ struct sMsgSelf_002693C0 {
 extern "C" void func_002693C0(cSetupMan* self, int hostState)
 {
     int kind = 247;
-    ((sMsgSelf_002693C0*)self)->f0 = hostState;
+    (self)->mState = hostState;
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int* netEvent = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
     netEvent[0] = kind;
@@ -3743,9 +3730,6 @@ int cPathSys_getNearAIPaths_impl(void* vself, float* pos, void** pathList, int m
 INCLUDE_ASM("bx/bxstringctor", cPathSys_getNearTrackPaths);
 #ifdef SKIP_ASM
 struct sBXBox;
-struct sPathItem_B178 {
-    char pad[0x3C];
-};
 
 
 extern "C" float cPath_getProximity(sBXBox* self, float* p);
@@ -3767,17 +3751,17 @@ static inline int minB178(int a, int b)
  * @param max  the most paths to return
  * @return the number of paths written
  */
-extern "C" int cPathSys_getNearTrackPaths(cPathSys* self, float* pos, sPathItem_B178** out, int max)
+extern "C" int cPathSys_getNearTrackPaths(cPathSys* self, float* pos, cTrackPath** out, int max)
 {
     float dist[52];
     int n = 0;
     int want = minB178(self->NumTrackPaths, max);
     int i;
     for (i = 0; i < self->NumTrackPaths; i++) {
-        dist[i] = cPath_getProximity((sBXBox*)&((sPathItem_B178*)self->TrackPaths)[i], pos);
+        dist[i] = cPath_getProximity((sBXBox*)&(self->TrackPaths)[i], pos);
         if (dist[i] == 0.0f) {
             dist[i] = 1e37f;
-            out[n++] = &((sPathItem_B178*)self->TrackPaths)[i];
+            out[n++] = &(self->TrackPaths)[i];
             if (n == want) {
                 break;
             }
@@ -3793,7 +3777,7 @@ extern "C" int cPathSys_getNearTrackPaths(cPathSys* self, float* pos, sPathItem_
             }
         }
         dist[bi] = 1e37f;
-        out[n] = &((sPathItem_B178*)self->TrackPaths)[bi];
+        out[n] = &(self->TrackPaths)[bi];
         n++;
     }
     return n;

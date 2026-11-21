@@ -6562,12 +6562,6 @@ struct sVec5920 {
     void* operator new[](unsigned int, void* p) { return p; }
 } __attribute__((aligned(16)));
 
-struct sWake5920 {
-    char pad0[0xC];             // 0x00
-    void** vtbl;                // 0x0C
-    void* fx[12];               // 0x10
-    sVec5920 v[2];              // 0x40
-};
 
 /**
  * Constructs the falling snow: six snow boxes ("SnowBox") per view, the second set only for two players.
@@ -6605,7 +6599,7 @@ extern "C" void* cSnowFall_cSnowFall(cSnowFall* self, void* bucket)
         ((void**)&self->mSnowBoxes[0])[11] = cSnowBox_cSnowBox((cSnowBox*)((char*)cMemMan_alloc(0xC0, str_SnowBox, 0, 0)), 1, 1, 2000.0f, 600.0f, 0.05999999865889549f, -100.0f);
     }
     cMemMan_validate();
-    return ((sWake5920*)self);
+    return (self);
 }
 #endif
 

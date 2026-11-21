@@ -9355,38 +9355,31 @@ struct sRing_264138
     int* q[32];
 };
 
-struct sRingOwner_264138
-{
-    int f0;
-    int* f4;
-    sRing_264138 a;     // 0x8
-    sRing_264138 b;     // 0x90
-};
 
-static inline int* PeekA_264138(sRingOwner_264138* o)
+static inline int* PeekA_264138(cSetupMan* o)
 {
-    if (o->a.head < o->a.end)
-        return o->a.q[o->a.head % 32];
+    if ((*(sRing_264138*)&o->mReadQueue).head < (*(sRing_264138*)&o->mReadQueue).end)
+        return (*(sRing_264138*)&o->mReadQueue).q[(*(sRing_264138*)&o->mReadQueue).head % 32];
     return 0;
 }
 
-static inline int* PopA_264138(sRingOwner_264138* o)
+static inline int* PopA_264138(cSetupMan* o)
 {
-    int h = o->a.head++;
-    return o->a.q[h % 32];
+    int h = (*(sRing_264138*)&o->mReadQueue).head++;
+    return (*(sRing_264138*)&o->mReadQueue).q[h % 32];
 }
 
-static inline int* PeekB_264138(sRingOwner_264138* o)
+static inline int* PeekB_264138(cSetupMan* o)
 {
-    if (o->b.head < o->b.end)
-        return o->b.q[o->b.head % 32];
+    if ((*(sRing_264138*)&o->mWriteQueue).head < (*(sRing_264138*)&o->mWriteQueue).end)
+        return (*(sRing_264138*)&o->mWriteQueue).q[(*(sRing_264138*)&o->mWriteQueue).head % 32];
     return 0;
 }
 
-static inline int* PopB_264138(sRingOwner_264138* o)
+static inline int* PopB_264138(cSetupMan* o)
 {
-    int h = o->b.head++;
-    return o->b.q[h % 32];
+    int h = (*(sRing_264138*)&o->mWriteQueue).head++;
+    return (*(sRing_264138*)&o->mWriteQueue).q[h % 32];
 }
 
 /**
@@ -9399,14 +9392,14 @@ static inline int* PopB_264138(sRingOwner_264138* o)
  */
 extern "C" void func_00264138(cSetupMan* self_, int flags)
 {
-    sRingOwner_264138* self = (sRingOwner_264138*)self_;
-    if (self->f4 != 0)
-        func_00264990((cSetupMan*)self, self->f4);
+    cSetupMan* self = self_;
+    if (((int*)self->mPacketCache) != 0)
+        func_00264990((cSetupMan*)self, ((int*)self->mPacketCache));
     while (PeekA_264138(self) != 0)
         func_00264990((cSetupMan*)self, PopA_264138(self));
     while (PeekB_264138(self) != 0)
         func_00264990((cSetupMan*)self, PopB_264138(self));
-    self->f0 = 1;
+    self->mState = 1;
     if (flags & 1)
         operator_delete((int*)self);
 }
@@ -9508,12 +9501,6 @@ static inline void post_42B8(char* g, void* msg)
     sMsgList42B8_insert(*(sMsgListNode42B8**)(g + 0xF0), mp);
 }
 
-struct sNetSession42B8 {
-    int state;                  // 0x0
-    char pad_0x4[0x124 - 0x4];
-    int host;                   // 0x124
-    int ready;                  // 0x128
-};
 
 /**
  * Updates the online setup manager (D_004A33CC): pumps its packet queues and handles one message from the peer.
@@ -9532,22 +9519,22 @@ struct sNetSession42B8 {
  */
 extern "C" void func_002642B8(cSetupMan* vself)
 {
-    sNetSession42B8* self = (sNetSession42B8*)vself;
+    cSetupMan* self = vself;
     sMsg42B8 msg;
     func_00264A58((cSetupMan*)self);
     func_00264B20((cSetupMan*)self);
-    int st = self->state;
+    int st = self->mState;
     if (st == 5 || st == 10) {
-        if (self->ready != 0 || st == 10) {
-            if (self->host != 0) {
-                self->state = 12;
+        if (self->mRanked != 0 || st == 10) {
+            if (self->mIsHost != 0) {
+                self->mState = 12;
                 msg.type = 0xF;
                 msg.a = 0;
                 msg.b = 0;
                 func_00264BE8(self, &msg, 20);
             }
         } else {
-            self->state = 7;
+            self->mState = 7;
             LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
             int* netEvent = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
             *(void***)((char*)netEvent + 4) = online_Event_vtbl;
@@ -9558,15 +9545,15 @@ extern "C" void func_002642B8(cSetupMan* vself)
     if (func_002649B0_3(self, &msg, 20) == 0)
         return;
     if (msg.type == 0xF) {
-        if (self->host == 0) {
-            self->state = 0xC;
+        if (self->mIsHost == 0) {
+            self->mState = 0xC;
             sMsg42B8 reply;
             reply.type = 0xF;
             reply.a = 0;
             reply.b = 0;
             func_00264BE8(self, &reply, 20);
         }
-        self->state = 13;
+        self->mState = 13;
         return;
     }
     if (msg.type == 0x10) {
@@ -9576,15 +9563,15 @@ extern "C" void func_002642B8(cSetupMan* vself)
         func_00264F88((cSetupMan*)self, cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(SSXApp->BE, 1), 0));
         return;
     }
-    if (self->host != 0) {
-        if (self->state < 7) {
+    if (self->mIsHost != 0) {
+        if (self->mState < 7) {
             switch (msg.type) {
             case 1: func_00265190_p(self, msg.a, &msg.c); break;
             case 3: func_00265290((cSetupMan*)self, msg.a); break;
             case 5: func_00265398((int*)self); break;
             case 0xF8:
             case 250: {
-                self->state = 11;
+                self->mState = 11;
                 if (func_00263128((BuddyMan*)((char*)Mgr_42B8()), LobbyMan_mLobbyMan->mOpponent) != 0)
                     func_00263018((BuddyMan*)Mgr_42B8(), LobbyMan_mLobbyMan->mOpponent);
                 func_0025F740(LobbyMan_mLobbyMan, msg.type);
@@ -9599,7 +9586,7 @@ extern "C" void func_002642B8(cSetupMan* vself)
             case 13: func_002696F8(self); break;
             case 0xF8:
             case 250: {
-                self->state = 11;
+                self->mState = 11;
                 if (func_00263128((BuddyMan*)((char*)Mgr_42B8()), LobbyMan_mLobbyMan->mOpponent) != 0)
                     func_00263018((BuddyMan*)Mgr_42B8(), LobbyMan_mLobbyMan->mOpponent);
                 func_0025F740(LobbyMan_mLobbyMan, msg.type);
@@ -9608,7 +9595,7 @@ extern "C" void func_002642B8(cSetupMan* vself)
             }
         }
     } else {
-        if (self->state < 7) {
+        if (self->mState < 7) {
             switch (msg.type) {
             case 1: func_00269008(self, msg.a, msg.b); break;
             case 3: func_002690C8(self, msg.a, msg.b); break;
@@ -9618,7 +9605,7 @@ extern "C" void func_002642B8(cSetupMan* vself)
             case 4: func_002693C0(self, msg.b); break;
             case 0xF8:
             case 250: {
-                self->state = 11;
+                self->mState = 11;
                 if (func_00263128((BuddyMan*)((char*)Mgr_42B8()), LobbyMan_mLobbyMan->mOpponent) != 0)
                     func_00263018((BuddyMan*)Mgr_42B8(), LobbyMan_mLobbyMan->mOpponent);
                 func_0025F740(LobbyMan_mLobbyMan, msg.type);
@@ -9637,7 +9624,7 @@ extern "C" void func_002642B8(cSetupMan* vself)
             case 13: func_00269CF0(self, msg.a); break;
             case 0xF8:
             case 250: {
-                self->state = 11;
+                self->mState = 11;
                 if (func_00263128((BuddyMan*)((char*)Mgr_42B8()), LobbyMan_mLobbyMan->mOpponent) != 0)
                     func_00263018((BuddyMan*)Mgr_42B8(), LobbyMan_mLobbyMan->mOpponent);
                 func_0025F740(LobbyMan_mLobbyMan, msg.type);
@@ -13983,9 +13970,6 @@ extern "C" void* cBXString_cBXString2(void* self, const char* s);
 extern char str_NetEvent[];
 extern void* online_FindPlayerEvent_vtbl[];
 
-struct sBlk2684C0 {
-    int v[5];
-};
 
 struct sMsg2684C0 {
     int type;           // 0x00
@@ -13994,7 +13978,7 @@ struct sMsg2684C0 {
     char b[4];          // 0x0C
     int f10;            // 0x10
     int f14;            // 0x14
-    sBlk2684C0 blk;     // 0x18
+    tLobbyStats blk;     // 0x18
 };
 
 static inline void Init2684C0(sMsg2684C0* m, const char* a, const char* b, int c, int d)
@@ -14022,7 +14006,7 @@ extern "C" void* online_FindPlayerEvent_clone(online_FindPlayerEvent* src)
 {
     sMsg2684C0* copy = (sMsg2684C0*)operator new(44, str_NetEvent, 0x20000000, 0);
     Init2684C0(copy, *(const char**)((char*)&src->mName), *(const char**)((char*)&src->mRoom), src->mOnline, src->mAddr);
-    copy->blk = (*(sBlk2684C0*)&src->mStats);
+    copy->blk = (*(&src->mStats));
     return copy;
 }
 #endif

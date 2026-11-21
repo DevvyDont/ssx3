@@ -224,17 +224,6 @@ struct sVec2_20EC18 {
     float x, y;
     sVec2_20EC18(float x_, float y_) : x(x_), y(y_) {}
 };
-struct sTrophyBox_20EC18 {
-    sVec2_20EC18 pos;     // 0x00
-    float top;            // 0x08
-    float bottom;         // 0x0C
-    float cx;             // 0x10
-    float y14;            // 0x14
-    float y18;            // 0x18
-    float s1C;            // 0x1C
-    sRect20EAA0 rect;     // 0x20
-    float s30;            // 0x30
-};
 
 /**
  * Computes a course-progress tracker's screen layout from the rectangle it is drawn in.
@@ -260,15 +249,15 @@ extern "C" void func_0020EC18(cHUDRadar* self, sRect20EAA0* screenRect, sRect20E
         textHeight = 30.0f;
     }
     float arrowHeight = D_004C8C58_f[72 / 4];
-    ((sTrophyBox_20EC18*)self)->pos = sVec2_20EC18(area->x + area->w * 0.5f, (area->y + area->h) - textHeight);
-    ((sTrophyBox_20EC18*)self)->top = area->y;
-    ((sTrophyBox_20EC18*)self)->bottom = area->y + area->h - textHeight - arrowHeight;
-    ((sTrophyBox_20EC18*)self)->cx = area->x + area->w * 0.5f;
-    ((sTrophyBox_20EC18*)self)->y14 = area->y + arrowHeight;
-    ((sTrophyBox_20EC18*)self)->y18 = ((sTrophyBox_20EC18*)self)->bottom;
-    ((sTrophyBox_20EC18*)self)->s1C = (((sTrophyBox_20EC18*)self)->bottom - ((sTrophyBox_20EC18*)self)->top - arrowHeight) * 9.999999747378752e-05f;
-    ((sTrophyBox_20EC18*)self)->rect = *area;
-    ((sTrophyBox_20EC18*)self)->s30 = ((sTrophyBox_20EC18*)self)->rect.h * 9.999999747378752e-05f;
+    (*(sVec2_20EC18*)&(self)->unk_000[0]) = sVec2_20EC18(area->x + area->w * 0.5f, (area->y + area->h) - textHeight);
+    (self)->unk_008 = area->y;
+    (self)->unk_00C = area->y + area->h - textHeight - arrowHeight;
+    (self)->unk_010 = area->x + area->w * 0.5f;
+    (self)->unk_014 = area->y + arrowHeight;
+    (self)->unk_018 = (self)->unk_00C;
+    (self)->unk_01C = ((self)->unk_00C - (self)->unk_008 - arrowHeight) * 9.999999747378752e-05f;
+    (*(sRect20EAA0*)&(self)->unk_020) = *area;
+    (self)->unk_030 = (*(sRect20EAA0*)&(self)->unk_020).h * 9.999999747378752e-05f;
 }
 #endif
 

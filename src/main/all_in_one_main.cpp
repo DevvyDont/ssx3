@@ -1,4 +1,5 @@
 #include "common.h"
+#include "util/menu.h"
 #include "online/privatemessage.h"
 #include "fe/debuglobbymenus.h"
 #include "fe/festatelegal.h"
@@ -167,18 +168,11 @@ extern "C" void DeletePersonaMenu_setpersonas_impl(char *self, char *src) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/all_in_one_main", PersonaMenu_setpersonas);
 #ifdef SKIP_ASM
-struct MenuItem_B418 {
-    char pad0[8];
-    int index;          // 0x08
-    char padC[8];
-    int data;           // 0x14
-    char pad18[0xC];
-};
 
 struct Menu_B418 {
     char pad0[0x2E8];
     char sub2E8[0x518 - 0x2E8];     // 0x2E8
-    MenuItem_B418 items[4];         // 0x518
+    cCommandMenuItem items[4];         // 0x518
     char item5A8[0x1C];             // 0x5A8
     char item5C4[0x1C];             // 0x5C4
 };
@@ -209,13 +203,13 @@ extern "C" void PersonaMenu_setpersonas(PersonaMenu* self, Src_B418* src)
     int i = 0;
     for (; i < src->count; i++) {
         int id = src->ids[i];
-        MenuItem_B418* it = &((MenuItem_B418*)&self->unk_518[0])[i];
-        it->data = id;
+        cCommandMenuItem* it = &((&self->unk_518[0]))[i];
+        (*(int*)&it->Caption) = id;
         cMenuItem_activate(it, 1);
-        it->index = i;
+        it->ID = i;
     }
     for (; i < 4; i++) {
-        cMenuItem_activate(&((MenuItem_B418*)&self->unk_518[0])[i], 0);
+        cMenuItem_activate(&((&self->unk_518[0]))[i], 0);
     }
     DeletePersonaMenu_setpersonas(((char*)&self->unk_2E8), src);
     cMenuItem_activate(((char*)&self->unk_5C4), src->count >= 2);
@@ -226,17 +220,10 @@ extern "C" void PersonaMenu_setpersonas(PersonaMenu* self, Src_B418* src)
 //100%
 INCLUDE_ASM("main/all_in_one_main", LobbyMenu_updaterooms);
 #ifdef SKIP_ASM
-struct MenuItem_B528 {
-    char pad0[8];
-    int index;          // 0x08
-    char padC[8];
-    void* data;         // 0x14
-    char pad18[0xC];
-};
 
 struct Menu_B528 {
     char pad0[0x168];
-    MenuItem_B528 items[12];    // 0x168
+    cCommandMenuItem items[12];    // 0x168
 };
 
 extern "C" int func_0025F120(void* src);
@@ -260,19 +247,19 @@ extern "C" void LobbyMenu_updaterooms(LobbyMenu* self, void* src)
     int i = 0;
     int n = func_0025F120(src);
     for (; i < n; i++) {
-        MenuItem_B528* it = &((MenuItem_B528*)&self->unk_168[0])[i];
-        it->data = func_0025F150(src, i);
+        cCommandMenuItem* it = &((&self->unk_168[0]))[i];
+        (*(void**)&it->Caption) = func_0025F150(src, i);
         cMenuItem_activate(it, 1);
-        it->index = i;
+        it->ID = i;
     }
     if (i == 0) {
-        ((MenuItem_B528*)&self->unk_168[0])[0].data = str_Receiving_Room_List;
+        (*(void**)&((&self->unk_168[0]))[0].Caption) = str_Receiving_Room_List;
         i = 1;
-        cMenuItem_activate(&((MenuItem_B528*)&self->unk_168[0])[0], 1);
-        ((MenuItem_B528*)&self->unk_168[0])[0].index = -1;
+        cMenuItem_activate(&((&self->unk_168[0]))[0], 1);
+        ((&self->unk_168[0]))[0].ID = -1;
     }
     for (; i < 12; i++) {
-        cMenuItem_activate(&((MenuItem_B528*)&self->unk_168[0])[i], 0);
+        cMenuItem_activate(&((&self->unk_168[0]))[i], 0);
     }
 }
 #endif
@@ -280,17 +267,10 @@ extern "C" void LobbyMenu_updaterooms(LobbyMenu* self, void* src)
 //100%
 INCLUDE_ASM("main/all_in_one_main", RoomMenu_updateusers);
 #ifdef SKIP_ASM
-struct MenuItem_B620 {
-    char pad0[8];
-    int index;          // 0x08
-    char padC[8];
-    void* data;         // 0x14
-    char pad18[0xC];
-};
 
 struct Menu_B620 {
     char pad0[0x16C];
-    MenuItem_B620 items[24];    // 0x16C
+    cCommandMenuItem items[24];    // 0x16C
 };
 
 extern "C" int func_0025F1B0(void* src);
@@ -314,19 +294,19 @@ extern "C" void RoomMenu_updateusers(RoomMenu* self, void* src)
     int i = 0;
     int n = func_0025F1B0(src);
     for (; i < n; i++) {
-        MenuItem_B620* it = &((MenuItem_B620*)&self->unk_16C[0])[i];
-        it->data = func_0025F1E0(src, i, 0);
+        cCommandMenuItem* it = &((&self->unk_16C[0]))[i];
+        (*(void**)&it->Caption) = func_0025F1E0(src, i, 0);
         cMenuItem_activate(it, 1);
-        it->index = i;
+        it->ID = i;
     }
     if (i == 0) {
-        ((MenuItem_B620*)&self->unk_16C[0])[0].data = str_No_users_in_room;
+        (*(void**)&((&self->unk_16C[0]))[0].Caption) = str_No_users_in_room;
         i = 1;
-        cMenuItem_activate(&((MenuItem_B620*)&self->unk_16C[0])[0], 1);
-        ((MenuItem_B620*)&self->unk_16C[0])[0].index = -1;
+        cMenuItem_activate(&((&self->unk_16C[0]))[0], 1);
+        ((&self->unk_16C[0]))[0].ID = -1;
     }
     for (; i < 24; i++) {
-        cMenuItem_activate(&((MenuItem_B620*)&self->unk_16C[0])[i], 0);
+        cMenuItem_activate(&((&self->unk_16C[0]))[i], 0);
     }
 }
 #endif
@@ -2212,8 +2192,7 @@ INCLUDE_ASM("main/all_in_one_main", LobbyMenu__LobbyMenu);
 #ifdef SKIP_ASM
 struct VEnt_D258 { short delta; short idx; void (*fn)(void*, int); };
 struct VTab_D258 { int a; int b; VEnt_D258 dtor; };
-struct Elem_D258 { char pad[0x10]; VTab_D258 *vt; char pad2[0x24 - 0x14]; };
-struct Obj_D258 { char pad[0x168]; Elem_D258 elems[12]; };
+struct Obj_D258 { char pad[0x168]; cCommandMenuItem elems[12]; };
 
 /**
  * Destroys the debug lobby's "Select Room" menu (vtable D_0046D4D8, built by LobbyMenu_LobbyMenu).
@@ -2225,12 +2204,12 @@ struct Obj_D258 { char pad[0x168]; Elem_D258 elems[12]; };
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
 extern "C" void LobbyMenu__LobbyMenu(LobbyMenu* self, int flags) {
-    if (((Elem_D258*)&self->unk_168[0]) != 0) {
-        Elem_D258 *end = ((Elem_D258*)&self->unk_168[0]) + 12;
-        Elem_D258 *elem = end;
-        while (((Elem_D258*)&self->unk_168[0]) != elem) {
+    if (((&self->unk_168[0])) != 0) {
+        cCommandMenuItem *end = ((&self->unk_168[0])) + 12;
+        cCommandMenuItem *elem = end;
+        while (((&self->unk_168[0])) != elem) {
             elem--;
-            elem->vt->dtor.fn((char*)elem + elem->vt->dtor.delta, 0);
+            ((VTab_D258*)elem->mVtbl)->dtor.fn((char*)elem + ((VTab_D258*)elem->mVtbl)->dtor.delta, 0);
         }
     }
     cMenuItem__cMenuItem((int)self + 336, 2);
@@ -2276,8 +2255,7 @@ INCLUDE_ASM("main/all_in_one_main", ChatMenu__ChatMenu);
 #ifdef SKIP_ASM
 struct VEnt_D398 { short delta; short idx; void (*fn)(void*, int); };
 struct VTab_D398 { int a; int b; VEnt_D398 dtor; };
-struct Elem_D398 { char pad[0x10]; VTab_D398 *vt; char pad2[0x24 - 0x14]; };
-struct Obj_D398 { char pad[0x194]; Elem_D398 elems[14]; };
+struct Obj_D398 { char pad[0x194]; cCommandMenuItem elems[14]; };
 
 /**
  * Destroys the debug lobby's "Chat Menu" (vtable D_0046D428, built by ChatMenu_ChatMenu).
@@ -2289,11 +2267,11 @@ struct Obj_D398 { char pad[0x194]; Elem_D398 elems[14]; };
  * @param flags  g++ destructor flags passed on to cMenu__cMenu; bit 0 set frees the menu
  */
 extern "C" void ChatMenu__ChatMenu(ChatMenu* self, int flags) {
-    if (((Elem_D398*)&self->unk_194[0]) != 0) {
-        Elem_D398 *elem = ((Elem_D398*)&self->unk_194[0]) + 14;
-        while (((Elem_D398*)&self->unk_194[0]) != elem) {
+    if (((&self->unk_194[0])) != 0) {
+        cCommandMenuItem *elem = ((&self->unk_194[0])) + 14;
+        while (((&self->unk_194[0])) != elem) {
             elem--;
-            elem->vt->dtor.fn((char*)elem + elem->vt->dtor.delta, 0);
+            ((VTab_D398*)elem->mVtbl)->dtor.fn((char*)elem + ((VTab_D398*)elem->mVtbl)->dtor.delta, 0);
         }
     }
     cMenuItem__cMenuItem((int)self + 360, 2);

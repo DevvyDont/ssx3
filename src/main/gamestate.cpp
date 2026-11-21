@@ -2396,10 +2396,6 @@ extern char str_InputSamples[];
 extern char str_SyncedPad[];
 extern char str_SyncedInput[];
 
-struct sRec_237140 {
-    int type;
-    char pad[0x60];
-};
 
 
 struct sOwner_237140 {
@@ -2430,10 +2426,10 @@ static inline void* initObj_237140(void* o, int a, int b)
 extern "C" void* cInputSync_createlocalinput(cInputSync* self, int* realinput)
 {
     cInputSync_SyncedPad* syncedPad = &((&self->syncedpads[0]))[self->numsyncedpads++];
-    *(sRec_237140**)&syncedPad->samples = (sRec_237140*)operator_new_tag(self->latency * 100, str_InputSamples, 0, 0);
-    MEM_fill(((sRec_237140*)syncedPad->samples), 0, self->latency * 100);
+    *(cInputSync_PadSample**)&syncedPad->samples = (cInputSync_PadSample*)operator_new_tag(self->latency * 100, str_InputSamples, 0, 0);
+    MEM_fill((syncedPad->samples), 0, self->latency * 100);
     for (int i = 0; i < self->latency; i++) {
-        ((sRec_237140*)syncedPad->samples)[i].type = 0x18;
+        (syncedPad->samples)[i].NumButtons = 0x18;
     }
     syncedPad->readpos = 0;
     syncedPad->writepos = self->sendlimit;
@@ -2460,10 +2456,6 @@ extern char str_InputSamples[];
 extern char str_SyncedPad[];
 extern char str_SyncedInput[];
 
-struct sRec_237280 {
-    int type;
-    char pad[0x60];
-};
 
 
 struct sOwner_237280 {
@@ -2493,10 +2485,10 @@ static inline void* initObj_237280(void* o, int a, int b)
 extern "C" void* cInputSync_createremoteinput(cInputSync* self, int realinputmap)
 {
     cInputSync_SyncedPad* syncedPad = &((&self->syncedpads[0]))[self->numsyncedpads++];
-    *(sRec_237280**)&syncedPad->samples = (sRec_237280*)operator_new_tag(self->latency * 100, str_InputSamples, 0, 0);
-    MEM_fill(((sRec_237280*)syncedPad->samples), 0, self->latency * 100);
+    *(cInputSync_PadSample**)&syncedPad->samples = (cInputSync_PadSample*)operator_new_tag(self->latency * 100, str_InputSamples, 0, 0);
+    MEM_fill((syncedPad->samples), 0, self->latency * 100);
     for (int i = 0; i < self->latency; i++) {
-        ((sRec_237280*)syncedPad->samples)[i].type = 0x18;
+        (syncedPad->samples)[i].NumButtons = 0x18;
     }
     syncedPad->readpos = 0;
     syncedPad->writepos = self->sendlimit;
@@ -2519,8 +2511,8 @@ INCLUDE_ASM("main/gamestate", cInputSync_preupdate);
 // (99.69% with a ternary clamp). Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 struct sPackSrc_7B28;
-extern "C" void cInputSync_decompressinput(cInputSync* self, sPackSrc_7B28* src, char* buf);
-extern "C" void cInputSync_sendClientInput(cInputSync* self, sPackSrc_7B28* src);
+extern "C" void cInputSync_decompressinput(cInputSync* self, cInputSync_PadSample* src, char* buf);
+extern "C" void cInputSync_sendClientInput(cInputSync* self, cInputSync_PadSample* src);
 extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" int cGameComm_readPacket(void* self, int ch, void* dst, int size);
 extern "C" float cGameComm_getLatency(void* self);
@@ -2585,7 +2577,7 @@ extern "C" void cInputSync_preupdate(cInputSync* self)
             if (net) {
                 while (sp.writepos - sp.readpos < self->latency - (self->numsamples - 1) &&
                        cGameComm_readPacket(GameComm(), 0, &compsample, sizeof(compsample))) {
-                    cInputSync_decompressinput(self, (sPackSrc_7B28*)&sample, (char*)&compsample);
+                    cInputSync_decompressinput(self, (&sample), (char*)&compsample);
                     for (int j = 0; j < self->numsamples; j++) {
                         (sp.samples)[sp.writepos % self->latency] = sample;
                         sp.writepos++;
@@ -2594,7 +2586,7 @@ extern "C" void cInputSync_preupdate(cInputSync* self)
             } else {
                 MEM_fill(&compsample, 0, sizeof(compsample));
                 compsample.NumButtons = 24;
-                cInputSync_decompressinput(self, (sPackSrc_7B28*)&sample, (char*)&compsample);
+                cInputSync_decompressinput(self, (&sample), (char*)&compsample);
                 while (sp.writepos - sp.readpos < self->latency - (self->numsamples - 1)) {
                     for (int j = 0; j < self->numsamples; j++) {
                         (sp.samples)[sp.writepos % self->latency] = sample;
@@ -2610,7 +2602,7 @@ extern "C" void cInputSync_preupdate(cInputSync* self)
                 for (int j = 0; j < localsample.NumButtons; j++) {
                     localsample.Buttons[j] = ((cInputPad_2373B8*)sp.sourcepad)->getButtonValue(j);
                 }
-                cInputSync_sendClientInput(self, (sPackSrc_7B28*)&localsample);
+                cInputSync_sendClientInput(self, (&localsample));
                 for (int j = 0; j < self->numsamples; j++) {
                     (sp.samples)[sp.writepos % self->latency] = localsample;
                     sp.writepos++;
@@ -2683,10 +2675,6 @@ INCLUDE_ASM("main/gamestate", cInputSync_aiupdate);
 #ifdef SKIP_ASM
 extern "C" void cInputPad_update(void* target, int a, void* data);
 
-struct sFrame002379C8 {
-    int first;
-    char data[0x60];
-};
 struct sPlayer002379C8 {
     int f0;
     int nFrames;
@@ -2715,8 +2703,8 @@ extern "C" int cInputSync_aiupdate(cInputSync* self)
     int i;
     for (i = 0; i < self->numsyncedpads; i++) {
         cInputSync_SyncedPad* syncedPad = &((&self->syncedpads[0]))[i];
-        sFrame002379C8* inputSample = &((sFrame002379C8*)syncedPad->samples)[syncedPad->readpos % self->latency];
-        cInputPad_update(((void*)syncedPad->destinationpad), inputSample->first, inputSample->data);
+        cInputSync_PadSample* inputSample = &(syncedPad->samples)[syncedPad->readpos % self->latency];
+        cInputPad_update(((void*)syncedPad->destinationpad), inputSample->NumButtons, ((char*)&inputSample->Buttons[0]));
         syncedPad->readpos++;
     }
     return 1;
@@ -2728,8 +2716,8 @@ INCLUDE_ASM("main/gamestate", cInputSync_sendClientInput);
 #ifdef SKIP_ASM
 struct sPackSrc_7B28;
 struct sPackDst_7B28;
-extern "C" int cInputSync_compressinput(cInputSync* self, sPackSrc_7B28* src, sPackDst_7B28* dst);
-extern "C" void cInputSync_decompressinput(cInputSync* self, sPackSrc_7B28* src, char* buf);
+extern "C" int cInputSync_compressinput(cInputSync* self, cInputSync_PadSample* src, sPackDst_7B28* dst);
+extern "C" void cInputSync_decompressinput(cInputSync* self, cInputSync_PadSample* src, char* buf);
 extern "C" void cGameComm_writePacket(void* mgr, int a, char* buf, int len);
 
 /**
@@ -2741,7 +2729,7 @@ extern "C" void cGameComm_writePacket(void* mgr, int a, char* buf, int len);
  *
  * @param src  the pad sample (button count and values)
  */
-extern "C" void cInputSync_sendClientInput(cInputSync* self, sPackSrc_7B28* src)
+extern "C" void cInputSync_sendClientInput(cInputSync* self, cInputSync_PadSample* src)
 {
     char buf[32];
     int len = cInputSync_compressinput(self, src, (sPackDst_7B28*)buf);
@@ -2757,10 +2745,6 @@ extern "C" void cInputSync_sendClientInput(cInputSync* self, sPackSrc_7B28* src)
 //100%
 INCLUDE_ASM("main/gamestate", cInputSync_compressinput);
 #ifdef SKIP_ASM
-struct sPackSrc_7B28 {
-    int count;
-    float vals[1];
-};
 
 struct sPackDst_7B28 {
     unsigned char count;
@@ -2778,18 +2762,18 @@ struct sPackDst_7B28 {
  * @param dst  the compressed sample
  * @return the compressed size in bytes (4 + the kept bytes)
  */
-extern "C" int cInputSync_compressinput(cInputSync* self, sPackSrc_7B28* src, sPackDst_7B28* dst)
+extern "C" int cInputSync_compressinput(cInputSync* self, cInputSync_PadSample* src, sPackDst_7B28* dst)
 {
     int i;
     int j;
     int n;
-    dst->count = src->count;
+    dst->count = src->NumButtons;
     for (j = 0; j < 3; j++) {
         dst->mask[j] = 0;
     }
     n = 0;
-    for (i = 0; i < src->count; i++) {
-        unsigned char quantized = (int)(src->vals[i] * 255.0f);
+    for (i = 0; i < src->NumButtons; i++) {
+        unsigned char quantized = (int)(((float*)&src->Buttons[0])[i] * 255.0f);
         if (quantized != 0) {
             dst->mask[i >> 3] |= 1 << (i & 7);
             dst->vals[n++] = quantized;
@@ -2812,18 +2796,18 @@ extern "C" void MEM_fill(void* dst, int value, int size);
  * @param out  the pad sample written
  * @param buf  the compressed sample
  */
-extern "C" void cInputSync_decompressinput(cInputSync* self, sPackSrc_7B28* out, char* buf)
+extern "C" void cInputSync_decompressinput(cInputSync* self, cInputSync_PadSample* out, char* buf)
 {
     sPackDst_7B28* in = (sPackDst_7B28*)buf;
-    out->count = in->count;
-    MEM_fill(out->vals, 0, 0x60);
+    out->NumButtons = in->count;
+    MEM_fill(((float*)&out->Buttons[0]), 0, 0x60);
     int k = 0;
     int i;
-    for (i = 0; i < out->count; i++) {
+    for (i = 0; i < out->NumButtons; i++) {
         if ((in->mask[i >> 3] >> (i & 7)) & 1) {
-            out->vals[i] = in->vals[k++] * 0.003921568859368563f;
+            ((float*)&out->Buttons[0])[i] = in->vals[k++] * 0.003921568859368563f;
         } else {
-            out->vals[i] = 0.0f;
+            ((float*)&out->Buttons[0])[i] = 0.0f;
         }
     }
 }

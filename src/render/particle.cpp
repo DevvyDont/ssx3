@@ -1324,11 +1324,6 @@ struct sPtVert_2520 {
 };
 extern sPtVert_2520 D_00501440[];
 
-struct sPtObj_2520 {
-    void** vt;      // 0x0
-    void* owner;    // 0x4
-    int f8;         // 0x8
-};
 
 /**
  * Constructs a segmented tube effect with @p owner segments and, the first time, fills the shared tube vertex array.
@@ -1365,7 +1360,7 @@ extern "C" void* cSimpleTube_cSimpleTube(cSimpleTube* self, void* owner)
         }
         D_004A422C = 1;
     }
-    return ((sPtObj_2520*)self);
+    return (self);
 }
 #endif
 
@@ -1466,11 +1461,6 @@ struct sPtCtx_26C8 {
     sPtVEntry_26C8* vtable;         // 0x10D8
 };
 
-struct sPtTrail_26C8 {
-    int f0;
-    int n;                          // 0x4
-    sPtV4_26C8* pts;                // 0x8
-};
 
 extern int D_004A41D4;
 extern float D_004A41D8;
@@ -1593,35 +1583,35 @@ static inline sPtV4_26C8 Scale_26C8(const sPtV4_26C8& v, float s)
  * the first n + 1 vertices and draws them through slot 73 (cPS2GraphicsMan_RenderLineStrip, a line strip), and pops the draw state. Slot
  * 3 (render) of cSimpleTube_vtbl.
  */
-extern "C" void cSimpleTube_render(sPtTrail_26C8* self)
+extern "C" void cSimpleTube_render(cSimpleTube* self)
 {
     if (D_004A41D4 == 0) {
         return;
     }
-    sPtV4_26C8 dir = Norm_26C8(Sub_26C8(self->pts[self->n], self->pts[0]));
+    sPtV4_26C8 dir = Norm_26C8(Sub_26C8(((sPtV4_26C8*)self->m_positions)[self->m_numSegments], ((sPtV4_26C8*)self->m_positions)[0]));
     sPtV4_26C8 sideOffset = Scale_26C8(Norm_26C8(Cross_26C8(dir, t4vect_ZAxis)), D_004A41D8);
     sPtV4_26C8 otherSideOffset = Scale_26C8(sideOffset, -1.0f);
     SubEq_26C8(sideOffset, Scale_26C8(t4vect_ZAxis, D_004A41DC));
     SubEq_26C8(otherSideOffset, Scale_26C8(t4vect_ZAxis, D_004A41DC));
-    for (int i = 0; i < self->n + 1; i++) {
-        D_00501440_v26C8[2 * i].pos = Add_26C8(self->pts[i], otherSideOffset);
-        D_00501440_v26C8[2 * i + 1].pos = self->pts[i];
-        D_00501440_v26C8[2 * (i + self->n + 2)].pos = self->pts[i];
-        D_00501440_v26C8[((self->n + i) << 1) + 5].pos = Add_26C8(self->pts[i], sideOffset);
+    for (int i = 0; i < self->m_numSegments + 1; i++) {
+        D_00501440_v26C8[2 * i].pos = Add_26C8(((sPtV4_26C8*)self->m_positions)[i], otherSideOffset);
+        D_00501440_v26C8[2 * i + 1].pos = ((sPtV4_26C8*)self->m_positions)[i];
+        D_00501440_v26C8[2 * (i + self->m_numSegments + 2)].pos = ((sPtV4_26C8*)self->m_positions)[i];
+        D_00501440_v26C8[((self->m_numSegments + i) << 1) + 5].pos = Add_26C8(((sPtV4_26C8*)self->m_positions)[i], sideOffset);
     }
-    D_00501440_v26C8[2 * self->n + 2] = D_00501440_v26C8[2 * self->n + 1];
-    D_00501440_v26C8[2 * self->n + 3] = D_00501440_v26C8[2 * self->n + 4];
+    D_00501440_v26C8[2 * self->m_numSegments + 2] = D_00501440_v26C8[2 * self->m_numSegments + 1];
+    D_00501440_v26C8[2 * self->m_numSegments + 3] = D_00501440_v26C8[2 * self->m_numSegments + 4];
     sPtCtx_26C8* ctx = D_004A5B80_ctx26C8;
     ctx->top[1] = ctx->top[0];
     ctx->top++;
     *ctx->top = D_00501420_rs26C8;
     sPtVEntry_26C8* vt = ctx->vtable;
-    vt[71].fn((char*)ctx + vt[71].delta, ((self->n + 1) << 2) | 2, D_00501440_v26C8, 0);
-    for (int i = 0; i < self->n + 1; i++) {
-        D_00501440_v26C8[i].pos = self->pts[i];
+    vt[71].fn((char*)ctx + vt[71].delta, ((self->m_numSegments + 1) << 2) | 2, D_00501440_v26C8, 0);
+    for (int i = 0; i < self->m_numSegments + 1; i++) {
+        D_00501440_v26C8[i].pos = ((sPtV4_26C8*)self->m_positions)[i];
     }
     vt = ctx->vtable;
-    vt[73].fn((char*)ctx + vt[73].delta, self->n + 1, D_00501440_v26C8, 0);
+    vt[73].fn((char*)ctx + vt[73].delta, self->m_numSegments + 1, D_00501440_v26C8, 0);
     ctx->top--;
 }
 #endif

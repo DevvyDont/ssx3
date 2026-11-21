@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "visualfx/transitionobj.h"
 #include "visualfx/cutscenetransitionman.h"
 #include "ai/riderhandler.h"
@@ -1901,7 +1902,6 @@ extern "C" void cWipe_TObj_Draw(cWipe_TObj* self, float amount)
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EBD88);
 #ifdef SKIP_ASM
-struct sTrailVec_002EBD88 { float x, y, z, w; };
 
 extern void* cCircle_TObj_vtbl[];
 
@@ -1917,11 +1917,11 @@ extern void* cCircle_TObj_vtbl[];
  * @param posY  centre y in screen units (0..480)
  * @return @p self
  */
-extern "C" void* func_002EBD88(cCircle_TObj* self, sTrailVec_002EBD88 rect, float posX, float posY)
+extern "C" void* func_002EBD88(cCircle_TObj* self, tARGB rect, float posX, float posY)
 {
     cTransitionObj_cTransitionObj(self);
     *(void***)self = cCircle_TObj_vtbl;
-    *(sTrailVec_002EBD88*)&self->mScreenColour = rect;
+    *(&self->mScreenColour) = rect;
     self->mOriginX = posX;
     self->mOriginY = posY;
     return ((void*)self);

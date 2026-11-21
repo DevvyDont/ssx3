@@ -1532,10 +1532,6 @@ static inline int AnimCount_229180(char* anim)
     return *(int*)(anim + 0x10);
 }
 
-struct sCrowd_229180 {
-    void* render;
-    char* anim;
-};
 
 /**
  * Constructs the 2D crowd manager: empty quad slots, its crowd renderer and animation, and the shared crowd record.
@@ -1566,7 +1562,7 @@ extern "C" void* func_00229180(cCrowdMan2d* self)
     D_00536690_229180[0].f8 = 0;
     D_00536690_229180[0].f6 = -1;
     func_002292E0(self);
-    return ((sCrowd_229180*)self);
+    return (self);
 }
 #endif
 
@@ -1614,17 +1610,6 @@ struct sCrowdSlot_2292E0 {
     char pad_0x34[0xC];
 };
 
-struct sCrowd_2292E0 {
-    int pad0;
-    int pad4;
-    unsigned int ids[128];          // 0x8
-    char pad_0x208[0x8];
-    sCrowdSlot_2292E0 slots[128];   // 0x210
-    int count;                      // 0x2210
-    int count2;                     // 0x2214
-    char pad_0x2218[0x8];
-    char rest[0x500];               // 0x2220
-};
 
 /**
  * Resets the 2D crowd manager's slots and markers.
@@ -1635,16 +1620,16 @@ struct sCrowd_2292E0 {
  */
 extern "C" void func_002292E0(cCrowdMan2d* self)
 {
-    sCrowd_2292E0* crowd = (sCrowd_2292E0*)self;
+    cCrowdMan2d* crowd = self;
     int i;
-    crowd->count = 0;
-    MEM_fill(crowd->slots, 0, 0x2000);
+    crowd->mCheerLevel = 0;
+    MEM_fill(((sCrowdSlot_2292E0*)&crowd->mQuad[0]), 0, 0x2000);
     for (i = 0; i < 128; i++) {
-        crowd->ids[i] = 0xFFFFFFFF;
-        crowd->slots[i].delay = BXrand() % 300 + 300;
+        crowd->mQuadId[i] = 0xFFFFFFFF;
+        ((sCrowdSlot_2292E0*)&crowd->mQuad[0])[i].delay = BXrand() % 300 + 300;
     }
-    crowd->count2 = 0;
-    MEM_fill(crowd->rest, 0, 1280);
+    crowd->mMarkerIndex = 0;
+    MEM_fill(((char*)&crowd->mMarker[0]), 0, 1280);
 }
 #endif
 
@@ -2362,10 +2347,6 @@ struct sMarker_229BA8 {
     char pad[0xC];
 };
 
-struct sMarkers_229BA8 {
-    char pad[0x2220];
-    sMarker_229BA8 markers[40];   // 0x2220
-};
 
 /**
  * Draws each live crowd marker as a 100 x 100 white sprite.
@@ -2379,14 +2360,14 @@ struct sMarkers_229BA8 {
  */
 extern "C" void func_00229BA8(cCrowdMan2d* crowdMan)
 {
-    sMarkers_229BA8* self = (sMarkers_229BA8*)crowdMan;
+    cCrowdMan2d* self = crowdMan;
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     int pushed = 0;
     sV2_229BA8 uv0;
     sV2_229BA8 uv1(1.0f, 1.0f);
     sV4_229BA8 col(1.0f, 1.0f, 1.0f, 1.0f);
     sV2_229BA8 size(100.0f, 100.0f);
-    sMarker_229BA8* markerList = self->markers;
+    sMarker_229BA8* markerList = ((sMarker_229BA8*)&self->mMarker[0]);
     for (int i = 0; i < 40; i++) {
         if (markerList[i].count > 0) {
             if (!pushed) {
@@ -2405,7 +2386,7 @@ extern "C" void func_00229BA8(cCrowdMan2d* crowdMan)
                 set2_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x3E0, 5, 4);
                 set1_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x7C, 2, 7);
             }
-            ((cGfx_229BA8*)ps2GraphicsMan)->DrawSprite(&self->markers[i].pos, &size, &uv0, &uv1, &col);
+            ((cGfx_229BA8*)ps2GraphicsMan)->DrawSprite(&((sMarker_229BA8*)&self->mMarker[0])[i].pos, &size, &uv0, &uv1, &col);
         }
     }
     if (pushed) {

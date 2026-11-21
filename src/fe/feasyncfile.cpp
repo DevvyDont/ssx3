@@ -2984,9 +2984,6 @@ void* cFEStateNet_cFEStateNet_3(void* self, int a1, int a2) __asm__("cFEStateNet
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern char cFEStateReadMessagePopup_vtbl[];
 
-struct sColor1A77A0 {
-    float r, g, b, a;
-};
 
 
 // PORT: the unit declares this as (void*, int, void*, int); the body uses typed arguments.
@@ -3017,12 +3014,12 @@ extern "C" void* cFEStateReadMessagePopup_cFEStateReadMessagePopup_impl(cFEState
     *(int*)&self->mMessages.mpStart = 0;
     *(int*)&self->mMessages.mpFinish = 0;
     *(int*)&self->mMessages.mpEndOfStorage = 0;
-    sColor1A77A0 white;
-    white.r = 1.0f;
-    white.g = 1.0f;
-    white.b = 1.0f;
-    white.a = 1.0f;
-    *(sColor1A77A0*)&self->mTextColour = white;
+    tARGB white;
+    white.A = 1.0f;
+    white.R = 1.0f;
+    white.G = 1.0f;
+    white.B = 1.0f;
+    *(&self->mTextColour) = white;
     return self;
 }
 #endif
@@ -11867,9 +11864,6 @@ void* cFEStateNet_cFEStateNet_3(void* self, int a1, int a2) __asm__("cFEStateNet
 extern "C" char* strcpy(char* dst, const char* src);
 extern void* cFEStateChatRoom_vtbl[];
 
-struct sCol_001B1F88 {
-    float r, g, b, a;
-};
 
 
 /**
@@ -11895,12 +11889,12 @@ extern "C" cFEStateChatRoom* cFEStateChatRoom_cFEStateChatRoom(cFEStateChatRoom*
     *(int*)&self->mpSlider1 = 0;
     *(int*)&self->mpTextScrollChat = 0;
     *(int*)&self->mpSlider2 = 0;
-    sCol_001B1F88 colour;
-    colour.r = 1.0f;
-    colour.g = 1.0f;
-    colour.b = 1.0f;
-    colour.a = 1.0f;
-    *(sCol_001B1F88*)&self->mChatColour = colour;
+    tARGB colour;
+    colour.A = 1.0f;
+    colour.R = 1.0f;
+    colour.G = 1.0f;
+    colour.B = 1.0f;
+    *(&self->mChatColour) = colour;
     strcpy(self->mszPlayerName, ((const char*)LobbyMan_mLobbyMan->mPersona));
     return self;
 }

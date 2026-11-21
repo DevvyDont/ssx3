@@ -2052,10 +2052,6 @@ struct sInputList3252F8 {
     sInputEntry3252F8 entries[1];
 };
 
-struct sInputParse3252F8 {
-    int defKind;
-    sInputList3252F8* list;
-};
 
 static inline unsigned int GetA3252F8(sInputList3252F8* l, int idx)
 {
@@ -2090,7 +2086,7 @@ static inline unsigned int GetD3252F8(sInputList3252F8* l, int idx)
 }
 
 // PORT: the unit declares cInputExec_getButton as (void*, int, int); the definition takes an unsigned kind.
-float cInputExec_getButton_impl(sInputParse3252F8* self, int idx, unsigned int kind) __asm__("cInputExec_getButton");
+float cInputExec_getButton_impl(cInputExec* self, int idx, unsigned int kind) __asm__("cInputExec_getButton");
 
 /**
  * Reads one button of the pad being evaluated, as its analogue value or as one of its state flags.
@@ -2104,24 +2100,24 @@ float cInputExec_getButton_impl(sInputParse3252F8* self, int idx, unsigned int k
  * @param kind  the button modifier, 0..5
  * @return the value
  */
-float cInputExec_getButton_impl(sInputParse3252F8* self, int idx, unsigned int kind)
+float cInputExec_getButton_impl(cInputExec* self, int idx, unsigned int kind)
 {
     switch (kind) {
     case 0:
-        if (idx < self->list->count) {
-            return self->list->entries[idx].value;
+        if (idx < ((sInputList3252F8*)self->Pad)->count) {
+            return ((sInputList3252F8*)self->Pad)->entries[idx].value;
         }
         break;
     case 1:
-        return (float)GetC3252F8(self->list, idx);
+        return (float)GetC3252F8(((sInputList3252F8*)self->Pad), idx);
     case 2:
-        return (float)GetA3252F8(self->list, idx);
+        return (float)GetA3252F8(((sInputList3252F8*)self->Pad), idx);
     case 3:
-        return (float)GetB3252F8(self->list, idx);
+        return (float)GetB3252F8(((sInputList3252F8*)self->Pad), idx);
     case 4:
-        return (float)GetD3252F8(self->list, idx);
+        return (float)GetD3252F8(((sInputList3252F8*)self->Pad), idx);
     case 5:
-        return cInputExec_getButton_impl(self, idx, self->defKind);
+        return cInputExec_getButton_impl(self, idx, self->DefaultButtonModifier);
     }
     return 0.0f;
 }
@@ -2151,14 +2147,9 @@ extern "C" float cInputExec_getConfig(cInputExec* self, int varIndex)
 //100%
 INCLUDE_ASM("input/inputparse", cInputExec_execute);
 #ifdef SKIP_ASM
-struct sInputVM_325450 {
-    int defKind;        // 0x0
-    void* list;         // 0x4
-    float regs[0x40];   // 0x8
-};
 
 // PORT: cInputExec_getRegister is declared with its own self struct earlier in the unit.
-extern "C" float cInputExec_getRegister_vm(sInputVM_325450* self, unsigned int id) __asm__("cInputExec_getRegister");
+extern "C" float cInputExec_getRegister_vm(cInputExec* self, unsigned int id) __asm__("cInputExec_getRegister");
 
 /**
  * Runs a compiled input map statement against a controller pad and returns its result.
@@ -2192,11 +2183,11 @@ extern "C" float cInputExec_execute(cInputExec* self, void* list, sInsn_324678* 
         }
         case 1: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
+            *destSlot = cInputExec_getRegister_vm((self), ins->r.src);
             break;
         }
         case 2:
-            if (cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->j.reg) != 0.0f) {
+            if (cInputExec_getRegister_vm((self), ins->j.reg) != 0.0f) {
                 break;
             }
         case 3:
@@ -2205,7 +2196,7 @@ extern "C" float cInputExec_execute(cInputExec* self, void* list, sInsn_324678* 
         case 4: {
             unsigned int boolResult = 0;
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            if (cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src) != 0.0f || cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg) != 0.0f) {
+            if (cInputExec_getRegister_vm((self), ins->r.src) != 0.0f || cInputExec_getRegister_vm((self), ins->r.arg) != 0.0f) {
                 boolResult = 1;
             }
             *destSlot = boolResult;
@@ -2214,7 +2205,7 @@ extern "C" float cInputExec_execute(cInputExec* self, void* list, sInsn_324678* 
         case 5: {
             unsigned int boolResult = 0;
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            if (cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src) != 0.0f && cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg) != 0.0f) {
+            if (cInputExec_getRegister_vm((self), ins->r.src) != 0.0f && cInputExec_getRegister_vm((self), ins->r.arg) != 0.0f) {
                 boolResult = 1;
             }
             *destSlot = boolResult;
@@ -2222,147 +2213,147 @@ extern "C" float cInputExec_execute(cInputExec* self, void* list, sInsn_324678* 
         }
         case 6: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
-            *destSlot = (lhs > cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg)) ? 1.0f : 0.0f;
+            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
+            *destSlot = (lhs > cInputExec_getRegister_vm((self), ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 7: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
-            *destSlot = (lhs >= cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg)) ? 1.0f : 0.0f;
+            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
+            *destSlot = (lhs >= cInputExec_getRegister_vm((self), ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 8: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
-            *destSlot = (lhs < cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg)) ? 1.0f : 0.0f;
+            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
+            *destSlot = (lhs < cInputExec_getRegister_vm((self), ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 9: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
-            *destSlot = (lhs <= cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg)) ? 1.0f : 0.0f;
+            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
+            *destSlot = (lhs <= cInputExec_getRegister_vm((self), ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 10: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
-            *destSlot = (lhs == cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg)) ? 1.0f : 0.0f;
+            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
+            *destSlot = (lhs == cInputExec_getRegister_vm((self), ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 11: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
-            *destSlot = (lhs != cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg)) ? 1.0f : 0.0f;
+            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
+            *destSlot = (lhs != cInputExec_getRegister_vm((self), ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 12: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
-            *destSlot = lhs + cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg);
+            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
+            *destSlot = lhs + cInputExec_getRegister_vm((self), ins->r.arg);
             break;
         }
         case 13: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
-            *destSlot = lhs - cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg);
+            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
+            *destSlot = lhs - cInputExec_getRegister_vm((self), ins->r.arg);
             break;
         }
         case 14: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
-            *destSlot = lhs * cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg);
+            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
+            *destSlot = lhs * cInputExec_getRegister_vm((self), ins->r.arg);
             break;
         }
         case 15: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
-            *destSlot = lhs / cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg);
+            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
+            *destSlot = lhs / cInputExec_getRegister_vm((self), ins->r.arg);
             break;
         }
         case 16: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = (cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src) > cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg))
-                ? cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src) : cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg);
+            *destSlot = (cInputExec_getRegister_vm((self), ins->r.src) > cInputExec_getRegister_vm((self), ins->r.arg))
+                ? cInputExec_getRegister_vm((self), ins->r.src) : cInputExec_getRegister_vm((self), ins->r.arg);
             break;
         }
         case 17: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = (cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src) < cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg))
-                ? cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src) : cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg);
+            *destSlot = (cInputExec_getRegister_vm((self), ins->r.src) < cInputExec_getRegister_vm((self), ins->r.arg))
+                ? cInputExec_getRegister_vm((self), ins->r.src) : cInputExec_getRegister_vm((self), ins->r.arg);
             break;
         }
         case 18: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
-            *destSlot = pow_4138(lhs, cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg));
+            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
+            *destSlot = pow_4138(lhs, cInputExec_getRegister_vm((self), ins->r.arg));
             break;
         }
         case 19: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
-            *destSlot = atan2_4138(lhs, cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg));
+            float lhs = cInputExec_getRegister_vm((self), ins->r.src);
+            *destSlot = atan2_4138(lhs, cInputExec_getRegister_vm((self), ins->r.arg));
             break;
         }
         case 20: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = func_0031C228(cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src));
+            *destSlot = func_0031C228(cInputExec_getRegister_vm((self), ins->r.src));
             break;
         }
         case 21: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = fSin(cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src));
+            *destSlot = fSin(cInputExec_getRegister_vm((self), ins->r.src));
             break;
         }
         case 22: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = fCos(cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src));
+            *destSlot = fCos(cInputExec_getRegister_vm((self), ins->r.src));
             break;
         }
         case 23: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = expf(cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src));
+            *destSlot = expf(cInputExec_getRegister_vm((self), ins->r.src));
             break;
         }
         case 24: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = logf(cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src));
+            *destSlot = logf(cInputExec_getRegister_vm((self), ins->r.src));
             break;
         }
         case 25: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = floor_43A0(cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src));
+            *destSlot = floor_43A0(cInputExec_getRegister_vm((self), ins->r.src));
             break;
         }
         case 26: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = ceil_43A0(cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src));
+            *destSlot = ceil_43A0(cInputExec_getRegister_vm((self), ins->r.src));
             break;
         }
         case 27: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = abs_43A0(cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src));
+            *destSlot = abs_43A0(cInputExec_getRegister_vm((self), ins->r.src));
             break;
         }
         case 28: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = sqrt_43A0(cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src));
+            *destSlot = sqrt_43A0(cInputExec_getRegister_vm((self), ins->r.src));
             break;
         }
         case 29: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float x = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
+            float x = cInputExec_getRegister_vm((self), ins->r.src);
             *destSlot = x - floor_43A0(x * 0.159154937f + 0.5f) * 6.28318548f;
             break;
         }
         case 30: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = -cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
+            *destSlot = -cInputExec_getRegister_vm((self), ins->r.src);
             break;
         }
         case 31: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = (cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src) == 0.0f) ? 1.0f : 0.0f;
+            *destSlot = (cInputExec_getRegister_vm((self), ins->r.src) == 0.0f) ? 1.0f : 0.0f;
             break;
         }
         case 32:
@@ -2370,7 +2361,7 @@ extern "C" float cInputExec_execute(cInputExec* self, void* list, sInsn_324678* 
             break;
         }
     } while (!done);
-    return cInputExec_getRegister_vm(((sInputVM_325450*)self), 0);
+    return cInputExec_getRegister_vm((self), 0);
 }
 #endif
 
@@ -3228,25 +3219,6 @@ extern "C" int func_00400490(int port, int slot);
 extern "C" int func_004004F0(int port, int slot);
 extern unsigned char D_004A3FB8;
 
-struct sPad_326EB0 {
-    char pad0[0x4];
-    int port;                   // 0x4
-    int slot;                   // 0x8
-    char padC[0x30 - 0xC];
-    int actSmall;               // 0x30
-    int lastSmall;              // 0x34
-    int actBig;                 // 0x38
-    int lastBig;                // 0x3C
-    unsigned char actDirect[8]; // 0x40
-    int phase;                  // 0x48
-    int retry;                  // 0x4C
-    int modeSet;                // 0x50
-    int pressure;               // 0x54
-    int analog;                 // 0x58
-    int actuator;               // 0x5C
-    char pad60[0x80 - 0x60];
-    unsigned char buf[0x100];   // 0x80
-};
 
 static inline float Analog_326EB0(int v)
 {
@@ -3272,125 +3244,125 @@ static inline float Analog_326EB0(int v)
  * @param out  receives up to 24 button values
  * @return 24 when the pad was read, otherwise 0
  */
-extern "C" int cPS2PadDevice_sampleButtons(sPad_326EB0* self, float* out)
+extern "C" int cPS2PadDevice_sampleButtons(cPS2PadDevice* self, float* out)
 {
     unsigned char data[32];
     int ok = 0;
     int ret;
-    if (self->phase == 0) {
-        int result = func_003FF708(self->port, self->slot, self->buf);
+    if (self->mPhase == 0) {
+        int result = func_003FF708(self->mPort, self->mSlot, self->mPadBuf);
         if (result == 1) {
-            self->phase = result;
-            self->modeSet = 0;
-            self->actSmall = 0;
-            self->lastSmall = -1;
-            self->actBig = 0;
-            self->lastBig = -1;
+            self->mPhase = result;
+            self->mModeSet = 0;
+            self->mActSmall = 0;
+            self->mLastSmall = -1;
+            self->mActBig = 0;
+            self->mLastBig = -1;
         }
     }
-    int state = func_003FFBC0(self->port, self->slot);
+    int state = func_003FFBC0(self->mPort, self->mSlot);
     if (state == 0 || state == 7) {
-        self->phase = 1;
-        self->modeSet = 0;
+        self->mPhase = 1;
+        self->mModeSet = 0;
     }
-    switch (self->phase) {
+    switch (self->mPhase) {
     case 1:
         if (state == 6 || state == 2) {
-            self->pressure = 0;
-            self->analog = 0;
-            self->actuator = 0;
-            int id = func_003FFFA0(self->port, self->slot, 1, 0);
+            self->mPressure = 0;
+            self->mAnalog = 0;
+            self->mActuator = 0;
+            int id = func_003FFFA0(self->mPort, self->mSlot, 1, 0);
             if (id != 0) {
-                int ext = func_003FFFA0(self->port, self->slot, 2, 0);
+                int ext = func_003FFFA0(self->mPort, self->mSlot, 2, 0);
                 switch (ext) {
                 case 0:
                     if (id == 4)
-                        self->phase = 10;
+                        self->mPhase = 10;
                     break;
                 case 4:
-                    self->phase = 2;
+                    self->mPhase = 2;
                     break;
                 case 7:
-                    self->analog = 1;
-                    self->phase = 2;
+                    self->mAnalog = 1;
+                    self->mPhase = 2;
                     break;
                 }
             }
         }
         break;
     case 2:
-        if (self->analog == 0 || self->modeSet == 0) {
-            int result = func_004000D8(self->port, self->slot, 1, 3);
+        if (self->mAnalog == 0 || self->mModeSet == 0) {
+            int result = func_004000D8(self->mPort, self->mSlot, 1, 3);
             if (result == 1) {
-                self->modeSet = result;
-                self->phase = 3;
+                self->mModeSet = result;
+                self->mPhase = 3;
             }
         } else {
-            self->phase = 4;
+            self->mPhase = 4;
         }
         break;
     case 3:
-        if (func_003FFBC0(self->port, self->slot) != 5)
-            self->phase = 1;
+        if (func_003FFBC0(self->mPort, self->mSlot) != 5)
+            self->mPhase = 1;
         break;
     case 4:
-        if (func_00400490(self->port, self->slot) == 1)
-            self->phase = 5;
+        if (func_00400490(self->mPort, self->mSlot) == 1)
+            self->mPhase = 5;
         else
-            self->phase = 7;
+            self->mPhase = 7;
         break;
     case 5:
-        if (func_004004F0(self->port, self->slot) == 1) {
-            self->retry = 0;
-            self->phase = 6;
+        if (func_004004F0(self->mPort, self->mSlot) == 1) {
+            self->mRetry = 0;
+            self->mPhase = 6;
         }
         break;
     case 6: {
-        int result = func_003FFCD8(self->port, self->slot);
+        int result = func_003FFCD8(self->mPort, self->mSlot);
         if (result == 1) {
-            self->phase = 1;
-            self->modeSet = 0;
+            self->mPhase = 1;
+            self->mModeSet = 0;
         } else if (result == 0) {
-            if (++self->retry >= 5) {
-                self->pressure = 1;
-                self->phase = 7;
+            if (++self->mRetry >= 5) {
+                self->mPressure = 1;
+                self->mPhase = 7;
             }
         } else {
-            self->retry = 0;
+            self->mRetry = 0;
         }
         break;
     }
     case 7:
-        if (func_003FFD60(self->port, self->slot, -1, 0) != 0)
-            self->phase = 8;
+        if (func_003FFD60(self->mPort, self->mSlot, -1, 0) != 0)
+            self->mPhase = 8;
         else
-            self->phase = 10;
+            self->mPhase = 10;
         break;
     case 8:
-        if (func_00400250(self->port, self->slot, &D_004A3FB8) == 1) {
-            self->retry = 0;
-            self->phase = 9;
+        if (func_00400250(self->mPort, self->mSlot, &D_004A3FB8) == 1) {
+            self->mRetry = 0;
+            self->mPhase = 9;
         }
         break;
     case 9: {
-        int result = func_003FFCD8(self->port, self->slot);
+        int result = func_003FFCD8(self->mPort, self->mSlot);
         if (result == 1) {
-            self->phase = 1;
-            self->modeSet = 0;
+            self->mPhase = 1;
+            self->mModeSet = 0;
         } else if (result == 0) {
-            if (++self->retry >= 5) {
-                self->actuator = 1;
-                self->phase = 10;
+            if (++self->mRetry >= 5) {
+                self->mActuator = 1;
+                self->mPhase = 10;
             }
         } else {
-            self->retry = 0;
+            self->mRetry = 0;
         }
         break;
     }
     case 10:
-        if (func_003FFA58(self->port, self->slot, data) == 0 || data[0] != 0) {
-            self->phase = 1;
-            self->modeSet = 0;
+        if (func_003FFA58(self->mPort, self->mSlot, data) == 0 || data[0] != 0) {
+            self->mPhase = 1;
+            self->mModeSet = 0;
         } else {
             ok = 1;
         }
@@ -3403,7 +3375,7 @@ extern "C" int cPS2PadDevice_sampleButtons(sPad_326EB0* self, float* out)
         out[1] = !(data[2] & 0x08) ? 1.0f : 0.0f;
         out[2] = !(data[2] & 0x02) ? 1.0f : 0.0f;
         out[3] = !(data[2] & 0x04) ? 1.0f : 0.0f;
-        if (self->pressure != 0) {
+        if (self->mPressure != 0) {
             out[4] = data[8] * 0.003921568859368563f;
             out[5] = data[9] * 0.003921568859368563f;
             out[6] = data[10] * 0.003921568859368563f;
@@ -3430,7 +3402,7 @@ extern "C" int cPS2PadDevice_sampleButtons(sPad_326EB0* self, float* out)
             out[14] = !(data[3] & 0x01) ? 1.0f : 0.0f;
             out[15] = !(data[3] & 0x02) ? 1.0f : 0.0f;
         }
-        if (self->analog != 0) {
+        if (self->mAnalog != 0) {
             out[16] = Analog_326EB0(((79 - data[4]) * 0xFF) / 79);
             out[17] = Analog_326EB0(((data[4] - 176) * 0xFF) / 79);
             out[18] = Analog_326EB0(((79 - data[5]) * 0xFF) / 79);
@@ -3450,12 +3422,12 @@ extern "C" int cPS2PadDevice_sampleButtons(sPad_326EB0* self, float* out)
             out[23] = 0.0f;
         }
     }
-    if (self->phase == 10 && (self->actSmall != self->lastSmall || self->actBig != self->lastBig)) {
-        self->actDirect[0] = self->actSmall;
-        self->actDirect[1] = self->actBig;
-        self->lastSmall = self->actSmall;
-        self->lastBig = self->actBig;
-        func_00400190(self->port, self->slot, self->actDirect);
+    if (self->mPhase == 10 && (self->mActSmall != self->mLastSmall || self->mActBig != self->mLastBig)) {
+        self->mActDirect[0] = self->mActSmall;
+        self->mActDirect[1] = self->mActBig;
+        self->mLastSmall = self->mActSmall;
+        self->mLastBig = self->mActBig;
+        func_00400190(self->mPort, self->mSlot, self->mActDirect);
     }
     return ret;
 }

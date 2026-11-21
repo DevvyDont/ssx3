@@ -49,10 +49,6 @@ extern char str_Shadow_c[];
 extern char str_Flags_b[];
 extern char str_Tube[];
 
-struct sMgr_0548 {
-    void* objs[17];
-    char* vptr;
-};
 
 /**
  * Constructs the platform visual-effects manager: the base manager plus its 17 effect-control objects.
@@ -65,7 +61,7 @@ struct sMgr_0548 {
  *
  * @return self
  */
-extern "C" sMgr_0548* cPS2VisualEffectsMan_cPS2VisualEffectsMan(cPS2VisualEffectsMan* self)
+extern "C" cPS2VisualEffectsMan* cPS2VisualEffectsMan_cPS2VisualEffectsMan(cPS2VisualEffectsMan* self)
 {
     cVisualEffectsMan_cVisualEffectsMan(self);
     self->mVtbl = (void**)cPS2VisualEffectsMan_vtbl;
@@ -86,7 +82,7 @@ extern "C" sMgr_0548* cPS2VisualEffectsMan_cPS2VisualEffectsMan(cPS2VisualEffect
     { void* effect = cMemMan_alloc(4, str_SplashToggles, 0, 0); *(char**)effect = D_004882B0; ((void**)&self->m_RenderToggles)[14] = effect; }
     { void* effect = cMemMan_alloc(4, str_Tube, 0, 0); *(char**)effect = cTube_vtbl; ((void**)&self->m_RenderToggles)[15] = effect; }
     ((void**)&self->m_RenderToggles)[16] = cPathArrow_cPathArrow(cMemMan_alloc(4, str_PathArrow, 0, 0));
-    return ((sMgr_0548*)self);
+    return (self);
 }
 #endif
 

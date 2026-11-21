@@ -716,10 +716,6 @@ struct sQuat_7550 {
     float x, y, z, w;
 };
 
-struct sBone_7550 {
-    sVec4_7550 pos;     // 0x00
-    sQuat_7550 rot;     // 0x10
-};
 
 struct sRadii_7550 {
     float r[4];
@@ -775,11 +771,11 @@ static inline sVec4_7550 vu0Sub_7550(const sVec4_7550& a, const sVec4_7550& b)
     return r;
 }
 
-static inline sVec4_7550 xAxis_7550(const sBone_7550* b)
+static inline sVec4_7550 xAxis_7550(const sAnimModelBone* b)
 {
-    return sVec4_7550(1.0f - 2.0f * (b->rot.y * b->rot.y + b->rot.z * b->rot.z),
-                      2.0f * (b->rot.x * b->rot.y + b->rot.w * b->rot.z),
-                      2.0f * (b->rot.x * b->rot.z - b->rot.w * b->rot.y),
+    return sVec4_7550(1.0f - 2.0f * ((*(sQuat_7550*)&b->rot).y * (*(sQuat_7550*)&b->rot).y + (*(sQuat_7550*)&b->rot).z * (*(sQuat_7550*)&b->rot).z),
+                      2.0f * ((*(sQuat_7550*)&b->rot).x * (*(sQuat_7550*)&b->rot).y + (*(sQuat_7550*)&b->rot).w * (*(sQuat_7550*)&b->rot).z),
+                      2.0f * ((*(sQuat_7550*)&b->rot).x * (*(sQuat_7550*)&b->rot).z - (*(sQuat_7550*)&b->rot).w * (*(sQuat_7550*)&b->rot).y),
                       0.0f);
 }
 
@@ -796,14 +792,14 @@ extern "C" void cWipeoutMotion_updateBoardSphereTree(cWipeoutMotion* self)
     sRadii_7550 radii = D_00458220;
     cRider* rider = self->mRider;
     cAnimModel* model = rider->mAnimModel;
-    sBone_7550* bone = &((sBone_7550*)model->bones)[rider->mBoneBoardChild];
+    sAnimModelBone* bone = &(model->bones)[rider->mBoneBoardChild];
     float modelScale = model->unk_140.x;
     sVec4_7550 boardAxis = vu0Scale_7550(xAxis_7550(bone), modelScale);
-    pts[0] = vu0Add_7550(bone->pos, vu0Scale_7550(boardAxis, 70.0f));
-    pts[1] = vu0Add_7550(bone->pos, vu0Scale_7550(boardAxis, 30.0f));
-    pts[2] = vu0Sub_7550(bone->pos, vu0Scale_7550(boardAxis, 30.0f));
-    pts[3] = vu0Sub_7550(bone->pos, vu0Scale_7550(boardAxis, 70.0f));
-    cRiderSphereTree_Update(self->BoardSphereTree, 4, pts, radii.r, &bone->pos,
+    pts[0] = vu0Add_7550((*(sVec4_7550*)&bone->pos), vu0Scale_7550(boardAxis, 70.0f));
+    pts[1] = vu0Add_7550((*(sVec4_7550*)&bone->pos), vu0Scale_7550(boardAxis, 30.0f));
+    pts[2] = vu0Sub_7550((*(sVec4_7550*)&bone->pos), vu0Scale_7550(boardAxis, 30.0f));
+    pts[3] = vu0Sub_7550((*(sVec4_7550*)&bone->pos), vu0Scale_7550(boardAxis, 70.0f));
+    cRiderSphereTree_Update(self->BoardSphereTree, 4, pts, radii.r, &(*(sVec4_7550*)&bone->pos),
                   self->mRider->mAnimModel->unk_140.x * 90.0f);
 }
 #endif

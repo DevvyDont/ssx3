@@ -2393,12 +2393,6 @@ struct sTrackRef51C0 {
     }
 };
 
-struct sSplineFollow51C0 {
-    sTrackRef51C0 ref;      // 0x0
-    int field_0x4;          // 0x4
-    int field_0x8;          // 0x8
-    float length;           // 0xC
-};
 
 /**
  * Points a spline at a spline record and measures it.
@@ -2407,13 +2401,13 @@ struct sSplineFollow51C0 {
  *
  * @param id  resource id of the spline (low 8 bits: resource set, >> 8: index)
  */
-extern "C" void cSpline_init(sSplineFollow51C0* self, unsigned int id)
+extern "C" void cSpline_init(cSpline* self, unsigned int id)
 {
-    self->ref.id = id;
-    sTrackNode51C0* node = self->ref.get();
-    self->field_0x8 = node->value;
-    self->field_0x4 = 0;
-    self->length = cSpline_calcLength((cSpline*)self);
+    (*(sTrackRef51C0*)&self->SplineId).id = id;
+    sTrackNode51C0* node = (*(sTrackRef51C0*)&self->SplineId).get();
+    (*(int*)&self->Seg) = node->value;
+    self->SegIndex = 0;
+    self->Length = cSpline_calcLength((cSpline*)self);
 }
 #endif
 

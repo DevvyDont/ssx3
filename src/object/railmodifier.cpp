@@ -2027,24 +2027,20 @@ static inline sRmMat33 Mul33_E248(const sRmMat33& a, const sRmMat33& b)
     return r;
 }
 
-struct sRmInertiaOwner_E248 {
-    char pad_0x0[0x280];
-    sRmMat33 inertia;   // 0x280: body-space inertia
-};
 
 // r = I * a, with I the body inertia (passed through its owner so each element is an offset from it).
-static inline sRmMat33 MulI_E248(const sRmMat33& a, const sRmInertiaOwner_E248* body)
+static inline sRmMat33 MulI_E248(const sRmMat33& a, const cRollerModifier* body)
 {
     sRmMat33 r;
-    r.m[0][0] = a.m[0][0] * body->inertia.m[0][0] + a.m[1][0] * body->inertia.m[0][1] + a.m[2][0] * body->inertia.m[0][2];
-    r.m[1][0] = a.m[0][0] * body->inertia.m[1][0] + a.m[1][0] * body->inertia.m[1][1] + a.m[2][0] * body->inertia.m[1][2];
-    r.m[2][0] = a.m[0][0] * body->inertia.m[2][0] + a.m[1][0] * body->inertia.m[2][1] + a.m[2][0] * body->inertia.m[2][2];
-    r.m[0][1] = a.m[0][1] * body->inertia.m[0][0] + a.m[1][1] * body->inertia.m[0][1] + a.m[2][1] * body->inertia.m[0][2];
-    r.m[1][1] = a.m[0][1] * body->inertia.m[1][0] + a.m[1][1] * body->inertia.m[1][1] + a.m[2][1] * body->inertia.m[1][2];
-    r.m[2][1] = a.m[0][1] * body->inertia.m[2][0] + a.m[1][1] * body->inertia.m[2][1] + a.m[2][1] * body->inertia.m[2][2];
-    r.m[0][2] = a.m[0][2] * body->inertia.m[0][0] + a.m[1][2] * body->inertia.m[0][1] + a.m[2][2] * body->inertia.m[0][2];
-    r.m[1][2] = a.m[0][2] * body->inertia.m[1][0] + a.m[1][2] * body->inertia.m[1][1] + a.m[2][2] * body->inertia.m[1][2];
-    r.m[2][2] = a.m[0][2] * body->inertia.m[2][0] + a.m[1][2] * body->inertia.m[2][1] + a.m[2][2] * body->inertia.m[2][2];
+    r.m[0][0] = a.m[0][0] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[0][0] + a.m[1][0] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[0][1] + a.m[2][0] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[0][2];
+    r.m[1][0] = a.m[0][0] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[1][0] + a.m[1][0] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[1][1] + a.m[2][0] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[1][2];
+    r.m[2][0] = a.m[0][0] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[2][0] + a.m[1][0] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[2][1] + a.m[2][0] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[2][2];
+    r.m[0][1] = a.m[0][1] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[0][0] + a.m[1][1] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[0][1] + a.m[2][1] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[0][2];
+    r.m[1][1] = a.m[0][1] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[1][0] + a.m[1][1] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[1][1] + a.m[2][1] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[1][2];
+    r.m[2][1] = a.m[0][1] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[2][0] + a.m[1][1] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[2][1] + a.m[2][1] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[2][2];
+    r.m[0][2] = a.m[0][2] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[0][0] + a.m[1][2] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[0][1] + a.m[2][2] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[0][2];
+    r.m[1][2] = a.m[0][2] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[1][0] + a.m[1][2] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[1][1] + a.m[2][2] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[1][2];
+    r.m[2][2] = a.m[0][2] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[2][0] + a.m[1][2] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[2][1] + a.m[2][2] * (*(sRmMat33*)&body->InvBodyMOI[0]).m[2][2];
     return r;
 }
 
@@ -2063,7 +2059,7 @@ extern "C" void cRollerModifier_updateMOI(cRollerModifier* self)
     rotT = Get33_E248(rotMat4);
     rot = rotT;
     Transpose33_E248(rotT);
-    *(sRmMat33*)&self->InvMOI[0] = Mul33_E248(MulI_E248(rot, (sRmInertiaOwner_E248*)self), rotT);
+    *(sRmMat33*)&self->InvMOI[0] = Mul33_E248(MulI_E248(rot, self), rotT);
 }
 #endif
 
@@ -8575,15 +8571,6 @@ struct sRmSaved_29B8 {
     int pad;
 };
 
-struct sRmBatch_29B8 {
-    char pad_0x0[0x51480];
-    int count;                      // 0x51480
-    sRmSaved_29B8 saved[1024];      // 0x51484
-    int base;                       // 0x57484
-    sRmSaved_29B8* a;               // 0x57488
-    sRmSaved_29B8* b;               // 0x5748C
-    sRmSaved_29B8* c;               // 0x57490
-};
 
 extern sRmCtx_29B8* D_004A5B80_29B8 __asm__("cGraphicsMan_TheGraphicsMan");
 extern sRmState_29B8 D_00501420_29B8 __asm__("sDrawState_s_defaultDrawState");
@@ -8603,10 +8590,10 @@ static inline void set2_29B8(sRmCtx_29B8* ctx, unsigned int mask, int shift, uns
     ctx->top->w2 = (ctx->top->w2 & ~mask) | ((v << shift) & mask);
 }
 
-static inline sRmSaved_29B8* save_29B8(sRmBatch_29B8* self, sRmCtx_29B8* ctx)
+static inline sRmSaved_29B8* save_29B8(cPS2DeferManager* self, sRmCtx_29B8* ctx)
 {
     sRmState_29B8* src = ctx->top;
-    sRmSaved_29B8* d = &self->saved[self->count++];
+    sRmSaved_29B8* d = &((sRmSaved_29B8*)&self->mDrawStates[0])[self->mUsedDrawStates++];
     d->st = *src;
     return d;
 }
@@ -8634,9 +8621,9 @@ extern "C" void func_003629B8(cPS2DeferManager* self)
     set0_29B8(ctx, 0x3C0, 6, 3);
     set1_29B8(ctx, 0x7C, 2, 1);
     set1_29B8(ctx, 0xF80, 7, 17);
-    self->unk_57488 = (cDrawStateList*)save_29B8(((sRmBatch_29B8*)self), ctx);
+    self->unk_57488 = (cDrawStateList*)save_29B8((self), ctx);
     set1_29B8(ctx, 0xF80, 7, 2);
-    self->unk_5748C = (cDrawStateList*)save_29B8(((sRmBatch_29B8*)self), ctx);
+    self->unk_5748C = (cDrawStateList*)save_29B8((self), ctx);
     set1_29B8(ctx, 0x7C, 2, 5);
     set1_29B8(ctx, 0xF80, 7, 3);
     set1_29B8(ctx, 0x3, 0, 1);
@@ -8644,7 +8631,7 @@ extern "C" void func_003629B8(cPS2DeferManager* self)
     set1_29B8(ctx, 0x1800000, 23, 1);
     set1_29B8(ctx, 0x300000, 20, 3);
     set1_29B8(ctx, 0xFF000, 12, 92);
-    self->unk_57490 = (cDrawStateList*)save_29B8(((sRmBatch_29B8*)self), ctx);
+    self->unk_57490 = (cDrawStateList*)save_29B8((self), ctx);
     self->mNumStaticStates = self->mUsedDrawStates;
 }
 #endif
@@ -9246,12 +9233,8 @@ extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sRmGs3C20* st, int nodeL
 //100%
 INCLUDE_ASM("object/railmodifier", func_00364050);
 #ifdef SKIP_ASM
-struct sRmSortItem4050 {
-    unsigned int key;
-    int val;
-};
 
-extern sRmSortItem4050 D_00505B70[];
+extern tDeferSortItem D_00505B70[];
 extern void* D_004A4474;
 extern "C" void* func_0038F460(void* ring, unsigned int addr, int size, int flags);
 extern "C" void func_0038F6A8(void* ring);
@@ -9265,13 +9248,13 @@ extern "C" void func_0038F6A8(void* ring);
 extern "C" void func_00364050(cPS2DeferManager* self)
 {
     void* ring = D_004A4474;
-    sRmSortItem4050* dst = D_00505B70;
+    tDeferSortItem* dst = D_00505B70;
     int n = self->mNumSortItems;
-    sRmSortItem4050* src = (sRmSortItem4050*)(&self->mSortItems[0]);
+    tDeferSortItem* src = ((&self->mSortItems[0]));
     int (*hist)[257] = (int (*)[257])func_0038F460(ring, 0, -1, 0);
     MEM_fill(hist, 0, 4112);
     for (int i = 0; i < n; i++) {
-        unsigned int key = src[i].key;
+        unsigned int key = src[i].mKey;
         hist[0][(key & 0xFF) + 1]++;
         hist[1][((key >> 8) & 0xFF) + 1]++;
         hist[2][((key >> 16) & 0xFF) + 1]++;
@@ -9287,10 +9270,10 @@ extern "C" void func_00364050(cPS2DeferManager* self)
     for (shift = 0; shift < 32; shift += 8) {
         int* digitCounts = (int*)hist + ((shift << 5) + (shift >> 3));
         for (int i = 0; i < n; i++) {
-            int idx = digitCounts[(src[i].key >> shift) & 0xFF]++;
+            int idx = digitCounts[(src[i].mKey >> shift) & 0xFF]++;
             dst[idx] = src[i];
         }
-        sRmSortItem4050* sortedBuf = dst;
+        tDeferSortItem* sortedBuf = dst;
         dst = src;
         src = sortedBuf;
     }

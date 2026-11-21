@@ -244,11 +244,6 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_purgeLocation);
 void cMemMan_free(void* p);
 extern "C" void ASYNCFILE_cancel(int handle);
 
-struct sPbEntryC898 {
-    int field_0x0;
-    void* data;             // 0x4
-    int field_0x8;          // 0x8
-};
 
 
 /**
@@ -267,18 +262,18 @@ extern "C" void cPlaybackMan_purgeLocation(cPlaybackMan* playbackMan)
         ASYNCFILE_cancel(self->AsyncHandle);
         self->AsyncHandle = -1;
     }
-    if (((sPbEntryC898*)self->PlaybackFiles) != 0) {
+    if ((self->PlaybackFiles) != 0) {
         for (int i = 0; i < self->NumPlaybackFiles; i++) {
-            if (((sPbEntryC898*)self->PlaybackFiles)[i].data != 0) {
-                cMemMan_free(((sPbEntryC898*)self->PlaybackFiles)[i].data);
-                ((sPbEntryC898*)self->PlaybackFiles)[i].data = 0;
+            if (((void*)(self->PlaybackFiles)[i].PackData) != 0) {
+                cMemMan_free(((void*)(self->PlaybackFiles)[i].PackData));
+                (*(void**)&(self->PlaybackFiles)[i].PackData) = 0;
             }
-            ((sPbEntryC898*)self->PlaybackFiles)[i].field_0x8 = 0;
+            (self->PlaybackFiles)[i].Size = 0;
         }
-        if (((sPbEntryC898*)self->PlaybackFiles) != 0) {
-            cMemMan_free(((sPbEntryC898*)self->PlaybackFiles));
+        if ((self->PlaybackFiles) != 0) {
+            cMemMan_free((self->PlaybackFiles));
         }
-        *(sPbEntryC898**)&self->PlaybackFiles = 0;
+        *(tPlaybackFile**)&self->PlaybackFiles = 0;
     }
     if (((void*)self->SaveFrameData) != 0) {
         cMemMan_free(((void*)self->SaveFrameData));
@@ -1232,16 +1227,13 @@ extern "C" void cReplayFrame_clearFrame(cReplayFrame* self)
 //100%
 INCLUDE_ASM("replay/playbackman", cReplayFrame_loadFrame);
 #ifdef SKIP_ASM
-struct sPbRgba_D678 {
-    unsigned char c[4];
-};
 
 struct sPbHeader_D678 {
     int field_0x0;
     int field_0x4;
     int field_0x8;
     int field_0xc;
-    sPbRgba_D678 colour;    // 0x10
+    tReplayFrameType colour;    // 0x10
     int field_0x14;
     int field_0x18;
     int field_0x1c;
@@ -1253,7 +1245,7 @@ struct sPbFrame_D678 {
     char pad_0x0[0x10];
     int field_0x10;         // 0x10
     char pad_0x14[0x8];
-    sPbRgba_D678 colour;    // 0x1C
+    tReplayFrameType colour;    // 0x1C
     int field_0x20;         // 0x20
     int field_0x24;         // 0x24
     int field_0x28;         // 0x28
@@ -1288,7 +1280,7 @@ extern "C" int cReplayFrame_loadFrame(cReplayFrame* self, char** pp)
     self->Size = header.field_0x4;
     self->FrameStartTick = header.field_0x8;
     self->FrameEndTick = header.field_0xc;
-    (*(sPbRgba_D678*)&self->FrameType) = header.colour;
+    (*(&self->FrameType)) = header.colour;
     self->Ranking[0] = header.field_0x14;
     self->Ranking[1] = header.field_0x18;
     self->HighlightEndTick[0] = header.field_0x1c;
