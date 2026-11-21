@@ -704,20 +704,20 @@ struct sFlagSet_C428 {
  * @param bucket  the bucket the node belongs to
  * @return @p self
  */
-extern "C" sFlagSet_C428* cFlagManager_cFlagManager(sFlagSet_C428* self, void* bucket)
+extern "C" sFlagSet_C428* cFlagManager_cFlagManager(cFlagManager* self, void* bucket)
 {
     int i;
-    sFlagSetElem_C428* elem = self->elems;
-    cObjNode_cObjNode1(self, bucket);
-    self->vtable = cFlagManager_vtbl;
+    sFlagSetElem_C428* elem = ((sFlagSetElem_C428*)&self->mFlagSets[0]);
+    cObjNode_cObjNode1(((sFlagSet_C428*)self), bucket);
+    self->mVtbl = cFlagManager_vtbl;
     for (i = 14; i != -1; i--, elem++) {
         cFlagSet_cFlagSet(elem);
     }
-    self->field_0x14 = 0.5f;
-    self->field_0x18 = 0.25f;
-    self->field_0x1c = 0;
-    self->field_0x10 = 0;
-    return self;
+    self->mWindBase = 0.5f;
+    self->mWindDelta = 0.25f;
+    *(int*)&self->mWindTime = 0;
+    *(int*)&self->mCurrentWindFactor = 0;
+    return ((sFlagSet_C428*)self);
 }
 #endif
 
@@ -750,17 +750,17 @@ struct sFlagSet_C4B8 {
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cFlagManager__cFlagManager(sFlagSet_C4B8* self, int flags)
+extern "C" void cFlagManager__cFlagManager(cFlagManager* self, int flags)
 {
-    self->vtable = cFlagManager_vtbl;
-    if (self->elems != 0) {
-        sFlagSetElem_C4B8* flagSet = self->elems + 15;
-        while (self->elems != flagSet) {
+    self->mVtbl = cFlagManager_vtbl;
+    if (((sFlagSetElem_C4B8*)&self->mFlagSets[0]) != 0) {
+        sFlagSetElem_C4B8* flagSet = ((sFlagSetElem_C4B8*)&self->mFlagSets[0]) + 15;
+        while (((sFlagSetElem_C4B8*)&self->mFlagSets[0]) != flagSet) {
             flagSet--;
             flagSet->vt[1].fn((char*)flagSet + flagSet->vt[1].delta, 0);
         }
     }
-    cObjNode__cObjNode(self, flags);
+    cObjNode__cObjNode(((sFlagSet_C4B8*)self), flags);
 }
 #endif
 
@@ -791,17 +791,17 @@ extern "C" void cFlagSet_AddFlag(void* self, void* data, void* ctx);
  * @param node  instance record of the flag
  * @param desc  converted flag data (tFlagState, 0x58 bytes)
  */
-extern "C" void cFlagManager_AddFlag(sFlagSet_C548* self, void* node, void* desc)
+extern "C" void cFlagManager_AddFlag(cFlagManager* self, void* node, void* desc)
 {
     int i;
     sFlagSetElem_C548* existing;
-    for (i = 0, existing = self->elems; i < 15; i++, existing++) {
+    for (i = 0, existing = ((sFlagSetElem_C548*)&self->mFlagSets[0]); i < 15; i++, existing++) {
         if (existing->active != 0 && cFlagSet_SameKind(existing, desc, node) != 0) {
             cFlagSet_AddFlag(existing, desc, node);
             return;
         }
     }
-    sFlagSetElem_C548* freeElem = self->elems;
+    sFlagSetElem_C548* freeElem = ((sFlagSetElem_C548*)&self->mFlagSets[0]);
     for (int j = 0; j < 15; j++, freeElem++) {
         if (freeElem->active == 0) {
             cFlagSet_AddFlag(freeElem, desc, node);
@@ -834,10 +834,10 @@ extern "C" int cFlagSet_RemoveFlag(void* elem, void* arg);
  *
  * @param instRecord  instance record of the flag
  */
-extern "C" void cFlagManager_RemoveFlag(sFlagSet_C600* self, void* instRecord)
+extern "C" void cFlagManager_RemoveFlag(cFlagManager* self, void* instRecord)
 {
     int i;
-    sFlagSetElem_C600* elem = self->elems;
+    sFlagSetElem_C600* elem = ((sFlagSetElem_C600*)&self->mFlagSets[0]);
     for (i = 0; i < 15; i++, elem++) {
         if (elem->active != 0 && cFlagSet_RemoveFlag(elem, instRecord) != 0) {
             return;
@@ -886,7 +886,7 @@ static inline float randf_34C668()
  * The step's range is 0.15, 0.3 or 0.45 by a per-location level read from the new-race BE (cObjectInterface_getPeakNumber,
  * probably the location's wind); the wind is kept within 0..1 and interpolated over the second.
  */
-extern "C" void cFlagManager_update(sFlagSet_C668* self)
+extern "C" void cFlagManager_update(cFlagManager* self)
 {
     float amp = 0.15f;
     switch (cObjectInterface_getPeakNumber()) {
@@ -900,23 +900,23 @@ extern "C" void cFlagManager_update(sFlagSet_C668* self)
         break;
     }
     float one = 1.0f;
-    self->t += one / (float)*(int*)(cAppMan_TheAppMan + 0x10);
-    if (one <= self->t) {
-        self->t -= one;
-        self->base += self->delta;
+    self->mWindTime += one / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+    if (one <= self->mWindTime) {
+        self->mWindTime -= one;
+        self->mWindBase += self->mWindDelta;
         float lo = -amp;
-        self->delta = lo + (amp - lo) * randf_34C668();
-        if (self->base + self->delta < 0.0f) {
-            self->delta = -self->base;
+        self->mWindDelta = lo + (amp - lo) * randf_34C668();
+        if (self->mWindBase + self->mWindDelta < 0.0f) {
+            self->mWindDelta = -self->mWindBase;
         }
-        if (one < self->base + self->delta) {
-            self->delta = one - self->base;
+        if (one < self->mWindBase + self->mWindDelta) {
+            self->mWindDelta = one - self->mWindBase;
         }
     }
-    self->level = self->base + self->delta * self->t;
+    self->mCurrentWindFactor = self->mWindBase + self->mWindDelta * self->mWindTime;
     int i;
     for (i = 0; i < 15; i++) {
-        sFlagSetElem_C668* entry = &self->elems[i];
+        sFlagSetElem_C668* entry = &((sFlagSetElem_C668*)&self->mFlagSets[0])[i];
         if (entry->active != 0) {
             cFlagSet_update((cFlagSet*)entry);
         }
@@ -945,11 +945,11 @@ extern "C" void cFlagSet_render(cFlagSet* e);
  *
  * Walks the 15 entries from offset 0x20 and calls cFlagSet_render() on each whose active word is set.
  */
-extern "C" void cFlagManager_render(sFlagSetOwner* self)
+extern "C" void cFlagManager_render(cFlagManager* self)
 {
     int i;
     for (i = 0; i < 15; i++) {
-        sFlagSetEntry* entry = &self->entries[i];
+        sFlagSetEntry* entry = &((sFlagSetEntry*)&self->mFlagSets[0])[i];
         if (entry->active != 0) {
             cFlagSet_render((cFlagSet*)entry);
         }
@@ -979,11 +979,11 @@ extern "C" void cFlagSet_writeToReplayFrame(cFlagSet* elem, void* arg);
  *
  * @param stream  the replay frame
  */
-extern "C" void cFlagManager_writeToReplayFrame(sFlagSet_C848* self, void* stream)
+extern "C" void cFlagManager_writeToReplayFrame(cFlagManager* self, void* stream)
 {
     int i;
     for (i = 0; i < 15; i++) {
-        cFlagSet_writeToReplayFrame((cFlagSet*)(&self->elems[i]), stream);
+        cFlagSet_writeToReplayFrame((cFlagSet*)(&((sFlagSetElem_C848*)&self->mFlagSets[0])[i]), stream);
     }
 }
 #endif
@@ -1009,11 +1009,11 @@ extern "C" void cFlagSet_readFromReplayFrame(cFlagSet* elem, void* arg);
  *
  * @param stream  the replay frame
  */
-extern "C" void cFlagManager_readFromReplayFrame(sFlagSet_C898* self, void* stream)
+extern "C" void cFlagManager_readFromReplayFrame(cFlagManager* self, void* stream)
 {
     int i;
     for (i = 0; i < 15; i++) {
-        cFlagSet_readFromReplayFrame((cFlagSet*)(&self->elems[i]), stream);
+        cFlagSet_readFromReplayFrame((cFlagSet*)(&((sFlagSetElem_C898*)&self->mFlagSets[0])[i]), stream);
     }
 }
 #endif

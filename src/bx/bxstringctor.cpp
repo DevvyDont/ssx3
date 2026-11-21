@@ -1,4 +1,5 @@
 #include "common.h"
+#include "path/basepath.h"
 #include "path/pathsys.h"
 #include "online/lobbyman.h"
 
@@ -2463,7 +2464,7 @@ extern "C" int cTrackPath_getEventsInRange(sBXRangeList* self, sBXRange* out, in
 //100%
 INCLUDE_ASM("bx/bxstringctor", cTrackPath_isForkInPath);
 #ifdef SKIP_ASM
-extern "C" float cPath_getLength(void* self);
+extern "C" float cPath_getLength(cPath* self);
 extern "C" int cPath_isForkInPath(sBXRangeList* self, float lo, float hi);
 
 /**
@@ -2485,7 +2486,7 @@ extern "C" int cTrackPath_isForkInPath(sBXRangeList* self, float ldist, float hd
     else
         lo = 0.0f;
     if (hdist < 0.0f)
-        hi = cPath_getLength(self);
+        hi = cPath_getLength((cPath*)self);
     else
         hi = self->field_0x38 - hdist;
     return cPath_isForkInPath(self, lo, hi);
@@ -3374,13 +3375,13 @@ struct sBXElem16 {
  *
  * @return the path length
  */
-extern "C" float cPath_getLength(void* self)
+extern "C" float cPath_getLength(cPath* self)
 {
-    int n = *(int*)((char*)self + 0x8);
+    int n = self->NumNodes;
     float sum = 0.0f;
     int i;
     for (i = 0; i < n; i++) {
-        sum += (*(sBXElem16**)((char*)self + 0x18))[i].fC;
+        sum += ((sBXElem16*)self->Nodes)[i].fC;
     }
     return sum;
 }
@@ -3432,15 +3433,15 @@ struct sBXBox2 {
  * @param hi  the rectangle maximum (x, y)
  * @return 1 when they overlap, else 0
  */
-extern "C" int cPath_isPathInBox(sBXBox2* self, float* lo, float* hi)
+extern "C" int cPath_isPathInBox(cPath* self, float* lo, float* hi)
 {
-    if (hi[0] < self->min[0])
+    if (hi[0] < self->MinBound[0])
         return 0;
-    if (hi[1] < self->min[1])
+    if (hi[1] < self->MinBound[1])
         return 0;
-    if (lo[0] > self->max[0])
+    if (lo[0] > self->MaxBound[0])
         return 0;
-    if (lo[1] > self->max[1])
+    if (lo[1] > self->MaxBound[1])
         return 0;
     return 1;
 }

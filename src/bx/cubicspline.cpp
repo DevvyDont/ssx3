@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/cubicspline.h"
 #include "bx/dynamicmemman.h"
 
 //100%
@@ -355,10 +356,10 @@ extern "C" void cCubicSplineInterpolant_evaluate(void* self, float t);
  * The range runs from the first segment's start x (+0x10 of the data) to the end (+0x4). A first loop over the same
  * steps is empty; this is what remains of a debug dump. Nothing calls it.
  */
-extern "C" void cCubicSplineInterpolant_SpewGraphPoints(void* self)
+extern "C" void cCubicSplineInterpolant_SpewGraphPoints(cCubicSplineInterpolant* self)
 {
-    float end = *(float*)((char*)self + 4);
-    float start = *(float*)(*(char**)((char*)self + 8) + 0x10);
+    float end = self->MaxX;
+    float start = *(float*)((char*)self->CubicSplines + 0x10);
     float step = (end - start) * 0.010101010091602802f;
     for (float firstPassT = start; firstPassT <= end; firstPassT += step) {
     }
@@ -378,9 +379,9 @@ static inline int cCubicSpline_getCount(sCubicSpline* s) { return s->flags.count
  *
  * An empty loop, what remains of a debug dump. Nothing calls it.
  */
-extern "C" void cCubicSplineInterpolant_SpewSplineNumbers(sCubicSpline* self)
+extern "C" void cCubicSplineInterpolant_SpewSplineNumbers(cCubicSplineInterpolant* self)
 {
-    for (int i = 0; i < cCubicSpline_getCount(self); i++) {
+    for (int i = 0; i < cCubicSpline_getCount(((sCubicSpline*)self)); i++) {
     }
 }
 #endif

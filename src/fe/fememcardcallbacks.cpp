@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fepopupconfirm.h"
 #include "fe/festatenethelppopup.h"
 #include "movie/mcoverlaymanager.h"
 #include "ui/uistate.h"
@@ -2468,7 +2469,7 @@ extern "C" void cFEMemCard_createReadBuffer(cFEMemCard* self, unsigned int size)
 INCLUDE_ASM("fe/fememcardcallbacks", cFEPopupConfirm_cFEPopupConfirm);
 #ifdef SKIP_ASM
 extern "C" void* cScreenPopup_cScreenPopup(void* mem, void* engine, void* owner);
-extern "C" void cFEPopupConfirm_initPopup(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
+extern "C" void cFEPopupConfirm_initPopup(cFEPopupConfirm* self, int a1, int a2, int a3, int a4, int a5, int a6);
 extern char cFEPopupConfirm_vtbl[];
 extern int cFEPopupConfirm_mUsePreFE;
 
@@ -2498,18 +2499,18 @@ struct sMemCardPopupK1D99C8 {
  * @param bSnowFlake  passed on to initPopup(), which ignores it
  * @return @p self
  */
-extern "C" sMemCardPopupK1D99C8* cFEPopupConfirm_cFEPopupConfirm(sMemCardPopupK1D99C8* self, cUIEngine* engine, cUIState* owner, int ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate, int bSnowFlake)
+extern "C" sMemCardPopupK1D99C8* cFEPopupConfirm_cFEPopupConfirm(cFEPopupConfirm* self, cUIEngine* engine, cUIState* owner, int ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate, int bSnowFlake)
 {
-    cScreenPopup_cScreenPopup(self, engine, owner);
-    self->vtbl = cFEPopupConfirm_vtbl;
+    cScreenPopup_cScreenPopup(((sMemCardPopupK1D99C8*)self), engine, owner);
+    self->mVtbl = (void**)cFEPopupConfirm_vtbl;
     if (cFEPopupConfirm_mUsePreFE == 0) {
-        self->f17C = 1;
+        self->info.meBackgroundType = 1;
     } else {
-        self->f17C = 2;
-        self->f14C = 4;
+        self->info.meBackgroundType = 2;
+        self->info.miLayerOffset = 4;
     }
     cFEPopupConfirm_initPopup(self, ustrDisplay, bYesOnly, bNoButtons, layerOffset, passUpdate, bSnowFlake);
-    return self;
+    return ((sMemCardPopupK1D99C8*)self);
 }
 #endif
 
@@ -2545,42 +2546,41 @@ extern char D_004A1408[];
  * @param bSnowFlake  unused
  */
 // PORT: the unit declares the string pointer as int; a6 is unused
-extern "C" void cFEPopupConfirm_initPopup(void* self, int ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate, int bSnowFlake)
+extern "C" void cFEPopupConfirm_initPopup(cFEPopupConfirm* self, int ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate, int bSnowFlake)
 {
     void* str = (void*)ustrDisplay;
-    char* popup = (char*)self;
-    char* sub = popup + 0xBC;
+    char* sub = ((char*)self) + 0xBC;
     func_001C57C0(sub, 0, GetHashValue32(str_kT_CMNYes));
     func_001C57C0(sub, 1, GetHashValue32(str_kT_CMNNo));
-    *(int*)(popup + 0xBC) = 2;
-    *(int*)(popup + 0x14C) = layerOffset;
-    *(int*)(popup + 0x168) = 0;
-    *(int*)(popup + 0x154) = 0;
-    *(int*)(popup + 0x164) = 0;
+    self->info.meType = 2;
+    self->info.miLayerOffset = layerOffset;
+    self->info.miDefaultOption = 0;
+    self->info.mbPassUpdate = 0;
+    self->info.mbReceivePrev = 0;
     char* displayText;
     if (str) {
-        strcpy1(popup + 0x360, str);
-        displayText = popup + 0x360;
+        strcpy1(((char*)self) + 0x360, str);
+        displayText = ((char*)self) + 0x360;
     } else {
-        displayText = popup + 0x360;
+        displayText = ((char*)self) + 0x360;
         func_002C2540(displayText, D_004A1408);
     }
     strcpy1(displayText, str);
     if (bNoButtons) {
-        *(int*)(popup + 0xBF8) = 0;
+        self->mNumButtons = 0;
         *(int*)(sub + 0x98) = 1;
         *(int*)(sub + 0) = 0;
     } else if (bYesOnly) {
-        *(int*)(popup + 0xBF8) = 1;
+        self->mNumButtons = 1;
         *(int*)(sub + 0) = 1;
         *(int*)(sub + 0x98) = passUpdate;
     } else {
-        *(int*)(popup + 0xBF8) = 2;
+        self->mNumButtons = 2;
         *(int*)(sub + 0x98) = passUpdate;
     }
     *(char**)(sub + 8) = displayText;
     *(int*)(sub + 4) = 1;
-    if (*(int*)(popup + 0x40)) {
+    if ((int)self->mpScreen) {
         cScreenPopup_redrawPopup_self(self);
     }
 }
@@ -2604,7 +2604,7 @@ void cScreenPopup_redrawPopup_self(void* self) __asm__("cScreenPopup_redrawPopup
  * @param src  the label, a 16-bit string (On Tour ustrText)
  * @param mode  which button: 0, 1, or anything else for a third one (On Tour uiButton)
  */
-extern "C" void cFEPopupConfirm_setButtonText(void* self, void* src, int mode)
+extern "C" void cFEPopupConfirm_setButtonText(cFEPopupConfirm* self, void* src, int mode)
 {
     void* slots = (char*)self + 0xBC;
     if (mode == 0) {
@@ -2612,19 +2612,19 @@ extern "C" void cFEPopupConfirm_setButtonText(void* self, void* src, int mode)
         strcpy1(buttonText, src);
         func_001C57A0(slots, 0, (int)buttonText); // PORT: pointer passed as int
     } else if (mode == 1) {
-        if (*(int*)((char*)self + 0xBF8) >= 2) {
+        if (self->mNumButtons >= 2) {
             void* buttonText = (char*)self + 0xA68;
             strcpy1(buttonText, src);
             func_001C57A0(slots, 1, (int)buttonText);
         }
     } else {
         void* buttonText = (char*)self + 0xB30;
-        *(int*)((char*)self + 0xBF8) = 3;
-        *(int*)((char*)self + 0xBC) = 3;
+        self->mNumButtons = 3;
+        self->info.meType = 3;
         strcpy1(buttonText, src);
         func_001C57A0(slots, 2, (int)buttonText);
     }
-    if (*(int*)((char*)self + 0x40) != 0) {
+    if ((int)self->mpScreen != 0) {
         cScreenPopup_redrawPopup_self(self);
     }
 }
@@ -2647,14 +2647,14 @@ void cScreenPopup_redrawPopup_self(void* self) __asm__("cScreenPopup_redrawPopup
  *
  * @param src  the new 16-bit message
  */
-extern "C" void cFEPopupConfirm_setMessage(void* self, void* src)
+extern "C" void cFEPopupConfirm_setMessage(cFEPopupConfirm* self, void* src)
 {
     if (src != 0 && strlen1(src) != 0) {
         void* dst = (char*)self + 0x360;
         strcpy1(dst, src);
         *(void**)((char*)self + 0xC4) = dst;
-        *(int*)((char*)self + 0xC0) = 1;
-        if (*(int*)((char*)self + 0x40) != 0) {
+        self->info.mtMessage.eType = 1;
+        if ((int)self->mpScreen != 0) {
             cScreenPopup_redrawPopup_self(self);
         }
     }
@@ -2674,10 +2674,10 @@ extern "C" void cScreenPopup_redrawPopup(void*, int);
  *
  * @param uiButton  index of the default button
  */
-extern "C" void cFEPopupConfirm_setDefaultButton(void* self, int uiButton)
+extern "C" void cFEPopupConfirm_setDefaultButton(cFEPopupConfirm* self, int uiButton)
 {
-    *(int*)((char*)self + 0x168) = uiButton;
-    if (*(int*)((char*)self + 0x40) != 0) {
+    self->info.miDefaultOption = uiButton;
+    if ((int)self->mpScreen != 0) {
         cScreenPopup_redrawPopup(self, uiButton);
     }
 }

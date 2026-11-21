@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/script/scriptcontroller.h"
 #include "camera/camera.h"
 #include "scripter/scriptobjcamera.h"
 #include "camera/trigger/cameratriggerlist.h"
@@ -72,16 +73,16 @@ public:
  *
  * @param flags  g++ destructor flags, passed to cCameraController__cCameraController()
  */
-extern "C" void cScriptCameraController__cScriptCameraController(void* self, int flags)
+extern "C" void cScriptCameraController__cScriptCameraController(cScriptCameraController* self, int flags)
 {
     int i;
-    *(void***)((char*)self + 0x14) = cScriptCameraController_vtbl;
+    self->mVtbl = cScriptCameraController_vtbl;
     for (i = 0; i < 2; i++) {
-        cScriptObject_DeInitScriptObject((*(cScrCamScriptK2***)((char*)self + 0x1C))[i]);
-        delete (*(cScrCamScriptK2***)((char*)self + 0x1C))[i];
+        cScriptObject_DeInitScriptObject(((cScrCamScriptK2**)self->ScriptObj)[i]);
+        delete ((cScrCamScriptK2**)self->ScriptObj)[i];
     }
-    if (*(void**)((char*)self + 0x1C) != 0)
-        cMemMan_free(*(void**)((char*)self + 0x1C));
+    if (self->ScriptObj != 0)
+        cMemMan_free(self->ScriptObj);
     cCameraController__cCameraController(self, flags);
 }
 #endif
@@ -111,7 +112,7 @@ extern char str_Algorithmic_Script_Camera_Algo[];
  *
  * @param cam  the script camera object (cScriptObjCamera)
  */
-extern "C" void cScriptCameraController_addCamera(char* self, cScriptObjCamera* cam)
+extern "C" void cScriptCameraController_addCamera(cScriptCameraController* self, cScriptObjCamera* cam)
 {
     void* ctl;
     switch (cScriptPlayerEntity_GetType(*(void**)((char*)cam->mpCameraEntity + 8)))
@@ -134,8 +135,8 @@ extern "C" void cScriptCameraController_addCamera(char* self, cScriptObjCamera* 
     // PORT: the camera pointer is passed through an int parameter.
     cScriptAlgorithm_setScriptObj(ctl, (int)cam);
     cam->mpCameraAlgorithm = (cScriptAlgorithm*)ctl;
-    cScriptCameraController_addAlgorithm_3(self, ctl, 1);
-    *(int*)(self + 0x18) = 1;
+    cScriptCameraController_addAlgorithm_3(((char*)self), ctl, 1);
+    self->IsActive = 1;
 }
 #endif
 
@@ -164,10 +165,10 @@ extern "C" void cCameraAlgoList_remove(sScrAlgoList* list, sScrAlgoNode* node);
  *
  * @param algo  the script camera object (On Tour's cScriptObjCamera)
  */
-extern "C" void cScriptCameraController_removeCamera(void* self, cScriptObjCamera* algo)
+extern "C" void cScriptCameraController_removeCamera(cScriptCameraController* self, cScriptObjCamera* algo)
 {
-    if (*(int*)((char*)self + 0x18) != 0) {
-        sScrAlgoList* list = *(sScrAlgoList**)((char*)self + 0x8);
+    if (self->IsActive != 0) {
+        sScrAlgoList* list = (sScrAlgoList*)self->AlgorithmList;
         for (sScrAlgoNode* n = list->head; n != 0; n = n->next) {
             int k = (int)algo->mpCameraAlgorithm;
             if (n->key == k) {
@@ -176,7 +177,7 @@ extern "C" void cScriptCameraController_removeCamera(void* self, cScriptObjCamer
             }
         }
         if (list->count <= 0)
-            *(int*)((char*)self + 0x18) = 0;
+            self->IsActive = 0;
     }
 }
 #endif
@@ -194,9 +195,9 @@ extern "C" void cCameraAlgoList_insert(void*, void*, float);
  *
  * @param algo  the camera algorithm to add
  */
-extern "C" void cScriptCameraController_addAlgorithm(void* self, void* algo)
+extern "C" void cScriptCameraController_addAlgorithm(cScriptCameraController* self, void* algo)
 {
-    cCameraAlgoList_insert(*(void**)((char*)self + 0x8), algo, 1.0f);
+    cCameraAlgoList_insert(self->AlgorithmList, algo, 1.0f);
 }
 #endif
 
@@ -233,9 +234,9 @@ struct sScrAlgoNodeK2 {
  * For each node the weight is smoothstep(t) = 3t^2 - 2t^3 (capped at 1) of the time at +0x18 of the object
  * cScriptAlgorithm_getScriptObj returns for the algorithm; then virtual slot 5 runs the algorithm.
  */
-extern "C" void cScriptCameraController_update(void* self)
+extern "C" void cScriptCameraController_update(cScriptCameraController* self)
 {
-    sScrAlgoNodeK2* n = **(sScrAlgoNodeK2***)((char*)self + 0x8);
+    sScrAlgoNodeK2* n = *(sScrAlgoNodeK2**)self->AlgorithmList;
     while (n != 0) {
         float progress = *(float*)(cScriptAlgorithm_getScriptObj_K2(n->algo) + 0x18);
         float progressSq = progress * progress;

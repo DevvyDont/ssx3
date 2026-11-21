@@ -1,4 +1,7 @@
 #include "common.h"
+#include "scripter/scriptentitycam.h"
+#include "scripter/scriptobjtransition.h"
+#include "scripter/scriptobj.h"
 #include "scripter/scriptentity.h"
 #include "inseq/scriptplayerentity.h"
 #include "inseq/scriptplayermain.h"
@@ -1254,19 +1257,19 @@ extern void* cScriptObjTransition_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cScriptObjTransition_cScriptObjTransition(void* self)
+extern "C" void* cScriptObjTransition_cScriptObjTransition(cScriptObjTransition* self)
 {
     cScriptObject_cScriptObject(self, 2);
-    *(void***)((char*)self + 0xC) = cScriptObjTransition_vtbl;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x2C) = 0;
-    *(int*)((char*)self + 0x14) = -1;
-    *(int*)((char*)self + 0x18) = 9;
-    *(int*)((char*)self + 0x1C) = 0;
-    *(int*)((char*)self + 0x20) = 0;
-    *(int*)((char*)self + 0x24) = 0;
-    *(int*)((char*)self + 0x28) = 0;
-    return self;
+    self->mVtbl = cScriptObjTransition_vtbl;
+    self->mpCameraManager = 0;
+    *(int*)&self->mInfo.currTime = 0;
+    self->mPlayerID = -1;
+    self->mInfo.transition = 9;
+    *(int*)&self->mInfo.inTime = 0;
+    *(int*)&self->mInfo.holdTime = 0;
+    *(int*)&self->mInfo.outTime = 0;
+    self->mInfo.transitionColour = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1284,13 +1287,13 @@ void* cScriptObjTransition_SetTransition_f4(void* self, int a1, int a2, float f0
  *
  * @param dt  the frame delta in frames
  */
-extern "C" void cScriptObjTransition_Update(void* self, float dt)
+extern "C" void cScriptObjTransition_Update(cScriptObjTransition* self, float dt)
 {
-    int id = *(int*)((char*)self + 0x14);
+    int id = self->mPlayerID;
     if (id >= 0) {
-        float currTime = *(float*)((char*)self + 0x2C) + dt * 0.01666666753590107f;
-        *(float*)((char*)self + 0x2C) = currTime;
-        if (*(float*)((char*)self + 0x1C) + *(float*)((char*)self + 0x20) + *(float*)((char*)self + 0x24) - 0.009999999776482582f <= currTime) {
+        float currTime = self->mInfo.currTime + dt * 0.01666666753590107f;
+        self->mInfo.currTime = currTime;
+        if (self->mInfo.inTime + self->mInfo.holdTime + self->mInfo.outTime - 0.009999999776482582f <= currTime) {
             cScriptObjTransition_SetTransition_f4(self, id, 9, 0.0f, 0.0f, 0.0f, 0.0f);
         }
     }
@@ -1412,9 +1415,9 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObjTransition_IsInUseByPlayer);
  * @param playerID  the player ID
  * @return 1 when owned by that player, else 0
  */
-extern "C" int cScriptObjTransition_IsInUseByPlayer(void* self, int playerID)
+extern "C" int cScriptObjTransition_IsInUseByPlayer(cScriptObjTransition* self, int playerID)
 {
-    return *(int*)((char*)self + 0x14) == playerID;
+    return self->mPlayerID == playerID;
 }
 #endif
 
@@ -1435,9 +1438,9 @@ public:
  * Pauses the transition object's script: calls the second virtual of the object at +0x10 (On Tour mpCameraManager,
  * a cScriptEntity; presumably PauseEntityScript).
  */
-extern "C" void cScriptObjTransition_PauseObjScript(void* self)
+extern "C" void cScriptObjTransition_PauseObjScript(cScriptObjTransition* self)
 {
-    (*(cBxScriptVirt**)((char*)self + 0x10))->PauseObjScript();
+    ((cBxScriptVirt*)self->mpCameraManager)->PauseObjScript();
 }
 #endif
 
@@ -1448,9 +1451,9 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObjTransition_ResumeObjScript);
  * Resumes the transition object's script: calls the third virtual of the object at +0x10 (On Tour mpCameraManager,
  * a cScriptEntity; presumably ResumeEntityScript).
  */
-extern "C" void cScriptObjTransition_ResumeObjScript(void* self)
+extern "C" void cScriptObjTransition_ResumeObjScript(cScriptObjTransition* self)
 {
-    (*(cBxScriptVirt**)((char*)self + 0x10))->ResumeObjScript();
+    ((cBxScriptVirt*)self->mpCameraManager)->ResumeObjScript();
 }
 #endif
 
@@ -1596,13 +1599,13 @@ void* cScriptEntity_cScriptEntity(void* self);
  *
  * @return @p self
  */
-extern "C" void* cScriptEntityCamera_cScriptEntityCamera(void* self)
+extern "C" void* cScriptEntityCamera_cScriptEntityCamera(cScriptEntityCamera* self)
 {
     cScriptEntity_cScriptEntity(self);
     *(void***)self = cScriptEntityCamera_vtbl;
-    *(int*)((char*)self + 0xC) = 9;
-    *(int*)((char*)self + 0x10) = 0;
-    return self;
+    self->mSubType = 9;
+    self->mpCamManager = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1625,21 +1628,21 @@ char* GetSSXCameraAlgorithmicHeader(void* self);
  *
  * @param obj  the InSeq player entity (cScriptPlayerEntity)
  */
-extern "C" void cScriptEntityCamera_OnInSeqLock(void* self, void* obj)
+extern "C" void cScriptEntityCamera_OnInSeqLock(cScriptEntityCamera* self, void* obj)
 {
     cScriptEntity_OnInSeqLock((cScriptEntity*)self, obj);
     switch (cScriptPlayerEntity_GetType(obj)) {
     case 0:
-        *(int*)((char*)self + 0xC) = *(signed char*)(GetSSXCameraManualHeader(obj) + 0x21);
+        self->mSubType = *(signed char*)(GetSSXCameraManualHeader(obj) + 0x21);
         break;
     case 1:
-        *(int*)((char*)self + 0xC) = *(signed char*)(GetSSXCameraTargetHeader(obj) + 0x21);
+        self->mSubType = *(signed char*)(GetSSXCameraTargetHeader(obj) + 0x21);
         break;
     case 2:
-        *(int*)((char*)self + 0xC) = *(signed char*)(GetSSXCameraSubjectHeader(obj) + 0x21);
+        self->mSubType = *(signed char*)(GetSSXCameraSubjectHeader(obj) + 0x21);
         break;
     case 3:
-        *(int*)((char*)self + 0xC) = *(signed char*)(GetSSXCameraAlgorithmicHeader(obj) + 0x1C);
+        self->mSubType = *(signed char*)(GetSSXCameraAlgorithmicHeader(obj) + 0x1C);
         break;
     }
 }
@@ -1653,10 +1656,10 @@ extern "C" void cScriptEntity_OnInSeqRelease(cScriptEntity* self);
 /**
  * Releases this camera script entity's InSeq lock (cScriptEntity_OnInSeqRelease) and resets its sub-type (+0xC) to 9.
  */
-extern "C" void cScriptEntityCamera_OnInSeqRelease(void* self)
+extern "C" void cScriptEntityCamera_OnInSeqRelease(cScriptEntityCamera* self)
 {
     cScriptEntity_OnInSeqRelease((cScriptEntity*)self);
-    *(int*)((char*)self + 0xC) = 9;
+    self->mSubType = 9;
 }
 #endif
 
@@ -1676,13 +1679,13 @@ void* cSSXScriptEngine_GetScriptSetupInfo_2(void* self, int idx) __asm__("cSSXSc
  * @param n  the entity type
  * @return 1 on a match, else 0
  */
-extern "C" int cScriptEntityCamera_IsMatchingEntity(void* self, cScriptPlayerEntity* entity, int n)
+extern "C" int cScriptEntityCamera_IsMatchingEntity(cScriptEntityCamera* self, cScriptPlayerEntity* entity, int n)
 {
     if (n >= 4) {
         return 0;
     }
     return *(int*)((char*)cSSXScriptEngine_GetScriptSetupInfo_2(ScriptEngine, (int)entity->mpOwner) + 0xC) ==
-           *(int*)(*(char**)((char*)self + 0x10) + 0xF8);
+           *(int*)((char*)self->mpCamManager + 0xF8);
 }
 #endif
 
@@ -1712,7 +1715,7 @@ void* cScriptObject_cScriptObject(void* self, int objType)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cScriptObject__cScriptObject);
 #ifdef SKIP_ASM
-extern "C" void cScriptObject_DeInitScriptObject(void* self);
+extern "C" void cScriptObject_DeInitScriptObject(cScriptObject* self);
 void operator_delete(int* ptr);
 
 /**
@@ -1723,12 +1726,12 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cScriptObject__cScriptObject(void* self, int flags)
+extern "C" void cScriptObject__cScriptObject(cScriptObject* self, int flags)
 {
-    *(void***)((char*)self + 0xC) = cScriptObject_vtbl;
-    if (*(int*)((char*)self + 0x4) != -1 && *(int*)((char*)self + 0x4) != 0) {
+    self->mVtbl = cScriptObject_vtbl;
+    if (self->mObjID != -1 && self->mObjID != 0) {
         cScriptObject_DeInitScriptObject(self);
-        *(int*)((char*)self + 0x4) = -1;
+        self->mObjID = -1;
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1754,11 +1757,11 @@ struct sBxsVEntryA {
  * asserts the handle is >= 0 afterwards; retail does not. cSSXScriptEngine_Load registers its script objects with it,
  * and cRider_cRider the rider's.
  */
-extern "C" void cScriptObject_InitScriptObject(void* self)
+extern "C" void cScriptObject_InitScriptObject(cScriptObject* self)
 {
     char* mgr = (char*)cScriptDatabaseObject_GetDatabaseObject();
     sBxsVEntryA* vt = *(sBxsVEntryA**)(mgr + 0x2A8);
-    *(int*)((char*)self + 0x4) = vt[2].fn(mgr + vt[2].delta, self);
+    self->mObjID = vt[2].fn(mgr + vt[2].delta, self);
 }
 #endif
 
@@ -1778,12 +1781,12 @@ struct sBxsVEntryB {
  * +0x2A8, passing the object's database handle (+0x4); cScriptDatabaseObject_RemoveObjectAll() uses the same
  * slot to remove each entry. The handle is then set to -1.
  */
-extern "C" void cScriptObject_DeInitScriptObject(void* self)
+extern "C" void cScriptObject_DeInitScriptObject(cScriptObject* self)
 {
     char* mgr = (char*)cScriptDatabaseObject_GetDatabaseObject();
     sBxsVEntryB* vt = *(sBxsVEntryB**)(mgr + 0x2A8);
-    vt[3].fn(mgr + vt[3].delta, *(int*)((char*)self + 0x4));
-    *(int*)((char*)self + 0x4) = -1;
+    vt[3].fn(mgr + vt[3].delta, self->mObjID);
+    self->mObjID = -1;
 }
 #endif
 
@@ -1813,12 +1816,12 @@ public:
  * classes without their own PauseObjScript inherit (cScriptObjRider's vtable D_00482018). On Tour asserts each entity
  * is non-null; retail does not.
  */
-extern "C" void cScriptObject_PauseObjScript(cScriptOwner3320* self)
+extern "C" void cScriptObject_PauseObjScript(cScriptObject* self)
 {
     int i = 0;
-    int n = self->GetNumScriptEntities();
+    int n = ((cScriptOwner3320*)self)->GetNumScriptEntities();
     for (; i < n; i++) {
-        cScriptEntity_PauseEntityScript((cScriptEntity*)self->GetScriptEntity(i));
+        cScriptEntity_PauseEntityScript((cScriptEntity*)((cScriptOwner3320*)self)->GetScriptEntity(i));
     }
 }
 #endif
@@ -1848,12 +1851,12 @@ public:
  * cScriptEntity::ResumeEntityScript) on each virtual GetScriptEntity(i) (slot 7); the base implementation that
  * cScriptObjRider (vtable D_00482018) inherits. The counterpart of cScriptObject_PauseObjScript.
  */
-extern "C" void cScriptObject_ResumeObjScript(cScriptOwner33A8* self)
+extern "C" void cScriptObject_ResumeObjScript(cScriptObject* self)
 {
     int i = 0;
-    int n = self->GetNumScriptEntities();
+    int n = ((cScriptOwner33A8*)self)->GetNumScriptEntities();
     for (; i < n; i++) {
-        cScriptEntity_ResumeEntityScript((cScriptEntity*)self->GetScriptEntity(i));
+        cScriptEntity_ResumeEntityScript((cScriptEntity*)((cScriptOwner33A8*)self)->GetScriptEntity(i));
     }
 }
 #endif

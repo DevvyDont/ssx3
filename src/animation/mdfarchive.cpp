@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/gameanimmap.h"
 #include "animation/adfdatasource.h"
 
 //100%
@@ -91,11 +92,11 @@ extern void* cGameAnimMap_TheGameAnimMap;
  *
  * @return @p self
  */
-extern "C" void* cGameAnimMap_cGameAnimMap(void* self)
+extern "C" void* cGameAnimMap_cGameAnimMap(cGameAnimMap* self)
 {
-    new (self) sMdfEntry_314D98[518];
-    cGameAnimMap_TheGameAnimMap = self;
-    return self;
+    new (((void*)self)) sMdfEntry_314D98[518];
+    cGameAnimMap_TheGameAnimMap = ((void*)self);
+    return ((void*)self);
 }
 #endif
 
@@ -214,9 +215,9 @@ INCLUDE_ASM("animation/mdfarchive", cGameAnimMap_setMap);
  * @param hash  the animation's name hash
  * @param value  the animation id to map it to (bank in the low 8 bits, index in the upper 24), or kAnimIDInvalid
  */
-extern "C" void cGameAnimMap_setMap(sMdfIndex_00314E88* self, unsigned int hash, void* value)
+extern "C" void cGameAnimMap_setMap(cGameAnimMap* self, unsigned int hash, void* value)
 {
-    int i = cGameAnimMap_lookupGAD(self, hash);
+    int i = cGameAnimMap_lookupGAD(((sMdfIndex_00314E88*)self), hash);
     if (i >= 0)
     {
         ((void**)((char*)self + 0x1030))[i] = value;
@@ -248,14 +249,14 @@ void cGameAnimMap_setMap_handle(sMdfIndex_00314E88* self, unsigned int hash, sMd
  * @param kind  the bank number stored in each id
  * @param list  the animation data source (cAdfDataSource) of the bank
  */
-extern "C" void cGameAnimMap_addSource(sMdfIndex_00314E88* self, int kind, cAdfDataSource* list)
+extern "C" void cGameAnimMap_addSource(cGameAnimMap* self, int kind, cAdfDataSource* list)
 {
     sMdfHandle_00314F30 handle;
     for (int i = 0; i < *(short*)((char*)list->Archive + 2); i++)
     {
         SetKind_00314F30(&handle, kind);
         SetIndex_00314F30(&handle, i);
-        cGameAnimMap_setMap_handle(self, *(unsigned int*)(i * 0x14 + (int)list->Anims), handle);
+        cGameAnimMap_setMap_handle(((sMdfIndex_00314E88*)self), *(unsigned int*)(i * 0x14 + (int)list->Anims), handle);
     }
 }
 #endif
@@ -272,7 +273,7 @@ extern void* kAnimIDInvalid;
  *
  * @param list  the animation data source (cAdfDataSource) of the bank
  */
-extern "C" void cGameAnimMap_remSource(sMdfIndex_00314E88* self, cAdfDataSource* list)
+extern "C" void cGameAnimMap_remSource(cGameAnimMap* self, cAdfDataSource* list)
 {
     for (int i = 0; i < *(short*)((char*)list->Archive + 2); i++)
     {
@@ -295,11 +296,11 @@ extern char str_error[];
  * @param value  the animation id to look for
  * @return the game animation's name, or str_error
  */
-extern "C" char* cGameAnimMap_getAnimName(char* self, void* value)
+extern "C" char* cGameAnimMap_getAnimName(cGameAnimMap* self, void* value)
 {
     for (int i = 0; i < 518; i++)
     {
-        if (value == ((void**)(self + 0x1030))[i])
+        if (value == ((void**)(((char*)self) + 0x1030))[i])
         {
             return D_0048CFC0[i];
         }

@@ -880,11 +880,11 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 /**
  * Creates the cheat-character select screen "131cheat_char" and plays its first frame.
  */
-extern "C" void cFEStateCheatCharSelect_onCreateScreen(void* self)
+extern "C" void cFEStateCheatCharSelect_onCreateScreen(cFEStateCheatCharSelect* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_131cheat_char), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -1031,7 +1031,7 @@ struct sVEK182690b {
  * @param menu  the picture widget (ignored when 0); its id plus the menu's scroll offset is the entry
  * @param msg  the widget event
  */
-extern "C" void cFEStateCheatCharSelect_onWidgetEvent(void* self, cUIThing* menu, unsigned int msg)
+extern "C" void cFEStateCheatCharSelect_onWidgetEvent(cFEStateCheatCharSelect* self, cUIThing* menu, unsigned int msg)
 {
     if (((void*)menu) == 0)
         return;
@@ -1042,28 +1042,28 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(void* self, cUIThing* menu
         break;
     }
     case 1: {
-        int sel = menu->mMiscData + *(unsigned char*)(*(char**)((char*)self + 0x6C) + 0x98);
+        int sel = menu->mMiscData + *(unsigned char*)((char*)self->mpMenu + 0x98);
         sVEK182690a* vt = (sVEK182690a*)menu->mVtbl;
         vt[21].fn((char*)menu + vt[21].delta, D_004C66B8);
-        cUIText_setAsciiString(*(cUIText**)((char*)self + 0x50), *(const char**)((char*)self + (sel << 2) + 0x16C));
+        cUIText_setAsciiString(self->mpNameWidget, *(const char**)((char*)self + (sel << 2) + 0x16C));
         break;
     }
     case 6:
-        *(int*)((char*)self + 0x70) = 0;
-        cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
+        self->mCheatCharID = 0;
+        cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
         break;
     case 5: {
-        int sel = menu->mMiscData + *(unsigned char*)(*(char**)((char*)self + 0x6C) + 0x98);
+        int sel = menu->mMiscData + *(unsigned char*)((char*)self->mpMenu + 0x98);
         if (sel == 0)
-            *(int*)((char*)self + 0x70) = 0;
+            self->mCheatCharID = 0;
         else
-            *(int*)((char*)self + 0x70) = *(int*)((char*)self + (sel << 2) + 0x7C);
+            self->mCheatCharID = *(int*)((char*)self + (sel << 2) + 0x7C);
         char* pl = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
-        cBENewPlayerInterface_setPlayerCheatCharID(pl, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x70));
+        cBENewPlayerInterface_setPlayerCheatCharID(pl, self->mUserNum, self->mCheatCharID);
         sVEK182690b* vt = *(sVEK182690b**)(pl + 0xC);
         vt[1].fn(pl + vt[1].delta);
-        *(int*)((char*)self + 0x74) = 1;
-        cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
+        self->mDone = 1;
+        cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
         break;
     }
     }
@@ -1073,7 +1073,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(void* self, cUIThing* menu
 //100%
 INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_onWidgetMenu);
 #ifdef SKIP_ASM
-extern "C" void cFEStateCheatCharSelect_updateCharWidgets(void* self);
+extern "C" void cFEStateCheatCharSelect_updateCharWidgets(cFEStateCheatCharSelect* self);
 
 /**
  * Handles the cheat-character menu's events: entry checks, picture refresh and which events pass on.
@@ -1084,7 +1084,7 @@ extern "C" void cFEStateCheatCharSelect_updateCharWidgets(void* self);
  * @return 0x100 for events 7-9, for event 1 whether @p value is below the entry count, else 0x101 (event 5
  *         refreshes the pictures first)
  */
-extern "C" int cFEStateCheatCharSelect_onWidgetMenu(void* self, int pMenu, unsigned int msg, int value)
+extern "C" int cFEStateCheatCharSelect_onWidgetMenu(cFEStateCheatCharSelect* self, int pMenu, unsigned int msg, int value)
 {
     switch (msg) {
     case 7:
@@ -1092,7 +1092,7 @@ extern "C" int cFEStateCheatCharSelect_onWidgetMenu(void* self, int pMenu, unsig
     case 9:
         return 0x100;
     case 1:
-        return value < *(int*)((char*)self + 0x78);
+        return value < self->mNumCharacters;
     case 5:
         cFEStateCheatCharSelect_updateCharWidgets(self);
         break;
@@ -1111,10 +1111,10 @@ INCLUDE_ASM("fe/festatecharselect", cFEStateCheatCharSelect_updateCharWidgets);
  * texture element of entry first + i (+0xF4) at +0x7C, with +0x78 set to -1. cFEStateCheatCharSelect_onWidgetMenu calls
  * it for menu event 5.
  */
-extern "C" void cFEStateCheatCharSelect_updateCharWidgets(void* self)
+extern "C" void cFEStateCheatCharSelect_updateCharWidgets(cFEStateCheatCharSelect* self)
 {
     int i;
-    int idx = *(unsigned char*)(*(char**)((char*)self + 0x6c) + 0x98);
+    int idx = *(unsigned char*)((char*)self->mpMenu + 0x98);
     for (i = 0; i < 6; i++) {
         void* it = ((void**)((char*)self + 0x54))[i];
         if (it != 0) {

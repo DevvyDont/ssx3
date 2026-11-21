@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/fepopupconfirm.h"
+#include "fe/debugfe.h"
 #include "fe/screenkeyboard.h"
 #include "fe/festatememcard.h"
 #include "util/locale.h"
@@ -1332,8 +1334,8 @@ INCLUDE_ASM("main/all_in_one_main", cDebugFE_getFont);
  * @param self  the debug front end
  * @return the word at +0x18
  */
-extern "C" int cDebugFE_getFont(void *self) {
-    return (*(int *)((char*)(self) + (0x18)));
+extern "C" int cDebugFE_getFont(cDebugFE* self) {
+    return ((int)self->Font);
 }
 #endif
 
@@ -1346,8 +1348,8 @@ INCLUDE_ASM("main/all_in_one_main", cDebugFE_getBoxTID);
  * @param debugFE  the debug front end
  * @return the word at +0x20
  */
-extern "C" int cDebugFE_getBoxTID(void *debugFE) {
-    return (*(int *)((char*)(debugFE) + (0x20)));
+extern "C" int cDebugFE_getBoxTID(cDebugFE* debugFE) {
+    return (debugFE->BoxTID);
 }
 #endif
 
@@ -2795,8 +2797,8 @@ extern void* cFEState_vtbl[];
  * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  */
-extern "C" void cFEStateCheatCharSelect__cFEStateCheatCharSelect(void *self) {
-    *(void***)((char*)self + 8) = cFEState_vtbl;
+extern "C" void cFEStateCheatCharSelect__cFEStateCheatCharSelect(cFEStateCheatCharSelect* self) {
+    self->mVtbl = cFEState_vtbl;
     cUIState__cUIState_DD868(self);
 }
 #endif
@@ -2810,8 +2812,8 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateCheatCharSelect_isDone);
  * @param cheatCharSelect  the cheat character select state
  * @return non-zero once a choice has been made
  */
-extern "C" int cFEStateCheatCharSelect_isDone(void *cheatCharSelect) {
-    return (*(int *)((char*)(cheatCharSelect) + (0x74)));
+extern "C" int cFEStateCheatCharSelect_isDone(cFEStateCheatCharSelect* cheatCharSelect) {
+    return (cheatCharSelect->mDone);
 }
 #endif
 
@@ -2824,8 +2826,8 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateCheatCharSelect_getCheatCharID);
  * @param cheatCharSelect  the cheat character select state
  * @return the chosen character id
  */
-extern "C" int cFEStateCheatCharSelect_getCheatCharID(void *cheatCharSelect) {
-    return (*(int *)((char*)(cheatCharSelect) + (0x70)));
+extern "C" int cFEStateCheatCharSelect_getCheatCharID(cFEStateCheatCharSelect* cheatCharSelect) {
+    return (cheatCharSelect->mCheatCharID);
 }
 #endif
 
@@ -4195,10 +4197,10 @@ extern int cFEPopupConfirm_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *cFEPopupConfirm_cFEPopupConfirm1(void *self) {
+extern "C" void *cFEPopupConfirm_cFEPopupConfirm1(cFEPopupConfirm* self) {
     cScreenPopup_cScreenPopup_DE78(self, 0, 0);
-    *(int **)((char *)self + 8) = cFEPopupConfirm_vtbl;
-    return self;
+    self->mVtbl = (void**)cFEPopupConfirm_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -4215,8 +4217,8 @@ extern void* D_0046C890_DEB8[] __asm__("cFEPopupConfirm_vtbl");
  * The g++ destructor flags are not declared here; they stay in the second argument register for
  * cScreenPopup__cScreenPopup.
  */
-extern "C" void cFEPopupConfirm__cFEPopupConfirm(void *self) {
-    *(void***)((char*)self + 8) = D_0046C890_DEB8;
+extern "C" void cFEPopupConfirm__cFEPopupConfirm(cFEPopupConfirm* self) {
+    self->mVtbl = D_0046C890_DEB8;
     cScreenPopup__cScreenPopup_DEB8(self);
 }
 #endif
@@ -4249,10 +4251,10 @@ extern void* cFEStateOptions_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateOptions_cFEStateOptions(void *self) {
+extern "C" void* cFEStateOptions_cFEStateOptions(cFEStateOptions* self) {
     cUIState_cUIState_DEE8(self, 0);
-    *(void***)((char*)self + 8) = cFEStateOptions_vtbl;
-    return self;
+    self->mVtbl = cFEStateOptions_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -4270,8 +4272,8 @@ extern void* cFEState_vtbl[];
  * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  */
-extern "C" void cFEStateOptions__cFEStateOptions(void *self) {
-    *(void***)((char*)self + 8) = cFEState_vtbl;
+extern "C" void cFEStateOptions__cFEStateOptions(cFEStateOptions* self) {
+    self->mVtbl = cFEState_vtbl;
     cUIState__cUIState_DDF20(self);
 }
 #endif
@@ -4477,10 +4479,10 @@ extern int cFEStateOptionsSaveLoad_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad(void *self) {
+extern "C" void *cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad(cFEStateOptionsSaveLoad* self) {
     cUIState_cUIState_E0F0(self, 0);
-    *(int **)((char *)self + 8) = cFEStateOptionsSaveLoad_vtbl;
-    return self;
+    self->mVtbl = (void**)cFEStateOptionsSaveLoad_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -4498,8 +4500,8 @@ extern void* cFEState_vtbl[];
  * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  */
-extern "C" void cFEStateOptionsSaveLoad__cFEStateOptionsSaveLoad(void *self) {
-    *(void***)((char*)self + 8) = cFEState_vtbl;
+extern "C" void cFEStateOptionsSaveLoad__cFEStateOptionsSaveLoad(cFEStateOptionsSaveLoad* self) {
+    self->mVtbl = cFEState_vtbl;
     cUIState__cUIState_DE128(self);
 }
 #endif

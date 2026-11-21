@@ -1,4 +1,8 @@
 #include "common.h"
+#include "scripter/scriptentitycam.h"
+#include "scripter/scriptobjevent.h"
+#include "scripter/scriptobjtransition.h"
+#include "scripter/scriptobj.h"
 #include "scripter/scriptobjrider.h"
 #include "scripter/scriptentity.h"
 #include "scripter/videngine.h"
@@ -178,8 +182,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObject_GetObjectID);
  * @param scriptObject  the script object
  * @return its object ID
  */
-extern "C" int cScriptObject_GetObjectID(void *scriptObject) {
-    return (*(int *)((char*)(scriptObject) + (4)));
+extern "C" int cScriptObject_GetObjectID(cScriptObject* scriptObject) {
+    return (scriptObject->mObjID);
 }
 #endif
 
@@ -192,8 +196,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObject_IsInUse);
  * @param scriptObject  the script object
  * @return 1 if in use, else 0
  */
-extern "C" int cScriptObject_IsInUse(void *scriptObject) {
-    return (*(int *)((char*)(scriptObject) + (8))) > 0;
+extern "C" int cScriptObject_IsInUse(cScriptObject* scriptObject) {
+    return (scriptObject->mInUse) > 0;
 }
 #endif
 
@@ -422,8 +426,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptEntityCamera_GetSubType);
  * @param entityCamera  the camera script entity
  * @return its sub-type
  */
-extern "C" int cScriptEntityCamera_GetSubType(void *entityCamera) {
-    return (*(int *)((char*)(entityCamera) + (0xC)));
+extern "C" int cScriptEntityCamera_GetSubType(cScriptEntityCamera* entityCamera) {
+    return (entityCamera->mSubType);
 }
 #endif
 
@@ -546,9 +550,9 @@ extern char D_00482298[];
  * @param eventObject  the object (cSSXScriptEngine::mObjectEvent)
  * @param deleteFlags  destructor flags; bit 0 frees the memory
  */
-extern "C" void cScriptObjEvent__cScriptObjEvent(void *eventObject, int deleteFlags) {
-    *(char **)((char*)eventObject + 0x18) = D_00482298;
-    *(char **)((char*)eventObject + 0x0) = cScriptObjEvent_vtbl;
+extern "C" void cScriptObjEvent__cScriptObjEvent(cScriptObjEvent* eventObject, int deleteFlags) {
+    eventObject->mScriptObjectVtbl = (void**)D_00482298;
+    eventObject->mVtbl = (void**)cScriptObjEvent_vtbl;
     cScriptObject__cScriptObject_4950((char*)eventObject + 0xC, 0);
     if (deleteFlags & 1) {
         operator_delete((int *)eventObject);
@@ -907,8 +911,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjTransition_GetCameraManage
  * @param transitionObj  the transition object
  * @return its camera manager
  */
-extern "C" int cScriptObjTransition_GetCameraManager(void *transitionObj) {
-    return (*(int *)((char*)(transitionObj) + (0x10)));
+extern "C" int cScriptObjTransition_GetCameraManager(cScriptObjTransition* transitionObj) {
+    return ((int)transitionObj->mpCameraManager);
 }
 #endif
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/inputsync.h"
 #include "main/gamestate.h"
 #include "replay/frameptr.h"
 #include "be/beintnewrace.h"
@@ -2327,15 +2328,15 @@ INCLUDE_ASM("main/gamestate", cInputSync_cInputSync);
  * @param numSamples  copies per sample
  * @return @p self
  */
-extern "C" void* cInputSync_cInputSync(void* self, int latencyFrames, int numSamples)
+extern "C" void* cInputSync_cInputSync(cInputSync* self, int latencyFrames, int numSamples)
 {
-    *(int*)((char*)self + 0x4) = latencyFrames;
-    *(int*)((char*)self + 0x8) = numSamples;
-    *(int*)((char*)self + 0xc) = 0;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x0) = latencyFrames * numSamples;
-    *(int*)((char*)self + 0x4) = (60 / numSamples) * numSamples;
-    return self;
+    self->latency = latencyFrames;
+    self->numsamples = numSamples;
+    self->tick = 0;
+    self->numsyncedpads = 0;
+    self->sendlimit = latencyFrames * numSamples;
+    self->latency = (60 / numSamples) * numSamples;
+    return ((void*)self);
 }
 #endif
 
@@ -2366,11 +2367,11 @@ struct sObj_cInputSync__cInputSync {
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void cInputSync__cInputSync(sObj_cInputSync__cInputSync* self, int flags)
+extern "C" void cInputSync__cInputSync(cInputSync* self, int flags)
 {
     int i;
-    for (i = 0; i < self->count; i++) {
-        sEntry_cInputSync__cInputSync* entry = &self->entries[i];
+    for (i = 0; i < self->numsyncedpads; i++) {
+        sEntry_cInputSync__cInputSync* entry = &((sEntry_cInputSync__cInputSync*)&self->syncedpads[0])[i];
         if (entry->buf)
             cMemMan_free(entry->buf);
         operator_delete(entry->a);
@@ -2434,16 +2435,16 @@ static inline void* initObj_237140(void* o, int a, int b)
  * @param realinput  the real input (On Tour realinput)
  * @return the synced input that replaces it
  */
-extern "C" void* cInputSync_createlocalinput(sOwner_237140* self, int* realinput)
+extern "C" void* cInputSync_createlocalinput(cInputSync* self, int* realinput)
 {
-    sEntry_237140* syncedPad = &self->entries[self->n++];
-    syncedPad->recs = (sRec_237140*)operator_new_tag(self->count * 100, str_InputSamples, 0, 0);
-    MEM_fill(syncedPad->recs, 0, self->count * 100);
-    for (int i = 0; i < self->count; i++) {
+    sEntry_237140* syncedPad = &((sEntry_237140*)&self->syncedpads[0])[self->numsyncedpads++];
+    syncedPad->recs = (sRec_237140*)operator_new_tag(self->latency * 100, str_InputSamples, 0, 0);
+    MEM_fill(syncedPad->recs, 0, self->latency * 100);
+    for (int i = 0; i < self->latency; i++) {
         syncedPad->recs[i].type = 0x18;
     }
     syncedPad->f4 = 0;
-    syncedPad->f8 = self->f0;
+    syncedPad->f8 = self->sendlimit;
     syncedPad->fC = realinput[0];
     syncedPad->f10 = (int*)cMemMan_alloc(676, str_SyncedPad, 0, 0);
     *syncedPad->f10 = 0;
@@ -2505,16 +2506,16 @@ static inline void* initObj_237280(void* o, int a, int b)
  * @param realinputmap  the input map (On Tour realinputmap)
  * @return the synced input
  */
-extern "C" void* cInputSync_createremoteinput(sOwner_237280* self, int realinputmap)
+extern "C" void* cInputSync_createremoteinput(cInputSync* self, int realinputmap)
 {
-    sEntry_237280* syncedPad = &self->entries[self->n++];
-    syncedPad->recs = (sRec_237280*)operator_new_tag(self->count * 100, str_InputSamples, 0, 0);
-    MEM_fill(syncedPad->recs, 0, self->count * 100);
-    for (int i = 0; i < self->count; i++) {
+    sEntry_237280* syncedPad = &((sEntry_237280*)&self->syncedpads[0])[self->numsyncedpads++];
+    syncedPad->recs = (sRec_237280*)operator_new_tag(self->latency * 100, str_InputSamples, 0, 0);
+    MEM_fill(syncedPad->recs, 0, self->latency * 100);
+    for (int i = 0; i < self->latency; i++) {
         syncedPad->recs[i].type = 0x18;
     }
     syncedPad->f4 = 0;
-    syncedPad->f8 = self->f0;
+    syncedPad->f8 = self->sendlimit;
     syncedPad->fC = 0;
     syncedPad->f10 = (int*)cMemMan_alloc(676, str_SyncedPad, 0, 0);
     *syncedPad->f10 = 0;
@@ -2534,8 +2535,8 @@ INCLUDE_ASM("main/gamestate", cInputSync_preupdate);
 // (99.69% with a ternary clamp). Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 struct sPackSrc_7B28;
-extern "C" void cInputSync_decompressinput(void* self, sPackSrc_7B28* src, char* buf);
-extern "C" void cInputSync_sendClientInput(void* self, sPackSrc_7B28* src);
+extern "C" void cInputSync_decompressinput(cInputSync* self, sPackSrc_7B28* src, char* buf);
+extern "C" void cInputSync_sendClientInput(cInputSync* self, sPackSrc_7B28* src);
 extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" int cGameComm_readPacket(void* self, int ch, void* dst, int size);
 extern "C" float cGameComm_getLatency(void* self);
@@ -2598,7 +2599,7 @@ struct cInputSync_2373B8 {
  * sends them (cInputSync_sendClientInput), queues them, and recomputes the send limit from the connection's latency (cGameComm_getLatency)
  * divided by the frame time (SSXApp + 0x14), at least 2 samples, capped at the ring size. cGame_update calls it.
  */
-extern "C" void cInputSync_preupdate(cInputSync_2373B8* self)
+extern "C" void cInputSync_preupdate(cInputSync* self)
 {
     PadSample_2373B8 sample;
     CompressedSample_2373B8 compsample;
@@ -2606,7 +2607,7 @@ extern "C" void cInputSync_preupdate(cInputSync_2373B8* self)
         return;
     }
     for (int i = 0; i < self->numsyncedpads; i++) {
-        SyncedPad_2373B8* psp = &self->syncedpads[i];
+        SyncedPad_2373B8* psp = &((SyncedPad_2373B8*)&self->syncedpads[0])[i];
         SyncedPad_2373B8& sp = *psp;
         if (sp.sourcepad == 0) {
             char* gc = GameComm();
@@ -2692,7 +2693,7 @@ struct sOwner237950 {
  *
  * @return 1 when input is ready, otherwise 0
  */
-extern "C" int cInputSync_aiinputready(sOwner237950* self)
+extern "C" int cInputSync_aiinputready(cInputSync* self)
 {
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm->mState < 14) {
@@ -2703,8 +2704,8 @@ extern "C" int cInputSync_aiinputready(sOwner237950* self)
         return 0;
     }
     int i;
-    for (i = 0; i < self->count; i++) {
-        sSlot237950* slot = &self->slots[i];
+    for (i = 0; i < self->numsyncedpads; i++) {
+        sSlot237950* slot = &((sSlot237950*)&self->syncedpads[0])[i];
         if (slot->cur == slot->max) {
             return 0;
         }
@@ -2747,18 +2748,18 @@ struct sPlayer002379C8 {
  *
  * @return 1 when the pads were updated
  */
-extern "C" int cInputSync_aiupdate(sPlayer002379C8* self)
+extern "C" int cInputSync_aiupdate(cInputSync* self)
 {
     if (cGameComm_mGameComm->mState < 14) {
         return 0;
     }
-    if (cInputSync_aiinputready((sOwner237950*)self) == 0) {
+    if (cInputSync_aiinputready(self) == 0) {
         return 0;
     }
     int i;
-    for (i = 0; i < self->count; i++) {
-        sTrack002379C8* syncedPad = &self->tracks[i];
-        sFrame002379C8* inputSample = &syncedPad->frames[syncedPad->cur % self->nFrames];
+    for (i = 0; i < self->numsyncedpads; i++) {
+        sTrack002379C8* syncedPad = &((sTrack002379C8*)&self->syncedpads[0])[i];
+        sFrame002379C8* inputSample = &syncedPad->frames[syncedPad->cur % self->latency];
         cInputPad_update(syncedPad->target, inputSample->first, inputSample->data);
         syncedPad->cur++;
     }
@@ -2771,8 +2772,8 @@ INCLUDE_ASM("main/gamestate", cInputSync_sendClientInput);
 #ifdef SKIP_ASM
 struct sPackSrc_7B28;
 struct sPackDst_7B28;
-extern "C" int cInputSync_compressinput(void* self, sPackSrc_7B28* src, sPackDst_7B28* dst);
-extern "C" void cInputSync_decompressinput(void* self, sPackSrc_7B28* src, char* buf);
+extern "C" int cInputSync_compressinput(cInputSync* self, sPackSrc_7B28* src, sPackDst_7B28* dst);
+extern "C" void cInputSync_decompressinput(cInputSync* self, sPackSrc_7B28* src, char* buf);
 extern "C" void cGameComm_writePacket(void* mgr, int a, char* buf, int len);
 
 /**
@@ -2784,7 +2785,7 @@ extern "C" void cGameComm_writePacket(void* mgr, int a, char* buf, int len);
  *
  * @param src  the pad sample (button count and values)
  */
-extern "C" void cInputSync_sendClientInput(void* self, sPackSrc_7B28* src)
+extern "C" void cInputSync_sendClientInput(cInputSync* self, sPackSrc_7B28* src)
 {
     char buf[32];
     int len = cInputSync_compressinput(self, src, (sPackDst_7B28*)buf);
@@ -2821,7 +2822,7 @@ struct sPackDst_7B28 {
  * @param dst  the compressed sample
  * @return the compressed size in bytes (4 + the kept bytes)
  */
-extern "C" int cInputSync_compressinput(void* self, sPackSrc_7B28* src, sPackDst_7B28* dst)
+extern "C" int cInputSync_compressinput(cInputSync* self, sPackSrc_7B28* src, sPackDst_7B28* dst)
 {
     int i;
     int j;
@@ -2855,7 +2856,7 @@ extern "C" void MEM_fill(void* dst, int value, int size);
  * @param out  the pad sample written
  * @param buf  the compressed sample
  */
-extern "C" void cInputSync_decompressinput(void* self, sPackSrc_7B28* out, char* buf)
+extern "C" void cInputSync_decompressinput(cInputSync* self, sPackSrc_7B28* out, char* buf)
 {
     sPackDst_7B28* in = (sPackDst_7B28*)buf;
     out->count = in->count;

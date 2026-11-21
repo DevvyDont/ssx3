@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/animframe.h"
 #include "object/meshanimnode.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
@@ -83,8 +84,8 @@ INCLUDE_ASM("object/instanceman", cAnimFrame_cAnimFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void cAnimFrame_init(void* self);
-extern "C" void cAnimFrame_setAnimRecord(void* self, float* src);
+extern "C" void cAnimFrame_init(cAnimFrame* self);
+extern "C" void cAnimFrame_setAnimRecord(cAnimFrame* self, float* src);
 void cAnimFrame_update_impl(char* self, float t) __asm__("cAnimFrame_update");
 extern char cAnimFrame_vtbl[];
 
@@ -102,8 +103,8 @@ extern "C" void* cAnimFrame_cAnimFrame_impl(char* self, float* src, float f) __a
 extern "C" void* cAnimFrame_cAnimFrame_impl(char* self, float* src, float time)
 {
     *(void**)(self + 0x84) = cAnimFrame_vtbl;
-    cAnimFrame_init(self);
-    cAnimFrame_setAnimRecord(self, src);
+    cAnimFrame_init((cAnimFrame*)self);
+    cAnimFrame_setAnimRecord((cAnimFrame*)self, src);
     cAnimFrame_update_impl(self, time);
     return self;
 }
@@ -119,15 +120,15 @@ INCLUDE_ASM("object/instanceman", cAnimFrame_setAnimRecord);
  *
  * @param src  anim record (tAnimRecord)
  */
-extern "C" void cAnimFrame_setAnimRecord(void* self, float* src)
+extern "C" void cAnimFrame_setAnimRecord(cAnimFrame* self, float* src)
 {
-    *(float**)((char*)self + 0x40) = src;
-    *(float*)((char*)self + 0x44) = src[0];
-    *(float*)((char*)self + 0x48) = src[1];
-    *(float*)((char*)self + 0x4c) = src[2];
-    *(float*)((char*)self + 0x50) = src[3];
-    *(float*)((char*)self + 0x54) = src[4];
-    *(float*)((char*)self + 0x58) = src[5];
+    self->AnimRecord = (const tAnimRecord*)src;
+    self->Vals[0] = src[0];
+    self->Vals[1] = src[1];
+    self->Vals[2] = src[2];
+    self->Vals[3] = src[3];
+    self->Vals[4] = src[4];
+    self->Vals[5] = src[5];
 }
 #endif
 
@@ -139,11 +140,11 @@ extern "C" void* MEM_fill(void* dst, int value, int size);
 /**
  * Clears an animation frame: zeroes its two 0x40-byte value blocks (+0x0, +0x44) and the record pointer (+0x40).
  */
-extern "C" void cAnimFrame_init(void* self)
+extern "C" void cAnimFrame_init(cAnimFrame* self)
 {
     MEM_fill(self, 0, 0x40);
     MEM_fill((char*)self + 0x44, 0, 0x40);
-    *(int*)((char*)self + 0x40) = 0;
+    self->AnimRecord = 0;
 }
 #endif
 
@@ -162,7 +163,7 @@ public:
  * @param src  the animation frame
  * @param sink  replay stream to write to
  */
-extern "C" void cAnimFrame_writeToReplayFrame(void *src, cInstSink *sink) {
+extern "C" void cAnimFrame_writeToReplayFrame(cAnimFrame* src, cInstSink *sink) {
     sink->write(src, 0x40);
 }
 #endif
@@ -175,7 +176,7 @@ INCLUDE_ASM("object/instanceman", cAnimFrame_readFromReplayFrame);
  * @param src  the animation frame
  * @param sink  replay stream to read from
  */
-extern "C" void cAnimFrame_readFromReplayFrame(void *src, cInstSink *sink) {
+extern "C" void cAnimFrame_readFromReplayFrame(cAnimFrame* src, cInstSink *sink) {
     sink->read(src, 0x40);
 }
 #endif
@@ -219,14 +220,14 @@ void cMeshAnimFrame_update_vf(void* self, float f) __asm__("cMeshAnimFrame_updat
  * @param time  time to evaluate at
  * @return self
  */
-extern "C" void* cMeshAnimFrame_cMeshAnimFrame(void* self, float* src, float time)
+extern "C" void* cMeshAnimFrame_cMeshAnimFrame(cMeshAnimFrame* self, float* src, float time)
 {
     cAnimFrame_cAnimFrame(self, src, time);
-    *(void***)((char*)self + 0x84) = cMeshAnimFrame_vtbl;
+    self->mVtbl = cMeshAnimFrame_vtbl;
     vu0CopyMat_351480((sImMat44_351480*)((char*)self + 0x90), &t4mat_Identity);
-    *(float**)((char*)self + 0x40) = src;
+    self->AnimRecord = (const tAnimRecord*)src;
     cMeshAnimFrame_update_vf(self, time);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -243,10 +244,10 @@ INCLUDE_ASM("object/instanceman", cAnimFrame_getStartTime);
  * @return the start time in frames, or 0.0
  */
 // PORT: the original reads *a before checking a for null.
-extern "C" float cAnimFrame_getStartTime(void* self)
+extern "C" float cAnimFrame_getStartTime(cAnimFrame* self)
 {
     float startTime = 0.0f;
-    char** channelList = *(char***)(*(char**)((char*)self + 0x40) + 0x20);
+    char** channelList = *(char***)((char*)self->AnimRecord + 0x20);
     char* channel = *channelList;
     if (channelList != 0 && channel != 0) {
         char* segments = *(char**)(channel + 0x4);
@@ -356,16 +357,16 @@ static inline bool inRange_351660(sImSeg_351660* e, float x)
  * @param rotVel  receives the negated angle rates (w = 0) (On Tour dAng)
  * @param time       the animation time
  */
-extern "C" void cAnimFrame_getDeriv(char* self, sImV4_351660* vel, sImV4_351660* rotVel, float time)
+extern "C" void cAnimFrame_getDeriv(cAnimFrame* self, sImV4_351660* vel, sImV4_351660* rotVel, float time)
 {
     float out[16];
-    sImCurve_351660** curves = *(sImCurve_351660***)(*(char**)(self + 0x40) + 0x20);
+    sImCurve_351660** curves = *(sImCurve_351660***)((char*)self->AnimRecord + 0x20);
     int* cur = (int*)self;
     int mask = 1;
     float* outRate = out;
     for (int i = 0; i < 16; i++, mask <<= 1, outRate++) {
         sImCurve_351660* channel = *curves;
-        if (*(int*)(*(char**)(self + 0x40) + 0x18) & mask) {
+        if (*(int*)((char*)self->AnimRecord + 0x18) & mask) {
             sImSeg_351660* segment = &channel->segs[*cur];
             if (!inRange_351660(segment, time)) {
                 segment = (sImSeg_351660*)cAnimChannel_nextSegment((sImRangeTable*)channel, cur, time);
@@ -510,7 +511,7 @@ static inline void vu0CopyMatIM(sImMat44* d, const sImMat44* s)
  *
  * @param xform  the transform to apply (On Tour xform)
  */
-extern "C" void cMeshAnimFrame_transform(void* self, sImMat44* xform)
+extern "C" void cMeshAnimFrame_transform(cMeshAnimFrame* self, sImMat44* xform)
 {
     sImMat44* dst = (sImMat44*)((char*)self + 0x90);
     sImMat44 productCopy;
@@ -540,12 +541,12 @@ void cCamAnimFrame_update_vf(void* self, float f) __asm__("cCamAnimFrame_update_
  * @param animTime  time to evaluate at
  * @return self
  */
-extern "C" void* cCamAnimFrame_cCamAnimFrame(void* self, float* src, float animTime)
+extern "C" void* cCamAnimFrame_cCamAnimFrame(cCamAnimFrame* self, float* src, float animTime)
 {
     cAnimFrame_cAnimFrame(self, src, animTime);
-    *(void***)((char*)self + 0x84) = cCamAnimFrame_vtbl;
+    self->mVtbl = cCamAnimFrame_vtbl;
     cCamAnimFrame_update_vf(self, animTime);
-    return self;
+    return ((void*)self);
 }
 #endif
 

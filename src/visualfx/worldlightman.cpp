@@ -1,4 +1,6 @@
 #include "common.h"
+#include "visualfx/lensfx.h"
+#include "visualfx/cutscenetransitionman.h"
 #include "visualfx/avalanche.h"
 #include "visualfx/transitionman.h"
 #include "bx/math3d.h"
@@ -2224,8 +2226,8 @@ INCLUDE_ASM("visualfx/worldlightman", cLensFxMan_SetNumViews);
  * @param lensMan  the lens effect manager
  * @param numViews  the number of views
  */
-extern "C" void cLensFxMan_SetNumViews(void *lensMan, int numViews) {
-    (*(int *)((char*)(lensMan) + (0x6490))) = numViews;
+extern "C" void cLensFxMan_SetNumViews(cLensFxMan* lensMan, int numViews) {
+    (lensMan->mNumViews) = numViews;
 }
 #endif
 //100%
@@ -2240,8 +2242,8 @@ INCLUDE_ASM("visualfx/worldlightman", cLensFxMan_Lock);
  * @param lensMan  the lens effect manager
  * @param locked  the flag
  */
-extern "C" void cLensFxMan_Lock(void *lensMan, int locked) {
-    (*(int *)((char*)(lensMan) + (0x6494))) = locked;
+extern "C" void cLensFxMan_Lock(cLensFxMan* lensMan, int locked) {
+    (lensMan->mbLocked) = locked;
 }
 #endif
 
@@ -3456,8 +3458,8 @@ INCLUDE_ASM("visualfx/worldlightman", cCutSceneTransitionMan_GetCurrentState);
  * @param cutSceneMan  the cut-scene transition manager
  * @return the state
  */
-extern "C" int cCutSceneTransitionMan_GetCurrentState(void *cutSceneMan) {
-    return (*(int *)((char*)(cutSceneMan) + (0x10)));
+extern "C" int cCutSceneTransitionMan_GetCurrentState(cCutSceneTransitionMan* cutSceneMan) {
+    return (cutSceneMan->mCurrentState);
 }
 #endif
 //100%

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/bedbprofile.h"
 #include "be/beintecon.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -609,14 +610,14 @@ void operator_delete(int*);
  *
  * @param flags  bit 0: operator_delete the object
  */
-extern "C" void cBECharProfileDB__cBECharProfileDB(void* self, int flags)
+extern "C" void cBECharProfileDB__cBECharProfileDB(cBECharProfileDB* self, int flags)
 {
-    void* buffer = *(void**)((char*)self + 0x288);
+    void* buffer = self->mpBoltsMap;
     if (buffer != 0)
     {
         cMemMan_free(buffer);
     }
-    *(void**)((char*)self + 0x288) = 0;
+    self->mpBoltsMap = 0;
     if (flags & 1)
     {
         operator_delete((int*)self);
@@ -631,7 +632,7 @@ int func_0014DC40(void* self, int kind);
 extern "C" void* func_0014DC50(void* self, int kind);
 int func_0014D988(void* self, int i);
 extern "C" void* func_0014D998(void* self, int i);
-extern "C" int func_00151C90(void* self, int id, int on);
+extern "C" int func_00151C90(cBECharProfileDB* self, int id, int on);
 extern char D_004A6750[];
 
 struct sEconItem_1513B8
@@ -693,7 +694,7 @@ static inline int Price_1513B8(sEconDef_1513B8* d)
  *
  * @param vself  the character profile
  */
-extern "C" void func_001513B8(void* vself)
+extern "C" void func_001513B8(cBECharProfileDB* vself)
 {
     sEconItems_1513B8* self = (sEconItems_1513B8*)vself;
     void* db = D_004A6750;
@@ -701,7 +702,7 @@ extern "C" void func_001513B8(void* vself)
     sEconGroup_1513B8* prizeGroup = (sEconGroup_1513B8*)func_0014DC50(db, self->kind);
     for (int i = 0; i < n; i++, prizeGroup++)
     {
-        func_00151C90(self, prizeGroup->prize, 1);
+        func_00151C90((cBECharProfileDB*)self, prizeGroup->prize, 1);
     }
     int j;
     for (j = 0; j < self->count; j++)
@@ -722,7 +723,7 @@ extern "C" void func_001513B8(void* vself)
         else if (Price_1513B8(itemDef) == -1)
         {
             Find_1513B8(self, itemDef->id)->flags |= 2;
-            func_00151C90(self, itemDef->id, 1);
+            func_00151C90((cBECharProfileDB*)self, itemDef->id, 1);
             changed = 1;
         }
     }
@@ -762,10 +763,10 @@ struct sEconItems_001515B8
  *
  * The save-file loader calls it for every loaded profile.
  */
-extern "C" void func_001515B8(sEconItems_001515B8* self)
+extern "C" void func_001515B8(cBECharProfileDB* self)
 {
-    int n = self->count;
-    sEconItem_001515B8* item = self->items;
+    int n = self->mNumBolts;
+    sEconItem_001515B8* item = ((sEconItem_001515B8*)&self->mBolts[0]);
     for (int i = 0; i < n; i++, item++)
     {
         if (item->flags & 4)
@@ -882,7 +883,7 @@ extern "C" void* func_00416210(void* dst, int c, int n);
 extern "C" void MEM_fill(void* dst, int c, int n);
 struct sEconItems_151A88;
 struct sEcon_001519E0;
-extern "C" void func_00151A88(sEconItems_151A88* self, int k);
+extern "C" void func_00151A88(cBECharProfileDB* self, int k);
 extern "C" void func_001519E0(sEcon_001519E0* self, int k);
 extern "C" void func_00150558(int kind, void* dst);
 extern sEconDef_1600 D_0043EE10_v1600[] __asm__("cBELibrary_missionInfo");
@@ -904,7 +905,7 @@ extern sEconColRec_1600 D_005308D9[];
 extern "C" void cBECharProfileDB_init(sEcon_1600* self, int k, int reload)
 {
     if (reload) {
-        func_00151A88((sEconItems_151A88*)self, k);
+        func_00151A88((cBECharProfileDB*)((sEconItems_151A88*)self), k);
     }
     self->bits.b0 = 0;
     self->bits.b1 = 0;
@@ -1039,7 +1040,7 @@ INCLUDE_ASM("be/beintecon", func_00151A88);
 #ifdef SKIP_ASM
 int func_0014D988(void* self, int i);
 extern "C" void* func_0014D998(void* self, int i);
-extern "C" void func_001513B8(void* self);
+extern "C" void func_001513B8(cBECharProfileDB* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern int D_004A11E8;
@@ -1079,29 +1080,29 @@ struct sEconItems_151A88
  *
  * @param k  the character
  */
-extern "C" void func_00151A88(sEconItems_151A88* self, int k)
+extern "C" void func_00151A88(cBECharProfileDB* self, int k)
 {
     void* db = D_004A6750;
     sEconDef_151A88* itemDef = (sEconDef_151A88*)func_0014D998(db, k);
     int n = func_0014D988(db, k);
-    self->kind = k;
-    self->count = n;
-    if (self->lookup == 0)
-        self->lookup = (short*)operator_new_tag(D_004A11E8 * 2, str_Profile_Bolts_Map, 0, 0);
+    self->unk_BC0 = k;
+    self->mNumBolts = n;
+    if (self->mpBoltsMap == 0)
+        self->mpBoltsMap = (short*)operator_new_tag(D_004A11E8 * 2, str_Profile_Bolts_Map, 0, 0);
     int i;
     for (i = 0; i < D_004A11E8; i++)
-        self->lookup[i] = -1;
+        self->mpBoltsMap[i] = -1;
     for (i = 0; i < n; i++, itemDef++)
     {
-        sEconItem_151A88* itemSlot = &self->items[i];
+        sEconItem_151A88* itemSlot = &((sEconItem_151A88*)&self->mBolts[0])[i];
         itemSlot->flags = 0;
         int id = itemDef->id;
         itemSlot->id = id;
-        self->lookup[itemDef->id] = i;
+        self->mpBoltsMap[itemDef->id] = i;
     }
     for (i = n; i < 525; i++)
     {
-        sEconItem_151A88* emptySlot = &self->items[i];
+        sEconItem_151A88* emptySlot = &((sEconItem_151A88*)&self->mBolts[0])[i];
         emptySlot->id = -1;
         emptySlot->flags = 0;
     }
@@ -1134,10 +1135,10 @@ static inline unsigned int clearBits_151BD0(unsigned int f, unsigned int m)
 /**
  * Normalises a character profile's item flags: items with flag 0x20 get flags 0x16; the others lose flags 0x10 and 4.
  */
-extern "C" void func_00151BD0(sEconItems_151BD0* self)
+extern "C" void func_00151BD0(cBECharProfileDB* self)
 {
-    for (int i = 0; i < self->count; i++) {
-        sEconItem_151BD0* item = &self->items[i];
+    for (int i = 0; i < self->mNumBolts; i++) {
+        sEconItem_151BD0* item = &((sEconItem_151BD0*)&self->mBolts[0])[i];
         unsigned int oldFlags = item->flags;
         item->flags = (oldFlags & 0x20) ? (oldFlags | 0x16) : clearBits_151BD0(clearBits_151BD0(oldFlags, 0x10), 4);
     }
@@ -1152,9 +1153,9 @@ INCLUDE_ASM("be/beintecon", func_00151C20);
  * @param i  the slot
  * @return the item id, or -1
  */
-extern "C" short func_00151C20(void* self, int i)
+extern "C" short func_00151C20(cBECharProfileDB* self, int i)
 {
-    if (i >= *(int*)((char*)self + 0x28C))
+    if (i >= self->mNumBolts)
         return -1;
     return *(short*)((i << 2) + (int)self + 0x290);
 }
@@ -1185,12 +1186,12 @@ struct sEconItems_00151C48
  * @param id  the item id
  * @param on  nonzero to set the flag
  */
-extern "C" void func_00151C48(sEconItems_00151C48* self, int id, int on)
+extern "C" void func_00151C48(cBECharProfileDB* self, int id, int on)
 {
-    int idx = self->lookup[id];
+    int idx = self->mpBoltsMap[id];
     sEconItem_00151C48* item;
     if (idx >= 0)
-        item = &self->items[idx];
+        item = &((sEconItem_00151C48*)&self->mBolts[0])[idx];
     else
         item = 0;
     if (on)
@@ -1209,7 +1210,7 @@ void* func_0014BDB8_1C90() __asm__("func_0014BDB8__FPv");
 extern "C" int func_0014D448(void* db, int kind, int id);
 extern "C" void* func_0014D558(void* db, int kind, int id);
 extern "C" int func_0014D4C8(void* db, int kind, int id);
-extern "C" int func_00151EF0(void* self, int id, int on);
+extern "C" int func_00151EF0(cBECharProfileDB* self, int id, int on);
 
 struct sEconItem_151C90
 {
@@ -1289,7 +1290,7 @@ static inline sEconDef_151C90* getDef_151C90(sEconDefs_151C90* db, int i)
  */
 // Sets item id owned/unowned; turning on cascades turn-offs to conflicting items (def flag 1), turning off
 // cascades to dependent items (owned before or def flag 8). Then applies the item's links; 0 on failure.
-extern "C" int func_00151C90(void* selfp, int id, int on)
+extern "C" int func_00151C90(cBECharProfileDB* selfp, int id, int on)
 {
     sEconItems_151C90* self = (sEconItems_151C90*)selfp;
     sEconDefs_151C90* db = (sEconDefs_151C90*)func_0014BDB8_1C90();
@@ -1317,7 +1318,7 @@ extern "C" int func_00151C90(void* selfp, int id, int on)
                 int j = self->lookup[sid];
                 if (j >= 0 && (isOwned_151C90(&self->items[j]) || (rel->flags & 8)))
                 {
-                    if (func_00151C90(self, sid, 0) == 0)
+                    if (func_00151C90((cBECharProfileDB*)self, sid, 0) == 0)
                         return 0;
                 }
             }
@@ -1329,13 +1330,13 @@ extern "C" int func_00151C90(void* selfp, int id, int on)
         int n = func_0014D4C8(db, self->kind, id);
         for (int i = 0; i < n; i++, rel++)
         {
-            if (func_00151C90(self, rel->other, 0) == 0)
+            if (func_00151C90((cBECharProfileDB*)self, rel->other, 0) == 0)
                 return 0;
         }
     }
     if ((on && !wasOn) || (!on && wasOn))
     {
-        if (func_00151EF0(self, id, on) == 0)
+        if (func_00151EF0((cBECharProfileDB*)self, id, on) == 0)
             return 0;
     }
     return 1;
@@ -1350,7 +1351,7 @@ void* func_0014BDB8_1EF0() __asm__("func_0014BDB8__FPv");
 struct sEconLink_151EF0;
 extern "C" sEconLink_151EF0* func_0014DB40(void* db, int kind, int id, int on, int* n);
 extern "C" int func_0014D448(void* db, int kind, int id);
-extern "C" int func_00151C90(void* self, int id, int on);
+extern "C" int func_00151C90(cBECharProfileDB* self, int id, int on);
 
 struct sEconItem_151EF0
 {
@@ -1424,7 +1425,7 @@ static inline sEconDef_151EF0* getDef_151EF0(sEconDefs_151EF0* db, int i)
  * @return 1 on success, 0 if a nested change failed
  */
 // Sets item id owned/unowned and applies its dependency links (cascading through func_00151C90); 0 on failure.
-extern "C" int func_00151EF0(void* selfp, int id, int on)
+extern "C" int func_00151EF0(cBECharProfileDB* selfp, int id, int on)
 {
     sEconItems_151EF0* self = (sEconItems_151EF0*)selfp;
     sEconDefs_151EF0* db = (sEconDefs_151EF0*)func_0014BDB8_1EF0();
@@ -1456,7 +1457,7 @@ extern "C" int func_00151EF0(void* selfp, int id, int on)
             else
                 item->flags &= ~0x10;
         }
-        else if (func_00151C90(self, targetItem->id, link->on != 0) == 0)
+        else if (func_00151C90((cBECharProfileDB*)self, targetItem->id, link->on != 0) == 0)
         {
             return 0;
         }
@@ -1471,7 +1472,7 @@ INCLUDE_ASM("be/beintecon", func_001520E8);
 void* func_0014BDB8(void* self);
 int func_0014D988(void* self, int i);
 extern "C" void* func_0014D998(void* self, int i);
-extern "C" int func_00151EF0(void* self, int id, int on);
+extern "C" int func_00151EF0(cBECharProfileDB* self, int id, int on);
 
 struct sEconItem_001520E8
 {
@@ -1509,9 +1510,9 @@ static inline sEconItem_001520E8* getItem_001520E8(sEconItems_001520E8* self, in
  * @param changed  receives 1 when at least one such item was owned, else 0
  * @return 1 on success, 0 if applying links failed
  */
-extern "C" int func_001520E8(sEconItems_001520E8* self, int* changed)
+extern "C" int func_001520E8(cBECharProfileDB* self, int* changed)
 {
-    void* db = func_0014BDB8(self);
+    void* db = func_0014BDB8(((sEconItems_001520E8*)self));
     int n = func_0014D988(db, *((signed char*)self + 0xBC0));
     sEconDef_001520E8* def = (sEconDef_001520E8*)func_0014D998(db, *((signed char*)self + 0xBC0));
     *changed = 0;
@@ -1519,7 +1520,7 @@ extern "C" int func_001520E8(sEconItems_001520E8* self, int* changed)
     {
         if (def->flags & 0x1000)
         {
-            if (getItem_001520E8(self, def->id)->flags & 0x10)
+            if (getItem_001520E8(((sEconItems_001520E8*)self), def->id)->flags & 0x10)
             {
                 *changed = 1;
                 if (func_00151EF0(self, def->id, 1) == 0)
@@ -1539,7 +1540,7 @@ void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
 int func_0014DC40(void* self, int kind);
 extern "C" void* func_0014DC50(void* self, int kind);
 extern "C" int func_0014D608(void* self, int kind, int id, void** out, int a, int b);
-extern "C" int func_00151C90(void* self, int id, int on);
+extern "C" int func_00151C90(cBECharProfileDB* self, int id, int on);
 
 struct sEconItem_1521F0
 {
@@ -1588,21 +1589,21 @@ static inline sEconItem_1521F0* Find_1521F0(sEconItems_1521F0* self, int id)
  *
  * @return 1, or 0 when a prize could not be owned
  */
-extern "C" int func_001521F0(sEconItems_1521F0* self)
+extern "C" int func_001521F0(cBECharProfileDB* self)
 {
     int i = 0;
     int ok = 1;
     void* db = func_0014BDB8_noarg();
-    sEconGroup_1521F0* group = (sEconGroup_1521F0*)func_0014DC50(db, self->kind);
-    int n = func_0014DC40(db, self->kind);
+    sEconGroup_1521F0* group = (sEconGroup_1521F0*)func_0014DC50(db, self->unk_BC0);
+    int n = func_0014DC40(db, self->unk_BC0);
     for (; i < n; i++, group++)
     {
         sEconDef_1521F0* list[528];
-        int cnt = func_0014D608(db, self->kind, group->id, (void**)list, -1, 1);
+        int cnt = func_0014D608(db, self->unk_BC0, group->id, (void**)list, -1, 1);
         int j;
         for (j = 0; j < cnt; j++)
         {
-            if (!(Find_1521F0(self, list[j]->id)->flags & 0x10))
+            if (!(Find_1521F0(((sEconItems_1521F0*)self), list[j]->id)->flags & 0x10))
                 continue;
             if (list[j]->flags & 0x10)
                 break;
@@ -1635,9 +1636,9 @@ static inline bool testFlag_152340(unsigned int flags, unsigned int mask)
  * @param id  the item id
  * @return true when owned
  */
-extern "C" bool func_00152340(void* self, int id)
+extern "C" bool func_00152340(cBECharProfileDB* self, int id)
 {
-    int idx = (*(short**)((char*)self + 0x288))[id];
+    int idx = (self->mpBoltsMap)[id];
     unsigned int flags = *(unsigned short*)((idx << 2) + (int)self + 0x292);
     return testFlag_152340(flags, 0x10);
 }
@@ -1653,9 +1654,9 @@ INCLUDE_ASM("be/beintecon", func_00152368);
  * @param mask  the flags to test
  * @return true when all are set
  */
-extern "C" bool func_00152368(void* self, int id, unsigned int mask)
+extern "C" bool func_00152368(cBECharProfileDB* self, int id, unsigned int mask)
 {
-    int idx = (*(short**)((char*)self + 0x288))[id];
+    int idx = (self->mpBoltsMap)[id];
     unsigned int flags = *(unsigned short*)((idx << 2) + (int)self + 0x292);
     return (~flags & mask) == 0;
 }

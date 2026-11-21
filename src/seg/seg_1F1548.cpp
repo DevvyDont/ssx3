@@ -1,4 +1,6 @@
 #include "common.h"
+#include "visualfx/worldlightman.h"
+#include "visualfx/lensfx.h"
 #include "visualfx/splashfx.h"
 #include "ai/riderhandler.h"
 #include "render/ps2graphicsman.h"
@@ -3019,14 +3021,14 @@ struct Elem4380 { Elem4380() {} };
  * @param sunHalo  the object to construct (this)
  * @return @p sunHalo
  */
-extern "C" void *cSunHalo_cSunHalo(void *sunHalo) {
+extern "C" void *cSunHalo_cSunHalo(cSunHalo* sunHalo) {
     cHalo_cHalo(sunHalo);
     new ((char*)sunHalo + 0x40) Elem4380[16];
-    *(int *)((char*)sunHalo + 0x204) = 0;
-    *(short *)((char*)sunHalo + 0x2E) = 0;
-    *(short *)((char*)sunHalo + 0x2C) = 0;
+    *(int*)&sunHalo->mfOcclude = 0;
+    *(short*)&sunHalo->mbRequestZSample = 0;
+    *(short*)&sunHalo->mbOnScreen = 0;
     cSunHalo_InitLens(sunHalo);
-    return sunHalo;
+    return ((void*)sunHalo);
 }
 #endif
 
@@ -3371,9 +3373,9 @@ struct sSun_4A08 {
  * @param vp  the viewport rectangle (x, y, width, height)
  * @param flag  nonzero picks render-state set 7 instead of 6
  */
-extern "C" void cSunHalo_Render(sSun_4A08* self, sV4_4A08* vp, int flag)
+extern "C" void cSunHalo_Render(cSunHalo* self, sV4_4A08* vp, int flag)
 {
-    if (self->visible == 0)
+    if (self->mbOnScreen == 0)
         return;
     int id = !flag ? 6 : 7;
     float sunRed = cRenderStateMan_SunColorR(id);
@@ -3381,7 +3383,7 @@ extern "C" void cSunHalo_Render(sSun_4A08* self, sV4_4A08* vp, int flag)
     float sunBlue = cRenderStateMan_SunColorB(id);
     sV4_4A08 col;
     col = sV4_4A08(1.0f, sunRed, sunGreen, sunBlue);
-    col.x *= self->intensity * cRenderStateMan_SunIntensity(id);
+    col.x *= self->mfOcclude * cRenderStateMan_SunIntensity(id);
     float size = cRenderStateMan_SunRadius(id);
     int tex = cRenderStateMan_SunType(id);
     if (size == 1.0f)
@@ -3405,10 +3407,10 @@ extern "C" void cSunHalo_Render(sSun_4A08* self, sV4_4A08* vp, int flag)
     ((cGfx_4A08*)gfx)->stateTop->f4_2 = 7;
     ((cGfx_4A08*)gfx)->stateTop->f8_5 = 8;
     ((cGfx_4A08*)gfx)->stateTop->f10 = ((cGfx_4A08*)gfx)->GetTexId(tex);
-    sV4_4A08 pos(self->sunX, self->sunY, 0.0f, 1.0f);
+    sV4_4A08 pos(self->mScreenPosition.x, self->mScreenPosition.y, 0.0f, 1.0f);
     ((cGfx_4A08*)gfx)->DrawSprite(pos, sV2_4A08(size, size),
                     sV2_4A08(0.0f, 0.0f), sV2_4A08(1.0f, 1.0f), col);
-    cSunHalo_RenderLens_4A08(self, vp);
+    cSunHalo_RenderLens_4A08(((sSun_4A08*)self), vp);
     ((cGfx_4A08*)gfx)->stateTop--;
     ((cGfx_4A08*)gfx)->PopView();
     ((cGfx_4A08*)gfx)->PopViewport();
@@ -3541,12 +3543,12 @@ static inline float clamp_4DB8(float v, float lo, float hi)
  * @param cam  the view info: viewport rectangle, view matrix (+0x10) and far clip (+0x58)
  * @param flag  nonzero picks render-state set 7 instead of 6
  */
-extern "C" void cSunHalo_Process(sSun_4DB8* self, sCam_4DB8* cam, int flag)
+extern "C" void cSunHalo_Process(cSunHalo* self, sCam_4DB8* cam, int flag)
 {
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     if (cRenderStateMan_SunType(6) == -1) {
-        self->visible = 0;
-        self->onScreen = 0;
+        self->mbOnScreen = 0;
+        self->mbRequestZSample = 0;
         return;
     }
     float dist = cam->farClip - 500.0f;
@@ -3590,22 +3592,22 @@ extern "C" void cSunHalo_Process(sSun_4DB8* self, sCam_4DB8* cam, int flag)
     ScaleEq_4DB8(sun, dist);
     AddEq_4DB8(sun, dir);
     if (((cGfx_4DB8*)ps2GraphicsMan)->IsCulled(sun)) {
-        self->visible = 0;
-        self->onScreen = 0;
-        self->intensity = 0.0f;
+        self->mbOnScreen = 0;
+        self->mbRequestZSample = 0;
+        self->mfOcclude = 0.0f;
         return;
     }
-    self->visible = 1;
-    self->onScreen = 1;
-    self->screen = ((cGfx_4DB8*)ps2GraphicsMan)->Project(sun);
-    self->rect.x = self->screen.x - 8.0f;
-    self->rect.y = self->screen.y - 8.0f;
-    self->rect.w = 16.0f;
-    self->rect.h = 16.0f;
-    self->clip = self->rect;
-    self->clip.x = clamp_4DB8(self->clip.x, 0.0f, cam->vp.x + cam->vp.w - 16.0f);
-    self->clip.y = clamp_4DB8(self->clip.y, 0.0f, cam->vp.x + cam->vp.h - 16.0f);
-    self->depth = self->screen.z;
+    self->mbOnScreen = 1;
+    self->mbRequestZSample = 1;
+    (*(sV4_4DB8*)&self->mScreenPosition) = ((cGfx_4DB8*)ps2GraphicsMan)->Project(sun);
+    self->mZRect.X = self->mScreenPosition.x - 8.0f;
+    self->mZRect.Y = self->mScreenPosition.y - 8.0f;
+    self->mZRect.W = 16.0f;
+    self->mZRect.H = 16.0f;
+    (*(sRect_4DB8*)&self->mZSRect) = (*(sRect_4DB8*)&self->mZRect);
+    self->mZSRect.X = clamp_4DB8(self->mZSRect.X, 0.0f, cam->vp.x + cam->vp.w - 16.0f);
+    self->mZSRect.Y = clamp_4DB8(self->mZSRect.Y, 0.0f, cam->vp.x + cam->vp.h - 16.0f);
+    self->mZDist = self->mScreenPosition.z;
 }
 #endif
 
@@ -3676,11 +3678,11 @@ struct Outer5230 { int pad; Inner5230 *p; };
  * @param lightMan  the light manager (this)
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cWorldLightMan__cWorldLightMan(Outer5230 *lightMan, int flags) {
-    if (lightMan->p != 0) {
-        delete lightMan->p;
+extern "C" void cWorldLightMan__cWorldLightMan(cWorldLightMan* lightMan, int flags) {
+    if ((Inner5230*)lightMan->m_pWPQuery != 0) {
+        delete (Inner5230*)lightMan->m_pWPQuery;
     }
-    cWorldLightMan_purgeLightCache(lightMan);
+    cWorldLightMan_purgeLightCache(((Outer5230*)lightMan));
     if (flags & 1) {
         operator_delete((int *)lightMan);
     }

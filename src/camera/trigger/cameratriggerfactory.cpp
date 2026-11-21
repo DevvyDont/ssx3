@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/debugfe.h"
 #include "camera/trigger/triggeralgorithms.h"
 #include "camera/trigger/cameratriggerman.h"
 #include "camera/camera.h"
@@ -6963,7 +6964,7 @@ struct sStr_17A378 {
  * @param selfp  the track file manager (this, On Tour cTrackFileMan)
  * @param file  path of the index file
  */
-extern "C" void cTrackFileMan_scanTrackIndex(void* selfp, const char* file)
+extern "C" void cTrackFileMan_scanTrackIndex(cTrackFileMan* selfp, const char* file)
 {
     sCamMgr_17A378* self = (sCamMgr_17A378*)selfp;
     int size;
@@ -7077,33 +7078,33 @@ extern char* str_BAM_b[];
  * exist, and for each one found copies its file name, records its location id, marks it a BAM location and,
  * when cTrackFileMan_testWCBAMStartLocation says so, a WC BAM start. On Tour's second pass for separate "%sBAM" files is not here.
  */
-extern "C" void cTrackFileMan_scanLocations(sCamMgr* self)
+extern "C" void cTrackFileMan_scanLocations(cTrackFileMan* self)
 {
     sCamName names[0x18];
     int i;
-    self->count = 0;
-    self->numActive = 0;
-    self->numValid = 0;
-    MEM_fill(self->entries, 0, 35840);
+    self->NumLocations = 0;
+    self->NumBAMLocations = 0;
+    self->NumWCBAMStartLocations = 0;
+    MEM_fill(((sCamEntry*)&self->LocationInfo[0]), 0, 35840);
     void* iface = cBE_getInterface_17A638(cBE_getBE(), 0);
     for (i = 0; i < 22; i++)
         names[i].name = cBENewRaceInterface_getLocationFile(iface, i);
-    if (cTrackFileMan_checkLocation1_A638(self, 22, names, (char*)str_BAM_b)) {
+    if (cTrackFileMan_checkLocation1_A638(((sCamMgr*)self), 22, names, (char*)str_BAM_b)) {
         int j;
-        for (j = 0; j < 22 && self->count < 0x100; j++) {
+        for (j = 0; j < 22 && self->NumLocations < 0x100; j++) {
             if (names[j].ok) {
-                int* ip = &self->entries[0].idx;
-                int* ap = &self->entries[0].active;
-                strcpy(self->entries[self->count].name, cBENewRaceInterface_getLocationFile(iface, j));
-                *(char**)((char*)self + 0x44 + self->count * 0x8C) = str_BAM_b[0];
-                ip[self->count * 35] = j;
-                ap[self->count * 35] = 1;
-                self->numActive++;
-                if (cTrackFileMan_testWCBAMStartLocation_A638(self, ip[self->count * 35])) {
-                    *(int*)((char*)self + 0x8C + self->count * 0x8C) = 1;
-                    self->numValid++;
+                int* ip = &((sCamEntry*)&self->LocationInfo[0])[0].idx;
+                int* ap = &((sCamEntry*)&self->LocationInfo[0])[0].active;
+                strcpy(((sCamEntry*)&self->LocationInfo[0])[self->NumLocations].name, cBENewRaceInterface_getLocationFile(iface, j));
+                *(char**)((char*)self + 0x44 + self->NumLocations * 0x8C) = str_BAM_b[0];
+                ip[self->NumLocations * 35] = j;
+                ap[self->NumLocations * 35] = 1;
+                self->NumBAMLocations++;
+                if (cTrackFileMan_testWCBAMStartLocation_A638(((sCamMgr*)self), ip[self->NumLocations * 35])) {
+                    *(int*)((char*)self + 0x8C + self->NumLocations * 0x8C) = 1;
+                    self->NumWCBAMStartLocations++;
                 }
-                self->count++;
+                self->NumLocations++;
             }
         }
     }
@@ -7172,12 +7173,12 @@ struct sBigFile_A830 {
  * @param tag  the big file name (On Tour sBigFile)
  * @return 1 when the section exists and is not in the table yet, else 0
  */
-extern "C" int cTrackFileMan_checkLocation(sCamMgr_A830* self, char* name, char* tag)
+extern "C" int cTrackFileMan_checkLocation(cTrackFileMan* self, char* name, char* tag)
 {
     int i;
-    for (i = 0; i < self->count; i++) {
-        if (strcasecmp(name, self->entries[i].name) == 0 &&
-            strcasecmp(tag, self->entries[i].tag) == 0) {
+    for (i = 0; i < self->NumLocations; i++) {
+        if (strcasecmp(name, ((sCamEntry_A830*)&self->LocationInfo[0])[i].name) == 0 &&
+            strcasecmp(tag, ((sCamEntry_A830*)&self->LocationInfo[0])[i].tag) == 0) {
             return 0;
         }
     }
@@ -7266,7 +7267,7 @@ struct sBigFile_17A978 {
  * @param tag  the big file name (On Tour sBigFile)
  * @return 1 when at least one name was found in the big file, else 0
  */
-extern "C" int cTrackFileMan_checkLocation1(void* selfp, int n, void* namesp, char* tag)
+extern "C" int cTrackFileMan_checkLocation1(cTrackFileMan* selfp, int n, void* namesp, char* tag)
 {
     sCamMgr_17A978* self = (sCamMgr_17A978*)selfp;
     sCamName_17A978* names = (sCamName_17A978*)namesp;

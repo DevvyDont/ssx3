@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/ps2chunkresolve.h"
 #include "world/chunkresolve.h"
 #include "wscript/wscriptcache.h"
 #include "render/ps2graphicsman.h"
@@ -1596,12 +1597,12 @@ INCLUDE_ASM("world/worldview", cPS2ChunkResolve_init);
  *
  * @param pNash  the texture manager handle cWorldCache_init passes on (On Tour Nash* pNash)
  */
-extern "C" void cPS2ChunkResolve_init(void* self, int pNash)
+extern "C" void cPS2ChunkResolve_init(cPS2ChunkResolve* self, int pNash)
 {
     cWorld* w = cWorld_m_pTheWorld;
-    *(int*)((char*)self + 0xC) = pNash;
+    self->mp_Nash = (Nash*)pNash;
     *(char****)self = (char***)w;
-    *(int*)((char*)self + 0x10) = *(short*)(*(char**)w->m_pWorldCache + 0x2A);
+    self->m_iNumImages = *(short*)(*(char**)w->m_pWorldCache + 0x2A);
 }
 #endif
 
@@ -1709,11 +1710,11 @@ static inline void insert_AE68(void* self, int type, char* obj, int off)
  * @param obj  the loaded data (On Tour pData)
  * @return @p obj
  */
-extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID, char* obj)
+extern "C" void* cPS2ChunkResolve_resolve(cPS2ChunkResolve* self, int msg, unsigned int RID, char* obj)
 {
     switch (msg) {
     case 1:
-        *(unsigned short*)(obj + 0x1A2) += *(int*)((char*)self + 0x10);
+        *(unsigned short*)(obj + 0x1A2) += self->m_iNumImages;
         insert_AE68(self, 1, obj, 344);
         break;
     case 9: {
@@ -1725,7 +1726,7 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
     case 10: {
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
         sVEntry_AE68* vtEntry = (sVEntry_AE68*)((char*)w->mVtbl + 0x170);
-        ((tMsgS_AE68)vtEntry->fn)((char*)w + vtEntry->delta, obj, str_strm_lpg, 0, 0, (RID >> 8) + *(int*)((char*)self + 0x10));
+        ((tMsgS_AE68)vtEntry->fn)((char*)w + vtEntry->delta, obj, str_strm_lpg, 0, 0, (RID >> 8) + self->m_iNumImages);
         break;
     }
     case 3:
@@ -1924,7 +1925,7 @@ static inline void update_B498(char* w, int idx, void* item, const sWVBox_B498* 
  * @param data  the chunk's data (On Tour pData)
  * @return @p data, or 0 for type 14
  */
-extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsigned int resourceId, char* data)
+extern "C" void* cPS2ChunkResolve_unresolve(cPS2ChunkResolve* self, unsigned int msg, unsigned int resourceId, char* data)
 {
     switch (msg) {
     case 0:
@@ -1932,7 +1933,7 @@ extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsign
     case 1: {
         sWVBox_B498 box;
         WV_MAKEBOX_B498(box, data, 344);
-        update_B498(*(char**)(self + 0xC), 1, data, &box);
+        update_B498((char*)self->mp_Nash, 1, data, &box);
         break;
     }
     case 9: {
@@ -1944,13 +1945,13 @@ extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsign
     case 10: {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
         sWVEntry_B498* vt = (sWVEntry_B498*)ps2GraphicsMan->mVtbl;
-        ((void (*)(void*, unsigned int))vt[50].fn)((char*)ps2GraphicsMan + vt[50].delta, (resourceId >> 8) + *(int*)(self + 0x10));
+        ((void (*)(void*, unsigned int))vt[50].fn)((char*)ps2GraphicsMan + vt[50].delta, (resourceId >> 8) + self->m_iNumImages);
         break;
     }
     case 3: {
         sWVBox_B498 box;
         WV_MAKEBOX_B498(box, data, 0x60);
-        update_B498(*(char**)(self + 0xC), 0, data, &box);
+        update_B498((char*)self->mp_Nash, 0, data, &box);
         break;
     }
     case 8: {
@@ -1962,7 +1963,7 @@ extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsign
                 *(int*)(e + 0x8) = one;
                 sWVBox_B498 box;
                 WV_MAKEBOX_B498(box, e, 108);
-                update_B498(*(char**)(self + 0xC), 2, e, &box);
+                update_B498((char*)self->mp_Nash, 2, e, &box);
                 e = *(char**)(e + 0x64);
                 i++;
             } while (i < *(int*)(data + 0x20));
@@ -1970,12 +1971,12 @@ extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsign
         break;
     }
     case 6: {
-        sWVEntry_B498* vt = *(sWVEntry_B498**)(self + 0x8);
-        if (((int (*)(void*, void*))vt[22].fn)(self + vt[22].delta, data)) {
+        sWVEntry_B498* vt = (sWVEntry_B498*)self->mVtbl;
+        if (((int (*)(void*, void*))vt[22].fn)(((char*)self) + vt[22].delta, data)) {
             *(int*)(data + 0x8) = 6;
             sWVBox_B498 box;
             WV_MAKEBOX_B498(box, data, 68);
-            update_B498(*(char**)(self + 0xC), 2, data, &box);
+            update_B498((char*)self->mp_Nash, 2, data, &box);
         }
         break;
     }
@@ -1983,14 +1984,14 @@ extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsign
         *(int*)(data + 0x8) = 8;
         sWVBox_B498 box;
         WV_MAKEBOX_B498(box, data, 40);
-        update_B498(*(char**)(self + 0xC), 2, data, &box);
+        update_B498((char*)self->mp_Nash, 2, data, &box);
         break;
     }
     case 5: {
         *(int*)(data + 0x8) = 7;
         sWVBox_B498 box;
         WV_MAKEBOX_B498(box, data, 104);
-        update_B498(*(char**)(self + 0xC), 2, data, &box);
+        update_B498((char*)self->mp_Nash, 2, data, &box);
         break;
     }
     case 13:
@@ -2057,7 +2058,7 @@ public:
     virtual int resolveModelHeirarchy(void* a1);
 };
 
-extern "C" int func_003ABF20(void* self, void* a1);
+extern "C" int func_003ABF20(cPS2ChunkResolve* self, void* a1);
 
 static inline unsigned int cPS2ChunkResolve_resolveModel_lookup(cPS2ChunkResolve_resolveModel_cObj* self, unsigned int id)
 {
@@ -2083,7 +2084,7 @@ static inline unsigned int cPS2ChunkResolve_resolveModel_lookup(cPS2ChunkResolve
  * @return always 1
  */
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cPS2ChunkResolve_resolveModel(cPS2ChunkResolve_resolveModel_cObj* self, void* pModel)
+extern "C" int cPS2ChunkResolve_resolveModel(cPS2ChunkResolve* self, void* pModel)
 {
     int i = 0;
     *(int*)((char*)pModel + 0x8) += (int)pModel;
@@ -2091,9 +2092,9 @@ extern "C" int cPS2ChunkResolve_resolveModel(cPS2ChunkResolve_resolveModel_cObj*
     int* tbl = *(int**)((char*)pModel + 0xC);
     unsigned int* entry = (unsigned int*)(tbl + 1);
     for (; i < *tbl; i++, entry++) {
-        *entry = cPS2ChunkResolve_resolveModel_lookup(self, *entry);
+        *entry = cPS2ChunkResolve_resolveModel_lookup(((cPS2ChunkResolve_resolveModel_cObj*)self), *entry);
     }
-    self->resolveModelHeirarchy(pModel);
+    ((cPS2ChunkResolve_resolveModel_cObj*)self)->resolveModelHeirarchy(pModel);
     func_003ABF20(self, pModel);
     return 1;
 }
@@ -2113,7 +2114,7 @@ extern "C" void func_003ABF50(void* self, void* a1);
  * @return 1
  */
 // PORT: adds a pointer to an int field (offset -> pointer fixup); not 64-bit safe.
-extern "C" int func_003ABF20(void* self, void* list)
+extern "C" int func_003ABF20(cPS2ChunkResolve* self, void* list)
 {
     *(int*)((char*)list + 0x24) += (int)list;
     func_003ABF50(self, list);
@@ -2329,7 +2330,7 @@ struct cPS2ChunkResolve_resolveInstance_cObj {
     cPS2ChunkResolve_resolveInstance_sView* f4;
 };
 
-extern "C" int func_003AC358(void* self, void* a1);
+extern "C" int func_003AC358(cPS2ChunkResolve* self, void* a1);
 
 static inline cPS2ChunkResolve_resolveInstance_sRes* cPS2ChunkResolve_resolveInstance_lookup(cPS2ChunkResolve_resolveInstance_cObj* self, unsigned int id)
 {
@@ -2361,7 +2362,7 @@ extern "C" int cPS2ChunkResolve_resolveInstance(cPS2ChunkResolve_resolveInstance
     *(cPS2ChunkResolve_resolveInstance_sView**)((char*)pInstance + 0x88) = self->f4;
     int x = self->f4->f4 & 0xFFFF0000;
     *(int*)((char*)pInstance + 0x8) = x | (x >> 16) | 2;
-    func_003AC358(self, pInstance);
+    func_003AC358((cPS2ChunkResolve*)self, pInstance);
     return 1;
 }
 #endif
@@ -2385,7 +2386,7 @@ struct func_003AC358_sList {
     func_003AC358_sEnt* entries;
 };
 
-extern "C" void* func_003AC508(void* self, void* a1, func_003AC358_sList* list, void* cur);
+extern "C" void* func_003AC508(cPS2ChunkResolve* self, void* a1, func_003AC358_sList* list, void* cur);
 
 /**
  * Turns a streamed instance's DMA data offset (+0x98) into a pointer and fixes up its per-instance packets.
@@ -2397,7 +2398,7 @@ extern "C" void* func_003AC508(void* self, void* a1, func_003AC358_sList* list, 
  * @return 1
  */
 // PORT: stores a pointer in an int field (offset -> pointer fixup); not 64-bit safe.
-extern "C" int func_003AC358(void* self, void* instance)
+extern "C" int func_003AC358(cPS2ChunkResolve* self, void* instance)
 {
     int i;
     func_003AC358_sList* list;
@@ -2497,7 +2498,7 @@ extern char D_00509400[];
  */
 // Walks one instance DMA chain: relocates the ref tags (+0x98 instance base for geometry, +0x24 for the
 // rest) and patches each packet's MSCAL (first one D_2270, later ones D_22C8).
-extern "C" void* func_003AC508(void* self, void* instance, func_003AC358_sList* list, void* cur)
+extern "C" void* func_003AC508(cPS2ChunkResolve* self, void* instance, func_003AC358_sList* list, void* cur)
 {
     char* ctx = (char*)list;
     char* tagPtr = (char*)cur;

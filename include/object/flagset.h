@@ -106,4 +106,55 @@ CHECK_OFFSET(cFlagSet, mInstances, 0x094);
 CHECK_OFFSET(cFlagSet, mVtbl, 0x184);
 CHECK_SIZE(cFlagSet, 0x188);
 
+
+// ---- cFlagManager ----
+
+// cFlagManager: the scene node (a cObjNode in bucket 2) that owns the 15 cFlagSets and the shared wind: update advances
+// a random walk of the wind factor (mWindBase + mWindDelta * mWindTime, re-rolled once a second with an amplitude from
+// the peak number) and updates the sets that have instances; render draws them; cFlagNode's ctor / dtor route
+// AddFlag / RemoveFlag through it (cObjectInterface_getFlagManager). The game owns one (cGame::FlagManager,
+// main/game.h). Retail methods: object/flagset (0x0034C428..0x0034C8E8) and the inline GetWindFactor in
+// object/railmodifier (0x00361760). Vtable cFlagManager_vtbl (0x0048FB80, 13 slots: cObjNode's with 1 dtor, 2 update,
+// 4 render, 12 writeToReplayFrame, 13 readFromReplayFrame overridden).
+// Size 0x1718: [R] cGame_load allocates operator new(5912 = 0x1718, "cFlagManager") + cFlagManager_cFlagManager(p, 2),
+// and the ctor builds 15 cFlagSet at +0x20 with stride 0x188 (0x20 + 15 * 0x188 = 0x1718); the dtor's array cleanup
+// walks back from +0x1718. [O] On Tour's cFlagManager is 0x1714 with mFlagSets at 0x1C: its cObjNode is 0xC, retail's
+// 0x10 (object/objnode.h), so every member sits 4 bytes later in retail.
+// Base: cObjNode (0x00-0x10, object/objnode.h), written out inline. cObjNode declares the virtuals, so the vptr is
+// cObjNode's at 0xC.
+// Tags as above, plus [P] the preview's GetWindFactor__12cFlagManager (lwc1 0x10; tools/layout_xlate.py: preview ==
+// retail for 0xC..0x1C).
+
+struct cObjNode;
+
+struct cFlagManager {
+    // --- cObjNode (0x10; object/objnode.h)
+    int unk_00;                     // 0x000 cObjNode's leading word; no ctor writes it (object/objnode.h)
+    cObjNode* Next;                 // 0x004 [O] cObjNode::Next; bucket list forward link
+    cObjNode* Prev;                 // 0x008 [O] cObjNode::Prev; bucket list back link
+    void** mVtbl;                   // 0x00C [R] cFlagManager_vtbl (0x0048FB80) in the ctor and the dtor
+    // --- cFlagManager
+    float mCurrentWindFactor;       // 0x010 [O]; [P] GetWindFactor (lwc1 0x10); [R] ctor 0 (sw $0); [U] update stores
+                                    //       mWindBase + mWindDelta * mWindTime; cFlagManager_GetWindFactor returns it
+    float mWindBase;                // 0x014 [O]; [R] ctor 0.5; [U] update adds mWindDelta once a second
+    float mWindDelta;               // 0x018 [O]; [R] ctor 0.25; [U] update re-rolls it in [-amp, amp), clamped so
+                                    //       base + delta stays in [0, 1]
+    float mWindTime;                // 0x01C [O]; [R] ctor 0 (sw $0); [U] update adds 1 / frame rate and wraps at 1
+    cFlagSet mFlagSets[15];         // 0x020 [O] kNumFlagSets = 15; [R] ctor: cFlagSet_cFlagSet on each (stride 0x188);
+                                    //       dtor: each set's virtual dtor (slot 1, vptr at +0x184) in reverse;
+                                    //       [U] AddFlag / RemoveFlag / update / render test mCurrentNumInstances (+0x5C);
+                                    //       write/readFromReplayFrame call the sets' replay methods
+};
+
+CHECK_OFFSET(cFlagManager, unk_00, 0x000);
+CHECK_OFFSET(cFlagManager, Next, 0x004);
+CHECK_OFFSET(cFlagManager, Prev, 0x008);
+CHECK_OFFSET(cFlagManager, mVtbl, 0x00C);
+CHECK_OFFSET(cFlagManager, mCurrentWindFactor, 0x010);
+CHECK_OFFSET(cFlagManager, mWindBase, 0x014);
+CHECK_OFFSET(cFlagManager, mWindDelta, 0x018);
+CHECK_OFFSET(cFlagManager, mWindTime, 0x01C);
+CHECK_OFFSET(cFlagManager, mFlagSets, 0x020);
+CHECK_SIZE(cFlagManager, 0x1718);
+
 #endif /* OBJECT_FLAGSET_H */

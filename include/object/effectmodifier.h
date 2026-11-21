@@ -13,7 +13,10 @@
 //        cMoveNode_addDynamicParticle; ctors cDynamicParticleModifier_cDynamicParticleModifier1(pdata, inst, mesh, offset) / cDynamicParticleModifier_cDynamicParticleModifier(replay); vtable
 //        cDynamicParticleModifier_vtbl; DynamicParticleCount D_004A3FFC). Its second base cDynamicParticleModifierState
 //        (On Tour, 0x50) occupies 0x10-0x60: the replay record writes/reads it as one 0x50 block at +0x10.
-//     (cHaloModifier, 0x40, is EA's fourth class here; not laid out yet.)
+//     -> cHaloModifier (0x40: cMemMan_alloc(0x40, "HaloModifier") in cMoveNode_addHalo; ctors
+//        cHaloModifier_cHaloModifier(hdata, inst) / cHaloModifier_cHaloModifier1(replay); vtable cHaloModifier_vtbl;
+//        HaloCount D_004A4000). Its second base cHaloModifierState (On Tour, 0x30) occupies 0x10-0x40: the replay record
+//        writes/reads it as one 0x30 block at +0x10.
 // Vtables (7 slots): 1 dtor, 2 getType, 3 fadeEffect, 4 writeToReplayFrame, 5 update, 6 render, 7 signal.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet; cEffectLink and
@@ -137,5 +140,51 @@ CHECK_OFFSET(cDynamicParticleModifier, Emitter, 0x60);
 CHECK_OFFSET(cDynamicParticleModifier, ParticleData, 0x260);
 CHECK_OFFSET(cDynamicParticleModifier, unk_264, 0x264);
 CHECK_SIZE(cDynamicParticleModifier, 0x270);
+
+
+// cHaloModifier: a light halo drawn at one mesh of the instance, spinning by Speed degrees per update
+// (cObjectInterface_renderSimpleLightHalo(P, Color, Type, Radius, Angle) with P = the mesh matrix's translation).
+// Size 0x40: [R] cMoveNode_addHalo allocates cMemMan_alloc(0x40, "HaloModifier"); the replay record is the 0x30-byte
+// cHaloModifierState at +0x10 (write/readFromReplayFrame), ending at 0x40; [O] On Tour's cHaloModifier is 0x40.
+// Bases: cEffectModifier (0x00-0x10, above), then cHaloModifierState (On Tour class, 0x30: Color, Radius, Type, Mesh,
+// Speed, Angle) at 0x10. The ctor copies the fields from a tAddHaloData (On Tour 0x28: InstId, Type, Mesh, ColourA,
+// ColourR, ColourG, ColourB, Radius, Speed), reordering A,R,G,B into Color = {R, G, B, A}.
+// Tags as above, plus [P] tools/layout_xlate.py (preview == retail at 0x24, 0x28, 0x2C, 0x30: render / update).
+struct cHaloModifier {
+    // --- cEffectLink (object/effectlink.h)
+    cEffectLink* Next;              // 0x000 [O] cEffectLink::Next; [R] the cEffectModifier ctors zero it; [U]
+                                    //       cEffectLink_add, unlink (cEffectLink_unlink)
+    cEffectLink* Prev;              // 0x004 [O] cEffectLink::Prev; [R] ditto
+    void** mVtbl;                   // 0x008 [R] cHaloModifier_vtbl (0x00491220) in both ctors and the dtor
+    // --- cEffectModifier
+    tInstanceRecord* Instance;      // 0x00C [O] cEffectModifier::Instance; [R] cEffectModifier_cEffectModifier(inst) /
+                                    //       the replay ctor; [U] render passes it to cInstanceNode_buildMeshMat
+    // --- cHaloModifierState (On Tour second base, 0x30)
+    t4Vector Color;                 // 0x010 [O] (state); [R] ctor = {ColourR, ColourG, ColourB, ColourA} of the
+                                    //       tAddHaloData (one sq); [U] render passes &Color as the halo colour
+    float Radius;                   // 0x020 [O] (state); [R] ctor = hdata.Radius (swc1); [U] render passes it (lwc1)
+    int Type;                       // 0x024 [O] (state); [R] ctor = hdata.Type; [P]; [U] render passes it as the halo
+                                    //       type
+    int Mesh;                       // 0x028 [O] (state); [R] ctor = hdata.Mesh; [P]; [U] render:
+                                    //       cInstanceNode_buildMeshMat(Instance, Mesh, &m)
+    int Speed;                      // 0x02C [O] (state); [R] ctor = hdata.Speed; [P]; [U] update adds (float)Speed to
+                                    //       Angle
+    float Angle;                    // 0x030 [O] (state); [R] ctor 0 (sw $0); [P]; [U] update advances it and resets it
+                                    //       to 0 past +-360; render passes it
+    char unk_034[0xC];              // 0x034 padding (16-byte aligned: Color is a t4Vector)
+};
+
+CHECK_OFFSET(cHaloModifier, Next, 0x000);
+CHECK_OFFSET(cHaloModifier, Prev, 0x004);
+CHECK_OFFSET(cHaloModifier, mVtbl, 0x008);
+CHECK_OFFSET(cHaloModifier, Instance, 0x00C);
+CHECK_OFFSET(cHaloModifier, Color, 0x010);
+CHECK_OFFSET(cHaloModifier, Radius, 0x020);
+CHECK_OFFSET(cHaloModifier, Type, 0x024);
+CHECK_OFFSET(cHaloModifier, Mesh, 0x028);
+CHECK_OFFSET(cHaloModifier, Speed, 0x02C);
+CHECK_OFFSET(cHaloModifier, Angle, 0x030);
+CHECK_OFFSET(cHaloModifier, unk_034, 0x034);
+CHECK_SIZE(cHaloModifier, 0x40);
 
 #endif /* OBJECT_EFFECTMODIFIER_H */

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "input/padcache.h"
 #include "intersect/aifwddiff.h"
 #include "input/inputparse.h"
 
@@ -2882,11 +2883,11 @@ extern "C" int cPadDevice_construct(void* p, int n);
  * Stores the count cPadDevice_construct returns for the device array (+0x2EEC, up to 4) in +0x2EE8, sets the read position
  * (+0x2EE0) to 29 and the write position (+0x2EE4) to 0. Called by cSSXApp_init.
  */
-extern "C" void cPadCache_init(void* self)
+extern "C" void cPadCache_init(cPadCache* self)
 {
-    *(int*)((char*)self + 0x2EE8) = cPadDevice_construct((char*)self + 0x2EEC, 4);
-    *(int*)((char*)self + 0x2EE0) = 29;
-    *(int*)((char*)self + 0x2EE4) = 0;
+    self->NumPadDevices = cPadDevice_construct((char*)self + 0x2EEC, 4);
+    self->CacheReadPos = (unsigned int)29;
+    self->CacheWritePos = (unsigned int)0;
 }
 #endif
 
@@ -2915,11 +2916,11 @@ struct sOwner00326A68 {
  * Calls each non-null device's virtual destructor (slot 1) with flags 3, which frees it. The array entries and the
  * count (+0x2EE8) are left as they were. Called by cSSXApp_purge.
  */
-extern "C" void cPadCache_purge(sOwner00326A68* self)
+extern "C" void cPadCache_purge(cPadCache* self)
 {
     int i;
-    for (i = 0; i < self->count; i++) {
-        sObj00326A68* inputPad = self->objs[i];
+    for (i = 0; i < self->NumPadDevices; i++) {
+        sObj00326A68* inputPad = ((sObj00326A68**)&self->PadDevices[0])[i];
         if (inputPad != 0) {
             inputPad->vt[1].fn((char*)inputPad + inputPad->vt[1].delta, 3);
         }
@@ -2937,10 +2938,10 @@ extern "C" void cPadDevice_clearAllVibrations(void* p);
  *
  * Calls cPadDevice_clearAllVibrations on each device. Called by cGame_update and cGame_updateUI.
  */
-extern "C" void cPadCache_clearAllVibrations(void* self)
+extern "C" void cPadCache_clearAllVibrations(cPadCache* self)
 {
     int i;
-    for (i = 0; i < *(int*)((char*)self + 0x2EE8); i++) {
+    for (i = 0; i < self->NumPadDevices; i++) {
         cPadDevice_clearAllVibrations(((void**)((char*)self + 0x2EEC))[i]);
     }
 }
@@ -2969,13 +2970,13 @@ struct sInputParse_00326B48 {
  * @param controllerCache  the pad cache (this)
  * @return 1 when it advanced, 0 when no newer frame is cached
  */
-extern "C" int cPadCache_nextInput(sInputParse_00326B48* controllerCache)
+extern "C" int cPadCache_nextInput(cPadCache* controllerCache)
 {
-    unsigned int next = (controllerCache->head + 1) % 30;
-    if (next == controllerCache->tail) {
+    unsigned int next = (controllerCache->CacheReadPos + 1) % 30;
+    if (next == controllerCache->CacheWritePos) {
         return 0;
     }
-    controllerCache->head = next;
+    controllerCache->CacheReadPos = next;
     return 1;
 }
 #endif
@@ -3034,11 +3035,11 @@ struct sInputParse_00326C60 {
  *
  * @return the number of cached frames
  */
-extern "C" int cPadCache_flush(sInputParse_00326C60* self)
+extern "C" int cPadCache_flush(cPadCache* self)
 {
-    int tail = self->tail;
-    int head = self->head;
-    self->head = (tail + 29) % 30;
+    int tail = (int)self->CacheWritePos;
+    int head = (int)self->CacheReadPos;
+    self->CacheReadPos = (unsigned int)((tail + 29) % 30);
     return (tail - head + 30) % 30;
 }
 #endif
@@ -3065,7 +3066,7 @@ struct sInputParse_00326CA0 {
  * @param i  the pad index (On Tour pad)
  * @return the number of button values
  */
-extern "C" int cPadCache_numButtons(void* self, int i)
+extern "C" int cPadCache_numButtons(cPadCache* self, int i)
 {
     sInputParse_00326CA0* controllerCache = (sInputParse_00326CA0*)self;
     return controllerCache->slots[controllerCache->bank][i].value;
@@ -3093,7 +3094,7 @@ struct sInputParse_00326CC8 {
  * @param i  the pad index (On Tour pad)
  * @return the address of the values
  */
-extern "C" void* cPadCache_buttonValues(void* self, int i)
+extern "C" void* cPadCache_buttonValues(cPadCache* self, int i)
 {
     sInputParse_00326CC8* controllerCache = (sInputParse_00326CC8*)self;
     return controllerCache->slots[controllerCache->bank][i].data;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "wscript/wscriptmission.h"
 #include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
 #include "world/world.h"
@@ -9489,14 +9490,14 @@ extern "C" int cWScriptMan_getScriptCode_7128(int, int) __asm__("cWScriptMan_get
  * @param key  the mission key
  * @return @p self
  */
-extern "C" void* cWScriptMission_cWScriptMission(void* self, void* man, int sectionId, char* data, int key) {
+extern "C" void* cWScriptMission_cWScriptMission(cWScriptMission* self, void* man, int sectionId, char* data, int key) {
     cWScriptProcess_cWScriptProcess(self, man, sectionId, (int)data);
-    *(void**)((char*)self + 0x5C) = D_00489A30_7128;
-    *(int*)((char*)self + 0x60) = *(int*)(data + 0x50);
-    *(int*)((char*)self + 0x64) = key;
+    self->mVtbl = (void**)D_00489A30_7128;
+    self->Scope = *(int*)(data + 0x50);
+    self->SortKey = key;
     for (int i = 0; i < 4; i++)
-        ((int*)((char*)self + 0x68))[i] = cWScriptMan_getScriptCode_7128(*(int*)((char*)self + 0x10), ((int*)(data + 0x40))[i]);
-    return self;
+        ((int*)((char*)self + 0x68))[i] = cWScriptMan_getScriptCode_7128((int)self->Manager, ((int*)(data + 0x40))[i]);
+    return ((void*)self);
 }
 #endif
 
@@ -9511,8 +9512,8 @@ extern "C" void cWScriptProcess__cWScriptProcess_71C8(void*) __asm__("cWScriptPr
  *
  * There is no flags argument here; the base destructor gets it in the untouched second argument register.
  */
-extern "C" void cWScriptMission__cWScriptMission(void* self) {
-    *(void**)((char*)self + 0x5C) = D_00489A30_71C8;
+extern "C" void cWScriptMission__cWScriptMission(cWScriptMission* self) {
+    self->mVtbl = (void**)D_00489A30_71C8;
     cWScriptProcess__cWScriptProcess_71C8(self);
 }
 #endif
@@ -9529,8 +9530,8 @@ struct Tab_71F0 { char pad[0x28]; void *arr[1]; };
  * Starts a mission: shows HUD effect 0x1A for one second on the manager's rider (cRider_flagEventMissionStart), then runs
  * the base process start.
  */
-extern "C" void cWScriptMission_processStart(void* self) {
-    cRider_flagEventMissionStart_71F0((*(Tab_71F0**)(*(char**)(D_004A28A8_71F0 + 0x84) + 0xC))->arr[**(int**)((char*)self + 0x10)]);
+extern "C" void cWScriptMission_processStart(cWScriptMission* self) {
+    cRider_flagEventMissionStart_71F0((*(Tab_71F0**)(*(char**)(D_004A28A8_71F0 + 0x84) + 0xC))->arr[*(int*)self->Manager]);
     cWScriptProcess_processStart_71F0(self);
 }
 #endif
@@ -9547,10 +9548,10 @@ extern "C" void cSSXAudio_BigChallengeComplete_7240(void*) __asm__("cSSXAudio_Bi
  * Completes a mission that the script manager still lists: runs its virtual slots 6 and 18, then calls
  * cSSXAudio_BigChallengeComplete on the sound system.
  */
-extern "C" void cWScriptMission_processComplete(P_7240* self) {
-    if (cWScriptMan_isProcessActive_7240(*(void**)((char*)self + 0x10), self)) {
-        self->v06();
-        self->v18();
+extern "C" void cWScriptMission_processComplete(cWScriptMission* self) {
+    if (cWScriptMan_isProcessActive_7240(self->Manager, ((P_7240*)self))) {
+        ((P_7240*)self)->v06();
+        ((P_7240*)self)->v18();
         cSSXAudio_BigChallengeComplete_7240(cAudioInterface_bxAudio_7240());
     }
 }
@@ -9617,34 +9618,34 @@ struct sGame_7308 {
  * On Tour also awards leaderboard points and a medal and triggers an overlay; retail has none of that.
  */
 // Mission completed: pays the reward the first time, unlocks the follow-up mission and resets the script.
-extern "C" void cWScriptMission_missionPass(char* self)
+extern "C" void cWScriptMission_missionPass(cWScriptMission* self)
 {
     int money = 0;
     void* missions = cBE_getInterface_Fv(cBE_getBE(), 10);
-    if (cBEMissionInterface_isMissionCompleted(missions, *(int*)(self + 0x20)) == 0) {
-        cBEMissionInterface_setIsCompleted(missions, *(int*)(self + 0x20), 1);
-        int reward = cBEMissionInterface_getDiffLevel(missions, *(int*)(self + 0x20));
+    if (cBEMissionInterface_isMissionCompleted(missions, (int)self->ProcessId) == 0) {
+        cBEMissionInterface_setIsCompleted(missions, (int)self->ProcessId, 1);
+        int reward = cBEMissionInterface_getDiffLevel(missions, (int)self->ProcessId);
         money = cBEEconInterface_getMissionCash(cBE_getInterface_Fv(cBE_getBE(), 11), reward);
     }
     int pl = cBENewRaceInterface_getLocationPeak1(cBE_getInterface_Fv(cBE_getBE(), 0));
     sGame_7308* game = *(sGame_7308**)(*(char**)(D_004A28A8_7308 + 0x84) + 0xC);
-    cRider_flagEventMissionSuccess(game->riders[**(int**)(self + 0x10)], pl, money);
-    unsigned int next = cBEMissionInterface_getNextMissionID(missions, *(int*)(self + 0x20));
+    cRider_flagEventMissionSuccess(game->riders[*(int*)self->Manager], pl, money);
+    unsigned int next = cBEMissionInterface_getNextMissionID(missions, (int)self->ProcessId);
     if (next != 0xFFFFFFFF) {
-        cBEMissionInterface_setIsShowIcon(missions, *(int*)(self + 0x20), 0);
-        if (*(int*)(self + 0x6C) != 0) {
-            cWScriptMan_runScriptCode(*(int*)(self + 0x10), self, *(int*)(self + 0x6C));
+        cBEMissionInterface_setIsShowIcon(missions, (int)self->ProcessId, 0);
+        if ((int)self->MissionScriptCode[1] != 0) {
+            cWScriptMan_runScriptCode((int)self->Manager, ((char*)self), (int)self->MissionScriptCode[1]);
         }
         if (cBEMissionInterface_isMissionLocked(missions, next) != 0) {
             cBEMissionInterface_setIsLocked(missions, next, 0);
             cBEMissionInterface_setIsReady(missions, next, 1);
             cBEMissionInterface_setIsShowIcon(missions, next, 1);
         }
-    } else if (*(int*)(self + 0x6C) != 0) {
-        cWScriptMan_runScriptCode(*(int*)(self + 0x10), self, *(int*)(self + 0x6C));
+    } else if ((int)self->MissionScriptCode[1] != 0) {
+        cWScriptMan_runScriptCode((int)self->Manager, ((char*)self), (int)self->MissionScriptCode[1]);
     }
-    cWScriptMan_updateWorld(*(int*)(self + 0x10));
-    cWScriptMan_processPass(*(int*)(self + 0x10), self);
+    cWScriptMan_updateWorld((int)self->Manager);
+    cWScriptMan_processPass((int)self->Manager, ((char*)self));
     cReplay_reset(*(void**)(*(char**)(D_004A28A8_7308 + 0x84) + 0x28));
     cReplay_startRace(*(void**)(*(char**)(D_004A28A8_7308 + 0x84) + 0x28));
 }
@@ -9695,12 +9696,12 @@ extern "C" void cWScriptMan_runScriptCode(int, void *, int);
  *
  * @param mission  the mission (this)
  */
-extern "C" void cWScriptMission_missionUpdateWorld(void *mission) {
+extern "C" void cWScriptMission_missionUpdateWorld(cWScriptMission* mission) {
     int temp_6;
 
-    temp_6 = (*(int *)((char*)(mission) + (0x74)));
+    temp_6 = ((int)mission->MissionScriptCode[3]);
     if (temp_6 != 0) {
-        cWScriptMan_runScriptCode((*(int *)((char*)(mission) + (0x10))), mission, temp_6);
+        cWScriptMan_runScriptCode(((int)mission->Manager), mission, temp_6);
     }
 }
 #endif

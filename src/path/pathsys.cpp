@@ -1,4 +1,5 @@
 #include "common.h"
+#include "path/basepath.h"
 #include "path/pathsys.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -754,8 +755,8 @@ INCLUDE_ASM("path/pathsys", cPath_getAllEvents);
  * @param path  the path
  * @return the 16-byte event nodes
  */
-extern "C" int cPath_getAllEvents(void *path) {
-    return (*(int *)((char*)(path) + (4)));
+extern "C" int cPath_getAllEvents(cPath* path) {
+    return ((int)path->Events);
 }
 #endif
 //100%

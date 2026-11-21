@@ -1,4 +1,6 @@
 #include "common.h"
+#include "intersect/bxnash.h"
+#include "intersect/overlaplist.h"
 #include "object/animteeternode.h"
 #include "object/boostnode.h"
 #include "object/animobject.h"
@@ -692,18 +694,18 @@ static inline void queryCell_330BA8(sGrid_330BA8* grid, int i, void* box, sCtx_3
  *
  * @param box  the query box: min at +0x0, max at +0x10
  */
-extern "C" void cOverlapList_getinstances(sQuery_330BA8* self, sBox_3309D8* box)
+extern "C" void cOverlapList_getinstances(cOverlapList* self, sBox_3309D8* box)
 {
     sCtx_3309D8 ctx;
     char flags[8];
-    sGrid_330BA8* grid = self->grid;
+    sGrid_330BA8* grid = (sGrid_330BA8*)self->nash;
     sCtx_3309D8* pctx = &ctx;
-    self->unk04 = grid->unkA0;
-    ctx.list = self->items;
-    ctx.count = &self->count;
+    self->deletecount = (unsigned int)grid->unkA0;
+    ctx.list = ((sNode_3309D8**)&self->instances[0]);
+    ctx.count = (int*)&self->numinstances;
     ctx.pad08 = 0x40;
     ctx.box = box;
-    self->count = 0;
+    self->numinstances = (unsigned int)0;
     queryCell_330BA8(grid, 0, box, pctx, flags);
     queryCell_330BA8(grid, 1, box, pctx, flags);
     queryCell_330BA8(grid, 2, box, pctx, flags);
@@ -712,8 +714,8 @@ extern "C" void cOverlapList_getinstances(sQuery_330BA8* self, sBox_3309D8* box)
     queryCell_330BA8(grid, 5, box, pctx, flags);
     queryCell_330BA8(grid, 6, box, pctx, flags);
     queryCell_330BA8(grid, 7, box, pctx, flags);
-    self->ntris = 0xFFFFFFFF;
-    self->nobjs = 0xFFFFFFFF;
+    self->numpatches = 0xFFFFFFFF;
+    self->numtyped = 0xFFFFFFFF;
 }
 #endif
 
@@ -803,17 +805,17 @@ static inline int queryCell_331450(sGrid_331450* grid, int i, void* box, sCtx_33
  *
  * @param box  the query box: min at +0x0, max at +0x10
  */
-extern "C" void cOverlapList_gettyped(sQuery_331450* self, sBox_3309D8* box)
+extern "C" void cOverlapList_gettyped(cOverlapList* self, sBox_3309D8* box)
 {
     sCtx_3309D8 ctx;
-    sGrid_331450* grid = self->grid;
+    sGrid_331450* grid = (sGrid_331450*)self->nash;
     sCtx_3309D8* pctx = &ctx;
-    self->unk04 = grid->unkA0;
-    ctx.list = (sNode_3309D8**)self->objs;
-    ctx.count = (int*)&self->nobjs;
+    self->deletecount = (unsigned int)grid->unkA0;
+    ctx.list = (sNode_3309D8**)((void**)&self->typed[0]);
+    ctx.count = (int*)&self->numtyped;
     ctx.pad08 = 0x200;
     ctx.box = box;
-    self->nobjs = 0;
+    self->numtyped = 0;
     queryCell_331450(grid, 0, box, pctx);
     queryCell_331450(grid, 1, box, pctx);
     queryCell_331450(grid, 2, box, pctx);
@@ -822,8 +824,8 @@ extern "C" void cOverlapList_gettyped(sQuery_331450* self, sBox_3309D8* box)
     queryCell_331450(grid, 5, box, pctx);
     queryCell_331450(grid, 6, box, pctx);
     queryCell_331450(grid, 7, box, pctx);
-    self->ntris = 0xFFFFFFFF;
-    self->count = 0xFFFFFFFF;
+    self->numpatches = 0xFFFFFFFF;
+    self->numinstances = 0xFFFFFFFF;
 }
 #endif
 
@@ -1287,7 +1289,7 @@ static inline void reset_333EF8(sHit_333EF8* h)
  * @param hitCache  passed to cWorldIntersectType_IsPatchInt as its last argument (On Tour tIntHint *hint)
  * @return the number of hits stored
  */
-extern "C" int cOverlapList_terrainIntersect(void* vself, void* vq, sHit_003342D0* vhits, int cap, int hitCache)
+extern "C" int cOverlapList_terrainIntersect(cOverlapList* vself, void* vq, sHit_003342D0* vhits, int cap, int hitCache)
 {
     sTree_333EF8* self = (sTree_333EF8*)vself;
     sQuery_333EF8* query = (sQuery_333EF8*)vq;
@@ -1362,7 +1364,7 @@ struct sHit_003342D0 {
 } __attribute__((aligned(16)));
 
 struct sVEnt_003342D0 { short delta; short index; float (*fn)(void*); };
-extern "C" int cOverlapList_terrainIntersect(void* self, void* q, sHit_003342D0* hits, int max, int a4);
+extern "C" int cOverlapList_terrainIntersect(cOverlapList* self, void* q, sHit_003342D0* hits, int max, int a4);
 
 // PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
 static inline float absf_003342D0(float x)
@@ -1401,7 +1403,7 @@ static inline int isBetter_003342D0(sHit_003342D0* a, sHit_003342D0* b)
  * @param hitCache  passed through to cOverlapList_terrainIntersect (On Tour tIntHint *hint)
  * @return the chosen hit's parameter, or -1.0
  */
-extern "C" float cOverlapList_terrainIntersect1(void* self, char* query, sHit_003342D0* out, int hitCache)
+extern "C" float cOverlapList_terrainIntersect1(cOverlapList* self, char* query, sHit_003342D0* out, int hitCache)
 {
     sHit_003342D0 hits[64];
     int n = cOverlapList_terrainIntersect(self, query, hits, 0x40, hitCache);
@@ -1584,7 +1586,7 @@ static inline void wsAddEq_334680(sWsVec4& a, const sWsVec4& b)
  * @param testRadius     the test radius
  * @return the number of hits
  */
-extern "C" int cOverlapList_splineIntersect(char* self, sWsVec4* pos, int intInfo, int mask, float testRadius)
+extern "C" int cOverlapList_splineIntersect(cOverlapList* self, sWsVec4* pos, int intInfo, int mask, float testRadius)
 {
     sBox_00334680 box;
     sWsVec4 ext;
@@ -1601,8 +1603,8 @@ extern "C" int cOverlapList_splineIntersect(char* self, sWsVec4* pos, int intInf
     ext.w = zero;
     wsSubEq_334680(box.min, ext);
     wsAddEq_334680(box.max, ext);
-    for (unsigned int i = 0; i < *(unsigned int*)(self + 0x210); i++) {
-        char* spaceNode = ((char**)(self + 0x214))[i];
+    for (unsigned int i = 0; i < self->numtyped; i++) {
+        char* spaceNode = ((char**)(((char*)self) + 0x214))[i];
         int type = *(int*)(spaceNode + 8);
         if (type == 2) {
             cRailModifier_splineIntersect(*(void**)(spaceNode + 0xC), &box, &box, pos, mask, &cnt, &dist, intInfo);
@@ -1632,10 +1634,10 @@ extern char str_AIFwdDiffCache[];
  * Allocates 0x10 bytes tagged "AIFwdDiffCache", runs the constructor, stores the cache at +0xA4 and calls
  * cAIFwdDiffCache_Init(cache, 40), which allocates the entries and their hash buckets.
  */
-extern "C" void cBXNash_initTheAIFwdDiffCache(void* self)
+extern "C" void cBXNash_initTheAIFwdDiffCache(cBXNash* self)
 {
     void* cache = cAIFwdDiffCache_cAIFwdDiffCache(cMemMan_alloc(0x10, str_AIFwdDiffCache, 0, 0));
-    *(void**)((char*)self + 0xA4) = cache;
+    self->TheAIFwdDiffCache = (cAIFwdDiffCache*)cache;
     cAIFwdDiffCache_Init(cache, 40);
 }
 #endif
@@ -1648,13 +1650,13 @@ extern "C" void cAIFwdDiffCache__cAIFwdDiffCache(void* p, int flags);
 /**
  * Deletes the AI forward-difference cache (+0xA4) built by cBXNash_initTheAIFwdDiffCache, then clears the pointer.
  */
-extern "C" void cBXNash_purgeTheAIFwdDiffCache(void* self)
+extern "C" void cBXNash_purgeTheAIFwdDiffCache(cBXNash* self)
 {
-    void* fwdDiffCache = *(void**)((char*)self + 0xA4);
+    void* fwdDiffCache = self->TheAIFwdDiffCache;
     if (fwdDiffCache != 0) {
         cAIFwdDiffCache__cAIFwdDiffCache(fwdDiffCache, 3);
     }
-    *(void**)((char*)self + 0xA4) = 0;
+    self->TheAIFwdDiffCache = 0;
 }
 #endif
 
@@ -2774,7 +2776,7 @@ struct sHit_00336850;
  * @param hitCache  passed to cWorldIntersectType_IsPatchInt for each patch (On Tour tIntHint *hint)
  * @return the number of hits stored
  */
-extern "C" int cBXNash_terrainIntersect(void* vself, void* vq, sHit_00336850* hits, int cap, int hitCache)
+extern "C" int cBXNash_terrainIntersect(cBXNash* vself, void* vq, sHit_00336850* hits, int cap, int hitCache)
 {
     sGrid_335D78* grid = (sGrid_335D78*)vself;
     sQry_335D78* query = (sQry_335D78*)vq;
@@ -2817,7 +2819,7 @@ struct sHit_00336850 {
 } __attribute__((aligned(16)));
 
 struct sVEnt_00336850 { short delta; short index; float (*fn)(void*); };
-extern "C" int cBXNash_terrainIntersect(void* self, void* q, sHit_00336850* hits, int max, int a4);
+extern "C" int cBXNash_terrainIntersect(cBXNash* self, void* q, sHit_00336850* hits, int max, int a4);
 
 // PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
 static inline float absf_00336850(float x)
@@ -2855,7 +2857,7 @@ static inline int isBetter_00336850(sHit_00336850* a, sHit_00336850* b)
  * @param hint  passed through to cBXNash_terrainIntersect (On Tour tIntHint *hint; cCamera_avoidGround passes its intersection hint)
  * @return the chosen hit's parameter, or -1.0
  */
-extern "C" float cBXNash_terrainIntersect1(void* self, char* intersectType, sHit_00336850* out, int hint)
+extern "C" float cBXNash_terrainIntersect1(cBXNash* self, char* intersectType, sHit_00336850* out, int hint)
 {
     sHit_00336850 hits[64];
     int n = cBXNash_terrainIntersect(self, intersectType, hits, 0x40, hint);
@@ -2976,7 +2978,7 @@ static inline void visit_003369D8(sCell_369D8* c, char* flag, sQuery_369D8* q, s
  * @param outN  out: the hit normal
  * @return 1 on a hit, otherwise 0
  */
-extern "C" int cBXNash_getGroundHeight(sCell_369D8* self, float* pos, sQuad_369D8* outP, sQuad_369D8* outN)
+extern "C" int cBXNash_getGroundHeight(cBXNash* self, float* pos, sQuad_369D8* outP, sQuad_369D8* outN)
 {
     char seg[176];
     float lo = pos[2] - 100000.0f;
@@ -3003,26 +3005,26 @@ extern "C" int cBXNash_getGroundHeight(sCell_369D8* self, float* pos, sQuad_369D
     sTrav_369D8 tr;
     terrainQuery.count = &tr.count;
     terrainQuery.f10 = 0;
-    terrainQuery.f14 = *(void**)((char*)self + 0xA4);
+    terrainQuery.f14 = (void*)self->TheAIFwdDiffCache;
     tr.count = 0;
     tr.ctx.pos = pos;
     sCtx_369D8* ctx = &tr.ctx;
-    sCell_369D8* octant0 = &self[0];
-    sCell_369D8* octant1 = &self[1];
-    sCell_369D8* octant2 = &self[2];
-    sCell_369D8* octant3 = &self[3];
-    sCell_369D8* octant4 = &self[4];
-    sCell_369D8* octant5 = &self[5];
-    sCell_369D8* octant6 = &self[6];
-    sCell_369D8* octant7 = &self[7];
-    if (self[0].node) visit_003369D8(octant0, &tr.ctx.flags[0], &terrainQuery, ctx);
-    if (self[1].node) visit_003369D8(octant1, &tr.ctx.flags[1], &terrainQuery, ctx);
-    if (self[2].node) visit_003369D8(octant2, &tr.ctx.flags[2], &terrainQuery, ctx);
-    if (self[3].node) visit_003369D8(octant3, &tr.ctx.flags[3], &terrainQuery, ctx);
-    if (self[4].node) visit_003369D8(octant4, &tr.ctx.flags[4], &terrainQuery, ctx);
-    if (self[5].node) visit_003369D8(octant5, &tr.ctx.flags[5], &terrainQuery, ctx);
-    if (self[6].node) visit_003369D8(octant6, &tr.ctx.flags[6], &terrainQuery, ctx);
-    if (self[7].node) visit_003369D8(octant7, &tr.ctx.flags[7], &terrainQuery, ctx);
+    sCell_369D8* octant0 = &((sCell_369D8*)self)[0];
+    sCell_369D8* octant1 = &((sCell_369D8*)self)[1];
+    sCell_369D8* octant2 = &((sCell_369D8*)self)[2];
+    sCell_369D8* octant3 = &((sCell_369D8*)self)[3];
+    sCell_369D8* octant4 = &((sCell_369D8*)self)[4];
+    sCell_369D8* octant5 = &((sCell_369D8*)self)[5];
+    sCell_369D8* octant6 = &((sCell_369D8*)self)[6];
+    sCell_369D8* octant7 = &((sCell_369D8*)self)[7];
+    if (((sCell_369D8*)self)[0].node) visit_003369D8(octant0, &tr.ctx.flags[0], &terrainQuery, ctx);
+    if (((sCell_369D8*)self)[1].node) visit_003369D8(octant1, &tr.ctx.flags[1], &terrainQuery, ctx);
+    if (((sCell_369D8*)self)[2].node) visit_003369D8(octant2, &tr.ctx.flags[2], &terrainQuery, ctx);
+    if (((sCell_369D8*)self)[3].node) visit_003369D8(octant3, &tr.ctx.flags[3], &terrainQuery, ctx);
+    if (((sCell_369D8*)self)[4].node) visit_003369D8(octant4, &tr.ctx.flags[4], &terrainQuery, ctx);
+    if (((sCell_369D8*)self)[5].node) visit_003369D8(octant5, &tr.ctx.flags[5], &terrainQuery, ctx);
+    if (((sCell_369D8*)self)[6].node) visit_003369D8(octant6, &tr.ctx.flags[6], &terrainQuery, ctx);
+    if (((sCell_369D8*)self)[7].node) visit_003369D8(octant7, &tr.ctx.flags[7], &terrainQuery, ctx);
     if (tr.count == 0) {
         return 0;
     }
@@ -3243,7 +3245,7 @@ struct sHit_003378C0;
  * @param full  nonzero makes StaticObjectCallback_intersectinstance pass mode 3 instead of 1 (On Tour includeRidable)
  * @return the number of hits stored
  */
-extern "C" int cBXNash_staticObjectIntersect(void* vself, void* vq, sHit_003378C0* hits, int cap, int full)
+extern "C" int cBXNash_staticObjectIntersect(cBXNash* vself, void* vq, sHit_003378C0* hits, int cap, int full)
 {
     sGrid_336F30* grid = (sGrid_336F30*)vself;
     sQry_336F30* query = (sQry_336F30*)vq;
@@ -3285,7 +3287,7 @@ struct sHit_003378C0 {
 } __attribute__((aligned(16)));
 
 struct sVEnt_003378C0 { short delta; short index; float (*fn)(void*); };
-extern "C" int cBXNash_staticObjectIntersect(void* self, void* q, sHit_003378C0* hits, int max, int a4);
+extern "C" int cBXNash_staticObjectIntersect(cBXNash* self, void* q, sHit_003378C0* hits, int max, int a4);
 
 // PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
 static inline float absf_003378C0(float x)
@@ -3322,7 +3324,7 @@ static inline int isBetter_003378C0(sHit_003378C0* a, sHit_003378C0* b)
  * @param full  passed through to cBXNash_staticObjectIntersect (On Tour includeRidable)
  * @return the chosen hit's parameter, or -1.0
  */
-extern "C" float cBXNash_staticObjectIntersect1(void* self, char* query, sHit_003378C0* out, int full)
+extern "C" float cBXNash_staticObjectIntersect1(cBXNash* self, char* query, sHit_003378C0* out, int full)
 {
     sHit_003378C0 hits[128];
     int n = cBXNash_staticObjectIntersect(self, query, hits, 0x80, full);
@@ -3443,7 +3445,7 @@ static inline void queryCell_337A48(sGrid_337A48* grid, int i, sBox_00334680* bo
  * @param testRadius  the test radius
  * @return nonzero when a hit was recorded
  */
-extern "C" int cBXNash_splineIntersect(sGrid_337A48* grid, sWsVec4* pos, int intInfo, int mask, float testRadius)
+extern "C" int cBXNash_splineIntersect(cBXNash* grid, sWsVec4* pos, int intInfo, int mask, float testRadius)
 {
     sBox_00334680 box;
     sWsVec4 ext;
@@ -3467,14 +3469,14 @@ extern "C" int cBXNash_splineIntersect(sGrid_337A48* grid, sWsVec4* pos, int int
     splineQuery.box = pbox;
     dist = 0.0f;
     cnt = 0;
-    queryCell_337A48(grid, 0, pbox, &splineQuery);
-    queryCell_337A48(grid, 1, pbox, &splineQuery);
-    queryCell_337A48(grid, 2, pbox, &splineQuery);
-    queryCell_337A48(grid, 3, pbox, &splineQuery);
-    queryCell_337A48(grid, 4, pbox, &splineQuery);
-    queryCell_337A48(grid, 5, pbox, &splineQuery);
-    queryCell_337A48(grid, 6, pbox, &splineQuery);
-    queryCell_337A48(grid, 7, pbox, &splineQuery);
+    queryCell_337A48(((sGrid_337A48*)grid), 0, pbox, &splineQuery);
+    queryCell_337A48(((sGrid_337A48*)grid), 1, pbox, &splineQuery);
+    queryCell_337A48(((sGrid_337A48*)grid), 2, pbox, &splineQuery);
+    queryCell_337A48(((sGrid_337A48*)grid), 3, pbox, &splineQuery);
+    queryCell_337A48(((sGrid_337A48*)grid), 4, pbox, &splineQuery);
+    queryCell_337A48(((sGrid_337A48*)grid), 5, pbox, &splineQuery);
+    queryCell_337A48(((sGrid_337A48*)grid), 6, pbox, &splineQuery);
+    queryCell_337A48(((sGrid_337A48*)grid), 7, pbox, &splineQuery);
     return cnt;
 }
 #endif

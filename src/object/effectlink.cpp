@@ -831,14 +831,14 @@ struct sEffVEntry61C0 {
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cHaloModifier_cHaloModifier1(void* self, void* stream)
+extern "C" void* cHaloModifier_cHaloModifier1(cHaloModifier* self, void* stream)
 {
     cEffectModifier_cEffectModifier1((cEffectModifier*)self, stream);
-    *(void***)((char*)self + 0x8) = cHaloModifier_vtbl;
+    self->mVtbl = cHaloModifier_vtbl;
     sEffVEntry61C0* vt = *(sEffVEntry61C0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x10, 0x30);
     D_004A4000++;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -859,7 +859,7 @@ struct sEffectLinkObj_6228 {
  *
  * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
  */
-extern "C" void cHaloModifier__cHaloModifier(void* self, int flags)
+extern "C" void cHaloModifier__cHaloModifier(cHaloModifier* self, int flags)
 {
     ((sEffectLinkObj_6228*)self)->vt = cHaloModifier_vtbl;
     D_004A4000--;
@@ -873,12 +873,12 @@ INCLUDE_ASM("object/effectlink", cHaloModifier_update);
 /**
  * Spins a halo: adds the integer step (+0x2C) to its angle in degrees (+0x30), resetting it to 0 at +/-360.
  */
-extern "C" void cHaloModifier_update(void* self)
+extern "C" void cHaloModifier_update(cHaloModifier* self)
 {
-    float angle = *(float*)((char*)self + 0x30) + (float)*(int*)((char*)self + 0x2c);
-    *(float*)((char*)self + 0x30) = angle;
+    float angle = self->Angle + (float)self->Speed;
+    self->Angle = angle;
     if (angle >= 360.0f || angle <= -360.0f) {
-        *(float*)((char*)self + 0x30) = 0.0f;
+        self->Angle = 0.0f;
     }
 }
 #endif
@@ -903,14 +903,14 @@ extern "C" void cObjectInterface_renderSimpleLightHalo(sEffVec4_62A0* pos, void*
  * Gets the world matrix of mesh +0x28 of the instance (+0xC) and draws the halo sprite there with
  * cObjectInterface_renderSimpleLightHalo(), passing the halo data (+0x10), +0x24, the size (+0x20) and the current angle (+0x30).
  */
-extern "C" void cHaloModifier_render(void* self)
+extern "C" void cHaloModifier_render(cHaloModifier* self)
 {
     sEffMtx_62A0 matrix;
     void* colour = (char*)self + 0x10;
-    cInstanceNode_buildMeshMat(*(void**)((char*)self + 0xC), *(int*)((char*)self + 0x28), &matrix);
+    cInstanceNode_buildMeshMat(self->Instance, self->Mesh, &matrix);
     sEffVec4_62A0 origin = matrix.r[3];
-    cObjectInterface_renderSimpleLightHalo(&origin, colour, *(int*)((char*)self + 0x24),
-                  *(float*)((char*)self + 0x20), *(float*)((char*)self + 0x30));
+    cObjectInterface_renderSimpleLightHalo(&origin, colour, self->Type,
+                  self->Radius, self->Angle);
 }
 #endif
 
@@ -933,7 +933,7 @@ extern "C" void cEffectModifier_writeToReplayFrame(cEffectModifier* self, void* 
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cHaloModifier_writeToReplayFrame(void* self, void* stream)
+extern "C" void cHaloModifier_writeToReplayFrame(cHaloModifier* self, void* stream)
 {
     cEffectModifier_writeToReplayFrame((cEffectModifier*)self, stream);
     sEffectLinkVEntry* vt = *(sEffectLinkVEntry**)stream;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/focusbox.h"
 #include "ai/dangerman.h"
 #include "ai/rideranim.h"
 #include "camera/trigger/cameratriggerman.h"
@@ -2035,18 +2036,18 @@ struct S_3308 { char pad[0xD8]; int cnt; void *arr[8]; };
  * @param focusMan  the focus manager (this; cAI's FocusMan, +0xA4)
  * @param sectionId  the id of the section being unloaded, compared with each record's byte at +0x78
  */
-extern "C" void cFocusMan_purgesection(S_3308 *focusMan, int sectionId) {
+extern "C" void cFocusMan_purgesection(cFocusMan* focusMan, int sectionId) {
     int n = 0;
     int i;
 
-    for (i = 0; i < focusMan->cnt; i++) {
-        void *instance = focusMan->arr[i];
+    for (i = 0; i < focusMan->NumFocusInstances; i++) {
+        void *instance = ((void**)&focusMan->FocusInstances[0])[i];
         if (*(unsigned char *)((char*)instance + 0x78) != sectionId) {
-            focusMan->arr[n] = instance;
+            ((void**)&focusMan->FocusInstances[0])[n] = instance;
             n++;
         }
     }
-    focusMan->cnt = n;
+    focusMan->NumFocusInstances = n;
 }
 #endif
 
@@ -2059,14 +2060,14 @@ struct S_3358 { char pad[0xD0]; int f_d0; int pad2; int cnt; void *arr[8]; };
  *
  * Clears bit 0x100 in each listed object's +0x8 flags, the mark that cFocusMan_addfocusinstance sets when it adds one.
  */
-extern "C" void cFocusMan_reset(S_3358 *self) {
+extern "C" void cFocusMan_reset(cFocusMan* self) {
     int i;
 
-    for (i = 0; i < self->cnt; i++) {
-        *(int *)((char*)self->arr[i] + 8) &= 0xFFFFFEFF;
+    for (i = 0; i < self->NumFocusInstances; i++) {
+        *(int *)((char*)((void**)&self->FocusInstances[0])[i] + 8) &= 0xFFFFFEFF;
     }
-    self->cnt = 0;
-    self->f_d0 = -1;
+    self->NumFocusInstances = 0;
+    self->LastUpdateTick = -1;
 }
 #endif
 
@@ -2086,14 +2087,14 @@ struct V_33B0 { int x, y, z, w; } __attribute__((aligned(16)));
  * @param focusMan  the focus manager (this; cAI's FocusMan, +0xA4)
  * @param focusBox  the cFocusBox to add
  */
-extern "C" void cFocusMan_addbox(void *focusMan, V_33B0 *focusBox) {
+extern "C" void cFocusMan_addbox(cFocusMan* focusMan, V_33B0 *focusBox) {
     V_33B0 boxCopy;
 
-    (*(int *)((char*)(focusMan) + (0xD0))) = -1;
-    (*(V_33B0 **)((char*)(focusMan) + ((*(int *)((char*)(focusMan) + (0))) << 5) + (0x10))) = focusBox;
+    (focusMan->LastUpdateTick) = -1;
+    (*(V_33B0 **)((char*)(focusMan) + ((focusMan->NumBoxes) << 5) + (0x10))) = focusBox;
     boxCopy = *focusBox;
-    (*(V_33B0 *)((char*)((((*(int *)((char*)(focusMan) + (0))) << 5) + (int)focusMan)) + (0x20))) = boxCopy;
-    (*(int *)((char*)(focusMan) + (0))) = (int) ((*(int *)((char*)(focusMan) + (0))) + 1);
+    (*(V_33B0 *)((char*)((((focusMan->NumBoxes) << 5) + (int)focusMan)) + (0x20))) = boxCopy;
+    (focusMan->NumBoxes) = (int) ((focusMan->NumBoxes) + 1);
 }
 #endif
 
@@ -2122,16 +2123,16 @@ struct sList1033F8 {
  * @param id  the cFocusBox to remove, compared with each record's box pointer
  */
 // Removes the entry with the given id from the list, shifting the rest down.
-extern "C" void cFocusMan_removebox(sList1033F8* self, int id)
+extern "C" void cFocusMan_removebox(cFocusMan* self, int id)
 {
     int i;
-    self->fD0 = -1;
-    for (i = 0; i < self->count; i++) {
-        if (self->entries[i].id == id) {
-            for (i++; i < self->count; i++) {
-                self->entries[i - 1] = self->entries[i];
+    self->LastUpdateTick = -1;
+    for (i = 0; i < self->NumBoxes; i++) {
+        if (((sEntry1033F8*)&self->Boxes[0])[i].id == id) {
+            for (i++; i < self->NumBoxes; i++) {
+                ((sEntry1033F8*)&self->Boxes[0])[i - 1] = ((sEntry1033F8*)&self->Boxes[0])[i];
             }
-            self->count--;
+            self->NumBoxes--;
             return;
         }
     }
@@ -2175,14 +2176,14 @@ struct sObj_3480 {
  *
  * @param data  the replay frame (cReplayFramePtr) written to
  */
-extern "C" void cFocusMan_writeToReplayFrame(sObj_3480* self, cStream_3480* data)
+extern "C" void cFocusMan_writeToReplayFrame(cFocusMan* self, cStream_3480* data)
 {
-    data->Write(&self->fD0, 4);
-    for (int i = 0; i < self->n; i++)
-        data->Write(&self->ents[i], 0x10);
-    data->Write(&self->m, 4);
-    for (int j = 0; j < self->m; j++)
-        data->WriteInt(self->vals[j]);
+    data->Write(&self->LastUpdateTick, 4);
+    for (int i = 0; i < self->NumBoxes; i++)
+        data->Write(&((sEnt_3480*)&self->Boxes[0].LastUpdatePos)[i], 0x10);
+    data->Write(&self->NumFocusInstances, 4);
+    for (int j = 0; j < self->NumFocusInstances; j++)
+        data->WriteInt(((int*)&self->FocusInstances[0])[j]);
 }
 #endif
 
@@ -2227,17 +2228,17 @@ struct sObj_3578 {
  *
  * @param data  the replay frame (cReplayFramePtr) read from
  */
-extern "C" void cFocusMan_readFromReplayFrame(sObj_3578* self, cStream_3578* data)
+extern "C" void cFocusMan_readFromReplayFrame(cFocusMan* self, cStream_3578* data)
 {
-    data->Read(&self->fD0, 4);
-    for (int i = 0; i < self->n; i++)
-        data->Read(&self->ents[i], 0x10);
-    self->fD4 = 1;
-    data->Read(&self->m, 4);
-    for (int j = 0; j < self->m; j++) {
+    data->Read(&self->LastUpdateTick, 4);
+    for (int i = 0; i < self->NumBoxes; i++)
+        data->Read(&((sEnt_3578*)&self->Boxes[0].LastUpdatePos)[i], 0x10);
+    self->IsEven = 1;
+    data->Read(&self->NumFocusInstances, 4);
+    for (int j = 0; j < self->NumFocusInstances; j++) {
         sItem_3578* it = data->ReadPtr();
         it->flags = (it->flags | 0x100) & 0xFFFFFDFF;
-        self->items[j] = it;
+        ((sItem_3578**)&self->FocusInstances[0])[j] = it;
     }
 }
 #endif

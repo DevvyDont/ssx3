@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/animframe.h"
 #include "object/flagset.h"
 #include "object/animteeternode.h"
 #include "object/springrailnode.h"
@@ -5708,11 +5709,11 @@ extern "C" void cAnimFrame_init(void*);
  *
  * @return self
  */
-extern "C" void* cAnimFrame_cAnimFrame1(void* self)
+extern "C" void* cAnimFrame_cAnimFrame1(cAnimFrame* self)
 {
-    *(int*)((char*)self + 0x84) = (int)(void*)cAnimFrame_vtbl;
+    self->mVtbl = (void**)((int)(void*)cAnimFrame_vtbl);
     cAnimFrame_init(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -5727,9 +5728,9 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cAnimFrame__cAnimFrame(void* self, int flags)
+extern "C" void cAnimFrame__cAnimFrame(cAnimFrame* self, int flags)
 {
-    *(void***)((char*)self + 0x84) = cAnimFrame_vtbl;
+    self->mVtbl = cAnimFrame_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -5748,12 +5749,12 @@ struct sVec4_361208 {
  *
  * @param out  receives the angles
  */
-extern "C" void cAnimFrame_getAngles(void* self, sVec4_361208* out)
+extern "C" void cAnimFrame_getAngles(cAnimFrame* self, sVec4_361208* out)
 {
     sVec4_361208 negated;
-    negated.x = -*(float*)((char*)self + 0x50);
-    negated.y = -*(float*)((char*)self + 0x54);
-    negated.z = -*(float*)((char*)self + 0x58);
+    negated.x = -self->Vals[3];
+    negated.y = -self->Vals[4];
+    negated.z = -self->Vals[5];
     negated.w = 0.0f;
     *out = negated;
 }
@@ -5764,7 +5765,7 @@ INCLUDE_ASM("object/railmodifier", cMeshAnimFrame_cMeshAnimFrame1);
 extern void* cAnimFrame_vtbl[];
 extern void* cMeshAnimFrame_vtbl[];
 extern "C" void cAnimFrame_init(void*);
-extern "C" void cMeshAnimFrame_init(void*);
+extern "C" void cMeshAnimFrame_init(cMeshAnimFrame*);
 
 /**
  * Constructs an empty mesh animation frame.
@@ -5774,13 +5775,13 @@ extern "C" void cMeshAnimFrame_init(void*);
  *
  * @return self
  */
-extern "C" void* cMeshAnimFrame_cMeshAnimFrame1(void* self)
+extern "C" void* cMeshAnimFrame_cMeshAnimFrame1(cMeshAnimFrame* self)
 {
-    *(int*)((char*)self + 0x84) = (int)(void*)cAnimFrame_vtbl;
+    self->mVtbl = (void**)((int)(void*)cAnimFrame_vtbl);
     cAnimFrame_init(self);
-    *(int*)((char*)self + 0x84) = (int)(void*)cMeshAnimFrame_vtbl;
+    self->mVtbl = (void**)((int)(void*)cMeshAnimFrame_vtbl);
     cMeshAnimFrame_init(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -5798,9 +5799,9 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cMeshAnimFrame__cMeshAnimFrame(void* self, int flags)
+extern "C" void cMeshAnimFrame__cMeshAnimFrame(cMeshAnimFrame* self, int flags)
 {
-    *(void***)((char*)self + 0x84) = cAnimFrame_vtbl;
+    self->mVtbl = cAnimFrame_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -5816,7 +5817,7 @@ extern char t4mat_Identity[];
  * Resets a mesh animation frame's FrameMatrix (+0x90) to t4mat_Identity.
  */
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-extern "C" void cMeshAnimFrame_init(void* self)
+extern "C" void cMeshAnimFrame_init(cMeshAnimFrame* self)
 {
     __asm__ __volatile__(
         ".set noreorder\n"
@@ -5860,12 +5861,12 @@ extern "C" void cAnimFrame_init(void*);
  *
  * @return self
  */
-extern "C" void* cCamAnimFrame_cCamAnimFrame1(void* self)
+extern "C" void* cCamAnimFrame_cCamAnimFrame1(cCamAnimFrame* self)
 {
-    *(int*)((char*)self + 0x84) = (int)(void*)cAnimFrame_vtbl;
+    self->mVtbl = (void**)((int)(void*)cAnimFrame_vtbl);
     cAnimFrame_init(self);
-    *(int*)((char*)self + 0x84) = (int)(void*)cCamAnimFrame_vtbl;
-    return self;
+    self->mVtbl = (void**)((int)(void*)cCamAnimFrame_vtbl);
+    return ((void*)self);
 }
 #endif
 
@@ -5880,9 +5881,9 @@ void operator_delete(int*);
  *
  * @param flags  destructor flags
  */
-extern "C" void cCamAnimFrame__cCamAnimFrame(void* self, int flags)
+extern "C" void cCamAnimFrame__cCamAnimFrame(cCamAnimFrame* self, int flags)
 {
-    *(void***)((char*)self + 0x84) = cAnimFrame_vtbl;
+    self->mVtbl = cAnimFrame_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -5914,12 +5915,12 @@ struct sVec4_361378 {
  *
  * @param out  receives the position
  */
-extern "C" void cCamAnimFrame_getPosition(void* self, sVec4_361378* out)
+extern "C" void cCamAnimFrame_getPosition(cCamAnimFrame* self, sVec4_361378* out)
 {
     sVec4_361378 result;
-    result.x = *(float*)((char*)self + 0x44);
-    result.y = *(float*)((char*)self + 0x48);
-    result.z = *(float*)((char*)self + 0x4C);
+    result.x = self->Vals[0];
+    result.y = self->Vals[1];
+    result.z = self->Vals[2];
     result.w = 1.0f;
     *out = result;
 }
@@ -5936,12 +5937,12 @@ struct sVec3_3613B0 {
  *
  * @param out  receives the angles
  */
-extern "C" void cCamAnimFrame_getAngles(void* self, sVec3_3613B0* out)
+extern "C" void cCamAnimFrame_getAngles(cCamAnimFrame* self, sVec3_3613B0* out)
 {
     sVec3_3613B0 result;
-    result.x = *(float*)((char*)self + 0x50);
-    result.y = *(float*)((char*)self + 0x54);
-    result.z = *(float*)((char*)self + 0x58);
+    result.x = self->Vals[3];
+    result.y = self->Vals[4];
+    result.z = self->Vals[5];
     *out = result;
 }
 #endif
@@ -5954,8 +5955,8 @@ INCLUDE_ASM("object/railmodifier", cCamAnimFrame_getFocalLength);
  * @param frame  the camera animation frame
  * @param out  receives the focal length
  */
-extern "C" void cCamAnimFrame_getFocalLength(void *frame, float *out) {
-    *out = (*(float *)((char*)(frame) + (0x70)));
+extern "C" void cCamAnimFrame_getFocalLength(cCamAnimFrame* frame, float *out) {
+    *out = (frame->Vals[11]);
 }
 #endif
 
@@ -6446,8 +6447,8 @@ INCLUDE_ASM("object/railmodifier", cFlagManager_GetWindFactor);
  * @param flagManager  the flag manager
  * @return the wind factor
  */
-extern "C" float cFlagManager_GetWindFactor(void *flagManager) {
-    return (*(float *)((char*)(flagManager) + (0x10)));
+extern "C" float cFlagManager_GetWindFactor(cFlagManager* flagManager) {
+    return (flagManager->mCurrentWindFactor);
 }
 #endif
 

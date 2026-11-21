@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/scsndmgr.h"
 #include "scripter/videngine.h"
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
@@ -58,7 +59,7 @@ INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager__cScriptSoundBankManage
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
-extern "C" void cScriptSoundBankManager_UnlinkBanksAll(void* self);
+extern "C" void cScriptSoundBankManager_UnlinkBanksAll(cScriptSoundBankManager* self);
 extern char cScriptSoundBankManager_vtbl[];
 
 /**
@@ -67,11 +68,11 @@ extern char cScriptSoundBankManager_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cScriptSoundBankManager__cScriptSoundBankManager(void* self, int flags)
+extern "C" void cScriptSoundBankManager__cScriptSoundBankManager(cScriptSoundBankManager* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cScriptSoundBankManager_vtbl;
+    self->mVtbl = (void**)cScriptSoundBankManager_vtbl;
     cScriptSoundBankManager_UnlinkBanksAll(self);
-    void* bankInfo = *(void**)((char*)self + 0x8);
+    void* bankInfo = self->mpBankInfo;
     if (bankInfo != 0) {
         cMemMan_free(bankInfo);
     }
@@ -103,11 +104,11 @@ extern "C" void cBankManager_BANK_Attach(void* bank, int handle, void* data, int
  * @param dataSize  size of the bank data in bytes
  * @return the slot's bank number
  */
-extern "C" int cScriptSoundBankManager_LinkBank(sSndList* self, int id, void* data, int dataSize)
+extern "C" int cScriptSoundBankManager_LinkBank(cScriptSoundBankManager* self, int id, void* data, int dataSize)
 {
-    char* bankInfo = (char*)cScriptSoundBankManager_GetBankInfo(self, id);
+    char* bankInfo = (char*)cScriptSoundBankManager_GetBankInfo(((sSndList*)self), id);
     if (bankInfo == 0) {
-        bankInfo = (char*)cScriptSoundBankManager_GetEmptyBankInfo(self);
+        bankInfo = (char*)cScriptSoundBankManager_GetEmptyBankInfo(((sSndList*)self));
         *(int*)(bankInfo + 0x0) = id;
         *(void**)(bankInfo + 0x8) = data;
         cBankManager_BANK_Attach(**(void***)((char*)cAudioInterface_bxAudio() + 0x118), *(int*)(bankInfo + 0x4), data, dataSize);
@@ -137,11 +138,11 @@ extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(sSndList* self, int id
  *
  * @param id  the bank's user ID
  */
-extern "C" void cScriptSoundBankManager_UnlinkBank1(sSndList* self, int id)
+extern "C" void cScriptSoundBankManager_UnlinkBank1(cScriptSoundBankManager* self, int id)
 {
-    sSndEntry* bankInfo = cScriptSoundBankManager_GetBankInfo(self, id);
+    sSndEntry* bankInfo = cScriptSoundBankManager_GetBankInfo(((sSndList*)self), id);
     if (bankInfo != 0) {
-        sScSndVEntry* vt = *(sScSndVEntry**)((char*)self + 0xC);
+        sScSndVEntry* vt = (sScSndVEntry*)self->mVtbl;
         vt[2].fn((char*)self + vt[2].delta, bankInfo);
     }
 }
@@ -177,7 +178,7 @@ struct sDmTable283658 {
  *
  * @param self_  the script sound bank manager (this)
  */
-extern "C" void cScriptSoundBankManager_UnlinkBanksAll(void* self_)
+extern "C" void cScriptSoundBankManager_UnlinkBanksAll(cScriptSoundBankManager* self_)
 {
     sDmTable283658* self = (sDmTable283658*)self_;
     int i;
@@ -237,7 +238,7 @@ extern "C" void cBankManager_BANK_UnAttach(void* bank, int handle);
  *
  * @param pBankInfo  the bank's slot (On Tour tScriptSoundBankInfo* pBankInfo: userID, bankNum, pData)
  */
-extern "C" void cScriptSoundBankManager_UnlinkBank(sSndList* self, sSndEntry* pBankInfo)
+extern "C" void cScriptSoundBankManager_UnlinkBank(cScriptSoundBankManager* self, sSndEntry* pBankInfo)
 {
     cBankManager_BANK_UnAttach(**(void***)((char*)cAudioInterface_bxAudio() + 0x118), pBankInfo->unk4);
     pBankInfo->id = -1;

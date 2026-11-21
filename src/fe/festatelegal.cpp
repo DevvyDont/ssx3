@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateoptions.h"
 
 //100%
 INCLUDE_ASM("fe/festatelegal", cFEStateLegal_onCreateScreen);
@@ -289,15 +290,15 @@ extern "C" void cFEFlowState_setValue(void* self, int a1, int a2);
  * @param reset  non-zero to clear the options entry in D_004A4E80
  * @return @p self
  */
-extern "C" void* func_001887A0(void* self, int engine, int reset)
+extern "C" void* func_001887A0(cFEStateOptions* self, int engine, int reset)
 {
     cUIState_cUIState(self);
-    *(int*)((char*)self + 0xC) = 0x18;
-    *(void***)((char*)self + 0x8) = cFEStateOptions_vtbl;
+    self->mHashName = 0x18;
+    self->mVtbl = cFEStateOptions_vtbl;
     if (reset != 0) {
         cFEFlowState_setValue(&D_004A4E80, 0x18, 0);
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 

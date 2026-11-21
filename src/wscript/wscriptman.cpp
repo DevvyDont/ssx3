@@ -1,4 +1,5 @@
 #include "common.h"
+#include "wscript/wscriptmission.h"
 #include "animation/animmodel.h"
 #include "replay/frameptr.h"
 #include "wscript/wscriptprocess.h"
@@ -4518,8 +4519,8 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMission_getSortKey);
  * @param mission  the mission
  * @return the sort key
  */
-extern "C" int cWScriptMission_getSortKey(void *mission) {
-    return (*(int *)((char*)(mission) + (0x64)));
+extern "C" int cWScriptMission_getSortKey(cWScriptMission* mission) {
+    return (mission->SortKey);
 }
 #endif
 
@@ -4548,8 +4549,8 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMission_isScopeLocal);
  * @param mission  the mission
  * @return 1 when the scope is 2, else 0
  */
-extern "C" int cWScriptMission_isScopeLocal(void *mission) {
-    return (*(int *)((char*)(mission) + (0x60))) == 2;
+extern "C" int cWScriptMission_isScopeLocal(cWScriptMission* mission) {
+    return (mission->Scope) == 2;
 }
 #endif
 

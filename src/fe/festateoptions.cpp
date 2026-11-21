@@ -26,16 +26,16 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
  * Then clears the word at +0x48 and sets the word at +0x4C to 1 (onPopupEvent writes the same pair after the
  * save-options prompt).
  */
-extern "C" void cFEStateOptions_onCreateScreen(void* self)
+extern "C" void cFEStateOptions_onCreateScreen(cFEStateOptions* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_18options), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    *(int*)((char*)self + 0x48) = 0;
-    *(int*)((char*)self + 0x4C) = 1;
+    self->mbToSaveOptionScreen = 0;
+    self->mbLetFrameGo = 1;
 }
 #endif
 
@@ -62,7 +62,7 @@ static inline int Is_00188870(int id, char* s) { return id == GetHashValue32(s);
  *
  * @param item  the widget being created; matched by its hash name (+0x38)
  */
-extern "C" void cFEStateOptions_onWidgetCreate(void* self, cUIThing* item)
+extern "C" void cFEStateOptions_onWidgetCreate(cFEStateOptions* self, cUIThing* item)
 {
     if (Is_00188870(item->mHashName, D_004A14F8)) {
         item->mMiscData = 0x1C;
@@ -97,7 +97,7 @@ extern "C" void cKeyboardPopup_setInputText(void* self, char* s);
 extern "C" void cKeyboardPopup_setStatic2(void* self, char* s);
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int a1, int a2, int a3);
 extern "C" int func_00187D38(void* self);
-extern "C" void cFEStateOptions_saveOptionPrompt(void* self);
+extern "C" void cFEStateOptions_saveOptionPrompt(cFEStateOptions* self);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern char str_cKeyboardPopup[];
@@ -158,18 +158,18 @@ static inline int Is_00188980(int id, char* s) { return id == GetHashValue32(s);
  * @param widget  the widget the event is for
  * @param event  UI event code (5, 6 or 13 are handled)
  */
-extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, cUIThing* widget, unsigned int event)
+extern "C" void cFEStateOptions_onWidgetEvent(cFEStateOptions* self, cUIThing* widget, unsigned int event)
 {
     switch (event) {
     case 5:
         if (Is_00188980(widget->mHashName, D_004A1520)) {
             void* mem = cMemMan_alloc(1092, str_cKeyboardPopup, 0x100, 0);
-            void* pop = cKeyboardPopup_cKeyboardPopup(mem, self->engine, self, 0, self->port);
-            self->popup = pop;
+            void* pop = cKeyboardPopup_cKeyboardPopup(mem, (char*)self->mpEngine, ((sOpt_188980*)self), 0, self->mCtrlBits);
+            self->mpKeyboard = (cKeyboardPopup*)pop;
             cKeyboardPopup_setInputText(pop, D_004A1408);
-            cKeyboardPopup_setStatic2(self->popup, D_004A1408);
-            cKeyboardPopup_setIncludeKey(self->popup, 75, 1, 2);
-            cUIStateStack_pushPopup(self->engine + 0x18, self->popup);
+            cKeyboardPopup_setStatic2(self->mpKeyboard, D_004A1408);
+            cKeyboardPopup_setIncludeKey(self->mpKeyboard, 75, 1, 2);
+            cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, self->mpKeyboard);
             break;
         } else if (Is_00188980(widget->mHashName, D_004A1530)) {
             if (D_004A14E0 == 0 && (D_004A14D0 != 0 || D_004A14D4 != 0 || D_004A14DC != 0 || D_004A14D8 != 0)) {
@@ -177,22 +177,22 @@ extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, cUIThing* widge
                 break;
             }
             D_004A14E0 = 0;
-            self->flags |= 0x80;
-            int frame = cUIScreen_getFrameByLabel(self->screen, GetHashValue32(str_TransitionOut));
+            self->mAttrState |= 0x80;
+            int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut));
             if (frame != 0xFFFF)
-                cUIScreen_playFrame(self->screen, frame, 1);
-            if (self->f48 == 0)
+                cUIScreen_playFrame(self->mpScreen, frame, 1);
+            if (self->mbToSaveOptionScreen == 0)
                 break;
-            char* custom = *(char**)self->engine;
+            char* custom = *(char**)(char*)self->mpEngine;
             if (custom != 0)
                 *(int*)(custom + 0xC) = 0x18;
         }
         {
-            char* obj = *(char**)self->engine;
+            char* obj = *(char**)(char*)self->mpEngine;
             sVE_188980p* vt = *(sVE_188980p**)(obj + 4);
-            void* r = vt[4].fn(obj + vt[4].delta, self, widget->mMiscData);
+            void* r = vt[4].fn(obj + vt[4].delta, ((sOpt_188980*)self), widget->mMiscData);
             if (r != 0)
-                cUIStateStack_push(self->engine + 0x18, r);
+                cUIStateStack_push((char*)self->mpEngine + 0x18, r);
         }
         break;
     case 6: {
@@ -201,16 +201,16 @@ extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, cUIThing* widge
             break;
         }
         D_004A14E0 = 0;
-        self->flags |= 0x80;
-        int frame = cUIScreen_getFrameByLabel(self->screen, GetHashValue32(str_TransitionOut));
+        self->mAttrState |= 0x80;
+        int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut));
         if (frame != 0xFFFF)
-            cUIScreen_playFrame(self->screen, frame, 1);
+            cUIScreen_playFrame(self->mpScreen, frame, 1);
         break;
     }
     case 13: {
-        int r = func_00187D38((char*)self->popup + 0x74);
+        int r = func_00187D38((char*)self->mpKeyboard + 0x74);
         char* obj = &gUISoundNull;
-        char* sound = *(char**)(self->engine + 0x14);
+        char* sound = *(char**)((char*)self->mpEngine + 0x14);
         if (sound != 0)
             obj = sound;
         if (obj != 0) {
@@ -220,7 +220,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, cUIThing* widge
                 ((cListener_188980*)obj)->playSound(4);
             }
         }
-        self->popup = 0;
+        self->mpKeyboard = 0;
         break;
     }
     }
@@ -240,7 +240,7 @@ extern int D_004A3484;
  * @param pInput  the UI input object
  * @return always 0
  */
-extern "C" int cFEStateOptions_onInputBegin(void* self, cUIInput* pInput)
+extern "C" int cFEStateOptions_onInputBegin(cFEStateOptions* self, cUIInput* pInput)
 {
     D_004A3484 = pInput->mPadNum;
     return 0;
@@ -265,7 +265,7 @@ extern char D_004A1530[];
  * @param index  index of the current entry in the menu list
  * @return 0x100, 0x101 or 1 (menu handling codes)
  */
-extern "C" int cFEStateOptions_onWidgetMenu(void* self, cUIMenu* menu, unsigned int key, int index)
+extern "C" int cFEStateOptions_onWidgetMenu(cFEStateOptions* self, cUIMenu* menu, unsigned int key, int index)
 {
     if (key < 10) {
         if (key >= 8) {
@@ -281,7 +281,7 @@ extern "C" int cFEStateOptions_onWidgetMenu(void* self, cUIMenu* menu, unsigned 
     if (key == 7) {
     check:
         int result = 257;
-        if (*(int*)((char*)self + 0x4C) == 0) {
+        if (self->mbLetFrameGo == 0) {
             result = 1;
         }
         return result;
@@ -328,7 +328,7 @@ static inline int IsK188D08(int id, char* s)
  * @param popup  the popup state; its hash (+0xC) and screen (+0x40) are read
  * @param event  popup event code (0x15 or 0x16 are handled)
  */
-extern "C" void cFEStateOptions_onPopupEvent(void* self, cUIState* popup, int event)
+extern "C" void cFEStateOptions_onPopupEvent(cFEStateOptions* self, cUIState* popup, int event)
 {
     switch (event) {
     case 21: {
@@ -341,20 +341,20 @@ extern "C" void cFEStateOptions_onPopupEvent(void* self, cUIState* popup, int ev
     }
     case 22:
         if (IsK188D08(popup->mHashName, str_111resetopts)) {
-            void* uiObj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1530));
+            void* uiObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1530));
             sVEK188D08a* vt = (sVEK188D08a*)popup->mVtbl;
             if (vt[23].fn(((char*)popup) + vt[23].delta, 0)) {
                 if (uiObj != 0) {
-                    *(int*)((char*)self + 0x48) = 1;
-                    *(int*)((char*)self + 0x4C) = 1;
-                    sVEK188D08b* vt2 = *(sVEK188D08b**)((char*)self + 8);
+                    self->mbToSaveOptionScreen = 1;
+                    self->mbLetFrameGo = 1;
+                    sVEK188D08b* vt2 = (sVEK188D08b*)self->mVtbl;
                     vt2[19].fn((char*)self + vt2[19].delta, uiObj, 5);
                 }
             } else {
                 if (uiObj != 0) {
-                    *(int*)((char*)self + 0x48) = 0;
-                    *(int*)((char*)self + 0x4C) = 1;
-                    sVEK188D08b* vt2 = *(sVEK188D08b**)((char*)self + 8);
+                    self->mbToSaveOptionScreen = 0;
+                    self->mbLetFrameGo = 1;
+                    sVEK188D08b* vt2 = (sVEK188D08b*)self->mVtbl;
                     vt2[19].fn((char*)self + vt2[19].delta, uiObj, 6);
                 }
             }
@@ -391,19 +391,19 @@ extern int D_004A14E0;
  * sets D_004A14E0 to 1 (cFEStateOptions_onWidgetEvent only prompts while it is 0 and clears it when the menu is left)
  * and clears +0x4C, which cFEStateOptions_onPopupEvent sets to 1 once the popup is answered.
  */
-extern "C" void cFEStateOptions_saveOptionPrompt(void* self)
+extern "C" void cFEStateOptions_saveOptionPrompt(cFEStateOptions* self)
 {
     char* savePopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
-    cUIState_cUIState1(savePopup, *(void**)((char*)self + 0x10), self);
+    cUIState_cUIState1(savePopup, self->mpEngine, self);
     *(void***)(savePopup + 8) = cFEPopupOptionReset_vtbl;
     *(char*)(savePopup + 0x48) = 0;
-    cUIStateStack_pushPopup(*(char**)((char*)self + 0x10) + 0x18, savePopup);
+    cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, savePopup);
     D_004A14D8 = 0;
     D_004A14E0 = 1;
     D_004A14DC = 0;
     D_004A14D4 = 0;
     D_004A14D0 = 0;
-    *(int*)((char*)self + 0x4C) = 0;
+    self->mbLetFrameGo = 0;
 }
 #endif
 
@@ -2611,13 +2611,13 @@ extern void* cFEStateOptionsSaveLoad_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1(void* self)
+extern "C" void* cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1(cFEStateOptionsSaveLoad* self)
 {
     cUIState_cUIState(self);
-    *(int*)((char*)self + 0xC) = 0x20;
-    *(void***)((char*)self + 0x8) = cFEStateOptionsSaveLoad_vtbl;
-    *(char*)((char*)self + 0x48) = 0;
-    return self;
+    self->mHashName = 0x20;
+    self->mVtbl = cFEStateOptionsSaveLoad_vtbl;
+    *(char*)&self->mSaveLoadCurrentCtrl = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -2632,11 +2632,11 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 /**
  * Creates the save/load menu screen ("25saveload") and shows its first frame.
  */
-extern "C" void cFEStateOptionsSaveLoad_onCreateScreen(void* self)
+extern "C" void cFEStateOptionsSaveLoad_onCreateScreen(cFEStateOptionsSaveLoad* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_25saveload), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -2664,7 +2664,7 @@ static inline int IsHash_D2E8(int id, char* s) { return id == GetHashValue32(s);
  *
  * @param widget  the widget being created; matched by its hash name (+0x38)
  */
-extern "C" void cFEStateOptionsSaveLoad_onWidgetCreate(void* self, cUIThing* widget)
+extern "C" void cFEStateOptionsSaveLoad_onWidgetCreate(cFEStateOptionsSaveLoad* self, cUIThing* widget)
 {
     if (IsHash_D2E8(widget->mHashName, str_1saveoptions)) {
         widget->mMiscData = 0;
@@ -2697,14 +2697,14 @@ extern char str_4new_game[];
  *
  * DisableTextWidget and D_004A19D8 are not identified (probably greys the two entries out).
  */
-extern "C" void cFEStateOptionsSaveLoad_onPreRender2D(void* self)
+extern "C" void cFEStateOptionsSaveLoad_onPreRender2D(cFEStateOptionsSaveLoad* self)
 {
     if (D_004A19D8 != 0) {
-        void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_3loadreplay));
+        void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_3loadreplay));
         if (obj != 0) {
             DisableTextWidget(obj);
         }
-        obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_4new_game));
+        obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_4new_game));
         if (obj != 0) {
             DisableTextWidget(obj);
         }
@@ -2725,7 +2725,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onWidgetMenu);
  * @return 0x100 for keys 8 and 9, else 0x101
  */
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cFEStateOptionsSaveLoad_onWidgetMenu(void* self, int menu, unsigned int key)
+extern "C" int cFEStateOptionsSaveLoad_onWidgetMenu(cFEStateOptionsSaveLoad* self, int menu, unsigned int key)
 {
     int result = 257;
     if (key < 10) {
@@ -2781,16 +2781,16 @@ struct sVE_18D460p {
  * @param widget  the popup state (its misc data at +0x18 holds the answer)
  * @param event  popup event code (0xF, 0x10, 0x15 or 0x16)
  */
-extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(char* self, cUIState* widget, unsigned int event)
+extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(cFEStateOptionsSaveLoad* self, cUIState* widget, unsigned int event)
 {
     switch (event) {
     case 0xF:
         widget->miMiscData = 1;
-        cUIStateStack_pop(*(char**)(self + 0x10) + 0x18, 1);
+        cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
         break;
     case 0x10:
         widget->miMiscData = 0;
-        cUIStateStack_pop(*(char**)(self + 0x10) + 0x18, 1);
+        cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
         break;
     case 21:
         break;
@@ -2798,7 +2798,7 @@ extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(char* self, cUIState* widge
         if (widget->miMiscData == 0) {
             break;
         }
-        int sel = *(signed char*)(self + 0x44);
+        int sel = self->mUserNum;
         if (sel < 0) {
             sel = 0;
         }
@@ -2813,15 +2813,15 @@ extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(char* self, cUIState* widge
         feRider = cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, 1);
         cFERider_purge(feRider);
         cFERider_init(feRider, 1, 0, 0);
-        char* obj = **(char***)(self + 0x10);
+        char* obj = *(char**)self->mpEngine;
         sVE_18D460p* vt2 = *(sVE_18D460p**)(obj + 4);
-        void* x = vt2[4].fn(obj + vt2[4].delta, self, (1 << *(signed char*)(self + 0x48)) | 0x100);
+        void* x = vt2[4].fn(obj + vt2[4].delta, ((char*)self), (1 << self->mSaveLoadCurrentCtrl) | 0x100);
         if (x != 0) {
-            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, x);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, x);
         }
-        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(str_TransitionOut));
+        int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut));
         if (frame != 0xFFFF) {
-            cUIScreen_playFrame(*(void**)(self + 0x40), frame, 1);
+            cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
         break;
     }
@@ -2871,7 +2871,7 @@ struct sVE_18D648v {
  * @param widget  the selected widget
  * @param event  UI event code (5 or 6 are handled)
  */
-extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(char* self, cUIThing* widget, int event)
+extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(cFEStateOptionsSaveLoad* self, cUIThing* widget, int event)
 {
     if (((char*)widget) == 0) {
         return;
@@ -2881,35 +2881,35 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(char* self, cUIThing* widg
         unsigned int widgetId = (unsigned int)widget->mMiscData;
         widget->mMiscData = 3;
         if (widgetId == 3) {
-            *(signed char*)(self + 0x48) = *(signed char*)(self + 0x14);
+            self->mSaveLoadCurrentCtrl = self->mCurrentCtrl;
             char* mgr = (char*)SSXApp->FELocale;
             sVE_18D648s* vt = *(sVE_18D648s**)(mgr + 4);
             unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(str_kT_HELPCreateNewFilePrompt));
             char* mem = (char*)operator new(3068, str_cFEPopupConfirm, 0x100, 0);
-            char* confirmPopup = (char*)cFEPopupConfirm_cFEPopupConfirm(mem, *(void**)(self + 0x10), self, text, 0, 0, 0, 0, 0);
+            char* confirmPopup = (char*)cFEPopupConfirm_cFEPopupConfirm(mem, self->mpEngine, ((char*)self), text, 0, 0, 0, 0, 0);
             sVE_18D648v* vt2 = *(sVE_18D648v**)(confirmPopup + 8);
             vt2[25].fn(confirmPopup + vt2[25].delta, 1);
             *(int*)(confirmPopup + 0x18) = 0;
-            cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, confirmPopup);
+            cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, confirmPopup);
         } else {
             if (widgetId > 3) {
-                widgetId |= 1 << *(signed char*)(self + 0x14);
+                widgetId |= 1 << self->mCurrentCtrl;
             }
-            char* obj = **(char***)(self + 0x10);
+            char* obj = *(char**)self->mpEngine;
             sVE_18D648p* vt = *(sVE_18D648p**)(obj + 4);
-            void* nextState = vt[4].fn(obj + vt[4].delta, self, widgetId);
+            void* nextState = vt[4].fn(obj + vt[4].delta, ((char*)self), widgetId);
             if (nextState != 0) {
-                cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
+                cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
             }
         }
         break;
     }
     case 6: {
-        char* obj = **(char***)(self + 0x10);
+        char* obj = *(char**)self->mpEngine;
         sVE_18D648p* vt = *(sVE_18D648p**)(obj + 4);
-        void* nextState = vt[5].fn(obj + vt[5].delta, self, widget->mMiscData);
+        void* nextState = vt[5].fn(obj + vt[5].delta, ((char*)self), widget->mMiscData);
         if (nextState != 0) {
-            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }
         break;
     }

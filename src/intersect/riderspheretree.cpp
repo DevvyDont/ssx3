@@ -1,4 +1,5 @@
 #include "common.h"
+#include "intersect/worldline.h"
 #include "intersect/worldrider.h"
 #include "intersect/worldsphere.h"
 #include "intersect/spheretree.h"
@@ -3465,26 +3466,26 @@ struct sRiderCapsule_E100 {
  * @param idealParam  the preferred hit parameter (On Tour aIdealParam)
  * @return @p self
  */
-extern "C" sRiderCapsule_E100* cWorldLine_cWorldLine(sRiderCapsule_E100* self, sSphereVec4* startPoint, sSphereVec4* endPoint,
+extern "C" sRiderCapsule_E100* cWorldLine_cWorldLine(cWorldLine* self, sSphereVec4* startPoint, sSphereVec4* endPoint,
                                              int state, float idealParam)
 {
-    self->state = state;
-    self->vtbl = cWorldLine_vtbl;
-    self->f8 = 0;
-    self->f4 = 0;
-    self->p0b = *startPoint;
-    self->p0 = self->p0b;
-    self->dirb = sphereCapsuleSub(endPoint, startPoint);
-    self->dir = self->dirb;
-    self->radius = idealParam;
-    self->max = sSphereV4_E100(startPoint->x > endPoint->x ? startPoint->x : endPoint->x,
+    self->mPrecision = state;
+    self->mVtbl = (void**)cWorldLine_vtbl;
+    self->useRejectNormal = 0;
+    self->isTransformed = 0;
+    (*(sSphereVec4*)&self->origP0) = *startPoint;
+    (*(sSphereVec4*)&self->p0) = (*(sSphereVec4*)&self->origP0);
+    (*(sSphereVec4*)&self->origDp) = sphereCapsuleSub(endPoint, startPoint);
+    (*(sSphereVec4*)&self->dp) = (*(sSphereVec4*)&self->origDp);
+    self->idealParam = idealParam;
+    (*(sSphereVec4*)&self->boxMax) = sSphereV4_E100(startPoint->x > endPoint->x ? startPoint->x : endPoint->x,
                                startPoint->y > endPoint->y ? startPoint->y : endPoint->y,
                                startPoint->z > endPoint->z ? startPoint->z : endPoint->z, 1.0f);
-    self->min = sSphereV4_E100(startPoint->x < endPoint->x ? startPoint->x : endPoint->x,
+    (*(sSphereVec4*)&self->boxMin) = sSphereV4_E100(startPoint->x < endPoint->x ? startPoint->x : endPoint->x,
                                startPoint->y < endPoint->y ? startPoint->y : endPoint->y,
                                startPoint->z < endPoint->z ? startPoint->z : endPoint->z, 1.0f);
-    self->center = sphereCapsuleDiv(sphereCapsuleAdd(&self->min, &self->max), 2.0f);
-    return self;
+    (*(sSphereVec4*)&self->boxCenter) = sphereCapsuleDiv(sphereCapsuleAdd(&(*(sSphereVec4*)&self->boxMin), &(*(sSphereVec4*)&self->boxMax)), 2.0f);
+    return ((sRiderCapsule_E100*)self);
 }
 #endif
 
@@ -3502,9 +3503,9 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldLine_IsInBoxTransformed);
  */
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (4 float adds).
 // segment self->p0 .. p0+dir overlaps the box [mn, mx]?
-extern "C" int cWorldLine_IsInBoxTransformed(sRiderCapsule_E100* self, sSphereVec4* mn, sSphereVec4* mx)
+extern "C" int cWorldLine_IsInBoxTransformed(cWorldLine* self, sSphereVec4* mn, sSphereVec4* mx)
 {
-    sSphereVec4 endPoint = sphereCapsuleAdd(&self->p0, &self->dir);
+    sSphereVec4 endPoint = sphereCapsuleAdd(&(*(sSphereVec4*)&self->p0), &(*(sSphereVec4*)&self->dp));
     if ((self->p0.x < mn->x && endPoint.x < mn->x) || (mx->x < self->p0.x && mx->x < endPoint.x) ||
         (self->p0.y < mn->y && endPoint.y < mn->y) || (mx->y < self->p0.y && mx->y < endPoint.y) ||
         (self->p0.z < mn->z && endPoint.z < mn->z) || (mx->z < self->p0.z && mx->z < endPoint.z)) {
@@ -3536,12 +3537,12 @@ struct sSphereProd_E398 : sSphereV4_E100 {
  * @param scale  the uniform scale applied after the matrix
  */
 // Transforms the capsule's base segment (p0b, dirb) by a matrix and a uniform scale (w kept at 1).
-extern "C" void cWorldLine_Transform(sRiderCapsule_E100* self, sSphereVec4* mat, float scale)
+extern "C" void cWorldLine_Transform(cWorldLine* self, sSphereVec4* mat, float scale)
 {
     sSphereV4_E100 sc(scale, scale, scale, 1.0f);
-    self->p0 = sSphereProd_E398(mtxMulVec_9B90(mat, &self->p0b), sc);
-    self->dir = sSphereProd_E398(mtxMulVec_9B90(mat, &self->dirb), sc);
-    self->f4 = 1;
+    (*(sSphereVec4*)&self->p0) = sSphereProd_E398(mtxMulVec_9B90(mat, &(*(sSphereVec4*)&self->origP0)), sc);
+    (*(sSphereVec4*)&self->dp) = sSphereProd_E398(mtxMulVec_9B90(mat, &(*(sSphereVec4*)&self->origDp)), sc);
+    self->isTransformed = 1;
 }
 #endif
 
@@ -3552,13 +3553,13 @@ INCLUDE_ASM("intersect/riderspheretree", cWorldLine_UnTransform);
  * Undoes cWorldLine_Transform: copies the base point and direction (+0x80, +0x90) back to +0x60 / +0x70 and clears
  * the transformed flag.
  */
-extern "C" void cWorldLine_UnTransform(void* self)
+extern "C" void cWorldLine_UnTransform(cWorldLine* self)
 {
-    cQuad128 origP0 = *(cQuad128*)((char*)self + 0x80);
-    cQuad128 origDp = *(cQuad128*)((char*)self + 0x90);
-    *(cQuad128*)((char*)self + 0x60) = origP0;
-    *(cQuad128*)((char*)self + 0x70) = origDp;
-    *(int*)((char*)self + 0x4) = 0;
+    cQuad128 origP0 = *(cQuad128*)&self->origP0;
+    cQuad128 origDp = *(cQuad128*)&self->origDp;
+    *(cQuad128*)&self->p0 = origP0;
+    *(cQuad128*)&self->dp = origDp;
+    self->isTransformed = 0;
 }
 #endif
 
@@ -3650,7 +3651,7 @@ static inline sSphereVec4 vu0Scale_E4D0(const sSphereVec4& v, float s)
  * @return nonzero when the segment hits inside the triangle, otherwise 0
  */
 // segment origin(0x60)+t*dir(0x70) against the plane through *p with normal *n
-extern "C" int cWorldLine_IsTriInt(void* self, sSphereVec4* vertA, sSphereVec4* vertB, sSphereVec4* vertC, sSphereVec4* n,
+extern "C" int cWorldLine_IsTriInt(cWorldLine* self, sSphereVec4* vertA, sSphereVec4* vertB, sSphereVec4* vertC, sSphereVec4* n,
                              sSphereVec4* hit, sSphereVec4* outN, float* outT)
 {
     sSphereVec4* origin = (sSphereVec4*)((char*)self + 0x60);
@@ -3705,17 +3706,17 @@ struct sCapsuleV_E5E8 {
  * @param hitParam  receives the line parameter (On Tour param)
  * @return the IsTriInt result
  */
-extern "C" int cWorldLine_Is2SidedTriInt(sCapsuleV_E5E8* self, t4Vector* vertA, t4Vector* vertB, t4Vector* vertC, sSphereVec4* normal, t4Vector* ipos, t4Vector* inorm, void* hitParam)
+extern "C" int cWorldLine_Is2SidedTriInt(cWorldLine* self, t4Vector* vertA, t4Vector* vertB, t4Vector* vertC, sSphereVec4* normal, t4Vector* ipos, t4Vector* inorm, void* hitParam)
 {
-    float dp = vu0Dot_E4D0(self->dir, *normal);
+    float dp = vu0Dot_E4D0((*(sSphereVec4*)&self->dp), *normal);
     sVE_E5E8* vt;
     if (dp < 0.0f) {
-        vt = self->vt;
+        vt = (sVE_E5E8*)self->mVtbl;
         char* target = (char*)self + vt[4].delta;
         sSphereVec4 n = vu0Scale_E4D0(*normal, -1.0f);
         return vt[4].fn(target, vertA, vertB, vertC, &n, ipos, inorm, hitParam);
     }
-    vt = self->vt;
+    vt = (sVE_E5E8*)self->mVtbl;
     return vt[4].fn((char*)self + vt[4].delta, vertA, vertB, vertC, normal, ipos, inorm, hitParam);
 }
 #endif
@@ -3799,12 +3800,12 @@ struct sRay_E690 {
  * @param hits  receives up to 2 intersections (On Tour tIntersectInfo* ti); On Tour's max count is not passed
  * @return the number of hits written (0-2)
  */
-extern "C" int cWorldLine_IsBoxInt(sRay_E690* self, float* bmin, float* bmax, sHit_E690* hits)
+extern "C" int cWorldLine_IsBoxInt(cWorldLine* self, float* bmin, float* bmax, sHit_E690* hits)
 {
     float tmin = -1.0f;
     float tmax = 2.0f;
-    float* pd = &self->dir.x;
-    float* po = &self->origin.x;
+    float* pd = &self->dp.x;
+    float* po = &self->p0.x;
     int fmin = -1;
     int fmax = -1;
     for (int i = 0; i < 3; i++, bmin++, bmax++, pd++, po++) {
@@ -3868,14 +3869,14 @@ extern "C" int cWorldLine_IsBoxInt(sRay_E690* self, float* bmin, float* bmax, sH
         sHit_E690* entryHit = &hits[0];
         reset_E690(entryHit);
         entryHit->nrm = D_004FF260[fmin];
-        entryHit->pos = vu0Add_E4D0(self->origin, vu0Scale_E4D0(self->dir, tmin));
+        entryHit->pos = vu0Add_E4D0((*(sSphereVec4*)&self->p0), vu0Scale_E4D0((*(sSphereVec4*)&self->dp), tmin));
         entryHit->dist = tmin;
         n = 1;
     }
     if (tmax < 1.0f) {
         reset_E690(&hits[n]);
         hits[n].nrm = D_004FF260[fmax];
-        hits[n].pos = vu0Add_E4D0(self->origin, vu0Scale_E4D0(self->dir, tmax));
+        hits[n].pos = vu0Add_E4D0((*(sSphereVec4*)&self->p0), vu0Scale_E4D0((*(sSphereVec4*)&self->dp), tmax));
         hits[n].dist = tmax;
         n++;
     }
@@ -4034,7 +4035,7 @@ static inline sSphereVec4 vu0Normalize_E9A0(const sSphereVec4& v)
  */
 // Intersect the line with a bicubic patch: four Newton steps from (u, v). Writes the hit point and the
 // surface normal only if (u, v) stays inside the unit square.
-extern "C" void cWorldLine_IntersectSubPatch(sLine_E9A0* line, sPatch_E9A0* patch, float& patchU, float& patchV, sSphereVec4* outPos,
+extern "C" void cWorldLine_IntersectSubPatch(cWorldLine* line, sPatch_E9A0* patch, float& patchU, float& patchV, sSphereVec4* outPos,
                               sSphereVec4* outNrm)
 {
     sSphereVec4* mat0 = patch->m[0];
@@ -4068,18 +4069,18 @@ extern "C" void cWorldLine_IntersectSubPatch(sLine_E9A0* line, sPatch_E9A0* patc
     float duy = vu0Dot_E4D0(vPowers, Column_E9A0(rowVecs, 1));
     float duz = vu0Dot_E4D0(vPowers, Column_E9A0(rowVecs, 2));
     for (int i = 0; i < 4; i++) {
-        sVec3_E9A0 originDelta(vu0Sub_E9A0(line->origin, surfPos));
+        sVec3_E9A0 originDelta(vu0Sub_E9A0((*(sSphereVec4*)&line->p0), surfPos));
         // Jacobian [dP/du dP/dv -dir], filled row by row
         sMat3_E9A0 jacobian;
         jacobian.m[0] = dux;
         jacobian.m[3] = dvx;
-        jacobian.m[6] = -line->dir.x;
+        jacobian.m[6] = -line->dp.x;
         jacobian.m[1] = duy;
         jacobian.m[4] = dvy;
-        jacobian.m[7] = -line->dir.y;
+        jacobian.m[7] = -line->dp.y;
         jacobian.m[2] = duz;
         jacobian.m[5] = dvz;
-        jacobian.m[8] = -line->dir.z;
+        jacobian.m[8] = -line->dp.z;
         {
             sMat3_E9A0 adj;
             adj.m[0] = jacobian.m[4] * jacobian.m[8] - jacobian.m[5] * jacobian.m[7];

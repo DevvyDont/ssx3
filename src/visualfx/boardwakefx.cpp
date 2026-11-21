@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/lensfx.h"
 #include "visualfx/transitionman.h"
 #include "be/beintnewrace.h"
 #include "visualfx/snowbox.h"
@@ -4051,7 +4052,7 @@ static inline int clampI_2B00(int v, int lo, int hi)
  * @param vself  the halo
  * @param vrect  the view information: view rectangle at +0x0, view matrix from +0x10
  */
-extern "C" void cLightHalo_Process(void* vself, void* vrect)
+extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
 {
     sWake_2B00* self = (sWake_2B00*)vself;
     float* rect = (float*)vrect;
@@ -4157,9 +4158,9 @@ extern "C" void cSunHalo_cSunHalo(void* self);
  * @return self
  */
 // PORT: hand-written g++ 2.95 member-array construction loops (vptr at 0x649C).
-extern "C" void* cLensFxMan_cLensFxMan(void* self)
+extern "C" void* cLensFxMan_cLensFxMan(cLensFxMan* self)
 {
-    *(void***)((char*)self + 0x649C) = cLensFxMan_vtbl;
+    self->mVtbl = cLensFxMan_vtbl;
     {
         char* rowPtr = (char*)self + 0x68;
         int rowsLeft = 0;
@@ -4191,7 +4192,7 @@ extern "C" void* cLensFxMan_cLensFxMan(void* self)
             rowPtr += 0x420;
         } while (--rowsLeft != -1);
     }
-    *(int*)((char*)self + 0x6494) = 1;
+    self->mbLocked = 1;
     {
         int i;
         for (i = 0; i < 1; i++) {
@@ -4205,7 +4206,7 @@ extern "C" void* cLensFxMan_cLensFxMan(void* self)
         setPhase2Slot->fn(obj + setPhase2Slot->delta, (void*)cLensFxMan__drawFrameCallBack, self);
     }
     cLensFxMan_mbDrawSun = 1;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -4279,11 +4280,11 @@ extern "C" void cLensFxMan_AddHalo(sWakeFx* self, int v, int i);
  * @param ignored  the clip code, unused
  * @param i  the view index
  */
-extern "C" void cLensFxMan_AddLightHalos(sWakeFx* self, int* vals, int count, int ignored, int i)
+extern "C" void cLensFxMan_AddLightHalos(cLensFxMan* self, int* vals, int count, int ignored, int i)
 {
     int n;
     for (n = 0; n < count; n++) {
-        cLensFxMan_AddHalo(self, vals[n], i);
+        cLensFxMan_AddHalo(((sWakeFx*)self), vals[n], i);
     }
 }
 #endif
@@ -4308,10 +4309,10 @@ void operator_delete(int* p);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cLensFxMan__cLensFxMan(void* self, int flags)
+extern "C" void cLensFxMan__cLensFxMan(cLensFxMan* self, int flags)
 {
     char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
-    *(void***)((char*)self + 0x649C) = cLensFxMan_vtbl;
+    self->mVtbl = cLensFxMan_vtbl;
     sBWVEntry2* setPhase2Slot = &(*(sBWVEntry2**)(obj + 0x10D8))[117];
     setPhase2Slot->fn(obj + setPhase2Slot->delta, 0, 0);
     cLensFxMan_mbDrawSun = 0;
@@ -4324,8 +4325,8 @@ extern "C" void cLensFxMan__cLensFxMan(void* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_render);
 #ifdef SKIP_ASM
-extern "C" void cLensFxMan_ProcessLens(void* self, int i);
-extern "C" void cLensFxMan_DrawLens(void* self, int i);
+extern "C" void cLensFxMan_ProcessLens(cLensFxMan* self, int i);
+extern "C" void cLensFxMan_DrawLens(cLensFxMan* self, int i);
 
 /**
  * Renders the light halos of one view: processes them (cLensFxMan_ProcessLens), then draws them (cLensFxMan_DrawLens).
@@ -4334,14 +4335,14 @@ extern "C" void cLensFxMan_DrawLens(void* self, int i);
  *
  * @param i  the view index
  */
-extern "C" void cLensFxMan_render(void* self, int i)
+extern "C" void cLensFxMan_render(cLensFxMan* self, int i)
 {
     cLensFxMan_ProcessLens(self, i);
     cLensFxMan_DrawLens(self, i);
 }
 #endif
 
-extern "C" void cLensFxMan_SampleLens(void* self);
+extern "C" void cLensFxMan_SampleLens(cLensFxMan* self);
 
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan__drawFrameCallBack__FPv);
@@ -4353,7 +4354,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan__drawFrameCallBack__FPv);
  */
 void cLensFxMan__drawFrameCallBack(void* self)
 {
-    cLensFxMan_SampleLens(self);
+    cLensFxMan_SampleLens((cLensFxMan*)self);
 }
 #endif
 
@@ -4423,7 +4424,7 @@ struct sLensSunBanks3130 {
 // retail's
 // zeroed register times 0x6000 is kept; plain form (constant bank 0, prev bank 1 through the same views) 79.77%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-extern "C" void cLensFxMan_SampleLens(void* selfp)
+extern "C" void cLensFxMan_SampleLens(cLensFxMan* selfp)
 {
     sLens3130* self = (sLens3130*)selfp;
     if (self->f6494 == 0) {
@@ -4464,7 +4465,7 @@ extern "C" void cLensFxMan_SampleLens(void* selfp)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_ProcessLens);
 #ifdef SKIP_ASM
-extern "C" void cLightHalo_Process(void* part, void* owner);
+extern "C" void cLightHalo_Process(cLightHalo* part, void* owner);
 extern "C" void cSunHalo_Process(void* emit, void* owner, int idx);
 
 struct sWkRect3338 { float x, y, w, h; };
@@ -4515,7 +4516,7 @@ static inline void vu0CopyMatrix3338(sWkMtx3338* dst, sWkMtx3338* src)
  * @param vself  the lens manager (this)
  * @param idx  the view index
  */
-extern "C" void cLensFxMan_ProcessLens(void* vself, int idx)
+extern "C" void cLensFxMan_ProcessLens(cLensFxMan* vself, int idx)
 {
     sWkFx3338* self = (sWkFx3338*)vself;
     char* ctx = cGraphicsMan_TheGraphicsMan_boardwakefx;
@@ -4540,7 +4541,7 @@ extern "C" void cLensFxMan_ProcessLens(void* vself, int idx)
         sWkPart3338(*pp)[0x100] = self->parts;
         sWkPart3338* halo = pp[idx];
         do {
-            cLightHalo_Process(halo, self);
+            cLightHalo_Process((cLightHalo*)halo, self);
             i++;
             halo++;
         } while (i < self->count[idx]);
@@ -4587,7 +4588,7 @@ extern "C" void cSunHalo_Render(void* dst, void* src, int i);
  * @param selfv  the lens manager (this)
  * @param i  the view index
  */
-extern "C" void cLensFxMan_DrawLens(void* selfv, int i)
+extern "C" void cLensFxMan_DrawLens(cLensFxMan* selfv, int i)
 {
     sBW3478Fx* self = (sBW3478Fx*)selfv;
     // The wake arrays have a leading bank dimension of one, indexed through a variable:

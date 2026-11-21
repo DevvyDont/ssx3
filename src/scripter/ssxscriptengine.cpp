@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/scriptobjevent.h"
 #include "scripter/scriptobjrider.h"
 #include "scripter/scriptobjcammgr.h"
 #include "scripter/nislist.h"
@@ -234,7 +235,7 @@ extern "C" void tNISList_Update(void* r);
 extern "C" void cBXScriptEngine_Update(void* self);
 extern "C" void cVidEngine_UpdateVideo(void* snd);
 extern "C" void cScriptObjCameraManager_Update(cScriptObjCameraManager* slot);
-extern "C" void cScriptObjEvent_Update(sScrObj05B8* self);
+extern "C" void cScriptObjEvent_Update(cScriptObjEvent* self);
 extern "C" int tNISList_IsSkipAllowed(tNISList* r);
 // The unit declares tNISList_GetState as void, but this caller tests its result: bind an int view by asm label.
 extern "C" int tNISList_GetState_i(void* r) __asm__("tNISList_GetState");
@@ -291,7 +292,7 @@ extern "C" void cSSXScriptEngine_Update(sSse8720* self)
     cVidEngine_UpdateVideo(self->snd);
     for (int i = 0; i < 2; i++)
         cScriptObjCameraManager_Update((cScriptObjCameraManager*)self->rigs[i]);
-    cScriptObjEvent_Update((sScrObj05B8*)self->fx);
+    cScriptObjEvent_Update((cScriptObjEvent*)((sScrObj05B8*)self->fx));
     if (self->state != 2)
     {
         sSseObj8720* nisList = &self->objsA[self->state];
@@ -5908,23 +5909,23 @@ struct sScrObj05B8 {
  *
  * @return @p self
  */
-extern "C" void* cScriptObjEvent_cScriptObjEvent(sScrObj05B8* self)
+extern "C" void* cScriptObjEvent_cScriptObjEvent(cScriptObjEvent* self)
 {
-    cScriptEntity_cScriptEntity(self);
+    cScriptEntity_cScriptEntity(((sScrObj05B8*)self));
     cScriptObject_cScriptObject((char*)self + 0xC, 5);
-    *(void***)((char*)self + 0x18) = D_00482298;
+    self->mScriptObjectVtbl = D_00482298;
     *(void***)self = cScriptObjEvent_vtbl;
-    self->field_0xEC = 0;
-    self->field_0xF0 = 0;
-    self->field_0xF4 = 0;
-    self->field_0xF8 = 0;
+    self->mNumAbortWorldScripts = 0;
+    self->mHasTriggeredSpeechEvents = 0;
+    self->mCheckForStopOnSpeechEnd = 0;
+    self->mpSoundBankInfo = 0;
     for (int i = 0; i < 4; i++) {
-        sScrTrig05B8* trigger = &self->trig[i];
+        sScrTrig05B8* trigger = &((sScrTrig05B8*)&self->mSounds[0])[i];
         trigger->target = -1;
         trigger->id = -1;
         trigger->count = 0;
     }
-    return self;
+    return ((sScrObj05B8*)self);
 }
 #endif
 
@@ -5946,11 +5947,11 @@ extern "C" int func_002B0E28(void* p, int i);
  * func_002B0E28(audio + 0x5560, 0) returns non-zero the playing NIS list's scripts are skipped
  * (cSSXScriptEngine_SkipNISListScripts).
  */
-extern "C" void cScriptObjEvent_Update(sScrObj05B8* self)
+extern "C" void cScriptObjEvent_Update(cScriptObjEvent* self)
 {
     char* snd = (char*)cAudioInterface_bxAudio();
     for (int i = 0; i < 4; i++) {
-        sScrTrig05B8* soundSlot = &self->trig[i];
+        sScrTrig05B8* soundSlot = &((sScrTrig05B8*)&self->mSounds[0])[i];
         if (soundSlot->id >= 0) {
             if (soundSlot->count != 0) {
                 cBankMonitor_BANKMONITOR_StopHandle(**(char***)(snd + 0x118) + 0x1D8, soundSlot->id, 1, 0.0f);
@@ -5964,8 +5965,8 @@ extern "C" void cScriptObjEvent_Update(sScrObj05B8* self)
             }
         }
     }
-    if (self->field_0xF4 != 0) {
-        self->field_0xF4 = 0;
+    if (self->mCheckForStopOnSpeechEnd != 0) {
+        self->mCheckForStopOnSpeechEnd = 0;
         if (func_002B0E28(snd + 0x5560, 0) != 0) {
             cSSXScriptEngine_SkipNISListScripts(ScriptEngine, ScriptEngine->mPlayingNISList, 1, 1);
         }
@@ -5994,17 +5995,17 @@ struct sScrTrig_0730 {
  * cSSXScriptEngine_GetSoundBankInfo__FPv for the bank of the playing script (+0x1C of the GetSSXScriptHeader header) and empties the 4 sound slots at
  * +0xBC (ID -1, count 0, target -1). The player ID argument is not declared (unused).
  */
-extern "C" void cScriptObjEvent_OnStartObjectUse(void* self)
+extern "C" void cScriptObjEvent_OnStartObjectUse(cScriptObjEvent* self)
 {
     int i;
     cScriptObject_OnStartObjectUse((char*)self + 0xC);
-    *(int*)((char*)self + 0xEC) = 0;
-    *(int*)((char*)self + 0xF0) = 0;
-    *(int*)((char*)self + 0xF4) = 0;
+    self->mNumAbortWorldScripts = 0;
+    self->mHasTriggeredSpeechEvents = 0;
+    self->mCheckForStopOnSpeechEnd = 0;
     // PORT: GetSSXScriptHeader returns a pointer as int
-    char* info = (char*)GetSSXScriptHeader(*(void**)(*(char**)((char*)self + 0x8) + 0x8));
+    char* info = (char*)GetSSXScriptHeader(*(void**)((char*)self->mpEntity + 0x8));
     int key = *(int*)(info + 0x1C);
-    *(void**)((char*)self + 0xF8) = cSSXScriptEngine_GetSoundBankInfo_2(ScriptEngine, key);
+    self->mpSoundBankInfo = (tScriptSoundBankInfo*)cSSXScriptEngine_GetSoundBankInfo_2(ScriptEngine, key);
     sScrTrig_0730* soundSlot = (sScrTrig_0730*)((char*)self + 0xBC);
     for (i = 3; i >= 0; i--) {
         soundSlot->c = -1;
@@ -6108,7 +6109,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjEvent_IsMatchingEntity);
  * @param type  the entity type
  * @return 1 for type 7, else 0
  */
-extern "C" int cScriptObjEvent_IsMatchingEntity(void* self, cScriptPlayerEntity* entity, int type)
+extern "C" int cScriptObjEvent_IsMatchingEntity(cScriptObjEvent* self, cScriptPlayerEntity* entity, int type)
 {
     return type == 7;
 }

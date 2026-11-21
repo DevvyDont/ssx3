@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/cutscenetransitionman.h"
 #include "ai/riderhandler.h"
 #include "render/ps2graphicsman.h"
 
@@ -1057,7 +1058,7 @@ INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_cCutSceneTransitionM
 #ifdef SKIP_ASM
 extern void* cCutSceneTransitionMan_vtbl[];
 extern "C" void* cObjNode_cObjNode1(void* self);
-extern "C" void cCutSceneTransitionMan_FindTVParameters(void* self);
+extern "C" void cCutSceneTransitionMan_FindTVParameters(cCutSceneTransitionMan* self);
 
 /**
  * Constructs the cut-scene transition manager as a render object.
@@ -1068,21 +1069,21 @@ extern "C" void cCutSceneTransitionMan_FindTVParameters(void* self);
  *
  * @return @p self
  */
-extern "C" void* cCutSceneTransitionMan_cCutSceneTransitionMan(void* self)
+extern "C" void* cCutSceneTransitionMan_cCutSceneTransitionMan(cCutSceneTransitionMan* self)
 {
     cObjNode_cObjNode1(self);
-    *(void***)((char*)self + 0xC) = cCutSceneTransitionMan_vtbl;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x1C) = 0;
+    self->mVtbl = cCutSceneTransitionMan_vtbl;
+    self->mCurrentState = 0;
+    self->mNumPause = 0;
     cCutSceneTransitionMan_FindTVParameters(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_StartCutScene);
 #ifdef SKIP_ASM
-extern "C" void cCutSceneTransitionMan_FindTVParameters(void* self);
+extern "C" void cCutSceneTransitionMan_FindTVParameters(cCutSceneTransitionMan* self);
 
 struct cCutSceneTransitionMan_StartCutScene_sFade {
     char pad[0x10];
@@ -1100,30 +1101,30 @@ struct cCutSceneTransitionMan_StartCutScene_sFade {
  *
  * @param dur  transition length (On Tour time)
  */
-extern "C" void cCutSceneTransitionMan_StartCutScene(cCutSceneTransitionMan_StartCutScene_sFade* self, float dur)
+extern "C" void cCutSceneTransitionMan_StartCutScene(cCutSceneTransitionMan* self, float dur)
 {
-    switch (self->state) {
+    switch (self->mCurrentState) {
     case 0:
         cCutSceneTransitionMan_FindTVParameters(self);
-        self->dur = dur;
-        self->t = 0.0f;
+        self->mfLengthOfTime = dur;
+        self->mfCurrentTime = 0.0f;
         break;
     case 1:
         return;
     case 2: {
-        float progress = self->t / self->dur;
-        self->dur = dur;
-        self->t = (1.0f - progress) * dur;
+        float progress = self->mfCurrentTime / self->mfLengthOfTime;
+        self->mfLengthOfTime = dur;
+        self->mfCurrentTime = (1.0f - progress) * dur;
         break;
     }
     case 3: {
-        float progress = self->t / self->dur;
-        self->dur = dur;
-        self->t = progress * dur;
+        float progress = self->mfCurrentTime / self->mfLengthOfTime;
+        self->mfLengthOfTime = dur;
+        self->mfCurrentTime = progress * dur;
         break;
     }
     }
-    self->state = 3;
+    self->mCurrentState = 3;
 }
 #endif
 
@@ -1147,25 +1148,25 @@ struct sTrailFade {
  *
  * @param fadeTime  transition length
  */
-extern "C" void cCutSceneTransitionMan_EndCutScene(sTrailFade* self, float fadeTime)
+extern "C" void cCutSceneTransitionMan_EndCutScene(cCutSceneTransitionMan* self, float fadeTime)
 {
-    switch (self->state) {
+    switch (self->mCurrentState) {
     case 0:
         return;
     case 1:
-        self->time = fadeTime;
-        self->value = 0.0f;
+        self->mfLengthOfTime = fadeTime;
+        self->mfCurrentTime = 0.0f;
         break;
     case 2:
-        self->value = (self->value / self->time) * fadeTime;
-        self->time = fadeTime;
+        self->mfCurrentTime = (self->mfCurrentTime / self->mfLengthOfTime) * fadeTime;
+        self->mfLengthOfTime = fadeTime;
         break;
     case 3:
-        self->value = (1.0f - self->value / self->time) * fadeTime;
-        self->time = fadeTime;
+        self->mfCurrentTime = (1.0f - self->mfCurrentTime / self->mfLengthOfTime) * fadeTime;
+        self->mfLengthOfTime = fadeTime;
         break;
     }
-    self->state = 2;
+    self->mCurrentState = 2;
 }
 #endif
 
@@ -1185,10 +1186,10 @@ struct sBTVEntry {
  * When the mode flag at +0x10 is set, clears it and passes the regular parameters at +0x20 to the graphics manager's
  * virtual slot 41.
  */
-extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void* self)
+extern "C" void cCutSceneTransitionMan_ForceToRegularMode(cCutSceneTransitionMan* self)
 {
-    if (*(int*)((char*)self + 0x10) != 0) {
-        *(int*)((char*)self + 0x10) = 0;
+    if (self->mCurrentState != 0) {
+        self->mCurrentState = 0;
         cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
         sBTVEntry* vtblEntry = &(((sBTVEntry*)obj->mVtbl))[41];
         vtblEntry->fn((char*)obj + vtblEntry->delta, (char*)self + 0x20);
@@ -1206,13 +1207,13 @@ INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_ForceToCutSceneMode)
  * Reads the TV parameters first if the mode flag at +0x10 is clear, sets the flag and passes the cut-scene parameters
  * at +0x34 to the graphics manager's virtual slot 41.
  */
-extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* self)
+extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(cCutSceneTransitionMan* self)
 {
-    if (*(int*)((char*)self + 0x10) == 0) {
+    if (self->mCurrentState == 0) {
         cCutSceneTransitionMan_FindTVParameters(self);
     }
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-    *(int*)((char*)self + 0x10) = 1;
+    self->mCurrentState = 1;
     sBTVEntry* vtblEntry = &(((sBTVEntry*)obj->mVtbl))[41];
     vtblEntry->fn((char*)obj + vtblEntry->delta, (char*)self + 0x34);
 }
@@ -1230,19 +1231,19 @@ INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_Pause);
  *
  * @param up  nonzero to pause, zero to resume
  */
-extern "C" void cCutSceneTransitionMan_Pause(void* self, int up)
+extern "C" void cCutSceneTransitionMan_Pause(cCutSceneTransitionMan* self, int up)
 {
-    int state = *(int*)((char*)self + 0x10);
+    int state = self->mCurrentState;
     if (state == 2 || state == 3) {
-        *(int*)((char*)self + 0x1C) = 0;
+        self->mNumPause = 0;
         return;
     }
     if (up) {
-        *(int*)((char*)self + 0x1C) += 1;
+        self->mNumPause += 1;
         return;
     }
-    if (*(int*)((char*)self + 0x1C) > 0) {
-        *(int*)((char*)self + 0x1C) -= 1;
+    if (self->mNumPause > 0) {
+        self->mNumPause -= 1;
     }
 }
 #endif
@@ -1251,8 +1252,8 @@ extern "C" void cCutSceneTransitionMan_Pause(void* self, int up)
 INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void* self);
-extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* self);
+extern "C" void cCutSceneTransitionMan_ForceToRegularMode(cCutSceneTransitionMan* self);
+extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(cCutSceneTransitionMan* self);
 
 struct sFadeCol_A900 {
     int id;
@@ -1283,30 +1284,30 @@ extern char* D_004A5B64_A900 __asm__("cAppMan_TheAppMan");
  * (cCutSceneTransitionMan_ForceToCutSceneMode). Otherwise it lerps the four floats of the regular (+0x20) and cut-scene (+0x34) formats
  * and applies them through the graphics manager's virtual slot 41.
  */
-extern "C" void cCutSceneTransitionMan_update(sFade_A900* self)
+extern "C" void cCutSceneTransitionMan_update(cCutSceneTransitionMan* self)
 {
-    if (self->done != 0)
+    if (self->mNumPause != 0)
         return;
-    int mode = self->mode;
+    int mode = self->mCurrentState;
     if (mode != 2 && mode != 3)
         return;
-    self->t += 1.0f / (float)*(int*)(D_004A5B64_A900 + 0x10);
-    if (self->dur < self->t) {
+    self->mfCurrentTime += 1.0f / (float)*(int*)(D_004A5B64_A900 + 0x10);
+    if (self->mfLengthOfTime < self->mfCurrentTime) {
         if (mode == 2)
             cCutSceneTransitionMan_ForceToRegularMode(self);
         else
             cCutSceneTransitionMan_ForceToCutSceneMode(self);
         return;
     }
-    float k = self->t / self->dur;
+    float k = self->mfCurrentTime / self->mfLengthOfTime;
     if (mode == 2)
         k = 1.0f - k;
     sFadeCol_A900 col;
-    col.id = self->id;
-    col.c[2] = self->from[2] + (self->to[2] - self->from[2]) * k;
-    col.c[3] = self->from[3] + (self->to[3] - self->from[3]) * k;
-    col.c[0] = self->from[0] + (self->to[0] - self->from[0]) * k;
-    col.c[1] = self->from[1] + (self->to[1] - self->from[1]) * k;
+    col.id = self->mRegularTVFormat.mDisplayFormat;
+    col.c[2] = ((float*)&self->mRegularTVFormat.mfTVYOffset)[2] + (((float*)&self->mCutSceneTVFormat.mfTVYOffset)[2] - ((float*)&self->mRegularTVFormat.mfTVYOffset)[2]) * k;
+    col.c[3] = ((float*)&self->mRegularTVFormat.mfTVYOffset)[3] + (((float*)&self->mCutSceneTVFormat.mfTVYOffset)[3] - ((float*)&self->mRegularTVFormat.mfTVYOffset)[3]) * k;
+    col.c[0] = ((float*)&self->mRegularTVFormat.mfTVYOffset)[0] + (((float*)&self->mCutSceneTVFormat.mfTVYOffset)[0] - ((float*)&self->mRegularTVFormat.mfTVYOffset)[0]) * k;
+    col.c[1] = ((float*)&self->mRegularTVFormat.mfTVYOffset)[1] + (((float*)&self->mCutSceneTVFormat.mfTVYOffset)[1] - ((float*)&self->mRegularTVFormat.mfTVYOffset)[1]) * k;
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sVE_A900* vt = (sVE_A900*)ps2GraphicsMan->mVtbl;
     vt[41].fn((char*)ps2GraphicsMan + vt[41].delta, &col);
@@ -1344,7 +1345,7 @@ struct sBTVEntryGet {
  * cut-scene format (2, y offset 0, y scale 1.0, aspect 0.75/0.63); any other gets (1, 0.125, 0.75,
  * 0.75/0.63), probably a letterbox.
  */
-extern "C" void cCutSceneTransitionMan_FindTVParameters(void* self)
+extern "C" void cCutSceneTransitionMan_FindTVParameters(cCutSceneTransitionMan* self)
 {
     sBTFx* transMan = (sBTFx*)self;
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;

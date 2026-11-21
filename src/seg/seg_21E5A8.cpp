@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/cubicspline.h"
 
 //100%
 INCLUDE_ASM("seg/seg_21E5A8", cCSICubicSpline_evaluate);
@@ -55,12 +56,12 @@ struct Flags_D5E8 {
  *
  * @return @p self
  */
-extern "C" Flags_D5E8 *cCubicSplineInterpolant_cCubicSplineInterpolant(Flags_D5E8 *self) {
-    self->w8 = 0;
-    self->b = 0;
-    self->c = 0;
-    self->d = 0;
-    return self;
+extern "C" Flags_D5E8 *cCubicSplineInterpolant_cCubicSplineInterpolant(cCubicSplineInterpolant* self) {
+    self->CubicSplines = 0;
+    ((Flags_D5E8*)self)->b = 0;
+    ((Flags_D5E8*)self)->c = 0;
+    ((Flags_D5E8*)self)->d = 0;
+    return ((Flags_D5E8*)self);
 }
 #endif
 

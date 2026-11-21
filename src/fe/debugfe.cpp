@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/debugfe.h"
 #include "fe/screenkeyboard.h"
 #include "fe/heartbeat.h"
 #include "fe/feinput.h"
@@ -2060,11 +2061,11 @@ struct sDbgList17F7B8 {
  *
  * @return @p self
  */
-extern "C" void* cDebugFE_cDebugFE(void* self)
+extern "C" void* cDebugFE_cDebugFE(cDebugFE* self)
 {
     cFadeScreen_cFadeScreen(self);
     *(void**)self = cDebugFE_vtbl;
-    *(int*)((char*)self + 0x24) = 0;
+    *(int*)&self->HeartBeat = 0;
     *(int*)((char*)self + 0x28) = 0;
     *(int*)((char*)self + 0x2C) = 0;
     *(int*)((char*)self + 0x30) = 0;
@@ -2072,7 +2073,7 @@ extern "C" void* cDebugFE_cDebugFE(void* self)
     new (list->e) sDbgEntry17F7B8[64];
     list->n = 0;
     MEM_fill(list->e, 0, 0x200);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2089,7 +2090,7 @@ extern char D_0046D970[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cDebugFE__cDebugFE(void* self, int flags)
+extern "C" void cDebugFE__cDebugFE(cDebugFE* self, int flags)
 {
     *(void**)self = D_0046D970;
     if (flags & 1) {
@@ -2197,7 +2198,7 @@ typedef void (*tFn_17FA60)(void*, const sVec3K17FA60&);
  *
  * Calls cGraphicsMan_UploadTextures (On Tour cGraphicsMan::UploadTextures), then GrMan's slot 15 (SetClearColor) with (0, 0, 0).
  */
-extern "C" void cDebugFE_gainFocus(void* self)
+extern "C" void cDebugFE_gainFocus(cDebugFE* self)
 {
     char* graphicsMan;
     char* vt;
@@ -2253,11 +2254,11 @@ struct sDebugFE_0017FAD0 {
  * when >= 0) through GrMan slot 50, and deletes the font (+0x18) with cFont__cFont(font, 3). The local view calls
  * the texture ids snd1C/snd20; they are On Tour's ParticleTID and BoxTID.
  */
-extern "C" void cDebugFE_purge(sDebugFE_0017FAD0* self)
+extern "C" void cDebugFE_purge(cDebugFE* self)
 {
     for (int i = 0; i < 2; i++)
     {
-        char* screen = self->objs[i];
+        char* screen = ((char**)&self->Screens[0])[i];
         if (screen != 0)
         {
             sVEi_0017FAD0* vt = *(sVEi_0017FAD0**)screen;
@@ -2267,20 +2268,20 @@ extern "C" void cDebugFE_purge(sDebugFE_0017FAD0* self)
     char* app = (char*)SSXApp;
     *(int*)(app + 0x7C) = 0;
     *(int*)(app + 0x80) = 0;
-    if (self->snd20 >= 0)
+    if (self->BoxTID >= 0)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEi_0017FAD0* vt = (sVEi_0017FAD0*)ps2GraphicsMan->mVtbl;
-        vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, self->snd20);
+        vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, self->BoxTID);
     }
-    if (self->snd1C >= 0)
+    if (self->ParticleTID >= 0)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEi_0017FAD0* vt = (sVEi_0017FAD0*)ps2GraphicsMan->mVtbl;
-        vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, self->snd1C);
+        vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, self->ParticleTID);
     }
-    if (self->font != 0)
-        cFont__cFont(self->font, 3);
+    if (self->Font != 0)
+        cFont__cFont(self->Font, 3);
 }
 #endif
 
@@ -2301,11 +2302,11 @@ extern "C" void cHeartBeat_update(cHeartBeat* p);
  * Calls cFadeScreen_update (On Tour cFadeScreen::update); while the app's word +0x4 is 0 it updates the active screen
  * (+0x14, virtual slot 2); then cHeartBeat_update (On Tour cHeartBeat::update) on the heartbeat at +0x24.
  */
-extern "C" void cDebugFE_update(void* self)
+extern "C" void cDebugFE_update(cDebugFE* self)
 {
     cFadeScreen_update(self);
     if (*(int*)((char*)SSXApp + 4) == 0)
-        (*(cFEObjK17FB98**)((char*)self + 0x14))->v02();
+        ((cFEObjK17FB98*)self->ActiveScreen)->v02();
     cHeartBeat_update((cHeartBeat*)((char*)self + 0x24));
 }
 #endif
@@ -2363,14 +2364,14 @@ static inline void setC5_17FBF0(sRS_17FBF0* r, int v) { r->c5 = v; }
  *
  * @return 0 when GrMan's slot 17 returns 0, otherwise 1
  */
-extern "C" int cDebugFE_render(char* self)
+extern "C" int cDebugFE_render(cDebugFE* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVEnt_17FBF0* vt = (sVEnt_17FBF0*)ps2GraphicsMan->mVtbl;
     if (!((FnI_17FBF0)vt[17].fn)((char*)ps2GraphicsMan + vt[17].delta)) {
         return 0;
     }
-    if (cFadeScreen_drawFade(self) == 0) {
+    if (cFadeScreen_drawFade(((char*)self)) == 0) {
         cPS2GraphicsMan* graphicsMan1 = GrMan;
         sVEnt_17FBF0* vt1 = (sVEnt_17FBF0*)graphicsMan1->mVtbl;
         char* this1 = (char*)graphicsMan1 + vt1[15].delta;
@@ -2394,9 +2395,9 @@ extern "C" int cDebugFE_render(char* self)
         setB12_17FBF0(rs_17FBF0((char*)graphicsMan4), 13);
         setB2_17FBF0(rs_17FBF0((char*)graphicsMan4), 5);
         setB22_17FBF0(rs_17FBF0((char*)graphicsMan4), 1);
-        cHeartBeat_draw((cHeartBeat*)(self + 0x24), *(int*)(self + 0x1C));
+        cHeartBeat_draw((cHeartBeat*)(((char*)self) + 0x24), self->ParticleTID);
         setC5_17FBF0(rs_17FBF0((char*)GrMan), 9);
-        void* menu = *(void**)(self + 0x14);
+        void* menu = self->ActiveScreen;
         sVEnt_17FBF0* mvt = *(sVEnt_17FBF0**)menu;
         ((FnV_17FBF0)mvt[3].fn)((char*)menu + mvt[3].delta);
     }

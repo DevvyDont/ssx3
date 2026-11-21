@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/replaycache.h"
 #include "replay/playbackman.h"
 #include "replay/replay.h"
 #include "main/game.h"
@@ -841,18 +842,18 @@ void cReplayCache_reset(void* self);
  *
  * @return @p self
  */
-extern "C" void* cReplayCache_cReplayCache(void* self)
+extern "C" void* cReplayCache_cReplayCache(cReplayCache* self)
 {
-    *(void**)((char*)self + 0xC) = operator_new_tag(0x8000, str_CmdFrame, 0, 0);
+    self->CmdFrame = (tControlCmd*)operator_new_tag(0x8000, str_CmdFrame, 0, 0);
     cReplayCache_reset(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("replay/playbackman", cReplayCache__cReplayCache);
 #ifdef SKIP_ASM
-extern "C" void cReplayCache_purge(void* self);
+extern "C" void cReplayCache_purge(cReplayCache* self);
 void operator_delete(int* ptr);
 
 /**
@@ -864,7 +865,7 @@ void operator_delete(int* ptr);
  */
 extern "C" void cReplayCache__cReplayCache(int* self, int flags)
 {
-    cReplayCache_purge(self);
+    cReplayCache_purge((cReplayCache*)self);
     if (flags & 1) {
         operator_delete(self);
     }
@@ -881,12 +882,12 @@ void cMemMan_free(void* p);
  *
  * cReplayCache__cReplayCache calls it when the cache is destroyed.
  */
-extern "C" void cReplayCache_purge(void* self)
+extern "C" void cReplayCache_purge(cReplayCache* self)
 {
-    void* buffer = *(void**)((char*)self + 0xC);
+    void* buffer = self->CmdFrame;
     if (buffer != 0) {
         cMemMan_free(buffer);
-        *(void**)((char*)self + 0xC) = 0;
+        self->CmdFrame = 0;
     }
 }
 #endif
@@ -927,9 +928,9 @@ int cReplayCache_getControlCmd_D178(void* self, int a1) __asm__("cReplayCache_ge
  * @param controlCmd  the 8-byte control command: read when recording, overwritten during playback
  * @return 0 when recording or idle, cReplayCache_getControlCmd's result during playback, 1 in the other states
  */
-extern "C" int cReplayCache_updateControlCmd(void* self, int controlCmd)
+extern "C" int cReplayCache_updateControlCmd(cReplayCache* self, int controlCmd)
 {
-    if (*(int*)((char*)self + 0xC) == 0) {
+    if ((int)self->CmdFrame == 0) {
         return 0;
     }
     int result = 1;
@@ -984,7 +985,7 @@ struct sPbStream_D228 {
  * @param stream  the replay input cache
  * @param chunkp  the command to append
  */
-extern "C" void cReplayCache_addCmdFrame(sPbStream_D2B0* stream, sPbChunk_D2B0* chunkp)
+extern "C" void cReplayCache_addCmdFrame(cReplayCache* stream, sPbChunk_D2B0* chunkp)
 {
     sPbStream_D228* self = (sPbStream_D228*)stream;
     sPbChunk_D228* chunk = (sPbChunk_D228*)chunkp;
@@ -1017,7 +1018,7 @@ struct sPbStream_D2B0 {
 };
 
 extern "C" int func_00415FC8(const void* a, const void* b, int n);
-extern "C" void cReplayCache_addCmdFrame(sPbStream_D2B0* self, sPbChunk_D2B0* chunk);
+extern "C" void cReplayCache_addCmdFrame(cReplayCache* self, sPbChunk_D2B0* chunk);
 
 /**
  * Records one frame's control command, run-length encoded: repeats of the last command only bump its count.
@@ -1038,10 +1039,10 @@ extern "C" int cReplayCache_addControlCmd(sPbStream_D2B0* self, sPbChunk_D2B0* c
         if (func_00415FC8(&last, chunk, 8) == 0 && (int)self->chunks[i].n < 0xFFF) {
             self->chunks[i].n++;
         } else {
-            cReplayCache_addCmdFrame(self, chunk);
+            cReplayCache_addCmdFrame((cReplayCache*)self, chunk);
         }
     } else {
-        cReplayCache_addCmdFrame(self, chunk);
+        cReplayCache_addCmdFrame((cReplayCache*)self, chunk);
     }
     return 1;
 }
@@ -1166,22 +1167,22 @@ struct sPlaybackStream {
  * @param pos  the tick to move to
  * @return 1 on success, 0 when the tick lies past the recorded input
  */
-extern "C" int cReplayCache_moveTo(sPlaybackStream* self, unsigned int pos)
+extern "C" int cReplayCache_moveTo(cReplayCache* self, unsigned int pos)
 {
     int i = 0;
-    sPlaybackChunk* chunk = self->chunks;
+    sPlaybackChunk* chunk = (sPlaybackChunk*)self->CmdFrame;
     unsigned int total = 0;
-    for (; i < self->count; i++) {
+    for (; i < self->RecordCursor; i++) {
         total += (chunk++)->info & 0xFFF;
         if (pos < total) {
             break;
         }
     }
-    if (i >= self->count) {
+    if (i >= self->RecordCursor) {
         return 0;
     }
-    self->index = i;
-    self->offset = total - pos;
+    self->PlaybackCursor = i;
+    self->PlaybackLeft = total - pos;
     return 1;
 }
 #endif
@@ -1202,7 +1203,7 @@ extern "C" int HUFF_decode(void* src, int a, int dst);
  * @param pp  in/out: the read cursor in the save data
  * @return 1 (always)
  */
-extern "C" int cReplayCache_load(void* self, char** pp)
+extern "C" int cReplayCache_load(cReplayCache* self, char** pp)
 {
     struct {
         int tag;
@@ -1214,7 +1215,7 @@ extern "C" int cReplayCache_load(void* self, char** pp)
     *(int*)self = hdr.value;
     MEM_copy(&size, *pp, 4);
     *pp += 4;
-    HUFF_decode(*pp, 0, *(int*)((char*)self + 0xC));
+    HUFF_decode(*pp, 0, (int)self->CmdFrame);
     *pp += size;
     return 1;
 }
