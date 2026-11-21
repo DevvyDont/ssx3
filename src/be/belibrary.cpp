@@ -1,14 +1,9 @@
 #include "common.h"
+#include "be/beintplayer.h"
 #include "be/beintoption.h"
 
 extern int cBELibrary_raceDB[];
 
-struct sCharEntry {
-    char pad_0x00[0x11];
-    signed char mCharID; // 0x11
-    char pad_0x12[0x1C - 0x11 - 1];
-};
-extern sCharEntry cBELibrary_playerDB[];
 
 //100%
 INCLUDE_ASM("be/belibrary", cBELibrary_getCharacterID__Fi);
@@ -25,8 +20,8 @@ INCLUDE_ASM("be/belibrary", cBELibrary_getCharacterID__Fi);
 signed char cBELibrary_getCharacterID(int index)
 {
     int charID = cBELibrary_raceDB[index];
-    sCharEntry* entry = &cBELibrary_playerDB[charID];
-    return entry->mCharID;
+    cBEPlayerDB* entry = &cBELibrary_playerDB[charID];
+    return entry->cCharacterID;
 }
 #endif
 
@@ -42,16 +37,10 @@ INCLUDE_ASM("be/belibrary", cBELibrary_getCheatCharacterID);
 extern "C" signed char cBELibrary_getCheatCharacterID(int index)
 {
     int charID = cBELibrary_raceDB[index];
-    signed char* entry = (signed char*)((char*)cBELibrary_playerDB + charID * 0x1C);
-    return entry[0x12];
+    return cBELibrary_playerDB[charID].cCheatCharacterID;
 }
 #endif
 
-struct sCharEntry2 {
-    char pad_0x00[0xC];
-    int field_0xC;
-    int field_0x10;
-};
 
 //100%
 INCLUDE_ASM("be/belibrary", cBELibrary_getProfileIndex__Fi);
@@ -65,11 +54,11 @@ INCLUDE_ASM("be/belibrary", cBELibrary_getProfileIndex__Fi);
 int cBELibrary_getProfileIndex(int index)
 {
     int charID = cBELibrary_raceDB[index];
-    sCharEntry2* entry = (sCharEntry2*)((char*)cBELibrary_playerDB + charID * 0x1C);
-    if (entry->field_0xC == -1) {
+    cBEPlayerDB* entry = &cBELibrary_playerDB[charID];
+    if (entry->iControllerID == -1) {
         return 2;
     }
-    return entry->field_0x10 & 1;
+    return entry->iHumanID;
 }
 #endif
 
@@ -90,8 +79,8 @@ int cBELibrary_getRiderIndex(int flag)
     int count = 0;
     while (1) {
         int charID = *base;
-        sCharEntry2* entry = (sCharEntry2*)((char*)cBELibrary_playerDB + charID * 0x1C);
-        int bit = entry->field_0x10 & 1;
+        cBEPlayerDB* entry = &cBELibrary_playerDB[charID];
+        int bit = entry->iHumanID;
         if (bit == flag) {
             return count;
         }
@@ -126,24 +115,22 @@ struct sBlkF88_A188 { char b[0xF88]; };
 struct sBlk9B50_A188 { char b[0x9B50]; };
 struct sBlk20_A188 { char b[0x20]; };
 
-// Profile block: the two active rider entries followed by the rest of the profile data
+// The whole player table (cBELibrary_playerDB) as one block: the copy below keeps cBEPlayerDB's 4-byte alignment, which a
+// memcpy from a char* would not (gcc's inline block move takes the smaller alignment of its two pointers).
 struct sProfileBlk_A188 {
-    sCharEntry rider[2];
-    char rest[0xA8 - 2 * sizeof(sCharEntry)];
+    cBEPlayerDB entries[6];
 };
 
 extern int cBELibrary_profileLib[];
 extern sBlkF88_A188 D_004B07F8_A188[] __asm__("D_004B07F8");
 extern sBlk9B50_A188 D_004BA348_A188 __asm__("D_004BA348");
 
-#define PROFILE_A188 ((sProfileBlk_A188*)cBELibrary_playerDB)
-
 /**
  * Writes the career data into a save buffer, in the layout cBELibrary_readFromData reads back.
  *
  * Copies, in order: the 0x4C-byte race DB (cBELibrary_raceDB), the 0xA8-byte player DB (cBELibrary_playerDB), player
  * 0's character record from profile 0 of cBELibrary_profileLib, player 1's character record from profile 1 (D_004B07F8)
- * when player 1 has a character (mCharID >= 0), the 0x9B50-byte profile D_004BA348 (profile 2) and the 0x20 bytes at
+ * when player 1 has a character (cCharacterID >= 0), the 0x9B50-byte profile D_004BA348 (profile 2) and the 0x20 bytes at
  * cBERules_mRules. cBE_writeToData calls it and appends the CRC.
  *
  * @param data  the save buffer to fill
@@ -153,12 +140,12 @@ extern "C" void func_0014A188(char* data)
     int rider;
     *(sBlk4C_A188*)data = *(sBlk4C_A188*)cBELibrary_raceDB;
     data += sizeof(sBlk4C_A188);
-    *(sProfileBlk_A188*)data = *PROFILE_A188;
-    data += sizeof(sProfileBlk_A188);
-    rider = PROFILE_A188->rider[0].mCharID;
+    *(sProfileBlk_A188*)data = *(sProfileBlk_A188*)cBELibrary_playerDB;
+    data += sizeof(cBELibrary_playerDB);
+    rider = cBELibrary_playerDB[0].cCharacterID;
     *(sBlkF88_A188*)data = ((sBlkF88_A188*)cBELibrary_profileLib)[rider];
     data += sizeof(sBlkF88_A188);
-    rider = PROFILE_A188->rider[1].mCharID;
+    rider = cBELibrary_playerDB[1].cCharacterID;
     if (rider >= 0) {
         *(sBlkF88_A188*)data = D_004B07F8_A188[rider];
         data += sizeof(sBlkF88_A188);
@@ -187,7 +174,6 @@ cBEIface_14A5E0* cBEScoreInterface_getThis();
 extern "C" cBEIface_14A5E0* cBEStatInterface_getThis(void);
 
 struct sBlk4C_14A5E0 { char d[0x4C]; };
-struct sBlkA8_14A5E0 { char d[0xA8]; };
 struct sBlkF88_14A5E0 { char d[0xF88]; };
 struct sBlk9B50_14A5E0 { char d[0x9B50]; };
 struct sBlk20_14A5E0 { char d[0x20]; };
@@ -195,6 +181,8 @@ struct sBlk20_14A5E0 { char d[0x20]; };
 extern sBlkF88_14A5E0 D_004A6CA8_14A5E0[] __asm__("cBELibrary_profileLib");
 extern sBlkF88_14A5E0 D_004B07F8[];
 extern sBlk9B50_14A5E0 D_004BA348;
+
+extern "C" void* memcpy(void*, const void*, unsigned int);
 
 /**
  * Restores the career data from a loaded save buffer.
@@ -214,13 +202,13 @@ extern "C" void cBELibrary_readFromData(char* data)
     *(sBlk4C_14A5E0*)cBELibrary_raceDB = *(sBlk4C_14A5E0*)data;
     cBENewRaceInterface_getThis()->onLoad();
     data += 0x4C;
-    *(sBlkA8_14A5E0*)cBELibrary_playerDB = *(sBlkA8_14A5E0*)data;
+    memcpy(cBELibrary_playerDB, data, sizeof(cBELibrary_playerDB));
     cBENewPlayerInterface_getThis()->onLoad();
     data += 0xA8;
-    idx = cBELibrary_playerDB[0].mCharID;
+    idx = cBELibrary_playerDB[0].cCharacterID;
     D_004A6CA8_14A5E0[idx] = *(sBlkF88_14A5E0*)data;
     data += 0xF88;
-    idx = cBELibrary_playerDB[1].mCharID;
+    idx = cBELibrary_playerDB[1].cCharacterID;
     if (idx >= 0) {
         D_004B07F8[idx] = *(sBlkF88_14A5E0*)data;
         data += 0xF88;

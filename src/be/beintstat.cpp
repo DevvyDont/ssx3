@@ -564,7 +564,6 @@ int GetHashValue32(char*);
 void* cBENewPlayerInterface_getThis();
 void* cBEBAGTInterface_getThis();
 extern char str_kT_MEMPlayerName[];
-extern char cBELibrary_playerDB[];
 extern char cBELibrary_profileLib[];
 
 struct sVEntry_149A88
@@ -574,14 +573,6 @@ struct sVEntry_149A88
     int (*fn)(void*, ...);
 };
 
-struct sRiderEntry_149A88
-{
-    char name[0x10];
-    unsigned f0 : 1;
-    unsigned f1 : 1;
-    unsigned pad : 6;
-    unsigned char c11;
-};
 
 static inline void vreset_149A88(char* o)
 {
@@ -593,7 +584,7 @@ static inline void vreset_149A88(char* o)
  * Resets a player profile to a new one: clears its player entry, names it "Player n", re-initialises its character
  * records and resets the player, stat and BAGT interfaces.
  *
- * Zeroes the 0x1C-byte entry @p idx of cBELibrary_playerDB, sets bit 1 of the word at +0x10 and the byte at +0x11 to 4,
+ * Zeroes the 0x1C-byte entry @p idx of cBELibrary_playerDB, sets iUseDualShock and cCharacterID 4,
  * and formats the localised kT_MEMPlayerName string (looked up through the FE locale's vtable) with @p idx + 1 as its
  * name. Then calls cBEProfileLib_init on profile @p idx of cBELibrary_profileLib and the discard virtual (vtable slot
  * 2) of the player (cBENewPlayerInterface_getThis), stat and BAGT interfaces. cBE's wrapper cBE_newProfile calls it on
@@ -604,14 +595,14 @@ static inline void vreset_149A88(char* o)
 extern "C" void cBELibrary_newProfile(void* self, signed char idx)
 {
     char buf[64];
-    sRiderEntry_149A88* playerEntry = (sRiderEntry_149A88*)(cBELibrary_playerDB + idx * 0x1C);
-    func_00416210(playerEntry, 0, 0x1C);
-    playerEntry->f1 = 1;
-    playerEntry->c11 = 4;
+    cBEPlayerDB* playerEntry = &cBELibrary_playerDB[idx];
+    func_00416210(playerEntry, 0, sizeof(cBEPlayerDB));
+    playerEntry->iUseDualShock = 1;
+    playerEntry->cCharacterID = 4;
     char* locale = (char*)SSXApp->FELocale;
     sVEntry_149A88* vt = *(sVEntry_149A88**)(locale + 4);
     strcpy2(buf, vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_MEMPlayerName)));
-    sprintf((char*)playerEntry, buf, idx + 1);
+    sprintf(playerEntry->strUserName, buf, idx + 1);
     cBEProfileLib_init(cBELibrary_profileLib + idx * 39760, 1);
     vreset_149A88((char*)cBENewPlayerInterface_getThis());
     vreset_149A88((char*)cBEStatInterface_getThis());
@@ -638,15 +629,6 @@ struct sCharSlot_149BB8
     char pad[0x4C - 0x30];
 };
 
-struct sRiderEntry_149BB8
-{
-    char name[0x10];
-    unsigned f0 : 1;
-    unsigned f1 : 1;
-    unsigned pad : 6;
-    unsigned char c11;
-    char pad12[0x1C - 0x12];
-};
 
 struct sCharStat_149BB8
 {
@@ -661,7 +643,6 @@ struct sCharSrc_149BB8
 extern char D_004A6750[];
 extern char cBELibrary_rewardDB[];
 extern sCharSlot_149BB8 cBELibrary_raceDB;
-extern sRiderEntry_149BB8 D_00535B20_149BB8[6] __asm__("cBELibrary_playerDB");
 extern const char str_data_be_charDB_dbl[];
 extern char cBELibrary_characterDB[];
 extern sCharStat_149BB8 cBELibrary_statDefault[10];
@@ -692,11 +673,11 @@ extern "C" void cBELibrary_loadData(void)
         cBELibrary_raceDB.a[i] = i;
         cBELibrary_raceDB.b[i] = i;
     }
-    func_00416210(D_00535B20_149BB8, 0, 168);
+    func_00416210(cBELibrary_playerDB, 0, sizeof(cBELibrary_playerDB));
     for (i = 0; i < 6; i++) {
-        D_00535B20_149BB8[i].name[0] = 0;
-        D_00535B20_149BB8[i].f1 = 1;
-        D_00535B20_149BB8[i].c11 = 4;
+        cBELibrary_playerDB[i].strUserName[0] = 0;
+        cBELibrary_playerDB[i].iUseDualShock = 1;
+        cBELibrary_playerDB[i].cCharacterID = 4;
     }
     buf = FILE_load(str_data_be_charDB_dbl, 0x100);
     func_0041605C(cBELibrary_characterDB, buf, 1360);

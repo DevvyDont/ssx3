@@ -1,5 +1,6 @@
 #include "common.h"
 #include "be/beintsavefile.h"
+#include "be/beintplayer.h"
 #include "main/ssxapp.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -129,8 +130,6 @@ extern void* cBESaveInterface_buffer;
 struct sSaveHdr_2758 { int w[0x288 / 4]; };
 extern sSaveHdr_2758 cBELibrary_optionDB;
 extern char cBELibrary_highScores[];
-struct sCharTbl_2758 { char pad[0x10]; unsigned b0 : 1; unsigned b1 : 1; unsigned b2 : 22; unsigned char f13; char pad14[8]; };
-extern sCharTbl_2758 cBELibrary_playerDB[];
 struct sSaveBits_2758 { unsigned a : 1; unsigned b : 8; unsigned rest : 23; };
 struct sSaveBits6_2758 { sSaveBits_2758 e[6]; };
 
@@ -157,8 +156,8 @@ extern "C" void* cBESaveInterface_generateSaveGame(cBESaveInterface* self)
     cursor += 0xA28;
     sSaveBits6_2758 bits;
     for (int i = 0; i < 6; i++) {
-        bits.e[i].a = cBELibrary_playerDB[i].b1;
-        bits.e[i].b = cBELibrary_playerDB[i].f13;
+        bits.e[i].a = cBELibrary_playerDB[i].iUseDualShock;
+        bits.e[i].b = cBELibrary_playerDB[i].cControlMap;
     }
     *(sSaveBits6_2758*)cursor = bits;
     cursor += sizeof(sSaveBits6_2758);
@@ -197,7 +196,6 @@ extern "C" int MEM_crc16(void* buf, int n, int seed);
 
 extern void* cBESaveInterface_buffer;
 
-extern sCharTbl_2758 cBELibrary_playerDB[];
 
 extern "C" int cBESaveInterface_getSaveProfileSize_2950() __asm__("cBESaveInterface_getSaveProfileSize");
 class cBEIface_2950 {
@@ -238,7 +236,7 @@ extern "C" void* cBESaveInterface_generateSaveProfile(cBESaveInterface* self, in
     cBESaveInterface_releaseBuffer_2950(self);
     cBESaveInterface_buffer = new (str_save_file_buffer, 0x100, 0) char[size];
     char* dataPtr = (char*)cBESaveInterface_buffer;
-    strncpy(dataPtr, (char*)&cBELibrary_playerDB[idx], 0xC);
+    strncpy(dataPtr, cBELibrary_playerDB[idx].strUserName, 0xC);
     dataPtr += 0xC;
     *(sProfile_2950*)dataPtr = D_004A6CA8_2950[idx];
     dataPtr += sizeof(sProfile_2950);
@@ -323,8 +321,8 @@ extern "C" int cBESaveInterface_loadSaveGame(cBESaveInterface* self, char* buf)
     iface->onLoad();
     sSaveBits6_2758 bits = *(sSaveBits6_2758*)cursor;
     for (int i = 0; i < 6; i++) {
-        cBELibrary_playerDB[i].b1 = bits.e[i].a;
-        cBELibrary_playerDB[i].f13 = bits.e[i].b;
+        cBELibrary_playerDB[i].iUseDualShock = bits.e[i].a;
+        cBELibrary_playerDB[i].cControlMap = bits.e[i].b;
     }
     iface = cBENewPlayerInterface_getThis();
     iface->onLoad();
@@ -376,7 +374,7 @@ extern "C" int cBESaveInterface_loadSaveProfile(cBESaveInterface* self, char* bu
         keep[i] = D_004A6CA8_2DE0[idx].sub[i].keep;
     }
     char* cursor = buf;
-    strncpy((char*)&cBELibrary_playerDB[idx], cursor, 0xC);
+    strncpy(cBELibrary_playerDB[idx].strUserName, cursor, 0xC);
     cursor += 0xC;
     D_004A6CA8_2DE0[idx] = *(sProfile_2DE0*)cursor;
     cursor += sizeof(sProfile_2DE0);

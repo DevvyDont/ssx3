@@ -96,5 +96,8 @@ CHECK_OFFSET(cBEPlayerDB, unk_014, 0x14);
 CHECK_OFFSET(cBEPlayerDB, unk_018, 0x18);
 CHECK_SIZE(cBEPlayerDB, 0x1C);
 
+extern cBEPlayerDB cBENewPlayerInterface_tempPlayers[6];  // [O] cBENewPlayerInterface::tempPlayers; [R] D_00534FE0
+extern cBEPlayerDB cBELibrary_playerDB[6];                // [O] cBELibrary::playerDB; [R] D_00535B20
+
 
 #endif /* BE_BEINTPLAYER_H */

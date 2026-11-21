@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintplayer.h"
 #include "be/beintoption.h"
 #include "be/beintreward.h"
 #include "be/beintcharacter.h"
@@ -107,17 +108,11 @@ struct sNetKey_E2C8 {
     short h[3];
 };
 
-struct sCharE_E2C8 {
-    char pad_0x00[0x11];
-    signed char charID;     // 0x11
-    char pad_0x12[0x2];
-    int w[2];
-};
 
 struct sNetState_E2C8 {
     sNetHdr_E2C8 hdr;                   // 0x000
-    sCharE_E2C8 me;             // 0x04C
-    sCharE_E2C8 chars[6];       // 0x068
+    cBEPlayerDB me;             // 0x04C
+    cBEPlayerDB chars[6];       // 0x068
     signed char charID;                 // 0x110
     sNetTag_E2C8 tag;                   // 0x111
     sNetKey_E2C8 keys[0x55];            // 0x118
@@ -131,7 +126,6 @@ struct sNetState_E2C8 {
     int b;                              // 0xC40
 };
 
-extern sCharE_E2C8 D_00535B20_E2C8[] __asm__("cBELibrary_playerDB");
 extern int cBENewRaceInterface_bIsBamLocation;
 extern int cBENewRaceInterface_mNextLocation;
 extern sNetHdr_E2C8 cBELibrary_raceDB;
@@ -157,10 +151,10 @@ extern "C" void cBENetworkInterface_getSyncData(cBENetworkInterface* self, int p
     out->b = cBENewRaceInterface_mNextLocation;
     out->hdr = cBELibrary_raceDB;
     for (int i = 0; i < 6; i++) {
-        out->chars[i] = D_00535B20_E2C8[i];
+        out->chars[i] = cBELibrary_playerDB[i];
     }
-    out->me = D_00535B20_E2C8[player];
-    signed char characterId = D_00535B20_E2C8[player].charID;
+    out->me = cBELibrary_playerDB[player];
+    signed char characterId = cBELibrary_playerDB[player].cCharacterID;
     out->charID = characterId;
     out->pair = *(sNetPair_E2C8*)D_005308D0;
     out->t0 = *(sNetTrip_E2C8*)(D_005308D0 - 0x18);
@@ -220,9 +214,9 @@ extern "C" void cBENetworkInterface_setSyncData(cBENetworkInterface* self, int p
     if (cBENetworkInterface_networkOpt.bIsHost == 0)
     {
         for (int i = 2; i < 6; i++)
-            D_00535B20_E2C8[i] = in->chars[i];
+            cBELibrary_playerDB[i] = in->chars[i];
     }
-    D_00535B20_E2C8[player] = in->me;
+    cBELibrary_playerDB[player] = in->me;
     ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 1))->discard();
     signed char characterId = in->charID;
     if (cBENetworkInterface_networkOpt.bIsHost == 0)
@@ -410,16 +404,8 @@ extern "C" void func_0014EBD8(cBENetworkInterface* self, const char* src)
 //100%
 INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_backupCharProfile);
 #ifdef SKIP_ASM
-struct sCharEntry_0014EBF8
-{
-    char pad_0x00[0x11];
-    signed char charID; // 0x11
-    char pad_0x12[0x2];
-    int w[2];
-};
 
-extern sCharEntry_0014EBF8 cBELibrary_playerDB[];
-extern sCharEntry_0014EBF8 cBENetworkInterface_BackupPlayerDB[];
+extern cBEPlayerDB cBENetworkInterface_BackupPlayerDB[];
 extern "C" void cBEProfileLib_backupCharProfile(sBEPlayerData* data, int charID);
 
 /**
@@ -432,7 +418,7 @@ extern "C" void cBEProfileLib_backupCharProfile(sBEPlayerData* data, int charID)
  */
 extern "C" void cBENetworkInterface_backupCharProfile(cBENetworkInterface* self, int idx)
 {
-    cBEProfileLib_backupCharProfile(&cBELibrary_profileLib[idx], cBELibrary_playerDB[idx].charID);
+    cBEProfileLib_backupCharProfile(&cBELibrary_profileLib[idx], cBELibrary_playerDB[idx].cCharacterID);
     for (int i = 0; i < 6; i++)
     {
         cBENetworkInterface_BackupPlayerDB[i] = cBELibrary_playerDB[i];
