@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "render/bxps2deferman.h"
 #include "render/bxps2tex.h"
 #include "object/objectnode.h"
@@ -2411,7 +2412,6 @@ extern "C" void cRollerModifier_collide(cRollerModifier* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTexFlipModifier_cTexFlipModifier);
 #ifdef SKIP_ASM
-extern char* cAppMan_TheAppMan;
 int BXrand();
 extern "C" void cTexFlipModifier_setupTexFlip(cTexFlipModifier* self);
 
@@ -2444,7 +2444,7 @@ extern "C" cTexFlipModifier* cTexFlipModifier_cTexFlipModifier(cTexFlipModifier*
     self->NumMaterials = 0;
     self->NumTexFlipMaterials = 0;
     self->Type = *(int*)(defData + 0x4);
-    float rate = *(float*)(defData + 0x10) * (one / (float)*(int*)(cAppMan_TheAppMan + 0x10));
+    float rate = *(float*)(defData + 0x10) * (one / (float)cAppMan_TheAppMan->TimerHz);
     self->Speed = rate;
     self->Dir = *(int*)(defData + 0xC);
     self->BaseSpeed = rate;
@@ -2671,7 +2671,7 @@ extern "C" void cTexFlipModifier_update(cTexFlipModifier* self)
             self->TexIndex = self->NumTexFlipMaterials - 1;
         }
     } else if (self->Type == 1) {
-        self->Speed = 10.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+        self->Speed = 10.0f / (float)cAppMan_TheAppMan->TimerHz;
         self->Type = 2;
         if (++self->TexIndex >= self->NumTexFlipMaterials) {
             self->TexIndex = 0;
@@ -2781,7 +2781,6 @@ extern "C" void cTexFlipModifier_writeToReplayFrame(cTexFlipModifier* self, cStr
 //100%
 INCLUDE_ASM("object/railmodifier", cUVScrollModifier_cUVScrollModifier);
 #ifdef SKIP_ASM
-extern char* cAppMan_TheAppMan;
 
 struct sRmQuad_F6E8 {
     float x, y, z, w;
@@ -2839,7 +2838,7 @@ extern "C" void* cUVScrollModifier_cUVScrollModifier(sRmState_F6E8* self, sRmDes
     self->fC = scrollData->f1C;
     self->f4 = 0;
     self->f10 = 0;
-    self->f14 = scrollData->f20 * (1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
+    self->f14 = scrollData->f20 * (1.0f / (float)cAppMan_TheAppMan->TimerHz);
     self->q = sRmQuad_F6E8(scrollData->f24, scrollData->f28, scrollData->f2C, 0.0f);
     self->f38 = scrollData->f10;
     self->f3C = scrollData->f14;
@@ -2873,7 +2872,6 @@ extern "C" void* cUVScrollModifier_cUVScrollModifier1(cUVScrollModifier* self, v
 //100%
 INCLUDE_ASM("object/railmodifier", cUVScrollModifier_update);
 #ifdef SKIP_ASM
-extern char* cAppMan_TheAppMan;
 
 struct sV2_F7D0 {
     float x, y;
@@ -2917,7 +2915,7 @@ struct sRmState_F7D0 {
 extern "C" void cUVScrollModifier_update(cUVScrollModifier* self)
 {
     if (self->TimeOn > 0.0f || self->TimeOff > 0.0f) {
-        self->Time += 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+        self->Time += 1.0f / (float)cAppMan_TheAppMan->TimerHz;
         if (self->On) {
             if (self->AngVel != 0.0f) {
                 self->Angle += self->AngVel;

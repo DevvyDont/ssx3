@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "main/fadescreen.h"
 #include "main/gamemodehandler.h"
 #include "main/gameobjnodes.h"
@@ -3563,7 +3564,6 @@ INCLUDE_ASM("main/ssxappdtor", func_002454F8);
 #ifdef SKIP_ASM
 extern char str_pct[];
 extern char str_pct_3dpct_pct[];
-extern char* cAppMan_TheAppMan;
 extern "C" void sprintf2(char* dst, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 
@@ -3582,7 +3582,7 @@ extern "C" int func_002454F8(cGameLoadState* self, int refresh)
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {
         char buf[208];
-        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(cAppMan_TheAppMan + 0x38));
+        sprintf2(buf, str_pct_3dpct_pct, (int)cAppMan_TheAppMan->LoadTimer.loadpercent);
         cUIText_setUnicodeString(obj, buf);
     }
     if (refresh != 0) {
@@ -3683,7 +3683,6 @@ INCLUDE_ASM("main/ssxappdtor", func_00245698);
 #ifdef SKIP_ASM
 extern char str_pct[];
 extern char str_pct_3dpct_pct[];
-extern char* cAppMan_TheAppMan;
 extern "C" void sprintf2(char* dst, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 
@@ -3700,7 +3699,7 @@ extern "C" int func_00245698(cGameLoadStateOutLodge* self)
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {
         char buf[208];
-        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(cAppMan_TheAppMan + 0x38));
+        sprintf2(buf, str_pct_3dpct_pct, (int)cAppMan_TheAppMan->LoadTimer.loadpercent);
         cUIText_setUnicodeString(obj, buf);
     }
     return 0;
@@ -3812,7 +3811,6 @@ INCLUDE_ASM("main/ssxappdtor", func_002458B8);
 #ifdef SKIP_ASM
 extern char str_pct[];
 extern char str_pct_3dpct_pct[];
-extern char* cAppMan_TheAppMan;
 extern "C" void sprintf2(char* dst, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 
@@ -3829,7 +3827,7 @@ extern "C" int func_002458B8(void* self)
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pct));
     if (obj != 0) {
         char buf[208];
-        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)(cAppMan_TheAppMan + 0x38));
+        sprintf2(buf, str_pct_3dpct_pct, (int)cAppMan_TheAppMan->LoadTimer.loadpercent);
         cUIText_setUnicodeString(obj, buf);
     }
     return 0;

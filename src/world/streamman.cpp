@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "world/streamman.h"
 
 //100%
@@ -218,7 +219,6 @@ extern "C" void cStreamMan_cancelStreamRequest(cStreamMan* self)
 //100%
 INCLUDE_ASM("world/streamman", cStreamMan_setBandWidthLimit);
 #ifdef SKIP_ASM
-extern char* cAppMan_TheAppMan;
 
 static inline int imax(int a, int b)
 {
@@ -236,7 +236,7 @@ static inline int imax(int a, int b)
 extern "C" void cStreamMan_setBandWidthLimit(cStreamMan* self, int rate)
 {
     rate = imax(0x8000, rate);
-    char* app = cAppMan_TheAppMan;
+    char* app = (char*)cAppMan_TheAppMan;
     self->m_iDataRatePerSecond = rate;
     self->m_fTicksPerChunk = (float)*(int*)(app + 0x10) / ((float)rate * 0.000030517578125f);
 }
@@ -246,7 +246,6 @@ extern "C" void cStreamMan_setBandWidthLimit(cStreamMan* self, int rate)
 INCLUDE_ASM("world/streamman", cStreamMan_update);
 #ifdef SKIP_ASM
 
-extern char* cAppMan_TheAppMan;
 void* cStreamMan_decompressChunk(void* self, int a1, int a2, int a3);
 extern "C" int cStreamMan_processChunk(void* self, void* a, void* b);
 extern "C" void cWorldCache_signalPageLoadComplete(void* self, int a1);
@@ -276,7 +275,7 @@ extern "C" void cStreamMan_update(cStreamMan* self)
         }
     }
     if (self->m_bLimitBandWidth != 0) {
-        int tick = *(int*)(cAppMan_TheAppMan + 0x18);
+        int tick = cAppMan_TheAppMan->TimerTick;
         if (self->m_iLastTimerTick != tick) {
             self->m_fTicksLeft -= (float)(tick - self->m_iLastTimerTick);
             self->m_iLastTimerTick = tick;

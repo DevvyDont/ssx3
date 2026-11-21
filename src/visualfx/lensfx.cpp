@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "visualfx/boltonfx.h"
 #include "visualfx/ps2lensfx.h"
 #include "visualfx/renderstateman.h"

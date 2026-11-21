@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "sound/icepick/worldtriggermanager.h"
 #include "sound/asyncsys.h"
 #include "sound/bankmonitor.h"
@@ -3431,7 +3432,6 @@ void cSSXAudio_HandleStreamChunk(void* self)
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_ApplyRMSData);
 #ifdef SKIP_ASM
-extern void* cAppMan_TheAppMan;
 extern "C" int func_0029F088(void* self, int a1);
 extern "C" void cSSXAudio_DuckByRMS(cSSXAudio* self, float v);
 
@@ -3453,7 +3453,7 @@ extern "C" void cSSXAudio_ApplyRMSData(cSSXAudio* self_)
         if (frame == (frame / 2) * 2) {
             audio->mRMSStepFrame = 0;
             audio->mRMSCurValue = audio->mRMSFinalValue;
-            int idx = (int)((float)(frame * audio->mRMSDataFrameRate) / *(float*)((char*)cAppMan_TheAppMan + 0x2C));
+            int idx = (int)((float)(frame * audio->mRMSDataFrameRate) / cAppMan_TheAppMan->FrameRate);
             if (idx < audio->mRMSSize) {
                 int val = *(signed char*)(((char*)self_) + idx + 0x6868);
                 if (val > 0) {

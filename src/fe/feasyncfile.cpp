@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "util/menu.h"
 #include "ui/uithing.h"
 #include "fe/festatenethelppopup.h"
@@ -630,7 +631,6 @@ extern "C" void cFEStateNetMessenger_onCreateScreen(cFEStateNetMessenger* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNetMessenger_onUpdate);
 #ifdef SKIP_ASM
-extern void* cAppMan_TheAppMan;
 extern "C" void func_001A6978(cFEStateNetMessenger* self);
 extern "C" void* cFEStateNet_onUpdate(cFEStateNet* self);
 
@@ -643,7 +643,7 @@ extern "C" void* cFEStateNet_onUpdate(cFEStateNet* self);
  */
 extern "C" void cFEStateNetMessenger_onUpdate(cFEStateNetMessenger* self)
 {
-    int now = *(int*)((char*)cAppMan_TheAppMan + 0x18);
+    int now = cAppMan_TheAppMan->TimerTick;
     int elapsed = now - self->mLastRefreshFrame;
     if (elapsed >= 1 && elapsed <= 59) {
         cFEStateNet_onUpdate((cFEStateNet*)self);
@@ -6043,7 +6043,6 @@ INCLUDE_ASM("fe/feasyncfile", func_001AA9B0);
 int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
-extern void* cAppMan_TheAppMan;
 extern char str_IconChallengeHint[];
 extern char str_TextMessageCount[];
 extern char str_IconMessageHint[];
@@ -6073,7 +6072,7 @@ public:
  */
 extern "C" void func_001AA9B0(cFEStateNet* self)
 {
-    unsigned int now = *(unsigned int*)((char*)cAppMan_TheAppMan + 0x18);
+    unsigned int now = (unsigned int)cAppMan_TheAppMan->TimerTick;
     cFEVObj_001AA9B0* hintIcon = (cFEVObj_001AA9B0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_IconChallengeHint));
     if (hintIcon != 0) {
         if (self->mChallengeHintFrame != 0) {
@@ -6113,7 +6112,6 @@ extern "C" int func_00261460(void* self);
 extern "C" void func_002613C8(void* self);
 extern "C" void func_0025B800(void* self);
 extern "C" int func_00262938(void* self);
-extern void* cAppMan_TheAppMan;
 extern char str_TextMessageCount[];
 extern char str_pct_d_b[];
 extern char str_sp[];
@@ -6193,7 +6191,7 @@ extern "C" void func_001AAB68(cFEStateNet* self)
     if (((cFEVObj_001AAB68*)self)->v29() == 0) {
         return;
     }
-    unsigned int now = *(unsigned int*)((char*)cAppMan_TheAppMan + 0x18);
+    unsigned int now = (unsigned int)cAppMan_TheAppMan->TimerTick;
     unsigned int elapsed = now - (self)->mLastPollFrame;
     if (elapsed > 0 && elapsed < 60) {
         return;
@@ -12046,7 +12044,6 @@ extern "C" void func_001B22A0()
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateChatRoom_onUpdate);
 #ifdef SKIP_ASM
-extern void* cAppMan_TheAppMan;
 extern "C" void func_001B3BF0(cFEStateChatRoom* self);
 extern "C" void* cFEStateNet_onUpdate(cFEStateNet* self);
 
@@ -12057,7 +12054,7 @@ extern "C" void* cFEStateNet_onUpdate(cFEStateNet* self);
  */
 extern "C" void cFEStateChatRoom_onUpdate(cFEStateChatRoom* self)
 {
-    if (*(int*)((char*)cAppMan_TheAppMan + 0x18) % 10000 == 0) {
+    if (cAppMan_TheAppMan->TimerTick % 10000 == 0) {
         func_001B3BF0(self);
     }
     cFEStateNet_onUpdate((cFEStateNet*)self);

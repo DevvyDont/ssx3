@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "bx/loadtimer.h"
 #include "bx/execman.h"
 
@@ -6,7 +7,6 @@
 INCLUDE_ASM("bx/appman", cAppMan_cAppMan);
 #ifdef SKIP_ASM
 extern void* cAppMan_vtbl[16];
-extern void* cAppMan_TheAppMan;
 
 /**
  * Constructs the application manager with its defaults and makes it the global instance (cAppMan_TheAppMan, On Tour
@@ -16,27 +16,26 @@ extern void* cAppMan_TheAppMan;
  *
  * @return @p self
  */
-extern "C" void* cAppMan_cAppMan(void* self)
+extern "C" void* cAppMan_cAppMan(cAppMan* self)
 {
-    *(void**)((char*)self + 0x5C) = cAppMan_vtbl;
-    *(int*)((char*)self + 0x20) = 0xC;
-    *(float*)((char*)self + 0x24) = 1.0f;
-    *(float*)((char*)self + 0x30) = 0.8999999761581421f;
-    *(int*)((char*)self + 0x34) = 0;
-    *(int*)((char*)self + 0x0) = 0;
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x1C) = 0;
-    *(int*)((char*)self + 0x18) = 0;
-    *(int*)((char*)self + 0x28) = 0;
-    *(int*)((char*)self + 0x2C) = 0;
-    *(int*)((char*)self + 0xC) = 0;
+    self->mVtbl = (void**)cAppMan_vtbl;
+    self->MaxUpdateSteps = 0xC;
+    self->GameRate = 1.0f;
+    self->FrameRateDamp = 0.8999999761581421f;
+    self->mLock30Fps = 0;
+    self->ActiveModule = 0;
+    self->LoadingModule = 0;
+    self->Tick = 0;
+    self->TimerTick = 0;
+    *(int*)&self->FracTick = 0;
+    *(int*)&self->FrameRate = 0;
+    self->m_AIUpdatesPerRender = 0;
     cAppMan_TheAppMan = self;
-    return self;
+    return ((void*)self);
 }
 #endif
 
 extern void* cAppMan_vtbl[16];
-extern void* cAppMan_TheAppMan;
 void operator_delete(int* ptr);
 
 //99.92%
@@ -133,11 +132,6 @@ extern "C" int cAppMan_run(char* self, char* exec, int ac, int av)
 }
 #endif
 
-struct cAppMan {
-    char pad_0x00[0x4];
-    unsigned int mNextModule; // offset 0x4
-    void* mExecutionMan; // offset 0x8
-};
 
 //100%
 INCLUDE_ASM("bx/appman", cAppMan_setNextModule__FP7cAppManUi);
@@ -145,11 +139,11 @@ INCLUDE_ASM("bx/appman", cAppMan_setNextModule__FP7cAppManUi);
 /**
  * Records which module the application manager should switch to next.
  *
- * @param module  module id stored in mNextModule
+ * @param module  the module, stored in LoadingModule
  */
 void cAppMan_setNextModule(cAppMan* self, unsigned int module)
 {
-    self->mNextModule = module;
+    self->LoadingModule = (cAppModule*)module;
 }
 #endif
 
@@ -307,11 +301,11 @@ INCLUDE_ASM("bx/appman", cAppMan_checkHalt__FP7cAppMan);
 /**
  * Asks the execution manager whether execution should halt.
  *
- * @return the result of cExecutionMan_checkHalt(mExecutionMan, 1)
+ * @return the result of cExecutionMan_checkHalt(ExecutionMan, 1)
  */
 int cAppMan_checkHalt(cAppMan* self)
 {
-    return cExecutionMan_checkHalt(self->mExecutionMan, 1);
+    return cExecutionMan_checkHalt(self->ExecutionMan, 1);
 }
 #endif
 
@@ -515,7 +509,7 @@ INCLUDE_ASM("bx/appman", getTheExecutionMan__Fv);
  */
 int getTheExecutionMan(void)
 {
-    return *(int*)((char*)cAppMan_TheAppMan + 0x8);
+    return (int)cAppMan_TheAppMan->ExecutionMan;
 }
 #endif
 
@@ -566,7 +560,7 @@ void cLoadTimer_setnextpercent(void* vself, float newValue)
     float diff = newValue - old8;
     float x0 = self->loadpercent;
     float rate = raw * diff;
-    int now = *(int*)((char*)cAppMan_TheAppMan + 0x1C);
+    int now = cAppMan_TheAppMan->Tick;
     x0 = x0 - newValue;
     rate = rate * 0.01f;
     self->lasttarget = old8;
@@ -594,8 +588,8 @@ INCLUDE_ASM("bx/appman", cLoadTimer_update__FPv);
 void cLoadTimer_update(void* vself)
 {
     cLoadTimer* self = (cLoadTimer*)vself;
-    int delta = *(int*)((char*)cAppMan_TheAppMan + 0x1C) - self->targettick;
-    float ret = expf((float)delta * *(float*)((char*)cAppMan_TheAppMan + 0x14) * self->decay);
+    int delta = cAppMan_TheAppMan->Tick - self->targettick;
+    float ret = expf((float)delta * cAppMan_TheAppMan->TimerPeriod * self->decay);
     self->loadpercent = self->offset + self->scale * ret;
 }
 #endif

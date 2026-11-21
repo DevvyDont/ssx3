@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "object/spline3d.h"
 #include "object/conveyornode.h"
 #include "object/counternode.h"
@@ -1467,7 +1468,6 @@ void* func_00344348(void* self)
 //100%
 INCLUDE_ASM("object/debouncenode", func_00344368);
 #ifdef SKIP_ASM
-extern char* cAppMan_TheAppMan;
 extern "C" void func_003443A8(void* self);
 
 /**
@@ -1481,7 +1481,7 @@ extern "C" void func_003443A8(void* self);
 extern "C" void func_00344368(void* self, int modelId)
 {
     char* owner = (char*)self;
-    char* appMan = cAppMan_TheAppMan;
+    char* appMan = (char*)cAppMan_TheAppMan;
     *(int*)(owner + 0x4) = modelId;
     *(int*)(owner + 0x1DC) = 0;
     *(float*)(owner + 0x1E4) = 1.0f / (float)*(int*)(appMan + 0x10);

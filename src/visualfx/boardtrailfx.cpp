@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "ui/uithing.h"
 #include "visualfx/transitionobj.h"
 #include "visualfx/cutscenetransitionman.h"

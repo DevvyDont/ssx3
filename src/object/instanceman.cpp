@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "object/instanceman.h"
 #include "object/animframe.h"
 #include "object/meshanimnode.h"
@@ -1000,7 +1001,6 @@ void* cMeshAnimNode__cMeshAnimNode(void* vself)
 INCLUDE_ASM("object/instanceman", cMeshAnimNode_init);
 #ifdef SKIP_ASM
 unsigned int BXrand();
-extern char* cAppMan_TheAppMan;
 
 struct sV4_352230 {
     float x, y, z, w;
@@ -1099,16 +1099,16 @@ extern "C" void cMeshAnimNode_init(cMeshAnimNode* debris)
         ((sV4_352230*)&self->Axis[0])[i] = Normalize_352230(((sV4_352230*)&self->Axis[0])[i]);
     }
     for (int j = 0; j < *(int*)(modelDef + 4); j++) {
-        float vx = randScale_352230(((float*)&self->Disperse)[0]) * (1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
+        float vx = randScale_352230(((float*)&self->Disperse)[0]) * (1.0f / (float)cAppMan_TheAppMan->TimerHz);
         if (BXrand() & 1) {
             vx = -vx;
         }
-        float vy = randScale_352230(((float*)&self->Disperse)[1]) * (1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
+        float vy = randScale_352230(((float*)&self->Disperse)[1]) * (1.0f / (float)cAppMan_TheAppMan->TimerHz);
         if (BXrand() & 1) {
             vy = -vy;
         }
-        float vz = randScale_352230(((float*)&self->Disperse)[2]) * (1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
-        ((sV4_352230*)&self->Vel[0])[j] = Scale_352230(*(sV4_352230*)&self->InitVel, *(float*)(cAppMan_TheAppMan + 0x14));
+        float vz = randScale_352230(((float*)&self->Disperse)[2]) * (1.0f / (float)cAppMan_TheAppMan->TimerHz);
+        ((sV4_352230*)&self->Vel[0])[j] = Scale_352230(*(sV4_352230*)&self->InitVel, cAppMan_TheAppMan->TimerPeriod);
         AddEq_352230(((sV4_352230*)&self->Vel[0])[j], sV4_352230(vx, vy, vz, 0.0f));
     }
 }
@@ -1118,7 +1118,6 @@ extern "C" void cMeshAnimNode_init(cMeshAnimNode* debris)
 INCLUDE_ASM("object/instanceman", cMeshAnimNode_update);
 #ifdef SKIP_ASM
 extern "C" void fSinCos(float* s, float* c, float angle);
-extern char* cAppMan_TheAppMan;
 
 struct sV4_352500 {
     float x, y, z, w;
@@ -1215,7 +1214,7 @@ static inline void AddEq_352500(sV4_352500& d, const sV4_352500& b)
 extern "C" void cMeshAnimNode_update(sDebris_352500* self)
 {
     if (self->timer > 0.0f) {
-        self->timer -= *(float*)(cAppMan_TheAppMan + 0x14);
+        self->timer -= cAppMan_TheAppMan->TimerPeriod;
         if (self->timer <= 0.0f) {
             self->vt[34].fn((char*)self + self->vt[34].delta, 1);
             return;
@@ -1232,7 +1231,7 @@ extern "C" void cMeshAnimNode_update(sDebris_352500* self)
         }
         for (int i = 0; i < *(int*)(skel + 4); i++) {
             AddEq_352500(self->pos[i], self->vel[i]);
-            AddEq_352500(self->vel[i], sV4_352500(0.0f, 0.0f, self->gravity * -980.0f * *(float*)(cAppMan_TheAppMan + 0x14), 0.0f));
+            AddEq_352500(self->vel[i], sV4_352500(0.0f, 0.0f, self->gravity * -980.0f * cAppMan_TheAppMan->TimerPeriod, 0.0f));
         }
     }
 }

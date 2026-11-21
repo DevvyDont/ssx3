@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 
 //100%
 INCLUDE_ASM("bx/ps2main", systemInit);
@@ -104,7 +105,6 @@ cExecutionMan* cExecutionMan_cExecutionMan(cExecutionMan* self);
 extern "C" void __main(void); // __main
 extern "C" void systemInit(void);
 extern "C" int cAppMan_run(void* self, cExecutionMan* exec, int argc, char** argv);
-extern void* cAppMan_TheAppMan;
 extern const char str_PS2ExecutionMan[];
 extern void* D_0048DB68[];
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "render/ps2graphicsman.h"
 #include "world/worldview.h"
 #include "world/worldcache.h"
@@ -545,7 +546,6 @@ INCLUDE_ASM("world/worldcache", cWorldCache_cWorldCache);
 #ifdef SKIP_ASM
 extern "C" void cWorldView_cWorldView(void* self);
 extern "C" void cStreamMan_cStreamMan(void* self);
-extern char* cAppMan_TheAppMan;
 
 /**
  * Constructs the world cache with its world view and stream manager, nothing loaded, and a touch-stale age of
@@ -557,7 +557,7 @@ extern "C" void* cWorldCache_cWorldCache(cWorldCache* self)
 {
     cWorldView_cWorldView((char*)&self->m_WorldView);
     cStreamMan_cStreamMan((char*)&self->m_StreamMan);
-    char* app = cAppMan_TheAppMan;
+    char* app = (char*)cAppMan_TheAppMan;
     self->mp_DataHeader = 0;
     self->m_uiNumHullPage = (unsigned int)0;
     self->mp_ChunkResolve = 0;
@@ -934,7 +934,6 @@ struct sWCSlots {
     int timeBase;        // 0x1BF0
 };
 
-extern char* cAppMan_TheAppMan;
 
 /**
  * Marks hull page @p i as wanted: stores the app tick (cAppMan_TheAppMan + 0x1C) in m_iTouchTick and @p priority in
@@ -945,7 +944,7 @@ extern char* cAppMan_TheAppMan;
  */
 extern "C" void cWorldCache_touchPage(sWCSlots* self, int i, float priority)
 {
-    self->slot[i].time = *(int*)(cAppMan_TheAppMan + 0x1C);
+    self->slot[i].time = cAppMan_TheAppMan->Tick;
     self->slot[i].fC = priority;
     self->slot[i].f4 = 0;
     switch (self->slot[i].state) {
@@ -966,7 +965,6 @@ extern "C" void cWorldCache_touchPage(sWCSlots* self, int i, float priority)
 //100%
 INCLUDE_ASM("world/worldcache", cWorldCache_flushPage);
 #ifdef SKIP_ASM
-extern char* cAppMan_TheAppMan;
 
 // PORT: callers declare (void*, unsigned short); the body never masks the id
 extern "C" void cWorldCache_flushPage_i(sWCSlots* self, int i) __asm__("cWorldCache_flushPage");
@@ -978,7 +976,7 @@ extern "C" void cWorldCache_flushPage_i(sWCSlots* self, int i) __asm__("cWorldCa
 extern "C" void cWorldCache_flushPage_i(sWCSlots* self, int i)
 {
     self->slot[i].f4 = 0;
-    self->slot[i].time = *(int*)(cAppMan_TheAppMan + 0x1C) - self->timeBase;
+    self->slot[i].time = cAppMan_TheAppMan->Tick - self->timeBase;
 }
 #endif
 
@@ -1124,7 +1122,6 @@ extern "C" void* cHullPage_cHullPage(cHullPage* self, unsigned short* data);
 extern "C" void* cWorldView_getHull(void* self, int i);
 extern "C" void cStreamMan_addStreamRequest(void* self, int i, int a, int b);
 extern "C" void cWorldCache_purgePage(cWorldCache* self, int i);
-extern char* cAppMan_TheAppMan;
 extern char str_cHullPage[];
 
 // PORT: g++ 2.95 new-expression; the ctor and the tagged allocator are bound to their symbols by asm label.
@@ -1174,7 +1171,7 @@ static inline int Frame_8668()
 extern "C" void cWorldCache_updatePages(cWorldCache* worldCache)
 {
     sWCPCache_8668* self = (sWCPCache_8668*)worldCache;
-    int now = *(int*)(cAppMan_TheAppMan + 0x1C);
+    int now = cAppMan_TheAppMan->Tick;
     int best = -1;
     float bestPri = -1.0f;
     for (unsigned int i = 0; i < self->count; i++)
@@ -1243,7 +1240,7 @@ INCLUDE_ASM("world/worldcache", cWorldCache_flushInActivePages);
 extern "C" void cWorldCache_flushInActivePages(cWorldCache* worldCache)
 {
     sWCPCache_8668* self = (sWCPCache_8668*)worldCache;
-    int now = *(int*)(cAppMan_TheAppMan + 0x1C);
+    int now = cAppMan_TheAppMan->Tick;
     for (unsigned int i = 0; i < self->count; i++)
     {
         int st = self->slot[i].state;

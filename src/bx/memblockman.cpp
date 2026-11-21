@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "bx/execman.h"
 
 //100%

@@ -1105,7 +1105,6 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard__cFEMemCard);
 #ifdef SKIP_ASM
 extern void* cFEMemCard_vtbl[];
 extern void* cOVState_vtbl[];
-extern void* cFEMemCard_mInstance;
 extern "C" void cUIState__cUIState(void* self, int flags);
 
 /**
@@ -1171,7 +1170,6 @@ extern "C" void cMCOverlayManager_getFileName(void* app, int a, char* buf, int n
 extern "C" void func_00241AA0(char* buf, int n);
 extern "C" void func_002C2540(char* buf, char* s);
 extern "C" void sprintf1(void* dst, char* a, char* b, char* c);
-extern void* cFEMemCard_mInstance;
 extern char str_pct_s_pct_s_c[];
 // PORT: callback function addresses taken through asm-label views (their real prototypes vary).
 extern char cFEMemCard_writeStart_a5488[] __asm__("cFEMemCard_writeStart");
@@ -1241,7 +1239,7 @@ extern char cFEMemCard_callbackCardChanged_a5488[] __asm__("cFEMemCard_callbackC
 extern "C" void cFEMemCard_initFEMemCard(cFEMemCard* self_, int mode)
 {
     void* gapp = SSXApp;
-    cFEMemCard_mInstance = ((char*)self_);
+    cFEMemCard_mInstance = self_;
     self_->mState = 0;
     self_->mScreenStatus = 0;
     char* app = (char*)cSSXApp_getMCManager(gapp);
@@ -1425,7 +1423,6 @@ extern "C" void cMCOverlayManager_WriteFile(void* app, char* name, int a, int b)
 extern "C" void cMCOverlayManager_GetMessage(void* app, char* buf, int n);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 void cMemMan_free(void* p);
-extern void* cFEMemCard_mInstance;
 extern char str_pct_s_pct_spct_04d[];
 extern char str_Temp_String[];
 
@@ -1452,25 +1449,25 @@ extern "C" void cFEMemCard_writeStart(void)
     char fmt1[0x200];
     char fmt2[0x200];
     char* app = (char*)cSSXApp_getMCManager(SSXApp);
-    int mode = *(int*)((char*)cFEMemCard_mInstance + 0x1BC);
+    int mode = cFEMemCard_mInstance->mType;
     if (mode == 2) {
         cMCOverlayManager_SettingsWriteStart(app);
     } else if (mode == 1) {
         void* replay = SSXApp->Game->Replay;
-        *(int*)((char*)cFEMemCard_mInstance + 0x1C8) = mode;
+        cFEMemCard_mInstance->mIsReplayAlloc = mode;
         cReplay_initSave(replay);
         int size = cBE_getDataSize(cBE_getBE());
         cFEMemCard_createReadBuffer_59A0(cFEMemCard_mInstance, size);
-        cBE_writeToData(cBE_getBE(), *(int*)((char*)cFEMemCard_mInstance + 0x1D4));
+        cBE_writeToData(cBE_getBE(), (int)cFEMemCard_mInstance->mpStartReadBuffer);
         cMCOverlayManager_getFileName(app, 0, name, 65);
         func_002C2540_59A0(fmt1, str_pct_s_pct_spct_04d);
         func_00241AA0(slot, 0x100);
         sprintf1_59A0(title, fmt1, slot, name, *(int*)(app + 0xF8) + 1);
-        cMCOverlayManager_WriteFile(app, title, *(int*)((char*)cFEMemCard_mInstance + 0x1D4), size);
+        cMCOverlayManager_WriteFile(app, title, (int)cFEMemCard_mInstance->mpStartReadBuffer, size);
     } else {
         char* app2 = (char*)cSSXApp_getMCManager(SSXApp);
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
-        int profileData = cBESaveInterface_generateSaveProfile(iface, *(int*)((char*)cFEMemCard_mInstance + 0x1CC));
+        int profileData = cBESaveInterface_generateSaveProfile(iface, cFEMemCard_mInstance->mPlayerIdx);
         int profileSize = cBESaveInterface_getSaveProfileSize();
         cMCOverlayManager_getFileName(app2, 1, name, 65);
         func_002C2540_59A0(fmt2, str_pct_s_pct_spct_04d);
@@ -1483,9 +1480,9 @@ extern "C" void cFEMemCard_writeStart(void)
         *(int*)(fe + 0x19C) = 22;
         char* buf = (char*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
         cMCOverlayManager_GetMessage(app, buf, 800);
-        sVE_59A0* vt = *(sVE_59A0**)((char*)cFEMemCard_mInstance + 8);
+        sVE_59A0* vt = (sVE_59A0*)cFEMemCard_mInstance->mVtbl;
         vt[36].fn((char*)cFEMemCard_mInstance + vt[36].delta, buf, 1, 1, 0, 0, 1);
-        *(int*)((char*)cFEMemCard_mInstance + 0x210) = 1;
+        cFEMemCard_mInstance->mIsStatusPopupOn = 1;
         if (buf != 0) {
             cMemMan_free(buf);
         }
@@ -1572,7 +1569,6 @@ extern "C" int cFEMemCard_callbackReadUpdate(int size)
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_callbackWriteUpdate);
 #ifdef SKIP_ASM
-extern void* cFEMemCard_mInstance;
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int cReplay_getSaveData(void* self, int* a, int* b);
 extern "C" void cMCOverlayManager_WriteData(void* self, int a, int b);
@@ -1716,7 +1712,6 @@ extern "C" void func_00287520(void* opt, int v);
 extern "C" void cSSXAudio_SetDJSpeech(void* opt, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* opt, int v);
 void cMemMan_free(void*);
-extern void* cFEMemCard_mInstance;
 
 struct sSndCfg_1D5F40 {
     unsigned int sfxVol : 4;        // bits 0-3

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "bx/math3d.h"
 #include "object/animnode.h"
 #include "object/floatingnode.h"
@@ -291,7 +292,6 @@ struct sVE_E798 {
 };
 
 extern sVec4_E798 t4vect_Zero;
-extern char* cAppMan_TheAppMan;
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cAnimFrame_getDeriv(void* node, sVec4_E798* pos, sVec4_E798* rot, float t);
 
@@ -432,8 +432,8 @@ extern "C" void cAnimNode_updateMeshVelocity(cAnimNode* self)
         cAnimFrame_getDeriv(node, &pos, &rotv, self->CacheTime);
         sVec4_E798 rot;
         rot = sVec4_E798(-*(float*)(node + 0x50), -*(float*)(node + 0x54), -*(float*)(node + 0x58), 0.0f);
-        vu0ScaleEq_E798(pos, animSpeed * (float)*(int*)(cAppMan_TheAppMan + 0x10));
-        vu0ScaleEq_E798(rotv, animSpeed * (float)*(int*)(cAppMan_TheAppMan + 0x10) * d2r);
+        vu0ScaleEq_E798(pos, animSpeed * (float)cAppMan_TheAppMan->TimerHz);
+        vu0ScaleEq_E798(rotv, animSpeed * (float)cAppMan_TheAppMan->TimerHz * d2r);
         t4Matrix eulerMat;
         {
             sVec3_E798 eulerAngles;

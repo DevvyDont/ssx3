@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "bx/math3d.h"
 #include "render/graphicsman.h"
 #include "world/worldview.h"
@@ -156,7 +157,6 @@ fail:
 //100%
 INCLUDE_ASM("render/graphicsman", cGraphicsMan_FlushRenderer);
 #ifdef SKIP_ASM
-extern char* cAppMan_TheAppMan;
 extern "C" void SYNCTASK_run(int a);
 extern "C" void THREAD_yield(int a);
 
@@ -193,10 +193,10 @@ extern "C" void cGraphicsMan_FlushRenderer(cGraphicsMan* self)
     for (;;) {
         sGmVEntryI_9C28* vt = (sGmVEntryI_9C28*)self->mVtbl;
         if (vt[18].fn((char*)self + vt[18].delta) != 0) break;
-        (*(cGmApp_9C28**)(cAppMan_TheAppMan + 0x8))->prepause();
+        ((cGmApp_9C28*)cAppMan_TheAppMan->ExecutionMan)->prepause();
         SYNCTASK_run(0);
         THREAD_yield(0);
-        (*(cGmApp_9C28**)(cAppMan_TheAppMan + 0x8))->postpause();
+        ((cGmApp_9C28*)cAppMan_TheAppMan->ExecutionMan)->postpause();
     }
 }
 #endif
@@ -2773,10 +2773,10 @@ extern "C" void cStaticEmitter_update(cStaticEmitter* self, float dt)
         return;
     }
     if (timer < 0.0f) {
-        tParticleEmitter_stepContinous(&self->Emitter, 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
+        tParticleEmitter_stepContinous(&self->Emitter, 1.0f / (float)cAppMan_TheAppMan->TimerHz);
     } else {
-        tParticleEmitter_step((tParticleEmitter*)(&self->Emitter), 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
-        self->Duration -= 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+        tParticleEmitter_step((tParticleEmitter*)(&self->Emitter), 1.0f / (float)cAppMan_TheAppMan->TimerHz);
+        self->Duration -= 1.0f / (float)cAppMan_TheAppMan->TimerHz;
         if (self->Duration < 0.0f) {
             self->Duration = 0.0f;
         }

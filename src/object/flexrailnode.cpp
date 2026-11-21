@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "bx/math3d.h"
 #include "object/flagset.h"
 #include "object/flagnode.h"
@@ -1650,7 +1651,6 @@ extern "C" void cSpringRailNode_writeToReplayFrame(cSpringRailNode* self, void* 
 //100%
 INCLUDE_ASM("object/flexrailnode", tFlagState_tFlagState);
 #ifdef SKIP_ASM
-extern char* cAppMan_TheAppMan;
 
 struct sFrRailDesc;
 
@@ -1682,7 +1682,7 @@ struct sFrRailSrc_AC88 {
 
 static inline float perSec_34AC88(float x)
 {
-    return x * (1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
+    return x * (1.0f / (float)cAppMan_TheAppMan->TimerHz);
 }
 
 /**

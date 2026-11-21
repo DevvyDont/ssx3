@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "main/loadscreens.h"
 #include "ui/uithing.h"
 #include "render/ps2graphicsman.h"
@@ -77,7 +78,6 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadHintState_onGainTransition);
 int GetHashValue32(char* str);
 extern char str_pct[];
 extern char str_pct_3dpct_pct[];
-extern void* cAppMan_TheAppMan;
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf2(char* buf, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, char* text);
@@ -94,7 +94,7 @@ extern "C" int cFELoadHintState_onGainTransition(cFELoadHintState* self)
     char buf[200];
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {
-        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)((char*)cAppMan_TheAppMan + 0x38));
+        sprintf2(buf, str_pct_3dpct_pct, (int)cAppMan_TheAppMan->LoadTimer.loadpercent);
         cUIText_setUnicodeString(obj, buf);
     }
     return 0;
@@ -182,7 +182,6 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadState_onGainTransition);
 int GetHashValue32(char* str);
 extern char str_pct[];
 extern char str_pct_3dpct_pct[];
-extern void* cAppMan_TheAppMan;
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf2(char* buf, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, char* text);
@@ -199,7 +198,7 @@ extern "C" int cFELoadState_onGainTransition(cFELoadState* self)
     char buf[200];
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {
-        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)((char*)cAppMan_TheAppMan + 0x38));
+        sprintf2(buf, str_pct_3dpct_pct, (int)cAppMan_TheAppMan->LoadTimer.loadpercent);
         cUIText_setUnicodeString(obj, buf);
     }
     return 0;
@@ -292,7 +291,6 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadStateInLodge_onGainTransition);
 int GetHashValue32(char* str);
 extern char str_pct[];
 extern char str_pct_3dpct_pct[];
-extern void* cAppMan_TheAppMan;
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf2(char* buf, const char* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, char* text);
@@ -309,7 +307,7 @@ extern "C" int cFELoadStateInLodge_onGainTransition(cFELoadStateInLodge* self)
     char buf[200];
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_pct));
     if (obj != 0) {
-        sprintf2(buf, str_pct_3dpct_pct, (int)*(float*)((char*)cAppMan_TheAppMan + 0x38));
+        sprintf2(buf, str_pct_3dpct_pct, (int)cAppMan_TheAppMan->LoadTimer.loadpercent);
         cUIText_setUnicodeString(obj, buf);
     }
     return 0;

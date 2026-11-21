@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "object/objectnode.h"
 #include "render/particle.h"
 #include "object/modifierblock.h"
@@ -341,7 +342,6 @@ extern "C" void cMoveNode_postUpdateModifierBlock(cMoveNode* self)
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_onCollide);
 #ifdef SKIP_ASM
-extern char* cAppMan_TheAppMan;
 extern "C" int cObjectInterface_getAIIndex(int);
 void cInstanceNode_runCollideScript(void*, int, int, int);
 
@@ -393,7 +393,7 @@ extern "C" void cMoveNode_onCollide(cMoveNode* self, int tc, int ti, int pBeing)
         }
     }
     if (self->Debounce <= 0) {
-        self->Debounce = *(int*)(cAppMan_TheAppMan + 0x10) / 2;
+        self->Debounce = cAppMan_TheAppMan->TimerHz / 2;
         cInstanceNode_runCollideScript(self, tc, ti, pBeing);
     }
 }
@@ -402,7 +402,6 @@ extern "C" void cMoveNode_onCollide(cMoveNode* self, int tc, int ti, int pBeing)
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_setDebounce);
 #ifdef SKIP_ASM
-extern char* cAppMan_TheAppMan;
 
 /**
  * Sets the node's collision debounce, in seconds, as a count of app timer ticks.
@@ -411,7 +410,7 @@ extern char* cAppMan_TheAppMan;
  */
 extern "C" void cMoveNode_setDebounce(cMoveNode* self, float secs)
 {
-    self->Debounce = (int)((float)*(int*)(cAppMan_TheAppMan + 0x10) * secs);
+    self->Debounce = (int)((float)cAppMan_TheAppMan->TimerHz * secs);
 }
 #endif
 

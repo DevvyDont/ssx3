@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "visualfx/boardwakefx.h"
 #include "visualfx/snowfall.h"
 #include "visualfx/lensfx.h"
@@ -5536,7 +5537,6 @@ extern "C" float cTransitionMan_GetTransitionTimeLeft(cTransitionMan* self)
 INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_update);
 #ifdef SKIP_ASM
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
-extern char* cAppMan_TheAppMan;
 
 struct sWkVtA46C8 { short delta; short index; int (*fn)(void*); };
 struct sWkVtB46C8 { short delta; short index; void (*fn)(void*, void*); };
@@ -5566,7 +5566,7 @@ extern "C" void cTransitionMan_update(cTransitionMan* self)
     } else if (self->mExternalTimePercentage != 0) {
         self->mfCurrentTime = *self->mExternalTimePercentage * (self->mfInTime + self->mfHoldTime + self->mfOutTime);
     } else {
-        self->mfCurrentTime += 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+        self->mfCurrentTime += 1.0f / (float)cAppMan_TheAppMan->TimerHz;
     }
     if (self->mfInTime + self->mfHoldTime + self->mfOutTime <= self->mfCurrentTime) {
         cTransitionMan_EndTransition(self);
@@ -6168,7 +6168,7 @@ extern "C" void cSnowBox_update_4F50(cSnowBox* self, const tWorldPainterSnowfall
         self->mWindScale = params->f[3] * 250.0f;
         break;
     }
-    const float kTimeDiff = 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+    const float kTimeDiff = 1.0f / (float)cAppMan_TheAppMan->TimerHz;
     float windBlend;
     float x;
     float y;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "object/floatingnode.h"
 #include "object/instancenode.h"
 
@@ -681,7 +682,6 @@ extern "C" void cFloatingNode_updateIntersectInfo(cFloatingNode* self, sV4_F790*
 //100%
 INCLUDE_ASM("object/floatingnode", cFloatingNode_updateNode);
 #ifdef SKIP_ASM
-extern char* cAppMan_TheAppMan;
 
 // The tilt clamp reads the angles through a view of the spring block at +0x2C.
 struct sFloatTilt_34F930 {
@@ -728,7 +728,7 @@ struct sFloatingNode_34F930 {
 // Steps the float spring (bob height plus two tilt axes) by one frame.
 extern "C" int cFloatingNode_updateNode(cFloatingNode* self)
 {
-    float dt = 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+    float dt = 1.0f / (float)cAppMan_TheAppMan->TimerHz;
     float accelZ = -self->ZSpring * (self->Z - self->Zo) + self->ForceScale * self->Force + -self->ZDamp * self->Vel;
     float accelX = -self->ASpring * self->OX + self->TorqueScale * self->TX + -self->ADamp * self->WX;
     float accelY = -self->ASpring * self->OY + self->TorqueScale * self->TY + -self->ADamp * self->WY;

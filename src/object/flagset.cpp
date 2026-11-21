@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "object/flagset.h"
 #include "object/animnode.h"
 #include "object/fencenode.h"
@@ -833,7 +834,6 @@ struct sFlagSet_C668 {
 extern "C" int cObjectInterface_getPeakNumber();
 extern "C" void cFlagSet_update(cFlagSet* elem);
 unsigned int BXrand();
-extern char* cAppMan_TheAppMan;
 
 // Uniform float in [0, 1) built from the random mantissa bits.
 static inline float randf_34C668()
@@ -866,7 +866,7 @@ extern "C" void cFlagManager_update(cFlagManager* self)
         break;
     }
     float one = 1.0f;
-    self->mWindTime += one / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+    self->mWindTime += one / (float)cAppMan_TheAppMan->TimerHz;
     if (one <= self->mWindTime) {
         self->mWindTime -= one;
         self->mWindBase += self->mWindDelta;

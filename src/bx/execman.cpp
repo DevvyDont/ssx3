@@ -314,8 +314,6 @@ extern "C" int cAppMan_getLoadTimer(int appMan) {
 //100%
 INCLUDE_ASM("bx/execman", getAppMan);
 #ifdef SKIP_ASM
-extern int cAppMan_TheAppMan;
-
 /**
  * Returns the application manager, cAppMan_TheAppMan.
  *
@@ -323,7 +321,7 @@ extern int cAppMan_TheAppMan;
  *
  * @return the application manager
  */
-extern "C" int getAppMan(void) {
+extern "C" cAppMan* getAppMan(void) {
     return cAppMan_TheAppMan;
 }
 #endif

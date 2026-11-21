@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "bx/math3d.h"
 #include "object/animdeltanode.h"
 #include "object/railmannode.h"
@@ -860,7 +861,6 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 extern "C" void cAnimObjectNode_cAnimObjectNode1_8C80(void* self, int a, int type, void* b, const void* c) __asm__("cAnimObjectNode_cAnimObjectNode1");
 extern char cAnimComboNode_vtbl[];
 extern char str_ComboXform[];
-extern char* cAppMan_TheAppMan;
 
 inline void* operator new[](unsigned int, void* p) { return p; }
 
@@ -934,7 +934,7 @@ extern "C" void* cAnimComboNode_cAnimComboNode1(cAnimComboNode* self, int bucket
     *rate = (adata->f28 < 0.0f ? adata->f10 : adata->f28) * 0.03333333507180214f;
     uFloat8C80* life = (uFloat8C80*)&self->ToTime2;
     life->v = adata->f2C < 0.0f ? *(float*)(pModel + 0x14) : adata->f2C * 0.03333333507180214f;
-    int fps = *(int*)(cAppMan_TheAppMan + 0x10);
+    int fps = cAppMan_TheAppMan->TimerHz;
     self->AnimSpeed2 = adata->f30 * 0.03333333507180214f / (float)fps;
     self->Stop = adata->f34 != 0;
     self->StopInPlace = adata->f34 < 0;

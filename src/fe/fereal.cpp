@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "fe/fesound.h"
 #include "fe/festateselectmp.h"
 #include "fe/fereal.h"
@@ -878,7 +879,6 @@ extern "C" void* cFESound_cFESound(cFESound* self);
 extern "C" void cIrradianceDataBase_Load(void* db);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_FrontEndLoad(void* snd);
-extern char* cAppMan_TheAppMan;
 extern char str_data_ui_fe[];
 extern char str_FEUIInput[];
 extern char str_FEUICustom[];
@@ -919,7 +919,7 @@ struct sUI_1E80 {
 
 static inline void progress_1E80(float t)
 {
-    cLoadTimer_setnextpercent(cAppMan_TheAppMan + 0x38, t);
+    cLoadTimer_setnextpercent(&cAppMan_TheAppMan->LoadTimer, t);
 }
 
 /**
@@ -935,7 +935,7 @@ static inline void progress_1E80(float t)
 // Front end: loads the UI files, rider data and sound for the front end.
 extern "C" void cRealFE_load(cRealFE* self)
 {
-    cLoadTimer_startload(cAppMan_TheAppMan + 0x38, 3.5f);
+    cLoadTimer_startload(&cAppMan_TheAppMan->LoadTimer, 3.5f);
     progress_1E80(20.0f);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     func_0014BD78(iface);

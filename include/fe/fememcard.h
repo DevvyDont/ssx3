@@ -213,7 +213,8 @@ CHECK_OFFSET(cFEMemCard, mMainButtonActive, 0x224);
 CHECK_OFFSET(cFEMemCard, mBufferState, 0x228);
 CHECK_SIZE(cFEMemCard, 0x22C);
 
-// The live memory-card screen (On Tour: static cFEMemCard::mInstance) is cFEMemCard_mInstance (D_004A2028), set by
-// cFEMemCard_initFEMemCard. Not declared here yet: 38 units still declare it locally as `void*`.
+// cFEMemCard::mInstance (D_004A2028), the live memory-card screen ([O] static cFEMemCard* mInstance), set by
+// cFEMemCard_initFEMemCard
+extern cFEMemCard* cFEMemCard_mInstance;
 
 #endif /* FE_FEMEMCARD_H */

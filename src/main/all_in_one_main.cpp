@@ -3862,7 +3862,6 @@ extern "C" void cUIStateBuyPopup_initBuyReward(int buyPopup) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isSavePressed);
 #ifdef SKIP_ASM
-extern void *cFEMemCard_mInstance;
 
 /**
  * Reports whether Save was pressed on the current memory-card screen: returns the word at +0x1DC of
@@ -3873,14 +3872,13 @@ extern void *cFEMemCard_mInstance;
  * @return the save-pressed word
  */
 extern "C" int cFEMemCard_isSavePressed(void) {
-    return (*(int *)((char*)(cFEMemCard_mInstance) + (0x1DC)));
+    return (cFEMemCard_mInstance->mIsSavePressed);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isLoadPressed);
 #ifdef SKIP_ASM
-extern void *cFEMemCard_mInstance;
 
 /**
  * Reports whether Load was pressed on the current memory-card screen: returns the word at +0x1F4 of
@@ -3891,14 +3889,13 @@ extern void *cFEMemCard_mInstance;
  * @return the load-pressed word
  */
 extern "C" int cFEMemCard_isLoadPressed(void) {
-    return (*(int *)((char*)(cFEMemCard_mInstance) + (0x1F4)));
+    return (cFEMemCard_mInstance->mIsLoadPressed);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isDeletePressed);
 #ifdef SKIP_ASM
-extern void *cFEMemCard_mInstance;
 
 /**
  * Reports whether Delete was pressed on the current memory-card screen: returns the word at +0x1E0 of
@@ -3909,14 +3906,13 @@ extern void *cFEMemCard_mInstance;
  * @return the delete-pressed word
  */
 extern "C" int cFEMemCard_isDeletePressed(void) {
-    return (*(int *)((char*)(cFEMemCard_mInstance) + (0x1E0)));
+    return (cFEMemCard_mInstance->mIsDeletePressed);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isCancelPressed);
 #ifdef SKIP_ASM
-extern void *cFEMemCard_mInstance;
 
 /**
  * Reports whether Cancel was pressed on the current memory-card screen, and consumes it.
@@ -3929,8 +3925,8 @@ extern void *cFEMemCard_mInstance;
 extern "C" int cFEMemCard_isCancelPressed(void) {
     int temp_2;
 
-    temp_2 = (*(int *)((char*)(cFEMemCard_mInstance) + (0x1E4)));
-    (*(int *)((char*)(cFEMemCard_mInstance) + (0x1E4))) = 0;
+    temp_2 = (cFEMemCard_mInstance->mIsCancelPressed);
+    (cFEMemCard_mInstance->mIsCancelPressed) = 0;
     return temp_2;
 }
 #endif
@@ -3938,7 +3934,6 @@ extern "C" int cFEMemCard_isCancelPressed(void) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isOWPressed);
 #ifdef SKIP_ASM
-extern void *cFEMemCard_mInstance;
 
 /**
  * Reports whether Overwrite was confirmed on the current memory-card screen: returns the word at +0x1F0 of
@@ -3949,14 +3944,13 @@ extern void *cFEMemCard_mInstance;
  * @return the overwrite-pressed word
  */
 extern "C" int cFEMemCard_isOWPressed(void) {
-    return (*(int *)((char*)(cFEMemCard_mInstance) + (0x1F0)));
+    return (cFEMemCard_mInstance->mIsOverwriteOK);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isDeviceSelected);
 #ifdef SKIP_ASM
-extern void *cFEMemCard_mInstance;
 
 /**
  * Reports whether a memory-card device is selected: returns the word at +0x1A8 of cFEMemCard_mInstance.
@@ -3967,14 +3961,13 @@ extern void *cFEMemCard_mInstance;
  * @return the device-selected word
  */
 extern "C" int cFEMemCard_isDeviceSelected(void) {
-    return (*(int *)((char*)(cFEMemCard_mInstance) + (0x1A8)));
+    return (cFEMemCard_mInstance->mIsProcessing);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isNextMCPressed);
 #ifdef SKIP_ASM
-extern void *cFEMemCard_mInstance;
 
 /**
  * Reports whether the next memory card was requested, and consumes it.
@@ -3987,8 +3980,8 @@ extern void *cFEMemCard_mInstance;
 extern "C" int cFEMemCard_isNextMCPressed(void) {
     int temp_2;
 
-    temp_2 = (*(int *)((char*)(cFEMemCard_mInstance) + (0x1F8)));
-    (*(int *)((char*)(cFEMemCard_mInstance) + (0x1F8))) = 0;
+    temp_2 = (cFEMemCard_mInstance->mDoNextMemCard);
+    (cFEMemCard_mInstance->mDoNextMemCard) = 0;
     return temp_2;
 }
 #endif
@@ -3996,7 +3989,6 @@ extern "C" int cFEMemCard_isNextMCPressed(void) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isPrevMCPressed);
 #ifdef SKIP_ASM
-extern void *cFEMemCard_mInstance;
 
 /**
  * Reports whether the previous memory card was requested, and consumes it.
@@ -4009,8 +4001,8 @@ extern void *cFEMemCard_mInstance;
 extern "C" int cFEMemCard_isPrevMCPressed(void) {
     int temp_2;
 
-    temp_2 = (*(int *)((char*)(cFEMemCard_mInstance) + (0x1FC)));
-    (*(int *)((char*)(cFEMemCard_mInstance) + (0x1FC))) = 0;
+    temp_2 = (cFEMemCard_mInstance->mDoPrevMemCard);
+    (cFEMemCard_mInstance->mDoPrevMemCard) = 0;
     return temp_2;
 }
 #endif
@@ -4018,7 +4010,6 @@ extern "C" int cFEMemCard_isPrevMCPressed(void) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEMemCard_isFormatPressed);
 #ifdef SKIP_ASM
-extern void *cFEMemCard_mInstance;
 
 /**
  * Reports whether Format was confirmed on the current memory-card screen: returns the word at +0x1E8 of
@@ -4029,14 +4020,13 @@ extern void *cFEMemCard_mInstance;
  * @return the format-pressed word
  */
 extern "C" int cFEMemCard_isFormatPressed(void) {
-    return (*(int *)((char*)(cFEMemCard_mInstance) + (0x1E8)));
+    return (cFEMemCard_mInstance->mIsFormatPressed);
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", cFEMemCard_callbackIsRetryPressed);
 #ifdef SKIP_ASM
-extern void *cFEMemCard_mInstance;
 
 /**
  * Reports whether Retry was pressed on the current memory-card screen, and consumes it.
@@ -4049,8 +4039,8 @@ extern void *cFEMemCard_mInstance;
 extern "C" int cFEMemCard_callbackIsRetryPressed(void) {
     int temp_2;
 
-    temp_2 = (*(int *)((char*)(cFEMemCard_mInstance) + (0x1EC)));
-    (*(int *)((char*)(cFEMemCard_mInstance) + (0x1EC))) = 0;
+    temp_2 = (cFEMemCard_mInstance->mIsRetryPressed);
+    (cFEMemCard_mInstance->mIsRetryPressed) = 0;
     return temp_2;
 }
 #endif

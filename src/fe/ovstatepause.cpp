@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "ui/uistate.h"
 #include "be/beintnewrace.h"
 #include "fe/ovstateheat.h"
@@ -678,7 +679,6 @@ extern "C" void cOVState_onCreateScreen(void* self);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(cOVState_PAUSE_ONLINE_ERROR* self, bool on);
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(cOVState_PAUSE_ONLINE_ERROR* self, int visible);
 extern "C" void func_002583A8(void* self, int a1, int a2);
-extern void* cAppMan_TheAppMan;
 extern char str_265InGameError[];
 extern char str_SubTitle[];
 extern char str_kT_OVROnlineError[];
@@ -807,7 +807,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(cOVState_PAUSE_ONLINE
     }
     if (cGameComm_mGameComm != 0) {
         func_002583A8(cGameComm_mGameComm, LobbyMan_mLobbyMan->mServerAddr, 3);
-        self->miStartPingTick = (unsigned int)(*(int*)((char*)cAppMan_TheAppMan + 0x18));
+        self->miStartPingTick = (unsigned int)(cAppMan_TheAppMan->TimerTick);
         cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(self, 0);
         cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextInfo));
         if (infoText != 0) {

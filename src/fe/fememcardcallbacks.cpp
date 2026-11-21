@@ -13,7 +13,6 @@
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackSaveSuccess);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern void* cFEMemCard_mInstance;
 extern char str_kT_MEMOVSaveDone[];
 extern char str_kT_CMNContinue[];
 void cFEMemCard_exitSave(void* self);
@@ -57,7 +56,7 @@ extern "C" void cFEMemCard_callbackSaveSuccess(void)
         char* locale2 = (char*)SSXApp->FELocale;
         sVEntryS1D66B0* o2vt = *(sVEntryS1D66B0**)(locale2 + 4);
         void* str2 = o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(str_kT_CMNContinue));
-        char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+        char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
         sVEntryVS1D66B0* mvt = *(sVEntryVS1D66B0**)(popup + 8);
         mvt[26].fn(popup + mvt[26].delta, str2, 0);
     } else {
@@ -71,7 +70,6 @@ extern "C" void cFEMemCard_callbackSaveSuccess(void)
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackReadSuccess);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern void* cFEMemCard_mInstance;
 extern char str_kT_MEMOVLoadDone[];
 extern char str_kT_CMNContinue[];
 extern "C" void cFEMemCard_SetLoadPressed(cFEMemCard*, int);
@@ -116,7 +114,7 @@ extern "C" void cFEMemCard_callbackReadSuccess(void)
         char* locale2 = (char*)SSXApp->FELocale;
         sVEntryR1D67C8* o2vt = *(sVEntryR1D67C8**)(locale2 + 4);
         void* str2 = o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(str_kT_CMNContinue));
-        char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+        char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
         sVEntryVR1D67C8* mvt = *(sVEntryVR1D67C8**)(popup + 8);
         mvt[26].fn(popup + mvt[26].delta, str2, 0);
     } else {
@@ -135,7 +133,6 @@ void cMemMan_free(void* p);
 int GetHashValue32(char* str);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-extern void* cFEMemCard_mInstance;
 extern char str_Temp_String[];
 extern char str_kT_MEMOVOverWriteFile[];
 
@@ -190,7 +187,6 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 void cMemMan_free(void* p);
 int GetHashValue32(char* str);
 extern "C" void* strcpy1(void* dst, void* src);
-extern void* cFEMemCard_mInstance;
 extern char str_Temp_String[];
 extern char str_kT_POPUP200CreateEdit[];
 
@@ -224,7 +220,7 @@ extern "C" void cFEMemCard_confirmLoad(void)
     *(int*)(fe + 0x19C) = 2;
     sVEntryV001D69E0* vt2 = *(sVEntryV001D69E0**)(fe + 8);
     vt2[36].fn(fe + vt2[36].delta, buf, 0, 0, 0, 0, 0);
-    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
     sVEntryV001D69E0* vt3 = *(sVEntryV001D69E0**)(popup + 8);
     vt3[25].fn(popup + vt3[25].delta, 1);
     if (buf != 0) {
@@ -243,7 +239,6 @@ int GetHashValue32(char* str);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void cMCOverlayManager_getDeviceNumberString(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-extern void* cFEMemCard_mInstance;
 extern char str_Temp_String[];
 extern char str_kT_MEMOVLoadFailedPS2NGC[];
 extern char str_kT_CMNContinue[];
@@ -269,7 +264,7 @@ extern "C" void cFEMemCard_callbackConfirmLoadFailed(void)
     *(int*)(fe + 0x19C) = 10;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
-    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
     char* mthis = popup + mvt[26].delta;
     char* locale2 = (char*)SSXApp->FELocale;
@@ -293,7 +288,6 @@ int GetHashValue32(char* str);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void cMCOverlayManager_getDeviceNumberString(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-extern void* cFEMemCard_mInstance;
 extern char str_Temp_String[];
 extern char str_kT_MEMOVSaveFailed[];
 extern char str_kT_CMNContinue[];
@@ -312,7 +306,7 @@ extern "C" void cFEMemCard_callbackConfirmSaveFailed(void)
     unsigned short name[0x100];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
-    *(int*)((char*)cFEMemCard_mInstance + 0x19C) = 11;
+    cFEMemCard_mInstance->mPopupType = 11;
     cMCOverlayManager_getDeviceNumberString(mp, name, *(int*)(mp + 0x428));
     char* locale = (char*)SSXApp->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
@@ -320,7 +314,7 @@ extern "C" void cFEMemCard_callbackConfirmSaveFailed(void)
     char* fe = (char*)cFEMemCard_mInstance;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
-    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
     char* mthis = popup + mvt[26].delta;
     char* locale2 = (char*)SSXApp->FELocale;
@@ -344,7 +338,6 @@ int GetHashValue32(char* str);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void cMCOverlayManager_getDeviceNumberString(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-extern void* cFEMemCard_mInstance;
 extern char str_Temp_String[];
 extern char str_kT_MEMOVNotDetectedPS2[];
 extern char str_kT_MEMOVRetry[];
@@ -361,7 +354,7 @@ static inline void* Str_1D6D88(char* key)
 
 static inline void SetLine_1D6D88(char* key, int a)
 {
-    char* m = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    char* m = (char*)cFEMemCard_mInstance->mStatusPopup;
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(m + 8);
     char* mthis = m + mvt[26].delta;
     void* str = Str_1D6D88(key);
@@ -387,13 +380,13 @@ extern "C" void cFEMemCard_callbackConfirmNoCards(void)
     char* locale = (char*)SSXApp->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
     sprintf1(buf, (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMOVNotDetectedPS2)), name);
-    *(int*)((char*)cFEMemCard_mInstance + 0x19C) = 9;
+    cFEMemCard_mInstance->mPopupType = 9;
     if (!(*(int*)(mp + 0xBC) || *(int*)(mp + 0xC0) || (*(int (**)())(mp + 0x78))())) {
         char* fe = (char*)cFEMemCard_mInstance;
         sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
         vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 0, 0);
         SetLine_1D6D88(str_kT_MEMOVRetry, 1);
-        char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+        char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
         sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
         mvt[25].fn(popup + mvt[25].delta, 1);
         SetLine_1D6D88(str_kT_BTNCancel, 0);
@@ -419,7 +412,6 @@ int GetHashValue32(char* str);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void cMCOverlayManager_getDeviceNumberString(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-extern void* cFEMemCard_mInstance;
 extern char str_Temp_String[];
 extern char str_kT_MEMOVGameCorruptPS2[];
 extern char str_kT_CMNContinue[];
@@ -458,7 +450,7 @@ extern "C" void cFEMemCard_callbackFileCorrupt(void)
     char* fe = (char*)cFEMemCard_mInstance;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 1, 0);
-    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
     char* mthis = popup + mvt[26].delta;
     char* buttonLocale = (char*)SSXApp->FELocale;
@@ -496,14 +488,14 @@ extern "C" void cFEMemCard_callbackSaveFileCorrupt(void)
     unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
     cMCOverlayManager_getDeviceNumberString(mp, name, *(int*)(mp + 0x428));
     cSSXApp* app = SSXApp;
-    *(int*)((char*)cFEMemCard_mInstance + 0x19C) = 13;
+    cFEMemCard_mInstance->mPopupType = 13;
     char* locale = (char*)app->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
     sprintf1(buf, (unsigned short*)ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_MEMCorruptSavePS2)), name);
     char* fe = (char*)cFEMemCard_mInstance;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 1, 0);
-    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
     mvt[25].fn(popup + mvt[25].delta, 1);
     if (buf != 0) {
@@ -521,7 +513,6 @@ struct sVEntry001D72A8 {
     void (*fn)(void*, ...);
 };
 
-extern void* cFEMemCard_mInstance;
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void cMCOverlayManager_SetAction(void*, int);
 
@@ -538,7 +529,7 @@ extern "C" void cFEMemCard_callbackFileNotFound(void)
     sVEntry001D72A8* vt = *(sVEntry001D72A8**)(fe + 8);
     vt[41].fn(fe + vt[41].delta);
     void* app = SSXApp;
-    *(int*)((char*)cFEMemCard_mInstance + 0x1E4) = 0;
+    cFEMemCard_mInstance->mIsCancelPressed = 0;
     char* obj = (char*)cSSXApp_getMCManager(app);
     sVEntry001D72A8* vt2 = *(sVEntry001D72A8**)(obj + 0x748);
     vt2[1].fn(obj + vt2[1].delta, 36);
@@ -575,7 +566,7 @@ extern "C" void cFEMemCard_callbackConfirmFormat(void)
     *(int*)(fe + 0x19C) = 0xE;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 1, 0);
-    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
     mvt[25].fn(popup + mvt[25].delta, 1);
     if (buf != 0) {
@@ -613,7 +604,7 @@ extern "C" void cFEMemCard_callbackConfirmFormatDone(void)
     char* locale2 = (char*)SSXApp->FELocale;
     sVEntry001D69E0* vt4 = *(sVEntry001D69E0**)(locale2 + 4);
     void* str = vt4[4].fn(locale2 + vt4[4].delta, GetHashValue32(str_kT_CMNContinue));
-    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
     sVEntryV001D69E0* vt3 = *(sVEntryV001D69E0**)(popup + 8);
     vt3[26].fn(popup + vt3[26].delta, str, 0);
     if (buf != 0) {
@@ -655,7 +646,7 @@ extern "C" void cFEMemCard_callbackConfirmFormatFail(void)
     char* locale2 = (char*)SSXApp->FELocale;
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(locale2 + 4);
     void* str2 = o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(str_kT_CMNContinue));
-    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
     mvt[26].fn(popup + mvt[26].delta, str2, 0);
     if (buf != 0) {
@@ -673,7 +664,6 @@ void cMemMan_free(void* p);
 int GetHashValue32(char* str);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-extern void* cFEMemCard_mInstance;
 extern char str_Temp_String[];
 extern char str_kT_MEMConfirmDeletePS2[];
 
@@ -701,7 +691,7 @@ extern "C" void cFEMemCard_callbackConfirmDelete(void)
     sVEntryI_001D7688* sfvt = *(sVEntryI_001D7688**)sf;
     if (sfvt[13].fn(sf + sfvt[13].delta) > 0) {
         unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
-        *(int*)((char*)cFEMemCard_mInstance + 0x19C) = 3;
+        cFEMemCard_mInstance->mPopupType = 3;
         char* sf2 = *(char**)(mp + 0x434);
         sVEntryV001D69E0* sfvt2 = *(sVEntryV001D69E0**)sf2;
         sfvt2[14].fn(sf2 + sfvt2[14].delta, *(int*)(mp + 0xF8), name);
@@ -711,7 +701,7 @@ extern "C" void cFEMemCard_callbackConfirmDelete(void)
         char* fe = (char*)cFEMemCard_mInstance;
         sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
         vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 1, 0);
-        char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+        char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
         sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
         mvt[25].fn(popup + mvt[25].delta, 1);
         if (buf != 0) {
@@ -756,7 +746,7 @@ extern "C" void cFEMemCard_callbackConfirmInvalidCard(void)
     *(int*)(fe + 0x19C) = 18;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 0, 0, 0, 0, 0);
-    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
     char* mthis = popup + mvt[26].delta;
     char* locale2 = (char*)SSXApp->FELocale;
@@ -764,7 +754,7 @@ extern "C" void cFEMemCard_callbackConfirmInvalidCard(void)
     char* o2this = locale2 + o2vt[4].delta;
     void* str2 = o2vt[4].fn(o2this, GetHashValue32(str_kT_MEMOVRetry));
     mvt[26].fn(mthis, str2, 0);
-    char* popup3 = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    char* popup3 = (char*)cFEMemCard_mInstance->mStatusPopup;
     sVEntryV001D69E0* m3vt = *(sVEntryV001D69E0**)(popup3 + 8);
     char* m3this = popup3 + m3vt[26].delta;
     char* locale3 = (char*)SSXApp->FELocale;
@@ -788,7 +778,6 @@ int GetHashValue32(char* str);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void cMCOverlayManager_getDeviceNumberString(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-extern void* cFEMemCard_mInstance;
 extern char str_Temp_String[];
 extern char str_kT_MEMFETooBigPS2[];
 extern char str_kT_CMNContinue[];
@@ -814,7 +803,7 @@ extern "C" void cFEMemCard_callbackConfirmSaveTooBig(void)
     unsigned short name[0x100];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
-    *(int*)((char*)cFEMemCard_mInstance + 0x19C) = 19;
+    cFEMemCard_mInstance->mPopupType = 19;
     cMCOverlayManager_getDeviceNumberString(mp, name, *(int*)(mp + 0x428));
     char* locale = (char*)SSXApp->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
@@ -826,7 +815,7 @@ extern "C" void cFEMemCard_callbackConfirmSaveTooBig(void)
     char* fe = (char*)cFEMemCard_mInstance;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 3, 1, 0);
-    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
     char* mthis = popup + mvt[26].delta;
     char* locale2 = (char*)SSXApp->FELocale;
@@ -847,7 +836,6 @@ int GetHashValue32(char* str);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void cMCOverlayManager_getDeviceNumberString(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-extern void* cFEMemCard_mInstance;
 extern char str_kT_MEMFETooBigPS2[];
 extern char str_kT_CMNContinue[];
 
@@ -873,7 +861,7 @@ extern "C" void cFEMemCard_callbackConfirmNoFreeBlocks(void)
     unsigned short buf[800];
     sLocal_001D7B18 name;
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-    *(int*)((char*)cFEMemCard_mInstance + 0x19C) = 19;
+    cFEMemCard_mInstance->mPopupType = 19;
     cMCOverlayManager_getDeviceNumberString(mp, &name, *(int*)(mp + 0x428));
     char* locale = (char*)SSXApp->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
@@ -885,7 +873,7 @@ extern "C" void cFEMemCard_callbackConfirmNoFreeBlocks(void)
     char* fe = (char*)cFEMemCard_mInstance;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 3, 1, 0);
-    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
     char* mthis = popup + mvt[26].delta;
     char* locale2 = (char*)SSXApp->FELocale;
@@ -919,12 +907,12 @@ extern "C" void cFEMemCard_callbackFileExists(void)
     char* locale = (char*)app->FELocale;
     sVEntry001D69E0* ovt = *(sVEntry001D69E0**)(locale + 4);
     vt[36].fn(fe + vt[36].delta, ovt[4].fn(locale + ovt[4].delta, GetHashValue32(str_kT_FENameAlreadyExists)), 1, 0, 0, 0, 0);
-    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
     char* locale2 = (char*)SSXApp->FELocale;
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(locale2 + 4);
     mvt[26].fn(popup + mvt[26].delta, o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(str_kT_CMNContinue)), 0);
-    *(int*)((char*)cFEMemCard_mInstance + 0x1C0) = 1;
+    cFEMemCard_mInstance->mState = 1;
 }
 #endif
 
@@ -938,7 +926,6 @@ int GetHashValue32(char* str);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void cMCOverlayManager_getDeviceNumberString(void* mp, void* out, int a2);
 extern "C" void sprintf1(unsigned short* dst, const unsigned short* fmt, ...);
-extern void* cFEMemCard_mInstance;
 extern char str_Temp_String[];
 extern char str_kT_MEMDifferentMemcardPS2[];
 extern char str_kT_CMNContinue[];
@@ -965,7 +952,7 @@ extern "C" void cFEMemCard_callbackCardChanged(void)
     *(int*)(fe + 0x19C) = 0x18;
     sVEntryV001D69E0* vt = *(sVEntryV001D69E0**)(fe + 8);
     vt[36].fn(fe + vt[36].delta, buf, 1, 0, 0, 0, 0);
-    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
     char* mthis = popup + mvt[26].delta;
     char* locale2 = (char*)SSXApp->FELocale;
@@ -973,7 +960,7 @@ extern "C" void cFEMemCard_callbackCardChanged(void)
     char* o2this = locale2 + o2vt[4].delta;
     void* str2 = o2vt[4].fn(o2this, GetHashValue32(str_kT_CMNContinue));
     mvt[26].fn(mthis, str2, 0);
-    *(int*)((char*)cFEMemCard_mInstance + 0x1C0) = 1;
+    cFEMemCard_mInstance->mState = 1;
     if (buf != 0) {
         cMemMan_free(buf);
     }
@@ -988,7 +975,6 @@ void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __a
 void cMemMan_free(void* p);
 int GetHashValue32(char* str);
 extern "C" void* strcpy1(void* dst, void* src);
-extern void* cFEMemCard_mInstance;
 extern char str_Temp_String[];
 extern char str_kT_MEMDeleteSuccess[];
 extern char str_kT_CMNContinue[];
@@ -1007,7 +993,7 @@ extern char str_kT_CMNContinue[];
  */
 extern "C" int cFEMemCard_callbackDeleteDone(void)
 {
-    if (*(int*)((char*)cFEMemCard_mInstance + 0x204) == 0) {
+    if (cFEMemCard_mInstance->mAutoLoadOn == 0) {
         void* buf = operator_new_tag(2000, str_Temp_String, 0x100, 0);
         char* locale = (char*)SSXApp->FELocale;
         sVEntry001D69E0* vt = *(sVEntry001D69E0**)(locale + 4);
@@ -1019,7 +1005,7 @@ extern "C" int cFEMemCard_callbackDeleteDone(void)
         char* locale2 = (char*)SSXApp->FELocale;
         sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(locale2 + 4);
         void* str2 = o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(str_kT_CMNContinue));
-        char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+        char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
         sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
         mvt[26].fn(popup + mvt[26].delta, str2, 0);
         if (buf != 0) {
@@ -1068,7 +1054,7 @@ extern "C" int cFEMemCard_callbackDeleteFailed(void)
     char* locale2 = (char*)SSXApp->FELocale;
     sVEntry001D69E0* o2vt = *(sVEntry001D69E0**)(locale2 + 4);
     void* str2 = o2vt[4].fn(locale2 + o2vt[4].delta, GetHashValue32(str_kT_CMNContinue));
-    char* popup = *(char**)((char*)cFEMemCard_mInstance + 0x218);
+    char* popup = (char*)cFEMemCard_mInstance->mStatusPopup;
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(popup + 8);
     mvt[26].fn(popup + mvt[26].delta, str2, 0);
     if (buf != 0) {
@@ -1202,7 +1188,6 @@ struct sVEntry001D8358 {
     void (*fn)(void*, int);
 };
 
-extern void* cFEMemCard_mInstance;
 
 /**
  * Switches the memory-card screen to display state 2 when no files were found, while the screen is still starting.
@@ -1233,7 +1218,6 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void* strcpy1(void* dst, void* src);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIText_setUnicodeStringWrap(void* self, unsigned short* str);
-extern void* cFEMemCard_mInstance;
 extern char str_Temp_String[];
 extern char str_text_box_message[];
 extern char str_kT_MEMNoCardsPS2[];
@@ -1266,7 +1250,7 @@ static inline void SetMode_001D83A8(char* fe, int mode)
 extern "C" void cFEMemCard_callbackFileChecked(void)
 {
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-    *(int*)((char*)cFEMemCard_mInstance + 0x1C0) = 1;
+    cFEMemCard_mInstance->mState = 1;
     sVEntryV001D69E0* mvt = *(sVEntryV001D69E0**)(mp + 0x748);
     mvt[1].fn(mp + mvt[1].delta, 2);
     char* sf = *(char**)(mp + 0x434);
@@ -1298,7 +1282,6 @@ extern "C" void cFEMemCard_callbackFileChecked(void)
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_getPopup);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void* cFEMemCard_mInstance;
 extern char str_cFEPopupConfirm[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEPopupConfirm_cFEPopupConfirm_8530(void* self, void* engine, void* owner, int a3, int a4, int a5, int a6, int a7, int a8) __asm__("cFEPopupConfirm_cFEPopupConfirm");
@@ -1359,7 +1342,7 @@ public:
  */
 extern "C" void cFEMemCard_getPopup(cFEMemCard* self_, int displayText, int yesOnly, int noButtons, int layerOffset, int passUpdate, int snowFlake)
 {
-    if (*(int*)((char*)cFEMemCard_mInstance + 0x19C) != 22) {
+    if (cFEMemCard_mInstance->mPopupType != 22) {
         self_->mIsStatusPopupOn = 0;
     }
     cPopup_8530* existingPopup = (cPopup_8530*)self_->mStatusPopup;
@@ -1367,12 +1350,12 @@ extern "C" void cFEMemCard_getPopup(cFEMemCard* self_, int displayText, int yesO
         existingPopup->initPopup(displayText, yesOnly, noButtons, layerOffset, passUpdate, snowFlake);
     } else {
         void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm, 0x100, 0);
-        void* engine = *(void**)((char*)cFEMemCard_mInstance + 0x10);
+        void* engine = cFEMemCard_mInstance->mpEngine;
         cPopup_8530* n = (cPopup_8530*)cFEPopupConfirm_cFEPopupConfirm_8530(mem, engine, cFEMemCard_mInstance, displayText, yesOnly, noButtons, layerOffset, passUpdate, snowFlake);
         self_->mStatusPopup = (cFEPopupConfirm*)n;
         cUIStateStack_pushPopup(&self_->mpEngine->mStateStack, n);
     }
-    if (*(int*)((char*)cFEMemCard_mInstance + 0x19C) == 1) {
+    if (cFEMemCard_mInstance->mPopupType == 1) {
         ((cPopup_8530*)self_->mStatusPopup)->setDefaultButton(1);
     }
 }
@@ -1381,7 +1364,6 @@ extern "C" void cFEMemCard_getPopup(cFEMemCard* self_, int displayText, int yesO
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_exitDelete);
 #ifdef SKIP_ASM
-extern void* cFEMemCard_mInstance;
 
 /**
  * Leaves the delete flow: screen state 4 (deleting) goes back to 1, and +0x1A8 and the delete word (+0x1E0) are
@@ -1392,8 +1374,8 @@ extern void* cFEMemCard_mInstance;
  */
 extern "C" void cFEMemCard_exitDelete(void)
 {
-    if (*(int*)((char*)cFEMemCard_mInstance + 0x1C0) == 4) {
-        *(int*)((char*)cFEMemCard_mInstance + 0x1C0) = 1;
+    if (cFEMemCard_mInstance->mState == 4) {
+        cFEMemCard_mInstance->mState = 1;
     }
     char* fe = (char*)cFEMemCard_mInstance;
     *(int*)(fe + 0x1A8) = 0;
@@ -1443,7 +1425,6 @@ extern "C" void cFEMemCard_startLoad(cFEMemCard* self)
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_onPopupEvent);
 #ifdef SKIP_ASM
-extern void* cFEMemCard_mInstance;
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void cFEMemCard_SetLoadPressed(cFEMemCard*, int);
 extern "C" void cFEMemCard_callbackSaveFileCorrupt(void);
@@ -1642,7 +1623,7 @@ extern "C" void cFEMemCard_onPopupEvent(void* self_, int popup, int button)
             break;
         }
         if (*(int*)(self + 0x19C) != 22) {
-            cUIStateStack_pop(*(char**)((char*)cFEMemCard_mInstance + 0x10) + 0x18, 1);
+            cUIStateStack_pop(&cFEMemCard_mInstance->mpEngine->mStateStack, 1);
         }
         *(int*)(self + 0x210) = 0;
     } else if (button == 22) {
@@ -1654,7 +1635,7 @@ extern "C" void cFEMemCard_onPopupEvent(void* self_, int popup, int button)
             if (*(int*)(self + 0x19C) == button) {
                 *(int*)(self + 0x210) = 0;
             }
-            *(int*)((char*)cFEMemCard_mInstance + 0x218) = 0;
+            *(int*)&cFEMemCard_mInstance->mStatusPopup = 0;
         }
     }
 }
@@ -1807,7 +1788,6 @@ extern "C" void cUIState_onUpdate(void*);
 extern "C" void cMCOverlayManager_ManagerStart(void*);
 extern "C" int cMCOverlayManager_isManagerDone(void*);
 extern "C" void cMCOverlayManager_update(void*);
-extern void* cFEMemCard_mInstance;
 extern char str_Temp_String[];
 extern char str_onmenu[];
 
@@ -1953,14 +1933,14 @@ extern "C" void cFEMemCard_onUpdate(cMemCardK1D8DE0* card)
         }
         break;
     }
-    if (*(int*)((char*)cFEMemCard_mInstance + 0x210) == 0 && *(int*)((char*)cFEMemCard_mInstance + 0x208) == 0 && *(int*)((char*)cFEMemCard_mInstance + 0x204) == 0) {
+    if (cFEMemCard_mInstance->mIsStatusPopupOn == 0 && cFEMemCard_mInstance->mAutoSaveOn == 0 && cFEMemCard_mInstance->mAutoLoadOn == 0) {
         int managerState = *(int*)(mp + 0x130);
         if (managerState == 40 || managerState == 11 || managerState == 0xF || managerState == 0x10 || managerState == 17 || managerState == 18 || managerState == 0x1F
             || managerState == 33 || managerState == 0x20 || managerState == 34 || managerState == 44 || managerState == 25 || managerState == 26) {
             VCALL_K1D8DE0(self, 8, 47));
         }
     }
-    if (*(int*)((char*)cFEMemCard_mInstance + 0x210) != 0) {
+    if (cFEMemCard_mInstance->mIsStatusPopupOn != 0) {
         unsigned short* buf = (unsigned short*)operator_new_tag(2000, str_Temp_String, 0x100, 0);
         cMCOverlayManager_GetMessage(mp, buf, 800);
         (*(cPopupK1D8DE0**)(self + 0x218))->setMessage(buf);

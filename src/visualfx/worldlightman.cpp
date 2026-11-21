@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "ui/uithing.h"
 #include "visualfx/snowfall.h"
 #include "visualfx/visualeffectsman.h"
@@ -139,7 +140,6 @@ INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_getRealTimeLights);
 extern char cIrradianceDataBase_TheDataBase[];
 extern int cIrradianceDataBase_mDefaultId;
 extern int cRenderStateMan_m_hasCustomIrradiance;
-extern char* cAppMan_TheAppMan;
 
 struct sVec_5400 {
     float x, y, z, w;
@@ -346,7 +346,7 @@ extern "C" sLightSet_5400* cWorldLightMan_getRealTimeLights(sMan_5400* self, cha
             break;
         }
     }
-    int prio = *(int*)(cAppMan_TheAppMan + 0x18);
+    int prio = cAppMan_TheAppMan->TimerTick;
     if (!found) {
         if (self->count < 32) {
             node = &self->nodes[self->count++];

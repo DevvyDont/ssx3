@@ -55,4 +55,7 @@ CHECK_OFFSET(cAppMan, LoadState, 0x058);
 CHECK_OFFSET(cAppMan, mVtbl, 0x05C);
 CHECK_SIZE(cAppMan, 0x60);
 
+// cAppMan::TheAppMan, the one instance ([O] static cAppMan* TheAppMan; [U] every module reads the timer / tick here)
+extern cAppMan* cAppMan_TheAppMan;
+
 #endif

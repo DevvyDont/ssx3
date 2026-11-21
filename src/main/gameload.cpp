@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "main/gamestate.h"
 #include "sound/icepick/worldtriggermanager.h"
 #include "camera/trigger/cameratriggerman.h"
@@ -101,7 +102,6 @@ extern "C" void* cObjNode_cObjNode1(void* p, int a);
 extern "C" void* cAIVisualEffectsMan_construct();
 extern "C" void* cVisualEffectsMan_construct();
 extern "C" void* cSSXStatsMan_construct();
-extern char* cAppMan_TheAppMan;
 extern int cBESaveInterface_bDoReplay;
 extern int D_004A3484;
 extern void* cGameState_mpGame;
@@ -225,8 +225,8 @@ extern "C" void cGame_load(cGame* self)
     void** worlds = ((void**)&self->TransitionMan[0]);
     void* bm = &D_004A5988_gl;
     void** lights = ((void**)&self->SplashManager[0]);
-    cLoadTimer_startload(cAppMan_TheAppMan + 0x38, 13.199999809265137f);
-    cLoadTimer_setnextpercent(cAppMan_TheAppMan + 0x38, 43.5f);
+    cLoadTimer_startload(&cAppMan_TheAppMan->LoadTimer, 13.199999809265137f);
+    cLoadTimer_setnextpercent(&cAppMan_TheAppMan->LoadTimer, 43.5f);
     cFELocale_loadOV(SSXApp->FELocale);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -277,7 +277,7 @@ extern "C" void cGame_load(cGame* self)
         sVEntryVoidGL* vt = *(sVEntryVoidGL**)(ai + 0xCC);
         vt[2].fn(ai + vt[2].delta);
     }
-    cLoadTimer_setnextpercent(cAppMan_TheAppMan + 0x38, 55.0f);
+    cLoadTimer_setnextpercent(&cAppMan_TheAppMan->LoadTimer, 55.0f);
     self->PlaybackMan = (cPlaybackMan*)cPlaybackMan_cPlaybackMan(operator new(0x7C, str_PlaybackMan, 0x20000000, 0), 40);
     cReplay_init(self->Replay);
     void* race = cBE_getInterface_Fv(SSXApp->BE, 5);
@@ -334,7 +334,7 @@ extern "C" void cGame_load(cGame* self)
     }
     if (file != 0)
         cMemMan_free(file);
-    cLoadTimer_setnextpercent(cAppMan_TheAppMan + 0x38, 93.0f);
+    cLoadTimer_setnextpercent(&cAppMan_TheAppMan->LoadTimer, 93.0f);
     for (unsigned int i = 0; i < 2; i++) {
         worlds[i] = cTransitionMan_cTransitionMan(operator new(132, str_cTransitionMan, 0, 0), 3, i);
         lights[i] = cSplashManager_cSplashManager(operator new(4144, str_cSplashManager, 0, 0), 2, i);
@@ -344,7 +344,7 @@ extern "C" void cGame_load(cGame* self)
     self->SnowFall = (cSnowFall*)cSnowFall_cSnowFall(operator new(0x60, str_SnowFall, 0, 0), 2);
     self->mUpdateTick = 0;
     cSSXAudio_InGameLoad(gSSXAudio);
-    cLoadTimer_setnextpercent(cAppMan_TheAppMan + 0x38, 99.0f);
+    cLoadTimer_setnextpercent(&cAppMan_TheAppMan->LoadTimer, 99.0f);
     sUIGL* ui = (sUIGL*)cUIEngine_cUIEngine(operator new(0x70, str_UIEngine_b, 0, 0));
     self->UI = (cUIEngine*)ui;
     ui->p10 = (void*)SSXApp->FELocale;
@@ -615,7 +615,6 @@ extern "C" void cSSXScriptEngine_Purge(void* p);
 extern "C" void cGarbageMan_Purge(void);
 
 extern int cPauseState_StackIdx;
-extern char* cAppMan_TheAppMan;
 extern char gPaths[];
 extern char cIrradianceDataBase_TheDataBase[];
 // The unit declares gBucketMan later as sGp2898 (8 bytes); bind a small-data alias here.
@@ -781,7 +780,7 @@ extern "C" void cGame_purge(char* self)
     cSSXScriptEngine_Purge(ScriptEngine);
     cGarbageMan_Purge();
     cPauseState_StackIdx = 0;
-    *(int*)(cAppMan_TheAppMan + 0x34) = 0;
+    cAppMan_TheAppMan->mLock30Fps = 0;
 }
 #endif
 
@@ -1316,7 +1315,6 @@ extern "C" void cFEAsyncManager_Update(void* p);
 extern "C" void func_001E1458(void);
 extern "C" void cBXLoadIndicator_Update(void* p);
 
-extern char* cAppMan_TheAppMan;
 extern void* PadCache;
 extern unsigned int D_004A20CC;
 extern char str_90bc_fail_b[];
@@ -1518,9 +1516,9 @@ static inline int updateState_2306B8(cGame* self)
 extern "C" void cGame_update(cGame* self)
 {
     if (*(unsigned int*)((char*)self->ViewMan + 0x10) >= 2) {
-        *(int*)(cAppMan_TheAppMan + 0x34) = 1;
+        cAppMan_TheAppMan->mLock30Fps = 1;
     } else {
-        *(int*)(cAppMan_TheAppMan + 0x34) = cRenderStateMan_SkyBoxRotation(6) > 0.9f;
+        cAppMan_TheAppMan->mLock30Fps = cRenderStateMan_SkyBoxRotation(6) > 0.9f;
     }
     if (cGameComm_mGameComm != 0) {
         cGameComm_update(cGameComm_mGameComm);
@@ -2488,7 +2486,6 @@ extern "C" void cLoadScreen_drawSplash(cLoadScreen* self, int value) {
 INCLUDE_ASM("main/gameload", cLoadScreen_loseFocus);
 #ifdef SKIP_ASM
 extern "C" int cFadeScreen_loseFocus(cFadeScreen* self);
-extern char* cAppMan_TheAppMan;
 
 /**
  * Lets a load screen lose focus only when the app's progress value (cAppMan_TheAppMan + 0x38) is exactly 100.
@@ -2500,7 +2497,7 @@ extern char* cAppMan_TheAppMan;
  */
 extern "C" int cLoadScreen_loseFocus(cLoadScreen* self)
 {
-    if (*(float*)(cAppMan_TheAppMan + 0x38) == 100.0f) {
+    if (cAppMan_TheAppMan->LoadTimer.loadpercent == 100.0f) {
         return cFadeScreen_loseFocus((cFadeScreen*)self);
     }
     return 0;

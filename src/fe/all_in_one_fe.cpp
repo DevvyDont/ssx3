@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fememcard.h"
 #include "fe/ovstateeventresults.h"
 #include "fe/ovstatetrophy.h"
 #include "fe/ovstaterewardslist.h"

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "fe/ovstateeventresults.h"
 #include "fe/fesound.h"
 #include "fe/festateselectmp.h"
@@ -5323,7 +5324,6 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E1458);
 extern int D_004A20C0;
 extern int D_004A20C8;
 extern int D_004A20BC;
-extern void* cAppMan_TheAppMan;
 extern "C" void func_001E12F0(void);
 extern "C" void func_001E14C0(int type);
 
@@ -5341,7 +5341,7 @@ extern "C" void func_001E1458(void)
             D_004A20C8 = 1;
             func_001E12F0();
         }
-        int appTicks = *(int*)((char*)cAppMan_TheAppMan + 0x1C);
+        int appTicks = cAppMan_TheAppMan->Tick;
         if (appTicks - D_004A20BC > 600) {
             func_001E14C0(1);
             D_004A20BC = appTicks;
@@ -10092,7 +10092,6 @@ void cOVState_FINAL_STANDINGS_onLoseFocus(void* vself)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cOVState_FINAL_STANDINGS_onUpdate);
 #ifdef SKIP_ASM
-extern void* cAppMan_TheAppMan;
 extern int cOVStateManager_mStatus;
 extern int cOVStateManager_mMiscData;
 extern "C" int cOVState_onUpdate_HandleIncomingChat(void* self);
@@ -10125,7 +10124,7 @@ extern "C" void cOVState_FINAL_STANDINGS_onUpdate(cOVState_FINAL_STANDINGS* self
                 }
             }
         }
-        if (*(int*)((char*)cAppMan_TheAppMan + 0x18) % 30 == 0 && cGameComm_mGameComm->mConnected == 0) {
+        if (cAppMan_TheAppMan->TimerTick % 30 == 0 && cGameComm_mGameComm->mConnected == 0) {
             cUIObjK1DEB90* panelWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ChatGroup));
             if (panelWidget != 0) {
                 panelWidget->setVisible(0);

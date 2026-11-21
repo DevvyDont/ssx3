@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "ai/riderhandler.h"
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
@@ -405,7 +406,6 @@ struct sSparkFx_ABC8 {
     int f78;                    // 0x78
 };
 
-extern char* cAppMan_TheAppMan;
 extern int cPowerUpFXToggles_m_SuperUberStateTest;
 extern int cPowerUpFXToggles_m_UberStateTest;
 extern int D_004A3AFC;
@@ -539,7 +539,7 @@ static inline sV4_ABC8 RiderSide_ABC8(char* rider)
 extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
 {
     char* rider = self->rider;
-    float dt = 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+    float dt = 1.0f / (float)cAppMan_TheAppMan->TimerHz;
     char* surfaceData = (char*)SSXApp->Game->SurfPropCache + *(int*)(rider + 0x438) * 0xB0;
     tParticleEmitter_stepContinous(self->gfx, dt);
     if (self->active) {

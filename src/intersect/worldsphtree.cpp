@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 #include "intersect/worldline.h"
 #include "intersect/bxnash.h"
 #include "intersect/overlaplist.h"
@@ -5494,7 +5495,6 @@ struct sObj_341388 {
 };
 
 extern void* cBoostNode_vtbl[];
-extern char* cAppMan_TheAppMan;
 extern sVec4_341388 D_004FF120_341388[] __asm__("t4vect_Zero");
 extern sVec4_341388 D_004FF150_341388[] __asm__("t4vect_YAxis");
 extern "C" void* cInstanceNode_cInstanceNode1(void* self, void* a1, int type, void* a3);
@@ -5584,7 +5584,7 @@ extern "C" sObj_341388* cBoostNode_cBoostNode1(cBoostNode* self, void* bucket, i
     self->mVtbl = cBoostNode_vtbl;
     int type = def->type;
     self->Type = type;
-    self->BoostTime = (int)(def->time * (float)*(int*)(cAppMan_TheAppMan + 0x10));
+    self->BoostTime = (int)(def->time * (float)cAppMan_TheAppMan->TimerHz);
     if (def->x == 0.0f && def->y == 0.0f && def->z == 0.0f) {
         if (type == 2) {
             *(sVec4_341388*)&self->Boost = *D_004FF150_341388;
@@ -5961,7 +5961,6 @@ extern "C" void cBoostNode_writeToReplayFrame(cBoostNode* self, void* stream)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cAnimObjectNode_cAnimObjectNode1);
 #ifdef SKIP_ASM
-extern char* cAppMan_TheAppMan;
 extern void* cAnimObjectNode_vtbl[];
 extern "C" void cAnimNode_cAnimNode(void* p, int a1, int a2, void* obj, int a4);
 extern "C" float cAnimFrame_getStartTime(void* inst);
@@ -6079,9 +6078,9 @@ extern "C" void* cAnimObjectNode_cAnimObjectNode1(cAnimObjectNode* self, int buc
     }
     self->CurrTime = frameTime;
     if (def->speedVar != 0.0f) {
-        self->AnimSpeed = func_00317890(def->speed * 0.03333333507180214f, def->speedVar * 0.03333333507180214f) / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+        self->AnimSpeed = func_00317890(def->speed * 0.03333333507180214f, def->speedVar * 0.03333333507180214f) / (float)cAppMan_TheAppMan->TimerHz;
     } else {
-        self->AnimSpeed = def->speed * 0.03333333507180214f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+        self->AnimSpeed = def->speed * 0.03333333507180214f / (float)cAppMan_TheAppMan->TimerHz;
     }
     if (def->dir == 1) {
         self->AnimSpeed = -self->AnimSpeed;
@@ -6374,7 +6373,6 @@ extern "C" void cAnimObjectNode_expire(cAnimObjectNode* self, int runscript)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cAnimObjectNode_signal);
 #ifdef SKIP_ASM
-extern char* cAppMan_TheAppMan;
 extern "C" void cMoveNode_signal(void* p);
 
 /**
@@ -6393,7 +6391,7 @@ extern "C" void cMoveNode_signal(void* p);
 extern "C" void cAnimObjectNode_signal(cAnimObjectNode* self, int msg, float msgValue)
 {
     if (msg == 100) {
-        self->Delay = (int)(msgValue * (float)*(int*)(cAppMan_TheAppMan + 0x10));
+        self->Delay = (int)(msgValue * (float)cAppMan_TheAppMan->TimerHz);
     } else if (msg == 101) {
         msgValue = msgValue * 0.03333333507180214f;
         if (self->FromTime <= msgValue && msgValue <= self->ToTime) {
@@ -6401,7 +6399,7 @@ extern "C" void cAnimObjectNode_signal(cAnimObjectNode* self, int msg, float msg
         }
     } else if (msg == 102) {
         msgValue = msgValue * 0.03333333507180214f;
-        self->AnimSpeed = msgValue / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+        self->AnimSpeed = msgValue / (float)cAppMan_TheAppMan->TimerHz;
     } else if (msg == 103) {
         msgValue = msgValue * 0.03333333507180214f;
         float lim = *(float*)(*(char**)((char*)self->Instance + 0x80) + 0x14);
@@ -6465,7 +6463,6 @@ extern "C" void cAnimObjectNode_writeToReplayFrame(cAnimObjectNode* self, void* 
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cAnimTeeterNode_cAnimTeeterNode1);
 #ifdef SKIP_ASM
-extern char* cAppMan_TheAppMan;
 extern void* cAnimTeeterNode_vtbl[];
 extern "C" void cAnimNode_cAnimNode(void* p, int a1, int a2, void* obj, int a4);
 extern "C" float cAnimFrame_getStartTime(void* inst);
@@ -6549,7 +6546,7 @@ extern "C" void* cAnimTeeterNode_cAnimTeeterNode1(cAnimTeeterNode* self, int buc
     setRateMax_003421A0((sFloat_003421A0*)&self->ToTime, *(float*)(def + 0x24), info);
     self->BounceFactor = *(float*)(def + 0x8);
     self->TorqueScale = *(float*)(def + 0x4) * 9.999999974752427e-07f;
-    self->MaxAnimSpeed = *(float*)(def + 0xC) * 0.03333333507180214f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+    self->MaxAnimSpeed = *(float*)(def + 0xC) * 0.03333333507180214f / (float)cAppMan_TheAppMan->TimerHz;
     self->AnimSign = *(int*)(def + 0x1C);
     self->PivotTime = *(float*)(def + 0x14) * 0.03333333507180214f;
     self->Damp = *(float*)(def + 0x18);
@@ -6954,7 +6951,6 @@ struct sSphDef_342768 {
     float x, y, z;
 };
 extern void* cBoostModifier_vtbl[];
-extern char* cAppMan_TheAppMan;
 
 /**
  * Constructs a boost modifier from its script data and instance.
@@ -6977,7 +6973,7 @@ extern "C" void* cBoostModifier_cBoostModifier(cBoostModifier* self, sSphDef_342
     self->Instance = (tInstanceRecord*)instRecord;
     int type = def->type;
     self->Type = type;
-    int boostFrames = (int)(def->time * (float)*(int*)(cAppMan_TheAppMan + 0x10));
+    int boostFrames = (int)(def->time * (float)cAppMan_TheAppMan->TimerHz);
     self->BoostTime = boostFrames;
     t4Vector boostDir;
     boostDir.x = def->x;
@@ -7327,7 +7323,7 @@ extern "C" void* cDebounceNode_cDebounceNode1(sSelf_342C08* self, void* bucket, 
 {
     cMoveNode_cMoveNode1(self, bucket, 0, instance);
     self->vt = cDebounceNode_vtbl;
-    self->t2C = (int)(def->time * (float)*(int*)(cAppMan_TheAppMan + 0x10));
+    self->t2C = (int)(def->time * (float)cAppMan_TheAppMan->TimerHz);
     self->t30 = def->f08;
     cMoveNode_transferFromOld(self, oldNode);
     if (def->mode == 0) {
