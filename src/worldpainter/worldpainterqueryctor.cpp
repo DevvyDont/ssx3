@@ -195,10 +195,6 @@ typedef void (*tEnd_0778)(void*);
 typedef int (*tTest_0778)(void*, float*);
 typedef void (*tSet_0778)(void*, float*, float);
 
-struct sOut_0778 {
-    float value;
-    sOutVt_0778* vt;
-};
 
 struct sLayer_0778 {
     char pad_0x0[0x4];
@@ -213,27 +209,20 @@ struct sEntry_0778 {
     sLayer_0778* layer;     // 0x8
 };
 
-struct sQuery_0778 {
-    sOut_0778* out;         // 0x0
-    int f4;
-    float x;                // 0x8
-    float z;                // 0xC
-    unsigned int id;        // 0x10
-};
 
 static inline int valid_0778(sEntry_0778* e)
 {
     return e->type == 3 && e->layer != 0 && e->layer->count > 0;
 }
 
-static inline void end_0778(sOut_0778* o)
+static inline void end_0778(tWPInGameData* o)
 {
-    ((tEnd_0778)o->vt[69].fn)((char*)o + o->vt[69].delta);
+    ((tEnd_0778)((sOutVt_0778*)o->mVtbl)[69].fn)((char*)o + ((sOutVt_0778*)o->mVtbl)[69].delta);
 }
 
-static inline void set_0778(sOut_0778* o, float* d, float v)
+static inline void set_0778(tWPInGameData* o, float* d, float v)
 {
-    ((tSet_0778)o->vt[66].fn)((char*)o + o->vt[66].delta, d, v);
+    ((tSet_0778)((sOutVt_0778*)o->mVtbl)[66].fn)((char*)o + ((sOutVt_0778*)o->mVtbl)[66].delta, d, v);
 }
 
 /**
@@ -252,61 +241,61 @@ static inline void set_0778(sOut_0778* o, float* d, float v)
  * @param blend  the blend weight, or -99999 for the distance rule (On Tour blend)
  * @return the query's result (On Tour const tWPInGameData*)
  */
-extern "C" sOut_0778* cWorldPainterQuery_queryPosition(sQuery_0778* self, float x, float z, float blend)
+extern "C" tWPInGameData* cWorldPainterQuery_queryPosition(cWorldPainterQuery* self, float x, float z, float blend)
 {
     int first = 1;
     char* map = *(char**)((char*)SSXApp->Game->World + 0x8);
-    if (self->out->value != -99999.0f) {
+    if ((self->m_data)->m_wpTravelDistance != -99999.0f) {
         first = 0;
     }
     if (!first) {
-        float dx = self->x - x;
-        float dz = self->z - z;
-        self->out->value += Sqrt_0778(dx * dx + dz * dz);
+        float dx = self->m_x - x;
+        float dz = self->m_y - z;
+        (self->m_data)->m_wpTravelDistance += Sqrt_0778(dx * dx + dz * dz);
     }
     int idx = cWorldPainterMan_m_iCurrSection;
-    self->x = x;
-    self->z = z;
+    self->m_x = x;
+    self->m_y = z;
     while (valid_0778(&(*(sEntry_0778**)(map + 4))[idx])) {
         sEntry_0778* entry = (sEntry_0778*)(*(char**)(map + 4) + idx * (int)sizeof(sEntry_0778));
-        void* cell = entry->layer->cells[*(unsigned char*)&self->id];
+        void* cell = entry->layer->cells[*(unsigned char*)&(*(unsigned int*)&self->m_regionType)];
         if (cell == 0) {
             if (first) {
-                end_0778(self->out);
+                end_0778((self->m_data));
             }
             break;
         }
-        sHit_0778* hit = cWorldPainterQuery_lookupRegion_q(self, cell, self->x, self->z);
+        sHit_0778* hit = cWorldPainterQuery_lookupRegion_q(self, cell, self->m_x, self->m_y);
         if (hit == 0) {
             break;
         }
-        if (hit->key != (self->id >> 8)) {
-            return self->out;
+        if (hit->key != ((*(unsigned int*)&self->m_regionType) >> 8)) {
+            return (self->m_data);
         }
-        if (((tTest_0778)self->out->vt[68].fn)((char*)self->out + self->out->vt[68].delta, hit->data)) {
-            self->out->value = 0.0f;
+        if (((tTest_0778)((sOutVt_0778*)(self->m_data)->mVtbl)[68].fn)((char*)(self->m_data) + ((sOutVt_0778*)(self->m_data)->mVtbl)[68].delta, hit->data)) {
+            (self->m_data)->m_wpTravelDistance = 0.0f;
         }
         if (first) {
-            set_0778(self->out, hit->data, -1.0f);
-            self->out->value = 0.0f;
-            return self->out;
+            set_0778((self->m_data), hit->data, -1.0f);
+            (self->m_data)->m_wpTravelDistance = 0.0f;
+            return (self->m_data);
         }
         if (blend == -99999.0f) {
             blend = 0.0f;
             float layerValue = *hit->data;
-            if (blend <= layerValue && layerValue <= self->out->value) {
-                set_0778(self->out, hit->data, 1.0f);
-                self->out->value = blend;
+            if (blend <= layerValue && layerValue <= (self->m_data)->m_wpTravelDistance) {
+                set_0778((self->m_data), hit->data, 1.0f);
+                (self->m_data)->m_wpTravelDistance = blend;
             } else {
-                set_0778(self->out, hit->data, -*hit->data);
+                set_0778((self->m_data), hit->data, -*hit->data);
             }
         } else {
-            set_0778(self->out, hit->data, blend);
+            set_0778((self->m_data), hit->data, blend);
         }
-        return self->out;
+        return (self->m_data);
     }
-    end_0778(self->out);
-    return self->out;
+    end_0778((self->m_data));
+    return (self->m_data);
 }
 #endif
 

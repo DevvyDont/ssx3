@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/bxstring.h"
 #include "render/bxps2tex.h"
 #include "ui/uianimation.h"
 #include "render/simpletube.h"
@@ -26,9 +27,6 @@ extern "C" void cFont_downloadTexture(cFont* self, sFontTexHdr* img);
 extern char str_Glyphs[];
 
 
-struct sPad_1788 {
-    float x, y;
-};
 
 
 /**
@@ -47,10 +45,10 @@ extern "C" void cFont_linkFont(cFont* vself, void* vdata, int flags)
     cFont* self = vself;
     char* data = (char*)vdata;
     tGlyph* src = (tGlyph*)(data + *(int*)(data + 0x14));
-    sPad_1788 offset;
+    t2Vector offset;
     offset.x = (float)data[0x10];
     offset.y = (float)data[0x11];
-    *(sPad_1788*)&self->Offset[0] = offset;
+    *(t2Vector*)&self->Offset[0] = offset;
     self->NumGlyphs = *(short*)(data + 0xA);
     *(tGlyph**)&self->Glyphs = (tGlyph*)operator_new_tag(self->NumGlyphs * 12, str_Glyphs, flags, 0);
     int space = 0;
@@ -872,9 +870,6 @@ extern void* cBXString_EmptyString;
 extern "C" void cBXString_vprintf(void* str, const char* fmt, void* ap);
 extern "C" void cBXString__cBXString(void* self, int flags);
 
-struct sBXStr_29F8 {
-    char* p;
-};
 
 /**
  * Formats text and draws it centred on a position.
@@ -886,10 +881,10 @@ struct sBXStr_29F8 {
  */
 extern "C" void cFont_vcentertextf(cFont* self, const char* fmt, void* ap, float x, float y)
 {
-    sBXStr_29F8 txt;
-    txt.p = (char*)cBXString_EmptyString;
+    cBXString txt;
+    txt.Str = (char*)cBXString_EmptyString;
     cBXString_vprintf(&txt, fmt, ap);
-    cFont_centertext(self, x, y, txt.p);
+    cFont_centertext(self, x, y, txt.Str);
     cBXString__cBXString(&txt, 2);
 }
 #endif
@@ -939,9 +934,6 @@ extern void* cBXString_EmptyString;
 extern "C" void cBXString_vprintf(void* str, const char* fmt, void* ap);
 extern "C" void cBXString__cBXString(void* self, int flags);
 
-struct sBXStr_2B40 {
-    char* p;
-};
 
 /**
  * Formats text and draws it right-aligned to a position.
@@ -953,10 +945,10 @@ struct sBXStr_2B40 {
  */
 extern "C" void cFont_vrighttextf(cFont* self, const char* fmt, void* ap, float x, float y)
 {
-    sBXStr_2B40 txt;
-    txt.p = (char*)cBXString_EmptyString;
+    cBXString txt;
+    txt.Str = (char*)cBXString_EmptyString;
     cBXString_vprintf(&txt, fmt, ap);
-    cFont_righttext(self, txt.p, x, y);
+    cFont_righttext(self, txt.Str, x, y);
     cBXString__cBXString(&txt, 2);
 }
 #endif
@@ -4739,14 +4731,11 @@ struct sMat_5750 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
-struct sVec_5750 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec_5750 Scale_5750(const sVec_5750& v, float s)
+static inline t4Vector Scale_5750(const t4Vector& v, float s)
 {
-    sVec_5750 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -4883,7 +4872,7 @@ static inline void Translate_5750(void* self, void* v)
  * @param ry  the rotation applied about the Z axis after the axis swap, in radians
  * @param rz  the rotation applied about the Y axis after the axis swap, in radians
  */
-extern "C" void cPS2GraphicsMan_SetView(cPS2GraphicsMan* self, sVec_5750* pos, float rx, float ry, float rz)
+extern "C" void cPS2GraphicsMan_SetView(cPS2GraphicsMan* self, t4Vector* pos, float rx, float ry, float rz)
 {
     LoadIdentity_5750(self);
     ((float*)self->mCurrentView)[5] = 0.0f;
@@ -4893,7 +4882,7 @@ extern "C" void cPS2GraphicsMan_SetView(cPS2GraphicsMan* self, sVec_5750* pos, f
     Rotate_5750(self, t4vect_XAxis, -rx);
     Rotate_5750(self, t4vect_ZAxis, -ry);
     Rotate_5750(self, t4vect_YAxis, -rz);
-    sVec_5750 negPos = Scale_5750(*pos, -1.0f);
+    t4Vector negPos = Scale_5750(*pos, -1.0f);
     negPos.w = -negPos.w;
     Translate_5750(self, &negPos);
     self->mMatricesValid = 0;
@@ -6664,9 +6653,6 @@ extern "C" int cBaseClass_DynamicEmitter_getEnabledCount(cBaseClass_DynamicEmitt
 //100%
 INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_getSubEmitterPosition);
 #ifdef SKIP_ASM
-struct sFontQuad_6618 {
-    int v[4];
-} __attribute__((aligned(16)));
 
 /**
  * Returns a copy of sub-emitter @p idx's position (m_positions entry, 16 bytes).
@@ -6677,18 +6663,15 @@ struct sFontQuad_6618 {
  * @param idx  the sub-emitter, counted from the oldest
  * @return the position
  */
-extern "C" sFontQuad_6618 cBaseClass_DynamicEmitter_getSubEmitterPosition(cBaseClass_DynamicEmitter* self, int idx)
+extern "C" t4Vector cBaseClass_DynamicEmitter_getSubEmitterPosition(cBaseClass_DynamicEmitter* self, int idx)
 {
     int next = self->m_subEmitterId + 1;
-    return ((sFontQuad_6618*)self->m_positions)[(idx + next) % self->m_numSubEmitters];
+    return (self->m_positions)[(idx + next) % self->m_numSubEmitters];
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_getSubEmitterVelocity);
 #ifdef SKIP_ASM
-struct sFontQuad_6658 {
-    int v[4];
-} __attribute__((aligned(16)));
 
 /**
  * Returns a copy of sub-emitter @p idx's velocity (m_velocities entry, 16 bytes).
@@ -6699,10 +6682,10 @@ struct sFontQuad_6658 {
  * @param idx  the sub-emitter, counted from the oldest
  * @return the velocity
  */
-extern "C" sFontQuad_6658 cBaseClass_DynamicEmitter_getSubEmitterVelocity(cBaseClass_DynamicEmitter* self, int idx)
+extern "C" t4Vector cBaseClass_DynamicEmitter_getSubEmitterVelocity(cBaseClass_DynamicEmitter* self, int idx)
 {
     int next = self->m_subEmitterId + 1;
-    return ((sFontQuad_6658*)self->m_velocities)[(idx + next) % self->m_numSubEmitters];
+    return (self->m_velocities)[(idx + next) % self->m_numSubEmitters];
 }
 #endif
 //100%
@@ -6729,9 +6712,6 @@ extern "C" void cBaseClass_DynamicEmitter_getSubEmitterPositionVelocity(cBaseCla
 //100%
 INCLUDE_ASM("render/font", cBaseClass_DynamicEmitter_getSubEmitterPositionVelocity1);
 #ifdef SKIP_ASM
-struct sFontQuad_66D8 {
-    int v[4];
-} __attribute__((aligned(16)));
 
 /**
  * Copies sub-emitter @p idx's position and velocity into @p outA and @p outB.
@@ -6743,12 +6723,12 @@ struct sFontQuad_66D8 {
  * @param outA  receives the position
  * @param outB  receives the velocity
  */
-extern "C" void cBaseClass_DynamicEmitter_getSubEmitterPositionVelocity1(cBaseClass_DynamicEmitter* self, int idx, sFontQuad_66D8* outA, sFontQuad_66D8* outB)
+extern "C" void cBaseClass_DynamicEmitter_getSubEmitterPositionVelocity1(cBaseClass_DynamicEmitter* self, int idx, t4Vector* outA, t4Vector* outB)
 {
     int next = self->m_subEmitterId + 1;
     int i = (idx + next) % self->m_numSubEmitters;
-    *outA = ((sFontQuad_66D8*)self->m_positions)[i];
-    *outB = ((sFontQuad_66D8*)self->m_velocities)[i];
+    *outA = (self->m_positions)[i];
+    *outB = (self->m_velocities)[i];
 }
 #endif
 //100%
@@ -6773,7 +6753,7 @@ extern "C" void cDynamicColourEmitter_getSubEmitterPositionVelocityColour(cDynam
     int off = i * 0x10;
     *outA = (int*)((char*)self->m_positions + off);
     *outB = (int*)((char*)self->m_velocities + off);
-    *outC = (int*)((char*)self->m_colours + i * 4);
+    *outC = (int*)&self->m_colours[i];
 }
 #endif
 //100%
@@ -6814,11 +6794,6 @@ struct sFontP_67D8 {
     int v;
 } __attribute__((packed));
 
-struct sFontWord_67D8 {
-    sFontP_67D8 p;
-    sFontWord_67D8() {}
-    sFontWord_67D8(const sFontWord_67D8& o) : p(o.p) {}
-};
 
 /**
  * Returns sub-emitter @p idx's packed colour (the 4-byte m_colours entry, +0x204).
@@ -6829,10 +6804,10 @@ struct sFontWord_67D8 {
  * @param idx  the sub-emitter, counted from the oldest
  * @return the colour
  */
-extern "C" sFontWord_67D8 cDynamicColourEmitter_getSubEmitterColour(cDynamicColourEmitter* self, int idx)
+extern "C" tPackedRGBA cDynamicColourEmitter_getSubEmitterColour(cDynamicColourEmitter* self, int idx)
 {
     int next = self->m_subEmitterId + 1;
-    return ((sFontWord_67D8*)self->m_colours)[(idx + next) % self->m_numSubEmitters];
+    return (self->m_colours)[(idx + next) % self->m_numSubEmitters];
 }
 #endif
 //100%
@@ -7641,9 +7616,6 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_SetBlendMatrices);
 extern char D_80[];
 extern char D_70[];
 
-struct sMtx_6C30 {
-    float m[16];
-};
 
 struct sMtxList_6C30 {
     int count;
@@ -7680,7 +7652,7 @@ static inline void vu0CopyMtx_6C30(void* dst, const void* src)
  * @param mats  the matrix array
  * @param cur  the packet write pointer, advanced past the packet
  */
-extern "C" void cPS2GraphicsMan_SetBlendMatrices(cPS2GraphicsMan* self, sMtxList_6C30* list, sMtx_6C30* mats, unsigned long** cur)
+extern "C" void cPS2GraphicsMan_SetBlendMatrices(cPS2GraphicsMan* self, sMtxList_6C30* list, t4Matrix* mats, unsigned long** cur)
 {
     int n = list->count;
     int* idx = list->index;

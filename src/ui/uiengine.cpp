@@ -1,5 +1,9 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uidata.h"
+#include "bx/math3d.h"
+#include "fe/ovstatehud.h"
+#include "ui/uifontinterface.h"
 #include "ui/uiscreen.h"
 #include "ui/uiinput.h"
 #include "ui/uistate.h"
@@ -536,10 +540,6 @@ extern "C" void cUITextureBank_setData(cUITextureBank* vbank, int id, void* vdat
 //100%
 INCLUDE_ASM("ui/uiengine", cUITextureBank_getElementByHashname);
 #ifdef SKIP_ASM
-struct s398380Item {
-    char pad[0x1C];
-    int id;
-};
 
 /**
  * Looks up a texture element by its hashed name.
@@ -550,12 +550,12 @@ struct s398380Item {
  * @param id  hashed element name (On Tour hashname)
  * @return the element (On Tour cTextureElement), or 0
  */
-extern "C" s398380Item* cUITextureBank_getElementByHashname(cUITextureBank* self, int id)
+extern "C" cTextureElement* cUITextureBank_getElementByHashname(cUITextureBank* self, int id)
 {
     int i;
     for (i = 0; i < self->mNumElements; i++) {
-        s398380Item* item = &((s398380Item*)self->mpElements)[i];
-        if (item->id == id) {
+        cTextureElement* item = &(self->mpElements)[i];
+        if (((int)item->mHashID) == id) {
             return item;
         }
     }
@@ -566,11 +566,6 @@ extern "C" s398380Item* cUITextureBank_getElementByHashname(cUITextureBank* self
 //100%
 INCLUDE_ASM("ui/uiengine", cUITextureBank_getTextureByHashname);
 #ifdef SKIP_ASM
-struct sUiEntry_83B8 {
-    int value;          // 0x00
-    char pad4[0x18];
-    int key;            // 0x1C
-};
 
 /**
  * Returns the texture of the UI texture bank element with hash name @p key, or 0.
@@ -585,9 +580,9 @@ extern "C" int cUITextureBank_getTextureByHashname(cUITextureBank* self, int key
 {
     int count = self->mNumElements;
     for (int i = 0; i < count; i++) {
-        sUiEntry_83B8* entry = &((sUiEntry_83B8*)self->mpElements)[i];
-        if (entry->key == key) {
-            return entry->value;
+        cTextureElement* entry = &(self->mpElements)[i];
+        if (((int)entry->mHashID) == key) {
+            return entry->mSourceShape;
         }
     }
     return 0;
@@ -597,17 +592,7 @@ extern "C" int cUITextureBank_getTextureByHashname(cUITextureBank* self, int key
 //100%
 INCLUDE_ASM("ui/uiengine", cUIFontInterface_getFontByHashName);
 #ifdef SKIP_ASM
-struct s3983F0Entry {
-    int key;
-    int unk4;
-    int value;
-};
 
-struct s3983F0 {
-    int unk0;
-    s3983F0Entry entries[4];
-    signed char count;
-};
 
 /**
  * Returns the font of the font-interface entry with hash name @p key, or 0.
@@ -618,13 +603,13 @@ struct s3983F0 {
  * @param key  the font hash name
  * @return the font, or 0 when not found
  */
-extern "C" int cUIFontInterface_getFontByHashName(s3983F0* self, int key)
+extern "C" int cUIFontInterface_getFontByHashName(cUIFontInterface* self, int key)
 {
     signed char i;
-    for (i = 0; i < self->count; i++) {
-        s3983F0Entry* entry = &self->entries[i];
-        if (entry->key == key) {
-            return entry->value;
+    for (i = 0; i < self->mFontCount; i++) {
+        cUIFontEntry* entry = &((&self->mFontEntry[0]))[i];
+        if (((int)entry->mHashID) == key) {
+            return ((int)entry->mpFont);
         }
     }
     return 0;
@@ -642,17 +627,17 @@ extern "C" void cFont__cFont(int h, int a);
  * Each entry with a font (+0x8) has it destroyed with cFont__cFont(font, 3); every entry's name and hash are cleared
  * and the count (+0x34) goes to 0. cSSXApp_purge calls it.
  */
-extern "C" void cUIFontInterface_purgeFonts(s3983F0* self)
+extern "C" void cUIFontInterface_purgeFonts(cUIFontInterface* self)
 {
-    for (int i = 0; i < self->count; i++) {
-        s3983F0Entry* fontEntry = &self->entries[i];
-        if (fontEntry->value != 0) {
-            cFont__cFont(fontEntry->value, 3);
+    for (int i = 0; i < self->mFontCount; i++) {
+        cUIFontEntry* fontEntry = &((&self->mFontEntry[0]))[i];
+        if (((int)fontEntry->mpFont) != 0) {
+            cFont__cFont(((int)fontEntry->mpFont), 3);
         }
-        fontEntry->unk4 = 0;
-        fontEntry->key = 0;
+        (*(int*)&fontEntry->mpFileName) = 0;
+        fontEntry->mHashID = 0;
     }
-    self->count = 0;
+    self->mFontCount = 0;
 }
 #endif
 
@@ -662,16 +647,16 @@ INCLUDE_ASM("ui/uiengine", cUIFontInterface_addFontEntry);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // cUIFontInterface::addFontEntry (On Tour): fill font slot `index` (cUIFontEntry::setFileName then
 // setHashName, both inline here) and bump the font count.
-extern "C" void cUIFontInterface_addFontEntry_impl(s3983F0* self, int index, char* pszFontName, unsigned int hashID) __asm__("cUIFontInterface_addFontEntry");
+extern "C" void cUIFontInterface_addFontEntry_impl(cUIFontInterface* self, int index, char* pszFontName, unsigned int hashID) __asm__("cUIFontInterface_addFontEntry");
 
-static inline void uiFontSetFileName(s3983F0Entry* e, const char* name)
+static inline void uiFontSetFileName(cUIFontEntry* e, const char* name)
 {
-    e->unk4 = (int)name;
+    (*(int*)&e->mpFileName) = (int)name;
 }
 
-static inline void uiFontSetHashName(s3983F0Entry* e, unsigned int hash)
+static inline void uiFontSetHashName(cUIFontEntry* e, unsigned int hash)
 {
-    e->key = hash;
+    e->mHashID = hash;
 }
 
 /**
@@ -684,12 +669,12 @@ static inline void uiFontSetHashName(s3983F0Entry* e, unsigned int hash)
  * @param pszFontName  the font file name
  * @param hashID  the font hash name
  */
-extern "C" void cUIFontInterface_addFontEntry_impl(s3983F0* self, int index, char* pszFontName, unsigned int hashID)
+extern "C" void cUIFontInterface_addFontEntry_impl(cUIFontInterface* self, int index, char* pszFontName, unsigned int hashID)
 {
-    if (self->count < 4) {
-        uiFontSetFileName(&self->entries[index], pszFontName);
-        uiFontSetHashName(&self->entries[index], hashID);
-        self->count++;
+    if (self->mFontCount < 4) {
+        uiFontSetFileName(&((&self->mFontEntry[0]))[index], pszFontName);
+        uiFontSetHashName(&((&self->mFontEntry[0]))[index], hashID);
+        self->mFontCount++;
     }
 }
 #endif
@@ -699,9 +684,6 @@ INCLUDE_ASM("ui/uiengine", cUIFontInterface_setData);
 #ifdef SKIP_ASM
 extern "C" void cUIFontInterface_addFontEntry(void* self, unsigned int index, void* data, int type);
 
-struct sChunkHdr_3984E8 {
-    unsigned int count;
-};
 
 /**
  * Points a font interface at a font table and adds each of its records as a font entry.
@@ -711,17 +693,17 @@ struct sChunkHdr_3984E8 {
  *
  * @param hdr  the font table: a count followed by the records
  */
-extern "C" void cUIFontInterface_setData(sChunkHdr_3984E8** self, sChunkHdr_3984E8* hdr)
+extern "C" void cUIFontInterface_setData(tUIFontTableHeader** self, tUIFontTableHeader* hdr)
 {
     char* rec = (char*)hdr + 4;
     *self = hdr;
     unsigned int i = 0;
-    if (hdr->count != 0) {
+    if (hdr->mNumEntries != 0) {
         do {
             cUIFontInterface_addFontEntry(self, i, rec + 8, *(int*)rec);
             i++;
             rec += *(int*)(rec + 4) + 8;
-        } while (i < (*self)->count);
+        } while (i < (*self)->mNumEntries);
     }
 }
 #endif
@@ -733,19 +715,19 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" int cFont_cFont(void* mem, int name, int a2);
 extern char str_UI_Font[];
 
-static inline int uiFontNameOf(s3983F0Entry* e)
+static inline int uiFontNameOf(cUIFontEntry* e)
 {
-    return e->unk4;
+    return ((int)e->mpFileName);
 }
 
 /**
  * Creates a cFont for each of the UI's font entries.
  */
-extern "C" void cUIFontInterface_loadFonts(s3983F0* self)
+extern "C" void cUIFontInterface_loadFonts(cUIFontInterface* self)
 {
-    for (int i = 0; i < self->count; i++) {
+    for (int i = 0; i < self->mFontCount; i++) {
         signed char j = i;
-        *(int*)((char*)self + j * 12 + 0xC) = cFont_cFont(cMemMan_alloc(132, str_UI_Font, 0, 0), uiFontNameOf(&self->entries[i]), 0);
+        *(int*)&self->mFontEntry[j].mpFont = cFont_cFont(cMemMan_alloc(132, str_UI_Font, 0, 0), uiFontNameOf(&((&self->mFontEntry[0]))[i]), 0);
     }
 }
 #endif
@@ -1010,11 +992,6 @@ INCLUDE_ASM("ui/uiengine", cUIIcon_setUIData);
 // PORT: cUIThing_setUIData really takes (self, data) and its result is unused here; the unit declares it with one argument.
 void cUIThing_setUIData_8998(void* self, void* data) __asm__("cUIThing_setUIData");
 
-struct sUISize8998 {
-    float w, h;
-    sUISize8998() {}
-    sUISize8998(float aw, float ah) : w(aw), h(ah) {}
-};
 struct sUIObj8998 {
     char pad0[0x5C];
     char* scene;                // 0x5C
@@ -1024,8 +1001,8 @@ struct sUIObj8998 {
     unsigned int align : 2;
     unsigned int rest : 28;
     char pad78[0x7C - 0x78];
-    s398380Item* item;          // 0x7C
-    sUISize8998 size;           // 0x80
+    cTextureElement* item;          // 0x7C
+    t2Vector size;           // 0x80
 };
 struct sUIData8998 {
     char pad0[0x20];
@@ -1050,7 +1027,7 @@ extern "C" void cUIIcon_setUIData(cUIIcon* self, sUIData8998* data)
     ((sUIObj8998*)self)->clip = data->clip;
     ((sUIObj8998*)self)->align = data->align;
     self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname((cUITextureBank*)(&self->mpScreen->mpState->mpEngine->mTextureBank), data->id);
-    *(sUISize8998*)&self->mTileUV[0] = sUISize8998(data->w * 0.01f, data->h * 0.01f);
+    *(t2Vector*)&self->mTileUV[0] = t2Vector(data->w * 0.01f, data->h * 0.01f);
 }
 #endif
 
@@ -1432,13 +1409,6 @@ struct sUIObj9820 {
     unsigned int rest : 29;
     sUIColor9820 color;         // 0x78
 };
-struct sUIData9820 {
-    char pad0[0x20];
-    unsigned char mode;         // 0x20
-    char pad21;
-    unsigned short vis;         // 0x22
-    unsigned char r, g, b, a;   // 0x24
-};
 
 /**
  * Sets a list box up from its screen record.
@@ -1449,15 +1419,15 @@ struct sUIData9820 {
  *
  * @param data  the screen record (On Tour tUIBaseObject* pUIBase)
  */
-extern "C" void cUIListBox_setUIData(sUIObj9820* self, sUIData9820* data)
+extern "C" void cUIListBox_setUIData(sUIObj9820* self, tUIListBox* data)
 {
     cUIThing_setUIData_2(self, data);
-    self->mode = data->mode & 3;
-    self->vt[23].fn((char*)self + self->vt[23].delta, data->vis & 1);
+    self->mode = data->mFontID & 3;
+    self->vt[23].fn((char*)self + self->vt[23].delta, data->mFlags & 1);
     int listAttr = *(int*)((char*)self + 0x74) >> 2;
     if (listAttr & 1) {
-        self->color = sUIColor9820(data->r * 0.003921568859368563f, data->g * 0.003921568859368563f,
-                                   data->b * 0.003921568859368563f, data->a * 0.003921568859368563f);
+        self->color = sUIColor9820(data->mSColour.a * 0.003921568859368563f, data->mSColour.r * 0.003921568859368563f,
+                                   data->mSColour.g * 0.003921568859368563f, data->mSColour.b * 0.003921568859368563f);
     }
     self->flags14 |= 0x80;
 }

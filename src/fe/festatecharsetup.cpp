@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "fe/ferider.h"
 #include "sound/ssxaudio.h"
 #include "fe/fereal.h"
@@ -239,7 +240,6 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(cFEStateCharSetup* self, cUIThin
 INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_updateWidget);
 #ifdef SKIP_ASM
 struct cUIText;
-struct sVec4_182DB8 { float x, y, z, w; } __attribute__((aligned(16)));
 int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind); bind the 2-arg form to that symbol.
@@ -248,7 +248,7 @@ int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int player, int index);
-extern "C" void cSimpleCamera_setupCamWithPosAndTarget(void* cam, sVec4_182DB8* a, sVec4_182DB8* b);
+extern "C" void cSimpleCamera_setupCamWithPosAndTarget(void* cam, t4Vector* a, t4Vector* b);
 extern "C" void cFEStateCharSetup_show3DCharacter(cFEStateCharSetup* self, int a1);
 extern "C" void cFEStateCharSetup_updateCharacter3DPos(cFEStateCharSetup* self);
 extern char str_rider_name[];
@@ -268,12 +268,12 @@ extern "C" void cFEStateCharSetup_updateWidget(cFEStateCharSetup* self)
     signed char cid = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
     cUIText_setAsciiString(text, (const char*)cBECharacterInterface_getShortNameByCharacter(cBE_getInterface_Fv(cBE_getBE(), 2), cid, 0));
     cFE* cam = SSXApp->RealFE;
-    sVec4_182DB8 pos;
+    t4Vector pos;
     pos.x = 0.0f;
     pos.y = 200.0f;
     pos.z = 0.0f;
     pos.w = 1.0f;
-    sVec4_182DB8 lookAt;
+    t4Vector lookAt;
     lookAt.x = 0.0f;
     lookAt.y = 0.0f;
     lookAt.z = 0.0f;
@@ -303,17 +303,12 @@ struct sQuat_182EC0
     sQuat_182EC0(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-struct sXform_182EC0
-{
-    sQuat_182EC0 pos;
-    sQuat_182EC0 rot;
-};
 
 extern sQuat_182EC0 t4vect_XAxis;
 extern sQuat_182EC0 t4vect_YAxis;
 extern sQuat_182EC0 t4vect_ZAxis;
-extern "C" void cFERider_setPose(void* rider, sXform_182EC0* xf);
-extern "C" void cFERider_setBoardPose(void* rider, sXform_182EC0* xf);
+extern "C" void cFERider_setPose(void* rider, tPose* xf);
+extern "C" void cFERider_setBoardPose(void* rider, tPose* xf);
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
 static inline sQuat_182EC0 QuatMul_182EC0(const sQuat_182EC0& a, const sQuat_182EC0& b)
@@ -365,7 +360,7 @@ extern "C" void cFEStateCharSetup_updateCharacter3DPos(cFEStateCharSetup* self_)
     }
     if (ok && self_->mbDraw3D != 0) {
         sQuat_182EC0 pos;
-        sXform_182EC0 xf;
+        tPose xf;
         {
             sQuat_182EC0 position;
             position.x = 136.0f;
@@ -373,15 +368,15 @@ extern "C" void cFEStateCharSetup_updateCharacter3DPos(cFEStateCharSetup* self_)
             position.z = -82.0f;
             position.w = 1.0f;
             pos = position;
-            xf.pos = position;
-            xf.rot.x = 0.0f;
-            xf.rot.w = 1.0f;
-            xf.rot.y = 0.0f;
-            xf.rot.z = 0.0f;
-            xf.rot = QuatMul_182EC0(xf.rot, AxisAngle_182EC0(t4vect_XAxis, 0.0f));
+            (*(sQuat_182EC0*)&xf.P) = position;
+            (*(sQuat_182EC0*)&xf.Q).x = 0.0f;
+            (*(sQuat_182EC0*)&xf.Q).w = 1.0f;
+            (*(sQuat_182EC0*)&xf.Q).y = 0.0f;
+            (*(sQuat_182EC0*)&xf.Q).z = 0.0f;
+            (*(sQuat_182EC0*)&xf.Q) = QuatMul_182EC0((*(sQuat_182EC0*)&xf.Q), AxisAngle_182EC0(t4vect_XAxis, 0.0f));
         }
-        xf.rot = QuatMul_182EC0(xf.rot, AxisAngle_182EC0(t4vect_YAxis, 0.0f));
-        xf.rot = QuatMul_182EC0(xf.rot, AxisAngle_182EC0(t4vect_ZAxis, 1.7453293800354004f));
+        (*(sQuat_182EC0*)&xf.Q) = QuatMul_182EC0((*(sQuat_182EC0*)&xf.Q), AxisAngle_182EC0(t4vect_YAxis, 0.0f));
+        (*(sQuat_182EC0*)&xf.Q) = QuatMul_182EC0((*(sQuat_182EC0*)&xf.Q), AxisAngle_182EC0(t4vect_ZAxis, 1.7453293800354004f));
         cFERider_setPose(rider, &xf);
         {
             sQuat_182EC0 position;
@@ -389,7 +384,7 @@ extern "C" void cFEStateCharSetup_updateCharacter3DPos(cFEStateCharSetup* self_)
             position.y = 10000.0f;
             position.z = 0.0f;
             position.w = 1.0f;
-            xf.pos = position;
+            (*(sQuat_182EC0*)&xf.P) = position;
         }
         cFERider_setBoardPose(rider, &xf);
         if (self_->mbIsFirst != 0) {

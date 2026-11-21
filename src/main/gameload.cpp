@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "wscript/wscriptcache.h"
 #include "main/gameviewman.h"
 #include "ui/uiengine.h"
 #include "bx/appman.h"
@@ -1075,20 +1076,16 @@ struct sScriptSection_0430 {
     void* data;
 };
 
-struct sScriptCache_0430 {
-    int f0;
-    sScriptSection_0430* sections;
-};
 
 struct sWorldCache_0430 {
     int f0;
-    sScriptCache_0430* scripts;
+    cWScriptCache* scripts;
 };
 
 
-static inline bool isSectionLoaded_0430(sScriptCache_0430* c, int sectionId)
+static inline bool isSectionLoaded_0430(cWScriptCache* c, int sectionId)
 {
-    return c->sections[sectionId].state >= 2 && c->sections[sectionId].data != 0;
+    return ((sScriptSection_0430*)c->mpCache)[sectionId].state >= 2 && ((sScriptSection_0430*)c->mpCache)[sectionId].data != 0;
 }
 
 /**
@@ -1102,7 +1099,7 @@ static inline bool isSectionLoaded_0430(sScriptCache_0430* c, int sectionId)
  */
 extern "C" void cGame_loadWScriptManSection(cGame* self, int sectionId)
 {
-    if (isSectionLoaded_0430((sScriptCache_0430*)cWorld_m_pTheWorld->m_pWScriptCache, sectionId)) {
+    if (isSectionLoaded_0430(cWorld_m_pTheWorld->m_pWScriptCache, sectionId)) {
         cWScriptMan_loadSection_2(cWScriptMan_TheWScriptMan, sectionId);
     }
 }

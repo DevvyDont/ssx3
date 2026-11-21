@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "fe/ovstatereplay.h"
 #include "fe/ovstate.h"
 #include "main/game.h"
@@ -295,9 +296,6 @@ extern char str_showhelp[];
 extern char str_ReplayMenuPopup[];
 extern char str_bottom[];
 
-struct sVec3_0020E530 {
-    float x, y, z;
-};
 
 
 /**
@@ -333,9 +331,9 @@ extern "C" void cOVState_REPLAY_onUpdate(cOVState_REPLAY* vself)
         cUIState_hideObjSafe(self, str_showhelp);
     }
     char* obj = (char*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_bottom));
-    sVec3_0020E530 bottomPos = *(sVec3_0020E530*)(obj + 0x44);
+    t3Vector bottomPos = *(t3Vector*)(obj + 0x44);
     bottomPos.y = (float)self->mBottom_y;
-    *(sVec3_0020E530*)(obj + 0x44) = bottomPos;
+    *(t3Vector*)(obj + 0x44) = bottomPos;
     if (self->mShowPopupMenu != 0) {
         cUIState_showObjSafe(self, str_ReplayMenuPopup);
     } else {
@@ -421,9 +419,6 @@ INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_setupTicker);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern char str_percentcomplete[];
-struct sVec3_20E818 {
-    float x, y, z;
-};
 
 /**
  * Moves the "percentcomplete" marker along the timeline to the playback position.
@@ -434,7 +429,7 @@ extern "C" void cOVState_REPLAY_setupTicker(cOVState_REPLAY* self)
 {
     char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_percentcomplete));
     if (obj != 0) {
-        sVec3_20E818 pos = *(sVec3_20E818*)(obj + 0x44);
+        t3Vector pos = *(t3Vector*)(obj + 0x44);
         char* replay = (char*)SSXApp->Game->Replay;
         int total = *(int*)(replay + 0x3CC);
         float frac;
@@ -444,7 +439,7 @@ extern "C" void cOVState_REPLAY_setupTicker(cOVState_REPLAY* self)
             frac = 0.0f;
         }
         pos.x = frac * 315.0f + 170.0f;
-        *(sVec3_20E818*)(obj + 0x44) = pos;
+        *(t3Vector*)(obj + 0x44) = pos;
     }
 }
 #endif

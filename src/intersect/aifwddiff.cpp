@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "intersect/riderspheretree.h"
+#include "world/worldview.h"
+#include "intersect/bxnash.h"
 #include "object/rollermodifier.h"
 #include "bx/math3d.h"
 #include "intersect/aifwddiff.h"
@@ -303,14 +306,6 @@ struct sBlock_27CC8 {
     int d[32];
 };
 
-struct sFwdDiff_27CC8 {
-    sQuad_27CC8 m[8];       // 0x00
-    sQuad_27CC8 q;          // 0x80
-    char pad_0x90[0x8];
-    sBlock_27CC8* blkp;     // 0x98
-    char pad_0x9C[0x24];
-    sBlock_27CC8 blk;       // 0xC0
-};
 
 /**
  * Copies a sphere tree's placement and static info into this one.
@@ -322,15 +317,15 @@ struct sFwdDiff_27CC8 {
  * @param src  the tree to copy (On Tour aTree)
  * @return @p self
  */
-extern "C" sFwdDiff_27CC8* bxSphereTree_operatorE(sFwdDiff_27CC8* self, sFwdDiff_27CC8* src)
+extern "C" bxSphereTree* bxSphereTree_operatorE(bxSphereTree* self, bxSphereTree* src)
 {
     int i;
     for (i = 0; i < 8; i++) {
-        self->m[i] = src->m[i];
+        ((sQuad_27CC8*)&self->axis[0])[i] = ((sQuad_27CC8*)&src->axis[0])[i];
     }
-    self->q = src->q;
-    self->blk = src->blk;
-    self->blkp = &self->blk;
+    (*(sQuad_27CC8*)&self->transCenter) = (*(sQuad_27CC8*)&src->transCenter);
+    (*(sBlock_27CC8*)&self->staticInfo) = (*(sBlock_27CC8*)&src->staticInfo);
+    (*(sBlock_27CC8**)&self->treeInfo) = &(*(sBlock_27CC8*)&self->staticInfo);
     return self;
 }
 #endif
@@ -352,44 +347,44 @@ extern "C" void MEM_copy(void* dst, void* src, int n);
  * @param aTreeID   the tree's id (On Tour aTreeID)
  * @return the number of bytes of @p buf the tree uses
  */
-extern "C" int bxSphereTree_Load(sFwdDiff_27CC8* self, char* buf, int aTreeID)
+extern "C" int bxSphereTree_Load(bxSphereTree* self, char* buf, int aTreeID)
 {
     if (buf == 0) {
         return 0;
     }
-    self->blk.d[0] = aTreeID;
-    self->blk.d[1] = 0;
-    self->blkp = &self->blk;
-    self->blk.d[4] = 1;
+    (*(sBlock_27CC8*)&self->staticInfo).d[0] = aTreeID;
+    (*(sBlock_27CC8*)&self->staticInfo).d[1] = 0;
+    (*(sBlock_27CC8**)&self->treeInfo) = &(*(sBlock_27CC8*)&self->staticInfo);
+    (*(sBlock_27CC8*)&self->staticInfo).d[4] = 1;
     int len0;
     int len1;
     MEM_copy(&len0, buf, 4);
     MEM_copy(&len1, buf + 4, 4);
-    MEM_copy((char*)self->blkp + 0x8, buf + 0x8, 4);
-    MEM_copy((char*)self->blkp + 0xC, buf + 0xC, 4);
-    MEM_copy((char*)self->blkp + 0x14, buf + 0x10, 0xC);
-    MEM_copy((char*)self->blkp + 0x2C, buf + 0x1C, 0xC);
-    MEM_copy((char*)self->blkp + 0x38, buf + 0x28, 36);
-    MEM_copy((char*)self->blkp + 0x5C, buf + 0x4C, 36);
+    MEM_copy((char*)((sBlock_27CC8*)self->treeInfo) + 0x8, buf + 0x8, 4);
+    MEM_copy((char*)((sBlock_27CC8*)self->treeInfo) + 0xC, buf + 0xC, 4);
+    MEM_copy((char*)((sBlock_27CC8*)self->treeInfo) + 0x14, buf + 0x10, 0xC);
+    MEM_copy((char*)((sBlock_27CC8*)self->treeInfo) + 0x2C, buf + 0x1C, 0xC);
+    MEM_copy((char*)((sBlock_27CC8*)self->treeInfo) + 0x38, buf + 0x28, 36);
+    MEM_copy((char*)((sBlock_27CC8*)self->treeInfo) + 0x5C, buf + 0x4C, 36);
     char* cursor = buf + 0x70;
-    *(char**)((char*)self->blkp + 0x20) = cursor;
-    cursor += (*(int*)((char*)self->blkp + 0xC) + 1) * 0xC;
-    *(char**)((char*)self->blkp + 0x24) = cursor;
+    *(char**)((char*)((sBlock_27CC8*)self->treeInfo) + 0x20) = cursor;
+    cursor += (*(int*)((char*)((sBlock_27CC8*)self->treeInfo) + 0xC) + 1) * 0xC;
+    *(char**)((char*)((sBlock_27CC8*)self->treeInfo) + 0x24) = cursor;
     cursor += len1;
     cursor += len0;
-    char* treeInfo = (char*)self->blkp;
+    char* treeInfo = (char*)((sBlock_27CC8*)self->treeInfo);
     if (*(int*)(treeInfo + 0x8) != 0) {
         *(char**)(treeInfo + 0x28) = 0;
     } else {
         *(char**)(treeInfo + 0x28) = *(char**)(treeInfo + 0x24);
     }
     sQuad_27CC8 centre;
-    char* infoBlock = (char*)self->blkp;
+    char* infoBlock = (char*)((sBlock_27CC8*)self->treeInfo);
     centre.x = *(float*)(infoBlock + 0x14);
     centre.y = *(float*)(infoBlock + 0x18);
     centre.z = *(float*)(infoBlock + 0x1C);
     centre.w = 1.0f;
-    self->q = centre;
+    (*(sQuad_27CC8*)&self->transCenter) = centre;
     return cursor - buf;
 }
 #endif
@@ -404,14 +399,6 @@ struct sSphere_27F18 {
     float pos[4];
     float radius;
     int pad[3];
-};
-struct sShape_27F18 {
-    char pad[0x10];
-    float pos[4];           // 0x10
-    float radius;           // 0x20
-    int pad24[2];
-    int count;              // 0x2C
-    sSphere_27F18 subs[1];  // 0x30
 };
 
 /**
@@ -428,20 +415,20 @@ struct sShape_27F18 {
  * @param outContact  out: the contact point (On Tour loc)
  * @return 1 on contact, else 0
  */
-extern "C" int bxSphereTree_IsRiderTreeCollision(bxSphereTree* self, sShape_27F18* shape, int outPush, int outContact)
+extern "C" int bxSphereTree_IsRiderTreeCollision(bxSphereTree* self, cRiderSphereTree* shape, int outPush, int outContact)
 {
     void* tree = self->treeInfo;
     if (*(int*)((char*)tree + 8) != 0) {
-        *(int*)((char*)self->treeInfo + 0x28) = SphereTree_AllocBuf(tree);
+        self->treeInfo->bitTree = (unsigned char*)SphereTree_AllocBuf(tree);
     }
-    if (SphereTree_isSphereCollision(self, shape->pos, &self->transCenter, 0, 0, outPush, outContact, shape->radius) == 0) {
+    if (SphereTree_isSphereCollision(self, ((float*)&shape->boundCen), &self->transCenter, 0, 0, outPush, outContact, shape->boundRad) == 0) {
         return 0;
     }
-    if (shape->count == 0) {
+    if (shape->listLen == 0) {
         return 1;
     }
-    for (int i = 0; i < shape->count; i++) {
-        if (SphereTree_isSphereCollision(self, shape->subs[i].pos, &self->transCenter, 0, 0, outPush, outContact, shape->subs[i].radius) != 0) {
+    for (int i = 0; i < shape->listLen; i++) {
+        if (SphereTree_isSphereCollision(self, ((sSphere_27F18*)&shape->sphList[0])[i].pos, &self->transCenter, 0, 0, outPush, outContact, ((sSphere_27F18*)&shape->sphList[0])[i].radius) != 0) {
             return 1;
         }
     }
@@ -565,10 +552,6 @@ extern "C" void bxSphereTree_Draw(void *octree) {
 //100%
 INCLUDE_ASM("intersect/aifwddiff", bxSphereTree_drawLeaves);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sVec4_281D0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 struct sLevel_281D0 {
     float scale;   // 0x0
     float child;   // 0x4
@@ -582,16 +565,9 @@ struct sGrid_281D0 {
     char pad24[4];
     unsigned char* bits;  // 0x28
 };
-struct sAI_281D0 {
-    sVec4_281D0 dirs[8];   // 0x0
-    char pad80[0x10];
-    float unit;            // 0x90
-    char pad94[4];
-    sGrid_281D0* grid;     // 0x98
-};
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline void vu0Scale_281D0(sVec4_281D0& r, const sVec4_281D0& v, float s)
+static inline void vu0Scale_281D0(t4Vector& r, const t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -605,7 +581,7 @@ static inline void vu0Scale_281D0(sVec4_281D0& r, const sVec4_281D0& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline void vu0Add_281D0(sVec4_281D0& r, const sVec4_281D0& a, const sVec4_281D0& b)
+static inline void vu0Add_281D0(t4Vector& r, const t4Vector& a, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -618,7 +594,7 @@ static inline void vu0Add_281D0(sVec4_281D0& r, const sVec4_281D0& a, const sVec
 }
 
 
-extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level, int off) __asm__("bxSphereTree_drawLeaves");
+extern "C" void func_281D0(bxSphereTree* self, int end, t4Vector* pos, int level, int off) __asm__("bxSphereTree_drawLeaves");
 /**
  * Recursively draws the occupied leaf cells of a sphere tree as magenta boxes.
  *
@@ -633,20 +609,20 @@ extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level
  * @param level  this cell's level
  * @param off  this cell's index into the occupancy bytes (On Tour index)
  */
-extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level, int off)
+extern "C" void func_281D0(bxSphereTree* self, int end, t4Vector* pos, int level, int off)
 {
     if (level < end) {
-        float levelOffset = *(float*)((char*)self->grid->levels + level * 12 + 0x10);
+        float levelOffset = *(float*)((char*)((sGrid_281D0*)self->treeInfo)->levels + level * 12 + 0x10);
         for (int i = 0; i < 8; i++) {
-            if ((self->grid->bits[off] >> i) & 1) {
-                sVec4_281D0 sum;
-                sVec4_281D0 offsetVec;
-                sVec4_281D0 tmpVec;
-                vu0Scale_281D0(tmpVec, self->dirs[i], levelOffset);
+            if ((((sGrid_281D0*)self->treeInfo)->bits[off] >> i) & 1) {
+                t4Vector sum;
+                t4Vector offsetVec;
+                t4Vector tmpVec;
+                vu0Scale_281D0(tmpVec, self->axis[i], levelOffset);
                 offsetVec = tmpVec;
                 vu0Add_281D0(tmpVec, *pos, offsetVec);
                 sum = tmpVec;
-                int st = self->grid->levels[level].stride;
+                int st = ((sGrid_281D0*)self->treeInfo)->levels[level].stride;
                 func_281D0(self, end, &sum, level + 1, (i + 1) * st + off);
             }
         }
@@ -654,8 +630,8 @@ extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level
         cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;
         sVEntry<void(void*, float, void*, void*, int)>* vt = &((sVEntry<void(void*, float, void*, void*, int)>*)w->mVtbl)[87];
         char* thisp = (char*)w + vt->delta;
-        sVec4_281D0 color;
-        float boxSize = self->grid->levels[level].scale * self->unit;
+        t4Vector color;
+        float boxSize = ((sGrid_281D0*)self->treeInfo)->levels[level].scale * self->scale;
         color.x = 1.0f;
         color.y = 0.0f;
         color.z = 1.0f;
@@ -668,14 +644,6 @@ extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level
 //100%
 INCLUDE_ASM("intersect/aifwddiff", nash_CellKey_proximitytest);
 #ifdef SKIP_ASM
-struct sCell_00328360 {
-    int level;
-    int x, y, z;
-};
-struct sBox_00328360 {
-    float minx, miny, minz, pad;
-    float maxx, maxy, maxz;
-};
 
 /**
  * Classifies an octree cell against a bounding box: outside (1), crossing (2) or inside (0).
@@ -694,7 +662,7 @@ struct sBox_00328360 {
  * @param box  the query box: min at +0x0, max at +0x10
  * @return 1 outside, 2 crossing, 0 inside (On Tour ProximityResult)
  */
-extern "C" int nash_CellKey_proximitytest(sCell_00328360* cell, sBox_00328360* box)
+extern "C" int nash_CellKey_proximitytest(nash_CellKey* cell, tBoundBox* box)
 {
     union {
         int i;
@@ -703,45 +671,45 @@ extern "C" int nash_CellKey_proximitytest(sCell_00328360* cell, sBox_00328360* b
     expBits.i = (cell->level + 0x7F) << 23;
     float scale = expBits.f;
     float x0 = ((float)cell->x - 0.2f) * scale;
-    if (box->maxx < x0) {
+    if (box->MaxPoint.x < x0) {
         return 1;
     }
     float y0 = ((float)cell->y - 0.2f) * scale;
-    if (box->maxy < y0) {
+    if (box->MaxPoint.y < y0) {
         return 1;
     }
     float z0 = ((float)cell->z - 0.2f) * scale;
-    if (box->maxz < z0) {
+    if (box->MaxPoint.z < z0) {
         return 1;
     }
     float x1 = ((float)(cell->x + 1) + 0.2f) * scale;
-    if (x1 < box->minx) {
+    if (x1 < box->MinPoint.x) {
         return 1;
     }
     float y1 = ((float)(cell->y + 1) + 0.2f) * scale;
-    if (y1 < box->miny) {
+    if (y1 < box->MinPoint.y) {
         return 1;
     }
     float z1 = ((float)(cell->z + 1) + 0.2f) * scale;
-    if (z1 < box->minz) {
+    if (z1 < box->MinPoint.z) {
         return 1;
     }
-    if (x1 < box->maxx) {
+    if (x1 < box->MaxPoint.x) {
         return 2;
     }
-    if (y1 < box->maxy) {
+    if (y1 < box->MaxPoint.y) {
         return 2;
     }
-    if (z1 < box->maxz) {
+    if (z1 < box->MaxPoint.z) {
         return 2;
     }
-    if (box->minx < x1) {
+    if (box->MinPoint.x < x1) {
         return 2;
     }
-    if (box->miny < y1) {
+    if (box->MinPoint.y < y1) {
         return 2;
     }
-    if (box->miny < y1) {
+    if (box->MinPoint.y < y1) {
         return 2;
     }
     return 0;
@@ -784,10 +752,6 @@ struct sNode_003284B8 {
         return 1;
     }
 };
-struct sCell_003284B8 {
-    int level;
-    int x, y, z;
-};
 
 /**
  * Removes a node from the spatial hash cell that holds it, freeing cells that become empty.
@@ -801,8 +765,8 @@ struct sCell_003284B8 {
  * @param target  the node's cell key
  * @param cur     this cell's key
  */
-extern "C" void nash_Cell_remnode(sNode_003284B8* node, int idx, sItem_003284B8* item, const sCell_003284B8* target,
-                              const sCell_003284B8* cur)
+extern "C" void nash_Cell_remnode(sNode_003284B8* node, int idx, sItem_003284B8* item, const nash_CellKey* target,
+                              const nash_CellKey* cur)
 {
     int lv = cur->level;
     if (target->level == lv) {
@@ -813,7 +777,7 @@ extern "C" void nash_Cell_remnode(sNode_003284B8* node, int idx, sItem_003284B8*
     int dx = (target->x >> sh) - cur->x * 2;
     int dy = (target->y >> sh) - cur->y * 2;
     int dz = (target->z >> sh) - cur->z * 2;
-    sCell_003284B8 childKey;
+    nash_CellKey childKey;
     childKey.x = cur->x * 2 + dx;
     childKey.level = --lv;
     childKey.y = cur->y * 2 + dy;
@@ -855,10 +819,6 @@ struct sNode_00328660 {
     sList_00328660 lists[3];            // 0x20
     sNode_00328660() { MEM_fill(child, 0, sizeof(child)); }
 };
-struct sCell_00328660 {
-    int level;
-    int x, y, z;
-};
 
 /**
  * Adds a node to the spatial hash below this cell, creating the cells on the way.
@@ -873,9 +833,9 @@ struct sCell_00328660 {
  * @param target  the cell key the node belongs in
  * @param mykey   this cell's key
  */
-extern "C" void nash_Cell_addnode(sNode_00328660* node, int idx, sItem_00328660* item, sCell_00328660* target, const sCell_00328660* mykey)
+extern "C" void nash_Cell_addnode(sNode_00328660* node, int idx, sItem_00328660* item, nash_CellKey* target, const nash_CellKey* mykey)
 {
-    sCell_00328660 cur = *mykey;
+    nash_CellKey cur = *mykey;
     while (cur.level != target->level) {
         int sh = cur.level - target->level - 1;
         cur.level--;
@@ -914,11 +874,11 @@ INCLUDE_ASM("intersect/aifwddiff", nash_Cell_movenode);
  * @param newkey  the cell key it moves to
  * @param mykey   this cell's key
  */
-extern "C" void nash_Cell_movenode(sNode_003284B8* node, int type, sItem_00328660* item, sCell_00328660* oldkey,
-                              sCell_00328660* newkey, sCell_00328660* mykey)
+extern "C" void nash_Cell_movenode(sNode_003284B8* node, int type, sItem_00328660* item, nash_CellKey* oldkey,
+                              nash_CellKey* newkey, nash_CellKey* mykey)
 {
     if (newkey->level == mykey->level) {
-        nash_Cell_remnode(node, type, (sItem_003284B8*)item, (sCell_003284B8*)oldkey, (sCell_003284B8*)mykey);
+        nash_Cell_remnode(node, type, (sItem_003284B8*)item, oldkey, mykey);
         ((sList_00328660*)&node->lists[type])->push(item);
         return;
     }
@@ -936,7 +896,7 @@ extern "C" void nash_Cell_movenode(sNode_003284B8* node, int type, sItem_0032866
     int newcy = (newkey->y >> news) - mykey->y * 2;
     int newcz = (newkey->z >> news) - mykey->z * 2;
     if (oldcx == newcx && oldcy == newcy && oldcz == newcz) {
-        sCell_00328660 childkey;
+        nash_CellKey childkey;
         childkey.level = mykey->level - 1;
         childkey.x = mykey->x * 2 + newcx;
         childkey.y = mykey->y * 2 + newcy;
@@ -945,18 +905,18 @@ extern "C" void nash_Cell_movenode(sNode_003284B8* node, int type, sItem_0032866
         nash_Cell_movenode(child, type, item, oldkey, newkey, &childkey);
         return;
     }
-    sCell_00328660 oldchildkey;
+    nash_CellKey oldchildkey;
     oldchildkey.level = mykey->level - 1;
     oldchildkey.x = mykey->x * 2 + oldcx;
     oldchildkey.y = mykey->y * 2 + oldcy;
     oldchildkey.z = mykey->z * 2 + oldcz;
     sNode_003284B8*& oldchild = node->child[oldcx][oldcy][oldcz];
-    nash_Cell_remnode(oldchild, type, (sItem_003284B8*)item, (sCell_003284B8*)oldkey, (sCell_003284B8*)&oldchildkey);
+    nash_Cell_remnode(oldchild, type, (sItem_003284B8*)item, oldkey, (&oldchildkey));
     if (oldchild->empty()) {
         operator_delete((int*)oldchild);
         oldchild = 0;
     }
-    sCell_00328660 newchildkey;
+    nash_CellKey newchildkey;
     newchildkey.level = mykey->level - 1;
     newchildkey.x = mykey->x * 2 + newcx;
     newchildkey.y = mykey->y * 2 + newcy;
@@ -976,7 +936,7 @@ struct sNode_8C20 {
     sNode_8C20* child[2][2][2];         // 0x00
     sList_00328660 lists[3];            // 0x20
     sNode_8C20() {}
-    sNode_8C20(sNode_8C20* c, const sCell_00328660& cc, const sCell_00328660& pc)
+    sNode_8C20(sNode_8C20* c, const nash_CellKey& cc, const nash_CellKey& pc)
     {
         int dx = cc.x - pc.x * 2;
         int dy = cc.y - pc.y * 2;
@@ -986,12 +946,8 @@ struct sNode_8C20 {
     }
 };
 
-struct sRoot_8C20 {
-    sCell_00328660 cell;            // 0x00
-    sNode_8C20* node;               // 0x10
-};
 
-static inline int Contains_8C20(const sCell_00328660& a, const sCell_00328660& b)
+static inline int Contains_8C20(const nash_CellKey& a, const nash_CellKey& b)
 {
     int d = a.level - b.level;
     if (d < 0) {
@@ -1003,9 +959,9 @@ static inline int Contains_8C20(const sCell_00328660& a, const sCell_00328660& b
     return (b.x >> d) == a.x && (b.y >> d) == a.y && (b.z >> d) == a.z;
 }
 
-static inline sCell_00328660 Parent_8C20(const sCell_00328660& c)
+static inline nash_CellKey Parent_8C20(const nash_CellKey& c)
 {
-    sCell_00328660 r;
+    nash_CellKey r;
     r.level = c.level + 1;
     r.x = c.x >> 1;
     r.y = c.y >> 1;
@@ -1025,48 +981,37 @@ static inline sCell_00328660 Parent_8C20(const sCell_00328660& c)
  * @param item  the node to add
  * @param cell  the node's cell key
  */
-extern "C" void nash_Octant_addnode(sRoot_8C20* root, int idx, sItem_00328660* item, sCell_00328660* cell)
+extern "C" void nash_Octant_addnode(nash_Octant* root, int idx, sItem_00328660* item, nash_CellKey* cell)
 {
-    sNode_8C20** pn = &root->node;
-    if (root->node == 0) {
-        root->cell = *cell;
+    sNode_8C20** pn = &(*(sNode_8C20**)&root->rootcell);
+    if (((sNode_8C20*)root->rootcell) == 0) {
+        root->rootkey = *cell;
         sNode_8C20* n = new (str_Cell, 0x20000000, 0) sNode_8C20;
         MEM_fill(n->child, 0, sizeof(n->child));
         *pn = n;
-        root->node->lists[idx].push(item);
+        ((sNode_8C20*)root->rootcell)->lists[idx].push(item);
         return;
     }
-    while (!Contains_8C20(root->cell, *cell)) {
-        sCell_00328660 nc = Parent_8C20(root->cell);
-        sNode_8C20* n = new (str_Cell, 0x20000000, 0) sNode_8C20(root->node, root->cell, nc);
-        root->cell = nc;
-        root->node = n;
+    while (!Contains_8C20(root->rootkey, *cell)) {
+        nash_CellKey nc = Parent_8C20(root->rootkey);
+        sNode_8C20* n = new (str_Cell, 0x20000000, 0) sNode_8C20(((sNode_8C20*)root->rootcell), root->rootkey, nc);
+        root->rootkey = nc;
+        (*(sNode_8C20**)&root->rootcell) = n;
     }
-    nash_Cell_addnode((sNode_00328660*)root->node, idx, item, cell, &root->cell);
+    nash_Cell_addnode((sNode_00328660*)((sNode_8C20*)root->rootcell), idx, item, cell, &root->rootkey);
 }
 #endif
 
 //100%
 INCLUDE_ASM("intersect/aifwddiff", nash_Nash_findkey);
 #ifdef SKIP_ASM
-struct sVec4_8F28 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-struct sBox_8F28 {
-    sVec4_8F28 min;
-    sVec4_8F28 max;
-};
 
-struct sCell_8F28 {
-    int level;
-    int x, y, z;
-};
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sVec4_8F28 vu0Sub_8F28(const sVec4_8F28& a, const sVec4_8F28& b)
+static inline t4Vector vu0Sub_8F28(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_8F28 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1078,9 +1023,9 @@ static inline sVec4_8F28 vu0Sub_8F28(const sVec4_8F28& a, const sVec4_8F28& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add).
-static inline sVec4_8F28 vu0Add_8F28(const sVec4_8F28& a, const sVec4_8F28& b)
+static inline t4Vector vu0Add_8F28(const t4Vector& a, const t4Vector& b)
 {
-    sVec4_8F28 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1092,9 +1037,9 @@ static inline sVec4_8F28 vu0Add_8F28(const sVec4_8F28& a, const sVec4_8F28& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_8F28 vu0Scale_8F28(const sVec4_8F28& v, float s)
+static inline t4Vector vu0Scale_8F28(const t4Vector& v, float s)
 {
-    sVec4_8F28 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1119,9 +1064,9 @@ static inline int Floor_8F28(float f)
     return q;
 }
 
-static inline sCell_8F28 Parent_8F28(const sCell_8F28& c)
+static inline nash_CellKey Parent_8F28(const nash_CellKey& c)
 {
-    sCell_8F28 r;
+    nash_CellKey r;
     r.level = c.level + 1;
     r.x = c.x >> 1;
     r.y = c.y >> 1;
@@ -1138,10 +1083,10 @@ static inline sCell_8F28 Parent_8F28(const sCell_8F28& c)
  * @param key  out: the cell key
  * @param box  the bounding box
  */
-extern "C" void nash_Nash_findkey(sCell_8F28* key, sBox_8F28* box)
+extern "C" void nash_Nash_findkey(nash_CellKey* key, tBoundBox* box)
 {
-    sVec4_8F28 size = vu0Sub_8F28(box->max, box->min);
-    sVec4_8F28 center = vu0Add_8F28(box->min, vu0Scale_8F28(size, 0.5f));
+    t4Vector size = vu0Sub_8F28((*(&box->MaxPoint)), (*(&box->MinPoint)));
+    t4Vector center = vu0Add_8F28((*(&box->MinPoint)), vu0Scale_8F28(size, 0.5f));
     float maxExtent = size.x;
     if (maxExtent < size.y) {
         maxExtent = size.y;
@@ -1171,8 +1116,8 @@ extern "C" void nash_Nash_findkey(sCell_8F28* key, sBox_8F28* box)
         scaleBits.i = (key->level + 0x7F) << 23;
         scale = scaleBits.f;
         int ok = 0;
-        if (((float)key->x - 0.2f) * scale <= box->min.x && ((float)key->y - 0.2f) * scale <= box->min.y && ((float)key->z - 0.2f) * scale <= box->min.z
-            && box->max.x <= ((float)(key->x + 1) + 0.2f) * scale && box->max.y <= ((float)(key->y + 1) + 0.2f) * scale && box->max.z <= ((float)(key->z + 1) + 0.2f) * scale) {
+        if (((float)key->x - 0.2f) * scale <= (*(&box->MinPoint)).x && ((float)key->y - 0.2f) * scale <= (*(&box->MinPoint)).y && ((float)key->z - 0.2f) * scale <= (*(&box->MinPoint)).z
+            && (*(&box->MaxPoint)).x <= ((float)(key->x + 1) + 0.2f) * scale && (*(&box->MaxPoint)).y <= ((float)(key->y + 1) + 0.2f) * scale && (*(&box->MaxPoint)).z <= ((float)(key->z + 1) + 0.2f) * scale) {
             ok = 1;
         }
         if (ok) {
@@ -1187,31 +1132,31 @@ extern "C" void nash_Nash_findkey(sCell_8F28* key, sBox_8F28* box)
 INCLUDE_ASM("intersect/aifwddiff", nash_Nash_movenode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void nash_Cell_movenode_91E0(sNode_003284B8* node, int idx, sItem_00328660* item, sCell_00328660* from,
-                              sCell_00328660* to, sRoot_8C20* root) __asm__("nash_Cell_movenode");
+extern "C" void nash_Cell_movenode_91E0(sNode_003284B8* node, int idx, sItem_00328660* item, nash_CellKey* from,
+                              nash_CellKey* to, nash_Octant* root) __asm__("nash_Cell_movenode");
 
-static inline int Equal_91E0(const sCell_8F28& a, const sCell_8F28& b)
+static inline int Equal_91E0(const nash_CellKey& a, const nash_CellKey& b)
 {
     return a.level == b.level && a.x == b.x && a.y == b.y && a.z == b.z;
 }
 
-static inline void Remove_91E0(sRoot_8C20* root, int idx, sItem_00328660* item, sCell_8F28* from)
+static inline void Remove_91E0(nash_Octant* root, int idx, sItem_00328660* item, nash_CellKey* from)
 {
-    nash_Cell_remnode((sNode_003284B8*)root->node, idx, (sItem_003284B8*)item, (sCell_003284B8*)from,
-                  (sCell_003284B8*)root);
-    if (((sNode_003284B8*)root->node)->empty()) {
-        operator_delete((int*)root->node);
-        root->node = 0;
+    nash_Cell_remnode((sNode_003284B8*)((sNode_8C20*)root->rootcell), idx, (sItem_003284B8*)item, from,
+                  (nash_CellKey*)root);
+    if (((sNode_003284B8*)((sNode_8C20*)root->rootcell))->empty()) {
+        operator_delete((int*)((sNode_8C20*)root->rootcell));
+        (*(sNode_8C20**)&root->rootcell) = 0;
     }
 }
 
-static inline void Move_91E0(sRoot_8C20* root, int idx, sItem_00328660* item, sCell_8F28* from, sCell_8F28* to)
+static inline void Move_91E0(nash_Octant* root, int idx, sItem_00328660* item, nash_CellKey* from, nash_CellKey* to)
 {
-    if (!Contains_8C20(root->cell, *(sCell_00328660*)to)) {
+    if (!Contains_8C20(root->rootkey, *(nash_CellKey*)to)) {
         Remove_91E0(root, idx, item, from);
-        nash_Octant_addnode(root, idx, item, (sCell_00328660*)to);
+        nash_Octant_addnode(root, idx, item, (nash_CellKey*)to);
     } else {
-        nash_Cell_movenode_91E0((sNode_003284B8*)root->node, idx, item, (sCell_00328660*)from, (sCell_00328660*)to, root);
+        nash_Cell_movenode_91E0((sNode_003284B8*)((sNode_8C20*)root->rootcell), idx, item, (nash_CellKey*)from, (nash_CellKey*)to, root);
     }
 }
 
@@ -1228,11 +1173,11 @@ static inline void Move_91E0(sRoot_8C20* root, int idx, sItem_00328660* item, sC
  * @param box     the node's new bounding box
  * @param oldBox  the node's previous bounding box
  */
-extern "C" void nash_Nash_movenode(sRoot_8C20 (*roots)[2][2], int idx, sItem_00328660* item, sBox_8F28* box,
-                              sBox_8F28* oldBox)
+extern "C" void nash_Nash_movenode(nash_Octant (*roots)[2][2], int idx, sItem_00328660* item, tBoundBox* box,
+                              tBoundBox* oldBox)
 {
-    sCell_8F28 oc;
-    sCell_8F28 nc;
+    nash_CellKey oc;
+    nash_CellKey nc;
     nash_Nash_findkey(&oc, oldBox);
     nash_Nash_findkey(&nc, box);
     if (Equal_91E0(nc, oc)) {
@@ -1246,7 +1191,7 @@ extern "C" void nash_Nash_movenode(sRoot_8C20 (*roots)[2][2], int idx, sItem_003
     unsigned int oz = (unsigned int)oc.z >> 31;
     if (nx != ox || ny != oy || nz != oz) {
         Remove_91E0(&roots[ox][oy][oz], idx, item, &oc);
-        nash_Octant_addnode(&roots[nx][ny][nz], idx, item, (sCell_00328660*)&nc);
+        nash_Octant_addnode(&roots[nx][ny][nz], idx, item, (nash_CellKey*)&nc);
     } else {
         Move_91E0(&roots[nx][ny][nz], idx, item, &oc, &nc);
     }
@@ -1256,19 +1201,15 @@ extern "C" void nash_Nash_movenode(sRoot_8C20 (*roots)[2][2], int idx, sItem_003
 //100%
 INCLUDE_ASM("intersect/aifwddiff", gIsBoxSphereInt);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sVec4_29590 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-extern sVec4_29590 t4vect_XAxis;
-extern sVec4_29590 t4vect_YAxis;
-extern sVec4_29590 t4vect_ZAxis;
+extern t4Vector t4vect_XAxis;
+extern t4Vector t4vect_YAxis;
+extern t4Vector t4vect_ZAxis;
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_29590 vu0Scale_29590(const sVec4_29590& v, float s)
+static inline t4Vector vu0Scale_29590(const t4Vector& v, float s)
 {
-    sVec4_29590 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1301,7 +1242,7 @@ static inline sVec4_29590 vu0Scale_29590(const sVec4_29590& v, float s)
  * @param outDist  out: the depth, 1e30 when there is none (On Tour param)
  * @return 1 when a face was found, else 0
  */
-extern "C" int gIsBoxSphereInt(float margin, sVec4_29590* mn, sVec4_29590* mx, sVec4_29590* point, sVec4_29590* hp, sVec4_29590* nrm, float* outDist)
+extern "C" int gIsBoxSphereInt(float margin, t4Vector* mn, t4Vector* mx, t4Vector* point, t4Vector* hp, t4Vector* nrm, float* outDist)
 {
     *outDist = 1e30f;
     if (mn->y <= point->y && point->y <= mx->y && point->z >= mn->z && point->z <= mx->z) {
@@ -1312,7 +1253,7 @@ extern "C" int gIsBoxSphereInt(float margin, sVec4_29590* mn, sVec4_29590* mx, s
                 *hp = *point;
                 hp->x = mn->x;
                 *outDist = distMin;
-                sVec4_29590 n = vu0Scale_29590(t4vect_XAxis, -1.0f);
+                t4Vector n = vu0Scale_29590(t4vect_XAxis, -1.0f);
                 *nrm = n;
             }
             if (distMax < *outDist) {
@@ -1331,7 +1272,7 @@ extern "C" int gIsBoxSphereInt(float margin, sVec4_29590* mn, sVec4_29590* mx, s
                 *hp = *point;
                 hp->y = mn->y;
                 *outDist = distMin;
-                sVec4_29590 n = vu0Scale_29590(t4vect_YAxis, -1.0f);
+                t4Vector n = vu0Scale_29590(t4vect_YAxis, -1.0f);
                 *nrm = n;
             }
             if (distMax < *outDist) {
@@ -1350,7 +1291,7 @@ extern "C" int gIsBoxSphereInt(float margin, sVec4_29590* mn, sVec4_29590* mx, s
                 *hp = *point;
                 hp->z = mn->z;
                 *outDist = distMin;
-                sVec4_29590 n = vu0Scale_29590(t4vect_ZAxis, -1.0f);
+                t4Vector n = vu0Scale_29590(t4vect_ZAxis, -1.0f);
                 *nrm = n;
             }
             if (distMax < *outDist) {

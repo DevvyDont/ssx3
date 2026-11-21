@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uidata.h"
 #include "ui/uithing.h"
 #include "ui/uianimation.h"
 
@@ -222,7 +223,7 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_isLastFrame);
  * @return 1 at or past the last frame, else 0
  */
 extern "C" int cUIAnimation_isLastFrame(cUIAnimation* anim) {
-    return (anim->mFrameNum) >= (int) (*(unsigned short *)((char*)((anim->mpAnimHeader)) + (2)));
+    return (anim->mFrameNum) >= (int) (anim->mpAnimHeader->mNumFrames);
 }
 #endif
 //100%
@@ -352,7 +353,6 @@ extern "C" void cUIAnimation_updateFrame(cUIAnimation_updateFrame_sAnim* self, u
 //100%
 INCLUDE_ASM("ui/uianimation", cUIAnimation_updateThing);
 #ifdef SKIP_ASM
-struct sUIAnimHdr75E0 { short f0; unsigned short nframes; unsigned int ntracks; };
 
 /**
  * Applies the animation's current frame to a UI object, once per new frame.
@@ -376,8 +376,8 @@ extern "C" void cUIAnimation_updateThing(cUIAnimation* self, cUIThing* obj, int 
         self->mFrameNum = frame;
     }
     if (self->mLastFrameEval == frame) return;
-    if (frame < ((sUIAnimHdr75E0*)self->mpAnimHeader)->nframes) {
-        for (unsigned int i = 0; i < ((sUIAnimHdr75E0*)self->mpAnimHeader)->ntracks; i++) {
+    if (frame < (self->mpAnimHeader)->mNumFrames) {
+        for (unsigned int i = 0; i < (self->mpAnimHeader)->mNumChannels; i++) {
             float chanValue = cUIAnimationChannel_evalAtFrameFloat((cUIAnimationChannel_evalAtFrameFloat_sAnim**)&self->mpAnimChannels[i], frame);
             sVEntry<void(void*, int, float)>* vt = (sVEntry<void(void*, int, float)>*)obj->mVtbl;
             vt[12].fn(((char*)obj) + vt[12].delta, cUIAnimationChannel_getAnimChanType(&self->mpAnimChannels[i]), chanValue);

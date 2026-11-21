@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/frame.h"
 #include "ai/rider.h"
 #include "inseq/scriptplayerchannel.h"
 #include "inseq/scriptheap.h"
@@ -74,11 +75,6 @@ INCLUDE_ASM("replay/replaycache", cReplay_allocReplayFrame);
 extern "C" void cReplay_freeOneReplayFrame(cReplay* self);
 extern "C" void* cReplayFrameList_remTail(void* list);
 
-struct sFrameDesc270130 {
-    short type;
-    char a;
-    char b;
-};
 
 /**
  * Takes a frame off FreeFrameList, first freeing a recorded one (cReplay_freeOneReplayFrame) when the free list is empty.
@@ -95,11 +91,11 @@ extern "C" void* cReplay_allocReplayFrame(cReplay* self)
         cReplay_freeOneReplayFrame(self);
     }
     void* node = cReplayFrameList_remTail(list);
-    sFrameDesc270130 desc;
-    desc.type = 0;
-    desc.a = 0;
-    desc.b = 0;
-    *(sFrameDesc270130*)((char*)node + 0x1C) = desc;
+    tReplayFrameType desc;
+    desc.Type = 0;
+    desc.Highlights = 0;
+    desc.Chapter = 0;
+    *(tReplayFrameType*)((char*)node + 0x1C) = desc;
     *(int*)((char*)node + 0x20) = -1;
     *(int*)((char*)node + 0x24) = -1;
     *(int*)((char*)node + 0x34) = -1;
@@ -250,7 +246,7 @@ extern "C" void cReplay_rewind(cReplay* self, void* frame)
     } else {
         self->PlaybackFrame = (cReplayFrame*)*(void**)&self->FrameList;
     }
-    self->PlaybackTick = *(int*)((char*)self->PlaybackFrame + 0x30);
+    self->PlaybackTick = self->PlaybackFrame->FrameStartTick;
     for (i = 0; i < 2; i++) {
         if (((void**)&self->InputCache[0])[i] != 0) {
             cReplayCache_moveTo(((void**)&self->InputCache[0])[i], self->PlaybackTick);
@@ -327,7 +323,7 @@ extern "C" void cReplay_stepFrame(cReplay* self, int reset)
         self->PlaybackFrame = (cReplayFrame*)(*(void**)((char*)frame + 0x18));
     }
     if (reset) {
-        self->PlaybackTick = *(int*)((char*)self->PlaybackFrame + 0x30);
+        self->PlaybackTick = self->PlaybackFrame->FrameStartTick;
         for (i = 0; i < 2; i++) {
             if (((void**)&self->InputCache[0])[i] != 0) {
                 cReplayCache_moveTo(((void**)&self->InputCache[0])[i], self->PlaybackTick);
@@ -1292,17 +1288,6 @@ struct sReplayCache;
 extern "C" int cReplay_writeFrameCount(cReplay* self);
 extern "C" void cAI_getPodiumActorList(void* self, int* dst);
 
-struct sReplayHdr_1228 {
-    int magic;   // 0x0
-    int count;   // 0x4
-    int a;       // 0x8
-    int b;       // 0xC
-    int c;       // 0x10
-    int d;       // 0x14
-    int mode;    // 0x18
-    int pad;     // 0x1C
-    int data[2]; // 0x20
-};
 
 /**
  * Builds the 0x28-byte save header in WriteTmp and advances WriteState.
@@ -1313,17 +1298,17 @@ struct sReplayHdr_1228 {
  */
 extern "C" void cReplay_writeHeaderStart(cReplay* self)
 {
-    sReplayHdr_1228* hdr = (sReplayHdr_1228*)self->WriteTmp;
-    hdr->count = cReplay_writeFrameCount(self);
+    tReplayManSaveHeader* hdr = (tReplayManSaveHeader*)self->WriteTmp;
+    hdr->NumSaveFrames = cReplay_writeFrameCount(self);
     cSSXApp* app = SSXApp;
-    hdr->a = self->SaveFrameTicks;
-    hdr->b = self->ReplayError;
-    hdr->c = self->RecordTick;
-    hdr->d = self->EndRecordTick;
+    hdr->SaveFrameTicks = self->SaveFrameTicks;
+    hdr->ReplayError = self->ReplayError;
+    hdr->RecordTick = self->RecordTick;
+    hdr->EndRecordTick = self->EndRecordTick;
     int mode = app->Game->AI->NumberOfPlayersAllocated;
-    hdr->magic = 0xABCD0002;
-    hdr->mode = mode;
-    cAI_getPodiumActorList(app->Game->AI, hdr->data);
+    hdr->Version = 0xABCD0002;
+    hdr->Players = mode;
+    cAI_getPodiumActorList(app->Game->AI, hdr->PodiumActorList);
     self->WriteSrc = 0;
     self->WriteSrcSize = 0;
     self->WriteState = self->WriteState + 1;
@@ -2094,15 +2079,10 @@ struct sBlk_2308 {
     unsigned int size;
     sBlk_2308* next;
 };
-struct sHeap_2308 {
-    int f0;
-    int f4;
-    sBlk_2308* free;
-};
 
 // First-fit allocation from the heap's free list (8-byte block headers); splits a block that has room to spare.
 // PORT: the unit declares it as void*(void*, int); defined under its own name bound to the symbol.
-extern "C" void* cScriptHeap_AllocMem_impl(sHeap_2308* h, unsigned int size) __asm__("cScriptHeap_AllocMem");
+extern "C" void* cScriptHeap_AllocMem_impl(cScriptHeap* h, unsigned int size) __asm__("cScriptHeap_AllocMem");
 /**
  * Allocates a block from the script heap (first fit).
  *
@@ -2115,11 +2095,11 @@ extern "C" void* cScriptHeap_AllocMem_impl(sHeap_2308* h, unsigned int size) __a
  * @param size  the number of bytes wanted
  * @return the usable memory, just past the block header
  */
-extern "C" void* cScriptHeap_AllocMem_impl(sHeap_2308* heap, unsigned int size)
+extern "C" void* cScriptHeap_AllocMem_impl(cScriptHeap* heap, unsigned int size)
 {
     size = (size + 3) & ~3;
     sBlk_2308* prev = 0;
-    sBlk_2308* block = heap->free;
+    sBlk_2308* block = ((sBlk_2308*)heap->mpTopFreeBlock);
     sBlk_2308* found = 0;
     unsigned int split = size + 16;
     if (block != 0) {
@@ -2134,7 +2114,7 @@ extern "C" void* cScriptHeap_AllocMem_impl(sHeap_2308* heap, unsigned int size)
                 }
                 found = block;
                 if (prev == 0)
-                    heap->free = found->next;
+                    (*(sBlk_2308**)&heap->mpTopFreeBlock) = found->next;
                 else
                     prev->next = found->next;
                 block->next = 0;
@@ -3008,7 +2988,7 @@ extern "C" int cScriptPlayerChannelBlock_Play(cScriptPlayerChannelBlock* self, u
             cScriptPlayerChannelBlock_AddActiveKey((cScriptPlayerChannelBlock*)self, (sCacheRecord*)self->mpNextKey);
             cScriptPlayerChannelBlock_LoadNextScriptKey((cScriptPlayerChannelBlock*)self);
         } while ((char*)self->mpNextKey != 0 &&
-               *(unsigned short*)((char*)self->mpNextKey + 4) == 0);
+               self->mpNextKey->frameStart == 0);
     }
     return *(unsigned short*)self->mpHeader != 0;
 }
@@ -3051,10 +3031,6 @@ struct sCacheEvent_2F28 {
     sCacheEvent_2F28* next;         // 0x18
 };
 
-struct sCacheRec_2F28 {
-    char pad0[4];
-    unsigned short time;            // 0x4
-};
 
 
 /**
@@ -3090,14 +3066,14 @@ extern "C" int cScriptPlayerChannelBlock_Update(cScriptPlayerChannelBlock* self,
     zeroF = 0.0f;
 loop:
     do {
-        if (((sCacheRec_2F28*)self->mpNextKey) != 0 && currFrameNum - (float)((sCacheRec_2F28*)self->mpNextKey)->time >= zeroF) {
+        if ((self->mpNextKey) != 0 && currFrameNum - (float)(self->mpNextKey)->frameStart >= zeroF) {
             *flags |= 4;
-            cScriptPlayerChannelBlock_AddActiveKey((cScriptPlayerChannelBlock*)self, (sCacheRecord*)((sCacheRec_2F28*)self->mpNextKey));
+            cScriptPlayerChannelBlock_AddActiveKey((cScriptPlayerChannelBlock*)self, (sCacheRecord*)(self->mpNextKey));
             cScriptPlayerChannelBlock_LoadNextScriptKey((cScriptPlayerChannelBlock*)self);
             goto loop;
         }
     } while (0);
-    if (((sCacheEvent_2F28*)self->mpActiveBlockList) == 0 && ((sCacheRec_2F28*)self->mpNextKey) == 0)
+    if (((sCacheEvent_2F28*)self->mpActiveBlockList) == 0 && (self->mpNextKey) == 0)
         return 0;
     return 1;
 }
@@ -3179,7 +3155,7 @@ struct sCacheEntry {
  */
 extern "C" sCacheEntry* cScriptPlayerChannelBlock_AddActiveKey(cScriptPlayerChannelBlock* self, sCacheRecord* rec)
 {
-    sCacheEntry* newKey = (sCacheEntry*)((char*)self->mpBlockArray + rec->id * 0x1C);
+    sCacheEntry* newKey = (sCacheEntry*)&self->mpBlockArray[rec->id];
     newKey->x = rec->x;
     newKey->id = rec->id;
     newKey->y = rec->y;
@@ -3538,7 +3514,7 @@ extern "C" int cScriptPlayerChannelObject_Play(cScriptPlayerChannelObject* self,
             cScriptPlayerChannelObject_AddActiveKey((cScriptPlayerChannelObject*)self, (sCacheRecord2*)self->mpNextKey);
             cScriptPlayerChannelObject_LoadNextScriptKey((cScriptPlayerChannelObject*)self);
         } while ((char*)self->mpNextKey != 0 &&
-               *(unsigned short*)((char*)self->mpNextKey + 4) == 0);
+               self->mpNextKey->frameStart == 0);
     }
     return *(unsigned short*)self->mpHeader != 0;
 }
@@ -3584,10 +3560,6 @@ struct sCacheEvent_3698 {
     sCacheEvent_3698* next;         // 0x20
 };
 
-struct sCacheRec_3698 {
-    char pad0[4];
-    unsigned short time;            // 0x4
-};
 
 
 /**
@@ -3627,18 +3599,18 @@ extern "C" int cScriptPlayerChannelObject_Update(cScriptPlayerChannelObject* sel
     zeroF = 0.0f;
 loop:
     do {
-        if (((sCacheRec_3698*)self->mpNextKey) != 0) {
-            float frameDiff = frameDelta - (float)((sCacheRec_3698*)self->mpNextKey)->time;
+        if ((self->mpNextKey) != 0) {
+            float frameDiff = frameDelta - (float)(self->mpNextKey)->frameStart;
             if (frameDiff >= zeroF) {
                 *flags |= 1;
-                sCacheEvent_3698* n = (sCacheEvent_3698*)cScriptPlayerChannelObject_AddActiveKey((cScriptPlayerChannelObject*)self, (sCacheRecord2*)((sCacheRec_3698*)self->mpNextKey));
+                sCacheEvent_3698* n = (sCacheEvent_3698*)cScriptPlayerChannelObject_AddActiveKey((cScriptPlayerChannelObject*)self, (sCacheRecord2*)(self->mpNextKey));
                 n->value += frameDiff * n->speed;
                 cScriptPlayerChannelObject_LoadNextScriptKey((cScriptPlayerChannelObject*)self);
                 goto loop;
             }
         }
     } while (0);
-    if (((sCacheEvent_3698*)self->mpActiveObjectList) == 0 && ((sCacheRec_3698*)self->mpNextKey) == 0)
+    if (((sCacheEvent_3698*)self->mpActiveObjectList) == 0 && (self->mpNextKey) == 0)
         return 0;
     return 1;
 }
@@ -3724,7 +3696,7 @@ struct sCacheEntry2 {
  */
 extern "C" sCacheEntry2* cScriptPlayerChannelObject_AddActiveKey(cScriptPlayerChannelObject* self, sCacheRecord2* rec)
 {
-    sCacheEntry2* newKey = (sCacheEntry2*)((char*)self->mpObjectArray + rec->id * 0x24);
+    sCacheEntry2* newKey = (sCacheEntry2*)&self->mpObjectArray[rec->id];
     newKey->x = rec->x;
     newKey->y = rec->y;
     newKey->fx = rec->ix;
@@ -3929,15 +3901,7 @@ struct sRcVE3_273AA8 {
 };
 
 
-struct sRcRec_273AA8 {
-    unsigned short type;    // 0x0
-    unsigned short size;    // 0x2
-};
 
-struct sRcObj_273AA8 {
-    int f0;
-    sRcVE_273AA8* vt;       // 0x4
-};
 
 
 /**
@@ -3959,42 +3923,42 @@ extern "C" int cScriptPlayerEntity_SetupPlay(cScriptPlayerEntity* self)
     self->mSetupScriptInitialEventBits = 0;
     if ((self->mpSystemHeader)->numChannels) {
         void* heap = (char*)&self->mpOwner->mpManager->mHeap;
-        *(sRcObj_273AA8***)&self->mpChannelPlayers = (sRcObj_273AA8**)cScriptHeap_AllocMem(heap, (self->mpSystemHeader)->numChannels * 4);
+        *(cScriptPlayerChannel***)&self->mpChannelPlayers = (cScriptPlayerChannel**)cScriptHeap_AllocMem(heap, (self->mpSystemHeader)->numChannels * 4);
         char* channelData = (char*)(self->mpSystemHeader) + (self->mpSystemHeader)->headerSize;
         for (int i = 0; i < (self->mpSystemHeader)->numChannels; i++) {
-            sRcRec_273AA8* channelHeader = (sRcRec_273AA8*)channelData;
+            tInSeqEntityChannelHeader* channelHeader = (tInSeqEntityChannelHeader*)channelData;
             channelData += 4;
             switch (channelHeader->type) {
             case 0: {
-                sRcObj_273AA8** slot = (sRcObj_273AA8**)((i << 2) + (int)((sRcObj_273AA8**)self->mpChannelPlayers));
-                *slot = (sRcObj_273AA8*)cScriptPlayerChannelSpline_cScriptPlayerChannelSpline((cScriptPlayerChannelSpline*)func_00272488_impl(40, heap));
+                cScriptPlayerChannel** slot = (cScriptPlayerChannel**)((i << 2) + (int)((cScriptPlayerChannel**)self->mpChannelPlayers));
+                *slot = (cScriptPlayerChannel*)cScriptPlayerChannelSpline_cScriptPlayerChannelSpline((cScriptPlayerChannelSpline*)func_00272488_impl(40, heap));
                 break;
             }
             case 1: {
-                sRcObj_273AA8** slot = (sRcObj_273AA8**)((i << 2) + (int)((sRcObj_273AA8**)self->mpChannelPlayers));
-                *slot = (sRcObj_273AA8*)cScriptPlayerChannelObject_cScriptPlayerChannelObject((cScriptPlayerChannelObject*)func_00272488_impl(40, heap));
+                cScriptPlayerChannel** slot = (cScriptPlayerChannel**)((i << 2) + (int)((cScriptPlayerChannel**)self->mpChannelPlayers));
+                *slot = (cScriptPlayerChannel*)cScriptPlayerChannelObject_cScriptPlayerChannelObject((cScriptPlayerChannelObject*)func_00272488_impl(40, heap));
                 break;
             }
             case 2: {
-                sRcObj_273AA8** slot = (sRcObj_273AA8**)((i << 2) + (int)((sRcObj_273AA8**)self->mpChannelPlayers));
-                *slot = (sRcObj_273AA8*)cScriptPlayerChannelBlock_cScriptPlayerChannelBlock((cScriptPlayerChannelBlock*)func_00272488_impl(44, heap));
+                cScriptPlayerChannel** slot = (cScriptPlayerChannel**)((i << 2) + (int)((cScriptPlayerChannel**)self->mpChannelPlayers));
+                *slot = (cScriptPlayerChannel*)cScriptPlayerChannelBlock_cScriptPlayerChannelBlock((cScriptPlayerChannelBlock*)func_00272488_impl(44, heap));
                 break;
             }
             case 3: {
-                sRcObj_273AA8** slot = (sRcObj_273AA8**)((i << 2) + (int)((sRcObj_273AA8**)self->mpChannelPlayers));
-                *slot = (sRcObj_273AA8*)cScriptPlayerChannelEvent_cScriptPlayerChannelEvent((cScriptPlayerChannelEvent*)func_00272488_impl(40, heap));
+                cScriptPlayerChannel** slot = (cScriptPlayerChannel**)((i << 2) + (int)((cScriptPlayerChannel**)self->mpChannelPlayers));
+                *slot = (cScriptPlayerChannel*)cScriptPlayerChannelEvent_cScriptPlayerChannelEvent((cScriptPlayerChannelEvent*)func_00272488_impl(40, heap));
                 break;
             }
             }
             int flag = 0;
             int* pd = &self->mSetupScriptHasKeysLeft;
             int keysLeft = 0;
-            sRcObj_273AA8* channel = ((sRcObj_273AA8**)self->mpChannelPlayers)[i];
-            if (channel->vt[1].fn((char*)channel + channel->vt[1].delta, channelData, self, &flag) || self->mSetupScriptHasKeysLeft)
+            cScriptPlayerChannel* channel = ((cScriptPlayerChannel**)self->mpChannelPlayers)[i];
+            if (((sRcVE_273AA8*)channel->mVtbl)[1].fn((char*)channel + ((sRcVE_273AA8*)channel->mVtbl)[1].delta, channelData, self, &flag) || self->mSetupScriptHasKeysLeft)
                 keysLeft = 1;
             *pd = keysLeft;
             self->mSetupScriptInitialEventBits |= flag;
-            channelData += channelHeader->size;
+            channelData += channelHeader->dataSize;
         }
     }
     self->mIsPlaying = 1;

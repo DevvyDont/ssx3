@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/nislist.h"
 #include "sound/ssxaudio.h"
 #include "scripter/videngine.h"
 #include "scripter/circularbuffer.h"
@@ -304,9 +305,6 @@ INCLUDE_ASM("scripter/videngine", cCircularBuffer_AddToTail);
 int cCircularBuffer_IsFull(void*);
 extern "C" int cCircularBuffer_IncBufferIndex(cCircularBuffer* self, int a1);
 
-struct sVidCmd3C80 {
-    int v[7];
-};
 
 /**
  * Appends a NIS list entry to a circular buffer: copies the 0x1C-byte @p cmd to the tail slot (+0x90), advances the
@@ -315,10 +313,10 @@ struct sVidCmd3C80 {
  * @param cmd  the entry to copy
  * @return 1, or 0 when the buffer was full
  */
-extern "C" int cCircularBuffer_AddToTail(cCircularBuffer* self, sVidCmd3C80* cmd)
+extern "C" int cCircularBuffer_AddToTail(cCircularBuffer* self, tNISListEntry* cmd)
 {
     if (cCircularBuffer_IsFull(self) != 0) return 0;
-    ((sVidCmd3C80*)self)[self->mTailIndex] = *cmd;
+    ((tNISListEntry*)self)[self->mTailIndex] = *cmd;
     self->mTailIndex = cCircularBuffer_IncBufferIndex(self, self->mTailIndex);
     if (self->mTailIndex == self->mHeadIndex) {
         self->mIsFull = 1;

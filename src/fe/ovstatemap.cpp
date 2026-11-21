@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "sound/ssxaudio.h"
 #include "main/gamestate.h"
 #include "ui/uitext.h"
@@ -281,10 +282,6 @@ struct sVEntry00208B00 {
     void (*fn)(void*, int);
 };
 
-struct sObj00208B00 {
-    int pad[2];
-    sVEntry00208B00* vt;
-};
 
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -300,12 +297,12 @@ extern char str_ConfirmMenu[];
  */
 extern "C" void cOVState_MAP_onGainFocus(cOVState_MAP* self, int pPrevState)
 {
-    sObj00208B00* confirmMenu;
+    cUIThing* confirmMenu;
     cUIState_onGainFocus(self, pPrevState);
-    confirmMenu = (sObj00208B00*)cUIScreen_getObjectByHashName(self->mpMapScreen, GetHashValue32(str_ConfirmMenu));
+    confirmMenu = (cUIThing*)cUIScreen_getObjectByHashName(self->mpMapScreen, GetHashValue32(str_ConfirmMenu));
     if (confirmMenu != 0) {
-        confirmMenu->vt[7].fn((char*)confirmMenu + confirmMenu->vt[7].delta, 0);
-        confirmMenu->vt[9].fn((char*)confirmMenu + confirmMenu->vt[9].delta, 0);
+        ((sVEntry00208B00*)confirmMenu->mVtbl)[7].fn((char*)confirmMenu + ((sVEntry00208B00*)confirmMenu->mVtbl)[7].delta, 0);
+        ((sVEntry00208B00*)confirmMenu->mVtbl)[9].fn((char*)confirmMenu + ((sVEntry00208B00*)confirmMenu->mVtbl)[9].delta, 0);
     }
 }
 #endif
@@ -340,10 +337,6 @@ struct sVEntry00208BB8 {
     void (*fn)(void*, int);
 };
 
-struct sObj00208BB8 {
-    int pad[2];
-    sVEntry00208BB8* vt;
-};
 
 /**
  * Starts leaving the map overlay: flags the exit and hides its two pop-up widgets.
@@ -353,16 +346,16 @@ struct sObj00208BB8 {
  */
 extern "C" void cOVState_MAP_setupScreenExit(cOVState_MAP* self)
 {
-    sObj00208BB8* popupWidget;
+    cUIThing* popupWidget;
     self->mScreenExiting = 1;
     self->mMapTextureSet = 0;
-    popupWidget = (sObj00208BB8*)self->mpMap;
+    popupWidget = (cUIThing*)self->mpMap;
     if (popupWidget != 0) {
-        popupWidget->vt[9].fn((char*)popupWidget + popupWidget->vt[9].delta, 0);
+        ((sVEntry00208BB8*)popupWidget->mVtbl)[9].fn((char*)popupWidget + ((sVEntry00208BB8*)popupWidget->mVtbl)[9].delta, 0);
     }
-    popupWidget = (sObj00208BB8*)self->mpPlayerIcon;
+    popupWidget = (cUIThing*)self->mpPlayerIcon;
     if (popupWidget != 0) {
-        popupWidget->vt[9].fn((char*)popupWidget + popupWidget->vt[9].delta, 0);
+        ((sVEntry00208BB8*)popupWidget->mVtbl)[9].fn((char*)popupWidget + ((sVEntry00208BB8*)popupWidget->mVtbl)[9].delta, 0);
     }
 }
 #endif
@@ -682,10 +675,6 @@ struct sVEntry00209300 {
     int (*fn)(void*);
 };
 
-struct sObj00209300 {
-    int pad[2];
-    sVEntry00209300* vt;
-};
 
 extern "C" void cOVState_MAP_showIndicators(cOVState_MAP* self);
 
@@ -696,9 +685,9 @@ extern "C" void cOVState_MAP_showIndicators(cOVState_MAP* self);
  *
  * @param pInput  the UI input object
  */
-extern "C" void cOVState_MAP_onInputAlways(cOVState_MAP* self, sObj00209300* pInput)
+extern "C" void cOVState_MAP_onInputAlways(cOVState_MAP* self, cUIThing* pInput)
 {
-    if (pInput->vt[17].fn((char*)pInput + pInput->vt[17].delta) != 0 || pInput->vt[18].fn((char*)pInput + pInput->vt[18].delta) != 0) {
+    if (((sVEntry00209300*)pInput->mVtbl)[17].fn((char*)pInput + ((sVEntry00209300*)pInput->mVtbl)[17].delta) != 0 || ((sVEntry00209300*)pInput->mVtbl)[18].fn((char*)pInput + ((sVEntry00209300*)pInput->mVtbl)[18].delta) != 0) {
         cOVState_MAP_showIndicators(self);
     }
 }
@@ -917,9 +906,6 @@ struct sV3_96A8 {
     sV3_96A8(const float& ax, const float& ay) : x(ax), y(ay), z(0.0f) {}
 };
 
-struct sV4_96A8 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sBounds_96A8 {
     char pad_0x0[0x1C];
@@ -956,12 +942,6 @@ public:
     virtual void SetScale(const sV3_96A8& s);
 };
 
-struct sFEObjData_96A8 {
-    char pad_0x0[0x14];
-    int flags;                  // 0x14
-    char pad_0x18[0x2C];
-    sV3_96A8 pos;               // 0x44
-};
 
 class cRiderSub_96A8 {
 public:
@@ -969,7 +949,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual sV4_96A8* getPosition();
+    virtual t4Vector* getPosition();
 };
 
 
@@ -1007,9 +987,9 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(cOVState_MAP* selfp)
     cOVState_MAP* self = selfp;
     void* ifMap = cBE_getInterface_Fv(cBE_getBE(), 10);
     void* ifGame = cBE_getInterface_Fv(cBE_getBE(), 0);
-    sV3_96A8 mapPos = ((sFEObjData_96A8*)((cFEObj_96A8*)self->mpMap))->pos;
+    sV3_96A8 mapPos = (*(sV3_96A8*)&((cUIThing*)((cFEObj_96A8*)self->mpMap))->mPosition);
     char* rider = (char*)SSXApp->Game->AI->Riders[0];
-    sV4_96A8 pp = *((cRiderSub_96A8*)(rider + 0x6C0))->getPosition();
+    t4Vector pp = *((cRiderSub_96A8*)(rider + 0x6C0))->getPosition();
     sBounds_96A8 bounds;
     cBEMissionInterface_getPictureDBRecord(&bounds, ifMap, *cBENewRaceInterface_getLocation(ifGame));
     float fx = Absf_96A8((pp.x - bounds.minX) / (bounds.maxX - bounds.minX));
@@ -1025,13 +1005,13 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(cOVState_MAP* selfp)
     *(int*)(ind + 0x7C) = 0;
     {
         sV3_96A8 indicatorPos((float)(unsigned int)(px + 0xFC) - 5.0f, (float)(unsigned int)(py + 97) - 5.0f, mapPos.z);
-        ((sFEObjData_96A8*)((cFEObj_96A8*)self->mpPlayerIcon))->pos = indicatorPos;
+        (*(sV3_96A8*)&((cUIThing*)((cFEObj_96A8*)self->mpPlayerIcon))->mPosition) = indicatorPos;
     }
     ((cFEObj_96A8*)self->mpPlayerIcon)->SetScale(sV3_96A8(17.0f, 17.0f));
     cUIIcon_setTextureByHashValue(((cFEObj_96A8*)self->mpPlayerIcon), GetHashValue32(str_location));
     ((cFEObj_96A8*)self->mpPlayerIcon)->SetVisible(0);
-    sFEObjData_96A8* indicatorData = (sFEObjData_96A8*)((cFEObj_96A8*)self->mpPlayerIcon);
-    indicatorData->flags = (indicatorData->flags & ~0x1F00) | 0xD00;
+    cUIThing* indicatorData = (cUIThing*)((cFEObj_96A8*)self->mpPlayerIcon);
+    indicatorData->mAttr = (indicatorData->mAttr & ~0x1F00) | 0xD00;
     cList_addToEnd((cList*)(((char*)self->mpMapScreen) + 0xB4), (cListNode*)((cFEObj_96A8*)self->mpPlayerIcon));
 }
 #endif
@@ -1098,7 +1078,7 @@ extern "C" void cOVState_MAP_setupLocalSessionList(cOVState_MAP* selfp)
     void* ifMap = cBE_getInterface_Fv(cBE_getBE(), 10);
     void* ifGame = cBE_getInterface_Fv(cBE_getBE(), 0);
     self->nSessions = cBEMissionInterface_getNumberSessionsOnTrack(ifMap, *cBENewRaceInterface_getLocation(ifGame));
-    sV3_96A8 mapPos = ((sFEObjData_96A8*)self->img)->pos;
+    sV3_96A8 mapPos = (*(sV3_96A8*)&((cUIThing*)self->img)->mPosition);
     for (int i = 0; i < self->nSessions; i++) {
         if (cPathSys_isStartpoint(gPaths, 2, i + 1) != 0) {
         const char* sp = (const char*)cPathSys_getStartpoint(gPaths, 2, i + 1);
@@ -1121,8 +1101,8 @@ extern "C" void cOVState_MAP_setupLocalSessionList(cOVState_MAP* selfp)
         self->markA[i]->SetScale(sV3_96A8(18.0f, 18.0f));
         cUIIcon_setTextureByHashValue(self->markA[i], GetHashValue32(str_dot_visited));
         self->markA[i]->SetVisible(0);
-        sFEObjData_96A8* da = (sFEObjData_96A8*)self->markA[i];
-        da->flags = (da->flags & ~0x1F00) | 0xB00;
+        cUIThing* da = (cUIThing*)self->markA[i];
+        da->mAttr = (da->mAttr & ~0x1F00) | 0xB00;
         cList_addToEnd((cList*)(self->screen + 0xB4), (cListNode*)self->markA[i]);
 
         self->markB[i] = (cFEObj_96A8*)new (str_Map_Indicator_Highlight, 0x20000000, 0) cUIIcon_9970(self->screen);
@@ -1131,8 +1111,8 @@ extern "C" void cOVState_MAP_setupLocalSessionList(cOVState_MAP* selfp)
         self->markB[i]->SetScale(sV3_96A8(18.0f, 18.0f));
         cUIIcon_setTextureByHashValue(self->markB[i], GetHashValue32(str_indicator));
         self->markB[i]->SetVisible(0);
-        sFEObjData_96A8* db = (sFEObjData_96A8*)self->markB[i];
-        db->flags = (db->flags & ~0x1F00) | 0xC00;
+        cUIThing* db = (cUIThing*)self->markB[i];
+        db->mAttr = (db->mAttr & ~0x1F00) | 0xC00;
         cList_addToEnd((cList*)(self->screen + 0xB4), (cListNode*)self->markB[i]);
         }
     }

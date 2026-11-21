@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "intersect/bxnash.h"
+#include "ui/uithing.h"
 #include "world/worldview.h"
 #include "object/spline3d.h"
 #include "object/splinemodifier.h"
@@ -203,16 +205,13 @@ extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cSpline_getPos(void* follow, float t, void* pos, void* vel, void* acc);
 
 
-struct sSmV3_9830 {
-    float x, y, z;
-};
 
 struct sSmM44_9830 {
     float m[4][4];
 } __attribute__((aligned(16)));
 
 
-extern sSmV3_9830 t4vect_ZAxis;
+extern t3Vector t4vect_ZAxis;
 
 
 static inline float Atan2_9830(float y, float x)
@@ -313,11 +312,11 @@ extern "C" void cSplineModifier_updateRootTransform(cSplineModifier* self)
         float len = fsqrt(self->X2 + self->Y2);
         ry += Atan2_9830(self->Dir.z, len);
     }
-    sSmV3_9830 rot;
+    t3Vector rot;
     rot.x = rx;
     rot.y = ry;
     rot.z = rz;
-    sSmV3_9830 pos;
+    t3Vector pos;
     pos.x = self->Pos.x;
     pos.y = self->Pos.y;
     pos.z = self->Pos.z;
@@ -356,7 +355,7 @@ extern "C" void cSplineModifier_updateRootTransform(cSplineModifier* self)
     (*(sSmM44_9830*)&self->Transform).m[3][3] = 1.0f;
     tBoundBox* sub = &self->BoundBox;
     if (self->HeadTweak != 0.0f) {
-        const sSmV3_9830* axis = &t4vect_ZAxis;
+        const t3Vector* axis = &t4vect_ZAxis;
         fSinCos(&sc[3][0], &sc[3][1], *(float*)(((char*)sub) + 0x28));
         float k = 1.0f - sc[3][1];
         float kx = k * axis->x;
@@ -1178,14 +1177,10 @@ struct sOctCell_A780 {
     void* lists[3];
 };
 
-struct sHashCellR_A780 {
-    char pad_0x0[0x10];
-    sOctCell_A780* oct;   // 0x10
-};
 
 extern "C" void nash_Nash_findkey_A780(sHashKey_A780* out, void* box) __asm__("nash_Nash_findkey");
 extern "C" void nash_Cell_remnode_A780(sOctCell_A780* oct, int type, void* node, sHashKey_A780* key,
-                                   sHashCellR_A780* cell) __asm__("nash_Cell_remnode");
+                                   nash_Octant* cell) __asm__("nash_Cell_remnode");
 
 static inline int octEmpty_A780(sOctCell_A780* o)
 {
@@ -1217,20 +1212,20 @@ extern "C" void cMultiSplineModifier_restoreOverlapSystem(cMultiSplineModifier* 
 {
     for (int i = 1; i < vself->NumModels; i++) {
         void* node = ((void**)vself->NodeInst)[i];
-        sHashCellR_A780* cell = (sHashCellR_A780*)cObjectInterface_getNash();
+        nash_Octant* cell = (nash_Octant*)cObjectInterface_getNash();
         // PORT: the segment array (0x60-byte entries) is indexed with 32-bit integer arithmetic.
         char* box = (char*)(i * 0x60 + (int)vself->Nodes) + 0x30;
         (*(int*)((char*)cell + 0xA0))++;
         sHashKey_A780 key;
         nash_Nash_findkey_A780(&key, box);
-        sHashCellR_A780* cellX = key.x < 0 ? cell + 4 : cell;
-        sHashCellR_A780* cellXY = key.y < 0 ? cellX + 2 : cellX;
-        sHashCellR_A780* cellXYZ = key.z < 0 ? cellXY + 1 : cellXY;
-        sHashCellR_A780* octant = cellXYZ;
-        nash_Cell_remnode_A780(octant->oct, 0, node, &key, octant);
-        if (octEmpty_A780(octant->oct)) {
-            operator_delete((int*)octant->oct);
-            octant->oct = 0;
+        nash_Octant* cellX = key.x < 0 ? cell + 4 : cell;
+        nash_Octant* cellXY = key.y < 0 ? cellX + 2 : cellX;
+        nash_Octant* cellXYZ = key.z < 0 ? cellXY + 1 : cellXY;
+        nash_Octant* octant = cellXYZ;
+        nash_Cell_remnode_A780(((sOctCell_A780*)octant->rootcell), 0, node, &key, octant);
+        if (octEmpty_A780(((sOctCell_A780*)octant->rootcell))) {
+            operator_delete((int*)((sOctCell_A780*)octant->rootcell));
+            (*(sOctCell_A780**)&octant->rootcell) = 0;
         }
     }
 }
@@ -1243,14 +1238,10 @@ struct sSmVec4_A918 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sSmBox_A918 {
-    sSmVec4_A918 min;       // 0x30
-    sSmVec4_A918 max;       // 0x40
-};
 
 struct sSmElem_A918 {
     char pad_0x0[0x30];
-    sSmBox_A918 box;        // 0x30
+    tBoundBox box;        // 0x30
     char pad_0x50[0x10];
 };
 
@@ -1331,19 +1322,19 @@ extern "C" void cMultiSplineModifier_updateOverlapSystem(cMultiSplineModifier* s
         ((sVEntry<void(void*)>*)self->mVtbl)[3].fn((char*)self + ((sVEntry<void(void*)>*)self->mVtbl)[3].delta);
     }
     for (int i = 1; i < self->NumModels; i++) {
-        sSmBox_A918 old = ((sSmElem_A918*)self->Nodes)[i].box;
+        tBoundBox old = ((sSmElem_A918*)self->Nodes)[i].box;
         float halfSize = self->Radius;
         sSmVec4_A918 ext;
         ext.x = halfSize;
         ext.y = halfSize;
         ext.z = halfSize;
         ext.w = 0.0f;
-        ((sSmElem_A918*)self->Nodes)[i].box.min = vu0Sub_A918(instPos_A918(self, i), ext);
-        ((sSmElem_A918*)self->Nodes)[i].box.max = vu0Add_A918(instPos_A918(self, i), ext);
+        (*(sSmVec4_A918*)&((sSmElem_A918*)self->Nodes)[i].box.MinPoint) = vu0Sub_A918(instPos_A918(self, i), ext);
+        (*(sSmVec4_A918*)&((sSmElem_A918*)self->Nodes)[i].box.MaxPoint) = vu0Add_A918(instPos_A918(self, i), ext);
         void* id = ((char**)self->NodeInst)[i];
         nash_Nash_movenode(cObjectInterface_getNash(), 0, id, (sBox_F048*)&((sSmElem_A918*)self->Nodes)[i].box, (sBox_F048*)&old);
-        setMin_A918((sSmInst_A918*)((char**)self->NodeInst)[i], ((sSmElem_A918*)self->Nodes)[i].box.min);
-        setMax_A918((sSmInst_A918*)((char**)self->NodeInst)[i], ((sSmElem_A918*)self->Nodes)[i].box.max);
+        setMin_A918((sSmInst_A918*)((char**)self->NodeInst)[i], (*(sSmVec4_A918*)&((sSmElem_A918*)self->Nodes)[i].box.MinPoint));
+        setMax_A918((sSmInst_A918*)((char**)self->NodeInst)[i], (*(sSmVec4_A918*)&((sSmElem_A918*)self->Nodes)[i].box.MaxPoint));
     }
 }
 #endif

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "main/gameviewman.h"
 #include "main/sectionman.h"
 #include "bx/appman.h"
@@ -3771,10 +3772,9 @@ void* cHalo_cHalo(void* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cLightHalo_Render);
 #ifdef SKIP_ASM
-struct sV3_2868 { float x, y, z; };
 struct sV4_2868 { float x, y, z, w; sV4_2868(const float& a, const float& b, const float& c, const float& d) { x = a; y = b; z = c; w = d; } };
 struct sV2_2868 { float x, y; sV2_2868() { x = 0.0f; y = 0.0f; } sV2_2868(const float& a, const float& b) { x = a; y = b; } };
-struct sCol_2868 { float a; sV3_2868 d; };
+struct sCol_2868 { float a; t3Vector d; };
 
 struct sRsState_2868 {
     int f0;                 // 0x0
@@ -3882,8 +3882,8 @@ struct sRsCtx_2868 {
 struct sPart_2868 {
     char pad0[0xC];
     int flags;                  // 0xC
-    sV3_2868 vel;               // 0x10
-    sV3_2868 pos;               // 0x1C
+    t3Vector vel;               // 0x10
+    t3Vector pos;               // 0x1C
     char pad28[0x40 - 0x28];
     float alpha[1];             // 0x40
 };
@@ -3932,7 +3932,7 @@ extern "C" void cLightHalo_Render(cLightHalo* self, int idx)
     if (self->mbOnScreen == 0) {
         return;
     }
-    sV3_2868 n;
+    t3Vector n;
     sPart_2868* haloRecord = ((sPart_2868*)self->mpHalo);
     float x = haloRecord->vel.x;
     float y = haloRecord->vel.y;
@@ -4088,7 +4088,7 @@ extern "C" void cLightHalo_Process(cLightHalo* vself, void* vrect)
                 pullBack = 200.0f;
                 break;
             }
-            sV3_2868 viewDir;
+            t3Vector viewDir;
             viewDir.x = rect[6];
             viewDir.y = rect[10];
             viewDir.z = rect[14];
@@ -5589,12 +5589,6 @@ struct sRsVtV47E8 {
     void (*fn)(void*, int, int, float, float, float, float, float, float);
 };
 
-struct sRsCtx47E8 {
-    char pad0[0xE84];
-    sRsState47E8* top;          // 0xE84
-    char pad1[0x10D8 - 0xE88];
-    sRsVt47E8* vtable;          // 0x10D8
-};
 
 struct sFadeVt47E8 {
     short delta;
@@ -5619,19 +5613,19 @@ struct sFade47E8 {
     int rider;                  // 0x74
 };
 
-static inline void rsSetA47E8(sRsCtx47E8* ctx, int mask, int shift, int v)
+static inline void rsSetA47E8(cPS2GraphicsMan* ctx, int mask, int shift, int v)
 {
-    ctx->top->flagsA = (ctx->top->flagsA & ~mask) | ((v << shift) & mask);
+    ((sRsState47E8*)ctx->m_pCurrentDrawState)->flagsA = (((sRsState47E8*)ctx->m_pCurrentDrawState)->flagsA & ~mask) | ((v << shift) & mask);
 }
 
-static inline void rsSetB47E8(sRsCtx47E8* ctx, int mask, int shift, int v)
+static inline void rsSetB47E8(cPS2GraphicsMan* ctx, int mask, int shift, int v)
 {
-    ctx->top->flagsB = (ctx->top->flagsB & ~mask) | ((v << shift) & mask);
+    ((sRsState47E8*)ctx->m_pCurrentDrawState)->flagsB = (((sRsState47E8*)ctx->m_pCurrentDrawState)->flagsB & ~mask) | ((v << shift) & mask);
 }
 
-static inline void rsSet047E8(sRsCtx47E8* ctx, int mask, int shift, int v)
+static inline void rsSet047E8(cPS2GraphicsMan* ctx, int mask, int shift, int v)
 {
-    ctx->top->f0 = (ctx->top->f0 & ~mask) | ((v << shift) & mask);
+    ((sRsState47E8*)ctx->m_pCurrentDrawState)->f0 = (((sRsState47E8*)ctx->m_pCurrentDrawState)->f0 & ~mask) | ((v << shift) & mask);
 }
 
 static inline int fadeTex47E8(sFade47E8* self)
@@ -5653,13 +5647,13 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
         return;
     }
     FigureOutTransitionUVs();
-    sRsCtx47E8* ctx = (sRsCtx47E8*)cGraphicsMan_TheGraphicsMan_boardwakefx;
+    cPS2GraphicsMan* ctx = (cPS2GraphicsMan*)cGraphicsMan_TheGraphicsMan_boardwakefx;
     if (self->mbPlayingTransition == 0) {
         return;
     }
     float curTime = self->mfCurrentTime;
     if (self->mRequestingScreenGrab != 0 && self->mfInTime + self->mfHoldTime <= curTime) {
-        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)ctx->vtable;
+        sVEntry<void(void*, void*)>* vt = (sVEntry<void(void*, void*)>*)((sRsVt47E8*)ctx->mVtbl);
         vt[61].fn((char*)ctx + vt[61].delta, (int*)&self->mScreenGrabHandle);
         self->mRequestingScreenGrab = 0;
     }
@@ -5682,12 +5676,12 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
     if (clamped >= 0.93f) {
         cWorldPainterMan_reset_47E8();
     }
-    ctx->top[1] = ctx->top[0];
-    ctx->top++;
-    ctx->vtable[21].fn((char*)ctx + ctx->vtable[21].delta);
-    ctx->vtable[31].fn((char*)ctx + ctx->vtable[31].delta);
-    ctx->vtable[37].fn((char*)ctx + ctx->vtable[37].delta);
-    sRsVtV47E8* vv = (sRsVtV47E8*)ctx->vtable;
+    ((sRsState47E8*)ctx->m_pCurrentDrawState)[1] = ((sRsState47E8*)ctx->m_pCurrentDrawState)[0];
+    (*(sRsState47E8**)&ctx->m_pCurrentDrawState)++;
+    ((sRsVt47E8*)ctx->mVtbl)[21].fn((char*)ctx + ((sRsVt47E8*)ctx->mVtbl)[21].delta);
+    ((sRsVt47E8*)ctx->mVtbl)[31].fn((char*)ctx + ((sRsVt47E8*)ctx->mVtbl)[31].delta);
+    ((sRsVt47E8*)ctx->mVtbl)[37].fn((char*)ctx + ((sRsVt47E8*)ctx->mVtbl)[37].delta);
+    sRsVtV47E8* vv = (sRsVtV47E8*)((sRsVt47E8*)ctx->mVtbl);
     vv[26].fn((char*)ctx + vv[26].delta, 0, 0, 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
     rsSetB47E8(ctx, 0x3E0, 5, 8);
     rsSetA47E8(ctx, 0x400000, 22, 1);
@@ -5699,17 +5693,17 @@ extern "C" void cTransitionMan_render(cTransitionMan* self)
     rsSetA47E8(ctx, 0x3, 0, 2);
     rsSetB47E8(ctx, 0x1FFFFC00, 10, 0);
     if (self->mUsingScreenGrab != 0) {
-        ctx->top->tex = fadeTex47E8(((sFade47E8*)self));
+        ((sRsState47E8*)ctx->m_pCurrentDrawState)->tex = fadeTex47E8(((sFade47E8*)self));
     } else {
-        ctx->top->tex = -1;
+        ((sRsState47E8*)ctx->m_pCurrentDrawState)->tex = -1;
     }
     if (self->mUsingScreenGrab == 0 || self->mRequestingScreenGrab == 0) {
         sFadeVt47E8* ov = *(sFadeVt47E8**)transition;
         ov[2].fn(transition + ov[2].delta, clamped);
     }
-    ctx->vtable[32].fn((char*)ctx + ctx->vtable[32].delta);
-    ctx->vtable[22].fn((char*)ctx + ctx->vtable[22].delta);
-    ctx->top--;
+    ((sRsVt47E8*)ctx->mVtbl)[32].fn((char*)ctx + ((sRsVt47E8*)ctx->mVtbl)[32].delta);
+    ((sRsVt47E8*)ctx->mVtbl)[22].fn((char*)ctx + ((sRsVt47E8*)ctx->mVtbl)[22].delta);
+    (*(sRsState47E8**)&ctx->m_pCurrentDrawState)--;
 }
 #endif
 

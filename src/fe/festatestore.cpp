@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "fe/ferider.h"
 #include "sound/ssxaudio.h"
 #include "fe/fereal.h"
@@ -190,9 +191,6 @@ extern char str_empty_box[];
 extern char str_checkbox[];
 extern char str_yell_dollar_sign[];
 
-struct sVec4_1849B0 {
-    float x, y, z, w;
-};
 
 
 /**
@@ -222,8 +220,8 @@ extern "C" void cFEStateUberTrick_onCreateScreen(cFEStateUberTrick* self)
     cFERiderManager_setHumanCharacter(&SSXApp->RealFE->mRiderManager, self->mUserNum, charID, 0);
     cFERiderManager_setHumanVisible(&SSXApp->RealFE->mRiderManager, self->mUserNum, 0);
     char* realFe = (char*)SSXApp->RealFE;
-    sVec4_1849B0 camPos;
-    sVec4_1849B0 lookAt;
+    t4Vector camPos;
+    t4Vector lookAt;
     float z = 80.0f;
     float w = 1.0f;
     float y = 660.0f;
@@ -311,10 +309,6 @@ struct sVEntry00184BE0 {
     void (*fn)(void*, int);
 };
 
-struct sObj00184BE0 {
-    int pad[2];
-    sVEntry00184BE0* vt;
-};
 
 extern "C" void cFEStateUberTrick_activateMainMenu(void* self);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
@@ -329,15 +323,15 @@ extern "C" void cUIState_onGainFocus(void* self, int a1);
  */
 extern "C" void cFEStateUberTrick_onGainFocus(cFEStateUberTrick* self, int prevState)
 {
-    sObj00184BE0* menu;
+    cUIThing* menu;
     cFEStateUberTrick_activateMainMenu(self);
-    menu = (sObj00184BE0*)self->mpMainMenu;
+    menu = (cUIThing*)self->mpMainMenu;
     if (menu != 0) {
-        menu->vt[7].fn((char*)menu + menu->vt[7].delta, 1);
+        ((sVEntry00184BE0*)menu->mVtbl)[7].fn((char*)menu + ((sVEntry00184BE0*)menu->mVtbl)[7].delta, 1);
     }
-    menu = (sObj00184BE0*)self->mpTrickMenu;
+    menu = (cUIThing*)self->mpTrickMenu;
     if (menu != 0) {
-        menu->vt[7].fn((char*)menu + menu->vt[7].delta, 0);
+        ((sVEntry00184BE0*)menu->mVtbl)[7].fn((char*)menu + ((sVEntry00184BE0*)menu->mVtbl)[7].delta, 0);
     }
     cUIState_onGainFocus(self, prevState);
 }

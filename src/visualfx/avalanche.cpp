@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "render/particle.h"
 #include "sound/ssxaudio.h"
 #include "visualfx/avalanche.h"
 #include "render/ps2graphicsman.h"
@@ -1955,9 +1956,8 @@ extern "C" void cAvalanche_addAvalancheNode(int id, char* obj, int type, float l
 //100%
 INCLUDE_ASM("visualfx/avalanche", cAvalanche_setAvalancheNodeEmitterData);
 #ifdef SKIP_ASM
-struct sAvParams9538 { int data[0xD8 / 4]; };
 struct sAvNode9538 {
-    sAvParams9538 params;       // 0x0
+    tParticleData params;       // 0x0
     char padD8[0xF0 - 0xD8];
     unsigned short type;        // 0xF0
     unsigned char emit;         // 0xF2
@@ -1983,7 +1983,7 @@ extern void* cAvalanche_m_avalancheList;
  * @param id  the instance record the node belongs to
  * @param params  the 0xD8-byte emitter parameters to copy
  */
-extern "C" void cAvalanche_setAvalancheNodeEmitterData(int id, sAvParams9538* params)
+extern "C" void cAvalanche_setAvalancheNodeEmitterData(int id, tParticleData* params)
 {
     for (sAvGroup9538* group = (sAvGroup9538*)cAvalanche_m_avalancheList; group != 0; group = group->next) {
         for (sAvNode9538* n = group->nodes; n != 0; n = n->next) {

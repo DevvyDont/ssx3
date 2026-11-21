@@ -1,4 +1,7 @@
 #include "common.h"
+#include "render/irradiance.h"
+#include "world/worldcache.h"
+#include "visualfx/worldlightman.h"
 #include "bx/appman.h"
 #include "ui/uithing.h"
 #include "visualfx/snowfall.h"
@@ -163,10 +166,6 @@ struct sAABox_5400 {
     sAABox_5400(const sVec_5400& a, const sVec_5400& b) { min = a; max = b; }
 };
 
-// 0xA0-byte light set (ten quadwords).
-struct sLightSet_5400 {
-    sVec_5400 v[10];
-};
 
 struct sBox_5400 {
     unsigned int id;
@@ -180,11 +179,11 @@ struct sNode_5400 {
     unsigned int id;          // 0x0
     int priority;             // 0x4
     char pad08[0x8];
-    sLightSet_5400 cur;       // 0x10
+    cIrradiance cur;       // 0x10
     sVec_5400 pos;            // 0xB0
     sBox_5400* box;           // 0xC0
     char padC4[0xC];
-    sLightSet_5400 target;    // 0xD0
+    cIrradiance target;    // 0xD0
     sNode_5400* next;         // 0x170
     sNode_5400* prev;         // 0x174
     char pad178[8];
@@ -222,9 +221,9 @@ extern "C" sBox_5400* cWorldLightMan_evictOverlapNode(sMan_5400* self, int prior
 extern "C" void cWorldLightMan_IntersectLights1(void* self, void* a1, void* a2, void* a3, int count);
 extern "C" void cInstanceNode_buildMeshMat(void* obj, int a1, sMat_5400* out);
 extern "C" void cOverlapList_gettyped(void* cell, sAABox_5400* box);
-extern "C" sLightSet_5400* cRenderStateMan_getCustomIrradiance(void);
+extern "C" cIrradiance* cRenderStateMan_getCustomIrradiance(void);
 extern "C" int cIrradianceDataBase_GetIDByName(void*, void*);
-extern "C" sLightSet_5400* cIrradianceDataBase_Get(void* self, int i);
+extern "C" cIrradiance* cIrradianceDataBase_Get(void* self, int i);
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline sVec_5400 Sub_5400(const sVec_5400& a, const sVec_5400& b)
@@ -285,7 +284,7 @@ static inline sVec_5400 ObjPos_5400(char* obj)
     return *(sVec_5400*)(obj + 0x40);
 }
 
-static inline sLightSet_5400* Resolve_5400(sLightRef_5400* ref)
+static inline cIrradiance* Resolve_5400(sLightRef_5400* ref)
 {
     if (ref->magic != 0x123400) {
         ref->handle = cIrradianceDataBase_GetIDByName(cIrradianceDataBase_TheDataBase, ref);
@@ -334,7 +333,7 @@ static inline sLightRef_5400* GetRef_5400(char* o, int slot)
  * @param force  nonzero for a moving instance: re-check its position
  * @return the entry's current light set (+0x10)
  */
-extern "C" sLightSet_5400* cWorldLightMan_getRealTimeLights(sMan_5400* self, char* obj, int force)
+extern "C" cIrradiance* cWorldLightMan_getRealTimeLights(sMan_5400* self, char* obj, int force)
 {
     unsigned int key = *(unsigned int*)(obj + 0x78);
     int slot = (key >> 8) & 0x1F;
@@ -521,32 +520,11 @@ extern "C" sWorldLightNode* cWorldLightMan_evictHashTableEntry(sWorldLightMan* s
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_evictOverlapNode);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// cWorldLightMan::evictOverlapNode(int iCurrentTick) (SSX On Tour DWARF): returns the first free overlap node,
-// else the one with the oldest tick. Types and names follow On Tour.
-// tResourceID: a 4-byte resource id; tResourceID::Invalid() is 0xFFFFFFFF. The comparison goes through the
-// bool-returning operator== (store-flag, which combine turns into retail's nor/bnez); a plain integer compare is 25%.
-struct tResourceID_5A70 {
-    unsigned int m_uiRID;
-    tResourceID_5A70(unsigned int rid) : m_uiRID(rid) {}
-    bool operator==(const tResourceID_5A70& a) const { return m_uiRID == a.m_uiRID; }
-    bool operator!=(const tResourceID_5A70& a) const { return m_uiRID != a.m_uiRID; }
-    static const tResourceID_5A70 Invalid() { return tResourceID_5A70(0xFFFFFFFF); }
-};
 
-struct tOverlapListNode_5A70 {
-    tResourceID_5A70 RID;  // 0x00
-    int iTick;             // 0x04
-    char pad08[0x38];      // tBoundBox box at 0x10, cOverlapList* pOverlapList at 0x30
-};
 
-struct cWorldLightMan_5A70 {
-    char pad00[0x10];      // m_pNash, m_pWPQuery
-    tOverlapListNode_5A70 OverlapNodeList[8];
-};
 
 // The unit declares this function as `sBox_5400* cWorldLightMan_evictOverlapNode(sMan_5400*, int)` (line ~198); define it under its own types.
-extern "C" tOverlapListNode_5A70* cWorldLightMan_evictOverlapNode_5A70(cWorldLightMan_5A70* self, int iCurrentTick) __asm__("cWorldLightMan_evictOverlapNode");
+extern "C" tOverlapListNode* cWorldLightMan_evictOverlapNode_5A70(cWorldLightMan* self, int iCurrentTick) __asm__("cWorldLightMan_evictOverlapNode");
 /**
  * Takes an overlap node for reuse: the first free one (id -1) of the 8, else the one with the oldest tick.
  *
@@ -556,13 +534,13 @@ extern "C" tOverlapListNode_5A70* cWorldLightMan_evictOverlapNode_5A70(cWorldLig
  * @param iCurrentTick  the current tick (cAppMan_TheAppMan +0x18)
  * @return the node, or null when none qualifies
  */
-extern "C" tOverlapListNode_5A70* cWorldLightMan_evictOverlapNode_5A70(cWorldLightMan_5A70* self, int iCurrentTick)
+extern "C" tOverlapListNode* cWorldLightMan_evictOverlapNode_5A70(cWorldLightMan* self, int iCurrentTick)
 {
-    tOverlapListNode_5A70* pNode = 0;
+    tOverlapListNode* pNode = 0;
     int iOldest = iCurrentTick + 1;
     unsigned int i;
     for (i = 0; i < 8; i++) {
-        if (self->OverlapNodeList[i].RID == tResourceID_5A70::Invalid()) {
+        if (self->OverlapNodeList[i].RID == tResourceID::Invalid()) {
             pNode = &self->OverlapNodeList[i];
             break;
         }
@@ -611,15 +589,11 @@ INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_IntersectLights);
 #ifdef SKIP_ASM
 extern "C" float cWorldLightMan_GetIntensity(void* a, t4Vector* b, void* light);
 
-struct sLight_5B68 {
-    char pad_0x0[0x8];
-    int type;           // 0x8
-};
 
 struct sLightMgr_5B68 {
     char pad_0x0[0x210];
     unsigned int count;         // 0x210
-    sLight_5B68* lights[1];     // 0x214
+    tLightRecord* lights[1];     // 0x214
 };
 
 /**
@@ -639,7 +613,7 @@ struct sLightMgr_5B68 {
 extern "C" void cWorldLightMan_IntersectLights(void* lightMan, void* point, void* mgrp, void** outp, int max)
 {
     sLightMgr_5B68* mgr = (sLightMgr_5B68*)mgrp;
-    sLight_5B68** out = (sLight_5B68**)outp;
+    tLightRecord** out = (tLightRecord**)outp;
     float score[32];
     int count = 0;
     int i;
@@ -650,8 +624,8 @@ extern "C" void cWorldLightMan_IntersectLights(void* lightMan, void* point, void
     float minScore = 0.0f;
     unsigned int n = mgr->count;
     for (unsigned int j = 0; j < n; j++) {
-        sLight_5B68* lightRec = mgr->lights[j];
-        if (lightRec->type == 6) {
+        tLightRecord* lightRec = mgr->lights[j];
+        if (lightRec->m_iIntersect[2] == 6) {
             float lightScore = cWorldLightMan_GetIntensity(lightMan, (t4Vector*)point, lightRec);
             if (minScore < lightScore) {
                 int k;
@@ -684,30 +658,18 @@ struct cWorldLightMan_CalcLightDist_sLight;
 extern "C" int cWorldLightMan_CalcLightDist(void* self, cWorldLightMan_CalcLightDist_sVec3* p, cWorldLightMan_CalcLightDist_sLight* light,
                              float* outDist, float* outInvDist, float* outDot);
 
-struct sLight_5D30 {
-    char pad0[0x10];
-    int type;               // 0x10
-    float intensity;        // 0x14
-    float scale;            // 0x18
-    float radius;           // 0x1C
-    char pad20[0x5C - 0x20];
-    float inner;            // 0x5C
-    float outer;            // 0x60
-    signed char fallPow;    // 0x64
-    signed char conePow;    // 0x65
-};
 
-static inline float Atten_5D30(sLight_5D30* l, float dist)
+static inline float Atten_5D30(tLightRecord* l, float dist)
 {
-    if (l->radius < 5000.0f || dist <= 3750.0f) {
+    if (l->m_fMaxDistance < 5000.0f || dist <= 3750.0f) {
         return 1.0f;
     }
     return 1.0f - (dist - 3750.0f) * 0.0008f;
 }
 
-static inline float Fall_5D30(sLight_5D30* l, float inv)
+static inline float Fall_5D30(tLightRecord* l, float inv)
 {
-    int p = l->fallPow;
+    int p = l->m_cDecayRate;
     float s = inv * 100.0f;
     if (s < 1.0f) {
         switch (p) {
@@ -777,35 +739,35 @@ static inline float Pow_5D30(float x, int n)
  */
 extern "C" float cWorldLightMan_GetIntensity(void* lightMan, t4Vector* point, void* lp)
 {
-    sLight_5D30* light = (sLight_5D30*)lp;
+    tLightRecord* light = (tLightRecord*)lp;
     float dist;
     float inv;
     float dot;
     float att;
     float amount;
-    switch (light->type) {
+    switch (light->m_eLightType) {
     case 0:
-        return light->scale;
+        return light->m_fRGBIntensity;
     case 1:
         if (cWorldLightMan_CalcLightDist(lightMan, (cWorldLightMan_CalcLightDist_sVec3*)point, (cWorldLightMan_CalcLightDist_sLight*)light, &dist, &inv, &dot)) {
-            if (dot >= light->outer) {
+            if (dot >= light->unk_060) {
                 att = Atten_5D30(light, dist);
-                amount = Fall_5D30(light, inv) * light->intensity * att;
-                if (light->inner <= dot) {
-                    amount *= Pow_5D30(dot, light->conePow);
+                amount = Fall_5D30(light, inv) * light->m_fIntensity * att;
+                if (light->unk_05C <= dot) {
+                    amount *= Pow_5D30(dot, light->m_cDropOff);
                 } else {
-                    amount *= Pow_5D30(light->inner, light->conePow);
-                    amount *= (dot - light->outer) / (light->inner - light->outer);
+                    amount *= Pow_5D30(light->unk_05C, light->m_cDropOff);
+                    amount *= (dot - light->unk_060) / (light->unk_05C - light->unk_060);
                 }
-                return light->scale * amount;
+                return light->m_fRGBIntensity * amount;
             }
         }
         break;
     case 2:
         if (cWorldLightMan_CalcLightDist(lightMan, (cWorldLightMan_CalcLightDist_sVec3*)point, (cWorldLightMan_CalcLightDist_sLight*)light, &dist, &inv, 0)) {
             att = Atten_5D30(light, dist);
-            amount = Fall_5D30(light, inv) * light->intensity * att;
-            return light->scale * amount;
+            amount = Fall_5D30(light, inv) * light->m_fIntensity * att;
+            return light->m_fRGBIntensity * amount;
         }
         break;
     case 3:

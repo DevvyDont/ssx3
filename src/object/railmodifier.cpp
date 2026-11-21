@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "ai/rider.h"
+#include "ui/uithing.h"
 #include "bx/appman.h"
 #include "render/bxps2deferman.h"
 #include "render/bxps2tex.h"
@@ -1070,15 +1072,6 @@ INCLUDE_ASM("object/railmodifier", cRigidBody_stepMotion);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
 
-struct sRmBody_D340 {
-    t4Vector pos;       // 0x00
-    t4Vector quat;      // 0x10
-    t4Vector acc0;      // 0x20
-    t4Vector acc1;      // 0x30
-    char pad_0x40[0x40];
-    t4Vector vel;       // 0x80
-    t4Vector angVel;    // 0x90
-};
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
 static inline void ScaleD340(t4Vector& out, const t4Vector& v, float s)
@@ -1166,25 +1159,25 @@ static inline void NormalizeD340(t4Vector& v)
  * @param torque  torque applied over the step
  * @param dt  time step
  */
-extern "C" void cRigidBody_stepMotion(sRmBody_D340* body, const t4Vector* force, const t4Vector* torque, float dt)
+extern "C" void cRigidBody_stepMotion(cRigidBody* body, const t4Vector* force, const t4Vector* torque, float dt)
 {
     t4Vector step;
-    ScaleD340(step, body->vel, dt);
-    AddEqD340(body->pos, step);
+    ScaleD340(step, body->V, dt);
+    AddEqD340(body->Pose.P, step);
     {
         t4Vector quatDeriv;
-        QuatDerivD340(quatDeriv, body->quat, body->angVel);
+        QuatDerivD340(quatDeriv, body->Pose.Q, body->W);
         ScaleD340(step, quatDeriv, dt);
     }
-    body->quat.x += step.x;
-    body->quat.y += step.y;
-    body->quat.z += step.z;
-    body->quat.w += step.w;
-    NormalizeD340(body->quat);
+    body->Pose.Q.x += step.x;
+    body->Pose.Q.y += step.y;
+    body->Pose.Q.z += step.z;
+    body->Pose.Q.w += step.w;
+    NormalizeD340(body->Pose.Q);
     ScaleD340(step, *force, dt);
-    AddEqD340(body->acc0, step);
+    AddEqD340(body->P, step);
     ScaleD340(step, *torque, dt);
-    AddEqD340(body->acc1, step);
+    AddEqD340(body->L, step);
 }
 #endif
 
@@ -1647,13 +1640,6 @@ struct sRmV4_35DDE8 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-// tCollideInfo (On Tour name)
-struct sRmPath_35DDE8 {
-    char pad_0x0[0x10];
-    sRmV4_35DDE8 dir;   // 0x10
-    sRmV4_35DDE8 up;    // 0x20
-    float len;          // 0x30
-};
 
 // PORT: PS2-only VU0 inline asm (a + b), by value.
 static inline sRmV4_35DDE8 vu0AddR_35DDE8(const sRmV4_35DDE8& a, const sRmV4_35DDE8& b)
@@ -1774,7 +1760,7 @@ struct cRollerModifier_DDE8 : public cTransformModifier_DDE8, public cRollerNode
         P = vu0DivR_35DDE8(v, getInvM());
         V = v;
     }
-    void Collision(const sRmPath_35DDE8* tc) __asm__("cRollerModifier_Collision");
+    void Collision(const tCollideInfo* tc) __asm__("cRollerModifier_Collision");
 };
 
 /**
@@ -1787,16 +1773,16 @@ struct cRollerModifier_DDE8 : public cTransformModifier_DDE8, public cRollerNode
  * @param tc  collision info (On Tour tCollideInfo): direction at +0x10, up vector at +0x20, length at +0x30
  */
 // PORT: the unit declares cRollerModifier_Collision(void*) for its caller; this is the method (On Tour: cRollerModifier::Collision).
-void cRollerModifier_DDE8::Collision(const sRmPath_35DDE8* tc)
+void cRollerModifier_DDE8::Collision(const tCollideInfo* tc)
 {
     float addZ = 5000.0f / mMass + 100.0f;
     HitFrequency = 0.0f;
     if (addZ > 600.0f) {
         addZ = 600.0f;
     }
-    setV(vu0AddR_35DDE8(vu0DivR_35DDE8(vu0ScaleR_35DDE8(tc->dir, tc->len), 2.0f),
+    setV(vu0AddR_35DDE8(vu0DivR_35DDE8(vu0ScaleR_35DDE8((*(sRmV4_35DDE8*)&tc->Direct), tc->Vel), 2.0f),
                         sV4K_35DDE8(0.0f, 0.0f, addZ, 0.0f)));
-    setW(vu0ScaleR_35DDE8(tc->up, 10.0f));
+    setW(vu0ScaleR_35DDE8((*(sRmV4_35DDE8*)&tc->Reflect), 10.0f));
     mKineticEnergy = vu0Dot_35DDE8(V, P) + vu0Dot_35DDE8(W, L);
 }
 #endif
@@ -5747,18 +5733,15 @@ extern "C" void cAnimFrame__cAnimFrame(cAnimFrame* self, int flags)
 //100%
 INCLUDE_ASM("object/railmodifier", cAnimFrame_getAngles);
 #ifdef SKIP_ASM
-struct sVec4_361208 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 /**
  * Returns an animation frame's angles: the values at +0x50..+0x58 negated, with w = 0.
  *
  * @param out  receives the angles
  */
-extern "C" void cAnimFrame_getAngles(cAnimFrame* self, sVec4_361208* out)
+extern "C" void cAnimFrame_getAngles(cAnimFrame* self, t4Vector* out)
 {
-    sVec4_361208 negated;
+    t4Vector negated;
     negated.x = -self->Vals[3];
     negated.y = -self->Vals[4];
     negated.z = -self->Vals[5];
@@ -5913,18 +5896,15 @@ extern "C" void cCamAnimFrame_setAnimRecord(void *frame, int source) {
 //100%
 INCLUDE_ASM("object/railmodifier", cCamAnimFrame_getPosition);
 #ifdef SKIP_ASM
-struct sVec4_361378 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 /**
  * Returns a camera animation frame's position: the values at +0x44..+0x4C with w = 1.
  *
  * @param out  receives the position
  */
-extern "C" void cCamAnimFrame_getPosition(cCamAnimFrame* self, sVec4_361378* out)
+extern "C" void cCamAnimFrame_getPosition(cCamAnimFrame* self, t4Vector* out)
 {
-    sVec4_361378 result;
+    t4Vector result;
     result.x = self->Vals[0];
     result.y = self->Vals[1];
     result.z = self->Vals[2];
@@ -5935,18 +5915,15 @@ extern "C" void cCamAnimFrame_getPosition(cCamAnimFrame* self, sVec4_361378* out
 //100%
 INCLUDE_ASM("object/railmodifier", cCamAnimFrame_getAngles);
 #ifdef SKIP_ASM
-struct sVec3_3613B0 {
-    float x, y, z;
-};
 
 /**
  * Returns a camera animation frame's angles: the three values at +0x50..+0x58.
  *
  * @param out  receives the angles
  */
-extern "C" void cCamAnimFrame_getAngles(cCamAnimFrame* self, sVec3_3613B0* out)
+extern "C" void cCamAnimFrame_getAngles(cCamAnimFrame* self, t3Vector* out)
 {
-    sVec3_3613B0 result;
+    t3Vector result;
     result.x = self->Vals[3];
     result.y = self->Vals[4];
     result.z = self->Vals[5];
@@ -7255,7 +7232,7 @@ INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_getBoundBox__FPv);
 void* cMultiSplineModifier_getBoundBox(void* vself)
 {
     cMultiSplineModifier* self = (cMultiSplineModifier*)vself;
-    return (char*)self->Nodes + 0x30;
+    return (char*)&self->Nodes->BoundBox;
 }
 #endif
 

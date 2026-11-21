@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "fe/festateruleselect.h"
 #include "ui/uistate.h"
 #include "be/beintnewrace.h"
@@ -547,20 +548,16 @@ struct sVObj_38F8 {
     sVE_38F8* vt;                   // 0x4
 };
 
-struct sWidget_38F8 {
-    char pad_0x0[0x18];
-    int panel;                      // 0x18
-};
 
 static inline int isOn_38F8()
 {
     return D_004A1A70 == 1;
 }
 
-static inline void* vcall_38F8(char* self, int slot, sWidget_38F8* w)
+static inline void* vcall_38F8(char* self, int slot, cUIThing* w)
 {
     sVObj_38F8* o = **(sVObj_38F8***)(self + 0x10);
-    return o->vt[slot].fn((char*)o + o->vt[slot].delta, self, w->panel);
+    return o->vt[slot].fn((char*)o + o->vt[slot].delta, self, w->mMiscData);
 }
 
 /**
@@ -576,7 +573,7 @@ static inline void* vcall_38F8(char* self, int slot, sWidget_38F8* w)
  * @param event  the widget event
  */
 // Widget event handler of the big radio-button screen (two radio panels at self+0x6D0).
-extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* self, sWidget_38F8* w, int event)
+extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* self, cUIThing* w, int event)
 {
     int panel;
     switch (event) {
@@ -624,7 +621,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
         break;
     case 1:
     case 2:
-        panel = w->panel;
+        panel = w->mMiscData;
         cBraggingRightsMenu_setMenuItemColor((char*)&self->mMenuCtrl[0] + panel * 52);
         break;
     case 7:
@@ -637,7 +634,7 @@ extern "C" void cFEStateBraggingRights_onWidgetEvent(cFEStateBraggingRights* sel
             int slot = cBraggingRightsMenu_findListBoxP_38F8(&self->mMenuCtrl[0], w);
             func_00265568(snd, slot, cUIListBox_getCurrentEntryData_38F8(w));
         } else {
-            panel = w->panel;
+            panel = w->mMiscData;
             int slot = cBraggingRightsMenu_findListBoxP_38F8((char*)&self->mMenuCtrl[0] + panel * 52, w);
             int which = ((signed char*)self->mpGameEventMapping)[slot];
             if (which != -1)
@@ -1070,15 +1067,12 @@ extern "C" void func_00194440(void* self, void* popup, int popupEvent)
 //100%
 INCLUDE_ASM("fe/festatebigradio", DisableTextWidget);
 #ifdef SKIP_ASM
-struct sColor4_4498 {
-    float x, y, z, w;
-};
 
 
 struct sVEntry00194498b {
     short delta;
     short index;
-    void (*fn)(void*, sColor4_4498*);
+    void (*fn)(void*, tARGB*);
 };
 
 /**
@@ -1093,9 +1087,9 @@ extern "C" void DisableTextWidget(void* self)
 {
     sVEntry<void(void*, int)>* vt = *(sVEntry<void(void*, int)>**)((char*)self + 8);
     vt[8].fn((char*)self + vt[8].delta, 1);
-    sColor4_4498 colour = *(sColor4_4498*)((char*)self + 0x1C);
-    if (colour.x > 0.5f) {
-        colour.x = 0.5f;
+    tARGB colour = *(tARGB*)((char*)self + 0x1C);
+    if (colour.A > 0.5f) {
+        colour.A = 0.5f;
         sVEntry00194498b* vt2 = *(sVEntry00194498b**)((char*)self + 8);
         vt2[11].fn((char*)self + vt2[11].delta, &colour);
     }

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "main/game.h"
 #include "sound/ssxaudio.h"
 #include "ui/uistate.h"
 #include "ui/uithing.h"
@@ -120,10 +121,6 @@ struct sFlag001F72E0 {
     int f4;
     int active;
 };
-struct sGame001F72E0 {
-    char pad[0x200];
-    sFlag001F72E0* flag;
-};
 struct sSelf001F72E0 {
     char pad[0x10];
     char* mgr;
@@ -147,7 +144,7 @@ extern "C" void cOVState_ENTERLODGE_onWidgetEvent(cOVState_ENTERLODGE* self, cUI
     if (((void*)widget) != 0) {
         switch (msg) {
         case 5:
-            ((sGame001F72E0*)SSXApp->Game)->flag->active = 1;
+            ((sFlag001F72E0*)(SSXApp->Game)->mCurrentState)->active = 1;
             switch (widget->mMiscData) {
             case 0:
                 {
@@ -164,7 +161,7 @@ extern "C" void cOVState_ENTERLODGE_onWidgetEvent(cOVState_ENTERLODGE* self, cUI
             break;
         case 6:
             self->mRemovePDA = 1;
-            ((sGame001F72E0*)SSXApp->Game)->flag->active = 1;
+            ((sFlag001F72E0*)(SSXApp->Game)->mCurrentState)->active = 1;
             cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
             break;
         }

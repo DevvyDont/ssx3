@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/worldview.h"
+#include "world/instancerecord.h"
+#include "object/animframe.h"
 #include "bx/appman.h"
 #include "bx/math3d.h"
 #include "object/animdeltanode.h"
@@ -513,10 +516,6 @@ INCLUDE_ASM("object/multiparticle", cRailManNode_disableRail);
 struct sMpVec4_8780 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
-struct sMpBox_8780 {
-    sMpVec4_8780 min;
-    sMpVec4_8780 max;
-};
 struct sMpCell_8780 {
     int level;
     int x, y, z;
@@ -596,7 +595,7 @@ static inline sMpRoot_8780* findRoot_8780(char* w, int x, int y, int z)
     return rz;
 }
 
-static inline void remove_8780(char* w, void* item, const sMpBox_8780* box)
+static inline void remove_8780(char* w, void* item, const tBoundBox* box)
 {
     (*(int*)(w + 0xA0))++;
     sMpCell_8780 c;
@@ -625,15 +624,15 @@ extern "C" void cRailManNode_disableRail(cRailManNode* self, int idx)
     sMpPart_8780* part = (sMpPart_8780*)ref.get(*cObjectInterface_getWorld_8780());
     char* node = part->first;
     for (int i = 0; i < part->count; i++) {
-        sMpBox_8780 box;
-        box.min.x = *(float*)(node + 0x6C);
-        box.min.y = *(float*)(node + 0x70);
-        box.min.z = *(float*)(node + 0x74);
-        box.min.w = 1.0f;
-        box.max.x = *(float*)(node + 0x78);
-        box.max.y = *(float*)(node + 0x7C);
-        box.max.z = *(float*)(node + 0x80);
-        box.max.w = 1.0f;
+        tBoundBox box;
+        (*(sMpVec4_8780*)&box.MinPoint).x = *(float*)(node + 0x6C);
+        (*(sMpVec4_8780*)&box.MinPoint).y = *(float*)(node + 0x70);
+        (*(sMpVec4_8780*)&box.MinPoint).z = *(float*)(node + 0x74);
+        (*(sMpVec4_8780*)&box.MinPoint).w = 1.0f;
+        (*(sMpVec4_8780*)&box.MaxPoint).x = *(float*)(node + 0x78);
+        (*(sMpVec4_8780*)&box.MaxPoint).y = *(float*)(node + 0x7C);
+        (*(sMpVec4_8780*)&box.MaxPoint).z = *(float*)(node + 0x80);
+        (*(sMpVec4_8780*)&box.MaxPoint).w = 1.0f;
         remove_8780(cObjectInterface_getNash(), node, &box);
         node = *(char**)(node + 0x64);
     }
@@ -647,10 +646,6 @@ INCLUDE_ASM("object/multiparticle", cRailManNode_enableRail);
 struct sMpVec4_8998 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
-struct sMpBox_8998 {
-    sMpVec4_8998 min;
-    sMpVec4_8998 max;
-};
 struct sMpCell_8998 {
     int level;
     int x, y, z;
@@ -714,7 +709,7 @@ static inline sMpRoot_8998* findRoot_8998(char* w, int x, int y, int z)
     return rz;
 }
 
-static inline void insert_8998(char* w, void* item, const sMpBox_8998* box)
+static inline void insert_8998(char* w, void* item, const tBoundBox* box)
 {
     sMpCell_8998 c;
     nash_Nash_findkey(&c, box);
@@ -736,15 +731,15 @@ extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx)
     sMpPart_8998* part = (sMpPart_8998*)ref.get(*cObjectInterface_getWorld_8998());
     char* node = part->first;
     for (int i = 0; i < part->count; i++) {
-        sMpBox_8998 box;
-        box.min.x = *(float*)(node + 0x6C);
-        box.min.y = *(float*)(node + 0x70);
-        box.min.z = *(float*)(node + 0x74);
-        box.min.w = 1.0f;
-        box.max.x = *(float*)(node + 0x78);
-        box.max.y = *(float*)(node + 0x7C);
-        box.max.z = *(float*)(node + 0x80);
-        box.max.w = 1.0f;
+        tBoundBox box;
+        (*(sMpVec4_8998*)&box.MinPoint).x = *(float*)(node + 0x6C);
+        (*(sMpVec4_8998*)&box.MinPoint).y = *(float*)(node + 0x70);
+        (*(sMpVec4_8998*)&box.MinPoint).z = *(float*)(node + 0x74);
+        (*(sMpVec4_8998*)&box.MinPoint).w = 1.0f;
+        (*(sMpVec4_8998*)&box.MaxPoint).x = *(float*)(node + 0x78);
+        (*(sMpVec4_8998*)&box.MaxPoint).y = *(float*)(node + 0x7C);
+        (*(sMpVec4_8998*)&box.MaxPoint).z = *(float*)(node + 0x80);
+        (*(sMpVec4_8998*)&box.MaxPoint).w = 1.0f;
         insert_8998(cObjectInterface_getNash(), node, &box);
         node = *(char**)(node + 0x64);
     }
@@ -1147,10 +1142,6 @@ struct sMpModel_9030 {
     sMpPart_9030* parts;    // 0x8
 };
 
-struct sMpInst_9030 {
-    char pad_0x0[0x80];
-    sMpModel_9030* model;   // 0x80
-};
 
 struct sMpNode_9030 {
     char pad_0x0[0x48];
@@ -1191,7 +1182,7 @@ extern "C" void cAnimComboNode_setComboXform(cAnimComboNode* vself)
     if (self->NumAnimMeshes <= 0) {
         return;
     }
-    sMpModel_9030* model = ((sMpInst_9030*)self->Instance)->model;
+    sMpModel_9030* model = ((sMpModel_9030*)(self->Instance)->m_Model);
     int n = 0;
     sMpPart_9030* part = model->parts;
     for (int i = 0; i < model->count; i++, part++) {
@@ -1246,9 +1237,6 @@ extern "C" void cAnimComboNode_writeToReplayFrame(cAnimComboNode* self, void* ob
 //100%
 INCLUDE_ASM("object/multiparticle", cAnimComboNode_cacheFrame);
 #ifdef SKIP_ASM
-struct sMpItem_9140 {
-    char data[0xD0];
-};
 
 
 struct sMpPartInfo_9140 {
@@ -1269,14 +1257,10 @@ struct sMpModel_9140 {
     sMpPart_9140* parts;    // 0x8
 };
 
-struct sMpInst_9140 {
-    char pad_0x0[0x80];
-    sMpModel_9140* model;   // 0x80
-};
 
 
 extern "C" void cAnimNode_cacheFrame(void* self);
-extern "C" void cMeshAnimFrame_transform(sMpItem_9140* item, t4Matrix* mtx);
+extern "C" void cMeshAnimFrame_transform(cMeshAnimFrame* item, t4Matrix* mtx);
 
 /**
  * Caches a combo node's animation frame and applies its combo transforms to every animated mesh.
@@ -1288,7 +1272,7 @@ extern "C" void cMeshAnimFrame_transform(sMpItem_9140* item, t4Matrix* mtx);
 extern "C" void cAnimComboNode_cacheFrame(cAnimComboNode* self)
 {
     cAnimNode_cacheFrame(&self->CurrTime);
-    if (((sMpItem_9140*)self->AnimFrames) == 0) {
+    if ((self->AnimFrames) == 0) {
         return;
     }
     if (*(signed char*)&self->AnimActive2 == 0) {
@@ -1299,12 +1283,12 @@ extern "C" void cAnimComboNode_cacheFrame(cAnimComboNode* self)
             return;
         }
     }
-    sMpModel_9140* model = ((sMpInst_9140*)self->Instance)->model;
+    sMpModel_9140* model = ((sMpModel_9140*)(self->Instance)->m_Model);
     int n = 0;
     sMpPart_9140* meshPart = model->parts;
     for (int i = 0; i < model->count; i++, meshPart++) {
         if (meshPart->info->active != 0) {
-            cMeshAnimFrame_transform(&((sMpItem_9140*)self->AnimFrames)[n], &self->ComboXform[n]);
+            cMeshAnimFrame_transform(&(self->AnimFrames)[n], &self->ComboXform[n]);
             n++;
         }
     }

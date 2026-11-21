@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "replay/frame.h"
 #include "sound/ssxaudio.h"
 #include "main/gameviewman.h"
 #include "ui/uiengine.h"
@@ -631,15 +632,7 @@ void cReplay_frameSync(void* self);
 void operator_delete(int* ptr);
 
 
-struct sFpNodeF088 {
-    sVEntry<void(void*, int)>* vtable;  // 0x0
-    char pad_0x4[0x34];
-};
 
-struct sFpKeyF088 {
-    char pad_0x0[0xB4];
-    ~sFpKeyF088() {}
-};
 
 /**
  * Destroys the replay system: stops any playback, purges it, destroys its frames and frees it if asked.
@@ -664,19 +657,19 @@ extern "C" void cReplay__cReplay(int* self, int flags)
         cReplay_stopReplay((cReplay*)((cReplay*)self));
     }
     cReplay_frameSync(self);
-    cReplay_purge((cReplay*)((sFpOwner26F428*)self));
+    cReplay_purge((cReplay*)((cReplay*)self));
     if (replay + 0x494 != 0) {
         char* element = replay + 0x494 + 0x168;
         while (replay + 0x494 != element) {
             element -= 0xB4;
-            ((sFpKeyF088*)element)->~sFpKeyF088();
+            ((cReplayHighlight*)element)->~cReplayHighlight();
         }
     }
     if (replay + 0x2C != 0) {
         char* element = replay + 0x2C + 0x380;
         while (replay + 0x2C != element) {
             element -= 0x38;
-            sVEntry<void(void*, int)>* vt = ((sFpNodeF088*)element)->vtable;
+            sVEntry<void(void*, int)>* vt = ((sVEntry<void (void*, int)>*)((cReplayFrame*)element)->mVtbl);
             vt[7].fn(element + vt[7].delta, 0);
         }
     }
@@ -689,9 +682,6 @@ extern "C" void cReplay__cReplay(int* self, int flags)
 //100%
 INCLUDE_ASM("replay/frameptr", cReplay_init);
 #ifdef SKIP_ASM
-struct sReplayBlock_F180 {
-    char data[0x38];
-};
 
 
 extern "C" void cReplayFramePtr_initBlock(cReplayFramePtr* self, unsigned int size);
@@ -711,7 +701,7 @@ extern "C" void cReplay_init(cReplay* self)
     self->SaveFrameTicks = 0;
     int i = 0;
     do {
-        cReplayFramePtr_initBlock((cReplayFramePtr*)(&((sReplayBlock_F180*)&self->Frames[0])[i]), self->FrameBlockSize);
+        cReplayFramePtr_initBlock((cReplayFramePtr*)(&((&self->Frames[0]))[i]), self->FrameBlockSize);
         i++;
     } while (i < self->MaxFrames);
     cReplay_setReplayState((self), 10);
@@ -805,7 +795,7 @@ extern "C" void cReplay_reset(cReplay* self)
     cReplayFrameList_reset(frameList);
     cReplayFrameList_reset(freeList);
     for (i = 0; i < self->MaxFrames; i++) {
-        cReplayFrameList_addFrame(freeList, (char*)&self->Frames[0] + i * 0x38);
+        cReplayFrameList_addFrame(freeList, &self->Frames[i]);
     }
     int three = 3;
     self->CurrentReplayCamIndex = 0;
@@ -825,16 +815,7 @@ INCLUDE_ASM("replay/frameptr", cReplay_purge);
 #ifdef SKIP_ASM
 void cReplayFrameList_reset(void* self);
 
-struct sFpEntry26F428 {
-    char pad[0x38];
-};
 
-struct sFpOwner26F428 {
-    char pad_0x00[0x8];
-    int count;
-    char pad_0x0C[0x20];
-    sFpEntry26F428 entries[1];
-};
 
 /**
  * Frees the data block of each of the MaxFrames frames and empties FrameList and FreeFrameList.
@@ -843,7 +824,7 @@ extern "C" void cReplay_purge(cReplay* self)
 {
     int i;
     for (i = 0; i < self->MaxFrames; i++) {
-        cReplayFramePtr_purgeBlock((cReplayFramePtr*)(&((sFpEntry26F428*)&self->Frames[0])[i]));
+        cReplayFramePtr_purgeBlock((cReplayFramePtr*)(&((&self->Frames[0]))[i]));
     }
     cReplayFrameList_reset((char*)&self->FrameList);
     cReplayFrameList_reset((char*)&self->FreeFrameList);
@@ -1048,13 +1029,8 @@ extern "C" void cReplay_startRace(int* self)
 //100%
 INCLUDE_ASM("replay/frameptr", cReplay_pushReplaySaveFrame);
 #ifdef SKIP_ASM
-struct sFrameDesc26F7F8 {
-    short type;
-    char a;
-    char b;
-};
 
-extern "C" void* cReplay_saveReplayFrame(void* self, sFrameDesc26F7F8* desc);
+extern "C" void* cReplay_saveReplayFrame(void* self, tReplayFrameType* desc);
 // PORT: cReplay_addReplayFrame is mangled with one parameter (__FPv) but is called here
 // with (self, block); bind the 2-arg form to the symbol.
 void cReplay_addReplayFrame_2(void* self, void* block) __asm__("cReplay_addReplayFrame__FPv");
@@ -1068,10 +1044,10 @@ void cReplay_addReplayFrame_2(void* self, void* block) __asm__("cReplay_addRepla
 extern "C" void cReplay_pushReplaySaveFrame(cReplay* self)
 {
     if (self->SaveFrame == 0) {
-        sFrameDesc26F7F8 desc;
-        desc.type = 1;
-        desc.a = 0;
-        desc.b = 0;
+        tReplayFrameType desc;
+        desc.Type = 1;
+        desc.Highlights = 0;
+        desc.Chapter = 0;
         void* block = cReplay_saveReplayFrame(self, &desc);
         self->SaveFrame = (cReplayFrame*)block;
         cReplay_addReplayFrame_2(self, block);
@@ -1473,7 +1449,7 @@ extern "C" void cReplay_processInput(cReplay* self)
     }
     case 4:
         redraw = 1;
-        if (*(int*)((char*)self->PlaybackFrame + 0x14) != 0) {
+        if ((int)self->PlaybackFrame->Next != 0) {
             cReplay_nextFrame(((char*)self));
             cReplay_stepFrame(((char*)self), 1);
             cReplay_setReplayState(((char*)self), 5);

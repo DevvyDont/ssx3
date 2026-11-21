@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "util/locale.h"
+#include "ui/uithing.h"
 #include "fe/debuglobbymenus.h"
 #include "fe/festatenethelppopup.h"
 #include "main/ssxapp.h"
@@ -115,28 +117,22 @@ extern char str_actrl[];
 extern char str_ps2sel[];
 extern char str_TextOptionpct_d[];
 
-struct sWidget_1D9F38 {
-    char pad00[0x14];
-    unsigned int flags;
-    char pad18[0x20];
-    int hash;
-};
 
 struct sNetHelp_1D9F38 {
     char pad00[0xA8];
-    sWidget_1D9F38* wA8;
-    sWidget_1D9F38* wAC;
-    sWidget_1D9F38* wB0;
-    sWidget_1D9F38* rows[7];
-    sWidget_1D9F38* wD0;
-    sWidget_1D9F38* wD4;
-    sWidget_1D9F38* wD8;
-    sWidget_1D9F38* wDC;
-    sWidget_1D9F38* wE0;
-    sWidget_1D9F38* wE4;
-    sWidget_1D9F38* wE8;
-    sWidget_1D9F38* wEC;
-    sWidget_1D9F38* wF0;
+    cUIThing* wA8;
+    cUIThing* wAC;
+    cUIThing* wB0;
+    cUIThing* rows[7];
+    cUIThing* wD0;
+    cUIThing* wD4;
+    cUIThing* wD8;
+    cUIThing* wDC;
+    cUIThing* wE0;
+    cUIThing* wE4;
+    cUIThing* wE8;
+    cUIThing* wEC;
+    cUIThing* wF0;
 };
 
 static inline int IsHash_1D9F38(int id, char* s) { return id == GetHashValue32(s); }
@@ -147,42 +143,42 @@ static inline int IsHash_1D9F38(int id, char* s) { return id == GetHashValue32(s
  *
  * @param w  the widget being created
  */
-extern "C" void cFEStateNetHelpPopup_onWidgetCreate(cFEStateNetHelpPopup* self, sWidget_1D9F38* w)
+extern "C" void cFEStateNetHelpPopup_onWidgetCreate(cFEStateNetHelpPopup* self, cUIThing* w)
 {
-    int hashName = w->hash;
+    int hashName = w->mHashName;
     if (hashName == GetHashValue32(str_OnlineAccSetup)) {
         self->mpScreenName = (cUIText*)w;
-        w->flags |= 0x80;
+        (*(unsigned int*)&w->mAttr) |= 0x80;
     } else if (hashName == GetHashValue32(str_TopText)) {
         self->mpDescription = (cUIText*)w;
-        w->flags |= 0x80;
+        (*(unsigned int*)&w->mAttr) |= 0x80;
     } else if (hashName == GetHashValue32(str_BottomNote)) {
         self->mpBottom = (cUIText*)w;
-        w->flags |= 0x80;
-    } else if (IsHash_1D9F38(w->hash, str_xselect)) {
+        (*(unsigned int*)&w->mAttr) |= 0x80;
+    } else if (IsHash_1D9F38(w->mHashName, str_xselect)) {
         self->mpObject[0] = (cUIIcon*)w;
-    } else if (IsHash_1D9F38(w->hash, str_ps2triangle)) {
+    } else if (IsHash_1D9F38(w->mHashName, str_ps2triangle)) {
         self->mpObject[1] = (cUIIcon*)w;
-    } else if (IsHash_1D9F38(w->hash, str_ps2circle)) {
+    } else if (IsHash_1D9F38(w->mHashName, str_ps2circle)) {
         self->mpObject[2] = (cUIIcon*)w;
-    } else if (IsHash_1D9F38(w->hash, str_updownarrows)) {
+    } else if (IsHash_1D9F38(w->mHashName, str_updownarrows)) {
         self->mpObject[3] = (cUIIcon*)w;
-    } else if (IsHash_1D9F38(w->hash, str_leftrightarrows)) {
+    } else if (IsHash_1D9F38(w->mHashName, str_leftrightarrows)) {
         self->mpObject[4] = (cUIIcon*)w;
-    } else if (IsHash_1D9F38(w->hash, str_ps2l1)) {
+    } else if (IsHash_1D9F38(w->mHashName, str_ps2l1)) {
         self->mpObject[6] = (cUIIcon*)w;
-    } else if (IsHash_1D9F38(w->hash, str_ps2r1)) {
+    } else if (IsHash_1D9F38(w->mHashName, str_ps2r1)) {
         self->mpObject[5] = (cUIIcon*)w;
-    } else if (IsHash_1D9F38(w->hash, str_actrl)) {
+    } else if (IsHash_1D9F38(w->mHashName, str_actrl)) {
         self->mpObject[8] = (cUIIcon*)w;
-    } else if (IsHash_1D9F38(w->hash, str_ps2sel)) {
+    } else if (IsHash_1D9F38(w->mHashName, str_ps2sel)) {
         self->mpObject[7] = (cUIIcon*)w;
     } else {
         char buf[16];
         for (int i = 0; i < 7; i++) {
             sprintf(buf, str_TextOptionpct_d, i);
             if (hashName == GetHashValue32(buf)) {
-                ((sWidget_1D9F38**)&self->mpOptions[0])[i] = w;
+                ((cUIThing**)&self->mpOptions[0])[i] = w;
                 break;
             }
         }
@@ -207,10 +203,6 @@ struct sVE_A110 {
     unsigned short* (*fn)(void*, int);
 };
 
-struct sStrings_A110 {
-    int pad0;
-    sVE_A110* vt;
-};
 
 /**
  * Builds the help popup's description: concatenates its (up to three) localised description strings and shows them in
@@ -235,8 +227,8 @@ extern "C" void cFEStateNetHelpPopup_createAndSetDescriptionString(cFEStateNetHe
         if (ids[i] == 0) {
             break;
         }
-        sStrings_A110* locale = (sStrings_A110*)SSXApp->FELocale;
-        strs[i] = locale->vt[4].fn((char*)locale + locale->vt[4].delta, ids[i]);
+        cFELocale* locale = SSXApp->FELocale;
+        strs[i] = ((sVE_A110*)locale->mVtbl)[4].fn((char*)locale + ((sVE_A110*)locale->mVtbl)[4].delta, ids[i]);
         count++;
         total += USTR_length(strs[i]) + 1;
         i++;

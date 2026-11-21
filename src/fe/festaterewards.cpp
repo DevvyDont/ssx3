@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ealib/shape.h"
 #include "be/berewarddb.h"
 #include "sound/ssxaudio.h"
 #include "fe/fereal.h"
@@ -706,8 +707,8 @@ extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" int func_0019E238(void* self, int bank, int i);
 struct sSelf001CFFF8;
 struct sData001CFFF8;
-extern "C" sData001CFFF8* func_0019E2B0(void* self, int bank, int i);
-extern "C" void cFEStateRewardGalleryBase_allocIcons(cFEStateRewardGalleryBase* self, sData001CFFF8* data);
+extern "C" SHAPEFILE* func_0019E2B0(void* self, int bank, int i);
+extern "C" void cFEStateRewardGalleryBase_allocIcons(cFEStateRewardGalleryBase* self, SHAPEFILE* data);
 struct sVE_FF10 {
     short delta;
     short index;
@@ -807,14 +808,6 @@ struct sDataEnt001CFFF8 {
     int off;
     int f4;
 };
-struct sData001CFFF8 {
-    int f0;
-    int f4;
-    int count;
-    int fC;
-    int f10;
-    sDataEnt001CFFF8 tbl[1];
-};
 struct sSelf001CFFF8 {
     char pad[0x78];
     int count;
@@ -832,18 +825,18 @@ struct sSelf001CFFF8 {
  *
  * @param data  the loaded icon file, or 0
  */
-extern "C" void cFEStateRewardGalleryBase_allocIcons(cFEStateRewardGalleryBase* self, sData001CFFF8* data)
+extern "C" void cFEStateRewardGalleryBase_allocIcons(cFEStateRewardGalleryBase* self, SHAPEFILE* data)
 {
     if (data == 0) {
         self->mNumIcons = 0;
         return;
     }
-    self->mNumIcons = data->count;
+    self->mNumIcons = data->num;
     int i;
     for (i = 0; i < self->mNumIcons; i++) {
         SHAPE_name(data, i, &((&self->mIcons[0]))[i]);
         ((&self->mIcons[0]))[i].mName[4] = 0;
-        ((&self->mIcons[0]))[i].mID = ((cGame001CFFF8*)GrMan)->AddTexture((char*)data + data->tbl[i].off, &((&self->mIcons[0]))[i], 0, 1, -1);
+        ((&self->mIcons[0]))[i].mID = ((cGame001CFFF8*)GrMan)->AddTexture((char*)data + ((sDataEnt001CFFF8*)&data->tbl[0].offset)[i].off, &((&self->mIcons[0]))[i], 0, 1, -1);
     }
 }
 #endif
@@ -2942,8 +2935,8 @@ extern "C" void cFEStatePreviewReward_updateTextureLoad(cFEStatePreviewReward* s
     char* mgr = SSXApp->RealFE->mBoltFileManager;
     if (func_0019E238(mgr, self->mCharID, self->mTextureFileIndex) == 0)
         return;
-    sData001CFFF8* data = func_0019E2B0(mgr, self->mCharID, self->mTextureFileIndex);
-    char* shapeHeader = (char*)data + data->tbl[0].off;
+    SHAPEFILE* data = func_0019E2B0(mgr, self->mCharID, self->mTextureFileIndex);
+    char* shapeHeader = (char*)data + ((sDataEnt001CFFF8*)&data->tbl[0].offset)[0].off;
     short shapeWidth = *(short*)(shapeHeader + 4);
     short shapeHeight = *(short*)(shapeHeader + 6);
     if (shapeHeight < shapeWidth)

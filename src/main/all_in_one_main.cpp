@@ -2970,21 +2970,19 @@ extern "C" int cPopupInfo_getPassUpdate(cPopupInfo* popupInfo) {
 //100%
 INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setOffset);
 #ifdef SKIP_ASM
-struct V3_D950 { float x, y, z; };
 /**
  * Sets a popup description's screen offset, mvOffset (+0x9C), from a vector passed by value.
  *
  * @param offset  the offset (x, y, z)
  */
-extern "C" void cPopupInfo_setOffset(cPopupInfo* self, V3_D950 offset) {
-    *(V3_D950*)&self->mvOffset[0] = offset;
+extern "C" void cPopupInfo_setOffset(cPopupInfo* self, t3Vector offset) {
+    *(t3Vector*)&self->mvOffset[0] = offset;
 }
 #endif
 
 //100%
 INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getOffset);
 #ifdef SKIP_ASM
-struct V12_D990 { int a; int b; int c; };
 /**
  * Returns a popup description's screen offset, mvOffset (+0x9C), by value.
  *
@@ -2994,8 +2992,8 @@ struct V12_D990 { int a; int b; int c; };
  * @param src  the popup description (cPopupInfo)
  * @return @p dst
  */
-extern "C" V12_D990* cPopupInfo_getOffset(V12_D990* dst, char* src) {
-    *dst = *(V12_D990*)(src + 0x9C);
+extern "C" t3Vector* cPopupInfo_getOffset(t3Vector* dst, char* src) {
+    *dst = *(t3Vector*)(src + 0x9C);
     return dst;
 }
 #endif

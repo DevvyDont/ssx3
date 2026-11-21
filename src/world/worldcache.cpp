@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/chunkresolve.h"
 #include "bx/appman.h"
 #include "render/ps2graphicsman.h"
 #include "world/worldview.h"
@@ -1023,16 +1024,10 @@ struct sRef_8528 {
     unsigned char type;
     unsigned short index;
 };
-struct sRefList_8528 {
-    int f0;
-    int f4;
-    int count;          // 0x8
-    sRef_8528* refs;    // 0xC
-};
 struct sCell_8528 {
     int loaded;             // 0x0
     int f4;
-    sRefList_8528* list;    // 0x8
+    cHullPage* list;    // 0x8
     int pad[3];
 };
 struct sCache_8528 {
@@ -1052,13 +1047,13 @@ extern "C" void cHullPage__cHullPage(int* self, int flags);
 extern "C" void cWorldCache_purgePage(cWorldCache* vself, int cell)
 {
     sCache_8528* self = (sCache_8528*)vself;
-    sRefList_8528* list = self->cells[cell].list;
+    cHullPage* list = self->cells[cell].list;
     sHandle_8528 resHandle;
     *(unsigned int*)&resHandle = 0xFFFFFFFF;  // starts as the invalid handle
-    for (int i = list->count - 1; i >= 0; i--) {
-        resHandle.type = list->refs[i].type;
-        resHandle.index = list->refs[i].index;
-        cWorldCache_removeBxStreamData(self, cell, list->refs[i].kind, resHandle);
+    for (int i = ((int)list->m_uiCurrentPageEntry) - 1; i >= 0; i--) {
+        resHandle.type = ((sRef_8528*)list->m_pPageEntries)[i].type;
+        resHandle.index = ((sRef_8528*)list->m_pPageEntries)[i].index;
+        cWorldCache_removeBxStreamData(self, cell, ((sRef_8528*)list->m_pPageEntries)[i].kind, resHandle);
     }
     if (self->cells[cell].list != 0)
         cHullPage__cHullPage((int*)self->cells[cell].list, 3);
@@ -1571,19 +1566,7 @@ struct sWCVt_8E20 {
     void* (*fn)(void*, int, unsigned int, char*);
 };
 
-struct sWCObj_8E20 {
-    int f0;
-    int f4;
-    sWCVt_8E20* vt;             // 0x8
-};
 
-struct sWorldCache_8E20 {
-    int f0;
-    sBxBank_8AA8* global;       // 0x4
-    sBxBank_8AA8** banks;       // 0x8
-    char padC[0x3E8 - 0xC];
-    sWCObj_8E20* obj;           // 0x3E8
-};
 
 // Drops one reference; on the last one returns the stored data pointer and clears it.
 static inline char* release_8E20(sBxRef_8AA8* r)
@@ -1597,7 +1580,7 @@ static inline char* release_8E20(sBxRef_8AA8* r)
     return 0;
 }
 
-extern "C" void rel_8E20(sWorldCache_8E20* self, int cell, int type, unsigned int key) __asm__("cWorldCache_removeBxStreamData");
+extern "C" void rel_8E20(cWorldCache* self, int cell, int type, unsigned int key) __asm__("cWorldCache_removeBxStreamData");
 /**
  * Releases one streamed resource: drops its tag's refcount and, at zero, clears the address and unresolves the data.
  *
@@ -1609,23 +1592,23 @@ extern "C" void rel_8E20(sWorldCache_8E20* self, int cell, int type, unsigned in
  * @param type  the eBxStreamDataType
  * @param key  the tResourceID
  */
-extern "C" void rel_8E20(sWorldCache_8E20* self, int cell, int type, unsigned int key)
+extern "C" void rel_8E20(cWorldCache* self, int cell, int type, unsigned int key)
 {
     int bank = key & 0xFF;
     unsigned int id = key >> 8;
     sBxBank_8AA8* bankData;
     if (bank == 0xFF)
-        bankData = self->global;
+        bankData = ((sBxBank_8AA8*)self->m_pSharedCacheTable);
     else
-        bankData = self->banks[bank];
+        bankData = ((sBxBank_8AA8**)self->m_pSectionCacheTable)[bank];
     char* chunk = release_8E20(&bankData->types[type].refs[id]);
     if (chunk != 0) {
         if (chunk == (char*)&cStreamMan_NULLCHUNK) {
-            sWCObj_8E20* callbackObj = self->obj;
-            chunk = (char*)callbackObj->vt[4].fn((char*)callbackObj + callbackObj->vt[4].delta, type, key, 0);
+            cChunkResolve* callbackObj = (self->mp_ChunkResolve);
+            chunk = (char*)((sWCVt_8E20*)callbackObj->mVtbl)[4].fn((char*)callbackObj + ((sWCVt_8E20*)callbackObj->mVtbl)[4].delta, type, key, 0);
         } else {
-            sWCObj_8E20* callbackObj = self->obj;
-            chunk = (char*)callbackObj->vt[4].fn((char*)callbackObj + callbackObj->vt[4].delta, type, key, chunk);
+            cChunkResolve* callbackObj = (self->mp_ChunkResolve);
+            chunk = (char*)((sWCVt_8E20*)callbackObj->mVtbl)[4].fn((char*)callbackObj + ((sWCVt_8E20*)callbackObj->mVtbl)[4].delta, type, key, chunk);
         }
         if (chunk != 0 && bank == 0xFF)
             cMemMan_free(chunk);

@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uithing.h"
+#include "bx/math3d.h"
 #include "sound/ssxaudio.h"
 #include "main/gameviewman.h"
 #include "main/sectionman.h"
@@ -1045,8 +1047,8 @@ extern "C" int cAI_isAILoadedAndReady(void* p);
 void cAI_resolveRace(void* p);
 extern "C" void cAI_loadRiders(void* p);
 extern "C" sVec4_235CC8 cRider_getEventStartPos(void* rider);
-extern "C" void cWorldView_setFocus(void* cache, int idx, const sVec4_236960* pos, float radius);
-extern "C" int cWorldView_getTestFocus(void* cache, int idx, sVec4_236960* pos, float* dist);
+extern "C" void cWorldView_setFocus(void* cache, int idx, const t4Vector* pos, float radius);
+extern "C" int cWorldView_getTestFocus(void* cache, int idx, t4Vector* pos, float* dist);
 extern "C" int cSSXScriptEngine_GetNISListState(void* p, int a);
 extern "C" int cSSXScriptEngine_IsActiveNISInTransition(void* p);
 extern "C" void cSSXScriptEngine_EndTransportSequence(void* p);
@@ -1086,7 +1088,7 @@ extern "C" void cGFNextHeatState_update(cGFNextHeatState* self)
             ((sCacheTbl_235CC8*)*cache)->slot[idx].f0 = 1;
             cPlayer* player = SSXApp->Game->AI->Players[0];
             sVec4_235CC8 pos = cRider_getEventStartPos(player->mRider);
-            cWorldView_setFocus(*cache + 0x10, idx, (const sVec4_236960*)&pos, 45000.0f);
+            cWorldView_setFocus(*cache + 0x10, idx, (const t4Vector*)&pos, 45000.0f);
             self->CurrentNextHeatState = 2;
         } else {
             cAI_loadRiders(SSXApp->Game->AI);
@@ -1096,7 +1098,7 @@ extern "C" void cGFNextHeatState_update(cGFNextHeatState* self)
         if (self->PlayTransport != 0) {
             sVec4_235CC8 focusPos;
             float dist;
-            cWorldView_getTestFocus(*cache + 0x10, idx, (sVec4_236960*)&focusPos, &dist);
+            cWorldView_getTestFocus(*cache + 0x10, idx, (t4Vector*)&focusPos, &dist);
             if (dist < 20000.0f)
                 break;
             if (self->WaitTicks < 120)
@@ -1216,9 +1218,6 @@ void* cTransitionObj_cTransitionObj(void* self);
 extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, void* a3, float f0, float f1, int a4, int a5, float f2);
 extern void* cFade_TObj_vtbl[];
 
-struct sColor_236058 {
-    float r, g, b, a;
-};
 
 /**
  * Teleports the rider for a new session: free-ride event 12, a partial restart at the mission start point, a
@@ -1236,14 +1235,14 @@ extern "C" void cGFSessionTeleportState_gainFocus(cGFSessionTeleportState* self)
     cRider_cleanupAfterPutAt(SSXApp->Game->AI->Players[0]->mRider, 1);
     void* transitionMan = cGame_getTransitionMan(SSXApp->Game, 0);
     char* fade = (char*)cTransitionObj_operator_new_sz(20);
-    sColor_236058 colour;
-    colour.r = one;
-    colour.g = one;
-    colour.b = one;
-    colour.a = one;
+    tARGB colour;
+    colour.A = one;
+    colour.R = one;
+    colour.G = one;
+    colour.B = one;
     cTransitionObj_cTransitionObj(fade);
     *(void***)fade = cFade_TObj_vtbl;
-    *(sColor_236058*)(fade + 4) = colour;
+    *(tARGB*)(fade + 4) = colour;
     cTransitionMan_StartTransition(transitionMan, 1, 0, fade, 0.0f, 0.0f, 0, 0, one);
 }
 #endif
@@ -1695,9 +1694,6 @@ extern "C" void cGFSectionLoadState_gainFocus(cGFSectionLoadState* self)
 //100%
 INCLUDE_ASM("main/gamestate", cGFSectionLoadState_update);
 #ifdef SKIP_ASM
-struct sVec4_236960 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct cRiderObj_236960 {
     int f0, f4, f8;
@@ -1713,9 +1709,9 @@ struct cRiderObj_236960 {
 
 extern "C" int cSectionMan_isLoaded(void* self, int idx);
 extern "C" void cSectionMan_activate(void* self, int idx, int mode);
-extern "C" sVec4_236960 cRider_GetNISEndPosition(void* rider);
-extern "C" void cWorldView_setFocus(void* cache, int idx, const sVec4_236960* pos, float radius);
-extern "C" int cWorldView_getTestFocus(void* cache, int idx, sVec4_236960* pos, float* dist);
+extern "C" t4Vector cRider_GetNISEndPosition(void* rider);
+extern "C" void cWorldView_setFocus(void* cache, int idx, const t4Vector* pos, float radius);
+extern "C" int cWorldView_getTestFocus(void* cache, int idx, t4Vector* pos, float* dist);
 extern "C" int cSSXScriptEngine_IsActiveNISInTransition(void* p);
 extern "C" void cSSXScriptEngine_EndTransportSequence(void* p);
 
@@ -1743,7 +1739,7 @@ extern "C" void cGFSectionLoadState_update(cGFSectionLoadState* self)
     case 0:
         if (cSectionMan_isLoaded(sectionMan, *(int*)(sectionMan + 0x1BC)) != 0) {
             cPlayer* aiPlayer = SSXApp->Game->AI->Players[0];
-            sVec4_236960 pos = cRider_GetNISEndPosition(aiPlayer->mRider);
+            t4Vector pos = cRider_GetNISEndPosition(aiPlayer->mRider);
             char* viewEntry = *cache + idx * 80;
             *(int*)(viewEntry + 0x250) = 1;
             cWorldView_setFocus(*cache + 0x10, idx, &pos, 45000.0f);
@@ -1751,7 +1747,7 @@ extern "C" void cGFSectionLoadState_update(cGFSectionLoadState* self)
         }
         break;
     case 1: {
-        sVec4_236960 focusPos;
+        t4Vector focusPos;
         float dist;
         cWorldView_getTestFocus(*cache + 0x10, idx, &focusPos, &dist);
         if (dist < 20000.0f) {
@@ -2511,12 +2507,6 @@ extern "C" float cGameComm_getLatency(void* self);
 static inline char* GameComm() { return (char*)cGameComm_mGameComm; }
 
 
-// cInputSync::CompressedSample (SSX 3 layout: no PlayerID byte, size 0x1C).
-struct CompressedSample_2373B8 {
-    unsigned char NumButtons;
-    unsigned char NonZeroBitBytes[3];
-    unsigned char NonZeroBytes[24];
-};
 
 struct sInputPadButton_2373B8 {
     float value;
@@ -2553,7 +2543,7 @@ struct cInputSync_2373B8 {
 extern "C" void cInputSync_preupdate(cInputSync* self)
 {
     cInputSync_PadSample sample;
-    CompressedSample_2373B8 compsample;
+    cInputSync_CompressedSample compsample;
     if (*(int*)(GameComm() + 0x70) < 14) {
         return;
     }

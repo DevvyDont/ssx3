@@ -1,4 +1,6 @@
 #include "common.h"
+#include "bx/math3d.h"
+#include "render/2drender.h"
 #include "bx/appman.h"
 #include "ui/uithing.h"
 #include "visualfx/transitionobj.h"
@@ -211,26 +213,12 @@ extern "C" void cBoardTrailFX_reset(cBoardTrailFX_reset_sTrail* self)
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX_shouldSample);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sBTV4_86F0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-// The trail part of sBoardTrailFXView that this function uses (see cBoardTrailFX_update's sBTrail_8938).
-struct sBTrail_86F0 {
-    char* rider;                // 0x00 virtual base pointer (the cRider part)
-    char pad04[0x94 - 0x04];
-    int state;                  // 0x94
-    char pad98[0xB0 - 0x98];
-    sBTV4_86F0 lastPos;         // 0xB0
-    char padC0[0xE0 - 0xC0];
-    int delay;                  // 0xE0
-};
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sBTV4_86F0 btSub_86F0(const sBTV4_86F0& a, const sBTV4_86F0& b)
+static inline t4Vector btSub_86F0(const t4Vector& a, const t4Vector& b)
 {
-    sBTV4_86F0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -243,7 +231,7 @@ static inline sBTV4_86F0 btSub_86F0(const sBTV4_86F0& a, const sBTV4_86F0& b)
 }
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float btLength_86F0(const sBTV4_86F0& v)
+static inline float btLength_86F0(const t4Vector& v)
 {
     float r;
     int t;
@@ -283,23 +271,23 @@ static inline int boardTrailCanDraw_86F0(char* r)
  * @param dirDot  dot product of this frame's and the last direction (1 = no turn)
  * @return 1 when a new sample is taken, otherwise 0
  */
-extern "C" int cBoardTrailFX_shouldSample(sBTrail_86F0* self, float dirDot)
+extern "C" int cBoardTrailFX_shouldSample(cBoardTrailFX* self, float dirDot)
 {
-    if (self->delay > 0) {
-        self->delay--;
+    if (self->DelaySampling > 0) {
+        self->DelaySampling--;
         return 0;
     }
-    sBTV4_86F0 dist = btSub_86F0(*(sBTV4_86F0*)(self->rider + 0x460), self->lastPos);
+    t4Vector dist = btSub_86F0(*(t4Vector*)(((char*)self->mRider) + 0x460), (*(&self->LastCen)));
     float maxLen = 110.0f;
     float len = btLength_86F0(dist);
-    if (boardTrailCanDraw_86F0(self->rider)) {
+    if (boardTrailCanDraw_86F0(((char*)self->mRider))) {
         maxLen = 30.0f;
     }
-    if (self->state == 1 || maxLen <= len || dirDot < 0.999f) {
-        if (self->state == 1) {
-            self->delay = 2;
+    if (self->State == 1 || maxLen <= len || dirDot < 0.999f) {
+        if (self->State == 1) {
+            self->DelaySampling = 2;
         }
-        self->lastPos = *(sBTV4_86F0*)(self->rider + 0x460);
+        (*(&self->LastCen)) = *(t4Vector*)(((char*)self->mRider) + 0x460);
         return 1;
     }
     return 0;
@@ -983,7 +971,7 @@ extern "C" void cBoardTrailFX_render(cBoardTrailFX* self)
             return;
         }
     }
-    if (*(int*)((char*)self + 0x90) < 2) {
+    if (self->BufLen < 2) {
         return;
     }
     push_A480((sRenderCtx_A480*)GrMan);
@@ -2039,15 +2027,11 @@ extern "C" void InitVertex_C060(float* out, float* col, float x, float y) __asm_
 
 extern float cSinCosTable_gSinCosTable[];
 
-struct sBTVert_C060 {
-    float f[12];
-    sBTVert_C060() {}
-} __attribute__((aligned(16)));
 
 struct sBTVEntryDraw {
     short delta;
     short index;
-    void (*fn)(void*, int, sBTVert_C060*, int);
+    void (*fn)(void*, int, tBxVertex*, int);
 };
 
 static inline float clampBT(float v, float lo, float hi)
@@ -2113,19 +2097,19 @@ extern "C" void cCircle_TObj_Draw(cCircle_TObj* self, float amount)
     float xs[40];
     BuildArc_C060(ys, xs, self->mOriginX, radius, 0.08055365830659866f); // pi / 39
 
-    sBTVert_C060 top[80];
-    sBTVert_C060 bot[80];
+    tBxVertex top[80];
+    tBxVertex bot[80];
     for (int i = 0; i < 40; i++) {
-        sBTVert_C060* topVert = top + i * 2;
-        InitVertex_C060(topVert->f, (float*)(&self->mScreenColour), xs[i], 0.0f);
-        sBTVert_C060* topArcVert = top + i * 2 + 1;
+        tBxVertex* topVert = top + i * 2;
+        InitVertex_C060(((float*)&topVert->u), (float*)(&self->mScreenColour), xs[i], 0.0f);
+        tBxVertex* topArcVert = top + i * 2 + 1;
         float y0 = clampBT(self->mOriginY - ys[i], 0.0f, 480.0f);
-        InitVertex_C060(topArcVert->f, (float*)(&self->mScreenColour), xs[i], y0);
+        InitVertex_C060(((float*)&topArcVert->u), (float*)(&self->mScreenColour), xs[i], y0);
         float y1 = clampBT(self->mOriginY + ys[i], 0.0f, 480.0f);
-        sBTVert_C060* botArcVert = bot + i * 2;
-        InitVertex_C060(botArcVert->f, (float*)(&self->mScreenColour), xs[i], y1);
-        sBTVert_C060* botBaseVert = bot + i * 2 + 1;
-        InitVertex_C060(botBaseVert->f, (float*)(&self->mScreenColour), xs[i], 480.0f);
+        tBxVertex* botArcVert = bot + i * 2;
+        InitVertex_C060(((float*)&botArcVert->u), (float*)(&self->mScreenColour), xs[i], y1);
+        tBxVertex* botBaseVert = bot + i * 2 + 1;
+        InitVertex_C060(((float*)&botBaseVert->u), (float*)(&self->mScreenColour), xs[i], 480.0f);
     }
 
     char* obj = (char*)cGraphicsMan_TheGraphicsMan;

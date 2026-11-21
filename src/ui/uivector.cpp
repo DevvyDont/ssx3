@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "ui/uianimation.h"
 #include "ui/uitextscroll.h"
 #include "ui/uistate.h"
@@ -128,7 +129,6 @@ extern "C" void cUIVector_setUIData(cUIVector* uiVector, void* pUIBase)
 //100%
 INCLUDE_ASM("ui/uivector", cUIVector_setChannelData);
 #ifdef SKIP_ASM
-struct sUV_36D0 { float u, v; };
 struct sCount_36D0 {
     unsigned int flag : 1;
     unsigned int pad1 : 1;
@@ -162,8 +162,8 @@ extern "C" void cUIVector_setChannelData(cUIVector* self, unsigned short key, fl
         case 0: (self->mpVertexPosition)[idx].x = data; break;
         case 1: (self->mpVertexPosition)[idx].y = data; break;
         case 2: (self->mpVertexPosition)[idx].z = data; break;
-        case 3: ((sUV_36D0*)self->mpUV)[idx].u = data; break;
-        case 4: ((sUV_36D0*)self->mpUV)[idx].v = data; break;
+        case 3: (self->mpUV)[idx].x = data; break;
+        case 4: (self->mpUV)[idx].y = data; break;
         case 5: (self->mpVertexColour)[idx].A = data; break;
         case 6: (self->mpVertexColour)[idx].R = data; break;
         case 7: (self->mpVertexColour)[idx].G = data; break;

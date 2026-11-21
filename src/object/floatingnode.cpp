@@ -1,4 +1,7 @@
 #include "common.h"
+#include "world/instancerecord.h"
+#include "bx/math3d.h"
+#include "world/worldview.h"
 #include "bx/appman.h"
 #include "object/floatingnode.h"
 #include "object/instancenode.h"
@@ -48,27 +51,16 @@ INCLUDE_ASM("object/floatingnode", cFloatingNode_updateOverlapSystem);
 #ifdef SKIP_ASM
 struct sBox_F048;
 extern "C" void* cObjectInterface_getNash();
-extern "C" void nash_Nash_movenode(void* world, int type, void* id, sBox_F048* box, sBox_F048* old);
+extern "C" void nash_Nash_movenode(void* world, int type, void* id, tBoundBox* box, tBoundBox* old);
 extern "C" void cMoveNode_updateOverlapSystem(void* self);
 
-struct sFlVec4_34EF40 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-struct sFlBox_34EF40 {
-    sFlVec4_34EF40 min;
-    sFlVec4_34EF40 max;
-};
 
-struct sFlInfo_34EF40 {
-    sFlBox_34EF40 box;
-    float radius;
-};
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline sFlVec4_34EF40 vu0Sub_34EF40(const sFlVec4_34EF40& a, const sFlVec4_34EF40& b)
+static inline t4Vector vu0Sub_34EF40(const t4Vector& a, const t4Vector& b)
 {
-    sFlVec4_34EF40 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -81,9 +73,9 @@ static inline sFlVec4_34EF40 vu0Sub_34EF40(const sFlVec4_34EF40& a, const sFlVec
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline sFlVec4_34EF40 vu0Add_34EF40(const sFlVec4_34EF40& a, const sFlVec4_34EF40& b)
+static inline t4Vector vu0Add_34EF40(const t4Vector& a, const t4Vector& b)
 {
-    sFlVec4_34EF40 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -101,10 +93,10 @@ struct sFlVEntry_34EF40 {
     char* (*fn)(void*);
 };
 
-static inline sFlVec4_34EF40 nodePos_34EF40(char* self)
+static inline t4Vector nodePos_34EF40(char* self)
 {
     sFlVEntry_34EF40* vt = *(sFlVEntry_34EF40**)(self + 0xC);
-    return *(sFlVec4_34EF40*)(vt[24].fn(self + vt[24].delta) + 0x30);
+    return *(t4Vector*)(vt[24].fn(self + vt[24].delta) + 0x30);
 }
 
 /**
@@ -114,21 +106,21 @@ static inline sFlVec4_34EF40 nodePos_34EF40(char* self)
  */
 extern "C" void cFloatingNode_updateOverlapSystem(cFloatingNode* self)
 {
-    sFlInfo_34EF40* info = (sFlInfo_34EF40*)self->Info;
+    tFloatBoundBoxInfo* info = self->Info;
     if (info != 0) {
-        sFlBox_34EF40 nb;
-        sFlBox_34EF40 old = info->box;
-        float extent = info->radius;
-        sFlVec4_34EF40 ext;
+        tBoundBox nb;
+        tBoundBox old = (*(&info->BoundBox));
+        float extent = info->Radius;
+        t4Vector ext;
         ext.x = extent;
         ext.y = extent;
         ext.z = extent;
         ext.w = 0.0f;
-        nb.min = vu0Sub_34EF40(nodePos_34EF40(((char*)self)), ext);
-        nb.max = vu0Add_34EF40(nodePos_34EF40(((char*)self)), ext);
-        ((sFlInfo_34EF40*)self->Info)->box = nb;
+        nb.MinPoint = vu0Sub_34EF40(nodePos_34EF40(((char*)self)), ext);
+        nb.MaxPoint = vu0Add_34EF40(nodePos_34EF40(((char*)self)), ext);
+        (*(&(self->Info)->BoundBox)) = nb;
         void* id = self->Instance;
-        nash_Nash_movenode(cObjectInterface_getNash(), 0, id, (sBox_F048*)&nb, (sBox_F048*)&old);
+        nash_Nash_movenode(cObjectInterface_getNash(), 0, id, (tBoundBox*)&nb, (tBoundBox*)&old);
     } else {
         cMoveNode_updateOverlapSystem(((char*)self));
     }
@@ -138,23 +130,11 @@ extern "C" void cFloatingNode_updateOverlapSystem(cFloatingNode* self)
 //100%
 INCLUDE_ASM("object/floatingnode", cFloatingNode_restoreOverlapSystem);
 #ifdef SKIP_ASM
-struct sVec4_F048 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-struct sBox_F048 {
-    sVec4_F048 min;
-    sVec4_F048 max;
-};
 
-struct sInst_F048 {
-    char pad_0x00[0x60];
-    float min[3];   // 0x60
-    float max[3];   // 0x6C
-};
 
 extern "C" void* cObjectInterface_getNash();
-extern "C" void nash_Nash_movenode(void* world, int type, void* id, sBox_F048* box, sBox_F048* old);
+extern "C" void nash_Nash_movenode(void* world, int type, void* id, tBoundBox* box, tBoundBox* old);
 extern "C" void cMoveNode_restoreOverlapSystem(void* self);
 
 /**
@@ -165,21 +145,21 @@ extern "C" void cMoveNode_restoreOverlapSystem(void* self);
  */
 extern "C" void cFloatingNode_restoreOverlapSystem(cFloatingNode* self)
 {
-    sBox_F048* info = (sBox_F048*)((void*)self->Info);
+    tBoundBox* info = (tBoundBox*)((void*)self->Info);
     if (info != 0) {
-        sBox_F048 nb;
-        sBox_F048 old = *info;
-        sInst_F048* inst = (sInst_F048*)self->Instance;
-        sVec4_F048 corner;
-        corner.x = inst->min[0];
-        corner.y = inst->min[1];
-        corner.z = inst->min[2];
+        tBoundBox nb;
+        tBoundBox old = *info;
+        tInstanceRecord* inst = self->Instance;
+        t4Vector corner;
+        corner.x = inst->m_fvMin.m[0];
+        corner.y = inst->m_fvMin.m[1];
+        corner.z = inst->m_fvMin.m[2];
         corner.w = 1.0f;
-        nb.min = corner;
-        corner.x = inst->max[0];
-        corner.y = inst->max[1];
-        corner.z = inst->max[2];
-        nb.max = corner;
+        (*(&nb.MinPoint)) = corner;
+        corner.x = inst->m_fvMax.m[0];
+        corner.y = inst->m_fvMax.m[1];
+        corner.z = inst->m_fvMax.m[2];
+        (*(&nb.MaxPoint)) = corner;
         *info = nb;
         void* id = self->Instance;
         nash_Nash_movenode(cObjectInterface_getNash(), 0, id, &nb, &old);
@@ -195,13 +175,7 @@ INCLUDE_ASM("object/floatingnode", cFloatingNode_makeAnimMats);
 #ifdef SKIP_ASM
 extern "C" void fSinCos(float* s, float* c, float angle); // sincos
 
-struct sQuad_F120 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-struct sMat_F120 {
-    sQuad_F120 row[4];
-};
 
 struct sVec4_F120 {
     float x, y, z, w;
@@ -213,7 +187,7 @@ struct sVec4_F120 {
 struct sBone_F120 {
     int parent;
     int pad4[2];
-    sMat_F120* local;   // 0xC
+    t4Matrix* local;   // 0xC
 };
 
 struct sSkel_F120 {
@@ -222,13 +196,6 @@ struct sSkel_F120 {
     sBone_F120* bones;  // 0x8
 };
 
-// The tilt angles are read through a view of the spring block at +0x2C (see cFloatingNode_updateNode).
-struct sFloatTilt_F120 {
-    char pad0[0x28];
-    float pos2;         // 0x54
-    char pad2C[0x38 - 0x2C];
-    float pos3;         // 0x64
-};
 
 struct sFloatingNode_F120 {
     char pad0[0x12];
@@ -299,26 +266,26 @@ static inline void Mul_F120(void* out, const void* a, const void* b)
         : "memory");
 }
 
-static inline sQuad_F120 Row_F120(const sMat_F120* m, int k)
+static inline t4Vector Row_F120(const t4Matrix* m, int k)
 {
     return m->row[k];
 }
 
-static inline sVec4_F120 CompMul_F120(const sQuad_F120& a, const sVec4_F120& b)
+static inline sVec4_F120 CompMul_F120(const t4Vector& a, const sVec4_F120& b)
 {
     return sVec4_F120(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
 }
 
 // dst = parent * (local with its translation scaled by s).
-static inline void Pose_F120(sMat_F120* dst, const sMat_F120* parent, const sMat_F120* local, const sVec4_F120& s)
+static inline void Pose_F120(t4Matrix* dst, const t4Matrix* parent, const t4Matrix* local, const sVec4_F120& s)
 {
-    sMat_F120 l;
+    t4Matrix l;
     l.row[0] = Row_F120(local, 0);
     l.row[1] = Row_F120(local, 1);
     l.row[2] = Row_F120(local, 2);
     sVec4_F120 v = CompMul_F120(Row_F120(local, 3), s);
-    l.row[3] = *(sQuad_F120*)&v;
-    sMat_F120 t;
+    l.row[3] = *(t4Vector*)&v;
+    t4Matrix t;
     Mul_F120(&t, parent, &l);
     Copy_F120(dst, &t);
 }
@@ -334,18 +301,18 @@ static inline void Pose_F120(sMat_F120* dst, const sMat_F120* parent, const sMat
  * @param out  receives one matrix per part (On Tour animMats)
  */
 // Poses a floating object's skeleton: the root bob/tilt transform, then each bone under its parent.
-extern "C" void cFloatingNode_makeAnimMats(cFloatingNode* self, sMat_F120* mat, sMat_F120* out)
+extern "C" void cFloatingNode_makeAnimMats(cFloatingNode* self, t4Matrix* mat, t4Matrix* out)
 {
-    sMat_F120 tiltMat;
-    sQuad_F120 base = mat->row[3];
+    t4Matrix tiltMat;
+    t4Vector base = mat->row[3];
     float pos[3];
     float rot[3];
     pos[0] = 0.0f;
     pos[1] = 0.0f;
     pos[2] = self->Z - base.z;
-    sFloatTilt_F120* tilt = (sFloatTilt_F120*)&self->ZSpring;
-    rot[0] = tilt->pos2;
-    rot[1] = tilt->pos3;
+    cFloatingNodeState* tilt = (cFloatingNodeState*)&self->ZSpring;
+    rot[0] = tilt->OX;
+    rot[1] = tilt->OY;
     rot[2] = 0.0f;
     // Rotation from the tilt angles (same construction as cMeshAnimFrame_update), translated by pos.
     float sx, cx, sy, cy, sz, cz;
@@ -371,19 +338,19 @@ extern "C" void cFloatingNode_makeAnimMats(cFloatingNode* self, sMat_F120* mat, 
     tiltMat.row[3].y = pos[1];
     tiltMat.row[3].z = pos[2];
     tiltMat.row[3].w = 1.0f;
-    sSkel_F120* skel = *(sSkel_F120**)((char*)self->Instance + 0x80);
-    float sc4 = *(float*)((char*)self->Instance + 0x84);
+    sSkel_F120* skel = (sSkel_F120*)self->Instance->m_Model;
+    float sc4 = self->Instance->m_fScale;
     sBone_F120* bone = skel->bones;
     sVec4_F120 scale(sc4, sc4, sc4, 1.0f);
     int i;
     for (i = 0; i < skel->count; i++, bone++) {
-        sMat_F120 boneMat;
+        t4Matrix boneMat;
         if (bone->parent != -1) {
             Pose_F120(&boneMat, &out[bone->parent], bone->local, scale);
             Copy_F120(&out[i], &boneMat);
         } else {
-            sMat_F120 w;
-            sMat_F120 rootMat;
+            t4Matrix w;
+            t4Matrix rootMat;
             Mul_F120(&rootMat, mat, &tiltMat);
             Copy_F120(&w, &rootMat);
             Pose_F120(&boneMat, &w, bone->local, scale);
@@ -683,13 +650,6 @@ extern "C" void cFloatingNode_updateIntersectInfo(cFloatingNode* self, sV4_F790*
 INCLUDE_ASM("object/floatingnode", cFloatingNode_updateNode);
 #ifdef SKIP_ASM
 
-// The tilt clamp reads the angles through a view of the spring block at +0x2C.
-struct sFloatTilt_34F930 {
-    char pad0[0x28];
-    float pos2;         // 0x54
-    char pad2C[0x38 - 0x2C];
-    float pos3;         // 0x64
-};
 
 struct sFloatingNode_34F930 {
     char pad0[0x12];
@@ -738,11 +698,11 @@ extern "C" int cFloatingNode_updateNode(cFloatingNode* self)
     self->WX += accelX * dt;
     self->OY += self->WY * dt;
     self->WY += accelY * dt;
-    sFloatTilt_34F930* tilt = (sFloatTilt_34F930*)&self->ZSpring;
+    cFloatingNodeState* tilt = (cFloatingNodeState*)&self->ZSpring;
     float lo = -1.3962635f;    // +-80 degrees
     float hi = 1.3962635f;
-    self->OX = tilt->pos2 >= lo ? tilt->pos2 <? hi : lo;
-    self->OY = tilt->pos3 >= lo ? tilt->pos3 <? hi : lo;
+    self->OX = tilt->OX >= lo ? tilt->OX <? hi : lo;
+    self->OY = tilt->OY >= lo ? tilt->OY <? hi : lo;
     self->Force = 0.0f;
     self->TX = 0.0f;
     self->TY = 0.0f;

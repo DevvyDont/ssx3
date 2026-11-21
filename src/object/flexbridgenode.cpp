@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/instancerecord.h"
+#include "ai/rider.h"
 #include "bx/math3d.h"
 #include "world/worldview.h"
 #include "object/flexbridgenode.h"
@@ -307,22 +309,8 @@ extern "C" void cFlexBridgeNode_initSpringNodes(sFlexBridge* self)
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_applyForce);
 #ifdef SKIP_ASM
 
-struct sMat_6E38 {
-    t4Vector r[4];
-};
 
-struct sSeg_6E38 {
-    char pad_0x0[0x30];
-    t4Vector force;             // 0x30
-    float torque;               // 0x40
-    char pad_0x44[0xC];
-};
 
-struct sNode_6E38 {
-    t4Vector pos;               // 0x00
-    char pad_0x10[0x50];
-    int idx;                    // 0x60
-};
 
 class cBridge_6E38 {
 public:
@@ -350,7 +338,7 @@ public:
     virtual void v21();
     virtual void v22();
     virtual void v23();
-    virtual sMat_6E38* GetMatrix();
+    virtual t4Matrix* GetMatrix();
 };
 
 
@@ -408,7 +396,7 @@ static inline t4Vector vu0Norm_6E38(const t4Vector& v)
 }
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix * vector).
-static inline t4Vector vu0MulMat_6E38(const sMat_6E38* m, const t4Vector& v)
+static inline t4Vector vu0MulMat_6E38(const t4Matrix* m, const t4Vector& v)
 {
     t4Vector r;
     __asm__(
@@ -460,18 +448,18 @@ static inline void vu0AddEq_6E38(t4Vector& dst, t4Vector b)
         : "m"(dst), "m"(b));
 }
 
-static inline t4Vector Pos_6E38(const sMat_6E38* m)
+static inline t4Vector Pos_6E38(const t4Matrix* m)
 {
-    return m->r[3];
+    return m->row[3];
 }
 
-static inline t4Vector ToLocal_6E38(const sMat_6E38* m, const t4Vector& v)
+static inline t4Vector ToLocal_6E38(const t4Matrix* m, const t4Vector& v)
 {
     t4Vector r;
     t4Vector f = vu0Sub_6E38(v, vu0Scale_6E38(v.w, Pos_6E38(m)));
-    r.x = m->r[0].x * f.x + m->r[0].y * f.y + m->r[0].z * f.z;
-    r.y = m->r[1].x * f.x + m->r[1].y * f.y + m->r[1].z * f.z;
-    r.z = m->r[2].x * f.x + m->r[2].y * f.y + m->r[2].z * f.z;
+    r.x = m->row[0].x * f.x + m->row[0].y * f.y + m->row[0].z * f.z;
+    r.y = m->row[1].x * f.x + m->row[1].y * f.y + m->row[1].z * f.z;
+    r.z = m->row[2].x * f.x + m->row[2].y * f.y + m->row[2].z * f.z;
     r.w = v.w;
     return r;
 }
@@ -491,21 +479,21 @@ static inline float Torque_6E38(float k, const t4Vector& a, const t4Vector& b)
  * @param intInfo  the hit (On Tour tIntersectInfo): position and triangle index
  * @param force    the force to apply
  */
-extern "C" void cFlexBridgeNode_applyForce(cFlexBridgeNode* self, sNode_6E38* intInfo, t4Vector* force)
+extern "C" void cFlexBridgeNode_applyForce(cFlexBridgeNode* self, tIntersectInfo* intInfo, t4Vector* force)
 {
     cFlexBridgeNode* data = self;
-    if (intInfo->idx < 0) {
+    if (intInfo->Face < 0) {
         return;
     }
-    sMat_6E38* transform = ((cBridge_6E38*)self)->GetMatrix();
-    t4Vector relPos = vu0Sub_6E38(intInfo->pos, Pos_6E38(transform));
+    t4Matrix* transform = ((cBridge_6E38*)self)->GetMatrix();
+    t4Vector relPos = vu0Sub_6E38(intInfo->Ipos, Pos_6E38(transform));
     t4Vector y = vu0MulMat_6E38(transform, vu0Norm_6E38(*(&data->BottomRightOffset)));
-    t4Vector n = vu0MulMat_6E38(transform, (data->FaceNorms)[intInfo->idx]);
+    t4Vector n = vu0MulMat_6E38(transform, (data->FaceNorms)[intInfo->Face]);
     float yoffset = vu0Dot_6E38(relPos, y);
-    int seg = intInfo->idx / 2;
-    sSeg_6E38* pNode = ((sSeg_6E38*)data->Mesh.Nodes);
-    vu0AddEq_6E38(pNode[seg].force, vu0Scale_6E38(data->Mesh.ForceScale, ToLocal_6E38(transform, *force)));
-    pNode[seg].torque += Torque_6E38(data->Mesh.TorqueScale, n, *force) * yoffset;
+    int seg = intInfo->Face / 2;
+    tSpringNode* pNode = (data->Mesh.Nodes);
+    vu0AddEq_6E38(pNode[seg].F, vu0Scale_6E38(data->Mesh.ForceScale, ToLocal_6E38(transform, *force)));
+    pNode[seg].T += Torque_6E38(data->Mesh.TorqueScale, n, *force) * yoffset;
 }
 #endif
 
@@ -943,12 +931,6 @@ struct sVE_75D8 {
     void* (*fn)(...);
 };
 
-struct sFlexNode_75D8 {
-    sV4_75D8 pos;           // 0x00
-    char pad_0x10[0x10];
-    float angle;            // 0x20
-    char pad_0x24[0x50 - 0x24];
-};
 
 struct sVEV_75D8 {
     short delta;
@@ -1109,13 +1091,13 @@ extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode* vself)
     sV4_75D8 sideRef = Scale_75D8(t4vect_ZAxis, Length_75D8(*(sV4_75D8*)&self->BottomLeftOffset));
     int nverts = n * 2;
     int ntris = (n - 1) * 2;
-    sFlexNode_75D8* node = ((sFlexNode_75D8*)self->Mesh.Nodes);
+    tSpringNode* node = (self->Mesh.Nodes);
     int i;
     for (i = 0; i < n; i++) {
         float sinAngle, cosAngle;
-        fSinCos(&sinAngle, &cosAngle, node->angle);
-        ((sV4_75D8*)self->Verts)[i] = Add_75D8(Add_75D8(node->pos, Scale_75D8(*(sV4_75D8*)&self->BottomRightOffset, cosAngle)), Scale_75D8(upRef, sinAngle));
-        ((sV4_75D8*)self->Verts)[n + i] = Sub_75D8(Add_75D8(node->pos, Scale_75D8(*(sV4_75D8*)&self->BottomLeftOffset, cosAngle)), Scale_75D8(sideRef, sinAngle));
+        fSinCos(&sinAngle, &cosAngle, node->O);
+        ((sV4_75D8*)self->Verts)[i] = Add_75D8(Add_75D8((*(sV4_75D8*)&node->P), Scale_75D8(*(sV4_75D8*)&self->BottomRightOffset, cosAngle)), Scale_75D8(upRef, sinAngle));
+        ((sV4_75D8*)self->Verts)[n + i] = Sub_75D8(Add_75D8((*(sV4_75D8*)&node->P), Scale_75D8(*(sV4_75D8*)&self->BottomLeftOffset, cosAngle)), Scale_75D8(sideRef, sinAngle));
         node++;
     }
     int k;
@@ -1177,21 +1159,14 @@ struct sRow_7B80 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sModel_7B80 {
-    char pad_0x0[0x7D];
-    unsigned char page;     // 0x7D
-    short slot;             // 0x7E
-    char pad_0x80[0x14];
-    void* mesh;             // 0x94
-};
 
-static inline int IsLoaded_7B80(sModel_7B80* m)
+static inline int IsLoaded_7B80(tInstanceRecord* m)
 {
     char* wc = (char*)cWorld_m_pTheWorld->m_pWorldCache;
-    if (m->page == 0xFF)
+    if (m->m_SMap.m_uiSectionID == 0xFF)
         return 1;
-    int ok = *(int*)(wc + (m->page << 3) + 0x24) == 6;
-    return ok ? *(int*)(wc + m->slot * 0x18 + 0x3F0) == 3 : 0;
+    int ok = *(int*)(wc + (m->m_SMap.m_uiSectionID << 3) + 0x24) == 6;
+    return ok ? *(int*)(wc + m->m_SMap.m_iHullID * 0x18 + 0x3F0) == 3 : 0;
 }
 
 struct sPair_7B80 { sRow_7B80 r[4]; };
@@ -1213,7 +1188,7 @@ struct sVE24_7B80 { short delta; short index; void* (*fn)(void*); };
 // Draws the bridge piece's model (through its handler if it has one) unless it is culled or not streamed in.
 extern "C" void cFlexBridgeNode_render(cFlexBridgeNode* self)
 {
-    sModel_7B80* model = (sModel_7B80*)self->Instance;
+    tInstanceRecord* model = self->Instance;
     if (!IsLoaded_7B80(model)) {
         return;
     }
@@ -1238,7 +1213,7 @@ extern "C" void cFlexBridgeNode_render(cFlexBridgeNode* self)
     char* renderer = (char*)self->GridMesh;
     if (renderer != 0) {
         sVE7_7B80* hv = *(sVE7_7B80**)(renderer + 4);
-        hv[7].fn(renderer + hv[7].delta, mtx, ((sModel_7B80*)self->Instance)->mesh, 0);
+        hv[7].fn(renderer + hv[7].delta, mtx, (self->Instance)->unk_094, 0);
     } else {
         sVE96_7B80* ctxVtbl = *(sVE96_7B80**)(ctx + 0x10D8);
         ctxVtbl[96].fn(ctx + ctxVtbl[96].delta, self->Instance, 0, 0, 0);
@@ -1884,7 +1859,7 @@ extern "C" void cFlexRailNode_splineIntersect(cFlexRailNode* self, const sFbV_82
             if (mesh <= 0) {
                 mesh = 0;
             }
-            short* surf = (short*)(*(char**)((char*)self->Instance + 0x88) + 0x1A + mesh * 12);
+            short* surf = (short*)((char*)self->Instance->m_pCollideRecord + 0x1A + mesh * 12);
             if (*surf == -1) {
                 intInfo->surf = 0;
             } else {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/rider.h"
 #include "intersect/worldline.h"
 #include "intersect/worldrider.h"
 #include "intersect/worldsphere.h"
@@ -95,9 +96,9 @@ extern "C" void cRiderSphereTree_Init1(cRiderSphereTree* self, float radius)
     self->sphMask = 0xFFFFFFFF;
     self->listLen = 1;
     self->boundRad = radius;
-    *(float*)((char*)self + 0x40) = radius;
+    self->sphList[0].rad = radius;
     self->boundBone = -1;
-    *(int*)((char*)self + 0x44) = -1;
+    self->sphList[0].bone = -1;
     self->bonePoses = 0;
 }
 #endif
@@ -126,8 +127,8 @@ extern "C" void cRiderSphereTree_Init(cRiderSphereTree* self, int type, int n, i
     self->sphMask = 0xFFFFFFFF;
     self->listLen = n;
     for (int i = 0; i < self->listLen; i++) {
-        *(int*)((char*)self + i * 0x20 + 0x44) = ids[i];
-        *(float*)((char*)self + i * 0x20 + 0x40) = radii[i];
+        self->sphList[i].bone = ids[i];
+        self->sphList[i].rad = radii[i];
     }
     *(int*)&self->bonePoses = type;
     self->boundRad = radius;
@@ -1089,7 +1090,7 @@ struct sSphereHit_32FAC0;
  * @param hit  out: the contact point (On Tour loc)
  * @return 1 on contact, else 0
  */
-extern "C" int cRiderSphereTree_IsBoxCollision(void* tree, t3Vector* boxMin, t3Vector* boxMax, sSphereVec4* outPos, sSphereHit_32FAC0* hit)
+extern "C" int cRiderSphereTree_IsBoxCollision(void* tree, t3Vector* boxMin, t3Vector* boxMax, sSphereVec4* outPos, tIntersectInfo* hit)
 {
     sSphereHit_B2B8* self = (sSphereHit_B2B8*)tree;
     sSphereVec4* outNormal = (sSphereVec4*)hit;
@@ -2017,7 +2018,6 @@ extern "C" void SphereTree_TransformAbs(SphereTree* self, sSphereVec4* transMat,
 INCLUDE_ASM("intersect/riderspheretree", SphereTree_TransformRel);
 #ifdef SKIP_ASM
 
-struct sSc_C770 { float x, y, z, w; };
 
 extern "C" void SphereTree_TransformRel_i(SphereTree* self, sSphereVec4* m, float scale) __asm__("SphereTree_TransformRel");
 
@@ -2036,7 +2036,7 @@ extern "C" void SphereTree_TransformRel_i(SphereTree* self, sSphereVec4* mat, fl
     }
     sSphereVec4 scaledCenter;
     sSphereVec4 transformedCenter = mtxMulVec_9B90(mat, (sSphereVec4*)&self->transCenter);
-    sSc_C770 sc;
+    t4Vector sc;
     sc.w = 1.0f;
     sc.x = scale;
     sc.y = scale;
@@ -4110,21 +4110,6 @@ static inline t4Vector vecScale_2F650(const t4Vector& v, float s)
     return r;
 }
 
-struct sRiderSphere_2F650 {
-    int state;          // 0x00
-    int f4;             // 0x04
-    int f8;             // 0x08
-    int pad_0xC[5];
-    t4Vector max;    // 0x20
-    t4Vector min;    // 0x30
-    t4Vector center; // 0x40
-    void** vtbl;        // 0x50
-    int pad_0x54[3];
-    void* tree;         // 0x60
-    void* tree2;        // 0x64
-    int pad_0x68[2];
-    cRiderSphereTree node; // 0x70
-};
 
 cRiderSphereTree* cRiderSphereTree_cRiderSphereTree(cRiderSphereTree* self);
 extern "C" void cRiderSphereTree_GetMaskBoundBox(void* tree, t4Vector* mn, t4Vector* mx);
@@ -4140,7 +4125,7 @@ extern void* cWorldRider_vtbl[];
  * @param flag  On Tour isLow
  * @return @p self
  */
-extern "C" sRiderSphere_2F650* cWorldRider_cWorldRider(cWorldRider* self, cRiderSphereTree* tree, int flag)
+extern "C" cWorldRider* cWorldRider_cWorldRider(cWorldRider* self, cRiderSphereTree* tree, int flag)
 {
     self->useRejectNormal = 0;
     self->isTransformed = 0;
@@ -4151,7 +4136,7 @@ extern "C" sRiderSphere_2F650* cWorldRider_cWorldRider(cWorldRider* self, cRider
     self->mPrecision = flag == 0;
     cRiderSphereTree_GetMaskBoundBox(tree, (&self->boxMin), (&self->boxMax));
     *(&self->boxCenter) = vecScale_2F650(vecAdd_2F650((&self->boxMin), (&self->boxMax)), 0.5f);
-    return ((sRiderSphere_2F650*)self);
+    return (self);
 }
 #endif
 
@@ -4458,14 +4443,8 @@ static inline void sphereDivEq_32FA30(sSphereVec4& v, float s)
         : "memory");
 }
 
-struct sSphereHit_32FA30 {
-    char pad_0x00[0x10];
-    sSphereVec4 dir;      // 0x10
-    char pad_0x20[0x20];
-    float len;            // 0x40
-};
 
-extern "C" int bxSphereTree_IsRiderTreeCollision(void* a, void* tree, sSphereVec4* dir, sSphereHit_32FA30* hit);
+extern "C" int bxSphereTree_IsRiderTreeCollision(void* a, void* tree, sSphereVec4* dir, tIntersectInfo* hit);
 
 /**
  * Collides another sphere tree with the rider's current tree and normalises the hit's push-out vector.
@@ -4476,12 +4455,12 @@ extern "C" int bxSphereTree_IsRiderTreeCollision(void* a, void* tree, sSphereVec
  * @param hit  receives the intersection (On Tour tIntersectInfo* ti)
  * @return 1 on a hit, otherwise 0
  */
-extern "C" int cWorldRider_IsSphTreeInt(cWorldRider* self, void* tree, sSphereHit_32FA30* hit)
+extern "C" int cWorldRider_IsSphTreeInt(cWorldRider* self, void* tree, tIntersectInfo* hit)
 {
-    if (bxSphereTree_IsRiderTreeCollision(tree, self->st, &hit->dir, hit) != 0) {
-        float len = sphereLength_32FA30(hit->dir);
-        hit->len = len;
-        sphereDivEq_32FA30(hit->dir, len);
+    if (bxSphereTree_IsRiderTreeCollision(tree, self->st, &(*(sSphereVec4*)&hit->Inorm), hit) != 0) {
+        float len = sphereLength_32FA30((*(sSphereVec4*)&hit->Inorm));
+        hit->Iparam = len;
+        sphereDivEq_32FA30((*(sSphereVec4*)&hit->Inorm), len);
         return 1;
     }
     return 0;
@@ -4529,14 +4508,8 @@ static inline void sphereDivEq_32FAC0(sSphereVec4& v, float s)
         : "memory");
 }
 
-struct sSphereHit_32FAC0 {
-    char pad_0x00[0x10];
-    sSphereVec4 dir;      // 0x10
-    char pad_0x20[0x20];
-    float len;            // 0x40
-};
 
-extern "C" int cRiderSphereTree_IsBoxCollision(void* tree, t3Vector* a1, t3Vector* a2, sSphereVec4* dir, sSphereHit_32FAC0* hit);
+extern "C" int cRiderSphereTree_IsBoxCollision(void* tree, t3Vector* a1, t3Vector* a2, sSphereVec4* dir, tIntersectInfo* hit);
 
 /**
  * Collides the rider's current sphere tree with an axis-aligned box and normalises the hit's push-out vector.
@@ -4546,12 +4519,12 @@ extern "C" int cRiderSphereTree_IsBoxCollision(void* tree, t3Vector* a1, t3Vecto
  * @param hit  receives the intersection (On Tour tIntersectInfo* ti); direction normalised, length stored
  * @return 1 on a hit (cRiderSphereTree_IsBoxCollision), otherwise 0
  */
-extern "C" int cWorldRider_IsBoxInt(cWorldRider* self, void* bMin, void* bMax, sSphereHit_32FAC0* hit)
+extern "C" int cWorldRider_IsBoxInt(cWorldRider* self, void* bMin, void* bMax, tIntersectInfo* hit)
 {
-    if (cRiderSphereTree_IsBoxCollision(self->st, (t3Vector*)bMin, (t3Vector*)bMax, &hit->dir, hit) != 0) {
-        float len = sphereLength_32FAC0(hit->dir);
-        hit->len = len;
-        sphereDivEq_32FAC0(hit->dir, len);
+    if (cRiderSphereTree_IsBoxCollision(self->st, (t3Vector*)bMin, (t3Vector*)bMax, &(*(sSphereVec4*)&hit->Inorm), hit) != 0) {
+        float len = sphereLength_32FAC0((*(sSphereVec4*)&hit->Inorm));
+        hit->Iparam = len;
+        sphereDivEq_32FAC0((*(sSphereVec4*)&hit->Inorm), len);
         return 1;
     }
     return 0;
@@ -4756,12 +4729,6 @@ static inline void sphereDivEq_32FDB0(sSphereVec4& v, float s)
         : "memory");
 }
 
-struct sSphereHit_32FDB0 {
-    char pad_0x00[0x10];
-    sSphereVec4 dir;      // 0x10
-    char pad_0x20[0x20];
-    float len;            // 0x40
-};
 
 extern "C" int SphereTree_IsSphereCollision(SphereTree* self, t4Vector* a1, float f, t4Vector* a2, t4Vector* a3);
 
@@ -4772,12 +4739,12 @@ extern "C" int SphereTree_IsSphereCollision(SphereTree* self, t4Vector* a1, floa
  * @param hit  receives the intersection (On Tour tIntersectInfo* ti); direction normalised, length stored
  * @return 1 on a hit (SphereTree_IsSphereCollision with the centre and radius), otherwise 0
  */
-extern "C" int cWorldSphere_IsSphTreeInt(cWorldSphere* self, void* tree, sSphereHit_32FDB0* hit)
+extern "C" int cWorldSphere_IsSphTreeInt(cWorldSphere* self, void* tree, tIntersectInfo* hit)
 {
-    if (SphereTree_IsSphereCollision((SphereTree*)tree, (t4Vector*)&self->cen, self->rad, (t4Vector*)(&hit->dir), (t4Vector*)hit) != 0) {
-        float len = sphereLength_32FDB0(hit->dir);
-        hit->len = len;
-        sphereDivEq_32FDB0(hit->dir, len);
+    if (SphereTree_IsSphereCollision((SphereTree*)tree, (t4Vector*)&self->cen, self->rad, (t4Vector*)(&(*(sSphereVec4*)&hit->Inorm)), (t4Vector*)hit) != 0) {
+        float len = sphereLength_32FDB0((*(sSphereVec4*)&hit->Inorm));
+        hit->Iparam = len;
+        sphereDivEq_32FDB0((*(sSphereVec4*)&hit->Inorm), len);
         return 1;
     }
     return 0;

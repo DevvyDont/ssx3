@@ -292,13 +292,11 @@ int cBERewardInterface_getTrackMedal(void* self, int player, int charID, int mod
 // PORT: the unit declares cBENewPlayerInterface_isEventLocked as returning int; its result is negated as a bool here.
 bool cBENewPlayerInterface_isEventLocked_b(void* iface, int player, int charID, int x) __asm__("cBENewPlayerInterface_isEventLocked");
 
-// The unit's sPeakGoal (0x6C bytes), defined further down; only the leading fields are read here.
-struct sMapEvent_0B50 { int track; int f4; int kind; int rest[0x6C / 4 - 3]; };
 
 // PORT: the unit declares cUITemplate_MAP_isMapEventCompleted(void*, sPeakGoal*, int) further down; the goal is really taken by value
 // (the callee copies it), so this definition binds the by-value form to the symbol. Each kind returns through its
 // own call; g++ merges the two identical tails.
-extern "C" int cUITemplate_MAP_isMapEventCompleted_byval(void* self, sMapEvent_0B50 ev, int peak) __asm__("cUITemplate_MAP_isMapEventCompleted");
+extern "C" int cUITemplate_MAP_isMapEventCompleted_byval(void* self, tMapLocation ev, int peak) __asm__("cUITemplate_MAP_isMapEventCompleted");
 /**
  * Tells whether the map location's event has been completed by the current character.
  *
@@ -311,21 +309,21 @@ extern "C" int cUITemplate_MAP_isMapEventCompleted_byval(void* self, sMapEvent_0
  * @param peak  the peak (On Tour eBEPeakID)
  * @return 1 when completed, otherwise 0
  */
-extern "C" int cUITemplate_MAP_isMapEventCompleted_byval(void* self, sMapEvent_0B50 ev, int peak)
+extern "C" int cUITemplate_MAP_isMapEventCompleted_byval(void* self, tMapLocation ev, int peak)
 {
     void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* rw = cBE_getInterface_Fv(cBE_getBE(), 13);
     int cid = cBELibrary_getCharacterID(0);
-    if (ev.track == 23)
+    if (ev.location == 23)
         return 0;
-    if (ev.kind == 4) {
+    if (ev.gameEvent == 4) {
         int x = 6;
         if (peak == 1)
             x = 7;
         if (peak == 2)
             x = 8;
         return !cBENewPlayerInterface_isEventLocked_b(np, 0, cBELibrary_getCharacterID(0), x);
-    } else if (ev.kind == 5) {
+    } else if (ev.gameEvent == 5) {
         int x = 9;
         if (peak == 1)
             x = 10;
@@ -333,7 +331,7 @@ extern "C" int cUITemplate_MAP_isMapEventCompleted_byval(void* self, sMapEvent_0
             x = 11;
         return !cBENewPlayerInterface_isEventLocked_b(np, 0, cBELibrary_getCharacterID(0), x);
     }
-    return cBERewardInterface_getTrackMedal(rw, 0, cid, ev.kind, ev.track) != -1;
+    return cBERewardInterface_getTrackMedal(rw, 0, cid, ev.gameEvent, ev.location) != -1;
 }
 #endif
 

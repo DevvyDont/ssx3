@@ -1134,10 +1134,6 @@ struct sVEntry002122E8 {
     void (*fn)(void*, int);
 };
 
-struct sObj002122E8 {
-    int pad[2];
-    sVEntry002122E8* vt;
-};
 
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -1156,8 +1152,8 @@ extern "C" void cOVState_AUTOSAVE_displayStatus(cOVState_AUTOSAVE* self)
     if (status != 0 && status != 6) {
         cOVState_AUTOSAVE_displayOn(self);
     } else {
-        sObj002122E8* autosaveText = (sObj002122E8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_autosave_text));
-        autosaveText->vt[9].fn((char*)autosaveText + autosaveText->vt[9].delta, 0);
+        cUIThing* autosaveText = (cUIThing*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_autosave_text));
+        ((sVEntry002122E8*)autosaveText->mVtbl)[9].fn((char*)autosaveText + ((sVEntry002122E8*)autosaveText->mVtbl)[9].delta, 0);
     }
 }
 #endif

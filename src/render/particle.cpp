@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uithing.h"
+#include "render/2drender.h"
 #include "render/simpletube.h"
 #include "render/ps2gridmesh.h"
 #include "render/irradiance.h"
@@ -257,9 +259,6 @@ extern "C" void cBaseClass_DynamicEmitter_setupEmitter(cEmitter_00370DC8* self, 
 //100%
 INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_updateBASE);
 #ifdef SKIP_ASM
-struct sPtQ10D0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 static inline float randUnit10D0()
 {
@@ -269,7 +268,7 @@ static inline float randUnit10D0()
 }
 
 // PORT: the unit's callers use a 4-arg declaration; bind the real 5-arg body by asm label.
-extern "C" void cBaseClass_DynamicEmitter_updateBASE_impl(char* self, sPtQ10D0* pos, sPtQ10D0* vel, int rnd, float dt) __asm__("cBaseClass_DynamicEmitter_updateBASE");
+extern "C" void cBaseClass_DynamicEmitter_updateBASE_impl(char* self, t4Vector* pos, t4Vector* vel, int rnd, float dt) __asm__("cBaseClass_DynamicEmitter_updateBASE");
 /**
  * Records a dynamic emitter's new sub-emitter position and velocity for this frame and advances its ring index and
  * texture flip frame.
@@ -288,12 +287,12 @@ extern "C" void cBaseClass_DynamicEmitter_updateBASE_impl(char* self, sPtQ10D0* 
  * @param rnd  non-zero when the sub-emitter is enabled this frame
  * @param dt  the frame time
  */
-extern "C" void cBaseClass_DynamicEmitter_updateBASE_impl(char* self, sPtQ10D0* pos, sPtQ10D0* vel, int rnd, float dt)
+extern "C" void cBaseClass_DynamicEmitter_updateBASE_impl(char* self, t4Vector* pos, t4Vector* vel, int rnd, float dt)
 {
     if (*(int*)(self + 0x174) == 0) {
         return;
     }
-    int alive = (*(sPtQ10D0**)(self + 0x1A4))[*(int*)(self + 0x17C)].w > 0.0f;
+    int alive = (*(t4Vector**)(self + 0x1A4))[*(int*)(self + 0x17C)].w > 0.0f;
     if (alive) {
         if (rnd == 0) {
             *(int*)(self + 0x1E0) = *(int*)(self + 0x1E0) - 1;
@@ -302,20 +301,20 @@ extern "C" void cBaseClass_DynamicEmitter_updateBASE_impl(char* self, sPtQ10D0* 
         *(int*)(self + 0x1E0) = *(int*)(self + 0x1E0) + 1;
     }
     if (pos) {
-        *(sPtQ10D0*)(self + 0x1B0) = *pos;
+        *(t4Vector*)(self + 0x1B0) = *pos;
     } else {
-        pos = (sPtQ10D0*)(self + 0x1B0);
+        pos = (t4Vector*)(self + 0x1B0);
     }
     if (vel) {
-        *(sPtQ10D0*)(self + 0x1C0) = *vel;
+        *(t4Vector*)(self + 0x1C0) = *vel;
     } else {
-        vel = (sPtQ10D0*)(self + 0x1C0);
+        vel = (t4Vector*)(self + 0x1C0);
     }
-    (*(sPtQ10D0**)(self + 0x1A0))[*(int*)(self + 0x17C)] = *pos;
-    (*(sPtQ10D0**)(self + 0x1A0))[*(int*)(self + 0x17C)].w = 0.0f;
-    (*(sPtQ10D0**)(self + 0x1A4))[*(int*)(self + 0x17C)] = *vel;
+    (*(t4Vector**)(self + 0x1A0))[*(int*)(self + 0x17C)] = *pos;
+    (*(t4Vector**)(self + 0x1A0))[*(int*)(self + 0x17C)].w = 0.0f;
+    (*(t4Vector**)(self + 0x1A4))[*(int*)(self + 0x17C)] = *vel;
     // PORT: pointer held in int (index-first addu)
-    sPtQ10D0* velSlot = (sPtQ10D0*)((*(int*)(self + 0x17C) << 4) + *(int*)(self + 0x1A4));
+    t4Vector* velSlot = (t4Vector*)((*(int*)(self + 0x17C) << 4) + *(int*)(self + 0x1A4));
     if (rnd) {
         velSlot->w = randUnit10D0() + 1.0f;
     } else {
@@ -533,10 +532,6 @@ INCLUDE_ASM("render/particle", cDynamicColourEmitter_Allocate);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char str_DynEmitterData_Colours[];
 
-struct sEmitColour_1548 {
-    unsigned char rgba[4];
-    sEmitColour_1548() {}
-};
 
 /**
  * Allocates a colour emitter's arrays: the base positions and velocities plus one RGBA colour each.
@@ -545,9 +540,9 @@ struct sEmitColour_1548 {
  */
 extern "C" void cDynamicColourEmitter_Allocate(cDynamicColourEmitter* self)
 {
-    sEmitColour_1548** pc = (sEmitColour_1548**)(&self->m_colours);
+    tPackedRGBA** pc = (tPackedRGBA**)(&self->m_colours);
     cBaseClass_DynamicEmitter_Allocate((cBaseClass_DynamicEmitter*)self);
-    *pc = new (str_DynEmitterData_Colours, 0, 0) sEmitColour_1548[self->m_numSubEmitters];
+    *pc = new (str_DynEmitterData_Colours, 0, 0) tPackedRGBA[self->m_numSubEmitters];
 }
 #endif
 
@@ -675,9 +670,6 @@ extern "C" void cDynamicColourEmitter_render(cDynamicColourEmitter* self, int bl
 INCLUDE_ASM("render/particle", cDynamicColourEmitter_update);
 #ifdef SKIP_ASM
 
-struct sPtRGBA17C0 {
-    unsigned char r, g, b, a;
-};
 
 
 extern "C" void cBaseClass_DynamicEmitter_updateBASE(void* self, int a1, int a2, int a3);
@@ -712,10 +704,10 @@ extern "C" void cDynamicColourEmitter_update(cDynamicColourEmitter* self, int po
     } else {
         col = (&self->m_currColour);
     }
-    ((sPtRGBA17C0*)self->m_colours)[self->m_subEmitterId].a = (int)clamp17C0(col->w * 255.0f, 0.0f, 255.0f);
-    ((sPtRGBA17C0*)self->m_colours)[self->m_subEmitterId].r = (int)clamp17C0(col->x * 255.0f, 0.0f, 255.0f);
-    ((sPtRGBA17C0*)self->m_colours)[self->m_subEmitterId].g = (int)clamp17C0(col->y * 255.0f, 0.0f, 255.0f);
-    ((sPtRGBA17C0*)self->m_colours)[self->m_subEmitterId].b = (int)clamp17C0(col->z * 255.0f, 0.0f, 255.0f);
+    (self->m_colours)[self->m_subEmitterId].a = (int)clamp17C0(col->w * 255.0f, 0.0f, 255.0f);
+    (self->m_colours)[self->m_subEmitterId].r = (int)clamp17C0(col->x * 255.0f, 0.0f, 255.0f);
+    (self->m_colours)[self->m_subEmitterId].g = (int)clamp17C0(col->y * 255.0f, 0.0f, 255.0f);
+    (self->m_colours)[self->m_subEmitterId].b = (int)clamp17C0(col->z * 255.0f, 0.0f, 255.0f);
     cBaseClass_DynamicEmitter_updateBASE(self, position, velocity, enable);
 }
 #endif
@@ -1309,18 +1301,7 @@ extern int cTube_m_G;
 extern int cTube_m_B;
 extern void* cSimpleTube_vtbl[];
 
-struct sPtVert_2520 {
-    float x;        // 0x0
-    float y;        // 0x4
-    float z;        // 0x8
-    int w;          // 0xC
-    int r;          // 0x10
-    int g;          // 0x14
-    int b;          // 0x18
-    int a;          // 0x1C
-    char pad[0x10];
-};
-extern sPtVert_2520 cSimpleTube_m_vertices[];
+extern tBxVertex cSimpleTube_m_vertices[];
 
 
 /**
@@ -1341,19 +1322,19 @@ extern "C" void* cSimpleTube_cSimpleTube(cSimpleTube* self, void* owner)
     self->mVtbl = cSimpleTube_vtbl;
     self->m_positions = 0;
     if (cSimpleTube_m_initialized == 0) {
-        sPtVert_2520* vertex = cSimpleTube_m_vertices;
+        tBxVertex* vertex = cSimpleTube_m_vertices;
         for (i = 0; i < 262; i++, vertex++) {
             vertex->a = 0xFF;
             vertex->r = cTube_m_R;
             vertex->g = cTube_m_G;
             vertex->b = cTube_m_B;
-            vertex->z = 1.0f;
-            vertex->w = 0;
-            vertex->x = 0.0f;
+            vertex->one = 1.0f;
+            (*(int*)&vertex->pad) = 0;
+            vertex->u = 0.0f;
             if (i & 1) {
-                vertex->y = 1.0f;
+                vertex->v = 1.0f;
             } else {
-                vertex->y = 0.0f;
+                vertex->v = 0.0f;
             }
         }
         cSimpleTube_m_initialized = 1;
@@ -1383,7 +1364,7 @@ extern "C" void* cSimpleTube_updateColours(void* self)
     if (D_004A4230 != (float)cTube_m_R || D_004A4234 != (float)cTube_m_G || D_004A4238 != (float)cTube_m_B) {
         int i;
         for (i = 0; i < 262; i++) {
-            sPtVert_2520* vertex = &cSimpleTube_m_vertices[i];
+            tBxVertex* vertex = &cSimpleTube_m_vertices[i];
             vertex->r = cTube_m_R;
             vertex->g = cTube_m_G;
             vertex->b = cTube_m_B;
@@ -5746,12 +5727,8 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_CreateGridMesh);
 #ifdef SKIP_ASM
 
 
-struct sPartEmitter_A540 {
-    int field_0x0;
-    void* vt;       // 0x4
-};
 
-extern "C" sPartEmitter_A540* cPS2GridMesh_cPS2GridMesh(void* mem, void* a1, void* a2, void* a3, unsigned int flags);
+extern "C" cGridMesh* cPS2GridMesh_cPS2GridMesh(void* mem, void* a1, void* a2, void* a3, unsigned int flags);
 extern const char str_cPS2GridMesh[];
 
 /**
@@ -5767,16 +5744,16 @@ extern const char str_cPS2GridMesh[];
  * @param flags           the memory flags (On Tour memtype)
  * @return the new mesh, or 0
  */
-extern "C" sPartEmitter_A540* cPS2GraphicsMan_CreateGridMesh(cPS2GraphicsMan* pS2GraphicsMan, void* width, void* height, unsigned int flags)
+extern "C" cGridMesh* cPS2GraphicsMan_CreateGridMesh(cPS2GraphicsMan* pS2GraphicsMan, void* width, void* height, unsigned int flags)
 {
-    sPartEmitter_A540* gridMesh = cPS2GridMesh_cPS2GridMesh(cMemMan_alloc(460, str_cPS2GridMesh, flags, 0), width, height, pS2GraphicsMan, flags);
+    cGridMesh* gridMesh = cPS2GridMesh_cPS2GridMesh(cMemMan_alloc(460, str_cPS2GridMesh, flags, 0), width, height, pS2GraphicsMan, flags);
     if (flags & 0x40000000) {
         if (gridMesh == 0) {
             return 0;
         }
-        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)gridMesh->vt;
+        sVEntry<int(void*)>* vt = (sVEntry<int(void*)>*)((void*)gridMesh->mVtbl);
         if (vt[2].fn((char*)gridMesh + vt[2].delta) == 0) {
-            sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)gridMesh->vt;
+            sVEntry<void(void*, int)>* vt2 = (sVEntry<void(void*, int)>*)((void*)gridMesh->mVtbl);
             vt2[1].fn((char*)gridMesh + vt2[1].delta, 3);
             return 0;
         }
@@ -11328,13 +11305,7 @@ struct sPartVec3;
 extern "C" void func_00385A38(cPS2GridMesh* self, short* out, int i, sPartVec3* v);
 extern "C" void func_00385AA0(cPS2GridMesh* self, unsigned short* buf, int idx, const float* c);
 
-struct sPartPos5530 {
-    float x, y, z;
-};
 
-struct sPartCol5530 {
-    float c[4];
-};
 
 struct sPartStrip5530 {
     int field_0x0;
@@ -11364,7 +11335,7 @@ struct sPartGrid5530 {
  * @param pos  the grid positions, row by row (x, y, z floats)
  * @param col  the grid colours, row by row (a, r, g, b floats, 0..1)
  */
-extern "C" void cPS2GridMesh_Update2(sPartGrid5530* self, sPartPos5530* pos, sPartCol5530* col)
+extern "C" void cPS2GridMesh_Update2(sPartGrid5530* self, t3Vector* pos, tARGB* col)
 {
     int back = self->sel == 0;
     for (int i = 0; i < self->rows; i++) {
@@ -11375,14 +11346,14 @@ extern "C" void cPS2GridMesh_Update2(sPartGrid5530* self, sPartPos5530* pos, sPa
         int k = 0;
         int j = 0;
         if (j < self->cols) {
-            sPartPos5530* nextPos = &pos[nextRowStart];
-            sPartPos5530* curPos = &pos[rowStart];
-            sPartCol5530* nextCol = (sPartCol5530*)((nextRowStart << 4) + (int)col);  // PORT: pointer in int
-            sPartCol5530* curCol = (sPartCol5530*)((rowStart << 4) + (int)col);  // PORT: pointer in int
+            t3Vector* nextPos = &pos[nextRowStart];
+            t3Vector* curPos = &pos[rowStart];
+            tARGB* nextCol = (tARGB*)((nextRowStart << 4) + (int)col);  // PORT: pointer in int
+            tARGB* curCol = (tARGB*)((rowStart << 4) + (int)col);  // PORT: pointer in int
             do {
-                func_00385AA0((cPS2GridMesh*)self, strip->col, k, curCol->c);
+                func_00385AA0((cPS2GridMesh*)self, strip->col, k, ((float*)&curCol->A));
                 func_00385A38((cPS2GridMesh*)self, strip->pos, k, (sPartVec3*)curPos);
-                func_00385AA0((cPS2GridMesh*)self, strip->col, k + 1, nextCol->c);
+                func_00385AA0((cPS2GridMesh*)self, strip->col, k + 1, ((float*)&nextCol->A));
                 func_00385A38((cPS2GridMesh*)self, strip->pos, k + 1, (sPartVec3*)nextPos);
                 k += 2;
                 curPos++;
@@ -13435,7 +13406,6 @@ extern "C" void func_00389660(sV4_9660* vecs, float* weights)
 //100%
 INCLUDE_ASM("render/particle", cIrradiance_Scale);
 #ifdef SKIP_ASM
-struct sV4_96C0 { float x, y, z, w; };
 
 /**
  * Scales irradiance set @p vecs in place by @p scale and a tint: x of each of the ten vectors times scale *
@@ -13447,7 +13417,7 @@ struct sV4_96C0 { float x, y, z, w; };
  * @param weights  the tint, as a, r, g, b
  * @param scale  overall factor
  */
-extern "C" void cIrradiance_Scale(sV4_96C0* vecs, float* weights, float scale)
+extern "C" void cIrradiance_Scale(t4Vector* vecs, float* weights, float scale)
 {
     for (int i = 0; i < 10; i++) {
         vecs[i].x = vecs[i].x * scale * weights[1];

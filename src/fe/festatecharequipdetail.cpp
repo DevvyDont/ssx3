@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ealib/shape.h"
 #include "sound/ssxaudio.h"
 #include "fe/fereal.h"
 #include "ui/uimenu.h"
@@ -1106,14 +1107,6 @@ struct sPkgEntK19A098 {
     int off;
     int f4;
 };
-struct sPkgK19A098 {
-    int f0;
-    int f4;
-    int count;      // 0x8
-    int fC;
-    int f10;
-    sPkgEntK19A098 ents[1];   // 0x14
-};
 struct sVEK19A098a {
     short delta;
     short index;
@@ -1140,18 +1133,18 @@ extern "C" int cFEStateCharEquip_getIconID(cFEStateCharEquip* self, const char* 
 {
     if (self->mIconsLoaded == 0)
         return -1;
-    sPkgK19A098* pkg = (sPkgK19A098*)func_0019E2B0((sEquipTable*)((char*)SSXApp->RealFE + 0x1A70),
+    SHAPEFILE* pkg = (SHAPEFILE*)func_0019E2B0((sEquipTable*)((char*)SSXApp->RealFE + 0x1A70),
                                                   self->mCharID, self->mIconsFileIndex);
     if (pkg == 0)
         return -1;
-    int n = pkg->count;
+    int n = pkg->num;
     int i;
     for (i = 0; i < n; i++) {
         char nm[16];
         SHAPE_name(pkg, i, nm);
         nm[4] = 0;
         if (func_004165A8(nm, name) == 0) {
-            sPkgEntK19A098* entry = &pkg->ents[i];
+            sPkgEntK19A098* entry = &((sPkgEntK19A098*)&pkg->tbl[0].offset)[i];
             char* data = (char*)pkg + entry->off;
             int id = self->mIconTextureID;
             if (id == -1) {
@@ -4809,11 +4802,6 @@ extern "C" void* cFERider_cFERider(sRiderSlotCE* self)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFERider__cFERider);
 #ifdef SKIP_ASM
-struct sSlot0019E498 {
-    int id;
-    char flag;
-    char pad[7];
-};
 
 extern "C" void cFERider_purge(void* self);
 void operator_delete(int* p);
@@ -4829,18 +4817,18 @@ void operator_delete(int* p);
  */
 extern "C" void cFERider__cFERider(cFERider* self, int flags)
 {
-    sSlot0019E498* slot = (sSlot0019E498*)&self->mTextureRefs;
+    tTextureRef* slot = (tTextureRef*)&self->mTextureRefs;
     cFERider_purge(self);
     int i;
     int none = -1;
     for (i = 0xFF; i >= 0; i--, slot++) {
-        if (slot->id >= 0) {
+        if (slot->TextureID >= 0) {
             cPS2GraphicsMan* ps2GraphicsMan = GrMan;
             sVEntry<void(void*, int)>* vt = (sVEntry<void(void*, int)>*)ps2GraphicsMan->mVtbl;
-            vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, slot->id);
+            vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, slot->TextureID);
         }
-        slot->id = none;
-        slot->flag = 0;
+        slot->TextureID = none;
+        slot->Name[0] = 0;
     }
     if (flags & 1) {
         operator_delete((int*)self);

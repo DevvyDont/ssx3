@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "input/inputpad.h"
 #include "sound/ssxaudio.h"
 #include "ui/uistate.h"
 #include "ui/uithing.h"
@@ -98,20 +99,16 @@ struct sItem_1948A8 {
     int active;
     char pad2[0xC];
 };
-struct sList_1948A8 {
-    int count;
-    sItem_1948A8 items[1];
-};
 
 struct sApp_1948A8 {
     char pad[0xB0];
-    sList_1948A8** lists[2];
+    cInputPad** lists[2];
 };
 
-static inline int isActive_1948A8(sList_1948A8* l, int j)
+static inline int isActive_1948A8(cInputPad* l, int j)
 {
-    if (j < l->count) {
-        return l->items[j].active;
+    if (j < l->NumButtons) {
+        return ((sItem_1948A8*)&l->Buttons[0])[j].active;
     }
     return 0;
 }
@@ -135,8 +132,8 @@ extern "C" void cFEStateTitle_onUpdate(cFEStateTitle* self)
     int found = 0;
     int i;
     for (i = 0; i < 2; i++) {
-        sList_1948A8* list = *((sApp_1948A8*)SSXApp)->lists[i];
-        int n = list->count;
+        cInputPad* list = *((sApp_1948A8*)SSXApp)->lists[i];
+        int n = list->NumButtons;
         if (n != 0) {
             int j;
             for (j = 0; j < n; j++) {
@@ -327,9 +324,6 @@ extern int EnableOnline;
 extern char str_3multi_play[];
 extern char str_5online[];
 
-struct sColor_194BF0 {
-    float r, g, b, a;
-};
 
 class cUIObj_194BF0 {
 public:
@@ -344,7 +338,7 @@ public:
     virtual void setStatic(int v);
     virtual void setVisible(int v);
     virtual void v10();
-    virtual void setColor(const sColor_194BF0& c);
+    virtual void setColor(const tARGB& c);
     virtual void v12();
     virtual void v13();
     virtual void v14();
@@ -376,8 +370,8 @@ extern "C" void cFEStateMainMenu_onPreRender2D(cFEStateMainMenu* self)
         } else if ((*(unsigned char*)((char*)self + 0x1D) & 0x3F) == 5) {
             obj->setUseStaticColour(0);
             obj->setStatic(0);
-            sColor_194BF0 color = *(sColor_194BF0*)((char*)obj + 0x1C);
-            color.r = 1.0f;
+            tARGB color = *(tARGB*)((char*)obj + 0x1C);
+            color.A = 1.0f;
             obj->setColor(color);
         }
     }

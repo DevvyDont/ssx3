@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
 #include "fe/popupinfo.h"
 #include "ui/uiinput.h"
 #include "ui/uistate.h"
@@ -1764,12 +1765,11 @@ extern "C" void cScreenPopup_getStringSize2(cScreenPopup* self, void* text, cons
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_getStringSize3);
 #ifdef SKIP_ASM
-struct sVec2_8628 { float x, y; };
 
 struct sVEntry001C8628 {
     short delta;
     short index;
-    void (*fn)(void*, sVec2_8628*);
+    void (*fn)(void*, t2Vector*);
 };
 
 /**
@@ -1782,7 +1782,7 @@ struct sVEntry001C8628 {
  */
 extern "C" void cScreenPopup_getStringSize3(cScreenPopup* self, void* obj, void* out)
 {
-    sVec2_8628 widgetSize;
+    t2Vector widgetSize;
     sVEntry001C8628* vt = *(sVEntry001C8628**)((char*)obj + 8);
     vt[20].fn((char*)obj + vt[20].delta, &widgetSize);
     *(float*)((char*)out + 0x8) = widgetSize.x;
@@ -1905,13 +1905,12 @@ struct sObjBitsK8930 {
     unsigned state : 6;
     unsigned hi : 13;
 };
-struct sVec2K8930 { float x, y; };
 struct sVec3K8930 { float x, y, z; };
 
 struct sVEntryK8930 {
     short delta;
     short index;
-    void (*fn)(void*, sVec2K8930*);
+    void (*fn)(void*, t2Vector*);
 };
 
 /**
@@ -1929,7 +1928,7 @@ extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned
     sObjBitsK8930* pivotBits = (sObjBitsK8930*)((char*)obj + 0x14);
     if (pivotBits->state == state)
         return;
-    sVec2K8930 size;
+    t2Vector size;
     sVEntryK8930* vt = *(sVEntryK8930**)((char*)obj + 8);
     vt[20].fn((char*)obj + vt[20].delta, &size);
     sVec3K8930 pos = *(sVec3K8930*)((char*)obj + 0x44);
@@ -2313,11 +2312,10 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_getMessageLineWrapSize2);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sVec3_94B0 { float x, y, z; };
-struct sVec2_94B0 { float x, y; };
 struct sVEntry_94B0 {
     short delta;
     short index;
-    void (*fn)(void*, sVec2_94B0*);
+    void (*fn)(void*, t2Vector*);
 };
 extern "C" void* cUIText_getFont(void* self);
 extern "C" float cFont_charAdvance1(void* font, int c);
@@ -2355,7 +2353,7 @@ extern "C" void cScreenPopup_getMessageLineWrapSize2(cScreenPopup* self, void* t
     unsigned short* buf = new (str_UITEXTTEMP, 0x100, 0) unsigned short[n + 1];
     USTR_copy(buf, str);
     sVec3_94B0 textScale;
-    sVec2_94B0 size;
+    t2Vector size;
     sVEntry_94B0* vt = *(sVEntry_94B0**)((char*)text + 8);
     vt[20].fn((char*)text + vt[20].delta, &size);
     textScale = *(sVec3_94B0*)((char*)text + 0x50);
@@ -2528,11 +2526,10 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_getTextBoxWrapSize1);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct cUIText;
 struct sVec3_9938 { float x, y, z; };
-struct sVec2_9938 { float x, y; };
 struct sVEntry_9938 {
     short delta;
     short index;
-    void (*fn)(void*, sVec2_9938*);
+    void (*fn)(void*, t2Vector*);
 };
 extern "C" void* cUIText_getFont(void* self);
 extern "C" float cFont_charAdvance1(void* font, int c);
@@ -2571,7 +2568,7 @@ extern "C" void cScreenPopup_getTextBoxWrapSize1(cScreenPopup* self, cUIText* te
     unsigned short* buf = new (str_UITEXTTEMP, 0x100, 0) unsigned short[n + 1];
     USTR_copy(buf, str);
     sVec3_9938 textScale;
-    sVec2_9938 size;
+    t2Vector size;
     sVEntry_9938* vt = *(sVEntry_9938**)((char*)text + 8);
     vt[20].fn((char*)text + vt[20].delta, &size);
     textScale = *(sVec3_9938*)((char*)text + 0x50);

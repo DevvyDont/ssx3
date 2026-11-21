@@ -1,5 +1,9 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/instancerecord.h"
+#include "intersect/worldinttypes.h"
+#include "ai/rider.h"
+#include "world/worldview.h"
 #include "bx/appman.h"
 #include "intersect/worldline.h"
 #include "intersect/bxnash.h"
@@ -425,12 +429,6 @@ static inline void wsDivEq_3308C8(sWsVec4& v, float s)
         : "memory");
 }
 
-struct sWsHit_3308C8 {
-    char pad_0x00[0x10];
-    sWsVec4 dir;      // 0x10
-    char pad_0x20[0x20];
-    float len;            // 0x40
-};
 
 extern "C" int SphereTree_IsTreeCollision(void* self, void* other, void* a2, void* a3);
 
@@ -441,12 +439,12 @@ extern "C" int SphereTree_IsTreeCollision(void* self, void* other, void* a2, voi
  * @param hit  receives the intersection (On Tour tIntersectInfo* ti); direction normalised, length stored
  * @return 1 on a hit (SphereTree_IsTreeCollision), otherwise 0
  */
-extern "C" int cWorldSphTree_IsSphTreeInt(cWorldSphTree* self, void* tree, sWsHit_3308C8* hit)
+extern "C" int cWorldSphTree_IsSphTreeInt(cWorldSphTree* self, void* tree, tIntersectInfo* hit)
 {
-    if (SphereTree_IsTreeCollision(self->st, tree, &hit->dir, hit) != 0) {
-        float len = wsLength_3308C8(hit->dir);
-        hit->len = len;
-        wsDivEq_3308C8(hit->dir, len);
+    if (SphereTree_IsTreeCollision(self->st, tree, &(*(sWsVec4*)&hit->Inorm), hit) != 0) {
+        float len = wsLength_3308C8((*(sWsVec4*)&hit->Inorm));
+        hit->Iparam = len;
+        wsDivEq_3308C8((*(sWsVec4*)&hit->Inorm), len);
         return 1;
     }
     return 0;
@@ -494,12 +492,6 @@ static inline void wsDivEq_330950(sWsVec4& v, float s)
         : "memory");
 }
 
-struct sWsHit_330950 {
-    char pad_0x00[0x10];
-    sWsVec4 dir;      // 0x10
-    char pad_0x20[0x20];
-    float len;            // 0x40
-};
 
 extern "C" int SphereTree_IsBoxCollision(void* self, void* a1, void* a2, void* a3, void* a4);
 
@@ -511,12 +503,12 @@ extern "C" int SphereTree_IsBoxCollision(void* self, void* a1, void* a2, void* a
  * @param hit  receives the intersection (On Tour tIntersectInfo* ti); direction normalised, length stored
  * @return 1 on a hit (SphereTree_IsBoxCollision), otherwise 0
  */
-extern "C" int cWorldSphTree_IsBoxInt(cWorldSphTree* self, void* bMin, void* bMax, sWsHit_330950* hit)
+extern "C" int cWorldSphTree_IsBoxInt(cWorldSphTree* self, void* bMin, void* bMax, tIntersectInfo* hit)
 {
-    if (SphereTree_IsBoxCollision(self->st, bMin, bMax, &hit->dir, hit) != 0) {
-        float len = wsLength_330950(hit->dir);
-        hit->len = len;
-        wsDivEq_330950(hit->dir, len);
+    if (SphereTree_IsBoxCollision(self->st, bMin, bMax, &(*(sWsVec4*)&hit->Inorm), hit) != 0) {
+        float len = wsLength_330950((*(sWsVec4*)&hit->Inorm));
+        hit->Iparam = len;
+        wsDivEq_330950((*(sWsVec4*)&hit->Inorm), len);
         return 1;
     }
     return 0;
@@ -528,13 +520,9 @@ INCLUDE_ASM("intersect/worldsphtree", OverlapInstancesCallback_operatorCall);
 #ifdef SKIP_ASM
 typedef int (*Test_3309D8)(void*);
 
-struct sBox_3309D8 {
-    float min[4];
-    float max[4];
-};
 
 struct sBox_3309D8;
-typedef sBox_3309D8* (*GetBox_3309D8)(void*);
+typedef tBoundBox* (*GetBox_3309D8)(void*);
 struct sObj_3309D8 {
     int pad00[3];
     sVEntry<void>* vt;
@@ -550,30 +538,24 @@ struct sNode_3309D8 {
     float bmax[3];
 };
 
-struct sCtx_3309D8 {
-    sNode_3309D8** list;
-    int* count;
-    int pad08;
-    sBox_3309D8* box;
-};
 
-static inline int overlapNode_3309D8(const sBox_3309D8* b, const sNode_3309D8* n)
+static inline int overlapNode_3309D8(const tBoundBox* b, const sNode_3309D8* n)
 {
     int r = 0;
-    if (b->min[0] <= n->bmax[0] && b->max[0] >= n->bmin[0] &&
-        b->min[1] <= n->bmax[1] && b->max[1] >= n->bmin[1] &&
-        b->min[2] <= n->bmax[2] && b->max[2] >= n->bmin[2]) {
+    if (((float*)&b->MinPoint)[0] <= n->bmax[0] && ((float*)&b->MaxPoint)[0] >= n->bmin[0] &&
+        ((float*)&b->MinPoint)[1] <= n->bmax[1] && ((float*)&b->MaxPoint)[1] >= n->bmin[1] &&
+        ((float*)&b->MinPoint)[2] <= n->bmax[2] && ((float*)&b->MaxPoint)[2] >= n->bmin[2]) {
         r = 1;
     }
     return r;
 }
 
-static inline int overlapBox_3309D8(const sBox_3309D8* b, const sBox_3309D8* o)
+static inline int overlapBox_3309D8(const tBoundBox* b, const tBoundBox* o)
 {
     int r = 0;
-    if (b->min[0] <= o->max[0] && b->max[0] >= o->min[0] &&
-        b->min[1] <= o->max[1] && b->max[1] >= o->min[1] &&
-        b->min[2] <= o->max[2] && b->max[2] >= o->min[2]) {
+    if (((float*)&b->MinPoint)[0] <= ((float*)&o->MaxPoint)[0] && ((float*)&b->MaxPoint)[0] >= ((float*)&o->MinPoint)[0] &&
+        ((float*)&b->MinPoint)[1] <= ((float*)&o->MaxPoint)[1] && ((float*)&b->MaxPoint)[1] >= ((float*)&o->MinPoint)[1] &&
+        ((float*)&b->MinPoint)[2] <= ((float*)&o->MaxPoint)[2] && ((float*)&b->MaxPoint)[2] >= ((float*)&o->MinPoint)[2]) {
         r = 1;
     }
     return r;
@@ -592,26 +574,26 @@ static inline int overlapBox_3309D8(const sBox_3309D8* b, const sBox_3309D8* o)
  * @param ctx  the callback: instance list, count pointer, maximum, query box (On Tour OverlapInstancesCallback, this)
  * @param tree  the octree cell (On Tour const Cell& cell)
  */
-extern "C" void OverlapInstancesCallback_operatorCall(sCtx_3309D8* ctx, nash_Cell* tree)
+extern "C" void OverlapInstancesCallback_operatorCall(OverlapInstancesCallback* ctx, nash_Cell* tree)
 {
     for (sNode_3309D8* node = *(sNode_3309D8**)&tree->nodesinside[0]; node != 0; node = node->next) {
         int flags = node->flags;
         if (flags & 0x20) {
-            if (overlapNode_3309D8(ctx->box, node)) {
-                int* cnt = ctx->count;
+            if (overlapNode_3309D8(((tBoundBox*)ctx->box), node)) {
+                int* cnt = ((int*)ctx->number);
                 int n = *cnt;
-                ctx->list[n] = node;
+                ((sNode_3309D8**)ctx->instances)[n] = node;
                 *cnt = n + 1;
             }
         } else if (flags & 0x40) {
             sVEntry<void>* vt = node->obj->vt;
             if (((Test_3309D8)vt[44].fn)((char*)node->obj + vt[44].delta)) {
                 sVEntry<void>* vt2 = node->obj->vt;
-                sBox_3309D8* objBox = ((GetBox_3309D8)vt2[45].fn)((char*)node->obj + vt2[45].delta);
-                if (overlapBox_3309D8(ctx->box, objBox)) {
-                    int* cnt = ctx->count;
+                tBoundBox* objBox = ((GetBox_3309D8)vt2[45].fn)((char*)node->obj + vt2[45].delta);
+                if (overlapBox_3309D8(((tBoundBox*)ctx->box), objBox)) {
+                    int* cnt = ((int*)ctx->number);
                     int n = *cnt;
-                    ctx->list[n] = node;
+                    ((sNode_3309D8**)ctx->instances)[n] = node;
                     *cnt = n + 1;
                 }
             }
@@ -624,18 +606,15 @@ extern "C" void OverlapInstancesCallback_operatorCall(sCtx_3309D8* ctx, nash_Cel
 INCLUDE_ASM("intersect/worldsphtree", cOverlapList_getinstances);
 #ifdef SKIP_ASM
 struct sSphNode_340A40;
-extern "C" void nash_Cell_descend(nash_Cell* node, sCtx_3309D8* ctx);
+extern "C" void nash_Cell_descend(nash_Cell* node, OverlapInstancesCallback* ctx);
 extern "C" int nash_CellKey_proximitytest(void* cell, void* box);
-extern "C" void nash_privy_QueryHelper_helpX1(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, void* box, void* tree, void* cell);
+extern "C" void nash_privy_QueryHelper_helpX1(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, void* box, void* tree, void* cell);
 
-struct sOctNode_330BA8 {
-    sSphNode_340A40* child[8];
-};
 
 struct sCell_330BA8 {
     int level;
     int x, y, z;
-    sOctNode_330BA8* tree;
+    nash_Cell* tree;
 };
 
 struct sGrid_330BA8 {
@@ -653,25 +632,25 @@ struct sQuery_330BA8 {
     unsigned int nobjs;             // 0x210
 };
 
-static inline void collect_330BA8(sOctNode_330BA8* node, sCtx_3309D8* ctx)
+static inline void collect_330BA8(nash_Cell* node, OverlapInstancesCallback* ctx)
 {
     OverlapInstancesCallback_operatorCall(ctx, (nash_Cell*)node);
-    if (node->child[0] != 0) nash_Cell_descend((nash_Cell*)node->child[0], ctx);
-    if (node->child[1] != 0) nash_Cell_descend((nash_Cell*)node->child[1], ctx);
-    if (node->child[2] != 0) nash_Cell_descend((nash_Cell*)node->child[2], ctx);
-    if (node->child[3] != 0) nash_Cell_descend((nash_Cell*)node->child[3], ctx);
-    if (node->child[4] != 0) nash_Cell_descend((nash_Cell*)node->child[4], ctx);
-    if (node->child[5] != 0) nash_Cell_descend((nash_Cell*)node->child[5], ctx);
-    if (node->child[6] != 0) nash_Cell_descend((nash_Cell*)node->child[6], ctx);
-    if (node->child[7] != 0) nash_Cell_descend((nash_Cell*)node->child[7], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[0] != 0) nash_Cell_descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[0], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[1] != 0) nash_Cell_descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[1], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[2] != 0) nash_Cell_descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[2], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[3] != 0) nash_Cell_descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[3], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[4] != 0) nash_Cell_descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[4], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[5] != 0) nash_Cell_descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[5], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[6] != 0) nash_Cell_descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[6], ctx);
+    if (((nash_Cell**)&node->children[0][0][0])[7] != 0) nash_Cell_descend((nash_Cell*)((nash_Cell**)&node->children[0][0][0])[7], ctx);
 }
 
 // One top-level cell: test it, then either take the whole subtree or recurse into it.
-static inline void queryCell_330BA8(sGrid_330BA8* grid, int i, void* box, sCtx_3309D8* ctx, char* flags)
+static inline void queryCell_330BA8(sGrid_330BA8* grid, int i, void* box, OverlapInstancesCallback* ctx, char* flags)
 {
     sCell_330BA8* cell = &grid->cells[i];
     if (grid->cells[i].tree != 0) {
-        sOctNode_330BA8* tree = cell->tree;
+        nash_Cell* tree = cell->tree;
         char* flag = &flags[i];
         int r = nash_CellKey_proximitytest(cell, box);
         if (r == 0) {
@@ -694,17 +673,17 @@ static inline void queryCell_330BA8(sGrid_330BA8* grid, int i, void* box, sCtx_3
  *
  * @param box  the query box: min at +0x0, max at +0x10
  */
-extern "C" void cOverlapList_getinstances(cOverlapList* self, sBox_3309D8* box)
+extern "C" void cOverlapList_getinstances(cOverlapList* self, tBoundBox* box)
 {
-    sCtx_3309D8 ctx;
+    OverlapInstancesCallback ctx;
     char flags[8];
     sGrid_330BA8* grid = (sGrid_330BA8*)self->nash;
-    sCtx_3309D8* pctx = &ctx;
+    OverlapInstancesCallback* pctx = &ctx;
     self->deletecount = (unsigned int)grid->unkA0;
-    ctx.list = ((sNode_3309D8**)&self->instances[0]);
-    ctx.count = (int*)&self->numinstances;
-    ctx.pad08 = 0x40;
-    ctx.box = box;
+    (*(sNode_3309D8***)&ctx.instances) = ((sNode_3309D8**)&self->instances[0]);
+    (*(int**)&ctx.number) = (int*)&self->numinstances;
+    ctx.maximum = 0x40;
+    (*(tBoundBox**)&ctx.box) = box;
     self->numinstances = (unsigned int)0;
     queryCell_330BA8(grid, 0, box, pctx, flags);
     queryCell_330BA8(grid, 1, box, pctx, flags);
@@ -724,21 +703,16 @@ INCLUDE_ASM("intersect/worldsphtree", cOverlapList_gettyped);
 #ifdef SKIP_ASM
 struct sOctCollect;
 extern "C" void nash_Cell_descend1(nash_Cell* self, sOctCollect* out);
-extern "C" void nash_privy_QueryHelper_helpX2(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, void* box, void* tree, void* cell);
+extern "C" void nash_privy_QueryHelper_helpX2(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, void* box, void* tree, void* cell);
 
 struct sTag_331450 {
 };
 
-struct sOctNode_331450 {
-    void* child[8];         // 0x00
-    int pad20[2];           // 0x20
-    void** objs;            // 0x28
-};
 
 struct sCell_331450 {
     int level;
     int x, y, z;
-    sOctNode_331450* tree;
+    nash_Cell* tree;
 };
 
 struct sGrid_331450 {
@@ -757,26 +731,26 @@ struct sQuery_331450 {
     void* objs[0x200];              // 0x214
 };
 
-static inline void collect_331450(sOctNode_331450* node, sCtx_3309D8* ctx)
+static inline void collect_331450(nash_Cell* node, OverlapInstancesCallback* ctx)
 {
     void** p;
-    for (p = node->objs; p != 0; p = (void**)*p) {
-        ctx->list[(*ctx->count)++] = (sNode_3309D8*)p;
+    for (p = (*(void***)&node->nodesinside[2]); p != 0; p = (void**)*p) {
+        ((sNode_3309D8**)ctx->instances)[(*((int*)ctx->number))++] = (sNode_3309D8*)p;
     }
-    if (node->child[0] != 0) nash_Cell_descend1((nash_Cell*)node->child[0], (sOctCollect*)ctx);
-    if (node->child[1] != 0) nash_Cell_descend1((nash_Cell*)node->child[1], (sOctCollect*)ctx);
-    if (node->child[2] != 0) nash_Cell_descend1((nash_Cell*)node->child[2], (sOctCollect*)ctx);
-    if (node->child[3] != 0) nash_Cell_descend1((nash_Cell*)node->child[3], (sOctCollect*)ctx);
-    if (node->child[4] != 0) nash_Cell_descend1((nash_Cell*)node->child[4], (sOctCollect*)ctx);
-    if (node->child[5] != 0) nash_Cell_descend1((nash_Cell*)node->child[5], (sOctCollect*)ctx);
-    if (node->child[6] != 0) nash_Cell_descend1((nash_Cell*)node->child[6], (sOctCollect*)ctx);
-    if (node->child[7] != 0) nash_Cell_descend1((nash_Cell*)node->child[7], (sOctCollect*)ctx);
+    if (((void**)&node->children[0][0][0])[0] != 0) nash_Cell_descend1((nash_Cell*)((void**)&node->children[0][0][0])[0], (sOctCollect*)ctx);
+    if (((void**)&node->children[0][0][0])[1] != 0) nash_Cell_descend1((nash_Cell*)((void**)&node->children[0][0][0])[1], (sOctCollect*)ctx);
+    if (((void**)&node->children[0][0][0])[2] != 0) nash_Cell_descend1((nash_Cell*)((void**)&node->children[0][0][0])[2], (sOctCollect*)ctx);
+    if (((void**)&node->children[0][0][0])[3] != 0) nash_Cell_descend1((nash_Cell*)((void**)&node->children[0][0][0])[3], (sOctCollect*)ctx);
+    if (((void**)&node->children[0][0][0])[4] != 0) nash_Cell_descend1((nash_Cell*)((void**)&node->children[0][0][0])[4], (sOctCollect*)ctx);
+    if (((void**)&node->children[0][0][0])[5] != 0) nash_Cell_descend1((nash_Cell*)((void**)&node->children[0][0][0])[5], (sOctCollect*)ctx);
+    if (((void**)&node->children[0][0][0])[6] != 0) nash_Cell_descend1((nash_Cell*)((void**)&node->children[0][0][0])[6], (sOctCollect*)ctx);
+    if (((void**)&node->children[0][0][0])[7] != 0) nash_Cell_descend1((nash_Cell*)((void**)&node->children[0][0][0])[7], (sOctCollect*)ctx);
 }
 
-static inline int queryCell_331450(sGrid_331450* grid, int i, void* box, sCtx_3309D8* ctx)
+static inline int queryCell_331450(sGrid_331450* grid, int i, void* box, OverlapInstancesCallback* ctx)
 {
     sCell_331450* cell = &grid->cells[i];
-    sOctNode_331450* tree;
+    nash_Cell* tree;
     sTag_331450 tag;
     char* flag;
     int r = 1;
@@ -805,16 +779,16 @@ static inline int queryCell_331450(sGrid_331450* grid, int i, void* box, sCtx_33
  *
  * @param box  the query box: min at +0x0, max at +0x10
  */
-extern "C" void cOverlapList_gettyped(cOverlapList* self, sBox_3309D8* box)
+extern "C" void cOverlapList_gettyped(cOverlapList* self, tBoundBox* box)
 {
-    sCtx_3309D8 ctx;
+    OverlapInstancesCallback ctx;
     sGrid_331450* grid = (sGrid_331450*)self->nash;
-    sCtx_3309D8* pctx = &ctx;
+    OverlapInstancesCallback* pctx = &ctx;
     self->deletecount = (unsigned int)grid->unkA0;
-    ctx.list = (sNode_3309D8**)((void**)&self->typed[0]);
-    ctx.count = (int*)&self->numtyped;
-    ctx.pad08 = 0x200;
-    ctx.box = box;
+    (*(sNode_3309D8***)&ctx.instances) = (sNode_3309D8**)((void**)&self->typed[0]);
+    (*(int**)&ctx.number) = (int*)&self->numtyped;
+    ctx.maximum = 0x200;
+    (*(tBoundBox**)&ctx.box) = box;
     self->numtyped = 0;
     queryCell_331450(grid, 0, box, pctx);
     queryCell_331450(grid, 1, box, pctx);
@@ -833,8 +807,8 @@ extern "C" void cOverlapList_gettyped(cOverlapList* self, sBox_3309D8* box)
 INCLUDE_ASM("intersect/worldsphtree", cOverlapList_getpatchesandinstances);
 #ifdef SKIP_ASM
 struct sTree_340C20;
-extern "C" void nash_Cell_descend2(nash_Cell* tree, sCtx_3309D8* ctx);
-extern "C" void nash_privy_QueryHelper_helpX3(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, void* vbox, void* vnode, void* vcell);
+extern "C" void nash_Cell_descend2(nash_Cell* tree, OverlapInstancesCallback* ctx);
+extern "C" void nash_privy_QueryHelper_helpX3(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, void* vbox, void* vnode, void* vcell);
 
 struct sObj_331E90 {
     sObj_331E90* next;
@@ -862,30 +836,30 @@ struct sGrid_331E90 {
 
 
 struct sCtx2_331E90 {
-    sCtx_3309D8 nodes;
-    sCtx_3309D8 objs;
+    OverlapInstancesCallback nodes;
+    OverlapInstancesCallback objs;
 };
 
-static inline int overlapObj_331E90(const sBox_3309D8* b, const sObj_331E90* n)
+static inline int overlapObj_331E90(const tBoundBox* b, const sObj_331E90* n)
 {
     int r = 0;
-    if (b->min[0] <= n->bmax[0] && b->max[0] >= n->bmin[0] &&
-        b->min[1] <= n->bmax[1] && b->max[1] >= n->bmin[1] &&
-        b->min[2] <= n->bmax[2] && b->max[2] >= n->bmin[2]) {
+    if (((float*)&b->MinPoint)[0] <= n->bmax[0] && ((float*)&b->MaxPoint)[0] >= n->bmin[0] &&
+        ((float*)&b->MinPoint)[1] <= n->bmax[1] && ((float*)&b->MaxPoint)[1] >= n->bmin[1] &&
+        ((float*)&b->MinPoint)[2] <= n->bmax[2] && ((float*)&b->MaxPoint)[2] >= n->bmin[2]) {
         r = 1;
     }
     return r;
 }
 
-static inline void collect_331E90(sTree_331E90* tree, sCtx_3309D8* ctx)
+static inline void collect_331E90(sTree_331E90* tree, OverlapInstancesCallback* ctx)
 {
     OverlapInstancesCallback_operatorCall(ctx, (nash_Cell*)tree);
-    sCtx_3309D8* q = (sCtx_3309D8*)((char*)ctx + 0x10);
+    OverlapInstancesCallback* q = (OverlapInstancesCallback*)((char*)ctx + 0x10);
     for (sObj_331E90* p = tree->objs; p != 0; p = p->next) {
-        if (overlapObj_331E90(q->box, p)) {
-            int* cnt = q->count;
+        if (overlapObj_331E90(((tBoundBox*)q->box), p)) {
+            int* cnt = ((int*)q->number);
             int n = *cnt;
-            q->list[n] = (sNode_3309D8*)p;
+            ((sNode_3309D8**)q->instances)[n] = (sNode_3309D8*)p;
             *cnt = n + 1;
         }
     }
@@ -902,7 +876,7 @@ static inline void collect_331E90(sTree_331E90* tree, sCtx_3309D8* ctx)
 struct sTag_331E90 {
 };
 
-static inline void queryCell_331E90(sGrid_331E90* grid, int i, sBox_3309D8* box, sCtx_3309D8* ctx)
+static inline void queryCell_331E90(sGrid_331E90* grid, int i, tBoundBox* box, OverlapInstancesCallback* ctx)
 {
     sCell_331E90* cell = &grid->cells[i];
     if (grid->cells[i].tree != 0) {
@@ -930,23 +904,23 @@ static inline void queryCell_331E90(sGrid_331E90* grid, int i, sBox_3309D8* box,
  *
  * @param box  the query box: min at +0x0, max at +0x10
  */
-extern "C" void cOverlapList_getpatchesandinstances(cOverlapList* self, sBox_3309D8* box)
+extern "C" void cOverlapList_getpatchesandinstances(cOverlapList* self, tBoundBox* box)
 {
     sCtx2_331E90 ctx;
     self->deletecount = ((sGrid_331E90*)self->nash)->unkA0;
-    ctx.nodes.list = ((sNode_3309D8**)&self->instances[0]);
-    ctx.nodes.count = (int*)&self->numinstances;
-    ctx.nodes.pad08 = 0x40;
-    ctx.nodes.box = box;
-    ctx.objs.list = ((sNode_3309D8**)&self->patches[0]);
-    ctx.objs.count = (int*)&self->numpatches;
-    ctx.objs.pad08 = 0x40;
-    ctx.objs.box = box;
-    sCtx_3309D8* objs = &ctx.objs;
+    (*(sNode_3309D8***)&ctx.nodes.instances) = ((sNode_3309D8**)&self->instances[0]);
+    (*(int**)&ctx.nodes.number) = (int*)&self->numinstances;
+    ctx.nodes.maximum = 0x40;
+    (*(tBoundBox**)&ctx.nodes.box) = box;
+    (*(sNode_3309D8***)&ctx.objs.instances) = ((sNode_3309D8**)&self->patches[0]);
+    (*(int**)&ctx.objs.number) = (int*)&self->numpatches;
+    ctx.objs.maximum = 0x40;
+    (*(tBoundBox**)&ctx.objs.box) = box;
+    OverlapInstancesCallback* objs = &ctx.objs;
     self->numinstances = 0;
-    *objs->count = 0;
+    *((int*)objs->number) = 0;
     sGrid_331E90* grid = ((sGrid_331E90*)self->nash);
-    sCtx_3309D8* pctx = &ctx.nodes;
+    OverlapInstancesCallback* pctx = &ctx.nodes;
     queryCell_331E90(grid, 0, box, pctx);
     queryCell_331E90(grid, 1, box, pctx);
     queryCell_331E90(grid, 2, box, pctx);
@@ -964,8 +938,8 @@ INCLUDE_ASM("intersect/worldsphtree", cOverlapList_geteverything);
 #ifdef SKIP_ASM
 struct sTree_340DC0;
 struct sCtx_340DC0;
-extern "C" void nash_Cell_descend3(nash_Cell* self, sCtx_340DC0* ctx);
-extern "C" void nash_privy_QueryHelper_helpX4(char* flag, sCtx_340DC0* ctx, sCtx_340DC0* ctx2, void* vbox, void* vnode, void* vcell);
+extern "C" void nash_Cell_descend3(nash_Cell* self, OverlapEverythingCallback* ctx);
+extern "C" void nash_privy_QueryHelper_helpX4(char* flag, OverlapEverythingCallback* ctx, OverlapEverythingCallback* ctx2, void* vbox, void* vnode, void* vcell);
 
 struct sObj_332DB8 {
     sObj_332DB8* next;
@@ -994,39 +968,39 @@ struct sGrid_332DB8 {
 
 
 struct sCtx3_332DB8 {
-    sCtx_3309D8 nodes;
-    sCtx_3309D8 objs;
-    sCtx_3309D8 all;
+    OverlapInstancesCallback nodes;
+    OverlapInstancesCallback objs;
+    OverlapInstancesCallback all;
 };
 
 struct sTag_332DB8 {
 };
 
-static inline int overlapObj_332DB8(const sBox_3309D8* b, const sObj_332DB8* n)
+static inline int overlapObj_332DB8(const tBoundBox* b, const sObj_332DB8* n)
 {
     int r = 0;
-    if (b->min[0] <= n->bmax[0] && b->max[0] >= n->bmin[0] &&
-        b->min[1] <= n->bmax[1] && b->max[1] >= n->bmin[1] &&
-        b->min[2] <= n->bmax[2] && b->max[2] >= n->bmin[2]) {
+    if (((float*)&b->MinPoint)[0] <= n->bmax[0] && ((float*)&b->MaxPoint)[0] >= n->bmin[0] &&
+        ((float*)&b->MinPoint)[1] <= n->bmax[1] && ((float*)&b->MaxPoint)[1] >= n->bmin[1] &&
+        ((float*)&b->MinPoint)[2] <= n->bmax[2] && ((float*)&b->MaxPoint)[2] >= n->bmin[2]) {
         r = 1;
     }
     return r;
 }
 
-static inline void add_332DB8(sCtx_3309D8* s, void* p)
+static inline void add_332DB8(OverlapInstancesCallback* s, void* p)
 {
-    int* cnt = s->count;
+    int* cnt = ((int*)s->number);
     int n = *cnt;
-    s->list[n] = (sNode_3309D8*)p;
+    ((sNode_3309D8**)s->instances)[n] = (sNode_3309D8*)p;
     *cnt = n + 1;
 }
 
 static inline void collect_332DB8(sTree_332DB8* tree, sCtx3_332DB8* ctx)
 {
     OverlapInstancesCallback_operatorCall(&ctx->nodes, (nash_Cell*)tree);
-    sCtx_3309D8* s = &ctx->objs;
+    OverlapInstancesCallback* s = &ctx->objs;
     for (sObj_332DB8* p = tree->objs; p != 0; p = p->next) {
-        if (overlapObj_332DB8(s->box, p)) {
+        if (overlapObj_332DB8(((tBoundBox*)s->box), p)) {
             add_332DB8(s, p);
         }
     }
@@ -1034,17 +1008,17 @@ static inline void collect_332DB8(sTree_332DB8* tree, sCtx3_332DB8* ctx)
     for (void** q = tree->all; q != 0; q = (void**)*q) {
         add_332DB8(s, q);
     }
-    if (tree->child[0]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[0]), (sCtx_340DC0*)ctx);
-    if (tree->child[1]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[1]), (sCtx_340DC0*)ctx);
-    if (tree->child[2]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[2]), (sCtx_340DC0*)ctx);
-    if (tree->child[3]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[3]), (sCtx_340DC0*)ctx);
-    if (tree->child[4]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[4]), (sCtx_340DC0*)ctx);
-    if (tree->child[5]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[5]), (sCtx_340DC0*)ctx);
-    if (tree->child[6]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[6]), (sCtx_340DC0*)ctx);
-    if (tree->child[7]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[7]), (sCtx_340DC0*)ctx);
+    if (tree->child[0]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[0]), (OverlapEverythingCallback*)ctx);
+    if (tree->child[1]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[1]), (OverlapEverythingCallback*)ctx);
+    if (tree->child[2]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[2]), (OverlapEverythingCallback*)ctx);
+    if (tree->child[3]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[3]), (OverlapEverythingCallback*)ctx);
+    if (tree->child[4]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[4]), (OverlapEverythingCallback*)ctx);
+    if (tree->child[5]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[5]), (OverlapEverythingCallback*)ctx);
+    if (tree->child[6]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[6]), (OverlapEverythingCallback*)ctx);
+    if (tree->child[7]) nash_Cell_descend3((nash_Cell*)((sTree_340DC0*)tree->child[7]), (OverlapEverythingCallback*)ctx);
 }
 
-static inline void queryCell_332DB8(sGrid_332DB8* grid, int i, sBox_3309D8* box, sCtx3_332DB8* ctx)
+static inline void queryCell_332DB8(sGrid_332DB8* grid, int i, tBoundBox* box, sCtx3_332DB8* ctx)
 {
     sCell_332DB8* cell = &grid->cells[i];
     if (grid->cells[i].tree != 0) {
@@ -1055,7 +1029,7 @@ static inline void queryCell_332DB8(sGrid_332DB8* grid, int i, sBox_3309D8* box,
         if (r == 0) {
             collect_332DB8(tree, ctx);
         } else if (r == 2) {
-            nash_privy_QueryHelper_helpX4(flag, (sCtx_340DC0*)ctx, (sCtx_340DC0*)ctx, box, tree, cell);
+            nash_privy_QueryHelper_helpX4(flag, (OverlapEverythingCallback*)ctx, (OverlapEverythingCallback*)ctx, box, tree, cell);
         }
     }
 }
@@ -1073,27 +1047,27 @@ static inline void queryCell_332DB8(sGrid_332DB8* grid, int i, sBox_3309D8* box,
  *
  * @param box  the query box: min at +0x0, max at +0x10
  */
-extern "C" void cOverlapList_geteverything(cOverlapList* self, sBox_3309D8* box)
+extern "C" void cOverlapList_geteverything(cOverlapList* self, tBoundBox* box)
 {
     sCtx3_332DB8 ctx;
     self->deletecount = ((sGrid_332DB8*)self->nash)->unkA0;
-    ctx.nodes.list = ((sNode_3309D8**)&self->instances[0]);
-    ctx.nodes.count = (int*)&self->numinstances;
-    ctx.nodes.pad08 = 0x40;
-    ctx.nodes.box = box;
-    ctx.objs.list = ((sNode_3309D8**)&self->patches[0]);
-    ctx.objs.count = (int*)&self->numpatches;
-    ctx.objs.pad08 = 0x40;
-    ctx.objs.box = box;
-    sCtx_3309D8* objs = &ctx.objs;
+    (*(sNode_3309D8***)&ctx.nodes.instances) = ((sNode_3309D8**)&self->instances[0]);
+    (*(int**)&ctx.nodes.number) = (int*)&self->numinstances;
+    ctx.nodes.maximum = 0x40;
+    (*(tBoundBox**)&ctx.nodes.box) = box;
+    (*(sNode_3309D8***)&ctx.objs.instances) = ((sNode_3309D8**)&self->patches[0]);
+    (*(int**)&ctx.objs.number) = (int*)&self->numpatches;
+    ctx.objs.maximum = 0x40;
+    (*(tBoundBox**)&ctx.objs.box) = box;
+    OverlapInstancesCallback* objs = &ctx.objs;
     self->numinstances = 0;
-    *objs->count = 0;
-    ctx.all.list = ((sNode_3309D8**)&self->typed[0]);
-    ctx.all.count = (int*)&self->numtyped;
-    ctx.all.pad08 = 0x200;
-    ctx.all.box = box;
-    sCtx_3309D8* all = &ctx.all;
-    *all->count = 0;
+    *((int*)objs->number) = 0;
+    (*(sNode_3309D8***)&ctx.all.instances) = ((sNode_3309D8**)&self->typed[0]);
+    (*(int**)&ctx.all.number) = (int*)&self->numtyped;
+    ctx.all.maximum = 0x200;
+    (*(tBoundBox**)&ctx.all.box) = box;
+    OverlapInstancesCallback* all = &ctx.all;
+    *((int*)all->number) = 0;
     sGrid_332DB8* grid = ((sGrid_332DB8*)self->nash);
     sCtx3_332DB8* pctx = &ctx;
     queryCell_332DB8(grid, 0, box, pctx);
@@ -1117,11 +1091,6 @@ struct sVec4_333EF8 {
 
 extern sVec4_333EF8 D_004FF120_333EF8[] __asm__("t4vect_Zero");
 
-struct sQuery_333EF8 {
-    char pad00[0x20];
-    float max[4];
-    float min[4];
-};
 
 struct sTriObj_333EF8 {
     char pad00[8];
@@ -1132,26 +1101,6 @@ struct sTriObj_333EF8 {
     float bmax[3];
 };
 
-struct sHit_333EF8 {
-    sVec4_333EF8 pos;   // 0x00
-    sVec4_333EF8 nrm;   // 0x10
-    sVec4_333EF8 v20;   // 0x20
-    sVec4_333EF8 v30;   // 0x30
-    float dist;         // 0x40
-    int type;           // 0x44
-    int pad48;
-    int id;             // 0x4C
-    int f50;            // 0x50
-    void* obj;          // 0x54
-    int f58;            // 0x58
-    int f5C;            // 0x5C
-    int f60;            // 0x60
-    int f64;            // 0x64
-    int f68;            // 0x68
-    float u;            // 0x6C
-    float v;            // 0x70
-    int pad74[3];
-};
 
 struct sVEnt_333EF8 { short delta; short index; void* fn; };
 struct sBox_333EF8;
@@ -1197,55 +1146,55 @@ struct sTree_333EF8 {
 extern "C" void cAIFwdDiffCache_GetFwdDiff(void* cache, void* src, void** out);
 struct sVec4_335960;
 struct sHit_003342D0;
-extern "C" int cWorldIntersectType_IsPatchInt(void* q, void* obj, void* node, sVec4_335960* pos, sVec4_335960* nrm, float* dist, sVec4_335960* uv, int arg);
+extern "C" int cWorldIntersectType_IsPatchInt(void* q, void* obj, void* node, t4Vector* pos, t4Vector* nrm, float* dist, t4Vector* uv, int arg);
 extern "C" int intersect_instanceIntersect(void* q, void* node, void* buf, int cap, int mode);
 
-static inline int overlapTri_333EF8(const sQuery_333EF8* q, const sTriObj_333EF8* n)
+static inline int overlapTri_333EF8(const cWorldIntersectType* q, const sTriObj_333EF8* n)
 {
     int r = 0;
-    if (q->max[0] > n->bmin[0] && q->min[0] < n->bmax[0] &&
-        q->max[1] > n->bmin[1] && q->min[1] < n->bmax[1] &&
-        q->max[2] > n->bmin[2] && q->min[2] < n->bmax[2]) {
+    if (((float*)&q->boxMax)[0] > n->bmin[0] && ((float*)&q->boxMin)[0] < n->bmax[0] &&
+        ((float*)&q->boxMax)[1] > n->bmin[1] && ((float*)&q->boxMin)[1] < n->bmax[1] &&
+        ((float*)&q->boxMax)[2] > n->bmin[2] && ((float*)&q->boxMin)[2] < n->bmax[2]) {
         r = 1;
     }
     return r;
 }
 
-static inline int overlapNode_333EF8(const sQuery_333EF8* q, const sNode_333EF8* n)
+static inline int overlapNode_333EF8(const cWorldIntersectType* q, const sNode_333EF8* n)
 {
     int r = 0;
-    if (q->max[0] > n->bmin[0] && q->min[0] < n->bmax[0] &&
-        q->max[1] > n->bmin[1] && q->min[1] < n->bmax[1] &&
-        q->max[2] > n->bmin[2] && q->min[2] < n->bmax[2]) {
+    if (((float*)&q->boxMax)[0] > n->bmin[0] && ((float*)&q->boxMin)[0] < n->bmax[0] &&
+        ((float*)&q->boxMax)[1] > n->bmin[1] && ((float*)&q->boxMin)[1] < n->bmax[1] &&
+        ((float*)&q->boxMax)[2] > n->bmin[2] && ((float*)&q->boxMin)[2] < n->bmax[2]) {
         r = 1;
     }
     return r;
 }
 
-static inline int overlapBox_333EF8(const sQuery_333EF8* q, const sBox_333EF8* o)
+static inline int overlapBox_333EF8(const cWorldIntersectType* q, const sBox_333EF8* o)
 {
     int r = 0;
-    if (q->max[0] > o->min[0] && q->min[0] < o->max[0] &&
-        q->max[1] > o->min[1] && q->min[1] < o->max[1] &&
-        q->max[2] > o->min[2] && o->max[2] > q->min[2]) {
+    if (((float*)&q->boxMax)[0] > o->min[0] && ((float*)&q->boxMin)[0] < o->max[0] &&
+        ((float*)&q->boxMax)[1] > o->min[1] && ((float*)&q->boxMin)[1] < o->max[1] &&
+        ((float*)&q->boxMax)[2] > o->min[2] && o->max[2] > ((float*)&q->boxMin)[2]) {
         r = 1;
     }
     return r;
 }
 
-static inline void reset_333EF8(sHit_333EF8* h)
+static inline void reset_333EF8(tIntersectInfo* h)
 {
-    h->type = 2;
-    h->obj = 0;
-    h->f50 = 0;
-    h->f58 = 0;
-    h->f5C = -1;
-    h->f60 = -1;
-    h->f64 = -1;
-    h->id = -1;
-    h->v20 = *D_004FF120_333EF8;
-    h->v30 = *D_004FF120_333EF8;
-    h->f68 = 0;
+    h->HitType = 2;
+    (*(void**)&h->Patch) = 0;
+    (*(int*)&h->Inst) = 0;
+    (*(int*)&h->Spline) = 0;
+    h->Mesh = -1;
+    h->Face = -1;
+    h->Seg = -1;
+    h->Stype = -1;
+    (*(sVec4_333EF8*)&h->Ivel) = *D_004FF120_333EF8;
+    (*(sVec4_333EF8*)&h->Iangvel) = *D_004FF120_333EF8;
+    (*(int*)&h->T) = 0;
     h->u = 0;
     h->v = 0;
 }
@@ -1273,8 +1222,8 @@ static inline void reset_333EF8(sHit_333EF8* h)
 extern "C" int cOverlapList_terrainIntersect(cOverlapList* vself, void* vq, sHit_003342D0* vhits, int cap, int hitCache)
 {
     sTree_333EF8* self = (sTree_333EF8*)vself;
-    sQuery_333EF8* query = (sQuery_333EF8*)vq;
-    sHit_333EF8* hits = (sHit_333EF8*)vhits;
+    cWorldIntersectType* query = (cWorldIntersectType*)vq;
+    tIntersectInfo* hits = (tIntersectInfo*)vhits;
     int n = 0;
     for (unsigned int i = 0; i < self->ntris; i++) {
         sTriObj_333EF8* obj = self->tris[i];
@@ -1290,15 +1239,15 @@ extern "C" int cOverlapList_terrainIntersect(cOverlapList* vself, void* vq, sHit
         void* node;
         float dist;
         cAIFwdDiffCache_GetFwdDiff(self->owner->cache, obj, &node);
-        if (!cWorldIntersectType_IsPatchInt(query, obj, node, (sVec4_335960*)&pos, (sVec4_335960*)&nrm, &dist, (sVec4_335960*)&uv, hitCache)) {
+        if (!cWorldIntersectType_IsPatchInt(query, obj, node, (t4Vector*)&pos, (t4Vector*)&nrm, &dist, (t4Vector*)&uv, hitCache)) {
             continue;
         }
         reset_333EF8(&hits[n]);
-        hits[n].pos = pos;
-        hits[n].nrm = nrm;
-        hits[n].id = obj->id;
-        hits[n].obj = obj;
-        hits[n].dist = dist;
+        (*(sVec4_333EF8*)&hits[n].Ipos) = pos;
+        (*(sVec4_333EF8*)&hits[n].Inorm) = nrm;
+        hits[n].Stype = obj->id;
+        (*(void**)&hits[n].Patch) = obj;
+        hits[n].Iparam = dist;
         hits[n].u = uv.x;
         hits[n].v = uv.y;
         n++;
@@ -1311,7 +1260,7 @@ extern "C" int cOverlapList_terrainIntersect(cOverlapList* vself, void* vq, sHit
         int flags = node->flags;
         if (flags & 0x20) {
             if (overlapNode_333EF8(query, node)) {
-                n += intersect_instanceIntersect(query, node, (char*)hits + n * 0x80, cap - n, 2);
+                n += intersect_instanceIntersect(query, node, &hits[n], cap - n, 2);
             }
         } else if (flags & 0x40) {
             if (node->obj == 0) {
@@ -1322,7 +1271,7 @@ extern "C" int cOverlapList_terrainIntersect(cOverlapList* vself, void* vq, sHit
                 sVEnt_333EF8* vt2 = node->obj->vt;
                 sBox_333EF8* objBox = ((GetBox_333EF8)vt2[45].fn)((char*)node->obj + vt2[45].delta);
                 if (overlapBox_333EF8(query, objBox)) {
-                    n += intersect_instanceIntersect(query, node, (char*)hits + n * 0x80, cap - n, 2);
+                    n += intersect_instanceIntersect(query, node, &hits[n], cap - n, 2);
                 }
             }
         }
@@ -1422,52 +1371,38 @@ struct sBox_334458 {
     float max[4];
 };
 
-struct sQuery_334458 {
-    char pad00[0x20];
-    float max[4];
-    float min[4];
-};
 
 struct sObj_334458 {
     int pad00[3];
     sVEntry<void>* vt;
 };
 
-struct sNode_334458 {
-    void* next;
-    int pad04;
-    int flags;
-    sObj_334458* obj;
-    int pad10[20];
-    float bmin[3];
-    float bmax[3];
-};
 
 struct sList_334458 {
     int pad00[2];
     unsigned int count;
-    sNode_334458* items[1];
+    tInstanceRecord* items[1];
 };
 
 extern "C" int intersect_instanceIntersect(void* q, void* node, void* buf, int cap, int mode);
 
-static inline int overlapNode_334458(const sQuery_334458* q, const sNode_334458* n)
+static inline int overlapNode_334458(const cWorldIntersectType* q, const tInstanceRecord* n)
 {
     int r = 0;
-    if (q->max[0] > n->bmin[0] && q->min[0] < n->bmax[0] &&
-        q->max[1] > n->bmin[1] && q->min[1] < n->bmax[1] &&
-        q->max[2] > n->bmin[2] && q->min[2] < n->bmax[2]) {
+    if (((float*)&q->boxMax)[0] > n->m_fvMin.m[0] && ((float*)&q->boxMin)[0] < n->m_fvMax.m[0] &&
+        ((float*)&q->boxMax)[1] > n->m_fvMin.m[1] && ((float*)&q->boxMin)[1] < n->m_fvMax.m[1] &&
+        ((float*)&q->boxMax)[2] > n->m_fvMin.m[2] && ((float*)&q->boxMin)[2] < n->m_fvMax.m[2]) {
         r = 1;
     }
     return r;
 }
 
-static inline int overlapBox_334458(const sQuery_334458* q, const sBox_334458* o)
+static inline int overlapBox_334458(const cWorldIntersectType* q, const sBox_334458* o)
 {
     int r = 0;
-    if (q->max[0] > o->min[0] && q->min[0] < o->max[0] &&
-        q->max[1] > o->min[1] && q->min[1] < o->max[1] &&
-        q->max[2] > o->min[2] && o->max[2] > q->min[2]) {
+    if (((float*)&q->boxMax)[0] > o->min[0] && ((float*)&q->boxMin)[0] < o->max[0] &&
+        ((float*)&q->boxMax)[1] > o->min[1] && ((float*)&q->boxMin)[1] < o->max[1] &&
+        ((float*)&q->boxMax)[2] > o->min[2] && o->max[2] > ((float*)&q->boxMin)[2]) {
         r = 1;
     }
     return r;
@@ -1488,23 +1423,23 @@ static inline int overlapBox_334458(const sQuery_334458* q, const sBox_334458* o
  * @param full  nonzero selects mode 2 instead of 1 (On Tour includeridable)
  * @return the number of hits stored
  */
-extern "C" int cOverlapList_staticObjectIntersect(sList_334458* self, sQuery_334458* query, char* buf, int cap, int full)
+extern "C" int cOverlapList_staticObjectIntersect(sList_334458* self, cWorldIntersectType* query, char* buf, int cap, int full)
 {
     int mode = 1;
     if (full) mode = 2;
     int n = 0;
     for (unsigned int i = 0; i < self->count; i++) {
-        sNode_334458* node = self->items[i];
-        int flags = node->flags;
+        tInstanceRecord* node = self->items[i];
+        int flags = node->m_iFlags;
         if (flags & 0x20) {
             if (overlapNode_334458(query, node)) {
                 n += intersect_instanceIntersect(query, node, buf + n * 0x80, cap - n, mode);
             }
         } else if (flags & 0x40) {
-            sVEntry<void>* vt = node->obj->vt;
-            if (((Test_334458)vt[44].fn)((char*)node->obj + vt[44].delta)) {
-                sVEntry<void>* vt2 = node->obj->vt;
-                sBox_334458* objBox = ((GetBox_334458)vt2[45].fn)((char*)node->obj + vt2[45].delta);
+            sVEntry<void>* vt = ((sObj_334458*)node->m_pActiveNode)->vt;
+            if (((Test_334458)vt[44].fn)((char*)((sObj_334458*)node->m_pActiveNode) + vt[44].delta)) {
+                sVEntry<void>* vt2 = ((sObj_334458*)node->m_pActiveNode)->vt;
+                sBox_334458* objBox = ((GetBox_334458)vt2[45].fn)((char*)((sObj_334458*)node->m_pActiveNode) + vt2[45].delta);
                 if (overlapBox_334458(query, objBox)) {
                     n += intersect_instanceIntersect(query, node, buf + n * 0x80, cap - n, mode);
                 }
@@ -1518,13 +1453,9 @@ extern "C" int cOverlapList_staticObjectIntersect(sList_334458* self, sQuery_334
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cOverlapList_splineIntersect);
 #ifdef SKIP_ASM
-struct sBox_00334680 {
-    sWsVec4 min;
-    sWsVec4 max;
-};
-extern "C" void cRailModifier_splineIntersect(void* a0, sBox_00334680* box, sBox_00334680* box2, sWsVec4* pos, int mask, int* cnt, float* dist, int a7);
-extern "C" void cFlexRailNode_splineIntersect(void* a0, sBox_00334680* box, sBox_00334680* box2, sWsVec4* pos, int mask, int* cnt, float* dist, int a7);
-extern "C" void intersect_staticSplineSegmentIntersect(void* obj, sBox_00334680* box, sWsVec4* pos, int* cnt, float* dist, int a5);
+extern "C" void cRailModifier_splineIntersect(void* a0, tBoundBox* box, tBoundBox* box2, sWsVec4* pos, int mask, int* cnt, float* dist, int a7);
+extern "C" void cFlexRailNode_splineIntersect(void* a0, tBoundBox* box, tBoundBox* box2, sWsVec4* pos, int mask, int* cnt, float* dist, int a7);
+extern "C" void intersect_staticSplineSegmentIntersect(void* obj, tBoundBox* box, sWsVec4* pos, int* cnt, float* dist, int a5);
 
 // PORT: PS2-only VU0 inline asm (in-place vector subtract).
 static inline void wsSubEq_334680(sWsVec4& a, const sWsVec4& b)
@@ -1567,21 +1498,21 @@ static inline void wsAddEq_334680(sWsVec4& a, const sWsVec4& b)
  */
 extern "C" int cOverlapList_splineIntersect(cOverlapList* self, sWsVec4* pos, int intInfo, int mask, float testRadius)
 {
-    sBox_00334680 box;
+    tBoundBox box;
     sWsVec4 ext;
     int cnt;
     float dist;
     float zero = 0.0f;
     cnt = 0;
     dist = zero;
-    box.min = *pos;
-    box.max = *pos;
+    (*(sWsVec4*)&box.MinPoint) = *pos;
+    (*(sWsVec4*)&box.MaxPoint) = *pos;
     ext.x = testRadius;
     ext.y = testRadius;
     ext.z = testRadius;
     ext.w = zero;
-    wsSubEq_334680(box.min, ext);
-    wsAddEq_334680(box.max, ext);
+    wsSubEq_334680((*(sWsVec4*)&box.MinPoint), ext);
+    wsAddEq_334680((*(sWsVec4*)&box.MaxPoint), ext);
     for (unsigned int i = 0; i < self->numtyped; i++) {
         char* spaceNode = ((char**)(&self->typed[0]))[i];
         int type = *(int*)(spaceNode + 8);
@@ -2318,7 +2249,7 @@ static inline void reset_335128(sHit_335128* h)
 // intersect::staticSplineSegmentIntersect (On Tour name): closest point on a spline segment to intersectpos,
 // a coarse 4-segment scan, then a golden-section search.
 // The unit declares intersect_staticSplineSegmentIntersect with an int last parameter; bind the typed definition by asm label.
-extern "C" void intersect_staticSplineSegmentIntersect_typed(sCurveObj_335128* pSplineSeg, sBox_00334680* box, sV_335128* intersectpos, bool* hit, float* intersectdist, sHit_335128* intersectinfo) __asm__("intersect_staticSplineSegmentIntersect");
+extern "C" void intersect_staticSplineSegmentIntersect_typed(sCurveObj_335128* pSplineSeg, tBoundBox* box, sV_335128* intersectpos, bool* hit, float* intersectdist, sHit_335128* intersectinfo) __asm__("intersect_staticSplineSegmentIntersect");
 /**
  * Finds the point of a spline segment nearest @p intersectpos and records it when it beats the best hit so far.
  *
@@ -2338,11 +2269,11 @@ extern "C" void intersect_staticSplineSegmentIntersect_typed(sCurveObj_335128* p
  * @param intersectdist  in/out: the distance of the recorded hit
  * @param intersectinfo  out: the hit record (0x80 bytes)
  */
-extern "C" void intersect_staticSplineSegmentIntersect_typed(sCurveObj_335128* pSplineSeg, sBox_00334680* box, sV_335128* intersectpos, bool* hit, float* intersectdist, sHit_335128* intersectinfo)
+extern "C" void intersect_staticSplineSegmentIntersect_typed(sCurveObj_335128* pSplineSeg, tBoundBox* box, sV_335128* intersectpos, bool* hit, float* intersectdist, sHit_335128* intersectinfo)
 {
-    if (box->max.x < pSplineSeg->bmin[0] || box->min.x > pSplineSeg->bmax[0] ||
-        box->max.y < pSplineSeg->bmin[1] || box->min.y > pSplineSeg->bmax[1] ||
-        box->max.z < pSplineSeg->bmin[2] || box->min.z > pSplineSeg->bmax[2]) {
+    if ((*(sWsVec4*)&box->MaxPoint).x < pSplineSeg->bmin[0] || (*(sWsVec4*)&box->MinPoint).x > pSplineSeg->bmax[0] ||
+        (*(sWsVec4*)&box->MaxPoint).y < pSplineSeg->bmin[1] || (*(sWsVec4*)&box->MinPoint).y > pSplineSeg->bmax[1] ||
+        (*(sWsVec4*)&box->MaxPoint).z < pSplineSeg->bmin[2] || (*(sWsVec4*)&box->MinPoint).z > pSplineSeg->bmax[2]) {
         return;
     }
 
@@ -2432,11 +2363,8 @@ extern "C" void intersect_staticSplineSegmentIntersect_typed(sCurveObj_335128* p
 //100%
 INCLUDE_ASM("intersect/worldsphtree", TerrainCallback_intersectpatch);
 #ifdef SKIP_ASM
-struct sVec4_335960 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-extern sVec4_335960 t4vect_Zero[];
+extern t4Vector t4vect_Zero[];
 
 struct sQuery_335960 {
     char pad00[0x20];
@@ -2454,10 +2382,10 @@ struct sTriObj_335960 {
 };
 
 struct sHit_335960 {
-    sVec4_335960 pos;   // 0x00
-    sVec4_335960 nrm;   // 0x10
-    sVec4_335960 v20;   // 0x20
-    sVec4_335960 v30;   // 0x30
+    t4Vector pos;   // 0x00
+    t4Vector nrm;   // 0x10
+    t4Vector v20;   // 0x20
+    t4Vector v30;   // 0x30
     float dist;         // 0x40
     int type;           // 0x44
     int pad48;
@@ -2474,17 +2402,9 @@ struct sHit_335960 {
     int pad74[3];
 };
 
-struct sCtx_335960 {
-    sQuery_335960* q;
-    sHit_335960* hits;
-    int cap;
-    int* count;
-    int arg;
-    void* cache;
-};
 
 extern "C" void cAIFwdDiffCache_GetFwdDiff(void* cache, void* src, void** out);
-extern "C" int cWorldIntersectType_IsPatchInt(void* q, void* obj, void* node, sVec4_335960* pos, sVec4_335960* nrm, float* dist, sVec4_335960* uv, int arg);
+extern "C" int cWorldIntersectType_IsPatchInt(void* q, void* obj, void* node, t4Vector* pos, t4Vector* nrm, float* dist, t4Vector* uv, int arg);
 
 static inline int overlap_335960(const sQuery_335960* q, const sTriObj_335960* n)
 {
@@ -2529,26 +2449,26 @@ static inline void reset_335960(sHit_335960* h)
  */
 extern "C" void TerrainCallback_intersectpatch(void* vctx, void* vobj)
 {
-    sCtx_335960* ctx = (sCtx_335960*)vctx;
+    TerrainCallback* ctx = (TerrainCallback*)vctx;
     sTriObj_335960* obj = (sTriObj_335960*)vobj;
-    sVec4_335960 pos;
-    sVec4_335960 nrm;
-    sVec4_335960 uv;
+    t4Vector pos;
+    t4Vector nrm;
+    t4Vector uv;
     void* node;
     float dist;
     if ((obj->flags & 0x41) != 65) return;
-    if (!overlap_335960(ctx->q, obj)) return;
-    cAIFwdDiffCache_GetFwdDiff(ctx->cache, obj, &node);
-    if (!cWorldIntersectType_IsPatchInt(ctx->q, obj, node, &pos, &nrm, &dist, &uv, ctx->arg)) return;
-    reset_335960(&ctx->hits[*ctx->count]);
-    ctx->hits[*ctx->count].pos = pos;
-    ctx->hits[*ctx->count].nrm = nrm;
-    ctx->hits[*ctx->count].id = obj->id;
-    ctx->hits[*ctx->count].obj = obj;
-    ctx->hits[*ctx->count].dist = dist;
-    ctx->hits[*ctx->count].u = uv.x;
-    ctx->hits[*ctx->count].v = uv.y;
-    (*ctx->count)++;
+    if (!overlap_335960(((sQuery_335960*)ctx->intersecttype), obj)) return;
+    cAIFwdDiffCache_GetFwdDiff(((void*)ctx->fwddiffcache), obj, &node);
+    if (!cWorldIntersectType_IsPatchInt(((sQuery_335960*)ctx->intersecttype), obj, node, &pos, &nrm, &dist, &uv, ((int)ctx->hint))) return;
+    reset_335960(&((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo]);
+    ((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo].pos = pos;
+    ((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo].nrm = nrm;
+    ((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo].id = obj->id;
+    ((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo].obj = obj;
+    ((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo].dist = dist;
+    ((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo].u = uv.x;
+    ((sHit_335960*)ctx->intersectinfo)[*ctx->numintersectinfo].v = uv.y;
+    (*ctx->numintersectinfo)++;
 }
 #endif
 
@@ -2575,33 +2495,16 @@ struct sObj_335B90 {
     sVEntry<void>* vt;
 };
 
-struct sNode_335B90 {
-    void* next;
-    int pad04;
-    int flags;
-    sObj_335B90* obj;
-    int pad10[20];
-    float bmin[3];
-    float bmax[3];
-    int pad78[4];
-    int active;
-};
 
-struct sCtx_335B90 {
-    sQuery_335B90* q;
-    char* buf;
-    int cap;
-    int* count;
-};
 
 extern "C" int intersect_instanceIntersect(void* q, void* node, void* buf, int cap, int mode);
 
-static inline int overlapNode_335B90(const sQuery_335B90* q, const sNode_335B90* n)
+static inline int overlapNode_335B90(const sQuery_335B90* q, const tInstanceRecord* n)
 {
     int r = 0;
-    if (q->max[0] > n->bmin[0] && q->min[0] < n->bmax[0] &&
-        q->max[1] > n->bmin[1] && q->min[1] < n->bmax[1] &&
-        q->max[2] > n->bmin[2] && q->min[2] < n->bmax[2]) {
+    if (q->max[0] > n->m_fvMin.m[0] && q->min[0] < n->m_fvMax.m[0] &&
+        q->max[1] > n->m_fvMin.m[1] && q->min[1] < n->m_fvMax.m[1] &&
+        q->max[2] > n->m_fvMin.m[2] && q->min[2] < n->m_fvMax.m[2]) {
         r = 1;
     }
     return r;
@@ -2618,10 +2521,10 @@ static inline int overlapBox_335B90(const sQuery_335B90* q, const sBox_335B90* o
     return r;
 }
 
-static inline void collect_335B90(sCtx_335B90* ctx, sNode_335B90* node)
+static inline void collect_335B90(TerrainCallback* ctx, tInstanceRecord* node)
 {
-    int n = *ctx->count;
-    *ctx->count += intersect_instanceIntersect(ctx->q, node, ctx->buf + n * 0x80, ctx->cap - n, 2);
+    int n = *ctx->numintersectinfo;
+    *ctx->numintersectinfo += intersect_instanceIntersect(((sQuery_335B90*)ctx->intersecttype), node, &ctx->intersectinfo[n], ctx->maxintersectinfo - n, 2);
 }
 
 /**
@@ -2638,21 +2541,21 @@ static inline void collect_335B90(sCtx_335B90* ctx, sNode_335B90* node)
  */
 extern "C" void TerrainCallback_intersectinstance(void* vctx, void* vnode)
 {
-    sCtx_335B90* ctx = (sCtx_335B90*)vctx;
-    sNode_335B90* node = (sNode_335B90*)vnode;
-    if (node->active == 0) return;
-    int flags = node->flags;
+    TerrainCallback* ctx = (TerrainCallback*)vctx;
+    tInstanceRecord* node = (tInstanceRecord*)vnode;
+    if (((int)node->m_pCollideRecord) == 0) return;
+    int flags = node->m_iFlags;
     if (flags & 0x20) {
-        if (overlapNode_335B90(ctx->q, node)) {
+        if (overlapNode_335B90(((sQuery_335B90*)ctx->intersecttype), node)) {
             collect_335B90(ctx, node);
         }
     } else if (flags & 0x40) {
-        if (node->obj == 0) return;
-        sVEntry<void>* vt = node->obj->vt;
-        if (((Test_335B90)vt[44].fn)((char*)node->obj + vt[44].delta)) {
-            sVEntry<void>* vt2 = node->obj->vt;
-            sBox_335B90* objBox = ((GetBox_335B90)vt2[45].fn)((char*)node->obj + vt2[45].delta);
-            if (overlapBox_335B90(ctx->q, objBox)) {
+        if (((sObj_335B90*)node->m_pActiveNode) == 0) return;
+        sVEntry<void>* vt = ((sObj_335B90*)node->m_pActiveNode)->vt;
+        if (((Test_335B90)vt[44].fn)((char*)((sObj_335B90*)node->m_pActiveNode) + vt[44].delta)) {
+            sVEntry<void>* vt2 = ((sObj_335B90*)node->m_pActiveNode)->vt;
+            sBox_335B90* objBox = ((GetBox_335B90)vt2[45].fn)((char*)((sObj_335B90*)node->m_pActiveNode) + vt2[45].delta);
+            if (overlapBox_335B90(((sQuery_335B90*)ctx->intersecttype), objBox)) {
                 collect_335B90(ctx, node);
             }
         }
@@ -2667,27 +2570,17 @@ struct sQuad_335D78 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sQry_335D78 {
-    char pad00[0x20];
-    sQuad_335D78 max;   // 0x20
-    sQuad_335D78 min;   // 0x30
-};
 
 struct sBox_335D78 {
     sQuad_335D78 min;
     sQuad_335D78 max;
 };
 
-struct sOct_335D78 {
-    void* child[8];
-    void* listB;        // 0x20
-    void* listA;        // 0x24
-};
 
 struct sCell_335D78 {
     int level;
     int x, y, z;
-    sOct_335D78* tree;
+    nash_Cell* tree;
 };
 
 struct sGrid_335D78 {
@@ -2700,32 +2593,32 @@ struct sTag_335D78 {
 };
 
 extern "C" void nash_Cell_descend4(nash_Cell* self, void* ctx);
-extern "C" void nash_privy_QueryHelper_helpX5(char* flag, sCtx_335960* ctx, sCtx_335960* ctx2, void* box, void* tree, void* cell);
+extern "C" void nash_privy_QueryHelper_helpX5(char* flag, TerrainCallback* ctx, TerrainCallback* ctx2, void* box, void* tree, void* cell);
 
-static inline void collect_335D78(sOct_335D78* node, sCtx_335960* ctx)
+static inline void collect_335D78(nash_Cell* node, TerrainCallback* ctx)
 {
     void** p;
-    for (p = (void**)node->listA; p != 0; p = (void**)*p) {
+    for (p = (void**)(*(void**)&node->nodesinside[1]); p != 0; p = (void**)*p) {
         TerrainCallback_intersectpatch(ctx, p);
     }
-    for (p = (void**)node->listB; p != 0; p = (void**)*p) {
+    for (p = (void**)(*(void**)&node->nodesinside[0]); p != 0; p = (void**)*p) {
         TerrainCallback_intersectinstance(ctx, p);
     }
-    if (node->child[0] != 0) nash_Cell_descend4((nash_Cell*)node->child[0], ctx);
-    if (node->child[1] != 0) nash_Cell_descend4((nash_Cell*)node->child[1], ctx);
-    if (node->child[2] != 0) nash_Cell_descend4((nash_Cell*)node->child[2], ctx);
-    if (node->child[3] != 0) nash_Cell_descend4((nash_Cell*)node->child[3], ctx);
-    if (node->child[4] != 0) nash_Cell_descend4((nash_Cell*)node->child[4], ctx);
-    if (node->child[5] != 0) nash_Cell_descend4((nash_Cell*)node->child[5], ctx);
-    if (node->child[6] != 0) nash_Cell_descend4((nash_Cell*)node->child[6], ctx);
-    if (node->child[7] != 0) nash_Cell_descend4((nash_Cell*)node->child[7], ctx);
+    if (((void**)&node->children[0][0][0])[0] != 0) nash_Cell_descend4((nash_Cell*)((void**)&node->children[0][0][0])[0], ctx);
+    if (((void**)&node->children[0][0][0])[1] != 0) nash_Cell_descend4((nash_Cell*)((void**)&node->children[0][0][0])[1], ctx);
+    if (((void**)&node->children[0][0][0])[2] != 0) nash_Cell_descend4((nash_Cell*)((void**)&node->children[0][0][0])[2], ctx);
+    if (((void**)&node->children[0][0][0])[3] != 0) nash_Cell_descend4((nash_Cell*)((void**)&node->children[0][0][0])[3], ctx);
+    if (((void**)&node->children[0][0][0])[4] != 0) nash_Cell_descend4((nash_Cell*)((void**)&node->children[0][0][0])[4], ctx);
+    if (((void**)&node->children[0][0][0])[5] != 0) nash_Cell_descend4((nash_Cell*)((void**)&node->children[0][0][0])[5], ctx);
+    if (((void**)&node->children[0][0][0])[6] != 0) nash_Cell_descend4((nash_Cell*)((void**)&node->children[0][0][0])[6], ctx);
+    if (((void**)&node->children[0][0][0])[7] != 0) nash_Cell_descend4((nash_Cell*)((void**)&node->children[0][0][0])[7], ctx);
 }
 
-static inline void queryCell_335D78(sGrid_335D78* grid, int i, sBox_335D78* box, sCtx_335960* ctx)
+static inline void queryCell_335D78(sGrid_335D78* grid, int i, sBox_335D78* box, TerrainCallback* ctx)
 {
     sCell_335D78* cell = &grid->cells[i];
     if (grid->cells[i].tree != 0) {
-        sOct_335D78* tree = cell->tree;
+        nash_Cell* tree = cell->tree;
         sTag_335D78 tag;
         char* flag = (char*)&tag;
         int r = nash_CellKey_proximitytest(cell, box);
@@ -2757,19 +2650,19 @@ struct sHit_00336850;
 extern "C" int cBXNash_terrainIntersect(cBXNash* vself, void* vq, sHit_00336850* hits, int cap, int hitCache)
 {
     sGrid_335D78* grid = (sGrid_335D78*)vself;
-    sQry_335D78* query = (sQry_335D78*)vq;
-    sCtx_335960 ctx;
+    cWorldIntersectType* query = (cWorldIntersectType*)vq;
+    TerrainCallback ctx;
     sBox_335D78 box;
     int count;
-    ctx.q = (sQuery_335960*)query;
-    ctx.hits = (sHit_335960*)hits;
-    ctx.cap = cap;
-    ctx.count = &count;
-    ctx.arg = hitCache;
-    ctx.cache = grid->cache;
-    box.min = query->min;
-    box.max = query->max;
-    sCtx_335960* pctx = &ctx;
+    (*(sQuery_335960**)&ctx.intersecttype) = (sQuery_335960*)query;
+    (*(sHit_335960**)&ctx.intersectinfo) = (sHit_335960*)hits;
+    ctx.maxintersectinfo = cap;
+    ctx.numintersectinfo = &count;
+    (*(int*)&ctx.hint) = hitCache;
+    (*(void**)&ctx.fwddiffcache) = grid->cache;
+    box.min = (*(sQuad_335D78*)&query->boxMin);
+    box.max = (*(sQuad_335D78*)&query->boxMax);
+    TerrainCallback* pctx = &ctx;
     count = 0;
     queryCell_335D78(grid, 0, &box, pctx);
     queryCell_335D78(grid, 1, &box, pctx);
@@ -2880,14 +2773,6 @@ struct sHit_003369D8 {
     sHit_003369D8() {}
 } __attribute__((aligned(16)));
 
-struct sQuery_369D8 {
-    void* seg;              // 0x00
-    sHit_003369D8* hits;    // 0x04
-    int max;                // 0x08
-    int* count;             // 0x0C
-    int f10;                // 0x10
-    void* f14;              // 0x14
-};
 
 struct sCell_369D8 {
     int f0, f4, f8, fC;
@@ -2905,7 +2790,7 @@ struct sTrav_369D8 {
     sCtx_369D8 ctx;         // 0x4
 };
 
-extern "C" void nash_privy_QueryHelper_help(char* flag, sQuery_369D8* q, sQuery_369D8* q2, sCtx_369D8* ctx, void* node, sCell_369D8* cell);
+extern "C" void nash_privy_QueryHelper_help(char* flag, TerrainCallback* q, TerrainCallback* q2, sCtx_369D8* ctx, void* node, sCell_369D8* cell);
 
 // PORT: PS2 FPU abs.s via inline asm; use fabsf off-PS2.
 static inline float absf_003369D8(float x)
@@ -2936,7 +2821,7 @@ static inline int isBetter_003369D8(sHit_003369D8* a, sHit_003369D8* b)
     return *(unsigned int*)(a->tri + 0x150) < *(unsigned int*)(b->tri + 0x150);
 }
 
-static inline void visit_003369D8(sCell_369D8* c, char* flag, sQuery_369D8* q, sCtx_369D8* p)
+static inline void visit_003369D8(sCell_369D8* c, char* flag, TerrainCallback* q, sCtx_369D8* p)
 {
     nash_privy_QueryHelper_help(flag, q, q, p, c->node, c);
 }
@@ -2975,14 +2860,14 @@ extern "C" int cBXNash_getGroundHeight(cBXNash* self, float* pos, sQuad_369D8* o
         cWorldLine_cWorldLine(seg, lineStart, lineEnd, 2, idealParam);
     }
     sHit_003369D8 hits[64];
-    sQuery_369D8 terrainQuery;
-    terrainQuery.seg = seg;
-    terrainQuery.hits = hits;
-    terrainQuery.max = 0x40;
+    TerrainCallback terrainQuery;
+    (*(void**)&terrainQuery.intersecttype) = seg;
+    (*(sHit_003369D8**)&terrainQuery.intersectinfo) = hits;
+    terrainQuery.maxintersectinfo = 0x40;
     sTrav_369D8 tr;
-    terrainQuery.count = &tr.count;
-    terrainQuery.f10 = 0;
-    terrainQuery.f14 = (void*)self->TheAIFwdDiffCache;
+    terrainQuery.numintersectinfo = &tr.count;
+    (*(int*)&terrainQuery.hint) = 0;
+    (*(void**)&terrainQuery.fwddiffcache) = (void*)self->TheAIFwdDiffCache;
     tr.count = 0;
     tr.ctx.pos = pos;
     sCtx_369D8* ctx = &tr.ctx;
@@ -3048,34 +2933,16 @@ struct sObj_336D40 {
     sVEntry<void>* vt;
 };
 
-struct sNode_336D40 {
-    void* next;
-    int pad04;
-    int flags;
-    sObj_336D40* obj;
-    int pad10[20];
-    float bmin[3];
-    float bmax[3];
-    int pad78[4];
-    int active;
-};
 
-struct sCtx_336D40 {
-    sQuery_336D40* q;
-    char* buf;
-    int cap;
-    int* count;
-    int full;
-};
 
 extern "C" int intersect_instanceIntersect(void* q, void* node, void* buf, int cap, int mode);
 
-static inline int overlapNode_336D40(const sQuery_336D40* q, const sNode_336D40* n)
+static inline int overlapNode_336D40(const sQuery_336D40* q, const tInstanceRecord* n)
 {
     int r = 0;
-    if (q->max[0] > n->bmin[0] && q->min[0] < n->bmax[0] &&
-        q->max[1] > n->bmin[1] && q->min[1] < n->bmax[1] &&
-        q->max[2] > n->bmin[2] && q->min[2] < n->bmax[2]) {
+    if (q->max[0] > n->m_fvMin.m[0] && q->min[0] < n->m_fvMax.m[0] &&
+        q->max[1] > n->m_fvMin.m[1] && q->min[1] < n->m_fvMax.m[1] &&
+        q->max[2] > n->m_fvMin.m[2] && q->min[2] < n->m_fvMax.m[2]) {
         r = 1;
     }
     return r;
@@ -3092,10 +2959,10 @@ static inline int overlapBox_336D40(const sQuery_336D40* q, const sBox_336D40* o
     return r;
 }
 
-static inline void collect_336D40(sCtx_336D40* ctx, sNode_336D40* node, int mode)
+static inline void collect_336D40(StaticObjectCallback* ctx, tInstanceRecord* node, int mode)
 {
-    int n = *ctx->count;
-    *ctx->count += intersect_instanceIntersect(ctx->q, node, ctx->buf + n * 0x80, ctx->cap - n, mode);
+    int n = *ctx->numintersectinfo;
+    *ctx->numintersectinfo += intersect_instanceIntersect(((sQuery_336D40*)ctx->intersecttype), node, &ctx->intersectinfo[n], ctx->maxintersectinfo - n, mode);
 }
 
 /**
@@ -3112,20 +2979,20 @@ static inline void collect_336D40(sCtx_336D40* ctx, sNode_336D40* node, int mode
  */
 extern "C" void StaticObjectCallback_intersectinstance(void* vctx, void* vnode)
 {
-    sCtx_336D40* ctx = (sCtx_336D40*)vctx;
-    sNode_336D40* node = (sNode_336D40*)vnode;
-    int mode = ctx->full ? 3 : 1;
-    int flags = node->flags;
+    StaticObjectCallback* ctx = (StaticObjectCallback*)vctx;
+    tInstanceRecord* node = (tInstanceRecord*)vnode;
+    int mode = ctx->includeridable ? 3 : 1;
+    int flags = node->m_iFlags;
     if (flags & 0x20) {
-        if (overlapNode_336D40(ctx->q, node)) {
+        if (overlapNode_336D40(((sQuery_336D40*)ctx->intersecttype), node)) {
             collect_336D40(ctx, node, mode);
         }
     } else if (flags & 0x40) {
-        sVEntry<void>* vt = node->obj->vt;
-        if (((Test_336D40)vt[44].fn)((char*)node->obj + vt[44].delta)) {
-            sVEntry<void>* vt2 = node->obj->vt;
-            sBox_336D40* objBox = ((GetBox_336D40)vt2[45].fn)((char*)node->obj + vt2[45].delta);
-            if (overlapBox_336D40(ctx->q, objBox)) {
+        sVEntry<void>* vt = ((sObj_336D40*)node->m_pActiveNode)->vt;
+        if (((Test_336D40)vt[44].fn)((char*)((sObj_336D40*)node->m_pActiveNode) + vt[44].delta)) {
+            sVEntry<void>* vt2 = ((sObj_336D40*)node->m_pActiveNode)->vt;
+            sBox_336D40* objBox = ((GetBox_336D40)vt2[45].fn)((char*)((sObj_336D40*)node->m_pActiveNode) + vt2[45].delta);
+            if (overlapBox_336D40(((sQuery_336D40*)ctx->intersecttype), objBox)) {
                 collect_336D40(ctx, node, mode);
             }
         }
@@ -3140,11 +3007,6 @@ struct sQuad_336F30 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sQry_336F30 {
-    char pad00[0x20];
-    sQuad_336F30 max;   // 0x20
-    sQuad_336F30 min;   // 0x30
-};
 
 struct sBox_336F30 {
     sQuad_336F30 min;
@@ -3170,9 +3032,9 @@ struct sTag_336F30 {
 };
 
 extern "C" void nash_Cell_descend5(nash_Cell* self, void* ctx);
-extern "C" void nash_privy_QueryHelper_helpX6(char* flag, sCtx_336D40* ctx, sCtx_336D40* ctx2, void* box, void* tree, void* cell);
+extern "C" void nash_privy_QueryHelper_helpX6(char* flag, StaticObjectCallback* ctx, StaticObjectCallback* ctx2, void* box, void* tree, void* cell);
 
-static inline void collect_336F30(sOct_336F30* node, sCtx_336D40* ctx)
+static inline void collect_336F30(sOct_336F30* node, StaticObjectCallback* ctx)
 {
     void** p;
     for (p = (void**)node->list; p != 0; p = (void**)*p) {
@@ -3188,7 +3050,7 @@ static inline void collect_336F30(sOct_336F30* node, sCtx_336D40* ctx)
     if (node->child[7] != 0) nash_Cell_descend5((nash_Cell*)node->child[7], ctx);
 }
 
-static inline void queryCell_336F30(sGrid_336F30* grid, int i, sBox_336F30* box, sCtx_336D40* ctx)
+static inline void queryCell_336F30(sGrid_336F30* grid, int i, sBox_336F30* box, StaticObjectCallback* ctx)
 {
     sCell_336F30* cell = &grid->cells[i];
     if (grid->cells[i].tree != 0) {
@@ -3224,18 +3086,18 @@ struct sHit_003378C0;
 extern "C" int cBXNash_staticObjectIntersect(cBXNash* vself, void* vq, sHit_003378C0* hits, int cap, int full)
 {
     sGrid_336F30* grid = (sGrid_336F30*)vself;
-    sQry_336F30* query = (sQry_336F30*)vq;
-    sCtx_336D40 ctx;
+    cWorldIntersectType* query = (cWorldIntersectType*)vq;
+    StaticObjectCallback ctx;
     sBox_336F30 box;
     int count;
-    ctx.q = (sQuery_336D40*)query;
-    ctx.buf = (char*)hits;
-    ctx.cap = cap;
-    ctx.count = &count;
-    ctx.full = full;
-    box.min = query->min;
-    box.max = query->max;
-    sCtx_336D40* pctx = &ctx;
+    (*(sQuery_336D40**)&ctx.intersecttype) = (sQuery_336D40*)query;
+    (*(char**)&ctx.intersectinfo) = (char*)hits;
+    ctx.maxintersectinfo = cap;
+    ctx.numintersectinfo = &count;
+    ctx.includeridable = full;
+    box.min = (*(sQuad_336F30*)&query->boxMin);
+    box.max = (*(sQuad_336F30*)&query->boxMax);
+    StaticObjectCallback* pctx = &ctx;
     count = 0;
     queryCell_336F30(grid, 0, &box, pctx);
     queryCell_336F30(grid, 1, &box, pctx);
@@ -3333,14 +3195,6 @@ struct sTree_3411B8;
 struct sQuery_3411B8;
 extern "C" void nash_Cell_descend6(nash_Cell* tree, sQuery_3411B8* q);
 
-struct sQry_337A48 {
-    sWsVec4* pos;               // 0x00
-    int a7;                     // 0x04
-    int mask;                   // 0x08
-    int* cnt;                   // 0x0C
-    float* dist;                // 0x10
-    sBox_00334680* box;         // 0x14
-};
 
 struct sOct_337A48 {
     sOct_337A48* child[8];
@@ -3361,19 +3215,19 @@ struct sGrid_337A48 {
 struct sTag_337A48 {
 };
 
-extern "C" void nash_privy_QueryHelper_helpX7(char* flag, sQry_337A48* q, sQry_337A48* q2, sBox_00334680* box, void* tree, void* cell);
+extern "C" void nash_privy_QueryHelper_helpX7(char* flag, SplineCallback* q, SplineCallback* q2, tBoundBox* box, void* tree, void* cell);
 
-static inline void collect_337A48(sOct_337A48* tree, sQry_337A48* q)
+static inline void collect_337A48(sOct_337A48* tree, SplineCallback* q)
 {
     for (char* o = tree->objs; o != 0; o = *(char**)o) {
         int type = *(int*)(o + 8);
         if (type == 2) {
-            cRailModifier_splineIntersect(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
+            cRailModifier_splineIntersect(*(void**)(o + 0xC), ((tBoundBox*)q->box), ((tBoundBox*)q->box), ((sWsVec4*)q->intersectpos), ((int)q->splinefiltermask), q->hit, q->intersectdist, ((int)q->intersectinfo));
         } else if (type == 3) {
-            cFlexRailNode_splineIntersect(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
+            cFlexRailNode_splineIntersect(*(void**)(o + 0xC), ((tBoundBox*)q->box), ((tBoundBox*)q->box), ((sWsVec4*)q->intersectpos), ((int)q->splinefiltermask), q->hit, q->intersectdist, ((int)q->intersectinfo));
         } else if (type == 1) {
-            if (*(int*)(*(char**)(o + 0x68) + 0x1C) & q->mask) {
-                intersect_staticSplineSegmentIntersect(o, q->box, q->pos, q->cnt, q->dist, q->a7);
+            if (*(int*)(*(char**)(o + 0x68) + 0x1C) & ((int)q->splinefiltermask)) {
+                intersect_staticSplineSegmentIntersect(o, ((tBoundBox*)q->box), ((sWsVec4*)q->intersectpos), q->hit, q->intersectdist, ((int)q->intersectinfo));
             }
         }
     }
@@ -3387,7 +3241,7 @@ static inline void collect_337A48(sOct_337A48* tree, sQry_337A48* q)
     if (tree->child[7] != 0) nash_Cell_descend6((nash_Cell*)((sTree_3411B8*)tree->child[7]), (sQuery_3411B8*)q);
 }
 
-static inline void queryCell_337A48(sGrid_337A48* grid, int i, sBox_00334680* box, sQry_337A48* q)
+static inline void queryCell_337A48(sGrid_337A48* grid, int i, tBoundBox* box, SplineCallback* q)
 {
     sCell_337A48* cell = &grid->cells[i];
     if (grid->cells[i].tree != 0) {
@@ -3422,26 +3276,26 @@ static inline void queryCell_337A48(sGrid_337A48* grid, int i, sBox_00334680* bo
  */
 extern "C" int cBXNash_splineIntersect(cBXNash* grid, sWsVec4* pos, int intInfo, int mask, float testRadius)
 {
-    sBox_00334680 box;
+    tBoundBox box;
     sWsVec4 ext;
-    sQry_337A48 splineQuery;
+    SplineCallback splineQuery;
     int cnt;
     float dist;
-    box.min = *pos;
-    box.max = *pos;
+    (*(sWsVec4*)&box.MinPoint) = *pos;
+    (*(sWsVec4*)&box.MaxPoint) = *pos;
     ext.x = testRadius;
     ext.y = testRadius;
     ext.z = testRadius;
     ext.w = 0.0f;
-    wsSubEq_334680(box.min, ext);
-    wsAddEq_334680(box.max, ext);
-    sBox_00334680* pbox = &box;
-    splineQuery.pos = pos;
-    splineQuery.a7 = intInfo;
-    splineQuery.mask = mask;
-    splineQuery.cnt = &cnt;
-    splineQuery.dist = &dist;
-    splineQuery.box = pbox;
+    wsSubEq_334680((*(sWsVec4*)&box.MinPoint), ext);
+    wsAddEq_334680((*(sWsVec4*)&box.MaxPoint), ext);
+    tBoundBox* pbox = &box;
+    (*(sWsVec4**)&splineQuery.intersectpos) = pos;
+    (*(int*)&splineQuery.intersectinfo) = intInfo;
+    splineQuery.splinefiltermask = mask;
+    splineQuery.hit = &cnt;
+    splineQuery.intersectdist = &dist;
+    (*(tBoundBox**)&splineQuery.box) = pbox;
     dist = 0.0f;
     cnt = 0;
     queryCell_337A48(((sGrid_337A48*)grid), 0, pbox, &splineQuery);
@@ -3474,10 +3328,6 @@ extern "C" void* func_003388E0(void* self, ...)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", nash_privy_QueryHelper_helpX1);
 #ifdef SKIP_ASM
-struct sCell_338920 {
-    int level;
-    int x, y, z;
-};
 
 /**
  * Walks a crossing octree cell for the overlap-list instance query: collects its instances, then visits its children.
@@ -3496,16 +3346,16 @@ struct sCell_338920 {
  * @param vnode  the cell (On Tour const Cell *)
  * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
  */
-extern "C" void nash_privy_QueryHelper_helpX1(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, void* vbox, void* vnode, void* vcell)
+extern "C" void nash_privy_QueryHelper_helpX1(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, void* vbox, void* vnode, void* vcell)
 {
-    sBox_3309D8* box = (sBox_3309D8*)vbox;
-    sOctNode_330BA8* node = (sOctNode_330BA8*)vnode;
-    sCell_338920* cell = (sCell_338920*)vcell;
+    tBoundBox* box = (tBoundBox*)vbox;
+    nash_Cell* node = (nash_Cell*)vnode;
+    nash_CellKey* cell = (nash_CellKey*)vcell;
     OverlapInstancesCallback_operatorCall(ctx, (nash_Cell*)node);
     if (cell->level == 11) {
         return;
     }
-    sCell_338920 sub;
+    nash_CellKey sub;
     sub.level = cell->level - 1;
     sub.x = cell->x * 2;
     sub.y = cell->y * 2;
@@ -3516,95 +3366,95 @@ extern "C" void nash_privy_QueryHelper_helpX1(char* flag, sCtx_3309D8* ctx, sCtx
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
-    if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
+    if (((float*)&box->MinPoint)[0] < x0hi && x0lo < ((float*)&box->MaxPoint)[0]) ox0 = 1;
     float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
     float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
-    if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
+    if (((float*)&box->MinPoint)[0] < x1hi && x1lo < ((float*)&box->MaxPoint)[0]) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
     float y0lo = ((float)sub.y - 0.2f) * cellSize;
     float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
-    if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
+    if (((float*)&box->MinPoint)[1] < y0hi && y0lo < ((float*)&box->MaxPoint)[1]) oy0 = 1;
     float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
     float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
-    if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
+    if (((float*)&box->MinPoint)[1] < y1hi && y1lo < ((float*)&box->MaxPoint)[1]) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
     float z0lo = ((float)sub.z - 0.2f) * cellSize;
     float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
-    if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
+    if (((float*)&box->MinPoint)[2] < z0hi && z0lo < ((float*)&box->MaxPoint)[2]) oz0 = 1;
     float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
     float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
-    if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
+    if (((float*)&box->MinPoint)[2] < z1hi && z1lo < ((float*)&box->MaxPoint)[2]) oz1 = 1;
     if (!oz0 && !oz1) {
         return;
     }
     int cx0 = 0;
-    if (box->min[0] < x0lo && x0hi < box->max[0]) cx0 = 1;
+    if (((float*)&box->MinPoint)[0] < x0lo && x0hi < ((float*)&box->MaxPoint)[0]) cx0 = 1;
     int cx1 = 0;
-    if (box->min[0] < x1lo && x1hi < box->max[0]) cx1 = 1;
+    if (((float*)&box->MinPoint)[0] < x1lo && x1hi < ((float*)&box->MaxPoint)[0]) cx1 = 1;
     int cy0 = 0;
-    if (box->min[1] < y0lo && y0hi < box->max[1]) cy0 = 1;
+    if (((float*)&box->MinPoint)[1] < y0lo && y0hi < ((float*)&box->MaxPoint)[1]) cy0 = 1;
     int cy1 = 0;
-    if (box->min[1] < y1lo && y1hi < box->max[1]) cy1 = 1;
+    if (((float*)&box->MinPoint)[1] < y1lo && y1hi < ((float*)&box->MaxPoint)[1]) cy1 = 1;
     int cz0 = 0;
-    if (box->min[2] < z0lo && z0hi < box->max[2]) cz0 = 1;
+    if (((float*)&box->MinPoint)[2] < z0lo && z0hi < ((float*)&box->MaxPoint)[2]) cz0 = 1;
     int cz1 = 0;
-    if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
+    if (((float*)&box->MinPoint)[2] < z1lo && z1hi < ((float*)&box->MaxPoint)[2]) cz1 = 1;
 
-    sSphNode_340A40* subNode;
-    subNode = node->child[0];
+    nash_Cell* subNode;
+    subNode = ((nash_Cell**)&node->children[0][0][0])[0];
     if (subNode && ox0 && oy0 && oz0) {
-        if (cx0 && cy0 && cz0) collect_330BA8((sOctNode_330BA8*)subNode, ctx2);
+        if (cx0 && cy0 && cz0) collect_330BA8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX1(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    subNode = node->child[1];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[1];
     if (subNode && ox0 && oy0 && oz1) {
-        if (cx0 && cy0 && cz1) collect_330BA8((sOctNode_330BA8*)subNode, ctx2);
+        if (cx0 && cy0 && cz1) collect_330BA8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX1(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y++;
-    subNode = node->child[3];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[3];
     if (subNode && ox0 && oy1 && oz1) {
-        if (cx0 && cy1 && cz1) collect_330BA8((sOctNode_330BA8*)subNode, ctx2);
+        if (cx0 && cy1 && cz1) collect_330BA8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX1(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    subNode = node->child[2];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[2];
     if (subNode && ox0 && oy1 && oz0) {
-        if (cx0 && cy1 && cz0) collect_330BA8((sOctNode_330BA8*)subNode, ctx2);
+        if (cx0 && cy1 && cz0) collect_330BA8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX1(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.x++;
-    subNode = node->child[6];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[6];
     if (subNode && ox1 && oy1 && oz0) {
-        if (cx1 && cy1 && cz0) collect_330BA8((sOctNode_330BA8*)subNode, ctx2);
+        if (cx1 && cy1 && cz0) collect_330BA8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX1(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    subNode = node->child[7];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[7];
     if (subNode && ox1 && oy1 && oz1) {
-        if (cx1 && cy1 && cz1) collect_330BA8((sOctNode_330BA8*)subNode, ctx2);
+        if (cx1 && cy1 && cz1) collect_330BA8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX1(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y--;
-    subNode = node->child[5];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[5];
     if (subNode && ox1 && oy0 && oz1) {
-        if (cx1 && cy0 && cz1) collect_330BA8((sOctNode_330BA8*)subNode, ctx2);
+        if (cx1 && cy0 && cz1) collect_330BA8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX1(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    subNode = node->child[4];
+    subNode = ((nash_Cell**)&node->children[0][0][0])[4];
     if (subNode && ox1 && oy0 && oz0) {
-        if (cx1 && cy0 && cz0) collect_330BA8((sOctNode_330BA8*)subNode, ctx2);
+        if (cx1 && cy0 && cz0) collect_330BA8(subNode, ctx2);
         else nash_privy_QueryHelper_helpX1(flag, ctx, ctx2, box, subNode, &sub);
     }
 }
@@ -3613,10 +3463,6 @@ extern "C" void nash_privy_QueryHelper_helpX1(char* flag, sCtx_3309D8* ctx, sCtx
 //100%
 INCLUDE_ASM("intersect/worldsphtree", nash_privy_QueryHelper_helpX2);
 #ifdef SKIP_ASM
-struct sCell_339598 {
-    int level;
-    int x, y, z;
-};
 
 /**
  * Walks a crossing octree cell for the overlap-list typed query: collects its typed nodes, then visits its children.
@@ -3635,19 +3481,19 @@ struct sCell_339598 {
  * @param vnode  the cell (On Tour const Cell *)
  * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
  */
-extern "C" void nash_privy_QueryHelper_helpX2(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, void* vbox, void* vnode, void* vcell)
+extern "C" void nash_privy_QueryHelper_helpX2(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, void* vbox, void* vnode, void* vcell)
 {
-    sBox_3309D8* box = (sBox_3309D8*)vbox;
-    sOctNode_331450* node = (sOctNode_331450*)vnode;
-    sCell_339598* cell = (sCell_339598*)vcell;
+    tBoundBox* box = (tBoundBox*)vbox;
+    nash_Cell* node = (nash_Cell*)vnode;
+    nash_CellKey* cell = (nash_CellKey*)vcell;
     void** objNode;
-    for (objNode = node->objs; objNode != 0; objNode = (void**)*objNode) {
-        ctx->list[(*ctx->count)++] = (sNode_3309D8*)objNode;
+    for (objNode = (*(void***)&node->nodesinside[2]); objNode != 0; objNode = (void**)*objNode) {
+        ((sNode_3309D8**)ctx->instances)[(*((int*)ctx->number))++] = (sNode_3309D8*)objNode;
     }
     if (cell->level == 11) {
         return;
     }
-    sCell_339598 sub;
+    nash_CellKey sub;
     sub.level = cell->level - 1;
     sub.x = cell->x * 2;
     sub.y = cell->y * 2;
@@ -3658,93 +3504,93 @@ extern "C" void nash_privy_QueryHelper_helpX2(char* flag, sCtx_3309D8* ctx, sCtx
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
-    if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
+    if (((float*)&box->MinPoint)[0] < x0hi && x0lo < ((float*)&box->MaxPoint)[0]) ox0 = 1;
     float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
     float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
-    if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
+    if (((float*)&box->MinPoint)[0] < x1hi && x1lo < ((float*)&box->MaxPoint)[0]) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
     float y0lo = ((float)sub.y - 0.2f) * cellSize;
     float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
-    if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
+    if (((float*)&box->MinPoint)[1] < y0hi && y0lo < ((float*)&box->MaxPoint)[1]) oy0 = 1;
     float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
     float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
-    if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
+    if (((float*)&box->MinPoint)[1] < y1hi && y1lo < ((float*)&box->MaxPoint)[1]) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
     float z0lo = ((float)sub.z - 0.2f) * cellSize;
     float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
-    if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
+    if (((float*)&box->MinPoint)[2] < z0hi && z0lo < ((float*)&box->MaxPoint)[2]) oz0 = 1;
     float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
     float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
-    if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
+    if (((float*)&box->MinPoint)[2] < z1hi && z1lo < ((float*)&box->MaxPoint)[2]) oz1 = 1;
     if (!oz0 && !oz1) {
         return;
     }
     int cx0 = 0;
-    if (box->min[0] < x0lo && x0hi < box->max[0]) cx0 = 1;
+    if (((float*)&box->MinPoint)[0] < x0lo && x0hi < ((float*)&box->MaxPoint)[0]) cx0 = 1;
     int cx1 = 0;
-    if (box->min[0] < x1lo && x1hi < box->max[0]) cx1 = 1;
+    if (((float*)&box->MinPoint)[0] < x1lo && x1hi < ((float*)&box->MaxPoint)[0]) cx1 = 1;
     int cy0 = 0;
-    if (box->min[1] < y0lo && y0hi < box->max[1]) cy0 = 1;
+    if (((float*)&box->MinPoint)[1] < y0lo && y0hi < ((float*)&box->MaxPoint)[1]) cy0 = 1;
     int cy1 = 0;
-    if (box->min[1] < y1lo && y1hi < box->max[1]) cy1 = 1;
+    if (((float*)&box->MinPoint)[1] < y1lo && y1hi < ((float*)&box->MaxPoint)[1]) cy1 = 1;
     int cz0 = 0;
-    if (box->min[2] < z0lo && z0hi < box->max[2]) cz0 = 1;
+    if (((float*)&box->MinPoint)[2] < z0lo && z0hi < ((float*)&box->MaxPoint)[2]) cz0 = 1;
     int cz1 = 0;
-    if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
+    if (((float*)&box->MinPoint)[2] < z1lo && z1hi < ((float*)&box->MaxPoint)[2]) cz1 = 1;
 
-    sOctNode_331450* subNode;
-    subNode = (sOctNode_331450*)node->child[0];
+    nash_Cell* subNode;
+    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[0];
     if (subNode && ox0 && oy0 && oz0) {
         if (cx0 && cy0 && cz0) collect_331450(subNode, ctx2);
         else nash_privy_QueryHelper_helpX2(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    subNode = (sOctNode_331450*)node->child[1];
+    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[1];
     if (subNode && ox0 && oy0 && oz1) {
         if (cx0 && cy0 && cz1) collect_331450(subNode, ctx2);
         else nash_privy_QueryHelper_helpX2(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y++;
-    subNode = (sOctNode_331450*)node->child[3];
+    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[3];
     if (subNode && ox0 && oy1 && oz1) {
         if (cx0 && cy1 && cz1) collect_331450(subNode, ctx2);
         else nash_privy_QueryHelper_helpX2(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    subNode = (sOctNode_331450*)node->child[2];
+    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[2];
     if (subNode && ox0 && oy1 && oz0) {
         if (cx0 && cy1 && cz0) collect_331450(subNode, ctx2);
         else nash_privy_QueryHelper_helpX2(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.x++;
-    subNode = (sOctNode_331450*)node->child[6];
+    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[6];
     if (subNode && ox1 && oy1 && oz0) {
         if (cx1 && cy1 && cz0) collect_331450(subNode, ctx2);
         else nash_privy_QueryHelper_helpX2(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    subNode = (sOctNode_331450*)node->child[7];
+    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[7];
     if (subNode && ox1 && oy1 && oz1) {
         if (cx1 && cy1 && cz1) collect_331450(subNode, ctx2);
         else nash_privy_QueryHelper_helpX2(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y--;
-    subNode = (sOctNode_331450*)node->child[5];
+    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[5];
     if (subNode && ox1 && oy0 && oz1) {
         if (cx1 && cy0 && cz1) collect_331450(subNode, ctx2);
         else nash_privy_QueryHelper_helpX2(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    subNode = (sOctNode_331450*)node->child[4];
+    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[4];
     if (subNode && ox1 && oy0 && oz0) {
         if (cx1 && cy0 && cz0) collect_331450(subNode, ctx2);
         else nash_privy_QueryHelper_helpX2(flag, ctx, ctx2, box, subNode, &sub);
@@ -3756,7 +3602,7 @@ extern "C" void nash_privy_QueryHelper_helpX2(char* flag, sCtx_3309D8* ctx, sCtx
 INCLUDE_ASM("intersect/worldsphtree", nash_privy_QueryHelper_helpX3);
 #ifdef SKIP_ASM
 struct sTree_340C20;
-extern "C" void nash_Cell_descend2(nash_Cell* tree, sCtx_3309D8* ctx);
+extern "C" void nash_Cell_descend2(nash_Cell* tree, OverlapInstancesCallback* ctx);
 
 struct sObj_33A3D8 {
     sObj_33A3D8* next;
@@ -3771,32 +3617,32 @@ struct sTree_33A3D8 {
     sObj_33A3D8* objs;          // 0x24
 };
 
-static inline int overlapObj_33A3D8(const sBox_3309D8* b, const sObj_33A3D8* n)
+static inline int overlapObj_33A3D8(const tBoundBox* b, const sObj_33A3D8* n)
 {
     int r = 0;
-    if (b->min[0] <= n->bmax[0] && b->max[0] >= n->bmin[0] &&
-        b->min[1] <= n->bmax[1] && b->max[1] >= n->bmin[1] &&
-        b->min[2] <= n->bmax[2] && b->max[2] >= n->bmin[2]) {
+    if (((float*)&b->MinPoint)[0] <= n->bmax[0] && ((float*)&b->MaxPoint)[0] >= n->bmin[0] &&
+        ((float*)&b->MinPoint)[1] <= n->bmax[1] && ((float*)&b->MaxPoint)[1] >= n->bmin[1] &&
+        ((float*)&b->MinPoint)[2] <= n->bmax[2] && ((float*)&b->MaxPoint)[2] >= n->bmin[2]) {
         r = 1;
     }
     return r;
 }
 
-static inline void collectObjs_33A3D8(sTree_33A3D8* tree, sCtx_3309D8* ctx)
+static inline void collectObjs_33A3D8(sTree_33A3D8* tree, OverlapInstancesCallback* ctx)
 {
     OverlapInstancesCallback_operatorCall(ctx, (nash_Cell*)tree);
-    sCtx_3309D8* q = (sCtx_3309D8*)((char*)ctx + 0x10);
+    OverlapInstancesCallback* q = (OverlapInstancesCallback*)((char*)ctx + 0x10);
     for (sObj_33A3D8* p = tree->objs; p != 0; p = p->next) {
-        if (overlapObj_33A3D8(q->box, p)) {
-            int* cnt = q->count;
+        if (overlapObj_33A3D8(((tBoundBox*)q->box), p)) {
+            int* cnt = ((int*)q->number);
             int n = *cnt;
-            q->list[n] = (sNode_3309D8*)p;
+            ((sNode_3309D8**)q->instances)[n] = (sNode_3309D8*)p;
             *cnt = n + 1;
         }
     }
 }
 
-static inline void collect_33A3D8(sTree_33A3D8* tree, sCtx_3309D8* ctx)
+static inline void collect_33A3D8(sTree_33A3D8* tree, OverlapInstancesCallback* ctx)
 {
     collectObjs_33A3D8(tree, ctx);
     if (tree->child[0] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->child[0]), ctx);
@@ -3809,10 +3655,6 @@ static inline void collect_33A3D8(sTree_33A3D8* tree, sCtx_3309D8* ctx)
     if (tree->child[7] != 0) nash_Cell_descend2((nash_Cell*)((sTree_340C20*)tree->child[7]), ctx);
 }
 
-struct sCell_33A3D8 {
-    int level;
-    int x, y, z;
-};
 
 /**
  * Walks a crossing octree cell for the overlap-list patch and instance query: collects both, then visits its children.
@@ -3832,16 +3674,16 @@ struct sCell_33A3D8 {
  * @param vnode  the cell (On Tour const Cell *)
  * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
  */
-extern "C" void nash_privy_QueryHelper_helpX3(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, void* vbox, void* vnode, void* vcell)
+extern "C" void nash_privy_QueryHelper_helpX3(char* flag, OverlapInstancesCallback* ctx, OverlapInstancesCallback* ctx2, void* vbox, void* vnode, void* vcell)
 {
-    sBox_3309D8* box = (sBox_3309D8*)vbox;
+    tBoundBox* box = (tBoundBox*)vbox;
     sTree_33A3D8* node = (sTree_33A3D8*)vnode;
-    sCell_33A3D8* cell = (sCell_33A3D8*)vcell;
+    nash_CellKey* cell = (nash_CellKey*)vcell;
     collectObjs_33A3D8(node, ctx);
     if (cell->level == 11) {
         return;
     }
-    sCell_33A3D8 sub;
+    nash_CellKey sub;
     sub.level = cell->level - 1;
     sub.x = cell->x * 2;
     sub.y = cell->y * 2;
@@ -3852,48 +3694,48 @@ extern "C" void nash_privy_QueryHelper_helpX3(char* flag, sCtx_3309D8* ctx, sCtx
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
-    if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
+    if (((float*)&box->MinPoint)[0] < x0hi && x0lo < ((float*)&box->MaxPoint)[0]) ox0 = 1;
     float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
     float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
-    if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
+    if (((float*)&box->MinPoint)[0] < x1hi && x1lo < ((float*)&box->MaxPoint)[0]) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
     float y0lo = ((float)sub.y - 0.2f) * cellSize;
     float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
-    if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
+    if (((float*)&box->MinPoint)[1] < y0hi && y0lo < ((float*)&box->MaxPoint)[1]) oy0 = 1;
     float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
     float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
-    if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
+    if (((float*)&box->MinPoint)[1] < y1hi && y1lo < ((float*)&box->MaxPoint)[1]) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
     float z0lo = ((float)sub.z - 0.2f) * cellSize;
     float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
-    if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
+    if (((float*)&box->MinPoint)[2] < z0hi && z0lo < ((float*)&box->MaxPoint)[2]) oz0 = 1;
     float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
     float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
-    if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
+    if (((float*)&box->MinPoint)[2] < z1hi && z1lo < ((float*)&box->MaxPoint)[2]) oz1 = 1;
     if (!oz0 && !oz1) {
         return;
     }
     int cx0 = 0;
-    if (box->min[0] < x0lo && x0hi < box->max[0]) cx0 = 1;
+    if (((float*)&box->MinPoint)[0] < x0lo && x0hi < ((float*)&box->MaxPoint)[0]) cx0 = 1;
     int cx1 = 0;
-    if (box->min[0] < x1lo && x1hi < box->max[0]) cx1 = 1;
+    if (((float*)&box->MinPoint)[0] < x1lo && x1hi < ((float*)&box->MaxPoint)[0]) cx1 = 1;
     int cy0 = 0;
-    if (box->min[1] < y0lo && y0hi < box->max[1]) cy0 = 1;
+    if (((float*)&box->MinPoint)[1] < y0lo && y0hi < ((float*)&box->MaxPoint)[1]) cy0 = 1;
     int cy1 = 0;
-    if (box->min[1] < y1lo && y1hi < box->max[1]) cy1 = 1;
+    if (((float*)&box->MinPoint)[1] < y1lo && y1hi < ((float*)&box->MaxPoint)[1]) cy1 = 1;
     int cz0 = 0;
-    if (box->min[2] < z0lo && z0hi < box->max[2]) cz0 = 1;
+    if (((float*)&box->MinPoint)[2] < z0lo && z0hi < ((float*)&box->MaxPoint)[2]) cz0 = 1;
     int cz1 = 0;
-    if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
+    if (((float*)&box->MinPoint)[2] < z1lo && z1hi < ((float*)&box->MaxPoint)[2]) cz1 = 1;
 
     sTree_33A3D8* subNode;
     subNode = node->child[0];
@@ -3961,11 +3803,6 @@ struct sSub_33B748 {
     sBox_33B748* box;
 };
 
-struct sCtx_33B748 {
-    sSub_33B748 nodes;
-    sSub_33B748 objs;
-    sSub_33B748 all;
-};
 
 struct sObjNode_33B748 {
     sObjNode_33B748* next;
@@ -3987,7 +3824,7 @@ struct sCell_33B748 {
 };
 
 // PORT: alias; the unit defines nash_Cell_descend3 later with its own struct types.
-extern "C" void nash_Cell_descend3_33B748(sTree_33B748* self, sCtx_33B748* ctx) __asm__("nash_Cell_descend3");
+extern "C" void nash_Cell_descend3_33B748(sTree_33B748* self, OverlapEverythingCallback* ctx) __asm__("nash_Cell_descend3");
 
 static inline void add_33B748(sSub_33B748* s, void* p)
 {
@@ -4008,22 +3845,22 @@ static inline int overlap_33B748(const sBox_33B748* b, const sObjNode_33B748* n)
     return r;
 }
 
-static inline void visit_33B748(sTree_33B748* self, sCtx_33B748* ctx)
+static inline void visit_33B748(sTree_33B748* self, OverlapEverythingCallback* ctx)
 {
-    OverlapInstancesCallback_operatorCall((sCtx_3309D8*)ctx, (nash_Cell*)self);
-    sSub_33B748* s = &ctx->objs;
+    OverlapInstancesCallback_operatorCall((OverlapInstancesCallback*)ctx, (nash_Cell*)self);
+    sSub_33B748* s = &(*(sSub_33B748*)&ctx->patchescallback);
     for (sObjNode_33B748* p = self->objs; p != 0; p = p->next) {
         if (overlap_33B748(s->box, p)) {
             add_33B748(s, p);
         }
     }
-    s = &ctx->all;
+    s = &(*(sSub_33B748*)&ctx->typedcallback);
     for (void** q = self->all; q != 0; q = (void**)*q) {
         add_33B748(s, q);
     }
 }
 
-static inline void collect_33B748(sTree_33B748* self, sCtx_33B748* ctx)
+static inline void collect_33B748(sTree_33B748* self, OverlapEverythingCallback* ctx)
 {
     visit_33B748(self, ctx);
     if (self->child[0]) nash_Cell_descend3_33B748(self->child[0], ctx);
@@ -4057,11 +3894,11 @@ struct sCtx_340DC0;
  * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
  */
 // Declared as cOverlapList_geteverything (its caller) declares it; sCtx_340DC0 has sCtx_33B748's layout.
-extern "C" void nash_privy_QueryHelper_helpX4(char* flag, sCtx_340DC0* vctx, sCtx_340DC0* vctx2, void* vbox, void* vnode, void* vcell)
+extern "C" void nash_privy_QueryHelper_helpX4(char* flag, OverlapEverythingCallback* vctx, OverlapEverythingCallback* vctx2, void* vbox, void* vnode, void* vcell)
 {
-    sCtx_33B748* ctx = (sCtx_33B748*)vctx;
-    sCtx_33B748* ctx2 = (sCtx_33B748*)vctx2;
-    sBox_3309D8* box = (sBox_3309D8*)vbox;
+    OverlapEverythingCallback* ctx = vctx;
+    OverlapEverythingCallback* ctx2 = vctx2;
+    tBoundBox* box = (tBoundBox*)vbox;
     sTree_33B748* node = (sTree_33B748*)vnode;
     sCell_33B748* cell = (sCell_33B748*)vcell;
     visit_33B748(node, ctx);
@@ -4079,48 +3916,48 @@ extern "C" void nash_privy_QueryHelper_helpX4(char* flag, sCtx_340DC0* vctx, sCt
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
-    if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
+    if (((float*)&box->MinPoint)[0] < x0hi && x0lo < ((float*)&box->MaxPoint)[0]) ox0 = 1;
     float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
     float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
-    if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
+    if (((float*)&box->MinPoint)[0] < x1hi && x1lo < ((float*)&box->MaxPoint)[0]) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
     float y0lo = ((float)sub.y - 0.2f) * cellSize;
     float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
-    if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
+    if (((float*)&box->MinPoint)[1] < y0hi && y0lo < ((float*)&box->MaxPoint)[1]) oy0 = 1;
     float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
     float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
-    if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
+    if (((float*)&box->MinPoint)[1] < y1hi && y1lo < ((float*)&box->MaxPoint)[1]) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
     float z0lo = ((float)sub.z - 0.2f) * cellSize;
     float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
-    if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
+    if (((float*)&box->MinPoint)[2] < z0hi && z0lo < ((float*)&box->MaxPoint)[2]) oz0 = 1;
     float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
     float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
-    if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
+    if (((float*)&box->MinPoint)[2] < z1hi && z1lo < ((float*)&box->MaxPoint)[2]) oz1 = 1;
     if (!oz0 && !oz1) {
         return;
     }
     int cx0 = 0;
-    if (box->min[0] < x0lo && x0hi < box->max[0]) cx0 = 1;
+    if (((float*)&box->MinPoint)[0] < x0lo && x0hi < ((float*)&box->MaxPoint)[0]) cx0 = 1;
     int cx1 = 0;
-    if (box->min[0] < x1lo && x1hi < box->max[0]) cx1 = 1;
+    if (((float*)&box->MinPoint)[0] < x1lo && x1hi < ((float*)&box->MaxPoint)[0]) cx1 = 1;
     int cy0 = 0;
-    if (box->min[1] < y0lo && y0hi < box->max[1]) cy0 = 1;
+    if (((float*)&box->MinPoint)[1] < y0lo && y0hi < ((float*)&box->MaxPoint)[1]) cy0 = 1;
     int cy1 = 0;
-    if (box->min[1] < y1lo && y1hi < box->max[1]) cy1 = 1;
+    if (((float*)&box->MinPoint)[1] < y1lo && y1hi < ((float*)&box->MaxPoint)[1]) cy1 = 1;
     int cz0 = 0;
-    if (box->min[2] < z0lo && z0hi < box->max[2]) cz0 = 1;
+    if (((float*)&box->MinPoint)[2] < z0lo && z0hi < ((float*)&box->MaxPoint)[2]) cz0 = 1;
     int cz1 = 0;
-    if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
+    if (((float*)&box->MinPoint)[2] < z1lo && z1hi < ((float*)&box->MaxPoint)[2]) cz1 = 1;
 
     sTree_33B748* subNode;
     subNode = node->child[0];
@@ -4176,10 +4013,6 @@ extern "C" void nash_privy_QueryHelper_helpX4(char* flag, sCtx_340DC0* vctx, sCt
 //100%
 INCLUDE_ASM("intersect/worldsphtree", nash_privy_QueryHelper_helpX5);
 #ifdef SKIP_ASM
-struct sCell_33CCF8 {
-    int level;
-    int x, y, z;
-};
 
 /**
  * Walks a crossing octree cell for the Nash terrain query: intersects its patches and instances, then its children.
@@ -4198,22 +4031,22 @@ struct sCell_33CCF8 {
  * @param vnode  the cell (On Tour const Cell *)
  * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
  */
-extern "C" void nash_privy_QueryHelper_helpX5(char* flag, sCtx_335960* ctx, sCtx_335960* ctx2, void* vbox, void* vnode, void* vcell)
+extern "C" void nash_privy_QueryHelper_helpX5(char* flag, TerrainCallback* ctx, TerrainCallback* ctx2, void* vbox, void* vnode, void* vcell)
 {
-    sBox_3309D8* box = (sBox_3309D8*)vbox;
-    sOct_335D78* node = (sOct_335D78*)vnode;
-    sCell_33CCF8* cell = (sCell_33CCF8*)vcell;
+    tBoundBox* box = (tBoundBox*)vbox;
+    nash_Cell* node = (nash_Cell*)vnode;
+    nash_CellKey* cell = (nash_CellKey*)vcell;
     void** objNode;
-    for (objNode = (void**)node->listA; objNode != 0; objNode = (void**)*objNode) {
+    for (objNode = (void**)(*(void**)&node->nodesinside[1]); objNode != 0; objNode = (void**)*objNode) {
         TerrainCallback_intersectpatch(ctx, objNode);
     }
-    for (objNode = (void**)node->listB; objNode != 0; objNode = (void**)*objNode) {
+    for (objNode = (void**)(*(void**)&node->nodesinside[0]); objNode != 0; objNode = (void**)*objNode) {
         TerrainCallback_intersectinstance(ctx, objNode);
     }
     if (cell->level == 11) {
         return;
     }
-    sCell_33CCF8 sub;
+    nash_CellKey sub;
     sub.level = cell->level - 1;
     sub.x = cell->x * 2;
     sub.y = cell->y * 2;
@@ -4224,93 +4057,93 @@ extern "C" void nash_privy_QueryHelper_helpX5(char* flag, sCtx_335960* ctx, sCtx
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
-    if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
+    if (((float*)&box->MinPoint)[0] < x0hi && x0lo < ((float*)&box->MaxPoint)[0]) ox0 = 1;
     float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
     float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
-    if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
+    if (((float*)&box->MinPoint)[0] < x1hi && x1lo < ((float*)&box->MaxPoint)[0]) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
     float y0lo = ((float)sub.y - 0.2f) * cellSize;
     float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
-    if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
+    if (((float*)&box->MinPoint)[1] < y0hi && y0lo < ((float*)&box->MaxPoint)[1]) oy0 = 1;
     float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
     float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
-    if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
+    if (((float*)&box->MinPoint)[1] < y1hi && y1lo < ((float*)&box->MaxPoint)[1]) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
     float z0lo = ((float)sub.z - 0.2f) * cellSize;
     float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
-    if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
+    if (((float*)&box->MinPoint)[2] < z0hi && z0lo < ((float*)&box->MaxPoint)[2]) oz0 = 1;
     float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
     float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
-    if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
+    if (((float*)&box->MinPoint)[2] < z1hi && z1lo < ((float*)&box->MaxPoint)[2]) oz1 = 1;
     if (!oz0 && !oz1) {
         return;
     }
     int cx0 = 0;
-    if (box->min[0] < x0lo && x0hi < box->max[0]) cx0 = 1;
+    if (((float*)&box->MinPoint)[0] < x0lo && x0hi < ((float*)&box->MaxPoint)[0]) cx0 = 1;
     int cx1 = 0;
-    if (box->min[0] < x1lo && x1hi < box->max[0]) cx1 = 1;
+    if (((float*)&box->MinPoint)[0] < x1lo && x1hi < ((float*)&box->MaxPoint)[0]) cx1 = 1;
     int cy0 = 0;
-    if (box->min[1] < y0lo && y0hi < box->max[1]) cy0 = 1;
+    if (((float*)&box->MinPoint)[1] < y0lo && y0hi < ((float*)&box->MaxPoint)[1]) cy0 = 1;
     int cy1 = 0;
-    if (box->min[1] < y1lo && y1hi < box->max[1]) cy1 = 1;
+    if (((float*)&box->MinPoint)[1] < y1lo && y1hi < ((float*)&box->MaxPoint)[1]) cy1 = 1;
     int cz0 = 0;
-    if (box->min[2] < z0lo && z0hi < box->max[2]) cz0 = 1;
+    if (((float*)&box->MinPoint)[2] < z0lo && z0hi < ((float*)&box->MaxPoint)[2]) cz0 = 1;
     int cz1 = 0;
-    if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
+    if (((float*)&box->MinPoint)[2] < z1lo && z1hi < ((float*)&box->MaxPoint)[2]) cz1 = 1;
 
-    sOct_335D78* subNode;
-    subNode = (sOct_335D78*)node->child[0];
+    nash_Cell* subNode;
+    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[0];
     if (subNode && ox0 && oy0 && oz0) {
         if (cx0 && cy0 && cz0) collect_335D78(subNode, ctx2);
         else nash_privy_QueryHelper_helpX5(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    subNode = (sOct_335D78*)node->child[1];
+    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[1];
     if (subNode && ox0 && oy0 && oz1) {
         if (cx0 && cy0 && cz1) collect_335D78(subNode, ctx2);
         else nash_privy_QueryHelper_helpX5(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y++;
-    subNode = (sOct_335D78*)node->child[3];
+    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[3];
     if (subNode && ox0 && oy1 && oz1) {
         if (cx0 && cy1 && cz1) collect_335D78(subNode, ctx2);
         else nash_privy_QueryHelper_helpX5(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    subNode = (sOct_335D78*)node->child[2];
+    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[2];
     if (subNode && ox0 && oy1 && oz0) {
         if (cx0 && cy1 && cz0) collect_335D78(subNode, ctx2);
         else nash_privy_QueryHelper_helpX5(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.x++;
-    subNode = (sOct_335D78*)node->child[6];
+    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[6];
     if (subNode && ox1 && oy1 && oz0) {
         if (cx1 && cy1 && cz0) collect_335D78(subNode, ctx2);
         else nash_privy_QueryHelper_helpX5(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z++;
-    subNode = (sOct_335D78*)node->child[7];
+    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[7];
     if (subNode && ox1 && oy1 && oz1) {
         if (cx1 && cy1 && cz1) collect_335D78(subNode, ctx2);
         else nash_privy_QueryHelper_helpX5(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.y--;
-    subNode = (sOct_335D78*)node->child[5];
+    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[5];
     if (subNode && ox1 && oy0 && oz1) {
         if (cx1 && cy0 && cz1) collect_335D78(subNode, ctx2);
         else nash_privy_QueryHelper_helpX5(flag, ctx, ctx2, box, subNode, &sub);
     }
     sub.z--;
-    subNode = (sOct_335D78*)node->child[4];
+    subNode = (nash_Cell*)((void**)&node->children[0][0][0])[4];
     if (subNode && ox1 && oy0 && oz0) {
         if (cx1 && cy0 && cz0) collect_335D78(subNode, ctx2);
         else nash_privy_QueryHelper_helpX5(flag, ctx, ctx2, box, subNode, &sub);
@@ -4382,7 +4215,7 @@ static inline int Classify_DBE8(sCtx_DBE8* ctx, sCell_DBE8* c)
  * @param vnode  the cell (On Tour const Cell *)
  * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
  */
-extern "C" void nash_privy_QueryHelper_help(char* flag, sQuery_369D8* query, sQuery_369D8* insideQuery, sCtx_369D8* vctx, void* vnode, sCell_369D8* vcell)
+extern "C" void nash_privy_QueryHelper_help(char* flag, TerrainCallback* query, TerrainCallback* insideQuery, sCtx_369D8* vctx, void* vnode, sCell_369D8* vcell)
 {
     sCtx_DBE8* ctx = (sCtx_DBE8*)vctx;
     sOct_DBE8* node = (sOct_DBE8*)vnode;
@@ -4474,10 +4307,6 @@ extern "C" void nash_privy_QueryHelper_help(char* flag, sQuery_369D8* query, sQu
 //100%
 INCLUDE_ASM("intersect/worldsphtree", nash_privy_QueryHelper_helpX6);
 #ifdef SKIP_ASM
-struct sCell_33DFD8 {
-    int level;
-    int x, y, z;
-};
 
 struct sOct_33DFD8 {
     sOct_33DFD8* child[8];
@@ -4486,7 +4315,7 @@ struct sOct_33DFD8 {
 
 extern "C" void nash_Cell_descend5(nash_Cell* self, void* ctx);
 
-static inline void collect_33DFD8(sOct_33DFD8* node, sCtx_336D40* ctx)
+static inline void collect_33DFD8(sOct_33DFD8* node, StaticObjectCallback* ctx)
 {
     void** p;
     for (p = (void**)node->list; p != 0; p = (void**)*p) {
@@ -4518,11 +4347,11 @@ static inline void collect_33DFD8(sOct_33DFD8* node, sCtx_336D40* ctx)
  * @param vnode  the cell (On Tour const Cell *)
  * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
  */
-extern "C" void nash_privy_QueryHelper_helpX6(char* flag, sCtx_336D40* ctx, sCtx_336D40* ctx2, void* vbox, void* vnode, void* vcell)
+extern "C" void nash_privy_QueryHelper_helpX6(char* flag, StaticObjectCallback* ctx, StaticObjectCallback* ctx2, void* vbox, void* vnode, void* vcell)
 {
-    sBox_3309D8* box = (sBox_3309D8*)vbox;
+    tBoundBox* box = (tBoundBox*)vbox;
     sOct_33DFD8* node = (sOct_33DFD8*)vnode;
-    sCell_33DFD8* cell = (sCell_33DFD8*)vcell;
+    nash_CellKey* cell = (nash_CellKey*)vcell;
     void** objNode;
     for (objNode = (void**)node->list; objNode != 0; objNode = (void**)*objNode) {
         StaticObjectCallback_intersectinstance(ctx, objNode);
@@ -4530,7 +4359,7 @@ extern "C" void nash_privy_QueryHelper_helpX6(char* flag, sCtx_336D40* ctx, sCtx
     if (cell->level == 11) {
         return;
     }
-    sCell_33DFD8 sub;
+    nash_CellKey sub;
     sub.level = cell->level - 1;
     sub.x = cell->x * 2;
     sub.y = cell->y * 2;
@@ -4541,48 +4370,48 @@ extern "C" void nash_privy_QueryHelper_helpX6(char* flag, sCtx_336D40* ctx, sCtx
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
-    if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
+    if (((float*)&box->MinPoint)[0] < x0hi && x0lo < ((float*)&box->MaxPoint)[0]) ox0 = 1;
     float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
     float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
-    if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
+    if (((float*)&box->MinPoint)[0] < x1hi && x1lo < ((float*)&box->MaxPoint)[0]) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
     float y0lo = ((float)sub.y - 0.2f) * cellSize;
     float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
-    if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
+    if (((float*)&box->MinPoint)[1] < y0hi && y0lo < ((float*)&box->MaxPoint)[1]) oy0 = 1;
     float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
     float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
-    if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
+    if (((float*)&box->MinPoint)[1] < y1hi && y1lo < ((float*)&box->MaxPoint)[1]) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
     float z0lo = ((float)sub.z - 0.2f) * cellSize;
     float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
-    if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
+    if (((float*)&box->MinPoint)[2] < z0hi && z0lo < ((float*)&box->MaxPoint)[2]) oz0 = 1;
     float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
     float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
-    if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
+    if (((float*)&box->MinPoint)[2] < z1hi && z1lo < ((float*)&box->MaxPoint)[2]) oz1 = 1;
     if (!oz0 && !oz1) {
         return;
     }
     int cx0 = 0;
-    if (box->min[0] < x0lo && x0hi < box->max[0]) cx0 = 1;
+    if (((float*)&box->MinPoint)[0] < x0lo && x0hi < ((float*)&box->MaxPoint)[0]) cx0 = 1;
     int cx1 = 0;
-    if (box->min[0] < x1lo && x1hi < box->max[0]) cx1 = 1;
+    if (((float*)&box->MinPoint)[0] < x1lo && x1hi < ((float*)&box->MaxPoint)[0]) cx1 = 1;
     int cy0 = 0;
-    if (box->min[1] < y0lo && y0hi < box->max[1]) cy0 = 1;
+    if (((float*)&box->MinPoint)[1] < y0lo && y0hi < ((float*)&box->MaxPoint)[1]) cy0 = 1;
     int cy1 = 0;
-    if (box->min[1] < y1lo && y1hi < box->max[1]) cy1 = 1;
+    if (((float*)&box->MinPoint)[1] < y1lo && y1hi < ((float*)&box->MaxPoint)[1]) cy1 = 1;
     int cz0 = 0;
-    if (box->min[2] < z0lo && z0hi < box->max[2]) cz0 = 1;
+    if (((float*)&box->MinPoint)[2] < z0lo && z0hi < ((float*)&box->MaxPoint)[2]) cz0 = 1;
     int cz1 = 0;
-    if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
+    if (((float*)&box->MinPoint)[2] < z1lo && z1hi < ((float*)&box->MaxPoint)[2]) cz1 = 1;
 
     sOct_33DFD8* subNode;
     subNode = node->child[0];
@@ -4638,14 +4467,6 @@ extern "C" void nash_privy_QueryHelper_helpX6(char* flag, sCtx_336D40* ctx, sCtx
 //100%
 INCLUDE_ASM("intersect/worldsphtree", nash_privy_QueryHelper_helpX7);
 #ifdef SKIP_ASM
-struct sQuery_33ED60 {
-    sWsVec4* pos;               // 0x00
-    int a7;                     // 0x04
-    int mask;                   // 0x08
-    int* cnt;                   // 0x0C
-    float* dist;                // 0x10
-    sBox_00334680* box;         // 0x14
-};
 
 struct sCell_33ED60 {
     int level;
@@ -4659,25 +4480,25 @@ struct sOct_33ED60 {
 };
 
 // PORT: alias; the unit defines nash_Cell_descend6 later with its own struct types.
-extern "C" void nash_Cell_descend6_33ED60(sOct_33ED60* tree, sQuery_33ED60* q) __asm__("nash_Cell_descend6");
+extern "C" void nash_Cell_descend6_33ED60(sOct_33ED60* tree, SplineCallback* q) __asm__("nash_Cell_descend6");
 
-static inline void objs_33ED60(char* o, sQuery_33ED60* q)
+static inline void objs_33ED60(char* o, SplineCallback* q)
 {
     for (; o != 0; o = *(char**)o) {
         int type = *(int*)(o + 8);
         if (type == 2) {
-            cRailModifier_splineIntersect(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
+            cRailModifier_splineIntersect(*(void**)(o + 0xC), ((tBoundBox*)q->box), ((tBoundBox*)q->box), ((sWsVec4*)q->intersectpos), ((int)q->splinefiltermask), q->hit, q->intersectdist, ((int)q->intersectinfo));
         } else if (type == 3) {
-            cFlexRailNode_splineIntersect(*(void**)(o + 0xC), q->box, q->box, q->pos, q->mask, q->cnt, q->dist, q->a7);
+            cFlexRailNode_splineIntersect(*(void**)(o + 0xC), ((tBoundBox*)q->box), ((tBoundBox*)q->box), ((sWsVec4*)q->intersectpos), ((int)q->splinefiltermask), q->hit, q->intersectdist, ((int)q->intersectinfo));
         } else if (type == 1) {
-            if (*(int*)(*(char**)(o + 0x68) + 0x1C) & q->mask) {
-                intersect_staticSplineSegmentIntersect(o, q->box, q->pos, q->cnt, q->dist, q->a7);
+            if (*(int*)(*(char**)(o + 0x68) + 0x1C) & ((int)q->splinefiltermask)) {
+                intersect_staticSplineSegmentIntersect(o, ((tBoundBox*)q->box), ((sWsVec4*)q->intersectpos), q->hit, q->intersectdist, ((int)q->intersectinfo));
             }
         }
     }
 }
 
-static inline void collect_33ED60(sOct_33ED60* node, sQuery_33ED60* q)
+static inline void collect_33ED60(sOct_33ED60* node, SplineCallback* q)
 {
     objs_33ED60(node->objs, q);
     if (node->child[0] != 0) nash_Cell_descend6_33ED60(node->child[0], q);
@@ -4718,11 +4539,11 @@ struct sQry_337A48;
  * @param vcell  the cell's key: level and x, y, z cell coordinates (On Tour CellKey)
  */
 // Declared as cBXNash_splineIntersect (its caller) declares it; sQry_337A48 has sQuery_33ED60's layout.
-extern "C" void nash_privy_QueryHelper_helpX7(char* flag, sQry_337A48* vctx, sQry_337A48* vctx2, sBox_00334680* vbox, void* vnode, void* vcell)
+extern "C" void nash_privy_QueryHelper_helpX7(char* flag, SplineCallback* vctx, SplineCallback* vctx2, tBoundBox* vbox, void* vnode, void* vcell)
 {
-    sQuery_33ED60* ctx = (sQuery_33ED60*)vctx;
-    sQuery_33ED60* ctx2 = (sQuery_33ED60*)vctx2;
-    sBox_3309D8* box = (sBox_3309D8*)vbox;
+    SplineCallback* ctx = (SplineCallback*)vctx;
+    SplineCallback* ctx2 = (SplineCallback*)vctx2;
+    tBoundBox* box = (tBoundBox*)vbox;
     sOct_33ED60* node = (sOct_33ED60*)vnode;
     sCell_33ED60* cell = (sCell_33ED60*)vcell;
     objs_33ED60(node->objs, ctx);
@@ -4740,48 +4561,48 @@ extern "C" void nash_privy_QueryHelper_helpX7(char* flag, sQry_337A48* vctx, sQr
     float x0lo = ((float)sub.x - 0.2f) * cellSize;
     float x0hi = ((float)(sub.x + 1) + 0.2f) * cellSize;
     int ox0 = 0;
-    if (box->min[0] < x0hi && x0lo < box->max[0]) ox0 = 1;
+    if (((float*)&box->MinPoint)[0] < x0hi && x0lo < ((float*)&box->MaxPoint)[0]) ox0 = 1;
     float x1lo = ((float)(sub.x + 1) - 0.2f) * cellSize;
     float x1hi = ((float)(sub.x + 2) + 0.2f) * cellSize;
     int ox1 = 0;
-    if (box->min[0] < x1hi && x1lo < box->max[0]) ox1 = 1;
+    if (((float*)&box->MinPoint)[0] < x1hi && x1lo < ((float*)&box->MaxPoint)[0]) ox1 = 1;
     if (!ox0 && !ox1) {
         return;
     }
     float y0lo = ((float)sub.y - 0.2f) * cellSize;
     float y0hi = ((float)(sub.y + 1) + 0.2f) * cellSize;
     int oy0 = 0;
-    if (box->min[1] < y0hi && y0lo < box->max[1]) oy0 = 1;
+    if (((float*)&box->MinPoint)[1] < y0hi && y0lo < ((float*)&box->MaxPoint)[1]) oy0 = 1;
     float y1lo = ((float)(sub.y + 1) - 0.2f) * cellSize;
     float y1hi = ((float)(sub.y + 2) + 0.2f) * cellSize;
     int oy1 = 0;
-    if (box->min[1] < y1hi && y1lo < box->max[1]) oy1 = 1;
+    if (((float*)&box->MinPoint)[1] < y1hi && y1lo < ((float*)&box->MaxPoint)[1]) oy1 = 1;
     if (!oy0 && !oy1) {
         return;
     }
     float z0lo = ((float)sub.z - 0.2f) * cellSize;
     float z0hi = ((float)(sub.z + 1) + 0.2f) * cellSize;
     int oz0 = 0;
-    if (box->min[2] < z0hi && z0lo < box->max[2]) oz0 = 1;
+    if (((float*)&box->MinPoint)[2] < z0hi && z0lo < ((float*)&box->MaxPoint)[2]) oz0 = 1;
     float z1lo = ((float)(sub.z + 1) - 0.2f) * cellSize;
     float z1hi = ((float)(sub.z + 2) + 0.2f) * cellSize;
     int oz1 = 0;
-    if (box->min[2] < z1hi && z1lo < box->max[2]) oz1 = 1;
+    if (((float*)&box->MinPoint)[2] < z1hi && z1lo < ((float*)&box->MaxPoint)[2]) oz1 = 1;
     if (!oz0 && !oz1) {
         return;
     }
     int cx0 = 0;
-    if (box->min[0] < x0lo && x0hi < box->max[0]) cx0 = 1;
+    if (((float*)&box->MinPoint)[0] < x0lo && x0hi < ((float*)&box->MaxPoint)[0]) cx0 = 1;
     int cx1 = 0;
-    if (box->min[0] < x1lo && x1hi < box->max[0]) cx1 = 1;
+    if (((float*)&box->MinPoint)[0] < x1lo && x1hi < ((float*)&box->MaxPoint)[0]) cx1 = 1;
     int cy0 = 0;
-    if (box->min[1] < y0lo && y0hi < box->max[1]) cy0 = 1;
+    if (((float*)&box->MinPoint)[1] < y0lo && y0hi < ((float*)&box->MaxPoint)[1]) cy0 = 1;
     int cy1 = 0;
-    if (box->min[1] < y1lo && y1hi < box->max[1]) cy1 = 1;
+    if (((float*)&box->MinPoint)[1] < y1lo && y1hi < ((float*)&box->MaxPoint)[1]) cy1 = 1;
     int cz0 = 0;
-    if (box->min[2] < z0lo && z0hi < box->max[2]) cz0 = 1;
+    if (((float*)&box->MinPoint)[2] < z0lo && z0hi < ((float*)&box->MaxPoint)[2]) cz0 = 1;
     int cz1 = 0;
-    if (box->min[2] < z1lo && z1hi < box->max[2]) cz1 = 1;
+    if (((float*)&box->MinPoint)[2] < z1lo && z1hi < ((float*)&box->MaxPoint)[2]) cz1 = 1;
 
     sOct_33ED60* subNode;
     subNode = node->child[0];
@@ -5107,9 +4928,6 @@ extern "C" float cWorldSphere_GetIdealParam(cWorldSphere* self)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", nash_Cell_descend);
 #ifdef SKIP_ASM
-struct sSphNode_340A40 {
-    sSphNode_340A40* child[8];
-};
 
 /**
  * Collects the overlapping instances of an octree cell and of every cell below it.
@@ -5120,17 +4938,17 @@ struct sSphNode_340A40 {
  * @param node  the octree cell (On Tour nash::Cell)
  * @param ctx  the instance callback: list, count pointer, maximum, query box (On Tour OverlapInstancesCallback)
  */
-extern "C" void nash_Cell_descend(nash_Cell* node, sCtx_3309D8* ctx)
+extern "C" void nash_Cell_descend(nash_Cell* node, OverlapInstancesCallback* ctx)
 {
     OverlapInstancesCallback_operatorCall(ctx, node);
-    if (((sSphNode_340A40**)&node->children[0])[0] != 0) nash_Cell_descend((nash_Cell*)((sSphNode_340A40**)&node->children[0])[0], ctx);
-    if (((sSphNode_340A40**)&node->children[0])[1] != 0) nash_Cell_descend((nash_Cell*)((sSphNode_340A40**)&node->children[0])[1], ctx);
-    if (((sSphNode_340A40**)&node->children[0])[2] != 0) nash_Cell_descend((nash_Cell*)((sSphNode_340A40**)&node->children[0])[2], ctx);
-    if (((sSphNode_340A40**)&node->children[0])[3] != 0) nash_Cell_descend((nash_Cell*)((sSphNode_340A40**)&node->children[0])[3], ctx);
-    if (((sSphNode_340A40**)&node->children[0])[4] != 0) nash_Cell_descend((nash_Cell*)((sSphNode_340A40**)&node->children[0])[4], ctx);
-    if (((sSphNode_340A40**)&node->children[0])[5] != 0) nash_Cell_descend((nash_Cell*)((sSphNode_340A40**)&node->children[0])[5], ctx);
-    if (((sSphNode_340A40**)&node->children[0])[6] != 0) nash_Cell_descend((nash_Cell*)((sSphNode_340A40**)&node->children[0])[6], ctx);
-    if (((sSphNode_340A40**)&node->children[0])[7] != 0) nash_Cell_descend((nash_Cell*)((sSphNode_340A40**)&node->children[0])[7], ctx);
+    if (((nash_Cell**)&node->children[0])[0] != 0) nash_Cell_descend((nash_Cell*)((nash_Cell**)&node->children[0])[0], ctx);
+    if (((nash_Cell**)&node->children[0])[1] != 0) nash_Cell_descend((nash_Cell*)((nash_Cell**)&node->children[0])[1], ctx);
+    if (((nash_Cell**)&node->children[0])[2] != 0) nash_Cell_descend((nash_Cell*)((nash_Cell**)&node->children[0])[2], ctx);
+    if (((nash_Cell**)&node->children[0])[3] != 0) nash_Cell_descend((nash_Cell*)((nash_Cell**)&node->children[0])[3], ctx);
+    if (((nash_Cell**)&node->children[0])[4] != 0) nash_Cell_descend((nash_Cell*)((nash_Cell**)&node->children[0])[4], ctx);
+    if (((nash_Cell**)&node->children[0])[5] != 0) nash_Cell_descend((nash_Cell*)((nash_Cell**)&node->children[0])[5], ctx);
+    if (((nash_Cell**)&node->children[0])[6] != 0) nash_Cell_descend((nash_Cell*)((nash_Cell**)&node->children[0])[6], ctx);
+    if (((nash_Cell**)&node->children[0])[7] != 0) nash_Cell_descend((nash_Cell*)((nash_Cell**)&node->children[0])[7], ctx);
 }
 #endif
 
@@ -5184,12 +5002,12 @@ struct sTree_340C20 {
     sObj_340C20* objs;          // 0x24
 };
 
-static inline int overlapObj_340C20(const sBox_3309D8* b, const sObj_340C20* n)
+static inline int overlapObj_340C20(const tBoundBox* b, const sObj_340C20* n)
 {
     int r = 0;
-    if (b->min[0] <= n->bmax[0] && b->max[0] >= n->bmin[0] &&
-        b->min[1] <= n->bmax[1] && b->max[1] >= n->bmin[1] &&
-        b->min[2] <= n->bmax[2] && b->max[2] >= n->bmin[2]) {
+    if (((float*)&b->MinPoint)[0] <= n->bmax[0] && ((float*)&b->MaxPoint)[0] >= n->bmin[0] &&
+        ((float*)&b->MinPoint)[1] <= n->bmax[1] && ((float*)&b->MaxPoint)[1] >= n->bmin[1] &&
+        ((float*)&b->MinPoint)[2] <= n->bmax[2] && ((float*)&b->MaxPoint)[2] >= n->bmin[2]) {
         r = 1;
     }
     return r;
@@ -5206,15 +5024,15 @@ static inline int overlapObj_340C20(const sBox_3309D8* b, const sObj_340C20* n)
  * @param tree  the octree cell (On Tour nash::Cell)
  * @param ctx  the callback: instance part (+0x0) and patch part (+0x10)
  */
-extern "C" void nash_Cell_descend2(nash_Cell* tree, sCtx_3309D8* ctx)
+extern "C" void nash_Cell_descend2(nash_Cell* tree, OverlapInstancesCallback* ctx)
 {
     OverlapInstancesCallback_operatorCall(ctx, tree);
-    sCtx_3309D8* objCtx = (sCtx_3309D8*)((char*)ctx + 0x10);
+    OverlapInstancesCallback* objCtx = (OverlapInstancesCallback*)((char*)ctx + 0x10);
     for (sObj_340C20* obj = *(sObj_340C20**)&tree->nodesinside[1]; obj != 0; obj = obj->next) {
-        if (overlapObj_340C20(objCtx->box, obj)) {
-            int* cnt = objCtx->count;
+        if (overlapObj_340C20(((tBoundBox*)objCtx->box), obj)) {
+            int* cnt = ((int*)objCtx->number);
             int n = *cnt;
-            objCtx->list[n] = (sNode_3309D8*)obj;
+            ((sNode_3309D8**)objCtx->instances)[n] = (sNode_3309D8*)obj;
             *cnt = n + 1;
         }
     }
@@ -5233,25 +5051,14 @@ extern "C" void nash_Cell_descend2(nash_Cell* tree, sCtx_3309D8* ctx)
 INCLUDE_ASM("intersect/worldsphtree", nash_Cell_descend3);
 #ifdef SKIP_ASM
 struct sCtx_3309D8;
-extern "C" void OverlapInstancesCallback_operatorCall(sCtx_3309D8* ctx, nash_Cell* tree);
+extern "C" void OverlapInstancesCallback_operatorCall(OverlapInstancesCallback* ctx, nash_Cell* tree);
 
 struct sBox_340DC0 {
     float min[4];
     float max[4];
 };
 
-struct sSub_340DC0 {
-    void** list;
-    int* count;
-    int pad08;
-    sBox_340DC0* box;
-};
 
-struct sCtx_340DC0 {
-    sSub_340DC0 nodes;
-    sSub_340DC0 objs;
-    sSub_340DC0 all;
-};
 
 struct sObjNode_340DC0 {
     sObjNode_340DC0* next;
@@ -5267,11 +5074,11 @@ struct sTree_340DC0 {
     void** all;
 };
 
-static inline void add_340DC0(sSub_340DC0* s, void* p)
+static inline void add_340DC0(OverlapTypedCallback* s, void* p)
 {
-    int* cnt = s->count;
+    int* cnt = ((int*)s->number);
     int n = *cnt;
-    s->list[n] = p;
+    ((void**)s->typed)[n] = p;
     *cnt = n + 1;
 }
 
@@ -5296,16 +5103,16 @@ static inline int overlap_340DC0(const sBox_340DC0* b, const sObjNode_340DC0* n)
  *
  * @param ctx  the callback: instance (+0x0), patch (+0x10) and typed-node (+0x20) parts, each list, count pointer, box
  */
-extern "C" void nash_Cell_descend3(nash_Cell* self, sCtx_340DC0* ctx)
+extern "C" void nash_Cell_descend3(nash_Cell* self, OverlapEverythingCallback* ctx)
 {
-    OverlapInstancesCallback_operatorCall((sCtx_3309D8*)ctx, self);
-    sSub_340DC0* bucket = &ctx->objs;
+    OverlapInstancesCallback_operatorCall((OverlapInstancesCallback*)ctx, self);
+    OverlapTypedCallback* bucket = &(*(OverlapTypedCallback*)&ctx->patchescallback);
     for (sObjNode_340DC0* objNode = *(sObjNode_340DC0**)&self->nodesinside[1]; objNode != 0; objNode = objNode->next) {
-        if (overlap_340DC0(bucket->box, objNode)) {
+        if (overlap_340DC0(((sBox_340DC0*)bucket->box), objNode)) {
             add_340DC0(bucket, objNode);
         }
     }
-    bucket = &ctx->all;
+    bucket = &(*(&ctx->typedcallback));
     for (void** allNode = *(void***)&self->nodesinside[2]; allNode != 0; allNode = (void**)*allNode) {
         add_340DC0(bucket, allNode);
     }
@@ -5396,7 +5203,7 @@ struct sQuery_3411B8 {
     int mask;                   // 0x08
     int* cnt;                   // 0x0C
     float* dist;                // 0x10
-    sBox_00334680* box;         // 0x14
+    tBoundBox* box;         // 0x14
 };
 
 struct sTree_3411B8 {
@@ -5592,7 +5399,7 @@ extern "C" sObj_341388* cBoostNode_cBoostNode1(cBoostNode* self, void* bucket, i
     self->Drag = def->f0C;
     self->Time = self->Type ? self->BoostTime : 0;
     if (self->Type == 2) {
-        char* instMatrix = (char*)self->Instance + 0x10;
+        char* instMatrix = (char*)&self->Instance->m_fmTransform;
         *(sVec4_341388*)&self->Boost = vu0Xform_341388(vu0Scale_341388(*(sVec4_341388*)&self->Boost, -1.0f), instMatrix);
         self->MaxSpeed = -self->MaxSpeed;
     }
@@ -5737,14 +5544,11 @@ extern "C" void cBoostNode_update(cBoostNode* self)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cBoostNode_applyDrag);
 #ifdef SKIP_ASM
-struct sVec4_341770 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_341770 vu0Scale_341770(const sVec4_341770& v, float s)
+static inline t4Vector vu0Scale_341770(const t4Vector& v, float s)
 {
-    sVec4_341770 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -5761,9 +5565,9 @@ static inline sVec4_341770 vu0Scale_341770(const sVec4_341770& v, float s)
 class cMover_341770 {
 public:
     virtual void v01();
-    virtual sVec4_341770* getVelocity();
+    virtual t4Vector* getVelocity();
     virtual void v03();
-    virtual void applyBoost(sVec4_341770* v);
+    virtual void applyBoost(t4Vector* v);
 };
 
 extern "C" float cObjectInterface_getUpdateTime();
@@ -5778,7 +5582,7 @@ extern "C" float cObjectInterface_getUpdateTime();
  */
 extern "C" void cBoostNode_applyDrag(cBoostNode* self, cMover_341770* obj)
 {
-    sVec4_341770 newVel = vu0Scale_341770(vu0Scale_341770(*obj->getVelocity(), self->Drag + 1.0f), cObjectInterface_getUpdateTime());
+    t4Vector newVel = vu0Scale_341770(vu0Scale_341770(*obj->getVelocity(), self->Drag + 1.0f), cObjectInterface_getUpdateTime());
     obj->applyBoost(&newVel);
 }
 #endif
@@ -5855,21 +5659,16 @@ public:
 
 extern "C" float cObjectInterface_getUpdateTime();
 
-struct sParams_341818 {
-    t4Vector dir;
-    float speed;
-    float scale;
-};
 
 struct sSph_341818 {
     char pad00[0x20];
-    sParams_341818 params;
+    cBoostNodeState params;
     int type;
 };
 
-static inline void push_341818(sParams_341818* p, cMover_341818* obj, const t4Vector& dir, float amount)
+static inline void push_341818(cBoostNodeState* p, cMover_341818* obj, const t4Vector& dir, float amount)
 {
-    t4Vector u = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, amount), p->scale), cObjectInterface_getUpdateTime());
+    t4Vector u = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, amount), p->Drag), cObjectInterface_getUpdateTime());
     obj->applyBoost(&u);
 }
 
@@ -5892,14 +5691,14 @@ extern "C" void cBoostNode_applyBoost(cBoostNode* self, cMover_341818* obj)
     }
     float alongSpeed = vu0Dot_341818(vel, dir);
     float diff = self->MaxSpeed - alongSpeed;
-    sParams_341818* boostParams = (sParams_341818*)&self->Boost;
+    cBoostNodeState* boostParams = (cBoostNodeState*)&self->Boost;
     if (self->Type == 2) {
         if (alongSpeed >= 0.0f) {
-            t4Vector newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, boostParams->speed), boostParams->scale), cObjectInterface_getUpdateTime());
+            t4Vector newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, boostParams->MaxSpeed), boostParams->Drag), cObjectInterface_getUpdateTime());
             obj->applyBoost(&newVel);
         }
     } else if (diff > 0.0f) {
-        t4Vector newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, diff), boostParams->scale), cObjectInterface_getUpdateTime());
+        t4Vector newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, diff), boostParams->Drag), cObjectInterface_getUpdateTime());
         obj->applyBoost(&newVel);
     }
 }
@@ -6385,7 +6184,7 @@ extern "C" void cAnimObjectNode_signal(cAnimObjectNode* self, int msg, float msg
         self->AnimSpeed = msgValue / (float)cAppMan_TheAppMan->TimerHz;
     } else if (msg == 103) {
         msgValue = msgValue * 0.03333333507180214f;
-        float lim = *(float*)(*(char**)((char*)self->Instance + 0x80) + 0x14);
+        float lim = *(float*)((char*)self->Instance->m_Model + 0x14);
         if (lim < msgValue) {
             msgValue = lim;
         }
@@ -6398,7 +6197,7 @@ extern "C" void cAnimObjectNode_signal(cAnimObjectNode* self, int msg, float msg
         }
     } else if (msg == 104) {
         msgValue = msgValue * 0.03333333507180214f;
-        float lim = *(float*)(*(char**)((char*)self->Instance + 0x80) + 0x14);
+        float lim = *(float*)((char*)self->Instance->m_Model + 0x14);
         if (lim < msgValue) {
             msgValue = lim;
         }
@@ -7052,14 +6851,11 @@ extern "C" void cBoostModifier_update(cBoostModifier* self)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cBoostModifier_applyDrag);
 #ifdef SKIP_ASM
-struct sVec4_3429E0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sVec4_3429E0 vu0Scale_3429E0(const sVec4_3429E0& v, float s)
+static inline t4Vector vu0Scale_3429E0(const t4Vector& v, float s)
 {
-    sVec4_3429E0 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -7076,9 +6872,9 @@ static inline sVec4_3429E0 vu0Scale_3429E0(const sVec4_3429E0& v, float s)
 class cMover_3429E0 {
 public:
     virtual void v01();
-    virtual sVec4_3429E0* getVelocity();
+    virtual t4Vector* getVelocity();
     virtual void v03();
-    virtual void applyBoost(sVec4_3429E0* v);
+    virtual void applyBoost(t4Vector* v);
 };
 
 extern "C" float cObjectInterface_getUpdateTime();
@@ -7093,7 +6889,7 @@ extern "C" float cObjectInterface_getUpdateTime();
  */
 extern "C" void cBoostModifier_applyDrag(cBoostModifier* self, cMover_3429E0* obj)
 {
-    sVec4_3429E0 newVelocity = vu0Scale_3429E0(vu0Scale_3429E0(*obj->getVelocity(), self->Drag + 1.0f), cObjectInterface_getUpdateTime());
+    t4Vector newVelocity = vu0Scale_3429E0(vu0Scale_3429E0(*obj->getVelocity(), self->Drag + 1.0f), cObjectInterface_getUpdateTime());
     obj->applyBoost(&newVelocity);
 }
 #endif
@@ -7161,15 +6957,10 @@ static inline void setVel_342A88(cWsMover* o, t4Vector* v)
     o->applyBoost(v);
 }
 
-struct sPlane_342A88 {
-    t4Vector n;
-    float d;
-    float k;
-};
 
 struct sSelf_342A88 {
     char pad[0x10];
-    sPlane_342A88 plane;
+    cBoostModifierState plane;
 };
 
 /**
@@ -7186,8 +6977,8 @@ extern "C" void cBoostModifier_applyBoost(cBoostModifier* self, cWsMover* obj)
     float speedDeficit = self->MaxSpeed - vu0Dot(*obj->getVelocity(), self->Boost);
     if (speedDeficit > 0.0f) {
         // PORT: takes the address of a temporary (g++ 2.95 accepts it).
-        sPlane_342A88* pl = (sPlane_342A88*)&self->Boost;
-        setVel_342A88(obj, &vu0Scale(vu0Scale(vu0Scale(pl->n, speedDeficit), pl->k), cObjectInterface_getUpdateTime()));
+        cBoostModifierState* pl = (cBoostModifierState*)&self->Boost;
+        setVel_342A88(obj, &vu0Scale(vu0Scale(vu0Scale(pl->Boost, speedDeficit), pl->Drag), cObjectInterface_getUpdateTime()));
     }
 }
 #endif

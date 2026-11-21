@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "replay/frameptr.h"
 #include "object/skybox.h"
 #include "object/flexbridgenode.h"
 #include "object/physicsmodifier.h"
@@ -816,14 +817,6 @@ extern "C" void cUVScrollModifier_writeToReplayFrame(void* self, void* stream);
 struct sVE_353448 { short delta; short index; int (*fn)(void*); };
 struct sVEv_353448 { short delta; short index; void (*fn)(void*, void*); };
 
-struct sHdr_353448 {
-    int flags;
-    int a;
-    int b;
-    int count1;
-    int count2;
-    char ids[32];
-};
 
 
 static inline int VCall0_353448(char* o, int voff, int slot)
@@ -850,42 +843,42 @@ static inline void VCall1_353448(char* o, int voff, int slot, void* arg)
  */
 extern "C" void tModifierBlock_writeToReplayFrame(tModifierBlock* self, char* stream)
 {
-    sHdr_353448 info;
-    info.flags = 0;
-    info.b = 0;
-    info.a = 0;
-    info.count1 = 0;
-    info.count2 = 0;
+    tModifierBlockInfo info;
+    info.Flags = 0;
+    info.PhysicsType = 0;
+    info.TransformType = 0;
+    info.NumEffects = 0;
+    info.NumRails = 0;
     for (int i = 0; i < 32; i++) {
-        info.ids[i] = 0;
+        info.EffectType[i] = 0;
     }
     char* transformModifier = (char*)self->RootTransform;
     if (transformModifier != 0) {
-        info.flags |= 1;
-        info.a = VCall0_353448(transformModifier, 0, 26);
+        info.Flags |= 1;
+        info.TransformType = VCall0_353448(transformModifier, 0, 26);
     }
     if (self->UVScroll != 0) {
-        info.flags |= 2;
+        info.Flags |= 2;
     }
     if (self->TexFlip != 0) {
-        info.flags |= 4;
+        info.Flags |= 4;
     }
     char* oC = (char*)self->Physics;
     if (oC != 0) {
-        info.flags |= 8;
-        info.b = VCall0_353448(oC, 4, 5);
+        info.Flags |= 8;
+        info.PhysicsType = VCall0_353448(oC, 4, 5);
     }
     for (char* link = *(char**)&self->Effect; link; link = *(char**)link) {
-        info.ids[info.count1++] = VCall0_353448(link, 8, 2);
+        info.EffectType[info.NumEffects++] = VCall0_353448(link, 8, 2);
     }
-    if (info.count1 > 0) {
-        info.flags |= 0x10;
+    if (info.NumEffects > 0) {
+        info.Flags |= 0x10;
     }
     for (char* link = *(char**)&self->Rail; link; link = *(char**)link) {
-        info.count2++;
+        info.NumRails++;
     }
-    if (info.count2 > 0) {
-        info.flags |= 0x20;
+    if (info.NumRails > 0) {
+        info.Flags |= 0x20;
     }
     {
         sVEntry<void(void*, void*, int)>* writeEntry = &(*(sVEntry<void(void*, void*, int)>**)stream)[1];
@@ -905,12 +898,12 @@ extern "C" void tModifierBlock_writeToReplayFrame(tModifierBlock* self, char* st
     if (wC != 0) {
         VCall1_353448(wC, 4, 6, stream);
     }
-    if (info.count1 > 0) {
+    if (info.NumEffects > 0) {
         for (char* link = *(char**)&self->Effect; link; link = *(char**)link) {
             VCall1_353448(link, 8, 4, stream);
         }
     }
-    if (info.count2 > 0) {
+    if (info.NumRails > 0) {
         for (char* link = *(char**)&self->Rail; link; link = *(char**)link) {
             VCall1_353448(link, 8, 2, stream);
         }
@@ -927,9 +920,6 @@ struct sMbStreamVEntry36D8 {
     void (*fn)(void*, void*, int);
 };
 
-struct sMbStream36D8 {
-    sMbStreamVEntry36D8* vt;
-};
 
 struct sMbReplayHdr36D8 {
     unsigned int flags;      // 0x00
@@ -941,20 +931,20 @@ struct sMbReplayHdr36D8 {
 };
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cSplineModifier_cSplineModifier(void* self, sMbStream36D8* s);
-extern "C" void* cMultiSplineModifier_cMultiSplineModifier1(void* self, sMbStream36D8* s);
-extern "C" void* cParentModifier_cParentModifier(void* self, sMbStream36D8* s);
-extern "C" void* cPositionModifier_cPositionModifier2(void* self, sMbStream36D8* s);
-extern "C" void* cRollerModifier_cRollerModifier1(void* self, sMbStream36D8* s);
-extern "C" void* cMagnetModifier_cMagnetModifier1(void* self, sMbStream36D8* s);
-extern "C" void* cAvaSplineModifier_cAvaSplineModifier1(void* self, sMbStream36D8* s);
-extern "C" void* cUVScrollModifier_cUVScrollModifier1(void* self, sMbStream36D8* s);
-extern "C" void* cTexFlipModifier_cTexFlipModifier1(void* self, sMbStream36D8* s);
-extern "C" void* cBoostModifier_cBoostModifier1(void* self, sMbStream36D8* s);
-extern "C" void* cParticleModifier_cParticleModifier1(void* self, sMbStream36D8* s);
-extern "C" void* cDynamicParticleModifier_cDynamicParticleModifier(void* self, sMbStream36D8* s);
-extern "C" void* cHaloModifier_cHaloModifier1(void* self, sMbStream36D8* s);
-extern "C" void* cRailModifier_cRailModifier1(void* self, sMbStream36D8* s);
+extern "C" void* cSplineModifier_cSplineModifier(void* self, cReplayFramePtr* s);
+extern "C" void* cMultiSplineModifier_cMultiSplineModifier1(void* self, cReplayFramePtr* s);
+extern "C" void* cParentModifier_cParentModifier(void* self, cReplayFramePtr* s);
+extern "C" void* cPositionModifier_cPositionModifier2(void* self, cReplayFramePtr* s);
+extern "C" void* cRollerModifier_cRollerModifier1(void* self, cReplayFramePtr* s);
+extern "C" void* cMagnetModifier_cMagnetModifier1(void* self, cReplayFramePtr* s);
+extern "C" void* cAvaSplineModifier_cAvaSplineModifier1(void* self, cReplayFramePtr* s);
+extern "C" void* cUVScrollModifier_cUVScrollModifier1(void* self, cReplayFramePtr* s);
+extern "C" void* cTexFlipModifier_cTexFlipModifier1(void* self, cReplayFramePtr* s);
+extern "C" void* cBoostModifier_cBoostModifier1(void* self, cReplayFramePtr* s);
+extern "C" void* cParticleModifier_cParticleModifier1(void* self, cReplayFramePtr* s);
+extern "C" void* cDynamicParticleModifier_cDynamicParticleModifier(void* self, cReplayFramePtr* s);
+extern "C" void* cHaloModifier_cHaloModifier1(void* self, cReplayFramePtr* s);
+extern "C" void* cRailModifier_cRailModifier1(void* self, cReplayFramePtr* s);
 extern "C" void cEffectLink_append(void* pool, void* item);
 extern "C" void cRailLink_append(void* list, void* item);
 
@@ -982,7 +972,7 @@ extern const char str_RailModifier[];
  *
  * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
  */
-extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, sMbStream36D8* stream)
+extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, cReplayFramePtr* stream)
 {
     sMbReplayHdr36D8 hdr;
     int i;
@@ -991,7 +981,7 @@ extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, sMbStre
     self->UVScroll = 0;
     self->TexFlip = 0;
     self->Physics = 0;
-    stream->vt[2].fn((char*)stream + stream->vt[2].delta, &hdr, 52);
+    ((sMbStreamVEntry36D8*)stream->mVtbl)[2].fn((char*)stream + ((sMbStreamVEntry36D8*)stream->mVtbl)[2].delta, &hdr, 52);
 
     if (hdr.flags & 1) {
         if (hdr.type == 1) {

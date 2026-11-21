@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "wscript/wscriptcache.h"
+#include "luno/lunovm.h"
+#include "luno/lunovar.h"
 #include "sound/ssxaudio.h"
 #include "wscript/missionmenuqueue.h"
 #include "wscript/wscriptmission.h"
@@ -471,14 +474,6 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_runScript);
 #ifdef SKIP_ASM
 extern "C" int cWorld_getWScriptScript(void*, int*);
 struct cWScriptMan_isFunc_sValue;
-struct sLunoValue_9C88 {
-    int word0;
-    int word1;
-    int type;
-};
-struct sLunoCall_9C88 {
-    int pad[4];
-};
 void luno_cLunoFunc_init(void* self, int a1, int a2);
 extern "C" void* luno_cLunoVM_cLunoVM(void* self);
 extern "C" void luno_cLunoVM_run(void* self, void* args, void* table, void* ret);
@@ -494,12 +489,12 @@ extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int fla
  */
 extern "C" void cWScriptMan_runScript(cWScriptMan* self, int* handle)
 {
-    sLunoValue_9C88 scriptVar;
-    sLunoValue_9C88 ret;
-    sLunoCall_9C88 call;
+    luno_cLunoVar scriptVar;
+    luno_cLunoVar ret;
+    luno_cLunoVM call;
     luno_cLunoFunc_init(&scriptVar, cWorld_getWScriptScript(self->World, handle), 0);
-    ret.type = 0;
-    ret.word0 = 0;
+    ret.Type = 0;
+    ret.Data.Int = 0;
     void* table = (void*)self->GlobalTables[*(unsigned char*)handle];
     luno_cLunoVM_cLunoVM(&call);
     luno_cLunoVM_run(&call, &scriptVar, table, &ret);
@@ -898,10 +893,6 @@ extern "C" int cWScriptMan_hasOnLoseFocusScript(cWScriptMan* self, int id)
 //100%
 INCLUDE_ASM("wscript/wscriptman", cWScriptMan_isFocusInstance);
 #ifdef SKIP_ASM
-struct sEntry_A310 {
-    short type;
-    char pad[10];
-};
 /**
  * Returns whether a world instance can take the player's focus: always when it has a script controller (+0xC);
  * otherwise only a script instance (its type in the world's instance type table, indexed by the record's byte +0x78, is
@@ -917,8 +908,8 @@ extern "C" int cWScriptMan_isFocusInstance(cWScriptMan* self, void* obj)
     if (*(int*)(inst + 0xC) != 0) {
         return 1;
     }
-    sEntry_A310* tab = *(sEntry_A310**)((char*)self->World->m_pWScriptCache + 0x4);
-    bool isType3 = tab[*(unsigned char*)(inst + 0x78)].type == 3;
+    cWScriptCacheEntry* tab = self->World->m_pWScriptCache->mpCache;
+    bool isType3 = tab[*(unsigned char*)(inst + 0x78)].mState == 3;
     if (isType3) {
         if (cWScriptMan_hasOnFocusScript(self, (int)obj) || cWScriptMan_hasOnLoseFocusScript(self, (int)obj)) {
             return 1;
@@ -1000,7 +991,7 @@ extern "C" void cWScriptMan_upFocusScript(cWScriptMan* self, void* obj)
             (*(cWScriptCtl**)((char*)obj + 0xC))->incFocusCount(obj);
         }
     } else {
-        cWScriptMan_upFocusScript_sType* instTypes = *(cWScriptMan_upFocusScript_sType**)((char*)self->World->m_pWScriptCache + 0x4);
+        cWScriptMan_upFocusScript_sType* instTypes = (cWScriptMan_upFocusScript_sType*)self->World->m_pWScriptCache->mpCache;
         bool isScript = instTypes[*(unsigned char*)((char*)obj + 0x78)].type == 3;
         if (isScript) {
             if (cWScriptMan_hasOnFocusScript(self, (int)obj) != 0) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uidata.h"
 #include "ui/uiscreen.h"
 #include "ui/uitext.h"
 #include "ui/uithing.h"
@@ -376,15 +377,6 @@ struct sUIThing03F0 {
     unsigned int rest : 30;
     sUIColor03F0 color;         // 0x78
 };
-struct sUIData03F0 {
-    char pad0[0x20];
-    unsigned char mode;         // 0x20
-    char pad21;
-    unsigned char vis;          // 0x22
-    char pad23;
-    int textId;                 // 0x24
-    unsigned char r, g, b, a;   // 0x28
-};
 
 /**
  * Sets a text widget up from its screen-data record: font, visibility, localized string and, when enabled,
@@ -392,16 +384,16 @@ struct sUIData03F0 {
  *
  * @param data  the widget's record (On Tour tUIBaseObject* pUIBase)
  */
-extern "C" void cUIText_setUIData(sUIThing03F0* self, sUIData03F0* data)
+extern "C" void cUIText_setUIData(sUIThing03F0* self, tUIText* data)
 {
     cUIThing_setUIData_2(self, data);
-    self->mode = data->mode & 3;
-    self->vt[23].fn((char*)self + self->vt[23].delta, data->vis & 1);
-    cUIText_setUnicodeStringByID((cUIText*)self, data->textId);
+    self->mode = data->mFontID & 3;
+    self->vt[23].fn((char*)self + self->vt[23].delta, data->mBools1 & 1);
+    cUIText_setUnicodeStringByID((cUIText*)self, ((int)data->mStringID));
     int textFlags = *(int*)((char*)self + 0x74) >> 2;
     if (textFlags & 1) {
-        self->color = sUIColor03F0(data->r * 0.003921568859368563f, data->g * 0.003921568859368563f,
-                                   data->b * 0.003921568859368563f, data->a * 0.003921568859368563f);
+        self->color = sUIColor03F0(data->mSColour.a * 0.003921568859368563f, data->mSColour.r * 0.003921568859368563f,
+                                   data->mSColour.g * 0.003921568859368563f, data->mSColour.b * 0.003921568859368563f);
     }
 }
 #endif

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uithing.h"
 #include "ui/uilistbox.h"
 #include "ui/uiscreen.h"
 #include "ui/uimenu.h"
@@ -826,10 +827,6 @@ struct sVEntry00192740 {
     void (*fn)(void*, int);
 };
 
-struct sObj00192740 {
-    int pad[2];
-    sVEntry00192740* vt;
-};
 
 /**
  * Sets a bragging-rights panel's confirmed flag (+0x28) and locks or unlocks its list boxes with it.
@@ -845,9 +842,9 @@ extern "C" void cBraggingRightsMenu_setConfirmed(cBraggingRightsMenu* self, int 
     int i;
     self->mbConfirmed = enabled;
     for (i = 0; i < 8; i++) {
-        sObj00192740* item = ((sObj00192740**)(&self->mpListBox[0]))[i];
+        cUIThing* item = ((cUIThing**)(&self->mpListBox[0]))[i];
         if (item != 0) {
-            item->vt[8].fn((char*)item + item->vt[8].delta, enabled);
+            ((sVEntry00192740*)item->mVtbl)[8].fn((char*)item + ((sVEntry00192740*)item->mVtbl)[8].delta, enabled);
         }
     }
 }
@@ -864,8 +861,7 @@ struct sColor_001927B0 {
     sColor_001927B0(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
 };
 struct sVEnt_001927B0 { short delta; short index; void (*fn)(void*, const sColor_001927B0&); };
-struct sObj_001927B0 { int pad[2]; sVEnt_001927B0* vt; };
-struct sRuleSel_001927B0 { void* owner; int f4; sObj_001927B0* items[8]; };
+struct sRuleSel_001927B0 { void* owner; int f4; cUIThing* items[8]; };
 
 /**
  * Colours a bragging-rights panel's rows: the selected row white, the others by their current value.
@@ -890,16 +886,16 @@ extern "C" void cBraggingRightsMenu_setMenuItemColor(sRuleSel_001927B0* self)
             continue;
         }
         if (i == sel) {
-            sObj_001927B0* item = self->items[i];
-            sVEnt_001927B0* colorEntry = &item->vt[11];
+            cUIThing* item = self->items[i];
+            sVEnt_001927B0* colorEntry = &((sVEnt_001927B0*)item->mVtbl)[11];
             colorEntry->fn((char*)item + colorEntry->delta, sColor_001927B0(1.0f, 1.0f, 1.0f, 1.0f));
         } else if (cUIListBox_getCurrentEntryData(self->items[i])) {
-            sObj_001927B0* item = self->items[i];
-            sVEnt_001927B0* colorEntry = &item->vt[11];
+            cUIThing* item = self->items[i];
+            sVEnt_001927B0* colorEntry = &((sVEnt_001927B0*)item->mVtbl)[11];
             colorEntry->fn((char*)item + colorEntry->delta, sColor_001927B0(1.0f, 0.5921568870544434f, 0.04313725605607033f, 0.0f));
         } else {
-            sObj_001927B0* item = self->items[i];
-            sVEnt_001927B0* colorEntry = &item->vt[11];
+            cUIThing* item = self->items[i];
+            sVEnt_001927B0* colorEntry = &((sVEnt_001927B0*)item->mVtbl)[11];
             colorEntry->fn((char*)item + colorEntry->delta, sColor_001927B0(1.0f, 0.14509804546833038f, 0.027450982481241226f, 0.019607843831181526f));
         }
     }

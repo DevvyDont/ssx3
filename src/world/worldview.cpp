@@ -424,16 +424,6 @@ struct sWVCam_9D60 {
     char pad4C[0x50 - 0x4C];
 };
 
-struct sWV_9D60 {
-    void* world;
-    tStreamDataHeader* mp_Hdr;
-    sWVItem_9D60* items;
-    int fC;
-    int f10;
-    sWVSlot_9D60 slots[0x45];
-    char pad23C[0x240 - 0x23C];
-    sWVCam_9D60 cams[4];
-};
 
 extern "C" void cWorldView_recursiveTreeFocus(void* self, void* section, int cam, int loaded);
 
@@ -446,22 +436,22 @@ extern "C" void cWorldView_recursiveTreeFocus(void* self, void* section, int cam
  *
  * @param cam  the focus index (0 or 1)
  */
-extern "C" void cWorldView_refreshStreamFocus(sWV_9D60* self, int cam)
+extern "C" void cWorldView_refreshStreamFocus(cWorldView* self, int cam)
 {
-    if (*(int*)((char*)self + cam * 0x50 + 0x240) != 0) {
+    if (self->m_StreamFocus[cam].m_bActive != 0) {
         int frame = cAppMan_TheAppMan->TimerTick;
-        float loadRadius = *(float*)((char*)self + cam * 0x50 + 0x280);
-        *(float*)((char*)self + cam * 0x50 + 0x284) = loadRadius;
-        *(float*)((char*)self + cam * 0x50 + 0x288) = loadRadius;
+        float loadRadius = self->m_StreamFocus[cam].m_fLoadRadius;
+        self->m_StreamFocus[cam].m_fSafeRadius = loadRadius;
+        self->m_StreamFocus[cam].m_fSafeTestRadius = loadRadius;
         unsigned int i;
         for (i = 0; i < (unsigned int)self->mp_Hdr->m_uiNumSections; i++) {
-            int st = self->slots[i].state;
+            int st = ((sWVSlot_9D60*)&self->mp_SectionState[0])[i].state;
             if (st == 5 || st == 6) {
-                cWorldView_recursiveTreeFocus(self, self->items[i].section, cam, st == 6);
+                cWorldView_recursiveTreeFocus(self, ((sWVItem_9D60*)self->mp_Section)[i].section, cam, st == 6);
             }
         }
-        *(int*)((char*)self + cam * 0x50 + 0x248) = frame;
-        *(int*)((char*)self + cam * 0x50 + 0x244) = 0;
+        self->m_StreamFocus[cam].m_iFocusTick = frame;
+        self->m_StreamFocus[cam].m_bFocusUpdate = 0;
     }
 }
 #endif

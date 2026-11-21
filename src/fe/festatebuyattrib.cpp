@@ -218,10 +218,7 @@ struct sVEr_4A90 {
     short index;
     void* (*fn)(void*, void*, void*);
 };
-struct sDefObj_4A90 {
-    sVE_4A90* vt;
-};
-extern sDefObj_4A90 gUISoundNull;
+extern cUISoundInterface gUISoundNull;
 
 /**
  * Handles accept and back on the buy-attributes screen: opens the buy popup, closes the prompt, or leaves.
@@ -248,11 +245,11 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
             cUIStateBuyPopup_initBuyAttributes(o, 0, self->mTotalCost, self->mBank);
             cUIStateStack_pushPopup(&self->mpEngine->mStateStack, o);
         } else {
-            sDefObj_4A90* sound = *(sDefObj_4A90**)&self->mpEngine->mpSound;
+            cUISoundInterface* sound = *(cUISoundInterface**)&self->mpEngine->mpSound;
             if (sound == 0)
                 sound = &gUISoundNull;
             if (sound != 0)
-                sound->vt[2].fn((char*)sound + sound->vt[2].delta, 4);
+                ((sVE_4A90*)sound->mVtbl)[2].fn((char*)sound + ((sVE_4A90*)sound->mVtbl)[2].delta, 4);
         }
         break;
     case 6:
@@ -295,11 +292,11 @@ extern char str_hl_left_b[];
 
 static inline void defaultMsg_4C30(cFEStateBuyAttrib* s, int msg)
 {
-    sDefObj_4A90* p = (sDefObj_4A90*)s->mpEngine->mpSound;
+    cUISoundInterface* p = s->mpEngine->mpSound;
     if (p == 0)
         p = &gUISoundNull;
     if (p != 0)
-        p->vt[2].fn((char*)p + p->vt[2].delta, msg);
+        ((sVE_4A90*)p->mVtbl)[2].fn((char*)p + ((sVE_4A90*)p->mVtbl)[2].delta, msg);
 }
 
 static inline void playFrame_4C30(cFEStateBuyAttrib* s, char* name)
@@ -466,11 +463,10 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_Vectorpct_d[];
 extern char str_underpct_d[];
 
-struct sVec3K1F50B0 { float x, y, z; };
 struct sVEK1F50B0a {
     short delta;
     short index;
-    void (*fn)(void*, sVec3K1F50B0*);
+    void (*fn)(void*, t3Vector*);
 };
 
 /**
@@ -490,7 +486,7 @@ extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(cFEStateBuyAttrib* buy
         sprintf(name, str_Vectorpct_d, i);
         char* bar = (char*)cUIScreen_getObjectByHashName(((void*)self->mpAttribScreen), GetHashValue32(name));
         if (bar != 0) {
-            sVec3K1F50B0 barSize;
+            t3Vector barSize;
             barSize.y = 12.0f;
             barSize.x = (float)self->mExperience[i] * 3.3636362552642822f;
             barSize.z = 0.0f;
@@ -502,7 +498,7 @@ extern "C" void cFEStateBuyAttrib_updateExperienceDisplay(cFEStateBuyAttrib* buy
         sprintf(name, str_underpct_d, i);
         bar = (char*)cUIScreen_getObjectByHashName(((void*)self->mpAttribScreen), GetHashValue32(name));
         if (bar != 0) {
-            sVec3K1F50B0 barSize;
+            t3Vector barSize;
             barSize.x = (float)(self->mPotentialExperience[i] + self->mExperience[i]) * 3.3636362552642822f;
             barSize.y = 12.0f;
             barSize.z = 0.0f;
@@ -963,11 +959,11 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIIn
             }
         }
     }
-    sDefObj_4A90* sound = *(sDefObj_4A90**)&self->mpEngine->mpSound;
+    cUISoundInterface* sound = *(cUISoundInterface**)&self->mpEngine->mpSound;
     if (sound == 0)
         sound = &gUISoundNull;
     if (sound != 0)
-        sound->vt[2].fn((char*)sound + sound->vt[2].delta, msg);
+        ((sVE_4A90*)sound->mVtbl)[2].fn((char*)sound + ((sVE_4A90*)sound->mVtbl)[2].delta, msg);
     return handled;
 }
 #endif

@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "bx/math3d.h"
+#include "ai/rider.h"
 #include "bx/appman.h"
 #include "object/spline3d.h"
 #include "object/conveyornode.h"
@@ -530,14 +532,6 @@ struct sVE3130 {
     sMat3130* (*fn)(void*);
 };
 
-struct sHit3130 {
-    sVec3130 pos;               // 0x00
-    sVec3130 dir;               // 0x10
-    sVec3130 angVel;            // 0x20
-    sVec3130 vel;               // 0x30
-    char pad40[0x1C];           // 0x40
-    int bone;                   // 0x5C
-};
 
 struct sNode3130 {
     char pad0[0xC];
@@ -560,30 +554,30 @@ struct sNode3130 {
  *
  * @param hit  intersect info of the collision (position, direction, accumulators, bone index)
  */
-extern "C" void cConveyorNode_updateIntersectInfo(sNode3130* self, sHit3130* hit)
+extern "C" void cConveyorNode_updateIntersectInfo(sNode3130* self, tIntersectInfo* hit)
 {
-    if (hit->bone < 0) {
+    if (hit->Mesh < 0) {
         return;
     }
     sMat3130* w = self->vt[24].fn((char*)self + self->vt[24].delta);
     sBone3130* bones = *(sBone3130**)(*(char**)(self->model + 0x80) + 0x8);
-    sMat3130 boneMat = *bones[hit->bone].mat;
-    for (int parentIndex = bones[hit->bone].parent; parentIndex != -1; parentIndex = bones[parentIndex].parent) {
+    sMat3130 boneMat = *bones[hit->Mesh].mat;
+    for (int parentIndex = bones[hit->Mesh].parent; parentIndex != -1; parentIndex = bones[parentIndex].parent) {
         boneMat = mulMat3130(*bones[parentIndex].mat, boneMat);
     }
     boneMat = mulMat3130(*w, boneMat);
-    if (self->flags[hit->bone] != 0) {
-        sVec3130 offset = sub3130(hit->pos, pos3130(boneMat));
+    if (self->flags[hit->Mesh] != 0) {
+        sVec3130 offset = sub3130((*(sVec3130*)&hit->Ipos), pos3130(boneMat));
         float k = self->strength / len3130(offset);
-        sVec3130 impulse = scale3130(hit->dir, k);
+        sVec3130 impulse = scale3130((*(sVec3130*)&hit->Inorm), k);
         sVec3130 torque = cross3130(offset, impulse);
-        addEq3130(hit->angVel, torque);
-        addEq3130(hit->vel, impulse);
+        addEq3130((*(sVec3130*)&hit->Ivel), torque);
+        addEq3130((*(sVec3130*)&hit->Iangvel), impulse);
     } else {
         loadVf8_3130(*(sVec3130*)&t4vect_YAxis);
         sVec3130 n = norm3130(mulVec3130(boneMat));
-        sVec3130 torque = scale3130(cross3130(n, hit->dir), self->strength);
-        addEq3130(hit->angVel, torque);
+        sVec3130 torque = scale3130(cross3130(n, (*(sVec3130*)&hit->Inorm)), self->strength);
+        addEq3130((*(sVec3130*)&hit->Ivel), torque);
     }
 }
 #endif
@@ -624,13 +618,9 @@ extern "C" void cConveyorNode_update(cConveyorNode* self)
 //100%
 INCLUDE_ASM("object/debouncenode", cConveyorNode_render);
 #ifdef SKIP_ASM
-// PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sDfVec_343588 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 struct sDfMat_343588 {
-    sDfVec_343588 r[4];
+    t4Vector r[4];
 };
 
 struct sDfSlot_343588 {
@@ -665,7 +655,7 @@ struct cDfGfx_343588 {
 };
 
 typedef sDfMat_343588 (*DfViewFn_343588)(void*);
-typedef int (*DfCullFn_343588)(void*, sDfVec_343588*, sDfVec_343588*, const sDfMat_343588&);
+typedef int (*DfCullFn_343588)(void*, t4Vector*, t4Vector*, const sDfMat_343588&);
 typedef void (*DfDrawFn_343588)(void*, void*, void*, void*, int);
 
 extern sDfMat_343588 D_004FF1A0_343588 __asm__("t4mat_Identity");
@@ -723,7 +713,7 @@ extern "C" void cConveyorNode_render(cConveyorNode* self)
     {
         sVEntry<void>* vt = (sVEntry<void>*)gfx->mVtbl;
         char* thisp = (char*)gfx + vt[93].delta;
-        sDfVec_343588 cullBox[2];
+        t4Vector cullBox[2];
         cullBox[0].x = OBJ_343588(self)->pos[0];
         cullBox[0].y = OBJ_343588(self)->pos[1];
         cullBox[0].z = OBJ_343588(self)->pos[2];
@@ -2474,7 +2464,7 @@ INCLUDE_ASM("object/debouncenode", cSpline_isVisible);
 extern "C" int cSpline_isVisible(sTrackRef51C0* self)
 {
     float* bounds = (float*)self->get();
-    sDfVec_343588 box[2];
+    t4Vector box[2];
     box[0].x = bounds[1];
     box[0].y = bounds[2];
     box[0].z = bounds[3];

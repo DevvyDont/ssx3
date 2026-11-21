@@ -436,7 +436,7 @@ extern "C" int cPlaybackMan_setupPreview(cPlaybackMan* self, int fileId)
             THREAD_yieldticks(1);
         }
         if (cPlaybackMan_setupFile(self, idx) != 0) {
-            if (*(int*)((char*)self->CurrentFrame + 0xC) > 0)
+            if (self->CurrentFrame->Buffer.IndexMax > 0)
                 return 1;
         }
     }
@@ -466,11 +466,6 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_saveFrame);
 struct sPbBytes4;
 extern "C" void cReplay_saveFrame1(cReplay* self, void* out, sPbBytes4* src);
 
-struct sFrameDesc26CBB8 {
-    short type;
-    char a;
-    char b;
-};
 
 /**
  * Saves the replay's current state into the playback manager's frame, once.
@@ -482,10 +477,10 @@ extern "C" void cPlaybackMan_saveFrame(cPlaybackMan* self)
 {
     if (self->SaveFrame == 0) {
         int one = 1;
-        sFrameDesc26CBB8 desc;
-        desc.type = one;
-        desc.a = 0;
-        desc.b = 0;
+        tReplayFrameType desc;
+        desc.Type = one;
+        desc.Highlights = 0;
+        desc.Chapter = 0;
         cReplay_saveFrame1((cReplay*)(self->Game->Replay), (char*)&self->SaveFramePtr,
                       (sPbBytes4*)&desc);
         self->SaveFrame = one;
@@ -537,16 +532,16 @@ void AIsetseed(void* self);
  */
 extern "C" void cPlaybackMan_startPreview(cPlaybackMan* self)
 {
-    if (self->State == 0 && *(int*)((char*)self->CurrentFrame + 0xC) > 0) {
+    if (self->State == 0 && self->CurrentFrame->Buffer.IndexMax > 0) {
         cAI_purgeMissionRiders(self->AI);
         cAI_reinitMissionRiders(self->AI);
         cReplay* replay = self->Game->Replay;
         replay->SaveState = *(int*)replay;
         cReplay_setReplayState(replay, 14);
         cPlaybackMan_saveFrame(self);
-        *(int*)((char*)self->CurrentFrame + 0x8) = 0;
-        AIsetseed((char*)self->CurrentFrame + 0x1C214);
-        *(int*)((char*)self->AI + 0x8) = *(int*)((char*)self->CurrentFrame + 0x1C210);
+        self->CurrentFrame->Buffer.Index = 0;
+        AIsetseed(&self->CurrentFrame->AISeed[0]);
+        *(int*)((char*)self->AI + 0x8) = self->CurrentFrame->AITick;
         self->State = 1;
         char* x = *(char**)((char*)self->AI + 0x70);
         int targetRider = x ? *(int*)(x + 0x18) : 0;
@@ -600,7 +595,7 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_startPerform);
 extern "C" void cPlaybackMan_startPerform(cPlaybackMan* self)
 {
     cPlaybackMan_saveFrame(self);
-    *(int *)((char*)self->CurrentFrame + 8) = 0;
+    self->CurrentFrame->Buffer.Index = 0;
     self->State = 2;
 }
 #endif
@@ -654,13 +649,6 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_isPauseAI);
 #ifdef SKIP_ASM
 extern "C" void cInputPad_update(void* self, int n, float* vals);
 
-struct sPbBuf_26CE50 {
-    int f0;
-    int size;       // 0x4
-    int pos;        // 0x8
-    int end;        // 0xC
-    unsigned char data[1];  // 0x10
-};
 
 // Axis table at self+0x64.
 struct sPbAxisItem_26CE50 {
@@ -689,22 +677,22 @@ extern "C" int cPlaybackMan_isPauseAI(cPlaybackMan* self)
 {
     float vals[24];
     if (self->State == 1) {
-        sPbBuf_26CE50* buf = (sPbBuf_26CE50*)self->CurrentFrame;
-        if (buf->pos < buf->end) {
-            unsigned char* cursor = &buf->data[buf->pos];
+        tPlaybackFrame* buf = self->CurrentFrame;
+        if (buf->Buffer.Index < buf->Buffer.IndexMax) {
+            unsigned char* cursor = &((unsigned char*)&buf->Buffer.Buffer[0])[buf->Buffer.Index];
             int n = *cursor++;
             for (int i = 0; i < n; i++)
                 vals[i] = *cursor++ * 0.003921568859368563f;
-            ((sPbBuf_26CE50*)self->CurrentFrame)->pos += 1 + n;
+            (self->CurrentFrame)->Buffer.Index += 1 + n;
             cInputPad_update(self->InputPad, n, vals);
             return 0;
         } else {
             return 1;
         }
     } else if (self->State == 3) {
-        sPbBuf_26CE50* buf = (sPbBuf_26CE50*)self->CurrentFrame;
-        if (buf->pos < buf->size - 0x18) {
-            unsigned char* cursor = &buf->data[buf->pos];
+        tPlaybackFrame* buf = self->CurrentFrame;
+        if (buf->Buffer.Index < buf->Buffer.Size - 0x18) {
+            unsigned char* cursor = &((unsigned char*)&buf->Buffer.Buffer[0])[buf->Buffer.Index];
             int n = ((sPbAxes_26CE50*)self->RealInputPad)->count;
             *cursor++ = n;
             for (int i = 0; i < n; i++) {
@@ -717,8 +705,8 @@ extern "C" int cPlaybackMan_isPauseAI(cPlaybackMan* self)
                 *cursor = (int)(axisValue * 255.0f);
                 vals[i] = *cursor++ * 0.003921568859368563f;
             }
-            ((sPbBuf_26CE50*)self->CurrentFrame)->pos += 1 + n;
-            ((sPbBuf_26CE50*)self->CurrentFrame)->end += 1 + n;
+            (self->CurrentFrame)->Buffer.Index += 1 + n;
+            (self->CurrentFrame)->Buffer.IndexMax += 1 + n;
             cInputPad_update(self->InputPad, n, vals);
             return 0;
         } else {
@@ -1333,9 +1321,6 @@ void* cReplay_addReplayFrame(void* vself)
 //100%
 INCLUDE_ASM("replay/playbackman", cReplay_saveReplayFrame);
 #ifdef SKIP_ASM
-struct sPbBytes4D760 {
-    char b[4];
-};
 
 extern "C" void* cReplay_allocReplayFrame(void* self);
 extern "C" void cReplay_saveFrame(cReplay* self, void* out);
@@ -1352,10 +1337,10 @@ void cReplayFramePtr_putFrameBlock_2(void* self, int a) __asm__("cReplayFramePtr
  * @param src  the frame type, passed by address here (On Tour tReplayFrameType type)
  * @return the saved frame
  */
-extern "C" void* cReplay_saveReplayFrame(cReplay* self, sPbBytes4D760* src)
+extern "C" void* cReplay_saveReplayFrame(cReplay* self, tReplayFrameType* src)
 {
     void* out = cReplay_allocReplayFrame(self);
-    *(sPbBytes4D760*)((char*)out + 0x1C) = *src;
+    *(tReplayFrameType*)((char*)out + 0x1C) = *src;
     cReplay_saveFrame((cReplay*)self, out);
     *(int*)((char*)out + 0x30) = self->RecordTick;
     cReplayFramePtr_putFrameBlock_2(out, 0);

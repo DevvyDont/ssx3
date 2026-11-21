@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uidata.h"
+#include "render/font.h"
 #include "ui/uiinput.h"
 #include "ui/uitextscroll.h"
 #include "ui/uithing.h"
@@ -640,14 +642,6 @@ struct sUIText11B8 {
     unsigned int rest : 29;
     sUIColor11B8 color;         // 0x78
 };
-struct sUIData11B8 {
-    char pad0[0x20];
-    unsigned char mode;         // 0x20
-    unsigned char vis;          // 0x21
-    char pad22[2];
-    int textId;                 // 0x24
-    unsigned char r, g, b, a;   // 0x28
-};
 
 /**
  * Sets a text scroll up from its screen record.
@@ -658,19 +652,19 @@ struct sUIData11B8 {
  *
  * @param data  the screen record (On Tour tUIBaseObject* pUIBase)
  */
-extern "C" void cUITextScroll_setUIData(sUIText11B8* self, sUIData11B8* data)
+extern "C" void cUITextScroll_setUIData(sUIText11B8* self, tUITextScroll* data)
 {
     cUIThing_setUIData_2(self, data);
-    self->mode = data->mode & 3;
-    self->vt[23].fn((char*)self + self->vt[23].delta, data->vis & 1);
-    if (data->textId != 0) {
+    self->mode = data->mFontID & 3;
+    self->vt[23].fn((char*)self + self->vt[23].delta, data->mTextFlags & 1);
+    if (((int)data->mStringID) != 0) {
         cUITextScroll_clearBuffer_1(self);
-        cUITextScroll_addUnicodeStringByID((cUITextScroll*)self, data->textId);
+        cUITextScroll_addUnicodeStringByID((cUITextScroll*)self, ((int)data->mStringID));
     }
     int bits = *(int*)((char*)self + 0x74) >> 3;
     if (bits & 1) {
-        self->color = sUIColor11B8(data->r * 0.003921568859368563f, data->g * 0.003921568859368563f,
-                                   data->b * 0.003921568859368563f, data->a * 0.003921568859368563f);
+        self->color = sUIColor11B8(data->mSColour.a * 0.003921568859368563f, data->mSColour.r * 0.003921568859368563f,
+                                   data->mSColour.g * 0.003921568859368563f, data->mSColour.b * 0.003921568859368563f);
     }
 }
 #endif
@@ -774,28 +768,7 @@ struct sUIInputVE13E0 {
     int (*fn)(void*, int);
 };
 
-struct sUIFont13E0 {
-    char pad_0x0[0x14];
-    int height;             // 0x14
-    char pad_0x18[0x1C];
-    float scale;            // 0x34
-};
 
-struct sUIText13E0 {
-    char pad_0x0[0x54];
-    float scale;            // 0x54
-    char pad_0x58[0xC];
-    float height;           // 0x64
-    char pad_0x68[0xC];
-    unsigned int flags;     // 0x74
-    char pad_0x78[0x10];
-    signed char keyUp;      // 0x88
-    signed char keyDown;    // 0x89
-    char pad_0x8A[0x3A];
-    unsigned short cur;     // 0xC4
-    unsigned short top;     // 0xC6
-    unsigned short count;   // 0xC8
-};
 
 static inline int pressed13E0(char* input, int key)
 {
@@ -814,44 +787,44 @@ static inline int pressed13E0(char* input, int key)
  * @param input  the input (On Tour const cUIInput* pInput)
  * @return 1 when a key was used, else 0 (On Tour returns bool)
  */
-extern "C" int cUITextScroll_onInput(sUIText13E0* self, cUIInput* input)
+extern "C" int cUITextScroll_onInput(cUITextScroll* self, cUIInput* input)
 {
-    sUIFont13E0* font = (sUIFont13E0*)cUITextScroll_getFont((cUITextScroll*)self);
+    cFont* font = (cFont*)cUITextScroll_getFont((cUITextScroll*)self);
     if (font == 0) {
         return 0;
     }
-    signed char rows = (int)(self->height / (self->scale * ((float)font->height * font->scale) + 3.0f));
-    if (self->flags & 1) {
-        if (pressed13E0(((char*)input), self->keyUp) != 0) {
-            if (self->cur != 0) {
-                self->cur--;
+    signed char rows = (int)(self->mSize.y / (self->mScale.y * ((float)font->MaxCharHeight * font->BaseScale[1]) + 3.0f));
+    if ((*(unsigned int*)&self->mAttrTextScroll) & 1) {
+        if (pressed13E0(((char*)input), (*(signed char*)&self->mInputMap[0])) != 0) {
+            if (self->mSelectedIndex != 0) {
+                self->mSelectedIndex--;
             }
             return 1;
         }
-        if (pressed13E0(((char*)input), self->keyDown) != 0) {
-            if (self->cur < self->count - 1) {
-                self->cur++;
+        if (pressed13E0(((char*)input), (*(signed char*)&self->mInputMap[1])) != 0) {
+            if (self->mSelectedIndex < self->mLineSize - 1) {
+                self->mSelectedIndex++;
             }
             return 1;
         }
-        short rowOffset = self->cur - self->top;
+        short rowOffset = self->mSelectedIndex - self->mLinesOffset;
         if (rowOffset < 0) {
-            self->top = self->cur;
+            self->mLinesOffset = self->mSelectedIndex;
         } else if (rowOffset >= rows) {
-            self->top = self->cur - rows + 1;
+            self->mLinesOffset = self->mSelectedIndex - rows + 1;
         }
     } else {
-        if (pressed13E0(((char*)input), self->keyUp) != 0) {
-            if (self->top != 0) {
-                self->top--;
+        if (pressed13E0(((char*)input), (*(signed char*)&self->mInputMap[0])) != 0) {
+            if (self->mLinesOffset != 0) {
+                self->mLinesOffset--;
             }
             return 1;
         }
-        if (pressed13E0(((char*)input), self->keyDown) == 0) {
+        if (pressed13E0(((char*)input), (*(signed char*)&self->mInputMap[1])) == 0) {
             return 0;
         }
-        if (self->top < self->count - rows) {
-            self->top++;
+        if (self->mLinesOffset < self->mLineSize - rows) {
+            self->mLinesOffset++;
         }
         return 1;
     }

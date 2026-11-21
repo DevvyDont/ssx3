@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "main/gamemode.h"
 #include "sound/ssxaudio.h"
 #include "main/gameviewman.h"
 #include "ui/uiengine.h"
@@ -1007,13 +1008,6 @@ struct sVE_2341D0 {
     void (*fn)(void*);
 };
 
-struct sGM_2341D0 {
-    char pad0[0x10];
-    int total;      // 0x10
-    int humans;     // 0x14
-    int chars[10];  // 0x18
-    int boards[10]; // 0x40
-};
 
 static inline int isMode4_2341D0()
 {
@@ -1040,9 +1034,9 @@ extern "C" void cGFEventStartState_gainFocus(cGFEventStartState* self, int mode)
     cAI_setAIState(*(void**)((char*)cGameState_mpGame + 0xC), 3);
     cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 0);
     cBE_setState(0);
-    sGM_2341D0* gm = (sGM_2341D0*)SSXApp->GameModeMan;
+    cGameModeMan* gm = SSXApp->GameModeMan;
     cReplay_reset(*(void**)((char*)cGameState_mpGame + 0x28));
-    int n = gm->total - gm->humans;
+    int n = gm->iNumberAI - gm->iSimAI;
     int base = *(int*)(*(char**)((char*)cGameState_mpGame + 0xC) + 0x7C);
     cBENewRaceInterface_setNumberAI(race, n);
     {
@@ -1050,8 +1044,8 @@ extern "C" void cGFEventStartState_gainFocus(cGFEventStartState* self, int mode)
         vt[1].fn(race + vt[1].delta);
     }
     for (; i < n; i++) {
-        cBENewPlayerInterface_setRiderCharID(player, i + base, gm->chars[base + i]);
-        cBENewPlayerInterface_setRiderCheatCharID(player, i + base, gm->boards[base + i]);
+        cBENewPlayerInterface_setRiderCharID(player, i + base, gm->iCharacters[base + i]);
+        cBENewPlayerInterface_setRiderCheatCharID(player, i + base, gm->iCheatCharacters[base + i]);
     }
     {
         sVE_2341D0* vt = *(sVE_2341D0**)(player + 0xC);

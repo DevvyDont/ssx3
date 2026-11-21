@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "online/privatemessage.h"
 #include "sound/ssxaudio.h"
 #include "ui/uiengine.h"
 #include "ui/uiscreen.h"
@@ -3044,13 +3045,9 @@ struct sVE1A7848 {
     void (*fn)(void*, int);
 };
 
-struct sObj1A7848 {
-    char pad[0xC];
-    sVE1A7848* vt;
-};
 
 
-static inline void Dealloc1A7848(sObj1A7848** p, int n)
+static inline void Dealloc1A7848(cPrivateMessage** p, int n)
 {
     if (p != 0) {
         if (n == 1) {
@@ -3074,19 +3071,19 @@ extern "C" void cFEStateReadMessagePopup__cFEStateReadMessagePopup(cFEStateReadM
 {
     *(void**)&self->mVtbl = cFEStateReadMessagePopup_vtbl;
     for (;;) {
-        if (((sObj1A7848**)(*(&self->mMessages)).mpStart) == ((sObj1A7848**)(*(&self->mMessages)).mpFinish)) break;
-        sObj1A7848* message = ((sObj1A7848**)(*(&self->mMessages)).mpFinish)[-1];
-        (*(sObj1A7848***)&(*(&self->mMessages)).mpFinish)--;
+        if (((cPrivateMessage**)(*(&self->mMessages)).mpStart) == ((cPrivateMessage**)(*(&self->mMessages)).mpFinish)) break;
+        cPrivateMessage* message = ((cPrivateMessage**)(*(&self->mMessages)).mpFinish)[-1];
+        (*(cPrivateMessage***)&(*(&self->mMessages)).mpFinish)--;
         if (message) {
-            message->vt[1].fn((char*)message + message->vt[1].delta, 3);
+            ((sVE1A7848*)message->mVtbl)[1].fn((char*)message + ((sVE1A7848*)message->mVtbl)[1].delta, 3);
         }
     }
     tFEPrivateMessageVector* messages = (&self->mMessages);
-    sObj1A7848** first = ((sObj1A7848**)(*(&self->mMessages)).mpStart);
-    sObj1A7848** last = ((sObj1A7848**)(*(&self->mMessages)).mpFinish);
-    func_0041610C(first, last, (((sObj1A7848**)messages->mpFinish) - last) * sizeof(sObj1A7848*));
-    (*(sObj1A7848***)&(*(&self->mMessages)).mpFinish) -= last - first;
-    Dealloc1A7848(((sObj1A7848**)messages->mpStart), ((sObj1A7848**)(*(&self->mMessages)).mpEndOfStorage) - ((sObj1A7848**)(*(&self->mMessages)).mpStart));
+    cPrivateMessage** first = ((cPrivateMessage**)(*(&self->mMessages)).mpStart);
+    cPrivateMessage** last = ((cPrivateMessage**)(*(&self->mMessages)).mpFinish);
+    func_0041610C(first, last, (((cPrivateMessage**)messages->mpFinish) - last) * sizeof(cPrivateMessage*));
+    (*(cPrivateMessage***)&(*(&self->mMessages)).mpFinish) -= last - first;
+    Dealloc1A7848(((cPrivateMessage**)messages->mpStart), ((cPrivateMessage**)(*(&self->mMessages)).mpEndOfStorage) - ((cPrivateMessage**)(*(&self->mMessages)).mpStart));
     cBXString__cBXString(((char*)&self->mszSender), 2);
     cFEStateNet__cFEStateNet_dtor(self, flags);
 }
@@ -3113,9 +3110,6 @@ struct sCol1A7970 {
     sCol1A7970(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
 };
 
-struct sBlk1A7970 {
-    int v[4];
-};
 
 class cFEVObj_001A7970 {
 public:
@@ -3168,7 +3162,7 @@ extern "C" void cFEStateReadMessagePopup_onCreateScreen(cFEStateReadMessagePopup
         obj->setVisible(1);
         textScroll->mAttr |= 0x80;
         obj->setColour(sCol1A7970(1.0f, 0.0f, 0.0f, 0.0f));
-        *(sBlk1A7970*)(int*)&textScroll->mSelectedColour = *(sBlk1A7970*)&self->mTextColour;
+        *(tARGB*)(int*)&textScroll->mSelectedColour = *(&self->mTextColour);
         textScroll->mpScrollBar = (cUIThing*)scrollBar;
     }
 }
@@ -23061,12 +23055,6 @@ static inline int Loc_001BEF60(char* name)
 
 static inline int IsHash_001BEF60(int id, char* name) { return id == GetHashValue32(name); }
 
-struct sItem_001BEF60 {
-    char pad[0x18];
-    int mState;
-    char pad1C[0x38 - 0x1C];
-    int mId;
-};
 
 class cFEVObj_001BEF60 {
 public:
@@ -23111,9 +23099,9 @@ public:
 extern "C" void cFEStateLogin_onWidgetCreate(cFEStateLogin* self, cFEVObj_001BEF60* pWidget)
 {
     unsigned short buf[64];
-    sItem_001BEF60* widget = (sItem_001BEF60*)pWidget;
-    if (IsHash_001BEF60(widget->mId, str_TextUseAccount)) {
-        widget->mState = 0;
+    cUIThing* widget = (cUIThing*)pWidget;
+    if (IsHash_001BEF60(widget->mHashName, str_TextUseAccount)) {
+        widget->mMiscData = 0;
         int locStr = Loc_001BEF60(str_kT_CMNUse);
         usprintf_1BEF60(buf, str_pct_s_pct_S, locStr, AccountData);
         cUIText_setUnicodeString((cUIText*)pWidget, (char*)buf);
@@ -23123,26 +23111,26 @@ extern "C" void cFEStateLogin_onWidgetCreate(cFEStateLogin* self, cFEVObj_001BEF
             pWidget->setStatic(1);
             pWidget->setVisible(0);
         }
-    } else if (IsHash_001BEF60(widget->mId, str_1rectangle)) {
+    } else if (IsHash_001BEF60(widget->mHashName, str_1rectangle)) {
         if (strlen(AccountData) == 0) {
             pWidget->setVisible(0);
         } else {
             pWidget->setVisible(1);
         }
-    } else if (IsHash_001BEF60(widget->mId, str_4rectangle)) {
+    } else if (IsHash_001BEF60(widget->mHashName, str_4rectangle)) {
         if (strlen(AccountData) == 0) {
             pWidget->setVisible(0);
         } else {
             pWidget->setVisible(1);
         }
-    } else if (IsHash_001BEF60(widget->mId, str_TextCreateAccount)) {
-        widget->mState = 2;
+    } else if (IsHash_001BEF60(widget->mHashName, str_TextCreateAccount)) {
+        widget->mMiscData = 2;
         pWidget->setVisible(1);
-    } else if (IsHash_001BEF60(widget->mId, str_TextExistingAccount)) {
-        widget->mState = 1;
+    } else if (IsHash_001BEF60(widget->mHashName, str_TextExistingAccount)) {
+        widget->mMiscData = 1;
         pWidget->setVisible(1);
-    } else if (IsHash_001BEF60(widget->mId, str_TextDelectAccount)) {
-        widget->mState = 3;
+    } else if (IsHash_001BEF60(widget->mHashName, str_TextDelectAccount)) {
+        widget->mMiscData = 3;
         int locStr = Loc_001BEF60(str_kT_BTNDelete);
         usprintf_1BEF60(buf, str_pct_s_pct_S, locStr, AccountData);
         cUIText_setUnicodeString((cUIText*)pWidget, (char*)buf);
@@ -25410,14 +25398,11 @@ extern const char str_cFEStateNetQuickMessages[];
 extern char str_cFEStateOnlineAgreement[];
 extern const char str_FEOptions[];
 
-struct sColor_1C1EA8 {
-    float r, g, b, a;
-};
 
 struct sTextVE_1C1EA8 {
     short delta;
     short index;
-    void (*fn)(void*, sColor_1C1EA8*);
+    void (*fn)(void*, tARGB*);
 };
 
 /**
@@ -25466,24 +25451,24 @@ extern "C" void cFEStateNetSSXWorld_onWidgetEvent(cFEStateNet* self, char* msg, 
         func_001A8A40(((char*)self), cFEStateOnlineMainMenu_cFEStateOnlineMainMenu((cFEStateNet*)cMemMan_alloc(1744, str_cFEStateOnlineMainMenu, 0, 0), (int)self->mpEngine));
         break;
     case 1: {
-        sColor_1C1EA8 color;
+        tARGB color;
         sTextVE_1C1EA8* vt = *(sTextVE_1C1EA8**)(msg + 8);
         char* obj = msg + vt[11].delta;
-        color.r = 1.0f;
-        color.g = 1.0f;
-        color.b = 1.0f;
-        color.a = 1.0f;
+        color.A = 1.0f;
+        color.R = 1.0f;
+        color.G = 1.0f;
+        color.B = 1.0f;
         vt[11].fn(obj, &color);
         break;
     }
     case 2: {
-        sColor_1C1EA8 color;
+        tARGB color;
         sTextVE_1C1EA8* vt = *(sTextVE_1C1EA8**)(msg + 8);
         char* obj = msg + vt[11].delta;
-        color.r = 1.0f;
-        color.g = 0.0f;
-        color.b = 0.0f;
-        color.a = 0.0f;
+        color.A = 1.0f;
+        color.R = 0.0f;
+        color.G = 0.0f;
+        color.B = 0.0f;
         vt[11].fn(obj, &color);
         break;
     }
@@ -26674,9 +26659,6 @@ struct cVec_3668 {
     cVec_3668(float a, float b, float c, float e) { x = a; y = b; z = c; w = e; }
 };
 
-struct cPos_3668 {
-    float x, y, z;
-};
 
 class cObj_3668 {
 public:
@@ -26688,7 +26670,7 @@ public:
     virtual void setColor(const cVec_3668& v);
     virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16();
     virtual void v17(); virtual void v18(); virtual void v19();
-    virtual void getSize(cPos_3668* out);
+    virtual void getSize(t3Vector* out);
 };
 
 // Same slot-9 setVisible, declared with other return types so the two highlight-off arms are not cross-jumped.
@@ -26783,14 +26765,14 @@ extern "C" void cFEStateStats_onWidgetEvent(cFEStateStats* self, cObj_3668* w, i
             for (int i = 0; i < 10; i++) {
                 sprintf(buf, str_resultsItem0pct_d, i);
                 if (isButton_3668(w, buf)) {
-                    cPos_3668 pos;
-                    cPos_3668 size;
+                    t3Vector pos;
+                    t3Vector size;
                     cObj_3668* rankHighlight = getObj_3668(((char*)self), str_rankhl);
                     func_003A0290_3668(w, &pos);
                     w->getSize(&size);
                     pos.y = pos.y - size.y + 14.0f;
                     pos.x = pos.x + -40.0f;
-                    *(cPos_3668*)((char*)rankHighlight + 0x44) = pos;
+                    *(t3Vector*)((char*)rankHighlight + 0x44) = pos;
                     rankHighlight->setVisible(1);
                     func_001C3D68_3668(((char*)self), i + self->miFirstResult, func_0025F338_3668(LobbyMan_mLobbyMan));
                     break;
@@ -27987,11 +27969,8 @@ INCLUDE_ASM("fe/feasyncfile", cPopupInfo_clear);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 
-struct sVec3_1C5630 {
-    int x, y, z;
-};
 
-extern sVec3_1C5630 t3vect_Zero;
+extern t3Vector t3vect_Zero;
 
 /**
  * Resets a popup description to a plain message popup with no texts, options or confirmations.
@@ -28025,7 +28004,7 @@ extern "C" void cPopupInfo_clear(cPopupInfo* self)
     *(int*)&self->mfMinSize = 0;
     self->meType = 0;
     self->miLayerOffset = 0;
-    *(sVec3_1C5630*)&self->mvOffset[0] = t3vect_Zero;
+    *(t3Vector*)&self->mvOffset[0] = t3vect_Zero;
     self->miDefaultOption = -1;
     self->meBackgroundType = 0;
     self->mbDeferEventsFlag = 0;

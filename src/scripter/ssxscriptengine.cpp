@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uithing.h"
+#include "visualfx/transitionobj.h"
+#include "path/pathsys.h"
 #include "sound/ssxaudio.h"
 #include "bx/math3d.h"
 #include "main/gameviewman.h"
@@ -258,24 +261,8 @@ extern "C" void* cUIStateStack_findState(void* list, int hash);
 extern "C" void cBXLoadIndicator_Show(void*, int);
 extern "C" void cBXLoadIndicator_Hide(void*, int);
 
-struct sSseObj8720 {
-    char data[0xCC];
-};
 
 
-struct sSse8720 {
-    char pad_0x0[0x500];
-    char snd[0x4C];                 // 0x500
-    sSseObj8720* objsA;             // 0x54C
-    int state;                      // 0x550
-    int delay;                      // 0x554
-    char pad_0x558[0x624 - 0x558];
-    sSseObj8720* objsB;             // 0x624
-    char pad_0x628[0x6D0 - 0x628];
-    char rigs[2][0x120];            // 0x6D0
-    char pad_0x910[0x1C];
-    char fx[0x10];                  // 0x92C
-};
 
 /**
  * Runs one frame of the script engine: updates the lists, requests, video, cameras and the playing NIS.
@@ -287,20 +274,20 @@ struct sSse8720 {
  * "hud" UI state up the load indicator shows while the list is probably loading. Counts mNumFramesNoSkip
  * down.
  */
-extern "C" void cSSXScriptEngine_Update(sSse8720* self)
+extern "C" void cSSXScriptEngine_Update(cSSXScriptEngine* self)
 {
     for (int i = 0; i < 2; i++)
-        tNISList_Update(&self->objsA[i]);
+        tNISList_Update(&self->mpNISLists[i]);
     for (int i = 0; i < 2; i++)
-        tNISList_Update(&self->objsB[i]);
+        tNISList_Update(&self->mpIdleLists[i]);
     cBXScriptEngine_Update(self);
-    cVidEngine_UpdateVideo(self->snd);
+    cVidEngine_UpdateVideo(((char*)&self->mpPlayer));
     for (int i = 0; i < 2; i++)
-        cScriptObjCameraManager_Update((cScriptObjCameraManager*)self->rigs[i]);
-    cScriptObjEvent_Update((cScriptObjEvent*)((cScriptObjEvent*)self->fx));
-    if (self->state != 2)
+        cScriptObjCameraManager_Update((cScriptObjCameraManager*)self->mObjectCameraManager[i]);
+    cScriptObjEvent_Update((cScriptObjEvent*)((cScriptObjEvent*)((char*)&self->mObjectEvent)));
+    if (self->mPlayingNISList != 2)
     {
-        sSseObj8720* nisList = &self->objsA[self->state];
+        tNISList* nisList = &self->mpNISLists[self->mPlayingNISList];
         if (tNISList_IsSkipAllowed((tNISList*)nisList))
         {
             cAI* lvl = SSXApp->Game->AI;
@@ -308,7 +295,7 @@ extern "C" void cSSXScriptEngine_Update(sSse8720* self)
             for (int j = 0; j < n; j++)
             {
                 void* obj = *(void**)(((char**)&lvl->Players[0])[j] + 0xDF0);
-                if (**(int**)obj != 0 && self->delay == 0 && cInput_getState(obj, 111))
+                if (**(int**)obj != 0 && self->mNumFramesNoSkip == 0 && cInput_getState(obj, 111))
                 {
                     tNISList_DoSkip(nisList);
                     goto done;
@@ -326,8 +313,8 @@ extern "C" void cSSXScriptEngine_Update(sSse8720* self)
                 cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 1);
         }
     }
-    if (self->delay > 0)
-        self->delay--;
+    if (self->mNumFramesNoSkip > 0)
+        self->mNumFramesNoSkip--;
 }
 #endif
 
@@ -339,10 +326,6 @@ extern "C" int ASYNCFILE_getstatus(void*);
 extern "C" void cSSXScriptEngine_ProcessAsyncLoadTrackTableComplete(cSSXScriptEngine* self, void* file);
 extern "C" void cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete(cSSXScriptEngine* self, void* file);
 
-struct sScrSlot8918 {
-    void* file;
-    int pad[3];
-};
 
 /**
  * Polls the pending asynchronous loads and processes any that have finished.
@@ -357,9 +340,9 @@ extern "C" void cSSXScriptEngine_UpdateLoad(cSSXScriptEngine* self)
     if (tableHandle != 0 && ASYNCFILE_getstatus(tableHandle) != 0) {
         cSSXScriptEngine_ProcessAsyncLoadTrackTableComplete(self, self->mFilterTableAsyncHandle);
     }
-    sScrSlot8918* slots = (sScrSlot8918*)(&self->mScriptDataBanks[0].asyncHandle);
+    tSSXScriptBankInfo* slots = (tSSXScriptBankInfo*)(&self->mScriptDataBanks[0].asyncHandle);
     for (int i = 0; i < 10; i++) {
-        void* bankFile = slots[i].file;
+        void* bankFile = slots[i].dataBankHandle;
         if (bankFile != 0 && ASYNCFILE_getstatus(bankFile) != 0) {
             cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete((cSSXScriptEngine*)self, bankFile);
         }
@@ -1300,7 +1283,6 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_RequestScriptByHashID);
 #ifdef SKIP_ASM
 extern "C" int cSSXScriptEngine_RequestScriptByIndex(cSSXScriptEngine* self, int key, int a, int b, int c);
 
-struct sEnt_002796B8 { int a; int key; int c; };
 
 /**
  * Requests the master-table script with the given hash ID, with up to three characters cast in it.
@@ -1316,7 +1298,7 @@ extern "C" int cSSXScriptEngine_RequestScriptByHashID(cSSXScriptEngine* self, in
     int i = 0;
     if (*(int*)self->mpMasterTableHeader > 0) {
         do {
-            if (((sEnt_002796B8*)self->mpMasterTable)[i].key == id)
+            if (((int)(self->mpMasterTable)[i].hashID) == id)
                 return cSSXScriptEngine_RequestScriptByIndex(self, i, mainCharAIIndex, supportChar0AIIndex, supportChar1AIIndex);
             i++;
         } while (i < *(int*)self->mpMasterTableHeader);
@@ -2098,27 +2080,16 @@ extern void* cFade_TObj_vtbl[];
 // PORT: the wake-fx pool allocator ignores its argument; callers pass the object size.
 extern "C" void* cTransitionObj_operator_new_sz(unsigned size) __asm__("cTransitionObj_operator_new");
 
-struct sColor_27A4A0
-{
-    float r, g, b, a;
-    sColor_27A4A0() {}
-    sColor_27A4A0(float ar, float ag, float ab, float aa) { r = ar; g = ag; b = ab; a = aa; }
-};
 
-struct sFx_27A4A0
-{
-    void** vt;
-    sColor_27A4A0 c;
-};
 
-extern "C" void* cWipe_TObj_cWipe_TObj(void* self, const sColor_27A4A0* col, int dx, int dy);
-extern "C" void* cCircle_TObj_cCircle_TObj(void* self, const sColor_27A4A0* col);
+extern "C" void* cWipe_TObj_cWipe_TObj(void* self, const tARGB* col, int dx, int dy);
+extern "C" void* cCircle_TObj_cCircle_TObj(void* self, const tARGB* col);
 
-static inline sFx_27A4A0* initFx_27A4A0(sFx_27A4A0* p, const sColor_27A4A0& col)
+static inline cFade_TObj* initFx_27A4A0(cFade_TObj* p, const tARGB& col)
 {
     cTransitionObj_cTransitionObj(p);
-    p->vt = cFade_TObj_vtbl;
-    p->c = col;
+    p->mVtbl = cFade_TObj_vtbl;
+    (*(&p->mColour)) = col;
     return p;
 }
 
@@ -2135,25 +2106,25 @@ static inline sFx_27A4A0* initFx_27A4A0(sFx_27A4A0* p, const sColor_27A4A0& col)
  */
 extern "C" void* cSSXScriptEngine_MakeTransitionObject(cSSXScriptEngine* self, int type, int mode)
 {
-    sColor_27A4A0 color;
+    tARGB color;
     switch (mode) {
     case 0:
-        color.r = 1.0f;
-        color.g = 0.0f;
-        color.b = 0.0f;
-        color.a = 0.0f;
+        color.A = 1.0f;
+        color.R = 0.0f;
+        color.G = 0.0f;
+        color.B = 0.0f;
         break;
     case 1:
-        color.r = 1.0f;
-        color.g = 1.0f;
-        color.b = 1.0f;
-        color.a = 1.0f;
+        color.A = 1.0f;
+        color.R = 1.0f;
+        color.G = 1.0f;
+        color.B = 1.0f;
         break;
     }
     switch (type) {
     case 1: {
-        sFx_27A4A0* fxObj = (sFx_27A4A0*)cTransitionObj_operator_new_sz(20);
-        sColor_27A4A0 fxColor = color;
+        cFade_TObj* fxObj = (cFade_TObj*)cTransitionObj_operator_new_sz(20);
+        tARGB fxColor = color;
         return initFx_27A4A0(fxObj, fxColor);
     }
     case 2:
@@ -2167,12 +2138,12 @@ extern "C" void* cSSXScriptEngine_MakeTransitionObject(cSSXScriptEngine* self, i
     case 6:
         return cCircle_TObj_cCircle_TObj(cTransitionObj_operator_new_sz(0x1C), &color);
     case 7: {
-        sFx_27A4A0* fxObj = (sFx_27A4A0*)cTransitionObj_operator_new_sz(20);
-        sColor_27A4A0 fxColor;
-        fxColor.r = 1.0f;
-        fxColor.g = 1.0f;
-        fxColor.b = 1.0f;
-        fxColor.a = 1.0f;
+        cFade_TObj* fxObj = (cFade_TObj*)cTransitionObj_operator_new_sz(20);
+        tARGB fxColor;
+        fxColor.A = 1.0f;
+        fxColor.R = 1.0f;
+        fxColor.G = 1.0f;
+        fxColor.B = 1.0f;
         return initFx_27A4A0(fxObj, fxColor);
     }
     case 0:
@@ -2644,17 +2615,7 @@ void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm
 extern "C" void cSSXScriptEngine_BuildCharacterBitRoleArray(void* self, int* flags);
 extern char str_ScriptChoice[];
 
-struct sScript_27B0C0
-{
-    int id;
-    short mask[21];
-};
 
-struct sCategory_27B0C0
-{
-    int count;
-    sScript_27B0C0* scripts;
-};
 
 struct sPri_27B0C0
 {
@@ -2678,25 +2639,25 @@ struct sPri_27B0C0
 extern "C" int* cSSXScriptEngine_GetScriptFromCategory(cSSXScriptEngine* engine, int cat)
 {
     cSSXScriptEngine* self = engine;
-    if (((int)self->mpFilterTableHeader) == 0 || ((sCategory_27B0C0*)self->mpCategoryFilterTable)[cat].count == 0)
+    if (((int)self->mpFilterTableHeader) == 0 || (self->mpCategoryFilterTable)[cat].numScripts == 0)
         return 0;
     int flags[21];
     cSSXScriptEngine_BuildCharacterBitRoleArray(self, flags);
     int best = 0xFFFF;
     int n = 0;
-    sScript_27B0C0** list = new (str_ScriptChoice, 0x100, 0) sScript_27B0C0*[100];
-    int count = ((sCategory_27B0C0*)self->mpCategoryFilterTable)[cat].count;
-    sScript_27B0C0* scripts = ((sCategory_27B0C0*)self->mpCategoryFilterTable)[cat].scripts;
+    tSSXHiveScriptFilter** list = new (str_ScriptChoice, 0x100, 0) tSSXHiveScriptFilter*[100];
+    int count = (self->mpCategoryFilterTable)[cat].numScripts;
+    tSSXHiveScriptFilter* scripts = (self->mpCategoryFilterTable)[cat].scriptFilterPtr.pScriptFilter;
     for (int i = 0; i < count; i++)
     {
-        sScript_27B0C0* script = &scripts[i];
-        int pri = ((sPri_27B0C0*)self->mpMasterTable)[script->id].pri;
+        tSSXHiveScriptFilter* script = &scripts[i];
+        int pri = ((sPri_27B0C0*)self->mpMasterTable)[script->scriptIndex].pri;
         if (pri <= best)
         {
             int fail = 0;
             for (int j = 0; j < 21; j++)
             {
-                if (script->mask[j] != 0 && (flags[j] & script->mask[j]) == 0)
+                if (script->charFilters[j] != 0 && (flags[j] & script->charFilters[j]) == 0)
                 {
                     fail = 1;
                     break;
@@ -2713,7 +2674,7 @@ extern "C" int* cSSXScriptEngine_GetScriptFromCategory(cSSXScriptEngine* engine,
             }
         }
     }
-    sScript_27B0C0* chosen = n ? list[BXrand() % n] : 0;
+    tSSXHiveScriptFilter* chosen = n ? list[BXrand() % n] : 0;
     if (list)
         cMemMan_free(list);
     return (int*)chosen;
@@ -3037,12 +2998,6 @@ struct sVec2_27B750
     sVec2_27B750() {}
 };
 
-struct sNode_27B750
-{
-    char pad0[0x8];
-    float px, py, pz;
-    float dx, dy, dz;
-};
 
 
 // PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
@@ -3095,13 +3050,13 @@ extern "C" void cSSXScriptEngine_FillOrientationFromStartPointInfo(cSSXScriptEng
 {
     char* sub = (char*)&obj->mVtbl;
     sVEntry<int(void*)>* vtEntry = &(*(sVEntry<int(void*)>**)sub)[7];
-    sNode_27B750* startPoint = (sNode_27B750*)cPathSys_getStartpoint(gPaths, 1, vtEntry->fn(sub + vtEntry->delta));
-    *pos = sVec4_27B750(startPoint->px, startPoint->py, startPoint->pz, 1.0f);
-    *yaw = Atan2_27B750(startPoint->dy, startPoint->dx);
-    float z = startPoint->dz;
+    tPathStartpoint* startPoint = (tPathStartpoint*)cPathSys_getStartpoint(gPaths, 1, vtEntry->fn(sub + vtEntry->delta));
+    *pos = sVec4_27B750(startPoint->Pos.x, startPoint->Pos.y, startPoint->Pos.z, 1.0f);
+    *yaw = Atan2_27B750(startPoint->Dir.y, startPoint->Dir.x);
+    float z = startPoint->Dir.z;
     sVec2_27B750 horiz;
-    horiz.x = startPoint->dx;
-    horiz.y = startPoint->dy;
+    horiz.x = startPoint->Dir.x;
+    horiz.y = startPoint->Dir.y;
     *pitch = Atan2_27B750(z, Length_27B750(horiz));
     *roll = 0;
 }
@@ -4560,13 +4515,6 @@ extern "C" cScriptDatabaseObject* cScriptDatabaseObject_GetDatabaseObject()
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_GetPlayerIDByEntity);
 #ifdef SKIP_ASM
-struct sVar0050 {
-    int a;
-    int b;
-    int value;
-    int type;
-    int e;
-};
 
 
 /**
@@ -4578,11 +4526,11 @@ struct sVar0050 {
  */
 extern "C" int cScriptDatabaseObject_GetPlayerIDByEntity(cScriptDatabaseObject* self, void* entity)
 {
-    sVar0050* record = &((sVar0050*)&self->mEntityDatabase[0])[*(int*)((char*)entity + 0x4)];
-    if (record->type != 1) {
+    tScriptEntityRecord* record = &((&self->mEntityDatabase[0]))[*(int*)((char*)entity + 0x4)];
+    if (record->relation != 1) {
         return -1;
     }
-    return record->value;
+    return record->playerID;
 }
 #endif
 
@@ -4637,13 +4585,6 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_RemoveEntity);
 #ifdef SKIP_ASM
 extern "C" void cScriptEntity_DetachEntity(void* self);
 
-struct sScrEnt27D390 {
-    int* obj;
-    int a;
-    int b;
-    int state;
-    int c;
-};
 
 /**
  * Unregisters a script entity: frees its record (mEntityDatabase[its database ID, +0x4]).
@@ -4656,16 +4597,16 @@ struct sScrEnt27D390 {
  */
 extern "C" int cScriptDatabaseObject_RemoveEntity(cScriptDatabaseObject* self, void* msg)
 {
-    sScrEnt27D390* record = (sScrEnt27D390*)((char*)self + (*(int*)((char*)msg + 0x4) * 0x14 + 0x50));
-    if (record->state == 1) {
+    tScriptEntityRecord* record = &self->mEntityDatabase[*(int*)((char*)msg + 0x4)];
+    if (record->relation == 1) {
         cScriptEntity_DetachEntity(msg);
     }
-    record->obj[1] = -1;
-    record->a = -1;
-    record->obj = 0;
-    record->b = -1;
-    record->state = 0;
-    record->c = -1;
+    ((int*)record->pEntity)[1] = -1;
+    record->objID = -1;
+    (*(int**)&record->pEntity) = 0;
+    record->playerID = -1;
+    record->relation = 0;
+    record->reservedPlayerID = -1;
     return 1;
 }
 #endif
@@ -4680,17 +4621,10 @@ struct sScrVEntryD400b {
     void (*fn)(void*, int);
 };
 
-struct sScrSlotD400 {
-    int field_0x0;
-    int id;         // 0x4
-    int value;      // 0x8
-    int set;        // 0xC
-    int field_0x10;
-};
 
 struct sScrOwnerD400 {
     void* objs[0x14];           // 0x0
-    sScrSlotD400 slots[1];      // 0x50
+    tScriptEntityRecord slots[1];      // 0x50
 };
 
 /**
@@ -4706,14 +4640,14 @@ struct sScrOwnerD400 {
 extern "C" void cScriptDatabaseObject_MarkEntityAsUsed(sScrOwnerD400* self, int* key, int value)
 {
     sVEntry<int(void*, int, int)>* vt = *(sVEntry<int(void*, int, int)>**)((char*)self + 0x2A8);
-    sScrSlotD400* record = &self->slots[key[1]];
-    if (vt[4].fn((char*)self + vt[4].delta, record->id, value) == 0) {
-        char* obj = (char*)self->objs[record->id];
+    tScriptEntityRecord* record = &self->slots[key[1]];
+    if (vt[4].fn((char*)self + vt[4].delta, record->objID, value) == 0) {
+        char* obj = (char*)self->objs[record->objID];
         sScrVEntryD400b* vt2 = *(sScrVEntryD400b**)(obj + 0xC);
         vt2[4].fn(obj + vt2[4].delta, value);
     }
-    record->value = value;
-    record->set = 1;
+    record->playerID = value;
+    record->relation = 1;
 }
 #endif
 
@@ -4818,14 +4752,14 @@ extern "C" int cScriptDatabaseObject_GetAvailableEntities(cScriptDatabaseObject*
 {
     int n = 0;
     int i = 0;
-    sVar0050* record = ((sVar0050*)&self->mEntityDatabase[0]);
+    tScriptEntityRecord* record = ((&self->mEntityDatabase[0]));
     while (i < 30 && n != max) {
-        if (record->a != 0 && record->type != 1 && (record->e < 0 || record->e == key)) {
-            *out++ = record->a;
+        if (((int)record->pEntity) != 0 && record->relation != 1 && (record->reservedPlayerID < 0 || record->reservedPlayerID == key)) {
+            *out++ = ((int)record->pEntity);
             n++;
         }
         i++;
-        if (i < 30) record = &((sVar0050*)&self->mEntityDatabase[0])[i];
+        if (i < 30) record = &((&self->mEntityDatabase[0]))[i];
     }
     return n;
 }

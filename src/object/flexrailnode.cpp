@@ -1,5 +1,9 @@
 #include "vtable.h"
 #include "common.h"
+#include "ai/rider.h"
+#include "world/instancerecord.h"
+#include "intersect/bxnash.h"
+#include "object/railspacenode.h"
 #include "bx/appman.h"
 #include "bx/math3d.h"
 #include "object/flagset.h"
@@ -11,28 +15,13 @@
 //100%
 INCLUDE_ASM("object/flexrailnode", cFlexRailNode_addSpaceHash);
 #ifdef SKIP_ASM
-struct sHashKey_8B90 {
-    int level;      // 0x0
-    int x;          // 0x4
-    int y;          // 0x8
-    int z;          // 0xC
-};
 
-struct sHashCell_8B90 {
-    char data[0x14];
-};
 
-struct sHashNode_8B90 {
-    int field_0x0;
-    int field_0x4;
-    int type;       // 0x8
-    void* owner;    // 0xC
-};
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cObjectInterface_getNash();
-extern "C" void nash_Nash_findkey(sHashKey_8B90* out, void* box);
-extern "C" void nash_Octant_addnode(sHashCell_8B90* cell, int type, sHashNode_8B90* node, sHashKey_8B90* key);
+extern "C" void nash_Nash_findkey(nash_CellKey* out, void* box);
+extern "C" void nash_Octant_addnode(nash_Octant* cell, int type, cFlexRailSpaceNode* node, nash_CellKey* key);
 extern const char str_FlexRailSpaceNode[];
 
 /**
@@ -43,17 +32,17 @@ extern const char str_FlexRailSpaceNode[];
  */
 extern "C" void cFlexRailNode_addSpaceHash(cFlexRailNode* self)
 {
-    sHashNode_8B90* n = (sHashNode_8B90*)cMemMan_alloc(0x10, str_FlexRailSpaceNode, 0x20000000, 0);
-    n->owner = ((void*)self);
+    cFlexRailSpaceNode* n = (cFlexRailSpaceNode*)cMemMan_alloc(0x10, str_FlexRailSpaceNode, 0x20000000, 0);
+    (*(void**)&n->FlexNode) = ((void*)self);
     n->type = 3;
     self->Node = (cFlexRailSpaceNode*)n;
-    sHashCell_8B90* cell = (sHashCell_8B90*)cObjectInterface_getNash();
-    sHashNode_8B90* node = (sHashNode_8B90*)self->Node;
-    sHashKey_8B90 key;
+    nash_Octant* cell = (nash_Octant*)cObjectInterface_getNash();
+    cFlexRailSpaceNode* node = self->Node;
+    nash_CellKey key;
     nash_Nash_findkey(&key, (char*)&self->BoundBox);
-    sHashCell_8B90* cellX = key.x < 0 ? cell + 4 : cell;
-    sHashCell_8B90* cellXY = key.y < 0 ? cellX + 2 : cellX;
-    sHashCell_8B90* cellXYZ = key.z < 0 ? cellXY + 1 : cellXY;
+    nash_Octant* cellX = key.x < 0 ? cell + 4 : cell;
+    nash_Octant* cellXY = key.y < 0 ? cellX + 2 : cellX;
+    nash_Octant* cellXYZ = key.z < 0 ? cellXY + 1 : cellXY;
     nash_Octant_addnode(cellXYZ, 2, node, &key);
 }
 #endif
@@ -67,12 +56,8 @@ struct sOctCell_8C48 {
     void* lists[3];
 };
 
-struct sHashCellR_8C48 {
-    char pad_0x0[0x10];
-    sOctCell_8C48* oct;   // 0x10
-};
 
-extern "C" void nash_Cell_remnode(sOctCell_8C48* oct, int type, sHashNode_8B90* node, sHashKey_8B90* key, sHashCellR_8C48* cell);
+extern "C" void nash_Cell_remnode(sOctCell_8C48* oct, int type, cFlexRailSpaceNode* node, nash_CellKey* key, nash_Octant* cell);
 
 static inline int octEmpty_8C48(sOctCell_8C48* o)
 {
@@ -98,19 +83,19 @@ static inline int octEmpty_8C48(sOctCell_8C48* o)
  */
 extern "C" void cFlexRailNode_remSpaceHash(cFlexRailNode* self)
 {
-    sHashCellR_8C48* cell = (sHashCellR_8C48*)cObjectInterface_getNash();
-    sHashNode_8B90* node = (sHashNode_8B90*)self->Node;
+    nash_Octant* cell = (nash_Octant*)cObjectInterface_getNash();
+    cFlexRailSpaceNode* node = self->Node;
     (*(int*)((char*)cell + 0xA0))++;
-    sHashKey_8B90 key;
+    nash_CellKey key;
     nash_Nash_findkey(&key, (char*)&self->BoundBox);
-    sHashCellR_8C48* cellX = key.x < 0 ? cell + 4 : cell;
-    sHashCellR_8C48* cellXY = key.y < 0 ? cellX + 2 : cellX;
-    sHashCellR_8C48* cellXYZ = key.z < 0 ? cellXY + 1 : cellXY;
-    sHashCellR_8C48* octant = cellXYZ;
-    nash_Cell_remnode(octant->oct, 2, node, &key, octant);
-    if (octEmpty_8C48(octant->oct)) {
-        operator_delete((int*)octant->oct);
-        octant->oct = 0;
+    nash_Octant* cellX = key.x < 0 ? cell + 4 : cell;
+    nash_Octant* cellXY = key.y < 0 ? cellX + 2 : cellX;
+    nash_Octant* cellXYZ = key.z < 0 ? cellXY + 1 : cellXY;
+    nash_Octant* octant = cellXYZ;
+    nash_Cell_remnode(((sOctCell_8C48*)octant->rootcell), 2, node, &key, octant);
+    if (octEmpty_8C48(((sOctCell_8C48*)octant->rootcell))) {
+        operator_delete((int*)((sOctCell_8C48*)octant->rootcell));
+        (*(sOctCell_8C48**)&octant->rootcell) = 0;
     }
     operator_delete((int*)self->Node);
     self->Node = 0;
@@ -126,7 +111,7 @@ struct sFrBoxRail;
 extern "C" void cFloatRailNode_updateBoundBox(cFloatRailNode* self);
 extern "C" void cFlexRailNode_addSpaceHash(cFlexRailNode* self);
 struct sFrNode9220;
-extern "C" void cFloatRailNode_getPosition(cFloatRailNode* self, sFrNode9220* node);
+extern "C" void cFloatRailNode_getPosition(cFloatRailNode* self, tFloatRailNode* node);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
 extern char cFloatRailNode_vtbl[];
@@ -190,7 +175,7 @@ extern "C" void* cFloatRailNode_cFloatRailNode(cFloatRailNode* self, void* instR
         ((sFlexRailElem_348D98*)self->Nodes)[j].bone = bones[j];
         ((sFlexRailElem_348D98*)self->Nodes)[j].vel = t4vect_Zero;
         ((sFlexRailElem_348D98*)self->Nodes)[j].force = t4vect_Zero;
-        cFloatRailNode_getPosition(self, (sFrNode9220*)&((sFlexRailElem_348D98*)self->Nodes)[j]);
+        cFloatRailNode_getPosition(self, (tFloatRailNode*)&((sFlexRailElem_348D98*)self->Nodes)[j]);
         ((sFlexRailElem_348D98*)self->Nodes)[j].posB = ((sFlexRailElem_348D98*)self->Nodes)[j].posA;
     }
     cFloatRailNode_updateMats(self);
@@ -414,13 +399,6 @@ struct sFrModelRef9220 {
     }
 };
 
-struct sFrNode9220 {
-    char pad_0x0[0x20];
-    sFrNodeVec4 posA;       // 0x20
-    sFrNodeVec4 posB;       // 0x30
-    sFrModelRef9220 model;  // 0x40
-    int bone;               // 0x44
-};
 
 /**
  * Sets a float rail node's Pos and OPos to the current position of its mesh.
@@ -429,13 +407,13 @@ struct sFrNode9220 {
  *
  * @param node  rail node to update
  */
-extern "C" void cFloatRailNode_getPosition(cFloatRailNode* self, sFrNode9220* node)
+extern "C" void cFloatRailNode_getPosition(cFloatRailNode* self, tFloatRailNode* node)
 {
     sFrNodeMtx boneMat;
-    cInstanceNode_buildMeshMat(node->model.get(), node->bone, &boneMat);
+    cInstanceNode_buildMeshMat((*(sFrModelRef9220*)&node->InstId).get(), node->Mesh, &boneMat);
     sFrNodeVec4 bonePos = boneMat.r[3];
-    node->posB = bonePos;
-    node->posA = bonePos;
+    (*(sFrNodeVec4*)&node->OPos) = bonePos;
+    (*(sFrNodeVec4*)&node->Pos) = bonePos;
 }
 #endif
 
@@ -449,11 +427,6 @@ struct sFrV4_92A8 {
 } __attribute__((aligned(16)));
 
 
-struct sFrElem_92A8 {
-    char pad_0x00[0x20];
-    sFrV4_92A8 pos; // 0x20
-    char pad_0x30[0x20];
-};
 
 
 extern float D_004FFAC0[16];
@@ -546,11 +519,11 @@ extern "C" void cFloatRailNode_updateMats(cFloatRailNode* selfv)
 {
     cFloatRailNode* self = selfv;
     int i = 1;
-    updateMat_92A8((self->Mats)[0], ((sFrElem_92A8*)self->Nodes)[0].pos, ((sFrElem_92A8*)self->Nodes)[0].pos, ((sFrElem_92A8*)self->Nodes)[1].pos, ((sFrElem_92A8*)self->Nodes)[2].pos);
+    updateMat_92A8((self->Mats)[0], (*(sFrV4_92A8*)&(self->Nodes)[0].Pos), (*(sFrV4_92A8*)&(self->Nodes)[0].Pos), (*(sFrV4_92A8*)&(self->Nodes)[1].Pos), (*(sFrV4_92A8*)&(self->Nodes)[2].Pos));
     for (; i < self->NumNodes - 2; i++) {
-        updateMat_92A8((self->Mats)[i], ((sFrElem_92A8*)self->Nodes)[i - 1].pos, ((sFrElem_92A8*)self->Nodes)[i].pos, ((sFrElem_92A8*)self->Nodes)[i + 1].pos, ((sFrElem_92A8*)self->Nodes)[i + 2].pos);
+        updateMat_92A8((self->Mats)[i], (*(sFrV4_92A8*)&(self->Nodes)[i - 1].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i + 1].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i + 2].Pos));
     }
-    updateMat_92A8((self->Mats)[i], ((sFrElem_92A8*)self->Nodes)[i - 1].pos, ((sFrElem_92A8*)self->Nodes)[i].pos, ((sFrElem_92A8*)self->Nodes)[i + 1].pos, ((sFrElem_92A8*)self->Nodes)[i + 1].pos);
+    updateMat_92A8((self->Mats)[i], (*(sFrV4_92A8*)&(self->Nodes)[i - 1].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i + 1].Pos), (*(sFrV4_92A8*)&(self->Nodes)[i + 1].Pos));
 }
 #endif
 
@@ -662,7 +635,7 @@ struct sFrN_98E8 {
 };
 
 extern "C" float cObjectInterface_getUpdateTime();
-extern "C" void cFloatRailNode_getPosition(cFloatRailNode* self, sFrNode9220* node);
+extern "C" void cFloatRailNode_getPosition(cFloatRailNode* self, tFloatRailNode* node);
 // View (cFloatRailNode_cFloatRailNode earlier in this unit declares it with its own type).
 extern sFrV_98E8 D_004FF120_98E8 __asm__("t4vect_Zero");
 
@@ -738,7 +711,7 @@ extern "C" void cFloatRailNode_updateNodes(cFloatRailNode* self)
     sFrN_98E8* n = (sFrN_98E8*)self->Nodes;
     for (int i = 0; i < self->NumNodes; i++, n++) {
         if (*(int*)((char*)n->model.get() + 0xC))
-            cFloatRailNode_getPosition(self, (sFrNode9220*)n);
+            cFloatRailNode_getPosition(self, (tFloatRailNode*)n);
         float* k = (float*)(&self->LSpring);
         float ks = -self->LSpring;
         sFrV_98E8 acc = vu0Add_98E8(vu0Scale_98E8(vu0Sub_98E8(n->posA, n->posB), ks),
@@ -788,7 +761,7 @@ extern "C" void cSpringRailNode_updateMats(cSpringRailNode* self);
 struct sFrBoxRail60;
 extern "C" void cSpringRailNode_updateBoundBox(cSpringRailNode* self);
 struct sFrNodeA028;
-extern "C" void cSpringRailNode_getPosition(cSpringRailNode* self, sFrNodeA028* node);
+extern "C" void cSpringRailNode_getPosition(cSpringRailNode* self, tSpringRailNode* node);
 extern char cSpringRailNode_vtbl[];
 extern char str_SpringRailNodes[];
 
@@ -867,7 +840,7 @@ extern "C" void* cSpringRailNode_cSpringRailNode(cSpringRailNode* self, void* in
         ((sFlexElem_9B48*)self->Nodes)[j].v40 = D_004FF120_9B48;
         ((sFlexElem_9B48*)self->Nodes)[j].v20 = D_004FF120_9B48;
         ((sFlexElem_9B48*)self->Nodes)[j].dir = D_004FF120_9B48;
-        cSpringRailNode_getPosition(self, (sFrNodeA028*)&((sFlexElem_9B48*)self->Nodes)[j]);
+        cSpringRailNode_getPosition(self, (tSpringRailNode*)&((sFlexElem_9B48*)self->Nodes)[j]);
     }
     for (int k = 0; k < self->NumNodes - 1; k++) {
         ((sFlexElem_9B48*)self->Nodes)[k].dir =
@@ -1020,24 +993,18 @@ INCLUDE_ASM("object/flexrailnode", cSpringRailNode_getPosition);
 extern "C" sFrWorld9220** cObjectInterface_getWorld();
 extern "C" void cInstanceNode_buildMeshMat(void* model, int bone, sFrNodeMtx* out);
 
-struct sFrNodeA028 {
-    sFrNodeVec4 pos;        // 0x0
-    char pad_0x10[0x40];
-    sFrModelRef9220 model;  // 0x50
-    int bone;               // 0x54
-};
 
 /**
  * Sets a spring rail node's P to the current position of its mesh (cInstanceNode_buildMeshMat translation).
  *
  * @param node  rail node to update
  */
-extern "C" void cSpringRailNode_getPosition(cSpringRailNode* self, sFrNodeA028* node)
+extern "C" void cSpringRailNode_getPosition(cSpringRailNode* self, tSpringRailNode* node)
 {
     sFrNodeMtx boneMat;
-    cInstanceNode_buildMeshMat(node->model.get(), node->bone, &boneMat);
+    cInstanceNode_buildMeshMat((*(sFrModelRef9220*)&node->InstId).get(), node->Mesh, &boneMat);
     sFrNodeVec4 bonePos = boneMat.r[3];
-    node->pos = bonePos;
+    (*(sFrNodeVec4*)&node->P) = bonePos;
 }
 #endif
 
@@ -1188,28 +1155,12 @@ extern "C" void cSpringRailNode_updateMats(cSpringRailNode* selfv)
 //100%
 INCLUDE_ASM("object/flexrailnode", cSpringRailNode_applyForce);
 #ifdef SKIP_ASM
-struct sV4_A568 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-struct sFrElem_A568 {
-    sV4_A568 pos;               // 0x00
-    sV4_A568 vel;               // 0x10
-    sV4_A568 posA;              // 0x20
-    sV4_A568 posB;              // 0x30
-    sV4_A568 force;             // 0x40
-    char pad50[0x10];
-};
 
-struct sFrNodeA568 {
-    sV4_A568 pos;               // 0x00
-    char pad10[0x54];
-    int idx;                    // 0x64
-};
 
 
 // PORT: PS2-only VU0 inline asm (vector length).
-static inline float vu0Len_A568(const sV4_A568& v)
+static inline float vu0Len_A568(const t4Vector& v)
 {
     float r;
     int t;
@@ -1230,9 +1181,9 @@ static inline float vu0Len_A568(const sV4_A568& v)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
-static inline sV4_A568 vu0Scale_A568(const sV4_A568& v, float s)
+static inline t4Vector vu0Scale_A568(const t4Vector& v, float s)
 {
-    sV4_A568 r;
+    t4Vector r;
     int t;
     __asm__(
         "mfc1      %1, %3\n"
@@ -1247,7 +1198,7 @@ static inline sV4_A568 vu0Scale_A568(const sV4_A568& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector times scalar, in place).
-static inline void vu0ScaleEq_A568(sV4_A568& v, float s)
+static inline void vu0ScaleEq_A568(t4Vector& v, float s)
 {
     int t;
     __asm__(
@@ -1262,9 +1213,9 @@ static inline void vu0ScaleEq_A568(sV4_A568& v, float s)
 }
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sV4_A568 vu0Sub_A568(const sV4_A568& a, const sV4_A568& b)
+static inline t4Vector vu0Sub_A568(const t4Vector& a, const t4Vector& b)
 {
-    sV4_A568 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1277,9 +1228,9 @@ static inline sV4_A568 vu0Sub_A568(const sV4_A568& a, const sV4_A568& b)
 }
 
 // PORT: PS2-only VU0 inline asm (cross product).
-static inline sV4_A568 vu0Cross_A568(const sV4_A568& a, const sV4_A568& b)
+static inline t4Vector vu0Cross_A568(const t4Vector& a, const t4Vector& b)
 {
-    sV4_A568 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -1294,7 +1245,7 @@ static inline sV4_A568 vu0Cross_A568(const sV4_A568& a, const sV4_A568& b)
 }
 
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-static inline void vu0AddEq_A568(sV4_A568& dst, sV4_A568 b)
+static inline void vu0AddEq_A568(t4Vector& dst, t4Vector b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -1317,62 +1268,45 @@ static inline void vu0AddEq_A568(sV4_A568& dst, sV4_A568 b)
  * @param node  intersect info of the hit (position, segment +0x64)
  * @param dir  force to apply
  */
-extern "C" void cSpringRailNode_applyForce(cSpringRailNode* self, sFrNodeA568* node, sV4_A568* dir)
+extern "C" void cSpringRailNode_applyForce(cSpringRailNode* self, tIntersectInfo* node, t4Vector* dir)
 {
     float len = vu0Len_A568(*dir);
-    sV4_A568 clamped;
+    t4Vector clamped;
     if (200.0f < len) {
         clamped = vu0Scale_A568(*dir, 200.0f / len);
     } else {
         clamped = *dir;
     }
-    if (node->idx < 0) {
+    if (node->Seg < 0) {
         return;
     }
-    sV4_A568 arm = vu0Sub_A568(node->pos, ((sFrElem_A568*)self->Nodes)[0].pos);
-    sV4_A568 torque = vu0Cross_A568(clamped, arm);
+    t4Vector arm = vu0Sub_A568(node->Ipos, (self->Nodes)[0].P);
+    t4Vector torque = vu0Cross_A568(clamped, arm);
     float alen = vu0Len_A568(arm);
     int i;
-    for (i = 0; i < node->idx; i++) {
+    for (i = 0; i < node->Seg; i++) {
         float* k = ((float*)&self->ASpring);
-        sV4_A568 scaled = arm;
-        float lv = vu0Len_A568(((sFrElem_A568*)self->Nodes)[i].vel);
+        t4Vector scaled = arm;
+        float lv = vu0Len_A568((self->Nodes)[i].V);
         vu0ScaleEq_A568(scaled, lv / vu0Len_A568(scaled));
-        vu0AddEq_A568(((sFrElem_A568*)self->Nodes)[i].force, vu0Scale_A568(vu0Scale_A568(torque, vu0Len_A568(((sFrElem_A568*)self->Nodes)[i].vel) / alen), k[2]));
+        vu0AddEq_A568((self->Nodes)[i].T, vu0Scale_A568(vu0Scale_A568(torque, vu0Len_A568((self->Nodes)[i].V) / alen), k[2]));
     }
     float* k = ((float*)&self->ASpring);
-    vu0AddEq_A568(((sFrElem_A568*)self->Nodes)[node->idx].force, vu0Scale_A568(vu0Scale_A568(torque, vu0Len_A568(vu0Sub_A568(node->pos, ((sFrElem_A568*)self->Nodes)[node->idx].pos)) / alen), k[2]));
+    vu0AddEq_A568((self->Nodes)[node->Seg].T, vu0Scale_A568(vu0Scale_A568(torque, vu0Len_A568(vu0Sub_A568(node->Ipos, (self->Nodes)[node->Seg].P)) / alen), k[2]));
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/flexrailnode", cSpringRailNode_updateIntersectInfo);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sFrV_A838 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-struct sFrE_A838 {
-    sFrV_A838 pos;      // 0x00
-    char pad10[0x20];
-    sFrV_A838 axis;     // 0x30
-    char pad40[0x20];
-};
 
-struct sFrN_A838 {
-    sFrV_A838 pos;      // 0x00
-    char pad10[0x10];
-    sFrV_A838 acc;      // 0x20
-    char pad30[0x34];
-    int idx;            // 0x64
-};
 
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
-static inline sFrV_A838 vu0Sub_A838(const sFrV_A838& a, const sFrV_A838& b)
+static inline t4Vector vu0Sub_A838(const t4Vector& a, const t4Vector& b)
 {
-    sFrV_A838 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1385,9 +1319,9 @@ static inline sFrV_A838 vu0Sub_A838(const sFrV_A838& a, const sFrV_A838& b)
 }
 
 // PORT: PS2-only VU0 inline asm (cross product into dst, w = 0).
-static inline void vu0CrossTo_A838(sFrV_A838& dst, const sFrV_A838& a, const sFrV_A838& b)
+static inline void vu0CrossTo_A838(t4Vector& dst, const t4Vector& a, const t4Vector& b)
 {
-    sFrV_A838 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -1402,7 +1336,7 @@ static inline void vu0CrossTo_A838(sFrV_A838& dst, const sFrV_A838& a, const sFr
 }
 
 // PORT: PS2-only VU0 inline asm (vector add-assign).
-static inline void vu0AddEq_A838(sFrV_A838& dst, const sFrV_A838& b)
+static inline void vu0AddEq_A838(t4Vector& dst, const t4Vector& b)
 {
     __asm__(
         "lqc2      $vf3, %1\n"
@@ -1422,15 +1356,15 @@ static inline void vu0AddEq_A838(sFrV_A838& dst, const sFrV_A838& b)
  *
  * @param node  intersect info of the hit
  */
-extern "C" void cSpringRailNode_updateIntersectInfo(cSpringRailNode* self, sFrN_A838* node)
+extern "C" void cSpringRailNode_updateIntersectInfo(cSpringRailNode* self, tIntersectInfo* node)
 {
-    if (node->idx < 0)
+    if (node->Seg < 0)
         return;
-    for (int i = 0; i <= node->idx; i++) {
-        sFrV_A838 cross;
-        sFrV_A838 arm = vu0Sub_A838(node->pos, ((sFrE_A838*)self->Nodes)[i].pos);
-        vu0CrossTo_A838(cross, arm, ((sFrE_A838*)self->Nodes)[i].axis);
-        vu0AddEq_A838(node->acc, cross);
+    for (int i = 0; i <= node->Seg; i++) {
+        t4Vector cross;
+        t4Vector arm = vu0Sub_A838(node->Ipos, (self->Nodes)[i].P);
+        vu0CrossTo_A838(cross, arm, (self->Nodes)[i].W);
+        vu0AddEq_A838(node->Ivel, cross);
     }
 }
 #endif
@@ -1996,19 +1930,13 @@ extern "C" void cFlagSet_AddFlag(sFlagSet_34B038* self, sFlagDef_34B038* def, ch
 //100%
 INCLUDE_ASM("object/flexrailnode", cFlagSet_RemoveFlag);
 #ifdef SKIP_ASM
-struct sFrRider_B168 {
-    char pad_0x0[0x78];
-    int id;                 // 0x78
-    char pad_0x7c[0x4];
-    int* track;             // 0x80
-};
 
 struct sFrRail_B168 {
     char pad_0x0[0x58];
     int track;              // 0x58
     int count;              // 0x5C
     char pad_0x60[0x34];
-    sFrRider_B168* riders[1]; // 0x94
+    tInstanceRecord* riders[1]; // 0x94
 };
 
 extern "C" void cFlagSet_PurgeMesh(void* self);
@@ -2023,16 +1951,16 @@ extern "C" void cFlagSet_PurgeMesh(void* self);
  * @param rider  instance record of the flag to remove
  * @return 1 if the instance was removed, else 0
  */
-extern "C" int cFlagSet_RemoveFlag(sFrRail_B168* self, sFrRider_B168* rider)
+extern "C" int cFlagSet_RemoveFlag(sFrRail_B168* self, tInstanceRecord* rider)
 {
     if (self->count == 0) {
         return 0;
     }
-    if (*rider->track != self->track) {
+    if (*((int*)rider->m_Model) != self->track) {
         return 0;
     }
     for (int i = 0; i < self->count; i++) {
-        if (self->riders[i]->id == rider->id) {
+        if (((int)self->riders[i]->m_RID) == ((int)rider->m_RID)) {
             self->riders[i] = self->riders[self->count - 1];
             self->riders[self->count - 1] = 0;
             if (--self->count == 0) {

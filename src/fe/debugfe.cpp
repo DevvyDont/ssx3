@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "render/font.h"
+#include "bx/math3d.h"
 #include "fe/debuglobbymenus.h"
 #include "fe/debugfe.h"
 #include "fe/screenkeyboard.h"
@@ -1612,12 +1614,6 @@ struct sColor17E5C8 {
     sColor17E5C8(float r_, float g_, float b_, float a_) : r(r_), g(g_), b(b_), a(a_) {}
 };
 
-struct sFont17E5C8 {
-    char pad0[0x30];
-    float bx, by;
-    float sx, sy;
-    sColor17E5C8 color;
-};
 
 // Returned by value through a hidden pointer and destroyed at the end of the
 // full expression, so it shares its stack slot with the colour temporaries.
@@ -1636,10 +1632,10 @@ struct sDebugFE17E5C8 {
     unsigned int tag;
 };
 
-static inline void scale17E5C8(sFont17E5C8* f, float s)
+static inline void scale17E5C8(cFont* f, float s)
 {
-    f->sx = f->bx * s;
-    f->sy = f->by * s;
+    f->Scale[0] = f->BaseScale[0] * s;
+    f->Scale[1] = f->BaseScale[1] * s;
 }
 
 static inline void* top17E5C8(sDebugFE17E5C8* self)
@@ -1678,128 +1674,128 @@ static inline int isEq17E5C8(int a, int b) { return a == b; }
  */
 extern "C" void cDebugLobbyScreen_draw(sDebugFE17E5C8* self)
 {
-    sFont17E5C8* font = (sFont17E5C8*)SSXApp->DebugFE->Font;
+    cFont* font = SSXApp->DebugFE->Font;
     switch (self->state) {
     case 0:
     case 1:
         scale17E5C8(font, 1.5f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 200.0f, str_Connecting_to_network);
         break;
     case 2:
         scale17E5C8(font, 1.5f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 200.0f, str_Connecting_to_lobby);
         break;
     case 4:
         scale17E5C8(font, 1.5f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 200.0f, str_Creating_account);
         break;
     case 5:
         scale17E5C8(font, 1.5f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 200.0f, str_Authenticating_account);
         break;
     case 8:
         scale17E5C8(font, 1.5f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 200.0f, str_Creating_Persona);
         break;
     case 9:
         scale17E5C8(font, 1.5f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 200.0f, str_Deleting_Persona);
         break;
     case 7:
         scale17E5C8(font, 1.5f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 200.0f, str_Selecting_Persona);
         break;
     case 11:
         scale17E5C8(font, 1.5f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 200.0f, str_Selecting_Room);
         break;
     case 13:
         scale17E5C8(font, 1.5f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Waiting_for_reponse);
         break;
     case 17:
         scale17E5C8(font, 1.5f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Challenge_Declined);
         break;
     case 18: {
         scale17E5C8(font, 1.5f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Error_Connecting);
         scale17E5C8(font, 0.8f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
         cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 19: {
         scale17E5C8(font, 1.5f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Disconnected_from_server);
         scale17E5C8(font, 0.8f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
         cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 20: {
         scale17E5C8(font, 1.5f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Error_Creating_Account);
         scale17E5C8(font, 0.8f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
         cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 22: {
         scale17E5C8(font, 1.5f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Persona_Error);
         scale17E5C8(font, 0.8f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
         cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 21: {
         scale17E5C8(font, 1.5f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Error_Authenticating_Account);
         scale17E5C8(font, 0.8f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
         cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 23: {
         scale17E5C8(font, 1.5f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Error_Entering_room);
         scale17E5C8(font, 0.8f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
         cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 24: {
         scale17E5C8(font, 1.5f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Error_Issueing_Challenge);
         scale17E5C8(font, 0.8f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
         cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 16: {
         scale17E5C8(font, 1.5f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
         cFont_centertext(font, 320.0f, 100.0f, str_Play_Game);
         scale17E5C8(font, 0.7f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.6f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.6f);
         float y = 200.0f;
         cFont_text(font, 110.0f, y, str_Game);
         cFont_righttext(font, LobbyMan_mLobbyMan->mGameName, 530.0f, y);
@@ -1830,7 +1826,7 @@ extern "C" void cDebugLobbyScreen_draw(sDebugFE17E5C8* self)
         unsigned int ip;
         cCommSystem_netConnLocalAddr(cCommSystem_mCommSystem, (int*)&ip);
         scale17E5C8(font, 0.8f);
-        font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.2f);
+        (*(sColor17E5C8*)&font->Color[0]) = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.2f);
         unsigned int localAddr = ip;
         cFont_centertextf(font, 320.0f, 420.0f, str_pct_d_pct_d_pct_d_pct_d, localAddr >> 24, (localAddr >> 16) & 0xFF, (localAddr >> 8) & 0xFF, localAddr & 0xFF);
     }
@@ -1866,12 +1862,6 @@ struct sVec2_17F2D0 {
     }
 };
 
-struct sFirefly_17F2D0 {
-    sVec2_17F2D0 pos;        // 0x0
-    sVec2_17F2D0 phase;      // 0x8
-    sVec2_17F2D0 trail[64];  // 0x10
-    int head;                // 0x210
-};
 
 // PORT: PS2-only inline asm (EE cvt.w.s truncates in the FPU; the C cast goes through a GPR).
 static inline float ffloor_17F2D0(float x)
@@ -1900,27 +1890,27 @@ static inline float wrap_17F2D0(float x)
  */
 extern "C" void cHeartBeat_update(cHeartBeat* heartBeat)
 {
-    sFirefly_17F2D0* self = (sFirefly_17F2D0*)heartBeat;
+    cHeartBeat* self = heartBeat;
     for (int i = 0; i < 2; i++) {
-        sVec2_17F2D0 posStep(fSin(self->phase.x), fSin(self->phase.y));
+        sVec2_17F2D0 posStep(fSin((*(sVec2_17F2D0*)&self->Phase[0]).x), fSin((*(sVec2_17F2D0*)&self->Phase[0]).y));
         posStep += 1.899999976158142f;
         posStep *= 0.03200000151991844f;
         {
             sVec2_17F2D0 phaseStep;
             phaseStep.x = 0.004999999888241291f;
             phaseStep.y = 0.008999999612569809f;
-            self->phase.x += phaseStep.x;
-            self->phase.y += phaseStep.y;
+            (*(sVec2_17F2D0*)&self->Phase[0]).x += phaseStep.x;
+            (*(sVec2_17F2D0*)&self->Phase[0]).y += phaseStep.y;
         }
-        self->pos += posStep;
-        self->phase.x = wrap_17F2D0(self->phase.x);
-        self->phase.y = wrap_17F2D0(self->phase.y);
-        self->pos.x = wrap_17F2D0(self->pos.x);
-        self->pos.y = wrap_17F2D0(self->pos.y);
-        self->head = (self->head + 1) % 64;
-        sVec2_17F2D0 pt(fSin(self->pos.x) * 20.0f + 550.0f,
-                        fSin(self->pos.y) * 20.0f + 420.0f);
-        self->trail[self->head] = pt;
+        (*(sVec2_17F2D0*)&self->Angle[0]) += posStep;
+        (*(sVec2_17F2D0*)&self->Phase[0]).x = wrap_17F2D0((*(sVec2_17F2D0*)&self->Phase[0]).x);
+        (*(sVec2_17F2D0*)&self->Phase[0]).y = wrap_17F2D0((*(sVec2_17F2D0*)&self->Phase[0]).y);
+        (*(sVec2_17F2D0*)&self->Angle[0]).x = wrap_17F2D0((*(sVec2_17F2D0*)&self->Angle[0]).x);
+        (*(sVec2_17F2D0*)&self->Angle[0]).y = wrap_17F2D0((*(sVec2_17F2D0*)&self->Angle[0]).y);
+        self->HistoryIdx = (self->HistoryIdx + 1) % 64;
+        sVec2_17F2D0 pt(fSin((*(sVec2_17F2D0*)&self->Angle[0]).x) * 20.0f + 550.0f,
+                        fSin((*(sVec2_17F2D0*)&self->Angle[0]).y) * 20.0f + 420.0f);
+        ((sVec2_17F2D0*)&self->History[0][0])[self->HistoryIdx] = pt;
     }
 }
 #endif
@@ -1933,17 +1923,12 @@ extern void* G2D;
 extern "C" void c2DRender_drawRect4(void* self, float* p0, float* p1, float* col, float z);
 
 
-struct sV2_17F500 {
-    float x, y;
-    sV2_17F500() {}
-    sV2_17F500(float ax, float ay) : x(ax), y(ay) {}
-};
 
-static inline sV2_17F500 operator*(const sV2_17F500& a, float s) { return sV2_17F500(a.x * s, a.y * s); }
-static inline sV2_17F500 operator-(const sVec2_17F2D0& a, const sV2_17F500& b);
-static inline sV2_17F500 operator+(const sVec2_17F2D0& a, const sV2_17F500& b);
-static inline sV2_17F500 operator-(const sVec2_17F2D0& a, const sV2_17F500& b) { return sV2_17F500(a.x - b.x, a.y - b.y); }
-static inline sV2_17F500 operator+(const sVec2_17F2D0& a, const sV2_17F500& b) { return sV2_17F500(a.x + b.x, a.y + b.y); }
+static inline t2Vector operator*(const t2Vector& a, float s) { return t2Vector(a.x * s, a.y * s); }
+static inline t2Vector operator-(const sVec2_17F2D0& a, const t2Vector& b);
+static inline t2Vector operator+(const sVec2_17F2D0& a, const t2Vector& b);
+static inline t2Vector operator-(const sVec2_17F2D0& a, const t2Vector& b) { return t2Vector(a.x - b.x, a.y - b.y); }
+static inline t2Vector operator+(const sVec2_17F2D0& a, const t2Vector& b) { return t2Vector(a.x + b.x, a.y + b.y); }
 
 struct sCol_17F500 {
     float a, r, g, b;
@@ -1951,7 +1936,7 @@ struct sCol_17F500 {
 };
 
 // The quad routine takes its corners and colour by reference (pointers on the EE).
-void c2DRender_drawRect4_r(void* self, const sV2_17F500& p0, const sV2_17F500& p1, const sCol_17F500& c, float z) __asm__("c2DRender_drawRect4");
+void c2DRender_drawRect4_r(void* self, const t2Vector& p0, const t2Vector& p1, const sCol_17F500& c, float z) __asm__("c2DRender_drawRect4");
 
 static inline void set1_17F500(char* m, unsigned int mask, int shift, unsigned int v)
 {
@@ -1976,24 +1961,24 @@ static inline void set1_17F500(char* m, unsigned int mask, int shift, unsigned i
  */
 extern "C" void cHeartBeat_draw(cHeartBeat* p_, int tex)
 {
-    sFirefly_17F2D0* self = (sFirefly_17F2D0*)p_;
+    cHeartBeat* self = p_;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     set1_17F500((char*)ps2GraphicsMan, 0x1800000, 23, 2);
     set1_17F500((char*)ps2GraphicsMan, 0x300000, 20, 3);
     set1_17F500((char*)ps2GraphicsMan, 0xFF000, 12, 13);
     set1_17F500((char*)ps2GraphicsMan, 0x7C, 2, 5);
     set1_17F500((char*)ps2GraphicsMan, 0x400000, 22, 1);
-    sV2_17F500 size(6.0f, 6.0f);
+    t2Vector size(6.0f, 6.0f);
     (ps2GraphicsMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
     for (int i = 1; i < 64; i++) {
-        sVec2_17F2D0& pt = self->trail[(self->head + i) % 64];
+        sVec2_17F2D0& pt = ((sVec2_17F2D0*)&self->History[0][0])[(self->HistoryIdx + i) % 64];
         float recency = (float)i * 0.015625f;
         c2DRender_drawRect4_r(G2D, pt - size * 0.5f, pt + size * 0.5f, sCol_17F500(recency * recency * 0.15f, 0.5f, recency * 0.2f + 0.3f, recency * (recency * 0.5f)), 0.0f);
     }
     // Head marker colour; named locals (not literals) so the inlined ctor stores sp-relative (CHEATSHEET).
     float hi = 0.5f;
     float lo = 0.25f;
-    c2DRender_drawRect4_r(G2D, self->trail[self->head] - size, self->trail[self->head] + size, sCol_17F500(hi, lo, lo, hi), 0.0f);
+    c2DRender_drawRect4_r(G2D, ((sVec2_17F2D0*)&self->History[0][0])[self->HistoryIdx] - size, ((sVec2_17F2D0*)&self->History[0][0])[self->HistoryIdx] + size, sCol_17F500(hi, lo, lo, hi), 0.0f);
 }
 #endif
 
@@ -2004,22 +1989,9 @@ extern "C" void cFadeScreen_cFadeScreen(void* self);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern char cDebugFE_vtbl[];
 
-struct sDbgEntry17F7B8 {
-    int a;
-    int b;
-    sDbgEntry17F7B8() {}
-};
 
 inline void* operator new[](unsigned int, void* p) { return p; }
 
-struct sDbgList17F7B8 {
-    int a;                      // 0x00
-    int b;                      // 0x04
-    int c;                      // 0x08
-    int d;                      // 0x0C
-    sDbgEntry17F7B8 e[64];      // 0x10
-    int n;                      // 0x210
-};
 
 /**
  * Constructs the debug front end: the cFadeScreen base, cDebugFE's vtable and a zeroed heartbeat.
@@ -2038,10 +2010,10 @@ extern "C" void* cDebugFE_cDebugFE(cDebugFE* self)
     *(int*)&self->HeartBeat.Angle[1] = 0;
     *(int*)&self->HeartBeat.Phase[0] = 0;
     *(int*)&self->HeartBeat.Phase[1] = 0;
-    sDbgList17F7B8* list = (sDbgList17F7B8*)(&self->HeartBeat);
-    new (list->e) sDbgEntry17F7B8[64];
-    list->n = 0;
-    MEM_fill(list->e, 0, 0x200);
+    cHeartBeat* list = ((&self->HeartBeat));
+    new (((t2Vector*)&list->History[0][0])) t2Vector[64];
+    list->HistoryIdx = 0;
+    MEM_fill(((t2Vector*)&list->History[0][0]), 0, 0x200);
     return ((void*)self);
 }
 #endif

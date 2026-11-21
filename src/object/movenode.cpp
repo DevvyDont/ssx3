@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/worldview.h"
 #include "bx/appman.h"
 #include "object/objectnode.h"
 #include "render/particle.h"
@@ -1013,9 +1014,6 @@ struct sMnVec_6298 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-struct sMnMat_6298 {
-    sMnVec_6298 r[4];
-};
 
 struct sMnSlot_6298 {
     int f0;
@@ -1142,8 +1140,8 @@ struct cMnGfx_6298 {
     sMnGfxVt_6298* vt;              // 0x10D8
 };
 
-typedef sMnMat_6298 (*MnViewFn_6298)(void*);
-typedef int (*MnCullFn_6298)(void*, sMnVec_6298*, sMnVec_6298*, const sMnMat_6298&);
+typedef t4Matrix (*MnViewFn_6298)(void*);
+typedef int (*MnCullFn_6298)(void*, sMnVec_6298*, sMnVec_6298*, const t4Matrix&);
 typedef void (*MnDrawFn_6298)(void*, void*, void*, void*, void*, void*, int, float);
 
 extern "C" void tModifierBlock_render(void* self);
@@ -1163,7 +1161,7 @@ static inline int HasLight_6298(sMnMod_6298* m)
     return m != 0 && m->light != 0;
 }
 
-static inline void* Mat_6298(void* rot, sMnMat_6298* m)
+static inline void* Mat_6298(void* rot, t4Matrix* m)
 {
     void* r;
     if (rot) {
@@ -1187,7 +1185,7 @@ static inline void* Lm_6298(char* l)
     return LmSub_6298(l);
 }
 
-static inline void* RotOf_6298(cMnNode_6298* n, sMnMat_6298* m)
+static inline void* RotOf_6298(cMnNode_6298* n, t4Matrix* m)
 {
     if (HasRot_6298(MOD_6298(n))) {
         return Mat_6298(MOD_6298(n)->rot, m);
@@ -1292,7 +1290,7 @@ extern "C" void cMoveNode_render(cMoveNode* self)
         tex = 0;
         xf = ((cMnNode_6298*)self)->getRootTransform();
     }
-    sMnMat_6298 rm;
+    t4Matrix rm;
     if (HasRot_6298(MOD_6298(self))) {
         rot = RotOf_6298(((cMnNode_6298*)self), &rm);
         flags |= 2;
@@ -1326,7 +1324,7 @@ extern "C" void cMoveNode_renderModel(cMoveNode* self, t4Matrix* tex, int flags)
     }
     void* rot = 0;
     cPS2GraphicsMan* gfx = cGraphicsMan_TheGraphicsMan;
-    sMnMat_6298 rm;
+    t4Matrix rm;
     if (HasRot_6298(MOD_6298(self))) {
         rot = RotOf_6298(((cMnNode_6298*)self), &rm);
         flags |= 2;
@@ -1346,9 +1344,6 @@ extern "C" void cInstanceNode_getBoundBoxInfo(void* self, void* box, float* radi
 void tModifierBlock_setBoundBox_K(tModifierBlock* mb, void* box) __asm__("tModifierBlock_setBoundBox__FP14tModifierBlock");
 void tModifierBlock_setRadius_K(tModifierBlock* mb, float r) __asm__("tModifierBlock_setRadius__FP14tModifierBlock");
 
-struct sBox_3567 {
-    float v[8];
-} __attribute__((aligned(16)));
 
 /**
  * Copies the instance's bounding box and radius into the node's modifier block.
@@ -1368,7 +1363,7 @@ extern "C" void cMoveNode_setupOverlapSystem(cMoveNode* self_)
     else
         n = 0;
     if (n) {
-        sBox_3567 box;
+        tBoundBox box;
         float radius;
         cInstanceNode_getBoundBoxInfo(((char*)self_), &box, &radius);
         tModifierBlock_setBoundBox_K(self_->ModifierBlock, &box);
@@ -1384,17 +1379,11 @@ INCLUDE_ASM("object/movenode", cMoveNode_restoreOverlapSystem);
 #include "common.h"
 struct tModifierBlock;
 void tModifierBlock_setBoundBox_K(tModifierBlock* mb, void* box) __asm__("tModifierBlock_setBoundBox__FP14tModifierBlock");
-struct sMnVec4_67E0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-struct sMnBox_67E0 {
-    sMnVec4_67E0 min, max;
-};
 
-extern "C" sMnBox_67E0* tModifierBlock_getBoundBox_67E0(void* mb) __asm__("tModifierBlock_getBoundBox");
+extern "C" tBoundBox* tModifierBlock_getBoundBox_67E0(void* mb) __asm__("tModifierBlock_getBoundBox");
 extern "C" void* cObjectInterface_getNash(void);
-extern "C" void nash_Nash_movenode_67E0(void* mgr, int a, void* obj, sMnBox_67E0* box, sMnBox_67E0* old) __asm__("nash_Nash_movenode");
+extern "C" void nash_Nash_movenode_67E0(void* mgr, int a, void* obj, tBoundBox* box, tBoundBox* old) __asm__("nash_Nash_movenode");
 
 /**
  * Puts the node back in the overlap system with the object's own bound box, moving it from the old box.
@@ -1410,19 +1399,19 @@ extern "C" void cMoveNode_restoreOverlapSystem(cMoveNode* vself)
     char*& transformModifier = blk;
     if (transformModifier == 0)
         return;
-    sMnBox_67E0 box;
-    sMnBox_67E0 old = *tModifierBlock_getBoundBox_67E0(vself->ModifierBlock);
+    tBoundBox box;
+    tBoundBox old = *tModifierBlock_getBoundBox_67E0(vself->ModifierBlock);
     char* n = (char*)vself->Instance;
-    sMnVec4_67E0 corner;
+    t4Vector corner;
     corner.x = *(float*)(n + 0x60);
     corner.y = *(float*)(n + 0x64);
     corner.z = *(float*)(n + 0x68);
     corner.w = 1.0f;
-    box.min = corner;
+    box.MinPoint = corner;
     corner.x = *(float*)(n + 0x6C);
     corner.y = *(float*)(n + 0x70);
     corner.z = *(float*)(n + 0x74);
-    box.max = corner;
+    box.MaxPoint = corner;
     tModifierBlock_setBoundBox_K(vself->ModifierBlock, &box);
     void* obj = vself->Instance;
     nash_Nash_movenode_67E0(cObjectInterface_getNash(), 0, obj, &box, &old);
@@ -1432,19 +1421,12 @@ extern "C" void cMoveNode_restoreOverlapSystem(cMoveNode* vself)
 //100%
 INCLUDE_ASM("object/movenode", cMoveNode_updateOverlapSystem);
 #ifdef SKIP_ASM
-// From peak3project's fork (github.com/peak3project/ssx3).
-struct sMnVec4_68B0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-struct sMnBox_68B0 {
-    sMnVec4_68B0 min, max;
-};
 
 struct sMnVEntM_68B0 {
     short delta;
     short index;
-    sMnVec4_68B0* (*fn)(void*);
+    t4Vector* (*fn)(void*);
 };
 struct sMnVEnt_68B0 {
     short delta;
@@ -1452,15 +1434,15 @@ struct sMnVEnt_68B0 {
     void (*fn)(void*);
 };
 
-extern "C" sMnBox_68B0* tModifierBlock_getBoundBox_68B0(void* mb) __asm__("tModifierBlock_getBoundBox");
+extern "C" tBoundBox* tModifierBlock_getBoundBox_68B0(void* mb) __asm__("tModifierBlock_getBoundBox");
 extern "C" float tModifierBlock_getRadius(void* mb);
 extern "C" void* cObjectInterface_getNash(void);
-extern "C" void nash_Nash_movenode(void* mgr, int a, void* obj, sMnBox_68B0* box, sMnBox_68B0* old);
+extern "C" void nash_Nash_movenode(void* mgr, int a, void* obj, tBoundBox* box, tBoundBox* old);
 
 // PORT: PS2-only VU0 inline asm (a - b).
-static inline void vu0Sub_68B0(sMnVec4_68B0& out, const sMnVec4_68B0& a, const sMnVec4_68B0& b)
+static inline void vu0Sub_68B0(t4Vector& out, const t4Vector& a, const t4Vector& b)
 {
-    sMnVec4_68B0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1473,9 +1455,9 @@ static inline void vu0Sub_68B0(sMnVec4_68B0& out, const sMnVec4_68B0& a, const s
 }
 
 // PORT: PS2-only VU0 inline asm (a + b).
-static inline void vu0Add_68B0(sMnVec4_68B0& out, const sMnVec4_68B0& a, const sMnVec4_68B0& b)
+static inline void vu0Add_68B0(t4Vector& out, const t4Vector& a, const t4Vector& b)
 {
-    sMnVec4_68B0 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf3, %1\n"
         "lqc2      $vf4, %2\n"
@@ -1488,7 +1470,7 @@ static inline void vu0Add_68B0(sMnVec4_68B0& out, const sMnVec4_68B0& a, const s
 }
 
 // World position: translation row of the node's transform (virtual slot 24).
-static inline sMnVec4_68B0 pos_68B0(char* self)
+static inline t4Vector pos_68B0(char* self)
 {
     sMnVEntM_68B0* vt = *(sMnVEntM_68B0**)(self + 0xC);
     return vt[24].fn(self + vt[24].delta)[3];
@@ -1511,19 +1493,19 @@ extern "C" void cMoveNode_updateOverlapSystem(cMoveNode* self)
     char* transformModifier = modBlock ? *modBlock : 0;
     if (transformModifier == 0)
         return;
-    sMnBox_68B0 box;
-    sMnBox_68B0 old = *tModifierBlock_getBoundBox_68B0(self->ModifierBlock);
+    tBoundBox box;
+    tBoundBox old = *tModifierBlock_getBoundBox_68B0(self->ModifierBlock);
     float radius = tModifierBlock_getRadius(self->ModifierBlock);
-    sMnVec4_68B0 rv;
+    t4Vector rv;
     rv.w = 0.0f;
     rv.x = radius;
     rv.y = radius;
     rv.z = radius;
-    sMnVec4_68B0 corner;
+    t4Vector corner;
     vu0Sub_68B0(corner, pos_68B0(((char*)self)), rv);
-    box.min = corner;
+    box.MinPoint = corner;
     vu0Add_68B0(corner, pos_68B0(((char*)self)), rv);
-    box.max = corner;
+    box.MaxPoint = corner;
     tModifierBlock_setBoundBox_K(self->ModifierBlock, &box);
     void* obj = self->Instance;
     nash_Nash_movenode(cObjectInterface_getNash(), 0, obj, &box, &old);

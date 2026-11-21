@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "camera/camera.h"
 #include "main/gameviewman.h"
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
@@ -221,10 +222,6 @@ struct sVEntry0022E730 {
     short index;
     void (*fn)(void*, int);
 };
-struct sItem0022E730 {
-    char pad[0x90];
-    sVEntry0022E730* vt;
-};
 void operator_delete(int* p);
 
 /**
@@ -239,9 +236,9 @@ extern "C" void cGameViewMan__cGameViewMan(cGameViewMan* self, int flags)
 {
     unsigned int i;
     for (i = 0; i < self->m_uiNumPlayers; i++) {
-        sItem0022E730* it = ((sItem0022E730**)&self->PlayerCamera[0])[i];
+        cCamera* it = ((cCamera**)&self->PlayerCamera[0])[i];
         if (it != 0) {
-            it->vt[1].fn((char*)it + it->vt[1].delta, 3);
+            ((sVEntry0022E730*)it->mVtbl)[1].fn((char*)it + ((sVEntry0022E730*)it->mVtbl)[1].delta, 3);
         }
     }
     self->m_uiNumView = 0;

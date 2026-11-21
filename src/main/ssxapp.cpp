@@ -1,4 +1,5 @@
 #include "common.h"
+#include "input/inputparse.h"
 #include "bx/math3d.h"
 #include "main/crowdman2d.h"
 #include "main/gamerender.h"
@@ -399,11 +400,6 @@ extern char str_ReplayMenuUp[];
 extern char str_ReplayMenuDown[];
 extern char str_ReplayTimeLine[];
 
-struct sParseBuf_226B60 {
-    int size;
-    int cap;
-    char* data;
-};
 
 /**
  * Loads an input map file and compiles it into a new cInputMap.
@@ -418,7 +414,7 @@ struct sParseBuf_226B60 {
 // PORT: the unit declares it returning int (callers store the map pointer in an int field).
 extern "C" int cSSXApp_loadInputMap(cSSXApp* self, const char* path)
 {
-    sParseBuf_226B60 buf;
+    cInputPreProcessor buf;
     int size;
     void* data = cInputPreProcessor_loadFileSize(&buf, path, &size);
     void* map = cMemMan_alloc(0x18, str_InputMap, 0, 0);
@@ -2869,10 +2865,6 @@ struct sSrc_A368 {
     sNode_A368* head;   // 0x20
 };
 
-struct sList_A368 {
-    sSrc_A368* src;
-    int vuFrustum;
-};
 
 /**
  * Frustum-tests the nodes of each listed source with FrustumIntersector_crossinginstance, then files the last pending one.
@@ -2883,12 +2875,12 @@ struct sList_A368 {
  * @param list  the source entries
  * @param count  the number of entries
  */
-extern "C" void FrustumIntersector_AddAllInstancesCrossing(FrustumIntersector* self, sList_A368* list, int count)
+extern "C" void FrustumIntersector_AddAllInstancesCrossing(FrustumIntersector* self, CellClipT* list, int count)
 {
     for (; count > 0; count--, list++) {
-        sNode_A368* n = list->src->head;
+        sNode_A368* n = ((sSrc_A368*)list->pCell)->head;
         while (n != 0) {
-            FrustumIntersector_crossinginstance(self, n, list->vuFrustum);
+            FrustumIntersector_crossinginstance(self, n, ((int)list->uVisMask));
             n = n->next;
         }
     }
@@ -2912,10 +2904,6 @@ struct sSrc_A408 {
     sNode_A408* head;   // 0x24
 };
 
-struct sList_A408 {
-    sSrc_A408* src;
-    int vuFrustum;
-};
 
 /**
  * Frustum-tests the nodes of each listed source with FrustumIntersector_crossingpatch, then files the last pending one.
@@ -2925,12 +2913,12 @@ struct sList_A408 {
  * @param list  the source entries
  * @param count  the number of entries
  */
-extern "C" void FrustumIntersector_AddAllPatchesCrossing(FrustumIntersector* self, sList_A408* list, int count)
+extern "C" void FrustumIntersector_AddAllPatchesCrossing(FrustumIntersector* self, CellClipT* list, int count)
 {
     for (; count > 0; count--, list++) {
-        sNode_A408* n = list->src->head;
+        sNode_A408* n = ((sSrc_A408*)list->pCell)->head;
         while (n != 0) {
-            FrustumIntersector_crossingpatch(self, n, list->vuFrustum);
+            FrustumIntersector_crossingpatch(self, n, ((int)list->uVisMask));
             n = n->next;
         }
     }
@@ -3128,10 +3116,6 @@ struct sVisSrc_A698 {
     sVisNode_A698* head;    // 0x24
 };
 
-struct sVisList_A698 {
-    sVisSrc_A698* src;
-    int vuFrustum;
-};
 
 struct sVisSlot_A698 {
     int f0;
@@ -3199,13 +3183,13 @@ static inline int visOnPath_A698(sVisCam_A698* cam, sVisNode_A698* n)
 extern "C" void FrustumIntersector_AddAllPatchesInside(FrustumIntersector* self_, void* list_, int count)
 {
     sVisOwner_A698* self = (sVisOwner_A698*)self_;
-    sVisList_A698* list = (sVisList_A698*)list_;
+    CellClipT* list = (CellClipT*)list_;
     for (; count > 0; count--, list++) {
-        sVisNode_A698* n = list->src->head;
+        sVisNode_A698* n = ((sVisSrc_A698*)list->pCell)->head;
         while (n != 0) {
             // A do/while(0) block around the body (as a macro would) reproduces the target's register choice.
             do {
-                int frustum = list->vuFrustum;
+                int frustum = ((int)list->uVisMask);
                 if (visOnPath_A698(*self->cam, n)) {
                     if (frustum == 0 || visSphereTest_A698(n->sphere, frustum) != 2) {
                         self->nodes[self->count++] = n;
@@ -3234,10 +3218,6 @@ struct sVisSrc_A770 {
     sVisNode_A770* head;    // 0x28
 };
 
-struct sVisList_A770 {
-    sVisSrc_A770* src;
-    int vuFrustum;
-};
 
 struct sVisOwner_A770 {
     char pad_0x0[0x78B4];
@@ -3274,13 +3254,13 @@ static inline int visSphereTest_A770(int* sphere, int frustum)
  * @param list  the cell entries (cell, plane mask)
  * @param count  the number of entries
  */
-extern "C" void FrustumIntersector_AddAllTypedInside(sVisOwner_A770* self, sVisList_A770* list, int count)
+extern "C" void FrustumIntersector_AddAllTypedInside(sVisOwner_A770* self, CellClipT* list, int count)
 {
     for (; count > 0; count--, list++) {
-        sVisNode_A770* n = list->src->head;
+        sVisNode_A770* n = ((sVisSrc_A770*)list->pCell)->head;
         while (n != 0) {
             if (n->type == 7) {
-                int frustum = list->vuFrustum;
+                int frustum = ((int)list->uVisMask);
                 if (frustum == 0 || visSphereTest_A770(n->sphere, frustum) != 2) {
                     self->nodesA[self->countA++] = n;
                 }
@@ -3669,9 +3649,9 @@ extern "C" char* FrustumIntersector_FrustumIntersector(char* self, sCfg_22ADD8* 
     Load_22ADD8(&ctx, cfg[7].data, &cfg[7]);
     FrustumIntersector_AddAllPatchesInside((FrustumIntersector*)self, self + 0x98, *(int*)(self + 0x94));
     FrustumIntersector_AddAllInstancesInside((FrustumIntersector*)self, self + 0x98, *(int*)(self + 0x94));
-    FrustumIntersector_AddAllTypedInside((sVisOwner_A770*)self, (sVisList_A770*)(self + 0x98), *(int*)(self + 0x94));
-    FrustumIntersector_AddAllPatchesCrossing((FrustumIntersector*)self, (sList_A408*)(self + 0x109C), *(int*)(self + 0x1098));
-    FrustumIntersector_AddAllInstancesCrossing((FrustumIntersector*)self, (sList_A368*)(self + 0x109C), *(int*)(self + 0x1098));
+    FrustumIntersector_AddAllTypedInside((sVisOwner_A770*)self, (CellClipT*)(self + 0x98), *(int*)(self + 0x94));
+    FrustumIntersector_AddAllPatchesCrossing((FrustumIntersector*)self, (CellClipT*)(self + 0x109C), *(int*)(self + 0x1098));
+    FrustumIntersector_AddAllInstancesCrossing((FrustumIntersector*)self, (CellClipT*)(self + 0x109C), *(int*)(self + 0x1098));
     FrustumIntersector_AddAllTypedCrossing((sWorld_22A4A8*)self, (sItem_22A4A8*)(self + 0x109C), *(int*)(self + 0x1098));
     return self;
 }

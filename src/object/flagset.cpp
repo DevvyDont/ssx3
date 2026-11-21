@@ -1,5 +1,8 @@
 #include "vtable.h"
 #include "common.h"
+#include "object/animframe.h"
+#include "render/ps2gridmesh.h"
+#include "world/instancerecord.h"
 #include "bx/appman.h"
 #include "object/flagset.h"
 #include "object/animnode.h"
@@ -205,10 +208,6 @@ struct sFlagVert_B818 {
 };
 
 
-struct sFlagMesh_B818 {
-    int pad0;
-    sVEntry<void(void*, void*)>* vt;   // 0x4
-};
 
 
 /**
@@ -232,7 +231,7 @@ extern "C" void cFlagSet_update(cFlagSet* elem)
     if (self->mCurrentNumInstances == 0) {
         return;
     }
-    if (((sFlagMesh_B818*)self->mGridMesh) == 0) {
+    if ((self->mGridMesh) == 0) {
         return;
     }
     char* wind = (char*)cObjectInterface_getFlagManager();
@@ -248,8 +247,8 @@ extern "C" void cFlagSet_update(cFlagSet* elem)
     if (cObjectInterface_getAITick() % 2 == self->mFrameToUpdateGrid) {
         sFlagVert_B818 verts[50];
         cFlagSet_updateGrid((cFlagSet*)self, (t3Vector*)verts);
-        sFlagMesh_B818* gridMesh = ((sFlagMesh_B818*)self->mGridMesh);
-        sVEntry<void(void*, void*)>* setVertsSlot = &gridMesh->vt[3];
+        cGridMesh* gridMesh = (self->mGridMesh);
+        sVEntry<void(void*, void*)>* setVertsSlot = &((sVEntry<void (void*, void*)>*)gridMesh->mVtbl)[3];
         setVertsSlot->fn((char*)gridMesh + setVertsSlot->delta, verts);
     }
     if (0.001f < self->mFlagData.mUScrollRate || 0.001f < self->mFlagData.mVScrollRate) {
@@ -301,19 +300,14 @@ struct sMat_34B9B0 {
     sRow_34B9B0 r[4];
 };
 
-struct sModel_34B9B0 {
-    char pad_0x0[0x7D];
-    unsigned char page;     // 0x7D
-    short slot;             // 0x7E
-};
 
-static inline int IsLoaded_34B9B0(sModel_34B9B0* m)
+static inline int IsLoaded_34B9B0(tInstanceRecord* m)
 {
     char* wc = (char*)cWorld_m_pTheWorld->m_pWorldCache;
-    if (m->page == 0xFF)
+    if (m->m_SMap.m_uiSectionID == 0xFF)
         return 1;
-    int ok = *(int*)(wc + (m->page << 3) + 0x24) == 6;
-    return ok ? *(int*)(wc + m->slot * 0x18 + 0x3F0) == 3 : 0;
+    int ok = *(int*)(wc + (m->m_SMap.m_uiSectionID << 3) + 0x24) == 6;
+    return ok ? *(int*)(wc + m->m_SMap.m_iHullID * 0x18 + 0x3F0) == 3 : 0;
 }
 
 struct sPair_34B9B0 { sRow_34B9B0 r[4]; };
@@ -346,7 +340,7 @@ static inline void MatCopy_34B9B0(sMat_34B9B0* d, const sMat_34B9B0* s)
 struct sFlagSetEntry;
 struct sFSE_34B9B0 {
     char pad[0x94];
-    sModel_34B9B0* models[1];
+    tInstanceRecord* models[1];
 };
 
 #define TOP_34B9B0(c) (*(sRS_34B9B0**)((c) + 0xE84))
@@ -379,15 +373,15 @@ extern "C" void cFlagSet_render(cFlagSet* flagSet)
     }
     float one = 1.0f;
     for (int i = 0; i < flagSet->mCurrentNumInstances; i++) {
-        sModel_34B9B0* instRecord = ((sFSE_34B9B0*)flagSet)->models[i];
+        tInstanceRecord* instRecord = ((sFSE_34B9B0*)flagSet)->models[i];
         if (!IsLoaded_34B9B0(instRecord)) {
             continue;
         }
         {
             sVE93_34B9B0* vt = *(sVE93_34B9B0**)(ctx + 0x10D8);
             char* thisp = ctx + vt[93].delta;
-            sVec4_34B9B0 boxMin(*(float*)((char*)instRecord + 0x60), *(float*)((char*)instRecord + 0x64), *(float*)((char*)instRecord + 0x68), one);
-            sVec4_34B9B0 boxMax(*(float*)((char*)instRecord + 0x6C), *(float*)((char*)instRecord + 0x70), *(float*)((char*)instRecord + 0x74), one);
+            sVec4_34B9B0 boxMin(instRecord->m_fvMin.m[0], instRecord->m_fvMin.m[1], instRecord->m_fvMin.m[2], one);
+            sVec4_34B9B0 boxMax(instRecord->m_fvMax.m[0], instRecord->m_fvMax.m[1], instRecord->m_fvMax.m[2], one);
             sVec4_34B9B0* pb = &boxMax;
             sVE43_34B9B0* vt43 = *(sVE43_34B9B0**)(ctx + 0x10D8);
             sPair_34B9B0 viewMat = vt43[43].fn(ctx + vt43[43].delta);
@@ -396,7 +390,7 @@ extern "C" void cFlagSet_render(cFlagSet* flagSet)
             }
         }
         {
-            char* pos = (char*)instRecord + 0x10;
+            char* pos = (char*)&instRecord->m_fmTransform;
             sMat_34B9B0 mat;
             MatCopy_34B9B0(&mat, (sMat_34B9B0*)t4mat_Identity);
             mat.r[3].x = flagSet->mScrollU;
@@ -404,7 +398,7 @@ extern "C" void cFlagSet_render(cFlagSet* flagSet)
             char* gridMesh = (char*)flagSet->mGridMesh;
             if (gridMesh != 0) {
                 sVE7_34B9B0* hv = *(sVE7_34B9B0**)(gridMesh + 4);
-                hv[7].fn(gridMesh + hv[7].delta, pos, *(void**)((char*)instRecord + 0x94), &mat);
+                hv[7].fn(gridMesh + hv[7].delta, pos, instRecord->unk_094, &mat);
             } else {
                 sVE96_34B9B0* drawSlot = *(sVE96_34B9B0**)(ctx + 0x10D8);
                 drawSlot[96].fn(ctx + drawSlot[96].delta, instRecord, 0, 0, 0);
@@ -656,15 +650,6 @@ extern "C" void* cFlagSet_cFlagSet(void* self);
 extern void* cFlagManager_vtbl[];
 
 
-struct sFlagSet_C428 {
-    char pad0[0xC];
-    void** vtable;                  // 0xC
-    int field_0x10;                 // 0x10
-    float field_0x14;               // 0x14
-    float field_0x18;               // 0x18
-    int field_0x1c;                 // 0x1C
-    cFlagSet elems[15];    // 0x20
-};
 
 /**
  * Constructs the flag manager object node with 15 empty flag sets and its wind at base 0.5, delta 0.25.
@@ -672,11 +657,11 @@ struct sFlagSet_C428 {
  * @param bucket  the bucket the node belongs to
  * @return @p self
  */
-extern "C" sFlagSet_C428* cFlagManager_cFlagManager(cFlagManager* self, void* bucket)
+extern "C" cFlagManager* cFlagManager_cFlagManager(cFlagManager* self, void* bucket)
 {
     int i;
     cFlagSet* elem = ((&self->mFlagSets[0]));
-    cObjNode_cObjNode1(((sFlagSet_C428*)self), bucket);
+    cObjNode_cObjNode1((self), bucket);
     self->mVtbl = cFlagManager_vtbl;
     for (i = 14; i != -1; i--, elem++) {
         cFlagSet_cFlagSet(elem);
@@ -685,7 +670,7 @@ extern "C" sFlagSet_C428* cFlagManager_cFlagManager(cFlagManager* self, void* bu
     self->mWindDelta = 0.25f;
     *(int*)&self->mWindTime = 0;
     *(int*)&self->mCurrentWindFactor = 0;
-    return ((sFlagSet_C428*)self);
+    return (self);
 }
 #endif
 
@@ -1113,7 +1098,7 @@ extern "C" cFenceNode_C8E8* cFenceNode_cFenceNode1(cFenceNode* self, int bucket,
     self->NextPropTime = 0;
     self->PrevPropTime = 0;
     if (self->GridMesh != 0) {
-        sVec4_C8E8 dir = Normalize_C8E8(MulMat_C8E8((sMat_C8E8*)((char*)self->Instance + 0x10), &t4vect_XAxis));
+        sVec4_C8E8 dir = Normalize_C8E8(MulMat_C8E8((sMat_C8E8*)(&self->Instance->m_fmTransform), &t4vect_XAxis));
         float speed = fabs_C8E8(*(float*)(info + 0x30));
         force = Dot_C8E8(dir, *(sVec4_C8E8*)(info + 0x10));
         force = speed * (force * 0.0010000000474974513f);
@@ -1691,12 +1676,9 @@ INCLUDE_ASM("object/flagset", cFenceNode_onCollide);
 #ifdef SKIP_ASM
 extern "C" void cFenceNode_setForce(cFenceNode* self, float dt);
 
-struct sFsVec4_D650 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (4-component dot product).
-static inline float fsDot_D650(const sFsVec4_D650& a, const sFsVec4_D650& b)
+static inline float fsDot_D650(const t4Vector& a, const t4Vector& b)
 {
     float r;
     int t;
@@ -1727,7 +1709,7 @@ extern "C" void cFenceNode_onCollide(cFenceNode* self, void* obj)
 {
     char* hitInfo = (char*)obj;
     if (self->ForceMax >= 1.0f) return;
-    float dot = fsDot_D650(*(sFsVec4_D650*)(hitInfo + 0x20), *(sFsVec4_D650*)(hitInfo + 0x10));
+    float dot = fsDot_D650(*(t4Vector*)(hitInfo + 0x20), *(t4Vector*)(hitInfo + 0x10));
     cFenceNode_setForce(self, dot * 0.0010000000474974513f * *(float*)(hitInfo + 0x30));
     if (self->NextPropTime == 0) self->NextPropTime = 4;
     if (self->PrevPropTime == 0) self->PrevPropTime = 4;
@@ -1786,17 +1768,17 @@ INCLUDE_ASM("object/flagset", cFenceNode_render);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void cFenceNode_render(cFenceNode* self)
 {
-    if (!IsLoaded_34B9B0((sModel_34B9B0*)self->Instance)) {
+    if (!IsLoaded_34B9B0(self->Instance)) {
         return;
     }
     char* ctx = cGraphicsMan_TheGraphicsMan;
     float one = 1.0f;
     {
-        sModel_34B9B0* model = (sModel_34B9B0*)self->Instance;
+        tInstanceRecord* model = self->Instance;
         sVE93_34B9B0* vt = *(sVE93_34B9B0**)(ctx + 0x10D8);
         char* thisp = ctx + vt[93].delta;
-        sVec4_34B9B0 boxMin(*(float*)((char*)model + 0x60), *(float*)((char*)model + 0x64), *(float*)((char*)model + 0x68), one);
-        sVec4_34B9B0 boxMax(*(float*)((char*)model + 0x6C), *(float*)((char*)model + 0x70), *(float*)((char*)model + 0x74), one);
+        sVec4_34B9B0 boxMin(model->m_fvMin.m[0], model->m_fvMin.m[1], model->m_fvMin.m[2], one);
+        sVec4_34B9B0 boxMax(model->m_fvMax.m[0], model->m_fvMax.m[1], model->m_fvMax.m[2], one);
         sVec4_34B9B0* pb = &boxMax;
         sVE43_34B9B0* vt43 = *(sVE43_34B9B0**)(ctx + 0x10D8);
         sPair_34B9B0 cullInfo = vt43[43].fn(ctx + vt43[43].delta);
@@ -1808,12 +1790,12 @@ extern "C" void cFenceNode_render(cFenceNode* self)
     sRS_34B9B0* renderState = TOP_34B9B0(ctx);
     TOP_34B9B0(ctx) = renderState + 1;
     ((int*)renderState)[6] = (((int*)renderState)[6] & ~0x7C) | 0x14;
-    sModel_34B9B0* model = (sModel_34B9B0*)self->Instance;
-    char* pos = (char*)model + 0x10;
+    tInstanceRecord* model = self->Instance;
+    char* pos = (char*)&model->m_fmTransform;
     char* gridMesh = (char*)self->GridMesh;
     if (gridMesh != 0) {
         sVE7_34B9B0* hv = *(sVE7_34B9B0**)(gridMesh + 4);
-        hv[7].fn(gridMesh + hv[7].delta, pos, *(void**)((char*)model + 0x94), 0);
+        hv[7].fn(gridMesh + hv[7].delta, pos, model->unk_094, 0);
     } else {
         sVE96_34B9B0* vt96 = *(sVE96_34B9B0**)(ctx + 0x10D8);
         vt96[96].fn(ctx + vt96[96].delta, model, 0, 0, 0);
@@ -2246,11 +2228,6 @@ struct sFlagSetVEntry_E348 {
     void (*fn)(void*, float);
 };
 
-struct sFlagItem_E348 {
-    char pad0[0x84];
-    sFlagSetVEntry_E348* vt;    // 0x84
-    char pad88[0x48];
-};
 
 struct sFlagOwner_E348 {
     int field_0x0;
@@ -2260,7 +2237,7 @@ struct sFlagOwner_E348 {
     char pad14[0x2C];
     int count;                  // 0x40
     int field_0x44;
-    sFlagItem_E348* items;      // 0x48
+    cMeshAnimFrame* items;      // 0x48
 };
 
 /**
@@ -2273,11 +2250,11 @@ struct sFlagOwner_E348 {
 extern "C" void cAnimNode_cacheFrame(cAnimNode* self)
 {
     int i;
-    if ((sFlagItem_E348*)self->AnimFrames != 0) {
+    if (self->AnimFrames != 0) {
         for (i = 0; i < self->NumAnimMeshes; i++) {
             // PORT: pointer arithmetic done in int (gives the target's offset-first addu).
-            sFlagItem_E348* animFrame = (sFlagItem_E348*)(i * 0xD0 + (int)(sFlagItem_E348*)self->AnimFrames);
-            animFrame->vt[2].fn((char*)animFrame + animFrame->vt[2].delta, self->CacheTime);
+            cMeshAnimFrame* animFrame = (cMeshAnimFrame*)(i * 0xD0 + (int)self->AnimFrames);
+            ((sFlagSetVEntry_E348*)animFrame->mVtbl)[2].fn((char*)animFrame + ((sFlagSetVEntry_E348*)animFrame->mVtbl)[2].delta, self->CacheTime);
         }
     }
     self->MeshVelocityDirty = 1;

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "render/2drender.h"
 #include "bx/appman.h"
 #include "bx/math3d.h"
 #include "render/graphicsman.h"
@@ -87,10 +88,6 @@ struct sKey_9A78 {
     unsigned short idB;             // 0xA
 };
 
-struct sEnt_9A78 {
-    int type;
-    sKey_9A78* key;
-};
 
 static inline int iabs_9A78(int v)
 {
@@ -121,19 +118,19 @@ static inline int iabs_9A78(int v)
  */
 extern "C" int areBlendedMatricesEqual(void* ap, void* bp, int tol0, int tol1, int tol2)
 {
-    sEnt_9A78* lhs = (sEnt_9A78*)ap;
-    sEnt_9A78* rhs = (sEnt_9A78*)bp;
-    if (lhs->type != rhs->type)
+    tMdfBlendedMatrix* lhs = (tMdfBlendedMatrix*)ap;
+    tMdfBlendedMatrix* rhs = (tMdfBlendedMatrix*)bp;
+    if (lhs->m_iNumMatrices != rhs->m_iNumMatrices)
         goto fail;
-    if (lhs->key->id != rhs->key->id)
+    if (((sKey_9A78*)lhs->m_matrixList)->id != ((sKey_9A78*)rhs->m_matrixList)->id)
         goto fail;
-    switch (lhs->type) {
+    switch (lhs->m_iNumMatrices) {
     case 1:
-        if (lhs->key->x == rhs->key->x)
+        if (((sKey_9A78*)lhs->m_matrixList)->x == ((sKey_9A78*)rhs->m_matrixList)->x)
             return 1;
         break;
     case 2:
-        if (lhs->key->x == rhs->key->x && lhs->key->idA == rhs->key->idA && lhs->key->y == rhs->key->y)
+        if (((sKey_9A78*)lhs->m_matrixList)->x == ((sKey_9A78*)rhs->m_matrixList)->x && ((sKey_9A78*)lhs->m_matrixList)->idA == ((sKey_9A78*)rhs->m_matrixList)->idA && ((sKey_9A78*)lhs->m_matrixList)->y == ((sKey_9A78*)rhs->m_matrixList)->y)
             return 1;
         break;
     case 3:
@@ -141,13 +138,13 @@ extern "C" int areBlendedMatricesEqual(void* ap, void* bp, int tol0, int tol1, i
     default:
         goto fail;
     }
-    if (lhs->key->idA == rhs->key->idA && lhs->key->idB == rhs->key->idB) {
-        if (iabs_9A78(lhs->key->x - rhs->key->x) > tol0 || iabs_9A78(lhs->key->y - rhs->key->y) > tol1 || iabs_9A78(lhs->key->z - rhs->key->z) > tol2)
+    if (((sKey_9A78*)lhs->m_matrixList)->idA == ((sKey_9A78*)rhs->m_matrixList)->idA && ((sKey_9A78*)lhs->m_matrixList)->idB == ((sKey_9A78*)rhs->m_matrixList)->idB) {
+        if (iabs_9A78(((sKey_9A78*)lhs->m_matrixList)->x - ((sKey_9A78*)rhs->m_matrixList)->x) > tol0 || iabs_9A78(((sKey_9A78*)lhs->m_matrixList)->y - ((sKey_9A78*)rhs->m_matrixList)->y) > tol1 || iabs_9A78(((sKey_9A78*)lhs->m_matrixList)->z - ((sKey_9A78*)rhs->m_matrixList)->z) > tol2)
             goto fail;
         return 1;
     }
-    if (lhs->key->idB == rhs->key->idA && lhs->key->idA == rhs->key->idB) {
-        if (iabs_9A78(lhs->key->x - rhs->key->x) <= tol0 && iabs_9A78(lhs->key->z - rhs->key->y) <= tol1 && iabs_9A78(lhs->key->y - rhs->key->z) <= tol2)
+    if (((sKey_9A78*)lhs->m_matrixList)->idB == ((sKey_9A78*)rhs->m_matrixList)->idA && ((sKey_9A78*)lhs->m_matrixList)->idA == ((sKey_9A78*)rhs->m_matrixList)->idB) {
+        if (iabs_9A78(((sKey_9A78*)lhs->m_matrixList)->x - ((sKey_9A78*)rhs->m_matrixList)->x) <= tol0 && iabs_9A78(((sKey_9A78*)lhs->m_matrixList)->z - ((sKey_9A78*)rhs->m_matrixList)->y) <= tol1 && iabs_9A78(((sKey_9A78*)lhs->m_matrixList)->y - ((sKey_9A78*)rhs->m_matrixList)->z) <= tol2)
             return 1;
     }
 fail:
@@ -255,17 +252,11 @@ struct sGmUVW_369CF8 {
     sGmUVW_369CF8() {}
 } __attribute__((aligned(16)));
 
-struct sGmVert_369CF8 {
-    sGmUVW_369CF8 uv;       // 0x00
-    int r, g, b, a;         // 0x10
-    sGmV4_369CF8 pos;       // 0x20
-    sGmVert_369CF8() {}
-};
 
 struct sGmVE_369CF8 {
     short delta;
     short index;
-    void (*fn)(void*, int, sGmVert_369CF8*, int);
+    void (*fn)(void*, int, tBxVertex*, int);
 };
 
 /**
@@ -286,21 +277,21 @@ struct sGmVE_369CF8 {
 extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTris, int NumVerts, unsigned char* Indices, sGmV3_369CF8* Positions,
                               sGmUV_369CF8* UV, sGmV4_369CF8* Color, sGmV3_369CF8* Offset)
 {
-    sGmVert_369CF8 verts[3];
-    verts[2].uv.z = 1.0f;
-    verts[1].uv.z = 1.0f;
-    verts[0].uv.z = 1.0f;
+    tBxVertex verts[3];
+    (*(sGmUVW_369CF8*)&verts[2].u).z = 1.0f;
+    (*(sGmUVW_369CF8*)&verts[1].u).z = 1.0f;
+    (*(sGmUVW_369CF8*)&verts[0].u).z = 1.0f;
     if (UV) {
         for (int i = 0; i < NumTris; i++) {
             for (int j = 0; j < 3; j++) {
                 int Index = Indices[j];
-                verts[j].pos = sGmV4_369CF8(Positions[Index] + *Offset, 1.0f);
+                (*(sGmV4_369CF8*)&verts[j].p) = sGmV4_369CF8(Positions[Index] + *Offset, 1.0f);
                 verts[j].a = (int)(Color[Index].x * 0.5f);
                 verts[j].r = (int)(Color[Index].y * 0.5f);
                 verts[j].g = (int)(Color[Index].z * 0.5f);
                 verts[j].b = (int)(Color[Index].w * 0.5f);
-                verts[j].uv.x = UV[Index].x();
-                verts[j].uv.y = UV[Index].y();
+                (*(sGmUVW_369CF8*)&verts[j].u).x = UV[Index].x();
+                (*(sGmUVW_369CF8*)&verts[j].u).y = UV[Index].y();
             }
             Indices += 3;
             sGmVE_369CF8* vt = (sGmVE_369CF8*)self->mVtbl;
@@ -310,14 +301,14 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTri
         for (int i = 0; i < NumTris; i++) {
             for (int j = 0; j < 3; j++) {
                 int Index = Indices[j];
-                verts[j].pos = sGmV4_369CF8(Positions[Index] + *Offset, 1.0f);
+                (*(sGmV4_369CF8*)&verts[j].p) = sGmV4_369CF8(Positions[Index] + *Offset, 1.0f);
                 verts[j].a = (int)(Color[Index].x * 0.5f);
                 verts[j].r = (int)(Color[Index].y * 0.5f);
                 verts[j].g = (int)(Color[Index].z * 0.5f);
                 verts[j].b = (int)(Color[Index].w * 0.5f);
-                verts[j].uv.z = 1.0f;
-                verts[j].uv.x = 0.0f;
-                verts[j].uv.y = 0.0f;
+                (*(sGmUVW_369CF8*)&verts[j].u).z = 1.0f;
+                (*(sGmUVW_369CF8*)&verts[j].u).x = 0.0f;
+                (*(sGmUVW_369CF8*)&verts[j].u).y = 0.0f;
             }
             Indices += 3;
             sGmVE_369CF8* vt = (sGmVE_369CF8*)self->mVtbl;

@@ -1516,19 +1516,9 @@ extern "C" void luno_cLunoVar_writeToReplayFrame(cLunoValue* self, sVEntry<void(
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("luno/lunovm", luno_cLunoVar_readFromReplayFrame);
 #ifdef SKIP_ASM
-struct sLunoPair_225CA0 {
-    int word0;
-    int word1;
-};
 
 // PORT: luno_cLunoTable_cLunoTable forwards a size argument to constructTable (unit declares 1 arg).
 extern "C++" cLunoTableRef* luno_cLunoTable_cLunoTable_sz(cLunoTableRef* self, int size) __asm__("luno_cLunoTable_cLunoTable");
-// Non-POD (user copy ctor) so the local is BLKmode and shares the block-scoped slot.
-struct cLunoRefTmp_225CA0 {
-    cLunoTable* table;
-    cLunoRefTmp_225CA0() {}
-    cLunoRefTmp_225CA0(const cLunoRefTmp_225CA0&);
-};
 extern "C" void luno_cLunoTable_readFromReplayFrame(cLunoTableRef* self, sVEntry<void(void*, void*, int)>** stream, int base);
 
 static inline int lunoReadInt_225CA0(sVEntry<void(void*, void*, int)>** stream)
@@ -1552,19 +1542,19 @@ extern "C" void luno_cLunoVar_readFromReplayFrame(cLunoValue* self, sVEntry<void
 {
     int type = lunoReadInt_225CA0(stream);
     if (type == 5) {
-        sLunoPair_225CA0 pair;
-        pair.word0 = 0;
-        pair.word1 = 0;
+        luno_cLunoFunc pair;
+        (*(int*)&pair.Chunk) = 0;
+        pair.FuncNum = 0;
         luno_cLunoFunc_readFromReplayFrame((luno_cLunoFunc*)(&pair), (sVEntry<void(void*, void*, int)>**)stream, base);
         if (self->type == 4) {
             luno_cLunoTable__cLunoTable((cLunoTableRef*)self, 2);
         }
         self->type = 0;
         self->word0 = 0;
-        *(sLunoPair_225CA0*)self = pair;
+        *(luno_cLunoFunc*)self = pair;
         self->type = type;
     } else if (type == 4) {
-        cLunoRefTmp_225CA0 ref;
+        luno_cLunoTable ref;
         luno_cLunoTable_cLunoTable_sz((cLunoTableRef*)&ref, 0x20);
         luno_cLunoTable_readFromReplayFrame((cLunoTableRef*)&ref, stream, base);
         if (self->type == type) {

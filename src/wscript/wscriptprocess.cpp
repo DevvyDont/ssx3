@@ -2013,15 +2013,6 @@ struct sRefWorld_309270 {
     sRefSet_309270** sets;  // 0x8
 };
 
-struct sCmd_309270 {
-    unsigned int flags;
-    unsigned int id;
-    int f8;
-};
-struct sCmdList_309270 {
-    int count;
-    sCmd_309270 e[32];
-};
 
 static inline void* refToPtr_309270(unsigned int p)
 {
@@ -2066,20 +2057,20 @@ extern "C" void cWScriptMan_update(cWScriptMan* self)
         cProcessList_addProcess((char*)&self->IdleList, process);
         cWScriptMan_startProcess(self, process);
     }
-    sCmdList_309270 list = *(sCmdList_309270*)(self->Events);
+    tWScriptEventList list = *(tWScriptEventList*)(self->Events);
     *(int*)(self->Events) = 0;
-    for (int i = 0; i < list.count; i++) {
-        sCmd_309270* event = &list.e[i];
-        if ((unsigned short)event->flags == 0)
-            self->Inst = (tInstanceRecord*)lookup_309270(*(sRefWorld_309270**)self->World, event->id);
+    for (int i = 0; i < list.NumEvents; i++) {
+        tWScriptEvent* event = &list.Events[i];
+        if ((unsigned short)event->EventId == 0)
+            self->Inst = (tInstanceRecord*)lookup_309270(*(sRefWorld_309270**)self->World, event->unk_04);
         char* next = *(char**)&self->ActiveList;
         while (next != 0) {
             cWScriptProcess* proc = (cWScriptProcess*)next;
             next = (char*)proc->Next;
             self->CurrentProcess = (cWScriptProcess*)proc;
-            if (event->flags & 0x20000)
+            if (event->EventId & 0x20000)
                 cWScriptProcess_dispatchProcessEvent((cWScriptProcess*)proc, event);
-            if (event->flags & 0x10000)
+            if (event->EventId & 0x10000)
                 cWScriptProcess_dispatchTaskEvent((cWScriptProcess*)((cWScriptProcList*)proc), (int)event);
         }
         self->Inst = 0;

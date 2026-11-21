@@ -680,15 +680,11 @@ INCLUDE_ASM("fe/feridermanager", cFERider_translate);
 #ifdef SKIP_ASM
 extern "C" void cFERider_updateModelPose(cFERider* self);
 
-struct sVec_F418 {
-    float x, y, z, w;
-    sVec_F418() {}
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
-static inline sVec_F418 Rot_F418(const sVec_F418& q, const sVec_F418& v)
+static inline t4Vector Rot_F418(const t4Vector& q, const t4Vector& v)
 {
-    sVec_F418 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -710,7 +706,7 @@ static inline sVec_F418 Rot_F418(const sVec_F418& q, const sVec_F418& v)
 }
 
 // PORT: PS2-only VU0 inline asm (dst += b).
-static inline void AddTo_F418(sVec_F418& dst, const sVec_F418& b)
+static inline void AddTo_F418(t4Vector& dst, const t4Vector& b)
 {
     __asm__(
         ".set push\n"
@@ -730,10 +726,10 @@ static inline void AddTo_F418(sVec_F418& dst, const sVec_F418& b)
  *
  * @param delta  the move, in the rider's frame
  */
-extern "C" void cFERider_translate(cFERider* self, sVec_F418* delta)
+extern "C" void cFERider_translate(cFERider* self, t4Vector* delta)
 {
-    sVec_F418* pos = (sVec_F418*)&self->mPose;
-    sVec_F418* rot = (sVec_F418*)(&self->mPose.Q);
+    t4Vector* pos = (t4Vector*)&self->mPose;
+    t4Vector* rot = ((&self->mPose.Q));
     AddTo_F418(*pos, Rot_F418(*rot, *delta));
     cFERider_updateModelPose(self);
 }
@@ -815,15 +811,11 @@ INCLUDE_ASM("fe/feridermanager", cFERider_translateBoard);
 #ifdef SKIP_ASM
 extern "C" void cFERider_updateModelPose(cFERider* self);
 
-struct sVec_F578 {
-    float x, y, z, w;
-    sVec_F578() {}
-} __attribute__((aligned(16)));
 
 // PORT: PS2-only VU0 inline asm (v rotated by quaternion q).
-static inline sVec_F578 Rot_F578(const sVec_F578& q, const sVec_F578& v)
+static inline t4Vector Rot_F578(const t4Vector& q, const t4Vector& v)
 {
-    sVec_F578 r;
+    t4Vector r;
     __asm__(
         "lqc2      $vf4, %1\n"
         "lqc2      $vf5, %2\n"
@@ -845,7 +837,7 @@ static inline sVec_F578 Rot_F578(const sVec_F578& q, const sVec_F578& v)
 }
 
 // PORT: PS2-only VU0 inline asm (dst += b).
-static inline void AddTo_F578(sVec_F578& dst, const sVec_F578& b)
+static inline void AddTo_F578(t4Vector& dst, const t4Vector& b)
 {
     __asm__(
         ".set push\n"
@@ -865,10 +857,10 @@ static inline void AddTo_F578(sVec_F578& dst, const sVec_F578& b)
  *
  * @param delta  the move, in the board's frame
  */
-extern "C" void cFERider_translateBoard(cFERider* self, sVec_F578* delta)
+extern "C" void cFERider_translateBoard(cFERider* self, t4Vector* delta)
 {
-    sVec_F578* pos = (sVec_F578*)&self->mBoardPose;
-    sVec_F578* rot = (sVec_F578*)(&self->mBoardPose.Q);
+    t4Vector* pos = (t4Vector*)&self->mBoardPose;
+    t4Vector* rot = ((&self->mBoardPose.Q));
     AddTo_F578(*pos, Rot_F578(*rot, *delta));
     cFERider_updateModelPose(self);
 }

@@ -1,5 +1,6 @@
 #include "vtable.h"
 #include "common.h"
+#include "ui/uidata.h"
 #include "ui/uithing.h"
 #include "ui/uiinput.h"
 #include "ui/uiengine.h"
@@ -331,18 +332,12 @@ extern void cUIScreen_parseScreenFocusLose_4(void *, void *, void *, void *) __a
 extern void cUIScreen_parseScreenStart_4(void *, void *, void *, void *) __asm__("cUIScreen_parseScreenStart__FPv");
 extern void cUIScreen_parseScreenEnd_4(void *, void *, void *, void *) __asm__("cUIScreen_parseScreenEnd");
 
-// One frame command: opcode and byte size (commands are packed back to back).
-struct sCmd_C978 {
-    unsigned char op;         // 0x0
-    char pad1;
-    unsigned short size;      // 0x2
-};
 
 // The frame's command list (from cUIScreen_getFrameByIndex).
 struct sCmdList_C978 {
     char pad0[0xA];
     unsigned short count;     // 0xA
-    sCmd_C978 first;          // 0xC
+    tUIKCPBase first;          // 0xC
 };
 
 /**
@@ -358,7 +353,7 @@ extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, void *thread)
 {
     cUIThread_C870 *uiThread = (cUIThread_C870 *)thread;
     sCmdList_C978 *list;
-    sCmd_C978 *cmd;
+    tUIKCPBase *cmd;
     unsigned int i;
     unsigned short CurrentFrame = uiThread->getCurrentFrameNumber();
     uiThread->setLastFrameNumber(uiThread->getCurrentFrameNumber());
@@ -381,7 +376,7 @@ extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, void *thread)
         i = 0;
         if (list->count != 0) {
             do {
-                switch (cmd->op) {
+                switch (cmd->mTag) {
                 case 0x10:
                     cUIScreen_parseKeyframePause_4(self, list, cmd, uiThread);
                     break;
@@ -420,7 +415,7 @@ extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, void *thread)
                     break;
                 }
                 i++;
-                cmd = (sCmd_C978 *)((char *)cmd + cmd->size);
+                cmd = (tUIKCPBase *)((char *)cmd + cmd->mPacketSize);
             } while (i < list->count);
         }
     }
@@ -775,11 +770,6 @@ extern "C" void cUIScreen_createAllObjects(cUIScreen* self)
 //100%
 INCLUDE_ASM("ui/uiscreen", cUIScreen_createObjectByHashName);
 #ifdef SKIP_ASM
-struct sObjRec_0039D008 {
-    short pad0;
-    unsigned short size; // 0x2
-    int key;             // 0x4
-};
 
 /**
  * Creates the object of a UI screen whose record has hash name @p key.
@@ -792,15 +782,15 @@ struct sObjRec_0039D008 {
  */
 extern "C" void* cUIScreen_createObjectByHashName(cUIScreen* self, int key)
 {
-    sObjRec_0039D008* record = (sObjRec_0039D008*)((char*)self->mpObjectBlock + 4);
+    tUIBaseObject* record = (tUIBaseObject*)((char*)self->mpObjectBlock + 4);
     unsigned int i;
     for (i = 0; i < *((unsigned int*)self->mpObjectBlock); i++) {
-        if (record->key == key) {
+        if (((int)record->mHashID) == key) {
             char* obj = cUIScreen_createObjectByStruct((cUIScreen*)self, (char*)record);
             *(int*)(obj + 0x38) = key;
             return obj;
         }
-        record = (sObjRec_0039D008*)((char*)record + record->size);
+        record = (tUIBaseObject*)((char*)record + record->mByteSize);
     }
     return 0;
 }

@@ -1,5 +1,7 @@
 #include "vtable.h"
 #include "common.h"
+#include "world/instancerecord.h"
+#include "bx/math3d.h"
 #include "world/worldview.h"
 #include "object/flexbridgenode.h"
 #include "object/effectmodifier.h"
@@ -569,7 +571,7 @@ struct sEffMtx_5EF8 {
 };
 
 struct sEffMtx_62A0;
-extern "C" void cInstanceNode_buildMeshMat(void* a, int b, sEffMtx_62A0* out);
+extern "C" void cInstanceNode_buildMeshMat(void* a, int b, t4Matrix* out);
 
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (matrix * vector).
 static inline sEffVec4_5EF8 effMtxApply5EF8(sEffMtx_5EF8* m, sEffVec4_5EF8* v)
@@ -615,7 +617,7 @@ struct sEffectLink5EF8 {
 extern "C" void cDynamicParticleModifier_updatePosition(cDynamicParticleModifier* self)
 {
     sEffMtx_5EF8 meshMat;
-    cInstanceNode_buildMeshMat(self->Instance, self->Mesh, (sEffMtx_62A0*)&meshMat);
+    cInstanceNode_buildMeshMat(self->Instance, self->Mesh, (t4Matrix*)&meshMat);
     *(sEffVec4_5EF8*)&self->Pos = effMtxApply5EF8(&meshMat, (sEffVec4_5EF8*)&self->Offset);
     *(sEffVec4_5EF8*)&self->Vel = effMtxApply5EF8(&meshMat, (sEffVec4_5EF8*)&self->InitVel);
 }
@@ -855,16 +857,10 @@ extern "C" void cHaloModifier_update(cHaloModifier* self)
 //100%
 INCLUDE_ASM("object/effectlink", cHaloModifier_render);
 #ifdef SKIP_ASM
-struct sEffVec4_62A0 {
-    float x, y, z, w;
-} __attribute__((aligned(16)));
 
-struct sEffMtx_62A0 {
-    sEffVec4_62A0 r[4];
-};
 
-extern "C" void cInstanceNode_buildMeshMat(void* a, int b, sEffMtx_62A0* out);
-extern "C" void cObjectInterface_renderSimpleLightHalo(sEffVec4_62A0* pos, void* p, int n, float a, float b);
+extern "C" void cInstanceNode_buildMeshMat(void* a, int b, t4Matrix* out);
+extern "C" void cObjectInterface_renderSimpleLightHalo(t4Vector* pos, void* p, int n, float a, float b);
 
 /**
  * Draws a halo at the position of its instance's mesh.
@@ -874,10 +870,10 @@ extern "C" void cObjectInterface_renderSimpleLightHalo(sEffVec4_62A0* pos, void*
  */
 extern "C" void cHaloModifier_render(cHaloModifier* self)
 {
-    sEffMtx_62A0 matrix;
+    t4Matrix matrix;
     void* colour = (char*)&self->Color;
     cInstanceNode_buildMeshMat(self->Instance, self->Mesh, &matrix);
-    sEffVec4_62A0 origin = matrix.r[3];
+    t4Vector origin = ((&matrix.row[0]))[3];
     cObjectInterface_renderSimpleLightHalo(&origin, colour, self->Type,
                   self->Radius, self->Angle);
 }
@@ -990,9 +986,9 @@ extern "C" void* cFlexBridgeNode_cFlexBridgeNode(cFlexBridgeNode* self, int buck
     cFlexBridgeNode_setupGrid(self);
     cFlexBridgeNode_initSpringNodes(self);
     cFlexBridgeNode_updateGrid(self);
-    unsigned int* flags = (unsigned int*)((char*)self->Instance + 8);
+    unsigned int* flags = (unsigned int*)(&self->Instance->m_iFlags);
     *flags = (*flags & 0xFFFFFFFD) | 4;
-    flags = (unsigned int*)((char*)self->Instance + 8);
+    flags = (unsigned int*)(&self->Instance->m_iFlags);
     *flags = (*flags & 0xFFFFFFDF) | 0x40;
     return ((void*)self);
 }
@@ -1046,11 +1042,6 @@ struct sVec4_346568 {
 } __attribute__((aligned(16)));
 
 
-struct sInst_346568 {
-    char pad_0x00[0x60];
-    float min[3];
-    float max[3];
-};
 
 extern "C" void nash_Nash_movenode(void* world, int type, void* id, tBoundBox* box, tBoundBox* old);
 
@@ -1083,16 +1074,16 @@ extern "C" void cFlexBridgeNode__cFlexBridgeNode(cFlexBridgeNode* self, int flag
     tBoundBox* box = ((&self->BoundBox));
     ((sVEntry<void(void*, void*)>*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].fn((char*)cGraphicsMan_TheGraphicsMan + ((sVEntry<void(void*, void*)>*)cGraphicsMan_TheGraphicsMan->mVtbl)[77].delta, self->GridMesh);
     tBoundBox old = *(&self->BoundBox);
-    sInst_346568* inst = (sInst_346568*)self->Instance;
+    tInstanceRecord* inst = self->Instance;
     sVec4_346568 corner;
-    corner.x = inst->min[0];
-    corner.y = inst->min[1];
-    corner.z = inst->min[2];
+    corner.x = inst->m_fvMin.m[0];
+    corner.y = inst->m_fvMin.m[1];
+    corner.z = inst->m_fvMin.m[2];
     corner.w = 1.0f;
     *(sVec4_346568*)&self->BoundBox = corner;
-    corner.x = inst->max[0];
-    corner.y = inst->max[1];
-    corner.z = inst->max[2];
+    corner.x = inst->m_fvMax.m[0];
+    corner.y = inst->m_fvMax.m[1];
+    corner.z = inst->m_fvMax.m[2];
     corner.w = 1.0f;
     *(sVec4_346568*)&self->BoundBox.MaxPoint = corner;
     nash_Nash_movenode(cObjectInterface_getNash(), 0, inst, box, &old);

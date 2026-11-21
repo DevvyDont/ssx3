@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "fe/ferider.h"
 #include "be/berewarddb.h"
 #include "fe/fereal.h"
@@ -14,12 +15,11 @@
 //100%
 INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onCreateScreen);
 #ifdef SKIP_ASM
-struct sVec4_181148 { float x, y, z, w; } __attribute__((aligned(16)));
 int GetHashValue32(char* str);
 extern char str_08sel_char[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void cSimpleCamera_setupCamWithPosAndTarget(void* cam, sVec4_181148* a, sVec4_181148* b);
+extern "C" void cSimpleCamera_setupCamWithPosAndTarget(void* cam, t4Vector* a, t4Vector* b);
 extern "C" cFERider* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFERider_setVisible(void* self, int a1);
 
@@ -39,12 +39,12 @@ extern "C" void cFEStateCharSelect_onCreateScreen(cFEStateCharSelect* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     cFE* cam = SSXApp->RealFE;
-    sVec4_181148 pos;
+    t4Vector pos;
     pos.x = 0.0f;
     pos.y = 200.0f;
     pos.z = 0.0f;
     pos.w = 1.0f;
-    sVec4_181148 lookAt;
+    t4Vector lookAt;
     lookAt.x = 0.0f;
     lookAt.y = 0.0f;
     lookAt.z = 0.0f;
@@ -664,17 +664,12 @@ struct sQuat_181EF0
     sQuat_181EF0(float ax, float ay, float az, float aw) { w = aw; x = ax; y = ay; z = az; }
 } __attribute__((aligned(16)));
 
-struct sXform_181EF0
-{
-    sQuat_181EF0 pos;
-    sQuat_181EF0 rot;
-};
 
 extern sQuat_181EF0 t4vect_XAxis;
 extern sQuat_181EF0 t4vect_YAxis;
 extern sQuat_181EF0 t4vect_ZAxis;
-extern "C" void cFERider_setPose(void* rider, sXform_181EF0* xf);
-extern "C" void cFERider_setBoardPose(void* rider, sXform_181EF0* xf);
+extern "C" void cFERider_setPose(void* rider, tPose* xf);
+extern "C" void cFERider_setBoardPose(void* rider, tPose* xf);
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
 static inline sQuat_181EF0 QuatMul_181EF0(const sQuat_181EF0& a, const sQuat_181EF0& b)
@@ -726,7 +721,7 @@ extern "C" void cFEStateCharSelect_updateCharacter3DPos(cFEStateCharSelect* vsel
     }
     if (ok && vself->mbDraw3D != 0) {
         sQuat_181EF0 pos;
-        sXform_181EF0 xf;
+        tPose xf;
         float ang = vself->mPlayerRotation;
         {
             sQuat_181EF0 position;
@@ -735,17 +730,17 @@ extern "C" void cFEStateCharSelect_updateCharacter3DPos(cFEStateCharSelect* vsel
             position.z = -82.0f;
             position.w = 1.0f;
             pos = position;
-            xf.pos = position;
-            xf.rot.x = 0.0f;
-            xf.rot.y = 0.0f;
-            xf.rot.z = 0.0f;
-            xf.rot.w = 1.0f;
-            xf.rot = QuatMul_181EF0(xf.rot, AxisAngle_181EF0(t4vect_XAxis, 0.0f));
+            (*(sQuat_181EF0*)&xf.P) = position;
+            (*(sQuat_181EF0*)&xf.Q).x = 0.0f;
+            (*(sQuat_181EF0*)&xf.Q).y = 0.0f;
+            (*(sQuat_181EF0*)&xf.Q).z = 0.0f;
+            (*(sQuat_181EF0*)&xf.Q).w = 1.0f;
+            (*(sQuat_181EF0*)&xf.Q) = QuatMul_181EF0((*(sQuat_181EF0*)&xf.Q), AxisAngle_181EF0(t4vect_XAxis, 0.0f));
         }
-        xf.rot = QuatMul_181EF0(xf.rot, AxisAngle_181EF0(t4vect_YAxis, 0.0f));
+        (*(sQuat_181EF0*)&xf.Q) = QuatMul_181EF0((*(sQuat_181EF0*)&xf.Q), AxisAngle_181EF0(t4vect_YAxis, 0.0f));
         ang += 100.0f;
         ang *= 0.01745329424738884f;
-        xf.rot = QuatMul_181EF0(xf.rot, AxisAngle_181EF0(t4vect_ZAxis, ang));
+        (*(sQuat_181EF0*)&xf.Q) = QuatMul_181EF0((*(sQuat_181EF0*)&xf.Q), AxisAngle_181EF0(t4vect_ZAxis, ang));
         cFERider_setPose(rider, &xf);
         if (vself->mbIsFirst != 0) {
             void* anim = *(void**)(rider + 0xC);
@@ -762,7 +757,7 @@ extern "C" void cFEStateCharSelect_updateCharacter3DPos(cFEStateCharSelect* vsel
             position.y = 10000.0f;
             position.z = 0.0f;
             position.w = 1.0f;
-            xf.pos = position;
+            (*(sQuat_181EF0*)&xf.P) = position;
         }
         cFERider_setBoardPose(rider, &xf);
         cFERider_setVisible(rider, 1);
