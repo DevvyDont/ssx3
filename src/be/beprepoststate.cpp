@@ -1,4 +1,6 @@
 #include "common.h"
+#include "be/beprofilelib.h"
+#include "be/bestate.h"
 #include "be/beintsavefile.h"
 #include "be/beintaggression.h"
 #include "be/beintnewrace.h"
@@ -75,7 +77,7 @@ void* cBERewardInterface_getThis();
  * @return the interface's getThis() singleton, or 0 for an unknown kind
  */
 // Returns the backend interface singleton for the given kind.
-extern "C" void* cBEPostRaceState_getInterface(void* self, int kind)
+extern "C" void* cBEPostRaceState_getInterface(cBEPostRaceState* self, int kind)
 {
     switch (kind) {
     case 0:
@@ -221,7 +223,7 @@ void* cBERewardInterface_getThis();
  * @return the interface's getThis() singleton, or 0 for an unknown kind
  */
 // Returns the backend interface singleton for the given kind.
-extern "C" void* cBEPreRaceState_getInterface(void* self, int kind)
+extern "C" void* cBEPreRaceState_getInterface(cBEPreRaceState* self, int kind)
 {
     switch (kind) {
     case 0:
@@ -328,7 +330,7 @@ extern "C" void cBECharProfileDB_init(void* p, int i, int arg);
  *
  * @param reload  nonzero to reload each character's item data first
  */
-extern "C" void cBEProfileLib_init(void* self, int reload)
+extern "C" void cBEProfileLib_init(cBEProfileLib* self, int reload)
 {
     int i;
     for (i = 0; i < 10; i++) {
@@ -348,7 +350,7 @@ extern "C" void func_001519E0(void* p, int i);
  * func_001519E0 is the part of cBECharProfileDB_init that sets a character kind's defaults. The network interface calls
  * this when it resets a player's profile.
  */
-extern "C" void func_00156810(void* self)
+extern "C" void func_00156810(cBEProfileLib* self)
 {
     int i;
     for (i = 0; i < 10; i++) {
@@ -421,10 +423,10 @@ extern char D_004C4090[];
  * @param base  the profile (10 character records)
  * @param idx  the character whose record is saved
  */
-extern "C" void cBEProfileLib_backupCharProfile(char* base, int idx)
+extern "C" void cBEProfileLib_backupCharProfile(cBEProfileLib* base, int idx)
 {
     D_004A125C = idx;
-    MEM_copy(D_004C4090, base + idx * 3976, 3976);
+    MEM_copy(D_004C4090, ((char*)base) + idx * 3976, 3976);
 }
 #endif
 
@@ -441,9 +443,9 @@ extern char D_004C4090[];
  *
  * @param base  the profile (10 character records)
  */
-extern "C" void cBEProfileLib_restoreCharProfile(char* base)
+extern "C" void cBEProfileLib_restoreCharProfile(cBEProfileLib* base)
 {
-    MEM_copy(base + D_004A125C * 3976, D_004C4090, 3976);
+    MEM_copy(((char*)base) + D_004A125C * 3976, D_004C4090, 3976);
 }
 #endif
 

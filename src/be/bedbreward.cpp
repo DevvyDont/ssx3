@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/bestate.h"
 #include "camera/cameraalgolist.h"
 #include "be/beintaggression.h"
 #include "be/beintmission.h"
@@ -1958,10 +1959,10 @@ extern char cBEPreRaceState_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cBEPreRaceState_cBEPreRaceState(void* self)
+extern "C" void* cBEPreRaceState_cBEPreRaceState(cBEPreRaceState* self)
 {
-    *(char**)((char*)self + 4) = cBEPreRaceState_vtbl;
-    return self;
+    self->mVtbl = (void**)cBEPreRaceState_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -1994,10 +1995,10 @@ extern char cBERaceState_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cBERaceState_cBERaceState(void* self)
+extern "C" void* cBERaceState_cBERaceState(cBERaceState* self)
 {
-    *(char**)((char*)self + 4) = cBERaceState_vtbl;
-    return self;
+    self->mVtbl = (void**)cBERaceState_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -2032,10 +2033,10 @@ extern char cBEPostRaceState_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cBEPostRaceState_cBEPostRaceState(void* self)
+extern "C" void* cBEPostRaceState_cBEPostRaceState(cBEPostRaceState* self)
 {
-    *(char**)((char*)self + 4) = cBEPostRaceState_vtbl;
-    return self;
+    self->mVtbl = (void**)cBEPostRaceState_vtbl;
+    return ((void*)self);
 }
 #endif
 

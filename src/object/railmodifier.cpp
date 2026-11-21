@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/objectnode.h"
 #include "object/restorenode.h"
 #include "object/particlenode.h"
 #include "object/hidenode.h"
@@ -5511,9 +5512,10 @@ INCLUDE_ASM("object/railmodifier", cObjectNode__cObjectNode__FPv);
  *
  * @return cMoveNode__cMoveNode's result
  */
-void* cObjectNode__cObjectNode(void* self)
+void* cObjectNode__cObjectNode(void* vself)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)cObjectNode_vtbl;
+    cObjectNode* self = (cObjectNode*)vself;
+    self->mVtbl = (void**)((int)(void*)cObjectNode_vtbl);
     return cMoveNode__cMoveNode(self);
 }
 #endif

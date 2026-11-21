@@ -105,4 +105,63 @@ CHECK_SIZE(BuddyMan, 0xF0);
 // The buddy-list manager (BuddyMan::mBuddyMan; preview assert "!mBuddyMan"): set when func_00260F80 creates it.
 extern BuddyMan* BuddyMan_mBuddyMan;
 
+// cChallenger: one pending race challenge received from another player (BuddyMan::mChallengers*). Only BuddyMan's
+// challenge handler func_00262AF0 (called by LobbyMan_onchatmsg with the fields of a "challenge" private message) makes
+// one: `operator new(0x40, "cChallenger", 0x20000000)` with the constructor inlined (vtable, two cBXStrings, the words
+// 0x8..0x34); func_00263018 / func_00261530 delete it through slot 1 (the only virtual: cChallenger__cChallenger, in
+// unit bx/bxstringctor). Readers: func_00262E20 / func_00263128 / func_00263270 / func_00263308 (the name at 0x0) and
+// cFEStateChallengeReceivedPopup_onCreateScreen (fe/feasyncfile.cpp, view sRaceSetup_FE68: the race settings).
+// No EA path (no out-of-line method besides the destructor); BuddyMan's code is in EA's online/lobbyman.cpp.
+// Not in SSX On Tour (no [O]); member names are from retail use.
+//
+// Size 0x40: [R] the allocation in func_00262AF0. No base class: its one virtual (the destructor; vtable cChallenger_vtbl
+// 0x004810E0, 1 slot) puts the vptr after the data (g++ 2.95), at 0x3C ([R] func_00262AF0 and the destructor store it).
+// cBXString members are written as their one word (char* Str: bx/bxstring.h), as in online/lobbyman.h.
+// Tags: [R] func_00262AF0's stores, the destructor; [U] how retail code uses the field.
+struct cChallenger {
+    char* mName;                    // 0x00 [R] cBXString(name) (cBXString_cBXString2(this, name)); dtor destroys it;
+                                    //      [U] func_00262E20 / func_00263128 / func_00263270 compare it with the
+                                    //      challenger's name (strcasecmp / strcmp)
+    char* mMessage;                 // 0x04 [R] cBXString(messageText) (this + 4): the whole chat message; dtor destroys
+                                    //      it; [U] the challenge popup copies it to LobbyMan::unk_08C (view `name`)
+    int miLocation;                 // 0x08 [R] the message's 1st number; [U] the popup stores it in
+                                    //      cBENewRaceInterface_newRace.iLocationIdx (view f8)
+    int miGameMode;                 // 0x0C [R] 2nd number; [U] the popup's setGameMode (view mode)
+    int miGameEvent;                // 0x10 [R] 3rd number; [U] the popup's setGameEvent (view event)
+    int mbRanked;                   // 0x14 [R] 4th number as 0/1; [U] the popup: cBENetworkInterface_networkOpt
+                                    //      .bIsRankedGame (view f14)
+    int mbMultipliers;              // 0x18 [R] 5th number as 0/1; [U] the popup: race-option bit 6 of D_005308B8 (the
+                                    //      multipliers bit, festatenetchallenge mpLBMultipliers) (view f18)
+    int mbPowerUps;                 // 0x1C [R] 6th number as 0/1; [U] the popup: race-option bit 8 (power-ups) (view f1C)
+    int miNumberAI;                 // 0x20 [R] 7th number; [U] the popup's cBENewRaceInterface_setNumberAI (view numAI)
+    int mbPointIcons;               // 0x24 [R] 8th number as 0/1; [U] the popup: race-option bit 7 (point icons) (view f24)
+    // 0x28..0x3B: the challenger's lobby stats, a tLobbyStats (online/lobbyman.h, 0x14) that the popup block-copies into
+    // LobbyMan::mOpponentStats (view info[5]); written out as its five words with tLobbyStats' names.
+    int mRank;                      // 0x28 [R] the 4th number after the signature ("rank"); [U] tLobbyStats::mRank
+    int unk_02C;                    // 0x2C [R] 1st number after the signature (tLobbyStats::unk_04, "STAT" field 2)
+    int unk_030;                    // 0x30 [R] 2nd number after it (tLobbyStats::unk_08, "STAT" fields 2 + 3 + 4)
+    int unk_034;                    // 0x34 [R] 3rd number after it (tLobbyStats::unk_0C, "STAT" field 6)
+    int unk_038;                    // 0x38 never written by func_00262AF0; copied by the popup as tLobbyStats::unk_10
+    void** mVtbl;                   // 0x3C [R] cChallenger_vtbl (func_00262AF0, the dtor); [U] func_00263018 deletes
+                                    //      through slot 1 (flags 3)
+};
+
+CHECK_OFFSET(cChallenger, mName, 0x00);
+CHECK_OFFSET(cChallenger, mMessage, 0x04);
+CHECK_OFFSET(cChallenger, miLocation, 0x08);
+CHECK_OFFSET(cChallenger, miGameMode, 0x0C);
+CHECK_OFFSET(cChallenger, miGameEvent, 0x10);
+CHECK_OFFSET(cChallenger, mbRanked, 0x14);
+CHECK_OFFSET(cChallenger, mbMultipliers, 0x18);
+CHECK_OFFSET(cChallenger, mbPowerUps, 0x1C);
+CHECK_OFFSET(cChallenger, miNumberAI, 0x20);
+CHECK_OFFSET(cChallenger, mbPointIcons, 0x24);
+CHECK_OFFSET(cChallenger, mRank, 0x28);
+CHECK_OFFSET(cChallenger, unk_02C, 0x2C);
+CHECK_OFFSET(cChallenger, unk_030, 0x30);
+CHECK_OFFSET(cChallenger, unk_034, 0x34);
+CHECK_OFFSET(cChallenger, unk_038, 0x38);
+CHECK_OFFSET(cChallenger, mVtbl, 0x3C);
+CHECK_SIZE(cChallenger, 0x40);
+
 #endif /* ONLINE_BUDDYMAN_H */

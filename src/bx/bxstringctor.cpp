@@ -1,4 +1,7 @@
 #include "common.h"
+#include "path/trackpath.h"
+#include "online/buddyman.h"
+#include "path/aipath.h"
 #include "path/basepath.h"
 #include "path/pathsys.h"
 #include "online/lobbyman.h"
@@ -89,10 +92,10 @@ extern char cChallenger_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cChallenger__cChallenger(void* self, int flags)
+extern "C" void cChallenger__cChallenger(cChallenger* self, int flags)
 {
-    *(void**)((char*)self + 0x3C) = cChallenger_vtbl;
-    cBXString__cBXString((char*)self + 4, 2);
+    self->mVtbl = (void**)cChallenger_vtbl;
+    cBXString__cBXString(&self->mMessage, 2);
     cBXString__cBXString(self, 2);
     if (flags & 1)
     {
@@ -2256,11 +2259,12 @@ INCLUDE_ASM("bx/bxstringctor", cAIPath_populateDataWithDefaults__FPv);
  *
  * @return 0x2E (the C's view; On Tour returns nothing)
  */
-int cAIPath_populateDataWithDefaults(void* self)
+int cAIPath_populateDataWithDefaults(void* vself)
 {
+    cAIPath* self = (cAIPath*)vself;
     int pathAttributes = 46;
-    *(int*)((char*)self + 0x38) = pathAttributes;
-    *(int*)((char*)self + 0x3c) = 1;
+    self->PathAttributes = pathAttributes;
+    self->IsResetPath = 1;
     return pathAttributes;
 }
 #endif
@@ -2280,12 +2284,12 @@ extern "C" void pathREAD_tInt32(void* p);
  * @param data  the field's data in the path file (On Tour p)
  * @param id  the field id: 0x64 or 0x65
  */
-extern "C" void cAIPath_populateData(void* self, int data, int id)
+extern "C" void cAIPath_populateData(cAIPath* self, int data, int id)
 {
     if (id == 100) {
-        pathREAD_tInt32((char*)self + 0x38);
+        pathREAD_tInt32(&self->PathAttributes);
     } else if (id == 101) {
-        pathREAD_tInt32((char*)self + 0x3C);
+        pathREAD_tInt32(&self->IsResetPath);
     }
 }
 #endif
@@ -2395,9 +2399,10 @@ INCLUDE_ASM("bx/bxstringctor", cTrackPath_populateDataWithDefaults__FPv);
  *
  * +0x38 = 0 (On Tour stores the float 0.0).
  */
-void cTrackPath_populateDataWithDefaults(void* self)
+void cTrackPath_populateDataWithDefaults(void* vself)
 {
-    *(int*)((char*)self + 0x38) = 0;
+    cTrackPath* self = (cTrackPath*)vself;
+    *(int*)&self->BaseDistanceLeft = 0;
 }
 #endif
 
@@ -2415,10 +2420,10 @@ INCLUDE_ASM("bx/bxstringctor", cTrackPath_populateData);
  * @param data  the field's data in the path file (On Tour p)
  * @param fieldId  the field id; only 0 is read
  */
-extern "C" void cTrackPath_populateData(void* self, int data, int fieldId)
+extern "C" void cTrackPath_populateData(cTrackPath* self, int data, int fieldId)
 {
     if (fieldId == 0) {
-        pathREAD_float((char*)self + 0x38);
+        pathREAD_float(&self->BaseDistanceLeft);
     }
 }
 #endif
@@ -2454,10 +2459,10 @@ extern "C" int cPath_getEventsInRange(sBXRangeList* self, sBXRange* out, int max
  * @param hdist  the second distance from the finish (On Tour hdist)
  * @return the number of events written
  */
-extern "C" int cTrackPath_getEventsInRange(sBXRangeList* self, sBXRange* out, int maxOut, float ldist, float hdist)
+extern "C" int cTrackPath_getEventsInRange(cTrackPath* self, sBXRange* out, int maxOut, float ldist, float hdist)
 {
-    float base = self->field_0x38;
-    return cPath_getEventsInRange(self, out, maxOut, base - ldist, base - hdist);
+    float base = self->BaseDistanceLeft;
+    return cPath_getEventsInRange(((sBXRangeList*)self), out, maxOut, base - ldist, base - hdist);
 }
 #endif
 
@@ -2477,19 +2482,19 @@ extern "C" int cPath_isForkInPath(sBXRangeList* self, float lo, float hi);
  * @param hdist  the second distance from the finish; negative for the path end (On Tour hdist)
  * @return nonzero when there is a fork in that stretch
  */
-extern "C" int cTrackPath_isForkInPath(sBXRangeList* self, float ldist, float hdist)
+extern "C" int cTrackPath_isForkInPath(cTrackPath* self, float ldist, float hdist)
 {
     float lo;
     float hi;
     if (ldist >= 0.0f)
-        lo = self->field_0x38 - ldist;
+        lo = self->BaseDistanceLeft - ldist;
     else
         lo = 0.0f;
     if (hdist < 0.0f)
         hi = cPath_getLength((cPath*)self);
     else
-        hi = self->field_0x38 - hdist;
-    return cPath_isForkInPath(self, lo, hi);
+        hi = self->BaseDistanceLeft - hdist;
+    return cPath_isForkInPath(((sBXRangeList*)self), lo, hi);
 }
 #endif
 

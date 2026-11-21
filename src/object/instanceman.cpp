@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/instanceman.h"
 #include "object/animframe.h"
 #include "object/meshanimnode.h"
 #include "render/ps2graphicsman.h"
@@ -26,8 +27,9 @@ INCLUDE_ASM("object/instanceman", cInstanceMan_copyInstance__FPvP15sInstanceStru
  * @param dst  record to overwrite
  * @param src  record to copy from
  */
-void cInstanceMan_copyInstance(void* self, sInstanceStruct* dst, void* src)
+void cInstanceMan_copyInstance(void* vself, sInstanceStruct* dst, void* src)
 {
+    cInstanceMan* self = (cInstanceMan*)vself;
     void* saved = dst->field_0x78;
     MEM_copy(dst, src, 160);
     dst->field_0x78 = saved;

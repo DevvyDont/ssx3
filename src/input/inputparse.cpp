@@ -1,4 +1,5 @@
 #include "common.h"
+#include "input/ps2pad.h"
 #include "input/padcache.h"
 #include "intersect/aifwddiff.h"
 #include "input/inputparse.h"
@@ -1984,7 +1985,7 @@ struct sInputParse_325260 {
     float v[0x40];
 };
 extern "C" float cInputExec_getButton(void* self, int idx, int sel);
-extern "C" float cInputExec_getConfig(void* self, int a1);
+extern "C" float cInputExec_getConfig(cInputExec* self, int a1);
 
 /**
  * Reads an input register: a temporary, a config value or a button.
@@ -1995,10 +1996,10 @@ extern "C" float cInputExec_getConfig(void* self, int a1);
  * @param id  the register number
  * @return the register's value
  */
-extern "C" float cInputExec_getRegister(sInputParse_325260* self, unsigned int id)
+extern "C" float cInputExec_getRegister(cInputExec* self, unsigned int id)
 {
     if (id < 0x40) {
-        return self->v[id];
+        return self->Temp[id];
     }
     if (id - 0x40 < 0x20) {
         return cInputExec_getConfig(self, id - 0x40);
@@ -2027,7 +2028,7 @@ struct sInputParse_003252E8 {
  * @param i  the temporary register index
  * @return the register's address
  */
-extern "C" void* cInputExec_getTempReg(void* self, int i)
+extern "C" void* cInputExec_getTempReg(cInputExec* self, int i)
 {
     return &((sInputParse_003252E8*)self)->a[i];
 }
@@ -2137,7 +2138,7 @@ INCLUDE_ASM("input/inputparse", cInputExec_getConfig);
  * @param varIndex  the config index
  * @return the value, or 0.0 for config 0
  */
-extern "C" float cInputExec_getConfig(void* self, int varIndex)
+extern "C" float cInputExec_getConfig(cInputExec* self, int varIndex)
 {
     if (varIndex == 0) {
         return 0.0f;
@@ -2175,11 +2176,11 @@ extern "C" float cInputExec_getRegister_vm(sInputVM_325450* self, unsigned int i
  * @return the value of register 0 when End is reached
  */
 // Runs one compiled input expression (see cInputMapParser_compileParseNode for the encoder); returns register 0.
-extern "C" float cInputExec_execute(sInputVM_325450* self, void* list, sInsn_324678* code)
+extern "C" float cInputExec_execute(cInputExec* self, void* list, sInsn_324678* code)
 {
     int pc = 0;
     int done = 0;
-    self->list = list;
+    self->Pad = (cInputPad*)list;
     do {
         sInsn_324678* ins = &code[pc];
         pc++;
@@ -2191,11 +2192,11 @@ extern "C" float cInputExec_execute(sInputVM_325450* self, void* list, sInsn_324
         }
         case 1: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = cInputExec_getRegister_vm(self, ins->r.src);
+            *destSlot = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
             break;
         }
         case 2:
-            if (cInputExec_getRegister_vm(self, ins->j.reg) != 0.0f) {
+            if (cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->j.reg) != 0.0f) {
                 break;
             }
         case 3:
@@ -2204,7 +2205,7 @@ extern "C" float cInputExec_execute(sInputVM_325450* self, void* list, sInsn_324
         case 4: {
             unsigned int boolResult = 0;
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            if (cInputExec_getRegister_vm(self, ins->r.src) != 0.0f || cInputExec_getRegister_vm(self, ins->r.arg) != 0.0f) {
+            if (cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src) != 0.0f || cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg) != 0.0f) {
                 boolResult = 1;
             }
             *destSlot = boolResult;
@@ -2213,7 +2214,7 @@ extern "C" float cInputExec_execute(sInputVM_325450* self, void* list, sInsn_324
         case 5: {
             unsigned int boolResult = 0;
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            if (cInputExec_getRegister_vm(self, ins->r.src) != 0.0f && cInputExec_getRegister_vm(self, ins->r.arg) != 0.0f) {
+            if (cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src) != 0.0f && cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg) != 0.0f) {
                 boolResult = 1;
             }
             *destSlot = boolResult;
@@ -2221,147 +2222,147 @@ extern "C" float cInputExec_execute(sInputVM_325450* self, void* list, sInsn_324
         }
         case 6: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
-            *destSlot = (lhs > cInputExec_getRegister_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
+            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
+            *destSlot = (lhs > cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 7: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
-            *destSlot = (lhs >= cInputExec_getRegister_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
+            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
+            *destSlot = (lhs >= cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 8: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
-            *destSlot = (lhs < cInputExec_getRegister_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
+            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
+            *destSlot = (lhs < cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 9: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
-            *destSlot = (lhs <= cInputExec_getRegister_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
+            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
+            *destSlot = (lhs <= cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 10: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
-            *destSlot = (lhs == cInputExec_getRegister_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
+            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
+            *destSlot = (lhs == cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 11: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
-            *destSlot = (lhs != cInputExec_getRegister_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
+            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
+            *destSlot = (lhs != cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 12: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
-            *destSlot = lhs + cInputExec_getRegister_vm(self, ins->r.arg);
+            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
+            *destSlot = lhs + cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg);
             break;
         }
         case 13: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
-            *destSlot = lhs - cInputExec_getRegister_vm(self, ins->r.arg);
+            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
+            *destSlot = lhs - cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg);
             break;
         }
         case 14: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
-            *destSlot = lhs * cInputExec_getRegister_vm(self, ins->r.arg);
+            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
+            *destSlot = lhs * cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg);
             break;
         }
         case 15: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
-            *destSlot = lhs / cInputExec_getRegister_vm(self, ins->r.arg);
+            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
+            *destSlot = lhs / cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg);
             break;
         }
         case 16: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = (cInputExec_getRegister_vm(self, ins->r.src) > cInputExec_getRegister_vm(self, ins->r.arg))
-                ? cInputExec_getRegister_vm(self, ins->r.src) : cInputExec_getRegister_vm(self, ins->r.arg);
+            *destSlot = (cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src) > cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg))
+                ? cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src) : cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg);
             break;
         }
         case 17: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = (cInputExec_getRegister_vm(self, ins->r.src) < cInputExec_getRegister_vm(self, ins->r.arg))
-                ? cInputExec_getRegister_vm(self, ins->r.src) : cInputExec_getRegister_vm(self, ins->r.arg);
+            *destSlot = (cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src) < cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg))
+                ? cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src) : cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg);
             break;
         }
         case 18: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
-            *destSlot = pow_4138(lhs, cInputExec_getRegister_vm(self, ins->r.arg));
+            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
+            *destSlot = pow_4138(lhs, cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg));
             break;
         }
         case 19: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
-            *destSlot = atan2_4138(lhs, cInputExec_getRegister_vm(self, ins->r.arg));
+            float lhs = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
+            *destSlot = atan2_4138(lhs, cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.arg));
             break;
         }
         case 20: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = func_0031C228(cInputExec_getRegister_vm(self, ins->r.src));
+            *destSlot = func_0031C228(cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src));
             break;
         }
         case 21: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = fSin(cInputExec_getRegister_vm(self, ins->r.src));
+            *destSlot = fSin(cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src));
             break;
         }
         case 22: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = fCos(cInputExec_getRegister_vm(self, ins->r.src));
+            *destSlot = fCos(cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src));
             break;
         }
         case 23: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = expf(cInputExec_getRegister_vm(self, ins->r.src));
+            *destSlot = expf(cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src));
             break;
         }
         case 24: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = logf(cInputExec_getRegister_vm(self, ins->r.src));
+            *destSlot = logf(cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src));
             break;
         }
         case 25: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = floor_43A0(cInputExec_getRegister_vm(self, ins->r.src));
+            *destSlot = floor_43A0(cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src));
             break;
         }
         case 26: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = ceil_43A0(cInputExec_getRegister_vm(self, ins->r.src));
+            *destSlot = ceil_43A0(cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src));
             break;
         }
         case 27: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = abs_43A0(cInputExec_getRegister_vm(self, ins->r.src));
+            *destSlot = abs_43A0(cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src));
             break;
         }
         case 28: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = sqrt_43A0(cInputExec_getRegister_vm(self, ins->r.src));
+            *destSlot = sqrt_43A0(cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src));
             break;
         }
         case 29: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            float x = cInputExec_getRegister_vm(self, ins->r.src);
+            float x = cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
             *destSlot = x - floor_43A0(x * 0.159154937f + 0.5f) * 6.28318548f;
             break;
         }
         case 30: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = -cInputExec_getRegister_vm(self, ins->r.src);
+            *destSlot = -cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src);
             break;
         }
         case 31: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = (cInputExec_getRegister_vm(self, ins->r.src) == 0.0f) ? 1.0f : 0.0f;
+            *destSlot = (cInputExec_getRegister_vm(((sInputVM_325450*)self), ins->r.src) == 0.0f) ? 1.0f : 0.0f;
             break;
         }
         case 32:
@@ -2369,7 +2370,7 @@ extern "C" float cInputExec_execute(sInputVM_325450* self, void* list, sInsn_324
             break;
         }
     } while (!done);
-    return cInputExec_getRegister_vm(self, 0);
+    return cInputExec_getRegister_vm(((sInputVM_325450*)self), 0);
 }
 #endif
 
@@ -3125,7 +3126,7 @@ extern "C" void cPadDevice_clearAllVibrations(void* inputPad)
 INCLUDE_ASM("input/inputparse", cPadDevice_construct);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cPS2PadDevice_cPS2PadDevice(void* self, int a1, int a2);
+extern "C" void* cPS2PadDevice_cPS2PadDevice(cPS2PadDevice* self, int a1, int a2);
 extern char str_PS2Pad[];
 
 /**
@@ -3146,7 +3147,7 @@ extern "C" int cPadDevice_construct(void* inputPads, int n)
         n = 2;
     }
     for (i = 0; i < n; i++) {
-        arr[i] = cPS2PadDevice_cPS2PadDevice(cMemMan_alloc(0x180, str_PS2Pad, 0x4000000, 0), i, 0);
+        arr[i] = cPS2PadDevice_cPS2PadDevice((cPS2PadDevice*)cMemMan_alloc(0x180, str_PS2Pad, 0x4000000, 0), i, 0);
     }
     return n;
 }
@@ -3168,19 +3169,19 @@ extern void* cPS2PadDevice_vtbl[];
  * @param slot  the multitap slot
  * @return @p self
  */
-extern "C" void* cPS2PadDevice_cPS2PadDevice(void* self, int port, int slot)
+extern "C" void* cPS2PadDevice_cPS2PadDevice(cPS2PadDevice* self, int port, int slot)
 {
     *(void***)self = cPS2PadDevice_vtbl;
-    *(int*)((char*)self + 0x4) = port;
-    *(int*)((char*)self + 0x8) = slot;
+    self->mPort = port;
+    self->mSlot = slot;
     func_00416210((char*)self + 0xC, 0, 36);
-    *(int*)((char*)self + 0x54) = 0;
-    *(int*)((char*)self + 0x58) = 0;
-    *(int*)((char*)self + 0x50) = 0;
-    *(int*)((char*)self + 0x5C) = 0;
-    *(int*)((char*)self + 0x48) = 0;
-    *(int*)((char*)self + 0x4C) = 0;
-    return self;
+    self->mPressure = 0;
+    self->mAnalog = 0;
+    self->mModeSet = 0;
+    self->mActuator = 0;
+    self->mPhase = 0;
+    self->mRetry = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -3200,10 +3201,10 @@ extern char cPadDevice_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void cPS2PadDevice__cPS2PadDevice(void* self, int flags)
+extern "C" void cPS2PadDevice__cPS2PadDevice(cPS2PadDevice* self, int flags)
 {
     *(void***)self = cPS2PadDevice_vtbl;
-    func_003FF8F0(*(int*)((char*)self + 0x4), *(int*)((char*)self + 0x8));
+    func_003FF8F0(self->mPort, self->mSlot);
     *(void**)self = cPadDevice_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -3470,8 +3471,9 @@ INCLUDE_ASM("input/inputparse", cPS2PadDevice_numActuators__FPv);
  *
  * @return 2
  */
-int cPS2PadDevice_numActuators(void* self)
+int cPS2PadDevice_numActuators(void* vself)
 {
+    cPS2PadDevice* self = (cPS2PadDevice*)vself;
     return 0x2;
 }
 #endif
@@ -3501,13 +3503,13 @@ static inline int clamp_327740(int v, int lo, int hi)
  * @param mode  the actuator index (On Tour act)
  * @param level  the strength, 0..1 (On Tour frequency)
  */
-extern "C" void cPS2PadDevice_setActuator(void* self, int mode, float level)
+extern "C" void cPS2PadDevice_setActuator(cPS2PadDevice* self, int mode, float level)
 {
     if (mode == 1) {
-        *(int*)((char*)self + 0x30) = level != 0.0f;
+        self->mActSmall = level != 0.0f;
         return;
     }
-    int* motorOut = (int*)((char*)self + 0x38);
+    int* motorOut = (int*)(&self->mActBig);
     int speed;
     if (level != 0.0f) {
         int rawSpeed = (int)(level * 205.0f + 50.0f);

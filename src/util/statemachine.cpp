@@ -1,4 +1,5 @@
 #include "common.h"
+#include "util/consoleconfig.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -24,7 +25,7 @@ extern char str_pct_02d_pct_02d_pct_02d_PM[];
  * @param sec   seconds
  * @param mode  0 for 24-hour time, 1 for AM/PM
  */
-extern "C" void cConsoleConfig_setTimeString(void* self, char* dst, int size, int hour, int min, int sec, int mode)
+extern "C" void cConsoleConfig_setTimeString(cConsoleConfig* self, char* dst, int size, int hour, int min, int sec, int mode)
 {
     char buf[0x40];
     switch (mode) {
@@ -63,7 +64,7 @@ extern char str_pct_02d_pct_02d_pct_04d[];
  * @param year  year
  * @param mode  0 year first, 1 month first, 2 day first
  */
-extern "C" void cConsoleConfig_setDateString(void* self, char* dst, int size, int day, int month, int year, int mode)
+extern "C" void cConsoleConfig_setDateString(cConsoleConfig* self, char* dst, int size, int day, int month, int year, int mode)
 {
     char buf[0x40];
     switch (mode) {
@@ -83,7 +84,7 @@ extern "C" void cConsoleConfig_setDateString(void* self, char* dst, int size, in
 //100%
 INCLUDE_ASM("util/statemachine", cConsoleConfig_getTime);
 #ifdef SKIP_ASM
-extern "C" void cConsoleConfig_updateDateTime(void*);
+extern "C" void cConsoleConfig_updateDateTime(cConsoleConfig*);
 
 /**
  * Brings the console clock up to date (cConsoleConfig_updateDateTime) and returns the time: hour (+0x8), minute (+0xC) and second
@@ -93,17 +94,17 @@ extern "C" void cConsoleConfig_updateDateTime(void*);
  * @param minute  receives the minute
  * @param second  receives the second
  */
-extern "C" void cConsoleConfig_getTime(void *self, int *hour, int *minute, int *second) {
+extern "C" void cConsoleConfig_getTime(cConsoleConfig* self, int *hour, int *minute, int *second) {
     cConsoleConfig_updateDateTime(self);
-    *hour = (*(int *)((char*)(self) + (8)));
-    *minute = (*(int *)((char*)(self) + (0xC)));
-    *second = (*(int *)((char*)(self) + (0x10)));
+    *hour = (self->m_iHour);
+    *minute = (self->m_iMinute);
+    *second = (self->m_iSecond);
 }
 #endif
 //100%
 INCLUDE_ASM("util/statemachine", cConsoleConfig_getDate);
 #ifdef SKIP_ASM
-extern "C" void cConsoleConfig_updateDateTime(void*);
+extern "C" void cConsoleConfig_updateDateTime(cConsoleConfig*);
 
 /**
  * Brings the console clock up to date (cConsoleConfig_updateDateTime) and returns the date: day (+0x1C), month (+0x18) and year
@@ -113,11 +114,11 @@ extern "C" void cConsoleConfig_updateDateTime(void*);
  * @param month  receives the month
  * @param year  receives the year
  */
-extern "C" void cConsoleConfig_getDate(void *self, int *day, int *month, int *year) {
+extern "C" void cConsoleConfig_getDate(cConsoleConfig* self, int *day, int *month, int *year) {
     cConsoleConfig_updateDateTime(self);
-    *day = (*(int *)((char*)(self) + (0x1C)));
-    *month = (*(int *)((char*)(self) + (0x18)));
-    *year = (*(int *)((char*)(self) + (0x14)));
+    *day = (self->m_iDay);
+    *month = (self->m_iMonth);
+    *year = (self->m_iYear);
 }
 #endif
 //100%
@@ -129,7 +130,7 @@ INCLUDE_ASM("util/statemachine", cConsoleConfig_isLeapYear);
  * @param year  the year
  * @return 1 for a leap year, else 0
  */
-extern "C" int cConsoleConfig_isLeapYear(void* self, int year) {
+extern "C" int cConsoleConfig_isLeapYear(cConsoleConfig* self, int year) {
     int leap;
 
     leap = 0;
@@ -146,7 +147,7 @@ extern "C" int cConsoleConfig_isLeapYear(void* self, int year) {
 INCLUDE_ASM("util/statemachine", cConsoleConfig_numberOfDays);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int cConsoleConfig_isLeapYear(void* self, int a1);
+extern "C" int cConsoleConfig_isLeapYear(cConsoleConfig* self, int a1);
 
 /**
  * Returns the number of days in @p month of @p year: 28 or 29 for February (cConsoleConfig_isLeapYear), otherwise 31 or 30 by the
@@ -163,7 +164,7 @@ extern "C" int cConsoleConfig_numberOfDays(int self, int month, int year)
         if (m >= 8) m++;
         return (m & 1) ? 31 : 30;
     }
-    m = cConsoleConfig_isLeapYear((void*)self, year);
+    m = cConsoleConfig_isLeapYear((cConsoleConfig*)((void*)self), year);
     return m == 0 ? 28 : 29;
 }
 #endif
@@ -226,7 +227,7 @@ INCLUDE_ASM("util/statemachine", cConsoleConfig_addSecondsToTime);
  * @param add  seconds to add
  * @return the number of days carried
  */
-extern "C" int cConsoleConfig_addSecondsToTime(void* self, int* sec, int* min, int* hour, int add) {
+extern "C" int cConsoleConfig_addSecondsToTime(cConsoleConfig* self, int* sec, int* min, int* hour, int add) {
     int total;
     int rem;
     int days;
@@ -255,18 +256,18 @@ extern "C" void cConsoleConfig_addDaysToDate_v(void*, int*, int*, int*, int) __a
  * slowly falls behind), adds them to second/minute/hour (cConsoleConfig_addSecondsToTime on +0x10/+0xC/+0x8) and adds the carried days to
  * day/month/year (cConsoleConfig_addDaysToDate on +0x1C/+0x18/+0x14).
  */
-extern "C" void cConsoleConfig_updateDateTime(void* self) {
+extern "C" void cConsoleConfig_updateDateTime(cConsoleConfig* self) {
     int rem;
     int now;
     int ticks;
 
     now = SSXApp->TimerTick;
-    ticks = (now - *(int*)((char*)self + 0x20)) / SSXApp->TimerHz;
+    ticks = (now - self->m_iStartTick) / SSXApp->TimerHz;
     if (ticks != 0) {
-        *(int*)((char*)self + 0x20) = now;
-        rem = cConsoleConfig_addSecondsToTime_v(self, (int*)((char*)self + 0x10), (int*)((char*)self + 0xC), (int*)((char*)self + 8), ticks);
+        self->m_iStartTick = now;
+        rem = cConsoleConfig_addSecondsToTime_v(self, (int*)(&self->m_iSecond), (int*)(&self->m_iMinute), (int*)(&self->m_iHour), ticks);
         if (rem != 0) {
-            cConsoleConfig_addDaysToDate_v(self, (int*)((char*)self + 0x1C), (int*)((char*)self + 0x18), (int*)((char*)self + 0x14), rem);
+            cConsoleConfig_addDaysToDate_v(self, (int*)(&self->m_iDay), (int*)(&self->m_iMonth), (int*)(&self->m_iYear), rem);
         }
     }
 }
@@ -276,7 +277,7 @@ extern "C" void cConsoleConfig_updateDateTime(void* self) {
 INCLUDE_ASM("util/statemachine", cConsoleConfig_construct);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cPS2ConsoleConfig_cPS2ConsoleConfig(void* self);
+extern "C" void* cPS2ConsoleConfig_cPS2ConsoleConfig(cPS2ConsoleConfig* self);
 extern char str_cPS2ConsoleConfig[];
 
 /**
@@ -290,7 +291,7 @@ extern char str_cPS2ConsoleConfig[];
  */
 extern "C" void* cConsoleConfig_construct(void)
 {
-    return cPS2ConsoleConfig_cPS2ConsoleConfig(cMemMan_alloc(0x38, str_cPS2ConsoleConfig, 0, 0));
+    return cPS2ConsoleConfig_cPS2ConsoleConfig((cPS2ConsoleConfig*)cMemMan_alloc(0x38, str_cPS2ConsoleConfig, 0, 0));
 }
 #endif
 
@@ -321,7 +322,7 @@ extern void* D_004A28A8_7478 __asm__("SSXApp");
  * @param self_  the memory for the object (this)
  * @return this
  */
-extern "C" void* cPS2ConsoleConfig_cPS2ConsoleConfig(void* self_)
+extern "C" void* cPS2ConsoleConfig_cPS2ConsoleConfig(cPS2ConsoleConfig* self_)
 {
     int* self = (int*)self_;
     unsigned char clock[8];

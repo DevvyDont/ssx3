@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/objectnode.h"
 #include "render/particle.h"
 #include "object/modifierblock.h"
 #include "object/instancenode.h"
@@ -1925,19 +1926,19 @@ extern "C" void* cMoveNode_cMoveNode1(void* self, void* a1, int type, void* a3);
  * @param forceVisible  force the instance visible
  * @return self
  */
-extern "C" void* cObjectNode_cObjectNode(void* self, void* bucket, void* instRecord, int isSolid, int forceVisible)
+extern "C" void* cObjectNode_cObjectNode(cObjectNode* self, void* bucket, void* instRecord, int isSolid, int forceVisible)
 {
     cMoveNode_cMoveNode1(self, bucket, 17, instRecord);
-    *(void***)((char*)self + 0xC) = cObjectNode_vtbl;
-    if (forceVisible != 0 || ((*(sMoveFlags_6DB0**)((char*)self + 0x18))->w & 3) == 3) {
-        sMoveFlags_6DB0* recordFlags = *(sMoveFlags_6DB0**)((char*)self + 0x18);
+    self->mVtbl = cObjectNode_vtbl;
+    if (forceVisible != 0 || (((sMoveFlags_6DB0*)self->Instance)->w & 3) == 3) {
+        sMoveFlags_6DB0* recordFlags = (sMoveFlags_6DB0*)self->Instance;
         recordFlags->w = (recordFlags->w & ~2) | 4;
     }
     if (isSolid != 0) {
-        sMoveFlags_6DB0* recordFlags = *(sMoveFlags_6DB0**)((char*)self + 0x18);
+        sMoveFlags_6DB0* recordFlags = (sMoveFlags_6DB0*)self->Instance;
         recordFlags->w = (recordFlags->w & ~0x40) | 0x20;
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1952,11 +1953,11 @@ extern void* cObjectNode_vtbl[];
  *
  * @return self
  */
-extern "C" void* cObjectNode_cObjectNode1(void* self)
+extern "C" void* cObjectNode_cObjectNode1(cObjectNode* self)
 {
     cMoveNode_cMoveNode(self);
-    *(void***)((char*)self + 0xC) = cObjectNode_vtbl;
-    return self;
+    self->mVtbl = cObjectNode_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -1970,8 +1971,9 @@ INCLUDE_ASM("object/movenode", cObjectNode_writeToReplayFrame__FPv);
  *
  * @return cMoveNode_writeToReplayFrame's result (callers ignore it)
  */
-void* cObjectNode_writeToReplayFrame(void* self)
+void* cObjectNode_writeToReplayFrame(void* vself)
 {
+    cObjectNode* self = (cObjectNode*)vself;
     return cMoveNode_writeToReplayFrame(self);
 }
 #endif

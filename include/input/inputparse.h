@@ -171,4 +171,40 @@ CHECK_OFFSET(cInputPreProcessor, OutputBuf, 0x8);
 CHECK_OFFSET(cInputPreProcessor, CurrentChar, 0xC);
 CHECK_SIZE(cInputPreProcessor, 0x10);
 
+// cInputExec: the input-map evaluator - runs one compiled input-map statement (cInputMapParser's op-codes) against a
+// controller pad and returns register 0 (execute). Never allocated: cInputMap_getValue / getValue1 / getState /
+// getState1 (input/inputmap.cpp) build one at sp + 0 (declared there as char parser[400] or 0x190-byte views
+// sParser_1010 / sParser_1188; the saved registers start at sp + 0x190), construct it with cInputExec_cInputExec
+// (DefaultButtonModifier = 0) and, in the *1 overloads, store the default modifier and configs 1..8 before
+// cInputExec_execute. Methods in input/inputparse.cpp (0x00325250..0x00325450); EA's inline asserts
+// for it are filed under d:/ssx/code/source/input/inputparse.cpp ("DefaultButtonModifier != kButtonModifier_Default",
+// "reg >= kFirstTempRegister && reg < kFirstTempRegister + kNumTempRegisters", "reg >= 0 && reg < kNumConfigRegisters").
+//
+// Size 0x188: [O] On Tour's cInputExec is 0x188 with the same four members; [U] getRegister reads configs 0..0x1F
+// (registers 0x40..0x5F) through getConfig at 0x108 + 4 * i, so Config ends at 0x188. No bases, no vtable.
+// Registers: 0..0x3F = Temp (getTempReg / getRegister), 0x40..0x5F = Config, 0x60 + 6 * button + modifier = a button of
+// Pad (getButton).
+// Tags: [R] cInputExec_cInputExec; [P] the preview's assert strings above; [U] how retail code uses the field;
+// [O] On Tour's DWARF (class cInputExec: same names, types, order and offsets). Enums are ints.
+
+struct cInputPad;   // On Tour: int NumButtons + 24 button records of 0x1C (cPlaybackMan allocates 676 "cInputPad")
+
+struct cInputExec {
+    int DefaultButtonModifier;      // 0x000 [O] eButtonModifiers; [P] assert "DefaultButtonModifier !=
+                                    //       kButtonModifier_Default"; [R] ctor 0; [U] getButton(kind 5) recurses with it;
+                                    //       cInputMap_getValue1 / getState1 store their modifier argument
+    cInputPad* Pad;                 // 0x004 [O]; [U] execute stores its pad argument; getButton reads Pad->NumButtons
+                                    //       and the button records (0x1C stride)
+    float Temp[64];                 // 0x008 [O]; [P] kFirstTempRegister / kNumTempRegisters assert; [U] getTempReg
+                                    //       returns &Temp[i], getRegister reads Temp[id] for id < 0x40
+    float Config[32];               // 0x108 [O]; [P] kNumConfigRegisters asserts; [U] getConfig reads Config[i] (i != 0);
+                                    //       cInputMap_getValue1 / getState1 store configs 1..8 (0x10C..0x128)
+};
+
+CHECK_OFFSET(cInputExec, DefaultButtonModifier, 0x000);
+CHECK_OFFSET(cInputExec, Pad, 0x004);
+CHECK_OFFSET(cInputExec, Temp, 0x008);
+CHECK_OFFSET(cInputExec, Config, 0x108);
+CHECK_SIZE(cInputExec, 0x188);
+
 #endif /* INPUT_INPUTPARSE_H */

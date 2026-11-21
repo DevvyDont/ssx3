@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/frame.h"
 #include "replay/replaycache.h"
 #include "replay/playbackman.h"
 #include "replay/replay.h"
@@ -15,7 +16,7 @@ extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, in
 // PORT: the second argument is a pointer passed as int (mangled FPvi).
 void cInput_setPad(void* self, int buf);
 void cInput_setMap(void* self, int n);
-extern "C" void* cReplayFrame_cReplayFrame(void* self);
+extern "C" void* cReplayFrame_cReplayFrame(cReplayFrame* self);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char* D_004A3418;
 extern int D_004A3410;
@@ -39,7 +40,7 @@ extern char str_BigFile_b[];
  */
 extern "C" cPlaybackMan* cPlaybackMan_cPlaybackMan(cPlaybackMan* self, int maxPlaybackFiles)
 {
-    cReplayFrame_cReplayFrame(self->SaveFramePtr);
+    cReplayFrame_cReplayFrame((cReplayFrame*)self->SaveFramePtr);
     cGame* world = SSXApp->Game;
     *(char**)&self->Game = ((char*)world);
     char* level = (char*)world->AI;
@@ -167,7 +168,7 @@ extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void* cMemMan_alloc(unsigned int size, const char* tag, int flags, int d);
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void cReplayFrame_clearFrame(void* self);
+extern "C" void cReplayFrame_clearFrame(cReplayFrame* self);
 extern "C" void cReplayFramePtr_setBlock(void* self, void* buf, int a2);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern "C" int cBEMissionInterface_getNumberMissions(void* iface);
@@ -216,7 +217,7 @@ extern "C" void cPlaybackMan_initLocation(cPlaybackMan_C6E8* self, const char* n
     self->cur = -1;
     self->handle = -1;
     self->field_0x4C = operator_new_tag(0x14000, str_SaveFrameData, 0, 0);
-    cReplayFrame_clearFrame((char*)self + 0x14);
+    cReplayFrame_clearFrame((cReplayFrame*)((char*)self + 0x14));
     cReplayFramePtr_setBlock((char*)self + 0x14, self->field_0x4C, 0);
     unsigned int* hdr = (unsigned int*)cMemMan_alloc(0x1C22C, str_CurrentFrame, 0, 0);
     self->hdr = hdr;
@@ -1172,7 +1173,7 @@ extern "C" int cReplayCache_load(cReplayCache* self, char** pp)
 INCLUDE_ASM("replay/playbackman", cReplayFrame_cReplayFrame);
 #ifdef SKIP_ASM
 void* cReplayFramePtr_cReplayFramePtr(void* self);
-extern "C" void cReplayFrame_clearFrame(void* self);
+extern "C" void cReplayFrame_clearFrame(cReplayFrame* self);
 extern void* cReplayFrame_vtbl[];
 
 /**
@@ -1184,12 +1185,12 @@ extern void* cReplayFrame_vtbl[];
  *
  * @return the constructed frame (self)
  */
-extern "C" void* cReplayFrame_cReplayFrame(void* self)
+extern "C" void* cReplayFrame_cReplayFrame(cReplayFrame* self)
 {
     cReplayFramePtr_cReplayFramePtr(self);
     *(void***)self = cReplayFrame_vtbl;
     cReplayFrame_clearFrame(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1209,22 +1210,22 @@ struct sPlaybackKey {
  * and +0x10, and sets the words at +0x20, +0x24, +0x28, +0x2C and +0x34 to -1. The vtable and the list links
  * (+0x14, +0x18) are left alone.
  */
-extern "C" void cReplayFrame_clearFrame(void* self)
+extern "C" void cReplayFrame_clearFrame(cReplayFrame* self)
 {
     sPlaybackKey k;
     k.a = 0;
     k.b = 0;
     k.c = 0;
-    *(int*)((char*)self + 0x30) = 0;
-    *(int*)((char*)self + 0x34) = -1;
-    *(sPlaybackKey*)((char*)self + 0x1c) = k;
-    *(int*)((char*)self + 0x20) = -1;
-    *(int*)((char*)self + 0x24) = -1;
-    *(int*)((char*)self + 0x28) = -1;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0xc) = 0;
-    *(int*)((char*)self + 0x2c) = -1;
-    *(int*)((char*)self + 0x10) = 0;
+    self->FrameStartTick = 0;
+    self->FrameEndTick = -1;
+    *(sPlaybackKey*)&self->FrameType = k;
+    self->Ranking[0] = -1;
+    self->Ranking[1] = -1;
+    self->HighlightEndTick[0] = -1;
+    self->WriteData = 0;
+    self->ReadData = 0;
+    self->HighlightEndTick[1] = -1;
+    self->Size = 0;
 }
 #endif
 
@@ -1278,20 +1279,20 @@ void cReplayFramePtr_putFrameBlock_2(void* self, int a) __asm__("cReplayFramePtr
  * @param pp  in/out: the read cursor in the save data
  * @return 1 (always; On Tour asserts the save type)
  */
-extern "C" int cReplayFrame_loadFrame(sPbFrame_D678* self, char** pp)
+extern "C" int cReplayFrame_loadFrame(cReplayFrame* self, char** pp)
 {
     sPbHeader_D678 header;
     char* start = *pp;
     *pp = start + 0x28;
     MEM_copy(&header, start, 40);
-    self->field_0x10 = header.field_0x4;
-    self->field_0x30 = header.field_0x8;
-    self->field_0x34 = header.field_0xc;
-    self->colour = header.colour;
-    self->field_0x20 = header.field_0x14;
-    self->field_0x24 = header.field_0x18;
-    self->field_0x28 = header.field_0x1c;
-    self->field_0x2c = header.field_0x20;
+    self->Size = header.field_0x4;
+    self->FrameStartTick = header.field_0x8;
+    self->FrameEndTick = header.field_0xc;
+    (*(sPbRgba_D678*)&self->FrameType) = header.colour;
+    self->Ranking[0] = header.field_0x14;
+    self->Ranking[1] = header.field_0x18;
+    self->HighlightEndTick[0] = header.field_0x1c;
+    self->HighlightEndTick[1] = header.field_0x20;
     cReplayFramePtr_loadBlock(self, pp, start + 0x24);
     cReplayFramePtr_putFrameBlock_2(self, 1);
     return 1;
@@ -1309,8 +1310,9 @@ INCLUDE_ASM("replay/playbackman", cReplayFrame_setRanking__FPvii);
  * @param i  the player index
  * @param value  the value to store
  */
-void cReplayFrame_setRanking(void* self, int i, int value)
+void cReplayFrame_setRanking(void* vself, int i, int value)
 {
+    cReplayFrame* self = (cReplayFrame*)vself;
     *(int*)((char*)self + (i << 2) + 0x20) = value;
 }
 #endif

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/statscalc.h"
 
 //100%
 INCLUDE_ASM("seg/seg_218AE8", cStatsCalc_add);
@@ -12,16 +13,16 @@ INCLUDE_ASM("seg/seg_218AE8", cStatsCalc_add);
  *
  * @param x  the sample
  */
-extern "C" void cStatsCalc_add(char *self, float x) {
-    if (*(int*)(self + 0x10) == 0) {
-        *(float*)(self + 8) = *(float*)(self + 0xC) = x;
+extern "C" void cStatsCalc_add(cStatsCalc* self, float x) {
+    if (self->Samples == 0) {
+        self->MinSample = self->MaxSample = x;
     } else {
-        if (x < *(float*)(self + 8)) *(float*)(self + 8) = x;
-        if (*(float*)(self + 0xC) < x) *(float*)(self + 0xC) = x;
+        if (x < self->MinSample) self->MinSample = x;
+        if (self->MaxSample < x) self->MaxSample = x;
     }
-    *(float*)(self + 0) = *(float*)(self + 0) + x;
-    *(float*)(self + 4) = *(float*)(self + 4) + x * x;
-    *(int*)(self + 0x10) = *(int*)(self + 0x10) + 1;
+    self->Sum = self->Sum + x;
+    self->SumSquare = self->SumSquare + x * x;
+    self->Samples = self->Samples + 1;
 }
 #endif
 

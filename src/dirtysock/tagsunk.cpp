@@ -1,4 +1,5 @@
 #include "common.h"
+#include "online/connman.h"
 #include "online/buddyman.h"
 #include "online/lobbyman.h"
 #include "be/beintnewrace.h"
@@ -414,7 +415,7 @@ extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
 extern "C" int* func_002591D0();
-extern "C" void func_00263BA8(void* p, int arg);
+extern "C" void func_00263BA8(cGameConnMan* p, int arg);
 
 struct sMsgListNodeK2 {
     sMsgListNodeK2* next;
@@ -461,7 +462,7 @@ extern "C" void LobbyMan_onconnectionmsg(LobbyMan* self, int* msg)
         sMsgListK2_insert((sMsgListNodeK2*)self->mEventList.mpHead, mp);
         self->mDisconnected = 1;
         if (*func_002591D0() != 0)
-            func_00263BA8(func_002591D0(), 2);
+            func_00263BA8((cGameConnMan*)func_002591D0(), 2);
     }
 }
 #endif
@@ -815,7 +816,7 @@ extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" int func_0025A730(LobbyMan* self, const char* key, int def);
 extern "C" int func_004165A8(void*, void*);
 extern "C" int* func_002591D0();
-extern "C" void func_00263BA8(void* p, int arg);
+extern "C" void func_00263BA8(cGameConnMan* p, int arg);
 extern "C" void func_00259098(void* p, int a, int b);
 extern "C" unsigned int strlen(const char*);
 extern "C" void* cBE_getBE();
@@ -921,7 +922,7 @@ extern "C" void LobbyMan_onplaymsg(LobbyMan* self, char* msg)
     if (*(int*)self != 0x18 && *(int*)self != 20)
     {
         *(int*)self = 25;
-        func_00263BA8(func_002591D0(), 0);
+        func_00263BA8((cGameConnMan*)func_002591D0(), 0);
         return;
     }
     *(int*)self = 25;
@@ -1360,7 +1361,7 @@ extern "C" void func_00263018(BuddyMan* self, void* name);
 extern "C" void func_0025F628(LobbyMan* selfp, int notify, int flag);
 extern "C" void func_0025EED8(LobbyMan* self);
 extern "C" int* func_002591D0();
-extern "C" void func_00263BA8(void* p, int arg);
+extern "C" void func_00263BA8(cGameConnMan* p, int arg);
 extern "C" int cCommSystem_isChannelOpen(void* comm, int chan);
 extern "C" void cCommSystem_closeChannel(void* comm, int chan);
 extern "C" void func_003EE620(void* p);
@@ -1610,7 +1611,7 @@ extern "C" void func_0025AC50(LobbyMan* self)
         int notJoined = *(int*)self != 25;
         if (notJoined) {
             if (*func_002591D0() != 0)
-                func_00263BA8(func_002591D0(), 0);
+                func_00263BA8((cGameConnMan*)func_002591D0(), 0);
             else if (cCommSystem_isChannelOpen(cCommSystem_mCommSystem, 0) != 0)
                 cCommSystem_closeChannel(cCommSystem_mCommSystem, 0);
         }
@@ -4582,7 +4583,7 @@ extern char str_StlBlock_b[];
 extern char str_KIND[];
 extern char str_star[];
 extern "C" int* func_002591D0();
-extern "C" void func_00263BA8(void* p, int arg);
+extern "C" void func_00263BA8(cGameConnMan* p, int arg);
 extern "C" void func_00268E78(void* self, void* a1, int a2);
 extern void* online_Event_vtbl[];
 extern void* online_ErrorEvent_vtbl[];
@@ -4633,7 +4634,7 @@ extern "C" void func_0025EED8(LobbyMan* self)
         return;
     if (st == 25) {
         if (*func_002591D0() != 0)
-            func_00263BA8(func_002591D0(), 2);
+            func_00263BA8((cGameConnMan*)func_002591D0(), 2);
     } else if (st != 1) {
         char buf[0x100];
         buf[0] = 0;
@@ -8662,11 +8663,12 @@ INCLUDE_ASM("dirtysock/tagsunk", cConnMan_cConnMan__FPv);
  *
  * @return the object
  */
-void* cConnMan_cConnMan(void* self)
+void* cConnMan_cConnMan(void* vself)
 {
+    cConnMan* self = (cConnMan*)vself;
     *(int*)self = 0;
-    *(int*)((char*)self + 0x8) = (int)(void*)cConnMan_vtbl;
-    return self;
+    self->mVtbl = (void**)((int)(void*)cConnMan_vtbl);
+    return ((void*)self);
 }
 #endif
 
@@ -8684,9 +8686,9 @@ void operator_delete(int*);
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void cConnMan__cConnMan(void* self, int flags)
+extern "C" void cConnMan__cConnMan(cConnMan* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cConnMan_vtbl;
+    self->mVtbl = cConnMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -8708,7 +8710,7 @@ extern "C" void cCommSystem_netConnConnect(void* p);
  * argument register. Sets the timeout at +0x4 to 60.0 seconds on broadband (mBroadBand set) or 180.0 otherwise, and the
  * state at +0x0 to 1; func_00263828() then watches mNetConnState.
  */
-extern "C" void func_002636A8(void* self)
+extern "C" void func_002636A8(cConnMan* self)
 {
     cCommSystem_netConnConnect(cCommSystem_mCommSystem);
     float timeout;
@@ -8717,7 +8719,7 @@ extern "C" void func_002636A8(void* self)
     } else {
         timeout = D_004A2F10;
     }
-    *(float*)((char*)self + 0x4) = timeout;
+    self->mTimeout = timeout;
     *(int*)self = 1;
 }
 #endif
@@ -8910,11 +8912,12 @@ INCLUDE_ASM("dirtysock/tagsunk", cGameConnMan_cGameConnMan__FPv);
  *
  * @return the object
  */
-void* cGameConnMan_cGameConnMan(void* self)
+void* cGameConnMan_cGameConnMan(void* vself)
 {
+    cGameConnMan* self = (cGameConnMan*)vself;
     *(int*)self = 0;
-    *(int*)((char*)self + 0x14) = (int)(void*)cGameConnMan_vtbl;
-    return self;
+    self->mVtbl = (void**)((int)(void*)cGameConnMan_vtbl);
+    return ((void*)self);
 }
 #endif
 
@@ -8932,9 +8935,9 @@ void operator_delete(int*);
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void cGameConnMan__cGameConnMan(void* self, int flags)
+extern "C" void cGameConnMan__cGameConnMan(cGameConnMan* self, int flags)
 {
-    *(void***)((char*)self + 0x14) = cGameConnMan_vtbl;
+    self->mVtbl = cGameConnMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -9088,7 +9091,7 @@ static inline void post_3BA8(char* self, void* msg)
  * @param gameConn    the game-connection manager (cRealFE + 0xB5ABC, from func_002591D0)
  * @param reason  reason: 0 connect failure or timeout, 1 cancelled after connecting, other values post nothing
  */
-extern "C" void func_00263BA8(void* gameConn, int reason)
+extern "C" void func_00263BA8(cGameConnMan* gameConn, int reason)
 {
     int* self = (int*)gameConn;
     if (self[0] != 0 && cCommSystem_isChannelOpen(cCommSystem_mCommSystem, self[1]) != 0)
@@ -9135,7 +9138,7 @@ extern "C" void func_00260F80(void);
 extern "C" void func_002613C8(BuddyMan* p);
 extern "C" int func_00261460(void* p);
 extern "C" void func_00262768(BuddyMan* self, int a1, int a2, int a3, int a4, int a5);
-extern "C" void func_00263BA8(void* p, int arg);
+extern "C" void func_00263BA8(cGameConnMan* p, int arg);
 extern "C" void func_00264030(int a1, int a2, int a3);
 extern "C" void func_00264098(void);
 extern "C" void func_002642B8(void* self);
@@ -9195,7 +9198,7 @@ extern "C" void func_00263CF0(int* self)
         {
             if (self[3] != 0)
             {
-                func_00263BA8(self, 1);
+                func_00263BA8((cGameConnMan*)self, 1);
                 return;
             }
             cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -9206,7 +9209,7 @@ extern "C" void func_00263CF0(int* self)
         }
         if (cCommSystem_getError(cCommSystem_mCommSystem, self[1]) || tsTimedOut_263CF0(self))
         {
-            func_00263BA8(self, 0);
+            func_00263BA8((cGameConnMan*)self, 0);
             return;
         }
         *(float*)(self + 4) = *(float*)(self + 4) - SSXApp->TimerPeriod;
@@ -9222,7 +9225,7 @@ extern "C" void func_00263CF0(int* self)
                 netEvent[0] = 275;
                 post_3BA8((char*)lobbyMan, netEvent);
             }
-            func_00263BA8(self, 2);
+            func_00263BA8((cGameConnMan*)self, 2);
             return;
         }
         {
@@ -9232,7 +9235,7 @@ extern "C" void func_00263CF0(int* self)
             if (st == 13)
                 go = 1;
             else if (st == 11)
-                func_00263BA8(self, 2);
+                func_00263BA8((cGameConnMan*)self, 2);
             if (go == 0)
                 return;
             func_00264098();

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/instanceman.h"
 
 //100%
 INCLUDE_ASM("wscript/wscriptcompile", cWScriptCompile_parseKeywords);
@@ -75,9 +76,9 @@ void cMemMan_free(void* p);
  *
  * @param flags  g++ in-charge flags; bit 0 deletes the object
  */
-extern "C" void cInstanceMan__cInstanceMan(void* self, int flags)
+extern "C" void cInstanceMan__cInstanceMan(cInstanceMan* self, int flags)
 {
-    void* instances = *(void**)((char*)self + 0xC);
+    void* instances = self->Instances;
     if (instances != 0) {
         cMemMan_free(instances);
     }
@@ -117,14 +118,14 @@ struct sWSPool {
  *
  * @return the record
  */
-extern "C" sWSNode* cInstanceMan_allocInstance1(sWSPool* self)
+extern "C" sWSNode* cInstanceMan_allocInstance1(cInstanceMan* self)
 {
-    sWSNode* node = self->free;
+    sWSNode* node = (sWSNode*)self->FreeInstances;
     if (node != 0) {
-        self->free = node->next;
+        self->FreeInstances = (tInstanceList*)node->next;
     }
-    node->type = self->type;
-    node->index = node - self->base;
+    node->type = *(unsigned char*)&self->InstanceSectionId;
+    node->index = node - (sWSNode*)self->Instances;
     node->flags |= 0x2000;
     return node;
 }
@@ -142,15 +143,15 @@ INCLUDE_ASM("wscript/wscriptcompile", cInstanceMan_allocInstance);
  * @param id  the resource ID of the instance (On Tour tResourceID); bits 8 and up are the record index
  * @return the record, or 0 when it is not on the free list
  */
-extern "C" sWSNode* cInstanceMan_allocInstance(sWSPool* self, unsigned int id)
+extern "C" sWSNode* cInstanceMan_allocInstance(cInstanceMan* self, unsigned int id)
 {
-    sWSNode** link = &self->free;
-    sWSNode* inst = self->free;
+    sWSNode** link = (sWSNode**)&self->FreeInstances;
+    sWSNode* inst = (sWSNode*)self->FreeInstances;
     while (inst != 0) {
-        if (inst - self->base == (id >> 8)) {
+        if (inst - (sWSNode*)self->Instances == (id >> 8)) {
             *link = inst->next;
-            inst->type = self->type;
-            int idx = inst - self->base;
+            inst->type = *(unsigned char*)&self->InstanceSectionId;
+            int idx = inst - (sWSNode*)self->Instances;
             inst->flags |= 0x2000;
             inst->index = idx;
             return inst;
@@ -172,11 +173,12 @@ INCLUDE_ASM("wscript/wscriptcompile", cInstanceMan_freeInstance__FPvT0);
  * @param node  the instance record
  * @return the previous list head
  */
-int cInstanceMan_freeInstance(void* self, void* node)
+int cInstanceMan_freeInstance(void* vself, void* node)
 {
-    int oldHead = *(int*)((char*)self + 0x8);
+    cInstanceMan* self = (cInstanceMan*)vself;
+    int oldHead = (int)self->FreeInstances;
     *(int*)node = oldHead;
-    *(int*)((char*)self + 0x8) = (int)node;
+    self->FreeInstances = (tInstanceList*)((int)node);
     return oldHead;
 }
 #endif

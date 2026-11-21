@@ -1,4 +1,5 @@
 #include "common.h"
+#include "util/consoleconfig.h"
 #include "util/menu.h"
 #include "util/bxps2memcard.h"
 
@@ -1790,8 +1791,8 @@ extern void* D_00487480[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cPS2ConsoleConfig__cPS2ConsoleConfig(char *self, int flags) {
-    *(void***)(self + 0x34) = D_00487480;
+extern "C" void cPS2ConsoleConfig__cPS2ConsoleConfig(cPS2ConsoleConfig* self, int flags) {
+    self->mVtbl = D_00487480;
     if (flags & 1) operator_delete((int*)self);
 }
 #endif
@@ -1828,8 +1829,8 @@ extern void* D_00487480[];
  *
  * @param flags  bit 0: free the memory
  */
-extern "C" void cConsoleConfig__cConsoleConfig(char *self, int flags) {
-    *(void***)(self + 0x34) = D_00487480;
+extern "C" void cConsoleConfig__cConsoleConfig(cConsoleConfig* self, int flags) {
+    self->mVtbl = D_00487480;
     if (flags & 1) operator_delete((int*)self);
 }
 #endif

@@ -1,4 +1,6 @@
 #include "common.h"
+#include "path/trackpath.h"
+#include "path/aipath.h"
 #include "path/basepath.h"
 #include "path/pathsys.h"
 #include "main/game.h"
@@ -788,8 +790,8 @@ INCLUDE_ASM("path/pathsys", cAIPath_getPathAttributes);
  * @param aiPath  the AI path
  * @return the attributes
  */
-extern "C" int cAIPath_getPathAttributes(void *aiPath) {
-    return (*(int *)((char*)(aiPath) + (0x38)));
+extern "C" int cAIPath_getPathAttributes(cAIPath* aiPath) {
+    return (aiPath->PathAttributes);
 }
 #endif
 //100%
@@ -801,8 +803,8 @@ INCLUDE_ASM("path/pathsys", cAIPath_getIsResetPath);
  * @param aiPath  the AI path
  * @return nonzero for a reset path
  */
-extern "C" int cAIPath_getIsResetPath(void *aiPath) {
-    return (*(int *)((char*)(aiPath) + (0x3C)));
+extern "C" int cAIPath_getIsResetPath(cAIPath* aiPath) {
+    return (aiPath->IsResetPath);
 }
 #endif
 //100%
@@ -814,8 +816,8 @@ INCLUDE_ASM("path/pathsys", cTrackPath_getBaseDistanceLeft);
  * @param trackPath  the track path
  * @return the distance
  */
-extern "C" float cTrackPath_getBaseDistanceLeft(void *trackPath) {
-    return (*(float *)((char*)(trackPath) + (0x38)));
+extern "C" float cTrackPath_getBaseDistanceLeft(cTrackPath* trackPath) {
+    return (trackPath->BaseDistanceLeft);
 }
 #endif
 
